@@ -3138,3 +3138,15 @@ paths:
   aucun cas particulier. Le cours ne parlait pas de modéliser une forme réelle : une `methode`
   « Aire d'une forme réelle » ajoutée avant la carte (pas d'exemple, donc rien à ajouter à
   `ENONCES_DEMONSTRATION`).
+
+- **6e (6h), Chapitre 4 — retours de l'utilisateur sur le lot 6gen77–84** : 6gen82 — famille xⁿ
+  élargie aux exposants fractionnaires 3/2, 5/2, 4/3, 5/3 (une fois sur deux), point de lecture
+  carré ou cube parfait pour que L(p) reste décimal exact, aide « racine puis puissance », forme
+  `lecture:puissance-frac` à part dans le profil. 6gen80 — variante « cuve-max » sans figure dans
+  l'énoncé (le croisement e/s donnait l'instant du maximum), figure hachurée gardée au corrigé.
+  6gen79 — courbes du signe et de la comparaison affichées dès le départ (écran et papier), version
+  neutre pour le signe (région grise, légende sans le signe), figure colorée en fin d'exercice.
+  6gen78 — encadré des données retiré (la définition de A était répétée). 6gen83 — tonneau et pot
+  déclarés `calculatriceIndispensable` ; décision de l'utilisateur généralisée : en évaluation
+  « calculatrice interdite », toute variante de cette liste est exclue (rangée grisée dans le
+  panneau, retirée par `construireItemsPayload`).

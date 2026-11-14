@@ -1352,6 +1352,7 @@ table.feature-table td { white-space: normal; }
 }
 .admin-eval-table td.admin-eval-col-nombre { text-align: center; }
 .admin-eval-variante-label { color: var(--ink-faint); font-size: 0.82rem; }
+.admin-eval-variante-exclue { color: var(--ink-faint); font-size: 0.78rem; font-style: italic; }
 
 .admin-eval-stepper { display: inline-flex; align-items: center; gap: 8px; }
 .admin-eval-stepper-valeur { width: 1.4em; display: inline-block; text-align: center; font-weight: 700; font-family: var(--mono); }

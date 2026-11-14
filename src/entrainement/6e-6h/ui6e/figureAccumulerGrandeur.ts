@@ -135,6 +135,13 @@ export function figureAccumulerGrandeurSvg(e: ExerciceAccumulerGrandeur, hachure
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${L} ${H}" width="100%" style="max-width:${L}px;display:block;margin:0 auto" role="img" aria-label="Graphique du taux en fonction du temps${hachure ? ", aire de la quantité accumulée hachurée" : ""}">${morceaux.join("")}${textes.join("")}</svg>`;
 }
 
+/** Figure de l'énoncé (écran et papier). Décision de l'utilisateur : rien pour « cuve-max », où le
+ * croisement des droites d'entrée et de sortie donnerait graphiquement l'instant du volume maximal
+ * (les débits restent dans les données) ; la figure hachurée reste dans le corrigé. */
+export function figureEnonceAccumulerGrandeur(e: ExerciceAccumulerGrandeur): string | null {
+  return e.variante === "cuve-max" ? null : figureAccumulerGrandeurSvg(e, false);
+}
+
 /** Légende de l'aire hachurée (sous la figure du corrigé). */
 export function legendeAire(e: ExerciceAccumulerGrandeur): string {
   return fiche(e).figure.libelleAire;

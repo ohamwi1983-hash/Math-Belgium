@@ -1,6 +1,5 @@
 import type { ExerciceComparerIntegrales, ExerciceEncadrerIntegrale, ExerciceEncadrerIntegrales, ExerciceSigneIntegrale, NombreExact } from "../core6e/encadrerIntegrales.types";
 import type { PhaseEncadrerIntegrales } from "../moteur6e/typesEncadrerIntegrales";
-import { phasesExercice } from "../moteur6e/typesEncadrerIntegrales";
 import { COULEURS, fenetreY, repereSvg } from "./figureRepereIntegrales";
 import type { CourbeRepere, RegionRepere, SegmentRepere } from "./figureRepereIntegrales";
 
@@ -44,15 +43,16 @@ function bornesVerticales(fns: ((x: number) => number)[], p: number, q: number):
   return segments;
 }
 
-/** Signe : courbe de f, région entre la courbe et l'axe sur [p ; q]. */
-export function figureSigneSvg(e: ExerciceSigneIntegrale): string {
+/** Signe : courbe de f, région entre la courbe et l'axe sur [p ; q]. `neutre` (énoncé) : région
+ * grise et légende sans le signe — la courbe se lit, mais aucun texte ni couleur ne donne la réponse. */
+export function figureSigneSvg(e: ExerciceSigneIntegrale, neutre = false): string {
   const p = e.p.valeur;
   const q = e.q.valeur;
   const { xMin, xMax } = fenetreX(p, q);
   const { yMin, yMax } = fenetreY([e.fn], p, q);
   const positif = e.signeF === "positif";
   const regions: RegionRepere[] = [
-    { de: p, a: q, haut: (x) => Math.max(e.fn(x), 0), bas: (x) => Math.min(e.fn(x), 0), remplissage: positif ? COULEURS.bonDoux : COULEURS.mauvaisDoux, contour: positif ? COULEURS.bon : COULEURS.mauvais },
+    { de: p, a: q, haut: (x) => Math.max(e.fn(x), 0), bas: (x) => Math.min(e.fn(x), 0), remplissage: neutre ? NEUTRE : positif ? COULEURS.bonDoux : COULEURS.mauvaisDoux, contour: neutre ? NEUTRE_TRAIT : positif ? COULEURS.bon : COULEURS.mauvais },
   ];
   const courbes: CourbeRepere[] = [{ fn: e.fn, de: xMin, a: xMax, couleur: COULEURS.accent, etiquette: "f" }];
   return repereSvg({
@@ -64,7 +64,7 @@ export function figureSigneSvg(e: ExerciceSigneIntegrale): string {
     regions,
     courbes,
     segments: bornesVerticales([e.fn], p, q),
-    libelle: `Courbe de f sur [${e.p.texte} ; ${e.q.texte}] : f y est ${positif ? "positive" : "négative"}`,
+    libelle: neutre ? `Courbe de f sur [${e.p.texte} ; ${e.q.texte}]` : `Courbe de f sur [${e.p.texte} ; ${e.q.texte}] : f y est ${positif ? "positive" : "négative"}`,
   });
 }
 
@@ -213,22 +213,23 @@ export function tableauVariationsSvg(e: ExerciceEncadrerIntegrale): string {
 // ============================================================================
 
 /** Figure affichée à l'écran pendant la phase donnée (`null` : aucune). */
-export function figureEcranSvg(e: ExerciceEncadrerIntegrales, phase: PhaseEncadrerIntegrales): string | null {
-  const index = phasesExercice(e).indexOf(phase);
+export function figureEcranSvg(e: ExerciceEncadrerIntegrales, _phase: PhaseEncadrerIntegrales): string | null {
+  // Décision de l'utilisateur : les courbes du signe et de la comparaison sont visibles dès le départ.
   switch (e.variante) {
     case "signe":
-      return index >= 1 ? figureSigneSvg(e) : null;
+      return figureSigneSvg(e, true);
     case "comparer":
-      return index >= 1 ? figureComparaisonSvg(e) : null;
+      return figureComparaisonSvg(e);
     case "encadrer":
     case "moyenne":
       return e.structure === "variations" ? tableauVariationsSvg(e) : figureCourbeEncadrementSvg(e);
   }
 }
 
-/** Figure de l'énoncé papier (`enteteHtml`) : seulement pour l'encadrement (courbe ou tableau). */
+/** Figure de l'énoncé papier (`enteteHtml`) : la même que celle de l'écran au départ. */
 export function figureEnoncePapier(e: ExerciceEncadrerIntegrales): string | null {
-  if (e.variante !== "encadrer" && e.variante !== "moyenne") return null;
+  if (e.variante === "signe") return figureSigneSvg(e, true);
+  if (e.variante === "comparer") return figureComparaisonSvg(e);
   return e.structure === "variations" ? tableauVariationsSvg(e) : figureCourbeEncadrementSvg(e);
 }
 

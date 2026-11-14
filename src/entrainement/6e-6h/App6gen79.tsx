@@ -172,7 +172,7 @@ export function App6gen79() {
           key={`${compteur}-${phase}`}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          figureSvg={enAttente?.etatSuivant.terminee && (exercice.variante === "encadrer" || exercice.variante === "moyenne") ? figureCorrigeSvg(exercice) : figureEcranSvg(exercice, phase)}
+          figureSvg={enAttente?.etatSuivant.terminee ? figureCorrigeSvg(exercice) : figureEcranSvg(exercice, phase)}
           consigneEcran={consigneEcran(exercice, phase)}
           mode={mode}
           aideNiveau1={aideNiveau1(exercice, phase)}

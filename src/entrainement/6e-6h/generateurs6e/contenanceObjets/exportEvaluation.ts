@@ -263,5 +263,7 @@ export const adaptateurEvaluationContenanceObjets: AdaptateurFeuilleExercices<Ex
   bareme,
   enoncePapier,
   dureeMinutes: 15,
+  // Tonneau et pot : aucune instance à valeur exacte → exclus d'une évaluation sans calculatrice.
+  calculatriceIndispensable: ["tonneau", "pot"],
   profilInstance: profilContenanceObjets,
 };

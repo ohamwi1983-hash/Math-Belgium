@@ -551,6 +551,14 @@ export function calculatriceIndispensable(generatorId: IdGenerateurPilote, varia
   return !!valeur
 }
 
+/** `true` si CETTE variante exige toujours la calculatrice (`calculatriceIndispensable` donné sous
+ * forme de liste de variantes). Décision de l'utilisateur : une telle variante est EXCLUE d'une
+ * évaluation « calculatrice interdite » (case grisée dans le panneau, retirée des items). */
+export function varianteExigeCalculatrice(generatorId: string, varianteId: string): boolean {
+  const valeur = EVALUATION_ADAPTER_REGISTRY[generatorId]?.calculatriceIndispensable
+  return Array.isArray(valeur) && valeur.includes(varianteId)
+}
+
 /** Nom lisible d'un générateur (titre de son document, sans « — Évaluation »). */
 export function nomGenerateur(generatorId: IdGenerateurPilote): string {
   const titre = EVALUATION_ADAPTER_REGISTRY[generatorId]?.titreDocument
@@ -4618,7 +4626,7 @@ export function construireItemsPayload(entete: EnTeteEvaluation, lignes: LigneSe
       const config = generateursPourSection(ligne.chapitreSlug, ligne.sectionId).find((g) => g.generatorId === ligne.cle)
       if (!config) continue
       const parVariante = Object.entries(ligne.parVariante ?? {})
-        .filter(([, nombre]) => nombre > 0)
+        .filter(([cle, nombre]) => nombre > 0 && !(entete.calculatrice === 'interdite' && varianteExigeCalculatrice(config.generatorId, varianteDeCle(cle))))
         .map(([cle, nombre]) => {
           const reglages = reglagesVariante(ligne, cle)
           return {

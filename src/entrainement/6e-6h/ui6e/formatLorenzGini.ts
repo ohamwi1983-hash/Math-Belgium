@@ -53,6 +53,18 @@ function puissanceE(m: number): string {
   return Math.abs(m - 1) < 1e-9 ? "e" : `e^{${decimalLatex(m, 6)}}`;
 }
 
+/** Exposant n de xⁿ en LaTeX : entier (« 3 ») ou fraction (« \frac{3}{2} »). */
+function exposantLatex(n: number): string {
+  const f = fractionDepuisValeur(n, 12);
+  return f && f.den !== 1 ? `\\frac{${f.num}}{${f.den}}` : `${Math.round(n)}`;
+}
+
+/** 1/(n + 1) en LaTeX (« \dfrac{1}{4} », « \dfrac{2}{5} ») : coefficient de la primitive de xⁿ. */
+function inverseNPlusUnLatex(n: number): string {
+  const f = fractionDepuisValeur(1 / (n + 1), 24);
+  return f ? fractionLatex(f.num, f.den) : `\\dfrac{1}{${decimalLatex(n + 1, 6)}}`;
+}
+
 /** e^{kx} en LaTeX : « e^{x} », « e^{2x} ». */
 function expKx(k: number): string {
   return k === 1 ? "e^{x}" : `e^{${k}x}`;
@@ -63,7 +75,7 @@ export function lorenzLatex(c: CourbeLorenz): string {
   const p = c.parametre;
   switch (c.famille) {
     case "puissance":
-      return `x^{${p}}`;
+      return `x^{${exposantLatex(p)}}`;
     case "mixte2":
       return `${coefLatex(p)}x^{2}+${coefLatex(1 - p)}x`;
     case "mixte3":
@@ -78,7 +90,7 @@ export function differenceLatex(c: CourbeLorenz): string {
   const p = c.parametre;
   switch (c.famille) {
     case "puissance":
-      return `x-x^{${p}}`;
+      return `x-x^{${exposantLatex(p)}}`;
     case "mixte2":
       return `${coefLatex(p)}\\left(x-x^{2}\\right)`;
     case "mixte3":
@@ -94,7 +106,10 @@ export function calculAireLatex(c: CourbeLorenz): string {
   const integrale = `\\displaystyle\\int_0^1\\left(${differenceLatex(c)}\\right)dx`;
   switch (c.famille) {
     case "puissance":
-      return `${integrale}=\\left[\\dfrac{x^{2}}{2}-\\dfrac{x^{${p + 1}}}{${p + 1}}\\right]_0^1=\\dfrac{1}{2}-\\dfrac{1}{${p + 1}}`;
+      // Entier : x^{n+1}/(n+1) ; fractionnaire : coefficient 1/(n+1) écrit comme une fraction.
+      return Number.isInteger(p)
+        ? `${integrale}=\\left[\\dfrac{x^{2}}{2}-\\dfrac{x^{${p + 1}}}{${p + 1}}\\right]_0^1=\\dfrac{1}{2}-\\dfrac{1}{${p + 1}}`
+        : `${integrale}=\\left[\\dfrac{x^{2}}{2}-${inverseNPlusUnLatex(p)}\\,x^{${exposantLatex(p + 1)}}\\right]_0^1=\\dfrac{1}{2}-${inverseNPlusUnLatex(p)}`;
     case "mixte2":
       return `${integrale}=${coefLatex(p)}\\left[\\dfrac{x^{2}}{2}-\\dfrac{x^{3}}{3}\\right]_0^1=${coefLatex(p)}\\times\\dfrac{1}{6}`;
     case "mixte3":
@@ -153,11 +168,11 @@ function pourcentTexte(v: number, approche: boolean): string {
 }
 
 function pTexte(p: number): string {
-  return decimalTexte(p, 1);
+  return decimalTexte(p, 3);
 }
 
 function pLatex(p: number): string {
-  return decimalLatex(p, 1);
+  return decimalLatex(p, 3);
 }
 
 // ============================================================================
@@ -335,7 +350,7 @@ export function libellesChamps(e: ExerciceLorenzGini): string[] {
 function interpretationsCanoniques(e: ExerciceLorenzLecture): string[] {
   const v = vocabulaire(e.contexte);
   const approche = e.courbe.famille === "expo";
-  const P = decimalTexte(e.p * 100, 0);
+  const P = decimalTexte(e.p * 100, 1);
   const valeur = evaluerLorenz(e.courbe, e.p);
   const V = pourcentTexte(valeur, approche);
   const complement = pourcentTexte(1 - valeur, approche);
@@ -415,7 +430,7 @@ export function formatReponseAttenduePhaseLatex(e: ExerciceLorenzGini, phase: Ph
 export function aideNiveau1(e: ExerciceLorenzGini, phase: PhaseLorenz): AideAvecLatex {
   switch (phase) {
     case "valeur":
-      return e.variante === "lecture" ? { texte: `La part des revenus détenue par les ${decimalTexte(e.p * 100, 0)} % ${vocabulaire(e.contexte).pauvres} est l'image de ${pTexte(e.p)} par L :`, latex: `L(${pLatex(e.p)})` } : { texte: "" };
+      return e.variante === "lecture" ? { texte: `La part des revenus détenue par les ${decimalTexte(e.p * 100, 1)} % ${vocabulaire(e.contexte).pauvres} est l'image de ${pTexte(e.p)} par L :`, latex: `L(${pLatex(e.p)})` } : { texte: "" };
     case "interpretation":
       return { texte: "En abscisse, une part de la population (en commençant par les plus pauvres) ; en ordonnée, la part des revenus qu'elle détient :", latex: "x\\ \\longmapsto\\ L(x)" };
     case "aire":
@@ -442,6 +457,12 @@ export function aideNiveau2(e: ExerciceLorenzGini, phase: PhaseLorenz): AideAvec
       if (e.courbe.famille === "expo") {
         const k = e.courbe.parametre;
         return { texte: "Remplace x par sa valeur : au numérateur, l'exposant de e vaut :", latex: `${k}\\times ${pLatex(e.p)}=${decimalLatex(k * e.p, 6)}` };
+      }
+      if (e.courbe.famille === "puissance" && !Number.isInteger(e.courbe.parametre)) {
+        // Exposant k/2 ou k/3 : racine (carrée ou cubique) d'abord, puis puissance entière.
+        const f = fractionDepuisValeur(e.courbe.parametre, 12)!;
+        const racine = f.den === 2 ? `\\sqrt{${pLatex(e.p)}}` : `\\sqrt[3]{${pLatex(e.p)}}`;
+        return { texte: `Un exposant ${f.num}/${f.den} se calcule en prenant d'abord la racine ${f.den === 2 ? "carrée" : "cubique"}, puis la puissance ${f.num} :`, latex: `${substitutionLatex(e)}=\\left(${racine}\\right)^{${f.num}}` };
       }
       return { texte: "Remplace x par sa valeur dans l'expression de L :", latex: substitutionLatex(e) };
     case "interpretation":

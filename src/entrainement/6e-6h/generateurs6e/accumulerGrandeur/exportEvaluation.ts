@@ -12,7 +12,7 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import { PHASES_ACCUMULER_GRANDEUR } from "../../moteur6e/typesAccumulerGrandeur";
 import type { PhaseAccumulerGrandeur } from "../../moteur6e/typesAccumulerGrandeur";
 import { fiche, formatReponseAttenduePhaseLatex } from "../../ui6e/formatAccumulerGrandeur";
-import { figureAccumulerGrandeurSvg, legendeAire } from "../../ui6e/figureAccumulerGrandeur";
+import { figureAccumulerGrandeurSvg, figureEnonceAccumulerGrandeur, legendeAire } from "../../ui6e/figureAccumulerGrandeur";
 import { VARIANTES_CALCULATRICE_ACCUMULER, profilAccumulerGrandeur } from "./profilEvaluation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAccumulerGrandeur } from "./index";
 import type { IdVarianteAccumulerGrandeur } from "./index";
@@ -48,7 +48,7 @@ function donnees(e: ExerciceAccumulerGrandeur): FragmentConsigne[] {
 function construireEnonce(e: ExerciceAccumulerGrandeur): SectionExercice {
   return {
     enteteFragments: [...fiche(e).consigneGenerale, t(" Données : "), ...donnees(e), t(".")],
-    enteteHtml: figureAccumulerGrandeurSvg(e, false),
+    ...(figureEnonceAccumulerGrandeur(e) ? { enteteHtml: figureEnonceAccumulerGrandeur(e)! } : {}),
     questions: PHASES_ACCUMULER_GRANDEUR.map((phase) => ({ consigne: fiche(e).consignes[phase] })),
   };
 }
@@ -62,7 +62,7 @@ function enoncePapier(e: ExerciceAccumulerGrandeur): EnoncePapier {
   return {
     section: {
       enteteFragments: [...fi.consigneGenerale, t(" Données : "), ...donnees(e), t(". Justifie chaque réponse par un calcul.")],
-      enteteHtml: figureAccumulerGrandeurSvg(e, false),
+      ...(figureEnonceAccumulerGrandeur(e) ? { enteteHtml: figureEnonceAccumulerGrandeur(e)! } : {}),
       questions: fi.questionsPapier.map((consigne) => ({ consigne })),
     },
     etapesParQuestion: [["a", "b", "c"], ["d"], ["e"]],

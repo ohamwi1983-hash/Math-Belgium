@@ -19,7 +19,6 @@ export type ModeEcranFonctionAire =
 
 interface Props {
   consigneGenerale: FragmentConsigne[];
-  blocDonnees: string[];
   /** Courbe de f (chaîne SVG autonome), affichée sous l'énoncé sur chaque écran. */
   figureSvg: string;
   consigneEcran: FragmentConsigne[];
@@ -48,7 +47,6 @@ interface Props {
  */
 export function EtapeFonctionAire({
   consigneGenerale,
-  blocDonnees,
   figureSvg,
   consigneEcran,
   mode,
@@ -92,15 +90,7 @@ export function EtapeFonctionAire({
     <div>
       <EnTeteExercice
         consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
-        blocDonnees={
-          <div className="equation-box">
-            <div className="equation-box-donnees">
-              {blocDonnees.map((frag, i) => (
-                <Katex key={i} expression={frag} block />
-              ))}
-            </div>
-          </div>
-        }
+        blocDonnees={null}
       />
       <figure className="figure-fonction-aire" style={{ margin: "12px 0", textAlign: "center" }} aria-label="Courbe de f" dangerouslySetInnerHTML={{ __html: figureSvg }} />
       <p className="prompt-text">

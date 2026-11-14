@@ -141,10 +141,6 @@ export function consigneGenerale(e: ExerciceFonctionAire): FragmentConsigne[] {
   ];
 }
 
-export function blocDonnees(e: ExerciceFonctionAire): string[] {
-  return [definitionALatex(e)];
-}
-
 // ============================================================================
 // Écrans.
 // ============================================================================

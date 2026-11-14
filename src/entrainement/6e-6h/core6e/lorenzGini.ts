@@ -4,7 +4,7 @@
  *
  * Une courbe de Lorenz L vérifie L(0) = 0, L(1) = 1, L croissante, convexe et L(x) ≤ x sur [0 ; 1].
  * Familles retenues (toutes vérifient ces conditions) :
- * - `puissance` : L(x) = xⁿ, n ∈ {2 ; 3 ; 4} ;
+ * - `puissance` : L(x) = xⁿ, n ∈ {2 ; 3 ; 4} ou fractionnaire n ∈ {3/2 ; 5/2 ; 4/3 ; 5/3} (n > 1 : convexe) ;
  * - `mixte2` : L(x) = a·x² + (1 − a)·x, 0 < a < 1 (L′ = 2ax + 1 − a ≥ 0, L″ = 2a ≥ 0) ;
  * - `mixte3` : L(x) = a·x³ + (1 − a)·x, 0 < a < 1 ;
  * - `expo` : L(x) = (e^{kx} − 1)/(e^k − 1), k ∈ {1 ; 2 ; 3} (variante à la calculatrice).
@@ -32,8 +32,10 @@ export interface ExerciceLorenzLecture {
   /** Nom du pays fictif (ignoré pour une entreprise). */
   nomPays: string;
   courbe: CourbeLorenz;
-  /** Part de la population dont on lit la part des revenus. */
-  p: 0.5 | 0.8;
+  /** Part de la population dont on lit la part des revenus : 0,5 ou 0,8 ; pour un exposant
+   * fractionnaire, un carré (n = k/2) ou un cube (n = k/3) parfait, pour que L(p) reste un décimal
+   * exact (calcul sans calculatrice). */
+  p: number;
   /** Ordre d'affichage des 4 options d'interprétation (indices dans la liste canonique, 0 = juste). */
   ordreInterpretation: number[];
 }

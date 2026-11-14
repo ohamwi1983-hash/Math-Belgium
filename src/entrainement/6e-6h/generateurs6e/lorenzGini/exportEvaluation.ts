@@ -100,7 +100,7 @@ function construireCorrection(e: ExerciceLorenzGini): BlocCorrection[] {
 }
 
 function questionsLecture(e: ExerciceLorenzLecture) {
-  const p = decimalLatex(e.p, 1);
+  const p = decimalLatex(e.p, 3);
   return [{ consigne: [t("Calcule "), f(`L(${p})`), t(" (valeur exacte, puis arrondie au millième si nécessaire) et interprète ce résultat par une phrase.")] }, { consigne: [t("Calcule le coefficient de Gini de cette répartition (valeur exacte, puis arrondie au millième).")] }];
 }
 
@@ -148,10 +148,10 @@ const METHODE_GINI: FragmentConsigne[] = [
 
 function lignesLecture(e: ExerciceLorenzLecture): EtapeCorrection[] {
   const c = e.courbe;
-  const p = decimalLatex(e.p, 1);
+  const p = decimalLatex(e.p, 3);
   const figure = figuresCorrigeSvg(e)[0];
   return [
-    { label: "Méthode", sousQuestion: "a", fragments: [t(`La part des revenus détenue par les ${decimalTexte(e.p * 100, 0)} % ${e.contexte === "pays" ? "les plus pauvres" : "les moins bien payés"} est l'image de `), f(p), t(" par L.")] },
+    { label: "Méthode", sousQuestion: "a", fragments: [t(`La part des revenus détenue par les ${decimalTexte(e.p * 100, 1)} % ${e.contexte === "pays" ? "les plus pauvres" : "les moins bien payés"} est l'image de `), f(p), t(" par L.")] },
     { label: "Calcul", sousQuestion: "a", fragments: [f(substitutionLatex(e))] },
     { label: "Conclusion", sousQuestion: "a", fragments: reponseEtape(e, "valeur") },
     { label: "Conclusion", sousQuestion: "b", fragments: reponseChoix(e, "interpretation") },

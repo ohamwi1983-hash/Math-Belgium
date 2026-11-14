@@ -34,6 +34,7 @@ import {
   reglagesVariante,
   varianteDeCle,
   calculatriceIndispensable,
+  varianteExigeCalculatrice,
   nomGenerateur,
   construireItemsPayload,
   deriveQuestionsComprehension,
@@ -435,12 +436,24 @@ export function EvaluationGeneratorPanel({
     setGenereLocalementCompte(null)
   }
 
+  /** Décision de l'utilisateur : en évaluation « calculatrice interdite », une variante qui exige
+   * toujours la calculatrice (`calculatriceIndispensable` en liste) est exclue — rangée grisée, ni
+   * comptée ni tirée (`construireItemsPayload` la retire aussi). */
+  function varianteExclue(generatorId: string, cle: string): boolean {
+    return !estExercice && calculatrice === 'interdite' && varianteExigeCalculatrice(generatorId, varianteDeCle(cle))
+  }
+
+  function nombreLigne(ligne: LigneSelection): number {
+    if (ligne.type !== 'exercice') return ligne.nombre
+    return Object.entries(ligne.parVariante ?? {}).reduce((total, [cle, n]) => total + (varianteExclue(ligne.cle ?? '', cle) ? 0 : n), 0)
+  }
+
   /** Points totaux d'une ligne — pour `type==='exercice'`, somme par variante (`pointsParVariante`,
    * replié sur `points` tant qu'une variante n'a pas encore son propre barème édité) ; pour les
    * autres types, simple produit `points × nombre` (pas de notion de variante). */
   function pointsLigne(ligne: LigneSelection): number {
     if (ligne.type === 'exercice') {
-      return Object.entries(ligne.parVariante ?? {}).reduce(
+      return Object.entries(ligne.parVariante ?? {}).filter(([cle]) => !varianteExclue(ligne.cle ?? '', cle)).reduce(
         (total, [varianteId, nombre]) => total + (ligne.pointsParVariante?.[varianteId] ?? ligne.points) * nombre,
         0,
       )
@@ -449,7 +462,7 @@ export function EvaluationGeneratorPanel({
     return ligne.points * ligne.nombre
   }
 
-  const totalNombre = lignes.reduce((total, l) => total + l.nombre, 0)
+  const totalNombre = lignes.reduce((total, l) => total + nombreLigne(l), 0)
   const totalPoints = lignes.reduce((total, l) => total + pointsLigne(l), 0)
   const pointsParProcessus = ([1, 2, 3] as const).map((p) => lignes.filter((l) => l.processus === p).reduce((t, l) => t + pointsLigne(l), 0))
   /** Lignes choisies dont le générateur exige toujours une calculatrice (avertissement si interdite). */
@@ -461,7 +474,7 @@ export function EvaluationGeneratorPanel({
         l.cle &&
         calculatriceIndispensable(
           l.cle as IdGenerateurPilote,
-          Object.entries(l.parVariante ?? {}).filter(([, n]) => n > 0).map(([v]) => varianteDeCle(v)),
+          Object.entries(l.parVariante ?? {}).filter(([v, n]) => n > 0 && !varianteExclue(l.cle ?? '', v)).map(([v]) => varianteDeCle(v)),
         ),
     )
     .map((l) => `« ${nomGenerateur(l.cle as IdGenerateurPilote)} »`)
@@ -928,11 +941,12 @@ export function EvaluationGeneratorPanel({
                                       return [variante.id, ...copies].map((cle) => ({ cle, variante, copie: cle !== variante.id }))
                                     })
                                     return lignesVariantes.flatMap(({ cle, variante, copie }) => {
-                                      const nombreVariante = ligne.parVariante?.[cle] ?? 0
+                                      const exclue = varianteExclue(ligne.cle ?? '', cle)
+                                      const nombreVariante = exclue ? 0 : (ligne.parVariante?.[cle] ?? 0)
                                       const reglages = reglagesVariante(ligne, cle)
                                       // Case « cas particulier » seulement si CETTE variante peut en recevoir un
                                       // (calculé seulement quand la sous-rangée s'affiche, puis mis en cache).
-                                      const afficherReglages = nombreVariante > 0 || copie
+                                      const afficherReglages = !exclue && (nombreVariante > 0 || copie)
                                       const libelleCasVariante =
                                         libelleCas && afficherReglages && varianteAdmetCasParticulier(ligne.cle ?? '', variante.id) ? libelleCas : null
                                       const aDesReglages = parametres.length > 0 || !!libelleCasVariante
@@ -944,12 +958,14 @@ export function EvaluationGeneratorPanel({
                                               {variante.label}
                                               {copie ? ` (${cle.split('~')[1]})` : ''}
                                             </span>
+                                            {exclue && <span className="admin-eval-variante-exclue"> — exclue : demande une calculatrice</span>}
                                           </td>
                                           <td>—</td>
                                           <td className="admin-eval-col-nombre">
                                             <Stepper
                                               valeur={nombreVariante}
                                               max={MAX_EXERCICE}
+                                              disabled={exclue}
                                               onChange={(v) => mettreAJourVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, v)}
                                             />
                                           </td>

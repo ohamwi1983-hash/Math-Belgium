@@ -17,7 +17,7 @@ interface Props {
   consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
   /** Graphique du taux (chaîne SVG autonome), sans hachure. */
-  figureSvg: string;
+  figureSvg: string | null;
   consigneEcran: FragmentConsigne[];
   mode: ModeEcranAccumuler;
   aideNiveau1: AideAvecLatex;
@@ -90,7 +90,7 @@ export function EtapeAccumulerGrandeur({
           </div>
         }
       />
-      <div style={{ margin: "12px 0" }} dangerouslySetInnerHTML={{ __html: figureSvg }} />
+      {figureSvg && <div style={{ margin: "12px 0" }} dangerouslySetInnerHTML={{ __html: figureSvg }} />}
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>

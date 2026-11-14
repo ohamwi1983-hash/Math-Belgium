@@ -1,5 +1,6 @@
 import type { ProfilInstance } from "../../../export/genererFeuilleExercices";
 import type { ExerciceLorenzGini } from "../../core6e/lorenzGini";
+import { estExposantFractionnaire } from "./index";
 
 /**
  * Profil de tirage équilibré de `6gen82` « Courbe de Lorenz et coefficient de Gini »
@@ -17,7 +18,10 @@ import type { ExerciceLorenzGini } from "../../core6e/lorenzGini";
 export function profilLorenzGini(e: ExerciceLorenzGini): ProfilInstance {
   switch (e.variante) {
     case "lecture":
-      return e.courbe.famille === "expo" ? { casParticulier: null, calcul: "calculatrice", forme: "lecture:expo" } : { casParticulier: null, forme: `lecture:${e.courbe.famille}` };
+      if (e.courbe.famille === "expo") return { casParticulier: null, calcul: "calculatrice", forme: "lecture:expo" };
+      // Exposant fractionnaire : primitive et lecture plus exigeantes → forme à part (même difficulté
+      // dans toutes les séries).
+      return { casParticulier: null, forme: `lecture:${e.courbe.famille}${estExposantFractionnaire(e.courbe) ? "-frac" : ""}` };
     case "comparaison": {
       const familles = e.courbes.map((c) => c.famille).sort();
       return { casParticulier: null, calcul: familles.includes("expo") ? "calculatrice" : "exacte", forme: `${e.contexte}:${familles.join("+")}` };

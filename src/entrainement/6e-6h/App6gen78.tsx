@@ -12,7 +12,7 @@ import { RenduFragments } from "./components/RenduFragments";
 import { EtapeFonctionAire } from "./components6e/EtapeFonctionAire";
 import type { ModeEcranFonctionAire } from "./components6e/EtapeFonctionAire";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { aideNiveau1, aideNiveau2, blocDonnees, champsEcran, consigneEcran, consigneGenerale, libellePhase, lignesChoix, reponseAttendue } from "./ui6e/formatFonctionAire";
+import { aideNiveau1, aideNiveau2, champsEcran, consigneEcran, consigneGenerale, libellePhase, lignesChoix, reponseAttendue } from "./ui6e/formatFonctionAire";
 import { figureCandidat, figureCorrigeExercice, figureFonctionF } from "./ui6e/figureFonctionAire";
 import { calculerRecapitulatifFonctionAire, calculerSegmentsProgressionFonctionAire } from "./ui6e/recapitulatifFonctionAire";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
@@ -161,7 +161,6 @@ export function App6gen78() {
         <EtapeFonctionAire
           key={`${compteur}-${phase}`}
           consigneGenerale={consigneGenerale(exercice)}
-          blocDonnees={blocDonnees(exercice)}
           figureSvg={figureFonctionF(exercice)}
           consigneEcran={consigneEcran(exercice, phase)}
           mode={mode}

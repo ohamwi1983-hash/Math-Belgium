@@ -14,7 +14,7 @@ import { EtapeAccumulerGrandeur } from "./components6e/EtapeAccumulerGrandeur";
 import type { ModeEcranAccumuler } from "./components6e/EtapeAccumulerGrandeur";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { LIBELLE_PHASE, aideNiveau1, aideNiveau2, blocDonnees, champEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, optionsModele } from "./ui6e/formatAccumulerGrandeur";
-import { figureAccumulerGrandeurSvg, legendeAire } from "./ui6e/figureAccumulerGrandeur";
+import { figureAccumulerGrandeurSvg, figureEnonceAccumulerGrandeur, legendeAire } from "./ui6e/figureAccumulerGrandeur";
 import { calculerRecapitulatifAccumulerGrandeur, calculerSegmentsProgressionAccumulerGrandeur } from "./ui6e/recapitulatifAccumulerGrandeur";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -151,7 +151,7 @@ export function App6gen80() {
           key={`${compteur}-${phase}`}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          figureSvg={figureAccumulerGrandeurSvg(exercice, false)}
+          figureSvg={figureEnonceAccumulerGrandeur(exercice)}
           consigneEcran={consigneEcran(exercice, phase)}
           mode={modeEcran(exercice, phase)}
           aideNiveau1={aideNiveau1(exercice, phase)}

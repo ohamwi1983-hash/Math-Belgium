@@ -33,11 +33,25 @@ function melange(n: number): number[] {
   return t;
 }
 
-/** Courbe de la famille donnée, paramètre tiré : n ∈ {2 ; 3 ; 4}, a ∈ {0,2 ; … ; 0,9}, k ∈ {1 ; 2 ; 3}. */
+/** Exposants fractionnaires (décision de l'utilisateur : élargir la famille xⁿ). Tous > 1 (courbe
+ * convexe sous la diagonale) ; ∫₀¹ xⁿ dx = 1/(n + 1) reste une fraction simple. */
+export const EXPOSANTS_FRACTIONNAIRES = [3 / 2, 5 / 2, 4 / 3, 5 / 3];
+
+/** Vrai pour un exposant fractionnaire (non entier) de la famille `puissance`. */
+export function estExposantFractionnaire(c: CourbeLorenz): boolean {
+  return c.famille === "puissance" && Math.abs(c.parametre - Math.round(c.parametre)) > 1e-9;
+}
+
+/** Points de lecture qui gardent L(p) décimal exact : carrés parfaits (n = k/2), cubes (n = k/3). */
+const POINTS_CARRES = [0.25, 0.36, 0.49, 0.64, 0.81];
+const POINTS_CUBES = [0.216, 0.343, 0.512, 0.729];
+
+/** Courbe de la famille donnée, paramètre tiré : n ∈ {2 ; 3 ; 4} ou fractionnaire (une fois sur
+ * deux), a ∈ {0,2 ; … ; 0,9}, k ∈ {1 ; 2 ; 3}. */
 export function tirerCourbe(famille: FamilleLorenz): CourbeLorenz {
   switch (famille) {
     case "puissance":
-      return { famille, parametre: entier(2, 4) };
+      return { famille, parametre: Math.random() < 0.5 ? entier(2, 4) : parmi(EXPOSANTS_FRACTIONNAIRES) };
     case "mixte2":
     case "mixte3":
       return { famille, parametre: entier(2, 9) / 10 };
@@ -51,14 +65,13 @@ function contexteRepartition(): ContexteRepartition {
 }
 
 function construireLecture(familles: FamilleLorenz[]): ExerciceLorenzLecture {
-  return {
-    variante: "lecture",
-    contexte: contexteRepartition(),
-    nomPays: parmi(PAYS_FICTIFS),
-    courbe: tirerCourbe(parmi(familles)),
-    p: Math.random() < 0.5 ? 0.5 : 0.8,
-    ordreInterpretation: melange(4),
-  };
+  const contexte = contexteRepartition();
+  const nomPays = parmi(PAYS_FICTIFS);
+  const courbe = tirerCourbe(parmi(familles));
+  const pLibre = Math.random() < 0.5 ? 0.5 : 0.8;
+  const demi = Math.abs(courbe.parametre * 2 - Math.round(courbe.parametre * 2)) < 1e-9;
+  const p = estExposantFractionnaire(courbe) ? parmi(demi ? POINTS_CARRES : POINTS_CUBES) : pLibre;
+  return { variante: "lecture", contexte, nomPays, courbe, p, ordreInterpretation: melange(4) };
 }
 
 /** Familles des courbes comparées : polynômes surtout, exponentielle (calculatrice) parfois. */
@@ -102,7 +115,7 @@ function construireParametre(): ExerciceLorenzParametre {
 export type IdVarianteLorenzGini = "lecture-puissance" | "lecture-mixte" | "lecture-expo" | "comparer-pays" | "comparer-reforme" | "parametre";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteLorenzGini; label: string }[] = [
-  { id: "lecture-puissance", label: "Lecture, aire et Gini — L(x) = xⁿ" },
+  { id: "lecture-puissance", label: "Lecture, aire et Gini — L(x) = xⁿ (n entier ou fractionnaire)" },
   { id: "lecture-mixte", label: "Lecture, aire et Gini — L(x) = a·x² + (1 − a)·x ou a·x³ + (1 − a)·x" },
   { id: "lecture-expo", label: "Lecture, aire et Gini — exponentielle (calculatrice)" },
   { id: "comparer-pays", label: "Comparer deux pays (deux Gini, verdict)" },
