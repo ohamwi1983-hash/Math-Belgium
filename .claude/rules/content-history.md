@@ -3066,3 +3066,24 @@ paths:
   comment lire variations/extremums de A sur la courbe de f : un `methode` « Lire la fonction aire
   sur le graphique de f » ajouté avant la carte (pas d'exemple, rien à ajouter à
   `ENONCES_DEMONSTRATION`).
+- **6e (6h), Chapitre 4 — Intégrales et primitives** (`primitives-integrales`) : nouveau 6gen80
+  « Accumuler une grandeur : débits, puissances, consommations » (section `problemes`, processus 3,
+  carte après celle de 6gen29). Huit variantes = situation × question de transfert : cuve (débit
+  d'entrée constant, débit de sortie affine, volume initial) → volume maximal (débit net nul) ou
+  instant où elle est vide ; salle/stade/festival (rythme d'entrée affine, personnes déjà là,
+  capacité) → instant où c'est complet ; panneaux solaires sinusoïdaux → heure où la batterie est
+  pleine ; deux installations solaires polynomiales → E_A − E_B ; averse exponentielle → instant où
+  une hauteur est atteinte ; orage polynomial contre pluie fine constante → H₁ − H₂ ; CO₂
+  (exponentielle, quantité déjà émise, budget carbone) → année où le budget est épuisé. Chaîne fixe
+  de 5 écrans : intégrale à poser (choix fermé, une tentative ; pièges quantité initiale ou sortie
+  oubliée, taux au lieu de son intégrale, bornes en heures de la journée / en années / en minutes),
+  primitive (à une constante près), quantité accumulée, transfert, réponse dans l'unité demandée
+  (L → m³, min → h, W·h → kW·h, mm sur un toit → L, kt → Mt). Graphique du taux avec unités sur
+  l'écran et dans l'énoncé papier ; aire hachurée en fin d'exercice et dans le corrigé. Profil :
+  aucun cas particulier, `forme` = variante, `calcul` exacte (cuve, salle, comparaisons) ou
+  calculatrice (sinus, exponentielles, `calculatriceIndispensable` sur ces trois variantes). Le
+  cours ne traitait que « débit → volume » sans sortie ni quantité initiale : `methode`
+  « Accumuler une grandeur à partir de son taux » (taux net, maximum quand le taux net s'annule,
+  unités, conversions) ajoutée avant la carte de 6gen29 (pas d'exemple, rien à ajouter à
+  `ENONCES_DEMONSTRATION`). Dans `evaluationPayload.ts`, la ligne de 6gen29 reçoit le libellé
+  « Problèmes (6gen29) » (la section a désormais deux générateurs).
