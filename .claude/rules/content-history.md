@@ -3087,3 +3087,22 @@ paths:
   unités, conversions) ajoutée avant la carte de 6gen29 (pas d'exemple, rien à ajouter à
   `ENONCES_DEMONSTRATION`). Dans `evaluationPayload.ts`, la ligne de 6gen29 reçoit le libellé
   « Problèmes (6gen29) » (la section a désormais deux générateurs).
+- **6e (6h), Chapitre 4 — Intégrales et primitives** (`primitives-integrales`) : nouveau 6gen83
+  « Contenance d'objets de révolution » (section `volumes`, processus 3, carte après 6gen27). La
+  méthode des disques en contexte : convention du cours (axe de l'objet = axe des abscisses, x en
+  cm le long de l'axe, f(x) = rayon intérieur), origine au fond intérieur (verre, vase, pot) ou au
+  milieu (tonneau, flacon : bornes −H et H). Variantes = objets : verre à vin f(x) = √(ax) avec
+  pied, vase évasé r + x²/n avec fond, tonneau bombé R − x²/n, flacon ellipsoïdal
+  (b/a)√(a² − x²) avec bouchon, pot de fleurs en tronc de cône (cotes en diamètres, f à trouver).
+  Cinq écrans : modèle (choix fermé : disques / sans carré / sans π / rondelles avec le profil
+  extérieur ou [2f(x)]²), bornes + [f(x)]² (ou f(x) pour le pot), V en cm³, contenance en L ou
+  cL, transfert (hauteur du liquide — fraction de la contenance ou quantité en cL/L —, nombre de
+  récipients — partie entière, ou entier supérieur pour le vase —, comparaison avec un cône ou un
+  cylindre coté en diamètre, verdict 50/50). Messages ciblés sur les pièges (π, carré, diamètre,
+  cote totale, conversion, arrondi) ; `parse_error` refusé avant soumission. Calculs exacts par
+  fractions dans `core6e/contenanceObjetsCalcul.ts` (partagé A/B/ui). `forme` = objet-transfert,
+  pas de cas particulier, `calcul` exacte (comparaison, fraction du verre ; sauf tonneau) /
+  calculatrice. Piège découvert : une figure SVG dans `construireEnonce().enteteHtml` (ids uniques
+  par appel) rend l'empreinte anti-doublon du pipeline toujours nouvelle → figure seulement dans
+  `enoncePapier`. Cours : `methode` « Contenance d'un objet de révolution » avant la carte (pas
+  d'exemple, rien à ajouter à `ENONCES_DEMONSTRATION`).
