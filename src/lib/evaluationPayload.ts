@@ -95,7 +95,7 @@ export type IdGenerateurPilote =
   | 'gen39' | 'gen40' | 'gen41'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
-  | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19' | '5gen44' | '5gen45' | '5gen46'
+  | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19' | '5gen44' | '5gen45' | '5gen46' | '5gen48'
   | '5gen20' | '5gen21' | '5gen22' | '5gen23' | '5gen24'
   | '5gen25' | '5gen26' | '5gen27' | '5gen28' | '5gen29' | '5gen30' | '5gen31' | '5gen32' | '5gen33' | '5gen34' | '5gen35'
 
@@ -317,7 +317,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'suites', sectionId: 'suites-geometriques', generatorId: '5gen44', label: 'Définir et reconnaître une suite (5gen44)', processus: 2 },
   { chapitreSlug: 'suites', sectionId: 'suites-geometriques', generatorId: '5gen45', label: 'Sommes de termes consécutifs (5gen45)' },
   { chapitreSlug: 'suites', sectionId: 'suites-geometriques', generatorId: '5gen46', label: 'Trois termes consécutifs (5gen46)', processus: 2 },
-  { chapitreSlug: 'suites', sectionId: 'convergence', generatorId: '5gen16', label: '' },
+  { chapitreSlug: 'suites', sectionId: 'convergence', generatorId: '5gen16', label: 'Convergence et divergence des suites (5gen16)' },
+  { chapitreSlug: 'suites', sectionId: 'convergence', generatorId: '5gen48', label: 'Somme infinie en situation (5gen48)', processus: 3 },
   { chapitreSlug: 'suites', sectionId: 'problemes-classiques', generatorId: '5gen17', label: '', processus: 3 },
   { chapitreSlug: 'suites', sectionId: 'comparaison-suites', generatorId: '5gen18', label: '' },
   { chapitreSlug: 'suites', sectionId: 'recurrente-affine', generatorId: '5gen19', label: '' },

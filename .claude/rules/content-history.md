@@ -3393,3 +3393,27 @@ paths:
   aucun terme nul) et exemple résolu « trois termes consécutifs, x à trouver » (x − 1, 3x − 3, x + 15 :
   x = 1 écartée, x = 3 convient) après « isoler x entre deux termes », énoncé ajouté à
   `ENONCES_DEMONSTRATION` ; libellé de 5gen46 sur la page de conception.
+
+- **5e (4h), Chapitre 3 — Suites** (`suites`), section `convergence` : nouveau générateur
+  **5gen48 « Somme infinie en situation »** (processus 3), carte après 5gen16. Quatre familles,
+  quatre écrans à champ libre chacune (premier terme u₁ → raison q → S∞ exacte, la condition
+  |q| < 1 étant demandée dans la consigne et justifiée dans la réponse/le corrigé, plutôt qu'un choix
+  toujours « oui » → réponse au problème) : `periodique` (0,272727…, 2,4545…, 1,2333…, 0,41515… →
+  fraction irréductible ; sous-cas pur/mixte), `rebonds` (balle/bille/ballon lâché de h, remontées à
+  p % ; distance = h + 2·S∞), `zenon` (poursuite d'Achille et de la tortue, d'un chien et de son
+  maître, d'un cycliste et d'un piéton découpée en étapes à la Zénon : le poursuivi avance de la
+  moitié, du tiers, du quart… de la distance restante ; uₙ = distance du poursuivi, réponse =
+  avance + S∞), `figures` (triangles des milieux avec triangle central colorié, ou hexagones des
+  milieux avec une couronne sur deux coloriée, q = 9/16 ; réponse = aire non coloriée) — jamais des
+  carrés (déjà dans 5gen17). Figures SVG sans identifiant, une seule construction pour l'écran et le
+  papier (`export5e/svgSommeInfinieSituation.ts`, palettes écran/papier). Valeurs exactes comparées à
+  10⁻⁹ près ; valeur approchée et fraction non irréductible (réponse finale du nombre périodique)
+  refusées SANS consommer de tentative. Profil : aucun cas particulier, pas de `calcul`, `forme` =
+  `periodique:pur|mixte`, `rebonds`, `zenon`, `figures:triangle|hexagones` (≈ 50 % chacune dans sa
+  variante). Pièges diagnostiqués : partie fixe prise pour u₁ ou oubliée, bloc mal placé, q = 1/10
+  pour un bloc de deux chiffres, q à l'envers ou 1 − q, pourcentage tel quel, hauteur de départ
+  prise pour u₁, h + S∞ / 2(h + S∞), distance du poursuivant prise pour u₁, S∞ sans l'avance, 3/4
+  au lieu de 9/16, 1/2 au lieu de 1/4, 1 + q au dénominateur, somme commencée à u₂, aire coloriée
+  donnée au lieu de l'aire non coloriée. Cours : `methode` « une somme infinie en situation » (u₁ et
+  q, |q| < 1, revenir à la question : partie non périodique à ajouter, h + 2S∞) juste après
+  l'atelier Zénon ; libellés de 5gen16 et 5gen48 sur la page de conception.
