@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ChapterContent } from '../../content/types'
+import { OutilsChapitre } from './OutilsChapitre'
 import { estGenerateurMigre, generatorLink } from '../../lib/generatorLink'
 
 interface SectionRepere {
@@ -363,7 +364,7 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
         }}
       >
         <div className="lecture-sheet-body">
-          <p className="lecture-sheet-title">Ce chapitre</p>
+          <OutilsChapitre chapter={chapter} avantImpression={() => setTiroirOuvert(false)} />
           {ongletsNav}
           {rendreListeOnglet('lecture-sheet', true)}
           <button type="button" className="lecture-sheet-close" onClick={() => setTiroirOuvert(false)}>
@@ -378,7 +379,7 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
           principe que le tiroir/les boutons flottants ci-dessus, jamais un second montage/démontage
           conditionnel en JS qui dupliquerait la logique de bascule. */}
       <aside className="chapter-sidebar no-export">
-        <p className="lecture-sheet-title">Ce chapitre</p>
+        <OutilsChapitre chapter={chapter} />
         {ongletsNav}
         <div className="lecture-sidebar-list">{rendreListeOnglet('lecture-sidebar', false)}</div>
       </aside>

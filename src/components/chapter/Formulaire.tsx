@@ -1,5 +1,6 @@
 import type { ChapterContent } from '../../content/types'
 import { RichText } from '../Math'
+import { imprimerFormulaireSeul } from '../../lib/imprimer'
 
 /**
  * Formulaire de fin de chapitre ("fiche de référence") : toutes les formules nécessaires pour
@@ -10,15 +11,7 @@ export function Formulaire({ formulaire, chapter }: { formulaire: ChapterContent
   if (!formulaire) return null
   const total = formulaire.groups.reduce((n, g) => n + g.formulas.length, 0)
 
-  function handlePrint() {
-    document.body.classList.add('print-formulaire-only')
-    const cleanup = () => {
-      document.body.classList.remove('print-formulaire-only')
-      window.removeEventListener('afterprint', cleanup)
-    }
-    window.addEventListener('afterprint', cleanup)
-    window.print()
-  }
+  const handlePrint = imprimerFormulaireSeul
 
   return (
     <>
