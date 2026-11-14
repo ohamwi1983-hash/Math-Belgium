@@ -3051,3 +3051,18 @@ paths:
   illustration `curvePlot` (x², aire 1/6 colorée), un exemple résolu (énoncé ajouté à
   `ENONCES_DEMONSTRATION`, clé « coefficient de Gini d'un pays fictif ») et un `piege`, avant la
   carte.
+- **6e (6h), Chapitre 4 — Intégrales et primitives** (`primitives-integrales`) : nouveau 6gen78
+  « La fonction aire » (section `integralesdefinies`, processus 2), carte placée juste après
+  l'atelier `fonction-aire-widget` de la sous-section « La fonction aire » (et non en fin de
+  section). Vocabulaire du cours conservé : la fonction aire s'appelle A (pas F), A(a) = 0, A′ = f.
+  Données : la courbe de f seule, sur quadrillage d'unité 1 (segments à sommets entiers, parfois un
+  demi-cercle), et la borne a. Les changements de signe de f ont toujours lieu en un sommet
+  d'ordonnée nulle : aires multiples de 1/2 ou de π/4, extremums de A lisibles. Variantes :
+  valeurs (aires signées puis A en 3 points, dont un à gauche de a si a est intérieur), sens de
+  variation (choix par intervalle, coupé aussi aux sommets « pics » de f pour tester le piège « A
+  décroît quand f décroît ») puis valeurs du tableau, extremums (abscisses candidates : zéros avec
+  ou sans changement de signe, extremums de f) puis valeurs, A′ = f (pentes puis A(p) et tangente),
+  graphique de A parmi 4 (A, f, f(a) + A, −A ; position tirée au hasard). Le cours ne disait pas
+  comment lire variations/extremums de A sur la courbe de f : un `methode` « Lire la fonction aire
+  sur le graphique de f » ajouté avant la carte (pas d'exemple, rien à ajouter à
+  `ENONCES_DEMONSTRATION`).
