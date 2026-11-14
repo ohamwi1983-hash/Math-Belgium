@@ -786,6 +786,108 @@
   gap: 8px;
 }
 
+/* gen53 — construction aux instruments : choix de l'instrument, actions de tracé, bilan d'écran. */
+.entrainement .construction-barre {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.entrainement .construction-outils {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.entrainement .construction-outil {
+  min-height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.entrainement .construction-outil[aria-pressed="true"] {
+  background: var(--color-primary);
+  color: var(--on-accent);
+}
+
+.entrainement .construction-pointe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.entrainement .construction-pointe .construction-outil {
+  min-width: 48px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.entrainement .construction-pointe .construction-outil[aria-pressed="true"] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--on-accent);
+}
+
+.entrainement .construction-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.entrainement .construction-action {
+  min-height: 44px;
+}
+
+.entrainement .construction-mode-emploi {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.entrainement .construction-figure {
+  position: relative;
+}
+
+.entrainement .construction-recentrer {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.entrainement .construction-bilan {
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-surface);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 /* Icône croix/coche des bandeaux — même technique `::before`/`mask-image` que `.btn-primary`
  * ci-dessus, même raison (`.alert-error` est rendu par ~490 écrans, jamais un fichier partagé). */
 .entrainement .alert-error::before {

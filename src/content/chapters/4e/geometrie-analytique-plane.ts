@@ -1592,6 +1592,70 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             "tracer l'allure complète à main levée.",
         },
         {
+          kind: 'para',
+          text:
+            "**En pratique, aux instruments.** Commence par l'**axe** : à l'équerre, trace la " +
+            "perpendiculaire à $d$ passant par $F$ ; elle coupe $d$ en $K$. Le **sommet** $S$ est " +
+            "le milieu de $[KF]$ : trace sa **médiatrice** au compas (deux arcs de même ouverture, " +
+            "plus grande que la moitié de $KF$, centrés en $K$ puis en $F$) ; la droite qui joint " +
+            "leurs points d'intersection coupe l'axe en $S$. Pour chaque ouverture $r$ : pointe en " +
+            "$K$, l'arc coupe l'axe en $A$, du côté de $F$, à la distance $r$ de $d$ ; à l'équerre, " +
+            "la parallèle à $d$ passant par $A$ (c'est la perpendiculaire à l'axe en $A$) ; enfin, " +
+            "**sans changer l'ouverture**, pointe en $F$ : le cercle coupe cette parallèle en deux " +
+            "points de la parabole. La même ouverture sert deux fois — c'est elle qui garantit " +
+            "$PF = distance(P, d)$.",
+        },
+        { kind: 'subheading', text: 'Deuxième méthode : la médiatrice' },
+        {
+          kind: 'para',
+          text:
+            "On peut aussi partir d'un point $H$ de la directrice. Le point $P$ de la parabole " +
+            "qui se projette en $H$ sur $d$ vérifie deux conditions. D'abord, sa distance à $d$ " +
+            "est $PH$ : $P$ est sur la **perpendiculaire** à $d$ en $H$, tracée à l'équerre. " +
+            "Ensuite, $PF = PH$ : $P$ est à égale distance de $F$ et de $H$, donc sur la " +
+            "**médiatrice** de $[FH]$, tracée au compas. L'intersection de ces deux droites est " +
+            "le point $P$ cherché. Le sommet en est le cas particulier $H = K$ : c'est exactement " +
+            "la construction de $S$ ci-dessus.",
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -3,
+            xMax: 3.6,
+            yMin: -2,
+            yMax: 3,
+            showAxes: false,
+            curves: [{ fn: (x: number) => (x * x) / 4, tone: 'faint', xMin: -3, xMax: 3.4 }],
+            vectors: [
+              { from: { x: -3, y: -1 }, to: { x: 3.6, y: -1 }, tone: 'ink', arrow: false },
+              { from: { x: 2, y: -2 }, to: { x: 2, y: 3 }, tone: 'attn', arrow: false },
+              { from: { x: -1, y: -2 }, to: { x: 3.6, y: 2.6 }, tone: 'accent', dashed: true, arrow: false },
+              { from: { x: 2, y: 1 }, to: { x: 0, y: 1 }, tone: 'good', tick: true, arrow: false },
+              { from: { x: 2, y: 1 }, to: { x: 2, y: -1 }, tone: 'good', tick: true, arrow: false },
+            ],
+            rightAngleMarkers: [{ vertex: { x: 2, y: -1 }, arm1: { x: 1, y: -1 }, arm2: { x: 2, y: 0 } }],
+            points: [
+              { x: 0, y: 1, label: 'F', tone: 'good', labelPos: 'left' },
+              { x: 2, y: -1, label: 'H', tone: 'ink', labelPos: 'below' },
+              { x: 2, y: 1, label: 'P', tone: 'accent', labelPos: 'right' },
+              { x: 0, y: 0, label: 'S', tone: 'ink', labelPos: 'left' },
+              { x: -2.6, y: -0.75, label: 'directrice d', tone: 'ink', node: false },
+            ],
+            caption:
+              'perpendiculaire à d en H (trait plein) ∩ médiatrice de [FH] (pointillés) = P, avec PF = PH',
+          },
+        },
+        {
+          kind: 'astuce',
+          text:
+            "Chaque point $H$ de $d$ donne un point de la parabole, et son **symétrique par " +
+            "rapport à l'axe** en donne un second sans nouvelle construction. Avantage : tu " +
+            "choisis où tombent les points ($H$ proche de $K$ : un point proche du sommet). " +
+            "Bonus : la médiatrice de $[FH]$ touche la parabole en $P$ sans la traverser — c'est " +
+            "la **tangente** en $P$.",
+        },
+        {
           kind: 'atelier',
           tag: 'parabole-foyer-widget',
           label: 'Manipule toi-même : foyer et directrice',
@@ -1623,7 +1687,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'entrainement',
           title: 'Construction graphique de la parabole',
           generatorId: 'gen53',
-          description: ['Construis la parabole au compas et à l\'équerre, à partir du foyer et de la directrice seuls. Sans aucune coordonnée à calculer.'],
+          description: ['Construis l\'axe, le sommet puis des points de la parabole avec une équerre et un compas, par la méthode du cercle et de la parallèle ou par celle de la médiatrice. Aucune grille, aucune coordonnée.'],
           chantier: '4e',
           whereLabel: '4e → « 53. Construction graphique de la parabole »',
         },

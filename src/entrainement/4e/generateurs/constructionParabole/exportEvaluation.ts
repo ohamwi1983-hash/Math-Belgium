@@ -1,428 +1,174 @@
-import type { ExerciceConstructionParabole } from "../../core/constructionParabole.types";
-import type { Point } from "../../core/vecteur.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { texte } from "../../../export/fragmentsDocx";
-import { calculerViewBoxGrilleTournee, demiPorteeGrilleTournee } from "../../ui/grilleTourneeGraph";
-import type { ViewBoxTransformation } from "../../ui/vecteurGraph";
-import { RATIO_GRAPHE } from "../../ui/mafsTransformation";
-import { pointsCiblesIteration, rCanonique } from "../../moteur/verificationConstructionParabole";
-import { evaluerParaboleLocale } from "../../ui/traceParaboleGraph";
-import { genererExerciceConstructionParabole } from "./index";
-
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceConstructionParabole>` pour gen53
- * ("Construction graphique de la parabole", `AppConstructionParabole.tsx`) — voir
- * `generateurs/analyseFonction/exportWord.ts` pour le mécanisme générique de référence, et
- * `generateurs/constructionVectorielle/exportEvaluation.ts` pour le patron "grille papier +
- * graphique HTML" suivi ici (même famille de générateurs graphiques que `constructionDroite`).
- *
- * Chapitre Math-Belgium "Géométrie analytique plane" (4e), section "parabole"
- * (`src/content/chapters/4e/geometrie-analytique-plane.ts`) — cette section est couverte par 3
- * générateurs distincts (gen51 `equationParabole`, gen52 `equationParaboleDeveloppee`, gen53
- * celui-ci) ; ce fichier ne touche QUE `generateurs/constructionParabole/`.
- *
- * **PAS de `CATALOGUE_VARIANTES`** — confirmé en lisant `generateurs/constructionParabole/index.ts`
- * EN ENTIER : il n'exporte que `genererExerciceConstructionParabole`/`construireExercice`, aucune
- * notion de variante/famille forçable (tirage uniforme de `foyer.y` parmi 2 candidats, de `foyer.x`
- * sur un petit intervalle, et de `theta` par rejet). `catalogueVariantes`/`genererInstanceAvecVariante`
- * sont donc omis ici, même contrat "zéro-argument" que `constructionVectorielle/exportEvaluation.ts`
- * (déjà sans catalogue pour la même raison).
- *
- * **Écran → question — PAS un tracé "depuis une équation"** : contrairement à gen51/gen52 (qui
- * partent d'une équation ou d'un graphe déjà tracé), gen53 ne donne NI équation NI coordonnée
- * numérique — uniquement un foyer F et une directrice d (repère LOCAL où d est TOUJOURS `y=0` et
- * F=(foyer.x,foyer.y), obliquité appliquée seulement à l'affichage via `theta`, voir l'en-tête de
- * `core/constructionParabole.types.ts`/`ui/grilleTourneeGraph.ts`). L'écran interactif a 2 phases
- * bien distinctes (`moteur/sessionConstructionParabole.ts`) : 3 itérations "construction" (choisir un
- * rayon r au compas centré en F, tracer la parallèle à d à distance r du côté de F, ce qui donne 2
- * points de la parabole par itération — `verificationConstructionParabole.ts::pointsCiblesIteration`),
- * puis un écran "trace" terminal (relier les 6 points obtenus, d'une extrémité à l'autre de la courbe, pour
- * former la courbe). Sur papier (refonte), l'énoncé est la figure et UNE consigne globale
- * (« construis au moins 6 points, puis trace la parabole ») ; les 4 écrans (3 constructions, le
- * tracé) deviennent les étapes 1 à 4 du corrigé détaillé, avec la méthode et un exemple de rayon
- * pour chacune, et la figure complète sous l'étape du tracé.
- *
- * **Représentation papier** : grille (vierge en énoncé) + foyer F + directrice d, exactement comme
- * `ConstructionParaboleGraph`/`GrilleTournee` (`components/mafsGraphPartage.tsx`) les affiche à
- * l'écran — AUCUNE graduation ni coordonnée numérique (même contrainte pédagogique que l'écran, voir
- * l'en-tête de `ui/grilleTourneeGraph.ts` : "aucune coordonnée chiffrée visible"), donc aucun
- * fragment LaTeX/texte de ce fichier ne révèle jamais `foyer.x`/`foyer.y`/un rayon en valeur brute.
- * `construireSvgConstructionParabole` ci-dessous écrit son propre petit moteur de tracé `<svg>` (même
- * précédent que `constructionVectorielle`/`triangleLies`/`boiteMoustaches` — chacun le sien, aucun
- * moteur générique partagé dans `export/`), mais RÉUTILISE toute la géométrie déjà partagée par
- * l'écran interactif plutôt que de la dupliquer :
- * - `ui/grilleTourneeGraph.ts::calculerViewBoxGrilleTournee`/`demiPorteeGrilleTournee` — EXACTEMENT
- *   le même calcul de viewBox/étendue de grille tournée que `ConstructionParaboleGraph.tsx`.
- * - `moteur/verificationConstructionParabole.ts::rCanonique`/`pointsCiblesIteration` — le même calcul
- *   de rayon canonique et de points d'intersection cercle/droite que le moteur de vérification.
- * - `ui/traceParaboleGraph.ts::evaluerParaboleLocale` — la même équation analytique locale de la
- *   parabole que l'écran "trace" (jamais montrée à l'élève, réservée au tracé de la courbe).
- * Le seul calcul écrit ici et absent de `ui/grilleTourneeGraph.ts` est la rotation d'un point LOCAL
- * vers le repère extérieur (`tournerPointLocal` ci-dessous) : la fonction équivalente
- * (`tournerPoint`) existe déjà dans `ui/grilleTourneeGraph.ts` mais n'y est PAS exportée (usage
- * interne à `calculerViewBoxGrilleTournee`) — ce fichier ne devant toucher AUCUN autre fichier
- * (consigne explicite de la tâche), la même formule (rotation 2D standard, `cos`/`sin`) est reproduite
- * ici à l'identique plutôt que d'exporter l'originale.
- *
- * **Rayons choisis pour l'illustration — PAS la famille "abscisses entières" du commentaire de tête
- * de `index.ts`** : ce commentaire dérive une famille infinie de rayons `r = h·(1+k²)` (`k=1,2,3,…`,
- * `h = foyer.y/2`) donnant une abscisse d'intersection ENTIÈRE — mais cette famille croît vite
- * (ex. r=2,5,10 pour foyer.y=2 ; r=4,10,20 pour foyer.y=4, cf. son propre commentaire) : afficher les
- * 3 cercles simultanément sur UN SEUL graphique statique (contrairement à l'écran, qui n'affiche
- * jamais qu'UN cercle à la fois, celui de l'itération en cours) rendrait le graphique soit minuscule
- * (le petit cercle r=2 écrasé par le grand r=10/20) soit surdimensionné. Comme aucune graduation n'est
- * de toute façon affichée (voir ci-dessus), la propriété "abscisse entière" n'apporte ici AUCUN
- * bénéfice visuel. Les 3 rayons choisis sont donc simplement `rCanonique(exercice)`,
- * `rCanonique(exercice)+1`, `rCanonique(exercice)+2` — 3 valeurs proches, toujours strictement
- * valides et deux à deux distinctes par construction (`rEstValide` ne rejette qu'un rayon ≤ rMinimal
- * ou déjà utilisé), qui donnent un graphique compact quel que soit `foyer.y`. `rCanonique` est de
- * plus DÉJÀ la valeur utilisée par l'aide niveau 2 de l'écran interactif (cercle de référence) — la
- * cohérence entre "l'exemple montré à l'élève en aide" et "le premier rayon illustré en correction
- * papier" est donc un bonus gratuit de cette réutilisation, pas un choix indépendant.
- *
- * Correction RESYNTHÉTISÉE depuis les valeurs déjà connues de l'instance tirée (`exercice.foyer`,
- * `exercice.theta`) : `EtapeConstructionParabole.tsx`/`EtapeTraceParabole.tsx` n'ont pas de texte
- * d'aide progressif à concaténer tel quel (leurs 2 aides, `TEXTE_AIDE_CONSTRUCTION_NIVEAU1/2`, sont
- * déjà génériques et réutilisées presque mot pour mot dans la consigne d'énoncé ci-dessous — aucune
- * n'est spécifique à l'instance) ; le texte de correction explicite directement le principe
- * d'équidistance foyer/directrice qui justifie la construction, jamais recalculé indépendamment de
- * `pointsCiblesIteration`/`evaluerParaboleLocale` déjà importés.
- *
- * **PAS `regroupable`** — les 3 conditions de `AdaptateurFeuilleExercices.regroupable`
- * (`export/genererFeuilleExercices.ts`) sont violées : `enteteHtml` (le graphique) est utilisé, ce qui
- * disqualifie `regroupable` à lui seul, quelle que soit la consigne (voir la doc du champ) — de
- * surcroît la consigne ne dépend certes PAS des valeurs tirées (générique par construction, aucune
- * coordonnée numérique n'apparaissant jamais dans le texte), mais peu importe puisque `enteteHtml`
- * suffit déjà à exclure `regroupable`.
- *
- * Pas de zone de réponse vierge (`reponse` omis sur l'unique question, comportement par défaut de
- * `construireZoneReponse`/`zoneReponseHtml` : 1 ligne en docx, SANS AUCUN EFFET sur le pipeline HTML
- * évaluation qui n'affiche jamais de zone de réponse, voir `export/assemblerEvaluationHtml.ts`) : la
- * réponse attendue est une CONSTRUCTION à main levée sur la grille déjà imprimée dans l'énoncé, jamais
- * une ligne de texte à remplir — même raison que `constructionVectorielle`/`boiteMoustaches`/
- * `triangleLies`, qui laissent également `reponse` implicite pour leurs questions à tracé.
+ * Adaptateur feuilles d'exercices / évaluations de `gen53` (construction de la parabole au compas
+ * et à l'équerre). Énoncé papier = figure sans grille (F, d oblique, et H₁, H₂, H₃ pour la méthode
+ * de la médiatrice) + consigne globale qui nomme la méthode ; les étapes (axe, sommet, trois couples
+ * ou trois points, tracé) vont dans le corrigé. `forme` = méthode : la même dans toutes les séries.
  */
+import type { ExerciceConstructionParabole } from "../../core/constructionParabole.types";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, ProfilInstance, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { svgConstructionParabole } from "../../ui/figureConstructionParabole";
+import { fr } from "../../ui/formatConstructionParabole";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceConstructionParabole } from "./index";
 
-const LARGEUR_SVG = 300;
-const HAUTEUR_SVG = Math.round(LARGEUR_SVG / RATIO_GRAPHE);
-const MARGE_PX = 20;
+type E = ExerciceConstructionParabole;
 
-const COULEUR_GRILLE = "#d8dee6";
-const COULEUR_DIRECTRICE = "#495057";
-const COULEUR_FOYER = "#f08c00";
-const COULEUR_COMPAS = "#1971c2";
-const COULEUR_EQUERRE = "#e8590c";
-const COULEUR_POINT = "#2f9e44";
-const COULEUR_COURBE = "#2f9e44";
-
-/** Nombre de segments de la polyline de la courbe finale — dense pour paraître lisse sur un
- * graphique de cette taille (≈300px), même ordre de grandeur que `PAS_ECHANTILLONNAGE_COURBE`
- * (`ui/traceParaboleGraph.ts`, non exportée — valeur reproduite ici, jamais réimportée). */
-const PAS_ECHANTILLONNAGE_COURBE = 60;
-
-interface Echelle {
-  sx: (x: number) => number;
-  sy: (y: number) => number;
-  /** Facteur d'échelle scalaire (moyenne des 2 axes, quasi identiques une fois `viewBox` ajusté au
-   * ratio du canevas) — utilisé pour convertir un RAYON réel (isotrope par nature) en pixels, ce que
-   * `sx`/`sy` seuls ne permettent pas directement. */
-  rayon: (r: number) => number;
+function enteteEnonce(e: E): FragmentConsigne[] {
+  return e.methode === "cercle"
+    ? fr("On donne le foyer $F$ et la directrice $d$ d'une parabole.")
+    : fr("On donne le foyer $F$ et la directrice $d$ d'une parabole, ainsi que trois points $H_1$, $H_2$ et $H_3$ de $d$.");
 }
 
-function construireEchelle(viewBox: ViewBoxTransformation): Echelle {
-  const [xMin, xMax] = viewBox.x;
-  const [yMin, yMax] = viewBox.y;
-  const zoneX = LARGEUR_SVG - 2 * MARGE_PX;
-  const zoneY = HAUTEUR_SVG - 2 * MARGE_PX;
-  const facteurX = zoneX / (xMax - xMin);
-  const facteurY = zoneY / (yMax - yMin);
-  const facteurMoyen = (facteurX + facteurY) / 2;
-  return {
-    sx: (x) => MARGE_PX + (x - xMin) * facteurX,
-    sy: (y) => HAUTEUR_SVG - MARGE_PX - (y - yMin) * facteurY,
-    rayon: (r) => r * facteurMoyen,
-  };
-}
-
-/** Fait pivoter un point du repère LOCAL vers le repère extérieur (avant rotation) — MÊME formule
- * que la fonction privée `tournerPoint` de `ui/grilleTourneeGraph.ts` (non exportée, voir le
- * commentaire de tête pour pourquoi elle est reproduite ici plutôt que modifiée en export). */
-function tournerPointLocal(point: Point, theta: number): Point {
-  const cos = Math.cos(theta);
-  const sin = Math.sin(theta);
-  return { x: point.x * cos - point.y * sin, y: point.x * sin + point.y * cos };
-}
-
-/** Les 3 rayons illustrés en correction — voir le commentaire de tête pour pourquoi ce ne sont PAS
- * les rayons "abscisse entière" du commentaire de tête de `index.ts` (graphique trop grand). */
-function rayonsIllustration(exercice: ExerciceConstructionParabole): [number, number, number] {
-  const r1 = rCanonique(exercice);
-  return [r1, r1 + 1, r1 + 2];
-}
-
-/** Points LOCAUX (pré-rotation) à couvrir par la grille/le viewBox — foyer, point de la directrice
- * sous le foyer, les 4 extrémités cardinales du plus grand des 3 cercles illustrés (pour que ce
- * cercle reste visuellement entier), ET les 6 points cibles eux-mêmes (`pointsCiblesIteration`,
- * déjà importée). Ces derniers sont indispensables : `calculerViewBoxGrilleTournee` calcule le
- * viewBox comme le rectangle englobant des points TOURNÉS qu'on lui donne, jamais l'enveloppe
- * convexe — les 4 extrémités cardinales d'un cercle ne couvrent, une fois tournées, QUE le losange
- * inscrit dans ce cercle (norme L1), pas le disque entier (norme L2) : un point cible qui n'est PAS
- * dans une direction cardinale (le cas général) peut donc rester sur le cercle mais hors de ce
- * losange, et se retrouver hors du viewBox si on ne le fournit pas lui-même explicitement — trouvé
- * par un test de propriété (smoke test, coordonnées SVG hors du canevas sur un échantillon aléatoire)
- * avant d'être corrigé ici, méthode "verify before fixing" du projet. */
-function pointsCouverture(exercice: ExerciceConstructionParabole, rayons: [number, number, number]): Point[] {
-  const { foyer } = exercice;
-  const rMax = rayons[2];
-  const cibles = rayons.flatMap((r) => pointsCiblesIteration(exercice, r));
+function questions(e: E): FragmentConsigne[][] {
+  const debut = [
+    fr("Construis à l'équerre l'axe de la parabole ; il coupe $d$ en $K$."),
+    fr("Construis au compas le sommet $S$, milieu de $[KF]$."),
+  ];
+  const fin = [fr("Trace la parabole.")];
+  if (e.methode === "cercle") {
+    const ordinal = ["un premier", "un deuxième", "un troisième"];
+    return [
+      ...debut,
+      ...ordinal.map((o, i) =>
+        fr(`Par la méthode du cercle et de la parallèle, construis ${o} couple de points de la parabole${i > 0 ? ", avec une autre ouverture de compas" : ""}.`),
+      ),
+      ...fin,
+    ];
+  }
   return [
-    foyer,
-    { x: foyer.x, y: 0 },
-    { x: foyer.x - rMax, y: foyer.y },
-    { x: foyer.x + rMax, y: foyer.y },
-    { x: foyer.x, y: foyer.y + rMax },
-    { x: foyer.x, y: foyer.y - rMax },
-    ...cibles,
+    ...debut,
+    ...[1, 2, 3].map((i) => fr(`Par la méthode de la médiatrice, construis le point de la parabole qui se projette en $H_${i}$ sur $d$, puis son symétrique par rapport à l'axe.`)),
+    ...fin,
   ];
 }
 
-function projeter(point: Point, theta: number, echelle: Echelle): { x: number; y: number } {
-  const tourne = tournerPointLocal(point, theta);
-  return { x: echelle.sx(tourne.x), y: echelle.sy(tourne.y) };
-}
-
-/** Grille tournée dessinée "à la main" — même géométrie que `GrilleTournee`
- * (`components/mafsGraphPartage.tsx`) : lignes horizontales/verticales à espacement entier dans le
- * repère LOCAL, sur `±demiPortee`, chacune tournée par `theta` puis projetée en pixels. Aucune
- * graduation ni label numérique (même contrainte que l'écran). */
-function construireGrilleHtml(demiPortee: number, theta: number, echelle: Echelle): string {
-  const pas = 1;
-  const nombreLignes = Math.ceil(demiPortee / pas);
-  const lignes: string[] = [];
-  for (let k = -nombreLignes; k <= nombreLignes; k++) {
-    const v1 = projeter({ x: k * pas, y: -demiPortee }, theta, echelle);
-    const v2 = projeter({ x: k * pas, y: demiPortee }, theta, echelle);
-    lignes.push(`<line x1="${v1.x.toFixed(1)}" y1="${v1.y.toFixed(1)}" x2="${v2.x.toFixed(1)}" y2="${v2.y.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    const h1 = projeter({ x: -demiPortee, y: k * pas }, theta, echelle);
-    const h2 = projeter({ x: demiPortee, y: k * pas }, theta, echelle);
-    lignes.push(`<line x1="${h1.x.toFixed(1)}" y1="${h1.y.toFixed(1)}" x2="${h2.x.toFixed(1)}" y2="${h2.y.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-  }
-  return lignes.join("");
-}
-
-/** Directrice (droite locale `y=0`, tournée) + foyer F (croix), avec leurs étiquettes "d"/"F" —
- * seuls éléments déjà connus de l'élève, présents aussi bien en énoncé qu'en correction. */
-function construireDirectriceEtFoyerHtml(exercice: ExerciceConstructionParabole, demiPortee: number, echelle: Echelle): string {
-  const { foyer, theta } = exercice;
-  const d1 = projeter({ x: -demiPortee, y: 0 }, theta, echelle);
-  const d2 = projeter({ x: demiPortee, y: 0 }, theta, echelle);
-  const f = projeter(foyer, theta, echelle);
-  const TAILLE_CROIX = 5;
-
-  return (
-    `<line x1="${d1.x.toFixed(1)}" y1="${d1.y.toFixed(1)}" x2="${d2.x.toFixed(1)}" y2="${d2.y.toFixed(1)}" stroke="${COULEUR_DIRECTRICE}" stroke-width="2"/>` +
-    `<text x="${(d1.x + 6).toFixed(1)}" y="${(d1.y - 5).toFixed(1)}" font-size="11" font-weight="700" fill="${COULEUR_DIRECTRICE}">d</text>` +
-    `<g stroke="${COULEUR_FOYER}" stroke-width="2.2">` +
-    `<line x1="${(f.x - TAILLE_CROIX).toFixed(1)}" y1="${(f.y - TAILLE_CROIX).toFixed(1)}" x2="${(f.x + TAILLE_CROIX).toFixed(1)}" y2="${(f.y + TAILLE_CROIX).toFixed(1)}"/>` +
-    `<line x1="${(f.x - TAILLE_CROIX).toFixed(1)}" y1="${(f.y + TAILLE_CROIX).toFixed(1)}" x2="${(f.x + TAILLE_CROIX).toFixed(1)}" y2="${(f.y - TAILLE_CROIX).toFixed(1)}"/>` +
-    `</g>` +
-    `<text x="${(f.x + 8).toFixed(1)}" y="${(f.y - 6).toFixed(1)}" font-size="12" font-weight="700" fill="${COULEUR_FOYER}">F</text>`
-  );
-}
-
-/** Construction complète (correction uniquement) : les 3 cercles (compas, bleu), les 3 parallèles
- * (équerre, orange), les 6 points d'intersection (vert) et la courbe de la parabole reliant ces
- * points (vert, `evaluerParaboleLocale` — jamais recalculée indépendamment). */
-function construireConstructionHtml(exercice: ExerciceConstructionParabole, rayons: [number, number, number], demiPortee: number, echelle: Echelle): string {
-  const { foyer, theta } = exercice;
-  const f = projeter(foyer, theta, echelle);
-
-  const cercles = rayons
-    .map((r) => `<circle cx="${f.x.toFixed(1)}" cy="${f.y.toFixed(1)}" r="${echelle.rayon(r).toFixed(1)}" fill="none" stroke="${COULEUR_COMPAS}" stroke-width="1.6"/>`)
-    .join("");
-
-  const paralleles = rayons
-    .map((r) => {
-      const p1 = projeter({ x: -demiPortee, y: r }, theta, echelle);
-      const p2 = projeter({ x: demiPortee, y: r }, theta, echelle);
-      return `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="${COULEUR_EQUERRE}" stroke-width="1.6" stroke-dasharray="4 3"/>`;
-    })
-    .join("");
-
-  const cibles = rayons.flatMap((r) => pointsCiblesIteration(exercice, r));
-  const points = cibles
-    .map((p) => {
-      const px = projeter(p, theta, echelle);
-      return `<circle cx="${px.x.toFixed(1)}" cy="${px.y.toFixed(1)}" r="3.2" fill="${COULEUR_POINT}"/>`;
-    })
-    .join("");
-
-  const xMinLocal = Math.min(...cibles.map((p) => p.x));
-  const xMaxLocal = Math.max(...cibles.map((p) => p.x));
-  const courbePoints: string[] = [];
-  for (let i = 0; i <= PAS_ECHANTILLONNAGE_COURBE; i++) {
-    const x = xMinLocal + (xMaxLocal - xMinLocal) * (i / PAS_ECHANTILLONNAGE_COURBE);
-    const y = evaluerParaboleLocale(exercice, x);
-    const px = projeter({ x, y }, theta, echelle);
-    courbePoints.push(`${px.x.toFixed(1)},${px.y.toFixed(1)}`);
-  }
-  const courbe = `<polyline points="${courbePoints.join(" ")}" fill="none" stroke="${COULEUR_COURBE}" stroke-width="2.4"/>`;
-
-  return `${cercles}${paralleles}${courbe}${points}`;
-}
-
-/** Graphique complet (grille + directrice + F), avec en plus la construction (cercles, parallèles,
- * points, courbe) quand `avecConstruction` (réservé à la correction — jamais l'énoncé, qui ne doit
- * pas trahir la réponse). Le viewBox est TOUJOURS calculé en tenant compte des 3 cercles (même s'ils
- * ne sont pas affichés) — sur papier, contrairement à l'écran (Mafs pan/zoom), la grille imprimée en
- * énoncé doit déjà montrer assez d'espace pour que l'élève y trace sa construction sans en sortir. */
-function construireSvgConstructionParabole(exercice: ExerciceConstructionParabole, avecConstruction: boolean): string {
-  const rayons = rayonsIllustration(exercice);
-  const couverture = pointsCouverture(exercice, rayons);
-  const viewBox = calculerViewBoxGrilleTournee(couverture, exercice.theta);
-  const demiPortee = demiPorteeGrilleTournee(couverture);
-  const echelle = construireEchelle(viewBox);
-
-  const grilleHtml = construireGrilleHtml(demiPortee, exercice.theta, echelle);
-  const directriceFoyerHtml = construireDirectriceEtFoyerHtml(exercice, demiPortee, echelle);
-  const constructionHtml = avecConstruction ? construireConstructionHtml(exercice, rayons, demiPortee, echelle) : "";
-
-  return `<svg width="${LARGEUR_SVG}" height="${HAUTEUR_SVG}" viewBox="0 0 ${LARGEUR_SVG} ${HAUTEUR_SVG}" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:8px auto 14px;border:1px solid #e6e6f0;border-radius:8px;background:#ffffff;">
-<rect x="0" y="0" width="${LARGEUR_SVG}" height="${HAUTEUR_SVG}" fill="#ffffff"/>
-${grilleHtml}
-${directriceFoyerHtml}
-${constructionHtml}
-</svg>`;
-}
-
-/** Consignes des 4 étapes (3 constructions, puis le tracé) — version papier des écrans
- * (`CONSIGNE_CONSTRUCTION`, écran « trace ») : elles titrent les étapes du corrigé. */
-const ORDINAUX = ["un premier", "un deuxième", "un troisième"];
-const RAYONS = ["r", "r′ différent du premier", "r″ différent des deux premiers"];
-
-function consigneConstruction(numero: number): string {
-  return `Construis ${ORDINAUX[numero]} couple de points : au compas, le cercle de centre F et de rayon ${RAYONS[numero]} ; à l'équerre, la parallèle à d située à cette même distance, du côté de F ; leurs 2 points d'intersection sont sur la parabole.`;
-}
-
-const CONSIGNE_TRACE_PAPIER = "Relie les 6 points obtenus par une courbe régulière, d'une extrémité à l'autre, le long de la courbe.";
-
-function construireEnonceConstructionParabole(exercice: ExerciceConstructionParabole): SectionExercice {
+function construireEnonce(e: E): SectionExercice {
   return {
-    enteteFragments: [texte("On donne le foyer F et la directrice d d'une parabole.")],
-    enteteHtml: construireSvgConstructionParabole(exercice, false),
-    questions: [0, 1, 2].map((n) => ({ consigne: [texte(consigneConstruction(n))] })).concat([{ consigne: [texte(CONSIGNE_TRACE_PAPIER)] }]),
+    enteteFragments: enteteEnonce(e),
+    enteteHtml: svgConstructionParabole(e, false),
+    questions: questions(e).map((consigne) => ({ consigne })),
   };
 }
 
-/** Énoncé papier : la figure et la consigne globale, sans la méthode (elle passe dans le corrigé,
- * étape par étape). */
-function enoncePapierConstructionParabole(exercice: ExerciceConstructionParabole): EnoncePapier {
-  return {
-    section: {
-      enteteFragments: [
-        texte("On donne le foyer F et la directrice d d'une parabole. Construis au compas et à l'équerre, sans calcul de coordonnées, au moins 6 points de cette parabole, puis trace-la."),
-      ],
-      enteteHtml: construireSvgConstructionParabole(exercice, false),
-      questions: [],
-    },
-  };
+function enoncePapier(e: E): EnoncePapier {
+  const consigne =
+    e.methode === "cercle"
+      ? fr("On donne le foyer $F$ et la directrice $d$ d'une parabole. Construis au compas et à l'équerre son axe, son sommet $S$, puis au moins six autres points de la parabole par la méthode du cercle et de la parallèle, avec trois ouvertures de compas différentes. Trace enfin la parabole.")
+      : fr("On donne le foyer $F$, la directrice $d$ d'une parabole et trois points $H_1$, $H_2$, $H_3$ de $d$. Construis au compas et à l'équerre son axe, son sommet $S$, puis, par la méthode de la médiatrice, les points de la parabole qui se projettent en $H_1$, $H_2$ et $H_3$ sur $d$, ainsi que leurs symétriques par rapport à l'axe. Trace enfin la parabole.");
+  return { section: { enteteFragments: consigne, enteteHtml: svgConstructionParabole(e, false), questions: [] } };
 }
 
-function construireCorrectionConstructionParabole(exercice: ExerciceConstructionParabole): BlocCorrection[] {
+function construireCorrection(e: E): BlocCorrection[] {
   return [
-    { type: "html", html: construireSvgConstructionParabole(exercice, true) },
+    { type: "html", html: svgConstructionParabole(e, true) },
     {
       type: "paragraphe",
-      fragments: [
-        texte(
-          "Un point M appartient à la parabole si et seulement s'il est à la même distance du foyer F et de la directrice d : pour chaque rayon r, les 2 points d'intersection du cercle de centre F et de rayon r avec la parallèle à d située à la distance r, du côté de F, conviennent.",
-        ),
-      ],
+      fragments:
+        e.methode === "cercle"
+          ? fr("Un point $P$ est sur la parabole si et seulement si $PF$ est égale à la distance de $P$ à $d$. Avec une ouverture $r$ plus grande que $KS$, le cercle de centre $F$ et de rayon $r$ coupe la parallèle à $d$ située à la distance $r$, du côté de $F$, en deux points de la parabole.")
+          : fr("Un point $P$ est sur la parabole si et seulement si $PF = PH$, où $H$ est son projeté orthogonal sur $d$ : $P$ est à la fois sur la perpendiculaire à $d$ en $H$ et sur la médiatrice de $[FH]$."),
     },
   ];
 }
 
-function carreaux(n: number): string {
-  return `${n} carreau${n > 1 ? "x" : ""}`;
-}
-
-function difficulteConstructionParabole(): 1 | 2 | 3 {
-  return 2;
-}
-
-function reponseBreveConstructionParabole(exercice: ExerciceConstructionParabole): FragmentConsigne[] {
-  return [texte(`Parabole passant par les 6 points construits, de sommet situé à mi-chemin entre F et d (à ${carreaux(exercice.foyer.y / 2)} de d), ouverte du côté de F.`)];
-}
-
-function correctionDetailleeConstructionParabole(exercice: ExerciceConstructionParabole): EtapeCorrection[] {
-  const distance = exercice.foyer.y;
-  const rayons = rayonsIllustration(exercice);
+function lignesCorrection(e: E): EtapeCorrection[] {
   const lignes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [texte("Un point M est sur la parabole s'il est à la même distance de F et de d. Un point du cercle de centre F et de rayon r est à la distance r de F ; un point de la parallèle à d située à la distance r (du côté de F) est à la distance r de d : leurs points communs conviennent.")],
-    },
-    {
-      label: "Condition",
-      sousQuestion: "a",
-      fragments: [texte(`F est à ${carreaux(distance)} de d : le rayon doit dépasser la moitié de cette distance (r > ${distance / 2}), sinon le cercle ne coupe pas la parallèle.`)],
-    },
+    { label: "Axe", sousQuestion: "a", fragments: fr("Un côté de l'angle droit de l'équerre sur $d$, l'autre passant par $F$ : l'axe est la perpendiculaire à $d$ passant par $F$ ; il coupe $d$ en $K$.") },
+    { label: "Sommet", sousQuestion: "b", fragments: fr("Même ouverture, plus grande que la moitié de $KF$ : un arc de centre $K$ et un arc de centre $F$ de chaque côté de l'axe. La droite qui joint leurs points d'intersection est la médiatrice de $[KF]$ ; elle coupe l'axe en $S$, avec $SK = SF$.") },
   ];
-  rayons.forEach((r, i) => {
-    lignes.push({
-      label: "Construction",
-      sousQuestion: "abc"[i]!,
-      fragments: [texte(`Par exemple r = ${carreaux(r)} : cercle de centre F et de rayon ${r}, parallèle à d à ${carreaux(r)} de d du côté de F ; 2 points d'intersection.`)],
+  if (e.methode === "cercle") {
+    ["c", "d", "e"].forEach((lettre, i) => {
+      lignes.push({
+        label: `Couple ${i + 1}`,
+        sousQuestion: lettre,
+        fragments: fr(
+          `Ouverture $r$${i > 0 ? " différente des précédentes" : ""}, plus grande que $KS$. Pointe en $K$ : l'arc coupe l'axe en $A$, du côté de $F$, à la distance $r$ de $d$. Équerre : la parallèle à $d$ passant par $A$. Même ouverture, pointe en $F$ : le cercle coupe la parallèle en $P$ et $P'$, avec $PF = r$ = distance de $P$ à $d$.`,
+        ),
+      });
     });
+  } else {
+    ["c", "d", "e"].forEach((lettre, i) => {
+      const h = `H_${i + 1}`;
+      lignes.push({
+        label: `Point de H${"₁₂₃"[i]}`,
+        sousQuestion: lettre,
+        fragments: fr(
+          `Équerre : la perpendiculaire à $d$ en $${h}$. Compas : médiatrice de $[F${h}]$ (même ouverture, plus grande que la moitié de $F${h}$). Leur intersection $P_${i + 1}$ vérifie $P_${i + 1}F = P_${i + 1}${h}$ = distance de $P_${i + 1}$ à $d$. Son symétrique par rapport à l'axe est aussi sur la parabole.`,
+        ),
+      });
+    });
+  }
+  lignes.push({
+    label: "Tracé",
+    sousQuestion: "f",
+    fragments: fr("Courbe lisse, sans angle, passant par $S$ et par les six points de proche en proche, symétrique par rapport à l'axe et ouverte du côté de $F$."),
+    figureHtml: svgConstructionParabole(e, true),
   });
-  lignes.push(
-    {
-      label: "Tracé",
-      sousQuestion: "d",
-      fragments: [texte("On relie les 6 points dans l'ordre, le long de la courbe. Le sommet est à mi-chemin entre F et d, sur la perpendiculaire à d passant par F, et la parabole s'ouvre du côté de F.")],
-      figureHtml: construireSvgConstructionParabole(exercice, true),
-    },
-    {
-      label: "Piège",
-      sousQuestion: "d",
-      fragments: [texte("La parallèle se trace à la distance r de d (pas de F), et toujours du côté de F ; deux rayons différents donnent deux couples de points différents.")],
-    },
-  );
   return lignes;
 }
 
-function baremeConstructionParabole(): BaremeExercice {
+function reponseBreve(e: E): FragmentConsigne[] {
+  return e.methode === "cercle"
+    ? fr("Axe : perpendiculaire à $d$ par $F$ ; $S$ milieu de $[KF]$ ; trois couples de points obtenus avec trois ouvertures différentes ; parabole tracée (voir la figure du corrigé).")
+    : fr("Axe : perpendiculaire à $d$ par $F$ ; $S$ milieu de $[KF]$ ; trois points sur les perpendiculaires en $H_1$, $H_2$, $H_3$ et sur les médiatrices, et leurs symétriques ; parabole tracée (voir la figure du corrigé).");
+}
+
+function bareme(e: E): BaremeExercice {
+  const criteres =
+    e.methode === "cercle"
+      ? ["Premier couple : arc de centre K, parallèle à d, cercle de centre F de même ouverture", "Deuxième couple (autre ouverture)", "Troisième couple (autre ouverture)"]
+      : ["Point de H₁ : perpendiculaire en H₁, médiatrice de [FH₁], symétrique", "Point de H₂ et son symétrique", "Point de H₃ et son symétrique"];
+  const erreurs =
+    e.methode === "cercle"
+      ? [
+          { description: fr("Distance reportée depuis $F$ au lieu de la directrice (arc de centre $F$ pour placer la parallèle)"), cout: "0 pt sur le couple" },
+          { description: fr("Parallèle tracée du côté de $d$ opposé à $F$"), cout: "0 pt sur le couple" },
+          { description: fr("Ouverture changée entre l'arc de centre $K$ et le cercle de centre $F$"), cout: "0 pt sur le couple" },
+          { description: fr("Ouverture inférieure à $KS$ : aucun point obtenu"), cout: "0 pt sur le couple" },
+        ]
+      : [
+          { description: fr("Perpendiculaire qui ne passe pas par le point $H$ donné"), cout: "0 pt sur le point" },
+          { description: fr("Arcs de la médiatrice tracés avec deux ouvertures différentes"), cout: "0 pt sur le point" },
+          { description: fr("Symétrique par rapport à l'axe oublié"), cout: "moitié des points du point" },
+        ];
   return {
-    reponseFinale: [texte("Parabole tracée par au moins 6 points construits (voir la figure du corrigé).")],
+    reponseFinale: reponseBreve(e),
     criteres: [
-      { sousQuestion: "a", critere: [texte("Premier couple de points : cercle de centre F et parallèle à d à la même distance r, du côté de F")], points: 1 },
-      { sousQuestion: "b", critere: [texte("Deuxième couple de points (autre rayon)")], points: 1 },
-      { sousQuestion: "c", critere: [texte("Troisième couple de points (autre rayon)")], points: 1 },
-      { sousQuestion: "d", critere: [texte("Courbe régulière passant par les points, sommet entre F et d, ouverte du côté de F")], points: 1 },
+      { sousQuestion: "a", critere: fr("Axe : perpendiculaire à $d$ passant par $F$, tracée à l'équerre"), points: 0.5 },
+      { sousQuestion: "b", critere: fr("Sommet $S$ construit comme milieu de $[KF]$ (médiatrice au compas)"), points: 0.5 },
+      { sousQuestion: "c", critere: [{ type: "texte", valeur: criteres[0]! }], points: 0.75 },
+      { sousQuestion: "d", critere: [{ type: "texte", valeur: criteres[1]! }], points: 0.75 },
+      { sousQuestion: "e", critere: [{ type: "texte", valeur: criteres[2]! }], points: 0.75 },
+      { sousQuestion: "f", critere: fr("Courbe lisse par $S$ et les six points, symétrique par rapport à l'axe"), points: 0.75 },
     ],
-    erreursFrequentes: [
-      { description: [texte("Parallèle tracée à la distance r de F au lieu de d, ou du mauvais côté de d")], cout: "−1 par couple" },
-      { description: [texte("Rayon trop petit (au plus la moitié de la distance de F à d) : aucun point d'intersection")], cout: "−1" },
-      { description: [texte("Points reliés par des segments ou dans le désordre")], cout: "−0,5" },
-    ],
-    reponsesAcceptees: [[texte("Tout choix de rayons valides et distincts")]],
+    erreursFrequentes: [...erreurs, { description: fr("Points reliés par des segments, ou pointe anguleuse au sommet"), cout: "moitié des points du tracé" }],
+    reponsesAcceptees:
+      e.methode === "cercle"
+        ? [fr("Toutes ouvertures distinctes plus grandes que $KS$ (les points obtenus diffèrent du corrigé)")]
+        : [fr("Toute ouverture de compas plus grande que la moitié du segment pour chaque médiatrice")],
   };
 }
 
-export const adaptateurEvaluationConstructionParabole: AdaptateurFeuilleExercices<ExerciceConstructionParabole> = {
-  titreDocument: "Construction graphique de la parabole — Évaluation",
+function difficulte(e: E): 1 | 2 | 3 {
+  return e.methode === "cercle" ? 2 : 3;
+}
+
+function profilInstance(e: E): ProfilInstance {
+  return { casParticulier: null, forme: e.methode };
+}
+
+export const adaptateurEvaluationConstructionParabole: AdaptateurFeuilleExercices<E> = {
+  profilInstance,
+  titreDocument: "Construction de la parabole au compas et à l'équerre — Évaluation",
   nomFichierBase: "construction-parabole",
   genererInstance: genererExerciceConstructionParabole,
-  construireEnonce: construireEnonceConstructionParabole,
-  construireCorrection: construireCorrectionConstructionParabole,
-  difficulte: difficulteConstructionParabole,
-  reponseBreve: reponseBreveConstructionParabole,
-  correctionDetaillee: correctionDetailleeConstructionParabole,
-  bareme: baremeConstructionParabole,
-  enoncePapier: enoncePapierConstructionParabole,
-  dureeMinutes: 8,
-  // Pas de profil : aucun paramètre ni cas particulier (foyer à 2 ou 4 carreaux de d, angle de la
-  // grille) — `profilsEvaluation4eCh7Coniques.ts`.
-  // PAS regroupable — `enteteHtml` (le graphique) est utilisé.
+  catalogueVariantes: CATALOGUE_VARIANTES,
+  genererInstanceAvecVariante: construireAvecVarianteId,
+  construireEnonce,
+  construireCorrection,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee: lignesCorrection,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 15,
 };

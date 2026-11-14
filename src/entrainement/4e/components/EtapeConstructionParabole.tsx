@@ -1,153 +1,203 @@
 import { useState } from "react";
 import type { ExerciceConstructionParabole } from "../core/constructionParabole.types";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
+import { coordonneesPoint, outilsEcran, pointsConstruits, pointsPiquables, referenceEquerre, type AcquisConstruction, type EcranConstructionParabole, type OutilConstruction, type TraceConstruction } from "../moteur/modeleConstructionParabole";
+import { pointH, sommet, type NomPoint } from "../moteur/geometrieConstructionParabole";
 import { NIVEAU_AIDE_MAX_CONSTRUCTION } from "../moteur/sessionConstructionParabole";
-import { diagnostiquerConstruction, pointsCiblesIteration } from "../moteur/verificationConstructionParabole";
-import type { ReponseConstructionParabole } from "../moteur/verificationConstructionParabole";
-import {
-  CONSIGNE_CONSTRUCTION,
-  TEXTE_AIDE_CONSTRUCTION_NIVEAU1,
-  TEXTE_AIDE_CONSTRUCTION_NIVEAU2,
-  formatLegendeDistanceLigne,
-  formatLegendeRayon,
-  messageRayonDejaUtilise,
-  messageRayonInvalide,
-  rEstDejaUtilise,
-} from "../ui/formatConstructionParabole";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { ConstructionParaboleGraph } from "./ConstructionParaboleGraph";
-import { ValidationEcran } from "../../components/ValidationEcran";
-import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { PlanConstructionParabole, type EtatCompas } from "./PlanConstructionParabole";
+import { SurcoucheResultat, aimantsEquerre, tracesContexte } from "./SurcouchesConstructionParabole";
+import { RenduFragments } from "./RenduFragments";
+import { Katex } from "./Katex";
 import { BoutonAide } from "./BoutonAide";
+import { ValidationEcran, type ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceConstructionParabole;
-  numeroIteration: number;
+  ecran: EcranConstructionParabole;
+  /** Acquis courant (déjà mis à jour quand l'écran est clos). */
+  acquis: AcquisConstruction;
+  consigne: FragmentConsigne[];
+  aides: FragmentConsigne[][];
+  niveauAide: number;
+  onActiverAide: () => void;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
-  /** Les r déjà confirmés aux itérations précédentes de ce même exercice — un r réutilisé est
-   * rejeté (voir `verificationConstructionParabole.ts::rEstValide`). */
-  rDejaUtilises: number[];
-  onActiverAide: () => void;
-  onValider: (reponse: ReponseConstructionParabole) => void;
-  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
-  validation?: ValidationEtapeProps | null;
-  /** Rayon de la construction attendue, une fois l'écran clos sur une révélation (tentatives
-   * épuisées) — le rayon de repli réellement retenu par le moteur (`rCanoniqueDisponible`) : le
-   * cercle et la droite attendus sont alors DESSINÉS à la place de ceux de l'élève, et ce sont bien
-   * leurs 2 points d'intersection qui apparaîtront en vert à l'itération suivante. */
-  rRevele?: number | null;
+  /** Message du dernier essai raté (diagnostic du geste fautif). */
+  messageErreur: FragmentConsigne[] | null;
+  onValider: (traces: TraceConstruction[]) => void;
+  validation: ValidationEtapeProps | null;
+  /** Écran clos : tracés à montrer (ceux de l'élève s'il a réussi, la construction attendue sinon). */
+  tracesClos: TraceConstruction[] | null;
+  bilan: FragmentConsigne[];
 }
 
-const R_INITIAL = 1;
-const LIGNE_Y_INITIALE = 0;
+/** Ouverture de départ : un peu trop petite pour le report comme pour les médiatrices (l'élève doit
+ * l'ajuster), mais assez grande pour que la pointe et la mine ne se chevauchent pas au doigt. */
+const OUVERTURE_DEPART = 1;
 
-/**
- * Écran "construction", répété `NOMBRE_ITERATIONS_CONSTRUCTION_PARABOLE` fois — un geste de compas
- * (rayon r, poignée bleue) suivi d'un geste d'équerre (droite parallèle à la directrice, poignée
- * orange), sur la même grille tournée. Aucun champ de saisie : les 2 poignées `MovablePoint` PORTENT
- * la réponse — `onValider` soumet leur position courante telle quelle.
- *
- * `pointsConfirmes` (`promptgen53corrections.md`, A.2/A.3) — recalculés à chaque rendu depuis
- * `rDejaUtilises` (jamais stockés séparément, même principe de cohérence interne que le reste du
- * moteur) et transmis en permanence à `ConstructionParaboleGraph` : dès qu'une itération se clôt
- * avec succès, son `r` rejoint `rDejaUtilises` et ses 2 points apparaissent donc immédiatement, sans
- * étape de transition séparée. Le cercle/la droite de l'itération EN COURS, eux, sont remis à zéro à
- * chaque nouvelle itération via `key={numeroIteration}` posé par l'appelant (A.1,
- * `AppConstructionParabole.tsx`) — jamais réinitialisés ici (ce composant n'a aucune connaissance de
- * son propre remontage).
- *
- * Rayon déjà utilisé à une itération précédente (A.4/A.5) : message INFORMATIF (`.info-banner`,
- * jamais une alerte rouge) affiché en direct pendant la manipulation, ET bouton "Valider" verrouillé
- * tant que la valeur crantée courante est un doublon — rend cette situation impossible à soumettre,
- * donc jamais rencontrée après validation.
- */
+function compasInitial(exercice: ExerciceConstructionParabole, ecran: EcranConstructionParabole, acquis: AcquisConstruction): EtatCompas {
+  if (ecran.type === "cercleF" && acquis.ouvertureEnCours !== null) {
+    return { pointe: "K", mine: { x: acquis.ouvertureEnCours, y: 0 } };
+  }
+  const pointe: NomPoint = "F";
+  const p = coordonneesPoint(exercice, pointe);
+  return { pointe, mine: { x: p.x + OUVERTURE_DEPART, y: p.y } };
+}
+
+function equerreInitiale(exercice: ExerciceConstructionParabole, ecran: EcranConstructionParabole, acquis: AcquisConstruction): number {
+  if (referenceEquerre(ecran) === "axe") {
+    const r = acquis.ouvertureEnCours ?? 0;
+    return Math.abs(5.2 - r) < 1 ? -0.8 : 5.2;
+  }
+  const cible = ecran.type === "axe" ? 0 : pointH(exercice, ecran.type === "pointRapide" ? ecran.indice : 0).x;
+  return cible + 2.5 <= 4.6 ? cible + 2.5 : cible - 2.5;
+}
+
+const LIBELLES_OUTILS: Record<OutilConstruction, string> = { compas: "Compas", equerre: "Équerre" };
+
 export function EtapeConstructionParabole({
   exercice,
-  numeroIteration,
+  ecran,
+  acquis,
+  consigne,
+  aides,
+  niveauAide,
+  onActiverAide,
   tentativesUtilisees,
   tentativesMax,
-  niveauAide,
-  rDejaUtilises,
-  onActiverAide,
+  messageErreur,
   onValider,
   validation,
-  rRevele = null,
+  tracesClos,
+  bilan,
 }: Props) {
-  const [rSaisi, setR] = useState(R_INITIAL);
-  const [ligneSaisie, setLigneY] = useState(LIGNE_Y_INITIALE);
-  /** Le compas a-t-il déjà été manipulé ? Le rayon initial (1) est toujours ≤ au rayon minimal :
-   * l'avertissement « rayon trop petit » n'a de sens qu'après un geste de l'élève, jamais dès le
-   * chargement de l'écran (audit chapitre 7). */
-  const [compasManipule, setCompasManipule] = useState(false);
-  const r = rRevele ?? rSaisi;
-  const ligneY = rRevele ?? ligneSaisie;
+  const outils = outilsEcran(ecran);
+  const [outil, setOutil] = useState<OutilConstruction>(outils[0]!);
+  const [compas, setCompas] = useState<EtatCompas>(() => compasInitial(exercice, ecran, acquis));
+  const [positionEquerre, setPositionEquerre] = useState(() => equerreInitiale(exercice, ecran, acquis));
+  const [traces, setTraces] = useState<TraceConstruction[]>([]);
+  const [tentativesVues, setTentativesVues] = useState(tentativesUtilisees);
 
-  function changerR(valeur: number) {
-    setCompasManipule(true);
-    setR(valeur);
+  // Essai raté : les tracés repartent vides (les instruments restent où l'élève les a laissés).
+  if (tentativesVues !== tentativesUtilisees) {
+    setTentativesVues(tentativesUtilisees);
+    setTraces([]);
   }
 
-  const apresEchec = tentativesUtilisees > 0;
-  const statut = apresEchec ? diagnostiquerConstruction(exercice, { r, ligneY }, rDejaUtilises) : undefined;
-  const rErronee = rRevele === null && apresEchec && statut !== undefined && !statut.rValide;
-  const ligneErronee = rRevele === null && apresEchec && statut !== undefined && !statut.ligneValide;
-  const avertissementRayon = compasManipule && !validation ? messageRayonInvalide(exercice, r) : null;
-  const rDejaUtiliseActuellement = rEstDejaUtilise(r, rDejaUtilises);
-  const messageDejaUtilise = messageRayonDejaUtilise(r, rDejaUtilises);
-  const pointsConfirmes = rDejaUtilises.flatMap((rConfirme) => pointsCiblesIteration(exercice, rConfirme));
+  const clos = validation !== null;
+  const reference = referenceEquerre(ecran);
+  const contexte = tracesContexte(exercice, ecran, acquis);
+  const pointeCoord = coordonneesPoint(exercice, compas.pointe);
+  const ouverture = Math.hypot(compas.mine.x - pointeCoord.x, compas.mine.y - pointeCoord.y);
+  const pointsRemarquables = [sommet(exercice), ...pointsConstruits(exercice, acquis).map((p) => p.point)];
+
+  function piquer(nom: NomPoint) {
+    const p = coordonneesPoint(exercice, nom);
+    setCompas({ pointe: nom, mine: { x: p.x + (compas.mine.x - pointeCoord.x), y: p.y + (compas.mine.y - pointeCoord.y) } });
+  }
+
+  function tracer() {
+    if (outil === "compas") setTraces((t) => [...t, { type: "cercle", centre: compas.pointe, rayon: ouverture }]);
+    else setTraces((t) => [...t, { type: "droite", reference, position: positionEquerre }]);
+  }
 
   return (
     <div>
       <p className="prompt-text">
-        Itération {numeroIteration} / 3 — {CONSIGNE_CONSTRUCTION}
+        <RenduFragments fragments={consigne} />
       </p>
 
-      <ConstructionParaboleGraph
+      <PlanConstructionParabole
         exercice={exercice}
-        r={r}
-        ligneY={ligneY}
-        onChangeR={changerR}
-        onChangeLigneY={setLigneY}
-        verrouille={!!validation}
-        afficherCercleReference={niveauAide >= 2}
-        rErronee={rErronee}
-        ligneErronee={ligneErronee}
-        pointsConfirmes={pointsConfirmes}
+        acquis={acquis}
+        tracesContexte={contexte}
+        coupesK={ecran.type === "report" || ecran.type === "parallele" || ecran.type === "cercleF" || ecran.type === "coupleRapide"}
+        traces={clos ? (tracesClos ?? traces) : traces}
+        surcouche={clos ? <SurcoucheResultat exercice={exercice} ecran={ecran} acquis={acquis} /> : null}
+        equerre={
+          !clos && outil === "equerre"
+            ? { reference, position: positionEquerre, onChange: setPositionEquerre, aimants: aimantsEquerre(exercice, reference, [...contexte, ...traces], pointsRemarquables) }
+            : null
+        }
+        compas={!clos && outil === "compas" ? { etat: compas, onChange: setCompas } : null}
       />
-      <p className="mafs-graph-pas">
-        {formatLegendeRayon(r)} — {formatLegendeDistanceLigne(ligneY)}
-      </p>
-      {avertissementRayon && (
-        <p className="alert-error" role="alert">
-          {avertissementRayon}
-        </p>
+
+      {!clos && (
+        <div className="construction-barre">
+          {outils.length > 1 && (
+            <div className="construction-outils" role="group" aria-label="Instrument">
+              {outils.map((o) => (
+                <button key={o} type="button" className="construction-outil" aria-pressed={outil === o} onClick={() => setOutil(o)}>
+                  {LIBELLES_OUTILS[o]}
+                </button>
+              ))}
+            </div>
+          )}
+          {outil === "compas" && (
+            <div className="construction-pointe" role="group" aria-label="Pointe du compas">
+              <span>Pointe du compas en</span>
+              {pointsPiquables(exercice, acquis).map((nom) => (
+                <button key={nom} type="button" className="construction-outil" data-pointe={nom} aria-pressed={compas.pointe === nom} onClick={() => piquer(nom)}>
+                  <Katex expression={nom.replace(/H(\d)/, "H_$1")} />
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="construction-actions">
+            <button type="button" className="btn construction-action" onClick={tracer}>
+              {outil === "compas" ? "Tracer le cercle" : "Tracer la droite"}
+            </button>
+            <button type="button" className="btn construction-action" disabled={traces.length === 0} onClick={() => setTraces((t) => t.slice(0, -1))}>
+              Effacer le dernier tracé
+            </button>
+          </div>
+          <p className="construction-mode-emploi">
+            {outil === "compas"
+              ? "Choisis où piquer la pointe, puis fais glisser la mine (bleue) pour régler l'ouverture."
+              : "Fais glisser le coin de l'angle droit (orange) le long de la droite."}{" Pour plus de précision, zoome sur la figure (deux doigts ou molette)."}
+          </p>
+        </div>
       )}
-      {messageDejaUtilise && <p className="info-banner">{messageDejaUtilise}</p>}
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_CONSTRUCTION_NIVEAU1}</p>
-          {niveauAide >= 2 && <p>{TEXTE_AIDE_CONSTRUCTION_NIVEAU2}</p>}
+          {aides.slice(0, niveauAide).map((aide, i) => (
+            <p key={i}>
+              <RenduFragments fragments={aide} />
+            </p>
+          ))}
         </div>
       )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONSTRUCTION} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={rDejaUtiliseActuellement} onClick={() => onValider({ r, ligneY })}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-          </p>
-        )}
+      {!clos && (
+        <>
+          <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONSTRUCTION} onActiverAide={onActiverAide} />
+          <button type="button" className="btn btn-primary" disabled={traces.length === 0} onClick={() => onValider(traces)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              <span>
+                {messageErreur && (
+                  <>
+                    <RenduFragments fragments={messageErreur} />{" "}
+                  </>
+                )}
+                {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+              </span>
+            </p>
+          )}
         </>
       )}
-      {validation && <ValidationEcran {...validation} />}
+      {clos && (
+        <>
+          <p className="construction-bilan">
+            <RenduFragments fragments={bilan} />
+          </p>
+          <ValidationEcran {...validation} />
+        </>
+      )}
     </div>
   );
 }

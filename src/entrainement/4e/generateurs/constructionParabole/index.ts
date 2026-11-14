@@ -1,54 +1,62 @@
 /**
- * Couche A — "Construction graphique de la parabole". Génère uniquement `foyer` (repère LOCAL,
- * directrice toujours `y=0` par convention — voir `core/constructionParabole.types.ts`) et `theta`
- * (angle de rendu uniquement).
+ * Couche A — `gen53`, « Construction de la parabole au compas et à l'équerre ».
  *
- * Choix de `foyer.y` — jamais un triplet pythagoricien (contrairement à l'ancien générateur, qui en
- * avait besoin uniquement parce que la directrice était oblique DANS LE SYSTÈME DE COORDONNÉES DE
- * VÉRIFICATION lui-même) : ici la distance foyer-directrice est simplement `foyer.y`, un entier
- * trivial. La "propreté" des rayons atteignables (`promptgen53remplacement.md`, "Contrainte de
- * génération") découle directement du choix de `foyer.y` parmi `FOYER_Y_CANDIDATS` : pour
- * `foyer.y=2h`, l'intersection cercle-droite à l'itération de rayon `r` a pour abscisse
- * `±√(foyer.y·(2r-foyer.y))` (voir `moteur/verificationConstructionParabole.ts`) — en posant
- * `2r-foyer.y = 2h·k²`, cette quantité vaut `(2hk)²`, un carré parfait, pour TOUT entier `k≥1`, donc
- * pour la famille infinie `r = h·(1+k²)` (`k=1,2,3,...`), chacune strictement supérieure à
- * `rMinimal=h`. Les 2 candidats retenus (`foyer.y∈{2,4}`) donnent chacun au moins 3 valeurs propres
- * dans une plage d'affichage raisonnable (r=2,5,10 pour foyer.y=2 ; r=4,10,20 pour foyer.y=4) —
- * verrouillé par test de propriété (recherche brute indépendante de cette dérivation) plutôt que
- * supposé correct.
+ * Tirage : la méthode (variante), l'angle de rendu `theta` (rejeté à moins de 15° d'un multiple de
+ * π/2 : directrice franchement oblique) et, pour la méthode de la médiatrice, les trois points H de
+ * la directrice. `h` est fixe : sans grille ni coordonnée à l'écran, la distance F–d ne change que
+ * l'échelle de la figure.
  *
- * Choix de `theta` — tiré uniformément sur [0,2π[, ré-échantillonné (rejet) tant qu'il tombe dans un
- * voisinage de ±15° autour d'un multiple de π/2, pour garantir une obliquité nette de la directrice
- * à l'écran (jamais horizontale ni verticale, contrainte pédagogique explicite du prompt).
+ * Points H (méthode médiatrice) : trois distances à K distinctes parmi 1 ; 1,5 ; 2,5 et 3,5 unités
+ * (h = 2), dont au moins une ≤ 1,5 (un point près du sommet) et au moins une ≥ 2,5, chacune
+ * d'un côté de l'axe tiré au hasard. Le symétrique de chaque point construit complète la courbe.
  */
-import type { ExerciceConstructionParabole } from "../../core/constructionParabole.types";
+import type { ExerciceConstructionParabole, MethodeConstructionParabole } from "../../core/constructionParabole.types";
 
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+export const H_CONSTRUCTION_PARABOLE = 2;
+
+export const CATALOGUE_VARIANTES: { id: MethodeConstructionParabole; label: string }[] = [
+  { id: "cercle", label: "Méthode du cercle et de la parallèle" },
+  { id: "mediatrice", label: "Méthode de la médiatrice" },
+];
+
+const DISTANCES_H = [1, 1.5, 2.5, 3.5];
+const ECART_MIN_ANGLE_DROIT = Math.PI / 12;
+
+function melanger<T>(valeurs: T[]): T[] {
+  const copie = [...valeurs];
+  for (let i = copie.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copie[i], copie[j]] = [copie[j]!, copie[i]!];
+  }
+  return copie;
 }
-
-const FOYER_Y_CANDIDATS = [2, 4];
-const BORNE_FOYER_X = 2;
-const DEMI_LARGEUR_EXCLUSION_AXE = Math.PI / 12; // 15°
 
 function tirerTheta(): number {
-  let theta = 0;
-  let valide = false;
-  while (!valide) {
-    theta = Math.random() * 2 * Math.PI;
-    const modulo = ((theta % (Math.PI / 2)) + Math.PI / 2) % (Math.PI / 2);
-    const distanceAxe = Math.min(modulo, Math.PI / 2 - modulo);
-    valide = distanceAxe >= DEMI_LARGEUR_EXCLUSION_AXE;
+  for (;;) {
+    const theta = Math.random() * 2 * Math.PI;
+    const reste = theta % (Math.PI / 2);
+    if (reste >= ECART_MIN_ANGLE_DROIT && reste <= Math.PI / 2 - ECART_MIN_ANGLE_DROIT) return theta;
   }
-  return theta;
 }
 
-export function construireExercice(foyerY: number, foyerX: number, theta: number): ExerciceConstructionParabole {
-  return { foyer: { x: foyerX, y: foyerY }, theta };
+function tirerAbscissesH(): number[] {
+  for (;;) {
+    const distances = melanger(DISTANCES_H).slice(0, 3);
+    if (Math.min(...distances) > 1.5 || Math.max(...distances) < 2.5) continue;
+    return distances.map((d) => (Math.random() < 0.5 ? -d : d));
+  }
+}
+
+export function construireAvecVarianteId(id: string): ExerciceConstructionParabole {
+  const methode: MethodeConstructionParabole = id === "mediatrice" ? "mediatrice" : "cercle";
+  return {
+    methode,
+    h: H_CONSTRUCTION_PARABOLE,
+    theta: tirerTheta(),
+    abscissesH: methode === "mediatrice" ? tirerAbscissesH() : [],
+  };
 }
 
 export function genererExerciceConstructionParabole(): ExerciceConstructionParabole {
-  const foyerY = FOYER_Y_CANDIDATS[randomInt(0, FOYER_Y_CANDIDATS.length - 1)]!;
-  const foyerX = randomInt(-BORNE_FOYER_X, BORNE_FOYER_X);
-  return construireExercice(foyerY, foyerX, tirerTheta());
+  return construireAvecVarianteId(Math.random() < 0.5 ? "cercle" : "mediatrice");
 }

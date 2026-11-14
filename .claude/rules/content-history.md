@@ -3290,3 +3290,39 @@ paths:
   l'équation d'une tangente avec ln : `methode` « Tangente à une courbe logarithmique » (trois
   cas) et `exemple` « tangente à ln passant par l'origine » (énoncé ajouté à
   `ENONCES_DEMONSTRATION`) insérés après l'exemple « étudier un signe avec ln ».
+
+## 4e, Chapitre 7 — gen53 refondu : « Construction de la parabole au compas et à l'équerre »
+
+- Ancien gen53 jugé raté par l'utilisateur (deux curseurs crantés sur une grille tournée avec d :
+  l'élève comptait des carreaux, aucun geste d'instrument, pas de sommet, figure papier
+  non orthonormée — rayon moyen de deux échelles différentes). Refonte totale :
+  `core/constructionParabole.types.ts` (`methode`, `h` = 2, `theta`, `abscissesH`),
+  `moteur/geometrieConstructionParabole.ts` (géométrie pure, repère local d : y = 0, F = (0 ; h)),
+  `moteur/modeleConstructionParabole.ts` (écrans, tracés, acquis, vérification des GESTES),
+  `moteur/sessionConstructionParabole.ts`, `components/PlanConstructionParabole.tsx` (figure Mafs
+  sans grille + instruments), `SurcouchesConstructionParabole.tsx`, `ui/figureConstructionParabole.ts`
+  (SVG papier, une seule échelle).
+- Instruments : équerre = triangle qui glisse le long de d ou de l'axe (aimant 0,35 unité sur les
+  projections des points remarquables, tolérance 0,25) ; compas = pointe choisie par BOUTONS
+  « Pointe du compas en F/K/S/H… » + mine seule déplaçable (la zone tactile d'une poignée Mafs fait
+  60 px : pointe et mine se chevauchaient au doigt pour une petite ouverture). Tracer / Effacer le
+  dernier tracé ; un essai raté vide les tracés. Figure : zoom (0,7 à 4) et déplacement, bouton
+  « Recentrer ». `Line.PointAngle` paraît tronquée sous `<Transform rotate>` (extrémités calculées
+  avant rotation) et `Plot.Parametric` ignore la rotation : droites = longs `Line.Segment`, arcs de
+  parabole = `Polyline` échantillonnée.
+- Méthode du cercle (8 écrans) : axe (équerre sur d jusqu'à F) → sommet (cercles de même ouverture
+  > KF/2 centrés en K et F, médiatrice tracée à la clôture) → report de r depuis K (pièges : pointe
+  en F ou S, r ≤ KS, r trop proche d'un couple précédent) → parallèle (équerre sur l'axe jusqu'au
+  point de coupe ; piège : côté opposé à F) → cercle de centre F à la même ouverture → deux couples
+  « en enchaînement » (compas + équerre, diagnostic du premier geste fautif) → tracé (7 points
+  touchés de proche en proche, arcs exacts entre voisins, segment pointillé sinon).
+- Méthode de la médiatrice (7 écrans, variante) : axe → sommet (cas H = K) → perpendiculaire à d
+  en H₁ → médiatrice de [FH₁] → H₂, H₃ en enchaînement → tracé ; le symétrique par rapport à l'axe
+  de chaque point est ajouté (P′). Distances de H à K : trois parmi 1 ; 1,5 ; 2,5 ; 3,5 (au moins une
+  ≤ 1,5 et une ≥ 2,5). Après chaque écran clos, PF et PH sont montrés codés égaux.
+- Papier : énoncé = F, d oblique (et H₁, H₂, H₃) sans grille + consigne globale qui nomme la
+  méthode ; corrigé « Étape n » (axe, sommet, trois couples/points, tracé) avec arcs de
+  construction ; `forme` = méthode ; durée 15 min. Chapitre (section `parabole`) : paragraphe « En
+  pratique, aux instruments » (axe, sommet par médiatrice, report depuis K, même ouverture), sous-titre
+  « Deuxième méthode : la médiatrice » + figure (perpendiculaire en H ∩ médiatrice de [FH], PF = PH
+  codés) + astuce (symétrique, choix des points, médiatrice = tangente).
