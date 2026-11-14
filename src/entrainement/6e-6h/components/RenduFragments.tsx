@@ -16,10 +16,16 @@ interface Props {
  * (`<p className="prompt-text">`, `<p>` d'aide, etc), exactement comme le faisaient les anciens
  * `.map()` locaux.
  */
+/** Espaces insécables typographiques (« ? », « ! », « : », « ; », « » ») : le signe ne passe jamais seul
+ * à la ligne — même règle que le composant 4e et que les feuilles imprimées. */
+function espacesInsecables(texte: string): string {
+  return texte.replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0");
+}
+
 export function RenduFragments({ fragments }: Props) {
   return (
     <>
-      {fragments.map((fragment, index) => (fragment.type === "texte" ? <span key={index}>{fragment.valeur}</span> : <Katex key={index} expression={fragment.valeur} />))}
+      {fragments.map((fragment, index) => (fragment.type === "texte" ? <span key={index}>{espacesInsecables(fragment.valeur)}</span> : <Katex key={index} expression={fragment.valeur} />))}
     </>
   );
 }
