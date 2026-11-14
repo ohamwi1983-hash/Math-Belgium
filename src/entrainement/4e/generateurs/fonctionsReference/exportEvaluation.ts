@@ -11,6 +11,7 @@ import type {
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { construireSvgFonction, type PointMarqueSvg } from "../../../export/svgGraph";
+import { cadrageLisible } from "../../../export/cadrageLisible";
 import { calculerViewBoxFonctionReference, RATIO_GRAPHE } from "../../ui/mafsFonctionsReference";
 import { evaluerFonctionReference, pointUnitaire } from "../../moteur/verificationFonctionsReference";
 import { formatEquationFonctionReferenceLatex } from "../../ui/formatFonctionsReference";
@@ -51,7 +52,38 @@ import { profilFonctionReference, PARAMETRES_TRANSFORMATIONS } from "../profilsE
 
 /** Exporté pour gen11 (forme canonique) : même courbe f, mêmes deux points, même fonction de
  * référence en pointillés dans son corrigé détaillé. */
+/** Familles dont la courbe se prolonge des deux côtés du point caractéristique (horizontalement),
+ * et celles à symétrie centrale (aussi verticalement) — cadrage de l'énoncé papier. */
+const SYMETRIE_X: FamilleReference[] = ["carre", "valeur_absolue", "cube", "racine_cubique", "inverse"];
+const SYMETRIE_Y: FamilleReference[] = ["cube", "racine_cubique", "inverse"];
+
+/** Asymptotes de 1/x (centre au point caractéristique), en pointillés : partie de la courbe, comme
+ * à l'écran (`Line.PointAngle`). */
+function asymptotes(exercice: ExerciceFonctionReference) {
+  return exercice.famille === "inverse"
+    ? { verticales: [{ x: exercice.th }], courbesSecondaires: [{ evaluer: () => exercice.tv, pointilles: true }] }
+    : { verticales: undefined, courbesSecondaires: undefined };
+}
+
+/** Graphique de l'ÉNONCÉ papier (décision de l'utilisateur) : la courbe seule, sans point marqué ni
+ * coordonnée ; quadrillage et zoom choisis pour que le point caractéristique ET le point où
+ * l'argument vaut 1 tombent sur des intersections (`cadrageLisible`). */
+function grapheEnonceFonctionReference(exercice: ExerciceFonctionReference): string {
+  const cadrage = cadrageLisible({ x: exercice.th, y: exercice.tv }, pointUnitaire(exercice), {
+    symetrieX: SYMETRIE_X.includes(exercice.famille),
+    symetrieY: SYMETRIE_Y.includes(exercice.famille),
+  });
+  return construireSvgFonction((x) => evaluerFonctionReference(exercice, x), cadrage.viewBox, {
+    largeur: cadrage.largeur,
+    hauteur: cadrage.hauteur,
+    classe: "graphe-fonction-reference",
+    grille: cadrage.grille,
+    ...asymptotes(exercice),
+  });
+}
+
 export function construireGrapheFonctionReference(exercice: ExerciceFonctionReference, estCorrige: boolean, libelleCourbe = "f (courbe donnée)"): string {
+  if (!estCorrige) return grapheEnonceFonctionReference(exercice);
   // Corrigé : la fonction de référence g (paramètres neutres) en pointillés gris sous la courbe de
   // f, pour voir les transformations appliquées au point (0 ; 0) et au point (1 ; 1). La fenêtre
   // englobe alors les deux courbes (même calcul que l'écran, qui l'étend à la courbe « live »).
@@ -82,7 +114,11 @@ export function construireGrapheFonctionReference(exercice: ExerciceFonctionRefe
     hauteur: (estCorrige ? 420 : largeur) / RATIO_GRAPHE,
     classe: estCorrige ? "figure-corrige" : "graphe-fonction-reference",
     points,
-    courbesSecondaires: estCorrige ? [{ evaluer: (x) => evaluerFonctionReference(reference, x) }] : undefined,
+    courbesSecondaires: [
+      ...(estCorrige ? [{ evaluer: (x: number) => evaluerFonctionReference(reference, x) }] : []),
+      ...(asymptotes(exercice).courbesSecondaires ?? []),
+    ],
+    verticales: asymptotes(exercice).verticales,
     legende: estCorrige
       ? [
           { texte: libelleCourbe, couleur: "#1971c2" },
@@ -113,20 +149,6 @@ function coordonneesLatex(x: number, y: number): string {
   return `\\left(${nombreLatex(x)}\\,;\\,${nombreLatex(y)}\\right)`;
 }
 
-/** Données lues sur le graphique, comme dans la légende de l'écran (`MafsGraphFonctionsReference` :
- * « Point caractéristique » et « Point croix » avec leurs coordonnées exactes — le point croix a
- * souvent des coordonnées fractionnaires, illisibles sur un quadrillage imprimé). */
-function donneesGraphique(exercice: ExerciceFonctionReference): FragmentConsigne[] {
-  const croix = pointUnitaire(exercice);
-  return [
-    texte(exercice.famille === "inverse" ? "Point caractéristique (•, centre de la courbe, à l'intersection de ses asymptotes) : " : "Point caractéristique (•) : "),
-    latex(coordonneesLatex(exercice.th, exercice.tv)),
-    texte(" ; point croix (×) : "),
-    latex(coordonneesLatex(croix.x, croix.y)),
-    texte("."),
-  ];
-}
-
 const PHRASE_GRAPHIQUE = "Le graphique ci-dessous représente une fonction f obtenue en transformant l'une des fonctions de référence ";
 const FONCTIONS_REFERENCE: FragmentConsigne[] = [latex("x^2"), texte(", "), latex("x^3"), texte(", "), latex("\\sqrt{x}"), texte(", "), latex("\\sqrt[3]{x}"), texte(", "), latex("\\dfrac{1}{x}"), texte(" ou "), latex("|x|"), texte(". ")];
 
@@ -135,12 +157,12 @@ const FONCTIONS_REFERENCE: FragmentConsigne[] = [latex("x^2"), texte(", "), late
  * corrigé sur papier (`enoncePapier`). */
 function construireEnonceFonctionsReference(exercice: ExerciceFonctionReference): SectionExercice {
   return {
-    enteteFragments: [texte(PHRASE_GRAPHIQUE), ...FONCTIONS_REFERENCE, ...donneesGraphique(exercice)],
+    enteteFragments: [texte(PHRASE_GRAPHIQUE), ...FONCTIONS_REFERENCE],
     enteteHtml: construireGrapheFonctionReference(exercice, false),
     questions: [
       { consigne: [texte("Reconnais la fonction de référence dont la courbe est issue.")] },
       { consigne: [texte("Lis les translations horizontale et verticale à l'aide du point caractéristique.")] },
-      { consigne: [texte("Compare le point croix au point caractéristique : déduis-en l'étirement ou la compression, et les symétries.")] },
+      { consigne: [texte("Compare au point caractéristique le point de la courbe qui correspond au point (1 ; 1) de la fonction de référence : déduis-en l'étirement ou la compression, et les symétries.")] },
       { consigne: [texte("Écris l'équation de f, sous sa forme la plus simple.")] },
     ],
   };
@@ -155,8 +177,7 @@ function enoncePapierFonctionsReference(exercice: ExerciceFonctionReference): En
       enteteFragments: [
         texte(PHRASE_GRAPHIQUE),
         ...FONCTIONS_REFERENCE,
-        ...donneesGraphique(exercice),
-        texte(" Détermine l'équation de f, sous sa forme la plus simple."),
+        texte("Détermine l'équation de f, sous sa forme la plus simple."),
       ],
       enteteHtml: construireGrapheFonctionReference(exercice, false),
       questions: [],
@@ -178,7 +199,7 @@ function construireCorrectionFonctionsReference(exercice: ExerciceFonctionRefere
     {
       type: "paragraphe",
       fragments: [
-        texte("Second point marqué (là où l'argument de la fonction vaut exactement 1) : "),
+        texte("Second point, sur une intersection du quadrillage (là où l'argument de la fonction vaut exactement 1) : "),
         latex(`(${formatFractionIrreductible(croix.x)} ; ${formatFractionIrreductible(croix.y)})`),
         texte(" — il permet de retrouver le rapport d'échelle et l'orientation de la courbe."),
       ],
@@ -299,16 +320,16 @@ function correctionDetailleeFonctionsReference(exercice: ExerciceFonctionReferen
       fragments: [
         texte("Pour "),
         latex(BASE_LATEX[exercice.famille]),
-        texte(", le point croix est "),
+        texte(", le point "),
         latex("(1\\,;\\,1)"),
-        texte(", à 1 unité à droite et 1 unité au-dessus du point caractéristique. On compare donc les écarts."),
+        texte(" est à 1 unité à droite et 1 unité au-dessus du point caractéristique. Sur la courbe de f, le point qui lui correspond tombe sur une intersection du quadrillage : on compare les écarts."),
       ],
     },
     {
       label: "Calcul",
       sousQuestion: "c",
       fragments: [
-        texte("Point croix "),
+        texte("Point correspondant lu "),
         latex(coordonneesLatex(croix.x, croix.y)),
         texte(" : "),
         latex(`\\Delta x = ${nombreLatex(dx)}`),
@@ -369,7 +390,7 @@ function baremeFonctionsReference(exercice: ExerciceFonctionReference): BaremeEx
     criteres: [
       { sousQuestion: "a", critere: [texte("Fonction de référence reconnue : "), latex(BASE_LATEX[exercice.famille])], points: 1 },
       { sousQuestion: "b", critere: [texte("Translations lues au point caractéristique "), latex(coordonneesLatex(th, tv))], points: 1 },
-      { sousQuestion: "c", critere: [texte("Facteur et symétries déduits du point croix")], points: 1 },
+      { sousQuestion: "c", critere: [texte("Facteur et symétries déduits du point correspondant à (1 ; 1)")], points: 1 },
       { sousQuestion: "d", critere: [texte("Équation complète et correcte")], points: 1 },
     ],
     erreursFrequentes: erreurs,

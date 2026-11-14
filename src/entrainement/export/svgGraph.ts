@@ -74,6 +74,17 @@ function echantillonnerSegments(evaluer: (x: number) => number | null, xMin: num
 /** Point marqué sur le graphe (ex. sommet, point "unitaire") — `forme:"croix"` pour un ×, sinon un
  * disque plein. Rendu APRÈS la courbe/grille, AVANT le cadre/coche (toujours au-dessus du tracé,
  * jamais caché par la bordure du corrigé). */
+/** Quadrillage IMPOSÉ (au lieu du pas « nombre rond » automatique) : lignes tous les `pasX`/`pasY`,
+ * graduations écrites tous les `etiquetteX`/`etiquetteY` (multiples entiers du pas). Sert aux
+ * graphiques papier qui doivent faire tomber des points précis sur les intersections
+ * (`cadrageLisible.ts`). Lignes des valeurs entières plus marquées quand le pas est fractionnaire. */
+export interface GrilleSvg {
+  pasX: number;
+  pasY: number;
+  etiquetteX: number;
+  etiquetteY: number;
+}
+
 export interface PointMarqueSvg {
   x: number;
   y: number;
@@ -111,6 +122,25 @@ export interface OptionsSvgFonction {
    * (5gen5 : minimum de f + g, seuil de rentabilité). */
   divisionsX?: number;
   divisionsY?: number;
+  /** Quadrillage imposé (voir `GrilleSvg`). */
+  grille?: GrilleSvg;
+  /** Droites verticales x = constante (asymptote de 1/x…), en pointillés par défaut. */
+  verticales?: { x: number; couleur?: string; pointilles?: boolean }[];
+}
+
+const COULEUR_GRILLE_ENTIERE = "#aeb8c4";
+/** Halo blanc sous un texte de graduation (lisible même posé sur une ligne de la grille). */
+const HALO_TEXTE = 'stroke="#ffffff" stroke-width="2.5" paint-order="stroke"';
+
+/** Multiples de `pas` dans [min ; max], calculés par indice entier (pas de dérive flottante). */
+function multiplesDans(min: number, max: number, pas: number): number[] {
+  const valeurs: number[] = [];
+  for (let i = Math.ceil(min / pas - 1e-9); i <= Math.floor(max / pas + 1e-9); i++) valeurs.push(i * pas);
+  return valeurs;
+}
+
+function estMultiple(v: number, pas: number): boolean {
+  return Math.abs(v / pas - Math.round(v / pas)) < 1e-6;
 }
 
 /** Construit le `<svg>` autonome (axes, grille, courbe échantillonnée) d'UNE fonction réelle. */
@@ -125,23 +155,43 @@ export function construireSvgFonction(evaluer: (x: number) => number | null, vie
   const sx = (x: number) => MARGE + ((x - xMin) / (xMax - xMin)) * zoneX;
   const sy = (y: number) => MARGE + ((yMax - y) / (yMax - yMin)) * zoneY;
 
-  const pasX = pasNombreRond(xMax - xMin, options.divisionsX);
-  const pasY = pasNombreRond(yMax - yMin, options.divisionsY);
+  const grille = options.grille;
+  const pasX = grille?.pasX ?? pasNombreRond(xMax - xMin, options.divisionsX);
+  const pasY = grille?.pasY ?? pasNombreRond(yMax - yMin, options.divisionsY);
+  const etiquetteX = grille?.etiquetteX ?? pasX;
+  const etiquetteY = grille?.etiquetteY ?? pasY;
+  // Graduations sur l'axe quand il est visible, sinon le long du bord du cadre (axe hors fenêtre).
+  const yEtiquettesX = yMin <= 0 && 0 <= yMax ? Math.min(sy(0) + 11, hauteur - 3) : hauteur - MARGE - 3;
+  // Axe des y visible et assez loin du bord gauche : graduations à sa gauche ; trop près du bord
+  // (elles seraient coupées) : à sa droite ; axe hors fenêtre : le long du bord gauche.
+  const axeYVisible = xMin <= 0 && 0 <= xMax;
+  const aGaucheDeLAxe = axeYVisible && sx(0) >= MARGE + 22;
+  const xEtiquettesY = !axeYVisible ? MARGE + 3 : aGaucheDeLAxe ? sx(0) - 4 : sx(0) + 4;
+  const ancreY = aGaucheDeLAxe ? "end" : "start";
 
   const lignesGrilleX: string[] = [];
   const labelsX: string[] = [];
-  for (let v = Math.ceil(xMin / pasX) * pasX; v <= xMax + 1e-9; v += pasX) {
+  for (const v of multiplesDans(xMin, xMax, pasX)) {
     const px = sx(v);
-    lignesGrilleX.push(`<line x1="${px.toFixed(1)}" y1="${MARGE}" x2="${px.toFixed(1)}" y2="${hauteur - MARGE}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9) labelsX.push(`<text x="${px.toFixed(1)}" y="${(sy(0) + 11).toFixed(1)}" font-size="8" text-anchor="middle" fill="${COULEUR_AXE}">${formatNombreGraphique(v)}</text>`);
+    const forte = grille && pasX < 1 && estMultiple(v, 1);
+    lignesGrilleX.push(`<line x1="${px.toFixed(1)}" y1="${MARGE}" x2="${px.toFixed(1)}" y2="${hauteur - MARGE}" stroke="${forte ? COULEUR_GRILLE_ENTIERE : COULEUR_GRILLE}" stroke-width="1"/>`);
+    // Coin commun avec la colonne des graduations de y (posée près du bord gauche) : on n'écrit pas.
+    const conflitCoin = (!axeYVisible || !aGaucheDeLAxe) && Math.abs(px - xEtiquettesY) < 12;
+    if (Math.abs(v) > 1e-9 && estMultiple(v, etiquetteX) && !conflitCoin) labelsX.push(`<text x="${px.toFixed(1)}" y="${yEtiquettesX.toFixed(1)}" font-size="8" text-anchor="middle" fill="${COULEUR_AXE}" ${HALO_TEXTE}>${formatNombreGraphique(v).replace("-", "−")}</text>`);
   }
   const lignesGrilleY: string[] = [];
   const labelsY: string[] = [];
-  for (let v = Math.ceil(yMin / pasY) * pasY; v <= yMax + 1e-9; v += pasY) {
+  for (const v of multiplesDans(yMin, yMax, pasY)) {
     const py = sy(v);
-    lignesGrilleY.push(`<line x1="${MARGE}" y1="${py.toFixed(1)}" x2="${largeur - MARGE}" y2="${py.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9) labelsY.push(`<text x="${(sx(0) - 4).toFixed(1)}" y="${(py + 3).toFixed(1)}" font-size="8" text-anchor="end" fill="${COULEUR_AXE}">${formatNombreGraphique(v)}</text>`);
+    const forte = grille && pasY < 1 && estMultiple(v, 1);
+    lignesGrilleY.push(`<line x1="${MARGE}" y1="${py.toFixed(1)}" x2="${largeur - MARGE}" y2="${py.toFixed(1)}" stroke="${forte ? COULEUR_GRILLE_ENTIERE : COULEUR_GRILLE}" stroke-width="1"/>`);
+    const conflitRangee = !(yMin <= 0 && 0 <= yMax) && Math.abs(py + 3 - yEtiquettesX) < 9;
+    if (Math.abs(v) > 1e-9 && estMultiple(v, etiquetteY) && !conflitRangee) labelsY.push(`<text x="${xEtiquettesY.toFixed(1)}" y="${(py + 3).toFixed(1)}" font-size="8" text-anchor="${ancreY}" fill="${COULEUR_AXE}" ${HALO_TEXTE}>${formatNombreGraphique(v).replace("-", "−")}</text>`);
   }
+  const verticales = (options.verticales ?? [])
+    .filter((d) => d.x >= xMin && d.x <= xMax)
+    .map((d) => `<line x1="${sx(d.x).toFixed(1)}" y1="${MARGE}" x2="${sx(d.x).toFixed(1)}" y2="${hauteur - MARGE}" stroke="${d.couleur ?? "#8a8f98"}" stroke-width="1.4"${d.pointilles ?? true ? ' stroke-dasharray="5 4"' : ""}/>`)
+    .join("");
 
   const axeX = `<line x1="${MARGE}" y1="${sy(0).toFixed(1)}" x2="${largeur - MARGE}" y2="${sy(0).toFixed(1)}" stroke="${COULEUR_AXE}" stroke-width="1.4"/>`;
   const axeY = `<line x1="${sx(0).toFixed(1)}" y1="${MARGE}" x2="${sx(0).toFixed(1)}" y2="${hauteur - MARGE}" stroke="${COULEUR_AXE}" stroke-width="1.4"/>`;
@@ -197,7 +247,7 @@ export function construireSvgFonction(evaluer: (x: number) => number | null, vie
 <rect x="0" y="0" width="${largeur}" height="${hauteur}" fill="#ffffff"/>
 ${lignesGrilleX.join("")}${lignesGrilleY.join("")}
 ${axeX}${axeY}
-${chemins}
+${verticales}${chemins}
 ${labelsX.join("")}${labelsY.join("")}
 ${points}
 ${legende}${lettreHtml}

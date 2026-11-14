@@ -125,6 +125,15 @@ les étapes 1 et 2 » (ou en lettre de question papier).
 - **Durée estimée** : imprimée seulement si le professeur coche « Afficher la durée estimée »
   (`EnTeteEvaluation.afficherDuree`, défaut : non).
 
+## Graphiques de transformation sur papier (gen8, gen10 — décision de l'utilisateur)
+
+L'écran marque le point caractéristique et le « point croix » et donne leurs coordonnées ; sur
+papier, l'énoncé n'a que la COURBE (aucun point marqué, aucune coordonnée dans le texte). Le
+cadrage (`export/cadrageLisible.ts`) choisit le pas du quadrillage (1/dénominateur des écarts au
+point caractéristique) et le zoom pour que le point caractéristique ET le point croix tombent sur
+des intersections ; graduations écrites aux seules valeurs entières (lignes entières plus marquées,
+`GrilleSvg` de `svgGraph.ts`). Le corrigé garde les points étiquetés et raisonne avec le point croix.
+
 ## Registre et code d'exercice
 
 - Dans `lib/evaluationAdapterRegistry.ts`, envelopper chaque adaptateur du chapitre :
