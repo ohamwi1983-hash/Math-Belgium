@@ -3375,6 +3375,51 @@ export const fonctionsLogarithmes: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 88. Le détective d\'erreurs : logarithmes »',
         },
+        { kind: 'subheading', text: 'Linéariser des données : du tableau au modèle' },
+        {
+          kind: 'methode',
+          label: 'Linéariser des données',
+          items: [
+            'Passe aux logarithmes : si les points $(x\\,;\\ln(y))$ sont alignés (représentation ' +
+              '**semi-logarithmique**), le modèle est exponentiel $y = k\\cdot a^x$ ; si ce sont les points ' +
+              '$(\\ln(x)\\,;\\ln(y))$ (représentation **log-log**), le modèle est une puissance $y = k\\cdot x^n$. ' +
+              'Si les mesures brutes sont déjà alignées, le modèle est affine.',
+            'Détermine la droite $Y = mX + p$ à partir de deux lignes bien éloignées du tableau : la pente ' +
+              '$m = \\dfrac{Y_2-Y_1}{X_2-X_1}$, puis l\'ordonnée à l\'origine $p = Y_1 - mX_1$.',
+            'Reviens au modèle avec l\'exponentielle : $\\ln(y) = mx + p \\iff y = e^p\\cdot\\left(e^m\\right)^x$, ' +
+              'donc $k = e^p$ et $a = e^m$ ; $\\ln(y) = m\\ln(x) + p \\iff y = e^p\\cdot x^m$, donc $k = e^p$ et $n = m$.',
+            'Prévois avec le modèle obtenu, dans l\'unité du contexte, en gardant assez de décimales : une ' +
+              'extrapolation amplifie les erreurs d\'arrondi.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'linéariser un refroidissement',
+          formula:
+            'Un café refroidit dans une pièce à 20 °C. L\'écart $\\theta$ (en °C) entre sa température et celle de ' +
+            'la pièce vaut 48,6 à $t = 2$ min, 39,4 à $t = 4$, 31,9 à $t = 6$, 25,8 à $t = 8$ et 20,9 à $t = 10$. ' +
+            'Détermine un modèle $\\theta = k\\cdot a^t$, puis estime la température du café après 20 minutes.',
+          steps: [
+            { tag: 'passer aux logarithmes', text: '$\\ln(48{,}6) \\approx 3{,}884$ et $\\ln(20{,}9) \\approx 3{,}040$ : les points $(t\\,;\\ln(\\theta))$ du tableau sont alignés.' },
+            { tag: 'pente et ordonnée à l\'origine', text: '$m = \\dfrac{3{,}040-3{,}884}{10-2} \\approx -0{,}105$ et $p = 3{,}884-(-0{,}105)\\times 2 \\approx 4{,}095$' },
+            { tag: 'retour au modèle', text: '$k = e^{4{,}095} \\approx 60{,}0$ et $a = e^{-0{,}105} \\approx 0{,}900$, donc $\\theta \\approx 60{,}0\\cdot 0{,}900^t$' },
+          ],
+          result: { tag: 'résultat', text: '$\\theta(20) \\approx 60{,}0\\times 0{,}900^{20} \\approx 7{,}3$ : le café est à environ $27{,}3$ °C (on ajoute les 20 °C de la pièce).' },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Linéariser des données : du tableau au modèle',
+          generatorId: '6gen89',
+          description: [
+            'À partir d\'un tableau de mesures en contexte (refroidissement, loi de Moore, bactéries, ' +
+              'décharge d\'un condensateur, désintégration, 3e loi de Kepler, métabolisme, chute libre, ' +
+              'éclairement), passe aux logarithmes (semi-log ou log-log, ou choisis la bonne ' +
+              'représentation), détermine la droite puis le modèle y = k·aˣ ou y = k·xⁿ, et fais une ' +
+              'prévision dans l\'unité du contexte.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 89. Linéariser des données »',
+        },
       ],
     },
   ],

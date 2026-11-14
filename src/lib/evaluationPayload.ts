@@ -79,7 +79,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
-  | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22' | '6gen90' | '6gen85' | '6gen91' | '6gen88' | '6gen86' | '6gen92'
+  | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22' | '6gen90' | '6gen85' | '6gen91' | '6gen88' | '6gen86' | '6gen92' | '6gen89'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
@@ -161,6 +161,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'problemes', generatorId: '6gen22', label: 'Logarithmes : problèmes (6gen22)' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'problemes', generatorId: '6gen90', label: 'Échelles logarithmiques : rapports et sommes (6gen90)', processus: 3 },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'problemes', generatorId: '6gen88', label: 'Détective d\'erreurs (6gen88)', processus: 3 },
+  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'problemes', generatorId: '6gen89', label: 'Linéariser des données (6gen89)', processus: 3 },
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementfondamental', generatorId: '6gen43', label: '' },
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementcombine', generatorId: '6gen44', label: '' },
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomenewton', generatorId: '6gen45', label: '' },
@@ -1300,6 +1301,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'datation au carbone 14', enonce: "Un os ne contient plus que 30 % du carbone 14 qu'il contenait à la mort de l'animal. Sachant que la demi-vie du carbone 14 vaut 5 730 ans, détermine l'âge de l'os." },
     { cle: 'temps de doublement', enonce: "Un capital placé à intérêts composés en continu évolue selon $C(t) = C_0\\,e^{rt}$, avec $r = 0{,}035$. Détermine le temps nécessaire pour que le capital double." },
     { cle: 'un instant précis dans le modèle logistique', enonce: "Pour le modèle logistique $y(t) = \\dfrac{10}{1 + 9e^{-t}}$, détermine l'instant où $y$ atteint la valeur 9." },
+    { cle: 'linéariser un refroidissement', enonce: "Un café refroidit dans une pièce à 20 °C. L'écart $\\theta$ (en °C) entre sa température et celle de la pièce vaut 48,6 à $t = 2$ min, 39,4 à $t = 4$, 31,9 à $t = 6$, 25,8 à $t = 8$ et 20,9 à $t = 10$. Détermine un modèle $\\theta = k\\cdot a^t$, puis estime la température du café après 20 minutes." },
   ],
   },
   'primitives-integrales': {
