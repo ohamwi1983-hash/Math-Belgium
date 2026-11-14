@@ -2074,6 +2074,99 @@ export const primitivesIntegrales: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 29. Intégrales et primitives : problèmes »',
         },
+        { kind: 'subheading', text: 'Pour aller plus loin — inégalités de revenus : courbe de Lorenz et coefficient de Gini' },
+        {
+          kind: 'para',
+          text:
+            'Classons les ménages d\'un pays du plus pauvre au plus riche. La **courbe de Lorenz** associe à la ' +
+            'part $x$ des ménages les plus pauvres ($0 \\le x \\le 1$) la part $L(x)$ du revenu total qu\'ils se ' +
+            'partagent. Par exemple, $L(0{,}5) = 0{,}2$ signifie que **les 50 % les plus pauvres se partagent 20 % ' +
+            'du revenu total** — et non l\'inverse.',
+        },
+        {
+          kind: 'definition',
+          label: 'Courbe de Lorenz et coefficient de Gini',
+          items: [
+            'Une courbe de Lorenz vérifie $L(0) = 0$ et $L(1) = 1$ ; elle est croissante, convexe et reste sous ' +
+              'la **diagonale** $y = x$, qui représente l\'**égalité parfaite** (chaque part de la population ' +
+              'détient la même part des revenus).',
+            'Le **coefficient de Gini** mesure l\'écart à l\'égalité : $G = 2\\int_0^1 (x - L(x))\\,dx$. C\'est l\'aire ' +
+              'comprise entre la diagonale et la courbe, rapportée à l\'aire $\\dfrac{1}{2}$ du triangle sous la ' +
+              'diagonale. Toujours $0 \\le G \\le 1$ : $G = 0$ pour l\'égalité parfaite, $G$ proche de 1 quand presque ' +
+              'tout le revenu est concentré entre quelques mains.',
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x, tone: 'faint', xMin: 0, xMax: 1 },
+              { fn: (x) => x * x, tone: 'accent', xMin: 0, xMax: 1 },
+            ],
+            xMin: -0.08,
+            xMax: 1.12,
+            xTicks: [0.5, 1],
+            xTickLabels: { 0.5: '0,5', 1: '1' },
+            yTicks: [0.5, 1],
+            yTickLabels: { 0.5: '0,5', 1: '1' },
+            fixedYRange: { min: -0.08, max: 1.12 },
+            shadedRegions: [{ from: 0, to: 1, upper: (x) => x, lower: (x) => x * x, tone: 'accent' }],
+            textLabels: [
+              { x: 0.62, y: 0.8, text: 'y = x', tone: 'faint', anchor: 'end' },
+              { x: 0.86, y: 0.5, text: 'L(x) = x²', tone: 'accent', anchor: 'start' },
+              { x: 0.52, y: 0.4, text: 'aire 1/6', tone: 'ink', anchor: 'middle' },
+            ],
+            xAxisLabel: 'part de la population',
+            yAxisLabel: 'part des revenus',
+            caption:
+              'Pour $L(x) = x^2$ : l\'aire entre la diagonale et la courbe vaut $\\int_0^1 (x - x^2)\\,dx = \\dfrac{1}{6}$, ' +
+              'donc $G = 2 \\cdot \\dfrac{1}{6} = \\dfrac{1}{3}$.',
+          },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — coefficient de Gini d\'un pays fictif',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'En Valdorie, la courbe de Lorenz des revenus est modélisée par $L(x) = 0{,}6x^2 + 0{,}4x$. ' +
+                'Interprète $L(0{,}5)$, puis calcule le coefficient de Gini.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Lecture** : $L(0{,}5) = 0{,}6 \\cdot 0{,}25 + 0{,}4 \\cdot 0{,}5 = 0{,}35$ — les 50 % des ménages ' +
+                'les plus pauvres se partagent 35 % du revenu total.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Aire** : $x - L(x) = 0{,}6\\left(x - x^2\\right)$, donc $\\int_0^1 (x - L(x))\\,dx = ' +
+                '0{,}6\\left[\\dfrac{x^2}{2} - \\dfrac{x^3}{3}\\right]_0^1 = 0{,}6 \\cdot \\dfrac{1}{6} = 0{,}1$',
+            },
+            { kind: 'para', text: '**Gini** : $G = 2 \\cdot 0{,}1 = 0{,}2$ — une répartition assez peu inégalitaire.' },
+          ],
+        },
+        {
+          kind: 'piege',
+          text:
+            'Trois erreurs classiques : intégrer $L$ au lieu de $x - L(x)$ (on obtient l\'aire **sous** la courbe), ' +
+            'oublier le facteur 2, et lire $L(0{,}5)$ à l\'envers ($0{,}5$ est une part de la **population**, ' +
+            '$L(0{,}5)$ une part des **revenus**). Un coefficient de Gini négatif ou supérieur à 1 signale toujours une erreur.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Inégalités de revenus : courbe de Lorenz et coefficient de Gini',
+          generatorId: '6gen82',
+          description: [
+            'Lis et interprète une courbe de Lorenz, calcule l\'aire entre la diagonale et la courbe puis le ' +
+              'coefficient de Gini ; compare deux pays ou l\'effet d\'une réforme fiscale.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 82. Inégalités de revenus : courbe de Lorenz et coefficient de Gini »',
+        },
       ],
     },
   ],
