@@ -182,6 +182,18 @@ function tokeniser(expression: string): Jeton[] {
       jetons.push({ type: "IDENTIFIANT", texte: mot });
       continue;
     }
+    // « π » tapé directement (clavier de téléphone, copier-coller) : même constante que « pi ».
+    if (c === "π") {
+      jetons.push({ type: "CONSTANTE", texte: "\\pi" });
+      i++;
+      continue;
+    }
+    // « √ » tapé directement : même fonction que « rac »/« sqrt » (argument entre parenthèses).
+    if (c === "√") {
+      jetons.push({ type: "FONCTION", nomFonction: "sqrt" });
+      i++;
+      continue;
+    }
     if (c === "≤" || c === "≥") {
       jetons.push({ type: "COMPARAISON", symboleComparaison: c });
       i++;
@@ -203,6 +215,8 @@ function tokeniser(expression: string): Jeton[] {
     const correspondance: Partial<Record<string, TypeJeton>> = {
       "+": "PLUS",
       "-": "MOINS",
+      "−": "MOINS",
+      "–": "MOINS",
       "*": "FOIS",
       "·": "FOIS",
       "×": "FOIS",
@@ -388,12 +402,18 @@ function latexGroupeSiNecessaire(noeud: Noeud): string {
   return estAtomique(noeud) ? rendu : `\\left(${rendu}\\right)`;
 }
 
-/** Un nombre décimal tapé avec une virgule française ("1,5") est déjà normalisé en point par le
- * tokeniseur — jamais réaffiché avec une virgule (LaTeX/KaTeX attend un point). */
+/** Membre d'une fraction : des parenthèses tapées pour délimiter le numérateur ou le dénominateur
+ * (« 1/(2x+4) ») ne sont pas réaffichées — la barre de fraction les remplace (comme l'aperçu 4e). */
+function membreFractionLatex(noeud: Noeud): string {
+  return noeud.type === "groupe" ? noeudVersLatex(noeud.interieur) : noeudVersLatex(noeud);
+}
+
+/** Un nombre décimal ("1,5" ou "1.5") est normalisé en point par le tokeniseur, puis réaffiché avec
+ * la virgule décimale française : `{,}` évite l'espace que KaTeX ajoute après une virgule nue. */
 function noeudVersLatex(noeud: Noeud): string {
   switch (noeud.type) {
     case "nombre":
-      return noeud.texte;
+      return noeud.texte.replace(".", "{,}");
     case "x":
       return "x";
     case "variable":
@@ -406,7 +426,7 @@ function noeudVersLatex(noeud: Noeud): string {
       return `${noeudVersLatex(noeud.gauche)} ${noeud.operateur} ${noeudVersLatex(noeud.droite)}`;
     case "produit":
       if (noeud.operateur === "/") {
-        return `\\frac{${noeudVersLatex(noeud.gauche)}}{${noeudVersLatex(noeud.droite)}}`;
+        return `\\frac{${membreFractionLatex(noeud.gauche)}}{${membreFractionLatex(noeud.droite)}}`;
       }
       // Point de multiplication affiché quand l'élève l'a tapé explicitement ("*"/"·"/"×") — jamais
       // avalé silencieusement, l'intention de l'écrire était délibérée. Sinon (multiplication
