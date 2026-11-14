@@ -3030,3 +3030,24 @@ paths:
   sans consommer de tentative ; une primitive est acceptée à une constante près quand la ligne ne
   demande qu'une primitive. `forme` = type + support + ligne + scénario, aucun cas particulier, pas
   de `calcul`. Le cours couvrait déjà toutes les formules : aucun bloc ajouté, seulement la carte.
+- **6e (6h), Chapitre 4 — Intégrales et primitives** (`primitives-integrales`) : nouveau 6gen82
+  « Inégalités de revenus : courbe de Lorenz et coefficient de Gini » (section `problemes`,
+  processus 3, carte après celle de 6gen29). Courbes de Lorenz plausibles uniquement (L(0) = 0,
+  L(1) = 1, croissante, convexe, L ≤ x) : xⁿ (n = 2, 3, 4), a·x² + (1 − a)·x et a·x³ + (1 − a)·x
+  (a ∈ {0,2 ; … ; 0,9}), (e^{kx} − 1)/(e^k − 1) (k = 1, 2, 3 : variante à la calculatrice) ; pays
+  FICTIFS seulement (Valdorie, Belmarie…), une entreprise sans nom, un pays avant/après une réforme
+  fiscale. Parcours : lecture (L(0,5) ou L(0,8), interprétation en choix fermé — pièges population
+  ↔ revenus, plus riches, complément —, aire 𝒜 = ∫₀¹ (x − L(x)) dx, G = 2𝒜) ; comparaison (deux
+  aires, deux Gini, verdict équilibré : l'ordre des courbes est tiré après leurs familles, écart de
+  Gini ≥ 0,05) ; paramètre (𝒜(a), G(a), a pour un Gini visé). Une saisie illisible n'est pas
+  soumise (aucune tentative comptée) ; `messagePiege` signale aire sous la courbe, facteur 2
+  oublié, Gini hors de [0 ; 1], a hors de [0 ; 1]. Figures : `repereSvg` de 6gen26 (carré unité,
+  diagonale pointillée, légende sous la figure) ; énoncé sans aire colorée, corrigé avec la région
+  entre la diagonale et chaque courbe ; teinte `--attn` (et non `--accent`, bleu dans les documents
+  imprimés) pour la première courbe. Profil : `forme` = variante + famille(s) (triées pour une
+  comparaison), aucun cas particulier, `calcul` seulement là où il discrimine (exponentielle →
+  calculatrice, comparaison de polynômes → exacte). Le cours ne parlait ni de Lorenz ni de Gini :
+  sous-titre « Pour aller plus loin — inégalités de revenus… », un para, une `definition`, une
+  illustration `curvePlot` (x², aire 1/6 colorée), un exemple résolu (énoncé ajouté à
+  `ENONCES_DEMONSTRATION`, clé « coefficient de Gini d'un pays fictif ») et un `piege`, avant la
+  carte.

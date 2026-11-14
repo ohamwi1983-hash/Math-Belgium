@@ -82,7 +82,7 @@ export type IdGenerateurPilote =
   | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
-  | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84'
+  | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82'
   | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42'
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
@@ -175,6 +175,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'primitives-integrales', sectionId: 'longueurarc', generatorId: '6gen28', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'problemes', generatorId: '6gen29', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'problemes', generatorId: '6gen84', label: 'Détective d\'erreurs (6gen84)', processus: 3 },
+  { chapitreSlug: 'primitives-integrales', sectionId: 'problemes', generatorId: '6gen82', label: 'Courbe de Lorenz et coefficient de Gini (6gen82)', processus: 3 },
   { chapitreSlug: 'nombres-complexes', sectionId: 'operationsbase', generatorId: '6gen34', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'affixesracines', generatorId: '6gen35', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'equationscomplexes', generatorId: '6gen36', label: '' },
@@ -1344,6 +1345,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'trapèzes sur des relevés', enonce: "La vitesse d'une voiture est relevée toutes les 10 s : 0 ; 8 ; 13 ; 15 ; 16 m/s (de $t = 0$ à $t = 40$ s). Estime la distance parcourue par la méthode des trapèzes." },
     { cle: 'débit et volume', enonce: "Une piscine se remplit avec un débit $d(t) = 12 - 0{,}1t$ (en m³/h, t en heures). Calcule le volume d'eau qui entre en 10 heures." },
     { cle: 'volume par soustraction : un bol', enonce: "Un bol a la forme d'une demi-boule de rayon extérieur 5 cm, creusée d'une demi-boule de rayon 4 cm. Calcule le volume de matière qu'il contient." },
+    { cle: "coefficient de Gini d'un pays fictif", enonce: "En Valdorie, la courbe de Lorenz des revenus (part $L(x)$ du revenu total détenue par la part $x$ des ménages les plus pauvres) est modélisée par $L(x) = 0{,}6x^2 + 0{,}4x$. Interprète $L(0{,}5)$, puis calcule le coefficient de Gini de cette répartition." },
   ],
   },
   'fonctions-composees': {
