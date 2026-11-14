@@ -3150,3 +3150,26 @@ paths:
   déclarés `calculatriceIndispensable` ; décision de l'utilisateur généralisée : en évaluation
   « calculatrice interdite », toute variante de cette liste est exclue (rangée grisée dans le
   panneau, retirée par `construireItemsPayload`).
+
+- **6e (6h), Chapitre 3 — Fonctions logarithmes** (`fonctions-logarithmes`) : nouveau 6gen89
+  « Linéariser des données : du tableau au modèle » (section `problemes`, processus 3, carte juste
+  après 6gen22). Un tableau de 6 mesures en contexte, arrondies à 3 chiffres significatifs (les
+  points transformés ne sont donc pas exactement alignés). Trois variantes : semi-log (y = k·aᵗ :
+  refroidissement — écart à la pièce, loi de Moore, bactéries, décharge d'un condensateur,
+  désintégration), log-log (y = k·xⁿ : 3e loi de Kepler n = 1,5, métabolisme n ≈ 0,75, chute libre
+  n = 2, éclairement n = −2) — écrans ln des deux lignes désignées → pente → ordonnée à l'origine →
+  modèle (k = eᵖ, a = eᵐ ou n = m) → prévision (valeur, ou abscisse d'un seuil) ; « choisir »
+  (contextes neutres, issue aucune/semi-log/log-log tirée avant la construction, rejet tant que la
+  bonne représentation n'aligne pas les points à 1 % près et que les deux autres ne s'en écartent
+  pas de 6 %) — choix → pente → ordonnée → prévision (même nombre d'écrans quelle que soit
+  l'issue ; « aucune » = données brutes déjà alignées, modèle affine). Tolérances : intervalle
+  obtenu en propageant aux coins les arrondis acceptés des étapes précédentes (ln, m, p au
+  millième ; k à 4 chiffres significatifs ; a, n au millième), plus une demi-unité de la précision
+  annoncée — la consigne de la prévision le dit (« petite différence due aux arrondis acceptée ») ;
+  les tirages dont la tolérance dépasserait 5 % sont rejetés. Profil : aucun cas particulier,
+  `forme` = variante + type de prévision (`choisir` seul : le verdict reste libre), `calcul`
+  calculatrice, `calculatriceIndispensable: true`. Énoncé papier : contexte + tableau + a) modèle,
+  b) prévision ; nuage transformé et droite seulement au corrigé (et en fin d'exercice à l'écran).
+  Cours : sous-titre, `methode` « Linéariser des données » et un `exemple` (badge « linéariser un
+  refroidissement », énoncé ajouté à `ENONCES_DEMONSTRATION`) avant la carte ; libellés de la page
+  de conception : « Logarithmes : problèmes (6gen22) » et « Linéariser des données (6gen89) ».
