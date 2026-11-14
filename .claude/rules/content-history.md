@@ -2991,3 +2991,24 @@ paths:
   construction d'une combinaison ni le placement d'un point par une relation : un `methode`
   « Construire une combinaison ou placer un point » ajouté avant la carte (pas d'exemple, donc
   rien à ajouter à `ENONCES_DEMONSTRATION`).
+
+- **6e, Chapitre 4 — Intégrales et primitives** (`primitives-integrales`) : nouveau 6gen77
+  « L'intégrale lue sur un graphique (aire signée) » (section `integralesdefinies`, processus 2,
+  carte AVANT celle de 6gen25 : le sens de l'intégrale sans primitive précède le calcul par le
+  théorème fondamental). Courbe affine par morceaux (sommets entiers, |y| ≤ 3) avec au plus une
+  portion de disque (demi-disque ou quart de disque, rayon entier, centre sur l'axe), sur quadrillage
+  orthonormé (`ui6e/figureIntegraleGraphique.ts` : l'énoncé ne colorie rien ; le corrigé colorie en
+  vert/rouge et écrit l'intégrale de chaque morceau). Trois variantes de 3 écrans : `calcul`
+  (abscisses de découpe en choix multiple à un essai, intégrale signée de chaque morceau, somme),
+  `aireIntegrale` (changements de signe, intégrale par intervalle de signe constant, puis intégrale ET
+  aire), `proprietes` (courbe connue sur [c ; d] seulement, intégrale donnée sur un intervalle plus
+  grand : lecture, Chasles, bornes inversées). Valeurs exactes q + p·π représentées par `{q4, p4}`,
+  saisie exacte (fractions, π). La « découpe » est définie sans ambiguïté (à chaque SOMMET de la
+  courbe et à chaque traversée de l'axe) : « une figure simple » seule était ambiguë (un rectangle
+  suivi d'un triangle forme aussi un trapèze). `forme` = variante + disque + nombre de morceaux (ou
+  d'intervalles de signe), tirée uniformément AVANT la courbe ; aucun cas particulier, pas de
+  `calcul`. Le cours ne montrait l'aire signée qu'en une phrase : `methode` « Lire une intégrale sur un
+  graphique, sans primitive » et `attention` « Aire ou intégrale ? » ajoutés après le bloc
+  « Propriétés » (pas d'exemple, donc rien à ajouter à `ENONCES_DEMONSTRATION`). Dans
+  `GENERATEURS_EVALUATION_PILOTE`, la section ayant désormais deux générateurs, 6gen25 reçoit aussi
+  un libellé.

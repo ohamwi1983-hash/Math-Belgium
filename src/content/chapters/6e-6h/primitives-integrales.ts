@@ -786,6 +786,31 @@ export const primitivesIntegrales: ChapterContent = {
               'aires (section 4).',
           ],
         },
+        {
+          kind: 'methode',
+          label: 'Lire une intégrale sur un graphique, sans primitive',
+          items: [
+            'Découpe $[a;b]$ à chaque sommet de la courbe (changement de direction, début ou fin ' +
+              'd\'un arc de cercle) et là où elle traverse l\'axe des abscisses : chaque morceau ' +
+              'est une figure simple (rectangle, triangle, trapèze, demi-disque, quart de disque) ' +
+              'entièrement au-dessus ou entièrement sous l\'axe.',
+            'Sur chaque morceau, l\'intégrale vaut l\'aire de la figure, **comptée négativement** ' +
+              'sous l\'axe. Un demi-disque de rayon r a pour aire $\\dfrac{\\pi r^2}{2}$, un quart ' +
+              'de disque $\\dfrac{\\pi r^2}{4}$.',
+            'Additionne ces intégrales signées (additivité) : tu obtiens $\\int_a^b f(x)dx$. Si ' +
+              'les bornes sont échangées, change le signe : $\\int_b^a f(x)dx = -\\int_a^b f(x)dx$.',
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Aire ou intégrale ?',
+          text:
+            'L\'**aire** de la région comprise entre la courbe et l\'axe additionne les aires de ' +
+            'tous les morceaux, toujours positivement ; l\'**intégrale** retranche celles des ' +
+            'morceaux situés sous l\'axe. Si f vaut 2 sur $[0;3]$ et $-1$ sur $[3;5]$, alors ' +
+            '$\\int_0^5 f(x)dx = 6 - 2 = 4$, mais l\'aire de la région vaut $6 + 2 = 8$ u.a. : ' +
+            'ce ne sont pas les mêmes nombres.',
+        },
         { kind: 'subheading', text: 'La fonction aire : pourquoi une primitive calcule une aire' },
         {
           kind: 'definition',
@@ -1032,6 +1057,18 @@ export const primitivesIntegrales: ChapterContent = {
             },
             { kind: 'para', text: 'm = 3' },
           ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'L\'intégrale lue sur un graphique (aire signée)',
+          generatorId: '6gen77',
+          description: [
+            'Sans primitive : découpe une courbe faite de segments et de portions de disque en ' +
+              'figures simples, compte négativement les aires sous l\'axe, utilise l\'additivité ' +
+              'et les bornes inversées, et distingue l\'aire de l\'intégrale.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 77. L\'intégrale lue sur un graphique (aire signée) »',
         },
         {
           kind: 'entrainement',
