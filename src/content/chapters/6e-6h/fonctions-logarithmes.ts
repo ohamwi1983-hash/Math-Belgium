@@ -3150,6 +3150,42 @@ export const fonctionsLogarithmes: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 22. Logarithmes : problèmes »',
         },
+        {
+          kind: 'methode',
+          label: 'Raisonner sur une échelle logarithmique : écart ↔ rapport',
+          items: [
+            'Repère ce que donne l\'énoncé : deux valeurs sur l\'échelle (un **écart**) ou un facteur sur la grandeur physique (un **rapport**).',
+            'Sur une échelle $L = a\\log(X) + b$ (log en base 10), multiplier $X$ par $k$ **ajoute** $a\\log(k)$ à $L$ : deux sources sonores identiques au lieu d\'une, c\'est environ $+3$ dB ; dix sources, $+10$ dB.',
+            'Inversement, un écart $\\Delta L$ sur l\'échelle donne $\\log\\left(\\dfrac{X_2}{X_1}\\right) = \\dfrac{\\Delta L}{a}$, donc $\\dfrac{X_2}{X_1} = 10^{\\Delta L / a}$ : on ne compare jamais deux niveaux par leur quotient.',
+            'Réponds dans le contexte : nouveau niveau (avec son unité et l\'arrondi demandé), « combien de fois plus », ou nombre entier — arrondi à l\'entier **supérieur** s\'il faut atteindre au moins un niveau.',
+          ],
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Échelle', 'Un écart sur l\'échelle donne le rapport'],
+          rows: [
+            ['Décibels : $L = 10\\log(I/I_0)$', '$\\dfrac{I_2}{I_1} = 10^{(L_2 - L_1)/10}$'],
+            ['Séisme (amplitude) : $M = \\log(A/A_0)$', '$\\dfrac{A_2}{A_1} = 10^{M_2 - M_1}$'],
+            ['Séisme (énergie) : $\\log(E) = 1{,}5M + 4{,}8$', '$\\dfrac{E_2}{E_1} = 10^{1{,}5(M_2 - M_1)}$'],
+            ['pH : $\\mathrm{pH} = -\\log(c)$', '$\\dfrac{c_A}{c_B} = 10^{\\mathrm{pH}_B - \\mathrm{pH}_A}$'],
+            ['Étoiles : $m = -2{,}5\\log(E) + C$', '$\\dfrac{E_A}{E_B} = 10^{0{,}4(m_B - m_A)}$'],
+          ],
+          caption: 'Un même écart sur l\'échelle correspond toujours au même rapport, quel que soit le niveau de départ. Attention au sens : pour le pH et les magnitudes d\'étoiles, la plus petite valeur correspond à la plus grande grandeur.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Échelles logarithmiques : rapports et sommes',
+          generatorId: '6gen90',
+          description: [
+            'Raisonne sur une échelle logarithmique sans repartir de la formule : n sources sonores ' +
+              'identiques, intensité divisée par un facteur, nombre de sources pour atteindre un ' +
+              'niveau, rapport d\'intensités, d\'amplitudes ou d\'énergies de séismes, concentrations ' +
+              'en ions H₃O⁺ et dilution, éclat et magnitude des étoiles. Traduis l\'écart en rapport ' +
+              '(ou l\'inverse), calcule, puis réponds dans le contexte.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 90. Échelles logarithmiques : rapports et sommes »',
+        },
       ],
     },
   ],

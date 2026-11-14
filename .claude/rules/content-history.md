@@ -3150,3 +3150,20 @@ paths:
   déclarés `calculatriceIndispensable` ; décision de l'utilisateur généralisée : en évaluation
   « calculatrice interdite », toute variante de cette liste est exclue (rangée grisée dans le
   panneau, retirée par `construireItemsPayload`).
+
+- **6e (6h), Chapitre 3 — Fonctions logarithmes** (`fonctions-logarithmes`) : nouveau 6gen90
+  « Échelles logarithmiques : rapports et sommes » (section `problemes`, processus 3, carte après
+  6gen22). 6gen22 calcule pH, décibels et magnitude À PARTIR DE LA FORMULE ; 6gen90 fait raisonner
+  sur l'échelle (écart ↔ rapport). Onze variantes = contexte × type : facteur → écart (n sources
+  identiques, intensité divisée par k, magnitude d'un séisme k fois plus énergétique, pH après
+  dilution, magnitude d'une étoile k fois plus/moins lumineuse), écart → rapport (deux niveaux
+  sonores, amplitudes et énergies de deux séismes, concentrations en ions H₃O⁺, éclat de deux
+  étoiles), écart visé → nombre minimal de sources (entier SUPÉRIEUR). Trois écrans fixes : traduire
+  (choix fermé de la relation), calcul (écart, ou logarithme du rapport), réponse en contexte à la
+  précision annoncée ; écran `EtapeAccumulerGrandeur` de 6gen80 réutilisé tel quel. Profil :
+  `forme` = variante, `calcul` exacte (facteur puissance de 10, logarithme du rapport entier) /
+  calculatrice, régime tiré avant les nombres ; aucune variante sans instance exacte. Le cours ne
+  donnait l'écart ↔ rapport que par deux exemples (énergie des séismes, deux machines de 60 dB) :
+  ajout d'une `methode` « Raisonner sur une échelle logarithmique : écart ↔ rapport » et d'un
+  `featureTable` (décibels, séisme amplitude/énergie, pH, étoiles) avant la carte — pas d'exemple,
+  donc rien à ajouter à `ENONCES_DEMONSTRATION`. Libellé de la page de conception donné à 6gen22.
