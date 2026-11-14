@@ -3106,3 +3106,21 @@ paths:
   par appel) rend l'empreinte anti-doublon du pipeline toujours nouvelle → figure seulement dans
   `enoncePapier`. Cours : `methode` « Contenance d'un objet de révolution » avant la carte (pas
   d'exemple, rien à ajouter à `ENONCES_DEMONSTRATION`).
+- **6e (6h), Chapitre 4 — Intégrales et primitives** (`primitives-integrales`) : nouveau 6gen79
+  « Comparer et encadrer des intégrales » (section `integralesdefinies`, processus 2, carte après
+  celle de 6gen25). Quatre variantes : signe d'une intégrale sans la calculer (f de signe constant,
+  bornes dans l'ordre ou échangées — écran « positivité, bornes dans l'ordre » en plus quand elles
+  sont échangées), comparaison de ∫f et ∫g (f ≤ g, f ≥ g ou f − g qui change de signe : verdicts
+  équiprobables, tirés AVANT la paire et l'intervalle), encadrement m(b − a) ≤ I ≤ M(b − a) (f
+  monotone : dérivée à étudier ; ou tableau de variations donné), encadrement de la valeur moyenne
+  (m et M, intégrale, puis μ). Choix fermés à une tentative, champs exacts (e, ln, √, fractions)
+  ou au centième. Figures : pour le signe et la comparaison, seulement une fois l'étape 1 close
+  (elles montreraient la réponse) — f orange et g bleu quelle que soit l'issue, région entre elles
+  grise ; pour l'encadrement, courbe sans graduation verticale ou tableau de variations, rectangles
+  m(b − a) et M(b − a) à la validation finale et dans le corrigé. Profil : `forme` = variante
+  (+ ordre des bornes, + monotone/variations) ; `calcul` seulement pour l'encadrement et la
+  moyenne. Le cours énonçait déjà positivité et croissance mais pas l'encadrement comme propriété :
+  sous-titre « Comparer et encadrer une intégrale sans la calculer », un `methode` (signe, bornes
+  échangées, comparaison, encadrement et valeur moyenne), un exemple résolu (encadrer
+  ∫₀¹ e^{x²} dx puis le comparer à ∫₀¹ eˣ dx, énoncé ajouté à `ENONCES_DEMONSTRATION`, clé
+  « encadrer une intégrale sans primitive ») et un `piege` (bornes échangées, x³ ≤ x² sur [0 ; 1]).

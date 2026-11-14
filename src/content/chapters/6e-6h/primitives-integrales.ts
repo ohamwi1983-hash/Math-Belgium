@@ -1110,6 +1110,50 @@ export const primitivesIntegrales: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 25. Intégrales définies, paramètre et valeur moyenne »',
         },
+        { kind: 'subheading', text: 'Comparer et encadrer une intégrale sans la calculer' },
+        {
+          kind: 'methode',
+          label: 'Trois conséquences de la positivité',
+          items: [
+            '**Signe** : si $f$ garde un signe constant sur $[a;b]$ avec $a < b$, $\\int_a^b f(x)dx$ a ce signe. ' +
+              'Si les bornes sont échangées, $\\int_b^a f(x)dx = -\\int_a^b f(x)dx$ : le signe s\'inverse.',
+            '**Comparaison** : si $f(x) \\le g(x)$ pour tout $x$ de $[a;b]$ ($a < b$), alors ' +
+              '$\\int_a^b f(x)dx \\le \\int_a^b g(x)dx$. On établit l\'inégalité en étudiant le signe de ' +
+              '$f(x) - g(x)$ ; si cette différence change de signe sur $[a;b]$, la propriété ne permet pas de conclure.',
+            '**Encadrement** : si $m$ et $M$ sont le minimum et le maximum de $f$ sur $[a;b]$, alors ' +
+              '$m(b-a) \\le \\int_a^b f(x)dx \\le M(b-a)$ — et, en divisant par $b-a$, la valeur moyenne de $f$ est ' +
+              'comprise entre $m$ et $M$. C\'est l\'outil qui reste quand on ne connaît aucune primitive de $f$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'encadrer une intégrale sans primitive',
+          formula: 'Sans la calculer, encadre $\\int_0^1 e^{x^2}dx$, puis compare-la à $\\int_0^1 e^{x}dx$.',
+          steps: [
+            { tag: 'sens de variation', text: '$f(x) = e^{x^2}$ a pour dérivée $f\'(x) = 2x\\,e^{x^2} \\ge 0$ sur $[0;1]$ : f est croissante' },
+            { tag: 'minimum et maximum', text: '$m = f(0) = 1$ et $M = f(1) = e$' },
+            { tag: 'encadrement', text: '$1 \\cdot (1-0) \\le \\int_0^1 e^{x^2}dx \\le e \\cdot (1-0)$' },
+            { tag: 'comparaison', text: 'sur $[0;1]$, $x^2 \\le x$ et exp est croissante, donc $e^{x^2} \\le e^{x}$ : $\\int_0^1 e^{x^2}dx \\le \\int_0^1 e^{x}dx = e - 1$' },
+          ],
+          result: { tag: 'résultat', text: '$1 \\le \\int_0^1 e^{x^2}dx \\le e - 1 \\approx 1{,}72$' },
+        },
+        {
+          kind: 'piege',
+          text:
+            'Une fonction **positive** peut avoir une intégrale **négative** : $\\int_5^2 \\ln(x)dx \\le 0$, car les bornes ' +
+            'sont échangées. Et $x^3$ n\'est pas toujours plus grand que $x^2$ : sur $[0;1]$, c\'est l\'inverse.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Comparer et encadrer des intégrales',
+          generatorId: '6gen79',
+          description: [
+            'Détermine le signe d\'une intégrale sans la calculer, compare deux intégrales en comparant les ' +
+              'fonctions, encadre une intégrale ou une valeur moyenne entre m(b − a) et M(b − a).',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 79. Comparer et encadrer des intégrales »',
+        },
       ],
     },
     {
