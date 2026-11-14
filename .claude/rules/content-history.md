@@ -3343,3 +3343,27 @@ paths:
   le premier terme de la somme » (avec 3 + 6 + … + 3072) et exemple résolu « somme de u4 à u9 »
   (énoncé ajouté à `ENONCES_DEMONSTRATION`) juste après l'exemple S₈ ; libellés de 5gen15 et 5gen45
   sur la page de conception.
+
+- **5e (4h), Chapitre 3 — Suites** (`suites`), section `suites-geometriques` : nouveau générateur
+  **5gen46 « Trois termes consécutifs »** (processus 2), carte après 5gen45. a, b, c dépendent de x :
+  pour quelle(s) valeur(s) de x sont-ils trois termes consécutifs d'une suite arithmétique
+  (variante `arithmetique`, 2b = a + c, expressions affines ou avec des x² qui s'éliminent, toujours
+  une solution) ou géométrique (variante `geometrique`, b² = a·c, expressions affines) ? Quatre
+  écrans : relation (choix fermé, UNE tentative, 5 relations mélangées), équation réduite « … = 0 »
+  (vérifiée à un facteur non nul près ; écriture non réduite, second membre non nul ou « x = … »
+  refusés SANS consommer de tentative), valeur(s) de x (« Aucune valeur ne convient » / liste à
+  compléter, patron de `4e/components/EtapeZeros.tsx`), puis a, b, c et la raison pour chaque valeur.
+  Géométrique : le NOMBRE de valeurs qui conviennent (0, 1, 2) est un verdict tiré avant la
+  construction (1/3 chacun) ; 2 → second degré à deux racines (interpolation de deux suites
+  géométriques) ; 1 → racine double, ou racine annulant deux termes consécutifs (à ÉCARTER) + racine
+  valable, ou premier degré ; 0 → Δ < 0, premier degré dont la racine annule deux termes, ou « 0 = k »
+  (ex. x, x + 1, x + 2). Racines et termes entiers, raison q fraction possible. Sans valeur qui
+  convient, l'exercice s'arrête après l'écran 3 mais la barre garde quatre puces (4e « sans objet »)
+  pour ne pas trahir le verdict. Profil : aucun cas particulier, pas de `calcul`, `forme` =
+  `arithmetique:affine|carres`, `geometrique:degre1|degre2` (forme la plus rare ≈ 22 %). Pièges
+  diagnostiqués : 2 non distribué, signes, double produit oublié dans b², b au lieu de b², solution
+  écartée gardée, solution manquante, raison à l'envers ou en différence. Cours : `methode` « trois
+  termes consécutifs a, b, c qui dépendent de x » (b² = a·c plutôt que b = √(a·c), fausse si b < 0 ;
+  aucun terme nul) et exemple résolu « trois termes consécutifs, x à trouver » (x − 1, 3x − 3, x + 15 :
+  x = 1 écartée, x = 3 convient) après « isoler x entre deux termes », énoncé ajouté à
+  `ENONCES_DEMONSTRATION` ; libellé de 5gen46 sur la page de conception.
