@@ -133,6 +133,11 @@ cadrage (`export/cadrageLisible.ts`) choisit le pas du quadrillage (1/dénominat
 point caractéristique) et le zoom pour que le point caractéristique ET le point croix tombent sur
 des intersections ; graduations écrites aux seules valeurs entières (lignes entières plus marquées,
 `GrilleSvg` de `svgGraph.ts`). Le corrigé garde les points étiquetés et raisonne avec le point croix.
+Même exigence pour gen12 (lecture des caractéristiques, valeurs toutes entières) : fenêtre aux
+bornes entières, quadrillage d'une unité, graduations tous les 1/2/5 sur des lignes marquées,
+carreaux de 11 à 18 px (`cadreCaracteristiques`) — le pas automatique de 5 ou 10 laissait les
+valeurs entre deux lignes. Tout graphique papier à LIRE doit vérifier que les valeurs demandées
+tombent sur les lignes de sa grille.
 
 ## Registre et code d'exercice
 

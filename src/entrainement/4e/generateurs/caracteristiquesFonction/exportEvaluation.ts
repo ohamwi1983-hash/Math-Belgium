@@ -12,7 +12,7 @@ import type {
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { construireSvgFonction, type ViewBoxSvg } from "../../../export/svgGraph";
+import { construireSvgFonction, type GrilleSvg, type ViewBoxSvg } from "../../../export/svgGraph";
 import { calculerViewBoxCaracteristiques } from "../../ui/mafsCaracteristiquesFonction";
 import {
   constanceAttendueCaracteristiques,
@@ -77,8 +77,35 @@ const COULEUR_COURBE = "#d6336c";
 /** Même valeur que la constante interne (non exportée) `MARGE` de `export/svgGraph.ts` — nécessaire
  * pour dupliquer localement sa transformation x/y→pixel (voir commentaire de tête de fichier). */
 const MARGE_SVG = 10;
-const LARGEUR_SVG = 360;
-const HAUTEUR_SVG = 240;
+/** Cadre du graphique papier : fenêtre aux bornes ENTIÈRES, quadrillage d'une unité, carreaux
+ * carrés assez grands pour lire (décision de l'utilisateur : toutes les valeurs à lire — bornes,
+ * zéros, extremums, f(0), f(v), asymptotes, toutes entières — tombent sur les lignes de la grille ;
+ * le pas automatique « nombre rond » de 5 ou 10 les laissait entre deux lignes). */
+interface CadreCaracteristiques {
+  viewBox: ViewBoxSvg;
+  largeur: number;
+  hauteur: number;
+  grille: GrilleSvg;
+}
+
+const LARGEUR_UTILE_MAX = 600;
+const HAUTEUR_UTILE_MAX = 420;
+
+function cadreCaracteristiques(exercice: ExerciceCaracteristiquesFonction): CadreCaracteristiques {
+  const v = calculerViewBoxCaracteristiques(exercice);
+  const viewBox: ViewBoxSvg = { xMin: Math.floor(v.x[0]), xMax: Math.ceil(v.x[1]), yMin: Math.floor(v.y[0]), yMax: Math.ceil(v.y[1]) };
+  const carreauxX = viewBox.xMax - viewBox.xMin;
+  const carreauxY = viewBox.yMax - viewBox.yMin;
+  const carreau = Math.max(11, Math.min(18, Math.floor(Math.min(LARGEUR_UTILE_MAX / carreauxX, HAUTEUR_UTILE_MAX / carreauxY))));
+  // Graduation écrite toutes les 1, 2 ou 5 unités selon la place (≥ 16 px entre deux nombres).
+  const etiquette = carreau >= 16 ? 1 : 2 * carreau >= 16 ? 2 : 5;
+  return {
+    viewBox,
+    largeur: carreauxX * carreau + 2 * MARGE_SVG,
+    hauteur: carreauxY * carreau + 2 * MARGE_SVG,
+    grille: { pasX: 1, pasY: 1, etiquetteX: etiquette, etiquetteY: etiquette },
+  };
+}
 
 function formatNombre(valeur: number): string {
   return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
@@ -157,8 +184,9 @@ function cerclePlein(sx: (x: number) => number, sy: (y: number) => number, x: nu
  * 3e point plein isolé pour "pointRedefini", segment pointillé reliant les deux marqueurs de la
  * discontinuité, asymptotes x=AV et y=L en pointillé.
  */
-function construireMarqueursSupplementaires(exercice: ExerciceCaracteristiquesFonction, viewBox: ViewBoxSvg): string {
-  const { sx, sy } = construireTransformSvg(viewBox, LARGEUR_SVG, HAUTEUR_SVG);
+function construireMarqueursSupplementaires(exercice: ExerciceCaracteristiquesFonction, cadre: CadreCaracteristiques): string {
+  const { largeur: LARGEUR_SVG, hauteur: HAUTEUR_SVG } = cadre;
+  const { sx, sy } = construireTransformSvg(cadre.viewBox, LARGEUR_SVG, HAUTEUR_SVG);
   const morceaux: string[] = [];
 
   const xAV = sx(exercice.AV).toFixed(1);
@@ -190,15 +218,16 @@ function construireMarqueursSupplementaires(exercice: ExerciceCaracteristiquesFo
 }
 
 function construireGrapheCaracteristiques(exercice: ExerciceCaracteristiquesFonction, annote = false): string {
-  const viewBoxMafs = calculerViewBoxCaracteristiques(exercice);
-  const viewBox: ViewBoxSvg = { xMin: viewBoxMafs.x[0], xMax: viewBoxMafs.x[1], yMin: viewBoxMafs.y[0], yMax: viewBoxMafs.y[1] };
+  const cadre = cadreCaracteristiques(exercice);
+  const { viewBox } = cadre;
   const svgBase = construireSvgFonction(evaluerPourSvgCaracteristiques(exercice, viewBox), viewBox, {
-    largeur: LARGEUR_SVG,
-    hauteur: HAUTEUR_SVG,
+    largeur: cadre.largeur,
+    hauteur: cadre.hauteur,
     couleurCourbe: COULEUR_COURBE,
     classe: annote ? "figure-corrige" : "graphe-caracteristiques",
+    grille: cadre.grille,
   });
-  const marqueurs = construireMarqueursSupplementaires(exercice, viewBox) + (annote ? construireAnnotationsCorrige(exercice, viewBox) : "");
+  const marqueurs = construireMarqueursSupplementaires(exercice, cadre) + (annote ? construireAnnotationsCorrige(exercice, cadre) : "");
   return svgBase.replace("</svg>", `${marqueurs}</svg>`);
 }
 
@@ -219,7 +248,9 @@ function texteLecture(x: number, y: number, contenu: string, ancre: "start" | "m
  * deux asymptotes. Mêmes valeurs que les conclusions du corrigé (`exercice.zeros`,
  * `evaluerCourbeCaracteristiques`).
  */
-function construireAnnotationsCorrige(exercice: ExerciceCaracteristiquesFonction, viewBox: ViewBoxSvg): string {
+function construireAnnotationsCorrige(exercice: ExerciceCaracteristiquesFonction, cadre: CadreCaracteristiques): string {
+  const { largeur: LARGEUR_SVG, hauteur: HAUTEUR_SVG } = cadre;
+  const { viewBox } = cadre;
   const { sx, sy } = construireTransformSvg(viewBox, LARGEUR_SVG, HAUTEUR_SVG);
   const m: string[] = [];
   const dansX = (x: number) => x >= viewBox.xMin && x <= viewBox.xMax;

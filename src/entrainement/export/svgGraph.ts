@@ -173,7 +173,8 @@ export function construireSvgFonction(evaluer: (x: number) => number | null, vie
   const labelsX: string[] = [];
   for (const v of multiplesDans(xMin, xMax, pasX)) {
     const px = sx(v);
-    const forte = grille && pasX < 1 && estMultiple(v, 1);
+    // Lignes marquées : valeurs entières d'une grille fine, ou valeurs graduées d'une grille d'une unité.
+    const forte = grille && (pasX < 1 ? estMultiple(v, 1) : etiquetteX > pasX && estMultiple(v, etiquetteX));
     lignesGrilleX.push(`<line x1="${px.toFixed(1)}" y1="${MARGE}" x2="${px.toFixed(1)}" y2="${hauteur - MARGE}" stroke="${forte ? COULEUR_GRILLE_ENTIERE : COULEUR_GRILLE}" stroke-width="1"/>`);
     // Coin commun avec la colonne des graduations de y (posée près du bord gauche) : on n'écrit pas.
     const conflitCoin = (!axeYVisible || !aGaucheDeLAxe) && Math.abs(px - xEtiquettesY) < 12;
@@ -183,7 +184,7 @@ export function construireSvgFonction(evaluer: (x: number) => number | null, vie
   const labelsY: string[] = [];
   for (const v of multiplesDans(yMin, yMax, pasY)) {
     const py = sy(v);
-    const forte = grille && pasY < 1 && estMultiple(v, 1);
+    const forte = grille && (pasY < 1 ? estMultiple(v, 1) : etiquetteY > pasY && estMultiple(v, etiquetteY));
     lignesGrilleY.push(`<line x1="${MARGE}" y1="${py.toFixed(1)}" x2="${largeur - MARGE}" y2="${py.toFixed(1)}" stroke="${forte ? COULEUR_GRILLE_ENTIERE : COULEUR_GRILLE}" stroke-width="1"/>`);
     const conflitRangee = !(yMin <= 0 && 0 <= yMax) && Math.abs(py + 3 - yEtiquettesX) < 9;
     if (Math.abs(v) > 1e-9 && estMultiple(v, etiquetteY) && !conflitRangee) labelsY.push(`<text x="${xEtiquettesY.toFixed(1)}" y="${(py + 3).toFixed(1)}" font-size="8" text-anchor="${ancreY}" fill="${COULEUR_AXE}" ${HALO_TEXTE}>${formatNombreGraphique(v).replace("-", "−")}</text>`);
