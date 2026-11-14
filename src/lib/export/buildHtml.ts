@@ -146,7 +146,9 @@ const STYLE_IMPRESSION = `
  * le point où le texte du diagramme rejoint la taille du texte courant, vérifié à la fois sur un
  * diagramme simple (`fonction-second-degre`) et sur un diagramme dense à plusieurs étiquettes
  * (`lieux-geometriques`). Ramené à 52 % quand la colonne imprimée s'est élargie (marges @page
- * 17 mm, `.page` sans marge intérieure) : même taille absolue de figure qu'avant (≈ 92 mm). Réduit le CADRE (`.diagram-frame`, bordure + fond) lui-même et le centre,
+ * 17 mm, `.page` sans marge intérieure) : même taille absolue de figure qu'avant (≈ 92 mm). Porté à
+ * 66 % quand le corps imprimé est passé de 13 px à 11,5 pt (demande utilisateur : texte et
+ * graphes trop petits) — même rapport que le texte, pour garder des graduations à sa taille. Réduit le CADRE (`.diagram-frame`, bordure + fond) lui-même et le centre,
  * pas seulement le SVG à l'intérieur (sinon le cadre resterait pleine largeur avec le dessin
  * flottant au milieu, entouré de vide) ; le SVG repasse à 100% pour remplir son cadre déjà réduit.
  * Exclut les mini-diagrammes d'un `illustrationGroup` (`.diag-multi`) : déjà réduits par leur
@@ -154,7 +156,7 @@ const STYLE_IMPRESSION = `
  *
  * Ce format reste du vrai DOM/CSS — jamais rasterisé — donc un `width` en `%` sur un `<svg>` s'y
  * résout normalement, sans risque de mauvaise résolution/déformation. */
-const ECHELLE_DIAGRAMMES_HTML = 52
+const ECHELLE_DIAGRAMMES_HTML = 66
 const STYLE_DIAGRAMMES = `
 .diagram-frame { width: ${ECHELLE_DIAGRAMMES_HTML}% !important; margin: 0 auto !important; }
 .diagram-frame svg { width: 100% !important; margin: 0 !important; }

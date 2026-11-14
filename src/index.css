@@ -147,7 +147,9 @@
        PROPORTIONNELLEMENT, sans toucher chaque sélecteur un par un. `:root` n'a aucune règle
        `font-size` hors media query avec laquelle entrer en conflit de spécificité — pas besoin de
        !important ici (contrairement au `body` juste en dessous). */
-    font-size: calc(16px * 13 / 17);
+    /* Corps imprimé en 11,5 pt (≈ 15,3 px ; auparavant 13 px, jugé trop petit sur papier par
+       l'utilisateur) : la racine suit le même rapport que le corps d'écran (16/17). */
+    font-size: calc(11.5pt * 16 / 17);
   }
   /* !important nécessaire : la règle `body { background: <quadrillage>, var(--paper) }` plus bas
      dans ce fichier est hors media query (s'applique toujours) et arrive APRÈS ce bloc dans
@@ -156,7 +158,25 @@
      imprimé réel (Playwright, @media print), pas supposé : le quadrillage restait visible tant que
      ce !important n'y était pas. Même raison pour `font-size` ci-dessous (17px sur `body` hors
      media query, même sélecteur, même ordre des sources). */
-  body { background: #ffffff !important; font-size: 13px !important; }
+  body { background: #ffffff !important; font-size: 11.5pt !important; }
+  /* Une seule colonne pleine largeur : la grille d'écran (sommaire 240 px + texte) restait active
+     à l'impression alors que le sommaire est masqué (`.no-export`) — le texte tombait dans la
+     colonne de 240 px, un tiers de la page, d'où une police et des figures minuscules (repéré sur
+     un PDF A4 réel, Playwright). */
+  .chapter-layout { display: block !important; max-width: none !important; padding: 0 !important; margin: 0 !important; }
+  .chapter-layout .page.chapter-main, .page { max-width: none !important; padding: 0 !important; margin: 0 !important; }
+  .chapter-sidebar { display: none !important; }
+  /* Figures : 66 % de la largeur utile, centrées — leurs graduations et étiquettes restent à la
+     taille du texte courant (même règle que l'export « Télécharger ce chapitre », `buildHtml.ts`).
+     Les mini-figures d'un groupe (`.diag-multi`) gardent leur colonne. */
+  .diagram-frame { width: 66% !important; margin-left: auto !important; margin-right: auto !important; }
+  .diagram-frame svg { width: 100% !important; }
+  .diag-multi .diagram-frame { width: 100% !important; }
+  /* Pas de titre seul en bas de page, pas de figure ni de tableau coupé en deux (mêmes règles que
+     l'export « Télécharger ce chapitre »). */
+  figure, .diagram-frame, table.tableau, .wrong-right { break-inside: avoid; page-break-inside: avoid; }
+  h1, h2, h3, .section-head, .sub-title, .exemple-head, .callout-label { break-after: avoid; page-break-after: avoid; }
+  p, li { orphans: 3; widows: 3; }
   /* `.no-export` marque déjà toute la chrome d'interface (TOC collante, barre de progression,
      en-tête de section collant, boutons flottants "Sections"/"remonter en haut", tiroir de
      navigation, nav "Dans ce chapitre", section "Télécharger ce chapitre"...) pour le pipeline
@@ -168,6 +188,9 @@
      ici couvre tout le site, pas seulement le formulaire — aucun fichier de contenu à toucher. */
   .no-export { display: none !important; }
 }
+
+/* Marges d'impression : la place de perforer, sans gaspiller de papier. */
+@page { size: A4; margin: 12mm 14mm 14mm 16mm; }
 
 * { box-sizing: border-box; }
 
