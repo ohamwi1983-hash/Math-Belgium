@@ -3150,3 +3150,19 @@ paths:
   déclarés `calculatriceIndispensable` ; décision de l'utilisateur généralisée : en évaluation
   « calculatrice interdite », toute variante de cette liste est exclue (rangée grisée dans le
   panneau, retirée par `construireItemsPayload`).
+
+- **6e (6h), Chapitre 3 — générateur 6gen92 « Grands nombres et logarithme décimal »** (section
+  `proprietes`, processus 3, carte juste après celle de 6gen13) : le logarithme décimal pour des
+  nombres trop grands pour la calculatrice. Quatre variantes : nombre de chiffres de aⁿ (dont
+  le contexte des nombres premiers de Mersenne 2ⁿ − 1 découverts de 1952 à 1982) ; comparer aⁿ
+  et bᵐ (logarithmes à la calculatrice, ou sans calculatrice par un même exposant : 2³⁰⁰ = 8¹⁰⁰,
+  3²⁰⁰ = 9¹⁰⁰ ; verdict tiré avant la construction) ; écriture scientifique et premier chiffre ;
+  temps de calcul d'un algorithme en 2ⁿ opérations (durée en secondes puis en années, ou plus
+  grand n traitable en une durée donnée). Marges du générateur : partie décimale de n·log a dans
+  [0,01 ; 0,99], mantisse à 0,05 au moins d'un entier, écart des logarithmes ≥ 0,02. Profil :
+  aucun cas particulier, `forme` = variante + sous-cas, `calcul` exacte seulement pour la
+  comparaison par même exposant ; `calculatriceIndispensable` = chiffres, premier-chiffre, temps.
+  Le cours n'avait pas le lien « nombre de chiffres ↔ partie entière de log » : sous-titre
+  « Le logarithme décimal et les très grands nombres », `methode`, `exemple` (« nombre de chiffres
+  de 2¹⁰⁰⁰ », énoncé ajouté à `ENONCES_DEMONSTRATION`) et `piege` (« + 1 » oublié) ajoutés avant
+  la carte de 6gen13. Libellé de la ligne 6gen13 de la page de conception renseigné.
