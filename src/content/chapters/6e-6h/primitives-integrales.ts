@@ -843,6 +843,34 @@ export const primitivesIntegrales: ChapterContent = {
         },
         {
           kind: 'methode',
+          label: 'Lire la fonction aire sur le graphique de f',
+          items: [
+            '**Valeurs** : $A(a) = 0$ ; pour $x > a$, $A(x)$ est l\'aire signée de a à x (une aire sous l\'axe ' +
+              'compte négativement) ; pour $x < a$, $A(x) = -\\int_x^a f(t)dt$.',
+            '**Sens de variation** : $A\' = f$, donc A est croissante là où $f \\ge 0$ et décroissante là où ' +
+              '$f \\le 0$. C\'est le **signe** de f qui compte, pas son sens de variation : là où f décroît en ' +
+              'restant positive, A croît encore.',
+            '**Extremums** : A admet un extremum local là où f **change de signe** — un maximum si f passe ' +
+              'de + à −, un minimum si f passe de − à +. Un zéro de f sans changement de signe, ou un ' +
+              'sommet de la courbe de f, n\'en donne pas.',
+            '**Pente** : la tangente à la courbe de A au point d\'abscisse p a pour pente $A\'(p) = f(p)$, ' +
+              'une ordonnée lue sur la courbe de f (et non une aire).',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'La fonction aire',
+          generatorId: '6gen78',
+          description: [
+            'À partir du seul graphique de f, étudie la fonction aire A(x) = ∫ₐˣ f(t) dt : valeurs par ' +
+              'des aires signées, sens de variation, extremums, pente A′ = f, et reconnaissance du ' +
+              'graphique de A.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 78. La fonction aire »',
+        },
+        {
+          kind: 'methode',
           label: 'Substitution dans une intégrale définie : changer aussi les bornes',
           items: [
             'Quand tu poses $u = u(x)$, les bornes portent sur x : remplace-les par $u(a)$ et $u(b)$ — ' +

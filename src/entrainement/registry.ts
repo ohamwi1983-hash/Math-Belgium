@@ -275,6 +275,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen28': entree(CH_6E_PRIMITIVES_INTEGRALES, () => import('./6e-6h/App6gen28').then((m) => ({ default: m.App6gen28 }))),
   '6gen29': entree(CH_6E_PRIMITIVES_INTEGRALES, () => import('./6e-6h/App6gen29').then((m) => ({ default: m.App6gen29 }))),
   '6gen67': entree(CH_6E_PRIMITIVES_INTEGRALES, () => import('./6e-6h/App6gen67').then((m) => ({ default: m.App6gen67 }))),
+  '6gen78': entree(CH_6E_PRIMITIVES_INTEGRALES, () => import('./6e-6h/App6gen78').then((m) => ({ default: m.App6gen78 }))),
   '6gen34': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen34').then((m) => ({ default: m.App6gen34 }))),
   '6gen35': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen35').then((m) => ({ default: m.App6gen35 }))),
   '6gen36': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen36').then((m) => ({ default: m.App6gen36 }))),
