@@ -3326,3 +3326,20 @@ paths:
   pratique, aux instruments » (axe, sommet par médiatrice, report depuis K, même ouverture), sous-titre
   « Deuxième méthode : la médiatrice » + figure (perpendiculaire en H ∩ médiatrice de [FH], PF = PH
   codés) + astuce (symétrique, choix des points, médiatrice = tangente).
+
+- **5e (4h), Chapitre 3 — Suites** (`suites`), section `suites-geometriques` : nouveau générateur
+  **5gen45 « Sommes de termes consécutifs »** (processus 2), carte après 5gen15 (et 5gen44). Quatre
+  variantes, trois écrans à champs libres chacune : somme de uₚ à uₙ d'une suite arithmétique
+  (formule an + b ou u₁ et r : nombre de termes → uₚ et uₙ → somme), somme arithmétique en extension
+  (liste 7 + 11 + … + 203 : raison → N → S ; impairs/pairs : terme général → N → S ; multiples de d
+  entre deux bornes : premier et dernier multiple → N → S), somme de uₚ à uₙ d'une suite géométrique
+  (u₁ et q, ou formule k·qⁿ⁻¹ / k·qⁿ : N → uₚ → S = uₚ(1 − qᴺ)/(1 − q)), somme géométrique en
+  extension (q → N par puissance connue → S). Termes toujours entiers (q = ±1/2 avec un premier terme
+  multiple de la bonne puissance de 2), sommes ≤ 30 000 : tout est exact, pas de `calcul` dans le
+  profil, aucun cas particulier ; `forme` = variante + type de données (+ `:fraction`), forme la plus
+  rare ≈ 12,5 % de sa variante. Pièges diagnostiqués : « + 1 » oublié, rang du dernier terme pris
+  pour N, Sₙ depuis u₁, u₁ au lieu de uₚ devant la fraction, exposant N ± 1, division par 2 oubliée,
+  facteur (n − 1), quotient à l'envers. Cours : `attention` « une somme qui ne commence pas à u₁ :
+  le premier terme de la somme » (avec 3 + 6 + … + 3072) et exemple résolu « somme de u4 à u9 »
+  (énoncé ajouté à `ENONCES_DEMONSTRATION`) juste après l'exemple S₈ ; libellés de 5gen15 et 5gen45
+  sur la page de conception.

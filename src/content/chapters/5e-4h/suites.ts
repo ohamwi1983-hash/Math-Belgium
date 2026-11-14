@@ -588,6 +588,29 @@ export const suites: ChapterContent = {
           steps: [{ tag: 'application directe de la formule, n = 8', text: '$S_8 = 3 \\times \\dfrac{1-2^8}{1-2} = 3 \\times \\dfrac{1-256}{-1} = 3 \\times 255$' }],
           result: { tag: 'résultat', text: '$S_8 = 765$' },
         },
+        {
+          kind: 'attention',
+          label: 'Attention — une somme qui ne commence pas à u₁ : le premier terme de la somme',
+          text:
+            'La formule $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$ vaut pour les $n$ termes **à partir de** ' +
+            '$u_1$. Pour $u_p + u_{p+1} + \\ldots + u_n$, remplace $u_1$ par le **premier terme de la ' +
+            'somme**, $u_p$, et l\'exposant par le **nombre de termes**, $N = n - p + 1$ : ' +
+            '$S = u_p \\times \\dfrac{1-q^N}{1-q}$. Même réflexe pour une somme écrite en extension, ' +
+            'comme $3 + 6 + 12 + \\ldots + 3072$ : $q = 2$, et $3 \\times 2^{N-1} = 3072$ donne ' +
+            '$2^{N-1} = 1024 = 2^{10}$, donc $N = 11$ termes.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'somme de u4 à u9',
+          formula:
+            'La suite géométrique $(u_n)$ a pour premier terme $u_1 = 3$ et pour raison $q = 2$. ' +
+            'Calcule la somme $u_4 + u_5 + \\ldots + u_9$.',
+          steps: [
+            { tag: 'compter les termes — n − p + 1', text: '$9 - 4 + 1 = 6$ termes' },
+            { tag: 'premier terme de la somme', text: '$u_4 = 3 \\times 2^{3} = 24$' },
+          ],
+          result: { tag: 'somme — u₄ devant la fraction, pas u₁', text: '$S = 24 \\times \\dfrac{1-2^{6}}{1-2} = 24 \\times \\dfrac{-63}{-1} = 1512$' },
+        },
         { kind: 'subheading', text: 'Retrouver une inconnue : x ou le rang n' },
         {
           kind: 'rappel',
@@ -689,6 +712,19 @@ export const suites: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 15. Suites géométriques, formule générale et termes »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Sommes de termes consécutifs',
+          generatorId: '5gen45',
+          description: [
+            'Calcule la somme de uₚ à uₙ d\'une suite arithmétique ou géométrique, ou une somme ' +
+              'écrite en extension (7 + 11 + … + 203, nombres impairs, multiples d\'un nombre, ' +
+              '3 + 6 + 12 + … + 3072) : compte les termes, trouve le premier terme de la somme, ' +
+              'puis applique la bonne formule.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 45. Sommes de termes consécutifs »',
         },
       ],
     },

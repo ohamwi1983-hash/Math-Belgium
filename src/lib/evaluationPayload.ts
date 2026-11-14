@@ -95,7 +95,7 @@ export type IdGenerateurPilote =
   | 'gen39' | 'gen40' | 'gen41'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
-  | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19'
+  | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19' | '5gen45'
   | '5gen20' | '5gen21' | '5gen22' | '5gen23' | '5gen24'
   | '5gen25' | '5gen26' | '5gen27' | '5gen28' | '5gen29' | '5gen30' | '5gen31' | '5gen32' | '5gen33' | '5gen34' | '5gen35'
 
@@ -313,7 +313,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'trigonometrie', sectionId: 'modeliser', generatorId: '5gen13', label: '' },
   { chapitreSlug: 'trigonometrie', sectionId: 'equations', generatorId: '5gen10', label: '' },
   { chapitreSlug: 'suites', sectionId: 'suites-arithmetiques', generatorId: '5gen14', label: '' },
-  { chapitreSlug: 'suites', sectionId: 'suites-geometriques', generatorId: '5gen15', label: '' },
+  { chapitreSlug: 'suites', sectionId: 'suites-geometriques', generatorId: '5gen15', label: 'Suites géométriques, formule générale et termes (5gen15)' },
+  { chapitreSlug: 'suites', sectionId: 'suites-geometriques', generatorId: '5gen45', label: 'Sommes de termes consécutifs (5gen45)' },
   { chapitreSlug: 'suites', sectionId: 'convergence', generatorId: '5gen16', label: '' },
   { chapitreSlug: 'suites', sectionId: 'problemes-classiques', generatorId: '5gen17', label: '', processus: 3 },
   { chapitreSlug: 'suites', sectionId: 'comparaison-suites', generatorId: '5gen18', label: '' },
@@ -1104,6 +1105,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'Exemple résolu — intérêts simples ou intérêts composés ?', enonce: "Tu places 1 000 € à 4 % par an pendant 10 ans. On note $u_n$ le capital à la fin de la n-ième année. Exprime $u_n$ et calcule $u_{10}$, d'abord avec des intérêts simples (4 % du capital de départ chaque année), puis avec des intérêts composés (4 % du capital déjà atteint chaque année). Compare les deux placements." },
     { cle: 'Démonstration — établir la formule de la somme', enonce: "Démontre que la somme des n premiers termes d'une suite géométrique de raison $q \\neq 1$ vaut $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$." },
     { cle: 'somme des 8 premiers termes', enonce: "Calcule la somme des 8 premiers termes d'une suite géométrique de premier terme $u_1 = 3$ et de raison $q = 2$." },
+    { cle: 'somme de u4 à u9', enonce: "La suite géométrique $(u_n)$ a pour premier terme $u_1 = 3$ et pour raison $q = 2$. Calcule la somme $u_4 + u_5 + \\ldots + u_9$." },
     { cle: 'isoler x entre deux termes', enonce: "Dans une suite géométrique de raison $q = 2$, on donne $u_3 = x+5$ et $u_5 = 3x+8$. Détermine $x$, puis $u_3$ et $u_5$." },
     { cle: 'isoler le rang n', enonce: "Une suite géométrique a pour premier terme $u_1 = 3$ et pour raison $q = 2$. Détermine le rang $n$ pour lequel $u_n = 384$, en réduisant à la même base." },
   ],
