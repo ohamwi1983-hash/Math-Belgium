@@ -1014,6 +1014,41 @@ export const fonctionsLogarithmes: ChapterContent = {
             'mobile sous a, puis lis au-dessus de b : log a + log b = log(ab). Si le ' +
             'produit dépasse 10, on utilise l\'index 10 et on multiplie la lecture par 10.',
         },
+        { kind: 'subheading', text: 'Le logarithme décimal et les très grands nombres' },
+        {
+          kind: 'methode',
+          label: 'Méthode — nombre de chiffres, écriture scientifique et comparaison',
+          items: [
+            'On note $\\log$ le logarithme décimal : $\\log(x) = \\log_{10}(x)$.',
+            'Un entier $N$ compte $k$ chiffres lorsque $10^{k-1} \\le N < 10^{k}$, c\'est-à-dire ' +
+              '$k-1 \\le \\log(N) < k$ : le **nombre de chiffres** de $N$ est la **partie entière** de ' +
+              '$\\log(N)$, **plus 1**.',
+            'Pour $N = a^n$, trop grand pour la calculatrice, la propriété de la puissance donne ' +
+              '$\\log(a^n) = n\\log(a)$ : calcule ce produit d\'un seul coup, sans arrondir $\\log(a)$ avant.',
+            'Si $\\log(N) = E + f$ avec $E$ entier et $0 \\le f < 1$, alors $N = 10^{f} \\times 10^{E}$ ' +
+              'avec $1 \\le 10^{f} < 10$ : c\'est l\'**écriture scientifique** de $N$, et le premier chiffre ' +
+              'de $N$ est celui de $10^{f}$.',
+            'Pour **comparer** $a^n$ et $b^m$, compare $n\\log(a)$ et $m\\log(b)$ : la fonction $\\log$ ' +
+              'est strictement croissante.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'nombre de chiffres de 2¹⁰⁰⁰',
+          formula: 'Combien de chiffres compte $2^{1000}$ ? Par quel chiffre commence-t-il ?',
+          steps: [
+            { tag: 'propriété de la puissance', text: '$\\log\\left(2^{1000}\\right) = 1000\\log(2) \\approx 301{,}030$' },
+            { tag: 'partie entière', text: '$301 \\le \\log\\left(2^{1000}\\right) < 302$, donc $10^{301} \\le 2^{1000} < 10^{302}$' },
+            { tag: 'écriture scientifique', text: '$2^{1000} \\approx 10^{0{,}030} \\times 10^{301} \\approx 1{,}07 \\times 10^{301}$' },
+          ],
+          result: { tag: 'conclusion', text: '$2^{1000}$ compte $301 + 1 = 302$ chiffres et commence par 1.' },
+        },
+        {
+          kind: 'piege',
+          text:
+            'N\'oublie pas le « + 1 » : $100 = 10^2$ compte **trois** chiffres, alors que ' +
+            '$\\log(100) = 2$. Et la partie entière n\'est pas l\'arrondi : celle de $126{,}76$ est $126$.',
+        },
         {
           kind: 'entrainement',
           title: 'Propriétés du logarithme',
@@ -1037,6 +1072,18 @@ export const fonctionsLogarithmes: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 86. Comparer et encadrer des logarithmes sans calculatrice »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Grands nombres et logarithme décimal',
+          generatorId: '6gen92',
+          description: [
+            'Le logarithme décimal pour des nombres trop grands pour la calculatrice : nombre de ' +
+              'chiffres de aⁿ, comparaison de deux grands nombres (avec ou sans calculatrice), ' +
+              'écriture scientifique et premier chiffre, temps de calcul d\'un algorithme en 2ⁿ opérations.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 92. Grands nombres et logarithme décimal »',
         },
       ],
     },
