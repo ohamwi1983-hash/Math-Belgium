@@ -636,6 +636,35 @@ export const suites: ChapterContent = {
         },
         {
           kind: 'methode',
+          label: 'Méthode — trois termes consécutifs a, b, c qui dépendent de x',
+          items: [
+            'Écris la relation entre trois termes consécutifs. Arithmétique : $b$ est la moyenne de ' +
+              'ses voisins, $2b = a + c$. Géométrique : $\\dfrac{b}{a} = \\dfrac{c}{b}$, donc ' +
+              '$b^2 = a \\times c$ (produit en croix) — plus sûr que $b = \\sqrt{a \\times c}$, ' +
+              'fausse quand $b$ est négatif.',
+            'Remplace $a$, $b$ et $c$ par leurs expressions, développe et ramène tous les termes dans ' +
+              'un membre : tu obtiens une équation du premier ou du second degré.',
+            'Résous-la (avec le discriminant $\\Delta$ si elle est du second degré).',
+            'Vérifie chaque solution. Dans une suite géométrique, **aucun terme n\'est nul** : une ' +
+              'solution qui annule un terme est écartée. Il peut donc rester deux, une ou aucune valeur de $x$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'trois termes consécutifs, x à trouver',
+          formula:
+            'Pour quelle(s) valeur(s) de $x$ les nombres $a = x-1$, $b = 3x-3$ et $c = x+15$ sont-ils, ' +
+            'dans cet ordre, trois termes consécutifs d\'une suite géométrique ?',
+          steps: [
+            { tag: 'relation b² = a × c', text: '$(3x-3)^2 = (x-1)(x+15) \\implies 9x^2-18x+9 = x^2+14x-15$' },
+            { tag: 'équation réduite', text: '$8x^2-32x+24 = 0 \\implies x^2-4x+3 = 0$' },
+            { tag: 'discriminant', text: '$\\Delta = 16-12 = 4$, donc $x = 1$ ou $x = 3$' },
+            { tag: 'vérifier chaque solution', text: 'Pour $x = 1$ : $0$ ; $0$ ; $16$ — un terme nul, valeur écartée. Pour $x = 3$ : $2$ ; $6$ ; $18$.' },
+          ],
+          result: { tag: 'résultat', text: 'Seule $x = 3$ convient : $2$ ; $6$ ; $18$, de raison $q = 3$.' },
+        },
+        {
+          kind: 'methode',
           label: 'Méthode — isoler le rang n : réduire à la même base',
           items: [
             'Pose $u_n = k$ : $u_1 \\times q^{n-1} = k$.',
@@ -766,6 +795,19 @@ export const suites: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 45. Sommes de termes consécutifs »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Trois termes consécutifs',
+          generatorId: '5gen46',
+          description: [
+            'Trois nombres a, b, c dépendent de x : pour quelle(s) valeur(s) de x sont-ils trois termes ' +
+              'consécutifs d\'une suite arithmétique (2b = a + c) ou géométrique (b² = a × c) ? Pose ' +
+              'l\'équation, résous-la, écarte une solution qui annule un terme, puis calcule les termes et ' +
+              'la raison.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 46. Trois termes consécutifs »',
         },
       ],
     },
