@@ -2064,6 +2064,21 @@ export const primitivesIntegrales: ChapterContent = {
             'contexte ne change jamais la technique, seulement le sens du résultat final.',
         },
         {
+          kind: 'methode',
+          label: 'Accumuler une grandeur à partir de son taux',
+          items: [
+            'La quantité à l\'instant T vaut la quantité initiale plus ce qui s\'est accumulé : ' +
+              '$Q(T) = Q(0) + \\int_0^T r(t)\\,dt$, où r est le taux (débit, puissance, intensité de pluie, rythme...).',
+            'Quand une grandeur entre ET sort, on intègre le taux **net** : $r(t) = e(t) - s(t)$ (entrée moins sortie).',
+            'La quantité est maximale (ou minimale) quand le taux net s\'annule en changeant de signe : ' +
+              'elle augmente tant que $r(t) > 0$ et diminue ensuite.',
+            'Unités : unité du taux × unité du temps — L/min × min = L ; W × h = W·h ; mm/h × h = mm. ' +
+              'Les bornes s\'expriment dans l\'unité de temps du taux.',
+            'Conversions utiles : $1\\ \\text{m}^3 = 1000\\ \\text{L}$ ; $1\\ \\text{kW}\\cdot\\text{h} = 1000\\ \\text{W}\\cdot\\text{h}$ ; ' +
+              '1 mm de pluie sur 1 m² donne 1 L d\'eau.',
+          ],
+        },
+        {
           kind: 'entrainement',
           title: 'Intégrales et primitives : problèmes',
           generatorId: '6gen29',
@@ -2073,6 +2088,19 @@ export const primitivesIntegrales: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 29. Intégrales et primitives : problèmes »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Accumuler une grandeur : débits, puissances, consommations',
+          generatorId: '6gen80',
+          description: [
+            'Cuve qui se remplit et se vide, panneaux solaires, pluie sur un toit, salle qui se ' +
+              'remplit, émissions de CO₂ : choisis ce qu\'il faut intégrer, calcule la quantité ' +
+              'accumulée, réponds à une question de transfert (instant, comparaison) et donne le ' +
+              'résultat dans l\'unité demandée.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 80. Accumuler une grandeur : débits, puissances, consommations »',
         },
       ],
     },

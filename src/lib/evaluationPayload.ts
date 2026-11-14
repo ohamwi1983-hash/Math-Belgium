@@ -82,7 +82,7 @@ export type IdGenerateurPilote =
   | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
-  | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29'
+  | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen80'
   | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42'
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
@@ -172,7 +172,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'primitives-integrales', sectionId: 'aires', generatorId: '6gen26', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'volumes', generatorId: '6gen27', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'longueurarc', generatorId: '6gen28', label: '' },
-  { chapitreSlug: 'primitives-integrales', sectionId: 'problemes', generatorId: '6gen29', label: '' },
+  { chapitreSlug: 'primitives-integrales', sectionId: 'problemes', generatorId: '6gen29', label: 'Problèmes (6gen29)' },
+  { chapitreSlug: 'primitives-integrales', sectionId: 'problemes', generatorId: '6gen80', label: 'Accumuler une grandeur (6gen80)', processus: 3 },
   { chapitreSlug: 'nombres-complexes', sectionId: 'operationsbase', generatorId: '6gen34', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'affixesracines', generatorId: '6gen35', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'equationscomplexes', generatorId: '6gen36', label: '' },
