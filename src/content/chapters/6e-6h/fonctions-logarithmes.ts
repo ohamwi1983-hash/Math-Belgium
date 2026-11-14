@@ -1875,6 +1875,34 @@ export const fonctionsLogarithmes: ChapterContent = {
           result: { tag: 'résultat', text: 'f décroît puis croît : **minimum en x = 1**, $f(1) = 0 - 1 = -1$.' },
         },
         {
+          kind: 'methode',
+          label: 'Tangente à une courbe logarithmique',
+          items: [
+            'Au point d\'abscisse $x_0$ du domaine, la tangente a pour équation ' +
+              '$y = f\'(x_0)(x - x_0) + f(x_0)$ : il suffit de calculer $f(x_0)$ et $f\'(x_0)$, en valeurs exactes.',
+            'Tangente **parallèle** à une droite $y = mx + q$ : elle a la même pente, donc on résout ' +
+              '$f\'(x) = m$ **dans le domaine** de f — chaque solution retenue donne une tangente.',
+            'Tangente **passant par un point** P qui n\'est pas sur la courbe : on écrit la tangente au point ' +
+              'd\'abscisse $a$ (inconnue), on exprime que P vérifie cette équation, puis on résout en $a$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'tangente à ln passant par l\'origine',
+          formula: 'Détermine la tangente au graphique de $f(x) = \\ln(x)$ qui passe par l\'origine du repère.',
+          steps: [
+            {
+              tag: 'tangente au point d\'abscisse a',
+              text: '$f(a) = \\ln(a)$ et $f\'(a) = \\dfrac{1}{a}$, donc $y = \\dfrac{1}{a}(x - a) + \\ln(a)$',
+            },
+            {
+              tag: 'O(0 ; 0) vérifie cette équation',
+              text: '$0 = \\dfrac{1}{a}(0 - a) + \\ln(a) \\iff -1 + \\ln(a) = 0 \\iff a = e$',
+            },
+          ],
+          result: { tag: 'résultat', text: '$y = \\dfrac{x}{e}$ : la tangente au point $(e\\,;1)$ passe par l\'origine.' },
+        },
+        {
           kind: 'application',
           titre: 'Lire un taux de croissance directement sur un graphique économique',
           illustrations: [
@@ -2059,6 +2087,18 @@ export const fonctionsLogarithmes: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 16. Domaine, dérivée et dérivation logarithmique »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Tangentes aux courbes logarithmiques',
+          generatorId: '6gen87',
+          description: [
+            'Écris l\'équation d\'une tangente à une courbe logarithmique : en un point donné, ' +
+              'parallèle à une droite (une ou deux tangentes ?), ou passant par un point extérieur ' +
+              'à la courbe.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 87. Tangentes aux courbes logarithmiques »',
         },
       ],
     },

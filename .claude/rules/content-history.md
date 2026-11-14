@@ -3150,3 +3150,24 @@ paths:
   déclarés `calculatriceIndispensable` ; décision de l'utilisateur généralisée : en évaluation
   « calculatrice interdite », toute variante de cette liste est exclue (rangée grisée dans le
   panneau, retirée par `construireItemsPayload`).
+
+- **6e (6h), Chapitre 3 — Fonctions logarithmes** (`fonctions-logarithmes`) : nouveau 6gen87
+  « Tangentes aux courbes logarithmiques » (section `derivee`, carte après 6gen16, processus 2).
+  Trois variantes : tangente en un point (f′(x) → f(x₀) et f′(x₀) → y = mx + p ; familles
+  k ln(bx + c) + d, log_b(x), x ln(x) + cx, k ln(x)/x, k ln(x² + q)), tangente(s) parallèle(s) à une
+  droite (f′(x) → abscisses de contact dans le domaine → une équation par tangente ; le nombre de
+  tangentes, une ou deux, est tiré à 50/50 avant la famille), tangente passant par P(0 ; p)
+  (équation en a → valeur de a → équation). Valeurs toutes exactes (combinaisons rationnelles de
+  1, ln n, eᵏ, 1/eᵏ, √e, 1/ln b : `generateurs6e/tangentesLogarithmiques/exact.ts`), équations
+  vérifiées par équivalence (« y = … », « … = y », « ux + vy + w = 0 » ou l'expression seule).
+  Piège rencontré : deux points de MÊME pente proches l'un de l'autre encadrent un point
+  d'inflexion et leurs tangentes sont presque confondues (k ln(x² + q) : écart d'ordonnée à
+  l'origine toujours < 0,4 ; x²/2 + 2 ln(x) avec racines 1 et 2 : 0,11) — figure illisible ; la
+  variante « parallèle » n'utilise donc que des racines écartées (1 ; 4), (1 ; 5), (1 ; 6),
+  (2 ; 6) et les familles x²/2 + bx + c ln(x) et k ln(x) + c/x (une tangente : racine négative
+  rejetée par le domaine ou racine double). L'ordonnée à l'origine de d est DÉTERMINÉE par f et la
+  pente, pour que l'anti-doublon des séries écarte deux instances ne différant que par d. Profil :
+  `forme` = variante + famille, aucun cas particulier, pas de `calcul`. Le cours ne traitait pas
+  l'équation d'une tangente avec ln : `methode` « Tangente à une courbe logarithmique » (trois
+  cas) et `exemple` « tangente à ln passant par l'origine » (énoncé ajouté à
+  `ENONCES_DEMONSTRATION`) insérés après l'exemple « étudier un signe avec ln ».
