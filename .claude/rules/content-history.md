@@ -3167,3 +3167,18 @@ paths:
   ajout d'une `methode` « Raisonner sur une échelle logarithmique : écart ↔ rapport » et d'un
   `featureTable` (décibels, séisme amplitude/énergie, pH, étoiles) avant la carte — pas d'exemple,
   donc rien à ajouter à `ENONCES_DEMONSTRATION`. Libellé de la page de conception donné à 6gen22.
+- **6e (6h), Chapitre 3 — Fonctions logarithmes** (`fonctions-logarithmes`) : nouveau 6gen85
+  « Lire une courbe logarithmique » (section `parametres`, processus 2, carte après 6gen18). À
+  partir du graphique de f(x) = logₐ(x − c) + d : variante « lecture » (asymptote, domaine construit,
+  base via le point une unité plus haut/plus bas que (c + 1 ; d), expression — log2(…), log(…),
+  ln(…)/ln(1/2) acceptés) et variante « associer » (4 courbes, 4 expressions : référence, miroir de
+  sens opposé, autre base de même sens, même base avec une translation changée ; un choix fermé par
+  courbe). Bases 2, 3, 4, 5, 10 (lecture seulement) et 1/2, 1/3, 1/4 ; c, d entiers ; figure SVG
+  unique écran/papier (`ui6e/figureCourbeLogarithmique.ts`, quadrillage d'une unité, fenêtre aux
+  bornes entières, courbe échantillonnée en ln(x − c) pour atteindre le bord même en base 10, clip
+  à identifiant dérivé du contenu) ; papier = courbe seule, points et coordonnées au corrigé.
+  Profil : `forme` = variante + sens de variation + translations présentes, aucun cas particulier,
+  pas de `calcul`. Le cours ne montrait pas comment lire la base sur un graphique : une `methode`
+  « Lire une courbe f(x) = logₐ(x − c) + d » ajoutée avant la carte (pas d'exemple, donc rien à
+  ajouter à `ENONCES_DEMONSTRATION`) ; libellé « Paramètres depuis des conditions graphiques
+  (6gen18) » donné à l'entrée pilote de 6gen18.
