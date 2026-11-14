@@ -97,7 +97,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           badge: 'calculer un logarithme',
           formula:
             'Calcule, sans calculatrice : $\\log_2(32)$, $\\log_3\\left(\\dfrac{1}{81}\\right)$, ' +
-            '$\\log_4(8)$, $\\log_{1/2}(8)$ et $\\log_{10}(0{,}001)$.',
+            '$\\log_4(8)$, $\\log_{1/2}(8)$ et $\\log(0{,}001)$.',
           steps: [
             { tag: 'écrire l\'argument comme une puissance de la base', text: '$32 = 2^5$ et $\\dfrac{1}{81} = 3^{-4}$' },
             { tag: 'une base qui n\'est pas « visible »', text: '$8 = 2^3 = \\left(4^{1/2}\\right)^3 = 4^{3/2}$ et $8 = 2^3 = \\left(\\dfrac{1}{2}\\right)^{-3}$' },
@@ -107,7 +107,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             tag: 'résultat — lire l\'exposant (P3)',
             text:
               '$\\log_2(32) = 5$, $\\log_3\\left(\\dfrac{1}{81}\\right) = -4$, $\\log_4(8) = \\dfrac{3}{2}$, ' +
-              '$\\log_{1/2}(8) = -3$, $\\log_{10}(0{,}001) = -3$.',
+              '$\\log_{1/2}(8) = -3$, $\\log(0{,}001) = -3$.',
           },
         },
         { kind: 'subheading', text: 'Graphique et réciprocité avec expₐ' },
@@ -651,7 +651,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             textLabels: [
               { x: 3.2, y: 1.95, text: 'log₂', tone: 'good', anchor: 'start' },
               { x: 3.2, y: 1.3, text: 'ln', tone: 'accent', anchor: 'start' },
-              { x: 3.2, y: 0.18, text: 'log₁₀', tone: 'bad', anchor: 'start' },
+              { x: 3.2, y: 0.18, text: 'log', tone: 'bad', anchor: 'start' },
               { x: 2.35, y: -2.1, text: 'log₀,₅', tone: 'faint', anchor: 'start' },
             ],
             points: [{ x: 1, y: 0, label: '(1;0)', tone: 'accent', labelPos: 'below' }],
@@ -673,7 +673,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             'Napier en personne. Les deux hommes s\'accordent sur une amélioration ' +
             "décisive : les tables originales de Napier n'utilisaient pas la base 10, ce qui " +
             'compliquait les calculs pratiques. Briggs propose de tout recalculer avec ' +
-            '$\\log_{10}$ comme base de référence — le **logarithme décimal** (ou ' +
+            'la base 10 comme base de référence — le **logarithme décimal**, noté $\\log$ (ou ' +
             '« logarithme vulgaire »), visible dans le graphique ci-dessus. Il publiera ' +
             'lui-même, en 1624, une table de logarithmes décimaux de 30 000 nombres ' +
             "calculés à 14 décimales près, entièrement à la main. C'est cette base 10, " +
@@ -690,7 +690,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'para',
           text:
-            'On note simplement $\\log$ le logarithme décimal : $\\log(x) = \\log_{10}(x)$. Sans ' +
+            'On note simplement $\\log$ le logarithme décimal, de base 10 : $\\log(10^k) = k$. Sans ' +
             'calculatrice, on ne connaît exactement que les logarithmes des puissances de la base ' +
             '— mais cela suffit pour **situer** n\'importe quel logarithme, grâce à la monotonie de ' +
             '$\\log_a$ : strictement croissante si $a>1$, strictement décroissante si $0<a<1$.',
@@ -969,8 +969,8 @@ export const fonctionsLogarithmes: ChapterContent = {
             'logarithmique** : une même distance sépare toujours deux graduations de même ' +
             '**rapport** (entre 1 et 10, autant qu\'entre 10 et 100, ou 100 et 1 000), et non de ' +
             'même différence. Une telle échelle se construit avec le logarithme de base 10 : la ' +
-            'distance entre l\'origine et une valeur $N$ vaut $\\log_{10}(N)$ — l\'origine se ' +
-            'situe donc en 1, car $\\log_{10}(1)=0$. Ce type de repère représente un ' +
+            'distance entre l\'origine et une valeur $N$ vaut $\\log(N)$ — l\'origine se ' +
+            'situe donc en 1, car $\\log(1)=0$. Ce type de repère représente un ' +
             'phénomène exponentiel par une droite, et permet de comparer des taux de croissance ' +
             'très différents sur un même graphique.',
         },
@@ -1019,7 +1019,6 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'methode',
           label: 'Méthode — nombre de chiffres, écriture scientifique et comparaison',
           items: [
-            'On note $\\log$ le logarithme décimal : $\\log(x) = \\log_{10}(x)$.',
             'Un entier $N$ compte $k$ chiffres lorsque $10^{k-1} \\le N < 10^{k}$, c\'est-à-dire ' +
               '$k-1 \\le \\log(N) < k$ : le **nombre de chiffres** de $N$ est la **partie entière** de ' +
               '$\\log(N)$, **plus 1**.',
@@ -3170,7 +3169,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             "lisible ! Le logarithme résout exactement ce problème : il **compresse** des " +
             "écarts énormes en petits nombres bien lisibles, en transformant un facteur ×10 " +
             "en un simple +1. C'est pour ça que la magnitude de Richter, les décibels ou le pH " +
-            "sont tous construits avec un log₁₀ — une magnitude 6 ne représente pas « un peu " +
+            "sont tous construits avec un log — une magnitude 6 ne représente pas « un peu " +
             "plus » qu'une magnitude 5 : l'amplitude des ondes est 10 fois plus grande, et l'énergie " +
             "libérée environ 32 fois plus grande, cachées derrière un chiffre qui n'augmente, lui, " +
             "que d'une unité.",
@@ -3179,9 +3178,9 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'definition',
           label: 'Échelle logarithmique',
           items: [
-            '$L = a \\cdot \\log_{10}(X) + b$',
+            '$L = a \\cdot \\log(X) + b$',
             'Multiplier la grandeur physique X par un facteur k modifie L de façon ' +
-              '**additive** ($\\Delta L = a \\cdot \\log_{10}(k)$), jamais de façon multiplicative.',
+              '**additive** ($\\Delta L = a \\cdot \\log(k)$), jamais de façon multiplicative.',
           ],
         },
         {
@@ -3191,12 +3190,12 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Le pH d\'une solution vaut $pH = -\\log_{10}([H^+])$. Si la concentration ' +
+                'Le pH d\'une solution vaut $pH = -\\log([H^+])$. Si la concentration ' +
                 '$[H^+]$ est multipliée par 10 :',
             },
             {
               kind: 'para',
-              text: '$pH_{nouveau} = -\\log_{10}(10 \\cdot [H^+]) = -(1+\\log_{10}([H^+])) = pH_{ancien} - 1$',
+              text: '$pH_{nouveau} = -\\log(10 \\cdot [H^+]) = -(1+\\log([H^+])) = pH_{ancien} - 1$',
             },
             { kind: 'para', text: 'Le pH **diminue** de 1 (solution plus acide) — jamais « ×10 ».' },
           ],
@@ -3206,11 +3205,11 @@ export const fonctionsLogarithmes: ChapterContent = {
           badge: 'magnitude et énergie',
           formula:
             'L\'énergie E (en joules) libérée par un séisme de magnitude M vérifie ' +
-            '$\\log_{10}(E) = 1{,}5M + 4{,}8$. Combien de fois plus d\'énergie libère un séisme de magnitude 7 ' +
+            '$\\log(E) = 1{,}5M + 4{,}8$. Combien de fois plus d\'énergie libère un séisme de magnitude 7 ' +
             'qu\'un séisme de magnitude 5 ?',
           steps: [
-            { tag: 'écart des logarithmes', text: '$\\log_{10}(E_7) - \\log_{10}(E_5) = 1{,}5\\times(7-5) = 3$' },
-            { tag: 'quotient', text: '$\\log_{10}\\left(\\dfrac{E_7}{E_5}\\right) = 3 \\iff \\dfrac{E_7}{E_5} = 10^3$' },
+            { tag: 'écart des logarithmes', text: '$\\log(E_7) - \\log(E_5) = 1{,}5\\times(7-5) = 3$' },
+            { tag: 'quotient', text: '$\\log\\left(\\dfrac{E_7}{E_5}\\right) = 3 \\iff \\dfrac{E_7}{E_5} = 10^3$' },
           ],
           result: { tag: 'résultat', text: '1 000 fois plus d\'énergie (et environ 32 fois plus pour un seul degré, car $10^{1{,}5} \\approx 31{,}6$).' },
         },
@@ -3288,7 +3287,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Le niveau sonore vaut $L = 10 \\cdot \\log_{10}(I/I_0)$ dB, où $I$ est l\'intensité. ' +
+                'Le niveau sonore vaut $L = 10 \\cdot \\log(I/I_0)$ dB, où $I$ est l\'intensité. ' +
                 'Deux machines produisent chacune **60 dB**. Quel est le niveau quand elles ' +
                 'fonctionnent ensemble ?',
             },
@@ -3296,7 +3295,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 'Ce sont les **intensités** qui s\'additionnent, pas les niveaux : $I_{total} = 2I$, ' +
-                'donc $L_{total} = 10\\log_{10}(2I/I_0) = 60 + 10\\log_{10}(2) \\approx 63$ dB.',
+                'donc $L_{total} = 10\\log(2I/I_0) = 60 + 10\\log(2) \\approx 63$ dB.',
             },
             { kind: 'para', text: 'Jamais 120 dB : doubler l\'intensité n\'ajoute qu\'environ 3 dB.' },
           ],

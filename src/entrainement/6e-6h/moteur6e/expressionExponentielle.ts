@@ -91,8 +91,16 @@ function tokeniser(texte: string): Jeton[] {
     if (/[a-zA-Z]/.test(c)) {
       let j = i;
       while (j < s.length && /[a-zA-Z]/.test(s[j])) j++;
-      const mot = s.slice(i, j).toLowerCase();
+      let mot = s.slice(i, j).toLowerCase();
       i = j;
+      // Multiplication implicite COLLÉE devant une fonction (« aln(a) », « xexp(x) », « 2xlog(x) ») :
+      // un mot qui n'est pas lui-même une fonction mais se termine par un nom de fonction est coupé
+      // en « préfixe » × « fonction » (« asin », « cosh »… restent des fonctions entières).
+      const decoupe = decouperNomColle(mot, /[0-9]/.test(s[i] ?? ""));
+      if (decoupe) {
+        jetons.push({ type: "identifiant", nom: decoupe[0] });
+        mot = decoupe[1];
+      }
       // "racN" — racine n-ième (ex: rac4(x) = x^(1/4)), demandée par des élèves pour être plus
       // parlante que l'écriture en puissance. N est un entier collé juste après "rac" : le scan
       // ci-dessus ne lit que des lettres, donc il faut le consommer ici explicitement (sinon
@@ -140,6 +148,21 @@ function tokeniser(texte: string): Jeton[] {
   }
   jetons.push({ type: "fin" });
   return jetons;
+}
+
+/** Coupe « préfixe + nom de fonction » collés (voir `tokeniser`) ; `null` si le mot est déjà une
+ * fonction ou ne se termine par aucune. `chiffreApres` : un chiffre suit (« alog2(x) », « xrac3(x) »). */
+function decouperNomColle(mot: string, chiffreApres: boolean): [string, string] | null {
+  if (mot in FONCTIONS || mot === "pi" || mot === "e") return null;
+  if (chiffreApres && (mot === "log" || mot === "rac")) return null;
+  for (let k = 1; k < mot.length; k++) {
+    const suffixe = mot.slice(k);
+    const prefixe = mot.slice(0, k);
+    const estFonction = suffixe in FONCTIONS || (chiffreApres && (suffixe === "log" || suffixe === "rac"));
+    // Suffixe le plus LONG d'abord (k croissant) : « xcosh » → x·cosh, jamais xcos·h.
+    if (estFonction && !(prefixe in FONCTIONS)) return [prefixe, suffixe];
+  }
+  return null;
 }
 
 const FONCTIONS: Record<string, (v: number) => number> = {

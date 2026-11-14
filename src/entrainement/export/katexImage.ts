@@ -1,4 +1,5 @@
 import katex from "katex";
+import { normaliserLogDecimal } from "../../lib/notationLog";
 import "katex/dist/katex.min.css";
 
 export interface ImageRasterisee {
@@ -214,7 +215,7 @@ function derniereLigneAvecEncre(contexte: CanvasRenderingContext2D, largeur: num
 async function rasteriserSansCache(expression: string, bloc: boolean): Promise<ImageRasterisee> {
   await policesPretes();
 
-  const html = katex.renderToString(expression, { throwOnError: false, displayMode: bloc });
+  const html = katex.renderToString(normaliserLogDecimal(expression), { throwOnError: false, displayMode: bloc });
   const [{ largeur, hauteur, baselineY }, cssKatex] = await Promise.all([mesurerRendu(html, !bloc), obtenirCssKatexAutonome()]);
 
   const pixelRatio = 3;

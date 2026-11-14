@@ -46,7 +46,7 @@ function demandeGlobale(e: ExerciceGrandsNombres): FragmentConsigne[] {
 
 function entetePapier(e: ExerciceGrandsNombres): FragmentConsigne[] {
   if (e.variante === "premier-chiffre") {
-    return [t("Le nombre "), f(puissanceLatex(e.a, e.n)), t(" est trop grand pour ta calculatrice. On note "), f("\\log"), t(" le logarithme décimal ("), f("\\log=\\log_{10}"), t(").")];
+    return [t("Le nombre "), f(puissanceLatex(e.a, e.n)), t(" est trop grand pour ta calculatrice. On note "), f("\\log"), t(" le logarithme décimal, de base 10 ("), f("\\log(10^k)=k"), t(").")];
   }
   return [...consigneGenerale(e), ...demandeGlobale(e)];
 }
@@ -249,7 +249,6 @@ function lignesDuree(e: ExerciceTempsDuree): EtapeCorrection[] {
     { label: "Piège", sousQuestion: "b", fragments: [t("Multiplier par "), f(`10^{${e.p}}`), t(" au lieu de diviser ; la durée en secondes est le quotient du nombre d'opérations par la vitesse de l'ordinateur.")] },
     { label: "Méthode", sousQuestion: "c", fragments: [t("Une année de 365 jours compte "), f("365\\times 24\\times 3600=31\\,536\\,000"), t(" secondes.")] },
     { label: "Conclusion", sousQuestion: "c", fragments: conclusion },
-    { label: "Piège", sousQuestion: "c", fragments: [t("S'arrêter à une durée en heures ou en jours, alors que l'unité demandée est l'année.")] },
   ];
 }
 

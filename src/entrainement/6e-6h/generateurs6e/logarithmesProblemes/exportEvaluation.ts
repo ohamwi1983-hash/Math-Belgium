@@ -133,7 +133,7 @@ function pieges(exercice: ExerciceLogarithmesProblemes): PiegeLog[] {
     case "C":
       return [{ phase: "cEcran3", texte: "Le facteur correctif est T₂/T₁ (nouvelle valeur sur ancienne), pas T₁/T₂.", cout: "−1" }];
     case "E": {
-      const liste: PiegeLog[] = [{ phase: "eEcran3", texte: "Un facteur multiplicatif sur X est un écart ADDITIF sur L : ΔL = a·log₁₀(k).", cout: "−1" }];
+      const liste: PiegeLog[] = [{ phase: "eEcran3", texte: "Un facteur multiplicatif sur X est un écart ADDITIF sur L : ΔL = a·log(k).", cout: "−1" }];
       if (exercice.avecEcran4) liste.push({ phase: "eEcran4", texte: "Les niveaux L ne s'additionnent pas : ce sont les intensités X qu'on additionne.", cout: "−1" });
       return liste;
     }

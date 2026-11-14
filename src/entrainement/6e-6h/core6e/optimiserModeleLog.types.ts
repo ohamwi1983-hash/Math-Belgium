@@ -19,6 +19,10 @@
 
 export type IdVarianteOptimiserLog = "engrais" | "benefice" | "rendement-moyen" | "cout-moyen" | "debit";
 
+/** Familles de fonctions (variantes du catalogue — décision de l'utilisateur : regrouper les
+ * situations par famille, pour que la nature de l'optimum puisse varier dans une même forme). */
+export type IdFamilleOptimiserLog = "ln-lineaire" | "x-ln-x" | "ln-sur-x";
+
 export type ModeCalculOptimiserLog = "exacte" | "arrondie";
 
 interface Base {

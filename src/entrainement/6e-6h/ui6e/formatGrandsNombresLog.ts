@@ -101,7 +101,7 @@ function approxLatex(x: number): string {
 }
 
 const PRECISION_LOG = " (arrondi au millième)";
-const LOG_DECIMAL = [t("On note "), l("\\log"), t(" le logarithme décimal ("), l("\\log=\\log_{10}"), t(").")];
+const LOG_DECIMAL = [t("On note "), l("\\log"), t(" le logarithme décimal, de base 10 ("), l("\\log(10^k)=k"), t(").")];
 
 // ============================================================================
 // Consigne générale et données.

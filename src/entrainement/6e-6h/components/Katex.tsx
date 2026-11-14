@@ -1,5 +1,6 @@
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
+import { normaliserLogDecimal } from "../../../lib/notationLog";
 
 interface KatexProps {
   expression: string;
@@ -7,5 +8,6 @@ interface KatexProps {
 }
 
 export function Katex({ expression, block = false }: KatexProps) {
-  return block ? <BlockMath math={expression} /> : <InlineMath math={expression} />;
+  const math = normaliserLogDecimal(expression);
+  return block ? <BlockMath math={math} /> : <InlineMath math={math} />;
 }

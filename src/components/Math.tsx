@@ -1,10 +1,11 @@
 import { Fragment, memo } from 'react'
 import type { ReactNode } from 'react'
 import katex from 'katex'
+import { normaliserLogDecimal } from '../lib/notationLog'
 
 /** Renders a single LaTeX expression inline via KaTeX. */
 export const MathInline = memo(function MathInline({ tex }: { tex: string }) {
-  const html = katex.renderToString(tex, {
+  const html = katex.renderToString(normaliserLogDecimal(tex), {
     throwOnError: false,
     output: 'html',
   })

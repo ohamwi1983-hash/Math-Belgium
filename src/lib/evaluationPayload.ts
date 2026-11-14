@@ -1229,7 +1229,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'changement de base pour les logarithmes', enonce: "Démontre que, pour $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et tout $x>0$, $\\log_a(x) = \\dfrac{\\log_b(x)}{\\log_b(a)}$ (changement de base pour les logarithmes)." },
     { cle: 'pourquoi ln est exactement log_e', enonce: "Démontre que $\\ln(a) = \\log_e(a)$ pour tout $a>0$." },
     { cle: 'réécrire une exponentielle avec une base choisie', enonce: "Montre que toute fonction $f(x) = r \\cdot a^{sx+t}$ ($a>0$, $a \\neq 1$, $r,s,t$ réels) peut s'écrire $f(x) = C \\cdot b^{kx}$ dans n'importe quelle autre base $b>0$, $b \\neq 1$, en explicitant $C$ et $k$ en fonction de $r,s,t,a,b$. Applique ensuite ce résultat à $f(x) = 4 \\cdot 3^{5x+2}$, réécrite en base $e$." },
-    { cle: 'calculer un logarithme', enonce: "Calcule, sans calculatrice, $\\log_2(32)$, $\\log_3\\left(\\dfrac{1}{81}\\right)$, $\\log_4(8)$, $\\log_{1/2}(8)$ et $\\log_{10}(0{,}001)$, en écrivant chaque argument comme une puissance de la base." },
+    { cle: 'calculer un logarithme', enonce: "Calcule, sans calculatrice, $\\log_2(32)$, $\\log_3\\left(\\dfrac{1}{81}\\right)$, $\\log_4(8)$, $\\log_{1/2}(8)$ et $\\log(0{,}001)$, en écrivant chaque argument comme une puissance de la base." },
     { cle: 'développer un logarithme', enonce: "Développe $\\ln\\left(\\dfrac{x^3\\sqrt{y}}{z^2}\\right)$ pour $x,y,z>0$, à l'aide des propriétés algébriques du logarithme." },
     { cle: 'réduire en un seul logarithme', enonce: "Écris $2\\ln(3) - \\ln(6) + \\ln(4)$ sous la forme d'un seul logarithme." },
     { cle: 'encadrer et comparer des logarithmes', enonce: "Sans calculatrice, compare $\\log_2(10)$ et $\\log_3(10)$, puis $\\log_4(10)$ et $\\log_2(3)$, en justifiant." },
@@ -1295,11 +1295,11 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'vitesse qui maximise le débit', enonce: "Sur une route limitée à 90 km/h, le débit (en centaines de véhicules par heure) est $D(v) = 5v - 2v\\ln(v)$, où $v$ est la vitesse en dizaines de km/h. Détermine le domaine de $D$ dans ce contexte, puis la vitesse (en km/h) pour laquelle le débit est maximal et ce débit maximal (en véhicules par heure)." },
   ],
   problemes: [
-    { cle: 'pH', enonce: "Le pH d'une solution vaut $pH = -\\log_{10}([H^+])$. Démontre que si la concentration $[H^+]$ est multipliée par $10$, le pH diminue exactement de $1$." },
+    { cle: 'pH', enonce: "Le pH d'une solution vaut $pH = -\\log([H^+])$. Démontre que si la concentration $[H^+]$ est multipliée par $10$, le pH diminue exactement de $1$." },
     { cle: 'demi-vie radioactive', enonce: "Un modèle de décroissance radioactive s'écrit $N(t) = N_0 \\cdot e^{-\\lambda t}$. Démontre que la demi-vie $T$ (l'instant où $N(T) = N_0/2$) vaut $T = \\dfrac{\\ln(2)}{\\lambda}$." },
-    { cle: 'combiner deux niveaux sonores', enonce: "Le niveau sonore vaut $L = 10 \\cdot \\log_{10}(I/I_0)$ dB. Deux machines produisent chacune $60$ dB. Démontre que, lorsqu'elles fonctionnent ensemble, le niveau vaut environ $63$ dB et non $120$ dB." },
+    { cle: 'combiner deux niveaux sonores', enonce: "Le niveau sonore vaut $L = 10 \\cdot \\log(I/I_0)$ dB. Deux machines produisent chacune $60$ dB. Démontre que, lorsqu'elles fonctionnent ensemble, le niveau vaut environ $63$ dB et non $120$ dB." },
     { cle: 'croissance logistique', enonce: "Pour le modèle de croissance logistique $y(t) = \\dfrac{k}{1+a \\cdot e^{-rt}}$, démontre que le point d'inflexion (croissance la plus rapide) a lieu en $y=k/2$, à l'instant $t = \\dfrac{\\ln(a)}{r}$, puis calcule cet instant et cette valeur pour $k=10$, $a=9$, $r=1$." },
-    { cle: 'magnitude et énergie', enonce: "L'énergie $E$ (en joules) libérée par un séisme de magnitude $M$ vérifie $\\log_{10}(E) = 1{,}5M + 4{,}8$. Combien de fois plus d'énergie libère un séisme de magnitude 7 qu'un séisme de magnitude 5 ?" },
+    { cle: 'magnitude et énergie', enonce: "L'énergie $E$ (en joules) libérée par un séisme de magnitude $M$ vérifie $\\log(E) = 1{,}5M + 4{,}8$. Combien de fois plus d'énergie libère un séisme de magnitude 7 qu'un séisme de magnitude 5 ?" },
     { cle: 'datation au carbone 14', enonce: "Un os ne contient plus que 30 % du carbone 14 qu'il contenait à la mort de l'animal. Sachant que la demi-vie du carbone 14 vaut 5 730 ans, détermine l'âge de l'os." },
     { cle: 'temps de doublement', enonce: "Un capital placé à intérêts composés en continu évolue selon $C(t) = C_0\\,e^{rt}$, avec $r = 0{,}035$. Détermine le temps nécessaire pour que le capital double." },
     { cle: 'un instant précis dans le modèle logistique', enonce: "Pour le modèle logistique $y(t) = \\dfrac{10}{1 + 9e^{-t}}$, détermine l'instant où $y$ atteint la valeur 9." },
@@ -3632,7 +3632,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       {
         enonce: "Pourquoi les échelles logarithmiques (pH, magnitude de Richter, décibels) transforment-elles un facteur multiplicatif en un simple écart additif ?",
         corrige:
-          "Une échelle logarithmique s'écrit L=a·log₁₀(X)+b, et la propriété qui transforme un produit en somme dit exactement que multiplier X par un facteur k ajoute à L une quantité fixe, qui ne dépend pas de la valeur de départ. C'est cette propriété qui permet de représenter des écarts physiques énormes — des facteurs de 10, de 1000, d'un million — par de petits nombres bien lisibles.",
+          "Une échelle logarithmique s'écrit L=a·log(X)+b, et la propriété qui transforme un produit en somme dit exactement que multiplier X par un facteur k ajoute à L une quantité fixe, qui ne dépend pas de la valeur de départ. C'est cette propriété qui permet de représenter des écarts physiques énormes — des facteurs de 10, de 1000, d'un million — par de petits nombres bien lisibles.",
       },
       {
         enonce: "Dans le modèle de croissance logistique, pourquoi le point d'inflexion se situe-t-il exactement à la moitié de la capacité limite, et pas ailleurs ?",

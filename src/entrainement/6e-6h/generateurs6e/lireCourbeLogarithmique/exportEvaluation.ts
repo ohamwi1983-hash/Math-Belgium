@@ -16,7 +16,6 @@ import {
   expressionLatex,
   fonctionLatex,
   listeExpressions,
-  logLatex,
   nb,
   pointBase,
   pointUn,
@@ -266,7 +265,7 @@ function bareme(e: ExerciceLireCourbeLogarithmique): BaremeExercice {
     const reste = d === 0 ? "" : d > 0 ? ` + ${d}` : ` - ${-d}`;
     acceptees.push([latex(`f(x) = -\\log_{${n}}(${argumentLatex(c)})${reste}`), texte(" ou "), latex(`f(x) = \\dfrac{\\ln(${argumentLatex(c)})}{\\ln\\left(${baseLatex(k.base)}\\right)}${reste}`)]);
   }
-  if (k.base.num === 10) acceptees.push([latex(`f(x) = ${logLatex({ num: 10, den: 1 }, argumentLatex(c)).replace("\\log(", "\\log_{10}(")}${d === 0 ? "" : d > 0 ? ` + ${d}` : ` - ${-d}`}`)]);
+  if (k.base.num === 10) acceptees.push([texte("La base 10 écrite explicitement en indice (logarithme décimal)")]);
   return {
     reponseFinale: reponseBreve(e),
     criteres: [

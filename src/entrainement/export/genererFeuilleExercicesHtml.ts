@@ -1,4 +1,5 @@
 import katex from "katex";
+import { normaliserLogDecimal } from "../../lib/notationLog";
 import type { FragmentConsigne } from "./genererFeuilleExercices";
 import type { AdaptateurFeuilleExercices, BlocCorrection, ProgressionGeneration, SectionExercice, ZoneReponse } from "./genererFeuilleExercices";
 import { obtenirCssKatexAutonome } from "./katexImage";
@@ -56,7 +57,7 @@ export function fragmentsVersHtml(fragments: FragmentConsigne[], options?: { blo
   return fragments
     .map((fragment) =>
       // Espace insécable avant « ? ! : ; » (typographie française : jamais un signe seul à la ligne).
-      fragment.type === "texte" ? echapperHtml(fragment.valeur.replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0")) : katex.renderToString(fragment.valeur, { throwOnError: false, displayMode: options?.bloc ?? false }),
+      fragment.type === "texte" ? echapperHtml(fragment.valeur.replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0")) : katex.renderToString(normaliserLogDecimal(fragment.valeur), { throwOnError: false, displayMode: options?.bloc ?? false }),
     )
     .join("");
 }

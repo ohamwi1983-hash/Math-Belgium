@@ -15,7 +15,6 @@ import { fiche, formatReponseAttenduePhaseLatex } from "../../ui6e/formatOptimis
 import { figureOptimiserLogSvg } from "../../ui6e/figureOptimiserModeleLog";
 import { VARIANTES_CALCULATRICE_OPTIMISER_LOG, profilOptimiserLog } from "./profilEvaluation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOptimiserLog } from "./index";
-import type { IdVarianteOptimiserLog } from "./index";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceOptimiserLog>` de `6gen91` « Optimiser un modèle
@@ -127,7 +126,7 @@ export const adaptateurEvaluationOptimiserModeleLog: AdaptateurFeuilleExercices<
   nomFichierBase: "optimiser-modele-logarithmique",
   genererInstance: genererExerciceOptimiserLog,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteOptimiserLog),
+  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce,
   construireCorrection,
   difficulte,

@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import type { ExerciceOptimiserLog } from "./core6e/optimiserModeleLog.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOptimiserLog } from "./generateurs6e/optimiserModeleLog";
-import type { IdVarianteOptimiserLog } from "./generateurs6e/optimiserModeleLog";
 import { activerAideSuivante, demarrerSessionOptimiserLog, niveauAideMaxPhase, soumettreReponseEcran, tentativesMaxPhase } from "./moteur6e/sessionOptimiserModeleLog";
 import { estPhaseChoix } from "./moteur6e/typesOptimiserModeleLog";
 import type { EtatSessionOptimiserLog, PhaseOptimiserLog } from "./moteur6e/typesOptimiserModeleLog";
@@ -41,7 +40,7 @@ function sessionInitiale(): EtatSessionOptimiserLog {
   const code = lireCodeDepuisUrl();
   if (!code) return nouvelleSession();
   return demarrerSessionOptimiserLog(REGLAGES_DEMO, () =>
-    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceOptimiserLog, (id) => construireAvecVarianteId(id as IdVarianteOptimiserLog)),
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceOptimiserLog, (id) => construireAvecVarianteId(id)),
   );
 }
 
@@ -129,7 +128,7 @@ export function App6gen91() {
   }
 
   function forcerVariante(id: string) {
-    reinitialiser(demarrerSessionOptimiserLog(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteOptimiserLog)));
+    reinitialiser(demarrerSessionOptimiserLog(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
   // Hook DEV-ONLY (même garde que `SelecteurVarianteDev`) : exercice tiré exposé pour Playwright.

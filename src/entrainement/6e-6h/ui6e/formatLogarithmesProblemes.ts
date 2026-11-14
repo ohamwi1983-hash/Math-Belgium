@@ -346,7 +346,7 @@ const LABEL_CONTEXTE_E: Record<ExerciceLogProbE["contexteE"], { nom: string; gra
 
 function consigneGeneraleE(ex: ExerciceLogProbE): FragmentConsigne[] {
   const label = LABEL_CONTEXTE_E[ex.contexteE];
-  return [texte(`On étudie ${label.nom}, une échelle logarithmique liée à ${label.grandeur} par `), latex("L = a\\cdot\\log_{10}(X) + b"), texte(".")];
+  return [texte(`On étudie ${label.nom}, une échelle logarithmique liée à ${label.grandeur} par `), latex("L = a\\cdot\\log(X) + b"), texte(".")];
 }
 function blocDonneesE(ex: ExerciceLogProbE): string[] {
   if (ex.deduireAB) return [`X_1 = 10^{${Math.round(Math.log10(ex.X1))}}, \\ L_1 = ${formatDecimal(ex.L1, 1)}`, `X_2 = 10^{${Math.round(Math.log10(ex.X2))}}, \\ L_2 = ${formatDecimal(ex.L2, 1)}`];
@@ -354,7 +354,7 @@ function blocDonneesE(ex: ExerciceLogProbE): string[] {
 }
 function etatActuelE(ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4"): string[] | null {
   if (phase === "eEcran1") return null;
-  const modele = `L = ${formatDecimal(ex.a, 3)}\\cdot \\log_{10}(X)${formatPlusB(ex.b, 3)}`;
+  const modele = `L = ${formatDecimal(ex.a, 3)}\\cdot \\log(X)${formatPlusB(ex.b, 3)}`;
   if (phase === "eEcran2") return [modele];
   if (phase === "eEcran3") return [modele];
   return [modele];
@@ -384,9 +384,9 @@ function consigneEcranE(ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eE
   ];
 }
 function aideE1(_ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4"): AideAvecLatex {
-  if (phase === "eEcran1") return { texte: "Écris le modèle pour chacun des deux points, puis résous ce système de 2 équations à 2 inconnues :", latex: "L_1=a\\cdot\\log_{10}(X_1)+b\\qquad L_2=a\\cdot\\log_{10}(X_2)+b" };
-  if (phase === "eEcran2") return { texte: "Substitue directement la valeur donnée dans le modèle :", latex: "L=a\\cdot\\log_{10}(X)+b" };
-  if (phase === "eEcran3") return { texte: "Attention : un facteur MULTIPLICATIF sur X correspond à un écart ADDITIF sur L — ne confonds pas les deux opérations :", latex: "\\Delta L=a\\cdot\\log_{10}(k)" };
+  if (phase === "eEcran1") return { texte: "Écris le modèle pour chacun des deux points, puis résous ce système de 2 équations à 2 inconnues :", latex: "L_1=a\\cdot\\log(X_1)+b\\qquad L_2=a\\cdot\\log(X_2)+b" };
+  if (phase === "eEcran2") return { texte: "Substitue directement la valeur donnée dans le modèle :", latex: "L=a\\cdot\\log(X)+b" };
+  if (phase === "eEcran3") return { texte: "Attention : un facteur MULTIPLICATIF sur X correspond à un écart ADDITIF sur L — ne confonds pas les deux opérations :", latex: "\\Delta L=a\\cdot\\log(k)" };
   return { texte: "Ce sont les intensités X qui s'additionnent, pas les niveaux L : reconvertis chaque niveau en intensité, additionne, puis repasse à l'échelle logarithmique.", latex: "X = 10^{(L-b)/a}" };
 }
 function aideE2(ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4"): AideAvecLatex {
@@ -400,7 +400,7 @@ function aideE2(ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eEcran3" |
       texte: "Substitution faite, calcul final non fait :",
       latex: ex.sensEcran2 === "versL" ? `L = ${formatDecimal(ex.a, 3)}\\cdot ${Math.round(Math.log10(ex.X0))}${formatPlusB(ex.b, 3)}` : `X = 10^{(${formatDecimalTexte(ex.L0Affiche, 1)}-${formatDecimal(ex.b, 2)})/${formatDecimal(ex.a, 3)}}`,
     };
-  if (phase === "eEcran3") return { texte: "Formule de propriété d'échelle :", latex: "\\Delta L = a\\cdot \\log_{10}(k) \\quad \\Longleftrightarrow \\quad k = 10^{\\Delta L / a}" };
+  if (phase === "eEcran3") return { texte: "Formule de propriété d'échelle :", latex: "\\Delta L = a\\cdot \\log(k) \\quad \\Longleftrightarrow \\quad k = 10^{\\Delta L / a}" };
   return {
     texte: "X1 et X2 reconvertis (somme et reconversion finale non faites) :",
     latex: `X_1 \\approx ${formatScientifique(ex.X1e4)}, \\quad X_2 \\approx ${formatScientifique(ex.X2e4)}`,

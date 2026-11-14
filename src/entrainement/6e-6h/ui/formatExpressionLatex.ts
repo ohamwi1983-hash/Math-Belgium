@@ -138,8 +138,26 @@ function tokeniser(expression: string): Jeton[] {
       // NOMBRE(3), rendant cet alias de `ALIAS_FONCTIONS` en pratique jamais atteignable ; corrigé
       // ici car cette copie n'a aucune raison de reproduire ce défaut latent non couvert par un test.
       while (j < expression.length && /[a-zA-Z0-9]/.test(expression[j])) j++;
-      const mot = expression.slice(i, j);
+      let mot = expression.slice(i, j);
       i = j;
+      // Multiplication implicite COLLÉE devant une fonction (« aln(a) » → a·ln(a)) — même règle que
+      // le lecteur `moteur6e/expressionExponentielle.ts::decouperNomColle` : un mot qui n'est pas
+      // lui-même une fonction mais se termine par un nom de fonction est coupé en deux.
+      const minuscule = mot.toLowerCase();
+      if (!(minuscule in ALIAS_FONCTIONS) && !/^(?:rac|racine|log)\d+$/.test(minuscule)) {
+        for (let k = 1; k < mot.length; k++) {
+          const suffixe = minuscule.slice(k).replace(/\d+$/, "");
+          const prefixe = minuscule.slice(0, k);
+          const suffixeFonction = suffixe.length > 0 && minuscule.slice(k).length > 0 && (minuscule.slice(k) in ALIAS_FONCTIONS || /^(?:rac|racine|log)\d+$/.test(minuscule.slice(k)) || suffixe in ALIAS_FONCTIONS);
+          if (suffixeFonction && !(prefixe in ALIAS_FONCTIONS)) {
+            if (prefixe === "x") jetons.push({ type: "X" });
+            else if (MOTS_CONSTANTES[prefixe]) jetons.push({ type: "CONSTANTE", texte: MOTS_CONSTANTES[prefixe] });
+            else jetons.push({ type: "IDENTIFIANT", texte: mot.slice(0, k) });
+            mot = mot.slice(k);
+            break;
+          }
+        }
+      }
       if (mot.toLowerCase() === "x") {
         jetons.push({ type: "X" });
         continue;

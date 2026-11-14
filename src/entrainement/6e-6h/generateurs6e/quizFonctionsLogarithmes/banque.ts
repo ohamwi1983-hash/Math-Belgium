@@ -1666,24 +1666,24 @@ export const BANQUE_QUIZ_FONCTIONS_LOGARITHMES: Record<VarianteQuizFonctionsLoga
   // ==========================================================================
   logarithmesProblemes: [
     {
-      enonce: [texte("Une échelle logarithmique de la forme "), latex("L=a\\cdot\\log_{10}(X)+b"), texte(" modélise des phénomènes comme la magnitude de Richter, le niveau sonore en décibels, ou le pH, où "), latex("X"), texte(" désigne la grandeur physique sous-jacente.")],
+      enonce: [texte("Une échelle logarithmique de la forme "), latex("L=a\\cdot\\log(X)+b"), texte(" modélise des phénomènes comme la magnitude de Richter, le niveau sonore en décibels, ou le pH, où "), latex("X"), texte(" désigne la grandeur physique sous-jacente.")],
       reponse: true,
       justification: [texte("C'est le modèle général d'échelle logarithmique utilisé pour ce type de phénomène : une grandeur variant sur plusieurs ordres de grandeur est ainsi ramenée à une échelle plus lisible.")],
     },
     {
-      enonce: [texte("Sur une échelle logarithmique "), latex("L=a\\cdot\\log_{10}(X)+b"), texte(", doubler "), latex("X"), texte(" double toujours "), latex("L"), texte(".")],
+      enonce: [texte("Sur une échelle logarithmique "), latex("L=a\\cdot\\log(X)+b"), texte(", doubler "), latex("X"), texte(" double toujours "), latex("L"), texte(".")],
       reponse: false,
       justification: [texte("C'est une confusion entre échelle linéaire et échelle logarithmique : sur une échelle logarithmique, multiplier "), latex("X"), texte(" par un facteur modifie "), latex("L"), texte(" de façon ADDITIVE, jamais en le multipliant lui-même.")],
     },
     {
-      enonce: [texte("Sur une échelle logarithmique, multiplier "), latex("X"), texte(" par un facteur "), latex("k"), texte(" modifie "), latex("L"), texte(" de façon ADDITIVE : "), latex("\\Delta L = a\\cdot\\log_{10}(k)"), texte(", et non de façon multiplicative.")],
+      enonce: [texte("Sur une échelle logarithmique, multiplier "), latex("X"), texte(" par un facteur "), latex("k"), texte(" modifie "), latex("L"), texte(" de façon ADDITIVE : "), latex("\\Delta L = a\\cdot\\log(k)"), texte(", et non de façon multiplicative.")],
       reponse: true,
       justification: [texte("C'est la propriété d'échelle caractéristique d'un modèle logarithmique : un facteur multiplicatif sur "), latex("X"), texte(" se traduit par un ÉCART additif sur "), latex("L"), texte(", jamais par un facteur multiplicatif sur "), latex("L"), texte(" lui-même.")],
     },
     {
       enonce: [texte("Sur une échelle logarithmique, multiplier "), latex("X"), texte(" par un facteur "), latex("k"), texte(" multiplie "), latex("L"), texte(" par ce même facteur "), latex("k"), texte(".")],
       reponse: false,
-      justification: [texte("C'est faux : un facteur multiplicatif sur "), latex("X"), texte(" se traduit par un écart ADDITIF sur "), latex("L"), texte(" ("), latex("\\Delta L=a\\log_{10}(k)"), texte("), pas par une multiplication de "), latex("L"), texte(".")],
+      justification: [texte("C'est faux : un facteur multiplicatif sur "), latex("X"), texte(" se traduit par un écart ADDITIF sur "), latex("L"), texte(" ("), latex("\\Delta L=a\\log(k)"), texte("), pas par une multiplication de "), latex("L"), texte(".")],
     },
     {
       enonce: [texte("Deux valeurs "), latex("L_1"), texte(" et "), latex("L_2"), texte(" venant de deux sources séparées, une fois combinées, ne donnent PAS simplement "), latex("L_{total}=L_1+L_2"), texte(" en général.")],
@@ -1768,7 +1768,7 @@ export const BANQUE_QUIZ_FONCTIONS_LOGARITHMES: Record<VarianteQuizFonctionsLoga
     {
       enonce: [texte("Si la concentration en ions "), latex("H^+"), texte(" est multipliée par 10, le pH DIMINUE de 1.")],
       reponse: true,
-      justification: [latex("pH=-\\log_{10}([H^+])"), texte(", donc "), latex("-\\log_{10}(10\\cdot[H^+])=-(1+\\log_{10}([H^+]))=pH-1"), texte(" : la solution devient plus acide, d'exactement une unité.")],
+      justification: [latex("pH=-\\log([H^+])"), texte(", donc "), latex("-\\log(10\\cdot[H^+])=-(1+\\log([H^+]))=pH-1"), texte(" : la solution devient plus acide, d'exactement une unité.")],
     },
     {
       enonce: [texte("Si la concentration en ions "), latex("H^+"), texte(" est multipliée par 10, le pH est lui aussi multiplié par 10.")],
@@ -1813,12 +1813,12 @@ export const BANQUE_QUIZ_FONCTIONS_LOGARITHMES: Record<VarianteQuizFonctionsLoga
     {
       enonce: [texte("Si le pH d'une solution passe de 3 à 5, sa concentration en ions "), latex("H^+"), texte(" est divisée par 2.")],
       reponse: false,
-      justification: [latex("pH=-\\log_{10}([H^+])"), texte(" : 2 unités de pH en plus correspondent à une concentration divisée par "), latex("10^2=100"), texte(", pas par 2.")],
+      justification: [latex("pH=-\\log([H^+])"), texte(" : 2 unités de pH en plus correspondent à une concentration divisée par "), latex("10^2=100"), texte(", pas par 2.")],
     },
     {
       enonce: [texte("Pour combiner deux niveaux sonores "), latex("L_1"), texte(" et "), latex("L_2"), texte(" venant de deux sources distinctes, il faut prendre leur moyenne "), latex("\\dfrac{L_1+L_2}{2}"), texte(".")],
       reponse: false,
-      justification: [texte("Une échelle logarithmique n'est ni additive ni « moyennable » : il faut reconvertir chaque niveau en grandeur physique ("), latex("X_1"), texte(", "), latex("X_2"), texte("), les ADDITIONNER, puis reconvertir : "), latex("L=a\\log_{10}(X_1+X_2)+b"), texte(".")],
+      justification: [texte("Une échelle logarithmique n'est ni additive ni « moyennable » : il faut reconvertir chaque niveau en grandeur physique ("), latex("X_1"), texte(", "), latex("X_2"), texte("), les ADDITIONNER, puis reconvertir : "), latex("L=a\\log(X_1+X_2)+b"), texte(".")],
     },
     {
       enonce: [texte("Dans le modèle logistique "), latex("y(t)=\\dfrac{k}{1+a\\,e^{-rt}}"), texte(", l'instant de croissance maximale vaut "), latex("t=\\dfrac{\\ln(a)}{r}"), texte(".")],
@@ -1831,9 +1831,9 @@ export const BANQUE_QUIZ_FONCTIONS_LOGARITHMES: Record<VarianteQuizFonctionsLoga
       justification: [latex("y(0)=\\dfrac{k}{1+a}"), texte(" : le paramètre "), latex("a"), texte(" se retrouve depuis la valeur initiale par "), latex("a=\\dfrac{k}{y(0)}-1"), texte(", jamais directement.")],
     },
     {
-      enonce: [texte("Sur l'échelle des décibels "), latex("L=10\\log_{10}\\!\\left(\\dfrac{I}{I_0}\\right)"), texte(", multiplier l'intensité "), latex("I"), texte(" par 100 augmente le niveau de 20 dB.")],
+      enonce: [texte("Sur l'échelle des décibels "), latex("L=10\\log\\left(\\dfrac{I}{I_0}\\right)"), texte(", multiplier l'intensité "), latex("I"), texte(" par 100 augmente le niveau de 20 dB.")],
       reponse: true,
-      justification: [latex("\\Delta L=10\\log_{10}(100)=10\\times2=20"), texte(" dB : un facteur multiplicatif sur "), latex("I"), texte(" devient un écart additif sur "), latex("L"), texte(".")],
+      justification: [latex("\\Delta L=10\\log(100)=10\\times2=20"), texte(" dB : un facteur multiplicatif sur "), latex("I"), texte(" devient un écart additif sur "), latex("L"), texte(".")],
     },
     {
       enonce: [texte("Dans le modèle logistique "), latex("y(t)=\\dfrac{k}{1+a\\,e^{-rt}}"), texte(" ("), latex("a>0"), texte(", "), latex("r>0"), texte("), "), latex("y(t)"), texte(" finit par dépasser "), latex("k"), texte(".")],

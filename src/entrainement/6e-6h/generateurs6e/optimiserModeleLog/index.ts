@@ -5,11 +5,12 @@ import type {
   ExerciceEngrais,
   ExerciceOptimiserLog,
   ExerciceRendementMoyen,
+  IdFamilleOptimiserLog,
   IdVarianteOptimiserLog,
   ModeCalculOptimiserLog,
 } from "../../core6e/optimiserModeleLog.types";
 
-export type { IdVarianteOptimiserLog } from "../../core6e/optimiserModeleLog.types";
+export type { IdFamilleOptimiserLog, IdVarianteOptimiserLog } from "../../core6e/optimiserModeleLog.types";
 
 /**
  * Couche A (6e) — tirage de `6gen91` « Optimiser un modèle logarithmique ». Une fonction de
@@ -22,13 +23,24 @@ export type { IdVarianteOptimiserLog } from "../../core6e/optimiserModeleLog.typ
  * ne pas biaiser sa fréquence (≈ 1/2 dans les trois situations à optimum eᵏ).
  */
 
-export const CATALOGUE_VARIANTES: { id: IdVarianteOptimiserLog; label: string }[] = [
-  { id: "engrais", label: "Engrais — rendement c + a ln(1 + x) − bx (dose optimale)" },
-  { id: "benefice", label: "Bénéfice — a ln(q) − bq − c (production optimale)" },
-  { id: "rendement-moyen", label: "Bénéfice moyen — (a ln(x) + d)/x (maximum en eᵏ)" },
-  { id: "cout-moyen", label: "Coût moyen — a x ln(x) − bx + c (minimum en eᵏ)" },
-  { id: "debit", label: "Débit d'une route — av − bv ln(v) (vitesse optimale)" },
+/** Variantes = FAMILLES de fonctions (décision de l'utilisateur) ; la situation est tirée dans la
+ * famille, AVANT la construction : dans « x ln x », coût moyen (minimum) et débit (maximum) sortent
+ * une fois sur deux, donc la nature de l'optimum n'est pas figée d'une série à l'autre. */
+export const CATALOGUE_VARIANTES: { id: IdFamilleOptimiserLog; label: string }[] = [
+  { id: "ln-lineaire", label: "a ln(…) − bx : engrais (c + a ln(1 + x) − bx) ou bénéfice (a ln(q) − bq − c)" },
+  { id: "x-ln-x", label: "x ln x : coût moyen (minimum) ou débit d'une route (maximum)" },
+  { id: "ln-sur-x", label: "ln(x)/x : bénéfice moyen (a ln(x) + d)/x" },
 ];
+
+export const SITUATIONS_PAR_FAMILLE: Record<IdFamilleOptimiserLog, IdVarianteOptimiserLog[]> = {
+  "ln-lineaire": ["engrais", "benefice"],
+  "x-ln-x": ["cout-moyen", "debit"],
+  "ln-sur-x": ["rendement-moyen"],
+};
+
+export function familleDeSituation(situation: IdVarianteOptimiserLog): IdFamilleOptimiserLog {
+  return (Object.keys(SITUATIONS_PAR_FAMILLE) as IdFamilleOptimiserLog[]).find((f) => SITUATIONS_PAR_FAMILLE[f].includes(situation))!;
+}
 
 function choisir<T>(liste: readonly T[]): T {
   return liste[Math.floor(Math.random() * liste.length)];
@@ -148,7 +160,14 @@ export function construireDebit(): ExerciceDebit {
 // Points d'entrée.
 // ============================================================================
 
-export function construireAvecVarianteId(id: IdVarianteOptimiserLog): ExerciceOptimiserLog {
+/** Construit une instance d'une FAMILLE (variante du catalogue : situation tirée dans la famille)
+ * ou d'une situation précise. */
+export function construireAvecVarianteId(id: string): ExerciceOptimiserLog {
+  if (id in SITUATIONS_PAR_FAMILLE) return construireSituation(choisir(SITUATIONS_PAR_FAMILLE[id as IdFamilleOptimiserLog]));
+  return construireSituation(id as IdVarianteOptimiserLog);
+}
+
+function construireSituation(id: IdVarianteOptimiserLog): ExerciceOptimiserLog {
   switch (id) {
     case "engrais":
       return construireEngrais();
@@ -163,7 +182,7 @@ export function construireAvecVarianteId(id: IdVarianteOptimiserLog): ExerciceOp
   }
 }
 
-/** Tirage libre : situation équiprobable parmi les 5 du catalogue. */
+/** Tirage libre : famille équiprobable parmi les 3 du catalogue, puis situation dans la famille. */
 export function genererExerciceOptimiserLog(): ExerciceOptimiserLog {
   return construireAvecVarianteId(choisir(CATALOGUE_VARIANTES).id);
 }
