@@ -3417,3 +3417,27 @@ paths:
   exportEvaluation), `moteur5e/{types,session,verification}ModeliserSuite.ts`,
   `ui5e/{format,recapitulatif}ModeliserSuite.ts`, `components5e/EtapeModeliserSuite.tsx` ; libellés
   de 5gen17 et 5gen47 sur la page de conception.
+- **5e (4h), Chapitre 3 — Suites** (`suites`), section `problemes-classiques` : nouveau générateur
+  **5gen49 « Détective d'erreurs : suites »** (processus 3), carte après 5gen47 (le cours couvrait
+  déjà toutes les règles : seulement la carte). Même mécanique que 6gen88/6gen84 : `CopieEleve`,
+  `EtapeLigneFausse`, `EtapeDescriptionErreur`, `BlocAides` réutilisés depuis
+  `4e/components/EtapesDetectiveErreurs.tsx` ; écran 3 propre (`components5e/EtapeCorrectionDetectiveSuites.tsx`,
+  un champ libre, raccourcis qui REMPLISSENT le champ « n'existe pas » / « +∞ » / « −∞ », valeur
+  approchée d'une valeur exacte non comptée, message « c'est le résultat de la copie »).
+  **Choix de profil différent de 6gen88** (fiche validée : type d'erreur et ligne fausse sont des
+  verdicts, jamais figés par `forme`) : VARIANTE = exercice support, pas le type d'erreur —
+  arithmétique (somme u_p + … + u_m : n au lieu de n − 1 en ligne 1, n − p termes en ligne 3),
+  géométrique (raison u₁/u₂ en ligne 1, qⁿ en ligne 2, n − p termes en ligne 3), pourcentage (valeur
+  d'une année : q = t/100 en ligne 1, rang sans le + 1 en ligne 2, qⁿ en ligne 3), convergence (somme
+  infinie : raison inversée en ligne 1 — avec |q| < 1 ou > 1 —, « q < 1 » au lieu de « |q| < 1 » en
+  ligne 2 ; ou limite de P(n)/Q(n) : numérateur et dénominateur divisés par des puissances
+  différentes en ligne 2). Type tiré uniformément dans la variante AVANT les nombres ; `forme` = la
+  variante seule ; aucun cas particulier ; `calcul` seulement pour « pourcentage », mode exact
+  (q = 1,5 ; 1,25 ; 1,2 ; 0,75 ; 0,8, termes entiers) / calculatrice (arrondi à l'unité, tolérance
+  d'une unité) tiré à pile ou face INDÉPENDAMMENT du type (leçon de 5gen47). Plan réel 3 séries :
+  même structure, nombres différents, verdicts différents d'une série à l'autre. Piège trouvé au
+  collecteur : `nombreLatex(x, 0)` retirait les zéros finaux d'un ENTIER (10 790 → 1 079) — ne
+  retirer les zéros qu'après une virgule. Fichiers : `App5gen49.tsx`, `core5e/detectiveSuites.types.ts`,
+  `moteur5e/{modele,session,verification}DetectiveSuites.ts`, `ui5e/formatDetectiveSuites.ts`,
+  `generateurs5e/detectiveSuites/` (index, profil, exportEvaluation). Libellé de conception
+  « Détective d'erreurs : suites (5gen49) ».

@@ -1325,6 +1325,19 @@ export const suites: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 47. Modéliser une situation par une suite »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Détective d\'erreurs : suites',
+          generatorId: '5gen49',
+          description: [
+            'La copie d\'un élève — somme de termes d\'une suite arithmétique ou géométrique, ' +
+              'évolution en pourcentage, somme infinie ou limite de P(n)/Q(n) — contient une ' +
+              'erreur : trouve la ligne fausse, nomme l\'erreur (n au lieu de n − 1, terme oublié ' +
+              'dans le compte, q = t/100, |q| ≥ 1, raison inversée…), puis donne le bon résultat.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 49. Détective d\'erreurs : suites »',
+        },
       ],
     },
     {
