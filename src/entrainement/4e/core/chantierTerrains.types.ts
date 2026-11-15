@@ -5,7 +5,7 @@
  * Un plan de terrain repéré en mètres ; une question posée avec les mots du chantier (« alignés »,
  * « d'équerre », « parallèles », « à mi-chemin », « parallélogramme »…). L'élève reconnaît l'outil
  * vectoriel caché derrière ces mots, calcule les vecteurs utiles, applique le critère du cours
- * (déterminant `x_u·y_v − y_u·x_v`, produit scalaire `x_u·x_v + y_u·y_v`, milieu, égalité de
+ * (critère de colinéarité `x_u·y_v − y_u·x_v`, produit scalaire `x_u·x_v + y_u·y_v`, milieu, égalité de
  * vecteurs) puis répond dans le contexte.
  */
 

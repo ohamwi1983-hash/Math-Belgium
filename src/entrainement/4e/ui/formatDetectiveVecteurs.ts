@@ -99,7 +99,7 @@ export function lignesCopie(e: ExerciceDetectiveVecteurs): FragmentConsigne[][] 
 export function valeurFragments(v: ValeurLigne): FragmentConsigne[] {
   switch (v.genre) {
     case "nombre":
-      return v.quantite ? [l(`${v.quantite} = ${v.latex}`)] : [t("déterminant : "), l(v.latex)];
+      return v.quantite ? [l(`${v.quantite} = ${v.latex}`)] : [t("critère de colinéarité : "), l(v.latex)];
     case "vecteur":
       return [l(`${v.quantite} = ${colonne(nb(v.x), nb(v.y))}`)];
     case "point":
@@ -115,7 +115,7 @@ export function libellesValeurs(e: ExerciceDetectiveVecteurs): FragmentConsigne[
   const valeurs = valeursAttendues(e);
   return valeurs.map((v, i) => {
     if (i === 0 && valeurs.length > 1) {
-      return [t(v.genre === "nombre" && !v.quantite ? `Ligne ${n} corrigée (déterminant) :` : `Ligne ${n} corrigée :`)];
+      return [t(v.genre === "nombre" && !v.quantite ? `Ligne ${n} corrigée (critère de colinéarité) :` : `Ligne ${n} corrigée :`)];
     }
     return [t("Conclusion corrigée :")];
   });
@@ -203,14 +203,14 @@ function descriptionBrute(id: IdDescriptionVecteurs, e: ExerciceDetectiveVecteur
         : [t("Le carré d'un nombre négatif est compté comme négatif : "), l(`${par(n)}^2 = ${n * n}`), t(", et non "), l(`-${n * n}`), t(".")];
     }
     case "detSigne":
-      return [t("Le déterminant est calculé avec un « + » au lieu d'un « − » : la condition de colinéarité est "), l("x_u \\cdot y_v - y_u \\cdot x_v = 0"), t(".")];
+      return [t("Le critère de colinéarité est calculé avec un « + » au lieu d'un « − » : la condition de colinéarité est "), l("x_u \\cdot y_v - y_u \\cdot x_v = 0"), t(".")];
     case "rapports":
       return [
         t("Les rapports comparés ne se correspondent pas : il fallait comparer "),
         l("\\dfrac{x_{\\vec{AB}}}{x_{\\vec{AC}}}"),
         t(" à "),
         l("\\dfrac{y_{\\vec{AB}}}{y_{\\vec{AC}}}"),
-        t(" (ou, plus sûr, calculer le déterminant)."),
+        t(" (ou, plus sûr, calculer le critère de colinéarité)."),
       ];
     case "scalaireSigne":
       return [t("Le produit scalaire est calculé avec un « − » au lieu d'un « + » : la condition d'orthogonalité est "), l("x_u \\cdot x_v + y_u \\cdot y_v = 0"), t(".")];
@@ -236,7 +236,7 @@ function descriptionBrute(id: IdDescriptionVecteurs, e: ExerciceDetectiveVecteur
       return [t("C'est le test de colinéarité qui est utilisé, au lieu de celui de l'orthogonalité.")];
     case "conditionNorme":
       return [
-        t(support(e) === "alignement" ? "Un déterminant nul ne suffit pas : il faut en plus que " : "Un produit scalaire nul ne suffit pas : il faut en plus que "),
+        t(support(e) === "alignement" ? "Un critère de colinéarité nul ne suffit pas : il faut en plus que " : "Un produit scalaire nul ne suffit pas : il faut en plus que "),
         l("\\vec{AB}"),
         t(" et "),
         l("\\vec{AC}"),
@@ -257,7 +257,7 @@ const NOMS_COURTS: Partial<Record<IdDescriptionVecteurs, string>> = {
   chaslesEnchainement: "Chasles appliqué à des vecteurs qui ne se suivent pas",
   racine: "racine carrée oubliée dans la norme",
   carre: "carré d'un négatif compté négatif",
-  detSigne: "signe faux dans le déterminant",
+  detSigne: "signe faux dans le critère de colinéarité",
   rapports: "rapports de composantes mal associés",
   scalaireSigne: "signe faux dans le produit scalaire",
   produitSigne: "règle des signes mal appliquée",
@@ -375,7 +375,7 @@ function constatBrut(e: ExerciceDetectiveVecteurs): FragmentConsigne[] {
       return [t(`À la ligne ${n}, un carré est négatif : `), l(`${par(neg)}^2`), t(" est remplacé par "), l(`-${neg * neg}`), t(".")];
     }
     case "detSigne":
-      return [t(`À la ligne ${n}, le déterminant est calculé avec un « + » : ce n'est pas la condition de colinéarité du cours.`)];
+      return [t(`À la ligne ${n}, le critère de colinéarité est calculé avec un « + » : ce n'est pas la condition de colinéarité du cours.`)];
     case "rapports":
       return [t(`À la ligne ${n}, les rapports comparés ne se correspondent pas : le premier divise les abscisses de `), l("\\vec{AB}"), t(" et "), l("\\vec{AC}"), t(", le second les ordonnées dans l'autre sens.")];
     case "scalaireSigne":
@@ -409,7 +409,7 @@ function piegeBrut(e: ExerciceDetectiveVecteurs): FragmentConsigne[] {
     case "norme":
       return [t("Une norme est la racine carrée d'une somme de carrés, et un carré n'est jamais négatif : "), l("(-3)^2 = 9"), t(".")];
     case "colinearite":
-      return [t("Colinéarité : déterminant "), l("x_u \\cdot y_v - y_u \\cdot x_v"), t(" ; orthogonalité : produit scalaire "), l("x_u \\cdot x_v + y_u \\cdot y_v"), t(". Ne mélange pas les deux tests.")];
+      return [t("Colinéarité : critère de colinéarité "), l("x_u \\cdot y_v - y_u \\cdot x_v"), t(" ; orthogonalité : produit scalaire "), l("x_u \\cdot x_v + y_u \\cdot y_v"), t(". Ne mélange pas les deux tests.")];
     case "orthogonalite":
       return [t("Produit scalaire : un « + » entre les deux produits, et la règle des signes dans chaque produit.")];
     case "parallelogramme":

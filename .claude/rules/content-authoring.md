@@ -7,6 +7,14 @@ paths:
 
 # Conventions de rédaction du contenu (`ChapterContent`)
 
+## Programme : notions hors programme à ne jamais employer
+
+- **4e : pas de « déterminant »** (décision de l'utilisateur). Le déterminant relève du calcul
+  matriciel, absent du programme de 4e. Pour la colinéarité de deux vecteurs, dire « critère de
+  colinéarité » : $x_u \cdot y_v - y_u \cdot x_v = 0$, autrement dit « les produits en croix sont
+  égaux ». Vaut pour le cours, les générateurs (consignes, aides, corrigés, barèmes, quiz) et les
+  énoncés de démonstration de la 4e.
+
 ## Schéma `ChapterContent`
 
 Un chapitre a un en-tête (niveau, numéro, titre, lede), une intro optionnelle ("mise en

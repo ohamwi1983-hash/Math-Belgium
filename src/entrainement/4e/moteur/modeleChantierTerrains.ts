@@ -3,7 +3,7 @@ import type { Affine, ExerciceChantierTerrains, OutilVectoriel, PointPlan } from
 /**
  * Modèle de gen88 : vecteurs utiles, critère, point cherché. Une seule source pour l'écran, les
  * aides, la vérification et l'adaptateur de feuilles. Critères tels qu'enseignés (sections
- * « colinéarité » et « orthogonalité ») : déterminant `x_u·y_v − y_u·x_v`, produit scalaire
+ * « colinéarité » et « orthogonalité ») : critère de colinéarité `x_u·y_v − y_u·x_v`, produit scalaire
  * `x_u·x_v + y_u·y_v`.
  */
 
@@ -68,7 +68,7 @@ function net(n: number): number {
   return n === 0 ? 0 : n;
 }
 
-/** Déterminant de deux vecteurs (affine en l'inconnue si l'un d'eux en dépend). */
+/** Critère de colinéarité de deux vecteurs (affine en l'inconnue si l'un d'eux en dépend). */
 export function determinant(u: VecteurUtile, v: VecteurUtile): Affine {
   // Un seul des deux vecteurs dépend de l'inconnue : le produit reste du premier degré.
   return {
@@ -81,7 +81,7 @@ export function produitScalaire(u: VecteurUtile, v: VecteurUtile): number {
   return net(u.x.cst * v.x.cst + u.y.cst * v.y.cst);
 }
 
-/** Valeur du critère numérique de l'écran 3 (déterminant ou produit scalaire). */
+/** Valeur du critère numérique de l'écran 3 (critère de colinéarité ou produit scalaire). */
 export function valeurCritere(e: ExerciceChantierTerrains): number {
   const [u, v] = vecteursUtiles(e);
   return e.situation === "equerre" ? produitScalaire(u!, v!) : determinant(u!, v!).cst;
@@ -93,7 +93,7 @@ export function demiVecteur(e: ExerciceChantierTerrains): { x: number; y: number
   return { x: u!.x.cst / 2, y: u!.y.cst / 2 };
 }
 
-/** Piquet : équation du premier degré `coef·t + cst = 0` (déterminant de AB et AP nul). */
+/** Piquet : équation du premier degré `coef·t + cst = 0` (critère de colinéarité de AB et AP nul). */
 export function equationPiquet(e: ExerciceChantierTerrains): Affine {
   const [u, v] = vecteursUtiles(e);
   return determinant(u!, v!);

@@ -2,7 +2,7 @@
  * Couche A — "Colinéarité et alignement de points" (chapitre "Calcul vectoriel"), réécriture
  * complète (`promptcreationgenerateur24colinearitealignement.md`). Réutilise
  * `additionner`/`determinant`/`multiplier` (`generateurs/vecteur/arithmetique.ts`, module frère) —
- * jamais nommé "déterminant" côté présentation, voir `ui/formatColinearite.ts`.
+ * jamais nommé "critère de colinéarité" côté présentation, voir `ui/formatColinearite.ts`.
  *
  * Simplification délibérée (même principe que "Loi des sinus", chapitre "Cercle
  * trigonométrique") : les 2 vecteurs des variantes "vecteurs"/"parametre" sont toujours nommés

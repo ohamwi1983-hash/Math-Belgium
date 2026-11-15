@@ -1,7 +1,7 @@
 /**
  * Présentation — "Colinéarité et alignement de points" (chapitre "Calcul vectoriel"), réécriture
  * complète (`promptcreationgenerateur24colinearitealignement.md`). **Ne jamais utiliser le terme
- * "déterminant"** dans un texte visible à l'élève — les matrices ne sont pas au programme de 4e.
+ * "critère de colinéarité"** dans un texte visible à l'élève — les matrices ne sont pas au programme de 4e.
  *
  * `formatLinExpr`/`formuleSubstitueeLatex` sont volontairement génériques sur `ComposantesLin`
  * (`coefX=0` représentant une composante purement numérique) — les variantes "vecteurs"/"points"
@@ -204,7 +204,7 @@ export function etatActuelReductionAvecX(exercice: ExerciceColinearPointsParamet
 }
 
 // ============================================================================
-// Textes d'aide — jamais "déterminant", toujours "critère de colinéarité"
+// Textes d'aide — jamais "critère de colinéarité", toujours "critère de colinéarité"
 // ============================================================================
 
 /** `promptcorrectionsgenerateur24complet.md`, points 2 et 13 — aide simplifiée (formule seule,

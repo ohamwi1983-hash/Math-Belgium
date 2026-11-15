@@ -16,7 +16,7 @@ import { distance3D } from "../moteur/geometrieEspace";
 
 /**
  * Présentation — "Section plane d'un solide" (40e générateur, chapitre "Géométrie dans l'espace").
- * Terminologie interdite dans tout texte affiché à l'élève : "déterminant", "produit scalaire" (même
+ * Terminologie interdite dans tout texte affiché à l'élève : "critère de colinéarité", "produit scalaire" (même
  * règle que "Position droite/plan").
  *
  * Aucune saisie libre nulle part (sélection uniquement, spec section "Vérification") — jamais de

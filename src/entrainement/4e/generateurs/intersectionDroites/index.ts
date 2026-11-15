@@ -94,7 +94,7 @@ function determinant(u: Composantes, v: Composantes): number {
 function construireLignesSecantes(): { donnee1: DonneeLigne; donnee2: DonneeLigne; pointCroise: Point } {
   if (Math.random() < PROBABILITE_POINT_FRACTIONNAIRE) {
     // Deux droites quelconques (point entier + vecteur entier) : Cramer donne en général un point
-    // fractionnaire, de dénominateur divisant le déterminant — borné pour rester calculable à la main.
+    // fractionnaire, de dénominateur divisant le critère de colinéarité — borné pour rester calculable à la main.
     for (;;) {
       const donnee1 = { point: tirerPoint(), vecteur: tirerVecteur() };
       const donnee2 = { point: tirerPoint(), vecteur: tirerVecteur() };

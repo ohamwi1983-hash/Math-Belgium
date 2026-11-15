@@ -456,7 +456,7 @@ function bareme(e: ExerciceDecompositionVecteur): BaremeExercice {
       { description: [texte("Système résolu sans vérifier la colinéarité")], cout: "1 pt sur le verdict" },
       erreurSigne,
     ],
-    reponsesAcceptees: [[texte("Justification par le déterminant (produits en croix) ou par la proportionnalité des composantes")]],
+    reponsesAcceptees: [[texte("Justification par le critère de colinéarité (produits en croix) ou par la proportionnalité des composantes")]],
   };
 }
 

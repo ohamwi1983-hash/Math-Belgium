@@ -983,7 +983,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     colinearite: [
       { cle: 'alignement', enonce: "Les points $A(0\\,;\\,0)$, $B(2\\,;\\,1)$ et $C(6\\,;\\,3)$ sont-ils alignés ? Justifie à l'aide du critère de colinéarité de deux vecteurs." },
-      { cle: 'déterminant', enonce: "Démontre que deux vecteurs $\\vec{u}\\begin{pmatrix}x_u\\\\y_u\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x_v\\\\y_v\\end{pmatrix}$ sont colinéaires si et seulement si $x_u\\cdot y_v - y_u\\cdot x_v = 0$." },
+      { cle: 'critère de colinéarité', enonce: "Démontre que deux vecteurs $\\vec{u}\\begin{pmatrix}x_u\\\\y_u\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x_v\\\\y_v\\end{pmatrix}$ sont colinéaires si et seulement si $x_u\\cdot y_v - y_u\\cdot x_v = 0$." },
       { cle: 'trois points non alignés', enonce: "Les points $A(1\\,;\\,2)$, $B(3\\,;\\,3)$ et $C(6\\,;\\,5)$ sont-ils alignés ? Justifie par le calcul." },
       { cle: 'colinéarité avec un paramètre', enonce: "Détermine les valeurs de $x$ pour lesquelles les vecteurs $\\vec{u}\\begin{pmatrix}2\\\\x\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x\\\\8\\end{pmatrix}$ sont colinéaires." },
       { cle: 'sans repère : trois points alignés', enonce: "$ABCD$ est un parallélogramme, $I$ est le milieu de $[DC]$ et $E$ est le point tel que $\\vec{DE}=\\dfrac{1}{3}\\vec{DB}$. Démontre que les points $A$, $E$ et $I$ sont alignés." },
@@ -2590,9 +2590,9 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
     colinearite: [
       {
         enonce:
-          "Pourquoi le déterminant x_u·y_v - y_u·x_v reste-t-il valable même quand une composante de u vaut 0, alors que l'égalité des quotients x_v/x_u = y_v/y_u ne l'est pas ?",
+          "Pourquoi le critère de colinéarité x_u·y_v - y_u·x_v reste-t-il valable même quand une composante de u vaut 0, alors que l'égalité des quotients x_v/x_u = y_v/y_u ne l'est pas ?",
         corrige:
-          "L'égalité de deux quotients suppose implicitement que les dénominateurs ne sont pas nuls — elle n'a simplement pas de sens si x_u=0. Le déterminant, obtenu en multipliant en croix avant toute division, ne contient plus aucune fraction : il reste défini et correct quelle que soit la valeur des composantes, y compris nulle.",
+          "L'égalité de deux quotients suppose implicitement que les dénominateurs ne sont pas nuls — elle n'a simplement pas de sens si x_u=0. Le critère de colinéarité, obtenu en multipliant en croix avant toute division, ne contient plus aucune fraction : il reste défini et correct quelle que soit la valeur des composantes, y compris nulle.",
       },
       {
         enonce: 'Pourquoi A, B, C alignés équivaut-il exactement à AB et AC colinéaires ?',
@@ -2616,7 +2616,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Pourquoi ne faut-il jamais confondre le test de colinéarité et celui d'orthogonalité, malgré leur ressemblance ?",
         corrige:
-          "Ils testent deux relations géométriques opposées : colinéaire veut dire « même direction » (angle nul ou 180°), orthogonal veut dire « angle droit ». Les deux formules utilisent les mêmes composantes mais une opération différente — un déterminant avec soustraction, un produit scalaire avec addition — confondre les deux donnerait un verdict sur la mauvaise relation.",
+          "Ils testent deux relations géométriques opposées : colinéaire veut dire « même direction » (angle nul ou 180°), orthogonal veut dire « angle droit ». Les deux formules utilisent les mêmes composantes mais une opération différente — un critère de colinéarité avec soustraction, un produit scalaire avec addition — confondre les deux donnerait un verdict sur la mauvaise relation.",
       },
     ],
     directeur: [
@@ -2703,7 +2703,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       {
         enonce: "Deux vecteurs directeurs non nuls peuvent-ils être à la fois colinéaires et orthogonaux ? Justifie à partir des deux critères.",
         corrige:
-          "Non. Colinéaires signifie même direction (angle 0° ou 180° entre eux) ; orthogonaux signifie un angle de 90° entre eux. Ces deux conditions sont géométriquement incompatibles pour des vecteurs non nuls — un déterminant nul et un produit scalaire nul ne peuvent être vérifiés simultanément, sauf par un vecteur nul, exclu ici.",
+          "Non. Colinéaires signifie même direction (angle 0° ou 180° entre eux) ; orthogonaux signifie un angle de 90° entre eux. Ces deux conditions sont géométriquement incompatibles pour des vecteurs non nuls — un critère de colinéarité nul et un produit scalaire nul ne peuvent être vérifiés simultanément, sauf par un vecteur nul, exclu ici.",
       },
     ],
     intersection: [

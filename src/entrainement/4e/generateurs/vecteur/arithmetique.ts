@@ -30,7 +30,7 @@ export function milieu(a: Point, b: Point): Point {
   return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
 }
 
-/** Déterminant (produit en croix) — deux vecteurs colinéaires ⟺ déterminant nul. */
+/** Critère de colinéarité (produit en croix) — deux vecteurs colinéaires ⟺ critère de colinéarité nul. */
 export function determinant(a: Composantes, b: Composantes): number {
   return a.x * b.y - a.y * b.x;
 }

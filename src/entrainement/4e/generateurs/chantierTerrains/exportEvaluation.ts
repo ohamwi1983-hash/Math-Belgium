@@ -112,7 +112,7 @@ function etapesCritere(e: ExerciceChantierTerrains): EtapeCorrection[] {
     case "piquet": {
       const lettre = lettreInconnue(e)!;
       return [
-        { label: "Méthode", sousQuestion: "c", fragments: [texte("A, B et P alignés : le déterminant de "), latex(vecLatex("A", "B")), texte(" et "), latex(vecLatex("A", "P")), texte(" est nul : "), latex(`${formuleCritereLatex(e)} = 0`), texte(".")] },
+        { label: "Méthode", sousQuestion: "c", fragments: [texte("A, B et P alignés : le critère de colinéarité de "), latex(vecLatex("A", "B")), texte(" et "), latex(vecLatex("A", "P")), texte(" est nul : "), latex(`${formuleCritereLatex(e)} = 0`), texte(".")] },
         {
           label: "Calcul",
           sousQuestion: "c",
@@ -188,7 +188,7 @@ function piege(e: ExerciceChantierTerrains): EtapeCorrection {
     case "paralleles": {
       if (!e.verdict) {
         const ecart = Math.min(angleDegres({ x: u!.x.cst, y: u!.y.cst }, { x: v!.x.cst, y: v!.y.cst }), 180 - angleDegres({ x: u!.x.cst, y: u!.y.cst }, { x: v!.x.cst, y: v!.y.cst }));
-        return { label: "Piège", sousQuestion: "d", fragments: [texte(`Sur le plan, l'écart ne se voit presque pas (environ ${arrondi1(ecart)}°) : seul le calcul tranche. Un déterminant non nul, même petit, veut dire « non ».`)] };
+        return { label: "Piège", sousQuestion: "d", fragments: [texte(`Sur le plan, l'écart ne se voit presque pas (environ ${arrondi1(ecart)}°) : seul le calcul tranche. Un critère de colinéarité non nul, même petit, veut dire « non ».`)] };
       }
       const g = pgcd(v!.x.cst, u!.x.cst);
       const num = Math.abs(v!.x.cst) / g;
@@ -209,7 +209,7 @@ function piege(e: ExerciceChantierTerrains): EtapeCorrection {
         fragments: [
           texte("Pour un angle droit, c'est le produit scalaire "),
           latex("x_u \\cdot x_v + y_u \\cdot y_v"),
-          texte(" — pas le déterminant, qui teste la colinéarité."),
+          texte(" — pas le critère de colinéarité, qui teste la colinéarité."),
           ...(e.verdict ? [] : [texte(` Ici, l'angle en A mesure environ ${arrondi1(angle)}° : à l'œil, impossible de le distinguer d'un angle droit.`)]),
         ],
       };
@@ -263,10 +263,10 @@ function bareme(e: ExerciceChantierTerrains): BaremeExercice {
   const erreurs: ErreurFrequente[] = [{ description: [texte("Composantes calculées « départ moins arrivée » (signes inversés)")], cout: "−0,5 par vecteur" }];
   const acceptees: FragmentConsigne[][] = [];
   if (e.verdict !== null) {
-    erreurs.unshift({ description: [texte(e.situation === "equerre" ? "Déterminant calculé au lieu du produit scalaire" : "Produit scalaire calculé au lieu du déterminant")], cout: "0 pt sur a), c) et d)" });
+    erreurs.unshift({ description: [texte(e.situation === "equerre" ? "Critère de colinéarité calculé au lieu du produit scalaire" : "Produit scalaire calculé au lieu du critère de colinéarité")], cout: "0 pt sur a), c) et d)" });
     erreurs.push({ description: [texte("Conclusion tirée du dessin, ou résultat non nul jugé « négligeable »")], cout: "0 pt sur d)" });
     acceptees.push([texte("Tout autre couple de vecteurs valable (par exemple "), latex(e.situation === "paralleles" ? `${vecLatex("B", "A")} \\text{ et } ${vecLatex("D", "C")}` : `${vecLatex("B", "A")} \\text{ et } ${vecLatex("B", "C")}`), texte(e.situation === "equerre" ? ")… à condition que l'angle testé soit bien celui en A" : ")")]);
-    if (e.situation !== "equerre") acceptees.push([texte("Déterminant calculé avec les vecteurs dans l'autre ordre (valeur opposée), si la conclusion est juste")]);
+    if (e.situation !== "equerre") acceptees.push([texte("Critère de colinéarité calculé avec les vecteurs dans l'autre ordre (valeur opposée), si la conclusion est juste")]);
   } else if (e.situation === "milieu") {
     erreurs.push({ description: [texte("Composantes de "), latex(vecLatex("A", e.cherche!.nom)), texte(" données comme coordonnées du point")], cout: "0 pt sur d)" });
     acceptees.push([texte("Coordonnées obtenues directement par la moyenne des coordonnées de A et B")]);
@@ -275,7 +275,7 @@ function bareme(e: ExerciceChantierTerrains): BaremeExercice {
     acceptees.push([texte("Égalité "), latex(`${vecLatex("A", "D")} = ${vecLatex("B", "C")}`), texte(" ou "), latex(`${vecLatex("B", "A")} = ${vecLatex("C", "D")}`), texte(", qui donnent le même point D")]);
   } else {
     erreurs.push({ description: [texte("Coordonnée inconnue de P remplacée par un nombre au hasard, ou équation mal développée")], cout: "0 pt sur c) et d)" });
-    acceptees.push([texte("Équation écrite sous une autre forme équivalente (multipliée par un nombre, déterminant de "), latex(`${vecLatex("A", "P")} \\text{ et } ${vecLatex("A", "B")}`), texte(")")]);
+    acceptees.push([texte("Équation écrite sous une autre forme équivalente (multipliée par un nombre, critère de colinéarité de "), latex(`${vecLatex("A", "P")} \\text{ et } ${vecLatex("A", "B")}`), texte(")")]);
   }
   return {
     reponseFinale: reponseBreve(e),

@@ -9,7 +9,7 @@ import {
 
 /**
  * Présentation — "Position d'une droite par rapport à un plan". Terminologie interdite dans tout
- * texte affiché à l'élève : "déterminant", "produit scalaire" (le calcul interne peut les utiliser
+ * texte affiché à l'élève : "critère de colinéarité", "produit scalaire" (le calcul interne peut les utiliser
  * mathématiquement — `moteur/geometrieEspace.ts` — mais jamais nommés ainsi ici).
  */
 

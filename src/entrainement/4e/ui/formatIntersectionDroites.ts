@@ -303,7 +303,7 @@ export function formatReponsePointAttendueLatex(exercice: ExerciceIntersectionDr
 }
 
 /** Placeholders hors de l'espace des tirages (audit chapitre 7, point 10 : « ex : −2 » valait t une
- * fois sur six) — dénominateur 13, jamais atteint : celui d'une coordonnée divise le déterminant des
+ * fois sur six) — dénominateur 13, jamais atteint : celui d'une coordonnée divise le critère de colinéarité des
  * vecteurs directeurs (|det| ≤ 12), celui d'un paramètre divise det × une composante (≤ 4), et 13
  * est premier. */
 export const PLACEHOLDER_PARAMETRE_INTERSECTION = "ex : 14/13";

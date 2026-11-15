@@ -1,7 +1,7 @@
 /**
  * Couche core — "L'un sans l'autre" (chapitre 3, remplace "Angles associés" en position 16 —
  * promptcreationgenerateur16unsanslautre.md). À partir d'une valeur connue de cosθ ou sinθ et d'un
- * intervalle sur θ déterminant un unique quadrant, l'élève retrouve l'autre valeur via l'identité
+ * intervalle sur θ critère de colinéarité un unique quadrant, l'élève retrouve l'autre valeur via l'identité
  * cos²θ+sin²θ=1, puis calcule tanθ=sinθ/cosθ. Portée limitée (section "Objectif pédagogique") :
  * jamais de résolution d'équation/inéquation trigonométrique générale, jamais d'autre identité,
  * à l'origine jamais la variante où tanθ serait la valeur de départ.

@@ -539,7 +539,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       id: 'relations',
       number: 4,
       title: 'Droites parallèles et perpendiculaires',
-      kicker: 'déterminant nul ↔ parallèles — produit scalaire nul ↔ perpendiculaires',
+      kicker: 'critère de colinéarité nul ↔ parallèles — produit scalaire nul ↔ perpendiculaires',
       blocks: [
         { kind: 'video', title: 'Droites parallèles, perpendiculaires et intersection de deux droites', youtubeId: 'E0Uvj1gvBi0' },
         {
@@ -614,7 +614,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           items: [
             'Prends deux vecteurs directeurs $\\vec{u}\\begin{pmatrix} \\alpha \\\\ \\beta \\end{pmatrix}$ ' +
               "et $\\vec{v}\\begin{pmatrix} \\alpha' \\\\ \\beta' \\end{pmatrix}$ (pour $ax+by+c=0$, prends $\\begin{pmatrix} -b \\\\ a \\end{pmatrix}$) :",
-            "**Parallèles** ⟺ déterminant nul : $\\alpha \\cdot \\beta' - \\beta \\cdot \\alpha' = 0$. En pentes (si les deux existent), ça donne $m = m'$.",
+            "**Parallèles** ⟺ critère de colinéarité nul : $\\alpha \\cdot \\beta' - \\beta \\cdot \\alpha' = 0$. En pentes (si les deux existent), ça donne $m = m'$.",
             "**Perpendiculaires** ⟺ produit scalaire nul : $\\alpha \\cdot \\alpha' + \\beta \\cdot \\beta' = 0$. En pentes (si les deux existent), ça donne $m \\cdot m' = -1$.",
           ],
         },
@@ -681,7 +681,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           label: 'Manipule toi-même : parallèles, perpendiculaires ou sécantes ?',
           caption:
             'Règle les coefficients de d₁ et d₂ : l\'atelier lit un vecteur directeur (−b ; ' +
-            'a) de chaque droite, puis teste le déterminant (parallèles ?) et le produit ' +
+            'a) de chaque droite, puis teste le critère de colinéarité (parallèles ?) et le produit ' +
             'scalaire (perpendiculaires ?). Quand les droites sont sécantes, il calcule ' +
             'leur point d\'intersection pas à pas, par substitution ou par combinaison ' +
             '(section 5). En mode Défi, trouve la position relative de deux droites en un ' +
@@ -816,7 +816,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           steps: [
             {
               tag: 'directeurs non colinéaires',
-              text: '$\\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$ et $\\begin{pmatrix} 1 \\\\ -2 \\end{pmatrix}$ — déterminant $2 \\cdot (-2) - 1 \\cdot 1 = -5 \\neq 0$ → sécantes',
+              text: '$\\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$ et $\\begin{pmatrix} 1 \\\\ -2 \\end{pmatrix}$ — critère de colinéarité $2 \\cdot (-2) - 1 \\cdot 1 = -5 \\neq 0$ → sécantes',
             },
             { tag: 'isoler x dans d₁', text: '$x = 2y-1$' },
             { tag: 'substituer dans d₂', text: '$2(2y-1) + y - 5 = 0 \\to 5y-7=0 \\to y = \\frac{7}{5}$' },
@@ -1912,7 +1912,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         formulas: [
           {
             text: '$\\alpha \\cdot \\beta\' - \\beta \\cdot \\alpha\' = 0$',
-            condition: 'parallèles (déterminant nul) — ou $m=m\'$',
+            condition: 'parallèles (critère de colinéarité nul) — ou $m=m\'$',
           },
           {
             text: '$\\alpha \\cdot \\alpha\' + \\beta \\cdot \\beta\' = 0$',
@@ -1959,7 +1959,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       'Pente et angle — $m=\\tan\\theta$, $\\theta \\in [0°;180°[$. Angle avec Oy = 90° − angle ' +
         'avec Ox, ramené dans $[0°;180°[$. La pente peut être négative (droite qui descend), mais un ' +
         'angle ne l\'est jamais : une pente négative donne un angle avec Ox obtus.',
-      'Parallèles / perpendiculaires — déterminant nul ↔ colinéaires ; produit scalaire nul ↔ ' +
+      'Parallèles / perpendiculaires — critère de colinéarité nul ↔ colinéaires ; produit scalaire nul ↔ ' +
         'orthogonaux. En pentes : $m=m\'$ ou $m \\cdot m\'=-1$.',
       "Intersection — compare d'abord les vecteurs directeurs (sécantes ou colinéaires), avant tout calcul de système.",
       'Distance — jamais de formule directe : perpendiculaire, intersection, puis norme du vecteur obtenu.',

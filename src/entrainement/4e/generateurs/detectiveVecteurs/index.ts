@@ -160,7 +160,7 @@ export function instanceValide(e: ExerciceDetectiveVecteurs): boolean {
   const copie = copieEleve(e);
   const correcte = resolutionCorrecte(e);
   const i = indiceLigneFausse(e);
-  // Coordonnées et composantes dans un cadre raisonnable (un nombre isolé — norme, déterminant,
+  // Coordonnées et composantes dans un cadre raisonnable (un nombre isolé — norme, critère de colinéarité,
   // produit scalaire — peut être plus grand).
   for (const l of [...copie, ...correcte]) {
     const v = l.valeur;

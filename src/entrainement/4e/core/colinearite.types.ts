@@ -1,7 +1,7 @@
 /**
  * Contrat — "Colinéarité et alignement de points" (chapitre "Calcul vectoriel"), réécriture
  * complète (`promptcreationgenerateur24colinearitealignement.md`) : 4 variantes plutôt que 2,
- * toutes fondées sur le même critère `a·d-b·c` (jamais le mot "déterminant", hors programme de
+ * toutes fondées sur le même critère `a·d-b·c` (jamais le mot "critère de colinéarité", hors programme de
  * 4e — les matrices n'y sont pas encore vues).
  *
  * **`LinExpr`** (`coefX·x + constante`) généralise une composante qui PEUT dépendre de `x` —

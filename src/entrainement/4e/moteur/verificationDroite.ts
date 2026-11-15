@@ -19,7 +19,7 @@
  * `statutTripletProportionnel` comparent par PROPORTIONNALITÉ (tout multiple non nul accepté)
  * plutôt que par égalité exacte, réutilisant le critère de colinéarité `a·d-b·c=0` déjà construit
  * pour "Colinéarité et alignement de points" et le critère d'orthogonalité `a·c+b·d=0` déjà
- * construit pour "Orthogonalité et théorème de Pythagore généralisé" — jamais "déterminant" ni
+ * construit pour "Orthogonalité et théorème de Pythagore généralisé" — jamais "critère de colinéarité" ni
  * "produit scalaire" dans un texte affiché à l'élève, mêmes bans que ces deux générateurs.
  */
 import type { Composantes, Point } from "../core/vecteur.types";
@@ -31,11 +31,11 @@ import type { StatutVerification } from "./statutVerification";
  * reste du projet (`verificationColinearite.ts`/`verificationOrthogonalite.ts`). */
 export const TOLERANCE = 0.01;
 
-/** Tolérance pour un critère structurel qui doit valoir EXACTEMENT 0 (déterminant, produit
+/** Tolérance pour un critère structurel qui doit valoir EXACTEMENT 0 (critère de colinéarité, produit
  * scalaire, substitution dans une équation) — les coefficients de ce groupe de générateurs sont
  * toujours de petits entiers/rationnels par construction, un critère correct y est donc soit
  * exactement 0, soit clairement non nul ; resserré par rapport à `TOLERANCE` pour ne jamais
- * accepter à tort une réponse non colinéaire dont le déterminant serait "petit mais non nul".
+ * accepter à tort une réponse non colinéaire dont le critère de colinéarité serait "petit mais non nul".
  * Même valeur que `diagnostiquerFormeCanonique` (`expressionAlgebrique.ts`, tolérance par défaut). */
 export const EPSILON_STRUCTURE = 1e-6;
 
@@ -398,7 +398,7 @@ export function impliciteDepuisPointVecteurDroite(point: Point, v: Composantes):
 /**
  * Intersection de deux droites implicites — même formule (Cramer) que `intersectionDeuxDroites`
  * (`generateurs/droite/geometrieDroite.ts`), dupliquée ici côté Couche B. `null` si les deux
- * droites sont parallèles/confondues (déterminant en-dessous d'`EPSILON_STRUCTURE`) — cas qui ne se
+ * droites sont parallèles/confondues (critère de colinéarité en-dessous d'`EPSILON_STRUCTURE`) — cas qui ne se
  * présente structurellement jamais pour les deux seuls appelants de cette fonction dans le projet
  * (deux droites perpendiculaires, ou une perpendiculaire et l'une des deux parallèles de "Distance
  * point-droite et droite-droite", jamais parallèles entre elles par construction).

@@ -33,7 +33,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceColineari
  * `moteur/typesColinearite.ts` — chaque variante n'utilise QUE le sous-ensemble d'écrans listé ici) :
  * - "vecteurs" (V1, `ExerciceColinearVecteurs`) : UN seul écran "test"
  *   (`EtapeTestColinearite.tsx`) → UNE question papier : "Calcule le critère de colinéarité, puis
- *   conclus [...]" — le champ numérique (le critère `a·d-b·c`, jamais nommé "déterminant" à
+ *   conclus [...]" — le champ numérique (le critère `a·d-b·c`, jamais nommé "critère de colinéarité" à
  *   l'élève, voir `ui/formatColinearite.ts`) et la conclusion catégorielle (colinéaires/non)
  *   fusionnés en une seule consigne papier, la distinction champ numérique/bouton Oui-Non n'ayant
  *   pas d'équivalent papier séparé (même décision que `quelAngle/exportEvaluation.ts`, "Pas de
@@ -83,7 +83,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceColineari
  * `formatEquationReduiteLatex`/`formatEnonceLatex`/`formatComposantesLatex`/
  * `formatComposantesLinLatex` (`ui/formatColinearite.ts`, déjà les fonctions de présentation de
  * l'écran, génériques sur `ComposantesLin` — `coefX=0` pour les variantes sans x — donc partagées
- * sans duplication entre les 4 variantes). Jamais le mot "déterminant" dans un texte visible à
+ * sans duplication entre les 4 variantes). Jamais le mot "critère de colinéarité" dans un texte visible à
  * l'élève (hors programme de 4e, voir l'en-tête de `ui/formatColinearite.ts`), toujours "critère de
  * colinéarité".
  */

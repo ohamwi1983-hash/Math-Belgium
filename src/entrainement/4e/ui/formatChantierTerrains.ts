@@ -143,7 +143,7 @@ export function consignePapier(e: ExerciceChantierTerrains): FragmentConsigne[] 
 // ---------------------------------------------------------------------------------------------
 
 export const OUTILS: { id: OutilVectoriel; libelle: string }[] = [
-  { id: "colinearite", libelle: "Colinéarité de deux vecteurs (déterminant nul)" },
+  { id: "colinearite", libelle: "Colinéarité de deux vecteurs (critère de colinéarité nul)" },
   { id: "orthogonalite", libelle: "Orthogonalité de deux vecteurs (produit scalaire nul)" },
   { id: "distance", libelle: "Distance entre deux points (norme d'un vecteur)" },
   { id: "milieu", libelle: "Milieu d'un segment" },
@@ -158,17 +158,17 @@ export function indiceOutilAttendu(e: ExerciceChantierTerrains): number {
 export function traductionOutil(e: ExerciceChantierTerrains): FragmentConsigne[] {
   switch (e.situation) {
     case "alignement":
-      return [texte("« Alignés » : les trois points sont sur une même droite, donc "), latex(vecLatex("A", "B")), texte(" et "), latex(vecLatex("A", "C")), texte(" ont la même direction — ils sont colinéaires (déterminant nul).")];
+      return [texte("« Alignés » : les trois points sont sur une même droite, donc "), latex(vecLatex("A", "B")), texte(" et "), latex(vecLatex("A", "C")), texte(" ont la même direction — ils sont colinéaires (critère de colinéarité nul).")];
     case "equerre":
       return [texte("« D'équerre » : les deux bords forment un angle droit en A, donc "), latex(vecLatex("A", "B")), texte(" et "), latex(vecLatex("A", "C")), texte(" sont orthogonaux (produit scalaire nul).")];
     case "paralleles":
-      return [texte("« Parallèles » : deux droites parallèles ont des vecteurs directeurs de même direction, donc "), latex(vecLatex("A", "B")), texte(" et "), latex(vecLatex("C", "D")), texte(" doivent être colinéaires (déterminant nul).")];
+      return [texte("« Parallèles » : deux droites parallèles ont des vecteurs directeurs de même direction, donc "), latex(vecLatex("A", "B")), texte(" et "), latex(vecLatex("C", "D")), texte(" doivent être colinéaires (critère de colinéarité nul).")];
     case "milieu":
       return [texte(`« À mi-chemin » sur un chemin droit : ${e.cherche!.nom} est le milieu du segment [AB], donc `), latex(`${vecLatex("A", e.cherche!.nom)} = \\frac{1}{2}\\,${vecLatex("A", "B")}`), texte(".")];
     case "enclos":
       return [texte("« Parallélogramme ABCD » : les côtés opposés [AB] et [DC] sont parallèles, de même longueur et de même sens — c'est une égalité de vecteurs.")];
     case "piquet":
-      return [texte("« Aligné avec A et B » : "), latex(vecLatex("A", "B")), texte(" et "), latex(vecLatex("A", "P")), texte(" doivent être colinéaires (déterminant nul).")];
+      return [texte("« Aligné avec A et B » : "), latex(vecLatex("A", "B")), texte(" et "), latex(vecLatex("A", "P")), texte(" doivent être colinéaires (critère de colinéarité nul).")];
   }
 }
 
@@ -190,7 +190,7 @@ function aidesOutil(e: ExerciceChantierTerrains): FragmentConsigne[][] {
 // ---------------------------------------------------------------------------------------------
 
 export type Attendu =
-  /** Nombre (coef = 0) ou expression du premier degré en `lettre`. `signe` : le déterminant —
+  /** Nombre (coef = 0) ou expression du premier degré en `lettre`. `signe` : le critère de colinéarité —
    * l'opposé est signalé (ordre des vecteurs inversé). */
   | { type: "valeur"; cible: Affine; lettre: "x" | "y" | null; signe?: boolean }
   /** Équation équivalente à `cible = 0` (tout multiple non nul, toute écriture). */
@@ -273,7 +273,7 @@ export function critereCalculLatex(e: ExerciceChantierTerrains): string {
 }
 
 export function nomCritere(e: ExerciceChantierTerrains): string {
-  return e.situation === "equerre" ? "produit scalaire" : "déterminant";
+  return e.situation === "equerre" ? "produit scalaire" : "critère de colinéarité";
 }
 
 export function equationLatex(e: ExerciceChantierTerrains): string {
@@ -334,7 +334,7 @@ function ecranCritere(e: ExerciceChantierTerrains): Ecran {
       consigne: [texte(`Écris la condition d'alignement de A, B et P sous la forme d'une équation d'inconnue ${lettre}.`)],
       champs: [{ id: "equation", libelle: [texte("Équation :")], attendu: { type: "equation", cible: equationPiquet(e), lettre } }],
       aides: [
-        [texte("A, B et P sont alignés quand le déterminant de "), latex(vecLatex("A", "B")), texte(" et "), latex(vecLatex("A", "P")), texte(" est nul :"), latex(`${formuleCritereLatex(e)} = 0`)],
+        [texte("A, B et P sont alignés quand le critère de colinéarité de "), latex(vecLatex("A", "B")), texte(" et "), latex(vecLatex("A", "P")), texte(" est nul :"), latex(`${formuleCritereLatex(e)} = 0`)],
         [texte("Ici, avec les composantes de l'étape précédente :"), latex(vecteursLatex(e)), texte(" — remplace dans la formule, puis développe.")],
       ],
       indication: `Une équation avec « = », par exemple 2${lettre} − 6 = 0.`,
@@ -348,9 +348,9 @@ function ecranCritere(e: ExerciceChantierTerrains): Ecran {
     type: "champs",
     titre,
     consigne: [texte(`Calcule le ${nomCritere(e)} de `), latex(nomU), texte(" et "), latex(nomV), texte(".")],
-    champs: [{ id: "critere", libelle: [texte(ortho ? "Produit scalaire :" : "Déterminant :")], attendu: { type: "valeur", cible: { coef: 0, cst: valeurCritere(e) }, lettre: null, signe: !ortho } }],
+    champs: [{ id: "critere", libelle: [texte(ortho ? "Produit scalaire :" : "Critère de colinéarité :")], attendu: { type: "valeur", cible: { coef: 0, cst: valeurCritere(e) }, lettre: null, signe: !ortho } }],
     aides: [
-      [texte(ortho ? "Produit scalaire de deux vecteurs :" : "Déterminant de deux vecteurs, dans cet ordre :"), latex(formuleCritereLatex(e))],
+      [texte(ortho ? "Produit scalaire de deux vecteurs :" : "Critère de colinéarité de deux vecteurs, dans cet ordre :"), latex(formuleCritereLatex(e))],
       [texte("Avec les composantes de l'étape précédente :"), latex(critereSubstitueLatex(e)), texte(" — il reste à calculer.")],
     ],
     indication: "Un nombre entier, positif ou négatif.",
@@ -368,8 +368,8 @@ export function phrasesConclusion(e: ExerciceChantierTerrains): FragmentConsigne
   switch (e.situation) {
     case "alignement":
       return [
-        [texte(`Oui, ${s} sont alignés : le déterminant de `), nu, texte(" et "), nv, texte(" est nul.")],
-        [texte(`Non, ${s} ne sont pas alignés : le déterminant de `), nu, texte(" et "), nv, texte(" n'est pas nul.")],
+        [texte(`Oui, ${s} sont alignés : le critère de colinéarité de `), nu, texte(" et "), nv, texte(" est nul.")],
+        [texte(`Non, ${s} ne sont pas alignés : le critère de colinéarité de `), nu, texte(" et "), nv, texte(" n'est pas nul.")],
         [texte(`Oui, ${s} sont alignés : sur le plan, ils semblent sur une même ligne droite.`)],
         [texte(`Non, ${s} ne sont pas alignés : `), nu, texte(" et "), nv, texte(" n'ont pas les mêmes composantes.")],
       ];
@@ -378,12 +378,12 @@ export function phrasesConclusion(e: ExerciceChantierTerrains): FragmentConsigne
         [texte(`Oui, ${s} est d'équerre : le produit scalaire de `), nu, texte(" et "), nv, texte(" est nul.")],
         [texte(`Non, ${s} n'est pas d'équerre : le produit scalaire de `), nu, texte(" et "), nv, texte(" n'est pas nul.")],
         [texte(`Oui, ${s} est d'équerre : sur le plan, l'angle en A a l'air droit.`)],
-        [texte(`Non, ${s} n'est pas d'équerre : le déterminant de `), nu, texte(" et "), nv, texte(" n'est pas nul.")],
+        [texte(`Non, ${s} n'est pas d'équerre : le critère de colinéarité de `), nu, texte(" et "), nv, texte(" n'est pas nul.")],
       ];
     default:
       return [
-        [texte(`Oui, ${s} sont parallèles : le déterminant de `), nu, texte(" et "), nv, texte(" est nul.")],
-        [texte(`Non, ${s} ne sont pas parallèles : le déterminant de `), nu, texte(" et "), nv, texte(" n'est pas nul.")],
+        [texte(`Oui, ${s} sont parallèles : le critère de colinéarité de `), nu, texte(" et "), nv, texte(" est nul.")],
+        [texte(`Non, ${s} ne sont pas parallèles : le critère de colinéarité de `), nu, texte(" et "), nv, texte(" n'est pas nul.")],
         [texte(`Oui, ${s} sont parallèles : sur le plan, l'écart entre elles semble constant.`)],
         [texte(`Non, ${s} ne sont pas parallèles : `), nu, texte(" et "), nv, texte(" n'ont pas la même longueur.")],
       ];

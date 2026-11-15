@@ -29,7 +29,7 @@ export interface PointNommePositionDroitePlan {
 export interface CandidatSegmentPositionDroitePlan {
   type: "segment";
   sommets: [string, string];
-  /** Libellé pédagogique, ex. "arête AB" / "diagonale AC" — jamais "déterminant"/"produit scalaire". */
+  /** Libellé pédagogique, ex. "arête AB" / "diagonale AC" — jamais "critère de colinéarité"/"produit scalaire". */
   label: string;
 }
 

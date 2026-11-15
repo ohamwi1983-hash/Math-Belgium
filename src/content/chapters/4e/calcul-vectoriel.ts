@@ -1287,7 +1287,7 @@ export const calculVectoriel: ChapterContent = {
       id: 'colinearite',
       number: 13,
       title: 'Colinéarité de vecteurs et alignement de points',
-      kicker: 'colinéaires ⟺ déterminant nul',
+      kicker: 'colinéaires ⟺ produits en croix égaux',
       blocks: [
         {
           kind: 'para',
@@ -1301,7 +1301,7 @@ export const calculVectoriel: ChapterContent = {
           items: [
             'Colinéarité de deux vecteurs — $\\vec{u}\\begin{pmatrix} x_u \\\\ y_u \\end{pmatrix}$ ' +
               'et $\\vec{v}\\begin{pmatrix} x_v \\\\ y_v \\end{pmatrix}$ sont colinéaires ⟺ ' +
-              '$x_u \\cdot y_v - y_u \\cdot x_v = 0$. On dit que le déterminant est nul.',
+              '$x_u \\cdot y_v - y_u \\cdot x_v = 0$. Autrement dit, les produits en croix sont égaux : $x_u \\cdot y_v = y_u \\cdot x_v$.',
             'Alignement de 3 points — A, B, C alignés ⟺ $\\vec{AB}$ et $\\vec{AC}$ colinéaires.',
           ],
         },
@@ -1312,9 +1312,9 @@ export const calculVectoriel: ChapterContent = {
           steps: [
             { tag: 'AB', text: '$\\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$' },
             { tag: 'AC', text: '$\\begin{pmatrix} 6 \\\\ 3 \\end{pmatrix}$' },
-            { tag: 'déterminant', text: '$2 \\times 3 - 1 \\times 6 = 6 - 6 = 0$' },
+            { tag: 'critère de colinéarité', text: '$2 \\times 3 - 1 \\times 6 = 6 - 6 = 0$' },
           ],
-          result: { tag: 'résultat', text: 'déterminant nul → A, B, C sont alignés ($\\vec{AC} = 3\\vec{AB}$)' },
+          result: { tag: 'résultat', text: 'critère de colinéarité nul → A, B, C sont alignés ($\\vec{AC} = 3\\vec{AB}$)' },
         },
         {
           kind: 'exemple',
@@ -1338,7 +1338,7 @@ export const calculVectoriel: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: "Démonstration — d'où vient ce déterminant ?",
+          label: "Démonstration — d'où vient ce critère de colinéarité ?",
           blocks: [
             {
               kind: 'para',
@@ -1379,7 +1379,7 @@ export const calculVectoriel: ChapterContent = {
           label: 'Manipule toi-même : colinéarité ou orthogonalité ?',
           caption:
             'A(0 ; 0) et B(2 ; 1) sont fixes : fais glisser C et bascule entre les deux ' +
-            'tests. Quand le déterminant est nul, l\'atelier donne k tel que AC = k·AB ; ' +
+            'tests. Quand le critère de colinéarité est nul, l\'atelier donne k tel que AC = k·AB ; ' +
             'quand le produit scalaire est nul, l\'angle droit apparaît en A et Pythagore se ' +
             'vérifie. Le réglage de départ (C(6 ; 3)) reproduit le premier exemple de la ' +
             'section.',
@@ -2116,8 +2116,8 @@ export const calculVectoriel: ChapterContent = {
           kind: 'featureTable',
           headers: ['Mot du contexte', 'Relation vectorielle', 'Critère'],
           rows: [
-            ['A, B, C alignés', '$\\vec{AB}$ et $\\vec{AC}$ colinéaires', 'déterminant nul'],
-            ['(AB) et (CD) parallèles', '$\\vec{AB}$ et $\\vec{CD}$ colinéaires', 'déterminant nul'],
+            ['A, B, C alignés', '$\\vec{AB}$ et $\\vec{AC}$ colinéaires', 'critère de colinéarité nul'],
+            ['(AB) et (CD) parallèles', '$\\vec{AB}$ et $\\vec{CD}$ colinéaires', 'critère de colinéarité nul'],
             ['coin A d\'équerre', '$\\vec{AB}$ et $\\vec{AC}$ orthogonaux', 'produit scalaire nul'],
             ['M à mi-chemin entre A et B', 'M milieu de [AB]', '$\\vec{AM} = \\frac{1}{2}\\,\\vec{AB}$'],
             ['ABCD parallélogramme', 'côtés opposés égaux', '$\\vec{AB} = \\vec{DC}$'],
@@ -2126,7 +2126,7 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'attention',
           text:
-            'Le critère est une égalité **exacte**. Un déterminant ou un produit scalaire qui vaut 2 ' +
+            'Le critère est une égalité **exacte**. Un critère de colinéarité ou un produit scalaire qui vaut 2 ' +
             'n\'est pas « presque nul » : sur le terrain, un coin à 88° ou trois piquets décalés de ' +
             'quelques centimètres se verraient au bout de quelques mètres. Et un plan qui « a l\'air » ' +
             'aligné ne prouve rien.',
@@ -2214,7 +2214,7 @@ export const calculVectoriel: ChapterContent = {
       {
         title: 'Colinéarité et orthogonalité',
         formulas: [
-          { text: '$x_u \\cdot y_v - y_u \\cdot x_v = 0$', condition: 'colinéaires (déterminant nul)' },
+          { text: '$x_u \\cdot y_v - y_u \\cdot x_v = 0$', condition: 'colinéaires (critère de colinéarité nul)' },
           { text: '$x_u \\cdot x_v + y_u \\cdot y_v = 0$', condition: 'orthogonaux (produit scalaire nul)' },
         ],
       },
@@ -2258,7 +2258,7 @@ export const calculVectoriel: ChapterContent = {
         'Ai-je bien vérifié que les vecteurs se relaient point par point avant d\'appliquer Chasles ?',
         'Ma norme est-elle bien positive ou nulle, jamais négative ?',
         'Ai-je bien calculé le milieu comme une moyenne, jamais comme une différence de coordonnées ?',
-        'Ai-je utilisé la bonne formule — déterminant pour la colinéarité, produit scalaire pour l\'orthogonalité ?',
+        'Ai-je utilisé la bonne formule — critère de colinéarité pour la colinéarité, produit scalaire pour l\'orthogonalité ?',
         'Ai-je bien écrit $\\vec{AB} - \\vec{AC} = \\vec{CB}$, et non $\\vec{BC}$ ?',
         'Dans la formule de la résultante, ai-je bien mis « + 2F₁F₂·cos θ » (θ = angle entre les deux vecteurs) ?',
       ],

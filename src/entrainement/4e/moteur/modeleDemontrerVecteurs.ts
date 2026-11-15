@@ -75,7 +75,7 @@ export function cFois(k: Rationnel, a: Coefficients): Coefficients {
 export function cEgaux(a: Coefficients, b: Coefficients): boolean {
   return egaux(a.x, b.x) && egaux(a.y, b.y);
 }
-/** Déterminant (produit en croix) : nul ⟺ colinéaires. */
+/** Critère de colinéarité (produit en croix) : nul ⟺ colinéaires. */
 export function det(a: Coefficients, b: Coefficients): Rationnel {
   return moins(fois(a.x, b.y), fois(a.y, b.x));
 }

@@ -365,8 +365,8 @@ function lignesAlignement(e: ExerciceDetectiveVecteurs, fautive: boolean): Ligne
   } else {
     const c = fautive ? combinaison([u.x, v.y], [u.y, v.x], "+") : det;
     alignes = c.valeur === 0;
-    l3 = { fragments: [t("Déterminant : "), l(c.texte)], valeur: { genre: "nombre", quantite: "", valeur: c.valeur, latex: nb(c.valeur) }, formule: c.formule };
-    raison = alignes ? "le déterminant est nul" : "le déterminant n'est pas nul";
+    l3 = { fragments: [t("Critère de colinéarité : "), l(c.texte)], valeur: { genre: "nombre", quantite: "", valeur: c.valeur, latex: nb(c.valeur) }, formule: c.formule };
+    raison = alignes ? "le critère de colinéarité est nul" : "le critère de colinéarité n'est pas nul";
   }
   const conclusion: LigneCopie = {
     fragments: [t(`Conclusion : ${raison}, donc A, B et C ${alignes ? "sont alignés" : "ne sont pas alignés"}.`)],
@@ -376,7 +376,7 @@ function lignesAlignement(e: ExerciceDetectiveVecteurs, fautive: boolean): Ligne
   return [u, v, l3, conclusion];
 }
 
-/** Déterminant juste (valeur de la ligne 3 corrigée). */
+/** Critère de colinéarité juste (valeur de la ligne 3 corrigée). */
 export function determinant(e: ExerciceDetectiveVecteurs): number {
   const { A, B, C } = e.donnees;
   return (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);

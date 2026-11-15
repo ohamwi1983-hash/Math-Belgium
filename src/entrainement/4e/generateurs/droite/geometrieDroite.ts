@@ -107,12 +107,12 @@ export function pointDepuisExpliciteX(d: DroiteExpliciteX): Point {
   return { x: d.q, y: 0 };
 }
 
-/** Tolérance sur le déterminant du système 2×2 — droites considérées parallèles/confondues en deçà. */
+/** Tolérance sur le critère de colinéarité du système 2×2 — droites considérées parallèles/confondues en deçà. */
 const EPSILON_INTERSECTION = 1e-6;
 
 /**
  * Intersection de deux droites implicites — résolution du système `{a1x+b1y+c1=0, a2x+b2y+c2=0}`
- * par la règle de Cramer. `null` si le déterminant `a1·b2-a2·b1` est en-dessous d'un epsilon
+ * par la règle de Cramer. `null` si le critère de colinéarité `a1·b2-a2·b1` est en-dessous d'un epsilon
  * (droites parallèles ou confondues, aucun point d'intersection unique).
  *
  * Nouvelle primitive géométrique partagée du groupe "droites" — introduite pour "Distance

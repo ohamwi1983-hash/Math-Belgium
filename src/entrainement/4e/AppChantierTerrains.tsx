@@ -23,7 +23,7 @@ import type { ValidationEtapeProps } from "../components/ValidationEcran";
  * question posée avec les mots du chantier. Quatre écrans :
  * 1. choisir l'outil vectoriel caché derrière les mots (choix fermé, une tentative) ;
  * 2. calculer les composantes des vecteurs utiles ;
- * 3. appliquer le critère (déterminant, produit scalaire, demi-vecteur, égalité de vecteurs,
+ * 3. appliquer le critère (critère de colinéarité, produit scalaire, demi-vecteur, égalité de vecteurs,
  *    équation du piquet) ;
  * 4. répondre dans le contexte (phrase-réponse, ou coordonnées / valeur).
  * Aucun point affiché. `?code=` (QR code d'une feuille) : première instance tirée avec les MÊMES
