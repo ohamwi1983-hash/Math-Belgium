@@ -1,38 +1,59 @@
 /**
  * Couche B — moteur de session pour "Paramètres de dispersion" (remplace "Mode et classe modale",
- * `promptgen34remplacement.md`). N'importe jamais rien de `src/generateurs/` — voir
- * `sessionDispersion.test.ts` pour la preuve avec un générateur factice, même principe que les 33
- * autres moteurs.
+ * `promptgen34remplacement.md`). N'importe jamais rien de `src/generateurs/` — même principe que
+ * les autres moteurs.
  *
- * 2 phases FIXES, toujours dans le même ordre — `tableau → varianceEcartType`, cette dernière
- * toujours terminale. **Aide PROGRESSIVE par écran** (même mécanique
- * exacte que "Moyenne pondérée"/"Tableau de fréquences"/"Triangle quelconque"/"Colinéarité"/
- * "Orthogonalité").
+ * Phases FIXES par famille (voir `typesDispersion.ts`) — famille "valeurs" : `tableau →
+ * varianceEcartType` (comportement historique inchangé) ; famille "classes" : `centresMoyenne →
+ * tableau → varianceEcartType`. `varianceEcartType` toujours terminale. **Aide PROGRESSIVE par
+ * écran** (même mécanique exacte que "Moyenne pondérée"/"Tableau de fréquences"/"Triangle
+ * quelconque"/"Colinéarité"/"Orthogonalité").
  */
 import type { ExerciceDispersion, GenerateurExerciceDispersion } from "../core/dispersion.types";
 import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
-import type { ReponseTableauDispersion, ReponseVarianceEcartType } from "./verificationDispersion";
-import { verifierTableauDispersion, verifierVarianceEcartType } from "./verificationDispersion";
-import type { EtatSessionDispersion, ResultatExerciceDispersion } from "./typesDispersion";
+import type { ReponseCentresMoyenneDispersion, ReponseTableauDispersion, ReponseVarianceEcartType } from "./verificationDispersion";
+import { verifierCentresMoyenneDispersion, verifierTableauDispersion, verifierVarianceEcartType } from "./verificationDispersion";
+import type { EtatSessionDispersion, PhaseDispersion, ResultatExerciceDispersion } from "./typesDispersion";
 
 const POINTS_DE_BASE = 100;
+export const NIVEAU_AIDE_MAX_CENTRES_MOYENNE = 2;
 export const NIVEAU_AIDE_MAX_TABLEAU = 2;
 export const NIVEAU_AIDE_MAX_VARIANCE_ECART_TYPE = 2;
+
+/** Première phase d'un exercice : l'écran supplémentaire « centres et moyenne » pour la famille
+ * "classes", directement le tableau sinon. */
+export function phaseInitialeDispersion(exercice: ExerciceDispersion): PhaseDispersion {
+  return exercice.enClasses ? "centresMoyenne" : "tableau";
+}
+
+/** Ordre des écrans d'un exercice (puces de progression). */
+export function ordrePhasesDispersion(exercice: ExerciceDispersion): PhaseDispersion[] {
+  return exercice.enClasses ? ["centresMoyenne", "tableau", "varianceEcartType"] : ["tableau", "varianceEcartType"];
+}
+
+function etatExercice(exerciceCourant: ExerciceDispersion) {
+  return {
+    exerciceCourant,
+    phase: phaseInitialeDispersion(exerciceCourant),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAideCentresMoyenne: 0,
+    niveauAideTableau: 0,
+    niveauAideVarianceEcartType: 0,
+    scoreCentresMoyenneExercice: null,
+    centresMoyenneRevele: false,
+    scoreTableauExercice: null,
+    tableauRevele: false,
+  };
+}
 
 export function demarrerSessionDispersion(reglages: ReglagesSession, generateur: GenerateurExerciceDispersion): EtatSessionDispersion {
   return {
     reglages,
     generateur,
     indexExercice: 0,
-    exerciceCourant: generateur(),
-    phase: "tableau",
-    etapeCourante: demarrerEtapeTentatives(),
-    niveauAideTableau: 0,
-    niveauAideVarianceEcartType: 0,
-    scoreTableauExercice: null,
-    tableauRevele: false,
+    ...etatExercice(generateur()),
     resultats: [],
     terminee: false,
   };
@@ -50,6 +71,12 @@ function reglagesEtape(etat: EtatSessionDispersion): ReglagesEtape {
 export function activerAideSuivante(etat: EtatSessionDispersion): EtatSessionDispersion {
   if (etat.terminee) {
     throw new Error("activerAideSuivante : la session est déjà terminée");
+  }
+  if (etat.phase === "centresMoyenne") {
+    if (etat.niveauAideCentresMoyenne >= NIVEAU_AIDE_MAX_CENTRES_MOYENNE) {
+      throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
+    }
+    return { ...etat, niveauAideCentresMoyenne: etat.niveauAideCentresMoyenne + 1 };
   }
   if (etat.phase === "tableau") {
     if (etat.niveauAideTableau >= NIVEAU_AIDE_MAX_TABLEAU) {
@@ -75,13 +102,33 @@ function cloturerExerciceOuSuivant(etat: EtatSessionDispersion, resultat: Result
     ...etat,
     resultats,
     indexExercice,
-    exerciceCourant: etat.generateur(),
-    phase: "tableau",
+    ...etatExercice(etat.generateur()),
+  };
+}
+
+/** Écran supplémentaire de la famille "classes" : centres de classes et x̄. */
+export function soumettreReponseCentresMoyenne(etat: EtatSessionDispersion, reponse: ReponseCentresMoyenneDispersion): EtatSessionDispersion {
+  if (etat.terminee || etat.phase !== "centresMoyenne") {
+    throw new Error("soumettreReponseCentresMoyenne : la session n'est pas à l'étape centresMoyenne");
+  }
+
+  const exerciceCourant = etat.exerciceCourant;
+  const etapeCourante = soumettreEtapeTentatives<ReponseCentresMoyenneDispersion>(etat.etapeCourante, reponse, {
+    ...reglagesEtape(etat),
+    verifier: (r) => verifierCentresMoyenneDispersion(exerciceCourant, r),
+    revelerReponse: () => {},
+  });
+
+  if (!etapeCourante.terminee) {
+    return { ...etat, etapeCourante };
+  }
+
+  return {
+    ...etat,
     etapeCourante: demarrerEtapeTentatives(),
-    niveauAideTableau: 0,
-    niveauAideVarianceEcartType: 0,
-    scoreTableauExercice: null,
-    tableauRevele: false,
+    phase: "tableau",
+    scoreCentresMoyenneExercice: etapeCourante.score as number,
+    centresMoyenneRevele: etapeCourante.revelee,
   };
 }
 
@@ -138,5 +185,12 @@ export function soumettreReponseVarianceEcartType(etat: EtatSessionDispersion, r
     scoreVarianceEcartType: score,
     varianceEcartTypeRevele: etapeCourante.revelee,
     niveauAideVarianceEcartType: etat.niveauAideVarianceEcartType,
+    ...(exerciceCourant.enClasses
+      ? {
+          scoreCentresMoyenne: etat.scoreCentresMoyenneExercice as number,
+          centresMoyenneRevele: etat.centresMoyenneRevele,
+          niveauAideCentresMoyenne: etat.niveauAideCentresMoyenne,
+        }
+      : {}),
   });
 }

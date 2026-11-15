@@ -87,11 +87,17 @@ export function profilMediane(e: ExerciceMediane): ProfilInstance {
 /** gen34 — variance et écart-type. L'écart-type demandé n'est calculable sans calculatrice que si
  * la variance est un carré parfait (σ entier : 1,5 % des tirages, 74 séries distinctes sur 5 000)
  * → `'exacte'` seulement dans ce cas, sinon `'calculatrice'`. x̄ est toujours entier (construction).
- * Effectifs tous égaux : 0,8 % → exclu sans case. */
+ * Effectifs tous égaux : 0,8 % → exclu sans case.
+ * Famille ajoutée « classes » (centres et x̄ à calculer, un écran de plus) : `forme` = famille
+ * (`"valeurs"` / `"classes"`), imposée identique d'une série à l'autre quand la ligne tire au hasard
+ * entre les deux familles (une chance sur deux chacune). Même règle de calculatrice : σ entier
+ * (classes : 2,3 % des tirages, x̄ à au plus une décimale par construction) → `'exacte'`. Effectifs
+ * tous égaux : impossibles en classes (x̄ serait la moyenne simple des centres, rejetée). */
 export function profilDispersion(e: ExerciceDispersion): ProfilInstance {
   return {
     casParticulier: cas([tousEgaux(e.lignes.map((l) => l.effectif)) && "effectifs-egaux"]),
     calcul: estEntier(Math.sqrt(e.varianceAttendue)) ? "exacte" : "calculatrice",
+    forme: e.enClasses ? "classes" : "valeurs",
   };
 }
 

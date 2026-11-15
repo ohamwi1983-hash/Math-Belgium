@@ -1,6 +1,6 @@
 import type { EtatSessionDispersion } from "../moteur/typesDispersion";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { formatEtatActuelTableauLatex } from "./formatDispersion";
+import { formatEtatActuelTableauLatex, formatMoyenneConfirmeeLatex } from "./formatDispersion";
 
 /**
  * Récapitulatif "Ce qu'on sait déjà" — 2 phases FIXES (`tableau` → `varianceEcartType`, toujours
@@ -11,6 +11,17 @@ import { formatEtatActuelTableauLatex } from "./formatDispersion";
  */
 export function calculerRecapitulatifDispersion(etat: EtatSessionDispersion): EntreeRecapitulatif[] {
   const entrees: EntreeRecapitulatif[] = [];
+
+  // Famille "classes" : x̄ confirmé à l'écran « centres et moyenne » (les centres sont repris dans
+  // la colonne xᵢ du tableau de l'écran suivant).
+  if (etat.scoreCentresMoyenneExercice !== null) {
+    entrees.push({
+      libelle: "Moyenne confirmée",
+      estLatex: true,
+      valeur: formatMoyenneConfirmeeLatex(etat.exerciceCourant),
+      revele: etat.centresMoyenneRevele,
+    });
+  }
 
   if (etat.scoreTableauExercice !== null) {
     entrees.push({

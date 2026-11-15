@@ -17,7 +17,7 @@
  */
 import type { ContexteBienaymeTchebychev } from "../core/bienaymeTchebychev.types";
 import type { ExerciceDispersion } from "../core/dispersion.types";
-import { aupresDesPopulationMajuscule } from "./phrasesContexteStatistique";
+import { aupresDesPopulation, aupresDesPopulationMajuscule, deCaractere } from "./phrasesContexteStatistique";
 import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
 export const LABEL_XBAR = "\\bar{x}";
@@ -36,6 +36,10 @@ export const PLACEHOLDER_VARIANCE = "ex : 4,8";
 export const PLACEHOLDER_ECART_TYPE = "ex : 2,19";
 
 export const PRECISION_2_DECIMALES = "arrondi à la 2e décimale";
+
+/** Message d'une saisie illisible (gen34) — elle n'est pas envoyée au moteur : aucune tentative
+ * consommée (décision de l'utilisateur). */
+export const MESSAGE_SAISIE_ILLISIBLE = "Saisie non reconnue : écris un nombre, avec une virgule décimale si besoin (ex. 12,5). Cette saisie ne compte pas comme une tentative.";
 
 /** Index de la ligne "exemple" utilisée par l'Aide 2 de l'écran "tableau" — toujours la première
  * ligne du tableau, jamais un second tirage côté présentation (le tirage aléatoire vit exclusivement
@@ -85,6 +89,10 @@ function Kx(valeur: string): SegmentTexte {
 
 export function formatEnonceSegments(exercice: ExerciceDispersion): SegmentTexte[] {
   const { contexte, xBar } = exercice;
+  if (exercice.enClasses) {
+    // Famille "classes" : x̄ n'est PAS donné (l'élève le calcule à l'écran « centres et moyenne »).
+    return [T(`Voici la répartition ${deCaractere(contexte)} (en ${contexte.unite}) ${aupresDesPopulation(contexte)}, regroupée en classes de même amplitude.`)];
+  }
   return [
     T(`${aupresDesPopulationMajuscule(contexte)}, ${contexte.caractereDefini} ${contexte.moyenAccord} est `),
     Kx(`${LABEL_XBAR} = ${xBar}\\text{ ${contexte.unite}}`),
@@ -121,7 +129,9 @@ export function texteAideTableauNiveau1(): SegmentTexte[] {
 
 export function texteAideTableauNiveau2(exercice: ExerciceDispersion): AideDeuxLignes {
   const ligne = exercice.lignes[INDEX_LIGNE_EXEMPLE];
-  const ecart = ligne.valeur - exercice.xBar;
+  // Arrondi au millionième : sans effet sur des entiers, efface le bruit flottant quand x̄ est
+  // décimal (famille "classes" : 165 − 174,6 = −9,600000000000009 en flottant).
+  const ecart = Math.round((ligne.valeur - exercice.xBar) * 1e6) / 1e6;
   // Un écart négatif est TOUJOURS parenthésé : −6^2 vaudrait −36, jamais 36 (audit chapitre 4).
   const ecartLatex = ecart < 0 ? `(${formatNombreLatex(ecart)})` : formatNombreLatex(ecart);
   return {
@@ -165,8 +175,82 @@ export function texteAideVarianceEcartTypeNiveau2(exercice: ExerciceDispersion):
     texte: "Avec les valeurs de l'exercice (non calculé) :",
     // σ = √V sans substituer V : la variance arrondie est justement la réponse du premier champ
     // de cet écran — l'afficher ici la donnerait (audit chapitre 4).
-    latex: `\\begin{gathered} ${LABEL_VARIANCE} = \\dfrac{${exercice.sommeProduits}}{${exercice.n}} \\\\ ${LABEL_ECART_TYPE} = \\sqrt{${LABEL_VARIANCE}} \\end{gathered}`,
+    // `virgulesLatex` : sans effet sur une somme entière (famille "valeurs"), virgule décimale pour
+    // une somme décimale (famille "classes").
+    latex: virgulesLatex(`\\begin{gathered} ${LABEL_VARIANCE} = \\dfrac{${exercice.sommeProduits}}{${exercice.n}} \\\\ ${LABEL_ECART_TYPE} = \\sqrt{${LABEL_VARIANCE}} \\end{gathered}`),
   };
+}
+
+// ============================================================================
+// Écran supplémentaire de la famille "classes" — "Centres et moyenne".
+// ============================================================================
+
+export const PLACEHOLDER_CENTRE = "ex : 25";
+export const PLACEHOLDER_MOYENNE = "ex : 27,4";
+
+/** Classe `[a ; b[` en texte brut (la dernière fermée des deux côtés) — même convention que
+ * « Moyenne pondérée » (`formatClasseTexte`). */
+export function formatClasseDispersionTexte(exercice: ExerciceDispersion, index: number): string {
+  const classes = exercice.enClasses?.classes ?? [];
+  const classe = classes[index];
+  if (!classe) return "";
+  const fermante = index === classes.length - 1 ? "]" : "[";
+  return virgulesTexte(`[${classe.borneInf} ; ${classe.borneSup}${fermante}`);
+}
+
+/** Même classe en KaTeX (crochet ouvrant inversé via `\mathclose{[}`), pour le papier. */
+export function formatClasseDispersionLatex(exercice: ExerciceDispersion, index: number): string {
+  const classes = exercice.enClasses?.classes ?? [];
+  const classe = classes[index];
+  if (!classe) return "";
+  const fermante = index === classes.length - 1 ? "]" : "\\mathclose{[}";
+  return `[${formatNombreLatex(classe.borneInf)}\\,;\\,${formatNombreLatex(classe.borneSup)}${fermante}`;
+}
+
+export function consigneCentresMoyenne(exercice: ExerciceDispersion): SegmentTexte[] {
+  return [
+    T("Calcule le centre "),
+    Kx(LABEL_VALEUR_XI),
+    T(" de chaque classe, puis la moyenne "),
+    Kx(LABEL_XBAR),
+    T(` de la série en utilisant ces centres (valeur exacte, en ${exercice.contexte.unite}).`),
+  ];
+}
+
+export function texteAideCentresMoyenneNiveau1(): { segments: SegmentTexte[]; latex: string } {
+  return {
+    segments: [
+      T("Rappel : le centre de la classe "),
+      Kx("[a\\,;\\,b\\mathclose{[}"),
+      T(" est la moyenne de ses deux bornes ; la moyenne de la série se calcule ensuite avec les centres, chacun multiplié par son effectif :"),
+    ],
+    latex: `\\begin{gathered} ${LABEL_VALEUR_XI} = \\dfrac{a+b}{2} \\\\ ${LABEL_XBAR} = \\dfrac{\\Sigma(x_i \\cdot n_i)}{${LABEL_SOMME_N}} \\end{gathered}`,
+  };
+}
+
+/** Le premier centre calculé, puis x̄ avec le seul premier terme substitué : il reste les autres
+ * centres et toute la division à faire. */
+export function texteAideCentresMoyenneNiveau2(exercice: ExerciceDispersion): AideDeuxLignes {
+  const classe = exercice.enClasses?.classes[INDEX_LIGNE_EXEMPLE];
+  if (!classe) return { texte: "", latex: "" };
+  const c = formatNombreLatex(classe.centre);
+  return {
+    texte: `Pour la première classe ${formatClasseDispersionTexte(exercice, INDEX_LIGNE_EXEMPLE)}, puis pour la moyenne (à compléter) :`,
+    latex: virgulesLatex(
+      `\\begin{gathered} x_1 = \\dfrac{${classe.borneInf}+${classe.borneSup}}{2} = ${c} \\\\ ${LABEL_XBAR} = \\dfrac{${c} \\cdot ${classe.effectif} + \\ldots}{${classe.effectif} + \\ldots} \\end{gathered}`,
+    ),
+  };
+}
+
+/** Révélation (panneau de résultat après échec) de l'écran « centres et moyenne ». */
+export function formatCentresMoyenneAttendusTexte(exercice: ExerciceDispersion): SegmentTexte[] {
+  const centres = (exercice.enClasses?.classes ?? []).map((c) => formatNombreTexte(c.centre)).join(" ; ");
+  return [T(`centres : ${centres} — `), Kx(`${LABEL_XBAR} = ${formatNombreLatex(exercice.xBar)}`), T(` ${exercice.contexte.unite}`)];
+}
+
+/** Récapitulatif « Ce qu'on sait déjà » après l'écran « centres et moyenne ». */
+export function formatMoyenneConfirmeeLatex(exercice: ExerciceDispersion): string {
+  return `${LABEL_XBAR} = ${formatNombreLatex(exercice.xBar)}\\text{ ${exercice.contexte.unite}}`;
 }
 
 /** État actuel de l'écran 2 — les deux sommes CONFIRMÉES à l'écran 1, toujours des entiers exacts

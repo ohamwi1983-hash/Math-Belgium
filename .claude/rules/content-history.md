@@ -3574,3 +3574,36 @@ paths:
   `core/valeurAberrante.types.ts`, `moteur/{modele,session}ValeurAberrante.ts`,
   `ui/{format,figure}ValeurAberrante.ts`, `components/EtapesValeurAberrante.tsx`,
   `generateurs/valeurAberrante/` (index, profil, exportEvaluation).
+- **4e, Chapitre 4 — Statistique descriptive** (`statistique-descriptive`), section `dispersion` :
+  **famille ajoutée à gen34** (« Paramètres de dispersion », `AppDispersion.tsx`) — données
+  GROUPÉES EN CLASSES. gen34 n'avait pas de catalogue : il en a désormais un (`"valeurs"` = la
+  famille historique, construction, écrans, vérification et papier INCHANGÉS ; `"classes"`),
+  branché sur `SelecteurVarianteDev`, l'adaptateur (`catalogueVariantes`) et `?code=` ; le tirage
+  libre choisit une famille sur deux (conséquence : un QR code imprimé AVANT ce changement, sans
+  variante, peut rouvrir un autre exercice). Famille "classes" : 4 ou 5 classes de même amplitude
+  (2 unités d'échelle `tirerEchelle`, centres entiers), effectifs 2 à 12, x̄ gardé seulement s'il a
+  au plus UNE décimale ; produits (xᵢ − x̄)²·nᵢ décimaux exacts à ≤ 2 décimales (stockés arrondis au
+  centième) ; V et σ en cascade d'arrondis à 2 décimales comme la famille historique (même
+  vérification exacte). Rejet des tirages où la moyenne SIMPLE des centres égale x̄ ou une moyenne
+  « avec les bornes » (pièges indistinguables, trouvé au parcours : 140 = x̄ − demi-amplitude).
+  `ExerciceDispersion.enClasses?` (optionnel) porte les classes et les valeurs des pièges : les
+  exercices que l'exercice de synthèse gen35 fabrique (`versDispersion`) n'en ont pas et gardent
+  exactement leur comportement. Écrans : a) NOUVEAU « centres et moyenne » (`EtapeCentresMoyenneDispersion`
+  : colonne des centres + x̄, aides « Rappel : … » et « première classe / x̄ à compléter ») ;
+  b) le tableau historique (centres en xᵢ) ; c) variance et écart-type. Pièges diagnostiqués :
+  centre = borne, x̄ avec les bornes, x̄ non pondéré, écart-type sans la racine (ce dernier
+  seulement pour la famille "classes", l'écran étant partagé avec gen35). Les deux écrans partagés
+  reçoivent `saisieIllisibleNonComptee` (passé par `AppDispersion` seulement) : une saisie
+  illisible n'est plus envoyée ni comptée dans gen34 (décision permanente), gen35 inchangé. Bug de
+  mise en page corrigé au passage : les messages d'erreur à formule (`.alert-error` est flex)
+  éclataient en colonnes — contenu enveloppé dans un seul `<span>`. Clé de génération sur les
+  écrans (champs vides après « Générer »). Papier : énoncé = tableau des classes + consigne globale
+  (« en représentant chaque classe par son centre… x̄ (valeur exacte), V et σ arrondis à la 2e
+  décimale ») ; corrigé « Étape 1/2/3 » (tableau classes/centres/nᵢ/xᵢ·nᵢ, puis les étapes
+  historiques réutilisées) ; barème 0,5 + 1 + 1 + 0,75 + 0,75 ; durée 8 min. Profil : `forme` =
+  famille, `calcul` exacte ssi σ entier (classes : ~1 % des tirages, ~50 attendus par recherche de
+  200 ms). Cours : `rappel` « Variance de données groupées en classes » avant la carte, description
+  de la carte mise à jour. Fichiers : `core/dispersion.types.ts`, `generateurs/dispersion/{index,exportEvaluation}.ts`,
+  `generateurs/profilsEvaluationStatistique.ts`, `moteur/{session,types,verification}Dispersion.ts`,
+  `ui/{format,recapitulatif}Dispersion.ts`, `components/EtapeCentresMoyenneDispersion.tsx` (nouveau),
+  `components/Etape{Tableau,VarianceEcartType}Dispersion.tsx`, `AppDispersion.tsx`.

@@ -2,10 +2,12 @@ import type { ExerciceDispersion, GenerateurExerciceDispersion } from "../core/d
 import type { ReglagesSession } from "../core/session.types";
 import type { EtatEtapeTentatives } from "./etapeTentatives";
 
-/** 2 phases FIXES, toujours dans le même ordre — aucune variante, aucun saut conditionnel (contrat
- * n'a qu'un seul mécanisme, voir `core/dispersion.types.ts`) : `tableau → varianceEcartType`,
- * `varianceEcartType` toujours terminale. */
-export type PhaseDispersion = "tableau" | "varianceEcartType";
+/** Phases dans un ordre FIXE par famille, aucun saut conditionnel :
+ * - famille "valeurs" (historique) : `tableau → varianceEcartType` ;
+ * - famille "classes" : `centresMoyenne → tableau → varianceEcartType` (écran supplémentaire : les
+ *   centres de classes et x̄ à calculer soi-même).
+ * `varianceEcartType` est toujours terminale. */
+export type PhaseDispersion = "centresMoyenne" | "tableau" | "varianceEcartType";
 
 export interface ResultatExerciceDispersion {
   scoreTableau: number;
@@ -14,6 +16,10 @@ export interface ResultatExerciceDispersion {
   scoreVarianceEcartType: number;
   varianceEcartTypeRevele: boolean;
   niveauAideVarianceEcartType: number;
+  /** Famille "classes" seulement (absents sinon). */
+  scoreCentresMoyenne?: number;
+  centresMoyenneRevele?: boolean;
+  niveauAideCentresMoyenne?: number;
 }
 
 export interface EtatSessionDispersion {
@@ -24,9 +30,14 @@ export interface EtatSessionDispersion {
   phase: PhaseDispersion;
   etapeCourante: EtatEtapeTentatives;
   /** Aide PROGRESSIVE par écran (comme "Moyenne pondérée"/"Tableau de fréquences"...) — 2 niveaux
-   * sur chacun des 2 écrans (spec). */
+   * sur chacun des écrans (spec). */
+  niveauAideCentresMoyenne: number;
   niveauAideTableau: number;
   niveauAideVarianceEcartType: number;
+  /** Score/révélation de l'écran "centresMoyenne" (famille "classes"), conservés jusqu'à la
+   * clôture finale de l'exercice. */
+  scoreCentresMoyenneExercice: number | null;
+  centresMoyenneRevele: boolean;
   /** Score/révélation de l'écran "tableau", conservés jusqu'à la clôture finale de l'exercice
    * (qui construit le `ResultatExerciceDispersion` complet) — même principe que le reste du projet. */
   scoreTableauExercice: number | null;

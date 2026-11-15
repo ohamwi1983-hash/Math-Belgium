@@ -1266,12 +1266,24 @@ export const statistiqueDescriptive: ChapterContent = {
           domaines: ['Industrie', 'Contrôle qualité'],
         },
         {
+          kind: 'rappel',
+          label: 'Variance de données groupées en classes',
+          items: [
+            'Comme pour la moyenne, chaque classe est représentée par son **centre** $x_i$, la ' +
+              'moyenne de ses deux bornes — jamais par une borne.',
+            'On calcule d\'abord $\\bar{x}$ avec ces centres, pondérés par les effectifs, puis la ' +
+              'variance avec la même formule : $V = \\dfrac{\\Sigma(x_i-\\bar{x})^2 \\cdot n_i}{n}$, et ' +
+              '$\\sigma = \\sqrt{V}$. Comme pour la moyenne, c\'est une **approximation**.',
+          ],
+        },
+        {
           kind: 'entrainement',
           title: 'Paramètres de dispersion',
           generatorId: 'gen34',
           description: [
-            'Calcule la variance puis l\'écart-type d\'une série discrète. x̄ est donné dans ' +
-              'l\'énoncé.',
+            'Calcule la variance puis l\'écart-type d\'une série : soit une série discrète dont x̄ ' +
+              'est donné, soit des données groupées en classes, où tu calcules d\'abord les centres ' +
+              'et x̄ toi-même.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 34. Paramètres de dispersion »',

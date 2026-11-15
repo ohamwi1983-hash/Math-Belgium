@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ExerciceDispersion } from "../core/dispersion.types";
 import type { ReponseTableauDispersion } from "../moteur/verificationDispersion";
-import { diagnostiquerTableauDispersion } from "../moteur/verificationDispersion";
+import { diagnostiquerTableauDispersion, saisieIllisible } from "../moteur/verificationDispersion";
+import { MESSAGE_SAISIE_ILLISIBLE } from "../ui/formatDispersion";
 import { NIVEAU_AIDE_MAX_TABLEAU } from "../moteur/sessionDispersion";
 import { INDEX_LIGNE_EXEMPLE, LABEL_EFFECTIF_NI, LABEL_PRODUIT, LABEL_VALEUR_XI, PLACEHOLDER_PRODUIT, PLACEHOLDER_SOMME_N, PLACEHOLDER_SOMME_PRODUIT, consigneTableau, texteAideTableauNiveau1, texteAideTableauNiveau2 } from "../ui/formatDispersion";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -24,6 +25,10 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Décision de l'utilisateur « une saisie illisible ne consomme jamais de tentative » : `true`
+   * (passé par `AppDispersion`, gen34) → une saisie illisible n'est pas envoyée, un message le dit.
+   * Absent (exercice de synthèse gen35) → comportement historique inchangé. */
+  saisieIllisibleNonComptee?: boolean;
 }
 
 /**
@@ -32,13 +37,30 @@ interface Props {
  * tentative (tout ou rien), même mécanique exacte que l'écran "Sommes" de "Moyenne pondérée"
  * (`EtapeSommesMoyennePonderee.tsx`).
  */
-export function EtapeTableauDispersion({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeTableauDispersion({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation, saisieIllisibleNonComptee = false }: Props) {
   const [produits, setProduits] = useState<string[]>(() => new Array(exercice.lignes.length).fill("") as string[]);
-  const [sommeN, setSommeN] = useState("");
-  const [sommeProduits, setSommeProduits] = useState("");
+  const [sommeN, setSommeNBrut] = useState("");
+  const [sommeProduits, setSommeProduitsBrut] = useState("");
+  const [illisible, setIllisible] = useState(false);
 
   function modifierProduit(index: number, valeur: string) {
+    setIllisible(false);
     setProduits(produits.map((p, i) => (i === index ? valeur : p)));
+  }
+  function setSommeN(valeur: string) {
+    setIllisible(false);
+    setSommeNBrut(valeur);
+  }
+  function setSommeProduits(valeur: string) {
+    setIllisible(false);
+    setSommeProduitsBrut(valeur);
+  }
+  function valider() {
+    if (saisieIllisibleNonComptee && [...produits, sommeN, sommeProduits].some(saisieIllisible)) {
+      setIllisible(true);
+      return;
+    }
+    onValider({ produits, sommeN, sommeProduits });
   }
 
   const complet = produits.every((p) => p.trim() !== "") && sommeN.trim() !== "" && sommeProduits.trim() !== "";
@@ -137,13 +159,18 @@ export function EtapeTableauDispersion({ exercice, tentativesUtilisees, tentativ
           type="button"
           className="btn btn-primary"
           disabled={!complet}
-          onClick={() => onValider({ produits, sommeN, sommeProduits })}
+          onClick={valider}
         >
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
+        {illisible && (
           <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            {MESSAGE_SAISIE_ILLISIBLE}
+          </p>
+        )}
+        {!illisible && tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, saisieIllisibleNonComptee ? undefined : statut)}
           </p>
         )}
         </>

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { ExerciceDispersion } from "../core/dispersion.types";
 import type { ReponseVarianceEcartType } from "../moteur/verificationDispersion";
-import { diagnostiquerVarianceEcartType, ecartTypeDepuisVarianceNonArrondie } from "../moteur/verificationDispersion";
+import { diagnostiquerVarianceEcartType, ecartTypeDepuisVarianceNonArrondie, ecartTypeSansRacine, saisieIllisible } from "../moteur/verificationDispersion";
 import { NIVEAU_AIDE_MAX_VARIANCE_ECART_TYPE } from "../moteur/sessionDispersion";
-import { LABEL_ECART_TYPE, LABEL_VARIANCE, PLACEHOLDER_ECART_TYPE, PLACEHOLDER_VARIANCE, consigneEcartType, consigneVariance, texteAideVarianceEcartTypeNiveau1, texteAideVarianceEcartTypeNiveau2 } from "../ui/formatDispersion";
+import { LABEL_ECART_TYPE, LABEL_VARIANCE, MESSAGE_SAISIE_ILLISIBLE, PLACEHOLDER_ECART_TYPE, PLACEHOLDER_VARIANCE, consigneEcartType, consigneVariance, texteAideVarianceEcartTypeNiveau1, texteAideVarianceEcartTypeNiveau2 } from "../ui/formatDispersion";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -22,6 +22,9 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Voir `EtapeTableauDispersion` : `true` pour gen34 (saisie illisible non envoyée, aucune
+   * tentative consommée) ; absent pour l'exercice de synthèse (comportement historique). */
+  saisieIllisibleNonComptee?: boolean;
 }
 
 /**
@@ -40,15 +43,36 @@ export function EtapeVarianceEcartTypeDispersion({
   onActiverAide,
   onValider,
   validation,
+  saisieIllisibleNonComptee = false,
 }: Props) {
-  const [variance, setVariance] = useState("");
-  const [ecartType, setEcartType] = useState("");
+  const [variance, setVarianceBrut] = useState("");
+  const [ecartType, setEcartTypeBrut] = useState("");
+  const [illisible, setIllisible] = useState(false);
+
+  function setVariance(valeur: string) {
+    setIllisible(false);
+    setVarianceBrut(valeur);
+  }
+  function setEcartType(valeur: string) {
+    setIllisible(false);
+    setEcartTypeBrut(valeur);
+  }
+  function valider() {
+    if (saisieIllisibleNonComptee && (saisieIllisible(variance) || saisieIllisible(ecartType))) {
+      setIllisible(true);
+      return;
+    }
+    onValider({ variance, ecartType });
+  }
 
   const complet = variance.trim() !== "" && ecartType.trim() !== "";
   const apresEchec = tentativesUtilisees > 0;
   const evaluation = apresEchec ? diagnostiquerVarianceEcartType(exercice, { variance, ecartType }) : null;
   const statut = evaluation && (evaluation.variance === "parse_error" || evaluation.ecartType === "parse_error") ? "parse_error" : undefined;
   const sigmaDepuisVarianceBrute = evaluation !== null && evaluation.ecartType !== "correct" && ecartTypeDepuisVarianceNonArrondie(exercice, ecartType);
+  // Piège « écart-type sans la racine » : diagnostiqué pour la famille "classes" seulement (les
+  // autres usages de cet écran gardent leur comportement historique).
+  const sigmaSansRacine = exercice.enClasses !== undefined && evaluation !== null && evaluation.ecartType !== "correct" && ecartTypeSansRacine(exercice, ecartType);
   const consigneV = consigneVariance(exercice.contexte);
   const consigneS = consigneEcartType(exercice.contexte);
   const aide2 = texteAideVarianceEcartTypeNiveau2(exercice);
@@ -108,17 +132,31 @@ export function EtapeVarianceEcartTypeDispersion({
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_VARIANCE_ECART_TYPE} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ variance, ecartType })}>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
+        {illisible && (
           <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-            {sigmaDepuisVarianceBrute && (
-              <>
-                {" "}Ton écart-type est calculé à partir de la variance non arrondie : calcule <Katex expression={`${LABEL_ECART_TYPE}=\\sqrt{${LABEL_VARIANCE}}`} /> à partir de la variance arrondie à 2 décimales.
-              </>
-            )}
+            {MESSAGE_SAISIE_ILLISIBLE}
+          </p>
+        )}
+        {!illisible && tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {/* Un seul enfant : `.alert-error` est un conteneur flex, chaque morceau (texte, formule)
+                deviendrait sinon une colonne étroite. */}
+            <span>
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, saisieIllisibleNonComptee ? undefined : statut)}
+              {sigmaSansRacine && (
+                <>
+                  {" "}Ton écart-type est égal à la variance : l'écart-type est sa racine carrée, <Katex expression={`${LABEL_ECART_TYPE}=\\sqrt{${LABEL_VARIANCE}}`} />.
+                </>
+              )}
+              {sigmaDepuisVarianceBrute && (
+                <>
+                  {" "}Ton écart-type est calculé à partir de la variance non arrondie : calcule <Katex expression={`${LABEL_ECART_TYPE}=\\sqrt{${LABEL_VARIANCE}}`} /> à partir de la variance arrondie à 2 décimales.
+                </>
+              )}
+            </span>
           </p>
         )}
         </>

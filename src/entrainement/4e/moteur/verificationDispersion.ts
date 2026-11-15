@@ -22,6 +22,72 @@ function statutValeurExacte(texte: string, cible: number): StatutVerification {
   return Math.abs(valeur - cible) <= TOLERANCE ? "correct" : "not_equivalent";
 }
 
+/** Une saisie est-elle illisible ? (statut `parse_error` — ne consomme jamais de tentative). */
+export function saisieIllisible(texte: string): boolean {
+  return texte.trim() !== "" && parserNombreOuFraction(texte) === null;
+}
+
+// ============================================================================
+// Écran supplémentaire de la famille "classes" — "Centres et moyenne" : un centre par classe, puis
+// x̄ (valeur exacte, au plus 1 décimale par construction : tolérance de bruit seulement).
+// ============================================================================
+
+export interface ReponseCentresMoyenneDispersion {
+  /** Un centre par classe, index-aligné avec `exercice.enClasses.classes`. */
+  centres: string[];
+  moyenne: string;
+}
+
+export interface StatutCentresMoyenneDispersion {
+  centres: StatutVerification[];
+  moyenne: StatutVerification;
+}
+
+export function diagnostiquerCentresMoyenneDispersion(exercice: ExerciceDispersion, reponse: ReponseCentresMoyenneDispersion): StatutCentresMoyenneDispersion {
+  const classes = exercice.enClasses?.classes ?? [];
+  return {
+    centres: classes.map((c, i) => statutValeurExacte(reponse.centres[i] ?? "", c.centre)),
+    moyenne: statutValeurExacte(reponse.moyenne, exercice.xBar),
+  };
+}
+
+export function verifierCentresMoyenneDispersion(exercice: ExerciceDispersion, reponse: ReponseCentresMoyenneDispersion): boolean {
+  if (!exercice.enClasses || reponse.centres.length !== exercice.enClasses.classes.length) return false;
+  const statut = diagnostiquerCentresMoyenneDispersion(exercice, reponse);
+  return statut.centres.every((s) => s === "correct") && statut.moyenne === "correct";
+}
+
+/** Pièges reconnus à l'écran « centres et moyenne » (seulement sur des champs FAUX). */
+export interface PiegesCentresMoyenneDispersion {
+  /** Un centre saisi égal à une borne de sa classe. */
+  centreEgalBorne: boolean;
+  /** x̄ calculé avec les bornes (inférieures ou supérieures) au lieu des centres. */
+  moyenneAvecBornes: boolean;
+  /** x̄ = moyenne simple des centres, sans les effectifs. */
+  moyenneNonPonderee: boolean;
+}
+
+function proche(texte: string, cible: number, tolerance: number): boolean {
+  const valeur = parserNombreOuFraction(texte);
+  return valeur !== null && Math.abs(valeur - cible) <= tolerance;
+}
+
+export function piegesCentresMoyenneDispersion(exercice: ExerciceDispersion, reponse: ReponseCentresMoyenneDispersion): PiegesCentresMoyenneDispersion {
+  const donnees = exercice.enClasses;
+  if (!donnees) return { centreEgalBorne: false, moyenneAvecBornes: false, moyenneNonPonderee: false };
+  const statut = diagnostiquerCentresMoyenneDispersion(exercice, reponse);
+  const moyenneFausse = statut.moyenne === "not_equivalent";
+  return {
+    centreEgalBorne: donnees.classes.some(
+      (c, i) => statut.centres[i] === "not_equivalent" && (proche(reponse.centres[i] ?? "", c.borneInf, TOLERANCE) || proche(reponse.centres[i] ?? "", c.borneSup, TOLERANCE)),
+    ),
+    // Les deux moyennes « avec les bornes » sont des décimaux courts (x̄ ∓ demi-amplitude) : écart au
+    // centième près. La moyenne simple des centres peut avoir plus de décimales : arrondi toléré.
+    moyenneAvecBornes: moyenneFausse && (proche(reponse.moyenne, donnees.moyenneBornesInf, 0.01) || proche(reponse.moyenne, donnees.moyenneBornesSup, 0.01)),
+    moyenneNonPonderee: moyenneFausse && proche(reponse.moyenne, donnees.moyenneNonPonderee, 0.05),
+  };
+}
+
 // ============================================================================
 // Écran 1 — "Tableau et sommes intermédiaires" : un produit (x_i-x̄)²·n_i PAR LIGNE, plus les deux
 // totaux Σn_i/Σ(x_i-x̄)²·n_i intégrés à la dernière ligne du tableau (même mécanique que "Moyenne
@@ -110,4 +176,11 @@ export function ecartTypeDepuisVarianceNonArrondie(exercice: ExerciceDispersion,
   const ecartTypeNonArrondi = Math.round(Math.sqrt(exercice.sommeProduits / exercice.n) * 100) / 100;
   if (Math.abs(ecartTypeNonArrondi - exercice.ecartTypeAttendu) <= TOLERANCE) return false;
   return Math.abs(valeur - ecartTypeNonArrondi) <= TOLERANCE;
+}
+
+/** Piège « écart-type sans la racine » (diagnostiqué pour la famille "classes") : σ saisi égal à la
+ * variance (arrondie ou non). Jamais vrai quand V = σ (V = 0 ou 1). */
+export function ecartTypeSansRacine(exercice: ExerciceDispersion, texte: string): boolean {
+  if (Math.abs(exercice.varianceAttendue - exercice.ecartTypeAttendu) <= 0.01) return false;
+  return proche(texte, exercice.varianceAttendue, 0.01) || proche(texte, exercice.sommeProduits / exercice.n, 0.01);
 }

@@ -3,13 +3,14 @@
  * intégralement "Mode et classe modale" (`promptgen34remplacement.md`) à la même position (gen34).
  * Ce contenu (mode multiple, absence de mode, classe modale isolée) disparaît de la plateforme,
  * remplacé par le calcul de la variance et de l'écart-type à partir d'un tableau x_i/n_i déjà
- * construit — **pas de variante avec classes groupées** (contrairement à d'autres générateurs du
- * chapitre 5, ce générateur reste uniquement sur données discrètes) : aucun `CATALOGUE_VARIANTES`/
- * `construireAvecVarianteId` nécessaire (même exemption que "Caractéristiques d'une fonction"/
- * "Étendue et écart interquartile" — pas d'axe de technique/méthode discret, seule la variété
- * numérique du tirage).
+ * construit.
  *
- * $\bar{x}$ est TOUJOURS donné directement dans l'énoncé (jamais recalculé par l'élève dans ce
+ * **Famille ajoutée (fiche validée, 4e ch. 4) : données groupées en classes** — catalogue de
+ * variantes `"valeurs"` (famille historique décrite ci-dessous, INCHANGÉE) / `"classes"` (voir
+ * `DonneesClassesDispersion` : centres de classes et x̄ à calculer par l'élève sur un écran
+ * supplémentaire, puis le même tableau et le même écran variance/écart-type, avec les centres).
+ *
+ * Famille `"valeurs"` : $\bar{x}$ est TOUJOURS donné directement dans l'énoncé (jamais recalculé par l'élève dans ce
  * générateur — cette compétence est déjà couverte par "Moyenne pondérée") — mais reste
  * mathématiquement COHÉRENT avec le tableau x_i/n_i (Σ(x_i·n_i)/n = xBar exactement), jamais une
  * valeur incohérente avec les données affichées.
@@ -59,6 +60,47 @@ export interface ExerciceDispersion {
   varianceAttendue: number;
   /** √varianceAttendue (déjà arrondie), arrondi à son tour à 2 décimales — voir "cascade" ci-dessus. */
   ecartTypeAttendu: number;
+  /** Présent SEULEMENT pour la famille `"classes"` (absent = famille `"valeurs"` ; toujours absent
+   * pour les exercices fabriqués par `versDispersion` de l'exercice de synthèse, qui gardent donc
+   * exactement le comportement historique). Dans ce cas, `lignes[i].valeur` est le CENTRE de la
+   * classe i, `xBar` (décimal à au plus 1 décimale) est à calculer par l'élève, et les produits
+   * `(xᵢ − x̄)²·nᵢ` sont des décimaux exacts à au plus 2 décimales (stockés arrondis au centième,
+   * sans bruit flottant), de même que `sommeProduits`. */
+  enClasses?: DonneesClassesDispersion;
+}
+
+/** Famille de gen34 (catalogue de variantes, `generateurs/dispersion/index.ts`) : `"valeurs"` —
+ * série discrète, x̄ DONNÉ (famille historique, inchangée) ; `"classes"` — données groupées en
+ * classes, l'élève calcule les centres et x̄ lui-même (écran supplémentaire « centres et moyenne »),
+ * puis la variance et l'écart-type avec les centres. */
+export type FamilleDispersion = "valeurs" | "classes";
+
+/** Une classe `[borneInf ; borneSup[` (la dernière fermée des deux côtés) — famille `"classes"`. */
+export interface ClasseDispersion {
+  borneInf: number;
+  borneSup: number;
+  effectif: number;
+  /** (borneInf + borneSup) / 2 — toujours un entier par construction (amplitude paire en unités). */
+  centre: number;
+}
+
+/** Données propres à la famille `"classes"` : les classes affichées (sans leurs centres), et les
+ * valeurs des pièges diagnostiqués à l'écran « centres et moyenne ». */
+export interface DonneesClassesDispersion {
+  classes: ClasseDispersion[];
+  /** Σ(centre·nᵢ) — entier exact. */
+  sommeCentresN: number;
+  /** Piège « bornes au lieu des centres » : moyenne calculée avec les bornes inférieures, puis avec
+   * les bornes supérieures (valeurs exactes). */
+  moyenneBornesInf: number;
+  moyenneBornesSup: number;
+  /** Piège « x̄ non pondéré » : moyenne simple des centres (jamais égale à x̄ par construction). */
+  moyenneNonPonderee: number;
 }
 
 export type GenerateurExerciceDispersion = () => ExerciceDispersion;
+
+/** Famille d'une instance (absence de `enClasses` = famille historique `"valeurs"`). */
+export function familleDispersion(exercice: ExerciceDispersion): FamilleDispersion {
+  return exercice.enClasses ? "classes" : "valeurs";
+}
