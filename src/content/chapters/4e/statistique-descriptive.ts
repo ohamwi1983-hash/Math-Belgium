@@ -194,6 +194,98 @@ export const statistiqueDescriptive: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 30. Tableau de fréquences »',
         },
+        { kind: 'subheading', text: 'Le diagramme circulaire' },
+        {
+          kind: 'para',
+          text:
+            'Pour montrer comment un tout se **partage**, on utilise un **diagramme circulaire** : le ' +
+            'disque entier représente 100 % des individus, et chaque catégorie reçoit un **secteur** ' +
+            'proportionnel à sa fréquence. Comme le disque fait 360°, l\'angle du secteur vaut ' +
+            '$\\alpha_i = f_i \\times 360^{\\circ}$ (avec $f_i$ écrite en décimal : 30 % = 0,30). Dans ' +
+            'l\'autre sens, un angle lu donne la fréquence : $f_i = \\dfrac{\\alpha_i}{360^{\\circ}}$.',
+        },
+        {
+          kind: 'featureTable',
+          caption: 'Série des livres lus : de la fréquence à l\'angle (la somme des angles vaut bien 360°)',
+          headers: ['xᵢ', 'fᵢ (%)', 'calcul', 'angle'],
+          rows: [
+            ['3', '30', '$0{,}30 \\times 360^{\\circ}$', '108°'],
+            ['5', '35', '$0{,}35 \\times 360^{\\circ}$', '126°'],
+            ['7', '20', '$0{,}20 \\times 360^{\\circ}$', '72°'],
+            ['12', '15', '$0{,}15 \\times 360^{\\circ}$', '54°'],
+          ],
+        },
+        { kind: 'subheading', text: 'Graphiques trompeurs' },
+        {
+          kind: 'attention',
+          label: 'Un graphique peut mentir sans écrire un seul chiffre faux',
+          text:
+            'Avant de croire ce qu\'un graphique « montre », lis ses axes et ses nombres. Quatre ' +
+            'manipulations reviennent souvent :',
+          items: [
+            '**Axe vertical tronqué** : il ne commence pas à 0, et une petite hausse paraît énorme.',
+            '**Graduations irrégulières** : des écarts égaux sur l\'axe ne représentent pas des écarts ' +
+              'égaux de valeurs.',
+            '**Pictogrammes agrandis dans les deux sens** : un dessin 2 fois plus haut ET 2 fois plus ' +
+              'large a une aire 4 fois plus grande — l\'œil voit « ×4 » pour une valeur seulement doublée.',
+            '**Diagramme circulaire dont les parts ne totalisent pas 100 %** : les parts ne découpent ' +
+              'plus un tout (souvent parce que chacun pouvait donner plusieurs réponses).',
+          ],
+        },
+        {
+          kind: 'illustrationGroup',
+          items: [
+            {
+              kind: 'curvePlot',
+              curves: [],
+              shadedRegions: [
+                { from: 0.7, to: 1.3, upper: () => 1000, lower: () => 960, tone: 'accent' },
+                { from: 1.7, to: 2.3, upper: () => 1080, lower: () => 960, tone: 'accent' },
+              ],
+              xMin: 0,
+              xMax: 3,
+              xTicks: [1, 2],
+              xTickLabels: { 1: '2023', 2: '2024' },
+              yTicks: [960, 1000, 1040, 1080],
+              fixedYRange: { min: 960, max: 1110 },
+              xAxisLabel: '',
+              yAxisLabel: 'ventes',
+              compact: true,
+              caption: 'Axe tronqué (il part de 960) : la barre de 2024 paraît 3 fois plus haute.',
+            },
+            {
+              kind: 'curvePlot',
+              curves: [],
+              shadedRegions: [
+                { from: 0.7, to: 1.3, upper: () => 1000, tone: 'accent' },
+                { from: 1.7, to: 2.3, upper: () => 1080, tone: 'accent' },
+              ],
+              xMin: 0,
+              xMax: 3,
+              xTicks: [1, 2],
+              xTickLabels: { 1: '2023', 2: '2024' },
+              yTicks: [0, 250, 500, 750, 1000],
+              fixedYRange: { min: 0, max: 1200 },
+              xAxisLabel: '',
+              yAxisLabel: 'ventes',
+              compact: true,
+              caption:
+                'Mêmes données, axe partant de 0 : de 1000 à 1080, la hausse réelle est de ' +
+                '$\\dfrac{1080 - 1000}{1000} \\times 100 = 8$ %.',
+            },
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Diagrammes et graphiques trompeurs',
+          generatorId: 'gen111',
+          description: [
+            'Passe des fréquences aux angles d\'un diagramme circulaire (et inversement), lis un ' +
+              'diagramme en bâtons, puis démasque un graphique trompeur et corrige sa conclusion chiffrée.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 111. Diagrammes et graphiques trompeurs »',
+        },
       ],
     },
     {
