@@ -88,7 +88,7 @@ export type IdGenerateurPilote =
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
-  | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
+  | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38' | 'gen108'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
@@ -242,7 +242,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'statistique-descriptive', sectionId: 'histogramme', generatorId: 'gen31', label: '' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'moyenne', generatorId: 'gen32', label: '' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'position', generatorId: 'gen33', label: '' },
-  { chapitreSlug: 'statistique-descriptive', sectionId: 'dispersion', generatorId: 'gen34', label: '' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'dispersion', generatorId: 'gen34', label: 'Paramètres de dispersion (gen34)' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'dispersion', generatorId: 'gen108', label: 'Effet d\'une transformation des données (gen108)', processus: 3 },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'boite', generatorId: 'gen36', label: '' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'tchebychev', generatorId: 'gen37', label: '' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'comparaison', generatorId: 'gen38', label: '', processus: 3 },
@@ -862,6 +863,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   dispersion: [
     { cle: 'x̄ donné, n = 24', enonce: "Calcule la variance puis l'écart-type de la série de valeurs $x_i=6,8,12,14$ et d'effectifs respectifs $n_i=5,8,4,7$ (effectif total $n=24$), sachant que $\\bar{x}=10$." },
     { cle: 'la série des sections 3 et 4', enonce: "Calcule la variance puis l'écart-type de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$, sachant que $\\bar{x}=6{,}5$ (écart-type au centième, à partir de la variance arrondie à 2 décimales)." },
+    { cle: 'conversion en degrés Fahrenheit', enonce: "Une série de températures a pour moyenne 15 °C, médiane 14 °C, étendue 12 °C, variance 16 et écart-type 4 °C. On convertit chaque température en degrés Fahrenheit : on la multiplie par 1,8, puis on ajoute 32. Sans recalculer les valeurs une à une, détermine la moyenne, la médiane, l'étendue, la variance et l'écart-type des températures en degrés Fahrenheit." },
   ],
   tchebychev: [
     { cle: 'k = 2', enonce: "À l'aide de l'inégalité de Bienaymé-Tchebychev, détermine le pourcentage minimal des valeurs d'une série qui se trouvent dans l'intervalle $[\\bar{x}-2\\sigma\\,;\\,\\bar{x}+2\\sigma]$." },

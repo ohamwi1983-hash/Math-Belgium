@@ -1104,6 +1104,78 @@ export const statistiqueDescriptive: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 34. Paramètres de dispersion »',
         },
+        { kind: 'subheading', text: 'Transformer toutes les données : l\'effet de y = ax + b' },
+        {
+          kind: 'para',
+          text:
+            'Il arrive qu\'on transforme **toutes** les valeurs d\'une série de la même façon : une ' +
+            'prime de 50 € pour chaque employé, une hausse de 3 %, un changement d\'unité… Inutile ' +
+            'de tout recalculer : on écrit la transformation sous la forme $y = a\\,x + b$ ($a$ : le ' +
+            'nombre qui multiplie chaque valeur, $b$ : le nombre ajouté ensuite), puis on applique ' +
+            'les règles du tableau.',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Indicateur', 'Effet de y = ax + b'],
+          rows: [
+            ['Moyenne', '$\\bar{y} = a\\,\\bar{x} + b$ : elle suit toute la transformation'],
+            ['Médiane', 'même effet : multipliée par $a$, puis $+\\,b$'],
+            ['Étendue', 'multipliée par $|a|$ ; $b$ ne change rien'],
+            ['Variance', '$V_y = a^2\\,V_x$ ; $b$ ne change rien'],
+            ['Écart-type', '$\\sigma_y = |a|\\,\\sigma_x$ ; $b$ ne change rien'],
+          ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi b ne change pas la dispersion ?',
+          text:
+            'Ajouter $b$ à toutes les valeurs déplace la série d\'un bloc, comme si on faisait glisser ' +
+            'tous les points sur la droite graduée : le centre bouge, mais les écarts entre les ' +
+            'valeurs restent les mêmes. Multiplier par $a$, au contraire, étire (ou resserre) la ' +
+            'série : les écarts sont multipliés par $|a|$ — et la variance, qui est une moyenne de ' +
+            '**carrés** d\'écarts, par $a^2$.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — conversion en degrés Fahrenheit',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Des températures ont pour moyenne $\\bar{x} = 15$ °C, médiane 14 °C, étendue 12 °C, ' +
+                'variance $V_x = 16$ et écart-type $\\sigma_x = 4$ °C. Pour les convertir en degrés ' +
+                'Fahrenheit, on multiplie par 1,8 puis on ajoute 32 : $y = 1{,}8\\,x + 32$.',
+            },
+            { kind: 'para', text: 'Moyenne : $\\bar{y} = 1{,}8 \\times 15 + 32 = 59$ °F. Médiane : $1{,}8 \\times 14 + 32 = 57{,}2$ °F.' },
+            {
+              kind: 'para',
+              text:
+                'Étendue : $1{,}8 \\times 12 = 21{,}6$ °F. Écart-type : $\\sigma_y = 1{,}8 \\times 4 = 7{,}2$ °F. ' +
+                'Variance : $V_y = 1{,}8^2 \\times 16 = 3{,}24 \\times 16 = 51{,}84$. Le $+32$ n\'intervient ' +
+                'dans aucun de ces trois calculs.',
+            },
+          ],
+        },
+        {
+          kind: 'piege',
+          text:
+            'Un nombre ajouté à toutes les valeurs ne change **jamais** la dispersion : avec une prime ' +
+            'de 50 € pour tous, l\'écart-type des salaires reste le même — surtout pas « $\\sigma + 50$ ». ' +
+            'La variance est multipliée par $a^2$, pas par $a$. Et un écart-type n\'est jamais négatif : ' +
+            'si $a < 0$, on multiplie par $|a|$.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Effet d\'une transformation des données',
+          generatorId: 'gen108',
+          description: [
+            'Prime pour tous, hausse en %, changement d\'unité, °C → °F : écris la transformation ' +
+              'y = ax + b, puis déduis les nouveaux indicateurs (moyenne, médiane, étendue, ' +
+              'variance, écart-type) sans recalculer la série.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 108. Effet d\'une transformation des données »',
+        },
       ],
     },
     {

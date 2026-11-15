@@ -3465,3 +3465,28 @@ paths:
   `moteur5e/{modele,session,verification}DetectiveSuites.ts`, `ui5e/formatDetectiveSuites.ts`,
   `generateurs5e/detectiveSuites/` (index, profil, exportEvaluation). Libellé de conception
   « Détective d'erreurs : suites (5gen49) ».
+- **4e, Chapitre 4 — Statistique descriptive** (`statistique-descriptive`), section `dispersion` :
+  nouveau générateur **gen108 « Effet d'une transformation des données »** (processus 3), carte en
+  fin de section après gen34. Le cours n'en parlait pas : ajout, entre la carte gen34 et la carte
+  gen108, d'un sous-titre « Transformer toutes les données : l'effet de y = ax + b », d'un `para`,
+  d'un `featureTable` (moyenne/médiane → a·x̄ + b ; étendue, écart-type → |a| ; variance → a²), d'un
+  callout `intuition` (« Pourquoi b ne change pas la dispersion ? »), d'un `exempleLibre`
+  « Exemple résolu — conversion en degrés Fahrenheit » (énoncé ajouté à `ENONCES_DEMONSTRATION`,
+  clé « conversion en degrés Fahrenheit ») et d'un `piege` (σ + b, variance × a, |a|).
+  Générateur : indicateurs de départ DONNÉS (tableau x̄, médiane, étendue, Vₓ = σₓ² exacte, σₓ),
+  transformation décrite avec les mots du contexte (24 contextes : prime, bonus, thermomètre
+  corrigé, °C → K, hausse en %, soldes, h → min, km → m, g → kg, € → $, °C → °F, taxi, « bonus puis
+  ×5 », « prime puis hausse », points manquants 20 − x, temps restant 90 − x). Quatre écrans : a et b
+  de y = a·x + b ; moyenne et médiane ; étendue, variance, écart-type ; phrase de conclusion (choix
+  fermé, 4 idées fausses fréquentes). Valeurs EXACTES et courtes par construction (≤ 3 décimales,
+  ≤ 4 pour la variance) ; une saisie seulement arrondie ou illisible ne compte pas de tentative ;
+  pièges reconnus avec message ciblé (b ajouté à σ, variance × a, −σ, a = 0,03 pour 3 %, b non
+  multiplié quand la constante est ajoutée AVANT la multiplication). Profil : variante = nature
+  (constante / multiplication / affine), `forme` = signature tirée AVANT le contexte avec poids fixes
+  (pourcentage/facteur ; direct/avant/negatif), aucun cas particulier, `calcul` exacte si a ∈ {−1 ;
+  0,001 ; 0,5 ; 2 ; 5 ; 60 ; 1000}, sans objet pour « constante ». Libellés de conception
+  « Paramètres de dispersion (gen34) » et « Effet d'une transformation des données (gen108) ».
+  Fichiers : `AppTransformationDonnees.tsx`, `core/transformationDonnees.types.ts`,
+  `moteur/{contextes,session,verification}TransformationDonnees.ts`,
+  `ui/formatTransformationDonnees.ts`, `components/EtapesTransformationDonnees.tsx`,
+  `generateurs/transformationDonnees/` (index, profil, exportEvaluation).
