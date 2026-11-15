@@ -3515,3 +3515,32 @@ paths:
   `ui/formatNombreDiagrammes.ts`, `components/EtapesDiagrammesTrompeurs.tsx`,
   `generateurs/diagrammesTrompeurs/` (index, profil, exportEvaluation). Libellés de conception
   « Tableau de fréquences (gen30) » et « Diagrammes et graphiques trompeurs (gen111) ».
+- **4e, Chapitre 4 — Statistique descriptive** (`statistique-descriptive`), section `position` :
+  nouveau générateur **gen110 « Moyenne ou médiane ? La valeur aberrante »** (processus 3), carte
+  après gen33. Le cours avait déjà l'intuition du château, la méthode « Quelle valeur centrale
+  choisir ? », l'atelier `valeur-aberrante-widget` et l'application du basketteur ; seul le
+  contre-exemple (« les deux se valent ») manquait : ajout, entre la carte gen33 et la nouvelle
+  carte, d'une `astuce` « Moyenne ou médiane ? Le test du retrait » (retirer la valeur la plus
+  éloignée et comparer l'effet sur les deux indicateurs). Aucun `exemple` ajouté. Générateur : une
+  série BRUTE non rangée en contexte (6 contextes = 6 variantes = `forme` : salaires d'une petite
+  entreprise gérante comprise, trajet, prix des maisons d'un village, points au basket, notes —
+  valeur la plus PETITE retirée —, délais de livraison). Le VERDICT (médiane / les deux se valent)
+  est tiré à pile ou face AVANT la construction, jamais dans `forme` ; le récit est le même dans
+  les deux cas (on retire toujours la plus grande valeur, isolée ou non) — il ne trahit rien.
+  Écrans : a) moyenne et médiane ; b) les mêmes sans la plus grande (plus petite) valeur ;
+  c) indicateur (moyenne / médiane / les deux se valent) ET justification (4 phrases, toujours les
+  mêmes, mélangées) validés ensemble en UNE tentative, puis explication chiffrée et nuage de points
+  (moyenne et médiane repérées, couleurs en dur, montré seulement après l'écran c et dans le
+  corrigé). « La moyenne » n'est jamais la bonne réponse : c'est le piège de la fiche (« croire la
+  moyenne toujours meilleure »). Médiane = règle du SEUIL du chapitre (rang ⌊n/2⌋ + 1) ; le
+  générateur impose que les deux valeurs centrales de la série d'effectif pair soient égales, pour
+  que la convention « moyenne des deux valeurs centrales » donne la même valeur. Moyennes exactes à
+  au plus 2 décimales ; pièges reconnus (médiane lue sans trier, moyenne non recalculée, ancien
+  effectif, moyenne/médiane interverties) ; champs de gen108 (`EtapeChampsTransformation`,
+  `diagnostiquerChamps`) réutilisés ; notes en « /20 » (saisie « 13,5/20 » nettoyée avant lecture :
+  sinon lue comme une fraction). Profil : `forme` = contexte, aucun cas particulier, pas de `calcul`
+  (tout est exact). Libellés de conception « Paramètres de position (gen33) » et « Moyenne ou
+  médiane ? La valeur aberrante (gen110) ». Fichiers : `AppValeurAberrante.tsx`,
+  `core/valeurAberrante.types.ts`, `moteur/{modele,session}ValeurAberrante.ts`,
+  `ui/{format,figure}ValeurAberrante.ts`, `components/EtapesValeurAberrante.tsx`,
+  `generateurs/valeurAberrante/` (index, profil, exportEvaluation).
