@@ -209,6 +209,7 @@ import { adaptateurEvaluationSommesTermes } from '../entrainement/5e-4h/generate
 import { adaptateurEvaluationTroisTermes } from '../entrainement/5e-4h/generateurs5e/troisTermes/exportEvaluation'
 import { adaptateurEvaluationModeliserSuite } from '../entrainement/5e-4h/generateurs5e/modeliserSuite/exportEvaluation'
 import { adaptateurEvaluationSommeInfinie } from '../entrainement/5e-4h/generateurs5e/sommeInfinieSituation/exportEvaluation'
+import { adaptateurEvaluationDetectiveSuites } from '../entrainement/5e-4h/generateurs5e/detectiveSuites/exportEvaluation'
 import { adaptateurEvaluationLimites } from '../entrainement/5e-4h/generateurs5e/limites/exportEvaluation'
 import { adaptateurEvaluationAsymptoteOblique } from '../entrainement/5e-4h/generateurs5e/asymptoteOblique/exportEvaluation'
 import { adaptateurEvaluationLectureGraphiqueLimites } from '../entrainement/5e-4h/generateurs5e/lectureGraphiqueLimites/exportEvaluation'
@@ -251,6 +252,7 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen46': versionPapier(adaptateurEvaluationTroisTermes) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen47': versionPapier(adaptateurEvaluationModeliserSuite) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen48': versionPapier(adaptateurEvaluationSommeInfinie) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen49': versionPapier(adaptateurEvaluationDetectiveSuites) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen20': versionPapier(adaptateurEvaluationLimites) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen21': versionPapier(adaptateurEvaluationAsymptoteOblique) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen22': versionPapier(adaptateurEvaluationLectureGraphiqueLimites) as unknown as AdaptateurFeuilleExercices<never>,
