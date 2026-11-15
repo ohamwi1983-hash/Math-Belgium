@@ -923,6 +923,29 @@ export const statistiqueDescriptive: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 33. Paramètres de position »',
         },
+        {
+          kind: 'astuce',
+          label: 'Moyenne ou médiane\u00a0? Le test du retrait',
+          text:
+            'Pour décider, retire la valeur la plus éloignée des autres et recalcule les deux ' +
+            'indicateurs. Si la moyenne bouge beaucoup alors que la médiane ne bouge presque pas, ' +
+            'une valeur extrême tire la moyenne : la **médiane** est plus représentative. Si les ' +
+            'deux bougent à peine et restent proches, aucune valeur n\'est isolée : les deux ' +
+            'indicateurs **se valent**. La moyenne n\'est donc pas « toujours la meilleure » parce ' +
+            'qu\'elle utilise toutes les valeurs — et la médiane non plus.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Moyenne ou médiane\u00a0? La valeur aberrante',
+          generatorId: 'gen110',
+          description: [
+            'Calcule moyenne et médiane d\'une série brute (salaires, trajets, prix, notes…), puis ' +
+              'sans la valeur la plus éloignée, et décide quel indicateur est le plus représentatif — ' +
+              'parfois la médiane, parfois les deux se valent.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 110. Moyenne ou médiane ? La valeur aberrante »',
+        },
       ],
     },
     {

@@ -127,6 +127,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen108: entree(CH_4E_STATISTIQUE_DESCRIPTIVE, () => import('./4e/AppTransformationDonnees').then((m) => ({ default: m.AppTransformationDonnees }))),
   gen111: entree(CH_4E_STATISTIQUE_DESCRIPTIVE, () => import('./4e/AppDiagrammesTrompeurs').then((m) => ({ default: m.AppDiagrammesTrompeurs }))),
   gen109: entree(CH_4E_STATISTIQUE_DESCRIPTIVE, () => import('./4e/AppValeurManquante').then((m) => ({ default: m.AppValeurManquante }))),
+  gen110: entree(CH_4E_STATISTIQUE_DESCRIPTIVE, () => import('./4e/AppValeurAberrante').then((m) => ({ default: m.AppValeurAberrante }))),
 
   // --- 4e, chapitre 6 : Calcul vectoriel ---
   gen20: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppPointVectoriel').then((m) => ({ default: m.AppPointVectoriel }))),
