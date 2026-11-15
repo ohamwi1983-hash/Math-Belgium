@@ -982,6 +982,20 @@ export const suites: ChapterContent = {
             'de S∞ ; avec q ≥ 1, elles ne se stabilisent pas et la somme infinie n\'existe ' +
             'pas. Le préréglage « 0,999… » montre pourquoi 0,999… = 1.',
         },
+        {
+          kind: 'methode',
+          label: 'Méthode — une somme infinie en situation',
+          items: [
+            'Repère ce qui se répète en se **multipliant** : nomme $u_n$ (le n-ième terme), calcule ' +
+              '$u_1$, puis la raison $q = \\dfrac{u_2}{u_1}$.',
+            'Vérifie $|q| < 1$ avant d\'écrire $S_\\infty = \\dfrac{u_1}{1-q}$.',
+            'Reviens à la question posée : $S_\\infty$ n\'est souvent qu\'**une partie** de la ' +
+              'réponse. Pour $1{,}2333\\ldots = 1{,}2 + (0{,}03 + 0{,}003 + \\ldots)$, ajoute la ' +
+              'partie qui ne se répète pas, puis simplifie la fraction. Pour une balle qui ' +
+              'rebondit, chaque remontée est suivie d\'une descente de même longueur : distance ' +
+              'totale $= h + 2\\,S_\\infty$ (seule la première chute $h$ compte une fois).',
+          ],
+        },
         { kind: 'subheading', text: "Le cas d'une suite quelconque — comparer les degrés" },
         {
           kind: 'para',
@@ -1075,6 +1089,19 @@ export const suites: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 16. Convergence et divergence des suites »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Somme infinie en situation',
+          generatorId: '5gen48',
+          description: [
+            'Nombre décimal périodique à écrire en fraction irréductible, balle qui rebondit ' +
+              'indéfiniment, poursuite d\'Achille et de la tortue découpée en étapes (Zénon), ' +
+              'triangles ou hexagones emboîtés : premier terme, raison, condition |q| < 1, ' +
+              'somme infinie S∞, puis réponse au problème.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 48. Somme infinie en situation »',
         },
       ],
     },
