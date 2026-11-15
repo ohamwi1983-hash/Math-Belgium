@@ -484,6 +484,63 @@ export const statistiqueDescriptive: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 32. Moyenne pondérée »',
         },
+        { kind: 'subheading', text: 'Retrouver une valeur manquante' },
+        {
+          kind: 'methode',
+          label: 'Quand la moyenne est connue mais qu\'une donnée manque',
+          items: [
+            'Appelle l\'inconnue par une lettre ($x$ pour une note, $k$ pour un effectif…), puis écris la ' +
+              'formule de la moyenne **avec toutes les données**, l\'inconnue comprise : elle apparaît au ' +
+              'numérateur (multipliée par son coefficient ou sa valeur) ET, si c\'est un effectif ou un ' +
+              'coefficient, au dénominateur.',
+            'Égale cette expression à la moyenne connue : c\'est une équation du premier degré. Multiplie ' +
+              'les deux membres par le dénominateur, puis isole l\'inconnue.',
+            'Conclus dans le contexte : une note ne dépasse pas 20 (le résultat peut montrer que c\'est ' +
+              'impossible), un effectif est un nombre entier, et l\'effectif total change quand on ajoute ' +
+              'des données.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — la note à obtenir',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Léa a obtenu 12, 9 et 14 sur 20 aux trois premiers contrôles. Quelle note doit-elle ' +
+                'obtenir au quatrième, qui compte autant que les autres, pour atteindre une moyenne de 12 ?',
+            },
+            { kind: 'para', text: 'Avec la note $x$ qui manque, il y a 4 notes : $\\dfrac{12 + 9 + 14 + x}{4} = 12$.' },
+            { kind: 'para', text: 'On multiplie par 4 : $35 + x = 48$, donc $x = 13$.' },
+            {
+              kind: 'para',
+              text:
+                'Conclusion : Léa doit obtenir **au moins** 13/20 — avec exactement 13, sa moyenne vaut 12 ; ' +
+                'avec plus, elle dépasse 12.',
+            },
+          ],
+        },
+        {
+          kind: 'piege',
+          label: 'La moyenne des moyennes',
+          text:
+            'Pour réunir deux groupes de tailles différentes, on ne fait **jamais** la moyenne des deux ' +
+            'moyennes. La 4e A (24 élèves, moyenne 14) et la 4e B (16 élèves, moyenne 9) ont ensemble une ' +
+            'moyenne de $\\dfrac{24 \\times 14 + 16 \\times 9}{24 + 16} = \\dfrac{480}{40} = 12$, et non ' +
+            '$\\dfrac{14 + 9}{2} = 11{,}5$ : le groupe le plus nombreux pèse davantage.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Retrouver une valeur manquante',
+          generatorId: 'gen109',
+          description: [
+            'Note à obtenir pour atteindre une moyenne (avec ou sans coefficients), effectif effacé ' +
+              'd\'un tableau, moyenne de deux groupes réunis, et combien de valeurs ajouter pour ' +
+              'obtenir une médiane (règle du seuil, section 4) : pose l\'équation, résous-la, conclus.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 109. Retrouver une valeur manquante »',
+        },
       ],
     },
     {

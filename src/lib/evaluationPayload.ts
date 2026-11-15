@@ -88,7 +88,7 @@ export type IdGenerateurPilote =
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
-  | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38' | 'gen108'
+  | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38' | 'gen108' | 'gen109'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
@@ -240,7 +240,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen72', label: 'Domaine et ensemble image après transformations (gen72)', processus: 3 },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'frequences', generatorId: 'gen30', label: '' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'histogramme', generatorId: 'gen31', label: '' },
-  { chapitreSlug: 'statistique-descriptive', sectionId: 'moyenne', generatorId: 'gen32', label: '' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'moyenne', generatorId: 'gen32', label: 'Moyenne pondérée (gen32)' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'moyenne', generatorId: 'gen109', label: 'Retrouver une valeur manquante (gen109)', processus: 3 },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'position', generatorId: 'gen33', label: '' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'dispersion', generatorId: 'gen34', label: 'Paramètres de dispersion (gen34)' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'dispersion', generatorId: 'gen108', label: 'Effet d\'une transformation des données (gen108)', processus: 3 },
@@ -852,6 +853,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   moyenne: [
     { cle: 'données discrètes', enonce: "Calcule la moyenne pondérée $\\bar{x}$ de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$." },
     { cle: 'données en classes', enonce: "Calcule une valeur approchée de la moyenne d'une série regroupée en classes $[0\\,;\\,4[$, $[4\\,;\\,8[$, $[8\\,;\\,12[$ et $[12\\,;\\,16[$, d'effectifs respectifs 5, 8, 4 et 3, en utilisant le centre de chaque classe." },
+    { cle: 'la note à obtenir', enonce: "Léa a obtenu 12, 9 et 14 sur 20 aux trois premiers contrôles. Quelle note doit-elle obtenir au quatrième, qui compte autant que les autres, pour atteindre une moyenne de 12 ? Est-ce possible ?" },
   ],
   position: [
     { cle: 'données discrètes, n = 20', enonce: "Détermine la médiane, le premier quartile $Q_1$ et le troisième quartile $Q_3$ de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$ (effectif total $n=20$), à l'aide de la règle du seuil strictement dépassé sur les effectifs cumulés." },

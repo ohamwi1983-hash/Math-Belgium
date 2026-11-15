@@ -48,6 +48,7 @@ import { adaptateurEvaluationBoiteMoustaches } from '../entrainement/4e/generate
 import { adaptateurEvaluationBienaymeTchebychev } from '../entrainement/4e/generateurs/bienaymeTchebychev/exportEvaluation'
 import { adaptateurEvaluationComparaisonSeries } from '../entrainement/4e/generateurs/comparaisonSeries/exportEvaluation'
 import { adaptateurEvaluationTransformationDonnees } from '../entrainement/4e/generateurs/transformationDonnees/exportEvaluation'
+import { adaptateurEvaluationValeurManquante } from '../entrainement/4e/generateurs/valeurManquante/exportEvaluation'
 import { adaptateurEvaluationCercleTrigonometrique } from '../entrainement/4e/generateurs/cercleTrigonometrique/exportEvaluation'
 import { adaptateurEvaluationValeursRemarquables } from '../entrainement/4e/generateurs/valeursRemarquables/exportEvaluation'
 import { adaptateurEvaluationUnSansLautre } from '../entrainement/4e/generateurs/unSansLautre/exportEvaluation'
@@ -133,6 +134,7 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen37: versionPapier(adaptateurEvaluationBienaymeTchebychev) as unknown as AdaptateurFeuilleExercices<never>,
   gen38: versionPapier(adaptateurEvaluationComparaisonSeries) as unknown as AdaptateurFeuilleExercices<never>,
   gen108: versionPapier(adaptateurEvaluationTransformationDonnees) as unknown as AdaptateurFeuilleExercices<never>,
+  gen109: versionPapier(adaptateurEvaluationValeurManquante) as unknown as AdaptateurFeuilleExercices<never>,
   gen14: versionPapier(adaptateurEvaluationCercleTrigonometrique) as unknown as AdaptateurFeuilleExercices<never>,
   gen15: versionPapier(adaptateurEvaluationValeursRemarquables) as unknown as AdaptateurFeuilleExercices<never>,
   gen16: versionPapier(adaptateurEvaluationUnSansLautre) as unknown as AdaptateurFeuilleExercices<never>,
