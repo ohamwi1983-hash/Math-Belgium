@@ -1715,9 +1715,10 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Deux façons de réviser ce chapitre. Un **exercice de synthèse**, qui enchaîne sur ' +
+            'Trois façons de réviser ce chapitre. Un **exercice de synthèse**, qui enchaîne sur ' +
             'un seul jeu de données cohérent : la moyenne pondérée, les paramètres de ' +
-            'position, la boîte à moustaches, la dispersion et Bienaymé-Tchebychev. Ou un ' +
+            'position, la boîte à moustaches, la dispersion et Bienaymé-Tchebychev. Un ' +
+            '**détective d\'erreurs**, où tu traques l\'erreur dans la copie d\'un élève. Ou un ' +
             '**quiz vrai/faux**, qui couvre transversalement les 9 générateurs de ce chapitre.',
         },
         {
@@ -1730,6 +1731,19 @@ export const statistiqueDescriptive: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 35. Synthèse — Statistique descriptive complète »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Détective d\'erreurs : statistique',
+          generatorId: 'gen112',
+          description: [
+            'La copie d\'un élève contient UNE ligne fausse (moyenne sans les effectifs, médiane sur ' +
+              'la série non rangée, seuil de Q1 atteint mais pas dépassé, mauvais effectif cumulé, ' +
+              'variance non divisée par n, racine oubliée, moyenne des moyennes) : trouve-la, nomme ' +
+              'l\'erreur, puis donne le résultat corrigé.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 112. Détective d\'erreurs : statistique »',
         },
         {
           kind: 'astuce',

@@ -3574,3 +3574,32 @@ paths:
   `core/valeurAberrante.types.ts`, `moteur/{modele,session}ValeurAberrante.ts`,
   `ui/{format,figure}ValeurAberrante.ts`, `components/EtapesValeurAberrante.tsx`,
   `generateurs/valeurAberrante/` (index, profil, exportEvaluation).
+- **4e, Chapitre 4 — Statistique descriptive** (`statistique-descriptive`), section `revision` :
+  nouveau générateur **gen112 « Détective d'erreurs : statistique »** (processus 3), carte entre
+  gen35 et l'astuce du quiz gen59 ; le paragraphe d'ouverture de la section passe de « Deux façons
+  de réviser » à « Trois façons » (mention du détective). Aucun bloc de cours ajouté (toutes les
+  erreurs sont déjà traitées : piège de la moyenne non pondérée, de la moyenne des moyennes, du seuil
+  strict, convention n / variance arrondie). Même mécanique que gen91 et 5gen49 (`CopieEleve`,
+  `EtapeLigneFausse`, `EtapeDescriptionErreur`, `BlocAides` réutilisés) : copie de 4 à 6 lignes,
+  UNE fausse, la suite cohérente avec l'erreur ; a) ligne (1 tentative), b) description parmi 4
+  (1 tentative), c) résultat final corrigé (champ libre, 3 tentatives, message « c'est le résultat
+  de la copie »). Variante = exercice support (jamais l'erreur) : moyenne pondérée + pourcentage
+  au-dessus de x̄ (moyenneNonPonderee L2 | cumulMalLu L4), médiane/Q1/Q3/écart interquartile d'une
+  série brute n = 12 ou 16 (medianeNonTriee L1 | q1MalPlace L4), variance/écart-type
+  (moyenneNonPonderee L2 | varianceSansN L4 | sansRacine L5), effectifs cumulés : Q1, Q3 et
+  pourcentage entre les deux (q1MalPlace L2 | cumulMalLu L4), moyenne de deux groupes réunis
+  (moyenneNonPonderee L2 | moyenneDesMoyennes L3). Type d'erreur tiré uniformément AVANT les
+  nombres ; contraintes de données COMMUNES à tous les types d'une variante (un cumulé vaut toujours
+  n/4 en « cumules », n toujours multiple de 4 en « position », une valeur toujours entre la moyenne
+  pondérée et la moyenne des valeurs en « moyenne »…) et garantissant que CHAQUE erreur possible
+  change le résultat final d'au moins 0,1 — aucun détail des données ne trahit le verdict. Règle du
+  seuil du chapitre (rang ⌊n/2⌋ + 1 ; médiane et Q3 sans ambiguïté entre conventions) ; variance
+  divisée par n et arrondie à 2 décimales avant la racine, écart-type au centième (tolérance 0,01).
+  Profil (`generateurs/detectiveStatistique/profil.ts`) : `forme` = variante, aucun cas
+  particulier, `calcul: 'calculatrice'` pour « dispersion » seule (déclarée dans
+  `calculatriceIndispensable`). Libellés de conception « Synthèse — Statistique descriptive
+  complète (gen35) » et « Détective d'erreurs : statistique (gen112) ». Fichiers :
+  `AppDetectiveStatistique.tsx`, `core/detectiveStatistique.types.ts`,
+  `moteur/{modele,session,verification}DetectiveStatistique.ts`, `ui/formatDetectiveStatistique.ts`,
+  `components/EtapeCorrectionDetectiveStatistique.tsx`, `generateurs/detectiveStatistique/` (index,
+  profil, exportEvaluation).
