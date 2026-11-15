@@ -3515,3 +3515,33 @@ paths:
   `ui/formatNombreDiagrammes.ts`, `components/EtapesDiagrammesTrompeurs.tsx`,
   `generateurs/diagrammesTrompeurs/` (index, profil, exportEvaluation). Libellés de conception
   « Tableau de fréquences (gen30) » et « Diagrammes et graphiques trompeurs (gen111) ».
+- **4e, Chapitre 4 — Statistique descriptive** (`statistique-descriptive`), section `moyenne` :
+  nouveau générateur **gen109 « Retrouver une valeur manquante »** (processus 3), carte après gen32.
+  Le cours ne traitait pas le problème « inverse » : ajout, entre la carte gen32 et la carte gen109,
+  d'un sous-titre « Retrouver une valeur manquante », d'un `methode` (l'inconnue au numérateur ET, si
+  c'est un effectif ou un coefficient, au dénominateur ; conclure dans le contexte), d'un
+  `exempleLibre` « Exemple résolu — la note à obtenir » (énoncé ajouté à `ENONCES_DEMONSTRATION`, clé
+  « la note à obtenir ») et d'un `piege` « La moyenne des moyennes » (deux classes de tailles
+  différentes). Générateur : quatre variantes — note à obtenir (avec ou sans coefficients ; verdict
+  possible / impossible > 20 tiré à part, ≈ 20 % d'impossibles), effectif effacé d'un tableau
+  (moyenne donnée ; la valeur de la ligne « ? » vaut au moins 2, sinon « v·k » se confondrait avec
+  « k »), combien de valeurs ajouter (toutes égales au max — forme `haut` — ou au min — forme `bas`)
+  pour que la médiane devienne une valeur donnée, deux groupes (moyenne globale, ou moyenne d'un
+  groupe connaissant la globale). **Médiane = règle du seuil du cours** (première valeur dont
+  l'effectif cumulé dépasse STRICTEMENT n/2, jamais la moyenne des deux valeurs centrales) : l'équation
+  « seuil = effectif cumulé » donne k₀ ; en `haut` l'égalité suffit (k_min = k₀), en `bas` il faut
+  dépasser strictement (k_min = k₀ + 1) — c'est l'écran 3 qui le fait décider ; chaque instance est
+  contrôlée par la règle du seuil (k_min donne la médiane voulue, k_min − 1 non, k_min + 1 encore).
+  Le « quel effectif pour une médiane » de la fiche est traité par cet ajout de valeurs (un effectif
+  INCONNU donnerait une inéquation, pas une équation). Trois écrans : poser l'équation (choix fermé,
+  les 3 fausses équations = pièges classiques : moyenne des moyennes, coefficients oubliés, effectif
+  total non mis à jour, mauvais effectif cumulé…), la résoudre (champ, pièges reconnus = solutions
+  des fausses équations), conclure (choix fermé). Écrans et vérification des champs de gen108
+  (`EtapesTransformationDonnees.tsx`, `verificationTransformationDonnees.ts`) réutilisés tels quels.
+  Valeurs exactes par construction (note sur une grille de 0,5, effectifs entiers, moyennes à au plus
+  deux décimales). Profil : `forme` = « variante:forme » (sans-coef/avec-coef, effectif, haut/bas,
+  globale/groupe) tirée AVANT les nombres, verdict jamais dans le profil, aucun cas particulier, pas
+  de `calcul` (tout se fait sans calculatrice). Libellés de conception « Moyenne pondérée (gen32) »
+  et « Retrouver une valeur manquante (gen109) ». Fichiers : `AppValeurManquante.tsx`,
+  `core/valeurManquante.types.ts`, `moteur/{contextes,session}ValeurManquante.ts`,
+  `ui/formatValeurManquante.ts`, `generateurs/valeurManquante/` (index, profil, exportEvaluation).
