@@ -88,7 +88,7 @@ export type IdGenerateurPilote =
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
-  | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
+  | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38' | 'gen111'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
@@ -238,7 +238,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen69', label: 'Choisir le bon modèle (gen69)', processus: 3 },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen71', label: 'Le portrait-robot d’une fonction (gen71)', processus: 3 },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen72', label: 'Domaine et ensemble image après transformations (gen72)', processus: 3 },
-  { chapitreSlug: 'statistique-descriptive', sectionId: 'frequences', generatorId: 'gen30', label: '' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'frequences', generatorId: 'gen30', label: 'Tableau de fréquences (gen30)' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'frequences', generatorId: 'gen111', label: 'Diagrammes et graphiques trompeurs (gen111)', processus: 2 },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'histogramme', generatorId: 'gen31', label: '' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'moyenne', generatorId: 'gen32', label: '' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'position', generatorId: 'gen33', label: '' },

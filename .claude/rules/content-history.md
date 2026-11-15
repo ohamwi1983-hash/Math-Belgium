@@ -3465,3 +3465,28 @@ paths:
   `moteur5e/{modele,session,verification}DetectiveSuites.ts`, `ui5e/formatDetectiveSuites.ts`,
   `generateurs5e/detectiveSuites/` (index, profil, exportEvaluation). Libellé de conception
   « Détective d'erreurs : suites (5gen49) ».
+- **4e, Chapitre 4 — Statistique descriptive** (`statistique-descriptive`), section `frequences` :
+  nouveau générateur **gen111 « Diagrammes et graphiques trompeurs »** (processus 2), carte après
+  gen30. Le cours ne parlait ni du diagramme circulaire ni des graphiques trompeurs : ajout, entre
+  la carte gen30 et la nouvelle carte, d'un sous-titre « Le diagramme circulaire » (para
+  αᵢ = fᵢ × 360°, featureTable sur la série des livres : 108°, 126°, 72°, 54°) et d'un sous-titre
+  « Graphiques trompeurs » (attention aux 4 manipulations + `illustrationGroup` de deux `curvePlot`
+  compacts : mêmes ventes 1000 → 1080 sur un axe tronqué à 960 puis sur un axe partant de 0 ; les
+  barres de l'axe tronqué ont `lower: () => 960`, sinon le polygone descendait sous le cadre). Aucun
+  `exemple` ajouté (rien à mettre dans `ENONCES_DEMONSTRATION`). Trois variantes : diagramme
+  circulaire dans les deux sens (direct : effectifs → fréquences → angles, le disque attendu en
+  `figureHtml` du corrigé ; inverse : angles → fréquences → effectifs), lecture (bâtons sur un
+  quadrillage d'une unité, ou disque en % avec une part « ? »), trompeur (axe tronqué, graduations
+  irrégulières, pictogrammes agrandis dans les deux sens, parts dont le total dépasse 100 % —
+  écran 1 en choix fermé, puis vraies valeurs lues sur l'axe et vraie évolution en %, ou somme des
+  pourcentages et nombre total de réponses). `forme` = variante + sous-type (fiche validée : le type
+  de manipulation est la signature de l'exercice) ; aucun cas particulier, pas de `calcul` (tout est
+  exact). Pièges trouvés : la feuille de style des documents définit `--accent` en BLEU (secteurs
+  « accent » et « sky » confondus sur papier) → teintes des secteurs prises hors `--accent` ;
+  `.figure-corrige-bloc svg { width: 100% }` agrandissait le disque du corrigé sur 14 cm → largeur
+  maximale mise en style inline ; contexte « couleur des voitures » retiré (secteur « Rouge »
+  dessiné en bleu). Fichiers : `AppDiagrammesTrompeurs.tsx`, `core/diagrammesTrompeurs.types.ts`,
+  `moteur/{modele,session,verification}DiagrammesTrompeurs.ts`, `ui/{format,figure}DiagrammesTrompeurs.ts`,
+  `ui/formatNombreDiagrammes.ts`, `components/EtapesDiagrammesTrompeurs.tsx`,
+  `generateurs/diagrammesTrompeurs/` (index, profil, exportEvaluation). Libellés de conception
+  « Tableau de fréquences (gen30) » et « Diagrammes et graphiques trompeurs (gen111) ».
