@@ -1,0 +1,163 @@
+import { useState } from "react";
+import type { ReactNode } from "react";
+import type { ReglagesSession6e } from "./core6e/session6e.types";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDeuxEcritures } from "./generateurs6e/deuxEcrituresComplexe";
+import type { IdVarianteDeuxEcritures } from "./generateurs6e/deuxEcrituresComplexe";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionDeuxEcritures, soumettreReponseEcran } from "./moteur6e/sessionDeuxEcritures";
+import type { EtatSessionDeuxEcritures, PhaseDeuxEcritures } from "./moteur6e/typesDeuxEcritures";
+import { controleAvantSoumission, diagnostiquerChamps, messagePiege } from "./moteur6e/verificationDeuxEcritures";
+import { RenduFragments } from "./components/RenduFragments";
+import { EtapeLinearisationEuler } from "./components6e/EtapeLinearisationEuler";
+import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { aideNiveau1, aideNiveau2, champsEcran, consigneEcran, consigneGenerale, libellePhase, reponseFragments } from "./ui6e/formatDeuxEcritures";
+import { calculerRecapitulatifDeuxEcritures, calculerSegmentsProgressionDeuxEcritures } from "./ui6e/recapitulatifDeuxEcritures";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+
+/**
+ * `6gen94` — « Valeurs exactes par deux écritures d'un même complexe » (chapitre 5 de 6e, « Nombres
+ * complexes », section `formetrigonometrique`, processus 3 TRANSFÉRER). z = z₁z₂ ou z₁/z₂ (un facteur
+ * de la famille de π/4, l'autre de celle de π/6 ou π/3) : forme algébrique, module et argument des
+ * facteurs, forme trigonométrique de z, puis identification → cos et sin exacts d'un angle de la
+ * forme kπ/12. Même patron que `App6gen93.tsx` ; l'écran à champs libres `EtapeLinearisationEuler`
+ * est réutilisé tel quel (il ne dépend que de consignes, champs, aides et fonctions de contrôle).
+ * Le `?code=` (QR code des feuilles) rejoue l'instance de
+ * `generateurs6e/deuxEcrituresComplexe/exportEvaluation.ts` avec les MÊMES fonctions de génération.
+ */
+
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
+
+function nouvelleSession(): EtatSessionDeuxEcritures {
+  return demarrerSessionDeuxEcritures(REGLAGES_DEMO, genererExerciceDeuxEcritures);
+}
+
+/** Première session : le code d'un exercice imprimé (`?code=XXXXXX`) en fixe le PREMIER exercice. */
+function sessionInitiale(): EtatSessionDeuxEcritures {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionDeuxEcritures(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceDeuxEcritures, (id) => construireAvecVarianteId(id as IdVarianteDeuxEcritures)),
+  );
+}
+
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionDeuxEcritures;
+  revele: boolean;
+}
+
+export function App6gen94() {
+  const [etat, setEtat] = useState<EtatSessionDeuxEcritures>(sessionInitiale);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseDeuxEcritures, boolean>>>({});
+  /** Compteur d'exercices affichés : entre dans la `key` de l'écran pour vider la saisie à chaque
+   * nouvel exercice (« Générer », « Nouvel exercice »), même quand la phase est la même. */
+  const [compteur, setCompteur] = useState(0);
+
+  const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
+  const champs = champsEcran(exercice, phase);
+
+  function reponseAttendue(): ReactNode {
+    return (
+      <span className="prompt-text" style={{ overflowX: "auto", display: "block", maxWidth: "100%" }}>
+        <RenduFragments fragments={reponseFragments(exercice, phase)} />
+      </span>
+    );
+  }
+
+  function votreReponse(valeurs: string[]): ReactNode {
+    return champs.map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; ");
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionDeuxEcritures, valeurs: string[]) {
+    const transition = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee || nouvelEtat.exerciceCourant !== etat.exerciceCourant;
+    if (!transition) {
+      setEtat(nouvelEtat);
+      return;
+    }
+    const revele = nouvelEtat.derniereTransitionRevelee;
+    setAideParPhase((prev) => ({ ...prev, [phase]: etat.niveauAide > 0 }));
+    setHistorique((h) => [...h, { titre: libellePhase(phase), votreReponse: votreReponse(valeurs), correcte: !revele, reponseAttendue: revele ? reponseAttendue() : undefined }]);
+    setEnAttente({ etatSuivant: nouvelEtat, revele });
+  }
+
+  function reinitialiser(nouvelEtat: EtatSessionDeuxEcritures) {
+    setEtat(nouvelEtat);
+    setEnAttente(null);
+    setHistorique([]);
+    setAideParPhase({});
+    setFicheOuverteIndex(null);
+    setCompteur((c) => c + 1);
+  }
+
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) {
+      reinitialiser(nouvelleSession());
+      return;
+    }
+    setEtat(enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    reinitialiser(demarrerSessionDeuxEcritures(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteDeuxEcritures)));
+  }
+
+  // Hook DEV-ONLY (même garde que `SelecteurVarianteDev`) : exercice tiré exposé pour Playwright.
+  const modeDevActif = import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1";
+  if (modeDevActif) {
+    (window as unknown as { __debug6gen94?: unknown }).__debug6gen94 = { exercice, phase };
+  }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttendue(),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <p className="app-eyebrow">6e — Entraînement</p>
+        <h1 className="app-title">Valeurs exactes par deux écritures d'un même complexe</h1>
+        <p className="app-subtitle">Chapitre 5 — Nombres complexes</p>
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionDeuxEcritures(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+      </header>
+      <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifDeuxEcritures(etat)} />
+        <EtapeLinearisationEuler
+          key={`${compteur}-${phase}`}
+          consigneGenerale={consigneGenerale(exercice)}
+          consigneEcran={consigneEcran(exercice, phase)}
+          champs={champs}
+          aideNiveau1={aideNiveau1(exercice, phase)}
+          aideNiveau2={aideNiveau2(exercice, phase)}
+          tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+          tentativesMax={etat.reglages.tentativesMax}
+          niveauAide={etat.niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX}
+          onActiverAide={() => setEtat(activerAideSuivante(etat))}
+          validation={validation}
+          diagnostiquer={(valeurs) => diagnostiquerChamps(exercice, phase, valeurs)}
+          controle={(valeurs) => controleAvantSoumission(exercice, phase, valeurs)}
+          piege={(valeurs) => messagePiege(exercice, phase, valeurs)}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs)}
+        />
+      </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
+    </div>
+  );
+}

@@ -987,6 +987,56 @@ export const nombresComplexes: ChapterContent = {
             ['Quotient $z_1/z_2$', '$|z_1/z_2|=|z_1|/|z_2|$', '$\\arg(z_1/z_2)=\\arg(z_1)-\\arg(z_2)$'],
           ],
         },
+        { kind: 'subheading', text: 'Deux écritures d\'un même nombre : des valeurs exactes' },
+        {
+          kind: 'para',
+          text:
+            'L\'angle $\\dfrac{\\pi}{12}$ n\'est pas remarquable : son cosinus ne se lit pas sur le ' +
+            'cercle. Mais $\\dfrac{\\pi}{12}=\\dfrac{\\pi}{4}-\\dfrac{\\pi}{6}$, la différence de deux ' +
+            'angles remarquables. Un quotient de deux complexes d\'arguments $\\dfrac{\\pi}{4}$ et ' +
+            '$\\dfrac{\\pi}{6}$ a donc $\\dfrac{\\pi}{12}$ pour argument : en l\'écrivant sous forme ' +
+            'algébrique ET sous forme trigonométrique, puis en **identifiant** les deux écritures ' +
+            '(mêmes parties réelles, mêmes parties imaginaires), on obtient les valeurs exactes.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'cos(π/12) et sin(π/12) par deux écritures',
+          formula: 'Calcule les valeurs exactes de $\\cos\\dfrac{\\pi}{12}$ et $\\sin\\dfrac{\\pi}{12}$ à l\'aide de $z=\\dfrac{1+i}{\\sqrt{3}+i}$.',
+          steps: [
+            {
+              tag: 'forme algébrique (conjugué)',
+              text:
+                '$z=\\dfrac{(1+i)(\\sqrt{3}-i)}{(\\sqrt{3}+i)(\\sqrt{3}-i)}=\\dfrac{\\sqrt{3}-i+i\\sqrt{3}+1}{4}' +
+                '=\\dfrac{\\sqrt{3}+1}{4}+\\dfrac{\\sqrt{3}-1}{4}\\,i$',
+            },
+            { tag: 'module et argument des facteurs', text: '$1+i=\\sqrt{2}\\,e^{i\\pi/4}$ et $\\sqrt{3}+i=2\\,e^{i\\pi/6}$' },
+            {
+              tag: 'forme trigonométrique (quotient)',
+              text:
+                '$|z|=\\dfrac{\\sqrt{2}}{2}$ et $\\arg z=\\dfrac{\\pi}{4}-\\dfrac{\\pi}{6}=\\dfrac{3\\pi}{12}-\\dfrac{2\\pi}{12}=\\dfrac{\\pi}{12}$, ' +
+                'donc $z=\\dfrac{\\sqrt{2}}{2}\\left(\\cos\\dfrac{\\pi}{12}+i\\sin\\dfrac{\\pi}{12}\\right)$',
+            },
+            {
+              tag: 'identifier les deux écritures',
+              text:
+                '$\\dfrac{\\sqrt{2}}{2}\\cos\\dfrac{\\pi}{12}=\\dfrac{\\sqrt{3}+1}{4}$, donc ' +
+                '$\\cos\\dfrac{\\pi}{12}=\\dfrac{\\sqrt{3}+1}{2\\sqrt{2}}=\\dfrac{\\sqrt{6}+\\sqrt{2}}{4}$ ' +
+                '(on multiplie haut et bas par $\\sqrt{2}$) ; de même avec les parties imaginaires, ' +
+                '$\\sin\\dfrac{\\pi}{12}=\\dfrac{\\sqrt{3}-1}{2\\sqrt{2}}=\\dfrac{\\sqrt{6}-\\sqrt{2}}{4}$',
+            },
+          ],
+          result: {
+            tag: 'valeurs exactes',
+            text: '$\\cos\\dfrac{\\pi}{12}=\\dfrac{\\sqrt{6}+\\sqrt{2}}{4}\\approx 0{,}966 \\qquad \\sin\\dfrac{\\pi}{12}=\\dfrac{\\sqrt{6}-\\sqrt{2}}{4}\\approx 0{,}259$',
+          },
+        },
+        {
+          kind: 'piege',
+          text:
+            'En identifiant, n\'oublie pas le module : $r\\cos\\theta$ est la partie réelle, donc ' +
+            '$\\cos\\theta=\\dfrac{\\mathrm{Re}(z)}{r}$. Recopier la partie réelle ne donne le cosinus ' +
+            'que si $|z|=1$.',
+        },
         {
           kind: 'application',
           titre: 'Décrire un courant électrique alternatif',
@@ -1061,6 +1111,14 @@ export const nombresComplexes: ChapterContent = {
           description: ['Calcule module et argument (accepté à 2π près, ou réduit quand l\'énoncé le demande), convertis entre les formes algébrique, trigonométrique et exponentielle, et multiplie ou divise des complexes sous forme exponentielle.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 37. Forme trigonométrique, module et argument »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Valeurs exactes par deux écritures d\'un même complexe',
+          generatorId: '6gen94',
+          description: ['Écris z = (1 + i)/(√3 + i), ou un produit du même genre, sous forme algébrique puis sous forme trigonométrique (modules et arguments des facteurs), et identifie les deux écritures pour obtenir cos(π/12), sin(5π/12)… en valeurs exactes.'],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 94. Valeurs exactes par deux écritures d\'un même complexe »',
         },
       ],
     },
