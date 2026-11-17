@@ -1524,6 +1524,72 @@ export const geometrieDansEspace: ChapterContent = {
               'CC BY-SA 3.0, via Wikimedia Commons.',
           },
         },
+        {
+          kind: 'methode',
+          label: 'Compléter un carrelage, une rangée de poteaux, placer un objet',
+          items: [
+            'Un **carrelage** de carreaux carrés : les côtés qui s\'éloignent sont des fuyantes vers le point ' +
+              'de fuite F ; les lignes des rangs, parallèles à la vitre, restent horizontales. Les diagonales ' +
+              'des carreaux, parallèles entre elles, ont **leur propre point de fuite** sur la ligne d\'horizon. ' +
+              'Prolonge la diagonale d\'un carreau du 1er rang : elle coupe les fuyantes aux coins des rangs ' +
+              'suivants — on ne reporte jamais une profondeur mesurée sur le dessin.',
+            'Une **rangée de poteaux** de même hauteur : les pieds et les sommets sont sur deux fuyantes qui se ' +
+              'rejoignent au point de fuite ; chaque poteau reste vertical. Pour garder le même écart, joins le ' +
+              'sommet d\'un poteau au **milieu** du suivant (un poteau est parallèle à la vitre : son milieu reste ' +
+              'au milieu du dessin) ; cette droite touche le sol au pied du poteau d\'après.',
+            'Un **objet de face** placé plus loin (un panneau, une fenêtre) garde sa forme mais rétrécit : ses ' +
+              'coins sont sur les fuyantes issues des coins de l\'objet de devant, ses côtés restent horizontaux ' +
+              'et verticaux.',
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'planeSketch',
+            width: 340,
+            height: 195,
+            lines: [
+              { points: [{ x: 0, y: 40 }, { x: 340, y: 40 }], tone: 'faint', dashed: true },
+              { points: [{ x: 50, y: 180 }, { x: 130.0, y: 86.7 }], tone: 'ink' },
+              { points: [{ x: 130.0, y: 86.7 }, { x: 170, y: 40 }], tone: 'faint', dashed: true },
+              { points: [{ x: 110, y: 180 }, { x: 150.0, y: 86.7 }], tone: 'ink' },
+              { points: [{ x: 150.0, y: 86.7 }, { x: 170, y: 40 }], tone: 'faint', dashed: true },
+              { points: [{ x: 170, y: 180 }, { x: 170.0, y: 86.7 }], tone: 'ink' },
+              { points: [{ x: 170.0, y: 86.7 }, { x: 170, y: 40 }], tone: 'faint', dashed: true },
+              { points: [{ x: 230, y: 180 }, { x: 190.0, y: 86.7 }], tone: 'ink' },
+              { points: [{ x: 190.0, y: 86.7 }, { x: 170, y: 40 }], tone: 'faint', dashed: true },
+              { points: [{ x: 290, y: 180 }, { x: 210.0, y: 86.7 }], tone: 'ink' },
+              { points: [{ x: 210.0, y: 86.7 }, { x: 170, y: 40 }], tone: 'faint', dashed: true },
+              { points: [{ x: 50, y: 180 }, { x: 290, y: 180 }], tone: 'ink' },
+              { points: [{ x: 98.0, y: 124 }, { x: 242.0, y: 124 }], tone: 'ink' },
+              { points: [{ x: 118.6, y: 100 }, { x: 221.4, y: 100 }], tone: 'ink' },
+              { points: [{ x: 130.0, y: 86.7 }, { x: 210.0, y: 86.7 }], tone: 'ink' },
+              { points: [{ x: 50, y: 180 }, { x: 260, y: 40 }], tone: 'accent', dashed: true },
+            ],
+            points: [
+              { x: 170, y: 40, label: 'F', tone: 'accent', labelDx: -4, labelDy: -10 },
+              { x: 260, y: 40, label: 'V', tone: 'accent', labelDx: -4, labelDy: -10 },
+            ],
+            freeLabels: [{ x: 8, y: 32, text: "ligne d'horizon", tone: 'ink' }],
+            caption:
+              'carrelage en perspective centrale : la diagonale d\'un carreau du 1er rang (pointillé orange), ' +
+              'prolongée, passe par les coins des rangs suivants et par V, le point de fuite des diagonales ; ' +
+              'les lignes des rangs restent horizontales',
+          },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Perspective centrale : point de fuite',
+          generatorId: 'gen105',
+          description: [
+            'Construis sur une vitre quadrillée, avec la règle et l\'équerre : le point de fuite d\'une boîte, ' +
+              'le 2e rang d\'un carrelage grâce aux diagonales, le poteau suivant d\'une rangée, un panneau ' +
+              'placé plus loin sur les mêmes fuyantes — puis repère ce que la perspective centrale conserve, ' +
+              'ou non, par rapport à la cavalière.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 105. Perspective centrale : point de fuite »',
+        },
       ],
     },
 

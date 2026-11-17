@@ -4015,3 +4015,34 @@ paths:
   `components/EtapesPercee.tsx`, `core/perceePlanAuxiliaire.types.ts`, `ui/formatPercee.ts`,
   `ui/figurePercee.ts`, `generateurs/perceePlanAuxiliaire/` (geometriePercee, index, profil,
   exportEvaluation).
+- **4e, Chapitre 8 — gen105 « Perspective centrale : point de fuite »** (section `point-de-fuite`,
+  s'appuie sur `fenetre-durer`, processus 2). Vraie construction, gardée en entier (décision de
+  l'utilisateur), sur la vitre quadrillée de Dürer (12 × 9 carreaux, aucune coordonnée écrite) :
+  ligne d'horizon y = h, points DONNÉS tous sur des nœuds, points à construire là où la construction
+  les met. Variantes (= `forme`) : `boite` (point de fuite d'un pavé à partir de deux arêtes
+  fuyantes, puis un sommet de la face arrière — fuyante + horizontale ou verticale par un sommet
+  voisin ; visibilité des arêtes par faces visibles), `carrelage` (point de fuite V des diagonales
+  du 1er rang, puis coin R du 2e rang par la diagonale prolongée), `poteaux` (sommet du 2e poteau
+  sur la fuyante des sommets, puis pied du 3e par le milieu M du 2e — le milieu d'une verticale
+  reste au milieu), `panneaux` (coins J et L d'un second panneau de face, plus loin, sur les mêmes
+  fuyantes). **Écrans 1–2** : outils « Droite » (par deux points nommés, prolongée sur toute la
+  figure), « Horizontale », « Verticale » (par un point nommé — les droites parallèles à la vitre
+  restent parallèles), puis « Placer X » : un toucher place le point, UNE poignée HTML `<div>` de
+  44 px le fait glisser (Chromium ignore `touch-action` sur le SVG), aimant aux intersections des
+  droites dessinées (objets, horizon, tracés) puis aux nœuds tout proches ; tolérance 0,3 carreau,
+  3 tentatives, diagnostics (pas sur l'horizon / sur une seule des deux droites qui portent le
+  point) ; après clôture, les deux droites qui portent le point en vert et, si révélé, le point de
+  l'élève en rouge. **Écran 3** : l'affirmation vraie parmi trois (UNE tentative ; une vraie, deux
+  fausses tirées dans une banque par variante : fuyantes qui convergent, verticales et horizontales
+  de face qui restent parallèles, longueurs non conservées, lien avec la cavalière ; aucune
+  affirmation qui se déduit du seul énoncé). Étiquettes placées une fois sur la scène complète
+  (rien ne bouge d'un écran à l'autre), « ligne d'horizon » glissée le long de la ligne loin des
+  objets. Papier : figure de départ + a) construction, b) affirmations (vraies questions) ;
+  construction complète dans le corrigé (`figureHtml`). Profil : `forme` = variante, aucun cas
+  particulier, pas de `calcul`. Mesures (5 000 tirages par variante) : figures distinctes boîte ≈ 740,
+  carrelage ≈ 580, poteaux ≈ 230, panneaux ≈ 130 (× 4 × 6 × 6 jeux d'affirmations). Cours : `methode`
+  « Compléter un carrelage, une rangée de poteaux, placer un objet » + illustration du carrelage
+  (diagonale prolongée jusqu'à V) avant la carte, en fin de section. Fichiers : `AppPointDeFuite.tsx`,
+  `components/ConstructionPointFuite.tsx`, `core/pointFuite.types.ts`, `ui/formatPointFuite.ts`,
+  `ui/figurePointFuite.ts`, `generateurs/pointFuite/` (geometrieFuite, index, profil,
+  exportEvaluation).
