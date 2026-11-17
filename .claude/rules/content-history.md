@@ -3872,3 +3872,42 @@ paths:
   `components6e/EtapeCorrectionDetectiveComplexes.tsx`, `core6e/detectiveComplexes.types.ts`,
   `moteur6e/{modele,session,verification}DetectiveComplexes.ts`, `ui6e/formatDetectiveComplexes.ts`,
   `generateurs6e/detectiveComplexes/` (index, profil, exportEvaluation).
+- **4e, Chapitre 8 — générateur gen100 « Positions de deux droites et plan déterminé »** (section
+  `deux-droites`, carte en fin de section, processus 2 ; fiche validée : « Déterminer un plan » est
+  fusionné ici). Deux variantes sur un solide en perspective cavalière (cube, parallélépipède
+  rectangle, prisme droit, pyramide SABCD, tétraèdre), sans coordonnées. `positions` (3 écrans,
+  choix fermés, UNE tentative) : a) plan commun aux deux droites parmi 3 plans nommés par 3 points
+  + « aucun plan » ; b) sécantes / parallèles / gauches ; c) justification propre au verdict — où
+  se coupent-elles (point nommé, point du solide non nommé, hors du solide), quelle droite du solide
+  est parallèle aux deux, ou en quel point la seconde droite perce un plan (Q) qui contient la
+  première (technique du cours). `plan` (2 écrans) : trois points / une droite et un point / deux
+  droites ; a) déterminent-elles un plan, et un seul ? b) oui → nommer le plan (saisie libre « (ABG) »,
+  3 tentatives, tout triplet de points nommés non alignés du plan, ordre et casse libres ; lettre
+  inconnue, nombre de lettres ≠ 3 ou lettres répétées = illisible, sans tentative) ; non → la raison
+  (alignés : une infinité de plans / aucun plan / « il faut 4 points » ; idem pour le point sur la
+  droite ; gauches : aucun plan / une infinité / « seulement si sécantes »). Moteur : énumération
+  unique par gabarit puis seaux (verdict × catégorie × nombre de milieux), `generateurs/deuxDroitesPlan/`.
+  Ordre du tirage : verdict d'abord (1/3 chacun ; oui/non 1/2), puis nombre de milieux (0 ou 2,
+  jamais 1 : une droite « sommet + milieu » n'est parallèle à rien, un seul milieu excluait
+  « parallèles »), catégorie (point commun nommé / sur le solide / hors : 1/3 chacun quand des
+  milieux existent ; gauches croisées SUR LE DESSIN 70 %, jamais sur un point nommé), gabarit.
+  Triplets « plan » : 1 ou 3 points non sommets (les seuls possibles pour trois points alignés :
+  A, I, B ; A, K, C avec K centre de face ; I, K, J sur une médiane de face), même tirage pour les
+  non-alignés. Anti-devinette mesurée : plans de l'écran a nommés à 2 lettres communes avec les
+  droites autant que possible ; dans un cas gauche, 85 % du temps un distracteur « une droite + un
+  point de l'autre » nommé par ces 3 points (comme le bon plan d'un cas coplanaire sans autre point
+  nommé) — meilleure stratégie « lettres seules » : 48 % (25 % au hasard, 33 % « toujours aucun ») ;
+  le point de percée n'est jamais dans le nom de (Q). `Solide3DSketch` étendu de façon additive :
+  prop `droitesSupplementaires` (seconde couleur, `.solide3d-droite-seconde`, variable
+  `--solide3d-droite-2` du thème) — gen39/40/41 inchangés. Papier (`ui/figureDeuxDroitesPlan.ts`) :
+  énoncé = consigne + figure (données seules) + une question globale ; corrigé : étapes a, b, c,
+  figure complétée (section du plan commun / déterminé ou du plan (Q), point commun — cadrage élargi
+  s'il est hors du solide). Profil : `forme` = variante + type de données (`positions`,
+  `plan-troisPoints|droitePoint|deuxDroites`), aucun cas particulier, pas de `calcul`. Mesures
+  (20 000 tirages) : verdicts 32,9 / 33,9 / 33,2 % ; oui/non 16,4–16,9 % par type ; énoncés distincts
+  9 735 (positions), 3 194 à 4 763 par type « plan » ; P(deux séries identiques) ≤ 0,08 %. Cours :
+  encadrés `methode` (« deux droites sur un solide dessiné ») et `rappel` (« Ces données
+  déterminent-elles un plan ? ») avant la carte. Fichiers : `AppPositionsDeuxDroites.tsx`,
+  `core/deuxDroitesPlan.types.ts`, `moteur/sessionDeuxDroitesPlan.ts`, `ui/formatDeuxDroitesPlan.ts`,
+  `ui/figureDeuxDroitesPlan.ts`, `components/EtapeNomPlan.tsx`, `generateurs/deuxDroitesPlan/`
+  (index, profil, exportEvaluation).

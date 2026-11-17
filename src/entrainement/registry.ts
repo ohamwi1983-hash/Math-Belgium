@@ -174,6 +174,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen40: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppSectionPlaneSolide').then((m) => ({ default: m.AppSectionPlaneSolide }))),
   gen41: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppOmbreSoleil').then((m) => ({ default: m.AppOmbreSoleil }))),
   gen66: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppQuizGeometrieEspace').then((m) => ({ default: m.AppQuizGeometrieEspace }))),
+  gen100: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppPositionsDeuxDroites').then((m) => ({ default: m.AppPositionsDeuxDroites }))),
   gen67: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppRelationsRacines').then((m) => ({ default: m.AppRelationsRacines }))),
 
   // --- 5e, chapitre 1 : Fonctions : rappels et compléments ---

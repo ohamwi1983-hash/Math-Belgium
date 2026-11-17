@@ -381,6 +381,43 @@ export const geometrieDansEspace: ChapterContent = {
             'dessin. En mode Défi, réponds d\'après la vue cavalière en un seul essai, puis ' +
             'tourne le cube pour contrôler.',
         },
+        {
+          kind: 'methode',
+          label: 'Méthode — deux droites sur un solide dessiné',
+          items: [
+            'Cherche un plan qui contient les **quatre** points qui nomment les deux droites. ' +
+              'S\'il n\'en existe aucun, les droites sont **gauches**.',
+            'S\'il en existe un, regarde dans ce plan : même direction → **parallèles** ; sinon → ' +
+              '**sécantes**. Leur point commun peut être un point nommé, un point d\'une face ou ' +
+              'même un point situé **hors** du solide : prolonge les droites, le plan est infini.',
+            'Deux droites qui se croisent **sur le dessin** ne sont pas forcément sécantes : en ' +
+              'perspective, des droites gauches semblent souvent se couper.',
+          ],
+        },
+        {
+          kind: 'rappel',
+          label: 'Ces données déterminent-elles un plan ?',
+          items: [
+            'Un seul plan : trois points **non alignés** ; une droite et un point **hors** de cette ' +
+              'droite ; deux droites **sécantes** ; deux droites **parallèles** distinctes.',
+            'Une infinité de plans : trois points **alignés** ; une droite et un point **situé sur** ' +
+              'cette droite — comme les pages d\'un livre autour de sa reliure.',
+            'Aucun plan : deux droites **gauches**.',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Positions de deux droites et plan déterminé',
+          generatorId: 'gen100',
+          description: [
+            'Sur un solide en perspective cavalière (cube, parallélépipède, prisme, pyramide ou ' +
+              'tétraèdre), trouve le plan commun à deux droites, décide si elles sont sécantes, ' +
+              'parallèles ou gauches et justifie-le. Ou décide si trois points, une droite et un ' +
+              'point, ou deux droites déterminent un plan — puis nomme-le, ou explique pourquoi.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 100. Positions de deux droites et plan déterminé »',
+        },
       ],
     },
 

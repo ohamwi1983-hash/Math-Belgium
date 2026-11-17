@@ -92,7 +92,7 @@ export type IdGenerateurPilote =
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
-  | 'gen39' | 'gen40' | 'gen41'
+  | 'gen39' | 'gen40' | 'gen41' | 'gen100'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
   | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19' | '5gen44' | '5gen45' | '5gen46' | '5gen47' | '5gen48' | '5gen49'
@@ -308,6 +308,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen52', label: "Sommet, foyer, paramètre et directrice depuis l'équation développée (gen52)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen53', label: "Construction graphique d'une parabole (gen53)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lieux', generatorId: 'gen54', label: '', processus: 3 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'deux-droites', generatorId: 'gen100', label: 'Positions de deux droites et plan déterminé (gen100)', processus: 2 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'position', generatorId: 'gen39', label: '' },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'section', generatorId: 'gen40', label: '' },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'ombre', generatorId: 'gen41', label: '' },

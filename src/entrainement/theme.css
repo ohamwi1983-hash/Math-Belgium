@@ -4173,6 +4173,7 @@
   --solide3d-plan: #6d28d9;
   --solide3d-plan-opacite: 0.22;
   --solide3d-droite: #e8590c;
+  --solide3d-droite-2: #1c7ed6;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -4180,6 +4181,7 @@
     --solide3d-plan: #a78bfa;
     --solide3d-plan-opacite: 0.26;
     --solide3d-droite: #ff8f4d;
+    --solide3d-droite-2: #74c0fc;
   }
 }
 
@@ -4217,6 +4219,11 @@
   stroke-width: 3;
   stroke-linecap: round;
   fill: none;
+}
+
+/* Seconde droite (gen100, positions de deux droites) : même trait, autre couleur. */
+.entrainement .solide3d-droite.solide3d-droite-seconde {
+  stroke: var(--solide3d-droite-2);
 }
 
 .entrainement .solide3d-droite.is-cachee {

@@ -44,6 +44,10 @@ interface Props {
   pointsExtra?: PointExtraSolide3D[];
   /** Segments annexes déjà tracés (ex. section en cours de construction, ombre déjà projetée). */
   segmentsExtra?: SegmentExtraSolide3D[];
+  /** Droites supplémentaires (gen100 : la seconde de deux droites), tracées comme `droite` — prolongées,
+   * partie cachée en pointillé — mais dans une seconde couleur (`.solide3d-droite-seconde`). Absent par
+   * défaut : comportement historique inchangé. */
+  droitesSupplementaires?: [Point3D, Point3D][];
   /** Masque les étiquettes de sommet — utile quand un écran veut isoler la lecture (rare, défaut
    * toujours affiché). */
   labelsSommets?: boolean;
@@ -57,7 +61,7 @@ interface Props {
  * (projection, visibilité des arêtes, polygone du plan) est déjà calculée par `ui/solide3DSketch.ts`
  * — ce composant ne fait que consommer ces structures, jamais de logique géométrique ici.
  */
-export function Solide3DSketch({ solide, plan, droite, droitePoints, pointsExtra = [], segmentsExtra = [], labelsSommets = true }: Props) {
+export function Solide3DSketch({ solide, plan, droite, droitePoints, droitesSupplementaires, pointsExtra = [], segmentsExtra = [], labelsSommets = true }: Props) {
   const geometrie = useMemo(() => calculerGeometrieSolide3D(solide), [solide]);
   const echelleProjection = useMemo(() => calculerEchelleProjection(solide), [solide]);
   const polygonePlan = useMemo(() => (plan ? calculerPolygonePlan(solide, plan) : null), [solide, plan]);
@@ -69,6 +73,12 @@ export function Solide3DSketch({ solide, plan, droite, droitePoints, pointsExtra
     const [a, b] = JSON.parse(cleDroite) as [Point3D, Point3D];
     return calculerSegmentsDroite(solide, a, b);
   }, [solide, cleDroite]);
+
+  const cleSupplementaires = droitesSupplementaires ? JSON.stringify(droitesSupplementaires) : "";
+  const segmentsSupplementaires = useMemo(() => {
+    if (!cleSupplementaires) return [];
+    return (JSON.parse(cleSupplementaires) as [Point3D, Point3D][]).flatMap(([a, b]) => calculerSegmentsDroite(solide, a, b));
+  }, [solide, cleSupplementaires]);
 
   const aretesCachees = geometrie.aretes.filter((a) => !a.visible);
   const aretesVisibles = geometrie.aretes.filter((a) => a.visible);
@@ -106,6 +116,17 @@ export function Solide3DSketch({ solide, plan, droite, droitePoints, pointsExtra
           x2={segment.x2}
           y2={segment.y2}
           className={`solide3d-droite${segment.cache ? " is-cachee" : ""}`}
+        />
+      ))}
+
+      {segmentsSupplementaires.map((segment, index) => (
+        <line
+          key={`droite-supplementaire-${index}`}
+          x1={segment.x1}
+          y1={segment.y1}
+          x2={segment.x2}
+          y2={segment.y2}
+          className={`solide3d-droite solide3d-droite-seconde${segment.cache ? " is-cachee" : ""}`}
         />
       ))}
 
