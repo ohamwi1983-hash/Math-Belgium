@@ -3662,3 +3662,35 @@ paths:
   `App6gen93.tsx`, `core6e/linearisationEuler.ts`, `moteur6e/{types,session,verification}LinearisationEuler.ts`,
   `ui6e/{format,recapitulatif}LinearisationEuler.ts`, `components6e/EtapeLinearisationEuler.tsx`,
   `generateurs6e/linearisationEuler/` (index, profilEvaluation, exportEvaluation).
+- **6e (6h), Chapitre 5 — générateur 6gen94 « Valeurs exactes par deux écritures d'un même
+  complexe »** (section `formetrigonometrique`, carte après 6gen37, processus 3) : z = z₁z₂ ou
+  z₁/z₂, un facteur de la famille de π/4 (c(±1 ± i)) et un de la famille de π/6 ou π/3
+  (d(±√3 ± i), d(±1 ± i√3)), (c ; d) ∈ {(1 ; 1), (2 ; 1), (1 ; 2)}, ordre tiré au hasard : l'argument
+  de z est toujours ±π/12, ±5π/12, ±7π/12 ou ±11π/12 (en douzièmes de π : ±3/±9 et ±2/±4/±8/±10,
+  somme ou différence impaire et jamais multiple de 3). Calcul EXACT de la forme algébrique dans
+  les nombres (p + q√3)/d (`core6e/deuxEcrituresComplexe.ts`), module de z toujours k√2. Variantes
+  `produit` / `quotient`, quatre écrans à champs libres : a) Re z et Im z exacts (développement ou
+  conjugué) ; b) module et argument de chaque facteur ; c) module et argument de z (forme
+  trigonométrique) ; d) identification → cos θ et sin θ exacts (toute écriture exacte acceptée,
+  (√3 + 1)/(2√2) comme (√6 + √2)/4). Arguments acceptés à 2kπ près ; degrés, valeur arrondie
+  (décimale à 1 % près sans racine ni π), « i » dans une partie, cos(…) recopié : refusés sans
+  tentative. Pièges reconnus : parties échangées, division par |z₂|² oubliée, multiplication par
+  z₂ au lieu du conjugué, i² = +1, module sans racine ou somme des parties, arctan sans correction
+  de quadrant, cos/sin d'un facteur échangés, arguments additionnés/soustraits à tort ou dans le
+  mauvais ordre, modules additionnés, cos et sin échangés, partie réelle recopiée sans diviser par
+  r. L'écran à champs libres `components6e/EtapeLinearisationEuler.tsx` (6gen93) est réutilisé tel
+  quel. Papier : l'exercice classique en trois vraies questions (a) forme algébrique, b) forme
+  trigonométrique, c) cos θ et sin θ, θ nommé), `etapesParQuestion` [a] [b, c] [d]. Profil
+  (`generateurs6e/deuxEcrituresComplexe/profilEvaluation.ts`) : `forme` = type (produit/quotient),
+  aucun cas particulier (toutes les instances demandent les quatre étapes), pas de `calcul`.
+  Mesures (20 000 tirages par variante) : 192 énoncés distincts par type, fréquence max/min d'un
+  énoncé 134/78, probabilité que deux séries tombent sur le même énoncé ≈ 0,5 %, les huit angles
+  visés à 12,5 % ± 0,3 chacun. Cours : sous-titre « Deux écritures d'un même nombre : des valeurs
+  exactes », paragraphe, exemple « cos(π/12) et sin(π/12) par deux écritures » (z = (1 + i)/(√3 + i),
+  énoncé ajouté à `ENONCES_DEMONSTRATION`) et piège « n'oublie pas le module », insérés après le
+  tableau récapitulatif des opérations, avant l'application électrique. Libellés de conception
+  « Forme trigonométrique, module et argument (6gen37) » (jusque-là vide) et « Valeurs exactes par
+  deux écritures d'un même complexe (6gen94) ». Fichiers : `App6gen94.tsx`,
+  `core6e/deuxEcrituresComplexe.ts`, `moteur6e/{types,session,verification}DeuxEcritures.ts`,
+  `ui6e/{format,recapitulatif}DeuxEcritures.ts`, `generateurs6e/deuxEcrituresComplexe/` (index,
+  profilEvaluation, exportEvaluation).
