@@ -33,7 +33,7 @@ const LABEL_OFFSET: Record<'above' | 'below' | 'left' | 'right', { dx: number; d
  * optionnels. Composant généraliste réutilisé pour la quasi-totalité des diagrammes du chapitre
  * sur les nombres complexes — dans le même esprit que la généralisation de `circleDiagram`.
  */
-export function ComplexPlane({ xMin, xMax, yMin, yMax, circle, polygon, vectors, points, angleArcs }: Props) {
+export function ComplexPlane({ xMin, xMax, yMin, yMax, circle, polygon, region, vectors, points, angleArcs }: Props) {
   const markerId = `cplane-${useId()}`
   const xScale = (x: number) => ((x - xMin) / (xMax - xMin)) * L
   const yScale = (y: number) => H - ((y - yMin) / (yMax - yMin)) * H
@@ -67,6 +67,15 @@ export function ComplexPlane({ xMin, xMax, yMin, yMax, circle, polygon, vectors,
           </marker>
         ))}
       </defs>
+
+      {/* région coloriée (sous les axes), sans contour */}
+      {region && (
+        <polygon
+          points={region.points.map((p) => `${xScale(p.x).toFixed(1)},${yScale(p.y).toFixed(1)}`).join(' ')}
+          className="svg-plan-fill"
+          style={{ stroke: 'none' }}
+        />
+      )}
 
       {/* axes Re / Im, à travers l'origine si elle est dans le cadre */}
       <line x1={0} y1={axisY0} x2={L} y2={axisY0} className="svg-line" strokeWidth="1.2" />

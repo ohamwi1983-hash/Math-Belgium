@@ -478,6 +478,10 @@ export type IllustrationSpec =
       yMax: number
       circle?: { cx: number; cy: number; r: number; tone?: 'faint' | 'accent' }
       polygon?: { points: { x: number; y: number }[]; tone?: 'accent' | 'faint' }
+      /** Région du plan coloriée (polygone rempli, sans contour — les frontières se tracent à part,
+       * en trait plein si elles sont incluses, en pointillés sinon). Ajout de 6gen98 « Régions du
+       * plan complexe ». */
+      region?: { points: { x: number; y: number }[] }
       vectors?: { from: { x: number; y: number }; to: { x: number; y: number }; tone: 'accent' | 'good' | 'bad' | 'faint'; dashed?: boolean; tick?: boolean }[]
       points?: { x: number; y: number; label?: string; tone: 'accent' | 'good' | 'bad' | 'ink'; labelPos?: 'above' | 'below' | 'left' | 'right'; node?: boolean }[]
       /** Arc d'angle en degrés (convention standard, sens direct), à un centre libre — pas

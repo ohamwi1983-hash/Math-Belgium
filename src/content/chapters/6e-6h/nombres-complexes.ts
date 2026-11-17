@@ -2248,6 +2248,77 @@ export const nombresComplexes: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 42. Nombres complexes — problèmes avancés »',
         },
+        { kind: 'subheading', text: 'Régions du plan complexe' },
+        {
+          kind: 'para',
+          text:
+            'Une **inégalité** sur $z$ ne décrit plus une courbe mais une **région** du plan. Sa ' +
+            '**frontière** est le lieu obtenu en remplaçant l\'inégalité par une égalité — un lieu ' +
+            'que tu sais déjà reconnaître (tableau des lieux géométriques ci-dessus).',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Condition', 'Région', 'Frontière'],
+          rows: [
+            ['$|z-a|\\leq r$', 'disque de centre $A$ et de rayon $r$', 'cercle (inclus)'],
+            ['$|z-a|>r$', 'extérieur de ce disque', 'cercle (exclu)'],
+            ['$\\mathrm{Re}(z)\\geq k$', 'demi-plan à droite de la droite $x=k$', 'droite verticale $x=k$ (incluse)'],
+            ['$\\mathrm{Im}(z)<k$', 'demi-plan sous la droite $y=k$', 'droite horizontale $y=k$ (exclue)'],
+            ['$|z-a|<|z-b|$', 'demi-plan des points plus proches de $A$ que de $B$', 'médiatrice de $[AB]$ (exclue)'],
+            ['$\\theta_1\\leq\\arg(z-a)\\leq\\theta_2$', 'secteur angulaire de sommet $A$, de $\\theta_1$ à $\\theta_2$ dans le sens trigonométrique', 'deux demi-droites d\'origine $A$ ($A$ exclu)'],
+          ],
+        },
+        {
+          kind: 'methode',
+          label: 'Représenter une région du plan complexe',
+          items: [
+            '**Frontière** : remplace l\'inégalité par une égalité et traduis-la en géométrie — $|z-a|$ est la distance $AM$ (réécris $|z+2-i|=|z-(-2+i)|$ pour lire le centre), $\\mathrm{Re}(z)=x$ et $\\mathrm{Im}(z)=y$, $\\arg(z-a)$ est l\'angle de la demi-droite $[AM)$.',
+            '**Bord** : inégalité large ($\\leq$, $\\geq$) → frontière incluse, en trait plein ; inégalité stricte ($<$, $>$) → frontière exclue, en pointillés.',
+            '**Côté** : teste un point qui n\'est pas sur la frontière (souvent $O$). S\'il vérifie la condition, la région est le côté qui le contient ; sinon, c\'est l\'autre côté.',
+            '**Plusieurs conditions** reliées par « et » : la région est la **partie commune** des régions de chaque condition.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'région |z−1−i| ≤ 2 et Im z > 1',
+          formula: 'Représente l\'ensemble $E$ des points $M$ d\'affixe $z$ tels que $|z-1-i|\\leq 2$ et $\\mathrm{Im}(z)>1$.',
+          steps: [
+            { tag: 'première condition', text: '$|z-1-i|=|z-(1+i)|=\\Omega M$ avec $\\Omega(1+i)$ : $\\Omega M\\leq 2$, c\'est le disque de centre $\\Omega$ et de rayon 2 ; inégalité large, le cercle est inclus (trait plein)' },
+            { tag: 'deuxième condition', text: 'avec $z=x+yi$, $\\mathrm{Im}(z)=y$ : $y>1$, le demi-plan au-dessus de la droite $y=1$ ; inégalité stricte, la droite est exclue (pointillés). Test : $O$ a $y=0$, $0>1$ est faux, donc la région est du côté opposé à $O$' },
+            { tag: 'partie commune', text: 'le demi-disque supérieur : arc de cercle compris, diamètre (sur la droite $y=1$) exclu, de même que ses extrémités $-1+i$ et $3+i$' },
+          ],
+          result: { tag: 'région', text: '$E$ est le demi-disque supérieur de centre $\\Omega(1+i)$ et de rayon 2, arc compris, diamètre exclu' },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'complexPlane',
+            xMin: -2.2,
+            xMax: 4.2,
+            yMin: -1.5,
+            yMax: 4.5,
+            region: { points: Array.from({ length: 25 }, (_, i) => ({ x: 1 + 2 * Math.cos((PI * i) / 24), y: 1 + 2 * Math.sin((PI * i) / 24) })) },
+            circle: { cx: 1, cy: 1, r: 2, tone: 'accent' },
+            vectors: [{ from: { x: -2.2, y: 1 }, to: { x: 4.2, y: 1 }, tone: 'accent', dashed: true }],
+            points: [
+              { x: 1, y: 1, label: 'Ω', tone: 'ink', labelPos: 'below' },
+              { x: 0, y: 0, label: 'O', tone: 'ink', labelPos: 'left', node: false },
+            ],
+            caption:
+              'Région $|z-1-i|\\leq 2$ et $\\mathrm{Im}(z)>1$ : le demi-disque colorié. Le cercle ' +
+              '(inclus) est en trait plein, la droite $y=1$ (exclue) en pointillés.',
+          },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Régions du plan complexe',
+          generatorId: '6gen98',
+          description: [
+            'Reconnais la frontière d\'une région définie par une inégalité (|z − a| ≤ r, Re(z) ≥ k, |z − a| < |z − b|, θ₁ ≤ arg(z − a) ≤ θ₂, ou deux conditions à la fois), donne ses éléments, dis si le bord est inclus, puis choisis la bonne région parmi quatre figures.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 98. Régions du plan complexe »',
+        },
       ],
     },
   ],
