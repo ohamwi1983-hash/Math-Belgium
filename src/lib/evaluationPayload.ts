@@ -83,7 +83,7 @@ export type IdGenerateurPilote =
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
-  | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93'
+  | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95'
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
@@ -190,7 +190,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'primitives-integrales', sectionId: 'problemes', generatorId: '6gen82', label: 'Courbe de Lorenz et coefficient de Gini (6gen82)', processus: 3 },
   { chapitreSlug: 'primitives-integrales', sectionId: 'problemes', generatorId: '6gen80', label: 'Accumuler une grandeur (6gen80)', processus: 3 },
   { chapitreSlug: 'nombres-complexes', sectionId: 'operationsbase', generatorId: '6gen34', label: '' },
-  { chapitreSlug: 'nombres-complexes', sectionId: 'affixesracines', generatorId: '6gen35', label: '' },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'affixesracines', generatorId: '6gen35', label: 'Affixes et racines carrées (6gen35)' },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'transformationsplan', generatorId: '6gen95', label: 'Lire et placer dans le plan complexe (6gen95)', processus: 1 },
   { chapitreSlug: 'nombres-complexes', sectionId: 'equationscomplexes', generatorId: '6gen36', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'formetrigonometrique', generatorId: '6gen37', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'formulemoivre', generatorId: '6gen38', label: 'Formule de Moivre (6gen38)' },

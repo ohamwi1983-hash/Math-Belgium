@@ -3662,3 +3662,35 @@ paths:
   `App6gen93.tsx`, `core6e/linearisationEuler.ts`, `moteur6e/{types,session,verification}LinearisationEuler.ts`,
   `ui6e/{format,recapitulatif}LinearisationEuler.ts`, `components6e/EtapeLinearisationEuler.tsx`,
   `generateurs6e/linearisationEuler/` (index, profilEvaluation, exportEvaluation).
+- **6e (6h), Chapitre 5 — Nombres complexes** (`nombres-complexes`), section `transformationsplan` :
+  nouveau générateur **6gen95 « Lire et placer dans le plan complexe »** (processus 1), carte après
+  6gen40, précédée d'un `featureTable` (opération → point obtenu → transformation : z̄, −z, −z̄, iz,
+  2z, z + w, z − w ; renvoi à la section 4 pour module/argument). Placée d'abord en section 2
+  (`affixesracines`) par l'agent, déplacée au merge en section 7 : l'exercice mobilise l'argument
+  (section 4) et la rotation/homothétie (section 7), pas encore vus en section 2.
+  Chaîne fixe de 5 écrans : lire z (et w) sur le quadrillage (forme réduite exigée, diagnostic
+  « parties inversées » / signes) → placer P puis Q (images de A par deux opérations tirées) →
+  associer chaque opération à sa transformation (choix fermé, UNE tentative, 8 options dont les
+  distracteurs rotation −π/2 et translation de vecteur BO ; 6 sans point B) → |z_C| exact et un
+  argument (radians, à 2kπ près ; valeur approchée, degrés ou saisie illisible refusées sans
+  tentative). Repère FIXE [−5 ; 5]², tous les points dans [−4 ; 4]², distincts, à ≥ 1,5 l'un de
+  l'autre ; z = a + bi avec a, b ≠ 0 et |a| ≠ |b| (z̄, −z, −z̄, iz, −iz distincts : chaque piège de
+  placement — z̄ ↔ −z, iz tourné de −π/2, i² oublié, une coordonnée doublée, w − z au lieu de
+  z − w, somme ↔ différence, parties inversées — a sa position et son message). Placement au doigt
+  (`components6e/PlanComplexeInteractif.tsx`, SVG maison) : UN toucher sur le quadrillage place le
+  point sur l'intersection la plus proche, une seule poignée (zone de 44 px) se fait glisser de nœud
+  en nœud. **Piège trouvé** : Chromium (et Safari) n'appliquent pas `touch-action` aux éléments
+  graphiques SVG — une poignée `<circle style="touch-action:none">` recevait `pointercancel` après
+  deux déplacements (le navigateur reprenait le geste pour faire défiler) ; la poignée est donc un
+  `<div>` HTML posé sur la figure. Le fond garde `touch-action: manipulation` (la page défile en
+  glissant sur la figure, contrairement à Mafs qui bloque tout le plan). Vérifié sur iPhone 13
+  émulé avec de vrais événements tactiles (CDP). Variantes = familles d'opérations : `symetries`
+  (2 parmi z̄, −z, −z̄), `rotation-homothetie` (iz ou 2z + une autre), `translations` (z + w ou
+  z − w + une autre). Papier : figure de l'énoncé (A, B, C, aucune coordonnée, fenêtre fixe qui ne
+  trahit pas les points à placer) + quatre vraies questions (lire, placer P et Q, nommer les
+  transformations, module/argument), P et Q placés dans le corrigé (`figureHtml`). Profil
+  (`generateurs6e/lirePlacerPlanComplexe/profilEvaluation.ts`) : `forme` = variante (les opérations
+  précises, donc la transformation à nommer, changent d'une série à l'autre), cas particulier
+  « axe » (C sur un axe : module entier, argument immédiat ; 1 fois sur 4), pas de `calcul`.
+  Ajouts partagés (additifs) : `planComplexeSvg` accepte `fenetreFixe` et `idBase` (identifiants
+  SVG déterministes). Libellé de conception de 6gen35 renseigné.

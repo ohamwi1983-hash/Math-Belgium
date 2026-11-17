@@ -1847,6 +1847,30 @@ export const nombresComplexes: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 40. Transformations du plan via les nombres complexes »',
         },
+        {
+          kind: 'featureTable',
+          caption:
+            'Lire une opération sur le quadrillage : point obtenu à partir de M(a ; b), d\'affixe z = a + bi ' +
+            '(w = c + di est l\'affixe d\'un point B). Module et argument : section 4.',
+          headers: ['Opération', 'Point obtenu', 'Transformation du plan'],
+          rows: [
+            ['$\\bar{z}$', '$(a\\,;-b)$', 'symétrie orthogonale d\'axe réel'],
+            ['$-z$', '$(-a\\,;-b)$', 'symétrie centrale de centre O'],
+            ['$-\\bar{z}$', '$(-a\\,;b)$', 'symétrie orthogonale d\'axe imaginaire'],
+            ['$iz$', '$(-b\\,;a)$', 'rotation de centre O et d\'angle $\\frac{\\pi}{2}$'],
+            ['$2z$', '$(2a\\,;2b)$', 'homothétie de centre O et de rapport 2'],
+            ['$z+w$', '$(a+c\\,;b+d)$', 'translation de vecteur $\\overrightarrow{OB}$'],
+            ['$z-w$', '$(a-c\\,;b-d)$', 'translation de vecteur $\\overrightarrow{BO}$'],
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Lire et placer dans le plan complexe',
+          generatorId: '6gen95',
+          description: ['Lis l\'affixe d\'un ou deux points sur le quadrillage, place au doigt les points d\'affixes z̄, −z, −z̄, iz, 2z, z + w ou z − w, associe chaque opération à sa transformation (symétrie, rotation, translation, homothétie), puis lis le module et un argument d\'un point.'],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 95. Lire et placer dans le plan complexe »',
+        },
       ],
     },
     {

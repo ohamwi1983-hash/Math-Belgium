@@ -340,6 +340,7 @@ import { adaptateurEvaluationEncadrerIntegrales } from '../entrainement/6e-6h/ge
 import { adaptateurEvaluationComparerEncadrerLog } from '../entrainement/6e-6h/generateurs6e/comparerEncadrerLogarithmes/exportEvaluation'
 import { adaptateurEvaluationNombresComplexes } from '../entrainement/6e-6h/generateurs6e/nombresComplexes/exportEvaluation'
 import { adaptateurEvaluationAffixesRacines } from '../entrainement/6e-6h/generateurs6e/affixesRacines/exportEvaluation'
+import { adaptateurEvaluationLirePlacerPlanComplexe } from '../entrainement/6e-6h/generateurs6e/lirePlacerPlanComplexe/exportEvaluation'
 import { adaptateurEvaluationEquationsComplexes } from '../entrainement/6e-6h/generateurs6e/equationsComplexes/exportEvaluation'
 import { adaptateurEvaluationFormeTrigonometrique } from '../entrainement/6e-6h/generateurs6e/formeTrigonometrique/exportEvaluation'
 import { adaptateurEvaluationFormuleMoivre } from '../entrainement/6e-6h/generateurs6e/formuleMoivre/exportEvaluation'
@@ -438,6 +439,7 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen40': versionPapier(adaptateurEvaluationTransformationsPlan) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen41': versionPapier(adaptateurEvaluationTrianglesComplexes) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen42': versionPapier(adaptateurEvaluationComplexesAvances) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen95': versionPapier(adaptateurEvaluationLirePlacerPlanComplexe) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen30': versionPapier(adaptateurEvaluationProbabilitesEnsembles) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen31': versionPapier(adaptateurEvaluationTiragesArbres) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen32': versionPapier(adaptateurEvaluationIndependanceBayes) as unknown as AdaptateurFeuilleExercices<never>,

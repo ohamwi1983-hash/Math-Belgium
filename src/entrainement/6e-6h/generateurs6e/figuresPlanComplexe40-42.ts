@@ -79,6 +79,11 @@ export interface OptionsPlan {
   polygones?: PolygonePlan[];
   /** Points à garder dans la fenêtre sans les dessiner. */
   inclure?: Coord[];
+  /** Fenêtre imposée (bornes entières, carrée) au lieu de la fenêtre ajustée au contenu — 6gen95 :
+   * repère fixe [−5 ; 5]², qui ne trahit pas la position des points à placer. */
+  fenetreFixe?: { xMin: number; xMax: number; yMin: number; yMax: number };
+  /** Préfixe des identifiants SVG (déterministe, dérivé du contenu) au lieu du compteur global. */
+  idBase?: string;
   libelle: string;
 }
 
@@ -149,8 +154,8 @@ const DECALAGES: Record<NonNullable<PointPlan["position"]>, { dx: number; dy: nu
 };
 
 export function planComplexeSvg(o: OptionsPlan): string {
-  const id = `pc${++compteurFigures}`;
-  const { xMin, xMax, yMin, yMax } = fenetre(o);
+  const id = o.idBase ?? `pc${++compteurFigures}`;
+  const { xMin, xMax, yMin, yMax } = o.fenetreFixe ?? fenetre(o);
   const marge = 22;
   const cote = 300;
   const unite = (cote - 2 * marge) / (xMax - xMin);
