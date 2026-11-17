@@ -3726,3 +3726,30 @@ paths:
   `core6e/deuxEcrituresComplexe.ts`, `moteur6e/{types,session,verification}DeuxEcritures.ts`,
   `ui6e/{format,recapitulatif}DeuxEcritures.ts`, `generateurs6e/deuxEcrituresComplexe/` (index,
   profilEvaluation, exportEvaluation).
+- **6e (6h), Chapitre 5 — Nombres complexes** (`nombres-complexes`), section `racinesniemes` :
+  nouveau générateur **6gen97 « Polygones réguliers et racines n-ièmes »** (processus 3), carte après
+  6gen39, précédée d'un bloc `methode` (le cours ne traitait ni la rotation de centre quelconque à
+  cet endroit, ni le côté/l'aire du polygone inscrit) : zₖ = c + (a − c)·e^{2ikπ/n}, côté
+  |z₁ − z₀| = 2r·sin(π/n) (par factorisation de e^{iπ/n}), aire (n/2)·r²·sin(2π/n), somme des
+  sommets = n·c. Trois variantes, chaîne fixe de 4 écrans chacune : `sommets` (n = 3, 4, 6, 8 —
+  relation des sommets en choix fermé, distracteurs « rotation autour de O », « translation
+  oubliée », « e^{2ikπ} », « kπ/n », « sens horaire » ; a − c et l'angle ; Z₁ ; Z₂ (et Z₃) en
+  parties réelle/imaginaire exactes), `mesures` (n = 3, 4, 6 : rayon |z₀|, côté, périmètre, aire,
+  valeurs exactes), `somme-nulle` (n = 3 à 8 : (ω − 1)S = ωⁿ − 1 puis « ωⁿ = 1 et ω ≠ 1 » en choix
+  fermés, puis somme des affixes = n·c et somme sans A). Valeurs exactes p + q√d gérées par
+  `moteur6e/modelePolygonesReguliers.ts` (affichage) ; saisie des sommets en DEUX champs réels
+  (évaluateur réel, qui accepte √ et fractions — même choix que 6gen39) ; valeur décimale approchée,
+  angle en degrés, saisie illisible ou forme non réduite refusées sans tentative. Figures écran
+  (`components6e/PlanPolygoneRegulier.tsx`, SVG maison, fenêtre fixe) : pour `sommets`, C, A et le
+  cercle seulement — les sommets demandés apparaissent écran après écran, le polygone complet à la
+  fin (pour n = 4 ils tomberaient sur le quadrillage) ; racines de l'unité sur le cercle unité pour
+  la démonstration de S = 0. **Leçon** : pour `mesures`, les réponses ne dépendent que de n et de
+  |z₀|² — avec `forme` = variante + n et un point tiré dans [−4 ; 4]², un plan réel a donné deux
+  séries sur trois aux réponses identiques (énoncés pourtant différents) ; corrigé en tirant |z₀|²
+  équiprobable parmi 32 valeurs ([−7 ; 7]²) et en sortant n de la forme. Profil
+  (`generateurs6e/polygonesReguliers/profilEvaluation.ts`) : `forme` = `sommets-nN`, `mesures`,
+  `somme-nulle` ; cas particulier « centre-origine » (`sommets`, C = O : pas de translation, 1 fois
+  sur 6) ; pas de `calcul`. Papier : `sommets` → une question (affixes de Z₁, Z₂ (, Z₃)), polygone
+  complet dans le corrigé (`figureHtml`) ; `mesures` → rayon, démonstration du côté puis valeur,
+  périmètre et aire ; `somme-nulle` → « Démontre que S = 0 », puis les deux sommes. Libellé de
+  conception de 6gen39 renseigné.
