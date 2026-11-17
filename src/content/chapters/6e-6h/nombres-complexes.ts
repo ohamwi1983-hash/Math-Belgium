@@ -1053,13 +1053,13 @@ export const nombresComplexes: ChapterContent = {
                 { from: { x: 3, y: 4 }, to: { x: 0, y: 4 }, tone: 'faint', dashed: true },
               ],
               points: [
-                { x: 3, y: 4, label: 'Z = 3+4i', tone: 'accent', labelPos: 'above' },
+                { x: 3, y: 4, label: 'Z = 3+4j', tone: 'accent', labelPos: 'above' },
                 { x: 3, y: 0, label: 'R = 3 Ω', tone: 'ink', labelPos: 'below', node: false },
                 { x: 0, y: 4, label: 'X = 4 Ω', tone: 'ink', labelPos: 'left', node: false },
               ],
               angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 53, radiusPx: 28, label: 'φ', tone: 'good' }],
               caption:
-                "L'impédance Z = 3+4i comme point du plan complexe : sa partie réelle R = 3 Ω " +
+                "L'impédance Z = 3+4j comme point du plan complexe : sa partie réelle R = 3 Ω " +
                 '(résistance) et sa partie imaginaire X = 4 Ω (réactance) se lisent en projetant Z ' +
                 'sur les deux axes. Le module |Z| = 5 Ω — la longueur du vecteur — est ' +
                 "l'opposition totale au courant.",
@@ -1097,7 +1097,7 @@ export const nombresComplexes: ChapterContent = {
             "de $i$, pour ne pas confondre avec l'intensité du courant). $R$ est la résistance " +
             'pure (partie réelle), $X$ est la **réactance** (partie imaginaire), due aux ' +
             "bobines et aux condensateurs. Pour une résistance de $3\\,\\Omega$ en série avec " +
-            'une réactance de $4\\,\\Omega$ : $Z=3+4i$, donc $|Z|=\\sqrt{3^2+4^2}=5$ Ω ' +
+            'une réactance de $4\\,\\Omega$ : $Z=3+4j$, donc $|Z|=\\sqrt{3^2+4^2}=5$ Ω ' +
             "(l'opposition totale au courant) et $\\arg(Z)$ vaut environ 53° (le décalage entre " +
             'tension et courant). Sans les complexes, calculer cette combinaison résistance + ' +
             'bobine + condensateur demanderait de refaire de la trigonométrie à chaque étape — ' +
@@ -2247,6 +2247,68 @@ export const nombresComplexes: ChapterContent = {
           description: ['Détermine quand une puissance zⁿ est réelle ou réelle positive, décris un lieu géométrique (cercle |z − a| = k, demi-droite ou droite arg(z − a) ≡ θ), ou démontre une propriété d\'une transformation complexe. En approfondissement : lieux de Thalès et d\'Apollonius.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 42. Nombres complexes — problèmes avancés »',
+        },
+        { kind: 'subheading', text: 'Application : les impédances complexes en électricité' },
+        {
+          kind: 'para',
+          text:
+            "En électricité, l'unité imaginaire se note $j$ (avec $j^2=-1$) : $j$ joue le rôle de $i$, car " +
+            "la lettre $i$ désigne l'intensité du courant. Toutes les règles de ce chapitre restent valables : " +
+            "on écrit $Z=a+bj$, on calcule $|Z|=\\sqrt{a^2+b^2}$ et un argument comme d'habitude. Sous une " +
+            'tension alternative de pulsation $\\omega$ (en rad/s), chaque composant a une **impédance** ' +
+            'complexe ($R$ en ohms, $L$ en henrys, $C$ en farads) : réelle pour une résistance, de partie ' +
+            "imaginaire positive pour une bobine, négative pour un condensateur. L'impédance d'un circuit se " +
+            'calcule comme une résistance équivalente : en série, $Z=Z_1+Z_2$ ; en parallèle, ' +
+            "$\\dfrac{1}{Z}=\\dfrac{1}{Z_1}+\\dfrac{1}{Z_2}$, c'est-à-dire $Z=\\dfrac{Z_1Z_2}{Z_1+Z_2}$.",
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Composant', 'Impédance', 'Courant'],
+          rows: [
+            ['résistance $R$', '$Z_R=R$', 'en phase avec la tension'],
+            ['bobine $L$', '$Z_L=jL\\omega$', 'en retard'],
+            ['condensateur $C$', '$Z_C=\\dfrac{1}{jC\\omega}$', 'en avance'],
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            "Le module $|Z|$ (en Ω) donne l'intensité efficace par la loi d'Ohm $I=\\dfrac{U}{|Z|}$ ; " +
+            "l'argument $\\varphi=\\arg Z$ est le **déphasage** entre la tension et le courant. Comme " +
+            '$\\mathrm{Re}(Z)>0$, $\\varphi=\\arctan\\dfrac{\\mathrm{Im}(Z)}{\\mathrm{Re}(Z)}$ est compris entre ' +
+            '$-90^\\circ$ et $90^\\circ$. Le circuit est **inductif** si $\\varphi>0$, **capacitif** si ' +
+            "$\\varphi<0$ et **résistif** si $\\varphi=0$ — pour un circuit RLC série, c'est la résonance, " +
+            '$L\\omega=\\dfrac{1}{C\\omega}$.',
+        },
+        {
+          kind: 'piege',
+          text:
+            "$\\dfrac{1}{j}=\\dfrac{j}{j^2}=-j$, donc $Z_C=-\\dfrac{j}{C\\omega}$ : l'impédance d'un condensateur a une partie imaginaire " +
+            "NÉGATIVE — l'écrire positive change la nature du circuit. Et en parallèle, on n'additionne jamais " +
+            "les impédances elles-mêmes : ce sont leurs inverses qui s'additionnent.",
+        },
+        {
+          kind: 'exemple',
+          badge: 'circuit RLC série',
+          formula:
+            'Un circuit RLC série ($R=40\\,\\Omega$, $L=50\\,\\text{mH}$, $C=50\\,\\mu\\text{F}$) est alimenté ' +
+            'sous une tension efficace $U=230$ V de pulsation $\\omega=1000$ rad/s. Calcule son impédance, le ' +
+            "déphasage et l'intensité efficace du courant.",
+          steps: [
+            { tag: 'impédance de chaque composant', text: '$Z_L=j\\times0{,}05\\times1000=50j$ et $Z_C=\\dfrac{1}{j\\times50\\cdot10^{-6}\\times1000}=\\dfrac{20}{j}=-20j$ (en Ω)' },
+            { tag: 'en série, on additionne', text: '$Z=40+50j-20j=40+30j$ (en Ω)' },
+            { tag: 'module et argument', text: '$|Z|=\\sqrt{40^2+30^2}=50$ Ω et $\\varphi=\\arctan\\dfrac{30}{40}\\approx36{,}9^\\circ$' },
+            { tag: "loi d'Ohm", text: '$I=\\dfrac{U}{|Z|}=\\dfrac{230}{50}=4{,}6$ A' },
+          ],
+          result: { tag: 'circuit inductif', text: '$\\varphi\\approx36{,}9^\\circ>0$ : le courant est en retard sur la tension' },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Électricité : impédances complexes',
+          generatorId: '6gen96',
+          description: ["Avec la notation j des électriciens (j² = −1), calcule l'impédance de chaque composant d'un circuit RL, RC, RLC série ou à deux branches en parallèle, puis l'impédance totale, son module et le déphasage, l'intensité efficace et la nature du circuit (inductif, capacitif ou résistif)."],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 96. Électricité : impédances complexes »',
         },
       ],
     },

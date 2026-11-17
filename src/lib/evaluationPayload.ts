@@ -83,7 +83,7 @@ export type IdGenerateurPilote =
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
-  | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95' | '6gen94' | '6gen97'
+  | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95' | '6gen94' | '6gen97' | '6gen96'
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
@@ -201,7 +201,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'nombres-complexes', sectionId: 'transformationsplan', generatorId: '6gen40', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'transformationsplan', generatorId: '6gen95', label: 'Lire et placer dans le plan complexe (6gen95)', processus: 1 },
   { chapitreSlug: 'nombres-complexes', sectionId: 'trianglescomplexes', generatorId: '6gen41', label: '' },
-  { chapitreSlug: 'nombres-complexes', sectionId: 'problemesavances', generatorId: '6gen42', label: '', processus: 3 },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'problemesavances', generatorId: '6gen42', label: 'Nombres complexes — problèmes avancés (6gen42)', processus: 3 },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'problemesavances', generatorId: '6gen96', label: 'Électricité : impédances complexes (6gen96)', processus: 3 },
   { chapitreSlug: 'probabilites', sectionId: 'probabilitesensembles', generatorId: '6gen30', label: 'Probabilités et ensembles (6gen30)' },
   // Audit 6e ch. 6 : 6gen75 (fréquence et probabilité), 6gen74 (arbre, tableau, effectifs) et
   // 6gen76 (paradoxes, processus 3) ; 6gen33 mobilise plusieurs notions combinées → processus 3.
@@ -1479,6 +1480,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'z³ réel positif', enonce: "Pour $z = e^{i\\theta}$ avec $\\theta \\in [0\\,;2\\pi[$, détermine les valeurs de $\\theta$ pour lesquelles $z^3$ est un réel positif, puis celles pour lesquelles $z^3$ est un réel négatif." },
       { cle: 'lieu |z−1| = |z+i|', enonce: "Détermine le lieu des points $M$ d'affixe $z$ tels que $|z-1|=|z+i|$." },
       { cle: 'si |z|=1 alors |z′|=1', enonce: "Démontre que, pour $a$ complexe tel que $|a|\\neq1$, si $|z|=1$ alors $|z'|=1$, où $z'=\\dfrac{z-a}{1-\\bar{a}z}$." },
+      { cle: 'circuit RLC série', enonce: "Un circuit RLC série ($R=40\\,\\Omega$, $L=50\\,\\text{mH}$, $C=50\\,\\mu\\text{F}$) est alimenté sous une tension efficace $U=230$ V de pulsation $\\omega=1000$ rad/s. En notant $j$ l'unité imaginaire ($j^2=-1$), avec $Z_L=jL\\omega$ et $Z_C=\\dfrac{1}{jC\\omega}$, calcule son impédance complexe, le déphasage $\\varphi=\\arg Z$ et l'intensité efficace $I=\\dfrac{U}{|Z|}$ ; le circuit est-il inductif ou capacitif ?" },
     ],
   },
   'probabilites': {
