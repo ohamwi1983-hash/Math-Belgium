@@ -608,6 +608,39 @@ export const geometrieDansEspace: ChapterContent = {
           ],
           result: { tag: 'résultat', text: '(AC) ∥ (EG), par la propriété 1' },
         },
+        {
+          kind: 'methode',
+          label: 'Méthode — deux plans nommés par leurs points',
+          items: [
+            'Les trois points qui nomment le second plan sont-ils tous dans le premier ? Si oui, les ' +
+              'deux noms désignent le **même plan** : les plans sont **confondus**.',
+            'Sinon, cherche **un point commun** : un point nommé qui appartient aux deux plans, ou le ' +
+              'point de rencontre d\'une droite de chaque plan **tracées dans une même face**. S\'il en ' +
+              'existe un, les plans sont **sécants**. Un second point commun donne leur droite ' +
+              'd\'intersection (section 8).',
+            'S\'il n\'y en a aucun, vérifie le critère de la section 7 : deux droites **sécantes** du ' +
+              'premier plan, parallèles à deux droites du second. Les plans sont alors **parallèles**.',
+          ],
+        },
+        {
+          kind: 'piege',
+          label: 'Deux morceaux de plans qui ne se touchent pas',
+          text:
+            'Sur le dessin, un plan n\'est représenté que par un morceau : une face, ou le triangle de ' +
+            'ses trois points. Deux morceaux qui ne se touchent pas peuvent très bien appartenir à ' +
+            'des plans **sécants** : leur droite d\'intersection passe ailleurs, parfois même hors du ' +
+            'solide. À l\'inverse, deux noms sans aucune lettre commune peuvent désigner le **même** plan.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'deux noms pour un même plan',
+          formula: 'Dans le cube ABCDEFGH, I est le milieu de [AE] et J celui de [BF]. Quelle est la position des plans (ABJ) et (EFI) ?',
+          steps: [
+            { tag: 'les points de (EFI)', text: 'E et F sont des sommets de la face ABFE ; I est sur l\'arête [AE], donc lui aussi dans cette face' },
+            { tag: 'les points de (ABJ)', text: 'A et B sont des sommets de la face ABFE, et J est sur l\'arête [BF]' },
+          ],
+          result: { tag: 'conclusion', text: 'E, F et I, non alignés, sont dans le plan (ABJ) : les plans (ABJ) et (EFI) sont confondus — c\'est la face ABFE' },
+        },
       ],
     },
 
@@ -686,6 +719,43 @@ export const geometrieDansEspace: ChapterContent = {
             'elles sont parallèles (les faces d\'une barre de Toblerone), ou elles sont ' +
             'confondues (les pages d\'un livre ouvert). Fais tourner chaque scène pour bien ' +
             'voir, et compare avec deux plans parallèles coupés par un troisième.',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — combien de points communs ont trois plans ?',
+          items: [
+            'Prends deux des trois plans. S\'ils sont **parallèles**, les trois plans n\'ont **aucun ' +
+              'point commun**.',
+            'Sinon, détermine leur droite d\'intersection d : deux points communs suffisent.',
+            'Étudie la position de d par rapport au troisième plan (section 4). Si d le perce : **un ' +
+              'seul point commun**. Si d y est incluse : **une droite commune**. Si d lui est parallèle ' +
+              'sans y être incluse : **aucun point commun** — c\'est le Toblerone.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'trois plans du cube sans point commun',
+          formula: 'Dans le cube ABCDEFGH, les plans (ABC), (ABF) et (DCF) ont-ils un point commun ?',
+          steps: [
+            { tag: 'deux des plans', text: '(ABC) et (ABF) se coupent suivant (AB)' },
+            {
+              tag: 'position par rapport au troisième',
+              text: '(DCF) est le plan DCFE. (AB) est parallèle à (DC), une droite de ce plan, et A n\'y est pas : (AB) est parallèle à (DCF) sans y être incluse',
+            },
+          ],
+          result: { tag: 'conclusion', text: 'aucun point commun : les trois plans se coupent deux à deux suivant (AB), (DC) et (EF), trois droites parallèles — le Toblerone' },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Positions de deux plans et de trois plans',
+          generatorId: 'gen101',
+          description: [
+            'Sur un solide en perspective cavalière, décide si deux plans sont parallèles, confondus ' +
+              'ou sécants — trouve alors deux points communs, parfois construits — ou si trois plans ont ' +
+              'un seul point commun, une droite commune ou aucun point commun. Justifie ensuite ta réponse.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 101. Positions de deux plans et de trois plans »',
         },
       ],
     },

@@ -3872,3 +3872,34 @@ paths:
   `components6e/EtapeCorrectionDetectiveComplexes.tsx`, `core6e/detectiveComplexes.types.ts`,
   `moteur6e/{modele,session,verification}DetectiveComplexes.ts`, `ui6e/formatDetectiveComplexes.ts`,
   `generateurs6e/detectiveComplexes/` (index, profil, exportEvaluation).
+
+- **4e, Chapitre 8 — gen101 « Positions de deux plans et de trois plans »** (section `trois-plans`,
+  couvre aussi `deux-plans`, processus 2). Deux variantes, sur parallélépipède, cube, prisme droit
+  ou tétraèdre (`GABARITS_TOUS`), plans nommés par 3 points (sommets ou milieux d'arêtes nommés I,
+  J, K) et dessinés par le TRIANGLE de ces points — jamais par leur section complète, qui
+  trahirait deux plans confondus ; la section complète, la droite d'intersection et les points
+  construits n'apparaissent qu'une fois l'exercice clos et dans le corrigé. **Deux plans** :
+  parallèles / confondus / sécants (UNE tentative, tirés à parts égales AVANT le rejet) ; sécants →
+  choisir deux points communs parmi les points nommés et des points de rencontre « (FK) ∩ (BC) »
+  (corrects : une droite de chaque plan dans une même face ; leurres : droites GAUCHES qui ne se
+  croisent que sur le dessin, ou droite qui n'est pas dans l'autre plan) ; parallèles / confondus →
+  justification à choisir (une seule valable ; leurres vrais mais insuffisants : deux droites
+  parallèles entre elles, deux points communs, triangles « sans point commun », impression du
+  dessin). Lettres communes aux deux noms : 0 dans 70 % des cas sécants/confondus (toujours 0 pour
+  parallèles) ; triangles disjoints sur le dessin ≈ 42 % pour CHAQUE position (piège « ne se
+  touchent pas, mais sécants ») ; ≈ 45 % des cas sécants demandent au moins un point construit,
+  dont la moitié hors du solide ; droite d'intersection entièrement hors du solide ≈ 5 %. **Trois
+  plans** : un point / une droite / aucun point (Toblerone ou deux plans parallèles, 50/50) ;
+  justification à choisir parmi 4 affirmations « (P) et (Q) se coupent suivant (XY), et (XY) perce /
+  est incluse dans / est parallèle à (R) » ou « (P) et (Q) sont parallèles », vérité calculée
+  géométriquement, leurres de même conclusion (droite qui n'est pas dans les deux plans). Profil :
+  `forme` = variante seule (le verdict n'y entre jamais), aucun cas particulier, pas de `calcul`.
+  Figures : `ui/figurePositionsPlans.ts` (même perspective et même visibilité que
+  `Solide3DSketch`, fonctions pures de `ui/solide3DSketch.ts` réutilisées sans modification, cadre
+  élargi au besoin pour un point construit). Cours : `methode` + `piege` + `exemple` « deux noms
+  pour un même plan » en fin de section `deux-plans` ; `methode` + `exemple` « trois plans du cube
+  sans point commun » + carte en fin de section `trois-plans` (énoncés dans
+  `ENONCES_DEMONSTRATION`). Fichiers : `AppPositionsPlans.tsx`, `components/EtapesPositionsPlans.tsx`,
+  `core/positionsPlans.types.ts`, `moteur/sessionPositionsPlans.ts`, `ui/formatPositionsPlans.ts`,
+  `ui/figurePositionsPlans.ts`, `generateurs/positionsPlans/` (geometriePlans, index, profil,
+  exportEvaluation).
