@@ -102,7 +102,7 @@ export const SOLIDES_DEUX_DROITES: NomSolide3D[] = ["cube", "parallelepipede", "
 
 /** Un point utilisable : un sommet, ou un point défini (milieu d'arête, centre de face) encore
  * anonyme — la lettre I, J, K n'est attribuée qu'une fois l'instance retenue. */
-interface Candidat {
+export interface Candidat {
   cle: string;
   position: Point3D;
   sommet: string | null;
@@ -141,7 +141,7 @@ function centre(points: Point3D[]): Point3D {
   );
 }
 
-function candidatsDe(solide: Solide3D, avecCentres: boolean): Candidat[] {
+export function candidatsDe(solide: Solide3D, avecCentres: boolean): Candidat[] {
   const sommets: Candidat[] = Object.entries(solide.sommets).map(([nom, position]) => ({ cle: nom, position, sommet: nom, definition: null }));
   const milieux: Candidat[] = aretesSolide(solide).map(([a, b]) => ({
     cle: `m${a}${b}`,
@@ -163,7 +163,7 @@ function candidatsDe(solide: Solide3D, avecCentres: boolean): Candidat[] {
 
 const CACHE_ECHELLE = new Map<string, EchelleProjection3D>();
 
-function pixel(solide: Solide3D, p: Point3D): Point2D {
+export function pixel(solide: Solide3D, p: Point3D): Point2D {
   let echelle = CACHE_ECHELLE.get(solide.id);
   if (!echelle) {
     echelle = calculerEchelleProjection(solide);
@@ -172,12 +172,12 @@ function pixel(solide: Solide3D, p: Point3D): Point2D {
   return projeter3DVersPixel(p, echelle);
 }
 
-function dist2D(a: Point2D, b: Point2D): number {
+export function dist2D(a: Point2D, b: Point2D): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
 /** Distance (px) du point `p` à la droite (ab) du dessin. */
-function distanceALaDroite2D(p: Point2D, a: Point2D, b: Point2D): number {
+export function distanceALaDroite2D(p: Point2D, a: Point2D, b: Point2D): number {
   const l = dist2D(a, b) || 1;
   return Math.abs((b.x - a.x) * (a.y - p.y) - (a.x - p.x) * (b.y - a.y)) / l;
 }
@@ -208,7 +208,7 @@ function ecartsAuxFaces(solide: Solide3D, p: Point3D): number[] {
   });
 }
 
-type LieuBrut =
+export type LieuBrut =
   | { type: "nomme"; cle: string }
   | { type: "arete"; arete: [string, string] }
   | { type: "face"; face: string[]; centre: boolean }
@@ -242,19 +242,19 @@ function categorieDe(lieu: LieuBrut): CategorieLieu {
 // Paires de droites (famille « positions », et « plan » avec deux droites)
 // ---------------------------------------------------------------------------------------------
 
-interface Ligne {
+export interface Ligne {
   p: Candidat;
   q: Candidat;
 }
 
-interface CombinaisonGauches {
+export interface CombinaisonGauches {
   /** Indice (0 ou 1) de la droite contenue dans (Q). */
   contenue: 0 | 1;
   /** Point de l'autre droite situé dans (Q). */
   r: Candidat;
 }
 
-interface PaireBrute {
+export interface PaireBrute {
   lignes: [Ligne, Ligne];
   position: PositionDeuxDroites;
   inter: Point3D | null;
@@ -281,7 +281,7 @@ function droiteSurUneArete(solide: Solide3D, p: Candidat, q: Candidat): boolean 
 
 /** Une droite se voit : ses deux points sont bien séparés sur le dessin, et sa projection n'est pas
  * presque réduite à un point (droite fuyante dans la direction de projection, comme pour gen39). */
-function ligneLisible(solide: Solide3D, p: Candidat, q: Candidat): boolean {
+export function ligneLisible(solide: Solide3D, p: Candidat, q: Candidat): boolean {
   const direction = soustraire3D(q.position, p.position);
   const projetee = projeterPoint3D(direction);
   if (Math.hypot(projetee.x, projetee.y) < 0.15 * Math.sqrt(normeCarree3D(direction))) return false;
@@ -465,7 +465,7 @@ function clePaire(p: PaireBrute): string {
 
 const CACHE_PAIRES = new Map<string, Map<string, PaireBrute[]>>();
 
-function seauxPaires(solide: Solide3D): Map<string, PaireBrute[]> {
+export function seauxPaires(solide: Solide3D): Map<string, PaireBrute[]> {
   let seaux = CACHE_PAIRES.get(solide.id);
   if (!seaux) {
     seaux = new Map();
@@ -683,7 +683,7 @@ function construirePositions(): ExerciceDeuxDroites {
 // Famille « plan déterminé »
 // ---------------------------------------------------------------------------------------------
 
-interface TripletBrut {
+export interface TripletBrut {
   points: [Candidat, Candidat, Candidat];
   alignes: boolean;
   nonSommets: number;
@@ -715,7 +715,7 @@ function enumererTriplets(solide: Solide3D): TripletBrut[] {
 
 const CACHE_TRIPLETS = new Map<string, Map<string, TripletBrut[]>>();
 
-function seauxTriplets(solide: Solide3D): Map<string, TripletBrut[]> {
+export function seauxTriplets(solide: Solide3D): Map<string, TripletBrut[]> {
   let seaux = CACHE_TRIPLETS.get(solide.id);
   if (!seaux) {
     seaux = new Map();

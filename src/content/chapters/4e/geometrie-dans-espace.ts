@@ -1874,6 +1874,22 @@ export const geometrieDansEspace: ChapterContent = {
             'testent les définitions et le raisonnement géométrique — jamais un calcul chiffré. ' +
             'Le quiz se trouve tout en bas de la page, dans la synthèse.',
         },
+        {
+          kind: 'entrainement',
+          title: "Détective d'erreurs : géométrie dans l'espace",
+          generatorId: 'gen107',
+          description: [
+            'Un élève a travaillé sur un solide dessiné en perspective cavalière — position de ' +
+              'trois paires de droites, données qui déterminent un plan, remarques pour construire ' +
+              'une section, démonstration que deux plans sont parallèles, ou dessin d\'un pavé —, ' +
+              'mais une ligne de sa copie est fausse : croisement des traits pris pour un point ' +
+              'commun, trois points alignés, segment tracé sur une face qui ne contient qu\'un des ' +
+              'deux points, droite témoin hors du plan, fuyante non réduite ou mal inclinée… ' +
+              'Trouve la ligne, nomme l\'erreur et corrige-la.',
+          ],
+          chantier: '4e',
+          whereLabel: "4e → « 107. Détective d'erreurs : géométrie dans l'espace »",
+        },
       ],
     },
   ],

@@ -110,6 +110,7 @@ import { adaptateurEvaluationDemontrerParallelisme } from '../entrainement/4e/ge
 import { adaptateurEvaluationPercee } from '../entrainement/4e/generateurs/perceePlanAuxiliaire/exportEvaluation'
 import { adaptateurEvaluationPointFuite } from '../entrainement/4e/generateurs/pointFuite/exportEvaluation'
 import { adaptateurEvaluationPerspectiveCavaliere } from '../entrainement/4e/generateurs/perspectiveCavaliere/exportEvaluation'
+import { adaptateurEvaluationDetectiveEspace } from '../entrainement/4e/generateurs/detectiveEspace/exportEvaluation'
 
 export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExercices<never>> = {
   gen1: versionPapier(adaptateurEvaluationSecondDegre) as unknown as AdaptateurFeuilleExercices<never>,
@@ -205,6 +206,7 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen102: versionPapier(adaptateurEvaluationPercee) as unknown as AdaptateurFeuilleExercices<never>,
   gen105: versionPapier(adaptateurEvaluationPointFuite) as unknown as AdaptateurFeuilleExercices<never>,
   gen104: versionPapier(adaptateurEvaluationPerspectiveCavaliere) as unknown as AdaptateurFeuilleExercices<never>,
+  gen107: versionPapier(adaptateurEvaluationDetectiveEspace) as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 import { adaptateurEvaluationDomaineDefinition } from '../entrainement/5e-4h/generateurs5e/domaineDefinition/exportEvaluation'

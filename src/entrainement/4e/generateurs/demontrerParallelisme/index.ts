@@ -136,7 +136,7 @@ export function texteRaison(r: RaisonParallele): string {
   return `${r.milieux![0]} et ${r.milieux![1]} sont les milieux des côtés opposés ${seg(c1[0], c1[1])} et ${seg(c2[0], c2[1])} du ${r.nature} ${fig}, ${conclusion}.`;
 }
 
-interface Contexte {
+export interface Contexte {
   d: DonneesSolide;
   pos: (nom: string) => Point3D;
 }
@@ -173,7 +173,7 @@ function quadrilateres(d: DonneesSolide): { figure: string[]; nature: string }[]
  * Un élève qui ne retient que les mots-clés (« rectangle », « milieu ») ne peut donc pas trancher sans
  * regarder la figure.
  */
-function justificationsPour(ctx: Contexte, r: RaisonParallele): OptionDemonstration[] {
+export function justificationsPour(ctx: Contexte, r: RaisonParallele): OptionDemonstration[] {
   const L = libelle(r.droite1);
   const M = libelle(r.droite2);
   const donc = `donc ${L} ∥ ${M}`;
@@ -306,7 +306,7 @@ function normale([p, q, r]: [Point3D, Point3D, Point3D]): Point3D {
   return { x: u.y * v.z - u.z * v.y, y: u.z * v.x - u.x * v.z, z: u.x * v.y - u.y * v.x };
 }
 
-function raisonDepuisFait(f: FaitParallele, nomDe: (p: PointDispo) => string, inverse: boolean): RaisonParallele {
+export function raisonDepuisFait(f: FaitParallele, nomDe: (p: PointDispo) => string, inverse: boolean): RaisonParallele {
   const d1 = trie(f.d1.map(nomDe) as DroiteNommee2);
   const d2 = trie(f.d2.map(nomDe) as DroiteNommee2);
   // Milieux cités dans l'ordre alphabétique (« I et J sont les milieux de… »), leurs côtés suivent.

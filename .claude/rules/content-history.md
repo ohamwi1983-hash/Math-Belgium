@@ -4078,3 +4078,40 @@ paths:
   `moteur/sessionPerspectiveCavaliere.ts`, `moteur/verificationPerspectiveCavaliere.ts`,
   `ui/figureCavaliere.ts`, `ui/formatCavaliere.ts`, `generateurs/perspectiveCavaliere/` (index,
   profil, exportEvaluation).
+
+- **4e, Chapitre 8 — gen107 « Détective d'erreurs : géométrie dans l'espace »** (section
+  `revision`, carte juste après le paragraphe d'introduction, processus 3). Même mécanique que gen91
+  / 6gen99 (`CopieEleve`, `EtapeLigneFausse`, `EtapeDescriptionErreur`, `BlocAides` réutilisés) :
+  la copie d'un élève fictif, avec figure, contient UNE ligne fausse ; trois écrans, tous des choix
+  fermés à UNE tentative — a) la ligne fausse, b) l'erreur (4 descriptions), c) la correction (4
+  lignes corrigées, droites ou justifications ; pour la cavalière, 4 DESSINS). Variante = thème
+  (= `forme`) : **droites** (position de trois paires de droites, chacune des trois positions écrite
+  une fois ; erreurs : croisement des traits pris pour un point commun, « parallèles » faute de
+  croisement sur le dessin, « gauches » faute de face commune ; paires de l'énumération de gen100,
+  boutons « Ligne n » qui tracent les droites citées), **plan** (trois jeux de données — trois
+  points, droite + point, deux droites — qui « déterminent un seul plan » ; erreurs : points
+  alignés, point sur la droite, droites gauches ; triplets de gen100), **section** (exemple du cours
+  « 4 faces traversées » sur cube/pavé : trois remarques — côté direct, faces parallèles, point
+  auxiliaire ; erreurs : segment sur une face qui ne contient qu'un des deux points, parallèle au
+  mauvais côté, arête hors de la face citée), **parallélisme** (démonstration « deux plans
+  parallèles » en 4 lignes, faits et leurres de gen103 ; erreurs : deux témoins parallèles, témoin
+  hors du plan, raison écrite sur le gabarit de la vraie mais fausse pour la figure),
+  **cavalière** (description et dessin d'un pavé sur quadrillage de 1 cm ; erreurs : angle 30°/60°,
+  profondeur non réduite, mauvais sommet caché). Type d'erreur et ligne fausse tirés AVANT toute
+  boucle de rejet, à parts égales, jamais dans `forme` ; pour droites/plan/section la ligne est
+  tirée indépendamment du type. **Mesures « devinette sans figure »** (3 000 tirages par thème) : la
+  longueur de la bonne proposition la trahissait (b : jusqu'à 100 %) → variantes de tournure
+  choisies pour que le RANG de longueur de la bonne proposition soit tiré au hasard
+  (`commun.ts::equilibrer`) : b ≈ 28–31 %, c ≤ 43 % (4 propositions) ; ligne fausse par
+  caractéristiques du texte ≈ 33–35 % (droites, section, cavalière), ≈ 39 % (plan, nombre de
+  points définis), ≈ 56 % (parallélisme : deux droites parallèles de (P) ne se justifient qu'avec
+  des parallélogrammes, ce qui rend les lignes 2–3 plus courtes — structurel, non corrigé). Extensions
+  ADDITIVES seulement : exports de fonctions et types internes de gen100 (`seauxPaires`,
+  `seauxTriplets`, `candidatsDe`, `ligneLisible`, `pixel`…) et de gen103 (`justificationsPour`,
+  `raisonDepuisFait`, `Contexte`) ; figures `figurePositionsPlansSvg` (gen101/103) et
+  `figureCavaliereSvg` (gen104) réutilisées sans changement de rendu. Papier : énoncé = texte +
+  figure + copie + consigne globale ; corrigé : contrôle de chaque ligne, erreur, ligne corrigée,
+  figure (droites, plan témoin, section complète ou dessin juste). Fichiers :
+  `AppDetectiveEspace.tsx`, `components/EtapesDetectiveEspace.tsx`, `core/detectiveEspace.types.ts`,
+  `moteur/sessionDetectiveEspace.ts`, `ui/formatDetectiveEspace.ts`, `generateurs/detectiveEspace/`
+  (commun, droites, plan, section, parallelisme, cavaliere, index, profil, exportEvaluation).
