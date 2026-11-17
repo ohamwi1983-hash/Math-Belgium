@@ -3636,3 +3636,29 @@ paths:
   `moteur/{modele,session,verification}DetectiveStatistique.ts`, `ui/formatDetectiveStatistique.ts`,
   `components/EtapeCorrectionDetectiveStatistique.tsx`, `generateurs/detectiveStatistique/` (index,
   profil, exportEvaluation).
+
+- **6e (6h), Chapitre 5 — générateur 6gen93 « Linéariser avec les formules d'Euler »** (section
+  `formulemoivre`, carte après 6gen38, processus 2) : la sous-partie « Le chemin inverse :
+  linéariser cosⁿx » n'avait pas de générateur. Expressions cos²x, sin²x, cos³x, sin³x, cos⁴x,
+  sin⁴x, cos²x·sin x, cos x·sin²x, cos²x·sin²x. Variantes `degre2`/`degre3`/`degre4` (quatre
+  écrans : a) facteur K = 1/(2ᵖ(2i)ᑫ), nombre complexe exact, « ^ » refusé sans tentative ;
+  b) coefficients entiers du binôme, un champ par exponentielle ; c) coefficients de cos(kx) ou de
+  sin(kx) — imaginaires purs « 2i », « −6i » quand q est impair ; d) forme linéarisée, expression
+  libre vérifiée par équivalence numérique en six points, une expression égale mais non linéarisée
+  — cos³x recopié, produit de cos — refusée sans tentative par un test de linéarité : chaque
+  cos/sin multiplié par λ, l'expression doit être affine en λ) et `application` (linéariser, une
+  primitive à une constante près, l'intégrale EXACTE sur un intervalle remarquable ; un décimal qui
+  n'est qu'un arrondi refusé sans tentative). Pulsation a ∈ {1 ; 2 ; 3} (a = 1 une fois sur deux)
+  dans les variantes de linéarisation : sans elle, la famille de degré 2 n'aurait que deux
+  exercices et les séries d'une évaluation se répéteraient. Profil (`generateurs6e/linearisationEuler/
+  profilEvaluation.ts`) : `forme` = famille de degré (`degre2`… ; `application:degN`), cas
+  particulier `termes-trig-nuls` (application : les sinus/cosinus de la primitive s'éliminent entre
+  les bornes, l'intégrale se réduit au terme constant), pas de `calcul` (tout est exact). Pièges
+  reconnus : signe de K / (2i)ᑫ, i oublié au dénominateur, facteur 2 de 2cos(kx) oublié, i de
+  2i·sin(kx) oublié, constante oubliée, K non appliqué, primitive dérivée, 1/k oublié, signe de
+  −cos(kx)/k, F(a) − F(b). Cours : astuce « Avec des sinus : 2i sin(kx) » ajoutée après l'exemple
+  « linéariser cos²x et cos³x » (exemple sin³x). Libellés de conception « Formule de Moivre
+  (6gen38) » (jusque-là vide) et « Linéariser avec les formules d'Euler (6gen93) ». Fichiers :
+  `App6gen93.tsx`, `core6e/linearisationEuler.ts`, `moteur6e/{types,session,verification}LinearisationEuler.ts`,
+  `ui6e/{format,recapitulatif}LinearisationEuler.ts`, `components6e/EtapeLinearisationEuler.tsx`,
+  `generateurs6e/linearisationEuler/` (index, profilEvaluation, exportEvaluation).

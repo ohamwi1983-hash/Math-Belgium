@@ -1261,6 +1261,16 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'astuce',
+          label: 'Avec des sinus : 2i sin(kx)',
+          text:
+            'Quand l\'expression contient $\\sin x$, son dénominateur $2i$ entre dans le facteur ' +
+            'constant : calcule les puissances de $i$ une par une, $(2i)^2=-4$ et $(2i)^3=-8i$. Les ' +
+            'termes du développement se regroupent alors aussi par différences : ' +
+            '$e^{ikx}-e^{-ikx}=2i\\sin(kx)$. Par exemple, $\\sin^3x=\\dfrac{(e^{ix}-e^{-ix})^3}{(2i)^3}=' +
+            '\\dfrac{2i\\sin(3x)-6i\\sin x}{-8i}=\\dfrac{3\\sin x-\\sin(3x)}{4}$.',
+        },
+        {
+          kind: 'astuce',
           label: 'Pourquoi linéariser ?',
           text:
             'Une puissance $\\cos^nx$ ne s\'intègre pas directement, alors que $\\cos(kx)$ a une ' +
@@ -1375,6 +1385,14 @@ export const nombresComplexes: ChapterContent = {
           description: ['Applique la formule de Moivre, et développe cos(nx)/sin(nx) grâce au binôme de Newton.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 38. Formule de Moivre »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Linéariser avec les formules d\'Euler',
+          generatorId: '6gen93',
+          description: ['Linéarise cos²x, sin³x, cos²x·sin²x… en quatre étapes (formules d\'Euler, binôme, regroupement en 2cos(kx) ou 2i·sin(kx), forme linéarisée), puis intègre : primitive et intégrale exacte sur un intervalle remarquable.'],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 93. Linéariser avec les formules d\'Euler »',
         },
       ],
     },
