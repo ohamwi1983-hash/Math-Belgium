@@ -1433,6 +1433,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   // `exemple` (ou le label de l'`exempleLibre`).
     operationsbase: [
       { cle: 'produit de deux complexes', enonce: "Calcule $(2+i)(3-i)$ et écris le résultat sous la forme $a+bi$." },
+      { cle: 'une « démonstration » de 1 = −1', enonce: "Voici une « démonstration » de $1=-1$ : $1=\\sqrt{1}=\\sqrt{(-1)\\cdot(-1)}=\\sqrt{-1}\\cdot\\sqrt{-1}=i\\cdot i=i^2=-1$. Indique l'égalité fausse et explique pourquoi elle est fausse." },
       { cle: 'le calcul de Bombelli', enonce: "Vérifie que $(2+i)^3=2+11i$. Déduis-en que la formule de Cardan $x=\\sqrt[3]{2+\\sqrt{-121}}+\\sqrt[3]{2-\\sqrt{-121}}$ donne la solution réelle $x=4$ de l'équation $x^3=15x+4$." },
       { cle: 'quotient par le conjugué', enonce: "Écris $\\dfrac{1+i}{1-i}$ sous la forme $a+bi$, en multipliant par le conjugué du dénominateur." },
       { cle: 'puissance de i', enonce: "Calcule $i^{2021}$, puis $i^{2022}$, en justifiant à l'aide du cycle des puissances de $i$." },

@@ -3825,3 +3825,11 @@ paths:
   (disque) à 8 406 (médiatrice), le plus petit groupe (disque centré en O) en a 16 — rayon porté
   jusqu'à 4 dans ce cas pour l'élargir. Libellés de conception « Nombres complexes — problèmes
   avancés (6gen42) » (jusque-là vide) et « Régions du plan complexe (6gen98) ».
+
+- **6e (6h), Chapitre 5 — Nombres complexes**, section `operationsbase` (demande de l'utilisateur) :
+  après le piège « i² = 1 est FAUX », un `exempleLibre` « Où est l'erreur ? — une « démonstration »
+  de 1 = −1 » (6 lignes 1 = √1 = √((−1)(−1)) = √(−1)·√(−1) = i·i = i² = −1 ; erreur au passage ② → ③ :
+  √(ab) = √a·√b réservé à a, b ≥ 0 ; −1 a deux racines carrées i et −i, ℂ non ordonné) puis un
+  `piege` « Jamais de √ sur un nombre négatif » (i défini par i² = −1, x² = −4 ⇒ x = ±2i). Énoncé
+  papier apparié dans `ENONCES_DEMONSTRATION` (clé = label, build strict). La même copie est
+  demandée comme thème du détective 6gen99.

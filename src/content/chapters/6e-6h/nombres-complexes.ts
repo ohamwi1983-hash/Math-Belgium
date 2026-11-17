@@ -138,6 +138,46 @@ export const nombresComplexes: ChapterContent = {
             'introduit $i$ : donner enfin une racine carrée à un nombre négatif.',
         },
         {
+          kind: 'exempleLibre',
+          label: 'Où est l\'erreur ? — une « démonstration » de 1 = −1',
+          blocks: [
+            { kind: 'para', text: '① $1 = \\sqrt{1}$' },
+            { kind: 'para', text: '② $1 = \\sqrt{(-1)\\cdot(-1)}$' },
+            { kind: 'para', text: '③ $1 = \\sqrt{-1}\\cdot\\sqrt{-1}$' },
+            { kind: 'para', text: '④ $1 = i\\cdot i$' },
+            { kind: 'para', text: '⑤ $1 = i^2$' },
+            { kind: 'para', text: '⑥ $1 = -1$' },
+            {
+              kind: 'para',
+              text:
+                '**L\'erreur est au passage ② → ③.** La règle $\\sqrt{ab} = \\sqrt{a}\\cdot\\sqrt{b}$ ' +
+                'n\'est vraie que pour $a \\geq 0$ et $b \\geq 0$ : sa preuve utilise que $\\sqrt{a}$ ' +
+                'et $\\sqrt{b}$ sont des réels positifs (leur produit est alors positif et son carré ' +
+                'vaut $ab$). Avec $a = b = -1$, cette hypothèse tombe, et la règle ne s\'applique pas. ' +
+                'Toutes les autres lignes sont correctes.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Plus profondément : $-1$ a **deux** racines carrées dans $\\mathbb{C}$, $i$ et $-i$, et ' +
+                'aucune n\'est « la positive » ($\\mathbb{C}$ n\'est pas ordonné). Le symbole ' +
+                '$\\sqrt{-1}$ n\'a donc pas de sens unique, et le calcul mélange les deux racines ' +
+                'carrées de 1 : $i \\cdot i = -1$ en est bien une, mais ce n\'est pas $\\sqrt{1} = 1$.',
+            },
+          ],
+        },
+        {
+          kind: 'piege',
+          label: 'Jamais de √ sur un nombre négatif',
+          text:
+            'On définit $i$ par $i^2 = -1$, jamais par $i = \\sqrt{-1}$. Pour un négatif, passe par ' +
+            '$i^2$ : $-4 = 4i^2$, donc les solutions de $x^2 = -4$ sont $x = \\pm 2i$ — et non ' +
+            '$\\sqrt{-4} = \\sqrt{4}\\cdot\\sqrt{-1}$. Les règles $\\sqrt{ab} = \\sqrt{a}\\cdot\\sqrt{b}$ ' +
+            'et $\\sqrt{a/b} = \\sqrt{a}/\\sqrt{b}$ sont réservées aux réels positifs. (Bombelli, ' +
+            'ci-dessous, écrit encore $\\sqrt{-121}$ : c\'était la notation de son époque, bien ' +
+            'avant l\'introduction de $i$.)',
+        },
+        {
           kind: 'exemple',
           badge: 'le calcul de Bombelli',
           formula: 'Vérifie que $(2+i)^3=2+11i$, puis déduis-en une solution réelle de $x^3=15x+4$ à partir de la formule de Cardan $x=\\sqrt[3]{2+\\sqrt{-121}}+\\sqrt[3]{2-\\sqrt{-121}}$.',
