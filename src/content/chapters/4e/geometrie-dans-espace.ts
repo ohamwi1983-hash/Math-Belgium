@@ -84,6 +84,25 @@ export const geometrieDansEspace: ChapterContent = {
             'cours est 45° et 0,5.',
         },
         {
+          kind: 'methode',
+          label: 'Méthode — dessiner un solide en perspective cavalière',
+          items: [
+            'Dessine la **face avant** en vraie grandeur : ses largeurs restent horizontales, ses ' +
+              'hauteurs verticales.',
+            'Depuis chaque sommet de la face avant, trace une **fuyante** : à 45° de l\'horizontale, ' +
+              'vers la droite et vers le haut, de longueur **la moitié** de la profondeur réelle. ' +
+              'Une profondeur de 4 cm se dessine donc avec une fuyante de 2 cm.',
+            'Mesure cette longueur à la règle, **le long de la fuyante** : le bout d\'une fuyante ne ' +
+              'tombe jamais sur un nœud du quadrillage. Compter « un carreau en diagonale » par ' +
+              'centimètre ne réduit pas de moitié, car la diagonale d\'un carreau mesure environ 1,4 cm.',
+            'Relie les sommets arrière : toutes les fuyantes sont parallèles et de même longueur, et ' +
+              'la face arrière est superposable à la face avant.',
+            'Pour une pyramide droite, le pied de la hauteur est le centre de la base, au croisement ' +
+              'de ses diagonales ; la hauteur est verticale, donc en vraie grandeur.',
+            'Trace en **pointillés** les arêtes cachées : celles que ne borde aucune face vue.',
+          ],
+        },
+        {
           kind: 'application',
           titre: 'Comment un jeu vidéo 3D dessine un monde sur ton écran plat',
           illustrations: [
@@ -166,6 +185,19 @@ export const geometrieDansEspace: ChapterContent = {
             alt: 'Portrait de Gaspard Monge',
             caption: 'Gaspard Monge (1746–1818), fondateur de la géométrie descriptive.',
           },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Dessiner en perspective cavalière',
+          generatorId: 'gen104',
+          description: [
+            'Termine sur un quadrillage le dessin d\'un pavé, d\'un prisme droit ou d\'une pyramide ' +
+              'dont tu connais les dimensions réelles : place les sommets arrière au bout de fuyantes ' +
+              'à 45° réduites de moitié (ou le sommet de la pyramide), puis trace les arêtes cachées ' +
+              'en pointillés.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 104. Dessiner en perspective cavalière »',
         },
       ],
     },

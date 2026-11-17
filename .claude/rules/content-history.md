@@ -4015,3 +4015,35 @@ paths:
   `components/EtapesPercee.tsx`, `core/perceePlanAuxiliaire.types.ts`, `ui/formatPercee.ts`,
   `ui/figurePercee.ts`, `generateurs/perceePlanAuxiliaire/` (geometriePercee, index, profil,
   exportEvaluation).
+- **4e, Chapitre 8 — gen104 « Dessiner en perspective cavalière »** (section `cavaliere`, processus
+  2). Vraie construction sur un quadrillage de 1 cm : le dessin d'un pavé droit (cube une fois sur
+  cinq), d'un prisme droit couché (face avant triangulaire ABC) ou d'une pyramide droite à base
+  rectangulaire est commencé — face avant en vraie grandeur, arête [AB] seule pour la pyramide —,
+  dimensions réelles entières données. **Écran 1** : placer un premier sommet arrière au bout de sa
+  fuyante. **Écran 2** : les autres sommets arrière (fuyantes parallèles, même longueur) ; pour la
+  pyramide, le 4e sommet de la base est complété et l'élève place S (diagonales de la base et
+  centre O tracés). **Écran 3** : classer les arêtes (un toucher sur la figure ou un bouton par
+  arête bascule trait plein / pointillés), validation globale, UNE tentative ; écrans 1–2 : 3
+  tentatives. **Convention non trichée** : 45° et ×0,5 → décalage p·√2/4, jamais un nœud du
+  quadrillage ; placement LIBRE (une seule poignée HTML à la fois, toucher pour poser puis
+  glissement relatif, flèches au clavier), tolérance 0,25 cm et aimant vers la position exacte ;
+  sous la figure, la mesure du segment comme à la règle et à l'équerre (« [BC] : 2 cm, à 45° de
+  l'horizontale, vers la droite et vers le haut »). Pièges reconnus avec message ciblé : fuyante
+  non réduite, « un carreau en diagonale par centimètre », fuyante horizontale ou verticale,
+  mauvais sens de fuite, longueur ou angle, point à la place d'un autre sommet ; pour S : pied au
+  milieu de [AB], hauteur réduite, hauteur non verticale ; écran 3 : arêtes cachées laissées en
+  trait plein / arêtes vues en pointillés. Visibilité par la direction de projection exacte
+  (√2/4 ; −1 ; √2/4), identique au moteur commun `ui/solide3DSketch.ts` (vérifié sur 15 000
+  tirages) grâce à des marges : pour le prisme et la pyramide, face de gauche vue (une arête
+  cachée) ou non (trois arêtes autour de D) tirée moitié-moitié AVANT la boucle de rejet ; sommets
+  à ≥ 1 cm les uns des autres. Profil : `forme` = variante, aucun cas particulier, pas de `calcul`.
+  Papier : énoncé = texte + quadrillage imprimé à l'ÉCHELLE RÉELLE (`width` en cm) avec la partie
+  donnée ; corrigé : dessin complet (fuyantes en orange, cachées en pointillés, mesure 45° et
+  longueur de la fuyante issue de B, diagonales et hauteur pour la pyramide). Étiquettes placées
+  automatiquement loin des traits et des textes. Cours : `methode` « Dessiner un solide en
+  perspective cavalière » après l'atelier, carte en fin de section. Fichiers :
+  `AppPerspectiveCavaliere.tsx`, `components/FigurePerspectiveCavaliere.tsx`,
+  `components/EtapesPerspectiveCavaliere.tsx`, `core/perspectiveCavaliere.types.ts`,
+  `moteur/sessionPerspectiveCavaliere.ts`, `moteur/verificationPerspectiveCavaliere.ts`,
+  `ui/figureCavaliere.ts`, `ui/formatCavaliere.ts`, `generateurs/perspectiveCavaliere/` (index,
+  profil, exportEvaluation).
