@@ -3792,3 +3792,36 @@ paths:
   `moteur6e/{types,session,verification}Impedances.ts`,
   `ui6e/{format,recapitulatif}Impedances.ts`, `ui6e/schemaCircuitImpedances.ts`,
   `generateurs6e/impedancesComplexes/` (index, profilEvaluation, exportEvaluation).
+- **6e (6h), Chapitre 5 — Nombres complexes** (`nombres-complexes`), section `problemesavances` :
+  nouveau générateur **6gen98 « Régions du plan complexe »** (processus 2), carte après 6gen42 (6gen96
+  s'insère avant à la fusion), précédée d'un sous-titre « Régions du plan complexe », d'un paragraphe
+  (frontière = l'inégalité devenue égalité), d'un `featureTable` Condition / Région / Frontière, d'une
+  `methode` (frontière, bord large/strict, point test, « et » = partie commune) et de l'exemple
+  « région |z−1−i| ≤ 2 et Im z > 1 » (énoncé ajouté à `ENONCES_DEMONSTRATION`) illustré : le
+  `complexPlane` a reçu un champ additif `region` (polygone rempli `svg-plan-fill`, sans contour).
+  Variantes `disque` (|z − a| ≤, <, ≥, > r), `demi-plan` (Re(z − w) ou Im(z − w) comparé à m : seule
+  la partie utile de w compte), `mediatrice` (|z − a| ≷ |z − b|, médiatrice oblique), `secteur`
+  (θ₁ ≤ arg(z − a) ≤ θ₂, angles multiples de π/4, petit ou grand secteur) et `intersection`
+  (disque/extérieur + demi-plan Re ou Im qui coupe le cercle, ou Re + Im). Chaîne fixe de 4 écrans,
+  une intersection posant chaque question pour ses deux conditions : a) nature de la frontière
+  (choix fermé : cercle, droite verticale, droite horizontale, médiatrice, deux demi-droites),
+  b) éléments (centre et rayon, équation x = k ou y = k, a et b, sommet et angle entre les
+  demi-droites ; 3 tentatives, pièges reconnus : signe du centre, une seule partie changée, rayon au
+  carré, m − Re(w), w oublié, mauvaise partie de w, A et B échangés, autre secteur, somme des
+  angles), c) bord inclus ou non (choix fermé ; la frontière est montrée en violet, sans style),
+  d) la région parmi quatre figures (une condition : {bonne frontière, frontière issue d'une erreur
+  classique — centre opposé ou rayon faux si centré en O, x = m − Re(w) ou Re/Im échangés, droite (AB)
+  au lieu de la médiatrice, angles mesurés à l'envers} × {bon côté, côté opposé} ; deux conditions :
+  les quatre combinaisons de côtés). Le côté, le bord inclus et Re/Im sont tirés 1 fois sur 2 avant
+  la boucle de rejet. Figures : `planComplexeSvg` (6gen40–42) étendu additivement (`regions` =
+  intersection de disques/demi-plans/secteurs par clipPaths imbriqués, `pointilles` des
+  demi-droites), fenêtre fixe [−5 ; 5]², frontières sur le quadrillage. Papier : l'ensemble E et une
+  consigne (nature et éléments de la frontière, bord, représenter E) ; la région coloriée va dans le
+  corrigé (`figureHtml`, étape d), avec le point test. Profil
+  (`generateurs6e/regionsPlanComplexe/profilEvaluation.ts`) : `forme` = variante
+  (`intersection-cercle-demiplan` / `intersection-quadrant`), cas particulier « origine »
+  (condition centrée en O, 1 fois sur 6), pas de `calcul`. Mesures (20 000 tirages par variante) :
+  verdicts à 50 % ± 0,5, cas particulier 16 à 17 %, énoncés distincts par forme complète de 320
+  (disque) à 8 406 (médiatrice), le plus petit groupe (disque centré en O) en a 16 — rayon porté
+  jusqu'à 4 dans ce cas pour l'élargir. Libellés de conception « Nombres complexes — problèmes
+  avancés (6gen42) » (jusque-là vide) et « Régions du plan complexe (6gen98) ».

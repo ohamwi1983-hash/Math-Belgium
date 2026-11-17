@@ -52,6 +52,8 @@ export interface DemiDroitePlan {
   depuis?: number;
   couleur?: string;
   epaisseur?: number;
+  /** Bord exclu d'une région (6gen98). */
+  pointilles?: boolean;
 }
 
 export interface CerclePlan {
@@ -70,7 +72,24 @@ export interface PolygonePlan {
   pointilles?: boolean;
 }
 
+/** Condition d'une région remplie (6gen98), en coordonnées du repère. */
+export type ConditionRegionPlan =
+  | { type: "disque"; cx: number; cy: number; r: number; interieur: boolean }
+  /** Demi-plan des points P tels que n·(P − p) ≥ 0. */
+  | { type: "demiPlan"; px: number; py: number; nx: number; ny: number }
+  /** Secteur de sommet s balayé de l'angle `de` à l'angle `a` (radians, `de` < `a`) dans le sens direct. */
+  | { type: "secteur"; sx: number; sy: number; de: number; a: number };
+
+/** Région remplie = intersection de ses conditions (6gen98). */
+export interface RegionPlan {
+  conditions: ConditionRegionPlan[];
+  couleur?: string;
+  opacite?: number;
+}
+
 export interface OptionsPlan {
+  /** Régions remplies, dessinées sous les axes (6gen98). */
+  regions?: RegionPlan[];
   points?: PointPlan[];
   segments?: SegmentPlan[];
   droites?: DroitePlan[];
@@ -184,6 +203,17 @@ export function planComplexeSvg(o: OptionsPlan): string {
     morceaux.push(`<line x1="${f1(sx(xMin))}" y1="${f1(sy(y))}" x2="${f1(sx(xMax))}" y2="${f1(sy(y))}" stroke="${COULEURS.pale}" stroke-width="0.4" stroke-opacity="0.6"/>`);
   }
 
+  // Régions remplies (6gen98) : intersection des conditions par clipPaths imbriqués.
+  const loinRegion = 4 * (xMax - xMin);
+  (o.regions ?? []).forEach((reg, ri) => {
+    const chemins = reg.conditions.map((c) => cheminCondition(c, sx, sy, unite, { xMin: xMin - loinRegion, xMax: xMax + loinRegion, yMin: yMin - loinRegion, yMax: yMax + loinRegion }));
+    if (chemins.length === 0) return;
+    const clips = chemins.slice(0, -1).map((d, j) => `<clipPath id="${id}r${ri}c${j}"><path d="${d}" clip-rule="evenodd"/></clipPath>`);
+    let interieur = `<path d="${chemins[chemins.length - 1]}" fill-rule="evenodd" fill="${reg.couleur ?? COULEURS.ciel}" fill-opacity="${reg.opacite ?? 0.3}"/>`;
+    for (let j = chemins.length - 2; j >= 0; j--) interieur = `<g clip-path="url(#${id}r${ri}c${j})">${interieur}</g>`;
+    morceaux.push(`${clips.length ? `<defs>${clips.join("")}</defs>` : ""}<g clip-path="url(#${id}cadre)">${interieur}</g>`);
+  });
+
   // Axes fléchés (l'origine est toujours dans la fenêtre).
   morceaux.push(
     `<line x1="${f1(sx(xMin))}" y1="${f1(sy(0))}" x2="${f1(sx(xMax) + 8)}" y2="${f1(sy(0))}" stroke="${COULEURS.doux}" stroke-width="1.1" marker-end="url(#${id}ax)"/>`,
@@ -234,7 +264,7 @@ export function planComplexeSvg(o: OptionsPlan): string {
     const a: Coord = [d.origine[0] + r0 * Math.cos(d.angle), d.origine[1] + r0 * Math.sin(d.angle)];
     const b: Coord = [d.origine[0] + loin * Math.cos(d.angle), d.origine[1] + loin * Math.sin(d.angle)];
     morceaux.push(
-      `<line clip-path="url(#${id}cadre)" x1="${f1(sx(a[0]))}" y1="${f1(sy(a[1]))}" x2="${f1(sx(b[0]))}" y2="${f1(sy(b[1]))}" stroke="${d.couleur ?? COULEURS.accent}" stroke-width="${d.epaisseur ?? 2}"/>`,
+      `<line clip-path="url(#${id}cadre)" x1="${f1(sx(a[0]))}" y1="${f1(sy(a[1]))}" x2="${f1(sx(b[0]))}" y2="${f1(sy(b[1]))}" stroke="${d.couleur ?? COULEURS.accent}" stroke-width="${d.epaisseur ?? 2}"${tirets(d.pointilles)}/>`,
     );
   }
   for (const s of o.segments ?? []) {
@@ -266,6 +296,56 @@ export function planComplexeSvg(o: OptionsPlan): string {
     etiquettesPoints.join("") +
     `</svg>`
   );
+}
+
+/** Chemin SVG (coordonnées écran) d'une condition de région, à remplir en `evenodd` (l'extérieur
+ * d'un disque = grand rectangle percé du cercle). `boite` : rectangle « infini » du repère. */
+function cheminCondition(
+  c: ConditionRegionPlan,
+  sx: (x: number) => number,
+  sy: (y: number) => number,
+  unite: number,
+  boite: { xMin: number; xMax: number; yMin: number; yMax: number },
+): string {
+  const polygone = (pts: Coord[]) => (pts.length ? `M${pts.map(([x, y]) => `${f1(sx(x))},${f1(sy(y))}`).join(" L")} Z` : "");
+  const coins: Coord[] = [
+    [boite.xMin, boite.yMin],
+    [boite.xMax, boite.yMin],
+    [boite.xMax, boite.yMax],
+    [boite.xMin, boite.yMax],
+  ];
+  if (c.type === "disque") {
+    const X = sx(c.cx);
+    const Y = sy(c.cy);
+    const R = c.r * unite;
+    const cercle = `M${f1(X + R)},${f1(Y)} A${f1(R)},${f1(R)} 0 1 0 ${f1(X - R)},${f1(Y)} A${f1(R)},${f1(R)} 0 1 0 ${f1(X + R)},${f1(Y)} Z`;
+    return c.interieur ? cercle : `${polygone(coins)} ${cercle}`;
+  }
+  if (c.type === "demiPlan") {
+    // Sutherland–Hodgman : la boîte coupée par le demi-plan n·(P − p) ≥ 0.
+    const f = ([x, y]: Coord) => c.nx * (x - c.px) + c.ny * (y - c.py);
+    const res: Coord[] = [];
+    for (let i = 0; i < coins.length; i++) {
+      const p = coins[i];
+      const q = coins[(i + 1) % coins.length];
+      const fp = f(p);
+      const fq = f(q);
+      if (fp >= 0) res.push(p);
+      if ((fp >= 0) !== (fq >= 0)) {
+        const t = fp / (fp - fq);
+        res.push([p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1])]);
+      }
+    }
+    return polygone(res);
+  }
+  const rayon = Math.max(boite.xMax - boite.xMin, boite.yMax - boite.yMin);
+  const n = Math.max(2, Math.ceil((c.a - c.de) / (Math.PI / 8)));
+  const pts: Coord[] = [[c.sx, c.sy]];
+  for (let i = 0; i <= n; i++) {
+    const t = c.de + ((c.a - c.de) * i) / n;
+    pts.push([c.sx + rayon * Math.cos(t), c.sy + rayon * Math.sin(t)]);
+  }
+  return polygone(pts);
 }
 
 /** Position d'étiquette qui éloigne le texte du point `centre` (centre de gravité d'une figure). */
