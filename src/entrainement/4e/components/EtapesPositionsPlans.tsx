@@ -21,7 +21,7 @@ interface PropsAides {
   onActiverAide: () => void;
 }
 
-function BlocAidesTexte({ aides, niveauAide, onActiverAide }: PropsAides) {
+export function BlocAidesTexte({ aides, niveauAide, onActiverAide }: PropsAides) {
   return (
     <div>
       {aides.slice(0, niveauAide).map((aide, i) => (
@@ -34,7 +34,7 @@ function BlocAidesTexte({ aides, niveauAide, onActiverAide }: PropsAides) {
   );
 }
 
-function Explication({ lignes }: { lignes: string[] }) {
+export function Explication({ lignes }: { lignes: string[] }) {
   return (
     <div className="triangle-quelconque-aide">
       {lignes.map((l, i) => (

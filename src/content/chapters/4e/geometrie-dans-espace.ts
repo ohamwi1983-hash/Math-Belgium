@@ -835,6 +835,53 @@ export const geometrieDansEspace: ChapterContent = {
           ],
           result: { tag: 'résultat', text: 'deux droites sécantes de (AFH) sont parallèles à deux droites de (BDG) : les plans sont parallèles' },
         },
+        {
+          kind: 'methode',
+          label: "Justifier que deux droites de l'espace sont parallèles",
+          items: [
+            'Cherche une **figure plane** qui contient les deux droites : une face du solide, un plan ' +
+              'diagonal, un triangle. Dans ce plan, utilise une propriété de géométrie plane.',
+            '**Côtés opposés d\'un parallélogramme** (rectangle, carré) : dans le cube, $ABFE$ est un ' +
+              'carré, donc $(AB) \\parallel (EF)$ ; $BDHF$ est un rectangle, donc $(BD) \\parallel (FH)$.',
+            '**Droite des milieux** : dans un triangle, la droite qui joint les milieux de deux côtés est ' +
+              'parallèle au troisième côté.',
+            '**Milieux de deux côtés opposés d\'un parallélogramme** : la droite qui les joint est ' +
+              'parallèle aux deux autres côtés.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'une droite parallèle à un plan',
+          formula:
+            'Dans le tétraèdre $ABCD$, $I$ est le milieu de $[DA]$ et $J$ celui de $[DB]$. Montre que la ' +
+            'droite $(IJ)$ est parallèle au plan $(ABC)$.',
+          steps: [
+            { tag: 'critère', text: 'il suffit de trouver une droite du plan $(ABC)$ parallèle à $(IJ)$' },
+            { tag: 'droite témoin', text: '$(AB)$, dont les deux points nomment le plan $(ABC)$' },
+            { tag: 'justification', text: 'dans le triangle $DAB$, $I$ et $J$ sont les milieux de $[DA]$ et $[DB]$ : la droite des milieux $(IJ)$ est parallèle à $(AB)$' },
+          ],
+          result: { tag: 'conclusion', text: '$(IJ)$ est parallèle à $(AB)$, une droite du plan $(ABC)$ : la droite $(IJ)$ est parallèle au plan $(ABC)$' },
+        },
+        {
+          kind: 'attention',
+          label: 'La droite témoin doit être DANS le plan',
+          text:
+            'Une droite parallèle à $(IJ)$ ne prouve rien si elle n\'est pas une droite du plan : elle ' +
+            'pourrait le percer. Et « aucun point commun » ou « dans deux faces parallèles » ne prouve ' +
+            'jamais que deux droites sont parallèles : elles pourraient être gauches.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Démontrer un parallélisme',
+          generatorId: 'gen103',
+          description: [
+            'Sur un solide en perspective cavalière, démontre qu\'une droite est parallèle à un plan, ou que ' +
+              'deux plans sont parallèles : choisis le critère du cours, la ou les droites témoins, puis ' +
+              'justifie chaque parallélisme (rectangle, parallélogramme, droite des milieux).',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 103. Démontrer un parallélisme »',
+        },
       ],
     },
 

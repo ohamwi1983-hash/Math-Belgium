@@ -142,7 +142,7 @@ function choisirTriangle(liste: Triple[]): Triple {
 /** Plan tiré dans une liste : 65 % parmi les plans qui passent par au moins 3 sommets (faces, plans
  * diagonaux), 35 % parmi ceux qui demandent un milieu nommé — sinon ces derniers, bien plus nombreux,
  * occuperaient presque tous les exercices. */
-function choisirPlan(liste: PlanGeo[]): PlanGeo {
+export function choisirPlan(liste: PlanGeo[]): PlanGeo {
   const parSommets = liste.filter((p) => p.contenus.filter((c) => c.sommet).length >= 3);
   const autres = liste.filter((p) => p.contenus.filter((c) => c.sommet).length < 3);
   if (parSommets.length === 0) return choisir(autres);
@@ -197,7 +197,7 @@ function partages(a: Triple, b: Triple): number {
 
 // --- Droites nommées ---------------------------------------------------------------------------
 
-interface DroiteNommee {
+export interface DroiteNommee {
   noms: [string, string];
   a: Point3D;
   b: Point3D;
@@ -209,7 +209,7 @@ function libelleDroite(dr: DroiteNommee): string {
 
 /** Droites passant par deux points nommés (dédupliquées : une droite qui porte 3 points nommés n'est
  * gardée qu'une fois, sous le nom de deux sommets si possible). */
-function droitesNommees(nommes: { nom: string; position: Point3D }[], filtre: (a: Point3D, b: Point3D) => boolean): DroiteNommee[] {
+export function droitesNommees(nommes: { nom: string; position: Point3D }[], filtre: (a: Point3D, b: Point3D) => boolean): DroiteNommee[] {
   const resultat: DroiteNommee[] = [];
   const paires: DroiteNommee[] = [];
   for (let i = 0; i < nommes.length; i++) {

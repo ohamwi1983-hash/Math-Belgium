@@ -1,5 +1,5 @@
-import type { Point3D, Solide3D } from "../core/geometrieEspace.types";
-import type { ExercicePositionsPlans } from "../core/positionsPlans.types";
+import type { PlanSolide3D, Point3D, Solide3D } from "../core/geometrieEspace.types";
+import type { MilieuNomme } from "../core/positionsPlans.types";
 import { additionner3D, multiplierScalaire3D, normalePlan, pointAppartientAuPlan, produitScalaire3D, soustraire3D } from "../moteur/geometrieEspace";
 import { projeterPoint3D, type Point2D } from "./projectionCavaliere";
 import { calculerAretesAvecVisibilite, pointCacheParSolide } from "./solide3DSketch";
@@ -25,6 +25,15 @@ const HAUTEUR = 320;
 const MARGE = 36;
 
 export type ModeFigure = "ecran" | "papier";
+
+/** Ce que la figure lit d'un exercice : le solide, les milieux nommés et les plans (3 points chacun).
+ * Tout exercice de gen101 (`ExercicePositionsPlans`) le fournit ; gen103 (« Démontrer un
+ * parallélisme ») aussi — type élargi sans rien changer au rendu. */
+export interface DonneesFigurePlans {
+  solide: Solide3D;
+  milieux: MilieuNomme[];
+  plans: readonly PlanSolide3D[];
+}
 
 /** Couleurs des plans 1, 2, 3 — lisibles en thème clair et sombre. */
 export const COULEURS_PLANS = ["#7c3aed", "#15803d", "#ea580c"];
@@ -73,11 +82,11 @@ function couleurs(mode: ModeFigure): Couleurs {
     : { trait: "#1b1c2b", cache: "#6b6f80", halo: "#ffffff" };
 }
 
-export function positionNommee(e: ExercicePositionsPlans, nom: string): Point3D {
+export function positionNommee(e: DonneesFigurePlans, nom: string): Point3D {
   return e.solide.sommets[nom] ?? e.milieux.find((m) => m.nom === nom)!.position;
 }
 
-export function pointsPlan(e: ExercicePositionsPlans, i: number): [Point3D, Point3D, Point3D] {
+export function pointsPlan(e: DonneesFigurePlans, i: number): [Point3D, Point3D, Point3D] {
   return e.plans[i]!.map((n) => positionNommee(e, n)) as [Point3D, Point3D, Point3D];
 }
 
@@ -214,7 +223,7 @@ function decaler(p: Point2D, centre: Point2D, distance = 14): Point2D {
  * sections), arêtes visibles, contours des triangles, droites, segments de construction, points,
  * étiquettes.
  */
-export function figurePositionsPlansSvg(e: ExercicePositionsPlans, options: OptionsFigure): string {
+export function figurePositionsPlansSvg(e: DonneesFigurePlans, options: OptionsFigure): string {
   const c = couleurs(options.mode);
   const solide = e.solide;
   const extra = [...(options.points ?? []).map((p) => p.position)];

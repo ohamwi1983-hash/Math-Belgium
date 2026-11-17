@@ -3942,3 +3942,46 @@ paths:
   `core/positionsPlans.types.ts`, `moteur/sessionPositionsPlans.ts`, `ui/formatPositionsPlans.ts`,
   `ui/figurePositionsPlans.ts`, `generateurs/positionsPlans/` (geometriePlans, index, profil,
   exportEvaluation).
+
+- **4e, Chapitre 8 — gen103 « Démontrer un parallélisme »** (section `parallelisme`, carte en fin de
+  section, processus 3). Deux variantes sur cube, parallélépipède, prisme droit, tétraèdre ou
+  pyramide SABCD, sans coordonnées ; énoncé « Démontre que … » (QUOI démontrer, jamais la méthode) ;
+  tous les écrans sont des choix fermés (UNE tentative). **Droite parallèle à un plan** (3 écrans) :
+  a) critère (« trouver une droite du plan parallèle à (T) » ; leurres : parallèle passant par un
+  point du plan, triangle « non rencontré » sur le dessin, deux droites sécantes du plan, deux points
+  de (T) dans le plan) ; b) droite témoin parmi 4–5 droites nommées (une seule témoin ; leurres
+  « parallèle mais HORS du plan » — toujours présent sauf dans le tétraèdre, qui n'en a pas — et
+  « dans le plan mais gauche ») ; c) justification. **Deux plans parallèles** (4 écrans) : a) critère
+  (leurres : une seule droite, deux droites parallèles, triangles disjoints, droite parallèle au
+  plan) ; b) deux parallélismes « droite de (P) ∥ droite de (Q) » parmi 5 (leurres : droite hors de
+  (P) ou hors de (Q) pourtant parallèle, faux parallélisme — une fois sur deux avec une droite témoin
+  attendue —, et parfois un 3e parallélisme valable dont la droite de (P) est parallèle à une des
+  deux autres : piège des deux témoins parallèles) ; c) et d) justification de chacun. Catalogue des
+  raisons (`generateurs/demontrerParallelisme/geometrieParallelisme.ts`, énumération déterministe) :
+  côtés opposés d'un parallélogramme de 4 sommets (face, plan diagonal : « BDHF est un rectangle »),
+  droite des milieux d'un triangle, droite des milieux de deux côtés opposés d'un parallélogramme.
+  Options de justification toutes conclues « donc (L) ∥ (M) » : la raison, un leurre aux mêmes mots
+  mais insuffisant (côtés opposés d'un quadrilatère quelconque, même longueur, « un point de »), un
+  leurre « bonne propriété, mauvaise figure » (vrai rectangle qui ne contient qu'une des droites,
+  un seul milieu, ou milieu attribué au mauvais côté) et un leurre générique vrai (deux faces
+  parallèles, face parallèle aux deux droites, aucun point commun, impression du dessin). Type de
+  raison tiré à parts égales AVANT le rejet (droite-plan). Noms en ordre alphabétique partout
+  (droites, segments, triangles) : l'ordre des lettres ne distingue jamais la bonne option ; milieux
+  nommés I, J, K dans un ordre tiré au hasard, chacun sert au nom d'un plan ou de (T). Mesures
+  (5 000 tirages par variante) : énoncés distincts 3 343 (droite-plan) et 1 719 (deux-plans),
+  P(deux séries identiques) 0,1 % et 0,4 % ; types de raison 33/34/33 % ; meilleure stratégie
+  « lettres seules » pour la droite témoin 30 % (hasard 22 %), pour la paire 22 % (hasard 11 %) ;
+  stratégie « mots-clés » sur les justifications 55 % (une option valable sur deux candidates).
+  Profil : `forme` = variante seule, aucun cas particulier, pas de `calcul`. Réutilise gen101 par
+  extensions additives seulement : `figurePositionsPlansSvg`, `positionNommee`, `pointsPlan` et
+  quelques textes acceptent un type élargi `DonneesFigurePlans` (solide, milieux, plans) ;
+  `choisirPlan`, `droitesNommees`, `BlocAidesTexte`, `Explication` exportés ;
+  description de la pyramide ajoutée à `DESCRIPTIONS_SOLIDES` — rendu de gen101 inchangé. Triangles de
+  nommage propres à gen103 (`trianglesNommage`) : mêmes seuils de lisibilité mais jusqu'à 3 milieux,
+  sinon le plan des milieux (tétraèdre, pyramide, plan médian) était exclu. Cours : `methode`
+  « Justifier que deux droites de l'espace sont parallèles », `exemple` « une droite parallèle à un
+  plan » (tétraèdre, droite des milieux ; énoncé dans `ENONCES_DEMONSTRATION`) et `attention` « La
+  droite témoin doit être DANS le plan » avant la carte. Fichiers : `AppDemontrerParallelisme.tsx`,
+  `components/EtapesDemontrerParallelisme.tsx`, `core/demontrerParallelisme.types.ts`,
+  `moteur/sessionDemontrerParallelisme.ts`, `ui/formatDemontrerParallelisme.ts`,
+  `generateurs/demontrerParallelisme/` (geometrieParallelisme, index, profil, exportEvaluation).

@@ -92,7 +92,7 @@ export type IdGenerateurPilote =
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
-  | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101'
+  | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
   | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19' | '5gen44' | '5gen45' | '5gen46' | '5gen47' | '5gen48' | '5gen49'
@@ -311,6 +311,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'deux-droites', generatorId: 'gen100', label: 'Positions de deux droites et plan déterminé (gen100)', processus: 2 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'position', generatorId: 'gen39', label: '' },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'trois-plans', generatorId: 'gen101', label: 'Positions de deux plans et de trois plans (gen101)', processus: 2 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'parallelisme', generatorId: 'gen103', label: 'Démontrer un parallélisme (gen103)', processus: 3 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'section', generatorId: 'gen40', label: '' },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'ombre', generatorId: 'gen41', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', generatorId: '5gen1', label: '' },
@@ -965,6 +966,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     'parallelisme': [
       { cle: 'deux plans parallèles dans le cube', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$), démontre que les plans $(AFH)$ et $(BDG)$ sont parallèles." },
+      { cle: 'une droite parallèle à un plan', enonce: "Dans le tétraèdre $ABCD$, $I$ est le milieu de $[DA]$ et $J$ celui de $[DB]$. Démontre que la droite $(IJ)$ est parallèle au plan $(ABC)$." },
     ],
     'percee': [
       { cle: 'point de percée hors du solide', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$, $F$ au-dessus de $B$), $J$ est le milieu de $[BF]$. Construis le point de percée $K$ de la droite $(AJ)$ dans le plan $(EFGH)$ et précise sa position." },

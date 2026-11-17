@@ -12,7 +12,7 @@ import {
   sontParalleles3D,
   soustraire3D,
 } from "../moteur/geometrieEspace";
-import { COULEUR_CONSTRUCTION, COULEUR_DROITE, NOMS_COULEURS_PLANS, pointsPlan, positionNommee, sectionSolide, type OptionsFigure, type PointFigure } from "./figurePositionsPlans";
+import { COULEUR_CONSTRUCTION, COULEUR_DROITE, NOMS_COULEURS_PLANS, pointsPlan, positionNommee, sectionSolide, type DonneesFigurePlans, type OptionsFigure, type PointFigure } from "./figurePositionsPlans";
 
 /**
  * Textes de gen101 (« Positions de deux plans et de trois plans ») : énoncé, consignes, options,
@@ -31,17 +31,18 @@ const DESCRIPTIONS_SOLIDES: Record<string, string> = {
   parallelepipede: "le parallélépipède rectangle ABCDEFGH",
   prisme: "le prisme droit ABCDEF (bases ABC et DEF)",
   tetraedre: "le tétraèdre ABCD",
+  pyramideCarree: "la pyramide SABCD (base carrée ABCD, sommet S)",
 };
 
-export function descriptionSolide(e: ExercicePositionsPlans): string {
+export function descriptionSolide(e: DonneesFigurePlans): string {
   return DESCRIPTIONS_SOLIDES[e.solide.id] ?? e.solide.label;
 }
 
-export function nomPlan(e: ExercicePositionsPlans, i: number): string {
+export function nomPlan(e: DonneesFigurePlans, i: number): string {
   return `(${e.plans[i]!.join("")})`;
 }
 
-export function phraseMilieux(e: ExercicePositionsPlans): string {
+export function phraseMilieux(e: DonneesFigurePlans): string {
   const m = e.milieux;
   if (m.length === 0) return "";
   const def = (i: number) => `[${m[i]!.milieuDe.join("")}]`;
@@ -215,7 +216,7 @@ export function droiteIntersection(e: ExercicePositionsPlans, i: number, j: numb
 }
 
 /** Point nommé (sommet ou milieu) situé exactement en `p`, ou `null`. */
-export function nomDuPoint(e: ExercicePositionsPlans, p: Point3D): string | null {
+export function nomDuPoint(e: DonneesFigurePlans, p: Point3D): string | null {
   for (const [nom, q] of Object.entries(e.solide.sommets)) if (distance3D(p, q) < EPSILON_3D) return nom;
   for (const m of e.milieux) if (distance3D(p, m.position) < EPSILON_3D) return m.nom;
   return null;
@@ -425,7 +426,7 @@ function pointRaisonnable(e: ExercicePositionsPlans, p: Point3D): boolean {
 
 /** Description du plan i par ses sommets (« la face ABFE », « le plan diagonal ACGE »), ou `null`
  * s'il passe par moins de trois sommets. */
-export function descriptionPlan(e: ExercicePositionsPlans, i: number): string | null {
+export function descriptionPlan(e: DonneesFigurePlans, i: number): string | null {
   const plan = pointsPlan(e, i);
   const section = sectionSolide(e.solide, plan);
   const noms = section.map((p) => nomDuPoint(e, p));
@@ -442,7 +443,7 @@ export function descriptionPlan(e: ExercicePositionsPlans, i: number): string | 
 }
 
 /** Le point nommé `nom` appartient-il au plan i ? */
-export function pointNommeDansPlan(e: ExercicePositionsPlans, nom: string, i: number): boolean {
+export function pointNommeDansPlan(e: DonneesFigurePlans, nom: string, i: number): boolean {
   return pointAppartientAuPlan(positionNommee(e, nom), pointsPlan(e, i));
 }
 
