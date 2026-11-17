@@ -181,6 +181,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen105: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppPointDeFuite').then((m) => ({ default: m.AppPointDeFuite }))),
   gen104: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppPerspectiveCavaliere').then((m) => ({ default: m.AppPerspectiveCavaliere }))),
   gen107: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppDetectiveEspace').then((m) => ({ default: m.AppDetectiveEspace }))),
+  gen106: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppOmbreLampe').then((m) => ({ default: m.AppOmbreLampe }))),
   gen67: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppRelationsRacines').then((m) => ({ default: m.AppRelationsRacines }))),
 
   // --- 5e, chapitre 1 : Fonctions : rappels et compléments ---

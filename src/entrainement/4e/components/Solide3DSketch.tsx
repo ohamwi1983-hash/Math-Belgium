@@ -19,6 +19,12 @@ export interface PointExtraSolide3D {
    * juste au-dessus du point — utile pour un point nommé posé sur une arête (milieu I...). Absent par
    * défaut : comportement historique inchangé. */
   labelExterieur?: boolean;
+  /** Rayon du disque (5 par défaut). gen106 : petits disques pour les sommets nommés d'un pavé.
+   * Absent : comportement historique inchangé. */
+  rayon?: number;
+  /** Décalage en pixels de l'étiquette par rapport au point (prioritaire sur `labelExterieur`).
+   * Absent : comportement historique inchangé (étiquette 11 px au-dessus du point). */
+  decalageLabel?: { x: number; y: number };
 }
 
 export interface SegmentExtraSolide3D {
@@ -161,10 +167,14 @@ export function Solide3DSketch({ solide, plan, droite, droitePoints, droitesSupp
 
       {pointsExtra.map((point, index) => {
         const p = projeter3DVersPixel(point.position, echelleProjection);
-        const label = point.labelExterieur ? positionLabelExterieur(solide, point.position) : { x: p.x, y: p.y - 11 };
+        const label = point.decalageLabel
+          ? { x: p.x + point.decalageLabel.x, y: p.y + point.decalageLabel.y }
+          : point.labelExterieur
+            ? positionLabelExterieur(solide, point.position)
+            : { x: p.x, y: p.y - 11 };
         return (
           <g key={`point-extra-${index}`}>
-            <circle cx={p.x} cy={p.y} r={5} className="solide3d-point-extra" style={{ fill: point.couleur }} />
+            <circle cx={p.x} cy={p.y} r={point.rayon ?? 5} className="solide3d-point-extra" style={{ fill: point.couleur }} />
             <text x={label.x} y={label.y} className="solide3d-point-extra-label" style={{ fill: point.couleur }}>
               {point.label}
             </text>

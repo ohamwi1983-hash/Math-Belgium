@@ -4115,3 +4115,38 @@ paths:
   `AppDetectiveEspace.tsx`, `components/EtapesDetectiveEspace.tsx`, `core/detectiveEspace.types.ts`,
   `moteur/sessionDetectiveEspace.ts`, `ui/formatDetectiveEspace.ts`, `generateurs/detectiveEspace/`
   (commun, droites, plan, section, parallelisme, cavaliere, index, profil, exportEvaluation).
+- **4e, Chapitre 8 — gen106 « Ombre à la lampe : projection centrale »** (section `ombre`, carte
+  juste après celle de gen41, processus 2). Prolongement de gen41 avec une source PONCTUELLE : une
+  lampe L au sommet d'un lampadaire de pied L₀ ; méthode = rayon issu de L par le sommet + trace au
+  sol par L₀ et le pied de l'objet. Quatre variantes, deux écrans de choix chacune (composant de
+  gen41 `ChoixCandidatsOmbre`, candidats mélangés à chaque écran, UNE tentative, bonne réponse en
+  vert après un échec et explication de l'erreur commise), puis la construction complète :
+  `poteau` (demi-droite de l'ombre issue du pied de A parmi 4 — leurres : parallèle à l'ombre de E
+  « comme au soleil », vers la lampe, prolongement du trait depuis la lampe dessinée, depuis le pied
+  de E, vers E, verticale du dessin —, puis A′), `cube` (ombres de deux sommets du haut d'un cube ou
+  d'un pavé dont l'ombre est un coin VISIBLE du contour ; leurres : trace par le pied d'un autre
+  sommet, rayon parallèle au premier, trace trop courte/longue, point sur le rayon hors trace, côté
+  lampe), `mur` (point M où la trace atteint le pied d'un mur frontal, puis A′ sur la verticale du
+  mur ; leurres : droit derrière le poteau, trace par le sommet, rayon jusqu'au pied du mur, trace
+  trop inclinée ; puis trop bas/haut, hauteur du poteau, derrière le poteau, sur le rayon hors
+  verticale), `lampe` (L₀ comme intersection des prolongements des deux ombres, puis L ; leurres :
+  image de la lampe, une seule trace, rayon pris pour une trace, ombres échangées ; verticale trop
+  basse/haute, un seul rayon). **Devinette sans la figure** : le rang de la bonne réponse est tiré
+  AVANT la boucle de rejet, selon DEUX critères à la fois (distance au pied concerné ou abscisse /
+  hauteur, et distance au centre des 4 candidats — sans ce second critère la bonne réponse, à
+  l'intersection de deux droites portant chacune des leurres, était « celle du milieu » dans 70 à
+  95 % des cas) ; les deux rangs étant liés par la géométrie, chaque écran tire un couple parmi deux
+  « permutations » de couples réalisables mesurés (`COUPLES_PAR_ECRAN`), ce qui rend chaque rang
+  uniforme. Mesures (5 000 tirages par variante) : rangs des critères équilibrés 19–30 % ; autres
+  heuristiques ≤ 48 %, sauf « A′ est le point le plus éloigné de L₀ » (51 %, écran 2 de `poteau` :
+  l'ombre est toujours du côté opposé à la lampe, rang par rapport au pied de L₀ irréalisable) et les
+  clés sans objet (distance de L₀ à lui-même, points alignés sur le pied du mur) ; ≥ 4 500 énoncés
+  distincts sur 5 000 par variante, P(deux tirages identiques) ≤ 0,03 %. Profil :
+  `forme` = variante, aucun cas particulier, pas de `calcul`. Papier : scène sans rien à construire
+  (lampadaire violet, mur brun) + consigne globale ; corrigé = construction complète en couleurs
+  (`figureHtml`). `Solide3DSketch` : props additives `rayon` et `decalageLabel` sur les points
+  annexes (petits sommets nommés du pavé). Cours : `methode` « construire une ombre à la lampe » +
+  `piege` après l'atelier « soleil ou lampe ? » ; libellés pilotes « Ombre au soleil (gen41) » et
+  « Ombre à la lampe : projection centrale (gen106) ». Fichiers : `AppOmbreLampe.tsx`,
+  `core/ombreLampe.types.ts`, `ui/formatOmbreLampe.ts`, `generateurs/ombreLampe/` (geometrieLampe,
+  index, profil, exportEvaluation).

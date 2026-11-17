@@ -62,7 +62,10 @@ export function profilSectionPlaneSolide(e: ExerciceSectionPlaneSolide): ProfilI
 // --- gen41 ---------------------------------------------------------------------------------------
 
 export function profilOmbreSoleil(e: ExerciceOmbreSoleil): ProfilInstance {
-  if (e.variante === "obstacle") return { casParticulier: null, forme: e.indexObstacleTouche === null ? "ombre-au-sol" : "ombre-sur-obstacle" };
+  // Variante obstacle : savoir si l'ombre tombe au sol ou sur un obstacle est ce que l'élève DÉCIDE
+  // (écrans direction/point) — un verdict, donc jamais dans `forme` (décision de l'utilisateur). Le
+  // générateur tire déjà cette issue avant sa boucle de rejet (`cibleSol`).
+  if (e.variante === "obstacle") return { casParticulier: null, forme: e.variante };
   if (e.variante === "directionInconnue") return { casParticulier: null, forme: `${e.piquets.length}-sommets` };
   return { casParticulier: null };
 }
