@@ -83,7 +83,7 @@ export type IdGenerateurPilote =
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
-  | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95'
+  | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95' | '6gen97'
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
@@ -196,7 +196,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'nombres-complexes', sectionId: 'formetrigonometrique', generatorId: '6gen37', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'formulemoivre', generatorId: '6gen38', label: 'Formule de Moivre (6gen38)' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'formulemoivre', generatorId: '6gen93', label: 'Linéariser avec les formules d\'Euler (6gen93)', processus: 2 },
-  { chapitreSlug: 'nombres-complexes', sectionId: 'racinesniemes', generatorId: '6gen39', label: '' },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'racinesniemes', generatorId: '6gen39', label: 'Racines n-ièmes d\'un nombre complexe (6gen39)' },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'racinesniemes', generatorId: '6gen97', label: 'Polygones réguliers et racines n-ièmes (6gen97)', processus: 3 },
   { chapitreSlug: 'nombres-complexes', sectionId: 'transformationsplan', generatorId: '6gen40', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'trianglescomplexes', generatorId: '6gen41', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'problemesavances', generatorId: '6gen42', label: '', processus: 3 },

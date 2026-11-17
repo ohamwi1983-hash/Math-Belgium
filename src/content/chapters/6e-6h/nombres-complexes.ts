@@ -1537,6 +1537,33 @@ export const nombresComplexes: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 39. Racines n-ièmes d\'un nombre complexe »',
         },
+        {
+          kind: 'methode',
+          label: 'Polygone régulier de centre quelconque : sommets, côté, aire',
+          items: [
+            'Polygone régulier à $n$ sommets de centre $C$ (affixe $c$) et de sommet $Z_0=A$ (affixe $a$), ' +
+              'numérotés dans le sens trigonométrique : on passe d\'un sommet au suivant par la rotation de ' +
+              'centre $C$ et d\'angle $\\frac{2\\pi}{n}$. On fait tourner le vecteur $\\overrightarrow{CA}$ ' +
+              '(affixe $a-c$), puis on ajoute $c$ : $z_k=c+(a-c)\\,e^{2ik\\pi/n}$, pour $k=0,1,\\ldots,n-1$.',
+            'Polygone inscrit dans un cercle de centre $O$ et de rayon $r$, avec $z_k=z_0\\,e^{2ik\\pi/n}$ : ' +
+              'le côté vaut $|z_1-z_0|=r\\,|e^{2i\\pi/n}-1|=2r\\sin\\frac{\\pi}{n}$ (factorise ' +
+              '$e^{i\\pi/n}$ et utilise $e^{i\\alpha}-e^{-i\\alpha}=2i\\sin\\alpha$) ; l\'aire est celle de $n$ ' +
+              'triangles isocèles de sommet $O$ : $\\mathcal{A}=\\frac{n}{2}\\,r^2\\sin\\frac{2\\pi}{n}$.',
+            'Somme des affixes des sommets, avec $\\omega=e^{2i\\pi/n}$ : $z_0+\\cdots+z_{n-1}=nc+(a-c)\\,S$, où ' +
+              '$S=1+\\omega+\\cdots+\\omega^{n-1}$ est la somme des racines n-ièmes de l\'unité, nulle : la somme ' +
+              'des affixes des sommets vaut donc $nc$.',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Polygones réguliers et racines n-ièmes',
+          generatorId: '6gen97',
+          description: [
+            'Calcule les affixes exactes des sommets d\'un polygone régulier de centre C par une rotation, son côté 2r·sin(π/n), son périmètre et son aire, puis justifie que la somme des racines n-ièmes de l\'unité est nulle.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 97. Polygones réguliers et racines n-ièmes »',
+        },
       ],
     },
     {
