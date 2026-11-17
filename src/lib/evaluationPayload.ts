@@ -92,7 +92,7 @@ export type IdGenerateurPilote =
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
-  | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103' | 'gen102' | 'gen105' | 'gen104'
+  | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103' | 'gen102' | 'gen105' | 'gen104' | 'gen106'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
   | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19' | '5gen44' | '5gen45' | '5gen46' | '5gen47' | '5gen48' | '5gen49'
@@ -316,7 +316,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'cavaliere', generatorId: 'gen104', label: 'Dessiner en perspective cavalière (gen104)', processus: 2 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'section', generatorId: 'gen40', label: '' },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'point-de-fuite', generatorId: 'gen105', label: 'Perspective centrale : point de fuite (gen105)', processus: 2 },
-  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'ombre', generatorId: 'gen41', label: '' },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'ombre', generatorId: 'gen41', label: 'Ombre au soleil (gen41)', processus: 2 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'ombre', generatorId: 'gen106', label: 'Ombre à la lampe : projection centrale (gen106)', processus: 2 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', generatorId: '5gen1', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', generatorId: '5gen2', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'composer', generatorId: '5gen3', label: '' },

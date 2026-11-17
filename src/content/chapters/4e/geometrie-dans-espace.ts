@@ -1797,6 +1797,30 @@ export const geometrieDansEspace: ChapterContent = {
             'piquet, l\'ombre de ce piquet ne s\'arrête jamais.',
         },
         {
+          kind: 'methode',
+          label: 'Méthode — construire une ombre à la lampe',
+          items: [
+            'Repère la lampe L et son **pied** L₀, le point du sol situé juste en dessous de la lampe.',
+            'Pour le sommet S d\'un objet vertical, trace le rayon qui part de L et passe par S.',
+            'Trace la **trace au sol** : la droite qui part de L₀ et passe par le pied de l\'objet. Le ' +
+              'rayon et la trace sont dans le même plan vertical : leur intersection est l\'ombre de S, ' +
+              'du côté opposé à la lampe.',
+            'Si l\'ombre rencontre un mur vertical, elle y monte **verticalement**, à partir du point où ' +
+              'la trace au sol touche le pied du mur, jusqu\'au rayon issu de L.',
+            'Pour **retrouver la lampe** : prolonge deux ombres au-delà du pied de leur poteau, elles se ' +
+              'coupent en L₀ ; la lampe L est à la verticale de L₀, sur les rayons qui joignent chaque ombre ' +
+              'au sommet de son poteau.',
+          ],
+        },
+        {
+          kind: 'piege',
+          label: 'Ne pas tracer les ombres parallèles',
+          text:
+            'Sous une lampe, les ombres de deux poteaux ne sont **pas** parallèles, même si elles en ont ' +
+            'l\'air sur un petit dessin : leurs droites se coupent au pied L₀ de la lampe. Et la trace au sol ' +
+            'part de L₀, pas du point L dessiné en haut du mât.',
+        },
+        {
           kind: 'application',
           titre: 'Calculer l\'ombre portée d\'un panneau solaire avant de l\'installer',
           text:
@@ -1852,6 +1876,18 @@ export const geometrieDansEspace: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 41. Ombre au soleil »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Ombre à la lampe : projection centrale',
+          generatorId: 'gen106',
+          description: [
+            'Les rayons partent tous de la lampe. Construis l\'ombre d\'un poteau, d\'un cube ou d\'un pavé, ' +
+              'ou d\'un poteau dont l\'ombre monte sur un mur, grâce au rayon issu de la lampe et à la trace ' +
+              'au sol qui passe par le pied de la lampe — ou retrouve la lampe à partir de deux ombres.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 106. Ombre à la lampe : projection centrale »',
         },
       ],
     },
