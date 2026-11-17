@@ -3726,3 +3726,42 @@ paths:
   `core6e/deuxEcrituresComplexe.ts`, `moteur6e/{types,session,verification}DeuxEcritures.ts`,
   `ui6e/{format,recapitulatif}DeuxEcritures.ts`, `generateurs6e/deuxEcrituresComplexe/` (index,
   profilEvaluation, exportEvaluation).
+- **6e (6h), Chapitre 5 — générateur 6gen96 « Électricité : impédances complexes »** (section
+  `problemesavances`, carte après 6gen42, processus 3) : notation **j** des électriciens (décision
+  de l'utilisateur), annoncée dans chaque énoncé (« j joue le rôle de i, car i désigne
+  l'intensité », j² = −1). Variantes = type de circuit : `serie2` (R avec une bobine OU un
+  condensateur), `rlc` (série RLC) et `parallele` (R ∥ L ou R ∥ C). Réactances entières (multiples
+  de 5, 10 à 150 Ω), ω ∈ {100, 200, 500, 1000} rad/s, L en mH entier, C en µF à au plus une
+  décimale ; jamais X = R (45°) ; en parallèle, forme algébrique décimale à au plus deux chiffres ;
+  I entre 0,25 et 20 A (`core6e/impedancesComplexes.ts`). Cinq écrans : a) impédance de chaque
+  composant réactif, saisie complexe avec j (évaluateur complexe du chapitre, j lu comme i ;
+  « 80j », « j·80 », « −j/(25e-6·1000) » acceptés) ; b) Re Z et Im Z exacts ; c) |Z| au dixième
+  d'ohm et φ au dixième de degré ; d) I = U/|Z| au centième (tolérance d'une unité, 0,8 % pour I
+  qui peut venir d'un |Z| arrondi) ; e) nature inductif / capacitif / résistif (choix fermé, une
+  tentative). Refusés sans tentative : saisie illisible, j dans une partie, angle en radians,
+  arrondi trop grossier, arrondi là où une valeur exacte est attendue. Pièges : j oublié, mH/µF
+  non convertis, 1/j = +j (signe de Z_C), Cω au lieu de 1/(Cω), X_C ajoutée, impédances des
+  branches additionnées, 1/Z non inversé, division par R² + X² oubliée, module = somme des parties
+  ou sans racine, arctan(a/b), signe de φ, I = U/R, U·|Z|. La nature (verdict) est tirée AVANT la
+  boucle de rejet, à parts égales (inductif/capacitif ; + résistif = résonance en RLC), jamais dans
+  `forme`. Schéma du circuit (symboles IEC, `ui6e/schemaCircuitImpedances.ts`, `currentColor`,
+  aucune donnée calculée) à l'écran et sur papier (`enteteHtml`). Papier : description + schéma +
+  rappels (j, impédances utiles, règle série/parallèle, loi d'Ohm, signe de φ) puis quatre vraies
+  questions (Z sous forme algébrique, |Z| et φ, I, nature justifiée), `etapesParQuestion`
+  [a, b] [c] [d] [e]. Profil (`generateurs6e/impedancesComplexes/profilEvaluation.ts`) : `forme` =
+  type de circuit, aucun cas particulier (pas même la résonance, qui est une issue du verdict),
+  `calcul: 'calculatrice'` partout et `calculatriceIndispensable` sur les trois variantes (exclues
+  en « calculatrice interdite »). Mesures (20 000 tirages par variante) : 6 283 / 13 051 / 1 312
+  énoncés distincts (probabilité que deux séries tombent sur le même : 0,025 % / 0,012 % /
+  0,097 %), natures 50/50, 33/33/33, 51/49. Cours : l'application « Décrire un courant électrique
+  alternatif » (section `formetrigonometrique`) passe de Z = 3+4i à Z = 3+4j (le texte annonçait
+  déjà la notation j) ; après la carte 6gen42, sous-titre « Application : les impédances complexes
+  en électricité », paragraphe (j, impédance, série/parallèle), tableau composant → impédance →
+  effet, paragraphe (|Z|, loi d'Ohm, déphasage, nature, résonance), piège (1/j = −j, inverses en
+  parallèle), exemple « circuit RLC série » (énoncé ajouté à `ENONCES_DEMONSTRATION`), carte.
+  Libellés de conception « Nombres complexes — problèmes avancés (6gen42) » (jusque-là vide) et
+  « Électricité : impédances complexes (6gen96) ». Fichiers : `App6gen96.tsx`,
+  `components6e/EtapeImpedances.tsx`, `core6e/impedancesComplexes.ts`,
+  `moteur6e/{types,session,verification}Impedances.ts`,
+  `ui6e/{format,recapitulatif}Impedances.ts`, `ui6e/schemaCircuitImpedances.ts`,
+  `generateurs6e/impedancesComplexes/` (index, profilEvaluation, exportEvaluation).
