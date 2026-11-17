@@ -83,7 +83,7 @@ export type IdGenerateurPilote =
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
-  | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95' | '6gen94' | '6gen97' | '6gen96' | '6gen98'
+  | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95' | '6gen94' | '6gen97' | '6gen96' | '6gen98' | '6gen99'
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
@@ -204,6 +204,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'nombres-complexes', sectionId: 'problemesavances', generatorId: '6gen42', label: 'Nombres complexes — problèmes avancés (6gen42)', processus: 3 },
   { chapitreSlug: 'nombres-complexes', sectionId: 'problemesavances', generatorId: '6gen96', label: 'Électricité : impédances complexes (6gen96)', processus: 3 },
   { chapitreSlug: 'nombres-complexes', sectionId: 'problemesavances', generatorId: '6gen98', label: 'Régions du plan complexe (6gen98)', processus: 2 },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'problemesavances', generatorId: '6gen99', label: 'Détective d\'erreurs : nombres complexes (6gen99)', processus: 3 },
   { chapitreSlug: 'probabilites', sectionId: 'probabilitesensembles', generatorId: '6gen30', label: 'Probabilités et ensembles (6gen30)' },
   // Audit 6e ch. 6 : 6gen75 (fréquence et probabilité), 6gen74 (arbre, tableau, effectifs) et
   // 6gen76 (paradoxes, processus 3) ; 6gen33 mobilise plusieurs notions combinées → processus 3.

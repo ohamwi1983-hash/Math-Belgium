@@ -2421,6 +2421,24 @@ export const nombresComplexes: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 98. Régions du plan complexe »',
         },
+        { kind: 'subheading', text: 'Repérer les erreurs classiques' },
+        {
+          kind: 'attention',
+          text:
+            'Le module d\'une somme n\'est PAS la somme des modules : on calcule d\'abord $z+w$, puis son ' +
+            'module. Par exemple, pour $z=3$ et $w=4i$ : $|z+w|=|3+4i|=5$, alors que $|z|+|w|=7$. On a ' +
+            'seulement $|z+w|\\le|z|+|w|$ (inégalité triangulaire : dans le plan complexe, un côté d\'un ' +
+            'triangle est plus court que la somme des deux autres), avec égalité seulement si $z$ et $w$ ont ' +
+            'le même argument. De même, $\\sqrt{a^2+b^2}$ ne vaut jamais $|a|+|b|$ quand $a$ et $b$ sont non nuls.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Détective d\'erreurs : nombres complexes',
+          generatorId: '6gen99',
+          description: ['La résolution d\'un élève contient une seule ligne fausse : trouve-la, nomme l\'erreur (argument sans correction de quadrant, i² = 1, conjugué oublié, rⁿ oublié dans Moivre, pas de 2π au lieu de 2π/n, |z + w| = |z| + |w|…) et corrige le résultat. Forme trigonométrique, quotient, puissance, Moivre, racines n-ièmes, module d\'une somme, et la célèbre « démonstration » de 1 = −1 (√(ab) = √a·√b appliquée à des négatifs).'],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 99. Détective d\'erreurs : nombres complexes »',
+        },
       ],
     },
   ],

@@ -3833,3 +3833,42 @@ paths:
   `piege` « Jamais de √ sur un nombre négatif » (i défini par i² = −1, x² = −4 ⇒ x = ±2i). Énoncé
   papier apparié dans `ENONCES_DEMONSTRATION` (clé = label, build strict). La même copie est
   demandée comme thème du détective 6gen99.
+- **6e (6h), Chapitre 5 — générateur 6gen99 « Détective d'erreurs : nombres complexes »** (section
+  `problemesavances`, carte après 6gen96 — 6gen98 viendra s'intercaler avant elle à la fusion —,
+  processus 3). Même mécanique que 5gen49 / 6gen88 (`CopieEleve`, `EtapeLigneFausse`,
+  `EtapeDescriptionErreur`, `BlocAides` du dossier 4e) : copie de 4 à 6 lignes à UNE ligne fausse,
+  la suite cohérente avec l'erreur ; a) ligne fausse (une tentative), b) erreur commise (4
+  descriptions, une tentative), c) valeurs corrigées (champs libres, 3 tentatives ; boutons « √ » et
+  « π » qui AJOUTENT le symbole au champ, sans filtre de frappe). Variante = exercice support,
+  jamais le type d'erreur ; dans chaque variante, le type d'erreur (donc la ligne fausse) est tiré
+  équiprobable AVANT les nombres, dans le même ensemble de données quel que soit le type :
+  `formeTrigo` (z = k(−1 ± i√3) ou k(−√3 ± i), toujours a < 0 et |a| ≠ |b| : racine oubliée dans
+  |z|, arctan(a/b), quadrant non corrigé) ; `quotient` (quotient entier de Gauss : numérateur
+  multiplié par c + di au lieu du conjugué, (c + di)(c − di) = c² − d², i² = 1 dans le numérateur) ;
+  `puissance` (z³ via z² : double produit oublié, (bi)² = b², produits croisés oubliés) ; `moivre`
+  (arguments multiples de π/6, jamais ±π/4 / ±3π/4 où cos et sin se confondent ; rⁿ oublié,
+  réduction de π au lieu de 2π, cos et sin échangés) ; `racines` (w toujours a < 0 : quadrant,
+  |w|/n au lieu de ⁿ√|w|, pas de 2π au lieu de 2π/n) ; `moduleSomme` (|a| > |b|, z et w ni
+  orthogonaux ni colinéaires : i dans le carré, √(c² + d²) = |c| + |d|, |z + w| = |z| + |w|) ;
+  `racineProduit`, ajouté à la demande de l'utilisateur : la « démonstration » de n = −n
+  (n = √(n²) ; √((−n)(−n)) ; √(−n)·√(−n) ; …), n de 1 à 20 (n = 1, ligne 3 : sa copie
+  « 1 = −1 » mot pour mot), une seule erreur (√(ab) = √a·√b appliquée à deux négatifs) dont la
+  POSITION (ligne 2, 3 ou 4) est tirée équiprobable ; c) demande la vraie valeur de √(−n)·√(−n).
+  L'aide de b) renvoie au piège √(−1) de la section 1 (encadré ajouté par le coordinateur). Toutes
+  les valeurs exactes (√, fractions, kπ/q) ; réels lus par `expressionExponentielle.ts`, arguments
+  comparés à 2kπ près (ensemble, ordre libre, pour les racines n-ièmes), complexes par les contrôles
+  communs (`saisieComplexe.ts`) ; refus sans tentative : illisible, forme non réduite, valeur
+  décimale approchée, angle en degrés ; message ciblé quand la saisie reprend les valeurs de la
+  copie. Profil (`generateurs6e/detectiveComplexes/profil.ts`) : `forme` = variante seule, aucun
+  cas particulier, pas de `calcul`. Mesures (20 000 tirages par variante) : types et lignes à
+  33 % ± 1 dans chaque variante ; données distinctes 48 (formeTrigo, puissance, moivre), 36
+  (racines), 20 (racineProduit), ≈ 2 800 (quotient), ≈ 6 200 (moduleSomme) ; probabilité que deux
+  séries aient les mêmes données 2,1 % / 2,1 % / 2,1 % / 2,8 % / 5,0 % / 0,04 % / 0,03 % (l'erreur,
+  donc la copie, diffère alors le plus souvent ; l'anti-doublon écarte les copies identiques).
+  Papier : énoncé + copie numérotée + consigne globale ; les trois écrans sont les étapes a, b, c du
+  corrigé (Contrôle, Erreur, lignes corrigées, Conclusion, Piège). Cours : sous-titre « Repérer les
+  erreurs classiques » + encadré `attention` (module d'une somme ≠ somme des modules, inégalité
+  triangulaire, √(a² + b²) ≠ |a| + |b|) avant la carte. Fichiers : `App6gen99.tsx`,
+  `components6e/EtapeCorrectionDetectiveComplexes.tsx`, `core6e/detectiveComplexes.types.ts`,
+  `moteur6e/{modele,session,verification}DetectiveComplexes.ts`, `ui6e/formatDetectiveComplexes.ts`,
+  `generateurs6e/detectiveComplexes/` (index, profil, exportEvaluation).
