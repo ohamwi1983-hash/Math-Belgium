@@ -3985,3 +3985,33 @@ paths:
   `components/EtapesDemontrerParallelisme.tsx`, `core/demontrerParallelisme.types.ts`,
   `moteur/sessionDemontrerParallelisme.ts`, `ui/formatDemontrerParallelisme.ts`,
   `generateurs/demontrerParallelisme/` (geometrieParallelisme, index, profil, exportEvaluation).
+- **4e, Chapitre 8 — gen102 « Point de percée par plan auxiliaire »** (section `percee`, processus
+  2). La méthode du cours, un écran par étape, sur parallélépipède, cube ou prisme droit (et
+  tétraèdre pour un plan par trois points) : d = (XY) passe par des sommets, milieux d'arêtes,
+  points aux tiers d'arêtes ou centres de faces (nommés I, J, K, L) — jamais par deux sommets ;
+  variantes = nature du plan α (face, plan diagonal, plan par trois points), dessiné par le
+  triangle de ses trois points. **Écran 1** : plan auxiliaire π parmi 4 (UNE tentative ; tout plan
+  qui contient d est accepté — 1 ou 2 bons plans dans la liste ; leurres : plans qui ne contiennent
+  qu'un point de d ; le triangle du plan touché s'affiche en vert). Noms jamais porteurs des deux
+  lettres de d, lettre de d présente une fois sur deux quelle que soit la validité, jamais deux
+  lettres du nom de α. **Écran 2** : deux points communs à π et α, en touchant un point nommé sur
+  la figure ou en choisissant un point de rencontre « (AE) ∩ (BD) » (droites dessinées en bleu ;
+  leurres : droites gauches, droite hors d'un des plans), comme gen101 (types et règles réutilisés).
+  **Écran 3** : le point de percée parmi 3–4 points numérotés sur d (toucher sur la figure) : là
+  où d croise sur le dessin une arête ou un côté de triangle (droites gauches, ou droite hors de α)
+  et le bon point d ∩ b — toujours un point NOUVEAU, jamais un point nommé ; b est dessinée par le
+  segment rouge entre ses deux points, à prolonger. Si le bon plan choisi n'a pas de droite
+  commune constructible avec les points de la figure, la suite se fait avec le plan de référence
+  (dit dans l'explication). Cadre de figure FIXE pour tout l'exercice et sur papier (point de
+  percée et points construits, justes ou leurres, inclus : place pour les prolongements), étiquettes
+  contrôlées sans chevauchement. Profil : `forme` = variante ; cas particulier « directe » (d dans
+  une face qui coupe α suivant une droite par deux points nommés : rien à construire) ≈ 46–50 % ;
+  pas de `calcul`. Mesures (5 000 tirages par variante) : devinette par les lettres écran 1 ≈ 32 %
+  pour un hasard ≈ 29 %, écran 2 ≈ 5–7 % pour un hasard ≈ 1,7 % ; P hors du solide 86 % (face :
+  géométrie), ≈ 35 % (diagonal, trois points) ; ≥ 1 point à construire dans la paire de référence
+  31 % (diagonal), 37 % (trois points), 0 % (face) ; P(deux tirages identiques) ≤ 0,11 % par
+  variante × cas. Cours : `astuce` « Choisir le plan auxiliaire » après l'exemple du point de percée
+  hors du solide, carte en fin de section. Fichiers : `AppPointPercee.tsx`,
+  `components/EtapesPercee.tsx`, `core/perceePlanAuxiliaire.types.ts`, `ui/formatPercee.ts`,
+  `ui/figurePercee.ts`, `generateurs/perceePlanAuxiliaire/` (geometriePercee, index, profil,
+  exportEvaluation).

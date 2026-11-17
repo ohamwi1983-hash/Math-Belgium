@@ -954,6 +954,17 @@ export const geometrieDansEspace: ChapterContent = {
           ],
           result: { tag: 'résultat', text: 'K est sur le prolongement de [EF], au-delà de F, avec F milieu de [EK] — en dehors du cube' },
         },
+        {
+          kind: 'astuce',
+          label: 'Choisir le plan auxiliaire',
+          text:
+            'Si d est dans une face du solide, cette face est souvent le meilleur choix : sa droite ' +
+            'commune avec α se lit sur le dessin. Sinon, prends un plan qui contient d et un sommet bien ' +
+            'choisi, souvent un plan diagonal. Pour trouver sa droite commune b avec α, repère deux points ' +
+            'communs ; s\'il en manque un, construis-le comme rencontre de deux droites tracées dans une ' +
+            'même face, l\'une dans π, l\'autre dans α. Ne prends jamais pour point de percée l\'endroit où ' +
+            'd croise une arête sur le dessin : d et cette arête sont souvent gauches.',
+        },
         { kind: 'subheading', text: 'Intersection de deux plans' },
         {
           kind: 'para',
@@ -982,6 +993,19 @@ export const geometrieDansEspace: ChapterContent = {
             { tag: '2e point commun', text: 'O′, centre de EFGH, est sur (EG) et sur (FH) : il appartient lui aussi aux deux plans' },
           ],
           result: { tag: 'résultat', text: 'deux points communs distincts suffisent : les plans se coupent suivant la droite verticale (OO′)' },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Point de percée par plan auxiliaire',
+          generatorId: 'gen102',
+          description: [
+            'Sur un solide en perspective cavalière, construis pas à pas le point où une droite perce ' +
+              'un plan : choisis un plan auxiliaire qui contient la droite, trouve sa droite commune ' +
+              'avec le plan — parfois grâce à un point construit — puis désigne le point de percée, ' +
+              'qui peut tomber hors du solide.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 102. Point de percée par plan auxiliaire »',
         },
       ],
     },
