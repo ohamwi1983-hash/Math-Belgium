@@ -99,7 +99,7 @@ const STYLE_IMPRESSION = `
   margin: 9mm 17mm 11mm 17mm;
   @bottom-center {
     content: counter(page) " / " counter(pages);
-    font-family: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+    font-family: "Andika", "Work Sans", sans-serif;
     font-size: 9.5pt;
     color: #182430;
   }

@@ -150,7 +150,21 @@
     /* Corps imprimé en 11,5 pt (≈ 15,3 px ; auparavant 13 px, jugé trop petit sur papier par
        l'utilisateur) : la racine suit le même rapport que le corps d'écran (16/17). */
     font-size: calc(11.5pt * 16 / 17);
+    /* Police d'impression : Andika (choix de l'utilisateur parmi 7 polices comparées sur une vraie
+       impression A4 — conçue pour les jeunes lecteurs, proche de l'écriture scolaire, I/l et 0/O
+       bien distincts). Titres, texte, étiquettes, légendes et graduations des figures (`--mono`)
+       passent tous en Andika ; les formules gardent leur police KaTeX. Fichiers servis par le site
+       (`@fontsource/andika`, importé dans `main.tsx`). */
+    --sans: "Andika", "Work Sans", "Segoe UI", sans-serif;
+    --serif: "Andika", "Work Sans", "Segoe UI", sans-serif;
+    --mono: "Andika", "Work Sans", "Segoe UI", sans-serif;
   }
+  /* Paragraphes justifiés à l'impression (demande de l'utilisateur), avec coupure des mots en
+     français (`<html lang="fr">`) pour éviter les grands blancs entre les mots. Seulement le corps
+     du chapitre : ni les cellules de tableau, ni les légendes de figure (centrées). La version
+     aménagée (plus bas) repasse à gauche : la justification est déconseillée pour la dyslexie. */
+  .chapter-main p, .chapter-main li { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+  .chapter-main td p, .chapter-main th p, .chapter-main figcaption p { text-align: inherit; }
   /* !important nécessaire : la règle `body { background: <quadrillage>, var(--paper) }` plus bas
      dans ce fichier est hors media query (s'applique toujours) et arrive APRÈS ce bloc dans
      l'ordre des sources — à spécificité égale (un seul sélecteur `body` de chaque côté), c'est elle
@@ -1195,6 +1209,44 @@ figcaption {
   body.print-formulaire-only .chapter-layout { display: block !important; }
   body.print-formulaire-only .page.chapter-main { max-width: none !important; }
   body.print-formulaire-only .page.chapter-main > :not(.formulaire) { display: none !important; }
+}
+
+/* Impression AMÉNAGÉE du chapitre (menu « Imprimer » → « Chapitre — version aménagée »,
+   `imprimerChapitreAmenage`, classe `print-amenage` posée sur `body` le temps de l'impression).
+   Maquette validée par l'utilisateur : même CONTENU que l'impression normale, seule la mise en page
+   change — Atkinson Hyperlegible (police des évaluations aménagées) en 14 pt, interligne 1,8,
+   lettres et mots un peu plus espacés, texte aligné à GAUCHE (jamais justifié : la justification
+   crée des espaces irréguliers, déconseillés pour la dyslexie), pas d'italique (gras à la place),
+   contraste renforcé, encadrés plus épais, étiquettes et légendes plus grandes et noires, figures
+   en pleine largeur, chaque section sur une nouvelle page. */
+@media print {
+  /* Les titres sont en `rem` : la racine suit le même rapport que pour l'impression normale. */
+  :root:has(body.print-amenage) { font-size: calc(14pt * 16 / 17); }
+  body.print-amenage {
+    --sans: "Atkinson Hyperlegible", Verdana, Tahoma, sans-serif;
+    --serif: "Atkinson Hyperlegible", Verdana, Tahoma, sans-serif;
+    --mono: "Atkinson Hyperlegible", Verdana, Tahoma, sans-serif;
+    --ink: #000000; --ink-soft: #111111; --ink-faint: #222222;
+    font-size: 14pt !important; line-height: 1.8 !important;
+    letter-spacing: 0.02em; word-spacing: 0.08em;
+  }
+  body.print-amenage .chapter-main p, body.print-amenage .chapter-main li {
+    text-align: left !important; hyphens: none !important; -webkit-hyphens: none !important; margin-bottom: 0.9em;
+  }
+  body.print-amenage em, body.print-amenage i { font-style: normal !important; font-weight: 700; }
+  body.print-amenage .callout, body.print-amenage .exemple, body.print-amenage .historique, body.print-amenage .application {
+    border-width: 3px !important; padding: 14px 18px !important; margin: 22px 0 !important;
+  }
+  body.print-amenage .callout-label, body.print-amenage .section-kicker, body.print-amenage figcaption,
+  body.print-amenage .exemple-head, body.print-amenage .step .tag, body.print-amenage .badge {
+    font-size: 0.95rem !important; color: #000000 !important; letter-spacing: 0.02em !important;
+  }
+  body.print-amenage h1 { font-size: 2.3rem !important; }
+  body.print-amenage h2 { font-size: 1.9rem !important; }
+  body.print-amenage h3 { font-size: 1.35rem !important; }
+  body.print-amenage .katex { font-size: 1.12em !important; }
+  body.print-amenage .diagram-frame { width: 100% !important; }
+  body.print-amenage .chapter-section:not(.intro-section) { break-before: page; page-break-before: always; }
 }
 
 /* ---------- chaîne d'opérations (operationChain) ---------- */

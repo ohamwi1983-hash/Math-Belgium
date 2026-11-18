@@ -42,3 +42,19 @@ retirés, voir `.claude/rules/content-history.md`) — via `src/lib/export/` :
 - `downloadBlob.ts` — téléchargement natif du navigateur (`URL.createObjectURL` + `<a download>`).
 - `buildHtmlBlob` est chargé à la demande (`import()` dynamique dans `runExport.ts`), pas au
   chargement de la page.
+
+## Impression des chapitres (bouton « Imprimer », Ctrl+P, fichier « Télécharger ce chapitre »)
+
+Décisions de l'utilisateur (choix fait sur de vraies impressions A4 comparées) :
+- **Police d'impression : Andika** (titres, texte, étiquettes, légendes, graduations des figures —
+  `--sans`/`--serif`/`--mono` redéfinis sous `@media print` dans `index.css`) ; formules en KaTeX.
+- **Paragraphes justifiés** à l'impression, coupure des mots en français (`hyphens: auto`).
+- **Version aménagée** : menu « Imprimer » → « Chapitre — version aménagée »
+  (`lib/imprimer.ts::imprimerChapitreAmenage`, classe `print-amenage` sur `body`) — Atkinson
+  Hyperlegible 14 pt, interligne 1,8, NON justifiée (dyslexie), pas d'italique, contraste et encadrés
+  renforcés, figures pleine largeur, une section par page. Même contenu, mise en page seule.
+- Polices servies par le site (`@fontsource/andika`, `@fontsource/atkinson-hyperlegible`, sous-ensemble
+  latin, importées dans `main.tsx`) — jamais Google Fonts : `buildHtml.ts` ne peut recopier et inliner
+  que des `@font-face` de même origine. `imprimer.ts` les charge avant `window.print()` (et les
+  précharge en tâche de fond à l'ouverture d'un chapitre) : sinon la première impression sortirait
+  dans la police de secours.

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ChapterContent } from '../../content/types'
-import { imprimerChapitre, imprimerFormulaireSeul } from '../../lib/imprimer'
+import { imprimerChapitre, imprimerChapitreAmenage, imprimerFormulaireSeul, prechargerPolicesImpression } from '../../lib/imprimer'
 
 /**
  * Ligne « CE CHAPITRE » du sommaire (ordinateur) et du tiroir « Sections » (téléphone), avec deux
@@ -9,14 +9,19 @@ import { imprimerChapitre, imprimerFormulaireSeul } from '../../lib/imprimer'
  * (icône + mot court) :
  * - « Feuilles » : page de conception des feuilles d'exercices et d'évaluation du chapitre
  *   (`/{levelSlug}/{slug}/exercices`) ;
- * - « Imprimer » : petit menu « Chapitre entier » / « Formulaire seul » (le second seulement si le
- *   chapitre a un formulaire ; sinon impression directe du chapitre).
+ * - « Imprimer » : petit menu « Chapitre entier » / « Chapitre — version aménagée » / « Formulaire
+ *   seul » (le dernier seulement si le chapitre a un formulaire).
  * `avantImpression` : ferme le tiroir du téléphone avant d'ouvrir la boîte d'impression.
  */
 export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterContent; avantImpression?: () => void }) {
   const [menuOuvert, setMenuOuvert] = useState(false)
   const conteneurRef = useRef<HTMLDivElement>(null)
   const aUnFormulaire = !!chapter.formulaire
+
+  // Polices d'impression (Andika, Atkinson) chargées en tâche de fond : un Ctrl+P direct les trouve prêtes.
+  useEffect(() => {
+    prechargerPolicesImpression()
+  }, [])
 
   useEffect(() => {
     if (!menuOuvert) return
@@ -58,9 +63,9 @@ export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterC
           type="button"
           className={`lecture-outil${menuOuvert ? ' actif' : ''}`}
           title="Imprimer"
-          aria-haspopup={aUnFormulaire ? 'menu' : undefined}
-          aria-expanded={aUnFormulaire ? menuOuvert : undefined}
-          onClick={() => (aUnFormulaire ? setMenuOuvert((o) => !o) : lancer(imprimerChapitre))}
+          aria-haspopup="menu"
+          aria-expanded={menuOuvert}
+          onClick={() => setMenuOuvert((o) => !o)}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M7 9V3h10v6" />
@@ -75,9 +80,14 @@ export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterC
             <button type="button" role="menuitem" onClick={() => lancer(imprimerChapitre)}>
               Chapitre entier
             </button>
-            <button type="button" role="menuitem" onClick={() => lancer(imprimerFormulaireSeul)}>
-              Formulaire seul
+            <button type="button" role="menuitem" onClick={() => lancer(imprimerChapitreAmenage)}>
+              Chapitre — version aménagée
             </button>
+            {aUnFormulaire && (
+              <button type="button" role="menuitem" onClick={() => lancer(imprimerFormulaireSeul)}>
+                Formulaire seul
+              </button>
+            )}
           </div>
         )}
       </div>
