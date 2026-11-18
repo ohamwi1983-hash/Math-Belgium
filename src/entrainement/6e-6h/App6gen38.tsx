@@ -18,6 +18,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeFormuleMoivre } from "./generateurs6e/formuleMoivre/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen38` — Formule de Moivre : développer cos(nx) et sin(nx) (chapitre 7, "Nombres complexes",
@@ -140,6 +143,7 @@ export function App6gen38() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFormuleMoivre(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />,
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (

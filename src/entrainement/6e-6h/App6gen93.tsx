@@ -16,6 +16,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeLinearisation } from "./generateurs6e/linearisationEuler/corrigeDetaille";
+import { phasesPourExercice as phasesLinearisation } from "./moteur6e/typesLinearisationEuler";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen93` — « Linéariser avec les formules d'Euler » (chapitre 5 de 6e, « Nombres complexes »,
@@ -116,6 +120,7 @@ export function App6gen93() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLinearisation(exercice), lettreEtape(phasesLinearisation(exercice).indexOf(phase)))} />,
         reponseAttendue: reponseAttendue(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

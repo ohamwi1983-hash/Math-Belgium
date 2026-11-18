@@ -29,6 +29,11 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeRacinesNiemes } from "./generateurs6e/racinesNiemes/corrigeDetaille";
+import { phasesPourExercice } from "./moteur6e/typesRacinesNiemes";
+import { avecFractionsNormalisees } from "./ui6e/papierComplexes";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen39` — Racines n-ièmes d'un nombre complexe (chapitre 7, "Nombres complexes", après `6gen34`/
@@ -155,6 +160,7 @@ export function App6gen39() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(avecFractionsNormalisees(correctionDetailleeRacinesNiemes)(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />,
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (

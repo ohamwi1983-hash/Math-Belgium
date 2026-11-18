@@ -93,6 +93,33 @@ export function decouperLigneCalcul(latex: string): { gauche: string; droite: st
   return { gauche: latex.trim(), droite: null };
 }
 
+/**
+ * Chaîne d'égalités « A=B=C=D » (déjà produite par une fonction de l'écran) éclatée en lignes de
+ * calcul alignées : « A=B », « =C », « =D » — une transformation par ligne. `justifications[k]` :
+ * règle de la k-ième égalité (k = 0 pour « A=B »). Les « = » à l'intérieur d'accolades ne coupent pas.
+ */
+export function lignesDepuisChaine(chaine: string, justifications: (string | Fragments | undefined)[] = []): LigneCalcul[] {
+  const membres: string[] = [];
+  let profondeur = 0;
+  let debut = 0;
+  for (let i = 0; i < chaine.length; i++) {
+    const c = chaine[i];
+    if (c === "\\") {
+      i++;
+      continue;
+    }
+    if (c === "{") profondeur++;
+    else if (c === "}") profondeur--;
+    else if (c === "=" && profondeur === 0) {
+      membres.push(chaine.slice(debut, i));
+      debut = i + 1;
+    }
+  }
+  membres.push(chaine.slice(debut));
+  if (membres.length < 3) return [ligne(chaine, justifications[0])];
+  return membres.slice(1).map((m, k) => ligne(k === 0 ? `${membres[0]}=${m}` : `=${m}`, justifications[k]));
+}
+
 /** Lignes du corrigé détaillé qui appartiennent à l'étape (écran) de lettre `lettre` — utilisé par
  * les générateurs pour afficher, après une étape échouée, EXACTEMENT les lignes du corrigé papier. */
 export function lignesDeLEtape(etapes: EtapeCorrection[], lettre: string): EtapeCorrection[] {
