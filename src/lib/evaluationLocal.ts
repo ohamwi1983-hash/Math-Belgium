@@ -4,9 +4,12 @@ import {
   genererEvaluationHtml,
   genererFeuilleExercicesComplete,
   genererVersionAmenagee,
+  type AnnexeDocument,
   type EnteteEvaluation as EnteteEvaluationSerie,
   type ItemEvaluation,
 } from '../entrainement/export/assemblerEvaluationHtml'
+import { annexeFormulaire } from '../entrainement/export/annexesPapier'
+import { findChapter } from '../content/chaptersIndex'
 import { encoderCode, genererAvecCode, tirerGraine } from '../entrainement/export/codeExercice'
 import { ENTRAINEMENT_REGISTRY } from '../entrainement/registry'
 import { EVALUATION_ADAPTER_REGISTRY } from './evaluationAdapterRegistry'
@@ -756,7 +759,28 @@ function enteteSerie(entete: EnTeteEvaluation, serieLettre: string): EnteteEvalu
     surtitre: entete.surtitre,
     titreChapitre: entete.titreChapitre,
     urlChapitre: entete.urlChapitre,
+    deuxColonnes: entete.deuxColonnes,
   }
+}
+
+/**
+ * Annexes jointes à la copie, à l'aménagée et à la feuille d'exercices (mécanisme générique,
+ * `AnnexeDocument`) — chacune UNE fois par document :
+ * - formulaire du chapitre, si la case « Joindre le formulaire » est cochée (`entete.joindreFormulaire`) :
+ *   une annexe par chapitre du plan qui a un formulaire, dans l'ordre du plan ;
+ * - (prévu, pas encore implémenté) table de la loi normale Φ, seulement si une question des `items`
+ *   en a besoin : la tester ici sur les items et ajouter `annexeTableNormale()` (`annexesPapier.ts`).
+ */
+export function annexesDuDocument(plan: PlanDocument, _items: ItemEvaluation[]): AnnexeDocument[] {
+  const annexes: AnnexeDocument[] = []
+  if (plan.entete.joindreFormulaire) {
+    for (const slug of plan.chapitresSlugs) {
+      const chapitre = findChapter(plan.levelSlug, slug)
+      const annexe = chapitre ? annexeFormulaire(chapitre) : null
+      if (annexe) annexes.push(annexe)
+    }
+  }
+  return annexes
 }
 
 export async function genererDocumentsDepuisPlan(plan: PlanDocument): Promise<DocumentGenere[]> {
@@ -765,17 +789,18 @@ export async function genererDocumentsDepuisPlan(plan: PlanDocument): Promise<Do
   for (const serie of plan.series) {
     const items = await itemsDepuisSerie(serie)
     const entete = enteteSerie(plan.entete, serie.lettre)
+    const annexes = annexesDuDocument(plan, items)
     if (exercice) {
-      documents.push({ type: 'feuille', libelle: 'Feuille d’exercices (énoncé, je vérifie, corrigé)', suffixe: 'feuille', blob: await genererFeuilleExercicesComplete(entete, items) })
-      if (plan.entete.versionAmenagee) documents.push({ type: 'amenagee', libelle: 'Version aménagée', suffixe: 'amenagee', blob: await genererVersionAmenagee(entete, items) })
+      documents.push({ type: 'feuille', libelle: 'Feuille d’exercices (énoncé, je vérifie, corrigé)', suffixe: 'feuille', blob: await genererFeuilleExercicesComplete(entete, items, annexes) })
+      if (plan.entete.versionAmenagee) documents.push({ type: 'amenagee', libelle: 'Version aménagée', suffixe: 'amenagee', blob: await genererVersionAmenagee(entete, items, annexes) })
       continue
     }
-    const { enonce, corrige, grille } = await genererEvaluationHtml(entete, items)
+    const { enonce, corrige, grille } = await genererEvaluationHtml(entete, items, annexes)
     const s = `serie-${serie.lettre}`
     documents.push({ type: 'enonce', serieLettre: serie.lettre, libelle: `Série ${serie.lettre} — copie de l’élève`, suffixe: `${s}-enonce`, blob: enonce })
     documents.push({ type: 'corrige', serieLettre: serie.lettre, libelle: `Série ${serie.lettre} — corrigé`, suffixe: `${s}-corrige`, blob: corrige })
     documents.push({ type: 'grille', serieLettre: serie.lettre, libelle: `Série ${serie.lettre} — grille de correction`, suffixe: `${s}-grille`, blob: grille })
-    if (plan.entete.versionAmenagee) documents.push({ type: 'amenagee', serieLettre: serie.lettre, libelle: `Série ${serie.lettre} — version aménagée`, suffixe: `${s}-amenagee`, blob: await genererVersionAmenagee(entete, items) })
+    if (plan.entete.versionAmenagee) documents.push({ type: 'amenagee', serieLettre: serie.lettre, libelle: `Série ${serie.lettre} — version aménagée`, suffixe: `${s}-amenagee`, blob: await genererVersionAmenagee(entete, items, annexes) })
   }
   return documents
 }
@@ -850,10 +875,19 @@ export function codesDuPlan(plan: PlanDocument): { serie: string; generatorId: s
   return res
 }
 
-/** Copie Word (.docx) d'une série d'évaluation — chargée à la demande (le module `docx` est lourd). */
-export async function genererCopieDocxDepuisPlan(plan: PlanDocument, lettre: string): Promise<Blob | null> {
+export type TypeDocx = 'copie' | 'corrige' | 'grille'
+
+/** Copie, corrigé ou grille Word (.docx) d'une série d'évaluation — module chargé à la demande
+ * (`docx` est lourd). Mêmes items que les documents HTML (même plan, mêmes graines). */
+export async function genererDocxDepuisPlan(plan: PlanDocument, lettre: string, type: TypeDocx): Promise<Blob | null> {
   const serie = plan.series.find((s) => s.lettre === lettre)
   if (!serie) return null
-  const { genererCopieEvaluationDocx } = await import('../entrainement/export/evaluationDocx')
-  return genererCopieEvaluationDocx(enteteSerie(plan.entete, lettre), await itemsDepuisSerie(serie))
+  const docx = await import('../entrainement/export/evaluationDocx')
+  const generer = type === 'copie' ? docx.genererCopieEvaluationDocx : type === 'corrige' ? docx.genererCorrigeEvaluationDocx : docx.genererGrilleEvaluationDocx
+  return generer(enteteSerie(plan.entete, lettre), await itemsDepuisSerie(serie))
+}
+
+/** Copie Word (.docx) d'une série d'évaluation. */
+export function genererCopieDocxDepuisPlan(plan: PlanDocument, lettre: string): Promise<Blob | null> {
+  return genererDocxDepuisPlan(plan, lettre, 'copie')
 }

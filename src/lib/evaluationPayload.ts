@@ -4627,6 +4627,15 @@ export interface EnTeteEvaluation {
   surtitre?: string
   titreChapitre?: string
   urlChapitre?: string
+  /** Génération locale uniquement — case « Joindre le formulaire du chapitre en annexe » : une page
+   * « Annexe — Formulaire : … » par chapitre du plan qui a un formulaire, à la fin de la copie, de
+   * l'aménagée et de la feuille d'exercices (jamais du corrigé ni de la grille). Absent (plans
+   * enregistrés avant) = non. */
+  joindreFormulaire?: boolean
+  /** Génération locale uniquement — case « Économie de papier (deux colonnes) » : marges réduites et
+   * énoncés en deux colonnes (copie d'évaluation, énoncé de la feuille d'exercices ; jamais
+   * l'aménagée, le corrigé, la grille ni « Je vérifie »). Absent (plans enregistrés avant) = non. */
+  deuxColonnes?: boolean
 }
 
 /**

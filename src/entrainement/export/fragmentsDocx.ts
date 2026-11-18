@@ -1,6 +1,7 @@
 import { ImageRun, TextRun, type ParagraphChild } from "docx";
 import type { FragmentConsigne } from "./genererFeuilleExercices";
 import { rasteriserLatex } from "./katexImage";
+import { fragmentsSansMajusculesDInsistance } from "./majusculesPapier";
 
 /**
  * Convertit un `FragmentConsigne[]` (texte brut mêlé à du LaTeX inline court — déjà le contrat
@@ -14,7 +15,8 @@ import { rasteriserLatex } from "./katexImage";
  */
 export async function fragmentsVersRunsDocx(fragments: FragmentConsigne[], options?: { bloc?: boolean; gras?: boolean }): Promise<ParagraphChild[]> {
   const runs: ParagraphChild[] = [];
-  for (const fragment of fragments) {
+  // Papier : plus de MAJUSCULES d'insistance venues des écrans (règle globale, `majusculesPapier.ts`).
+  for (const fragment of fragmentsSansMajusculesDInsistance(fragments)) {
     if (fragment.type === "texte") {
       runs.push(new TextRun({ text: fragment.valeur, bold: options?.gras }));
     } else {

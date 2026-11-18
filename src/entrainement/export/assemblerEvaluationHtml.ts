@@ -83,6 +83,30 @@ export interface EnteteEvaluation {
   titreChapitre?: string;
   /** Adresse de la page du chapitre (encadré « S'entraîner encore, en ligne »). */
   urlChapitre?: string;
+  /** Case « Économie de papier (deux colonnes) » : marges réduites et énoncés en deux colonnes
+   * (copie d'évaluation et énoncé de la feuille d'exercices seulement ; jamais l'aménagée, le
+   * corrigé, la grille ni la page « Je vérifie »). Absent = non. */
+  deuxColonnes?: boolean;
+}
+
+/**
+ * Annexe imprimée en fin de document (copie d'évaluation, version aménagée, feuille d'exercices —
+ * jamais le corrigé ni la grille) : une page par annexe, chacune UNE seule fois.
+ *
+ * Mécanisme générique (liste d'annexes du document, construite par
+ * `evaluationLocal.ts::annexesDuDocument`) : aujourd'hui le formulaire du chapitre (case « Joindre le
+ * formulaire du chapitre en annexe ») ; demain une table de la loi normale Φ, ajoutée seulement si
+ * une question du document en a besoin — il suffira d'ajouter son `AnnexeDocument` à cette liste.
+ */
+export interface AnnexeDocument {
+  /** Identifiant stable (« formulaire:nombres-complexes », plus tard « table-normale »). */
+  id: string;
+  /** Titre de la page (« Annexe — Formulaire : Nombres complexes »). */
+  titre: string;
+  /** Mention discrète à droite du titre (« 6e (6h) · chapitre 5 »). */
+  meta?: string;
+  /** Corps HTML, formules KaTeX déjà rendues. */
+  html: string;
 }
 
 const NOM_PROCESSUS: Record<1 | 2 | 3, string> = { 1: "Connaître", 2: "Appliquer", 3: "Transférer" };
@@ -105,7 +129,7 @@ export function pointsTexte(x: number): string {
 }
 
 /** Titre sans le préfixe par défaut du formulaire (« Feuille d'exercices — », « Évaluation — »). */
-function titreNettoye(entete: EnteteEvaluation): string {
+export function titreNettoye(entete: EnteteEvaluation): string {
   const t = entete.titre.replace(/^\s*(Feuille d'exercices|Évaluation)\s*[—–-]\s*/i, "").trim();
   return t || entete.titreChapitre || entete.titre;
 }
@@ -216,7 +240,77 @@ td, th { font-size: inherit; }
 .etape-titre b { font-family: Archivo, Arial, sans-serif; font-size: 9pt; color: var(--accent); }
 .etape-num { font-family: Archivo, Arial, sans-serif; font-size: 8pt; font-weight: 600; color: var(--accent); }
 .etapes-libres p { margin: 0 0 0.55em; }
+.liste-donnees { margin: 0.4em 0; }
+/* Points d'une sous-question / affirmation : colonne alignée à droite (le texte prend la place,
+   les points ne passent jamais seuls à la ligne). */
+.sq-pts { display: flex; gap: 14px; align-items: baseline; }
+.sq-pts > .sq-texte { flex: 1; min-width: 0; }
+.sq-pts > .pts, td.pts-col { flex: none; white-space: nowrap; min-width: 3.2em; text-align: right; }
+.tableau-regroupe { width: 100%; }
+.tableau-regroupe td.pts-col { padding-right: 0; width: 1%; }
+/* Encadré « Consignes » en tête de la copie d'évaluation (et de l'aménagée). */
+.consignes { border: 1.5px solid var(--accent); border-radius: 6px; padding: 6px 12px; margin: 10px 0 4px; background: #f2f7fc; break-inside: avoid; }
+.consignes b.titre { color: var(--accent); }
+/* Annexes (formulaire du chapitre…) : une page chacune, en fin de document. */
+.annexe h2.annexe-titre { font-size: 15pt; font-weight: 600; padding-bottom: 6px; border-bottom: 2px solid var(--encre); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.annexe h2 .meta { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 500; color: var(--gris); text-align: right; }
+.formulaire-papier { column-count: 2; column-gap: 8mm; column-rule: 1px solid var(--filet); }
+.formulaire-papier .groupe { break-inside: avoid; page-break-inside: avoid; margin: 0 0 10px; }
+.formulaire-papier h3 { font-family: Archivo, Arial, sans-serif; font-size: 9.5pt; font-weight: 700; color: var(--accent); border-bottom: 1px solid var(--accent); padding-bottom: 2px; margin-bottom: 3px; }
+.formulaire-papier .formule { padding: 3px 0; border-bottom: 1px dotted var(--filet); break-inside: avoid; overflow-wrap: anywhere; }
+.formulaire-papier .formule:last-child { border-bottom: 0; }
+.formulaire-papier .f, .formulaire-papier .cond { display: block; }
+.formulaire-papier .cond { font-size: 9pt; color: var(--gris); }
 @media print { body { padding: 0; width: auto; max-width: none; } }
+`;
+
+/** Pied de page de chaque page imprimée (boîtes de marge CSS Paged Media, comme l'export des
+ * chapitres — `lib/export/buildHtml.ts`). Copie d'évaluation et aménagée : « Série A · Nom : … » à
+ * gauche (la lettre de série en gras : boîte de coin `@bottom-left-corner`, alignée à droite, collée à
+ * la boîte `@bottom-left` — une boîte de marge n'a qu'un seul style de police), « page n / N » à
+ * droite ; feuille d'exercices : seulement « page n / N ». Firefox ignore les boîtes de marge : la
+ * page s'imprime alors sans pied, jamais bloquant. */
+function stylePied(serieLettre: string | null, police: string, taille = "8.5pt"): string {
+  const commun = `font-family: ${police}; font-size: ${taille}; color: #333; vertical-align: middle;`;
+  const gauche = serieLettre
+    ? `@bottom-left-corner { content: "Série ${serieLettre.replace(/["\\]/g, "")}"; ${commun} font-weight: 700; text-align: right; }
+  @bottom-left { content: "\\00a0· Nom : ……………………………………"; ${commun} text-align: left; }`
+    : "";
+  return `@page { margin-bottom: 1.5cm;
+  ${gauche}
+  @bottom-right { content: "page " counter(page) " / " counter(pages); ${commun} text-align: right; } }`;
+}
+
+/** Économie de papier (case « deux colonnes ») : marges réduites (page nommée `compacte`, pour que
+ * le corrigé, la grille, « Je vérifie » et les annexes gardent leurs marges) et énoncés en deux
+ * colonnes. Un exercice ou une question ne se coupe jamais entre deux colonnes ; une figure est
+ * réduite à la largeur de la colonne, sauf une figure très large, dont la question occupe toute la
+ * largeur (`column-span: all`, voir `classeLargeur`). */
+const STYLE_DEUX_COLONNES = `
+@page compacte { margin: 0.9cm 1.2cm 1.4cm; }
+.page-compacte { page: compacte; }
+.deux-colonnes { column-count: 2; column-gap: 8mm; column-rule: 1px solid var(--filet); font-size: 10.5pt; }
+/* Chaque exercice / question est un bloc MONOLITHIQUE (inline-block de la largeur de la colonne) :
+   avec un simple break-inside: avoid, Chromium coupait quand même une question entre deux colonnes
+   quand la rangée de colonnes commençait en milieu de page (sous une question pleine largeur) et que
+   la question était plus haute que la place restante — en inline-block, elle passe entière à la page
+   suivante. Les questions pleine largeur, et celles à trois figures ou plus (qui doivent pouvoir se
+   couper entre leurs figures), restent des blocs sur toute la largeur. */
+.deux-colonnes > .ex, .deux-colonnes > .question { display: inline-block; width: 100%; vertical-align: top; margin-top: 0; padding-top: 10px; break-inside: avoid; page-break-inside: avoid; }
+.deux-colonnes > .pleine-largeur, .deux-colonnes > .figures-multiples { display: block; column-span: all; }
+.deux-colonnes > .figures-multiples { break-inside: auto; page-break-inside: auto; }
+/* Les blocs monolithiques sont des LIGNES pour le moteur : sans orphans/widows à 1, deux questions
+   restaient ensemble dans la première colonne (veuves/orphelines = 2 lignes) au lieu d'équilibrer. */
+.deux-colonnes { orphans: 1; widows: 1; }
+/* Une formule affichée plus large que la colonne passe à la ligne entre ses termes au lieu d'être
+   coupée (le défilement d'écran n'existe pas sur papier). */
+.deux-colonnes .katex-display > .katex, .deux-colonnes .katex-display > .katex > .katex-html { white-space: normal; }
+.deux-colonnes svg[viewBox]:not(.katex svg) { max-width: 100%; height: auto; }
+.deux-colonnes .ex-corps { gap: 10px; }
+/* QR code réduit (≈ 14 mm, encore lisible par un téléphone) : à 66 px, avec ses trois lignes de
+   légende, il imposait sa hauteur à chaque exercice court. */
+.deux-colonnes .qr-bloc { width: 1.9cm; font-size: 6.5pt; line-height: 1.15; gap: 1px; }
+.deux-colonnes .qr-bloc svg { width: 52px; height: 52px; }
 `;
 
 const STYLE_FEUILLE = `
@@ -328,11 +422,14 @@ body { font-family: 'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif; font-s
 .enonce-am .entete + p, .enonce-am p { margin: 0.5em 0; }
 .identite-am { display: flex; gap: 24px; font-size: 11pt; color: var(--gris); margin-bottom: 10px; }
 .identite-am span.champ { display: inline-block; width: 5cm; border-bottom: 1px solid #8a8f98; }
+/* Annexes : une seule colonne, comme le formulaire aménagé du site. */
+.formulaire-papier { column-count: 1; }
+.formulaire-papier .cond { font-size: 11.5pt; }
 `;
 
 const SCRIPT_IMPRESSION = `<script>if(location.hash==='#imprimer'){addEventListener('load',function(){setTimeout(function(){window.print()},400)})}</script>`;
 
-function documentHtml(titre: string, corps: string, css: string, cssKatex: string, police: "standard" | "amenagee"): string {
+function documentHtml(titre: string, corps: string, css: string, cssKatex: string, police: "standard" | "amenagee", cssSupplementaire = ""): string {
   return `<!doctype html>
 <html lang="fr">
 <head>
@@ -340,7 +437,7 @@ function documentHtml(titre: string, corps: string, css: string, cssKatex: strin
 <meta name="viewport" content="width=820">
 <title>${echapperHtml(titre)}</title>
 ${police === "amenagee" ? POLICE_AMENAGEE : POLICES_STANDARD}
-<style>${cssKatex}${STYLE_COMMUN}${css}</style>
+<style>${cssKatex}${STYLE_COMMUN}${css}${cssSupplementaire}</style>
 ${SCRIPT_IMPRESSION}
 </head>
 <body>
@@ -363,30 +460,84 @@ function corpsQuestionHtml(item: ItemEvaluation, pointsSousQ?: Map<string, numbe
   let html = "";
   if (item.section.enteteFragments) html += `<div class="entete">${fragmentsEnteteHtml(item.section.enteteFragments)}</div>`;
   if (item.section.enteteHtml) html += item.section.enteteHtml;
-  const ptsSpan = (q: number) => {
+  // Points de la sous-question : colonne à droite (A1), jamais en fin de phrase où ils passaient
+  // seuls à la ligne.
+  const pointsDe = (q: number) => {
     const p = pointsSousQ?.get(lettreCle(q));
-    return p !== undefined ? ` <span class="pts">${pointsTexte(p)}</span>` : "";
+    return p !== undefined ? pointsTexte(p) : null;
   };
   if (item.section.disposeEnTableau && item.section.questions.length > 1) {
+    const avecPoints = item.section.questions.some((_, q) => pointsDe(q) !== null);
     html += `<table class="tableau-regroupe"><tbody>`;
     item.section.questions.forEach((question, q) => {
-      html += `<tr><td class="lettre-regroupe">${lettreCle(q)})</td><td>${fragmentsVersHtml(question.consigne)}${ptsSpan(q)}</td></tr>`;
+      const pts = avecPoints ? `<td class="pts-col"><span class="pts">${pointsDe(q) ?? ""}</span></td>` : "";
+      html += `<tr><td class="lettre-regroupe">${lettreCle(q)})</td><td>${fragmentsVersHtml(question.consigne)}</td>${pts}</tr>`;
     });
     html += `</tbody></table>`;
   } else {
     const plusieurs = item.section.questions.length > 1;
     item.section.questions.forEach((question, q) => {
       const lettre = plusieurs ? `<strong>${lettreCle(q)})</strong> ` : "";
-      html += `<p>${lettre}${fragmentsVersHtml(question.consigne)}${plusieurs ? ptsSpan(q) : ""}</p>`;
+      const pts = plusieurs ? pointsDe(q) : null;
+      html += pts !== null
+        ? `<p class="sq-pts"><span class="sq-texte">${lettre}${fragmentsVersHtml(question.consigne)}</span><span class="pts">${pts}</span></p>`
+        : `<p>${lettre}${fragmentsVersHtml(question.consigne)}</p>`;
     });
   }
   return html;
 }
 
+/** Largeur (px) de la plus large figure SVG d'un fragment HTML (attribut `width`, sinon `viewBox`). */
+/** Balises ouvrantes des FIGURES SVG d'un fragment HTML — sans les SVG internes de KaTeX (racines,
+ * flèches, accolades : largeur en `em` ou en `%`), qui ne sont pas des figures (une question à trois
+ * racines carrées passait pour une question « à trois figures »). */
+function balisesFigures(corpsHtml: string): string[] {
+  return [...corpsHtml.matchAll(/<svg\b[^>]*>/g)].map((m) => m[0]).filter((balise) => !/\swidth="[\d.]+(em|%)"/.test(balise));
+}
+
+function largeurFigureMax(corpsHtml: string): number {
+  let max = 0;
+  for (const balise of balisesFigures(corpsHtml)) {
+    const w = /\swidth="([\d.]+)(px)?"/.exec(balise);
+    const vb = /viewBox="[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)/.exec(balise);
+    const largeur = w ? Number(w[1]) : vb ? Number(vb[1]) : 0;
+    if (largeur > max) max = largeur;
+  }
+  return max;
+}
+
+/** Deux colonnes : une figure un peu plus large que la place disponible est simplement réduite à la
+ * largeur de la colonne (CSS `STYLE_DEUX_COLONNES`) ; au-delà de `seuil` px (largeur d'origine), la
+ * réduire rendrait ses étiquettes illisibles : la question occupe alors toute la largeur. Seuils
+ * mesurés sur les documents réels (colonne ≈ 8,6 cm ≈ 325 px) : copie d'évaluation 380 px (un
+ * triangle de 340 px passe à 95 %, un solide de 400 px prend la largeur) ; feuille d'exercices
+ * 260 px (le QR code laisse ≈ 225 px au texte). */
+function classeLargeur(corpsHtml: string, deuxColonnes: boolean, seuil: number): string {
+  return deuxColonnes && largeurFigureMax(corpsHtml) > seuil ? " pleine-largeur" : "";
+}
+
+/** Encadré « Consignes » de la copie d'évaluation (et de l'aménagée) — jamais sur la feuille
+ * d'exercices. Calculatrice selon l'en-tête ; durée seulement si le professeur l'affiche. */
+function consignesHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
+  const calculatrice = entete.calculatrice ? ` Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}.` : "";
+  const duree = entete.afficherDuree ? ` Durée : ${dureeEstimeeMinutes(items)} minutes.` : "";
+  return `<div class="consignes"><b class="titre">Consignes</b> — ${echapperHtml(TEXTE_CONSIGNES)}${calculatrice}${duree}</div>`;
+}
+
+/** Texte de l'encadré « Consignes » (repris tel quel par la copie Word). */
+export const TEXTE_CONSIGNES = "Réponds sur une feuille à part, en indiquant le numéro de la question. Justifie chaque réponse : un résultat sans démarche ne rapporte pas tous les points.";
+
+/** Annexes du document, une page chacune. */
+function annexesHtml(annexes: AnnexeDocument[] | undefined): string {
+  return (annexes ?? [])
+    .map((a) => `<div class="saut-page"></div><section class="annexe"><h2 class="annexe-titre"><span>${echapperHtml(a.titre)}</span>${a.meta ? `<span class="meta">${echapperHtml(a.meta)}</span>` : ""}</h2>${a.html}</section>`)
+    .join("");
+}
+
 /** Classe des questions à trois figures ou plus (6gen20 : cinq graphiques) : elles seules peuvent
  * se couper entre leurs figures (voir la CSS `.figures-multiples`). */
 function classeFigures(corpsHtml: string): string {
-  return (corpsHtml.match(/<svg[\s>]/g) ?? []).length >= 3 ? " figures-multiples" : "";
+  return balisesFigures(corpsHtml).length >= 3 ? " figures-multiples" : "";
 }
 
 function figureCorrigeHtml(e: EtapeCorrection): string {
@@ -479,13 +630,13 @@ function enteteFeuilleHtml(entete: EnteteEvaluation, sousTitre: string): string 
 </header>`;
 }
 
-function exerciceFeuilleHtml(item: ItemEvaluation, numero: number): string {
+function exerciceFeuilleHtml(item: ItemEvaluation, numero: number, deuxColonnes = false): string {
   const tag = [item.notion, NOM_PROCESSUS[item.processus]].filter(Boolean).join(" · ");
   const qr = item.code
     ? `<div class="qr-bloc">${qrCodeSvg(item.code.url, 66, `QR code : refaire l'exercice ${numero} en ligne`)}<span>Refaire en ligne<br>avec les aides</span><span class="code">code ${echapperHtml(item.code.code)}</span></div>`
     : "";
   const corps = corpsQuestionHtml(item);
-  return `<section class="ex${classeFigures(corps)}">
+  return `<section class="ex${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 260)}">
   <div class="ex-tete"><h3>Exercice ${numero}</h3>${etoiles(item.difficulte)}${tag ? `<span class="tag">${echapperHtml(tag)}</span>` : ""}</div>
   <div class="ex-corps"><div class="ex-texte">${corps}</div>${qr}</div>
 </section>`;
@@ -551,23 +702,28 @@ function pageCorrigeFeuilleHtml(numerotes: { item: ItemEvaluation; numero: numbe
   return `<h2 class="page-titre">Corrigé détaillé</h2>${blocs}`;
 }
 
-export async function genererFeuilleExercicesComplete(entete: EnteteEvaluation, items: ItemEvaluation[]): Promise<Blob> {
+export async function genererFeuilleExercicesComplete(entete: EnteteEvaluation, items: ItemEvaluation[], annexes?: AnnexeDocument[]): Promise<Blob> {
   const cssKatex = await obtenirCssKatexAutonome();
   const numerotes = itemsNumerotes(items);
+  const deuxColonnes = !!entete.deuxColonnes;
   const auMoinsUneDifficulte = items.some((it) => it.difficulte);
   const legende = `<div class="legende">${
     auMoinsUneDifficulte
       ? `<span><span class="etoiles">★</span> application directe</span><span><span class="etoiles">★★</span> plusieurs étapes</span><span><span class="etoiles">★★★</span> réflexion</span>`
       : ""
   }<span class="droite">Réponses brèves et corrigé : en fin de feuille</span></div>`;
-  const corps = `${enteteFeuilleHtml(entete, "Feuille d'exercices")}
+  const exercices = numerotes.map(({ item, numero }) => exerciceFeuilleHtml(item, numero, deuxColonnes)).join("");
+  const enonce = `${enteteFeuilleHtml(entete, "Feuille d'exercices")}
 ${legende}
-${numerotes.map(({ item, numero }) => exerciceFeuilleHtml(item, numero)).join("")}
+${deuxColonnes ? `<div class="deux-colonnes">${exercices}</div>` : exercices}`;
+  // Annexes (formulaire…) : une fois, à la fin de la feuille.
+  const corps = `${deuxColonnes ? `<div class="page-compacte">${enonce}</div>` : enonce}
 <div class="saut-page"></div>
 ${pageJeVerifieHtml(entete, numerotes)}
 <div class="saut-page"></div>
-${pageCorrigeFeuilleHtml(numerotes)}`;
-  const doc = documentHtml(`${titreNettoye(entete)} — Feuille d'exercices`, corps, STYLE_FEUILLE, cssKatex, "standard");
+${pageCorrigeFeuilleHtml(numerotes)}${annexesHtml(annexes)}`;
+  const css = `${stylePied(null, "Archivo, Arial, sans-serif")}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}`;
+  const doc = documentHtml(`${titreNettoye(entete)} — Feuille d'exercices`, corps, STYLE_FEUILLE, cssKatex, "standard", css);
   return new Blob([doc], { type: "text/html;charset=utf-8" });
 }
 
@@ -610,26 +766,37 @@ function enveloppeEvaluation(contenu: string): string {
   return contenu;
 }
 
-function questionsEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation[], avecCorrection: boolean): string {
+/** `deuxColonnes` (copie seulement, jamais le corrigé) : toutes les questions en deux colonnes qui
+ * s'enchaînent d'un processus à l'autre (des colonnes par processus laissaient une demi-colonne
+ * vide sous chaque processus à une ou deux questions) ; le bandeau d'un processus est alors placé
+ * DANS sa première question (insécable), pour ne jamais rester seul en bas de colonne. */
+function questionsEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation[], avecCorrection: boolean, deuxColonnes = false): string {
   const afficherTitres = entete.afficherTitresSection ?? false;
   let html = "";
   for (const groupe of grouperParProcessus(items)) {
     const totalP = groupe.items.reduce((t, x) => t + x.item.points, 0);
-    html += `<div class="bloc-processus"><h2>Processus ${groupe.processus} — ${NOM_PROCESSUS[groupe.processus]}</h2><span class="pts">${pointsTexte(totalP)}</span></div>`;
+    const bandeau = `<div class="bloc-processus"><h2>Processus ${groupe.processus} — ${NOM_PROCESSUS[groupe.processus]}</h2><span class="pts">${pointsTexte(totalP)}</span></div>`;
+    if (!deuxColonnes) html += bandeau;
     let sectionCourante: string | null = null;
+    let questions = "";
+    let premiere = true;
     for (const { item, numero } of groupe.items) {
+      let titre = "";
       if (afficherTitres && item.titreSection !== sectionCourante) {
         sectionCourante = item.titreSection;
-        html += `<div class="titre-section">${echapperHtml(item.titreSection)}</div>`;
+        titre = `<div class="titre-section">${echapperHtml(item.titreSection)}</div>`;
       }
+      if (!deuxColonnes) questions += titre;
       const pts = pointsParSousQuestion(item);
       const corps = corpsQuestionHtml(item, pts);
-      html += `<section class="question${classeFigures(corps)}"><div class="ligne-titre"><span class="num">Question ${numero}</span><span class="pts">${pointsTexte(item.points)}</span></div>${corps}${
+      questions += `<section class="question${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 380)}">${deuxColonnes ? `${premiere ? bandeau : ""}${titre}` : ""}<div class="ligne-titre"><span class="num">Question ${numero}</span><span class="pts">${pointsTexte(item.points)}</span></div>${corps}${
         avecCorrection ? `<div class="correction-bloc">${correctionHtml(item)}</div>` : ""
       }</section>`;
+      premiere = false;
     }
+    html += questions;
   }
-  return html;
+  return deuxColonnes ? `<div class="deux-colonnes">${html}</div>` : html;
 }
 
 function grilleHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
@@ -662,16 +829,21 @@ function grilleHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
 <div class="pied"><span>${echapperHtml(titreEvaluation(entete))} · ${echapperHtml(dateEnToutesLettres(entete.date))}</span><span>Ne pas distribuer aux élèves</span></div></div>`;
 }
 
-/** Copie, corrigé et grille de correction d'UNE série. */
-export async function genererEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): Promise<{ enonce: Blob; corrige: Blob; grille: Blob }> {
+/** Copie, corrigé et grille de correction d'UNE série. Copie : encadré « Consignes », pied de page
+ * « Série · Nom · page n / N », annexes en fin de copie, deux colonnes si demandé ; le corrigé et la
+ * grille gardent leur mise en page. */
+export async function genererEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation[], annexes?: AnnexeDocument[]): Promise<{ enonce: Blob; corrige: Blob; grille: Blob }> {
   const cssKatex = await obtenirCssKatexAutonome();
   const css = STYLE_EVALUATION;
   const titre = `${titreEvaluation(entete)} — Série ${entete.serieLettre}`;
-  const copie = enveloppeEvaluation(`${cartoucheEvaluationHtml(entete, items)}${resultatsHtml(entete, items)}${questionsEvaluationHtml(entete, items, false)}`);
+  const deuxColonnes = !!entete.deuxColonnes;
+  const contenuCopie = `${cartoucheEvaluationHtml(entete, items)}${resultatsHtml(entete, items)}${consignesHtml(entete, items)}${questionsEvaluationHtml(entete, items, false, deuxColonnes)}`;
+  const copie = enveloppeEvaluation(`${deuxColonnes ? `<div class="page-compacte">${contenuCopie}</div>` : contenuCopie}${annexesHtml(annexes)}`);
   const corrige = enveloppeEvaluation(`${cartoucheEvaluationHtml(entete, items, "Corrigé")}${questionsEvaluationHtml(entete, items, true)}`);
   const grille = grilleHtml(entete, items);
+  const cssCopie = `${stylePied(entete.serieLettre, "Archivo, Arial, sans-serif")}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}`;
   return {
-    enonce: new Blob([documentHtml(titre, copie, css, cssKatex, "standard")], { type: "text/html;charset=utf-8" }),
+    enonce: new Blob([documentHtml(titre, copie, css, cssKatex, "standard", cssCopie)], { type: "text/html;charset=utf-8" }),
     corrige: new Blob([documentHtml(`${titre} — Corrigé`, corrige, css, cssKatex, "standard")], { type: "text/html;charset=utf-8" }),
     grille: new Blob([documentHtml(`${titre} — Grille de correction`, grille, css, cssKatex, "standard")], { type: "text/html;charset=utf-8" }),
   };
@@ -690,17 +862,21 @@ function questionAmenageeHtml(item: ItemEvaluation, numero: number, estExercice:
   return `<section class="q-am"><h2><span>${titre}</span>${estExercice ? "" : `<span class="pts">${pointsTexte(item.points)}</span>`}</h2><div class="enonce-am">${corps}</div></section>`;
 }
 
-export async function genererVersionAmenagee(entete: EnteteEvaluation, items: ItemEvaluation[]): Promise<Blob> {
+/** Version aménagée : JAMAIS en deux colonnes (décision de l'utilisateur), même avec la case
+ * « Économie de papier ». Évaluation : même encadré « Consignes » et même pied de page que la copie ;
+ * annexes (formulaire…) en fin de document, dans les deux modes. */
+export async function genererVersionAmenagee(entete: EnteteEvaluation, items: ItemEvaluation[], annexes?: AnnexeDocument[]): Promise<Blob> {
   const cssKatex = await obtenirCssKatexAutonome();
   const estExercice = entete.mode === "exercice";
   const titre = estExercice ? titreNettoye(entete) : titreEvaluation(entete);
   const droite = estExercice ? "Mêmes exercices,<br>mise en page adaptée" : `Série <strong>${echapperHtml(entete.serieLettre)}</strong><br>Mêmes questions, même barème`;
   const tete = `<div class="tete-am"><div><span class="surtitre" style="color:#1d5b8f;font-weight:700">Version aménagée${estExercice ? " · Feuille d'exercices" : ""}</span><h1>${echapperHtml(titre)}</h1></div><span class="droite">${droite}</span></div>
 <div class="identite-am"><span>Nom <span class="champ"></span></span><span>Classe <span class="champ" style="width:2.5cm"></span></span><span>N° <span class="champ" style="width:1.2cm"></span></span><span>${echapperHtml(dateEnToutesLettres(entete.date))}</span></div>
-${!estExercice && entete.calculatrice ? `<p><b>Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}.</b></p>` : ""}`;
+${estExercice ? "" : consignesHtml(entete, items)}`;
   const pages = itemsNumerotes(items)
     .map(({ item, numero }, i) => `${i > 0 ? '<div class="saut-page"></div>' : ""}${i === 0 ? tete : ""}${questionAmenageeHtml(item, numero, estExercice)}`)
     .join("");
-  const doc = documentHtml(`${titre} — Version aménagée`, pages, STYLE_AMENAGE, cssKatex, "amenagee");
+  const police = "'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif";
+  const doc = documentHtml(`${titre} — Version aménagée`, `${pages}${annexesHtml(annexes)}`, STYLE_AMENAGE, cssKatex, "amenagee", stylePied(estExercice ? null : entete.serieLettre, police, "10pt"));
   return new Blob([doc], { type: "text/html;charset=utf-8" });
 }

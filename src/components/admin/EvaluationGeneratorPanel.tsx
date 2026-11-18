@@ -10,8 +10,8 @@ import {
   effacerHistorique,
   enregistrerDansHistorique,
   enregistrerPlan,
-  genererCopieDocxDepuisPlan,
   genererDocumentsDepuisPlan,
+  genererDocxDepuisPlan,
   lireHistorique,
   lirePlanDepuisJson,
   lirePlansEnregistres,
@@ -21,6 +21,7 @@ import {
   type DocumentGenere,
   type PlanDocument,
   type PlanEnregistre,
+  type TypeDocx,
 } from '../../lib/evaluationLocal'
 import {
   CHAPITRE_FONCTIONNEL_SLUG,
@@ -240,6 +241,10 @@ export function EvaluationGeneratorPanel({
   const [versionAmenagee, setVersionAmenagee] = useState(false)
   // Durée estimée imprimée sur l'évaluation : seulement si le professeur le décide (décoché par défaut).
   const [afficherDuree, setAfficherDuree] = useState(false)
+  // Annexe « Formulaire du chapitre » et économie de papier (deux colonnes) : décochés par défaut ;
+  // un plan enregistré sans ces champs se recharge avec « non ».
+  const [joindreFormulaire, setJoindreFormulaire] = useState(false)
+  const [deuxColonnes, setDeuxColonnes] = useState(false)
   /** Dernière génération locale : plan figé (graines) + documents produits. */
   const [planCourant, setPlanCourant] = useState<PlanDocument | null>(null)
   const [documents, setDocuments] = useState<DocumentGenere[]>([])
@@ -526,12 +531,12 @@ export function EvaluationGeneratorPanel({
     }
   }
 
-  async function telechargerWord(lettre: string) {
+  async function telechargerWord(lettre: string, type: TypeDocx = 'copie') {
     if (!planCourant) return
     setGenereEnCours(true)
     try {
-      const blob = await genererCopieDocxDepuisPlan(planCourant, lettre)
-      if (blob) declencherTelechargement(blob, `${nomBase(planCourant)} — serie-${lettre}-copie.docx`)
+      const blob = await genererDocxDepuisPlan(planCourant, lettre, type)
+      if (blob) declencherTelechargement(blob, `${nomBase(planCourant)} — serie-${lettre}-${type}.docx`)
     } catch (e) {
       console.error(e)
       setErreur('Erreur pendant la génération du fichier Word.')
@@ -568,6 +573,8 @@ export function EvaluationGeneratorPanel({
     setAfficherTitresSection(plan.entete.afficherTitresSection)
     setVersionAmenagee(!!plan.entete.versionAmenagee)
     setAfficherDuree(!!plan.entete.afficherDuree)
+    setJoindreFormulaire(!!plan.entete.joindreFormulaire)
+    setDeuxColonnes(!!plan.entete.deuxColonnes)
     void rendrePlan(plan, false)
   }
 
@@ -618,6 +625,8 @@ export function EvaluationGeneratorPanel({
       mode,
       versionAmenagee,
       afficherDuree: estExercice ? false : afficherDuree,
+      joindreFormulaire,
+      deuxColonnes,
       surtitre: chapitres.length === 1 ? `${niveauLabel} · Chapitre ${chapitres[0].chapterNumber}` : niveauLabel,
       titreChapitre: chapitres.length === 1 ? chapitres[0].title : undefined,
       urlChapitre: chapitres.length === 1 ? `https://math-belgium.vercel.app/${levelSlug}/${chapitres[0].slug}` : undefined,
@@ -818,6 +827,22 @@ export function EvaluationGeneratorPanel({
         <label className="admin-eval-checkbox-field" htmlFor="eval-amenagee" title="Même énoncé, police très lisible, grand interligne, une question par page — même barème.">
           <input id="eval-amenagee" type="checkbox" checked={versionAmenagee} onChange={(e) => setVersionAmenagee(e.target.checked)} />
           Version aménagée en plus
+        </label>
+        <label
+          className="admin-eval-checkbox-field"
+          htmlFor="eval-joindre-formulaire"
+          title="Ajoute une page « Annexe — Formulaire » (le formulaire de fin de chapitre) à la fin de la copie, de la version aménagée et de la feuille d'exercices — jamais au corrigé ni à la grille."
+        >
+          <input id="eval-joindre-formulaire" type="checkbox" checked={joindreFormulaire} onChange={(e) => setJoindreFormulaire(e.target.checked)} />
+          Joindre le formulaire du chapitre en annexe
+        </label>
+        <label
+          className="admin-eval-checkbox-field"
+          htmlFor="eval-deux-colonnes"
+          title="Marges réduites et énoncés en deux colonnes (copie et feuille d'exercices). Le corrigé, la grille, la page « Je vérifie » et la version aménagée gardent leur mise en page."
+        >
+          <input id="eval-deux-colonnes" type="checkbox" checked={deuxColonnes} onChange={(e) => setDeuxColonnes(e.target.checked)} />
+          Économie de papier (deux colonnes)
         </label>
         {!estExercice && calculatrice === 'interdite' && generateursACalculatrice.length > 0 && (
           <p className="admin-eval-avertissement" role="note">
@@ -1231,8 +1256,12 @@ export function EvaluationGeneratorPanel({
                       <button type="button" onClick={() => ouvrirDocument(doc, true)}>
                         Imprimer / PDF
                       </button>
-                      {doc.type === 'enonce' && doc.serieLettre && (
-                        <button type="button" onClick={() => void telechargerWord(doc.serieLettre!)} disabled={genereEnCours}>
+                      {(doc.type === 'enonce' || doc.type === 'corrige' || doc.type === 'grille') && doc.serieLettre && (
+                        <button
+                          type="button"
+                          onClick={() => void telechargerWord(doc.serieLettre!, doc.type === 'enonce' ? 'copie' : doc.type === 'corrige' ? 'corrige' : 'grille')}
+                          disabled={genereEnCours}
+                        >
                           Word
                         </button>
                       )}

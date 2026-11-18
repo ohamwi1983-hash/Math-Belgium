@@ -183,7 +183,75 @@ leur bloc, `overflow-wrap: anywhere` dans les blocs. Corrigé : une question lon
 étapes (`.question:has(.correction-bloc)`, `.corr:has(.etape-titre)`), jamais de page blanche.
 Énoncé : une question à une ou deux figures reste d'un bloc (sinon son texte restait seul en bas de
 page) ; seules les questions à trois figures ou plus (`classeFigures` → `.figures-multiples`) se
-coupent entre leurs figures.
+coupent entre leurs figures. Les SVG internes de KaTeX (racines, flèches : largeur en `em`/`%`) ne
+comptent pas comme figures (`balisesFigures` ; trois racines carrées faisaient une question « à trois
+figures »).
+
+Décisions de l'utilisateur (maquettes validées, lots A1–A4) :
+- **Points d'une sous-question / affirmation dans une colonne à droite** (`.sq-pts` : texte en
+  `flex: 1`, points `white-space: nowrap` ; colonne `td.pts-col` dans un tableau regroupé), jamais en
+  fin de phrase où ils passaient seuls à la ligne. Copie, aménagée et copie Word (taquet droit).
+- **Plus de MAJUSCULES d'insistance sur papier** (« la formule CONFIRMÉE », « ne change PAS ») :
+  règle GLOBALE `export/majusculesPapier.ts`, appliquée par `fragmentsVersHtml` et
+  `fragmentsVersRunsDocx` à TOUT texte imprimé (énoncé, consignes, corrigé, barème, vrai/faux,
+  questions ouvertes ; HTML et Word), y compris les adaptateurs non enveloppés par `versionPapier`.
+  Jamais dans les formules. Noms de points (ABC, (DEG), angle ROI₁), permutations (RBB, SSÉÉÉ), sigles
+  (SOX, SOH-CAH-TOA, ASA, IPP, PGCD) et chiffres romains intacts — règles et mesure détaillées en tête
+  du fichier. Un nouveau sigle ou mot-objet en capitales → l'ajouter à `SIGLES` ; une insistance
+  courte (3–4 lettres) non reconnue → `MOTS_COURTS`. Re-mesurer sur un corpus (tous les adaptateurs,
+  banques vrai/faux, questions ouvertes) : aucun nom de point ne doit apparaître dans les transformés.
+- **Pied de page** sur chaque page (boîtes de marge `@page`, `stylePied`) : copie et aménagée
+  d'évaluation « **Série A** · Nom : … » à gauche (la série en gras via `@bottom-left-corner` — une
+  boîte de marge n'a qu'un style), « page n / N » à droite ; feuille d'exercices et aménagée de la
+  feuille : « page n / N » seulement. Marge basse 1,5 cm. Firefox ignore les boîtes de marge.
+- **Encadré « Consignes »** en tête de la copie d'évaluation et de l'aménagée (après le tableau des
+  résultats) : « Réponds sur une feuille à part… ne rapporte pas tous les points. » + calculatrice
+  autorisée/interdite + « Durée : n minutes. » seulement si `afficherDuree`. Jamais sur la feuille
+  d'exercices. Même texte dans la copie Word (`TEXTE_CONSIGNES`).
+- **Liste de données affichée** (« Données : \text{…},\ \text{…} », 6gen44/46/48) : une formule
+  display ne se coupe jamais et sortait à 30 % de sa largeur ; une formule affichée de niveau 0
+  découpable à ses « ,\ » / « ;\ » et longue (> 45 caractères visibles) est rendue en formules EN
+  LIGNE séparées par leurs virgules (`formuleAfficheeHtml`, `genererFeuilleExercicesHtml.ts`).
+
+## Options du document (cases du panneau, `EnTeteEvaluation`)
+
+Toutes décochées par défaut ; un plan enregistré sans le champ se recharge avec « non ».
+
+- **« Joindre le formulaire du chapitre en annexe »** (`joindreFormulaire`) : une page « Annexe —
+  Formulaire : <chapitre> » à la FIN de la copie d'évaluation, de l'aménagée et de la feuille
+  d'exercices (après son corrigé) — jamais du corrigé ni de la grille. Une annexe par chapitre du
+  plan qui a un `formulaire`, dans l'ordre du plan. Rendu `export/annexesPapier.ts::annexeFormulaire`
+  (RichText → KaTeX, deux colonnes comme le « Formulaire seul » du site, une seule colonne dans
+  l'aménagée).
+  **Mécanisme générique d'annexes** : `AnnexeDocument` (`assemblerEvaluationHtml.ts`), liste
+  construite par `evaluationLocal.ts::annexesDuDocument(plan, items)` et passée aux trois
+  générateurs. Seconde annexe déjà décidée, PAS encore implémentée : une table de la loi normale Φ,
+  ajoutée seulement si au moins une question du document en a besoin — écrire
+  `annexeTableNormale()` dans `annexesPapier.ts` et l'ajouter dans `annexesDuDocument` quand un item
+  le demande (par ex. un champ posé par l'adaptateur sur l'item).
+- **« Économie de papier (deux colonnes) »** (`deuxColonnes`) : copie d'évaluation et énoncé de la
+  feuille d'exercices seulement. Page nommée `@page compacte` (marges 0,9/1,2/1,4 cm, pour que
+  « Je vérifie », le corrigé et les annexes gardent leurs marges), énoncés en deux colonnes
+  (`STYLE_DEUX_COLONNES`). Cartouche, tableau des résultats et consignes pleine largeur ; les
+  bandeaux de processus sont DANS la première question de leur processus (jamais seuls en bas de
+  colonne). Règles mesurées sur des documents réels :
+  - chaque exercice / question est un **inline-block** monolithique : avec `break-inside: avoid`
+    seul, Chromium coupait une question entre deux colonnes quand la rangée commençait en milieu de
+    page (sous une question pleine largeur) ; `orphans`/`widows` à 1 sur le conteneur, sinon deux
+    questions (deux « lignes ») restaient dans la même colonne au lieu d'équilibrer ;
+  - une figure est réduite à la largeur de la colonne (`svg[viewBox]` : `max-width: 100%`,
+    `height: auto`) ; au-delà d'un seuil de largeur d'origine — 380 px pour la copie, 260 px pour la
+    feuille (le QR code laisse ≈ 225 px au texte) — la question occupe toute la largeur
+    (`.pleine-largeur`, `column-span: all`), comme les questions à trois figures ou plus ;
+  - formule display trop large pour la colonne : passe à la ligne entre ses termes
+    (`white-space: normal` sur `.katex`) ; QR code réduit à 52 px dans la feuille.
+  JAMAIS pour la version aménagée, le corrigé, la grille ni la page « Je vérifie ».
+- **Word** (`export/evaluationDocx.ts`, boutons « Word » du panneau sur la copie, le corrigé et la
+  grille ; `evaluationLocal.ts::genererDocxDepuisPlan(plan, lettre, 'copie' | 'corrige' | 'grille')`) :
+  même contenu que le HTML. Formules en images PNG (KaTeX rasterisé, comme la copie l'a toujours
+  fait : `docx` n'écrit pas d'équation Word native) ; figures (`enteteHtml`, `figureHtml` du
+  corrigé, blocs `html`) rasterisées en PNG. Pied de page Word (série, page n / N). Pas d'annexe
+  formulaire ni de deux colonnes en Word.
 
 ## Vérification avant de pousser
 

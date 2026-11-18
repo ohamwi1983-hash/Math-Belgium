@@ -3,6 +3,7 @@ import { normaliserLogDecimal } from "../../lib/notationLog";
 import type { FragmentConsigne } from "./genererFeuilleExercices";
 import type { AdaptateurFeuilleExercices, BlocCorrection, ProgressionGeneration, SectionExercice, ZoneReponse } from "./genererFeuilleExercices";
 import { obtenirCssKatexAutonome } from "./katexImage";
+import { fragmentsSansMajusculesDInsistance } from "./majusculesPapier";
 
 /**
  * Export HTML — deuxième format de sortie du mécanisme générique (voir `genererFeuilleExercices.ts`
@@ -54,7 +55,8 @@ export function echapperHtml(texte: string): string {
 }
 
 export function fragmentsVersHtml(fragments: FragmentConsigne[], options?: { bloc?: boolean }): string {
-  return fragments
+  // Papier : plus de MAJUSCULES d'insistance venues des écrans (règle globale, `majusculesPapier.ts`).
+  return fragmentsSansMajusculesDInsistance(fragments)
     .map((fragment) =>
       // Espace insécable avant « ? ! : ; » (typographie française : jamais un signe seul à la ligne).
       fragment.type === "texte" ? echapperHtml(fragment.valeur.replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0")) : katex.renderToString(normaliserLogDecimal(fragment.valeur), { throwOnError: false, displayMode: options?.bloc ?? false }),
@@ -71,13 +73,57 @@ export function fragmentsVersHtml(fragments: FragmentConsigne[], options?: { blo
  */
 export function fragmentsEnteteHtml(fragments: FragmentConsigne[]): string {
   const significatifs = fragments.filter((f) => f.type === "latex" || f.valeur.trim() !== "");
-  if (significatifs.length === 1 && significatifs[0].type === "latex") return fragmentsVersHtml(significatifs, { bloc: true });
+  if (significatifs.length === 1 && significatifs[0].type === "latex") return formuleAfficheeHtml(significatifs[0].valeur);
   const dernier = significatifs[significatifs.length - 1];
   const avant = significatifs[significatifs.length - 2];
   if (dernier?.type === "latex" && avant?.type === "texte" && avant.valeur.trim().endsWith(":") && significatifs.slice(0, -1).every((f) => f.type === "texte")) {
-    return fragmentsVersHtml(significatifs.slice(0, -1)) + fragmentsVersHtml([dernier], { bloc: true });
+    return fragmentsVersHtml(significatifs.slice(0, -1)) + formuleAfficheeHtml(dernier.valeur);
   }
   return fragmentsVersHtml(fragments);
+}
+
+/** Découpe une formule à ses séparateurs de NIVEAU 0 « ,\ », « ;\ », « ,\quad »… (hors accolades) :
+ * c'est une LISTE de données (« n = 36 objets, k = 4 boîtes, Boîte Orange : 7 objets… »), pas une
+ * formule. */
+function elementsDeListe(latex: string): { morceau: string; separateur: string }[] {
+  const res: { morceau: string; separateur: string }[] = [];
+  let profondeur = 0;
+  let debut = 0;
+  for (let i = 0; i < latex.length; i++) {
+    const c = latex[i];
+    if (c === "\\" && profondeur === 0 && i > 0 && /[,;]/.test(latex[i - 1])) {
+      const m = /^\\(?: |quad|qquad|;|,)/.exec(latex.slice(i));
+      if (m) {
+        res.push({ morceau: latex.slice(debut, i - 1).trim(), separateur: latex[i - 1] });
+        i += m[0].length - 1;
+        debut = i + 1;
+        continue;
+      }
+    }
+    if (c === "\\") {
+      // \left…\right, \begin…\end et \{…\} comptent comme des accolades : jamais de coupure dedans.
+      const commande = /^\\([a-zA-Z]+|.)/.exec(latex.slice(i))?.[1] ?? "";
+      if (commande === "left" || commande === "begin" || commande === "{") profondeur++;
+      else if (commande === "right" || commande === "end" || commande === "}") profondeur--;
+      i += commande.length;
+      continue;
+    }
+    if (c === "{") profondeur++;
+    else if (c === "}") profondeur--;
+  }
+  res.push({ morceau: latex.slice(debut).trim(), separateur: "" });
+  return res.filter((e) => e.morceau !== "");
+}
+
+/** Formule affichée seule sur sa ligne (centrée). Une LISTE de données trop longue pour la ligne
+ * (relevé sur les documents réels : 6gen44/46/48, « Données : \text{Une urne contient…},\ … »
+ * coupée à 30 % de sa largeur à l'impression — une formule display ne se coupe jamais) devient une
+ * suite de formules EN LIGNE séparées par leurs virgules : elle passe à la ligne comme du texte. */
+function formuleAfficheeHtml(latex: string): string {
+  const elements = elementsDeListe(latex);
+  const visible = latex.replace(/\\text\{([^}]*)\}/g, "$1").replace(/\\[a-zA-Z]+/g, "x").replace(/[{}\s]/g, "");
+  if (elements.length < 2 || visible.length <= 45) return fragmentsVersHtml([{ type: "latex", valeur: latex }], { bloc: true });
+  return `<p class="liste-donnees">${elements.map((e) => fragmentsVersHtml([{ type: "latex", valeur: e.morceau }]) + (e.separateur ? `${e.separateur} ` : "")).join("")}</p>`;
 }
 
 function tableauHtml(libellesLignes: string[], valeursParLigne: (string[] | null)[], nombreColonnes: number): string {
