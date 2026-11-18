@@ -103,6 +103,11 @@ export function cd(re: number, im: number): string {
 
 /** Facteur d'un produit ou base d'une puissance : entre parenthèses sauf s'il s'agit d'un entier
  * positif (« (2i)^2 », « (3-i)(2i) »). */
+/** Produit de deux facteurs écrits : « \cdot » entre deux nombres (« 3\cdot 3 », jamais « 33 »). */
+export function juxtaposer(a: string, b: string): string {
+  return /[0-9}]$/.test(a) && /^[0-9]/.test(b) ? `${a}\\cdot ${b}` : `${a}${b}`;
+}
+
 export function parP(x: string): string {
   return /^([0-9]+|i)$/.test(x) ? x : `(${x})`;
 }
@@ -135,7 +140,7 @@ function pousser(lignes: LigneCalcul[], latex: string, justification?: string) {
  * `gauche` : membre de gauche (par défaut « (a+bi)(c+di) »).
  */
 export function lignesProduit(a: number, b: number, c: number, d: number, gauche?: string): LigneCalcul[] {
-  const g = gauche ?? `${parP(cz(a, b))}${parP(cz(c, d))}`;
+  const g = gauche ?? juxtaposer(parP(cz(a, b)), parP(cz(c, d)));
   const developpe = somme([mono(a * c), mono(a * d, "i"), mono(b * c, "i"), mono(b * d, "i^2")]);
   const lignes: LigneCalcul[] = [ligne(`${g}=${developpe}`, "on distribue")];
   if (b * d !== 0) pousser(lignes, somme([mono(a * c), mono(a * d, "i"), mono(b * c, "i"), mono(-b * d)]), "car i² = −1");
@@ -192,7 +197,7 @@ export function lignesDivisionConjugue(a: number, b: number, c: number, d: numbe
  * d'une division : quotient × dénominateur = numérateur).
  */
 export function lignesProduitQ(re: Fraction, im: Fraction, c: number, d: number, gauche?: string): LigneCalcul[] {
-  const g = gauche ?? `${parP(cq(re, im))}${parP(cz(c, d))}`;
+  const g = gauche ?? juxtaposer(parP(cq(re, im)), parP(cz(c, d)));
   const fq = (x: Fraction, k: number) => fois(x, frac(k));
   const lignes: LigneCalcul[] = [ligne(`${g}=${somme([monoQ(fq(re, c)), monoQ(fq(re, d), "i"), monoQ(fq(im, c), "i"), monoQ(fq(im, d), "i^2")])}`, "on distribue")];
   if (im.n !== 0 && d !== 0) pousser(lignes, somme([monoQ(fq(re, c)), monoQ(fq(re, d), "i"), monoQ(fq(im, c), "i"), monoQ(fq(frac(-im.n, im.d), d))]), "car i² = −1");

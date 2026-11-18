@@ -342,10 +342,43 @@ formule y passe en fragments `[texte("car "), latex("i^{3}=-i")]`).
   `docx` : `ui6e/papierComplexes.ts` (réexportées par `racinesNiemes/exportEvaluation.ts`).
 - Valeurs intermédiaires toujours CALCULÉES depuis l'instance (jamais recopiées) ; quand l'écran a
   déjà une chaîne de calcul (`calculEtape`, `calculModuleLatex`…), l'éclater avec
-  `lignesDepuisChaine` plutôt que la réécrire. Attention aux chaînes d'écran qui abusent du « = »
-  (« 17π/12 = 17π/12 − 2π » dans `calculArgumentZLatex` de 6gen94) : couper avant et réécrire.
+  `lignesDepuisChaine` plutôt que la réécrire. Une chaîne d'écran n'écrit QUE des égalités vraies :
+  pour ramener un angle dans ]−π ; π], la chaîne s'arrête à l'angle brut, puis une seconde chaîne
+  (séparée par `\qquad`) retire / ajoute le tour — `calculArgumentZLatex` (6gen94) :
+  « θ₁ + θ₂ = … = 19π/12 \qquad arg z = 19π/12 − 2π = 19π/12 − 24π/12 = −5π/12 » (l'ancienne
+  écriture « 19π/12 = 19π/12 − 2π » était fausse) ; le corrigé l'éclate tel quel (source unique).
+  Recherche faite sur les 16 générateurs du chapitre : c'était la seule chaîne de ce type fausse
+  (`lignesRamenerAngle`, les corrections de quadrant « α ± π » de 6gen99 et 6gen39 sont justes).
 - Pièges LaTeX trouvés par le contrôle : `\cdot${x}` collé à une lettre (`\cdoti`) → toujours
-  `\cdot ` suivi d'une espace ; facteur « 2i » non parenthésé devant un exposant (`2i^2`) → `parP`.
+  `\cdot ` suivi d'une espace ; facteur « 2i » non parenthésé devant un exposant (`2i^2`) → `parP` ;
+  deux nombres juxtaposés (« 33 » pour 3 × 3) → `juxtaposer(a, b)` (défaut de `lignesProduit`,
+  `lignesProduitQ`) ; base fractionnaire d'une puissance toujours entre parenthèses.
+- **Formule coupée sur papier** : KaTeX en ligne ne passe à la ligne qu'aux opérateurs de NIVEAU 0 ;
+  un produit de longs facteurs `\left(…\right)\left(…\right)` est insécable et sortait de sa cellule
+  à 680 px. Dans une ligne de calcul longue, crochets / parenthèses SIMPLES (`[(x+1)+(y+3)i]\,[…]`),
+  jamais `\left…\right`.
+- Ligne de calcul répétée (même LaTeX que la précédente, ou `\dfrac`/`\frac` près) : retirée
+  (`sansDoublons`, filtre de `lignesEtape` dans 6gen42).
+
+**6gen42 (problèmes avancés) — même niveau que les 15 autres.** Chaque étape de chaque variante a un
+bloc « Calcul » (aucune étape de pure lecture) : lieux par le produit `(z − p₁)·conj(z − p₂)`
+développé (partie Im ou Re, `mulLin` / `polyLatex` : polynômes exacts en x, y), carrés complétés
+ligne à ligne, rayon `√(r²)` simplifié pas à pas (`lignesRacine` : carré extrait, racine d'un
+quotient, dénominateur rendu rationnel) ; demi-droites par cos θ / sin θ ; droite et cercle vérifiés
+en substituant leurs points ; système droite ∩ cercle par substitution (`y = ±…`, puis `x₁`, `x₂`) ;
+famille C : développements, z z̄ = 1, différence `(p − p̄)(z − z̄) = −4b Im z` pour le contre-exemple ;
+D : racines n-ièmes une par une, Δ et formule du second degré (indices x₁, x₂ dans l'ordre de
+l'écran), α puis β avec vérification somme/produit ; E : quotient par le conjugué en entiers,
+argument (forme r(cos θ + i sin θ) ou arctan + correction de quadrant), angle des directions.
+**6gen93, étape « binôme »** : produit mixte → regroupement somme × différence, identité
+remarquable, développement, exposants (une ligne chacun) ; puissance seule → binôme de Newton écrit
+terme à terme, puis exposants.
+
+**Contrôle numérique des équations (6gen42)** : l'évaluateur du collecteur reçoit des variables
+(`x`, `y`, `m`, `\alpha`, `\beta`) fixées à un point du LIEU ou à la SOLUTION de l'instance
+(`vars42.ts` : point d'un cercle, d'une demi-droite, milieu pondéré de [P₁P₂], q₁, x₁ et m₀, α et β…) :
+chaque équation intermédiaire doit alors être vraie, comme chaque identité. Une ligne qui porte les
+deux solutions s'écrit `y=\pm 2` puis `x_1=…`, `x_2=…` (sinon le point choisi en contredit une).
 
 **Vérification (collecteur, ≥ 80 tirages + 12 par variante) :** chaque étape a « Ce qu'on
 utilise » et « Résultat » ; aucune ligne non typée ; aucune ligne de calcul sans relation ; aucun
@@ -353,6 +386,9 @@ utilise » et « Résultat » ; aucune ligne non typée ; aucune ligne de calcul
 clavier ; et **contrôle numérique de chaque égalité** : un évaluateur LaTeX → complexe (fractions,
 racines, puissances, i, π, cos/sin, e^{iθ}, modules) compare les membres successifs de chaque
 chaîne ; pour les identités trigonométriques (6gen38, 6gen93) la variable x est remplacée par 0,7.
+Contrôles ajoutés au lot 6gen42 : étape sans « Calcul » (6gen42), et tout « - » précédé d'une espace
+ou d'une parenthèse dans un texte (justification, « Ce qu'on utilise »…) — il a trouvé « argument
+-π/2 » dans le corrigé de 6gen37 (corrigé).
 Outils du pilote : `collecteur.ts`, `evalLatex.ts` (dossier de travail du chantier, à recopier).
 
 ## Vérification avant de pousser

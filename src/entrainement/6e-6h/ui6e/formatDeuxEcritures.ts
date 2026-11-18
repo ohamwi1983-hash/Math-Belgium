@@ -234,18 +234,26 @@ export function calculModuleZLatex(e: ExerciceDeuxEcritures): string {
   return `|z|=\\dfrac{|z_1|}{|z_2|}=${quotient === moduleZLatex(e) ? quotient : `${quotient}=${moduleZLatex(e)}`}`;
 }
 
-/** arg z = θ₁ ± θ₂ = … (au même dénominateur, puis réduit dans ]−π ; π] si besoin). */
+/**
+ * arg z = θ₁ ± θ₂ = … (au même dénominateur). Chaque « = » est une VRAIE égalité : quand θ₁ ± θ₂
+ * sort de ]−π ; π], la chaîne s'arrête à cet angle brut, puis une seconde chaîne (séparée par
+ * « \qquad ») retire ou ajoute un tour :
+ * « θ₁ − θ₂ = … = 17π/12 \qquad arg z = 17π/12 − 2π = 17π/12 − 24π/12 = −7π/12 ».
+ * (L'ancienne écriture « 17π/12 = 17π/12 − 2π » était fausse.) Source unique de l'écran (corrigé
+ * détaillé affiché après une étape ratée) et du corrigé papier.
+ */
 export function calculArgumentZLatex(e: ExerciceDeuxEcritures): string {
   const op = e.variante === "produit" ? "+" : "-";
-  const nomArg = e.variante === "produit" ? "\\arg z=\\theta_1+\\theta_2" : "\\arg z=\\theta_1-\\theta_2";
+  const somme = e.variante === "produit" ? "\\theta_1+\\theta_2" : "\\theta_1-\\theta_2";
   const brut = argumentBrut(e);
-  const morceaux = [`${nomArg}=${angleLatex(e.z1.t)}${op}${angleParenthese(e.z2.t)}`, `${douziemesLatex(e.z1.t)}${op}${angleParenthese(e.z2.t, douziemesLatex)}`];
-  if (brut !== reduireDouziemes(brut)) {
-    morceaux.push(douziemesLatex(brut));
-    morceaux.push(`${douziemesLatex(brut)}${brut > 0 ? "-" : "+"}2\\pi`);
-  }
-  morceaux.push(angleLatex(argumentZ(e)));
-  return morceaux.join("=");
+  const final = argumentZ(e);
+  const reduction = brut !== reduireDouziemes(brut);
+  const membres = [reduction ? somme : `\\arg z=${somme}`, `${angleLatex(e.z1.t)}${op}${angleParenthese(e.z2.t)}`, `${douziemesLatex(e.z1.t)}${op}${angleParenthese(e.z2.t, douziemesLatex)}`, douziemesLatex(brut)];
+  if (!reduction) membres.push(angleLatex(final));
+  const chaine = membres.filter((m, i) => i === 0 || m !== membres[i - 1]).join("=");
+  if (!reduction) return chaine;
+  const signe = brut > 0 ? "-" : "+";
+  return `${chaine}\\qquad \\arg z=${douziemesLatex(brut)}${signe}2\\pi=${douziemesLatex(brut)}${signe}\\dfrac{24\\pi}{12}=${angleLatex(final)}`;
 }
 
 export function formeAlgebriqueLatex(e: ExerciceDeuxEcritures): string {

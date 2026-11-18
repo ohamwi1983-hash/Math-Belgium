@@ -479,7 +479,9 @@ function equationAttendueB(e: ExerciceComplexesBSimple): string {
       const lien = e.forme === "imaginaire" ? Y : X;
       if (e.c === 0) return `${lien}=0`;
       const gauche = lien.length === 1 ? `2${lien}` : `2\\left(${lien}\\right)`;
-      return `${gauche}=${e.cLatex}\\sqrt{${carreDecale("x", p1.a)}+${carreDecale("y", p1.b)}}`;
+      // Coefficient 1 / −1 omis devant la racine (« =\sqrt{…} », jamais « =1\sqrt{…} »).
+      const coef = e.cLatex === "1" ? "" : e.cLatex === "-1" ? "-" : e.cLatex;
+      return `${gauche}=${coef}\\sqrt{${carreDecale("x", p1.a)}+${carreDecale("y", p1.b)}}`;
     }
     case "cercleO":
       return `x^2+y^2=${e.k}`;

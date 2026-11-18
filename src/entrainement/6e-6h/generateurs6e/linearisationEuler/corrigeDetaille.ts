@@ -11,6 +11,7 @@ import {
   developpementLatex,
   differenceBornesLatex,
   eulerLatex,
+  expoLatex,
   identiteLatex,
   lineaireLatex,
   lineaireTermesLatex,
@@ -30,6 +31,60 @@ import {
 
 const COURS = "(cours, § 5)";
 const REGROUPEMENT = "e^{ikx}+e^{-ikx}=2\\cos(kx)\\qquad e^{ikx}-e^{-ikx}=2i\\sin(kx)";
+
+/**
+ * Étape « binôme » : une transformation par ligne. Produit mixte (cos^p·sin^q) : on regroupe un
+ * facteur somme et un facteur différence, puis l'identité remarquable (a+b)(a−b) = a² − b², puis le
+ * développement, puis les exposants. Puissance seule : binôme de Newton écrit terme à terme, puis
+ * les exposants.
+ */
+function lignesDeveloppement(e: ExerciceLinearisation): LigneCalcul[] {
+  const { p, q, n } = puissances(e);
+  const A = expoLatex(e.a);
+  const B = expoLatex(-e.a);
+  const P = produitLatex(e);
+  const fin = developpementLatex(e);
+  const exposants = [texte("les exposants s'additionnent, "), latex(produitConjuguesLatex(e.a))];
+  if (p > 0 && q > 0) {
+    const X = expoLatex(2 * e.a);
+    const Y = expoLatex(-2 * e.a);
+    const somme = `\\left(${A}+${B}\\right)`;
+    const difference = `\\left(${A}-${B}\\right)`;
+    const m = Math.min(p, q);
+    const reste = p > q ? somme : q > p ? difference : "";
+    const lignes: LigneCalcul[] = [
+      ligne(`P=${P}`),
+      ligne(`=\\left[${somme}${difference}\\right]${m === 2 ? "^{2}" : reste}`, "on regroupe un facteur somme et un facteur différence"),
+      ligne(`=\\left(${X}-${Y}\\right)${m === 2 ? "^{2}" : reste}`, [latex("(a+b)(a-b)=a^2-b^2"), texte(", "), latex(`\\left(${A}\\right)^{2}=${X}`)]),
+    ];
+    if (m === 2) {
+      lignes.push(ligne(`=\\left(${X}\\right)^{2}-2\\,${X}\\cdot ${Y}+\\left(${Y}\\right)^{2}`, [latex("(a-b)^2=a^2-2ab+b^2")]));
+      lignes.push(ligne(`=${fin}`, [texte("les exposants s'additionnent, "), latex(`${X}\\cdot ${Y}=1`)]));
+      return lignes;
+    }
+    const s = p > q ? "+" : "-";
+    const s2 = p > q ? "-" : "+";
+    lignes.push(ligne(`=${X}\\cdot ${A}${s}${X}\\cdot ${B}-${Y}\\cdot ${A}${s2}${Y}\\cdot ${B}`, "on distribue"));
+    lignes.push(ligne(`=${fin}`, "les exposants s'additionnent"));
+    return lignes;
+  }
+  // Binôme de Newton terme à terme (signes alternés pour une différence).
+  const binom = (k: number) => {
+    let c = 1;
+    for (let j = 1; j <= k; j++) c = (c * (n - j + 1)) / j;
+    return c;
+  };
+  const puiss = (base: string, k: number) => (k === 0 ? "" : k === 1 ? base : `\\left(${base}\\right)^{${k}}`);
+  const termes: string[] = [];
+  for (let j = 0; j <= n; j++) {
+    const c = binom(j);
+    const negatif = q > 0 && j % 2 === 1;
+    const facteurs = [puiss(A, n - j), puiss(B, j)].filter((x) => x !== "").join("");
+    termes.push(`${j === 0 ? "" : negatif ? "-" : "+"}${c === 1 ? "" : c}${facteurs}`);
+  }
+  const coefficients = Array.from({ length: n + 1 }, (_, j) => binom(j)).join(", ");
+  return [ligne(`P=${P}`), ligne(`=${termes.join("")}`, `binôme de Newton : coefficients ${coefficients}${q > 0 ? ", signes alternés" : ""}`), ligne(`=${fin}`, exposants)];
+}
 
 function lignesK(e: ExerciceLinearisation): LigneCalcul[] {
   const { q } = puissances(e);
@@ -66,7 +121,7 @@ function lignesLinearisation(e: ExerciceLinearisation): EtapeCorrection[] {
     p > 0 && q > 0
       ? utilise("b", [texte("Le produit d'une somme par une différence est une identité remarquable : "), latex(identiteLatex(e.a)), texte(" ; on multiplie ensuite le reste, les exposants s'additionnent ("), latex("e^{iax}e^{ibx}=e^{i(a+b)x}"), texte(").")])
       : utilise("b", [texte("Binôme de Newton (coefficients du triangle de Pascal), avec "), latex(produitConjuguesLatex(e.a)), texte(q > 0 ? " ; le terme soustrait fait alterner les signes." : "."), texte(" Les exposants s'additionnent : "), latex("e^{iax}e^{ibx}=e^{i(a+b)x}"), texte(".")]),
-    calcul("b", [ligne(`P=${P}`), ligne(`=${developpementLatex(e)}`, p > 0 && q > 0 ? "identité remarquable, puis on distribue" : "binôme de Newton")]),
+    calcul("b", lignesDeveloppement(e)),
     resultat("b", [latex(`P=${developpementLatex(e)}`)]),
     utilise("c", [texte("On regroupe les exponentielles d'exposants opposés : "), latex(REGROUPEMENT), texte(".")]),
     calcul("c", [ligne(`P=${appariementLatex(e)}`, "on apparie les exposants opposés"), ligne(`=${regroupementLatex(e)}`, sinus ? "on regroupe : 2i sin(kx)" : "on regroupe : 2 cos(kx)")]),

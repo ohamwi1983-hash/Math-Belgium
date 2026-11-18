@@ -227,7 +227,7 @@ function lignesEtape(e: ExerciceFormeTrigonometrique, phase: PhaseFormeTrigonome
       } else if (phase === "dEcran2") {
         const a1 = aideNiveau1(e, phase);
         L.push(utilise(sq, [texte(`${a1.texte} `), ...(a1.latex ? [latex(a1.latex)] : []), texte(` ${COURS_MOIVRE}`)]));
-        L.push(calcul(sq, [ligne(`\\arg(z^n)=n\\theta=n\\cdot ${parAngle(th.latex)}`, "arg(zⁿ) = n · arg z"), ligne(`n\\cdot ${parAngle(th.latex)}=${cible.latex}+2p\\pi`, `zⁿ ${LIBELLE_CONDITION[e.condition]} : argument ${cible.latex === "0" ? "0" : cible.latex.replace("\\frac{\\pi}{2}", "π/2").replace("\\pi", "π")} à 2pπ près`)]));
+        L.push(calcul(sq, [ligne(`\\arg(z^n)=n\\theta=n\\cdot ${parAngle(th.latex)}`, "arg(zⁿ) = n · arg z"), ligne(`n\\cdot ${parAngle(th.latex)}=${cible.latex}+2p\\pi`, `zⁿ ${LIBELLE_CONDITION[e.condition]} : argument ${cible.latex === "0" ? "0" : cible.latex.replace("\\frac{\\pi}{2}", "π/2").replace("\\pi", "π").replace("-", "−")} à 2pπ près`)]));
         L.push(resultat(sq, [latex(congruenceLatex(e.condition)), texte(", "), latex("p\\in\\mathbb{Z}")]));
       } else {
         const Q = th.q * cible.q;

@@ -1,5 +1,4 @@
 import { argumentBrut, argumentZ, cosZ, sinZ } from "../../core6e/deuxEcrituresComplexe";
-import { lignesRamenerAngle } from "../../ui6e/corrigeComplexes";
 import type { ExerciceDeuxEcritures, Facteur } from "../../core6e/deuxEcrituresComplexe";
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, lignesDepuisChaine, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
@@ -42,13 +41,14 @@ export function correctionDetailleeDeuxEcritures(e: ExerciceDeuxEcritures): Etap
   const lignesA = quotient
     ? lignesDepuisChaine(algebrique, ["on multiplie haut et bas par le conjugué du dénominateur", "on développe, i² = −1 ; (c + di)(c − di) = c² + d²", "on simplifie"])
     : lignesDepuisChaine(algebrique, ["", "on distribue", "car i² = −1, on regroupe"]);
-  // Chaîne de l'écran jusqu'à l'angle brut θ₁ ± θ₂ ; la réduction dans ]−π ; π] est réécrite ligne
-  // à ligne (l'écran enchaîne « brut = brut − 2π », qui n'est pas une égalité).
+  // Chaîne de l'écran (`calculArgumentZLatex`, source unique) : θ₁ ± θ₂ jusqu'à l'angle obtenu, puis,
+  // s'il sort de ]−π ; π], une seconde chaîne qui retire ou ajoute un tour.
   const brut = argumentBrut(e);
-  const reduit = lignesRamenerAngle(brut, 12);
-  const membresArg = calculArgumentZLatex(e).split("=");
-  const argZ = (reduit.length ? membresArg.slice(0, 5) : membresArg).join("=");
-  const justifsArg = [quotient ? "arg(z₁/z₂) = arg z₁ − arg z₂" : "arg(z₁z₂) = arg z₁ + arg z₂", "arguments de l'étape 2", "même dénominateur"];
+  const [chaineArg, chaineTour] = calculArgumentZLatex(e).split("\\qquad ");
+  const justifsArg = [quotient ? "arg(z₁/z₂) = arg z₁ − arg z₂" : "arg(z₁z₂) = arg z₁ + arg z₂", "arguments de l'étape 2", "même dénominateur", "on additionne les numérateurs", "on simplifie"];
+  const tour = brut > 0 ? "on retire un tour pour revenir dans ]−π ; π]" : "on ajoute un tour pour revenir dans ]−π ; π]";
+  // Sans tour à retirer, la chaîne commence par « arg z = θ₁ ± θ₂ » (un membre de plus).
+  const lignesArg = [...lignesDepuisChaine(chaineArg, chaineTour ? justifsArg.slice(1) : justifsArg),...(chaineTour ? lignesDepuisChaine(chaineTour, [tour, "2π = 24π/12", "on calcule, puis on simplifie"]) : [])];
   const a1 = lignesArgumentFacteur(e.z1, "1");
   const a2 = lignesArgumentFacteur(e.z2, "2");
   const valeurs = [latex(`${trigLatex("cos", th)}=${douziemeLatex(cosZ(e))}`), texte(" et "), latex(`${trigLatex("sin", th)}=${douziemeLatex(sinZ(e))}`)];
@@ -70,7 +70,7 @@ export function correctionDetailleeDeuxEcritures(e: ExerciceDeuxEcritures): Etap
         : [texte("Un produit multiplie les modules et additionne les arguments : "), latex("|z_1z_2|=|z_1|\\cdot|z_2|"), texte(" et "), latex("\\arg(z_1z_2)=\\arg z_1+\\arg z_2"), texte(".")],
     ),
     calcul("c", lignesDepuisChaine(calculModuleZLatex(e), [quotient ? "|z₁/z₂| = |z₁| / |z₂|" : "|z₁z₂| = |z₁| · |z₂|", "modules de l'étape 2", "on simplifie"]), [], "Module"),
-    calcul("c", [...lignesDepuisChaine(argZ, justifsArg), ...reduit], [], "Argument"),
+    calcul("c", lignesArg, [], "Argument"),
     resultat("c", [latex(`z=${formeTrigonometriqueLatex(e)}`)]),
     ...(quotient
       ? [piege("c", [texte("Additionner les arguments d'un quotient : "), latex("\\arg\\dfrac{z_1}{z_2}=\\arg z_1-\\arg z_2"), texte(", dans cet ordre ; une somme donnerait un autre angle, donc d'autres valeurs de "), latex(trigLatex("cos", th)), texte(" et "), latex(trigLatex("sin", th)), texte(".")])]
