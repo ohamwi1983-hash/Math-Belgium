@@ -3290,6 +3290,35 @@ paths:
   l'équation d'une tangente avec ln : `methode` « Tangente à une courbe logarithmique » (trois
   cas) et `exemple` « tangente à ln passant par l'origine » (énoncé ajouté à
   `ENONCES_DEMONSTRATION`) insérés après l'exemple « étudier un signe avec ln ».
+- **6e (6h), Chapitre 3 — 6gen17 : famille D « Puissances f(x)^g(x) : formes 1^∞, 0^0, ∞^0 »**
+  (demande de l'utilisateur, qui LÈVE la décision K4 de l'audit : l'ancienne famille D « forme 1^∞ »
+  avait été retirée faute de cours ; la famille E — développements limités — reste retirée).
+  Méthode unique : f^g = e^{g ln f} (f > 0), L = lim g ln f, puis continuité de l'exponentielle.
+  7 sous-types disjoints (`familles/D.ts`, écritures `ui6e/formatLimitesPuissances.ts`) : 1^∞ —
+  d1 (1 + a/x^p)^{(b/d)x^q} (x → ±∞), d2 ((x+b)/(x+c))^{kx^q}, d3 (1 + ax)^{c/x^q} (x → 0±) ;
+  0^0 — d4 x^{ax^q} / x^{a/ln x}, d5 (e^{−1/x^p})^{ax^q} ; ∞^0 — d6 x^{a/x^q} / x^{a/ln x},
+  d7 (e^{x^p})^{a/x^q}. **Équilibre** : type de forme et issue (valeur finie ≠ 1, 1, +∞, 0) tirés
+  uniformément et indépendamment AVANT le sous-type (chaque type admet les 4 issues ; rejet sur les
+  seuls paramètres : |L| ≤ 6, fraction irréductible) — mesuré sur 6 000 tirages : issues 24–26 %,
+  types 32–35 %, chaque couple type × issue 7,8–9,2 % ; tirage libre A/B/C/D à 25 %. Catalogue :
+  3 entrées par TYPE (« D-1inf », « D-00 », « D-inf0 ») ajoutées en fin (codes QR existants
+  valides), jamais par issue. Trois écrans : (1) limites de la base (0, 1, +∞ en boutons —
+  `ConfigPartieDiagnostic.optionsValeurs`) et de l'exposant + type de forme (choix fermé avec
+  « pas indéterminée » en distracteur, prop `choix` d'`EtapeDiagnosticC`), 1 tentative ; (2) L
+  (`EtapeReponseLimiteLog`) ; (3) lim f^g, e^L exact. Écrans 2–3 : une CATÉGORIE fausse (+∞ / −∞ /
+  0 / valeur) clôt l'écran (message « ce choix ne se rejoue pas »), seule une valeur fausse dans la
+  bonne catégorie consomme les 3 tentatives ; saisie illisible = message sans tentative
+  (`diagnostiquerValeur`) ; e^L comparé par son logarithme (|ln s − L| ≤ 10⁻³ — la tolérance absolue
+  de 0,005 acceptait 0 pour e^{−6}). Aides (2 niveaux) : réécriture / outil (ln(1+u)/u avec u
+  explicite, croissance comparée, ln(e^t) = t), puis expression substituée non simplifiée.
+  Corrigé « comme au tableau » de D seulement (`limitesLogarithmiques/corrigeDetaille.ts`, partagé
+  écran/papier, `CorrigeDetailleEcran` après échec) ; A–C gardent l'ancien corrigé. Profil :
+  `forme` = « D:type » (jamais l'issue) ou la famille pour A–C (en tirage libre, une question A
+  reste A dans les séries B, C). Cours § 5 : sous-titre « Puissances : les formes 1^∞, 0^0 et
+  (+∞)^0 », `intuition` (intérêts composés (1 + 1/n)^n → e), `methode`, deux `exemple` (badges « la
+  limite qui définit e », « forme 0⁰ : x exposant x », énoncés clés), `piege` « 1^∞ ne vaut pas 1 » ;
+  formulaire : f^g = e^{g ln f} et (1 + a/x)^x → e^a ; une question de compréhension ; quiz 6gen66 :
+  4 affirmations (thème limites : 39, total 354 — texte de la carte mis à jour).
 
 ## 4e, Chapitre 7 — gen53 refondu : « Construction de la parabole au compas et à l'équerre »
 

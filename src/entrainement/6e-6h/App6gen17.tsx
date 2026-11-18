@@ -13,12 +13,19 @@ import {
   soumettreReponseBReformuler,
   soumettreReponseCConclure,
   soumettreReponseCDiagnostic,
+  soumettreReponseDConclure,
+  soumettreReponseDExposant,
+  soumettreReponseDForme,
   tentativesMaxPhase,
 } from "./moteur6e/sessionLimitesLogarithmiques";
 import { phaseApres, phaseInitiale } from "./moteur6e/typesLimitesLogarithmiques";
 import type { EtatSessionLimiteLogarithmique, PhaseLimiteLogarithmique } from "./moteur6e/typesLimitesLogarithmiques";
 import type { ReponseLimiteLog } from "./moteur6e/verificationLimitesLogarithmiques";
-import { diagnostiquerBConclure, diagnostiquerBReformuler } from "./moteur6e/verificationLimitesLogarithmiques";
+import { categorieCorrecteD, diagnostiquerBConclure, diagnostiquerBReformuler, diagnostiquerSaisieValeurD } from "./moteur6e/verificationLimitesLogarithmiques";
+import type { ChoixFormePuissance } from "./core6e/limitesLogarithmiques.types";
+import { correctionDetailleeD } from "./generateurs6e/limitesLogarithmiques/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { EtapeChampLimiteLog } from "./components6e/EtapeChampLimiteLog";
 import { EtapeDiagnosticC } from "./components6e/EtapeDiagnosticC";
 import { EtapeDominanceA } from "./components6e/EtapeDominanceA";
@@ -28,11 +35,14 @@ import { Katex } from "./components/Katex";
 import {
   aideNiveau1,
   aideNiveau2,
+  OPTIONS_FORME_D,
   configDiagnosticPartiesC,
+  configFormePartiesD,
   consigneEcran,
   etatActuel,
   formatCategorieLabel,
   formatLimiteEnonceLatex,
+  libelleChoixFormeD,
 } from "./ui6e/formatLimitesLogarithmiques";
 import { calculerRecapitulatifLimiteLogarithmique, calculerSegmentsProgressionLimiteLogarithmique, valeurPourPhase } from "./ui6e/recapitulatifLimitesLogarithmiques";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
@@ -50,6 +60,9 @@ const LIBELLE_PHASE: Record<PhaseLimiteLogarithmique, string> = {
   bConclure: "Limite",
   cDiagnostic: "Diagnostic (num./dénom.)",
   cConclure: "Limite",
+  dForme: "Forme (base, exposant)",
+  dExposant: "Limite de l'exposant",
+  dConclure: "Limite",
 };
 
 /** Séquence RÉELLEMENT traversée par la famille de l'exercice courant — même reconstruction que
@@ -105,7 +118,12 @@ function sessionInitiale(): EtatSessionLimiteLogarithmique {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionLimiteLogarithmique;
   revele: boolean;
+  /** Famille D, écrans 2 et 3 : écran clos AVANT d'épuiser les tentatives (mauvaise catégorie de
+   * réponse, choix fermé qui ne se rejoue pas). */
+  messageRevele?: string;
 }
+
+const MESSAGE_CATEGORIE_D = "Ce n'était pas le bon type de limite (+∞, −∞, 0 ou valeur finie) : ce choix ne se rejoue pas.";
 
 export function App6gen17() {
   const [etat, setEtat] = useState<EtatSessionLimiteLogarithmique>(sessionInitiale);
@@ -123,7 +141,7 @@ export function App6gen17() {
    * de 6e, point 3). */
   const [numeroExercice, setNumeroExercice] = useState(0);
 
-  function terminerEtape(nouvelEtat: EtatSessionLimiteLogarithmique, votreReponse?: ReactNode) {
+  function terminerEtape(nouvelEtat: EtatSessionLimiteLogarithmique, votreReponse?: ReactNode, messageRevele?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       // La phase qui vient PRÉCISÉMENT de se fermer est `etat.phase` (pas `nouvelEtat.phase`) — son
@@ -147,7 +165,7 @@ export function App6gen17() {
           },
         ]);
       }
-      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      setEnAttente({ etatSuivant: nouvelEtat, revele, ...(revele && messageRevele ? { messageRevele } : {}) });
       return;
     }
     setEtat(nouvelEtat);
@@ -199,9 +217,16 @@ export function App6gen17() {
     return estLatex ? <Katex expression={valeur} /> : <>{valeur}</>;
   };
 
+  // Famille D : corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier,
+  // `corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+  const corrigeDetaille =
+    exercice.famille === "D" ? <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeD(exercice), lettreEtape(sequenceReelle(exercice).indexOf(phase)))} /> : undefined;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        ...(enAttente.messageRevele ? { messageRevele: enAttente.messageRevele } : {}),
+        ...(corrigeDetaille ? { corrigeDetaille } : {}),
         reponseAttendue: reponseAttenduePhase(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
@@ -347,6 +372,58 @@ export function App6gen17() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={() => setEtat(activerAideSuivante(etat))}
                 onValider={(reponse) => terminerEtape(soumettreReponseCConclure(etat, reponse), formatReponseLimiteLogCourt(reponse))}
+                validation={validation}
+              />
+            )}
+
+            {phase === "dForme" && exercice.famille === "D" && (
+              <EtapeDiagnosticC
+                key={cleEcran}
+                consigneEcran={consigne}
+                enonceLatex={enonceLatex}
+                partie1={configFormePartiesD().partie1}
+                partie2={configFormePartiesD().partie2}
+                choix={{ label: "Type de forme obtenue", options: OPTIONS_FORME_D }}
+                aideNiveau1={aide1}
+                aideNiveau2={aide2}
+                tentativesUtilisees={tentativesUtilisees}
+                tentativesMax={tentativesMax}
+                niveauAide={niveauAide}
+                niveauAideMax={NIVEAU_AIDE_MAX}
+                onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                onValider={(reponse) =>
+                  terminerEtape(
+                    soumettreReponseDForme(etat, { base: reponse.partie1, exposant: reponse.partie2, forme: (reponse.choix ?? "determinee") as ChoixFormePuissance }),
+                    <>
+                      base : {formatReponseLimiteLogCourt(reponse.partie1)}, exposant : {formatReponseLimiteLogCourt(reponse.partie2)}, forme : <Katex expression={libelleChoixFormeD(reponse.choix ?? "determinee")} />
+                    </>,
+                  )
+                }
+                validation={validation}
+              />
+            )}
+            {(phase === "dExposant" || phase === "dConclure") && exercice.famille === "D" && (
+              <EtapeReponseLimiteLog
+                key={cleEcran}
+                consigneEcran={consigne}
+                enonceLatex={enonceLatex}
+                etatActuel={etatAct}
+                optionsCategorielles={["plus_infini", "moins_infini", "zero"]}
+                autoriserValeurLibre
+                placeholderValeur={phase === "dExposant" ? "ex : 7/4" : "ex : e^(7/4)"}
+                diagnostiquerValeur={diagnostiquerSaisieValeurD}
+                aideNiveau1={aide1}
+                aideNiveau2={aide2}
+                tentativesUtilisees={tentativesUtilisees}
+                tentativesMax={tentativesMax}
+                niveauAide={niveauAide}
+                niveauAideMax={NIVEAU_AIDE_MAX}
+                onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                onValider={(reponse) => {
+                  const cible = phase === "dExposant" ? exercice.limiteProduit : exercice.limiteFinale;
+                  const suivant = phase === "dExposant" ? soumettreReponseDExposant(etat, reponse) : soumettreReponseDConclure(etat, reponse);
+                  terminerEtape(suivant, formatReponseLimiteLogCourt(reponse), categorieCorrecteD(cible, reponse) ? undefined : MESSAGE_CATEGORIE_D);
+                }}
                 validation={validation}
               />
             )}

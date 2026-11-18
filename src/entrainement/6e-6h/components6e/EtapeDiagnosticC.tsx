@@ -31,6 +31,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseDiagnosticC) => void;
+  /** Troisième question FERMÉE facultative, validée avec les deux parties derrière le même bouton —
+   * famille D : type de forme indéterminée (1^∞, 0^0, ∞^0, pas indéterminée). Additif : absent pour
+   * la famille C. Option rendue en KaTeX (`latex`) ou en texte (`texte`). */
+  choix?: { label: string; options: { id: string; latex?: string; texte?: string }[] };
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -43,7 +47,8 @@ interface EtatPartie {
 }
 
 function GroupePartie({ config, etat, refuse, onChange }: { config: ConfigPartieDiagnostic; etat: EtatPartie; refuse: EtatPartie | null; onChange: (e: EtatPartie) => void }) {
-  const estRefuse = (statut: EtatPartie["statut"]) => refuse !== null && refuse.statut === statut && etat.statut === statut && (statut !== "valeur" || refuse.texte === etat.texte);
+  const estRefuse = (statut: EtatPartie["statut"], texteValeur?: string) =>
+    refuse !== null && refuse.statut === statut && etat.statut === statut && (statut !== "valeur" || (refuse.texte === etat.texte && (texteValeur === undefined || etat.texte === texteValeur)));
   return (
     <div className="field">
       <p className="field-label field-label-minuscule">{config.label}</p>
@@ -58,6 +63,16 @@ function GroupePartie({ config, etat, refuse, onChange }: { config: ConfigPartie
             <Katex expression={LABELS[option]} />
           </button>
         ))}
+        {(config.optionsValeurs ?? []).map((v) => (
+          <button
+            key={`v-${v}`}
+            type="button"
+            className={`btn ${etat.statut === "valeur" && etat.texte === v ? "toggle-active" : ""} ${estRefuse("valeur", v) ? "is-erronee" : ""}`}
+            onClick={() => onChange({ statut: "valeur", texte: v })}
+          >
+            <Katex expression={v} />
+          </button>
+        ))}
         {config.autoriserValeurLibre && (
           <button
             type="button"
@@ -68,7 +83,7 @@ function GroupePartie({ config, etat, refuse, onChange }: { config: ConfigPartie
           </button>
         )}
       </div>
-      {etat.statut === "valeur" && (
+      {etat.statut === "valeur" && config.autoriserValeurLibre && (
         <>
           <ApercuExpressionLatex texte={etat.texte} />
           <div className="field contenu-conditionnel">
@@ -92,22 +107,26 @@ function reponseDepuisEtat(etat: EtatPartie): ReponseLimiteLog | null {
  * chaque partie"). Même patron que `EtapeFacteursC.tsx` (6gen6), étendu pour supporter une option
  * "Valeur finie" par partie. `App6gen17.tsx` doit le rendre avec une `key` qui change à chaque
  * exercice et à chaque écran. */
-export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, choix }: Props) {
   const [etat1, setEtat1] = useState<EtatPartie>({ statut: null, texte: "" });
   const [etat2, setEtat2] = useState<EtatPartie>({ statut: null, texte: "" });
   /** Dernière réponse REFUSÉE — seul ce choix est marqué en rouge (audit chapitre 3 de 6e, point 4). */
   const [soumis, setSoumis] = useState<[EtatPartie, EtatPartie] | null>(null);
+  const [choixCourant, setChoixCourant] = useState<string | null>(null);
+  const [choixSoumis, setChoixSoumis] = useState<string | null>(null);
   const montrerErreurs = (tentativesUtilisees > 0 || Boolean(validation?.revele)) && soumis !== null;
 
   function valider() {
     const reponse1 = reponseDepuisEtat(etat1);
     const reponse2 = reponseDepuisEtat(etat2);
     if (reponse1 === null || reponse2 === null) return;
+    if (choix && choixCourant === null) return;
     setSoumis([etat1, etat2]);
-    onValider({ partie1: reponse1, partie2: reponse2 });
+    setChoixSoumis(choixCourant);
+    onValider({ partie1: reponse1, partie2: reponse2, ...(choix && choixCourant !== null ? { choix: choixCourant } : {}) });
   }
 
-  const pretAValider = reponseDepuisEtat(etat1) !== null && reponseDepuisEtat(etat2) !== null;
+  const pretAValider = reponseDepuisEtat(etat1) !== null && reponseDepuisEtat(etat2) !== null && (!choix || choixCourant !== null);
 
   return (
     <div>
@@ -124,6 +143,23 @@ export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2,
       </p>
       <GroupePartie config={partie1} etat={etat1} refuse={montrerErreurs && soumis ? soumis[0] : null} onChange={setEtat1} />
       <GroupePartie config={partie2} etat={etat2} refuse={montrerErreurs && soumis ? soumis[1] : null} onChange={setEtat2} />
+      {choix && (
+        <div className="field">
+          <p className="field-label field-label-minuscule">{choix.label}</p>
+          <div className="options-grid-compact">
+            {choix.options.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                className={`btn ${choixCourant === o.id ? "toggle-active" : ""} ${montrerErreurs && choixSoumis === o.id && choixCourant === o.id ? "is-erronee" : ""}`}
+                onClick={() => setChoixCourant(o.id)}
+              >
+                {o.latex ? <Katex expression={o.latex} /> : o.texte}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

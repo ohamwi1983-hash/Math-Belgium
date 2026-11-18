@@ -1,8 +1,10 @@
 import type { CibleLimiteLog, ExerciceLimiteLogarithmique, ExerciceLimiteLogA, ExerciceLimiteLogB, ExerciceLimiteLogC } from "../../core6e/limitesLogarithmiques.types";
-import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, ProfilInstance, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { CONSIGNE_GENERALE, configDiagnosticPartiesC, consigneEcran, formatCategorieLabel, formatCibleTexte, formatLimiteEnonceLatex, formatReformulationBLatex, formeFactoriseeA } from "../../ui6e/formatLimitesLogarithmiques";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLimiteLogarithmique } from "./index";
+import { approche, correctionDetailleeD } from "./corrigeDetaille";
+import { reponseAttendueDLatex } from "../../ui6e/formatLimitesPuissances";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceLimiteLogarithmique>` pour `6gen17` (Calcul de
@@ -16,7 +18,9 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLimiteLog
  * `moteur6e/typesLimitesLogarithmiques.ts` (`phaseInitiale`/`phaseApres`) : 2 écrans par famille.
  * Chaque écran RÉELLEMENT traversé devient donc une question a)/b) séparée — `regroupable` n'est
  * donc PAS activé ici. Les consignes réutilisent directement `consigneEcran` (ui6e), jamais
- * réécrites en dur ici. Le corrigé n'affiche que des formes EXACTES déjà construites par le
+ * réécrites en dur ici. Famille D (puissances f^g, 3 écrans) : corrigé détaillé « comme au tableau »
+ * partagé avec l'écran (`corrigeDetaille.ts`) ; les familles A–C gardent leur corrigé historique.
+ * Le corrigé n'affiche que des formes EXACTES déjà construites par le
  * générateur (`CibleLimiteLog.latex`, `limiteLatex`, `formatReformulationBLatex`) et une valeur
  * approchée à virgule quand elle est utile — jamais un flottant brut à point décimal (audit
  * chapitre 3 de 6e, point 7).
@@ -53,6 +57,15 @@ function construireEnonceLimitesLogarithmiques(exercice: ExerciceLimiteLogarithm
         questions: [
           { consigne: consigneEcran("cDiagnostic", exercice), reponse: { type: "lignes", nombre: 2 } },
           { consigne: consigneEcran("cConclure", exercice), reponse: { type: "lignes", nombre: 1 } },
+        ],
+      };
+    case "D":
+      return {
+        enteteFragments: entete,
+        questions: [
+          { consigne: consigneEcran("dForme", exercice), reponse: { type: "lignes", nombre: 2 } },
+          { consigne: consigneEcran("dExposant", exercice), reponse: { type: "lignes", nombre: 3 } },
+          { consigne: consigneEcran("dConclure", exercice), reponse: { type: "lignes", nombre: 1 } },
         ],
       };
   }
@@ -110,6 +123,12 @@ function construireCorrectionLimitesLogarithmiques(exercice: ExerciceLimiteLogar
         { type: "paragraphe", fragments: [texte("b) Limite : "), latex(formatCibleTexte(exercice.limiteFinale)), texte(".")] },
       ];
     }
+    case "D":
+      return [
+        { type: "paragraphe", fragments: [texte("a) "), latex(reponseAttendueDLatex(exercice, "dForme"))] },
+        { type: "paragraphe", fragments: [texte("b) "), latex(reponseAttendueDLatex(exercice, "dExposant"))] },
+        { type: "paragraphe", fragments: [texte("c) "), latex(reponseAttendueDLatex(exercice, "dConclure"))] },
+      ];
   }
 }
 
@@ -125,6 +144,16 @@ function limiteAttendue(exercice: ExerciceLimiteLogarithmique): CibleLimiteLog {
   if (exercice.famille === "A") return exercice.limiteGlobale;
   if (exercice.famille === "B") return { type: "valeur", valeur: exercice.limiteFinale, latex: exercice.limiteLatex };
   return exercice.limiteFinale;
+}
+
+/** Profil de tirage équilibré (même structure dans toutes les séries) : famille D, `forme` = type de
+ * forme indéterminée (1^∞, 0^0, ∞^0) — JAMAIS l'issue (valeur finie, 1, +∞, 0), que l'élève doit
+ * décider ; familles A–C, `forme` = la famille (sa sous-famille est déjà fixée quand le professeur
+ * choisit une variante ; en tirage libre, une question A reste une question A dans les séries B, C…).
+ * Aucun cas particulier, pas de `calcul` (valeurs toujours exactes). */
+function profilInstance(exercice: ExerciceLimiteLogarithmique): ProfilInstance {
+  if (exercice.famille === "D") return { casParticulier: null, forme: `D:${exercice.forme}` };
+  return { casParticulier: null, forme: exercice.famille };
 }
 
 /** Limite en LaTeX, avec une valeur approchée au centième quand elle n'est pas entière. */
@@ -144,10 +173,18 @@ function difficulte(exercice: ExerciceLimiteLogarithmique): 1 | 2 | 3 {
     case "C":
       // c3 : forme 0/0 apparente qui n'en est pas une (piège central).
       return exercice.sousType === "c3" ? 3 : 2;
+    case "D":
+      // Forme 1^∞ (limite de référence à faire apparaître) : 3 ; base x ou exponentielle : 2.
+      return exercice.forme === "un_infini" ? 3 : 2;
   }
 }
 
 function reponseBreve(exercice: ExerciceLimiteLogarithmique): FragmentConsigne[] {
+  // Famille D : e^L écrit exactement, valeur approchée à 4 chiffres significatifs (e^{−6} ≈ 0,002479).
+  if (exercice.famille === "D") {
+    const f = exercice.limiteFinale;
+    return [latex(`\\text{limite} = ${formatCibleTexte(f)}${f.type === "valeur" && f.valeur !== 1 ? ` \\approx ${approche(f.valeur)}` : ""}`)];
+  }
   return [latex(`\\text{limite} = ${limiteLatexAvecApproche(limiteAttendue(exercice))}`)];
 }
 
@@ -287,6 +324,7 @@ function correctionC(exercice: ExerciceLimiteLogC): EtapeCorrection[] {
 function correctionDetaillee(exercice: ExerciceLimiteLogarithmique): EtapeCorrection[] {
   if (exercice.famille === "A") return correctionA(exercice);
   if (exercice.famille === "B") return correctionB(exercice);
+  if (exercice.famille === "D") return correctionDetailleeD(exercice);
   return correctionC(exercice);
 }
 
@@ -319,6 +357,17 @@ function bareme(exercice: ExerciceLimiteLogarithmique): BaremeExercice {
       { description: [texte("Remplacer directement x par " + exercice.x0 + ", obtenir 0/0 et s'arrêter")], cout: "0 pt en a)" },
       { description: [texte("Oublier le coefficient de u en appliquant la limite de référence")], cout: "−1" },
     ];
+  } else if (exercice.famille === "D") {
+    criteres = [
+      { sousQuestion: "a", critere: [texte("Limites de la base et de l'exposant, forme indéterminée "), latex(reponseAttendueDLatex(exercice, "dForme").split("\\text{forme } ")[1])], points: 1 },
+      { sousQuestion: "b", critere: [texte("Réécriture "), latex("f(x)^{g(x)}=e^{g(x)\\ln f(x)}"), texte(" et transformation du produit")], points: 1 },
+      { sousQuestion: "b", critere: [texte("Limite de l'exposant : "), latex(formatCibleTexte(exercice.limiteProduit))], points: 1 },
+      { sousQuestion: "c", critere: [texte("Limite : "), latex(formatCibleTexte(exercice.limiteFinale))], points: 1 },
+    ];
+    erreursFrequentes = [
+      { description: [texte("Conclure sans calcul que "), latex(exercice.forme === "un_infini" ? "1^{\\infty}=1" : exercice.forme === "zero_zero" ? "0^{0}=1" : "(+\\infty)^{0}=1")], cout: "0 pt en b) et c)" },
+      { description: [texte("Donner la limite de l'exposant au lieu de son exponentielle")], cout: "−1" },
+    ];
   } else {
     const { label1, label2, cible1, signe2 } = partiesC(exercice);
     criteres = [
@@ -335,7 +384,8 @@ function bareme(exercice: ExerciceLimiteLogarithmique): BaremeExercice {
     ];
   }
   const reponsesAcceptees: FragmentConsigne[][] = [];
-  if (limite.type === "valeur" && !Number.isInteger(limite.valeur)) reponsesAcceptees.push([texte("Valeur approchée "), latex(formatApproche(limite.valeur)), texte(" si la forme exacte est aussi donnée dans la démarche")]);
+  if (limite.type === "valeur" && !Number.isInteger(limite.valeur)) reponsesAcceptees.push([texte("Valeur approchée "), latex(exercice.famille === "D" ? approche(limite.valeur) : formatApproche(limite.valeur)), texte(" si la forme exacte est aussi donnée dans la démarche")]);
+  if (exercice.famille === "D" && exercice.limiteProduit.type === "valeur") reponsesAcceptees.push([texte("Limite de l'exposant non simplifiée (même valeur), à condition que la conclusion soit "), latex(formatCibleTexte(exercice.limiteFinale))]);
   if (exercice.famille === "A" && exercice.sousType === "sous3") reponsesAcceptees.push([latex(`\\dfrac{${exercice.p1}\\ln(${exercice.base})}{${exercice.p2}}`), texte(" non simplifiée")]);
   return { reponseFinale: finale, criteres, erreursFrequentes, ...(reponsesAcceptees.length > 0 ? { reponsesAcceptees } : {}) };
 }
@@ -361,4 +411,5 @@ export const adaptateurEvaluationLimitesLogarithmiques: AdaptateurFeuilleExercic
   bareme,
   enoncePapier: enoncePapier,
   dureeMinutes: 5,
+  profilInstance,
 };

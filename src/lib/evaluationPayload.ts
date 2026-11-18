@@ -1307,6 +1307,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'forme ∞ − ∞ : regrouper', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\left[\\ln\\left(x^2+1\\right) - 2\\ln(x)\\right]$." },
     { cle: 'forme ∞ − ∞ : factoriser', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\left(x - \\ln(x)\\right)$." },
     { cle: 'une puissance du logarithme', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{(\\ln x)^2}{x}$." },
+    { cle: 'la limite qui définit e', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\left(1+\\dfrac{1}{x}\\right)^{x}$." },
+    { cle: 'forme 0⁰ : x exposant x', enonce: "Calcule $\\displaystyle\\lim_{x \\to 0^+} x^{x}$." },
   ],
   parametres: [
     { cle: 'passe par $(1;4)$', enonce: "Détermine $a$ et $b$ sachant que le graphique de $f(x) = a + b \\cdot \\ln(x)$ passe par le point $(1;4)$ et que sa tangente en $x=1$ a pour pente $3$." },
@@ -3617,6 +3619,11 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce: "En quoi le classement exponentielle > puissance > logarithme révèle-t-il une hiérarchie plus profonde entre ces trois familles de fonctions, au-delà d'un simple ordre à retenir ?",
         corrige:
           "Ce classement montre que la vitesse de croissance d'une fonction ne dépend pas de sa valeur à un instant donné (qui peut favoriser n'importe laquelle au départ), mais de la nature même de sa construction : une exponentielle s'amplifie par un facteur multiplicatif qui agit sur toute la valeur déjà atteinte, une puissance s'amplifie par un exposant fixe appliqué à x, et un logarithme compresse x en quelque chose de bien plus petit. C'est cette différence structurelle, et non les valeurs de départ, qui détermine qui domine qui en fin de course, peu importe à quel point la base ou le degré semblaient, a priori, favoriser l'un des deux camps.",
+      },
+      {
+        enonce: "Pourquoi une puissance dont la base tend vers 1 et l'exposant vers l'infini est-elle une forme indéterminée, alors que 1 élevé à n'importe quelle puissance vaut 1 ?",
+        corrige:
+          "Une base qui tend vers 1 n'est jamais égale à 1 : elle vaut un peu plus (ou un peu moins) que 1, et un exposant de plus en plus grand amplifie cet écart. Les deux effets se compensent plus ou moins selon leur vitesse : en écrivant $f(x)^{g(x)} = e^{g(x)\\ln f(x)}$, tout dépend de la limite L du produit $g(x)\\ln f(x)$, qui peut être nulle (limite 1), finie (limite $e^{L}$, par exemple $e$ pour $\\left(1+\\frac{1}{x}\\right)^{x}$), $+\\infty$ ou $-\\infty$ (limite 0).",
       },
     ],
     parametres: [

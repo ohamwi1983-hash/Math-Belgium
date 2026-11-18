@@ -3,12 +3,13 @@ import { phaseApres, phaseInitiale } from "../moteur6e/typesLimitesLogarithmique
 import type { EtatSessionLimiteLogarithmique, PhaseLimiteLogarithmique } from "../moteur6e/typesLimitesLogarithmiques";
 import type { EntreeRecapitulatif } from "./recapitulatif";
 import { formatCategorieLabel, formatCibleTexte, formatReformulationBLatex } from "./formatLimitesLogarithmiques";
+import { reponseAttendueDLatex } from "./formatLimitesPuissances";
 
 /**
  * Récapitulatif "Ce qu'on sait déjà" pour `6gen17`. Reprend EXACTEMENT, phase par phase, le contenu
  * de `reponseAttenduePhase` (`App6gen17.tsx`, lui-même aligné sur l'ancien
- * `ResultatPanelLimitesLogarithmiques.tsx`) — jamais une cible recalculée séparément. Couvre les 6
- * phases (familles A à C).
+ * `ResultatPanelLimitesLogarithmiques.tsx`) — jamais une cible recalculée séparément. Couvre les 9
+ * phases (familles A à D).
  *
  * `revele` déduit de `detailsPartiels[phase].revele` — jamais `scoresPartiels[phase] === 0`, non
  * fiable ici (voir le commentaire de `DetailPhaseLimiteLogarithmique`,
@@ -22,6 +23,9 @@ const LIBELLE_PHASE: Record<PhaseLimiteLogarithmique, string> = {
   bConclure: "Limite",
   cDiagnostic: "Diagnostic (num./dénom.)",
   cConclure: "Limite",
+  dForme: "Forme (base, exposant)",
+  dExposant: "Limite de l'exposant",
+  dConclure: "Limite",
 };
 
 type FragmentsRecap = Pick<EntreeRecapitulatif, "valeur" | "estLatex">;
@@ -38,6 +42,7 @@ export function valeurPourPhase(exercice: ExerciceLimiteLogarithmique, phase: Ph
     if (phase === "bReformuler") return { valeur: `f = ${formatReformulationBLatex(exercice)}`, estLatex: true };
     return { valeur: exercice.limiteLatex, estLatex: true };
   }
+  if (exercice.famille === "D") return { valeur: reponseAttendueDLatex(exercice, phase as "dForme" | "dExposant" | "dConclure"), estLatex: true };
   if (phase === "cDiagnostic") {
     const [cible1, cible2] = exercice.sousType === "c2" ? [exercice.partieFacteur1, exercice.partieFacteur2] : [exercice.partieNumerateur, exercice.partieDenominateur];
     return { valeur: `\\text{partie 1} \\to ${formatCibleTexte(cible1)},\\quad \\text{partie 2} \\to ${formatCibleTexte(cible2)}`, estLatex: true };
