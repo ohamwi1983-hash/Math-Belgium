@@ -37,6 +37,10 @@ import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { correctionDetailleeComplexesAvances } from "./generateurs6e/complexesAvances/corrigeDetaille";
+import { phasesPourExercice as phasesComplexesAvances } from "./moteur6e/typesComplexesAvances";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen42` — Nombres complexes : problèmes avancés (chapitre 7, "Nombres complexes", 9e et DERNIER
@@ -149,6 +153,7 @@ export function App6gen42() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComplexesAvances(exercice), lettreEtape(phasesComplexesAvances(exercice).indexOf(phase)))} />,
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (

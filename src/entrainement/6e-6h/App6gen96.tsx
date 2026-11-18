@@ -20,6 +20,10 @@ import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { NatureCircuit } from "./core6e/impedancesComplexes";
+import { correctionDetailleeImpedances } from "./generateurs6e/impedancesComplexes/corrigeDetaille";
+import { PHASES_IMPEDANCES } from "./moteur6e/typesImpedances";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen96` — « Électricité : impédances complexes » (chapitre 5 de 6e, « Nombres complexes »,
@@ -123,6 +127,7 @@ export function App6gen96() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeImpedances(exercice), lettreEtape(PHASES_IMPEDANCES.indexOf(phase)))} />,
         reponseAttendue: reponseAttendue(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

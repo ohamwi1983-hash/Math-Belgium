@@ -1,23 +1,21 @@
-import type { AffixeEntiere, ExerciceTransfoA, ExerciceTransfoB, ExerciceTransfoC, ExerciceTransfoD, ExerciceTransformationsPlan } from "../../core6e/transformationsPlan.types";
+import type { ExerciceTransfoA, ExerciceTransformationsPlan } from "../../core6e/transformationsPlan.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { affixeLatex, aideNiveau1, aideNiveau2, blocDonneesA, blocDonneesB, blocDonneesC, etatActuelA, formuleD, formatReponseAttenduePhaseLatex, nomPoint } from "../../ui6e/formatTransformationsPlan";
+import { blocDonneesA, blocDonneesB, blocDonneesC, formuleD, formatReponseAttenduePhaseLatex, nomPoint } from "../../ui6e/formatTransformationsPlan";
 import { phasesPourExercice } from "../../moteur6e/typesTransformationsPlan";
 import type { PhaseTransformationsPlan } from "../../moteur6e/typesTransformationsPlan";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTransformationsPlan } from "./index";
 import type { IdVarianteTransformationsPlan } from "./index";
 import { profilTransformationsPlan } from "../profilsEvaluationComplexes40-42";
-import { COULEURS, planComplexeSvg } from "../figuresPlanComplexe40-42";
-import type { PointPlan, SegmentPlan } from "../figuresPlanComplexe40-42";
+import { correctionDetailleeTransformationsPlan, piege } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceTransformationsPlan>` pour `6gen40` (Transformations
@@ -44,17 +42,6 @@ const t = (valeur: string): FragmentConsigne => texte(valeur);
 
 function reponse(e: ExerciceTransformationsPlan, phase: PhaseTransformationsPlan): FragmentConsigne[] {
   return [f(formatReponseAttenduePhaseLatex(e, phase).join(",\\quad "))];
-}
-
-const coord = (z: AffixeEntiere): [number, number] => [z.a, z.b];
-
-/** e^{iθ} pour un angle d'axe (π/2, π, −π/2) : i, −1 ou −i — même calcul que `appliquerRotationAxe`. */
-function expIThetaLatex(angle: { numerique: number }): string {
-  return affixeLatex({ a: Math.round(Math.cos(angle.numerique)), b: Math.round(Math.sin(angle.numerique)) });
-}
-
-function expITheta(angleLatex: string): string {
-  return `e^{${angleLatex.startsWith("-") ? `-i${angleLatex.slice(1)}` : `i${angleLatex}`}}`;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -197,191 +184,7 @@ function enoncePapier(e: ExerciceTransformationsPlan): EnoncePapier {
 // Figures du corrigé
 // ---------------------------------------------------------------------------------------------
 
-function figureA(e: ExerciceTransfoA): string {
-  const p = e.parametres;
-  const P = coord(e.zP);
-  const Pp = coord(e.image);
-  const points: PointPlan[] = [
-    { x: P[0], y: P[1], etiquette: "P", couleur: COULEURS.encre },
-    { x: Pp[0], y: Pp[1], etiquette: "P′", couleur: COULEURS.accent },
-  ];
-  const segments: SegmentPlan[] = [];
-  if (p.sousType === "translation") segments.push({ de: P, a: Pp, fleche: true, couleur: COULEURS.accent });
-  else if (p.sousType === "rotationTranslation") {
-    const R: [number, number] = [Pp[0] - p.zV.a, Pp[1] - p.zV.b];
-    points.push({ x: R[0], y: R[1], etiquette: "R", couleur: COULEURS.ciel });
-    segments.push({ de: [0, 0], a: P, pointilles: true, couleur: COULEURS.doux }, { de: [0, 0], a: R, pointilles: true, couleur: COULEURS.ciel }, { de: R, a: Pp, fleche: true, couleur: COULEURS.accent });
-  } else segments.push({ de: [0, 0], a: P, pointilles: true, couleur: COULEURS.doux }, { de: [0, 0], a: Pp, pointilles: true, couleur: COULEURS.accent });
-  return planComplexeSvg({ points, segments, libelle: "Le point P et son image P′" });
-}
-
-function figureB(e: ExerciceTransfoB): string {
-  const A = coord(e.zA);
-  const B = coord(e.zB);
-  const R = coord(e.zResultat);
-  const nom = e.sousType === "somme" ? "M" : "P";
-  const points: PointPlan[] = [
-    { x: A[0], y: A[1], etiquette: "A", couleur: COULEURS.encre },
-    { x: B[0], y: B[1], etiquette: "B", couleur: COULEURS.ciel },
-    { x: R[0], y: R[1], etiquette: nom, couleur: COULEURS.accent },
-  ];
-  const segments: SegmentPlan[] =
-    e.sousType === "somme"
-      ? [
-          { de: [0, 0], a: A, pointilles: true, couleur: COULEURS.doux },
-          { de: [0, 0], a: B, pointilles: true, couleur: COULEURS.doux },
-          { de: B, a: R, pointilles: true, couleur: COULEURS.doux },
-          { de: A, a: R, fleche: true, couleur: COULEURS.accent },
-        ]
-      : [
-          { de: [0, 0], a: A, pointilles: true, couleur: COULEURS.doux },
-          { de: [0, 0], a: R, pointilles: true, couleur: COULEURS.accent },
-        ];
-  return planComplexeSvg({ points, segments, libelle: `Les points A, B et ${nom}` });
-}
-
-function figureC(e: ExerciceTransfoC): string {
-  const points: PointPlan[] = [
-    { x: e.zA.a, y: e.zA.b, etiquette: "A", couleur: COULEURS.encre },
-    { x: e.zB.a, y: e.zB.b, etiquette: "B", couleur: COULEURS.accent },
-  ];
-  const segments: SegmentPlan[] = [
-    { de: [0, 0], a: coord(e.zA), pointilles: true, couleur: COULEURS.doux },
-    { de: [0, 0], a: coord(e.zB), pointilles: true, couleur: COULEURS.accent },
-  ];
-  e.autresPoints.forEach((pt, i) => {
-    const img = e.imagesAutresPoints[i];
-    points.push({ x: pt.a, y: pt.b, etiquette: nomPoint(i), couleur: COULEURS.encre }, { x: img.a, y: img.b, etiquette: `${nomPoint(i)}′`, couleur: COULEURS.accent });
-    segments.push({ de: [0, 0], a: coord(pt), pointilles: true, couleur: COULEURS.pale }, { de: [0, 0], a: coord(img), pointilles: true, couleur: COULEURS.pale });
-  });
-  return planComplexeSvg({ points, segments, cercles: [{ cx: 0, cy: 0, r: e.moduleCommun, pointilles: true, couleur: COULEURS.ciel, epaisseur: 1 }], libelle: "Points, images et rotation de centre O" });
-}
-
-/** D : l'image O′ (affixe b) de l'origine, et le centre Ω (ou le vecteur de translation). */
-function figureD(e: ExerciceTransfoD): string {
-  const Op = coord(e.b);
-  const points: PointPlan[] = [{ x: Op[0], y: Op[1], etiquette: "O′", couleur: COULEURS.accent }];
-  const segments: SegmentPlan[] = [];
-  if (e.centre === null) segments.push({ de: [0, 0], a: Op, fleche: true, couleur: COULEURS.accent });
-  else {
-    const W = coord(e.centre);
-    points.push({ x: W[0], y: W[1], etiquette: "Ω", couleur: COULEURS.bon });
-    segments.push({ de: W, a: [0, 0], pointilles: true, couleur: COULEURS.doux }, { de: W, a: Op, pointilles: true, couleur: COULEURS.accent });
-  }
-  return planComplexeSvg({ points, segments, libelle: e.centre === null ? "Vecteur de la translation" : "Centre Ω, l'origine O et son image O′" });
-}
-
-function figure(e: ExerciceTransformationsPlan): string {
-  switch (e.famille) {
-    case "A":
-      return figureA(e);
-    case "B":
-      return figureB(e);
-    case "C":
-      return figureC(e);
-    case "D":
-      return figureD(e);
-  }
-}
-
-// ---------------------------------------------------------------------------------------------
-// Corrigé détaillé
-// ---------------------------------------------------------------------------------------------
-
-function piege(e: ExerciceTransformationsPlan, phase: PhaseTransformationsPlan): FragmentConsigne[] | null {
-  if (e.famille === "A" && phase === "aEcran1") {
-    switch (e.parametres.sousType) {
-      case "translation":
-        return [t("Écrire "), f("z_P-z_v"), t(" ou "), f("z_v-z_P"), t(" : une translation ajoute l'affixe du vecteur.")];
-      case "homothetie":
-        return [t("Ajouter k au lieu de multiplier par k : "), f("z_P+k"), t(" n'est pas une homothétie.")];
-      case "rotation":
-        return [t("Multiplier par "), f("e^{-i\\theta}"), t(" : la rotation d'angle θ tourne dans le sens trigonométrique, on multiplie par "), f("e^{i\\theta}"), t(".")];
-      case "similitude":
-        return [t("Mettre le rapport dans l'exposant ("), f("e^{ik\\theta}"), t(") au lieu de multiplier par k.")];
-      case "rotationTranslation":
-        return [t("Translater avant de tourner : "), f("(z_P+z_v)\\cdot e^{i\\theta}"), t(" applique les deux transformations dans le mauvais ordre.")];
-    }
-  }
-  if (e.famille === "A" && phase === "aEcran2" && e.parametres.sousType !== "translation" && e.parametres.sousType !== "homothetie") return [t("Se tromper de signe en multipliant par i : "), f("i^2=-1"), t(".")];
-  if (e.famille === "B" && phase === "bEcran2")
-    return e.sousType === "somme"
-      ? [t("Donner "), f("z_M"), t(" au lieu de l'écart "), f("z_M-z_A"), t(".")]
-      : [t("Donner "), f("z_B"), t(" lui-même comme rapport : le rapport est "), f("|z_B|"), t(" et l'angle un argument de "), f("z_B"), t(".")];
-  if (e.famille === "C" && phase === "cEcran2") return [t("Calculer "), f("\\arg z_A-\\arg z_B"), t(" : l'angle de la rotation qui envoie A sur B est "), f("\\arg z_B-\\arg z_A"), t(".")];
-  if (e.famille === "D" && phase === "dEcran1") return [t("Confondre rotation et homothétie : "), f("|a|=1"), t(" (et "), f("a\\neq1"), t(") donne une rotation, "), f("a"), t(" réel (différent de 0 et 1) une homothétie.")];
-  if (e.famille === "D" && phase === "dEcran2" && e.centre !== null) return [t("Erreur de signe sur le centre : "), f("z_\\Omega=\\dfrac{b}{1-a}"), t(", pas "), f("\\dfrac{b}{a-1}"), t(".")];
-  return null;
-}
-
-/** Ligne « Calcul » propre à chaque étape — valeurs tirées des mêmes données que l'écran. */
-function calcul(e: ExerciceTransformationsPlan, phase: PhaseTransformationsPlan): FragmentConsigne[] | null {
-  switch (e.famille) {
-    case "A": {
-      if (phase !== "aEcran2") return null;
-      const substituee = (etatActuelA(e, "aEcran2") ?? [""])[0].replace("\\text{ (formule confirmée)}", "");
-      const p = e.parametres;
-      const lignes: FragmentConsigne[] = [];
-      if (p.sousType === "rotation" || p.sousType === "similitude" || p.sousType === "rotationTranslation") {
-        lignes.push(t("Ici "), f(`${expITheta(p.angle.latex)}=${expIThetaLatex(p.angle)}`), t(", donc "));
-      }
-      lignes.push(f(`z_{P'}=${substituee.split("=").slice(1).join("=")}=${affixeLatex(e.image)}`));
-      return lignes;
-    }
-    case "B":
-      if (phase === "bEcran1") {
-        const op = e.sousType === "somme" ? "+" : "\\cdot";
-        const nom = e.sousType === "somme" ? "M" : "P";
-        return [f(`z_{${nom}}=(${affixeLatex(e.zA)})${op}(${affixeLatex(e.zB)})=${affixeLatex(e.zResultat)}`)];
-      }
-      if (e.sousType === "somme") return [f(`z_M-z_A=(${affixeLatex(e.zResultat)})-(${affixeLatex(e.zA)})=${affixeLatex(e.zB)}`)];
-      {
-        // Rapport et angle : les valeurs de la réponse attendue (« \text{rapport : }r », « \theta=… »).
-        const [rapport, angle] = formatReponseAttenduePhaseLatex(e, "bEcran2");
-        return [f(`${aideNiveau2(e, phase).latex ?? ""}=${rapport.replace("\\text{rapport : }", "")}`), t(" et "), f(angle.replace("\\theta", "\\arg z_B"))];
-      }
-    case "C":
-      if (phase === "cEcran1") {
-        const r = formatReponseAttenduePhaseLatex(e, "cEcran1")[0].split("=").pop() ?? "";
-        return [f(`|z_A|=\\sqrt{(${e.zA.a})^2+(${e.zA.b})^2}=${r}`), t(" et "), f(`|z_B|=\\sqrt{(${e.zB.a})^2+(${e.zB.b})^2}=${r}`)];
-      }
-      if (phase === "cEcran2") return [f(aideNiveau2(e, phase).latex ?? ""), t(", donc "), f(`\\theta=${e.angleB.latex}-\\left(${e.angleA.latex}\\right)\\equiv ${e.angleRotation.latex}\\pmod{2\\pi}`)];
-      return [
-        t("Multiplier chaque affixe par "),
-        f(`${expITheta(e.angleRotation.latex)}=${expIThetaLatex(e.angleRotation)}`),
-        t(" : "),
-        f(e.autresPoints.map((pt, i) => `z_{${nomPoint(i)}'}=${expIThetaLatex(e.angleRotation)}\\cdot(${affixeLatex(pt)})`).join(",\\quad ")),
-      ];
-    case "D":
-      if (phase === "dEcran1") return aideNiveau2(e, phase).latex ? [f(aideNiveau2(e, phase).latex as string)] : null;
-      if (e.centre === null) return [f(`z'-z=${affixeLatex(e.b)}`), t(" pour tout point M.")];
-      return [f(`${aideNiveau2(e, phase).latex ?? ""}=${affixeLatex(e.centre)}`)];
-  }
-}
-
-function lignesEtape(e: ExerciceTransformationsPlan, phase: PhaseTransformationsPlan, sousQuestion: string, avecFigure: boolean): EtapeCorrection[] {
-  const aide1 = aideNiveau1(e, phase);
-  const lignes: EtapeCorrection[] = [];
-  if (aide1.texte.length > 0) lignes.push({ label: "Méthode", sousQuestion, fragments: [...aide1.texte, ...(aide1.latex ? [t(" Soit : "), f(aide1.latex)] : [])] });
-  else if (phase === "aEcran2" || phase === "cEcran3") lignes.push({ label: "Méthode", sousQuestion, fragments: [t("On applique la formule de la transformation à l'affixe du point.")] });
-  const c = calcul(e, phase);
-  if (c) lignes.push({ label: "Calcul", sousQuestion, fragments: c });
-  const conclusion = phase === "aEcran1" ? [f(`z_{P'}=${formatReponseAttenduePhaseLatex(e, phase)[0]}`)] : reponse(e, phase);
-  lignes.push({ label: "Conclusion", sousQuestion, fragments: conclusion, ...(avecFigure ? { figureHtml: figure(e) } : {}) });
-  const p = piege(e, phase);
-  if (p) lignes.push({ label: "Piège", sousQuestion, fragments: p });
-  return lignes;
-}
-
-/** Étape qui porte la figure : celle où les points construits sont connus. */
-function phaseFigure(e: ExerciceTransformationsPlan): PhaseTransformationsPlan {
-  return e.famille === "B" ? "bEcran1" : phaseFinale(e);
-}
-
-function correctionDetaillee(e: ExerciceTransformationsPlan): EtapeCorrection[] {
-  const avecFig = phaseFigure(e);
-  return phasesPourExercice(e).flatMap((phase, i) => lignesEtape(e, phase, LETTRES[i], phase === avecFig));
-}
+const correctionDetaillee = correctionDetailleeTransformationsPlan;
 
 function difficulte(e: ExerciceTransformationsPlan): 1 | 2 | 3 {
   switch (e.famille) {

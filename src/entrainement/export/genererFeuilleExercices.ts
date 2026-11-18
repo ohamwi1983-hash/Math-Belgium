@@ -74,6 +74,22 @@ export interface CatalogueVarianteEntree {
   label: string;
 }
 
+/** Une ligne d'une chaîne de calcul « comme au tableau » (`EtapeCorrection.calcul`) : UNE
+ * transformation, en LaTeX. Le rendu aligne les lignes sur leur premier signe de relation de niveau 0
+ * (« = », « \approx », « < »…) : une ligne qui COMMENCE par « = » continue la ligne précédente (son
+ * « = » tombe sous le « = » du dessus). `justification` : la règle utilisée, affichée à droite en
+ * petit italique (« on distribue », « car i² = −1 »). Jamais deux égalités séparées par « ; » dans une
+ * même ligne. */
+export interface LigneCalcul {
+  latex: string;
+  justification?: string | FragmentConsigne[];
+}
+
+/** Rôle d'une ligne du corrigé « comme au tableau » (voir `.claude/rules/feuilles-evaluations.md`,
+ * « Corrigé détaillé — comme au tableau ») : ce qu'on utilise → calcul → résultat (encadré) →
+ * vérification → piège. Absent = ligne historique (rendue comme avant). */
+export type TypeLigneCorrection = "utilise" | "calcul" | "resultat" | "verification" | "piege";
+
 /** Une étape du corrigé détaillé (rédaction modèle) — `label` court affiché dans la marge
  * (« Condition », « Méthode », « Calcul », « Vérification », « Conclusion »…), `sousQuestion` (« a »,
  * « b »…) quand l'étape répond à une sous-question précise de l'énoncé. */
@@ -81,6 +97,13 @@ export interface EtapeCorrection {
   label: string;
   fragments: FragmentConsigne[];
   sousQuestion?: string;
+  /** Rôle de la ligne (corrigé « comme au tableau ») : `resultat` est encadré, `piege` va dans
+   * l'encadré « Piège » de son étape. Optionnel (rétrocompatible). Constructeurs :
+   * `export/corrigeTableau.ts`. */
+  type?: TypeLigneCorrection;
+  /** Chaîne de calcul alignée sur « = », affichée sous `fragments` (texte d'introduction, peut être
+   * vide). */
+  calcul?: LigneCalcul[];
   /** Figure SVG (chaîne autonome) affichée sous le texte de la ligne — ex. polygone des effectifs
    * cumulés avec la lecture des quartiles. Rendue par le pipeline HTML uniquement. */
   figureHtml?: string;

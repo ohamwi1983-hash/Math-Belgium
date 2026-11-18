@@ -19,6 +19,10 @@ export interface ValidationEtapeProps {
   /** Optionnel (rétrocompatible) : message affiché à la place de « Tentatives épuisées — … » quand
    * l'écran a été clos AVANT d'épuiser les tentatives (verdict fermé faux, qui ne se rejoue pas). */
   messageRevele?: string;
+  /** Optionnel (rétrocompatible) : corrigé détaillé « comme au tableau » de l'étape, affiché sous la
+   * réponse attendue quand elle est révélée — les MÊMES lignes que le corrigé papier
+   * (`correctionDetaillee` de l'adaptateur, rendu `CorrigeDetailleEcran.tsx`). */
+  corrigeDetaille?: ReactNode;
 }
 
 type Props = ValidationEtapeProps;
@@ -29,7 +33,7 @@ type Props = ValidationEtapeProps;
  * `ResumeSessionXxx` — convention CLAUDE.md, "validation/invalidation avant de passer à l'écran
  * suivant"). Partagé par 4e/5e-4h/6e-6h (comme `BoutonExportWord.tsx`), jamais dupliqué par niveau.
  */
-export function ValidationEcran({ revele, reponseAttendue, labelSuivant, onSuivant, messageRevele }: Props) {
+export function ValidationEcran({ revele, reponseAttendue, labelSuivant, onSuivant, messageRevele, corrigeDetaille }: Props) {
   return (
     <div className="validation-ecran">
       <p className={revele ? "alert-error" : "alert-success"} role="alert">
@@ -41,6 +45,7 @@ export function ValidationEcran({ revele, reponseAttendue, labelSuivant, onSuiva
           {reponseAttendue}
         </div>
       )}
+      {revele && corrigeDetaille}
       <button type="button" className="btn btn-primary" onClick={onSuivant}>
         {labelSuivant}
       </button>

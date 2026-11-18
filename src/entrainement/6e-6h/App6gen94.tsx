@@ -16,6 +16,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeDeuxEcritures } from "./generateurs6e/deuxEcrituresComplexe/corrigeDetaille";
+import { PHASES_DEUX_ECRITURES } from "./moteur6e/typesDeuxEcritures";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen94` — « Valeurs exactes par deux écritures d'un même complexe » (chapitre 5 de 6e, « Nombres
@@ -118,6 +122,7 @@ export function App6gen94() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDeuxEcritures(exercice), lettreEtape(PHASES_DEUX_ECRITURES.indexOf(phase)))} />,
         reponseAttendue: reponseAttendue(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

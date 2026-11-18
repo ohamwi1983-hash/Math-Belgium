@@ -4,7 +4,6 @@ import type {
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -12,20 +11,17 @@ import { anglePasLatex, sommetsAutres } from "../../moteur6e/modelePolygonesRegu
 import { phasesDe } from "../../moteur6e/typesPolygonesReguliers";
 import type { PhasePolygones } from "../../moteur6e/typesPolygonesReguliers";
 import {
-  calculEtape,
   consigneEcran,
   consigneGenerale,
-  controleSommets,
   formatReponseAttenduePhaseLatex,
   l,
-  methodeFragments,
-  piegeEtape,
   reponseFragments,
   sommeZLatex,
   t,
 } from "../../ui6e/formatPolygonesReguliers";
-import { figureCorrigeSommetsSvg, figureEnoncePolygonesSvg } from "../../ui6e/figurePolygonesReguliers";
+import { figureEnoncePolygonesSvg } from "../../ui6e/figurePolygonesReguliers";
 import { LIBELLE_CAS_POLYGONES, profilPolygones } from "./profilEvaluation";
+import { correctionDetailleePolygones } from "./corrigeDetaille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePolygones } from "./index";
 
 /**
@@ -135,27 +131,7 @@ function enoncePapier(e: ExercicePolygones): EnoncePapier {
   };
 }
 
-function correctionDetaillee(e: ExercicePolygones): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [];
-  const phases = phasesDe(e);
-  phases.forEach((phase, i) => {
-    const sousQuestion = LETTRES[i];
-    lignes.push({ label: "Méthode", sousQuestion, fragments: methodeFragments(e, phase) });
-    calculEtape(e, phase).forEach((c, j) => lignes.push({ label: phase === "cote" && j === 0 ? "Démonstration" : "Calcul", sousQuestion, fragments: [l(c)] }));
-    if (phase === "autresSommets" && e.variante === "sommets") {
-      const controle = controleSommets(e);
-      if (controle) lignes.push({ label: "Contrôle", sousQuestion, fragments: controle });
-    }
-    lignes.push({ label: "Piège", sousQuestion, fragments: piegeEtape(e, phase) });
-    lignes.push({
-      label: "Conclusion",
-      sousQuestion,
-      fragments: reponseFragments(e, phase),
-      ...(phase === "autresSommets" && e.variante === "sommets" ? { figureHtml: figureCorrigeSommetsSvg(e) } : {}),
-    });
-  });
-  return lignes;
-}
+const correctionDetaillee = correctionDetailleePolygones;
 
 function difficulte(e: ExercicePolygones): 1 | 2 | 3 {
   if (e.variante === "mesures") return 2;

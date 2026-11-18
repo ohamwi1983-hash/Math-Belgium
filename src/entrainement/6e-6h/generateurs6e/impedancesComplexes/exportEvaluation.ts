@@ -1,31 +1,23 @@
 import type { ExerciceImpedances } from "../../core6e/impedancesComplexes";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { PHASES_IMPEDANCES } from "../../moteur6e/typesImpedances";
 import type { PhaseImpedances } from "../../moteur6e/typesImpedances";
 import {
   NOM_NATURE,
   RAPPEL_J,
-  UN_SUR_J_LATEX,
   argumentArrondiLatex,
-  calculArgumentLatex,
-  calculBobineLatex,
-  calculCondensateurLatex,
-  calculIntensiteLatex,
-  calculModuleLatex,
-  calculTotaleLatex,
   consigneEcran,
   consigneGenerale,
   descriptionCircuit,
   formeAlgebriqueLatex,
   intensiteArrondieLatex,
-  justificationNature,
   moduleArrondiLatex,
-  nomReactif,
   rappelImpedances,
   reponseFragments,
 } from "../../ui6e/formatImpedances";
 import { schemaCircuitSvg } from "../../ui6e/schemaCircuitImpedances";
+import { correctionDetailleeImpedances } from "./corrigeDetaille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceImpedances } from "./index";
 import type { IdVarianteImpedances } from "./index";
 import { profilImpedances } from "./profilEvaluation";
@@ -102,46 +94,7 @@ function enoncePapier(e: ExerciceImpedances): EnoncePapier {
 // Corrigé détaillé.
 // ============================================================================
 
-function lignesComposants(e: ExerciceImpedances): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments:
-        e.xC === null
-          ? [t("On remplace L, converti en henrys, dans la formule "), f("Z_L=jL\\omega"), t(".")]
-          : [t(e.xL !== null ? "On remplace L (en henrys) et C (en farads) dans les formules ; avec " : "On remplace C, converti en farads, dans la formule ; avec "), f("j^2=-1"), t(", "), f(UN_SUR_J_LATEX), t(".")],
-    },
-  ];
-  if (e.xL !== null) lignes.push({ label: "Calcul", sousQuestion: "a", fragments: [f(calculBobineLatex(e))] });
-  if (e.xC !== null) lignes.push({ label: "Calcul", sousQuestion: "a", fragments: [f(calculCondensateurLatex(e))] });
-  return lignes;
-}
-
-function correctionDetaillee(e: ExerciceImpedances): EtapeCorrection[] {
-  const parallele = e.variante === "parallele";
-  const lignes: EtapeCorrection[] = [
-    ...lignesComposants(e),
-    parallele
-      ? { label: "Méthode", sousQuestion: "b", fragments: [t("En parallèle, avec "), f(`Z_1=R`), t(" et "), f(`Z_2=${nomReactif(e)}`), t(" : "), f("\\dfrac{1}{Z}=\\dfrac{1}{Z_1}+\\dfrac{1}{Z_2}"), t(", c'est-à-dire "), f("Z=\\dfrac{Z_1Z_2}{Z_1+Z_2}"), t(" ; on multiplie ensuite par le conjugué du dénominateur.")] }
-      : { label: "Méthode", sousQuestion: "b", fragments: [t("En série, les impédances s'additionnent : parties réelles entre elles, parties imaginaires entre elles.")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [f(calculTotaleLatex(e))] },
-    { label: "Méthode", sousQuestion: "c", fragments: [t("Pour "), f("Z=a+bj"), t(" avec "), f("a>0"), t(" : "), f("|Z|=\\sqrt{a^2+b^2}"), t(" et "), f("\\varphi=\\arctan\\dfrac{b}{a}"), t(" (calculatrice en degrés).")] },
-    { label: "Calcul", sousQuestion: "c", fragments: [f(calculModuleLatex(e))] },
-    { label: "Calcul", sousQuestion: "c", fragments: [f(calculArgumentLatex(e))] },
-    { label: "Méthode", sousQuestion: "d", fragments: [t("Loi d'Ohm en alternatif, avec le module de l'impédance : "), f("I=\\dfrac{U}{|Z|}"), t(".")] },
-    { label: "Calcul", sousQuestion: "d", fragments: [f(calculIntensiteLatex(e))] },
-    { label: "Conclusion", sousQuestion: "e", fragments: justificationNature(e) },
-  ];
-  if (e.xC !== null && !parallele) {
-    lignes.push({ label: "Piège", sousQuestion: "a", fragments: [t("Le signe de l'impédance du condensateur : "), f("\\dfrac{1}{j}=-j"), t(", donc "), f("Z_C=-\\dfrac{j}{C\\omega}"), t(" a une partie imaginaire NÉGATIVE ; l'écrire positive change la nature du circuit.")] });
-  } else if (parallele) {
-    lignes.push({ label: "Piège", sousQuestion: "b", fragments: [t("Additionner directement les impédances des deux branches : "), f(`Z\\neq Z_1+Z_2`), t(" en parallèle, ce sont les inverses qui s'additionnent.")] });
-  } else {
-    lignes.push({ label: "Piège", sousQuestion: "d", fragments: [t("Diviser la tension par la seule résistance : "), f(`\\dfrac{U}{R}=\\dfrac{${e.U}}{${e.R}}`), t(" ignore la bobine ; c'est le module "), f("|Z|"), t(" qui intervient.")] });
-  }
-  return lignes;
-}
+const correctionDetaillee = correctionDetailleeImpedances;
 
 function difficulte(e: ExerciceImpedances): 1 | 2 | 3 {
   return e.variante === "parallele" ? 3 : 2;

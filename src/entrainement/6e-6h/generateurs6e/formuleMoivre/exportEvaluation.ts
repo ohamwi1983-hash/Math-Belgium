@@ -1,18 +1,18 @@
-import type { ExerciceFormuleMoivre, TermeDeveloppementMoivre } from "../../core6e/formuleMoivre.types";
+import type { ExerciceFormuleMoivre } from "../../core6e/formuleMoivre.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { aideNiveau1, aideNiveau2, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatFormuleMoivre";
+import { consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatFormuleMoivre";
 import { phasesPourExercice } from "../../moteur6e/typesFormuleMoivre";
 import type { PhaseFormuleMoivre } from "../../moteur6e/typesFormuleMoivre";
 import { profilFormuleMoivre } from "../profilsEvaluationComplexes37-39";
+import { correctionDetailleeFormuleMoivre, piegeEtape } from "./corrigeDetaille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceFormuleMoivre } from "./index";
 import type { IdVarianteFormuleMoivre } from "./index";
 
@@ -109,75 +109,7 @@ function enoncePapier(e: ExerciceFormuleMoivre): EnoncePapier {
 // Corrigé détaillé.
 // ============================================================================
 
-/** Substitution sin²(x) = 1 − cos²(x), terme à terme : chaque terme ±C·cosᵖ(x)·sin²ᵐ(x) devient
- * ±C·cosᵖ(x)·(1 − cos²(x))ᵐ. `decalage` = 1 pour sin(nx)/sin(x) (un facteur sin(x) déjà retiré). */
-function substitutionLatex(termes: TermeDeveloppementMoivre[], signe: (t: TermeDeveloppementMoivre) => number, decalage: number): string {
-  return termes
-    .map((terme, i) => {
-      const m = (terme.k - decalage) / 2;
-      const facteurs = [
-        terme.coefBinomial === 1 ? "" : `${terme.coefBinomial}`,
-        terme.puissanceCos === 0 ? "" : terme.puissanceCos === 1 ? "\\cos(x)" : `\\cos^{${terme.puissanceCos}}(x)`,
-        m === 0 ? "" : m === 1 ? "\\left(1-\\cos^2(x)\\right)" : `\\left(1-\\cos^2(x)\\right)^{${m}}`,
-      ].filter((x) => x !== "");
-      const corps = facteurs.length === 0 ? "1" : facteurs.join("");
-      const s = signe(terme);
-      return `${s < 0 ? "-" : i === 0 ? "" : "+"}${corps}`;
-    })
-    .join("");
-}
-
-function piege(e: ExerciceFormuleMoivre, phase: PhaseFormuleMoivre): string {
-  if (phase === "ecran1") return `Oublier les coefficients binomiaux : ce sont ceux de la ligne ${e.n} du triangle de Pascal.`;
-  if (phase === "ecran2") return "Mal simplifier les puissances de i : i² = −1 et i³ = −i, donc les signes alternent d'un terme réel (ou imaginaire) au suivant.";
-  if (e.cible === "cosSeul") return e.n >= 4 ? "Développer (1 − cos²(x))² comme 1 − cos⁴(x) : c'est 1 − 2cos²(x) + cos⁴(x)." : "Remplacer sin²(x) par 1 + cos²(x) au lieu de 1 − cos²(x).";
-  if (e.cible === "sinSurSin") return "Oublier de diviser chaque terme par sin(x), ou laisser des puissances paires de sin(x) sans les remplacer.";
-  return `Garder le facteur i dans sin(${e.n}x) : sin(${e.n}x) est le coefficient de i, un nombre réel.`;
-}
-
-function lignesEtape(e: ExerciceFormuleMoivre, phase: PhaseFormuleMoivre, sq: string): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [];
-  if (phase === "ecran1") {
-    const coefs = e.termes.map((x) => x.coefBinomial).join(",\\ ");
-    lignes.push({
-      label: "Méthode",
-      sousQuestion: sq,
-      fragments: [t("Binôme de Newton, avec les coefficients de la ligne "), f(`${e.n}`), t(" du triangle de Pascal : "), f(`C_{${e.n}}^{0},\\ \\ldots,\\ C_{${e.n}}^{${e.n}}=${coefs}`), t(".")],
-    });
-  } else if (phase === "ecran2") {
-    const a1 = aideNiveau1(e, phase);
-    const a2 = aideNiveau2(e, phase);
-    lignes.push({ label: "Méthode", sousQuestion: sq, fragments: [t("Les puissances de i se répètent tous les 4 exposants : "), ...(a1.latex ? [f(a1.latex)] : [])] });
-    if (a2.latex) lignes.push({ label: "Calcul", sousQuestion: sq, fragments: [t("Premiers termes : "), f(a2.latex), t(" ; et de même pour les suivants.")] });
-  } else if (e.cible === "standard") {
-    lignes.push({
-      label: "Méthode",
-      sousQuestion: sq,
-      fragments: [t("Par la formule de Moivre, "), f(`\\cos(${nx(e)})`), t(" est la partie réelle du développement et "), f(`\\sin(${nx(e)})`), t(" le coefficient de i.")],
-    });
-  } else {
-    const reels = e.termes.filter((x) => x.k % 2 === 0);
-    const imaginaires = e.termes.filter((x) => x.k % 2 === 1);
-    lignes.push({ label: "Méthode", sousQuestion: sq, fragments: [t("On remplace chaque puissance paire de sin(x) grâce à "), f("\\sin^2(x)=1-\\cos^2(x)"), t(", puis on développe et on regroupe.")] });
-    if (e.cible === "cosSeul") {
-      lignes.push({ label: "Calcul", sousQuestion: sq, fragments: [f(`\\cos(${nx(e)})=${sansTexte(formatReponseAttenduePhaseLatex(e, "ecran2")[0])}`), t(" ; donc "), f(`\\cos(${nx(e)})=${substitutionLatex(reels, (x) => x.reI, 0)}`)] });
-    } else {
-      const sinNx = aideNiveau2(e, phase).latex ?? "";
-      lignes.push({
-        label: "Calcul",
-        sousQuestion: sq,
-        fragments: [t("Coefficient de i : "), f(sinNx), t(" ; on divise par sin(x) : "), f(`\\dfrac{\\sin(${nx(e)})}{\\sin(x)}=${substitutionLatex(imaginaires, (x) => x.imI, 1)}`)],
-      });
-    }
-  }
-  lignes.push({ label: "Conclusion", sousQuestion: sq, fragments: reponse(e, phase) });
-  lignes.push({ label: "Piège", sousQuestion: sq, fragments: [t(piege(e, phase))] });
-  return lignes;
-}
-
-function correctionDetaillee(e: ExerciceFormuleMoivre): EtapeCorrection[] {
-  return phasesPourExercice(e).flatMap((phase, i) => lignesEtape(e, phase, LETTRES[i]));
-}
+const correctionDetaillee = correctionDetailleeFormuleMoivre;
 
 function difficulte(e: ExerciceFormuleMoivre): 1 | 2 | 3 {
   return e.n >= 5 || e.cible !== "standard" ? 3 : 2;
@@ -199,7 +131,7 @@ function bareme(e: ExerciceFormuleMoivre): BaremeExercice {
       { sousQuestion: "b", critere: [t("Puissances de i simplifiées, termes réels et imaginaires séparés")], points: 1 },
       ...criteresFinaux,
     ],
-    erreursFrequentes: phasesPourExercice(e).map((phase) => ({ description: [t(piege(e, phase))], cout: "−1" })),
+    erreursFrequentes: phasesPourExercice(e).map((phase) => ({ description: piegeEtape(e, phase), cout: "−1" })),
     reponsesAcceptees: [[t("Termes écrits dans un autre ordre"), ...(e.cible === "standard" ? [] : [t(" ; polynôme non ordonné mais réduit")])]],
   };
 }

@@ -1,19 +1,12 @@
 import { argumentZ, cosZ, sinZ } from "../../core6e/deuxEcrituresComplexe";
 import type { ExerciceDeuxEcritures } from "../../core6e/deuxEcrituresComplexe";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { PHASES_DEUX_ECRITURES } from "../../moteur6e/typesDeuxEcritures";
 import {
-  calculAlgebriqueLatex,
-  calculArgumentFacteurLatex,
-  calculArgumentZLatex,
-  calculIdentificationLatex,
-  calculModuleFacteurLatex,
-  calculModuleZLatex,
   consigneEcran,
   consigneGenerale,
   douziemeLatex,
-  facteurLatex,
   formeAlgebriqueLatex,
   formeTrigonometriqueLatex,
   reponseFragments,
@@ -23,6 +16,7 @@ import {
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDeuxEcritures } from "./index";
 import type { IdVarianteDeuxEcritures } from "./index";
 import { profilDeuxEcritures } from "./profilEvaluation";
+import { correctionDetailleeDeuxEcritures } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceDeuxEcritures>` de `6gen94` « Valeurs exactes par
@@ -80,35 +74,7 @@ function enoncePapier(e: ExerciceDeuxEcritures): EnoncePapier {
 // Corrigé détaillé.
 // ============================================================================
 
-function correctionDetaillee(e: ExerciceDeuxEcritures): EtapeCorrection[] {
-  const quotient = e.variante === "quotient";
-  const th = argumentZ(e);
-  const lignes: EtapeCorrection[] = [
-    quotient
-      ? { label: "Méthode", sousQuestion: "a", fragments: [t("On multiplie le numérateur et le dénominateur par le conjugué du dénominateur, qui devient réel : "), f("(c+di)(c-di)=c^2+d^2"), t(".")] }
-      : { label: "Méthode", sousQuestion: "a", fragments: [t("On développe le produit terme à terme et on remplace "), f("i^2"), t(" par "), f("-1"), t(".")] },
-    { label: "Calcul", sousQuestion: "a", fragments: [f(calculAlgebriqueLatex(e))] },
-    { label: "Méthode", sousQuestion: "b", fragments: [t("Module "), f("r=\\sqrt{a^2+b^2}"), t(", puis l'angle "), f("\\theta"), t(" tel que "), f("\\cos\\theta=\\dfrac{a}{r}"), t(" et "), f("\\sin\\theta=\\dfrac{b}{r}"), t(" (angle remarquable).")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [f(`z_1=${facteurLatex(e.z1)}`), t(" : "), f(calculModuleFacteurLatex(e.z1, "z_1")), t(" et "), f(calculArgumentFacteurLatex(e.z1, "1")), t(".")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [f(`z_2=${facteurLatex(e.z2)}`), t(" : "), f(calculModuleFacteurLatex(e.z2, "z_2")), t(" et "), f(calculArgumentFacteurLatex(e.z2, "2")), t(".")] },
-    {
-      label: "Méthode",
-      sousQuestion: "c",
-      fragments: quotient
-        ? [t("Un quotient divise les modules et soustrait les arguments : "), f("\\left|\\dfrac{z_1}{z_2}\\right|=\\dfrac{|z_1|}{|z_2|}"), t(" et "), f("\\arg\\dfrac{z_1}{z_2}=\\arg z_1-\\arg z_2"), t(".")]
-        : [t("Un produit multiplie les modules et additionne les arguments : "), f("|z_1z_2|=|z_1|\\cdot|z_2|"), t(" et "), f("\\arg(z_1z_2)=\\arg z_1+\\arg z_2"), t(".")],
-    },
-    { label: "Calcul", sousQuestion: "c", fragments: [f(calculModuleZLatex(e)), t(" et "), f(calculArgumentZLatex(e)), t(".")] },
-    { label: "Conclusion", sousQuestion: "c", fragments: [f(`z=${formeTrigonometriqueLatex(e)}`), t(".")] },
-    { label: "Méthode", sousQuestion: "d", fragments: [t("Les deux écritures désignent le même nombre : "), f(`${formeTrigonometriqueLatex(e)}=${formeAlgebriqueLatex(e)}`), t(". On identifie les parties réelles, puis les parties imaginaires.")] },
-    { label: "Calcul", sousQuestion: "d", fragments: [f(calculIdentificationLatex(e, "cos")), t(" et "), f(calculIdentificationLatex(e, "sin")), t(" (on multiplie le numérateur et le dénominateur par "), f("\\sqrt{2}"), t(").")] },
-    { label: "Conclusion", sousQuestion: "d", fragments: [f(valeursFinalesLatex(e)), t(".")] },
-    quotient
-      ? { label: "Piège", sousQuestion: "c", fragments: [t("Additionner les arguments d'un quotient : "), f("\\arg\\dfrac{z_1}{z_2}=\\arg z_1-\\arg z_2"), t(", dans cet ordre ; une somme donnerait un autre angle, donc d'autres valeurs de "), f(trigLatex("cos", th)), t(" et "), f(trigLatex("sin", th)), t(".")] }
-      : { label: "Piège", sousQuestion: "d", fragments: [t("Oublier le module en identifiant : "), f("r\\cos\\theta=\\mathrm{Re}(z)"), t(", donc "), f("\\cos\\theta=\\dfrac{\\mathrm{Re}(z)}{r}"), t(" ; ici "), f("r\\neq1"), t(", recopier la partie réelle ne donne pas le cosinus.")] },
-  ];
-  return lignes;
-}
+const correctionDetaillee = correctionDetailleeDeuxEcritures;
 
 function difficulte(): 1 | 2 | 3 {
   return 3;

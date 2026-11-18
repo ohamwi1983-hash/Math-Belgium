@@ -31,7 +31,8 @@ import {
   type EnteteEvaluation,
   type ItemEvaluation,
 } from "./assemblerEvaluationHtml";
-import type { BlocCorrection, EtapeCorrection } from "./genererFeuilleExercices";
+import type { BlocCorrection, EtapeCorrection, LigneCalcul } from "./genererFeuilleExercices";
+import { decouperLigneCalcul, estLignePiege } from "./corrigeTableau";
 
 /**
  * Export Word (.docx) d'une série d'évaluation, pour que le professeur puisse retoucher les
@@ -255,21 +256,64 @@ async function questionsDocx(entete: EnteteEvaluation, items: ItemEvaluation[], 
 
 const COULEUR_CORRIGE = "1155CC";
 
+const SANS_BORD = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" } as const;
+const BORDS_INVISIBLES = { top: SANS_BORD, bottom: SANS_BORD, left: SANS_BORD, right: SANS_BORD, insideHorizontal: SANS_BORD, insideVertical: SANS_BORD };
+
+/** Chaîne de calcul « comme au tableau » : tableau sans bordure à trois colonnes (membre de gauche
+ * aligné à droite, relation et suite alignées à gauche — les « = » tombent les uns sous les autres —,
+ * justification en petit italique), lignes jamais coupées d'une page à l'autre. */
+async function calculDocx(lignes: LigneCalcul[]): Promise<Table> {
+  const avecJustif = lignes.some((l) => l.justification !== undefined);
+  const largeurs = avecJustif ? [2600, 4300, 2400] : [3000, 6300];
+  const rangees: TableRow[] = [];
+  for (const l of lignes) {
+    const { gauche, droite } = decouperLigneCalcul(l.latex);
+    const cell = (enfants: ParagraphChild[], largeur: number, alignement?: (typeof AlignmentType)[keyof typeof AlignmentType], colonnes?: number) =>
+      new TableCell({ children: [new Paragraph({ children: enfants, alignment: alignement })], width: { size: largeur, type: WidthType.DXA }, columnSpan: colonnes, borders: BORDS_INVISIBLES });
+    const cellules: TableCell[] =
+      droite === null
+        ? [cell(await fragmentsVersRunsDocx([{ type: "latex", valeur: gauche }]), largeurs[0] + largeurs[1], AlignmentType.LEFT, 2)]
+        : [
+            cell(gauche ? await fragmentsVersRunsDocx([{ type: "latex", valeur: gauche }]) : [], largeurs[0], AlignmentType.RIGHT),
+            cell(await fragmentsVersRunsDocx([{ type: "latex", valeur: `{}${droite}` }]), largeurs[1], AlignmentType.LEFT),
+          ];
+    if (avecJustif) {
+      const j = l.justification === undefined ? [] : typeof l.justification === "string" ? [{ type: "texte" as const, valeur: l.justification }] : l.justification;
+      const runs: ParagraphChild[] = [];
+      for (const f of j) runs.push(...(f.type === "texte" ? [new TextRun({ text: f.valeur, italics: true, size: 16, color: GRIS })] : await fragmentsVersRunsDocx([f])));
+      cellules.push(cell(runs, largeurs[2], AlignmentType.LEFT));
+    }
+    rangees.push(new TableRow({ children: cellules, cantSplit: true }));
+  }
+  return new Table({ rows: rangees, columnWidths: largeurs, borders: BORDS_INVISIBLES, indent: { size: 240, type: WidthType.DXA } });
+}
+
 async function lignesEtapesDocx(etapes: EtapeCorrection[]): Promise<FileChild[]> {
   const enfants: FileChild[] = [];
-  const estPiege = (e: EtapeCorrection) => e.label.trim().toLowerCase() === "piège";
-  for (const e of etapes.filter((x) => !estPiege(x))) {
+  for (const e of etapes.filter((x) => !estLignePiege(x))) {
     const lbl = `${e.sousQuestion ? `${e.sousQuestion.replace(/\)$/, "")}) ` : ""}${e.label}`.trim();
-    enfants.push(
-      new Paragraph({
-        children: [...(lbl ? [new TextRun({ text: `${lbl}  `, bold: true, color: ACCENT, size: 18 })] : []), ...(await fragmentsVersRunsDocx(e.fragments))],
-        spacing: { before: 40 },
-        indent: { left: 240 },
-      }),
-    );
+    const bordResultat = { style: BorderStyle.SINGLE, size: 10, color: ACCENT, space: 3 } as const;
+    const runsLbl = lbl ? [new TextRun({ text: `${lbl}  `, bold: true, color: ACCENT, size: 18 })] : [];
+    if (e.type === "resultat") {
+      // Résultat encadré : étiquette sur sa ligne, puis le résultat dans un cadre.
+      enfants.push(new Paragraph({ children: runsLbl, spacing: { before: 40 }, indent: { left: 240 }, keepNext: true }));
+      enfants.push(
+        new Paragraph({
+          children: await fragmentsVersRunsDocx(e.fragments),
+          border: { top: bordResultat, bottom: bordResultat, left: bordResultat, right: bordResultat },
+          shading: { type: ShadingType.CLEAR, color: "auto", fill: "F2F7FC" },
+          spacing: { before: 20, after: 40 },
+          indent: { left: 480, right: 2400 },
+        }),
+      );
+    } else {
+      const texteLigne = await fragmentsVersRunsDocx(e.fragments);
+      enfants.push(new Paragraph({ children: [...runsLbl, ...texteLigne], spacing: { before: 40 }, indent: { left: 240 }, keepNext: !!e.calcul?.length }));
+    }
+    if (e.calcul?.length) enfants.push(await calculDocx(e.calcul));
     if (e.figureHtml) enfants.push(...(await htmlVersParagraphes(e.figureHtml)));
   }
-  for (const e of etapes.filter(estPiege)) {
+  for (const e of etapes.filter(estLignePiege)) {
     enfants.push(
       new Paragraph({
         children: [new TextRun({ text: "PIÈGE  ", bold: true, color: ALERTE, size: 18 }), ...(await fragmentsVersRunsDocx(e.fragments))],

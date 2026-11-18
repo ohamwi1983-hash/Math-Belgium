@@ -2,6 +2,8 @@
 paths:
   - "src/entrainement/export/**"
   - "src/entrainement/**/exportEvaluation.ts"
+  - "src/entrainement/**/corrigeDetaille.ts"
+  - "src/entrainement/components/CorrigeDetailleEcran.tsx"
   - "src/lib/evaluationLocal.ts"
   - "src/lib/evaluationRemediation.ts"
   - "src/lib/evaluationPayload.ts"
@@ -45,7 +47,7 @@ Chaque `generateurs*/**/exportEvaluation.ts` du chapitre remplit, en plus de
 | --- | --- |
 | `difficulte` | 1–3 étoiles (★ application directe, ★★ plusieurs étapes, ★★★ réflexion), selon l'instance. |
 | `reponseBreve` | Résultat seul (page « Je vérifie »). Pas de lettres a)/b) si l'énoncé papier n'en a pas. |
-| `correctionDetaillee` | `EtapeCorrection[]` : `label` court (Méthode, Calcul, Condition, Conclusion, Piège…), `sousQuestion` = lettre de l'ÉTAPE (« a », « b »… dans l'ordre des écrans). Une ligne « Piège » ciblée. |
+| `correctionDetaillee` | `EtapeCorrection[]` : `label` court (Méthode, Calcul, Condition, Conclusion, Piège…), `sousQuestion` = lettre de l'ÉTAPE (« a », « b »… dans l'ordre des écrans). Une ligne « Piège » ciblée. Format « comme au tableau » (typé, calculs alignés) : voir la section dédiée plus bas — obligatoire pour tout chapitre migré. |
 | `EtapeCorrection.figureHtml` | Figure SVG autonome sous une ligne du corrigé : tout exercice dont la réponse est un GRAPHIQUE (polygone des effectifs cumulés avec lecture de Q₁/Q₂/Q₃, boîte à moustaches attendue, courbes annotées…) la montre dans le corrigé détaillé — sinon elle disparaît, car `correctionDetaillee` remplace l'ancien corrigé. Jamais dans l'énoncé ni la version aménagée. |
 | `bareme` | `reponseFinale`, `criteres` (poids, somme ≈ 4, `sousQuestion` = étape), `erreursFrequentes` (avec `cout`), `reponsesAcceptees`. |
 | `enoncePapier` | `EnoncePapier` : `section` (énoncé + consigne globale ; `questions: []` sauf vraies questions), `etapesParQuestion` (lettres d'étapes couvertes par chaque question papier), `reponseBreve` alignée si celle de l'adaptateur est découpée par étape. |
@@ -288,6 +290,70 @@ codes, aménagée si cochée) intitulée « Remédiation — <titre sans « Éva
   n'est pas enregistrée automatiquement ; ses exercices vont dans l'historique comme toute génération.
 - Vérifié (Playwright, 5 chapitres 4e/5e/6e, toutes questions, n = 3) : numérotation identique à la
   copie A, mêmes générateurs/variantes/profils, 0 énoncé repris, 0 doublon, vrai/faux disjoints.
+
+## Corrigé détaillé — comme au tableau (pilote : 6e, chapitre 5)
+
+Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feuilles d'exercices et des
+évaluations ne saute plus d'étape. Migré sur les 16 générateurs du chapitre 5 de 6e (6gen34–42,
+6gen93–99) ; les autres adaptateurs s'affichent comme avant (contrat rétrocompatible).
+
+**Chaque étape (= écran du générateur, lettre `sousQuestion`) contient, dans cet ordre :**
+1. **Ce qu'on utilise** (`utilise`) : propriété / formule / méthode, avec le renvoi « (cours, § n) »
+   (numéro `number` de la section du chapitre) quand c'est pertinent ;
+2. **Calcul** (`calcul`) : UNE transformation par ligne (`ligne(latex, justification)`), lignes
+   alignées sur leur premier signe de relation (une ligne qui commence par « = » continue la
+   précédente), règle utilisée à droite en petit italique (« on distribue », « car i² = −1 »,
+   « on ajoute un tour, 2π = 8π/4 »). On ne saute que le calcul mental élémentaire. Jamais de « ; »
+   entre deux égalités, jamais une ligne « Calcul » qui dit quoi faire sans le faire. Plusieurs
+   blocs possibles dans une étape, avec un intitulé (`calcul(sq, lignes, intro, "Module")`) ;
+3. **Résultat** (`resultat`), encadré (la réponse de l'écran, `formatReponseAttenduePhaseLatex…`) ;
+4. **Vérification** (`verification`) quand elle est simple et parlante (substituer, recalculer un
+   module, somme des racines nulle, valeur en x = π/3…) ;
+5. **Piège** (`piege`), rattaché à SON étape (il s'affiche dans l'étape, plus à la fin).
+Une étape de pure lecture ou de verdict peut n'avoir que « Ce qu'on utilise » + « Résultat ».
+Typographie inchangée (« − », `{,}`, KaTeX, aucune notation clavier dans les justifications : une
+formule y passe en fragments `[texte("car "), latex("i^{3}=-i")]`).
+
+**Mécanique (commune à tous les chapitres) :**
+- Contrat `EtapeCorrection` (`export/genererFeuilleExercices.ts`) : champs optionnels `type`
+  (`utilise | calcul | resultat | verification | piege`) et `calcul: LigneCalcul[]`
+  (`{ latex, justification? }`). Constructeurs et outils dans `export/corrigeTableau.ts` :
+  `utilise`, `calcul`, `resultat`, `verification`, `piege`, `ligne`, `texte`/`latex` (SANS `docx`),
+  `decouperLigneCalcul` (coupe au premier « = », `\approx`, `<`, `\notin`… de niveau 0),
+  `lignesDepuisChaine` (éclate une chaîne « A=B=C » d'une fonction de l'écran en lignes alignées,
+  avec une justification par égalité), `lignesDeLEtape`, `lettreEtape`.
+- Rendu partagé : HTML `assemblerEvaluationHtml.ts::calculHtml` (grille 3 colonnes membre de
+  gauche / suite / justification, `.calcul` insécable entre deux pages, KaTeX en ligne qui passe à
+  la ligne dans sa cellule — mesuré : 0 formule coupée à 680, 820 et 1280 px), résultat
+  `.resultat .cadre` ; Word `evaluationDocx.ts::calculDocx` (tableau sans bordure, rangées
+  insécables, résultat dans un paragraphe encadré) ; écran `components/CorrigeDetailleEcran.tsx`.
+- **Même source pour le papier et l'écran** : le corrigé de chaque générateur vit dans
+  `generateurs*/<générateur>/corrigeDetaille.ts` (jamais dans `exportEvaluation.ts`, qui importe
+  `docx`), importé par l'adaptateur ET par l'appli. L'appli passe
+  `corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correction(exercice), lettreEtape(indexEcran))} />`
+  dans son objet `validation` (`ValidationEtapeProps.corrigeDetaille`, affiché par `ValidationEcran`
+  sous la réponse attendue quand elle est révélée) — aucun composant d'écran à modifier.
+  Adaptateur enveloppé par `avecFractionsNormalisees` (6gen37, 6gen39) : l'appli applique le même
+  enveloppement.
+- Briques du chapitre « complexes » (`6e-6h/ui6e/corrigeComplexes.ts`, réutilisables) : produit,
+  carré, division par le conjugué (dénominateur réel → division directe), somme, quotient
+  `z = N/D`, racine carrée par identification, angles kπ/d ramenés dans ]−π ; π] ligne à ligne
+  (`lignesRamenerAngle`), écritures exactes (`frac`, `cq`, `cv`, `parP`). Figures papier sans
+  `docx` : `ui6e/papierComplexes.ts` (réexportées par `racinesNiemes/exportEvaluation.ts`).
+- Valeurs intermédiaires toujours CALCULÉES depuis l'instance (jamais recopiées) ; quand l'écran a
+  déjà une chaîne de calcul (`calculEtape`, `calculModuleLatex`…), l'éclater avec
+  `lignesDepuisChaine` plutôt que la réécrire. Attention aux chaînes d'écran qui abusent du « = »
+  (« 17π/12 = 17π/12 − 2π » dans `calculArgumentZLatex` de 6gen94) : couper avant et réécrire.
+- Pièges LaTeX trouvés par le contrôle : `\cdot${x}` collé à une lettre (`\cdoti`) → toujours
+  `\cdot ` suivi d'une espace ; facteur « 2i » non parenthésé devant un exposant (`2i^2`) → `parP`.
+
+**Vérification (collecteur, ≥ 80 tirages + 12 par variante) :** chaque étape a « Ce qu'on
+utilise » et « Résultat » ; aucune ligne non typée ; aucune ligne de calcul sans relation ; aucun
+« ; » entre deux égalités ; KaTeX valide (`throwOnError`) ; pas de `NaN`/`undefined`/notation
+clavier ; et **contrôle numérique de chaque égalité** : un évaluateur LaTeX → complexe (fractions,
+racines, puissances, i, π, cos/sin, e^{iθ}, modules) compare les membres successifs de chaque
+chaîne ; pour les identités trigonométriques (6gen38, 6gen93) la variable x est remplacée par 0,7.
+Outils du pilote : `collecteur.ts`, `evalLatex.ts` (dossier de travail du chantier, à recopier).
 
 ## Vérification avant de pousser
 
