@@ -90,7 +90,7 @@ export interface EnteteEvaluation {
 }
 
 /**
- * Annexe imprimée en fin de document (copie d'évaluation, version aménagée, feuille d'exercices —
+ * Annexe imprimée après l'énoncé (copie d'évaluation, version aménagée, feuille d'exercices —
  * jamais le corrigé ni la grille) : une page par annexe, chacune UNE seule fois.
  *
  * Mécanisme générique (liste d'annexes du document, construite par
@@ -716,12 +716,13 @@ export async function genererFeuilleExercicesComplete(entete: EnteteEvaluation, 
   const enonce = `${enteteFeuilleHtml(entete, "Feuille d'exercices")}
 ${legende}
 ${deuxColonnes ? `<div class="deux-colonnes">${exercices}</div>` : exercices}`;
-  // Annexes (formulaire…) : une fois, à la fin de la feuille.
-  const corps = `${deuxColonnes ? `<div class="page-compacte">${enonce}</div>` : enonce}
+  // Annexes (formulaire…) : une fois, juste après l'énoncé (décision de l'utilisateur : l'élève les
+  // consulte sans feuilleter « Je vérifie » ni le corrigé).
+  const corps = `${deuxColonnes ? `<div class="page-compacte">${enonce}</div>` : enonce}${annexesHtml(annexes)}
 <div class="saut-page"></div>
 ${pageJeVerifieHtml(entete, numerotes)}
 <div class="saut-page"></div>
-${pageCorrigeFeuilleHtml(numerotes)}${annexesHtml(annexes)}`;
+${pageCorrigeFeuilleHtml(numerotes)}`;
   const css = `${stylePied(null, "Archivo, Arial, sans-serif")}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}`;
   const doc = documentHtml(`${titreNettoye(entete)} — Feuille d'exercices`, corps, STYLE_FEUILLE, cssKatex, "standard", css);
   return new Blob([doc], { type: "text/html;charset=utf-8" });

@@ -219,8 +219,9 @@ Décisions de l'utilisateur (maquettes validées, lots A1–A4) :
 Toutes décochées par défaut ; un plan enregistré sans le champ se recharge avec « non ».
 
 - **« Joindre le formulaire du chapitre en annexe »** (`joindreFormulaire`) : une page « Annexe —
-  Formulaire : <chapitre> » à la FIN de la copie d'évaluation, de l'aménagée et de la feuille
-  d'exercices (après son corrigé) — jamais du corrigé ni de la grille. Une annexe par chapitre du
+  Formulaire : <chapitre> » à la FIN de la copie d'évaluation et de l'aménagée ; dans la feuille
+  d'exercices, JUSTE APRÈS L'ÉNONCÉ, avant « Je vérifie » et le corrigé (décision de l'utilisateur :
+  l'élève la consulte sans feuilleter le corrigé) — jamais dans le corrigé ni la grille. Une annexe par chapitre du
   plan qui a un `formulaire`, dans l'ordre du plan. Rendu `export/annexesPapier.ts::annexeFormulaire`
   (RichText → KaTeX, deux colonnes comme le « Formulaire seul » du site, une seule colonne dans
   l'aménagée).
