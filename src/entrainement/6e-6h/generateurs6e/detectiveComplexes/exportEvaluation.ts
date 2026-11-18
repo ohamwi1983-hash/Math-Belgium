@@ -4,17 +4,17 @@ import type {
   BlocCorrection,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDetectiveComplexes } from "../../core6e/detectiveComplexes.types";
-import { correction, descriptionCorrecte, indiceLigneFausse } from "../../moteur6e/modeleDetectiveComplexes";
-import { CONSIGNE_GENERALE, consignesEcrans, constat, descriptionFragments, enonceExercice, lignesCopie, nomErreur, piege, reponseFragments, souderPonctuation } from "../../ui6e/formatDetectiveComplexes";
+import { indiceLigneFausse } from "../../moteur6e/modeleDetectiveComplexes";
+import { CONSIGNE_GENERALE, consignesEcrans, enonceExercice, lignesCopie, nomErreur, reponseFragments, souderPonctuation } from "../../ui6e/formatDetectiveComplexes";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveComplexes } from "./index";
 import { profilDetectiveComplexes } from "./profil";
+import { correctionDetailleeDetective } from "./corrigeDetaille";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de 6gen99 « Détective d'erreurs : nombres
@@ -62,25 +62,7 @@ function reponseBreve(e: ExerciceDetectiveComplexes): FragmentConsigne[] {
   return souderPonctuation([texte(`Ligne ${indiceLigneFausse(e) + 1} fausse (${nomErreur(e)}) ; `), ...reponseFragments(e)]);
 }
 
-function correctionDetaillee(e: ExerciceDetectiveComplexes): EtapeCorrection[] {
-  const i = indiceLigneFausse(e);
-  const etapes: EtapeCorrection[] = [
-    { label: "Contrôle", sousQuestion: "a", fragments: constat(e) },
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte(`La ligne ${i + 1} est fausse.`)] },
-    { label: "Erreur", sousQuestion: "b", fragments: descriptionFragments(descriptionCorrecte(e), e) },
-  ];
-  /** « Ligne n corrigée : … » : minuscule après les deux-points. */
-  const enMinuscule = (ligne: FragmentConsigne[]): FragmentConsigne[] =>
-    ligne.map((f, j) => (j === 0 && f.type === "texte" && /^[A-ZÉ][a-zé]/.test(f.valeur) ? { ...f, valeur: f.valeur[0]!.toLowerCase() + f.valeur.slice(1) } : f));
-  // La résolution corrigée, à partir de la ligne fausse ; les lignes suivantes sont reprises.
-  const lignes = correction(e).slice(i).map(souderPonctuation);
-  lignes.forEach((ligne, k) => {
-    etapes.push({ label: k === 0 ? "Correction" : "Calcul", sousQuestion: "c", fragments: souderPonctuation(k === 0 ? [texte(`Ligne ${i + 1} corrigée : `), ...enMinuscule(ligne)] : ligne) });
-  });
-  etapes.push({ label: "Conclusion", sousQuestion: "c", fragments: souderPonctuation(reponseFragments(e)) });
-  etapes.push({ label: "Piège", sousQuestion: "b", fragments: piege(e) });
-  return etapes;
-}
+const correctionDetaillee = correctionDetailleeDetective;
 
 function construireCorrection(e: ExerciceDetectiveComplexes): BlocCorrection[] {
   return [{ type: "paragraphe", fragments: reponseBreve(e) }];

@@ -18,6 +18,9 @@ import { EtapeCorrectionDetectiveComplexes } from "./components6e/EtapeCorrectio
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { correctionDetailleeDetective } from "./generateurs6e/detectiveComplexes/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * 6gen99 — « Détective d'erreurs : nombres complexes » (6e, chapitre 5 « Nombres complexes »,
@@ -145,6 +148,7 @@ export function App6gen99() {
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetective(e), lettreEtape(ecran))} />,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

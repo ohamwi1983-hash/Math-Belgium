@@ -35,6 +35,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeRegions } from "./generateurs6e/regionsPlanComplexe/corrigeDetaille";
+import { PHASES_REGIONS } from "./moteur6e/typesRegionsPlanComplexe";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen98` — « Régions du plan complexe » (6e, chapitre 5, section « Problèmes avancés »,
@@ -148,6 +152,7 @@ export function App6gen98() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeRegions(exercice), lettreEtape(PHASES_REGIONS.indexOf(phase)))} />,
         reponseAttendue: reponseAttendue(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

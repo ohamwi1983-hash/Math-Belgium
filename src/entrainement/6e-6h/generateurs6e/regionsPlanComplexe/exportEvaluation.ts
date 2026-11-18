@@ -4,14 +4,13 @@ import type {
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { PHASES_REGIONS } from "../../moteur6e/typesRegionsPlanComplexe";
 import type { PhaseRegions } from "../../moteur6e/typesRegionsPlanComplexe";
-import { calculEtape, conclusionTest, conditionsFragments, methodeFragments, piegeEtape, reponseFragments, t } from "../../ui6e/formatRegionsPlanComplexe";
-import { figureCorrigeSvg } from "../../ui6e/figureRegionsPlanComplexe";
+import { conditionsFragments, reponseFragments, t } from "../../ui6e/formatRegionsPlanComplexe";
+import { correctionDetailleeRegions } from "./corrigeDetaille";
 import { LIBELLE_CAS_REGIONS, profilRegions } from "./profilEvaluation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRegions } from "./index";
 
@@ -85,23 +84,7 @@ function enoncePapier(e: ExerciceRegions): EnoncePapier {
   };
 }
 
-function correctionDetaillee(e: ExerciceRegions): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [];
-  for (const phase of PHASES_REGIONS) {
-    const sousQuestion = LETTRES[phase];
-    lignes.push({ label: "Méthode", sousQuestion, fragments: methodeFragments(e, phase) });
-    calculEtape(e, phase).forEach((c) => lignes.push({ label: phase === "region" ? "Test" : "Calcul", sousQuestion, fragments: [{ type: "latex", valeur: c }] }));
-    if (phase === "region") lignes.push({ label: "Test", sousQuestion, fragments: conclusionTest(e) });
-    lignes.push({ label: "Piège", sousQuestion, fragments: piegeEtape(e, phase) });
-    lignes.push({
-      label: "Conclusion",
-      sousQuestion,
-      fragments: reponseFragments(e, phase),
-      ...(phase === "region" ? { figureHtml: figureCorrigeSvg(e) } : {}),
-    });
-  }
-  return lignes;
-}
+const correctionDetaillee = correctionDetailleeRegions;
 
 function difficulte(e: ExerciceRegions): 1 | 2 | 3 {
   if (e.variante === "intersection") return 3;

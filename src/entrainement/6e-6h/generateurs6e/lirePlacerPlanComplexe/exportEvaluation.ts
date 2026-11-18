@@ -4,7 +4,6 @@ import type {
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -12,25 +11,19 @@ import { argumentCLatex } from "../../moteur6e/modeleLirePlacerPlanComplexe";
 import { PHASES_LIRE_PLACER } from "../../moteur6e/typesLirePlacerPlanComplexe";
 import type { PhaseLirePlacer } from "../../moteur6e/typesLirePlacerPlanComplexe";
 import {
-  JUSTIFICATION_TRANSFORMATION,
   NOMS_IMAGES,
   OPERATION_LATEX,
   PIEGE_OPERATION,
-  affixeLatex,
-  aideNiveau1,
-  calculModuleArgument,
-  calculPlacement,
   consigneEcran,
   coordonneesLatex,
   imageDe,
-  justificationArgument,
   l,
-  piegeAssocier,
   reponseFragments,
   t,
 } from "../../ui6e/formatLirePlacerPlanComplexe";
-import { figureCorrigeLirePlacerSvg, figureEnonceLirePlacerSvg } from "../../ui6e/figureLirePlacerPlanComplexe";
+import { figureEnonceLirePlacerSvg } from "../../ui6e/figureLirePlacerPlanComplexe";
 import { LIBELLE_CAS_LIRE_PLACER, profilLirePlacer } from "./profilEvaluation";
+import { correctionDetailleeLirePlacer } from "./corrigeDetaille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLirePlacer } from "./index";
 
 /**
@@ -132,50 +125,7 @@ function enoncePapier(e: ExerciceLirePlacer): EnoncePapier {
   };
 }
 
-function methode(e: ExerciceLirePlacer, phase: PhaseLirePlacer): FragmentConsigne[] {
-  const aide = aideNiveau1(e, phase);
-  return aide.latex ? [t(`${aide.texte} `), l(aide.latex)] : [t(aide.texte)];
-}
-
-function correctionDetaillee(e: ExerciceLirePlacer): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [];
-  // a) Lecture.
-  const lecture = [`A${coordonneesLatex(e.z)}\\ \\Rightarrow\\ z=${affixeLatex(e.z)}`];
-  if (e.w) lecture.push(`B${coordonneesLatex(e.w)}\\ \\Rightarrow\\ w=${affixeLatex(e.w)}`);
-  lignes.push(
-    { label: "Méthode", sousQuestion: "a", fragments: methode(e, "lire") },
-    { label: "Calcul", sousQuestion: "a", fragments: [l(lecture.join("\\qquad "))] },
-    { label: "Piège", sousQuestion: "a", fragments: [t("Échanger partie réelle et partie imaginaire : la partie réelle est l'abscisse (axe horizontal).")] },
-    { label: "Conclusion", sousQuestion: "a", fragments: reponseFragments(e, "lire") },
-  );
-  // b), c) Placement.
-  ([0, 1] as const).forEach((i) => {
-    const phase: PhaseLirePlacer = i === 0 ? "placer1" : "placer2";
-    const sousQuestion = LETTRES[phase];
-    lignes.push(
-      { label: "Méthode", sousQuestion, fragments: methode(e, phase) },
-      { label: "Calcul", sousQuestion, fragments: [l(calculPlacement(e, i))] },
-      { label: "Piège", sousQuestion, fragments: PIEGE_OPERATION[e.operations[i]] },
-      { label: "Conclusion", sousQuestion, fragments: reponseFragments(e, phase), ...(i === 1 ? { figureHtml: figureCorrigeLirePlacerSvg(e) } : {}) },
-    );
-  });
-  // d) Transformations.
-  lignes.push(
-    { label: "Méthode", sousQuestion: "d", fragments: [t("Traduis chaque opération sur un point quelconque d'affixe "), l("a+bi"), t(" (ou sur "), l("z"), t(") et reconnais la transformation :")] },
-    { label: "Calcul", sousQuestion: "d", fragments: [l(e.operations.map((op) => JUSTIFICATION_TRANSFORMATION[op]).join("\\qquad "))] },
-    { label: "Piège", sousQuestion: "d", fragments: piegeAssocier(e) },
-    { label: "Conclusion", sousQuestion: "d", fragments: reponseFragments(e, "associer") },
-  );
-  // e) Module et argument.
-  lignes.push(
-    { label: "Méthode", sousQuestion: "e", fragments: methode(e, "moduleArgument") },
-    { label: "Calcul", sousQuestion: "e", fragments: [l(calculModuleArgument(e))] },
-    { label: "Argument", sousQuestion: "e", fragments: justificationArgument(e) },
-    { label: "Piège", sousQuestion: "e", fragments: [t("Oublier la racine carrée (donner "), l("|z_C|^2"), t("), ou se tromper de quadrant pour l'argument.")] },
-    { label: "Conclusion", sousQuestion: "e", fragments: reponseFragments(e, "moduleArgument") },
-  );
-  return lignes;
-}
+const correctionDetaillee = correctionDetailleeLirePlacer;
 
 function difficulte(e: ExerciceLirePlacer): 1 | 2 | 3 {
   return e.variante === "symetries" ? 1 : 2;
