@@ -4339,6 +4339,9 @@
 }
 .entrainement .corrige-ecran-piege-lbl { flex: none; white-space: nowrap; padding-top: 2px; font-size: 12px; font-weight: 700; color: var(--color-warning); text-transform: uppercase; }
 @media (max-width: 640px) {
-  .entrainement .corrige-ecran-calcul { grid-template-columns: max-content max-content; }
-  .entrainement .corrige-ecran-calcul .cc-j { grid-column: 1 / -1; padding: 0 0 4px 1.2em; }
+  /* La justification passe sous sa ligne et s'enroule sur la largeur de l'écran : `contain:
+   * inline-size` l'empêche d'élargir la grille (sinon une justification longue faisait défiler
+   * tout le bloc et sortait de l'écran — lectures graphiques de 4e ch. 3). */
+  .entrainement .corrige-ecran-calcul { grid-template-columns: max-content minmax(max-content, 1fr); min-width: 100%; }
+  .entrainement .corrige-ecran-calcul .cc-j { grid-column: 1 / -1; padding: 0 0 4px 1.2em; contain: inline-size; }
 }

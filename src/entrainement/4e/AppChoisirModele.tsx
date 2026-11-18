@@ -42,6 +42,9 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeChoisirModele } from "./generateurs/choisirModele/corrigeDetaille";
 
 /**
  * gen69 — « Choisir le bon modèle » (4e, chapitre 3, section `transformer`, processus 3
@@ -180,6 +183,7 @@ export function AppChoisirModele() {
         labelSuivant: ecran === NB_ECRANS - 1 ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerSuivant,
         messageRevele: TENTATIVES_MAX[ecran] === 1 ? "Ce n'était pas la bonne réponse." : undefined,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeChoisirModele(exercice), lettreEtape(ecran))} />,
       }
     : null;
 

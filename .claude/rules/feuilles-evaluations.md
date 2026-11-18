@@ -294,8 +294,9 @@ codes, aménagée si cochée) intitulée « Remédiation — <titre sans « Éva
 ## Corrigé détaillé — comme au tableau (pilote : 6e, chapitre 5)
 
 Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feuilles d'exercices et des
-évaluations ne saute plus d'étape. Migré sur les 16 générateurs du chapitre 5 de 6e (6gen34–42,
-6gen93–99) ; les autres adaptateurs s'affichent comme avant (contrat rétrocompatible).
+évaluations ne saute plus d'étape. **Chapitres migrés** : 6e ch. 5 (pilote, 6gen34–42, 6gen93–99) ;
+4e ch. 3 (gen10–13, gen68–72 — voir « Lectures graphiques et décisions » plus bas). Les autres
+adaptateurs s'affichent comme avant (contrat rétrocompatible).
 
 **Chaque étape (= écran du générateur, lettre `sousQuestion`) contient, dans cet ordre :**
 1. **Ce qu'on utilise** (`utilise`) : propriété / formule / méthode, avec le renvoi « (cours, § n) »
@@ -390,6 +391,59 @@ Contrôles ajoutés au lot 6gen42 : étape sans « Calcul » (6gen42), et tout �
 ou d'une parenthèse dans un texte (justification, « Ce qu'on utilise »…) — il a trouvé « argument
 -π/2 » dans le corrigé de 6gen37 (corrigé).
 Outils du pilote : `collecteur.ts`, `evalLatex.ts` (dossier de travail du chantier, à recopier).
+
+**Lectures graphiques et décisions (4e ch. 3, 9 générateurs).** Toute étape a un bloc « Calcul »
+(collecteur : 0 étape sans calcul), y compris les lectures et les verdicts. Conventions :
+- **Lecture** = une ligne par chose lue, AVEC une relation, la justification dit où on lit :
+  `x=-2` « asymptote verticale », `f(3)=0` « la courbe coupe Ox en x = 3 », `x\in]2;4[` « aucun
+  tracé : exclus », `f(2)=f(5)=4` « palier », `(\text{TH};\text{TV})=(1;-3)` « point
+  caractéristique lu ». Intervalles de variation : `x\in[a;b[` + « la courbe monte du point (a ; …)
+  jusqu'au cercle vide (b ; …) » (extrémités lues : point plein, cercle vide, asymptote, bord).
+- **Identifier la question** (gen70, écran « type ») : ligne « donnée » et ligne « cherché »,
+  `x=10` puis `f(10)=\,?` (ou `f(x)=14`, `x=\,?`) ; inéquation `f(x)\geq 14` ; croissance
+  `x_1<x_2\Rightarrow f(x_1)<f(x_2)`.
+- **Facteur par le point croix** (gen10, gen69) : `\Delta x=x_c-\text{TH}` puis `=…`, idem Δy,
+  puis `\text{CH}=\dfrac{1}{|\Delta x|}=2` (ou EH, EV, CV) ; signe de l'écart → symétrie (en
+  justification). Écart vertical de la référence écrit `g(2)=2^3`, `=8`.
+- **Équation construite transformation par transformation** (gen10) : `y=x^2`, puis une ligne
+  `y=…` par transformation dans l'ordre de la formule unifiée (TH, CH/EH, SOY, EV/CV, SOX, TV),
+  chaque expression produite par la fonction de l'écran (`formatEquationFonctionReferenceLatex`
+  sur l'exercice partiellement « allumé »), dernière ligne `f(x)=…`, puis `=…` simplifiée (g paire
+  / impaire). Vérification par le point croix (argument = 1, g(1) = 1).
+- **Ensembles transformés** (gen72) : `D_0=[…]`, puis `D_1=…`, `D_2=…` — une ligne par
+  transformation, la règle sur les bornes à droite (opération écrite en clair : `-2+3`,
+  `\dfrac{-8}{2}` ; symétrie : bornes opposées ET échangées, chaque crochet suit sa borne ; borne
+  infinie : `±\infty`, signe changé par une symétrie).
+- **Parité** (gen13) : domaine non symétrique → `t\in\mathrm{dom}\,f`, `-t\notin\mathrm{dom}\,f` ;
+  décalage → contre-exemple numérique `f(1)=…`, `f(-1)=…`, `f(-1)\neq f(1)` (t choisi pour que
+  f(−t) ≠ ±f(t)) ; b = 0 → calcul littéral `f(-x)=…=f(x)` (ou `-f(x)`).
+- **Raisonnement sur une fonction inconnue** (gen71 « déduction ») : la démonstration du sens de
+  variation sur [−m ; 0] ligne à ligne (`-m\leq x_1<x_2\leq 0`, multiplication par −1, f sur
+  [0 ; m], parité) ; comparaisons : ramener dans [0 ; m] avec la parité, ranger, conclure.
+- **Choix d'une courbe** (gen71) : chaque condition testée sur la courbe (`f_{B}(1)=-6`,
+  `\mathrm{im}\,f_{B}=…`, `\text{nombre d'asymptotes horizontales}=0`) — jamais une ligne sans
+  relation.
+- Un écran qui couvre plusieurs étapes papier (gen10 : « exercice » = b, c, d) : l'appli filtre
+  par une table `LETTRES_PHASE` ; gen13 : `lettrePhaseCaracteristiquesAlgebriques(instance, phase)`
+  (séparation/« se débarrasser » → étape intermédiaire, branches, validation). gen11 est
+  `regroupable` : sur papier ses six étapes s'affichent à plat sous la lettre de l'instance (le
+  collecteur compte 6 écrans pour lui).
+- Fonctions intermédiaires (gen11, écrans EH/CH/SOY, TH, EV/CV/SOX) : l'écran les nomme toutes
+  `f(x)` ; le corrigé écrit `f_1`, `f_2`, `f_3` (une égalité `f(x)=…` fausse sinon).
+- Briques partagées sans `docx` : `4e/ui/corrigeChapitre3.ts` (`q` exact, `plusQ`, `mono`,
+  `somme`, `polynome`, `lignesPremierDegre` — reste fractionnaire n/d divisé en `\dfrac{n}{d\cdot a}`,
+  jamais de fraction de fraction —, `racineCarreeLatex`, `racineCubiqueLatex`, `sansDoublons`,
+  renvois `COURS_*`). Figures sorties des adaptateurs : `fonctionsReference/figures.ts`,
+  `caracteristiquesFonction/figure.ts`, `portraitRobotFonction/figures.ts` ;
+  `formatTransformationsEnsembles.ts` importe `texte`/`latex` de `corrigeTableau` (plus de `docx`).
+- Écran étroit : la justification passe sous sa ligne et s'enroule (`.cc-j { contain: inline-size }`,
+  `theme.css`) — avant, une justification longue élargissait la grille et sortait de l'écran.
+- Collecteur étendu (dossier `corrige-4e3`) : `env.ts` donne à l'évaluateur les fonctions nommées
+  de l'instance (`f`, `t`, `c`, `E`…, valeur exacte du moteur) et des valeurs candidates des
+  variables (solutions, bornes, points lus + valeurs génériques) : une identité doit être vraie pour
+  une valeur générique, une équation pour au moins une valeur notable ; intervalles comparés borne
+  à borne ET crochet par crochet ; équations sans solution réelle (Δ < 0, carré = négatif, aucune
+  branche retenue) comptées « non testables ». Mesuré : 1 950 tirages (120 libres + 15 par variante), ≈ 19 000 égalités évaluées, 0 fausse.
 
 ## Vérification avant de pousser
 

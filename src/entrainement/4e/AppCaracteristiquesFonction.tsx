@@ -45,6 +45,9 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeCaracteristiquesFonction } from "./generateurs/caracteristiquesFonction/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Lis les caractéristiques de cette fonction sur son graphique.";
 
@@ -331,6 +334,9 @@ export function AppCaracteristiquesFonction() {
             ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: (
+          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCaracteristiquesFonction(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />
+        ),
       }
     : null;
 

@@ -108,7 +108,7 @@ export function formeAvecALatex(f: FonctionTransformee): string {
 }
 
 /** Même forme avec x remplacé par un nombre (contrôle, équation en a). */
-function formeSubstitueeLatex(f: FonctionTransformee, x: number, avecA: boolean): string {
+export function formeSubstitueeLatex(f: FonctionTransformee, x: number, avecA: boolean): string {
   const xs = x < 0 ? `(${nombreLatex(x)})` : nombreLatex(x);
   const arg = f.h === 0 ? xs : f.h > 0 ? `${xs} - ${nombreLatex(f.h)}` : `${xs} + ${nombreLatex(-f.h)}`;
   const coef = avecA ? "a" : f.a === 1 ? "" : f.a === -1 ? "-" : `${nombreLatex(f.a)} \\cdot `;

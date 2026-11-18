@@ -44,6 +44,12 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { ecranClos, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 import { expressionLibreVersLatex } from "./ui/formatExpressionLatex";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeProblemesFonctionsReference } from "./generateurs/problemesFonctionsReference/corrigeDetaille";
+
+/** Lettre du corrigé détaillé de chaque écran. */
+const LETTRE_PHASE = { fonction: "a", domaine: "b", question: "c", interpretation: "d" } as const;
 
 const CONSIGNE_GENERALE = "Modélise la situation par une fonction de référence, puis utilise-la pour répondre aux questions.";
 
@@ -170,6 +176,7 @@ export function AppProblemesFonctionsReference() {
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(etat.phase === "domaine" || etat.phase === "interpretation" ? { messageRevele: MESSAGE_CHOIX_FERME } : {}),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeProblemesFonctionsReference(exercice), LETTRE_PHASE[etat.phase])} />,
       }
     : null;
 

@@ -4,15 +4,13 @@ import type {
   BlocCorrection,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import type { ExerciceChoisirModele } from "./types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceChoisirModele } from "./index";
-import { expressionModeleLatex, INFOS_CONTEXTE, modeleLatex, nombreLatex, uneSeuleTransformation } from "./modele";
+import { INFOS_CONTEXTE, modeleLatex, nombreLatex, uneSeuleTransformation } from "./modele";
 import {
-  aidesEcran4,
   CONSIGNE_FAMILLES,
   justificationFamille,
   justificationSens,
@@ -29,6 +27,7 @@ import {
   t,
 } from "./textes";
 import { construireFigureModele, PALETTE_PAPIER } from "./figure";
+import { correctionDetailleeChoisirModele } from "./corrigeDetaille";
 import { LIBELLE_CAS_CHOISIR_MODELE, profilChoisirModele } from "./profil";
 
 /**
@@ -128,52 +127,6 @@ function reponseBreveChoisirModele(e: ExerciceChoisirModele): FragmentConsigne[]
     m(reponseUtilisationLatex(e)),
     t(" ; e) "),
     ...sensBref(e),
-  ];
-}
-
-/** Calcul de b) en LaTeX (étapes du corrigé). */
-function calculUtilisation(e: ExerciceChoisirModele): FragmentConsigne[] {
-  const info = INFOS_CONTEXTE[e.contexte];
-  const q = e.question4;
-  if (q.type === "predire") {
-    const substitue = expressionModeleLatex(e, nombreLatex(q.x));
-    return [m(`${info.fonction}(${nombreLatex(q.x)}) = ${substitue} = ${nombreLatex(q.y)}`)];
-  }
-  // Résoudre : l'aide de niveau 2 de l'écran donne déjà l'équation isolée ; on la reprend.
-  const equation = `${expressionModeleLatex(e)} = ${nombreLatex(q.y)}`;
-  const isolee = aidesEcran4(e)[1].find((f) => f.type === "latex");
-  const etapeIsolee = isolee && isolee.valeur !== equation ? [t(" donne "), isolee] : [];
-  return [m(equation), ...etapeIsolee, t(", d'où "), m(reponseUtilisationLatex(e)), t(".")];
-}
-
-function piege(e: ExerciceChoisirModele): FragmentConsigne[] {
-  const v = INFOS_CONTEXTE[e.contexte].variable;
-  if (e.th !== 0) {
-    return [
-      t("Le point caractéristique est en "),
-      m(`${v} = ${nombreLatex(e.th)}`),
-      t(" : la translation vers la droite s'écrit "),
-      m(`(${v}-${nombreLatex(e.th)})`),
-      t(", avec un signe « − », et non "),
-      m(`(${v}+${nombreLatex(e.th)})`),
-      t("."),
-    ];
-  }
-  if (e.famille === "inverse") {
-    return [t("Le point caractéristique de l'hyperbole n'est pas sur la courbe : c'est le centre, à l'intersection des asymptotes. Le facteur se lit en comparant un point de la courbe à ce centre.")];
-  }
-  return [t("Le point caractéristique ne bouge qu'avec les translations : un étirement ne le déplace pas. Ici, seule la translation verticale l'a déplacé.")];
-}
-
-function correctionDetailleeChoisirModele(e: ExerciceChoisirModele): EtapeCorrection[] {
-  const q = e.question4;
-  return [
-    { label: "Famille", sousQuestion: "a", fragments: justificationFamille(e) },
-    { label: "Lecture", sousQuestion: "b", fragments: lectureTransformations(e), figureHtml: figureCorrige(e) },
-    { label: "Conclusion", sousQuestion: "c", fragments: [m(modeleLatex(e))] },
-    { label: q.type === "predire" ? "Calcul" : "Équation", sousQuestion: "d", fragments: calculUtilisation(e) },
-    { label: "Interprétation", sousQuestion: "e", fragments: [...sensBref(e), t(" "), ...justificationSens(e)] },
-    { label: "Piège", fragments: piege(e) },
   ];
 }
 

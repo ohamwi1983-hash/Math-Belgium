@@ -41,6 +41,10 @@ import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { SaisieExpressionLatex } from "./components/SaisieExpressionLatex";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeFormeCanoniqueFonctionsReference } from "./generateurs/formeCanoniqueFonctionsReference/corrigeDetaille";
+
 
 const CONSIGNE_GENERALE = "Détermine la forme canonique de cette fonction de référence transformée.";
 
@@ -212,6 +216,9 @@ export function AppFormeCanoniqueFonctionsReference() {
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttenduePhase(etat.phase, exercice),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: (
+          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFormeCanoniqueFonctionsReference(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />
+        ),
       }
     : null;
 

@@ -90,6 +90,9 @@ import { EnTeteExercice } from "./components/EnTeteExercice";
 import { necessiteSeparation } from "./moteur/verificationCaracteristiquesAlgebriques";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeCaracteristiquesAlgebriques, lettrePhaseCaracteristiquesAlgebriques } from "./generateurs/caracteristiquesAlgebriques/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Étudie les caractéristiques algébriques de cette fonction de référence.";
 
@@ -590,6 +593,11 @@ export function AppCaracteristiquesAlgebriques() {
         reponseAttendue: reponseAttenduePhase(etat),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: (
+          <CorrigeDetailleEcran
+            etapes={lignesDeLEtape(correctionDetailleeCaracteristiquesAlgebriques(etat.exerciceCourant), lettrePhaseCaracteristiquesAlgebriques(etat.exerciceCourant, etat.phase))}
+          />
+        ),
       }
     : null;
 

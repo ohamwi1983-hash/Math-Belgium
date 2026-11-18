@@ -28,6 +28,9 @@ import { EtapeChaineIntervalles, EtapeClassementTransformations } from "./compon
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeTransformationsEnsembles } from "./generateurs/transformationsEnsembles/corrigeDetaille";
 
 /**
  * gen72 — « Domaine et ensemble image après transformations » (4e, chapitre 3, section
@@ -131,6 +134,7 @@ export function AppTransformationsEnsembles() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTransformationsEnsembles(e), lettreEtape(ecran))} />,
       }
     : null;
 

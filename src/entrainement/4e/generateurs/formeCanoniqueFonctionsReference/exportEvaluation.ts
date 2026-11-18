@@ -5,22 +5,17 @@ import type {
   BlocCorrection,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { cibleFinale } from "../../moteur/verificationFormeCanoniqueFonctionsReference";
 import {
-  fonctionReferenceLatex,
   formatCibleLatex,
-  formatCoefficientLatex,
   formatFormeDepartLatex,
-  formatGabaritLatex,
-  formatLineaire,
 } from "../../ui/formatFormeCanoniqueFonctionsReference";
 import { CATALOGUE_VARIANTES, construireAvecFamille, genererExerciceFormeCanoniqueFonctionReference } from "./index";
-import { construireGrapheFonctionReference } from "../fonctionsReference/exportEvaluation";
+import { correctionDetailleeFormeCanoniqueFonctionsReference } from "./corrigeDetaille";
 import { profilFormeCanonique, PARAMETRES_FORME_CANONIQUE } from "../profilsEvaluation4eCh2Ch3";
 
 /**
@@ -47,15 +42,6 @@ import { profilFormeCanonique, PARAMETRES_FORME_CANONIQUE } from "../profilsEval
 
 const CONSIGNE_GENERALE = "Détermine la forme canonique de la fonction (fonction de référence transformée).";
 
-const NOM_FAMILLE: Record<FamilleReference, string> = {
-  carre: "fonction carré",
-  cube: "fonction cube",
-  racine_carree: "fonction racine carrée",
-  racine_cubique: "fonction racine cubique",
-  inverse: "fonction inverse",
-  valeur_absolue: "fonction valeur absolue",
-};
-
 /** Formule en `\\displaystyle` : sur papier, une fraction en ligne (`\\frac` en style texte) est
  * illisible, surtout imbriquée (forme de départ de l'inverse). */
 function formule(expression: string): FragmentConsigne {
@@ -65,34 +51,6 @@ function formule(expression: string): FragmentConsigne {
 // ---------------------------------------------------------------------------------------------
 // Briques LaTeX du corrigé
 // ---------------------------------------------------------------------------------------------
-
-/** Coefficient placé devant un facteur : 1 → rien, −1 → « − », sinon le nombre (fraction exacte). */
-function prefixe(valeur: number): string {
-  if (valeur === 1) return "";
-  if (valeur === -1) return "-";
-  return formatCoefficientLatex(valeur);
-}
-
-/** `x − p` (ou `x + |p|`, ou `x` si p = 0). */
-function binome(p: number): string {
-  if (p === 0) return "x";
-  return p > 0 ? `x - ${formatCoefficientLatex(p)}` : `x + ${formatCoefficientLatex(-p)}`;
-}
-
-/** `coef(x − p)`, ou `coef·x` sans parenthèses si p = 0. */
-function produitBinome(coef: number, p: number): string {
-  return p === 0 ? `${prefixe(coef)}x` : `${prefixe(coef)}(${binome(p)})`;
-}
-
-/** ` + v` / ` - |v|` / rien si v = 0. */
-function termeConstant(v: number): string {
-  if (Math.abs(v) < 1e-9) return "";
-  return v > 0 ? ` + ${formatCoefficientLatex(v)}` : ` - ${formatCoefficientLatex(-v)}`;
-}
-
-function egal(a: number, b: number): boolean {
-  return Math.abs(a - b) < 1e-9;
-}
 
 /** Méthode de simplification de la famille (corrigé). */
 function methode(exercice: ExerciceFormeCanoniqueFonctionReference): FragmentConsigne[] {
@@ -110,92 +68,6 @@ function methode(exercice: ExerciceFormeCanoniqueFonctionReference): FragmentCon
       return [texte("Mettre le coefficient de x en évidence dans la valeur absolue, puis le faire sortir en valeur absolue : "), latex("|a\\cdot u| = |a|\\cdot|u|"), texte(".")];
   }
 }
-
-/** Calcul intermédiaire (corrigé), recalculé depuis `formeDepart` par les formules de `cibleEtape1`. */
-function calculIntermediaire(exercice: ExerciceFormeCanoniqueFonctionReference): string {
-  const forme = exercice.formeDepart;
-  switch (forme.type) {
-    case "carre": {
-      const p = -forme.b / (2 * forme.a);
-      if (egal(p, 0)) return `f(x) = ${prefixe(forme.a)}x^2${termeConstant(forme.c)} \\quad (\\text{pas de terme en } x)`;
-      const lineaire = `x^2 ${-2 * p > 0 ? "+" : "-"} ${prefixe(Math.abs(2 * p))}x`;
-      const avecA = (contenu: string) => (forme.a === 1 ? contenu : `${prefixe(forme.a)}\\left[${contenu}\\right]`);
-      const premier = forme.a === 1 ? lineaire : `${prefixe(forme.a)}\\left(${lineaire}\\right)`;
-      return `f(x) = ${premier}${termeConstant(forme.c)} = ${avecA(`(${binome(p)})^2 - ${formatCoefficientLatex(p * p)}`)}${termeConstant(forme.c)}`;
-    }
-    case "inverse": {
-      const quotient = forme.a / forme.c;
-      const reste = forme.b - (forme.a * forme.d) / forme.c;
-      const p = -forme.d / forme.c;
-      const denominateur = formatLineaire(forme.c, forme.d);
-      const fraction = (numerateur: number, den: string) => `${numerateur < 0 ? "-" : ""}\\frac{${formatCoefficientLatex(Math.abs(numerateur))}}{${den}}`;
-      const finale = `${fraction(reste / forme.c, binome(p))}${termeConstant(quotient)}`;
-      if (quotient === 0) {
-        // Numérateur constant : rien à diviser, seulement le coefficient de x à sortir du dénominateur.
-        return forme.c === 1 ? `f(x) = ${finale} \\quad (\\text{déjà de la forme } \\tfrac{a}{x - p})` : `f(x) = ${fraction(reste, denominateur)} = ${finale}`;
-      }
-      const numerateur = quotient === 1 ? `${denominateur}${termeConstant(reste)}` : `${prefixe(quotient)}\\left(${denominateur}\\right)${termeConstant(reste)}`;
-      const separee = `${fraction(reste, denominateur)}${termeConstant(quotient)}`;
-      return `f(x) = \\frac{${numerateur}}{${denominateur}} = ${separee}${forme.c === 1 ? "" : ` = ${finale}`}`;
-    }
-    case "cube": {
-      const p = -forme.a / forme.b;
-      const puissance = p === 0 ? `${prefixe(forme.b ** 3)}x^3` : `${prefixe(forme.b ** 3)}(${binome(p)})^3`;
-      return `(${formatLineaire(forme.b, forme.a)})^3 = \\left(${produitBinome(forme.b, p)}\\right)^3 = ${puissance}`;
-    }
-    case "racine_carree":
-    case "racine_cubique": {
-      const p = -forme.b / forme.a;
-      const racine = (contenu: string) => (forme.type === "racine_carree" ? `\\sqrt{${contenu}}` : `\\sqrt[3]{${contenu}}`);
-      if (p === 0) return `${racine(formatLineaire(forme.a, forme.b))} \\quad (\\text{pas de terme constant : rien à mettre en évidence})`;
-      return `${racine(formatLineaire(forme.a, forme.b))} = ${racine(produitBinome(forme.a, p))}`;
-    }
-    case "valeur_absolue": {
-      const p = -forme.b / forme.a;
-      return `\\left|${formatLineaire(forme.a, forme.b)}\\right| = \\left|${formatCoefficientLatex(forme.a)}\\right|\\cdot\\left|${binome(p)}\\right| = ${prefixe(Math.abs(forme.a))}\\left|${binome(p)}\\right|`;
-    }
-  }
-}
-
-/** Rapport `n/d` en LaTeX, jamais réduit à un décimal. */
-function rapport(n: number, d: number): string {
-  return d === 1 ? `${n}` : `\\tfrac{${n}}{${d}}`;
-}
-
-/** Les transformations d'UNE décomposition possible (celle de l'exercice tiré), dans l'ordre de la
- * formule unifiée du cours. */
-function listeTransformations(exercice: ExerciceFormeCanoniqueFonctionReference): FragmentConsigne[][] {
-  const items: FragmentConsigne[][] = [];
-  const horizontal = exercice.ch / exercice.eh;
-  if (horizontal > 1) items.push([texte("compression horizontale "), latex(`\\tfrac{CH}{EH} = ${rapport(exercice.ch, exercice.eh)}`)]);
-  if (horizontal < 1) items.push([texte("étirement horizontal "), latex(`\\tfrac{CH}{EH} = ${rapport(exercice.ch, exercice.eh)}`)]);
-  if (exercice.soy) items.push([texte("symétrie d'axe Oy")]);
-  if (exercice.th !== 0) items.push([texte("translation horizontale "), latex(`TH = ${exercice.th}`)]);
-  const vertical = exercice.ev / exercice.cv;
-  if (vertical > 1) items.push([texte("étirement vertical "), latex(`\\tfrac{EV}{CV} = ${rapport(exercice.ev, exercice.cv)}`)]);
-  if (vertical < 1) items.push([texte("compression verticale "), latex(`\\tfrac{EV}{CV} = ${rapport(exercice.ev, exercice.cv)}`)]);
-  if (exercice.sox) items.push([texte("symétrie d'axe Ox")]);
-  if (exercice.tv !== 0) items.push([texte("translation verticale "), latex(`TV = ${exercice.tv}`)]);
-  return items;
-}
-
-function piege(exercice: ExerciceFormeCanoniqueFonctionReference): string {
-  switch (exercice.formeDepart.type) {
-    case "carre":
-      return "En complétant le carré, le terme soustrait p² est lui aussi multiplié par le coefficient mis en évidence.";
-    case "inverse":
-      return "Le reste de la division doit encore être divisé par le coefficient de x du dénominateur, pour faire apparaître x − p.";
-    case "cube":
-      return "Le coefficient mis en évidence dans le cube sort AU CUBE, pas tel quel.";
-    case "racine_carree":
-    case "racine_cubique":
-      return "Le coefficient mis en évidence reste SOUS la racine : on ne le fait pas sortir.";
-    case "valeur_absolue":
-      return "Le coefficient sort de la valeur absolue en valeur absolue : un coefficient négatif devient positif.";
-  }
-}
-
-const PIEGE_SIGNE = "Piège du signe : x + 3 = x − (−3), donc le point caractéristique est en x = −3, pas en x = 3.";
 
 function formeCanoniqueLatex(exercice: ExerciceFormeCanoniqueFonctionReference): string {
   return formatCibleLatex(exercice.famille, cibleFinale(exercice));
@@ -234,28 +106,6 @@ function difficulteFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanon
 
 function reponseBreveFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): FragmentConsigne[] {
   return [formule(formeCanoniqueLatex(exercice))];
-}
-
-function correctionDetailleeFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): EtapeCorrection[] {
-  const transformations = listeTransformations(exercice).flatMap((item, i) => (i === 0 ? item : [texte(", "), ...item]));
-  return [
-    { label: "Famille", fragments: [texte(`La forme de départ enveloppe x dans la ${NOM_FAMILLE[exercice.famille]} : `), latex(fonctionReferenceLatex(exercice.famille)), texte(".")] },
-    { label: "Méthode", fragments: methode(exercice) },
-    { label: "Calcul", fragments: [formule(calculIntermediaire(exercice))] },
-    { label: "Conclusion", fragments: [formule(formeCanoniqueLatex(exercice))] },
-    {
-      label: "Transformations",
-      fragments: [
-        texte("Une décomposition possible à partir de g : "),
-        formule(formatGabaritLatex(exercice)),
-        ...(transformations.length > 0 ? [texte(" — "), ...transformations, texte(".")] : [texte(".")]),
-      ],
-      // Graphique de f (forme canonique) avec g en pointillés : le point (0 ; 0) de g arrive au
-      // point caractéristique (TH ; TV), le point (1 ; 1) au point croix.
-      figureHtml: construireGrapheFonctionReference(exercice, true, "f (forme canonique)"),
-    },
-    { label: "Piège", fragments: [texte(exercice.th !== 0 && exercice.formeDepart.type !== "carre" && exercice.formeDepart.type !== "inverse" ? `${piege(exercice)} ${PIEGE_SIGNE}` : piege(exercice))] },
-  ];
 }
 
 function erreursFrequentes(exercice: ExerciceFormeCanoniqueFonctionReference): ErreurFrequente[] {

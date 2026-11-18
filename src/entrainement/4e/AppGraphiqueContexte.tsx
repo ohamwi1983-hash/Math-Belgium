@@ -32,6 +32,9 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeGraphiqueContexte } from "./generateurs/graphiqueContexte/corrigeDetaille";
 
 /**
  * gen70 — Lire un graphique en contexte (4e, chapitre 3, processus TRANSFÉRER).
@@ -170,6 +173,7 @@ export function AppGraphiqueContexte() {
         messageRevele: ecranLecture ? undefined : "Ce n'était pas la caractéristique demandée.",
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeGraphiqueContexte(exercice), lettreEtape(etat.indexEcran))} />,
       }
     : null;
 

@@ -20,6 +20,12 @@ import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { MafsGraphFonctionsReference } from "./components/MafsGraphFonctionsReference";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeFonctionsReference } from "./generateurs/fonctionsReference/corrigeDetaille";
+
+/** Étapes du corrigé détaillé couvertes par chaque écran : « reconnaissance » = a ; « exercice » =
+ * translations, facteurs et équation (b, c, d). */
+const LETTRES_PHASE = { reconnaissance: ["a"], exercice: ["b", "c", "d"] } as const;
 
 const CONSIGNE_GENERALE = "Étudie les transformations graphiques de cette fonction de référence.";
 
@@ -249,6 +255,11 @@ export function AppFonctionsReference() {
         reponseAttendue: reponseAttenduePhase(etat, enAttente.etatSuivant),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: (
+          <CorrigeDetailleEcran
+            etapes={correctionDetailleeFonctionsReference(etat.exerciceCourant).filter((l) => (LETTRES_PHASE[etat.phase] as readonly string[]).includes(l.sousQuestion ?? ""))}
+          />
+        ),
       }
     : null;
 

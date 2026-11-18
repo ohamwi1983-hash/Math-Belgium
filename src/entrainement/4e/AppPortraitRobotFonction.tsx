@@ -61,6 +61,9 @@ import { GrilleCourbesPortraitRobot } from "./components/CourbesPortraitRobot";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleePortraitRobot } from "./generateurs/portraitRobotFonction/corrigeDetaille";
 
 /**
  * gen71 — « Le portrait-robot d'une fonction » (4e, chapitre 3, section « transformer », processus 3
@@ -196,6 +199,7 @@ export function AppPortraitRobotFonction() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePortraitRobot(e), lettreEtape(ecran))} />,
       }
     : null;
 

@@ -1,18 +1,15 @@
-import type { ExerciceProblemesFonctionsReference, SensQuestion } from "../../core/problemesFonctionsReference.types";
+import type { ExerciceProblemesFonctionsReference } from "../../core/problemesFonctionsReference.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte as texteBrut } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
-import { decrireProbleme, ensembleLatex, morceauLatex, nombreLatex, symboleLatex } from "../../moteur/problemesFonctionsReference";
+import { decrireProbleme, morceauLatex } from "../../moteur/problemesFonctionsReference";
 import {
-  aidesDomaine,
-  aidesFonction,
   consigneDomaine,
   consigneFonction,
   consigneQuestion,
@@ -26,6 +23,7 @@ import {
   questionInterpretation,
 } from "../../ui/formatProblemesFonctionsReference";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProblemesFonctionsReference } from "./index";
+import { correctionDetailleeProblemesFonctionsReference, domaineConclusionLatex, solutionLatex } from "./corrigeDetaille";
 import { profilProblemesFonctionsReference } from "./profilEvaluation";
 
 /**
@@ -48,8 +46,6 @@ type E = ExerciceProblemesFonctionsReference;
 
 const texte = (valeur: string): FragmentConsigne => texteBrut(insecables(valeur));
 
-const INVERSE: Record<SensQuestion, SensQuestion> = { "<": ">", "≤": "≥", ">": "<", "≥": "≤" };
-
 function enteteFragments(e: E): FragmentConsigne[] {
   return enonceFragments(e);
 }
@@ -71,122 +67,9 @@ function questionsPapier(e: E): FragmentConsigne[][] {
   ];
 }
 
-function domaineConclusionLatex(e: E): string {
-  const d = decrireProbleme(e);
-  return `\\operatorname{dom} ${d.nomFonction} = ${morceauLatex(d.domaineContexte)}`;
-}
-
-function solutionLatex(e: E): string {
-  return `S = ${ensembleLatex(decrireProbleme(e).solution)}`;
-}
-
-/** Résolution de l'inéquation (sans la restriction au domaine), en fragments. */
-function resolution(e: E): FragmentConsigne[] {
-  const d = decrireProbleme(e);
-  const p = e.p;
-  const s = symboleLatex(e.sens);
-  const inv = symboleLatex(INVERSE[e.sens]);
-  const auDessus = e.sens === ">" || e.sens === "≥";
-  switch (e.famille) {
-    case "trajet": {
-      const t = nombreLatex(p.heures! + p.minutes! / 60);
-      const borne = Math.round(p.d! / (p.heures! + p.minutes! / 60));
-      return [latex(`${d.inequationLatex} \\iff ${p.d} ${s} ${t}\\,v \\iff v ${inv} ${borne}`), texte(" (on multiplie par "), latex("v > 0"), texte(", puis on divise par "), latex(t), texte(").")];
-    }
-    case "location": {
-      const ecart = p.seuil! - p.prixHeure!;
-      const borne = p.forfait! / ecart;
-      return [
-        latex(`${d.inequationLatex} \\iff \\dfrac{${p.forfait}}{x} ${s} ${ecart} \\iff ${p.forfait} ${s} ${ecart}\\,x \\iff x ${inv} ${borne}`),
-        texte(" (on multiplie par "),
-        latex("x > 0"),
-        texte(").")
-      ];
-    }
-    case "potager":
-      return [latex(`${d.inequationLatex} \\iff A ${s} ${p.k! * p.k!}`), texte(" (les deux membres sont positifs : on peut les élever au carré).")];
-    case "aquarium":
-      return [latex(`${d.inequationLatex} \\iff V ${s} ${p.k! ** 3}`), texte(" (la fonction cube est croissante).")];
-    case "thermostat": {
-      const c = p.consigne!;
-      const k = p.k!;
-      if (!auDessus) return [latex(`${d.inequationLatex} \\iff -${k} ${s} T - ${c} ${s} ${k} \\iff ${c - k} ${s} T ${s} ${c + k}`)];
-      return [latex(`${d.inequationLatex} \\iff T - ${c} ${inv} -${k}`), texte(" ou "), latex(`T - ${c} ${s} ${k}`), texte(", c'est-à-dire "), latex(`T ${inv} ${c - k}`), texte(" ou "), latex(`T ${s} ${c + k}`), texte(".")];
-    }
-    case "plaque": {
-      const k = p.k!;
-      if (!auDessus) return [latex(`${d.inequationLatex} \\iff -${k} ${s} c ${s} ${k}`)];
-      return [latex(`${d.inequationLatex} \\iff c ${inv} -${k}`), texte(" ou "), latex(`c ${s} ${k}`), texte(".")];
-    }
-  }
-}
-
-function piege(e: E): FragmentConsigne[] {
-  const p = e.p;
-  switch (e.famille) {
-    case "trajet":
-      return [
-        texte("La fonction inverse est décroissante sur "),
-        latex("]0 \\,;\\, +\\infty["),
-        texte(" : une durée plus courte demande une vitesse plus grande, le sens de l'inégalité s'inverse."),
-        ...(p.minutes! > 0 ? [texte(` Et ${dureeTexte(e)} = `), latex(nombreLatex(p.heures! + p.minutes! / 60)), texte(" h, pas "), latex(`${p.heures}{,}${String(p.minutes).padStart(2, "0")}`), texte(" h.")] : []),
-      ];
-    case "location":
-      return [texte("Le coût horaire moyen diminue quand la durée augmente : en passant de la comparaison des coûts à celle des durées, le sens de l'inégalité s'inverse.")];
-    case "potager":
-      return [texte(`Les aires qui dépassent ${p.amax} m² (et l'aire nulle) n'ont pas de sens ici : la réponse reste dans le domaine de la situation.`)];
-    case "aquarium":
-      return [texte(`Les volumes nuls et ceux qui dépassent ${p.vmax} L n'ont pas de sens ici : la réponse s'arrête au domaine.`)];
-    case "thermostat":
-      return e.sens === ">" || e.sens === "≥"
-        ? [texte("Un écart supérieur à une valeur donne DEUX morceaux, de part et d'autre de la consigne, chacun limité par la plage du thermostat.")]
-        : [texte("Un écart inférieur à une valeur donne UN seul intervalle centré sur la consigne.")];
-    case "plaque":
-      return [texte("Sur "), latex("\\mathbb{R}"), texte(", l'inéquation a aussi des solutions négatives : une longueur négative n'a pas de sens, la situation les élimine.")];
-  }
-}
-
-function justificationInterpretation(e: E): FragmentConsigne[] {
-  const p = e.p;
-  switch (e.famille) {
-    case "trajet":
-      return [latex(`t(2v) = \\dfrac{${p.d}}{2v} = \\dfrac{1}{2} \\cdot \\dfrac{${p.d}}{v} = \\dfrac{t(v)}{2}`)];
-    case "potager":
-      return [latex("c(4A) = \\sqrt{4A} = \\sqrt{4} \\cdot \\sqrt{A} = 2\\,c(A)")];
-    case "aquarium":
-      return [latex("a(8V) = \\sqrt[3]{8V} = \\sqrt[3]{8} \\cdot \\sqrt[3]{V} = 2\\,a(V)")];
-    case "thermostat": {
-      const c = p.consigne!;
-      return [latex(`E(${c - 2}) = |${c - 2} - ${c}| = |-2| = 2`), texte(" et "), latex(`E(${c + 2}) = |${c + 2} - ${c}| = |2| = 2`)];
-    }
-    case "location":
-      return [latex(`C(x) - ${p.prixHeure} = \\dfrac{${p.forfait}}{x} > 0`), texte(", et ce quotient se rapproche de 0 quand "), latex("x"), texte(" devient très grand.")];
-    case "plaque":
-      return [latex("A(2c) = (2c)^2 = 4c^2 = 4\\,A(c)")];
-  }
-}
-
-function lignesCorrection(e: E): EtapeCorrection[] {
-  const d = decrireProbleme(e);
-  const [methodeFonction] = aidesFonction(e);
-  const [, raisonDomaine] = aidesDomaine(e);
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: methodeFonction! },
-    { label: "Conclusion", sousQuestion: "a", fragments: [latex(fonctionAttendueLatex(e))] },
-    { label: "Méthode", sousQuestion: "b", fragments: [texte("L'expression existe pour "), latex(`${d.variable} \\in ${d.domaineAlgebriqueLatex}`), texte(", mais la situation restreint ces valeurs. "), ...raisonDomaine!] },
-    { label: "Conclusion", sousQuestion: "b", fragments: [latex(domaineConclusionLatex(e))] },
-    { label: "Méthode", sousQuestion: "c", fragments: [texte("La question se traduit par l'inéquation "), latex(d.inequationLatex), texte(".")] },
-    { label: "Calcul", sousQuestion: "c", fragments: resolution(e) },
-    { label: "Piège", sousQuestion: "c", fragments: piege(e) },
-    { label: "Conclusion", sousQuestion: "c", fragments: [texte("En ne gardant que les valeurs du domaine "), latex(morceauLatex(d.domaineContexte)), texte(" : "), latex(solutionLatex(e)), texte(".")] },
-    { label: "Calcul", sousQuestion: "d", fragments: justificationInterpretation(e) },
-    { label: "Conclusion", sousQuestion: "d", fragments: [texte(optionsInterpretation(e)[0]!)] },
-  ];
-}
-
 function construireCorrection(e: E): BlocCorrection[] {
-  return lignesCorrection(e)
-    .filter((l) => l.label !== "Piège")
+  return correctionDetailleeProblemesFonctionsReference(e)
+    .filter((l) => l.type === "resultat")
     .map((l): BlocCorrection => ({ type: "paragraphe", fragments: [texte(`${l.sousQuestion}) `), ...l.fragments] }));
 }
 
@@ -292,7 +175,7 @@ export const adaptateurEvaluationProblemesFonctionsReference: AdaptateurFeuilleE
   construireCorrection,
   difficulte,
   reponseBreve,
-  correctionDetaillee: lignesCorrection,
+  correctionDetaillee: correctionDetailleeProblemesFonctionsReference,
   bareme,
   enoncePapier,
   dureeMinutes: 8,

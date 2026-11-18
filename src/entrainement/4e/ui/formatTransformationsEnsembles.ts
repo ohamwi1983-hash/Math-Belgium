@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { Axe, ExerciceTransformationsEnsembles, Intervalle, Transformation, TypeTransformation } from "../core/transformationsEnsembles.types";
 import { axeDe, transformationsDeLAxe } from "../moteur/modeleTransformationsEnsembles";
 
