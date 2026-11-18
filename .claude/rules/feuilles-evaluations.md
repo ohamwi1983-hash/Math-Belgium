@@ -153,6 +153,14 @@ tombent sur les lignes de sa grille.
 
 ## Vrai/faux et démonstrations
 
+- **Tous les vrai/faux d'une série forment UNE seule question** (décision de l'utilisateur), même
+  s'ils viennent de sections ou de chapitres différents : « Question n — Vrai ou faux ? Justifie
+  chaque réponse. a) … b) … », lettres continues, chaque affirmation garde les points de sa ligne
+  (`evaluationLocal.ts::itemVraiFauxRegroupe`, placée au rang du premier vrai/faux). Notion et
+  section du cours gardées si toutes les affirmations viennent de la même section, sinon « Vrai ou
+  faux ». Vaut pour la feuille d'exercices, l'évaluation, l'aménagée, le corrigé, la grille et le Word.
+- **Lettre de la série en gras** (« Série **A** ») dans l'en-tête de la copie, du corrigé, de la
+  grille, de l'aménagée et de la copie Word.
 - Vrai/faux générés localement depuis la banque du quiz du chapitre (`lib/banquesVraiFaux.ts`) ;
   jamais de « grand calcul » (voir `.claude/rules/quiz-generators.md`).
 - Questions « démonstration » : énoncés soignés `ENONCES_DEMONSTRATION` (`lib/evaluationPayload.ts`)

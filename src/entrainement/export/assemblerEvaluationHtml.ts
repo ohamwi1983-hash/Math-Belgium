@@ -591,7 +591,7 @@ function cartoucheEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation
   return `<div class="cartouche">
   <div class="g"><span class="surtitre">${echapperHtml(ECOLE_NOM)} · Mathématiques ${echapperHtml(entete.heuresSemaine)}h/sem · ${echapperHtml(PROFESSEUR)}</span>
     <h1>${echapperHtml(titreEvaluation(entete))}${suffixe ? ` — ${echapperHtml(suffixe)}` : ""}</h1>
-    <span class="meta">${echapperHtml(dateEnToutesLettres(entete.date))} · Série ${echapperHtml(entete.serieLettre)}${duree} · ${echapperHtml(ECOLE_ADRESSE)}</span></div>
+    <span class="meta">${echapperHtml(dateEnToutesLettres(entete.date))} · Série <strong>${echapperHtml(entete.serieLettre)}</strong>${duree} · ${echapperHtml(ECOLE_ADRESSE)}</span></div>
   <div class="d"><span>Nom</span><span class="champ"></span><span>Classe</span><span class="champ"></span><span>N°</span><span class="champ"></span></div>
 </div>`;
 }
@@ -657,7 +657,7 @@ function grilleHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
       }${acceptees ? `<div class="note"><span class="ok">Accepter :</span> ${acceptees}</div>` : ""}${code ? `<div class="note">${code}</div>` : ""}</section>`;
     })
     .join("");
-  return `<div class="grille"><div class="tete-grille"><div><span class="surtitre">Document professeur · Série ${echapperHtml(entete.serieLettre)}</span><h1>Grille de correction — ${echapperHtml(titreNettoye(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${blocs}
+  return `<div class="grille"><div class="tete-grille"><div><span class="surtitre">Document professeur · Série <strong>${echapperHtml(entete.serieLettre)}</strong></span><h1>Grille de correction — ${echapperHtml(titreNettoye(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${blocs}
 <div class="regle"><span class="sans">RÈGLE</span><span>Une erreur n'est pénalisée qu'une fois : si une valeur fausse est réutilisée correctement dans la suite, la suite rapporte ses points.</span></div>
 <div class="pied"><span>${echapperHtml(titreEvaluation(entete))} · ${echapperHtml(dateEnToutesLettres(entete.date))}</span><span>Ne pas distribuer aux élèves</span></div></div>`;
 }
@@ -694,7 +694,7 @@ export async function genererVersionAmenagee(entete: EnteteEvaluation, items: It
   const cssKatex = await obtenirCssKatexAutonome();
   const estExercice = entete.mode === "exercice";
   const titre = estExercice ? titreNettoye(entete) : titreEvaluation(entete);
-  const droite = estExercice ? "Mêmes exercices,<br>mise en page adaptée" : `Série ${echapperHtml(entete.serieLettre)}<br>Mêmes questions, même barème`;
+  const droite = estExercice ? "Mêmes exercices,<br>mise en page adaptée" : `Série <strong>${echapperHtml(entete.serieLettre)}</strong><br>Mêmes questions, même barème`;
   const tete = `<div class="tete-am"><div><span class="surtitre" style="color:#1d5b8f;font-weight:700">Version aménagée${estExercice ? " · Feuille d'exercices" : ""}</span><h1>${echapperHtml(titre)}</h1></div><span class="droite">${droite}</span></div>
 <div class="identite-am"><span>Nom <span class="champ"></span></span><span>Classe <span class="champ" style="width:2.5cm"></span></span><span>N° <span class="champ" style="width:1.2cm"></span></span><span>${echapperHtml(dateEnToutesLettres(entete.date))}</span></div>
 ${!estExercice && entete.calculatrice ? `<p><b>Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}.</b></p>` : ""}`;

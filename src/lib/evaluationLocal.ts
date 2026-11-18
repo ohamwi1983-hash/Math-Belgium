@@ -661,28 +661,47 @@ function itemOuverte(el: Extract<ElementPlan, { type: 'ouverte' }>): ItemEvaluat
   }
 }
 
-async function itemVraiFaux(el: Extract<ElementPlan, { type: 'vraiFaux' }>): Promise<ItemEvaluation | null> {
-  const banque = await chargerThemeVraiFaux(el.chapitreSlug, el.theme)
-  if (!banque) return null
-  const affirmations = el.indices.map((i) => banque[i]).filter(Boolean)
+type ElementVraiFaux = Extract<ElementPlan, { type: 'vraiFaux' }>
+
+/** TOUS les vrai/faux d'une série forment UNE seule question (demande de l'utilisateur), même
+ * s'ils viennent de sections, voire de chapitres différents : « Question n : Vrai ou faux ? Justifie
+ * chaque réponse. a) … b) … ». Lettres continues sur l'ensemble des affirmations ; chaque
+ * affirmation garde ses propres points (`pointsParAffirmation` de sa ligne). */
+async function itemVraiFauxRegroupe(elements: ElementVraiFaux[]): Promise<ItemEvaluation | null> {
+  const affirmations: { enonce: FragmentConsigne[]; reponse: boolean; justification: FragmentConsigne[]; points: number }[] = []
+  const sources: ElementVraiFaux[] = []
+  for (const el of elements) {
+    const banque = await chargerThemeVraiFaux(el.chapitreSlug, el.theme)
+    if (!banque) continue
+    const choisies = el.indices.map((i) => banque[i]).filter(Boolean)
+    if (choisies.length === 0) continue
+    sources.push(el)
+    for (const a of choisies) affirmations.push({ ...a, points: el.pointsParAffirmation })
+  }
   if (affirmations.length === 0) return null
   const vf = (r: boolean) => (r ? 'Vrai' : 'Faux')
   const seule = affirmations.length === 1
   const lettre = (i: number) => LETTRES[i] ?? String(i + 1)
   // Une seule affirmation : pas de lettre « a) » (même convention que les sous-questions).
   const prefixe = (i: number) => (seule ? '' : `${lettre(i)}) `)
+  // Une seule section d'origine : on garde sa notion et sa référence au cours (« Je fais le point ») ;
+  // plusieurs : la question est simplement « Vrai ou faux ».
+  const communs = champsCommuns(sources[0])
+  const memeSection = sources.every((el) => el.section && sources[0].section && el.section.titre === sources[0].section.titre && el.chapitreSlug === sources[0].chapitreSlug)
+  const champs = memeSection ? communs : { ...communs, titreSection: 'Vrai ou faux', notion: 'Vrai ou faux', sectionCours: undefined }
+  const resume = affirmations.map((a, i) => `${prefixe(i)}${vf(a.reponse)}`).join(' · ')
   return {
-    ...champsCommuns(el),
+    ...champs,
     nature: 'vraiFaux',
-    points: affirmations.length * el.pointsParAffirmation,
+    points: affirmations.reduce((t, a) => t + a.points, 0),
     section: { enteteFragments: [texte(seule ? 'Vrai ou faux ? Justifie ta réponse.' : CONSIGNE_VRAI_FAUX)], questions: affirmations.map((a) => ({ consigne: a.enonce })) },
     correction: affirmations.map((a, i) => ({ type: 'paragraphe', fragments: [texte(`${prefixe(i)}${vf(a.reponse)} — `), ...a.justification] })),
     difficulte: 1,
-    reponseBreve: [texte(affirmations.map((a, i) => `${prefixe(i)}${vf(a.reponse)}`).join(' · '))],
+    reponseBreve: [texte(resume)],
     correctionDetaillee: affirmations.map((a, i) => ({ label: vf(a.reponse), sousQuestion: seule ? undefined : lettre(i), fragments: a.justification })),
     bareme: {
-      reponseFinale: [texte(affirmations.map((a, i) => `${prefixe(i)}${vf(a.reponse)}`).join(' · '))],
-      criteres: affirmations.map((a, i) => ({ sousQuestion: seule ? undefined : lettre(i), critere: [texte(`${vf(a.reponse)}, avec une justification correcte`)], points: 1 })),
+      reponseFinale: [texte(resume)],
+      criteres: affirmations.map((a, i) => ({ sousQuestion: seule ? undefined : lettre(i), critere: [texte(`${vf(a.reponse)}, avec une justification correcte`)], points: a.points })),
       erreursFrequentes: [{ description: [texte('Bonne réponse sans justification, ou justification par un seul exemple numérique')], cout: 'la moitié des points de l’affirmation' }],
     },
     dureeMinutes: affirmations.length * 2,
@@ -690,12 +709,20 @@ async function itemVraiFaux(el: Extract<ElementPlan, { type: 'vraiFaux' }>): Pro
 }
 
 export async function itemsDepuisSerie(serie: PlanSerie): Promise<ItemEvaluation[]> {
-  const items: ItemEvaluation[] = []
+  const items: (ItemEvaluation | 'vraiFaux')[] = []
+  const vraiFaux: ElementVraiFaux[] = []
   for (const el of serie.elements) {
-    const item = el.type === 'exercice' ? itemExercice(el) : el.type === 'ouverte' ? itemOuverte(el) : await itemVraiFaux(el)
+    if (el.type === 'vraiFaux') {
+      // La question regroupée prend la place du PREMIER vrai/faux de la série.
+      if (vraiFaux.length === 0) items.push('vraiFaux')
+      vraiFaux.push(el)
+      continue
+    }
+    const item = el.type === 'exercice' ? itemExercice(el) : itemOuverte(el)
     if (item) items.push(item)
   }
-  return items
+  const regroupe = vraiFaux.length > 0 ? await itemVraiFauxRegroupe(vraiFaux) : null
+  return items.flatMap((it) => (it === 'vraiFaux' ? (regroupe ? [regroupe] : []) : [it]))
 }
 
 /* ----------------------------------------------------------------------------------------------

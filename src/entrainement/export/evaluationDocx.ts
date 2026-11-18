@@ -121,7 +121,12 @@ export async function genererCopieEvaluationDocx(entete: EnteteEvaluation, items
   enfants.push(new Paragraph({ children: [new TextRun({ text: titreEvaluation(entete), bold: true, size: 32 })], spacing: { before: 60 } }));
   enfants.push(
     new Paragraph({
-      children: [new TextRun({ text: `${dateEnToutesLettres(entete.date)} · Série ${entete.serieLettre}${entete.afficherDuree ? ` · ${dureeEstimeeMinutes(items)} minutes` : ""}`, size: 18, color: "4A4F58" })],
+      children: [
+        new TextRun({ text: `${dateEnToutesLettres(entete.date)} · Série `, size: 18, color: "4A4F58" }),
+        // Lettre de série en gras (demande de l'utilisateur), comme dans la copie HTML.
+        new TextRun({ text: entete.serieLettre, size: 18, color: "1F2937", bold: true }),
+        new TextRun({ text: entete.afficherDuree ? ` · ${dureeEstimeeMinutes(items)} minutes` : "", size: 18, color: "4A4F58" }),
+      ],
       spacing: { after: 120 },
     }),
   );
