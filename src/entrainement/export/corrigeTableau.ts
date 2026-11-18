@@ -34,7 +34,10 @@ export function latex(valeur: string): FragmentConsigne {
 
 /** Une ligne de calcul : une seule transformation, et la règle utilisée (facultative). */
 export function ligne(latex: string, justification?: string | Fragments): LigneCalcul {
-  return justification === undefined || justification === "" ? { latex } : { latex, justification };
+  if (justification === undefined || justification === "") return { latex };
+  // Justification en texte : « − » typographique devant un nombre (« par −4 », jamais « par -4 »).
+  const j = typeof justification === "string" ? justification.replace(/(^|[\s(])-(?=\d)/g, "$1−") : justification;
+  return { latex, justification: j };
 }
 
 export function utilise(sousQuestion: string | undefined, fragments: Fragments): EtapeCorrection {
