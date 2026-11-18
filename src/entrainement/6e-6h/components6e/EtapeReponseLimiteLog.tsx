@@ -3,6 +3,8 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseLimiteLog } from "../moteur6e/verificationLimitesLogarithmiques";
+import type { StatutVerification } from "../moteur/statutVerification";
+import { formatMessageErreur } from "../ui/messageErreur";
 import { CONSIGNE_GENERALE } from "../ui6e/formatLimitesLogarithmiques";
 import type { FragmentConsigne } from "../ui6e/formatLimitesLogarithmiques";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -45,6 +47,11 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Facultatif (famille D) : lecture de la valeur saisie AVANT soumission — `parse_error` affiche
+   * un message sans soumettre (aucune tentative perdue pour une saisie illisible). */
+  diagnostiquerValeur?: (texte: string) => StatutVerification;
+  /** Facultatif : placeholder du champ « Valeur finie » (défaut historique « ex : 5/7 ou 3*ln(7) »). */
+  placeholderValeur?: string;
 }
 
 /**
@@ -53,12 +60,14 @@ interface Props {
  * chaque écran. Même patron que
  * `EtapeReponseLimite.tsx` (6gen6).
  */
-export function EtapeReponseLimiteLog({ consigneEcran, enonceLatex, etatActuel, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReponseLimiteLog({ consigneEcran, enonceLatex, etatActuel, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, diagnostiquerValeur, placeholderValeur }: Props) {
   const [statut, setStatut] = useState<ReponseLimiteLog["type"] | null>(null);
   const [texte, setTexte] = useState("");
   /** Dernière réponse REFUSÉE — seul ce choix est marqué en rouge, jamais une nouvelle sélection
    * pas encore validée (audit chapitre 3 de 6e, point 4). */
   const [soumis, setSoumis] = useState<{ statut: ReponseLimiteLog["type"]; texte: string } | null>(null);
+  /** Dernière saisie ILLISIBLE (non soumise) — message tant que le champ la contient encore. */
+  const [illisible, setIllisible] = useState<string | null>(null);
   // Après une révélation (1 seule tentative), l'état de session n'est appliqué qu'au clic sur
   // « Écran suivant » : `validation.revele` signale alors le refus.
   const montrerErreurs = tentativesUtilisees > 0 || Boolean(validation?.revele);
@@ -67,6 +76,11 @@ export function EtapeReponseLimiteLog({ consigneEcran, enonceLatex, etatActuel, 
   function valider() {
     if (statut === null) return;
     if (statut === "valeur" && texte.trim() === "") return;
+    if (statut === "valeur" && diagnostiquerValeur && diagnostiquerValeur(texte) === "parse_error") {
+      setIllisible(texte);
+      return;
+    }
+    setIllisible(null);
     setSoumis({ statut, texte });
     onValider(statut === "valeur" ? { type: "valeur", texte } : { type: statut });
   }
@@ -109,7 +123,7 @@ export function EtapeReponseLimiteLog({ consigneEcran, enonceLatex, etatActuel, 
         <>
           <ApercuExpressionLatex texte={texte} />
           <div className="field contenu-conditionnel">
-            <input type="text" className={`text-input ${estRefuse("valeur") ? "is-erronee" : ""}`} value={texte} placeholder="ex : 5/7 ou 3*ln(7)" onChange={(e) => setTexte(e.target.value)} />
+            <input type="text" className={`text-input ${estRefuse("valeur") ? "is-erronee" : ""}`} value={texte} placeholder={placeholderValeur ?? "ex : 5/7 ou 3*ln(7)"} onChange={(e) => setTexte(e.target.value)} />
           </div>
         </>
       )}
@@ -131,10 +145,16 @@ export function EtapeReponseLimiteLog({ consigneEcran, enonceLatex, etatActuel, 
         <button type="button" className="btn btn-primary" disabled={statut === null || (statut === "valeur" && texte.trim() === "")} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {illisible !== null && statut === "valeur" && texte === illisible ? (
           <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")} Aucune tentative n'est comptée.
           </p>
+        ) : (
+          montrerErreurs && (
+            <p className="alert-error" role="alert">
+              Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            </p>
+          )
         )}
         </>
       )}

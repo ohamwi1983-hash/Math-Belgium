@@ -1,7 +1,8 @@
 /**
  * Couche core (6e) — contrat pour `6gen17` ("Calculer des limites, fonctions logarithmes",
- * chapitre 3). 3 familles A-C STRUCTURELLEMENT DISJOINTES (union discriminée), même principe que
- * `limitesExponentielles.types.ts` (6gen6, chapitre 2) : nombre d'écrans variable (2 ou 3) et forme
+ * chapitre 3). 4 familles A-D STRUCTURELLEMENT DISJOINTES (union discriminée), même principe que
+ * `limitesExponentielles.types.ts` (6gen6, chapitre 2) : nombre d'écrans variable (2 pour A-C, 3
+ * pour D) et forme
  * de réponse variable par écran, la plupart catégorielle (+∞/−∞/0/valeur) plutôt qu'un champ libre
  * systématique.
  *
@@ -41,17 +42,30 @@
  * catégorielle `CibleLimiteLog` — même primitive que l'écran 2 (conclusion), réutilisée pour les
  * DEUX écrans de cette famille.
  *
- * **Familles D (forme 1^∞) et E (développements limités) retirées** (audit chapitre 3 de 6e,
- * décision K4) : ces deux techniques ne sont enseignées dans aucun cours du site. Le générateur
- * se limite aux trois familles couvertes par la section « Calculer des limites » du cours :
- * croissances comparées (A), limite de référence ln(1+u)/u → 1 (B), limites déterminées
- * déguisées (C).
+ * **Famille D — puissances f(x)^{g(x)} : formes 1^∞, 0^0, ∞^0** (rétablie à la demande de
+ * l'utilisateur, qui LÈVE la décision K4 de l'audit du chapitre 3 de 6e : l'ancienne famille D
+ * « forme 1^∞ » avait été retirée parce que la technique n'était enseignée dans aucun cours du
+ * site ; la section « Calculer des limites » du cours (§ 5) l'enseigne désormais — sous-titre
+ * « Puissances : les formes 1^∞, 0^0 et ∞^0 », méthode, deux exemples résolus, piège, formulaire).
+ * Méthode unique : pour f > 0, f^g = e^{g·ln f} ; on calcule L = lim g·ln f (forme 0·∞ levée avec
+ * les outils du cours : ln(1+u)/u → 1, croissances comparées, ln(e^u) = u), puis on conclut par
+ * continuité de l'exponentielle (e^L si L fini, +∞ si L = +∞, 0 si L = −∞).
+ * 7 sous-types STRUCTURELLEMENT disjoints (union sur `sousType`) répartis sur les 3 types de forme.
+ * **Équilibre** (décision permanente) : le TYPE de forme et l'ISSUE (valeur finie ≠ 1, 1, +∞, 0)
+ * sont tirés indépendamment et uniformément AVANT de choisir un sous-type compatible — chaque type
+ * admet les 4 issues, l'issue ne se devine donc jamais au type ; dans les sous-types « comparaison
+ * d'exposants » (d1, d2, d3, d5, d7) une même structure couvre toutes les issues, seul le calcul de
+ * L tranche. Une issue n'est jamais un « cas particulier » (profil d'évaluation : `forme` = type de
+ * forme indéterminée, jamais l'issue).
+ *
+ * **Famille E (développements limités) toujours retirée** (audit chapitre 3 de 6e, décision K4) :
+ * technique enseignée dans aucun cours du site.
  *
  * **Valeur exacte affichée** : toute cible `valeur` porte sa forme LaTeX EXACTE (`latex`, ex.
  * `\frac{\ln 5}{2}`), construite par le générateur — jamais un flottant brut affiché à l'élève.
  */
 
-export type FamilleLimiteLogarithmique = "A" | "B" | "C";
+export type FamilleLimiteLogarithmique = "A" | "B" | "C" | "D";
 
 /** Cible catégorielle ou valeur exacte — voir la note de conception ci-dessus. */
 export type CibleLimiteLog = { type: "plus_infini" } | { type: "moins_infini" } | { type: "zero" } | { type: "valeur"; valeur: number; latex: string };
@@ -221,6 +235,104 @@ export interface ExerciceLimiteLogC3 {
 
 export type ExerciceLimiteLogC = ExerciceLimiteLogC1 | ExerciceLimiteLogC2 | ExerciceLimiteLogC3;
 
-export type ExerciceLimiteLogarithmique = ExerciceLimiteLogA | ExerciceLimiteLogB | ExerciceLimiteLogC;
+// ============================================================================
+// Famille D — Puissances f(x)^{g(x)} (3 écrans : reconnaître la forme, limite de l'exposant
+// g·ln f, conclure). 7 sous-types STRUCTURELLEMENT disjoints. Toute cible porte sa forme LaTeX
+// exacte ; `limiteFinale` d'une issue finie ≠ 1 vaut e^L écrit exactement (`e^{-6}`, `e^{\frac{3}{2}}`).
+// ============================================================================
+
+/** Type de forme indéterminée d'une puissance. */
+export type FormePuissance = "un_infini" | "zero_zero" | "infini_zero";
+/** Choix proposés à l'écran 1 : les trois formes + « pas indéterminée » (distracteur qui vise le
+ * réflexe « 1^∞ = 1 », jamais la bonne réponse : toutes les instances sont indéterminées). */
+export type ChoixFormePuissance = FormePuissance | "determinee";
+/** Issue de la limite (tirée AVANT le sous-type). */
+export type IssuePuissance = "fini" | "un" | "plus_infini" | "zero";
+
+interface ExerciceLimiteLogDCommun {
+  famille: "D";
+  forme: FormePuissance;
+  issue: IssuePuissance;
+  /** Limite de la base f(x) : 1 (valeur), 0 ou +∞. */
+  limiteBase: CibleLimiteLog;
+  /** Limite de l'exposant g(x) : ±∞ ou 0. */
+  limiteExposant: CibleLimiteLog;
+  /** L = lim g(x)·ln f(x) : valeur exacte non nulle, 0, +∞ ou −∞. */
+  limiteProduit: CibleLimiteLog;
+  /** lim f(x)^{g(x)} : e^L (valeur, LaTeX exact), 1, +∞ ou 0. */
+  limiteFinale: CibleLimiteLog;
+}
+
+/** d1 — (1 + a/x^p)^{(b/d)·x^q}, x → ±∞. q = p : e^{ab/d} ; q < p : 1 ; q > p : +∞ ou 0 (signe de
+ * ab). x → −∞ seulement pour (p, q) ∈ {(1,1), (2,2), (2,1)} (x^{q−p} y garde le même signe). */
+export interface ExerciceLimiteLogD1 extends ExerciceLimiteLogDCommun {
+  sousType: "d1";
+  a: number;
+  p: 1 | 2;
+  q: 0.5 | 1 | 2 | 3;
+  b: number;
+  d: 1 | 2 | 3;
+  direction: DirectionX;
+}
+
+/** d2 — ((x+b)/(x+c))^{k·x^q}, x → ±∞ (−∞ seulement pour q = 1). q = 1 : e^{k(b−c)} ; q = 1/2 : 1 ;
+ * q = 2 (x → +∞) : +∞ ou 0 (signe de k(b−c)). */
+export interface ExerciceLimiteLogD2 extends ExerciceLimiteLogDCommun {
+  sousType: "d2";
+  b: number;
+  c: number;
+  k: number;
+  q: 0.5 | 1 | 2;
+  direction: DirectionX;
+}
+
+/** d3 — (1 + a·x)^{c/x^q}, x → 0⁺ (ou 0⁻ pour q = 1). q = 1 : e^{ac} ; q = 1/2 : 1 ; q = 2 : +∞ ou 0
+ * (signe de ac). */
+export interface ExerciceLimiteLogD3 extends ExerciceLimiteLogDCommun {
+  sousType: "d3";
+  a: number;
+  c: number;
+  q: 0.5 | 1 | 2;
+  cote: "droite" | "gauche";
+}
+
+/** d4 — x^{g(x)}, x → 0⁺ (forme 0^0) : g = a·x^q → 1 (croissance comparée x·ln x → 0), ou
+ * g = a/ln x → e^a. */
+export interface ExerciceLimiteLogD4 extends ExerciceLimiteLogDCommun {
+  sousType: "d4";
+  a: number;
+  exposant: "puissance" | "surLn";
+  q: 1 | 2;
+}
+
+/** d5 — (e^{−1/x^p})^{a·x^q}, x → 0⁺ (forme 0^0) : g·ln f = −a·x^{q−p} ; q > p : 1 ; q = p : e^{−a} ;
+ * q < p : 0 (a > 0) ou +∞ (a < 0). */
+export interface ExerciceLimiteLogD5 extends ExerciceLimiteLogDCommun {
+  sousType: "d5";
+  p: 1 | 2 | 3;
+  q: 1 | 2 | 3;
+  a: number;
+}
+
+/** d6 — x^{g(x)}, x → +∞ (forme ∞^0) : g = a/x^q → 1 (ln x / x^q → 0), ou g = a/ln x → e^a. */
+export interface ExerciceLimiteLogD6 extends ExerciceLimiteLogDCommun {
+  sousType: "d6";
+  a: number;
+  exposant: "puissance" | "surLn";
+  q: 1 | 2;
+}
+
+/** d7 — (e^{x^p})^{a/x^q}, x → +∞ (forme ∞^0) : g·ln f = a·x^{p−q} ; p < q : 1 ; p = q : e^a ;
+ * p > q : +∞ (a > 0) ou 0 (a < 0). */
+export interface ExerciceLimiteLogD7 extends ExerciceLimiteLogDCommun {
+  sousType: "d7";
+  p: 1 | 2 | 3;
+  q: 1 | 2 | 3;
+  a: number;
+}
+
+export type ExerciceLimiteLogD = ExerciceLimiteLogD1 | ExerciceLimiteLogD2 | ExerciceLimiteLogD3 | ExerciceLimiteLogD4 | ExerciceLimiteLogD5 | ExerciceLimiteLogD6 | ExerciceLimiteLogD7;
+
+export type ExerciceLimiteLogarithmique = ExerciceLimiteLogA | ExerciceLimiteLogB | ExerciceLimiteLogC | ExerciceLimiteLogD;
 
 export type GenerateurExerciceLimiteLogarithmique = () => ExerciceLimiteLogarithmique;

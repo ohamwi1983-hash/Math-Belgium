@@ -13,14 +13,18 @@ import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesLimitesLogarithmiques";
 import type { DetailPhaseLimiteLogarithmique, EtatSessionLimiteLogarithmique, PhaseLimiteLogarithmique, ResultatExerciceLimiteLogarithmique } from "./typesLimitesLogarithmiques";
-import type { ReponseDiagnosticC, ReponseDominanceA, ReponseLimiteLog } from "./verificationLimitesLogarithmiques";
+import type { ReponseDiagnosticC, ReponseDominanceA, ReponseFormeD, ReponseLimiteLog } from "./verificationLimitesLogarithmiques";
 import {
+  categorieCorrecteD,
   verifierADominance,
   verifierAConclure,
   verifierBConclure,
   verifierBReformuler,
   verifierCConclure,
   verifierCDiagnostic,
+  verifierDConclure,
+  verifierDExposant,
+  verifierDForme,
 } from "./verificationLimitesLogarithmiques";
 
 const POINTS_DE_BASE = 100;
@@ -32,7 +36,7 @@ export const NIVEAU_AIDE_MAX = 2;
  * diagnostic) — sinon ils se gagnent par élimination (audit chapitre 3 de 6e, point 5). Les écrans à
  * expression libre (famille B) gardent `reglages.tentativesMax`. */
 export const TENTATIVES_CHOIX_FERME = 1;
-const PHASES_CHOIX_FERME: ReadonlySet<PhaseLimiteLogarithmique> = new Set(["aDominance", "aConclure", "cDiagnostic", "cConclure"]);
+const PHASES_CHOIX_FERME: ReadonlySet<PhaseLimiteLogarithmique> = new Set(["aDominance", "aConclure", "cDiagnostic", "cConclure", "dForme"]);
 
 export function tentativesMaxPhase(etat: Pick<EtatSessionLimiteLogarithmique, "phase" | "reglages">): number {
   return PHASES_CHOIX_FERME.has(etat.phase) ? TENTATIVES_CHOIX_FERME : etat.reglages.tentativesMax;
@@ -50,6 +54,13 @@ export function demarrerSessionLimiteLogarithmique(reglages: ReglagesSession6e, 
 
 function reglagesEtape(etat: EtatSessionLimiteLogarithmique): ReglagesEtape {
   return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxPhase(etat) };
+}
+
+/** Famille D, écrans 2 et 3 : une catégorie fausse (+∞ au lieu d'une valeur, 0 au lieu de −∞…)
+ * clôt l'écran tout de suite — le choix de catégorie est un choix fermé, il ne se rejoue pas ;
+ * seule une valeur exacte fausse dans la BONNE catégorie consomme une tentative du champ. */
+function tentativesMaxSoumissionD(etat: EtatSessionLimiteLogarithmique, categorieJuste: boolean): number | undefined {
+  return categorieJuste ? undefined : etat.etapeCourante.tentativesUtilisees + 1;
 }
 
 export function activerAideSuivante(etat: EtatSessionLimiteLogarithmique): EtatSessionLimiteLogarithmique {
@@ -79,6 +90,8 @@ function construireResultat(
       return { famille: "B", exercice, scoreReformuler: scores.bReformuler as number, scoreConclure: scores.bConclure as number, details };
     case "C":
       return { famille: "C", exercice, scoreDiagnostic: scores.cDiagnostic as number, scoreConclure: scores.cConclure as number, details };
+    case "D":
+      return { famille: "D", exercice, scoreForme: scores.dForme as number, scoreExposant: scores.dExposant as number, scoreConclure: scores.dConclure as number, details };
   }
 }
 
@@ -87,6 +100,7 @@ function avancerPhase<TReponse>(
   reponse: TReponse,
   verifier: (exercice: ExerciceLimiteLogarithmique, reponse: TReponse) => boolean,
   phaseAttendue: PhaseLimiteLogarithmique,
+  tentativesMaxForcees?: number,
 ): EtatSessionLimiteLogarithmique {
   if (etat.terminee) throw new Error("soumettreReponse : la session est déjà terminée");
   if (etat.phase !== phaseAttendue) throw new Error(`soumettreReponse : attendu à la phase "${phaseAttendue}", trouvé "${etat.phase}"`);
@@ -94,6 +108,7 @@ function avancerPhase<TReponse>(
 
   const etapeCourante = soumettreEtapeTentatives<TReponse>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(tentativesMaxForcees !== undefined ? { tentativesMax: tentativesMaxForcees } : {}),
     verifier: (r) => verifier(exercice, r),
     revelerReponse: () => {},
   });
@@ -146,4 +161,24 @@ export function soumettreReponseCDiagnostic(etat: EtatSessionLimiteLogarithmique
 
 export function soumettreReponseCConclure(etat: EtatSessionLimiteLogarithmique, reponse: ReponseLimiteLog): EtatSessionLimiteLogarithmique {
   return avancerPhase(etat, reponse, (e, r) => (e.famille === "C" ? verifierCConclure(e, r) : false), "cConclure");
+}
+
+// ============================================================================
+// Famille D
+// ============================================================================
+
+export function soumettreReponseDForme(etat: EtatSessionLimiteLogarithmique, reponse: ReponseFormeD): EtatSessionLimiteLogarithmique {
+  return avancerPhase(etat, reponse, (e, r) => (e.famille === "D" ? verifierDForme(e, r) : false), "dForme");
+}
+
+export function soumettreReponseDExposant(etat: EtatSessionLimiteLogarithmique, reponse: ReponseLimiteLog): EtatSessionLimiteLogarithmique {
+  const e = etat.exerciceCourant;
+  const categorieJuste = e.famille === "D" && categorieCorrecteD(e.limiteProduit, reponse);
+  return avancerPhase(etat, reponse, (x, r) => (x.famille === "D" ? verifierDExposant(x, r) : false), "dExposant", tentativesMaxSoumissionD(etat, categorieJuste));
+}
+
+export function soumettreReponseDConclure(etat: EtatSessionLimiteLogarithmique, reponse: ReponseLimiteLog): EtatSessionLimiteLogarithmique {
+  const e = etat.exerciceCourant;
+  const categorieJuste = e.famille === "D" && categorieCorrecteD(e.limiteFinale, reponse);
+  return avancerPhase(etat, reponse, (x, r) => (x.famille === "D" ? verifierDConclure(x, r) : false), "dConclure", tentativesMaxSoumissionD(etat, categorieJuste));
 }

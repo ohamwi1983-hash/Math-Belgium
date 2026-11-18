@@ -2,9 +2,10 @@ import type { ExerciceLimiteLogarithmique, FamilleLimiteLogarithmique } from "..
 import { construireA, construireASousType } from "./familles/A";
 import { construireB, construireBSousType } from "./familles/B";
 import { construireC, construireCSousType } from "./familles/C";
+import { construireD } from "./familles/D";
 
 /**
- * Catalogue dev — une entrée par sous-type PLUTÔT que par famille seule (5+2+3=10 entrées),
+ * Catalogue dev — une entrée par sous-type PLUTÔT que par famille seule (5+2+3=10 entrées pour A–C ; la famille D a une entrée par type de forme, 3 entrées),
  * pour que le panneau `SelecteurVarianteDev` puisse forcer chaque sous-type individuellement lors
  * des tests Playwright (voir CLAUDE.md, point 6 des clarifications). `construireAvecVarianteId`
  * dispatch directement vers le sous-type — jamais vers un simple tirage de famille suivi d'un
@@ -21,6 +22,12 @@ export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
   { id: "C-c1", label: "C1 — log_x(x+c), x→1±" },
   { id: "C-c2", label: "C2 — x·baseˣ(c/x), ∞×constante" },
   { id: "C-c3", label: "C3 — numérateur ne s'annule pas" },
+  // Famille D (puissances f(x)^g(x)) : une entrée par TYPE de forme indéterminée, jamais par issue —
+  // l'issue (valeur finie ≠ 1, 1, +∞, 0) reste tirée au hasard, équilibrée, quelle que soit l'entrée.
+  // Ajoutées en FIN de catalogue : les codes QR déjà imprimés (indice de variante) restent valides.
+  { id: "D-1inf", label: "D1 — puissance, forme 1 exposant ∞" },
+  { id: "D-00", label: "D2 — puissance, forme 0⁰" },
+  { id: "D-inf0", label: "D3 — puissance, forme ∞⁰" },
 ];
 
 export function construireAvecVarianteId(id: string): ExerciceLimiteLogarithmique {
@@ -45,6 +52,12 @@ export function construireAvecVarianteId(id: string): ExerciceLimiteLogarithmiqu
       return construireCSousType("c2");
     case "C-c3":
       return construireCSousType("c3");
+    case "D-1inf":
+      return construireD("un_infini");
+    case "D-00":
+      return construireD("zero_zero");
+    case "D-inf0":
+      return construireD("infini_zero");
     default:
       throw new Error(`construireAvecVarianteId : identifiant inconnu "${id}"`);
   }
@@ -54,10 +67,12 @@ const CONSTRUCTEURS_FAMILLE: Record<FamilleLimiteLogarithmique, () => ExerciceLi
   A: construireA,
   B: construireB,
   C: construireC,
+  D: () => construireD(),
 };
 
-/** Tirage équiprobable des 3 familles (familles D et E retirées, audit chapitre 3 de 6e, décision K4). */
-const FAMILLES: FamilleLimiteLogarithmique[] = ["A", "B", "C"];
+/** Tirage équiprobable des 4 familles (famille D rétablie à la demande de l'utilisateur, qui lève la
+ * décision K4 ; famille E toujours retirée). */
+const FAMILLES: FamilleLimiteLogarithmique[] = ["A", "B", "C", "D"];
 
 export function tirerFamillePonderee(): FamilleLimiteLogarithmique {
   return FAMILLES[Math.floor(Math.random() * FAMILLES.length)];

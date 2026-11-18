@@ -2500,14 +2500,93 @@ export const fonctionsLogarithmes: ChapterContent = {
             'expression comme $\\displaystyle\\lim_{x \\to -\\infty} \\ln(x)$ n\'a **aucun sens** — ni +∞, ' +
             'ni −∞, ni 0 : la question elle-même est mal posée.',
         },
+        { kind: 'subheading', text: 'Puissances : les formes $1^{\\infty}$, $0^{0}$ et $(+\\infty)^{0}$' },
+        {
+          kind: 'para',
+          text:
+            'Quand la base **et** l\'exposant varient tous les deux, comme dans $f(x)^{g(x)}$, trois ' +
+            'situations ne se règlent pas « de tête » : une base qui tend vers 1 avec un exposant ' +
+            'infini (forme $1^{\\pm\\infty}$), une base et un exposant qui tendent vers 0 (forme ' +
+            '$0^{0}$), une base qui tend vers $+\\infty$ avec un exposant qui tend vers 0 (forme ' +
+            '$(+\\infty)^{0}$). Ce sont des **formes indéterminées** : selon l\'exercice, la limite ' +
+            'peut valoir 1, n\'importe quel autre nombre strictement positif, $+\\infty$ ou 0.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi « 1 exposant l\'infini » ne vaut-il pas 1 ?',
+          text:
+            '$1^{n}=1$ pour tout n, mais une base qui **tend vers** 1 n\'est jamais égale à 1. Un ' +
+            'capital placé à 100 % par an, avec des intérêts versés n fois dans l\'année, est ' +
+            'multiplié en un an par $\\left(1+\\frac{1}{n}\\right)^{n}$ : 2 pour un versement, ' +
+            '$2{,}613$ pour 12 versements, $2{,}7146$ pour 365. La base se rapproche de 1 pendant que ' +
+            'l\'exposant grandit, les deux effets se compensent… et c\'est $e \\approx 2{,}718$ qui ' +
+            'sort, pas 1.',
+        },
+        {
+          kind: 'methode',
+          label: 'Calculer la limite d\'une puissance dont la base et l\'exposant varient',
+          items: [
+            'Vérifier que la base est strictement positive près du point, puis calculer séparément ' +
+              '$\\lim f(x)$ et $\\lim g(x)$ pour reconnaître la forme ($1^{\\pm\\infty}$, $0^{0}$ ou ' +
+              '$(+\\infty)^{0}$).',
+            'Réécrire la puissance avec l\'exponentielle : $f(x)^{g(x)} = e^{g(x)\\ln f(x)}$ (valable ' +
+              'car $f(x)>0$).',
+            'Calculer $L = \\lim g(x)\\ln f(x)$ : c\'est une forme « l\'infini fois 0 », qu\'on lève ' +
+              'avec les outils de cette section — la limite fondamentale ' +
+              '$\\dfrac{\\ln(1+u)}{u} \\to 1$ (forme $1^{\\infty}$), les croissances comparées ' +
+              '$x\\ln x \\to 0$ en $0^+$ et $\\dfrac{\\ln x}{x^{k}} \\to 0$ en $+\\infty$, ou ' +
+              '$\\ln\\left(e^{u}\\right)=u$.',
+            'Conclure par continuité de l\'exponentielle : la limite vaut $e^{L}$ si L est fini, ' +
+              '$+\\infty$ si $L=+\\infty$, et 0 si $L=-\\infty$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'forme « 1 exposant l\'infini » : la limite qui définit e',
+          formula: 'Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\left(1+\\dfrac{1}{x}\\right)^{x}$.',
+          steps: [
+            {
+              tag: 'reconnaître la forme',
+              text: '$1+\\dfrac{1}{x} \\to 1$ et $x \\to +\\infty$ : forme indéterminée $1^{+\\infty}$ (la base est positive pour $x>0$).',
+            },
+            { tag: 'réécrire avec l\'exponentielle', text: '$\\left(1+\\dfrac{1}{x}\\right)^{x} = e^{x\\ln\\left(1+\\frac{1}{x}\\right)}$' },
+            {
+              tag: 'changement de variable u = 1 sur x',
+              text: 'Avec $u=\\dfrac{1}{x} \\to 0^+$ : $x\\ln\\left(1+\\dfrac{1}{x}\\right) = \\dfrac{\\ln(1+u)}{u} \\to 1$ (limite fondamentale en 1).',
+            },
+            { tag: 'continuité de l\'exponentielle', text: 'L\'exposant tend vers 1, donc la puissance tend vers $e^{1}=e$.' },
+          ],
+          result: { tag: 'résultat', text: '$\\displaystyle\\lim_{x \\to +\\infty} \\left(1+\\dfrac{1}{x}\\right)^{x} = e \\approx 2{,}718$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'forme 0⁰ : x exposant x',
+          formula: 'Calcule $\\displaystyle\\lim_{x \\to 0^+} x^{x}$.',
+          steps: [
+            { tag: 'reconnaître la forme', text: 'La base $x$ et l\'exposant $x$ tendent tous les deux vers 0 : forme indéterminée $0^{0}$.' },
+            { tag: 'réécrire avec l\'exponentielle', text: '$x^{x} = e^{x\\ln x}$, car $x>0$' },
+            { tag: 'croissance comparée', text: '$\\displaystyle\\lim_{x \\to 0^+} x\\ln x = 0$ (forme 0 × (−∞) résolue plus haut)' },
+          ],
+          result: { tag: 'résultat', text: '$\\displaystyle\\lim_{x \\to 0^+} x^{x} = e^{0} = 1$' },
+        },
+        {
+          kind: 'piege',
+          text:
+            '$1^{\\infty}$ **ne vaut pas** 1 : remplacer d\'abord la base par sa limite donnerait ' +
+            '$1^{x}=1$, donc la réponse 1 au lieu de $e$ dans le premier exemple. De même, $0^{0}$ et ' +
+            '$(+\\infty)^{0}$ ne valent pas « automatiquement » 1 : en $+\\infty$, ' +
+            '$\\left(e^{x}\\right)^{\\frac{2}{x}} = e^{2}$ et $\\left(e^{x^{2}}\\right)^{\\frac{1}{x}} = e^{x} \\to +\\infty$. ' +
+            'Toujours passer par $e^{g(x)\\ln f(x)}$.',
+        },
         {
           kind: 'entrainement',
           title: 'Calculer des limites',
           generatorId: '6gen17',
           description: [
             'Calcule des limites de fonctions logarithmiques : croissance comparée ' +
-              '(exponentielle > puissance > logarithme), limite de référence ln(1+u)/u → 1, et ' +
-              'limites déterminées déguisées en formes indéterminées.',
+              '(exponentielle > puissance > logarithme), limite de référence ln(1+u)/u → 1, ' +
+              'limites déterminées déguisées en formes indéterminées, et limites de puissances ' +
+              'dont la base et l\'exposant varient (formes « 1 exposant l\'infini », 0⁰ et ∞⁰).',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 17. Calculer des limites »',
@@ -3520,6 +3599,13 @@ export const fonctionsLogarithmes: ChapterContent = {
           },
           { text: '$a^x > x^n > \\log_b(x)$', condition: 'pour $x$ assez grand, $a>1$, $b>1$, $n>0$' },
           { text: '$\\displaystyle\\lim_{x \\to 0^+} x\\ln(x) = 0 \\qquad \\lim_{u \\to 0} \\dfrac{\\ln(1+u)}{u} = 1$' },
+          {
+            text: '$f(x)^{g(x)} = e^{g(x)\\ln f(x)}$',
+            condition:
+              'pour $f(x)>0$ — formes indéterminées $1^{\\pm\\infty}$, $0^{0}$, $(+\\infty)^{0}$ : si ' +
+              '$g(x)\\ln f(x) \\to L$, la puissance tend vers $e^{L}$ ($+\\infty$ si $L=+\\infty$, 0 si $L=-\\infty$)',
+          },
+          { text: '$\\displaystyle\\lim_{x \\to \\pm\\infty} \\left(1+\\dfrac{a}{x}\\right)^{x} = e^{a}$', condition: 'pour tout réel $a$ (forme $1^{\\infty}$)' },
           { text: '$\\ln(x) \\le x - 1$', condition: 'pour tout $x>0$ — égalité seulement en $x=1$' },
         ],
       },
@@ -3569,8 +3655,8 @@ export const fonctionsLogarithmes: ChapterContent = {
       title: 'Quiz vrai/faux : réviser tout le chapitre',
       generatorId: '6gen66',
       description: [
-        'Choisis un thème et teste-toi sur tout le chapitre : 350 affirmations pré-écrites en ' +
-          '10 thèmes (35 par thème), une seule tentative par question, justification toujours ' +
+        'Choisis un thème et teste-toi sur tout le chapitre : 354 affirmations pré-écrites en ' +
+          '10 thèmes (35 à 39 par thème), une seule tentative par question, justification toujours ' +
           'révélée.',
       ],
       chantier: '6e-6h',

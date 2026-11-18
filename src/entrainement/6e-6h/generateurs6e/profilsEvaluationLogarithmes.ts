@@ -15,9 +15,12 @@
  * professeur qui l'a choisie.
  *
  * Générateurs sans profil (mesures sur 5 000 tirages par variante, voir le rapport) : 6gen13 (calcul
- * littéral, structure fixée par la variante), 6gen17 (limites : structure fixée par la sous-famille,
- * valeurs exactes), 6gen20 (choix d'un graphique), 6gen22 (problèmes en contexte : toujours
- * décimaux, calculatrice indispensable quelle que soit l'instance).
+ * littéral, structure fixée par la variante), 6gen20 (choix d'un graphique), 6gen22 (problèmes en
+ * contexte : toujours décimaux, calculatrice indispensable quelle que soit l'instance). 6gen17
+ * (limites, valeurs exactes) porte son profil dans son propre adaptateur
+ * (`limitesLogarithmiques/exportEvaluation.ts::profilInstance`) : familles A–C, `forme` = la famille
+ * (sous-famille déjà fixée par la variante) ; famille D (puissances f^g) `forme` = type de forme
+ * indéterminée (1^∞, 0^0, ∞^0), JAMAIS l'issue (valeur finie, 1, +∞, 0), que l'élève décide.
  *
  * Plusieurs caractéristiques à la fois → identifiants joints par « + » (jamais tirés pour la case).
  */

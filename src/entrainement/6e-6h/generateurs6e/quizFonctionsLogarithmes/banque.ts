@@ -927,6 +927,27 @@ export const BANQUE_QUIZ_FONCTIONS_LOGARITHMES: Record<VarianteQuizFonctionsLoga
       reponse: false,
       justification: [latex("0/0"), texte(" est une forme INDÉTERMINÉE : elle peut valoir n'importe quoi. Ce chapitre en donne le contre-exemple central, "), latex("\\ln(1+u)/u\\to1"), texte(".")],
     },
+    // Puissances f(x)^g(x) (famille D de 6gen17) : vérifications rapides, aucun grand calcul.
+    {
+      enonce: [texte("Une puissance dont la base tend vers 1 et l'exposant vers "), latex("+\\infty"), texte(" (forme "), latex("1^{\\infty}"), texte(") est une forme indéterminée.")],
+      reponse: true,
+      justification: [texte("La base n'est jamais exactement 1 : selon la vitesse de chacune, la limite peut valoir 1, tout autre nombre strictement positif, "), latex("+\\infty"), texte(" ou 0 — par exemple "), latex("\\left(1+\\frac{1}{x}\\right)^{x}\\to e"), texte(".")],
+    },
+    {
+      enonce: [latex("\\displaystyle\\lim_{x\\to+\\infty}\\left(1+\\frac{1}{x}\\right)^{x}=1"), texte(".")],
+      reponse: false,
+      justification: [texte("C'est le piège « "), latex("1^{\\infty}=1"), texte(" » : avec "), latex("\\left(1+\\frac{1}{x}\\right)^{x}=e^{x\\ln\\left(1+\\frac{1}{x}\\right)}"), texte(" et "), latex("x\\ln\\left(1+\\frac{1}{x}\\right)\\to1"), texte(", la limite vaut "), latex("e"), texte(".")],
+    },
+    {
+      enonce: [texte("Pour "), latex("f(x)>0"), texte(", on peut toujours écrire "), latex("f(x)^{g(x)}=e^{g(x)\\ln f(x)}"), texte(".")],
+      reponse: true,
+      justification: [texte("C'est la définition d'une puissance à exposant réel ("), latex("a^{b}=e^{b\\ln a}"), texte(" pour "), latex("a>0"), texte(") : on ramène la limite de la puissance à celle de l'exposant "), latex("g(x)\\ln f(x)"), texte(".")],
+    },
+    {
+      enonce: [texte("Si "), latex("g(x)\\ln f(x)\\to-\\infty"), texte(", alors "), latex("f(x)^{g(x)}\\to-\\infty"), texte(".")],
+      reponse: false,
+      justification: [texte("Une exponentielle est toujours positive : "), latex("e^{t}\\to0"), texte(" quand "), latex("t\\to-\\infty"), texte(", donc la puissance tend vers 0, jamais vers "), latex("-\\infty"), texte(".")],
+    },
   ],
 
   // ==========================================================================

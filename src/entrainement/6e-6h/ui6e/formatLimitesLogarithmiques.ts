@@ -1,5 +1,18 @@
-import type { CibleLimiteLog, ExerciceLimiteLogA, ExerciceLimiteLogB, ExerciceLimiteLogC, ExerciceLimiteLogarithmique } from "../core6e/limitesLogarithmiques.types";
+import type { CibleLimiteLog, ExerciceLimiteLogA, ExerciceLimiteLogB, ExerciceLimiteLogC, ExerciceLimiteLogD, ExerciceLimiteLogarithmique } from "../core6e/limitesLogarithmiques.types";
 import type { PhaseLimiteLogarithmique } from "../moteur6e/typesLimitesLogarithmiques";
+import {
+  CHOIX_FORME_LATEX,
+  cibleLatexD,
+  fLatexD,
+  formeExacteLatexD,
+  gLatexD,
+  limD,
+  lnUnPlusULatexD,
+  parSigne,
+  produitBrutLatexD,
+  puissanceLatexD,
+  uLatexD,
+} from "./formatLimitesPuissances";
 
 /**
  * Textes de consigne/aide + formatage LaTeX pour `6gen17`. Toute aide qui embarque un symbole
@@ -293,6 +306,10 @@ export interface ConfigPartieDiagnostic {
   optionsCategorielles: ("plus_infini" | "moins_infini" | "zero")[];
   autoriserValeurLibre: boolean;
   placeholderValeur: string;
+  /** Valeurs finies proposées en BOUTONS (sans champ), ex. « 1 » pour la base d'une puissance
+   * (famille D) — additif : absent pour les familles A–C. Chaque entrée est le texte soumis, rendu en
+   * KaTeX sur le bouton. */
+  optionsValeurs?: string[];
 }
 
 export function configDiagnosticPartiesC(exercice: ExerciceLimiteLogC): { partie1: ConfigPartieDiagnostic; partie2: ConfigPartieDiagnostic } {
@@ -319,6 +336,95 @@ function aideC2(phase: "cDiagnostic" | "cConclure", exercice: ExerciceLimiteLogC
 }
 
 // ============================================================================
+// Famille D — puissances f(x)^{g(x)} (écritures : `formatLimitesPuissances.ts`)
+// ============================================================================
+
+/** Écran 1 de la famille D : limite de la base (0, 1, +∞ en boutons) et de l'exposant (+∞, −∞, 0). */
+export function configFormePartiesD(): { partie1: ConfigPartieDiagnostic; partie2: ConfigPartieDiagnostic } {
+  return {
+    partie1: { label: "Base f(x) →", optionsCategorielles: ["zero", "plus_infini"], autoriserValeurLibre: false, placeholderValeur: "", optionsValeurs: ["1"] },
+    partie2: { label: "Exposant g(x) →", optionsCategorielles: ["plus_infini", "moins_infini", "zero"], autoriserValeurLibre: false, placeholderValeur: "" },
+  };
+}
+
+/** Choix fermé du type de forme (écran 1) : les trois formes indéterminées + « pas indéterminée »
+ * (distracteur du réflexe « 1^∞ = 1 »). */
+export const OPTIONS_FORME_D: { id: string; latex?: string; texte?: string }[] = [...CHOIX_FORME_LATEX, { id: "determinee", texte: "Pas indéterminée" }];
+
+export function libelleChoixFormeD(id: string): string {
+  return CHOIX_FORME_LATEX.find((c) => c.id === id)?.latex ?? "\\text{pas indéterminée}";
+}
+
+const TEXTE_REFERENCE_D = "Le produit est une forme « l'infini fois 0 » : fais apparaître la limite de référence du cours (§ 5), où u tend vers 0 :";
+
+function consigneD(phase: "dForme" | "dExposant" | "dConclure"): FragmentConsigne[] {
+  if (phase === "dForme") return [texte("Détermine la limite de la base et celle de l'exposant, puis le type de forme obtenu.")];
+  if (phase === "dExposant") {
+    return [texte("La base est strictement positive, donc "), latex("f(x)^{g(x)}=e^{g(x)\\ln f(x)}"), texte(". Calcule la limite de l'exposant "), latex("g(x)\\ln f(x)"), texte(" (valeur exacte si elle est finie).")];
+  }
+  return [texte("Conclus : donne la limite de départ (valeur exacte, par exemple "), latex("e^{-6}"), texte(").")];
+}
+
+function aideD1(phase: "dForme" | "dExposant" | "dConclure", exercice: ExerciceLimiteLogD): AideAvecLatex {
+  if (phase === "dForme") {
+    return { texte: "Évalue séparément la base et l'exposant. Trois formes de puissance sont indéterminées (une base qui tend vers 1 n'est jamais exactement 1) :", latex: "1^{\\pm\\infty},\\qquad 0^{0},\\qquad (+\\infty)^{0}" };
+  }
+  if (phase === "dConclure") {
+    return { texte: "L'exponentielle est continue : la limite de la puissance se déduit de la limite L de l'exposant (confirmée à l'étape précédente) :", latex: `${limD(exercice)} f(x)^{g(x)}=${limD(exercice)} e^{g(x)\\ln f(x)}` };
+  }
+  switch (exercice.sousType) {
+    case "d1":
+    case "d2":
+    case "d3":
+      return { texte: TEXTE_REFERENCE_D, latex: `\\lim_{u\\to 0}\\dfrac{\\ln(1+u)}{u}=1,\\qquad u=${uLatexD(exercice)}` };
+    case "d4":
+    case "d6":
+      return exercice.exposant === "surLn"
+        ? { texte: "Écris le logarithme de la base : il se simplifie avec le dénominateur de l'exposant. Rappel :", latex: "\\ln x\\neq 0 \\text{ pour } x\\neq 1" }
+        : { texte: "Le produit est une forme « 0 fois l'infini » : utilise une croissance comparée du cours (§ 5) :", latex: exercice.sousType === "d4" ? "\\lim_{x\\to 0^+} x\\ln x=0" : "\\lim_{x\\to +\\infty}\\dfrac{\\ln x}{x^{k}}=0\\ (k>0)" };
+    case "d5":
+    case "d7":
+      return { texte: "Le logarithme défait l'exponentielle de la base :", latex: "\\ln\\left(e^{u}\\right)=u" };
+  }
+}
+
+function aideD2(phase: "dForme" | "dExposant" | "dConclure", exercice: ExerciceLimiteLogD): AideAvecLatex {
+  if (phase === "dConclure") {
+    return { texte: "Trois cas, selon la limite L de l'exposant :", latex: "\\begin{gathered} L \\text{ fini} \\;\\Rightarrow\\; e^{L} \\\\ L=+\\infty \\;\\Rightarrow\\; +\\infty \\\\ L=-\\infty \\;\\Rightarrow\\; 0 \\end{gathered}" };
+  }
+  if (phase === "dForme") {
+    switch (exercice.sousType) {
+      case "d1":
+        return { texte: "Pour la base, regarde la fraction ; pour l'exposant, le signe de son coefficient et le côté vers lequel tend x :", latex: `${uLatexD(exercice)}\\to 0` };
+      case "d2":
+        return { texte: "Pour la base, divise le numérateur et le dénominateur par x ; pour l'exposant, regarde son signe :", latex: `${fLatexD(exercice)}=\\dfrac{1${exercice.b === 0 ? "" : `${exercice.b > 0 ? "+" : "-"}\\frac{${Math.abs(exercice.b)}}{x}`}}{1${exercice.c === 0 ? "" : `${exercice.c > 0 ? "+" : "-"}\\frac{${Math.abs(exercice.c)}}{x}`}}` };
+      case "d3":
+        return { texte: "Remplace x par 0 dans la base. Dans l'exposant, un nombre non nul divisé par une quantité qui tend vers 0 devient infini : regarde les signes.", latex: null };
+      case "d4":
+      case "d5":
+        return { texte: "Limites utiles quand x tend vers 0 par valeurs positives :", latex: exercice.sousType === "d4" ? "\\lim_{x\\to 0^+}\\ln x=-\\infty" : "\\lim_{t\\to -\\infty} e^{t}=0" };
+      case "d6":
+      case "d7":
+        return { texte: "Limites utiles quand x tend vers l'infini :", latex: exercice.sousType === "d6" ? "\\lim_{x\\to +\\infty}\\ln x=+\\infty" : "\\lim_{t\\to +\\infty} e^{t}=+\\infty" };
+    }
+  }
+  // Écran 2 : l'expression écrite avec les fonctions de l'exercice, transformée mais NON simplifiée.
+  const u = uLatexD(exercice);
+  if (u !== null) {
+    return { texte: "Produit écrit avec les fonctions de l'exercice, puis multiplié et divisé par u (calcul final non fait) :", latex: `g(x)\\ln f(x)=${gLatexD(exercice)}\\cdot ${parSigne(u)}\\cdot\\dfrac{${lnUnPlusULatexD(exercice)}}{${u}}` };
+  }
+  return { texte: "Produit écrit avec les fonctions de l'exercice (calcul final non fait) :", latex: `g(x)\\ln f(x)=${produitBrutLatexD(exercice)}` };
+}
+
+function etatActuelD(phase: "dForme" | "dExposant" | "dConclure", exercice: ExerciceLimiteLogD): string[] | null {
+  if (phase === "dForme") return null;
+  if (phase === "dExposant") {
+    return [`f(x)=${fLatexD(exercice)}\\to ${cibleLatexD(exercice.limiteBase)},\\quad g(x)=${gLatexD(exercice)}\\to ${cibleLatexD(exercice.limiteExposant)}`, `\\text{forme } ${formeExacteLatexD(exercice)}`];
+  }
+  return [`${limD(exercice)} g(x)\\ln f(x)=${cibleLatexD(exercice.limiteProduit)}`];
+}
+
+// ============================================================================
 // Dispatch public.
 // ============================================================================
 
@@ -332,6 +438,8 @@ export function formatLimiteEnonceLatex(exercice: ExerciceLimiteLogarithmique): 
       return `\\lim_{x \\to ${exercice.x0}} \\left(${formatFonctionB(exercice)}\\right)`;
     case "C":
       return `\\lim_{${formatDirectionC(exercice)}} \\left(${formatFonctionC(exercice)}\\right)`;
+    case "D":
+      return `${limD(exercice)} ${puissanceLatexD(exercice)}`;
   }
 }
 
@@ -343,6 +451,8 @@ export function consigneEcran(phase: PhaseLimiteLogarithmique, exercice: Exercic
       return consigneB(phase as "bReformuler" | "bConclure", exercice);
     case "C":
       return consigneC(phase as "cDiagnostic" | "cConclure");
+    case "D":
+      return consigneD(phase as "dForme" | "dExposant" | "dConclure");
   }
 }
 
@@ -354,6 +464,8 @@ export function aideNiveau1(phase: PhaseLimiteLogarithmique, exercice: ExerciceL
       return aideB1(phase as "bReformuler" | "bConclure");
     case "C":
       return aideC1(phase as "cDiagnostic" | "cConclure");
+    case "D":
+      return aideD1(phase as "dForme" | "dExposant" | "dConclure", exercice);
   }
 }
 
@@ -365,6 +477,8 @@ export function aideNiveau2(phase: PhaseLimiteLogarithmique, exercice: ExerciceL
       return aideB2(phase as "bReformuler" | "bConclure", exercice);
     case "C":
       return aideC2(phase as "cDiagnostic" | "cConclure", exercice);
+    case "D":
+      return aideD2(phase as "dForme" | "dExposant" | "dConclure", exercice);
   }
 }
 
@@ -392,5 +506,7 @@ export function etatActuel(phase: PhaseLimiteLogarithmique, exercice: ExerciceLi
       const [cible1, cible2] = exercice.sousType === "c2" ? [exercice.partieFacteur1, exercice.partieFacteur2] : [exercice.partieNumerateur, exercice.partieDenominateur];
       return [`\\text{partie 1} \\to ${formatCibleTexte(cible1)},\\quad \\text{partie 2} \\to ${formatCibleTexte(cible2)}`];
     }
+    case "D":
+      return etatActuelD(phase as "dForme" | "dExposant" | "dConclure", exercice);
   }
 }

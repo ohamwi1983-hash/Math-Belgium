@@ -1,4 +1,4 @@
-import type { CategorieCroissance, CibleLimiteLog, ExerciceLimiteLogA, ExerciceLimiteLogB, ExerciceLimiteLogC } from "../core6e/limitesLogarithmiques.types";
+import type { CategorieCroissance, ChoixFormePuissance, CibleLimiteLog, ExerciceLimiteLogA, ExerciceLimiteLogB, ExerciceLimiteLogC, ExerciceLimiteLogD } from "../core6e/limitesLogarithmiques.types";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { evaluerExpressionExponentielle } from "./equivalenceExponentielle";
 
@@ -126,6 +126,8 @@ export function verifierBConclure(exercice: ExerciceLimiteLogB, texte: string): 
 export interface ReponseDiagnosticC {
   partie1: ReponseLimiteLog;
   partie2: ReponseLimiteLog;
+  /** Troisième question fermée facultative de l'écran (famille D : type de forme). */
+  choix?: string;
 }
 
 function ciblesDiagnosticC(exercice: ExerciceLimiteLogC): { cible1: CibleLimiteLog; cible2: CibleLimiteLog } {
@@ -141,4 +143,76 @@ export function verifierCDiagnostic(exercice: ExerciceLimiteLogC, reponse: Repon
 
 export function verifierCConclure(exercice: ExerciceLimiteLogC, reponse: ReponseLimiteLog): boolean {
   return verifierReponseLimiteLog(exercice.limiteFinale, reponse);
+}
+
+// ============================================================================
+// Famille D — 3 écrans (reconnaître la forme, limite de l'exposant g·ln f, conclure).
+// ============================================================================
+
+/** Écran 1 : limite de la base, limite de l'exposant (cibles catégorielles/valeur, comme l'écran 1
+ * de la famille C) et type de forme (choix fermé). */
+export interface ReponseFormeD {
+  base: ReponseLimiteLog;
+  exposant: ReponseLimiteLog;
+  forme: ChoixFormePuissance;
+}
+
+export function verifierDForme(exercice: ExerciceLimiteLogD, reponse: ReponseFormeD): boolean {
+  return verifierReponseLimiteLog(exercice.limiteBase, reponse.base) && verifierReponseLimiteLog(exercice.limiteExposant, reponse.exposant) && reponse.forme === exercice.forme;
+}
+
+/** Saisie d'une valeur seule : `parse_error` si illisible (aucune tentative décomptée — l'appli ne
+ * soumet pas), `correct` sinon (la justesse est jugée par `verifierDExposant`/`verifierDConclure`). */
+export function diagnostiquerSaisieValeurD(texte: string): StatutVerification {
+  try {
+    evaluerExpressionExponentielle(texte, {});
+    return "correct";
+  } catch {
+    return "parse_error";
+  }
+}
+
+/** Catégorie d'une réponse (+∞, −∞, 0, valeur finie non nulle) : une valeur saisie qui vaut
+ * exactement 0 compte comme « 0 ». */
+function categorieReponseD(reponse: ReponseLimiteLog): CibleLimiteLog["type"] {
+  if (reponse.type !== "valeur") return reponse.type;
+  try {
+    if (evaluerExpressionExponentielle(reponse.texte, {}) === 0) return "zero";
+  } catch {
+    /* illisible : reste « valeur » */
+  }
+  return "valeur";
+}
+
+/** La CATÉGORIE de la réponse (+∞, −∞, 0 ou valeur finie) est-elle la bonne ? Écrans 2 et 3 de la
+ * famille D : un choix de catégorie faux clôt l'écran (choix fermé, une tentative — sinon il se
+ * gagnerait par élimination), seule une VALEUR exacte fausse dans la bonne catégorie laisse les
+ * tentatives du champ (`reglages.tentativesMax`). */
+export function categorieCorrecteD(cible: CibleLimiteLog, reponse: ReponseLimiteLog): boolean {
+  return categorieReponseD(reponse) === cible.type;
+}
+
+function verifierCibleD(cible: CibleLimiteLog, reponse: ReponseLimiteLog, comparer: (soumis: number, cible: number) => boolean): boolean {
+  if (!categorieCorrecteD(cible, reponse)) return false;
+  if (cible.type !== "valeur") return true;
+  if (reponse.type !== "valeur") return false;
+  let soumis: number;
+  try {
+    soumis = evaluerExpressionExponentielle(reponse.texte, {});
+  } catch {
+    return false;
+  }
+  return Number.isFinite(soumis) && comparer(soumis, cible.valeur);
+}
+
+/** Écran 2 : L = lim g·ln f (valeur exacte, ±∞ ou 0) — même tolérance relative que les autres
+ * valeurs de 6gen17 (`toleranceValeur`) ; |L| ≥ 1/3 par construction. */
+export function verifierDExposant(exercice: ExerciceLimiteLogD, reponse: ReponseLimiteLog): boolean {
+  return verifierCibleD(exercice.limiteProduit, reponse, (s, c) => Math.abs(s - c) <= toleranceValeur(c));
+}
+
+/** Écran 3 : lim f^g. Une valeur e^L se compare par son LOGARITHME (|ln s − L| ≤ 10⁻³) : la
+ * tolérance absolue de 0,005 acceptait « 0 » pour e^{−6} ≈ 0,0025, ou e^{−5} pour e^{−6}. */
+export function verifierDConclure(exercice: ExerciceLimiteLogD, reponse: ReponseLimiteLog): boolean {
+  return verifierCibleD(exercice.limiteFinale, reponse, (s, c) => s > 0 && Math.abs(Math.log(s) - Math.log(c)) <= 1e-3);
 }
