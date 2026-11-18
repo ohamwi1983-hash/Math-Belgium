@@ -170,6 +170,7 @@ export function lignesDivisionConjugue(a: number, b: number, c: number, d: numbe
   const D = cz(c, d);
   const Db = cz(c, -d);
   const g = gauche ?? `\\dfrac{${N}}{${D}}`;
+  if (d === 0) return [ligne(`${g}=${cq(frac(a, c), frac(b, c))}`, `on divise chaque partie par ${c}`.replace("-", "−"))];
   const pr = a * c + b * d;
   const pi = b * c - a * d;
   const n2 = c * c + d * d;

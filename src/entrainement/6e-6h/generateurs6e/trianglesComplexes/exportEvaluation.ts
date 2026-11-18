@@ -1,24 +1,21 @@
-import type { ExerciceTrianglesB, ExerciceTrianglesComplexes, Longueur, PointComplexe } from "../../core6e/trianglesComplexes.types";
+import type { ExerciceTrianglesComplexes } from "../../core6e/trianglesComplexes.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { aideNiveau1, aideNiveau2, blocDonnees, formatReponseAttenduePhaseLatex } from "../../ui6e/formatTrianglesComplexes";
+import { blocDonnees, formatReponseAttenduePhaseLatex } from "../../ui6e/formatTrianglesComplexes";
 import { phasesPourExercice } from "../../moteur6e/typesTrianglesComplexes";
 import type { PhaseTrianglesComplexes } from "../../moteur6e/typesTrianglesComplexes";
-import { pointEntierLatex } from "./construction";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTrianglesComplexes } from "./index";
 import type { IdVarianteTrianglesComplexes } from "./index";
 import { profilTrianglesComplexes } from "../profilsEvaluationComplexes40-42";
-import { COULEURS, planComplexeSvg, positionLoinDe } from "../figuresPlanComplexe40-42";
-import type { Coord, PointPlan, SegmentPlan } from "../figuresPlanComplexe40-42";
+import { conclusion, correctionDetailleeTriangles, piege } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceTrianglesComplexes>` pour `6gen41` (Triangles et
@@ -160,237 +157,7 @@ function enoncePapier(e: ExerciceTrianglesComplexes): EnoncePapier {
   return { section: { enteteFragments: entetePapier(e), questions }, etapesParQuestion: etapesParQuestion(e), reponseBreve: reponseB };
 }
 
-// ---------------------------------------------------------------------------------------------
-// Figures du corrigé
-// ---------------------------------------------------------------------------------------------
-
-const c = (p: PointComplexe): Coord => [p.re, p.im];
-
-function centre(pts: Coord[]): Coord {
-  return [pts.reduce((s, p) => s + p[0], 0) / pts.length, pts.reduce((s, p) => s + p[1], 0) / pts.length];
-}
-
-function pointsNommes(liste: [string, PointComplexe, string?][], g: Coord): PointPlan[] {
-  return liste.map(([nom, p, couleur]) => ({ x: p.re, y: p.im, etiquette: nom, couleur: couleur ?? COULEURS.encre, position: positionLoinDe(c(p), g) }));
-}
-
-function figure(e: ExerciceTrianglesComplexes): string {
-  switch (e.famille) {
-    case "A": {
-      const g = centre([c(e.A), c(e.B), c(e.C)]);
-      return planComplexeSvg({
-        polygones: [{ sommets: [c(e.A), c(e.B), c(e.C)], couleur: COULEURS.accent, remplissage: COULEURS.accentDoux }],
-        points: pointsNommes([["A", e.A], ["B", e.B], ["C", e.C]], g),
-        libelle: "Le triangle ABC",
-      });
-    }
-    case "B": {
-      const g = centre([c(e.O), c(e.A), c(e.B)]);
-      return planComplexeSvg({
-        polygones: [{ sommets: [c(e.O), c(e.A), c(e.B)], couleur: COULEURS.accent, remplissage: COULEURS.accentDoux }],
-        points: pointsNommes([["O", e.O], ["A", e.A], ["B", e.B]], g),
-        libelle: "Le triangle OAB",
-      });
-    }
-    case "C": {
-      const g = centre([c(e.O), c(e.B), c(e.F)]);
-      const segments: SegmentPlan[] = [c(e.O), c(e.B), c(e.F)].map((s) => ({ de: c(e.A), a: s, pointilles: true, couleur: COULEURS.ciel }));
-      return planComplexeSvg({
-        polygones: [{ sommets: [c(e.O), c(e.B), c(e.F)], couleur: COULEURS.accent, remplissage: COULEURS.accentDoux }],
-        segments,
-        points: [...pointsNommes([["O", e.O], ["B", e.B], ["F", e.F]], g), { x: e.A.re, y: e.A.im, etiquette: "A", couleur: COULEURS.ciel, position: "se" }],
-        libelle: "Le triangle OBF et le point A",
-      });
-    }
-    case "D": {
-      const g = centre([c(e.O), c(e.A), c(e.B), c(e.C), c(e.D)]);
-      return planComplexeSvg({
-        polygones: [
-          { sommets: [c(e.O), c(e.A), c(e.B)], couleur: COULEURS.encre },
-          { sommets: [c(e.O), c(e.C), c(e.D)], couleur: COULEURS.accent, pointilles: !e.coherent },
-        ],
-        points: pointsNommes(
-          [
-            ["O", e.O],
-            ["A", e.A],
-            ["B", e.B],
-            ["C", e.C, COULEURS.accent],
-            ["D", e.D, COULEURS.accent],
-          ],
-          g,
-        ),
-        libelle: "Les triangles OAB et OCD",
-      });
-    }
-    case "E": {
-      const g = centre([c(e.A), c(e.B), c(e.C)]);
-      return planComplexeSvg({
-        droites: [
-          { p1: c(e.A), p2: c(e.B), couleur: COULEURS.accent },
-          { p1: c(e.A), p2: c(e.C), couleur: COULEURS.ciel },
-        ],
-        points: pointsNommes([["A", e.A], ["B", e.B], ["C", e.C]], g),
-        libelle: "Les droites (AB) et (AC)",
-      });
-    }
-  }
-}
-
-// ---------------------------------------------------------------------------------------------
-// Corrigé détaillé
-// ---------------------------------------------------------------------------------------------
-
-const carre = (l: Longueur) => Math.round(l.numerique * l.numerique);
-
-/** « AB = |z_B − z_A| = |3+i| = √10 » quand les deux affixes sont entières. */
-function ligneLongueur(nom: string, p: PointComplexe, q: PointComplexe, l: Longueur): string {
-  const entiers = [p.re, p.im, q.re, q.im].every((v) => Number.isInteger(v));
-  const zp = nom[0];
-  const zq = nom[1];
-  const diff = entiers ? `=|${pointEntierLatex(q.re - p.re, q.im - p.im)}|=\\sqrt{(${q.re - p.re})^2+(${q.im - p.im})^2}` : "";
-  return `${nom}=|z_${zq}-z_${zp}|${diff}=${l.latex}`;
-}
-
-/** Côtés autour du sommet principal S du triangle isocèle OAB (carrés entiers) — mêmes données que
- * l'aide de l'écran 4 (`aideNiveau1B`/`aideNiveau2B`). */
-function cosinusB(e: ExerciceTrianglesB): FragmentConsigne[] {
-  const s = e.sommetIsocele;
-  const [l1, l2, lo] = s === "O" ? [carre(e.OA), carre(e.OB), carre(e.AB)] : s === "A" ? [carre(e.OA), carre(e.AB), carre(e.OB)] : [carre(e.OB), carre(e.AB), carre(e.OA)];
-  const num = l1 + l2 - lo;
-  // Triangle isocèle en S : les deux côtés adjacents sont égaux, leur produit vaut l1.
-  const den = 2 * l1;
-  let a = Math.abs(num);
-  let b = den;
-  while (b) [a, b] = [b, a % b];
-  const g = a || 1;
-  const frac = num === 0 ? "0" : `${num < 0 ? "-" : ""}\\dfrac{${Math.abs(num) / g}}{${den / g}}`;
-  const autres = (["O", "A", "B"] as const).filter((x) => x !== s);
-  const deg = (v: number) => `${(Math.round(v * 10) / 10).toString().replace(".", "{,}")}^{\\circ}`;
-  return [
-    f(`\\cos\\widehat{${s}}=\\dfrac{${l1}+${l2}-${lo}}{2\\cdot ${l1}}=${frac}`),
-    t(", donc "),
-    f(`\\widehat{${s}}\\approx ${deg(e.anglesDeg[s])}`),
-    t(" et "),
-    f(`\\widehat{${autres[0]}}=\\widehat{${autres[1]}}=\\dfrac{180^{\\circ}-\\widehat{${s}}}{2}\\approx ${deg(e.anglesDeg[autres[0]])}`),
-    t("."),
-  ];
-}
-
-function calcul(e: ExerciceTrianglesComplexes, phase: PhaseTrianglesComplexes): FragmentConsigne[] | null {
-  switch (phase) {
-    case "aEcran1":
-      if (e.famille !== "A") return null;
-      return [f(ligneLongueur("AB", e.A, e.B, e.AB)), t(" ; "), f(ligneLongueur("AC", e.A, e.C, e.AC)), t(" ; "), f(ligneLongueur("BC", e.B, e.C, e.BC))];
-    case "bEcran1":
-      if (e.famille !== "B") return null;
-      return [f(ligneLongueur("OA", e.O, e.A, e.OA)), t(" ; "), f(ligneLongueur("OB", e.O, e.B, e.OB)), t(" ; "), f(ligneLongueur("AB", e.A, e.B, e.AB))];
-    case "cEcran2":
-      if (e.famille !== "C") return null;
-      return [f(`AO=|z_O-z_A|=${e.AO.latex}`), t(" ; "), f(`AB=|z_B-z_A|=${e.AB.latex}`), t(" ; "), f(`AF=|z_F-z_A|=${e.AF.latex}`)];
-    case "eEcran1": {
-      if (e.famille !== "E") return null;
-      // q = u/v = u·v̄/|v|² (affixes entières).
-      const [ua, ub] = [e.C.re - e.A.re, e.C.im - e.A.im];
-      const [va, vb] = [e.B.re - e.A.re, e.B.im - e.A.im];
-      const u = pointEntierLatex(ua, ub);
-      const v = pointEntierLatex(va, vb);
-      const vBarre = pointEntierLatex(va, -vb);
-      return [f(`q=\\dfrac{${u}}{${v}}=\\dfrac{(${u})(${vBarre})}{${va * va + vb * vb}}=${formatReponseAttenduePhaseLatex(e, "eEcran1")[0].replace(/^q=/, "")}`)];
-    }
-    case "aEcran3":
-    case "dEcran1": {
-      const aide = aideNiveau2(e, phase);
-      return aide.latex ? [t(`${aide.texte.replace(/ ?\((comparaison|les 2 autres|angle|division) non (faite|calculées?|calculé)\)/, "")} `), f(aide.latex)] : null;
-    }
-    case "bEcran3": {
-      if (e.famille !== "B") return null;
-      return [f(`OA^2=${carre(e.OA)}\\qquad OB^2=${carre(e.OB)}\\qquad AB^2=${carre(e.AB)}`)];
-    }
-    case "bEcran4":
-      return e.famille === "B" ? cosinusB(e) : null;
-    default:
-      return null;
-  }
-}
-
-function methode(e: ExerciceTrianglesComplexes, phase: PhaseTrianglesComplexes): FragmentConsigne[] | null {
-  const aide = aideNiveau1(e, phase);
-  if (aide.texte) return [t(`${aide.texte} `), ...(aide.latex ? [f(aide.latex)] : [])];
-  switch (phase) {
-    case "aEcran1":
-    case "bEcran1":
-    case "cEcran1":
-      return [t("La distance entre deux points est le module de la différence de leurs affixes : "), f("MN=|z_N-z_M|"), t(".")];
-    case "aEcran2":
-    case "bEcran2":
-      return [t("Un triangle est isocèle quand deux de ses côtés ont la même longueur ; le sommet principal est le sommet commun à ces deux côtés.")];
-    case "bEcran3":
-      return [t("Un triangle est rectangle si le carré du plus grand côté est égal à la somme des carrés des deux autres ; l'angle droit est opposé à ce plus grand côté.")];
-    case "cEcran3":
-      return [t("Le centre d'un triangle équilatéral est le seul point situé à égale distance de ses trois sommets.")];
-    case "dEcran2":
-      return [t("D est l'image de B par la même similitude si et seulement si B et D donnent le même rapport et le même angle que A et C.")];
-    case "dEcran3":
-      return [t("La similitude de centre O de rapport k et d'angle θ multiplie les affixes par "), f("k\\cdot e^{i\\theta}=k\\cos\\theta+i\\,k\\sin\\theta"), t(".")];
-    default:
-      return null;
-  }
-}
-
-/** Conclusion en phrase pour les verdicts D (l'écran affiche « Cohérent » / « Incohérent »). */
-function conclusion(e: ExerciceTrianglesComplexes, phase: PhaseTrianglesComplexes): FragmentConsigne[] {
-  if (e.famille === "D" && phase === "dEcran2")
-    return e.coherent ? [t("Oui : B et D donnent le même rapport et le même angle, donc la similitude envoie B sur D.")] : [t("Non : B et D donnent un autre rapport ou un autre angle, donc la similitude n'envoie pas B sur D.")];
-  return reponse(e, phase);
-}
-
-function piege(phase: PhaseTrianglesComplexes): FragmentConsigne[] | null {
-  switch (phase) {
-    case "aEcran1":
-    case "bEcran1":
-      return [t("Additionner les modules au lieu de prendre le module de la différence : "), f("|z_B-z_A|\\neq|z_B|-|z_A|"), t(".")];
-    case "aEcran2":
-    case "bEcran2":
-      return [t("Se tromper de sommet principal : c'est le sommet commun aux deux côtés égaux.")];
-    case "aEcran3":
-    case "bEcran3":
-      return [t("Conclure sans comparer le carré du plus grand côté à la somme des carrés des deux autres.")];
-    case "bEcran4":
-      return [t("Calculer l'arccosinus avec la calculatrice réglée en radians : les angles sont demandés en degrés.")];
-    case "cEcran3":
-      return [t("Conclure « centre » dès que deux distances sont égales : il faut les trois égales.")];
-    case "dEcran2":
-      return [t("Ne comparer que les rapports (ou que les angles) : il faut le même rapport et le même angle.")];
-    case "eEcran2":
-      return [t("Inverser les deux critères : quotient réel → points alignés ; quotient imaginaire pur → droites perpendiculaires.")];
-    default:
-      return null;
-  }
-}
-
-function lignesEtape(e: ExerciceTrianglesComplexes, phase: PhaseTrianglesComplexes, sousQuestion: string, avecFigure: boolean): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [];
-  const m = methode(e, phase);
-  if (m) lignes.push({ label: "Méthode", sousQuestion, fragments: m });
-  const cl = calcul(e, phase);
-  if (cl) lignes.push({ label: "Calcul", sousQuestion, fragments: cl });
-  lignes.push({ label: "Conclusion", sousQuestion, fragments: conclusion(e, phase), ...(avecFigure ? { figureHtml: figure(e) } : {}) });
-  const p = piege(phase);
-  if (p) lignes.push({ label: "Piège", sousQuestion, fragments: p });
-  return lignes;
-}
-
-/** La figure va APRÈS les verdicts : dernière étape (D : étape 2, le verdict de cohérence). */
-function phaseFigure(e: ExerciceTrianglesComplexes): PhaseTrianglesComplexes {
-  if (e.famille === "D") return "dEcran2";
-  const phases = phasesPourExercice(e);
-  return phases[phases.length - 1];
-}
-
-function correctionDetaillee(e: ExerciceTrianglesComplexes): EtapeCorrection[] {
-  const avecFig = phaseFigure(e);
-  return phasesPourExercice(e).flatMap((phase, i) => lignesEtape(e, phase, LETTRES[i], phase === avecFig));
-}
+const correctionDetaillee = correctionDetailleeTriangles;
 
 function difficulte(e: ExerciceTrianglesComplexes): 1 | 2 | 3 {
   switch (e.famille) {
