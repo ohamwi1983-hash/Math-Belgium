@@ -19,6 +19,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeFormeTrigonometrique } from "./generateurs6e/formeTrigonometrique/corrigeDetaille";
+import { avecFractionsNormalisees } from "./ui6e/papierComplexes";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen37` — Forme trigonométrique, module, argument et opérations (chapitre 7, "Nombres
@@ -143,6 +147,7 @@ export function App6gen37() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(avecFractionsNormalisees(correctionDetailleeFormeTrigonometrique)(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />,
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (

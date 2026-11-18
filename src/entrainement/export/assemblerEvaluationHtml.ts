@@ -1,4 +1,5 @@
-import type { BaremeExercice, BlocCorrection, EtapeCorrection, FragmentConsigne, SectionExercice } from "./genererFeuilleExercices";
+import type { BaremeExercice, BlocCorrection, EtapeCorrection, FragmentConsigne, LigneCalcul, SectionExercice } from "./genererFeuilleExercices";
+import { decouperLigneCalcul, estLignePiege } from "./corrigeTableau";
 import { blocCorrectionHtml, echapperHtml, fragmentsEnteteHtml, fragmentsVersHtml, grillesLisiblesAImpression } from "./genererFeuilleExercicesHtml";
 import { obtenirCssKatexAutonome } from "./katexImage";
 import { qrCodeSvg } from "./qrSvg";
@@ -238,6 +239,18 @@ td, th { font-size: inherit; }
 .etape-titre { margin: 10px 0 4px; padding-top: 6px; border-top: 1px solid var(--filet); overflow-wrap: anywhere; }
 .etape-titre:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 .etape-titre b { font-family: Archivo, Arial, sans-serif; font-size: 9pt; color: var(--accent); }
+/* Corrigé « comme au tableau » : chaîne de calcul alignée sur « = » (membre de gauche aligné à
+   droite, suite alignée à gauche), justification en petit italique à droite ; résultat encadré. */
+.etapes .contenu { min-width: 0; }
+.etapes .contenu > .intro { display: block; }
+.calcul { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(2.6cm, 4.4cm); align-items: baseline; row-gap: 2px; margin: 2px 0 3px; break-inside: avoid; page-break-inside: avoid; }
+.calcul.sans-just { grid-template-columns: auto minmax(0, 1fr); }
+.calcul > .g { text-align: right; white-space: nowrap; }
+.calcul > .d { min-width: 0; padding-right: 10px; }
+.calcul > .s { grid-column: 1 / 3; min-width: 0; padding-right: 10px; }
+.calcul > .j { font-family: Archivo, Arial, sans-serif; font-style: italic; font-size: 8.5pt; line-height: 1.3; color: var(--gris); }
+.correction-bloc .calcul > .j { color: #4f6f9a; }
+.resultat .cadre { display: inline-block; border: 1.5px solid var(--accent); border-radius: 5px; padding: 2px 10px; background: #f2f7fc; max-width: 100%; }
 .etape-num { font-family: Archivo, Arial, sans-serif; font-size: 8pt; font-weight: 600; color: var(--accent); }
 .etapes-libres p { margin: 0 0 0.55em; }
 .liste-donnees { margin: 0.4em 0; }
@@ -544,18 +557,42 @@ function figureCorrigeHtml(e: EtapeCorrection): string {
   return e.figureHtml ? `<div class="figure-corrige-bloc">${e.figureHtml}</div>` : "";
 }
 
+/** Chaîne de calcul « comme au tableau » : grille à trois colonnes — membre de gauche (aligné à
+ * droite), relation et suite (alignées à gauche : les « = » tombent les uns sous les autres),
+ * justification en petit italique. Jamais coupée entre deux pages (`.calcul` insécable). */
+export function calculHtml(lignes: LigneCalcul[] | undefined): string {
+  if (!lignes || lignes.length === 0) return "";
+  const avecJustif = lignes.some((l) => l.justification !== undefined);
+  const k = (t: string) => fragmentsVersHtml([{ type: "latex", valeur: t }]);
+  const cellules = lignes
+    .map((l) => {
+      const { gauche, droite } = decouperLigneCalcul(l.latex);
+      const j = l.justification === undefined ? "" : fragmentsVersHtml(typeof l.justification === "string" ? [{ type: "texte", valeur: l.justification }] : l.justification);
+      const formule = droite === null ? `<span class="s">${k(gauche)}</span>` : `<span class="g">${gauche ? k(gauche) : ""}</span><span class="d">${k(`{}${droite}`)}</span>`;
+      return `${formule}${avecJustif ? `<span class="j">${j}</span>` : ""}`;
+    })
+    .join("");
+  return `<div class="calcul${avecJustif ? "" : " sans-just"}">${cellules}</div>`;
+}
+
+function contenuLigneHtml(e: EtapeCorrection): string {
+  const texteHtml = fragmentsVersHtml(e.fragments);
+  if (e.type === "resultat") return `<span class="resultat"><span class="cadre">${texteHtml}</span>${calculHtml(e.calcul)}</span>${figureCorrigeHtml(e)}`;
+  return `${texteHtml ? `<span class="intro">${texteHtml}</span>` : ""}${calculHtml(e.calcul)}${figureCorrigeHtml(e)}`;
+}
+
 function etapesCorrectionHtml(etapes: EtapeCorrection[]): string {
-  const normales = etapes.filter((e) => e.label.trim().toLowerCase() !== "piège");
-  const pieges = etapes.filter((e) => e.label.trim().toLowerCase() === "piège");
+  const normales = etapes.filter((e) => !estLignePiege(e));
+  const pieges = etapes.filter(estLignePiege);
   let html = "";
   if (normales.length > 0 && normales.every((e) => !e.label.trim() && !e.sousQuestion)) {
     // Aucune étiquette (corrigé d'une question ouverte) : simples paragraphes, sans colonne vide.
-    html += `<div class="etapes-libres">${normales.map((e) => `<p>${fragmentsVersHtml(e.fragments)}</p>${figureCorrigeHtml(e)}`).join("")}</div>`;
+    html += `<div class="etapes-libres">${normales.map((e) => `<p>${fragmentsVersHtml(e.fragments)}</p>${calculHtml(e.calcul)}${figureCorrigeHtml(e)}`).join("")}</div>`;
   } else if (normales.length > 0) {
     html += `<div class="etapes">`;
     for (const e of normales) {
       const lbl = `${e.sousQuestion ? `${e.sousQuestion.replace(/\)$/, "")}) ` : ""}${e.label}`;
-      html += `<span class="lbl">${echapperHtml(lbl)}</span><span>${fragmentsVersHtml(e.fragments)}${figureCorrigeHtml(e)}</span>`;
+      html += `<span class="lbl">${echapperHtml(lbl)}</span><span class="contenu">${contenuLigneHtml(e)}</span>`;
     }
     html += `</div>`;
   }

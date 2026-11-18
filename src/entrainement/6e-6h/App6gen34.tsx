@@ -19,6 +19,9 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { correctionDetailleeNombresComplexes } from "./generateurs6e/nombresComplexes/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen34` — Nombres complexes : opérations de base et puissances de i (chapitre 7, "Nombres
@@ -144,6 +147,7 @@ export function App6gen34() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeNombresComplexes(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />,
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (

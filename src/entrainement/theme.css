@@ -4268,3 +4268,77 @@
   stroke: var(--surface);
   stroke-width: 1.5;
 }
+
+/* `CorrigeDetailleEcran.tsx` — corrigé détaillé « comme au tableau » d'une étape échouée (mêmes lignes
+ * que le corrigé papier) : étiquette au-dessus du contenu, chaîne de calcul alignée sur « = » (membre
+ * de gauche aligné à droite, suite à gauche), justification en petit italique — à droite sur grand
+ * écran, sous sa ligne sur téléphone. Le bloc de calcul défile horizontalement si une formule est
+ * trop large : la page ne déborde jamais. */
+.entrainement .corrige-ecran {
+  text-align: left;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--color-surface);
+  min-width: 0;
+  font-size: 0.94em;
+}
+.entrainement .corrige-ecran-titre {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+.entrainement .corrige-ecran-ligne {
+  padding: 5px 0;
+  border-top: 1px solid var(--color-border);
+  min-width: 0;
+}
+.entrainement .corrige-ecran-titre + .corrige-ecran-ligne { border-top: 0; }
+.entrainement .corrige-ecran-lbl {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 2px;
+}
+.entrainement .corrige-ecran-contenu { min-width: 0; overflow-wrap: anywhere; line-height: 1.6; }
+.entrainement .corrige-ecran-cadre {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  vertical-align: top;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 6px;
+  padding: 3px 10px;
+  background: var(--color-primary-bg);
+}
+.entrainement .corrige-ecran-calcul-defile { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding: 2px 0; }
+.entrainement .corrige-ecran-calcul {
+  display: grid;
+  grid-template-columns: max-content max-content minmax(10em, 1fr);
+  align-items: baseline;
+  row-gap: 3px;
+  overflow-wrap: normal;
+}
+.entrainement .corrige-ecran-calcul .cc-g { grid-column: 1; text-align: right; white-space: nowrap; }
+.entrainement .corrige-ecran-calcul .cc-d { grid-column: 2; white-space: nowrap; padding-right: 12px; }
+.entrainement .corrige-ecran-calcul .cc-s { grid-column: 1 / 3; white-space: nowrap; padding-right: 12px; }
+.entrainement .corrige-ecran-calcul .cc-j { grid-column: 3; font-size: 12px; font-style: italic; color: var(--color-text-muted); line-height: 1.3; }
+.entrainement .corrige-ecran-figure svg { max-width: 100%; height: auto; }
+.entrainement .corrige-ecran-piege {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--color-warning-bg);
+  overflow-wrap: anywhere;
+}
+.entrainement .corrige-ecran-piege-lbl { flex: none; white-space: nowrap; padding-top: 2px; font-size: 12px; font-weight: 700; color: var(--color-warning); text-transform: uppercase; }
+@media (max-width: 640px) {
+  .entrainement .corrige-ecran-calcul { grid-template-columns: max-content max-content; }
+  .entrainement .corrige-ecran-calcul .cc-j { grid-column: 1 / -1; padding: 0 0 4px 1.2em; }
+}

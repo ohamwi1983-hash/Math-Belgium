@@ -22,6 +22,9 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { correctionDetailleeAffixesRacines } from "./generateurs6e/affixesRacines/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen35` — Nombres complexes : affixes et racines carrées (chapitre 7, "Nombres complexes",
@@ -145,6 +148,7 @@ export function App6gen35() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAffixesRacines(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />,
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
