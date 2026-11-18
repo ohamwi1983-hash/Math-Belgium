@@ -100,6 +100,17 @@ export interface PlanDocument {
   lignes: LigneSelection[]
   chapitresSlugs: string[]
   series: PlanSerie[]
+  /** Feuille de remédiation (`evaluationRemediation.ts`) : évaluation d'origine et questions
+   * retravaillées. Un tel plan se recharge tel quel, sans toucher à la sélection du panneau (ses
+   * `lignes` sont celles de l'évaluation d'origine). Absent pour une évaluation / feuille normale. */
+  remediation?: {
+    titreSource: string
+    questions: number[]
+    exercicesParQuestion: number
+    /** Questions pour lesquelles le générateur n'avait plus assez d'énoncés inédits (variante à très
+     * peu d'énoncés, déjà tous dans l'évaluation) : moins d'exercices que demandé, jamais de répétition. */
+    incompletes?: number[]
+  }
 }
 
 /* ----------------------------------------------------------------------------------------------
@@ -160,7 +171,7 @@ function sansIdentifiantsSvg(texte: string): string {
     .replace(/href=\\?"#[^"\\]*\\?"/g, 'href')
 }
 
-function empreinteSection(generatorId: string, section: SectionExercice): string {
+export function empreinteSection(generatorId: string, section: SectionExercice): string {
   return `${generatorId}:${hacher(sansIdentifiantsSvg(JSON.stringify([section.enteteFragments ?? [], section.questions.map((q) => q.consigne), section.enteteHtml ?? ''])))}`
 }
 
@@ -168,7 +179,7 @@ function empreinteSection(generatorId: string, section: SectionExercice): string
  * Tirage des instances
  * -------------------------------------------------------------------------------------------- */
 
-type Adaptateur = AdaptateurFeuilleExercices<never>
+export type Adaptateur = AdaptateurFeuilleExercices<never>
 
 function indexVariante(adaptateur: Adaptateur, varianteId: string): number | null {
   if (!adaptateur.catalogueVariantes || !adaptateur.genererInstanceAvecVariante) return null
@@ -178,7 +189,7 @@ function indexVariante(adaptateur: Adaptateur, varianteId: string): number | nul
 
 /** Instance reproductible — EXACTEMENT le tirage que fait l'appli interactive à partir du code
  * (`genererAvecCode`), pour que le QR code rouvre le même exercice. */
-function tirerInstance(adaptateur: Adaptateur, varianteId: string, graine: number): never {
+export function tirerInstance(adaptateur: Adaptateur, varianteId: string, graine: number): never {
   const varianteIndex = indexVariante(adaptateur, varianteId)
   return genererAvecCode(
     { graine, varianteIndex },
@@ -206,7 +217,7 @@ function codeInstance(generatorId: string, adaptateur: Adaptateur, varianteId: s
  * - `calculatrice` : interdite → jamais d'instance qui exige la calculatrice ; autorisée →
  *   seulement des instances qui l'exigent (pas d'angles ni de valeurs remarquables).
  * Sans `profilInstance` dans l'adaptateur, aucune contrainte (comportement historique). */
-interface ContrainteTirage {
+export interface ContrainteTirage {
   cas: 'complet' | 'particulier' | string
   idsParametres: string[]
   parametresExclus: string[] | null
@@ -215,7 +226,7 @@ interface ContrainteTirage {
 }
 
 /** Caractéristiques du profil qui ne sont PAS des paramètres au choix (cas particuliers), jointes par « + ». */
-function autresCaracteristiques(profil: ProfilInstance, idsParametres: string[]): string | null {
+export function autresCaracteristiques(profil: ProfilInstance, idsParametres: string[]): string | null {
   const autres = (profil.casParticulier ? profil.casParticulier.split('+') : []).filter((c) => !idsParametres.includes(c))
   return autres.length === 0 ? null : autres.join('+')
 }
@@ -234,7 +245,7 @@ function parametresRespectes(profil: ProfilInstance, contrainte: ContrainteTirag
   return absents.length === voulus.length && voulus.every((c) => absents.includes(c))
 }
 
-function respecteContrainte(profil: ProfilInstance, contrainte: ContrainteTirage, avecCalcul: boolean): boolean {
+export function respecteContrainte(profil: ProfilInstance, contrainte: ContrainteTirage, avecCalcul: boolean): boolean {
   if (!parametresRespectes(profil, contrainte)) return false
   if (!casRespecte(autresCaracteristiques(profil, contrainte.idsParametres), contrainte.cas)) return false
   if (contrainte.forme !== undefined && profil.forme !== contrainte.forme) return false
@@ -275,7 +286,7 @@ export function varianteAdmetCasParticulier(generatorId: string, varianteId: str
  * contrainte et n'a pas encore été imprimée. Recherche par paliers : contrainte complète, puis (cas
  * particulier introuvable) un exercice complet, puis sans la calculatrice (une variante sans aucun cas « à la calculatrice » ne bloque pas la génération),
  * puis sans contrainte. Renvoie aussi le cas particulier obtenu, pour l'imposer aux autres séries. */
-function graineInedite(generatorId: string, adaptateur: Adaptateur, varianteId: string, dejaVues: Set<string>, contrainte?: ContrainteTirage, strict = false): { graine: number; casParticulier: string | null } {
+export function graineInedite(generatorId: string, adaptateur: Adaptateur, varianteId: string, dejaVues: Set<string>, contrainte?: ContrainteTirage, strict = false): { graine: number; casParticulier: string | null } {
   const profilDe = adaptateur.profilInstance
   const paliers: { essais: number; filtre: ((p: ProfilInstance) => boolean) | null }[] =
     profilDe && contrainte
@@ -334,7 +345,7 @@ function melanger<T>(liste: T[]): T[] {
   return copie
 }
 
-function piocherIndices(total: number, nombre: number, eviter: Set<number>): number[] {
+export function piocherIndices(total: number, nombre: number, eviter: Set<number>): number[] {
   const tous = melanger(Array.from({ length: total }, (_, i) => i))
   const inedits = tous.filter((i) => !eviter.has(i))
   const deja = tous.filter((i) => eviter.has(i))

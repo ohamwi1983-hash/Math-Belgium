@@ -23,6 +23,7 @@ import {
   type PlanEnregistre,
   type TypeDocx,
 } from '../../lib/evaluationLocal'
+import { construirePlanRemediation, questionsRemediables, titreSansPrefixe } from '../../lib/evaluationRemediation'
 import {
   CHAPITRE_FONCTIONNEL_SLUG,
   HEURES_PAR_NIVEAU,
@@ -147,6 +148,11 @@ function dureeLigne(ligne: LigneSelection, points: number): number {
   return points * 2.5
 }
 
+/** Titre affiché dans le formulaire de remédiation : celui de l'évaluation, sans « Évaluation — ». */
+function titreRemediation(e: PlanEnregistre): string {
+  return titreSansPrefixe(e.plan)
+}
+
 function slugFichier(texte: string): string {
   return texte.replace(/[\\/:*?"<>|]/g, '-').trim()
 }
@@ -173,11 +179,13 @@ function CompteurFlottant({ nombre, points }: { nombre: number; points?: number 
 function Stepper({
   valeur,
   max,
+  min = 0,
   disabled,
   onChange,
 }: {
   valeur: number
   max: number
+  min?: number
   disabled?: boolean
   onChange: (prochaineValeur: number) => void
 }) {
@@ -186,8 +194,8 @@ function Stepper({
       <button
         type="button"
         className="admin-eval-stepper-btn"
-        disabled={disabled || valeur <= 0}
-        onClick={() => onChange(Math.max(0, valeur - 1))}
+        disabled={disabled || valeur <= min}
+        onClick={() => onChange(Math.max(min, valeur - 1))}
         aria-label="Diminuer"
       >
         −
@@ -252,6 +260,14 @@ export function EvaluationGeneratorPanel({
   const [nombreHistorique, setNombreHistorique] = useState(() => lireHistorique().length)
   const [message, setMessage] = useState<string | null>(null)
   const urlsDocuments = useRef<string[]>([])
+  const blocDocuments = useRef<HTMLDivElement>(null)
+  /** Feuille de remédiation (`evaluationRemediation.ts`) : enregistrement dont le formulaire est
+   * ouvert, questions cochées (numéros de la copie de la série A, aucune par défaut), exercices par
+   * question, version aménagée. */
+  const [remediationId, setRemediationId] = useState<string | null>(null)
+  const [remediationCochees, setRemediationCochees] = useState<Set<number>>(() => new Set())
+  const [remediationNombre, setRemediationNombre] = useState(2)
+  const [remediationAmenagee, setRemediationAmenagee] = useState(false)
   const entreeImport = useRef<HTMLInputElement>(null)
   /** Sélection exclusive (groupe de type radio) : un seul processus affiché à la fois, jamais 2 ou 3
    * simultanément — voir `.admin-eval-processus-bar`. */
@@ -545,8 +561,48 @@ export function EvaluationGeneratorPanel({
     }
   }
 
+  function ouvrirRemediation(e: PlanEnregistre) {
+    if (remediationId === e.id) {
+      setRemediationId(null)
+      return
+    }
+    setRemediationId(e.id)
+    setRemediationCochees(new Set())
+    setRemediationNombre(2)
+    setRemediationAmenagee(!!e.plan.entete.versionAmenagee)
+  }
+
+  async function creerRemediation(e: PlanEnregistre) {
+    if (remediationCochees.size === 0) return
+    setGenereEnCours(true)
+    let plan: PlanDocument | null = null
+    try {
+      plan = await construirePlanRemediation(e.plan, [...remediationCochees], remediationNombre, remediationAmenagee)
+    } catch (err) {
+      console.error(err)
+      setErreur('Erreur pendant la création de la feuille de remédiation — réessaie.')
+      setGenereEnCours(false)
+      return
+    }
+    await rendrePlan(plan, true)
+    const incompletes = plan.remediation?.incompletes ?? []
+    setMessage(
+      `Feuille de remédiation créée (${remediationCochees.size} question${remediationCochees.size > 1 ? 's' : ''}) — documents ci-dessus.` +
+        (incompletes.length > 0
+          ? ` ${incompletes.length > 1 ? 'Questions' : 'Question'} ${incompletes.join(', ')} : moins d'exercices que demandé — le générateur n'a pas d'autre énoncé que ceux déjà donnés (jamais de répétition).`
+          : ''),
+    )
+    requestAnimationFrame(() => blocDocuments.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
+
   /** Recharge un plan enregistré : la sélection du panneau ET les graines (mêmes exercices). */
   function chargerPlan(plan: PlanDocument) {
+    // Feuille de remédiation : ses `lignes` sont celles de l'évaluation d'origine — on rend les
+    // documents sans toucher à la sélection du panneau.
+    if (plan.remediation) {
+      void rendrePlan(plan, false)
+      return
+    }
     const nh = resoudreNiveauHeures(plan.levelSlug)
     if (verrouille && plan.levelSlug !== verrouille.levelSlug) {
       setErreur('Ce fichier concerne un autre niveau que cette page.')
@@ -1240,8 +1296,8 @@ export function EvaluationGeneratorPanel({
           )}
           {message && <p className="admin-eval-lien">{message}</p>}
           {planCourant && documents.length > 0 && genereLocalementCompte !== null && (
-            <div className="admin-eval-documents">
-              <h3>Documents générés</h3>
+            <div className="admin-eval-documents" ref={blocDocuments}>
+              <h3>{planCourant.remediation ? planCourant.entete.titre : 'Documents générés'}</h3>
               <ul>
                 {documents.map((doc) => (
                   <li key={doc.suffixe}>
@@ -1298,18 +1354,78 @@ export function EvaluationGeneratorPanel({
             {enregistrees.length > 0 ? (
               <ul>
                 {enregistrees.map((e) => (
-                  <li key={e.id}>
+                  <li key={e.id} className={remediationId === e.id ? 'admin-eval-enregistree-ouverte' : undefined}>
                     <span>
-                      {e.nom} <span className="admin-eval-variante-label">— {new Date(e.enregistreLe).toLocaleDateString('fr-BE')}</span>
+                      {e.nom}{' '}
+                      <span className="admin-eval-variante-label">
+                        — {new Date(e.enregistreLe).toLocaleDateString('fr-BE')}
+                        {e.plan.remediation ? ' · remédiation' : e.plan.series.length > 1 ? ` · séries ${e.plan.series.map((s) => s.lettre).join(', ')}` : ''}
+                      </span>
                     </span>
                     <span className="admin-eval-documents-actions">
                       <button type="button" onClick={() => chargerPlan(e.plan)}>
                         Recharger (mêmes exercices)
                       </button>
+                      {!e.plan.remediation && (
+                        <button
+                          type="button"
+                          className={remediationId === e.id ? 'admin-eval-bouton-actif' : undefined}
+                          aria-expanded={remediationId === e.id}
+                          onClick={() => ouvrirRemediation(e)}
+                        >
+                          Feuille de remédiation
+                        </button>
+                      )}
                       <button type="button" onClick={() => setEnregistrees(supprimerPlanEnregistre(e.id))}>
                         Supprimer
                       </button>
                     </span>
+                    {remediationId === e.id && (
+                      <div className="admin-eval-remediation">
+                        <h4>Feuille de remédiation — {titreRemediation(e)}</h4>
+                        <p className="admin-eval-variante-label">
+                          Coche les questions à retravailler (numéros de la copie de la série A) : chaque exercice revient avec d'autres nombres, même type et mêmes réglages ; le corrigé est en fin de feuille et un QR code renvoie au générateur avec les aides.
+                        </p>
+                        <fieldset className="admin-eval-choix">
+                          <legend>Questions de l'évaluation</legend>
+                          {questionsRemediables(e.plan).map((q) => (
+                            <label className="admin-eval-choix-item" key={q.numero}>
+                              <input
+                                type="checkbox"
+                                checked={remediationCochees.has(q.numero)}
+                                onChange={(ev) => {
+                                  const suivant = new Set(remediationCochees)
+                                  if (ev.target.checked) suivant.add(q.numero)
+                                  else suivant.delete(q.numero)
+                                  setRemediationCochees(suivant)
+                                }}
+                              />
+                              <span className="admin-eval-choix-texte">
+                                <span className="admin-eval-choix-titre">
+                                  Question {q.numero} — <RichText text={q.titre} /> ({q.nomProcessus})
+                                </span>
+                                <span className="admin-eval-choix-enonce">
+                                  <RichText text={q.detail} />
+                                </span>
+                                {q.memeQuestion && <span className="admin-eval-choix-longueur">Même question reprise une fois (pas d'autre tirage possible)</span>}
+                              </span>
+                            </label>
+                          ))}
+                        </fieldset>
+                        <div className="admin-eval-remediation-options">
+                          <span className="admin-eval-remediation-nombre">
+                            Exercices par question
+                            <Stepper valeur={remediationNombre} min={1} max={6} onChange={setRemediationNombre} />
+                          </span>
+                          <label>
+                            <input type="checkbox" checked={remediationAmenagee} onChange={(ev) => setRemediationAmenagee(ev.target.checked)} /> Version aménagée en plus
+                          </label>
+                        </div>
+                        <button type="button" className="admin-gate-submit" disabled={genereEnCours || remediationCochees.size === 0} onClick={() => void creerRemediation(e)}>
+                          {genereEnCours ? 'Création en cours…' : 'Créer la feuille'}
+                        </button>
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>

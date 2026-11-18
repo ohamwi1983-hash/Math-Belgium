@@ -3,6 +3,7 @@ paths:
   - "src/entrainement/export/**"
   - "src/entrainement/**/exportEvaluation.ts"
   - "src/lib/evaluationLocal.ts"
+  - "src/lib/evaluationRemediation.ts"
   - "src/lib/evaluationPayload.ts"
   - "src/lib/evaluationAdapterRegistry.ts"
   - "src/lib/banquesVraiFaux.ts"
@@ -252,6 +253,40 @@ Toutes décochées par défaut ; un plan enregistré sans le champ se recharge a
   fait : `docx` n'écrit pas d'équation Word native) ; figures (`enteteHtml`, `figureHtml` du
   corrigé, blocs `html`) rasterisées en PNG. Pied de page Word (série, page n / N). Pas d'annexe
   formulaire ni de deux colonnes en Word.
+
+## Feuille de remédiation en un clic (`lib/evaluationRemediation.ts`, décision C9)
+
+Bouton « Feuille de remédiation » sous chaque évaluation / feuille ENREGISTRÉE (liste
+« Enregistrements, import et historique » du panneau ; pas sous une remédiation). Formulaire :
+questions de l'évaluation à cocher (aucune par défaut), « Exercices par question » (`Stepper` −/+,
+1–6, défaut 2 — jamais de champ numérique), « Version aménagée en plus » (préremplie d'après le plan
+d'origine), « Créer la feuille ». Résultat : une FEUILLE D'EXERCICES ordinaire (mode `exercice`,
+une série, rendue par `genererDocumentsDepuisPlan` : énoncé, « Je vérifie », corrigé détaillé, QR
+codes, aménagée si cochée) intitulée « Remédiation — <titre sans « Évaluation — »> ».
+- **Numérotation = copie de la série A** (`questionsRemediables`) : mêmes règles que
+  `itemsDepuisSerie` + `grouperParProcessus` — items rangés par processus (tri stable), TOUS les
+  vrai/faux de la série = UNE question au rang du premier. À garder synchronisé si ces règles changent.
+- **Exercice** : n exercices de la MÊME variante, avec la contrainte reconstruite depuis le profil de
+  l'instance d'origine (`contrainteDepuisOrigine` : cas particulier exact, ensemble exact des
+  paramètres absents, `forme`, calculatrice de l'évaluation). Graines neuves (`graineRemediation`) :
+  jamais un énoncé de l'évaluation (TOUTES les séries, empreinte `empreinteSection`), jamais deux fois
+  le même dans la feuille ; paliers : moteur `graineInedite` → même contrainte en recherche directe →
+  même variante sans contrainte → exercice OMIS. Des variantes n'ont que 1 à 9 énoncés (6gen38 « n3 » :
+  1 ; « cos seul » : 4 ; gen57 « produit d'entiers consécutifs » : 3) : plutôt moins d'exercices
+  qu'une répétition ; `plan.remediation.incompletes` et le message du panneau le signalent. Question
+  regroupée a)/b)/c) (`regroupable`) : reprise en entier, n fois.
+- **Vrai/faux** : d'autres affirmations des mêmes thèmes, n × le nombre d'origine par thème ; celles de
+  l'évaluation (toutes séries) seulement si la banque n'en a pas assez (`piocherIndices`).
+- **Questions ouvertes** (« Formule », démonstration, compréhension) : la même question, une fois —
+  mention « Même question reprise une fois (pas d'autre tirage possible) » dans le formulaire.
+- En-tête hérité : `joindreFormulaire` (annexe des seuls chapitres des questions retenues),
+  `deuxColonnes`, `afficherTitresSection`, surtitre/chapitre ; pas de numéro, de calculatrice ni de durée.
+- Plan `PlanDocument.remediation` (`titreSource`, `questions`, `exercicesParQuestion`) : la feuille
+  s'enregistre / s'exporte comme un autre plan (boutons habituels) ; « Recharger » rend ses documents
+  sans toucher à la sélection du panneau (ses `lignes` sont celles de l'évaluation d'origine). Elle
+  n'est pas enregistrée automatiquement ; ses exercices vont dans l'historique comme toute génération.
+- Vérifié (Playwright, 5 chapitres 4e/5e/6e, toutes questions, n = 3) : numérotation identique à la
+  copie A, mêmes générateurs/variantes/profils, 0 énoncé repris, 0 doublon, vrai/faux disjoints.
 
 ## Vérification avant de pousser
 

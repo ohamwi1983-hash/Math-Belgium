@@ -1522,6 +1522,23 @@ table.feature-table td { white-space: normal; }
 .admin-eval-enregistrees summary { cursor: pointer; font-weight: 600; }
 .admin-eval-enregistrees > p { margin: 8px 0 0; }
 
+/* Feuille de remédiation (formulaire sous un enregistrement, `evaluationRemediation.ts`). */
+.admin-eval-enregistrees button.admin-eval-bouton-actif { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
+.admin-eval-remediation {
+  flex: 1 0 100%; min-width: 0; display: flex; flex-direction: column; gap: 10px;
+  margin: 4px 0 6px; padding: 12px 14px; background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
+}
+.admin-eval-remediation h4 { margin: 0; font-size: 0.98rem; overflow-wrap: anywhere; }
+.admin-eval-remediation > p { margin: 0; }
+.admin-eval-remediation-options { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; font-size: 0.9rem; }
+.admin-eval-remediation-nombre { display: inline-flex; align-items: center; gap: 10px; }
+.admin-eval-remediation-options label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.admin-eval-enregistrees .admin-eval-remediation .admin-gate-submit {
+  align-self: flex-start; padding: 9px 16px; border-color: var(--accent); background: var(--accent-soft);
+  color: var(--accent-ink); font-weight: 700; font-size: 0.9rem; min-height: 40px;
+}
+.admin-eval-enregistrees .admin-eval-remediation .admin-eval-stepper-btn { min-height: 0; padding: 0; width: 30px; height: 30px; font-size: 1rem; }
+
 @media (max-width: 640px) {
   .admin-eval-divider { display: none; }
   .admin-eval-bottombar { justify-content: flex-start; }
