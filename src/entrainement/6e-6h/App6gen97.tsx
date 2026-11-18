@@ -31,6 +31,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleePolygones } from "./generateurs6e/polygonesReguliers/corrigeDetaille";
+import { phasesDe } from "./moteur6e/typesPolygonesReguliers";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen97` — « Polygones réguliers et racines n-ièmes » (6e, chapitre 5, section « Racines n-ièmes
@@ -131,6 +135,7 @@ export function App6gen97() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePolygones(exercice), lettreEtape(phasesDe(exercice).indexOf(phase)))} />,
         reponseAttendue: reponseAttendue(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
