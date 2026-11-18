@@ -226,13 +226,27 @@ export interface ParametresGabarit {
  * un simple signe (jamais de `\cdot` entre un signe seul et ce qui suit, ni entre le coefficient
  * interne et le binôme qu'il multiplie — juxtaposition directe, comme partout ailleurs dans le
  * projet). */
-export function formatGabaritLatex(parametres: ParametresGabarit): string {
+export function formatGabaritLatex(parametres: ParametresGabarit, nom: string = "f"): string {
   const { famille, ch, eh, th, soy, ev, cv, sox, tv } = parametres;
   const argument = formatArgumentGabarit(ch, eh, th, soy);
   const base = formatBaseGabarit(famille, argument);
   const prefixeExterne = formatFacteurSigneEtRatio(sox, ev, cv);
   const corps = prefixeExterne === "" ? base : prefixeExterne === "-" ? `-${base}` : `${prefixeExterne}\\cdot ${base}`;
-  return `f(x) = ${corps}${formatResidu(tv)}`;
+  return `${nom}(x) = ${corps}${formatResidu(tv)}`;
+}
+
+/** Noms des fonctions INTERMÉDIAIRES (après EH/CH/SOY, puis TH, puis EV/CV/SOX) : ce ne sont pas
+ * encore f, donc jamais « f(x) » — f₁, f₂, f₃, comme dans le corrigé détaillé (qui lit ces mêmes
+ * constantes via `formatGabaritEtape2Latex`…). La fonction de départ et la fonction finale (après
+ * TV) restent f ; la fonction de référence est g (`fonctionReferenceLatex`). `texte` : libellé
+ * plain-text des champs de saisie (« f₁(x) = »), `latex` : nom dans une formule. */
+export const FONCTION_ETAPE2 = { latex: "f_1", texte: "f₁" } as const;
+export const FONCTION_ETAPE3 = { latex: "f_2", texte: "f₂" } as const;
+export const FONCTION_ETAPE4 = { latex: "f_3", texte: "f₃" } as const;
+
+/** Valeur d'un curseur en texte simple (« TH : −2 ») : vrai signe moins, jamais « - ». */
+export function nombreSigne(valeur: number): string {
+  return valeur < 0 ? `−${-valeur}` : String(valeur);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -247,8 +261,9 @@ export function formatGabaritLatex(parametres: ParametresGabarit): string {
 // révélation "Fonction attendue" de l'étape correspondante après épuisement des tentatives.
 // ---------------------------------------------------------------------------------------------
 
-/** État atteint après confirmation de EH/CH/SOY (étape 2) — TH/EV/CV/SOX/TV encore neutres. Sert
- * d'énoncé "à partir de" sur l'écran TH (étape 3) et de révélation pour l'étape EH/CH/SOY. */
+/** État atteint après confirmation de EH/CH/SOY (étape 2) — TH/EV/CV/SOX/TV encore neutres, nommé
+ * f₁ (`FONCTION_ETAPE2`). Sert d'énoncé "à partir de" sur l'écran TH (étape 3), de légende de sa
+ * trace et de révélation pour l'étape EH/CH/SOY. */
 export function formatGabaritEtape2Latex(exercice: ExerciceFormeCanoniqueFonctionReference): string {
   return formatGabaritLatex({
     famille: exercice.famille,
@@ -260,11 +275,12 @@ export function formatGabaritEtape2Latex(exercice: ExerciceFormeCanoniqueFonctio
     cv: 1,
     sox: false,
     tv: 0,
-  });
+  }, FONCTION_ETAPE2.latex);
 }
 
-/** État atteint après confirmation de EH/CH/SOY et TH (étape 3) — EV/CV/SOX/TV encore neutres. Sert
- * d'énoncé "à partir de" sur l'écran EV/CV/SOX (étape 4) et de révélation pour l'étape TH. */
+/** État atteint après confirmation de EH/CH/SOY et TH (étape 3) — EV/CV/SOX/TV encore neutres, nommé
+ * f₂ (`FONCTION_ETAPE3`). Sert d'énoncé "à partir de" sur l'écran EV/CV/SOX (étape 4) et de
+ * révélation pour l'étape TH. */
 export function formatGabaritEtape3Latex(exercice: ExerciceFormeCanoniqueFonctionReference): string {
   return formatGabaritLatex({
     famille: exercice.famille,
@@ -276,11 +292,12 @@ export function formatGabaritEtape3Latex(exercice: ExerciceFormeCanoniqueFonctio
     cv: 1,
     sox: false,
     tv: 0,
-  });
+  }, FONCTION_ETAPE3.latex);
 }
 
-/** État atteint après confirmation de EH/CH/SOY, TH et EV/CV/SOX (étape 4) — TV encore neutre. Sert
- * d'énoncé "à partir de" sur l'écran TV (étape 5) et de révélation pour l'étape EV/CV/SOX. */
+/** État atteint après confirmation de EH/CH/SOY, TH et EV/CV/SOX (étape 4) — TV encore neutre, nommé
+ * f₃ (`FONCTION_ETAPE4`). Sert d'énoncé "à partir de" sur l'écran TV (étape 5) et de révélation
+ * pour l'étape EV/CV/SOX. */
 export function formatGabaritEtape4Latex(exercice: ExerciceFormeCanoniqueFonctionReference): string {
   return formatGabaritLatex({
     famille: exercice.famille,
@@ -292,7 +309,7 @@ export function formatGabaritEtape4Latex(exercice: ExerciceFormeCanoniqueFonctio
     cv: exercice.cv,
     sox: exercice.sox,
     tv: 0,
-  });
+  }, FONCTION_ETAPE4.latex);
 }
 
 /** `g(x)` de la famille de référence, en LaTeX (corrigé et version aménagée des feuilles). */

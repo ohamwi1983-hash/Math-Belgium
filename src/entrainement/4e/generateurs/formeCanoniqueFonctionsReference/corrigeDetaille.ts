@@ -20,7 +20,9 @@ import { construireGrapheFonctionReference } from "../fonctionsReference/figures
  * b) forme canonique (calcul complet depuis la forme de départ), c) EH, CH, SOY, d) TH,
  * e) EV, CV, SOX, f) TV — les transformations sont UNE décomposition possible, lue sur le gabarit
  * affiché par l'écran (`formatGabaritLatex`). Valeurs tirées des fonctions de l'écran
- * (`cibleFinale`, `formatCibleLatex`, gabarits) ; partagé par l'adaptateur papier et l'appli.
+ * (`cibleFinale`, `formatCibleLatex`, gabarits) ; partagé par l'adaptateur papier et l'appli. Les
+ * fonctions intermédiaires f₁, f₂, f₃ viennent telles quelles, nom compris, des gabarits partiels
+ * affichés par l'écran (`formatGabaritEtape2Latex`…, noms `FONCTION_ETAPE2`…) : une seule source.
  */
 
 type E = ExerciceFormeCanoniqueFonctionReference;
@@ -43,7 +45,8 @@ const ENVELOPPE: Record<FamilleReference, string> = {
   valeur_absolue: "l'expression en x est dans une valeur absolue",
 };
 
-const sansF = (l: string) => l.replace(/^f\(x\) = /, "").replace(/\\frac/g, "\\dfrac");
+const enDfrac = (l: string) => l.replace(/\\frac/g, "\\dfrac");
+const sansF = (l: string) => enDfrac(l.replace(/^f\(x\) = /, ""));
 
 function egal(a: number, b: number): boolean {
   return Math.abs(a - b) < 1e-9;
@@ -195,11 +198,11 @@ export function correctionDetailleeFormeCanoniqueFonctionsReference(e: E): Etape
         ligne(`\\text{SOY}\\cdot\\dfrac{\\text{CH}}{\\text{EH}}=${signeH}${rapport(e.ch, e.eh)}`, e.soy ? "coefficient négatif : symétrie d'axe Oy" : "coefficient positif : pas de symétrie d'axe Oy"),
         ligne(`\\text{CH}=${e.ch}`, e.ch > 1 ? "compression horizontale" : "pas de compression"),
         ligne(`\\text{EH}=${e.eh}`, e.eh > 1 ? "étirement horizontal" : "pas d'étirement"),
-        ligne(`f_1(x)=${sansF(formatGabaritEtape2Latex(e))}`, "on applique à g seulement EH, CH et SOY"),
+        ligne(enDfrac(formatGabaritEtape2Latex(e)), "on applique à g seulement EH, CH et SOY"),
       ],
       intro("EH, CH et SOY"),
     ),
-    resultat("c", [latex(`\\text{EH}=${e.eh},\\ \\text{CH}=${e.ch}`), texte(`, SOY : ${e.soy ? "oui" : "non"} ; `), latex(`f_1(x)=${sansF(formatGabaritEtape2Latex(e))}`)]),
+    resultat("c", [latex(`\\text{EH}=${e.eh},\\ \\text{CH}=${e.ch}`), texte(`, SOY : ${e.soy ? "oui" : "non"} ; `), latex(enDfrac(formatGabaritEtape2Latex(e)))]),
     // d) TH
     utilise("d", [texte(`TH est le nombre soustrait à x dans l'argument : le point caractéristique est en x = TH ${COURS_TRANSFORMATIONS}.`)]),
     calcul(
@@ -207,11 +210,11 @@ export function correctionDetailleeFormeCanoniqueFonctionsReference(e: E): Etape
       [
         ligne(`x-\\text{TH}=${moinsH(e.th)}`, "parenthèse de l'argument"),
         ligne(`\\text{TH}=${q(e.th)}`, e.th === 0 ? "pas de translation horizontale" : `translation de ${nombreTexte(Math.abs(e.th))} vers ${e.th > 0 ? "la droite" : "la gauche"}`),
-        ligne(`f_2(x)=${sansF(formatGabaritEtape3Latex(e))}`, "x devient x − TH dans l'argument"),
+        ligne(enDfrac(formatGabaritEtape3Latex(e)), "x devient x − TH dans l'argument"),
       ],
       intro("TH"),
     ),
-    resultat("d", [latex(`\\text{TH}=${q(e.th)}`), texte(" ; "), latex(`f_2(x)=${sansF(formatGabaritEtape3Latex(e))}`)]),
+    resultat("d", [latex(`\\text{TH}=${q(e.th)}`), texte(" ; "), latex(enDfrac(formatGabaritEtape3Latex(e)))]),
     piege("d", [texte("Le signe de TH est l'opposé de celui qu'on lit dans la parenthèse : "), latex("x+3=x-(-3)"), texte(" donne TH = −3.")]),
     // e) EV, CV, SOX
     utilise("e", [texte(`Le facteur devant g donne SOX (son signe) et le rapport EV/CV, qui vaut |a| — seul ce rapport compte ${COURS_TRANSFORMATIONS}.`)]),
@@ -221,11 +224,11 @@ export function correctionDetailleeFormeCanoniqueFonctionsReference(e: E): Etape
         ligne(`\\text{SOX}\\cdot\\dfrac{\\text{EV}}{\\text{CV}}=${signeV}${rapport(e.ev, e.cv)}`, e.sox ? "facteur négatif : symétrie d'axe Ox" : "facteur positif : pas de symétrie d'axe Ox"),
         ligne(`\\text{EV}=${e.ev}`, e.ev > 1 ? "étirement vertical" : "pas d'étirement"),
         ligne(`\\text{CV}=${e.cv}`, e.cv > 1 ? "compression verticale" : "pas de compression"),
-        ligne(`f_3(x)=${sansF(formatGabaritEtape4Latex(e))}`, "la fonction est multipliée par ce facteur"),
+        ligne(enDfrac(formatGabaritEtape4Latex(e)), "la fonction est multipliée par ce facteur"),
       ],
       intro("EV, CV et SOX"),
     ),
-    resultat("e", [latex(`\\text{EV}=${e.ev},\\ \\text{CV}=${e.cv}`), texte(`, SOX : ${e.sox ? "oui" : "non"} ; `), latex(`f_3(x)=${sansF(formatGabaritEtape4Latex(e))}`)]),
+    resultat("e", [latex(`\\text{EV}=${e.ev},\\ \\text{CV}=${e.cv}`), texte(`, SOX : ${e.sox ? "oui" : "non"} ; `), latex(enDfrac(formatGabaritEtape4Latex(e)))]),
     // f) TV
     utilise("f", [texte(`TV est le nombre ajouté à la fin : le point caractéristique est à la hauteur y = TV ${COURS_TRANSFORMATIONS}.`)]),
     {

@@ -428,8 +428,16 @@ Outils du pilote : `collecteur.ts`, `evalLatex.ts` (dossier de travail du chanti
   (séparation/« se débarrasser » → étape intermédiaire, branches, validation). gen11 est
   `regroupable` : sur papier ses six étapes s'affichent à plat sous la lettre de l'instance (le
   collecteur compte 6 écrans pour lui).
-- Fonctions intermédiaires (gen11, écrans EH/CH/SOY, TH, EV/CV/SOX) : l'écran les nomme toutes
-  `f(x)` ; le corrigé écrit `f_1`, `f_2`, `f_3` (une égalité `f(x)=…` fausse sinon).
+- Fonctions intermédiaires (gen11, écrans EH/CH/SOY, TH, EV/CV/SOX) : `f_1`, `f_2`, `f_3` à
+  l'écran (consignes, libellés des champs « f₁(x) = », légendes du graphique, réponse attendue,
+  fiches des puces) ET dans le corrigé — une seule source, `formatGabaritEtape2Latex`… (noms
+  `FONCTION_ETAPE2`…, `formatFormeCanoniqueFonctionsReference.ts`). f reste le nom de la fonction de
+  départ et de la fonction finale ; la fonction de référence est g. La vérification ignore un
+  préfixe « f(x) = » / « f₁(x) = » / « f_1(x) = » recopié (`sansPrefixeFonction`).
+- gen69, modèle inverse : l'équation isolée s'écrit avec le numérateur a SIGNÉ
+  (`modele.ts::fractionInverseLatex`, aide de l'écran 4 ET corrigé) ; les aides de l'écran 4
+  disent « multiplie / divise par le coefficient a » avec sa valeur signée, jamais « le facteur »
+  (qui vaut |a| au récapitulatif).
 - Briques partagées sans `docx` : `4e/ui/corrigeChapitre3.ts` (`q` exact, `plusQ`, `mono`,
   `somme`, `polynome`, `lignesPremierDegre` — reste fractionnaire n/d divisé en `\dfrac{n}{d\cdot a}`,
   jamais de fraction de fraction —, `racineCarreeLatex`, `racineCubiqueLatex`, `sansDoublons`,

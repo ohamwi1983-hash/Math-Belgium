@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import type { ExerciceFormeCanoniqueFonctionReference, ReponseEvCvSoxFR } from "../core/formeCanoniqueFonctionsReference.types";
 import { cibleEtape4, diagnostiquerEvCvSoxFR, diagnostiquerFonctionFamille, evaluerEvCvSoxFR } from "../moteur/verificationFormeCanoniqueFonctionsReference";
-import { formatGabaritEtape2Latex, formatGabaritEtape3Latex, formatGabaritLatex } from "../ui/formatFormeCanoniqueFonctionsReference";
+import { FONCTION_ETAPE4, formatGabaritEtape2Latex, formatGabaritEtape3Latex, formatGabaritLatex } from "../ui/formatFormeCanoniqueFonctionsReference";
 import { placeholderEquation } from "../ui/formatFonctionsReference";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { courbeEtape2, courbeEtape3 } from "../ui/mafsFormeCanoniqueFonctionsReference";
@@ -25,8 +25,12 @@ interface Props {
 const COULEUR_BLEU = "#1971c2";
 const COULEUR_ORANGE = "#f08c00";
 
-/** Étape 4 (section 2 de la spec) : le graphe affiche les traces confirmées des étapes 2 (bleu) et
- * 3 (orange), curseurs EV/CV (exclusivité mutuelle) et toggle SOX, champ "fonction intermédiaire". */
+/** Libellé du champ : la fonction obtenue après EV/CV/SOX n'est pas encore f (`FONCTION_ETAPE4`). */
+const LIBELLE_CHAMP = `${FONCTION_ETAPE4.texte}(x) =`;
+
+/** Étape 4 (section 2 de la spec) : le graphe affiche les traces confirmées des étapes 2 (f₁, bleu)
+ * et 3 (f₂, orange), curseurs EV/CV (exclusivité mutuelle) et toggle SOX, champ "fonction
+ * intermédiaire" f₃. */
 export function EtapeEvCvSoxFR({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [ev, setEv] = useState(1);
   const [cv, setCv] = useState(1);
@@ -61,7 +65,7 @@ export function EtapeEvCvSoxFR({ exercice, tentativesUtilisees, tentativesMax, o
       <p className="prompt-text">
         Choisis les transformations étirement vertical (<strong>EV</strong>), compression verticale
         (<strong>CV</strong>) et symétrie orthogonale d'axe Ox (<strong>SOX</strong>) à partir de{" "}
-        <Katex expression={enonceEtape3} />.
+        <Katex expression={enonceEtape3} />, puis écris la fonction obtenue <Katex expression={`${FONCTION_ETAPE4.latex}(x)`} />.
       </p>
       <MafsGraphFormeCanoniqueFonctionsReference
         confirmees={[
@@ -90,10 +94,10 @@ export function EtapeEvCvSoxFR({ exercice, tentativesUtilisees, tentativesMax, o
       <button type="button" className={classeCurseur(evaluation.sox) + " btn"} onClick={() => setSox((v) => !v)}>
         {sox ? "SOX : Oui" : "SOX : Non"}
       </button>
-      <ApercuExpressionLatex texte={fonctionIntermediaire} label="f(x) =" />
+      <ApercuExpressionLatex texte={fonctionIntermediaire} label={LIBELLE_CHAMP} />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule" htmlFor="evcvsox-fr-fonction-intermediaire">
-          f(x) =
+          {LIBELLE_CHAMP}
         </label>
         <input
           id="evcvsox-fr-fonction-intermediaire"

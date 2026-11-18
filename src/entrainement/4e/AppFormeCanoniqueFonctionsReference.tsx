@@ -26,6 +26,9 @@ import { EtapeThFR } from "./components/EtapeThFR";
 import { EtapeEvCvSoxFR } from "./components/EtapeEvCvSoxFR";
 import { EtapeTvFR } from "./components/EtapeTvFR";
 import {
+  FONCTION_ETAPE2,
+  FONCTION_ETAPE3,
+  FONCTION_ETAPE4,
   formatCibleLatex,
   formatGabaritEtape2Latex,
   formatGabaritEtape3Latex,
@@ -125,9 +128,11 @@ function reponseAttenduePhase(phase: PhaseFormeCanoniqueFonctionReference, exerc
   }
 }
 
-/** Expression saisie, rendue comme dans l'aperçu sous le champ. */
-function fonctionSaisie(texte: string): ReactNode {
-  return <SaisieExpressionLatex texte={texte} prefixeLatex="f(x) =" />;
+/** Expression saisie, rendue comme dans l'aperçu sous le champ, avec le nom de SA fonction : f pour
+ * la forme canonique, f₁/f₂/f₃ pour les fonctions intermédiaires (mêmes noms que l'écran et le
+ * corrigé détaillé). */
+function fonctionSaisie(texte: string, nom: string = "f"): ReactNode {
+  return <SaisieExpressionLatex texte={texte} prefixeLatex={`${nom}(x) =`} />;
 }
 
 function ouiNon(b: boolean): string {
@@ -267,7 +272,7 @@ export function AppFormeCanoniqueFonctionsReference() {
                     <Katex expression={`\\text{EH} = ${reponse.eh}`} />
                     <Katex expression={`\\text{CH} = ${reponse.ch}`} />
                     <Katex expression={`\\text{SOY : ${ouiNon(reponse.soy)}}`} />
-                    {fonctionSaisie(reponse.fonctionIntermediaire)}
+                    {fonctionSaisie(reponse.fonctionIntermediaire, FONCTION_ETAPE2.latex)}
                   </span>,
                 )
               }
@@ -284,7 +289,7 @@ export function AppFormeCanoniqueFonctionsReference() {
                   soumettreReponseThFR(etat, reponse),
                   <span className="equation-box-termes">
                     <Katex expression={`\\text{TH} = ${reponse.th}`} />
-                    {fonctionSaisie(reponse.fonctionIntermediaire)}
+                    {fonctionSaisie(reponse.fonctionIntermediaire, FONCTION_ETAPE3.latex)}
                   </span>,
                 )
               }
@@ -303,7 +308,7 @@ export function AppFormeCanoniqueFonctionsReference() {
                     <Katex expression={`\\text{EV} = ${reponse.ev}`} />
                     <Katex expression={`\\text{CV} = ${reponse.cv}`} />
                     <Katex expression={`\\text{SOX : ${ouiNon(reponse.sox)}}`} />
-                    {fonctionSaisie(reponse.fonctionIntermediaire)}
+                    {fonctionSaisie(reponse.fonctionIntermediaire, FONCTION_ETAPE4.latex)}
                   </span>,
                 )
               }

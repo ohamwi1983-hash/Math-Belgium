@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import type { ExerciceFormeCanoniqueFonctionReference, ReponseEhChSoy } from "../core/formeCanoniqueFonctionsReference.types";
 import { cibleEtape2, diagnostiquerEhChSoy, diagnostiquerFonctionFamille, evaluerEhChSoy } from "../moteur/verificationFormeCanoniqueFonctionsReference";
-import { formatGabaritLatex } from "../ui/formatFormeCanoniqueFonctionsReference";
+import { FONCTION_ETAPE2, fonctionReferenceLatex, formatGabaritLatex } from "../ui/formatFormeCanoniqueFonctionsReference";
 import { placeholderEquation } from "../ui/formatFonctionsReference";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { MafsGraphFormeCanoniqueFonctionsReference } from "./MafsGraphFormeCanoniqueFonctionsReference";
@@ -21,18 +21,13 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-const NOM_G: Record<ExerciceFormeCanoniqueFonctionReference["famille"], string> = {
-  carre: "f(x)=x^2",
-  cube: "f(x)=x^3",
-  racine_carree: "f(x)=\\sqrt{x}",
-  racine_cubique: "f(x)=\\sqrt[3]{x}",
-  inverse: "f(x)=\\frac{1}{x}",
-  valeur_absolue: "f(x)=\\left|x\\right|",
-};
+/** Libellé du champ : la fonction obtenue après EH/CH/SOY n'est pas encore f (`FONCTION_ETAPE2`). */
+const LIBELLE_CHAMP = `${FONCTION_ETAPE2.texte}(x) =`;
 
-/** Étape 2 (section 2 de la spec) : graphe partant de la fonction de référence pure (sans aucune
- * transformation), curseurs EH/CH (exclusivité mutuelle) et toggle SOY, champ "fonction
- * intermédiaire" — première étape à afficher un graphe, aucune trace confirmée encore. */
+/** Étape 2 (section 2 de la spec) : graphe partant de la fonction de référence pure g (sans aucune
+ * transformation — nommée g comme dans la formule unifiée et le corrigé, jamais « f(x) = x² »),
+ * curseurs EH/CH (exclusivité mutuelle) et toggle SOY, champ "fonction intermédiaire" f₁ —
+ * première étape à afficher un graphe, aucune trace confirmée encore. */
 export function EtapeEhChSoy({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [eh, setEh] = useState(1);
   const [ch, setCh] = useState(1);
@@ -65,8 +60,9 @@ export function EtapeEhChSoy({ exercice, tentativesUtilisees, tentativesMax, onV
       </div>
       <p className="prompt-text">
         Choisis les transformations étirement horizontal (<strong>EH</strong>), compression horizontale
-        (<strong>CH</strong>) et symétrie orthogonale d'axe Oy (<strong>SOY</strong>) à partir de{" "}
-        <Katex expression={NOM_G[exercice.famille]} />.
+        (<strong>CH</strong>) et symétrie orthogonale d'axe Oy (<strong>SOY</strong>) à partir de la
+        fonction de référence <Katex expression={fonctionReferenceLatex(exercice.famille)} />, puis écris la
+        fonction obtenue <Katex expression={`${FONCTION_ETAPE2.latex}(x)`} />.
       </p>
       <MafsGraphFormeCanoniqueFonctionsReference confirmees={[]} live={live} />
       {/* EH et CH ne sont jamais comparés séparément (voir `evaluerEhChSoy`) : seul leur RAPPORT
@@ -90,10 +86,10 @@ export function EtapeEhChSoy({ exercice, tentativesUtilisees, tentativesMax, onV
       <button type="button" className={classeCurseur(evaluation.soy) + " btn"} onClick={() => setSoy((v) => !v)}>
         {soy ? "SOY : Oui" : "SOY : Non"}
       </button>
-      <ApercuExpressionLatex texte={fonctionIntermediaire} label="f(x) =" />
+      <ApercuExpressionLatex texte={fonctionIntermediaire} label={LIBELLE_CHAMP} />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule" htmlFor="ehchsoy-fonction-intermediaire">
-          f(x) =
+          {LIBELLE_CHAMP}
         </label>
         <input
           id="ehchsoy-fonction-intermediaire"

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import type { ExerciceFormeCanoniqueFonctionReference, ReponseThFR } from "../core/formeCanoniqueFonctionsReference.types";
 import { cibleEtape3, diagnostiquerFonctionFamille, diagnostiquerThFR } from "../moteur/verificationFormeCanoniqueFonctionsReference";
-import { formatGabaritEtape2Latex, formatGabaritLatex } from "../ui/formatFormeCanoniqueFonctionsReference";
+import { FONCTION_ETAPE3, formatGabaritEtape2Latex, formatGabaritLatex, nombreSigne } from "../ui/formatFormeCanoniqueFonctionsReference";
 import { placeholderEquation } from "../ui/formatFonctionsReference";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { courbeEtape2 } from "../ui/mafsFormeCanoniqueFonctionsReference";
@@ -24,8 +24,11 @@ interface Props {
 
 const COULEUR_BLEU = "#1971c2";
 
-/** Étape 3 (section 2 de la spec) : le graphe affiche la trace confirmée de l'étape 2 en bleu
- * (légendée avec son expression réelle), curseur TH, champ "fonction intermédiaire". */
+/** Libellé du champ : la fonction obtenue après TH n'est pas encore f (`FONCTION_ETAPE3`). */
+const LIBELLE_CHAMP = `${FONCTION_ETAPE3.texte}(x) =`;
+
+/** Étape 3 (section 2 de la spec) : le graphe affiche la trace confirmée de l'étape 2 (f₁) en bleu
+ * (légendée avec son expression réelle), curseur TH, champ "fonction intermédiaire" f₂. */
 export function EtapeThFR({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [th, setTh] = useState(0);
   const [fonctionIntermediaire, setFonctionIntermediaire] = useState("");
@@ -52,7 +55,8 @@ export function EtapeThFR({ exercice, tentativesUtilisees, tentativesMax, onVali
         <Katex expression={formeCanoniqueComplete} block />
       </div>
       <p className="prompt-text">
-        Choisis la translation horizontale (<strong>TH</strong>) à partir de <Katex expression={enonceEtape2} />.
+        Choisis la translation horizontale (<strong>TH</strong>) à partir de <Katex expression={enonceEtape2} />, puis
+        écris la fonction obtenue <Katex expression={`${FONCTION_ETAPE3.latex}(x)`} />.
       </p>
       <MafsGraphFormeCanoniqueFonctionsReference
         confirmees={[{ parametres: fonctionEtape2, couleur: COULEUR_BLEU, labelLatex: enonceEtape2 }]}
@@ -60,14 +64,14 @@ export function EtapeThFR({ exercice, tentativesUtilisees, tentativesMax, onVali
       />
       <div className="curseur-row">
         <label className={curseurErrone ? "curseur-champ is-erronee" : "curseur-champ"} htmlFor="curseur-th-fr">
-          <span>TH : {th}</span>
+          <span>TH : {nombreSigne(th)}</span>
           <input id="curseur-th-fr" type="range" min={-5} max={5} step={1} value={th} onChange={(e) => setTh(Number(e.target.value))} />
         </label>
       </div>
-      <ApercuExpressionLatex texte={fonctionIntermediaire} label="f(x) =" />
+      <ApercuExpressionLatex texte={fonctionIntermediaire} label={LIBELLE_CHAMP} />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule" htmlFor="th-fr-fonction-intermediaire">
-          f(x) =
+          {LIBELLE_CHAMP}
         </label>
         <input
           id="th-fr-fonction-intermediaire"

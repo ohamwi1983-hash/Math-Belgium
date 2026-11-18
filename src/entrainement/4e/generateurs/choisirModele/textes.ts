@@ -1,6 +1,6 @@
 import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
 import type { ContexteModele, ExerciceChoisirModele, FamilleModele, ParametreModele } from "./types";
-import { evaluerModele, expressionModeleLatex, INFOS_CONTEXTE, modeleLatex, nombreLatex, nombreTexte, UNITE_LATEX } from "./modele";
+import { argumentLatex, evaluerModele, expressionModeleLatex, fractionInverseLatex, INFOS_CONTEXTE, modeleLatex, nombreLatex, nombreTexte, UNITE_LATEX } from "./modele";
 
 /**
  * Textes de gen69 (situations, consignes, aides, options de l'écran 5, justifications) — une seule
@@ -408,16 +408,23 @@ export function aidesEcran4(e: ExerciceChoisirModele): Fragments[] {
   const info = INFOS_CONTEXTE[e.contexte];
   const v = info.variable;
   const q = e.question4;
+  // Le coefficient a est toujours écrit avec son signe (multiplier / diviser par a) : « le facteur »
+  // désigne |a| au récapitulatif de l'écran 2, il donnerait un mauvais signe dès que a < 0.
   if (q.type === "predire") {
     const interieur = q.x - e.th;
+    const thLatex = e.th < 0 ? `(${nombreLatex(e.th)})` : nombreLatex(e.th);
+    const ensuite: Fragments = [t(", puis applique la fonction de référence")];
+    if (e.a !== 1) ensuite.push(t(e.tv !== 0 ? ", multiplie par " : " et multiplie par "), m(nombreLatex(e.a)));
+    if (e.tv !== 0) ensuite.push(t(" et ajoute la translation verticale"));
+    ensuite.push(t("."));
     return [
       [t(`Remplace ${v} par ${nombreTexte(q.x)} dans le modèle, puis calcule.`)],
-      [t("Commence par l'intérieur : "), m(e.th === 0 ? `${v} = ${nombreLatex(q.x)}` : `${nombreLatex(q.x)}-${nombreLatex(e.th)} = ${nombreLatex(interieur)}`), t(", puis applique la fonction de référence, le facteur et la translation verticale.")],
+      [t("Commence par l'intérieur : "), m(e.th === 0 ? `${v} = ${nombreLatex(q.x)}` : `${nombreLatex(q.x)}-${thLatex} = ${nombreLatex(interieur)}`), ...ensuite],
     ];
   }
   const y = nombreLatex(q.y);
   const isole = (q.y - e.tv) / e.a;
-  const arg = e.th === 0 ? v : `${v}-${nombreLatex(e.th)}`;
+  const arg = argumentLatex(v, e.th);
   let equationIsolee: string;
   let suite: string;
   switch (e.famille) {
@@ -442,17 +449,27 @@ export function aidesEcran4(e: ExerciceChoisirModele): Fragments[] {
       suite = "Prends la racine cubique des deux membres.";
       break;
     case "inverse":
-      // Diviser par le numérateur donnerait un décimal peu lisible (0,0625) : on isole la fraction.
-      equationIsolee = `\\dfrac{${nombreLatex(Math.abs(e.a))}}{${arg}} = ${nombreLatex(q.y - e.tv)}`;
+      // Diviser par le numérateur donnerait un décimal peu lisible (0,0625) : on isole la fraction,
+      // numérateur a SIGNÉ (même écriture que le corrigé détaillé, `fractionInverseLatex`).
+      equationIsolee = `${fractionInverseLatex(e)} = ${nombreLatex(q.y - e.tv)}`;
       suite = "Le dénominateur vaut donc le numérateur divisé par ce nombre.";
       break;
   }
+  const operations: Fragments[] = [];
+  if (e.tv !== 0) operations.push([t("enlève la translation verticale")]);
+  if (e.famille === "inverse") {
+    if (e.a < 0) operations.push([t("écris le signe « − » au numérateur")]);
+  } else if (e.a !== 1) {
+    operations.push([t("divise par le coefficient "), m(nombreLatex(e.a))]);
+  }
+  const isoler: Fragments = operations.length === 0 ? [t(".")] : [t(`, puis isole ${e.famille === "inverse" ? "la fraction" : "la fonction de référence"} : `)];
+  operations.forEach((op, i) => {
+    if (i > 0) isoler.push(t(", puis "));
+    isoler.push(...op);
+    if (i === operations.length - 1) isoler.push(t("."));
+  });
   return [
-    [
-      t("Pose l'équation "),
-      m(`${expressionModeleLatex(e)} = ${y}`),
-      t(e.famille === "inverse" ? ", puis isole la fraction : enlève d'abord la translation verticale." : ", puis isole la fonction de référence : enlève d'abord la translation verticale, puis divise par le facteur."),
-    ],
+    [t("Pose l'équation "), m(`${expressionModeleLatex(e)} = ${y}`), ...isoler],
     [t("Tu dois arriver à "), m(equationIsolee), t(`. ${suite}`)],
   ];
 }

@@ -79,9 +79,17 @@ export function nombreLatex(v: number): string {
 }
 
 /** « variable − TH » en LaTeX (variable seule si TH = 0). */
-function argumentLatex(variable: string, th: number): string {
+export function argumentLatex(variable: string, th: number): string {
   if (th === 0) return variable;
   return th > 0 ? `${variable}-${nombreLatex(th)}` : `${variable}+${nombreLatex(-th)}`;
+}
+
+/** Fraction du modèle inverse avec son numérateur SIGNÉ, a / (variable − TH) : l'écriture qu'on
+ * isole pour résoudre une équation (aide de l'écran 4 ET corrigé détaillé, une seule source). Juste
+ * pour tout signe de a — le modèle affiché (`expressionModeleLatex`) porte, lui, le signe devant la
+ * fraction ; le numérateur |a| seul ferait une équation fausse dès que a < 0. */
+export function fractionInverseLatex(e: Pick<ExerciceChoisirModele, "th" | "a" | "contexte">): string {
+  return `\\dfrac{${nombreLatex(e.a)}}{${argumentLatex(INFOS_CONTEXTE[e.contexte].variable, e.th)}}`;
 }
 
 function coefficientLatex(a: number): string {

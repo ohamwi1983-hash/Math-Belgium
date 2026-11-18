@@ -1,7 +1,7 @@
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceChoisirModele, FamilleModele } from "./types";
-import { evaluerModele, expressionModeleLatex, INFOS_CONTEXTE, modeleLatex, nombreLatex, nombreTexte } from "./modele";
+import { argumentLatex, evaluerModele, expressionModeleLatex, fractionInverseLatex, INFOS_CONTEXTE, modeleLatex, nombreLatex, nombreTexte } from "./modele";
 import { ecartsLecture, REFERENCE_LATEX, reponseUtilisationLatex, transformationsLatex } from "./textes";
 import { construireFigureModele, PALETTE_PAPIER } from "./figure";
 import { COURS_FAMILLES, COURS_TRANSFORMATIONS } from "../../ui/corrigeChapitre3";
@@ -132,7 +132,7 @@ function etapeUtilisation(e: E): EtapeCorrection[] {
   const info = INFOS_CONTEXTE[e.contexte];
   const v = info.variable;
   const q = e.question4;
-  const arg = e.th === 0 ? v : `${v}-${n(e.th)}`;
+  const arg = argumentLatex(v, e.th);
   const lignes: LigneCalcul[] = [];
   if (q.type === "predire") {
     const u = q.x - e.th;
@@ -147,11 +147,15 @@ function etapeUtilisation(e: E): EtapeCorrection[] {
     lignes.push(ligne(`${expressionModeleLatex(e)}=${n(q.y)}`, "on pose l'équation"));
     const K = q.y - e.tv;
     if (e.famille === "inverse") {
-      const A = Math.abs(e.a);
-      if (e.tv !== 0) lignes.push(ligne(`\\dfrac{${n(A)}}{${arg}}=${n(q.y)}${e.tv > 0 ? "-" : "+"}${n(Math.abs(e.tv))}`, "on enlève la translation verticale"), ligne(`=${n(K)}`));
-      lignes.push(ligne(`${arg}=\\dfrac{${n(A)}}{${n(K)}}`, "le dénominateur vaut le numérateur divisé par ce nombre"));
-      lignes.push(ligne(`=${n(A / K)}`));
-      if (e.th !== 0) lignes.push(ligne(`${v}=${n(A / K + e.th)}`, `on ajoute ${nombreTexte(e.th)}`));
+      // Numérateur a SIGNÉ (`fractionInverseLatex`, même écriture que l'aide de l'écran 4) : avec
+      // |a|, l'équation isolée serait fausse dès que a < 0.
+      const frac = fractionInverseLatex(e);
+      const signe = e.a < 0 ? "on écrit le signe « − » au numérateur" : "";
+      if (e.tv !== 0) lignes.push(ligne(`${frac}=${n(q.y)}${e.tv > 0 ? "-" : "+"}${n(Math.abs(e.tv))}`, signe ? `on enlève la translation verticale et ${signe}` : "on enlève la translation verticale"), ligne(`=${n(K)}`));
+      else if (signe) lignes.push(ligne(`${frac}=${n(q.y)}`, signe));
+      lignes.push(ligne(`${arg}=\\dfrac{${n(e.a)}}{${n(K)}}`, "le dénominateur vaut le numérateur divisé par ce nombre"));
+      lignes.push(ligne(`=${n(e.a / K)}`));
+      if (e.th !== 0) lignes.push(ligne(`${v}=${n(e.a / K + e.th)}`, `on ajoute ${nombreTexte(e.th)}`));
     } else {
       const iso = K / e.a;
       const corps = gLatex(e.famille, e.th === 0 || (e.famille !== "carre" && e.famille !== "cube") ? arg : `(${arg})`);
@@ -214,9 +218,9 @@ function lignesSens(e: E): LigneCalcul[] {
     case "glacon:tv":
       return [ligne(`${f}(${v})-\\sqrt[3]{${v}}=${n(e.tv)}`, "côté de la boîte moins côté du glaçon (en cm)")];
     case "gaz:a":
-      return [...valeur(1, "pour un volume de 1 L"), ligne(`${f}\\times ${v}=${n(Math.abs(e.a))}`, "le produit P × V est constant")];
+      return [...valeur(1, "pour un volume de 1 L"), ligne(`${f}\\times ${v}=${n(e.a)}`, "le produit P × V est constant")];
     case "velo:tv":
-      return [ligne(`${f}(${v})-\\dfrac{${n(Math.abs(e.a))}}{${v}}=${n(e.tv)}`, "durée totale moins temps passé à rouler : les pauses (en h)")];
+      return [ligne(`${f}(${v})-${fractionInverseLatex(e)}=${n(e.tv)}`, "durée totale moins temps passé à rouler : les pauses (en h)")];
     case "velo:a":
       return [ligne(`${n(Math.abs(e.a))}=\\text{vitesse}\\times\\text{temps de roulage}`, "distance = vitesse × temps : le circuit, en km")];
     case "chauffage:a":

@@ -6,6 +6,7 @@ import {
   formatGabaritEtape3Latex,
   formatGabaritEtape4Latex,
   formatGabaritLatex,
+  nombreSigne,
 } from "../ui/formatFormeCanoniqueFonctionsReference";
 import { cibleFinale, diagnostiquerFonctionFamille, diagnostiquerTvFR } from "../moteur/verificationFormeCanoniqueFonctionsReference";
 import { placeholderEquation } from "../ui/formatFonctionsReference";
@@ -63,7 +64,8 @@ export function EtapeTvFR({ exercice, tentativesUtilisees, tentativesMax, onVali
         <Katex expression={formeCanoniqueComplete} block />
       </div>
       <p className="prompt-text">
-        Choisis la translation verticale (<strong>TV</strong>) à partir de <Katex expression={enonceEtape4} />.
+        Choisis la translation verticale (<strong>TV</strong>) à partir de <Katex expression={enonceEtape4} />, puis
+        écris la fonction obtenue <Katex expression="f(x)" />.
       </p>
       <MafsGraphFormeCanoniqueFonctionsReference
         confirmees={[
@@ -75,7 +77,7 @@ export function EtapeTvFR({ exercice, tentativesUtilisees, tentativesMax, onVali
       />
       <div className="curseur-row">
         <label className={curseurErrone ? "curseur-champ is-erronee" : "curseur-champ"} htmlFor="curseur-tv-fr">
-          <span>TV : {tv}</span>
+          <span>TV : {nombreSigne(tv)}</span>
           <input id="curseur-tv-fr" type="range" min={-5} max={5} step={1} value={tv} onChange={(e) => setTv(Number(e.target.value))} />
         </label>
       </div>

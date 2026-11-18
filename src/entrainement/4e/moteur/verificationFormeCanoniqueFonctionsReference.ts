@@ -91,12 +91,15 @@ function analyserCoefEtDecalage(texteBrut: string): { coef: number; p: number } 
   const texte = texteBrut.trim();
 
   const matchDivision = /^(.+)\/([^/()]+)$/.exec(texte);
-  if (matchDivision) {
-    const diviseur = parserNombreOuFraction(matchDivision[2]);
-    if (diviseur === null || diviseur === 0) return null;
+  // Diviseur qui n'est pas un nombre (« 1/25*x », « 1/5x ») : ce « / » est celui d'un coefficient
+  // fractionnaire écrit devant x, pas une division de l'expression — on laisse les branches
+  // suivantes le lire (avant, ces saisies étaient refusées : impossible d'écrire f₁(x) = 1/25·x²).
+  const diviseurDivision = matchDivision ? parserNombreOuFraction(matchDivision[2]) : null;
+  if (matchDivision && diviseurDivision !== null) {
+    if (diviseurDivision === 0) return null;
     const reste = analyserCoefEtDecalage(matchDivision[1]);
     if (!reste) return null;
-    return { coef: reste.coef / diviseur, p: reste.p };
+    return { coef: reste.coef / diviseurDivision, p: reste.p };
   }
 
   const matchParen = /^(.*)\(x([+-])([^()]+)\)$/.exec(texte);
@@ -266,6 +269,16 @@ function prochesFonctionDouble(a: FonctionDouble, b: FonctionDouble): boolean {
   );
 }
 
+/** « f(x) = », « f₁(x) = », « f_1(x) = », « f1(x) = »… recopié devant l'expression : le libellé du
+ * champ porte déjà le nom de la fonction (f pour la forme canonique et la fonction finale, f₁, f₂,
+ * f₃ pour les fonctions intermédiaires) ; l'élève qui le recopie — avec l'ancien nom f ou le
+ * nouveau — n'est jamais refusé pour ça. */
+const PREFIXE_FONCTION = /^\s*f\s*(?:_?\s*\{?\s*[0-9]\s*\}?|[₀-₉])?\s*\(\s*x\s*\)\s*=/;
+
+export function sansPrefixeFonction(texte: string): string {
+  return texte.replace(PREFIXE_FONCTION, "");
+}
+
 /**
  * Statut à 3 valeurs (convention CLAUDE.md) : `analyserFormeSimple`/`analyserFormeDouble`
  * calculent déjà en interne la distinction "structure non reconnue" (`null`) vs "reconnue avec ces
@@ -275,9 +288,10 @@ function prochesFonctionDouble(a: FonctionDouble, b: FonctionDouble): boolean {
  */
 export function diagnostiquerFonctionFamille(
   famille: FamilleReference,
-  texte: string,
+  texteBrut: string,
   cible: FonctionSimple | FonctionDouble,
 ): StatutVerification {
+  const texte = sansPrefixeFonction(texteBrut);
   if (estFamilleDouble(famille)) {
     const parsee = analyserFormeDouble(texte, famille);
     if (parsee === null) return "parse_error";
