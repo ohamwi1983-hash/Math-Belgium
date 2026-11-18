@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ChapterContent } from '../../content/types'
-import { imprimerChapitre, imprimerChapitreAmenage, imprimerFormulaireSeul, prechargerPolicesImpression } from '../../lib/imprimer'
+import { imprimerChapitre, imprimerChapitreAmenage, imprimerFormulaireAmenage, imprimerFormulaireSeul, prechargerPolicesImpression } from '../../lib/imprimer'
 
 /**
  * Ligne « CE CHAPITRE » du sommaire (ordinateur) et du tiroir « Sections » (téléphone), avec deux
@@ -10,7 +10,8 @@ import { imprimerChapitre, imprimerChapitreAmenage, imprimerFormulaireSeul, prec
  * - « Feuilles » : page de conception des feuilles d'exercices et d'évaluation du chapitre
  *   (`/{levelSlug}/{slug}/exercices`) ;
  * - « Imprimer » : petit menu « Chapitre entier » / « Chapitre — version aménagée » / « Formulaire
- *   seul » (le dernier seulement si le chapitre a un formulaire).
+ *   seul » / « Formulaire — version aménagée » (les deux derniers seulement si le chapitre a un
+ *   formulaire).
  * `avantImpression` : ferme le tiroir du téléphone avant d'ouvrir la boîte d'impression.
  */
 export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterContent; avantImpression?: () => void }) {
@@ -84,9 +85,14 @@ export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterC
               Chapitre — version aménagée
             </button>
             {aUnFormulaire && (
-              <button type="button" role="menuitem" onClick={() => lancer(imprimerFormulaireSeul)}>
-                Formulaire seul
-              </button>
+              <>
+                <button type="button" role="menuitem" onClick={() => lancer(imprimerFormulaireSeul)}>
+                  Formulaire seul
+                </button>
+                <button type="button" role="menuitem" onClick={() => lancer(imprimerFormulaireAmenage)}>
+                  Formulaire — version aménagée
+                </button>
+              </>
             )}
           </div>
         )}

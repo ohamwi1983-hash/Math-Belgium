@@ -7,6 +7,7 @@
  *   posée sur `body` le temps de l'impression (Atkinson Hyperlegible 14 pt, non justifié…).
  * - `imprimerFormulaireSeul` : le formulaire de fin de chapitre seul — classe
  *   `print-formulaire-only` posée sur `body` le temps de l'impression.
+ * - `imprimerFormulaireAmenage` : le formulaire seul, mise en page aménagée (les deux classes).
  * Les classes sont retirées à `afterprint` ; voir les règles `@media print` de `index.css`.
  */
 
@@ -39,12 +40,12 @@ export function prechargerPolicesImpression(): void {
   else window.setTimeout(lancer, 1500)
 }
 
-function imprimerAvecClasse(classe: string | null): void {
+function imprimerAvecClasses(classes: string[]): void {
   void chargerPolicesImpression().then(() => {
-    if (classe) {
-      document.body.classList.add(classe)
+    if (classes.length > 0) {
+      document.body.classList.add(...classes)
       const nettoyer = () => {
-        document.body.classList.remove(classe)
+        document.body.classList.remove(...classes)
         window.removeEventListener('afterprint', nettoyer)
       }
       window.addEventListener('afterprint', nettoyer)
@@ -54,13 +55,17 @@ function imprimerAvecClasse(classe: string | null): void {
 }
 
 export function imprimerChapitre(): void {
-  imprimerAvecClasse(null)
+  imprimerAvecClasses([])
 }
 
 export function imprimerChapitreAmenage(): void {
-  imprimerAvecClasse('print-amenage')
+  imprimerAvecClasses(['print-amenage'])
 }
 
 export function imprimerFormulaireSeul(): void {
-  imprimerAvecClasse('print-formulaire-only')
+  imprimerAvecClasses(['print-formulaire-only'])
+}
+
+export function imprimerFormulaireAmenage(): void {
+  imprimerAvecClasses(['print-formulaire-only', 'print-amenage'])
 }

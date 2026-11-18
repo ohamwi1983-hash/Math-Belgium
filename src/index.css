@@ -1182,7 +1182,7 @@ figcaption {
   display: flex; justify-content: space-between; gap: 10px; padding: 10px 24px; background: var(--surface-2);
   border-top: 1px solid var(--line-soft); font-size: 11px; color: var(--ink-faint);
 }
-.formulaire-actions { margin-top: 12px; text-align: center; }
+.formulaire-actions { margin-top: 12px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 .formulaire-print-btn {
   font: inherit; font-size: 0.85rem; padding: 8px 16px; border-radius: var(--radius);
   border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
@@ -1209,6 +1209,9 @@ figcaption {
   body.print-formulaire-only .chapter-layout { display: block !important; }
   body.print-formulaire-only .page.chapter-main { max-width: none !important; }
   body.print-formulaire-only .page.chapter-main > :not(.formulaire) { display: none !important; }
+  /* Formulaire imprimé : même police (Andika, via les jetons de `:root`) et même justification que
+     le chapitre — ses formules et conditions sont des `span` en bloc, pas des `p`. */
+  .formulaire-f, .formulaire-cond { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
 }
 
 /* Impression AMÉNAGÉE du chapitre (menu « Imprimer » → « Chapitre — version aménagée »,
@@ -1247,6 +1250,15 @@ figcaption {
   body.print-amenage .katex { font-size: 1.12em !important; }
   body.print-amenage .diagram-frame { width: 100% !important; }
   body.print-amenage .chapter-section:not(.intro-section) { break-before: page; page-break-before: always; }
+  /* Formulaire aménagé (« Formulaire — version aménagée ») : une seule colonne (en 14 pt, deux
+     colonnes seraient trop étroites), aligné à gauche, conditions en noir et plus grandes, formules
+     plus espacées. */
+  body.print-amenage .formulaire-corps { columns: 1 !important; }
+  body.print-amenage .formulaire-f, body.print-amenage .formulaire-cond { text-align: left !important; hyphens: none !important; -webkit-hyphens: none !important; }
+  body.print-amenage .formulaire-f { font-size: 1.05rem !important; line-height: 1.8 !important; }
+  body.print-amenage .formulaire-cond { font-size: 0.95rem !important; color: #000000 !important; }
+  body.print-amenage .formulaire-formule { border-left-width: 3px !important; margin-bottom: 12px !important; }
+  body.print-amenage .formulaire-groupe h3 { font-size: 1.2rem !important; }
 }
 
 /* ---------- chaîne d'opérations (operationChain) ---------- */

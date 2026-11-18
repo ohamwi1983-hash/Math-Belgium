@@ -53,6 +53,9 @@ Décisions de l'utilisateur (choix fait sur de vraies impressions A4 comparées)
   (`lib/imprimer.ts::imprimerChapitreAmenage`, classe `print-amenage` sur `body`) — Atkinson
   Hyperlegible 14 pt, interligne 1,8, NON justifiée (dyslexie), pas d'italique, contraste et encadrés
   renforcés, figures pleine largeur, une section par page. Même contenu, mise en page seule.
+- **Formulaire** : même règles (« Formulaire seul » en Andika, formules et conditions justifiées ;
+  « Formulaire — version aménagée », classes `print-formulaire-only` + `print-amenage`, en une seule
+  colonne). Accessible depuis le menu « Imprimer » et par les deux boutons sous le formulaire.
 - Polices servies par le site (`@fontsource/andika`, `@fontsource/atkinson-hyperlegible`, sous-ensemble
   latin, importées dans `main.tsx`) — jamais Google Fonts : `buildHtml.ts` ne peut recopier et inliner
   que des `@font-face` de même origine. `imprimer.ts` les charge avant `window.print()` (et les
