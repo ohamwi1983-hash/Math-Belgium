@@ -16,6 +16,10 @@ import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { correctionDetailleeQuellePrimitive } from "./generateurs6e/quellePrimitive/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige24 } from "./moteur6e/typesQuellePrimitive";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen24` — Quelle primitive ? (condition initiale) (chapitre 4, "Intégrales et primitives",
@@ -148,6 +152,9 @@ export function App6gen24() {
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs6e/quellePrimitive/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeQuellePrimitive(exercice), lettreEtape(phasesCorrige24(exercice).indexOf(phase)))} />,
       }
     : null;
 

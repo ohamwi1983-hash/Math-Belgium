@@ -59,13 +59,13 @@ export function formatFractionLatex(num: number, den: number): string {
 }
 
 /** Signe + magnitude (« -\dfrac{3}{x} », « + \dfrac{3}{x} »). */
-function signer(negatif: boolean, magnitude: string, premier: boolean): string {
+export function signer(negatif: boolean, magnitude: string, premier: boolean): string {
   if (premier) return negatif ? `-${magnitude}` : magnitude;
   return negatif ? ` - ${magnitude}` : ` + ${magnitude}`;
 }
 
 /** Facteur affine entre parenthèses (« (x-2) »), ou « x » seul si la constante est nulle. */
-function facteurAffine(c: number): string {
+export function facteurAffine(c: number): string {
   return c === 0 ? "x" : `(${xPlus(c)})`;
 }
 
@@ -73,7 +73,7 @@ function facteurAffine(c: number): string {
 // Famille A.
 // ============================================================================
 
-function termeFLatexA(t: TermeA, premier: boolean): string {
+export function termeFLatexA(t: TermeA, premier: boolean): string {
   const negatif = t.coef < 0;
   const abs = Math.abs(t.coef);
   switch (t.type) {
@@ -96,7 +96,7 @@ function termeFLatexA(t: TermeA, premier: boolean): string {
   }
 }
 
-function termePrimitiveLatexA(t: TermeA, premier: boolean): string {
+export function termePrimitiveLatexA(t: TermeA, premier: boolean): string {
   const negatif = t.coef < 0;
   const abs = Math.abs(t.coef);
   switch (t.type) {
@@ -121,7 +121,7 @@ function termePrimitiveLatexA(t: TermeA, premier: boolean): string {
   }
 }
 
-const FORMULE_PRIMITIVE_TERME: Record<TypeTermeA, string> = {
+export const FORMULE_PRIMITIVE_TERME: Record<TypeTermeA, string> = {
   invX: "\\dfrac{1}{x}\\to\\ln|x|",
   puissance: "x^n\\to\\dfrac{x^{n+1}}{n+1}",
   expX: "e^x\\to e^x",
@@ -132,7 +132,7 @@ const FORMULE_PRIMITIVE_TERME: Record<TypeTermeA, string> = {
   constante: "k\\to kx",
 };
 
-function formeReecriteA(exercice: Exclude<ExerciceFamilleA, { sousType: "direct" }>): string {
+export function formeReecriteA(exercice: Exclude<ExerciceFamilleA, { sousType: "direct" }>): string {
   if (exercice.sousType === "diviserFraction") {
     const { a, p, b, q, r } = exercice;
     return sommeLatex([
@@ -159,7 +159,7 @@ export function primitiveLatexA(exercice: ExerciceFamilleA): string {
   return monome(2 * c, 2 * k + 3, puissanceX(2 * k + 3, 2), true);
 }
 
-function integrandeLatexA(exercice: ExerciceFamilleA): string {
+export function integrandeLatexA(exercice: ExerciceFamilleA): string {
   if (exercice.sousType === "direct") return exercice.termes.map((t, i) => termeFLatexA(t, i === 0)).join("");
   if (exercice.sousType === "diviserFraction") {
     const { a, p, b, q, r } = exercice;
@@ -228,7 +228,7 @@ function reponseIntermediaireA(exercice: ExerciceFamilleA, phase: PhaseCalculPri
 // Famille B.
 // ============================================================================
 
-function uLatexB(exercice: ExerciceFamilleB): string {
+export function uLatexB(exercice: ExerciceFamilleB): string {
   if (exercice.typeU === "affine") {
     return sommeLatex([
       { num: exercice.mAffine as number, corps: "x" },
@@ -241,12 +241,12 @@ function uLatexB(exercice: ExerciceFamilleB): string {
   ]);
 }
 
-function uPrimeLatexB(exercice: ExerciceFamilleB): string {
+export function uPrimeLatexB(exercice: ExerciceFamilleB): string {
   return monome(exercice.mCoef, 1, exercice.expPart === 0 ? "" : puissanceX(exercice.expPart), true);
 }
 
 /** g(u) avec u littéral (« u ») ou son expression. */
-function gCorpsLatex(typeG: TypeGFamilleB, u: string, nG?: number): string {
+export function gCorpsLatex(typeG: TypeGFamilleB, u: string, nG?: number): string {
   switch (typeG) {
     case "puissance":
       return `\\left(${u}\\right)^{${nG}}`;
@@ -265,7 +265,7 @@ function gCorpsLatex(typeG: TypeGFamilleB, u: string, nG?: number): string {
   }
 }
 
-function gPrimitiveLatexB(typeG: TypeGFamilleB, u: string, nG?: number): string {
+export function gPrimitiveLatexB(typeG: TypeGFamilleB, u: string, nG?: number): string {
   switch (typeG) {
     case "puissance":
       return `\\dfrac{\\left(${u}\\right)^{${(nG as number) + 1}}}{${(nG as number) + 1}}`;
@@ -299,7 +299,7 @@ export function primitiveLatexB(exercice: ExerciceFamilleB): string {
   return monome(k, mCoef, corps[typeG], true);
 }
 
-function integrandeLatexB(exercice: ExerciceFamilleB): string {
+export function integrandeLatexB(exercice: ExerciceFamilleB): string {
   const { k, expPart, typeG, nG } = exercice;
   const u = uLatexB(exercice);
   const xPart = expPart === 0 ? "" : puissanceX(expPart);
@@ -313,7 +313,7 @@ function integrandeLatexB(exercice: ExerciceFamilleB): string {
   return `${monome(k, 1, xPart, true).replace(/^1$/, "").replace(/^-1$/, "-")}${gCorpsLatex(typeG, u, nG)}`;
 }
 
-function facteurLatexB(exercice: ExerciceFamilleB): string {
+export function facteurLatexB(exercice: ExerciceFamilleB): string {
   return fractionLatex(exercice.k, exercice.mCoef);
 }
 
@@ -366,7 +366,7 @@ function reponseIntermediaireB(exercice: ExerciceFamilleB, phase: PhaseCalculPri
 // Famille C.
 // ============================================================================
 
-interface PiecesC {
+export interface PiecesC {
   u: string;
   xDeU: string | null;
   dx: string;
@@ -375,18 +375,18 @@ interface PiecesC {
   formuleAide: string;
 }
 
-function radicalC1(exercice: Extract<ExerciceFamilleC, { sousType: "1" }>): string {
+export function radicalC1(exercice: Extract<ExerciceFamilleC, { sousType: "1" }>): string {
   return sommeLatex([
     { num: exercice.a, corps: "x" },
     { num: exercice.b, corps: "" },
   ]);
 }
 
-function cycloLatex(cyclo: "arctan" | "arcsin"): string {
+export function cycloLatex(cyclo: "arctan" | "arcsin"): string {
   return cyclo === "arctan" ? "\\arctan(x)" : "\\arcsin(x)";
 }
 
-function piecesC(exercice: ExerciceFamilleC): PiecesC {
+export function piecesC(exercice: ExerciceFamilleC): PiecesC {
   switch (exercice.sousType) {
     case "1": {
       const { a, b, k } = exercice;
@@ -461,7 +461,7 @@ export function primitiveLatexC(exercice: ExerciceFamilleC): string {
   }
 }
 
-function integrandeLatexC(exercice: ExerciceFamilleC): string {
+export function integrandeLatexC(exercice: ExerciceFamilleC): string {
   switch (exercice.sousType) {
     case "1":
       return `${coefDevant(exercice.k)}x\\sqrt{${radicalC1(exercice)}}`;
@@ -538,9 +538,9 @@ function reponseIntermediaireC(exercice: ExerciceFamilleC, phase: PhaseCalculPri
 // Famille D.
 // ============================================================================
 
-type ExerciceFamilleDIpp = Exclude<ExerciceFamilleD, { sousType: "5" }>;
+export type ExerciceFamilleDIpp = Exclude<ExerciceFamilleD, { sousType: "5" }>;
 
-interface PiecesD {
+export interface PiecesD {
   u: string;
   dv: string;
   du: string;
@@ -549,11 +549,11 @@ interface PiecesD {
   vDu: string;
 }
 
-function argumentK(k: number): string {
+export function argumentK(k: number): string {
   return k === 1 ? "x" : `${k}x`;
 }
 
-function piecesD(exercice: ExerciceFamilleDIpp): PiecesD {
+export function piecesD(exercice: ExerciceFamilleDIpp): PiecesD {
   switch (exercice.sousType) {
     case "1": {
       const { a, b, kTrig, trig } = exercice;
@@ -680,7 +680,7 @@ export function primitiveLatexD(exercice: ExerciceFamilleD): string {
   }
 }
 
-function integrandeLatexD(exercice: ExerciceFamilleD): string {
+export function integrandeLatexD(exercice: ExerciceFamilleD): string {
   switch (exercice.sousType) {
     case "5":
       return `${exercice.k === 1 ? "" : `${exercice.k}\\cdot `}${exercice.base}^{x}\\cdot e^{x}`;
@@ -779,7 +779,7 @@ function reponseIntermediaireD(exercice: ExerciceFamilleD, phase: PhaseCalculPri
 // Famille E.
 // ============================================================================
 
-interface PiecesE {
+export interface PiecesE {
   xTheta: string;
   dx: string;
   simplifiee: string;
@@ -787,7 +787,7 @@ interface PiecesE {
   primitiveTheta: string;
 }
 
-function piecesE(exercice: ExerciceFamilleE): PiecesE {
+export function piecesE(exercice: ExerciceFamilleE): PiecesE {
   const { a } = exercice;
   const a2 = a * a;
   if (exercice.sousType === "sinus") {
@@ -822,7 +822,7 @@ export function primitiveLatexE(exercice: ExerciceFamilleE): string {
   return `-\\dfrac{\\sqrt{${a2}+x^2}}{${a2}x}`;
 }
 
-function integrandeLatexE(exercice: ExerciceFamilleE): string {
+export function integrandeLatexE(exercice: ExerciceFamilleE): string {
   const a2 = exercice.a * exercice.a;
   if (exercice.sousType === "sinus") return `\\sqrt{${a2}-x^2}`;
   return `\\dfrac{1}{x^2\\sqrt{${a2}+x^2}}\\quad(x>0)`;
@@ -891,7 +891,7 @@ function reponseIntermediaireE(exercice: ExerciceFamilleE, phase: PhaseCalculPri
 // Famille F.
 // ============================================================================
 
-function formeReecriteF(exercice: ExerciceFamilleF): string {
+export function formeReecriteF(exercice: ExerciceFamilleF): string {
   const k = exercice.k;
   const c = coefDevant(k);
   switch (exercice.sousType) {
@@ -928,7 +928,7 @@ export function primitiveLatexF(exercice: ExerciceFamilleF): string {
   }
 }
 
-function integrandeLatexF(exercice: ExerciceFamilleF): string {
+export function integrandeLatexF(exercice: ExerciceFamilleF): string {
   const k = coefDevant(exercice.k);
   switch (exercice.sousType) {
     case "tan":
@@ -1025,30 +1025,30 @@ function reponseIntermediaireF(exercice: ExerciceFamilleF, phase: PhaseCalculPri
 // Famille G.
 // ============================================================================
 
-function numerateurG1(exercice: Extract<ExerciceFamilleG, { sousType: "1" }>): string {
+export function numerateurG1(exercice: Extract<ExerciceFamilleG, { sousType: "1" }>): string {
   const { A, B, r1, r2 } = exercice;
   return polynomeLatex([A + B, -(A * r2 + B * r1)]);
 }
-function denominateurG1(exercice: Extract<ExerciceFamilleG, { sousType: "1" }>): string {
+export function denominateurG1(exercice: Extract<ExerciceFamilleG, { sousType: "1" }>): string {
   const { r1, r2 } = exercice;
   return polynomeLatex([1, -(r1 + r2), r1 * r2]);
 }
-function numerateurG3(exercice: Extract<ExerciceFamilleG, { sousType: "3" }>): string {
+export function numerateurG3(exercice: Extract<ExerciceFamilleG, { sousType: "3" }>): string {
   return polynomeLatex([exercice.A + exercice.B, exercice.C, exercice.A]);
 }
-function denominateurG4(exercice: Extract<ExerciceFamilleG, { sousType: "4" }>): string {
+export function denominateurG4(exercice: Extract<ExerciceFamilleG, { sousType: "4" }>): string {
   return polynomeLatex([1, exercice.p, exercice.q]);
 }
-function carreCompleteG4(exercice: Extract<ExerciceFamilleG, { sousType: "4" }>): string {
+export function carreCompleteG4(exercice: Extract<ExerciceFamilleG, { sousType: "4" }>): string {
   const { h, m } = exercice;
   return `${h === 0 ? "x^2" : `(${xPlus(h)})^2`}+${m * m}`;
 }
 /** Fraction signée « \dfrac{num}{den} » / « -\dfrac{|num|}{den} » (num entier). */
-function fractionSignee(num: number, den: string): string {
+export function fractionSignee(num: number, den: string): string {
   return signer(num < 0, `\\dfrac{${Math.abs(num)}}{${den}}`, true);
 }
 
-function decompositionPoseeG(exercice: ExerciceFamilleG): string {
+export function decompositionPoseeG(exercice: ExerciceFamilleG): string {
   switch (exercice.sousType) {
     case "1":
       return `\\dfrac{A}{${xPlus(-exercice.r1)}}+\\dfrac{B}{${xPlus(-exercice.r2)}}`;
@@ -1061,7 +1061,7 @@ function decompositionPoseeG(exercice: ExerciceFamilleG): string {
   }
 }
 
-function decompositionNumeriqueG(exercice: ExerciceFamilleG): string {
+export function decompositionNumeriqueG(exercice: ExerciceFamilleG): string {
   switch (exercice.sousType) {
     case "1":
       return `${fractionSignee(exercice.A, xPlus(-exercice.r1))}${exercice.B < 0 ? "" : "+"}${fractionSignee(exercice.B, xPlus(-exercice.r2))}`;
@@ -1112,7 +1112,7 @@ export function primitiveLatexG(exercice: ExerciceFamilleG): string {
   }
 }
 
-function integrandeLatexG(exercice: ExerciceFamilleG): string {
+export function integrandeLatexG(exercice: ExerciceFamilleG): string {
   switch (exercice.sousType) {
     case "1":
       // Numérateur ET dénominateur développés-réduits (audit) : la forme A(x−r₂)+B(x−r₁) donnait

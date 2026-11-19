@@ -16,6 +16,10 @@ import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { correctionDetailleeCalculPrimitives } from "./generateurs6e/calculPrimitives/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige23 } from "./moteur6e/typesCalculPrimitives";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen23` — Calcul de primitives (chapitre 4, "Intégrales et primitives"). Contrairement aux
@@ -147,6 +151,9 @@ export function App6gen23() {
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs6e/calculPrimitives/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCalculPrimitives(exercice), lettreEtape(phasesCorrige23(exercice).indexOf(phase)))} />,
       }
     : null;
 

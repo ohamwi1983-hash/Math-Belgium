@@ -19,6 +19,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeCalculAires } from "./generateurs6e/calculAires/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige26 } from "./moteur6e/typesCalculAires";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen26` — Calcul d'aires par intégrale (chapitre 4, "Intégrales et primitives"). Même patron que
@@ -152,6 +156,9 @@ export function App6gen26() {
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs6e/calculAires/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCalculAires(exercice), lettreEtape(phasesCorrige26(exercice).indexOf(phase)))} />,
       }
     : null;
 

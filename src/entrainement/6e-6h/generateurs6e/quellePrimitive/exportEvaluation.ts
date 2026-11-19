@@ -4,14 +4,11 @@ import type {
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
-  aideNiveau1QuellePrimitive,
-  aideNiveau2QuellePrimitive,
   consigneEcranQuellePrimitive,
   formatReponseAttenduePhaseLatexQuellePrimitive,
   intervalleLatexQuellePrimitive,
@@ -24,7 +21,6 @@ import {
   definitionFPrimitive,
   difficultePrimitive,
   erreursFrequentesPrimitive,
-  lignesEtapePrimitive,
   methodePapierPrimitive,
   poidsEtapesPrimitive,
   reponseEtapePrimitive,
@@ -33,6 +29,7 @@ import {
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, construireQuellePrimitive } from "./index";
 import type { IdVarianteQuellePrimitive } from "./index";
 import { LIBELLE_CAS_QUELLE_PRIMITIVE, profilQuellePrimitive } from "./profilEvaluation";
+import { PIEGE_FINAL_QUELLE_PRIMITIVE, correctionDetailleeQuellePrimitive } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceQuellePrimitive>` pour `6gen24` (Trouver la
@@ -90,28 +87,7 @@ function enoncePapier(e: ExerciceQuellePrimitive): EnoncePapier {
   return { section: { enteteFragments: entetePapier(e), questions: [] }, reponseBreve: reponse(e, "final") };
 }
 
-const PIEGE_FINAL = "Fixer C à 0 dans la primitive générale, ou remplacer x par a dans f au lieu de F.";
-
-function correctionDetaillee(e: ExerciceQuellePrimitive): EtapeCorrection[] {
-  const phases = phasesPourExercice(e);
-  return phases.flatMap((phase, i) => {
-    const sousQuestion = LETTRES[i];
-    if (!estFinale(phase)) {
-      const derniereBase = i === phases.length - 2;
-      // Dernier écran de la chaîne empruntée : la primitive GÉNÉRALE (avec C), vérifiée par dérivation.
-      return lignesEtapePrimitive(e.exerciceBase, phase as PhaseCalculPrimitives, sousQuestion, derniereBase, false);
-    }
-    const aide1 = aideNiveau1QuellePrimitive(e, phase);
-    const aide2 = aideNiveau2QuellePrimitive(e, phase);
-    const lignes: EtapeCorrection[] = [
-      { label: "Méthode", sousQuestion, fragments: [t(`${aide1.texte.trim()} `), ...(aide1.latex ? [f(aide1.latex)] : [])] },
-    ];
-    if (aide2.latex) lignes.push({ label: "Calcul", sousQuestion, fragments: [t("Valeur de la primitive (sans C) au point de la condition, puis C isolé : "), f(aide2.latex)] });
-    lignes.push({ label: "Conclusion", sousQuestion, fragments: reponse(e, phase) });
-    lignes.push({ label: "Piège", sousQuestion, fragments: [t(PIEGE_FINAL)] });
-    return lignes;
-  });
-}
+const PIEGE_FINAL = PIEGE_FINAL_QUELLE_PRIMITIVE;
 
 function difficulte(e: ExerciceQuellePrimitive): 1 | 2 | 3 {
   return Math.max(2, difficultePrimitive(e.exerciceBase)) as 2 | 3;
@@ -146,7 +122,7 @@ export const adaptateurEvaluationQuellePrimitive: AdaptateurFeuilleExercices<Exe
   construireCorrection,
   difficulte,
   reponseBreve: (e) => reponse(e, "final"),
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeQuellePrimitive,
   bareme,
   enoncePapier,
   dureeMinutes: 10,

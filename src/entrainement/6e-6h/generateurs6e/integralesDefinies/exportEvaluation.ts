@@ -4,15 +4,13 @@ import type {
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, formatReponseAttenduePhaseLatex } from "../../ui6e/formatIntegralesDefinies";
+import { blocDonnees, consigneEcran, formatReponseAttenduePhaseLatex } from "../../ui6e/formatIntegralesDefinies";
 import { decimalLatex, valeurExacteLatex } from "../../ui6e/formatMonome";
-import { figureIntegralesDefiniesSvg } from "../../ui6e/figureIntegralesDefinies";
 import { phasesPourExercice } from "../../moteur6e/typesIntegralesDefinies";
 import type { PhaseIntegralesDefinies } from "../../moteur6e/typesIntegralesDefinies";
 import type { PhaseCalculPrimitives } from "../../moteur6e/typesCalculPrimitives";
@@ -21,7 +19,6 @@ import {
   definitionFPrimitive,
   difficultePrimitive,
   erreursFrequentesPrimitive,
-  lignesEtapePrimitive,
   methodePapierPrimitive,
   poidsEtapesPrimitive,
   reponseEtapePrimitive,
@@ -30,6 +27,7 @@ import {
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntegralesDefinies } from "./index";
 import type { IdVarianteIntegralesDefinies } from "./index";
 import { LIBELLE_CAS_INTEGRALES_DEFINIES, profilIntegralesDefinies } from "./profilEvaluation";
+import { correctionDetailleeIntegralesDefinies, piegeIntegralesDefinies } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceIntegralesDefinies>` pour `6gen25` (Intégrales
@@ -136,36 +134,7 @@ function enoncePapier(e: ExerciceIntegralesDefinies): EnoncePapier {
   };
 }
 
-function piegePropre(e: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies): string | null {
-  if (phase === "finalIntegrale") return "Soustraire dans le mauvais ordre : c'est F(borne supérieure) − F(borne inférieure).";
-  if (phase === "valeurMoyenne") return "Confondre l'intégrale et la valeur moyenne : il faut encore diviser par la longueur b − a de l'intervalle.";
-  if (phase === "resoudreM" && e.scenario === "parametre") {
-    if (e.technique === "polynomiale") return "Oublier une des deux solutions de l'équation du second degré, ou ne pas vérifier qu'elle convient.";
-    if (e.technique === "exponentielle") return "Appliquer ln avant d'avoir isolé l'exponentielle, ou à un nombre négatif.";
-    return "Garder une solution hors de l'intervalle imposé pour m.";
-  }
-  return null;
-}
-
-function lignesEtapePropre(e: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies, sousQuestion: string): EtapeCorrection[] {
-  const aide1 = aideNiveau1(e, phase);
-  const aide2 = aideNiveau2(e, phase);
-  const lignes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion, fragments: [t(`${aide1.texte.trim()} `), ...(aide1.latex ? [f(aide1.latex)] : [])] }];
-  if (phase !== "poserEquationM" && aide2.latex) lignes.push({ label: "Calcul", sousQuestion, fragments: [f(aide2.latex)] });
-  const avecFigure = (e.scenario === "simple" && phase === "finalIntegrale") || (e.scenario === "moyenne" && phase === "valeurMoyenne") || (e.scenario === "parametre" && phase === "resoudreM");
-  lignes.push({ label: "Conclusion", sousQuestion, fragments: reponse(e, phase), ...(avecFigure ? { figureHtml: figureIntegralesDefiniesSvg(e) } : {}) });
-  const piege = piegePropre(e, phase);
-  if (piege) lignes.push({ label: "Piège", sousQuestion, fragments: [t(piege)] });
-  return lignes;
-}
-
-function correctionDetaillee(e: ExerciceIntegralesDefinies): EtapeCorrection[] {
-  const phases = phasesPourExercice(e);
-  const nBase = phasesPrimitive(e.primitive).length;
-  return phases.flatMap((phase, i) =>
-    estEmpruntee(e, phase) ? lignesEtapePrimitive(e.primitive, phase, LETTRES[i], i === nBase - 1, false) : lignesEtapePropre(e, phase, LETTRES[i]),
-  );
-}
+const piegePropre = piegeIntegralesDefinies;
 
 function difficulte(e: ExerciceIntegralesDefinies): 1 | 2 | 3 {
   if (e.scenario === "parametre") return e.technique === "polynomiale" ? 2 : 3;
@@ -211,7 +180,7 @@ export const adaptateurEvaluationIntegralesDefinies: AdaptateurFeuilleExercices<
   construireCorrection,
   difficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeIntegralesDefinies,
   bareme,
   enoncePapier,
   dureeMinutes: 12,

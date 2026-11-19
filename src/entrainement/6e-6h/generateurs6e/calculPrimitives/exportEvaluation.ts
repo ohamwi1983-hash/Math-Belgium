@@ -4,17 +4,19 @@ import type {
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { aideNiveau1, blocDonnees, consigneEcran, formatReponseAttenduePhaseLatex, integrandeLatex, primitiveLatex } from "../../ui6e/formatCalculPrimitives";
+import { aideNiveau1, blocDonnees, consigneEcran, formatReponseAttenduePhaseLatex, primitiveLatex } from "../../ui6e/formatCalculPrimitives";
 import { phasesPourExercice } from "../../moteur6e/typesCalculPrimitives";
 import type { PhaseCalculPrimitives } from "../../moteur6e/typesCalculPrimitives";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCalculPrimitives } from "./index";
 import type { IdVarianteCalculPrimitives } from "./index";
 import { LIBELLE_CAS_CALCUL_PRIMITIVES, profilCalculPrimitives } from "./profilEvaluation";
+import { correctionDetailleeCalculPrimitives, piegePrimitive } from "./corrigeDetaille";
+
+export { piegePrimitive };
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceCalculPrimitives>` pour `6gen23` (Calcul de
@@ -87,38 +89,6 @@ export function reponseEtapePrimitive(e: ExerciceCalculPrimitives, phase: PhaseC
   return [f(formatReponseAttenduePhaseLatex(e, phase).join(",\\quad "))];
 }
 
-/** Piège ciblé de l'instance (une ligne « Piège » du corrigé, et une erreur fréquente du barème). */
-export function piegePrimitive(e: ExerciceCalculPrimitives): string {
-  switch (e.famille) {
-    case "A":
-      if (e.sousType === "direct") {
-        return e.termes.some((x) => x.type === "invX")
-          ? "Oublier la valeur absolue : une primitive de 1/x est ln|x|, car 1/x est aussi définie pour x < 0."
-          : "Oublier de diviser par l'exposant augmenté de 1, ou se tromper de signe sur une primitive usuelle.";
-      }
-      return e.sousType === "diviserFraction"
-        ? "Primitiver séparément le numérateur et le dénominateur : il faut d'abord diviser chaque terme."
-        : "Multiplier les exposants au lieu de les additionner : x·√x = x^(1 + 1/2).";
-    case "B":
-      return "Oublier le facteur λ, ou diviser par u′(x) au lieu d'ajuster le coefficient.";
-    case "C":
-      return "Laisser des x dans l'intégrale en u (dx aussi doit être remplacé), ou oublier de revenir à x.";
-    case "D":
-      if (e.sousType === "5") return "Se lancer dans une intégration par parties : le produit de deux exponentielles est une seule exponentielle.";
-      if (e.sousType === "2") return "S'arrêter après la première intégration par parties : l'intégrale restante en demande une seconde.";
-      if (e.sousType === "4") return "Faire la seconde intégration par parties en inversant les rôles : on retombe sur une identité sans intérêt.";
-      return "Choisir u et dv à l'envers : l'intégrale restante devient plus compliquée au lieu de se simplifier.";
-    case "E":
-      return "Oublier de remplacer dx (le facteur de dθ), ou revenir à x sans le triangle rectangle de référence.";
-    case "F":
-      if (e.sousType === "tan") return "Oublier le signe moins : une primitive de tan(x) est −ln|cos(x)|.";
-      if (e.sousType === "angleDoubleSin" || e.sousType === "angleDoubleCos") return "Se tromper de signe dans la formule de duplication : sin²(x) = (1 − cos(2x))/2 et cos²(x) = (1 + cos(2x))/2.";
-      return "Primitiver une puissance de sin ou de cos sans la réécrire : seule la forme u′·g(u) se primitive directement.";
-    case "G":
-      return "Oublier la valeur absolue dans les logarithmes, ou identifier les coefficients sans vérifier la décomposition.";
-  }
-}
-
 /** Difficulté propre au calcul de la primitive. */
 export function difficultePrimitive(e: ExerciceCalculPrimitives): 1 | 2 | 3 {
   switch (e.famille) {
@@ -136,21 +106,6 @@ export function difficultePrimitive(e: ExerciceCalculPrimitives): 1 | 2 | 3 {
     case "F":
       return 2;
   }
-}
-
-/** Lignes du corrigé d'une étape de calcul de primitive : Méthode (aide de niveau 1 de l'écran),
- * Conclusion (vraie valeur de l'étape) ; sur la dernière étape, Vérification par dérivation et
- * Piège ciblé. */
-export function lignesEtapePrimitive(e: ExerciceCalculPrimitives, phase: PhaseCalculPrimitives, sousQuestion: string, derniere: boolean, avecPiege: boolean): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [];
-  const methode = methodeEtapePrimitive(e, phase);
-  if (methode.length > 0) lignes.push({ label: "Méthode", sousQuestion, fragments: methode });
-  lignes.push({ label: derniere ? "Conclusion" : "Résultat", sousQuestion, fragments: reponseEtapePrimitive(e, phase) });
-  if (derniere) {
-    lignes.push({ label: "Vérification", sousQuestion, fragments: [t("En dérivant, on retrouve "), f(`f(x)=${integrandeLatex(e)}`), t(".")] });
-    if (avecPiege) lignes.push({ label: "Piège", sousQuestion, fragments: [t(piegePrimitive(e))] });
-  }
-  return lignes;
 }
 
 /** Erreurs fréquentes communes à tout calcul de primitive. */
@@ -192,11 +147,6 @@ function enoncePapier(e: ExerciceCalculPrimitives): EnoncePapier {
   return { section: { enteteFragments: entetePapier(e), questions: [] }, reponseBreve: reponseEtapePrimitive(e, phases[phases.length - 1]) };
 }
 
-function correctionDetaillee(e: ExerciceCalculPrimitives): EtapeCorrection[] {
-  const phases = phasesPourExercice(e);
-  return phases.flatMap((phase, i) => lignesEtapePrimitive(e, phase, LETTRES[i], i === phases.length - 1, true));
-}
-
 function reponseBreve(e: ExerciceCalculPrimitives): FragmentConsigne[] {
   const phases = phasesPourExercice(e);
   return reponseEtapePrimitive(e, phases[phases.length - 1]);
@@ -226,7 +176,7 @@ export const adaptateurEvaluationCalculPrimitives: AdaptateurFeuilleExercices<Ex
   construireCorrection,
   difficulte: difficultePrimitive,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeCalculPrimitives,
   bareme,
   enoncePapier,
   dureeMinutes: 8,
