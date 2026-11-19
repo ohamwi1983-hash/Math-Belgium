@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { ChoixIndicateur, ExerciceValeurAberrante, Justification } from "../core/valeurAberrante.types";
 import { nombreTexteFr } from "../moteur/contextesTransformationDonnees";
 import { arrondi9, contexteDef, indicateursComplets, indicateursSansExtreme, valeurRetiree, valeursRestantes, type Indicateurs } from "../moteur/modeleValeurAberrante";

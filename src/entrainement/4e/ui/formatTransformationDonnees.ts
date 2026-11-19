@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { ExerciceTransformationDonnees, IndicateursSerie } from "../core/transformationDonnees.types";
 import { contexteParId, nombreTexteFr, type ContexteTransformation } from "../moteur/contextesTransformationDonnees";
 

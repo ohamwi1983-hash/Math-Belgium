@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import type { ExerciceTransformationDonnees } from "./core/transformationDonnees.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceTransformationDonnees } from "./generateurs/transformationDonnees";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeTransformationDonnees } from "./generateurs/transformationDonnees/corrigeDetaille";
 import { activerAide, demarrer, ecranSuivant, soumettre, tentativesMaxEcran, type EtatTransformationDonnees } from "./moteur/sessionTransformationDonnees";
 import { diagnostiquerChamps, type StatutChamp } from "./moteur/verificationTransformationDonnees";
 import { CONSIGNE_GENERALE, NOMBRE_ECRANS, TITRES_ECRANS, ecrans, lignesIndicateurs, populationTexte, transformationTexte, type Ecran } from "./ui/formatTransformationDonnees";
@@ -112,6 +115,7 @@ export function AppTransformationDonnees() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTransformationDonnees(e), lettreEtape(ecran))} />,
       }
     : null;
 

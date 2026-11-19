@@ -1,11 +1,10 @@
 import type {
-  CumulComparaisonSeries,
   ExerciceComparaisonSeries,
   QuestionComparaisonSeries,
   QuestionSeuil,
   SerieComparaison,
 } from "../../core/comparaisonSeries.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, ErreurFrequente, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, CriteresDifficulte, ErreurFrequente, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
@@ -20,12 +19,12 @@ import {
   segmentsSeuilAttendu,
   texteProfilSerie,
   type SegmentTexte,
-  LABEL_SIGMA,
 } from "../../ui/formatComparaisonSeries";
-import { calculerViewBoxComparaisonSeries, pointsCourbeCumulee, type PointCourbeCumulee } from "../../ui/comparaisonSeriesGraph";
+import { construireSvgCourbesCumulees, type MarqueurCourbeCumulee } from "../../ui/figureComparaisonSeries";
+import { correctionDetailleeComparaisonSeries, texteReponseSeuil } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComparaisonSeries } from "./index";
-import { avecVirgulesBelges, segmentEnVirgules, virgulesLatex } from "../../ui/nombreFr";
-import { LABEL_Q1, LABEL_Q2, LABEL_Q3 } from "../../ui/formatBoiteMoustaches";
+import { avecVirgulesBelges, segmentEnVirgules } from "../../ui/nombreFr";
 import { profilComparaisonSeries, LIBELLE_CAS_COMPARAISON } from "../profilsEvaluationStatistique";
 
 
@@ -95,18 +94,6 @@ import { profilComparaisonSeries, LIBELLE_CAS_COMPARAISON } from "../profilsEval
  * écrit.
  */
 
-const COULEUR_SERIE_A = "#1971c2";
-const COULEUR_SERIE_B = "#f08c00";
-const COULEUR_GRILLE_SVG = "#d8dee6";
-const COULEUR_AXE_SVG = "#495057";
-const LARGEUR_SVG_COURBES = 360;
-const HAUTEUR_SVG_COURBES = 250;
-const MARGE_GAUCHE_SVG = 32;
-const MARGE_BAS_SVG = 24;
-const MARGE_HAUT_SVG = 26;
-const MARGE_DROITE_SVG = 12;
-const CIBLE_DIVISIONS_SVG = 5;
-
 function formatNombre(valeur: number): string {
   return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
 }
@@ -173,113 +160,8 @@ function construireTableRecapitulatifHtml(serieA: SerieComparaison, serieB: Seri
 }
 
 // ============================================================================
-// Variante "graphique" — courbes cumulées, moteur de tracé dédié (voir commentaire de tête).
+// Variante "graphique" — courbes cumulées : `ui/figureComparaisonSeries.ts` (partagé avec le corrigé détaillé).
 // ============================================================================
-
-/** Pas "nombre rond" (1/2/5 × 10^n) — dupliquée depuis `export/svgGraph.ts::pasNombreRond` (non
- * exportée), même principe que le reste du projet ("dupliqué, pas importé"). */
-function pasNombreRondSvg(etendue: number): number {
-  const brut = etendue / CIBLE_DIVISIONS_SVG;
-  const magnitude = 10 ** Math.floor(Math.log10(brut));
-  const normalise = brut / magnitude;
-  const nice = normalise < 1.5 ? 1 : normalise < 3 ? 2 : normalise < 7 ? 5 : 10;
-  return nice * magnitude;
-}
-
-function formatNombreSvg(v: number): string {
-  return Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(2);
-}
-
-/** Un point marqué/étiqueté sur UNE courbe (corrigé de la variante "graphique", question "seuil"
- * uniquement — voir commentaire de tête de fichier). */
-interface MarqueurCourbeCumulee {
-  serie: "A" | "B";
-  valeur: number;
-  label: string;
-}
-
-function traceCourbeSvg(points: PointCourbeCumulee[], couleur: string, sx: (x: number) => number, sy: (y: number) => number): string {
-  const chemin = points.map((p, i) => `${i === 0 ? "M" : "L"} ${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(" ");
-  const sommets = points.map((p) => `<circle cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="2.4" fill="${couleur}"/>`).join("");
-  return `<path d="${chemin}" fill="none" stroke="${couleur}" stroke-width="2" stroke-linecap="round"/>${sommets}`;
-}
-
-/** Construit le `<svg>` autonome des 2 courbes cumulées (ogives) — géométrie déléguée à
- * `pointsCourbeCumulee`/`calculerViewBoxComparaisonSeries` (`ui/comparaisonSeriesGraph.ts`, source
- * unique déjà partagée avec l'écran), rendu (grille/cadre/tracé/étiquettes) propre à ce fichier. */
-function construireSvgCourbesCumulees(
-  serieA: SerieComparaison,
-  serieB: SerieComparaison,
-  cumul: CumulComparaisonSeries,
-  unite: string,
-  marqueurs: MarqueurCourbeCumulee[] = [],
-): string {
-  const pointsA = pointsCourbeCumulee(serieA, cumul);
-  const pointsB = pointsCourbeCumulee(serieB, cumul);
-  const viewBox = calculerViewBoxComparaisonSeries(pointsA, pointsB);
-  const [xMin, xMax] = viewBox.x;
-  const [yMin, yMax] = viewBox.y;
-
-  const zoneX = LARGEUR_SVG_COURBES - MARGE_GAUCHE_SVG - MARGE_DROITE_SVG;
-  const zoneY = HAUTEUR_SVG_COURBES - MARGE_HAUT_SVG - MARGE_BAS_SVG;
-  const sx = (x: number) => MARGE_GAUCHE_SVG + ((x - xMin) / (xMax - xMin)) * zoneX;
-  const sy = (y: number) => MARGE_HAUT_SVG + ((yMax - y) / (yMax - yMin)) * zoneY;
-
-  const pasX = pasNombreRondSvg(xMax - xMin);
-  const pasY = pasNombreRondSvg(yMax - yMin);
-
-  const grilleX: string[] = [];
-  const labelsX: string[] = [];
-  for (let v = Math.ceil(xMin / pasX) * pasX; v <= xMax + 1e-9; v += pasX) {
-    const px = sx(v);
-    grilleX.push(`<line x1="${px.toFixed(1)}" y1="${MARGE_HAUT_SVG}" x2="${px.toFixed(1)}" y2="${HAUTEUR_SVG_COURBES - MARGE_BAS_SVG}" stroke="${COULEUR_GRILLE_SVG}" stroke-width="1"/>`);
-    labelsX.push(`<text x="${px.toFixed(1)}" y="${(HAUTEUR_SVG_COURBES - MARGE_BAS_SVG + 12).toFixed(1)}" font-size="8" text-anchor="middle" fill="${COULEUR_AXE_SVG}">${formatNombreSvg(v)}</text>`);
-  }
-  const grilleY: string[] = [];
-  const labelsY: string[] = [];
-  for (let v = Math.ceil(yMin / pasY) * pasY; v <= yMax + 1e-9; v += pasY) {
-    const py = sy(v);
-    grilleY.push(`<line x1="${MARGE_GAUCHE_SVG}" y1="${py.toFixed(1)}" x2="${LARGEUR_SVG_COURBES - MARGE_DROITE_SVG}" y2="${py.toFixed(1)}" stroke="${COULEUR_GRILLE_SVG}" stroke-width="1"/>`);
-    labelsY.push(`<text x="${(MARGE_GAUCHE_SVG - 4).toFixed(1)}" y="${(py + 3).toFixed(1)}" font-size="8" text-anchor="end" fill="${COULEUR_AXE_SVG}">${formatNombreSvg(v)}</text>`);
-  }
-
-  const cadre = `<rect x="${MARGE_GAUCHE_SVG}" y="${MARGE_HAUT_SVG}" width="${zoneX}" height="${zoneY}" fill="none" stroke="${COULEUR_AXE_SVG}" stroke-width="1.2"/>`;
-  const traceA = traceCourbeSvg(pointsA, COULEUR_SERIE_A, sx, sy);
-  const traceB = traceCourbeSvg(pointsB, COULEUR_SERIE_B, sx, sy);
-
-  const marqueursHtml = marqueurs
-    .map((marqueur) => {
-      const serie = marqueur.serie === "A" ? serieA : serieB;
-      const couleur = marqueur.serie === "A" ? COULEUR_SERIE_A : COULEUR_SERIE_B;
-      const ligne = serie.lignes.find((l) => l.valeur === marqueur.valeur);
-      if (!ligne) return "";
-      const y = cumul === "effectif" ? ligne.effectifCumule : ligne.frequenceCumulee;
-      const px = sx(marqueur.valeur);
-      const py = sy(y);
-      return (
-        `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="4.5" fill="#ffffff" stroke="${couleur}" stroke-width="2"/>` +
-        `<text x="${px.toFixed(1)}" y="${(py - 8).toFixed(1)}" font-size="8" text-anchor="middle" font-weight="bold" fill="${couleur}">${echapperHtml(marqueur.label)}</text>`
-      );
-    })
-    .join("");
-
-  const legende =
-    `<text x="${MARGE_GAUCHE_SVG}" y="12" font-size="9" font-weight="bold" fill="${COULEUR_SERIE_A}">Série A</text>` +
-    `<text x="${MARGE_GAUCHE_SVG + 58}" y="12" font-size="9" font-weight="bold" fill="${COULEUR_SERIE_B}">Série B</text>`;
-  const libelleY = cumul === "effectif" ? "effectif cumulé" : "fréquence cumulée (%)";
-  const legendeAxes = `<text x="${MARGE_GAUCHE_SVG}" y="${HAUTEUR_SVG_COURBES - 4}" font-size="7.5" fill="${COULEUR_AXE_SVG}">Horizontal : valeur (${echapperHtml(unite)}) — Vertical : ${echapperHtml(libelleY)}</text>`;
-
-  return `<svg class="graphe-comparaison-series" width="${LARGEUR_SVG_COURBES}" height="${HAUTEUR_SVG_COURBES}" viewBox="0 0 ${LARGEUR_SVG_COURBES} ${HAUTEUR_SVG_COURBES}" xmlns="http://www.w3.org/2000/svg">
-<rect x="0" y="0" width="${LARGEUR_SVG_COURBES}" height="${HAUTEUR_SVG_COURBES}" fill="#ffffff"/>
-${grilleX.join("")}${grilleY.join("")}
-${cadre}
-${traceA}${traceB}
-${labelsX.join("")}${labelsY.join("")}
-${legende}
-${marqueursHtml}
-${legendeAxes}
-</svg>`;
-}
 
 // ============================================================================
 // Consigne — dispatch sur `question.type`, réutilise `ui/formatComparaisonSeries.ts` (voir
@@ -424,23 +306,6 @@ function enVirgules(fragments: FragmentConsigne[]): FragmentConsigne[] {
   return fragments.map(segmentEnVirgules);
 }
 
-function n(valeur: number): string {
-  return virgulesLatex(formatNombre(valeur));
-}
-
-function difficulteComparaisonSeries(instance: ExerciceComparaisonSeries): 1 | 2 | 3 {
-  if (instance.variante === "recapitulatif") return 1;
-  if (instance.variante === "graphique") return 2;
-  // Tableaux bruts : le seuil se lit dans la colonne « cumulé », le profil exige de calculer
-  // médianes et dispersions des deux séries.
-  return instance.question.type === "seuil" ? 1 : 3;
-}
-
-function texteReponseSeuil(question: QuestionSeuil): string {
-  if (question.estFrequence) return `${formatNombre(question.reponseAttendue)} %`;
-  return `${formatNombre(question.reponseAttendue)} ${question.reponseAttendue === 1 ? "individu" : "individus"}`;
-}
-
 function reponseBreveComparaisonSeries(instance: ExerciceComparaisonSeries): FragmentConsigne[] {
   const { question } = instance;
   if (question.type === "seuil") return [texte(texteReponseSeuil(question))];
@@ -453,81 +318,13 @@ function segmentsReponseAttendueCourte(question: Exclude<QuestionComparaisonSeri
   return segmentsInterpretationAttendu(question);
 }
 
-/** Origine des indicateurs selon la présentation des données. */
-function sourceIndicateurs(instance: ExerciceComparaisonSeries): string {
-  if (instance.variante === "recapitulatif") return "On les lit directement dans le tableau récapitulatif.";
-  if (instance.variante === "graphique") return "Sur les courbes cumulées, la médiane est l'abscisse où la courbe atteint la moitié de l'effectif (50 %), Q1 et Q3 celles du quart et des trois quarts.";
-  return "On les calcule à partir des effectifs cumulés de chaque tableau (seuils n/4, n/2, 3n/4).";
-}
-
-function lignesMedianes(instance: ExerciceComparaisonSeries): FragmentConsigne[] {
-  const { serieA, serieB, contexte } = instance;
-  return [
-    texte("Série A : "),
-    latex(`${LABEL_Q2} = ${n(serieA.mediane)}`),
-    texte(` ${contexte.unite} ; série B : `),
-    latex(`${LABEL_Q2} = ${n(serieB.mediane)}`),
-    texte(` ${contexte.unite}.`),
-  ];
-}
-
-function lignesDispersion(instance: ExerciceComparaisonSeries): FragmentConsigne[] {
-  const { serieA, serieB } = instance;
-  return [
-    texte("Écarts-types : "),
-    latex(`${LABEL_SIGMA}_A = ${n(serieA.sigma)}`),
-    texte(" et "),
-    latex(`${LABEL_SIGMA}_B = ${n(serieB.sigma)}`),
-    texte(" ; écarts interquartiles : "),
-    latex(`(${LABEL_Q3}-${LABEL_Q1})_A = ${n(serieA.ecartInterquartile)}`),
-    texte(" et "),
-    latex(`(${LABEL_Q3}-${LABEL_Q1})_B = ${n(serieB.ecartInterquartile)}`),
-    texte("."),
-  ];
-}
-
-function correctionDetailleeComparaisonSeries(instance: ExerciceComparaisonSeries): EtapeCorrection[] {
-  const { question } = instance;
-  const etapes: EtapeCorrection[] = [];
-  if (question.type === "centrage") {
-    etapes.push({ label: "Méthode", fragments: [texte("La médiane partage la série en deux moitiés de même effectif : on compare la médiane des deux séries. "), texte(sourceIndicateurs(instance))] });
-    etapes.push({ label: "Lecture", fragments: lignesMedianes(instance) });
-    etapes.push({ label: "Conclusion", fragments: segmentsVersFragments(segmentsCentrageAttendu(question)) });
-    etapes.push({ label: "Piège", fragments: [texte("Comparer les étendues ou les valeurs maximales ne renseigne pas sur la position du milieu de la série.")] });
-  } else if (question.type === "dispersion") {
-    etapes.push({ label: "Méthode", fragments: [texte("Une série est d'autant plus homogène que ses valeurs sont peu dispersées : on compare l'écart-type et/ou l'écart interquartile (le plus petit l'emporte). "), texte(sourceIndicateurs(instance))] });
-    etapes.push({ label: "Calcul", fragments: lignesDispersion(instance) });
-    etapes.push({ label: "Conclusion", fragments: [...segmentsVersFragments(segmentsDispersionAttendu(question)), texte(question.nombreArguments === 2 ? " Les deux mesures vont dans le même sens : ce sont les deux arguments attendus." : " Une seule de ces deux mesures suffit comme argument.")] });
-    etapes.push({ label: "Piège", fragments: [texte("L'étendue (max − min) ne dépend que des deux valeurs extrêmes : elle n'est pas un argument valable d'homogénéité.")] });
-  } else if (question.type === "seuil") {
-    etapes.push({
-      label: "Méthode",
-      fragments: [texte(question.estFrequence ? "On lit la fréquence cumulée à la valeur demandée" : "On lit l'effectif cumulé à la valeur demandée"), texte(question.indexBas === null ? "." : " ; pour une tranche, on soustrait le cumul à la borne basse du cumul à la borne haute.")],
-    });
-    etapes.push({
-      label: "Lecture",
-      fragments: fragmentsExplicationSeuil(question, instance),
-      // Variante graphique : la lecture se fait sur les courbes cumulées, annotées au seuil demandé.
-      figureHtml:
-        instance.variante === "graphique"
-          ? construireSvgCourbesCumulees(instance.serieA, instance.serieB, instance.cumul ?? "effectif", instance.contexte.unite, marqueursSeuilCorrection(question, instance))
-          : undefined,
-    });
-    etapes.push({ label: "Conclusion", fragments: [texte(`${texteReponseSeuil(question)}.`)] });
-    etapes.push({ label: "Piège", fragments: [texte("C'est l'effectif CUMULÉ qui compte les individus jusqu'à une valeur — pas l'effectif de la seule ligne de cette valeur.")] });
-  } else {
-    etapes.push({ label: "Méthode", fragments: [texte("On compare d'abord les médianes (niveau général), puis les dispersions (homogénéité) des deux séries. "), texte(sourceIndicateurs(instance))] });
-    etapes.push({ label: "Niveau", fragments: lignesMedianes(instance) });
-    etapes.push({ label: "Dispersion", fragments: lignesDispersion(instance) });
-    etapes.push({ label: "Profils", fragments: [texte(`Série A : ${texteProfilSerie(instance, "A")}. Série B : ${texteProfilSerie(instance, "B")}.`)] });
-    etapes.push({ label: "Conclusion", fragments: segmentsVersFragments(segmentsInterpretationAttendu(question)) });
-  }
-  // Variante graphique (hors seuil, déjà annoté à sa lecture) : les courbes cumulées de l'énoncé
-  // en tête du corrigé, comme dans l'ancien corrigé.
-  if (instance.variante === "graphique" && question.type !== "seuil" && etapes.length > 0) {
-    etapes[0] = { ...etapes[0], figureHtml: construireSvgCourbesCumulees(instance.serieA, instance.serieB, instance.cumul ?? "effectif", instance.contexte.unite, []) };
-  }
-  return etapes.map((e) => ({ ...e, fragments: enVirgules(e.fragments) }));
+/** Niveau (grille commune) : un seul écran ; tableau récapitulatif ou lecture d'un cumul = lecture
+ * pure ; méthode à choisir (quel indicateur comparer) pour centrage, dispersion et interprétation ;
+ * aucun piège dans les données. */
+function criteresDifficulte(instance: ExerciceComparaisonSeries): CriteresDifficulte {
+  const { question, variante } = instance;
+  const lecture = variante === "recapitulatif" || (question.type === "seuil" && question.indexBas === null) ? ["a"] : [];
+  return { ...etapesDuCorrige(correctionDetailleeComparaisonSeries(instance), lecture), methode: question.type === "seuil" ? 0 : 1, piege: 0 };
 }
 
 function baremeComparaisonSeries(instance: ExerciceComparaisonSeries): BaremeExercice {
@@ -575,14 +372,13 @@ const adaptateurEvaluationComparaisonSeriesBrut: AdaptateurFeuilleExercices<Exer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceComparaisonSeries,
   construireCorrection: construireCorrectionComparaisonSeries,
-  difficulte: difficulteComparaisonSeries,
+  criteresDifficulte,
   reponseBreve: (instance) => enVirgules(reponseBreveComparaisonSeries(instance)),
-  correctionDetaillee: correctionDetailleeComparaisonSeries,
+  correctionDetaillee: (instance) => correctionDetailleeComparaisonSeries(instance).map((e) => ({ ...e, fragments: enVirgules(e.fragments) })),
   bareme: (instance) => {
     const b = baremeComparaisonSeries(instance);
     return { ...b, reponseFinale: enVirgules(b.reponseFinale) };
   },
-  dureeMinutes: 4,
 };
 
 /** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */

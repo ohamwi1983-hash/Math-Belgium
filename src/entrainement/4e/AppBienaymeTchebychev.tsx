@@ -55,6 +55,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeBienaymeTchebychev } from "./generateurs/bienaymeTchebychev/corrigeDetaille";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -254,6 +257,8 @@ export function AppBienaymeTchebychev() {
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : construireReponseAttendue(etat, exercice),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'écran clos (mêmes lignes que le papier).
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeBienaymeTchebychev(exercice), lettreEtape(SEQUENCES[exercice.variante].indexOf(etat.phase)))} />,
       }
     : null;
 

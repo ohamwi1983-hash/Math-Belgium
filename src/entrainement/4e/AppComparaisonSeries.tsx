@@ -21,6 +21,9 @@ import { formatEnonceTexte, segmentsReponseAttendue } from "./ui/formatComparais
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { DonneesComparaisonSeries } from "./components/DonneesComparaisonSeries";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeComparaisonSeries } from "./generateurs/comparaisonSeries/corrigeDetaille";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -100,6 +103,7 @@ export function AppComparaisonSeries() {
         reponseAttendue: <SegmentsInline segments={segmentsReponseAttendue(exercice)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComparaisonSeries(exercice), lettreEtape(0))} />,
       }
     : null;
 

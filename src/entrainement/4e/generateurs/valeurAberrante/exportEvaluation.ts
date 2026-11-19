@@ -1,28 +1,23 @@
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { texte } from "../../../export/fragmentsDocx";
 import type { ExerciceValeurAberrante } from "../../core/valeurAberrante.types";
-import { indicateursComplets, indicateursSansExtreme, valeurRetiree, valeursRestantes } from "../../moteur/modeleValeurAberrante";
-import { figureNuageSvg } from "../../ui/figureValeurAberrante";
+import { indicateursComplets, indicateursSansExtreme, valeurRetiree } from "../../moteur/modeleValeurAberrante";
 import {
   LIBELLES_INDICATEURS,
-  calculMediane,
-  calculMoyenne,
-  conclusionVerdict,
   consigneGenerale,
   ecrans,
   explicationVerdict,
   laValeurRetiree,
   listeTexte,
-  piegeVerdict,
   questionVerdict,
   recit,
-  texteJustification,
   titreListe,
-  bonneJustification,
   valeurTexte,
 } from "../../ui/formatValeurAberrante";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceValeurAberrante } from "./index";
 import { profilValeurAberrante } from "./profil";
+import { correctionDetailleeValeurAberrante } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen110 (« Moyenne ou médiane ? La valeur
@@ -81,23 +76,11 @@ function reponseBreve(e: ExerciceValeurAberrante): FragmentConsigne[] {
   return [texte(`${resultatsTexte(e)}. ${LIBELLES_INDICATEURS[e.verdict === "mediane" ? "mediane" : "les-deux"]}.`)];
 }
 
-function correctionDetaillee(e: ExerciceValeurAberrante): EtapeCorrection[] {
-  const a = indicateursComplets(e);
-  const b = indicateursSansExtreme(e);
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [texte("Moyenne : somme des valeurs divisée par leur nombre. Médiane : on RANGE d'abord les valeurs, puis on prend la première dont le rang dépasse strictement n/2 (règle du seuil).")],
-    },
-    { label: "Calcul", sousQuestion: "a", fragments: calculMoyenne(e, a, e.valeurs) },
-    { label: "Calcul", sousQuestion: "a", fragments: calculMediane(e, a) },
-    { label: "Calcul", sousQuestion: "b", fragments: calculMoyenne(e, b, valeursRestantes(e)) },
-    { label: "Calcul", sousQuestion: "b", fragments: calculMediane(e, b) },
-    { label: "Comparaison", sousQuestion: "c", fragments: explicationVerdict(e), figureHtml: figureNuageSvg(e, 380) },
-    { label: "Conclusion", sousQuestion: "c", fragments: [texte(`${conclusionVerdict(e)} Justification : ${texteJustification(e, bonneJustification(e))}`)] },
-    { label: "Piège", sousQuestion: "c", fragments: piegeVerdict(e) },
-  ];
+/** Niveau (grille commune) : trois écrans qui transforment (le verdict s'appuie sur des écarts
+ * calculés) ; méthode : choisir l'indicateur représentatif (1) ; aucun piège dans les données (le
+ * verdict est la question, jamais un cas particulier). */
+function criteresDifficulte(e: ExerciceValeurAberrante): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeValeurAberrante(e)), methode: 1, piege: 0 };
 }
 
 function construireCorrection(e: ExerciceValeurAberrante): BlocCorrection[] {
@@ -138,10 +121,9 @@ export const adaptateurEvaluationValeurAberrante: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte: () => 2,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeValeurAberrante,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };
