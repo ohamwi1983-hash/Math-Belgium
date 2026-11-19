@@ -17,7 +17,7 @@ const TABLE_LATEX_MAGNITUDE: Record<FonctionTrig, Record<number, string>> = {
   tan: LATEX_TAN,
 };
 
-export const DOMAINE_LATEX = "\\left[0^\\circ,\\ 360^\\circ\\right[";
+export const DOMAINE_LATEX = "\\left[0^\\circ \\,;\\, 360^\\circ\\right[";
 
 /** Bloc énoncé fixe — `sin α = k` (valeur exacte, signée) — jamais recalculé depuis `Math.sin`/
  * `cos`/`tan`, toujours composé depuis les tables exactes de "Valeurs remarquables". */

@@ -355,3 +355,19 @@ export function avecFinale(lignes: LigneCalcul[], finale: string, justification?
   }
   return [...lignes, ligne(`=${finale}`, justification)];
 }
+
+/** Les deux candidats α₁, α₂ (ou la solution unique), une ligne chacun. */
+export function lignesCandidats(f: "sin" | "cos" | "tan", ref: number, positif: boolean, nom = "\\alpha"): LigneCalcul[] {
+  const pref = prefixesCandidats(f, positif);
+  const quad = quadrantsCandidats(f, positif);
+  const vals = pref.map((p) => valeurCandidatBrute(p, ref));
+  const norm = vals.map((v) => ((v % 360) + 360) % 360);
+  if (norm[0] === norm[1]) {
+    return [ligne(`${nom}=${deg(norm[0]!)}`, `les deux candidats ${vals[0]}° et ${pref[1]!.replace("^\\circ", "°").replace("-", " − ").replace("+", " + ")}${ref}° = ${vals[1]}° donnent le même point du cercle : une seule solution`)];
+  }
+  return pref.map((p, i) =>
+    p === ""
+      ? ligne(`${nom}_${i + 1}=${deg(ref)}`, ref === 0 || ref === 90 ? "point sur un axe" : "l'angle de référence lui-même (quadrant I)")
+      : ligne(`${nom}_${i + 1}=${p}${deg(ref)}=${deg(vals[i]!)}`, ref === 0 || ref === 90 ? "point sur un axe" : quad[i]!),
+  );
+}

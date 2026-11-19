@@ -11,6 +11,9 @@ import { BlocEnonceAnglesAssocies } from "./components/BlocEnonceAnglesAssocies"
 import { Katex } from "./components/Katex";
 import { decimal3Latex } from "./ui/formatAnglesAssocies";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeAnglesAssocies } from "./generateurs/anglesAssocies/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Détermine la valeur demandée à l'aide des angles associés.";
 
@@ -81,6 +84,8 @@ export function AppAnglesAssocies() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: etat.reglages.affichageReponseApresEchec ? <Katex expression={decimal3Latex(exercice.valeurCible)} /> : undefined,
+        // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAnglesAssocies(exercice), "a")} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

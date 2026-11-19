@@ -10,6 +10,9 @@ import { Katex } from "./components/Katex";
 import { formatTermesSolutionsLatex } from "./ui/formatQuelAngle";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeQuelAngle } from "./generateurs/quelAngle/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Résous cette équation trigonométrique.";
 
@@ -86,6 +89,8 @@ export function AppQuelAngle() {
             ))}
           </span>
         ),
+        // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeQuelAngle(exercice), "a")} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

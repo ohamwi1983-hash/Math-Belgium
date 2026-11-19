@@ -6,13 +6,15 @@ import type {
   IdVarianteAnglesAssocies,
   QuadrantAnglesAssocies,
 } from "../../core/anglesAssocies.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { decimal3Latex, formatBlocBaseLatex, formatBlocDemandeLatex, texteAide2, texteAide3Intro } from "../../ui/formatAnglesAssocies";
 import { necessiteAide3 } from "../../moteur/verificationAnglesAssocies";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAnglesAssocies } from "./index";
 import { LIBELLE_CAS_ANGLES_ASSOCIES, profilAnglesAssocies } from "../profilsEvaluation4eCh5";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeAnglesAssocies } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceAnglesAssocies>` pour gen17 (Angles associés,
@@ -235,41 +237,6 @@ function valeurFinaleLatex(instance: ExerciceAnglesAssocies): string {
 }
 
 /** Valeur en l'angle de référence (avant le signe), même règle que la correction historique. */
-function ligneReference(instance: ExerciceAnglesAssocies): string {
-  const { alpha, xReference } = instance;
-  if (instance.variante === "tangente") return `\\tan(${xReference}^\\circ) \\approx ${decimal3Latex(instance.tanAlpha)}`;
-  const f = instance.fonctionCible;
-  const co = necessiteAide3(instance) || instance.quadrant === "I";
-  const cf = cofonction(f);
-  const v = co ? (f === "sin" ? instance.cosAlpha : instance.sinAlpha) : f === "sin" ? instance.sinAlpha : instance.cosAlpha;
-  return co ? `\\${f}(${xReference === alpha ? 90 - alpha : xReference}^\\circ) = \\${cf}(${alpha}^\\circ) \\approx ${decimal3Latex(v)}` : `\\${f}(${xReference}^\\circ) \\approx ${decimal3Latex(v)}`;
-}
-
-function correctionDetaillee(instance: ExerciceAnglesAssocies): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion: "a", fragments: [texte(texteAide2(instance))] }];
-  if (instance.variante === "sinCos" && instance.quadrant !== "I" && necessiteAide3(instance)) {
-    lignes.push({ label: "Méthode", sousQuestion: "a", fragments: [texte(`${texteAide3Intro(instance)} Le sinus de l'un est le cosinus de l'autre.`)] });
-  }
-  if (instance.variante === "sinCos" && instance.quadrant === "I") {
-    lignes.push({ label: "Méthode", sousQuestion: "a", fragments: [texte("Co-fonction : "), latex(`\\${instance.fonctionCible}(90^\\circ - x) = \\${cofonction(instance.fonctionCible)}(x)`)] });
-  }
-  lignes.push({ label: "Calcul", sousQuestion: "a", fragments: [latex(ligneReference(instance))] });
-  const fonction = instance.variante === "sinCos" ? instance.fonctionCible : "tan";
-  const signe = `${SIGNE_LIBELLE[instance.quadrant][fonction]}${fonction === "tan" ? "e" : ""}`;
-  const nom = fonction === "sin" ? "le sinus" : fonction === "cos" ? "le cosinus" : "la tangente";
-  lignes.push({ label: "Conclusion", sousQuestion: "a", fragments: [texte(`${instance.theta}° est dans le quadrant ${instance.quadrant}, où ${nom} est ${signe} : `), latex(valeurFinaleLatex(instance))] });
-  lignes.push({
-    label: "Piège",
-    sousQuestion: "a",
-    fragments: [
-      instance.variante === "sinCos" && (necessiteAide3(instance) || instance.quadrant === "I")
-        ? texte(`Passer par le complémentaire échange sinus et cosinus : on utilise ${fonction === "sin" ? "cos" : "sin"} ${instance.alpha}°, pas ${fonction} ${instance.alpha}°.`)
-        : texte(`Le signe vient du quadrant de ${instance.theta}° : la valeur de ${instance.alpha}° est toujours positive.`),
-    ],
-  });
-  return lignes;
-}
-
 function reponseBreve(instance: ExerciceAnglesAssocies): FragmentConsigne[] {
   return [latex(valeurFinaleLatex(instance))];
 }
@@ -294,8 +261,17 @@ function bareme(instance: ExerciceAnglesAssocies): BaremeExercice {
 }
 
 /** ★ une seule relation (tangente, ou sin/cos sans complémentaire) ; ★★ avec passage au complémentaire. */
-function difficulte(instance: ExerciceAnglesAssocies): 1 | 2 | 3 {
-  return instance.variante === "sinCos" && (necessiteAide3(instance) || instance.quadrant === "I") ? 2 : 1;
+/** Niveau (grille commune) : un écran ; méthode à choisir (relation des angles associés) ; piège
+ * dans les données : sinus et cosinus de α donnés tous les deux quand il faut passer par le
+ * complémentaire (la valeur à prendre est celle de l'autre fonction). Nombres : 0 — les valeurs
+ * approchées sont DONNÉES et recopiées avec un signe, aucun calcul approché (choix de notation). */
+function criteresDifficulte(instance: ExerciceAnglesAssocies): CriteresDifficulte {
+  return {
+    ...etapesDuCorrige(correctionDetailleeAnglesAssocies(instance)),
+    methode: 1,
+    piege: instance.variante === "sinCos" && (necessiteAide3(instance) || instance.quadrant === "I") ? 1 : 0,
+    nombres: 0,
+  };
 }
 
 export const adaptateurEvaluationAnglesAssocies: AdaptateurFeuilleExercices<ExerciceAnglesAssocies> = {
@@ -306,12 +282,11 @@ export const adaptateurEvaluationAnglesAssocies: AdaptateurFeuilleExercices<Exer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteAnglesAssocies),
   construireEnonce: construireEnonceAnglesAssocies,
   construireCorrection: construireCorrectionAnglesAssocies,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeAnglesAssocies,
   bareme,
   enoncePapier,
-  dureeMinutes: 3,
   profilInstance: profilAnglesAssocies,
   libelleCasParticulier: LIBELLE_CAS_ANGLES_ASSOCIES,
   // Pas de `regroupable` (absent = comportement historique, une question complète par instance) —
