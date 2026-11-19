@@ -4,6 +4,9 @@ import type { ExerciceValeurExacte, TermeTrig } from "./core/valeurExacte.types"
 import type { Quadrant } from "./core/cercleTrigonometrique.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceValeurExacte } from "./generateurs/valeurExacte";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeValeurExacte, lettreEcranValeurExacte } from "./generateurs/valeurExacte/corrigeDetaille";
 import { activerAide, demarrer, ecranCourant, ecranSuivant, soumettre, tentativesMaxEcran, type EcranValeurExacte, type EtatValeurExacte } from "./moteur/sessionValeurExacte";
 import { angleAssocie, angleReduit, quadrantDe, signeDe, valeurExpression, valeurFonction } from "./moteur/modeleValeurExacte";
 import {
@@ -196,6 +199,8 @@ export function AppValeurExacte() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
+        // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeValeurExacte(e), lettreEcranValeurExacte(etat.ecran))} />,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
