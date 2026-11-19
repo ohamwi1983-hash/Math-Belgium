@@ -53,6 +53,9 @@ import { formatSolutionEnsembleProduitLatex } from "./ui/formatSolutionEnsembleP
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeSignesProduit, lettreEcranSignesProduit } from "./generateurs/signesProduit/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Résous cette inéquation en étudiant le signe de chacun de ses facteurs.";
 
@@ -400,6 +403,13 @@ export function AppSignesProduit() {
         // attendue avant l'audit gen5) : la même entrée que le récapitulatif, retrouvée par la phase
         // et le facteur de l'écran qui se clôt — jamais une seconde source.
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttendueEcran(etat.phase, enAttente.etatSuivant),
+        // Corrigé détaillé de l'écran (mêmes lignes que le papier), calculé sur l'instance INITIALE
+        // (avant réduction d'un facteur) : la lettre suit la séquence de la session.
+        corrigeDetaille: (
+          <CorrigeDetailleEcran
+            etapes={lignesDeLEtape(correctionDetailleeSignesProduit(etat.exerciceInitial), lettreEcranSignesProduit(etat.exerciceInitial, etat.phase, etat.indexFacteurExercice))}
+          />
+        ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

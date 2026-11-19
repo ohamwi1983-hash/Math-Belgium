@@ -23,6 +23,9 @@ import {
 } from "./generateurs/equationInequationSecondDegre";
 import type { FamilleEquationInequationSecondDegre, VarianteEquationInequationSecondDegre } from "./core/equationInequationSecondDegre.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeEquationInequationSecondDegre, lettrePhaseEquationInequationSecondDegre } from "./generateurs/equationInequationSecondDegre/corrigeDetaille";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifEquationInequationSecondDegre } from "./ui/recapitulatifEquationInequationSecondDegre";
 import { EtapePoserSystemeEquationInequationSecondDegre } from "./components/EtapePoserSystemeEquationInequationSecondDegre";
@@ -256,6 +259,7 @@ export function AppEquationInequationSecondDegre() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttenduePour(exercice, etat.phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationInequationSecondDegre(exercice), lettrePhaseEquationInequationSecondDegre(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

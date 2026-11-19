@@ -24,6 +24,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { ecranClos, nombreSaisi, saisieEnLatex, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeRelationsRacines, lettrePhaseRelationsRacines } from "./generateurs/relationsRacines/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Exploite les relations entre les racines et les coefficients de cette équation.";
 
@@ -117,6 +120,7 @@ export function AppRelationsRacines() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : <Katex expression={recapDerniereReponse(etat)} />,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeRelationsRacines(etat.exerciceCourant), lettrePhaseRelationsRacines(etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

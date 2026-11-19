@@ -3,13 +3,15 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
-import { formatEnonceLatex, formatFormeFactoriseeDepuisRacines, formatMembreGauche } from "../../ui/formatEquation";
+import { formatEnonceLatex } from "../../ui/formatEquation";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeRelationsRacines, equationUnitaireLatex, factorisationLatex } from "./corrigeDetaille";
 import { sommeEtProduitAttendus } from "../../moteur/verificationRelationsRacines";
 import { genererExerciceRelationsRacines } from "./index";
 import { profilRelationsRacines, LIBELLE_CAS_RELATIONS_RACINES } from "../profilsEvaluation4eCh2Ch3";
@@ -31,14 +33,7 @@ function equationLatex(exercice: ExerciceRelationsRacines): string {
   return formatEnonceLatex(exercice.enonce);
 }
 
-function factorisationLatex(exercice: ExerciceRelationsRacines): string {
-  return `${formatFormeFactoriseeDepuisRacines(exercice.enonce, exercice.racines)} = 0`;
-}
 
-function equationUnitaireLatex(exercice: ExerciceRelationsRacines): string {
-  const { s, p } = sommeEtProduitAttendus(exercice);
-  return `${formatMembreGauche({ a: 1, b: -s, c: p })} = 0`;
-}
 
 /** Consignes des trois questions (= des trois écrans) — utilisées telles quelles par l'énoncé
  * papier ET comme étapes du corrigé. */
@@ -68,25 +63,9 @@ function enoncePapier(exercice: ExerciceRelationsRacines): EnoncePapier {
   };
 }
 
-function lignesCorrection(exercice: ExerciceRelationsRacines): EtapeCorrection[] {
-  const { a, b, c } = exercice.enonce;
-  const { s, p } = sommeEtProduitAttendus(exercice);
-  const par = (n: number) => (n < 0 ? `(${n})` : String(n));
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("Relations de Viète : "), latex("S = -\\dfrac{b}{a}"), texte(" et "), latex("P = \\dfrac{c}{a}"), texte(".")] },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(`S = -\\dfrac{${b}}{${par(a)}} = ${s}`), texte(" ; "), latex(`P = \\dfrac{${c}}{${par(a)}} = ${p}`)] },
-    { label: "Piège", sousQuestion: "a", fragments: [texte("Le signe moins de "), latex("S = -\\dfrac{b}{a}"), texte(" : S n'est pas "), latex("\\dfrac{b}{a}"), texte(".")] },
-    { label: "Méthode", sousQuestion: "b", fragments: [texte("Factorisation à partir des racines : "), latex("a(x - x_1)(x - x_2) = 0"), texte(", avec le même coefficient a que l'équation.")] },
-    { label: "Conclusion", sousQuestion: "b", fragments: [latex(factorisationLatex(exercice))] },
-    { label: "Piège", sousQuestion: "b", fragments: [texte(a === 1 ? "Une racine négative donne un facteur avec un signe plus : " : "Oublier le coefficient a devant le produit change l'équation : "), latex(a === 1 ? "x - (-3) = x + 3" : `a = ${a}`), texte(".")] },
-    { label: "Méthode", sousQuestion: "c", fragments: [texte("L'équation de coefficient 1 qui a ces racines est "), latex("x^2 - Sx + P = 0"), texte(", avec S et P de la question a).")] },
-    { label: "Conclusion", sousQuestion: "c", fragments: [latex(equationUnitaireLatex(exercice))] },
-  ];
-}
-
 function construireCorrection(exercice: ExerciceRelationsRacines): BlocCorrection[] {
-  return lignesCorrection(exercice)
-    .filter((l) => l.label !== "Piège")
+  return correctionDetailleeRelationsRacines(exercice)
+    .filter((l) => l.type === "resultat")
     .map((l): BlocCorrection => ({ type: "paragraphe", fragments: [texte(`${l.sousQuestion}) `), ...l.fragments] }));
 }
 
@@ -114,9 +93,10 @@ function bareme(exercice: ExerciceRelationsRacines): BaremeExercice {
   };
 }
 
-/** ★ si a = 1 (S et P se lisent presque directement) ; ★★ sinon. */
-function difficulte(exercice: ExerciceRelationsRacines): 1 | 2 | 3 {
-  return exercice.enonce.a === 1 ? 1 : 2;
+/** Niveau (grille commune) : trois questions, démarche imposée par chacune (méthode 0) ; piège dans
+ * les données : un coefficient a ≠ 1 à garder devant la factorisation. */
+function criteresDifficulte(exercice: ExerciceRelationsRacines): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeRelationsRacines(exercice)), methode: 0, piege: exercice.enonce.a === 1 ? 0 : 1 };
 }
 
 export const adaptateurEvaluationRelationsRacines: AdaptateurFeuilleExercices<ExerciceRelationsRacines> = {
@@ -127,10 +107,9 @@ export const adaptateurEvaluationRelationsRacines: AdaptateurFeuilleExercices<Ex
   genererInstance: genererExerciceRelationsRacines,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee: lignesCorrection,
+  correctionDetaillee: correctionDetailleeRelationsRacines,
   bareme,
   enoncePapier,
-  dureeMinutes: 4,
 };

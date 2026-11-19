@@ -135,6 +135,9 @@ import { libelleCategorie } from "./ui/categorieLabels";
 import { enonceSimplifie, facteurCommun, necessiteSimplification } from "./moteur/simplificationEquation";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeInequationRationnelle, lettrePhaseInequationRationnelle } from "./generateurs/inequationRationnelle/corrigeDetaille";
 import { ecranClos, entreeAjoutee, nombreSaisi, saisieEnLatex, segmentsDepuisHistorique, valeurRecap, type EcranClos } from "./ui/historiqueProgression";
 
 /** `fraction.denominateur`/`.numerateur` sont toujours des P2 pour le type "P2/P2" (seul type utilisé par facteurCommun). */
@@ -759,6 +762,9 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
 
 export function AppInequationRationnelle() {
   const [etat, setEtat] = useState<EtatSessionInequationRationnelle>(sessionInitiale);
+  /** Instance telle que tirée (avant toute réduction du numérateur ou du dénominateur par la session) :
+   * source du corrigé détaillé affiché après une étape ratée — mêmes lettres que le papier. */
+  const [exerciceInitial, setExerciceInitial] = useState(() => etat.exerciceCourant);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionInequationRationnelle`, jamais dans le moteur. Remis à vide à
@@ -801,7 +807,9 @@ export function AppInequationRationnelle() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
-      setEtat(nouvelleSession());
+      const session = nouvelleSession();
+      setEtat(session);
+      setExerciceInitial(session.exerciceCourant);
       setHistorique([]);
       setFicheOuverteIndex(null);
       setNumeroExercice((n) => n + 1);
@@ -816,7 +824,9 @@ export function AppInequationRationnelle() {
     setHistorique([]);
     setFicheOuverteIndex(null);
     setNumeroExercice((n) => n + 1);
-    setEtat(demarrerSessionInequationRationnelle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteInequationRationnelleId)));
+    const session = demarrerSessionInequationRationnelle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteInequationRationnelleId));
+    setEtat(session);
+    setExerciceInitial(session.exerciceCourant);
   }
 
   const recapitulatif = calculerRecapitulatifInequationRationnelle(etat);
@@ -877,6 +887,9 @@ export function AppInequationRationnelle() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePhase(etat),
+        corrigeDetaille: (
+          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeInequationRationnelle(exerciceInitial), lettrePhaseInequationRationnelle(exerciceInitial, etat.phase))} />
+        ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
