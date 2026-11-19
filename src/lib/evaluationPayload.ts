@@ -921,9 +921,9 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   // position : entrée texte simple au même rang.
   'cercle-trigonometrique-triangles': {
     cercle: [
-      { cle: 'réduire puis situer', enonce: "Pour un angle de 430°, détermine son angle réduit dans $[0°\\,;\\,360°[$, son quadrant, l'angle associé du premier quadrant, puis les signes de son sinus, de son cosinus et de sa tangente." },
-      { cle: 'angle négatif', enonce: "Pour un angle de −120°, détermine son angle réduit dans $[0°\\,;\\,360°[$, son quadrant et l'angle associé du premier quadrant, puis les signes de son sinus, de son cosinus et de sa tangente." },
-      { cle: "plus d'un tour", enonce: "Pour un angle de 1000°, détermine son angle réduit dans $[0°\\,;\\,360°[$, son quadrant et l'angle associé du premier quadrant, puis les signes de son sinus, de son cosinus et de sa tangente." },
+      { cle: 'réduire puis situer', enonce: "Pour un angle de 430°, détermine son angle réduit dans $[0°\\,;\\,360°[$, son quadrant, l'angle du premier quadrant, puis les signes de son sinus, de son cosinus et de sa tangente." },
+      { cle: 'angle négatif', enonce: "Pour un angle de −120°, détermine son angle réduit dans $[0°\\,;\\,360°[$, son quadrant et l'angle du premier quadrant, puis les signes de son sinus, de son cosinus et de sa tangente." },
+      { cle: "plus d'un tour", enonce: "Pour un angle de 1000°, détermine son angle réduit dans $[0°\\,;\\,360°[$, son quadrant et l'angle du premier quadrant, puis les signes de son sinus, de son cosinus et de sa tangente." },
     ],
     identite: [
       { cle: 'Formule', enonce: "Énonce l'identité fondamentale $\\cos^2\\theta + \\sin^2\\theta = 1$, valable pour tout angle $\\theta$, et explique comment elle permet de retrouver $\\cos\\theta$ à partir de $\\sin\\theta$ (ou l'inverse)." },
@@ -934,7 +934,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     remarquables: [
       { cle: 'triangle rectangle isocèle', enonce: "À l'aide d'un triangle rectangle isocèle dont les côtés de l'angle droit mesurent 1, démontre que $\\sin 45° = \\cos 45° = \\dfrac{\\sqrt{2}}{2}$, puis déduis-en $\\tan 45°$." },
       { cle: 'demi-triangle équilatéral', enonce: "Sachant que $\\sin 60° = \\dfrac{\\sqrt{3}}{2}$, $\\cos 60° = \\dfrac{1}{2}$ et $\\tan 60° = \\sqrt{3}$, déduis-en les valeurs exactes de $\\sin 30°$, $\\cos 30°$ et $\\tan 30°$, en utilisant le fait que 30° et 60° sont les deux angles aigus d'un même triangle rectangle." },
-      { cle: 'quadrant III', enonce: "Calcule la valeur exacte de $\\cos 210°$ sans calculatrice, en passant par l'angle associé du premier quadrant." },
+      { cle: 'quadrant III', enonce: "Calcule la valeur exacte de $\\cos 210°$ sans calculatrice, en passant par l'angle du premier quadrant." },
       { cle: 'quadrants II et IV', enonce: "Calcule sans calculatrice la valeur exacte de $\\tan 150°$ et de $\\sin 315°$." },
     ],
     associes: [

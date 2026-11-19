@@ -164,12 +164,12 @@ function piege(e: ExerciceValeurExacte): EtapeCorrection {
   // 4. Priorité des opérations, ou rappel du rôle de l'angle associé.
   return e.operateurs.includes("*")
     ? { label: "Piège", sousQuestion: lettreDe(e, "final"), fragments: [texte("Le produit se calcule avant la somme ou la différence.")] }
-    : { label: "Piège", sousQuestion: lettreDe(e, "valeur", 0), fragments: [texte("L'angle associé du premier quadrant donne la valeur remarquable ; le signe vient toujours du quadrant de l'angle de départ.")] };
+    : { label: "Piège", sousQuestion: lettreDe(e, "valeur", 0), fragments: [texte("L'angle du premier quadrant donne la valeur remarquable ; le signe vient toujours du quadrant de l'angle de départ.")] };
 }
 
 function correctionDetaillee(e: ExerciceValeurExacte): EtapeCorrection[] {
   return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("Pour chaque terme : ramener l'angle dans [0° ; 360°[ si nécessaire, repérer le quadrant (qui donne le signe), puis l'angle associé du premier quadrant (qui donne la valeur remarquable). On calcule ensuite l'expression.")] },
+    { label: "Méthode", sousQuestion: "a", fragments: [texte("Pour chaque terme : ramener l'angle dans [0° ; 360°[ si nécessaire, repérer le quadrant (qui donne le signe), puis l'angle du premier quadrant (qui donne la valeur remarquable). On calcule ensuite l'expression.")] },
     ...e.termes.flatMap((_, i) => etapesTerme(e, i)),
     ...etapesFinales(e),
     piege(e),

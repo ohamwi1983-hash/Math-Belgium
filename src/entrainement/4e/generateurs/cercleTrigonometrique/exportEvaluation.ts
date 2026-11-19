@@ -246,7 +246,7 @@ function deg(angle: number): string {
 function consigneGlobale(exercice: ExerciceCercleTrigonometrique): string {
   return estSurAxe(exercice)
     ? "Situe cet angle sur le cercle trigonométrique (angle équivalent entre 0° et 360°, axe sur lequel il se trouve), puis donne la valeur exacte de sin θ, cos θ et tan θ."
-    : "Situe cet angle sur le cercle trigonométrique (angle équivalent entre 0° et 360°, quadrant, angle associé du premier quadrant), puis donne le signe de sin θ, cos θ et tan θ.";
+    : "Situe cet angle sur le cercle trigonométrique (angle équivalent entre 0° et 360°, quadrant, angle du premier quadrant), puis donne le signe de sin θ, cos θ et tan θ.";
 }
 
 function enoncePapier(exercice: ExerciceCercleTrigonometrique): EnoncePapier {

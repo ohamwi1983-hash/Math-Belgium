@@ -176,7 +176,7 @@ export function consigneEcran(e: ExerciceValeurExacte, ecran: EcranValeurExacte)
   if (ecran.type === "placement") {
     return [texte("Dans quel quadrant se trouve l'angle "), latex(angleLatex(angleTravail(t))), texte(" ? Quel est le signe de "), latex(ft), texte(" ?")];
   }
-  return [texte("Quel est l'angle associé du premier quadrant ? Donne ensuite la valeur exacte de "), latex(ft), texte(", avec son signe.")];
+  return [texte("Quel est l'angle du premier quadrant ? Donne ensuite la valeur exacte de "), latex(ft), texte(", avec son signe.")];
 }
 
 /** Rappel « cos 750° = cos 30° » affiché sur les écrans qui suivent une réduction. */
@@ -230,9 +230,9 @@ function formuleAngleAssocie(t: TermeTrig): string {
 
 const NOM_RELATION: Record<QuadrantStrict, string> = {
   I: "est déjà dans le premier quadrant : l'angle associé α est l'angle lui-même",
-  II: "est dans le quadrant II : c'est le supplémentaire de l'angle associé α du premier quadrant, qui vaut",
-  III: "est dans le quadrant III : c'est l'anti-supplémentaire de l'angle associé α du premier quadrant, qui vaut",
-  IV: "est dans le quadrant IV : il donne le même point que −α, l'opposé de l'angle associé α du premier quadrant, qui vaut",
+  II: "est dans le quadrant II : c'est le supplémentaire de l'angle α du premier quadrant, qui vaut",
+  III: "est dans le quadrant III : c'est l'anti-supplémentaire de l'angle α du premier quadrant, qui vaut",
+  IV: "est dans le quadrant IV : il donne le même point que −α, l'opposé de l'angle α du premier quadrant, qui vaut",
 };
 
 export function aidesValeur(t: TermeTrig): FragmentConsigne[][] {
