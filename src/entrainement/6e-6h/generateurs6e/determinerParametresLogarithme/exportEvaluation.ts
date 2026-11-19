@@ -1,11 +1,12 @@
 import type { ExerciceDeterminerParametresLogarithme } from "../../core6e/determinerParametresLogarithme.types";
-import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { CONSIGNE_GENERALE, consigneEcran, descriptionGraphique, formatEquationBLatex, formatFonctionLatex, ordonneeSecondeMarque } from "../../ui6e/formatDeterminerParametresLogarithme";
+import { CONSIGNE_GENERALE, consigneEcran, descriptionGraphique, formatEquationBLatex, formatFonctionLatex } from "../../ui6e/formatDeterminerParametresLogarithme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDeterminerParametresLogarithme } from "./index";
 import { construireSvgParametresLogarithme } from "./svgParametresLogarithme";
+import { correctionDetailleeParametresLog as correctionDetaillee } from "./corrigeDetaille";
 import { profilDeterminerParametresLogarithme, PARAMETRES_LOG } from "../profilsEvaluationLogarithmes";
 
 /**
@@ -43,10 +44,6 @@ function construireCorrection(exercice: ExerciceDeterminerParametresLogarithme):
   ];
 }
 
-/** Nombre en texte courant, avec le vrai signe moins typographique. */
-function nb(n: number): string {
-  return String(n).replace("-", "−");
-}
 
 /** Abscisse de la seconde marque, en LaTeX (e ou e²) — variantes `pointE`/`pointE2` seulement. */
 function abscisseLatex(exercice: ExerciceDeterminerParametresLogarithme): string {
@@ -68,77 +65,6 @@ function reponseBreve(exercice: ExerciceDeterminerParametresLogarithme): Fragmen
   return [latex(`a = ${exercice.a}`), texte(" ; "), latex(`b = ${exercice.b}`), texte(" ; "), latex(formatFonctionLatex(exercice))];
 }
 
-function correctionDetaillee(exercice: ExerciceDeterminerParametresLogarithme): EtapeCorrection[] {
-  const { a, b } = exercice;
-  const etapes: EtapeCorrection[] = [
-    {
-      label: "Lire a",
-      sousQuestion: "a",
-      fragments: [
-        texte("Comme ln(1) = 0, "),
-        latex("f(1) = a + b\\cdot\\ln(1) = a"),
-        texte(`. Le point ${exercice.lettrePoint1} a pour coordonnées `),
-        latex(`(1\\,;\\,${a})`),
-        texte(`, donc a = ${nb(a)}.`),
-      ],
-    },
-  ];
-  if (exercice.variante === "pente") {
-    etapes.push(
-      {
-        label: "Méthode",
-        sousQuestion: "b",
-        fragments: [texte("La pente de la tangente en x = 1 est le nombre dérivé f′(1). Or "), latex("f'(x) = \\dfrac{b}{x}"), texte(", donc "), latex("f'(1) = b"), texte(".")],
-      },
-      {
-        label: "Pente",
-        sousQuestion: "b",
-        fragments: [
-          texte("La tangente passe par "),
-          latex(`(1\\,;\\,${a})`),
-          texte(" et "),
-          latex(`(2\\,;\\,${a + b})`),
-          texte(" : sa pente vaut "),
-          latex(`\\dfrac{${a + b} - (${a})}{2 - 1} = ${b}`),
-          texte("."),
-        ],
-      },
-      { label: "Équation", sousQuestion: "b", fragments: [latex(formatEquationBLatex(exercice)), texte(".")] },
-    );
-  } else {
-    const y = ordonneeSecondeMarque(exercice);
-    const n = lnSecondeMarque(exercice);
-    etapes.push(
-      {
-        label: "Méthode",
-        sousQuestion: "b",
-        fragments: [
-          texte(`Le point ${exercice.lettrePoint2} `),
-          latex(`(${abscisseLatex(exercice)}\\,;\\,${y})`),
-          texte(" est sur la courbe : son ordonnée est l'image de son abscisse, et "),
-          latex(`\\ln(${abscisseLatex(exercice)}) = ${n}`),
-          texte("."),
-        ],
-      },
-      { label: "Équation", sousQuestion: "b", fragments: [latex(formatEquationBLatex(exercice)), texte(".")] },
-      {
-        label: "Piège",
-        fragments: [
-          texte("Au point d'abscisse "),
-          latex(abscisseLatex(exercice)),
-          texte(" on lit "),
-          latex(n === 1 ? "a + b" : "a + 2b"),
-          texte(", pas a : seul le point d'abscisse 1 donne a directement."),
-        ],
-      },
-    );
-  }
-  etapes.push(
-    { label: "Calcul", sousQuestion: "c", fragments: [texte("On isole b : "), latex(`b = ${b}`), texte(".")] },
-    { label: "Conclusion", sousQuestion: "c", fragments: [latex(formatFonctionLatex(exercice)), texte(".")] },
-  );
-  return etapes;
-}
 
 function bareme(exercice: ExerciceDeterminerParametresLogarithme): BaremeExercice {
   const { a, b } = exercice;

@@ -27,6 +27,10 @@ import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ExerciceDeterminerParametresLogarithme } from "./core6e/determinerParametresLogarithme.types";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeParametresLog } from "./generateurs6e/determinerParametresLogarithme/corrigeDetaille";
+import { SEQUENCE_PHASES as SEQUENCE_PHASES_CORRIGE } from "./moteur6e/typesDeterminerParametresLogarithme";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen18` — Paramètres depuis des conditions graphiques : f(x) = a + b·ln(x), a et b lus sur un
@@ -140,9 +144,14 @@ export function App6gen18() {
     (window as unknown as { __debug6gen18?: unknown }).__debug6gen18 = { exercice, phase };
   }
 
+  // Corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier, `corrigeDetaille.ts`),
+  // affiché sous la réponse attendue quand elle est révélée.
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeParametresLog(exercice), lettreEtape(SEQUENCE_PHASES_CORRIGE.indexOf(phase)))} />;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: <ReponseLatex valeurs={formatReponseAttenduePhaseLatex(exercice, phase)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

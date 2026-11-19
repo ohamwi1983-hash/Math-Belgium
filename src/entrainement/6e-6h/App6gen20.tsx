@@ -2,6 +2,9 @@ import { useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceGraphiqueDeriveeLogarithme } from "./generateurs6e/graphiqueDeriveeLogarithme/index";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeGraphiqueDeriveeLog } from "./generateurs6e/graphiqueDeriveeLogarithme/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionGraphiqueDeriveeLogarithme, soumettreReponseDerivee, soumettreReponseSelection } from "./moteur6e/sessionGraphiqueDeriveeLogarithme";
 import { tentativesMaxPhase } from "./moteur6e/typesGraphiqueDeriveeLogarithme";
 import type { EtatSessionGraphiqueDeriveeLogarithme } from "./moteur6e/typesGraphiqueDeriveeLogarithme";
@@ -113,9 +116,14 @@ export function App6gen20() {
   const tentativesMax = tentativesMaxPhase(etat.phase, etat.reglages.tentativesMax);
   const cle = `${numeroExercice}-${etat.phase}`;
 
+  // Corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier, `corrigeDetaille.ts`),
+  // affiché sous la réponse attendue quand elle est révélée.
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeGraphiqueDeriveeLog(exercice), lettreEtape(etat.phase === "selection" ? 0 : 1))} />;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: etat.phase === "derivee" ? <Katex expression={formatDeriveeCorrecteLatex(exercice)} block /> : reponseSelection,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

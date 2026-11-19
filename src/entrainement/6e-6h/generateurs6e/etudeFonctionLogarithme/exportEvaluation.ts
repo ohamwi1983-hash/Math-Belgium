@@ -3,7 +3,6 @@ import type {
   AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
-  EtapeCorrection,
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -13,17 +12,8 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { construireSvgFonction } from "../../../export/svgGraph";
 import {
-  aideAsymptotesNiveau1,
-  aideConcaviteNiveau1,
   aideConcaviteNiveau2,
-  aideCroissanceNiveau1,
   aideCroissanceNiveau2,
-  aideDomaineNiveau1,
-  aideDomaineNiveau2,
-  aideGraphiqueNiveau1,
-  aideLimitesNiveau1,
-  aideLimitesNiveau2,
-  type AideAvecLatex,
   calculerViewBox,
   consigneAsymptotes,
   consigneConcavite,
@@ -38,7 +28,7 @@ import {
   LIBELLE_PHASE_ETUDE_LOG,
 } from "../../ui6e/formatEtudeFonctionLogarithme";
 import type { PhaseEtudeFonctionLogarithme } from "../../moteur6e/typesEtudeFonctionLogarithme";
-import { termeConstanteLatex, trinomeLatex } from "./familles/latex";
+import { correctionDetailleeEtudeFonctionLog as correctionDetailleeEtudeFonctionLogarithme } from "./corrigeDetaille";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeFonctionLogarithme } from "./index";
 import { profilEtudeFonctionLogarithme, LIBELLE_CAS_ETUDE_LOG } from "../profilsEvaluationLogarithmes";
 
@@ -130,47 +120,9 @@ function construireCorrectionEtudeFonctionLogarithme(exercice: ExerciceEtudeFonc
 const PHASES: PhaseEtudeFonctionLogarithme[] = ["domaine", "limites", "asymptotes", "croissance", "concavite", "graphique"];
 const LETTRE_SOUS_QUESTION: Record<PhaseEtudeFonctionLogarithme, string> = { domaine: "a", limites: "b", asymptotes: "c", croissance: "d", concavite: "e", graphique: "f" };
 
-function fragmentsAide(aide: AideAvecLatex): FragmentConsigne[] {
-  return aide.latex === null ? [texte(aide.texte)] : [texte(`${aide.texte} `), latex(aide.latex)];
-}
 
-/** f'(x) de la famille C — (m·ln|u|)' = m·u'/u, u = (x−p)² − q². */
-function deriveeCLatex(exercice: ExerciceEtudeLogC): string {
-  return `f'(x) = \\dfrac{${2 * exercice.m}\\left(x${termeConstanteLatex(-exercice.p)}\\right)}{${trinomeLatex(-2 * exercice.p, exercice.p * exercice.p - exercice.q * exercice.q)}}`;
-}
 
-function aideMethode(exercice: ExerciceEtudeFonctionLogarithme, phase: PhaseEtudeFonctionLogarithme): AideAvecLatex {
-  switch (phase) {
-    case "domaine":
-      return aideDomaineNiveau1(exercice);
-    case "limites":
-      return aideLimitesNiveau1(exercice);
-    case "asymptotes":
-      return aideAsymptotesNiveau1(exercice);
-    case "croissance":
-      return aideCroissanceNiveau1(exercice);
-    case "concavite":
-      return aideConcaviteNiveau1(exercice);
-    case "graphique":
-      return aideGraphiqueNiveau1(exercice);
-  }
-}
 
-/** Calcul intermédiaire (LaTeX) d'un écran, ou `null` s'il n'y en a pas. */
-function calculIntermediaire(exercice: ExerciceEtudeFonctionLogarithme, phase: PhaseEtudeFonctionLogarithme): string | null {
-  switch (phase) {
-    case "domaine":
-      return aideDomaineNiveau2(exercice).latex;
-    case "limites":
-      return aideLimitesNiveau2(exercice).latex;
-    case "croissance":
-      return exercice.famille === "C" ? deriveeCLatex(exercice) : aideCroissanceNiveau2(exercice).latex;
-    case "concavite":
-      return aideConcaviteNiveau2(exercice).latex;
-    default:
-      return null;
-  }
-}
 
 const PIEGE: Record<ExerciceEtudeFonctionLogarithme["famille"], { phase: PhaseEtudeFonctionLogarithme; texte: string; cout: string }> = {
   A: { phase: "limites", texte: "En +∞, ln(x)/x tend vers 0 (croissances comparées) : ne pas conclure à +∞.", cout: "−1" },
@@ -185,33 +137,13 @@ const POIDS: Record<PhaseEtudeFonctionLogarithme, number> = { domaine: 1, limite
 /** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
  * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
 function criteresDifficulte(e: ExerciceEtudeFonctionLogarithme): CriteresDifficulte {
-  // Étude complète en six écrans : le corrigé (pas encore « comme au tableau ») résume en une ligne
-  // les limites (b), la dérivée et son signe (d), la dérivée seconde et son signe (e) — lignes
-  // qu'aurait chacune de ces étapes au tableau.
-  return { ...etapesDuCorrige(correctionDetailleeEtudeFonctionLogarithme(e)), methode: e.famille === "B" ? 1 : 0, piege: 1, lignesMinimales: { b: 10, d: 16, e: 10 } };
+  // Corrigé « comme au tableau » : la charge de chaque étape est mesurée sur ses lignes de calcul
+  // (plus de `lignesMinimales`).
+  return { ...etapesDuCorrige(correctionDetailleeEtudeFonctionLogarithme(e)), methode: e.famille === "B" ? 1 : 0, piege: 1 };
 }
 
 function reponseBreveEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme): FragmentConsigne[] {
   return PHASES.flatMap((phase, i) => [texte(`${i === 0 ? "" : " ; "}${LETTRE_SOUS_QUESTION[phase]}) `), latex(contenuRecapLatex(exercice, phase))]);
-}
-
-function correctionDetailleeEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme): EtapeCorrection[] {
-  const piege = PIEGE[exercice.famille];
-  return PHASES.flatMap((phase) => {
-    const sousQuestion = LETTRE_SOUS_QUESTION[phase];
-    const etapes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion, fragments: fragmentsAide(aideMethode(exercice, phase)) }];
-    const calcul = calculIntermediaire(exercice, phase);
-    if (calcul !== null) etapes.push({ label: "Calcul", sousQuestion, fragments: [latex(calcul)] });
-    if (piege.phase === phase) etapes.push({ label: "Piège", sousQuestion, fragments: [texte(piege.texte)] });
-    etapes.push({
-      label: "Conclusion",
-      sousQuestion,
-      fragments: [latex(contenuRecapLatex(exercice, phase))],
-      // Choix du graphique : les candidats, le bon mis en évidence (comme dans l'ancien corrigé).
-      figureHtml: phase === "graphique" ? construireGrilleSvgCandidats(exercice, exercice.indexCorrect) : undefined,
-    });
-    return etapes;
-  });
 }
 
 function baremeEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme): BaremeExercice {

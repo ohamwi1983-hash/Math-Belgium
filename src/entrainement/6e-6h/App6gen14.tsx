@@ -50,6 +50,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeEquationsExpLog } from "./generateurs6e/equationsExpLog/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /** Mêmes 3 libellés que `OPTIONS` (`components6e/EtapeStatutGEquationsExpLog.tsx`, non exporté) —
  * répliqués ICI pour formater "votre réponse" dans la fiche de consultation. */
@@ -167,9 +170,14 @@ export function App6gen14() {
   const donnees = blocDonnees(exercice);
   const consigne = consigneEcran(exercice, phase);
 
+  // Corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier, `corrigeDetaille.ts`),
+  // affiché sous la réponse attendue quand elle est révélée.
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationsExpLog(exercice), lettreEtape(PHASES_PAR_FAMILLE[exercice.famille].indexOf(phase)))} />;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (

@@ -53,14 +53,14 @@ export const CONSIGNE_GENERALE: FragmentConsigne[] = [
 ];
 
 /** "" / "-" / "2" — jamais un coefficient ±1 littéral devant un corps de formule. */
-function formatCoef(a: number): string {
+export function formatCoef(a: number): string {
   if (a === 1) return "";
   if (a === -1) return "-";
   return `${a}`;
 }
 
 /** Argument "kx" — jamais "1x". */
-function formatArgument(k: number, negatif = false): string {
+export function formatArgument(k: number, negatif = false): string {
   const corps = k === 1 ? "x" : `${k}x`;
   return negatif ? `-${corps}` : corps;
 }
@@ -69,7 +69,7 @@ function formatArgument(k: number, negatif = false): string {
 // Famille A — Parité de combinaisons.
 // ============================================================================
 
-function formatFonctionA(exercice: ExerciceHyperboliquesA): string {
+export function formatFonctionA(exercice: ExerciceHyperboliquesA): string {
   switch (exercice.type) {
     case "shKx":
       return `${formatCoef(exercice.a)}${SH}(${formatArgument(exercice.k)})`;
@@ -156,7 +156,7 @@ function pgcd(a: number, b: number): number {
 }
 
 /** k en LaTeX — entier, ou fraction irréductible signée. */
-function formatKLatex(exercice: ExerciceHyperboliquesB): string {
+export function formatKLatex(exercice: ExerciceHyperboliquesB): string {
   if (exercice.kDen === 1) return `${exercice.kNum}`;
   const signe = exercice.kNum < 0 ? "-" : "";
   return `${signe}\\dfrac{${Math.abs(exercice.kNum)}}{${exercice.kDen}}`;
@@ -181,7 +181,7 @@ function formatRacineSurEntier(n: number, d: number): string {
 
 /** Valeur exacte positive de la racine attendue : √(1+k²) (trouverCh) ou √(k²−1) (trouverSh),
  * k = kNum/kDen ⟹ √(kDen² ± kNum²)/kDen. */
-function formatRacineB(exercice: ExerciceHyperboliquesB): string {
+export function formatRacineB(exercice: ExerciceHyperboliquesB): string {
   const n = exercice.sousType === "trouverCh" ? exercice.kDen * exercice.kDen + exercice.kNum * exercice.kNum : exercice.kNum * exercice.kNum - exercice.kDen * exercice.kDen;
   return formatRacineSurEntier(n, exercice.kDen);
 }

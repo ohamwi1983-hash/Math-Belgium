@@ -67,18 +67,18 @@ function formatBase(base: number, baseEstE: boolean): string {
 }
 
 /** log_base(u) — `\ln(u)` si base=e, `\log_{base}(u)` sinon. */
-function formatLog(u: string, base: number, baseEstE: boolean): string {
+export function formatLog(u: string, base: number, baseEstE: boolean): string {
   return baseEstE ? `\\ln(${u})` : `\\log_{${base}}(${u})`;
 }
 
 /** `x-p` / `x+|p|` / `x` selon le signe de `p` — jamais `x+-3` ni `x-0`. */
-function formatXMoins(p: number): string {
+export function formatXMoins(p: number): string {
   if (p === 0) return "x";
   return p > 0 ? `x-${p}` : `x+${-p}`;
 }
 
 /** `mx+n` affiché (jamais de coefficient ±1 littéral ni de terme nul). */
-function formatAffine(m: number, n: number): string {
+export function formatAffine(m: number, n: number): string {
   return formatSommeTermes([
     { valeur: m, suffixe: "x" },
     { valeur: n, suffixe: "" },
@@ -86,12 +86,12 @@ function formatAffine(m: number, n: number): string {
 }
 
 /** `k·x` affiché — `x` si k=1. */
-function formatKx(k: number): string {
+export function formatKx(k: number): string {
   return k === 1 ? "x" : `${k}x`;
 }
 
 /** Fraction LaTeX `num/den` précédée de son signe : `-\dfrac{3}{…}` plutôt que `\dfrac{-3}{…}`. */
-function fractionSignee(numerateur: number, reste: string, denominateur: string): string {
+export function fractionSignee(numerateur: number, reste: string, denominateur: string): string {
   const abs = Math.abs(numerateur);
   const corps = `\\dfrac{${abs === 1 && reste !== "" ? "" : abs}${reste}}{${denominateur}}`;
   return numerateur < 0 ? `-${corps}` : corps;
@@ -107,14 +107,14 @@ function facteurLnBase(base: number, baseEstE: boolean): string {
 // Famille A
 // ============================================================================
 
-function formatFonctionA(exercice: ExerciceDomaineDeriveeLogA): string {
+export function formatFonctionA(exercice: ExerciceDomaineDeriveeLogA): string {
   const { base, baseEstE } = exercice;
   if (exercice.sousType === "puissance") return formatLog(`${exercice.k}^x`, base, baseEstE);
   if (exercice.sousType === "carre") return formatLog(`x^2+${exercice.c}`, base, baseEstE);
   return formatLog(formatAffine(exercice.m, exercice.n), base, baseEstE);
 }
 
-function argumentA(exercice: ExerciceDomaineDeriveeLogA): { u: string; uPrime: string } {
+export function argumentA(exercice: ExerciceDomaineDeriveeLogA): { u: string; uPrime: string } {
   if (exercice.sousType === "puissance") return { u: `${exercice.k}^x`, uPrime: `\\ln(${exercice.k})\\cdot ${exercice.k}^x` };
   if (exercice.sousType === "carre") return { u: `x^2+${exercice.c}`, uPrime: "2x" };
   return { u: formatAffine(exercice.m, exercice.n), uPrime: `${exercice.m}` };
@@ -149,7 +149,7 @@ function aideANiveau2(phase: "aDomaine" | "aDerivee", exercice: ExerciceDomaineD
 // Famille B
 // ============================================================================
 
-function formatFonctionB(exercice: ExerciceDomaineDeriveeLogB): string {
+export function formatFonctionB(exercice: ExerciceDomaineDeriveeLogB): string {
   if (exercice.sousType === "doubleContrainte") return `\\sqrt{1-${formatLog(formatAffine(exercice.m, exercice.n), exercice.base, false)}}`;
   if (exercice.sousType === "racineInterne") return formatLog("\\sqrt{1-x^2}", exercice.base, false);
   if (exercice.sousType === "quadratique") return formatLog(`x^2-${exercice.k}^2`, exercice.base, false);
@@ -205,7 +205,7 @@ function aideBNiveau2(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineD
 // Famille C
 // ============================================================================
 
-function facteursLatexC(exercice: ExerciceDomaineDeriveeLogC): { u: string; uPrime: string; v: string; vPrime: string } {
+export function facteursLatexC(exercice: ExerciceDomaineDeriveeLogC): { u: string; uPrime: string; v: string; vPrime: string } {
   if (exercice.sousType === "produitLn") return { u: `${exercice.k}x`, uPrime: `${exercice.k}`, v: "\\ln(x)", vPrime: "\\dfrac{1}{x}" };
   if (exercice.sousType === "trigLn") {
     const trig = exercice.trig === "sin" ? "\\sin(x)" : "\\cos(x)";
@@ -294,7 +294,7 @@ function aideCNiveau2(phase: "cDomaine" | "cFacteurs" | "cAssemblage", exercice:
 // Famille D
 // ============================================================================
 
-function nDLatexD(exercice: ExerciceDomaineDeriveeLogD): { n: string; nPrime: string; d: string; dPrime: string } {
+export function nDLatexD(exercice: ExerciceDomaineDeriveeLogD): { n: string; nPrime: string; d: string; dPrime: string } {
   if (exercice.sousType === "sommeLog") {
     const n = exercice.baseEstE ? "x+\\ln(x)" : `x+\\log_{${exercice.base}}(x)`;
     const nPrime = exercice.baseEstE ? "1+\\dfrac{1}{x}" : `1+\\dfrac{1}{x\\ln(${exercice.base})}`;
@@ -349,7 +349,7 @@ function aideDNiveau2(phase: "dDomaine" | "dND" | "dAssemblage", exercice: Exerc
 // Famille E
 // ============================================================================
 
-function formatFonctionEOrigine(exercice: ExerciceDomaineDeriveeLogE): string {
+export function formatFonctionEOrigine(exercice: ExerciceDomaineDeriveeLogE): string {
   switch (exercice.sousType) {
     case "puissanceAbs":
       return "\\ln\\left((e^x-1)^2\\right)";
@@ -366,7 +366,7 @@ function formatFonctionEOrigine(exercice: ExerciceDomaineDeriveeLogE): string {
   }
 }
 
-function formeSimplifieeLatexE(exercice: ExerciceDomaineDeriveeLogE): string {
+export function formeSimplifieeLatexE(exercice: ExerciceDomaineDeriveeLogE): string {
   switch (exercice.sousType) {
     case "puissanceAbs":
       return "2\\ln\\left|e^x-1\\right|";
@@ -486,7 +486,7 @@ function aideENiveau2(phase: "eDomaine" | "eSimplifier" | "eDerivee", exercice: 
 // Famille F
 // ============================================================================
 
-function formatFonctionF(exercice: ExerciceDomaineDeriveeLogF): string {
+export function formatFonctionF(exercice: ExerciceDomaineDeriveeLogF): string {
   switch (exercice.sousType) {
     case "lnSurSin":
       return `\\dfrac{\\ln(${exercice.a}+\\sin(e^x))}{${exercice.a}+\\sin(e^x)}`;
@@ -560,7 +560,7 @@ function coef(a: number): string {
   return a === 1 ? "" : String(a);
 }
 
-function uvLatexG(exercice: ExerciceDomaineDeriveeLogG): UVLatexG {
+export function uvLatexG(exercice: ExerciceDomaineDeriveeLogG): UVLatexG {
   const { a } = exercice;
   switch (exercice.variante) {
     case "xx":
@@ -591,7 +591,7 @@ function puissanceUV(u: string, v: string): string {
   return u === "x" ? `x^{${exposant}}` : `\\left(${u}\\right)^{${exposant}}`;
 }
 
-function formatFonctionG(exercice: ExerciceDomaineDeriveeLogG): string {
+export function formatFonctionG(exercice: ExerciceDomaineDeriveeLogG): string {
   const { a } = exercice;
   switch (exercice.variante) {
     case "xx":
@@ -645,7 +645,7 @@ function fPrimeSurFLatexG(exercice: ExerciceDomaineDeriveeLogG): string {
 
 /** f réécrite sous sa forme la plus simple (une seule puissance pour les 2 variantes « à
  * simplifier », f d'origine pour le produit). */
-function fSimplifieeLatexG(exercice: ExerciceDomaineDeriveeLogG): string {
+export function fSimplifieeLatexG(exercice: ExerciceDomaineDeriveeLogG): string {
   if (exercice.variante === "racineXPuissanceX" || exercice.variante === "xRacineXPuissanceX") return "x^{1+\\frac{x}{2}}";
   return formatFonctionG(exercice);
 }
@@ -708,7 +708,7 @@ export function blocDonnees(exercice: ExerciceDomaineDeriveeLogarithme): string[
 }
 
 /** Partie puissance u^v attendue à l'écran `gIdentifier` (forme réduite, une seule puissance). */
-function formeUVLatexG(exercice: ExerciceDomaineDeriveeLogG): string {
+export function formeUVLatexG(exercice: ExerciceDomaineDeriveeLogG): string {
   const { u, v } = uvLatexG(exercice);
   return puissanceUV(u, v);
 }

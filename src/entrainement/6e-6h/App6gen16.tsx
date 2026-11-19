@@ -42,6 +42,9 @@ import { EtapeDeuxChampsDomaineDeriveeLog } from "./components6e/EtapeDeuxChamps
 import { EtapeDomaineDomaineDeriveeLog } from "./components6e/EtapeDomaineDomaineDeriveeLog";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeDomaineDeriveeLog, phasesDomaineDeriveeLog } from "./generateurs6e/domaineDeriveeLogarithme/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { Katex } from "./components/Katex";
 import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
 import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, etatActuel, labelsDeuxChamps, reponseAttendueLatex } from "./ui6e/formatDomaineDeriveeLogarithme";
@@ -268,9 +271,14 @@ export function App6gen16() {
     return reponse === null ? null : <Katex expression={reponse} />;
   };
 
+  // Corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier, `corrigeDetaille.ts`),
+  // affiché sous la réponse attendue quand elle est révélée.
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDomaineDeriveeLog(exercice), lettreEtape(phasesDomaineDeriveeLog(exercice).indexOf(phase)))} />;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: reponseAttenduePhase(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
