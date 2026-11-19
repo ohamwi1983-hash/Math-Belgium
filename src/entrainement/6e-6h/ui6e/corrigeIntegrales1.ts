@@ -314,9 +314,20 @@ export function lignesCrochet(o: OptionsCrochet): LigneCalcul[] {
   const subA = substituer(o.F, o.aL, v);
   const lignes: LigneCalcul[] = [];
   const debut = o.gauche ?? crochet(o.F, o.aL, o.bL);
-  lignes.push(ligne(`${debut}=${moins(subB, subA)}`, o.justification ?? "F(b) − F(a)"));
   const eB = o.FbL !== undefined ? o.FbL : exact(o.Fb);
   const eA = o.FaL !== undefined ? o.FaL : exact(o.Fa);
+  if (eB !== null && eA !== null && longueurVisible(moins(subB, subA)) > LONGUEUR_MAX_SUBSTITUTION) {
+    // Différence substituée trop longue : F(b), F(a) d'abord, chacun sur sa ligne.
+    lignes.push(...lignesFbFa(o.F, v, o.aL, o.bL, subA, subB, eA, eB));
+    const diff = moins(eB, eA);
+    // Membre de gauche explicite : un « = » seul continuerait la ligne de F(a) (lecture fausse).
+    const membre = debut && !debut.startsWith("=") ? debut : crochet(o.F, o.aL, o.bL);
+    lignes.push(ligne(`${membre}=F(${o.bL})-F(${o.aL})`, o.justification ?? "F(b) − F(a)"));
+    lignes.push(ligne(`=${diff}`, "valeurs calculées ci-dessus"));
+    lignes.push(...lignesFin(o.Fb - o.Fa, diff, "on réduit"));
+    return lignes;
+  }
+  lignes.push(ligne(`${debut}=${moins(subB, subA)}`, o.justification ?? "F(b) − F(a)"));
   let dernier = moins(subB, subA);
   if (eB !== null && eA !== null) {
     const l = moins(eB, eA);
@@ -437,6 +448,31 @@ export function lignesCarrePoly(p: Poly, gauche: string): LigneCalcul[] {
 }
 
 /** « 3\pi », « -\dfrac{2\pi}{3} » : multiple rationnel de π. */
+/** Longueur « visible » approximative d'une formule (commandes et accolades retirées). */
+function longueurVisible(t: string): number {
+  return t.replace(/\\[a-zA-Z]+|[{}^_\s]/g, "").length;
+}
+
+/** Au-delà de cette longueur, « F(b) − F(a) » substitué sur UNE ligne se coupait en plein milieu
+ * sur papier : F(b) et F(a) sont alors calculés chacun sur leur ligne, avant la différence. */
+const LONGUEUR_MAX_SUBSTITUTION = 48;
+
+/** « on remplace x par b » en fragments (formules en KaTeX). */
+function remplace(v: string, valeur: string): FragmentConsigne[] {
+  return [texte("on remplace "), { type: "latex", valeur: v }, texte(" par "), { type: "latex", valeur: valeur }];
+}
+
+/** F(b) et F(a) calculés chacun sur leur ligne (F nommée d'abord), quand la différence substituée
+ * serait trop longue pour une seule ligne. */
+function lignesFbFa(Fl: string, v: string, aL: string, bL: string, subA: string, subB: string, eA: string | null, eB: string | null): LigneCalcul[] {
+  const l: LigneCalcul[] = [ligne(`F(${v})=${Fl}`, "on note F cette primitive")];
+  l.push(ligne(`F(${bL})=${subB}`, remplace(v, bL)));
+  if (eB !== null && eB !== subB) l.push(ligne(`=${eB}`, "on calcule"));
+  l.push(ligne(`F(${aL})=${subA}`, remplace(v, aL)));
+  if (eA !== null && eA !== subA) l.push(ligne(`=${eA}`, "on calcule"));
+  return l;
+}
+
 export function piL(c: Q): string {
   if (qNul(c)) return "0";
   const neg = c.n < 0;
@@ -476,9 +512,18 @@ export function lignesIntegralePoly(o: OptionsIntegralePoly): { lignes: LigneCal
   lignes.push(ligne(`=${fac}${crochet(polyL(P, v), aL, bL)}`, [texte("primitive terme à terme : "), { type: "latex", valeur: "x^n\\to\\dfrac{x^{n+1}}{n+1}" }]));
   const subB = substituer(polyL(P, v), bL, v);
   const subA = substituer(polyL(P, v), aL, v);
-  lignes.push(ligne(`=${enveloppe(moins(subB, subA))}`, "F(b) − F(a)"));
   const vals = moins(qL(Pb), qL(Pa));
-  if (vals !== moins(subB, subA)) lignes.push(ligne(`=${enveloppe(vals)}`, "on calcule F(b) et F(a)"));
+  if (longueurVisible(moins(subB, subA)) > LONGUEUR_MAX_SUBSTITUTION) {
+    // Différence substituée trop longue : F(b), F(a) d'abord, chacun sur sa ligne, puis on reprend
+    // la chaîne avec un membre de gauche explicite.
+    lignes.push(...lignesFbFa(polyL(P, v), v, aL, bL, subA, subB, qL(Pa), qL(Pb)));
+    const membre = o.gauche ? o.gauche : `${fac}${crochet(polyL(P, v), aL, bL)}`;
+    lignes.push(ligne(`${membre}=${enveloppe(`F(${bL})-F(${aL})`)}`, "F(b) − F(a)"));
+    lignes.push(ligne(`=${enveloppe(vals)}`, "valeurs calculées ci-dessus"));
+  } else {
+    lignes.push(ligne(`=${enveloppe(moins(subB, subA))}`, "F(b) − F(a)"));
+    if (vals !== moins(subB, subA)) lignes.push(ligne(`=${enveloppe(vals)}`, "on calcule F(b) et F(a)"));
+  }
   const fin = fac === "\\pi" ? piL(diff) : qL(valeur);
   lignes.push(ligne(`=${fin}`, "on réduit"));
   const num = fac === "\\pi" ? qVal(diff) * Math.PI : qVal(valeur);

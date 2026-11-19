@@ -49,6 +49,9 @@ interface Contenu {
   calcul: LigneCalcul[];
   verification?: EtapeCorrection;
   piege?: string;
+  /** Résultat propre au corrigé quand la réponse de l'écran ne se lit pas seule (signe : chaque
+   * inégalité suivie de son intervalle). Sinon : la réponse de l'écran. */
+  resultat?: FragmentConsigne[];
 }
 
 const poly = (termes: ExerciceAireB["termes"]): Poly => polyDepuisNombres(coefficients(termes));
@@ -141,7 +144,7 @@ function contenuB(e: ExerciceAireB, phase: PhaseCalculAires): Contenu {
     return { utilise: [t("Sans bornes données, la région est limitée par les points où la courbe coupe l'axe des abscisses : on résout "), f("f(x)=0"), t(` ${C4}.`)], calcul: lignesRacines(p, racinesB(e), e.termes) };
   }
   if (phase === "bEcran2") {
-    return { utilise: [t(`Entre deux racines consécutives, f garde un signe constant : on teste une valeur de l'intervalle ${C4}.`)], calcul: [...lignesTest(p, e.r1, e.r2), ligne(`${signeL(pos)}`, [t("sur "), f(`[${e.r1};${e.r2}]`)])] };
+    return { utilise: [t(`Entre deux racines consécutives, f garde un signe constant : on teste une valeur de l'intervalle ${C4}.`)], calcul: [...lignesTest(p, e.r1, e.r2), ligne(`${signeL(pos)}`, [t("sur "), f(`[${e.r1};${e.r2}]`)])], resultat: [f(`${signeL(pos)}\\text{ sur }[${e.r1};${e.r2}]`)] };
   }
   const { lignes } = lignesIntegralePoly({ gauche: "\\text{Aire}", integrande: "f(x)", p, a: q(e.r1), b: q(e.r2), facteur: pos ? "" : "-" });
   return {
@@ -160,6 +163,7 @@ function contenuC(e: ExerciceAireC, phase: PhaseCalculAires): Contenu {
     return {
       utilise: [t(`f change de signe à chaque racine simple : on teste une valeur dans chaque sous-intervalle ${C4}.`)],
       calcul: [...lignesTest(p, e.r1, e.r2), ligne(signeL(e.signeGauche === "positif"), [t("sur "), f(`]${e.r1};${e.r2}[`)]), ...lignesTest(p, e.r2, e.r3), ligne(signeL(e.signeDroit === "positif"), [t("sur "), f(`]${e.r2};${e.r3}[`)])],
+      resultat: [f(`${signeL(e.signeGauche === "positif")}\\text{ sur }]${e.r1};${e.r2}[,\\quad ${signeL(e.signeDroit === "positif")}\\text{ sur }]${e.r2};${e.r3}[`)],
     };
   }
   const i1 = lignesIntegralePoly({ gauche: "I_1", integrande: "f(x)", p, a: q(e.r1), b: q(e.r2) });
@@ -284,7 +288,7 @@ export function correctionDetailleeCalculAires(e: ExerciceCalculAires): EtapeCor
     const c = contenu(e, phase);
     const etapes: EtapeCorrection[] = [utilise(sq, c.utilise), calcul(sq, c.calcul)];
     const derniere = i === phases.length - 1;
-    etapes.push({ ...resultat(sq, [f(formatReponseAttenduePhaseLatex(e, phase).join(",\\quad "))]), ...(derniere ? { figureHtml: figureCalculAiresSvg(e) } : {}) });
+    etapes.push({ ...resultat(sq, c.resultat ?? [f(formatReponseAttenduePhaseLatex(e, phase).join(",\\quad "))]), ...(derniere ? { figureHtml: figureCalculAiresSvg(e) } : {}) });
     if (c.verification) etapes.push({ ...c.verification, sousQuestion: sq });
     if (c.piege) etapes.push(piege(sq, [t(c.piege)]));
     return etapes;
