@@ -173,6 +173,21 @@ export function aidesEcran(e: E, ecran: number): Fragments[] {
       n2 = [t("Ici "), l("\\cos\\theta=0"), t(" : deux angles de "), l(intervalleLatex(e)), t(" conviennent, ceux des deux points du cercle sur l'axe vertical. Regarde si M est en haut ou en bas.")];
     } else if (p === "axe-horizontal") {
       n2 = [t("Ici "), l(`\\cos\\theta=${valeurLatex(cos)}`), t(" : un seul angle de "), l(intervalleLatex(e)), t(` a ce cosinus, celui du point du cercle le plus à ${cos.signe > 0 ? "droite" : "gauche"}.`)];
+    } else if (p === "I") {
+      // Quadrant I : θ = α, donner α reviendrait à donner la réponse.
+      n2 = [
+        t("Deux angles de "),
+        l(intervalleLatex(e)),
+        t(" ont pour cosinus "),
+        l(valeurLatex(cos)),
+        t(` : ${quadrantsCandidats(e)}. M est ${c.vertical} (signe de `),
+        l("\\sin\\theta"),
+        t(") : c'est celui du quadrant I, donc "),
+        l("\\theta=\\alpha"),
+        t(", l'angle aigu dont le cosinus vaut "),
+        l(LATEX_GRANDEUR[cos.grandeur]),
+        t("."),
+      ];
     } else {
       n2 = [
         t("Ici "),

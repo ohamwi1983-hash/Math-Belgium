@@ -46,12 +46,13 @@ export function normaliserSaisieLecture(texte: string): string {
     .replace(/÷/g, "/")
     .replace(/\\pi\b|π/g, "pi")
     .replace(/½/g, "(1/2)");
+  // \sqrt{3}, \sqrt3 d'abord (leurs accolades gêneraient la lecture des fractions)
+  s = s.replace(/\\sqrt\s*\{([^{}]*)\}/g, "sqrt($1)").replace(/\\sqrt\s*([0-9]+)/g, "sqrt($1)");
   // \frac{a}{b}, \dfrac{a}{b}, \tfrac{a}{b} (imbrications simples comprises, de l'intérieur vers l'extérieur)
   for (let i = 0; i < 4; i++) s = s.replace(/\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, "(($1)/($2))");
   // \frac12, \frac{1}2… (arguments d'un seul caractère)
   s = s.replace(/\\[dt]?frac\s*(\{[^{}]*\}|[0-9a-z])\s*(\{[^{}]*\}|[0-9a-z])/g, (_m, a: string, b: string) => `((${a.replace(/[{}]/g, "")})/(${b.replace(/[{}]/g, "")}))`);
-  // \sqrt{3}, \sqrt3, √(…), √3, sqrt3, rac3, racine 3
-  s = s.replace(/\\sqrt\s*\{([^{}]*)\}/g, "sqrt($1)").replace(/\\sqrt\s*([0-9]+)/g, "sqrt($1)");
+  // √(…), √3, sqrt3, rac3, racine 3
   s = s.replace(/√\s*\(/g, "sqrt(").replace(/√\s*([0-9]+)/g, "sqrt($1)");
   s = s.replace(/\b(sqrt|racine|rac)\s*([0-9]+)/gi, "sqrt($2)").replace(/\b(racine|rac)\s*\(/gi, "sqrt(");
   s = s.replace(/[{}]/g, (c) => (c === "{" ? "(" : ")"));
