@@ -4223,3 +4223,23 @@ paths:
   (Δ et racines dans la variable de l'exercice). Fichiers de gen119 : `AppProblemesFraction.tsx`,
   `core/problemesFraction.types.ts`, `ui/formatProblemesFraction.ts`, `generateurs/problemesFraction/`
   (index, corrigeDetaille, profil, exportEvaluation).
+
+- **4e, Chapitre 2** (`equations-inequations-second-degre`), section `signe-trinome` (§ 2) : nouveau
+  générateur **gen120 « Construire une inéquation à partir de sa solution »** (processus 3), carte
+  après gen2. Démarche inverse : S est donné (variante `inequation` : ]r₁ ; r₂[, [r₁ ; r₂] ou
+  l'extérieur, ouvert ou fermé ; variante `equation` : {r₁ ; r₂}, deux entiers ou un entier et une
+  fraction de dénominateur 2 ou 3). Écrans : a) une (in)équation ax² + bx + c ◇ 0 de solution S —
+  **toute réponse juste est acceptée** : la saisie libre « membre ◇ membre » est ramenée à un
+  trinôme (degré 2 exigé) dont on calcule l'ensemble-solution, comparé à S (formes canoniques) ;
+  messages ciblés (complémentaire = intérieur/extérieur confondus, mêmes bornes = crochets, racines
+  opposées = facteur (x + r)) ; b) la même avec un coefficient de x² imposé (± 2, 3 ou 4, multiple
+  du dénominateur) — son signe est tiré à pile ou face, négatif = symbole à retourner ; c) la
+  parabole de racines r₁, r₂ qui passe par P(x₀ ; y₀) → a, b, c (champs, pièges de signe). Les trois
+  écrans sont de VRAIES questions distinctes : elles restent en a) b) c) sur papier
+  (`etapesParQuestion`). Profil : `forme` = « variante:allure:signe du coefficient imposé »
+  (4 formes à 25 %), aucun cas particulier, pas de `calcul`. Niveaux 4–5. Libellés de conception
+  « Tableau de signes (gen2) » (était vide) et « Construire une inéquation à partir de sa solution
+  (gen120) ». Bug corrigé dans le socle commun en écrivant gen120 : `proches(±∞, x)` était vrai
+  (∞ ≤ tol·∞), ce qui cassait les ensembles « extérieur ». Fichiers : `AppConstruireInequation.tsx`,
+  `core/construireInequation.types.ts`, `ui/formatConstruireInequation.ts`,
+  `generateurs/construireInequation/` (index, corrigeDetaille, profil, exportEvaluation).

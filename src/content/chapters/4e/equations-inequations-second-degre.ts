@@ -859,6 +859,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 2. Tableau de signes »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Construire une inéquation à partir de sa solution',
+          generatorId: 'gen120',
+          description: [
+            'La démarche à l’envers : on te donne l’ensemble des solutions, écris une inéquation ' +
+              '(ou une équation) du second degré qui l’a pour solution, puis la même avec un ' +
+              'coefficient de x² imposé, et retrouve une parabole à partir de ses racines et d’un point.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 120. Construire une inéquation à partir de sa solution »',
+        },
       ],
     },
     {

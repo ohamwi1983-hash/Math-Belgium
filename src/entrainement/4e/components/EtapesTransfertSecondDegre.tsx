@@ -6,7 +6,7 @@ import { lireEnsemble, normaliserExpression, saisieEnsembleComplete, type Saisie
 import { ensembleLatex } from "../moteur/algebreTransfertSecondDegre";
 import { etatListeInitiale } from "../ui/listeMorceaux";
 import { BoutonAide } from "./BoutonAide";
-import { RenduFragments } from "./RenduFragments";
+import { RenduFragments, espacesInsecables } from "./RenduFragments";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { ListeMorceauxInput } from "./ListeMorceauxInput";
 import { ListePointsIsolesInput } from "./ListePointsIsolesInput";
@@ -44,7 +44,7 @@ const AIDE_SAISIE: Record<Champ["type"], string> = {
   liste: "Sépare les valeurs par « ; » (par exemple 3 ; −1/2). S'il n'y en a aucune, écris « aucune ».",
   expression: "Écris x² ou x^2 ; la multiplication peut rester implicite (3x, 2(x+1)).",
   equation: "Écris une équation complète, avec « = » (par exemple 2x² − 3x + 1 = 0).",
-  relation: "Écris une relation complète : « = », « < », « > », « <= » (≤) ou « >= » (≥).",
+  relation: "Symboles au clavier : < ou >, <= pour ≤, >= pour ≥ (= pour une équation).",
   ensemble: "",
 };
 
@@ -196,7 +196,7 @@ export function EtapeChampsTransfert({ consigne, champs, tentativesUtilisees, te
         <>
           {types.length > 0 && (
             <p className="field-hint" style={{ fontSize: "0.9em", color: "var(--color-text-muted)", marginTop: 0 }}>
-              {types.map((t) => AIDE_SAISIE[t]).join(" ")}
+              {espacesInsecables(types.map((t) => AIDE_SAISIE[t]).join(" "))}
             </p>
           )}
           <BlocAides {...aides} />

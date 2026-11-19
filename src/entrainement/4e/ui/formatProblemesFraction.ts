@@ -250,7 +250,7 @@ export function ecrans(e: E): EcranTSD[] {
     {
       type: "champs",
       titre: "La condition d'existence",
-      consigne: [texte("Écris les valeurs de x interdites par la condition d'existence (CE) de l'équation "), latex(eq), texte(".")],
+      consigne: [texte("Écris les valeurs de x interdites par la condition d'existence (CE) de l'équation "), latex(`${eq}\\text{.}`)],
       champs: [
         {
           type: "liste",
