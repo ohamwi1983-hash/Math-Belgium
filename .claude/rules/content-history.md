@@ -2204,6 +2204,52 @@ paths:
   produit en croix », réutilisé au § 6) ; 6 nouveaux — `completer-le-carre-widget`,
   `viete-racines-widget`, `parametre-m-widget` (§ 1), `simplification-trou-widget` (§ 4),
   `racine-etrangere-rationnelle-widget` (§ 5), `seuil-ballon-widget` (§ 7).
+  **Second audit, lots A, F et G** (`scratchpad/audit-4e-ch2.md`, décisions de l'utilisateur dans
+  `decisions-4e-ch2.md`) :
+  - **Lot A (cours corrigé).** Un seul décompte partout (kicker, ouverture, intuition, tableau,
+    « cas caché ») : **3 raccourcis** (c = 0 ; b = 0 avec ac < 0 ; carré parfait), **1 cas sans
+    solution visible** (b = 0, ac > 0), le **cas général**, **1 cas caché** ; les lignes du tableau
+    sont préfixées en conséquence. C2 (§ 6 : « le dénominateur peut s'annuler, le quotient n'existe
+    pas »), C3 (§ 3, « système sûr » : la grille montre où CHAQUE facteur a le bon signe ; le signe
+    du seul produit ne suffit que parce que N − 500 et 3000 − N ne sont jamais négatifs ensemble),
+    C4 (« comme dans les pays anglo-saxons »), C5 (Viète : paragraphe « Cas Δ = 0 », b² = 4ac),
+    C6 (« le premier quiz qui les utilise »). Carré parfait reconnu ((a − b)², plus « b² et 4ac »),
+    label « Démonstration — formule du discriminant » (clé de l'énoncé changée avec lui), § 5 aligné
+    sur l'astuce (dénominateur commun d'abord), « t ∈ ]0 ; 4[ », al-Khwārizmī partout (légende de
+    l'atelier et texte visible de `completer-le-carre-widget`), majuscules d'insistance retirées,
+    cartes gen4/gen6/gen67 sans texte interne. Formulaire : racine double, (k√n)² et √(k²n),
+    b = 0 et ac > 0, carré parfait a(x + b/(2a))², x² − Sx + P = 0, signe des racines, ensembles
+    ℝ/∅/ℝ \ {r}/{r}, valeur de CE toujours exclue ; « facteur × facteur = 0 » déplacé dans les
+    raccourcis (groupe « Équation rationnelle » renommé « Fractions et CE »).
+  - **Lot F (cours enrichi).** Figures `curvePlot` : 3 paraboles selon Δ (§ 1, équations du cours),
+    3 paraboles colorées par le signe avec les ensembles ℝ, ∅, ℝ \ {r}, {r} (§ 2), courbe de
+    (x − 1)·x·(x − 3) colorée comme la ligne « produit » (§ 3, sans axe y : l'étiquette « 0 » le
+    chevauchait), courbe à trou de (2x² − 6x)/(x² − x − 6) (§ 4, branches coupées avant de sortir
+    de la fenêtre fixe), figure de l'exemple graphique. Exemples : coefficients irrationnels
+    (décision 3 : x² + 2√2x − 6 = 0, Δ = 32, √32 = 4√2, racines √2 et −3√2 ; puis
+    x² + 6√2x + 18 = 0, Δ = 0, −3√2) avec une astuce ; équation sans solution (3x² + 12 = 0 et
+    x² − 2x + 5 = 0) ; « lire f(x) ≥ k sur la parabole » (−x² + 4x + 1 ≥ 4 → [1 ; 3], lu puis
+    vérifié par Δ, pont avec le ch. 1, fin du § 2). Démonstrations D4 (racine évidente, par la
+    factorisation (x − 1)(ax − c), sans Viète) et D5 (signe du trinôme : grille de
+    (x − x₁)(x − x₂), Δ = 0 par le carré, Δ < 0 par la forme de l'étape 4 du discriminant).
+    Décision 1 : astuce « Racine évidente ou discriminant ? Les deux sont justes » (le cas général
+    2x² − 10x + 8 vérifie a + b + c = 0) et synthèse (`recap`) réécrite avec le décompte commun.
+    Énoncés ajoutés à `ENONCES_DEMONSTRATION` (par clé ; énoncé = ce qu'il faut démontrer).
+    **Piège KaTeX** : dans `]0;1[ \cup ]3;+\infty[`, le `[` est un délimiteur ouvrant, donc ∪ perd
+    ses espaces (« ]0;1[∪]3 ») ; écrire `\left]0;1\right[ \cup \left]3;+\infty\right[`.
+  - **Lot G (3 ateliers).** `methodes-resolution-widget` (§ 1, après l'astuce racine évidente) :
+    a, b, c entiers, 6 cartes de situation (toutes celles qui s'appliquent allumées, la première
+    marquée « méthode la plus rapide »), résolution en valeurs exactes (fractions, k√m, (B ± K√m)/D)
+    et seconde méthode juste (discriminant quand la racine évidente s'applique). `bicarree-widget`
+    (§ 1, après l'exemple bicarré) : parabole en t, zone t < 0 grisée, t rejeté barré, ±√t sur un
+    second axe, S exact. `parabole-droite-widget` (§ 2, après l'exemple graphique) : parabole et
+    droite réglables, symbole, partie de la parabole qui vérifie l'inéquation en vert, S sur l'axe
+    (ronds pleins/vides), trinôme f − g, Δ et S à la belge (« valeurs arrondies » si besoin).
+    Fenêtres fixes, flèches d'axes, `text-align:left` sur l'hôte (le cadre d'atelier centre le
+    texte). Contrôle exhaustif (`scratchpad/lot-4e2-cours/verif-ateliers.cjs`) : 6 250 réglages de
+    l'atelier « 6 situations » (racines exactes réévaluées, situation prioritaire), 525 de la
+    bicarrée, 54 880 de parabole/droite (S comparé à un échantillonnage de f − g) : 0 faux, 0 texte
+    suspect. Calculs du cours refaits par `verif-calculs.mjs` (661 contrôles).
 
 - **4e, Chapitre 1 — La fonction du second degré** (`fonction-second-degre`) : audit puis enrichissement
   validé par l'utilisateur (toutes les recommandations). Corrections : renvoi de l'intuition du ballon

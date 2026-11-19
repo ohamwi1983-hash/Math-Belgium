@@ -3,7 +3,7 @@
 
   /* ================================================================
    * <completer-le-carre-widget> — atelier interactif : la méthode géométrique
-   * d'al-Khwârizmî (IXe siècle) pour résoudre x² + bx = c (b, c > 0). Un carré
+   * d'al-Khwārizmī (IXe siècle) pour résoudre x² + bx = c (b, c > 0). Un carré
    * de côté x, deux rectangles x × b/2 accolés (le « gnomon »), puis le petit
    * carré manquant de côté b/2, d'abord en pointillés, complété au clic. Le
    * grand carré obtenu a pour côté x + b/2 et pour aire c + (b/2)². Les étapes
@@ -11,7 +11,7 @@
    * La figure est à l'échelle : son côté total (x + b/2) est ajusté au cadre.
    * ================================================================ */
 
-  var DEFAUT = { b: 10, c: 39 }; // le problème historique d'al-Khwârizmî : x² + 10x = 39
+  var DEFAUT = { b: 10, c: 39 }; // le problème historique d'al-Khwārizmī : x² + 10x = 39
   var BORNES_B = { min: 1, max: 14, step: 1 };
   var BORNES_C = { min: 1, max: 60, step: 1 };
   var PRESETS = [
@@ -86,7 +86,7 @@
     '</style>' +
     '<p class="formule" id="formule"></p>' +
     '<div class="presets" id="presets"></div>' +
-    '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + TAILLE + ' ' + TAILLE + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Carré complété d’al-Khwârizmî"></svg></div>' +
+    '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + TAILLE + ' ' + TAILLE + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Carré complété d’al-Khwārizmī"></svg></div>' +
     '<div class="actions"><button class="btn" id="completer" type="button" aria-pressed="false">Compléter le carré</button></div>' +
     '<ol class="etapes" id="etapes"></ol>' +
     '<p class="note" id="note"></p>' +
@@ -157,7 +157,7 @@
       var total = c + m2;            // aire du grand carré
       var rac = racineTexte(total);  // côté du grand carré : x + b/2
       var x = rac.r - m;             // racine positive
-      var xNeg = -rac.r - m;         // racine négative (refusée par al-Khwârizmî)
+      var xNeg = -rac.r - m;         // racine négative (refusée par al-Khwārizmī)
       var complete = this._complete;
 
       this._valeurB.textContent = fr(b);
@@ -229,7 +229,7 @@
       });
 
       this._note.textContent = complete
-        ? "Al-Khwârizmî ne gardait que la solution positive : x est la longueur d’un côté. L’équation a aussi une solution négative : x + " +
+        ? "Al-Khwārizmī ne gardait que la solution positive : x est la longueur d’un côté. L’équation a aussi une solution négative : x + " +
           fr(m) + " = −" + rac.valeur + " donne x " + (rac.exacte ? "= " : "≈ ") + fr(xNeg) + "."
         : "Il manque un petit carré dans le coin pour obtenir un grand carré. Appuie sur « Compléter le carré ».";
     }
