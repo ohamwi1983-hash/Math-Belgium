@@ -166,7 +166,7 @@ function etapePoser(sq: string, e: E): EtapeCorrection[] {
     const S = e.systeme.x0 + e.systeme.y0;
     return [
       utilise(sq, [texte(`Substitution : on isole y dans la première équation, puis on le remplace dans la seconde ${COURS_CONTEXTE}.`)]),
-      calcul(sq, [ligne(`y=${S}-x`, "on isole y"), ligne(`x(${S}-x)${symbole(e)}${d(e.k)}`, `on remplace y dans x · y ${symbole(e) === "=" ? "=" : symbole(e)} ${dTexte(e.k)}`), ligne(eq, "on distribue")]),
+      calcul(sq, [ligne(`y=${S}-x`, "on isole y"), ligne(`x(${S}-x)${symbole(e)}${d(e.k)}`, [texte("on remplace y dans "), latex(`x\\cdot y ${symbole(e)} ${d(e.k)}`)]), ligne(eq, "on distribue")]),
       resultat(sq, [latex(eq)]),
     ];
   }

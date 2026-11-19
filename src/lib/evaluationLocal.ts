@@ -14,6 +14,7 @@ import { findChapter } from '../content/chaptersIndex'
 import { encoderCode, genererAvecCode, tirerGraine } from '../entrainement/export/codeExercice'
 import { ENTRAINEMENT_REGISTRY } from '../entrainement/registry'
 import { EVALUATION_ADAPTER_REGISTRY } from './evaluationAdapterRegistry'
+import { groupeVerdict } from '../entrainement/export/groupesVerdict'
 import { chapitreAUneBanqueVraiFauxLocale, chargerThemeVraiFaux } from './banquesVraiFaux'
 import { LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, LEVELSLUG_FONCTIONNEL_6E, type EnTeteEvaluation, type ItemPayload, type LigneSelection, type QuestionOuverte } from './evaluationPayload'
 
@@ -191,6 +192,10 @@ function indexVariante(adaptateur: Adaptateur, varianteId: string): number | nul
 /** Instance reproductible — EXACTEMENT le tirage que fait l'appli interactive à partir du code
  * (`genererAvecCode`), pour que le QR code rouvre le même exercice. */
 export function tirerInstance(adaptateur: Adaptateur, varianteId: string, graine: number): never {
+  // Un plan porte toujours la variante RÉELLE ; un id de groupe « à verdict » n'arrive ici que pour
+  // une sonde (`varianteAdmetCasParticulier`) : membre choisi par la graine, reproductible.
+  const groupe = groupeVerdict(adaptateur, varianteId)
+  if (groupe) varianteId = groupe.variantes[graine % groupe.variantes.length]!
   const varianteIndex = indexVariante(adaptateur, varianteId)
   return genererAvecCode(
     { graine, varianteIndex },
@@ -362,6 +367,16 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
   /** Structure de chaque question de la série A (cas particulier, type de question), reproduite
    * question par question dans les autres séries — mêmes questions, autres nombres. */
   const structureParItem = new Map<number, { varianteId: string; cas: string | null; forme?: string }[]>()
+  /** Groupes « à verdict » (`groupesVerdict`, décision de l'utilisateur) : un paquet mélangé des
+   * variantes membres par (item, groupe), distribué question après question, série A puis B… —
+   * verdicts équilibrés sur l'ensemble des séries et différents d'une série à l'autre ; paquet
+   * re-mélangé quand il est vide. */
+  const paquets = new Map<string, string[]>()
+  const verdictSuivant = (cle: string, membres: string[]): string => {
+    let paquet = paquets.get(cle)
+    if (!paquet || paquet.length === 0) paquets.set(cle, (paquet = melanger([...membres])))
+    return paquet.shift()!
+  }
 
   for (let s = 0; s < nombreSeries; s++) {
     const elements: ElementPlan[] = []
@@ -389,14 +404,22 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
         const indexItem = items.indexOf(item)
         const structureA = structureParItem.get(indexItem)
         // Une question par instance, avec l'indice de son entrée (pour ses réglages).
-        const questions = entrees.flatMap((e, indexEntree) => Array.from({ length: e.nombre }, () => ({ varianteId: e.varianteId, points: e.points, indexEntree, exclus: exclusDe(e) })))
+        const questions = entrees.flatMap((e, indexEntree) =>
+          Array.from({ length: e.nombre }, () => {
+            const groupe = groupeVerdict(adaptateur as Adaptateur, e.varianteId)
+            const varianteId = groupe ? verdictSuivant(`${indexItem}:${groupe.id}`, groupe.variantes) : e.varianteId
+            return { varianteId, points: e.points, indexEntree, exclus: exclusDe(e) }
+          }),
+        )
         let instances: InstancePlan[]
         if (equilibre && structureA && structureA.length === questions.length) {
-          instances = questions.map(({ varianteId, points, exclus }, k) => ({
-            varianteId,
-            points,
-            graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe(structureA[k].cas ?? 'complet', exclus, structureA[k].forme)).graine,
-          }))
+          instances = questions.map(({ varianteId, points, exclus }, k) => {
+            // Groupe « à verdict » : la variante peut différer de la série A — on garde alors le cas
+            // particulier (oui / non) mais pas la forme, propre à la variante.
+            const meme = structureA[k].varianteId === varianteId
+            const cas = meme ? (structureA[k].cas ?? 'complet') : structureA[k].cas ? 'particulier' : 'complet'
+            return { varianteId, points, graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe(cas, exclus, meme ? structureA[k].forme : undefined)).graine }
+          })
         } else {
           instances = questions.map(({ varianteId, points, exclus }) => ({ varianteId, points, graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe('complet', exclus)).graine }))
           // « Inclure un cas particulier » (par variante) : la DERNIÈRE question de CETTE variante qui

@@ -13,8 +13,10 @@
  *
  * Ne sont PAS des cas particuliers (vraies étapes, pas des raccourcis) : une racine rejetée par les
  * conditions d'existence, une racine double obtenue par produit remarquable, une racine
- * irrationnelle, l'absence de symétrie dans une transformation. gen3, gen5 et gen6 n'ont pas de
- * profil : aucun raccourci mesuré (5 000 tirages par variante), et la calculatrice y est sans objet.
+ * irrationnelle, l'absence de symétrie dans une transformation. gen3, gen5, gen6 et gen57 n'ont
+ * aucun raccourci (5 000 tirages par variante) : leur profil ne porte que la `forme` (signature de
+ * difficulté, lot E de l'audit 4e ch. 2) ; la calculatrice de gen57 (familles A) passe par
+ * `calculatriceIndispensable`.
  *
  * Plusieurs caractéristiques à la fois → identifiants joints par « + » (jamais tirés pour la case).
  */
@@ -23,6 +25,10 @@ import type { Exercice } from "../core/generateur.types";
 import type { ExerciceInequation } from "../core/inequation.types";
 import type { ExerciceEquationRationnelle } from "../core/equationRationnelle.types";
 import type { ExerciceRelationsRacines } from "../core/relationsRacines.types";
+import type { ExerciceSimplification } from "../core/simplification.types";
+import type { ExerciceSignesProduit } from "../core/signesProduit.types";
+import type { ExerciceInequationRationnelle } from "../core/inequationRationnelle.types";
+import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import type { ExerciceFonctionReference } from "../core/fonctionsReference.types";
 import type { ExerciceFormeCanoniqueFonctionReference } from "../core/formeCanoniqueFonctionsReference.types";
 import type { ExerciceCaracteristiquesFonction } from "../core/caracteristiquesFonction.types";
@@ -90,6 +96,53 @@ export function profilRelationsRacines(e: ExerciceRelationsRacines): ProfilInsta
   const [x1, x2] = e.racines;
   return {
     casParticulier: cas([x1 !== 0 && x1 === -x2 && "racines-opposees"]),
+  };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Chapitre 2 — profils de FORME (lot E de l'audit 4e ch. 2)
+// ---------------------------------------------------------------------------------------------
+//
+// gen3, gen5, gen6 et gen57 n'ont aucun raccourci (pas de case « cas particulier ») mais leur
+// difficulté varie d'un tirage à l'autre : `forme` est leur SIGNATURE DE DIFFICULTÉ, reproduite par
+// les séries B, C… (même nombre de discriminants à calculer, même type d'inégalité), jamais un
+// verdict (la méthode rapide précise, le nombre de racines, une racine à rejeter ne sont pas dans la
+// forme). Fréquences mesurées sur 5 000 tirages par variante : la plus rare de chaque variante est
+// donnée au-dessus de chaque profil (la recherche de graine fait 20 000 essais en 200 ms).
+
+type AvecCategorie = { categorie: string };
+const estPolynome2 = (p: unknown): p is AvecCategorie => typeof p === "object" && p !== null && "categorie" in p;
+const nombreDelta = (polynomes: unknown[]): number => polynomes.filter((p) => estPolynome2(p) && p.categorie === "cas_general").length;
+
+/** gen3 — simplifier une fraction rationnelle : nombre de trinômes à factoriser par Δ (0, 1 ou 2). */
+export function profilSimplification(e: ExerciceSimplification): ProfilInstance {
+  return { casParticulier: null, forme: `delta-${nombreDelta([e.numerateur, e.denominateur])}` };
+}
+
+/** gen5 — signe d'un produit : nombre de facteurs du second degré à factoriser par Δ, et présence
+ * d'un facteur du premier degré à coefficient négatif (visible dans l'énoncé). */
+export function profilSignesProduit(e: ExerciceSignesProduit): ProfilInstance {
+  const delta = nombreDelta(e.facteurs.map((f) => (f.type === "quadratique_factorisable" ? f.exercice : null)));
+  const negatif = e.facteurs.some((f) => f.type === "lineaire" && f.polynome.k < 0);
+  return { casParticulier: null, forme: `delta-${delta}${negatif ? "|neg" : ""}` };
+}
+
+/** gen6 — inéquation rationnelle : nombre de trinômes à factoriser par Δ et inégalité large ou
+ * stricte (la valeur interdite reste exclue malgré « ≤ »). */
+export function profilInequationRationnelle(e: ExerciceInequationRationnelle): ProfilInstance {
+  const polynomes: unknown[] =
+    e.niveau === "facteurCommun" ? [e.fraction.numerateur, e.fraction.denominateur] : e.niveau === "sansFacteurCommun" ? [e.numerateur, e.denominateur] : "numerateur" in e ? [e.numerateur] : [];
+  const large = e.symbole === "≤" || e.symbole === "≥";
+  return { casParticulier: null, forme: `delta-${nombreDelta(polynomes)}|${large ? "large" : "strict"}` };
+}
+
+/** gen57 — problème du second degré en contexte : pour une inéquation, ensemble cherché entre les
+ * racines ou à l'extérieur, et symbole large ou strict (lus dans l'énoncé) ; la racine rejetée par
+ * le domaine est un verdict, jamais dans la forme. Familles A : calculatrice (`calculatriceIndispensable`). */
+export function profilEquationInequationSecondDegre(e: ExerciceEquationInequationSecondDegre): ProfilInstance {
+  return {
+    casParticulier: null,
+    forme: e.variante === "equation" ? "equation" : `${e.entreRacines ? "entre" : "exterieur"}|${e.large ? "large" : "strict"}`,
   };
 }
 

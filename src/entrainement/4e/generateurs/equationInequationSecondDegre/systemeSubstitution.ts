@@ -26,7 +26,7 @@ import type {
   VarianteEquationInequationSecondDegre,
 } from "../../core/equationInequationSecondDegre.types";
 import { construireOptionsInterpretationEquationInequation, formatQuestionFinaleEquationInequation } from "./interpretation";
-import { construireInequationContexte, solutionDansDomaine } from "./solutionInequation";
+import { construireInequationContexte, entiersDe, solutionDansDomaine } from "./solutionInequation";
 
 export interface ParametresSystemeSubstitution {
   famille: FamilleEquationInequationSecondDegre;
@@ -139,9 +139,19 @@ export function construireDepuisSysteme(p: ParametresSystemeSubstitution, varian
   // Sens « > » (x(S − x) < P donnerait deux intervalles disjoints, hors du format de réponse) ;
   // symbole large ou strict tiré (G14).
   const sens = "gt" as const;
-  const large = Math.random() < 0.5;
-  const solution = solutionDansDomaine(a, racinesCandidates, domaine, sens, large)!;
-  return construireInequationContexte({ famille: p.famille, base, k, voieSysteme: true, systeme, racines: racinesCandidates, sens, large, solution, entiers: p.famille === "sommeProduit" });
+  const entiers = p.famille === "sommeProduit";
+  let large = Math.random() < 0.5;
+  let solution = solutionDansDomaine(a, racinesCandidates, domaine, sens, large)!;
+  // Deux racines entières consécutives avec « > » : aucun entier strictement entre elles — on passe
+  // au symbole large (la réponse ne doit jamais être un ensemble d'entiers vide).
+  if (entiers && !large) {
+    const { min, max } = entiersDe(solution);
+    if (min > max) {
+      large = true;
+      solution = solutionDansDomaine(a, racinesCandidates, domaine, sens, large)!;
+    }
+  }
+  return construireInequationContexte({ famille: p.famille, base, k, voieSysteme: true, systeme, racines: racinesCandidates, sens, large, solution, entiers });
 }
 
 /** Même rôle que `vertexForm.ts::construireAvecParametres`. */

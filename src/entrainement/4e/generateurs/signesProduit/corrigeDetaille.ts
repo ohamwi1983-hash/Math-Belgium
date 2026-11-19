@@ -248,12 +248,10 @@ export function lettresLectureSignesProduit(e: E): string[] {
     .map((ecran, i) => {
       const f = ecran.position >= 0 ? e.facteurs[ecran.position] : null;
       const casGeneral = f?.type === "quadratique_factorisable" && f.exercice.categorie === "cas_general";
-      const lecture =
-        ecran.phase === "methodeFacteur" ||
-        ecran.phase === "signeIrreductible" ||
-        ecran.phase === "reductionFacteur" ||
-        ecran.phase === "factorisationFactorisation" ||
-        (ecran.phase === "factorisationChamp2" && !casGeneral);
+      // Lot E (audit 4e ch. 2) : le choix de la méthode (décision) et la factorisation après Δ
+      // (calcul) comptent comme des étapes ; restent des lectures le signe d'un facteur sans racine
+      // (signe de a), la réduction et les racines lues sur une forme factorisée.
+      const lecture = ecran.phase === "signeIrreductible" || ecran.phase === "reductionFacteur" || (ecran.phase === "factorisationChamp2" && !casGeneral);
       return lecture ? LETTRES[i] : "";
     })
     .filter(Boolean);

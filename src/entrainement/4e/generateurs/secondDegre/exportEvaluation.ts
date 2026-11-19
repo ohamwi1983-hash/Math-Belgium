@@ -207,6 +207,15 @@ function criteresDifficulteSecondDegre(instance: Exercice): CriteresDifficulte {
   return { ...etapesDuCorrige(correctionDetailleeSecondDegre(instance), []), methode: 1, piege };
 }
 
+/** Décision 4 de l'utilisateur (audit 4e ch. 2) : la méthode EST le verdict de la reconnaissance —
+ * choisir « binôme conjugué » ou « aucune solution » dans le panneau d'évaluation donnerait la
+ * réponse. Une seule rangée « Méthode à reconnaître » ; la variante de chaque question est tirée par
+ * `construirePlan`, équilibrée d'une série à l'autre. La mise en évidence généralisée (forme de
+ * l'énoncé visible, pas un verdict) reste une rangée à part. Générateur et feuille : intacts. */
+const GROUPES_VERDICT: { id: string; label: string; variantes: VarianteSecondDegreId[] }[] = [
+  { id: "groupe_methode", label: "Méthode à reconnaître (mise en évidence, binôme conjugué, produit remarquable, cas général ou aucune solution, au hasard)", variantes: ["mise_en_evidence", "binome_conjugue", "produit_remarquable", "cas_general", "aucune_solution"] },
+];
+
 export const adaptateurEvaluationSecondDegre: AdaptateurFeuilleExercices<Exercice> = {
   profilInstance: profilSecondDegre,
   libelleCasParticulier: LIBELLE_CAS_SECOND_DEGRE,
@@ -215,6 +224,7 @@ export const adaptateurEvaluationSecondDegre: AdaptateurFeuilleExercices<Exercic
   nomFichierBase: "second-degre-methode-rapide",
   genererInstance: genererExerciceSecondDegre,
   catalogueVariantes: CATALOGUE_VARIANTES,
+  groupesVerdict: GROUPES_VERDICT,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteSecondDegreId),
   construireEnonce: construireEnonceSecondDegre,
   construireCorrection: construireCorrectionSecondDegre,

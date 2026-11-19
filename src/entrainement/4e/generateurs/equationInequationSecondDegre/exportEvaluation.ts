@@ -25,6 +25,7 @@ import {
 } from "./corrigeDetaille";
 import { croquisEquationInequationSvg } from "../croquisPapierSecondDegre";
 import { CATALOGUE_FAMILLES, CATALOGUE_VARIANTES, PAIRES_VALIDES, construireAvecFamilleId, genererExerciceEquationInequationSecondDegre } from "./index";
+import { profilEquationInequationSecondDegre } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceEquationInequationSecondDegre>` pour gen57
@@ -136,6 +137,7 @@ function baremeEquationInequation(e: ExerciceEquationInequationSecondDegre): Bar
     e.variante === "equation"
       ? { description: [texte("Racine hors du domaine gardée (ou racine valide rejetée)")], cout: "0 pt sur la validation" }
       : { description: [texte("Intervalle des solutions donné sans l'intersecter avec le domaine")], cout: "0 pt sur la validation" },
+    ...(e.variante === "inequation" && e.entiers ? [{ description: [texte("Intervalle donné au lieu de l'ensemble des entiers qu'il contient")], cout: "moitié des points de la validation" }] : []),
     { description: [texte("Seuil oublié en ramenant à 0 (Δ calculé avec c au lieu de c − k)")], cout: "−1, suite notée sans double pénalité" },
     { description: [texte("Valeur de la variable et valeur de la grandeur confondues dans la conclusion")], cout: "0 pt sur la conclusion" },
   ];
@@ -144,11 +146,18 @@ function baremeEquationInequation(e: ExerciceEquationInequationSecondDegre): Bar
     reponseFinale: [texte(phraseConclusion(e))],
     criteres,
     erreursFrequentes: erreurs,
-    reponsesAcceptees: [[texte("Racines obtenues par factorisation plutôt que par le discriminant")], [texte("Ensemble des solutions écrit avec des inégalités (par exemple 7 < x < 19) plutôt qu'en intervalle")]],
+    reponsesAcceptees: [
+      [texte("Racines obtenues par factorisation plutôt que par le discriminant")],
+      [texte(`${e.variante === "equation" ? "Équation" : "Inéquation"} posée sous la forme `), latex(e.variante === "equation" ? "f(x) - k = 0" : "f(x) - k \\;\\Diamond\\; 0"), texte(" (ou multipliée par un nombre non nul, le symbole inversé si ce nombre est négatif)")],
+      e.variante === "inequation" && e.entiers
+        ? [texte("Ensemble des entiers écrit en extension ou « de … à … » (par exemple tous les entiers de 3 à 12)")]
+        : [texte("Ensemble des solutions écrit avec des inégalités (par exemple 7 < x < 19) plutôt qu'en intervalle")],
+    ],
   };
 }
 
 export const adaptateurEvaluationEquationInequationSecondDegre: AdaptateurFeuilleExercices<ExerciceEquationInequationSecondDegre> = {
+  profilInstance: profilEquationInequationSecondDegre,
   calculatriceIndispensable: PAIRES_CALCULATRICE,
   titreDocument: "Équations et inéquations du second degré en contexte — Évaluation",
   nomFichierBase: "equations-inequations-contexte",

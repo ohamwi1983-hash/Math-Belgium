@@ -306,8 +306,8 @@ function etapeSolutions(travail: E, l: string, methode: ChoixMethode | null): Et
     const { a, c } = travail.enonce;
     return [
       utilise(l, [texte(`Un carré n'est jamais négatif ${COURS_RESOUDRE}.`)]),
-      calcul(l, [ligne(`${trinomeLatex(travail)}=0`), ligne(`${mono(a, "x^2")}=${q(-c)}`, c > 0 ? `on soustrait ${q(c)} aux deux membres` : `on ajoute ${q(-c)} aux deux membres`), ligne(`x^2=${q(-c / a)}`, a === 1 ? "x² est déjà isolé" : `on divise par ${q(a)}`), ligne(`${q(-c / a)}<0`, "aucun réel n'a un carré négatif")]),
-      resultat(l, [latex("S=\varnothing")]),
+      calcul(l, [ligne(`${trinomeLatex(travail)}=0`), ligne(`${mono(a, "x^2")}=${q(-c)}`, c > 0 ? [texte("on soustrait "), latex(q(c)), texte(" aux deux membres")] : [texte("on ajoute "), latex(q(-c)), texte(" aux deux membres")]), ligne(`x^2=${q(-c / a)}`, a === 1 ? "x² est déjà isolé" : [texte("on divise par "), latex(q(a))]), ligne(`${q(-c / a)}<0`, "aucun réel n'a un carré négatif")]),
+      resultat(l, [latex("S=\\varnothing")]),
       piege(l, [texte("Ce n'est pas une différence de deux carrés : a et c sont de même signe, "), latex("x^2"), texte(" serait négatif.")]),
     ];
   }

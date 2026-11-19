@@ -74,6 +74,14 @@ export interface CatalogueVarianteEntree {
   label: string;
 }
 
+/** Groupe de variantes « à verdict » (voir `AdaptateurFeuilleExercices.groupesVerdict`). `id` ne doit
+ * être l'id d'aucune variante du catalogue ; `variantes` : ids du catalogue (au moins deux). */
+export interface GroupeVerdict {
+  id: string;
+  label: string;
+  variantes: string[];
+}
+
 /** Une ligne d'une chaîne de calcul « comme au tableau » (`EtapeCorrection.calcul`) : UNE
  * transformation, en LaTeX. Le rendu aligne les lignes sur leur premier signe de relation de niveau 0
  * (« = », « \approx », « < »…) : une ligne qui COMMENCE par « = » continue la ligne précédente (son
@@ -256,6 +264,16 @@ export interface AdaptateurFeuilleExercices<T> {
    * contexte…) ; liste d'ids de variantes : seulement CES variantes (5gen23 : club, population) — la
    * page de conception avertit le professeur s'il choisit « calculatrice interdite ». */
   calculatriceIndispensable?: boolean | string[];
+  /** Variantes « à verdict » regroupées dans le PANNEAU D'ÉVALUATION seulement (décision de
+   * l'utilisateur, audit 4e ch. 2) : quand le nom de la variante dit la réponse (« Δ < 0 », « racine
+   * étrangère », « mise en évidence »), choisir la variante, c'est donner le verdict. Le panneau
+   * d'évaluation montre alors UNE rangée par groupe (clé = `id` du groupe) ; `construirePlan` tire pour
+   * chaque question une variante membre en distribuant un paquet mélangé des membres d'une série à
+   * l'autre (série A q1…qn, puis B…) : verdicts équilibrés et différents d'une série à l'autre. Le
+   * plan, le QR `?code=` et le corrigé portent la variante réelle tirée. La feuille d'exercices et le
+   * `SelecteurVarianteDev` du générateur gardent les variantes séparées. Un verdict n'est jamais mis
+   * dans `ProfilInstance.forme`. Voir `export/groupesVerdict.ts`. */
+  groupesVerdict?: GroupeVerdict[];
   /** `true` ssi ce générateur produit TOUJOURS une seule question par instance, avec une consigne
    * GÉNÉRIQUE (indépendante des valeurs tirées, ex. une constante `CONSIGNE_GENERALE`) — permet à
    * `/admin` de Math-Belgium de regrouper plusieurs instances demandées sous UNE question imprimée

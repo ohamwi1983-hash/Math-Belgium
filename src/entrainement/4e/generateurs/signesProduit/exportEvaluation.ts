@@ -16,6 +16,7 @@ import { formatEnonceSignesProduitLatex } from "../../ui/formatSignesProduit";
 import { formatSolutionEnsembleProduitLatex } from "../../ui/formatSolutionEnsembleProduit";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSignesProduit, type VarianteSignesProduitId } from "./index";
 import { consigneEcranSignesProduit, correctionDetailleeSignesProduit, ecransSignesProduit, lettresLectureSignesProduit } from "./corrigeDetaille";
+import { profilSignesProduit } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceSignesProduit>` pour gen5 (signe d'un produit de
@@ -55,8 +56,9 @@ function reponseBreveSignesProduit(exercice: ExerciceSignesProduit): FragmentCon
 }
 
 /**
- * Niveau (grille commune) : un écran = une étape ; écrans de choix de la méthode et du signe d'un
- * facteur sans racine = lectures. Méthode 1 dès qu'un facteur du second degré est à traiter (choisir
+ * Niveau (grille commune) : un écran = une étape ; signe d’un facteur sans racine, réduction et racines
+ * lues sur une forme factorisée = lectures (le choix de la méthode et la factorisation après Δ sont des
+ * étapes depuis le lot E de l'audit 4e ch. 2). Méthode 1 dès qu'un facteur du second degré est à traiter (choisir
  * la technique de factorisation), 0 avec des facteurs du premier degré seuls. Piège dans les données :
  * racine double (pas de changement de signe) ou facteur du premier degré à coefficient négatif.
  */
@@ -102,6 +104,7 @@ function baremeSignesProduit(exercice: ExerciceSignesProduit): BaremeExercice {
 }
 
 export const adaptateurEvaluationSignesProduit: AdaptateurFeuilleExercices<ExerciceSignesProduit> = {
+  profilInstance: profilSignesProduit,
   titreDocument: "Signe d'un produit de plusieurs facteurs — Évaluation",
   nomFichierBase: "signes-produit",
   genererInstance: genererExerciceSignesProduit,

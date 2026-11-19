@@ -725,7 +725,9 @@ export function lettresLectureInequationRationnelle(e: E): string[] {
   return ecransInequationRationnelle(e)
     .map((phase, i) => {
       const casGeneral = polynomeDeLaPhase(e, phase)?.categorie === "cas_general";
-      const lecture = /Reconnaissance$|^reconnaissance$|Reduction$|^reduction$|Factorisation$|^factorisation$/.test(phase) || (/Champ2$|^champ2$/.test(phase) && !casGeneral);
+      // Lot E (audit 4e ch. 2) : reconnaissance (décision) et factorisation après Δ (calcul) sont des
+      // étapes ; restent des lectures la réduction et les racines lues sur une forme factorisée.
+      const lecture = /Reduction$|^reduction$/.test(phase) || (/Champ2$|^champ2$/.test(phase) && !casGeneral);
       return lecture ? LETTRES[i] : "";
     })
     .filter(Boolean);

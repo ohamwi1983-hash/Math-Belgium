@@ -70,6 +70,7 @@ export const HEURES_SEMAINE_DEFAUT: Record<NiveauCode, string> = { '4e': '5', '5
  * réexporté tel quel, aucun import existant ailleurs à changer. */
 export { LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, CHAPITRE_FONCTIONNEL_SLUG, estChapitreFonctionnel, type ChapitreFonctionnel } from './chapitresFonctionnels'
 import { LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, type ChapitreFonctionnel } from './chapitresFonctionnels'
+import { catalogueAvecGroupes, variantesDe } from '../entrainement/export/groupesVerdict'
 
 const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
   [LEVELSLUG_FONCTIONNEL_6E]: EVALUATION_BASE_URL_6E_6H,
@@ -581,7 +582,7 @@ export function parametresAuChoix(generatorId: IdGenerateurPilote): { id: string
  * quand le professeur choisit « calculatrice interdite »). */
 export function calculatriceIndispensable(generatorId: IdGenerateurPilote, variantesChoisies?: string[]): boolean {
   const valeur = EVALUATION_ADAPTER_REGISTRY[generatorId]?.calculatriceIndispensable
-  if (Array.isArray(valeur)) return (variantesChoisies ?? []).some((v) => valeur.includes(v))
+  if (Array.isArray(valeur)) return (variantesChoisies ?? []).some((v) => varianteExigeCalculatrice(generatorId, v))
   return !!valeur
 }
 
@@ -589,8 +590,10 @@ export function calculatriceIndispensable(generatorId: IdGenerateurPilote, varia
  * forme de liste de variantes). Décision de l'utilisateur : une telle variante est EXCLUE d'une
  * évaluation « calculatrice interdite » (case grisée dans le panneau, retirée des items). */
 export function varianteExigeCalculatrice(generatorId: string, varianteId: string): boolean {
-  const valeur = EVALUATION_ADAPTER_REGISTRY[generatorId]?.calculatriceIndispensable
-  return Array.isArray(valeur) && valeur.includes(varianteId)
+  const adaptateur = EVALUATION_ADAPTER_REGISTRY[generatorId]
+  const valeur = adaptateur?.calculatriceIndispensable
+  // Groupe « à verdict » : exclu seulement si TOUS ses membres exigent la calculatrice.
+  return Array.isArray(valeur) && variantesDe(adaptateur, varianteId).every((v) => valeur.includes(v))
 }
 
 /** Nom lisible d'un générateur (titre de son document, sans « — Évaluation »). */
@@ -625,10 +628,16 @@ export function libelleGenerateurPanneau(section: ChapterSection, generatorId: s
   return base === generatorId ? generatorId : `${base} (${generatorId})`
 }
 
-export function catalogueVariantesExercice(generatorId: IdGenerateurPilote): CatalogueVarianteEntree[] {
+/** Rangées de variantes du panneau. En ÉVALUATION, chaque groupe « à verdict »
+ * (`groupesVerdict` de l'adaptateur) remplace ses membres par UNE rangée (décision de l'utilisateur :
+ * choisir « Δ < 0 », c'est donner le verdict) ; un membre déjà demandé (`clesActives`, plan enregistré
+ * avant le regroupement) reste affiché. Feuille d'exercices : variantes séparées. */
+export function catalogueVariantesExercice(generatorId: IdGenerateurPilote, mode: 'evaluation' | 'exercice' = 'exercice', clesActives: string[] = []): CatalogueVarianteEntree[] {
   const adaptateur = EVALUATION_ADAPTER_REGISTRY[generatorId]
   if (!adaptateur) return []
-  if (adaptateur.catalogueVariantes && adaptateur.catalogueVariantes.length > 0) return adaptateur.catalogueVariantes
+  if (adaptateur.catalogueVariantes && adaptateur.catalogueVariantes.length > 0) {
+    return mode === 'evaluation' ? catalogueAvecGroupes(adaptateur.catalogueVariantes, adaptateur.groupesVerdict, clesActives) : adaptateur.catalogueVariantes
+  }
   return CATALOGUE_VARIANTE_PAR_DEFAUT
 }
 

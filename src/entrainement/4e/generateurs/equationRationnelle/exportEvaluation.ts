@@ -360,6 +360,15 @@ function baremeEquationRationnelle(instance: ExerciceEquationRationnelle): Barem
   };
 }
 
+/** Décision 4 de l'utilisateur (audit 4e ch. 2) : ces trois variantes disent s'il y a une racine à
+ * rejeter (jamais avec un seul dénominateur, toujours avec deux dénominateurs à facteur commun,
+ * parfois avec deux fractions du premier degré) — les choisir dans le panneau d'évaluation, c'est
+ * donner le verdict « racine étrangère ». Une seule rangée ; variante tirée par `construirePlan`. Les
+ * variantes P2/P1 et P1/P2 (forme de l'énoncé visible) restent à part. */
+const GROUPES_VERDICT: { id: string; label: string; variantes: VarianteEquationRationnelleId[] }[] = [
+  { id: "groupe_racine_etrangere", label: "Racine à rejeter ou non, au hasard (un dénominateur, deux dénominateurs, deux fractions du 1er degré)", variantes: ["un_denominateur", "deux_denominateurs", "deux_fractions_lineaires"] },
+];
+
 export const adaptateurEvaluationEquationRationnelle: AdaptateurFeuilleExercices<ExerciceEquationRationnelle> = {
   profilInstance: profilEquationRationnelle,
   libelleCasParticulier: LIBELLE_CAS_EQUATION_RATIONNELLE,
@@ -367,6 +376,7 @@ export const adaptateurEvaluationEquationRationnelle: AdaptateurFeuilleExercices
   nomFichierBase: "equation-rationnelle",
   genererInstance: genererExerciceEquationRationnelle,
   catalogueVariantes: CATALOGUE_VARIANTES,
+  groupesVerdict: GROUPES_VERDICT,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteEquationRationnelleId),
   // Papier : la méthode du dénominateur commun quand elle raccourcit (cours § 5, audit G5) ; l'appli
   // accepte les deux et suit celle de l'élève (même corrigé, `avecDenominateurCommun`).
