@@ -4238,3 +4238,46 @@ paths:
   comme dans le cours). gen10 : option `etiquettesLisibles` du graphe (pas de 1/3 → entiers écrits)
   et « − » typographique sur les axes et dans la légende. Détails et mesures :
   `.claude/rules/feuilles-evaluations.md` (sections « Corrigé détaillé » et gen11).
+
+## 4e, Chapitre 2 — lots B, C et E de l'audit (gen1–6, gen57, gen67)
+
+Décisions de l'utilisateur appliquées (audit 4e ch. 2, fichier de décisions du chantier) :
+
+- **gen1 accepte les deux méthodes** quand une racine évidente existe (cas général non irrationnel,
+  Δ > 0) : bouton « Racine évidente » (1 tentative) ou « Aucune méthode rapide » ; l'écran suivant
+  s'adapte (factorisation « (x − 1)(ax − c) » ou Δ) ; corrigé et récapitulatif suivent la méthode
+  retenue (`methodeRetenue` du moteur, `4e/moteur/methodeSecondDegre.ts`), corrigé papier : racine
+  évidente quand elle existe. **Variante « Aucune solution »** (ajoutée EN FIN de catalogue, indices
+  QR inchangés) : Δ < 0, ou b = 0 avec a et c de même signe (catégorie `irreductible`, écran de
+  factorisation sauté) — un verdict, jamais un cas particulier. Coefficients irrationnels gardés.
+  Second membre factorisé (G10) : « (x + p)² = m(x + p) ».
+- **Groupes « à verdict »** dans le panneau d'évaluation seulement (gen1 méthode, gen2 signe de Δ,
+  gen4 racine à rejeter) : mécanisme générique `groupesVerdict` (voir feuilles-evaluations.md).
+- **gen57, variable entière** (produit d'entiers consécutifs, carré diminué, somme-produit) : réponse
+  = ensemble d'entiers « x ∈ {8 ; 9 ; … ; 30} » (écran « Plus petit entier / Plus grand entier »,
+  corrigé : intervalle puis entiers) ; racines entières consécutives avec « > » → symbole large
+  (jamais d'ensemble vide).
+
+Lot B (tous les générateurs du chapitre) : « − » typographique normalisé dans tous les champs ;
+saisie illisible jamais comptée (`useTentativeLisible`, y compris le Δ de gen1, désormais
+`parse_error` s'il n'est pas un nombre ou un calcul numérique) ; choix fermés à 1 tentative ; aides
+à deux niveaux en KaTeX et messages ciblés (`4e/ui/aidesSecondDegre.ts`) ; figures : gen2 parabole
+avec « ? » par zone jusqu'à validation (écran du signe de a fusionné avec la lecture), gen5 / gen6
+courbe et signes après validation (`CourbeSignes.tsx`, `ValidationEcran.figureApres`).
+
+Lot C : gen2 consigne « Résous l'inéquation. », racine double jamais nulle ; gen4 dénominateur
+commun accepté (chemin du premier degré, `moteur/denominateurCommun.ts`, aussi sur papier), racine
+étrangère variée en sous-variante C, solutions bornées à 20 ; gen5 monôme en tête sans parenthèses,
+« Facteur à étudier » ; gen57 « f(x) − k ◇ 0 » accepté (et multiplié par un nombre non nul, symbole
+inversé si négatif), « Pour quelles valeurs… », sens et symbole large tirés par famille (familles D :
+« > » seulement, l'autre sens donnerait deux intervalles), camions 25–40 L/100 km, domaines élargis
+(énoncés distincts : 24–30 → 38–1 900 par variante) ; gen67 quatre variantes (racines distinctes
+a = ±1, racine double, racine nulle, a ≠ ±1) avec sélecteur, b) papier « À l'aide de a), retrouve
+les racines, puis factorise le membre de gauche » (les racines ne sont plus imprimées), corrigé b)
+qui retrouve les racines à partir de S et P, cas particulier réduit aux racines opposées.
+
+Lot E : profils de forme gen3 / gen5 / gen6 / gen57, lectures revues (méthode et factorisation
+après Δ = étapes), barème gen57 (forme « f(x) − k ◇ 0 », ensemble d'entiers). Bugs trouvés en
+route : « S = ∅ » du cas b = 0 rendu « S=arnothing » (`"\v"` dans une chaîne TS), justification
+« x · y \geq 70 » en texte (gen57), aide « racines du numérateur » pour un produit (gen5),
+`<div>` dans `<p>` (aide niveau 2 de la validation gen57). Mesures : feuilles-evaluations.md.

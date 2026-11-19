@@ -10,6 +10,9 @@ interface Props {
   masquerCourbe?: boolean;
   /** Textes posés au-dessus de l'axe (« ? » avant validation, signes « + » / « − » après). */
   etiquettes?: { x: number; texte: string }[];
+  /** Repère « 0 » à gauche de l'axe (croquis non à l'échelle) — masqué sur l'écran du signe de a,
+   * où il se trouvait à gauche d'une racine négative. */
+  afficherOrigine?: boolean;
 }
 
 /**
@@ -20,7 +23,7 @@ const HAUTEUR = 200;
 const ORIGINE_X = 14;
 const TAILLE_FLECHE = 7;
 
-export function ParabolaSketch({ croquis, couleurs, masquerCourbe = false, etiquettes = [] }: Props) {
+export function ParabolaSketch({ croquis, couleurs, masquerCourbe = false, etiquettes = [], afficherOrigine = true }: Props) {
   const finLigneAxe = croquis.largeur - TAILLE_FLECHE * 1.5;
 
   return (
@@ -35,10 +38,14 @@ export function ParabolaSketch({ croquis, couleurs, masquerCourbe = false, etiqu
         points={`${finLigneAxe},${croquis.axeY - TAILLE_FLECHE} ${finLigneAxe},${croquis.axeY + TAILLE_FLECHE} ${croquis.largeur},${croquis.axeY}`}
         className="parabola-fleche"
       />
-      <line x1={ORIGINE_X} y1={croquis.axeY - 5} x2={ORIGINE_X} y2={croquis.axeY + 5} className="parabola-origine" />
-      <text x={ORIGINE_X} y={croquis.axeY + 18} className="parabola-label-origine" textAnchor="middle">
-        0
-      </text>
+      {afficherOrigine && (
+        <>
+          <line x1={ORIGINE_X} y1={croquis.axeY - 5} x2={ORIGINE_X} y2={croquis.axeY + 5} className="parabola-origine" />
+          <text x={ORIGINE_X} y={croquis.axeY + 18} className="parabola-label-origine" textAnchor="middle">
+            0
+          </text>
+        </>
+      )}
       {masquerCourbe ? null : couleurs ? (
         couleurs.segments.map((segment, index) => (
           <polyline
@@ -64,7 +71,7 @@ export function ParabolaSketch({ croquis, couleurs, masquerCourbe = false, etiqu
             className={"couleur" in p ? `parabola-racine parabola-racine-${p.couleur}` : "parabola-racine"}
           />
           <text x={p.x} y={p.y + 18} className="parabola-label-racine" textAnchor="middle">
-            {p.valeur}
+            {String(p.valeur).replace(/-/g, "\u2212").replace(".", ",")}
           </text>
         </g>
       ))}

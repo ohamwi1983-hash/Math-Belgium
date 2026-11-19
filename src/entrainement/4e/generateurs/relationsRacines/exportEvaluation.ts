@@ -37,20 +37,9 @@ function equationLatex(exercice: ExerciceRelationsRacines): string {
 
 /** Consignes des trois questions (= des trois écrans) — utilisées telles quelles par l'énoncé
  * papier ET comme étapes du corrigé. */
-/** Consignes de l'ÉCRAN (le générateur révèle les racines à l'écran b, voir EtapeFactorisationRacines). */
-function consignes(exercice: ExerciceRelationsRacines): FragmentConsigne[][] {
-  const [x1, x2] = exercice.racines;
-  const racines: FragmentConsigne[] =
-    x1 === x2 ? [texte("Cette équation a une racine double, "), latex(`x_1 = x_2 = ${x1}`)] : [texte("Les racines de cette équation sont "), latex(`x_1 = ${x1}`), texte(" et "), latex(`x_2 = ${x2}`)];
-  return [
-    [texte("Calcule la somme S et le produit P des racines de cette équation, sans calculer les racines elles-mêmes.")],
-    [...racines, texte(". Factorise le membre de gauche à partir de ces racines.")],
-    [texte("Écris l'équation du second degré la plus simple (de coefficient a = 1) qui admet ces mêmes racines.")],
-  ];
-}
-
-/** Consignes PAPIER : b) ne donne plus les racines — elles répondaient à a) (audit P1, 100 % des
- * tirages) ; l'élève les retrouve à partir de S et P. */
+/** Consignes PAPIER (énoncé et titres d'étape du corrigé) : b) ne donne plus les racines — elles
+ * répondaient à a) (audit P1, 100 % des tirages) ; l'élève les retrouve à partir de S et P. L'écran
+ * b) du générateur, lui, révèle les racines (`EtapeFactorisationRacines`). */
 function consignesPapier(): FragmentConsigne[][] {
   return [
     [texte("Calcule la somme S et le produit P des racines de cette équation, sans calculer les racines elles-mêmes.")],
@@ -64,7 +53,7 @@ function enteteFragments(exercice: ExerciceRelationsRacines): FragmentConsigne[]
 }
 
 function construireEnonce(exercice: ExerciceRelationsRacines): SectionExercice {
-  return { enteteFragments: enteteFragments(exercice), questions: consignes(exercice).map((consigne) => ({ consigne })) };
+  return { enteteFragments: enteteFragments(exercice), questions: consignesPapier().map((consigne) => ({ consigne })) };
 }
 
 function enoncePapier(exercice: ExerciceRelationsRacines): EnoncePapier {

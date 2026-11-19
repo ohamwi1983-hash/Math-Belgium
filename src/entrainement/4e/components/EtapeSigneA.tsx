@@ -83,7 +83,7 @@ export function EtapeSigneA({ exercice, tentativesUtilisees, tentativesMax, reca
       </div>
 
       <div className="contenu-conditionnel">
-        <ParabolaSketch croquis={croquis} masquerCourbe={!validation} etiquettes={etiquettes} />
+        <ParabolaSketch croquis={croquis} masquerCourbe={!validation} etiquettes={etiquettes} afficherOrigine={false} />
       </div>
 
       {!validation && (

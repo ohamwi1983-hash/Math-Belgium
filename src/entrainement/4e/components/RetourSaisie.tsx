@@ -60,12 +60,16 @@ export function MessageRetour({ illisible, tentativesUtilisees, tentativesMax, c
   if (tentativesUtilisees === 0) return null;
   return (
     <p className="alert-error" role="alert">
-      {cible && cible.length > 0 && (
-        <>
-          <RenduFragments fragments={cible} />{" "}
-        </>
-      )}
-      Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+      {/* Un seul enfant texte : `.alert-error` est un conteneur flex, chaque fragment y devenait
+       * une colonne (« Relis le signe de | Δ | : … »). */}
+      <span>
+        {cible && cible.length > 0 && (
+          <>
+            <RenduFragments fragments={cible} />{" "}
+          </>
+        )}
+        Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+      </span>
     </p>
   );
 }

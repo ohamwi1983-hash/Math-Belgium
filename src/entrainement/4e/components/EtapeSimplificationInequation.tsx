@@ -82,10 +82,12 @@ export function EtapeSimplificationInequation({
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>
           )}
-          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => saisie.tenter(reponse, diagnostiquer(reponse) !== "parse_error", onValider)}>
+          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => saisie.tenter(reponse, /[<>≤≥]/.test(reponse) && diagnostiquer(reponse) !== "parse_error", onValider)}>
             Valider
           </button>
-          <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={saisie.soumise !== null ? messageCible?.(saisie.soumise) : null} />
+          <MessageRetour
+            texteIllisible="Inéquation non reconnue : écris les deux membres et le symbole (<, >, ≤ ou ≥), en vérifiant les parenthèses et les signes. Cette saisie ne compte pas comme une tentative."
+            illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={saisie.soumise !== null ? messageCible?.(saisie.soumise) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

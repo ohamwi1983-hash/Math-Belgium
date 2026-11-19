@@ -347,7 +347,7 @@ export function aideTexteIntervalleProduit(symbole: string, quotient: boolean): 
   return [
     texte("On garde les colonnes où le signe convient au symbole "),
     latex(symbole === "≤" ? "\\leq" : symbole === "≥" ? "\\geq" : symbole),
-    texte(large ? " ; inégalité large : les racines du numérateur sont solutions" : " ; inégalité stricte : les racines sont exclues"),
+    texte(large ? ` ; inégalité large : les racines ${quotient ? "du numérateur" : "des facteurs"} sont solutions` : " ; inégalité stricte : les racines sont exclues"),
     texte(quotient ? ", une valeur interdite est toujours exclue." : "."),
   ];
 }

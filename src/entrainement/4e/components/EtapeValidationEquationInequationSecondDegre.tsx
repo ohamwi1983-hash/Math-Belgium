@@ -46,9 +46,9 @@ export function EtapeValidationEquationInequationSecondDegre({
         <div className="triangle-quelconque-aide">
           <p>{texteAideValidationNiveau1()}</p>
           {niveauAide >= 2 && (
-            <p>
+            <div>
               <Katex expression={texteAideValidationNiveau2(exercice)} block />
-            </p>
+            </div>
           )}
           {niveauAide >= 3 && <p>{texteAideValidationNiveau3(exercice)}</p>}
         </div>

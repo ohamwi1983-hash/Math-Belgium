@@ -233,7 +233,7 @@ function etapeRacineEvidente(travail: E, l: string): EtapeCorrection[] {
       ligne(`x_1=${r}`),
       ligne(`x_1\cdot x_2=\dfrac{c}{a}=${q(c / a)}`, "produit des racines"),
       ligne(`x_2=${q(x2)}`, r === 1 ? "on divise par x₁ = 1" : "on divise par x₁ = −1"),
-      ligne(`${trinomeLatex(travail)}=${forme}`, [texte("car "), latex(`a(x-x_1)(x-x_2)=(x${r === 1 ? "-1" : "+1"})(ax${r === 1 ? "-" : "+"}c)`)]),
+      ligne(`${trinomeLatex(travail)}=${forme}`, [texte("forme "), latex("a(x-x_1)(x-x_2)"), texte(" avec "), latex(`x_1=${r === 1 ? "1" : "-1"}`), texte(" et "), latex(r === 1 ? "x_2=\\dfrac{c}{a}" : "x_2=-\\dfrac{c}{a}")]),
     ]),
     resultat(l, [latex(`${forme}=0`)]),
   ];
