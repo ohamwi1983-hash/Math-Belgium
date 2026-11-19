@@ -63,7 +63,7 @@ function lignesRacine(nom: string, num: number, den: number, intro: string): Lig
   }
   // Dénominateur irrationnel (variante tan : cos²θ = q²/S) : √(q²/S) = q/√S, puis rendu rationnel.
   lignes.push(ligne(`=\\pm\\dfrac{${radical(num)}}{\\sqrt{${den}}}`, "racine d'un quotient"));
-  lignes.push(ligne(`=\\pm\\dfrac{${radical(num)}\\sqrt{${den}}}{${den}}`, [texte("on multiplie haut et bas par "), latex(`\\sqrt{${den}}`)]));
+  lignes.push(ligne(`=\\pm\\dfrac{${radical(num) === "1" ? "" : radical(num)}\\sqrt{${den}}}{${den}}`, [texte("on multiplie haut et bas par "), latex(`\\sqrt{${den}}`)]));
   return lignes;
 }
 
@@ -132,17 +132,17 @@ function correctionCosSin(e: E): EtapeCorrection[] {
   const cosSigne = e.fonctionConnue === "cos" ? e.signeConnu : e.signeCible;
   const sinL = `${sinSigne < 0 ? "-" : ""}\\dfrac{${sinNum}}{${q}}`;
   const cosL = `${cosSigne < 0 ? "-" : ""}\\dfrac{${cosNum}}{${q}}`;
-  const inverseCos = `${cosSigne < 0 ? "-" : ""}\\dfrac{${q}}{${cosNum}}`;
+  const inverseCos = `${cosSigne < 0 ? "-" : ""}${cosNum === "1" ? `${q}` : `\\dfrac{${q}}{${cosNum}}`}`;
   const signe = sinSigne * cosSigne < 0 ? "-" : "";
   const lignesTan: LigneCalcul[] = [
     ligne(`\\tan\\theta=\\dfrac{\\sin\\theta}{\\cos\\theta}`, "définition de la tangente"),
     ligne(`=${sinL}:${entre(cosL)}`, "on remplace sin θ et cos θ"),
     ligne(`=${sinL}\\cdot ${entre(inverseCos)}`, "diviser par une fraction, c'est multiplier par son inverse"),
-    ligne(`=${signe}\\dfrac{${sinNum}}{${cosNum}}`, `les ${q} se simplifient${sinSigne * cosSigne < 0 ? ", signes contraires" : ""}`),
+    ligne(`=${signe}${cosNum === "1" ? sinNum : `\\dfrac{${sinNum}}{${cosNum}}`}`, `les ${q} se simplifient${sinSigne * cosSigne < 0 ? ", signes contraires" : ""}`),
   ];
   if (e.fonctionConnue === "sin" && rn.m !== 1) {
     // Dénominateur irrationnel k√m : on multiplie haut et bas par √m.
-    lignesTan.push(ligne(`=${signe}\\dfrac{${p}\\sqrt{${rn.m}}}{${rn.k === 1 ? "" : `${rn.k}\\cdot `}${rn.m}}`, [texte("on multiplie haut et bas par "), latex(`\\sqrt{${rn.m}}`)]));
+    lignesTan.push(ligne(`=${signe}\\dfrac{${p === 1 ? "" : p}\\sqrt{${rn.m}}}{${rn.k === 1 ? "" : `${rn.k}\\cdot `}${rn.m}}`, [texte("on multiplie haut et bas par "), latex(`\\sqrt{${rn.m}}`)]));
   }
   etapes.push(
     utilise("c", [texte(`Définition de la tangente ${COURS_CERCLE} : `), latex("\\tan\\theta=\\dfrac{\\sin\\theta}{\\cos\\theta}"), texte(", avec les valeurs exactes de sin θ et cos θ.")]),

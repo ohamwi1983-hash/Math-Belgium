@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import type { ExerciceEquationsTransformer } from "./core/equationsTransformer.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceEquationsTransformer } from "./generateurs/equationsTransformer";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeEquationsTransformer, lettreEcranEquationsTransformer } from "./generateurs/equationsTransformer/corrigeDetaille";
 import { activerAide, demarrer, ecranSuivant, soumettre, TENTATIVES_MAX, type EtatEquationsTransformer } from "./moteur/sessionEquationsTransformer";
 import { ecransDe } from "./moteur/modeleEquationsTransformer";
 import { diagnostiquerBases, diagnostiquerEnsemble, diagnostiquerReference, diagnostiquerSolutions, lireAngle, type Diagnostic } from "./moteur/verificationEquationsTransformer";
@@ -118,6 +121,8 @@ export function AppEquationsTransformer() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
+        // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationsTransformer(e), lettreEcranEquationsTransformer(etat.ecran))} />,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,

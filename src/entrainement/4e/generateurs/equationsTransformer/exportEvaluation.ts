@@ -2,9 +2,9 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -15,23 +15,18 @@ import {
   DOMAINE_LATEX,
   angleLatex,
   baseLatex,
-  calculSolutionsLatex,
-  carreLatex,
   chaineCarreLatex,
-  chaineFacteurLatex,
-  chaineIsolementLatex,
   consigneEcran,
   enonceLatex,
   ensembleLatex,
   fonctionLatex,
-  kAbsLatex,
-  kLatex,
   precisionTexte,
   referenceAffichee,
-  regleSolutions,
 } from "../../ui/formatEquationsTransformer";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceEquationsTransformer } from "./index";
 import { LIBELLE_CAS_EQUATIONS_TRANSFORMER, profilEquationsTransformer } from "./profil";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeEquationsTransformer } from "./corrigeDetaille";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen78 (« Équations trigonométriques à
@@ -64,95 +59,9 @@ function enoncePapier(e: ExerciceEquationsTransformer): EnoncePapier {
   };
 }
 
-function lignesBases(e: ExerciceEquationsTransformer): EtapeCorrection[] {
-  const f = e.forme;
-  if (f.type === "affine") {
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: [texte("On isole "), latex(fonctionLatex(f.membre.fonction)), texte(" : on fait passer le terme constant dans l'autre membre, puis on divise par son coefficient.")] },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(chaineIsolementLatex(f.membre, e.bases[0]!.k))] },
-    ];
-  }
-  if (f.type === "carre") {
-    const nom = fonctionLatex(f.membre.fonction);
-    const lignes: EtapeCorrection[] = f.nue ? [] : [{ label: "Calcul", sousQuestion: "a", fragments: [texte("On isole le carré : "), latex(chaineCarreLatex(e))] }];
-    if (e.bases.length === 0) {
-      lignes.push({ label: "Conclusion", sousQuestion: "a", fragments: [texte("Un carré n'est jamais négatif : "), latex(`${nom.replace("\\alpha", "^2\\alpha")} = ${carreLatex(e)} < 0`), texte(" est impossible. L'équation n'a pas de solution : "), latex("S = \\varnothing"), texte(".")] });
-    } else if (e.bases.length === 1) {
-      lignes.push({ label: "Conclusion", sousQuestion: "a", fragments: [texte("Un seul nombre a pour carré 0 : "), latex(baseLatex(e.bases[0]!)), texte(".")] });
-    } else {
-      lignes.push({ label: "Conclusion", sousQuestion: "a", fragments: [texte("Deux nombres opposés ont ce carré : "), latex(`${nom} = \\sqrt{${carreLatex(e)}} = ${kLatex(e.bases[0]!.k)} \\quad\\text{ou}\\quad ${baseLatex(e.bases[1]!)}`), texte(".")] });
-    }
-    return lignes;
-  }
-  const iAffine = f.nuEnPremier ? 1 : 0;
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("Un produit est nul si et seulement si l'un de ses facteurs est nul.")] },
-    {
-      label: "Calcul",
-      sousQuestion: "a",
-      fragments: [latex(`${fonctionLatex(f.nu)} = 0`), texte(" ou "), latex(chaineFacteurLatex(f.affine, e.bases[iAffine]!.k))],
-    },
-  ];
-}
-
-function lignesBase(e: ExerciceEquationsTransformer, i: number): EtapeCorrection[] {
-  const b = e.bases[i]!;
-  const lRef = lettreDe(e, (x) => x.type === "reference" && x.base === i);
-  const lignes: EtapeCorrection[] = [];
-  if (b.reference === null) {
-    lignes.push({
-      label: "Conclusion",
-      sousQuestion: lRef,
-      fragments: [latex(`\\left|${kLatex(b.k)}\\right| > 1`), texte(` et ${b.fonction} α est toujours compris entre −1 et 1 : `), latex(baseLatex(b)), texte(" n'a pas de solution.")],
-    });
-    return lignes;
-  }
-  const abs = kAbsLatex(b.k);
-  lignes.push(
-    b.k.decimal
-      ? { label: "Calcul", sousQuestion: lRef, fragments: [texte("À la calculatrice (mode degrés) : "), latex(`\\alpha_0 = ${b.fonction === "sin" ? "\\sin" : b.fonction === "cos" ? "\\cos" : "\\tan"}^{-1}\\left(${abs}\\right) \\approx ${angleLatex(referenceAffichee(b))}`)] }
-      : { label: "Calcul", sousQuestion: lRef, fragments: [texte("Valeur remarquable : "), latex(`${b.fonction === "sin" ? "\\sin" : b.fonction === "cos" ? "\\cos" : "\\tan"}\\,${referenceAffichee(b)}^\\circ = ${abs}`), texte(", donc "), latex(`\\alpha_0 = ${angleLatex(referenceAffichee(b))}`), texte(".")] },
-  );
-  const lSol = lettreDe(e, (x) => x.type === "solutions" && x.base === i);
-  lignes.push({ label: "Méthode", sousQuestion: lSol, fragments: regleSolutions(b) });
-  lignes.push({ label: "Calcul", sousQuestion: lSol, fragments: [latex(calculSolutionsLatex(b))] });
-  if (b.solutions.length === 1) lignes.push({ label: "Conclusion", sousQuestion: lSol, fragments: [texte("Les deux candidats coïncident (sur un axe) : une seule solution.")] });
-  return lignes;
-}
-
-function piege(e: ExerciceEquationsTransformer): EtapeCorrection {
-  const f = e.forme;
-  if (f.type === "carre" && e.bases.length === 1) {
-    return { label: "Piège", sousQuestion: "a", fragments: [texte("Ici le carré vaut 0 : une seule équation de base, "), latex(baseLatex(e.bases[0]!)), texte(", dont les solutions sont sur un axe.")] };
-  }
-  if (f.type === "carre") {
-    return e.bases.length === 0
-      ? { label: "Piège", sousQuestion: "a", fragments: [texte("Inutile de chercher un angle : aucun carré n'est négatif, l'équation n'a pas de solution.")] }
-      : { label: "Piège", sousQuestion: "a", fragments: [texte("Ne pas oublier la racine négative : "), latex(`${fonctionLatex(f.membre.fonction).replace("\\alpha", "^2\\alpha")} = k`), texte(" donne "), latex(`${fonctionLatex(f.membre.fonction)} = \\sqrt{k}`), texte(" ou "), latex(`${fonctionLatex(f.membre.fonction)} = -\\sqrt{k}`), texte(" : deux fois plus de solutions.")] };
-  }
-  if (f.type === "produit") {
-    return { label: "Piège", sousQuestion: "a", fragments: [texte("Ne jamais diviser les deux membres par "), latex(fonctionLatex(f.nu)), texte(" : on perdrait les solutions de "), latex(`${fonctionLatex(f.nu)} = 0`), texte(".")] };
-  }
-  const b = e.bases[0]!;
-  if (b.reference === null) return { label: "Piège", sousQuestion: lettreDe(e, (x) => x.type === "reference"), fragments: [texte("Une fois "), latex(fonctionLatex(b.fonction)), texte(" isolé, vérifier que |k| ≤ 1 avant de chercher un angle.")] };
-  if (b.k.decimal) return { label: "Piège", sousQuestion: lettreDe(e, (x) => x.type === "solutions"), fragments: [texte(`La touche ${b.fonction}⁻¹ de la calculatrice ne donne qu'un angle : la seconde solution se trouve par symétrie sur le cercle.`)] };
-  return { label: "Piège", sousQuestion: "a", fragments: [texte("Isoler complètement "), latex(fonctionLatex(b.fonction)), texte(" (diviser par son coefficient) avant de chercher l'angle : l'angle de référence se lit sur |k|, pas sur le second membre de départ.")] };
-}
-
-function correctionDetaillee(e: ExerciceEquationsTransformer): EtapeCorrection[] {
-  const lignes = [...lignesBases(e), ...e.bases.flatMap((_, i) => lignesBase(e, i))];
-  if (e.bases.length >= 2) {
-    lignes.push({ label: "Conclusion", sousQuestion: lettreDe(e, (x) => x.type === "ensemble"), fragments: [texte("On réunit les solutions des équations de base : "), latex(ensembleLatex(e.solutions)), texte(".")] });
-  } else if (e.bases.length === 1) {
-    lignes.push({ label: "Conclusion", sousQuestion: LETTRES[ecransDe(e).length - 1]!, fragments: [latex(ensembleLatex(e.solutions))] });
-  }
-  lignes.push(piege(e));
-  return lignes;
-}
-
 function construireCorrection(e: ExerciceEquationsTransformer): BlocCorrection[] {
-  return correctionDetaillee(e)
-    .filter((l) => l.label === "Calcul" || l.label === "Conclusion")
+  return correctionDetailleeEquationsTransformer(e)
+    .filter((l) => l.type === "resultat")
     .map((l) => ({ type: "paragraphe", fragments: [texte(`${l.sousQuestion}) `), ...l.fragments] }));
 }
 
@@ -197,11 +106,23 @@ function bareme(e: ExerciceEquationsTransformer): BaremeExercice {
   };
 }
 
-/** ★ pas de solution du tout ; ★★ une équation de base ; ★★★ deux équations de base avec solutions. */
-function difficulte(e: ExerciceEquationsTransformer): 1 | 2 | 3 {
-  if (e.solutions.length === 0) return 1;
-  const avecSolutions = e.bases.filter((b) => b.solutions.length > 0 && !estSurAxe(b.fonction, b.k)).length;
-  return avecSolutions >= 2 ? 3 : 2;
+/** Niveau (grille commune) : aucun écran de lecture ; méthode imposée pour la forme affine (isoler),
+ * à choisir pour un carré (± racine) ou un produit (produit nul) ; piège dans les données : aucune
+ * solution (|k| > 1, carré négatif), valeur sur un axe (solution unique ou sur les axes) ou k
+ * négatif (quadrants à changer). Ne comptent pas : la racine négative d'un carré (toujours là : c'est
+ * la méthode) et le facteur nu f(α) = 0 d'un produit (toujours sur un axe). Nombres : calculatrice
+ * (profil) détectée par le module. */
+function criteresDifficulte(e: ExerciceEquationsTransformer): CriteresDifficulte {
+  const f = e.forme;
+  const piege =
+    f.type === "carre"
+      ? e.bases.length === 0 || e.bases.some((b) => estSurAxe(b.fonction, b.k))
+      : (f.type === "produit" ? [e.bases[f.nuEnPremier ? 1 : 0]!] : e.bases).some((b) => b.reference === null || estSurAxe(b.fonction, b.k) || b.k.signe === -1);
+  return {
+    ...etapesDuCorrige(correctionDetailleeEquationsTransformer(e)),
+    methode: e.forme.type === "affine" ? 0 : 1,
+    piege: piege ? 1 : 0,
+  };
 }
 
 export const adaptateurEvaluationEquationsTransformer: AdaptateurFeuilleExercices<ExerciceEquationsTransformer> = {
@@ -214,10 +135,9 @@ export const adaptateurEvaluationEquationsTransformer: AdaptateurFeuilleExercice
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeEquationsTransformer,
   bareme,
   enoncePapier,
-  dureeMinutes: 5,
 };

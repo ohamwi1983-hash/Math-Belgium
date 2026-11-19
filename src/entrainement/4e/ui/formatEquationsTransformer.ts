@@ -1,7 +1,7 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import { latex, texte } from "../../export/corrigeTableau";
 import type { EcranEquationsTransformer, EquationBase, ExerciceEquationsTransformer, FonctionTrig, MembreAffine, ValeurK } from "../core/equationsTransformer.types";
-import { candidats, ecransDe } from "../moteur/modeleEquationsTransformer";
+import { ecransDe } from "../moteur/modeleEquationsTransformer";
 
 /**
  * Textes de gen78 (« Équations trigonométriques à transformer ») — écran ET papier : une seule
@@ -306,35 +306,4 @@ export function chaineCarreLatex(e: ExerciceEquationsTransformer): string {
 /** Facteur affine du produit égalé à 0, isolé : « 2\cos\alpha - 1 = 0 \iff \cos\alpha = \frac{1}{2} ». */
 export function chaineFacteurLatex(m: MembreAffine, k: ValeurK): string {
   return chaineIsolementLatex(m, k);
-}
-
-/** Expression de chaque candidat en fonction de α₀ (même ordre que `candidats`). */
-function expressionsCandidats(b: EquationBase): [string, string] {
-  const positif = b.k.signe >= 0;
-  switch (b.fonction) {
-    case "sin":
-      return positif ? ["", "180^\\circ - "] : ["180^\\circ + ", "360^\\circ - "];
-    case "cos":
-      return positif ? ["", "360^\\circ - "] : ["180^\\circ - ", "180^\\circ + "];
-    case "tan":
-      return positif ? ["", "180^\\circ + "] : ["180^\\circ - ", "360^\\circ - "];
-  }
-}
-
-/** Calcul des solutions d'une base : « \alpha = 30^\circ \text{ ou } \alpha = 180^\circ - 30^\circ = 150^\circ ». */
-export function calculSolutionsLatex(b: EquationBase): string {
-  const ref = angleLatex(referenceAffichee(b));
-  const egal = b.k.decimal ? "\\approx" : "=";
-  const exprs = expressionsCandidats(b);
-  const arrondi = (x: number) => {
-    const r = b.k.decimal ? Math.round(x * 10) / 10 : Math.round(x);
-    return r >= 360 ? 0 : r;
-  };
-  const valeurs = candidats(b.fonction, b.reference ?? 0, b.k.signe >= 0).map(arrondi);
-  if (valeurs[0] === valeurs[1]) {
-    return `\\alpha ${egal} ${angleLatex(valeurs[0]!)}`;
-  }
-  return exprs
-    .map((prefixe, i) => (prefixe === "" ? `\\alpha ${egal} ${ref}` : `\\alpha = ${prefixe}${ref} ${egal} ${angleLatex(valeurs[i]!)}`))
-    .join(" \\quad\\text{ou}\\quad ");
 }
