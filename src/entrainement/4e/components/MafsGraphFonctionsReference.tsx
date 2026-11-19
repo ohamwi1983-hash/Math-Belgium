@@ -11,7 +11,7 @@ import {
   calculerViewBoxFonctionReference,
   evaluerPourGraphe,
 } from "../ui/mafsFonctionsReference";
-import { EPAISSEUR_TRAIT_ACCENTUE, EPAISSEUR_TRAIT_DISCRETE } from "../ui/mafsTransformation";
+import { EPAISSEUR_TRAIT_ACCENTUE, EPAISSEUR_TRAIT_DISCRETE, formatEtiquetteGrilleTypo } from "../ui/mafsTransformation";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { formatFractionIrreductible } from "../ui/formatFraction";
 import { FenetreVisibleXY, GrilleAdaptative, PointCroix } from "./mafsGraphPartage";
@@ -104,7 +104,8 @@ const LARGEUR_MAX = 480;
  * (croix, `u=1`) n'est pas concerné — `1/x` y est bien définie, inchangé pour cette famille.
  */
 function formatLabelPoint(x: number, y: number): string {
-  return `(${formatFractionIrreductible(x)} ; ${formatFractionIrreductible(y)})`;
+  // Vrai signe « − » (jamais le tiret « - »), comme les nombres de graduation.
+  return `(${formatFractionIrreductible(x)} ; ${formatFractionIrreductible(y)})`.replace(/-/g, "−");
 }
 
 /** Point caractéristique — cercle plein pour les 5 familles où il appartient réellement à la
@@ -152,7 +153,10 @@ export function MafsGraphFonctionsReference({ cible, live }: Props) {
         pan={true}
         zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}
       >
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} />
+        {/* Nombres écrits espacés et à écriture finie (pas de 1/3 : entiers seulement), jamais rognés ;
+            grille complète, les valeurs à lire restent sur ses lignes ; signe « − ». Avant : « 0,3333333333 »,
+            « 0,6666666666 »… superposés dès que CH/CV = 3 donnait un pas de 1/3. */}
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} etiquettesLisibles formatEtiquette={formatEtiquetteGrilleTypo} />
         <FenetreVisibleXY largeur={largeur} hauteur={hauteur}>
           {(visible, visibleY) =>
             calculerSegmentsVisibles(cible, visible, visibleY).map((segment, index) => (

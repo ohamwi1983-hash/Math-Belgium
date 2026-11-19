@@ -7,7 +7,7 @@ import { tirerEntier, tirerEntierNonNul, tirerParmi } from "../aleatoire";
  * granulaires `construireFamilleG1` à `construireFamilleG4`).
  *
  * **Construction "à l'envers"** pour les 4 sous-types : on choisit d'ABORD les coefficients de la
- * décomposition (A, B, C — ou h, m pour le sous-type 4), puis on RECOMBINE algébriquement pour
+ * décomposition (A, B, D — ou h, m pour le sous-type 4), puis on RECOMBINE algébriquement pour
  * obtenir le numérateur de la fraction de départ — garantit des coefficients de décomposition
  * EXACTS et simples par construction, jamais une division/résolution de système approchée.
  */
@@ -54,8 +54,9 @@ export function construireFamilleG2(): ExerciceFamilleG2 {
 // Sous-type 3 — dénominateur mixte x·(x²+1).
 // ============================================================================
 
-/** f(x) = [(A+B)x²+Cx+A] / (x(x²+1)) — décomposition A/x + (Bx+C)/(x²+1) par construction
- * (numérateur = A(x²+1) + (Bx+C)x). */
+/** f(x) = [(A+B)x²+Dx+A] / (x(x²+1)) — décomposition A/x + (Bx+D)/(x²+1) par construction
+ * (numérateur = A(x²+1) + (Bx+D)x). Le troisième coefficient s'appelle D, jamais C : C est la
+ * constante d'intégration (cours, écrans, corrigé). */
 export function construireFamilleG3(): ExerciceFamilleG3 {
   let A = 0;
   let B = 0;
@@ -63,13 +64,13 @@ export function construireFamilleG3(): ExerciceFamilleG3 {
     A = tirerEntierNonNul(-3, 3);
     B = tirerEntierNonNul(-3, 3);
   } while (A + B === 0);
-  const C = tirerEntierNonNul(-3, 3);
+  const D = tirerEntierNonNul(-3, 3);
 
-  const integrandeReference = (x: number) => ((A + B) * x * x + C * x + A) / (x * (x * x + 1));
-  const decompositionReference = (vars: Record<string, number>) => vars.a / vars.x + (vars.b * vars.x + vars.c) / (vars.x * vars.x + 1);
-  const primitiveReference = (x: number) => A * Math.log(Math.abs(x)) + (B / 2) * Math.log(x * x + 1) + C * Math.atan(x);
+  const integrandeReference = (x: number) => ((A + B) * x * x + D * x + A) / (x * (x * x + 1));
+  const decompositionReference = (vars: Record<string, number>) => vars.a / vars.x + (vars.b * vars.x + vars.d) / (vars.x * vars.x + 1);
+  const primitiveReference = (x: number) => A * Math.log(Math.abs(x)) + (B / 2) * Math.log(x * x + 1) + D * Math.atan(x);
 
-  return { famille: "G", sousType: "3", A, B, C, decompositionReference, primitiveReference, integrandeReference };
+  return { famille: "G", sousType: "3", A, B, D, decompositionReference, primitiveReference, integrandeReference };
 }
 
 // ============================================================================

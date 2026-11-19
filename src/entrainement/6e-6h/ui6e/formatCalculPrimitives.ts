@@ -1034,7 +1034,7 @@ export function denominateurG1(exercice: Extract<ExerciceFamilleG, { sousType: "
   return polynomeLatex([1, -(r1 + r2), r1 * r2]);
 }
 export function numerateurG3(exercice: Extract<ExerciceFamilleG, { sousType: "3" }>): string {
-  return polynomeLatex([exercice.A + exercice.B, exercice.C, exercice.A]);
+  return polynomeLatex([exercice.A + exercice.B, exercice.D, exercice.A]);
 }
 export function denominateurG4(exercice: Extract<ExerciceFamilleG, { sousType: "4" }>): string {
   return polynomeLatex([1, exercice.p, exercice.q]);
@@ -1055,7 +1055,7 @@ export function decompositionPoseeG(exercice: ExerciceFamilleG): string {
     case "2":
       return `\\dfrac{A}{${xPlus(-exercice.r)}}`;
     case "3":
-      return "\\dfrac{A}{x}+\\dfrac{Bx+C}{x^2+1}";
+      return "\\dfrac{A}{x}+\\dfrac{Bx+D}{x^2+1}";
     case "4":
       return `${fractionSignee(exercice.gamma, "(x+h)^2+m^2")}`;
   }
@@ -1068,10 +1068,10 @@ export function decompositionNumeriqueG(exercice: ExerciceFamilleG): string {
     case "2":
       return `${xPlus(exercice.d)}${exercice.e < 0 ? "" : "+"}${fractionSignee(exercice.e, xPlus(-exercice.r))}`;
     case "3": {
-      const { A, B, C } = exercice;
+      const { A, B, D } = exercice;
       return `${fractionSignee(A, "x")}+\\dfrac{${sommeLatex([
         { num: B, corps: "x" },
-        { num: C, corps: "" },
+        { num: D, corps: "" },
       ])}}{x^2+1}`;
     }
     case "4":
@@ -1097,11 +1097,11 @@ export function primitiveLatexG(exercice: ExerciceFamilleG): string {
       ]);
     }
     case "3": {
-      const { A, B, C } = exercice;
+      const { A, B, D } = exercice;
       return sommeLatex([
         { num: A, corps: "\\ln|x|" },
         { num: B, den: 2, corps: "\\ln(x^2+1)" },
-        { num: C, corps: "\\arctan(x)" },
+        { num: D, corps: "\\arctan(x)" },
       ]);
     }
     case "4": {
@@ -1128,6 +1128,10 @@ export function integrandeLatexG(exercice: ExerciceFamilleG): string {
   }
 }
 
+/** Coefficients indéterminés de la décomposition posée, par sous-type (G3 : A, B, D — C est la
+ * constante d'intégration, comme dans le cours). */
+const COEFFICIENTS_G: Record<"1" | "2" | "3", string> = { "1": "A, B", "2": "A", "3": "A, B, D" };
+
 export function consigneGeneraleG(): FragmentConsigne[] {
   return [texte("Calcule une primitive F de la fonction f définie ci-dessous, par décomposition en éléments simples.")];
 }
@@ -1139,7 +1143,7 @@ export function consigneEcranG(exercice: ExerciceFamilleG, phase: PhaseCalculPri
   if (phase === "gEcran2") {
     if (exercice.sousType === "4")
       return [texte("Complète le carré au dénominateur, puis pose la décomposition sous la forme "), latex("\\dfrac{\\gamma}{(x+h)^2+m^2}"), texte(" (h et m à déterminer).")];
-    return [texte("Factorise le dénominateur et pose la décomposition en éléments simples, avec des coefficients indéterminés (A, B, C).")];
+    return [texte(`Factorise le dénominateur et pose la décomposition en éléments simples, avec des coefficients indéterminés (${COEFFICIENTS_G[exercice.sousType]}).`)];
   }
   if (phase === "gEcran3") return [texte("Détermine la valeur de chaque coefficient indéterminé.")];
   return [texte("Intègre chaque terme de la décomposition trouvée.")];
@@ -1159,7 +1163,7 @@ export function champsG(exercice: ExerciceFamilleG, phase: PhaseCalculPrimitives
   if (phase === "gEcran3") {
     if (exercice.sousType === "1") return [{ label: "A =", placeholder: "ex : 7" }, { label: "B =", placeholder: "ex : −9" }];
     if (exercice.sousType === "2") return [{ label: "A =", placeholder: "ex : 7" }];
-    if (exercice.sousType === "3") return [{ label: "A =", placeholder: "ex : 7" }, { label: "B =", placeholder: "ex : −9" }, { label: "C =", placeholder: "ex : 8" }];
+    if (exercice.sousType === "3") return [{ label: "A =", placeholder: "ex : 7" }, { label: "B =", placeholder: "ex : −9" }, { label: "D =", placeholder: "ex : 8" }];
     return [{ label: "h =", placeholder: "ex : 7" }, { label: "m =", placeholder: "ex : 9" }];
   }
   return [{ label: "F(x) =", placeholder: "ex : 7ln|x-9|+C" }];
@@ -1168,7 +1172,7 @@ export function aideNiveau1G(exercice: ExerciceFamilleG, phase: PhaseCalculPrimi
   if (phase === "gEcran1") return { texte: "Effectue la division euclidienne du numérateur par le dénominateur, comme pour des nombres entiers.", latex: null };
   if (phase === "gEcran2") {
     if (exercice.sousType === "4") return { texte: "Complète le carré :", latex: "x^2+px+q=\\left(x+\\dfrac{p}{2}\\right)^2+q-\\dfrac{p^2}{4}" };
-    return { texte: "Forme des éléments simples, pour un facteur du premier degré puis pour un facteur du second degré irréductible :", latex: "\\dfrac{A}{x-r}\\qquad\\dfrac{Bx+C}{x^2+px+q}" };
+    return { texte: "Forme des éléments simples, pour un facteur du premier degré puis pour un facteur du second degré irréductible :", latex: "\\dfrac{A}{x-r}\\qquad\\dfrac{Bx+D}{x^2+px+q}" };
   }
   if (phase === "gEcran3") return { texte: "Réduis au même dénominateur puis identifie les coefficients (ou remplace x par des valeurs bien choisies).", latex: null };
   if (exercice.sousType === "3") return { texte: "Primitives des éléments simples :", latex: "\\dfrac{1}{x}\\to\\ln|x|,\\quad\\dfrac{2x}{x^2+1}\\to\\ln(x^2+1),\\quad\\dfrac{1}{x^2+1}\\to\\arctan(x)" };
@@ -1196,7 +1200,7 @@ export function aideNiveau2G(exercice: ExerciceFamilleG, phase: PhaseCalculPrimi
       case "2":
         return { texte: "Compare avec la fraction propre de l'étape 1 :", latex: fractionSignee(exercice.e, xPlus(-exercice.r)) };
       case "3":
-        return { texte: "Identité à exploiter :", latex: `A(x^2+1)+(Bx+C)\\,x=${numerateurG3(exercice)}` };
+        return { texte: "Identité à exploiter :", latex: `A(x^2+1)+(Bx+D)\\,x=${numerateurG3(exercice)}` };
       case "4":
         return { texte: "Identifie avec le carré complété :", latex: `${denominateurG4(exercice)}=(x+h)^2+m^2` };
     }
@@ -1215,7 +1219,7 @@ function reponseIntermediaireG(exercice: ExerciceFamilleG, phase: PhaseCalculPri
       case "2":
         return [`A=${exercice.e}`];
       case "3":
-        return [`A=${exercice.A}`, `B=${exercice.B}`, `C=${exercice.C}`];
+        return [`A=${exercice.A}`, `B=${exercice.B}`, `D=${exercice.D}`];
       case "4":
         return [`h=${exercice.h}`, `m=${exercice.m}`];
     }

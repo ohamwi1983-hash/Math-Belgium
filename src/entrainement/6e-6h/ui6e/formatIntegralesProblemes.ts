@@ -1,6 +1,7 @@
 import type { TermeA } from "../core6e/calculPrimitives.types";
 import type { ExerciceFamilleA_Problemes, ExerciceFamilleB_Problemes, ExerciceFamilleC_Problemes, ExerciceFamilleD_Problemes, ExerciceFamilleE_Problemes, ExerciceFamilleF_Problemes, ExerciceFamilleG_Problemes, ExerciceIntegralesProblemes } from "../core6e/integralesProblemes.types";
 import type { PhaseIntegralesProblemes } from "../moteur6e/typesIntegralesProblemes";
+import { equilibreArrondiF, fractionDebordeeArchimede, surplusAuDixiemeF } from "../moteur6e/valeursIntegralesProblemes";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen29`. Dispatch sur
@@ -91,6 +92,14 @@ export function decimalLatex(x: number, decimales = 3): string {
   return texteNombre.replace(".", "{,}");
 }
 
+/** Nombre arrondi à EXACTEMENT `decimales` chiffres après la virgule, zéros finaux gardés
+ * (« 15{,}0 » au dixième, « 2{,}30 » au centième) — réponse « arrondie au … » de la consigne. */
+export function decimalFixeLatex(x: number, decimales: number): string {
+  const facteur = 10 ** decimales;
+  const arrondi = Math.round(Number((x * facteur).toPrecision(12))) / facteur;
+  return (Object.is(arrondi, -0) ? 0 : arrondi).toFixed(decimales).replace(".", "{,}");
+}
+
 function estDecimalExact(x: number, decimales = 3): boolean {
   const facteur = 10 ** decimales;
   return Math.abs(Math.round(x * facteur) / facteur - x) < 1e-9;
@@ -123,6 +132,34 @@ export function multiplePiLatex(coef: number): string {
   const absN = Math.abs(n);
   const exact = d === 1 ? `${signe}${absN === 1 ? "" : absN}\\pi` : `${signe}\\dfrac{${absN === 1 ? "" : absN}\\pi}{${d}}`;
   return `${exact}\\approx ${valeur}`;
+}
+
+/** Nombre à `chiffres` chiffres significatifs, virgule décimale (« 0{,}00107 »). */
+export function significatifsLatex(x: number, chiffres = 3): string {
+  if (x === 0) return "0";
+  const decimales = Math.max(0, chiffres - 1 - Math.floor(Math.log10(Math.abs(x))));
+  return decimalLatex(x, decimales);
+}
+
+/** Valeur décimale d'une fraction exacte : « =0{,}125 » quand l'écriture décimale est exacte et
+ * courte (≤ 6 décimales : 9/1600 = 0,005625), sinon « \\approx » et trois chiffres significatifs (« \\approx 0{,}00107 »). */
+function valeurDecimaleFractionLatex(num: number, den: number): string {
+  const x = num / den;
+  return estDecimalExact(x, 6) ? `=${decimalLatex(x, 6)}` : `\\approx ${significatifsLatex(x, 3)}`;
+}
+
+/** Fraction débordée (Archimède) : fraction EXACTE puis sa valeur décimale avec assez de chiffres
+ * significatifs (« \\dfrac{2}{1875}\\approx 0{,}00107 ») — réponse de l'écran 3, résultat du corrigé. */
+export function fractionDebordeeLatex(exercice: Extract<ExerciceFamilleG_Problemes, { sousType: "archimede" }>): string {
+  const { num, den } = fractionDebordeeArchimede(exercice);
+  return `${fractionLatex(num, den)}${valeurDecimaleFractionLatex(num, den)}`;
+}
+
+/** Valeur décimale seule de la fraction débordée (dernière ligne du corrigé) : « \\approx 0{,}00107 »
+ * ou « =0{,}125 ». */
+export function valeurFractionDebordeeLatex(exercice: Extract<ExerciceFamilleG_Problemes, { sousType: "archimede" }>): string {
+  const { num, den } = fractionDebordeeArchimede(exercice);
+  return valeurDecimaleFractionLatex(num, den);
 }
 
 /** Terme affine signé COMPLET a·t+b — jamais un "+0"/"-0" orphelin (b peut être nul). */
@@ -180,6 +217,9 @@ export function sommeVolumeSimpleLatex(termes: TermeA[]): string {
 
 /** Phrase de précision ajoutée aux consignes dont un résultat peut ne pas tomber juste. */
 const PRECISION_CENTIEME = " Donne chaque résultat sous forme exacte, ou arrondi au centième.";
+/** Archimède : la fraction débordée est souvent de l'ordre du millième — arrondie au centième, elle
+ * vaudrait 0. Même texte à l'écran et sur papier. */
+export const PRECISION_ARCHIMEDE = " Donne les volumes sous forme exacte ou arrondis au centième, et la fraction sous forme exacte ou avec trois chiffres significatifs.";
 
 // ============================================================================
 // Famille A — Méthode des trapèzes.
@@ -580,6 +620,12 @@ export function consigneGeneraleF(exercice: ExerciceFamilleF_Problemes): Fragmen
     texte(", arrondi au dixième."),
   ];
 }
+/** Point d'équilibre au centième, comme le demande la consigne (réponse de l'étape 1, rappel de
+ * l'étape 2) : « Q ≈ 2,35 », « P ≈ 12,05 ». */
+export function equilibreArrondiLatexF(exercice: ExerciceFamilleF_Problemes): string[] {
+  const { Q, P } = equilibreArrondiF(exercice);
+  return [`Q\\approx ${decimalFixeLatex(Q, 2)}`, `P\\approx ${decimalFixeLatex(P, 2)}`];
+}
 export function blocDonneesF(exercice: ExerciceFamilleF_Problemes): string[] {
   return [`f(x)=${demandeLatexF(exercice)}`, `g(x)=${afficheAffine(exercice.m, exercice.p, "x")}`];
 }
@@ -588,7 +634,7 @@ export function consigneEcranF(phase: PhaseIntegralesProblemes): FragmentConsign
   return [texte("Calcule le surplus du consommateur "), latex("S=\\displaystyle\\int_0^Q \\big(f(x)-P\\big)\\,dx"), texte(", avec Q et P obtenus à l'étape 1 ; arrondis S au dixième.")];
 }
 export function etatActuelF(exercice: ExerciceFamilleF_Problemes, phase: PhaseIntegralesProblemes): string[] | null {
-  if (phase === "fEcran2") return [`Q${approxLatex(exercice.Q)}\\qquad P${approxLatex(exercice.P)}`];
+  if (phase === "fEcran2") return [equilibreArrondiLatexF(exercice).join("\\qquad ")];
   return null;
 }
 export function champsF(phase: PhaseIntegralesProblemes): ChampDef[] {
@@ -652,7 +698,7 @@ export function consigneGeneraleG(exercice: ExerciceFamilleG_Problemes): Fragmen
       texte(". Il est rempli d'eau à ras bord. On y plonge une bille de rayon "),
       latex(`r=${decimalLatex(exercice.r)}`),
       texte(", entièrement immergée. Détermine le volume du verre, le volume d'eau qui déborde, puis la fraction du volume d'eau initial qui a débordé."),
-      texte(PRECISION_CENTIEME),
+      texte(PRECISION_ARCHIMEDE),
     ];
   }
   return [
@@ -696,7 +742,7 @@ export function consigneEcranG(exercice: ExerciceFamilleG_Problemes, phase: Phas
   if (exercice.sousType === "archimede") {
     if (phase === "gArchimedeEcran1") return [texte("Calcule le volume du verre.")];
     if (phase === "gArchimedeEcran2") return [texte("Calcule le volume d'eau qui déborde quand la bille est entièrement immergée.")];
-    return [texte("Calcule la fraction du volume d'eau initial qui a débordé (volume débordé divisé par le volume du verre).")];
+    return [texte("Calcule la fraction du volume d'eau initial qui a débordé (volume débordé divisé par le volume du verre) : fraction exacte, ou valeur approchée à trois chiffres significatifs.")];
   }
   if (phase === "gCalotteEcran1") return [texte("Écris l'intégrande "), latex("r^2-(y-r)^2"), texte(" en remplaçant r par sa valeur.")];
   if (phase === "gCalotteEcran2") return [texte("Développe cet intégrande, puis donne une primitive (en y, de constante nulle).")];
@@ -982,8 +1028,8 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceIntegralesProb
     return [exercice.contexte === "stock" ? "\\text{taux de variation moyen du stock}" : "\\text{taux de variation moyen du cours}"];
   }
   if (exercice.famille === "F") {
-    if (phase === "fEcran1") return [`Q${approxLatex(exercice.Q)}`, `P${approxLatex(exercice.P)}`];
-    return [`S${approxLatex(exercice.surplusAttendu)}`];
+    if (phase === "fEcran1") return equilibreArrondiLatexF(exercice);
+    return [`S\\approx ${decimalFixeLatex(surplusAuDixiemeF(exercice), 1)}`];
   }
   // Famille G.
   if (exercice.sousType === "soustraction") {
@@ -996,7 +1042,7 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceIntegralesProb
     const coefBille = (4 / 3) * exercice.r ** 3;
     if (phase === "gArchimedeEcran1") return [multiplePiLatex(coefVerre)];
     if (phase === "gArchimedeEcran2") return [multiplePiLatex(coefBille)];
-    return [rationnelLatex(coefBille / coefVerre)];
+    return [fractionDebordeeLatex(exercice)];
   }
   const r = exercice.r;
   if (phase === "gCalotteEcran1") return [`${r}^2-(y-${r})^2`];

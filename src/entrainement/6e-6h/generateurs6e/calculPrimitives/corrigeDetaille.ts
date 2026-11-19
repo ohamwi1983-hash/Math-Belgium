@@ -764,8 +764,8 @@ function contenuG(e: ExerciceFamilleG, phase: PhaseCalculPrimitives): Contenu {
         };
       case "3":
         return {
-          utilise: [t("Le facteur "), f("x^2+1"), t(" n'a pas de racine réelle : on pose "), f("\\dfrac{A}{x}"), t(" pour le facteur x et "), f("\\dfrac{Bx+C}{x^2+1}"), t(` pour le facteur irréductible ${C1}.`)],
-          calcul: [ligne("x^3+x=x(x^2+1)", "mise en évidence de x"), ligne(`f(x)=\\dfrac{${numerateurG3(e)}}{x(x^2+1)}`, "dénominateur factorisé"), ligne(`=${decompositionPoseeG(e)}`, "A, B et C à déterminer")],
+          utilise: [t("Le facteur "), f("x^2+1"), t(" n'a pas de racine réelle : on pose "), f("\\dfrac{A}{x}"), t(" pour le facteur x et "), f("\\dfrac{Bx+D}{x^2+1}"), t(` pour le facteur irréductible ${C1}.`)],
+          calcul: [ligne("x^3+x=x(x^2+1)", "mise en évidence de x"), ligne(`f(x)=\\dfrac{${numerateurG3(e)}}{x(x^2+1)}`, "dénominateur factorisé"), ligne(`=${decompositionPoseeG(e)}`, "A, B et D à déterminer")],
         };
       case "4": {
         const { p, q: qq } = e;
@@ -800,14 +800,14 @@ function contenuG(e: ExerciceFamilleG, phase: PhaseCalculPrimitives): Contenu {
       case "2":
         return { utilise: [t(`On identifie avec la fraction propre trouvée à l'étape 1 ${C1}.`)], calcul: [ligne(`A=${e.e}`, "même dénominateur, numérateurs égaux")] };
       case "3": {
-        const { A, B, C } = e;
+        const { A, B, D } = e;
         return {
           utilise: [t(`On réduit au même dénominateur, on développe, puis on identifie les coefficients des mêmes puissances de x ${C1}.`)],
           calcul: [
-            ligne(`A(x^2+1)+(Bx+C)\\,x=${numerateurG3(e)}`, "même dénominateur, numérateurs égaux"),
-            ligne(`(A+B)x^2+Cx+A=${numerateurG3(e)}`, "on développe et on ordonne"),
+            ligne(`A(x^2+1)+(Bx+D)\\,x=${numerateurG3(e)}`, "même dénominateur, numérateurs égaux"),
+            ligne(`(A+B)x^2+Dx+A=${numerateurG3(e)}`, "on développe et on ordonne"),
             ligne(`A=${A}`, "termes constants"),
-            ligne(`C=${C}`, "coefficients de x"),
+            ligne(`D=${D}`, "coefficients de x"),
             ligne(`A+B=${A + B}`, "coefficients de x²"),
             ligne(`B=${A + B}-${qP(q(A))}`, "on remplace A"),
             ligne(`=${B}`),
@@ -858,19 +858,19 @@ function contenuG(e: ExerciceFamilleG, phase: PhaseCalculPrimitives): Contenu {
       };
     }
     case "3": {
-      const { A, B, C } = e;
+      const { A, B, D } = e;
       const bx = sommeLatex([
         { num: B, corps: "x" },
-        { num: C, corps: "" },
+        { num: D, corps: "" },
       ]);
       const cb = coefDevant(B, 2);
-      const termeC = `${C < 0 ? "-" : "+"}${coefDevant(Math.abs(C))}${Math.abs(C) === 1 ? "" : "\\cdot "}\\int\\dfrac{1}{x^2+1}\\,dx`;
+      const termeD = `${D < 0 ? "-" : "+"}${coefDevant(Math.abs(D))}${Math.abs(D) === 1 ? "" : "\\cdot "}\\int\\dfrac{1}{x^2+1}\\,dx`;
       return {
         utilise: [t(`Primitives des éléments simples ${C1} : `), f("\\dfrac{1}{x}\\to\\ln|x|,\\quad\\dfrac{2x}{x^2+1}\\to\\ln(x^2+1),\\quad\\dfrac{1}{x^2+1}\\to\\arctan(x)")],
         calcul: [
           ligne(`${intg(fractionSignee(A, "x"))}=${monome(A, 1, "\\ln|x|", true)}`, jPrimitive("\\dfrac{1}{x}", "\\ln|x|")),
-          ligne(`\\int\\dfrac{${bx}}{x^2+1}\\,dx=${cb}${cb === "" || cb === "-" ? "" : "\\cdot "}\\int\\dfrac{2x}{x^2+1}\\,dx${termeC}`, [t("on sépare et on fait apparaître u′/u, "), f("u=x^2+1")]),
-          ligne(`=${sommeLatex([{ num: B, den: 2, corps: "\\ln(x^2+1)" }, { num: C, corps: "\\arctan(x)" }])}`, [t("primitives "), f("\\ln(x^2+1)"), t(" (car "), f("x^2+1>0"), t(") et "), f("\\arctan(x)")]),
+          ligne(`\\int\\dfrac{${bx}}{x^2+1}\\,dx=${cb}${cb === "" || cb === "-" ? "" : "\\cdot "}\\int\\dfrac{2x}{x^2+1}\\,dx${termeD}`, [t("on sépare et on fait apparaître u′/u, "), f("u=x^2+1")]),
+          ligne(`=${sommeLatex([{ num: B, den: 2, corps: "\\ln(x^2+1)" }, { num: D, corps: "\\arctan(x)" }])}`, [t("primitives "), f("\\ln(x^2+1)"), t(" (car "), f("x^2+1>0"), t(") et "), f("\\arctan(x)")]),
           finale,
         ],
       };

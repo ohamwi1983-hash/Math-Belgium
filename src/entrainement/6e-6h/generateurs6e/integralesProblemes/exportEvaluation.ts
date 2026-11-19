@@ -29,6 +29,7 @@ import {
   demandeLatexF,
   fLatexE,
   fractionLatex,
+  PRECISION_ARCHIMEDE,
   rationnelExactLatex,
 } from "../../ui6e/formatIntegralesProblemes";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntegralesProblemes } from "./index";
@@ -210,7 +211,7 @@ function entetePapierArchimede(e: Extract<ExerciceFamilleG_Problemes, { sousType
     t(". Il est rempli d'eau à ras bord. On y plonge une bille de rayon "),
     f(`r=${decimalLatex(e.r)}`),
     t(", entièrement immergée."),
-    t(PRECISION),
+    t(PRECISION_ARCHIMEDE),
   ];
 }
 
@@ -319,6 +320,7 @@ function bareme(exercice: ExerciceIntegralesProblemes): BaremeExercice {
   const w = poids(exercice);
   const acceptees: FragmentConsigne[][] = [[t("Valeur exacte ou arrondie au centième ; un écart dû à l'arrondi d'une étape intermédiaire est toléré")]];
   if (exercice.famille === "F") acceptees.push([t("Q et P lus à la calculatrice à 0,01 près ; S à 0,1 près")]);
+  if (exercice.famille === "G" && exercice.sousType === "archimede") acceptees.push([t("Fraction débordée : forme exacte, ou valeur approchée à trois chiffres significatifs")]);
   if (exercice.famille === "E") acceptees.push([t("Toute formulation équivalente : « le taux constant qui produirait la même variation totale »")]);
   return {
     reponseFinale: reponse(exercice, phases[phases.length - 1]),

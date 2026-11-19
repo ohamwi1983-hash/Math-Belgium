@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Line, Mafs, Point as MafsPoint, Text } from "mafs";
 import "mafs/core.css";
 import type { Point } from "../core/vecteur.types";
-import { EPAISSEUR_TRAIT_ACCENTUE, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN, etendreViewBoxPourEtiquettes } from "../ui/mafsTransformation";
+import { EPAISSEUR_TRAIT_ACCENTUE, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN, etendreViewBoxPourEtiquettes, formatEtiquetteGrilleTypo } from "../ui/mafsTransformation";
 import type { DroiteImplicite } from "../core/droite.types";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
 import { anglePenteDroite, attacheEtiquettePoint, placerEtiquettesDroites, viewBoxCadrageDistanceDroite, viewBoxDistanceDroite } from "../ui/distanceDroiteGraph";
@@ -57,7 +57,8 @@ export function DistanceDroiteGraph({ lignes, points = [], cadrage }: Props) {
   return (
     <div className="mafs-graph" ref={wrapperRef}>
       <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBoxEtendu.x, y: viewBoxEtendu.y, padding: 0 }} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} />
+        {/* Nombres écrits espacés et à écriture finie, jamais rognés ni posés sur un nombre de l'autre axe (pas de 1/3 : entiers seulement) ; grille complète ; signe « − ». */}
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} etiquettesLisibles formatEtiquette={formatEtiquetteGrilleTypo} />
         {lignes.map((l, i) => {
           const ancrage = pointDepuisImpliciteDroite(l.droite);
           const etiquette = etiquettes[i]!;

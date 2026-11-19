@@ -31,6 +31,10 @@ function entier(min: number, max: number): number {
 
 const arrondi = (v: number, d = 6) => Math.round(v * 10 ** d) / 10 ** d;
 
+/** Écriture décimale exacte avec au plus `d` décimales — celle que l'énoncé imprime
+ * (`ui6e/formatAiresFormesReelles.ts::representer` écrit 4 décimales au plus). */
+const decimalCourt = (v: number, d = 4) => Math.abs(v * 10 ** d - Math.round(v * 10 ** d)) < 1e-6;
+
 function tirerCalcul(): CalculFormesReelles {
   return Math.random() < 0.5 ? "exacte" : "calculatrice";
 }
@@ -80,7 +84,7 @@ function construireMur(modele: ModeleFormesReelles, calcul: CalculFormesReelles 
       if (modele === "donnee") {
         // Fonction donnée : coefficient décimal court, la flèche en découle.
         k = arrondi((-parmi(MUR_DONNEE_CALC_A) * L * L) / 4);
-        if (k < 0.8 || k > 2.4) continue;
+        if (!decimalCourt(k) || k < 0.8 || k > 2.4) continue;
       } else {
         k = parmi([0.9, 1.1, 1.3, 1.45, 1.6]);
       }
@@ -199,8 +203,12 @@ function construireSection(modele: ModeleFormesReelles, contexte: ContexteSectio
       W = parmi(t.W);
       longueur = parmi(t.longueur);
       if (modele === "donnee") {
-        // Fonction donnée : coefficient décimal court, la profondeur en découle.
+        // Fonction donnée : coefficient décimal court, la profondeur en découle. D = a·(W/2)² doit
+        // lui aussi s'écrire EXACTEMENT avec au plus 4 décimales (W = 10,5 et a = 0,3 donnaient
+        // 8,26875, imprimé 8,2688 : les pieds ±5,25 n'étaient plus les racines de la fonction
+        // imprimée) — tirage refait sinon.
         D = arrondi((parmi(t.a) * W * W) / 4);
+        if (!decimalCourt(D)) continue;
         const [dMin, dMax] = contexte === "tunnel" ? [3.5, 9] : contexte === "canal" ? [0.8, 3] : [4, 10];
         if (D < dMin || D > dMax) continue;
       } else {
