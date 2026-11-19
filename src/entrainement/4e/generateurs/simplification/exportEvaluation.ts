@@ -5,19 +5,27 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import type { PhaseSimplification } from "../../moteur/typesSimplification";
+import { consigneEtapeSimplification, correctionDetailleeSimplification, lettrePhaseSimplification, phasesSimplification } from "./corrigeDetaille";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { libelleCategorie } from "../../ui/categorieLabels";
 import { formatFormeFactoriseeDepuisRacines } from "../../ui/formatEquation";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
-import { formatFraction, formatFractionProgressive, formatFractionSimplifiee, formatPolynome, formatPolynomeMisEnEvidence } from "../../ui/formatSimplification";
+import { formatFraction, formatFractionSimplifiee, formatPolynome, formatPolynomeMisEnEvidence } from "../../ui/formatSimplification";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSimplification } from "./index";
 
 /**
+ * Corrigé détaillé et barème : UNE étape par écran (`moteur/session*.ts::phasesExercice`), corrigé
+ * « comme au tableau » dans `corrigeDetaille.ts` (partagé avec l'appli) ; le regroupement en
+ * questions décrit plus bas ne vaut plus que pour l'ancien corrigé en paragraphes
+ * (`construireCorrection`).
+ *
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceSimplification>` pour gen3 (Simplifier une
  * fraction rationnelle, `AppSimplification.tsx`) — voir `generateurs/analyseFonction/exportWord.ts`
  * pour le mécanisme générique de référence.
@@ -137,16 +145,11 @@ function fractionNommee(instance: ExerciceSimplification): string {
   return `F(x) = ${fractionPapier(formatFraction(instance))}`;
 }
 
-/** Étapes du raisonnement (titres « Étape n » du corrigé). */
+/** Étapes = écrans réels de l'instance (titres « Étape n — … » du corrigé, jamais imprimés dans l'énoncé). */
 function construireEnonceSimplification(instance: ExerciceSimplification): SectionExercice {
   return {
     enteteFragments: [texte("On considère la fraction rationnelle "), latex(fractionNommee(instance)), texte(".")],
-    questions: [
-      { consigne: [texte("Factorise le dénominateur "), latex(`D(x) = ${formatPolynome(instance.denominateur)}`), texte(".")] },
-      { consigne: [texte("Écris les conditions d'existence de la fraction.")] },
-      { consigne: [texte("Factorise le numérateur "), latex(`N(x) = ${formatPolynome(instance.numerateur)}`), texte(".")] },
-      { consigne: [texte("Simplifie la fraction.")] },
-    ],
+    questions: phasesSimplification(instance).map((phase) => ({ consigne: consigneEtapeSimplification(instance, phase) })),
   };
 }
 
@@ -163,85 +166,23 @@ function enoncePapierSimplification(instance: ExerciceSimplification): EnoncePap
   };
 }
 
-/** Facteur (x − p) écrit proprement, signe compris. */
-function facteurLatex(p: number): string {
-  if (p === 0) return "x";
-  return `(x ${p < 0 ? "+" : "-"} ${formatNombre(Math.abs(p))})`;
-}
-
-/** Lignes du corrigé pour un côté de la fraction (étape « factoriser »). */
-function etapesCote(poly: Exercice | PolynomeLineaire, nom: "D" | "N", lettre: string): EtapeCorrection[] {
-  const brut = formatPolynome(poly);
-  const reduit = formatPolynomeMisEnEvidence(poly);
-  const etapes: EtapeCorrection[] = [];
-  if (estPolynomeLineaire(poly)) {
-    const methode = Math.abs(poly.k) === 1 ? "Premier degré, déjà sous forme factorisée." : "Premier degré : on met le coefficient de x en évidence.";
-    etapes.push({ label: "Méthode", sousQuestion: lettre, fragments: [texte(methode)] });
-    etapes.push({ label: "Conclusion", sousQuestion: lettre, fragments: [latex(`${nom}(x) = ${reduit}`)] });
-    return etapes;
-  }
-  if (brut !== reduit) {
-    etapes.push({ label: "Réduction", sousQuestion: lettre, fragments: [texte("On met d'abord le facteur numérique commun en évidence : "), latex(`${nom}(x) = ${reduit}`)] });
-  }
-  if (poly.categorie === "cas_general") {
-    const racines = racinesDistinctes(poly.solution.racines);
-    etapes.push({ label: "Méthode", sousQuestion: lettre, fragments: [texte("Aucune méthode rapide : on calcule le discriminant.")] });
-    etapes.push({
-      label: "Calcul",
-      sousQuestion: lettre,
-      fragments: [
-        latex(`\\Delta = ${formatNombre(poly.solution.delta ?? 0)}`),
-        texte(racines.length > 1 ? ", racines " : ", racine double "),
-        latex(racines.map((r) => `x = ${formatNombre(r)}`).join(" \\text{ et } ")),
-      ],
-    });
-  } else {
-    etapes.push({ label: "Méthode", sousQuestion: lettre, fragments: [texte(`${libelleCategorie(poly.categorie)}.`)] });
-  }
-  etapes.push({ label: "Conclusion", sousQuestion: lettre, fragments: [latex(`${nom}(x) = ${formeFactoriseeCote(poly)}`)] });
-  return etapes;
-}
-
-function correctionDetailleeSimplification(instance: ExerciceSimplification): EtapeCorrection[] {
-  const ce = conditionsExistence(instance.denominateur);
-  return [
-    ...etapesCote(instance.denominateur, "D", "a"),
-    { label: "Méthode", sousQuestion: "b", fragments: [texte("La fraction n'existe que si son dénominateur est non nul : on exclut les racines de D(x).")] },
-    { label: "Conclusion", sousQuestion: "b", fragments: [texte("CE : "), latex(formatCE(ce))] },
-    ...etapesCote(instance.numerateur, "N", "c"),
-    {
-      label: "Méthode",
-      sousQuestion: "d",
-      fragments: [
-        texte("N(x) et D(x) ont le facteur commun "),
-        latex(facteurLatex(instance.racineCommune)),
-        texte(" : on simplifie ce facteur (on simplifie des facteurs, jamais des termes)."),
-      ],
-    },
-    { label: "Calcul", sousQuestion: "d", fragments: [latex(`F(x) = ${fractionPapier(formatFractionProgressive(instance, "factorisee", "factorisee"))}`)] },
-    { label: "Conclusion", sousQuestion: "d", fragments: [latex(`F(x) = ${simplifieePapier(instance)}`), texte(" pour "), latex(formatCE(ce))] },
-    {
-      label: "Piège",
-      sousQuestion: "d",
-      fragments: [
-        texte("Les conditions d'existence se lisent AVANT de simplifier : "),
-        latex(`x = ${formatNombre(instance.racineCommune)}`),
-        texte(" reste interdit même si le facteur commun a disparu de la fraction simplifiée."),
-      ],
-    },
-  ];
-}
-
 function reponseBreveSimplification(instance: ExerciceSimplification): FragmentConsigne[] {
   return [texte("CE : "), latex(formatCE(conditionsExistence(instance.denominateur))), texte(" ; "), latex(`F(x) = ${simplifieePapier(instance)}`)];
 }
 
-function aCasGeneral(instance: ExerciceSimplification): boolean {
-  return [instance.denominateur, instance.numerateur].some((poly) => !estPolynomeLineaire(poly) && poly.categorie === "cas_general");
-}
-
-function difficulteSimplification(instance: ExerciceSimplification): 1 | 2 | 3 {
-  return instance.type === "P2/P2" || aCasGeneral(instance) ? 3 : 2;
+/** Critères du niveau (grille commune) : étapes = écrans du corrigé ; comptés comme lectures (1 min,
+ * sans niveau) : la reconnaissance de la méthode (un coup d'œil sur a, b, c, comme « identifier la
+ * question » de gen70), les conditions d'existence lues sur un dénominateur déjà factorisé (racines visibles) et la CE d'un
+ * dénominateur du premier degré ; méthode : choisir les factorisations parmi celles du cours ; piège
+ * dans les données : la valeur exclue qui disparaît de la fraction simplifiée (toujours présente). */
+function criteresDifficulteSimplification(instance: ExerciceSimplification): CriteresDifficulte {
+  const d = instance.denominateur;
+  const lecture: string[] = [];
+  const phases = phasesSimplification(instance);
+  for (const ph of ["denomReconnaissance", "numReconnaissance"] as const) if (phases.includes(ph)) lecture.push(lettrePhaseSimplification(instance, ph));
+  if (phases.includes("ceDirecte")) lecture.push(lettrePhaseSimplification(instance, "ceDirecte"));
+  if (phases.includes("denomChamp2") && !estPolynomeLineaire(d) && d.categorie !== "cas_general") lecture.push(lettrePhaseSimplification(instance, "denomChamp2"));
+  return { ...etapesDuCorrige(correctionDetailleeSimplification(instance), lecture), methode: 1, piege: 1 };
 }
 
 /** Poids par étape (somme 4, aucun critère sous 0,5) : un côté du premier degré se factorise en
@@ -252,27 +193,41 @@ function poidsEtapes(instance: ExerciceSimplification): [number, number, number,
   return [1, 1, 1, 1];
 }
 
+/** Lettre de l'écran qui conclut un geste (dernier écran présent parmi `candidates`), ou null. */
+function lettreDe(instance: ExerciceSimplification, candidates: PhaseSimplification[]): string | null {
+  const phases = phasesSimplification(instance);
+  const presentes = candidates.filter((c) => phases.includes(c));
+  return presentes.length ? lettrePhaseSimplification(instance, presentes[presentes.length - 1]!) : null;
+}
+
 function baremeSimplification(instance: ExerciceSimplification): BaremeExercice {
   const [pa, pb, pc, pd] = poidsEtapes(instance);
-  const criteres: CritereBareme[] = [
-    { sousQuestion: "a", critere: [texte("Dénominateur factorisé : "), latex(`D(x) = ${formeFactoriseeCote(instance.denominateur)}`)], points: pa },
-    { sousQuestion: "b", critere: [texte("Conditions d'existence : "), latex(formatCE(conditionsExistence(instance.denominateur)))], points: pb },
-    { sousQuestion: "c", critere: [texte("Numérateur factorisé : "), latex(`N(x) = ${formeFactoriseeCote(instance.numerateur)}`)], points: pc },
-    { sousQuestion: "d", critere: [texte("Fraction simplifiée : "), latex(`F(x) = ${simplifieePapier(instance)}`)], points: pd },
-  ];
+  const lD = lettreDe(instance, ["denomReductionP1", "denomChamp1", "denomFactorisation"]);
+  const lCE = lettreDe(instance, ["denomChamp2", "ceDirecte"])!;
+  const lN = lettreDe(instance, ["numReductionP1", "numChamp1", "numFactorisation"]);
+  const lS = lettrePhaseSimplification(instance, "simplification");
+  const criteres: CritereBareme[] = [];
+  let report = 0;
+  if (lD) criteres.push({ sousQuestion: lD, critere: [texte("Dénominateur factorisé : "), latex(`D(x) = ${formeFactoriseeCote(instance.denominateur)}`)], points: pa });
+  else report += pa;
+  criteres.push({ sousQuestion: lCE, critere: [texte("Conditions d'existence : "), latex(formatCE(conditionsExistence(instance.denominateur)))], points: pb });
+  if (lN) criteres.push({ sousQuestion: lN, critere: [texte("Numérateur factorisé : "), latex(`N(x) = ${formeFactoriseeCote(instance.numerateur)}`)], points: pc });
+  else report += pc;
+  criteres.push({ sousQuestion: lS, critere: [texte("Fraction simplifiée : "), latex(`F(x) = ${simplifieePapier(instance)}`)], points: pd + report });
   const erreurs: ErreurFrequente[] = [
     {
       description: [texte("Conditions d'existence lues sur la fraction simplifiée (la valeur "), latex(`x = ${formatNombre(instance.racineCommune)}`), texte(" n'est plus exclue)")],
-      cout: "0 pt sur b)",
+      cout: `0 pt sur ${lCE})`,
     },
-    { description: [texte("Simplification de termes (et non de facteurs) avant d'avoir factorisé")], cout: "0 pt sur d)" },
+    { description: [texte("Simplification de termes (et non de facteurs) avant d'avoir factorisé")], cout: `0 pt sur ${lS})` },
   ];
   for (const cote of ["denominateur", "numerateur"] as const) {
     const poly = instance[cote];
     if (estPolynomeLineaire(poly) || poly.categorie !== "cas_general") continue;
+    const l = cote === "denominateur" ? lD : lN;
     erreurs.push({
       description: [texte(`Erreur dans Δ ou dans la formule des racines (${cote === "denominateur" ? "dénominateur" : "numérateur"})`)],
-      cout: `0 pt sur ${cote === "denominateur" ? "a" : "c"}), suite notée sans double pénalité`,
+      cout: `0 pt sur ${l}), suite notée sans double pénalité`,
     });
   }
   if ([instance.denominateur, instance.numerateur].some((poly) => formatPolynome(poly) !== formatPolynomeMisEnEvidence(poly))) {
@@ -335,11 +290,10 @@ export const adaptateurEvaluationSimplification: AdaptateurFeuilleExercices<Exer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceSimplification,
   construireCorrection: construireCorrectionSimplification,
-  difficulte: difficulteSimplification,
+  criteresDifficulte: criteresDifficulteSimplification,
   reponseBreve: reponseBreveSimplification,
   correctionDetaillee: correctionDetailleeSimplification,
   bareme: baremeSimplification,
   enoncePapier: enoncePapierSimplification,
-  dureeMinutes: 7,
   // `regroupable` exclu : la consigne mentionne la fraction tirée, jamais générique.
 };

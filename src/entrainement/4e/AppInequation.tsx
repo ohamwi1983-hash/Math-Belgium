@@ -27,6 +27,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { ecranClos, nombreTexte, saisieEnLatex, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeInequations, lettrePhaseInequation } from "./generateurs/inequations/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Détermine le signe de ce trinôme du second degré.";
 
@@ -156,6 +159,9 @@ export function AppInequation() {
               : etat.phase === "signe_a"
                 ? <>Signe de a attendu : {exercice.enonce.a > 0 ? "a > 0" : "a < 0"}</>
                 : <>Réponse attendue : S = {formatSolutionEnsemble(exercice.solution)}</>,
+        // Corrigé de l'exercice COURANT : après la simplification, il est déjà réduit (mêmes étapes
+        // suivantes, sans l'écran de simplification — `phasesInequation`).
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeInequations(exercice), lettrePhaseInequation(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

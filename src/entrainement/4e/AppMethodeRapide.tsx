@@ -37,6 +37,9 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { ecranClos, nombreSaisi, saisieEnLatex, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 import { phasesExercice } from "./moteur/session";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeSecondDegre, lettrePhaseSecondDegre } from "./generateurs/secondDegre/corrigeDetaille";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -234,6 +237,9 @@ export function AppMethodeRapide() {
     ? {
         revele: enAttente.revele,
         reponseAttendue,
+        corrigeDetaille: (
+          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSecondDegre(etat.exerciceOriginal), lettrePhaseSecondDegre(etat.exerciceOriginal, phase))} />
+        ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

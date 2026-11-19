@@ -74,6 +74,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { ecranClos, nombreSaisi, saisieEnLatex, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeEquationRationnelle, lettrePhaseEquationRationnelle } from "./generateurs/equationRationnelle/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Résous cette équation rationnelle.";
 
@@ -441,6 +444,9 @@ export function AppEquationRationnelle() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePhase(etat),
+        corrigeDetaille: (
+          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationRationnelle(etat.exerciceCourant), lettrePhaseEquationRationnelle(etat.exerciceCourant, etat.phase))} />
+        ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

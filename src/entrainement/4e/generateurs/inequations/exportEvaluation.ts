@@ -1,18 +1,26 @@
-import type { Borne, ExerciceInequation, Morceau, SolutionEnsemble } from "../../core/inequation.types";
+import type { ExerciceInequation } from "../../core/inequation.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import {
+  consigneEtapeInequation,
+  correctionDetailleeInequations,
+  ensembleLatex,
+  lettrePhaseInequation,
+  phasesInequation,
+  type PhaseInequationCorrige,
+} from "./corrigeDetaille";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
-import { formatEquationAssocieeLatex, formatInequationLatex } from "../../ui/formatInequation";
-import { enonceSimplifie, facteurCommun, necessiteSimplification } from "../../moteur/simplificationInequation";
+import { formatInequationLatex } from "../../ui/formatInequation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceInequation, type VarianteInequationId } from "./index";
 import { profilInequationTrinome, LIBELLE_CAS_TRINOME } from "../profilsEvaluation4eCh2Ch3";
 
@@ -34,145 +42,16 @@ import { profilInequationTrinome, LIBELLE_CAS_TRINOME } from "../profilsEvaluati
 
 const LETTRES = "abcdefghijklmnopqrstuvwxyz";
 
-/** Nombre en LaTeX, virgule décimale. */
-function nombreLatex(valeur: number): string {
-  const brut = Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
-  return brut.replace(".", "{,}");
-}
-
-function borneLatex(borne: Borne): string {
-  if (borne === "-inf") return "-\\infty";
-  if (borne === "+inf") return "+\\infty";
-  return nombreLatex(borne);
-}
-
-function morceauLatex(m: Morceau): string {
-  return `${m.crochetGauche}${borneLatex(m.borneGauche)}\\,;\\,${borneLatex(m.borneDroite)}${m.crochetDroit}`;
-}
-
-/** Ensemble-solution en LaTeX (accolades littérales, ∅, ℝ). */
-function ensembleLatex(solution: SolutionEnsemble): string {
-  switch (solution.forme) {
-    case "vide":
-      return "\\varnothing";
-    case "reel":
-      return "\\mathbb{R}";
-    case "point":
-      return `\\left\\{${nombreLatex(solution.valeur)}\\right\\}`;
-    case "reel_sauf_point":
-      return `\\mathbb{R} \\setminus \\left\\{${nombreLatex(solution.valeur)}\\right\\}`;
-    case "intervalle":
-      return morceauLatex(solution.morceau);
-    case "union":
-      return `${morceauLatex(solution.morceau1)} \\cup ${morceauLatex(solution.morceau2)}`;
-  }
-}
-
-function descriptionSymbole(symbole: ExerciceInequation["symbole"]): string {
-  switch (symbole) {
-    case "<":
-      return "strictement négatif";
-    case ">":
-      return "strictement positif";
-    case "≤":
-      return "négatif ou nul";
-    case "≥":
-      return "positif ou nul";
-  }
-}
-
-type PhaseInequation = "simplification" | "racines" | "signe_a" | "intervalle";
+type PhaseInequation = PhaseInequationCorrige;
 
 interface EtapeResolution {
   phase: PhaseInequation;
   consigne: FragmentConsigne[];
-  lignes: { label: string; fragments: FragmentConsigne[] }[];
 }
 
+/** Étapes = écrans de l'appli, dans l'ordre (`corrigeDetaille.ts::phasesInequation`). */
 function etapesResolution(instance: ExerciceInequation): EtapeResolution[] {
-  const { enonce, symbole, delta, racines, solution } = instance;
-  const etapes: EtapeResolution[] = [];
-  let enonceEffectif = enonce;
-  let deltaEffectif = delta;
-  if (necessiteSimplification(instance)) {
-    const g = facteurCommun(enonce);
-    enonceEffectif = enonceSimplifie(enonce);
-    deltaEffectif = delta / (g * g);
-    etapes.push({
-      phase: "simplification",
-      consigne: [texte("Simplifie l'inéquation au maximum (coefficients entiers, sans facteur commun).")],
-      lignes: [
-        {
-          label: "Calcul",
-          fragments: [
-            texte(`Le plus grand commun diviseur de |a|, |b| et |c| vaut ${g}. On divise les deux membres par ${g}, un nombre positif : le sens de l'inégalité ne change pas. `),
-            latex(formatInequationLatex(enonceEffectif, symbole)),
-          ],
-        },
-      ],
-    });
-  }
-
-  const ligneRacines: { label: string; fragments: FragmentConsigne[] }[] = [
-    { label: "Méthode", fragments: [texte("On résout l'équation associée "), latex(formatEquationAssocieeLatex(enonceEffectif)), texte(" à l'aide du discriminant.")] },
-  ];
-  let r1 = 0;
-  let r2 = 0;
-  if (deltaEffectif < 0) {
-    ligneRacines.push({ label: "Conclusion", fragments: [latex(`\\Delta = ${nombreLatex(deltaEffectif)} < 0`), texte(" : aucune racine réelle.")] });
-  } else {
-    [r1, r2] = [...(racines as [number, number])].sort((x, y) => x - y);
-    ligneRacines.push(
-      r1 === r2
-        ? { label: "Conclusion", fragments: [latex("\\Delta = 0"), texte(" : une racine double, "), latex(`x = ${nombreLatex(r1)}`), texte(".")] }
-        : { label: "Conclusion", fragments: [latex(`\\Delta = ${nombreLatex(deltaEffectif)} > 0`), texte(" : deux racines, "), latex(`x_1 = ${nombreLatex(r1)}`), texte(" et "), latex(`x_2 = ${nombreLatex(r2)}`), texte(".")] },
-    );
-  }
-  etapes.push({ phase: "racines", consigne: [texte("Résous l'équation associée "), latex(formatEquationAssocieeLatex(enonceEffectif)), texte(".")], lignes: ligneRacines });
-
-  const aPositif = enonceEffectif.a > 0;
-  etapes.push({
-    phase: "signe_a",
-    consigne: [texte("Donne le signe de a.")],
-    lignes: [{ label: "Conclusion", fragments: [latex(`a = ${nombreLatex(enonceEffectif.a)}`), texte(aPositif ? " : a est positif." : " : a est négatif.")] }],
-  });
-
-  const signeA = aPositif ? "positif" : "négatif";
-  const signeOppose = aPositif ? "négatif" : "positif";
-  const regle: FragmentConsigne[] =
-    deltaEffectif < 0
-      ? [texte(`Sans racine, le trinôme garde le signe de a sur ℝ : il est toujours ${signeA}.`)]
-      : r1 === r2
-        ? [texte(`Le trinôme s'annule seulement en `), latex(`x = ${nombreLatex(r1)}`), texte(` et a le signe de a partout ailleurs : il est ${signeA} sur `), latex(`\\mathbb{R} \\setminus \\left\\{${nombreLatex(r1)}\\right\\}`), texte(".")]
-        : [
-            texte(`Le trinôme a le signe de a à l'extérieur des racines et le signe opposé entre elles : ${signeA} pour `),
-            latex(`x < ${nombreLatex(r1)}`),
-            texte(" ou "),
-            latex(`x > ${nombreLatex(r2)}`),
-            texte(`, ${signeOppose} pour `),
-            latex(`${nombreLatex(r1)} < x < ${nombreLatex(r2)}`),
-            texte("."),
-          ];
-  etapes.push({
-    phase: "intervalle",
-    consigne: [texte("Donne l'ensemble des solutions de l'inéquation.")],
-    lignes: [
-      { label: "Méthode", fragments: regle },
-      { label: "Conclusion", fragments: [texte(`On garde les x pour lesquels le trinôme est ${descriptionSymbole(symbole)} : `), latex(`S = ${ensembleLatex(solution)}`), texte(".")] },
-      {
-        label: "Piège",
-        fragments:
-          deltaEffectif < 0
-            ? [texte("Δ < 0 ne veut pas dire « pas de solution » : selon le signe de a et le symbole, S est ℝ tout entier ou vide.")]
-            : r1 === r2
-              ? [texte("Racine double : le trinôme ne change pas de signe. Avec une inégalité large, la racine elle-même est solution ; avec une inégalité stricte, elle est exclue.")]
-              : symbole === "≤" || symbole === "≥"
-              ? [texte("Inégalité large : les racines font partie de l'ensemble-solution (crochets fermés).")]
-              : [texte("Inégalité stricte : les racines sont exclues (crochets ouverts).")],
-      },
-    ],
-  });
-  return etapes;
+  return phasesInequation(instance).map((phase) => ({ phase, consigne: consigneEtapeInequation(instance, phase) }));
 }
 
 /** Étapes d'apprentissage (une par écran) : titres du corrigé, jamais imprimées dans l'énoncé. */
@@ -192,13 +71,11 @@ function enoncePapierInequations(instance: ExerciceInequation): EnoncePapier {
   };
 }
 
-/** Ancien corrigé (pipelines Word/PDF historiques) : la même résolution, en paragraphes. */
+/** Ancien corrigé (pipelines historiques) : les résultats de chaque étape, en paragraphes. */
 function construireCorrectionInequations(instance: ExerciceInequation): BlocCorrection[] {
-  return etapesResolution(instance).flatMap((e) => e.lignes.filter((l) => l.label !== "Piège").map((l): BlocCorrection => ({ type: "paragraphe", fragments: l.fragments })));
-}
-
-function correctionDetailleeInequations(instance: ExerciceInequation): EtapeCorrection[] {
-  return etapesResolution(instance).flatMap((e, i) => e.lignes.map((l): EtapeCorrection => ({ label: l.label, sousQuestion: LETTRES[i], fragments: l.fragments })));
+  return correctionDetailleeInequations(instance)
+    .filter((e) => e.type === "resultat")
+    .map((e): BlocCorrection => ({ type: "paragraphe", fragments: e.fragments }));
 }
 
 function reponseBreveInequations(instance: ExerciceInequation): FragmentConsigne[] {
@@ -237,12 +114,12 @@ function baremeInequations(instance: ExerciceInequation): BaremeExercice {
   };
 }
 
-/** ★ Δ < 0 ou racine double ; ★★ deux racines ; ★★★ s'il faut d'abord simplifier ou si a < 0
- * avec deux racines (signe opposé à gérer entre les racines). */
-function difficulteInequations(instance: ExerciceInequation): 1 | 2 | 3 {
-  const deuxRacines = instance.delta > 0;
-  if (necessiteSimplification(instance) || (deuxRacines && instance.enonce.a < 0)) return 3;
-  return deuxRacines ? 2 : 1;
+/** Critères du niveau (grille commune) : étapes = écrans du corrigé, « signe de a » est une lecture ;
+ * méthode : choisir la méthode des racines parmi celles du cours ; piège dans les données : Δ ≤ 0
+ * (S = ℝ, ∅, un point ou ℝ privé d'un point — un cas qui n'en est pas un) ou a < 0 (signe opposé). */
+function criteresDifficulteInequations(instance: ExerciceInequation): CriteresDifficulte {
+  const piege = instance.delta <= 0 || instance.enonce.a < 0 ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeInequations(instance), [lettrePhaseInequation(instance, "signe_a")]), methode: 1, piege };
 }
 
 export const adaptateurEvaluationInequations: AdaptateurFeuilleExercices<ExerciceInequation> = {
@@ -255,10 +132,9 @@ export const adaptateurEvaluationInequations: AdaptateurFeuilleExercices<Exercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteInequationId),
   construireEnonce: construireEnonceInequations,
   construireCorrection: construireCorrectionInequations,
-  difficulte: difficulteInequations,
+  criteresDifficulte: criteresDifficulteInequations,
   reponseBreve: reponseBreveInequations,
   correctionDetaillee: correctionDetailleeInequations,
   bareme: baremeInequations,
   enoncePapier: enoncePapierInequations,
-  dureeMinutes: 4,
 };
