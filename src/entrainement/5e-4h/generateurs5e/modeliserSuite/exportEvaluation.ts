@@ -1,6 +1,8 @@
 import { anneeDuRang, somme, terme } from "../../core5e/modeliserSuite";
 import type { ExerciceModeliserSuite } from "../../core5e/modeliserSuite";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EnoncePapier, ErreurFrequente, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur5e/typesModeliserSuite";
 import type { PhaseModeliserSuite } from "../../moteur5e/typesModeliserSuite";
@@ -80,8 +82,10 @@ function construireCorrection(e: ExerciceModeliserSuite): BlocCorrection[] {
 
 /** ★★ modélisation directe ; ★★★ si u₁ est à calculer (valeur de l'année précédente) ou si le
  * seuil se cherche par tableau. Jamais selon la nature (ce serait trahir le verdict). */
-function difficulte(e: ExerciceModeliserSuite): 1 | 2 | 3 {
-  return e.depart === "avant" || e.variante === "seuil" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceModeliserSuite): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeModeliserSuite(e)), methode: 2, piege: 1 };
 }
 
 // ============================================================================
@@ -165,11 +169,10 @@ export const adaptateurEvaluationModeliserSuite: AdaptateurFeuilleExercices<Exer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteModeliserSuite),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeModeliserSuite,
   bareme,
   enoncePapier,
-  dureeMinutes: 10,
   profilInstance: profilModeliserSuite,
 };

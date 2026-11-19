@@ -8,6 +8,8 @@ import type {
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { blocDonnees, consigneEcran, formatReponseAttenduePhaseLatex } from "../../ui6e/formatIntegralesDefinies";
 import { decimalLatex, valeurExacteLatex } from "../../ui6e/formatMonome";
@@ -17,7 +19,7 @@ import type { PhaseCalculPrimitives } from "../../moteur6e/typesCalculPrimitives
 import { phasesPourExercice as phasesPrimitive } from "../../moteur6e/typesCalculPrimitives";
 import {
   definitionFPrimitive,
-  difficultePrimitive,
+  jugementPrimitive,
   erreursFrequentesPrimitive,
   methodePapierPrimitive,
   poidsEtapesPrimitive,
@@ -136,10 +138,11 @@ function enoncePapier(e: ExerciceIntegralesDefinies): EnoncePapier {
 
 const piegePropre = piegeIntegralesDefinies;
 
-function difficulte(e: ExerciceIntegralesDefinies): 1 | 2 | 3 {
-  if (e.scenario === "parametre") return e.technique === "polynomiale" ? 2 : 3;
-  const base = difficultePrimitive(e.primitive);
-  return e.scenario === "moyenne" ? (Math.max(2, base) as 2 | 3) : base;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceIntegralesDefinies): CriteresDifficulte {
+  const jugement = e.scenario === "parametre" ? { methode: 1 as const, piege: 1 as const } : jugementPrimitive(e.primitive);
+  return { ...etapesDuCorrige(correctionDetailleeIntegralesDefinies(e)), ...jugement };
 }
 
 function reponseBreve(e: ExerciceIntegralesDefinies): FragmentConsigne[] {
@@ -178,12 +181,11 @@ export const adaptateurEvaluationIntegralesDefinies: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteIntegralesDefinies),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeIntegralesDefinies,
   bareme,
   enoncePapier,
-  dureeMinutes: 12,
   profilInstance: profilIntegralesDefinies,
   libelleCasParticulier: LIBELLE_CAS_INTEGRALES_DEFINIES,
   // Résultat irrationnel dans 5 000 tirages sur 5 000.

@@ -9,6 +9,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { estPhaseChoix, phasesExercice } from "../../moteur6e/typesEncadrerIntegrales";
 import type { PhaseEncadrerIntegrales } from "../../moteur6e/typesEncadrerIntegrales";
@@ -164,8 +166,11 @@ function enoncePapier(e: ExerciceEncadrerIntegrales): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeEncadrerIntegrales;
 
-function difficulte(e: ExerciceEncadrerIntegrales): 1 | 2 | 3 {
-  return e.variante === "signe" && !e.inverse ? 1 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceEncadrerIntegrales): CriteresDifficulte {
+  const r = e.variante === "signe" || e.variante === "comparer" ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: r, piege: r };
 }
 
 // ============================================================================
@@ -243,11 +248,10 @@ export const adaptateurEvaluationEncadrerIntegrales: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteEncadrerIntegrales),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 6,
   profilInstance: profilEncadrerIntegrales,
 };

@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { PHASES_ACCUMULER_GRANDEUR } from "../../moteur6e/typesAccumulerGrandeur";
 import type { PhaseAccumulerGrandeur } from "../../moteur6e/typesAccumulerGrandeur";
@@ -72,8 +74,10 @@ function enoncePapier(e: ExerciceAccumulerGrandeur): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeAccumulerGrandeur;
 
-function difficulte(e: ExerciceAccumulerGrandeur): 1 | 2 | 3 {
-  return VARIANTES_CALCULATRICE_ACCUMULER.includes(e.variante) ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceAccumulerGrandeur): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: 1 };
 }
 
 function reponseBreve(e: ExerciceAccumulerGrandeur): FragmentConsigne[] {
@@ -113,12 +117,11 @@ export const adaptateurEvaluationAccumulerGrandeur: AdaptateurFeuilleExercices<E
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteAccumulerGrandeur),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 15,
   profilInstance: profilAccumulerGrandeur,
   calculatriceIndispensable: VARIANTES_CALCULATRICE_ACCUMULER,
 };

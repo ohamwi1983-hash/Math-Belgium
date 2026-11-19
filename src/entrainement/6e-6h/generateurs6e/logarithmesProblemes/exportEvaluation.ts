@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { PhaseLogarithmesProblemes } from "../../moteur6e/typesLogarithmesProblemes";
 import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, LIBELLE_PHASE, phasesPourExercice } from "../../ui6e/formatLogarithmesProblemes";
@@ -142,18 +144,11 @@ function pieges(exercice: ExerciceLogarithmesProblemes): PiegeLog[] {
   }
 }
 
-function difficulteLogarithmesProblemes(exercice: ExerciceLogarithmesProblemes): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "A":
-      return exercice.sousType === "resoudreT" && exercice.variante === "simple" ? 1 : 2;
-    case "B":
-      return 3;
-    case "C":
-    case "F":
-      return 2;
-    case "E":
-      return exercice.deduireAB || exercice.avecEcran4 ? 3 : 2;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceLogarithmesProblemes): CriteresDifficulte {
+  const methode = e.famille === "A" || e.famille === "B" ? 2 : e.famille === "E" && !e.deduireAB ? 0 : 1;
+  return { ...etapesDuCorrige(correctionDetailleeLogarithmesProblemes(e)), methode, piege: 1 };
 }
 
 function reponseBreveLogarithmesProblemes(exercice: ExerciceLogarithmesProblemes): FragmentConsigne[] {
@@ -269,10 +264,9 @@ export const adaptateurEvaluationLogarithmesProblemes: AdaptateurFeuilleExercice
   genererInstanceAvecVariante: construireAvecVarianteId,
   construireEnonce: construireEnonceLogarithmesProblemes,
   construireCorrection: construireCorrectionLogarithmesProblemes,
-  difficulte: difficulteLogarithmesProblemes,
+  criteresDifficulte,
   reponseBreve: reponseBreveLogarithmesProblemes,
   correctionDetaillee: correctionDetailleeLogarithmesProblemes,
   bareme: baremeLogarithmesProblemes,
   enoncePapier: enoncePapierLogarithmesProblemes,
-  dureeMinutes: 12,
 };

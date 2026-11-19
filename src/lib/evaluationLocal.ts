@@ -9,6 +9,7 @@ import {
   type ItemEvaluation,
 } from '../entrainement/export/assemblerEvaluationHtml'
 import { annexeFormulaire } from '../entrainement/export/annexesPapier'
+import { niveauEtDuree, type NiveauDifficulte } from '../entrainement/export/niveauDifficulte'
 import { findChapter } from '../content/chaptersIndex'
 import { encoderCode, genererAvecCode, tirerGraine } from '../entrainement/export/codeExercice'
 import { ENTRAINEMENT_REGISTRY } from '../entrainement/registry'
@@ -495,9 +496,21 @@ function joindreAvecLettres(listes: FragmentConsigne[][]): FragmentConsigne[] {
   return listes.flatMap((fr, i) => [texte(`${i > 0 ? ' · ' : ''}${LETTRES[i] ?? i + 1}) `), ...fr])
 }
 
-function difficulteMax(valeurs: (1 | 2 | 3 | undefined)[]): 1 | 2 | 3 | undefined {
-  const d = valeurs.filter((v): v is 1 | 2 | 3 => v !== undefined)
-  return d.length > 0 ? (Math.max(...d) as 1 | 2 | 3) : undefined
+/** Niveau (1–7) et palier affichés pour un exercice — grille commune (`niveauDifficulte.ts`), ou
+ * conversion provisoire des étoiles d'un chapitre pas encore noté. Plusieurs instances regroupées :
+ * le plus haut niveau. */
+function niveauItem(niveaux: (NiveauDifficulte | undefined)[]): Pick<ItemEvaluation, 'niveau' | 'palier'> {
+  const n = niveaux.filter((v): v is NiveauDifficulte => v !== undefined)
+  if (n.length === 0) return {}
+  const max = n.reduce((a, b) => (b.niveau > a.niveau ? b : a))
+  return { niveau: max.niveau, palier: max.palier }
+}
+
+/** Durée d'un item = somme des durées par exercice (indéfinie si l'adaptateur n'en donne aucune). */
+function dureeItem(niveaux: (NiveauDifficulte | undefined)[], dureeConstante: number | undefined, nombre: number): number | undefined {
+  const d = niveaux.map((v) => v?.dureeMinutes)
+  if (d.every((x): x is number => x !== undefined)) return d.reduce((t, x) => t + x, 0)
+  return dureeConstante !== undefined ? dureeConstante * nombre : undefined
 }
 
 function champsCommuns(el: ElementBase): Pick<ItemEvaluation, 'processus' | 'titreSection' | 'notion' | 'sectionCours'> {
@@ -588,17 +601,18 @@ function itemExercice(el: Extract<ElementPlan, { type: 'exercice' }>): ItemEvalu
 
   if (tirees.length === 1) {
     const { inst, instance } = tirees[0]
+    const niveau = niveauEtDuree(adaptateur, instance)
     const item: ItemEvaluation = {
       ...communs,
       nature: 'exercice',
       points: inst.points,
       section: adaptateur.construireEnonce(instance),
       correction: adaptateur.construireCorrection(instance),
-      difficulte: adaptateur.difficulte?.(instance),
+      ...niveauItem([niveau]),
       reponseBreve: adaptateur.reponseBreve?.(instance),
       correctionDetaillee: adaptateur.correctionDetaillee?.(instance),
       bareme: adaptateur.bareme?.(instance),
-      dureeMinutes: adaptateur.dureeMinutes,
+      dureeMinutes: dureeItem([niveau], adaptateur.dureeMinutes, 1),
       code: codeInstance(el.generatorId, adaptateur, inst.varianteId, inst.graine),
     }
     return adaptateur.enoncePapier ? appliquerEnoncePapier(item, adaptateur.enoncePapier(instance)) : item
@@ -633,17 +647,18 @@ function itemExercice(el: Extract<ElementPlan, { type: 'exercice' }>): ItemEvalu
     }
   }
   const premier = tirees[0]
+  const niveaux = tirees.map(({ instance }) => niveauEtDuree(adaptateur, instance))
   return {
     ...communs,
     nature: 'exercice',
     points,
     section,
     correction,
-    difficulte: difficulteMax(tirees.map(({ instance }) => adaptateur.difficulte?.(instance))),
+    ...niveauItem(niveaux),
     reponseBreve: reponses ? joindreAvecLettres(reponses) : undefined,
     correctionDetaillee,
     bareme,
-    dureeMinutes: adaptateur.dureeMinutes !== undefined ? adaptateur.dureeMinutes * tirees.length : undefined,
+    dureeMinutes: dureeItem(niveaux, adaptateur.dureeMinutes, tirees.length),
     code: codeInstance(el.generatorId, adaptateur, premier.inst.varianteId, premier.inst.graine),
   }
 }
@@ -710,7 +725,9 @@ async function itemVraiFauxRegroupe(elements: ElementVraiFaux[]): Promise<ItemEv
     points: affirmations.reduce((t, a) => t + a.points, 0),
     section: { enteteFragments: [texte(seule ? 'Vrai ou faux ? Justifie ta réponse.' : CONSIGNE_VRAI_FAUX)], questions: affirmations.map((a) => ({ consigne: a.enonce })) },
     correction: affirmations.map((a, i) => ({ type: 'paragraphe', fragments: [texte(`${prefixe(i)}${vf(a.reponse)} — `), ...a.justification] })),
-    difficulte: 1,
+    // Vrai/faux : pas encore noté par la grille — ancien « ★ » converti (niveau 2, Base), provisoire.
+    niveau: 2,
+    palier: 'base',
     reponseBreve: [texte(resume)],
     correctionDetaillee: affirmations.map((a, i) => ({ label: vf(a.reponse), sousQuestion: seule ? undefined : lettre(i), fragments: a.justification })),
     bareme: {

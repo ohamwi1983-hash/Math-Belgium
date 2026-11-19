@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phaseApres, phaseInitiale, type PhaseHyperboliques } from "../../moteur6e/typesHyperboliques";
 import { pariteAttendueA } from "../../moteur6e/verificationHyperboliques";
@@ -90,7 +92,6 @@ function construireCorrectionHyperboliques(exercice: ExerciceHyperboliques): Blo
 const SH = "\\operatorname{sh}";
 const CH = "\\operatorname{ch}";
 const PHRASE_PARITE = { paire: "f est paire.", impaire: "f est impaire.", aucune: "f n'est ni paire ni impaire." } as const;
-const TYPES_PIEGES_A = new Set(["shCarre", "xSh", "shPlusConstante", "shPlusCh", "shMoinsCh"]);
 
 function fonctionLatex(exercice: ExerciceHyperboliques): string {
   return blocDonnees(exercice)[0];
@@ -108,18 +109,15 @@ function carreInconnueLatex(exercice: ExerciceHyperboliquesB): string {
   return d2 === 1 ? `${n}` : `\\dfrac{${n}}{${d2}}`;
 }
 
-function difficulteHyperboliques(exercice: ExerciceHyperboliques): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "A":
-      return TYPES_PIEGES_A.has(exercice.type) ? 2 : 1;
-    case "B":
-      if (exercice.sousType === "trouverCh") return 1;
-      return exercice.signeX0 === null ? 3 : 2;
-    case "C":
-      return 2;
-    case "D":
-      return 3;
-  }
+/** Parité dont la réponse attendue contredit le réflexe (variantes « piège ») — sh², x·sh, sh + c. */
+const PIEGES_PARITE = new Set(["shCarre", "xSh", "shPlusConstante"]);
+
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceHyperboliques): CriteresDifficulte {
+  const [methode, piege]: [0 | 1, 0 | 1] =
+    e.famille === "A" ? [0, PIEGES_PARITE.has(e.type) ? 1 : 0] : e.famille === "B" ? [0, e.sousType === "trouverCh" ? 0 : 1] : e.famille === "D" ? [1, 0] : [0, 0];
+  return { ...etapesDuCorrige(correctionDetailleeHyperboliques(e)), methode, piege };
 }
 
 function reponseBreveHyperboliques(exercice: ExerciceHyperboliques): FragmentConsigne[] {
@@ -287,11 +285,10 @@ export const adaptateurEvaluationHyperboliques: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteId),
   construireEnonce: construireEnonceHyperboliques,
   construireCorrection: construireCorrectionHyperboliques,
-  difficulte: difficulteHyperboliques,
+  criteresDifficulte,
   reponseBreve: reponseBreveHyperboliques,
   correctionDetaillee: correctionDetailleeHyperboliques,
   bareme: baremeHyperboliques,
   enoncePapier: enoncePapierHyperboliques,
-  dureeMinutes: 6,
 };
 

@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { anglePasLatex, sommetsAutres } from "../../moteur6e/modelePolygonesReguliers";
 import { phasesDe } from "../../moteur6e/typesPolygonesReguliers";
 import type { PhasePolygones } from "../../moteur6e/typesPolygonesReguliers";
@@ -133,10 +135,11 @@ function enoncePapier(e: ExercicePolygones): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleePolygones;
 
-function difficulte(e: ExercicePolygones): 1 | 2 | 3 {
-  if (e.variante === "mesures") return 2;
-  if (e.variante === "sommets" && e.n === 4) return 2;
-  return 3;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExercicePolygones): CriteresDifficulte {
+  const methode = e.variante === "mesures" ? 0 : 1;
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode, piege: methode, anglesEnPi: true };
 }
 
 const POIDS: Record<PhasePolygones, number> = {
@@ -211,12 +214,11 @@ export const adaptateurEvaluationPolygonesReguliers: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 12,
   profilInstance: profilPolygones,
   libelleCasParticulier: LIBELLE_CAS_POLYGONES,
 };

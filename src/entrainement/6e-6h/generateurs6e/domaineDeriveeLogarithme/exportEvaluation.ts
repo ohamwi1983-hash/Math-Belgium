@@ -9,6 +9,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phaseApres, phaseInitiale } from "../../moteur6e/typesDomaineDeriveeLogarithme";
 import type { PhaseDomaineDeriveeLogarithme } from "../../moteur6e/typesDomaineDeriveeLogarithme";
@@ -252,23 +254,11 @@ function baremeDomaineDeriveeLogarithme(exercice: Exercice): BaremeExercice {
   return { reponseFinale: reponseBreveDomaineDeriveeLogarithme(exercice), criteres, erreursFrequentes: erreursFrequentes(exercice), reponsesAcceptees: acceptees };
 }
 
-function difficulteDomaineDeriveeLogarithme(exercice: Exercice): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "A":
-      return 1;
-    case "B":
-      return exercice.sousType === "doubleContrainte" ? 3 : 2;
-    case "C":
-      return 2;
-    case "D":
-      return exercice.sousType === "expoSurLn" ? 3 : 2;
-    case "E":
-      return exercice.sousType === "puissanceSimple" ? 2 : 3;
-    case "F":
-      return exercice.sousType === "arctanLog" ? 3 : 2;
-    case "G":
-      return 3;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: Exercice): CriteresDifficulte {
+  const [methode, piege]: [0 | 1, 0 | 1] = e.famille === "E" || e.famille === "G" ? [1, 0] : e.famille === "F" ? [1, 1] : [0, 0];
+  return { ...etapesDuCorrige(correctionDetailleeDomaineDeriveeLogarithme(e)), methode, piege };
 }
 
 // ============================================================================
@@ -293,12 +283,11 @@ export const adaptateurEvaluationDomaineDeriveeLogarithme: AdaptateurFeuilleExer
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id as FamilleDomaineDeriveeLogarithme),
   construireEnonce: construireEnonceDomaineDeriveeLogarithme,
   construireCorrection: construireCorrectionDomaineDeriveeLogarithme,
-  difficulte: difficulteDomaineDeriveeLogarithme,
+  criteresDifficulte,
   reponseBreve: reponseBreveDomaineDeriveeLogarithme,
   correctionDetaillee: correctionDetailleeDomaineDeriveeLogarithme,
   bareme: baremeDomaineDeriveeLogarithme,
   enoncePapier: enoncePapierDomaineDeriveeLogarithme,
-  dureeMinutes: 6,
   // Nombre de questions VARIABLE selon la famille (2 pour A/B/F, 3 pour C/D/E/G) et en-tête
   // dépendant de l'instance (`blocDonnees`) — aucune des conditions de `regroupable` n'est réunie.
 };

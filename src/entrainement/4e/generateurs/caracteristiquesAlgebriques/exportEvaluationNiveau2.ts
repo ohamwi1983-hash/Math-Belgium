@@ -217,10 +217,6 @@ export function reponseBreveNiveau2(e: ExerciceCaracteristiquesAlgebriquesNiveau
   return [...ceFragments(e), texte(" ; "), latex(domaineLatex(e)), texte(" ; "), ...ordonneeFragments(e), texte(" ; "), ...zerosFragments(e, zerosAttendus(e))];
 }
 
-export function difficulteNiveau2(e: ExerciceCaracteristiquesAlgebriquesNiveau2): 1 | 2 | 3 {
-  return e.famille === "carre" || e.famille === "cube" ? 2 : 3;
-}
-
 // ---------------------------------------------------------------------------------------------
 // Corrigé détaillé
 // ---------------------------------------------------------------------------------------------

@@ -9,6 +9,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   aireExacte,
@@ -160,8 +162,10 @@ function enoncePapier(e: ExerciceFonctionAire): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeFonctionAire;
 
-function difficulte(e: ExerciceFonctionAire): 1 | 2 | 3 {
-  return e.variante === "extremums" || e.variante === "valeurs" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceFonctionAire): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: e.variante === "valeurs" ? 0 : 1, piege: 1 };
 }
 
 // ============================================================================
@@ -266,11 +270,10 @@ export const adaptateurEvaluationFonctionAire: AdaptateurFeuilleExercices<Exerci
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteFonctionAire),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 10,
   profilInstance: profilFonctionAire,
 };

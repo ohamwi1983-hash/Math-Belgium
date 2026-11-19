@@ -20,6 +20,8 @@ import type {
   SectionExercice,
   ZoneReponse,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phaseApres, phaseInitiale, type PhaseInequationLogarithmique } from "../../moteur6e/typesInequationsLogarithmiques";
 import {
@@ -128,8 +130,6 @@ function construireCorrectionInequationsLogarithmiques(exercice: ExerciceInequat
 // avec les 4 étapes du corrigé.
 // ============================================================================
 
-const DUREE_MINUTES_INEQUATIONS_LOG = 6;
-
 /** Ensemble en LaTeX — `\varnothing` pour un ensemble vide (jamais une chaîne vide). */
 function ensembleLatex(ensemble: EnsembleReelGuide): string {
   return ensemble.forme === "intervalles" && ensemble.morceaux.length === 0 ? "\\varnothing" : formatEnsembleReelLatex(ensemble);
@@ -186,21 +186,12 @@ function reponseBreveInequationsLog(exercice: ExerciceInequationLogarithmique): 
   }
 }
 
-function difficulteInequationsLog(exercice: ExerciceInequationLogarithmique): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "A":
-      return exercice.baseSuperieureA1 && exercice.m > 0 ? 1 : 2;
-    case "B":
-      return exercice.sousType === "racine" ? 3 : 2;
-    case "C":
-      return exercice.sousType === "produit" ? 3 : 2;
-    case "D":
-      return 3;
-    case "E":
-      return 2;
-    case "F":
-      return 3;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceInequationLogarithmique): CriteresDifficulte {
+  const [methode, piege]: [0 | 1, 0 | 1] =
+    e.famille === "A" ? [0, e.baseSuperieureA1 ? 0 : 1] : e.famille === "B" ? [e.sousType === "racine" ? 1 : 0, 1] : [1, 1];
+  return { ...etapesDuCorrige(correctionDetailleeInequationsLog(e)), methode, piege };
 }
 
 // ---------------------------------------------------------------------------- Famille A
@@ -583,12 +574,11 @@ export const adaptateurEvaluationInequationsLogarithmiques: AdaptateurFeuilleExe
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id as IdVarianteInequationLogarithmique),
   construireEnonce: construireEnonceInequationsLogarithmiques,
   construireCorrection: construireCorrectionInequationsLogarithmiques,
-  difficulte: difficulteInequationsLog,
+  criteresDifficulte,
   reponseBreve: reponseBreveInequationsLog,
   correctionDetaillee: correctionDetailleeInequationsLog,
   bareme: baremeInequationsLog,
   enoncePapier: enoncePapierInequationsLog,
-  dureeMinutes: DUREE_MINUTES_INEQUATIONS_LOG,
   // Plusieurs questions par instance (1 à 4 selon la famille) ET consigne dépendante de l'instance
   // pour plusieurs familles (B/C mentionnent le sous-type, F mentionne le carré parfait) — aucune
   // des deux conditions de `regroupable` n'est réunie, voir sa doc dans `genererFeuilleExercices.ts`.

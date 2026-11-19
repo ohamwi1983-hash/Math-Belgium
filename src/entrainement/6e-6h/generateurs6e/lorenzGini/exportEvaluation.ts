@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur6e/typesLorenzGini";
 import type { PhaseLorenz } from "../../moteur6e/typesLorenzGini";
@@ -122,9 +124,12 @@ function enoncePapier(e: ExerciceLorenzGini): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeLorenzGini;
 
-function difficulte(e: ExerciceLorenzGini): 1 | 2 | 3 {
-  if (e.variante === "lecture") return e.courbe.famille === "expo" ? 3 : 2;
-  return 3;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceLorenzGini): CriteresDifficulte {
+  // Variantes « lecture » : l'interprétation de L(x) (écran b) est une lecture.
+  const lecture = e.variante === "lecture";
+  return { ...etapesDuCorrige(correctionDetaillee(e), lecture ? ["b"] : []), methode: 1, piege: lecture ? 0 : 1 };
 }
 
 // ============================================================================
@@ -196,12 +201,11 @@ export const adaptateurEvaluationLorenzGini: AdaptateurFeuilleExercices<Exercice
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteLorenzGini),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 10,
   profilInstance: profilLorenzGini,
   calculatriceIndispensable: VARIANTES_CALCULATRICE_LORENZ,
 };

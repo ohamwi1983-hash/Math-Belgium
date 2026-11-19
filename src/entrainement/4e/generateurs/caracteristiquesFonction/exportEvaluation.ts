@@ -10,6 +10,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   constanceAttendueCaracteristiques,
@@ -273,9 +275,17 @@ function baremeCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFoncti
 
 /** Plus il y a d'exclusions particulières (intervalles sans tracé, discontinuité « trou » ou point
  * redéfini), plus la lecture du domaine et de f(v) demande de réflexion. */
-function difficulteCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFonction): 1 | 2 | 3 {
-  const pieges = exercice.gaps.length + (exercice.discontinuite.type === "pointPlein" ? 0 : 1);
-  return pieges >= 2 ? 3 : 2;
+/** Lettres d'étapes du corrigé (toutes les étapes, quand elles sont toutes des lectures). */
+function lettresDe(etapes: { sousQuestion?: string }[]): string[] {
+  return [...new Set(etapes.map((x) => x.sousQuestion).filter((l): l is string => !!l))];
+}
+
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceCaracteristiquesFonction): CriteresDifficulte {
+  // Lecture graphique pure : tous les écrans sont des lectures.
+  const etapes = correctionDetailleeCaracteristiquesFonction(e);
+  return { ...etapesDuCorrige(etapes, lettresDe(etapes)), methode: 0, piege: 1 };
 }
 
 export const adaptateurEvaluationCaracteristiquesFonction: AdaptateurFeuilleExercices<ExerciceCaracteristiquesFonction> = {
@@ -286,10 +296,9 @@ export const adaptateurEvaluationCaracteristiquesFonction: AdaptateurFeuilleExer
   genererInstance: genererExerciceCaracteristiquesFonction,
   construireEnonce: construireEnonceCaracteristiquesFonction,
   construireCorrection: construireCorrectionCaracteristiquesFonction,
-  difficulte: difficulteCaracteristiquesFonction,
+  criteresDifficulte,
   reponseBreve: reponseBreveCaracteristiquesFonction,
   correctionDetaillee: correctionDetailleeCaracteristiquesFonction,
   bareme: baremeCaracteristiquesFonction,
   enoncePapier: enoncePapierCaracteristiquesFonction,
-  dureeMinutes: 8,
 };

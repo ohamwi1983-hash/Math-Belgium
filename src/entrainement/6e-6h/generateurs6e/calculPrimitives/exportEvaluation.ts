@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { aideNiveau1, blocDonnees, consigneEcran, formatReponseAttenduePhaseLatex, primitiveLatex } from "../../ui6e/formatCalculPrimitives";
 import { phasesPourExercice } from "../../moteur6e/typesCalculPrimitives";
@@ -90,22 +92,20 @@ export function reponseEtapePrimitive(e: ExerciceCalculPrimitives, phase: PhaseC
 }
 
 /** Difficulté propre au calcul de la primitive. */
-export function difficultePrimitive(e: ExerciceCalculPrimitives): 1 | 2 | 3 {
-  switch (e.famille) {
-    case "A":
-      return e.sousType === "direct" ? 1 : 2;
-    case "B":
-      return 2;
-    case "C":
-      return e.sousType === "1" || e.sousType === "3" ? 3 : 2;
-    case "D":
-      return e.sousType === "2" || e.sousType === "4" ? 3 : 2;
-    case "E":
-    case "G":
-      return 3;
-    case "F":
-      return 2;
-  }
+/** Méthode et piège d'une technique de primitive (familles communes à 6gen23, 6gen24 et 6gen25) :
+ * réécrire avant d'intégrer (diviser, x·√x) ou reconnaître u′·g(u) sans que l'énoncé le dise → 1 ;
+ * D5 (aucune IPP nécessaire, à reconnaître) → méthode 1 et piège 1 ; technique imposée → 0. */
+export function jugementPrimitive(e: ExerciceCalculPrimitives): { methode: 0 | 1; piege: 0 | 1 } {
+  if (e.famille === "A") return { methode: e.sousType === "direct" ? 0 : 1, piege: 0 };
+  if (e.famille === "B") return { methode: 1, piege: 0 };
+  if (e.famille === "D" && e.sousType === "5") return { methode: 1, piege: 1 };
+  return { methode: 0, piege: 0 };
+}
+
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceCalculPrimitives): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeCalculPrimitives(e)), ...jugementPrimitive(e) };
 }
 
 /** Erreurs fréquentes communes à tout calcul de primitive. */
@@ -174,12 +174,11 @@ export const adaptateurEvaluationCalculPrimitives: AdaptateurFeuilleExercices<Ex
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteCalculPrimitives),
   construireEnonce,
   construireCorrection,
-  difficulte: difficultePrimitive,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeCalculPrimitives,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
   profilInstance: profilCalculPrimitives,
   libelleCasParticulier: LIBELLE_CAS_CALCUL_PRIMITIVES,
 };

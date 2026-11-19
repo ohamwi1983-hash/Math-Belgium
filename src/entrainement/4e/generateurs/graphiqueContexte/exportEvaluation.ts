@@ -9,6 +9,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { texte } from "../../../export/fragmentsDocx";
 import { CONSIGNE_TYPE, LIBELLE_TYPE, questionTexte } from "../../ui/formatGraphiqueContexte";
 import { construireSvgGraphiqueContexte } from "../../ui/svgGraphiqueContexte";
@@ -139,15 +141,17 @@ function baremeGraphiqueContexte(e: ExerciceGraphiqueContexte): BaremeExercice {
 
 /** ★★ par défaut ; ★★★ dès deux difficultés de lecture : inéquation à plusieurs intervalles ou à
  * niveau exclu, 3 antécédents ou plus, paliers à écarter, asymptote à reconnaître. */
-function difficulteGraphiqueContexte(e: ExerciceGraphiqueContexte): 1 | 2 | 3 {
-  let pieges = 0;
-  for (const q of e.questions) {
-    if (q.type === "inequation" && (q.solution.length > 1 || q.comparateur === ">" || q.comparateur === "<")) pieges++;
-    if (q.type === "antecedent" && q.solutions.length >= 3) pieges++;
-    if (q.type === "variation" && aDesPaliers(e)) pieges++;
-    if (q.type === "tendance") pieges++;
-  }
-  return pieges >= 2 ? 3 : 2;
+/** Lettres d'étapes du corrigé (toutes les étapes, quand elles sont toutes des lectures). */
+function lettresDe(etapes: { sousQuestion?: string }[]): string[] {
+  return [...new Set(etapes.map((x) => x.sousQuestion).filter((l): l is string => !!l))];
+}
+
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceGraphiqueContexte): CriteresDifficulte {
+  // Identifier la caractéristique demandée, puis la lire : tous les écrans sont des lectures.
+  const etapes = correctionDetailleeGraphiqueContexte(e);
+  return { ...etapesDuCorrige(etapes, lettresDe(etapes)), methode: 1, piege: 1 };
 }
 
 export const adaptateurEvaluationGraphiqueContexte: AdaptateurFeuilleExercices<ExerciceGraphiqueContexte> = {
@@ -158,11 +162,10 @@ export const adaptateurEvaluationGraphiqueContexte: AdaptateurFeuilleExercices<E
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdContexteGraphique),
   construireEnonce: construireEnonceGraphiqueContexte,
   construireCorrection: construireCorrectionGraphiqueContexte,
-  difficulte: difficulteGraphiqueContexte,
+  criteresDifficulte,
   reponseBreve: reponseBreveGraphiqueContexte,
   correctionDetaillee: correctionDetailleeGraphiqueContexte,
   bareme: baremeGraphiqueContexte,
   enoncePapier: enoncePapierGraphiqueContexte,
-  dureeMinutes: 10,
   profilInstance: profilGraphiqueContexte,
 };

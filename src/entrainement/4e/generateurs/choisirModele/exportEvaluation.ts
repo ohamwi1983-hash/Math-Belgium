@@ -7,9 +7,11 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import type { ExerciceChoisirModele } from "./types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceChoisirModele } from "./index";
-import { INFOS_CONTEXTE, modeleLatex, nombreLatex, uneSeuleTransformation } from "./modele";
+import { INFOS_CONTEXTE, modeleLatex, nombreLatex } from "./modele";
 import {
   CONSIGNE_FAMILLES,
   justificationFamille,
@@ -108,11 +110,12 @@ function construireCorrectionChoisirModele(e: ExerciceChoisirModele): BlocCorrec
 // Feuilles enrichies
 // ---------------------------------------------------------------------------------------------
 
-function difficulteChoisirModele(e: ExerciceChoisirModele): 1 | 2 | 3 {
-  if (uneSeuleTransformation(e)) return 1;
-  const deuxSolutions = e.question4.type === "resoudre" && e.question4.solutions.length === 2;
-  if (e.a < 0 || deuxSolutions) return 3;
-  return 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceChoisirModele): CriteresDifficulte {
+  const piege = e.contexte === "jet" || e.contexte === "glacon" || e.contexte === "toboggan" ? 0 : 1;
+  // Reconnaître la fonction de référence et lire les transformations sur la courbe : lectures.
+  return { ...etapesDuCorrige(correctionDetailleeChoisirModele(e), ["a", "b"]), methode: 2, piege };
 }
 
 function reponseBreveChoisirModele(e: ExerciceChoisirModele): FragmentConsigne[] {
@@ -170,10 +173,9 @@ export const adaptateurEvaluationChoisirModele: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce: construireEnonceChoisirModele,
   construireCorrection: construireCorrectionChoisirModele,
-  difficulte: difficulteChoisirModele,
+  criteresDifficulte,
   reponseBreve: reponseBreveChoisirModele,
   correctionDetaillee: correctionDetailleeChoisirModele,
   bareme: baremeChoisirModele,
   enoncePapier: enoncePapierChoisirModele,
-  dureeMinutes: 10,
 };

@@ -1,5 +1,7 @@
 import type { ExerciceDeterminerParametresLogarithme } from "../../core6e/determinerParametresLogarithme.types";
 import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { CONSIGNE_GENERALE, consigneEcran, descriptionGraphique, formatEquationBLatex, formatFonctionLatex, ordonneeSecondeMarque } from "../../ui6e/formatDeterminerParametresLogarithme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDeterminerParametresLogarithme } from "./index";
@@ -56,10 +58,10 @@ function lnSecondeMarque(exercice: ExerciceDeterminerParametresLogarithme): numb
   return exercice.variante === "pointE" ? 1 : 2;
 }
 
-function difficulte(exercice: ExerciceDeterminerParametresLogarithme): 1 | 2 | 3 {
-  // Tangente : une lecture de pente puis f′(1) = b ; point en e : le piège f(e) = a + b ; point
-  // en e² : même piège, doublé de ln(e²) = 2.
-  return exercice.variante === "pointE2" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceDeterminerParametresLogarithme): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: e.variante === "pente" ? 0 : 1 };
 }
 
 function reponseBreve(exercice: ExerciceDeterminerParametresLogarithme): FragmentConsigne[] {
@@ -198,10 +200,9 @@ export const adaptateurEvaluationDeterminerParametresLogarithme: AdaptateurFeuil
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier: enoncePapier,
-  dureeMinutes: 6,
 };

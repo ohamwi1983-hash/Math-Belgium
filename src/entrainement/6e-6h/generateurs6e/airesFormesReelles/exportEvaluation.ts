@@ -10,6 +10,8 @@ import type {
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesExercice } from "../../moteur6e/modeleAiresFormesReelles";
 import type { PhaseFormesReelles } from "../../moteur6e/modeleAiresFormesReelles";
@@ -182,9 +184,11 @@ function bareme(e: E): BaremeExercice {
   return { reponseFinale: reponseBreve(e), criteres, erreursFrequentes: erreurs(e), reponsesAcceptees: acceptees };
 }
 
-function difficulte(e: E): 1 | 2 | 3 {
-  if (e.situation === "vitrail") return 3;
-  return e.modele === "retrouver" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: E): CriteresDifficulte {
+  // « retrouver » : l'élève construit lui-même l'équation de l'arc (modélisation) ; sinon fonction donnée.
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: e.modele === "retrouver" ? 2 : 1, piege: 1 };
 }
 
 export const adaptateurEvaluationAiresFormesReelles: AdaptateurFeuilleExercices<E> = {
@@ -195,12 +199,11 @@ export const adaptateurEvaluationAiresFormesReelles: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteAiresFormesReelles),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 15,
   profilInstance: profilAiresFormesReelles,
 };
 

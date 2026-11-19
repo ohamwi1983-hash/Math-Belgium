@@ -1,0 +1,253 @@
+import type { AdaptateurFeuilleExercices, CriteresDifficulte, EtapeCorrection, FragmentConsigne } from "./genererFeuilleExercices";
+import { decouperLigneCalcul, lignesDepuisChaine } from "./corrigeTableau";
+
+/**
+ * Niveau de difficulté 1–7 (affiché « numéro + palier ») et durée PAR EXERCICE — décision de
+ * l'utilisateur, remplace les étoiles ★/★★/★★★ (voir `.claude/rules/feuilles-evaluations.md`,
+ * section « Niveau de difficulté et durée »).
+ *
+ * Grille commune, appliquée à l'instance TIRÉE (un même générateur peut donner un niveau 3 et un
+ * niveau 5 selon les nombres et la variante) :
+ * - Étapes (0/1/2) : étapes « qui transforment » (calcul, raisonnement) de l'instance — jamais les
+ *   écrans de pure lecture —, plus une CHARGE pour les étapes au calcul détaillé long (lignes de
+ *   calcul du corrigé « comme au tableau », `chargeEtape`) ; 1–2 étapes équivalentes → 0, 3–5 → 1,
+ *   6 et plus → 2.
+ * - Méthode (0/1/2), Piège (0/1) : jugés par l'adaptateur (`criteresDifficulte`).
+ * - Nombres (0/1) : calculatrice, valeur approchée, ln/e/π non remarquables → 1 ; donné par
+ *   l'adaptateur, ou détecté sur le corrigé (`nombresDuCorrige`).
+ * Niveau = score + 1 (1 à 7). Paliers : Base 1–2, Intermédiaire 3–4, Avancé 5–7.
+ * Durée (min) = 2 + 2 × étapes équivalentes + 1 × écran de lecture + 1 si Nombres + 2 si Méthode = 2.
+ *
+ * Adaptateur sans `criteresDifficulte` (chapitres pas encore notés) : conversion PROVISOIRE de ses
+ * étoiles (★ → 2, ★★ → 3, ★★★ → 5, palier conservé) et durée = sa constante `dureeMinutes`.
+ */
+
+export type Palier = "base" | "intermediaire" | "avance";
+
+export const LIBELLE_PALIER: Record<Palier, string> = { base: "Base", intermediaire: "Intermédiaire", avance: "Avancé" };
+
+/** Charge d'une étape longue : une étape dont le calcul détaillé dépasse `SEUILS_CHARGE[0]` lignes
+ * compte pour 2 étapes, au-delà de `SEUILS_CHARGE[1]` pour 3 (calibrage : voir les règles). */
+export const SEUILS_CHARGE: readonly number[] = [9, 15];
+
+export interface CriteresCalcules {
+  etapesTransformation: number;
+  etapesLecture: number;
+  /** Étapes ajoutées par la charge (étapes longues). */
+  charge: number;
+  etapesEquivalentes: number;
+  etapes: 0 | 1 | 2;
+  methode: 0 | 1 | 2;
+  piege: 0 | 1;
+  nombres: 0 | 1;
+}
+
+export interface NiveauDifficulte {
+  niveau: number;
+  palier: Palier;
+  score: number;
+  /** Absent pour une conversion provisoire d'étoiles. */
+  criteres?: CriteresCalcules;
+  /** Durée de CET exercice ; absente si l'adaptateur n'en donne aucune. */
+  dureeMinutes?: number;
+  /** `true` : niveau converti des anciennes étoiles (chapitre pas encore noté). */
+  provisoire: boolean;
+}
+
+export function palierDuNiveau(niveau: number): Palier {
+  return niveau <= 2 ? "base" : niveau <= 4 ? "intermediaire" : "avance";
+}
+
+export function scoreEtapes(etapesEquivalentes: number): 0 | 1 | 2 {
+  return etapesEquivalentes <= 2 ? 0 : etapesEquivalentes <= 5 ? 1 : 2;
+}
+
+/** Étapes équivalentes d'une étape de `lignes` lignes de calcul (1, 2 ou 3). */
+export function chargeEtape(lignes: number, seuils: readonly number[] = SEUILS_CHARGE): number {
+  return 1 + seuils.filter((s) => lignes > s).length;
+}
+
+const ETIQUETTES_HORS_CALCUL = /m[ée]thode|pi[eè]ge|rappel|remarque|conclusion|condition|v[ée]rification|ce qu.on utilise|r[ée]sultat/i;
+
+/** Lignes de calcul de chaque étape (lettre `sousQuestion`) du corrigé détaillé. Corrigé « comme au
+ * tableau » : lignes des blocs `calcul`. Corrigé historique (non typé) : chaque chaîne d'égalités des
+ * paragraphes de calcul est éclatée comme au tableau (`lignesDepuisChaine`, une ligne par égalité). */
+export function lignesCalculParEtape(etapes: EtapeCorrection[]): Map<string, number> {
+  const res = new Map<string, number>();
+  for (const e of etapes) {
+    if (!e.sousQuestion) continue;
+    let n = 0;
+    if (e.type) {
+      if (e.type === "calcul") n = e.calcul?.length ?? 0;
+    } else if (e.calcul) {
+      n = e.calcul.length;
+    } else if (!ETIQUETTES_HORS_CALCUL.test(e.label ?? "")) {
+      for (const f of e.fragments) {
+        if (f.type === "latex" && decouperLigneCalcul(f.valeur).droite !== null) n += lignesDepuisChaine(f.valeur).length;
+      }
+    }
+    res.set(e.sousQuestion, (res.get(e.sousQuestion) ?? 0) + n);
+  }
+  return res;
+}
+
+/** Étapes d'une instance lues sur son corrigé détaillé : une étape = une lettre `sousQuestion` (un
+ * écran du générateur). `lecture` : lettres des écrans de pure lecture (lire une valeur, un point,
+ * une caractéristique sur un graphique ou un tableau ; placer un point). */
+export function etapesDuCorrige(etapes: EtapeCorrection[], lecture: readonly string[] = []): Pick<CriteresDifficulte, "etapesTransformation" | "etapesLecture" | "lettresSansCharge"> {
+  const lettres = [...new Set(etapes.map((e) => e.sousQuestion).filter((l): l is string => !!l))];
+  const lues = lettres.filter((l) => lecture.includes(l));
+  // Corrigé sans lettres d'étapes (un seul écran, ex. 6gen19) : une étape.
+  return { etapesTransformation: lettres.length ? lettres.length - lues.length : 1, etapesLecture: lues.length, lettresSansCharge: lues };
+}
+
+/* ----------------------------------------------------------------------------------------------
+ * Nombres : détection sur le corrigé (même règle que l'analyse des cinq chapitres)
+ * -------------------------------------------------------------------------------------------- */
+
+function accolade(s: string, i: number): string | null {
+  if (s[i] !== "{") return null;
+  let n = 0;
+  for (let j = i; j < s.length; j++) {
+    if (s[j] === "{") n++;
+    else if (s[j] === "}") {
+      n--;
+      if (n === 0) return s.slice(i + 1, j);
+    }
+  }
+  return null;
+}
+
+const sansCommandes = (s: string) => s.replace(/\\(mathrm|text|operatorname)\{[^}]*\}/g, "").replace(/\\[a-zA-Z]+/g, "").replace(/[{}\s]/g, "");
+
+/** Une formule a-t-elle un nombre « non exact » : ≈, ln/log d'un nombre ≠ 1 et ≠ 10, e^(nombre),
+ * e seul, et — avec `anglesEnPi` — un angle kπ/n non remarquable (n ∉ {1, 2, 3, 4, 6}). Fractions,
+ * radicaux, décimaux exacts et π facteur d'un résultat exact ne comptent pas. */
+function formuleNonExacte(latex: string, anglesEnPi: boolean): boolean {
+  let s = latex.replace(/\{,\}/g, ",").replace(/\\left|\\right|\\big|\\Big|\\bigg|\\Bigg/g, "").replace(/\\[dt]frac/g, "\\frac");
+  s = s.replace(/\\text\{[^}]*\}/g, " ").replace(/\\mathrm\{([^e}][^}]*)\}/g, " ");
+  if (anglesEnPi) {
+    if (/\\pi/.test(s.replace(/\\frac\{-?\d*\\pi\}\{(2|3|4|6)\}/g, "").replace(/(?<![{\d])-?\d*\\pi(?![}])/g, ""))) return true;
+    s = s.replace(/\\frac\{-?\d*\\pi\}\{(2|3|4|6)\}/g, "ANG").replace(/-?\d*\\pi/g, "ANG");
+  }
+  if (/\\approx|≈/.test(s)) return true;
+  const reL = /\\(ln|log)(_\{?\d+\}?)?\s*\(?\s*(\d+(,\d+)?|\\frac\{\d)/g;
+  let m: RegExpExecArray | null;
+  while ((m = reL.exec(s))) if (m[3] !== "1" && m[3] !== "10") return true;
+  if (/\\(ln|log)\s*\(?\s*\\frac\{\d+\}\{\d+\}/.test(s)) return true;
+  const reE = /(\\mathrm\{e\}|(?<![a-zA-Z\\])e)\^/g;
+  while ((m = reE.exec(s))) {
+    const i = m.index + m[0].length;
+    const exp = s[i] === "{" ? (accolade(s, i) ?? "") : s[i];
+    if (/[a-zA-Z]/.test(sansCommandes(exp ?? ""))) continue;
+    if ((exp ?? "").trim() === "0") continue;
+    return true;
+  }
+  return /\\mathrm\{e\}(?!\^)/.test(s);
+}
+
+const TYPES_NOMBRES = new Set(["calcul", "resultat"]);
+
+/** Nombres = 1 si la réponse brève ou les lignes Calcul / Résultat du corrigé ont un nombre non
+ * exact (`formuleNonExacte`), un « ≈ » / « environ » / « arrondi » écrit, ou si le profil de
+ * l'instance exige la calculatrice. */
+export function nombresDuCorrige<T>(adaptateur: AdaptateurFeuilleExercices<T>, instance: T, etapes: EtapeCorrection[], anglesEnPi = false): 0 | 1 {
+  try {
+    if (adaptateur.profilInstance?.(instance).calcul === "calculatrice") return 1;
+  } catch {
+    /* profil indisponible */
+  }
+  const latexs: string[] = [];
+  const textes: string[] = [];
+  const ranger = (f: FragmentConsigne) => (f.type === "latex" ? latexs : textes).push(f.valeur ?? "");
+  (adaptateur.reponseBreve?.(instance) ?? []).forEach(ranger);
+  const types = etapes.some((e) => e.type);
+  for (const e of etapes) {
+    if (types ? !TYPES_NOMBRES.has(e.type ?? "") : /m[ée]thode|rappel|formule|pi[eè]ge|utilise/i.test(e.label ?? "")) continue;
+    e.fragments.forEach(ranger);
+    for (const l of e.calcul ?? []) latexs.push(l.latex ?? "");
+  }
+  if (latexs.some((l) => formuleNonExacte(l, anglesEnPi))) return 1;
+  return textes.some((t) => /≈|environ|arrondi/.test(t)) ? 1 : 0;
+}
+
+/* ----------------------------------------------------------------------------------------------
+ * Niveau et durée d'une instance
+ * -------------------------------------------------------------------------------------------- */
+
+const CONVERSION_ETOILES: Record<1 | 2 | 3, number> = { 1: 2, 2: 3, 3: 5 };
+
+/** Calcul complet à partir des critères (exposé pour les tests et les collecteurs). */
+export function niveauDepuisCriteres(c: CriteresDifficulte, lignes: Map<string, number>, nombres: 0 | 1, seuils: readonly number[] = SEUILS_CHARGE): Omit<NiveauDifficulte, "provisoire"> {
+  const sansCharge = new Set(c.sansCharge ? [...lignes.keys()] : (c.lettresSansCharge ?? []));
+  const parEtape = new Map(lignes);
+  for (const [lettre, n] of Object.entries(c.lignesMinimales ?? {})) parEtape.set(lettre, Math.max(n, parEtape.get(lettre) ?? 0));
+  let charge = 0;
+  for (const [lettre, n] of parEtape) if (!sansCharge.has(lettre)) charge += chargeEtape(n, seuils) - 1;
+  const etapesEquivalentes = c.etapesTransformation + charge;
+  const criteres: CriteresCalcules = {
+    etapesTransformation: c.etapesTransformation,
+    etapesLecture: c.etapesLecture,
+    charge,
+    etapesEquivalentes,
+    etapes: scoreEtapes(etapesEquivalentes),
+    methode: c.methode,
+    piege: c.piege,
+    nombres,
+  };
+  const score = criteres.etapes + criteres.methode + criteres.piege + criteres.nombres;
+  const niveau = score + 1;
+  const dureeMinutes = 2 + 2 * etapesEquivalentes + c.etapesLecture + nombres + (c.methode === 2 ? 2 : 0);
+  return { niveau, palier: palierDuNiveau(niveau), score, criteres, dureeMinutes };
+}
+
+/** Niveau, palier, critères et durée de l'instance tirée — `undefined` si l'adaptateur n'a ni
+ * critères ni étoiles (rien n'est alors affiché). */
+export function niveauEtDuree<T>(adaptateur: AdaptateurFeuilleExercices<T>, instance: T): NiveauDifficulte | undefined {
+  if (adaptateur.criteresDifficulte) {
+    const c = adaptateur.criteresDifficulte(instance);
+    const etapes = adaptateur.correctionDetaillee?.(instance) ?? [];
+    const nombres = c.nombres ?? nombresDuCorrige(adaptateur, instance, etapes, c.anglesEnPi);
+    return { ...niveauDepuisCriteres(c, lignesCalculParEtape(etapes), nombres), provisoire: false };
+  }
+  const etoiles = adaptateur.difficulte?.(instance);
+  if (!etoiles) return undefined;
+  // Conversion PROVISOIRE (chapitre pas encore noté) : le palier des étoiles est conservé.
+  const niveau = CONVERSION_ETOILES[etoiles];
+  return { niveau, palier: palierDuNiveau(niveau), score: niveau - 1, dureeMinutes: adaptateur.dureeMinutes, provisoire: true };
+}
+
+/** Durée d'une instance : celle de la grille si l'adaptateur est noté, sinon sa constante. */
+export function dureeInstance<T>(adaptateur: AdaptateurFeuilleExercices<T>, instance: T): number | undefined {
+  return adaptateur.criteresDifficulte ? niveauEtDuree(adaptateur, instance)?.dureeMinutes : adaptateur.dureeMinutes;
+}
+
+const cacheDurees = new WeakMap<object, Map<string, number | undefined>>();
+const TIRAGES_ESTIMATION = 6;
+
+/** Durée ESTIMÉE d'un exercice d'une variante (ou d'un tirage libre si `varianteId` est vide), avant
+ * tout tirage réel — panneau de conception : moyenne de quelques tirages, mise en cache. */
+export function dureeEstimeeVariante<T>(adaptateur: AdaptateurFeuilleExercices<T>, varianteId?: string | null): number | undefined {
+  if (!adaptateur.criteresDifficulte) return adaptateur.dureeMinutes;
+  let cache = cacheDurees.get(adaptateur);
+  if (!cache) cacheDurees.set(adaptateur, (cache = new Map()));
+  const cle = varianteId ?? "";
+  if (cache.has(cle)) return cache.get(cle);
+  let total = 0;
+  let n = 0;
+  for (let i = 0; i < TIRAGES_ESTIMATION; i++) {
+    try {
+      const instance = varianteId && adaptateur.genererInstanceAvecVariante ? adaptateur.genererInstanceAvecVariante(varianteId) : adaptateur.genererInstance();
+      const d = dureeInstance(adaptateur, instance);
+      if (d !== undefined) {
+        total += d;
+        n++;
+      }
+    } catch {
+      /* tirage impossible : ignoré */
+    }
+  }
+  const valeur = n ? total / n : adaptateur.dureeMinutes;
+  cache.set(cle, valeur);
+  return valeur;
+}

@@ -8,6 +8,8 @@ import type {
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { blocDonneesA, blocDonneesB, blocDonneesC, formuleD, formatReponseAttenduePhaseLatex, nomPoint } from "../../ui6e/formatTransformationsPlan";
 import { phasesPourExercice } from "../../moteur6e/typesTransformationsPlan";
@@ -186,17 +188,12 @@ function enoncePapier(e: ExerciceTransformationsPlan): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeTransformationsPlan;
 
-function difficulte(e: ExerciceTransformationsPlan): 1 | 2 | 3 {
-  switch (e.famille) {
-    case "A":
-      return e.parametres.sousType === "translation" || e.parametres.sousType === "homothetie" ? 1 : 2;
-    case "B":
-      return 2;
-    case "C":
-      return 3;
-    case "D":
-      return e.nature === "translation" ? 1 : 3;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceTransformationsPlan): CriteresDifficulte {
+  const [methode, piege]: [0 | 1, 0 | 1] =
+    e.famille === "A" ? [0, e.parametres.sousType === "rotationTranslation" ? 1 : 0] : e.famille === "C" ? [0, 1] : e.famille === "D" ? [1, 0] : [0, 0];
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode, piege, anglesEnPi: true };
 }
 
 function reponseBreve(e: ExerciceTransformationsPlan): FragmentConsigne[] {
@@ -229,11 +226,10 @@ export const adaptateurEvaluationTransformationsPlan: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteTransformationsPlan),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 10,
   profilInstance: profilTransformationsPlan,
 };

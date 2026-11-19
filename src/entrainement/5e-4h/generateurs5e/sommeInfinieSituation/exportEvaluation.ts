@@ -1,6 +1,8 @@
 import { donnees } from "../../core5e/sommeInfinieSituation.types";
 import type { ExerciceSommeInfinie } from "../../core5e/sommeInfinieSituation.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EnoncePapier, ErreurFrequente, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { PHASES } from "../../moteur5e/typesSommeInfinieSituation";
 import { consigneEcran, consigneGenerale, fracLatex, nbLatex, questionFinale, reponseFragments, reponseRecap } from "../../ui5e/formatSommeInfinieSituation";
@@ -72,15 +74,10 @@ function construireCorrection(e: ExerciceSommeInfinie): BlocCorrection[] {
 
 /** ★★ : nombre périodique pur, triangles des milieux ; ★★★ : partie non périodique à ajouter,
  * rebonds (descentes comptées deux fois), poursuite de Zénon, hexagones (une couronne sur deux). */
-function difficulte(e: ExerciceSommeInfinie): 1 | 2 | 3 {
-  switch (e.variante) {
-    case "periodique":
-      return e.sousCas === "pur" ? 2 : 3;
-    case "figures":
-      return e.sousCas === "triangle" ? 2 : 3;
-    default:
-      return 3;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceSommeInfinie): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeSommeInfinie(e)), methode: e.variante === "periodique" ? 1 : 2, piege: 1 };
 }
 
 // ============================================================================
@@ -144,11 +141,10 @@ export const adaptateurEvaluationSommeInfinie: AdaptateurFeuilleExercices<Exerci
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteSommeInfinie),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeSommeInfinie,
   bareme,
   enoncePapier,
-  dureeMinutes: 10,
   profilInstance: profilSommeInfinie,
 };

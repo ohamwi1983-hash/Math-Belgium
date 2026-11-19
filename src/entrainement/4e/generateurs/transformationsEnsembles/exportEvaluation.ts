@@ -7,6 +7,7 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceTransformationsEnsembles, Transformation } from "../../core/transformationsEnsembles.types";
@@ -88,11 +89,13 @@ function bareme(e: ExerciceTransformationsEnsembles): BaremeExercice {
   };
 }
 
-function difficulte(e: ExerciceTransformationsEnsembles): 1 | 2 | 3 {
-  const n = e.transformations.length;
-  if (n === 2 && e.niveau === 1) return 1;
-  if (n >= 5 || (e.niveau === 2 && n >= 4)) return 3;
-  return 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceTransformationsEnsembles): CriteresDifficulte {
+  // Une étape = une transformation de la chaîne (2 à 5), pas les trois écrans ; piège : une symétrie
+  // (bornes opposées ET échangées).
+  const piege = /S[1-9]/.test(profilTransformationsEnsembles(e).forme ?? "") ? 1 : 0;
+  return { etapesTransformation: e.transformations.length, etapesLecture: 0, sansCharge: true, methode: 0, piege };
 }
 
 export const adaptateurEvaluationTransformationsEnsembles: AdaptateurFeuilleExercices<ExerciceTransformationsEnsembles> = {
@@ -105,10 +108,9 @@ export const adaptateurEvaluationTransformationsEnsembles: AdaptateurFeuilleExer
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 6,
 };

@@ -8,6 +8,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type {
@@ -207,10 +209,12 @@ function bareme(e: ExercicePortraitRobot): BaremeExercice {
   };
 }
 
-function difficulte(e: ExercicePortraitRobot): 1 | 2 | 3 {
-  if (e.famille === "expression") return e.groupe === "extremum" || e.groupe === "symetrie" ? 3 : 2;
-  if (e.famille === "deduction") return e.parite === "impaire" || e.comparaisonImages.verdict === "indetermine" || e.comparaisonValeur.verdict === "indetermine" ? 3 : 2;
-  return e.conditions.some((c) => c.type === "monotonie" || c.type === "parite") ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExercicePortraitRobot): CriteresDifficulte {
+  const piege = e.famille === "expression" && e.groupe === "racine" ? 0 : 1;
+  // « courbe » : dire quelle condition une courbe écartée ne respecte pas = lecture sur la courbe.
+  return { ...etapesDuCorrige(correctionDetailleePortraitRobot(e), e.famille === "courbe" ? ["b", "c", "d"] : []), methode: 1, piege };
 }
 
 export const adaptateurEvaluationPortraitRobotFonction: AdaptateurFeuilleExercices<ExercicePortraitRobot> = {
@@ -223,10 +227,9 @@ export const adaptateurEvaluationPortraitRobotFonction: AdaptateurFeuilleExercic
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleePortraitRobot,
   bareme,
   enoncePapier,
-  dureeMinutes: 10,
 };

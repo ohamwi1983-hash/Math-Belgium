@@ -8,6 +8,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { pointUnitaire } from "../../moteur/verificationFonctionsReference";
 import { formatEquationFonctionReferenceLatex } from "../../ui/formatFonctionsReference";
@@ -129,12 +131,11 @@ function construireCorrectionFonctionsReference(exercice: ExerciceFonctionRefere
 // d) équation — mêmes étapes que `construireEnonce`.
 // ============================================================================
 
-function difficulteFonctionsReference(exercice: ExerciceFonctionReference): 1 | 2 | 3 {
-  // Compression (écart fractionnaire) : la lecture la plus délicate. Étirement ou symétrie : une
-  // transformation de plus à lire que les seules translations.
-  if (exercice.ch > 1 || exercice.cv > 1) return 3;
-  if (exercice.eh > 1 || exercice.ev > 1 || exercice.sox || exercice.soy) return 2;
-  return 1;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceFonctionReference): CriteresDifficulte {
+  // Reconnaître la fonction de référence et lire les translations : écrans de lecture.
+  return { ...etapesDuCorrige(correctionDetailleeFonctionsReference(e), ["a", "b"]), methode: 1, piege: 1 };
 }
 
 function reponseBreveFonctionsReference(exercice: ExerciceFonctionReference): FragmentConsigne[] {
@@ -187,10 +188,9 @@ export const adaptateurEvaluationFonctionsReference: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecFamille(id as FamilleReference),
   construireEnonce: construireEnonceFonctionsReference,
   construireCorrection: construireCorrectionFonctionsReference,
-  difficulte: difficulteFonctionsReference,
+  criteresDifficulte,
   reponseBreve: reponseBreveFonctionsReference,
   correctionDetaillee: correctionDetailleeFonctionsReference,
   bareme: baremeFonctionsReference,
   enoncePapier: enoncePapierFonctionsReference,
-  dureeMinutes: 5,
 };

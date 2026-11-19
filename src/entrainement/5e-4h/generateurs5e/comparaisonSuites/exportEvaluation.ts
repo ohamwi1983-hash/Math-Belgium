@@ -8,6 +8,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { consigneConclusion, consigneGenerale, consigneTableau, formatConclusionNLatex, formatTraductionAttendueTexte, formuleU, formuleV, labelU, labelV } from "../../ui5e/formatComparaisonSuites";
 import { correctionDetailleeComparaisonSuites, reponseTexteComparaison as reponseTexte } from "./corrigeDetaille";
@@ -92,8 +94,10 @@ function baremeComparaisonSuites(exercice: ExerciceComparaisonSuites): BaremeExe
 }
 
 /** Deux suites géométriques à taux proches : la bascule est la plus lente à cerner. */
-function difficulteComparaisonSuites(exercice: ExerciceComparaisonSuites): 1 | 2 | 3 {
-  return exercice.famille === "epargneCroissance" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceComparaisonSuites): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeComparaisonSuites(e)), methode: 2, piege: 1 };
 }
 
 export const adaptateurEvaluationComparaisonSuites: AdaptateurFeuilleExercices<ExerciceComparaisonSuites> = {
@@ -104,10 +108,9 @@ export const adaptateurEvaluationComparaisonSuites: AdaptateurFeuilleExercices<E
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id as FamilleComparaisonSuites),
   construireEnonce: construireEnonceComparaisonSuites,
   construireCorrection: construireCorrectionComparaisonSuites,
-  difficulte: difficulteComparaisonSuites,
+  criteresDifficulte,
   reponseBreve: reponseBreveComparaisonSuites,
   correctionDetaillee: correctionDetailleeComparaisonSuites,
   bareme: baremeComparaisonSuites,
   enoncePapier: enoncePapierComparaisonSuites,
-  dureeMinutes: 10,
 };

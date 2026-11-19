@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { PHASES_REGIONS } from "../../moteur6e/typesRegionsPlanComplexe";
 import type { PhaseRegions } from "../../moteur6e/typesRegionsPlanComplexe";
 import { conditionsFragments, reponseFragments, t } from "../../ui6e/formatRegionsPlanComplexe";
@@ -86,10 +88,13 @@ function enoncePapier(e: ExerciceRegions): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeRegions;
 
-function difficulte(e: ExerciceRegions): 1 | 2 | 3 {
-  if (e.variante === "intersection") return 3;
-  if (e.variante === "disque") return 1;
-  return 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceRegions): CriteresDifficulte {
+  const methode = e.variante === "mediatrice" || e.variante === "intersection" ? 1 : 0;
+  const piege = e.variante === "demi-plan" || e.variante === "intersection" ? 0 : 1;
+  // Frontière incluse ou non (verdict lu sur l'inégalité) et représentation : écrans de lecture.
+  return { ...etapesDuCorrige(correctionDetaillee(e), ["c", "d"]), methode, piege, anglesEnPi: true };
 }
 
 const POIDS: Record<PhaseRegions, number> = { nature: 0.5, elements: 1.5, bord: 0.5, region: 1.5 };
@@ -127,12 +132,11 @@ export const adaptateurEvaluationRegionsPlanComplexe: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
   profilInstance: profilRegions,
   libelleCasParticulier: LIBELLE_CAS_REGIONS,
 };

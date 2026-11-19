@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   blocDonnees,
@@ -83,9 +85,11 @@ function enoncePapier(exercice: ExerciceLongueurArc): EnoncePapier {
 // Corrigé détaillé.
 // ============================================================================
 
-function difficulte(exercice: ExerciceLongueurArc): 1 | 2 | 3 {
-  if (exercice.famille === "B") return 3;
-  return exercice.famille === "C" ? 1 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceLongueurArc): CriteresDifficulte {
+  const b = e.famille === "B" ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeLongueurArc(e)), methode: b, piege: b };
 }
 
 function reponseBreve(exercice: ExerciceLongueurArc): FragmentConsigne[] {
@@ -128,12 +132,11 @@ export const adaptateurEvaluationLongueurArc: AdaptateurFeuilleExercices<Exercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteLongueurArc),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeLongueurArc,
   bareme,
   enoncePapier,
-  dureeMinutes: 10,
   profilInstance: profilLongueurArc,
   libelleCasParticulier: LIBELLE_CAS_LONGUEUR_ARC,
 };

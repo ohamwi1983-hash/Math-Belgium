@@ -1,5 +1,4 @@
 import type { ExerciceEchellesLogarithmiques } from "../../core6e/echellesLogarithmiques.types";
-import { typeQuestion } from "../../core6e/echellesLogarithmiques.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
@@ -9,6 +8,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { PHASES_ECHELLES } from "../../moteur6e/typesEchellesLogarithmiques";
 import type { PhaseEchelles } from "../../moteur6e/typesEchellesLogarithmiques";
@@ -81,9 +82,10 @@ function correctionDetaillee(e: ExerciceEchellesLogarithmiques): EtapeCorrection
   });
 }
 
-function difficulte(e: ExerciceEchellesLogarithmiques): 1 | 2 | 3 {
-  if (typeQuestion(e.variante) === "combien" || e.variante === "seisme-magnitude" || e.variante === "etoiles-magnitude") return 3;
-  return 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceEchellesLogarithmiques): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: 1 };
 }
 
 function reponseBreve(e: ExerciceEchellesLogarithmiques): FragmentConsigne[] {
@@ -118,11 +120,10 @@ export const adaptateurEvaluationEchellesLogarithmiques: AdaptateurFeuilleExerci
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteEchelles),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
   profilInstance: profilEchellesLogarithmiques,
 };

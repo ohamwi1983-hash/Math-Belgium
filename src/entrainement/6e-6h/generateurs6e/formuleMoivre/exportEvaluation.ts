@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatFormuleMoivre";
 import { phasesPourExercice } from "../../moteur6e/typesFormuleMoivre";
@@ -111,8 +113,10 @@ function enoncePapier(e: ExerciceFormuleMoivre): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeFormuleMoivre;
 
-function difficulte(e: ExerciceFormuleMoivre): 1 | 2 | 3 {
-  return e.n >= 5 || e.cible !== "standard" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceFormuleMoivre): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 0, piege: 0, anglesEnPi: true };
 }
 
 function bareme(e: ExerciceFormuleMoivre): BaremeExercice {
@@ -144,11 +148,10 @@ export const adaptateurEvaluationFormuleMoivre: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteFormuleMoivre),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 12,
   profilInstance: profilFormuleMoivre,
 };

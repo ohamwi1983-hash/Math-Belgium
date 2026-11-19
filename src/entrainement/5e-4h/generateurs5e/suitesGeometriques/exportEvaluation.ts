@@ -11,6 +11,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   consigneGenerale,
@@ -200,12 +202,10 @@ function enoncePapierSuiteGeometrique(exercice: ExerciceSuiteGeometrique): Enonc
 
 /** ★ u₁ et q entiers donnés ; ★★ une grandeur à retrouver, fractions ; ★★★ deux valeurs de q,
  * inconnue x, rang n par réduction à la même base. */
-function difficulteSuiteGeometrique(exercice: ExerciceSuiteGeometrique): 1 | 2 | 3 {
-  if (exercice.famille !== "principal") return 3;
-  if (exercice.statutQ === "double") return 3;
-  const { combo } = exercice.donnees;
-  if (combo === "direct") return exercice.branches[0].u1.den === 1 && exercice.branches[0].q.den === 1 ? 1 : 2;
-  return 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceSuiteGeometrique): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeSuiteGeometrique(e)), methode: e.famille === "principal" ? 0 : 1, piege: 0 };
 }
 
 function reponseBreveSuiteGeometrique(exercice: ExerciceSuiteGeometrique): FragmentConsigne[] {
@@ -303,10 +303,9 @@ export const adaptateurEvaluationSuitesGeometriques: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id as FamilleSuiteGeometriqueId),
   construireEnonce: construireEnonceSuiteGeometrique,
   construireCorrection: construireCorrectionSuiteGeometrique,
-  difficulte: difficulteSuiteGeometrique,
+  criteresDifficulte,
   reponseBreve: reponseBreveSuiteGeometrique,
   correctionDetaillee: correctionDetailleeSuiteGeometrique,
   bareme: baremeSuiteGeometrique,
   enoncePapier: enoncePapierSuiteGeometrique,
-  dureeMinutes: 12,
 };

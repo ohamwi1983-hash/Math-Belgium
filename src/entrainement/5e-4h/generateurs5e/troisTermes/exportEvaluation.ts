@@ -1,5 +1,7 @@
 import type { ExerciceTroisTermes } from "../../core5e/troisTermes.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, ErreurFrequente, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesJouees } from "../../moteur5e/typesTroisTermes";
 import { conclusionSolutions, consigneEcran, consigneGenerale, equationSimplifieeLatex, reponseBreveFragments, reponseFragments } from "../../ui5e/formatTroisTermes";
@@ -46,8 +48,10 @@ function construireCorrection(e: ExerciceTroisTermes): BlocCorrection[] {
 }
 
 /** ★★ arithmétique (premier degré) ; ★★★ géométrique (second degré possible, solutions à vérifier). */
-function difficulte(e: ExerciceTroisTermes): 1 | 2 | 3 {
-  return e.variante === "arithmetique" ? 2 : 3;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceTroisTermes): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeTroisTermes(e)), methode: 0, piege: e.variante === "geometrique" ? 1 : 0 };
 }
 
 // ============================================================================
@@ -100,11 +104,10 @@ export const adaptateurEvaluationTroisTermes: AdaptateurFeuilleExercices<Exercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteTroisTermes),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeTroisTermes,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
   profilInstance: profilTroisTermes,
 };

@@ -6,6 +6,8 @@ import type {
   EnoncePapier,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte as texteBrut } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { decrireProbleme, morceauLatex } from "../../moteur/problemesFonctionsReference";
@@ -158,10 +160,10 @@ function bareme(e: E): BaremeExercice {
 
 /** ★★ : contexte direct (racine, carré, valeur absolue en un seul intervalle) ; ★★★ : sens qui
  * s'inverse avec une fonction décroissante (trajet, location) ou réponse en deux morceaux. */
-function difficulte(e: E): 1 | 2 | 3 {
-  if (e.famille === "trajet" || e.famille === "location") return 3;
-  if (e.famille === "thermostat" && (e.sens === ">" || e.sens === "≥")) return 3;
-  return 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: E): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeProblemesFonctionsReference(e)), methode: 2, piege: 1 };
 }
 
 export const adaptateurEvaluationProblemesFonctionsReference: AdaptateurFeuilleExercices<E> = {
@@ -173,10 +175,9 @@ export const adaptateurEvaluationProblemesFonctionsReference: AdaptateurFeuilleE
   genererInstanceAvecVariante: construireAvecVarianteId,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeProblemesFonctionsReference,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };

@@ -17,6 +17,8 @@ import type {
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur6e/typesIntegralesProblemes";
 import {
@@ -257,22 +259,16 @@ function enoncePapier(exercice: ExerciceIntegralesProblemes): EnoncePapier {
 // Corrigé détaillé : par étape, Méthode, Calcul, Piège éventuel, Conclusion.
 // ============================================================================
 
-function difficulte(exercice: ExerciceIntegralesProblemes): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "A":
-      return exercice.contexte === "terrain" ? 1 : 2;
-    case "B":
-      return exercice.sousType === "evaluer" ? 2 : 3;
-    case "C":
-      return exercice.a2 === null ? 1 : 2;
-    case "D":
-    case "E":
-      return 2;
-    case "F":
-      return 3;
-    case "G":
-      return exercice.sousType === "calotte" ? 3 : 2;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceIntegralesProblemes): CriteresDifficulte {
+  let methode: 0 | 1 = 0;
+  let piege: 0 | 1 = 0;
+  if (e.famille === "B") methode = 1;
+  else if (e.famille === "C") piege = e.a2 === null ? 0 : 1;
+  else if (e.famille === "D" || e.famille === "E") [methode, piege] = [1, 1];
+  else if (e.famille === "G") [methode, piege] = e.sousType === "soustraction" ? [1, 1] : e.sousType === "archimede" ? [1, 0] : [0, 0];
+  return { ...etapesDuCorrige(correctionDetailleeIntegralesProblemes(e)), methode, piege };
 }
 
 function reponseBreve(exercice: ExerciceIntegralesProblemes): FragmentConsigne[] {
@@ -336,12 +332,11 @@ export const adaptateurEvaluationIntegralesProblemes: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteIntegralesProblemes),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeIntegralesProblemes,
   bareme,
   enoncePapier,
-  dureeMinutes: 12,
   profilInstance: profilIntegralesProblemes,
   libelleCasParticulier: LIBELLE_CAS_INTEGRALES_PROBLEMES,
   // Équilibre transcendant (famille F) : la calculatrice est indispensable pour cette variante.

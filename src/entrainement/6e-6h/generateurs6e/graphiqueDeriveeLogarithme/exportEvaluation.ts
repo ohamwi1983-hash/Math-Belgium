@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { construireSvgFonction } from "../../../export/svgGraph";
 import {
@@ -137,8 +139,10 @@ const REGLE_DERIVATION: Record<ExerciceGraphiqueDeriveeLogarithme["famille"], { 
   C: { nom: "règle du produit (pour x·ln(x))", formule: "(uv)'=u'v+uv'" },
 };
 
-function difficulteGraphiqueDeriveeLogarithme(exercice: ExerciceGraphiqueDeriveeLogarithme): 1 | 2 | 3 {
-  return exercice.famille === "A" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceGraphiqueDeriveeLogarithme): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeGraphiqueDeriveeLogarithme(e)), methode: 1, piege: 0 };
 }
 
 function reponseBreveGraphiqueDeriveeLogarithme(exercice: ExerciceGraphiqueDeriveeLogarithme): FragmentConsigne[] {
@@ -206,10 +210,9 @@ export const adaptateurEvaluationGraphiqueDeriveeLogarithme: AdaptateurFeuilleEx
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0]),
   construireEnonce: construireEnonceGraphiqueDeriveeLogarithme,
   construireCorrection: construireCorrectionGraphiqueDeriveeLogarithme,
-  difficulte: difficulteGraphiqueDeriveeLogarithme,
+  criteresDifficulte,
   reponseBreve: reponseBreveGraphiqueDeriveeLogarithme,
   correctionDetaillee: correctionDetailleeGraphiqueDeriveeLogarithme,
   bareme: baremeGraphiqueDeriveeLogarithme,
   enoncePapier: enoncePapierGraphiqueDeriveeLogarithme,
-  dureeMinutes: 8,
 };

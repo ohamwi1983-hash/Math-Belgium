@@ -159,6 +159,35 @@ export interface ProfilInstance {
   parametresNonApplicables?: string[];
 }
 
+/** Critères de difficulté d'une instance (grille commune, `export/niveauDifficulte.ts`). Le module
+ * commun y ajoute la CHARGE des étapes longues (lignes de calcul du corrigé détaillé) et, si
+ * `nombres` est absent, détecte les nombres sur le corrigé. `etapesTransformation` /
+ * `etapesLecture` : lus sur le corrigé (`etapesDuCorrige`), pour rester la même source que le papier. */
+export interface CriteresDifficulte {
+  /** Étapes (écrans) qui transforment : calcul, raisonnement. */
+  etapesTransformation: number;
+  /** Écrans de pure lecture (lire une valeur, un point, une caractéristique ; placer un point). */
+  etapesLecture: number;
+  /** 0 imposée/évidente ; 1 choisir parmi les méthodes du cours ; 2 l'élève construit le modèle
+   * (au plus 1 si l'énoncé donne la formule du contexte ou la fonction). */
+  methode: 0 | 1 | 2;
+  /** 1 seulement si le piège est dans les DONNÉES (signe, valeur exclue, ordre, cas qui n'en est
+   * pas un, solution à rejeter) — jamais parce que le corrigé a une ligne « Piège ». */
+  piege: 0 | 1;
+  /** Calculatrice, valeur approchée, ln/e/π non remarquables → 1. Absent : détecté sur le corrigé. */
+  nombres?: 0 | 1;
+  /** Détection des nombres : un angle kπ/n non remarquable compte (chapitre des complexes). */
+  anglesEnPi?: boolean;
+  /** Lettres d'étapes dont la longueur n'ajoute pas de charge (écrans de lecture). */
+  lettresSansCharge?: string[];
+  /** Aucune charge (étapes déjà comptées autrement, ex. gen72 : une transformation = une étape). */
+  sansCharge?: boolean;
+  /** Corrigé pas encore « comme au tableau » (une ligne « Calcul » résume plusieurs transformations) :
+   * lignes de calcul qu'aurait l'étape au tableau, par lettre. La charge prend le maximum du mesuré
+   * et de cette valeur (ex. 6gen21, étude complète découpée en six écrans). */
+  lignesMinimales?: Record<string, number>;
+}
+
 export interface EnoncePapier {
   section: SectionExercice;
   /** Pour chaque question de `section.questions`, les lettres (« a », « b »…) des étapes de
@@ -184,7 +213,13 @@ export interface AdaptateurFeuilleExercices<T> {
   genererInstanceAvecVariante?: (varianteId: string) => T;
   construireEnonce: (instance: T) => SectionExercice;
   construireCorrection: (instance: T) => BlocCorrection[];
-  /** Difficulté de l'instance : 1 = application directe, 2 = plusieurs étapes, 3 = réflexion. */
+  /** Critères du NIVEAU de difficulté 1–7 et de la durée de l'instance (grille commune,
+   * `export/niveauDifficulte.ts::niveauEtDuree` — voir `CriteresDifficulte`). Remplace `difficulte`
+   * et `dureeMinutes` pour un chapitre noté. */
+  criteresDifficulte?: (instance: T) => CriteresDifficulte;
+  /** ANCIENNES étoiles (1 = application directe, 2 = plusieurs étapes, 3 = réflexion) : seulement
+   * pour un chapitre pas encore noté — affichées par conversion PROVISOIRE (★ → niveau 2, ★★ → 3,
+   * ★★★ → 5). Ignoré dès que `criteresDifficulte` est présent. */
   difficulte?: (instance: T) => 1 | 2 | 3;
   /** Résultat seul, sans démarche (page « Je vérifie » de la feuille d'exercices). */
   reponseBreve?: (instance: T) => FragmentConsigne[];
@@ -196,7 +231,8 @@ export interface AdaptateurFeuilleExercices<T> {
    * sous-questions de `construireEnonce` sont imprimées telles quelles. Ignoré quand plusieurs
    * instances sont regroupées sous une question (`regroupable`). */
   enoncePapier?: (instance: T) => EnoncePapier;
-  /** Durée indicative d'une instance en évaluation, en minutes (estimation de durée du panneau). */
+  /** Durée indicative CONSTANTE d'une instance, en minutes — seulement pour un chapitre pas encore
+   * noté : avec `criteresDifficulte`, la durée est calculée par exercice. */
   dureeMinutes?: number;
   /** Profil structurel d'une instance, pour le TIRAGE ÉQUILIBRÉ des évaluations (décision de
    * l'utilisateur, `lib/evaluationLocal.ts::graineInedite`) : par défaut seules les instances

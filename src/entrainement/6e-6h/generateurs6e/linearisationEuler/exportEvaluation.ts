@@ -1,5 +1,7 @@
 import type { ExerciceLinearisation } from "../../core6e/linearisationEuler";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur6e/typesLinearisationEuler";
 import type { PhaseLinearisation } from "../../moteur6e/typesLinearisationEuler";
@@ -78,8 +80,10 @@ function enoncePapier(e: ExerciceLinearisation): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeLinearisation;
 
-function difficulte(e: ExerciceLinearisation): 1 | 2 | 3 {
-  return e.variante === "degre4" || e.variante === "application" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceLinearisation): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 0, piege: 0, anglesEnPi: true };
 }
 
 // ============================================================================
@@ -130,12 +134,11 @@ export const adaptateurEvaluationLinearisationEuler: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteLinearisation),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 10,
   profilInstance: profilLinearisation,
   libelleCasParticulier: LIBELLE_CAS_LINEARISATION,
 };

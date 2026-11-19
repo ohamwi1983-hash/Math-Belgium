@@ -10,6 +10,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesExercice } from "../../moteur6e/typesTangentesLogarithmiques";
 import type { PhaseTangentesLog } from "../../moteur6e/typesTangentesLogarithmiques";
@@ -200,8 +202,11 @@ function correctionDetaillee(e: ExerciceTangentesLog): EtapeCorrection[] {
   return phasesExercice(e).flatMap((phase) => lignesEtape(e, phase));
 }
 
-function difficulte(e: ExerciceTangentesLog): 1 | 2 | 3 {
-  return e.variante === "point" ? 2 : 3;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceTangentesLog): CriteresDifficulte {
+  const r = e.variante === "point" ? 0 : 1;
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: r, piege: r };
 }
 
 // ============================================================================
@@ -263,11 +268,10 @@ export const adaptateurEvaluationTangentesLog: AdaptateurFeuilleExercices<Exerci
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteTangentesLog),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
   profilInstance: profilTangentesLog,
 };

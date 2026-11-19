@@ -10,6 +10,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { estPhaseChoix, phasesExercice } from "../../moteur6e/typesComparerEncadrerLogarithmes";
 import type { PhaseComparerEncadrerLog } from "../../moteur6e/typesComparerEncadrerLogarithmes";
@@ -292,8 +294,11 @@ function correctionDetaillee(e: ExerciceComparerEncadrerLog): EtapeCorrection[] 
 }
 
 /** Étoiles fixées par la variante (jamais par le verdict). */
-function difficulte(e: ExerciceComparerEncadrerLog): 1 | 2 | 3 {
-  return e.variante === "encadrer" ? 1 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceComparerEncadrerLog): CriteresDifficulte {
+  const r = e.variante === "comparer" || e.variante === "ranger" ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: r, piege: r };
 }
 
 // ============================================================================
@@ -368,11 +373,10 @@ export const adaptateurEvaluationComparerEncadrerLog: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteComparerEncadrerLog),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 6,
   profilInstance: profilComparerEncadrerLog,
 };

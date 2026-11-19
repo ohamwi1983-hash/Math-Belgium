@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { LIBELLE_PHASE, blocDonnees, consigneEcran, entierComplexeLatex, formatReponseAttenduePhaseLatex } from "../../ui6e/formatNombresComplexes";
 import { phasesPourExercice } from "../../moteur6e/typesNombresComplexes";
@@ -86,21 +88,12 @@ function reponseBreve(e: ExerciceNombresComplexes): FragmentConsigne[] {
   return [latex(`${expressionLatex(e)}=${resultatFinal(e)}`)];
 }
 
-function difficulte(e: ExerciceNombresComplexes): 1 | 2 | 3 {
-  switch (e.famille) {
-    case "A":
-      return 1;
-    case "B":
-      return e.sousType === "cube" ? 2 : 1;
-    case "C":
-    case "D":
-      return 2;
-    case "E":
-    case "F":
-      return 3;
-    case "G":
-      return e.n < 0 ? 2 : 1;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceNombresComplexes): CriteresDifficulte {
+  const methode = e.famille === "F" ? 1 : 0;
+  const piege = e.famille === "D" || (e.famille === "G" && e.n < 0) ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode, piege, anglesEnPi: true };
 }
 
 const crit = (sousQuestion: string, points: number, ...critere: FragmentConsigne[]) => ({ sousQuestion, points, critere });
@@ -216,10 +209,9 @@ export const adaptateurEvaluationNombresComplexes: AdaptateurFeuilleExercices<Ex
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteNombresComplexes),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 5,
 };

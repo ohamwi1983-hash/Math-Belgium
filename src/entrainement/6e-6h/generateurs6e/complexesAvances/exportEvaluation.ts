@@ -8,6 +8,8 @@ import type {
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { blocDonnees, consigneEcran, consigneGenerale, equationDReelles, formatReponseAttenduePhaseLatex } from "../../ui6e/formatComplexesAvances";
 import { phasesPourExercice } from "../../moteur6e/typesComplexesAvances";
@@ -192,18 +194,18 @@ function enoncePapier(e: ExerciceComplexesAvances): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeComplexesAvances;
 
-function difficulte(e: ExerciceComplexesAvances): 1 | 2 | 3 {
-  switch (e.famille) {
-    case "A":
-    case "C":
-      return 3;
-    case "B":
-      return e.sousType === "cercleO" || e.sousType === "cercleA" ? 2 : 3;
-    case "D":
-      return e.sousType === "coef" || e.sousType === "modules" ? 2 : 3;
-    case "E":
-      return 2;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceComplexesAvances): CriteresDifficulte {
+  let methode: 0 | 1 = 1;
+  let piege: 0 | 1 = 1;
+  if (e.famille === "B") {
+    if (e.sousType === "cercleA" || e.sousType === "cercleO") [methode, piege] = [0, 0];
+    else if (e.sousType === "intersection" || e.sousType === "apollonius") piege = 0;
+  } else if (e.famille === "C") piege = 0;
+  else if (e.famille === "D") [methode, piege] = e.sousType === "ratio" ? [0, 1] : [1, 0];
+  else if (e.famille === "E") methode = 0;
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode, piege, anglesEnPi: true };
 }
 
 function reponseBreve(e: ExerciceComplexesAvances): FragmentConsigne[] {
@@ -245,11 +247,10 @@ export const adaptateurEvaluationComplexesAvances: AdaptateurFeuilleExercices<Ex
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteComplexesAvances),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 12,
   profilInstance: profilComplexesAvances,
 };

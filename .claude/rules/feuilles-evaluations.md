@@ -45,13 +45,12 @@ Chaque `generateurs*/**/exportEvaluation.ts` du chapitre remplit, en plus de
 
 | Champ | Contenu |
 | --- | --- |
-| `difficulte` | 1–3 étoiles (★ application directe, ★★ plusieurs étapes, ★★★ réflexion), selon l'instance. |
+| `criteresDifficulte` | Critères du NIVEAU 1–7 de l'instance (étapes, méthode, piège, nombres) : voir « Niveau de difficulté et durée » plus bas. Remplace les étoiles `difficulte` et la constante `dureeMinutes`. |
 | `reponseBreve` | Résultat seul (page « Je vérifie »). Pas de lettres a)/b) si l'énoncé papier n'en a pas. |
 | `correctionDetaillee` | `EtapeCorrection[]` : `label` court (Méthode, Calcul, Condition, Conclusion, Piège…), `sousQuestion` = lettre de l'ÉTAPE (« a », « b »… dans l'ordre des écrans). Une ligne « Piège » ciblée. Format « comme au tableau » (typé, calculs alignés) : voir la section dédiée plus bas — obligatoire pour tout chapitre migré. |
 | `EtapeCorrection.figureHtml` | Figure SVG autonome sous une ligne du corrigé : tout exercice dont la réponse est un GRAPHIQUE (polygone des effectifs cumulés avec lecture de Q₁/Q₂/Q₃, boîte à moustaches attendue, courbes annotées…) la montre dans le corrigé détaillé — sinon elle disparaît, car `correctionDetaillee` remplace l'ancien corrigé. Jamais dans l'énoncé ni la version aménagée. |
 | `bareme` | `reponseFinale`, `criteres` (poids, somme ≈ 4, `sousQuestion` = étape), `erreursFrequentes` (avec `cout`), `reponsesAcceptees`. |
 | `enoncePapier` | `EnoncePapier` : `section` (énoncé + consigne globale ; `questions: []` sauf vraies questions), `etapesParQuestion` (lettres d'étapes couvertes par chaque question papier), `reponseBreve` alignée si celle de l'adaptateur est découpée par étape. |
-| `dureeMinutes` | Durée indicative d'une instance en évaluation. |
 
 Toutes les valeurs viennent des MÊMES fonctions que l'écran interactif (`formatReponseAttendue…`,
 `consigneEcran`, aides) — jamais une seconde source recalculée à part.
@@ -60,6 +59,60 @@ Le pipeline (`lib/evaluationLocal.ts::appliquerEnoncePapier`) fait le reste : é
 `enoncePapier`, `etapesCorrige` (titres « Étape n — consigne » du corrigé, préfixe « Étape n (…) — »
 retiré), critères rattachés à leur étape (`etape`), renvois « 0 pt sur a) et b) » réécrits en « sur
 les étapes 1 et 2 » (ou en lettre de question papier).
+
+## Niveau de difficulté et durée (décision de l'utilisateur)
+
+Les étoiles ★/★★/★★★ (posées au jugement) sont remplacées par un **NIVEAU 1–7** calculé par une grille
+commune, affiché « numéro + palier », et la durée constante par générateur par une **durée PAR
+EXERCICE** calculée avec les mêmes critères. Module commun `export/niveauDifficulte.ts`
+(`niveauEtDuree(adaptateur, instance) → { niveau, palier, score, criteres, dureeMinutes, provisoire }`,
+testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
+(`genererFeuilleExercices.ts`).
+
+- **Score par exercice** (instance tirée), niveau = score + 1 (1 à 7 ; le 7 est gardé). **Paliers** :
+  Base 1–2, Intermédiaire 3–4, Avancé 5–7 (`palierDuNiveau`).
+- **Étapes (0/1/2)** : étapes « qui transforment » (calcul, raisonnement) — une lettre `sousQuestion`
+  du corrigé détaillé = un écran (`etapesDuCorrige(corrigé, lettresDeLecture)`, corrigé sans lettre →
+  1 étape). Les écrans de **pure lecture** (lire une valeur, un point, une caractéristique sur un
+  graphique ou un tableau ; placer un point) ne comptent pas : gen12 (tous), gen70 (tous : identifier
+  la caractéristique puis la lire), 6gen95 a–c, 6gen98 c–d, gen10 a–b, gen69 a–b, 6gen85 a–b
+  (« associer » : tous), 6gen82 « lecture » b, gen71 « courbe » b–d. **Charge** ajoutée par le module :
+  une étape de plus de **9** lignes de calcul (`EtapeCorrection.calcul`, mêmes fonctions que le papier ;
+  corrigé non typé : chaînes éclatées par `lignesDepuisChaine`) compte pour 2, de plus de **15** pour 3
+  (`SEUILS_CHARGE`). Calibrage mesuré : 6/12 touchait 31 % des tirages, 8/14 17 %, 9/15 13 % et fait
+  monter les cas visés (6gen34 E 1 → 2, 6gen40 D_rotation/D_similitude 2 → 3, 6gen78 valeurs 2 → 3).
+  Puis étapes équivalentes 1–2 → 0, 3–5 → 1, 6+ → 2. Corrigé pas encore « comme au tableau » (6e ch. 3) :
+  `lignesMinimales` déclare les lignes qu'aurait l'étape au tableau (6gen21 : b 10, d 16, e 10).
+  gen72 : une transformation de la chaîne = une étape, `sansCharge`.
+- **Méthode (0/1/2)** : 0 imposée/évidente ; 1 choisir parmi les méthodes du cours ; 2 l'élève
+  construit lui-même le modèle ; formule du contexte / fonction donnée → au plus 1.
+- **Piège (0/1)** : seulement s'il est dans les DONNÉES (signe/quadrant, valeur exclue, ordre, cas
+  qui n'en est pas un, solution à rejeter) — jamais parce que le corrigé a une ligne Piège ; lu dans
+  l'instance quand il en dépend (6gen26 f négative, 6gen34 G exposant négatif, 6gen37 A / 6gen39 B
+  a < 0, 5gen16 suite qui oscille, gen72 symétrie).
+- **Nombres (0/1)** : calculatrice (profil), ≈ / arrondi / environ, ln ou log d'un nombre ≠ 1 et ≠ 10,
+  e^(nombre), angle kπ/n non remarquable (`anglesEnPi`, ch. 5 de 6e) → 1 ; fractions, radicaux,
+  décimaux exacts → 0. Absent de `criteresDifficulte` → détecté sur la réponse brève et les lignes
+  Calcul/Résultat du corrigé (`nombresDuCorrige`).
+- **Durée (min)** = 2 + 2 × étapes équivalentes (charge comprise) + 1 × écran de lecture + 1 si
+  Nombres + 2 si Méthode = 2 ; le piège n'ajoute rien. Item = somme des durées de ses exercices
+  (`evaluationLocal.ts::dureeItem`) ; copie (« Afficher la durée estimée ») = somme des items arrondie
+  aux 5 min. Panneau : estimation par variante avant tirage (`dureeEstimeeVariante`, moyenne de
+  6 tirages, en cache) × nombre d'exercices.
+- **Affichage** (maquette E) : cadre du NUMÉRO puis cadre du PALIER (« 5 » « Avancé »), noir et blanc
+  (`niveauHtml`, `.niveau .num/.pal`) en tête de chaque exercice de la feuille et de sa version
+  aménagée ; légende en tête de la feuille « Niveau 1 à 7 : Base 1–2 · Intermédiaire 3–4 · Avancé
+  5–7. Il monte avec… ». Rien sur la copie d'évaluation ni en Word (les étoiles n'y étaient pas).
+- **Chapitres notés** : 6e ch. 5, 6e ch. 4, 4e ch. 3, 6e ch. 3, 5e ch. 3 (ni `difficulte` ni
+  `dureeMinutes` : `criteresDifficulte` seul). **Conversion PROVISOIRE** pour les autres adaptateurs
+  (non encore notés) : leurs étoiles → niveau ★ 2, ★★ 3, ★★★ 5 (palier conservé), durée = leur
+  constante `dureeMinutes` ; sans étoiles → rien d'affiché. Vrai/faux : niveau 2 (Base), provisoire.
+- **Noter un nouveau chapitre** : pour chaque adaptateur, juger méthode et piège par variante (sur
+  l'énoncé PAPIER), repérer les écrans de pure lecture, écrire
+  `criteresDifficulte(e) = { ...etapesDuCorrige(correction(e), lecture), methode, piege }` (même
+  enveloppe que les autres champs, ex. `avecFractionsNormalisees`), retirer `difficulte` et
+  `dureeMinutes`, puis mesurer (≥ 200 tirages libres + 30 par variante, `niveauEtDuree`) : répartition
+  des niveaux, durées, cas extrêmes (outil du chantier : `verif.ts`, dossier de travail, à recopier).
 
 ## Tirage équilibré des évaluations (décisions de l'utilisateur)
 
@@ -126,7 +179,8 @@ les étapes 1 et 2 » (ou en lettre de question papier).
   sont neutralisés — une figure à compteur global (`ri12`, `ig3`…) dans `construireEnonce` ne rend
   donc plus deux énoncés identiques « différents » (bug trouvé par 6gen83).
 - **Durée estimée** : imprimée seulement si le professeur coche « Afficher la durée estimée »
-  (`EnTeteEvaluation.afficherDuree`, défaut : non).
+  (`EnTeteEvaluation.afficherDuree`, défaut : non) — somme des durées par exercice (voir « Niveau de
+  difficulté et durée »).
 
 ## Graphiques de transformation sur papier (gen8, gen10 — décision de l'utilisateur)
 
