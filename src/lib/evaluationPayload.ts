@@ -89,7 +89,7 @@ export type IdGenerateurPilote =
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
-  | 'gen113' | 'gen114' | 'gen115' | 'gen116' | 'gen117' | 'gen118' | 'gen119' | 'gen120' | 'gen121'
+  | 'gen113' | 'gen114' | 'gen115' | 'gen116' | 'gen117' | 'gen118' | 'gen119' | 'gen120' | 'gen121' | 'gen122'
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38' | 'gen108' | 'gen111' | 'gen109' | 'gen110' | 'gen112'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83'
@@ -272,6 +272,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'statistique-descriptive', sectionId: 'revision', generatorId: 'gen112', label: 'Détective d\'erreurs : statistique (gen112)', processus: 3 },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'cercle', generatorId: 'gen14', label: '' },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'remarquables', generatorId: 'gen15', label: '' },
+  { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'remarquables', generatorId: 'gen122', label: 'Lire sur le cercle trigonométrique (gen122)', processus: 1 },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'identite', generatorId: 'gen16', label: '' },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'associes', generatorId: 'gen17', label: '' },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'associes', generatorId: 'gen76', label: 'Valeur exacte sans calculatrice (gen76)', processus: 2 },

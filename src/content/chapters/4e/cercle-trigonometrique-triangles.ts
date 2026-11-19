@@ -571,6 +571,18 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 15. Valeurs remarquables »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lire sur le cercle trigonométrique',
+          generatorId: 'gen122',
+          description: [
+            'Le point M(θ) est placé sur le cercle, dans un quadrillage qui passe par les valeurs ' +
+              'remarquables : lis cos θ et sin θ, retrouve θ (deux angles ont le même cosinus, le ' +
+              'quadrant tranche), puis lis tan θ sur la tangente verticale x = 1.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 122. Lire sur le cercle trigonométrique »',
+        },
       ],
     },
     {

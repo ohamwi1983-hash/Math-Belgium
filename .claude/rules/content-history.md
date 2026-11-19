@@ -4456,3 +4456,25 @@ après Δ = étapes), barème gen57 (forme « f(x) − k ◇ 0 », ensemble d'en
 route : « S = ∅ » du cas b = 0 rendu « S=arnothing » (`"\v"` dans une chaîne TS), justification
 « x · y \geq 70 » en texte (gen57), aide « racines du numérateur » pour un produit (gen5),
 `<div>` dans `<p>` (aide niveau 2 de la validation gen57). Mesures : feuilles-evaluations.md.
+
+- **4e, Chapitre 5 — nouveau générateur gen122 « Lire sur le cercle trigonométrique »** (lot H de
+  l'audit, processus 1 Connaître, section `remarquables`, carte après gen15) : M(θ) sur le cercle,
+  dans un quadrillage dont les lignes passent par 0, ±1/2, ±√2/2, ±√3/2, ±1 (graduées sur les
+  demi-axes positifs : la valeur se lit sur la ligne symétrique, le signe au quadrant) ; tangente
+  x = 1 graduée en ±√3/3, ±1, ±√3. Écrans (3 tentatives chacun) : cos θ et sin θ (deux champs) ; θ
+  dans [0° ; 360°[ ou [0 ; 2π[ selon la variante (deux candidats de même cosinus, le signe de sin θ
+  tranche) ; tan θ lue sur la tangente ou bouton « tan θ n'est pas définie » (verdict, jamais cas
+  particulier). L'aide 2 de l'écran 3 trace (OM) ; l'aide 2 de l'écran 2 ne donne α que hors du
+  quadrant I (sinon c'était θ). Saisie : toute forme exacte (√3/2, sqrt(3)/2, \frac{\sqrt3}{2},
+  1/√3, 0,5, 2π/3, 2pi/3, \frac{2\pi}{3}, préfixe « cos θ = » et unité ignorés) ; illisible,
+  décimal approché d'une valeur irrationnelle et sin/cos/tan recopié : aucune tentative. Pièges
+  ciblés : cos/sin échangés, signe, graduation voisine, coordonnée nulle ; unité, tour en trop,
+  angle du premier quadrant, autre candidat de même cosinus / sinus, point opposé ; tan = sin θ,
+  signe de T, inverse, cos θ, verdict à tort. Tirage : axe vertical 20 %, axe horizontal 10 %,
+  quadrants 17,5 % chacun ; profil `forme` = variante, cas particulier = quadrant I. Fichiers :
+  `AppLectureCercle.tsx`, `components/EtapeLectureCercle.tsx`, `core/lectureCercle.types.ts`,
+  `moteur/{modele,verification,session}LectureCercle.ts`, `ui/formatLectureCercle.ts` (textes et
+  figure écran = papier), `generateurs/lectureCercle/` (index, profil, corrigé, adaptateur).
+  Mesures : 4 000 tirages (2 000 par variante), ≈ 265 000 saisies justes écrites autrement toutes
+  acceptées, 0 anomalie ; parcours iPhone 13 (5 instances dont axes et tentatives épuisées),
+  scrollWidth 390, 0 erreur console ; QR code : 12 / 12 codes de feuille rouvrent le même M.
