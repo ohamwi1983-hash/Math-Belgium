@@ -6,21 +6,22 @@ import type {
   BlocCorrection,
   CritereBareme,
   EnoncePapier,
-  EtapeCorrection,
+  CriteresDifficulte,
   FragmentConsigne,
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
-  formatAireTotaleAttendueLatex,
   formatArcElementaireAttendueLatex,
   formatArcMultiPasAttendueLatex,
-  formatCirconferenceAttendueLatex,
   formatSecteurElementaireAttendueLatex,
   formatSecteurMultiPasAttendueLatex,
 } from "../../ui5e/formatPolygonesArcsSecteurs";
-import { aireCercle, aireSecteur, CATALOGUE_VARIANTES_POLYGONES, circonference, genererExercicePolygonesArcsSecteurs, genererPolygonesAvecVariante, longueurArc } from "./index";
+import { correctionDetailleePolygonesArcsSecteurs } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { approche } from "../../ui5e/corrigeTrigonometrie1";
+import { aireSecteur, CATALOGUE_VARIANTES_POLYGONES, genererExercicePolygonesArcsSecteurs, genererPolygonesAvecVariante, longueurArc } from "./index";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExercicePolygonesArcsSecteurs>` pour 5gen7 (Polygones,
@@ -51,9 +52,18 @@ function lettreDe(exercice: ExercicePolygonesArcsSecteurs, phase: PhasePolygones
   return LETTRES[sequence(exercice).indexOf(phase)];
 }
 
-/** « ≈ 2,51 » — arrondi au centième, virgule décimale. */
+/** « ≈ 2,51 » — arrondi au centième, virgule décimale (zéros finaux gardés). */
 function approcheLatex(x: number): string {
-  return ` \\approx ${(Math.round(x * 100) / 100).toString().replace(".", "{,}")}`;
+  return ` \\approx ${approche(x, 2)}`;
+}
+
+/** Critères du niveau (grille commune, `export/niveauDifficulte.ts`), jugés sur l'énoncé PAPIER : un
+ * écran de calcul par grandeur (cercle entier, arcs, secteurs : 3 à 5 étapes, aucun écran de pure
+ * lecture — k est donné sur papier, compté sur la figure à l'écran puis utilisé dans le calcul),
+ * méthode 0 (fraction k/n du cercle, imposée), piège 0 (k côtés donnés en toutes lettres), nombres 0
+ * (valeurs exactes en π acceptées). */
+function criteresDifficultePolygonesArcsSecteurs(exercice: ExercicePolygonesArcsSecteurs): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleePolygonesArcsSecteurs(exercice)), methode: 0, piege: 0, nombres: 0 };
 }
 
 function description(exercice: ExercicePolygonesArcsSecteurs): string {
@@ -122,10 +132,6 @@ function enoncePapierPolygonesArcsSecteurs(exercice: ExercicePolygonesArcsSecteu
   };
 }
 
-/** ★ arc et secteur entre sommets consécutifs ; ★★ dès qu'un arc ou un secteur couvre plusieurs côtés. */
-function difficultePolygonesArcsSecteurs(exercice: ExercicePolygonesArcsSecteurs): 1 | 2 | 3 {
-  return exercice.arcMultiPas === null && exercice.secteurMultiPas === null ? 1 : 2;
-}
 
 function reponseBrevePolygonesArcsSecteurs(exercice: ExercicePolygonesArcsSecteurs): FragmentConsigne[] {
   const arc = arcFinal(exercice);
@@ -133,53 +139,6 @@ function reponseBrevePolygonesArcsSecteurs(exercice: ExercicePolygonesArcsSecteu
   return [latex(`s = ${arc.latex}${approcheLatex(arc.valeur)}`), texte(" ; "), latex(`A = ${secteur.latex}${approcheLatex(secteur.valeur)}`)];
 }
 
-function correctionDetailleePolygonesArcsSecteurs(exercice: ExercicePolygonesArcsSecteurs): EtapeCorrection[] {
-  const { r, n } = exercice;
-  return sequence(exercice).flatMap((phase): EtapeCorrection[] => {
-    const sousQuestion = lettreDe(exercice, phase);
-    switch (phase) {
-      case "cercleEntier":
-        return [
-          { label: "Formules", sousQuestion, fragments: [latex("\\text{Circonférence} = 2\\pi r"), texte(" ; "), latex("\\text{Aire} = \\pi r^2")] },
-          {
-            label: "Calcul",
-            sousQuestion,
-            fragments: [
-              latex(`2\\pi \\times ${r} = ${formatCirconferenceAttendueLatex(exercice)}${approcheLatex(circonference(r))}`),
-              texte(" ; "),
-              latex(`\\pi \\times ${r}^2 = ${formatAireTotaleAttendueLatex(exercice)}${approcheLatex(aireCercle(r))}`),
-            ],
-          },
-        ];
-      case "arcElementaire":
-        return [
-          { label: "Méthode", sousQuestion, fragments: [texte(`Les ${n} sommets partagent le cercle en ${n} arcs égaux : l'arc entre deux sommets consécutifs vaut `), latex(`\\dfrac{1}{${n}}`), texte(" de la circonférence.")] },
-          { label: "Calcul", sousQuestion, fragments: [latex(`s = \\dfrac{1}{${n}} \\times 2\\pi \\times ${r} = ${formatArcElementaireAttendueLatex(exercice)}${approcheLatex(longueurArc(r, n, 1))}`)] },
-        ];
-      case "secteurElementaire":
-        return [
-          { label: "Méthode", sousQuestion, fragments: [texte("Le secteur entre deux sommets consécutifs vaut "), latex(`\\dfrac{1}{${n}}`), texte(" de l'aire du disque.")] },
-          { label: "Calcul", sousQuestion, fragments: [latex(`A = \\dfrac{1}{${n}} \\times \\pi \\times ${r}^2 = ${formatSecteurElementaireAttendueLatex(exercice)}${approcheLatex(aireSecteur(r, n, 1))}`)] },
-        ];
-      case "arcMultiPas": {
-        const k = exercice.arcMultiPas?.k ?? 0;
-        return [
-          { label: "Méthode", sousQuestion, fragments: [texte(`L'arc couvre ${k} côtés du polygone sur ${n} : il représente `), latex(`\\dfrac{${k}}{${n}}`), texte(" du cercle.")] },
-          { label: "Calcul", sousQuestion, fragments: [latex(`s = \\dfrac{${k}}{${n}} \\times 2\\pi \\times ${r} = ${formatArcMultiPasAttendueLatex(exercice)}${approcheLatex(longueurArc(r, n, k))}`)] },
-          { label: "Piège", sousQuestion, fragments: [texte(`On compte les CÔTÉS couverts (${k}), pas les sommets (${k + 1}).`)] },
-        ];
-      }
-      case "secteurMultiPas": {
-        const k = exercice.secteurMultiPas?.k ?? 0;
-        return [
-          { label: "Méthode", sousQuestion, fragments: [texte(`Le secteur couvre ${k} côtés du polygone sur ${n} : il représente `), latex(`\\dfrac{${k}}{${n}}`), texte(" du disque.")] },
-          { label: "Calcul", sousQuestion, fragments: [latex(`A = \\dfrac{${k}}{${n}} \\times \\pi \\times ${r}^2 = ${formatSecteurMultiPasAttendueLatex(exercice)}${approcheLatex(aireSecteur(r, n, k))}`)] },
-          ...(exercice.arcMultiPas === null ? [{ label: "Piège", sousQuestion, fragments: [texte(`On compte les CÔTÉS couverts (${k}), pas les sommets (${k + 1}).`)] }] : []),
-        ];
-      }
-    }
-  });
-}
 
 /** Poids : cercle entier 1 ; l'arc final 1,5 et le secteur final 1,5 — partagés entre l'étape
  * élémentaire (0,5) et l'étape « plusieurs côtés » (1) quand celle-ci existe. Total toujours 4. */
@@ -219,10 +178,9 @@ export const adaptateurEvaluationPolygonesArcsSecteurs: AdaptateurFeuilleExercic
   genererInstanceAvecVariante: genererPolygonesAvecVariante,
   construireEnonce: construireEnoncePolygonesArcsSecteurs,
   construireCorrection: construireCorrectionPolygonesArcsSecteurs,
-  difficulte: difficultePolygonesArcsSecteurs,
+  criteresDifficulte: criteresDifficultePolygonesArcsSecteurs,
   reponseBreve: reponseBrevePolygonesArcsSecteurs,
   correctionDetaillee: correctionDetailleePolygonesArcsSecteurs,
   bareme: baremePolygonesArcsSecteurs,
   enoncePapier: enoncePapierPolygonesArcsSecteurs,
-  dureeMinutes: 5,
 };
