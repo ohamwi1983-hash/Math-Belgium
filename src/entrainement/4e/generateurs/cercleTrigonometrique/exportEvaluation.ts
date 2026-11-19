@@ -1,11 +1,13 @@
 import type { ExerciceCercleTrigonometrique, Quadrant, Signe, SigneTan, ValeurAxeTan, VarianteCercleTrigId } from "../../core/cercleTrigonometrique.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { formatEnonceCercleTrigLatex, libelleQuadrant } from "../../ui/formatCercleTrigonometrique";
 import { estSurAxe, valeursAxeAttendues } from "../../moteur/verificationCercleTrigonometrique";
 import { libelleValeurAxe } from "../../ui/cycleSigneCercleTrigonometrique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCercleTrigonometrique } from "./index";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeCercleTrigonometrique, lettresLectureCercleTrigonometrique } from "./corrigeDetaille";
 import { LIBELLE_CAS_QUADRANT_I, profilCercleTrigonometrique } from "../profilsEvaluation4eCh5";
 
 /**
@@ -258,14 +260,6 @@ function enoncePapier(exercice: ExerciceCercleTrigonometrique): EnoncePapier {
   };
 }
 
-/** Calcul de réduction en LaTeX : « −200° + 360° = 160° » ou « 750° − 2 × 360° = 30° ». */
-function calculReductionLatex(exercice: ExerciceCercleTrigonometrique): string {
-  const { angleDepart, angleReduit } = exercice;
-  const k = (angleReduit - angleDepart) / 360;
-  const tours = Math.abs(k) > 1 ? `${Math.abs(k)} \\times 360^\\circ` : "360^\\circ";
-  return `${deg(angleDepart)} ${k > 0 ? "+" : "-"} ${tours} = ${deg(angleReduit)}`;
-}
-
 function ligneSignesLatex(exercice: ExerciceCercleTrigonometrique): string {
   const s = (v: Signe | SigneTan) => (v === "-" ? "-" : v === "+" ? "+" : v === "0" ? "0" : "\\nexists");
   return `\\sin\\theta : ${s(exercice.signeSin)} \\qquad \\cos\\theta : ${s(exercice.signeCos)} \\qquad \\tan\\theta : ${s(exercice.signeTan)}`;
@@ -276,64 +270,6 @@ function valeursAxeLatex(exercice: ExerciceCercleTrigonometrique): string {
   const l = (x: string) => (x === "-1" ? "-1" : x);
   const tan = v.tan === "indefini" ? "\\tan\\theta \\text{ n'existe pas}" : `\\tan\\theta = ${l(v.tan)}`;
   return `\\sin\\theta = ${l(v.sin)} ; \\ \\cos\\theta = ${l(v.cos)} ; \\ ${tan}`;
-}
-
-function correctionDetaillee(exercice: ExerciceCercleTrigonometrique): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("Ajouter ou retrancher des tours complets de 360° ne change pas le point sur le cercle.")] },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(calculReductionLatex(exercice))] },
-    {
-      label: "Conclusion",
-      sousQuestion: "b",
-      fragments: [
-        texte(
-          estSurAxe(exercice)
-            ? `${exercice.angleReduit}° est sur l'axe ${exercice.quadrant === "axeOx" ? "Ox" : "Oy"} : il n'appartient à aucun quadrant.`
-            : texteJustificationQuadrant(exercice),
-        ),
-      ],
-    },
-  ];
-  if (estSurAxe(exercice)) {
-    const v = valeursAxeAttendues(exercice);
-    lignes.push(
-      {
-        label: "Méthode",
-        sousQuestion: "c",
-        fragments: [
-          texte("Sur un axe, M(θ) est l'un des points (±1 ; 0) ou (0 ; ±1) : on lit cos θ (abscisse) et sin θ (ordonnée), puis "),
-          latex("\\tan\\theta = \\dfrac{\\sin\\theta}{\\cos\\theta}"),
-          texte("."),
-        ],
-      },
-      { label: "Conclusion", sousQuestion: "c", fragments: [latex(valeursAxeLatex(exercice))] },
-      {
-        label: "Piège",
-        sousQuestion: "c",
-        fragments: [
-          v.tan === "indefini"
-            ? texte("Sur l'axe Oy, cos θ = 0 : tan θ n'existe pas (division par 0), elle ne vaut ni 0 ni 1.")
-            : texte("Sur l'axe Ox, sin θ = 0 donc tan θ = 0 ; cos θ vaut 1 ou −1 selon le côté, pas toujours 1."),
-        ],
-      },
-    );
-    return lignes;
-  }
-  lignes.push(
-    { label: "Calcul", sousQuestion: "c", fragments: [texte(texteJustificationAnglePremierQuadrant(exercice))] },
-    { label: "Méthode", sousQuestion: "d", fragments: [texte(texteJustificationSignes(exercice))] },
-    { label: "Conclusion", sousQuestion: "d", fragments: [latex(ligneSignesLatex(exercice))] },
-    {
-      label: "Piège",
-      sousQuestion: exercice.quadrant === "I" ? "a" : "c",
-      fragments: [
-        exercice.quadrant === "I"
-          ? texte("Le signe se lit sur l'angle réduit, pas sur l'angle de départ : un angle négatif peut très bien avoir tous ses rapports positifs.")
-          : texte(`Dans le quadrant ${exercice.quadrant}, l'angle du premier quadrant n'est pas l'angle réduit lui-même : il faut passer par la symétrie (180° ou 360°).`),
-      ],
-    },
-  );
-  return lignes;
 }
 
 function reponseBreve(exercice: ExerciceCercleTrigonometrique): FragmentConsigne[] {
@@ -377,10 +313,15 @@ function bareme(exercice: ExerciceCercleTrigonometrique): BaremeExercice {
   };
 }
 
-/** ★ un seul tour de 360° et quadrant I ; ★★ sinon. */
-function difficulte(exercice: ExerciceCercleTrigonometrique): 1 | 2 | 3 {
-  const tours = Math.abs((exercice.angleReduit - exercice.angleDepart) / 360);
-  return tours <= 1 && (exercice.quadrant === "I" || estSurAxe(exercice)) ? 1 : 2;
+/** Niveau (grille commune) : écrans de lecture b (quadrant / axe) et d (signes) ou c (valeurs sur un
+ * axe) ; méthode imposée ; piège dans les données : angle de départ négatif (signes à lire sur
+ * l'angle réduit) ou réduction qui tombe sur 0° (et non 360°). */
+function criteresDifficulte(e: ExerciceCercleTrigonometrique): CriteresDifficulte {
+  return {
+    ...etapesDuCorrige(correctionDetailleeCercleTrigonometrique(e), lettresLectureCercleTrigonometrique(e)),
+    methode: 0,
+    piege: e.angleDepart < 0 || e.angleReduit === 0 ? 1 : 0,
+  };
 }
 
 export const adaptateurEvaluationCercleTrigonometrique: AdaptateurFeuilleExercices<ExerciceCercleTrigonometrique> = {
@@ -391,12 +332,11 @@ export const adaptateurEvaluationCercleTrigonometrique: AdaptateurFeuilleExercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteCercleTrigId),
   construireEnonce: construireEnonceCercleTrigonometrique,
   construireCorrection: construireCorrectionCercleTrigonometrique,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeCercleTrigonometrique,
   bareme,
   enoncePapier,
-  dureeMinutes: 4,
   profilInstance: profilCercleTrigonometrique,
   libelleCasParticulier: LIBELLE_CAS_QUADRANT_I,
   // 4 étapes par instance (réduction, quadrant, angle du premier quadrant, signes) — jamais 1

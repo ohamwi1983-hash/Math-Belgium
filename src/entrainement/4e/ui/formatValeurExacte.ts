@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { ExerciceValeurExacte, FonctionTrig, QuadrantStrict, TermeTrig } from "../core/valeurExacte.types";
 import { denominateurCommun, exactLatex, exactLatexFacteur, type NombreExact } from "../moteur/corpsValeurExacte";
 import {

@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { EcranEquationsTransformer, EquationBase, ExerciceEquationsTransformer, FonctionTrig, MembreAffine, ValeurK } from "../core/equationsTransformer.types";
 import { candidats, ecransDe } from "../moteur/modeleEquationsTransformer";
 

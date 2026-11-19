@@ -28,6 +28,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeValeursRemarquables, lettreEcranValeursRemarquables } from "./generateurs/valeursRemarquables/corrigeDetaille";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -164,6 +167,8 @@ export function AppValeursRemarquables() {
             {exercice.tanLatex === "n'existe pas" ? "n'existe pas" : <Katex expression={`\\displaystyle ${exercice.tanLatex}`} />}
           </>
         ),
+        // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeValeursRemarquables(exercice), lettreEcranValeursRemarquables(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

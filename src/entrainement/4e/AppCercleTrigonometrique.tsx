@@ -30,6 +30,9 @@ import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeCercleTrigonometrique, lettreEcranCercleTrigonometrique } from "./generateurs/cercleTrigonometrique/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Place et lis des valeurs sur le cercle trigonométrique.";
 
@@ -211,6 +214,8 @@ export function AppCercleTrigonometrique() {
                 {exercice.signeTan === "indefini" ? "∄" : libelleSigne(exercice.signeTan)}
               </>
             ),
+        // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCercleTrigonometrique(exercice), lettreEcranCercleTrigonometrique(etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
