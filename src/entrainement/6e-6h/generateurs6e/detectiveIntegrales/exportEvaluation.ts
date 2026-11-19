@@ -4,17 +4,17 @@ import type {
   BlocCorrection,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDetectiveIntegrales } from "../../core6e/detectiveIntegrales.types";
-import { correction, descriptionCorrecte, indiceLigneFausse, typeErreur, valeursAttendues } from "../../moteur6e/modeleDetectiveIntegrales";
-import { CONSIGNE_GENERALE, consignesEcrans, constat, descriptionFragments, enonceExercice, lignesCopie, nomErreur, piege, souderPonctuation, valeurFragments } from "../../ui6e/formatDetectiveIntegrales";
+import { indiceLigneFausse, typeErreur, valeursAttendues } from "../../moteur6e/modeleDetectiveIntegrales";
+import { CONSIGNE_GENERALE, consignesEcrans, enonceExercice, lignesCopie, nomErreur, valeurFragments } from "../../ui6e/formatDetectiveIntegrales";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveIntegrales } from "./index";
 import { profilDetectiveIntegrales } from "./profil";
+import { correctionDetailleeDetectiveIntegrales } from "./corrigeDetaille";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de 6gen84. Énoncé papier = les données, la copie
@@ -66,23 +66,7 @@ function reponseBreve(e: ExerciceDetectiveIntegrales): FragmentConsigne[] {
   return [texte(`Ligne ${indiceLigneFausse(e) + 1} fausse (${nomErreur(e)}) ; `), ...valeurs(e)];
 }
 
-function correctionDetaillee(e: ExerciceDetectiveIntegrales): EtapeCorrection[] {
-  const i = indiceLigneFausse(e);
-  const etapes: EtapeCorrection[] = [
-    { label: "Contrôle", sousQuestion: "a", fragments: constat(e) },
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte(`La ligne ${i + 1} est fausse.`)] },
-    { label: "Erreur", sousQuestion: "b", fragments: descriptionFragments(descriptionCorrecte(e), e) },
-  ];
-  /** « Ligne n corrigée : une primitive… » (minuscule après les deux-points). */
-  const enMinuscule = (ligne: FragmentConsigne[]): FragmentConsigne[] =>
-    ligne.map((f, j) => (j === 0 && f.type === "texte" && /^[A-ZÉ][a-zé]/.test(f.valeur) ? { ...f, valeur: f.valeur[0]!.toLowerCase() + f.valeur.slice(1) } : f));
-  correction(e).forEach((ligne, k) => {
-    etapes.push({ label: k === 0 ? "Correction" : "Calcul", sousQuestion: "c", fragments: souderPonctuation(k === 0 ? [texte(`Ligne ${i + 1} corrigée : `), ...enMinuscule(ligne)] : ligne) });
-  });
-  etapes.push({ label: "Conclusion", sousQuestion: "c", fragments: valeurs(e) });
-  etapes.push({ label: "Piège", sousQuestion: "b", fragments: piege(e) });
-  return etapes;
-}
+const correctionDetaillee = correctionDetailleeDetectiveIntegrales;
 
 function construireCorrection(e: ExerciceDetectiveIntegrales): BlocCorrection[] {
   return [{ type: "paragraphe", fragments: reponseBreve(e) }];

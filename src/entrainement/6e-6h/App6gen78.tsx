@@ -20,6 +20,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { phasesPourExercice } from "./moteur6e/typesFonctionAire";
+import { correctionDetailleeFonctionAire } from "./generateurs6e/fonctionAire/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen78` — « La fonction aire » (chapitre 4 de 6e, section `integralesdefinies`). Données : la
@@ -141,6 +145,7 @@ export function App6gen78() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendueNoeud(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFonctionAire(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />,
         labelSuivant: derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(choix ? { messageRevele: "Ce n'était pas la bonne réponse (une seule tentative sur un choix fermé)." } : {}),
