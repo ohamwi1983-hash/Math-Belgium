@@ -81,6 +81,12 @@ export function eg(v: number, d: number, suffixe = ""): string {
   return `${rel(v, d)} ${nb(v, d)}${suffixe}`;
 }
 
+/** Relation suivie de la valeur : exacte telle quelle (« = 12{,}5 »), approchée avec tous ses
+ * chiffres (« \\approx 75{,}0 ») — le nombre de décimales dit la précision. */
+export function apres(r: "=" | "\\approx", v: number, d: number): string {
+  return `${r}${r === "=" ? nb(v, d) : nbFixe(v, d)}`;
+}
+
 /** Unité de longueur en LaTeX (« \text{ cm} ») ; chaîne vide sans unité. */
 export function u(unite: string | undefined): string {
   return unite ? `\\text{ ${unite}}` : "";
@@ -121,13 +127,22 @@ export function angleMemoire(v: number, d = 1): Val {
   return { v, d, angle: true };
 }
 
+/** Valeur écrite : exacte telle quelle ; arrondie (mémoire) avec TOUS ses chiffres (« 125{,}0 »,
+ * « 7{,}20 ») — le nombre de décimales dit la précision de l'arrondi. */
 export function tex(x: Val): string {
-  return x.angle ? deg(x.v, x.d) : nb(x.v, x.d);
+  const n = exacte(x) ? nb(x.v, x.d) : nbFixe(x.v, x.d);
+  return x.angle ? `${n}^\\circ` : n;
+}
+
+/** Nombre arrondi à `d` décimales, zéros finaux gardés : « 7{,}20 ». */
+export function nbFixe(v: number, d: number): string {
+  const r = arrondiA(v, d);
+  return (r < 0 ? "-" : "") + Math.abs(r).toFixed(d).replace(".", "{,}");
 }
 
 /** Facteur : entre parenthèses s'il est négatif. */
 function texF(x: Val): string {
-  return x.angle ? deg(x.v, x.d) : nbp(x.v, x.d);
+  return x.v < 0 ? `(${tex(x)})` : tex(x);
 }
 
 export function exacte(x: Val): boolean {
@@ -138,6 +153,13 @@ export function exacte(x: Val): boolean {
  * exactement, « \approx » dès qu'une valeur gardée en mémoire est écrite arrondie. */
 export function relSubst(...vals: Val[]): "=" | "\\approx" {
   return vals.every(exacte) ? "=" : "\\approx";
+}
+
+/** Relation d'un résultat qui suit une substitution : « \approx » dès qu'une valeur substituée est
+ * arrondie (le résultat vient de la valeur exacte en mémoire), sinon « = » ou « \approx » selon
+ * qu'il s'écrit exactement avec `d` décimales. */
+export function relApres(vals: Val[], v: number, d: number): "=" | "\\approx" {
+  return vals.every(exacte) ? rel(v, d) : "\\approx";
 }
 
 /** Justification d'une substitution, avec la mention « mémoire » quand une valeur est arrondie. */
@@ -157,7 +179,7 @@ export function lignesSommeAngles(o: { inconnu: string; autres: [string, string]
   return [
     ligne(`${o.inconnu}=180^\\circ-${y}-${z}`, "la somme des angles d'un triangle vaut 180°"),
     ligne(`${relSubst(vy, vz)}180^\\circ-${tex(vy)}-${tex(vz)}`, justifSubst([vy, vz])),
-    ligne(`${rel(o.resultat, d)}${deg(o.resultat, d)}`),
+    ligne(`${apres(relApres([vy, vz], o.resultat, d), o.resultat, d)}^\\circ`),
   ];
 }
 
@@ -180,7 +202,7 @@ export function lignesLoiSinusCote(o: {
     ligne(`\\dfrac{${o.x}}{\\sin ${o.X}}=\\dfrac{${o.k}}{\\sin ${o.K}}`, "loi des sinus : chaque côté avec le sinus de l'angle qui lui fait face"),
     ligne(`${o.x}=\\dfrac{${o.k}\\cdot\\sin ${o.X}}{\\sin ${o.K}}`, [texte("on multiplie les deux membres par "), latex(`\\sin ${o.X}`)]),
     ligne(`${relSubst(...vals)}\\dfrac{${tex(o.vk)}\\cdot\\sin ${tex(o.vX)}}{\\sin ${tex(o.vK)}}`, justifSubst(vals, "on remplace, calculatrice en degrés")),
-    ligne(`${rel(o.resultat, d)}${nb(o.resultat, d)}${u(o.unite)}`),
+    ligne(`${apres(relApres(vals, o.resultat, d), o.resultat, d)}${u(o.unite)}`),
   ];
 }
 
@@ -192,20 +214,20 @@ export function lignesLoiSinusSinus(o: { X: string; x: string; K: string; k: str
     ligne(`\\dfrac{\\sin ${o.X}}{${o.x}}=\\dfrac{\\sin ${o.K}}{${o.k}}`, "loi des sinus, écrite avec les sinus au numérateur"),
     ligne(`\\sin ${o.X}=\\dfrac{${o.x}\\cdot\\sin ${o.K}}{${o.k}}`, [texte("on multiplie les deux membres par "), latex(o.x)]),
     ligne(`${relSubst(...vals)}\\dfrac{${tex(o.vx)}\\cdot\\sin ${tex(o.vK)}}{${tex(o.vk)}}`, justifSubst(vals, "on remplace, calculatrice en degrés")),
-    ligne(`${rel(o.sinus, d)}${nb(o.sinus, d)}`, "valeur exacte gardée en mémoire"),
+    ligne(`${apres(relApres(vals, o.sinus, d), o.sinus, d)}`, "valeur exacte gardée en mémoire"),
   ];
 }
 
 /** Angle aigu par la touche sin⁻¹, puis (facultatif) son supplémentaire, de même sinus. */
 export function lignesArcsin(o: { X: string; angle: number; d?: number; supplementaire?: { X2: string; angle2: number } }): LigneCalcul[] {
   const d = o.d ?? 1;
-  const lignes = [ligne(`${o.X}${rel(o.angle, d)}${deg(o.angle, d)}`, [texte("touche "), latex("\\sin^{-1}"), texte(", calculatrice en degrés : l'angle aigu")])];
+  const lignes = [ligne(`${o.X}${apres(rel(o.angle, d), o.angle, d)}^\\circ`, [texte("touche "), latex("\\sin^{-1}"), texte(", calculatrice en degrés : l'angle aigu")])];
   if (o.supplementaire) {
     const { X2, angle2 } = o.supplementaire;
     lignes.push(
       ligne(`${X2}=180^\\circ-${o.X}`, `deux angles supplémentaires ont le même sinus ${COURS_ANGLES_ASSOCIES}`),
       ligne(`${relSubst(angleMemoire(o.angle, d))}180^\\circ-${deg(o.angle, d)}`, justifSubst([angleMemoire(o.angle, d)])),
-      ligne(`${rel(angle2, d)}${deg(angle2, d)}`),
+      ligne(`${apres(relApres([angleMemoire(o.angle, d)], angle2, d), angle2, d)}^\\circ`),
     );
   }
   return lignes;
@@ -238,9 +260,10 @@ export function lignesAlKashiCote(o: {
     lignes.push(ligne(`=${nb(o.vp.v ** 2)}+${nb(o.vq.v ** 2)}-${nb(deuxPQ)}\\cdot\\cos ${tex(o.vX)}`, "on calcule les carrés et le produit"));
   }
   const cosX = Math.cos((o.vX.v * Math.PI) / 180);
-  lignes.push(ligne(`${rel(carre, dCarre)}${nb(carre, dCarre)}`, cosX < 0 ? "calculatrice en degrés ; le cosinus est négatif, le terme retranché s'ajoute" : "calculatrice en degrés"));
-  lignes.push(ligne(`${o.x}${rel(carre, dCarre)}\\sqrt{${nb(carre, dCarre)}}`, "une longueur est positive : racine carrée"));
-  lignes.push(ligne(`${rel(o.resultat, d)}${nb(o.resultat, d)}${u(o.unite)}`));
+  lignes.push(ligne(`${apres(relApres(vals, carre, dCarre), carre, dCarre)}`, cosX < 0 ? "calculatrice en degrés ; le cosinus est négatif, le terme retranché s'ajoute" : "calculatrice en degrés"));
+  const rCarre = relApres(vals, carre, dCarre);
+  lignes.push(ligne(`${o.x}${rCarre}\\sqrt{${rCarre === "=" ? nb(carre, dCarre) : nbFixe(carre, dCarre)}}`, "une longueur est positive : racine carrée"));
+  lignes.push(ligne(`${apres(relApres([...vals, { v: carre, d: dCarre }], o.resultat, d), o.resultat, d)}${u(o.unite)}`));
   return lignes;
 }
 
@@ -280,9 +303,9 @@ export function lignesAlKashiAngle(o: { X: string; x: string; p: string; q: stri
       if (g > 1 && den / g !== 1) lignes.push(ligne(`=${fractionLatex(num / g, den / g)}`, `on simplifie par ${g}`));
     }
   }
-  if (!auPlus(cos, dCos) || !vals.every(exacte)) lignes.push(ligne(`${rel(cos, dCos)}${nb(cos, dCos)}`, "valeur exacte gardée en mémoire"));
+  if (!auPlus(cos, dCos) || !vals.every(exacte)) lignes.push(ligne(`${apres(relApres(vals, cos, dCos), cos, dCos)}`, "valeur exacte gardée en mémoire"));
   else if (!Number.isInteger(cos)) lignes.push(ligne(`=${nb(cos, dCos)}`));
-  lignes.push(ligne(`${o.X}${rel(o.angle, d)}${deg(o.angle, d)}`, [texte("touche "), latex("\\cos^{-1}"), texte(", calculatrice en degrés : un seul angle entre 0° et 180° a ce cosinus")]));
+  lignes.push(ligne(`${o.X}${apres(rel(o.angle, d), o.angle, d)}^\\circ`, [texte("touche "), latex("\\cos^{-1}"), texte(", calculatrice en degrés : un seul angle entre 0° et 180° a ce cosinus")]));
   return lignes;
 }
 
@@ -295,15 +318,15 @@ export function lignesAire(o: { nom?: string; p: string; q: string; X: string; v
     ligne(`${nom}=\\dfrac{1}{2}\\cdot ${o.p}\\cdot ${o.q}\\cdot\\sin ${o.X}`, "aire : demi-produit de deux côtés par le sinus de l'angle compris entre eux"),
     ligne(`${relSubst(...vals)}\\dfrac{1}{2}\\cdot ${tex(o.vp)}\\cdot ${tex(o.vq)}\\cdot\\sin ${tex(o.vX)}`, justifSubst(vals)),
   ];
-  if (exacte(o.vp) && exacte(o.vq)) lignes.push(ligne(`=${nb((o.vp.v * o.vq.v) / 2)}\\cdot\\sin ${tex(o.vX)}`, "on calcule le demi-produit des côtés"));
-  lignes.push(ligne(`${rel(o.aire, d)}${nb(o.aire, d)}${u2(o.unite)}`, "calculatrice en degrés"));
+  if (exacte(o.vp) && exacte(o.vq)) lignes.push(ligne(`${relSubst(o.vX)}${nb((o.vp.v * o.vq.v) / 2)}\\cdot\\sin ${tex(o.vX)}`, "on calcule le demi-produit des côtés"));
+  lignes.push(ligne(`${apres(relApres(vals, o.aire, d), o.aire, d)}${u2(o.unite)}`, "calculatrice en degrés"));
   return lignes;
 }
 
 /** Somme des angles vérifiée : X + Y + Z ≈ a + b + c ≈ 180°. */
 export function lignesVerificationSomme(noms: [string, string, string], angles: [Val, Val, Val]): LigneCalcul[] {
   const somme = angles.reduce((s, a) => s + arrondiA(a.v, a.d), 0);
-  return [ligne(`${noms.join("+")}${relSubst(...angles)}${angles.map(tex).join("+")}`, "valeurs arrondies au dixième"), ligne(`${rel(somme, 1)}${deg(somme, 1)}`, "à un arrondi près, 180°")];
+  return [ligne(`${noms.join("+")}${relSubst(...angles)}${angles.map(tex).join("+")}`, "valeurs arrondies au dixième"), ligne(`${apres(rel(somme, 1), somme, 1)}^\\circ`, "à un arrondi près, 180°")];
 }
 
 // ---------------------------------------------------------------------------------------------
