@@ -2384,21 +2384,22 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       id: 'revision',
       number: 8,
       title: 'Révision — quiz vrai/faux',
-      kicker: '245 affirmations en 7 thèmes, tout le chapitre',
+      kicker: '350 affirmations en 10 thèmes, tout le chapitre',
       blocks: [
         { kind: 'video', title: 'Cercle trigonométrique et triangles quelconques — synthèse et points à vérifier', youtubeId: 'YjmwkQmAxsc' },
         {
           kind: 'para',
           text:
-            'Un quiz vrai/faux qui couvre tout ce chapitre. 7 thèmes, un par grande partie du chapitre. ' +
-            'Choisis-le librement.',
+            'Un quiz vrai/faux qui couvre tout ce chapitre. 10 thèmes, dans l\'ordre des sections : un ' +
+            'par section, et un second pour les sections 5 (équations à transformer et rotations), 6 ' +
+            '(aire et cas ambigu) et 7 (forces, caps et visées). Choisis-le librement.',
         },
         {
           kind: 'entrainement',
           title: 'Cercle trigonométrique & triangles quelconques — quiz vrai/faux',
           generatorId: 'gen63',
           description: [
-            '245 affirmations pré-écrites, réparties en 7 thèmes (35 par thème), qui reprennent ' +
+            '350 affirmations pré-écrites, réparties en 10 thèmes (35 par thème), qui reprennent ' +
               'tout ce chapitre. Un seul essai par question. La justification est toujours révélée.',
           ],
           chantier: '4e',
