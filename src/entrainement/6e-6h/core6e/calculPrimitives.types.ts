@@ -324,13 +324,14 @@ export interface ExerciceFamilleG2 {
   integrandeReference: (x: number) => number;
 }
 
-/** Sous-type 3 — dénominateur mixte x·(x²+1) : f(x)=[(A+B)x²+Cx+A]/(x(x²+1)). */
+/** Sous-type 3 — dénominateur mixte x·(x²+1) : f(x)=[(A+B)x²+Dx+A]/(x(x²+1)). Coefficients
+ * nommés A, B, D (jamais C) : C reste la constante d'intégration, comme dans le cours. */
 export interface ExerciceFamilleG3 {
   famille: "G";
   sousType: "3";
   A: number;
   B: number;
-  C: number;
+  D: number;
   decompositionReference: (vars: Record<string, number>) => number;
   primitiveReference: (x: number) => number;
   integrandeReference: (x: number) => number;

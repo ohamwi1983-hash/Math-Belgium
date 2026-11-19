@@ -4179,3 +4179,16 @@ paths:
   « Ombre à la lampe : projection centrale (gen106) ». Fichiers : `AppOmbreLampe.tsx`,
   `core/ombreLampe.types.ts`, `ui/formatOmbreLampe.ts`, `generateurs/ombreLampe/` (geometrieLampe,
   index, profil, exportEvaluation).
+
+- **Corrections d'écran validées par l'utilisateur (6e ch. 4 et 4e ch. 3)** : 6gen81 « section —
+  fonction donnée » — tirage refait tant que la profondeur c = a·(W/2)² n'a pas une écriture décimale
+  exacte d'au plus 4 décimales (`decimalCourt`, aussi pour la flèche du mur) : W = 10,5 et a = 0,3
+  imprimaient f(x) = −0,3x² + 8,2688 (au lieu de 8,26875), dont ±5,25 n'étaient plus les racines
+  (14 tirages sur 2 000 avant, 0 sur 3 000 après). 6gen29 — Archimède : réponse « 2/1875 ≈ 0,00107 »
+  (fraction exacte en entiers, trois chiffres significatifs) au lieu de « ≈ 0,001 », consigne et
+  tolérance relative alignées ; surplus (F) : réponse au dixième, Q et P au centième, vérification à
+  un demi-dixième (`moteur6e/valeursIntegralesProblemes.ts`, source unique écran / corrigé /
+  vérification). 6gen23/24/25 G3 : troisième coefficient renommé D (C = constante d'intégration,
+  comme dans le cours). gen10 : option `etiquettesLisibles` du graphe (pas de 1/3 → entiers écrits)
+  et « − » typographique sur les axes et dans la légende. Détails et mesures :
+  `.claude/rules/feuilles-evaluations.md` (sections « Corrigé détaillé » et gen11).

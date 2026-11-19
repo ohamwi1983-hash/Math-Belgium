@@ -15,6 +15,7 @@ import { diagnostiquerEnsembleValeurs, diagnostiquerEquivalenceFonction, diagnos
 import { diagnostiquerPrimitive } from "./verificationCalculPrimitives";
 import { diagnostiquerFinalIntegrale, diagnostiquerValeurMoyenne } from "./verificationIntegralesDefinies";
 import type { PhaseIntegralesProblemes } from "./typesIntegralesProblemes";
+import { DEMI_DIXIEME, surplusAuCentiemeF, toleranceFractionDebordee, valeurFractionDebordee } from "./valeursIntegralesProblemes";
 
 /**
  * Couche B (6e) — vérification pour `6gen29`. N'importe JAMAIS rien de `src/generateurs6e/` (règle
@@ -154,10 +155,14 @@ export function diagnostiquerFEcran1(exercice: ExerciceFamilleF_Problemes, valeu
   const sP = diagnostiquerValeur(valeurs[1], exercice.P, TOLERANCE);
   return pireStatut(sQ, sP);
 }
-/** Écran 2 — surplus demandé au dixième, calculé avec Q et P arrondis au centième (erreur ≤ 0,005·Q
- * sur S, d'où la marge proportionnelle à Q). */
+/** Écran 2 — surplus demandé au dixième (consigne) : juste à un demi-dixième près du surplus calculé
+ * avec Q et P arrondis au centième puis écrit au centième (la méthode de la consigne et du corrigé)
+ * ou du surplus exact
+ * (élève qui garde les valeurs non arrondies de sa calculatrice) — `valeursIntegralesProblemes.ts`. */
 export function diagnostiquerFEcran2(exercice: ExerciceFamilleF_Problemes, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], exercice.surplusAttendu, 0.05 + 0.006 * exercice.Q);
+  const avecArrondis = diagnostiquerValeur(valeurs[0], surplusAuCentiemeF(exercice), DEMI_DIXIEME);
+  if (avecArrondis !== "not_equivalent") return avecArrondis;
+  return diagnostiquerValeur(valeurs[0], exercice.surplusAttendu, DEMI_DIXIEME);
 }
 
 // ============================================================================
@@ -180,9 +185,10 @@ export function diagnostiquerGArchimedeEcran2(exercice: ExerciceFamilleG_Archime
   const volumeDeplace = (4 / 3) * Math.PI * exercice.r * exercice.r * exercice.r;
   return diagnostiquerValeur(valeurs[0], volumeDeplace, toleranceVolume(volumeDeplace));
 }
+/** Écran 3 — fraction débordée : fraction exacte ou trois chiffres significatifs (consigne). La
+ * tolérance absolue de 0,01 acceptait 0 pour une fraction de l'ordre de 0,001. */
 export function diagnostiquerGArchimedeEcran3(exercice: ExerciceFamilleG_Archimede, valeurs: string[]): StatutVerification {
-  const volumeDeplace = (4 / 3) * Math.PI * exercice.r * exercice.r * exercice.r;
-  return diagnostiquerValeur(valeurs[0], volumeDeplace / exercice.paraboloide.volumeParaboloide, TOLERANCE);
+  return diagnostiquerValeur(valeurs[0], valeurFractionDebordee(exercice), toleranceFractionDebordee(exercice));
 }
 
 const CANDIDATS_Y = [0.2, 0.5, 0.8, 1.1, 1.4, 1.7, 2, 2.3, 2.6, 2.9];

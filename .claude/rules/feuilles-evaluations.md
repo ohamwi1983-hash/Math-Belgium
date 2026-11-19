@@ -303,6 +303,21 @@ Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feui
   ligne AVANT, puis « … = F(b) − F(a) = valeurs »), rationnels `Q`, trinôme, carré développé, `entoure`
   (`\Big(` au-delà de 14 caractères) ; 6gen23 réutilisé par 6gen24/25 via `etapesPhasePrimitive`.
   Étape « signe » : le résultat nomme chaque intervalle (« f ≥ 0 sur ]−2 ; 1[ »), jamais « f ≥ 0, f ≤ 0 » seul.
+  **Valeur arrondie ou exacte = UNE fonction pour l'écran, le corrigé et la vérification**
+  (`moteur6e/valeursIntegralesProblemes.ts`, 6gen29) : surplus (famille F) calculé avec Q et P
+  arrondis au centième (`equilibreArrondiF`), écrit au centième dans le corrigé, réponse = cet arrondi
+  au dixième (`surplusAuDixiemeF`, « S ≈ 28,9 » ; Q, P écrits « 3,96 ») ; vérification à un
+  demi-dixième de ce surplus OU du surplus exact. Archimède : fraction débordée EXACTE en entiers
+  (`fractionDebordeeArchimede`, 8r³/(3k²L²)) puis « = » décimal exact (≤ 6 décimales) ou « ≈ » trois
+  chiffres significatifs (`fractionDebordeeLatex` : « 2/1875 ≈ 0,00107 ») ; consigne « fraction exacte
+  ou trois chiffres significatifs » (écran et papier), tolérance relative 0,6 % (l'ancienne tolérance
+  absolue 0,01 acceptait 0 pour un tiers des tirages). 6gen81 « fonction donnée » : un coefficient
+  imprimé est TOUJOURS exact — tirage refait si c = a·(W/2)² a plus de 4 décimales (8,26875 était
+  imprimé 8,2688 : les pieds ±5,25 n'étaient plus racines) ; contrôle sur 3 000 tirages par variante :
+  coefficients imprimés relus en rationnels = coefficients du modèle, f(pieds annoncés) = 0 exactement.
+  6gen23/24/25, sous-type G3 : coefficients A, B, **D** de `A/x + (Bx + D)/(x² + 1)` (champ `D` du
+  type) — C reste la constante d'intégration, comme dans le cours ; la saisie « Bx + C » de la
+  décomposition (sans D) reste acceptée, « + C » / « + K » en fin de primitive aussi.
 - 6e ch. 4, 6gen77–84 : briques `6e-6h/ui6e/corrigeIntegrales2.ts` (renvois `COURS_*` § 1–7,
   `crochet`, `integraleTexte`, `lignesDepuisJustification` — justification rédigée éclatée en lignes,
   condition « pour / sur / car » rattachée à la ligne précédente) ; collecteur `corrige-6e4-m2` : ∫ par
@@ -458,7 +473,26 @@ Outils du pilote : `collecteur.ts`, `evalLatex.ts` (dossier de travail du chanti
   gabarit : son signe donne SOX, sa valeur sans le signe le rapport EV/CV ». Graphique : option
   `etiquettesLisibles` de `GrilleAdaptative` (nombres écrits = multiples du pas à écriture finie,
   espacés, jamais rognés ; pas de 1/3 → entiers seulement ; grille complète ; signe « − »).
-  Mesuré : 0 chevauchement à 390 et 1280 px sur 300 tirages × 8 états par famille.
+  Mesuré : 0 chevauchement à 390 et 1280 px sur 300 tirages × 8 états par famille. **gen10**
+  (`MafsGraphFonctionsReference`) : même option + `formatEtiquetteGrilleTypo` (`ui/mafsTransformation.ts`,
+  virgule et « − », partagé avec gen11) et « − » dans la légende des points. Mesuré (harnais,
+  300 tirages × 8 états — cible seule, avec curseurs neutres / justes / translations seules, zoom
+  avant 1, 2, 4 crans, zoom arrière — boîtes englobantes) : états avec chevauchement 807 / 2 400
+  à 390 px et 584 / 2 400 à 1 280 px (« 0,3333333333 » sur « 0,6666666666 » dans 386 états) →
+  0 et 0 ; nombres rognés 2 062 et 1 834 → 0. `GrilleAdaptative` (option `etiquettesLisibles`) : un
+  nombre Y qui toucherait un nombre X n'est pas écrit (croisement des deux lignes de nombres), et
+  les nombres Y passent à gauche de l'axe quand il longe le bord droit.
+  Autres graphes 4e à pas adaptatif par défaut (mantisse 10/3 de la décade 0,1–1 atteinte au zoom),
+  mesurés dans l'appli (20 tirages × 12 états — initial, zoom avant cran par cran jusqu'à 8, retour,
+  zoom arrière — à 390 et 1 280 px) : chevauchement de nombres d'un même axe au pas de 1/3 pour
+  gen47 (`DistanceDroiteGraph`, 24–30 états / 240), gen38 (`ComparaisonSeriesGraph`, 5 / 96),
+  gen33 (`PolygoneEffectifsGraph` / `LectureQuartileGraph`, 1 / 168) → option activée (gen35
+  partage les deux graphes de gen33), formats `formatEtiquetteGrilleTypo` / `nombreFrTypo` : 0
+  chevauchement après. gen8, gen9, gen12 : aucun chevauchement d'un même axe (240 états chacun) —
+  option non activée ; restent, au zoom, quelques nombres X posés sur un nombre Y au croisement des
+  axes (gen8 26 / 240, gen12 1 / 240), à traiter de la même façon si l'utilisateur le souhaite.
+  Graphes à pas fixe (`EquationCercleGraph`, `EquationParaboleGraph`, `ConstructionDroiteGraph`,
+  `LectureGraphiqueDroiteGraph`) ou à mantisses propres (`BoiteMoustachesGraph`) : pas de 1/3 impossible.
 - Briques partagées sans `docx` : `4e/ui/corrigeChapitre3.ts` (`q` exact, `plusQ`, `mono`,
   `somme`, `polynome`, `lignesPremierDegre` — reste fractionnaire n/d divisé en `\dfrac{n}{d\cdot a}`,
   jamais de fraction de fraction —, `racineCarreeLatex`, `racineCubiqueLatex`, `sansDoublons`,

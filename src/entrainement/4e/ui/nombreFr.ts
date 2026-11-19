@@ -12,6 +12,12 @@ export function nombreFr(valeur: number): string {
   return String(Number(valeur.toFixed(10))).replace(".", ",");
 }
 
+/** Nombre de graduation d'un graphe : `nombreFr` avec le vrai signe « − » (option `etiquettesLisibles`
+ * de `GrilleAdaptative`, gen33, gen35, gen38). */
+export function nombreFrTypo(valeur: number): string {
+  return nombreFr(valeur).replace("-", "−");
+}
+
 /** Même nombre pour KaTeX : `{,}` évite l'espace que LaTeX ajoute après une virgule. */
 export function nombreFrLatex(valeur: number): string {
   return String(Number(valeur.toFixed(10))).replace(".", "{,}");

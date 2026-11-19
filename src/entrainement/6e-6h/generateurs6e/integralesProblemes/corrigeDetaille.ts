@@ -12,7 +12,8 @@ import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../ex
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import { phasesPourExercice } from "../../moteur6e/typesIntegralesProblemes";
 import type { PhaseIntegralesProblemes } from "../../moteur6e/typesIntegralesProblemes";
-import { afficheAffine, cLatexD, coefRacineLatex, decimalLatex, demandeLatexF, fLatexE, formatReponseAttenduePhaseLatex, fractionLatex, vLatexB, xLatexB } from "../../ui6e/formatIntegralesProblemes";
+import { afficheAffine, cLatexD, coefRacineLatex, decimalFixeLatex, decimalLatex, demandeLatexF, fLatexE, formatReponseAttenduePhaseLatex, fractionDebordeeLatex, fractionLatex, valeurFractionDebordeeLatex, vLatexB, xLatexB } from "../../ui6e/formatIntegralesProblemes";
+import { equilibreArrondiF, surplusAuCentiemeF } from "../../moteur6e/valeursIntegralesProblemes";
 import { figureSurplusSvg, figureTrapezesSvg } from "../../ui6e/figureIntegralesProblemes";
 import { volumeExactALatex } from "../../ui6e/formatVolumesRevolution";
 import { cours, crochet, lignesFin, lignesIntegralePoly, piL, polyL, q, qDepuis, qDiv, qL, qMul, qP, qPow, qSub, qVal, substituer } from "../../ui6e/corrigeIntegrales1";
@@ -225,22 +226,22 @@ function contenuE(e: ExerciceFamilleE_Problemes, phase: PhaseIntegralesProblemes
 function contenuF(e: ExerciceFamilleF_Problemes, phase: PhaseIntegralesProblemes): Contenu {
   const dem = demandeLatexF(e);
   const g = afficheAffine(e.m, e.p, "x");
-  const Q2 = decimalLatex(e.Q, 2);
-  const P2 = decimalLatex(e.P, 2);
+  const arrondis = equilibreArrondiF(e);
+  const Q2 = decimalFixeLatex(arrondis.Q, 2);
+  const P2 = decimalFixeLatex(arrondis.P, 2);
   if (phase === "fEcran1") {
     return {
       utilise: [t("Le point d'équilibre est l'intersection de la demande et de l'offre : on résout "), f("f(x)=g(x)"), t(` à la calculatrice (graphique ou solveur), puis P = g(Q) ${C7}.`)],
       calcul: [ligne(`${dem}=${g}`, "équation f(x) = g(x)"), ligne(`Q\\approx ${Q2}`, "abscisse du point d'intersection (calculatrice)"), ligne("P=g(Q)", "prix d'équilibre"), ligne(`=${afficheAffine(e.m, e.p, "Q")}`), ligne(`\\approx ${P2}`, "avec la valeur de Q de la calculatrice, non arrondie")],
-      verification: { fragments: [t("Avec la demande, "), f(`f(${Q2})\\approx ${decimalLatex(e.A * Math.exp((-e.kNum / e.kDen) * Number(Q2.replace("{,}", "."))), 2)}`), t(" : on retrouve P, aux arrondis près.")] },
+      verification: { fragments: [t("Avec la demande, "), f(`f(${Q2})\\approx ${decimalLatex(e.A * Math.exp((-e.kNum / e.kDen) * arrondis.Q), 2)}`), t(" : on retrouve P, aux arrondis près.")] },
     };
   }
   const aSurK = fractionLatex(e.A * e.kDen, e.kNum);
   const ex = dem.slice(String(e.A).length);
   const F = `-${aSurK}${ex}-${P2}x`;
-  const Qr = Number(Q2.replace("{,}", "."));
-  const Pr = Number(P2.replace("{,}", "."));
-  const k = e.kNum / e.kDen;
-  const S = (e.A / k) * (1 - Math.exp(-k * Qr)) - Pr * Qr;
+  // Même valeur que l'écran et la vérification (`valeursIntegralesProblemes.ts`) : S calculé avec Q
+  // et P arrondis au centième ; le résultat encadré (réponse de l'écran) l'arrondit au dixième.
+  const S2 = decimalFixeLatex(surplusAuCentiemeF(e), 2);
   return {
     utilise: [t("Le surplus est l'aire entre la courbe de demande et la droite du prix d'équilibre, de 0 à Q ; une primitive de "), f(dem), t(" est "), f(`-${aSurK}${ex}`), t(` ${C7}.`)],
     calcul: [
@@ -248,7 +249,7 @@ function contenuF(e: ExerciceFamilleF_Problemes, phase: PhaseIntegralesProblemes
       ligne(`\\approx\\int_0^{${Q2}}\\big(${dem}-${P2}\\big)\\,dx`, "Q et P de l'étape 1"),
       ligne(`=${crochet(F, "0", Q2)}`, "primitive terme à terme"),
       ligne(`=${substituer(F, Q2)}-\\left(-${aSurK}\\right)`, [t("F(Q) − F(0), avec "), f("e^{0}=1")]),
-      ligne(`\\approx ${decimalLatex(S, 2)}`, "valeur approchée"),
+      ligne(`\\approx ${S2}`, "valeur approchée"),
     ],
     piege: "Arrondir Q et P trop tôt : garde au moins deux décimales jusqu'au calcul de S.",
     figure: figureSurplusSvg(e),
@@ -309,10 +310,18 @@ function contenuG(e: ExerciceFamilleG_Problemes, phase: PhaseIntegralesProblemes
         calcul: [ligne(`V_{\\text{bille}}=\\dfrac{4}{3}\\pi\\cdot ${Number.isInteger(e.r) ? `${e.r}` : `(${decimalLatex(e.r)})`}^3`, [f(`r=${decimalLatex(e.r)}`)]), ligne(`=${piL(Vb)}`), ligne(`\\approx ${decimalLatex(qVal(Vb) * Math.PI, 2)}`, "valeur approchée")],
       };
     }
-    const frac = qDiv(Vb, Vv);
+    // Fraction et valeur décimale : mêmes fonctions que la réponse de l'écran (`fractionDebordeeLatex`).
+    const fracL = fractionDebordeeLatex(e);
+    const valeurL = valeurFractionDebordeeLatex(e);
     return {
       utilise: [t(`Fraction débordée : volume de la bille divisé par le volume du verre (π se simplifie) ${C7}.`)],
-      calcul: [ligne(`\\dfrac{V_{\\text{bille}}}{V_{\\text{verre}}}=\\dfrac{${piL(Vb)}}{${piL(Vv)}}`, "volumes des étapes précédentes"), ligne(`=${qL(Vb)}\\cdot ${qL(qDiv(q(1), Vv))}`, "on simplifie par π : diviser, c'est multiplier par l'inverse"), ligne(`=${qL(frac)}`, "on calcule"), ligne(`\\approx ${decimalLatex(qVal(frac), 4)}`, "valeur approchée")],
+      calcul: [
+        ligne(`\\dfrac{V_{\\text{bille}}}{V_{\\text{verre}}}=\\dfrac{${piL(Vb)}}{${piL(Vv)}}`, "volumes des étapes précédentes"),
+        ligne(`=${qL(Vb)}\\cdot ${qL(qDiv(q(1), Vv))}`, "on simplifie par π : diviser, c'est multiplier par l'inverse"),
+        ligne(`=${fracL.slice(0, fracL.length - valeurL.length)}`, "on calcule"),
+        ligne(valeurL, valeurL.startsWith("=") ? "écriture décimale" : "valeur approchée, trois chiffres significatifs"),
+      ],
+      piege: "Arrondir la fraction au centième : elle vaut souvent quelques millièmes, garde trois chiffres significatifs.",
     };
   }
   const r = e.r;

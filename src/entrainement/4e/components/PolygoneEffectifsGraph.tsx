@@ -7,7 +7,7 @@ import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { GrilleAdaptative } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
 import { arrondirAuPas } from "../generateurs/bienaymeTchebychev/echelleContexte";
-import { nombreFr, virgulesTexte } from "../ui/nombreFr";
+import { nombreFr, nombreFrTypo, virgulesTexte } from "../ui/nombreFr";
 
 interface PointXY {
   x: number;
@@ -102,7 +102,8 @@ export function PolygoneEffectifsGraph({ pointFixe, points, erronees, onDeplacer
   return (
     <div className="mafs-graph" ref={wrapperRef}>
       <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBoxEtendu.x, y: viewBoxEtendu.y, padding: 0 }} preserveAspectRatio={false} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} formatEtiquette={nombreFr} cibleNombreLignes={cibleX} cibleNombreLignesY={10} />
+        {/* Nombres écrits espacés et à écriture finie, jamais rognés ni posés sur un nombre de l'autre axe (pas de 1/3 : entiers seulement) ; grille complète ; signe « − ». */}
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} etiquettesLisibles formatEtiquette={nombreFrTypo} cibleNombreLignes={cibleX} cibleNombreLignesY={10} />
         {sommets.slice(0, -1).map((sommet, i) => (
           <Line.Segment key={`segment-${i}`} point1={[sommet.x, sommet.y]} point2={[sommets[i + 1].x, sommets[i + 1].y]} color={COULEUR_SEGMENT} weight={EPAISSEUR_TRAIT_STANDARD} />
         ))}

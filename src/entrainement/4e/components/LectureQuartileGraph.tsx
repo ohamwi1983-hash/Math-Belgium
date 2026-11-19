@@ -7,7 +7,7 @@ import type { PointPolygoneXY } from "../ui/lectureQuartileGraph";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { GrilleAdaptative, PointCroix } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
-import { nombreFr, virgulesTexte } from "../ui/nombreFr";
+import { nombreFr, nombreFrTypo, virgulesTexte } from "../ui/nombreFr";
 
 interface Props {
   /** Le polygone des effectifs cumulés, déjà CONFIRMÉ (le point fixe + un point par classe) —
@@ -94,7 +94,8 @@ export function LectureQuartileGraph({ points, pointsEncadres }: Props) {
   return (
     <div className="mafs-graph" ref={wrapperRef}>
       <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBox.x, y: viewBox.y, padding: 0 }} preserveAspectRatio={false} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} formatEtiquette={nombreFr} cibleNombreLignes={cibleX} cibleNombreLignesY={10} />
+        {/* Nombres écrits espacés et à écriture finie, jamais rognés ni posés sur un nombre de l'autre axe (pas de 1/3 : entiers seulement) ; grille complète ; signe « − ». */}
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} etiquettesLisibles formatEtiquette={nombreFrTypo} cibleNombreLignes={cibleX} cibleNombreLignesY={10} />
         {points.slice(0, -1).map((sommet, i) => (
           <Line.Segment key={`segment-${i}`} point1={[sommet.x, sommet.y]} point2={[points[i + 1].x, points[i + 1].y]} color={COULEUR_POLYGONE} weight={EPAISSEUR_TRAIT_STANDARD} />
         ))}

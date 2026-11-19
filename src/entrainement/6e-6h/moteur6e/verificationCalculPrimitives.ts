@@ -144,7 +144,7 @@ export function diagnostiquerPrimitive(texte: string, referenceCorrecte: (v: num
 /** Compare un texte SANS "=" à une référence `(vars) => number` en plusieurs variables libres —
  * généralisation locale du même principe que `diagnostiquerExpressionMultiVariable` (6gen18),
  * réécrite ici pour rester self-contained (voir en-tête). Utilisée pour "poser la décomposition"
- * (famille G, vars {A,B[,C],x}) et pour tout champ "dx/du en fonction de x et du/dtheta" (familles
+ * (famille G, vars {A,B[,D],x}) et pour tout champ "dx/du en fonction de x et du/dtheta" (familles
  * C/D/E). */
 export function diagnostiquerExpressionMultiVariable(texte: string, reference: (vars: Record<string, number>) => number, echantillons: Record<string, number>[], tolerance: number = TOLERANCE): StatutVerification {
   let comparables = 0;
@@ -533,7 +533,7 @@ export function verifierGEcran1(exercice: ExerciceFamilleG, valeurs: string[]): 
  * formatCalculPrimitives.ts`, "A =", "B =") restent en MAJUSCULE — purement cosmétique, sans effet
  * puisque l'évaluateur est insensible à la casse pour tout identifiant. */
 function nomsCoefficients(sousType: ExerciceFamilleG["sousType"]): string[] {
-  if (sousType === "3") return ["a", "b", "c"];
+  if (sousType === "3") return ["a", "b", "d"];
   if (sousType === "4") return ["h", "m"];
   return ["a"]; // sous-types 1 et 2 : "a","b" pour 1, juste "a" pour 2 — voir override ci-dessous.
 }
@@ -554,9 +554,14 @@ export function diagnostiquerGEcran2(exercice: ExerciceFamilleG, valeurs: string
       echantillons.push(vars);
     }
   }
-  // « Bx+C » (écriture du cours) : le parseur lit « bx » comme un seul identifiant — on insère le
-  // produit implicite entre un coefficient A/B/C et x avant d'évaluer.
-  const texte = (valeurs[0] ?? "").replace(/(^|[^a-z])([abc])\s*x/gi, "$1$2*x");
+  // Sous-type 3 : le troisième coefficient s'appelle D (C est la constante d'intégration, comme dans
+  // le cours) ; une saisie qui le nomme encore C (sans D) reste acceptée — le nom d'un coefficient
+  // indéterminé est sans importance.
+  let saisie = valeurs[0] ?? "";
+  if (exercice.sousType === "3" && !/(^|[^a-z])d([^a-z]|$)/i.test(saisie)) saisie = saisie.replace(/(^|[^a-z])c(?=[^a-z]|$)/gi, "$1D");
+  // « Bx+D » (écriture du cours) : le parseur lit « bx » comme un seul identifiant — on insère le
+  // produit implicite entre un coefficient A/B/D et x avant d'évaluer.
+  const texte = saisie.replace(/(^|[^a-z])([abd])\s*x/gi, "$1$2*x");
   return diagnostiquerExpressionMultiVariable(texte, exercice.decompositionReference, echantillons);
 }
 export function verifierGEcran2(exercice: ExerciceFamilleG, valeurs: string[]): boolean {
@@ -572,7 +577,7 @@ export function verifierGEcran2(exercice: ExerciceFamilleG, valeurs: string[]): 
 export function diagnostiquerGEcran3(exercice: ExerciceFamilleG, valeurs: string[]): StatutVerification {
   if (exercice.sousType === "1") return pireStatut(diagnostiquerValeur(valeurs[0], exercice.A), diagnostiquerValeur(valeurs[1], exercice.B));
   if (exercice.sousType === "2") return diagnostiquerValeur(valeurs[0], exercice.e);
-  if (exercice.sousType === "3") return pireStatut(diagnostiquerValeur(valeurs[0], exercice.A), diagnostiquerValeur(valeurs[1], exercice.B), diagnostiquerValeur(valeurs[2], exercice.C));
+  if (exercice.sousType === "3") return pireStatut(diagnostiquerValeur(valeurs[0], exercice.A), diagnostiquerValeur(valeurs[1], exercice.B), diagnostiquerValeur(valeurs[2], exercice.D));
   return pireStatut(diagnostiquerValeur(valeurs[0], exercice.h), diagnostiquerValeur(valeurs[1], exercice.m));
 }
 export function verifierGEcran3(exercice: ExerciceFamilleG, valeurs: string[]): boolean {

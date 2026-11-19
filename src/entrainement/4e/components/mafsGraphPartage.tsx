@@ -133,9 +133,14 @@ export function GrilleAdaptative({
   /** N'écrit qu'un sous-ensemble des nombres de la grille, choisi par `pasEtiquettesLisibles`
    * (`ui/mafsTransformation.ts`) : multiples du pas à écriture décimale finie, assez espacés pour ne
    * jamais se chevaucher — avec un pas de 1/3, seuls les entiers sont écrits. Le quadrillage reste
-   * complet (toutes ses lignes tracées). Absent/`false` par défaut (comportement inchangé). Fourni
-   * par gen11 (`MafsGraphFormeCanoniqueFonctionsReference.tsx`) : ses compressions CH/CV = 3 donnent
-   * un pas de 1/3, dont les nombres « −1,333333333 », « −0,9999999999 » se superposaient. */
+   * complet (toutes ses lignes tracées). Un nombre Y qui toucherait un nombre X (croisement des deux
+   * lignes de nombres) n'est pas écrit ; près du bord droit, les nombres Y passent à gauche de l'axe.
+   * Absent/`false` par défaut (comportement inchangé). Fourni par gen11
+   * (`MafsGraphFormeCanoniqueFonctionsReference.tsx`) : ses compressions CH/CV = 3 donnent un pas de
+   * 1/3, dont les nombres « −1,333333333 », « −0,9999999999 » se superposaient ; puis gen10
+   * (`MafsGraphFonctionsReference.tsx`), gen47 (`DistanceDroiteGraph.tsx`), gen38
+   * (`ComparaisonSeriesGraph.tsx`), gen33/gen35 (`LectureQuartileGraph.tsx`,
+   * `PolygoneEffectifsGraph.tsx`), où le même pas de 1/3 (zoom) superposait leurs nombres. */
   etiquettesLisibles?: boolean;
 }) {
   const { viewTransform } = useTransformContext();
@@ -252,7 +257,7 @@ function GraduationsFlottantes({
   const xNombresY = etiquettesAuxBords
     ? MARGE_GRADUATION_FLOTTANTE / 2 + origineX
     : positionEcranClampee(ecranAxeX, largeur, MARGE_GRADUATION_FLOTTANTE) + origineX;
-  const ancrageNombresY = !etiquettesAuxBords && ecranAxeX > largeur - MARGE_GRADUATION_FLOTTANTE ? "end" : "start";
+  const ancrageNombresYBase = !etiquettesAuxBords && ecranAxeX > largeur - MARGE_GRADUATION_FLOTTANTE ? "end" : "start";
 
   // Coin bas-gauche dégagé (mode `etiquettesAuxBords`) : les nombres X trop à gauche et les nombres Y
   // trop bas s'y chevaucheraient.
@@ -288,6 +293,28 @@ function GraduationsFlottantes({
           (!etiquettesAuxBords || vec.transform([0, y], matrice)[1] - origineY < hauteur - COIN_Y) &&
           (!etiquettesLisibles || dansLeCadreY(vec.transform([0, y], matrice)[1] - origineY)),
       );
+  // Option `etiquettesLisibles` : là où la ligne des nombres X croise la colonne des nombres Y (près
+  // de l'origine, ou contre un bord quand un axe sort du cadre), un nombre Y qui toucherait un nombre X
+  // n'est pas écrit (sa ligne de grille reste tracée) — mesuré avant : « 0,4 » sur « −3,8 » en haut du
+  // cadre, zoom avant de gen10.
+  // Option `etiquettesLisibles` : axe des y juste à l'intérieur du bord droit (à moins d'une largeur de
+  // nombre) — les nombres Y, ancrés à gauche, dépassaient du cadre (mesuré sur gen10 : « −4,6 »…
+  // rognés) ; ils passent alors à gauche de l'axe.
+  const largeurMaxY = Math.max(0, ...ticksY.map((y) => largeurEtiquetteEm(formatEtiquette(y)) * taillePolice));
+  const ancrageNombresY = etiquettesLisibles && ancrageNombresYBase === "start" && xNombresY - origineX + largeurMaxY > largeur ? "end" : ancrageNombresYBase;
+  const ticksYEcrits = !etiquettesLisibles
+    ? ticksY
+    : ticksY.filter((y) => {
+        const yEcran = vec.transform([0, y], matrice)[1];
+        const largeurY = largeurEtiquetteEm(formatEtiquette(y)) * taillePolice;
+        const [gaucheY, droiteY] = ancrageNombresY === "end" ? [xNombresY - largeurY, xNombresY] : [xNombresY, xNombresY + largeurY];
+        return !ticksX.some((x) => {
+          const xEcran = vec.transform([x, 0], matrice)[0];
+          const demiX = (largeurEtiquetteEm(formatEtiquette(x)) * taillePolice) / 2;
+          const marge = 2;
+          return Math.abs(yEcran - yNombresX) < 1.2 * taillePolice + marge && xEcran + demiX + marge > gaucheY && xEcran - demiX - marge < droiteY;
+        });
+      });
 
   return (
     <g ref={groupRef} className="mafs-shadow">
@@ -296,7 +323,7 @@ function GraduationsFlottantes({
           {formatEtiquette(x)}
         </text>
       ))}
-      {ticksY.map((y) => (
+      {ticksYEcrits.map((y) => (
         <text key={`y${y}`} x={xNombresY} y={vec.transform([0, y], matrice)[1]} textAnchor={ancrageNombresY} dominantBaseline="central" style={{ fill: "var(--mafs-origin-color)" }}>
           {formatEtiquette(y)}
         </text>

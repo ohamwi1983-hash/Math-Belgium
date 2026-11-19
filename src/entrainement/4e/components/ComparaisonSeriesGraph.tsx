@@ -7,7 +7,7 @@ import { calculerViewBoxComparaisonSeries, pointsCourbeCumulee } from "../ui/com
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { GrilleAdaptative } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
-import { nombreFr, virgulesTexte } from "../ui/nombreFr";
+import { nombreFrTypo, virgulesTexte } from "../ui/nombreFr";
 
 const COULEUR_A = "#1971c2";
 const COULEUR_B = "#f08c00";
@@ -95,7 +95,8 @@ export function ComparaisonSeriesGraph({ serieA, serieB, cumul }: Props) {
           largeur={largeur}
           hauteur={hauteur}
           onPasChange={(x, y) => setPas({ x, y })}
-          formatEtiquette={nombreFr}
+          etiquettesLisibles
+          formatEtiquette={nombreFrTypo}
           etiquettesAuxBords
           uneEtiquetteXSurDeux={grandesValeurs && largeur < SEUIL_LARGEUR_ETROITE}
         />

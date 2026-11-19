@@ -212,6 +212,12 @@ export function formatEtiquetteGrille(valeur: number): string {
   return String(Number(valeur.toPrecision(10))).replace(".", ",");
 }
 
+/** Nombre de graduation avec virgule décimale ET vrai signe « − » (jamais le tiret « - ») — à passer
+ * en `formatEtiquette` avec l'option `etiquettesLisibles` de `GrilleAdaptative` (gen10, gen11). */
+export function formatEtiquetteGrilleTypo(valeur: number): string {
+  return formatEtiquetteGrille(valeur).replace("-", "−");
+}
+
 /** Ratio largeur/hauteur du conteneur du graphe (voir .mafs-graph, App.css) — fixe et connu à
  * l'avance, indépendant de la taille réelle de l'écran (le conteneur CSS impose ce ratio quelle
  * que soit sa largeur). Nécessaire pour pré-adapter le viewBox ci-dessous : Mafs impose une
