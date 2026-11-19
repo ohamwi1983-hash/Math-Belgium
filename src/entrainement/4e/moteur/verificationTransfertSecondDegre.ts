@@ -82,9 +82,12 @@ export function lireListe(saisie: string): number[] | null {
   if (morceaux.length === 0) return null;
   const valeurs: number[] = [];
   for (const m of morceaux) {
-    const v = lireNombre(m);
+    // « ±√3 », « +-2 » : les deux valeurs opposées.
+    const pm = /^(±|\+-|\+\/-)\s*(.+)$/.exec(m);
+    const v = lireNombre(pm ? pm[2]! : m);
     if (v === null) return null;
     valeurs.push(v);
+    if (pm) valeurs.push(-v);
   }
   return valeurs;
 }

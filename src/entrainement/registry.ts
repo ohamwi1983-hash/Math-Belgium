@@ -187,6 +187,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen120: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppConstruireInequation').then((m) => ({ default: m.AppConstruireInequation }))),
   gen115: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppEquationParametre').then((m) => ({ default: m.AppEquationParametre }))),
   gen118: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppParaboleDroite').then((m) => ({ default: m.AppParaboleDroite }))),
+  gen116: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppBicarree').then((m) => ({ default: m.AppBicarree }))),
 
   // --- 5e, chapitre 1 : Fonctions : rappels et compléments ---
   '5gen1': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen1').then((m) => ({ default: m.App5gen1 }))),

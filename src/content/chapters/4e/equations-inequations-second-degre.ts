@@ -658,6 +658,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 115. Équation à paramètre m »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Bicarrées et changement de variable',
+          generatorId: 'gen116',
+          description: [
+            'Résous une équation bicarrée (x⁴, x²) ou du type (x² − 1)² − 5(x² − 1) + 4 = 0 : pose une nouvelle inconnue t, résous en t, rejette les valeurs impossibles (un carré n’est jamais négatif), puis reviens à x.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 116. Bicarrées et changement de variable »',
+        },
       ],
     },
     {

@@ -4281,3 +4281,20 @@ paths:
   « Parabole et droite : intersection et position (gen118) ». Fichiers : `AppParaboleDroite.tsx`,
   `core/paraboleDroite.types.ts`, `ui/formatParaboleDroite.ts`, `generateurs/paraboleDroite/`
   (index, corrigeDetaille, profil, exportEvaluation).
+
+- **4e, Chapitre 2** (`equations-inequations-second-degre`), section `resoudre` (§ 1, « pour aller
+  plus loin ») : nouveau générateur **gen116 « Bicarrées et changement de variable »** (processus 2),
+  carte après gen115. (E) : a·u² + b·u + c = 0 avec u = x² (variante `bicarree`, ax⁴ + bx² + c = 0)
+  ou u = x² + k (variante `changement`, comme l'exemple (x² − 1)² − 5(x² − 1) + 4 = 0). Le nombre de
+  valeurs de t gardées est un VERDICT tiré avant les nombres (2 : 50 %, 1 : 40 %, 0 : 10 %) ; une
+  valeur gardée donne x² = t − k > 0, carré parfait (70 %) ou non (solutions ±√n). Écrans : a)
+  équation en t (toute équation proportionnelle ; une saisie en x est signalée « mauvaise lettre ») ;
+  b) ses solutions ; c) valeurs de t gardées (choix fermé parmi les 4 sous-ensembles, 1 tentative) ;
+  d) solutions en x (« ±√3 » accepté pour deux valeurs opposées, « aucune » possible ; piège : seules
+  les racines positives). Corrigé : t = x², x⁴ = (x²)² = t², Δ en t, tri par x² = t − k ≥ 0, x² = a
+  ⟺ x = ±√a, vérification en remplaçant x dans (E). Papier : « Résous dans ℝ l'équation … » (jamais
+  la méthode). Profil : `forme` = variante (le verdict et les radicaux, qui n'existent que si une
+  valeur est gardée, restent hors profil), aucun cas particulier, pas de `calcul`. Niveaux 3–4.
+  Libellé de conception « Bicarrées et changement de variable (gen116) ». Fichiers :
+  `AppBicarree.tsx`, `core/bicarree.types.ts`, `ui/formatBicarree.ts`, `generateurs/bicarree/`
+  (index, corrigeDetaille, profil, exportEvaluation).
