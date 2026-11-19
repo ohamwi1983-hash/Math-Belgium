@@ -1,3 +1,6 @@
+import { correctionDetailleeGrandsNombres } from "./generateurs6e/grandsNombresLog/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
@@ -5,7 +8,7 @@ import type { ExerciceGrandsNombres } from "./core6e/grandsNombresLog";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceGrandsNombres } from "./generateurs6e/grandsNombresLog";
 import type { IdVarianteGrandsNombres } from "./generateurs6e/grandsNombresLog";
 import { activerAideSuivante, demarrerSessionGrandsNombres, niveauAideMaxPhase, soumettreReponseEcran, tentativesMaxCourant } from "./moteur6e/sessionGrandsNombresLog";
-import { estPhaseChoix } from "./moteur6e/typesGrandsNombresLog";
+import { estPhaseChoix, phasesPourExercice } from "./moteur6e/typesGrandsNombresLog";
 import type { EtatSessionGrandsNombres, PhaseGrandsNombres } from "./moteur6e/typesGrandsNombresLog";
 import { diagnostiquerChamps, messageIllisible, messagePiege } from "./moteur6e/verificationGrandsNombresLog";
 import { RenduFragments } from "./components/RenduFragments";
@@ -126,6 +129,7 @@ export function App6gen92() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeGrandsNombres(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(choix ? { messageRevele: "Ce n'était pas la bonne conclusion (une seule tentative sur un choix fermé)." } : {}),

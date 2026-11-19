@@ -1,3 +1,7 @@
+import { correctionDetailleeOptimiserLog } from "./generateurs6e/optimiserModeleLog/corrigeDetaille";
+import { PHASES_OPTIMISER_LOG } from "./moteur6e/typesOptimiserModeleLog";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
@@ -142,6 +146,7 @@ export function App6gen91() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOptimiserLog(exercice), lettreEtape(PHASES_OPTIMISER_LOG.indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(choix ? { messageRevele: "Ce n'était pas la bonne conclusion (une seule tentative sur un choix fermé)." } : {}),

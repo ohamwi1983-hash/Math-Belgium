@@ -1,15 +1,16 @@
-import { AGE_UNIVERS_ANNEES, DUREES, basesCommunes, donneesTaille, ecritureScientifique, logPuissance, logsDuree } from "../../core6e/grandsNombresLog";
-import type { ExerciceChiffres, ExerciceComparer, ExerciceGrandsNombres, ExercicePremierChiffre, ExerciceTempsDuree, ExerciceTempsTaille } from "../../core6e/grandsNombresLog";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { DUREES, basesCommunes, donneesTaille, ecritureScientifique, logPuissance, logsDuree } from "../../core6e/grandsNombresLog";
+import type { ExerciceGrandsNombres } from "../../core6e/grandsNombresLog";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur6e/typesGrandsNombresLog";
 import type { PhaseGrandsNombres } from "../../moteur6e/typesGrandsNombresLog";
-import { consigneEcran, consigneGenerale, logPuissanceLatex, nbLatex, nbTexte, puissanceLatex, reponseFragments, scientifiqueLatex } from "../../ui6e/formatGrandsNombresLog";
+import { consigneEcran, consigneGenerale, logPuissanceLatex, nbTexte, puissanceLatex, reponseFragments, scientifiqueLatex } from "../../ui6e/formatGrandsNombresLog";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceGrandsNombres } from "./index";
 import type { IdVarianteGrandsNombres } from "./index";
 import { VARIANTES_CALCULATRICE_GRANDS_NOMBRES, profilGrandsNombres } from "./profilEvaluation";
+import { correctionDetailleeGrandsNombres } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceGrandsNombres>` de `6gen92` « Grands nombres et
@@ -108,183 +109,7 @@ function enoncePapier(e: ExerciceGrandsNombres): EnoncePapier {
   return { section: { enteteFragments: entetePapier(e), questions: [] }, reponseBreve: reponseBreve(e) };
 }
 
-// ============================================================================
-// Corrigé détaillé.
-// ============================================================================
-
-function methodePuissance(a: number, n: number, sq: string): EtapeCorrection {
-  return {
-    label: "Méthode",
-    sousQuestion: sq,
-    fragments: [t("Le nombre "), f(puissanceLatex(a, n)), t(" est trop grand pour la calculatrice ; la propriété de la puissance donne directement son logarithme décimal : "), f("\\log\\left(a^{n}\\right)=n\\log(a)"), t(".")],
-  };
-}
-
-function lignesChiffres(e: ExerciceChiffres): EtapeCorrection[] {
-  const P = puissanceLatex(e.a, e.n);
-  const s = ecritureScientifique(logPuissance(e.a, e.n));
-  const lignes: EtapeCorrection[] = [
-    methodePuissance(e.a, e.n, "a"),
-    { label: "Calcul", sousQuestion: "a", fragments: [f(logPuissanceLatex(e.a, e.n))] },
-    { label: "Méthode", sousQuestion: "b", fragments: [t("Un entier "), f("N"), t(" compte "), f("k"), t(" chiffres lorsque "), f("10^{k-1}\\leq N<10^{k}"), t(", c'est-à-dire "), f("k-1\\leq\\log(N)<k"), t(" : "), f("k-1"), t(" est la partie entière de "), f("\\log(N)"), t(".")] },
-    { label: "Calcul", sousQuestion: "b", fragments: reponseFragments(e, "partieEntiere") },
-    { label: "Conclusion", sousQuestion: "c", fragments: reponseFragments(e, "nombreChiffres") },
-  ];
-  if (e.mersenne) {
-    lignes.push({
-      label: "Conclusion",
-      sousQuestion: "c",
-      fragments: [t("Comme "), f(P), t(" n'est pas une puissance de 10 (il se termine par 2, 4, 6 ou 8), "), f(`${P}-1`), t(` compte aussi ${nbTexte(s.E + 1, 0)} chiffres.`)],
-    });
-  }
-  lignes.push({
-    label: "Piège",
-    sousQuestion: "c",
-    fragments: [
-      t("Oublier le « + 1 » : "),
-      f("100=10^{2}"),
-      t(" compte trois chiffres, alors que "),
-      f("\\log(100)=2"),
-      t(`. Autre piège : arrondir log(${e.a}) avant de le multiplier par ${nbTexte(e.n, 0)}, l'erreur d'arrondi est alors multipliée par ${nbTexte(e.n, 0)}.`),
-    ],
-  });
-  return lignes;
-}
-
-function lignesPremierChiffre(e: ExercicePremierChiffre): EtapeCorrection[] {
-  const P = puissanceLatex(e.a, e.n);
-  const L = logPuissance(e.a, e.n);
-  const s = ecritureScientifique(L);
-  return [
-    methodePuissance(e.a, e.n, "a"),
-    { label: "Calcul", sousQuestion: "a", fragments: [f(logPuissanceLatex(e.a, e.n))] },
-    {
-      label: "Méthode",
-      sousQuestion: "b",
-      fragments: [t("Si "), f("\\log(N)=E+f"), t(" avec "), f("E"), t(" entier et "), f("0\\leq f<1"), t(", alors "), f("N=10^{f}\\times 10^{E}"), t(" avec "), f("1\\leq 10^{f}<10"), t(" : c'est l'écriture scientifique de "), f("N"), t(".")],
-    },
-    { label: "Calcul", sousQuestion: "b", fragments: [f(`\\log(${P})\\approx ${s.E}+${nbLatex(s.f)}`), t(" ; "), ...reponseFragments(e, "scientifique")] },
-    {
-      label: "Conclusion",
-      sousQuestion: "c",
-      fragments: [t("Le premier chiffre est celui des unités de la mantisse, "), f(nbLatex(s.m, 2)), t(` : c'est ${Math.floor(s.m)}. Comme `), f(`10^{${s.E}}\\leq ${P}<10^{${s.E + 1}}`), t(`, le nombre compte ${nbTexte(s.E, 0)} + 1 = ${nbTexte(s.E + 1, 0)} chiffres.`)],
-    },
-    {
-      label: "Piège",
-      sousQuestion: "b",
-      fragments: [t("Prendre la partie décimale "), f(nbLatex(s.f)), t(" elle-même pour la mantisse, au lieu de "), f(`10^{${nbLatex(s.f)}}`), t(" ; ou mettre "), f("E+1"), t(" en exposant de 10 (le « + 1 » ne sert qu'à compter les chiffres).")],
-    },
-  ];
-}
-
-function lignesComparer(e: ExerciceComparer): EtapeCorrection[] {
-  const x = puissanceLatex(e.a, e.n);
-  const y = puissanceLatex(e.b, e.m);
-  if (e.sousCas === "exact") {
-    const [A, B] = basesCommunes(e);
-    const k = e.k ?? 1;
-    const p = e.n / k;
-    const q = e.m / k;
-    return [
-      {
-        label: "Méthode",
-        sousQuestion: "a",
-        fragments: [t(`Les exposants ${nbTexte(e.n, 0)} et ${nbTexte(e.m, 0)} sont tous deux des multiples de ${k} : on écrit les deux nombres comme des puissances d'exposant ${k}, grâce à `), f("\\left(a^{p}\\right)^{k}=a^{pk}"), t(".")],
-      },
-      { label: "Calcul", sousQuestion: "a", fragments: reponseFragments(e, "memeExposant") },
-      {
-        label: "Méthode",
-        sousQuestion: "b",
-        fragments: [t("La fonction "), f(`x\\mapsto x^{${k}}`), t(" est strictement croissante sur "), f("\\left[0\\,;+\\infty\\right["), t(" : deux puissances de même exposant sont rangées comme leurs bases.")],
-      },
-      { label: "Conclusion", sousQuestion: "b", fragments: reponseFragments(e, "verdict") },
-      {
-        label: "Remarque",
-        sousQuestion: "b",
-        fragments: [
-          t("Même conclusion avec les logarithmes, sans calculatrice : comparer "),
-          f(`${e.n}\\log(${e.a})`),
-          t(" et "),
-          f(`${e.m}\\log(${e.b})`),
-          t(` revient (en divisant par ${k}) à comparer `),
-          f(`${p === 1 ? "" : p}\\log(${e.a})=\\log(${A})`),
-          t(" et "),
-          f(`${q === 1 ? "" : q}\\log(${e.b})=\\log(${B})`),
-          t("."),
-        ],
-      },
-      { label: "Piège", sousQuestion: "b", fragments: [t("Conclure d'après les exposants seuls (ou les bases seules) : ici, le nombre qui a la plus grande base a le plus petit exposant ; seule l'écriture avec un même exposant tranche.")] },
-    ];
-  }
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [t("Les deux nombres sont trop grands pour la calculatrice : on compare leurs logarithmes décimaux, puisque log est strictement croissante ; "), f("\\log\\left(a^{n}\\right)=n\\log(a)"), t(".")] },
-    { label: "Calcul", sousQuestion: "a", fragments: reponseFragments(e, "logsDeux") },
-    { label: "Conclusion", sousQuestion: "b", fragments: reponseFragments(e, "verdict") },
-    {
-      label: "Piège",
-      sousQuestion: "b",
-      fragments: [t("Juger sur l'exposant seul ou sur la base seule : "), f(x), t(" et "), f(y), t(" ont des logarithmes très proches, seul leur calcul (sans arrondir log(a) avant de multiplier) permet de trancher.")],
-    },
-  ];
-}
-
-function lignesDuree(e: ExerciceTempsDuree): EtapeCorrection[] {
-  const L = logsDuree(e);
-  const rapportUnivers = L.annees - Math.log10(AGE_UNIVERS_ANNEES);
-  const conclusion: FragmentConsigne[] = [...reponseFragments(e, "dureeAnnees")];
-  if (rapportUnivers >= 1) conclusion.push(t(", soit environ "), f(scientifiqueLatex(rapportUnivers)), t(" fois l'âge de l'Univers (environ "), f("1{,}38\\times 10^{10}"), t(" années)."));
-  else conclusion.push(t("."));
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [t("On travaille avec le logarithme décimal du nombre d'opérations, grâce à la propriété de la puissance : "), f("\\log\\left(a^{n}\\right)=n\\log(a)"), t(".")],
-    },
-    { label: "Calcul", sousQuestion: "a", fragments: [f(logPuissanceLatex(2, e.n))] },
-    {
-      label: "Méthode",
-      sousQuestion: "b",
-      fragments: [t("Durée = nombre d'opérations divisé par le nombre d'opérations par seconde ; en logarithme, la division devient une soustraction : "), f(`\\log(T)=${e.n}\\log(2)-${e.p}\\approx ${nbLatex(L.secondes)}`), t(".")],
-    },
-    { label: "Calcul", sousQuestion: "b", fragments: [f(`T\\approx 10^{${nbLatex(L.secondes)}}=10^{${nbLatex(ecritureScientifique(L.secondes).f)}}\\times 10^{${ecritureScientifique(L.secondes).E}}`)] },
-    { label: "Conclusion", sousQuestion: "b", fragments: [...reponseFragments(e, "dureeSecondes"), t(".")] },
-    { label: "Piège", sousQuestion: "b", fragments: [t("Multiplier par "), f(`10^{${e.p}}`), t(" au lieu de diviser ; la durée en secondes est le quotient du nombre d'opérations par la vitesse de l'ordinateur.")] },
-    { label: "Méthode", sousQuestion: "c", fragments: [t("Une année de 365 jours compte "), f("365\\times 24\\times 3600=31\\,536\\,000"), t(" secondes.")] },
-    { label: "Conclusion", sousQuestion: "c", fragments: conclusion },
-  ];
-}
-
-function lignesTaille(e: ExerciceTempsTaille): EtapeCorrection[] {
-  const d = donneesTaille(e);
-  const D = DUREES[e.duree];
-  const avant = logPuissance(2, d.nMax);
-  const apres = logPuissance(2, d.nMax + 1);
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [t(`Durée en secondes : `), f(D.calculLatex), t(" ; on multiplie par le nombre d'opérations effectuées en une seconde.")] },
-    { label: "Calcul", sousQuestion: "a", fragments: reponseFragments(e, "operations") },
-    { label: "Méthode", sousQuestion: "b", fragments: [t("Il faut "), f("2^{n}\\leq N"), t(". La fonction log est croissante : on l'applique aux deux membres, puis on divise par "), f("\\log(2)>0"), t(" sans changer le sens.")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [...reponseFragments(e, "borne"), t(" avec "), f(`\\log(N)\\approx ${nbLatex(d.logN)}`), t(".")] },
-    {
-      label: "Conclusion",
-      sousQuestion: "c",
-      fragments: [t("La plus grande taille traitable est "), f(`n=${d.nMax}`), t(", car "), f(`2^{${d.nMax}}\\approx ${scientifiqueLatex(avant)}\\leq N`), t(" et "), f(`2^{${d.nMax + 1}}\\approx ${scientifiqueLatex(apres)}>N`), t(".")],
-    },
-    { label: "Piège", sousQuestion: "c", fragments: [t("Arrondir la borne au plus proche ou vers le haut : avec "), f(`n=${d.nMax + 1}`), t(", le nombre d'opérations dépasse N, le calcul ne se termine pas à temps.")] },
-  ];
-}
-
-function correctionDetaillee(e: ExerciceGrandsNombres): EtapeCorrection[] {
-  switch (e.variante) {
-    case "chiffres":
-      return lignesChiffres(e);
-    case "premier-chiffre":
-      return lignesPremierChiffre(e);
-    case "comparer":
-      return lignesComparer(e);
-    case "temps":
-      return e.sousCas === "duree" ? lignesDuree(e) : lignesTaille(e);
-  }
-}
+const correctionDetaillee = correctionDetailleeGrandsNombres;
 
 /** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
  * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */

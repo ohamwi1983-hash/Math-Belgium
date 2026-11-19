@@ -90,6 +90,10 @@ export function fonctionLnAffine(k: number, b: number, c: number, d: number): Fo
     pointsTest: offsets.map((o) => (b > 0 ? borne + o : borne - o)),
     regle: REGLE_CHAINE,
     detail: { texte: "Ici, l'argument du logarithme et sa dérivée valent :", latex: `u(x)=${affine(b, c, "x")},\\qquad u'(x)=${b}` },
+    lignesDerivee: [
+      { latex: `f'(x)=${k === 1 ? "" : k === -1 ? "-" : `${k}\\cdot `}\\dfrac{${b}}{${affine(b, c, "x")}}`, justification: d === 0 ? "règle de la chaîne, u′(x) = " + String(b).replace("-", "−") : "règle de la chaîne ; la constante ajoutée disparaît" },
+      { latex: `=${fraction(affine(b, c, "x"))}` },
+    ],
     ...(b !== 1 ? { oubliChaine: (x: number) => k / (b * x + c) } : {}),
   };
 }
@@ -116,6 +120,11 @@ export function fonctionLogBase(base: number): FonctionTangente {
     borneDroite: null,
     pointsTest: POINTS_POSITIFS,
     regle: { texte: "Dérivée d'un logarithme de base a :", latex: "(\\log_a(x))'=\\dfrac{1}{x\\ln(a)}" },
+    lignesDerivee: [
+      { latex: `f(x)=\\dfrac{\\ln(x)}{\\ln(${base})}`, justification: "changement de base" },
+      { latex: `f'(x)=\\dfrac{1}{\\ln(${base})}\\cdot\\dfrac{1}{x}`, justification: `ln(${base}) est une constante` },
+      { latex: `=\\dfrac{1}{x\\ln(${base})}` },
+    ],
     detail: { texte: "Ou, en revenant à ln par changement de base :", latex: `${logLatex(base, "x")}=\\dfrac{\\ln(x)}{\\ln(${base})}` },
   };
 }
@@ -139,6 +148,11 @@ export function fonctionXLnX(c: number): FonctionTangente {
     pointsTest: POINTS_POSITIFS,
     regle: { texte: "Le terme x ln(x) est un produit ; règle du produit :", latex: "(uv)'=u'v+uv'" },
     detail: { texte: "Dérivées des deux facteurs :", latex: "(x)'=1,\\qquad(\\ln(x))'=\\dfrac{1}{x}" },
+    lignesDerivee: [
+      { latex: `f'(x)=1\\cdot\\ln(x)+x\\cdot\\dfrac{1}{x}${constSigne(c)}`, justification: c === 0 ? "règle du produit" : "règle du produit ; (cx)′ = c" },
+      { latex: `=\\ln(x)+1${constSigne(c)}`, justification: "on simplifie par x" },
+      { latex: `=\\ln(x)${constSigne(1 + c)}` },
+    ],
   };
 }
 
@@ -162,6 +176,10 @@ export function fonctionLnSurX(k: number, d: number): FonctionTangente {
     pointsTest: POINTS_POSITIFS,
     regle: { texte: "Règle du quotient :", latex: "\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^{2}}" },
     detail: { texte: "Dérivées du numérateur et du dénominateur :", latex: `(${k1}\\ln(x))'=\\dfrac{${k}}{x},\\qquad(x)'=1` },
+    lignesDerivee: [
+      { latex: `f'(x)=\\dfrac{\\frac{${k}}{x}\\cdot x-${k1}\\ln(x)\\cdot 1}{x^{2}}`, justification: d === 0 ? "règle du quotient" : "règle du quotient ; la constante ajoutée disparaît" },
+      { latex: `=\\dfrac{${k}-${k1}\\ln(x)}{x^{2}}`, justification: "on simplifie par x" },
+    ],
   };
 }
 
@@ -186,6 +204,10 @@ export function fonctionLnQuad(k: number, q: number): FonctionTangente {
     pointsTest: POINTS_REELS,
     regle: REGLE_CHAINE,
     detail: { texte: "Ici, l'argument du logarithme et sa dérivée valent :", latex: `u(x)=x^{2}+${q},\\qquad u'(x)=2x` },
+    lignesDerivee: [
+      { latex: `f'(x)=${k === 1 ? "" : k === -1 ? "-" : `${k}\\cdot `}\\dfrac{2x}{x^{2}+${q}}`, justification: "règle de la chaîne, u′(x) = 2x" },
+      { latex: `=${fraction(`${Math.abs(deuxK)}x`, `x^{2}+${q}`)}` },
+    ],
     oubliChaine: (x) => k / (x * x + q),
   };
 }
@@ -211,6 +233,10 @@ export function fonctionPolyLn(b: number, c: number): FonctionTangente {
     pointsTest: POINTS_POSITIFS,
     regle: { texte: "Dérive terme à terme ; rappel :", latex: "(\\ln(x))'=\\dfrac{1}{x}" },
     detail: { texte: "Dérivée du premier terme :", latex: "\\left(\\dfrac{x^{2}}{2}\\right)'=x" },
+    lignesDerivee: [
+      { latex: `f'(x)=\\dfrac{2x}{2}${constSigne(b)}${c > 0 ? "+" : "-"}${Math.abs(c) === 1 ? "" : `${Math.abs(c)}\\cdot `}\\dfrac{1}{x}`, justification: "terme à terme" },
+      { latex: `=x${constSigne(b)}${fracTerme("x")}` },
+    ],
   };
 }
 
@@ -234,6 +260,12 @@ export function fonctionLnInverse(k: number, c: number): FonctionTangente {
     pointsTest: POINTS_POSITIFS,
     regle: { texte: "Dérive terme à terme ; rappels :", latex: "(\\ln(x))'=\\dfrac{1}{x},\\qquad\\left(\\dfrac{1}{x}\\right)'=-\\dfrac{1}{x^{2}}" },
     detail: { texte: "Pour résoudre ensuite une équation, mets le résultat au même dénominateur :", latex: "\\dfrac{u}{x}-\\dfrac{v}{x^{2}}=\\dfrac{ux-v}{x^{2}}" },
+    lignesDerivee: [
+      { latex: `f'(x)=${k === 1 ? "" : k === -1 ? "-" : `${k}\\cdot `}\\dfrac{1}{x}${c > 0 ? "+" : "-"}${Math.abs(c)}\\cdot\\left(-\\dfrac{1}{x^{2}}\\right)`, justification: "terme à terme" },
+      { latex: `=${k < 0 ? "-" : ""}\\dfrac{${Math.abs(k)}}{x}${c > 0 ? "-" : "+"}\\dfrac{${Math.abs(c)}}{x^{2}}`, justification: "signes" },
+      { latex: `=${k < 0 ? "-" : ""}\\dfrac{${Math.abs(k)}x}{x^{2}}${c > 0 ? "-" : "+"}\\dfrac{${Math.abs(c)}}{x^{2}}`, justification: "même dénominateur x²" },
+      { latex: `=\\dfrac{${affine(k, -c, "x")}}{x^{2}}` },
+    ],
   };
 }
 
@@ -257,5 +289,9 @@ export function fonctionLnSimple(k: number, d: number): FonctionTangente {
     pointsTest: POINTS_POSITIFS,
     regle: { texte: "Dérivée du logarithme népérien :", latex: "(\\ln(x))'=\\dfrac{1}{x}" },
     detail: { texte: "Une constante multiplicative se conserve, une constante ajoutée disparaît :", latex: "(k\\ln(x)+d)'=k\\cdot\\dfrac{1}{x}" },
+    lignesDerivee: [
+      { latex: `f'(x)=${k === 1 ? "" : k === -1 ? "-" : `${k}\\cdot `}\\dfrac{1}{x}`, justification: d === 0 ? "dérivée de ln" : "dérivée de ln ; la constante ajoutée disparaît" },
+      { latex: `=${fraction("x")}` },
+    ],
   };
 }

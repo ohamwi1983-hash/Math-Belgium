@@ -4,7 +4,6 @@ import type {
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -14,9 +13,9 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import { PHASES_OPTIMISER_LOG } from "../../moteur6e/typesOptimiserModeleLog";
 import type { PhaseOptimiserLog } from "../../moteur6e/typesOptimiserModeleLog";
 import { fiche, formatReponseAttenduePhaseLatex } from "../../ui6e/formatOptimiserModeleLog";
-import { figureOptimiserLogSvg } from "../../ui6e/figureOptimiserModeleLog";
 import { VARIANTES_CALCULATRICE_OPTIMISER_LOG, profilOptimiserLog } from "./profilEvaluation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOptimiserLog } from "./index";
+import { correctionDetailleeOptimiserLog } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceOptimiserLog>` de `6gen91` « Optimiser un modèle
@@ -65,28 +64,7 @@ function enoncePapier(e: ExerciceOptimiserLog): EnoncePapier {
   };
 }
 
-function methode(e: ExerciceOptimiserLog, phase: PhaseOptimiserLog): FragmentConsigne[] {
-  const aide = fiche(e).aides[phase][0];
-  return aide.latex ? [t(`${aide.texte} `), f(aide.latex)] : [t(aide.texte)];
-}
-
-function correctionDetaillee(e: ExerciceOptimiserLog): EtapeCorrection[] {
-  const fi = fiche(e);
-  return PHASES_OPTIMISER_LOG.flatMap((phase) => {
-    const sousQuestion = LETTRES[phase];
-    const lignes: EtapeCorrection[] = [
-      { label: "Méthode", sousQuestion, fragments: methode(e, phase) },
-      { label: "Calcul", sousQuestion, fragments: [f(fi.calculs[phase])] },
-      { label: "Piège", sousQuestion, fragments: [t(fi.pieges[phase])] },
-    ];
-    if (phase === "valeur") {
-      lignes.push({ label: "Conclusion", sousQuestion, fragments: reponse(e, phase), figureHtml: figureOptimiserLogSvg(e) });
-    } else {
-      lignes.push({ label: "Conclusion", sousQuestion, fragments: reponse(e, phase) });
-    }
-    return lignes;
-  });
-}
+const correctionDetaillee = correctionDetailleeOptimiserLog;
 
 /** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
  * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */

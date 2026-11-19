@@ -51,6 +51,9 @@ import { EtapeChampLogProblemes } from "./components6e/EtapeChampLogProblemes";
 import { EtapeDeuxValeursLogProblemes } from "./components6e/EtapeDeuxValeursLogProblemes";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { correctionDetailleeLogarithmesProblemes, lettrePhaseLogarithmesProblemes } from "./generateurs6e/logarithmesProblemes/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import { Katex } from "./components/Katex";
 import { LIBELLE_PHASE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "./ui6e/formatLogarithmesProblemes";
 import { calculerRecapitulatifLogarithmesProblemes, calculerSegmentsProgressionLogarithmesProblemes } from "./ui6e/recapitulatifLogarithmesProblemes";
@@ -191,6 +194,7 @@ export function App6gen22() {
             ))}
           </span>
         ),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLogarithmesProblemes(exercice), lettrePhaseLogarithmesProblemes(exercice, phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

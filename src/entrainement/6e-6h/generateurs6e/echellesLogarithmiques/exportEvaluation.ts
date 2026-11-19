@@ -4,7 +4,6 @@ import type {
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -17,6 +16,7 @@ import { fiche, formatReponseAttenduePhaseLatex } from "../../ui6e/formatEchelle
 import { profilEchellesLogarithmiques } from "./profilEvaluation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEchellesLogarithmiques } from "./index";
 import type { IdVarianteEchelles } from "./index";
+import { correctionDetailleeEchellesLogarithmiques } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceEchellesLogarithmiques>` de `6gen90`
@@ -64,23 +64,7 @@ function enoncePapier(e: ExerciceEchellesLogarithmiques): EnoncePapier {
   };
 }
 
-function methode(e: ExerciceEchellesLogarithmiques, phase: PhaseEchelles): FragmentConsigne[] {
-  const aide = fiche(e).aides[phase][0];
-  return aide.latex ? [t(`${aide.texte} `), f(aide.latex)] : [t(aide.texte)];
-}
-
-function correctionDetaillee(e: ExerciceEchellesLogarithmiques): EtapeCorrection[] {
-  const fi = fiche(e);
-  return PHASES_ECHELLES.flatMap((phase) => {
-    const sousQuestion = LETTRES[phase];
-    return [
-      { label: "Méthode", sousQuestion, fragments: methode(e, phase) },
-      { label: "Calcul", sousQuestion, fragments: [f(fi.calculs[phase])] },
-      { label: "Piège", sousQuestion, fragments: [t(fi.pieges[phase])] },
-      { label: "Conclusion", sousQuestion, fragments: reponse(e, phase) },
-    ];
-  });
-}
+const correctionDetaillee = correctionDetailleeEchellesLogarithmiques;
 
 /** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
  * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */

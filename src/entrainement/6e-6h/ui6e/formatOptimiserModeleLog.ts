@@ -418,7 +418,7 @@ function ficheCoutMoyen(e: ExerciceCoutMoyen): FicheOptimiser {
       derivee: `C'(x)=${cf(e.a)}\\left(\\ln(x)+x\\cdot\\dfrac{1}{x}\\right)${e.b ? `-${cf(e.b)}` : ""}=${deriv.slice(6)}`,
       zero: `${deriv.slice(6)}=0\\iff \\ln(x)=${exact(e.k)}\\iff x=${xs}`,
       nature: `C'(x)=${cf(e.a)}\\left(${facteurSigne}\\right)`,
-      valeur: `C\\left(${xs}\\right)=${cf(e.a)}\\cdot ${e.k < 0 ? `(${exact(e.k)})` : exact(e.k)}\\cdot ${xs}${e.b ? `-${cf(e.b)}${xs}` : ""}+${e.c}=${cs}${exacteMode ? "" : `\\approx ${dl(m.valeur, 3)}`}`,
+      valeur: `C\\left(${xs}\\right)=${e.a === 1 ? "" : `${dl(e.a)}\\cdot `}${e.k < 0 ? `(${exact(e.k)})` : exact(e.k)}\\cdot ${xs}${e.b ? `-${cf(e.b)}${xs}` : ""}+${e.c}=${cs}${exacteMode ? "" : `\\approx ${dl(m.valeur, 3)}`}`,
     },
     pieges: {
       domaine: "Inclure 0 : même si l'imprimerie peut ne rien produire, ln(0) n'existe pas — la borne 0 est exclue.",

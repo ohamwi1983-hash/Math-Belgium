@@ -554,7 +554,7 @@ function ficheEtoilesEclat(e: ExerciceEchellesLogarithmiques): FicheEchelles {
     justification: `m_B-m_A=-2{,}5\\log\\left(\\dfrac{E_B}{E_A}\\right)=2{,}5\\,${logR}\\iff ${logR}=\\dfrac{m_B-m_A}{2{,}5}=0{,}4\\,(m_B-m_A)`,
     rapport,
     rapportCourt: "E_A/E_B",
-    calculLog: `0{,}4\\times(${nf(e.v2, 1)}-${nf(e.v1, 1)})`,
+    calculLog: `0{,}4\\times(${nf(e.v2, 1)}-${e.v1 < 0 ? `(${nf(e.v1, 1)})` : nf(e.v1, 1)})`,
     question: [t("Combien de fois l'étoile A paraît-elle plus lumineuse que l'étoile B ?")],
     pieges: {
       traduire: "Multiplier par 2,5 au lieu de diviser : le logarithme du rapport d'éclat vaut l'écart des magnitudes divisé par 2,5, soit 0,4 fois cet écart.",

@@ -1,3 +1,7 @@
+import { correctionDetailleeEchellesLogarithmiques } from "./generateurs6e/echellesLogarithmiques/corrigeDetaille";
+import { PHASES_ECHELLES } from "./moteur6e/typesEchellesLogarithmiques";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
@@ -130,6 +134,7 @@ export function App6gen90() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEchellesLogarithmiques(exercice), lettreEtape(PHASES_ECHELLES.indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(choix ? { messageRevele: "Ce n'était pas la bonne relation (une seule tentative sur un choix fermé)." } : {}),
