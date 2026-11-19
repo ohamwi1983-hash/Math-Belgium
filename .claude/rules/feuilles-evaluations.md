@@ -10,6 +10,7 @@ paths:
   - "src/lib/evaluationAdapterRegistry.ts"
   - "src/lib/banquesVraiFaux.ts"
   - "src/components/admin/EvaluationGeneratorPanel.tsx"
+  - "src/components/admin/RepereNiveauDuree.tsx"
   - "scripts/verifier-enonces-evaluation.mjs"
 ---
 
@@ -104,6 +105,34 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   (`evaluationLocal.ts::dureeItem`) ; copie (« Afficher la durée estimée ») = somme des items arrondie
   aux 5 min. Panneau : estimation par variante avant tirage (`dureeEstimeeVariante`, moyenne de
   6 tirages, en cache) × nombre d'exercices.
+- **Page de conception : repère « niv. 2–3 · ≈ 7 min » sur chaque rangée de variante** (feuille
+  d'exercices ET évaluation ; `components/admin/RepereNiveauDuree.tsx`). Valeurs du code réel :
+  `estimationVariante(adaptateur, variante, { filtre, cleFiltre })` = `niveauEtDuree` sur 6 tirages
+  (plus petit / plus grand niveau, durée moyenne), cache PARTAGÉ avec `dureeEstimeeVariante` (clé
+  adaptateur + variante + réglages) : le repère, la « Durée estimée » au-dessus du tableau, le
+  sous-total du générateur et le badge flottant ne peuvent pas se contredire. Réglages respectés :
+  feuille d'exercices → tirages libres de la variante (le moteur n'y impose rien) ; évaluation →
+  seulement les instances que le moteur peut tirer pour la rangée (`respecteContrainte` : exercice
+  complet, paramètres décochés absents, calculatrice interdite / autorisée ; recherche bornée à
+  4 000 essais / 80 ms, sinon tirages libres et l'infobulle le dit) ; un cas particulier coché (une
+  seule question) n'est pas compté à part (dit dans l'infobulle). Numéros colorés par palier
+  (Base / Intermédiaire / Avancé, `--good` / `--attn` / `--bad`), mot du palier quand toute la
+  plage est dans un palier et la largeur > 640 px. Générateur pas encore noté : niveau converti
+  avec « * » (« niv. 3* »), infobulle « Provisoire : … étoiles converties, durée = constante » ;
+  sans étoiles : durée seule. **Calcul paresseux** : rien n'est tiré à l'ouverture ; une rangée
+  calcule seulement quand elle approche de l'écran (IntersectionObserver, marge 200 px), une variante
+  à la fois dans `requestIdleCallback`. Mesuré (build de production, 3 chapitres complets, 5 essais) :
+  ouverture inchangée (≈ 1,1 s avant comme après), bascule de processus + 30 à 40 ms, repères
+  visibles remplis en 0,1 à 0,35 s, 0 tâche longue (> 50 ms) en évaluation ; repères = valeurs de
+  40 tirages indépendants de `niveauEtDuree` (9 / 9 rangées contrôlées).
+  Sous chaque générateur dont une variante est choisie : rangée « Sous-total : n exercices · ≈ m min
+  (· p pts en évaluation) » ; récapitulatif par processus de l'évaluation : « Appliquer : 12 pts
+  (60 %) · ≈ 25 min ». Pas de nouvelle colonne (téléphone).
+- **Badge flottant** (`CompteurFlottant`) : « n questions · p points · ≈ m min » (durée = la même
+  « Durée estimée » que l'en-tête, variantes exclues non comptées), en évaluation et en feuille ;
+  « /exercices » caché sous 480 px (≈ 225 px de large sur iPhone 13). Masqué (fondu) dès que la
+  barre du bas (qui redonne le total) est à l'écran ou dépassée : il ne recouvre plus les documents
+  générés ni le formulaire de remédiation.
 - **Affichage** (maquette E) : cadre du NUMÉRO puis cadre du PALIER (« 5 » « Avancé »), noir et blanc
   (`niveauHtml`, `.niveau .num/.pal`) en tête de chaque exercice de la feuille et de sa version
   aménagée ; légende en tête de la feuille « Niveau 1 à 7 : Base 1–2 · Intermédiaire 3–4 · Avancé
@@ -167,6 +196,15 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   sans objet (racines irrationnelles en mise en évidence généralisée).
 - `calculatriceIndispensable: true` pour un générateur dont toutes les instances exigent la
   calculatrice : le panneau avertit si le professeur choisit « calculatrice interdite ».
+- **Variante exclue faute de calculatrice** (`calculatriceIndispensable` en liste, évaluation
+  « calculatrice interdite », réglage par défaut) : la rangée grisée porte la raison ET la solution
+  (« Demande une calculatrice : passe la calculatrice à « Autorisée » (en haut) pour l'utiliser. »)
+  avec un bouton « Aller au réglage » qui fait défiler jusqu'au sélecteur, lui donne le focus et le
+  surligne 2,6 s. Quand TOUTES les variantes d'un générateur sont exclues (6gen96), une seule note en
+  tête du générateur (« … : toutes ses variantes demandent une calculatrice … ce réglage vaut pour
+  toute l'évaluation ») et les rangées gardent « — demande une calculatrice ». Choix : le bouton ne
+  bascule PAS le réglage d'office — il vaut pour toute l'évaluation (« autorisée » ne tire plus que
+  des cas qui exigent la calculatrice, dans tous les générateurs).
 - Recherche de graine bornée par le temps (200 ms par palier) : les cas rares (σ entier, combinaison
   précise de paramètres) sont trouvés sans bloquer le panneau. Un cas particulier va sur la DERNIÈRE
   question de la ligne qui peut le recevoir (cas propre à une seule variante).
@@ -264,8 +302,13 @@ Décisions de l'utilisateur (maquettes validées, lots A1–A4) :
   banques vrai/faux, questions ouvertes) : aucun nom de point ne doit apparaître dans les transformés.
 - **Pied de page** sur chaque page (boîtes de marge `@page`, `stylePied`) : copie et aménagée
   d'évaluation « **Série A** · Nom : … » à gauche (la série en gras via `@bottom-left-corner` — une
-  boîte de marge n'a qu'un style), « page n / N » à droite ; feuille d'exercices et aménagée de la
-  feuille : « page n / N » seulement. Marge basse 1,5 cm. Firefox ignore les boîtes de marge.
+  boîte de marge n'a qu'un style), « page n / N » à droite ; **corrigé et grille d'évaluation**
+  (documents du professeur, `stylePied(…, avecNom = false)`) : « **Série A** » à gauche, sans
+  « Nom », « page n / N » à droite ; feuille d'exercices (énoncé, « Je vérifie » et corrigé détaillé
+  forment UN document) et aménagée de la feuille : « page n / N » seulement. Marge basse 1,5 cm.
+  Firefox ignore les boîtes de marge. Vérifié (PDF A4 d'une évaluation 2 séries + feuille, Chromium) :
+  pied sur chaque page (corrigé 7 / 7, grille 2 / 2, feuille 10 / 10 dont « Corrigé détaillé »),
+  0 collision corps / pied (`pdftotext -bbox`).
 - **Encadré « Consignes »** en tête de la copie d'évaluation et de l'aménagée (après le tableau des
   résultats) : « Réponds sur une feuille à part… ne rapporte pas tous les points. » + calculatrice
   autorisée/interdite + « Durée : n minutes. » seulement si `afficherDuree`. Jamais sur la feuille
@@ -313,7 +356,10 @@ Toutes décochées par défaut ; un plan enregistré sans le champ se recharge a
   grille ; `evaluationLocal.ts::genererDocxDepuisPlan(plan, lettre, 'copie' | 'corrige' | 'grille')`) :
   même contenu que le HTML. Formules en images PNG (KaTeX rasterisé, comme la copie l'a toujours
   fait : `docx` n'écrit pas d'équation Word native) ; figures (`enteteHtml`, `figureHtml` du
-  corrigé, blocs `html`) rasterisées en PNG. Pied de page Word (série, page n / N). Pas d'annexe
+  corrigé, blocs `html`) rasterisées en PNG. Pied de page Word (`piedDocx`) : copie « Série **A** ·
+  Nom : … », corrigé « Série **A** · Corrigé · document du professeur », grille « Série **A** · Grille
+  de correction · ne pas distribuer aux élèves », « page n / N » (champs PAGE / NUMPAGES) au taquet
+  droit — mention courte pour que le numéro ne passe jamais à la ligne. Pas d'annexe
   formulaire ni de deux colonnes en Word.
 
 ## Feuille de remédiation en un clic (`lib/evaluationRemediation.ts`, décision C9)

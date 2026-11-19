@@ -1,10 +1,11 @@
-import { Fragment, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { LEVELS } from '../../content/chaptersIndex'
 import type { ChapterContent } from '../../content/types'
 import { declencherTelechargement } from '../../entrainement/export/telechargerBlob'
 import { RichText } from '../Math'
 import { EVALUATION_ADAPTER_REGISTRY } from '../../lib/evaluationAdapterRegistry'
-import { dureeEstimeeVariante } from '../../entrainement/export/niveauDifficulte'
+import { dureeEstimeeVariante, type OptionsEstimation } from '../../entrainement/export/niveauDifficulte'
+import { RepereNiveauDuree } from './RepereNiveauDuree'
 import {
   codesDuPlan,
   construirePlan,
@@ -17,8 +18,11 @@ import {
   lirePlanDepuisJson,
   lirePlansEnregistres,
   peutGenererLocalement,
+  respecteContrainte,
   supprimerPlanEnregistre,
   varianteAdmetCasParticulier,
+  type Adaptateur,
+  type ContrainteTirage,
   type DocumentGenere,
   type PlanDocument,
   type PlanEnregistre,
@@ -138,26 +142,6 @@ function aujourdhui(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-/** Durée indicative d'une ligne, en minutes — exercice d'un chapitre noté : durée par exercice de la
- * grille commune, ESTIMÉE par variante avant tout tirage (moyenne de quelques tirages, en cache —
- * `dureeEstimeeVariante`) ; chapitre pas encore noté : constante `dureeMinutes` de l'adaptateur ;
- * sinon ≈ 2,5 min par point (même règle que la durée imprimée sur la copie). */
-function dureeLigne(ligne: LigneSelection, points: number): number {
-  const adaptateur = ligne.type === 'exercice' ? EVALUATION_ADAPTER_REGISTRY[ligne.cle ?? ''] : undefined
-  if (adaptateur) {
-    const parVariante = Object.entries(ligne.parVariante ?? {}).filter(([, n]) => n > 0)
-    const durees = parVariante.map(([cle, n]) => {
-      const d = dureeEstimeeVariante(adaptateur, varianteDeCle(cle))
-      return d === undefined ? undefined : d * n
-    })
-    if (parVariante.length > 0 && durees.every((d): d is number => d !== undefined)) return durees.reduce((t, d) => t + d, 0)
-    const d = dureeEstimeeVariante(adaptateur, null)
-    if (d !== undefined) return d * ligne.nombre
-  }
-  if (ligne.type === 'vraiFaux') return 2 * ligne.nombre
-  return points * 2.5
-}
-
 /** Titre affiché dans le formulaire de remédiation : celui de l'évaluation, sans « Évaluation — ». */
 function titreRemediation(e: PlanEnregistre): string {
   return titreSansPrefixe(e.plan)
@@ -168,17 +152,27 @@ function slugFichier(texte: string): string {
 }
 
 /** Résumé flottant (position fixe, toujours visible) du nombre total de questions/exercices
- * sélectionnés — et, en mode évaluation, du total de points — pour que l'admin/l'élève garde ce
- * compte sous les yeux en parcourant un long tableau, sans devoir défiler jusqu'à la barre du bas. */
-function CompteurFlottant({ nombre, points }: { nombre: number; points?: number }) {
+ * sélectionnés — et, en mode évaluation, du total de points — et de la durée estimée cumulée (même
+ * calcul que « Durée estimée » au-dessus du tableau), pour que l'admin/l'élève garde ce compte sous
+ * les yeux en parcourant un long tableau. `masque` : la barre du bas (qui redonne le total) ou ce qui
+ * la suit est à l'écran — le badge n'y recouvre plus les documents ni le formulaire de remédiation. */
+function CompteurFlottant({ nombre, points, duree, masque }: { nombre: number; points?: number; duree?: number; masque?: boolean }) {
   return (
-    <div className="admin-eval-compteur" aria-live="polite">
-      <strong>{nombre}</strong> question{nombre > 1 ? 's' : ''}/exercice{nombre > 1 ? 's' : ''}
+    <div className="admin-eval-compteur" aria-live="polite" data-masque={masque ? 'oui' : undefined} aria-hidden={masque || undefined}>
+      {/* Un groupe par donnée : l'écart du conteneur (flex `gap`) ne sépare que les groupes. */}
+      <span>
+        <strong>{nombre}</strong> question{nombre > 1 ? 's' : ''}
+        <span className="admin-eval-compteur-long">/exercice{nombre > 1 ? 's' : ''}</span>
+      </span>
       {points !== undefined && (
-        <>
-          {' '}
+        <span>
           · <strong>{points}</strong> point{points > 1 ? 's' : ''}
-        </>
+        </span>
+      )}
+      {duree !== undefined && (
+        <span>
+          · ≈ <strong>{duree}</strong> min
+        </span>
       )}
     </div>
   )
@@ -493,6 +487,67 @@ export function EvaluationGeneratorPanel({
     return ligne.points * ligne.nombre
   }
 
+  /** Identifiant de variante pour l'estimation : `null` (tirage libre) si l'adaptateur n'a pas cette
+   * variante dans son catalogue (entrée par défaut « Tirage aléatoire ») — comme `tirerInstance`. */
+  function varianteEstimation(adaptateur: Adaptateur, cle: string): string | null {
+    const id = varianteDeCle(cle)
+    return adaptateur.catalogueVariantes?.some((v) => v.id === id) ? id : null
+  }
+
+  /** Réglages d'estimation d'une rangée de variante (repère « niv. · ≈ min » ET durée de l'en-tête,
+   * même cache) : en évaluation, seulement les instances que le moteur peut tirer pour cette rangée
+   * (`respecteContrainte` : exercice complet, paramètres décochés absents, calculatrice) ; en feuille
+   * d'exercices, tirages libres de la variante (le moteur n'y impose rien). Le cas particulier coché
+   * (une seule question de la variante) n'est pas compté à part. */
+  function optionsEstimation(ligne: LigneSelection, cle: string): OptionsEstimation<never> | undefined {
+    if (estExercice) return undefined
+    const adaptateur = EVALUATION_ADAPTER_REGISTRY[ligne.cle ?? ''] as Adaptateur | undefined
+    const profilDe = adaptateur?.profilInstance
+    if (!adaptateur || !profilDe) return undefined
+    const idsParametres = (adaptateur.parametresAuChoix ?? []).map((p) => p.id)
+    const parametresExclus = adaptateur.parametresAuChoix ? reglagesVariante(ligne, cle).parametresExclus.filter((id) => idsParametres.includes(id)) : null
+    const contrainte: ContrainteTirage = { cas: 'complet', idsParametres, parametresExclus, calculatrice }
+    return {
+      filtre: (instance) => {
+        try {
+          return respecteContrainte(profilDe(instance), contrainte, true)
+        } catch {
+          return false
+        }
+      },
+      cleFiltre: `evaluation|${calculatrice}|${parametresExclus ? [...parametresExclus].sort().join(',') : '-'}`,
+    }
+  }
+
+  /** Phrase de l'infobulle du repère : quels réglages de la rangée l'estimation respecte. */
+  function texteReglagesEstimation(ligne: LigneSelection, cle: string): string {
+    if (estExercice) return 'Feuille d’exercices : tirages libres de la variante, comme la feuille.'
+    if (!optionsEstimation(ligne, cle)) return 'Tirages libres de la variante (générateur sans tirage équilibré).'
+    const reglages = reglagesVariante(ligne, cle)
+    return `Évaluation : exercices complets${reglages.parametresExclus.length > 0 ? ', paramètres décochés absents' : ''}, calculatrice ${calculatrice === 'interdite' ? 'interdite' : 'autorisée'}${reglages.inclureCasParticulier ? ' ; le cas particulier coché n’est pas compté à part' : ''}.`
+  }
+
+  /** Durée indicative d'une ligne, en minutes — exercice : durée par exercice de la grille commune,
+   * ESTIMÉE par variante avant tout tirage (`dureeEstimeeVariante`, mêmes réglages et même cache que
+   * le repère de la rangée) × nombre, variantes exclues non comptées ; chapitre pas encore noté :
+   * constante `dureeMinutes` de l'adaptateur ; vrai/faux : 2 min par affirmation ; sinon ≈ 2,5 min
+   * par point (même règle que la durée imprimée sur la copie). */
+  function dureeLigne(ligne: LigneSelection, points: number): number {
+    const adaptateur = ligne.type === 'exercice' ? EVALUATION_ADAPTER_REGISTRY[ligne.cle ?? ''] : undefined
+    if (adaptateur) {
+      const parVariante = Object.entries(ligne.parVariante ?? {}).filter(([cle, n]) => n > 0 && !varianteExclue(ligne.cle ?? '', cle))
+      const durees = parVariante.map(([cle, n]) => {
+        const d = dureeEstimeeVariante(adaptateur, varianteEstimation(adaptateur, cle), optionsEstimation(ligne, cle))
+        return d === undefined ? undefined : d * n
+      })
+      if (parVariante.length > 0 && durees.every((d): d is number => d !== undefined)) return durees.reduce((t, d) => t + d, 0)
+      const d = dureeEstimeeVariante(adaptateur, null)
+      if (d !== undefined) return d * nombreLigne(ligne)
+    }
+    if (ligne.type === 'vraiFaux') return 2 * ligne.nombre
+    return points * 2.5
+  }
+
   const totalNombre = lignes.reduce((total, l) => total + nombreLigne(l), 0)
   const totalPoints = lignes.reduce((total, l) => total + pointsLigne(l), 0)
   const pointsParProcessus = ([1, 2, 3] as const).map((p) => lignes.filter((l) => l.processus === p).reduce((t, l) => t + pointsLigne(l), 0))
@@ -509,7 +564,38 @@ export function EvaluationGeneratorPanel({
         ),
     )
     .map((l) => `« ${nomGenerateur(l.cle as IdGenerateurPilote)} »`)
-  const dureeEstimee = Math.max(5, Math.ceil(lignes.filter((l) => l.nombre > 0).reduce((t, l) => t + dureeLigne(l, pointsLigne(l)), 0) / 5) * 5)
+  const dureesParProcessus = ([1, 2, 3] as const).map((p) =>
+    lignes.filter((l) => l.processus === p && nombreLigne(l) > 0).reduce((t, l) => t + dureeLigne(l, pointsLigne(l)), 0),
+  )
+  const dureeEstimee = Math.max(5, Math.ceil(dureesParProcessus.reduce((t, d) => t + d, 0) / 5) * 5)
+
+  /** Bouton « Aller au réglage » des variantes exclues faute de calculatrice : fait défiler jusqu'au
+   * sélecteur « Calculatrice », lui donne le focus et le surligne un instant. Choix : on ne bascule PAS
+   * le réglage d'office — il vaut pour toute l'évaluation (« autorisée » ne tire plus que des cas qui
+   * exigent la calculatrice, dans TOUS les générateurs) ; le professeur décide en connaissance de cause. */
+  const selectCalculatrice = useRef<HTMLSelectElement>(null)
+  const [calculatriceSurlignee, setCalculatriceSurlignee] = useState(false)
+  function allerAuReglageCalculatrice() {
+    const el = selectCalculatrice.current
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    el.focus({ preventScroll: true })
+    setCalculatriceSurlignee(true)
+    window.setTimeout(() => setCalculatriceSurlignee(false), 2600)
+  }
+
+  /** Badge flottant masqué dès que la barre du bas (qui redonne le total) est à l'écran ou dépassée :
+   * il ne recouvre plus les documents générés ni le formulaire de remédiation. */
+  const barreDuBas = useRef<HTMLDivElement>(null)
+  const [compteurMasque, setCompteurMasque] = useState(false)
+  const avecTableau = chapitres.length > 0
+  useEffect(() => {
+    const el = barreDuBas.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    const obs = new IntersectionObserver(([e]) => setCompteurMasque(e.isIntersecting || e.boundingClientRect.top < 0))
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [avecTableau])
 
   function nomBase(plan: PlanDocument): string {
     return slugFichier(plan.entete.titre)
@@ -864,9 +950,9 @@ export function EvaluationGeneratorPanel({
         </div>
         {!estExercice && (
           <>
-            <div className="admin-eval-tf">
+            <div className={`admin-eval-tf${calculatriceSurlignee ? ' admin-eval-surligne' : ''}`}>
               <label htmlFor="eval-calculatrice">Calculatrice</label>
-              <select id="eval-calculatrice" value={calculatrice} onChange={(e) => setCalculatrice(e.target.value as 'interdite' | 'autorisee')}>
+              <select id="eval-calculatrice" ref={selectCalculatrice} value={calculatrice} onChange={(e) => setCalculatrice(e.target.value as 'interdite' | 'autorisee')}>
                 <option value="interdite">Interdite</option>
                 <option value="autorisee">Autorisée</option>
               </select>
@@ -956,7 +1042,7 @@ export function EvaluationGeneratorPanel({
             ))}
           </div>
 
-          <CompteurFlottant nombre={totalNombre} points={estExercice ? undefined : totalPoints} />
+          <CompteurFlottant nombre={totalNombre} points={estExercice ? undefined : totalPoints} duree={totalNombre > 0 ? dureeEstimee : undefined} masque={compteurMasque} />
 
           {totalNombre > 0 && (
             <div className="admin-eval-repartition" aria-live="polite">
@@ -965,6 +1051,7 @@ export function EvaluationGeneratorPanel({
                   <span key={p} className="admin-eval-repartition-item">
                     <span className="admin-eval-repartition-barre" style={{ width: `${totalPoints > 0 ? Math.round((pointsParProcessus[p - 1] / totalPoints) * 100) : 0}%` }} />
                     {LABEL_PROCESSUS[p]} : {pointsParProcessus[p - 1]} pt{pointsParProcessus[p - 1] > 1 ? 's' : ''} ({totalPoints > 0 ? Math.round((pointsParProcessus[p - 1] / totalPoints) * 100) : 0} %)
+                    {dureesParProcessus[p - 1] > 0 && ` · ≈ ${Math.max(1, Math.round(dureesParProcessus[p - 1]))} min`}
                   </span>
                 ))}
               <span className="admin-eval-repartition-item">Durée estimée : ≈ {dureeEstimee} min</span>
@@ -1031,7 +1118,11 @@ export function EvaluationGeneratorPanel({
                                         .sort((x, y) => Number(x.split('~')[1]) - Number(y.split('~')[1]))
                                       return [variante.id, ...copies].map((cle) => ({ cle, variante, copie: cle !== variante.id }))
                                     })
-                                    return lignesVariantes.flatMap(({ cle, variante, copie }) => {
+                                    const adaptateurLigne = EVALUATION_ADAPTER_REGISTRY[ligne.cle ?? ''] as Adaptateur | undefined
+                                    // Calculatrice interdite et TOUTES les variantes l'exigent : dit UNE fois, au
+                                    // niveau du générateur (rangée de tête), au lieu de répéter la note par variante.
+                                    const toutesExclues = catalogue.length > 0 && catalogue.every((v) => varianteExclue(ligne.cle ?? '', v.id))
+                                    const rangeesGenerateur = lignesVariantes.flatMap(({ cle, variante, copie }) => {
                                       const exclue = varianteExclue(ligne.cle ?? '', cle)
                                       const nombreVariante = exclue ? 0 : (ligne.parVariante?.[cle] ?? 0)
                                       const reglages = reglagesVariante(ligne, cle)
@@ -1049,7 +1140,28 @@ export function EvaluationGeneratorPanel({
                                               {variante.label}
                                               {copie ? ` (${cle.split('~')[1]})` : ''}
                                             </span>
-                                            {exclue && <span className="admin-eval-variante-exclue"> — exclue : demande une calculatrice</span>}
+                                            {!exclue && adaptateurLigne && (
+                                              <>
+                                                {' '}
+                                                <RepereNiveauDuree
+                                                  adaptateur={adaptateurLigne}
+                                                  varianteId={varianteEstimation(adaptateurLigne, cle) ?? ''}
+                                                  options={optionsEstimation(ligne, cle)}
+                                                  reglages={texteReglagesEstimation(ligne, cle)}
+                                                />
+                                              </>
+                                            )}
+                                            {exclue && toutesExclues && <span className="admin-eval-variante-exclue"> — demande une calculatrice</span>}
+                                            {exclue && !toutesExclues && (
+                                              <span className="admin-eval-calculatrice-note admin-eval-calculatrice-note-variante" role="note">
+                                                <span>
+                                                  <b>Demande une calculatrice</b> : passe la calculatrice à « Autorisée » (en haut) pour l’utiliser.
+                                                </span>
+                                                <button type="button" className="admin-eval-lien-bouton" onClick={allerAuReglageCalculatrice}>
+                                                  Aller au réglage
+                                                </button>
+                                              </span>
+                                            )}
                                           </td>
                                           <td>—</td>
                                           <td className="admin-eval-col-nombre">
@@ -1126,6 +1238,38 @@ export function EvaluationGeneratorPanel({
                                       }
                                       return rangees
                                     })
+                                    const enTete = toutesExclues
+                                      ? [
+                                          <tr className="admin-eval-row admin-eval-row-calculatrice" key={(ligne.cle ?? '') + '-calculatrice'}>
+                                            <td colSpan={4}>
+                                              <div className="admin-eval-calculatrice-note" role="note">
+                                                <span>
+                                                  <b>{libelleGenerateurPanneau(section, ligne.cle ?? '')}</b> : toutes ses variantes demandent une calculatrice.
+                                                  Pour l’utiliser, passe la calculatrice à « Autorisée » (en haut) — ce réglage vaut pour toute l’évaluation.
+                                                </span>
+                                                <button type="button" className="admin-eval-lien-bouton" onClick={allerAuReglageCalculatrice}>
+                                                  Aller au réglage « Calculatrice »
+                                                </button>
+                                              </div>
+                                            </td>
+                                          </tr>,
+                                        ]
+                                      : []
+                                    // Sous-total du générateur (toutes ses variantes choisies) : nombre, durée
+                                    // estimée (même calcul que l'en-tête) et, en évaluation, points.
+                                    const nombreGenerateur = nombreLigne(ligne)
+                                    const sousTotal =
+                                      nombreGenerateur > 0
+                                        ? [
+                                            <tr className="admin-eval-row admin-eval-row-soustotal" key={(ligne.cle ?? '') + '-soustotal'}>
+                                              <td colSpan={estExercice ? 3 : 4}>
+                                                Sous-total : {nombreGenerateur} exercice{nombreGenerateur > 1 ? 's' : ''} · ≈ {Math.max(1, Math.round(dureeLigne(ligne, pointsLigne(ligne))))} min
+                                                {!estExercice && ` · ${pointsLigne(ligne)} pt${pointsLigne(ligne) > 1 ? 's' : ''}`}
+                                              </td>
+                                            </tr>,
+                                          ]
+                                        : []
+                                    return [...enTete, ...rangeesGenerateur, ...sousTotal]
                                   }
 
                                   const estBanqueFixe = ligne.type === 'formule' || ligne.type === 'demonstration' || ligne.type === 'comprehension'
@@ -1278,7 +1422,7 @@ export function EvaluationGeneratorPanel({
             )
           })}
 
-          <div className="admin-eval-bottombar">
+          <div className="admin-eval-bottombar" ref={barreDuBas}>
             {!estExercice && (
               <p className="admin-eval-total">
                 Total : {totalPoints} point{totalPoints > 1 ? 's' : ''}

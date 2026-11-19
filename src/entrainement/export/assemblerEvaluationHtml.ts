@@ -286,14 +286,19 @@ td, th { font-size: inherit; }
  * chapitres — `lib/export/buildHtml.ts`). Copie d'évaluation et aménagée : « Série A · Nom : … » à
  * gauche (la lettre de série en gras : boîte de coin `@bottom-left-corner`, alignée à droite, collée à
  * la boîte `@bottom-left` — une boîte de marge n'a qu'un seul style de police), « page n / N » à
- * droite ; feuille d'exercices : seulement « page n / N ». Firefox ignore les boîtes de marge : la
- * page s'imprime alors sans pied, jamais bloquant. */
-function stylePied(serieLettre: string | null, police: string, taille = "8.5pt"): string {
+ * droite ; corrigé et grille d'évaluation (documents du professeur, `avecNom: false`) : « Série A »
+ * en gras à gauche, sans « Nom », « page n / N » à droite ; feuille d'exercices (énoncé, « Je
+ * vérifie » et corrigé détaillé forment UN document) : seulement « page n / N ». Firefox ignore les
+ * boîtes de marge : la page s'imprime alors sans pied, jamais bloquant. */
+function stylePied(serieLettre: string | null, police: string, taille = "8.5pt", avecNom = true): string {
   const commun = `font-family: ${police}; font-size: ${taille}; color: #333; vertical-align: middle;`;
-  const gauche = serieLettre
-    ? `@bottom-left-corner { content: "Série ${serieLettre.replace(/["\\]/g, "")}"; ${commun} font-weight: 700; text-align: right; }
+  const serie = (serieLettre ?? "").replace(/["\\]/g, "");
+  const gauche = !serieLettre
+    ? ""
+    : avecNom
+      ? `@bottom-left-corner { content: "Série ${serie}"; ${commun} font-weight: 700; text-align: right; }
   @bottom-left { content: "\\00a0· Nom : ……………………………………"; ${commun} text-align: left; }`
-    : "";
+      : `@bottom-left { content: "Série ${serie}"; ${commun} font-weight: 700; text-align: left; }`;
   return `@page { margin-bottom: 1.5cm;
   ${gauche}
   @bottom-right { content: "page " counter(page) " / " counter(pages); ${commun} text-align: right; } }`;
@@ -883,7 +888,7 @@ function grilleHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
 
 /** Copie, corrigé et grille de correction d'UNE série. Copie : encadré « Consignes », pied de page
  * « Série · Nom · page n / N », annexes en fin de copie, deux colonnes si demandé ; le corrigé et la
- * grille gardent leur mise en page. */
+ * grille gardent leur mise en page, avec le pied « Série A · page n / N » (sans « Nom »). */
 export async function genererEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation[], annexes?: AnnexeDocument[]): Promise<{ enonce: Blob; corrige: Blob; grille: Blob }> {
   const cssKatex = await obtenirCssKatexAutonome();
   const css = STYLE_EVALUATION;
@@ -894,10 +899,12 @@ export async function genererEvaluationHtml(entete: EnteteEvaluation, items: Ite
   const corrige = enveloppeEvaluation(`${cartoucheEvaluationHtml(entete, items, "Corrigé")}${questionsEvaluationHtml(entete, items, true)}`);
   const grille = grilleHtml(entete, items);
   const cssCopie = `${stylePied(entete.serieLettre, "Archivo, Arial, sans-serif")}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}`;
+  // Corrigé et grille : documents du professeur — « Série A » (sans « Nom ») et « page n / N ».
+  const cssProfesseur = stylePied(entete.serieLettre, "Archivo, Arial, sans-serif", "8.5pt", false);
   return {
     enonce: new Blob([documentHtml(titre, copie, css, cssKatex, "standard", cssCopie)], { type: "text/html;charset=utf-8" }),
-    corrige: new Blob([documentHtml(`${titre} — Corrigé`, corrige, css, cssKatex, "standard")], { type: "text/html;charset=utf-8" }),
-    grille: new Blob([documentHtml(`${titre} — Grille de correction`, grille, css, cssKatex, "standard")], { type: "text/html;charset=utf-8" }),
+    corrige: new Blob([documentHtml(`${titre} — Corrigé`, corrige, css, cssKatex, "standard", cssProfesseur)], { type: "text/html;charset=utf-8" }),
+    grille: new Blob([documentHtml(`${titre} — Grille de correction`, grille, css, cssKatex, "standard", cssProfesseur)], { type: "text/html;charset=utf-8" }),
   };
 }
 

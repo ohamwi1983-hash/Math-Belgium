@@ -1446,6 +1446,9 @@ table.feature-table td { white-space: normal; }
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25); font-size: 0.82rem; font-weight: 600;
 }
 .admin-eval-compteur strong { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.admin-eval-compteur { transition: opacity 0.18s, transform 0.18s; }
+.admin-eval-compteur > span { white-space: nowrap; }
+.admin-eval-compteur[data-masque] { opacity: 0; transform: translateY(10px); pointer-events: none; }
 
 .admin-eval-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
 .admin-eval-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
@@ -1470,8 +1473,39 @@ table.feature-table td { white-space: normal; }
   padding: 8px 14px;
 }
 .admin-eval-table td.admin-eval-col-nombre { text-align: center; }
-.admin-eval-variante-label { color: var(--ink-faint); font-size: 0.82rem; }
+.admin-eval-variante-label { color: var(--ink-faint); font-size: 0.82rem; overflow-wrap: anywhere; }
 .admin-eval-variante-exclue { color: var(--ink-faint); font-size: 0.78rem; font-style: italic; }
+
+/* Repère « niv. 2–3 · ≈ 7 min » d'une rangée de variante (`RepereNiveauDuree.tsx`) : discret, insécable,
+ * numéros colorés par palier (Base / Intermédiaire / Avancé), le mot du palier quand toute la plage
+ * est dans un même palier et que la place le permet ; « * » = niveau provisoire (étoiles converties). */
+.admin-eval-repere {
+  display: inline-block; white-space: nowrap; margin-left: 2px; padding: 0 7px; vertical-align: 1px;
+  border: 1px solid var(--line-soft); border-radius: 999px; background: var(--paper);
+  font-family: var(--mono); font-size: 0.7rem; line-height: 1.55; color: var(--ink-soft); cursor: help;
+}
+.admin-eval-repere[data-etat='attente'] { color: var(--ink-faint); opacity: 0.6; cursor: default; }
+.admin-eval-repere-n { font-weight: 700; }
+.admin-eval-repere-n.palier-base { color: var(--good); }
+.admin-eval-repere-n.palier-intermediaire { color: var(--attn); }
+.admin-eval-repere-n.palier-avance { color: var(--bad); }
+.admin-eval-repere-provisoire { color: var(--ink-faint); }
+.admin-eval-repere-palier { font-family: var(--sans); }
+/* Variante exclue faute de calculatrice : la raison ET la solution, avec un bouton vers le réglage. */
+.admin-eval-calculatrice-note {
+  display: flex; flex-wrap: wrap; align-items: center; column-gap: 12px; row-gap: 0;
+  margin: 4px 0 0; padding: 4px 10px; border-left: 3px solid var(--attn); border-radius: 4px;
+  background: var(--attn-soft); color: var(--ink); font-size: 0.82rem; text-align: left;
+}
+.admin-eval-calculatrice-note .admin-eval-lien-bouton { font-weight: 600; }
+.admin-eval-table tbody tr.admin-eval-row-calculatrice td { text-align: left; padding-top: 6px; padding-bottom: 6px; }
+.admin-eval-table tbody tr.admin-eval-row-calculatrice .admin-eval-calculatrice-note { margin: 0; }
+/* Sous-total d'un générateur (dès qu'une de ses variantes est choisie). */
+.admin-eval-table tbody tr.admin-eval-row-soustotal td {
+  padding: 3px 14px 6px; font-family: var(--mono); font-size: 0.74rem; color: var(--ink-soft);
+}
+/* Sélecteur « Calculatrice » ciblé par le bouton « Aller au réglage ». */
+.admin-eval-surligne select { outline: 3px solid var(--attn); outline-offset: 2px; }
 
 .admin-eval-stepper { display: inline-flex; align-items: center; gap: 8px; }
 .admin-eval-stepper-valeur { width: 1.4em; display: inline-block; text-align: center; font-weight: 700; font-family: var(--mono); }
@@ -1541,6 +1575,7 @@ table.feature-table td { white-space: normal; }
 
 @media (max-width: 640px) {
   .admin-eval-divider { display: none; }
+  .admin-eval-repere-palier { display: none; }
   .admin-eval-bottombar { justify-content: flex-start; }
 
   /* Les blocs (barre d'outils, barre de processus, tableau, barre du bas) s'étendent jusqu'au bord
@@ -1564,6 +1599,7 @@ table.feature-table td { white-space: normal; }
   .section-num { font-size: 2.1rem; }
   .admin-eval-processus-btn { padding: 8px 6px; font-size: 0.72rem; }
   .admin-eval-compteur { left: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); padding: 8px 12px; font-size: 0.76rem; }
+  .admin-eval-compteur-long { display: none; }
 }
 
 /* Choix explicite des questions « Formule » / « Formule + démonstration » (panneau feuilles et

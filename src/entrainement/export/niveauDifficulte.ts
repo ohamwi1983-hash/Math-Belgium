@@ -222,32 +222,128 @@ export function dureeInstance<T>(adaptateur: AdaptateurFeuilleExercices<T>, inst
   return adaptateur.criteresDifficulte ? niveauEtDuree(adaptateur, instance)?.dureeMinutes : adaptateur.dureeMinutes;
 }
 
-const cacheDurees = new WeakMap<object, Map<string, number | undefined>>();
-const TIRAGES_ESTIMATION = 6;
+/* ----------------------------------------------------------------------------------------------
+ * Estimation par variante, avant tout tirage réel (panneau de conception)
+ * -------------------------------------------------------------------------------------------- */
 
-/** Durée ESTIMÉE d'un exercice d'une variante (ou d'un tirage libre si `varianteId` est vide), avant
- * tout tirage réel — panneau de conception : moyenne de quelques tirages, mise en cache. */
-export function dureeEstimeeVariante<T>(adaptateur: AdaptateurFeuilleExercices<T>, varianteId?: string | null): number | undefined {
-  if (!adaptateur.criteresDifficulte) return adaptateur.dureeMinutes;
-  let cache = cacheDurees.get(adaptateur);
-  if (!cache) cacheDurees.set(adaptateur, (cache = new Map()));
-  const cle = varianteId ?? "";
+/** Niveau (plage) et durée d'un exercice d'une variante, estimés sur quelques tirages. */
+export interface EstimationVariante {
+  /** Durée moyenne d'UN exercice (min) ; chapitre pas encore noté : constante `dureeMinutes`. */
+  dureeMinutes?: number;
+  /** Plus petit et plus grand niveau des tirages (absents si l'adaptateur n'a ni critères ni étoiles). */
+  niveauMin?: number;
+  niveauMax?: number;
+  /** `true` : niveau converti des anciennes étoiles (chapitre pas encore noté). */
+  provisoire: boolean;
+  /** Nombre de tirages retenus. */
+  tirages: number;
+  /** `false` : aucun tirage ne respectait le filtre (réglages de la rangée) dans le budget — estimation
+   * faite sur des tirages libres de la variante. */
+  filtreRespecte: boolean;
+}
+
+/** Réglages de la rangée : `filtre` garde les instances que le moteur pourrait tirer (évaluation :
+ * exercice complet, paramètres décochés absents, calculatrice), `cleFiltre` l'identifie dans le cache. */
+export interface OptionsEstimation<T> {
+  filtre?: (instance: T) => boolean;
+  cleFiltre?: string;
+}
+
+const cacheEstimations = new WeakMap<object, Map<string, EstimationVariante | undefined>>();
+const TIRAGES_ESTIMATION = 6;
+/** Recherche d'instances qui respectent le filtre : au plus ce nombre d'essais et ce budget (ms). */
+const ESSAIS_FILTRE = 4000;
+const BUDGET_FILTRE_MS = 80;
+
+function cleEstimation(varianteId: string | null | undefined, cleFiltre: string | undefined): string {
+  return `${varianteId ?? ""}|${cleFiltre ?? ""}`;
+}
+
+function tirerPourEstimation<T>(adaptateur: AdaptateurFeuilleExercices<T>, varianteId: string | null | undefined): T {
+  return varianteId && adaptateur.genererInstanceAvecVariante ? adaptateur.genererInstanceAvecVariante(varianteId) : adaptateur.genererInstance();
+}
+
+/** Estimation déjà calculée (`null` si elle ne l'est pas encore) — lecture seule, ne tire rien : le
+ * panneau l'affiche tout de suite et ne calcule que les rangées visibles, plus tard (`estimationVariante`). */
+export function estimationEnCache<T>(adaptateur: AdaptateurFeuilleExercices<T>, varianteId: string | null | undefined, cleFiltre?: string): EstimationVariante | undefined | null {
+  const cache = cacheEstimations.get(adaptateur);
+  const cle = cleEstimation(varianteId, cleFiltre);
+  return cache?.has(cle) ? cache.get(cle) : null;
+}
+
+/** Niveau (plus petit et plus grand) et durée moyenne d'un exercice d'une variante (tirage libre si
+ * `varianteId` est vide) : `niveauEtDuree` sur `TIRAGES_ESTIMATION` tirages — les mêmes fonctions que
+ * la feuille imprimée —, mis en cache par adaptateur, variante et réglages. Avec `options.filtre`,
+ * seules les instances qui le respectent comptent (recherche bornée : `ESSAIS_FILTRE` essais,
+ * `BUDGET_FILTRE_MS` ms) ; si aucune ne le respecte, tirages libres (`filtreRespecte: false`).
+ * `undefined` : ni critères, ni étoiles, ni durée (rien à afficher). */
+export function estimationVariante<T>(adaptateur: AdaptateurFeuilleExercices<T>, varianteId?: string | null, options?: OptionsEstimation<T>): EstimationVariante | undefined {
+  let cache = cacheEstimations.get(adaptateur);
+  if (!cache) cacheEstimations.set(adaptateur, (cache = new Map()));
+  const cle = cleEstimation(varianteId, options?.filtre ? options.cleFiltre : undefined);
   if (cache.has(cle)) return cache.get(cle);
-  let total = 0;
-  let n = 0;
-  for (let i = 0; i < TIRAGES_ESTIMATION; i++) {
-    try {
-      const instance = varianteId && adaptateur.genererInstanceAvecVariante ? adaptateur.genererInstanceAvecVariante(varianteId) : adaptateur.genererInstance();
-      const d = dureeInstance(adaptateur, instance);
-      if (d !== undefined) {
-        total += d;
-        n++;
+
+  const retenues: T[] = [];
+  let filtreRespecte = true;
+  if (options?.filtre) {
+    const fin = Date.now() + BUDGET_FILTRE_MS;
+    for (let essai = 0; essai < ESSAIS_FILTRE && retenues.length < TIRAGES_ESTIMATION && (essai < TIRAGES_ESTIMATION || Date.now() < fin); essai++) {
+      try {
+        const instance = tirerPourEstimation(adaptateur, varianteId);
+        if (options.filtre(instance)) retenues.push(instance);
+      } catch {
+        break;
       }
-    } catch {
-      /* tirage impossible : ignoré */
+    }
+    filtreRespecte = retenues.length > 0;
+  }
+  if (retenues.length === 0) {
+    for (let i = 0; i < TIRAGES_ESTIMATION; i++) {
+      try {
+        retenues.push(tirerPourEstimation(adaptateur, varianteId));
+      } catch {
+        /* tirage impossible : ignoré */
+      }
     }
   }
-  const valeur = n ? total / n : adaptateur.dureeMinutes;
+
+  let total = 0;
+  let nDurees = 0;
+  let niveauMin: number | undefined;
+  let niveauMax: number | undefined;
+  let provisoire = false;
+  for (const instance of retenues) {
+    let n: NiveauDifficulte | undefined;
+    try {
+      n = niveauEtDuree(adaptateur, instance);
+    } catch {
+      continue;
+    }
+    if (!n) continue;
+    provisoire ||= n.provisoire;
+    niveauMin = niveauMin === undefined ? n.niveau : Math.min(niveauMin, n.niveau);
+    niveauMax = niveauMax === undefined ? n.niveau : Math.max(niveauMax, n.niveau);
+    // Même règle que `dureeInstance` : durée de la grille si noté, sinon la constante.
+    const d = adaptateur.criteresDifficulte ? n.dureeMinutes : adaptateur.dureeMinutes;
+    if (d !== undefined) {
+      total += d;
+      nDurees++;
+    }
+  }
+  const dureeMinutes = nDurees ? total / nDurees : adaptateur.dureeMinutes;
+  const valeur: EstimationVariante | undefined =
+    dureeMinutes === undefined && niveauMin === undefined
+      ? undefined
+      : { dureeMinutes, niveauMin, niveauMax, provisoire: provisoire || !adaptateur.criteresDifficulte, tirages: retenues.length, filtreRespecte };
   cache.set(cle, valeur);
   return valeur;
+}
+
+/** Durée ESTIMÉE d'un exercice d'une variante (ou d'un tirage libre si `varianteId` est vide), avant
+ * tout tirage réel — panneau de conception : moyenne de quelques tirages, en cache, partagée avec le
+ * repère « niv. · ≈ min » de la rangée (`estimationVariante`, mêmes réglages). Chapitre pas encore
+ * noté : constante `dureeMinutes` (sans tirage). */
+export function dureeEstimeeVariante<T>(adaptateur: AdaptateurFeuilleExercices<T>, varianteId?: string | null, options?: OptionsEstimation<T>): number | undefined {
+  if (!adaptateur.criteresDifficulte) return adaptateur.dureeMinutes;
+  return estimationVariante(adaptateur, varianteId, options)?.dureeMinutes;
 }

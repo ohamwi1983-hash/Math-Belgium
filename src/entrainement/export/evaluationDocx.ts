@@ -375,11 +375,15 @@ async function correctionDocx(item: ItemEvaluation): Promise<FileChild[]> {
  * Documents
  * -------------------------------------------------------------------------------------------- */
 
-/** Pied de page : « Série A · Nom : … » (lettre en gras) à gauche, « page n / N » à droite. */
-function piedDocx(serieLettre: string | null, mention?: string): Footer {
-  const gauche: ParagraphChild[] = serieLettre
-    ? [new TextRun({ text: "Série ", size: 16 }), new TextRun({ text: serieLettre, bold: true, size: 16 }), new TextRun({ text: " · Nom : ……………………………", size: 16 })]
-    : [new TextRun({ text: mention ?? "", size: 16, color: GRIS })];
+/** Pied de page : copie « Série A · Nom : … » (lettre en gras) à gauche, « page n / N » à droite ;
+ * corrigé et grille (documents du professeur, `mention` donnée) : « Série A · mention » sans « Nom »,
+ * « page n / N » à droite — comme le pied des documents HTML. */
+function piedDocx(serieLettre: string, mention?: string): Footer {
+  const gauche: ParagraphChild[] = [
+    new TextRun({ text: "Série ", size: 16 }),
+    new TextRun({ text: serieLettre, bold: true, size: 16 }),
+    mention === undefined ? new TextRun({ text: " · Nom : ……………………………", size: 16 }) : new TextRun({ text: ` · ${mention}`, size: 16, color: GRIS }),
+  ];
   return new Footer({
     children: [
       new Paragraph({
@@ -411,7 +415,7 @@ export async function genererCopieEvaluationDocx(entete: EnteteEvaluation, items
 /** Corrigé Word : même contenu que le corrigé HTML (énoncé de chaque question puis son corrigé détaillé). */
 export async function genererCorrigeEvaluationDocx(entete: EnteteEvaluation, items: ItemEvaluation[]): Promise<Blob> {
   const enfants: FileChild[] = [...enteteDocx(entete, items, "Corrigé").slice(0, 3), ...(await questionsDocx(entete, items, true))];
-  return documentDocx(enfants, piedDocx(null, `${titreEvaluation(entete)} — Série ${entete.serieLettre} — Corrigé`));
+  return documentDocx(enfants, piedDocx(entete.serieLettre, "Corrigé · document du professeur"));
 }
 
 /** Grille de correction Word : même contenu que la grille HTML (document professeur). */
@@ -485,5 +489,5 @@ export async function genererGrilleEvaluationDocx(entete: EnteteEvaluation, item
       spacing: { before: 280 },
     }),
   );
-  return documentDocx(enfants, piedDocx(null, `${titreEvaluation(entete)} · ${dateEnToutesLettres(entete.date)} · Ne pas distribuer aux élèves`));
+  return documentDocx(enfants, piedDocx(entete.serieLettre, "Grille de correction · ne pas distribuer aux élèves"));
 }
