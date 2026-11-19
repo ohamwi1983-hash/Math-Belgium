@@ -23,6 +23,9 @@ import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeTriangleQuelconque } from "./generateurs/triangleQuelconque/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Résous ce triangle quelconque.";
 
@@ -153,6 +156,7 @@ export function AppTriangleQuelconque() {
         reponseAttendue,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTriangleQuelconque(exercice), etat.phase === "donneeManquante" ? "a" : "b")} />,
       }
     : null;
 
