@@ -1,7 +1,7 @@
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceChoisirModele, FamilleModele } from "./types";
-import { argumentLatex, evaluerModele, expressionModeleLatex, fractionInverseLatex, INFOS_CONTEXTE, modeleLatex, nombreLatex, nombreTexte } from "./modele";
+import { argumentLatex, evaluerModele, expressionModeleLatex, fractionInverseLatex, INFOS_CONTEXTE, modeleLatex, nombreLatex, nombreTexte, numerateurInverseLatex } from "./modele";
 import { ecartsLecture, REFERENCE_LATEX, reponseUtilisationLatex, transformationsLatex } from "./textes";
 import { construireFigureModele, PALETTE_PAPIER } from "./figure";
 import { COURS_FAMILLES, COURS_TRANSFORMATIONS } from "../../ui/corrigeChapitre3";
@@ -218,11 +218,20 @@ function lignesSens(e: E): LigneCalcul[] {
     case "glacon:tv":
       return [ligne(`${f}(${v})-\\sqrt[3]{${v}}=${n(e.tv)}`, "côté de la boîte moins côté du glaçon (en cm)")];
     case "gaz:a":
-      return [...valeur(1, "pour un volume de 1 L"), ligne(`${f}\\times ${v}=${n(e.a)}`, "le produit P × V est constant")];
+      // Mêmes écritures que l'aide de l'écran 5 (`numerateurInverseLatex`) : TV = 0 et TH = 0 ici.
+      return [...valeur(numerateurInverseLatex(e).abscisseUn, "pour un volume de 1 L"), ligne(`${numerateurInverseLatex(e).produit}=${n(e.a)}`, "le produit P × V est constant")];
     case "velo:tv":
       return [ligne(`${f}(${v})-${fractionInverseLatex(e)}=${n(e.tv)}`, "durée totale moins temps passé à rouler : les pauses (en h)")];
-    case "velo:a":
-      return [ligne(`${n(Math.abs(e.a))}=\\text{vitesse}\\times\\text{temps de roulage}`, "distance = vitesse × temps : le circuit, en km")];
+    case "velo:a": {
+      // On retire les pauses AVANT le produit (même écriture que l'aide de l'écran 5) : T × v seul
+      // compterait les pauses dans la distance.
+      const { sansTv, produit } = numerateurInverseLatex(e);
+      return [
+        ...(sansTv === null ? [] : [ligne(sansTv, "on retire les pauses : il reste le temps passé à rouler")]),
+        ligne(`${n(e.a)}=${produit}`, `on multiplie les deux membres par ${v}`),
+        ligne("=\\text{temps de roulage}\\times\\text{vitesse}", "distance = vitesse × temps : le circuit, en km"),
+      ];
+    }
     case "chauffage:a":
       return [...valeur(e.th + 1, "un degré d'écart avec le minimum"), ligne(`${f}(${n(e.th + 1)})-${f}(${n(e.th)})=${n(evaluerModele(e, e.th + 1))}-${np(e.tv)}`), ligne(`=${n(Math.abs(e.a))}`, "pente de la branche, en kWh par degré")];
   }
@@ -231,14 +240,25 @@ function lignesSens(e: E): LigneCalcul[] {
 
 export function correctionDetailleeChoisirModele(e: E): EtapeCorrection[] {
   const bonne = e.options5.find((o) => o.correcte)?.fragments ?? [];
+  // Numérateur du modèle inverse (gaz, vélo) : un produit, pas un facteur vertical.
+  const numerateurInverse = e.famille === "inverse" && e.parametre5 === "a";
   return [
     ...etapeFamille(e),
     ...etapeTransformations(e),
     ...etapeModele(e),
     ...etapeUtilisation(e),
-    utilise("e", [texte("TH s'exprime dans l'unité de l'axe horizontal, TV et le facteur dans celle de l'axe vertical ; on calcule le modèle là où le paramètre intervient seul.")]),
-    calcul("e", lignesSens(e)),
-    resultat("e", bonne),
-    piege("e", [texte("Un paramètre s'interprète avec l'unité de son axe : TH en unités horizontales, TV et le facteur en unités verticales.")]),
+    ...(numerateurInverse
+      ? [
+          utilise("e", [texte("TH s'exprime dans l'unité de l'axe horizontal, TV dans celle de l'axe vertical. Le numérateur du modèle inverse vaut (grandeur verticale − TV) × (variable − TH) en tout point de la courbe : son unité est le produit des unités des deux axes.")]),
+          calcul("e", lignesSens(e)),
+          resultat("e", bonne),
+          piege("e", [texte("On retire la translation verticale avant de multiplier : le produit des deux grandeurs seul ne donne le numérateur que si TV = 0.")]),
+        ]
+      : [
+          utilise("e", [texte("TH s'exprime dans l'unité de l'axe horizontal, TV et le facteur dans celle de l'axe vertical ; on calcule le modèle là où le paramètre intervient seul.")]),
+          calcul("e", lignesSens(e)),
+          resultat("e", bonne),
+          piege("e", [texte("Un paramètre s'interprète avec l'unité de son axe : TH en unités horizontales, TV et le facteur en unités verticales.")]),
+        ]),
   ];
 }

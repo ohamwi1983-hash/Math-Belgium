@@ -8,6 +8,8 @@ import {
   domaineVisibleY,
   formatEtiquetteGrille,
   graduationsDansPlage,
+  largeurEtiquetteEm,
+  pasEtiquettesLisibles,
   positionEcranClampee,
 } from "../ui/mafsTransformation";
 
@@ -91,6 +93,7 @@ export function GrilleAdaptative({
   etiquettesAuxBords,
   uneEtiquetteXSurDeux,
   pasFixe,
+  etiquettesLisibles,
 }: {
   largeur: number;
   hauteur: number;
@@ -127,6 +130,13 @@ export function GrilleAdaptative({
    * comportement inchangé). Fourni par gen28 (audit chapitre 6) : comparer des longueurs exige
    * des carrés réels, jamais « horizontal 5 unités, vertical 2 unités ». */
   pasFixe?: number;
+  /** N'écrit qu'un sous-ensemble des nombres de la grille, choisi par `pasEtiquettesLisibles`
+   * (`ui/mafsTransformation.ts`) : multiples du pas à écriture décimale finie, assez espacés pour ne
+   * jamais se chevaucher — avec un pas de 1/3, seuls les entiers sont écrits. Le quadrillage reste
+   * complet (toutes ses lignes tracées). Absent/`false` par défaut (comportement inchangé). Fourni
+   * par gen11 (`MafsGraphFormeCanoniqueFonctionsReference.tsx`) : ses compressions CH/CV = 3 donnent
+   * un pas de 1/3, dont les nombres « −1,333333333 », « −0,9999999999 » se superposaient. */
+  etiquettesLisibles?: boolean;
 }) {
   const { viewTransform } = useTransformContext();
   const xSpan = largeur / viewTransform[0];
@@ -153,6 +163,7 @@ export function GrilleAdaptative({
           formatEtiquette={formatEtiquette}
           etiquettesAuxBords={etiquettesAuxBords}
           uneEtiquetteXSurDeux={uneEtiquetteXSurDeux}
+          etiquettesLisibles={etiquettesLisibles}
         />
       )}
     </Fragment>
@@ -205,6 +216,7 @@ function GraduationsFlottantes({
   formatEtiquette = formatEtiquetteGrille,
   etiquettesAuxBords = false,
   uneEtiquetteXSurDeux = false,
+  etiquettesLisibles = false,
 }: {
   largeur: number;
   hauteur: number;
@@ -213,6 +225,8 @@ function GraduationsFlottantes({
   formatEtiquette?: (valeur: number) => string;
   etiquettesAuxBords?: boolean;
   uneEtiquetteXSurDeux?: boolean;
+  /** Voir `etiquettesLisibles` de `GrilleAdaptative`. */
+  etiquettesLisibles?: boolean;
   /** Masque UNIQUEMENT les graduations flottantes de l'axe Y (jamais celles de l'axe X) — même
    * convention et même appelant que `masquerEtiquettesY` de `GrilleAdaptative` ci-dessus
    * (`BoiteMoustachesGraph.tsx` : axe Y jamais une vraie grandeur, juste un séparateur de ligne).
@@ -244,15 +258,35 @@ function GraduationsFlottantes({
   // trop bas s'y chevaucheraient.
   const COIN_X = 44;
   const COIN_Y = 2 * MARGE_GRADUATION_FLOTTANTE + 6;
-  const ticksX = graduationsDansPlage(visibleX[0], visibleX[1], pasX).filter(
+  // Option `etiquettesLisibles` : pas des nombres ÉCRITS (multiple du pas de la grille, voir
+  // `pasEtiquettesLisibles`) ; la grille, elle, garde `pasX`/`pasY`. Encombrement en X : le nombre
+  // le plus large écrit avec ce pas, plus une demi-police d'écart ; en Y : une hauteur de ligne.
+  const taillePolice = useTaillePolice(groupRef);
+  const pixelsParUniteX = Math.abs(vec.transform([1, 0], matrice)[0] - axeLocalX);
+  const pixelsParUniteY = Math.abs(vec.transform([0, 1], matrice)[1] - axeLocalY);
+  const pasEcritX = etiquettesLisibles
+    ? pasEtiquettesLisibles(pasX, pixelsParUniteX, (p) => {
+        const largeurs = graduationsDansPlage(visibleX[0], visibleX[1], p).map((v) => largeurEtiquetteEm(formatEtiquette(v)));
+        return (Math.max(0, ...largeurs) + 0.5) * taillePolice;
+      })
+    : pasX;
+  const pasEcritY = etiquettesLisibles ? pasEtiquettesLisibles(pasY, pixelsParUniteY, () => 1.25 * taillePolice) : pasY;
+  // Option `etiquettesLisibles` : un nombre qui serait rogné par le bord du cadre n'est pas écrit
+  // (sa ligne de grille reste tracée) — position ÉCRAN du centre, demi-largeur / demi-hauteur.
+  const dansLeCadreX = (ecranX: number, largeurTexte: number) => ecranX - largeurTexte / 2 >= 0 && ecranX + largeurTexte / 2 <= largeur;
+  const dansLeCadreY = (ecranY: number) => ecranY - 0.6 * taillePolice >= 0 && ecranY + 0.6 * taillePolice <= hauteur;
+  const ticksX = graduationsDansPlage(visibleX[0], visibleX[1], pasEcritX).filter(
     (x) =>
-      (!uneEtiquetteXSurDeux || Math.round(x / pasX) % 2 === 0) &&
-      (!etiquettesAuxBords || vec.transform([x, 0], matrice)[0] - origineX > COIN_X),
+      (!uneEtiquetteXSurDeux || Math.round(x / pasEcritX) % 2 === 0) &&
+      (!etiquettesAuxBords || vec.transform([x, 0], matrice)[0] - origineX > COIN_X) &&
+      (!etiquettesLisibles || dansLeCadreX(vec.transform([x, 0], matrice)[0] - origineX, largeurEtiquetteEm(formatEtiquette(x)) * taillePolice)),
   );
   const ticksY = masquerEtiquettesY
     ? []
-    : graduationsDansPlage(visibleY[0], visibleY[1], pasY).filter(
-        (y) => !etiquettesAuxBords || vec.transform([0, y], matrice)[1] - origineY < hauteur - COIN_Y,
+    : graduationsDansPlage(visibleY[0], visibleY[1], pasEcritY).filter(
+        (y) =>
+          (!etiquettesAuxBords || vec.transform([0, y], matrice)[1] - origineY < hauteur - COIN_Y) &&
+          (!etiquettesLisibles || dansLeCadreY(vec.transform([0, y], matrice)[1] - origineY)),
       );
 
   return (
@@ -269,6 +303,19 @@ function GraduationsFlottantes({
       ))}
     </g>
   );
+}
+
+/** Taille de police (px) des nombres de graduation, lue sur le `<g>` après chaque rendu (16 px au
+ * premier rendu, corrigée avant la peinture, comme `useOrigineLocaleSVG`). */
+function useTaillePolice(ref: RefObject<SVGGElement | null>): number {
+  const [taille, setTaille] = useState(16);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const lue = parseFloat(getComputedStyle(el).fontSize);
+    if (Number.isFinite(lue) && lue > 0) setTaille((t) => (t === lue ? t : lue));
+  });
+  return taille;
 }
 
 /**

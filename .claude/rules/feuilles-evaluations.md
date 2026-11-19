@@ -438,6 +438,17 @@ Outils du pilote : `collecteur.ts`, `evalLatex.ts` (dossier de travail du chanti
   (`modele.ts::fractionInverseLatex`, aide de l'écran 4 ET corrigé) ; les aides de l'écran 4
   disent « multiplie / divise par le coefficient a » avec sa valeur signée, jamais « le facteur »
   (qui vaut |a| au récapitulatif).
+- gen69, numérateur du modèle inverse (écran 5, gaz/vélo) : on retire TV AVANT le produit,
+  a = (y − TV)·(variable − TH), ou a = y(TH + 1) − TV — « le produit des deux grandeurs » seul donnait
+  92 au lieu de 90 avec 2 h de pauses. Écritures communes à l'aide et au corrigé :
+  `modele.ts::numerateurInverseLatex` (« T(v) − 2 = 90/v », « (T − 2) × v »). Son unité est le
+  produit des unités des deux axes (km pour le vélo), pas celle de l'axe vertical.
+- gen11, écran EV/CV/SOX et corrigé (étape e) : jamais « |a| » (a n'y est pas défini, et le
+  coefficient de la forme canonique combine aussi CH/EH) — « le facteur écrit devant g dans le
+  gabarit : son signe donne SOX, sa valeur sans le signe le rapport EV/CV ». Graphique : option
+  `etiquettesLisibles` de `GrilleAdaptative` (nombres écrits = multiples du pas à écriture finie,
+  espacés, jamais rognés ; pas de 1/3 → entiers seulement ; grille complète ; signe « − »).
+  Mesuré : 0 chevauchement à 390 et 1280 px sur 300 tirages × 8 états par famille.
 - Briques partagées sans `docx` : `4e/ui/corrigeChapitre3.ts` (`q` exact, `plusQ`, `mono`,
   `somme`, `polynome`, `lignesPremierDegre` — reste fractionnaire n/d divisé en `\dfrac{n}{d\cdot a}`,
   jamais de fraction de fraction —, `racineCarreeLatex`, `racineCubiqueLatex`, `sansDoublons`,

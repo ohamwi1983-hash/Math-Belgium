@@ -92,6 +92,23 @@ export function fractionInverseLatex(e: Pick<ExerciceChoisirModele, "th" | "a" |
   return `\\dfrac{${nombreLatex(e.a)}}{${argumentLatex(INFOS_CONTEXTE[e.contexte].variable, e.th)}}`;
 }
 
+/** Lecture du numérateur a du modèle inverse : y − TV = a / (variable − TH), donc
+ * a = (y − TV)·(variable − TH) en TOUT point de la courbe, et a = y(TH + 1) − TV. Le produit des
+ * deux grandeurs seul (y·variable) n'est juste que si TV = 0 et TH = 0 : avec des pauses (vélo,
+ * TV ≠ 0), il donnerait 92 au lieu de 90. Aide de l'écran 5 ET corrigé détaillé (une seule
+ * source).
+ * - `sansTv` : « T(v) − 2 = 90/v » (translation verticale retirée), `null` si TV = 0 ;
+ * - `produit` : « (T − 2) × v » (« P × V » si TV = 0 et TH = 0) ;
+ * - `abscisseUn` : TH + 1, valeur de la variable où le modèle vaut a + TV. */
+export function numerateurInverseLatex(e: Pick<ExerciceChoisirModele, "th" | "tv" | "a" | "contexte">): { sansTv: string | null; produit: string; abscisseUn: number } {
+  const { variable: v, fonction: f } = INFOS_CONTEXTE[e.contexte];
+  const moinsTv = e.tv > 0 ? `-${nombreLatex(e.tv)}` : `+${nombreLatex(-e.tv)}`;
+  const sansTv = e.tv === 0 ? null : `${f}(${v})${moinsTv} = ${fractionInverseLatex(e)}`;
+  const facteurY = e.tv === 0 ? f : `(${f}${moinsTv})`;
+  const facteurX = e.th === 0 ? v : `(${argumentLatex(v, e.th)})`;
+  return { sansTv, produit: `${facteurY}\\times ${facteurX}`, abscisseUn: e.th + 1 };
+}
+
 function coefficientLatex(a: number): string {
   if (a === 1) return "";
   if (a === -1) return "-";

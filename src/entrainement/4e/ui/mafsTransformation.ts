@@ -1158,6 +1158,46 @@ export function graduationsDansPlage(min: number, max: number, pas: number): num
   return valeurs;
 }
 
+/** Largeur approximative (en em) d'un nombre de graduation : chiffres tabulaires ≈ 0,6 em
+ * (majorant), virgule/point ≈ 0,3 em, signe « - » ≈ 0,4 em, « − » ≈ 0,6 em. Volontairement un peu
+ * large : sert à éviter un chevauchement, jamais à placer un texte au pixel près. */
+export function largeurEtiquetteEm(texte: string): number {
+  let em = 0;
+  for (const c of texte) em += c === "," || c === "." ? 0.3 : c === "-" ? 0.4 : 0.6;
+  return em;
+}
+
+/**
+ * Pas des graduations ÉCRITES d'un axe (option `etiquettesLisibles` de `GrilleAdaptative`, gen11) :
+ * un multiple du pas de la grille — chaque nombre écrit reste sur une ligne de la grille, et TOUTES
+ * les lignes restent tracées (règle « tout graphique à LIRE : valeurs sur les lignes de la grille ») —
+ * choisi parmi le pas lui-même et les valeurs rondes 1-2-5 × 10ⁿ, à deux conditions :
+ * - écriture décimale finie (au plus 2 décimales) : jamais « 0,3333333333 » ni « 0,9999999999 »
+ *   (3 × 0,3333333333, le pas de 1/3 étant arrondi à 10 chiffres) — avec un pas de 1/3, seuls les
+ *   entiers sont écrits ;
+ * - deux nombres voisins ne se touchent pas : `pixelsParUnite × pasEtiquettes ≥
+ *   encombrement(pasEtiquettes)` (distance minimale entre deux centres, en pixels, calculée par
+ *   l'appelant à partir des nombres réellement écrits avec ce pas).
+ * Mesuré (Playwright, boîtes englobantes) : 0 chevauchement à 390 et 1280 px sur gen11, contre des
+ * étiquettes « −1,333333333 » / « −0,9999999999 » superposées avant (pas de 1/3).
+ */
+export function pasEtiquettesLisibles(pas: number, pixelsParUnite: number, encombrement: (pasEtiquettes: number) => number): number {
+  if (!Number.isFinite(pas) || pas <= 0 || !Number.isFinite(pixelsParUnite) || pixelsParUnite <= 0) return pas;
+  // Le pas et ses petits multiples (0,2 → 0,4 plutôt qu'un saut direct à 1), puis les valeurs rondes.
+  const candidats: number[] = [pas, 2 * pas, 4 * pas, 5 * pas].map((v) => Number(v.toPrecision(10)));
+  const exposantMin = Math.floor(Math.log10(pas)) - 1;
+  for (let e = exposantMin; e <= exposantMin + 8; e++) {
+    for (const m of [1, 2, 5]) candidats.push(Number((m * Math.pow(10, e)).toPrecision(10)));
+  }
+  const decimalFinie = (v: number) => Math.abs(v * 100 - Math.round(v * 100)) < 1e-6;
+  const multipleDuPas = (v: number) => Math.abs(v / pas - Math.round(v / pas)) < 1e-6;
+  const valides = candidats.filter((v) => v >= pas * (1 - 1e-9) && multipleDuPas(v) && decimalFinie(v)).sort((a, b) => a - b);
+  for (const v of valides) {
+    if (pixelsParUnite * v >= encombrement(v)) return v;
+  }
+  return valides[valides.length - 1] ?? pas;
+}
+
 /**
  * `prompt-audit-graduations-flottantes-mafs.md` : position ÉCRAN (pixel LOCAL, avant ajout de
  * l'origine du viewBox courant — voir `domaineVisibleAxe` ci-dessus pour cette même convention

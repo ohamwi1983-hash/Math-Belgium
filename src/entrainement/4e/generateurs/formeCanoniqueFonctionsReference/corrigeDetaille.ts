@@ -217,7 +217,9 @@ export function correctionDetailleeFormeCanoniqueFonctionsReference(e: E): Etape
     resultat("d", [latex(`\\text{TH}=${q(e.th)}`), texte(" ; "), latex(enDfrac(formatGabaritEtape3Latex(e)))]),
     piege("d", [texte("Le signe de TH est l'opposé de celui qu'on lit dans la parenthèse : "), latex("x+3=x-(-3)"), texte(" donne TH = −3.")]),
     // e) EV, CV, SOX
-    utilise("e", [texte(`Le facteur devant g donne SOX (son signe) et le rapport EV/CV, qui vaut |a| — seul ce rapport compte ${COURS_TRANSFORMATIONS}.`)]),
+    // Jamais « |a| » : a n'est pas défini à cet endroit, et le coefficient de la forme canonique
+    // combine aussi CH et EH. Même formulation que l'écran EV/CV/SOX (`EtapeEvCvSoxFR.tsx`).
+    utilise("e", [texte(`Le facteur écrit devant g dans le gabarit donne SOX (un signe « − ») et le rapport EV/CV (sa valeur sans le signe, 1 s'il n'y a pas de facteur) — seul ce rapport compte ${COURS_TRANSFORMATIONS}.`)]),
     calcul(
       "e",
       [

@@ -9,7 +9,7 @@ import {
   calculerSegmentsVisiblesFR,
   calculerViewBoxFonctionReferenceMultiple,
 } from "../ui/mafsFormeCanoniqueFonctionsReference";
-import { EPAISSEUR_TRAIT_ACCENTUE, EPAISSEUR_TRAIT_STANDARD, etendreViewBoxPourEtiquettes } from "../ui/mafsTransformation";
+import { EPAISSEUR_TRAIT_ACCENTUE, EPAISSEUR_TRAIT_STANDARD, etendreViewBoxPourEtiquettes, formatEtiquetteGrille } from "../ui/mafsTransformation";
 import type { ParametresCourbeFR } from "../ui/mafsFormeCanoniqueFonctionsReference";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { FenetreVisibleXY, GrilleAdaptative } from "./mafsGraphPartage";
@@ -36,6 +36,11 @@ interface Props {
 /** Violet, distincte des 3 couleurs de trace confirmée (bleu/orange/vert, section 2 de la spec) —
  * "couleur principale du thème du site" pour la courbe actuellement pilotée par les curseurs. */
 const COULEUR_LIVE = "#7048e8";
+
+/** Nombres de graduation : virgule décimale et vrai signe « − » (jamais le tiret « - »). */
+function etiquetteAxe(valeur: number): string {
+  return formatEtiquetteGrille(valeur).replace("-", "−");
+}
 
 const LARGEUR_PAR_DEFAUT = 420;
 const LARGEUR_MIN = 240;
@@ -68,7 +73,8 @@ export function MafsGraphFormeCanoniqueFonctionsReference({ confirmees, live }: 
         pan={true}
         zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}
       >
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} />
+        {/* Nombres écrits espacés et à écriture finie (pas de 1/3 : entiers seulement), grille complète ; signe « − ». */}
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} etiquettesLisibles formatEtiquette={etiquetteAxe} />
         {confirmees.map((courbe, index) => {
           const pivot = pivotX(courbe.parametres);
           const yPivot = evaluerFonctionReference(courbe.parametres, pivot);

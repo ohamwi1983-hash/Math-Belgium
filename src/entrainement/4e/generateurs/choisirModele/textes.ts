@@ -1,6 +1,6 @@
 import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
 import type { ContexteModele, ExerciceChoisirModele, FamilleModele, ParametreModele } from "./types";
-import { argumentLatex, evaluerModele, expressionModeleLatex, fractionInverseLatex, INFOS_CONTEXTE, modeleLatex, nombreLatex, nombreTexte, UNITE_LATEX } from "./modele";
+import { argumentLatex, evaluerModele, expressionModeleLatex, fractionInverseLatex, INFOS_CONTEXTE, modeleLatex, nombreLatex, nombreTexte, numerateurInverseLatex, UNITE_LATEX } from "./modele";
 
 /**
  * Textes de gen69 (situations, consignes, aides, options de l'écran 5, justifications) — une seule
@@ -474,6 +474,30 @@ export function aidesEcran4(e: ExerciceChoisirModele): Fragments[] {
   ];
 }
 
+/** Aide de l'écran 5 pour le numérateur du modèle inverse : la translation verticale est retirée
+ * AVANT le produit (et la valeur en TH + 1 diminuée de TV) — « le produit des deux grandeurs » seul
+ * donnait 92 au lieu de 90 pour le vélo avec 2 h de pauses. Écritures de `numerateurInverseLatex`,
+ * reprises telles quelles par le corrigé détaillé. */
+function aideNumerateurInverse(e: ExerciceChoisirModele): Fragments {
+  const v = INFOS_CONTEXTE[e.contexte].variable;
+  const { sansTv, produit, abscisseUn } = numerateurInverseLatex(e);
+  const valeurPourUn: Fragments = [t(" ; c'est aussi la valeur du modèle pour "), m(`${v} = ${nombreLatex(abscisseUn)}`)];
+  if (sansTv === null) return [t("Le numérateur est le produit "), m(produit), t(" des deux grandeurs, en n'importe quel point de la courbe"), ...valeurPourUn, t(".")];
+  return [
+    // « : » en fin de texte : l'écran affiche la formule qui suit en bloc (`RenduFragments`), la phrase
+    // suivante commence donc sans ponctuation.
+    t("Retire d'abord la translation verticale :"),
+    m(sansTv),
+    t("Le numérateur est donc le produit "),
+    m(produit),
+    t(", en n'importe quel point de la courbe"),
+    ...valeurPourUn,
+    t(e.tv > 0 ? ", diminuée de " : ", augmentée de "),
+    m(nombreLatex(Math.abs(e.tv))),
+    t("."),
+  ];
+}
+
 export function aidesEcran5(e: ExerciceChoisirModele): Fragments[] {
   const info = INFOS_CONTEXTE[e.contexte];
   const premier: Fragments =
@@ -481,11 +505,16 @@ export function aidesEcran5(e: ExerciceChoisirModele): Fragments[] {
       ? [t("Le nombre soustrait à la variable est l'abscisse du point caractéristique : que se passe-t-il, dans la situation, en ce point ?")]
       : e.parametre5 === "tv"
         ? [t(e.famille === "inverse" ? "Le terme ajouté est la valeur dont la courbe se rapproche (asymptote horizontale) : quelle partie de la situation ne dépend pas de la variable ?" : "Le terme ajouté est l'ordonnée du point caractéristique : que vaut la grandeur en ce point ?")]
-        : [t(e.famille === "inverse" ? "Calcule la valeur du modèle pour une variable égale à 1, ou le produit des deux grandeurs." : "Calcule la valeur du modèle à 1 unité à droite du point caractéristique, et compare-la à sa valeur au point caractéristique.")];
-  return [
-    premier,
-    [t(`Regarde les unités : TH s'exprime dans l'unité de l'axe horizontal (${info.axeX.unite}), TV et le facteur vertical dans celle de l'axe vertical (${info.axeY.unite}).`)],
-  ];
+        : e.famille === "inverse"
+          ? aideNumerateurInverse(e)
+          : [t("Calcule la valeur du modèle à 1 unité à droite du point caractéristique, et compare-la à sa valeur au point caractéristique.")];
+  // Le numérateur du modèle inverse est un produit (grandeur verticale × grandeur horizontale) :
+  // son unité n'est pas celle de l'axe vertical (le circuit du vélo est en km, pas en h).
+  const unites: Fragments =
+    e.famille === "inverse" && e.parametre5 === "a"
+      ? [t(`Regarde les unités : TH s'exprime dans l'unité de l'axe horizontal (${info.axeX.unite}), TV dans celle de l'axe vertical (${info.axeY.unite}) ; le numérateur, produit d'une grandeur verticale par une grandeur horizontale, s'exprime en ${info.axeY.unite} × ${info.axeX.unite}.`)]
+      : [t(`Regarde les unités : TH s'exprime dans l'unité de l'axe horizontal (${info.axeX.unite}), TV et le facteur vertical dans celle de l'axe vertical (${info.axeY.unite}).`)];
+  return [premier, unites];
 }
 
 // ---------------------------------------------------------------------------------------------

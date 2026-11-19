@@ -75,11 +75,18 @@ export function EtapeEvCvSoxFR({ exercice, tentativesUtilisees, tentativesMax, o
         live={live}
       />
       {/* EV et CV ne sont jamais comparés séparément (voir `evaluerEvCvSoxFR`) : seul leur
-       * RAPPORT compte, car il représente |a|. Ce générateur n'a aucun mécanisme d'aide — cette
-       * précision reste donc visible en permanence plutôt que cachée derrière un bouton.
-       * Même correctif que `EtapeEvCvSox.tsx` (gen9, chapitre 1), suite à son audit. */}
+       * RAPPORT compte. Ce générateur n'a aucun mécanisme d'aide — cette précision reste donc
+       * visible en permanence plutôt que cachée derrière un bouton. Ce rapport est désigné par ce
+       * que l'élève VOIT (le facteur écrit devant la fonction de référence dans le gabarit affiché
+       * en haut, `formatGabaritLatex`), jamais par « |a| » : a n'est défini nulle part sur cet écran,
+       * et le coefficient a de la forme canonique combine aussi CH et EH (a = ±(EV/CV)·(CH/EH)²
+       * pour le carré). Même formulation que le corrigé détaillé (étape e). */}
       <p className="prompt-fact">
-        EV et CV se combinent : seul leur rapport EV / CV compte, il représente |a|. Plusieurs réglages peuvent donc être corrects (ex. EV=2 et CV=4 équivaut à EV=1 et CV=2).
+        EV et CV se combinent : seul leur rapport <Katex expression="\frac{\text{EV}}{\text{CV}}" /> compte. C'est le
+        facteur écrit devant la fonction de référence dans l'expression affichée en haut, sans son signe (1 s'il n'y a pas
+        de facteur) ; un signe « − » devant correspond à SOX. Plusieurs réglages peuvent donc être corrects (ex.{" "}
+        <Katex expression="\text{EV} = 2" /> et <Katex expression="\text{CV} = 4" /> équivaut à{" "}
+        <Katex expression="\text{EV} = 1" /> et <Katex expression="\text{CV} = 2" />).
       </p>
       <div className="curseur-row">
         <label className={classeCurseur(evaluation.ev)} htmlFor="curseur-ev-fr">
