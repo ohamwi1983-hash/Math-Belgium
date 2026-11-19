@@ -4,8 +4,8 @@ import { calcul, latex, ligne, piege, resultat, texte, utilise } from "../../../
 import { construireSvgFonction } from "../../../export/svgGraph";
 import type { PhaseEtudeFonctionLogarithme } from "../../moteur6e/typesEtudeFonctionLogarithme";
 import { PHASES_ETUDE_LOG } from "../../moteur6e/typesEtudeFonctionLogarithme";
-import { calculerViewBox, contenuRecapLatex, evaluerCandidat, formatFonctionLatex } from "../../ui6e/formatEtudeFonctionLogarithme";
-import { coefficientLatex, puissanceELatex, trinomeLatex } from "./familles/latex";
+import { calculerViewBox, contenuRecapLatex, deriveePremiereLatex, deriveeSecondeLatex, evaluerCandidat, formatFonctionLatex, formeDistribueeALatex } from "../../ui6e/formatEtudeFonctionLogarithme";
+import { carreXMoinsLatex, coefFoisLatex, coefficientLatex, fractionCoefLatex, puissanceELatex, trinomeLatex } from "./familles/latex";
 import { COURS_ETUDE, finaliserCorrige, justif, sommeTermes } from "../../ui6e/corrigeLogarithmes1";
 
 /**
@@ -27,6 +27,32 @@ const MI = "x\\to-\\infty";
 function moinsK(k: number, corps: string): string {
   const abs = Math.abs(k);
   return `${k > 0 ? "-" : "+"}${abs === 1 ? "" : abs}${corps}`;
+}
+
+/** « \dfrac{k}{x} » avec le signe sorti (« -\dfrac{1}{x} », jamais « \dfrac{-1}{x} »). */
+function surX(k: number, den = "x"): string {
+  return `${k < 0 ? "-" : ""}\\dfrac{${Math.abs(k)}}{${den}}`;
+}
+
+/** Fraction n/2 en LaTeX (« 1 », « \dfrac{3}{2} », « -\dfrac{1}{2} »). */
+function demi(n: number): string {
+  return n % 2 === 0 ? String(n / 2) : `${n < 0 ? "-" : ""}\\dfrac{${Math.abs(n)}}{2}`;
+}
+
+/** Ligne « =membre » seulement si elle diffère du membre de droite de `precedente`. */
+function siDifferente(precedente: string, membre: string, j: string): LigneCalcul[] {
+  const norme = (t: string) => t.replace(/\s+/g, "");
+  return norme(precedente.replace(/^[^=]*=/, "")) === norme(membre) ? [] : [ligne(`=${membre}`, j)];
+}
+
+/** f′ = m·u′/u écrite telle quelle (avant simplification), u = trinôme. */
+function derivee1Brute(m: number, p: number, tri: string): string {
+  return coefFoisLatex(m, `\\dfrac{2x${p === 0 ? "" : p > 0 ? `-${2 * p}` : `+${-2 * p}`}}{${tri}}`, false);
+}
+
+/** « (x − p) » en facteur d'un produit (« x » sans parenthèses si p = 0). */
+function xMoinsFacteur(p: number): string {
+  return p === 0 ? "x" : `(${xMoins(p)})`;
 }
 
 function lim(dir: string, expr: string, valeur: string, j?: string | FragmentConsigne[]): LigneCalcul {
@@ -75,8 +101,8 @@ function etudeA(e: ExerciceEtudeLogA): Etude {
   const xe = puissanceELatex(1 - c, 1);
   const xi = puissanceELatex(3 - 2 * c, 2);
   const unMoinsC = sommeTermes([[1 - c, ""], [-1, "\\ln(x)"]]);
-  const fp = `\\dfrac{${k}\\left(${unMoinsC}\\right)}{x^2}`;
-  const fpp = `\\dfrac{${k}\\left(${sommeTermes([[2, "\\ln(x)"], [2 * c - 3, ""]])}\\right)}{x^3}`;
+  const fp = deriveePremiereLatex(e);
+  const fpp = deriveeSecondeLatex(e);
   const maximum = k > 0;
   return {
     domaine: [ligne("x>0", justif("argument de ", { l: "\\ln(x)" })), ligne("x\\neq 0", "dénominateur non nul (déjà assuré par x > 0)")],
@@ -84,14 +110,14 @@ function etudeA(e: ExerciceEtudeLogA): Etude {
       lim(ZP, `\\left(${u}\\right)`, "-\\infty", justif("", { l: "\\ln(x)\\to-\\infty" })),
       lim(ZP, "\\dfrac{1}{x}", "+\\infty", "inverse d'un nombre qui tend vers 0⁺"),
       lim(ZP, "f(x)", infini(!maximum), `produit des limites, signe de k = ${k}`.replace("-", "−")),
-      ligne(`f(x)=${k}\\cdot\\dfrac{\\ln(x)}{x}${c === 0 ? "" : `${k * c < 0 ? "-" : "+"}\\dfrac{${Math.abs(k * c)}}{x}`}`, "on distribue"),
+      ligne(`f(x)=${formeDistribueeALatex(e)}`, "on distribue"),
       lim(PI, "\\dfrac{\\ln(x)}{x}", "0", "croissance comparée"),
       ...(c === 0 ? [] : [lim(PI, `\\dfrac{${Math.abs(k * c)}}{x}`, "0", "constante divisée par un infini")]),
       lim(PI, "f(x)", "0", "somme des limites"),
     ],
     asymptotes: [ligne("x=0", justif("asymptote verticale : ", { l: `\\lim_{${ZP}}f(x)=${infini(!maximum)}` })), ligne("y=0", justif("asymptote horizontale : ", { l: `\\lim_{${PI}}f(x)=0` }))],
     croissance: [
-      ligne(`f'(x)=\\dfrac{\\dfrac{${k}}{x}\\cdot x${moinsK(k, `\\left(${u}\\right)\\cdot 1`)}}{x^2}`, justif("", { l: "\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^2}" }, ", ", { l: `u'=\\dfrac{${k}}{x}` })),
+      ligne(`f'(x)=\\dfrac{${surX(k)}\\cdot x${moinsK(k, `\\left(${u}\\right)\\cdot 1`)}}{x^2}`, justif("", { l: "\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^2}" }, ", ", { l: `u'=${surX(k)}` })),
       ligne(`=${fp}`, "on simplifie et on met k en évidence"),
       ligne(`f'(x)=0\\iff \\ln(x)=${1 - c}`, "x² > 0 : seul le numérateur compte"),
       ligne(`\\iff x=${xe}`, "on applique exp"),
@@ -99,9 +125,9 @@ function etudeA(e: ExerciceEtudeLogA): Etude {
       ligne(`f'(x)${maximum ? "<" : ">"}0`, justif("pour ", { l: `x>${xe}` })),
     ],
     concavite: [
-      ligne(`f''(x)=\\dfrac{${k > 0 ? "-" : ""}\\dfrac{${Math.abs(k)}}{x}\\cdot x^2${moinsK(k, `\\left(${unMoinsC}\\right)\\cdot 2x`)}}{x^4}`, justif("règle du quotient sur f′ : ", { l: `(x^2)'=2x` })),
+      ligne(`f''(x)=\\dfrac{${surX(-k)}\\cdot x^2${moinsK(k, `\\left(${unMoinsC}\\right)\\cdot 2x`)}}{x^4}`, justif("règle du quotient sur f′ : ", { l: `(x^2)'=2x` })),
       ligne(`=${fpp}`, "on simplifie par x et on met k en évidence"),
-      ligne(`f''(x)=0\\iff \\ln(x)=${(3 - 2 * c) % 2 === 0 ? (3 - 2 * c) / 2 : `\\dfrac{${3 - 2 * c}}{2}`}`, "x³ > 0 sur le domaine"),
+      ligne(`f''(x)=0\\iff \\ln(x)=${demi(3 - 2 * c)}`, "x³ > 0 sur le domaine"),
       ligne(`\\iff x=${xi}`, "on applique exp"),
       ligne(`x<${xi}\\Rightarrow f''(x)${k > 0 ? "<" : ">"}0`, "f″ change de signe : point d'inflexion"),
     ],
@@ -160,7 +186,12 @@ function etudeC(e: ExerciceEtudeLogC): Etude {
   const mc = coefficientLatex(m);
   const posInf = m > 0;
   return {
-    domaine: [ligne(`${tri}\\neq 0`, justif("", { l: "\\ln|u|" }, " : u ≠ 0")), ligne(`(${xMoins(p)})^2\\neq ${q * q}`, "forme canonique"), ligne(`${xMoins(p)}\\neq\\pm ${q}`, "racine carrée"), ligne(`x\\neq ${r1}\\text{ et } x\\neq ${r2}`, `on ajoute ${p}`.replace("ajoute -", "retire "))],
+    domaine: [
+      ligne(`${tri}\\neq 0`, justif("", { l: "\\ln|u|" }, " : u ≠ 0")),
+      ligne(`${carreXMoinsLatex(p)}\\neq ${q * q}`, p === 0 ? "on isole x²" : "forme canonique"),
+      ligne(`${xMoins(p)}\\neq\\pm ${q}`, "racine carrée"),
+      ...(p === 0 ? [] : [ligne(`x\\neq ${r1}\\text{ et } x\\neq ${r2}`, `on ajoute ${p}`.replace("ajoute -", "retire "))]),
+    ],
     limites: [
       lim(MI, `\\left|${tri}\\right|`, "+\\infty", "le terme x² l'emporte"),
       lim(MI, "f(x)", infini(posInf), justif("", { l: "\\ln(t)\\to+\\infty" }, `, multiplié par ${m}`.replace("-", "−"))),
@@ -171,8 +202,8 @@ function etudeC(e: ExerciceEtudeLogC): Etude {
     ],
     asymptotes: [ligne(`x=${r1}`, "limite infinie en une valeur finie : asymptote verticale"), ligne(`x=${r2}`, "limite infinie en une valeur finie : asymptote verticale")],
     croissance: [
-      ligne(`f'(x)=${m}\\cdot\\dfrac{2x${p === 0 ? "" : p > 0 ? `-${2 * p}` : `+${-2 * p}`}}{${tri}}`, justif("", { l: "\\left(\\ln|u|\\right)'=\\dfrac{u'}{u}" })),
-      ligne(`=\\dfrac{${2 * m}(${xMoins(p)})}{${tri}}`, "on met 2 en évidence"),
+      ligne(`f'(x)=${derivee1Brute(m, p, tri)}`, justif("", { l: "\\left(\\ln|u|\\right)'=\\dfrac{u'}{u}" })),
+      ...siDifferente(derivee1Brute(m, p, tri), deriveePremiereLatex(e), p === 0 ? "on multiplie" : "on met 2 en évidence"),
       ligne(`${xMoins(p)}=0\\iff x=${p}`, "zéro du numérateur"),
       ligne(`${tri}<0\\iff ${r1}<x<${r2}`, "trinôme négatif entre ses racines"),
       ...e.croissance.signes.map((sg, i) => {
@@ -186,8 +217,8 @@ function etudeC(e: ExerciceEtudeLogC): Etude {
       ligne(`=${e.croissance.valeurExtremumLatex}`, justif("", { l: `\\ln(${q * q})=2\\ln(${q})` })),
     ],
     concavite: [
-      ligne(`f''(x)=\\dfrac{${2 * m}\\left[(${tri})-(${xMoins(p)})\\cdot 2(${xMoins(p)})\\right]}{(${tri})^2}`, "règle du quotient sur f′"),
-      ligne(`=\\dfrac{${-2 * m}\\left((${xMoins(p)})^2+${q * q}\\right)}{(${tri})^2}`, "on simplifie le crochet"),
+      ligne(`f''(x)=\\dfrac{${coefFoisLatex(2 * m, `\\left[(${tri})-${xMoinsFacteur(p)}\\cdot 2${xMoinsFacteur(p)}\\right]`, false)}}{(${tri})^2}`, "règle du quotient sur f′"),
+      ligne(`=${deriveeSecondeLatex(e)}`, "on simplifie le crochet"),
       ligne(`f''(x)${posInf ? "<" : ">"}0`, justif("signe de ", { l: `${-2 * m}` }, ` : f ${posInf ? "concave" : "convexe"} sur chaque intervalle du domaine`)),
     ],
     graphique: [],
@@ -201,18 +232,19 @@ function etudeD(e: ExerciceEtudeLogD): Etude {
   const tri = trinomeLatex(-2 * p, p * p + a * a);
   const posInf = m > 0;
   return {
-    domaine: [ligne(`${tri}=(${xMoins(p)})^2+${a * a}`, "forme canonique"), ligne(`(${xMoins(p)})^2+${a * a}>0`, "un carré plus un nombre positif : aucune restriction")],
+    domaine: [...(p === 0 ? [] : [ligne(`${tri}=${carreXMoinsLatex(p)}+${a * a}`, "forme canonique")]), ligne(`${carreXMoinsLatex(p)}+${a * a}>0`, "un carré plus un nombre positif : aucune restriction")],
     limites: [lim(MI, `(${tri})`, "+\\infty", "le terme x² l'emporte"), lim(MI, "f(x)", infini(posInf), justif("", { l: "\\ln(t)\\to+\\infty" }, `, multiplié par ${m}`.replace("-", "−"))), lim(PI, "f(x)", infini(posInf), "même raison")],
     asymptotes: [ligne("D_f=\\mathbb{R}", "aucune valeur interdite : pas d'asymptote verticale"), ligne(`\\lim_{${PI}}\\dfrac{f(x)}{x}=0`, "f tend vers l'infini mais f(x)/x → 0 : ni horizontale ni oblique")],
     croissance: [
-      ligne(`f'(x)=${m}\\cdot\\dfrac{2x${p === 0 ? "" : p > 0 ? `-${2 * p}` : `+${-2 * p}`}}{${tri}}`, justif("", { l: "\\left(\\ln(u)\\right)'=\\dfrac{u'}{u}" })),
+      ligne(`f'(x)=${derivee1Brute(m, p, tri)}`, justif("", { l: "\\left(\\ln(u)\\right)'=\\dfrac{u'}{u}" })),
+      ...siDifferente(derivee1Brute(m, p, tri), deriveePremiereLatex(e), p === 0 ? "on multiplie" : "on met 2 en évidence"),
       ligne(`f'(x)=0\\iff x=${p}`, "dénominateur > 0 : zéro du numérateur"),
       ligne(`f'(x)${posInf ? "<" : ">"}0`, justif("pour ", { l: `x<${p}` })),
       ligne(`f'(x)${posInf ? ">" : "<"}0`, justif("pour ", { l: `x>${p}` }, ` : ${posInf ? "minimum" : "maximum"}`)),
     ],
     concavite: [
-      ligne(`f''(x)=\\dfrac{${2 * m}\\left(${a * a}-(${xMoins(p)})^2\\right)}{(${tri})^2}`, "règle du quotient sur f′, puis on simplifie"),
-      ligne(`f''(x)=0\\iff (${xMoins(p)})^2=${a * a}`, "numérateur nul"),
+      ligne(`f''(x)=${deriveeSecondeLatex(e)}`, "règle du quotient sur f′, puis on simplifie"),
+      ligne(`f''(x)=0\\iff ${carreXMoinsLatex(p)}=${a * a}`, "numérateur nul"),
       ligne(`\\iff x=${p - a}\\text{ ou } x=${p + a}`, "racine carrée"),
       ligne(`${p - a}<x<${p + a}\\Rightarrow f''(x)${m > 0 ? ">" : "<"}0`, "f″ change de signe en chacun : deux points d'inflexion"),
     ],
@@ -228,22 +260,22 @@ function etudeE(e: ExerciceEtudeLogE): Etude {
   return {
     domaine: [ligne("x>0", justif("argument de ", { l: "\\ln(x)" }, " (alors x ≠ 0)"))],
     limites: [
-      ligne(`f(x)=\\dfrac{${m}\\left(x\\ln(x)+${c}\\right)}{x}`, "même dénominateur : on lève la forme indéterminée"),
+      ligne(`f(x)=${fractionCoefLatex(m, `x\\ln(x)+${c}`, true, "x")}`, "même dénominateur : on lève la forme indéterminée"),
       lim(ZP, `\\left(x\\ln(x)+${c}\\right)`, `${c}`, justif("croissance comparée : ", { l: "x\\ln(x)\\to 0" })),
       lim(ZP, "f(x)", infini(posInf), `nombre non nul divisé par 0⁺, signe de ${m}`.replace("-", "−")),
       lim(PI, "f(x)", infini(posInf), justif("", { l: "\\ln(x)\\to+\\infty" }, " et ", { l: "\\dfrac{c}{x}\\to 0" })),
     ],
     asymptotes: [ligne("x=0", justif("asymptote verticale : ", { l: `\\lim_{${ZP}}f(x)=${infini(posInf)}` })), ligne(`\\lim_{${PI}}\\dfrac{f(x)}{x}=0`, "f tend vers l'infini mais f(x)/x → 0 : pas d'asymptote en +∞")],
     croissance: [
-      ligne(`f'(x)=${m}\\left(\\dfrac{1}{x}-\\dfrac{${c}}{x^2}\\right)`, justif("", { l: "\\left(\\dfrac{c}{x}\\right)'=-\\dfrac{c}{x^2}" })),
-      ligne(`=\\dfrac{${m}(x-${c})}{x^2}`, "même dénominateur"),
+      ligne(`f'(x)=${coefFoisLatex(m, `\\dfrac{1}{x}-\\dfrac{${c}}{x^2}`, true)}`, justif("", { l: "\\left(\\dfrac{c}{x}\\right)'=-\\dfrac{c}{x^2}" })),
+      ligne(`=${deriveePremiereLatex(e)}`, "même dénominateur"),
       ligne(`f'(x)=0\\iff x=${c}`, "x² > 0"),
       ligne(`f'(x)${posInf ? "<" : ">"}0`, justif("pour ", { l: `0<x<${c}` })),
       ligne(`f'(x)${posInf ? ">" : "<"}0`, justif("pour ", { l: `x>${c}` }, ` : ${posInf ? "minimum" : "maximum"}`)),
     ],
     concavite: [
-      ligne(`f''(x)=${m}\\left(-\\dfrac{1}{x^2}+\\dfrac{${2 * c}}{x^3}\\right)`, "on dérive terme à terme"),
-      ligne(`=\\dfrac{${m}(${2 * c}-x)}{x^3}`, "même dénominateur"),
+      ligne(`f''(x)=${coefFoisLatex(m, `-\\dfrac{1}{x^2}+\\dfrac{${2 * c}}{x^3}`, true)}`, "on dérive terme à terme"),
+      ligne(`=${deriveeSecondeLatex(e)}`, "même dénominateur"),
       ligne(`f''(x)=0\\iff x=${2 * c}`, "x³ > 0"),
       ligne(`x<${2 * c}\\Rightarrow f''(x)${m > 0 ? ">" : "<"}0`, "f″ change de signe : point d'inflexion"),
     ],

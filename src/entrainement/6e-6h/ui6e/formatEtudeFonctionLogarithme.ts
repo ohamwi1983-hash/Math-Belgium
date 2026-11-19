@@ -4,7 +4,8 @@ import type { DetailPhaseEtudeFonctionLogarithme, PhaseEtudeFonctionLogarithme }
 import { PHASES_ETUDE_LOG } from "../moteur6e/typesEtudeFonctionLogarithme";
 import { calculerViewBoxCandidats, evaluerCandidatFamille } from "../generateurs6e/etudeFonctionLogarithme/graphe";
 import type { ViewBoxEtudeFonctionLog } from "../generateurs6e/etudeFonctionLogarithme/graphe";
-import { coefficientLatex, termeConstanteLatex, trinomeLatex } from "../generateurs6e/etudeFonctionLogarithme/familles/latex";
+import { carreXMoinsLatex, coefFoisLatex, coefficientLatex, fractionCoefLatex, termeConstanteLatex, trinomeLatex, xMoinsLatex } from "../generateurs6e/etudeFonctionLogarithme/familles/latex";
+import type { ExerciceEtudeLogA } from "../core6e/etudeFonctionLogarithme.types";
 import { formatEnsembleReelLatex } from "./formatEnsembleReel";
 import { assurerAxesVisibles } from "../ui/mafsTransformation";
 
@@ -91,6 +92,52 @@ export function formatFonctionLatex(exercice: ExerciceEtudeFonctionLogarithme): 
       const signeQuotient = m < 0 ? "-" : "+";
       return `f(x) = ${signe}${absM === 1 ? "" : absM}\\ln(x) ${signeQuotient} \\dfrac{${absM * c}}{x}`;
     }
+  }
+}
+
+// ============================================================================
+// Dérivées simplifiées — SOURCE UNIQUE de l'aide de l'écran, de la feuille et du corrigé.
+// ============================================================================
+
+type ExerciceSansB = Exclude<ExerciceEtudeFonctionLogarithme, ExerciceEtudeLogB>;
+
+/** f(x) = k(ln x + c)/x écrite en deux termes (« \dfrac{\ln(x)}{x} - \dfrac{2}{x} »). */
+export function formeDistribueeALatex(ex: ExerciceEtudeLogA): string {
+  const kc = ex.k * ex.c;
+  return `${coefFoisLatex(ex.k, "\\dfrac{\\ln(x)}{x}", false)}${kc === 0 ? "" : ` ${kc < 0 ? "-" : "+"} \\dfrac{${Math.abs(kc)}}{x}`}`;
+}
+
+/** f'(x) simplifiée (membre de droite) : A k(1 − c − ln x)/x², C 2m(x − p)/((x − p)² − q²),
+ * D 2m(x − p)/((x − p)² + a²), E m(x − c)/x². Jamais « 2(0 - \ln(x)) », « 1( », « -1( », « (x) ». */
+export function deriveePremiereLatex(ex: ExerciceSansB): string {
+  switch (ex.famille) {
+    case "A": {
+      const d = 1 - ex.c;
+      if (d > 0) return fractionCoefLatex(ex.k, `${d} - \\ln(x)`, true, "x^2");
+      if (d === 0) return fractionCoefLatex(-ex.k, "\\ln(x)", false, "x^2");
+      return fractionCoefLatex(-ex.k, `${-d} + \\ln(x)`, true, "x^2");
+    }
+    case "C":
+      return fractionCoefLatex(2 * ex.m, xMoinsLatex(ex.p), ex.p !== 0, trinomeC(ex));
+    case "D":
+      return fractionCoefLatex(2 * ex.m, xMoinsLatex(ex.p), ex.p !== 0, trinomeLatex(-2 * ex.p, ex.p * ex.p + ex.a * ex.a));
+    case "E":
+      return fractionCoefLatex(ex.m, xMoinsLatex(ex.c), true, "x^2");
+  }
+}
+
+/** f''(x) simplifiée (membre de droite) : A k(2 ln x + 2c − 3)/x³, C −2m((x − p)² + q²)/(trinôme)²,
+ * D 2m(a² − (x − p)²)/(trinôme)², E m(2c − x)/x³. */
+export function deriveeSecondeLatex(ex: ExerciceSansB): string {
+  switch (ex.famille) {
+    case "A":
+      return fractionCoefLatex(ex.k, `2\\ln(x)${termeConstanteLatex(2 * ex.c - 3)}`, true, "x^3");
+    case "C":
+      return fractionCoefLatex(-2 * ex.m, `${carreXMoinsLatex(ex.p)} + ${ex.q * ex.q}`, true, `\\left(${trinomeC(ex)}\\right)^2`);
+    case "D":
+      return fractionCoefLatex(2 * ex.m, `${ex.a * ex.a} - ${carreXMoinsLatex(ex.p)}`, true, `\\left(${trinomeLatex(-2 * ex.p, ex.p * ex.p + ex.a * ex.a)}\\right)^2`);
+    case "E":
+      return fractionCoefLatex(ex.m, `${2 * ex.c} - x`, true, "x^3");
   }
 }
 
@@ -303,7 +350,7 @@ export function aideLimitesNiveau1(exercice: ExerciceEtudeFonctionLogarithme): A
 export function aideLimitesNiveau2(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
   switch (exercice.famille) {
     case "A":
-      return { texte: "Sépare la fraction en deux termes :", latex: `f(x) = ${exercice.k}\\cdot\\dfrac{\\ln(x)}{x} + \\dfrac{${exercice.k * exercice.c}}{x}` };
+      return { texte: "Sépare la fraction en deux termes :", latex: `f(x) = ${formeDistribueeALatex(exercice)}` };
     case "B":
       return { texte: "En 0⁺, croissances comparées :", latex: "\\lim_{x\\to 0^+} x\\ln(x) = 0" };
     case "C":
@@ -351,15 +398,15 @@ export function aideCroissanceNiveau1(exercice: ExerciceEtudeFonctionLogarithme)
 export function aideCroissanceNiveau2(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
   switch (exercice.famille) {
     case "A":
-      return { texte: "Après simplification (l'équation f'(x) = 0 reste à résoudre) :", latex: `f'(x) = \\dfrac{${exercice.k}\\left(${1 - exercice.c} - \\ln(x)\\right)}{x^2}` };
+      return { texte: "Après simplification (l'équation f'(x) = 0 reste à résoudre) :", latex: `f'(x) = ${deriveePremiereLatex(exercice)}` };
     case "B":
       return { texte: "Tu dois obtenir (g > 0, il reste à étudier le signe de la parenthèse) :", latex: `\\dfrac{g'(x)}{g(x)} = ${exercice.a === 1 ? "" : exercice.a}\\left(\\ln\\left(${baseBLatex(exercice)}\\right) + 1\\right)` };
     case "C":
       return { texte: "La valeur de l'extremum se calcule en remplaçant x par le zéro de f' dans f. Au passage, le trinôme y vaut :", latex: `${-exercice.q * exercice.q}` };
     case "D":
-      return { texte: "Dérivée (son signe reste à étudier) :", latex: `f'(x) = \\dfrac{${exercice.m}\\left(2x${termeConstanteLatex(-2 * exercice.p)}\\right)}{${trinomeLatex(-2 * exercice.p, exercice.p * exercice.p + exercice.a * exercice.a)}}` };
+      return { texte: "Dérivée (son signe reste à étudier) :", latex: `f'(x) = ${deriveePremiereLatex(exercice)}` };
     case "E":
-      return { texte: "Dérivée terme à terme (mise au même dénominateur non faite) :", latex: `f'(x) = ${exercice.m}\\left(\\dfrac{1}{x} - \\dfrac{${exercice.c}}{x^2}\\right)` };
+      return { texte: "Dérivée terme à terme (mise au même dénominateur non faite) :", latex: `f'(x) = ${coefFoisLatex(exercice.m, `\\dfrac{1}{x} - \\dfrac{${exercice.c}}{x^2}`, true)}` };
   }
 }
 
@@ -373,21 +420,21 @@ export function aideConcaviteNiveau1(_exercice: ExerciceEtudeFonctionLogarithme)
 export function aideConcaviteNiveau2(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
   switch (exercice.famille) {
     case "A":
-      return { texte: "Dérivée seconde (son signe reste à étudier) :", latex: `f''(x) = \\dfrac{${exercice.k}\\left(2\\ln(x)${termeConstanteLatex(2 * exercice.c - 3)}\\right)}{x^3}` };
+      return { texte: "Dérivée seconde (son signe reste à étudier) :", latex: `f''(x) = ${deriveeSecondeLatex(exercice)}` };
     case "B":
       return { texte: "Avec g = f − c : g'' = g·[(g'/g)² + (g'/g)'] — compare chaque terme à 0 (x > 0).", latex: `\\dfrac{g''(x)}{g(x)} = ${exercice.a * exercice.a === 1 ? "" : exercice.a * exercice.a}\\left(\\ln\\left(${baseBLatex(exercice)}\\right)+1\\right)^2 + \\dfrac{${exercice.a}}{x}` };
     case "C":
       return {
         texte: "Dérivée seconde (son signe reste à étudier) :",
-        latex: `f''(x) = \\dfrac{${-2 * exercice.m}\\left(\\left(x${termeConstanteLatex(-exercice.p)}\\right)^2 + ${exercice.q * exercice.q}\\right)}{\\left(${trinomeC(exercice)}\\right)^2}`,
+        latex: `f''(x) = ${deriveeSecondeLatex(exercice)}`,
       };
     case "D":
       return {
         texte: "Dérivée seconde (son signe reste à étudier) :",
-        latex: `f''(x) = \\dfrac{${2 * exercice.m}\\left(${exercice.a * exercice.a} - \\left(x${termeConstanteLatex(-exercice.p)}\\right)^2\\right)}{\\left(${trinomeLatex(-2 * exercice.p, exercice.p * exercice.p + exercice.a * exercice.a)}\\right)^2}`,
+        latex: `f''(x) = ${deriveeSecondeLatex(exercice)}`,
       };
     case "E":
-      return { texte: "Dérivée seconde terme à terme (mise au même dénominateur non faite) :", latex: `f''(x) = ${exercice.m}\\left(-\\dfrac{1}{x^2} + \\dfrac{${2 * exercice.c}}{x^3}\\right)` };
+      return { texte: "Dérivée seconde terme à terme (mise au même dénominateur non faite) :", latex: `f''(x) = ${coefFoisLatex(exercice.m, `-\\dfrac{1}{x^2} + \\dfrac{${2 * exercice.c}}{x^3}`, true)}` };
   }
 }
 

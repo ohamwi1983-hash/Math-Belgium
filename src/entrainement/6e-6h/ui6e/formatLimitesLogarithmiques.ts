@@ -150,17 +150,25 @@ function formatDirectionA(): string {
 
 function consigneA(phase: "aDominance" | "aConclure"): FragmentConsigne[] {
   if (phase === "aDominance") {
-    return [texte("Identifie le terme dominant au numérateur et au dénominateur séparément (hiérarchie "), latex("\\ln(x) \\ll x^n \\ll \\text{base}^x"), texte(" avec base>1).")];
+    return [
+      texte("Identifie le terme dominant au numérateur et au dénominateur séparément (hiérarchie "),
+      latex("\\ln(x) \\ll x^n \\ll b^x"),
+      texte(", pour une exponentielle de la forme "),
+      latex("b^x"),
+      texte(" avec "),
+      latex("b > 1"),
+      texte(")."),
+    ];
   }
   return [texte("À partir de la dominance de l'étape précédente, conclus la limite (valeur exacte si elle est finie).")];
 }
 
-const RAPPEL_HIERARCHIE_LATEX = "\\ln(x) \\ll x^n \\ll \\text{base}^x \\ (\\text{base}>1)";
+const RAPPEL_HIERARCHIE_LATEX = "\\ln(x) \\ll x^n \\ll b^x \\quad (b > 1)";
 
 function aideA1(phase: "aDominance" | "aConclure"): AideAvecLatex {
   if (phase === "aDominance") {
     return {
-      texte: "Rappel de la hiérarchie de croissance à l'infini (une exponentielle de base<1 est, elle, négligeable — elle tend vers 0) :",
+      texte: "Rappel de la hiérarchie de croissance à l'infini (une exponentielle de base inférieure à 1 est, elle, négligeable — elle tend vers 0) :",
       latex: RAPPEL_HIERARCHIE_LATEX,
     };
   }
@@ -303,6 +311,9 @@ function aideC1(phase: "cDiagnostic" | "cConclure"): AideAvecLatex {
  * `components6e/EtapeDiagnosticC.tsx`. */
 export interface ConfigPartieDiagnostic {
   label: string;
+  /** Libellé avec formule (texte + LaTeX), prioritaire sur `label` quand il existe — jamais une
+   * formule écrite au clavier dans `label` (« b^(c/x) »). */
+  labelFragments?: FragmentConsigne[];
   optionsCategorielles: ("plus_infini" | "moins_infini" | "zero")[];
   autoriserValeurLibre: boolean;
   placeholderValeur: string;
@@ -316,7 +327,13 @@ export function configDiagnosticPartiesC(exercice: ExerciceLimiteLogC): { partie
   if (exercice.sousType === "c2") {
     return {
       partie1: { label: "Facteur x →", optionsCategorielles: ["plus_infini", "moins_infini"], autoriserValeurLibre: false, placeholderValeur: "" },
-      partie2: { label: `Facteur ${exercice.base}^(c/x) →`, optionsCategorielles: [], autoriserValeurLibre: true, placeholderValeur: "ex : 5/7" },
+      partie2: {
+        label: "Facteur exponentiel →",
+        labelFragments: [texte("Facteur "), latex(`${exercice.base}^{\\frac{${exercice.coefC}}{x}}`), texte(" →")],
+        optionsCategorielles: [],
+        autoriserValeurLibre: true,
+        placeholderValeur: "ex : 5/7",
+      },
     };
   }
   return {

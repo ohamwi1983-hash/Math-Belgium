@@ -80,6 +80,51 @@ function formatScientifique(v: number, decimales = 2): string {
 }
 
 // ============================================================================
+// Écriture commune des produits, coefficients et puissances (écran, aides, papier, corrigé) —
+// jamais « a·−13 », « −1·log(X) », « e^{−1t} », « + − », ni « − 0 ».
+// ============================================================================
+
+/** Facteur d'un produit écrit : entre parenthèses s'il est négatif (« (-13) »). */
+export function facteurLatex(x: string): string {
+  return x.trim().startsWith("-") ? `(${x})` : x;
+}
+
+/** Produit de deux facteurs écrits (substitution) : chaque facteur négatif entre parenthèses. */
+export function produitLatex(a: string, b: string): string {
+  return `${facteurLatex(a)}\\cdot ${facteurLatex(b)}`;
+}
+
+/** Coefficient écrit devant une expression : « 1 » omis, « -1 » réduit au signe. */
+export function coefDevantLatex(coef: string, expr: string): string {
+  if (coef === "1") return expr;
+  if (coef === "-1") return `-${expr}`;
+  return `${coef}\\cdot ${expr}`;
+}
+
+/** Coefficient collé à une variable (« 0{,}5t », « t » si 1, « -t » si −1). */
+export function coefVariableLatex(x: number, variable: string, decimales = 4): string {
+  if (x === 1) return variable;
+  if (x === -1) return `-${variable}`;
+  return `${formatDecimal(x, decimales)}${variable}`;
+}
+
+/** Terme signé « + 3 » / « - 3{,}2 » (rien si 0) — jamais « + - » ni « - 0 ». */
+export function termeSigneLatex(b: number, decimales: number): string {
+  return formatPlusB(b, decimales);
+}
+
+/** Exposant de « X = 10^{…} » tiré de L = a·log(X) + b : (L − b)/a écrit sans « − 0 », sans
+ * dénominateur 1 ni dénominateur négatif (« 10^{-1{,}2} », « 10^{35/10} »). */
+export function exposantDixLatex(L: string, a: number, b: number, decimalesA = 3, decimalesB = 3): string {
+  const num = b === 0 ? L : `${L}${termeSigneLatex(-b, decimalesB)}`;
+  if (num === "0") return "0";
+  const absA = Math.abs(a);
+  const quotient = absA === 1 ? num : `${b === 0 ? num : `(${num})`}/${formatDecimal(absA, decimalesA)}`;
+  if (a > 0) return quotient;
+  return absA === 1 && b !== 0 ? `-(${num})` : `-${quotient}`;
+}
+
+// ============================================================================
 // Famille A.
 // ============================================================================
 
@@ -354,7 +399,7 @@ function blocDonneesE(ex: ExerciceLogProbE): string[] {
 }
 function etatActuelE(ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4"): string[] | null {
   if (phase === "eEcran1") return null;
-  const modele = `L = ${formatDecimal(ex.a, 3)}\\cdot \\log(X)${formatPlusB(ex.b, 3)}`;
+  const modele = `L = ${coefDevantLatex(formatDecimal(ex.a, 3), "\\log(X)")}${formatPlusB(ex.b, 3)}`;
   if (phase === "eEcran2") return [modele];
   if (phase === "eEcran3") return [modele];
   return [modele];
@@ -393,12 +438,12 @@ function aideE2(ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eEcran3" |
   if (phase === "eEcran1")
     return {
       texte: "Système posé (il reste à le résoudre — soustrais les deux équations pour éliminer b) :",
-      latex: `\\begin{cases} ${formatDecimal(ex.L1, 1)} = a\\cdot ${Math.round(Math.log10(ex.X1))} + b \\\\ ${formatDecimal(ex.L2, 1)} = a\\cdot ${Math.round(Math.log10(ex.X2))} + b \\end{cases}`,
+      latex: `\\begin{cases} ${formatDecimal(ex.L1, 1)} = ${produitLatex("a", String(Math.round(Math.log10(ex.X1))))} + b \\\\ ${formatDecimal(ex.L2, 1)} = ${produitLatex("a", String(Math.round(Math.log10(ex.X2))))} + b \\end{cases}`,
     };
   if (phase === "eEcran2")
     return {
       texte: "Substitution faite, calcul final non fait :",
-      latex: ex.sensEcran2 === "versL" ? `L = ${formatDecimal(ex.a, 3)}\\cdot ${Math.round(Math.log10(ex.X0))}${formatPlusB(ex.b, 3)}` : `X = 10^{(${formatDecimalTexte(ex.L0Affiche, 1)}-${formatDecimal(ex.b, 2)})/${formatDecimal(ex.a, 3)}}`,
+      latex: ex.sensEcran2 === "versL" ? `L = ${produitLatex(formatDecimal(ex.a, 3), String(Math.round(Math.log10(ex.X0))))}${formatPlusB(ex.b, 3)}` : `X = 10^{${exposantDixLatex(formatDecimal(ex.L0Affiche, 1), ex.a, ex.b)}}`,
     };
   if (phase === "eEcran3") return { texte: "Formule de propriété d'échelle :", latex: "\\Delta L = a\\cdot \\log(k) \\quad \\Longleftrightarrow \\quad k = 10^{\\Delta L / a}" };
   return {
@@ -430,7 +475,7 @@ function blocDonneesF(ex: ExerciceLogProbF): string[] {
 function etatActuelF(ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcran3"): string[] | null {
   if (phase === "fEcran1") return null;
   const aLigne = `a \\approx ${formatDecimal(ex.a, 3)}`;
-  if (phase === "fEcran2") return [aLigne, `y(t) = \\dfrac{${ex.k}}{1+${formatDecimal(ex.a, 3)}\\cdot e^{-${formatDecimal(ex.r, 4)}t}}`];
+  if (phase === "fEcran2") return [aLigne, `y(t) = \\dfrac{${ex.k}}{1+${formatDecimal(ex.a, 3)}\\cdot e^{-${coefVariableLatex(ex.r, "t")}}}`];
   return [aLigne, `t \\approx ${formatDecimal(ex.t, 2)}`];
 }
 function consigneEcranF(_ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcran3"): FragmentConsigne[] {
@@ -447,8 +492,8 @@ function aideF1(_ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcran3")
 }
 function aideF2(ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcran3"): AideAvecLatex {
   if (phase === "fEcran1") return { texte: "Équation posée, non résolue :", latex: `${formatDecimal(ex.y0, 1)} = \\dfrac{${ex.k}}{1+a}` };
-  if (phase === "fEcran2") return { texte: "Équation posée, non résolue :", latex: `\\dfrac{${ex.k}}{2} = \\dfrac{${ex.k}}{1+${formatDecimal(ex.a, 3)}\\cdot e^{-${formatDecimal(ex.r, 4)}t}}` };
-  return { texte: "Remplace le terme exponentiel par sa limite dans l'expression de y(t) :", latex: `y(t) = \\dfrac{${ex.k}}{1+${formatDecimal(ex.a, 3)}\\cdot e^{-${formatDecimal(ex.r, 4)}t}}` };
+  if (phase === "fEcran2") return { texte: "Équation posée, non résolue :", latex: `\\dfrac{${ex.k}}{2} = \\dfrac{${ex.k}}{1+${formatDecimal(ex.a, 3)}\\cdot e^{-${coefVariableLatex(ex.r, "t")}}}` };
+  return { texte: "Remplace le terme exponentiel par sa limite dans l'expression de y(t) :", latex: `y(t) = \\dfrac{${ex.k}}{1+${formatDecimal(ex.a, 3)}\\cdot e^{-${coefVariableLatex(ex.r, "t")}}}` };
 }
 function reponseF(ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcran3"): string[] {
   if (phase === "fEcran1") return [formatDecimal(ex.a, 3)];

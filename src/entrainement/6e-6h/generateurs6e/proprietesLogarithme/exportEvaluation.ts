@@ -147,7 +147,7 @@ function baremeProprietesLogarithme(exercice: ExerciceProprieteLogarithme): Bare
   }));
   const acceptees: FragmentConsigne[][] = [[texte("Termes écrits dans un autre ordre, ou coefficient non simplifié (ex. "), latex("\\dfrac{2}{4}"), texte(" pour "), latex("\\dfrac{1}{2}"), texte(")")]];
   if (exercice.avecChangementBase) acceptees.push([texte("Au changement de base, la forme développée (chaque terme multiplié par c)")]);
-  else acceptees.push([texte("Une étape « r » écrite directement avec "), latex("\\log_a(\\dots)"), texte(" si le calcul est juste")]);
+  else acceptees.push([texte("Le logarithme qui reste noté par une lettre (par exemple r), si l'élève dit ce qu'elle désigne et si le calcul est juste")]);
   return { reponseFinale: reponseBreveProprietesLogarithme(exercice), criteres, erreursFrequentes: erreursFrequentesProprietesLogarithme(exercice), reponsesAcceptees: acceptees };
 }
 

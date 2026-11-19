@@ -13,6 +13,7 @@ import { calcul, latex, ligne, piege, resultat, texte, utilise } from "../../../
 import { phaseApres, phaseInitiale, type PhaseDomaineDeriveeLogarithme } from "../../moteur6e/typesDomaineDeriveeLogarithme";
 import {
   argumentA,
+  carreMoinsCarreLatex,
   facteursLatexC,
   formatAffine,
   formatFonctionEOrigine,
@@ -158,9 +159,9 @@ function correctionB(e: ExerciceDomaineDeriveeLogB): EtapeCorrection[] {
       ...finale(rep, "", "on simplifie par 2"),
     ];
   } else if (e.sousType === "quadratique") {
-    dom = [ligne(`x^2-${e.k}^2>0`, "argument strictement positif"), ligne(`x^2>${e.k * e.k}`, `on ajoute ${e.k * e.k}`), ligne(`|x|>${e.k}`, "racine carrée"), ligne(`x\\in ${domaineL(e)}`, justif("", { l: `x<-${e.k}` }, " ou ", { l: `x>${e.k}` }))];
+    dom = [ligne(`${carreMoinsCarreLatex(e.k)}>0`, "argument strictement positif"), ligne(`x^2>${e.k * e.k}`, `on ajoute ${e.k * e.k}`), ligne(`|x|>${e.k}`, "racine carrée"), ligne(`x\\in ${domaineL(e)}`, justif("", { l: `x<-${e.k}` }, " ou ", { l: `x>${e.k}` }))];
     formule = [texte("Dérivée d'un logarithme : "), latex(REGLE_LOG)];
-    der = [ligne(`u(x)=x^2-${e.k}^2`, "argument"), ligne("u'(x)=2x", "on dérive l'argument"), ligne(`f'(x)=\\dfrac{2x}{(x^2-${e.k}^2)\\ln(${b})}`, justif("", { l: REGLE_LOG })), ...finale(rep, "", justif("", { l: `${e.k}^2=${e.k * e.k}` }))];
+    der = [ligne(`u(x)=${carreMoinsCarreLatex(e.k)}`, "argument"), ligne("u'(x)=2x", "on dérive l'argument"), ligne(`f'(x)=\\dfrac{2x}{(${carreMoinsCarreLatex(e.k)})\\ln(${b})}`, justif("", { l: REGLE_LOG })), ...finale(rep, `\\dfrac{2x}{(${carreMoinsCarreLatex(e.k)})\\ln(${b})}`, justif("", { l: `${e.k}^2=${e.k * e.k}` }))];
     lePiege = [texte("Le domaine est la réunion de deux intervalles : "), latex(`x^2>${e.k * e.k}`), texte(" ne se résout pas en "), latex(`x>${e.k}`), texte(" seulement.")];
   } else {
     const xp = formatXMoins(e.p);
@@ -168,7 +169,7 @@ function correctionB(e: ExerciceDomaineDeriveeLogB): EtapeCorrection[] {
     formule = [texte("On simplifie d'abord avec la propriété de la puissance ("), latex("\\sqrt{u}=u^{\\frac{1}{2}}"), texte("), puis "), latex(REGLE_LOG)];
     der = [
       ligne(`f(x)=\\dfrac{1}{2}\\log_{${b}}(${xp})`, justif("", { l: "\\log_b\\!\\left(\\sqrt{u}\\right)=\\dfrac{1}{2}\\log_b(u)" })),
-      ligne(`f'(x)=\\dfrac{1}{2}\\cdot\\dfrac{1}{(${xp})\\ln(${b})}`, justif("", { l: REGLE_LOG }, ", u′ = 1")),
+      ligne(`f'(x)=\\dfrac{1}{2}\\cdot\\dfrac{1}{${e.p === 0 ? "x" : `(${xp})`}\\ln(${b})}`, justif("", { l: REGLE_LOG }, ", u′ = 1")),
       ...finale(rep, "", "on multiplie les fractions"),
     ];
   }
@@ -196,7 +197,7 @@ function correctionC(e: ExerciceDomaineDeriveeLogC): EtapeCorrection[] {
       dom = lignesPositif(e.m, e.n, "argument strictement positif");
       break;
     case "lnRacine":
-      dom = [ligne("x>0", justif("argument de ", { l: "\\ln(x)" })), ligne(`x^2-${e.k}^2\\geq 0`, "radicande positif"), ligne(`|x|\\geq ${e.k}`, justif("", { l: `x^2\\geq ${e.k * e.k}` })), ligne(`x\\geq ${e.k}`, "avec x > 0")];
+      dom = [ligne("x>0", justif("argument de ", { l: "\\ln(x)" })), ligne(`${carreMoinsCarreLatex(e.k)}\\geq 0`, "radicande positif"), ligne(`|x|\\geq ${e.k}`, justif("", { l: `x^2\\geq ${e.k * e.k}` })), ligne(`x\\geq ${e.k}`, "avec x > 0")];
       break;
   }
   const regleV = e.sousType === "lnRacine" ? justif("", { l: "\\left(\\sqrt{w}\\right)'=\\dfrac{w'}{2\\sqrt{w}}" }) : justif("", { l: REGLE_LN });
@@ -291,9 +292,9 @@ function correctionE(e: ExerciceDomaineDeriveeLogE): EtapeCorrection[] {
       der = [ligne("f'(x)=3(\\ln x)^2\\cdot\\dfrac{1}{x}-3\\cdot\\dfrac{1}{x}", justif("", { l: "(u^3)'=3u^2u'" }))];
       break;
     case "valeurAbsolueQuadratique":
-      dom = [ligne(`(x^2-${e.k}^2)^2>0`, "argument strictement positif"), ligne(`x^2-${e.k}^2\\neq 0`, "un carré est strictement positif sauf s'il est nul"), ligne(`x^2\\neq ${e.k * e.k}`, `on ajoute ${e.k * e.k}`), ligne(`x\\neq\\pm ${e.k}`, "racine carrée")];
-      simpl = [ligne(`f(x)=${origine}`), ligne(`=\\ln\\left(|x^2-${e.k}^2|^2\\right)`, justif("", { l: "u^2=|u|^2" })), ligne(`=${simple}`, justif("", { l: "\\ln(a^n)=n\\ln(a)" }, " avec a = |u| > 0"))];
-      der = [ligne(`f'(x)=2\\cdot\\dfrac{2x}{x^2-${e.k}^2}`, justif("", { l: "\\left(\\ln|u|\\right)'=\\dfrac{u'}{u}" }))];
+      dom = [ligne(`(${carreMoinsCarreLatex(e.k)})^2>0`, "argument strictement positif"), ligne(`${carreMoinsCarreLatex(e.k)}\\neq 0`, "un carré est strictement positif sauf s'il est nul"), ligne(`x^2\\neq ${e.k * e.k}`, `on ajoute ${e.k * e.k}`), ligne(`x\\neq\\pm ${e.k}`, "racine carrée")];
+      simpl = [ligne(`f(x)=${origine}`), ligne(`=\\ln\\left(|${carreMoinsCarreLatex(e.k)}|^2\\right)`, justif("", { l: "u^2=|u|^2" })), ligne(`=${simple}`, justif("", { l: "\\ln(a^n)=n\\ln(a)" }, " avec a = |u| > 0"))];
+      der = [ligne(`f'(x)=2\\cdot\\dfrac{2x}{${carreMoinsCarreLatex(e.k)}}`, justif("", { l: "\\left(\\ln|u|\\right)'=\\dfrac{u'}{u}" }))];
       break;
     case "dejaSimplifie":
       dom = [ligne("x>0", justif("base d'une puissance à exposant réel (alors ", { l: "x^x>0" }, ")"))];
@@ -389,7 +390,7 @@ function correctionG(e: ExerciceDomaineDeriveeLogG): EtapeCorrection[] {
   const repI = reponseAttendueLatex(e, "gIdentifier");
   const repF = reponseAttendueLatex(e, "gFPrimeSurF");
   const rep = reponseAttendueLatex(e, "gIsoler");
-  const sub = `${p(vPrime)}\\ln\\left(${u}\\right)+${p(v)}\\cdot\\dfrac{${uPrime}}{${u}}`;
+  const sub = `${vPrime === "1" ? "" : p(vPrime)}\\ln\\left(${u}\\right)+${p(v)}\\cdot\\dfrac{${uPrime}}{${u}}`;
   const fpf: LigneCalcul[] =
     e.variante === "produit"
       ? [

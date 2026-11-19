@@ -98,7 +98,7 @@ function construireCorrectionLimitesLogarithmiques(exercice: ExerciceLimiteLogar
 
     case "B":
       return [
-        { type: "paragraphe", fragments: [texte("a) En posant u = x/x₀ − 1 (u → 0), f devient : "), latex(formatReformulationBLatex(exercice)), texte(", où apparaît la limite de référence ln(1+u)/u → 1.")] },
+        { type: "paragraphe", fragments: [texte("a) En posant "), latex("u=\\dfrac{x}{x_0}-1"), texte(" ("), latex("u\\to 0"), texte("), f devient : "), latex(formatReformulationBLatex(exercice)), texte(", où apparaît la limite de référence "), latex("\\lim_{u\\to 0}\\dfrac{\\ln(1+u)}{u}=1"), texte(".")] },
         {
           type: "paragraphe",
           fragments:
@@ -115,9 +115,13 @@ function construireCorrectionLimitesLogarithmiques(exercice: ExerciceLimiteLogar
         {
           type: "paragraphe",
           fragments: [
-            texte(`a) ${partie1.label} : `),
+            texte("a) "),
+            ...(partie1.labelFragments ?? [texte(partie1.label)]),
+            texte(" : "),
             latex(formatCibleTexte(cible1)),
-            texte(`. ${partie2.label} : `),
+            texte(". "),
+            ...(partie2.labelFragments ?? [texte(partie2.label)]),
+            texte(" : "),
             latex(formatCibleTexte(cible2)),
             texte("."),
           ],

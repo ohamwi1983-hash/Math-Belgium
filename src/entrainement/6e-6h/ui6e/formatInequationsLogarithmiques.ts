@@ -97,12 +97,12 @@ function formatEnonceA(exercice: ExerciceLogA): string {
 
 function consigneA(phase: "aCE" | "aResoudre"): FragmentConsigne[] {
   if (phase === "aCE") return [txt("Pose la condition d'existence : l'argument du logarithme doit être strictement positif.")];
-  return [txt("À partir de la CE CORRECTE de l'étape précédente, résous l'inéquation en appliquant le bon sens (direct si la base est >1, inversé si elle est <1), puis intersecte avec la CE.")];
+  return [txt("À partir de la CE CORRECTE de l'étape précédente, résous l'inéquation en appliquant le bon sens (conservé si la base est supérieure à 1, inversé si elle est comprise entre 0 et 1), puis intersecte avec la CE.")];
 }
 
 function aideA1(phase: "aCE" | "aResoudre"): AideAvecLatex {
   if (phase === "aCE") return { texte: "L'argument d'un logarithme doit toujours être strictement positif.", latex: null };
-  return { texte: "Le logarithme de base b est croissant si b>1, décroissant si 0<b<1 — le sens de l'inégalité doit être adapté en conséquence.", latex: "b>1\\ (\\text{croissant})\\qquad 0<b<1\\ (\\text{décroissant})" };
+  return { texte: "Le logarithme de base b est croissant si b est supérieur à 1, décroissant si b est compris entre 0 et 1 — le sens de l'inégalité doit être adapté en conséquence :", latex: "b>1\\ (\\text{croissant})\\qquad 0<b<1\\ (\\text{décroissant})" };
 }
 
 function aideA2(phase: "aCE" | "aResoudre", exercice: ExerciceLogA): AideAvecLatex {
@@ -138,8 +138,8 @@ function consigneB(phase: "bCE" | "bResoudre", exercice: ExerciceLogB): Fragment
 function aideB1(phase: "bCE" | "bResoudre"): AideAvecLatex {
   if (phase === "bCE") return { texte: "Chacun des deux arguments doit être strictement positif — pose les deux conditions séparément.", latex: null };
   return {
-    texte: "log_base(f) [symbole] log_base(g) équivaut à f [même symbole] g si base>1, ou f [symbole inversé] g si 0<base<1 — mais UNIQUEMENT à l'intérieur de la CE. Ne jamais oublier de ré-intersecter avec la CE après cette étape.",
-    latex: "\\text{base}>1\\qquad 0<\\text{base}<1",
+    texte: "Comparer les logarithmes de f et de g revient à comparer f et g : dans le même sens si la base b est supérieure à 1, dans le sens inverse si elle est comprise entre 0 et 1 — mais UNIQUEMENT à l'intérieur de la CE. Ne jamais oublier de ré-intersecter avec la CE après cette étape :",
+    latex: "b>1 :\\ \\log_b f<\\log_b g\\iff f<g\\qquad 0<b<1 :\\ \\log_b f<\\log_b g\\iff f>g",
   };
 }
 
@@ -234,7 +234,7 @@ function consigneD(phase: "dCE" | "dReecrire" | "dResoudreY" | "dConvertirX"): F
     case "dResoudreY":
       return [txt("À partir de la réécriture CORRECTE de l'étape précédente, résous l'inéquation du second degré en y (tableau de signes).")];
     case "dConvertirX":
-      return [txt("À partir de l'intervalle en y CORRECT de l'étape précédente, convertis-le en x (via "), ltx("x=\\text{base}^{y}"), txt(" — attention à l'inversion des bornes si la base est <1), puis intersecte avec la CE.")];
+      return [txt("À partir de l'intervalle en y CORRECT de l'étape précédente, convertis-le en x (via "), ltx("x=\\text{base}^{y}"), txt(" — attention à l'inversion des bornes si la base est comprise entre 0 et 1), puis intersecte avec la CE.")];
   }
 }
 
@@ -284,7 +284,7 @@ function consigneE(phase: "eReconnaitre" | "eResoudre"): FragmentConsigne[] {
 
 function aideE1(phase: "eReconnaitre" | "eResoudre"): AideAvecLatex {
   if (phase === "eReconnaitre") return { texte: "Chacun des deux arguments doit être strictement positif. Écris les deux conditions, puis regarde si un même x peut les vérifier toutes les deux.", latex: null };
-  return { texte: "log_base(f) [symbole] log_base(g) équivaut à f [même symbole] g si base>1, ou f [symbole inversé] g si 0<base<1 — uniquement sur la CE.", latex: "\\text{base}>1\\qquad 0<\\text{base}<1" };
+  return { texte: "Comparer les logarithmes de f et de g revient à comparer f et g : dans le même sens si la base b est supérieure à 1, dans le sens inverse si elle est comprise entre 0 et 1 — uniquement sur la CE :", latex: "b>1 :\\ \\log_b f<\\log_b g\\iff f<g\\qquad 0<b<1 :\\ \\log_b f<\\log_b g\\iff f>g" };
 }
 
 function aideE2(phase: "eReconnaitre" | "eResoudre", exercice: ExerciceLogE): AideAvecLatex {

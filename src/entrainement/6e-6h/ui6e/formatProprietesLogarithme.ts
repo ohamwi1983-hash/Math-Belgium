@@ -26,9 +26,10 @@ import type { PhaseProprietesLogarithme } from "../moteur6e/typesProprietesLogar
  *
  * **Convention de notation** (inchangée) : tant qu'une partie de l'expression n'est pas encore
  * substituée en m/n/q, le fragment LaTeX garde la notation `\log_a(...)` en toutes lettres
- * (`etatVersLatexAvecLogPendant`) ; dès que l'expression est celle que l'ÉLÈVE SAISIT réellement
- * (champ de réponse, récapitulatif), on bascule sur m/n/q/r littéraux (`etatVersLatex`) — jamais les
- * deux mélangées sur un même écran.
+ * (`etatVersLatexAvecLogPendant`), y compris dans la réponse attendue affichée, le récapitulatif et
+ * le corrigé : plus de lettre auxiliaire « r » (elle désignait un logarithme différent à chaque
+ * étape). Seule la SAISIE à l'écran garde « r » (le champ ne sait pas lire `\log_a(…)` symbolique) :
+ * la consigne de l'écran le dit, et la vérification l'accepte toujours.
  */
 
 export interface AideAvecLatex {
@@ -228,7 +229,16 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceProprieteLogar
     const v = etatVersLatex(etatFinal);
     return [etatFinal.termes.length > 1 ? `\\left(${v}\\right)\\cdot c` : `${v}\\cdot c`];
   }
-  return [etatVersLatex(etats[ecran.etape + 1])];
+  // Le logarithme qui reste à décomposer est écrit EN TOUTES LETTRES (jamais la lettre auxiliaire
+  // « r », qui désignait un logarithme différent à chaque étape) ; la saisie « … + r » reste
+  // acceptée à l'écran (`verificationProprietesLogarithme.ts`, variable libre r).
+  return [logLettreSimple(etatVersLatexAvecLogPendant(etats[ecran.etape + 1]))];
+}
+
+/** Logarithme d'une seule lettre en parenthèses simples (« \log_a(N) » plutôt qu'un groupe
+ * « \left…\right » plus haut et plus large). */
+function logLettreSimple(t: string): string {
+  return t.replace(/\\log_a\\!\\left\(([MNP])\\right\)/g, "\\log_a($1)");
 }
 
 /** Même réponse en SYNTAXE DE SAISIE (`(1/2)*m`) — jamais affichée : sert aux contrôles
@@ -268,7 +278,7 @@ export function consigneEcriteEtape(exercice: ExerciceProprieteLogarithme, etape
  * que répétée à chaque sous-question (`consigneEcriteEtape`). */
 export function regleNotationEcrite(): FragmentConsigne[] {
   return [
-    texte("À chaque étape, écris m, n, q pour les parties déjà extraites et r pour le logarithme de la partie qui reste à décomposer, puis garde les termes déjà obtenus."),
+    texte("À chaque étape, écris m, n, q pour les parties déjà extraites, garde en toutes lettres le logarithme de la partie qui reste à décomposer, puis garde les termes déjà obtenus."),
   ];
 }
 

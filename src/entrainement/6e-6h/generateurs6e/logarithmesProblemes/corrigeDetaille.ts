@@ -2,7 +2,7 @@ import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../ex
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceLogarithmesProblemes, ExerciceLogProbA, ExerciceLogProbB, ExerciceLogProbC, ExerciceLogProbE, ExerciceLogProbF } from "../../core6e/logarithmesProblemes.types";
 import type { PhaseLogarithmesProblemes } from "../../moteur6e/typesLogarithmesProblemes";
-import { aideNiveau1, formatReponseAttenduePhaseLatex, phasesPourExercice } from "../../ui6e/formatLogarithmesProblemes";
+import { aideNiveau1, coefDevantLatex, coefVariableLatex, formatReponseAttenduePhaseLatex, phasesPourExercice, produitLatex } from "../../ui6e/formatLogarithmesProblemes";
 import { COURS_PROBLEMES, COURS_PROPRIETES, arrondi, dec, estExact, fragmentsAide, nt, par, sci, vaut } from "../../ui6e/corrigeLogarithmes2";
 import { CONTEXTES_A_CROISSANCE, CONTEXTES_A_DECROISSANCE, CONTEXTES_A_TAUX, CONTEXTES_A_TAUX_DECROISSANCE, CONTEXTES_B, CONTEXTES_F } from "./contextes";
 
@@ -20,13 +20,6 @@ type E = ExerciceLogarithmesProblemes;
 const t = texte;
 const f = latex;
 const LETTRES = "abcd";
-
-/** Coefficient devant une lettre : 1 → « », −1 → « - ». */
-function coef(x: number, d = 4): string {
-  if (x === 1) return "";
-  if (x === -1) return "-";
-  return dec(x, d);
-}
 
 /** Réponse de l'écran (une ou plusieurs formules). */
 function rep(e: E, phase: PhaseLogarithmesProblemes): string[] {
@@ -386,14 +379,17 @@ function etapeE(e: ExerciceLogProbE, phase: PhaseLogarithmesProblemes): Etape {
     const L2 = dec(e.L2, 1);
     const aSys = (e.L2 - e.L1) / (n2 - n1);
     const bSys = e.L1 - aSys * n1;
+    const d = n2 - n1;
+    const dL = dec(e.L2 - e.L1, 1);
+    // a = (L₂ − L₁)/(n₂ − n₁), signe sorti de la fraction (jamais « \dfrac{-3}{3} »).
+    const aFrac = `${e.L2 < e.L1 ? "-" : ""}\\dfrac{${dec(Math.abs(e.L2 - e.L1), 1)}}{${d}}`;
     const lignes: LigneCalcul[] = [
-      ligne(`${L1}=a\\cdot ${par(String(n1))}+b`, `point 1 : log(10${superscript(String(n1)).replace("-", "⁻")}) = ${nt(n1)}`),
-      ligne(`${L2}=a\\cdot ${par(String(n2))}+b`, `point 2 : log(10${superscript(String(n2)).replace("-", "⁻")}) = ${nt(n2)}`),
+      ligne(`${L1}=${produitLatex("a", String(n1))}+b`, `point 1 : log(10${superscript(String(n1)).replace("-", "⁻")}) = ${nt(n1)}`),
+      ligne(`${L2}=${produitLatex("a", String(n2))}+b`, `point 2 : log(10${superscript(String(n2)).replace("-", "⁻")}) = ${nt(n2)}`),
       ligne(`${L2}-${par(L1)}=a\\,\\big(${n2}-${par(String(n1))}\\big)`, "on soustrait : b disparaît"),
-      ligne(`${dec(e.L2 - e.L1, 1)}=${n2 - n1}a`),
-      ligne(`a=\\dfrac{${dec(e.L2 - e.L1, 1)}}{${n2 - n1}}`, `on divise par ${n2 - n1}`),
-      ligne(vaut(aSys, 3)),
-      ligne(`b=${L1}-${estExact(aSys, 3) ? par(dec(aSys, 3)) : `\\dfrac{${dec(e.L2 - e.L1, 1)}}{${n2 - n1}}`}\\cdot ${par(String(n1))}`, "on remplace a dans l'équation du point 1"),
+      ligne(`${dL}=${coefVariableLatex(d, "a")}`),
+      ...(d === 1 ? [] : [ligne(`a=${aFrac}`, `on divise par ${d}`), ligne(vaut(aSys, 3))]),
+      ligne(`b=${L1}-${produitLatex(estExact(aSys, 3) ? dec(aSys, 3) : aFrac, String(n1))}`, "on remplace a dans l'équation du point 1"),
       ligne(vaut(bSys, 3)),
     ];
     const blocs: Etape["blocs"] = [{ lignes }];
@@ -408,7 +404,7 @@ function etapeE(e: ExerciceLogProbE, phase: PhaseLogarithmesProblemes): Etape {
       utilise: aide,
       blocs,
       resultat: [t("Constantes : "), f(rep(e, phase)[0]!), t(" et "), f(rep(e, phase)[1]!)],
-      verification: { texte: [t("Point 2 : "), f(`${par(aL)}\\cdot ${par(String(n2))}${plusB}${vaut(e.a * n2 + e.b, 2)}`), t(Math.abs(e.a * n2 + e.b - e.L2) < 1e-9 ? " = L₂ ✓" : " ≈ L₂ ✓ (L₂ est arrondi)")] },
+      verification: { texte: [t("Point 2 : "), f(`${produitLatex(aL, String(n2))}${plusB}${vaut(e.a * n2 + e.b, 2)}`), t(Math.abs(e.a * n2 + e.b - e.L2) < 1e-9 ? " = L₂ ✓" : " ≈ L₂ ✓ (L₂ est arrondi)")] },
       pieges: [],
     };
   }
@@ -420,8 +416,8 @@ function etapeE(e: ExerciceLogProbE, phase: PhaseLogarithmesProblemes): Etape {
         blocs: [
           {
             lignes: [
-              ligne(`L=${aL}\\cdot\\log\\left(10^{${n0}}\\right)${plusB}`, "on remplace X"),
-              ligne(`=${aL}\\cdot ${par(String(n0))}${plusB}`, "log(10ⁿ) = n"),
+              ligne(`L=${coefDevantLatex(aL, `\\log\\left(10^{${n0}}\\right)`)}${plusB}`, "on remplace X"),
+              ligne(`=${coefDevantLatex(aL, par(String(n0)))}${plusB}`, "log(10ⁿ) = n"),
               ligne(vaut(e.reponseEcran2, 2)),
             ],
           },
@@ -432,14 +428,18 @@ function etapeE(e: ExerciceLogProbE, phase: PhaseLogarithmesProblemes): Etape {
     }
     const L0 = dec(e.L0Affiche, 1);
     const y = (e.L0Affiche - e.b) / e.a;
+    const numL = e.b === 0 ? L0 : `${L0}-${par(dec(e.b, 3))}`;
+    // a = −1 (pH) : on change de signe, jamais « \dfrac{…}{-1} ».
+    const logX = e.a === -1 ? (e.b === 0 ? (L0 === "0" ? "0" : `-${par(L0)}`) : `-(${numL})`) : numL === "0" ? "0" : `\\dfrac{${numL}}{${aL}}`;
+    const lignesLogX: LigneCalcul[] = [ligne(`\\log(X)=${logX}`, e.a === -1 ? "on multiplie par −1" : `on divise par ${nt(e.a, 3)}`)];
+    if (logX !== dec(y, 3)) lignesLogX.push(ligne(vaut(y, 3)));
     return {
       utilise: [t("On remplace L, on isole "), f("\\log(X)"), t(", puis "), f("\\log(X)=y\\iff X=10^{y}"), t(` ${COURS_PROPRIETES}.`)],
       blocs: [
         {
           lignes: [
-            ligne(`${L0}=${aL}\\cdot\\log(X)${plusB}`, "on remplace L"),
-            ligne(`\\log(X)=\\dfrac{${L0}${e.b === 0 ? "" : `-${par(dec(e.b, 3))}`}}{${aL}}`, `on divise par ${nt(e.a, 3)}`),
-            ligne(vaut(y, 3)),
+            ligne(`${L0}=${coefDevantLatex(aL, "\\log(X)")}${plusB}`, "on remplace L"),
+            ...lignesLogX,
             ligne(`X=10^{${dec(y, 3)}}`, [f("\\log(X)=y\\iff X=10^{y}")]),
             ligne(`\\approx ${rep(e, phase)[0]!.replace(/^X \\approx /, "")}`),
           ],
@@ -458,7 +458,7 @@ function etapeE(e: ExerciceLogProbE, phase: PhaseLogarithmesProblemes): Etape {
             lignes: [
               ligne(`\\Delta L=a\\log(kX)+b-\\big(a\\log(X)+b\\big)`, "niveau après − niveau avant"),
               ligne(`=a\\log(k)`, "log(kX) = log k + log X"),
-              ligne(`=${aL}\\cdot\\log(${e.kEcran3})`, `a = ${nt(e.a, 3)}, k = ${e.kEcran3}`),
+              ligne(`=${coefDevantLatex(aL, `\\log(${e.kEcran3})`)}`, `a = ${nt(e.a, 3)}, k = ${e.kEcran3}`),
               ligne(vaut(e.reponseEcran3, 2)),
             ],
           },
@@ -474,8 +474,12 @@ function etapeE(e: ExerciceLogProbE, phase: PhaseLogarithmesProblemes): Etape {
       blocs: [
         {
           lignes: [
-            ligne(`${dL}=${aL}\\cdot\\log(k)`, "ΔL = a log(k)"),
-            magnitude ? ligne(`\\log(k)=\\dfrac{3\\times ${par(dL)}}{2}`, [t("on multiplie par "), f("\\dfrac{3}{2}")]) : ligne(`\\log(k)=\\dfrac{${dL}}{${aL}}`, `on divise par ${nt(e.a, 3)}`),
+            ligne(`${dL}=${coefDevantLatex(aL, "\\log(k)")}`, "ΔL = a log(k)"),
+            magnitude
+              ? ligne(`\\log(k)=\\dfrac{3\\times ${par(dL)}}{2}`, [t("on multiplie par "), f("\\dfrac{3}{2}")])
+              : e.a === -1
+                ? ligne(`\\log(k)=-${par(dL)}`, "on multiplie par −1")
+                : ligne(`\\log(k)=\\dfrac{${dL}}{${aL}}`, `on divise par ${nt(e.a, 3)}`),
             ligne(vaut(y, 3)),
             ligne(`k=10^{${dec(y, 3)}}`, [f("\\log(k)=y\\iff k=10^{y}")]),
             ligne(vaut(e.reponseEcran3, 2)),
@@ -519,6 +523,7 @@ function etapeF(e: ExerciceLogProbF, phase: PhaseLogarithmesProblemes): Etape {
   const y0 = dec(e.y0, 1);
   const r = dec(e.r, 4);
   const aL = dec(e.a, 3);
+  const rt = coefVariableLatex(e.r, "t");
   const unite = uniteTemps(e);
   if (phase === "fEcran1")
     return {
@@ -545,12 +550,12 @@ function etapeF(e: ExerciceLogProbF, phase: PhaseLogarithmesProblemes): Etape {
       blocs: [
         {
           lignes: [
-            ligne(`\\dfrac{${e.k}}{1+a\\,e^{-${coef(e.r)}t}}=\\dfrac{${e.k}}{2}`, "la moitié de la capacité"),
-            ligne(`1+a\\,e^{-${coef(e.r)}t}=2`, "même numérateur : dénominateurs égaux"),
-            ligne(`e^{-${coef(e.r)}t}=\\dfrac{1}{a}`, "on retranche 1, puis on divise par a"),
-            ligne(`-${coef(e.r)}t=-\\ln(a)`, [t("on applique ln : "), f("\\ln\\dfrac{1}{a}=-\\ln a")]),
-            ligne(`t=\\dfrac{\\ln(a)}{${r}}`, `on divise par −${nt(e.r, 4)}`),
-            ligne(`\\approx\\dfrac{\\ln(${aL})}{${r}}`, "a de l'étape 1, arrondi"),
+            ligne(`\\dfrac{${e.k}}{1+a\\,e^{-${rt}}}=\\dfrac{${e.k}}{2}`, "la moitié de la capacité"),
+            ligne(`1+a\\,e^{-${rt}}=2`, "même numérateur : dénominateurs égaux"),
+            ligne(`e^{-${rt}}=\\dfrac{1}{a}`, "on retranche 1, puis on divise par a"),
+            ligne(`-${rt}=-\\ln(a)`, [t("on applique ln : "), f("\\ln\\dfrac{1}{a}=-\\ln a")]),
+            ligne(`t=${e.r === 1 ? "\\ln(a)" : `\\dfrac{\\ln(a)}{${r}}`}`, e.r === 1 ? "on multiplie par −1" : `on divise par −${nt(e.r, 4)}`),
+            ligne(`\\approx${e.r === 1 ? ` \\ln(${aL})` : `\\dfrac{\\ln(${aL})}{${r}}`}`, "a de l'étape 1, arrondi"),
             ligne(`\\approx ${dec(e.t, 2)}`),
           ],
         },
@@ -563,7 +568,7 @@ function etapeF(e: ExerciceLogProbF, phase: PhaseLogarithmesProblemes): Etape {
     blocs: [
       {
         lignes: [
-          ligne(`\\lim_{t\\to+\\infty}e^{-${coef(e.r)}t}=0`, `exposant −${nt(e.r, 4)}t → −∞`),
+          ligne(`\\lim_{t\\to+\\infty}e^{-${rt}}=0`, `exposant −${e.r === 1 ? "" : nt(e.r, 4)}t → −∞`),
           ligne(`\\lim_{t\\to+\\infty}y(t)=\\dfrac{${e.k}}{1+${aL}\\times 0}`, "on remplace l'exponentielle par sa limite"),
           ligne(`=${e.k}`),
         ],

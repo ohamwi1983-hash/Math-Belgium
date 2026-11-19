@@ -51,7 +51,7 @@ function GroupePartie({ config, etat, refuse, onChange }: { config: ConfigPartie
     refuse !== null && refuse.statut === statut && etat.statut === statut && (statut !== "valeur" || (refuse.texte === etat.texte && (texteValeur === undefined || etat.texte === texteValeur)));
   return (
     <div className="field">
-      <p className="field-label field-label-minuscule">{config.label}</p>
+      <p className="field-label field-label-minuscule">{config.labelFragments ? <RenduFragments fragments={config.labelFragments} /> : config.label}</p>
       <div className="options-grid-compact">
         {config.optionsCategorielles.map((option) => (
           <button

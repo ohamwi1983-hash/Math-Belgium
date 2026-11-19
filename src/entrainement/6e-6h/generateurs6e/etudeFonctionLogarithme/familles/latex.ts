@@ -31,6 +31,29 @@ export function coefficientLatex(m: number): string {
   return String(m);
 }
 
+/** « k × corps » écrit sans coefficient 1 ni « -1 » : 1 → corps, −1 → « -corps », sinon « 2\ln(x) »,
+ * « 2(x - 1) », « 2\cdot\dfrac{…}{…} » ; corps mis entre parenthèses si c'est une somme. */
+export function coefFoisLatex(k: number, corps: string, somme: boolean): string {
+  const c = somme ? `\\left(${corps}\\right)` : corps;
+  if (k === 1) return corps;
+  if (k === -1) return `-${c}`;
+  return !somme && /^([0-9]|\\d?frac)/.test(corps) ? `${k}\\cdot ${corps}` : `${k}${c}`;
+}
+
+/** Fraction « K·num / den », signe de K sorti devant (« -\dfrac{2\ln(x)}{x^2} », jamais
+ * « \dfrac{-1(x-3)}{x^2} ») ; coefficient 1 omis, numérateur parenthésé s'il est une somme. */
+export function fractionCoefLatex(K: number, num: string, numSomme: boolean, den: string): string {
+  return `${K < 0 ? "-" : ""}\\dfrac{${coefFoisLatex(Math.abs(K), num, numSomme)}}{${den}}`;
+}
+
+/** « x − p » (« x » si p = 0) et son carré (« x^2 », « \left(x - 2\right)^2 »). */
+export function xMoinsLatex(p: number): string {
+  return `x${termeConstanteLatex(-p)}`;
+}
+export function carreXMoinsLatex(p: number): string {
+  return p === 0 ? "x^2" : `\\left(${xMoinsLatex(p)}\\right)^2`;
+}
+
 /** Trinôme x² + βx + γ en LaTeX (termes nuls omis, signes propres). */
 export function trinomeLatex(beta: number, gamma: number): string {
   let s = "x^2";

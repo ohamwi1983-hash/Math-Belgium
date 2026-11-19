@@ -2,7 +2,7 @@ import type { ExerciceProprieteLogarithme } from "../../core6e/proprietesLogarit
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise } from "../../../export/corrigeTableau";
 import type { Caracteristique, EtatDecomposition, Fraction, Noeud } from "../../core6e/decompositionLogarithme";
-import { arbreVersLatexLogA, calculerEtatsArgument, etatVersLatex, etatVersLatexAvecLogPendant, resteVersLatexLogA } from "../../core6e/decompositionLogarithme";
+import { arbreVersLatexLogA, calculerEtatsArgument, etatVersLatexAvecLogPendant, resteVersLatexLogA } from "../../core6e/decompositionLogarithme";
 import { caracteristiqueDeLEtape, nombreEtapesAlgebriques } from "../../moteur6e/typesProprietesLogarithme";
 import { FORMULE_PROPRIETE, formatReponseAttenduePhaseLatex, membreGaucheCorrigeLatex, nomProprieteDeLEtape, phaseTransformationDeLEtape } from "../../ui6e/formatProprietesLogarithme";
 import { COURS_PROPRIETES, finaliserCorrige } from "../../ui6e/corrigeLogarithmes1";
@@ -131,8 +131,9 @@ function lignesArgument(exercice: ExerciceProprieteLogarithme, etape: number, se
     lignes.push(ligne(`=${rendre(partiesLettres)}`, justifConnus(connus)));
   } else {
     partiesLettres.push({ coef: cInt, nom: logDe(interieur) });
+    // Le logarithme qui reste est gardé en toutes lettres (plus de lettre auxiliaire « r » : la même
+    // lettre désignait un logarithme différent à chaque étape) — la dernière ligne est la réponse.
     if (connus.length) lignes.push(ligne(`=${rendre(partiesLettres)}`, justifConnus(connus)));
-    lignes.push(ligne(`=${seulReste ? rendre([...partiesLettres.slice(0, -1), { coef: cInt, nom: "r" }]) : etatVersLatex(etats[etape + 1])}`, [texte("on note "), latex(`r=${logDe(interieur)}`)]));
   }
   // Logarithme d'une seule lettre : parenthèses simples (« \log_a(M) », plus court qu'un groupe
   // « \left…\right » : la ligne passait sinon à la ligne dans sa cellule).
@@ -163,11 +164,23 @@ function calculsArgument(exercice: ExerciceProprieteLogarithme, etape: number, s
   if (!tropLong || avant.termes.length === 0) return [calcul(sq, complet)];
   const reste = lignesArgument(exercice, etape, true);
   const logA = arbreVersLatexLogA(exercice.arbre);
-  const fin = reste[reste.length - 1].latex.replace(/^=/, "");
+  // Membre de droite de la dernière ligne (la chaîne peut se réduire à la seule ligne « c·log = … »).
+  const derniere = reste[reste.length - 1].latex;
+  const gaucheReste = court(rendre([{ coef: avant.coefficientReste, nom: logDe(avant.reste as Noeud) }]));
+  const fin = derniere.startsWith("=") ? derniere.slice(1) : derniere.startsWith(`${gaucheReste}=`) ? derniere.slice(gaucheReste.length + 1) : derniere.replace(/^[^=]*=/, "");
   const T = rendre(termesConnus(avant));
+  const apresL = court(etatVersLatexAvecLogPendant(etats[etape + 1]));
   return [
     calcul(sq, reste, [texte("Sur le logarithme qui reste :")]),
-    calcul(sq, [ligne(`${logA}=${gauche}`, "étape précédente"), ligne(`=${T} ${fin.startsWith("-") ? "" : "+ "}${fin}`, "on remplace"), ...(etatVersLatex(etats[etape + 1]).replace(/\s/g, "") === `${T}${fin.startsWith("-") ? "" : "+"}${fin}`.replace(/\s/g, "") ? [] : [ligne(`=${etatVersLatex(etats[etape + 1])}`, "on ordonne les termes")])], [texte("Dans l'expression complète :")]),
+    calcul(
+      sq,
+      [
+        ligne(`${logA}=${gauche}`, "étape précédente"),
+        ligne(`=${T} ${fin.startsWith("-") ? "" : "+ "}${fin}`, "on remplace"),
+        ...(apresL.replace(/\s/g, "") === `${T}${fin.startsWith("-") ? "" : "+"}${fin}`.replace(/\s/g, "") ? [] : [ligne(`=${apresL}`, "on ordonne les termes")]),
+      ],
+      [texte("Dans l'expression complète :")],
+    ),
   ];
 }
 
@@ -227,9 +240,7 @@ export function correctionDetailleeProprietesLogarithme(exercice: ExercicePropri
         ]),
       );
       etapes.push(...calculsArgument(exercice, etape, sq));
-      const apres = etats[etape + 1];
-      const r = apres.reste ? [texte(", où "), latex(`r=${arbreVersLatexLogA(apres.reste)}`)] : [];
-      etapes.push(resultat(sq, [latex(`${logA}=${reponse}`), ...r]));
+      etapes.push(resultat(sq, [latex(`${logA}=${reponse}`)]));
     }
     if (lePiege.etape === etape) etapes.push(piege(sq, lePiege.fragments));
   }

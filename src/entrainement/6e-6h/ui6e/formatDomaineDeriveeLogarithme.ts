@@ -85,6 +85,12 @@ export function formatAffine(m: number, n: number): string {
   ]);
 }
 
+/** `x² − k²` affiché — `x^2-1` si k = 1 (jamais `x^2-1^2`), sinon `x^2-k^2` (forme qui montre la
+ * différence de deux carrés à factoriser). Source unique : énoncé, aides, réponse, corrigé. */
+export function carreMoinsCarreLatex(k: number): string {
+  return k === 1 ? "x^2-1" : `x^2-${k}^2`;
+}
+
 /** `k·x` affiché — `x` si k=1. */
 export function formatKx(k: number): string {
   return k === 1 ? "x" : `${k}x`;
@@ -152,7 +158,7 @@ function aideANiveau2(phase: "aDomaine" | "aDerivee", exercice: ExerciceDomaineD
 export function formatFonctionB(exercice: ExerciceDomaineDeriveeLogB): string {
   if (exercice.sousType === "doubleContrainte") return `\\sqrt{1-${formatLog(formatAffine(exercice.m, exercice.n), exercice.base, false)}}`;
   if (exercice.sousType === "racineInterne") return formatLog("\\sqrt{1-x^2}", exercice.base, false);
-  if (exercice.sousType === "quadratique") return formatLog(`x^2-${exercice.k}^2`, exercice.base, false);
+  if (exercice.sousType === "quadratique") return formatLog(`${carreMoinsCarreLatex(exercice.k)}`, exercice.base, false);
   return formatLog(`\\sqrt{${formatXMoins(exercice.p)}}`, exercice.base, false);
 }
 
@@ -164,7 +170,7 @@ function deriveeLatexB(exercice: ExerciceDomaineDeriveeLogB): string {
   }
   if (exercice.sousType === "racineInterne") return `-\\dfrac{x}{(1-x^2)\\ln(${b})}`;
   if (exercice.sousType === "quadratique") return `\\dfrac{2x}{(x^2-${exercice.k * exercice.k})\\ln(${b})}`;
-  return `\\dfrac{1}{2(${formatXMoins(exercice.p)})\\ln(${b})}`;
+  return `\\dfrac{1}{${exercice.p === 0 ? "2x" : `2(${formatXMoins(exercice.p)})`}\\ln(${b})}`;
 }
 
 function consigneB(phase: "bDomaine" | "bDerivee"): FragmentConsigne[] {
@@ -188,7 +194,7 @@ function aideBNiveau2(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineD
       return { texte: "Les deux inéquations, affichées séparément (intersection non faite) :", latex: `\\begin{gathered} ${arg} > 0 \\\\ ${arg} \\leq ${exercice.base} \\end{gathered}` };
     }
     if (exercice.sousType === "racineInterne") return { texte: "Conditions séparées :", latex: "\\begin{gathered} 1-x^2 \\geq 0 \\\\ \\sqrt{1-x^2} > 0 \\end{gathered}" };
-    if (exercice.sousType === "quadratique") return { texte: "Inéquation à résoudre :", latex: `x^2-${exercice.k}^2 > 0` };
+    if (exercice.sousType === "quadratique") return { texte: "Inéquation à résoudre :", latex: `${carreMoinsCarreLatex(exercice.k)} > 0` };
     return { texte: "Les deux conditions (à combiner) :", latex: `\\begin{gathered} ${formatXMoins(exercice.p)} \\geq 0 \\\\ \\sqrt{${formatXMoins(exercice.p)}} > 0 \\end{gathered}` };
   }
   const b = exercice.base;
@@ -197,7 +203,7 @@ function aideBNiveau2(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineD
     return { texte: "Fonction intérieure et sa dérivée (règle de la chaîne, pas encore assemblées) :", latex: `w(x) = 1-\\log_{${b}}(${arg}),\\qquad w'(x) = ${fractionSignee(-exercice.m, "", `(${arg})\\ln(${b})`)}` };
   }
   if (exercice.sousType === "racineInterne") return { texte: "Argument et sa dérivée — il reste à les placer dans la formule :", latex: `u(x) = \\sqrt{1-x^2},\\qquad u'(x) = -\\dfrac{x}{\\sqrt{1-x^2}}` };
-  if (exercice.sousType === "quadratique") return { texte: "Argument et sa dérivée — il reste à les placer dans la formule :", latex: `u(x) = x^2-${exercice.k}^2,\\qquad u'(x) = 2x` };
+  if (exercice.sousType === "quadratique") return { texte: "Argument et sa dérivée — il reste à les placer dans la formule :", latex: `u(x) = ${carreMoinsCarreLatex(exercice.k)},\\qquad u'(x) = 2x` };
   return { texte: "Argument et sa dérivée — il reste à les placer dans la formule :", latex: `u(x) = \\sqrt{${formatXMoins(exercice.p)}},\\qquad u'(x) = \\dfrac{1}{2\\sqrt{${formatXMoins(exercice.p)}}}` };
 }
 
@@ -224,7 +230,7 @@ export function facteursLatexC(exercice: ExerciceDomaineDeriveeLogC): { u: strin
     return { u: "x^2", uPrime: "2x", v: `\\ln(${arg})`, vPrime: fractionSignee(exercice.m, "", arg) };
   }
   const { k } = exercice;
-  return { u: "\\ln(x)", uPrime: "\\dfrac{1}{x}", v: `\\sqrt{x^2-${k}^2}`, vPrime: `\\dfrac{x}{\\sqrt{x^2-${k}^2}}` };
+  return { u: "\\ln(x)", uPrime: "\\dfrac{1}{x}", v: `\\sqrt{${carreMoinsCarreLatex(k)}}`, vPrime: `\\dfrac{x}{\\sqrt{${carreMoinsCarreLatex(k)}}}` };
 }
 
 function formatFonctionC(exercice: ExerciceDomaineDeriveeLogC): string {
@@ -251,7 +257,7 @@ function deriveeLatexC(exercice: ExerciceDomaineDeriveeLogC): string {
       return `2x\\ln(${arg})${second.startsWith("-") ? "" : "+"}${second}`;
     }
     case "lnRacine":
-      return `\\dfrac{\\sqrt{x^2-${exercice.k}^2}}{x}+\\dfrac{x\\ln(x)}{\\sqrt{x^2-${exercice.k}^2}}`;
+      return `\\dfrac{\\sqrt{${carreMoinsCarreLatex(exercice.k)}}}{x}+\\dfrac{x\\ln(x)}{\\sqrt{${carreMoinsCarreLatex(exercice.k)}}}`;
   }
 }
 
@@ -279,7 +285,7 @@ function conditionsDomaineC(exercice: ExerciceDomaineDeriveeLogC): string {
     case "carreLn":
       return `\\ln(${formatAffine(exercice.m, exercice.n)})\\ :\\ \\text{argument} > 0`;
     case "lnRacine":
-      return `\\begin{gathered} \\ln(x)\\ :\\ \\text{argument} > 0 \\\\ \\sqrt{x^2-${exercice.k}^2}\\ :\\ \\text{radicande} \\geq 0 \\end{gathered}`;
+      return `\\begin{gathered} \\ln(x)\\ :\\ \\text{argument} > 0 \\\\ \\sqrt{${carreMoinsCarreLatex(exercice.k)}}\\ :\\ \\text{radicande} \\geq 0 \\end{gathered}`;
   }
 }
 
@@ -323,7 +329,7 @@ function deriveeLatexD(exercice: ExerciceDomaineDeriveeLogD): string {
 function consigneD(phase: "dDomaine" | "dND" | "dAssemblage"): FragmentConsigne[] {
   if (phase === "dDomaine") return [texte(CONSIGNE_DOMAINE)];
   if (phase === "dND") return [texte("Dérive le numérateur N ET le dénominateur D SÉPARÉMENT ("), latex("N'(x)"), texte(" et "), latex("D'(x)"), texte(").")];
-  return [texte("Assemble via "), latex("(N'D-ND')/D^2"), texte(", à partir des valeurs "), latex("N'/D'"), texte(" CORRECTES de l'étape précédente.")];
+  return [texte("Assemble via "), latex("\\dfrac{N'D-ND'}{D^2}"), texte(", à partir des valeurs de "), latex("N'"), texte(" et "), latex("D'"), texte(" CORRECTES de l'étape précédente.")];
 }
 
 function aideDNiveau1(phase: "dDomaine" | "dND" | "dAssemblage", exercice: ExerciceDomaineDeriveeLogD): AideAvecLatex {
@@ -360,7 +366,7 @@ export function formatFonctionEOrigine(exercice: ExerciceDomaineDeriveeLogE): st
     case "combinaison":
       return "(\\ln x)^3-\\ln(x^3)";
     case "valeurAbsolueQuadratique":
-      return `\\ln\\left((x^2-${exercice.k}^2)^2\\right)`;
+      return `\\ln\\left((${carreMoinsCarreLatex(exercice.k)})^2\\right)`;
     case "dejaSimplifie":
       return "\\ln(x^x)";
   }
@@ -377,7 +383,7 @@ export function formeSimplifieeLatexE(exercice: ExerciceDomaineDeriveeLogE): str
     case "combinaison":
       return "(\\ln x)^3-3\\ln(x)";
     case "valeurAbsolueQuadratique":
-      return `2\\ln\\left|x^2-${exercice.k}^2\\right|`;
+      return `2\\ln\\left|${carreMoinsCarreLatex(exercice.k)}\\right|`;
     case "dejaSimplifie":
       return "x\\ln(x)";
   }
@@ -454,7 +460,7 @@ function conditionsDomaineE(exercice: ExerciceDomaineDeriveeLogE): string {
     case "combinaison":
       return "x > 0 \\quad\\text{et}\\quad x^3 > 0";
     case "valeurAbsolueQuadratique":
-      return `(x^2-${exercice.k}^2)^2 > 0`;
+      return `(${carreMoinsCarreLatex(exercice.k)})^2 > 0`;
     case "dejaSimplifie":
       return "x^x \\text{ (base } x \\text{ réelle quelconque : base } > 0\\text{)} \\quad\\text{et}\\quad x^x > 0";
   }
@@ -467,7 +473,7 @@ function aideENiveau2(phase: "eDomaine" | "eSimplifier" | "eDerivee", exercice: 
       case "puissanceAbs":
         return { texte: "Première étape (puissance descendue, valeur absolue pas encore ajoutée) :", latex: "2\\ln(e^x-1)\\ \\text{(FAUX, il manque la valeur absolue)}" };
       case "valeurAbsolueQuadratique":
-        return { texte: "Première étape (puissance descendue, valeur absolue pas encore ajoutée) :", latex: `2\\ln(x^2-${exercice.k}^2)\\ \\text{(FAUX, il manque la valeur absolue)}` };
+        return { texte: "Première étape (puissance descendue, valeur absolue pas encore ajoutée) :", latex: `2\\ln(${carreMoinsCarreLatex(exercice.k)})\\ \\text{(FAUX, il manque la valeur absolue)}` };
       case "quotientDifference":
         return { texte: "Première étape (quotient séparé, pas encore les 2 termes finaux) :", latex: "\\ln(\\text{numérateur})-\\ln(\\text{dénominateur})" };
       case "puissanceSimple":
@@ -510,7 +516,7 @@ function deriveeLatexF(exercice: ExerciceDomaineDeriveeLogF): string {
     case "arctanLog": {
       const { k, base } = exercice;
       const kCarreX2 = k === 1 ? "x^2" : `${k * k}x^2`;
-      return `\\dfrac{\\dfrac{${k}\\left(1-\\log_{${base}}(x)\\right)}{1+${kCarreX2}}+\\dfrac{\\arctan(${formatKx(k)})}{x\\ln(${base})}}{\\left(1-\\log_{${base}}(x)\\right)^2}`;
+      return `\\dfrac{\\dfrac{${k === 1 ? `1-\\log_{${base}}(x)` : `${k}\\left(1-\\log_{${base}}(x)\\right)`}}{1+${kCarreX2}}+\\dfrac{\\arctan(${formatKx(k)})}{x\\ln(${base})}}{\\left(1-\\log_{${base}}(x)\\right)^2}`;
     }
   }
 }
