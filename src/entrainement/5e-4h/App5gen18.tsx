@@ -23,6 +23,9 @@ import { EtapeTableauComparaisonSuites } from "./components5e/EtapeTableauCompar
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
 import { formatConclusionNLatex, formatTraductionAttendueTexte } from "./ui5e/formatComparaisonSuites";
 import { Katex } from "./components/Katex";
+import { correctionDetailleeComparaisonSuites } from "./generateurs5e/comparaisonSuites/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import { TableComparaisonRecap } from "./components5e/TableComparaisonRecap";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -151,6 +154,7 @@ export function App5gen18() {
               <Katex expression={formatConclusionNLatex(exercice)} /> — {formatTraductionAttendueTexte(exercice)}
             </>
           ),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComparaisonSuites(exercice), etat.phase === "tableau" ? "a" : "b")} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

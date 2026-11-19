@@ -6,25 +6,20 @@ import type {
   CritereBareme,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { construireSvgCarresEmboites, construireSvgCarresMilieux, construireSvgPartageCarre, construireSvgZigzag } from "../../export5e/svgSuiteClassique";
+import { construireSvgCarresEmboites, construireSvgZigzag } from "../../export5e/svgSuiteClassique";
 import type { PhaseSuiteClassique } from "../../moteur5e/typesSuiteClassique";
 import { ordreComplet } from "../../moteur5e/typesSuiteClassique";
 import {
   consigneGenerale,
   consignePhase,
-  formatTermesReponseAttendueLatex,
-  formatTermesSuitesFinalesLatex,
   LIBELLE_PHASE_SUITE_CLASSIQUE,
-  texteAideNiveau1,
-  texteAideNiveau2,
-  texteReponseAttendueQCM,
 } from "../../ui5e/formatSuiteClassique";
+import { correctionDetailleeSuiteClassique, reponseLatexSuiteClassique as reponseLatex } from "./corrigeDetaille";
 import { CATALOGUE_SCENARIOS, construireAvecScenarioId, genererExerciceSuiteClassique } from "./index";
 
 /**
@@ -50,25 +45,6 @@ const LETTRES = "abcdefghijklmnopqrstuvwxyz";
 
 function lettre(exercice: ExerciceSuiteClassique, phase: PhaseSuiteClassique): string {
   return LETTRES[ordreComplet(exercice).indexOf(phase)];
-}
-
-/** Mini-syntaxe « texte avec $formule$ » (aides de niveau 1 de l'écran) → fragments. */
-function fragmentsMiniSyntaxe(source: string): FragmentConsigne[] {
-  return source
-    .split("$")
-    .map((morceau, i) => (i % 2 === 1 ? latex(morceau) : texte(morceau)))
-    .filter((f) => !(f.type === "texte" && f.valeur === ""));
-}
-
-/** Réponse attendue d'un écran (mêmes fonctions que le récapitulatif de l'appli). */
-function reponseLatex(exercice: ExerciceSuiteClassique, phase: PhaseSuiteClassique): string {
-  if (phase === "suitesFinalesCombinees" && exercice.scenario === "suitesCombinees") {
-    const { arithmetique, geometrique } = formatTermesSuitesFinalesLatex(exercice);
-    return `${arithmetique.join(",\\ ")}\\quad;\\quad ${geometrique.join(",\\ ")}`;
-  }
-  const qcm = texteReponseAttendueQCM(exercice, phase);
-  if (qcm !== null) return qcm;
-  return (formatTermesReponseAttendueLatex(exercice, phase) ?? []).join(" \\quad ");
 }
 
 function enteteHtml(exercice: ExerciceSuiteClassique): string | undefined {
@@ -168,54 +144,6 @@ function construireCorrectionSuiteClassique(exercice: ExerciceSuiteClassique): B
 /** Réponses finales du problème (dernière étape de chaque question papier), sans lettre. */
 function reponseBreveSuiteClassique(exercice: ExerciceSuiteClassique): FragmentConsigne[] {
   return questionsPapier(exercice).flatMap((question, i): FragmentConsigne[] => [...(i === 0 ? [] : [texte(" ; ")]), latex(reponseLatex(exercice, question.phases[question.phases.length - 1]))]);
-}
-
-/** Piège ciblé, rattaché à l'écran où l'erreur se commet. */
-function piege(exercice: ExerciceSuiteClassique, phase: PhaseSuiteClassique): FragmentConsigne[] | null {
-  switch (phase) {
-    case "u64":
-      return [texte("Sur la case n, il y a "), latex("2^{n-1}"), texte(" grains, et non "), latex("2^n"), texte(" : la 1re case en porte "), latex("2^0=1"), texte(".")];
-    case "poserSysteme":
-      return [texte("Les 2 plus petites parts sont u₁ et u₂ : c'est la somme des 3 plus grandes qui vaut "), latex(`${exercice.scenario === "papyrusRhind" ? exercice.facteur : "k"}`), texte(" fois celle des 2 plus petites, pas l'inverse.")];
-    case "poserEquationCombinees":
-      return [texte("Comme "), latex("x^2=yz"), texte(", le produit "), latex("x\\cdot y\\cdot z"), texte(" vaut "), latex("x^3"), texte(" — et non "), latex("x^2"), texte(".")];
-    case "resoudreRCombinees":
-      return [latex("r=0"), texte(" est aussi solution de l'équation, mais donne une suite constante : on la rejette.")];
-    case "distance11":
-      return [latex("u_n=u_1+(n-1)\\,r"), texte(", et non "), latex("u_1+n\\,r"), texte(" : il y a n − 1 ajouts de r entre u₁ et uₙ.")];
-    case "troisMethodes":
-      return [texte("Pour passer des m/s aux km/h, on MULTIPLIE par 3,6.")];
-    case "resoudrePhi":
-      return [texte("L'équation a deux racines ; φ est la racine POSITIVE.")];
-    case "airesZigzag":
-      return [texte("Les longueurs sont divisées par 2 d'un triangle au suivant, mais les aires par "), latex("2^2=4"), texte(" : raison "), latex("\\dfrac14"), texte(", pas "), latex("\\dfrac12"), texte(".")];
-    case "sommePartielleA":
-      return [latex("S_5"), texte(" est la somme de 5 termes : la formule utilise "), latex("q^5"), texte(".")];
-    case "sommeInfinieB":
-      return [texte("La somme infinie existe parce que "), latex("|q|=\\dfrac12<1"), texte(" ; elle vaut le double de l'aire du premier carré.")];
-    default:
-      return null;
-  }
-}
-
-function figure(exercice: ExerciceSuiteClassique, phase: PhaseSuiteClassique): string | undefined {
-  if (exercice.scenario === "trianglesZigzag" && phase === "hauteursZigzag") return construireSvgZigzag(exercice);
-  if (exercice.scenario === "carresEmboites" && phase === "sommePartielleA") return construireSvgPartageCarre(exercice);
-  if (exercice.scenario === "carresEmboites" && phase === "airesB") return construireSvgCarresMilieux(exercice);
-  return undefined;
-}
-
-function correctionDetailleeSuiteClassique(exercice: ExerciceSuiteClassique): EtapeCorrection[] {
-  return ordreComplet(exercice).flatMap((phase, i): EtapeCorrection[] => {
-    const sousQuestion = LETTRES[i];
-    const lignes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion, fragments: fragmentsMiniSyntaxe(texteAideNiveau1(exercice, phase)), figureHtml: figure(exercice, phase) }];
-    const calcul = texteAideNiveau2(exercice, phase);
-    if (calcul !== "") lignes.push({ label: "Calcul", sousQuestion, fragments: [latex(calcul)] });
-    lignes.push({ label: "Conclusion", sousQuestion, fragments: [latex(reponseLatex(exercice, phase))] });
-    const p = piege(exercice, phase);
-    if (p !== null) lignes.push({ label: "Piège", sousQuestion, fragments: p });
-    return lignes;
-  });
 }
 
 // ============================================================================

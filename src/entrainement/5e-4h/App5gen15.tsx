@@ -37,6 +37,9 @@ import {
 } from "./moteur5e/sessionSuiteGeometrique";
 import type { ReponseEquation } from "./moteur5e/sessionSuiteGeometrique";
 import { ordreComplet } from "./moteur5e/typesSuiteGeometrique";
+import { correctionDetailleeSuiteGeometrique } from "./generateurs5e/suitesGeometriques/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import type { EtatSessionSuiteGeometrique, PhaseSuiteGeometrique } from "./moteur5e/typesSuiteGeometrique";
 import {
   diagnostiquerEquationComplete,
@@ -459,6 +462,7 @@ export function App5gen15() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendueEcran(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSuiteGeometrique(exercice), lettreEtape(ordreComplet(exercice).indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
