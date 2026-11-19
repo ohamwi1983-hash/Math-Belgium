@@ -4214,3 +4214,20 @@ paths:
   (jamais selon le type). Fichiers : `AppDetectiveSecondDegre.tsx`, `core/detectiveSecondDegre.types.ts`,
   `moteur/{modele,session,verification}DetectiveSecondDegre.ts`, `ui/formatDetectiveSecondDegre.ts`,
   `generateurs/detectiveSecondDegre/` (index, profil, corrigeDetaille, exportEvaluation).
+
+- **4e, Chapitre 2 — nouveau générateur gen113 « Méthode et nombre de solutions »** (lot H, processus 1
+  Connaître, section `resoudre`, carte après gen67) : une équation, 2 ou 3 écrans — la méthode la plus
+  rapide (6 choix : mise en évidence, différence de deux carrés, aucune solution sans calcul, carré
+  parfait, racine évidente, discriminant ; une tentative), le nombre de solutions (la seule affirmation
+  vraie parmi quatre « N solutions, car … », prémisses c = 0, b = 0 et x² = −c/a, Δ, a ± b + c = 0,
+  P < 0 ; une tentative), puis les solutions quand elles sont évidentes (champ libre, valeurs séparées
+  par « ; »). Décision 1 : pour a ± b + c = 0, « racine évidente » ET « discriminant » acceptés (note
+  sous la validation : la racine évidente est plus rapide). Variantes = allure (incomplètes c = 0 ou
+  b = 0 / complètes), méthode = verdict tiré au hasard (1/3 chacune), une seule méthode applicable
+  par équation (collecteur : 0 ambiguïté sur 1 200 tirages ; contrôle indépendant des raccourcis),
+  présentation réduite ou déplacée à parts égales. Niveau CONSTANT (2, 7 min) : le nombre d'écrans
+  dépend du verdict. Profil : `forme` = variante, aucun cas, pas de `calcul`. Composants génériques
+  ajoutés : `ChoixUniqueFragments.tsx` (choix fermé, une tentative, note après validation),
+  `EtapeChampLibreTrinome.tsx` (un champ libre, 3 tentatives). Fichiers : `AppMethodeNombreSolutions.tsx`,
+  `core/methodeNombreSolutions.types.ts`, `moteur/{modele,session,verification}MethodeNombreSolutions.ts`,
+  `ui/formatMethodeNombreSolutions.ts`, `generateurs/methodeNombreSolutions/`.

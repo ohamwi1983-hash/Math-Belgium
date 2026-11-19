@@ -648,6 +648,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 67. Relations entre racines et coefficients »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Méthode et nombre de solutions',
+          generatorId: 'gen113',
+          description: [
+            'Série rapide : pour chaque équation, reconnais le raccourci (mise en évidence, différence ' +
+              'de deux carrés, aucune solution, carré parfait, racine évidente) ou le cas général, ' +
+              'donne le nombre de solutions en une ligne, puis les solutions quand elles sont évidentes.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 113. Méthode et nombre de solutions »',
+        },
       ],
     },
     {
