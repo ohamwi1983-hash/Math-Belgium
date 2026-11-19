@@ -83,6 +83,10 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   monter les cas visés (6gen34 E 1 → 2, 6gen40 D_rotation/D_similitude 2 → 3, 6gen78 valeurs 2 → 3).
   Puis étapes équivalentes 1–2 → 0, 3–5 → 1, 6+ → 2. Corrigé pas encore « comme au tableau » (6e ch. 3) :
   `lignesMinimales` déclare les lignes qu'aurait l'étape au tableau (6gen21 : b 10, d 16, e 10).
+  Écrans répétitifs (5gen15, décision de l'utilisateur) : les étapes de la SECONDE suite (phases
+  « …B2 », mêmes calculs avec l'autre raison) comptent comme des lectures (1 min, sans niveau) ; un
+  écran « termes proches » (u₂, u₃, u₄… calculés de la même façon) est une étape SANS charge
+  (`lettresSansCharge`). Effet : « principal » 16,8 → 14,9 min en moyenne, maximum 25 → 21.
   gen72 : une transformation de la chaîne = une étape, `sansCharge`.
 - **Méthode (0/1/2)** : 0 imposée/évidente ; 1 choisir parmi les méthodes du cours ; 2 l'élève
   construit lui-même le modèle ; formule du contexte / fonction donnée → au plus 1.

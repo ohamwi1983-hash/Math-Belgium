@@ -204,8 +204,28 @@ function enoncePapierSuiteGeometrique(exercice: ExerciceSuiteGeometrique): Enonc
  * inconnue x, rang n par réduction à la même base. */
 /** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
  * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+/** Lettres des étapes de la SECONDE suite (phases « …B2 », quand qᵏ = a a deux solutions) : elles
+ * refont exactement les mêmes calculs avec l'autre raison. Décision de l'utilisateur : elles comptent
+ * comme des écrans de lecture (1 min, sans faire monter le niveau ni ajouter de charge) — sinon une
+ * instance à deux suites montait jusqu'à 25 min. */
+function lettresSecondeSuite(e: ExerciceSuiteGeometrique): string[] {
+  return ordreComplet(e).flatMap((phase, i) => (phase.endsWith("B2") ? [LETTRES[i]] : []));
+}
+
+/** Lettres des écrans « termes proches » : plusieurs termes calculés de la même façon (u₂, u₃, u₄…).
+ * L'écran compte pour UNE étape, sans charge supplémentaire pour la longueur de la liste. */
+function lettresTermesProches(e: ExerciceSuiteGeometrique): string[] {
+  return ordreComplet(e).flatMap((phase, i) => (phase.startsWith("termesProches") ? [LETTRES[i]] : []));
+}
+
 function criteresDifficulte(e: ExerciceSuiteGeometrique): CriteresDifficulte {
-  return { ...etapesDuCorrige(correctionDetailleeSuiteGeometrique(e)), methode: e.famille === "principal" ? 0 : 1, piege: 0 };
+  const base = etapesDuCorrige(correctionDetailleeSuiteGeometrique(e), lettresSecondeSuite(e));
+  return {
+    ...base,
+    lettresSansCharge: [...(base.lettresSansCharge ?? []), ...lettresTermesProches(e)],
+    methode: e.famille === "principal" ? 0 : 1,
+    piege: 0,
+  };
 }
 
 function reponseBreveSuiteGeometrique(exercice: ExerciceSuiteGeometrique): FragmentConsigne[] {
