@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceInequationRationnelle } from "../core/inequationRationnelle.types";
 import type { SolutionEnsembleProduit } from "../core/signesProduit.types";
 import { Katex } from "./Katex";
@@ -195,7 +196,7 @@ export function EtapeIntervalleQuotient({
             id="valeur-point"
             className="text-input"
             value={valeurPoint}
-            onChange={(e) => setValeurPoint(e.target.value)}
+            onChange={(e) => setValeurPoint(normaliserSigneMoins(e.target.value))}
           />
         </div>
       )}
@@ -207,7 +208,7 @@ export function EtapeIntervalleQuotient({
               <input
                 className="text-input"
                 value={valeur}
-                onChange={(e) => modifierValeurExclue(index, e.target.value)}
+                onChange={(e) => modifierValeurExclue(index, normaliserSigneMoins(e.target.value))}
                 placeholder="point exclu"
                 aria-label={`Point exclu ${index + 1}`}
               />

@@ -1,6 +1,7 @@
 import type { EtatSession } from "../moteur";
 import { formatEnonceAffichage, formatEnonceLatex, formatEquationIsoleeNonDeveloppee } from "./formatEquation";
 import { libelleCategorie } from "./categorieLabels";
+import { formeRacineEvidente, libelleMethode } from "../moteur/methodeSecondDegre";
 
 export interface EntreeRecapitulatif {
   libelle: string;
@@ -77,12 +78,14 @@ export function calculerRecapitulatif(etat: EtatSession): EntreeRecapitulatif[] 
   }
 
   if (etat.scoreReconnaissanceExercice !== null) {
-    entrees.push({ libelle: "Méthode", estLatex: false, valeur: libelleCategorie(exercice.categorie), revele: etat.categorieRevelee });
+    entrees.push({ libelle: "Méthode", estLatex: false, valeur: etat.methodeRetenue ? libelleMethode(etat.methodeRetenue) : libelleCategorie(exercice.categorie), revele: etat.categorieRevelee });
   }
 
   if (etat.scoreChampPrincipalExercice !== null) {
-    if (exercice.categorie === "cas_general") {
-      entrees.push({ libelle: "Δ", estLatex: false, valeur: `Δ = ${exercice.solution.delta}`, revele: etat.champPrincipalRevele });
+    if (etat.methodeRetenue === "racine_evidente") {
+      entrees.push({ libelle: "Forme factorisée", estLatex: true, valeur: `${formeRacineEvidente(exercice.enonce)} = 0`, revele: etat.champPrincipalRevele });
+    } else if (exercice.categorie === "cas_general") {
+      entrees.push({ libelle: "Δ", estLatex: true, valeur: `\\Delta = ${exercice.solution.delta}`, revele: etat.champPrincipalRevele });
     } else {
       entrees.push({
         libelle: "Forme factorisée",

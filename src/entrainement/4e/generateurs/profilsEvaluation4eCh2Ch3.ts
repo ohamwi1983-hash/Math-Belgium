@@ -45,11 +45,13 @@ export const LIBELLE_CAS_SECOND_DEGRE = "Inclure un cas particulier (équation i
  * relève alors d'une autre méthode, plus courte. */
 export function profilSecondDegre(e: Exercice): ProfilInstance {
   const meg = e.categorie === "mise_en_evidence_generalisee";
-  const marqueurs = [meg && (e.enonce.b === 0 || e.enonce.c === 0) && "equation-incomplete", !meg && e.solution.racinesExactes && "racines-rationnelles"].filter(Boolean);
+  // « Aucune solution » (décision 2) : un VERDICT, jamais un cas particulier ; pas de racine du tout,
+  // donc la case « racines irrationnelles » est sans objet, comme pour la mise en évidence généralisée.
+  const sansRacine = Number.isNaN(e.solution.racines[0]);
+  const marqueurs = [meg && (e.enonce.b === 0 || e.enonce.c === 0) && "equation-incomplete", !meg && !sansRacine && e.solution.racinesExactes && "racines-rationnelles"].filter(Boolean);
   return {
     casParticulier: marqueurs.length ? marqueurs.join("+") : null,
-    // La mise en évidence généralisée n'a jamais de racines irrationnelles : la case est sans objet.
-    parametresNonApplicables: meg ? ["racines-rationnelles"] : undefined,
+    parametresNonApplicables: meg || sansRacine ? ["racines-rationnelles"] : undefined,
   };
 }
 

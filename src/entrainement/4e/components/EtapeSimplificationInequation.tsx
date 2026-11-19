@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   tentativesUtilisees: number;
@@ -12,6 +14,10 @@ interface Props {
   diagnostiquer: (valeur: string) => StatutVerification;
   aideActivee: boolean;
   onActiverAide: () => void;
+  /** Aides à 2 niveaux (KaTeX) fournies par l'appli — remplacent l'aide historique à 1 niveau. */
+  aides?: FragmentConsigne[][];
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse (jamais la réponse). */
+  messageCible?: (valeur: string) => FragmentConsigne[] | null;
   onValider: (reponse: string) => void;
   validation?: ValidationEtapeProps | null;
 }
@@ -35,10 +41,13 @@ export function EtapeSimplificationInequation({
   diagnostiquer,
   aideActivee,
   onActiverAide,
+  aides,
+  messageCible,
   onValider,
   validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
+  const saisie = useTentativeLisible<string>();
 
   return (
     <div>
@@ -52,11 +61,14 @@ export function EtapeSimplificationInequation({
           id="simplification-inequation"
           className="text-input"
           value={reponse}
-          onChange={(e) => setReponse(e.target.value)}
+          onChange={(e) => setReponse(normaliserSigneMoins(e.target.value))}
         />
       </div>
       {!validation && (
         <>
+          {aides ? (
+            <AidesNiveaux aides={aides} onPremiereAide={onActiverAide} />
+          ) : (
           <div>
             {aideActivee && (
               <div className="triangle-quelconque-aide">
@@ -69,14 +81,11 @@ export function EtapeSimplificationInequation({
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>
-          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
+          )}
+          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => saisie.tenter(reponse, diagnostiquer(reponse) !== "parse_error", onValider)}>
             Valider
           </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer(reponse))}
-            </p>
-          )}
+          <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={saisie.soumise !== null ? messageCible?.(saisie.soumise) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

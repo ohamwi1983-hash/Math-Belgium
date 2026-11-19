@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceInequation, SolutionEnsemble } from "../core/inequation.types";
 import { Katex } from "./Katex";
 import { MorceauIntervalleInput } from "./MorceauIntervalleInput";
@@ -139,7 +140,7 @@ export function EtapeInequation({
             id="valeur-point"
             className="text-input"
             value={valeurPoint}
-            onChange={(e) => setValeurPoint(e.target.value)}
+            onChange={(e) => setValeurPoint(normaliserSigneMoins(e.target.value))}
           />
         </div>
       )}

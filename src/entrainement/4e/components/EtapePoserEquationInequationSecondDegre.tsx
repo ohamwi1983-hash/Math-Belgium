@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import { diagnostiquerPoserEquationInequation } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_POSER_EQUATION_INEQUATION } from "../moteur/sessionEquationInequationSecondDegre";
@@ -54,7 +55,7 @@ export function EtapePoserEquationInequationSecondDegre({ exercice, tentativesUt
           className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={exercice.variante === "equation" ? "ex : -3x^2+17x=5" : "ex : -3x^2+17x>5"}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

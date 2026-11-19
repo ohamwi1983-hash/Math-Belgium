@@ -1,13 +1,15 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceRelationsRacines } from "../core/relationsRacines.types";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { formatRacinesRevelees } from "../ui/formatRelationsRacines";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { Katex } from "./Katex";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
@@ -19,6 +21,10 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   diagnostiquer: (valeur: string) => StatutVerification;
+  /** Aides à 2 niveaux (KaTeX) fournies par l'appli — remplacent l'aide historique à 1 niveau. */
+  aides?: FragmentConsigne[][];
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse (jamais la réponse). */
+  messageCible?: (valeur: string) => FragmentConsigne[] | null;
   onValider: (reponse: string) => void;
   validation?: ValidationEtapeProps | null;
 }
@@ -31,6 +37,8 @@ interface Props {
  * construction plutôt que vérification).
  */
 export function EtapeFactorisationRacines({
+  aides,
+  messageCible,
   exercice,
   tentativesUtilisees,
   tentativesMax,
@@ -42,6 +50,7 @@ export function EtapeFactorisationRacines({
   validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
+  const saisie = useTentativeLisible<string>();
   const statut = tentativesUtilisees > 0 ? diagnostiquer(reponse) : undefined;
 
   return (
@@ -60,11 +69,14 @@ export function EtapeFactorisationRacines({
           id="relrac-factorisation"
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           value={reponse}
-          onChange={(e) => setReponse(e.target.value)}
+          onChange={(e) => setReponse(normaliserSigneMoins(e.target.value))}
         />
       </div>
       {!validation && (
         <>
+          {aides ? (
+            <AidesNiveaux aides={aides} onPremiereAide={onActiverAide} />
+          ) : (
           <div>
             {aideActivee && (
               <div className="triangle-quelconque-aide">
@@ -76,14 +88,11 @@ export function EtapeFactorisationRacines({
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>
-          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
+          )}
+          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => saisie.tenter(reponse, diagnostiquer(reponse) !== "parse_error", onValider)}>
             Valider
           </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-            </p>
-          )}
+          <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={saisie.soumise !== null ? messageCible?.(saisie.soumise) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

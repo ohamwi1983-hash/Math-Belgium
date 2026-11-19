@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import type { ReponseSysteme } from "../moteur/verificationEquationInequationSecondDegre";
 import { diagnostiquerRelation1, diagnostiquerRelation2 } from "../moteur/verificationEquationInequationSecondDegre";
@@ -59,7 +60,7 @@ export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tenta
           className={`text-input${tentativesUtilisees > 0 && statut1 && statut1 !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : x-y=3"
           value={relation1}
-          onChange={(e) => setRelation1(e.target.value)}
+          onChange={(e) => setRelation1(normaliserSigneMoins(e.target.value))}
         />
       </div>
       <ApercuExpressionLatex texte={relation2} />
@@ -72,7 +73,7 @@ export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tenta
           className={`text-input${tentativesUtilisees > 0 && statut2 && statut2 !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 2x*y=7"
           value={relation2}
-          onChange={(e) => setRelation2(e.target.value)}
+          onChange={(e) => setRelation2(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

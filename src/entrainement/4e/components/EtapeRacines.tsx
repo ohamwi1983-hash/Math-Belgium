@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceInequation, ReponseRacines } from "../core/inequation.types";
 import { Katex } from "./Katex";
 import { formatEquationAssocieeLatex } from "../ui/formatInequation";
@@ -94,7 +95,7 @@ export function EtapeRacines({ exercice, tentativesUtilisees, tentativesMax, onV
               <input
                 className="text-input"
                 value={valeur}
-                onChange={(e) => modifierChamp(index, e.target.value)}
+                onChange={(e) => modifierChamp(index, normaliserSigneMoins(e.target.value))}
                 placeholder={`solution ${index + 1}`}
                 aria-label={`Solution ${index + 1}`}
               />

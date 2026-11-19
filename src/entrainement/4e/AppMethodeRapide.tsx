@@ -1,6 +1,6 @@
 import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
-import type { Categorie, Exercice } from "./core/generateur.types";
+import type { Exercice } from "./core/generateur.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideChamp1,
@@ -30,7 +30,10 @@ import { EtapeChamp1 } from "./components/EtapeChamp1";
 import { EtapeZeros } from "./components/EtapeZeros";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatif } from "./ui/recapitulatif";
-import { libelleCategorie } from "./ui/categorieLabels";
+import { formeRacineEvidente, libelleMethode, libelleMethodesAttendues, OPTIONS_METHODE, type ChoixMethode } from "./moteur/methodeSecondDegre";
+import { diagnostiquerFactorisationCasGeneral } from "./moteur/verification";
+import { TENTATIVES_CHOIX_FERME } from "./moteur/session";
+import { aidesDelta, aidesDevelopper, aidesFactorisation, aidesIsolement, aidesMethode, aidesSimplification, aidesZeros, messageDelta, messageZeros } from "./ui/aidesSecondDegre";
 import { formatEnonceAffichage, formatEnonceLatex, formatEquationIsoleeNonDeveloppee, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
@@ -61,7 +64,7 @@ function sessionInitiale(): EtatSession {
   return demarrerSession(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceSecondDegre, (id) => construireAvecVarianteId(id as VarianteSecondDegreId)));
 }
 
-function titreEcran(phase: EtatSession["phase"], exercice: Exercice): string {
+function titreEcran(phase: EtatSession["phase"], exercice: Exercice, methode: ChoixMethode | null = null): string {
   switch (phase) {
     case "simplification":
       return "Équation simplifiée";
@@ -72,7 +75,7 @@ function titreEcran(phase: EtatSession["phase"], exercice: Exercice): string {
     case "reconnaissance":
       return "Méthode";
     case "champ1":
-      return exercice.categorie === "cas_general" ? "Discriminant" : "Factorisation";
+      return exercice.categorie === "cas_general" && methode !== "racine_evidente" ? "Discriminant" : "Factorisation";
     default:
       return "Solutions";
   }
@@ -155,7 +158,7 @@ export function AppMethodeRapide() {
                 : etat.phase === "champ1"
                   ? nouvelEtat.champPrincipalRevele
                   : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.zerosRevele;
-      setHistorique((h) => [...h, ecranClos(titreEcran(etat.phase, etat.exerciceCourant), votreReponse, revele, aideEcran(etat), reponseAttenduePour(etat.phase, nouvelEtat))]);
+      setHistorique((h) => [...h, ecranClos(titreEcran(etat.phase, etat.exerciceCourant, etat.methodeRetenue), votreReponse, revele, aideEcran(etat), reponseAttenduePour(etat.phase, nouvelEtat))]);
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -220,9 +223,17 @@ export function AppMethodeRapide() {
         Équation développée attendue : <Katex expression={formatEnonceLatex(exercice.enonce)} />
       </>
     ) : phase === "reconnaissance" ? (
-      <>Méthode attendue : {libelleCategorie(exercice.categorie)}</>
+      <>Méthode attendue : {libelleMethodesAttendues(exercice)}</>
     ) : phase === "champ1" ? (
-      <Katex expression={exercice.categorie === "cas_general" ? `\\Delta = ${exercice.solution.delta}` : `${exercice.solution.formeFactorisee} = 0`} />
+      <Katex
+        expression={
+          etat.methodeRetenue === "racine_evidente"
+            ? `${formeRacineEvidente(exercice.enonce)} = 0`
+            : exercice.categorie === "cas_general"
+              ? `\\Delta = ${exercice.solution.delta}`
+              : `${exercice.solution.formeFactorisee} = 0`
+        }
+      />
     ) : phase === "champ2" ? (
       <span className="equation-box-termes">
         {formatTermesZerosAttendusLatex(exercice).map((terme, i) => (
@@ -238,7 +249,9 @@ export function AppMethodeRapide() {
         revele: enAttente.revele,
         reponseAttendue,
         corrigeDetaille: (
-          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSecondDegre(etat.exerciceOriginal), lettrePhaseSecondDegre(etat.exerciceOriginal, phase))} />
+          <CorrigeDetailleEcran
+            etapes={lignesDeLEtape(correctionDetailleeSecondDegre(etat.exerciceOriginal, enAttente.etatSuivant.methodeRetenue ?? etat.methodeRetenue), lettrePhaseSecondDegre(etat.exerciceOriginal, phase))}
+          />
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
@@ -275,6 +288,7 @@ export function AppMethodeRapide() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               diagnostiquer={(v) => diagnostiquerSimplification(exercice, v)}
+              aides={aidesSimplification()}
               aideActivee={etat.aideSimplificationUtilisee}
               onActiverAide={() => setEtat(activerAideSimplification(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseSimplification(etat, reponse), saisieEnLatex(reponse))}
@@ -292,6 +306,7 @@ export function AppMethodeRapide() {
               question={demandeFormeGeneraleDirecte(exercice) ? undefined : "Regroupe tous les termes du même côté."}
               label={demandeFormeGeneraleDirecte(exercice) ? undefined : null}
               diagnostiquer={(v) => diagnostiquerIsolement(exercice, v)}
+              aides={aidesIsolement(exercice.formeAffichage === "produit_egale_constante" || exercice.formeAffichage === "carre_egale_expression")}
               aideActivee={etat.aideIsolementUtilisee}
               onActiverAide={() => setEtat(activerAideIsolement(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseIsolement(etat, reponse), saisieEnLatex(reponse))}
@@ -307,6 +322,7 @@ export function AppMethodeRapide() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               diagnostiquer={(v) => diagnostiquerIsolement(exercice, v)}
+              aides={aidesDevelopper()}
               aideActivee={etat.aideDevelopperUtilisee}
               onActiverAide={() => setEtat(activerAideDevelopper(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseDevelopper(etat, reponse), saisieEnLatex(reponse))}
@@ -319,9 +335,11 @@ export function AppMethodeRapide() {
               enonceFixe={enonceFixe}
               masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME}
               recapitulatif={recapitulatif}
-              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixCategorie(etat, choix), libelleCategorie(choix))}
+              options={OPTIONS_METHODE}
+              aides={aidesMethode()}
+              onChoisir={(choix: ChoixMethode) => terminerEtape(soumettreChoixCategorie(etat, choix), libelleMethode(choix))}
               validation={validation}
             />
           ) : phase === "champ1" ? (
@@ -333,11 +351,18 @@ export function AppMethodeRapide() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              diagnostiquer={(v) => diagnostiquerChampPrincipal(exercice, v)}
+              etapeFactorisationForcee={etat.methodeRetenue === "racine_evidente"}
+              labelFactorisation={etat.methodeRetenue === "racine_evidente" ? "Factorise à l'aide de la racine évidente" : undefined}
+              diagnostiquer={(v) => (etat.methodeRetenue === "racine_evidente" ? diagnostiquerFactorisationCasGeneral(exercice, v) : diagnostiquerChampPrincipal(exercice, v))}
+              aides={exercice.categorie === "cas_general" && etat.methodeRetenue !== "racine_evidente" ? aidesDelta(exercice) : aidesFactorisation(exercice, etat.methodeRetenue ?? "mise_en_evidence_generalisee")}
+              messageCible={exercice.categorie === "cas_general" && etat.methodeRetenue !== "racine_evidente" ? (v) => messageDelta(exercice, v) : undefined}
               aideActivee={etat.aideChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideChamp1(etat))}
               onValider={(reponse) =>
-                terminerEtape(soumettreReponseChamp1(etat, reponse), exercice.categorie === "cas_general" ? <>Δ = {saisieEnLatex(reponse)}</> : saisieEnLatex(reponse.includes("=") ? reponse : `${reponse}=0`))
+                terminerEtape(
+                  soumettreReponseChamp1(etat, reponse),
+                  exercice.categorie === "cas_general" && etat.methodeRetenue !== "racine_evidente" ? <>Δ = {saisieEnLatex(reponse)}</> : saisieEnLatex(reponse.includes("=") ? reponse : `${reponse}=0`),
+                )
               }
               validation={validation}
             />
@@ -350,6 +375,8 @@ export function AppMethodeRapide() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesZeros(exercice, etat.methodeRetenue ?? (exercice.categorie === "mise_en_evidence_generalisee" ? "mise_en_evidence_generalisee" : null))}
+              messageCible={(r) => messageZeros(exercice, r)}
               aideActivee={etat.aideZerosUtilisee}
               onActiverAide={() => setEtat(activerAideZeros(etat))}
               onValider={(reponse: ReponseZeros) => terminerEtape(soumettreReponseChamp2(etat, reponse), reponse.aucun ? "Pas de solution" : reponse.valeurs.map((v) => `x = ${nombreSaisi(v)}`).join(" ; "))}

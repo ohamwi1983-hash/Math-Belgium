@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceSimplification } from "../core/simplification.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
@@ -132,7 +133,7 @@ export function EtapeCEDirecte({
           <label className="field-label" htmlFor="ce-directe">
             {label ?? "Condition d'existence (CE)"}
           </label>
-          <input id="ce-directe" className="text-input" value={reponse} onChange={(e) => setReponse(e.target.value)} />
+          <input id="ce-directe" className="text-input" value={reponse} onChange={(e) => setReponse(normaliserSigneMoins(e.target.value))} />
         </div>
       )}
 

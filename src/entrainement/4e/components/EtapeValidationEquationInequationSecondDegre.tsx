@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import type { ReponseIntervalle } from "../moteur/verificationEquationInequationSecondDegre";
 import { diagnostiquerValidationInequation, verifierValidationEquation } from "../moteur/verificationEquationInequationSecondDegre";
@@ -205,7 +206,7 @@ function EcranValidationInequation({ exercice, apresEchec, tentativesUtilisees, 
             id="equation-inequation-validation-inf"
             className={`text-input${apresEchec && statut && statut.inf !== "correct" ? " is-erronee" : ""}`}
             value={inf}
-            onChange={(e) => setInf(e.target.value)}
+            onChange={(e) => setInf(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -216,7 +217,7 @@ function EcranValidationInequation({ exercice, apresEchec, tentativesUtilisees, 
             id="equation-inequation-validation-sup"
             className={`text-input${apresEchec && statut && statut.sup !== "correct" ? " is-erronee" : ""}`}
             value={sup}
-            onChange={(e) => setSup(e.target.value)}
+            onChange={(e) => setSup(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

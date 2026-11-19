@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceSimplification } from "../core/simplification.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -144,7 +145,7 @@ export function EtapeSimplification({
           className="text-input"
           placeholder={placeholders?.[0]}
           value={numerateur}
-          onChange={(e) => setNumerateur(e.target.value)}
+          onChange={(e) => setNumerateur(normaliserSigneMoins(e.target.value))}
         />
       </div>
       <div className="field">
@@ -156,7 +157,7 @@ export function EtapeSimplification({
           className="text-input"
           placeholder={placeholders?.[1]}
           value={denominateur}
-          onChange={(e) => setDenominateur(e.target.value)}
+          onChange={(e) => setDenominateur(normaliserSigneMoins(e.target.value))}
         />
       </div>
       {!validation && (

@@ -118,6 +118,8 @@ export function racinesExactes(ex: Exercice): Rac[] {
     return c1 === c2 ? [rac(c1, ex.irrationnel.k)] : [rac(c1, ex.irrationnel.k), rac(c2, ex.irrationnel.k)];
   }
   const [r1, r2] = [...ex.solution.racines].sort((x, y) => x - y);
+  // Aucune racine réelle (Δ < 0, ou b = 0 avec a, c de même signe) : racines [NaN, NaN].
+  if (Number.isNaN(r1) || Number.isNaN(r2)) return [];
   return r1 === r2 ? [rac(r1)] : [rac(r1), rac(r2)];
 }
 

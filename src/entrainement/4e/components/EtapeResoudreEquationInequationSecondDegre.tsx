@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import { diagnostiquerResoudre } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_RESOUDRE } from "../moteur/sessionEquationInequationSecondDegre";
@@ -55,7 +56,7 @@ export function EtapeResoudreEquationInequationSecondDegre({ exercice, tentative
               id={`equation-inequation-resoudre-${index}`}
               className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
               value={valeur}
-              onChange={(e) => modifier(index as 0 | 1, e.target.value)}
+              onChange={(e) => modifier(index as 0 | 1, normaliserSigneMoins(e.target.value))}
             />
           </div>
         ))}

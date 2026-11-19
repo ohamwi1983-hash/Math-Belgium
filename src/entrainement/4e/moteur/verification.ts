@@ -43,6 +43,8 @@ export function verifierRacines(saisies: [number, number], exercice: Exercice): 
  * Accepte, pour une racine double, une seule valeur ou deux valeurs identiques (point 5).
  */
 export function verifierZeros(reponse: ReponseZeros, exercice: Exercice): boolean {
+  // Variante « aucune solution » (décision 2) : racines [NaN, NaN].
+  if (Number.isNaN(exercice.solution.racines[0])) return reponse.aucun;
   if (reponse.aucun) return false;
 
   const [r1, r2] = [...exercice.solution.racines].sort((a, b) => a - b);

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
@@ -54,7 +55,7 @@ export function EtapeRacineLineaire({
           id="racine-lineaire"
           className="text-input"
           value={reponse}
-          onChange={(e) => setReponse(e.target.value)}
+          onChange={(e) => setReponse(normaliserSigneMoins(e.target.value))}
         />
       </div>
       {!validation && (

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { FractionAReduire } from "../core/equationRationnelle.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -86,7 +87,7 @@ export function EtapeSimplifierFractions({
               id={`simplifier-numerateur-${fraction.cote}`}
               className="text-input"
               value={numerateurs[index]}
-              onChange={(e) => modifierNumerateur(index, e.target.value)}
+              onChange={(e) => modifierNumerateur(index, normaliserSigneMoins(e.target.value))}
             />
           </div>
           <div className="field">
@@ -97,7 +98,7 @@ export function EtapeSimplifierFractions({
               id={`simplifier-denominateur-${fraction.cote}`}
               className="text-input"
               value={denominateurs[index]}
-              onChange={(e) => modifierDenominateur(index, e.target.value)}
+              onChange={(e) => modifierDenominateur(index, normaliserSigneMoins(e.target.value))}
             />
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 interface Props {
   /** Valeurs saisies (texte brut, une par point isolé) — vide tant que l'élève n'en ajoute pas. */
   valeurs: string[];
@@ -22,7 +23,7 @@ export function ListePointsIsolesInput({ valeurs, onChange }: Props) {
             value={valeur}
             placeholder="point isolé"
             aria-label={`Point isolé ${index + 1}`}
-            onChange={(e) => onChange(valeurs.map((v, i) => (i === index ? e.target.value : v)))}
+            onChange={(e) => onChange(valeurs.map((v, i) => (i === index ? normaliserSigneMoins(e.target.value) : v)))}
           />
           <span className="liste-points-accolade" aria-hidden="true">
             {"}"}

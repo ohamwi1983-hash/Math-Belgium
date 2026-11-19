@@ -1,10 +1,14 @@
-import type { Categorie, Exercice, GenerateurExercice } from "../core/generateur.types";
+import type { Exercice, GenerateurExercice } from "../core/generateur.types";
 import type { ReglagesSession } from "../core/session.types";
 import type { EtatSession, Phase, ReponseZeros, ResultatExercice } from "./types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
 import { exerciceSimplifie, necessiteSimplification } from "./simplificationEquation";
-import { verifierChampPrincipal, verifierIsolement, verifierSimplification, verifierZeros } from "./verification";
+import { verifierChampPrincipal, verifierFactorisationCasGeneral, verifierIsolement, verifierSimplification, verifierZeros } from "./verification";
+import { methodeParDefaut, methodesAcceptees, type ChoixMethode } from "./methodeSecondDegre";
+
+/** Choix fermé (écran « Méthode ») : UNE tentative (convention du site, audit 4e ch. 2 G3). */
+export const TENTATIVES_CHOIX_FERME = 1;
 
 const POINTS_DE_BASE = 100;
 
@@ -91,7 +95,9 @@ export function phasesExercice(exercice: Exercice): Phase[] {
     if (necessiteDeveloppement(exercice)) phases.push("developper");
   }
   if (necessiteReconnaissance(exercice)) phases.push("reconnaissance");
-  phases.push("champ1", "champ2");
+  // « Aucune solution » visible (b = 0, a et c de même signe) : pas de Δ ni de factorisation.
+  if (exercice.categorie !== "irreductible") phases.push("champ1");
+  phases.push("champ2");
   return phases;
 }
 
@@ -115,6 +121,7 @@ export function demarrerSession(reglages: ReglagesSession, generateur: Generateu
     scoreChampPrincipalExercice: null,
     champPrincipalRevele: false,
     categorieRevelee: false,
+    methodeRetenue: null,
     aideSimplificationUtilisee: false,
     aideIsolementUtilisee: false,
     aideDevelopperUtilisee: false,
@@ -258,15 +265,18 @@ export function activerAideDevelopper(etat: EtatSession): EtatSession {
   return { ...etat, aideDevelopperUtilisee: true };
 }
 
-/** Étape "reconnaissance" : choix de la catégorie parmi les 4. */
-export function soumettreChoixCategorie(etat: EtatSession, choix: Categorie): EtatSession {
+/** Étape "reconnaissance" : choix de la méthode (choix fermé, UNE tentative). Décision 1 : dans un
+ * cas général à racine évidente, « Racine évidente » ET « formule générale » sont justes ; l'écran
+ * suivant suit la méthode retenue (le choix de l'élève s'il est juste, sinon `methodeParDefaut`). */
+export function soumettreChoixCategorie(etat: EtatSession, choix: ChoixMethode): EtatSession {
   if (etat.terminee || etat.phase !== "reconnaissance") {
     throw new Error("soumettreChoixCategorie : la session n'est pas à l'étape de reconnaissance");
   }
 
-  const etapeCourante = soumettreEtapeTentatives<Categorie>(etat.etapeCourante, choix, {
+  const etapeCourante = soumettreEtapeTentatives<ChoixMethode>(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
-    verifier: (c) => c === etat.exerciceCourant.categorie,
+    tentativesMax: TENTATIVES_CHOIX_FERME,
+    verifier: (c) => methodesAcceptees(etat.exerciceCourant).includes(c),
     revelerReponse: () => {},
   });
 
@@ -277,9 +287,10 @@ export function soumettreChoixCategorie(etat: EtatSession, choix: Categorie): Et
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
-    phase: "champ1",
+    phase: etat.exerciceCourant.categorie === "irreductible" ? "champ2" : "champ1",
     scoreReconnaissanceExercice: etapeCourante.score,
     categorieRevelee: etapeCourante.revelee,
+    methodeRetenue: etapeCourante.reussie ? choix : methodeParDefaut(etat.exerciceCourant),
   };
 }
 
@@ -291,7 +302,7 @@ export function soumettreReponseChamp1(etat: EtatSession, reponse: string): Etat
 
   const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
-    verifier: (r) => verifierChampPrincipal(etat.exerciceCourant, r),
+    verifier: (r) => (etat.methodeRetenue === "racine_evidente" ? verifierFactorisationCasGeneral(etat.exerciceCourant, r) : verifierChampPrincipal(etat.exerciceCourant, r)),
     revelerReponse: () => {},
   });
 
@@ -348,6 +359,7 @@ function cloturerExerciceOuSuivant(etat: EtatSession, resultat: ResultatExercice
     scoreChampPrincipalExercice: null,
     champPrincipalRevele: false,
     categorieRevelee: false,
+    methodeRetenue: null,
     aideSimplificationUtilisee: false,
     aideIsolementUtilisee: false,
     aideDevelopperUtilisee: false,

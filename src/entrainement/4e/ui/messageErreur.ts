@@ -11,7 +11,7 @@ import type { StatutVerification } from "../moteur/statutVerification";
  */
 export function formatMessageErreur(tentativesUtilisees: number, tentativesMax: number, statut?: StatutVerification | null): string {
   if (statut === "parse_error") {
-    return 'Expression non reconnue — vérifie la syntaxe de ton expression (parenthèses, "*" entre un nombre et une variable, etc.).';
+    return "Expression non reconnue : vérifie les parenthèses, les signes et la place de x.";
   }
   return `Incorrect — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`;
 }

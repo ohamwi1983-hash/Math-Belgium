@@ -86,6 +86,9 @@ export interface EtatSession {
   /** même principe que `simplificationRevele` ci-dessus, pour la phase "champ1". */
   champPrincipalRevele: boolean;
   categorieRevelee: boolean;
+  /** Méthode qui pilote l'écran suivant la reconnaissance (gen1, décision 1) : le choix juste de
+   * l'élève, ou `methodeParDefaut` si le choix a été révélé ; null avant la reconnaissance. */
+  methodeRetenue: import("./methodeSecondDegre").ChoixMethode | null;
   /**
    * Aides à sens unique (1 seul niveau —
    * conceptionaidescomposantspartageshistorique.md) — chacune remise à false au passage à

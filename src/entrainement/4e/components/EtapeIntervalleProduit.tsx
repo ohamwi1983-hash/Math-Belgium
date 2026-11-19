@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceSignesProduit, SolutionEnsembleProduit } from "../core/signesProduit.types";
 import { Katex } from "./Katex";
 import { formatTermesEnonceSignesProduitFactoriseLatex } from "../ui/formatSignesProduit";
@@ -166,7 +167,7 @@ export function EtapeIntervalleProduit({
             id="valeur-point"
             className="text-input"
             value={valeurPoint}
-            onChange={(e) => setValeurPoint(e.target.value)}
+            onChange={(e) => setValeurPoint(normaliserSigneMoins(e.target.value))}
           />
         </div>
       )}
@@ -178,7 +179,7 @@ export function EtapeIntervalleProduit({
               <input
                 className="text-input"
                 value={valeur}
-                onChange={(e) => modifierValeurExclue(index, e.target.value)}
+                onChange={(e) => modifierValeurExclue(index, normaliserSigneMoins(e.target.value))}
                 placeholder="point exclu"
                 aria-label={`Point exclu ${index + 1}`}
               />

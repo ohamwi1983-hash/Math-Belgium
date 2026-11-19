@@ -1,15 +1,17 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { Exercice } from "../core/generateur.types";
 import { Katex } from "./Katex";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { formatEnonceAffichage } from "../ui/formatEquation";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   /** Requis sauf si expressionAffichee est fourni (voir plus bas) — sert uniquement au fallback d'affichage par défaut. */
@@ -63,6 +65,10 @@ interface Props {
   texteAide?: string;
   /** Exemple de saisie affiché dans le champ vide — absent par défaut (comportement inchangé). */
   placeholder?: string;
+  /** Aides à 2 niveaux (KaTeX) fournies par l'appli — remplacent l'aide historique à 1 niveau. */
+  aides?: FragmentConsigne[][];
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse (jamais la réponse). */
+  messageCible?: (valeur: string) => FragmentConsigne[] | null;
   onValider: (reponse: string) => void;
   validation?: ValidationEtapeProps | null;
 }
@@ -82,10 +88,13 @@ export function EtapeIsolement({
   onActiverAide,
   texteAide = "Rassemble tous les termes du même côté, pour obtenir 0 de l'autre côté.",
   placeholder,
+  aides,
+  messageCible,
   onValider,
   validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
+  const saisie = useTentativeLisible<string>();
   const expressionParDefaut = () =>
     expressionAffichee ??
     formatEnonceAffichage(
@@ -128,10 +137,13 @@ export function EtapeIsolement({
             {label ?? "Équation sous forme générale"}
           </label>
         )}
-        <input id="isolement" className="text-input" value={reponse} placeholder={placeholder} onChange={(e) => setReponse(e.target.value)} />
+        <input id="isolement" className="text-input" value={reponse} placeholder={placeholder} onChange={(e) => setReponse(normaliserSigneMoins(e.target.value))} />
       </div>
       {!validation && (
         <>
+          {aides ? (
+            <AidesNiveaux aides={aides} onPremiereAide={onActiverAide} />
+          ) : (
           <div>
             {aideActivee && (
               <div className="triangle-quelconque-aide">
@@ -140,14 +152,11 @@ export function EtapeIsolement({
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>
-          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
+          )}
+          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => saisie.tenter(reponse, diagnostiquer?.(reponse) !== "parse_error", onValider)}>
             Valider
           </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer?.(reponse))}
-            </p>
-          )}
+          <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={saisie.soumise !== null ? messageCible?.(saisie.soumise) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

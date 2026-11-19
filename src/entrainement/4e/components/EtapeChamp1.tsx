@@ -1,9 +1,9 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { Categorie, Exercice } from "../core/generateur.types";
 import { Katex } from "./Katex";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { formatEnonceAffichage } from "../ui/formatEquation";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
@@ -11,6 +11,8 @@ import { EtatActuelPanel } from "./EtatActuelPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   exercice: Exercice;
@@ -68,6 +70,10 @@ interface Props {
    */
   aideActivee?: boolean;
   onActiverAide?: () => void;
+  /** Aides à 2 niveaux (KaTeX) fournies par l'appli — remplacent l'aide historique à 1 niveau. */
+  aides?: FragmentConsigne[][];
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse (jamais la réponse). */
+  messageCible?: (valeur: string) => FragmentConsigne[] | null;
   onValider: (reponse: string) => void;
   validation?: ValidationEtapeProps | null;
 }
@@ -110,10 +116,13 @@ export function EtapeChamp1({
   diagnostiquer,
   aideActivee,
   onActiverAide,
+  aides,
+  messageCible,
   onValider,
   validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
+  const saisie = useTentativeLisible<string>();
 
   /**
    * Variante irrationnelle (mise_en_evidence/binome_conjugue/produit_remarquable) : depuis
@@ -178,30 +187,30 @@ export function EtapeChamp1({
           id="champ-principal"
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           value={reponse}
-          onChange={(e) => setReponse(e.target.value)}
+          onChange={(e) => setReponse(normaliserSigneMoins(e.target.value))}
           placeholder={placeholder}
         />
       </div>
       {!validation && (
         <>
-          {onActiverAide && (
-            <div>
-              {aideActivee && (
-                <div className="triangle-quelconque-aide">
-                  <p>{texteAideChamp1(exercice.categorie)}</p>
-                </div>
-              )}
-              <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-            </div>
+          {aides ? (
+            <AidesNiveaux aides={aides} onPremiereAide={onActiverAide} />
+          ) : (
+            onActiverAide && (
+              <div>
+                {aideActivee && (
+                  <div className="triangle-quelconque-aide">
+                    <p>{texteAideChamp1(exercice.categorie)}</p>
+                  </div>
+                )}
+                <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+              </div>
+            )
           )}
-          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
+          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => saisie.tenter(reponse, diagnostiquer?.(reponse) !== "parse_error", onValider)}>
             Valider
           </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-            </p>
-          )}
+          <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={saisie.soumise !== null ? messageCible?.(saisie.soumise) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
