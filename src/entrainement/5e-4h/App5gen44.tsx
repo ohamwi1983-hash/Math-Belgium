@@ -5,7 +5,7 @@ import type { ExerciceDefinirSuite } from "./core5e/definirSuite";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDefinirSuite } from "./generateurs5e/definirSuite";
 import type { IdVarianteDefinirSuite } from "./generateurs5e/definirSuite";
 import { activerAideSuivante, demarrerSessionDefinirSuite, niveauAideMaxPhase, soumettreReponseEcran, tentativesMaxCourant } from "./moteur5e/sessionDefinirSuite";
-import { estPhaseChoix } from "./moteur5e/typesDefinirSuite";
+import { estPhaseChoix, phasesPourExercice } from "./moteur5e/typesDefinirSuite";
 import type { EtatSessionDefinirSuite, PhaseDefinirSuite } from "./moteur5e/typesDefinirSuite";
 import { diagnostiquerChamps, explicationVerdictFaux, messageIllisible, messagePiege } from "./moteur5e/verificationDefinirSuite";
 import { EtapeDefinirSuite, RenduFragments5e } from "./components5e/EtapeDefinirSuite";
@@ -18,6 +18,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeDefinirSuite } from "./generateurs5e/definirSuite/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `5gen44` — « Définir et reconnaître une suite » (chapitre 3 de 5e, section `suites-geometriques`,
@@ -130,6 +133,9 @@ export function App5gen44() {
         reponseAttendue: reponseAttendue(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs5e/definirSuite/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDefinirSuite(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />,
         ...(choix ? { messageRevele: `Ce n'était pas la bonne conclusion (une seule tentative sur un choix fermé).${enAttente.explication ? ` ${enAttente.explication}` : ""}` } : {}),
       }
     : null;

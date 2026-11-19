@@ -6,6 +6,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSommesTer
 import type { IdVarianteSommesTermes } from "./generateurs5e/sommesTermes";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionSommesTermes, soumettreReponseEcran } from "./moteur5e/sessionSommesTermes";
 import type { EtatSessionSommesTermes, PhaseSommesTermes } from "./moteur5e/typesSommesTermes";
+import { phasesPourExercice } from "./moteur5e/typesSommesTermes";
 import { diagnostiquerChamps, messageIllisible, messagePiege } from "./moteur5e/verificationSommesTermes";
 import { EtapeSommesTermes, FragmentsSommes } from "./components5e/EtapeSommesTermes";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -16,6 +17,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeSommesTermes } from "./generateurs5e/sommesTermes/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `5gen45` — « Sommes de termes consécutifs » (chapitre 3 de 5e « Suites », section
@@ -120,6 +124,9 @@ export function App5gen45() {
         reponseAttendue: reponseAttendue(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs5e/sommesTermes/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSommesTermes(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />,
       }
     : null;
 

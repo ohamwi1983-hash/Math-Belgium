@@ -5,7 +5,7 @@ import type { ExerciceTroisTermes } from "./core5e/troisTermes.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTroisTermes } from "./generateurs5e/troisTermes";
 import type { IdVarianteTroisTermes } from "./generateurs5e/troisTermes";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionTroisTermes, soumettreReponseEcran } from "./moteur5e/sessionTroisTermes";
-import { REPONSE_AUCUNE, tentativesMaxPhase } from "./moteur5e/typesTroisTermes";
+import { REPONSE_AUCUNE, phasesJouees, tentativesMaxPhase } from "./moteur5e/typesTroisTermes";
 import type { EtatSessionTroisTermes, PhaseTroisTermes } from "./moteur5e/typesTroisTermes";
 import { diagnostiquerChamps, messageIllisible, messagePiege, refusFormat } from "./moteur5e/verificationTroisTermes";
 import { EtapeTroisTermes, FragmentsTroisTermes } from "./components5e/EtapeTroisTermes";
@@ -17,6 +17,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeTroisTermes } from "./generateurs5e/troisTermes/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `5gen46` — « Trois termes consécutifs » (chapitre 3 de 5e « Suites », section
@@ -123,6 +126,9 @@ export function App5gen46() {
         reponseAttendue: reponseAttendue(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs5e/troisTermes/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTroisTermes(exercice), lettreEtape(phasesJouees(exercice).indexOf(phase)))} />,
         messageRevele: phase === "relation" ? "Ce n'était pas la bonne relation (une seule tentative sur un choix)." : undefined,
       }
     : null;

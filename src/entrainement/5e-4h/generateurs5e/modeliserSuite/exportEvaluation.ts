@@ -1,36 +1,14 @@
-import { anneeDonnee, anneeDuRang, reponseFinale, somme, terme } from "../../core5e/modeliserSuite";
+import { anneeDuRang, somme, terme } from "../../core5e/modeliserSuite";
 import type { ExerciceModeliserSuite } from "../../core5e/modeliserSuite";
-import type {
-  AdaptateurFeuilleExercices,
-  BaremeExercice,
-  BlocCorrection,
-  CritereBareme,
-  EnoncePapier,
-  ErreurFrequente,
-  EtapeCorrection,
-  FragmentConsigne,
-  SectionExercice,
-} from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EnoncePapier, ErreurFrequente, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur5e/typesModeliserSuite";
 import type { PhaseModeliserSuite } from "../../moteur5e/typesModeliserSuite";
-import {
-  avecUnite,
-  consigneEcran,
-  consigneGenerale,
-  fragmentsSituation,
-  libellePhase,
-  methodeCorrige,
-  nbL,
-  phrasePrecision,
-  phraseQuestion,
-  reponseFragments,
-  reponseRecap,
-  valeur,
-} from "../../ui5e/formatModeliserSuite";
+import { consigneEcran, consigneGenerale, fragmentsSituation, libellePhase, phrasePrecision, phraseQuestion, reponseFragments, reponseRecap, valeur } from "../../ui5e/formatModeliserSuite";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceModeliserSuite } from "./index";
 import type { IdVarianteModeliserSuite } from "./index";
 import { profilModeliserSuite } from "./profilEvaluation";
+import { correctionDetailleeModeliserSuite } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceModeliserSuite>` de `5gen47` « Modéliser une
@@ -40,9 +18,8 @@ import { profilModeliserSuite } from "./profilEvaluation";
  *   la question posée avec sa précision et son unité, puis UNE demande globale (« justifie : nature,
  *   premier terme, raison » ; « par un tableau de valeurs » pour un seuil). Les cinq étapes
  *   d'apprentissage (nature, u₁, raison, rang/N/tableau, réponse) passent dans le corrigé.
- * - Corrigé : une étape par écran (lettres a à e dans l'ordre des écrans), valeurs tirées des MÊMES
- *   fonctions que l'écran (`methodeCorrige`, `reponseFragments`, `reponseRecap`), une ligne
- *   « Piège » ciblée.
+ * - Corrigé détaillé « comme au tableau » : `corrigeDetaille.ts` (partagé avec l'appli), une étape
+ *   par écran (lettres a à e dans l'ordre des écrans).
  * - Aucune figure. Version aménagée : même énoncé.
  */
 
@@ -105,81 +82,6 @@ function construireCorrection(e: ExerciceModeliserSuite): BlocCorrection[] {
  * seuil se cherche par tableau. Jamais selon la nature (ce serait trahir le verdict). */
 function difficulte(e: ExerciceModeliserSuite): 1 | 2 | 3 {
   return e.depart === "avant" || e.variante === "seuil" ? 3 : 2;
-}
-
-// ============================================================================
-// Corrigé détaillé.
-// ============================================================================
-
-function decimal(x: number): string {
-  return String(x).replace(".", ",");
-}
-
-/** La ligne « Piège », sur l'étape où l'erreur classique se commet. */
-function piege(e: ExerciceModeliserSuite): { phase: PhaseModeliserSuite; fragments: FragmentConsigne[] } {
-  if (e.nature === "arithmetique" && e.formulation === "pourcentInitial") {
-    return {
-      phase: "nature",
-      fragments: [t("Le symbole % ne suffit pas à conclure : les intérêts portent toujours sur la somme de départ, on ajoute donc chaque année le même montant — la suite est arithmétique, pas géométrique.")],
-    };
-  }
-  if (e.nature === "geometrique" && e.formulation === "pourcent" && e.pct !== null) {
-    const taux = nbL(e.pct / 100);
-    return e.sens === "hausse"
-      ? { phase: "raison", fragments: [t(`Une hausse de ${e.pct} % donne `), f(`q=${nbL(e.q)}`), t(" et non "), f(`q=${taux}`), t(` : on garde toute la valeur et on ajoute ${e.pct} %.`)] }
-      : { phase: "raison", fragments: [t(`Une baisse de ${e.pct} % donne `), f(`q=${nbL(e.q)}`), t(" et non "), f(`q=${taux}`), t(` : ${decimal(e.pct / 100)} est la part qui disparaît, il reste ${decimal(e.q)} de la valeur.`)] };
-  }
-  if (e.depart === "avant") {
-    return {
-      phase: "premierTerme",
-      fragments: [t(`La valeur donnée est celle de ${anneeDonnee(e)}, un an avant l'année de rang 1 : ce n'est pas `), f("u_1"), t(", il faut appliquer une fois l'évolution annuelle.")],
-    };
-  }
-  switch (e.variante) {
-    case "terme": {
-      const y = anneeDuRang(e, e.rang);
-      return { phase: "rang", fragments: [t(`L'année ${e.annee1} a déjà le rang 1 : `), f(`n=${y}-${e.annee1}+1`), t(", et non "), f(`${y}-${e.annee1}`), t(" (rang décalé d'une unité).")] };
-    }
-    case "somme":
-      return { phase: "somme", fragments: [t("Le total demandé est la somme des "), f("N"), t(" termes, "), f(`S_{${e.nombre}}`), t(", et non la valeur de la dernière année, "), f(`u_{${e.nombre}}`), t(".")] };
-    case "seuil":
-      return { phase: "annee", fragments: [t("La question demande une ANNÉE : le rang "), f(`n=${e.rangSeuil}`), t(` correspond à l'année ${anneeDuRang(e, e.rangSeuil)}.`)] };
-  }
-}
-
-function conclusion(e: ExerciceModeliserSuite): FragmentConsigne[] {
-  const c = e.contexte;
-  const environ = (x: number) => (valeur(e, x).approchee ? "environ " : "");
-  switch (e.variante) {
-    case "terme": {
-      const x = terme(e, e.rang);
-      return [t(`En ${anneeDuRang(e, e.rang)}, ${c.grandeur} vaudra ${environ(x)}${avecUnite(e, x)}.`)];
-    }
-    case "somme": {
-      const x = somme(e, e.nombre);
-      const total = c.total?.texte ?? "";
-      return [t(`${total.charAt(0).toUpperCase()}${total.slice(1)} de ${e.annee1} à ${anneeDuRang(e, e.nombre)} vaut ${environ(x)}${avecUnite(e, x)}.`)];
-    }
-    case "seuil": {
-      const verbe = e.sens === "hausse" ? "dépasse" : "passe sous";
-      return [t(`C'est en ${reponseFinale(e)} que ${c.grandeur} ${verbe} ${avecUnite(e, e.seuil)} pour la première fois.`)];
-    }
-  }
-}
-
-function correctionDetaillee(e: ExerciceModeliserSuite): EtapeCorrection[] {
-  const p = piege(e);
-  const phases = phasesPourExercice(e);
-  return phases.flatMap((phase, i): EtapeCorrection[] => {
-    const sousQuestion = LETTRES[i];
-    const methode = methodeCorrige(e, phase);
-    const lignes: EtapeCorrection[] = [];
-    if (methode.texte) lignes.push({ label: "Méthode", sousQuestion, fragments: [t(methode.texte), ...(methode.latex ? [t(" "), f(methode.latex)] : [])] });
-    lignes.push({ label: phase === "nature" ? "Conclusion" : "Calcul", sousQuestion, fragments: reponseFragments(e, phase) });
-    if (i === phases.length - 1) lignes.push({ label: "Conclusion", sousQuestion, fragments: conclusion(e) });
-    if (p.phase === phase) lignes.push({ label: "Piège", sousQuestion, fragments: p.fragments });
-    return lignes;
-  });
 }
 
 // ============================================================================
@@ -265,7 +167,7 @@ export const adaptateurEvaluationModeliserSuite: AdaptateurFeuilleExercices<Exer
   construireCorrection,
   difficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeModeliserSuite,
   bareme,
   enoncePapier,
   dureeMinutes: 10,

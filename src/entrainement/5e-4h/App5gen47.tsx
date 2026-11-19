@@ -6,7 +6,7 @@ import type { ExerciceModeliserSuite } from "./core5e/modeliserSuite";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceModeliserSuite } from "./generateurs5e/modeliserSuite";
 import type { IdVarianteModeliserSuite } from "./generateurs5e/modeliserSuite";
 import { activerAideSuivante, demarrerSessionModeliserSuite, niveauAideMaxPhase, soumettreReponseEcran, tentativesMaxCourant } from "./moteur5e/sessionModeliserSuite";
-import { estPhaseChoix } from "./moteur5e/typesModeliserSuite";
+import { estPhaseChoix, phasesPourExercice } from "./moteur5e/typesModeliserSuite";
 import type { EtatSessionModeliserSuite, PhaseModeliserSuite } from "./moteur5e/typesModeliserSuite";
 import { diagnostiquerChamps, messageIllisible, messagePiege } from "./moteur5e/verificationModeliserSuite";
 import { EtapeModeliserSuite, FragmentsModelisation } from "./components5e/EtapeModeliserSuite";
@@ -30,6 +30,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeModeliserSuite } from "./generateurs5e/modeliserSuite/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `5gen47` — « Modéliser une situation par une suite » (chapitre 3 de 5e « Suites », section
@@ -149,6 +152,9 @@ export function App5gen47() {
         reponseAttendue: reponseAttendue(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs5e/modeliserSuite/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeModeliserSuite(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />,
         ...(choix ? { messageRevele: `Ce n'était pas le bon type de suite (une seule tentative sur un choix fermé).${enAttente.explication ? ` ${enAttente.explication}` : ""}` } : {}),
       }
     : null;

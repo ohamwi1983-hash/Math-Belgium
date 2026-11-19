@@ -109,7 +109,8 @@ export function equationSimplifiee(e: ExerciceTroisTermes): Poly {
   const g = pgcd(pgcd(p[0], p[1]), p[2]) || 1;
   const dominant = p[2] !== 0 ? p[2] : p[1] !== 0 ? p[1] : p[0];
   const s = dominant < 0 ? -1 : 1;
-  return fois(s / g, p);
+  // Division exacte (s·c)/g : multiplier par la fraction s/g laissait « 0.9999999999999999x » (49 × 1/49).
+  return [(s * p[0]) / g + 0, (s * p[1]) / g + 0, (s * p[2]) / g + 0];
 }
 
 /** Membres développés de la relation (corrigé) : 2b et a + c, ou b² et a·c. */

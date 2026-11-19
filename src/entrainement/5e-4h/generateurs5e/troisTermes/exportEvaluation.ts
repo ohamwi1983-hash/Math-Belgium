@@ -1,22 +1,12 @@
-import { analyser } from "../../core5e/troisTermes.types";
 import type { ExerciceTroisTermes } from "../../core5e/troisTermes.types";
-import type {
-  AdaptateurFeuilleExercices,
-  BaremeExercice,
-  BlocCorrection,
-  EtapeCorrection,
-  ErreurFrequente,
-  EnoncePapier,
-  FragmentConsigne,
-  SectionExercice,
-} from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, ErreurFrequente, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesJouees } from "../../moteur5e/typesTroisTermes";
-import type { PhaseTroisTermes } from "../../moteur5e/typesTroisTermes";
-import { aideNiveau1, calculSolutionsFragments, conclusionSolutions, consigneEcran, consigneGenerale, equationSimplifieeLatex, reponseBreveFragments, reponseFragments } from "../../ui5e/formatTroisTermes";
+import { conclusionSolutions, consigneEcran, consigneGenerale, equationSimplifieeLatex, reponseBreveFragments, reponseFragments } from "../../ui5e/formatTroisTermes";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTroisTermes } from "./index";
 import type { IdVarianteTroisTermes } from "./index";
 import { profilTroisTermes } from "./profilEvaluation";
+import { correctionDetailleeTroisTermes } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceTroisTermes>` de `5gen46` « Trois termes
@@ -25,9 +15,8 @@ import { profilTroisTermes } from "./profilEvaluation";
  * - Énoncé papier : l'énoncé de l'écran tel quel (les trois expressions, la question « pour quelle(s)
  *   valeur(s) de x… », la demande des termes et de la raison) ; les quatre étapes d'apprentissage
  *   (relation, équation réduite, valeurs de x, termes) passent dans le corrigé.
- * - Corrigé : une étape par écran joué (lettres a, b, c, d dans l'ordre des écrans ; pas d'étape d
- *   quand aucune valeur ne convient), valeurs tirées des MÊMES fonctions que l'écran (`aideNiveau1`,
- *   `reponseFragments`), une ligne « Piège » ciblée.
+ * - Corrigé détaillé « comme au tableau » : `corrigeDetaille.ts` (partagé avec l'appli), une étape
+ *   par écran joué (lettres a, b, c, d ; pas d'étape d quand aucune valeur ne convient).
  * - Étoiles et durée fixées par la VARIANTE seulement : elles ne trahissent jamais le nombre de
  *   valeurs qui conviennent. Aucune figure, toutes les valeurs exactes. Version aménagée : même énoncé.
  */
@@ -59,37 +48,6 @@ function construireCorrection(e: ExerciceTroisTermes): BlocCorrection[] {
 /** ★★ arithmétique (premier degré) ; ★★★ géométrique (second degré possible, solutions à vérifier). */
 function difficulte(e: ExerciceTroisTermes): 1 | 2 | 3 {
   return e.variante === "arithmetique" ? 2 : 3;
-}
-
-// ============================================================================
-// Corrigé détaillé.
-// ============================================================================
-
-/** La ligne « Piège », sur l'étape où l'erreur classique se commet. */
-function piege(e: ExerciceTroisTermes): { phase: PhaseTroisTermes; fragments: FragmentConsigne[] } {
-  if (e.variante === "arithmetique") {
-    return { phase: "relation", fragments: [t("Le terme du milieu n'est pas la somme de ses voisins mais leur MOYENNE : "), f("b=\\dfrac{a+c}{2}"), t(", d'où "), f("2b=a+c"), t(" (et non "), f("b=a+c"), t(").")] };
-  }
-  const an = analyser(e);
-  if (an.ecartees.length > 0) {
-    return { phase: "solutions", fragments: [t("Une solution de l'équation n'est pas forcément une réponse : si elle annule un terme, on l'écarte, car une suite géométrique ne contient aucun terme nul (et "), f("b^2=a\\times c"), t(" est alors vraie sans que les nombres forment une suite géométrique).")] };
-  }
-  return { phase: "relation", fragments: [t("Le terme du milieu vérifie "), f("b^2=a\\times c"), t(" : pas "), f("b=a\\times c"), t(", et mieux vaut éviter "), f("b=\\sqrt{a\\times c}"), t(", fausse quand "), f("b"), t(" est négatif.")] };
-}
-
-function correctionDetaillee(e: ExerciceTroisTermes): EtapeCorrection[] {
-  const p = piege(e);
-  return phasesJouees(e).flatMap((phase, i): EtapeCorrection[] => {
-    const sousQuestion = LETTRES[i];
-    const aide = aideNiveau1(e, phase);
-    const lignes: EtapeCorrection[] = [
-      { label: "Méthode", sousQuestion, fragments: [t(aide.texte), ...(aide.latex ? [t(" "), f(aide.latex)] : [])] },
-      { label: "Calcul", sousQuestion, fragments: phase === "solutions" ? calculSolutionsFragments(e) : reponseFragments(e, phase) },
-    ];
-    if (phase === "solutions") lignes.push({ label: "Conclusion", sousQuestion, fragments: conclusionSolutions(e) });
-    if (p.phase === phase) lignes.push({ label: "Piège", sousQuestion, fragments: p.fragments });
-    return lignes;
-  });
 }
 
 // ============================================================================
@@ -144,7 +102,7 @@ export const adaptateurEvaluationTroisTermes: AdaptateurFeuilleExercices<Exercic
   construireCorrection,
   difficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeTroisTermes,
   bareme,
   enoncePapier,
   dureeMinutes: 8,

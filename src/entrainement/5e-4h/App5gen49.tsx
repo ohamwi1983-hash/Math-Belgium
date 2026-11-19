@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import type { ExerciceDetectiveSuites, IdDescriptionSuites } from "./core5e/detectiveSuites.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveSuites } from "./generateurs5e/detectiveSuites";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeDetectiveSuites } from "./generateurs5e/detectiveSuites/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { NOMBRE_ECRANS, activerAide, demarrer, ecranSuivant, soumettre, tentativesMaxEcran, type EtatDetectiveSuites } from "./moteur5e/sessionDetectiveSuites";
 import { diagnostiquerCorrection, estResultatCopie, verifierDescription, verifierLigne } from "./moteur5e/verificationDetectiveSuites";
 import { descriptionCorrecte, indiceLigneFausse, nombreLignes } from "./moteur5e/modeleDetectiveSuites";
@@ -153,6 +156,9 @@ export function App5gen49() {
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs5e/detectiveSuites/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveSuites(e), lettreEtape(ecran))} />,
         messageRevele: enAttente.messageRevele,
       }
     : null;

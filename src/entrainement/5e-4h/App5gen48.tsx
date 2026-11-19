@@ -6,6 +6,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSommeInfi
 import type { IdVarianteSommeInfinie } from "./generateurs5e/sommeInfinieSituation";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionSommeInfinie, soumettreReponseEcran } from "./moteur5e/sessionSommeInfinieSituation";
 import type { EtatSessionSommeInfinie, PhaseSommeInfinie } from "./moteur5e/typesSommeInfinieSituation";
+import { PHASES } from "./moteur5e/typesSommeInfinieSituation";
 import { diagnostiquerChamps, messageIllisible, messagePiege, refusFormat } from "./moteur5e/verificationSommeInfinieSituation";
 import { EtapeSommeInfinieSituation, FragmentsSommeInfinie } from "./components5e/EtapeSommeInfinieSituation";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -17,6 +18,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeSommeInfinie } from "./generateurs5e/sommeInfinieSituation/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `5gen48` — « Somme infinie en situation » (chapitre 3 de 5e « Suites », section `convergence`,
@@ -116,6 +120,9 @@ export function App5gen48() {
         reponseAttendue: reponseAttendue(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs5e/sommeInfinieSituation/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSommeInfinie(exercice), lettreEtape(PHASES.indexOf(phase)))} />,
       }
     : null;
 

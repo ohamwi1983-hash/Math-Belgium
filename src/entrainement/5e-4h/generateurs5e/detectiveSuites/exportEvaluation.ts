@@ -1,26 +1,19 @@
-import type {
-  AdaptateurFeuilleExercices,
-  BaremeExercice,
-  BlocCorrection,
-  EnoncePapier,
-  ErreurFrequente,
-  EtapeCorrection,
-  FragmentConsigne,
-  SectionExercice,
-} from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, ErreurFrequente, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDetectiveSuites } from "../../core5e/detectiveSuites.types";
-import { correction, descriptionCorrecte, indiceLigneFausse, majuscule } from "../../moteur5e/modeleDetectiveSuites";
-import { CONSIGNE_GENERALE, consignesEcrans, constat, descriptionFragments, enonceExercice, lignesCopie, nomErreur, piege, reponseFragments, souderPonctuation } from "../../ui5e/formatDetectiveSuites";
+import { indiceLigneFausse } from "../../moteur5e/modeleDetectiveSuites";
+import { CONSIGNE_GENERALE, consignesEcrans, enonceExercice, lignesCopie, nomErreur, reponseFragments, souderPonctuation } from "../../ui5e/formatDetectiveSuites";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveSuites } from "./index";
 import { profilDetectiveSuites } from "./profil";
+import { correctionDetailleeDetectiveSuites } from "./corrigeDetaille";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de 5gen49 « Détective d'erreurs : suites ».
  * Énoncé papier = ce que l'élève devait faire, la copie numérotée et la consigne globale (« Une
  * ligne de cette résolution est fausse. Trouve-la, explique l'erreur et corrige la résolution. ») ;
- * les trois écrans (ligne, erreur, correction) deviennent les étapes a, b, c du corrigé. Séries
+ * les trois écrans (ligne, erreur, correction) deviennent les étapes a, b, c du corrigé détaillé
+ * « comme au tableau » (`corrigeDetaille.ts`, partagé avec l'appli). Séries
  * équilibrées : `profil.ts`. Même mise en page de copie que 6gen88 (gen81/gen91, 6gen84).
  */
 
@@ -60,32 +53,6 @@ function enoncePapier(e: ExerciceDetectiveSuites): EnoncePapier {
 
 function reponseBreve(e: ExerciceDetectiveSuites): FragmentConsigne[] {
   return souderPonctuation([texte(`Ligne ${indiceLigneFausse(e) + 1} fausse (${nomErreur(e)}) ; `), ...reponseFragments(e)]);
-}
-
-function correctionDetaillee(e: ExerciceDetectiveSuites): EtapeCorrection[] {
-  const i = indiceLigneFausse(e);
-  const etapes: EtapeCorrection[] = [
-    { label: "Contrôle", sousQuestion: "a", fragments: constat(e) },
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte(`La ligne ${i + 1} est fausse.`)] },
-    { label: "Erreur", sousQuestion: "b", fragments: descriptionFragments(descriptionCorrecte(e), e) },
-  ];
-  /** « Ligne n corrigée : formule générale… » (minuscule après les deux-points). */
-  const enMinuscule = (ligne: FragmentConsigne[]): FragmentConsigne[] =>
-    ligne
-      // « Raison : », « Formule générale : », « Baisse de 4 % par an : suite géométrique de raison »
-      // en tête de ligne : déjà dit par « Ligne n corrigée : » (pas de deux-points en cascade).
-      .filter((f, j) => !(j === 0 && f.type === "texte" && /^(Raison|Formule générale) : $|^(Hausse|Baisse) de .* : suite géométrique de raison $/.test(f.valeur)))
-      .map((f, j) => (j === 0 && f.type === "texte" && /^[A-ZÉ][a-zé]/.test(f.valeur) ? { ...f, valeur: f.valeur[0]!.toLowerCase() + f.valeur.slice(1) } : f));
-  /** La dernière ligne de la résolution corrigée est toujours sa conclusion (la ligne fausse n'est
-   * jamais la dernière) : elle devient la ligne « Conclusion », sans son éventuel « Conclusion : ». */
-  const lignes = correction(e).map(souderPonctuation);
-  const conclusion = lignes.pop()!.map((f, j) => (j === 0 && f.type === "texte" && f.valeur.startsWith("Conclusion : ") ? { ...f, valeur: majuscule(f.valeur.slice("Conclusion : ".length)) } : f));
-  lignes.forEach((ligne, k) => {
-    etapes.push({ label: k === 0 ? "Correction" : "Calcul", sousQuestion: "c", fragments: souderPonctuation(k === 0 ? [texte(`Ligne ${i + 1} corrigée : `), ...enMinuscule(ligne)] : ligne) });
-  });
-  etapes.push({ label: "Conclusion", sousQuestion: "c", fragments: conclusion });
-  etapes.push({ label: "Piège", sousQuestion: "b", fragments: piege(e) });
-  return etapes;
 }
 
 function construireCorrection(e: ExerciceDetectiveSuites): BlocCorrection[] {
@@ -134,7 +101,7 @@ export const adaptateurEvaluationDetectiveSuites: AdaptateurFeuilleExercices<Exe
   construireCorrection,
   difficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeDetectiveSuites,
   bareme,
   enoncePapier,
   dureeMinutes: 8,
