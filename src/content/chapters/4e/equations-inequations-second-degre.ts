@@ -814,6 +814,29 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 116. Bicarrées et changement de variable »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Méthode et nombre de solutions',
+          generatorId: 'gen113',
+          description: [
+            'Série rapide : pour chaque équation, reconnais le raccourci (mise en évidence, différence ' +
+              'de deux carrés, aucune solution, carré parfait, racine évidente) ou le cas général, ' +
+              'donne le nombre de solutions en une ligne, puis les solutions quand elles sont évidentes.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 113. Méthode et nombre de solutions »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Signe des racines sans les calculer',
+          generatorId: 'gen114',
+          description: [
+            'Sans résoudre l\'équation, décide du signe de ses racines : le produit P = c/a, puis Δ si ' +
+              'P > 0, puis la somme S = −b/a. Variante : une racine évidente, puis l\'autre par le produit.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 114. Signe des racines sans les calculer »',
+        },
       ],
     },
     {
@@ -1263,6 +1286,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 118. Parabole et droite : intersection et position »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Lire une inéquation sur un graphique',
+          generatorId: 'gen117',
+          description: [
+            'Une parabole et une droite (l\'axe des x, y = k ou y = mx + p) sont tracées : lis les ' +
+              'abscisses des points communs sur la grille, la position de la parabole, puis écris ' +
+              'l\'ensemble-solution de l\'inéquation avec les bons crochets.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 117. Lire une inéquation sur un graphique »',
         },
       ],
     },
@@ -2098,6 +2133,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 61. Équations et inéquations du second degré — quiz vrai/faux »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Détective d\'erreurs : second degré',
+          generatorId: 'gen121',
+          description: [
+            'Un élève a résolu une équation ou une inéquation du chapitre, et une ligne de sa copie ' +
+              'est fausse : trouve-la, nomme l\'erreur (−3² dans Δ, b au lieu de −b, division par x, ' +
+              'sens non changé, valeur interdite gardée…), puis donne l\'ensemble-solution correct.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 121. Détective d\'erreurs : second degré »',
         },
       ],
     },

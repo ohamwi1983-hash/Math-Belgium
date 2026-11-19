@@ -4344,3 +4344,73 @@ paths:
   Libellé de conception « Bicarrées et changement de variable (gen116) ». Fichiers :
   `AppBicarree.tsx`, `core/bicarree.types.ts`, `ui/formatBicarree.ts`, `generateurs/bicarree/`
   (index, corrigeDetaille, profil, exportEvaluation).
+- **4e, Chapitre 2 — nouveau générateur gen121 « Détective d'erreurs : second degré »** (lot H de
+  l'audit `audit-4e-ch2.md`, processus 3 Transférer, section `revision`, carte après le quiz gen61) :
+  même mécanique que gen81/gen91/gen107/gen112 (copie fictive de 4 à 6 lignes, une seule ligne fausse
+  et la suite qui en découle ; écran 1 ligne fausse et écran 2 description, choix fermés à une
+  tentative ; écran 3 ensemble-solution corrigé, 3 tentatives). Six variantes = supports
+  (discriminant ; facteur commun kx² = mx ou (x + p)² = k(x + p) ; équation sans solution ;
+  inéquation k(x² + βx + γ) ◇ 0 avec k < 0 ; équation rationnelle x²/(x − p) = (sx − pr)/(x − p) ;
+  inéquation rationnelle (2x − (z + p))/(x − p) ◇ 1), deux types d'erreur par variante, sur deux
+  lignes différentes, tirés au hasard (verdict, jamais dans `forme`) : −3² dans Δ, b au lieu de −b,
+  division par x ou x + p, signes des solutions inversés, −4ac mal signé, Δ < 0 lu « racine double »,
+  sens non changé en divisant par un négatif, signe de a lu entre les racines, CE fausse, valeur
+  interdite gardée, produit en croix dans une inéquation, valeur interdite incluse avec ≥. Contraintes
+  communes aux deux types d'une variante (chaque erreur change S ; mesuré : 0 copie = correction sur
+  2 400 tirages). Erreur non reprise : « a oublié dans a(x − x₁)(x − x₂) » (sa réponse serait une
+  expression, pas un ensemble). Saisie guidée partagée avec gen117 :
+  `components/SaisieEnsembleSolutionTrinome.tsx` (six allures comme gen2, bornes en fractions,
+  comparaison d'ENSEMBLES `ui/ensembleSolutionTrinome.ts`) et `components/EtapeEnsembleSolutionTrinome.tsx`.
+  Profil : `forme` = variante, aucun cas, pas de `calcul` ; niveau 3, 8 à 10 min selon la variante
+  (jamais selon le type). Fichiers : `AppDetectiveSecondDegre.tsx`, `core/detectiveSecondDegre.types.ts`,
+  `moteur/{modele,session,verification}DetectiveSecondDegre.ts`, `ui/formatDetectiveSecondDegre.ts`,
+  `generateurs/detectiveSecondDegre/` (index, profil, corrigeDetaille, exportEvaluation).
+
+- **4e, Chapitre 2 — nouveau générateur gen113 « Méthode et nombre de solutions »** (lot H, processus 1
+  Connaître, section `resoudre`, carte après gen67) : une équation, 2 ou 3 écrans — la méthode la plus
+  rapide (6 choix : mise en évidence, différence de deux carrés, aucune solution sans calcul, carré
+  parfait, racine évidente, discriminant ; une tentative), le nombre de solutions (la seule affirmation
+  vraie parmi quatre « N solutions, car … », prémisses c = 0, b = 0 et x² = −c/a, Δ, a ± b + c = 0,
+  P < 0 ; une tentative), puis les solutions quand elles sont évidentes (champ libre, valeurs séparées
+  par « ; »). Décision 1 : pour a ± b + c = 0, « racine évidente » ET « discriminant » acceptés (note
+  sous la validation : la racine évidente est plus rapide). Variantes = allure (incomplètes c = 0 ou
+  b = 0 / complètes), méthode = verdict tiré au hasard (1/3 chacune), une seule méthode applicable
+  par équation (collecteur : 0 ambiguïté sur 1 200 tirages ; contrôle indépendant des raccourcis),
+  présentation réduite ou déplacée à parts égales. Niveau CONSTANT (2, 7 min) : le nombre d'écrans
+  dépend du verdict. Profil : `forme` = variante, aucun cas, pas de `calcul`. Composants génériques
+  ajoutés : `ChoixUniqueFragments.tsx` (choix fermé, une tentative, note après validation),
+  `EtapeChampLibreTrinome.tsx` (un champ libre, 3 tentatives). Fichiers : `AppMethodeNombreSolutions.tsx`,
+  `core/methodeNombreSolutions.types.ts`, `moteur/{modele,session,verification}MethodeNombreSolutions.ts`,
+  `ui/formatMethodeNombreSolutions.ts`, `generateurs/methodeNombreSolutions/`.
+
+- **4e, Chapitre 2 — nouveau générateur gen117 « Lire une inéquation sur un graphique »** (lot H,
+  processus 1 Connaître, section `signe-trinome`, carte après gen2 ; libellé pilote de gen2 rempli :
+  « Tableau de signes (gen2) ») : parabole 𝒫 (trait plein) et droite d (pointillés : axe des x, y = k ou
+  y = mx + p selon la variante) sur un quadrillage d'une unité ; trois écrans — abscisses des points
+  communs (champ libre ou bouton « Aucun point commun »), position (4 lectures « il faut 𝒫 au-dessus /
+  en dessous de d : c'est le cas entre / à l'extérieur / partout / nulle part », une seule juste),
+  ensemble-solution avec crochets (saisie guidée de gen121). f − g = α(x − x₁)(x − x₂), α(x − x₁)² ou
+  α((x − x₁)² + d), α ∈ {±1 ; ±1/2}, entiers : chaque point commun est un NŒUD de la grille ; fenêtre de
+  10 unités, bornes entières, hauteur 8 à 14 (collecteur : 0 point hors nœud ou hors fenêtre, S
+  contrôlé en 121 points, une seule lecture vraie, sur 1 800 tirages). Figure commune écran / papier
+  (`export/svgGraph.ts`, aucun point marqué dans l'énoncé ; points étiquetés au corrigé, `figureHtml`) ;
+  fond blanc sous les graduations de l'axe des y (une droite y = 4 en pointillés faisait lire « −4 »).
+  Issues tirées au hasard : 2 points (60 %), contact (20 %), aucun (20 %), symbole équiprobable.
+  Profil : `forme` = variante, aucun cas, pas de `calcul` ; niveau 1, 7 min (lecture + 2 écrans).
+  Fichiers : `AppLectureInequationGraphique.tsx`, `core/lectureInequationGraphique.types.ts`,
+  `moteur/{modeleLectureInequationGraphique,sessionLectureInequation}.ts`,
+  `ui/formatLectureInequationGraphique.ts`, `generateurs/lectureInequationGraphique/`.
+
+- **4e, Chapitre 2 — nouveau générateur gen114 « Signe des racines sans les calculer »** (lot H,
+  processus 2 Appliquer, section `resoudre`, carte après gen113) : variante « signes » — P = c/a, puis
+  Δ si P > 0, puis S = −b/a si Δ > 0, puis le verdict (signes opposés, deux positives, deux négatives,
+  aucune racine ; choix fermé, une tentative) : 2, 3 ou 4 écrans selon le verdict ; variante « racine
+  évidente » — x₁ (a ± b + c = 0), P, x₂ = P/x₁, verdict. Champs libres (fractions, 3 tentatives,
+  saisie illisible non comptée) avec messages ciblés (−c/a, b/a, −4ac mal signé, 1 au lieu de −1).
+  Verdict tiré AVANT les coefficients (1/4 chacun en « signes », 1/3 en « racine évidente » ;
+  collecteur : verdict recontrôlé par les racines exactes, 0 écart sur 1 200 tirages) ; pas de racine
+  évidente dans la variante « signes ». Niveau CONSTANT (2, 8 min) : le nombre d'écrans trahirait le
+  verdict. Profil : `forme` = variante, aucun cas (« signes opposés » est un verdict), pas de `calcul`.
+  Fichiers : `AppSigneRacines.tsx`, `core/signeRacines.types.ts`,
+  `moteur/{modele,session,verification}SigneRacines.ts`, `ui/formatSigneRacines.ts`,
+  `generateurs/signeRacines/`.
