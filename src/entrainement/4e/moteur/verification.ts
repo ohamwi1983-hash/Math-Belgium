@@ -43,6 +43,8 @@ export function verifierRacines(saisies: [number, number], exercice: Exercice): 
  * Accepte, pour une racine double, une seule valeur ou deux valeurs identiques (point 5).
  */
 export function verifierZeros(reponse: ReponseZeros, exercice: Exercice): boolean {
+  // Variante « aucune solution » (décision 2) : racines [NaN, NaN].
+  if (Number.isNaN(exercice.solution.racines[0])) return reponse.aucun;
   if (reponse.aucun) return false;
 
   const [r1, r2] = [...exercice.solution.racines].sort((a, b) => a - b);
@@ -131,8 +133,21 @@ export function diagnostiquerChampPrincipal(exercice: Exercice, valeurSaisie: st
 
   switch (exercice.categorie) {
     case "cas_general": {
-      const delta = Number(valeurSaisie.trim().replace(",", "."));
-      const correct = Number.isFinite(delta) && Math.abs(delta - (exercice.solution.delta ?? NaN)) < TOLERANCE_DELTA;
+      // Lot B (audit 4e ch. 2) : une saisie illisible (ni nombre, ni calcul numérique comme
+      // « 25 − 24 ») est un parse_error, qui ne consomme pas de tentative — plus un « faux ».
+      const texte = valeurSaisie.trim();
+      let delta = Number(texte.replace(",", "."));
+      if (!Number.isFinite(delta) || texte === "") {
+        try {
+          const v0 = evaluerExpressionGenerale(texte.replace(/,/g, "."), 0);
+          const v1 = evaluerExpressionGenerale(texte.replace(/,/g, "."), 1);
+          if (!Number.isFinite(v0) || Math.abs(v0 - v1) > 1e-9) return "parse_error";
+          delta = v0;
+        } catch {
+          return "parse_error";
+        }
+      }
+      const correct = Math.abs(delta - (exercice.solution.delta ?? NaN)) < TOLERANCE_DELTA;
       return correct ? "correct" : "not_equivalent";
     }
     case "mise_en_evidence":

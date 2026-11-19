@@ -1,4 +1,5 @@
 import type { EtatMorceau } from "../ui/morceauIntervalle";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import {
   crochetDroitEffectif,
   crochetDroitVerrouille,
@@ -68,7 +69,7 @@ export function MorceauIntervalleInput({ etat, onChange }: Props) {
         value={etat.borneGaucheMode === "-inf" ? "" : etat.borneGaucheValeur}
         disabled={etat.borneGaucheMode === "-inf"}
         aria-label="Borne gauche"
-        onChange={(e) => onChange({ ...etat, borneGaucheMode: "nombre", borneGaucheValeur: e.target.value })}
+        onChange={(e) => onChange({ ...etat, borneGaucheMode: "nombre", borneGaucheValeur: normaliserSigneMoins(e.target.value) })}
       />
       <button
         type="button"
@@ -90,7 +91,7 @@ export function MorceauIntervalleInput({ etat, onChange }: Props) {
         value={etat.borneDroiteMode === "+inf" ? "" : etat.borneDroiteValeur}
         disabled={etat.borneDroiteMode === "+inf"}
         aria-label="Borne droite"
-        onChange={(e) => onChange({ ...etat, borneDroiteMode: "nombre", borneDroiteValeur: e.target.value })}
+        onChange={(e) => onChange({ ...etat, borneDroiteMode: "nombre", borneDroiteValeur: normaliserSigneMoins(e.target.value) })}
       />
       <button
         type="button"

@@ -19,6 +19,7 @@ import { formatFormeFactoriseeDepuisRacines } from "../../ui/formatEquation";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { formatFraction, formatFractionSimplifiee, formatPolynome, formatPolynomeMisEnEvidence } from "../../ui/formatSimplification";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSimplification } from "./index";
+import { profilSimplification } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Corrigé détaillé et barème : UNE étape par écran (`moteur/session*.ts::phasesExercice`), corrigé
@@ -171,15 +172,15 @@ function reponseBreveSimplification(instance: ExerciceSimplification): FragmentC
 }
 
 /** Critères du niveau (grille commune) : étapes = écrans du corrigé ; comptés comme lectures (1 min,
- * sans niveau) : la reconnaissance de la méthode (un coup d'œil sur a, b, c, comme « identifier la
- * question » de gen70), les conditions d'existence lues sur un dénominateur déjà factorisé (racines visibles) et la CE d'un
- * dénominateur du premier degré ; méthode : choisir les factorisations parmi celles du cours ; piège
- * dans les données : la valeur exclue qui disparaît de la fraction simplifiée (toujours présente). */
+ * sans niveau) : les conditions d'existence lues sur un dénominateur déjà factorisé (racines visibles)
+ * et la CE d'un dénominateur du premier degré ; la reconnaissance de la méthode est une DÉCISION et
+ * compte comme une étape (lot E de l'audit 4e ch. 2) ; méthode : choisir les factorisations parmi
+ * celles du cours ; piège dans les données : la valeur exclue qui disparaît de la fraction simplifiée
+ * (toujours présente). */
 function criteresDifficulteSimplification(instance: ExerciceSimplification): CriteresDifficulte {
   const d = instance.denominateur;
   const lecture: string[] = [];
   const phases = phasesSimplification(instance);
-  for (const ph of ["denomReconnaissance", "numReconnaissance"] as const) if (phases.includes(ph)) lecture.push(lettrePhaseSimplification(instance, ph));
   if (phases.includes("ceDirecte")) lecture.push(lettrePhaseSimplification(instance, "ceDirecte"));
   if (phases.includes("denomChamp2") && !estPolynomeLineaire(d) && d.categorie !== "cas_general") lecture.push(lettrePhaseSimplification(instance, "denomChamp2"));
   return { ...etapesDuCorrige(correctionDetailleeSimplification(instance), lecture), methode: 1, piege: 1 };
@@ -283,6 +284,7 @@ function construireCorrectionSimplification(instance: ExerciceSimplification): B
 }
 
 export const adaptateurEvaluationSimplification: AdaptateurFeuilleExercices<ExerciceSimplification> = {
+  profilInstance: profilSimplification,
   titreDocument: "Simplifier une fraction rationnelle — Évaluation",
   nomFichierBase: "simplification-fraction-rationnelle",
   genererInstance: genererExerciceSimplification,

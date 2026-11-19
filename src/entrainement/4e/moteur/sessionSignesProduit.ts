@@ -35,6 +35,9 @@ import {
 } from "./verificationSignesProduit";
 import type { EtatSessionSignesProduit, PhaseSignesProduit, ResultatExerciceSignesProduit } from "./typesSignesProduit";
 
+/** Choix fermé (catégorie, signe) : UNE tentative (convention du site, audit 4e ch. 2 G3). */
+export const TENTATIVES_CHOIX_FERME = 1;
+
 const POINTS_DE_BASE = 100;
 
 /** Le facteur quadratique factorisable de l'exercice, s'il existe (au plus 1 — voir generateurs/signesProduit/index.ts). */
@@ -224,6 +227,7 @@ export function soumettreChoixMethodeFacteur(etat: EtatSessionSignesProduit, cho
 
   const etapeCourante = soumettreEtapeTentatives<Categorie>(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (c) => verifierMethodeFacteur(c, facteur),
     revelerReponse: () => {},
   });
@@ -373,6 +377,7 @@ export function soumettreReponseSigneIrreductible(
 
   const etapeCourante = soumettreEtapeTentatives<SigneA>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (r) => verifierSigneIrreductible(r, facteurCourant),
     revelerReponse: () => {},
   });

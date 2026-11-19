@@ -10,12 +10,16 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { AidesNiveaux } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   exercice: ExerciceInequationRationnelleFacteurCommun;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
+  /** Aides à 2 niveaux (KaTeX) : règle des signes, jamais la grille. */
+  aides?: FragmentConsigne[][];
   onValider: (reponse: GrilleQuotient) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -36,6 +40,7 @@ interface Props {
  * et le cycle de saisie sont déjà génériques sur `exercice.racines.length`.
  */
 export function EtapeGrilleQuotientFacteurCommun({
+  aides,
   exercice,
   tentativesUtilisees,
   tentativesMax,
@@ -156,6 +161,7 @@ export function EtapeGrilleQuotientFacteurCommun({
 
       {!validation && (
         <>
+        {aides && <AidesNiveaux aides={aides} />}
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>

@@ -188,6 +188,26 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   cohérentes ou non, une ou deux valeurs de q, nature d'une suite, existe/n'existe pas quand c'est
   la question), filtrer une issue rendrait la réponse prévisible. Est particulier ce qui
   RACCOURCIT la résolution (équation sans solution réglée en une ligne, données directes…).
+- **Groupes « à verdict »** (décision de l'utilisateur, audit 4e ch. 2) : quand le NOM d'une variante
+  dit la réponse (« Δ < 0 », « aucune solution », « binôme conjugué », « deux dénominateurs » = une
+  racine à rejeter), le professeur qui la choisit donne le verdict. Contrat :
+  `groupesVerdict: { id, label, variantes }[]` (`export/genererFeuilleExercices.ts`, outils
+  `export/groupesVerdict.ts`). Dans le panneau d'ÉVALUATION seulement
+  (`catalogueVariantesExercice(gen, 'evaluation', clésActives)`), le groupe remplace ses membres
+  par UNE rangée (un membre déjà demandé par un plan enregistré reste affiché) ; `construirePlan`
+  tire la variante réelle de chaque question dans un paquet mélangé des membres, distribué série A
+  q1…qn puis B… et re-mélangé quand il est vide (verdicts équilibrés, différents d'une série à
+  l'autre) ; la série B garde le cas particulier oui/non de la série A, pas sa forme (propre à la
+  variante). Le plan, le QR `?code=`, le corrigé et la remédiation portent la variante RÉELLE ;
+  `tirerInstance` ne reçoit un id de groupe que pour une sonde (membre choisi par la graine) ;
+  l'estimation niveau/durée de la rangée tire un membre au hasard à chaque tirage ;
+  `varianteExigeCalculatrice` : groupe exclu seulement si tous ses membres l'exigent. La feuille
+  d'exercices et le `SelecteurVarianteDev` gardent les variantes séparées. Déclarés : gen1
+  `groupe_methode` (mise en évidence, binôme conjugué, produit remarquable, cas général, aucune
+  solution ; la mise en évidence généralisée reste à part), gen2 `groupe_signe_delta`, gen4
+  `groupe_racine_etrangere` (un dénominateur, deux dénominateurs, deux fractions du 1er degré ;
+  P2/P1 et P1/P2 à part). Mesuré (30 plans × 2 séries, Playwright) : verdict de la série B ≠ série A
+  dans 30 / 30 plans pour les trois générateurs, toutes les variantes membres tirées.
 - **Même structure dans toutes les séries** : la série A fixe, question par question, le cas
   particulier et le TYPE de question (`ProfilInstance.forme`, ex. gen38 : centrage / dispersion /
   interprétation / lecture) ; les autres séries reproduisent cette structure avec d'autres nombres.
@@ -211,6 +231,13 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
 - Pour chaque chapitre : mesurer (≥ 5 000 tirages par variante) la part des cas particuliers et des
   cas « calculatrice », écrire le profil, vérifier avec un plan réel (2 séries, calculatrice
   interdite/autorisée, case cochée ou non). Modèle : `5e-4h/generateurs5e/profilsEvaluationTrigonometrie.ts`.
+- **Profils de forme du 4e ch. 2** (lot E, `profilsEvaluation4eCh2Ch3.ts`) : gen3 `delta-n` (trinômes à
+  factoriser par Δ), gen5 `delta-n` + `|neg` (facteur du 1er degré à coefficient négatif), gen6
+  `delta-n|large/strict`, gen57 `entre/exterieur|large/strict` (inéquation) ou `equation` ; jamais la
+  méthode rapide précise, le nombre de racines ni une racine à rejeter. Forme la plus rare sur 5 000
+  tirages par variante : gen3 8,4 %, gen5 11,8 %, gen6 4,1 %, gen57 24 %. Pas de case « cas
+  particulier » (aucun raccourci). gen57 : calculatrice seulement pour les familles A
+  (`calculatriceIndispensable: PAIRES_CALCULATRICE`).
 - **`forme` = signature de difficulté** quand le générateur combine librement des briques (gen72 :
   forme des ensembles + nombre de translations/symétries/dilatations par ensemble, jamais l'ordre
   exact) : la recherche de graine est aléatoire (20 000 essais, 200 ms), donc mesurer la fréquence
@@ -272,6 +299,16 @@ tombent sur les lignes de sa grille.
 - Aides et rappels : **aucune formule écrite au clavier** (« Q0·r^t », « ln(x^x) », « e^(−rt) »,
   « log_base(A·B) », « e^{…} », « (a+b)/2 ») — le texte est une phrase qui se termine par « : », la
   formule va dans la partie LaTeX (`AideAvecLatex.latex`, ou fragment `latex(...)`).
+- **Retours de saisie des générateurs (lot B, 4e ch. 2 ; modèle pour les autres chapitres)** :
+  `4e/components/RetourSaisie.tsx` — `useTentativeLisible` (une saisie ILLISIBLE n'est jamais
+  transmise au moteur : aucune tentative consommée, message « … ne compte pas comme une tentative »),
+  `MessageRetour` (message ciblé sur l'erreur du cours trahie par la dernière réponse fausse, puis
+  « Incorrect — tentative n/3 » ; contenu dans UN `<span>` : `.alert-error` est un conteneur flex,
+  chaque fragment KaTeX y devenait une colonne), `AidesNiveaux` (deux niveaux : propriété du cours,
+  puis application à l'instance ; la première ouverture lève le drapeau d'aide du moteur). Textes
+  dans `4e/ui/aidesSecondDegre.ts` (jamais la réponse). Nombres saisis : `ui/lireNombre.ts`
+  (virgule, fraction, racine ; `null` = illisible). Choix fermés (méthode, catégorie, signe de a,
+  « Pas de CE / Au moins une CE ») : 1 tentative (`TENTATIVES_CHOIX_FERME`), champs : 3.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 
@@ -402,7 +439,7 @@ Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feui
 évaluations ne saute plus d'étape. **Chapitres migrés** : 6e ch. 5 (pilote, 6gen34–42, 6gen93–99) ;
 4e ch. 3 (gen10–13, gen68–72 — voir « Lectures graphiques et décisions » plus bas) ; 6e ch. 4
 (6gen23–29, 6gen77–84) ; 5e ch. 3 (5gen14–19, 5gen44–49) ; 6e ch. 3 (6gen13–22, 6gen85–92) ; 4e ch. 4 (gen30–38, gen108–112) ; 4e ch. 2 (gen1–6, gen57, gen67). Les autres adaptateurs s'affichent comme avant (contrat rétrocompatible).
-- 4e ch. 2, moitié 1 (gen1–4, notés : `criteresDifficulte`, reconnaissance de la méthode, signe de a, CE lue sur un dénominateur factorisé comptés comme lectures) : briques `4e/ui/corrigeSecondDegre1.ts` (`COURS_*` § 1/2/4/5, nombres `c√k` exacts, reconnaissance testée ligne par ligne `c=0` / `b^2=4ac`…, factorisations jusqu'à la forme factorisée DE L'ÉCRAN, produit nul / CE facteur par facteur, Δ puis √Δ simplifiée et x₁, x₂, vérification Viète ou substitution, `finaliserCorrige` : formules des justifications et résultats rédigés groupées `{…}`) ; une lettre par ÉCRAN, lettres = `phasesExercice` du moteur (gen3 jusqu'à 11 écrans, gen4 jusqu'à 11) ; gen2 : figure allure + tableau de signes (racines marquées, solutions en gras), l'appli passe l'exercice COURANT (déjà réduit après simplification, `phasesInequation`) ; gen4 : produit en croix orienté pour retomber sur `equationIsolee`, sous-variante B factorisée par (x − p₃) avant de développer. Collecteur `corrige-4e2-m1` (ensemble final de gen2 relu point par point, solutions de gen1/gen4 remises dans l'équation de départ).
+- 4e ch. 2, moitié 1 (gen1–4, notés : `criteresDifficulte` ; lectures depuis le lot E de l'audit : signe de a (gen2), CE lue sur un dénominateur factorisé, racines lues sur une forme factorisée — la reconnaissance de la méthode est une DÉCISION et compte comme une étape) : briques `4e/ui/corrigeSecondDegre1.ts` (`COURS_*` § 1/2/4/5, nombres `c√k` exacts, reconnaissance testée ligne par ligne `c=0` / `b^2=4ac`…, factorisations jusqu'à la forme factorisée DE L'ÉCRAN, produit nul / CE facteur par facteur, Δ puis √Δ simplifiée et x₁, x₂, vérification Viète ou substitution, `finaliserCorrige` : formules des justifications et résultats rédigés groupées `{…}`) ; une lettre par ÉCRAN, lettres = `phasesExercice` du moteur (gen3 jusqu'à 11 écrans, gen4 jusqu'à 11) ; gen2 : figure allure + tableau de signes (racines marquées, solutions en gras), l'appli passe l'exercice COURANT (déjà réduit après simplification, `phasesInequation`) ; gen4 : produit en croix orienté pour retomber sur `equationIsolee`, sous-variante B factorisée par (x − p₃) avant de développer. Collecteur `corrige-4e2-m1` (ensemble final de gen2 relu point par point, solutions de gen1/gen4 remises dans l'équation de départ).
 - 4e ch. 4, moitié 1 (gen30–36, notés : `criteresDifficulte`) : briques `4e/ui/corrigeStatistique1.ts` (`COURS_*` § 1–7, `lignesSomme` / `lignesSommeProduits` — membre de droite ≤ 26 caractères visibles, sinon paquets « a+b+c=P » de gauche ≤ 18 : la colonne du milieu ne fait que ≈ 230 px à 680 px —, `couperSiLongue`, `ligneSeuil`, `ligneFrequence` « ×100 % = 20 % », `formulesInsecables` : formules des lignes de texte groupées `{…}`, sinon « h₁ = 32 % » se coupait après « = » en fin de ligne) ; une lettre par ÉCRAN (gen33 : 4 / 5 étapes, Q₁ et Q₃ séparés ; gen35 : 11 / 13 étapes, `etapesParQuestion` groupe les écrans par vraie question, ordre « classes » des questions = ordre des écrans) ; constructeurs d'étapes de gen32/33/34/36 réutilisés par gen35 sur l'exercice « mappé » ; figure de la boîte sortie dans `boiteMoustaches/figure.ts` (sans `docx`) ; lectures (min/max/mode, sommets du polygone, boîte tracée) comptées comme écrans de lecture.
 - 4e ch. 4, gen37/38/108–112 : briques `4e/ui/corrigeStatistique2.ts` (`COURS_*` § 1–8, `lignesSomme` — membre de droite ≤ 26 caractères visibles, sinon paquets `S_1`, `S_2`… puis leur somme —, `formulesInsecables` pour les formules d'un Résultat / Ce qu'on utilise rédigé) ; arrondi orienté écrit avec une relation VRAIE (« ≈ 1,3571 ≥ 1,35 » par défaut, « ≤ 1,30 » par excès, borne « = 44,8 ≥ 44 ») ; gen38 : figure `4e/ui/figureComparaisonSeries.ts` (seuils n/4, n/2, 3n/4 et quartiles lus marqués) ; gen112 : la correction reprend la copie bloc par bloc (« Ligne k »). Niveaux notés (`criteresDifficulte`) ; lectures : gen38 récapitulatif et seuil simple, gen111 bâtons a et trompeur b, gen108 d.
   Corrections validées par l'utilisateur (à la source, écran = aides = papier = corrigé) :
@@ -492,7 +529,7 @@ Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feui
   `fractionCoefLatex` (jamais « 2(0 − ln x) », « 1( », « −1( », « (x)² ») ; 6gen16 `carreMoinsCarreLatex` (« x² − 1 ») ;
   6gen22 `facteurLatex`/`produitLatex`/`coefDevantLatex`/`coefVariableLatex`/`exposantDixLatex`
   (`formatLogarithmesProblemes.ts` : « (−1)·(−7) », « −log(X) », « e^{−t} », « 10^{−1,2} »).
-- 4e ch. 2, moitié 2 (gen5, gen6, gen57, gen67 ; notés, `criteresDifficulte`) : briques `4e/ui/corrigeSecondDegre2.ts` (`COURS_*` § 1–7, un constructeur par écran du mécanisme « méthode la plus rapide » : réduction / mise en évidence, reconnaissance — tests c = 0, b = 0, b² = 4ac dans l'ordre du cours —, forme factorisée ou Δ, racines par produit nul ou formule, factorisation après Δ ; signes `ligneSigneLineaire` / `ligneSigneTrinome` « P < 0 ⟺ x ∈ ]r₁ ; r₂[ », lecture de S une ligne par zone et par racine) ; une lettre par ÉCRAN, séquence recalculée sur l'instance INITIALE (`ecransSignesProduit`, `ecransInequationRationnelle` = `ordrePhases` de l'appli ; gen6 garde l'instance initiale dans l'appli, la session réduit numérateur / dénominateur) ; vérification du tableau par une valeur test ; écrans de lecture : méthode, signe d'un facteur sans racine, réduction, racines lues sur la forme factorisée, factorisation après Δ, phrase de conclusion (gen57). Collecteur `corrige-4e2-m2` : équivalences de signe contrôlées en 60 points.
+- 4e ch. 2, moitié 2 (gen5, gen6, gen57, gen67 ; notés, `criteresDifficulte`) : briques `4e/ui/corrigeSecondDegre2.ts` (`COURS_*` § 1–7, un constructeur par écran du mécanisme « méthode la plus rapide » : réduction / mise en évidence, reconnaissance — tests c = 0, b = 0, b² = 4ac dans l'ordre du cours —, forme factorisée ou Δ, racines par produit nul ou formule, factorisation après Δ ; signes `ligneSigneLineaire` / `ligneSigneTrinome` « P < 0 ⟺ x ∈ ]r₁ ; r₂[ », lecture de S une ligne par zone et par racine) ; une lettre par ÉCRAN, séquence recalculée sur l'instance INITIALE (`ecransSignesProduit`, `ecransInequationRationnelle` = `ordrePhases` de l'appli ; gen6 garde l'instance initiale dans l'appli, la session réduit numérateur / dénominateur) ; vérification du tableau par une valeur test ; écrans de lecture (lot E de l'audit) : signe d'un facteur sans racine, réduction, racines lues sur la forme factorisée, phrase de conclusion (gen57) — le choix de la méthode et la factorisation après Δ comptent comme des étapes. Durées moyennes avant → après le lot E (1 000 tirages libres) : gen1 7,9 → 8,7 min ; gen2 8,6 → 8,5 ; gen3 13,4 → 14,8 ; gen4 18,1 → 18,7 ; gen5 12,9 → 14,4 ; gen6 16,9 → 18,5 ; gen57 13,1 → 13,1 ; gen67 8,0 → 8,0. Collecteur `corrige-4e2-m2` : équivalences de signe contrôlées en 60 points.
 
 **Chaque étape (= écran du générateur, lettre `sousQuestion`) contient, dans cet ordre :**
 1. **Ce qu'on utilise** (`utilise`) : propriété / formule / méthode, avec le renvoi « (cours, § n) »

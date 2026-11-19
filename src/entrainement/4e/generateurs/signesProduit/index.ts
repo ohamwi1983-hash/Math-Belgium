@@ -106,6 +106,10 @@ function melanger<T>(valeurs: T[]): T[] {
   return copie;
 }
 
+function estMonome(f: FacteurSignesProduit): boolean {
+  return f.type === "lineaire" && f.polynome.p === 0;
+}
+
 function construireDepuisPattern(pattern: TypeFacteur[]): ReturnType<GenerateurExerciceSignesProduit> {
   const facteurs: FacteurSignesProduit[] = [];
   let racinesUtilisees: number[] = [];
@@ -128,6 +132,8 @@ function construireDepuisPattern(pattern: TypeFacteur[]): ReturnType<GenerateurE
     }
   }
 
+  // Un monôme (kx, racine 0) passe en tête : il s'écrit alors sans parenthèses (audit G13, P3).
+  facteurs.sort((f, g) => Number(estMonome(g)) - Number(estMonome(f)));
   const symbole = SYMBOLES[randomInt(0, SYMBOLES.length - 1)];
   const { racines, grille } = construireGrille(facteurs);
   const solution = classifierSolutionProduit(racines, grille.produit, symbole);

@@ -22,6 +22,7 @@ import {
   ecransInequationRationnelle,
   lettresLectureInequationRationnelle,
 } from "./corrigeDetaille";
+import { profilInequationRationnelle } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceInequationRationnelle>` pour gen6 (Inéquations
@@ -62,7 +63,9 @@ function reponseBreveInequationRationnelle(exercice: ExerciceInequationRationnel
 }
 
 /**
- * Niveau (grille commune) : un écran = une étape, écrans de choix de la méthode = lectures. Méthode
+ * Niveau (grille commune) : un écran = une étape ; réduction et racines lues sur une forme factorisée
+ * = lectures (le choix de la méthode et la factorisation après Δ sont des étapes depuis le lot E de
+ * l'audit 4e ch. 2). Méthode
  * 1 dès qu'un polynôme du second degré est à factoriser (choisir la technique), 0 pour les niveaux 1
  * et 2 (premier degré seul, démarche imposée). Piège dans les données : valeur interdite qui reste
  * exclue malgré une inégalité large, facteur commun simplifié (sa valeur reste interdite), dénominateur
@@ -128,6 +131,7 @@ export const REGLAGES_PAR_DEFAUT: ReglagesInequationRationnelle = {
 const genererInstance = creerGenerateurInequationRationnelle(REGLAGES_PAR_DEFAUT);
 
 export const adaptateurEvaluationInequationRationnelle: AdaptateurFeuilleExercices<ExerciceInequationRationnelle> = {
+  profilInstance: profilInequationRationnelle,
   titreDocument: "Inéquations rationnelles — Évaluation",
   nomFichierBase: "inequations-rationnelles",
   genererInstance,

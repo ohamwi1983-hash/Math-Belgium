@@ -32,7 +32,7 @@ const SKINS: SkinEnclosAdosseMur[] = [
 ];
 
 const X_S_MIN = 13;
-const X_S_MAX = 17;
+const X_S_MAX = 25;
 
 export const construireEnclosAdosseMur = construireAvecParametres(() => {
   const xS = randomInt(X_S_MIN, X_S_MAX);

@@ -122,6 +122,13 @@ function criteresDifficulteInequations(instance: ExerciceInequation): CriteresDi
   return { ...etapesDuCorrige(correctionDetailleeInequations(instance), [lettrePhaseInequation(instance, "signe_a")]), methode: 1, piege };
 }
 
+/** Décision 4 de l'utilisateur (audit 4e ch. 2) : le signe de Δ décide du nombre de racines et de
+ * la forme de l'ensemble-solution — le choisir dans le panneau d'évaluation, c'est donner le verdict.
+ * Une seule rangée ; variante tirée par `construirePlan`, équilibrée d'une série à l'autre. */
+const GROUPES_VERDICT: { id: string; label: string; variantes: VarianteInequationId[] }[] = [
+  { id: "groupe_signe_delta", label: "Signe de Δ au hasard (Δ < 0, Δ = 0 ou Δ > 0)", variantes: ["deltaNegatif", "deltaNul", "deltaPositif"] },
+];
+
 export const adaptateurEvaluationInequations: AdaptateurFeuilleExercices<ExerciceInequation> = {
   profilInstance: profilInequationTrinome,
   libelleCasParticulier: LIBELLE_CAS_TRINOME,
@@ -129,6 +136,7 @@ export const adaptateurEvaluationInequations: AdaptateurFeuilleExercices<Exercic
   nomFichierBase: "tableau-signes-trinome",
   genererInstance: genererExerciceInequation,
   catalogueVariantes: CATALOGUE_VARIANTES,
+  groupesVerdict: GROUPES_VERDICT,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteInequationId),
   construireEnonce: construireEnonceInequations,
   construireCorrection: construireCorrectionInequations,

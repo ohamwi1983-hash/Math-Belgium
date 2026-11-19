@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { AidesNiveaux, MESSAGE_BORNE_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
+import { lireNombreSaisi } from "../ui/lireNombre";
 
 interface Props {
   tentativesUtilisees: number;
@@ -11,6 +15,10 @@ interface Props {
   recapitulatif: EntreeRecapitulatif[];
   /** Le facteur linéaire isolé courant, ex. "3x + 3 = 0" (encadré "état actuel"). */
   etatActuel: string;
+  /** Remplace le libellé « État actuel » (gen5 : « Facteur à étudier »). */
+  etatActuelLabel?: string;
+  /** Aides à 2 niveaux (KaTeX). */
+  aides?: FragmentConsigne[][];
   onValider: (racine: number) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -33,18 +41,22 @@ export function EtapeRacineLineaire({
   tentativesMax,
   recapitulatif,
   etatActuel,
+  etatActuelLabel,
+  aides,
   onValider,
   validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
+  const saisie = useTentativeLisible<number>();
 
-  const nombreSaisi = Number(reponse.trim().replace(",", "."));
-  const valide = reponse.trim() !== "" && Number.isFinite(nombreSaisi);
+  const lu = lireNombreSaisi(reponse);
+  const nombreSaisi = lu ?? NaN;
+  const valide = lu !== null;
 
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <EtatActuelPanel latex={etatActuel} />
+      <EtatActuelPanel latex={etatActuel} label={etatActuelLabel} />
       <p className="prompt-text">Quelle est la racine de ce facteur ?</p>
       <div className="field">
         <label className="field-label" htmlFor="racine-lineaire">
@@ -54,19 +66,16 @@ export function EtapeRacineLineaire({
           id="racine-lineaire"
           className="text-input"
           value={reponse}
-          onChange={(e) => setReponse(e.target.value)}
+          onChange={(e) => setReponse(normaliserSigneMoins(e.target.value))}
         />
       </div>
       {!validation && (
         <>
-        <button type="button" className="btn btn-primary" disabled={!valide} onClick={() => onValider(nombreSaisi)}>
+        {aides && <AidesNiveaux aides={aides} />}
+        <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => saisie.tenter(nombreSaisi, valide, onValider)}>
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour texteIllisible={MESSAGE_BORNE_ILLISIBLE} illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

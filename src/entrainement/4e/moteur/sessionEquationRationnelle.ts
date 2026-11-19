@@ -30,6 +30,10 @@ import { diagnostiquerMiseEnEvidenceFraction, verifierSimplification } from "./v
 import { necessiteSimplification as necessiteReductionCoefficients } from "./simplificationEquation";
 import { verifierCE, verifierFractionSimplifiee, verifierRacinesEtrangeres } from "./verificationEquationRationnelle";
 import type { EtatSessionEquationRationnelle, ResultatExerciceEquationRationnelle } from "./typesEquationRationnelle";
+import { equationDenominateurCommun } from "./denominateurCommun";
+
+/** Choix fermé (catégorie, signe) : UNE tentative (convention du site, audit 4e ch. 2 G3). */
+export const TENTATIVES_CHOIX_FERME = 1;
 
 const POINTS_DE_BASE = 100;
 
@@ -179,8 +183,12 @@ function garderPhase(etat: EtatSessionEquationRationnelle, phase: EtatSessionEqu
 export function soumettreReponseCE(etat: EtatSessionEquationRationnelle, reponse: number[]): EtatSessionEquationRationnelle {
   garderPhase(etat, "ce", "soumettreReponseCE");
 
+  // « Pas de CE » / « Au moins une CE » est un choix fermé (2 boutons) : un mauvais choix clôt l'écran
+  // (une tentative) ; seules les VALEURS d'une CE juste ont trois tentatives (audit G3).
+  const mauvaisChoix = (reponse.length === 0) !== (etat.exerciceCourant.ce.length === 0);
   const etapeCourante = soumettreEtapeTentatives<number[]>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(mauvaisChoix ? { tentativesMax: TENTATIVES_CHOIX_FERME } : {}),
     verifier: (r) => verifierCE(r, etat.exerciceCourant.ce),
     revelerReponse: () => {},
   });
@@ -258,6 +266,7 @@ export function soumettreChoixSimplifierCategorie(
 
   const etapeCourante = soumettreEtapeTentatives<Categorie>(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (c) => c === p2DeFractionGauche(etat.exerciceCourant).categorie,
     revelerReponse: () => {},
   });
@@ -445,19 +454,25 @@ export function soumettreReponseIsolement(
 ): EtatSessionEquationRationnelle {
   garderPhase(etat, "isolement", "soumettreReponseIsolement");
 
+  // Dénominateur commun (G5) : l'équation du 1er degré est juste aussi ; elle remplace alors
+  // l'équation du 2nd degré du produit en croix pour la suite (résolution du 1er degré).
+  const lineaire = equationDenominateurCommun(etat.exerciceCourant);
+  const parDenominateurCommun = lineaire !== null && !verifierIsolement(etat.exerciceCourant.equationIsolee, reponse) && verifierIsolement(lineaire, reponse);
   const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
-    verifier: (r) => verifierIsolement(etat.exerciceCourant.equationIsolee, r),
+    verifier: (r) => verifierIsolement(etat.exerciceCourant.equationIsolee, r) || (lineaire !== null && verifierIsolement(lineaire, r)),
     revelerReponse: () => {},
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
+  const exerciceCourant = parDenominateurCommun && etapeCourante.reussie ? { ...etat.exerciceCourant, equationIsolee: lineaire! } : etat.exerciceCourant;
   return {
     ...etat,
+    exerciceCourant,
     etapeCourante: demarrerEtapeTentatives(),
-    phase: !necessiteFactorisation(etat.exerciceCourant)
+    phase: !necessiteFactorisation(exerciceCourant)
       ? "champ2"
-      : necessiteReconnaissance(etat.exerciceCourant)
+      : necessiteReconnaissance(exerciceCourant)
         ? "reconnaissance"
         : "champ1",
     scoreIsolementExercice: etapeCourante.score,
@@ -480,6 +495,7 @@ export function soumettreChoixCategorie(
 
   const etapeCourante = soumettreEtapeTentatives<Categorie>(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (c) => c === etat.exerciceCourant.equationIsolee.categorie,
     revelerReponse: () => {},
   });

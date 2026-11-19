@@ -11,12 +11,23 @@ import { construireCas4b } from "./construireCas4b";
  * fait qu'elles sont les SEULES à laisser l'écran final "racines étrangères" varier réellement cas
  * par cas, plutôt que d'être entièrement déterminé par la construction tirée.
  */
+/** Solutions (racines de l'équation sans fraction) bornées à 20 en valeur absolue (audit G12 : x = 61
+ * sortait dans 9 à 13 % des tirages) — tirage refait, au plus 400 fois. */
+const BORNE_SOLUTIONS = 20;
+function borne<T extends ExerciceEquationRationnelle>(construire: () => T): () => T {
+  return () => {
+    let ex = construire();
+    for (let i = 0; i < 400 && ex.equationIsolee.solution.racines.some((r) => Math.abs(r) > BORNE_SOLUTIONS); i++) ex = construire();
+    return ex;
+  };
+}
+
 const CONSTRUCTEURS_PONDERES: Array<{ construire: () => ExerciceEquationRationnelle; poids: number }> = [
-  { construire: construireUnDenominateur, poids: 1 },
-  { construire: construireDeuxDenominateurs, poids: 1 },
-  { construire: construireDeuxFractionsLineaires, poids: 1 },
-  { construire: construireCas4a, poids: 2 },
-  { construire: construireCas4b, poids: 2 },
+  { construire: borne(construireUnDenominateur), poids: 1 },
+  { construire: borne(construireDeuxDenominateurs), poids: 1 },
+  { construire: borne(construireDeuxFractionsLineaires), poids: 1 },
+  { construire: borne(construireCas4a), poids: 2 },
+  { construire: borne(construireCas4b), poids: 2 },
 ];
 
 const POIDS_TOTAL = CONSTRUCTEURS_PONDERES.reduce((somme, c) => somme + c.poids, 0);
@@ -48,11 +59,11 @@ export const CATALOGUE_VARIANTES: VarianteEquationRationnelle[] = [
 ];
 
 const CONSTRUCTEURS_PAR_ID: Record<VarianteEquationRationnelleId, () => ExerciceEquationRationnelle> = {
-  un_denominateur: construireUnDenominateur,
-  deux_denominateurs: construireDeuxDenominateurs,
-  deux_fractions_lineaires: construireDeuxFractionsLineaires,
-  p2_sur_p1: construireCas4a,
-  p1_sur_p2: construireCas4b,
+  un_denominateur: borne(construireUnDenominateur),
+  deux_denominateurs: borne(construireDeuxDenominateurs),
+  deux_fractions_lineaires: borne(construireDeuxFractionsLineaires),
+  p2_sur_p1: borne(construireCas4a),
+  p1_sur_p2: borne(construireCas4b),
 };
 
 /**

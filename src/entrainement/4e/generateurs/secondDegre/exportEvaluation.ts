@@ -18,10 +18,11 @@ import {
   consigneEtapeSecondDegre,
   correctionDetailleeSecondDegre,
   formeFactoriseeSecondDegre,
-  lettrePhaseSecondDegre,
+  methodeCorrigeSecondDegre,
   phasesSecondDegre,
   solutionsSecondDegreLatex,
 } from "./corrigeDetaille";
+import { formeRacineEvidente } from "../../moteur/methodeSecondDegre";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSecondDegre, type VarianteSecondDegreId } from "./index";
 import { profilSecondDegre, LIBELLE_CAS_SECOND_DEGRE, PARAMETRES_SECOND_DEGRE } from "../profilsEvaluation4eCh2Ch3";
 
@@ -138,6 +139,14 @@ const CRITERE_PHASE: Record<PhaseSecondDegre, string> = {
   zeros: "Solutions correctes",
 };
 
+/** Critère de l'écran « champ 1 » selon la méthode du corrigé (racine évidente, Δ ou factorisation). */
+function critereChamp1(travail: Exercice): FragmentConsigne[] {
+  const methode = methodeCorrigeSecondDegre(travail);
+  if (methode === "racine_evidente") return [texte("Racine évidente repérée et factorisation correcte : "), latex(`${formeRacineEvidente(travail.enonce)}=0`)];
+  if (travail.categorie === "cas_general") return [texte("Discriminant correctement calculé : "), latex(`\\Delta=${travail.solution.delta ?? 0}`)];
+  return [texte("Factorisation correcte : "), latex(`${formeFactoriseeSecondDegre(travail)}=0`)];
+}
+
 function baremeSecondDegre(instance: Exercice): BaremeExercice {
   const etapes = etapesResolution(instance);
   const travail = necessiteSimplification(instance) ? exerciceSimplifie(instance) : instance;
@@ -145,7 +154,7 @@ function baremeSecondDegre(instance: Exercice): BaremeExercice {
     sousQuestion: LETTRES[i],
     critere:
       e.phase === "champ1"
-        ? [texte(travail.categorie === "cas_general" ? "Discriminant correctement calculé" : "Factorisation correcte : "), ...(travail.categorie === "cas_general" ? [] : [latex(`${formeFactoriseeSecondDegre(travail)}=0`)])]
+        ? critereChamp1(travail)
         : e.phase === "zeros"
           ? [texte(`${CRITERE_PHASE.zeros} : `), latex(solutionsLatex(instance))]
           : [texte(CRITERE_PHASE[e.phase])],
@@ -167,7 +176,11 @@ function baremeSecondDegre(instance: Exercice): BaremeExercice {
       break;
     case "cas_general":
       erreurs.push({ description: [texte("Carré de b écrit négatif dans Δ")], cout: `0 pt sur ${LETTRES[iChamp1]}), suite notée sans double pénalité` });
-      erreurs.push({ description: [texte("Formule résolvante sans diviser par 2a")], cout: `0 pt sur ${LETTRES[iZeros]})` });
+      if ((travail.solution.delta ?? 0) < 0) erreurs.push({ description: [texte("Δ < 0 lu comme « une solution » ou « deux solutions »")], cout: `0 pt sur ${LETTRES[iZeros]})` });
+      else erreurs.push({ description: [texte("Formule résolvante sans diviser par 2a")], cout: `0 pt sur ${LETTRES[iZeros]})` });
+      break;
+    case "irreductible":
+      erreurs.push({ description: [texte("Différence de deux carrés écrite à tort (a et c sont de même signe) : solutions inventées")], cout: `0 pt sur ${LETTRES[iZeros]})` });
       break;
   }
   if (necessiteIsolement(travail)) erreurs.push({ description: [texte("Erreur de signe en changeant un terme de membre")], cout: "0 pt sur l'étape, suite notée sans double pénalité" });
@@ -176,21 +189,32 @@ function baremeSecondDegre(instance: Exercice): BaremeExercice {
     criteres,
     erreursFrequentes: erreurs,
     reponsesAcceptees: [
+      ...(methodeCorrigeSecondDegre(travail) === "racine_evidente" ? [[texte("Racine évidente ou discriminant : les deux méthodes sont justes (tous les points, reconnaissance comprise).")]] : []),
       [texte("Méthode correcte autre que la plus rapide (par exemple le discriminant à la place d'une factorisation) : tous les points de résolution, pas ceux de la reconnaissance.")],
       [texte("Solutions sous forme de fraction ou de décimal exact")],
     ],
   };
 }
 
-/** Critères du niveau (grille commune, `export/niveauDifficulte.ts`) : étapes = écrans du corrigé
- * (la reconnaissance de la méthode — un coup d'œil sur a, b, c — compte comme une lecture : 1 min) ; méthode = choisir la plus rapide
- * parmi celles du cours ; piège dans les données : le cas caché (famille 5, ne pas développer ni
- * diviser par la parenthèse) et « ax² = bx » (tentation de diviser par x). */
+/** Critères du niveau (grille commune, `export/niveauDifficulte.ts`) : étapes = écrans du corrigé —
+ * le choix de la méthode est une DÉCISION (tests sur a, b, c, racine évidente), il compte comme une
+ * étape, plus comme une lecture (lot E de l'audit) ; méthode = choisir la plus rapide parmi celles
+ * du cours ; piège dans les données : le cas caché (famille 5, ne pas développer ni diviser par la
+ * parenthèse), « ax² = bx » (tentation de diviser par x) et « b = 0, a et c de même signe » (ce
+ * n'est pas une différence de deux carrés). */
 function criteresDifficulteSecondDegre(instance: Exercice): CriteresDifficulte {
-  const piege = instance.categorie === "mise_en_evidence_generalisee" || (instance.categorie === "mise_en_evidence" && instance.formeAffichage === "isolee_carre") ? 1 : 0;
-  const lecture = phasesSecondDegre(instance).includes("reconnaissance") ? [lettrePhaseSecondDegre(instance, "reconnaissance")] : [];
-  return { ...etapesDuCorrige(correctionDetailleeSecondDegre(instance), lecture), methode: 1, piege };
+  const piege = instance.categorie === "mise_en_evidence_generalisee" || instance.categorie === "irreductible" || (instance.categorie === "mise_en_evidence" && instance.formeAffichage === "isolee_carre") ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeSecondDegre(instance), []), methode: 1, piege };
 }
+
+/** Décision 4 de l'utilisateur (audit 4e ch. 2) : la méthode EST le verdict de la reconnaissance —
+ * choisir « binôme conjugué » ou « aucune solution » dans le panneau d'évaluation donnerait la
+ * réponse. Une seule rangée « Méthode à reconnaître » ; la variante de chaque question est tirée par
+ * `construirePlan`, équilibrée d'une série à l'autre. La mise en évidence généralisée (forme de
+ * l'énoncé visible, pas un verdict) reste une rangée à part. Générateur et feuille : intacts. */
+const GROUPES_VERDICT: { id: string; label: string; variantes: VarianteSecondDegreId[] }[] = [
+  { id: "groupe_methode", label: "Méthode à reconnaître (mise en évidence, binôme conjugué, produit remarquable, cas général ou aucune solution, au hasard)", variantes: ["mise_en_evidence", "binome_conjugue", "produit_remarquable", "cas_general", "aucune_solution"] },
+];
 
 export const adaptateurEvaluationSecondDegre: AdaptateurFeuilleExercices<Exercice> = {
   profilInstance: profilSecondDegre,
@@ -200,6 +224,7 @@ export const adaptateurEvaluationSecondDegre: AdaptateurFeuilleExercices<Exercic
   nomFichierBase: "second-degre-methode-rapide",
   genererInstance: genererExerciceSecondDegre,
   catalogueVariantes: CATALOGUE_VARIANTES,
+  groupesVerdict: GROUPES_VERDICT,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteSecondDegreId),
   construireEnonce: construireEnonceSecondDegre,
   construireCorrection: construireCorrectionSecondDegre,

@@ -14,12 +14,16 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { AidesNiveaux } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   exercice: ExerciceInequationRationnelleCubique;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
+  /** Aides à 2 niveaux (KaTeX) : règle des signes, jamais la grille. */
+  aides?: FragmentConsigne[][];
   onValider: (reponse: GrilleQuotientCubique) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -33,7 +37,7 @@ interface Props {
  * racines du facteur quadratique restant, triées) au lieu de 2, avec toujours 1 seule ligne D
  * (P1_D, un vrai PolynomeLineaire — formatLigneDenominateurLabel réutilisée telle quelle).
  */
-export function EtapeGrilleQuotientCubique({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
+export function EtapeGrilleQuotientCubique({ aides, exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
   const entete = formatEnTeteInterieur(exercice.racines);
   const nbColonnes = entete.length;
   const [racineQ1, racineQ2] = [...exercice.numerateur.solution.racines].sort((a, b) => a - b);
@@ -159,6 +163,7 @@ export function EtapeGrilleQuotientCubique({ exercice, tentativesUtilisees, tent
 
       {!validation && (
         <>
+        {aides && <AidesNiveaux aides={aides} />}
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>

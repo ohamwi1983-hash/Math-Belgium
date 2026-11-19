@@ -139,6 +139,10 @@ import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleeInequationRationnelle, lettrePhaseInequationRationnelle } from "./generateurs/inequationRationnelle/corrigeDetaille";
 import { ecranClos, entreeAjoutee, nombreSaisi, saisieEnLatex, segmentsDepuisHistorique, valeurRecap, type EcranClos } from "./ui/historiqueProgression";
+import { TENTATIVES_CHOIX_FERME } from "./moteur/sessionInequationRationnelle";
+import { aideTexteIntervalleProduit, aidesCE, aidesChamp1Categorie, aidesFactorisationApresDelta, aidesGrilleSignes, aidesIsolement, aidesMethodeFacteur, aidesRacinesFacteur, aidesReduction, aidesSimplificationFraction, messageDelta, messageIntervalleProduit, valeursInterditesQuotient } from "./ui/aidesSecondDegre";
+import { CourbeSignes } from "./components/CourbeSignes";
+import { valeurQuotientEtudie } from "./generateurs/inequationRationnelle/corrigeDetaille";
 
 /** `fraction.denominateur`/`.numerateur` sont toujours des P2 pour le type "P2/P2" (seul type utilisé par facteurCommun). */
 function estPolynomeLineaire(poly: Exercice | PolynomeLineaire): poly is PolynomeLineaire {
@@ -886,6 +890,17 @@ export function AppInequationRationnelle() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        messageRevele: /econnaissance/.test(etat.phase) ? "Ce n'était pas la bonne réponse." : undefined,
+        figureApres:
+          etat.phase === "grille" || etat.phase === "intervalle" ? (
+            <CourbeSignes
+              f={(x) => valeurQuotientEtudie(exerciceInitial, x)}
+              zeros={exerciceInitial.racines.filter((r) => !valeursInterditesQuotient(exerciceInitial).includes(r))}
+              interdites={valeursInterditesQuotient(exerciceInitial)}
+              solution={exerciceInitial.solution}
+              nom="Q(x)"
+            />
+          ) : undefined,
         reponseAttendue: reponseAttenduePhase(etat),
         corrigeDetaille: (
           <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeInequationRationnelle(exerciceInitial), lettrePhaseInequationRationnelle(exerciceInitial, etat.phase))} />
@@ -931,6 +946,7 @@ export function AppInequationRationnelle() {
               placeholder="ex : (2x+1)/(x-3) - 5 < 0"
               aideActivee={etat.aideIsolerUtilisee}
               onActiverAide={() => setEtat(activerAideIsoler(etat))}
+              aides={aidesIsolement(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseIsoler(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -949,6 +965,7 @@ export function AppInequationRationnelle() {
               placeholder="ex : (2x+1)/(x-3) - (x+4) < 0"
               aideActivee={etat.aideIsolerUtilisee}
               onActiverAide={() => setEtat(activerAideIsoler(etat))}
+              aides={aidesIsolement(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseIsoler(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -967,6 +984,7 @@ export function AppInequationRationnelle() {
               placeholder="ex : (x+1)/(x-2) - (3x-1)/(x+4) >= 0"
               aideActivee={etat.aideIsolerUtilisee}
               onActiverAide={() => setEtat(activerAideIsoler(etat))}
+              aides={aidesIsolement(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseIsoler(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -985,6 +1003,7 @@ export function AppInequationRationnelle() {
               placeholder="ex : 7/(x-1)^2 - 2 < 0"
               aideActivee={etat.aideIsolerUtilisee}
               onActiverAide={() => setEtat(activerAideIsoler(etat))}
+              aides={aidesIsolement(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseIsoler(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1003,6 +1022,7 @@ export function AppInequationRationnelle() {
               placeholder="ex : (x^2+1)/(x^2-4) - 2 > 0"
               aideActivee={etat.aideIsolerUtilisee}
               onActiverAide={() => setEtat(activerAideIsoler(etat))}
+              aides={aidesIsolement(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseIsoler(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1022,6 +1042,7 @@ export function AppInequationRationnelle() {
               texteAide="Mets au même dénominateur : la constante k s'écrit k·D(x)/D(x). Le numérateur devient N(x) − k·D(x) : développe puis réduis."
               aideActivee={etat.aideCombinerUtilisee}
               onActiverAide={() => setEtat(activerAideCombiner(etat))}
+              aides={aidesIsolement(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseCombiner(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1041,6 +1062,7 @@ export function AppInequationRationnelle() {
               texteAide="Mets au même dénominateur : le terme du 1er degré P(x) s'écrit P(x)·D(x)/D(x). Le numérateur devient N(x) − P(x)·D(x) : développe le produit puis réduis."
               aideActivee={etat.aideCombinerUtilisee}
               onActiverAide={() => setEtat(activerAideCombiner(etat))}
+              aides={aidesIsolement(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseCombiner(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1060,6 +1082,7 @@ export function AppInequationRationnelle() {
               texteAide="Mets au même dénominateur D₁(x)·D₂(x) : le numérateur devient N₁(x)·D₂(x) − N₂(x)·D₁(x). Développe chaque produit puis réduis."
               aideActivee={etat.aideCombinerUtilisee}
               onActiverAide={() => setEtat(activerAideCombiner(etat))}
+              aides={aidesIsolement(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseCombiner(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1079,6 +1102,7 @@ export function AppInequationRationnelle() {
               texteAide="Mets au même dénominateur D(x)², où D(x) est l'expression élevée au carré : la constante k s'écrit k·D(x)²/D(x)². Le numérateur devient A − k·D(x)² : développe le carré puis réduis."
               aideActivee={etat.aideCombinerUtilisee}
               onActiverAide={() => setEtat(activerAideCombiner(etat))}
+              aides={aidesIsolement(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseCombiner(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1098,6 +1122,7 @@ export function AppInequationRationnelle() {
               texteAide="Mets au même dénominateur : la constante k s'écrit k·D(x)/D(x). Le numérateur devient N(x) − k·D(x) : développe puis réduis."
               aideActivee={etat.aideCombinerUtilisee}
               onActiverAide={() => setEtat(activerAideCombiner(etat))}
+              aides={aidesIsolement(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseCombiner(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1113,6 +1138,7 @@ export function AppInequationRationnelle() {
               diagnostiquer={(v) => diagnostiquerReductionCoefficients(exerciceSansFacteurCommun.denominateur, v)}
               aideActivee={etat.aideDenomReductionUtilisee}
               onActiverAide={() => setEtat(activerAideDenomReduction(etat))}
+              aides={aidesReduction(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseDenomReduction(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1125,9 +1151,10 @@ export function AppInequationRationnelle() {
               enonceFixe={enonceFixe}
               masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME}
               recapitulatif={recapitulatif}
               onChoisir={(choix: Categorie) => terminerEtape(soumettreReponseDenomReconnaissance(etat, choix), libelleCategorie(choix))}
+              aides={aidesMethodeFacteur()}
               validation={validation}
             />
           ) : etat.phase === "denomChamp1" && exerciceSansFacteurCommun ? (
@@ -1143,6 +1170,8 @@ export function AppInequationRationnelle() {
               diagnostiquer={(v) => diagnostiquerChampPrincipal(exerciceSansFacteurCommun.denominateur, v)}
               aideActivee={etat.aideDenomChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideDenomChamp1(etat))}
+              aides={aidesChamp1Categorie(exerciceSansFacteurCommun.denominateur)}
+              messageCible={(exerciceSansFacteurCommun.denominateur).categorie === "cas_general" ? (v) => messageDelta(exerciceSansFacteurCommun.denominateur, v) : undefined}
               onValider={(reponse) => terminerEtape(soumettreReponseDenomChamp1(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1161,6 +1190,7 @@ export function AppInequationRationnelle() {
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(exerciceSansFacteurCommun.denominateur, v)}
               aideActivee={etat.aideDenomFactorisationUtilisee}
               onActiverAide={() => setEtat(activerAideDenomFactorisation(etat))}
+              aides={aidesFactorisationApresDelta()}
               onValider={(reponse) => terminerEtape(soumettreReponseDenomFactorisation(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1183,6 +1213,7 @@ export function AppInequationRationnelle() {
               texteAide="Une fois le dénominateur factorisé, chaque facteur égalé à 0 donne une condition d'existence (CE)."
               aideActivee={etat.aideCeUtilisee}
               onActiverAide={() => setEtat(activerAideCe(etat))}
+              aides={aidesCE()}
               onValider={(valeurs) => terminerEtape(soumettreReponseCEListe(etat, valeurs), formatCoupleSaisi(valeurs, "x ≠", "Pas de CE"))}
               validation={validation}
             />
@@ -1195,6 +1226,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesCE()}
               onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), formatCESaisie(reponse))}
               validation={validation}
             />
@@ -1214,6 +1246,7 @@ export function AppInequationRationnelle() {
               placeholder="ex : x(2x^2 - 5x + 3)"
               aideActivee={etat.aideMiseEnEvidenceUtilisee}
               onActiverAide={() => setEtat(activerAideMiseEnEvidence(etat))}
+              aides={aidesIsolement(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseMiseEnEvidence(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1226,6 +1259,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesCE()}
               onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), formatCESaisie(reponse))}
               validation={validation}
             />
@@ -1238,6 +1272,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesCE()}
               onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), formatCESaisie(reponse))}
               validation={validation}
             />
@@ -1260,6 +1295,7 @@ export function AppInequationRationnelle() {
               texteAide="Une fois le dénominateur factorisé, chaque facteur égalé à 0 donne une condition d'existence (CE)."
               aideActivee={etat.aideCeUtilisee}
               onActiverAide={() => setEtat(activerAideCe(etat))}
+              aides={aidesCE()}
               onValider={(valeurs) => terminerEtape(soumettreReponseCEListe(etat, valeurs), formatCoupleSaisi(valeurs, "x ≠", "Pas de CE"))}
               validation={validation}
             />
@@ -1282,6 +1318,7 @@ export function AppInequationRationnelle() {
               texteAide="Une fois le dénominateur factorisé, chaque facteur égalé à 0 donne une condition d'existence (CE)."
               aideActivee={etat.aideCeUtilisee}
               onActiverAide={() => setEtat(activerAideCe(etat))}
+              aides={aidesCE()}
               onValider={(valeurs) => terminerEtape(soumettreReponseCEListe(etat, valeurs), formatCoupleSaisi(valeurs, "x ≠", "Pas de CE"))}
               validation={validation}
             />
@@ -1299,6 +1336,7 @@ export function AppInequationRationnelle() {
               diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(denominateurFacteurCommun(exerciceFacteurCommun), v)}
               aideActivee={etat.aideSimplifierDenomReductionUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierDenomReduction(etat))}
+              aides={aidesReduction(true)}
               onValider={(reponse) => terminerEtape(soumettreReponseSimplifierDenomReduction(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1311,9 +1349,10 @@ export function AppInequationRationnelle() {
               enonceFixe={enonceFixe}
               masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME}
               recapitulatif={recapitulatif}
               onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixSimplifierDenomCategorie(etat, choix), libelleCategorie(choix))}
+              aides={aidesMethodeFacteur()}
               validation={validation}
             />
           ) : etat.phase === "simplifierDenomChamp1" && exerciceFacteurCommun ? (
@@ -1329,6 +1368,8 @@ export function AppInequationRationnelle() {
               diagnostiquer={(v) => diagnostiquerChampPrincipal(denominateurFacteurCommun(exerciceFacteurCommun), v)}
               aideActivee={etat.aideSimplifierDenomChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierDenomChamp1(etat))}
+              aides={aidesChamp1Categorie(denominateurFacteurCommun(exerciceFacteurCommun))}
+              messageCible={(denominateurFacteurCommun(exerciceFacteurCommun)).categorie === "cas_general" ? (v) => messageDelta(denominateurFacteurCommun(exerciceFacteurCommun), v) : undefined}
               onValider={(reponse) => terminerEtape(soumettreReponseSimplifierDenomChamp1(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1345,6 +1386,7 @@ export function AppInequationRationnelle() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideSimplifierDenomChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierDenomChamp2(etat))}
+              aides={aidesRacinesFacteur(denominateurFacteurCommun(exerciceFacteurCommun))}
               onValider={(racines) =>
                 terminerEtape(soumettreReponseSimplifierDenomChamp2(etat, racines), formatCoupleSaisi(racines, "x =", "Pas de racine"))
               }
@@ -1365,6 +1407,7 @@ export function AppInequationRationnelle() {
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(denominateurFacteurCommun(exerciceFacteurCommun), v)}
               aideActivee={etat.aideSimplifierDenomFactorisationUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierDenomFactorisation(etat))}
+              aides={aidesFactorisationApresDelta()}
               onValider={(reponse) => terminerEtape(soumettreReponseSimplifierDenomFactorisation(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1382,6 +1425,7 @@ export function AppInequationRationnelle() {
               diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(numerateurFacteurCommun(exerciceFacteurCommun), v)}
               aideActivee={etat.aideSimplifierNumReductionUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierNumReduction(etat))}
+              aides={aidesReduction(true)}
               onValider={(reponse) => terminerEtape(soumettreReponseSimplifierNumReduction(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1394,9 +1438,10 @@ export function AppInequationRationnelle() {
               enonceFixe={enonceFixe}
               masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME}
               recapitulatif={recapitulatif}
               onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixSimplifierNumCategorie(etat, choix), libelleCategorie(choix))}
+              aides={aidesMethodeFacteur()}
               validation={validation}
             />
           ) : etat.phase === "simplifierNumChamp1" && exerciceFacteurCommun ? (
@@ -1412,6 +1457,8 @@ export function AppInequationRationnelle() {
               diagnostiquer={(v) => diagnostiquerChampPrincipal(numerateurFacteurCommun(exerciceFacteurCommun), v)}
               aideActivee={etat.aideSimplifierNumChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierNumChamp1(etat))}
+              aides={aidesChamp1Categorie(numerateurFacteurCommun(exerciceFacteurCommun))}
+              messageCible={(numerateurFacteurCommun(exerciceFacteurCommun)).categorie === "cas_general" ? (v) => messageDelta(numerateurFacteurCommun(exerciceFacteurCommun), v) : undefined}
               onValider={(reponse) => terminerEtape(soumettreReponseSimplifierNumChamp1(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1428,6 +1475,7 @@ export function AppInequationRationnelle() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideSimplifierNumChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierNumChamp2(etat))}
+              aides={aidesRacinesFacteur(numerateurFacteurCommun(exerciceFacteurCommun))}
               onValider={(racines) =>
                 terminerEtape(soumettreReponseSimplifierNumChamp2(etat, racines), formatCoupleSaisi(racines, "x =", "Pas de racine"))
               }
@@ -1448,6 +1496,7 @@ export function AppInequationRationnelle() {
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(numerateurFacteurCommun(exerciceFacteurCommun), v)}
               aideActivee={etat.aideSimplifierNumFactorisationUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierNumFactorisation(etat))}
+              aides={aidesFactorisationApresDelta()}
               onValider={(reponse) => terminerEtape(soumettreReponseSimplifierNumFactorisation(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1464,6 +1513,7 @@ export function AppInequationRationnelle() {
               diagnostiquer={(n, d) => diagnostiquerSimplification(exerciceFacteurCommun.fraction, n, d)}
               aideActivee={etat.aideSimplifierFractionUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierFraction(etat))}
+              aides={aidesSimplificationFraction()}
               onValider={(numerateur, denominateur) =>
                 terminerEtape(soumettreReponseSimplifierFraction(etat, numerateur, denominateur), saisieEnLatex(`(${numerateur})/(${denominateur})`))
               }
@@ -1478,6 +1528,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesCE()}
               onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), formatCESaisie(reponse))}
               validation={validation}
             />
@@ -1494,6 +1545,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesCE()}
               onValider={(reponse) => terminerEtape(soumettreReponseRacineNumerateur(etat, reponse), reponse === "aucune" ? "Pas de racine" : `x = ${reponse.replace("-", "−").replace(".", ",")}`)}
               validation={validation}
             />
@@ -1510,6 +1562,7 @@ export function AppInequationRationnelle() {
               diagnostiquer={(v) => diagnostiquerReductionCoefficients(exerciceNumerateurQuadratique.numerateur, v)}
               aideActivee={etat.aideReductionUtilisee}
               onActiverAide={() => setEtat(activerAideReduction(etat))}
+              aides={aidesReduction(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseReduction(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1522,9 +1575,10 @@ export function AppInequationRationnelle() {
               enonceFixe={enonceFixe}
               masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME}
               recapitulatif={recapitulatif}
               onChoisir={(choix: Categorie) => terminerEtape(soumettreReponseReconnaissance(etat, choix), libelleCategorie(choix))}
+              aides={aidesMethodeFacteur()}
               validation={validation}
             />
           ) : etat.phase === "champ1" && exerciceNumerateurQuadratique ? (
@@ -1541,6 +1595,8 @@ export function AppInequationRationnelle() {
               diagnostiquer={(v) => diagnostiquerChampPrincipal(exerciceNumerateurQuadratique.numerateur, v)}
               aideActivee={etat.aideChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideChamp1(etat))}
+              aides={aidesChamp1Categorie(exerciceNumerateurQuadratique.numerateur)}
+              messageCible={(exerciceNumerateurQuadratique.numerateur).categorie === "cas_general" ? (v) => messageDelta(exerciceNumerateurQuadratique.numerateur, v) : undefined}
               onValider={(reponse) => terminerEtape(soumettreReponseChamp1(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1557,6 +1613,7 @@ export function AppInequationRationnelle() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideChamp2(etat))}
+              aides={aidesRacinesFacteur(exerciceNumerateurQuadratique.numerateur)}
               onValider={(racines) => terminerEtape(soumettreReponseChamp2(etat, racines), formatCoupleSaisi(racines, "x =", "Pas de racine"))}
               validation={validation}
             />
@@ -1575,6 +1632,7 @@ export function AppInequationRationnelle() {
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(exerciceNumerateurQuadratique.numerateur, v)}
               aideActivee={etat.aideFactorisationUtilisee}
               onActiverAide={() => setEtat(activerAideFactorisation(etat))}
+              aides={aidesFactorisationApresDelta()}
               onValider={(reponse) => terminerEtape(soumettreReponseFactorisation(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -1584,6 +1642,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesGrilleSignes(true)}
               onValider={(reponse: GrilleQuotientNiveau3) => terminerEtape(soumettreReponseGrilleNiveau3(etat, reponse), `Signe du quotient : ${reponse.ligneQuotient.join(" ").replace(/-/g, "−")}`)}
               validation={validation}
             />
@@ -1593,6 +1652,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesGrilleSignes(true)}
               onValider={(reponse: GrilleQuotientNiveau4) => terminerEtape(soumettreReponseGrilleNiveau4(etat, reponse), `Signe du quotient : ${reponse.ligneQuotient.join(" ").replace(/-/g, "−")}`)}
               validation={validation}
             />
@@ -1602,6 +1662,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesGrilleSignes(true)}
               onValider={(reponse: GrilleQuotientNiveau3) => terminerEtape(soumettreReponseGrilleNiveau3(etat, reponse), `Signe du quotient : ${reponse.ligneQuotient.join(" ").replace(/-/g, "−")}`)}
               validation={validation}
             />
@@ -1611,6 +1672,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesGrilleSignes(true)}
               onValider={(reponse: GrilleQuotient) => terminerEtape(soumettreReponseGrille(etat, reponse), `Signe du quotient : ${reponse.ligneQuotient.join(" ").replace(/-/g, "−")}`)}
               validation={validation}
             />
@@ -1620,6 +1682,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesGrilleSignes(true)}
               onValider={(reponse: GrilleQuotientSansFacteurCommun) =>
                 terminerEtape(soumettreReponseGrilleNiveau4(etat, reponse), `Signe du quotient : ${reponse.ligneQuotient.join(" ").replace(/-/g, "−")}`)
               }
@@ -1631,6 +1694,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesGrilleSignes(true)}
               onValider={(reponse: GrilleQuotientCubique) =>
                 terminerEtape(soumettreReponseGrilleCubique(etat, reponse), `Signe du quotient : ${reponse.ligneQuotient.join(" ").replace(/-/g, "−")}`)
               }
@@ -1642,6 +1706,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesGrilleSignes(true)}
               onValider={(reponse: GrilleQuotient) => terminerEtape(soumettreReponseGrille(etat, reponse), `Signe du quotient : ${reponse.ligneQuotient.join(" ").replace(/-/g, "−")}`)}
               validation={validation}
             />
@@ -1653,6 +1718,8 @@ export function AppInequationRationnelle() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideUtilisee}
               onActiverAide={() => setEtat(activerAideIntervalleQuotient(etat))}
+              aideTexte={aideTexteIntervalleProduit(etat.exerciceCourant.symbole, true)}
+              messageCible={(r) => messageIntervalleProduit(etat.exerciceCourant.solution, r, valeursInterditesQuotient(etat.exerciceCourant))}
               onValider={(reponse: SolutionEnsembleProduit) => terminerEtape(soumettreReponseIntervalle(etat, reponse), <Katex expression={`S = ${formatSolutionEnsembleProduitLatex(reponse)}`} />)}
               validation={validation}
             />

@@ -1,16 +1,18 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { Exercice } from "../core/generateur.types";
 import type { ReponseZeros } from "../moteur";
-import { diagnostiquerExpressionNumerique, parserExpressionNumerique } from "../moteur/verificationCaracteristiquesAlgebriques";
+import { parserExpressionNumerique } from "../moteur/verificationCaracteristiquesAlgebriques";
 import { formatEnonceAffichage } from "../ui/formatEquation";
 import { expressionLibreVersLatex } from "../ui/formatExpressionLatex";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux, MESSAGE_BORNE_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 type Choix = "aucun" | "auMoinsUn";
 
@@ -34,6 +36,10 @@ interface Props {
   masquerBlocDonnees?: boolean;
   aideActivee: boolean;
   onActiverAide: () => void;
+  /** Aides à 2 niveaux (KaTeX) — remplacent l'aide historique à 1 niveau. */
+  aides?: FragmentConsigne[][];
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse. */
+  messageCible?: (reponse: ReponseZeros) => FragmentConsigne[] | null;
   onValider: (reponse: ReponseZeros) => void;
   validation?: ValidationEtapeProps | null;
 }
@@ -57,10 +63,13 @@ export function EtapeZeros({
   masquerBlocDonnees = false,
   aideActivee,
   onActiverAide,
+  aides,
+  messageCible,
   onValider,
   validation,
 }: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
+  const saisie = useTentativeLisible<ReponseZeros>();
   const [valeurs, setValeurs] = useState<string[]>([""]);
 
   function choisir(nouveauChoix: Choix) {
@@ -92,7 +101,7 @@ export function EtapeZeros({
   }
 
   const reponse = construireReponse();
-  const placeholderExemple = exercice.irrationnel ? "ex : 6*sqrt(5)" : "ex : -3";
+  const placeholderExemple = exercice.irrationnel ? "ex : 6sqrt(5) pour 6√5" : "ex : −3";
 
   /**
    * Aperçu en direct de l'ensemble solution "S = {...}" (bug utilisateur du 27/09) — même principe
@@ -159,7 +168,7 @@ export function EtapeZeros({
               <input
                 className="text-input"
                 value={valeur}
-                onChange={(e) => modifierChamp(index, e.target.value)}
+                onChange={(e) => modifierChamp(index, normaliserSigneMoins(e.target.value))}
                 placeholder={`solution ${index + 1}, ${placeholderExemple}`}
                 aria-label={`Solution ${index + 1}`}
               />
@@ -183,34 +192,28 @@ export function EtapeZeros({
 
       {!validation && (
         <>
-          <div>
-            {aideActivee && (
-              <div className="triangle-quelconque-aide">
-                <p>Une fois l'équation factorisée, chaque facteur égalé à 0 donne une solution.</p>
-              </div>
-            )}
-            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-          </div>
+          {aides ? (
+            <AidesNiveaux aides={aides} onPremiereAide={onActiverAide} />
+          ) : (
+            <div>
+              {aideActivee && (
+                <div className="triangle-quelconque-aide">
+                  <p>Une fois l'équation factorisée, chaque facteur égalé à 0 donne une solution.</p>
+                </div>
+              )}
+              <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+            </div>
+          )}
 
           <button
             type="button"
             className="btn btn-primary"
-            disabled={reponse === null}
-            onClick={() => reponse !== null && onValider(reponse)}
+            disabled={choix === null || (choix === "auMoinsUn" && valeurs.every((v) => v.trim() === ""))}
+            onClick={() => saisie.tenter(reponse ?? { aucun: false, valeurs: [] }, reponse !== null, onValider)}
           >
             Valider
           </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(
-                tentativesUtilisees,
-                tentativesMax,
-                choix === "auMoinsUn" && valeurs.some((v) => diagnostiquerExpressionNumerique(v) === "parse_error")
-                  ? "parse_error"
-                  : undefined,
-              )}
-            </p>
-          )}
+          <MessageRetour texteIllisible={MESSAGE_BORNE_ILLISIBLE} illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={saisie.soumise !== null ? messageCible?.(saisie.soumise) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

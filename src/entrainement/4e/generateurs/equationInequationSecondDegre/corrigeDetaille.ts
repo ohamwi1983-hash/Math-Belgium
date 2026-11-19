@@ -2,7 +2,7 @@ import type { ExerciceEquationInequationSecondDegre } from "../../core/equationI
 import type { PhaseEquationInequationSecondDegre } from "../../moteur/typesEquationInequationSecondDegre";
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege as lignePiege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
-import { consignePoserSysteme, consigneValidation, formatEquationInequationLatex, texteAidePoserSystemeNiveau2 } from "../../ui/formatEquationInequationSecondDegre";
+import { consignePoserSysteme, consigneValidation, ensembleSurRLatex, ensembleValideLatex, formatEquationInequationLatex, intervalleValideSeulLatex, relationEquationInequation, symboleEquationInequation, texteAidePoserSystemeNiveau2 } from "../../ui/formatEquationInequationSecondDegre";
 import { formatFonctionDeveloppeeLatex } from "../../ui/formatOptimisation";
 import { COURS_CONTEXTE, COURS_RESOUDRE, COURS_SIGNE_TRINOME } from "../../ui/corrigeSecondDegre2";
 
@@ -46,7 +46,7 @@ function dTexte(v: number): string {
 const nomEquation = (e: E) => (e.variante === "equation" ? "équation" : "inéquation");
 
 function symbole(e: E): string {
-  return e.variante === "equation" ? "=" : e.sens === "gt" ? ">" : "<";
+  return symboleEquationInequation(e);
 }
 
 function racines(e: E): [number, number] {
@@ -59,17 +59,12 @@ function reduit(e: E): { a: number; b: number; c: number } {
   return { a, b, c: Number((c - e.k).toFixed(6)) };
 }
 
-function intervalleOuvert(v: string, inf: number, sup: number): string {
-  return `${v} \\in \\,]${d(inf)}\\,;\\,${d(sup)}[`;
-}
 
-/** Intervalle-solution valide : borne venant d'une racine (inéquation stricte) exclue, borne du domaine incluse. */
+/** Réponse finale d'une inéquation : intervalle avec ses crochets (racine comprise si le symbole est
+ * large, borne du domaine comprise) ou ensemble d'entiers (décision 5). Source : l'écran. */
 export function intervalleValideLatex(e: E): string {
   if (e.variante !== "inequation") return "";
-  const { inf, sup } = e.intervalleValide;
-  const gauche = inf === e.intervalleBrut.inf ? "]" : "[";
-  const droite = sup === e.intervalleBrut.sup ? "[" : "]";
-  return `${e.base.contexte.labelVariable} \\in \\,${gauche}${d(inf)}\\,;\\,${d(sup)}${droite}`;
+  return ensembleValideLatex(e);
 }
 
 export function phraseConclusion(e: E): string {
@@ -165,13 +160,13 @@ function lignesConstruction(e: E): { lignes: LigneCalcul[]; regle: string } | nu
 function etapePoser(sq: string, e: E): EtapeCorrection[] {
   const v = e.base.contexte.labelVariable;
   const eq = formatEquationInequationLatex(e);
-  const relation = e.variante === "equation" ? "vaut exactement" : e.sens === "gt" ? "dépasse" : "est en dessous de";
+  const relation = relationEquationInequation(e);
   const justifSeuil = `${e.base.contexte.nomGrandeur} ${relation} ${dTexte(e.k)}`;
   if (e.voieSysteme && e.systeme) {
     const S = e.systeme.x0 + e.systeme.y0;
     return [
       utilise(sq, [texte(`Substitution : on isole y dans la première équation, puis on le remplace dans la seconde ${COURS_CONTEXTE}.`)]),
-      calcul(sq, [ligne(`y=${S}-x`, "on isole y"), ligne(`x(${S}-x)${symbole(e)}${d(e.k)}`, `on remplace y dans x · y ${symbole(e) === "=" ? "=" : symbole(e)} ${dTexte(e.k)}`), ligne(eq, "on distribue")]),
+      calcul(sq, [ligne(`y=${S}-x`, "on isole y"), ligne(`x(${S}-x)${symbole(e)}${d(e.k)}`, [texte("on remplace y dans "), latex(`x\\cdot y ${symbole(e)} ${d(e.k)}`)]), ligne(eq, "on distribue")]),
       resultat(sq, [latex(eq)]),
     ];
   }
@@ -225,10 +220,16 @@ function etapeResoudre(sq: string, e: E): EtapeCorrection[] {
     calcul(sq, [...lignesRacine(t, 1, "-"), ...lignesRacine(t, 2, "+")], [], "Racines"),
   ];
   if (e.variante === "inequation") {
-    const entre = (t.a > 0 && sym === "<") || (t.a < 0 && sym === ">");
-    blocs.push(calcul(sq, [ligne(`${tri} ${sym} 0\\iff ${intervalleOuvert(v, r1, r2)}`, `signe de a (${t.a > 0 ? "+" : "−"}) à l'extérieur des racines, contraire entre elles : on garde ${entre ? "l'intérieur" : "l'extérieur"}`)], [], "Signe du trinôme"));
+    blocs.push(
+      calcul(
+        sq,
+        [ligne(`${tri} ${sym} 0\\iff ${ensembleSurRLatex(e)}`, `signe de a (${t.a > 0 ? "+" : "−"}) à l'extérieur des racines, contraire entre elles : on garde ${e.entreRacines ? "l'intérieur" : "l'extérieur"}, racines ${e.large ? "comprises (symbole large)" : "exclues (symbole strict)"}`)],
+        [],
+        "Signe du trinôme",
+      ),
+    );
   }
-  const res: FragmentConsigne[] = e.variante === "equation" ? [latex(`${v} = ${d(r1)}`), texte(" ou "), latex(`${v} = ${d(r2)}`)] : [latex(intervalleOuvert(v, r1, r2))];
+  const res: FragmentConsigne[] = e.variante === "equation" ? [latex(`${v} = ${d(r1)}`), texte(" ou "), latex(`${v} = ${d(r2)}`)] : [latex(ensembleSurRLatex(e))];
   return [
     utilise(sq, [texte(`On ramène à 0, puis discriminant et formule des racines ${COURS_RESOUDRE}${e.variante === "inequation" ? ` ; le signe du trinôme donne l'intervalle ${COURS_SIGNE_TRINOME}` : ""}.`)]),
     ...blocs,
@@ -251,8 +252,24 @@ function etapeValidation(sq: string, e: E): EtapeCorrection[] {
     const { inf: g, sup: dr } = e.intervalleBrut;
     const vg = e.intervalleValide.inf;
     const vd = e.intervalleValide.sup;
-    lignes.push(ligne(vg === g ? `${d(g)}\\geq ${d(inf)}` : `${d(g)}<${d(inf)}`, vg === g ? `borne gauche : la racine ${dTexte(g)}, exclue (inégalité stricte)` : `borne gauche : celle du domaine, ${dTexte(inf)}, incluse`));
-    lignes.push(ligne(vd === dr ? `${d(dr)}\\leq ${d(sup)}` : `${d(dr)}>${d(sup)}`, vd === dr ? `borne droite : la racine ${dTexte(dr)}, exclue (inégalité stricte)` : `borne droite : celle du domaine, ${dTexte(sup)}, incluse`));
+    const racineComprise = e.large ? "comprise (symbole large)" : "exclue (symbole strict)";
+    if (e.entreRacines) {
+      lignes.push(ligne(vg === g ? `${d(g)}\\geq ${d(inf)}` : `${d(g)}<${d(inf)}`, vg === g ? `borne gauche : la racine ${dTexte(g)}, ${racineComprise}` : `borne gauche : celle du domaine, ${dTexte(inf)}, comprise`));
+      lignes.push(ligne(vd === dr ? `${d(dr)}\\leq ${d(sup)}` : `${d(dr)}>${d(sup)}`, vd === dr ? `borne droite : la racine ${dTexte(dr)}, ${racineComprise}` : `borne droite : celle du domaine, ${dTexte(sup)}, comprise`));
+    } else if (vd === e.base.domaine.sup && vg !== inf) {
+      // partie de droite gardée : x au-delà de la plus grande racine
+      lignes.push(ligne(`${d(g)}\\leq ${d(inf)}`, `la partie à gauche de la racine ${dTexte(g)} est hors du domaine`));
+      lignes.push(ligne(`${d(dr)}\\geq ${d(inf)}`, `borne gauche : la racine ${dTexte(dr)}, ${racineComprise}`));
+      lignes.push(ligne(`${d(vd)}=${d(sup)}`, `borne droite : celle du domaine, ${dTexte(sup)}, comprise`));
+    } else {
+      lignes.push(ligne(`${d(dr)}\\geq ${d(sup)}`, `la partie à droite de la racine ${dTexte(dr)} est hors du domaine`));
+      lignes.push(ligne(`${d(vg)}=${d(inf)}`, `borne gauche : celle du domaine, ${dTexte(inf)}, comprise`));
+      lignes.push(ligne(`${d(g)}\\leq ${d(sup)}`, `borne droite : la racine ${dTexte(g)}, ${racineComprise}`));
+    }
+    if (e.entiers) {
+      lignes.push(ligne(intervalleValideSeulLatex(e), "intervalle-solution dans le domaine"));
+      lignes.push(ligne(ensembleValideLatex(e), `${v} est un nombre entier : on garde les entiers de cet intervalle`));
+    }
   }
   const res: FragmentConsigne[] =
     e.variante === "equation"
@@ -265,7 +282,9 @@ function etapeValidation(sq: string, e: E): EtapeCorrection[] {
       ? e.racinesValides.length < e.racinesCandidates.length
         ? "Une solution de l'équation n'est pas forcément une réponse au problème : la racine hors du domaine de validité est rejetée."
         : "Vérifier chaque racine dans le domaine : ici les deux conviennent, il y a deux réponses."
-      : "L'ensemble des solutions de l'inéquation n'est pas la réponse : on ne garde que sa partie commune avec le domaine de validité.";
+      : e.entiers
+        ? "La variable est un entier : la réponse est l'ensemble des entiers de l'intervalle, pas l'intervalle lui-même ; une borne exclue n'est pas un entier qui convient."
+        : "L'ensemble des solutions de l'inéquation n'est pas la réponse : on ne garde que sa partie commune avec le domaine de validité.";
   return [
     utilise(sq, [texte(`Domaine de validité `), latex(`${v} \\in ${dom}`), texte(` : seules les valeurs du domaine ont un sens dans la situation ${COURS_CONTEXTE}.`)]),
     calcul(sq, lignes),

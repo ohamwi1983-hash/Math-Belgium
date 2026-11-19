@@ -13,9 +13,9 @@ const SKINS: string[] = [
   "Dans un jeu de devinette, un entier naturel x (inférieur à 100) a été choisi ; on connaît son carré diminué de lui-même.",
 ];
 
-const R1_MIN = 12;
-const R1_MAX = 35;
-const DOMAINE_SUP = 100;
+const R1_MIN = 8;
+const R1_MAX = 45;
+const DOMAINE_SUP = 99; // « inférieur à 100 » : x ≤ 99
 
 export const construireCarreMoinsNombre = construireAvecParametresNombre(() => ({
   famille: "carreMoinsNombre",

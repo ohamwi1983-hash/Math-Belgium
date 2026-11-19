@@ -7,9 +7,11 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
+import { AidesNiveaux } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
-interface Props {
+interface Props<T extends string = Categorie> {
   exercice: Exercice;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -46,15 +48,17 @@ interface Props {
    * proposer "cas_general" (l'exercice ne génère jamais cette catégorie). Absent par défaut :
    * comportement inchangé (4 catégories) pour tous les autres appelants.
    */
-  options?: { valeur: Categorie; libelle: string }[];
-  onChoisir: (choix: Categorie) => void;
+  options?: { valeur: T; libelle: string }[];
+  onChoisir: (choix: T) => void;
+  /** Aides à 2 niveaux (KaTeX) : les tests du cours, jamais la réponse. */
+  aides?: FragmentConsigne[][];
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
 }
 
-export function EtapeReconnaissance({
+export function EtapeReconnaissance<T extends string = Categorie>({
   exercice,
   tentativesUtilisees,
   tentativesMax,
@@ -68,9 +72,10 @@ export function EtapeReconnaissance({
   masquerBlocDonnees = false,
   options,
   onChoisir,
+  aides,
   validation,
-}: Props) {
-  const [choix, setChoix] = useState<Categorie | null>(null);
+}: Props<T>) {
+  const [choix, setChoix] = useState<T | null>(null);
   const erronee = tentativesUtilisees > 0;
   const expressionParDefaut =
     expressionAffichee ??
@@ -116,7 +121,7 @@ export function EtapeReconnaissance({
       )}
       <p className="prompt-text">{question ?? "Quelle est la méthode la plus rapide pour résoudre cette équation ?"}</p>
       <div className="options-grid">
-        {(options ?? OPTIONS_CATEGORIE).map((option) => (
+        {(options ?? (OPTIONS_CATEGORIE as unknown as { valeur: T; libelle: string }[])).map((option) => (
           <button
             key={option.valeur}
             type="button"
@@ -129,10 +134,11 @@ export function EtapeReconnaissance({
       </div>
       {!validation && (
         <>
+        {aides && <AidesNiveaux aides={aides} />}
         <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onChoisir(choix)}>
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
+        {tentativesUtilisees > 0 && tentativesUtilisees < tentativesMax && (
           <p className="alert-error" role="alert">
             Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
           </p>

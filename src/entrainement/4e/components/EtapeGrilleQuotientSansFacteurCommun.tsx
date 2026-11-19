@@ -19,12 +19,16 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { AidesNiveaux } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   exercice: ExerciceInequationRationnelleSansFacteurCommun;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
+  /** Aides à 2 niveaux (KaTeX) : règle des signes, jamais la grille. */
+  aides?: FragmentConsigne[][];
   onValider: (reponse: GrilleQuotientSansFacteurCommun) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -40,7 +44,7 @@ interface Props {
  * formatLigneDenominateurSansFacteurCommunLabel plutôt que formatLigneDenominateurLabel (qui exige
  * un vrai PolynomeLineaire, absent ici).
  */
-export function EtapeGrilleQuotientSansFacteurCommun({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
+export function EtapeGrilleQuotientSansFacteurCommun({ aides, exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
   const entete = formatEnTeteInterieur(exercice.racines);
   const nbColonnes = entete.length;
   const [racineN1, racineN2] = [...exercice.numerateur.solution.racines].sort((a, b) => a - b);
@@ -170,6 +174,7 @@ export function EtapeGrilleQuotientSansFacteurCommun({ exercice, tentativesUtili
 
       {!validation && (
         <>
+        {aides && <AidesNiveaux aides={aides} />}
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>

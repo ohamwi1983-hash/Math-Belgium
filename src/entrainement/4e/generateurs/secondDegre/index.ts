@@ -8,6 +8,7 @@ import { construireMiseEnEvidenceIrrationnelle } from "./categories/miseEnEviden
 import { construireBinomeConjugueIrrationnelle } from "./categories/binomeConjugueIrrationnelle";
 import { construireProduitRemarquableIrrationnelle } from "./categories/produitRemarquableIrrationnelle";
 import { construireCasGeneralIrrationnelle } from "./categories/casGeneralIrrationnelle";
+import { construireAucuneSolution } from "./categories/aucuneSolution";
 import { tirerFormeAffichage } from "./tirageFormeAffichage";
 
 /** Complète un constructeur rationnel "standard" (catégories 1-4) avec une forme d'affichage tirée séparément. */
@@ -41,6 +42,8 @@ const constructeurs: Array<() => Exercice> = [
   // se gère entièrement elle-même (p,m, forme d'affichage) ; n'a pas de variante irrationnelle
   // pour cette itération — voir "N'affecte pas la famille 5" du prompt.
   construireMiseEnEvidenceGeneralisee,
+  // Variante « aucune solution » (décision 2) : b = 0 et a, c de même signe, ou Δ < 0.
+  construireAucuneSolution,
 ];
 
 /**
@@ -50,7 +53,7 @@ const constructeurs: Array<() => Exercice> = [
  * fonction du second degré"), `genererExerciceSecondDegre` ne la produit jamais (voir la section
  * dédiée de CLAUDE.md, "Extension du type Categorie partagé").
  */
-export type VarianteSecondDegreId = Exclude<Categorie, "irreductible">;
+export type VarianteSecondDegreId = Exclude<Categorie, "irreductible"> | "aucune_solution";
 
 export interface VarianteSecondDegre {
   id: VarianteSecondDegreId;
@@ -68,6 +71,8 @@ export const CATALOGUE_VARIANTES: VarianteSecondDegre[] = [
   { id: "produit_remarquable", label: "Produit remarquable (Δ=0, carré parfait)" },
   { id: "cas_general", label: "Cas général (formule du discriminant)" },
   { id: "mise_en_evidence_generalisee", label: "Mise en évidence généralisée ((x+p)²=m(x+p))" },
+  // Ajoutée EN DERNIER : l'indice de variante des codes déjà imprimés (QR) ne change pas.
+  { id: "aucune_solution", label: "Aucune solution (b=0 et a, c de même signe, ou Δ<0)" },
 ];
 
 const CONSTRUCTEURS_PAR_ID: Record<VarianteSecondDegreId, () => Exercice> = {
@@ -76,6 +81,7 @@ const CONSTRUCTEURS_PAR_ID: Record<VarianteSecondDegreId, () => Exercice> = {
   produit_remarquable: constructeurs[2],
   cas_general: constructeurs[3],
   mise_en_evidence_generalisee: constructeurs[4],
+  aucune_solution: constructeurs[5],
 };
 
 /**
@@ -87,10 +93,10 @@ const CONSTRUCTEURS_PAR_ID: Record<VarianteSecondDegreId, () => Exercice> = {
  * (tirage aléatoire de la sous-variante).
  */
 export function construireAvecVarianteId(varianteId: VarianteSecondDegreId, overrides?: { irrationnel?: boolean }): Exercice {
-  if (varianteId === "mise_en_evidence_generalisee" || overrides?.irrationnel === undefined) {
+  if (varianteId === "mise_en_evidence_generalisee" || varianteId === "aucune_solution" || overrides?.irrationnel === undefined) {
     return CONSTRUCTEURS_PAR_ID[varianteId]();
   }
-  const paires: Record<Exclude<VarianteSecondDegreId, "mise_en_evidence_generalisee">, [() => Omit<Exercice, "formeAffichage" | "parametresAffichage">, () => Exercice]> = {
+  const paires: Record<Exclude<VarianteSecondDegreId, "mise_en_evidence_generalisee" | "aucune_solution">, [() => Omit<Exercice, "formeAffichage" | "parametresAffichage">, () => Exercice]> = {
     mise_en_evidence: [construireMiseEnEvidence, construireMiseEnEvidenceIrrationnelle],
     binome_conjugue: [construireBinomeConjugue, construireBinomeConjugueIrrationnelle],
     produit_remarquable: [construireProduitRemarquable, construireProduitRemarquableIrrationnelle],

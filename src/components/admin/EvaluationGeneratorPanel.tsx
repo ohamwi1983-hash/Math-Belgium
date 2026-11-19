@@ -491,7 +491,8 @@ export function EvaluationGeneratorPanel({
    * variante dans son catalogue (entrée par défaut « Tirage aléatoire ») — comme `tirerInstance`. */
   function varianteEstimation(adaptateur: Adaptateur, cle: string): string | null {
     const id = varianteDeCle(cle)
-    return adaptateur.catalogueVariantes?.some((v) => v.id === id) ? id : null
+    // Groupe « à verdict » : l'estimation tire un membre au hasard à chaque tirage (`niveauDifficulte.ts`).
+    return adaptateur.catalogueVariantes?.some((v) => v.id === id) || adaptateur.groupesVerdict?.some((g) => g.id === id) ? id : null
   }
 
   /** Réglages d'estimation d'une rangée de variante (repère « niv. · ≈ min » ET durée de l'en-tête,
@@ -1105,7 +1106,11 @@ export function EvaluationGeneratorPanel({
                                 </tr>
                                 {lignesSection.flatMap((ligne) => {
                                   if (ligne.type === 'exercice') {
-                                    const catalogue = catalogueVariantesExercice(ligne.cle as IdGenerateurPilote)
+                                    const catalogue = catalogueVariantesExercice(
+                                      ligne.cle as IdGenerateurPilote,
+                                      estExercice ? 'exercice' : 'evaluation',
+                                      Object.entries(ligne.parVariante ?? {}).filter(([, n]) => n > 0).map(([c]) => varianteDeCle(c)),
+                                    )
                                     // Tirage équilibré : seulement des exercices complets, sauf si le professeur
                                     // coche « inclure un cas particulier » (évaluation, générateur doté d'un profil).
                                     const libelleCas = estExercice ? null : libelleCasParticulier(ligne.cle as IdGenerateurPilote)

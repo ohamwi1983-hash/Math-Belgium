@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import { diagnostiquerPoserEquationInequation } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_POSER_EQUATION_INEQUATION } from "../moteur/sessionEquationInequationSecondDegre";
 import { consignePoserEquationInequation, texteAidePoserEquationInequationNiveau1, texteAidePoserEquationInequationNiveau2 } from "../ui/formatEquationInequationSecondDegre";
 import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { CroquisEquationInequationSecondDegre } from "./CroquisEquationInequationSecondDegre";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { Katex } from "./Katex";
@@ -14,6 +14,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
+import { MessageRetour, useTentativeLisible } from "./RetourSaisie";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -32,6 +33,7 @@ interface Props {
  * en équation/inéquation `f(x) [=/>/<] k`. */
 export function EtapePoserEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
+  const saisie = useTentativeLisible<string>();
   const complet = texte.trim() !== "";
   const statut = complet ? diagnostiquerPoserEquationInequation(exercice, texte) : undefined;
   const label = exercice.variante === "equation" ? "Équation" : "Inéquation";
@@ -54,7 +56,7 @@ export function EtapePoserEquationInequationSecondDegre({ exercice, tentativesUt
           className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={exercice.variante === "equation" ? "ex : -3x^2+17x=5" : "ex : -3x^2+17x>5"}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 
@@ -72,14 +74,10 @@ export function EtapePoserEquationInequationSecondDegre({ exercice, tentativesUt
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POSER_EQUATION_INEQUATION} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(texte, statut !== "parse_error", onValider)}>
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -2716,6 +2716,70 @@
   fill: var(--color-text);
 }
 
+/* gen5 / gen6 : courbe et ligne de signes après validation (CourbeSignes). */
+.entrainement .courbe-signes {
+  margin: 12px 0;
+}
+.entrainement .courbe-signes svg {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.entrainement .courbe-signes figcaption {
+  font-size: 0.85rem;
+  color: var(--color-text-muted, var(--color-text));
+  text-align: center;
+  margin-top: 4px;
+}
+.entrainement .cs-axe,
+.entrainement .cs-trait {
+  stroke: var(--color-text);
+  stroke-width: 1;
+}
+.entrainement .cs-solution {
+  stroke: var(--color-success);
+  stroke-width: 5;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+.entrainement .cs-interdite {
+  stroke: var(--color-error);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+}
+.entrainement .cs-courbe {
+  fill: none;
+  stroke: var(--color-primary, var(--color-text));
+  stroke-width: 2;
+}
+.entrainement .cs-zero {
+  fill: var(--color-text);
+}
+.entrainement .cs-zero-solution {
+  fill: var(--color-success);
+}
+.entrainement .cs-nom,
+.entrainement .cs-graduation {
+  font-size: 12px;
+  fill: var(--color-text);
+}
+.entrainement .cs-signe {
+  font-size: 15px;
+  font-weight: 700;
+  fill: var(--color-text);
+}
+.entrainement .cs-signe-solution {
+  fill: var(--color-success);
+}
+
+/* gen2 : « ? » dans chaque zone avant validation, signe du trinôme après. */
+.entrainement .parabola-signe {
+  font-size: 18px;
+  font-weight: 700;
+  fill: var(--color-text);
+}
+
 .entrainement .caract-graph {
   display: block;
   width: 100%;

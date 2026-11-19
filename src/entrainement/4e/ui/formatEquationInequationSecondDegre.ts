@@ -10,6 +10,7 @@
 import type { ExerciceEquationInequationSecondDegre, FamilleEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import { formatDomaineLatex, formatFonctionDeveloppeeLatex } from "./formatOptimisation";
 import { CATALOGUE_FAMILLES } from "../generateurs/equationInequationSecondDegre";
+import { ensembleTexte, relationTexte } from "../generateurs/equationInequationSecondDegre/interpretation";
 
 /** Nombre en LaTeX : au plus 2 décimales, virgule décimale « {,} » (jamais un point). */
 function formatNombre(valeur: number): string {
@@ -31,8 +32,43 @@ function capitaliser(texte: string): string {
   return texte.charAt(0).toUpperCase() + texte.slice(1);
 }
 
-function symboleEquationInequation(exercice: ExerciceEquationInequationSecondDegre): string {
-  return exercice.variante === "equation" ? "=" : exercice.sens === "gt" ? ">" : "<";
+/** Symbole de l'équation / l'inéquation en LaTeX (≥ et ≤ tirés aussi, audit G14). */
+export function symboleEquationInequation(exercice: ExerciceEquationInequationSecondDegre): string {
+  if (exercice.variante === "equation") return "=";
+  return exercice.sens === "gt" ? (exercice.large ? "\\geq" : ">") : exercice.large ? "\\leq" : "<";
+}
+
+/** Relation en toutes lettres : « dépasse », « atteint au moins », « est en dessous de », « ne dépasse pas ». */
+export function relationEquationInequation(exercice: ExerciceEquationInequationSecondDegre): string {
+  if (exercice.variante === "equation") return "vaut exactement";
+  return relationTexte(exercice.sens, exercice.large);
+}
+
+/** Ensemble des solutions de l'inéquation sur ℝ (avant le domaine) : entre les racines ou à l'extérieur. */
+export function ensembleSurRLatex(exercice: Extract<ExerciceEquationInequationSecondDegre, { variante: "inequation" }>): string {
+  const label = exercice.base.contexte.labelVariable;
+  const { inf, sup } = exercice.intervalleBrut;
+  const [o, f] = exercice.large ? ["[", "]"] : ["]", "["];
+  if (exercice.entreRacines) return `${label} \\in \\,${o}${formatNombre(inf)}\\,;\\,${formatNombre(sup)}${f}`;
+  return `${label} \\in \\,]-\\infty\\,;\\,${formatNombre(inf)}${f}\\cup${o}${formatNombre(sup)}\\,;\\,+\\infty[`;
+}
+
+/** Réponse de l'écran « validation » d'une inéquation : intervalle avec ses crochets, ou ensemble
+ * d'ENTIERS (décision 5 : « x ∈ {0 ; 1 ; … ; 30} »). */
+export function ensembleValideLatex(exercice: Extract<ExerciceEquationInequationSecondDegre, { variante: "inequation" }>): string {
+  const label = exercice.base.contexte.labelVariable;
+  if (exercice.entiers) {
+    const { min, max } = exercice.entiers;
+    const liste = max - min <= 3 ? Array.from({ length: max - min + 1 }, (_, i) => formatNombre(min + i)).join("\\,;\\,") : `${formatNombre(min)}\\,;\\,${formatNombre(min + 1)}\\,;\\,\\ldots\\,;\\,${formatNombre(max)}`;
+    return `${label} \\in \\{${liste}\\}`;
+  }
+  return intervalleValideSeulLatex(exercice);
+}
+
+/** Intervalle-solution dans le domaine (même pour une variable entière : ligne qui précède les entiers). */
+export function intervalleValideSeulLatex(exercice: Extract<ExerciceEquationInequationSecondDegre, { variante: "inequation" }>): string {
+  const { inf, sup } = exercice.intervalleValide;
+  return `${exercice.base.contexte.labelVariable} \\in \\,${exercice.inclusInf ? "[" : "]"}${formatNombre(inf)}\\,;\\,${formatNombre(sup)}${exercice.inclusSup ? "]" : "["}`;
 }
 
 /** Membre gauche (fonction développée) + symbole + `k`, en LaTeX — jamais résolu. */
@@ -59,8 +95,7 @@ function ligneResolution(exercice: ExerciceEquationInequationSecondDegre): strin
     const [r1, r2] = exercice.racinesCandidates;
     return `${label} = ${formatNombre(r1)} \\text{ ou } ${label} = ${formatNombre(r2)}`;
   }
-  const { inf, sup } = exercice.intervalleBrut;
-  return `${label} \\in \\left] ${formatNombre(inf)} \\, ; \\, ${formatNombre(sup)} \\right[`;
+  return ensembleSurRLatex(exercice);
 }
 
 function ligneValidation(exercice: ExerciceEquationInequationSecondDegre): string {
@@ -69,10 +104,8 @@ function ligneValidation(exercice: ExerciceEquationInequationSecondDegre): strin
     if (exercice.racinesValides.length === 0) return "\\text{aucune racine valide}";
     return exercice.racinesValides.map((r) => `${label} = ${formatNombre(r)}`).join(" \\text{ ou } ");
   }
-  const { inf, sup } = exercice.intervalleValide;
-  const gauche = inf === exercice.intervalleBrut.inf ? "\\left]" : "\\left[";
-  const droite = sup === exercice.intervalleBrut.sup ? "\\right[" : "\\right]";
-  return `${label} \\in ${gauche} ${formatNombre(inf)} \\, ; \\, ${formatNombre(sup)} ${droite}`;
+  void label;
+  return ensembleValideLatex(exercice);
 }
 
 /** État actuel — écran "poserEquationInequation" : fonction+domaine déjà confirmés (écrans 1-3). */
@@ -130,8 +163,7 @@ export function consignePoserEquationInequation(exercice: ExerciceEquationInequa
   if (exercice.variante === "equation") {
     return `${capitaliser(nomGrandeur)} vaut exactement ${k} ${uniteGrandeur} : pose l'équation correspondante.`;
   }
-  const relation = exercice.sens === "gt" ? "dépasse" : "est en dessous de";
-  return `${capitaliser(nomGrandeur)} ${relation} ${k} ${uniteGrandeur} : pose l'inéquation correspondante.`;
+  return `${capitaliser(nomGrandeur)} ${relationEquationInequation(exercice)} ${k} ${uniteGrandeur} : pose l'inéquation correspondante.`;
 }
 
 /** Tolérance réellement vérifiée = `0.005` (`verificationEquationInequationSecondDegre.ts`) — soit
@@ -144,7 +176,9 @@ export function consigneValidation(exercice: ExerciceEquationInequationSecondDeg
   const domaine = `${exercice.base.contexte.labelVariable} ∈ ${formatDomaineTexte(exercice)}`;
   return exercice.variante === "equation"
     ? `Dans cette situation, le domaine de validité est ${domaine}. Chaque racine appartient-elle à ce domaine ? Classe chacune d'elles.`
-    : `Dans cette situation, le domaine de validité est ${domaine}. Détermine l'intervalle-solution valide, en tenant compte de ce domaine — arrondi au centième accepté si besoin.`;
+    : exercice.entiers
+      ? `Dans cette situation, le domaine de validité est ${domaine} et ${exercice.base.contexte.labelVariable} est un nombre entier. Donne le plus petit et le plus grand entier qui conviennent : la réponse est l'ensemble des entiers entre les deux.`
+      : `Dans cette situation, le domaine de validité est ${domaine}. Détermine l'intervalle-solution valide, en tenant compte de ce domaine — arrondi au centième accepté si besoin.`;
 }
 
 export function consigneInterpretation(): string {
@@ -156,12 +190,13 @@ export function consigneInterpretation(): string {
 // ============================================================================
 
 export function texteAidePoserEquationInequationNiveau1(): string {
-  return "Rappel : exprime la grandeur en fonction de la variable (développée), et pose l'égalité/l'inégalité avec le seuil donné.";
+  return "Exprime la grandeur en fonction de la variable, puis compare-la au seuil avec le symbole qui traduit la phrase (> « dépasse », ≥ « au moins », < « en dessous de », ≤ « ne dépasse pas »). Tu peux aussi tout ramener dans un membre : f(x) − k comparé à 0.";
 }
 
-/** LaTeX pur — l'appelant préfixe son propre texte avant de rendre via `<Katex>`. */
+/** LaTeX pur — l'expression de la grandeur seule (jamais l'inéquation complète : ce serait la
+ * réponse de l'écran). */
 export function texteAidePoserEquationInequationNiveau2(exercice: ExerciceEquationInequationSecondDegre): string {
-  return formatEquationInequationLatex(exercice);
+  return `${formatFonctionDeveloppeeLatex(exercice.base.fonction, exercice.base.contexte.labelVariable)} \\;?\\; ${formatNombre(exercice.k)}`;
 }
 
 export function texteAideResoudreNiveau1(): string {
@@ -201,7 +236,11 @@ export function formatResolutionAttendueTexte(exercice: ExerciceEquationInequati
   if (exercice.variante === "equation") {
     return exercice.racinesCandidates.map((r) => `${label} = ${formatNombreTexte(r)}`).join(" ; ");
   }
-  return `${label} ∈ ]${formatNombreTexte(exercice.intervalleBrut.inf)} ; ${formatNombreTexte(exercice.intervalleBrut.sup)}[`;
+  const { inf, sup } = exercice.intervalleBrut;
+  const [o, f] = exercice.large ? ["[", "]"] : ["]", "["];
+  return exercice.entreRacines
+    ? `${label} ∈ ${o}${formatNombreTexte(inf)} ; ${formatNombreTexte(sup)}${f}`
+    : `${label} ∈ ]−∞ ; ${formatNombreTexte(inf)}${f} ∪ ${o}${formatNombreTexte(sup)} ; +∞[`;
 }
 
 export function formatValidationAttendueTexte(exercice: ExerciceEquationInequationSecondDegre): string {
@@ -210,12 +249,8 @@ export function formatValidationAttendueTexte(exercice: ExerciceEquationInequati
     if (exercice.racinesValides.length === 0) return "aucune racine valide";
     return exercice.racinesCandidates.map((r) => `${label} = ${formatNombreTexte(r)} : ${exercice.racinesValides.includes(r) ? "valide" : "rejetée"}`).join(", ");
   }
-  // Borne venant d'une racine de l'inéquation (toujours stricte) : exclue ; borne venant du domaine
-  // de validité : incluse — même règle que le corrigé papier (exportEvaluation.ts).
-  const { inf, sup } = exercice.intervalleValide;
-  const gauche = inf === exercice.intervalleBrut.inf ? "]" : "[";
-  const droite = sup === exercice.intervalleBrut.sup ? "[" : "]";
-  return `${label} ∈ ${gauche}${formatNombreTexte(inf)} ; ${formatNombreTexte(sup)}${droite}`;
+  // Borne venant d'une racine : comprise si le symbole est large ; borne du domaine : comprise.
+  return ensembleTexte(label, exercice.intervalleValide, exercice.inclusInf, exercice.inclusSup, exercice.entiers).replace(/-/g, "−");
 }
 
 // ============================================================================

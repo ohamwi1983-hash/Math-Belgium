@@ -5,8 +5,8 @@ import type { Phase } from "../../moteur/types";
 import { phasesExercice } from "../../moteur/session";
 import { enonceSimplifie, exerciceSimplifie, facteurCommun, necessiteSimplification } from "../../moteur/simplificationEquation";
 import { formatEnonceAffichage, formatEnonceLatex, formatEquationIsoleeNonDeveloppee } from "../../ui/formatEquation";
-import { libelleCategorie } from "../../ui/categorieLabels";
-import { mono, q, qp, somme } from "../../ui/corrigeChapitre3";
+import { formeRacineEvidente, libelleMethode, methodeParDefaut, methodesAcceptees, racineEvidente, type ChoixMethode } from "../../moteur/methodeSecondDegre";
+import { mono, q, qp } from "../../ui/corrigeChapitre3";
 import {
   COURS_RESOUDRE,
   deltaDe,
@@ -98,7 +98,7 @@ export function consigneEtapeSecondDegre(instance: E, phase: Phase): FragmentCon
     case "reconnaissance":
       return [texte("Choisis la méthode la plus rapide pour résoudre cette équation.")];
     case "champ1":
-      return [texte(travail.categorie === "cas_general" ? "Calcule le discriminant Δ." : "Factorise le membre de gauche.")];
+      return [texte(methodeParDefaut(travail) === "racine_evidente" ? "Factorise le membre de gauche à l'aide de la racine évidente." : travail.categorie === "cas_general" ? "Calcule le discriminant Δ." : "Factorise le membre de gauche.")];
     case "champ2":
       return [texte("Donne les solutions de l'équation.")];
   }
@@ -149,7 +149,7 @@ function etapeIsolement(travail: E, l: string): EtapeCorrection[] {
       break;
     case "carre_egale_expression": {
       const { p, m } = travail.parametresAffichage!;
-      lignes.push(ligne(cible, [texte("on soustrait "), latex(somme([[m, "x"], [m * p, ""]])), texte(" aux deux membres")]));
+      lignes.push(ligne(cible, [texte("on soustrait "), latex(mono(m, `(${xPlus(p)})`)), texte(" aux deux membres, sans développer")]));
       break;
     }
     default:
@@ -170,12 +170,72 @@ function etapeDeveloppement(travail: E, l: string): EtapeCorrection[] {
   ];
 }
 
+/** « a + b + c = 2 + (−5) + 3 = 0 » (ou a − b + c). */
+function ligneRacineEvidente(travail: E): LigneCalcul {
+  const { a, b, c } = travail.enonce;
+  const r = racineEvidente(travail.enonce);
+  return r === 1
+    ? ligne(`a+b+c=${q(a)}+${qp(b)}+${qp(c)}=0`, "donc x = 1 est racine : on remplace x par 1, il reste a + b + c")
+    : ligne(`a-b+c=${q(a)}-${qp(b)}+${qp(c)}=0`, "donc x = −1 est racine : on remplace x par −1, il reste a − b + c");
+}
+
 function etapeReconnaissance(travail: E, l: string): EtapeCorrection[] {
   const t = trinomeDe(travail);
+  const methodes = methodesAcceptees(travail);
+  const intro: FragmentConsigne[] = [texte("Sur "), latex(`${trinomeLatex(travail)}=0`), texte(" :")];
+  if (travail.categorie === "irreductible") {
+    const { a, c } = travail.enonce;
+    return [
+      utilise(l, utiliseReconnaissance()),
+      calcul(l, [ligne("b=0", "pas de terme en x"), ligne(`a=${q(a)}`, a > 0 ? "a > 0" : "a < 0"), ligne(`c=${q(c)}`, `c ${c > 0 ? ">" : "<"} 0 : a et c de même signe`), ligne(`x^2=-\dfrac{c}{a}=${q(-c / a)}<0`, "un carré n'est jamais négatif")], intro),
+      resultat(l, [texte(`Méthode : ${libelleMethode("aucune_solution")}`)]),
+    ];
+  }
+  if (methodes.includes("racine_evidente")) {
+    const base = lignesReconnaissance(t, "cas_general");
+    return [
+      utilise(l, utiliseReconnaissance()),
+      calcul(l, [...base.slice(0, -1), ligne("b^2\neq 4ac", "pas un carré parfait"), ligneRacineEvidente(travail)], intro),
+      resultat(l, [texte(`Méthode : ${libelleMethode("racine_evidente")} ; la formule générale (Δ) est juste aussi, mais plus longue.`)]),
+    ];
+  }
   return [
     utilise(l, utiliseReconnaissance()),
-    calcul(l, lignesReconnaissance(t, travail.categorie), [texte("Sur "), latex(`${trinomeLatex(travail)}=0`), texte(" :")]),
-    resultat(l, [texte(`Méthode : ${libelleCategorie(travail.categorie)}`)]),
+    calcul(l, lignesReconnaissance(t, travail.categorie), intro),
+    resultat(l, [texte(`Méthode : ${libelleMethode(methodes[0] ?? "cas_general")}`)]),
+  ];
+}
+
+/** Écran « Factorise à l'aide de la racine évidente » (décision 1). */
+function etapeRacineEvidente(travail: E, l: string): EtapeCorrection[] {
+  const { a, c } = travail.enonce;
+  const r = racineEvidente(travail.enonce)!;
+  const x2 = r === 1 ? c / a : -c / a;
+  const forme = formeRacineEvidente(travail.enonce);
+  return [
+    utilise(l, [
+      texte("Si "),
+      latex("a+b+c=0"),
+      texte(", alors "),
+      latex("x_1=1"),
+      texte(" est racine ; si "),
+      latex("a-b+c=0"),
+      texte(", alors "),
+      latex("x_1=-1"),
+      texte(". L'autre racine vient du produit "),
+      latex("x_1\\cdot x_2=\\dfrac{c}{a}"),
+      texte(`, et ${"ax² + bx + c"} = `),
+      latex("a(x-x_1)(x-x_2)"),
+      texte(` ${COURS_RESOUDRE}.`),
+    ]),
+    calcul(l, [
+      ligneRacineEvidente(travail),
+      ligne(`x_1=${r}`),
+      ligne(`x_1\cdot x_2=\dfrac{c}{a}=${q(c / a)}`, "produit des racines"),
+      ligne(`x_2=${q(x2)}`, r === 1 ? "on divise par x₁ = 1" : "on divise par x₁ = −1"),
+      ligne(`${trinomeLatex(travail)}=${forme}`, [texte("forme "), latex("a(x-x_1)(x-x_2)"), texte(" avec "), latex(`x_1=${r === 1 ? "1" : "-1"}`), texte(" et "), latex(r === 1 ? "x_2=\\dfrac{c}{a}" : "x_2=-\\dfrac{c}{a}")]),
+    ]),
+    resultat(l, [latex(`${forme}=0`)]),
   ];
 }
 
@@ -184,13 +244,8 @@ function lignesGeneralisee(travail: E): LigneCalcul[] {
   const { p, m } = travail.parametresAffichage!;
   const F = xPlus(p);
   const composee = sansEspaces(formatEnonceAffichage(travail.enonce, "composee", travail.parametresAffichage));
-  const lignes: LigneCalcul[] = [];
-  if (travail.formeAffichage === "carre_egale_expression") {
-    lignes.push(ligne(sansEspaces(formatEquationIsoleeNonDeveloppee(travail))));
-    lignes.push(ligne(composee, [latex(`${somme([[-m, "x"], [-m * p, ""]])}=${mono(-m, `(${F})`)}`)]));
-  } else {
-    lignes.push(ligne(composee));
-  }
+  // Second membre factorisé (G10) : après l'isolement, l'équation est déjà (x + p)² − m(x + p) = 0.
+  const lignes: LigneCalcul[] = [ligne(composee)];
   lignes.push(ligne(`(${F})[(${F})${-m >= 0 ? "+" : "-"}${Math.abs(m)}]=0`, [texte("mise en évidence de "), latex(`(${F})`)]));
   lignes.push(ligne(`${formeGeneralisee(travail)}=0`, "on réduit le second facteur"));
   return lignes;
@@ -243,13 +298,37 @@ function piegeSolutions(travail: E): FragmentConsigne[] {
   }
 }
 
-function etapeSolutions(travail: E, l: string): EtapeCorrection[] {
+function etapeSolutions(travail: E, l: string, methode: ChoixMethode | null): EtapeCorrection[] {
   const t = trinomeDe(travail);
   const racines = racinesExactes(travail);
   const res = resultat(l, [latex(ensembleSolutionsLatex(racines))]);
+  if (travail.categorie === "irreductible") {
+    const { a, c } = travail.enonce;
+    return [
+      utilise(l, [texte(`Un carré n'est jamais négatif ${COURS_RESOUDRE}.`)]),
+      calcul(l, [ligne(`${trinomeLatex(travail)}=0`), ligne(`${mono(a, "x^2")}=${q(-c)}`, c > 0 ? [texte("on soustrait "), latex(q(c)), texte(" aux deux membres")] : [texte("on ajoute "), latex(q(-c)), texte(" aux deux membres")]), ligne(`x^2=${q(-c / a)}`, a === 1 ? "x² est déjà isolé" : [texte("on divise par "), latex(q(a))]), ligne(`${q(-c / a)}<0`, "aucun réel n'a un carré négatif")]),
+      resultat(l, [latex("S=\\varnothing")]),
+      piege(l, [texte("Ce n'est pas une différence de deux carrés : a et c sont de même signe, "), latex("x^2"), texte(" serait négatif.")]),
+    ];
+  }
+  if (methode === "racine_evidente") {
+    const forme = formeRacineEvidente(travail.enonce);
+    return [
+      utilise(l, utiliseProduitNul()),
+      calcul(l, lignesProduitNul(forme)),
+      res,
+      verification(l, [texte("On remplace chaque solution dans "), latex(`${trinomeLatex(travail)}=0`), texte(" :")], racines.flatMap((r) => lignesVerificationSubstitution(t, r))),
+    ];
+  }
   if (travail.categorie === "cas_general") {
     const delta = deltaDe(t);
-    if (delta < 0) return [utilise(l, utiliseFormule()), calcul(l, [ligne(`\\Delta=${q(delta)}<0`, "aucune solution réelle")]), resultat(l, [latex("S=\\varnothing")])];
+    if (delta < 0)
+      return [
+        utilise(l, utiliseFormule()),
+        calcul(l, [ligne(`\\Delta=${q(delta)}<0`, "aucune solution réelle : la racine carrée d'un nombre négatif n'existe pas")]),
+        resultat(l, [latex("S=\\varnothing")]),
+        piege(l, [texte("Un discriminant négatif ne donne pas « une solution » : la parabole ne coupe jamais l'axe, "), latex("S=\\varnothing"), texte(".")]),
+      ];
     const { lignes, racines: [x1, x2] } = lignesRacinesFormule(t);
     return [
       utilise(l, utiliseFormule()),
@@ -269,12 +348,15 @@ function etapeSolutions(travail: E, l: string): EtapeCorrection[] {
   ];
 }
 
-export function correctionDetailleeSecondDegre(instance: E): EtapeCorrection[] {
-  return finaliserCorrige(correctionDetailleeSecondDegreBrut(instance));
+/** `methode` : la méthode retenue à l'écran (décision 1 : racine évidente ou Δ) ; absente (papier),
+ * la racine évidente quand il y en a une (`methodeParDefaut`). */
+export function correctionDetailleeSecondDegre(instance: E, methode?: ChoixMethode | null): EtapeCorrection[] {
+  return finaliserCorrige(correctionDetailleeSecondDegreBrut(instance, methode ?? null));
 }
 
-function correctionDetailleeSecondDegreBrut(instance: E): EtapeCorrection[] {
+function correctionDetailleeSecondDegreBrut(instance: E, methodeEcran: ChoixMethode | null): EtapeCorrection[] {
   const travail = travailDe(instance);
+  const methode = methodeEcran ?? methodeParDefaut(travail);
   return phasesSecondDegre(instance).flatMap((phase) => {
     const l = lettrePhaseSecondDegre(instance, phase);
     switch (phase) {
@@ -287,11 +369,16 @@ function correctionDetailleeSecondDegreBrut(instance: E): EtapeCorrection[] {
       case "reconnaissance":
         return etapeReconnaissance(travail, l);
       case "champ1":
-        return etapeChamp1(travail, l);
+        return methode === "racine_evidente" ? etapeRacineEvidente(travail, l) : etapeChamp1(travail, l);
       case "champ2":
-        return etapeSolutions(travail, l);
+        return etapeSolutions(travail, l, methode);
     }
   });
+}
+
+/** Méthode retenue par le corrigé papier (racine évidente quand il y en a une). */
+export function methodeCorrigeSecondDegre(instance: E): ChoixMethode | null {
+  return methodeParDefaut(travailDe(instance));
 }
 
 /** Ensemble des solutions (réponse brève, barème). */

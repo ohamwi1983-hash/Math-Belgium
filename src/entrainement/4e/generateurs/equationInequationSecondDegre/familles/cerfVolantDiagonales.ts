@@ -35,7 +35,7 @@ const SKINS: SkinCerfVolantDiagonales[] = [
 ];
 
 const X_S_MIN = 12;
-const X_S_MAX = 16;
+const X_S_MAX = 24;
 
 export const construireCerfVolantDiagonales = construireAvecParametres(() => {
   const xS = randomInt(X_S_MIN, X_S_MAX);

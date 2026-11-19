@@ -91,11 +91,14 @@ function formatFacteurXPlusP(p: number): string {
   return p >= 0 ? `x + ${p}` : `x - ${Math.abs(p)}`;
 }
 
-/** (x+p)² = mx+mp — le membre de droite développé, (x+p) n'apparaît jamais explicitement à droite. */
+/** (x+p)² = m(x+p) — le second membre est écrit FACTORISÉ (audit 4e ch. 2, G10) : le cours apprend à
+ * repérer « la même expression entre parenthèses des deux côtés » ; l'ancien second membre
+ * développé (−5x − 30) demandait de reconnaître −5(x + 6), ce qui n'est jamais montré. Coefficient
+ * ±1 jamais écrit (« (x − 2)² = −(x − 2) »). */
 function formatCarreEgaleExpression(p: number, m: number): string {
-  const gauche = `(${formatFacteurXPlusP(p)})^2`;
-  const droite = formatSommeTermes([{ valeur: m, suffixe: "x" }, { valeur: m * p, suffixe: "" }]);
-  return `${gauche} = ${droite}`;
+  const facteur = formatFacteurXPlusP(p);
+  const coef = m === 1 ? "" : m === -1 ? "-" : String(m);
+  return `(${facteur})^2 = ${coef}(${facteur})`;
 }
 
 /**
@@ -326,9 +329,8 @@ export function formatEquationIsoleeNonDeveloppee(exercice: Exercice): string {
       if (!parametresAffichage) {
         throw new Error('formatEquationIsoleeNonDeveloppee: parametresAffichage requis pour "carre_egale_expression"');
       }
-      const { p, m } = parametresAffichage;
-      const termes = formatSommeTermes([{ valeur: -m, suffixe: "x" }, { valeur: -m * p, suffixe: "" }], true);
-      return `${avecSuite(`(${formatFacteurXPlusP(p)})^2`, termes)} = 0`;
+      // Second membre factorisé (G10) : on le ramène à gauche tel quel, (x + p)² − m(x + p) = 0.
+      return formatComposee(parametresAffichage.p, parametresAffichage.m);
     }
     case "composee":
       throw new Error('formatEquationIsoleeNonDeveloppee: jamais appelée pour "composee" (déjà "= 0", isolement sauté)');

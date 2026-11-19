@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceSignesProduit, SolutionEnsembleProduit } from "../core/signesProduit.types";
 import { Katex } from "./Katex";
 import { formatTermesEnonceSignesProduitFactoriseLatex } from "../ui/formatSignesProduit";
@@ -14,6 +15,10 @@ import { TableauSignesRecap } from "./TableauSignesRecap";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { MESSAGE_BORNE_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { RenduFragments } from "./RenduFragments";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
+import { lireNombreSaisi } from "../ui/lireNombre";
 
 type Forme = Exclude<SolutionEnsembleProduit["forme"], "union">;
 
@@ -35,6 +40,10 @@ interface Props {
   recapitulatif: EntreeRecapitulatif[];
   aideActivee: boolean;
   onActiverAide: () => void;
+  /** Aide de niveau 1 (KaTeX) : la règle de lecture ; le niveau 2 surligne le tableau. */
+  aideTexte?: FragmentConsigne[];
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse (valeur interdite incluse…). */
+  messageCible?: (reponse: SolutionEnsembleProduit) => FragmentConsigne[] | null;
   onValider: (reponse: SolutionEnsembleProduit) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -70,10 +79,15 @@ export function EtapeIntervalleProduit({
   recapitulatif,
   aideActivee,
   onActiverAide,
+  aideTexte,
+  messageCible,
   onValider,
   validation,
 }: Props) {
   const [forme, setForme] = useState<Forme | null>(null);
+  const saisie = useTentativeLisible<SolutionEnsembleProduit>();
+  const [niveauAide, setNiveauAide] = useState(aideActivee ? 2 : 0);
+  const surligne = aideTexte ? niveauAide >= 2 : aideActivee;
   const [valeurPoint, setValeurPoint] = useState("");
   const [valeursExclues, setValeursExclues] = useState<string[]>([]);
   const [liste, setListe] = useState<EtatListeMorceaux>(etatListeInitiale());
@@ -105,12 +119,12 @@ export function EtapeIntervalleProduit({
     if (forme === "reel") return { forme: "reel" };
     if (forme === "point") {
       const texte = valeurPoint.trim();
-      const valeur = Number(texte.replace(",", "."));
+      const valeur = lireNombreSaisi(texte) ?? NaN;
       if (texte === "" || !Number.isFinite(valeur)) return null;
       return { forme, valeur };
     }
     if (forme === "reel_sauf_points") {
-      const valeurs = valeursExclues.map((texte) => Number(texte.trim().replace(",", ".")));
+      const valeurs = valeursExclues.map((texte) => lireNombreSaisi(texte) ?? NaN);
       const toutesValides = valeursExclues.every((texte) => texte.trim() !== "") && valeurs.every((v) => Number.isFinite(v));
       return toutesValides ? { forme, valeurs } : null;
     }
@@ -123,7 +137,7 @@ export function EtapeIntervalleProduit({
 
   const reponse = construireReponse();
   const termesApercu = formatTermesApercuSolutionProduit(forme, valeurPoint, valeursExclues, liste, pointsIsoles);
-  const highlight = aideActivee ? calculerAideGrille(exercice) : undefined;
+  const highlight = surligne ? calculerAideGrille(exercice) : undefined;
 
   return (
     <div>
@@ -166,7 +180,7 @@ export function EtapeIntervalleProduit({
             id="valeur-point"
             className="text-input"
             value={valeurPoint}
-            onChange={(e) => setValeurPoint(e.target.value)}
+            onChange={(e) => setValeurPoint(normaliserSigneMoins(e.target.value))}
           />
         </div>
       )}
@@ -178,7 +192,7 @@ export function EtapeIntervalleProduit({
               <input
                 className="text-input"
                 value={valeur}
-                onChange={(e) => modifierValeurExclue(index, e.target.value)}
+                onChange={(e) => modifierValeurExclue(index, normaliserSigneMoins(e.target.value))}
                 placeholder="point exclu"
                 aria-label={`Point exclu ${index + 1}`}
               />
@@ -208,21 +222,37 @@ export function EtapeIntervalleProduit({
 
       {!validation && (
         <>
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+        {aideTexte && niveauAide >= 1 && (
+          <div className="triangle-quelconque-aide">
+            <p>
+              <RenduFragments fragments={aideTexte} />
+            </p>
+          </div>
+        )}
+        {aideTexte && niveauAide >= 2 && (
+          <div className="triangle-quelconque-aide">
+            <p>Dans le tableau, les zones où le signe convient sont surlignées.</p>
+          </div>
+        )}
+        <BoutonAide
+          niveauAide={aideTexte ? niveauAide : aideActivee ? 1 : 0}
+          niveauAideMax={aideTexte ? 2 : 1}
+          onActiverAide={() => {
+            if (!aideTexte) return onActiverAide();
+            if (niveauAide + 1 >= 2) onActiverAide();
+            setNiveauAide((n) => Math.min(2, n + 1));
+          }}
+        />
 
         <button
           type="button"
           className="btn btn-primary"
-          disabled={reponse === null}
-          onClick={() => reponse !== null && onValider(reponse)}
+          disabled={forme === null}
+          onClick={() => saisie.tenter(reponse ?? { forme: "vide" }, reponse !== null, onValider)}
         >
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour texteIllisible={MESSAGE_BORNE_ILLISIBLE} illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={saisie.soumise !== null ? messageCible?.(saisie.soumise) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -33,7 +33,7 @@ const SKINS: SkinTriangleRectangleCathetes[] = [
 ];
 
 const X_S_MIN = 12;
-const X_S_MAX = 16;
+const X_S_MAX = 24;
 
 export const construireTriangleRectangleCathetes = construireAvecParametres(() => {
   const xS = randomInt(X_S_MIN, X_S_MAX);

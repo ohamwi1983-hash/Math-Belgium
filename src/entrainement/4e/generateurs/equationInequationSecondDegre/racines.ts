@@ -37,6 +37,15 @@ export const ECART_MAX_DEPUIS_XS = DELTA_MAX + MARGE_LARGE_MAX;
 
 export function genererDeltaEtDomaine(xS: number, xMinPossible: number): DeltaEtDomaine {
   const delta = randomInt(DELTA_MIN, DELTA_MAX);
+  return { delta, domaine: genererDeltaEtDomaineAvecDelta(xS, xMinPossible, delta) };
+}
+
+/** Domaine de validité pour un écart `delta` déjà fixé (même tirage que `genererDeltaEtDomaine`). */
+export function genererDeltaEtDomaineAvecDelta(xS: number, xMinPossible: number, delta: number): { inf: number; sup: number } {
+  return genererDomaine(xS, xMinPossible, delta).domaine;
+}
+
+function genererDomaine(xS: number, xMinPossible: number, delta: number): DeltaEtDomaine {
 
   if (Math.random() >= RATIO_CLIP) {
     const margeGauche = randomInt(MARGE_LARGE_MIN, MARGE_LARGE_MAX);

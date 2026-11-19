@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { Exercice } from "../core/generateur.types";
 import type { PolynomeLineaire } from "../core/simplification.types";
 import { Katex } from "./Katex";
@@ -7,11 +8,12 @@ import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { formatPolynome } from "../ui/formatSimplification";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   /** Un P2 (gen1/gen2/gen3/gen4/gen5/gen6) ou un P1 (gen3 "Simplifier", `{k,p}` — gen3 image 6/7
@@ -24,6 +26,10 @@ interface Props {
   diagnostiquer: (valeur: string) => StatutVerification;
   aideActivee: boolean;
   onActiverAide: () => void;
+  /** Aides à 2 niveaux (KaTeX) fournies par l'appli — remplacent l'aide historique à 1 niveau. */
+  aides?: FragmentConsigne[][];
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse (jamais la réponse). */
+  messageCible?: (valeur: string) => FragmentConsigne[] | null;
   onValider: (reponse: string) => void;
   /** Récapitulatif des étapes déjà closes (RecapitulatifPanel) — absent par défaut : rien de rendu,
    * comportement historique inchangé pour gen1-4 (jamais de contexte multi-étapes plus large à
@@ -36,6 +42,8 @@ interface Props {
   /** Bloc "état actuel" (prompt-corrections-moteur-partage.md, point 1) — absent/null par défaut :
    * rien de rendu. */
   etatActuel?: string | null;
+  /** Remplace le libellé « État actuel » (gen5 : « Facteur à étudier »). */
+  etatActuelLabel?: string;
   /**
    * Préfixe LaTeX devant l'expression affichée par défaut (ex. "D(x)"/"N(x)" pour le numérateur/
    * dénominateur d'une fraction rationnelle, gen3) — absent par défaut : bloc rendu nu, comme avant
@@ -90,6 +98,8 @@ interface Props {
  * champ.
  */
 export function EtapeReductionCoefficients({
+  aides,
+  messageCible,
   exercice,
   nom,
   tentativesUtilisees,
@@ -101,6 +111,7 @@ export function EtapeReductionCoefficients({
   recapitulatif,
   expressionAfficheeTermes,
   etatActuel,
+  etatActuelLabel,
   variante = "reduction",
   prefixeExpression,
   masquerBlocDonnees = false,
@@ -109,6 +120,7 @@ export function EtapeReductionCoefficients({
   validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
+  const saisie = useTentativeLisible<string>();
   const nomCapitalise = nom.charAt(0).toUpperCase() + nom.slice(1);
   const libelleChamp = variante === "miseEnEvidence" ? `${nomCapitalise} mis en évidence` : `${nomCapitalise} réduit`;
 
@@ -130,7 +142,7 @@ export function EtapeReductionCoefficients({
             />
           </div>
         ))}
-      {etatActuel !== undefined && <EtatActuelPanel latex={etatActuel} />}
+      {etatActuel !== undefined && <EtatActuelPanel latex={etatActuel} label={etatActuelLabel} />}
       <p className="prompt-text">
         {variante === "miseEnEvidence"
           ? `Mets ce ${nom} en évidence : fais apparaître un facteur commun entier (le plus grand possible) devant une parenthèse à coefficients premiers entre eux.`
@@ -146,11 +158,14 @@ export function EtapeReductionCoefficients({
           className="text-input"
           placeholder={placeholder}
           value={reponse}
-          onChange={(e) => setReponse(e.target.value)}
+          onChange={(e) => setReponse(normaliserSigneMoins(e.target.value))}
         />
       </div>
       {!validation && (
         <>
+          {aides ? (
+            <AidesNiveaux aides={aides} onPremiereAide={onActiverAide} />
+          ) : (
           <div>
             {aideActivee && (
               <div className="triangle-quelconque-aide">
@@ -165,14 +180,11 @@ export function EtapeReductionCoefficients({
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>
-          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
+          )}
+          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => saisie.tenter(reponse, diagnostiquer(reponse) !== "parse_error", onValider)}>
             Valider
           </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer(reponse))}
-            </p>
-          )}
+          <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={saisie.soumise !== null ? messageCible?.(saisie.soumise) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

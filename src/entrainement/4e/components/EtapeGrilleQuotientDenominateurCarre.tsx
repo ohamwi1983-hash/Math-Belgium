@@ -20,12 +20,16 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { AidesNiveaux } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   exercice: ExerciceInequationRationnelleDenominateurCarre;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
+  /** Aides à 2 niveaux (KaTeX) : règle des signes, jamais la grille. */
+  aides?: FragmentConsigne[][];
   onValider: (reponse: GrilleQuotientNiveau3) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -43,7 +47,7 @@ interface Props {
  * cycle de saisie reste à 3 états comme toutes les autres lignes N/D — rien de spécial à faire
  * ici, la contrainte est uniquement respectée par la grille de référence.
  */
-export function EtapeGrilleQuotientDenominateurCarre({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
+export function EtapeGrilleQuotientDenominateurCarre({ aides, exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
   const entete = formatEnTeteInterieur(exercice.racines);
   const nbColonnes = entete.length;
   const [racineN1, racineN2] = [...exercice.numerateur.solution.racines].sort((a, b) => a - b);
@@ -180,6 +184,7 @@ export function EtapeGrilleQuotientDenominateurCarre({ exercice, tentativesUtili
 
       {!validation && (
         <>
+        {aides && <AidesNiveaux aides={aides} />}
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>

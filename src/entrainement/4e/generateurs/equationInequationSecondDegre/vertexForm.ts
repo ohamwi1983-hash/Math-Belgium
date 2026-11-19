@@ -22,7 +22,8 @@ import type {
   VarianteEquationInequationSecondDegre,
 } from "../../core/equationInequationSecondDegre.types";
 import { construireOptionsInterpretationEquationInequation, formatQuestionFinaleEquationInequation } from "./interpretation";
-import { ECART_MAX_DEPUIS_XS, genererDeltaEtDomaine, intervalleIntersecte, racinesDansDomaine } from "./racines";
+import { ECART_MAX_DEPUIS_XS, genererDeltaEtDomaine, genererDeltaEtDomaineAvecDelta, racinesDansDomaine } from "./racines";
+import { construireInequationContexte, solutionDansDomaine, tirerSensEtSymbole } from "./solutionInequation";
 
 export interface ParametresVertexForm {
   famille: FamilleEquationInequationSecondDegre;
@@ -176,42 +177,33 @@ export function construireDepuisSommet(p: ParametresVertexForm, variante: Varian
    * minimum en xS), c'est celui où `f(x)<k` (le creux est en dessous). Inverser cette
    * correspondance contredirait la phrase d'interprétation correcte (ex. "la hauteur dépasse k"
    * pour une parabole concave) — bug trouvé et corrigé en vérification Playwright. */
-  const sens: "gt" | "lt" = p.signe === 1 ? "lt" : "gt";
-  const intervalleBrut = { inf: p.xS - delta, sup: p.xS + delta };
-  const intervalleValide = intervalleIntersecte(p.xS, delta, domaine);
-  return {
-    variante: "inequation",
+  // Sens et symbole tirés (G14). À l'extérieur des racines, le domaine est retiré tant que la
+  // solution n'est pas UN intervalle (une seule racine dans le domaine) — au plus 80 essais, sinon le
+  // sens « entre les racines ».
+  let { sens, large } = tirerSensEtSymbole();
+  let dom = domaine;
+  let solution = solutionDansDomaine(a, [p.xS - delta, p.xS + delta], dom, sens, large);
+  for (let i = 0; i < 80 && solution === null; i++) {
+    dom = genererDeltaEtDomaineAvecDelta(p.xS, p.xMinPossible, delta);
+    solution = solutionDansDomaine(a, [p.xS - delta, p.xS + delta], dom, sens, large);
+  }
+  if (solution === null) {
+    sens = p.signe === 1 ? "lt" : "gt";
+    dom = domaine;
+    solution = solutionDansDomaine(a, [p.xS - delta, p.xS + delta], dom, sens, large)!;
+  }
+  return construireInequationContexte({
     famille: p.famille,
-    base,
+    base: { ...base, domaine: dom },
     k,
     voieSysteme: false,
     systeme: null,
+    racines: [p.xS - delta, p.xS + delta],
     sens,
-    intervalleBrut,
-    intervalleValide,
-    questionFinale: formatQuestionFinaleEquationInequation({
-      variante: "inequation",
-      sens,
-      labelVariable: p.labelVariable,
-      nomGrandeur: p.nomGrandeur,
-      genreGrandeur: p.genreGrandeur,
-      k,
-      uniteGrandeur: p.uniteGrandeur,
-    }),
-    optionsInterpretation: construireOptionsInterpretationEquationInequation({
-      variante: "inequation",
-      sens,
-      labelVariable: p.labelVariable,
-      nomGrandeur: p.nomGrandeur,
-      genreGrandeur: p.genreGrandeur,
-      uniteVariable: p.uniteVariable,
-      uniteGrandeur: p.uniteGrandeur,
-      uniteGrandeurFautive: p.uniteGrandeurFautive,
-      k,
-      intervalleValide,
-      intervalleBrut,
-    }),
-  };
+    large,
+    solution,
+    entiers: false,
+  });
 }
 
 /** Enveloppe une fonction "tire les paramètres narratifs au hasard" (par famille) en un

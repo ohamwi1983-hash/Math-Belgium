@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import type { ReponseIntervalle } from "../moteur/verificationEquationInequationSecondDegre";
 import { diagnostiquerValidationInequation, verifierValidationEquation } from "../moteur/verificationEquationInequationSecondDegre";
@@ -13,6 +14,7 @@ import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { MESSAGE_BORNE_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -44,9 +46,9 @@ export function EtapeValidationEquationInequationSecondDegre({
         <div className="triangle-quelconque-aide">
           <p>{texteAideValidationNiveau1()}</p>
           {niveauAide >= 2 && (
-            <p>
+            <div>
               <Katex expression={texteAideValidationNiveau2(exercice)} block />
-            </p>
+            </div>
           )}
           {niveauAide >= 3 && <p>{texteAideValidationNiveau3(exercice)}</p>}
         </div>
@@ -177,6 +179,7 @@ interface PropsInequation {
 function EcranValidationInequation({ exercice, apresEchec, tentativesUtilisees, tentativesMax, aide, onValider, validation }: PropsInequation) {
   const [inf, setInf] = useState("");
   const [sup, setSup] = useState("");
+  const saisie = useTentativeLisible<ReponseIntervalle>();
   const complet = inf.trim() !== "" && sup.trim() !== "";
   const reponse: ReponseIntervalle = { inf, sup };
   const statut = complet ? diagnostiquerValidationInequation(exercice, reponse) : undefined;
@@ -199,24 +202,24 @@ function EcranValidationInequation({ exercice, apresEchec, tentativesUtilisees, 
       <div className="field-row">
         <div className="field field-inline">
           <label className="field-label field-label-minuscule" htmlFor="equation-inequation-validation-inf">
-            <Katex expression={`${exercice.base.contexte.labelVariable}_{min} =`} />
+            {exercice.entiers ? "Plus petit entier :" : <Katex expression={`${exercice.base.contexte.labelVariable}_{min} =`} />}
           </label>
           <input
             id="equation-inequation-validation-inf"
             className={`text-input${apresEchec && statut && statut.inf !== "correct" ? " is-erronee" : ""}`}
             value={inf}
-            onChange={(e) => setInf(e.target.value)}
+            onChange={(e) => setInf(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
           <label className="field-label field-label-minuscule" htmlFor="equation-inequation-validation-sup">
-            <Katex expression={`${exercice.base.contexte.labelVariable}_{max} =`} />
+            {exercice.entiers ? "Plus grand entier :" : <Katex expression={`${exercice.base.contexte.labelVariable}_{max} =`} />}
           </label>
           <input
             id="equation-inequation-validation-sup"
             className={`text-input${apresEchec && statut && statut.sup !== "correct" ? " is-erronee" : ""}`}
             value={sup}
-            onChange={(e) => setSup(e.target.value)}
+            onChange={(e) => setSup(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>
@@ -225,14 +228,10 @@ function EcranValidationInequation({ exercice, apresEchec, tentativesUtilisees, 
         <>
           {aide}
 
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(reponse, statutGlobal !== "parse_error", onValider)}>
             Valider
           </button>
-          {apresEchec && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-            </p>
-          )}
+          <MessageRetour texteIllisible={MESSAGE_BORNE_ILLISIBLE} illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

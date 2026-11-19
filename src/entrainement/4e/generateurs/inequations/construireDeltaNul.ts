@@ -1,5 +1,5 @@
 import type { Enonce } from "../../core/inequation.types";
-import { randomInt, randomNonZeroInt } from "./aleatoire";
+import { randomNonZeroInt } from "./aleatoire";
 
 /**
  * a(x-r)² = ax²+bx+c, avec b=-2ar, c=a·r².
@@ -7,7 +7,8 @@ import { randomInt, randomNonZeroInt } from "./aleatoire";
  */
 export function construireDeltaNul(): { enonce: Enonce; delta: number; racines: [number, number] } {
   const a = randomNonZeroInt(-4, 4);
-  const r = randomInt(-6, 6);
+  // r ≠ 0 (audit G11) : sinon le trinôme est ax² seul (3x² ≥ 0), sans b ni c — jamais enseigné.
+  const r = randomNonZeroInt(-6, 6);
   const b = -2 * a * r;
   const c = a * r * r;
   const delta = b * b - 4 * a * c;

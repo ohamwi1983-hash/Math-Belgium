@@ -23,8 +23,13 @@ export function formatFacteurLatex(facteur: FacteurSignesProduit): string {
 }
 
 /** (F1)(F2)(F3) ◇ 0 — produit de facteurs parenthésés, jamais développé en un seul grand polynôme. */
+/** Facteur entre parenthèses, sauf un monôme (kx) en tête du produit : « 3x(x − 1) ». */
+function facteurDansProduit(f: FacteurSignesProduit, i: number): string {
+  return i === 0 && f.type === "lineaire" && f.polynome.p === 0 ? formatFacteurLatex(f) : `(${formatFacteurLatex(f)})`;
+}
+
 export function formatEnonceSignesProduitLatex(exercice: ExerciceSignesProduit): string {
-  const facteurs = exercice.facteurs.map((f) => `(${formatFacteurLatex(f)})`).join("");
+  const facteurs = exercice.facteurs.map(facteurDansProduit).join("");
   return `${facteurs} ${SYMBOLE_LATEX[exercice.symbole]} 0`;
 }
 
@@ -37,7 +42,7 @@ export function formatEnonceSignesProduitLatex(exercice: ExerciceSignesProduit):
  * reste attaché au dernier facteur (même principe que `formatTermesApercuSolutionProduit`).
  */
 export function formatTermesEnonceSignesProduitLatex(exercice: ExerciceSignesProduit): string[] {
-  const facteurs = exercice.facteurs.map((f) => `(${formatFacteurLatex(f)})`);
+  const facteurs = exercice.facteurs.map(facteurDansProduit);
   const dernier = facteurs.length - 1;
   return facteurs.map((f, i) => (i === dernier ? `${f} ${SYMBOLE_LATEX[exercice.symbole]} 0` : f));
 }

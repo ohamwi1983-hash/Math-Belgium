@@ -8,6 +8,9 @@ import { EtatActuelPanel } from "./EtatActuelPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux, MESSAGE_BORNE_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
+import { lireNombreSaisi } from "../ui/lireNombre";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Choix = "pasDe" | "auMoins";
@@ -77,6 +80,10 @@ interface Props {
    * dénominateur) le remplacent (conceptionaidescomposantspartageshistorique.md, point 6).
    */
   texteAide?: string;
+  /** Aides à 2 niveaux (KaTeX) — remplacent l'aide historique à 1 niveau. */
+  aides?: FragmentConsigne[][];
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse. */
+  messageCible?: (racines: [number, number]) => FragmentConsigne[] | null;
   onValider: (racines: [number, number]) => void;
   validation?: ValidationEtapeProps | null;
 }
@@ -113,11 +120,14 @@ export function EtapeRacinesFlexibles({
   aideActivee,
   onActiverAide,
   texteAide = "Une fois l'expression factorisée, chaque facteur égalé à 0 donne une racine.",
+  aides,
+  messageCible,
   onValider,
   validation,
 }: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
+  const saisie = useTentativeLisible<[number, number]>();
   const erronee = tentativesUtilisees > 0;
 
   function choisir(nouveauChoix: Choix) {
@@ -142,7 +152,7 @@ export function EtapeRacinesFlexibles({
   function construireReponse(): [number, number] | null {
     if (choix === "pasDe") return [NaN, NaN];
     if (choix === "auMoins") {
-      const nombres = valeurs.map((v) => Number(v.trim().replace(",", ".")));
+      const nombres = valeurs.map((v) => lireNombreSaisi(v) ?? NaN);
       if (valeurs.some((v) => v.trim() === "") || nombres.some((n) => !Number.isFinite(n))) return null;
       return nombres.length === 1 ? [nombres[0], nombres[0]] : [nombres[0], nombres[1]];
     }
@@ -243,30 +253,30 @@ export function EtapeRacinesFlexibles({
 
       {!validation && (
         <>
-          {onActiverAide && (
-            <div>
-              {aideActivee && (
-                <div className="triangle-quelconque-aide">
-                  <p>{texteAide}</p>
-                </div>
-              )}
-              <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-            </div>
+          {aides ? (
+            <AidesNiveaux aides={aides} onPremiereAide={onActiverAide} />
+          ) : (
+            onActiverAide && (
+              <div>
+                {aideActivee && (
+                  <div className="triangle-quelconque-aide">
+                    <p>{texteAide}</p>
+                  </div>
+                )}
+                <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+              </div>
+            )
           )}
 
           <button
             type="button"
             className="btn btn-primary"
-            disabled={reponse === null}
-            onClick={() => reponse !== null && onValider(reponse)}
+            disabled={choix === null || (choix === "auMoins" && valeurs.some((v) => v.trim() === ""))}
+            onClick={() => saisie.tenter(reponse ?? [NaN, NaN], reponse !== null, onValider)}
           >
             Valider
           </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-            </p>
-          )}
+          <MessageRetour texteIllisible={MESSAGE_BORNE_ILLISIBLE} illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={saisie.soumise !== null ? messageCible?.(saisie.soumise) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

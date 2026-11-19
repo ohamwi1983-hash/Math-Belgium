@@ -1,5 +1,6 @@
 import type { AdaptateurFeuilleExercices, CriteresDifficulte, EtapeCorrection, FragmentConsigne } from "./genererFeuilleExercices";
 import { decouperLigneCalcul, lignesDepuisChaine } from "./corrigeTableau";
+import { membreAuHasard } from "./groupesVerdict";
 
 /**
  * Niveau de difficulté 1–7 (affiché « numéro + palier ») et durée PAR EXERCICE — décision de
@@ -260,7 +261,9 @@ function cleEstimation(varianteId: string | null | undefined, cleFiltre: string 
 }
 
 function tirerPourEstimation<T>(adaptateur: AdaptateurFeuilleExercices<T>, varianteId: string | null | undefined): T {
-  return varianteId && adaptateur.genererInstanceAvecVariante ? adaptateur.genererInstanceAvecVariante(varianteId) : adaptateur.genererInstance();
+  // Rangée d'un groupe « à verdict » (panneau d'évaluation) : un membre au hasard à chaque tirage.
+  const id = varianteId ? membreAuHasard(adaptateur, varianteId) : varianteId;
+  return id && adaptateur.genererInstanceAvecVariante ? adaptateur.genererInstanceAvecVariante(id) : adaptateur.genererInstance();
 }
 
 /** Estimation déjà calculée (`null` si elle ne l'est pas encore) — lecture seule, ne tire rien : le

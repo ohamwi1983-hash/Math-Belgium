@@ -1,3 +1,5 @@
+import { lireNombreSaisi } from "../ui/lireNombre";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 interface Props {
   /** Valeurs saisies (texte brut, une par point isolé) — vide tant que l'élève n'en ajoute pas. */
   valeurs: string[];
@@ -22,7 +24,7 @@ export function ListePointsIsolesInput({ valeurs, onChange }: Props) {
             value={valeur}
             placeholder="point isolé"
             aria-label={`Point isolé ${index + 1}`}
-            onChange={(e) => onChange(valeurs.map((v, i) => (i === index ? e.target.value : v)))}
+            onChange={(e) => onChange(valeurs.map((v, i) => (i === index ? normaliserSigneMoins(e.target.value) : v)))}
           />
           <span className="liste-points-accolade" aria-hidden="true">
             {"}"}
@@ -46,7 +48,7 @@ export function ListePointsIsolesInput({ valeurs, onChange }: Props) {
 
 /** Valeurs numériques des points isolés, ou null si un champ ajouté est vide ou invalide. */
 export function construirePointsIsoles(valeurs: string[]): number[] | null {
-  const nombres = valeurs.map((texte) => Number(texte.trim().replace(",", ".")));
+  const nombres = valeurs.map((texte) => lireNombreSaisi(texte) ?? NaN);
   const valides = valeurs.every((texte) => texte.trim() !== "") && nombres.every((n) => Number.isFinite(n));
   return valides ? nombres : null;
 }

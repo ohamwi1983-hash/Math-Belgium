@@ -77,6 +77,10 @@ import { EnTeteExercice } from "./components/EnTeteExercice";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleeEquationRationnelle, lettrePhaseEquationRationnelle } from "./generateurs/equationRationnelle/corrigeDetaille";
+import { TENTATIVES_CHOIX_FERME } from "./moteur/sessionEquationRationnelle";
+import { aidesCE, aidesChamp1Categorie, aidesFactorisationApresDelta, aidesMethodeFacteur, aidesRacinesFacteur, aidesReduction, aidesSimplificationFraction, messageDelta } from "./ui/aidesSecondDegre";
+import { equationDenominateurCommun } from "./moteur/denominateurCommun";
+import { aidesEliminerDenominateurs } from "./ui/aidesSecondDegre";
 
 const CONSIGNE_GENERALE = "Résous cette équation rationnelle.";
 
@@ -443,6 +447,7 @@ export function AppEquationRationnelle() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        messageRevele: /econnaissance/.test(etat.phase) || (etat.phase === "ce" && etat.etapeCourante.tentativesUtilisees === 0) ? "Ce n'était pas la bonne réponse." : undefined,
         reponseAttendue: reponseAttenduePhase(etat),
         corrigeDetaille: (
           <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationRationnelle(etat.exerciceCourant), lettrePhaseEquationRationnelle(etat.exerciceCourant, etat.phase))} />
@@ -485,6 +490,7 @@ export function AppEquationRationnelle() {
               expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
               masquerBlocDonnees
               question={QUESTION_CE}
+              aides={aidesCE()}
               onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, [Number(reponse)]), `x ≠ ${nombreSaisi(Number(reponse))}`)}
               validation={validation}
             />
@@ -505,6 +511,7 @@ export function AppEquationRationnelle() {
               texteAide="Une fois le dénominateur factorisé, chaque facteur égalé à 0 donne une condition d'existence (CE)."
               aideActivee={etat.aideCeUtilisee}
               onActiverAide={() => setEtat(activerAideCe(etat))}
+              aides={aidesCE()}
               onValider={(valeurs) => terminerEtape(soumettreReponseCE(etat, valeurs), formatCoupleSaisi(valeurs, "x ≠", "Pas de CE"))}
               validation={validation}
             />
@@ -530,6 +537,7 @@ export function AppEquationRationnelle() {
               diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(p2DeFractionGauche(etat.exerciceCourant), v)}
               aideActivee={etat.aideSimplifierReductionUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierReduction(etat))}
+              aides={aidesReduction(true)}
               onValider={(reponse) => terminerEtape(soumettreReponseSimplifierReduction(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -537,11 +545,12 @@ export function AppEquationRationnelle() {
             <EtapeReconnaissance
               exercice={p2DeFractionGauche(etat.exerciceCourant)}
               tentativesUtilisees={tentativesUtilisees}
-              tentativesMax={tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME}
               recapitulatif={recapitulatif}
               expressionAffichee={expressionP2(etat.exerciceCourant)}
               question={QUESTION_FACTORISATION_FRACTION}
               onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixSimplifierCategorie(etat, choix), libelleCategorie(choix))}
+              aides={aidesMethodeFacteur()}
               validation={validation}
             />
           ) : etat.phase === "simplifierChamp1" ? (
@@ -555,6 +564,8 @@ export function AppEquationRationnelle() {
               diagnostiquer={(v) => diagnostiquerChampPrincipal(p2DeFractionGauche(etat.exerciceCourant), v)}
               aideActivee={etat.aideSimplifierChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierChamp1(etat))}
+              aides={aidesChamp1Categorie(p2DeFractionGauche(etat.exerciceCourant))}
+              messageCible={(p2DeFractionGauche(etat.exerciceCourant)).categorie === "cas_general" ? (v) => messageDelta(p2DeFractionGauche(etat.exerciceCourant), v) : undefined}
               onValider={(reponse) => terminerEtape(soumettreReponseSimplifierChamp1(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -568,6 +579,7 @@ export function AppEquationRationnelle() {
               prefixeChamp="x ="
               aideActivee={etat.aideSimplifierChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierChamp2(etat))}
+              aides={aidesRacinesFacteur(p2DeFractionGauche(etat.exerciceCourant))}
               onValider={(racines) =>
                 terminerEtape(soumettreReponseSimplifierChamp2(etat, racines), formatCoupleSaisi(racines, "x =", "Pas de racine"))
               }
@@ -585,6 +597,7 @@ export function AppEquationRationnelle() {
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(p2DeFractionGauche(etat.exerciceCourant), v)}
               aideActivee={etat.aideSimplifierFactorisationUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierFactorisation(etat))}
+              aides={aidesFactorisationApresDelta()}
               onValider={(reponse) => terminerEtape(soumettreReponseSimplifierFactorisation(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -606,6 +619,7 @@ export function AppEquationRationnelle() {
               }
               aideActivee={etat.aideSimplifierFractionUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierFraction(etat))}
+              aides={aidesSimplificationFraction()}
               onValider={(numerateur, denominateur) =>
                 terminerEtape(soumettreReponseSimplifierFraction(etat, numerateur, denominateur), saisieEnLatex(`(${numerateur})/(${denominateur})`))
               }
@@ -619,10 +633,15 @@ export function AppEquationRationnelle() {
               recapitulatif={recapitulatif}
               expressionAffichee={formatEquationRationnelleLatexApresSimplification(etat.exerciceCourant)}
               masquerBlocDonnees
-              diagnostiquer={(v) => diagnostiquerIsolement(etat.exerciceCourant.equationIsolee, v)}
+              diagnostiquer={(v) => {
+                const lineaire = equationDenominateurCommun(etat.exerciceCourant);
+                const statut = diagnostiquerIsolement(etat.exerciceCourant.equationIsolee, v);
+                return statut === "not_equivalent" && lineaire && diagnostiquerIsolement(lineaire, v) === "correct" ? "correct" : statut;
+              }}
               texteAide="Multiplie chaque terme par le dénominateur commun pour éliminer les fractions, puis regroupe."
               aideActivee={etat.aideIsolementUtilisee}
               onActiverAide={() => setEtat(activerAideIsolement(etat))}
+              aides={aidesEliminerDenominateurs()}
               onValider={(reponse) => terminerEtape(soumettreReponseIsolement(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -630,10 +649,11 @@ export function AppEquationRationnelle() {
             <EtapeReconnaissance
               exercice={etat.exerciceCourant.equationIsolee}
               tentativesUtilisees={tentativesUtilisees}
-              tentativesMax={tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME}
               recapitulatif={recapitulatif}
               question={QUESTION_FACTORISATION}
               onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixCategorie(etat, choix), libelleCategorie(choix))}
+              aides={aidesMethodeFacteur()}
               validation={validation}
             />
           ) : etat.phase === "champ1" ? (
@@ -645,6 +665,8 @@ export function AppEquationRationnelle() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideChamp1(etat))}
+              aides={aidesChamp1Categorie(etat.exerciceCourant.equationIsolee)}
+              messageCible={(etat.exerciceCourant.equationIsolee).categorie === "cas_general" ? (v) => messageDelta(etat.exerciceCourant.equationIsolee, v) : undefined}
               onValider={(reponse) => terminerEtape(soumettreReponseChamp1(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -662,6 +684,7 @@ export function AppEquationRationnelle() {
               texteAide="Une fois l'équation factorisée, chaque facteur égalé à 0 donne une solution."
               aideActivee={etat.aideChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideChamp2(etat))}
+              aides={aidesRacinesFacteur(etat.exerciceCourant.equationIsolee)}
               onValider={(racines) => terminerEtape(soumettreReponseChamp2(etat, racines), formatCoupleSaisi(racines, "x =", "Pas de solution"))}
               validation={validation}
             />

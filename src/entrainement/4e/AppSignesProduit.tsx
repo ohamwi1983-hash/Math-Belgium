@@ -56,6 +56,10 @@ import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleeSignesProduit, lettreEcranSignesProduit } from "./generateurs/signesProduit/corrigeDetaille";
+import { TENTATIVES_CHOIX_FERME } from "./moteur/sessionSignesProduit";
+import { aideTexteIntervalleProduit, aidesChamp1Categorie, aidesFactorisationApresDelta, aidesGrilleSignes, aidesMethodeFacteur, aidesRacineLineaire, aidesRacinesFacteur, aidesReduction, aidesSigneIrreductible, messageDelta, messageIntervalleProduit } from "./ui/aidesSecondDegre";
+import { CourbeSignes } from "./components/CourbeSignes";
+import { valeurProduit } from "./generateurs/signesProduit/grille";
 
 const CONSIGNE_GENERALE = "Résous cette inéquation en étudiant le signe de chacun de ses facteurs.";
 
@@ -399,6 +403,8 @@ export function AppSignesProduit() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        messageRevele: etat.phase === "methodeFacteur" || etat.phase === "signeIrreductible" ? "Ce n'était pas la bonne réponse." : undefined,
+        figureApres: etat.phase === "grille" || etat.phase === "intervalle" ? <CourbeSignes f={(x) => valeurProduit(etat.exerciceCourant.facteurs, x)} zeros={etat.exerciceCourant.racines} solution={etat.exerciceCourant.solution} nom="P(x)" /> : undefined,
         // Tous les écrans par facteur (dont réduction/méthode/Δ ou factorisation, sans réponse
         // attendue avant l'audit gen5) : la même entrée que le récapitulatif, retrouvée par la phase
         // et le facteur de l'écran qui se clôt — jamais une seconde source.
@@ -448,6 +454,8 @@ export function AppSignesProduit() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               etatActuel={etatActuel as string}
+              etatActuelLabel="Facteur à étudier"
+              aides={aidesRacineLineaire()}
               onValider={(racine) => terminerEtape(soumettreReponseRacineLineaire(etat, racine), `x = ${nombreSaisi(Number(racine))}`)}
               validation={validation}
             />
@@ -461,10 +469,12 @@ export function AppSignesProduit() {
               expressionAfficheeTermes={expressionEnonceTermes}
               masquerBlocDonnees
               etatActuel={etatActuel}
+              etatActuelLabel="Facteur à étudier"
               diagnostiquer={(v) => diagnostiquerReductionCoefficients(facteurCourant.exercice, v)}
               aideActivee={etat.aideReductionFacteurUtilisee}
               texteAide={TEXTE_AIDE_REDUCTION}
               onActiverAide={() => setEtat(activerAideReductionFacteur(etat))}
+              aides={aidesReduction(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseReductionFacteur(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
@@ -472,14 +482,16 @@ export function AppSignesProduit() {
             <EtapeReconnaissance
               exercice={facteurCourant.type === "quadratique_factorisable" ? facteurCourant.exercice : exerciceFactice(facteurCourant.enonce)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME}
               recapitulatif={recapitulatif}
               expressionAfficheeTermes={expressionEnonceTermes}
               masquerBlocDonnees
               etatActuel={etatActuel}
+              etatActuelLabel="Facteur à étudier"
               options={OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE}
               question="Quelle est la méthode la plus rapide pour factoriser ce facteur ?"
               onChoisir={(choix) => terminerEtape(soumettreChoixMethodeFacteur(etat, choix), libelleCategorie(choix))}
+              aides={aidesMethodeFacteur()}
               validation={validation}
             />
           ) : etat.phase === "factorisationChamp1" && factorisable ? (
@@ -491,10 +503,13 @@ export function AppSignesProduit() {
               expressionAfficheeTermes={expressionEnonceTermes}
               masquerBlocDonnees
               etatActuel={etatActuel}
+              etatActuelLabel="Facteur à étudier"
               labelFactorisation="Forme factorisée du facteur"
               diagnostiquer={(v) => diagnostiquerChampPrincipal(factorisable, v)}
               aideActivee={etat.aideFactorisationChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideFactorisationChamp1(etat))}
+              aides={aidesChamp1Categorie(factorisable)}
+              messageCible={(factorisable).categorie === "cas_general" ? (v) => messageDelta(factorisable, v) : undefined}
               onValider={(reponse) =>
                 terminerEtape(
                   soumettreReponseFactorisationChamp1(etat, reponse),
@@ -517,8 +532,10 @@ export function AppSignesProduit() {
               expressionAfficheeTermes={expressionEnonceTermes}
               masquerBlocDonnees
               etatActuel={etatActuel}
+              etatActuelLabel="Facteur à étudier"
               aideActivee={etat.aideFactorisationChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideFactorisationChamp2(etat))}
+              aides={aidesRacinesFacteur(factorisable)}
               onValider={(racines) =>
                 terminerEtape(
                   soumettreReponseFactorisationChamp2(etat, racines),
@@ -537,22 +554,26 @@ export function AppSignesProduit() {
               expressionAfficheeTermes={expressionEnonceTermes}
               masquerBlocDonnees
               etatActuel={etatActuel}
+              etatActuelLabel="Facteur à étudier"
               labelFactorisation="Forme factorisée"
               etapeFactorisationForcee
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(factorisable, v)}
               aideActivee={etat.aideFactorisationFactorisationUtilisee}
               onActiverAide={() => setEtat(activerAideFactorisationFactorisation(etat))}
+              aides={aidesFactorisationApresDelta()}
               onValider={(reponse) => terminerEtape(soumettreReponseFactorisationFactorisation(etat, reponse), saisieEnLatex(reponse.includes("=") ? reponse : `${reponse}=0`))}
               validation={validation}
             />
           ) : etat.phase === "signeIrreductible" && irreductibleCourant ? (
             <EtapeSigneIrreductible
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME}
               recapitulatif={recapitulatif}
               etatActuel={etatActuel}
+              etatActuelLabel="Facteur à étudier"
               aideActivee={etat.aideSigneIrreductibleCourante}
               onActiverAide={() => setEtat(activerAideSigneIrreductible(etat))}
+              aides={aidesSigneIrreductible()}
               onValider={(reponse) => terminerEtape(soumettreReponseSigneIrreductible(etat, reponse), reponse === "+" ? "Toujours positif" : "Toujours négatif")}
               validation={validation}
             />
@@ -564,6 +585,7 @@ export function AppSignesProduit() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideGrilleTableauUtilisee}
               onActiverAide={() => setEtat(activerAideGrilleTableau(etat))}
+              aides={aidesGrilleSignes(false)}
               onValider={(reponse) => terminerEtape(soumettreReponseGrille(etat, reponse), `Signe du produit : ${reponse.produit.join(" ").replace(/-/g, "−")}`)}
               validation={validation}
             />
@@ -575,6 +597,8 @@ export function AppSignesProduit() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideUtilisee}
               onActiverAide={() => setEtat(activerAideGrilleSolution(etat))}
+              aideTexte={aideTexteIntervalleProduit(etat.exerciceCourant.symbole, false)}
+              messageCible={(r) => messageIntervalleProduit(etat.exerciceCourant.solution, r)}
               onValider={(reponse: SolutionEnsembleProduit) => terminerEtape(soumettreReponseIntervalle(etat, reponse), <Katex expression={`S = ${formatSolutionEnsembleProduitLatex(reponse)}`} />)}
               validation={validation}
             />

@@ -58,6 +58,8 @@ import { EnTeteExercice } from "./components/EnTeteExercice";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleeSimplification, lettrePhaseSimplification } from "./generateurs/simplification/corrigeDetaille";
+import { TENTATIVES_CHOIX_FERME } from "./moteur/sessionSimplification";
+import { aidesCE, aidesChamp1Categorie, aidesFactorisationApresDelta, aidesMethodeFacteur, aidesRacinesFacteur, aidesReduction, aidesSimplificationFraction, messageDelta } from "./ui/aidesSecondDegre";
 
 /**
  * Questions/libellés de factorisation, adaptés au dénominateur ou au numérateur
@@ -239,6 +241,7 @@ export function AppSimplification() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        messageRevele: /econnaissance/.test(etat.phase) ? "Ce n'était pas la bonne réponse." : undefined,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttendueEcran(etat.phase),
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSimplification(exercice), lettrePhaseSimplification(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
@@ -351,6 +354,7 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(exercice.denominateur as Exercice, v)}
                 aideActivee={etat.aideDenomReductionUtilisee}
                 onActiverAide={() => setEtat(activerAideDenomReduction(etat))}
+                aides={aidesReduction(true)}
                 onValider={(reponse) => terminerEtape(soumettreReponseDenomReduction(etat, reponse), saisieEnLatex(reponse))}
                 validation={validation}
               />
@@ -368,6 +372,7 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerMiseEnEvidenceP1(exercice.denominateur as PolynomeLineaire, v)}
                 aideActivee={etat.aideDenomReductionP1Utilisee}
                 onActiverAide={() => setEtat(activerAideDenomReductionP1(etat))}
+                aides={aidesReduction(true)}
                 onValider={(reponse) => terminerEtape(soumettreReponseDenomReductionP1(etat, reponse), saisieEnLatex(reponse))}
                 validation={validation}
               />
@@ -377,11 +382,12 @@ export function AppSimplification() {
               <EtapeReconnaissance
                 exercice={exercice.denominateur as Exercice}
                 tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
+                tentativesMax={TENTATIVES_CHOIX_FERME}
                 recapitulatif={recapitulatif}
                 expressionAffichee={formatEquationDenominateur(exercice.denominateur as Exercice)}
                 question={QUESTION_FACTORISATION_DENOMINATEUR}
                 onChoisir={(choix) => terminerEtape(soumettreChoixDenomCategorie(etat, choix), libelleCategorie(choix))}
+                aides={aidesMethodeFacteur()}
                 validation={validation}
               />
             </>
@@ -397,6 +403,8 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerChampPrincipal(exercice.denominateur as Exercice, v)}
                 aideActivee={etat.aideDenomChamp1Utilisee}
                 onActiverAide={() => setEtat(activerAideDenomChamp1(etat))}
+                aides={aidesChamp1Categorie(exercice.denominateur as Exercice)}
+                messageCible={(exercice.denominateur as Exercice).categorie === "cas_general" ? (v) => messageDelta(exercice.denominateur as Exercice, v) : undefined}
                 onValider={(reponse) =>
                   terminerEtape(
                     soumettreReponseDenomChamp1(etat, reponse),
@@ -423,6 +431,7 @@ export function AppSimplification() {
                 texteAide="Une fois le dénominateur factorisé, chaque facteur égalé à 0 donne une condition d'existence (CE)."
                 aideActivee={etat.aideDenomChamp2Utilisee}
                 onActiverAide={() => setEtat(activerAideDenomChamp2(etat))}
+                aides={aidesCE()}
                 onValider={(racines) => terminerEtape(soumettreReponseDenomChamp2(etat, racines), (racines[0] === racines[1] ? [racines[0]] : racines).map((r) => `x ≠ ${nombreSaisi(r)}`).join(" ; "))}
                 validation={validation}
               />
@@ -440,6 +449,7 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(exercice.denominateur as Exercice, v)}
                 aideActivee={etat.aideDenomFactorisationUtilisee}
                 onActiverAide={() => setEtat(activerAideDenomFactorisation(etat))}
+                aides={aidesFactorisationApresDelta()}
                 onValider={(reponse) => terminerEtape(soumettreReponseDenomFactorisation(etat, reponse), saisieEnLatex(reponse.includes("=") ? reponse : `${reponse}=0`))}
                 validation={validation}
               />
@@ -450,6 +460,7 @@ export function AppSimplification() {
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               recapitulatif={recapitulatif}
+              aides={aidesCE()}
               onValider={(reponse) => terminerEtape(soumettreReponseCEDirecte(etat, reponse), `x ≠ ${reponse.replace("-", "−").replace(".", ",")}`)}
               validation={validation}
             />
@@ -466,6 +477,7 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(exercice.numerateur as Exercice, v)}
                 aideActivee={etat.aideNumReductionUtilisee}
                 onActiverAide={() => setEtat(activerAideNumReduction(etat))}
+                aides={aidesReduction(true)}
                 onValider={(reponse) => terminerEtape(soumettreReponseNumReduction(etat, reponse), saisieEnLatex(reponse))}
                 validation={validation}
               />
@@ -475,11 +487,12 @@ export function AppSimplification() {
               <EtapeReconnaissance
                 exercice={exercice.numerateur as Exercice}
                 tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
+                tentativesMax={TENTATIVES_CHOIX_FERME}
                 recapitulatif={recapitulatif}
                 expressionAffichee={formatEquationNumerateur(exercice.numerateur as Exercice)}
                 question={QUESTION_FACTORISATION_NUMERATEUR}
                 onChoisir={(choix) => terminerEtape(soumettreChoixNumCategorie(etat, choix), libelleCategorie(choix))}
+                aides={aidesMethodeFacteur()}
                 validation={validation}
               />
             </>
@@ -495,6 +508,8 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerChampPrincipal(exercice.numerateur as Exercice, v)}
                 aideActivee={etat.aideNumChamp1Utilisee}
                 onActiverAide={() => setEtat(activerAideNumChamp1(etat))}
+                aides={aidesChamp1Categorie(exercice.numerateur as Exercice)}
+                messageCible={(exercice.numerateur as Exercice).categorie === "cas_general" ? (v) => messageDelta(exercice.numerateur as Exercice, v) : undefined}
                 onValider={(reponse) =>
                   terminerEtape(
                     soumettreReponseNumChamp1(etat, reponse),
@@ -515,6 +530,7 @@ export function AppSimplification() {
                 prefixeChamp="x ="
                 aideActivee={etat.aideNumChamp2Utilisee}
                 onActiverAide={() => setEtat(activerAideNumChamp2(etat))}
+                aides={aidesRacinesFacteur(exercice.numerateur as Exercice)}
                 onValider={(racines) => terminerEtape(soumettreReponseNumChamp2(etat, racines), (racines[0] === racines[1] ? [racines[0]] : racines).map((r) => `x = ${nombreSaisi(r)}`).join(" ; "))}
                 validation={validation}
               />
@@ -532,6 +548,7 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(exercice.numerateur as Exercice, v)}
                 aideActivee={etat.aideNumFactorisationUtilisee}
                 onActiverAide={() => setEtat(activerAideNumFactorisation(etat))}
+                aides={aidesFactorisationApresDelta()}
                 onValider={(reponse) => terminerEtape(soumettreReponseNumFactorisation(etat, reponse), saisieEnLatex(reponse.includes("=") ? reponse : `${reponse}=0`))}
                 validation={validation}
               />
@@ -549,6 +566,7 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerMiseEnEvidenceP1(exercice.numerateur as PolynomeLineaire, v)}
                 aideActivee={etat.aideNumReductionP1Utilisee}
                 onActiverAide={() => setEtat(activerAideNumReductionP1(etat))}
+                aides={aidesReduction(true)}
                 onValider={(reponse) => terminerEtape(soumettreReponseNumReductionP1(etat, reponse), saisieEnLatex(reponse))}
                 validation={validation}
               />
@@ -562,6 +580,7 @@ export function AppSimplification() {
               diagnostiquer={(n, d) => diagnostiquerSimplification(exercice, n, d)}
               aideActivee={etat.aideSimplificationUtilisee}
               onActiverAide={() => setEtat(activerAideSimplification(etat))}
+              aides={aidesSimplificationFraction()}
               onValider={(numerateur, denominateur) => terminerEtape(soumettreReponseSimplification(etat, numerateur, denominateur), saisieEnLatex(`(${numerateur})/(${denominateur})`))}
               validation={validation}
             />

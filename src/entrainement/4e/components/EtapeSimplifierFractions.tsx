@@ -1,13 +1,14 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { FractionAReduire } from "../core/equationRationnelle.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { formatPolynomeLineaireDeveloppe } from "../ui/formatEquationRationnelle";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { MessageRetour, useTentativeLisible } from "./RetourSaisie";
 
 interface Props {
   fractions: FractionAReduire[];
@@ -50,6 +51,7 @@ export function EtapeSimplifierFractions({
 }: Props) {
   const [numerateurs, setNumerateurs] = useState<string[]>(() => fractions.map(() => ""));
   const [denominateurs, setDenominateurs] = useState<string[]>(() => fractions.map(() => ""));
+  const saisie = useTentativeLisible<Array<{ numerateur: string; denominateur: string }>>();
 
   function modifierNumerateur(index: number, valeur: string) {
     setNumerateurs((valeurs) => valeurs.map((v, i) => (i === index ? valeur : v)));
@@ -86,7 +88,7 @@ export function EtapeSimplifierFractions({
               id={`simplifier-numerateur-${fraction.cote}`}
               className="text-input"
               value={numerateurs[index]}
-              onChange={(e) => modifierNumerateur(index, e.target.value)}
+              onChange={(e) => modifierNumerateur(index, normaliserSigneMoins(e.target.value))}
             />
           </div>
           <div className="field">
@@ -97,21 +99,17 @@ export function EtapeSimplifierFractions({
               id={`simplifier-denominateur-${fraction.cote}`}
               className="text-input"
               value={denominateurs[index]}
-              onChange={(e) => modifierDenominateur(index, e.target.value)}
+              onChange={(e) => modifierDenominateur(index, normaliserSigneMoins(e.target.value))}
             />
           </div>
         </div>
       ))}
       {!validation && (
         <>
-        <button type="button" className="btn btn-primary" disabled={!tousRemplis} onClick={() => onValider(reponses)}>
+        <button type="button" className="btn btn-primary" disabled={!tousRemplis} onClick={() => saisie.tenter(reponses, diagnostiquer?.(reponses) !== "parse_error", onValider)}>
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer?.(reponses))}
-          </p>
-        )}
+        <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceSimplification } from "../core/simplification.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
@@ -6,6 +7,8 @@ import { FractionHeader } from "./FractionHeader";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { AidesNiveaux, MESSAGE_BORNE_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 type Choix = "pasDe" | "auMoins";
 
@@ -49,6 +52,8 @@ interface Props {
   libellePasDe?: string;
   /** Remplace le libellé par défaut du bouton "au moins une valeur" ("Au moins une CE") — même principe que libellePasDe. */
   libelleAuMoins?: string;
+  /** Aides à 2 niveaux (KaTeX). */
+  aides?: FragmentConsigne[][];
   onValider: (reponse: string) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -77,11 +82,13 @@ export function EtapeCEDirecte({
   masquerBlocDonnees = false,
   libellePasDe = "Pas de CE",
   libelleAuMoins = "Au moins une CE",
+  aides,
   onValider,
   validation,
 }: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [reponse, setReponse] = useState("");
+  const saisie = useTentativeLisible<string>();
 
   function choisir(nouveauChoix: Choix) {
     setChoix(nouveauChoix);
@@ -132,25 +139,22 @@ export function EtapeCEDirecte({
           <label className="field-label" htmlFor="ce-directe">
             {label ?? "Condition d'existence (CE)"}
           </label>
-          <input id="ce-directe" className="text-input" value={reponse} onChange={(e) => setReponse(e.target.value)} />
+          <input id="ce-directe" className="text-input" value={reponse} onChange={(e) => setReponse(normaliserSigneMoins(e.target.value))} />
         </div>
       )}
 
       {!validation && (
         <>
+        {aides && <AidesNiveaux aides={aides} />}
         <button
           type="button"
           className="btn btn-primary"
-          disabled={!peutValider}
-          onClick={() => valeurSoumise !== null && onValider(valeurSoumise)}
+          disabled={choix === null || (choix === "auMoins" && reponse.trim() === "")}
+          onClick={() => valeurSoumise !== null && saisie.tenter(valeurSoumise, peutValider, onValider)}
         >
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour texteIllisible={MESSAGE_BORNE_ILLISIBLE} illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
