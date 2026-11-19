@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { ConfigurationResolution, ElementTriangle, ExerciceResoudreTriangle, LoiResolution } from "../core/resoudreTriangle.types";
 import type { CoteTriangle, SommetTriangle } from "../core/triangle.types";
 import { COTES, SOMMETS, autresCotes, coteOppose, angleOppose, estCoteElement, plusGrandAngle, premiereLoi, type EtapeResolution } from "../moteur/resolutionTriangle";

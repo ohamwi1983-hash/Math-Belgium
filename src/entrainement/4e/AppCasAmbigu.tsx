@@ -2,6 +2,9 @@ import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceCasAmbigu } from "./core/casAmbigu.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceCasAmbigu } from "./generateurs/casAmbigu";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeCasAmbigu } from "./generateurs/casAmbigu/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { NOMBRE_ECRANS, activerAide, demarrer, ecranFerme, ecranSuivant, soumettre, tentativesMaxEcran, type EtatCasAmbigu } from "./moteur/sessionCasAmbigu";
 import { resoudreSSA } from "./moteur/modeleCasAmbigu";
@@ -161,6 +164,7 @@ export function AppCasAmbigu() {
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCasAmbigu(e), lettreEtape(ecran))} />,
         messageRevele: enAttente.messageRevele,
       }
     : null;

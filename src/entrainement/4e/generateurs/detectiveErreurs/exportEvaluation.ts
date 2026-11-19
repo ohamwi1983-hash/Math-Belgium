@@ -4,30 +4,28 @@ import type {
   BlocCorrection,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
+  CriteresDifficulte,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDetectiveErreurs } from "../../core/detectiveErreurs.types";
-import { descriptionCorrecte, indiceLigneFausse, resolutionCorrecte, typeErreur } from "../../moteur/modeleDetectiveErreurs";
+import { indiceLigneFausse, typeErreur } from "../../moteur/modeleDetectiveErreurs";
 import { champsAttendus } from "../../moteur/verificationDetectiveErreurs";
 import {
   CONSIGNE_GENERALE,
   NOTE_MEMOIRE,
   consignesEcrans,
-  constat,
-  descriptionFragments,
   enonceTriangle,
-  fragmentsLigne,
   lignesCopie,
   nomErreur,
-  piege,
   valeurLatex,
 } from "../../ui/formatDetectiveErreurs";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveErreurs } from "./index";
 import { profilDetectiveErreurs } from "./profil";
+import { correctionDetailleeDetectiveErreurs } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen81. Énoncé papier = les données du triangle,
@@ -80,25 +78,6 @@ function reponseBreve(e: ExerciceDetectiveErreurs): FragmentConsigne[] {
   return [texte(`Ligne ${indiceLigneFausse(e) + 1} fausse (${nomErreur(e)}) ; `), ...valeurs];
 }
 
-function correctionDetaillee(e: ExerciceDetectiveErreurs): EtapeCorrection[] {
-  const i = indiceLigneFausse(e);
-  const correcte = resolutionCorrecte(e);
-  const etapes: EtapeCorrection[] = [
-    { label: "Contrôle", sousQuestion: "a", fragments: constat(e) },
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte(`La ligne ${i + 1} est fausse.`)] },
-    { label: "Erreur", sousQuestion: "b", fragments: descriptionFragments(descriptionCorrecte(e), e) },
-  ];
-  correcte.slice(i).forEach((l, k) => {
-    const numero = i + k + 1;
-    const rang = e.scenario === "G1" ? "" : `Ligne ${numero} : `;
-    etapes.push({ label: k === 0 ? "Correction" : l.valeur === null ? "Conclusion" : "Calcul", sousQuestion: "c", fragments: [...(rang ? [texte(rang)] : []), ...fragmentsLigne(l)] });
-  });
-  const valeurs = champsAttendus(e).flatMap((v, k) => (k === 0 ? [latex(valeurLatex(v))] : [texte(" ; "), latex(valeurLatex(v))]));
-  etapes.push({ label: "Conclusion", sousQuestion: "c", fragments: valeurs });
-  etapes.push({ label: "Piège", sousQuestion: "b", fragments: piege(e) });
-  return etapes;
-}
-
 function construireCorrection(e: ExerciceDetectiveErreurs): BlocCorrection[] {
   return [{ type: "paragraphe", fragments: reponseBreve(e) }];
 }
@@ -128,9 +107,11 @@ function bareme(e: ExerciceDetectiveErreurs): BaremeExercice {
   };
 }
 
-function difficulte(e: ExerciceDetectiveErreurs): 1 | 2 | 3 {
-  const type = typeErreur(e);
-  return type === "arrondi" || type === "ambigu" || type === "obtus" ? 3 : 2;
+/** Niveau : méthode 1 (refaire la résolution avec les lois du cours) ; piège 0, CONSTANT — le type
+ * d'erreur est la réponse de l'écran 2 (un piège « angle obtus » ou « cas ambigu » le trahirait
+ * sur la feuille), comme gen112 ; aucun écran de lecture ; calculatrice. */
+function criteresDifficulte(e: ExerciceDetectiveErreurs): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeDetectiveErreurs(e)), methode: 1, piege: 0, nombres: 1 };
 }
 
 export const adaptateurEvaluationDetectiveErreurs: AdaptateurFeuilleExercices<ExerciceDetectiveErreurs> = {
@@ -143,10 +124,9 @@ export const adaptateurEvaluationDetectiveErreurs: AdaptateurFeuilleExercices<Ex
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeDetectiveErreurs,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };

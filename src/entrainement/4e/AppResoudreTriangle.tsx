@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import type { ConfigurationResolution, ExerciceResoudreTriangle, LoiResolution } from "./core/resoudreTriangle.types";
 import type { SommetTriangle } from "./core/triangle.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceResoudreTriangle } from "./generateurs/resoudreTriangle";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeResoudreTriangle } from "./generateurs/resoudreTriangle/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { NOMBRE_ECRANS, activerAide, demarrer, ecranSuivant, soumettre, tentativesMaxEcran, type EtatResoudreTriangle } from "./moteur/sessionResoudreTriangle";
 import { SOMMETS, plusGrandAngle, premiereLoi, type EtapeResolution } from "./moteur/resolutionTriangle";
@@ -149,6 +152,7 @@ export function AppResoudreTriangle() {
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeResoudreTriangle(e), lettreEtape(ecran))} />,
         messageRevele: enAttente.messageRevele,
       }
     : null;

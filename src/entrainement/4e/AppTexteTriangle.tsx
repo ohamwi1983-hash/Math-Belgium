@@ -2,6 +2,9 @@ import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceDeuxPositions, ExerciceTexteTriangle, ExerciceTexteTriangleStandard, RoleElement } from "./core/texteTriangle.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceTexteTriangle } from "./generateurs/texteTriangle";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeTexteTriangle } from "./generateurs/texteTriangle/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { activerAide, demarrer, ecranSuivant, soumettre, tentativesMax, typeEcran, type EtatTexteTriangle } from "./moteur/sessionTexteTriangle";
 import { NOMBRE_ECRANS, type TypeEcran } from "./moteur/modeleTexteTriangle";
@@ -19,7 +22,7 @@ import { aidesEcran, consigneEcran, degres, entreeRecap, justificationLoi, libel
 import { construireFigureTexteTriangle, PALETTE_ECRAN } from "./ui/figureTexteTriangle";
 import { ecranClos, nombreTexte, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 import type { EntreeRecapitulatif } from "./ui/recapitulatif";
-import { latex, texte } from "../export/fragmentsDocx";
+import { latex, texte } from "../export/corrigeTableau";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { QuestionFinale } from "./components/QuestionFinale";
@@ -225,6 +228,7 @@ export function AppTexteTriangle() {
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTexteTriangle(e), lettreEtape(etat.ecran))} />,
         messageRevele: enAttente.messageRevele,
       }
     : null;

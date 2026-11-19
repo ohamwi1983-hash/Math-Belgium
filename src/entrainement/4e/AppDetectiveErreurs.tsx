@@ -2,6 +2,9 @@ import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceDetectiveErreurs, IdDescription } from "./core/detectiveErreurs.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveErreurs } from "./generateurs/detectiveErreurs";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeDetectiveErreurs } from "./generateurs/detectiveErreurs/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { NOMBRE_ECRANS, activerAide, demarrer, ecranSuivant, soumettre, tentativesMaxEcran, type EtatDetectiveErreurs } from "./moteur/sessionDetectiveErreurs";
 import { champsAttendus, diagnostiquerCorrection, lireNombre, verifierDescription, verifierLigne, type StatutChamp } from "./moteur/verificationDetectiveErreurs";
@@ -130,6 +133,7 @@ export function AppDetectiveErreurs() {
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveErreurs(e), lettreEtape(ecran))} />,
         messageRevele: enAttente.messageRevele,
       }
     : null;

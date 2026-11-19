@@ -3,17 +3,19 @@ import type {
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
+  CriteresDifficulte,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import type { ExerciceDeuxPositions, ExerciceTexteTriangle, ExerciceTexteTriangleStandard, RoleElement } from "../../core/texteTriangle.types";
+import type { ExerciceTexteTriangle} from "../../core/texteTriangle.types";
 import { arrondir, sequenceEcrans, type TypeEcran } from "../../moteur/modeleTexteTriangle";
-import { calculComplet, consigneEcran, degres, formuleGenerale, justificationLoi, loiAttendue, n, nomLoi, nomsDeuxPositions, uniteLatex } from "../../ui/formatTexteTriangle";
+import { consigneEcran, degres, loiAttendue, n, nomLoi, nomsDeuxPositions, uniteLatex } from "../../ui/formatTexteTriangle";
 import { construireFigureTexteTriangle, PALETTE_PAPIER } from "../../ui/figureTexteTriangle";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceTexteTriangle } from "./index";
 import { profilTexteTriangle } from "./profil";
+import { correctionDetailleeTexteTriangle } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen77 (« Du texte au triangle »). Énoncé papier =
@@ -101,105 +103,12 @@ function reponseBreve(e: ExerciceTexteTriangle): FragmentConsigne[] {
 // Corrigé détaillé
 // ---------------------------------------------------------------------------------------------
 
+function construireCorrection(e: ExerciceTexteTriangle): BlocCorrection[] {
+  return [{ type: "paragraphe", fragments: [texte(e.options.find((o) => o.correcte)!.texte)] }];
+}
+
 function listeLatex(liste: string[]): FragmentConsigne[] {
   return liste.flatMap((l, i) => [...(i > 0 ? [texte(i === liste.length - 1 ? " et " : ", ")] : []), latex(l)]);
-}
-
-function elementsDeRole(e: ExerciceTexteTriangleStandard, role: RoleElement): string[] {
-  return e.elements.filter((el) => el.role === role).map((el) => el.latex);
-}
-
-function correctionStandard(e: ExerciceTexteTriangleStandard): EtapeCorrection[] {
-  const donnes = elementsDeRole(e, "donne");
-  const aConvertir = elementsDeRole(e, "convertir");
-  const lignes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [
-        texte(`Triangle ${e.triangle} — donné${donnes.length > 1 ? "s" : ""} dans le texte : `),
-        ...listeLatex(donnes),
-        texte(` ; à déduire du texte : `),
-        ...listeLatex(aConvertir),
-        texte(" ; cherché : "),
-        latex(e.inconnue.latex),
-        texte("."),
-      ],
-    },
-    ...e.conversions.map((c) => ({
-      label: "Calcul",
-      sousQuestion: "b",
-      fragments: [texte(`${c.justification} `), latex(`${c.latex} = ${c.calculLatex}${c.detailLatex ? ` = ${c.detailLatex}` : ""} = ${degres(c.valeur)}`)],
-    })),
-    { label: "Méthode", sousQuestion: "c", fragments: justificationLoi(e) },
-    { label: "Méthode", sousQuestion: "d", fragments: [texte("Loi écrite avec les noms du triangle : "), latex(formuleGenerale(e.calcul, e.inconnue.latex))] },
-    { label: "Calcul", sousQuestion: "d", fragments: [texte("Calculatrice en degrés, sans arrondir en cours de route : "), latex(calculComplet(e))] },
-    {
-      label: "Calcul",
-      sousQuestion: "e",
-      fragments: [
-        texte(`Arrondi demandé (${e.precision.texte}) : `),
-        latex(`${n(e.inconnue.valeur, Math.max(e.precision.decimales, 0) + 3)} \\approx ${nFixe(e.inconnue.valeur, e.precision.decimales)}${uniteLatex(e.unite)}`),
-      ],
-    },
-    { label: "Conclusion", sousQuestion: "e", fragments: [texte(e.options.find((o) => o.correcte)!.texte)], figureHtml: figure(e, true) },
-    { label: "Piège", sousQuestion: e.variante === "distanceInaccessible" && e.sousType === "somme" ? "d" : "b", fragments: [texte(e.piege.description)] },
-  ];
-  return lignes;
-}
-
-function correctionDeuxPositions(e: ExerciceDeuxPositions): EtapeCorrection[] {
-  const N = nomsDeuxPositions(e);
-  const sinB = (e.RP * Math.sin((e.angleP * Math.PI) / 180)) / e.RB;
-  const position = (i: 0 | 1): FragmentConsigne[] => {
-    const R = i === 0 ? N.angleR1 : N.angleR2;
-    const PB = i === 0 ? N.PB1 : N.PB2;
-    return [
-      texte(`Position ${i + 1} : `),
-      latex(`${R} = 180^\\circ - ${e.angleP}^\\circ - ${degres(e.candidats[i])} \\approx ${degres(e.anglesR[i])}`),
-      texte(", puis "),
-      latex(`${PB} = \\dfrac{${n(e.RB)} \\cdot \\sin ${degres(e.anglesR[i])}}{\\sin ${e.angleP}^\\circ} \\approx ${n(e.distances[i])}\\text{ km}`),
-    ];
-  };
-  const correcte = e.optionsConfiguration.find((o) => o.correcte)!.texte;
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte(`${correcte} L'angle connu n'est pas compris entre les deux côtés connus : c'est le cas ambigu, avec ici deux triangles possibles, donc deux positions.`)] },
-    { label: "Méthode", sousQuestion: "b", fragments: justificationLoi(e) },
-    {
-      label: "Calcul",
-      sousQuestion: "c",
-      fragments: [texte("Loi des sinus : "), latex(`\\sin ${N.angleB} = \\dfrac{${N.RP} \\cdot \\sin ${N.angleP}}{${N.RB}} = \\dfrac{${n(e.RP)} \\cdot \\sin ${e.angleP}^\\circ}{${n(e.RB)}} \\approx ${n(sinB, 4)}`)],
-    },
-    {
-      label: "Calcul",
-      sousQuestion: "c",
-      fragments: [
-        texte("Entre 0° et 180°, deux angles ont ce sinus : "),
-        latex(`${N.angleB1} \\approx ${degres(e.candidats[0])}`),
-        texte(" (calculatrice) et "),
-        latex(`${N.angleB2} = 180^\\circ - ${degres(e.candidats[0])} \\approx ${degres(e.candidats[1])}`),
-        texte("."),
-      ],
-    },
-    { label: "Calcul", sousQuestion: "d", fragments: position(0) },
-    { label: "Calcul", sousQuestion: "d", fragments: position(1) },
-    { label: "Conclusion", sousQuestion: "e", fragments: [texte(e.options.find((o) => o.correcte)!.texte)], figureHtml: figure(e, true) },
-    {
-      label: "Piège",
-      sousQuestion: "c",
-      fragments: [texte(`La calculatrice ne donne que l'angle aigu. Oublier son supplémentaire, c'est oublier une des deux positions — ici, c'est la position ${e.retenue + 1} qui est la bonne.`)],
-    },
-  ];
-}
-
-function correctionDetaillee(e: ExerciceTexteTriangle): EtapeCorrection[] {
-  return e.variante === "deuxPositions" ? correctionDeuxPositions(e) : correctionStandard(e);
-}
-
-function construireCorrection(e: ExerciceTexteTriangle): BlocCorrection[] {
-  return correctionDetaillee(e)
-    .filter((etape) => etape.label === "Conclusion")
-    .map((etape) => ({ type: "paragraphe", fragments: etape.fragments }));
 }
 
 function bareme(e: ExerciceTexteTriangle): BaremeExercice {
@@ -240,10 +149,12 @@ function bareme(e: ExerciceTexteTriangle): BaremeExercice {
   };
 }
 
-function difficulte(e: ExerciceTexteTriangle): 1 | 2 | 3 {
-  if (e.variante === "deuxPositions" || e.variante === "depression") return 3;
-  if (e.sousType === "nord" || e.sousType === "releve") return 3;
-  return 2;
+/** Niveau : méthode 2 (l'élève construit le triangle à partir du texte et traduit les angles) ;
+ * piège seulement dans les données — « deux positions » (cas ambigu : deux triangles) ; écrans de
+ * lecture : a (repérer données / inconnue dans le texte) et e (réponse arrondie, ou position
+ * retenue par comparaison au seuil de l'énoncé) ; calculatrice. */
+function criteresDifficulte(e: ExerciceTexteTriangle): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeTexteTriangle(e), ["a", "e"]), methode: 2, piege: e.variante === "deuxPositions" ? 1 : 0, nombres: 1 };
 }
 
 export const adaptateurEvaluationTexteTriangle: AdaptateurFeuilleExercices<ExerciceTexteTriangle> = {
@@ -254,12 +165,11 @@ export const adaptateurEvaluationTexteTriangle: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeTexteTriangle,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
   profilInstance: profilTexteTriangle,
   calculatriceIndispensable: true,
 };

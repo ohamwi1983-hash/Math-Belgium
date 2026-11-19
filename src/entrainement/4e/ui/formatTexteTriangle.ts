@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { CalculTriangle, ExerciceDeuxPositions, ExerciceTexteTriangle, ExerciceTexteTriangleStandard, LoiTexteTriangle, RoleElement, TypeConversion } from "../core/texteTriangle.types";
 import { arrondir, carreCosinus, valeurCalcul, type TypeEcran } from "../moteur/modeleTexteTriangle";
 import type { EntreeRecapitulatif } from "./recapitulatif";

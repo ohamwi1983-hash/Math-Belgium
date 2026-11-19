@@ -113,7 +113,7 @@ export function valeurAffichee(x: number, nature: NatureValeur): number {
   return estEntier(x) ? Math.round(x) : arrondir(x, DECIMALES[nature]);
 }
 
-const UNITE: Record<NatureValeur, string> = { cote: "\\text{ cm}", carre: "", angle: "°", trig: "", aire: "\\text{ cm}^2", aucune: "" };
+const UNITE: Record<NatureValeur, string> = { cote: "\\text{ cm}", carre: "", angle: "^\\circ", trig: "", aire: "\\text{ cm}^2", aucune: "" };
 
 /** Résultat affiché d'une valeur : « = 52 » si exact à la précision, « ≈ 7,21 cm » sinon. */
 function resultat(valeur: number, nature: NatureValeur, decimales = DECIMALES[nature]): { relation: "=" | "\\approx"; resultat: string } {
@@ -142,17 +142,17 @@ function lignesSAS(e: ExerciceDetectiveErreurs, fautive: boolean): LigneResoluti
   // 1. a² par Al-Kashi.
   let a2 = b * b + c * c - 2 * b * c * COS(A);
   let litteral = "b^2 + c^2 - 2bc\\cos\\hat{A}";
-  let chiffres = `${b}^2 + ${c}^2 - 2 \\cdot ${b} \\cdot ${c} \\cdot \\cos ${A}°`;
+  let chiffres = `${b}^2 + ${c}^2 - 2 \\cdot ${b} \\cdot ${c} \\cdot \\cos ${A}^\\circ`;
   if (f === "R1") a2 = b * b + c * c - 2 * b * c * Math.cos(A);
   if (f === "K1" && e.sousVariante === "signe") {
     a2 = b * b + c * c + 2 * b * c * COS(A);
     litteral = "b^2 + c^2 + 2bc\\cos\\hat{A}";
-    chiffres = `${b}^2 + ${c}^2 + 2 \\cdot ${b} \\cdot ${c} \\cdot \\cos ${A}°`;
+    chiffres = `${b}^2 + ${c}^2 + 2 \\cdot ${b} \\cdot ${c} \\cdot \\cos ${A}^\\circ`;
   }
   if (f === "K1" && e.sousVariante === "facteur") {
     a2 = b * b + c * c - b * c * COS(A);
     litteral = "b^2 + c^2 - bc\\cos\\hat{A}";
-    chiffres = `${b}^2 + ${c}^2 - ${b} \\cdot ${c} \\cdot \\cos ${A}°`;
+    chiffres = `${b}^2 + ${c}^2 - ${b} \\cdot ${c} \\cdot \\cos ${A}^\\circ`;
   }
   lignes.push(ligne("Al-Kashi : ", ["a^2", litteral, chiffres], a2, "a^2", "carre"));
 
@@ -170,10 +170,10 @@ function lignesSAS(e: ExerciceDetectiveErreurs, fautive: boolean): LigneResoluti
   if (e.scenario === "O1") {
     // 3. sin B̂ par la loi des sinus ; 4. B̂ (aigu dans la copie, obtus en réalité).
     const sinB = (b * SIN(A)) / a;
-    lignes.push(ligne("Loi des sinus : ", ["\\sin\\hat{B}", "\\dfrac{b\\sin\\hat{A}}{a}", `\\dfrac{${b}\\sin ${A}°}{${aD}}`], sinB, "\\sin\\hat{B}", "trig"));
+    lignes.push(ligne("Loi des sinus : ", ["\\sin\\hat{B}", "\\dfrac{b\\sin\\hat{A}}{a}", `\\dfrac{${b}\\sin ${A}^\\circ}{${aD}}`], sinB, "\\sin\\hat{B}", "trig"));
     const sD = nombreLatex(sinB, 4);
     if (fautive) lignes.push(ligne(null, ["\\hat{B}", `\\sin^{-1}(${sD})`], ASIN(sinB), "\\hat{B}", "angle"));
-    else lignes.push(ligne(null, ["\\hat{B}", `180° - \\sin^{-1}(${sD})`], 180 - ASIN(sinB), "\\hat{B}", "angle"));
+    else lignes.push(ligne(null, ["\\hat{B}", `180^\\circ - \\sin^{-1}(${sD})`], 180 - ASIN(sinB), "\\hat{B}", "angle"));
   } else {
     // 3. cos B̂ par Al-Kashi ; 4. B̂.
     const cosB = (a * a + c * c - b * b) / (2 * a * c);
@@ -193,14 +193,14 @@ function lignesSAS(e: ExerciceDetectiveErreurs, fautive: boolean): LigneResoluti
   if (e.scenario === "O2") {
     // 5. sin Ĉ par la loi des sinus ; 6. Ĉ (aigu dans la copie, obtus en réalité).
     const sinC = (c * SIN(A)) / a;
-    lignes.push(ligne("Loi des sinus : ", ["\\sin\\hat{C}", "\\dfrac{c\\sin\\hat{A}}{a}", `\\dfrac{${c}\\sin ${A}°}{${aD}}`], sinC, "\\sin\\hat{C}", "trig"));
+    lignes.push(ligne("Loi des sinus : ", ["\\sin\\hat{C}", "\\dfrac{c\\sin\\hat{A}}{a}", `\\dfrac{${c}\\sin ${A}^\\circ}{${aD}}`], sinC, "\\sin\\hat{C}", "trig"));
     const sD = nombreLatex(sinC, 4);
     if (fautive) lignes.push(ligne(null, ["\\hat{C}", `\\sin^{-1}(${sD})`], ASIN(sinC), "\\hat{C}", "angle"));
-    else lignes.push(ligne(null, ["\\hat{C}", `180° - \\sin^{-1}(${sD})`], 180 - ASIN(sinC), "\\hat{C}", "angle"));
+    else lignes.push(ligne(null, ["\\hat{C}", `180^\\circ - \\sin^{-1}(${sD})`], 180 - ASIN(sinC), "\\hat{C}", "angle"));
     return lignes;
   }
   // 5. Ĉ par la somme des angles (angles affichés).
-  lignes.push(ligne("Somme des angles : ", ["\\hat{C}", "180° - \\hat{A} - \\hat{B}", `180° - ${A}° - ${nombreLatex(B, 1)}°`], 180 - A - BD, "\\hat{C}", "angle"));
+  lignes.push(ligne("Somme des angles : ", ["\\hat{C}", "180^\\circ - \\hat{A} - \\hat{B}", `180^\\circ - ${A}^\\circ - ${nombreLatex(B, 1)}^\\circ`], 180 - A - BD, "\\hat{C}", "angle"));
   return lignes;
 }
 
@@ -233,10 +233,10 @@ function lignesSSS(e: ExerciceDetectiveErreurs, fautive: boolean): LigneResoluti
   if (e.scenario === "O3") {
     // 3. sin B̂ par la loi des sinus ; 4. B̂ (aigu dans la copie, obtus en réalité).
     const sinB = (b * SIN(A)) / a;
-    lignes.push(ligne("Loi des sinus : ", ["\\sin\\hat{B}", "\\dfrac{b\\sin\\hat{A}}{a}", `\\dfrac{${b}\\sin ${nombreLatex(A, 1)}°}{${a}}`], sinB, "\\sin\\hat{B}", "trig"));
+    lignes.push(ligne("Loi des sinus : ", ["\\sin\\hat{B}", "\\dfrac{b\\sin\\hat{A}}{a}", `\\dfrac{${b}\\sin ${nombreLatex(A, 1)}^\\circ}{${a}}`], sinB, "\\sin\\hat{B}", "trig"));
     const sD = nombreLatex(sinB, 4);
     if (fautive) lignes.push(ligne(null, ["\\hat{B}", `\\sin^{-1}(${sD})`], ASIN(sinB), "\\hat{B}", "angle"));
-    else lignes.push(ligne(null, ["\\hat{B}", `180° - \\sin^{-1}(${sD})`], 180 - ASIN(sinB), "\\hat{B}", "angle"));
+    else lignes.push(ligne(null, ["\\hat{B}", `180^\\circ - \\sin^{-1}(${sD})`], 180 - ASIN(sinB), "\\hat{B}", "angle"));
   } else {
     // 3. cos B̂ ; 4. B̂.
     let cosB = (a * a + c * c - b * b) / (2 * a * c);
@@ -258,7 +258,7 @@ function lignesSSS(e: ExerciceDetectiveErreurs, fautive: boolean): LigneResoluti
   const BD = valeurAffichee(lignes[3]!.valeur!, "angle");
 
   // 5. Ĉ par la somme des angles (angles affichés).
-  lignes.push(ligne("Somme des angles : ", ["\\hat{C}", "180° - \\hat{A} - \\hat{B}", `180° - ${nombreLatex(A, 1)}° - ${nombreLatex(lignes[3]!.valeur!, 1)}°`], 180 - AD - BD, "\\hat{C}", "angle"));
+  lignes.push(ligne("Somme des angles : ", ["\\hat{C}", "180^\\circ - \\hat{A} - \\hat{B}", `180^\\circ - ${nombreLatex(A, 1)}^\\circ - ${nombreLatex(lignes[3]!.valeur!, 1)}^\\circ`], 180 - AD - BD, "\\hat{C}", "angle"));
   return lignes;
 }
 
@@ -277,18 +277,18 @@ function lignesAAS(e: ExerciceDetectiveErreurs, fautive: boolean): LigneResoluti
   const lignes: LigneResolution[] = [];
 
   // 1. Ĉ.
-  lignes.push(ligne("Somme des angles : ", ["\\hat{C}", "180° - \\hat{A} - \\hat{B}", `180° - ${A}° - ${B}°`], C, "\\hat{C}", "angle"));
+  lignes.push(ligne("Somme des angles : ", ["\\hat{C}", "180^\\circ - \\hat{A} - \\hat{B}", `180^\\circ - ${A}^\\circ - ${B}^\\circ`], C, "\\hat{C}", "angle"));
 
   // 2. Rapport commun k = c / sin Ĉ.
   if (f === "C1") {
-    lignes.push(ligne("Loi des sinus : ", ["k", `\\dfrac{c}{\\sin${CHAPEAU[X]}}`, `\\dfrac{${c}}{\\sin ${angle[X]}°}`], c / SIN(angle[X]), "k", "cote"));
+    lignes.push(ligne("Loi des sinus : ", ["k", `\\dfrac{c}{\\sin${CHAPEAU[X]}}`, `\\dfrac{${c}}{\\sin ${angle[X]}^\\circ}`], c / SIN(angle[X]), "k", "cote"));
   } else {
     const k = f === "R2" ? c / Math.sin(C) : c / SIN(C);
     if (f === "A4") {
-      lignes.push(ligne("Loi des sinus : ", ["k", "\\dfrac{c}{\\sin\\hat{C}}", `\\dfrac{${c}}{\\sin ${C}°}`], Math.round(k), "k", "cote", 0));
+      lignes.push(ligne("Loi des sinus : ", ["k", "\\dfrac{c}{\\sin\\hat{C}}", `\\dfrac{${c}}{\\sin ${C}^\\circ}`], Math.round(k), "k", "cote", 0));
       lignes[1]!.relation = "\\approx";
     } else {
-      lignes.push(ligne("Loi des sinus : ", ["k", "\\dfrac{c}{\\sin\\hat{C}}", `\\dfrac{${c}}{\\sin ${C}°}`], k, "k", "cote"));
+      lignes.push(ligne("Loi des sinus : ", ["k", "\\dfrac{c}{\\sin\\hat{C}}", `\\dfrac{${c}}{\\sin ${C}^\\circ}`], k, "k", "cote"));
     }
   }
   const k = lignes[1]!.valeur!;
@@ -297,8 +297,8 @@ function lignesAAS(e: ExerciceDetectiveErreurs, fautive: boolean): LigneResoluti
   // 3. a = k sin Â ; 4. b = k sin B̂.
   const angleA: Sommet = f === "C2" ? X : "A";
   const angleB: Sommet = f === "C3" ? X : "B";
-  lignes.push(ligne(null, ["a", `k\\sin${CHAPEAU[angleA]}`, `${kD} \\cdot \\sin ${angle[angleA]}°`], k * SIN(angle[angleA]), "a", "cote"));
-  lignes.push(ligne(null, ["b", `k\\sin${CHAPEAU[angleB]}`, `${kD} \\cdot \\sin ${angle[angleB]}°`], k * SIN(angle[angleB]), "b", "cote"));
+  lignes.push(ligne(null, ["a", `k\\sin${CHAPEAU[angleA]}`, `${kD} \\cdot \\sin ${angle[angleA]}^\\circ`], k * SIN(angle[angleA]), "a", "cote"));
+  lignes.push(ligne(null, ["b", `k\\sin${CHAPEAU[angleB]}`, `${kD} \\cdot \\sin ${angle[angleB]}^\\circ`], k * SIN(angle[angleB]), "b", "cote"));
   const a = lignes[2]!.valeur!;
   const b = lignes[3]!.valeur!;
 
@@ -306,7 +306,7 @@ function lignesAAS(e: ExerciceDetectiveErreurs, fautive: boolean): LigneResoluti
   lignes.push(
     ligne(
       "Aire : ",
-      ["\\mathcal{A}", "\\dfrac{1}{2}\\,ab\\sin\\hat{C}", `\\dfrac{1}{2} \\cdot ${facteur(a, 2)} \\cdot ${facteur(b, 2)} \\cdot \\sin ${C}°`],
+      ["\\mathcal{A}", "\\dfrac{1}{2}\\,ab\\sin\\hat{C}", `\\dfrac{1}{2} \\cdot ${facteur(a, 2)} \\cdot ${facteur(b, 2)} \\cdot \\sin ${C}^\\circ`],
       0.5 * a * b * SIN(C),
       "\\mathcal{A}",
       "aire",
@@ -347,10 +347,10 @@ function lignesSSA(e: ExerciceDetectiveErreurs, fautive: boolean): LigneResoluti
   const B1D = nombreLatex(s.B1, 1);
   const B2D = nombreLatex(s.B2, 1);
   const lignes: LigneResolution[] = [];
-  lignes.push(ligne("Loi des sinus : ", ["\\sin\\hat{B}", "\\dfrac{b\\sin\\hat{A}}{a}", `\\dfrac{${b}\\sin ${A}°}{${a}}`], s.sinB, "\\sin\\hat{B}", "trig"));
+  lignes.push(ligne("Loi des sinus : ", ["\\sin\\hat{B}", "\\dfrac{b\\sin\\hat{A}}{a}", `\\dfrac{${b}\\sin ${A}^\\circ}{${a}}`], s.sinB, "\\sin\\hat{B}", "trig"));
   const triangle = (indice: string, B: number, C: number, cote: number): LigneResolution[] => [
-    ligne("Somme des angles : ", [`\\hat{C}${indice}`, `180° - \\hat{A} - \\hat{B}${indice}`, `180° - ${A}° - ${nombreLatex(B, 1)}°`], C, `\\hat{C}${indice}`, "angle"),
-    ligne("Loi des sinus : ", [`c${indice}`, `\\dfrac{a\\sin\\hat{C}${indice}}{\\sin\\hat{A}}`, `\\dfrac{${a}\\sin ${nombreLatex(C, 1)}°}{\\sin ${A}°}`], cote, `c${indice}`, "cote"),
+    ligne("Somme des angles : ", [`\\hat{C}${indice}`, `180^\\circ - \\hat{A} - \\hat{B}${indice}`, `180^\\circ - ${A}^\\circ - ${nombreLatex(B, 1)}^\\circ`], C, `\\hat{C}${indice}`, "angle"),
+    ligne("Loi des sinus : ", [`c${indice}`, `\\dfrac{a\\sin\\hat{C}${indice}}{\\sin\\hat{A}}`, `\\dfrac{${a}\\sin ${nombreLatex(C, 1)}^\\circ}{\\sin ${A}^\\circ}`], cote, `c${indice}`, "cote"),
   ];
   if (fautive) {
     lignes.push(ligne(null, ["\\hat{B}", `\\sin^{-1}(${sD})`], s.B1, "\\hat{B}", "angle", undefined, " : c'est le seul angle possible."));
@@ -363,9 +363,9 @@ function lignesSSA(e: ExerciceDetectiveErreurs, fautive: boolean): LigneResoluti
       suffixe: null,
       fragmentsLibres: [
         { type: "texte", valeur: "Conclusion : un seul triangle, avec " },
-        { type: "latex", valeur: `\\hat{B} \\approx ${B1D}°` },
+        { type: "latex", valeur: `\\hat{B} \\approx ${B1D}^\\circ` },
         { type: "texte", valeur: ", " },
-        { type: "latex", valeur: `\\hat{C} \\approx ${nombreLatex(s.C1, 1)}°` },
+        { type: "latex", valeur: `\\hat{C} \\approx ${nombreLatex(s.C1, 1)}^\\circ` },
         { type: "texte", valeur: " et " },
         { type: "latex", valeur: `c \\approx ${nombreLatex(s.c1, 2)}\\text{ cm}` },
         { type: "texte", valeur: "." },
@@ -383,11 +383,11 @@ function lignesSSA(e: ExerciceDetectiveErreurs, fautive: boolean): LigneResoluti
     resultat: null,
     suffixe: null,
     fragmentsLibres: [
-      { type: "latex", valeur: `\\hat{B}_1 = \\sin^{-1}(${sD}) \\approx ${B1D}°` },
+      { type: "latex", valeur: `\\hat{B}_1 = \\sin^{-1}(${sD}) \\approx ${B1D}^\\circ` },
       { type: "texte", valeur: " ou " },
-      { type: "latex", valeur: `\\hat{B}_2 = 180° - \\hat{B}_1 \\approx ${B2D}°` },
+      { type: "latex", valeur: `\\hat{B}_2 = 180^\\circ - \\hat{B}_1 \\approx ${B2D}^\\circ` },
       { type: "texte", valeur: ", qui convient aussi car " },
-      { type: "latex", valeur: `\\hat{A} + \\hat{B}_2 \\approx ${nombreLatex(A + valeurAffichee(s.B2, "angle"), 1)}° < 180°` },
+      { type: "latex", valeur: `\\hat{A} + \\hat{B}_2 \\approx ${nombreLatex(A + valeurAffichee(s.B2, "angle"), 1)}^\\circ < 180^\\circ` },
       { type: "texte", valeur: "." },
     ],
     valeur: s.B2,

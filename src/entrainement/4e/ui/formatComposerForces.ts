@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { ExerciceComposerForces, NomTriangle, UniteComposerForces } from "../core/composerForces.types";
 import {
   angleCap,
@@ -43,7 +43,7 @@ export function arrondiAngle(v: number): number {
 
 /** Angle en LaTeX, au dixième (« 65{,}4° »). */
 export function angleLatex(v: number): string {
-  return `${nombreFrLatex(arrondiAngle(v))}°`;
+  return `${nombreFrLatex(arrondiAngle(v))}^\\circ`;
 }
 
 export function intensiteLatex(v: number): string {
@@ -142,7 +142,7 @@ function enonceDirect(e: ExerciceComposerForces): FragmentConsigne[] {
   const v1 = latex(vecteur(e, "1"));
   const v2 = latex(vecteur(e, "2"));
   const somme = latex(`${vecteur(e, "R")} = ${vecteur(e, "1")} + ${vecteur(e, "2")}`);
-  const angle = latex(`${e.angle}°`);
+  const angle = latex(`${e.angle}^\\circ`);
   switch (e.situation) {
     case "bateau":
       return [
@@ -179,7 +179,7 @@ function enonceCap(e: ExerciceComposerForces): FragmentConsigne[] {
   const v1 = latex(vecteur(e, "1"));
   const v2 = latex(vecteur(e, "2"));
   const somme = latex(`${vecteur(e, "R")} = ${vecteur(e, "1")} + ${vecteur(e, "2")}`);
-  const angle = latex(`${e.angle}°`);
+  const angle = latex(`${e.angle}^\\circ`);
   if (e.situation === "avion") {
     return [
       texte("Un avion part de l'aérodrome O et veut rejoindre une ville en ligne droite : c'est la route voulue. Sa vitesse propre (par rapport à l'air) "), v1,
@@ -315,35 +315,35 @@ export function aidesEcran(e: ExerciceComposerForces, ecran: number): FragmentCo
     if (ecran === 1) {
       return [
         [texte(`Dans le triangle O${p}C, tu connais O${p}, ${p}C et l'angle en O, opposé à ${p}C. La loi des sinus donne l'angle en C, opposé à O${p} :`), latex(`\\dfrac{\\sin ${angleCapNom(e)}}{O${p}} = \\dfrac{\\sin ${angleDonneCapNom(e)}}{${p}C}`)],
-        [texte("Avec "), latex(`O${p} = ${e.petit}`), texte(", "), latex(`${p}C = ${e.grand}`), texte(" et "), latex(`${angleDonneCapNom(e)} = ${e.angle}°`), texte(" :"), latex(`\\sin ${angleCapNom(e)} = \\dfrac{${nombreFrLatex(e.petit)} \\cdot \\sin ${b}°}{${nombreFrLatex(e.grand)}}`)],
+        [texte("Avec "), latex(`O${p} = ${e.petit}`), texte(", "), latex(`${p}C = ${e.grand}`), texte(" et "), latex(`${angleDonneCapNom(e)} = ${e.angle}^\\circ`), texte(" :"), latex(`\\sin ${angleCapNom(e)} = \\dfrac{${nombreFrLatex(e.petit)} \\cdot \\sin ${b}^\\circ}{${nombreFrLatex(e.grand)}}`)],
       ];
     }
     if (ecran === 2) {
       return [
-        [texte("La somme des angles d'un triangle vaut 180° :"), latex(`${angleSommetPetitNom(e)} = 180° - ${angleDonneCapNom(e)} - ${angleCapNom(e)}`)],
-        [texte("Avec l'angle en C trouvé à l'étape précédente :"), latex(`${angleSommetPetitNom(e)} = 180° - ${b}° - ${angleLatex(angleCap(e))}`)],
+        [texte("La somme des angles d'un triangle vaut 180° :"), latex(`${angleSommetPetitNom(e)} = 180^\\circ - ${angleDonneCapNom(e)} - ${angleCapNom(e)}`)],
+        [texte("Avec l'angle en C trouvé à l'étape précédente :"), latex(`${angleSommetPetitNom(e)} \\approx 180^\\circ - ${b}^\\circ - ${angleLatex(angleCap(e))}`)],
       ];
     }
     return [
       [texte(`La loi des sinus relie OC à l'angle en ${p}, qui lui est opposé :`), latex(`\\dfrac{OC}{\\sin ${angleSommetPetitNom(e)}} = \\dfrac{${p}C}{\\sin ${angleDonneCapNom(e)}}`)],
-      [texte("Avec "), latex(`${p}C = ${e.grand}`), texte(" et les angles trouvés :"), latex(`OC = \\dfrac{${nombreFrLatex(e.grand)} \\cdot \\sin ${angleLatex(angleSommetPetit(e))}}{\\sin ${b}°}`)],
+      [texte("Avec "), latex(`${p}C = ${e.grand}`), texte(" et les angles trouvés :"), latex(`OC \\approx \\dfrac{${nombreFrLatex(e.grand)} \\cdot \\sin ${angleLatex(angleSommetPetit(e))}}{\\sin ${b}^\\circ}`)],
     ];
   }
   if (ecran === 1) {
     return [
-      [texte("L'angle donné, "), latex(`${angleNom(p, "O", g)} = ${e.angle}°`), texte(", est l'angle entre les deux vecteurs, en O. Dans le parallélogramme, deux angles consécutifs sont supplémentaires :"), latex(`${angleInterieurNom(e)} + ${angleNom(p, "O", g)} = 180°`)],
-      [texte("Donc :"), latex(`${angleInterieurNom(e)} = 180° - ${e.angle}°`)],
+      [texte("L'angle donné, "), latex(`${angleNom(p, "O", g)} = ${e.angle}^\\circ`), texte(", est l'angle entre les deux vecteurs, en O. Dans le parallélogramme, deux angles consécutifs sont supplémentaires :"), latex(`${angleInterieurNom(e)} + ${angleNom(p, "O", g)} = 180^\\circ`)],
+      [texte("Donc :"), latex(`${angleInterieurNom(e)} = 180^\\circ - ${e.angle}^\\circ`)],
     ];
   }
   if (ecran === 2) {
     return [
       [texte(`Al-Kashi dans le triangle O${g}C, avec l'angle en ${g} (opposé à OC) :`), latex(`OC^2 = O${g}^2 + ${g}C^2 - 2 \\cdot O${g} \\cdot ${g}C \\cdot \\cos ${angleInterieurNom(e)}`)],
-      [texte("Avec "), latex(`O${g} = ${e.grand}`), texte(", "), latex(`${g}C = ${e.petit}`), texte(" et "), latex(`${angleInterieurNom(e)} = ${angleInterieur(e)}°`), texte(" :"), latex(`${intensiteNom(e, "R")}^2 = ${e.grand}^2 + ${e.petit}^2 - 2 \\cdot ${e.grand} \\cdot ${e.petit} \\cdot \\cos ${angleInterieur(e)}°`)],
+      [texte("Avec "), latex(`O${g} = ${e.grand}`), texte(", "), latex(`${g}C = ${e.petit}`), texte(" et "), latex(`${angleInterieurNom(e)} = ${angleInterieur(e)}^\\circ`), texte(" :"), latex(`${intensiteNom(e, "R")}^2 = ${e.grand}^2 + ${e.petit}^2 - 2 \\cdot ${e.grand} \\cdot ${e.petit} \\cdot \\cos ${angleInterieur(e)}^\\circ`)],
     ];
   }
   return [
     [texte(`La loi des sinus dans le triangle O${g}C relie l'angle en O au côté ${g}C, qui lui est opposé :`), latex(`\\dfrac{\\sin ${deviationNom(e)}}{${g}C} = \\dfrac{\\sin ${angleInterieurNom(e)}}{OC}`)],
-    [texte("Avec "), latex(`${g}C = ${e.petit}`), texte(" et OC trouvé à l'étape précédente :"), latex(`\\sin ${deviationNom(e)} = \\dfrac{${nombreFrLatex(e.petit)} \\cdot \\sin ${angleInterieur(e)}°}{${intensiteLatex(intensiteResultante(e))}}`)],
+    [texte("Avec "), latex(`${g}C = ${e.petit}`), texte(" et OC trouvé à l'étape précédente :"), latex(`\\sin ${deviationNom(e)} \\approx \\dfrac{${nombreFrLatex(e.petit)} \\cdot \\sin ${angleInterieur(e)}^\\circ}{${intensiteLatex(intensiteResultante(e))}}`)],
   ];
 }
 
