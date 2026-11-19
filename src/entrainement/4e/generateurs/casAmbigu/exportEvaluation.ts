@@ -4,7 +4,7 @@ import type {
   BlocCorrection,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
+  CriteresDifficulte,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -12,11 +12,13 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceCasAmbigu } from "../../core/casAmbigu.types";
 import { resoudreSSA, type ResolutionSSA } from "../../moteur/modeleCasAmbigu";
-import { A_CHAPEAU, B_CHAPEAU, consignesEcrans, donneesFragments, egalOuEnviron, questionsPapier, sinusBLatex, sinusLatex, uniteLatex, angleLatex } from "../../ui/formatCasAmbigu";
+import { A_CHAPEAU, B_CHAPEAU, consignesEcrans, donneesFragments, egalOuEnviron, questionsPapier, uniteLatex } from "../../ui/formatCasAmbigu";
 import { figureCasAmbiguSvg } from "../../ui/figureCasAmbigu";
 import { nombreFrLatex } from "../../ui/nombreFr";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceCasAmbigu } from "./index";
 import { profilCasAmbigu } from "./profil";
+import { correctionDetailleeCasAmbigu } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen74. Énoncé papier = données + figure SANS arc
@@ -70,136 +72,16 @@ function reponseBreve(e: ExerciceCasAmbigu): FragmentConsigne[] {
   return [texte(`a) ${libelleNombre(r.nombreTriangles).replace(/^./, (c) => c.toUpperCase())} ; b) `), latex(cotesLatex(e, r))];
 }
 
-function etapesCandidats(e: ExerciceCasAmbigu, r: ResolutionSSA): EtapeCorrection[] {
-  if (r.candidats.length === 0) {
-    return [
-      {
-        label: "Conclusion",
-        sousQuestion: "c",
-        fragments: [texte("Aucun candidat à tester. Sur la figure, l'arc de cercle de centre C et de rayon a n'atteint pas la demi-droite [Ax) : a est plus court que la distance de C à cette demi-droite.")],
-      },
-    ];
-  }
-  if (r.candidats.length === 1) {
-    const c = r.candidats[0]!;
-    return [
-      { label: "Calcul", sousQuestion: "c", fragments: [latex(`${B_CHAPEAU} = 90^\\circ`), texte(" (le seul angle de sinus 1).")] },
-      { label: "Condition", sousQuestion: "c", fragments: [latex(`${A_CHAPEAU} + ${B_CHAPEAU} = ${e.angleA}^\\circ + 90^\\circ = ${nombreFrLatex(c.somme)}^\\circ < 180^\\circ`), texte(" : le candidat convient.")] },
-    ];
-  }
-  const [c1, c2] = r.candidats as [ResolutionSSA["candidats"][number], ResolutionSSA["candidats"][number]];
-  const verdict = (ok: boolean) => (ok ? " : il convient." : " : refusé, il ne reste aucune place pour le troisième angle.");
-  return [
-    {
-      label: "Calcul",
-      sousQuestion: "c",
-      fragments: [latex(`${B_CHAPEAU}_1 = \\sin^{-1}(${sinusLatex(r.sinB)}\\ldots) ${egalOuEnviron(c1.angleB, 1, "^\\circ")}`), texte(" et "), latex(`${B_CHAPEAU}_2 = 180^\\circ - ${B_CHAPEAU}_1 ${egalOuEnviron(c2.angleB, 1, "^\\circ")}`)],
-    },
-    { label: "Condition", sousQuestion: "c", fragments: [latex(`${A_CHAPEAU} + ${B_CHAPEAU}_1 ${egalOuEnviron(c1.somme, 1, "^\\circ")} < 180^\\circ`), texte(verdict(c1.valide))] },
-    {
-      label: "Condition",
-      sousQuestion: "c",
-      fragments: [latex(`${A_CHAPEAU} + ${B_CHAPEAU}_2 ${egalOuEnviron(c2.somme, 1, "^\\circ")} ${c2.valide ? "<" : "\\geq"} 180^\\circ`), texte(verdict(c2.valide))],
-    },
-  ];
-}
-
-function etapeNombre(e: ExerciceCasAmbigu, r: ResolutionSSA): EtapeCorrection {
-  const texteFigure =
-    r.nombreTriangles === 0
-      ? "Aucun triangle : l'arc de centre C et de rayon a ne rencontre pas la demi-droite [Ax)."
-      : r.nombreTriangles === 2
-        ? "Deux triangles : l'arc de centre C et de rayon a coupe la demi-droite [Ax) en deux points, B₁ et B₂."
-        : r.comparaison === "egal"
-          ? "Un seul triangle, rectangle en B : l'arc de centre C et de rayon a touche la demi-droite [Ax) en un seul point."
-          : "Un seul triangle : l'arc de centre C et de rayon a coupe la droite (Ax) deux fois, mais un seul point est sur la demi-droite [Ax) — l'autre, derrière A, correspond au candidat refusé.";
-  return { label: "Conclusion", sousQuestion: "d", fragments: [texte(texteFigure)], figureHtml: figureCasAmbiguSvg(e, true) };
-}
-
-function etapesCotes(e: ExerciceCasAmbigu, r: ResolutionSSA): EtapeCorrection[] {
-  const u = uniteLatex(e);
-  if (r.nombreTriangles === 0) {
-    return [
-      {
-        label: "Méthode",
-        sousQuestion: "e",
-        fragments: [texte("L'arc touche la demi-droite dès que a atteint la distance h de C à [Ax) — la hauteur issue de C, dans un triangle rectangle : "), latex(`h = b \\cdot \\sin ${A_CHAPEAU}`)],
-      },
-      { label: "Calcul", sousQuestion: "e", fragments: [latex(`h = ${nombreFrLatex(e.b)} \\cdot \\sin ${e.angleA}^\\circ ${egalOuEnviron(r.hauteur, 2, u)}`)] },
-      {
-        label: "Conclusion",
-        sousQuestion: "e",
-        fragments: [texte("Il faudrait "), latex(`BC \\geq ${nombreFrLatex(Math.round(r.hauteur * 100) / 100)}${u}`), texte(" ; pour BC = h, un seul triangle, rectangle en B.")],
-      },
-    ];
-  }
-  const etapes: EtapeCorrection[] = [
-    { label: "Méthode", sousQuestion: "e", fragments: [texte("Dans chaque triangle, "), latex(`\\hat{C} = 180^\\circ - ${A_CHAPEAU} - ${B_CHAPEAU}`), texte(", puis la loi des sinus : "), latex(`c = \\dfrac{a \\cdot \\sin \\hat{C}}{\\sin ${A_CHAPEAU}}`)] },
-  ];
-  for (const t of r.triangles) {
-    const i = r.nombreTriangles === 2 ? `_${t.rang}` : "";
-    etapes.push({
-      label: "Calcul",
-      sousQuestion: "e",
-      fragments: [
-        ...(r.nombreTriangles === 2 ? [texte(`Triangle AB${t.rang === 1 ? "₁" : "₂"}C : `)] : []),
-        latex(`\\hat{C}${i} = 180^\\circ - ${e.angleA}^\\circ - ${angleLatex(t.angleB)} ${egalOuEnviron(t.angleC, 1, "^\\circ")}`),
-        texte(" ; "),
-        latex(`c${i} = \\dfrac{${nombreFrLatex(e.a)} \\cdot \\sin ${angleLatex(t.angleC)}}{\\sin ${e.angleA}^\\circ} ${egalOuEnviron(t.c, 2, u)}`),
-      ],
-    });
-  }
-  return etapes;
-}
-
-function piege(r: ResolutionSSA): EtapeCorrection {
-  if (r.nombreTriangles === 0) {
-    return {
-      label: "Piège",
-      sousQuestion: "b",
-      fragments: [texte("La calculatrice affiche une erreur pour "), latex(`\\sin^{-1}(${sinusLatex(r.sinB)}\\ldots)`), texte(" : ce n'est pas une faute de calcul, c'est la preuve qu'aucun triangle n'existe.")],
-    };
-  }
-  if (r.comparaison === "egal") {
-    return { label: "Piège", sousQuestion: "c", fragments: [texte("Avec "), latex(`\\sin ${B_CHAPEAU} = 1`), texte(", il n'y a qu'un candidat : "), latex("180^\\circ - 90^\\circ = 90^\\circ"), texte(" est le même angle, pas un second triangle.")] };
-  }
-  if (r.nombreTriangles === 1) {
-    return {
-      label: "Piège",
-      sousQuestion: "c",
-      fragments: [latex(`${B_CHAPEAU}_2`), texte(" a le même sinus que "), latex(`${B_CHAPEAU}_1`), texte(", mais "), latex(`${A_CHAPEAU} + ${B_CHAPEAU}_2 \\geq 180^\\circ`), texte(" : le garder sans tester la somme conduirait à un « second triangle » impossible.")],
-    };
-  }
-  return {
-    label: "Piège",
-    sousQuestion: "c",
-    fragments: [texte("Ne pas s'arrêter à l'angle aigu donné par la touche sin⁻¹ : son supplémentaire "), latex(`${B_CHAPEAU}_2`), texte(" a le même sinus et donne ici un second triangle.")],
-  };
-}
-
-function correctionDetaillee(e: ExerciceCasAmbigu): EtapeCorrection[] {
-  const r = resoudreSSA(e);
-  const conclusionB: FragmentConsigne[] =
-    r.comparaison === "superieur"
-      ? [latex(`\\sin ${B_CHAPEAU} ${egalOuEnviron(r.sinB, 3)} > 1`), texte(" : impossible, un sinus ne dépasse jamais 1. Aucun angle "), latex(B_CHAPEAU), texte(" ne convient.")]
-      : r.comparaison === "egal"
-        ? [latex(`\\sin ${B_CHAPEAU} = 1`), texte(" : un seul angle candidat, "), latex(`${B_CHAPEAU} = 90^\\circ`), texte(".")]
-        : [latex(`\\sin ${B_CHAPEAU} ${egalOuEnviron(r.sinB, 3)} < 1`), texte(" : deux angles candidats, "), latex(`${B_CHAPEAU}_1`), texte(" (aigu) et "), latex(`${B_CHAPEAU}_2 = 180^\\circ - ${B_CHAPEAU}_1`), texte(" (obtus), de même sinus.")];
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("Loi des sinus, isolée en "), latex(`\\sin ${B_CHAPEAU}`), texte(" : "), latex(`\\dfrac{a}{\\sin ${A_CHAPEAU}} = \\dfrac{b}{\\sin ${B_CHAPEAU}} \\iff \\sin ${B_CHAPEAU} = \\dfrac{b \\cdot \\sin ${A_CHAPEAU}}{a}`)] },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(`${sinusBLatex(e)} ${egalOuEnviron(r.sinB, 3)}`)] },
-    { label: "Conclusion", sousQuestion: "b", fragments: conclusionB },
-    ...etapesCandidats(e, r),
-    etapeNombre(e, r),
-    ...etapesCotes(e, r),
-    piege(r),
-  ];
-}
-
 function construireCorrection(e: ExerciceCasAmbigu): BlocCorrection[] {
-  return correctionDetaillee(e)
-    .filter((etape) => etape.label === "Conclusion" || (etape.sousQuestion === "e" && etape.label === "Calcul"))
-    .map((etape) => ({ type: "paragraphe", fragments: [texte(`${etape.sousQuestion}) `), ...etape.fragments] }));
+  return [{ type: "paragraphe", fragments: reponseBreve(e) }];
+}
+
+/** Niveau CONSTANT, quelle que soit l'issue (0, 1 ou 2 triangles) : le nombre de triangles est le
+ * VERDICT de l'exercice — un niveau, une durée ou une charge qui en dépendraient le trahiraient sur la
+ * feuille. Méthode 0 (la consigne impose la loi des sinus), piège 0 (l'ambiguïté EST la question),
+ * écran « nombre de triangles » = lecture des tests de l'écran précédent, aucune charge. */
+function criteresDifficulte(e: ExerciceCasAmbigu): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeCasAmbigu(e), ["d"]), sansCharge: true, methode: 0, piege: 0, nombres: 1 };
 }
 
 function bareme(e: ExerciceCasAmbigu): BaremeExercice {
@@ -241,12 +123,9 @@ export const adaptateurEvaluationCasAmbigu: AdaptateurFeuilleExercices<ExerciceC
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  // Constante : une difficulté qui dépendrait de l'issue (★★ pour 0 triangle, ★★★ pour 2) la
-  // trahirait sur la feuille.
-  difficulte: () => 3,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeCasAmbigu,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };

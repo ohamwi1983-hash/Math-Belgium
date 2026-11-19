@@ -19,7 +19,7 @@ import { aidesEcran, consigneEcran, degres, entreeRecap, justificationLoi, libel
 import { construireFigureTexteTriangle, PALETTE_ECRAN } from "./ui/figureTexteTriangle";
 import { ecranClos, nombreTexte, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 import type { EntreeRecapitulatif } from "./ui/recapitulatif";
-import { latex, texte } from "../export/fragmentsDocx";
+import { latex, texte } from "../export/corrigeTableau";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { QuestionFinale } from "./components/QuestionFinale";

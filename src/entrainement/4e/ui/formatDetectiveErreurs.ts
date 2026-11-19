@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { ExerciceDetectiveErreurs, IdDescription, LigneResolution, NatureValeur, TypeErreur } from "../core/detectiveErreurs.types";
 import {
   DECIMALES,

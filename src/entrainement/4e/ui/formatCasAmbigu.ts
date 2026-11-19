@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { ExerciceCasAmbigu } from "../core/casAmbigu.types";
 import { resoudreSSA, type ComparaisonSinusSSA, type ResolutionSSA } from "../moteur/modeleCasAmbigu";
 import { REPONSE_ARC_SANS_CANDIDAT } from "../moteur/verificationCasAmbigu";
