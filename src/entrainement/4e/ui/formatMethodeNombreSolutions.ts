@@ -41,7 +41,7 @@ export function enonceFragments(e: E): FragmentConsigne[] {
 export function consignesEcrans(): FragmentConsigne[][] {
   return [
     [t("Quelle est la méthode la plus rapide pour résoudre cette équation ?")],
-    [t("Combien de solutions a-t-elle ? Choisis la seule affirmation vraie.")],
+    [t("Combien de solutions a-t-elle ? Justifie en une ligne.")],
     [t("Donne les solutions de l'équation.")],
   ];
 }

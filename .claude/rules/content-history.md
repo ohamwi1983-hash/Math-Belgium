@@ -4231,3 +4231,21 @@ paths:
   `EtapeChampLibreTrinome.tsx` (un champ libre, 3 tentatives). Fichiers : `AppMethodeNombreSolutions.tsx`,
   `core/methodeNombreSolutions.types.ts`, `moteur/{modele,session,verification}MethodeNombreSolutions.ts`,
   `ui/formatMethodeNombreSolutions.ts`, `generateurs/methodeNombreSolutions/`.
+
+- **4e, Chapitre 2 — nouveau générateur gen117 « Lire une inéquation sur un graphique »** (lot H,
+  processus 1 Connaître, section `signe-trinome`, carte après gen2 ; libellé pilote de gen2 rempli :
+  « Tableau de signes (gen2) ») : parabole 𝒫 (trait plein) et droite d (pointillés : axe des x, y = k ou
+  y = mx + p selon la variante) sur un quadrillage d'une unité ; trois écrans — abscisses des points
+  communs (champ libre ou bouton « Aucun point commun »), position (4 lectures « il faut 𝒫 au-dessus /
+  en dessous de d : c'est le cas entre / à l'extérieur / partout / nulle part », une seule juste),
+  ensemble-solution avec crochets (saisie guidée de gen121). f − g = α(x − x₁)(x − x₂), α(x − x₁)² ou
+  α((x − x₁)² + d), α ∈ {±1 ; ±1/2}, entiers : chaque point commun est un NŒUD de la grille ; fenêtre de
+  10 unités, bornes entières, hauteur 8 à 14 (collecteur : 0 point hors nœud ou hors fenêtre, S
+  contrôlé en 121 points, une seule lecture vraie, sur 1 800 tirages). Figure commune écran / papier
+  (`export/svgGraph.ts`, aucun point marqué dans l'énoncé ; points étiquetés au corrigé, `figureHtml`) ;
+  fond blanc sous les graduations de l'axe des y (une droite y = 4 en pointillés faisait lire « −4 »).
+  Issues tirées au hasard : 2 points (60 %), contact (20 %), aucun (20 %), symbole équiprobable.
+  Profil : `forme` = variante, aucun cas, pas de `calcul` ; niveau 1, 7 min (lecture + 2 écrans).
+  Fichiers : `AppLectureInequationGraphique.tsx`, `core/lectureInequationGraphique.types.ts`,
+  `moteur/{modeleLectureInequationGraphique,sessionLectureInequation}.ts`,
+  `ui/formatLectureInequationGraphique.ts`, `generateurs/lectureInequationGraphique/`.

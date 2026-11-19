@@ -871,6 +871,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 2. Tableau de signes »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lire une inéquation sur un graphique',
+          generatorId: 'gen117',
+          description: [
+            'Une parabole et une droite (l\'axe des x, y = k ou y = mx + p) sont tracées : lis les ' +
+              'abscisses des points communs sur la grille, la position de la parabole, puis écris ' +
+              'l\'ensemble-solution de l\'inéquation avec les bons crochets.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 117. Lire une inéquation sur un graphique »',
+        },
       ],
     },
     {
