@@ -1,3 +1,6 @@
+import { correctionDetailleeLireCourbeLogarithmique, lettrePhaseLireCourbeLogarithmique } from "./generateurs6e/lireCourbeLogarithmique/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
@@ -175,6 +178,7 @@ export function App6gen85() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLireCourbeLogarithmique(exercice), lettrePhaseLireCourbeLogarithmique(exercice, phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(choix ? { messageRevele: "Ce n'était pas la bonne expression (une seule tentative sur un choix fermé)." } : {}),

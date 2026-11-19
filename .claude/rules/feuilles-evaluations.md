@@ -406,6 +406,10 @@ Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feui
   mais 7 écrans). Collecteur `corrige-5e3-m1` : limites `\lim_{n\to+\infty}` évaluées en n = 10⁹,
   inégalités contrôlées, ≈ toléré à la demi-unité du dernier chiffre écrit (notation scientifique
   comprise), coupure d'une formule DANS une cellule détectée (`.katex-base` qui repart à gauche).
+- 6e ch. 3, seconde moitié (6gen22, 6gen85–92) : briques `6e-6h/ui6e/corrigeLogarithmes2.ts` (`COURS_*` § 1–10, `dec`/`vaut`/`sci`,
+  `fragmentsAide`) ; chaînes de l'écran (`fiche(e).calculs`, `chaineEquation`, `resolution`) éclatées aux « = », « ≈ », « ⟺ » ;
+  valeur arrondie : le corrigé calcule avec les valeurs NON arrondies de la chaîne de l'écran (6gen89 `chaineLinearisation`,
+  6gen22 B/C), jamais « arrondis substitués ≈ résultat exact » ; 6gen87 : dérivée ligne à ligne (`FonctionTangente.lignesDerivee`).
 
 **Chaque étape (= écran du générateur, lettre `sousQuestion`) contient, dans cet ordre :**
 1. **Ce qu'on utilise** (`utilise`) : propriété / formule / méthode, avec le renvoi « (cours, § n) »

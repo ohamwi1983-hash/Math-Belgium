@@ -1,3 +1,6 @@
+import { correctionDetailleeComparerEncadrerLog } from "./generateurs6e/comparerEncadrerLogarithmes/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
@@ -5,7 +8,7 @@ import type { ExerciceComparerEncadrerLog } from "./core6e/comparerEncadrerLogar
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComparerEncadrerLog } from "./generateurs6e/comparerEncadrerLogarithmes";
 import type { IdVarianteComparerEncadrerLog } from "./generateurs6e/comparerEncadrerLogarithmes";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionComparerEncadrerLog, soumettreReponseEcran } from "./moteur6e/sessionComparerEncadrerLogarithmes";
-import { estPhaseChoix } from "./moteur6e/typesComparerEncadrerLogarithmes";
+import { estPhaseChoix, phasesExercice } from "./moteur6e/typesComparerEncadrerLogarithmes";
 import type { EtatSessionComparerEncadrerLog, PhaseComparerEncadrerLog } from "./moteur6e/typesComparerEncadrerLogarithmes";
 import { diagnostiquerChamps, messageSpecifique } from "./moteur6e/verificationComparerEncadrerLogarithmes";
 import { Katex } from "./components/Katex";
@@ -160,6 +163,7 @@ export function App6gen86() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComparerEncadrerLog(exercice), lettreEtape(phasesExercice(exercice).indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(choix ? { messageRevele: "Ce n'était pas la bonne réponse (une seule tentative sur un choix fermé)." } : {}),

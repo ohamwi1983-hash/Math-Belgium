@@ -1,3 +1,6 @@
+import { correctionDetailleeLinearisation } from "./generateurs6e/linearisationDonnees/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
@@ -5,7 +8,7 @@ import type { ExerciceLinearisation } from "./core6e/linearisationDonnees";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLinearisation } from "./generateurs6e/linearisationDonnees";
 import type { IdVarianteLinearisation } from "./generateurs6e/linearisationDonnees";
 import { activerAideSuivante, demarrerSessionLinearisation, niveauAideMaxPhase, soumettreReponseEcran, tentativesMaxCourant } from "./moteur6e/sessionLinearisation";
-import { estPhaseChoix } from "./moteur6e/typesLinearisation";
+import { estPhaseChoix, phasesPourExercice } from "./moteur6e/typesLinearisation";
 import type { EtatSessionLinearisation, PhaseLinearisation } from "./moteur6e/typesLinearisation";
 import { diagnostiquerChamps, messagePiege } from "./moteur6e/verificationLinearisation";
 import { Katex } from "./components/Katex";
@@ -147,6 +150,7 @@ export function App6gen89() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLinearisation(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(choix ? { messageRevele: "Ce n'était pas la bonne réponse (une seule tentative sur un choix fermé)." } : {}),

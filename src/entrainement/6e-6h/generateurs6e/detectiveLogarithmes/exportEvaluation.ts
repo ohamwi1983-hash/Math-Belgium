@@ -4,7 +4,6 @@ import type {
   BlocCorrection,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -13,10 +12,11 @@ import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDetectiveLogarithmes } from "../../core6e/detectiveLogarithmes.types";
-import { correction, descriptionCorrecte, indiceLigneFausse, typeErreur, valeursAttendues } from "../../moteur6e/modeleDetectiveLogarithmes";
-import { CONSIGNE_GENERALE, consignesEcrans, constat, descriptionFragments, enonceExercice, lignesCopie, nomErreur, piege, souderPonctuation, valeurFragments } from "../../ui6e/formatDetectiveLogarithmes";
+import { indiceLigneFausse, typeErreur, valeursAttendues } from "../../moteur6e/modeleDetectiveLogarithmes";
+import { CONSIGNE_GENERALE, consignesEcrans, enonceExercice, lignesCopie, nomErreur, valeurFragments } from "../../ui6e/formatDetectiveLogarithmes";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveLogarithmes } from "./index";
 import { profilDetectiveLogarithmes } from "./profil";
+import { correctionDetailleeDetectiveLogarithmes } from "./corrigeDetaille";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de 6gen88. Énoncé papier = ce que l'élève devait
@@ -68,30 +68,7 @@ function reponseBreve(e: ExerciceDetectiveLogarithmes): FragmentConsigne[] {
   return [texte(`Ligne ${indiceLigneFausse(e) + 1} fausse (${nomErreur(e)}) ; `), ...valeurs(e)];
 }
 
-function correctionDetaillee(e: ExerciceDetectiveLogarithmes): EtapeCorrection[] {
-  const i = indiceLigneFausse(e);
-  const etapes: EtapeCorrection[] = [
-    { label: "Contrôle", sousQuestion: "a", fragments: constat(e) },
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte(`La ligne ${i + 1} est fausse.`)] },
-    { label: "Erreur", sousQuestion: "b", fragments: descriptionFragments(descriptionCorrecte(e), e) },
-  ];
-  /** « Ligne n corrigée : par définition… » (minuscule après les deux-points). */
-  const enMinuscule = (ligne: FragmentConsigne[]): FragmentConsigne[] =>
-    ligne.map((f, j) => (j === 0 && f.type === "texte" && /^[A-ZÉ][a-zé]/.test(f.valeur) && !/^CE\b/.test(f.valeur) ? { ...f, valeur: f.valeur[0]!.toLowerCase() + f.valeur.slice(1) } : f));
-  /** La dernière ligne de la résolution n'est pas répétée quand elle n'est que le résultat final
-   * (« $S = \{4\}$ ») : la ligne « Conclusion » le donne juste après. */
-  const lignes = correction(e);
-  const derniere = lignes[lignes.length - 1]!;
-  const conclusion = valeurs(e);
-  const memeLatex = (f: FragmentConsigne) => (f.type === "latex" ? f.valeur.replace(/\.$/, "") : null);
-  if (lignes.length > 1 && derniere.length === 1 && conclusion.length === 1 && memeLatex(derniere[0]!) === memeLatex(conclusion[0]!)) lignes.pop();
-  lignes.forEach((ligne, k) => {
-    etapes.push({ label: k === 0 ? "Correction" : "Calcul", sousQuestion: "c", fragments: souderPonctuation(k === 0 ? [texte(`Ligne ${i + 1} corrigée : `), ...enMinuscule(ligne)] : ligne) });
-  });
-  etapes.push({ label: "Conclusion", sousQuestion: "c", fragments: valeurs(e) });
-  etapes.push({ label: "Piège", sousQuestion: "b", fragments: piege(e) });
-  return etapes;
-}
+const correctionDetaillee = correctionDetailleeDetectiveLogarithmes;
 
 function construireCorrection(e: ExerciceDetectiveLogarithmes): BlocCorrection[] {
   return [{ type: "paragraphe", fragments: reponseBreve(e) }];

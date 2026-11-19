@@ -1,5 +1,5 @@
-import type { CourbeLog, ExerciceAssocierCourbesLog, ExerciceLectureCourbeLog, ExerciceLireCourbeLogarithmique } from "../../core6e/lireCourbeLogarithmique.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, ErreurFrequente, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CourbeLog, ExerciceLireCourbeLogarithmique } from "../../core6e/lireCourbeLogarithmique.types";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, ErreurFrequente, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
@@ -18,7 +18,6 @@ import {
   expressionLatex,
   fonctionLatex,
   listeExpressions,
-  nb,
   pointBase,
   pointUn,
 } from "../../ui6e/formatLireCourbeLogarithmique";
@@ -26,6 +25,7 @@ import { figureLecture, figuresAssocier } from "../../ui6e/figureCourbeLogarithm
 import { PHASES_ASSOCIER, PHASES_LECTURE } from "../../moteur6e/typesLireCourbeLogarithmique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLireCourbeLogarithmique } from "./index";
 import { profilLireCourbeLogarithmique } from "./profilEvaluation";
+import { correctionDetailleeLireCourbeLogarithmique } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceLireCourbeLogarithmique>` de `6gen85` « Lire une
@@ -105,108 +105,7 @@ function calculBaseLatex(k: CourbeLog): string {
   return estCroissante(k.base) ? `\\log_a(${n}) = 1 \\iff a = ${n}` : `\\log_a(${n}) = -1 \\iff a^{-1} = ${n} \\iff a = ${baseLatex(k.base)}`;
 }
 
-function sensTexte(k: CourbeLog): string {
-  return estCroissante(k.base) ? "croissante, donc a > 1" : "décroissante, donc 0 < a < 1";
-}
-
-function correctionLecture(e: ExerciceLectureCourbeLog): EtapeCorrection[] {
-  const k = e.courbe;
-  const { c, d } = k;
-  const un = pointUn(k);
-  const base = pointBase(k);
-  const croissante = estCroissante(k.base);
-  const etapes: EtapeCorrection[] = [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("L'argument "), latex(argumentLatex(c)), texte(" s'annule à l'asymptote : la courbe longe la droite en pointillés sans jamais la toucher.")] },
-    { label: "Lecture", sousQuestion: "a", fragments: [texte(`L'asymptote coupe l'axe des abscisses en ${nb(c)} : `), latex(equationAsymptoteLatex(k)), texte(".")] },
-    { label: "Condition", sousQuestion: "b", fragments: [latex(`${argumentLatex(c)} > 0 \\iff x > ${c}`), texte(" (la borne est exclue).")] },
-    { label: "Conclusion", sousQuestion: "b", fragments: [latex(domaineLatex(k)), texte(".")] },
-    {
-      label: "Méthode",
-      sousQuestion: "c",
-      fragments: [texte(`Au point d'abscisse ${nb(c + 1)}, l'argument vaut 1 et `), latex("\\log_a(1) = 0"), texte(" : "), latex(`f(${c + 1}) = d`), texte(". On lit le point "), latex(coordonneesLatex(un)), texte(".")],
-    },
-    {
-      label: "Lecture",
-      sousQuestion: "c",
-      fragments: [
-        texte(`La courbe est ${sensTexte(k)}. Le point de la courbe une unité ${croissante ? "au-dessus" : "au-dessous"}, sur une intersection du quadrillage, est `),
-        latex(coordonneesLatex(base)),
-        texte(" : là, "),
-        latex(`\\log_a(${c === 0 ? base.x : `${base.x} ${c > 0 ? "-" : "+"} ${Math.abs(c)}`}) = ${croissante ? "1" : "-1"}`),
-        texte("."),
-      ],
-      figureHtml: figureLecture(e, "corrige"),
-    },
-    { label: "Calcul", sousQuestion: "c", fragments: [latex(calculBaseLatex(k)), texte(".")] },
-    { label: "Lecture", sousQuestion: "d", fragments: [texte("d est l'ordonnée du point "), latex(coordonneesLatex(un)), texte(" : "), latex(`d = ${d}`), texte(".")] },
-    { label: "Conclusion", sousQuestion: "d", fragments: [latex(fonctionLatex(k)), texte(".")] },
-  ];
-  if (!croissante) {
-    etapes.push({
-      label: "Piège",
-      fragments: [texte("La courbe descend : le point une unité plus BAS donne "), latex(`\\log_a(${entierBase(k.base)}) = -1`), texte(", donc "), latex(`a = ${baseLatex(k.base)}`), texte(` et non ${entierBase(k.base)}.`)],
-    });
-  } else if (c !== 0) {
-    etapes.push({
-      label: "Piège",
-      fragments: [texte(`L'asymptote x = ${nb(c)} donne l'argument `), latex(argumentLatex(c)), texte(", et non "), latex(argumentLatex(-c)), texte(" : le nombre change de signe dans la parenthèse.")],
-    });
-  } else {
-    etapes.push({ label: "Piège", fragments: [texte("La base se lit une unité au-dessus du point d'abscisse 1 (ordonnée d + 1), pas au point d'ordonnée 1.")] });
-  }
-  return etapes;
-}
-
-function correctionAssocier(e: ExerciceAssocierCourbesLog): EtapeCorrection[] {
-  const courbes = courbesExercice(e);
-  const etapes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [
-        texte("Pour chaque courbe : l'asymptote x = c, le sens de variation (croissante si a > 1, décroissante si 0 < a < 1), le point d'abscisse c + 1 (ordonnée d) et le point une unité plus haut ou plus bas, qui donne la base."),
-      ],
-      figureHtml: grilleFigures(figuresAssocier(e, "corrige")),
-    },
-  ];
-  courbes.forEach((k, j) => {
-    const i = e.expressionDeCourbe[j];
-    etapes.push({
-      label: `Courbe ${j + 1}`,
-      sousQuestion: LETTRES_ETAPES[j],
-      fragments: [
-        texte("asymptote "),
-        latex(equationAsymptoteLatex(k)),
-        texte(`, ${sensTexte(k)}, points `),
-        latex(coordonneesLatex(pointUn(k))),
-        texte(" et "),
-        latex(coordonneesLatex(pointBase(k))),
-        texte(` : expression ${LETTRES_EXPRESSIONS[i]}, `),
-        latex(`y = ${expressionLatex(k)}`),
-        texte("."),
-      ],
-    });
-  });
-  // Les deux expressions de même asymptote, même translation verticale et même sens de variation :
-  // seule la base les distingue.
-  const jumelles = e.expressions.flatMap((k, i) => e.expressions.map((m, j) => [k, m, i, j] as const)).find(([k, m, i, j]) => i < j && k.c === m.c && k.d === m.d && estCroissante(k.base) === estCroissante(m.base));
-  if (jumelles) {
-    const [k, , i, j] = jumelles;
-    etapes.push({
-      label: "Piège",
-      fragments: [
-        texte(`${LETTRES_EXPRESSIONS[i]} et ${LETTRES_EXPRESSIONS[j]} ont la même asymptote, passent toutes deux par `),
-        latex(coordonneesLatex(pointUn(k))),
-        texte(" et varient dans le même sens : seule la base les distingue, lue au point une unité plus haut ou plus bas."),
-      ],
-    });
-  }
-  return etapes;
-}
-
-function correctionDetaillee(e: ExerciceLireCourbeLogarithmique): EtapeCorrection[] {
-  return e.variante === "lecture" ? correctionLecture(e) : correctionAssocier(e);
-}
+const correctionDetaillee = correctionDetailleeLireCourbeLogarithmique;
 
 function construireCorrection(e: ExerciceLireCourbeLogarithmique): BlocCorrection[] {
   if (e.variante === "lecture") {

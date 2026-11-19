@@ -3,7 +3,6 @@ import type {
   AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -11,8 +10,9 @@ import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { PhaseLogarithmesProblemes } from "../../moteur6e/typesLogarithmesProblemes";
-import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, LIBELLE_PHASE, phasesPourExercice } from "../../ui6e/formatLogarithmesProblemes";
+import { aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, LIBELLE_PHASE, phasesPourExercice } from "../../ui6e/formatLogarithmesProblemes";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLogarithmesProblemes } from "./index";
+import { correctionDetailleeLogarithmesProblemes } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceLogarithmesProblemes>` pour `6gen22`
@@ -67,12 +67,6 @@ function construireCorrectionLogarithmesProblemes(exercice: ExerciceLogarithmesP
 
 const LETTRES = "abcd";
 
-/** Nombre décimal en LaTeX, virgule décimale, arrondi à `decimales` chiffres. */
-function decimalLatex(v: number, decimales: number): string {
-  const f = Math.pow(10, decimales);
-  return String(Math.round(v * f) / f).replace(".", "{,}");
-}
-
 /** Écran « principal » (2 points sur 4) des familles à 3 écrans : la résolution proprement dite. */
 const ECRAN_PRINCIPAL: Partial<Record<PhaseLogarithmesProblemes, true>> = { aEcran3: true, cEcran2: true, eEcran3: true, fEcran2: true };
 
@@ -86,24 +80,6 @@ function poidsPhases(exercice: ExerciceLogarithmesProblemes): number[] {
 
 function fragmentsReponse(exercice: ExerciceLogarithmesProblemes, phase: PhaseLogarithmesProblemes): FragmentConsigne[] {
   return [latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\quad "))];
-}
-
-function fragmentsAide1(exercice: ExerciceLogarithmesProblemes, phase: PhaseLogarithmesProblemes): FragmentConsigne[] {
-  const aide = aideNiveau1(exercice, phase);
-  return aide.latex === null ? [texte(aide.texte)] : [texte(`${aide.texte} `), latex(aide.latex)];
-}
-
-/** Passage au logarithme de la famille A (résoudre pour t) : t ≥ ln(q)/ln(r), en renversant
- * l'inégalité quand ln(r) < 0. */
-function passageLogA(exercice: ExerciceLogarithmesProblemes): string | null {
-  if (exercice.famille !== "A" || exercice.sousType !== "resoudreT") return null;
-  const geq = (exercice.sens === ">=") === exercice.r > 1;
-  const rel = geq ? "\\geq" : "\\leq";
-  const r = decimalLatex(exercice.r, 4);
-  const ligne = (cible: number, exact: number, indice: string) =>
-    `t${indice} ${rel} \\dfrac{\\ln\\left(${decimalLatex(cible / exercice.Q0, 4)}\\right)}{\\ln\\left(${r}\\right)} \\approx ${decimalLatex(exact, 2)}`;
-  if (exercice.variante === "simple") return ligne(exercice.cible1Affiche, exercice.t1Exact, "");
-  return `${ligne(exercice.cible1Affiche, exercice.t1Exact, "_1")} \\qquad ${ligne(exercice.cible2Affiche, exercice.t2Exact, "_2")}`;
 }
 
 /** Famille E, écran 1 : les niveaux L₁, L₂ donnés sont-ils arrondis (le système ne retombe alors
@@ -153,23 +129,6 @@ function criteresDifficulte(e: ExerciceLogarithmesProblemes): CriteresDifficulte
 
 function reponseBreveLogarithmesProblemes(exercice: ExerciceLogarithmesProblemes): FragmentConsigne[] {
   return phasesPourExercice(exercice).flatMap((phase, i) => [texte(`${i === 0 ? "" : " ; "}${LETTRES[i]}) `), ...fragmentsReponse(exercice, phase)]);
-}
-
-function correctionDetailleeLogarithmesProblemes(exercice: ExerciceLogarithmesProblemes): EtapeCorrection[] {
-  const listePieges = pieges(exercice);
-  return phasesPourExercice(exercice).flatMap((phase, i) => {
-    const sousQuestion = LETTRES[i];
-    const etapes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion, fragments: fragmentsAide1(exercice, phase) }];
-    const calcul = aideNiveau2(exercice, phase).latex;
-    if (calcul !== null) etapes.push({ label: "Calcul", sousQuestion, fragments: [latex(calcul)] });
-    const passage = phase === "aEcran3" ? passageLogA(exercice) : null;
-    if (passage !== null) etapes.push({ label: "Calcul", sousQuestion, fragments: [latex(passage)] });
-    for (const piege of listePieges) if (piege.phase === phase) etapes.push({ label: "Piège", sousQuestion, fragments: [texte(piege.texte)] });
-    if (phase === "eEcran1" && pointsArrondisE(exercice))
-      etapes.push({ label: "Remarque", sousQuestion, fragments: [texte("L₁ et L₂ sont arrondis au dixième : le système donne a et b à cet arrondi près ; on retient les constantes de définition de l'échelle.")] });
-    etapes.push({ label: "Conclusion", sousQuestion, fragments: fragmentsReponse(exercice, phase) });
-    return etapes;
-  });
 }
 
 function baremeLogarithmesProblemes(exercice: ExerciceLogarithmesProblemes): BaremeExercice {

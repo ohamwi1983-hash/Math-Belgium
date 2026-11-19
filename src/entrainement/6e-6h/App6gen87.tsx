@@ -1,3 +1,6 @@
+import { correctionDetailleeTangentesLog } from "./generateurs6e/tangentesLogarithmiques/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
@@ -5,7 +8,7 @@ import type { ExerciceTangentesLog } from "./core6e/tangentesLogarithmiques.type
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTangentesLog } from "./generateurs6e/tangentesLogarithmiques";
 import type { IdVarianteTangentesLog } from "./generateurs6e/tangentesLogarithmiques";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionTangentesLog, soumettreReponseEcran } from "./moteur6e/sessionTangentesLogarithmiques";
-import { estPhaseListe } from "./moteur6e/typesTangentesLogarithmiques";
+import { estPhaseListe, phasesExercice } from "./moteur6e/typesTangentesLogarithmiques";
 import type { EtatSessionTangentesLog, PhaseTangentesLog } from "./moteur6e/typesTangentesLogarithmiques";
 import { diagnostiquerChamps, messageSpecifique } from "./moteur6e/verificationTangentesLogarithmiques";
 import { Katex } from "./components/Katex";
@@ -138,6 +141,7 @@ export function App6gen87() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTangentesLog(exercice), lettreEtape(phasesExercice(exercice).indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

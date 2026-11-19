@@ -222,7 +222,7 @@ function parallelePolyLn(nombre: 1 | 2): Omit<ExerciceTangenteParallele, "h"> {
     fonction,
     contacts,
     m,
-    chaineEquation: `${fonction.dfLatex}=${latexComb(m)}\\iff x^{2}${b === 0 ? "" : b > 0 ? "+x" : "-x"}${constSigne(c)}=${mEntier === 0 ? "0" : `${mEntier === 1 ? "" : mEntier === -1 ? "-" : mEntier}x`}\\iff ${equation}`,
+    chaineEquation: `${fonction.dfLatex}=${latexComb(m)}\\iff x^{2}${b === 0 ? "" : b === 1 ? "+x" : b === -1 ? "-x" : b > 0 ? `+${b}x` : `${b}x`}${constSigne(c)}=${mEntier === 0 ? "0" : `${mEntier === 1 ? "" : mEntier === -1 ? "-" : mEntier}x`}\\iff ${equation}`,
     equationSecondDegre: equation,
     racines,
     rejetees: racines.filter((r) => r <= 0),

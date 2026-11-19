@@ -1,3 +1,6 @@
+import { correctionDetailleeDetectiveLogarithmes } from "./generateurs6e/detectiveLogarithmes/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceDetectiveLogarithmes, IdDescriptionLogarithmes, NombreExact, ReponseChampLog, ValeurLog } from "./core6e/detectiveLogarithmes.types";
@@ -180,6 +183,7 @@ export function App6gen88() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveLogarithmes(e), lettreEtape(ecran))} />,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,

@@ -65,6 +65,9 @@ export interface FonctionTangente {
   detail: TexteAvecLatex;
   /** Dérivée obtenue en oubliant le facteur u′ de la règle de la chaîne (message ciblé). */
   oubliChaine?: (x: number) => number;
+  /** Calcul de f'(x) ligne par ligne (corrigé détaillé « comme au tableau », `corrigeDetaille.ts`) :
+   * chaque membre est une transformation, de la règle appliquée jusqu'à `dfLatex`. */
+  lignesDerivee: { latex: string; justification?: string }[];
 }
 
 /** Point de contact et tangente : y = m x + p. */

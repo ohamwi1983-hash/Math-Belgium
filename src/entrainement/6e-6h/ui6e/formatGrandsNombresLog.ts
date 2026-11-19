@@ -330,7 +330,7 @@ export function reponseFragments(e: ExerciceGrandsNombres, phase: PhaseGrandsNom
       if (phase === "logPuissance") return [l(logPuissanceLatex(e.a, e.n))];
       if (phase === "partieEntiere") return [l(`${s.E}\\leq\\log(${P})<${s.E + 1}`), t(` : la partie entière vaut ${nbTexte(s.E, 0)}.`)];
       if (phase === "nombreChiffres") return [l(`10^{${s.E}}\\leq ${P}<10^{${s.E + 1}}`), t(" : "), l(P), t(` compte ${nbTexte(s.E, 0)} + 1 = ${nbTexte(s.E + 1, 0)} chiffres.`)];
-      if (phase === "scientifique") return [l(`${P}\\approx 10^{${nbLatex(s.f)}}\\times 10^{${s.E}}\\approx ${scientifiqueLatex(L)}`)];
+      if (phase === "scientifique") return [l(`${P}\\approx 10^{${nbLatex(s.f, 4)}}\\times 10^{${s.E}}\\approx ${scientifiqueLatex(L)}`)];
       if (phase === "premierChiffre") return [t(`Premier chiffre : ${Math.floor(s.m)} ; nombre de chiffres : ${nbTexte(s.E, 0)} + 1 = ${nbTexte(s.E + 1, 0)}.`)];
       return [];
     }
