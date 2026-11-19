@@ -5,7 +5,6 @@ import type {
   BlocCorrection,
   CritereBareme,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -14,9 +13,10 @@ import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phaseApres, phaseInitiale } from "../../moteur6e/typesDomaineDeriveeLogarithme";
 import type { PhaseDomaineDeriveeLogarithme } from "../../moteur6e/typesDomaineDeriveeLogarithme";
-import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, reponseAttendueLatex } from "../../ui6e/formatDomaineDeriveeLogarithme";
+import { aideNiveau2, blocDonnees, consigneEcran, reponseAttendueLatex } from "../../ui6e/formatDomaineDeriveeLogarithme";
 import { formatEnsembleReelLatex } from "../../ui6e/formatEnsembleReel";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDomaineDeriveeLogarithme } from "./index";
+import { correctionDetailleeDomaineDeriveeLog as correctionDetailleeDomaineDeriveeLogarithme } from "./corrigeDetaille";
 import { profilDomaineDeriveeLogarithme, LIBELLE_CAS_DOMAINE_DERIVEE_LOG } from "../profilsEvaluationLogarithmes";
 
 /**
@@ -113,10 +113,6 @@ function ingredients(exercice: Exercice, phase: Phase): string | null {
   return l;
 }
 
-/** Écrans dont l'aide 2 ne fait que RÉPÉTER les résultats de l'écran précédent. */
-function repeteEcranPrecedent(phase: Phase): boolean {
-  return phase === "cAssemblage" || phase === "dAssemblage" || phase === "eDerivee" || phase === "gIsoler";
-}
 
 /** Point exclu « caché » (dénominateur qui s'annule alors que tout semble défini). */
 function piegeDomaine(exercice: Exercice): string | null {
@@ -152,27 +148,6 @@ function libellePhase(phase: Phase): string {
 /** Écran de dérivée « en un bloc » (A, B, F) — découpé en deux critères : ingrédients, puis résultat. */
 function estDeriveeEnUnBloc(phase: Phase): boolean {
   return phase === "aDerivee" || phase === "bDerivee" || phase === "fDerivee";
-}
-
-function correctionDetailleeDomaineDeriveeLogarithme(exercice: Exercice): EtapeCorrection[] {
-  const etapes: EtapeCorrection[] = [];
-  phasesDeLExercice(exercice).forEach((phase, i) => {
-    const sousQuestion = lettre(i);
-    const ing = repeteEcranPrecedent(phase) ? null : ingredients(exercice, phase);
-    if (estDomaine(phase)) {
-      if (exercice.famille === "E") etapes.push({ label: "Méthode", sousQuestion, fragments: [texte("Le domaine se lit sur l'expression ORIGINALE, avant toute simplification.")] });
-      if (ing) etapes.push({ label: "Conditions", sousQuestion, fragments: [latex(ing)] });
-      const piege = piegeDomaine(exercice);
-      if (piege) etapes.push({ label: "Piège", sousQuestion, fragments: [texte("Le dénominateur ne peut pas s'annuler : "), latex(piege), texte(".")] });
-      etapes.push({ label: "Domaine", sousQuestion, fragments: [latex(reponsePhase(exercice, phase))] });
-      return;
-    }
-    const formule = aideNiveau1(exercice, phase).latex;
-    if (formule) etapes.push({ label: "Formule", sousQuestion, fragments: [latex(formule)] });
-    if (ing) etapes.push({ label: "Ingrédients", sousQuestion, fragments: [latex(ing)] });
-    etapes.push({ label: libellePhase(phase), sousQuestion, fragments: [latex(reponsePhase(exercice, phase))] });
-  });
-  return etapes;
 }
 
 /** Réponse finale : domaine (sauf G) puis dernière réponse (f′(x)). */

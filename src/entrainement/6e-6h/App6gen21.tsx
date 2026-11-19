@@ -3,6 +3,10 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeFonctionLogarithme } from "./generateurs6e/etudeFonctionLogarithme";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeEtudeFonctionLog } from "./generateurs6e/etudeFonctionLogarithme/corrigeDetaille";
+import { PHASES_ETUDE_LOG as PHASES_CORRIGE } from "./moteur6e/typesEtudeFonctionLogarithme";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import {
   NIVEAU_AIDE_MAX,
   activerAideSuivante,
@@ -177,9 +181,14 @@ export function App6gen21() {
   // et choix vidés), même quand la phase reste identique.
   const cle = `${numeroExercice}-${etat.phase}`;
 
+  // Corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier, `corrigeDetaille.ts`),
+  // affiché sous la réponse attendue quand elle est révélée.
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEtudeFonctionLog(exercice), lettreEtape(PHASES_CORRIGE.indexOf(etat.phase)))} />;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: <Katex expression={contenuRecapLatex(exercice, etat.phase)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

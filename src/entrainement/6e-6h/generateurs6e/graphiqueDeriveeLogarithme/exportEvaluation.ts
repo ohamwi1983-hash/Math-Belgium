@@ -3,7 +3,6 @@ import type {
   AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -20,6 +19,7 @@ import {
   formatFonctionLatex,
   type ViewBoxGraphiqueDeriveeLogarithme,
 } from "../../ui6e/formatGraphiqueDeriveeLogarithme";
+import { correctionDetailleeGraphiqueDeriveeLog as correctionDetailleeGraphiqueDeriveeLogarithme } from "./corrigeDetaille";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceGraphiqueDeriveeLogarithme } from "./index";
 
 const LETTRES = "ABCD";
@@ -79,59 +79,13 @@ function construireCorrectionGraphiqueDeriveeLogarithme(exercice: ExerciceGraphi
 // Toutes les valeurs viennent de l'instance (mêmes fonctions que l'appli).
 // ============================================================================
 
-function pgcd(a: number, b: number): number {
-  let x = Math.abs(a);
-  let y = Math.abs(b);
-  while (y !== 0) [x, y] = [y, x % y];
-  return x;
-}
 
-/** Abscisse exacte de l'extremum de f en LaTeX : e (famille A), e^{−(k+p)/k} (famille C). */
-function abscisseExtremumLatex(exercice: ExerciceGraphiqueDeriveeLogarithme): string | null {
-  if (exercice.famille === "A") return "e";
-  if (exercice.famille === "B") return null;
-  let num = -(exercice.k + exercice.p);
-  let den = exercice.k;
-  if (num === 0) return "1";
-  if (den < 0) {
-    num = -num;
-    den = -den;
-  }
-  const g = pgcd(num, den);
-  num /= g;
-  den /= g;
-  const exposant = den === 1 ? `${num}` : `${num < 0 ? "-" : ""}\\frac{${Math.abs(num)}}{${den}}`;
-  return `e^{${exposant}}`;
-}
 
-/** Nature de l'extremum de f, lue sur le signe de f' (A : f' du signe de k avant e ; C : f' du
- * signe de −k avant le zéro). */
-function natureExtremum(exercice: ExerciceGraphiqueDeriveeLogarithme): "maximum" | "minimum" | null {
-  if (exercice.famille === "A") return exercice.k > 0 ? "maximum" : "minimum";
-  if (exercice.famille === "C") return exercice.k > 0 ? "minimum" : "maximum";
-  return null;
-}
 
 function lettreCorrecte(exercice: ExerciceGraphiqueDeriveeLogarithme): string {
   return LETTRES[exercice.indexCorrect] ?? String(exercice.indexCorrect + 1);
 }
 
-function lectureGraphique(exercice: ExerciceGraphiqueDeriveeLogarithme): FragmentConsigne[] {
-  const nature = natureExtremum(exercice);
-  const xe = abscisseExtremumLatex(exercice);
-  if (nature === null || xe === null) {
-    return [texte(`f est ${exercice.k > 0 ? "croissante" : "décroissante"} sur ]0 ; +∞[ et n'a aucun extremum : f'(x) est ${exercice.k > 0 ? "positive" : "négative"} partout et ne s'annule jamais.`)];
-  }
-  const avant = nature === "maximum" ? "croissante" : "décroissante";
-  const apres = nature === "maximum" ? "décroissante" : "croissante";
-  return [
-    texte(`f est ${avant}, puis ${apres}, avec un ${nature} en `),
-    latex(`x = ${xe}`),
-    texte(` : f'(x) est ${nature === "maximum" ? "positive puis négative" : "négative puis positive"} et s'annule en `),
-    latex(`x = ${xe}`),
-    texte("."),
-  ];
-}
 
 const REGLE_DERIVATION: Record<ExerciceGraphiqueDeriveeLogarithme["famille"], { nom: string; formule: string }> = {
   A: { nom: "règle du quotient", formule: "\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^2}" },
@@ -147,24 +101,6 @@ function criteresDifficulte(e: ExerciceGraphiqueDeriveeLogarithme): CriteresDiff
 
 function reponseBreveGraphiqueDeriveeLogarithme(exercice: ExerciceGraphiqueDeriveeLogarithme): FragmentConsigne[] {
   return [texte(`a) graphique ${lettreCorrecte(exercice)} ; b) `), latex(formatDeriveeCorrecteLatex(exercice))];
-}
-
-function correctionDetailleeGraphiqueDeriveeLogarithme(exercice: ExerciceGraphiqueDeriveeLogarithme): EtapeCorrection[] {
-  const regle = REGLE_DERIVATION[exercice.famille];
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("f croissante ⇔ f'(x) > 0 ; f décroissante ⇔ f'(x) < 0 ; en un extremum de f, f'(x) = 0.")] },
-    { label: "Lecture", sousQuestion: "a", fragments: lectureGraphique(exercice) },
-    {
-      label: "Conclusion",
-      sousQuestion: "a",
-      fragments: [texte(`Seul le graphique ${lettreCorrecte(exercice)} a ces signes${abscisseExtremumLatex(exercice) === null ? "" : " et ce zéro"}.`)],
-      // Les graphiques candidats, le bon mis en évidence (comme dans l'ancien corrigé).
-      figureHtml: construireGrilleSvgCandidats(exercice, calculerViewBoxGraphique(exercice), exercice.indexCorrect),
-    },
-    { label: "Méthode", sousQuestion: "b", fragments: [texte(`On dérive avec la ${regle.nom} : `), latex(regle.formule)] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(formatDeriveeCorrecteLatex(exercice))] },
-    { label: "Vérification", sousQuestion: "b", fragments: abscisseExtremumLatex(exercice) === null ? [latex("e^{ax}>0"), texte(" et "), latex("a\\ln(x)+\\dfrac{1}{x}>0"), texte(" sur ]0 ; +∞[ : f'(x) a le signe de k et ne s'annule jamais, ce qui confirme le choix.")] : [texte("f'(x) s'annule en "), latex(`x = ${abscisseExtremumLatex(exercice)}`), texte(", ce qui confirme le choix.")] },
-  ];
 }
 
 function baremeGraphiqueDeriveeLogarithme(exercice: ExerciceGraphiqueDeriveeLogarithme): BaremeExercice {

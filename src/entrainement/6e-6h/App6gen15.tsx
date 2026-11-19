@@ -42,6 +42,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeInequationsLog, phasesInequationLog } from "./generateurs6e/inequationsLogarithmiques/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /** Séquence RÉELLEMENT traversée par la famille de l'exercice courant — même reconstruction que
  * `sequencePourExercice` (`ui6e/recapitulatifInequationsLogarithmiques.ts`, non exporté), répliquée
@@ -173,9 +176,14 @@ export function App6gen15() {
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
   const contenuRecap = contenuRecapPhase(exercice, phase);
+  // Corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier, `corrigeDetaille.ts`),
+  // affiché sous la réponse attendue quand elle est révélée.
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeInequationsLog(exercice), lettreEtape(phasesInequationLog(exercice).indexOf(phase)))} />;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: contenuRecap.latex !== null ? <Katex expression={contenuRecap.latex} /> : contenuRecap.texte,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

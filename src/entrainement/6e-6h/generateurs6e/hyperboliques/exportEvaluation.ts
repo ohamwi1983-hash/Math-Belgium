@@ -1,9 +1,8 @@
-import type { ExerciceHyperboliques, ExerciceHyperboliquesB } from "../../core6e/hyperboliques.types";
+import type { ExerciceHyperboliques } from "../../core6e/hyperboliques.types";
 import type {
   AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -18,10 +17,10 @@ import {
   consigneEcran,
   formatDeriveeC,
   formatDeriveeSecondeC,
-  formatFMoinsXA,
   formatFormeExponentielleD,
   reponseAttendueLatex,
 } from "../../ui6e/formatHyperboliques";
+import { correctionDetailleeHyperboliques } from "./corrigeDetaille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceHyperboliques, type VarianteId } from "./index";
 import { profilHyperboliques, LIBELLE_CAS_HYPERBOLIQUES } from "../profilsEvaluationLogarithmes";
 
@@ -89,25 +88,10 @@ function construireCorrectionHyperboliques(exercice: ExerciceHyperboliques): Blo
 // Toutes les valeurs viennent de l'instance (mêmes fonctions que l'appli).
 // ============================================================================
 
-const SH = "\\operatorname{sh}";
-const CH = "\\operatorname{ch}";
 const PHRASE_PARITE = { paire: "f est paire.", impaire: "f est impaire.", aucune: "f n'est ni paire ni impaire." } as const;
 
-function fonctionLatex(exercice: ExerciceHyperboliques): string {
-  return blocDonnees(exercice)[0];
-}
 
-function kLatex(exercice: ExerciceHyperboliquesB): string {
-  if (exercice.kDen === 1) return `${exercice.kNum}`;
-  return `${exercice.kNum < 0 ? "-" : ""}\\dfrac{${Math.abs(exercice.kNum)}}{${exercice.kDen}}`;
-}
 
-/** Carré de l'inconnue, en fraction : 1+k² (trouverCh) ou k²−1 (trouverSh). */
-function carreInconnueLatex(exercice: ExerciceHyperboliquesB): string {
-  const d2 = exercice.kDen * exercice.kDen;
-  const n = exercice.sousType === "trouverCh" ? d2 + exercice.kNum * exercice.kNum : exercice.kNum * exercice.kNum - d2;
-  return d2 === 1 ? `${n}` : `\\dfrac{${n}}{${d2}}`;
-}
 
 /** Parité dont la réponse attendue contredit le réflexe (variantes « piège ») — sh², x·sh, sh + c. */
 const PIEGES_PARITE = new Set(["shCarre", "xSh", "shPlusConstante"]);
@@ -130,54 +114,6 @@ function reponseBreveHyperboliques(exercice: ExerciceHyperboliques): FragmentCon
       return [texte("a) "), latex(`f'(x) = ${formatDeriveeC(exercice)}`), texte(" ; b) "), latex(`f''(x) = ${formatDeriveeSecondeC(exercice)}`)];
     case "D":
       return [texte("a) "), latex(`f(x) = ${formatFormeExponentielleD(exercice)}`), texte(" ; b) "), latex(reponseAttendueLatex(exercice, "dLimites"))];
-  }
-}
-
-function correctionDetailleeHyperboliques(exercice: ExerciceHyperboliques): EtapeCorrection[] {
-  switch (exercice.famille) {
-    case "A": {
-      const parite = pariteAttendueA(exercice);
-      const comparaison =
-        parite === "paire" ? "on retrouve f(x) : " : parite === "impaire" ? "on obtient −f(x) : " : "on n'obtient ni f(x) ni −f(x) : ";
-      return [
-        { label: "Méthode", fragments: [texte("Calculer f(−x) en utilisant "), latex(`${SH}(-x)=-${SH}(x)`), texte(" (sh impaire) et "), latex(`${CH}(-x)=${CH}(x)`), texte(" (ch paire), puis comparer à f(x) et à −f(x).")] },
-        { label: "Calcul", fragments: [latex(`f(-x) = ${formatFMoinsXA(exercice)}`)] },
-        { label: "Comparaison", fragments: [texte(comparaison), latex(fonctionLatex(exercice))] },
-        { label: "Conclusion", fragments: [texte(PHRASE_PARITE[parite])] },
-      ];
-    }
-    case "B": {
-      const etapes: EtapeCorrection[] = [
-        { label: "Méthode", fragments: [texte("On utilise l'identité "), latex(`${CH}^2(x)-${SH}^2(x)=1`), texte(" en x₀.")] },
-        exercice.sousType === "trouverCh"
-          ? { label: "Calcul", fragments: [latex(`${CH}^2(x_0) = 1+${SH}^2(x_0) = 1+\\left(${kLatex(exercice)}\\right)^2 = ${carreInconnueLatex(exercice)}`)] }
-          : { label: "Calcul", fragments: [latex(`${SH}^2(x_0) = ${CH}^2(x_0)-1 = \\left(${kLatex(exercice)}\\right)^2-1 = ${carreInconnueLatex(exercice)}`)] },
-      ];
-      if (exercice.sousType === "trouverCh") {
-        etapes.push({ label: "Signe", fragments: [texte("ch(x) ≥ 1 pour tout réel x : on garde la racine positive.")] });
-      } else if (exercice.signeX0 === null) {
-        etapes.push({ label: "Signe", fragments: [texte("Le signe de x₀ n'est pas donné et sh(x) a le signe de x : les deux racines conviennent.")] });
-      } else {
-        etapes.push({ label: "Signe", fragments: [texte(`sh(x) a le signe de x et x₀ ${exercice.signeX0 > 0 ? "> 0" : "< 0"} : on garde la racine ${exercice.signeX0 > 0 ? "positive" : "négative"}.`)] });
-      }
-      etapes.push({ label: "Conclusion", fragments: [latex(reponseAttendueLatex(exercice, "bValeurs"))] });
-      return etapes;
-    }
-    case "C":
-      return [
-        { label: "Méthode", sousQuestion: "a", fragments: [latex(`${SH}' = ${CH}`), texte(" et "), latex(`${CH}' = ${SH}`), texte(` ; la dérivée de l'argument ${exercice.k === 1 ? "x vaut 1" : `${exercice.k}x fait apparaître le facteur ${exercice.k}`}.`)] },
-        { label: "Calcul", sousQuestion: "a", fragments: [latex(`f'(x) = ${formatDeriveeC(exercice)}`)] },
-        { label: "Calcul", sousQuestion: "b", fragments: [texte("Même règle appliquée à f'(x) : "), latex(`f''(x) = ${formatDeriveeSecondeC(exercice)}`)] },
-      ];
-    case "D": {
-      const { a, b } = exercice;
-      return [
-        { label: "Méthode", sousQuestion: "a", fragments: [texte("Remplacer sh(x) et ch(x) par leur définition, puis regrouper les termes en "), latex("e^x"), texte(" et en "), latex("e^{-x}"), texte(" : coefficient de "), latex("e^x"), texte(" : "), latex("\\dfrac{a+b}{2}"), texte(", de "), latex("e^{-x}"), texte(" : "), latex("\\dfrac{b-a}{2}"), texte(".")] },
-        { label: "Calcul", sousQuestion: "a", fragments: [latex(`f(x) = ${formatFormeExponentielleD(exercice)}`)] },
-        { label: "Limites", sousQuestion: "b", fragments: [texte("En +∞, "), latex("e^{-x}\\to 0"), texte(` : le terme en eˣ domine, de coefficient a+b = ${a + b}. En −∞, `), latex("e^{x}\\to 0"), texte(` : le terme en e⁻ˣ domine, de coefficient b−a = ${b - a}.`)] },
-        { label: "Conclusion", sousQuestion: "b", fragments: [latex(reponseAttendueLatex(exercice, "dLimites"))] },
-      ];
-    }
   }
 }
 

@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceHyperboliques } from "./generateurs6e/hyperboliques";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeHyperboliques, phasesHyperboliques } from "./generateurs6e/hyperboliques/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import {
   NIVEAU_AIDE_MAX,
   activerAideSuivante,
@@ -170,9 +173,14 @@ export function App6gen19() {
   /** Réponse attendue de l'écran courant, en LaTeX — la même que le récapitulatif et le corrigé. */
   const reponseAttenduePhase = () => <Katex expression={reponseAttendueLatex(exercice, phase)} block />;
 
+  // Corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier, `corrigeDetaille.ts`),
+  // affiché sous la réponse attendue quand elle est révélée.
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeHyperboliques(exercice), lettreEtape(phasesHyperboliques(exercice).indexOf(phase)))} />;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: reponseAttenduePhase(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

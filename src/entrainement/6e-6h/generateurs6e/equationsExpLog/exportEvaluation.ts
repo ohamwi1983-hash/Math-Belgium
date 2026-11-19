@@ -9,7 +9,7 @@ import type {
   FamilleEquationsExpLog,
 } from "../../core6e/equationsExpLog.types";
 import type { PhaseEquationsExpLog } from "../../moteur6e/typesEquationsExpLog";
-import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, CritereBareme, ErreurFrequente, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, CritereBareme, ErreurFrequente, SectionExercice } from "../../../export/genererFeuilleExercices";
 import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
@@ -30,10 +30,9 @@ import {
   formatDecimal,
   formatReponseAttenduePhaseLatex,
   polynomeELatex,
-  xExactA,
-  xExactC,
   xExactD,
 } from "../../ui6e/formatEquationsExpLog";
+import { correctionDetailleeEquationsExpLog } from "./corrigeDetaille";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEquationsExpLog } from "./index";
 import { profilEquationsExpLog, LIBELLE_CAS_EQUATIONS_EXP_LOG } from "../profilsEvaluationLogarithmes";
 
@@ -136,10 +135,6 @@ function equationEnTLatex(ex: ExerciceEqLogC): string {
   return rep(ex, "cEcran1")[0];
 }
 
-/** `x = log_base(t)` exact pour une valeur de t (entier, ln(t), ou ln(t)/ln(base)). */
-function xDeTLatex(ex: ExerciceEqLogC, t: number): string {
-  return xExactC(ex, t);
-}
 
 function reponseBreveEquationsExpLog(exercice: ExerciceEquationsExpLog): FragmentConsigne[] {
   switch (exercice.famille) {
@@ -171,39 +166,7 @@ function criteresDifficulte(e: ExerciceEquationsExpLog): CriteresDifficulte {
  * E 8, G 6. */
 // ---------------------------------------------------------------------------- Famille A
 
-function correctionA(ex: ExerciceEqLogA): EtapeCorrection[] {
-  const base = String(ex.base);
-  const affine = formatAffineLatex(ex.m, ex.n);
-  const etapes: EtapeCorrection[] = [{ label: "Condition", fragments: [texte("Aucune condition d'existence : "), latex(`${base}^{${affine}}`), texte(" est défini pour tout réel x.")] }];
-  if (ex.estPuissancePropre) {
-    etapes.push({ label: "Méthode", sousQuestion: "a", fragments: [texte("Le second membre est une puissance de "), latex(base), texte(" : "), latex(`${formatCLatex(ex)}=${base}^{${ex.p}}`), texte(", on égale les exposants (aucun logarithme utile).")] });
-  } else {
-    etapes.push({ label: "Méthode", sousQuestion: "a", fragments: [latex(String(ex.C)), texte(" n'est pas une puissance entière de "), latex(base), texte(" : on prend le logarithme, "), latex(`${base}^{u}=${ex.C}\\iff u=\\log_{${base}}(${ex.C})=\\dfrac{\\ln(${ex.C})}{\\ln(${base})}`), texte(".")] });
-  }
-  etapes.push({ label: "Calcul", sousQuestion: "a", fragments: [latex(`${affine}=${exposantExactA(ex)}`)] });
-  const secondMembre = ex.p !== null ? String(ex.p - ex.n) : `${exposantExactA(ex)}${ex.n === 0 ? "" : ex.n > 0 ? `-${ex.n}` : `+${-ex.n}`}`;
-  etapes.push({ label: "Calcul", sousQuestion: "b", fragments: [latex(`${formatCoef(ex.m)}x=${secondMembre}`), texte(", donc "), latex(egaliteX(rep(ex, "aEcran2")[0]))] });
-  etapes.push({ label: "Conclusion", fragments: [latex(ensembleLatex([xExactA(ex)]))] });
-  const piege = piegeA(ex);
-  if (piege) etapes.push({ label: "Piège", fragments: piege });
-  return etapes;
-}
 
-function formatCoef(m: number): string {
-  return m === 1 ? "" : m === -1 ? "-" : String(m);
-}
-
-/** Piège propre à l'instance — `null` quand aucun ne s'applique (ex. 5^{x+4} = 25 : m = 1, rien à
- * diviser), pour ne jamais afficher un avertissement hors sujet. */
-function piegeA(ex: ExerciceEqLogA): FragmentConsigne[] | null {
-  if (ex.estPuissancePropre && ex.p === 0) return [texte("Le second membre vaut 1 : "), latex(`1=${ex.base}^{0}`), texte(", l'exposant est 0 (pas 1).")];
-  if (ex.estPuissancePropre && (ex.p as number) < 0) return [texte("Une fraction "), latex(`\\dfrac{1}{${ex.base}^{k}}`), texte(" s'écrit "), latex(`${ex.base}^{-k}`), texte(" : l'exposant est NÉGATIF.")];
-  if (!ex.estPuissancePropre) return [latex(`\\log_{${ex.base}}(${ex.C})=\\dfrac{\\ln(${ex.C})}{\\ln(${ex.base})}`), texte(", et non "), latex(`\\dfrac{\\ln(${ex.base})}{\\ln(${ex.C})}`), texte(" ni "), latex(`\\ln\\!\\left(\\dfrac{${ex.C}}{${ex.base}}\\right)`), texte(".")];
-  if (ex.m === 1) return null;
-  const n = ex.n === 0 ? "" : ex.n > 0 ? `on soustrait ${ex.n}, puis ` : `on ajoute ${-ex.n}, puis `;
-  if (ex.m < 0) return [texte(`Pour isoler x, ${n}on divise par `), latex(String(ex.m)), texte(" : diviser par un nombre négatif change le signe du résultat.")];
-  return [texte(`Pour isoler x, ${n}on divise par `), latex(String(ex.m)), texte(" — dans cet ordre.")];
-}
 
 function baremeA(ex: ExerciceEqLogA): BaremeExercice {
   const base = String(ex.base);
@@ -243,17 +206,6 @@ function egaliteRegroupeeB(ex: ExerciceEqLogB): string {
   return `x\\left(${den}\\right)=${num}`;
 }
 
-function correctionB(ex: ExerciceEqLogB): EtapeCorrection[] {
-  return [
-    { label: "Condition", fragments: [texte("Aucune condition d'existence : les deux exponentielles sont définies sur ℝ.")] },
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("Bases différentes ("), latex(`${ex.base1}`), texte(" et "), latex(`${ex.base2}`), texte(") : on prend ln des deux membres, avec "), latex("\\ln(a^u)=u\\cdot\\ln(a)"), texte(".")] },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(rep(ex, "bEcran1")[0])] },
-    { label: "Calcul", sousQuestion: "b", fragments: [texte("On regroupe les termes en x : "), latex(egaliteRegroupeeB(ex)), texte(", donc "), latex(egaliteX(rep(ex, "bEcran2")[0]))] },
-    { label: "Conclusion", fragments: [latex(`S=\\left\\{${rep(ex, "bEcran2")[0].split(" \\approx")[0]}\\right\\}`)] },
-    { label: "Piège", fragments: [texte("Tout l'exposant multiplie le ln : "), latex(`\\ln\\!\\left(${ex.base1}^{${formatAffineLatex(ex.m1, ex.n1)}}\\right)=(${formatAffineLatex(ex.m1, ex.n1)})\\ln(${ex.base1})`), texte(" — parenthèses obligatoires.")] },
-  ];
-}
-
 function baremeB(ex: ExerciceEqLogB): BaremeExercice {
   return {
     reponseFinale: reponseBreveEquationsExpLog(ex),
@@ -281,37 +233,6 @@ function erreurParenthesesB(ex: ExerciceEqLogB): ErreurFrequente[] {
 }
 
 // ---------------------------------------------------------------------------- Famille C
-
-function correctionC(ex: ExerciceEqLogC): EtapeCorrection[] {
-  const b = formatBaseLatex(ex.base);
-  const racines = racinesEnT(ex);
-  const rejetees = racines.filter((t) => t <= 0);
-  const delta = ex.B * ex.B - 4 * ex.A * ex.Cc;
-  const etapes: EtapeCorrection[] = [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("On pose "), latex(`t=${b}^{x}`), texte(" ; alors "), latex(`${b}^{2x}=\\left(${b}^{x}\\right)^{2}=t^{2}`), texte(".")] },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(equationEnTLatex(ex))] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(`\\Delta=(${ex.B})^{2}-4\\cdot ${ex.A}\\cdot (${ex.Cc})=${delta}`), texte(", racines "), latex(`t_1=${racines[0]}`), texte(" et "), latex(`t_2=${racines[1]}`), texte(".")] },
-    {
-      label: "Condition",
-      sousQuestion: "b",
-      fragments:
-        rejetees.length === 0
-          ? [texte("Comme "), latex(`${b}^{x}>0`), texte(", t doit être strictement positif : les deux valeurs conviennent.")]
-          : [texte("Comme "), latex(`${b}^{x}>0`), texte(", t doit être strictement positif : on rejette "), latex(rejetees.map((t) => `t=${t}`).join(",\\ ")), texte(".")],
-    },
-  ];
-  if (ex.tValides.length > 0) {
-    etapes.push({ label: "Calcul", sousQuestion: "c", fragments: ex.tValides.flatMap((t, i) => [...(i === 0 ? [] : [texte(" ; ")]), latex(`${b}^{x}=${t}\\iff ${egaliteX(rep(ex, "cEcran3")[i])}`)]) });
-  } else {
-    etapes.push({ label: "Calcul", sousQuestion: "c", fragments: [texte("Aucune valeur de t ne convient : il n'y a pas de x à calculer.")] });
-  }
-  etapes.push({ label: "Conclusion", fragments: [latex(ensembleLatex(ex.tValides.map((t) => xDeTLatex(ex, t))))] });
-  etapes.push({
-    label: "Piège",
-    fragments: rejetees.length > 0 ? [texte("Une racine "), latex("t\\le 0"), texte(" ne donne AUCUNE solution : "), latex(`${b}^{x}`), texte(" n'est jamais négatif ni nul.")] : [latex(`${b}^{2x}=t^{2}`), texte(", et non "), latex("2t"), texte(".")],
-  });
-  return etapes;
-}
 
 function baremeC(ex: ExerciceEqLogC): BaremeExercice {
   const racines = racinesEnT(ex);
@@ -343,18 +264,6 @@ function puissanceDLatex(ex: ExerciceEqLogD): string {
   return `${ex.a}^{${ex.k}}`;
 }
 
-function correctionD(ex: ExerciceEqLogD): EtapeCorrection[] {
-  const calcul = ex.k < 0 ? `x=${puissanceDLatex(ex)}=\\dfrac{1}{${ex.a}^{${-ex.k}}}=${xExactD(ex)}` : `x=${puissanceDLatex(ex)}=${xExactD(ex)}`;
-  return [
-    { label: "Condition", sousQuestion: "a", fragments: [texte("L'argument du logarithme doit être strictement positif : "), latex("x>0"), texte(", soit "), latex(`\\text{CE} : ${rep(ex, "dEcran1")[0]}`), texte(".")] },
-    { label: "Méthode", sousQuestion: "b", fragments: [latex(`\\log_{${ex.a}}(x)=${ex.k}\\iff x=${puissanceDLatex(ex)}`), texte(" (logarithme et exponentielle de même base se défont).")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(ex.k === 0 ? `x=${ex.a}^{0}=1` : calcul)] },
-    { label: "Vérification", fragments: [latex(`${xExactD(ex)}>0`), texte(" : la valeur respecte la CE.")] },
-    { label: "Conclusion", fragments: [latex(ensembleLatex([xExactD(ex)]))] },
-    { label: "Piège", fragments: ex.k < 0 ? [latex(`${ex.a}^{-n}=\\dfrac{1}{${ex.a}^{n}}`), texte(", jamais un nombre négatif.")] : ex.k === 0 ? [latex(`${ex.a}^{0}=1`), texte(", pas 0.")] : [latex(`x=${puissanceDLatex(ex)}`), texte(", pas "), latex(`${ex.k}^{${ex.a}}`), texte(" ni "), latex(`${ex.a}\\cdot ${ex.k}`), texte(".")] },
-  ];
-}
-
 function baremeD(ex: ExerciceEqLogD): BaremeExercice {
   const erreurs: ErreurFrequente[] = [{ description: [latex(`x=${ex.k}^{${ex.a}}`), texte(" ou "), latex(`x=${ex.a}\\cdot ${ex.k}`), texte(" (base et exposant confondus)")], cout: "−2" }];
   if (ex.k < 0) erreurs.push({ description: [latex(`${ex.a}^{${ex.k}}`), texte(" calculé comme "), latex(`-${ex.a}^{${-ex.k}}`)], cout: "−1" });
@@ -381,24 +290,6 @@ function reponsesAccepteesD(ex: ExerciceEqLogD): FragmentConsigne[][] {
 
 // ---------------------------------------------------------------------------- Famille E
 
-function correctionE(ex: ExerciceEqLogE): EtapeCorrection[] {
-  const S = ex.p + ex.q + ex.e;
-  const P = ex.p * ex.q - ex.d;
-  const delta = S * S - 4 * P;
-  const [r1, r2] = ex.racinesAlgebriques;
-  const statut = (r: number) => (ex.solutionsFinales.includes(r) ? `${r}\\ \\text{convient}` : `${r}\\ \\text{est rejeté}`);
-  const b = formatBaseLatex(ex.base);
-  return [
-    { label: "Condition", sousQuestion: "a", fragments: [latex(`x-${ex.p}>0`), texte(", "), latex(`x-${ex.q}>0`), texte(" et "), latex(`${formatAffineLatex(ex.e, ex.d)}>0`), texte(", donc "), latex(`\\text{CE} : ${ceELatex(ex)}`), texte(".")] },
-    { label: "Méthode", sousQuestion: "b", fragments: [latex(`\\log_{${b}}(A)+\\log_{${b}}(B)=\\log_{${b}}(A\\cdot B)`), texte(", puis on égale les arguments (même base).")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(rep(ex, "eEcran2")[0])] },
-    { label: "Calcul", sousQuestion: "c", fragments: [latex(`${polynomeELatex(ex)}=0`), texte(", "), latex(`\\Delta=${delta}`), texte(", racines "), latex(`x_1=${r1}`), texte(" et "), latex(`x_2=${r2}`), texte(".")] },
-    { label: "Vérification", sousQuestion: "c", fragments: [texte("Avec la CE "), latex(ceELatex(ex)), texte(" : "), latex(`${statut(r1)}\\ ;\\ ${statut(r2)}`), texte(".")] },
-    { label: "Conclusion", fragments: [latex(ensembleLatex(ex.solutionsFinales.map(String)))] },
-    { label: "Piège", fragments: ex.solutionsFinales.length < 2 ? [texte("Une racine de l'équation du second degré n'est solution que si elle respecte la CE de l'équation de DÉPART.")] : [latex(`\\log_{${b}}(A)+\\log_{${b}}(B)\\neq\\log_{${b}}(A+B)`), texte(" : la somme de logarithmes devient le logarithme du PRODUIT.")] },
-  ];
-}
-
 function baremeE(ex: ExerciceEqLogE): BaremeExercice {
   const rejetees = ex.racinesAlgebriques.filter((r) => !ex.solutionsFinales.includes(r));
   const erreurs: ErreurFrequente[] = [];
@@ -421,43 +312,6 @@ function baremeE(ex: ExerciceEqLogE): BaremeExercice {
 
 // ---------------------------------------------------------------------------- Famille G
 
-function ceViolationLatex(ex: Extract<ExerciceEqLogG, { type: "violationCE" }>): string {
-  return `${formatAffineLatex(ex.m1, ex.n1)}>0 \\ \\text{et}\\ ${formatAffineLatex(ex.m2, ex.n2)}>0`;
-}
-
-function correctionG(ex: ExerciceEqLogG): EtapeCorrection[] {
-  const simplifiee = rep(ex, "gEcran1")[0];
-  if (ex.type === "violationCE") {
-    const x0 = (ex.n2 - ex.n1) / (ex.m1 - ex.m2);
-    const v = ex.m1 * x0 + ex.n1;
-    return [
-      { label: "Condition", fragments: [latex(`\\text{CE} : ${ceViolationLatex(ex)}`)] },
-      { label: "Méthode", sousQuestion: "a", fragments: [texte("Deux logarithmes de même base sont égaux si et seulement si leurs arguments le sont.")] },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(simplifiee), texte(", donc "), latex(`x=${x0}`), texte(".")] },
-      { label: "Vérification", sousQuestion: "b", fragments: [texte("Pour "), latex(`x=${x0}`), texte(" : "), latex(`${formatAffineLatex(ex.m1, ex.n1)}=${v}\\le 0`), texte(" — la CE n'est pas respectée.")] },
-      { label: "Conclusion", fragments: [latex("S=\\varnothing")] },
-      { label: "Piège", fragments: [texte("La valeur trouvée en égalant les arguments n'est qu'une CANDIDATE : sans test de la CE, on conclurait à tort "), latex(`S=\\{${x0}\\}`), texte(".")] },
-    ];
-  }
-  if (ex.type === "identite") {
-    const b = formatBaseLatex(ex.base);
-    return [
-      { label: "Condition", fragments: [latex(`${formatAffineLatex(ex.m1, ex.n1)}>0`), texte(" et "), latex(`${formatAffineLatex(ex.m2, ex.n2)}>0`), texte(", soit "), latex(`\\text{CE} : ${ceIdentiteLatex(ex)}`), texte(".")] },
-      { label: "Méthode", sousQuestion: "a", fragments: [texte("Propriété du produit au membre de gauche : "), latex(`\\log_{${b}}(A)+\\log_{${b}}(B)=\\log_{${b}}(A\\cdot B)`), texte(".")] },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(simplifiee)] },
-      { label: "Conclusion", sousQuestion: "b", fragments: [texte("L'égalité est vraie pour tout x où l'équation a un sens : "), latex(reponseBreveEquationsExpLog(ex)[0].valeur)] },
-      { label: "Piège", fragments: [texte("« Vrai pour tout x » ne veut pas dire "), latex("S=\\mathbb{R}"), texte(" : seulement les x de la CE.")] },
-    ];
-  }
-  return [
-    { label: "Condition", fragments: [latex(`x^{2}+${ex.b0}>0`), texte(" pour tout réel x : pas de restriction.")] },
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("Même base des deux côtés : on égale les arguments.")] },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(`x^{2}+${ex.b0}=${ex.c0}`), texte(", donc "), latex(simplifiee), texte(".")] },
-    { label: "Vérification", sousQuestion: "b", fragments: [texte("Un carré n'est jamais négatif : "), latex(`x^{2}=${ex.c0 - ex.b0}`), texte(" n'a pas de solution réelle.")] },
-    { label: "Conclusion", fragments: [latex("S=\\varnothing")] },
-    { label: "Piège", fragments: [texte("Écrire "), latex(`x=\\pm\\sqrt{${ex.c0 - ex.b0}}`), texte(" n'a pas de sens : la racine carrée d'un nombre négatif n'existe pas.")] },
-  ];
-}
 
 function baremeG(ex: ExerciceEqLogG): BaremeExercice {
   const simplifiee = rep(ex, "gEcran1")[0];
@@ -505,23 +359,6 @@ function baremeG(ex: ExerciceEqLogG): BaremeExercice {
 }
 
 // ---------------------------------------------------------------------------- Dispatch
-
-function correctionDetailleeEquationsExpLog(exercice: ExerciceEquationsExpLog): EtapeCorrection[] {
-  switch (exercice.famille) {
-    case "A":
-      return correctionA(exercice);
-    case "B":
-      return correctionB(exercice);
-    case "C":
-      return correctionC(exercice);
-    case "D":
-      return correctionD(exercice);
-    case "E":
-      return correctionE(exercice);
-    case "G":
-      return correctionG(exercice);
-  }
-}
 
 function baremeEquationsExpLog(exercice: ExerciceEquationsExpLog): BaremeExercice {
   switch (exercice.famille) {

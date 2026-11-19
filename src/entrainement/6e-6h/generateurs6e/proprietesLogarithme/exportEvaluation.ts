@@ -5,7 +5,6 @@ import type {
   BlocCorrection,
   CritereBareme,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -13,10 +12,9 @@ import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { Caracteristique } from "../../core6e/decompositionLogarithme";
-import { arbreVersLatexLogA, calculerEtatsArgument, etatVersLatex, resteVersLatexLogA } from "../../core6e/decompositionLogarithme";
+import { arbreVersLatexLogA, calculerEtatsArgument, etatVersLatex } from "../../core6e/decompositionLogarithme";
 import { caracteristiqueDeLEtape, nombreEtapesAlgebriques } from "../../moteur6e/typesProprietesLogarithme";
 import {
-  FORMULE_PROPRIETE,
   consigneEcriteEtape,
   regleNotationEcrite,
   consigneGenerale,
@@ -27,6 +25,7 @@ import {
   phaseTransformationDeLEtape,
 } from "../../ui6e/formatProprietesLogarithme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProprietesLogarithme } from "./index";
+import { correctionDetailleeProprietesLogarithme } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceProprieteLogarithme>` pour `6gen13` (Propriétés du
@@ -70,12 +69,6 @@ function construireCorrectionProprietesLogarithme(exercice: ExerciceProprieteLog
 // (`membreGaucheCorrigeLatex`, `formatReponseAttenduePhaseLatex`) : jamais de seconde source.
 // ============================================================================
 
-const OPERATION_EXTERIEURE: Record<Exclude<Caracteristique, "changementBase">, string> = {
-  produit: "un produit",
-  quotient: "un quotient",
-  puissance: "une puissance",
-  racine: "une racine",
-};
 
 function lettreEtape(etape: number): string {
   return String.fromCharCode(97 + etape);
@@ -121,56 +114,6 @@ function reponseBreveProprietesLogarithme(exercice: ExerciceProprieteLogarithme)
  * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
 function criteresDifficulte(e: ExerciceProprieteLogarithme): CriteresDifficulte {
   return { ...etapesDuCorrige(correctionDetailleeProprietesLogarithme(e)), methode: 0, piege: 0 };
-}
-
-function piegeProprietesLogarithme(exercice: ExerciceProprieteLogarithme): FragmentConsigne[] {
-  const presentes = caracteristiquesDesEtapes(exercice);
-  if (coefficientADistribuer(exercice)) {
-    return [texte("Un coefficient déjà sorti (exposant p ou 1/k) multiplie TOUT ce qui reste : quand on décompose ensuite le produit ou le quotient, il s'applique aux deux termes, pas seulement au premier.")];
-  }
-  if (presentes.includes("changementBase")) {
-    return [texte("On multiplie TOUTE l'expression obtenue en base a par "), latex(`c=\\log_${exercice.b}(a)`), texte(" — pas par "), latex(`\\log_a(${exercice.b})`), texte(", et pas seulement le premier terme.")];
-  }
-  if (presentes.includes("racine")) {
-    return [texte("La racine k-ième est une puissance 1/k : on DIVISE le logarithme par k, on ne le multiplie pas.")];
-  }
-  if (presentes.includes("quotient")) {
-    return [texte("Le logarithme d'un quotient est une DIFFÉRENCE : "), latex("\\log_a\\!\\left(\\dfrac{X}{Y}\\right)\\neq\\dfrac{\\log_a(X)}{\\log_a(Y)}"), texte(".")];
-  }
-  return [texte("Le logarithme d'un produit est une SOMME : "), latex("\\log_a(X\\cdot Y)\\neq\\log_a(X)\\cdot\\log_a(Y)"), texte(".")];
-}
-
-function correctionDetailleeProprietesLogarithme(exercice: ExerciceProprieteLogarithme): EtapeCorrection[] {
-  const etats = calculerEtatsArgument(exercice.arbre);
-  const etapes: EtapeCorrection[] = [];
-  const total = nombreEtapesAlgebriques(exercice);
-  for (let etape = 0; etape < total; etape++) {
-    const sousQuestion = lettreEtape(etape);
-    const caracteristique = caracteristiqueDeLEtape(exercice, etape);
-    const calcul = [latex(`${membreGaucheCorrigeLatex(exercice, etape)} = ${reponseEtapeLatex(exercice, etape)}`)];
-    if (caracteristique === "changementBase") {
-      etapes.push({ label: "Méthode", sousQuestion, fragments: [texte("Changement de base, appliqué à l'expression entière : "), latex(FORMULE_PROPRIETE.changementBase), texte(", avec "), latex(`\\log_${exercice.b}(a)=c`), texte(".")] });
-      etapes.push({ label: "Calcul", sousQuestion, fragments: [latex(`${logBLatex(exercice)} = ${arbreVersLatexLogA(exercice.arbre)}\\cdot\\log_${exercice.b}(a)`), texte(", donc "), ...calcul] });
-      continue;
-    }
-    etapes.push({
-      label: "Méthode",
-      sousQuestion,
-      fragments: [
-        texte("L'opération la plus extérieure de "),
-        latex(resteVersLatexLogA(etats[etape]) ?? arbreVersLatexLogA(exercice.arbre)),
-        texte(` est ${OPERATION_EXTERIEURE[caracteristique]} : ${nomProprieteDeLEtape(exercice, etape).toLowerCase()}, `),
-        latex(FORMULE_PROPRIETE[caracteristique]),
-        texte("."),
-      ],
-    });
-    etapes.push({ label: "Calcul", sousQuestion, fragments: calcul });
-  }
-  const conclusion: FragmentConsigne[] = [latex(`${arbreVersLatexLogA(exercice.arbre)} = ${expressionFinaleLatex(exercice)}`)];
-  if (exercice.avecChangementBase) conclusion.push(texte(" et "), latex(`${logBLatex(exercice)} = ${reponseEtapeLatex(exercice, total - 1)}`));
-  etapes.push({ label: "Conclusion", fragments: [...conclusion, texte(".")] });
-  etapes.push({ label: "Piège", fragments: piegeProprietesLogarithme(exercice) });
-  return etapes;
 }
 
 function erreursFrequentesProprietesLogarithme(exercice: ExerciceProprieteLogarithme): ErreurFrequente[] {

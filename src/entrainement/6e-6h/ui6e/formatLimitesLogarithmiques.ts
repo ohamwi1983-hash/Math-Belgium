@@ -43,7 +43,7 @@ function latex(valeur: string): FragmentConsigne {
   return { type: "latex", valeur };
 }
 
-interface TermeSigne {
+export interface TermeSigne {
   valeur: number;
   suffixe: string;
   /** Insère `\cdot` entre le coefficient et le suffixe (coefficient≠±1) — nécessaire pour un
@@ -52,7 +52,7 @@ interface TermeSigne {
   cdot?: boolean;
 }
 
-function formatSommeTermes(termes: TermeSigne[]): string {
+export function formatSommeTermes(termes: TermeSigne[]): string {
   const nonNuls = termes.filter((t) => t.valeur !== 0);
   if (nonNuls.length === 0) return "0";
   return nonNuls
@@ -66,12 +66,12 @@ function formatSommeTermes(termes: TermeSigne[]): string {
 }
 
 /** Base décimale (ex. 0,2) avec la virgule française — jamais `0.2`. */
-function formatBaseDecimale(base: number): string {
+export function formatBaseDecimale(base: number): string {
   return String(base).replace(".", "{,}");
 }
 
 /** Jamais d'exposant `^{1}` littéral. */
-function formatPuissance(base: string, exposant: number): string {
+export function formatPuissance(base: string, exposant: number): string {
   return exposant === 1 ? base : `${base}^{${exposant}}`;
 }
 
@@ -86,7 +86,7 @@ export function formatCibleTexte(cible: CibleLimiteLog): string {
 }
 
 /** `1+ku` sans double signe (jamais `1+-3u`). */
-function formatUnPlusKU(coefficient: number): string {
+export function formatUnPlusKU(coefficient: number): string {
   if (coefficient === 0) return "1";
   const abs = Math.abs(coefficient);
   const corps = abs === 1 ? "u" : `${abs}u`;
@@ -94,7 +94,7 @@ function formatUnPlusKU(coefficient: number): string {
 }
 
 /** `ku` sans coefficient 1 visible. */
-function formatKU(coefficient: number): string {
+export function formatKU(coefficient: number): string {
   if (coefficient === 1) return "u";
   if (coefficient === -1) return "-u";
   return `${coefficient}u`;
@@ -110,7 +110,7 @@ export function formatCategorieLabel(categorie: string): string {
 // Famille A
 // ============================================================================
 
-function formatFonctionA(exercice: ExerciceLimiteLogA): string {
+export function formatFonctionA(exercice: ExerciceLimiteLogA): string {
   switch (exercice.sousType) {
     case "sous1": {
       const numerateur = formatSommeTermes([{ valeur: exercice.k, suffixe: "\\ln(x)" }]);
@@ -218,13 +218,13 @@ export function formeFactoriseeA(exercice: ExerciceLimiteLogA): string {
 // ============================================================================
 
 /** Base `x/x0` simplifiée (jamais `x/1`), éventuellement élevée à `k` (jamais `^1`). */
-function formatBaseB(x0: number, k: number): string {
+export function formatBaseB(x0: number, k: number): string {
   const quotient = x0 === 1 ? "x" : `\\frac{x}{${x0}}`;
   if (k === 1) return quotient;
   return x0 === 1 ? `x^{${k}}` : `\\left(${quotient}\\right)^{${k}}`;
 }
 
-function formatFonctionB(exercice: ExerciceLimiteLogB): string {
+export function formatFonctionB(exercice: ExerciceLimiteLogB): string {
   if (exercice.sousType === "quotient") return `\\log_{${formatBaseB(exercice.x0, exercice.k)}}\\left(${formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }])}\\right)`;
   return `(x-${exercice.x0})\\cdot\\log_{${formatBaseB(exercice.x0, 1)}}(${exercice.k})`;
 }
@@ -273,7 +273,7 @@ function aideB2(phase: "bReformuler" | "bConclure", exercice: ExerciceLimiteLogB
 // Famille C
 // ============================================================================
 
-function formatFonctionC(exercice: ExerciceLimiteLogC): string {
+export function formatFonctionC(exercice: ExerciceLimiteLogC): string {
   if (exercice.sousType === "c1") return `\\log_x(x+${exercice.c})`;
   if (exercice.sousType === "c2") return `x\\cdot ${exercice.base}^{\\frac{${exercice.coefC}}{x}}`;
   const denominateur = exercice.coefC === 1 ? "x^2" : `${exercice.coefC}x^2`;
@@ -281,7 +281,7 @@ function formatFonctionC(exercice: ExerciceLimiteLogC): string {
   return `\\frac{${exercice.base}^x ${constante} + \\sin(x)}{\\ln(1+${denominateur})}`;
 }
 
-function formatDirectionC(exercice: ExerciceLimiteLogC): string {
+export function formatDirectionC(exercice: ExerciceLimiteLogC): string {
   if (exercice.sousType === "c1") return exercice.direction === "droite" ? "x \\to 1^+" : "x \\to 1^-";
   if (exercice.sousType === "c2") return exercice.direction === "plus_infini" ? "x \\to +\\infty" : "x \\to -\\infty";
   return "x \\to 0";

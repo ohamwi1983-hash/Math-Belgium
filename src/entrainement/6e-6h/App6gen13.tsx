@@ -18,6 +18,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeProprietesLogarithme } from "./generateurs6e/proprietesLogarithme/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -122,9 +125,14 @@ export function App6gen13() {
   const ecran = ecranDeLaPhase(exercice, phase);
   const niveauAide = etat.niveauAide;
 
+  // Corrigé détaillé « comme au tableau » de l'étape algébrique (mêmes lignes que le papier,
+  // `corrigeDetaille.ts`) : écran de choix et écran de transformation d'une même étape.
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeProprietesLogarithme(exercice), lettreEtape(ecran.etape))} />;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (

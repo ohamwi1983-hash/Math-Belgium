@@ -23,7 +23,7 @@ import type { EtatSessionLimiteLogarithmique, PhaseLimiteLogarithmique } from ".
 import type { ReponseLimiteLog } from "./moteur6e/verificationLimitesLogarithmiques";
 import { categorieCorrecteD, diagnostiquerBConclure, diagnostiquerBReformuler, diagnostiquerSaisieValeurD } from "./moteur6e/verificationLimitesLogarithmiques";
 import type { ChoixFormePuissance } from "./core6e/limitesLogarithmiques.types";
-import { correctionDetailleeD } from "./generateurs6e/limitesLogarithmiques/corrigeDetaille";
+import { correctionDetailleeLimitesLog } from "./generateurs6e/limitesLogarithmiques/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { EtapeChampLimiteLog } from "./components6e/EtapeChampLimiteLog";
@@ -217,16 +217,15 @@ export function App6gen17() {
     return estLatex ? <Katex expression={valeur} /> : <>{valeur}</>;
   };
 
-  // Famille D : corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier,
+  // Corrigé détaillé « comme au tableau » de l'étape, toutes familles (mêmes lignes que le papier,
   // `corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
-  const corrigeDetaille =
-    exercice.famille === "D" ? <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeD(exercice), lettreEtape(sequenceReelle(exercice).indexOf(phase)))} /> : undefined;
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLimitesLog(exercice), lettreEtape(sequenceReelle(exercice).indexOf(phase)))} />;
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         ...(enAttente.messageRevele ? { messageRevele: enAttente.messageRevele } : {}),
-        ...(corrigeDetaille ? { corrigeDetaille } : {}),
+        corrigeDetaille,
         reponseAttendue: reponseAttenduePhase(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

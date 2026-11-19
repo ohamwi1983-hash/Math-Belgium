@@ -15,7 +15,6 @@ import type {
   BaremeExercice,
   BlocCorrection,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
   ZoneReponse,
@@ -43,6 +42,7 @@ import {
 import { formatEnsembleReelLatex } from "../../ui6e/formatEnsembleReel";
 import { formatFractionLatex } from "../../ui6e/formatFraction";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceInequationLogarithmique, type IdVarianteInequationLogarithmique } from "./index";
+import { correctionDetailleeInequationsLog } from "./corrigeDetaille";
 import { profilInequationsLogarithmiques, LIBELLE_CAS_INEQUATIONS_LOG } from "../profilsEvaluationLogarithmes";
 
 /**
@@ -144,11 +144,6 @@ function comparateurArguments(ex: { baseSuperieureA1: boolean; comparateur: Comp
   return ex.baseSuperieureA1 ? ex.comparateur : inverserComparateurLatex(ex.comparateur);
 }
 
-function phraseSens(ex: { baseSuperieureA1: boolean; base: BaseLog }): FragmentConsigne[] {
-  return ex.baseSuperieureA1
-    ? [texte("Base "), latex(`${baseLatex(ex.base)}>1`), texte(" : le logarithme est croissant, le sens de l'inégalité est CONSERVÉ.")]
-    : [texte("Base "), latex(`0<${baseLatex(ex.base)}<1`), texte(" : le logarithme est décroissant, le sens de l'inégalité est INVERSÉ.")];
-}
 
 /** `base^k` en fraction exacte {num, den} (base = num/den, k entier relatif). */
 function puissanceExacte(base: BaseLog, k: number): { num: number; den: number } {
@@ -207,26 +202,6 @@ function passageA(ex: ExerciceLogA): { egalite: string; solution: string } {
   };
 }
 
-function correctionA(ex: ExerciceLogA): EtapeCorrection[] {
-  const bl = baseLatex(ex.base);
-  const { egalite, solution } = passageA(ex);
-  return [
-    { label: "Condition", sousQuestion: "a", fragments: [latex(`${formatAffineLatex({ m: ex.m, n: ex.n })}>0`), texte(", soit "), latex(`\\text{CE} : x\\in ${ensembleLatex(ex.ceEcran1)}`), texte(".")] },
-    { label: "Méthode", sousQuestion: "b", fragments: [texte("On écrit "), latex(`${ex.k}=${logBaseLatex(bl, puissanceBaseLatex(ex.base, ex.k))}`), texte(". "), ...phraseSens(ex)] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(egalite), texte(", donc "), latex(solution), texte(".")] },
-    { label: "Vérification", sousQuestion: "b", fragments: [texte("Intersection avec la CE "), latex(ensembleLatex(ex.ceEcran1)), texte(".")] },
-    { label: "Conclusion", fragments: sCorrige(ex.solutionEcran2) },
-    {
-      label: "Piège",
-      fragments: !ex.baseSuperieureA1
-        ? [texte("Base entre 0 et 1 : on inverse le sens en enlevant le logarithme.")]
-        : ex.m < 0
-          ? [texte("Diviser par "), latex(String(ex.m)), texte(" (négatif) inverse le sens de l'inégalité.")]
-          : [texte("Sans l'intersection avec la CE, on garderait des x pour lesquels le logarithme n'existe pas.")],
-    },
-  ];
-}
-
 function baremeA(ex: ExerciceLogA): BaremeExercice {
   const { egalite, solution } = passageA(ex);
   const erreurs: ErreurFrequente[] = [];
@@ -271,28 +246,6 @@ function passageB(ex: ExerciceLogB): { comparaison: string; resolution: string }
   };
 }
 
-function correctionB(ex: ExerciceLogB): EtapeCorrection[] {
-  const { comparaison, resolution } = passageB(ex);
-  const etapes: EtapeCorrection[] = [
-    { label: "Condition", sousQuestion: "a", fragments: [latex(`${argumentGaucheB(ex)}>0`), texte(" et "), latex(`${formatAffineLatex(ex.g)}>0`), texte(", soit "), latex(`\\text{CE} : x\\in ${ensembleLatex(ex.ceEcran1)}`), texte(".")] },
-    { label: "Méthode", sousQuestion: "b", fragments: [texte("Même base des deux côtés : on compare les arguments. "), ...phraseSens(ex)] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(comparaison), texte(", donc "), latex(resolution), texte(".")] },
-  ];
-  if (ex.sousType === "racine") etapes.splice(2, 0, { label: "Méthode", sousQuestion: "b", fragments: [texte("Sur la CE, les deux membres sont positifs : on peut élever au carré sans changer le sens.")] });
-  etapes.push({ label: "Vérification", sousQuestion: "b", fragments: [texte("Intersection avec la CE "), latex(ensembleLatex(ex.ceEcran1)), texte(".")] });
-  etapes.push({ label: "Conclusion", fragments: sCorrige(ex.solutionEcran2) });
-  etapes.push({
-    label: "Piège",
-    fragments:
-      ex.sousType === "racine"
-        ? [texte("Élever au carré n'est permis QUE parce que la CE rend les deux membres positifs.")]
-        : !ex.baseSuperieureA1
-          ? [texte("Base entre 0 et 1 : comparer les arguments INVERSE le sens.")]
-          : [texte("La comparaison des arguments ne vaut que sur la CE : il faut toujours intersecter.")],
-  });
-  return etapes;
-}
-
 function baremeB(ex: ExerciceLogB): BaremeExercice {
   const { comparaison, resolution } = passageB(ex);
   const erreurs: ErreurFrequente[] = [];
@@ -335,26 +288,6 @@ function inequationArgumentsC(ex: ExerciceLogC): { comparaison: string; resoluti
   };
 }
 
-function correctionC(ex: ExerciceLogC): EtapeCorrection[] {
-  const bl = baseLatex(ex.base);
-  const { comparaison, resolution } = inequationArgumentsC(ex);
-  return [
-    { label: "Condition", sousQuestion: "a", fragments: [latex(`${formatAffineLatex(ex.f)}>0`), texte(" et "), latex(`${formatAffineLatex(ex.g)}>0`), texte(", soit "), latex(`\\text{CE} : x\\in ${ensembleLatex(ex.ceEcran1)}`), texte(".")] },
-    { label: "Méthode", sousQuestion: "b", fragments: [texte(ex.sousType === "produit" ? "Somme de logarithmes = logarithme du produit : " : "Différence de logarithmes = logarithme du quotient : "), latex(`${logBaseLatex(bl, formatCombinaisonC(ex))} ${sym(ex.comparateur)} ${logBaseLatex(bl, String(ex.k))}`), texte(".")] },
-    { label: "Méthode", sousQuestion: "c", fragments: phraseSens(ex) },
-    { label: "Calcul", sousQuestion: "c", fragments: [latex(comparaison), texte(", soit "), latex(resolution), texte(".")] },
-    { label: "Vérification", sousQuestion: "c", fragments: [texte("Intersection avec la CE "), latex(ensembleLatex(ex.ceEcran1)), texte(".")] },
-    { label: "Conclusion", fragments: sCorrige(ex.solutionEcran3) },
-    {
-      label: "Piège",
-      fragments:
-        ex.sousType === "quotient"
-          ? [texte("Multiplier par "), latex(formatAffineLatex(ex.g)), texte(" ne change pas le sens SEULEMENT parce que ce facteur est positif sur la CE.")]
-          : [texte("La CE se pose sur l'inéquation de DÉPART (chaque argument), pas sur le produit combiné.")],
-    },
-  ];
-}
-
 function baremeC(ex: ExerciceLogC): BaremeExercice {
   const bl = baseLatex(ex.base);
   const { comparaison } = inequationArgumentsC(ex);
@@ -378,36 +311,6 @@ function baremeC(ex: ExerciceLogC): BaremeExercice {
 
 // ---------------------------------------------------------------------------- Famille D
 
-function correctionD(ex: ExerciceLogD): EtapeCorrection[] {
-  const bl = baseLatex(ex.base);
-  const [ya, yb] = [ex.y1, ex.y2].sort((u, v) => u - v);
-  const pa = puissanceExacte(ex.base, ya);
-  const pb = puissanceExacte(ex.base, yb);
-  return [
-    { label: "Condition", sousQuestion: "a", fragments: [latex("x>0"), texte(", soit "), latex(`\\text{CE} : x\\in ${ensembleLatex(ex.ceEcran1)}`), texte(".")] },
-    { label: "Méthode", sousQuestion: "b", fragments: [texte("On pose "), latex(`y=\\log_{${bl}}(x)`), texte(".")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(`${formatQuadratiqueYLatex(ex)} ${sym(ex.comparateur)} 0`)] },
-    { label: "Calcul", sousQuestion: "c", fragments: [texte("Racines "), latex(`y=${ya}`), texte(" et "), latex(`y=${yb}`), texte(" ; coefficient de "), latex("y^{2}"), texte(` ${ex.A > 0 ? "positif" : "négatif"} : `), latex(`y\\in ${ensembleLatex(ex.solutionEcran3)}`), texte(".")] },
-    {
-      label: "Calcul",
-      sousQuestion: "d",
-      fragments: [
-        latex(`x=${ex.base.den === 1 ? bl : `\\left(${bl}\\right)`}^{y}`),
-        texte(ex.baseSuperieureA1 ? " est croissante (bornes dans le même ordre) : " : " est décroissante (bornes échangées) : "),
-        latex(`${puissanceBaseLatex(ex.base, ya)}=${formatFractionLatex(pa.num, pa.den)}`),
-        texte(", "),
-        latex(`${puissanceBaseLatex(ex.base, yb)}=${formatFractionLatex(pb.num, pb.den)}`),
-        texte(", puis intersection avec la CE."),
-      ],
-    },
-    { label: "Conclusion", fragments: sCorrige(ex.solutionEcran4) },
-    {
-      label: "Piège",
-      fragments: ex.baseSuperieureA1 ? [texte("L'ensemble trouvé en y n'est PAS la réponse : il faut revenir à x avec "), latex(`x=${bl}^{y}`), texte(".")] : [texte("Base entre 0 et 1 : "), latex(`x=\\left(${bl}\\right)^{y}`), texte(" est décroissante, l'ordre des bornes s'inverse.")],
-    },
-  ];
-}
-
 function baremeD(ex: ExerciceLogD): BaremeExercice {
   const erreurs: ErreurFrequente[] = [{ description: [texte("Ensemble en y donné comme réponse finale")], cout: "−1" }];
   if (!ex.baseSuperieureA1) erreurs.push({ description: [texte("Bornes non échangées au retour en x (base entre 0 et 1)")], cout: "−1" });
@@ -426,27 +329,6 @@ function baremeD(ex: ExerciceLogD): BaremeExercice {
 }
 
 // ---------------------------------------------------------------------------- Famille E
-
-function correctionE(ex: ExerciceLogE): EtapeCorrection[] {
-  const conditions: EtapeCorrection = { label: "Condition", sousQuestion: "a", fragments: [latex(`x-${ex.p}>0`.replace("--", "+")), texte(" et "), latex(`-x+${ex.r}>0`.replace("+-", "-")), texte(", soit "), latex(`x>${ex.p}`), texte(" et "), latex(`x<${ex.r}`), texte(".")] };
-  if (!ex.ceCompatible) {
-    return [
-      conditions,
-      { label: "Vérification", sousQuestion: "a", fragments: [texte("Comme "), latex(`${ex.r}\\le ${ex.p}`), texte(", aucun réel n'est à la fois "), latex(`>${ex.p}`), texte(" et "), latex(`<${ex.r}`), texte(" : la CE est vide.")] },
-      { label: "Conclusion", fragments: [latex("S=\\varnothing"), texte(" (inutile de résoudre).")] },
-      { label: "Piège", fragments: [texte("Résoudre sans examiner la CE donne un ensemble faux : on doit d'abord vérifier que l'inéquation a un sens.")] },
-    ];
-  }
-  const cmp = comparateurArguments(ex);
-  return [
-    conditions,
-    { label: "Vérification", sousQuestion: "a", fragments: [texte("Comme "), latex(`${ex.p}<${ex.r}`), texte(", la CE est "), latex(ensembleLatex(ex.ceEcran1)), texte(" : elle admet des solutions.")] },
-    { label: "Méthode", sousQuestion: "b", fragments: phraseSens(ex) },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(`${formatAffineLatex({ m: 1, n: -ex.p })} ${sym(cmp)} ${formatAffineLatex({ m: -1, n: ex.r })}`), texte(", donc "), latex(resoudrePremierDegreLatex(2, -(ex.p + ex.r), cmp)), texte(", puis intersection avec la CE.")] },
-    { label: "Conclusion", fragments: sCorrige(ex.solution) },
-    { label: "Piège", fragments: [texte("Le résultat de la comparaison des arguments doit rester dans la CE "), latex(ensembleLatex(ex.ceEcran1)), texte(".")] },
-  ];
-}
 
 function baremeE(ex: ExerciceLogE): BaremeExercice {
   if (!ex.ceCompatible) {
@@ -480,25 +362,6 @@ function baremeE(ex: ExerciceLogE): BaremeExercice {
 
 // ---------------------------------------------------------------------------- Famille F
 
-function correctionF(ex: ExerciceLogF): EtapeCorrection[] {
-  const g = formatAffineLatex({ m: 1, n: -ex.p });
-  const carre = formatCarreXMoinsR(ex.r);
-  const vide: EnsembleReelGuide = { forme: "intervalles", points: [], morceaux: [] };
-  const casSup = ex.casVideEstSuperieurA1 ? vide : ex.ensembleSansR;
-  const casInf = ex.casVideEstSuperieurA1 ? ex.ensembleSansR : vide;
-  // a > 1 : g [cmp] g + carré ⟺ 0 [cmp] carré ; 0 < a < 1 : sens inversé.
-  const cmpSup = ex.comparateur === "<" ? `${carre}>0` : `${carre}<0`;
-  const cmpInf = ex.comparateur === "<" ? `${carre}<0` : `${carre}>0`;
-  return [
-    { label: "Condition", sousQuestion: "a", fragments: [latex(`${g}>0`), texte(" et "), latex(`${g}+${carre}>0`), texte(" ; la seconde découle de la première (un carré est positif), donc "), latex(`\\text{CE} : x\\in ${ensembleLatex(ex.ceEcran1)}`), texte(".")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(`f(x)-g(x)=\\left(${g}+${carre}\\right)-\\left(${g}\\right)=${carre}`)] },
-    { label: "Calcul", sousQuestion: "c", fragments: [texte("Si "), latex("a>1"), texte(" (sens conservé) : "), latex(`${cmpSup}`), texte(", donc "), latex(`S=${ensembleLatex(casSup)}`), texte(".")] },
-    { label: "Calcul", sousQuestion: "c", fragments: [texte("Si "), latex("0<a<1"), texte(" (sens inversé) : "), latex(`${cmpInf}`), texte(", donc "), latex(`S=${ensembleLatex(casInf)}`), texte(".")] },
-    { label: "Conclusion", fragments: reponseBreveInequationsLog(ex) },
-    { label: "Piège", fragments: [texte("Un carré est nul en "), latex(`x=${ex.r}`), texte(" : cette valeur est exclue quand l'inégalité est stricte.")] },
-  ];
-}
-
 function baremeF(ex: ExerciceLogF): BaremeExercice {
   const vide: EnsembleReelGuide = { forme: "intervalles", points: [], morceaux: [] };
   const casSup = ex.casVideEstSuperieurA1 ? vide : ex.ensembleSansR;
@@ -520,23 +383,6 @@ function baremeF(ex: ExerciceLogF): BaremeExercice {
 }
 
 // ---------------------------------------------------------------------------- Dispatch
-
-function correctionDetailleeInequationsLog(exercice: ExerciceInequationLogarithmique): EtapeCorrection[] {
-  switch (exercice.famille) {
-    case "A":
-      return correctionA(exercice);
-    case "B":
-      return correctionB(exercice);
-    case "C":
-      return correctionC(exercice);
-    case "D":
-      return correctionD(exercice);
-    case "E":
-      return correctionE(exercice);
-    case "F":
-      return correctionF(exercice);
-  }
-}
 
 function baremeInequationsLog(exercice: ExerciceInequationLogarithmique): BaremeExercice {
   switch (exercice.famille) {
