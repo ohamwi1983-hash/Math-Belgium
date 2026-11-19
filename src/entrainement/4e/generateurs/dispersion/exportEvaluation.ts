@@ -1,5 +1,7 @@
 import type { ExerciceDispersion, FamilleDispersion } from "../../core/dispersion.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeDispersion } from "./corrigeDetaille";
 import { texte, latex } from "../../../export/fragmentsDocx";
 import {
   LABEL_ECART_TYPE,
@@ -169,15 +171,6 @@ function tableauDonneesLatex(instance: ExerciceDispersion): string {
   return `\\begin{array}{c|${colonnes}}${LABEL_VALEUR_XI} & ${ligneX}\\\\\\hline ${LABEL_EFFECTIF_NI} & ${ligneN}\\end{array}`;
 }
 
-/** Tableau complété du corrigé (dernière colonne = totaux). */
-function tableauCompleteLatex(instance: ExerciceDispersion): string {
-  const colonnes = "c".repeat(instance.lignes.length + 1);
-  const ligneX = instance.lignes.map((l) => nombreFrLatex(l.valeur)).join(" & ");
-  const ligneN = instance.lignes.map((l) => nombreFrLatex(l.effectif)).join(" & ");
-  const ligneP = instance.lignes.map((l) => nombreFrLatex(l.produitAttendu)).join(" & ");
-  return `\\begin{array}{c|${colonnes}}${LABEL_VALEUR_XI} & ${ligneX} & \\text{Total}\\\\\\hline ${LABEL_EFFECTIF_NI} & ${ligneN} & ${instance.n}\\\\\\hline ${LABEL_PRODUIT} & ${ligneP} & ${instance.sommeProduits}\\end{array}`;
-}
-
 function egalOuEnviron(valeurArrondie: number, valeurExacte: number): string {
   return Math.abs(valeurArrondie - valeurExacte) < 1e-9 ? "=" : "\\approx";
 }
@@ -219,66 +212,6 @@ function reponseBreveDispersion(instance: ExerciceDispersion): FragmentConsigne[
   ]);
 }
 
-function correctionDetailleeDispersion(instance: ExerciceDispersion): EtapeCorrection[] {
-  const { n, sommeProduits, varianceAttendue, ecartTypeAttendu, xBar } = instance;
-  const u = instance.contexte.unite;
-  const vExact = sommeProduits / n;
-  const exemple = instance.lignes[0];
-  const etapes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [
-        texte("Pour chaque valeur, on calcule "),
-        latex(LABEL_PRODUIT),
-        texte(", puis les totaux "),
-        latex(LABEL_SOMME_N),
-        texte(" et "),
-        latex(LABEL_SOMME_PRODUIT),
-        texte(". Par exemple, "),
-        latex(`(${nombreFrLatex(exemple.valeur)}-${nombreFrLatex(xBar)})^2 \\cdot ${exemple.effectif} = ${nombreFrLatex(exemple.produitAttendu)}`),
-        texte("."),
-      ],
-    },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(tableauCompleteLatex(instance))] },
-    { label: "Conclusion", sousQuestion: "a", fragments: [latex(`${LABEL_SOMME_N} = ${n}`), texte(" et "), latex(`${LABEL_SOMME_PRODUIT} = ${sommeProduits}`), texte(".")] },
-    {
-      label: "Méthode",
-      sousQuestion: "b",
-      fragments: [latex(`${LABEL_VARIANCE} = \\dfrac{${LABEL_SOMME_PRODUIT}}{${LABEL_SOMME_N}}`), texte(" puis "), latex(`${LABEL_ECART_TYPE} = \\sqrt{${LABEL_VARIANCE}}`), texte(".")],
-    },
-    {
-      label: "Calcul",
-      sousQuestion: "b",
-      fragments: [
-        latex(`${LABEL_VARIANCE} = \\dfrac{${sommeProduits}}{${n}} ${egalOuEnviron(varianceAttendue, vExact)} ${nombreFrLatex(varianceAttendue)}`),
-        texte(` ${u}² ; `),
-        latex(`${LABEL_ECART_TYPE} = \\sqrt{${nombreFrLatex(varianceAttendue)}} ${egalOuEnviron(ecartTypeAttendu, Math.sqrt(varianceAttendue))} ${nombreFrLatex(ecartTypeAttendu)}`),
-        texte(` ${u}.`),
-      ],
-    },
-    {
-      label: "Conclusion",
-      sousQuestion: "b",
-      fragments: [
-        latex(`${LABEL_VARIANCE} ${egalOuEnviron(varianceAttendue, vExact)} ${nombreFrLatex(varianceAttendue)}`),
-        texte(` ${u}² et `),
-        latex(`${LABEL_ECART_TYPE} ${egalOuEnviron(ecartTypeAttendu, Math.sqrt(varianceAttendue))} ${nombreFrLatex(ecartTypeAttendu)}`),
-        texte(` ${u}.`),
-      ],
-    },
-    {
-      label: "Piège",
-      fragments: [
-        texte("On divise par l'effectif total "),
-        latex(LABEL_SOMME_N),
-        texte(` (ici ${n}), pas par le nombre de valeurs distinctes (${instance.lignes.length}) ; et l'écart-type est la racine carrée de la variance.`),
-      ],
-    },
-  ];
-  return etapes.map((e) => ({ ...e, fragments: enVirgules(e.fragments) }));
-}
-
 function baremeDispersion(instance: ExerciceDispersion): BaremeExercice {
   return {
     reponseFinale: reponseBreveDispersion(instance),
@@ -314,21 +247,6 @@ function tableauClassesLatex(instance: ExerciceDispersion): string {
   const ligneClasses = classes.map((_, i) => formatClasseDispersionLatex(instance, i)).join(" & ");
   const ligneN = classes.map((c) => nombreFrLatex(c.effectif)).join(" & ");
   return `\\begin{array}{c|${colonnes}}\\text{Classe} & ${ligneClasses}\\\\\\hline ${LABEL_EFFECTIF_NI} & ${ligneN}\\end{array}`;
-}
-
-/** Tableau du calcul de x̄ (corrigé, étape a) : classes, centres, effectifs, produits xᵢ·nᵢ, totaux. */
-function tableauMoyenneLatex(instance: ExerciceDispersion): string {
-  const classes = instance.enClasses?.classes ?? [];
-  const colonnes = "c".repeat(classes.length + 1);
-  const ligneClasses = classes.map((_, i) => formatClasseDispersionLatex(instance, i)).join(" & ");
-  const ligneX = classes.map((c) => nombreFrLatex(c.centre)).join(" & ");
-  const ligneN = classes.map((c) => nombreFrLatex(c.effectif)).join(" & ");
-  const ligneXN = classes.map((c) => nombreFrLatex(c.centre * c.effectif)).join(" & ");
-  return (
-    `\\begin{array}{c|${colonnes}}\\text{Classe} & ${ligneClasses} & \\text{Total}\\\\\\hline ` +
-    `${LABEL_VALEUR_XI} & ${ligneX} & \\\\\\hline ${LABEL_EFFECTIF_NI} & ${ligneN} & ${instance.n}\\\\\\hline ` +
-    `x_i \\cdot n_i & ${ligneXN} & ${nombreFrLatex(instance.enClasses?.sommeCentresN ?? 0)}\\end{array}`
-  );
 }
 
 function phraseRepartitionClasses(instance: ExerciceDispersion): string {
@@ -414,98 +332,6 @@ function reponseBreveClasses(instance: ExerciceDispersion): FragmentConsigne[] {
   return enVirgules([latex(`${LABEL_XBAR} = ${nombreFrLatex(instance.xBar)}`), texte(` ${u} ; `), ...reponseBreveDispersion(instance)]);
 }
 
-/** Étapes « tableau » et « variance/écart-type » communes aux deux familles, sous les lettres
- * données (famille "valeurs" : a, b ; famille "classes" : b, c). */
-function etapesTableauEtVariance(instance: ExerciceDispersion, lettreTableau: string, lettreVariance: string): EtapeCorrection[] {
-  const { n, sommeProduits, varianceAttendue, ecartTypeAttendu, xBar } = instance;
-  const u = instance.contexte.unite;
-  const vExact = sommeProduits / n;
-  const exemple = instance.lignes[0];
-  const ecartExemple = Math.round((exemple.valeur - xBar) * 1e6) / 1e6;
-  const sommeLatex = nombreFrLatex(sommeProduits);
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: lettreTableau,
-      fragments: [
-        texte("Pour chaque valeur, on calcule "),
-        latex(LABEL_PRODUIT),
-        texte(", puis les totaux "),
-        latex(LABEL_SOMME_N),
-        texte(" et "),
-        latex(LABEL_SOMME_PRODUIT),
-        texte(". Par exemple, "),
-        latex(
-          instance.enClasses
-            ? `(${nombreFrLatex(exemple.valeur)}-${nombreFrLatex(xBar)})^2 \\cdot ${exemple.effectif} = ${ecartExemple < 0 ? `(${nombreFrLatex(ecartExemple)})` : nombreFrLatex(ecartExemple)}^2 \\cdot ${exemple.effectif} = ${nombreFrLatex(exemple.produitAttendu)}`
-            : `(${nombreFrLatex(exemple.valeur)}-${nombreFrLatex(xBar)})^2 \\cdot ${exemple.effectif} = ${nombreFrLatex(exemple.produitAttendu)}`,
-        ),
-        texte("."),
-      ],
-    },
-    { label: "Calcul", sousQuestion: lettreTableau, fragments: [latex(tableauCompleteLatex(instance))] },
-    { label: "Conclusion", sousQuestion: lettreTableau, fragments: [latex(`${LABEL_SOMME_N} = ${n}`), texte(" et "), latex(`${LABEL_SOMME_PRODUIT} = ${sommeLatex}`), texte(".")] },
-    {
-      label: "Méthode",
-      sousQuestion: lettreVariance,
-      fragments: [latex(`${LABEL_VARIANCE} = \\dfrac{${LABEL_SOMME_PRODUIT}}{${LABEL_SOMME_N}}`), texte(" puis "), latex(`${LABEL_ECART_TYPE} = \\sqrt{${LABEL_VARIANCE}}`), texte(".")],
-    },
-    {
-      label: "Calcul",
-      sousQuestion: lettreVariance,
-      fragments: [
-        latex(`${LABEL_VARIANCE} = \\dfrac{${sommeLatex}}{${n}} ${egalOuEnviron(varianceAttendue, vExact)} ${nombreFrLatex(varianceAttendue)}`),
-        texte(` ${u}² ; `),
-        latex(`${LABEL_ECART_TYPE} = \\sqrt{${nombreFrLatex(varianceAttendue)}} ${egalOuEnviron(ecartTypeAttendu, Math.sqrt(varianceAttendue))} ${nombreFrLatex(ecartTypeAttendu)}`),
-        texte(` ${u}.`),
-      ],
-    },
-    {
-      label: "Conclusion",
-      sousQuestion: lettreVariance,
-      fragments: [
-        latex(`${LABEL_VARIANCE} ${egalOuEnviron(varianceAttendue, vExact)} ${nombreFrLatex(varianceAttendue)}`),
-        texte(` ${u}² et `),
-        latex(`${LABEL_ECART_TYPE} ${egalOuEnviron(ecartTypeAttendu, Math.sqrt(varianceAttendue))} ${nombreFrLatex(ecartTypeAttendu)}`),
-        texte(` ${u}.`),
-      ],
-    },
-  ];
-}
-
-function correctionDetailleeClasses(instance: ExerciceDispersion): EtapeCorrection[] {
-  const donnees = instance.enClasses!;
-  const u = instance.contexte.unite;
-  const premiere = donnees.classes[0];
-  const etapes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [
-        texte("Chaque classe est représentée par son centre, la moyenne de ses deux bornes : "),
-        latex(`x_1 = \\dfrac{${nombreFrLatex(premiere.borneInf)}+${nombreFrLatex(premiere.borneSup)}}{2} = ${nombreFrLatex(premiere.centre)}`),
-        texte(". Puis "),
-        latex(`${LABEL_XBAR} = \\dfrac{\\Sigma(x_i \\cdot n_i)}{${LABEL_SOMME_N}}`),
-        texte("."),
-      ],
-    },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(tableauMoyenneLatex(instance))] },
-    {
-      label: "Conclusion",
-      sousQuestion: "a",
-      fragments: [latex(`${LABEL_XBAR} = \\dfrac{${nombreFrLatex(donnees.sommeCentresN)}}{${instance.n}} = ${nombreFrLatex(instance.xBar)}`), texte(` ${u}.`)],
-    },
-    ...etapesTableauEtVariance(instance, "b", "c"),
-    {
-      label: "Piège",
-      fragments: [
-        texte("On calcule avec les centres des classes, jamais avec leurs bornes, et chaque centre est multiplié par son effectif (pas une moyenne simple des centres) ; l'écart-type est la racine carrée de la variance, pas la variance elle-même."),
-      ],
-    },
-  ];
-  return etapes.map((e) => ({ ...e, fragments: enVirgules(e.fragments) }));
-}
-
 function baremeClasses(instance: ExerciceDispersion): BaremeExercice {
   const donnees = instance.enClasses!;
   const u = instance.contexte.unite;
@@ -531,6 +357,13 @@ function baremeClasses(instance: ExerciceDispersion): BaremeExercice {
   };
 }
 
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : chaque écran
+ * transforme (centres et moyenne, tableau des écarts, variance et écart-type) ; méthode imposée ;
+ * aucun piège dans les données (les écarts négatifs sont élevés au carré dans tous les tirages). */
+function criteresDifficulte(instance: ExerciceDispersion): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeDispersion(instance)), methode: 0, piege: 0 };
+}
+
 const adaptateurEvaluationDispersionBrut: AdaptateurFeuilleExercices<ExerciceDispersion> = {
   titreDocument: "Paramètres de dispersion (variance, écart-type) — Évaluation",
   nomFichierBase: "parametres-dispersion",
@@ -548,11 +381,9 @@ const adaptateurEvaluationDispersionBrut: AdaptateurFeuilleExercices<ExerciceDis
 export const adaptateurEvaluationDispersion: AdaptateurFeuilleExercices<ExerciceDispersion> = {
   ...avecVirgulesBelges(adaptateurEvaluationDispersionBrut),
   profilInstance: profilDispersion,
-  difficulte: () => 2,
+  criteresDifficulte,
   reponseBreve: (instance) => (instance.enClasses ? reponseBreveClasses(instance) : reponseBreveDispersion(instance)),
-  correctionDetaillee: (instance) => (instance.enClasses ? correctionDetailleeClasses(instance) : correctionDetailleeDispersion(instance)),
+  correctionDetaillee: correctionDetailleeDispersion,
   bareme: (instance) => (instance.enClasses ? baremeClasses(instance) : baremeDispersion(instance)),
   enoncePapier: (instance) => (instance.enClasses ? enoncePapierClasses(instance) : enoncePapierDispersion(instance)),
-  // Moyenne des deux familles (≈ 7 min en valeurs discrètes, ≈ 10 min en classes).
-  dureeMinutes: 8,
 };

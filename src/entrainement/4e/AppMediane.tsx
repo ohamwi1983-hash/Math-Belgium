@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeMediane } from "./generateurs/mediane/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
@@ -299,6 +302,7 @@ export function AppMediane() {
         reponseAttendue,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeMediane(exercice), lettreEtape(sequencePourExercice(exercice).indexOf(phase)))} />,
       }
     : null;
 

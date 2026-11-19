@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeTableauFrequences } from "./generateurs/tableauFrequences/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -120,6 +123,7 @@ export function AppTableauFrequences() {
         reponseAttendue,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTableauFrequences(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />,
       }
     : null;
 

@@ -4,15 +4,15 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { valeurHauteur } from "../../ui/histogrammeGraph";
-import { construireSvgHistogramme } from "./histogrammeSvg";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeHistogramme, lettreTraceHistogramme } from "./corrigeDetaille";
 import {
   CONSIGNE_FREQUENCES,
   consigneClassement,
@@ -162,67 +162,18 @@ function donneeSurBorneFinale(instance: ExerciceHistogramme): number | null {
   return instance.donneesBrutes.some((d) => Math.abs(d - borneFinale) < 1e-9) ? borneFinale : null;
 }
 
-function phraseFrontiere(instance: ExerciceHistogramme): string {
-  const { valeur, classeIndex, surFrontiere } = instance.donneeFrontiere;
-  if (surFrontiere) {
-    return `La donnée ${nombreFr(valeur)} tombe sur la frontière : elle appartient à la classe ${classeTexte(instance, classeIndex)} (borne inférieure incluse), pas à ${classeTexte(instance, classeIndex - 1)}.`;
-  }
-  return `La donnée ${nombreFr(valeur)} est juste sous la frontière ${nombreFr(instance.classes[classeIndex].borneSup)} : elle reste dans la classe ${classeTexte(instance, classeIndex)}.`;
-}
-
-/** ★★ en général ; ★★★ quand les deux pièges se cumulent (donnée exactement sur une frontière ET
- * hauteurs en fréquences). */
-function difficulteHistogramme(instance: ExerciceHistogramme): 1 | 2 | 3 {
-  return instance.variante === "frequence" && instance.donneeFrontiere.surFrontiere ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : effectifs (et
+ * fréquences) transforment ; le tracé place des barres de hauteurs déjà calculées (écran de lecture).
+ * Méthode imposée ; piège dans les données quand une donnée tombe sur une frontière de classe (ou
+ * sur la borne finale, fermée). */
+function criteresDifficulte(instance: ExerciceHistogramme): CriteresDifficulte {
+  const piege = instance.donneeFrontiere.surFrontiere || donneeSurBorneFinale(instance) !== null ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeHistogramme(instance), [lettreTraceHistogramme(instance)]), methode: 0, piege };
 }
 
 function reponseBreveHistogramme(instance: ExerciceHistogramme): FragmentConsigne[] {
   const hauteur = instance.variante === "frequence" ? "hauteurs = fréquences (%)" : "hauteurs = effectifs";
   return [latex(tableauClassesLatex(instance, instance.variante === "frequence")), texte(` ; ${hauteur}`)];
-}
-
-function correctionDetailleeHistogramme(instance: ExerciceHistogramme): EtapeCorrection[] {
-  const etapes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [texte("Chaque donnée va dans la classe qui la contient : borne inférieure incluse, borne supérieure exclue — sauf la dernière classe, fermée des deux côtés.")],
-    },
-    { label: "Lecture", sousQuestion: "a", fragments: [texte(phraseFrontiere(instance))] },
-  ];
-  const finale = donneeSurBorneFinale(instance);
-  if (finale !== null) {
-    etapes.push({ label: "Lecture", sousQuestion: "a", fragments: [texte(`La donnée ${nombreFr(finale)} est la borne supérieure de la dernière classe, fermée : elle y est comptée.`)] });
-  }
-  etapes.push({ label: "Conclusion", sousQuestion: "a", fragments: [latex(tableauClassesLatex(instance, false)), texte(` (somme des effectifs : n = ${nombreFr(instance.n)})`)] });
-  if (instance.variante === "frequence") {
-    etapes.push({ label: "Méthode", sousQuestion: "b", fragments: [texte("Fréquence d'une classe, en % : "), latex("f_i = \\dfrac{n_i}{n} \\times 100"), texte(".")] });
-    etapes.push({ label: "Conclusion", sousQuestion: "b", fragments: [latex(tableauClassesLatex(instance, true))] });
-  }
-  const t = lettreTrace(instance);
-  const grandeur = instance.variante === "frequence" ? "la fréquence (en %)" : "l'effectif";
-  etapes.push({
-    label: "Méthode",
-    sousQuestion: t,
-    fragments: [
-      texte(
-        `Axe horizontal gradué de ${nombreFr(instance.classes[0].borneInf)} à ${nombreFr(instance.classes[instance.classes.length - 1].borneSup)} (${instance.contexte.unite}) ; une barre par classe, jointive avec ses voisines, de largeur égale à l'amplitude ${nombreFr(instance.amplitude)}.`,
-      ),
-    ],
-  });
-  etapes.push({
-    label: "Conclusion",
-    sousQuestion: t,
-    fragments: [texte(`La hauteur de chaque barre est ${grandeur} de sa classe : `), texte(instance.classes.map((_, i) => `${classeTexte(instance, i)} → ${nombreFr(valeurHauteur(instance, i))}${instance.variante === "frequence" ? " %" : ""}`).join(" ; ")), texte(".")],
-    // La réponse est un graphique : l'histogramme attendu.
-    figureHtml: construireSvgHistogramme(instance),
-  });
-  etapes.push({
-    label: "Piège",
-    sousQuestion: "a",
-    fragments: [texte("Une donnée égale à une borne appartient à la classe qui COMMENCE par cette borne (la borne supérieure d'une classe est exclue), sauf la toute dernière valeur de la série.")],
-  });
-  return etapes;
 }
 
 function baremeHistogramme(instance: ExerciceHistogramme): BaremeExercice {
@@ -286,12 +237,11 @@ const adaptateurEvaluationHistogrammeBrut: AdaptateurFeuilleExercices<ExerciceHi
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceHistogramme,
   construireCorrection: construireCorrectionHistogramme,
-  difficulte: difficulteHistogramme,
+  criteresDifficulte,
   reponseBreve: reponseBreveHistogramme,
   correctionDetaillee: correctionDetailleeHistogramme,
   bareme: baremeHistogramme,
   enoncePapier: enoncePapierHistogramme,
-  dureeMinutes: 8,
 };
 
 /** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */

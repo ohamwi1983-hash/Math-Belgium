@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeDispersion } from "./generateurs/dispersion/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
@@ -180,6 +183,7 @@ export function AppDispersion() {
         reponseAttendue: reponseAttenduePhase(etat.phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDispersion(exercice), lettreEtape(ordrePhasesDispersion(exercice).indexOf(etat.phase)))} />,
       }
     : null;
 

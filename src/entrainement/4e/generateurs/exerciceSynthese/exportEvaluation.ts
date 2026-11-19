@@ -1,8 +1,13 @@
 import type { ExerciceSynthese } from "../../core/exerciceSynthese.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EnoncePapier, ErreurFrequente, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, CriteresDifficulte, EnoncePapier, ErreurFrequente, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeExerciceSynthese } from "./corrigeDetaille";
+import { SEQUENCES, type PhaseExerciceSynthese } from "../../moteur/typesExerciceSynthese";
+import { precisionLecture } from "../../moteur/verificationMediane";
+import { CONSIGNE_SOMMES, consigneCentres, consigneQuotient } from "../../ui/formatMoyennePonderee";
+import { CONSIGNE_POLYGONE, consigneMedianeDiscrete, consigneMinMaxMode, consigneQ1, consigneQ3, libellePrecisionLecture } from "../../ui/formatMediane";
+import { consigneEcartType, consigneVariance } from "../../ui/formatDispersion";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { construireSvgPolygoneEffectifs } from "../mediane/polygoneEffectifsSvg";
-import { construireSvgBoiteMoustaches } from "../boiteMoustaches/exportEvaluation";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
   versBoiteMoustaches,
@@ -134,14 +139,6 @@ function enteteExerciceSynthese(exercice: ExerciceSynthese): FragmentConsigne[] 
 // Question a) — moyenne pondérée (gen32) : centres (classes uniquement) + sommes + quotient.
 // ============================================================================
 
-function consigneMoyenne(exercice: ExerciceSynthese): FragmentConsigne[] {
-  const unite = exercice.contexte.unite;
-  if (exercice.variante === "classes") {
-    return [texte(`Calcule le centre de chaque classe, les sommes intermédiaires `), latex("\\Sigma(x_i \\cdot n_i)"), texte(" et "), latex("\\Sigma n_i"), texte(`, puis la moyenne `), latex("\\bar{x}"), texte(` de cette série (en ${unite}).`)];
-  }
-  return [texte(`Calcule les sommes intermédiaires `), latex("\\Sigma(x_i \\cdot n_i)"), texte(" et "), latex("\\Sigma n_i"), texte(`, puis la moyenne `), latex("\\bar{x}"), texte(` de cette série (en ${unite}).`)];
-}
-
 function correctionMoyenne(exercice: ExerciceSynthese, lettre: string): BlocCorrection[] {
   const blocs: BlocCorrection[] = [];
   const fragmentsCentres: FragmentConsigne[] = [];
@@ -193,10 +190,6 @@ function correctionPositionDiscrete(exercice: ExerciceSynthese, lettre: string):
       ],
     },
   ];
-}
-
-function consignePolygone(): FragmentConsigne[] {
-  return [texte("Construis le polygone des effectifs cumulés de cette série (un point fixe à l'origine, puis un point par classe en (borne supérieure ; effectif cumulé), reliés par des segments).")];
 }
 
 function correctionPolygone(exercice: ExerciceSynthese, lettre: string): BlocCorrection[] {
@@ -279,18 +272,6 @@ function correctionBoxplot(exercice: ExerciceSynthese, lettre: string): BlocCorr
 // Question — variance/écart-type (gen34, reprend "Paramètres de dispersion" tel quel).
 // ============================================================================
 
-function consigneDispersion(exercice: ExerciceSynthese): FragmentConsigne[] {
-  return [
-    texte("Complète le tableau des écarts quadratiques pondérés à la moyenne "),
-    latex("(x_i-\\bar{x})^2 \\cdot n_i"),
-    texte(", puis calcule la variance "),
-    latex("V"),
-    texte(" et l'écart-type "),
-    latex("\\sigma = \\sqrt{V}"),
-    texte(` de cette série (arrondis à 2 décimales, en ${exercice.contexte.unite}² pour la variance, en ${exercice.contexte.unite} pour l'écart-type).`),
-  ];
-}
-
 function correctionDispersion(exercice: ExerciceSynthese, lettre: string): BlocCorrection[] {
   const mappe = versDispersion(exercice);
   const libellesLignes = ["x_i (ou centre)", "n_i", "(x_i-x̄)² · n_i"];
@@ -340,27 +321,79 @@ function correctionBienaymeTchebychev(exercice: ExerciceSynthese, lettre: string
 // Assemblage — branche par variante (5 questions "discrete", 6 questions "classes").
 // ============================================================================
 
-function construireEnonceExerciceSynthese(exercice: ExerciceSynthese): SectionExercice {
-  const questions =
-    exercice.variante === "discrete"
-      ? [
-          { consigne: consigneMoyenne(exercice) },
-          { consigne: consignePositionDiscrete(exercice) },
-          { consigne: consigneBoxplot(exercice) },
-          { consigne: consigneDispersion(exercice) },
-          { consigne: consigneBienaymeTchebychev(exercice) },
-        ]
-      : [
-          { consigne: consigneMoyenne(exercice) },
-          { consigne: consignePolygone() },
-          { consigne: consigneSyntheseClasses(exercice) },
-          { consigne: consigneDispersion(exercice) },
-          { consigne: consigneBoxplot(exercice) },
-          { consigne: consigneBienaymeTchebychev(exercice) },
-        ];
-
-  return { enteteFragments: enteteExerciceSynthese(exercice), questions };
+/** Consigne de chaque écran de l'appli, sans les tournures d'écran (« ci-dessous », « positionne la
+ * barre ») — titres « Étape n — … » du corrigé. */
+function consigneEcran(exercice: ExerciceSynthese, phase: PhaseExerciceSynthese): FragmentConsigne[] {
+  const u = exercice.contexte.unite;
+  const lecture = (seuil: string, nom: string, symbole: string) => {
+    const precision = exercice.variante === "classes" ? libellePrecisionLecture(precisionLecture(exercice.etendue)) : "";
+    return [texte("Calcule le seuil "), latex(seuil), texte(`, puis détermine par interpolation linéaire sur le polygone ${nom} `), latex(symbole), texte(` (en ${u}, ${precision}).`)];
+  };
+  switch (phase) {
+    case "centres":
+      return exercice.variante === "classes" ? [texte(consigneCentres(versMoyennePondereeClasses(exercice)))] : [];
+    case "sommes":
+      return [texte(CONSIGNE_SOMMES)];
+    case "quotient": {
+      const c = consigneQuotient(versMoyennePonderee(exercice));
+      return [texte(c.avant), latex(c.latex), texte(c.apres)];
+    }
+    case "mediane":
+      return exercice.variante === "discrete" ? [texte(consigneMedianeDiscrete(versMedianeDiscrete(exercice)))] : [];
+    case "q1":
+      return exercice.variante === "discrete" ? [texte(consigneQ1(versMedianeDiscrete(exercice)))] : [];
+    case "q3":
+      return exercice.variante === "discrete" ? [texte(consigneQ3(versMedianeDiscrete(exercice)))] : [];
+    case "minMaxMode":
+      return exercice.variante === "discrete" ? [texte(consigneMinMaxMode(versMedianeDiscrete(exercice)))] : [];
+    case "polygone":
+      return [texte(CONSIGNE_POLYGONE)];
+    case "lectureMediane":
+      return lecture("\\dfrac{n}{2}", "la médiane", "Q_2");
+    case "lectureQ1":
+      return lecture("\\dfrac{n}{4}", "le premier quartile", "Q_1");
+    case "lectureQ3":
+      return lecture("\\dfrac{3n}{4}", "le troisième quartile", "Q_3");
+    case "synthese":
+      return [texte("Détermine "), latex(LABEL_X_MIN), texte(", "), latex(LABEL_X_MAX), texte(", l'étendue, la classe modale et le mode de cette série.")];
+    case "boxplot":
+      return consigneBoxplot(exercice);
+    case "tableau":
+      return [texte("Calcule, pour chaque valeur, "), latex("(x_i-\\bar{x})^2 \\cdot n_i"), texte(", puis les sommes "), latex("\\Sigma n_i"), texte(" et "), latex("\\Sigma(x_i-\\bar{x})^2 \\cdot n_i"), texte(".")];
+    case "varianceEcartType": {
+      const v = consigneVariance(exercice.contexte);
+      const sg = consigneEcartType(exercice.contexte);
+      return [texte(v.avant), latex(v.latex), texte(`${v.apres.replace(" à partir des deux sommes ci-dessus", " à partir des deux sommes de l'étape précédente")} `), texte(sg.avant), latex(sg.latex), texte(sg.apres)];
+    }
+    case "btIntervalle":
+      return [texte(consigneBtIntervalle(exercice))];
+    case "btPourcent":
+      return [texte(consigneBtPourcent())];
+  }
 }
+
+function construireEnonceExerciceSynthese(exercice: ExerciceSynthese): SectionExercice {
+  return { enteteFragments: enteteExerciceSynthese(exercice), questions: SEQUENCES[exercice.variante].map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
+}
+
+/** Écrans (phases de `SEQUENCES`) couverts par chaque question papier. */
+const PHASES_QUESTION: Record<QuestionSynthese, PhaseExerciceSynthese[]> = {
+  moyenne: ["centres", "sommes", "quotient"],
+  positionDiscrete: ["mediane", "q1", "q3", "minMaxMode"],
+  polygone: ["polygone"],
+  syntheseClasses: ["lectureMediane", "lectureQ1", "lectureQ3", "synthese"],
+  boxplot: ["boxplot"],
+  dispersion: ["tableau", "varianceEcartType"],
+  bienaymeTchebychev: ["btIntervalle", "btPourcent"],
+};
+
+/** Lettres d'étapes (une par écran) couvertes par une question papier. */
+function lettresQuestion(exercice: ExerciceSynthese, question: QuestionSynthese): string[] {
+  const sequence = SEQUENCES[exercice.variante];
+  return PHASES_QUESTION[question].map((ph) => sequence.indexOf(ph)).filter((i) => i >= 0).map((i) => LETTRES_ETAPES[i]);
+}
+
+const LETTRES_ETAPES = "abcdefghijklmnopqrstuvwxyz";
 
 const LETTRES = "abcdefgh";
 
@@ -368,7 +401,7 @@ function construireCorrectionExerciceSynthese(exercice: ExerciceSynthese): BlocC
   const etapes: ((ex: ExerciceSynthese, lettre: string) => BlocCorrection[])[] =
     exercice.variante === "discrete"
       ? [correctionMoyenne, correctionPositionDiscrete, correctionBoxplot, correctionDispersion, correctionBienaymeTchebychev]
-      : [correctionMoyenne, correctionPolygone, correctionSyntheseClasses, correctionDispersion, correctionBoxplot, correctionBienaymeTchebychev];
+      : [correctionMoyenne, correctionPolygone, correctionSyntheseClasses, correctionBoxplot, correctionDispersion, correctionBienaymeTchebychev];
 
   return etapes.flatMap((construire, i) => construire(exercice, LETTRES[i] ?? String(i + 1)));
 }
@@ -387,7 +420,7 @@ type QuestionSynthese = "moyenne" | "positionDiscrete" | "polygone" | "syntheseC
 function questionsSynthese(exercice: ExerciceSynthese): QuestionSynthese[] {
   return exercice.variante === "discrete"
     ? ["moyenne", "positionDiscrete", "boxplot", "dispersion", "bienaymeTchebychev"]
-    : ["moyenne", "polygone", "syntheseClasses", "dispersion", "boxplot", "bienaymeTchebychev"];
+    : ["moyenne", "polygone", "syntheseClasses", "boxplot", "dispersion", "bienaymeTchebychev"];
 }
 
 function enVirgules(fragments: FragmentConsigne[]): FragmentConsigne[] {
@@ -419,101 +452,8 @@ function enoncePapierExerciceSynthese(exercice: ExerciceSynthese): EnoncePapier 
   const questions = questionsSynthese(exercice);
   return {
     section: { enteteFragments: enVirgules(enteteExerciceSynthese(exercice)), questions: questions.map((q) => ({ consigne: enVirgules(consignePapier(exercice, q)) })) },
-    etapesParQuestion: questions.map((_, i) => [LETTRES[i]]),
+    etapesParQuestion: questions.map((q) => lettresQuestion(exercice, q)),
   };
-}
-
-const CORRECTION_QUESTION: Record<QuestionSynthese, (ex: ExerciceSynthese, lettre: string) => BlocCorrection[]> = {
-  moyenne: correctionMoyenne,
-  positionDiscrete: correctionPositionDiscrete,
-  polygone: correctionPolygone,
-  syntheseClasses: correctionSyntheseClasses,
-  boxplot: correctionBoxplot,
-  dispersion: correctionDispersion,
-  bienaymeTchebychev: correctionBienaymeTchebychev,
-};
-
-function methodeQuestion(exercice: ExerciceSynthese, question: QuestionSynthese): FragmentConsigne[] {
-  switch (question) {
-    case "moyenne":
-      return [
-        texte(exercice.variante === "classes" ? "Moyenne pondérée, avec le centre de chaque classe : " : "Moyenne pondérée : "),
-        latex("\\bar{x} = \\dfrac{\\Sigma(x_i \\cdot n_i)}{\\Sigma n_i}"),
-      ];
-    case "positionDiscrete":
-      return [texte("Effectifs cumulés, puis seuils n/4, n/2 et 3n/4 : chaque quartile est la première valeur dont l'effectif cumulé dépasse strictement son seuil.")];
-    case "polygone":
-      return [texte("Un point de départ à la borne inférieure de la première classe (effectif cumulé 0), puis un point (borne supérieure ; effectif cumulé) par classe, reliés par des segments.")];
-    case "syntheseClasses":
-      return [texte("Sur le polygone, Q1, la médiane et Q3 sont les abscisses des points d'ordonnée n/4, n/2 et 3n/4 (lecture ou interpolation linéaire dans la classe).")];
-    case "boxplot":
-      return [texte("La boîte va de Q1 à Q3, un trait marque la médiane, les moustaches vont jusqu'au minimum et au maximum.")];
-    case "dispersion":
-      return [texte("Écarts à la moyenne au carré, pondérés par les effectifs : "), latex("V = \\dfrac{\\Sigma (x_i-\\bar{x})^2 \\cdot n_i}{\\Sigma n_i}"), texte(" et "), latex("\\sigma = \\sqrt{V}")];
-    case "bienaymeTchebychev":
-      return [texte("Au moins "), latex("1-\\dfrac{1}{k^2}"), texte(" de l'effectif se trouve dans "), latex("[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]"), texte(", bornes arrondies vers l'extérieur.")];
-  }
-}
-
-const PIEGE_QUESTION: Partial<Record<QuestionSynthese, string>> = {
-  moyenne: "On divise par l'effectif total Σnᵢ, pas par le nombre de valeurs (ou de classes) distinctes.",
-  dispersion: "Chaque écart au carré est multiplié par son effectif avant la somme ; σ est la racine de V.",
-};
-
-/** Libellés du tableau des écarts (`correctionDispersion`), en LaTeX. */
-const LIBELLE_LATEX_TABLEAU: Record<string, string> = {
-  "x_i (ou centre)": "x_i",
-  n_i: "n_i",
-  "(x_i-x̄)² · n_i": "(x_i-\\bar{x})^2 \\cdot n_i",
-};
-
-/** Bloc du corrigé historique → lignes du corrigé détaillé (préfixe « a) » retiré, tableau des écarts
- * en LaTeX). */
-function blocsVersLignes(blocs: BlocCorrection[], sousQuestion: string): EtapeCorrection[] {
-  return blocs.flatMap((bloc, i): EtapeCorrection[] => {
-    const label = i === blocs.length - 1 ? "Conclusion" : "Calcul";
-    if (bloc.type === "paragraphe") {
-      const [premier, ...suite] = bloc.fragments;
-      const fragments = premier && premier.type === "texte" ? [{ ...premier, valeur: premier.valeur.replace(/^[a-h]?\) /, "") }, ...suite] : bloc.fragments;
-      return fragments.some((f) => f.valeur.trim() !== "") ? [{ label, sousQuestion, fragments }] : [];
-    }
-    if (bloc.type === "tableau") {
-      // Tableau VERTICAL (une ligne par valeur, 3 colonnes) : l'horizontal déborde du corrigé dès 6 valeurs.
-      const entetes = bloc.libellesLignes.map((libelle) => LIBELLE_LATEX_TABLEAU[libelle] ?? `\\text{${libelle}}`).join(" & ");
-      const lignes = (bloc.valeursParLigne[0] ?? []).map((_, k) => bloc.valeursParLigne.map((ligne) => ligne[k]).join(" & ")).join(" \\\\ ");
-      const colonnes = bloc.libellesLignes.map(() => "c").join("|");
-      return [{ label, sousQuestion, fragments: [latex(virgulesLatex(`\\begin{array}{${colonnes}} ${entetes} \\\\ \\hline ${lignes} \\end{array}`))] }];
-    }
-    return [];
-  });
-}
-
-function correctionDetailleeExerciceSynthese(exercice: ExerciceSynthese): EtapeCorrection[] {
-  return questionsSynthese(exercice).flatMap((question, i) => {
-    const lettre = LETTRES[i];
-    const lignes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion: lettre, fragments: methodeQuestion(exercice, question) }];
-    lignes.push(...blocsVersLignes(CORRECTION_QUESTION[question](exercice, ""), lettre));
-    if (question === "boxplot") {
-      const boite = versBoiteMoustaches(exercice);
-      lignes.push({
-        label: "Graphique",
-        sousQuestion: lettre,
-        fragments: [texte("Boîte à moustaches attendue :")],
-        figureHtml: construireSvgBoiteMoustaches(boite.bornePlage, [{ valeurs: boite.valeurs }], true),
-      });
-    }
-    if (question === "polygone" && exercice.variante === "classes") {
-      lignes.push({
-        label: "Graphique",
-        sousQuestion: lettre,
-        fragments: [texte("Polygone des effectifs cumulés, avec la lecture de Q₁, Q₂ et Q₃ utilisée à la question suivante :")],
-        figureHtml: construireSvgPolygoneEffectifs(versMedianeClasses(exercice)),
-      });
-    }
-    const piege = PIEGE_QUESTION[question];
-    if (piege) lignes.push({ label: "Piège", sousQuestion: lettre, fragments: [texte(piege)] });
-    return lignes.map((l) => ({ ...l, fragments: enVirgules(l.fragments) }));
-  });
 }
 
 function reponseQuestion(exercice: ExerciceSynthese, question: QuestionSynthese): FragmentConsigne[] {
@@ -573,9 +513,9 @@ const CRITERE_QUESTION: Record<QuestionSynthese, string> = {
 
 function baremeExerciceSynthese(exercice: ExerciceSynthese): BaremeExercice {
   const questions = questionsSynthese(exercice);
-  const lettreDe = (q: QuestionSynthese) => LETTRES[questions.indexOf(q)];
-  const criteres: CritereBareme[] = questions.map((question, i) => ({
-    sousQuestion: LETTRES[i],
+  const lettreDe = (q: QuestionSynthese) => lettresQuestion(exercice, q)[0];
+  const criteres: CritereBareme[] = questions.map((question) => ({
+    sousQuestion: lettreDe(question),
     critere: enVirgules([texte(`${CRITERE_QUESTION[question]} : `), ...reponseQuestion(exercice, question)]),
     points: exercice.variante === "classes" && question === "dispersion" ? 0.5 : POIDS_QUESTION[question],
   }));
@@ -598,6 +538,18 @@ function baremeExerciceSynthese(exercice: ExerciceSynthese): BaremeExercice {
   };
 }
 
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : une étape par
+ * écran (11 en discrète, 13 en classes). Écrans de pure lecture : min, max, mode(s) lus sur le
+ * tableau, sommets du polygone placés, boîte à moustaches tracée avec des valeurs déjà trouvées.
+ * Méthode imposée question par question ; piège dans les données quand un effectif cumulé vaut
+ * EXACTEMENT un seuil en discrète (règle « dépasse strictement »). */
+function criteresDifficulte(exercice: ExerciceSynthese): CriteresDifficulte {
+  const sequence = SEQUENCES[exercice.variante];
+  const lecture = (["minMaxMode", "polygone", "boxplot"] as PhaseExerciceSynthese[]).map((ph) => sequence.indexOf(ph)).filter((i) => i >= 0).map((i) => LETTRES_ETAPES[i]);
+  const piege = exercice.variante === "discrete" && (profilExerciceSynthese(exercice).casParticulier ?? "").includes("seuil-atteint") ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeExerciceSynthese(exercice), lecture), methode: 0, piege };
+}
+
 const adaptateurEvaluationExerciceSyntheseBrut: AdaptateurFeuilleExercices<ExerciceSynthese> = {
   profilInstance: profilExerciceSynthese,
   libelleCasParticulier: LIBELLE_CAS_MEDIANE,
@@ -608,12 +560,11 @@ const adaptateurEvaluationExerciceSyntheseBrut: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceExerciceSynthese,
   construireCorrection: construireCorrectionExerciceSynthese,
-  difficulte: (exercice) => (exercice.variante === "classes" ? 3 : 2),
+  criteresDifficulte,
   reponseBreve: reponseBreveExerciceSynthese,
   correctionDetaillee: correctionDetailleeExerciceSynthese,
   bareme: baremeExerciceSynthese,
   enoncePapier: enoncePapierExerciceSynthese,
-  dureeMinutes: 15,
 };
 
 /** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */

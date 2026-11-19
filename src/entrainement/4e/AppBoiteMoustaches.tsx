@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeBoiteMoustaches, lettrePhaseBoiteMoustaches } from "./generateurs/boiteMoustaches/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
@@ -159,6 +162,7 @@ export function AppBoiteMoustaches() {
         reponseAttendue,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeBoiteMoustaches(exercice), lettrePhaseBoiteMoustaches(etat.phase))} />,
       }
     : null;
 

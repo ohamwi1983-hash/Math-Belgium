@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeExerciceSynthese, lettrePhaseExerciceSynthese } from "./generateurs/exerciceSynthese/corrigeDetaille";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -387,6 +390,7 @@ export function AppExerciceSynthese() {
         reponseAttendue: <div className="answer-reveal">{reponseAttenduePhase(phase, exercice)}</div>,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeExerciceSynthese(exercice), lettrePhaseExerciceSynthese(exercice, phase))} />,
       }
     : null;
 

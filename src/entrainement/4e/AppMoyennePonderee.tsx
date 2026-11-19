@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeMoyennePonderee } from "./generateurs/moyennePonderee/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -136,6 +139,7 @@ export function AppMoyennePonderee() {
         reponseAttendue,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeMoyennePonderee(exercice), lettreEtape(sequencePourExercice(exercice).indexOf(phase)))} />,
       }
     : null;
 

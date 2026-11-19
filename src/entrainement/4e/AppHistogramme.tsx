@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeHistogramme } from "./generateurs/histogramme/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -125,6 +128,7 @@ export function AppHistogramme() {
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeHistogramme(exercice), lettreEtape(sequencePourExercice(exercice).indexOf(phase)))} />,
       }
     : null;
 

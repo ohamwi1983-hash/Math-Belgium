@@ -8,13 +8,15 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeMoyennePonderee } from "./corrigeDetaille";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
   CONSIGNE_SOMMES,
@@ -196,20 +198,10 @@ function lettresEtapes(instance: ExerciceMoyennePonderee): LettresEtapes {
   return instance.variante === "classes" ? { centres: "a", sommes: "b", quotient: "c" } : { sommes: "a", quotient: "b" };
 }
 
-function classeLatex(instance: ExerciceMoyennePondereeClasses, index: number): string {
-  const classe = instance.classes[index];
-  const fermante = index === instance.classes.length - 1 ? "]" : "[";
-  return `[${nombreFrLatex(classe.borneInf)}\\,;\\,${nombreFrLatex(classe.borneSup)}${fermante}`;
-}
-
 function classeTexte(instance: ExerciceMoyennePondereeClasses, index: number): string {
   const classe = instance.classes[index];
   const fermante = index === instance.classes.length - 1 ? "]" : "[";
   return `[${nombreFr(classe.borneInf)} ; ${nombreFr(classe.borneSup)}${fermante}`;
-}
-
-function tableauLatex(rangees: [string, string[]][]): string {
-  return `\\begin{array}{l|${"c".repeat(rangees[0][1].length)}} ${rangees.map(([tete, cellules]) => [tete, ...cellules].join(" & ")).join(" \\\\ \\hline ")} \\end{array}`;
 }
 
 /** Moyenne NON pondérée des valeurs (ou centres) — l'erreur la plus fréquente, citée dans le barème. */
@@ -236,81 +228,15 @@ function tableauDonneesHtml(instance: ExerciceMoyennePonderee): string {
   return `<table style="border-collapse:collapse;margin:6px 0">${ligne(premiere, entetes)}${ligne("Effectif", effectifs)}</table>`;
 }
 
-/** ★ données discrètes (application directe) ; ★★ données groupées (centres, amplitudes inégales,
- * estimation). */
-function difficulteMoyennePonderee(instance: ExerciceMoyennePonderee): 1 | 2 | 3 {
-  return instance.variante === "classes" ? 2 : 1;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : chaque écran
+ * transforme (centres, sommes, quotient) ; méthode imposée ; piège dans les données pour les
+ * classes, d'amplitudes différentes (un centre par classe, jamais une amplitude commune). */
+function criteresDifficulte(instance: ExerciceMoyennePonderee): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeMoyennePonderee(instance)), methode: 0, piege: instance.variante === "classes" ? 1 : 0 };
 }
 
 function reponseBreveMoyennePonderee(instance: ExerciceMoyennePonderee): FragmentConsigne[] {
   return [latex(`\\bar{x} = ${nombreFrLatex(instance.moyenne)}`), texte(` ${instance.contexte.unite}${instance.variante === "classes" ? " (estimation)" : ""}`)];
-}
-
-function correctionDetailleeMoyennePonderee(instance: ExerciceMoyennePonderee): EtapeCorrection[] {
-  const l = lettresEtapes(instance);
-  const etapes: EtapeCorrection[] = [];
-  if (instance.variante === "classes" && l.centres) {
-    etapes.push({ label: "Méthode", sousQuestion: l.centres, fragments: [texte("Le centre d'une classe est la moyenne de ses bornes : "), latex("c_i = \\dfrac{\\text{borne inf.} + \\text{borne sup.}}{2}"), texte(".")] });
-    etapes.push({
-      label: "Conclusion",
-      sousQuestion: l.centres,
-      fragments: [latex(tableauLatex([["\\text{Classe}", instance.classes.map((_, i) => classeLatex(instance, i))], ["c_i", instance.classes.map((c) => nombreFrLatex(c.centre))]]))],
-    });
-  }
-  const donnees = donneesLignes(instance);
-  const tete = instance.variante === "classes" ? "c_i" : "x_i";
-  etapes.push({
-    label: "Méthode",
-    sousQuestion: l.sommes,
-    fragments: [
-      texte(`On multiplie chaque ${instance.variante === "classes" ? "centre" : "valeur"} par son effectif puis on additionne les produits ; `),
-      latex(LABEL_SOMME_N),
-      texte(" est la somme des effectifs."),
-    ],
-  });
-  etapes.push({
-    label: "Calcul",
-    sousQuestion: l.sommes,
-    fragments: [
-      latex(
-        tableauLatex([
-          [tete, donnees.map((d) => nombreFrLatex(d.x))],
-          ["n_i", donnees.map((d) => nombreFrLatex(d.n))],
-          [`${tete} \\cdot n_i`, donnees.map((d) => nombreFrLatex(d.x * d.n))],
-        ]),
-      ),
-    ],
-  });
-  etapes.push({
-    label: "Conclusion",
-    sousQuestion: l.sommes,
-    fragments: [latex(`${LABEL_SOMME_N} = ${nombreFrLatex(instance.n)}`), texte(" ; "), latex(`${LABEL_SOMME_XN} = ${nombreFrLatex(instance.sommeXN)}`)],
-  });
-  etapes.push({
-    label: "Calcul",
-    sousQuestion: l.quotient,
-    fragments: [latex(`${LABEL_MOYENNE_BARRE} = \\dfrac{${LABEL_SOMME_XN}}{${LABEL_SOMME_N}} = \\dfrac{${nombreFrLatex(instance.sommeXN)}}{${nombreFrLatex(instance.n)}} = ${nombreFrLatex(instance.moyenne)}`)],
-  });
-  etapes.push({
-    label: "Conclusion",
-    sousQuestion: l.quotient,
-    fragments: [
-      texte(`La moyenne vaut ${nombreFr(instance.moyenne)} ${instance.contexte.unite}`),
-      texte(instance.variante === "classes" ? " — c'est une ESTIMATION : on ne connaît pas les valeurs exactes à l'intérieur des classes." : "."),
-    ],
-  });
-  etapes.push({
-    label: "Piège",
-    sousQuestion: l.quotient,
-    fragments: [
-      texte(
-        instance.variante === "classes"
-          ? "Les classes n'ont pas toutes la même amplitude : chaque centre se calcule séparément, et on divise par n, la somme des effectifs — jamais par le nombre de classes."
-          : `On divise par n = ${nombreFr(instance.n)}, la somme des effectifs — jamais par le nombre de valeurs distinctes (${nombreFr(donnees.length)}).`,
-      ),
-    ],
-  });
-  return etapes;
 }
 
 function baremeMoyennePonderee(instance: ExerciceMoyennePonderee): BaremeExercice {
@@ -375,12 +301,11 @@ const adaptateurEvaluationMoyennePondereeBrut: AdaptateurFeuilleExercices<Exerci
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceMoyennePonderee,
   construireCorrection: construireCorrectionMoyennePonderee,
-  difficulte: difficulteMoyennePonderee,
+  criteresDifficulte,
   reponseBreve: reponseBreveMoyennePonderee,
   correctionDetaillee: correctionDetailleeMoyennePonderee,
   bareme: baremeMoyennePonderee,
   enoncePapier: enoncePapierMoyennePonderee,
-  dureeMinutes: 5,
 };
 
 /** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
