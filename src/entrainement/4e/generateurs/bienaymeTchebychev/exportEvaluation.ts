@@ -406,15 +406,15 @@ function criteresDifficulte(instance: ExerciceBienaymeTchebychev): CriteresDiffi
   return { ...etapesDuCorrige(correctionDetailleeBienaymeTchebychev(instance)), methode: directe ? 0 : 1, piege: 0 };
 }
 
-const LIBELLE_CRITERE: Record<EtapeBT, string> = {
-  kIntervalle: "k calculé à partir de l'intervalle, bien arrondi",
-  kPourcent: "k calculé à partir du pourcentage (1 − 1/k² = p), bien arrondi",
-  pourcentFinal: "Pourcentage minimal 1 − 1/k², arrondi dans le bon sens",
-  nombreFinal: "Nombre minimal d'individus, arrondi vers le haut (entier)",
-  pourcentDepuisNombre: "Nombre donné converti en pourcentage de l'effectif",
-  intervalleFinal: "Intervalle [x̄ − kσ ; x̄ + kσ], bornes arrondies vers l'extérieur",
-  sigma: "σ isolé à partir d'une borne, bien arrondi",
-  xBar: "x̄ = centre de l'intervalle",
+const LIBELLE_CRITERE: Record<EtapeBT, FragmentConsigne[]> = {
+  kIntervalle: [texte("k calculé à partir de l'intervalle, bien arrondi")],
+  kPourcent: [texte("k calculé à partir du pourcentage ("), latex("1-\\dfrac{1}{k^2}=p"), texte("), bien arrondi")],
+  pourcentFinal: [texte("Pourcentage minimal "), latex("1-\\dfrac{1}{k^2}"), texte(", arrondi dans le bon sens")],
+  nombreFinal: [texte("Nombre minimal d'individus, arrondi vers le haut (entier)")],
+  pourcentDepuisNombre: [texte("Nombre donné converti en pourcentage de l'effectif")],
+  intervalleFinal: [texte("Intervalle "), latex("[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]"), texte(", bornes arrondies vers l'extérieur")],
+  sigma: [latex("\\sigma"), texte(" isolé à partir d'une borne, bien arrondi")],
+  xBar: [latex("\\bar{x}"), texte(" = centre de l'intervalle")],
 };
 
 /** Poids par étape (somme 4, aucun critère sous 0,5). */
@@ -430,16 +430,16 @@ function baremeBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): BaremeE
   const criteres: CritereBareme[] =
     etapes.length === 1
       ? [
-          { sousQuestion: "a", critere: [texte("Justification : l'intervalle garanti [x̄ − kσ ; x̄ + kσ] est symétrique autour de x̄")], points: 2 },
+          { sousQuestion: "a", critere: [texte("Justification : l'intervalle garanti "), latex("[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]"), texte(" est symétrique autour de "), latex("\\bar{x}")], points: 2 },
           { sousQuestion: "a", critere: [texte(`Valeur : ${formatXBarAttenduTexte(instance as ExerciceBienaymeTchebychevIntervalleVersXBar)}`)], points: 2 },
         ]
-      : etapes.map((etape, i) => ({ sousQuestion: LETTRES[i], critere: [texte(LIBELLE_CRITERE[etape])], points: poids[i] }));
+      : etapes.map((etape, i) => ({ sousQuestion: LETTRES[i], critere: LIBELLE_CRITERE[etape], points: poids[i] }));
   const erreurs: ErreurFrequente[] = [];
   const i = (e: EtapeBT) => etapes.indexOf(e);
   if (i("kIntervalle") >= 0) erreurs.push({ description: [texte("k calculé avec la largeur totale de l'intervalle au lieu de la demi-largeur")], cout: `0 pt sur ${LETTRES[i("kIntervalle")]})` });
   if (i("pourcentFinal") >= 0 || i("kPourcent") >= 0) {
     const e = i("pourcentFinal") >= 0 ? i("pourcentFinal") : i("kPourcent");
-    erreurs.push({ description: [texte("1 − 1/k utilisé au lieu de 1 − 1/k²")], cout: `0 pt sur ${LETTRES[e]})` });
+    erreurs.push({ description: [latex("1-\\dfrac{1}{k}"), texte(" utilisé au lieu de "), latex("1-\\dfrac{1}{k^2}")], cout: `0 pt sur ${LETTRES[e]})` });
   }
   if (i("pourcentFinal") >= 0 || i("nombreFinal") >= 0) erreurs.push({ description: [texte("Minimum garanti arrondi vers le haut")], cout: "−0,5" });
   if (i("intervalleFinal") >= 0) erreurs.push({ description: [texte("Bornes arrondies vers l'intérieur de l'intervalle")], cout: "−0,5" });

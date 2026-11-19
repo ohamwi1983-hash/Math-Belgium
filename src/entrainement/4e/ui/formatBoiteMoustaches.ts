@@ -32,15 +32,15 @@ import { virgulesLatex, virgulesTexte } from "./nombreFr";
 export type SegmentTexte = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
 
 function T(valeur: string): SegmentTexte {
-  return { type: "texte", valeur: virgulesTexte(valeur) };
+  return { type: "texte", valeur: virgulesTexte(valeur).replace(/(^|[\s[;(=])-(?=\d)/g, "$1−") };
 }
 
 function Kx(valeur: string): SegmentTexte {
   return { type: "katex", valeur: virgulesLatex(valeur) };
 }
 
-export const LABEL_X_MIN = "x_{min}";
-export const LABEL_X_MAX = "x_{max}";
+export const LABEL_X_MIN = "x_{\\min}";
+export const LABEL_X_MAX = "x_{\\max}";
 export const LABEL_Q1 = "Q_1";
 export const LABEL_Q2 = "Q_2";
 export const LABEL_Q3 = "Q_3";

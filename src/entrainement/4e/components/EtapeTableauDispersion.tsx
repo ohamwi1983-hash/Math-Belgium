@@ -11,7 +11,7 @@ import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { nombreFr } from "../ui/nombreFr";
+import { nombreFrTypo } from "../ui/nombreFr";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
@@ -99,7 +99,7 @@ export function EtapeTableauDispersion({ exercice, tentativesUtilisees, tentativ
               const erronee = evaluation !== null && evaluation.produits[index] !== "correct";
               return (
                 <tr key={index}>
-                  <td className={estExemple ? "is-surlignee" : undefined}>{nombreFr(ligne.valeur)}</td>
+                  <td className={estExemple ? "is-surlignee" : undefined}>{nombreFrTypo(ligne.valeur)}</td>
                   <td className={estExemple ? "is-surlignee" : undefined}>{ligne.effectif}</td>
                   <td>
                     <input

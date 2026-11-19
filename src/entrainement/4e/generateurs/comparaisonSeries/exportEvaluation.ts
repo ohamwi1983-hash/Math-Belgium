@@ -170,7 +170,7 @@ function construireTableRecapitulatifHtml(serieA: SerieComparaison, serieB: Seri
 
 function segmentsConsignePourQuestion(question: QuestionComparaisonSeries, exercice: ExerciceComparaisonSeries): SegmentTexte[] {
   if (question.type === "centrage") return segmentsConsigneCentrage();
-  if (question.type === "dispersion") return segmentsConsigneDispersion(question);
+  if (question.type === "dispersion") return segmentsConsigneDispersion(question, exercice);
   if (question.type === "seuil") return segmentsConsigneSeuil(question, exercice);
   return segmentsConsigneInterpretation(question, exercice);
 }
@@ -265,11 +265,19 @@ function construireCorrectionComparaisonSeries(instance: ExerciceComparaisonSeri
     blocs.push({
       type: "paragraphe",
       fragments: [
-        texte(
-          `Écart-type : σ_A = ${formatNombre(serieA.sigma)}, σ_B = ${formatNombre(serieB.sigma)} (σ_A ${symboleSigma} σ_B). ` +
-            `Écart interquartile : (Q3−Q1)_A = ${formatNombre(serieA.ecartInterquartile)}, (Q3−Q1)_B = ${formatNombre(serieB.ecartInterquartile)} ` +
-            `((Q3−Q1)_A ${symboleIqr} (Q3−Q1)_B). Les deux mesures pointent vers la même série, qui vaut donc comme argument valide quel que soit le nombre demandé.`,
-        ),
+        texte("Écart-type : "),
+        latex(`\\sigma_A=${formatNombre(serieA.sigma)}`),
+        texte(", "),
+        latex(`\\sigma_B=${formatNombre(serieB.sigma)}`),
+        texte(" ("),
+        latex(`\\sigma_A ${symboleSigma} \\sigma_B`),
+        texte("). Écart interquartile : "),
+        latex(`(Q_3-Q_1)_A=${formatNombre(serieA.ecartInterquartile)}`),
+        texte(", "),
+        latex(`(Q_3-Q_1)_B=${formatNombre(serieB.ecartInterquartile)}`),
+        texte(" ("),
+        latex(`(Q_3-Q_1)_A ${symboleIqr} (Q_3-Q_1)_B`),
+        texte("). Les deux mesures pointent vers la même série, qui vaut donc comme argument valide quel que soit le nombre demandé."),
       ],
     });
     blocs.push({ type: "paragraphe", fragments: segmentsVersFragments(segmentsDispersionAttendu(question)) });
@@ -339,7 +347,7 @@ function baremeComparaisonSeries(instance: ExerciceComparaisonSeries): BaremeExe
   } else if (question.type === "dispersion") {
     criteres =
       question.nombreArguments === 2
-        ? [c("Écarts-types comparés", 1.5), c("Écarts interquartiles comparés", 1.5), c("Conclusion : série la plus homogène", 1)]
+        ? [c(instance.variante === "graphique" ? "Écarts-types calculés à partir des valeurs lues, puis comparés" : "Écarts-types comparés", 1.5), c("Écarts interquartiles comparés", 1.5), c("Conclusion : série la plus homogène", 1)]
         : [c("Une mesure de dispersion pertinente (écart-type ou écart interquartile) comparée", 2), c("Conclusion : série la plus homogène", 2)];
     erreurs.push({ description: [texte("Étendue utilisée comme argument")], cout: "0 pt pour cet argument" });
     erreurs.push({ description: [texte("Série la plus dispersée désignée comme la plus homogène")], cout: "0 pt sur la conclusion" });

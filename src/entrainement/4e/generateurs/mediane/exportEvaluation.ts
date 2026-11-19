@@ -23,7 +23,7 @@ import {
 } from "../../ui/formatMediane";
 import { precisionLecture, seuilLecture, valeurCibleLecture, type ParametreLecture } from "../../moteur/verificationMediane";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceMediane } from "./index";
-import { avecVirgulesBelges, nombreFr, nombreFrLatex, segmentEnVirgules } from "../../ui/nombreFr";
+import { avecVirgulesBelges, nombreFrLatex, nombreFrTypo, segmentEnVirgules } from "../../ui/nombreFr";
 import { profilMediane, LIBELLE_CAS_MEDIANE } from "../profilsEvaluationStatistique";
 
 /**
@@ -122,7 +122,7 @@ function tableauDonneesLatexDiscrete(instance: ExerciceMedianeDiscrete): string 
 
 function tableauDonneesLatexClasses(instance: ExerciceMedianeClasses): string {
   const colonnes = "c".repeat(instance.classes.length);
-  const ligneClasse = instance.classes.map((_, i) => `\\text{${formatClasseTexte(instance, i)}}`).join(" & ");
+  const ligneClasse = instance.classes.map((_, i) => `\\text{${formatClasseTexte(instance, i).split("−").join("}{-}\\text{")}}`).join(" & ");
   const ligneN = instance.classes.map((c) => formatNombre(c.effectif)).join(" & ");
   const ligneV = instance.classes.map((c) => formatNombre(c.effectifCumule)).join(" & ");
   return `\\begin{array}{c|${colonnes}}\\text{Classe} & ${ligneClasse}\\\\\\hline ${LABEL_EFFECTIF_NI} & ${ligneN}\\\\\\hline ${LABEL_EFFECTIF_CUMULE_VI} & ${ligneV}\\end{array}`;
@@ -132,13 +132,18 @@ function tableauDonneesLatexClasses(instance: ExerciceMedianeClasses): string {
 // Variante "discrete" — 3 questions (mediane ; q1+q3 fusionnés ; minMaxMode).
 // ============================================================================
 
+/** Consigne de l'écran (texte + KaTeX) → fragments du papier : même source, mêmes notations. */
+function fragmentsDeSegments(segments: { type: "texte" | "katex"; valeur: string }[]): FragmentConsigne[] {
+  return segments.map((seg) => (seg.type === "katex" ? latex(seg.valeur) : texte(seg.valeur)));
+}
+
 function construireEnonceDiscrete(instance: ExerciceMedianeDiscrete): SectionExercice {
   return {
     enteteFragments: [texte(formatEnonceTexte(instance)), latex(tableauDonneesLatexDiscrete(instance))],
     questions: [
-      { consigne: [texte(consigneMedianeDiscrete(instance))] },
-      { consigne: [texte(consigneQ1(instance))] },
-      { consigne: [texte(consigneQ3(instance))] },
+      { consigne: fragmentsDeSegments(consigneMedianeDiscrete(instance)) },
+      { consigne: fragmentsDeSegments(consigneQ1(instance)) },
+      { consigne: fragmentsDeSegments(consigneQ3(instance)) },
       { consigne: [texte(consigneMinMaxMode(instance))] },
     ],
   };
@@ -151,7 +156,9 @@ function construireEnonceDiscrete(instance: ExerciceMedianeDiscrete): SectionExe
  * recalculer. */
 function fragmentSeuilValeurDiscrete(labelFormule: string, seuil: number, ligne: { valeur: number; effectifCumule: number }, symboleLatex: string, unite: string): FragmentConsigne[] {
   return [
-    texte(`Seuil ${labelFormule} = ${formatNombre(seuil)}. La première valeur du tableau dont l'effectif cumulé dépasse strictement ce seuil est `),
+    texte("Seuil "),
+    latex(`${labelFormule}=${formatNombre(seuil)}`),
+    texte(`. La première valeur du tableau dont l'effectif cumulé dépasse strictement ce seuil est `),
     latex(`x = ${formatNombre(ligne.valeur)}`),
     texte(` (effectif cumulé ${formatNombre(ligne.effectifCumule)}), donc `),
     latex(`${symboleLatex} = ${formatNombre(ligne.valeur)}`),
@@ -168,14 +175,14 @@ function construireCorrectionDiscrete(instance: ExerciceMedianeDiscrete): BlocCo
   const effectifMax = effectifMaximalMinMaxMode(instance);
 
   const blocs: BlocCorrection[] = [
-    { type: "paragraphe", fragments: [texte("a) "), ...fragmentSeuilValeurDiscrete("n/2", instance.seuil, ligneMediane, "Q_2", unite)] },
+    { type: "paragraphe", fragments: [texte("a) "), ...fragmentSeuilValeurDiscrete("\\dfrac{n}{2}", instance.seuil, ligneMediane, "Q_2", unite)] },
     {
       type: "paragraphe",
       fragments: [
         texte("b) "),
-        ...fragmentSeuilValeurDiscrete("n/4", instance.seuilQ1, ligneQ1, "Q_1", unite),
+        ...fragmentSeuilValeurDiscrete("\\dfrac{n}{4}", instance.seuilQ1, ligneQ1, "Q_1", unite),
         texte(" "),
-        ...fragmentSeuilValeurDiscrete("3n/4", instance.seuilQ3, ligneQ3, "Q_3", unite),
+        ...fragmentSeuilValeurDiscrete("\\dfrac{3n}{4}", instance.seuilQ3, ligneQ3, "Q_3", unite),
       ],
     },
     {
@@ -189,7 +196,7 @@ function construireCorrectionDiscrete(instance: ExerciceMedianeDiscrete): BlocCo
     },
     {
       type: "tableau",
-      libellesLignes: ["Médiane (Q2)", "Q1", "Q3", "Minimum", "Maximum", "Mode(s)"],
+      libellesLignes: ["Médiane (Q₂)", "Premier quartile (Q₁)", "Troisième quartile (Q₃)", "Minimum", "Maximum", "Mode(s)"],
       valeursParLigne: [
         [`${formatNombre(instance.mediane)} ${unite}`],
         [`${formatNombre(instance.q1)} ${unite}`],
@@ -235,9 +242,9 @@ function consigneQuartileClasses(instance: ExerciceMedianeClasses, quartile: "Q1
 function consigneSyntheseClassesPapier(): FragmentConsigne[] {
   return [
     texte("Détermine "),
-    latex("x_{min}"),
+    latex("x_{\\min}"),
     texte(", "),
-    latex("x_{max}"),
+    latex("x_{\\max}"),
     texte(", l'étendue, la classe modale et le mode de cette série."),
   ];
 }
@@ -291,20 +298,24 @@ function construireCorrectionClasses(instance: ExerciceMedianeClasses): BlocCorr
     { type: "paragraphe", fragments: [texte("a) "), ...fragmentInterpolation(instance, "mediane")] },
     {
       type: "paragraphe",
-      fragments: [texte("b) Q1 : "), ...fragmentInterpolation(instance, "q1"), texte(" Q3 : "), ...fragmentInterpolation(instance, "q3")],
+      fragments: [texte("b) "), latex("Q_1"), texte(" : "), ...fragmentInterpolation(instance, "q1"), texte(" "), latex("Q_3"), texte(" : "), ...fragmentInterpolation(instance, "q3")],
     },
     {
       type: "paragraphe",
       fragments: [
+        texte("c) "),
+        latex(`x_{\\min}=${formatNombre(instance.xMin)}`),
+        texte(` ${unite}, `),
+        latex(`x_{\\max}=${formatNombre(instance.xMax)}`),
         texte(
-          `c) xmin = ${formatNombre(instance.xMin)} ${unite}, xmax = ${formatNombre(instance.xMax)} ${unite}, étendue = ${formatNombre(instance.etendue)} ${unite}. ` +
+          ` ${unite}, étendue = ${formatNombre(instance.etendue)} ${unite}. ` +
             `L'effectif maximal du tableau vaut ${effectifMax}, atteint par la classe ${classeModaleTexte} : mode = centre de cette classe = ${formatNombre(instance.modeCentreClasseModale)} ${unite}.`,
         ),
       ],
     },
     {
       type: "tableau",
-      libellesLignes: ["Médiane (Q2)", "Q1", "Q3", "xmin", "xmax", "Étendue", "Classe modale", "Mode"],
+      libellesLignes: ["Médiane (Q₂)", "Premier quartile (Q₁)", "Troisième quartile (Q₃)", "Minimum", "Maximum", "Étendue", "Classe modale", "Mode"],
       valeursParLigne: [
         [`${formatNombre(instance.mediane)} ${unite}`],
         [`${formatNombre(instance.q1)} ${unite}`],
@@ -384,9 +395,9 @@ function enoncePapierMediane(instance: ExerciceMediane): EnoncePapier {
             texte(" et "),
             latex("Q_3"),
             texte(` (en ${unite}, ${precision}). Donne ensuite `),
-            latex("x_{min}"),
+            latex("x_{\\min}"),
             texte(", "),
-            latex("x_{max}"),
+            latex("x_{\\max}"),
             texte(", l'étendue, la classe modale et le mode de cette série."),
           ],
         },
@@ -399,14 +410,14 @@ function enoncePapierMediane(instance: ExerciceMediane): EnoncePapier {
 function reponseBreveMediane(instance: ExerciceMediane): FragmentConsigne[] {
   const u = instance.contexte.unite;
   if (instance.variante === "discrete") {
-    const modes = instance.modes.map(nombreFr).join(" ; ");
+    const modes = instance.modes.map(nombreFrTypo).join(" ; ");
     return [
       latex(`Q_2 = ${nombreFrLatex(instance.mediane)}`),
       texte(" ; "),
       latex(`Q_1 = ${nombreFrLatex(instance.q1)}`),
       texte(" ; "),
       latex(`Q_3 = ${nombreFrLatex(instance.q3)}`),
-      texte(` (en ${u}) ; min = ${nombreFr(instance.min)} ; max = ${nombreFr(instance.max)} ; mode${instance.modes.length > 1 ? "s" : ""} = ${modes}`),
+      texte(` (en ${u}) ; min = ${nombreFrTypo(instance.min)} ; max = ${nombreFrTypo(instance.max)} ; mode${instance.modes.length > 1 ? "s" : ""} = ${modes}`),
     ];
   }
   return [
@@ -416,20 +427,20 @@ function reponseBreveMediane(instance: ExerciceMediane): FragmentConsigne[] {
     texte(" ; "),
     latex(`Q_3 \\approx ${nombreFrLatex(instance.q3)}`),
     texte(` (en ${u}) ; `),
-    latex(`x_{min} = ${nombreFrLatex(instance.xMin)}`),
+    latex(`x_{\\min} = ${nombreFrLatex(instance.xMin)}`),
     texte(" ; "),
-    latex(`x_{max} = ${nombreFrLatex(instance.xMax)}`),
-    texte(` ; étendue = ${nombreFr(instance.etendue)} ; classe modale ${formatClasseTexte(instance, instance.indexClasseModale)} ; mode = ${nombreFr(instance.modeCentreClasseModale)}`),
+    latex(`x_{\\max} = ${nombreFrLatex(instance.xMax)}`),
+    texte(` ; étendue = ${nombreFrTypo(instance.etendue)} ; classe modale ${formatClasseTexte(instance, instance.indexClasseModale)} ; mode = ${nombreFrTypo(instance.modeCentreClasseModale)}`),
   ];
 }
 
 function baremeMediane(instance: ExerciceMediane): BaremeExercice {
   const discrete = instance.variante === "discrete";
   const criteres: CritereBareme[] = [
-    { sousQuestion: discrete ? "a" : "b", critere: discrete ? [texte("Seuil n/2 et médiane (règle « dépasse strictement »)")] : [texte("Médiane par interpolation dans la bonne classe")], points: 1 },
-    { sousQuestion: discrete ? "b" : "c", critere: [latex("Q_1"), texte(discrete ? " (seuil n/4)" : " par interpolation")], points: 1 },
-    { sousQuestion: discrete ? "c" : "d", critere: [latex("Q_3"), texte(discrete ? " (seuil 3n/4)" : " par interpolation")], points: 1 },
-    { sousQuestion: discrete ? "d" : "e", critere: discrete ? [texte("Minimum et maximum")] : [latex("x_{min}"), texte(", "), latex("x_{max}"), texte(" et étendue")], points: 0.5 },
+    { sousQuestion: discrete ? "a" : "b", critere: discrete ? [texte("Seuil "), latex("\\dfrac{n}{2}"), texte(" et médiane (règle « dépasse strictement »)")] : [texte("Médiane par interpolation dans la bonne classe")], points: 1 },
+    { sousQuestion: discrete ? "b" : "c", critere: discrete ? [latex("Q_1"), texte(" (seuil "), latex("\\dfrac{n}{4}"), texte(")")] : [latex("Q_1"), texte(" par interpolation")], points: 1 },
+    { sousQuestion: discrete ? "c" : "d", critere: discrete ? [latex("Q_3"), texte(" (seuil "), latex("\\dfrac{3n}{4}"), texte(")")] : [latex("Q_3"), texte(" par interpolation")], points: 1 },
+    { sousQuestion: discrete ? "d" : "e", critere: discrete ? [texte("Minimum et maximum")] : [latex("x_{\\min}"), texte(", "), latex("x_{\\max}"), texte(" et étendue")], points: 0.5 },
     { sousQuestion: discrete ? "d" : "e", critere: [texte(discrete ? "Mode(s)" : "Classe modale et mode (centre de la classe)")], points: 0.5 },
   ];
   const erreurs: ErreurFrequente[] = discrete

@@ -3,7 +3,7 @@ import type { ExerciceMedianeDiscrete } from "../core/mediane.types";
 import type { ReponseQ1 } from "../moteur/verificationMediane";
 import { diagnostiquerQ1 } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_Q1 } from "../moteur/sessionMediane";
-import { LABEL_Q1, PLACEHOLDER_Q1, PLACEHOLDER_SEUIL, consigneQ1, texteAideQ1Niveau1, texteAideQ1Niveau2 } from "../ui/formatMediane";
+import { LABEL_Q1, PLACEHOLDER_Q1, PLACEHOLDER_SEUIL, consigneQ1, texteAideQ1Niveau1, texteAideQ1Niveau2, SEUIL_Q1_LATEX } from "../ui/formatMediane";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
@@ -44,11 +44,11 @@ export function EtapeQ1Mediane({ exercice, tentativesUtilisees, tentativesMax, n
 
   return (
     <div>
-      <p className="prompt-text">{consigneQ1(exercice)}</p>
+      <p className="prompt-text"><SegmentsInline segments={consigneQ1(exercice)} /></p>
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="q1-seuil">
-          Seuil (n/4) =
+          Seuil <Katex expression={SEUIL_Q1_LATEX} /> =
         </label>
         <input
           id="q1-seuil"
@@ -76,7 +76,7 @@ export function EtapeQ1Mediane({ exercice, tentativesUtilisees, tentativesMax, n
           <p>
             <SegmentsInline segments={texteAideQ1Niveau1()} />
           </p>
-          {niveauAide >= 2 && <p>{texteAideQ1Niveau2(exercice)}</p>}
+          {niveauAide >= 2 && <p><SegmentsInline segments={texteAideQ1Niveau2(exercice)} /></p>}
         </div>
       )}
       {!validation && (

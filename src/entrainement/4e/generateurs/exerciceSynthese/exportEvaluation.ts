@@ -126,7 +126,7 @@ function tableauDonneesLatex(exercice: ExerciceSynthese): string {
   }
   const mappe = versMedianeClasses(exercice);
   const cols = exercice.classes.map(() => "c").join("");
-  const classesTxt = exercice.classes.map((_, i) => `\\text{${formatClasseTexte(mappe, i)}}`).join(" & ");
+  const classesTxt = exercice.classes.map((_, i) => `\\text{${formatClasseTexte(mappe, i).split("−").join("}{-}\\text{")}}`).join(" & ");
   const ns = exercice.classes.map((c) => c.effectif).join(" & ");
   return `\\begin{array}{c|${cols}} \\text{Classe} & ${classesTxt} \\\\ \\hline n_i & ${ns} \\end{array}`;
 }
@@ -167,12 +167,25 @@ function correctionMoyenne(exercice: ExerciceSynthese, lettre: string): BlocCorr
 // variante discrète) OU polygone + lecture graphique + synthèse (variante "classes").
 // ============================================================================
 
+/** Segments de l'écran (texte + KaTeX) → fragments du papier : même source, mêmes notations. */
+function fragmentsDeSegments(segments: { type: "texte" | "katex"; valeur: string }[]): FragmentConsigne[] {
+  return segments.map((seg) => (seg.type === "katex" ? latex(seg.valeur) : texte(seg.valeur)));
+}
+
 function consignePositionDiscrete(exercice: ExerciceSynthese): FragmentConsigne[] {
   const unite = exercice.contexte.unite;
   return [
-    texte(
-      `Détermine la médiane, le premier quartile Q1 et le troisième quartile Q3 de cette série (en ${unite} — seuils n/4, n/2, 3n/4, règle stricte : première valeur dont l'effectif cumulé dépasse le seuil), ainsi que son minimum, son maximum et son (ses) mode(s).`,
-    ),
+    texte("Détermine la médiane, le premier quartile "),
+    latex(LABEL_Q1),
+    texte(" et le troisième quartile "),
+    latex(LABEL_Q3),
+    texte(` de cette série (en ${unite} — seuils `),
+    latex("\\dfrac{n}{4}"),
+    texte(", "),
+    latex("\\dfrac{n}{2}"),
+    texte(", "),
+    latex("\\dfrac{3n}{4}"),
+    texte(", règle stricte : première valeur dont l'effectif cumulé dépasse le seuil), ainsi que son minimum, son maximum et son (ses) mode(s)."),
   ];
 }
 
@@ -183,9 +196,13 @@ function correctionPositionDiscrete(exercice: ExerciceSynthese, lettre: string):
     {
       type: "paragraphe",
       fragments: [
-        texte(`${lettre}) Médiane : ${formatMedianeAttendueTexte(mappe)}. `),
-        texte(`Q1 : ${formatQ1AttendueTexte(mappe)}. `),
-        texte(`Q3 : ${formatQ3AttendueTexte(mappe)}. `),
+        texte(`${lettre}) Médiane : `),
+        ...fragmentsDeSegments(formatMedianeAttendueTexte(mappe)),
+        texte(". Premier quartile : "),
+        ...fragmentsDeSegments(formatQ1AttendueTexte(mappe)),
+        texte(". Troisième quartile : "),
+        ...fragmentsDeSegments(formatQ3AttendueTexte(mappe)),
+        texte(". "),
         texte(formatMinMaxModeAttendueTexte(mappe) + "."),
       ],
     },
@@ -201,9 +218,11 @@ function correctionPolygone(exercice: ExerciceSynthese, lettre: string): BlocCor
 function consigneSyntheseClasses(exercice: ExerciceSynthese): FragmentConsigne[] {
   const unite = exercice.contexte.unite;
   return [
-    texte(
-      `À l'aide de ce polygone (ou par le calcul), détermine l'étendue, le premier quartile Q1, la médiane, le troisième quartile Q3 (en ${unite}), ainsi que la classe modale et le mode de cette série.`,
-    ),
+    texte("À l'aide de ce polygone (ou par le calcul), détermine l'étendue, le premier quartile "),
+    latex(LABEL_Q1),
+    texte(", la médiane, le troisième quartile "),
+    latex(LABEL_Q3),
+    texte(` (en ${unite}), ainsi que la classe modale et le mode de cette série.`),
   ];
 }
 
@@ -214,9 +233,23 @@ function correctionSyntheseClasses(exercice: ExerciceSynthese, lettre: string): 
     {
       type: "paragraphe",
       fragments: [
-        texte(`${lettre}) Seuil Q1 = n/4 = ${formatNombreTexte(exercice.seuilQ1)} → ${formatLectureAttendueTexte(mappe, "q1")}. `),
-        texte(`Seuil médiane = n/2 = ${formatNombreTexte(exercice.seuil)} → ${formatLectureAttendueTexte(mappe, "mediane")}. `),
-        texte(`Seuil Q3 = 3n/4 = ${formatNombreTexte(exercice.seuilQ3)} → ${formatLectureAttendueTexte(mappe, "q3")}. `),
+        texte(`${lettre}) Seuil de `),
+        latex(LABEL_Q1),
+        texte(" : "),
+        latex(`\\dfrac{n}{4}=${virgulesLatex(String(exercice.seuilQ1))}`),
+        texte(" → "),
+        ...fragmentsDeSegments(formatLectureAttendueTexte(mappe, "q1")),
+        texte(". Seuil de la médiane : "),
+        latex(`\\dfrac{n}{2}=${virgulesLatex(String(exercice.seuil))}`),
+        texte(" → "),
+        ...fragmentsDeSegments(formatLectureAttendueTexte(mappe, "mediane")),
+        texte(". Seuil de "),
+        latex(LABEL_Q3),
+        texte(" : "),
+        latex(`\\dfrac{3n}{4}=${virgulesLatex(String(exercice.seuilQ3))}`),
+        texte(" → "),
+        ...fragmentsDeSegments(formatLectureAttendueTexte(mappe, "q3")),
+        texte(". "),
         texte(formatSyntheseAttendueTexte(mappe) + "."),
       ],
     },
@@ -274,7 +307,7 @@ function correctionBoxplot(exercice: ExerciceSynthese, lettre: string): BlocCorr
 
 function correctionDispersion(exercice: ExerciceSynthese, lettre: string): BlocCorrection[] {
   const mappe = versDispersion(exercice);
-  const libellesLignes = ["x_i (ou centre)", "n_i", "(x_i-x̄)² · n_i"];
+  const libellesLignes = ["xᵢ (ou centre)", "nᵢ", "(xᵢ − x̄)² · nᵢ"];
   const valeursParLigne = [mappe.lignes.map((l) => String(l.valeur)), mappe.lignes.map((l) => String(l.effectif)), mappe.lignes.map((l) => String(l.produitAttendu))];
 
   return [
@@ -339,11 +372,11 @@ function consigneEcran(exercice: ExerciceSynthese, phase: PhaseExerciceSynthese)
       return [texte(c.avant), latex(c.latex), texte(c.apres)];
     }
     case "mediane":
-      return exercice.variante === "discrete" ? [texte(consigneMedianeDiscrete(versMedianeDiscrete(exercice)))] : [];
+      return exercice.variante === "discrete" ? fragmentsDeSegments(consigneMedianeDiscrete(versMedianeDiscrete(exercice))) : [];
     case "q1":
-      return exercice.variante === "discrete" ? [texte(consigneQ1(versMedianeDiscrete(exercice)))] : [];
+      return exercice.variante === "discrete" ? fragmentsDeSegments(consigneQ1(versMedianeDiscrete(exercice))) : [];
     case "q3":
-      return exercice.variante === "discrete" ? [texte(consigneQ3(versMedianeDiscrete(exercice)))] : [];
+      return exercice.variante === "discrete" ? fragmentsDeSegments(consigneQ3(versMedianeDiscrete(exercice))) : [];
     case "minMaxMode":
       return exercice.variante === "discrete" ? [texte(consigneMinMaxMode(versMedianeDiscrete(exercice)))] : [];
     case "polygone":
@@ -463,9 +496,15 @@ function reponseQuestion(exercice: ExerciceSynthese, question: QuestionSynthese)
     case "positionDiscrete": {
       if (exercice.variante !== "discrete") return [];
       const mappe = versMedianeDiscrete(exercice);
-      // Réponse brève : les valeurs seules (les seuils n/4, n/2, 3n/4 restent dans le corrigé).
-      const sansSeuil = (t: string) => t.replace(/seuil = [^,]+, /, "");
-      return [texte(`${sansSeuil(formatQ1AttendueTexte(mappe))} ; ${sansSeuil(formatMedianeAttendueTexte(mappe))} ; ${sansSeuil(formatQ3AttendueTexte(mappe))} ; ${formatMinMaxModeAttendueTexte(mappe)}`)];
+      // Réponse brève : les valeurs seules (les seuils restent dans le corrigé).
+      return [
+        latex(virgulesLatex(`${LABEL_Q1}=${mappe.q1}`)),
+        texte(" ; "),
+        latex(virgulesLatex(`${LABEL_Q2}=${mappe.mediane}`)),
+        texte(" ; "),
+        latex(virgulesLatex(`${LABEL_Q3}=${mappe.q3}`)),
+        texte(` ; ${formatMinMaxModeAttendueTexte(mappe)}`),
+      ];
     }
     case "polygone":
       if (exercice.variante !== "classes") return [];
@@ -473,7 +512,14 @@ function reponseQuestion(exercice: ExerciceSynthese, question: QuestionSynthese)
     case "syntheseClasses": {
       if (exercice.variante !== "classes") return [];
       const mappe = versMedianeClasses(exercice);
-      return [texte(`${formatLectureAttendueTexte(mappe, "q1")} ; ${formatLectureAttendueTexte(mappe, "mediane")} ; ${formatLectureAttendueTexte(mappe, "q3")} ; ${formatSyntheseAttendueTexte(mappe)}`)];
+      return [
+        ...fragmentsDeSegments(formatLectureAttendueTexte(mappe, "q1")),
+        texte(" ; "),
+        ...fragmentsDeSegments(formatLectureAttendueTexte(mappe, "mediane")),
+        texte(" ; "),
+        ...fragmentsDeSegments(formatLectureAttendueTexte(mappe, "q3")),
+        texte(` ; ${formatSyntheseAttendueTexte(mappe)}`),
+      ];
     }
     case "boxplot":
       return [latex(formatCinqNombresLatex(versBoiteMoustaches(exercice).valeurs))];
@@ -508,7 +554,7 @@ const CRITERE_QUESTION: Record<QuestionSynthese, string> = {
   syntheseClasses: "Quartiles et médiane lus sur le polygone, étendue, classe modale et mode",
   boxplot: "Boîte à moustaches : cinq valeurs placées sur un axe gradué",
   dispersion: "Variance et écart-type (écarts pondérés)",
-  bienaymeTchebychev: "Intervalle garanti et pourcentage minimal 1 − 1/k²",
+  bienaymeTchebychev: "Intervalle garanti et pourcentage minimal",
 };
 
 function baremeExerciceSynthese(exercice: ExerciceSynthese): BaremeExercice {
@@ -522,7 +568,7 @@ function baremeExerciceSynthese(exercice: ExerciceSynthese): BaremeExercice {
   const erreurs: ErreurFrequente[] = [
     { description: [texte("Division par le nombre de valeurs distinctes au lieu de l'effectif total")], cout: `0 pt sur ${lettreDe("moyenne")})` },
     { description: [texte("Écarts au carré non pondérés par les effectifs, ou σ confondu avec V")], cout: `0 pt sur ${lettreDe("dispersion")})` },
-    { description: [texte("1 − 1/k au lieu de 1 − 1/k², ou bornes arrondies vers l'intérieur")], cout: `−0,5 sur ${lettreDe("bienaymeTchebychev")})` },
+    { description: [latex("1-\\dfrac{1}{k}"), texte(" au lieu de "), latex("1-\\dfrac{1}{k^2}"), texte(", ou bornes arrondies vers l'intérieur")], cout: `−0,5 sur ${lettreDe("bienaymeTchebychev")})` },
   ];
   if (exercice.variante === "classes") erreurs.splice(1, 0, { description: [texte("Bornes de classe utilisées au lieu des centres")], cout: `−0,5 sur ${lettreDe("moyenne")})` });
   else erreurs.splice(1, 0, { description: [texte("Quartile pris à la valeur dont l'effectif cumulé ÉGALE le seuil (règle stricte non respectée)")], cout: `−0,5 sur ${lettreDe("positionDiscrete")})` });

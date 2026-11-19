@@ -9,7 +9,7 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { nombreFr } from "../ui/nombreFr";
+import { nombreFrTypo } from "../ui/nombreFr";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
@@ -89,15 +89,15 @@ export function EtapeFrequencesCumuleesTableauFrequences({
               const erronee = evaluation !== null && evaluation[index] !== "correct";
               return (
                 <tr key={ligne.valeur}>
-                  <td>{nombreFr(ligne.valeur)}</td>
-                  <td>{nombreFr(ligne.frequencePourcent)}</td>
+                  <td>{nombreFrTypo(ligne.valeur)}</td>
+                  <td>{nombreFrTypo(ligne.frequencePourcent)}</td>
                   <td>
                     <input
                       className={`text-input${erronee ? " is-erronee" : ""}`}
                       placeholder={PLACEHOLDER_FREQUENCE_CUMULEE}
                       value={valeurs[index]}
                       onChange={(e) => modifier(index, normaliserSigneMoins(e.target.value))}
-                      aria-label={`Fréquence cumulée de la valeur ${nombreFr(ligne.valeur)}`}
+                      aria-label={`Fréquence cumulée de la valeur ${nombreFrTypo(ligne.valeur)}`}
                     />
                   </td>
                 </tr>
@@ -112,7 +112,7 @@ export function EtapeFrequencesCumuleesTableauFrequences({
           <p>{texteAideFrequencesCumuleesNiveau1(exercice)}</p>
           {niveauAide >= 2 && (
             <p>
-              Fréquences cumulées déjà connues : {reveles.map((r) => `${nombreFr(r.valeur)} → ${nombreFr(r.frequenceCumulee)} %`).join(", ")}. Reste à
+              Fréquences cumulées déjà connues : {reveles.map((r) => `${nombreFrTypo(r.valeur)} → ${nombreFrTypo(r.frequenceCumulee)} %`).join(", ")}. Reste à
               trouver celle de la dernière ligne — souviens-toi de ce qu'elle doit valoir.
             </p>
           )}

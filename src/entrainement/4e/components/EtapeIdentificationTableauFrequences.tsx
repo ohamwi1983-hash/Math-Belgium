@@ -9,7 +9,7 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { nombreFr } from "../ui/nombreFr";
+import { nombreFrTypo } from "../ui/nombreFr";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
@@ -92,7 +92,7 @@ export function EtapeIdentificationTableauFrequences({ exercice, tentativesUtili
             className={`tf-liste-brute-item${v === surlignerValeur ? " is-surlignee" : ""}${indicesCoches.has(i) ? " is-cochee" : ""}`}
             onClick={() => basculerCoche(i)}
           >
-            {nombreFr(v)}
+            {nombreFrTypo(v)}
           </button>
         ))}
       </div>

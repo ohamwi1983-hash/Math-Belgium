@@ -23,7 +23,7 @@ import {
   formatTraceAttendueTexte,
 } from "../../ui/formatHistogramme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceHistogramme } from "./index";
-import { avecVirgulesBelges, nombreFr, nombreFrLatex } from "../../ui/nombreFr";
+import { avecVirgulesBelges, nombreFrTypo as nombreFr, nombreFrLatex } from "../../ui/nombreFr";
 import { profilHistogramme } from "../profilsEvaluationStatistique";
 
 /**

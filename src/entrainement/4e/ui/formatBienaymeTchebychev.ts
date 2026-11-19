@@ -47,7 +47,7 @@ import type {
   VarianteBienaymeTchebychev,
 } from "../core/bienaymeTchebychev.types";
 import { aupresDesPopulationMajuscule, de, populationReprise } from "./phrasesContexteStatistique";
-import { virgulesLatex, virgulesTexte } from "./nombreFr";
+import { nombreFrTypo, virgulesLatex, virgulesTexte } from "./nombreFr";
 
 export const LABEL_XBAR = "\\bar{x}";
 export const LABEL_SIGMA = "\\sigma";
@@ -61,7 +61,7 @@ export interface AideAvecFormule {
 export type SegmentTexte = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
 
 function T(valeur: string): SegmentTexte {
-  return { type: "texte", valeur: virgulesTexte(valeur) };
+  return { type: "texte", valeur: virgulesTexte(valeur).replace(/(^|[\s[;(=])-(?=\d)/g, "$1−") };
 }
 
 function Kx(valeur: string): SegmentTexte {
@@ -148,7 +148,7 @@ function phraseCesPopulation(contexte: ContexteBienaymeTchebychev): string {
 }
 
 function phraseCaractereComprisEntre(contexte: ContexteBienaymeTchebychev, borneInf: number, borneSup: number): string {
-  return virgulesTexte(`${contexte.caractereIndefini} ${contexte.comprisAccord} entre ${borneInf} et ${borneSup} ${contexte.unite}`);
+  return virgulesTexte(`${contexte.caractereIndefini} ${contexte.comprisAccord} entre ${nombreFrTypo(borneInf)} et ${nombreFrTypo(borneSup)} ${contexte.unite}`);
 }
 
 function segmentsBaseComplete(contexte: ContexteBienaymeTchebychev, xBar: number, sigma: number): SegmentTexte[] {
@@ -510,7 +510,7 @@ export function formatIntervalleAttenduTexte(exercice: {
   const exactInf = estArrondiExact(borneInfValeurExacte(exercice), exercice.borneInfAttendue);
   const exactSup = estArrondiExact(borneSupValeurExacte(exercice), exercice.borneSupAttendue);
   const signe = exactInf && exactSup ? "=" : "≈";
-  return virgulesTexte(`${signe} [${formatNombreTexte(exercice.borneInfAttendue)} ; ${formatNombreTexte(exercice.borneSupAttendue)}]`);
+  return virgulesTexte(`${signe} [${formatNombreTexte(exercice.borneInfAttendue)} ; ${formatNombreTexte(exercice.borneSupAttendue)}]`).replace(/(^|[\s[;])-(?=\d)/g, "$1−");
 }
 
 export function formatNombreAttenduTexte(nMinAttendu: number): string {

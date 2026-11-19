@@ -260,7 +260,7 @@ function baremeMoyennePonderee(instance: ExerciceMoyennePonderee): BaremeExercic
 
   const erreurs: ErreurFrequente[] = [
     {
-      description: [texte(`Moyenne des ${classes ? "centres" : "valeurs"} sans tenir compte des effectifs (on trouve ${nombreFr(moyenneNonPonderee(instance))})`)],
+      description: [texte(`Moyenne des ${classes ? "centres" : "valeurs"} sans tenir compte des effectifs (on trouve ${nombreFr(moyenneNonPonderee(instance)).replace("-", "−")})`)],
       cout: `0 pt en ${l.quotient}) et sur les produits`,
     },
     { description: [texte(`Division par le nombre de ${classes ? "classes" : "valeurs distinctes"} au lieu de n = ${nombreFr(instance.n)}`)], cout: `0 pt sur le calcul en ${l.quotient})` },

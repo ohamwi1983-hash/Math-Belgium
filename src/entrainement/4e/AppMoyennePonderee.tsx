@@ -26,7 +26,7 @@ import { EnTeteExercice } from "./components/EnTeteExercice";
 import { calculerRecapitulatifMoyennePonderee } from "./ui/recapitulatifMoyennePonderee";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
-import { nombreFr } from "./ui/nombreFr";
+import { nombreFrTypo } from "./ui/nombreFr";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -130,7 +130,7 @@ export function AppMoyennePonderee() {
         Sommes attendues : <SegmentsInline segments={formatSommesAttenduesTexte(exercice)} />
       </>
     ) : (
-      <>Moyenne pondérée attendue : {nombreFr(exercice.moyenne)}</>
+      <>Moyenne pondérée attendue : {nombreFrTypo(exercice.moyenne)}</>
     );
 
   const validation = enAttente

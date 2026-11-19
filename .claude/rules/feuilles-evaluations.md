@@ -358,6 +358,26 @@ Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feui
 (6gen23–29, 6gen77–84) ; 5e ch. 3 (5gen14–19, 5gen44–49) ; 6e ch. 3 (6gen13–22, 6gen85–92) ; 4e ch. 4 (gen30–38, gen108–112). Les autres adaptateurs s'affichent comme avant (contrat rétrocompatible).
 - 4e ch. 4, moitié 1 (gen30–36, notés : `criteresDifficulte`) : briques `4e/ui/corrigeStatistique1.ts` (`COURS_*` § 1–7, `lignesSomme` / `lignesSommeProduits` — membre de droite ≤ 26 caractères visibles, sinon paquets « a+b+c=P » de gauche ≤ 18 : la colonne du milieu ne fait que ≈ 230 px à 680 px —, `couperSiLongue`, `ligneSeuil`, `ligneFrequence` « ×100 % = 20 % », `formulesInsecables` : formules des lignes de texte groupées `{…}`, sinon « h₁ = 32 % » se coupait après « = » en fin de ligne) ; une lettre par ÉCRAN (gen33 : 4 / 5 étapes, Q₁ et Q₃ séparés ; gen35 : 11 / 13 étapes, `etapesParQuestion` groupe les écrans par vraie question, ordre « classes » des questions = ordre des écrans) ; constructeurs d'étapes de gen32/33/34/36 réutilisés par gen35 sur l'exercice « mappé » ; figure de la boîte sortie dans `boiteMoustaches/figure.ts` (sans `docx`) ; lectures (min/max/mode, sommets du polygone, boîte tracée) comptées comme écrans de lecture.
 - 4e ch. 4, gen37/38/108–112 : briques `4e/ui/corrigeStatistique2.ts` (`COURS_*` § 1–8, `lignesSomme` — membre de droite ≤ 26 caractères visibles, sinon paquets `S_1`, `S_2`… puis leur somme —, `formulesInsecables` pour les formules d'un Résultat / Ce qu'on utilise rédigé) ; arrondi orienté écrit avec une relation VRAIE (« ≈ 1,3571 ≥ 1,35 » par défaut, « ≤ 1,30 » par excès, borne « = 44,8 ≥ 44 ») ; gen38 : figure `4e/ui/figureComparaisonSeries.ts` (seuils n/4, n/2, 3n/4 et quartiles lus marqués) ; gen112 : la correction reprend la copie bloc par bloc (« Ligne k »). Niveaux notés (`criteresDifficulte`) ; lectures : gen38 récapitulatif et seuil simple, gen111 bâtons a et trompeur b, gen108 d.
+  Corrections validées par l'utilisateur (à la source, écran = aides = papier = corrigé) :
+  **gen38 « graphique », dispersion à 2 arguments** : σ reste un argument (le cours, § 8, compare les
+  écarts-types ; une courbe cumulée d'une série DISCRÈTE redonne tout le tableau, chaque saut = une
+  valeur et son effectif/sa fréquence) — la consigne dit de le CALCULER à partir des valeurs lues
+  (calculatrice, mode statistique), l'aide 2 dit comment, le barème « écarts-types calculés à partir
+  des valeurs lues » ; vérification inchangée (σ + écart interquartile ; l'étendue reste le piège).
+  Remplacer σ par un indicateur lisible aurait laissé un seul argument valide sur les courbes.
+  **Figure papier des courbes cumulées** : axe vertical de 0 (aucune graduation négative) au cumul
+  total ; grille verticale passant par les seuils n/4, n/2, 3n/4 des DEUX séries (pas 1, 0,5, 1,25…
+  — `grilleVerticaleCourbesCumulees`) ou par 25/50/75 % (pas 5), grille horizontale passant par chaque
+  valeur xᵢ (`grilleHorizontaleCourbesCumulees`), lignes chiffrées plus marquées, deux seuils proches
+  écrits de part et d'autre du cadre. Écran : `GrilleAdaptative` option `etiquettesYMin={0}` (la marge
+  sous l'axe, place des nombres X, ne porte aucun nombre négatif).
+  **Consignes, aides, réponses attendues en KaTeX sur tout le chapitre** (« seuil $\dfrac{n}{2}$ »,
+  $Q_1$, $x_{\min}$, $1-\dfrac{1}{k^2}$, « − » typographique devant un nombre négatif) : les fonctions
+  d'écran (`consigneQ1`, `texteAide…Niveau2`, `consigneLecture`, `formatQ1AttendueTexte`…) renvoient
+  des segments texte/KaTeX, convertis tels quels en fragments pour le papier (titres d'étape compris) ;
+  libellés en chaîne seule (titres de fiche, en-têtes de tableau) : indices Unicode (Q₁). Balayage
+  (`notation.ts`, dossier de travail) : sorties papier + toutes les fonctions/constantes exportées des
+  14 `ui/format*.ts`, 300 tirages par variante.
 - 6e ch. 4, 6gen23–29 : briques `6e-6h/ui6e/corrigeIntegrales1.ts` — substitution `substituer`,
   `[F]ₐᵇ` en `\Big[…\Big]` puis F(b) − F(a) substitué (`lignesCrochet`, `lignesIntegralePoly` ;
   quand cette ligne dépasserait ≈ 48 caractères visibles, F(b) et F(a) sont calculés chacun sur leur

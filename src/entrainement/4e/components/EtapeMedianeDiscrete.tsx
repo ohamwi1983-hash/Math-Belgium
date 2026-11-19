@@ -3,7 +3,7 @@ import type { ExerciceMedianeDiscrete } from "../core/mediane.types";
 import type { ReponseMediane } from "../moteur/verificationMediane";
 import { diagnostiquerMediane } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_MEDIANE } from "../moteur/sessionMediane";
-import { LABEL_MEDIANE_Q2, PLACEHOLDER_MEDIANE, PLACEHOLDER_SEUIL, consigneMedianeDiscrete, texteAideMedianeNiveau1, texteAideMedianeNiveau2 } from "../ui/formatMediane";
+import { LABEL_MEDIANE_Q2, PLACEHOLDER_MEDIANE, PLACEHOLDER_SEUIL, consigneMedianeDiscrete, texteAideMedianeNiveau1, texteAideMedianeNiveau2, SEUIL_MEDIANE_LATEX } from "../ui/formatMediane";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
@@ -47,11 +47,11 @@ export function EtapeMedianeDiscrete({ exercice, tentativesUtilisees, tentatives
 
   return (
     <div>
-      <p className="prompt-text">{consigneMedianeDiscrete(exercice)}</p>
+      <p className="prompt-text"><SegmentsInline segments={consigneMedianeDiscrete(exercice)} /></p>
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="mediane-seuil">
-          Seuil (n/2) =
+          Seuil <Katex expression={SEUIL_MEDIANE_LATEX} /> =
         </label>
         <input
           id="mediane-seuil"
@@ -79,7 +79,7 @@ export function EtapeMedianeDiscrete({ exercice, tentativesUtilisees, tentatives
           <p>
             <SegmentsInline segments={texteAideMedianeNiveau1()} />
           </p>
-          {niveauAide >= 2 && <p>{texteAideMedianeNiveau2(exercice)}</p>}
+          {niveauAide >= 2 && <p><SegmentsInline segments={texteAideMedianeNiveau2(exercice)} /></p>}
         </div>
       )}
       {!validation && (

@@ -12,7 +12,7 @@ import type { StatutVerification } from "../moteur/statutVerification";
 import type { ExerciceHistogramme } from "../core/histogramme.types";
 import { valeurHauteur } from "./histogrammeGraph";
 import { phraseRepartition } from "./phrasesContexteStatistique";
-import { virgulesTexte } from "./nombreFr";
+import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
 /** Phrase d'intro, persistante sur les 3 écrans — même template que "Tableau de fréquences". */
 export function formatEnonceTexte(exercice: ExerciceHistogramme): string {
@@ -49,7 +49,7 @@ export function estDerniereClasse(exercice: ExerciceHistogramme, index: number):
  * à gauche, `[` ouvert/exclu à droite (`]` fermé/inclus, réservé à la toute dernière classe). */
 export function formatClasseTexte(exercice: ExerciceHistogramme, index: number): string {
   const classe = exercice.classes[index];
-  return virgulesTexte(`[${classe.borneInf} ; ${classe.borneSup}${estDerniereClasse(exercice, index) ? "]" : "["}`);
+  return virgulesTexte(`[${classe.borneInf} ; ${classe.borneSup}${estDerniereClasse(exercice, index) ? "]" : "["}`).replace(/-/g, "−");
 }
 
 /**
@@ -116,9 +116,14 @@ export function texteAideFrequencesNiveau1(exercice: ExerciceHistogramme): strin
   return virgulesTexte(`Fréquence (%) = effectif / n × 100, où n est la taille totale de l'échantillon (ici n = ${exercice.n}).`);
 }
 
-export function texteAideFrequencesNiveau2(exercice: ExerciceHistogramme): string {
+/** Exemple de calcul d'une fréquence — texte + KaTeX (jamais « 1/10 × 100 » en texte). */
+export function texteAideFrequencesNiveau2(exercice: ExerciceHistogramme): { type: "texte" | "katex"; valeur: string }[] {
   const classe = exercice.classes[0];
-  return virgulesTexte(`Pour la classe ${formatClasseTexte(exercice, 0)} : fréquence = ${classe.effectif}/${exercice.n} × 100 = ${classe.frequencePourcent} %.`);
+  return [
+    { type: "texte", valeur: virgulesTexte(`Pour la classe ${formatClasseTexte(exercice, 0)} : `) },
+    { type: "katex", valeur: virgulesLatex(`f=\\dfrac{${classe.effectif}}{${exercice.n}}\\times 100=${classe.frequencePourcent}\\,\\%`) },
+    { type: "texte", valeur: "." },
+  ];
 }
 
 // ============================================================================

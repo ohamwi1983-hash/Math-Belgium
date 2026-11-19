@@ -51,7 +51,7 @@ export function EtapeDispersionComparaison({ exercice, question, tentativesUtili
   return (
     <div>
       <p className="prompt-text">
-        <SegmentsInline segments={segmentsConsigneDispersion(question)} />
+        <SegmentsInline segments={segmentsConsigneDispersion(question, exercice)} />
       </p>
 
       <div className="options-grid-compact">
@@ -82,7 +82,7 @@ export function EtapeDispersionComparaison({ exercice, question, tentativesUtili
               className={`btn${actif ? " toggle-active" : ""}${erronee && actif ? " is-erronee" : ""}`}
               onClick={() => setArgumentsChoisis((liste) => basculer(liste, option.id))}
             >
-              {option.label}
+              <span><SegmentsInline segments={option.label} /></span>
             </button>
           );
         })}

@@ -94,6 +94,7 @@ export function GrilleAdaptative({
   uneEtiquetteXSurDeux,
   pasFixe,
   etiquettesLisibles,
+  etiquettesYMin,
 }: {
   largeur: number;
   hauteur: number;
@@ -142,6 +143,11 @@ export function GrilleAdaptative({
    * (`ComparaisonSeriesGraph.tsx`), gen33/gen35 (`LectureQuartileGraph.tsx`,
    * `PolygoneEffectifsGraph.tsx`), où le même pas de 1/3 (zoom) superposait leurs nombres. */
   etiquettesLisibles?: boolean;
+  /** N'écrit aucun nombre Y inférieur à cette valeur (le quadrillage reste tracé) — absent par
+   * défaut. Fourni par gen38 (`ComparaisonSeriesGraph.tsx`, `0`) : un effectif ou une fréquence
+   * cumulés ne sont jamais négatifs ; la marge sous l'axe (place des nombres X) ne porte aucune
+   * graduation négative. */
+  etiquettesYMin?: number;
 }) {
   const { viewTransform } = useTransformContext();
   const xSpan = largeur / viewTransform[0];
@@ -169,6 +175,7 @@ export function GrilleAdaptative({
           etiquettesAuxBords={etiquettesAuxBords}
           uneEtiquetteXSurDeux={uneEtiquetteXSurDeux}
           etiquettesLisibles={etiquettesLisibles}
+          etiquettesYMin={etiquettesYMin}
         />
       )}
     </Fragment>
@@ -222,6 +229,7 @@ function GraduationsFlottantes({
   etiquettesAuxBords = false,
   uneEtiquetteXSurDeux = false,
   etiquettesLisibles = false,
+  etiquettesYMin,
 }: {
   largeur: number;
   hauteur: number;
@@ -232,6 +240,8 @@ function GraduationsFlottantes({
   uneEtiquetteXSurDeux?: boolean;
   /** Voir `etiquettesLisibles` de `GrilleAdaptative`. */
   etiquettesLisibles?: boolean;
+  /** Voir `etiquettesYMin` de `GrilleAdaptative`. */
+  etiquettesYMin?: number;
   /** Masque UNIQUEMENT les graduations flottantes de l'axe Y (jamais celles de l'axe X) — même
    * convention et même appelant que `masquerEtiquettesY` de `GrilleAdaptative` ci-dessus
    * (`BoiteMoustachesGraph.tsx` : axe Y jamais une vraie grandeur, juste un séparateur de ligne).
@@ -290,6 +300,7 @@ function GraduationsFlottantes({
     ? []
     : graduationsDansPlage(visibleY[0], visibleY[1], pasEcritY).filter(
         (y) =>
+          (etiquettesYMin === undefined || y >= etiquettesYMin - 1e-9) &&
           (!etiquettesAuxBords || vec.transform([0, y], matrice)[1] - origineY < hauteur - COIN_Y) &&
           (!etiquettesLisibles || dansLeCadreY(vec.transform([0, y], matrice)[1] - origineY)),
       );

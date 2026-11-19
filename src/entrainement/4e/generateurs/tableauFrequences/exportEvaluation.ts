@@ -5,7 +5,7 @@ import { correctionDetailleeTableauFrequences } from "./corrigeDetaille";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatEnonceTexte } from "../../ui/formatTableauFrequences";
 import { genererExerciceTableauFrequences } from "./index";
-import { avecVirgulesBelges, nombreFr, nombreFrLatex } from "../../ui/nombreFr";
+import { avecVirgulesBelges, nombreFr, nombreFrLatex, nombreFrTypo } from "../../ui/nombreFr";
 import { profilTableauFrequences } from "../profilsEvaluationStatistique";
 
 /**
@@ -58,7 +58,7 @@ const CONSIGNE_GENERALE =
 
 function construireEnonceTableauFrequences(instance: ExerciceTableauFrequences): SectionExercice {
   return {
-    enteteFragments: [texte(`${formatEnonceTexte(instance)} ${instance.donneesBrutes.map(nombreFr).join(" ; ")}.`)],
+    enteteFragments: [texte(`${formatEnonceTexte(instance)} ${instance.donneesBrutes.map(nombreFrTypo).join(" ; ")}.`)],
     questions: [{ consigne: [texte(CONSIGNE_GENERALE)] }],
   };
 }

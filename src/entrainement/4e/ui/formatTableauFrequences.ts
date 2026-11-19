@@ -12,7 +12,7 @@
  */
 import type { ExerciceTableauFrequences } from "../core/tableauFrequences.types";
 import { phraseRepartition } from "./phrasesContexteStatistique";
-import { virgulesTexte } from "./nombreFr";
+import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
 /** Phrase d'intro, persistante sur les 4 écrans — même template que "Inégalité de
  * Bienaymé-Tchebychev" pour la construction `de {caractereComplement}` (`caractereComplement`
@@ -76,9 +76,14 @@ export function texteAideFrequencesNiveau1(exercice: ExerciceTableauFrequences):
   return virgulesTexte(`Fréquence (%) = effectif / n × 100, où n est le nombre total de valeurs de la liste (ici n = ${exercice.n}).`);
 }
 
-export function texteAideFrequencesNiveau2(exercice: ExerciceTableauFrequences): string {
+/** Exemple de calcul d'une fréquence — texte + KaTeX (jamais « 3/20 × 100 » en texte). */
+export function texteAideFrequencesNiveau2(exercice: ExerciceTableauFrequences): { type: "texte" | "katex"; valeur: string }[] {
   const ligne = ligneExemple(exercice);
-  return virgulesTexte(`Pour la valeur ${ligne.valeur} : fréquence = ${ligne.effectif}/${exercice.n} × 100 = ${ligne.frequencePourcent} %.`);
+  return [
+    { type: "texte", valeur: virgulesTexte(`Pour la valeur ${ligne.valeur} : `) },
+    { type: "katex", valeur: virgulesLatex(`f=\\dfrac{${ligne.effectif}}{${exercice.n}}\\times 100=${ligne.frequencePourcent}\\,\\%`) },
+    { type: "texte", valeur: "." },
+  ];
 }
 
 // ============================================================================

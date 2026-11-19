@@ -81,7 +81,7 @@ import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { TableEffectifsDiscrete } from "./components/TableEffectifsDiscrete";
 import { TableEffectifsClasses } from "./components/TableEffectifsClasses";
 import { pasCommun } from "./generateurs/bienaymeTchebychev/echelleContexte";
-import { nombreFr } from "./ui/nombreFr";
+import { nombreFrTypo } from "./ui/nombreFr";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -158,8 +158,8 @@ const TITRE_ECRAN: Record<PhaseExerciceSynthese, string> = {
 const LIBELLE_CHAMP: Record<string, string> = {
   seuil: "seuil",
   mediane: "médiane",
-  q1: "Q1",
-  q3: "Q3",
+  q1: "Q₁",
+  q3: "Q₃",
   min: "min",
   max: "max",
   modes: "mode(s)",
@@ -181,7 +181,7 @@ const LIBELLE_CHAMP: Record<string, string> = {
 function formaterReponseSaisie(valeur: unknown): string {
   if (valeur === null || valeur === undefined || valeur === "") return "—";
   if (typeof valeur === "string") return valeur;
-  if (typeof valeur === "number") return nombreFr(valeur);
+  if (typeof valeur === "number") return nombreFrTypo(valeur);
   if (Array.isArray(valeur)) return valeur.map(formaterReponseSaisie).join(" ; ");
   if (typeof valeur === "object") {
     const objet = valeur as Record<string, unknown>;
@@ -212,18 +212,18 @@ function reponseAttenduePhase(phase: PhaseExerciceSynthese, exercice: ExerciceSy
         </>
       );
     case "quotient":
-      return <>Moyenne pondérée attendue : {nombreFr(exercice.xBar)}</>;
+      return <>Moyenne pondérée attendue : {nombreFrTypo(exercice.xBar)}</>;
     case "mediane": {
       if (exercice.variante !== "discrete") return null;
-      return <>Médiane attendue : {formatMedianeAttendueTexte(versMedianeDiscrete(exercice))}</>;
+      return <>Médiane attendue : <SegmentsInline segments={formatMedianeAttendueTexte(versMedianeDiscrete(exercice))} /></>;
     }
     case "q1": {
       if (exercice.variante !== "discrete") return null;
-      return <>Q1 attendu : {formatQ1AttendueTexte(versMedianeDiscrete(exercice))}</>;
+      return <>Premier quartile attendu : <SegmentsInline segments={formatQ1AttendueTexte(versMedianeDiscrete(exercice))} /></>;
     }
     case "q3": {
       if (exercice.variante !== "discrete") return null;
-      return <>Q3 attendu : {formatQ3AttendueTexte(versMedianeDiscrete(exercice))}</>;
+      return <>Troisième quartile attendu : <SegmentsInline segments={formatQ3AttendueTexte(versMedianeDiscrete(exercice))} /></>;
     }
     case "minMaxMode": {
       if (exercice.variante !== "discrete") return null;
@@ -235,21 +235,21 @@ function reponseAttenduePhase(phase: PhaseExerciceSynthese, exercice: ExerciceSy
     }
     case "lectureMediane": {
       if (exercice.variante !== "classes") return null;
-      return <>Médiane attendue (lecture) : {formatLectureAttendueTexte(versMedianeClasses(exercice), "mediane")}</>;
+      return <>Médiane attendue (lecture) : <SegmentsInline segments={formatLectureAttendueTexte(versMedianeClasses(exercice), "mediane")} /></>;
     }
     case "lectureQ1": {
       if (exercice.variante !== "classes") return null;
-      return <>Q1 attendu (lecture) : {formatLectureAttendueTexte(versMedianeClasses(exercice), "q1")}</>;
+      return <>Premier quartile attendu (lecture) : <SegmentsInline segments={formatLectureAttendueTexte(versMedianeClasses(exercice), "q1")} /></>;
     }
     case "lectureQ3": {
       if (exercice.variante !== "classes") return null;
-      return <>Q3 attendu (lecture) : {formatLectureAttendueTexte(versMedianeClasses(exercice), "q3")}</>;
+      return <>Troisième quartile attendu (lecture) : <SegmentsInline segments={formatLectureAttendueTexte(versMedianeClasses(exercice), "q3")} /></>;
     }
     case "synthese": {
       if (exercice.variante !== "classes") return null;
       return (
         <>
-          Synthèse attendue : <Katex expression={LABEL_X_MIN} /> = {nombreFr(exercice.xMin)}, <Katex expression={LABEL_X_MAX} /> = {nombreFr(exercice.xMax)},{" "}
+          Synthèse attendue : <Katex expression={LABEL_X_MIN} /> = {nombreFrTypo(exercice.xMin)}, <Katex expression={LABEL_X_MAX} /> = {nombreFrTypo(exercice.xMax)},{" "}
           {formatSyntheseAttendueTexte(versMedianeClasses(exercice))}
         </>
       );

@@ -120,11 +120,13 @@ function etapeKPourcent(e: ExerciceBienaymeTchebychevAvecK, sq: string): EtapeCo
     utilise(sq, [
       texte("Au moins "),
       latex("1-\\dfrac{1}{k^2}"),
-      texte(` de l'effectif est dans [x̄ − kσ ; x̄ + kσ] : on égale cette proportion à la proportion voulue, puis on isole k (k > 1, racine positive) ${COURS_BT}.`),
+      texte(" de l'effectif est dans "),
+      latex("[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]"),
+      texte(` : on égale cette proportion à la proportion voulue, puis on isole k (k > 1, racine positive) ${COURS_BT}.`),
     ]),
     calcul(sq, [
-      ligne(texteAideKDepuisPourcentNiveau2(p).latex, `${nbTexte(p)} % = ${nbTexte(p)}/100`),
-      ligne(`\\dfrac{1}{k^2}=1-\\dfrac{${nb(p)}}{100}`, "on isole 1/k²"),
+      ligne(texteAideKDepuisPourcentNiveau2(p).latex, [latex(`${nb(p)}\\,\\%=\\dfrac{${nb(p)}}{100}`)]),
+      ligne(`\\dfrac{1}{k^2}=1-\\dfrac{${nb(p)}}{100}`, [texte("on isole "), latex("\\dfrac{1}{k^2}")]),
       ligne(`=\\dfrac{${nb(q)}}{100}`),
       ligne(`k^2=\\dfrac{100}{${nb(q)}}`, "on inverse les deux membres"),
       ...(auPlus(k2, 4) ? [ligne(`=${nb(arrondiA(k2, 4))}`)] : []),
@@ -134,7 +136,7 @@ function etapeKPourcent(e: ExerciceBienaymeTchebychevAvecK, sq: string): EtapeCo
         : [ligne(approche(exact, 4, 2, sens)), ...arrondiOriente(exact, e.kAttendu, sens, justifArrondi)]),
     ]),
     resultat(sq, [latex(formatEtatActuelKLatex(kEtatActuel(e)))]),
-    piege(sq, [texte(`La proportion s'écrit ${nbTexte(p)}/100, pas ${nbTexte(p)} ; et k est la racine carrée de 100/(100 − p), pas ce quotient lui-même.`)]),
+    piege(sq, [texte("La proportion s'écrit "), latex(`\\dfrac{${nb(p)}}{100}`), texte(`, pas ${nbTexte(p)} ; et k est la racine carrée de `), latex("\\dfrac{100}{100-p}"), texte(", pas ce quotient lui-même.")]),
   ];
 }
 
@@ -159,7 +161,7 @@ function etapePourcentFinal(e: E & { kAttendu: number; pourcentAttendu: number }
       ...arrondiOriente(exact, e.pourcentAttendu, "bas", final ? "arrondi à l'unité par défaut (vers le bas) : la garantie reste vraie" : "arrondi au centième par défaut (vers le bas)", "\\,\\%"),
     ]),
     resultat(sq, [latex(formatEtatActuelPourcentLatex(pourcentAttenduEtatActuel(e)))]),
-    piege(sq, [texte("La proportion garantie est 1 − 1/k², pas 1 − 1/k ; un minimum garanti s'arrondit vers le BAS.")]),
+    piege(sq, [texte("La proportion garantie est "), latex("1-\\dfrac{1}{k^2}"), texte(", pas "), latex("1-\\dfrac{1}{k}"), texte(" ; un minimum garanti s'arrondit vers le BAS.")]),
   ];
 }
 

@@ -133,7 +133,7 @@ export function formatBtIntervalleAttenduTexte(exercice: ExerciceSynthese): stri
   const inf = borneInfBTEtatActuel(exercice);
   const sup = borneSupBTEtatActuel(exercice);
   const signe = inf.exact && sup.exact ? "=" : "≈";
-  return virgulesTexte(`${signe} [${formatNombreTexte(inf.valeur)} ; ${formatNombreTexte(sup.valeur)}]`);
+  return virgulesTexte(`${signe} [${formatNombreTexte(inf.valeur)} ; ${formatNombreTexte(sup.valeur)}]`).replace(/(^|[\s[;])-(?=\d)/g, "$1−");
 }
 
 // ============================================================================
@@ -154,8 +154,8 @@ export function consigneBtPourcent(): string {
 
 export function texteAideBtPourcentNiveau1(exercice: ExerciceSynthese): AideDeuxLignes {
   return {
-    texte: "Rappel : la proportion minimale garantie est 1-1/k² (non calculée) :",
-    latex: `1-\\dfrac{1}{${exercice.kBT}^2}`,
+    texte: "Rappel : la proportion minimale garantie s'obtient avec la formule du cours (non calculée ici) :",
+    latex: `1-\\dfrac{1}{k^2}=1-\\dfrac{1}{${exercice.kBT}^2}`,
   };
 }
 

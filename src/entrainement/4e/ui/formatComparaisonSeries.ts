@@ -36,7 +36,7 @@ import { virgulesLatex, virgulesTexte } from "./nombreFr";
 export type SegmentTexte = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
 
 function T(valeur: string): SegmentTexte {
-  return { type: "texte", valeur: virgulesTexte(valeur) };
+  return { type: "texte", valeur: virgulesTexte(valeur).replace(/(^|[\s[;(=])-(?=\d)/g, "$1−") };
 }
 
 function Kx(valeur: string): SegmentTexte {
@@ -48,8 +48,8 @@ export const LABEL_SIGMA = "\\sigma";
 export const LABEL_Q1 = "Q_1";
 export const LABEL_Q2 = "Q_2";
 export const LABEL_Q3 = "Q_3";
-export const LABEL_X_MIN = "x_{min}";
-export const LABEL_X_MAX = "x_{max}";
+export const LABEL_X_MIN = "x_{\\min}";
+export const LABEL_X_MAX = "x_{\\max}";
 export const LABEL_VALEUR_XI = "x_i";
 export const LABEL_EFFECTIF_NI = "n_i";
 export const LABEL_EFFECTIF_CUMULE_VI = "v_i";
@@ -115,15 +115,35 @@ export function segmentsCentrageAttendu(question: QuestionCentrage): SegmentText
 // Question "dispersion" — quelle série est la plus homogène, justifiée par N argument(s).
 // ============================================================================
 
-export const OPTIONS_ARGUMENT_DISPERSION: { id: ArgumentDispersionOption; label: string }[] = [
-  { id: "ecartType", label: "Écart-type (σ)" },
-  { id: "ecartInterquartile", label: "Écart interquartile (Q3-Q1)" },
-  { id: "etendue", label: "Étendue (max - min)" },
+/** Libellés des boutons d'argument — phrase + notation KaTeX (jamais « Q3-Q1 », « max - min »). */
+export const OPTIONS_ARGUMENT_DISPERSION: { id: ArgumentDispersionOption; label: SegmentTexte[] }[] = [
+  { id: "ecartType", label: [T("Écart-type "), Kx(LABEL_SIGMA)] },
+  { id: "ecartInterquartile", label: [T("Écart interquartile "), Kx(`${LABEL_Q3}-${LABEL_Q1}`)] },
+  { id: "etendue", label: [T("Étendue "), Kx(`${LABEL_X_MAX}-${LABEL_X_MIN}`)] },
 ];
 
-export function segmentsConsigneDispersion(question: QuestionDispersion): SegmentTexte[] {
+/**
+ * Consigne de la question « dispersion ». Variante « graphique » à 2 arguments : les courbes ne
+ * donnent pas σ directement — la consigne dit comment l'obtenir (le cours, § 8, compare les
+ * écarts-types ; une courbe cumulée d'une série discrète redonne tout le tableau : chaque saut est
+ * une valeur et son effectif, ou sa fréquence). Même calcul que le corrigé (`lignesSigma`,
+ * « calculatrice, mode statistique »).
+ */
+export function segmentsConsigneDispersion(question: QuestionDispersion, exercice: ExerciceComparaisonSeries): SegmentTexte[] {
   const nombre = question.nombreArguments === 1 ? "1 argument statistique" : "2 arguments statistiques";
-  return [T(`Dans quelle série les valeurs sont-elles les plus homogènes ? Justifie à l'aide de ${nombre}.`)];
+  const base = [T(`Dans quelle série les valeurs sont-elles les plus homogènes ? Justifie à l'aide de ${nombre}.`)];
+  if (exercice.variante !== "graphique" || question.nombreArguments !== 2) return base;
+  const frequence = exercice.cumul === "frequence";
+  return [
+    ...base,
+    T(" L'écart-type "),
+    Kx(LABEL_SIGMA),
+    T(" ne se lit pas sur les courbes : calcule celui de chaque série à partir des valeurs lues — chaque saut d'une courbe donne une valeur "),
+    Kx(LABEL_VALEUR_XI),
+    T(` et ${frequence ? "sa fréquence" : "son effectif"} `),
+    Kx(frequence ? "f_i" : "n_i"),
+    T(" (calculatrice, mode statistique)."),
+  ];
 }
 
 export function segmentsAideDispersionNiveau1(): SegmentTexte[] {
@@ -132,7 +152,9 @@ export function segmentsAideDispersionNiveau1(): SegmentTexte[] {
     Kx(LABEL_SIGMA),
     T(") ou l'écart interquartile ("),
     Kx(`${LABEL_Q3}-${LABEL_Q1}`),
-    T(") est petit, plus la série est homogène. Ne confonds pas ces deux mesures avec l'étendue (max - min), qui ne tient compte que des deux valeurs extrêmes."),
+    T(") est petit, plus la série est homogène. Ne confonds pas ces deux mesures avec l'étendue ("),
+    Kx(`${LABEL_X_MAX}-${LABEL_X_MIN}`),
+    T("), qui ne tient compte que des deux valeurs extrêmes."),
   ];
 }
 
@@ -146,7 +168,23 @@ export function segmentsAideDispersionNiveau2(exercice: ExerciceComparaisonSerie
       T(" du tableau récapitulatif — la série avec les valeurs les plus petites est la plus homogène."),
     ];
   }
-  return [T("Sur le graphique, la série dont la courbe monte le plus rapidement — sur l'intervalle le plus étroit — est la plus homogène.")];
+  const base = [T("Sur le graphique, la série dont la courbe monte le plus rapidement — sur l'intervalle le plus étroit — est la plus homogène.")];
+  if (exercice.variante !== "graphique" || exercice.question.type !== "dispersion" || exercice.question.nombreArguments !== 2) return base;
+  const frequence = exercice.cumul === "frequence";
+  return [
+    ...base,
+    T(" Pour "),
+    Kx(LABEL_SIGMA),
+    T(" : relève sur chaque courbe les valeurs "),
+    Kx(LABEL_VALEUR_XI),
+    T(` et la hauteur de chaque saut (${frequence ? "la fréquence" : "l'effectif"} `),
+    Kx(frequence ? "f_i" : "n_i"),
+    T("), entre-les dans le mode statistique de la calculatrice et compare les deux écarts-types ; lis aussi "),
+    Kx(LABEL_Q1),
+    T(" et "),
+    Kx(LABEL_Q3),
+    T(" de chaque série pour l'écart interquartile."),
+  ];
 }
 
 export function segmentsDispersionAttendu(question: QuestionDispersion): SegmentTexte[] {

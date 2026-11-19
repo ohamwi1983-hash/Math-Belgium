@@ -80,7 +80,7 @@ export interface ConsigneSegmentee {
 export type SegmentTexte = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
 
 function T(valeur: string): SegmentTexte {
-  return { type: "texte", valeur: virgulesTexte(valeur) };
+  return { type: "texte", valeur: virgulesTexte(valeur).replace(/(^|[\s[;(=])-(?=\d)/g, "$1−") };
 }
 
 function Kx(valeur: string): SegmentTexte {

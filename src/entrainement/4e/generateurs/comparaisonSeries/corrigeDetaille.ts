@@ -115,9 +115,9 @@ const SEUILS_LATEX = "\\dfrac{n}{4},\\ \\dfrac{n}{2},\\ \\dfrac{3n}{4}";
 
 function source(e: E): Fragments {
   if (e.variante === "recapitulatif") return [texte(" On les lit dans le tableau récapitulatif.")];
-  if (e.variante === "graphique" && e.cumul === "frequence") return [texte(" Sur une courbe cumulée, Qₖ est la première valeur dont le point dépasse strictement 25 %, 50 % ou 75 %.")];
-  if (e.variante === "graphique") return [texte(" Sur une courbe cumulée, Qₖ est la première valeur dont le point dépasse strictement le seuil "), latex(SEUILS_LATEX), texte(".")];
-  return [texte(" Dans un tableau, Qₖ est la première valeur dont l'effectif cumulé dépasse strictement le seuil "), latex(SEUILS_LATEX), texte(".")];
+  if (e.variante === "graphique" && e.cumul === "frequence") return [texte(" Sur une courbe cumulée, "), latex("Q_k"), texte(" est la première valeur dont le point dépasse strictement 25 %, 50 % ou 75 %.")];
+  if (e.variante === "graphique") return [texte(" Sur une courbe cumulée, "), latex("Q_k"), texte(" est la première valeur dont le point dépasse strictement le seuil "), latex(SEUILS_LATEX), texte(".")];
+  return [texte(" Dans un tableau, "), latex("Q_k"), texte(" est la première valeur dont l'effectif cumulé dépasse strictement le seuil "), latex(SEUILS_LATEX), texte(".")];
 }
 
 function avecFigure(etape: EtapeCorrection, f: string | undefined): EtapeCorrection {
@@ -129,7 +129,9 @@ function corrigeCentrage(e: E): EtapeCorrection[] {
   if (q.type !== "centrage") return [];
   return [
     utilise(SQ, [
-      texte("La médiane Q₂ partage une série en deux moitiés de même effectif : c'est la première valeur dont l'effectif cumulé dépasse strictement "),
+      texte("La médiane "),
+      latex("Q_2"),
+      texte(" partage une série en deux moitiés de même effectif : c'est la première valeur dont l'effectif cumulé dépasse strictement "),
       latex("\\dfrac{n}{2}"),
       texte(` ${COURS_POSITION}. On compare les médianes des deux séries ${COURS_COMPARER}.`),
       ...source(e),
@@ -148,8 +150,15 @@ function corrigeDispersion(e: E): EtapeCorrection[] {
   if (q.nombreArguments === 2) blocs.push(calcul(SQ, [...lignesSigma(e, "A"), ...lignesSigma(e, "B"), comparaison(e.serieA.sigma, e.serieB.sigma, "écarts-types de A et de B")], [], "Écart-type"));
   return [
     utilise(SQ, [
-      texte(`Une série est d'autant plus homogène que ses valeurs sont peu dispersées : on compare l'écart interquartile Q₃ − Q₁ ${COURS_POSITION}${q.nombreArguments === 2 ? ` et l'écart-type σ ${COURS_DISPERSION}` : ""} des deux séries — le plus petit l'emporte.`),
+      texte("Une série est d'autant plus homogène que ses valeurs sont peu dispersées : on compare l'écart interquartile "),
+      latex("Q_3-Q_1"),
+      texte(` ${COURS_POSITION}`),
+      ...(q.nombreArguments === 2 ? [texte(" et l'écart-type "), latex("\\sigma"), texte(` ${COURS_DISPERSION}`)] : []),
+      texte(" des deux séries — le plus petit l'emporte."),
       ...source(e),
+      ...(q.nombreArguments === 2 && e.variante === "graphique"
+        ? [texte(" Les courbes ne donnent pas "), latex("\\sigma"), texte(" : on le calcule à partir des valeurs lues (chaque saut d'une courbe donne une valeur et son " + (frequence(e) ? "pourcentage" : "effectif") + "), calculatrice en mode statistique.")]
+        : []),
     ]),
     ...blocs,
     resultat(SQ, [...versFragments(segmentsDispersionAttendu(q)), texte(q.nombreArguments === 2 ? " Les deux mesures vont dans le même sens : ce sont les deux arguments." : " Une seule mesure suffit comme argument.")]),

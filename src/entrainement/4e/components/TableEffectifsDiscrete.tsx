@@ -2,7 +2,7 @@ import type { ExerciceMedianeDiscrete } from "../core/mediane.types";
 import { LABEL_EFFECTIF_CUMULE_VI, LABEL_EFFECTIF_NI, LABEL_VALEUR_XI } from "../ui/formatMediane";
 import type { SurlignageSeuilTable } from "../ui/formatMediane";
 import { Katex } from "./Katex";
-import { nombreFr } from "../ui/nombreFr";
+import { nombreFrTypo } from "../ui/nombreFr";
 
 interface Props {
   exercice: ExerciceMedianeDiscrete;
@@ -32,7 +32,7 @@ export function TableEffectifsDiscrete({ exercice, surlignage }: Props) {
         <tbody>
           {exercice.lignes.map((ligne, index) => (
             <tr key={index} className={surlignage?.type === "ligne" && surlignage.index === index ? "is-surlignee" : undefined}>
-              <td>{nombreFr(ligne.valeur)}</td>
+              <td>{nombreFrTypo(ligne.valeur)}</td>
               <td>{ligne.effectif}</td>
               <td className={surlignage?.type === "valeur" && surlignage.index === index ? "is-surlignee" : undefined}>{ligne.effectifCumule}</td>
             </tr>

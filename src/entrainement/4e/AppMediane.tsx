@@ -30,10 +30,13 @@ import { EtapePolygoneMediane } from "./components/EtapePolygoneMediane";
 import { EtapeLectureMediane } from "./components/EtapeLectureMediane";
 import { EtapeSyntheseMediane } from "./components/EtapeSyntheseMediane";
 import { Katex } from "./components/Katex";
+import { SegmentsInline } from "./components/SegmentsInline";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { TableEffectifsDiscrete } from "./components/TableEffectifsDiscrete";
 import { TableEffectifsClasses } from "./components/TableEffectifsClasses";
 import {
+  LABEL_Q1,
+  LABEL_Q3,
   LABEL_X_MAX,
   LABEL_X_MIN,
   formatEnonceTexte,
@@ -49,7 +52,7 @@ import {
 } from "./ui/formatMediane";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
-import { nombreFr } from "./ui/nombreFr";
+import { nombreFrTypo } from "./ui/nombreFr";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { PointPolygone, ReponseMediane, ReponseMinMaxMode, ReponseQ1, ReponseQ3, ReponseSynthese } from "./moteur/verificationMediane";
@@ -136,13 +139,13 @@ function calculerSegmentsProgression(etat: EtatSessionMediane): EtatPuceProgress
 /** Titre de la fiche de consultation d'un écran clos (puces cliquables). */
 const TITRE_PHASE: Record<PhaseMediane, string> = {
   mediane: "Médiane",
-  q1: "Premier quartile Q1",
-  q3: "Troisième quartile Q3",
+  q1: "Premier quartile Q₁",
+  q3: "Troisième quartile Q₃",
   minMaxMode: "Minimum, maximum et mode(s)",
   polygone: "Polygone des effectifs cumulés",
   lectureMediane: "Lecture de la médiane",
-  lectureQ1: "Lecture de Q1",
-  lectureQ3: "Lecture de Q3",
+  lectureQ1: "Lecture de Q₁",
+  lectureQ3: "Lecture de Q₃",
   synthese: "Synthèse",
 };
 
@@ -258,24 +261,24 @@ export function AppMediane() {
 
   function reponseAttenduePhase(phase: PhaseMediane): ReactNode {
     return phase === "mediane" && exercice.variante === "discrete" ? (
-      <>{formatMedianeAttendueTexte(exercice)}</>
+      <SegmentsInline segments={formatMedianeAttendueTexte(exercice)} />
     ) : phase === "q1" && exercice.variante === "discrete" ? (
-      <>{formatQ1AttendueTexte(exercice)}</>
+      <SegmentsInline segments={formatQ1AttendueTexte(exercice)} />
     ) : phase === "q3" && exercice.variante === "discrete" ? (
-      <>{formatQ3AttendueTexte(exercice)}</>
+      <SegmentsInline segments={formatQ3AttendueTexte(exercice)} />
     ) : phase === "minMaxMode" && exercice.variante === "discrete" ? (
       <>{formatMinMaxModeAttendueTexte(exercice)}</>
     ) : phase === "polygone" && exercice.variante === "classes" ? (
       <>{formatPolygoneAttenduTexte(exercice)}</>
     ) : phase === "lectureQ1" && exercice.variante === "classes" ? (
-      <>{formatLectureAttendueTexte(exercice, "q1")}</>
+      <SegmentsInline segments={formatLectureAttendueTexte(exercice, "q1")} />
     ) : phase === "lectureMediane" && exercice.variante === "classes" ? (
-      <>{formatLectureAttendueTexte(exercice, "mediane")}</>
+      <SegmentsInline segments={formatLectureAttendueTexte(exercice, "mediane")} />
     ) : phase === "lectureQ3" && exercice.variante === "classes" ? (
-      <>{formatLectureAttendueTexte(exercice, "q3")}</>
+      <SegmentsInline segments={formatLectureAttendueTexte(exercice, "q3")} />
     ) : exercice.variante === "classes" ? (
       <>
-        <Katex expression={LABEL_X_MIN} /> = {nombreFr(exercice.xMin)}, <Katex expression={LABEL_X_MAX} /> = {nombreFr(exercice.xMax)},{" "}
+        <Katex expression={LABEL_X_MIN} /> = {nombreFrTypo(exercice.xMin)}, <Katex expression={LABEL_X_MAX} /> = {nombreFrTypo(exercice.xMax)},{" "}
         {formatSyntheseAttendueTexte(exercice)}
       </>
     ) : null;
@@ -283,11 +286,19 @@ export function AppMediane() {
   const reponseAttendue = reponseAttenduePhase(phase);
 
   const saisieMediane = (r: ReponseMediane) => `seuil = ${texteSaisi(r.seuil)}, médiane = ${texteSaisi(r.mediane)}`;
-  const saisieQ1 = (r: ReponseQ1) => `seuil = ${texteSaisi(r.seuil)}, Q1 = ${texteSaisi(r.q1)}`;
-  const saisieQ3 = (r: ReponseQ3) => `seuil = ${texteSaisi(r.seuil)}, Q3 = ${texteSaisi(r.q3)}`;
+  const saisieQ1 = (r: ReponseQ1) => (
+    <>
+      seuil = {texteSaisi(r.seuil)}, <Katex expression={LABEL_Q1} /> = {texteSaisi(r.q1)}
+    </>
+  );
+  const saisieQ3 = (r: ReponseQ3) => (
+    <>
+      seuil = {texteSaisi(r.seuil)}, <Katex expression={LABEL_Q3} /> = {texteSaisi(r.q3)}
+    </>
+  );
   const saisieMinMaxMode = (r: ReponseMinMaxMode) =>
     `min = ${texteSaisi(r.min)}, max = ${texteSaisi(r.max)}, mode(s) = ${r.modes.map((m) => m.trim()).filter((m) => m !== "").join(" ; ") || "—"}`;
-  const saisiePolygone = (points: PointPolygone[]) => points.map((p) => `(${nombreFr(p.x)} ; ${nombreFr(p.y)})`).join(", ");
+  const saisiePolygone = (points: PointPolygone[]) => points.map((p) => `(${nombreFrTypo(p.x)} ; ${nombreFrTypo(p.y)})`).join(", ");
   const saisieSynthese = (r: ReponseSynthese) => (
     <>
       <Katex expression={LABEL_X_MIN} /> = {texteSaisi(r.xMin)}, <Katex expression={LABEL_X_MAX} /> = {texteSaisi(r.xMax)}, étendue ={" "}
@@ -402,7 +413,7 @@ export function AppMediane() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideLectureQ1}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseLectureQ1(etat, texte), `Q1 ≈ ${texteSaisi(texte)}`)}
+              onValider={(texte) => terminerEtape(soumettreReponseLectureQ1(etat, texte), <><Katex expression={LABEL_Q1} /> ≈ {texteSaisi(texte)}</>)}
               validation={validation}
             />
           ) : phase === "lectureQ3" && exercice.variante === "classes" ? (
@@ -414,7 +425,7 @@ export function AppMediane() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideLectureQ3}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseLectureQ3(etat, texte), `Q3 ≈ ${texteSaisi(texte)}`)}
+              onValider={(texte) => terminerEtape(soumettreReponseLectureQ3(etat, texte), <><Katex expression={LABEL_Q3} /> ≈ {texteSaisi(texte)}</>)}
               validation={validation}
             />
           ) : phase === "synthese" && exercice.variante === "classes" ? (

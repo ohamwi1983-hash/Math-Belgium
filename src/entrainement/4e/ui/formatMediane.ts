@@ -64,8 +64,13 @@ export const LABEL_Q3 = "Q_3";
  * littéral affiché à l'écran ("x_min"), toujours composée via `<Katex>` là où ces symboles
  * apparaissent : labels des champs de l'écran "Synthèse", texte de son Aide 1, et la révélation
  * du panneau de résultat (`ResultatPanelMediane.tsx`). */
-export const LABEL_X_MIN = "x_{min}";
-export const LABEL_X_MAX = "x_{max}";
+export const LABEL_X_MIN = "x_{\\min}";
+/** Seuils de la règle du cours, en KaTeX (consignes, aides, titres d'étape papier) — jamais
+ * « n/2 » en texte. */
+export const SEUIL_MEDIANE_LATEX = "\\dfrac{n}{2}";
+export const SEUIL_Q1_LATEX = "\\dfrac{n}{4}";
+export const SEUIL_Q3_LATEX = "\\dfrac{3n}{4}";
+export const LABEL_X_MAX = "x_{\\max}";
 
 /** Fragments texte/KaTeX — nécessaire dès qu'une phrase mêle plusieurs symboles distincts (ex.
  * xᵢ ET nᵢ dans la même aide) — même patron que `formatDispersion.ts`/`formatComparaisonSeries.ts`
@@ -74,7 +79,7 @@ export const LABEL_X_MAX = "x_{max}";
 export type SegmentTexte = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
 
 function T(valeur: string): SegmentTexte {
-  return { type: "texte", valeur: virgulesTexte(valeur) };
+  return { type: "texte", valeur: virgulesTexte(valeur).replace(/(^|[\s[;(=])-(?=\d)/g, "$1−") };
 }
 
 function Kx(valeur: string): SegmentTexte {
@@ -99,10 +104,15 @@ export function estDerniereClasse(exercice: ExerciceMedianeClasses, index: numbe
   return index === exercice.classes.length - 1;
 }
 
+/** « − » typographique devant un nombre négatif d'un texte (jamais le « - » du clavier). */
+function signesTypo(texte: string): string {
+  return texte.replace(/(^|[\s[;(=])-(?=\d)/g, "$1−");
+}
+
 export function formatClasseTexte(exercice: ExerciceMedianeClasses, index: number): string {
   const classe = exercice.classes[index];
   const fermante = estDerniereClasse(exercice, index) ? "]" : "[";
-  return virgulesTexte(`[${classe.borneInf} ; ${classe.borneSup}${fermante}`);
+  return signesTypo(virgulesTexte(`[${classe.borneInf} ; ${classe.borneSup}${fermante}`));
 }
 
 /** Le polygone COMPLET des effectifs cumulés (point fixe + un point par classe) — toujours dérivé
@@ -136,8 +146,8 @@ export function surlignageSeuilTable(exercice: ExerciceMedianeDiscrete, seuil: n
 // Écran "mediane" — variante "discrete", première étape de sa séquence (plus jamais terminale).
 // ============================================================================
 
-export function consigneMedianeDiscrete(exercice: ExerciceMedianeDiscrete): string {
-  return virgulesTexte(`Calcule le seuil n/2, puis détermine la médiane (en ${exercice.contexte.unite}) à partir du tableau.`);
+export function consigneMedianeDiscrete(exercice: ExerciceMedianeDiscrete): SegmentTexte[] {
+  return [T("Calcule le seuil "), Kx(SEUIL_MEDIANE_LATEX), T(`, puis détermine la médiane (en ${exercice.contexte.unite}) à partir du tableau.`)];
 }
 
 /** Rendu KaTeX (`promptinvestigationpoint3latexmobile.md`) — un simple symbole court inséré dans
@@ -146,12 +156,14 @@ export function texteAideMedianeNiveau1(): SegmentTexte[] {
   return [
     T("Rappel : la médiane correspond à la première valeur "),
     Kx(LABEL_VALEUR_XI),
-    T(" du tableau dont l'effectif cumulé dépasse STRICTEMENT n/2 (jamais « ≥ »)."),
+    T(" du tableau dont l'effectif cumulé dépasse STRICTEMENT "),
+    Kx(SEUIL_MEDIANE_LATEX),
+    T(" (jamais « ≥ »)."),
   ];
 }
 
-export function texteAideMedianeNiveau2(exercice: ExerciceMedianeDiscrete): string {
-  return virgulesTexte(`Le seuil n/2 vaut ${exercice.seuil}. Il reste à chercher, dans le tableau, la première valeur dont l'effectif cumulé dépasse ce seuil.`);
+export function texteAideMedianeNiveau2(exercice: ExerciceMedianeDiscrete): SegmentTexte[] {
+  return [T("Le seuil "), Kx(`${SEUIL_MEDIANE_LATEX}=${exercice.seuil}`), T(". Il reste à chercher, dans le tableau, la première valeur dont l'effectif cumulé dépasse ce seuil.")];
 }
 
 // ============================================================================
@@ -160,44 +172,48 @@ export function texteAideMedianeNiveau2(exercice: ExerciceMedianeDiscrete): stri
 // cascade par rapport à la position de la médiane).
 // ============================================================================
 
-export function consigneQ1(exercice: ExerciceMedianeDiscrete): string {
-  return virgulesTexte(`Calcule le seuil n/4, puis détermine le premier quartile Q1 (en ${exercice.contexte.unite}) à partir du tableau complet.`);
+export function consigneQ1(exercice: ExerciceMedianeDiscrete): SegmentTexte[] {
+  return [T("Calcule le seuil "), Kx(SEUIL_Q1_LATEX), T(", puis détermine le premier quartile "), Kx(LABEL_Q1), T(` (en ${exercice.contexte.unite}) à partir du tableau complet.`)];
 }
 
 export function texteAideQ1Niveau1(): SegmentTexte[] {
   return [
-    T("Rappel : Q1 correspond à la première valeur "),
+    T("Rappel : "),
+    Kx(LABEL_Q1),
+    T(" correspond à la première valeur "),
     Kx(LABEL_VALEUR_XI),
-    T(
-      " du tableau dont l'effectif cumulé dépasse STRICTEMENT n/4 (jamais « ≥ »). Calcul direct sur le tableau complet, indépendant de la position de la médiane.",
-    ),
+    T(" du tableau dont l'effectif cumulé dépasse STRICTEMENT "),
+    Kx(SEUIL_Q1_LATEX),
+    T(" (jamais « ≥ »). Calcul direct sur le tableau complet, indépendant de la position de la médiane."),
   ];
 }
 
-export function texteAideQ1Niveau2(exercice: ExerciceMedianeDiscrete): string {
-  return virgulesTexte(`Le seuil n/4 vaut ${exercice.seuilQ1}. Il reste à chercher, dans le tableau, la première valeur dont l'effectif cumulé dépasse ce seuil.`);
+export function texteAideQ1Niveau2(exercice: ExerciceMedianeDiscrete): SegmentTexte[] {
+  return [T("Le seuil "), Kx(`${SEUIL_Q1_LATEX}=${exercice.seuilQ1}`), T(". Il reste à chercher, dans le tableau, la première valeur dont l'effectif cumulé dépasse ce seuil.")];
 }
 
 // ============================================================================
 // Écran "q3" — variante "discrete" uniquement, même structure/logique, seuil 3n/4.
 // ============================================================================
 
-export function consigneQ3(exercice: ExerciceMedianeDiscrete): string {
-  return virgulesTexte(`Calcule le seuil 3n/4, puis détermine le troisième quartile Q3 (en ${exercice.contexte.unite}) à partir du tableau complet.`);
+export function consigneQ3(exercice: ExerciceMedianeDiscrete): SegmentTexte[] {
+  return [T("Calcule le seuil "), Kx(SEUIL_Q3_LATEX), T(", puis détermine le troisième quartile "), Kx(LABEL_Q3), T(` (en ${exercice.contexte.unite}) à partir du tableau complet.`)];
 }
 
 export function texteAideQ3Niveau1(): SegmentTexte[] {
   return [
-    T("Rappel : Q3 correspond à la première valeur "),
+    T("Rappel : "),
+    Kx(LABEL_Q3),
+    T(" correspond à la première valeur "),
     Kx(LABEL_VALEUR_XI),
-    T(
-      " du tableau dont l'effectif cumulé dépasse STRICTEMENT 3n/4 (jamais « ≥ »). Calcul direct sur le tableau complet, indépendant de la position de la médiane.",
-    ),
+    T(" du tableau dont l'effectif cumulé dépasse STRICTEMENT "),
+    Kx(SEUIL_Q3_LATEX),
+    T(" (jamais « ≥ »). Calcul direct sur le tableau complet, indépendant de la position de la médiane."),
   ];
 }
 
-export function texteAideQ3Niveau2(exercice: ExerciceMedianeDiscrete): string {
-  return virgulesTexte(`Le seuil 3n/4 vaut ${exercice.seuilQ3}. Il reste à chercher, dans le tableau, la première valeur dont l'effectif cumulé dépasse ce seuil.`);
+export function texteAideQ3Niveau2(exercice: ExerciceMedianeDiscrete): SegmentTexte[] {
+  return [T("Le seuil "), Kx(`${SEUIL_Q3_LATEX}=${exercice.seuilQ3}`), T(". Il reste à chercher, dans le tableau, la première valeur dont l'effectif cumulé dépasse ce seuil.")];
 }
 
 // ============================================================================
@@ -252,11 +268,12 @@ export function texteAidePolygoneNiveau1(): string {
 // l'aide, jamais notée à part comme dans la variante "discrete".
 // ============================================================================
 
-const CONSIGNE_LECTURE_DEBUT: Record<ParametreLecture, string> = {
-  q1: "Calcule le seuil n/4, positionne la barre à cette hauteur sur le polygone, puis lis le premier quartile Q1",
-  mediane: "Calcule le seuil n/2, positionne la barre à cette hauteur sur le polygone, puis lis la médiane",
-  q3: "Calcule le seuil 3n/4, positionne la barre à cette hauteur sur le polygone, puis lis le troisième quartile Q3",
-};
+/** Début de consigne d'un écran de lecture : seuil et paramètre en KaTeX. */
+function consigneLectureDebut(parametre: ParametreLecture): SegmentTexte[] {
+  const debut = [T("Calcule le seuil "), Kx(FORMULE_SEUIL[parametre]), T(", positionne la barre à cette hauteur sur le polygone, puis lis ")];
+  if (parametre === "mediane") return [...debut, T("la médiane")];
+  return [...debut, T(parametre === "q1" ? "le premier quartile " : "le troisième quartile "), Kx(LABEL_LECTURE[parametre])];
+}
 
 /** Formule le palier de précision de lecture en français naturel — jamais littéralement "arrondi à
  * 20" (`promptgen33gen35precisionlecture.md`, Correction 2) : réutilise la même convention de
@@ -282,13 +299,13 @@ function formatPrecisionTexte(precision: number): string {
  * vérification (`toleranceLecture`, `verificationMediane.ts`) est TOUJOURS ÉGALE au pas du palier
  * — la consigne mentionne donc une seule et même valeur pour l'arrondi attendu ET la marge
  * acceptée, jamais deux nombres distincts qui suggéreraient une double exigence. */
-export function consigneLecture(exercice: ExerciceMedianeClasses, parametre: ParametreLecture): string {
+export function consigneLecture(exercice: ExerciceMedianeClasses, parametre: ParametreLecture): SegmentTexte[] {
   const precision = precisionLecture(exercice.etendue);
   const texte = formatPrecisionTexte(precision);
-  return virgulesTexte(`${CONSIGNE_LECTURE_DEBUT[parametre]} (en ${exercice.contexte.unite}, ${libellePrecisionLecture(precision)}, réponse acceptée à ±${texte} près).`);
+  return [...consigneLectureDebut(parametre), T(` (en ${exercice.contexte.unite}, ${libellePrecisionLecture(precision)}, réponse acceptée à ±${texte} près).`)];
 }
 
-const FORMULE_SEUIL: Record<ParametreLecture, string> = { q1: "n/4", mediane: "n/2", q3: "3n/4" };
+const FORMULE_SEUIL: Record<ParametreLecture, string> = { q1: SEUIL_Q1_LATEX, mediane: SEUIL_MEDIANE_LATEX, q3: SEUIL_Q3_LATEX };
 const LABEL_LECTURE: Record<ParametreLecture, string> = { q1: "Q_1", mediane: "Q_2", q3: "Q_3" };
 
 export function labelChampLecture(parametre: ParametreLecture): string {
@@ -297,15 +314,19 @@ export function labelChampLecture(parametre: ParametreLecture): string {
 
 /** Aide 1 — rappel de la MÉTHODE (jamais les valeurs de l'exercice) : calculer le seuil, placer la
  * barre, lire l'intersection avec la courbe puis l'abscisse correspondante. */
-export function texteAideLectureNiveau1(parametre: ParametreLecture): string {
-  return virgulesTexte(`Rappel : calcule d'abord le seuil ${FORMULE_SEUIL[parametre]}, place la barre orange à cette hauteur sur le graphe — les pointillés et la croix se tracent automatiquement jusqu'à la courbe puis jusqu'à l'axe des x, où tu peux lire l'abscisse correspondante.`);
+export function texteAideLectureNiveau1(parametre: ParametreLecture): SegmentTexte[] {
+  return [
+    T("Rappel : calcule d'abord le seuil "),
+    Kx(FORMULE_SEUIL[parametre]),
+    T(", place la barre orange à cette hauteur sur le graphe — les pointillés et la croix se tracent automatiquement jusqu'à la courbe puis jusqu'à l'axe des x, où tu peux lire l'abscisse correspondante."),
+  ];
 }
 
 /** Aide 2 — révèle le SEUIL déjà calculé pour cet exercice précis, jamais la valeur finale
  * elle-même (l'élève doit encore positionner la barre et lire l'abscisse). */
-export function texteAideLectureNiveau2(exercice: ExerciceMedianeClasses, parametre: ParametreLecture): string {
+export function texteAideLectureNiveau2(exercice: ExerciceMedianeClasses, parametre: ParametreLecture): SegmentTexte[] {
   const seuil = parametre === "q1" ? exercice.seuilQ1 : parametre === "q3" ? exercice.seuilQ3 : exercice.seuil;
-  return virgulesTexte(`Le seuil ${FORMULE_SEUIL[parametre]} vaut ${seuil}. Positionne la barre à cette hauteur, puis lis l'abscisse où le pointillé vertical croise l'axe des x.`);
+  return [T("Le seuil "), Kx(`${FORMULE_SEUIL[parametre]}=${seuil}`), T(". Positionne la barre à cette hauteur, puis lis l'abscisse où le pointillé vertical croise l'axe des x.")];
 }
 
 /** Les 2 sommets du polygone (déjà confirmé, `polygonePoints`) qui encadrent le seuil du paramètre
@@ -380,33 +401,34 @@ export function texteAideSyntheseNiveau2(exercice: ExerciceMedianeClasses): stri
 // Révélation — panneau de résultat.
 // ============================================================================
 
-export function formatMedianeAttendueTexte(exercice: { seuil: number; mediane: number }): string {
-  return virgulesTexte(`seuil = ${exercice.seuil}, médiane = ${exercice.mediane}`);
+/** Réponse attendue d'un écran seuil + valeur : « seuil n/2 = 10 ; médiane Q₂ = 7 », en KaTeX. */
+export function formatMedianeAttendueTexte(exercice: { seuil: number; mediane: number }): SegmentTexte[] {
+  return [T("seuil "), Kx(`${SEUIL_MEDIANE_LATEX}=${exercice.seuil}`), T(" ; médiane "), Kx(`${LABEL_MEDIANE_Q2}=${exercice.mediane}`)];
 }
 
-export function formatQ1AttendueTexte(exercice: ExerciceMedianeDiscrete): string {
-  return virgulesTexte(`seuil = ${exercice.seuilQ1}, Q1 = ${exercice.q1}`);
+export function formatQ1AttendueTexte(exercice: ExerciceMedianeDiscrete): SegmentTexte[] {
+  return [T("seuil "), Kx(`${SEUIL_Q1_LATEX}=${exercice.seuilQ1}`), T(" ; "), Kx(`${LABEL_Q1}=${exercice.q1}`)];
 }
 
-export function formatQ3AttendueTexte(exercice: ExerciceMedianeDiscrete): string {
-  return virgulesTexte(`seuil = ${exercice.seuilQ3}, Q3 = ${exercice.q3}`);
+export function formatQ3AttendueTexte(exercice: ExerciceMedianeDiscrete): SegmentTexte[] {
+  return [T("seuil "), Kx(`${SEUIL_Q3_LATEX}=${exercice.seuilQ3}`), T(" ; "), Kx(`${LABEL_Q3}=${exercice.q3}`)];
 }
 
 export function formatMinMaxModeAttendueTexte(exercice: ExerciceMedianeDiscrete): string {
   const modes = exercice.modes.join(", ");
-  return virgulesTexte(`min = ${exercice.min}, max = ${exercice.max}, mode(s) = ${modes}`);
+  return signesTypo(virgulesTexte(`min = ${exercice.min}, max = ${exercice.max}, mode(s) = ${modes}`));
 }
 
 export function formatPolygoneAttenduTexte(exercice: ExerciceMedianeClasses): string {
-  return virgulesTexte(exercice.classes.map((c, i) => `${formatClasseTexte(exercice, i)} → (${c.borneSup} ; ${c.effectifCumule})`).join(", "));
+  return signesTypo(virgulesTexte(exercice.classes.map((c, i) => `${formatClasseTexte(exercice, i)} → (${c.borneSup} ; ${c.effectifCumule})`).join(", ")));
 }
 
 /** `≈` plutôt que `=` — révélation d'un écran à tolérance non nulle (le pas du palier de précision
  * applicable, `toleranceLecture`, `verificationMediane.ts`), jamais une correspondance exacte, quel
  * que soit le palier réellement en jeu. */
-export function formatLectureAttendueTexte(exercice: ExerciceMedianeClasses, parametre: ParametreLecture): string {
+export function formatLectureAttendueTexte(exercice: ExerciceMedianeClasses, parametre: ParametreLecture): SegmentTexte[] {
   const valeur = parametre === "q1" ? exercice.q1 : parametre === "q3" ? exercice.q3 : exercice.mediane;
-  return virgulesTexte(`${labelChampLecture(parametre).replace("_", "")} ≈ ${valeur}`);
+  return [Kx(`${LABEL_LECTURE[parametre]}\\approx ${valeur}`)];
 }
 
 /** Ne couvre plus que la portion sans `x_{min}`/`x_{max}` (`promptgen33ajustements.md`, point 3) —
@@ -414,5 +436,5 @@ export function formatLectureAttendueTexte(exercice: ExerciceMedianeClasses, par
  * notation indicielle réelle (`LABEL_X_MIN`/`LABEL_X_MAX`), jamais un tiret bas littéral. */
 export function formatSyntheseAttendueTexte(exercice: ExerciceMedianeClasses): string {
   const classeModale = formatClasseTexte(exercice, exercice.indexClasseModale);
-  return virgulesTexte(`étendue = ${exercice.etendue}, classe modale = ${classeModale}, mode = ${exercice.modeCentreClasseModale}`);
+  return signesTypo(virgulesTexte(`étendue = ${exercice.etendue}, classe modale = ${classeModale}, mode = ${exercice.modeCentreClasseModale}`));
 }

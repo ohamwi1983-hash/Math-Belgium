@@ -246,7 +246,7 @@ function enoncePapierBoiteMoustaches(exercice: ExerciceBoiteMoustaches): EnonceP
         questions: [
           {
             consigne: enVirgules([
-              texte(`Trace sur ta feuille la boîte à moustaches de cette série, sur un axe gradué (en ${u}) allant au moins de ${exercice.bornePlage.min} à ${exercice.bornePlage.max}.`),
+              texte(`Trace sur ta feuille la boîte à moustaches de cette série, sur un axe gradué (en ${u}) allant au moins de ${String(exercice.bornePlage.min).replace("-", "−")} à ${String(exercice.bornePlage.max).replace("-", "−")}.`),
             ]),
           },
         ],
@@ -330,7 +330,7 @@ function baremeBoiteMoustaches(exercice: ExerciceBoiteMoustaches): BaremeExercic
     ];
     erreurs = [
       { description: [texte("Médiane prise au milieu de la boîte")], cout: "0 pt sur la médiane" },
-      { description: [texte("Q1 et Q3 inversés")], cout: "0 pt sur Q1 et Q3" },
+      { description: [latex("Q_1"), texte(" et "), latex("Q_3"), texte(" inversés")], cout: "0 pt sur les deux quartiles" },
     ];
   } else {
     criteres = [

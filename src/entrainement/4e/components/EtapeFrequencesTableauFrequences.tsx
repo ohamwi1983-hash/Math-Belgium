@@ -4,12 +4,13 @@ import type { ReponseFrequences } from "../moteur/verificationTableauFrequences"
 import { evaluerFrequences } from "../moteur/verificationTableauFrequences";
 import { NIVEAU_AIDE_MAX_FREQUENCES } from "../moteur/sessionTableauFrequences";
 import { CONSIGNE_FREQUENCES, LABEL_EFFECTIF_NI, LABEL_FREQUENCE_FI, LABEL_VALEUR_XI, PLACEHOLDER_FREQUENCE, texteAideFrequencesNiveau1, texteAideFrequencesNiveau2 } from "../ui/formatTableauFrequences";
+import { SegmentsInline } from "./SegmentsInline";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { nombreFr } from "../ui/nombreFr";
+import { nombreFrTypo } from "../ui/nombreFr";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
@@ -75,7 +76,7 @@ export function EtapeFrequencesTableauFrequences({ exercice, tentativesUtilisees
               const erronee = evaluation !== null && evaluation[index] !== "correct";
               return (
                 <tr key={ligne.valeur}>
-                  <td>{nombreFr(ligne.valeur)}</td>
+                  <td>{nombreFrTypo(ligne.valeur)}</td>
                   <td>{ligne.effectif}</td>
                   <td>
                     <input
@@ -83,7 +84,7 @@ export function EtapeFrequencesTableauFrequences({ exercice, tentativesUtilisees
                       placeholder={PLACEHOLDER_FREQUENCE}
                       value={valeurs[index]}
                       onChange={(e) => modifier(index, normaliserSigneMoins(e.target.value))}
-                      aria-label={`Fréquence de la valeur ${nombreFr(ligne.valeur)}`}
+                      aria-label={`Fréquence de la valeur ${nombreFrTypo(ligne.valeur)}`}
                     />
                   </td>
                 </tr>
@@ -96,7 +97,7 @@ export function EtapeFrequencesTableauFrequences({ exercice, tentativesUtilisees
       {niveauAide >= 1 && (
         <div className="triangle-quelconque-aide">
           <p>{texteAideFrequencesNiveau1(exercice)}</p>
-          {niveauAide >= 2 && <p>{texteAideFrequencesNiveau2(exercice)}</p>}
+          {niveauAide >= 2 && <p><SegmentsInline segments={texteAideFrequencesNiveau2(exercice)} /></p>}
         </div>
       )}
       {!validation && (

@@ -17,7 +17,7 @@ import {
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { GrilleAdaptative } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
-import { nombreFr, virgulesTexte } from "../ui/nombreFr";
+import { nombreFr, nombreFrTypo, virgulesTexte } from "../ui/nombreFr";
 import { cibleLignesSansChevauchement } from "../ui/lectureQuartileGraph";
 
 const CLES: (keyof CinqNombres)[] = ["min", "q1", "mediane", "q3", "max"];
@@ -166,7 +166,7 @@ export function BoiteMoustachesGraph({ bornePlage, lignes }: Props) {
                         color={couleur}
                         size={14}
                       >
-                        {nombreFr(xParCle[cle])}
+                        {nombreFrTypo(xParCle[cle])}
                       </Text>
                     </g>
                   );

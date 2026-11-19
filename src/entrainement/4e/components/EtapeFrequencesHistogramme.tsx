@@ -4,6 +4,7 @@ import type { ReponseFrequencesHistogramme } from "../moteur/verificationHistogr
 import { evaluerFrequencesHistogramme } from "../moteur/verificationHistogramme";
 import { NIVEAU_AIDE_MAX_FREQUENCES } from "../moteur/sessionHistogramme";
 import { CONSIGNE_FREQUENCES, LABEL_CLASSE_XI, LABEL_EFFECTIF_NI, LABEL_FREQUENCE_FI, PLACEHOLDER_FREQUENCE_CLASSE, formatClasseTexte, texteAideFrequencesNiveau1, texteAideFrequencesNiveau2 } from "../ui/formatHistogramme";
+import { SegmentsInline } from "./SegmentsInline";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -93,7 +94,7 @@ export function EtapeFrequencesHistogramme({ exercice, tentativesUtilisees, tent
       {niveauAide >= 1 && (
         <div className="triangle-quelconque-aide">
           <p>{texteAideFrequencesNiveau1(exercice)}</p>
-          {niveauAide >= 2 && <p>{texteAideFrequencesNiveau2(exercice)}</p>}
+          {niveauAide >= 2 && <p><SegmentsInline segments={texteAideFrequencesNiveau2(exercice)} /></p>}
         </div>
       )}
       {!validation && (

@@ -98,6 +98,7 @@ export function ComparaisonSeriesGraph({ serieA, serieB, cumul }: Props) {
           etiquettesLisibles
           formatEtiquette={nombreFrTypo}
           etiquettesAuxBords
+          etiquettesYMin={0}
           uneEtiquetteXSurDeux={grandesValeurs && largeur < SEUIL_LARGEUR_ETROITE}
         />
         {courbes.map((courbe) => (
@@ -138,12 +139,12 @@ export function ComparaisonSeriesGraph({ serieA, serieB, cumul }: Props) {
         </span>
         {selectionneA !== null && (
           <span className="mafs-graph-legende-item" style={{ color: COULEUR_A }}>
-            Point sélectionné (A) : ({pointsA[selectionneA].x} ; {pointsA[selectionneA].y})
+            Point sélectionné (A) : ({nombreFrTypo(pointsA[selectionneA].x)} ; {nombreFrTypo(pointsA[selectionneA].y)}{cumul === "frequence" ? " %" : ""})
           </span>
         )}
         {selectionneB !== null && (
           <span className="mafs-graph-legende-item" style={{ color: COULEUR_B }}>
-            Point sélectionné (B) : ({pointsB[selectionneB].x} ; {pointsB[selectionneB].y})
+            Point sélectionné (B) : ({nombreFrTypo(pointsB[selectionneB].x)} ; {nombreFrTypo(pointsB[selectionneB].y)}{cumul === "frequence" ? " %" : ""})
           </span>
         )}
       </div>

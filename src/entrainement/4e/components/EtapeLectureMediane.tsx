@@ -64,7 +64,7 @@ export function EtapeLectureMediane({ exercice, parametre, tentativesUtilisees, 
 
   return (
     <div>
-      <p className="prompt-text">{consigneLecture(exercice, parametre)}</p>
+      <p className="prompt-text"><SegmentsInline segments={consigneLecture(exercice, parametre)} /></p>
 
       <LectureQuartileGraph points={polygonePoints(exercice)} pointsEncadres={niveauAide >= 3 ? pointsEncadresLecture(exercice, parametre) : undefined} />
 
@@ -83,8 +83,8 @@ export function EtapeLectureMediane({ exercice, parametre, tentativesUtilisees, 
 
       {niveauAide >= 1 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideLectureNiveau1(parametre)}</p>
-          {niveauAide >= 2 && <p>{texteAideLectureNiveau2(exercice, parametre)}</p>}
+          <p><SegmentsInline segments={texteAideLectureNiveau1(parametre)} /></p>
+          {niveauAide >= 2 && <p><SegmentsInline segments={texteAideLectureNiveau2(exercice, parametre)} /></p>}
           {niveauAide >= 3 && (
             <p>
               <SegmentsInline segments={texteAideLectureNiveau3(exercice, parametre)} />
