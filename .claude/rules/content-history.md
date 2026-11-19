@@ -4192,3 +4192,34 @@ paths:
   comme dans le cours). gen10 : option `etiquettesLisibles` du graphe (pas de 1/3 → entiers écrits)
   et « − » typographique sur les axes et dans la légende. Détails et mesures :
   `.claude/rules/feuilles-evaluations.md` (sections « Corrigé détaillé » et gen11).
+
+- **4e, Chapitre 2 — Équations et inéquations du second degré** (`equations-inequations-second-degre`),
+  section `contexte` (§ 7) : nouveau générateur **gen119 « Problèmes avec une fraction »**
+  (processus 3), carte après gen57. Trois contextes = trois variantes, tous traduits par
+  N/x + σ·N/(x + s) = p/q : prix unitaire et quantité (« s'il coûtait d € de moins, j'en aurais k de
+  plus »), aller-retour à deux vitesses (w km/h de moins au retour, durée totale en h et min à
+  convertir en fraction), deux robinets / deux imprimantes / deux jardiniers (fractions du travail
+  faites en une unité de temps, durée ensemble en h ou en min). Racines rationnelles par
+  construction (Δ carré parfait), la racine gardée est un entier ; l'autre est rejetée par le
+  CONTEXTE (négative, ou vitesse au retour négative : la racine du trajet est positive mais
+  inférieure à w), jamais par la CE — l'écran « rejeter » fait constater que les deux respectent la
+  CE. Écrans : a) poser l'équation (choix fermé, 1 tentative ; fausses équations = pièges classiques :
+  différence des prix inversée, durées additionnées, « distance × vitesse », durée décimale 3,30 pour
+  3 h 30 min) ; b) valeurs interdites (liste) ; c) équation du second degré obtenue (toute équation
+  proportionnelle acceptée) + ses solutions ; d) rejet (choix fermé) ; e) réponse à la question,
+  avec l'unité (x lui-même en `directe`, grandeur déduite — prix, vitesse au retour, durée de l'autre
+  robinet — en `deduite`). Profil : `forme` = « variante:directe|deduite » tirée avant les nombres
+  (50/50), aucun cas particulier, pas de `calcul`. Niveau 6 (Avancé), ≈ 16 min. Libellé de conception
+  « Problèmes avec une fraction (gen119) ». **Socle commun des nouveaux générateurs du ch. 2**
+  (gen115, gen116, gen118, gen119, gen120) : écrans en DONNÉES (`ui/ecransTransfertSecondDegre.ts` :
+  choix, ou champs typés nombre / liste / expression / équation à un facteur près / relation jugée
+  par son ensemble-solution / ensemble construit), vérification `moteur/verificationTransfertSecondDegre.ts`
+  (« − », « ² », « √ », virgule ; illisible = aucune tentative), algèbre et ensembles
+  `moteur/algebreTransfertSecondDegre.ts` (forme canonique, comparaison d'ensembles, écriture KaTeX
+  `\mathopen{]}`…), session `moteur/sessionTransfertSecondDegre.ts`, écran
+  `components/EtapesTransfertSecondDegre.tsx` (saisie d'ensemble avec `ListeMorceauxInput` +
+  `ListePointsIsolesInput` du chapitre) et coquille `components/AppTransfertSecondDegre.tsx` (puces,
+  aides, corrigé de l'étape, `?code=`) ; briques de corrigé `ui/corrigeTransfertSecondDegre.ts`
+  (Δ et racines dans la variable de l'exercice). Fichiers de gen119 : `AppProblemesFraction.tsx`,
+  `core/problemesFraction.types.ts`, `ui/formatProblemesFraction.ts`, `generateurs/problemesFraction/`
+  (index, corrigeDetaille, profil, exportEvaluation).

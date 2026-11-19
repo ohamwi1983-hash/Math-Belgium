@@ -1589,6 +1589,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 57. Équations/inéquations du second degré en contexte »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Problèmes avec une fraction',
+          generatorId: 'gen119',
+          description: [
+            'Prix et quantité, aller-retour à deux vitesses, deux robinets : mets le problème en ' +
+              'équation (x au dénominateur), pose la CE, résous, rejette la valeur impossible dans ' +
+              'le contexte, puis réponds à la question.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 119. Problèmes avec une fraction »',
+        },
       ],
     },
     {
