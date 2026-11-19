@@ -1,5 +1,6 @@
 import type { ResultatExerciceQuizCercleTriangles } from "../moteur/typesQuizCercleTriangles";
 import { LigneRecap, statutRecap } from "./LigneRecap";
+import { TexteRiche } from "./TexteRiche";
 
 interface Props {
   resultat: ResultatExerciceQuizCercleTriangles;
@@ -28,14 +29,21 @@ export function ResultatPanelQuizCercleTriangles({ resultat, labelBouton, onCont
   return (
     <div>
       <h2 className="result-title">{correct ? "Bonne réponse !" : "Mauvaise réponse"}</h2>
-      <p className="result-subtitle">{resultat.question.enonce}</p>
+      <p className="result-subtitle">
+        <TexteRiche texte={resultat.question.enonce} />
+      </p>
       <p className="prompt-text">
         Ta réponse : {libelleVraiFaux(resultat.reponseChoisie)} — Réponse correcte : {libelleVraiFaux(resultat.question.reponse)}
       </p>
       <LigneRecap label="Résultat" statut={statut}>
         {correct ? "Correct" : "Incorrect"}
       </LigneRecap>
-      <div className="triangle-quelconque-aide">{resultat.question.justification}</div>
+      {/* `<p>` : le bloc d'aide est un conteneur flex, chaque morceau texte/KaTeX y serait une colonne. */}
+      <div className="triangle-quelconque-aide">
+        <p>
+          <TexteRiche texte={resultat.question.justification} />
+        </p>
+      </div>
       <button type="button" className="btn btn-primary" onClick={onContinuer}>
         {labelBouton}
       </button>

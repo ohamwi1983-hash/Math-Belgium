@@ -183,7 +183,7 @@ export function FigureAngleAssocieValeurExacte({ terme }: { terme: TermeTrig }) 
   const trajet = calculerTrajetCercleTrig(reduit, reduit);
   const aide = calculerAidePremierQuadrant(angleAssocie(terme), quadrantDe(terme), reduit);
   return (
-    <CercleTrigTrajetBase trajet={trajet} labelAngleBrutTexte={`${reduit}°`} ariaLabel="Cercle trigonométrique montrant l'angle et son angle associé du premier quadrant">
+    <CercleTrigTrajetBase trajet={trajet} labelAngleBrutTexte={`${reduit}°`} ariaLabel="Cercle trigonométrique montrant l'angle et son angle du premier quadrant">
       {aide.afficherLignePointillee && <line x1={trajet.pointFinal.x} y1={trajet.pointFinal.y} x2={aide.point.x} y2={aide.point.y} className="cercle-trig-ligne-pointillee" />}
       <line x1={CENTRE_CERCLE_TRIG.x} y1={CENTRE_CERCLE_TRIG.y} x2={aide.point.x} y2={aide.point.y} className="cercle-trig-rayon-question" />
       <circle cx={aide.point.x} cy={aide.point.y} r={5} className="cercle-trig-point-question" />
@@ -307,7 +307,7 @@ export function EtapeValeurTermeValeurExacte({
     <div>
       {enTete}
       <p className="prompt-text">{consigne}</p>
-      <ChampAngle id="ve-angle-associe" label="Angle associé du premier quadrant" valeur={angle} onChange={setAngle} erronee={!fige && erreurs[0]} fige={fige} />
+      <ChampAngle id="ve-angle-associe" label="Angle du premier quadrant" valeur={angle} onChange={setAngle} erronee={!fige && erreurs[0]} fige={fige} />
       <ChampValeurExacte id="ve-valeur-terme" label={labelValeur} valeur={valeur} onChange={setValeur} erronee={!fige && erreurs[1]} fige={fige} />
       {!validation && (
         <>

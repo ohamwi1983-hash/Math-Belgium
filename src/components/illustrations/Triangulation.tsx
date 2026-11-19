@@ -8,10 +8,12 @@ const F = { x: 320, y: 220 }
 const S = { x: 320, y: 60 }
 
 /** Triangulation — A et B au sol, alignés avec le pied F d'une tour verticale de sommet S, deux
- * visées d'élévation depuis A et B. Forme géométrique fixe, propre à ce seul diagramme. */
+ * visées d'élévation depuis A et B. Forme géométrique fixe, propre à ce seul diagramme.
+ * Arcs d'élévation : l'extrémité suit la direction réelle de (AS) / (BS) — l'ancien facteur −1 sur
+ * l'angle les dessinait SOUS le sol ; cadre agrandi en bas pour les jambages (« appareil 1 »). */
 export function Triangulation({ labels }: Props) {
   return (
-    <svg viewBox="0 30 380 210" role="img" aria-label="Triangulation pour mesurer une hauteur inaccessible">
+    <svg viewBox="0 30 380 222" role="img" aria-label="Triangulation pour mesurer une hauteur inaccessible">
       <line x1={A.x} y1={A.y} x2={F.x} y2={F.y} className="svg-line" strokeWidth="1.5" />
       <line x1={F.x} y1={F.y} x2={S.x} y2={S.y} className="svg-good" strokeWidth="2" />
       <line x1={A.x} y1={A.y} x2={S.x} y2={S.y} className="svg-accent-outline" strokeWidth="1.6" strokeDasharray="4 3" />
@@ -19,8 +21,8 @@ export function Triangulation({ labels }: Props) {
       <rect x={F.x - 10} y={F.y - 10} width="10" height="10" fill="none" className="svg-line" strokeWidth="1.1" />
       <circle cx={B.x} cy={B.y} r="3" className="svg-ink" />
 
-      <path d={`M${A.x + 24},${A.y} A24,24 0 0 0 ${A.x + 24 * Math.cos(Math.atan2(S.y - A.y, S.x - A.x) * -1)},${A.y + 24 * Math.sin(Math.atan2(S.y - A.y, S.x - A.x) * -1)}`} fill="none" className="svg-accent-outline" strokeWidth="1.4" />
-      <path d={`M${B.x + 24},${B.y} A24,24 0 0 0 ${B.x + 24 * Math.cos(Math.atan2(S.y - B.y, S.x - B.x) * -1)},${B.y + 24 * Math.sin(Math.atan2(S.y - B.y, S.x - B.x) * -1)}`} fill="none" className="svg-accent-outline" strokeWidth="1.4" />
+      <path d={`M${A.x + 24},${A.y} A24,24 0 0 0 ${A.x + 24 * Math.cos(Math.atan2(S.y - A.y, S.x - A.x))},${A.y + 24 * Math.sin(Math.atan2(S.y - A.y, S.x - A.x))}`} fill="none" className="svg-accent-outline" strokeWidth="1.4" />
+      <path d={`M${B.x + 24},${B.y} A24,24 0 0 0 ${B.x + 24 * Math.cos(Math.atan2(S.y - B.y, S.x - B.x))},${B.y + 24 * Math.sin(Math.atan2(S.y - B.y, S.x - B.x))}`} fill="none" className="svg-accent-outline" strokeWidth="1.4" />
       {/* Rapproché de A et remonté (était +33/-14) : chevauchait `distanceLabel`, centré entre A
           et B juste au-dessus du segment — constaté à l'écran. */}
       <text x={A.x + 20} y={A.y - 20} fontSize="14.5" className="svg-accent" fontStyle="italic">
@@ -30,7 +32,7 @@ export function Triangulation({ labels }: Props) {
         {labels.angleAtB}
       </text>
 
-      <text x={(A.x + B.x) / 2} y={A.y - 6} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="13.5" className="svg-ink">
+      <text x={(A.x + B.x) / 2 + 12} y={A.y - 5} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="13.5" className="svg-ink">
         {labels.distanceLabel}
       </text>
       <text x={A.x} y={A.y + 22} textAnchor="middle" fontSize="15.5" className="svg-ink">

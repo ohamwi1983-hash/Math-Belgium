@@ -6,7 +6,7 @@
  *
  * Garanties (générateur) : chaque angle est un multiple de 30° ou de 45° STRICTEMENT dans un
  * quadrant (jamais sur un axe : une tangente n'est donc jamais indéfinie, et chaque terme suit la
- * même méthode — quadrant, signe, angle associé du premier quadrant, valeur remarquable) ; son
+ * même méthode — quadrant, signe, angle du premier quadrant, valeur remarquable) ; son
  * angle de référence vaut 30°, 45° ou 60°.
  */
 

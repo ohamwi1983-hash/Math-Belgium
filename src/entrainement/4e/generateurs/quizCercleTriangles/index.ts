@@ -8,17 +8,23 @@ import type { ExerciceQuizCercleTriangles, GenerateurExerciceQuizCercleTriangles
 import { randomInt } from "./aleatoire";
 import { BANQUE_QUIZ_CERCLE_TRIANGLES } from "./banque";
 
+/** Ordre = ordre des sections du chapitre (§ 1 à § 7). Les thèmes sont désignés par leur id, jamais
+ * par leur rang (`QUIZ_THEMES_EVALUATION_PILOTE`, panneau dev) : l'ordre peut changer sans casser une
+ * évaluation enregistrée. */
 export const CATALOGUE_VARIANTES: { id: VarianteQuizCercleTriangles; label: string }[] = [
   { id: "placementCercle", label: "Cercle trigonométrique — placement, quadrants et signes" },
-  { id: "valeursRemarquables", label: "Valeurs trigonométriques remarquables" },
   { id: "identiteFondamentale", label: "Identité fondamentale — retrouver sin ou cos à partir de l'autre" },
+  { id: "valeursRemarquables", label: "Valeurs trigonométriques remarquables" },
   { id: "anglesAssocies", label: "Angles associés" },
   { id: "resoudreAngle", label: "Résoudre une équation trigonométrique simple" },
+  { id: "equationsContexte", label: "Équations à transformer et rotations en contexte" },
   { id: "triangleQuelconque", label: "Triangle quelconque — lois des sinus et des cosinus" },
+  { id: "aireCasAmbigu", label: "Aire d'un triangle et cas ambigu" },
   { id: "trianglesLies", label: "Triangles liés — triangulation et applications concrètes" },
+  { id: "forcesCaps", label: "Forces, vitesses, caps et angles d'élévation" },
 ];
 
-/** Taille réelle de la banque d'un thème (35 aujourd'hui pour chacun des 7 thèmes) — jamais une
+/** Taille réelle de la banque d'un thème (35 aujourd'hui pour chacun des 10 thèmes) — jamais une
  * constante fixe : `AppQuizCercleTriangles.tsx` l'utilise pour fixer `nombreExercices`, seule façon
  * pour `creerGenerateurSansRepetition` de garder sa garantie « jamais de répétition dans une
  * session » si un thème venait à perdre ou gagner des affirmations. */
@@ -63,9 +69,9 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (35) : sans
- * cette précaution, le tirage indépendant habituel (`genererExerciceQuizCercleTriangles`) pourrait
- * répéter une question avant d'avoir couvert les 34 autres. État interne (file mélangée, ré-mélangée
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème : sans cette
+ * précaution, le tirage indépendant habituel (`genererExerciceQuizCercleTriangles`) pourrait répéter
+ * une question avant d'avoir couvert toutes les autres. État interne (file mélangée, ré-mélangée
  * à chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de cette fonction
  * — voir `AppQuizCercleTriangles.tsx`, qui en crée une par session démarrée.
  */

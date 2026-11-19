@@ -172,7 +172,7 @@ function etapesTerme(e: E, i: number): EtapeCorrection[] {
   const a = angleAssocie(t);
   etapes.push(
     utilise(lv, [
-      texte(`Angle associé du premier quadrant ${COURS_ASSOCIES}, puis valeur remarquable ${COURS_REMARQUABLES} : `),
+      texte(`Angle du premier quadrant ${COURS_ASSOCIES}, puis valeur remarquable ${COURS_REMARQUABLES} : `),
       latex(`${fonctionAngleLatex(t.fonction, a)}=${dfrac(exactLatex(valeurRemarquable(t.fonction, a)))}`),
       texte(" ; le signe vient du quadrant."),
     ]),
@@ -210,7 +210,7 @@ function piegeCible(e: E): EtapeCorrection {
   }
   return e.operateurs.includes("*")
     ? piege(lettreDe(e, "final"), [texte("Le produit se calcule avant la somme ou la différence.")])
-    : piege(lettreDe(e, "valeur", 0), [texte("L'angle associé du premier quadrant donne la valeur remarquable ; le signe vient toujours du quadrant de l'angle de départ.")]);
+    : piege(lettreDe(e, "valeur", 0), [texte("L'angle du premier quadrant donne la valeur remarquable ; le signe vient toujours du quadrant de l'angle de départ.")]);
 }
 
 export function correctionDetailleeValeurExacte(e: E): EtapeCorrection[] {
