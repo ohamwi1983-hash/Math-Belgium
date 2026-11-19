@@ -1,7 +1,7 @@
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceLectureCercle, ValeurExacteSignee } from "../core/lectureCercle.types";
 import { evaluerExpressionGenerale } from "./expressionGenerale";
-import { VALEUR_GRANDEUR, angleReference, candidatsCosinus, cosExact, ramener, sinExact, tanExact, valeurNumerique } from "./modeleLectureCercle";
+import { VALEUR_GRANDEUR, angleReference, candidatsCosinus, cosExact, ramener, sinExact, surUnAxe, tanExact, valeurNumerique } from "./modeleLectureCercle";
 
 /**
  * Vérification de gen122 « Lire sur le cercle trigonométrique ».
@@ -186,8 +186,8 @@ export function diagnostiquerAngle(e: E, saisie: string): DiagnosticAngle {
   if (ramener(d) === e.angle) return { etat: "piege", piege: "hors-intervalle" };
   if (d < 0 || d >= 360) return { etat: "faux" };
   const ref = angleReference(e);
-  if (d === ref && ref !== e.angle) return { etat: "piege", piege: "reference" };
   if (candidatsCosinus(e).includes(d)) return { etat: "piege", piege: "candidat-cos" };
+  if (d === ref && ref !== e.angle && !surUnAxe(e)) return { etat: "piege", piege: "reference" };
   if (d === ramener(180 - e.angle)) return { etat: "piege", piege: "candidat-sin" };
   if (d === ramener(e.angle + 180)) return { etat: "piege", piege: "oppose" };
   return { etat: "faux" };

@@ -400,7 +400,7 @@ export function figureSvg(e: E, options: OptionsFigure): string {
   // Tangente x = 1 et ses graduations
   if (options.tangente) {
     parts.push(`<line x1="${f2(X(1))}" y1="${f2(Y(cadre.yMin + 0.04))}" x2="${f2(X(1))}" y2="${f2(Y(cadre.yMax - 0.04))}" stroke="${COULEUR_TANGENTE}" stroke-width="1.5"/>`);
-    parts.push(`<text x="${f2(X(1) - 5)}" y="${f2(Y(cadre.yMax - 0.04) + 11)}" font-size="10" text-anchor="end" font-style="italic" ${POLICE} fill="${COULEUR_TANGENTE}">x = 1</text>`);
+    parts.push(`<text x="${f2(X(1) + 6)}" y="${f2(Y(cadre.yMax - 0.04) + 9)}" font-size="10" text-anchor="start" font-style="italic" ${POLICE} fill="${COULEUR_TANGENTE}">x = 1</text>`);
     for (const g of GRADUATIONS_TANGENTE) {
       for (const s of [1, -1]) {
         const y = s * VALEUR_GRANDEUR[g];
@@ -444,8 +444,8 @@ export function figureSvg(e: E, options: OptionsFigure): string {
     parts.push(`<line x1="${f2(X(v))}" y1="${f2(Y(0) - 3)}" x2="${f2(X(v))}" y2="${f2(Y(0) + 3)}" stroke="${COULEUR_AXE}" stroke-width="1.1"/>`);
     parts.push(`<line x1="${f2(X(0) - 3)}" y1="${f2(Y(v))}" x2="${f2(X(0) + 3)}" y2="${f2(Y(v))}" stroke="${COULEUR_AXE}" stroke-width="1.1"/>`);
     parts.push(g === "1" ? etiquette(g, X(v) + 8, Y(0) + 11) : etiquette(g, X(v), Y(0) + 17));
-    const colonne = g === "r2/2" || g === "1" ? 30 : 12;
-    parts.push(etiquette(g, X(0) - colonne, Y(v)));
+    // Axe vertical : deux colonnes (√2/2 décalé), « 1 » au-dessus du cercle (sinon il touchait le trait).
+    parts.push(g === "1" ? etiquette(g, X(0) - 9, Y(v) - 11) : etiquette(g, X(0) - (g === "r2/2" ? 30 : 12), Y(v)));
   }
   parts.push(`<text x="${f2(X(0) - 5)}" y="${f2(Y(0) + 12)}" font-size="11" text-anchor="end" ${POLICE} stroke="#ffffff" stroke-width="3" paint-order="stroke" fill="${COULEUR_AXE}">O</text>`);
   if (options.droiteOM && options.tangente) {

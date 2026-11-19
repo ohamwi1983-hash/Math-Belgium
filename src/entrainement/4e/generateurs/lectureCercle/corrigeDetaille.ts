@@ -145,7 +145,7 @@ export function correctionDetailleeLectureCercle(e: E): EtapeCorrection[] {
       texte(" n'est pas définie."),
     ]),
     calcul("c", lignesTangente(e)),
-    { ...resultat("c", souderPonctuation(reponseTangente(e))), figureHtml: figureSvg(e, { tangente: true, droiteOM: true }) },
+    { ...resultat("c", souderPonctuation(reponseTangente(e))), figureHtml: `<div style="max-width:8cm;margin:0 auto">${figureSvg(e, { tangente: true, droiteOM: true })}</div>` },
   ];
   if (t !== null) etapes.push(verification("c", [texte("Par le quotient :")], [ligne(`\\tan\\theta=\\dfrac{\\sin\\theta}{\\cos\\theta}`), ligne(`=${quotientLatex(sin, cos)}`), ligne(`=${valeurLatex(t)}`)]));
   etapes.push(
