@@ -4192,3 +4192,25 @@ paths:
   comme dans le cours). gen10 : option `etiquettesLisibles` du graphe (pas de 1/3 → entiers écrits)
   et « − » typographique sur les axes et dans la légende. Détails et mesures :
   `.claude/rules/feuilles-evaluations.md` (sections « Corrigé détaillé » et gen11).
+
+- **4e, Chapitre 2 — nouveau générateur gen121 « Détective d'erreurs : second degré »** (lot H de
+  l'audit `audit-4e-ch2.md`, processus 3 Transférer, section `revision`, carte après le quiz gen61) :
+  même mécanique que gen81/gen91/gen107/gen112 (copie fictive de 4 à 6 lignes, une seule ligne fausse
+  et la suite qui en découle ; écran 1 ligne fausse et écran 2 description, choix fermés à une
+  tentative ; écran 3 ensemble-solution corrigé, 3 tentatives). Six variantes = supports
+  (discriminant ; facteur commun kx² = mx ou (x + p)² = k(x + p) ; équation sans solution ;
+  inéquation k(x² + βx + γ) ◇ 0 avec k < 0 ; équation rationnelle x²/(x − p) = (sx − pr)/(x − p) ;
+  inéquation rationnelle (2x − (z + p))/(x − p) ◇ 1), deux types d'erreur par variante, sur deux
+  lignes différentes, tirés au hasard (verdict, jamais dans `forme`) : −3² dans Δ, b au lieu de −b,
+  division par x ou x + p, signes des solutions inversés, −4ac mal signé, Δ < 0 lu « racine double »,
+  sens non changé en divisant par un négatif, signe de a lu entre les racines, CE fausse, valeur
+  interdite gardée, produit en croix dans une inéquation, valeur interdite incluse avec ≥. Contraintes
+  communes aux deux types d'une variante (chaque erreur change S ; mesuré : 0 copie = correction sur
+  2 400 tirages). Erreur non reprise : « a oublié dans a(x − x₁)(x − x₂) » (sa réponse serait une
+  expression, pas un ensemble). Saisie guidée partagée avec gen117 :
+  `components/SaisieEnsembleSolutionTrinome.tsx` (six allures comme gen2, bornes en fractions,
+  comparaison d'ENSEMBLES `ui/ensembleSolutionTrinome.ts`) et `components/EtapeEnsembleSolutionTrinome.tsx`.
+  Profil : `forme` = variante, aucun cas, pas de `calcul` ; niveau 3, 8 à 10 min selon la variante
+  (jamais selon le type). Fichiers : `AppDetectiveSecondDegre.tsx`, `core/detectiveSecondDegre.types.ts`,
+  `moteur/{modele,session,verification}DetectiveSecondDegre.ts`, `ui/formatDetectiveSecondDegre.ts`,
+  `generateurs/detectiveSecondDegre/` (index, profil, corrigeDetaille, exportEvaluation).

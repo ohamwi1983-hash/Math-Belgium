@@ -1628,6 +1628,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 61. Équations et inéquations du second degré — quiz vrai/faux »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Détective d\'erreurs : second degré',
+          generatorId: 'gen121',
+          description: [
+            'Un élève a résolu une équation ou une inéquation du chapitre, et une ligne de sa copie ' +
+              'est fausse : trouve-la, nomme l\'erreur (−3² dans Δ, b au lieu de −b, division par x, ' +
+              'sens non changé, valeur interdite gardée…), puis donne l\'ensemble-solution correct.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 121. Détective d\'erreurs : second degré »',
+        },
       ],
     },
   ],
