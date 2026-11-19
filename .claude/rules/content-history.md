@@ -4249,3 +4249,17 @@ paths:
   Fichiers : `AppLectureInequationGraphique.tsx`, `core/lectureInequationGraphique.types.ts`,
   `moteur/{modeleLectureInequationGraphique,sessionLectureInequation}.ts`,
   `ui/formatLectureInequationGraphique.ts`, `generateurs/lectureInequationGraphique/`.
+
+- **4e, Chapitre 2 — nouveau générateur gen114 « Signe des racines sans les calculer »** (lot H,
+  processus 2 Appliquer, section `resoudre`, carte après gen113) : variante « signes » — P = c/a, puis
+  Δ si P > 0, puis S = −b/a si Δ > 0, puis le verdict (signes opposés, deux positives, deux négatives,
+  aucune racine ; choix fermé, une tentative) : 2, 3 ou 4 écrans selon le verdict ; variante « racine
+  évidente » — x₁ (a ± b + c = 0), P, x₂ = P/x₁, verdict. Champs libres (fractions, 3 tentatives,
+  saisie illisible non comptée) avec messages ciblés (−c/a, b/a, −4ac mal signé, 1 au lieu de −1).
+  Verdict tiré AVANT les coefficients (1/4 chacun en « signes », 1/3 en « racine évidente » ;
+  collecteur : verdict recontrôlé par les racines exactes, 0 écart sur 1 200 tirages) ; pas de racine
+  évidente dans la variante « signes ». Niveau CONSTANT (2, 8 min) : le nombre d'écrans trahirait le
+  verdict. Profil : `forme` = variante, aucun cas (« signes opposés » est un verdict), pas de `calcul`.
+  Fichiers : `AppSigneRacines.tsx`, `core/signeRacines.types.ts`,
+  `moteur/{modele,session,verification}SigneRacines.ts`, `ui/formatSigneRacines.ts`,
+  `generateurs/signeRacines/`.

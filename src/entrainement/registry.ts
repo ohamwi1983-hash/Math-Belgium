@@ -84,6 +84,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen121: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppDetectiveSecondDegre').then((m) => ({ default: m.AppDetectiveSecondDegre }))),
   gen113: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppMethodeNombreSolutions').then((m) => ({ default: m.AppMethodeNombreSolutions }))),
   gen117: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppLectureInequationGraphique').then((m) => ({ default: m.AppLectureInequationGraphique }))),
+  gen114: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppSigneRacines').then((m) => ({ default: m.AppSigneRacines }))),
 
   // --- 4e, chapitre 3 : Caractéristiques d'une fonction et fonctions de référence ---
   gen10: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppFonctionsReference').then((m) => ({ default: m.AppFonctionsReference }))),

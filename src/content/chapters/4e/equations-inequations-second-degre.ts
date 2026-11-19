@@ -660,6 +660,17 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 113. Méthode et nombre de solutions »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Signe des racines sans les calculer',
+          generatorId: 'gen114',
+          description: [
+            'Sans résoudre l\'équation, décide du signe de ses racines : le produit P = c/a, puis Δ si ' +
+              'P > 0, puis la somme S = −b/a. Variante : une racine évidente, puis l\'autre par le produit.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 114. Signe des racines sans les calculer »',
+        },
       ],
     },
     {
