@@ -1,4 +1,5 @@
 import type { ResultatExerciceQuizEquationsSecondDegre } from "../moteur/typesQuizEquationsSecondDegre";
+import { TexteRiche } from "./TexteRiche";
 
 interface Props {
   resultats: ResultatExerciceQuizEquationsSecondDegre[];
@@ -33,7 +34,9 @@ export function ResumeSessionQuizEquationsSecondDegre({ resultats, onRecommencer
             {resultats.map((resultat, index) => (
               <tr key={index}>
                 <td>{index + 1}</td>
-                <td>{resultat.question.enonce}</td>
+                <td>
+                  <TexteRiche texte={resultat.question.enonce} />
+                </td>
                 <td>{libelleVraiFaux(resultat.reponseChoisie)}</td>
                 <td>{resultat.score === 100 ? "✓" : "✗"}</td>
               </tr>

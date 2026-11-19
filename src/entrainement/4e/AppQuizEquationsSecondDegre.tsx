@@ -11,8 +11,13 @@ import { ResumeSessionQuizEquationsSecondDegre } from "./components/ResumeSessio
 
 /** `nombreExercices` est calculé depuis la taille RÉELLE de la banque du thème choisi
  * (`nombreQuestions`, `generateurs/quizEquationsSecondDegre/index.ts`) — jamais une constante fixe
- * (22 à 35 selon le thème) : couplé à `creerGenerateurSansRepetition`, une session parcourt donc
+ * (22 à 42 selon le thème) : couplé à `creerGenerateurSansRepetition`, une session parcourt donc
  * exactement les questions du thème choisi sans jamais en répéter une. */
+/** Annonce de l'accueil calculée depuis la banque (jamais un compte écrit en dur). */
+const TAILLES = CATALOGUE_VARIANTES.map((v) => nombreQuestions(v.id));
+const TAILLE_MIN = Math.min(...TAILLES);
+const TAILLE_MAX = Math.max(...TAILLES);
+
 function reglagesPourTheme(theme: VarianteQuizEquationsSecondDegre): ReglagesSession {
   return {
     nombreExercices: nombreQuestions(theme),
@@ -84,7 +89,9 @@ export function AppQuizEquationsSecondDegre() {
           {!etat ? (
             <div>
               <h2 className="result-title">Choisis un thème</h2>
-              <p className="result-subtitle">11 thèmes, 22 à 35 affirmations vrai/faux chacun — révision complète du chapitre, discriminant compris.</p>
+              <p className="result-subtitle">
+                {CATALOGUE_VARIANTES.length} thèmes, {TAILLE_MIN} à {TAILLE_MAX} affirmations vrai/faux chacun — révision complète du chapitre, discriminant compris.
+              </p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
                   <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

@@ -1,0 +1,14 @@
+import { Katex } from "./Katex";
+
+interface Props {
+  texte: string;
+}
+
+/** Texte et formules mêlés, écrits en `RichText` (`$…$` = LaTeX en ligne) — même découpage que
+ * `lib/banquesVraiFaux.ts::versFragments` (évaluations papier) et que `TexteRiche5e` (quiz de 5e).
+ * Utilisé par le quiz gen61 (`generateurs/quizEquationsSecondDegre/banque.ts`). Une chaîne sans `$`
+ * s'affiche telle quelle. */
+export function TexteRiche({ texte }: Props) {
+  const morceaux = texte.split(/\$([^$]+)\$/g);
+  return <>{morceaux.map((morceau, i) => (i % 2 === 1 ? <Katex key={i} expression={morceau} /> : morceau === "" ? null : <span key={i}>{morceau}</span>))}</>;
+}

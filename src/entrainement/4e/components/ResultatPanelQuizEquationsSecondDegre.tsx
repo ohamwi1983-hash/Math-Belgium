@@ -1,4 +1,5 @@
 import type { ResultatExerciceQuizEquationsSecondDegre } from "../moteur/typesQuizEquationsSecondDegre";
+import { TexteRiche } from "./TexteRiche";
 
 interface Props {
   resultat: ResultatExerciceQuizEquationsSecondDegre;
@@ -26,7 +27,9 @@ export function ResultatPanelQuizEquationsSecondDegre({ resultat, labelBouton, o
   return (
     <div>
       <h2 className="result-title">{correct ? "Bonne réponse !" : "Mauvaise réponse"}</h2>
-      <p className="result-subtitle">{resultat.question.enonce}</p>
+      <p className="result-subtitle">
+        <TexteRiche texte={resultat.question.enonce} />
+      </p>
       <ul className="score-list">
         <li className="score-item">
           <span>Ta réponse</span>
@@ -41,7 +44,12 @@ export function ResultatPanelQuizEquationsSecondDegre({ resultat, labelBouton, o
           <span className={classeScore(resultat.score)}>{correct ? "Correct" : "Incorrect"}</span>
         </li>
       </ul>
-      <div className="triangle-quelconque-aide">{resultat.question.justification}</div>
+      {/* `<p>` : le bloc d'aide est un conteneur flex, chaque morceau texte/KaTeX y serait une ligne. */}
+      <div className="triangle-quelconque-aide">
+        <p>
+          <TexteRiche texte={resultat.question.justification} />
+        </p>
+      </div>
       <button type="button" className="btn btn-primary" onClick={onContinuer}>
         {labelBouton}
       </button>
