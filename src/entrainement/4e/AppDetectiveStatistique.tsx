@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import type { ExerciceDetectiveStatistique, IdDescriptionStatistique } from "./core/detectiveStatistique.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveStatistique } from "./generateurs/detectiveStatistique";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeDetectiveStatistique } from "./generateurs/detectiveStatistique/corrigeDetaille";
 import { NOMBRE_ECRANS, activerAide, demarrer, ecranSuivant, soumettre, tentativesMaxEcran, type EtatDetectiveStatistique } from "./moteur/sessionDetectiveStatistique";
 import { diagnostiquerCorrection, estResultatCopie, verifierDescription, verifierLigne } from "./moteur/verificationDetectiveStatistique";
 import { descriptionCorrecte, indiceLigneFausse, nombreLignes } from "./moteur/modeleDetectiveStatistique";
@@ -140,6 +143,7 @@ export function AppDetectiveStatistique() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveStatistique(e), lettreEtape(ecran))} />,
       }
     : null;
 

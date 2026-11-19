@@ -108,7 +108,7 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   (`niveauHtml`, `.niveau .num/.pal`) en tête de chaque exercice de la feuille et de sa version
   aménagée ; légende en tête de la feuille « Niveau 1 à 7 : Base 1–2 · Intermédiaire 3–4 · Avancé
   5–7. Il monte avec… ». Rien sur la copie d'évaluation ni en Word (les étoiles n'y étaient pas).
-- **Chapitres notés** : 6e ch. 5, 6e ch. 4, 4e ch. 3, 6e ch. 3, 5e ch. 3 (ni `difficulte` ni
+- **Chapitres notés** : 6e ch. 5, 6e ch. 4, 4e ch. 3, 6e ch. 3, 5e ch. 3, 4e ch. 4 (ni `difficulte` ni
   `dureeMinutes` : `criteresDifficulte` seul). **Conversion PROVISOIRE** pour les autres adaptateurs
   (non encore notés) : leurs étoiles → niveau ★ 2, ★★ 3, ★★★ 5 (palier conservé), durée = leur
   constante `dureeMinutes` ; sans étoiles → rien d'affiché. Vrai/faux : niveau 2 (Base), provisoire.
@@ -355,8 +355,9 @@ codes, aménagée si cochée) intitulée « Remédiation — <titre sans « Éva
 Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feuilles d'exercices et des
 évaluations ne saute plus d'étape. **Chapitres migrés** : 6e ch. 5 (pilote, 6gen34–42, 6gen93–99) ;
 4e ch. 3 (gen10–13, gen68–72 — voir « Lectures graphiques et décisions » plus bas) ; 6e ch. 4
-(6gen23–29, 6gen77–84) ; 5e ch. 3 (5gen14–19, 5gen44–49) ; 6e ch. 3 (6gen13–22, 6gen85–92). Les autres adaptateurs s'affichent comme avant (contrat rétrocompatible).
+(6gen23–29, 6gen77–84) ; 5e ch. 3 (5gen14–19, 5gen44–49) ; 6e ch. 3 (6gen13–22, 6gen85–92) ; 4e ch. 4 (gen30–38, gen108–112). Les autres adaptateurs s'affichent comme avant (contrat rétrocompatible).
 - 4e ch. 4, moitié 1 (gen30–36, notés : `criteresDifficulte`) : briques `4e/ui/corrigeStatistique1.ts` (`COURS_*` § 1–7, `lignesSomme` / `lignesSommeProduits` — membre de droite ≤ 26 caractères visibles, sinon paquets « a+b+c=P » de gauche ≤ 18 : la colonne du milieu ne fait que ≈ 230 px à 680 px —, `couperSiLongue`, `ligneSeuil`, `ligneFrequence` « ×100 % = 20 % », `formulesInsecables` : formules des lignes de texte groupées `{…}`, sinon « h₁ = 32 % » se coupait après « = » en fin de ligne) ; une lettre par ÉCRAN (gen33 : 4 / 5 étapes, Q₁ et Q₃ séparés ; gen35 : 11 / 13 étapes, `etapesParQuestion` groupe les écrans par vraie question, ordre « classes » des questions = ordre des écrans) ; constructeurs d'étapes de gen32/33/34/36 réutilisés par gen35 sur l'exercice « mappé » ; figure de la boîte sortie dans `boiteMoustaches/figure.ts` (sans `docx`) ; lectures (min/max/mode, sommets du polygone, boîte tracée) comptées comme écrans de lecture.
+- 4e ch. 4, gen37/38/108–112 : briques `4e/ui/corrigeStatistique2.ts` (`COURS_*` § 1–8, `lignesSomme` — membre de droite ≤ 26 caractères visibles, sinon paquets `S_1`, `S_2`… puis leur somme —, `formulesInsecables` pour les formules d'un Résultat / Ce qu'on utilise rédigé) ; arrondi orienté écrit avec une relation VRAIE (« ≈ 1,3571 ≥ 1,35 » par défaut, « ≤ 1,30 » par excès, borne « = 44,8 ≥ 44 ») ; gen38 : figure `4e/ui/figureComparaisonSeries.ts` (seuils n/4, n/2, 3n/4 et quartiles lus marqués) ; gen112 : la correction reprend la copie bloc par bloc (« Ligne k »). Niveaux notés (`criteresDifficulte`) ; lectures : gen38 récapitulatif et seuil simple, gen111 bâtons a et trompeur b, gen108 d.
 - 6e ch. 4, 6gen23–29 : briques `6e-6h/ui6e/corrigeIntegrales1.ts` — substitution `substituer`,
   `[F]ₐᵇ` en `\Big[…\Big]` puis F(b) − F(a) substitué (`lignesCrochet`, `lignesIntegralePoly` ;
   quand cette ligne dépasserait ≈ 48 caractères visibles, F(b) et F(a) sont calculés chacun sur leur

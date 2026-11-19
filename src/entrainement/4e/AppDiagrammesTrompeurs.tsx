@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import type { ExerciceCirculaire, ExerciceDiagrammesTrompeurs, ExerciceTrompeurBarres, ExerciceTrompeurCirculaire, Manipulation } from "./core/diagrammesTrompeurs.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDiagrammesTrompeurs } from "./generateurs/diagrammesTrompeurs";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeDiagrammesTrompeurs } from "./generateurs/diagrammesTrompeurs/corrigeDetaille";
 import { activerAide, demarrer, ecranSuivant, nombreEcrans, soumettre, tentativesMaxEcran, type EtatDiagrammesTrompeurs } from "./moteur/sessionDiagrammesTrompeurs";
 import { statutChamp } from "./moteur/verificationDiagrammesTrompeurs";
 import type { StatutVerification } from "./moteur/statutVerification";
@@ -171,6 +174,7 @@ export function AppDiagrammesTrompeurs() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDiagrammesTrompeurs(e), lettreEtape(ecran))} />,
       }
     : null;
 

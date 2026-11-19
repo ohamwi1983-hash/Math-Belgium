@@ -2,10 +2,10 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   CritereBareme,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -16,20 +16,19 @@ import { angleSecteur, evolutionAffichee, evolutionReelle, pourcentageGroupe, po
 import { figureBarresSvg, figureBatonsSvg, figureCirculaireSvg, figurePictogrammesSvg, figureTotalFauxSvg } from "../../ui/figureDiagrammesTrompeurs";
 import {
   NOMS_MANIPULATIONS,
-  calculChamp,
   consigneGenerale,
   ecransExercice,
   enonceExercice,
-  explicationManipulation,
-  piege,
   questionEvolution,
   questionGroupe,
   questionReponses,
-  type EcranChamps,
+
 } from "../../ui/formatDiagrammesTrompeurs";
 import { nombreAffiche as nb } from "../../ui/formatNombreDiagrammes";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDiagrammesTrompeurs } from "./index";
 import { profilDiagrammesTrompeurs } from "./profil";
+import { correctionDetailleeDiagrammesTrompeurs } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen111 (« Diagrammes et graphiques trompeurs »).
@@ -156,40 +155,15 @@ function reponseBreve(e: ExerciceDiagrammesTrompeurs): FragmentConsigne[] {
   }
 }
 
-/** Méthode d'un écran à champs : la première aide (phrase + formule), la même qu'à l'écran. */
-function methode(ec: EcranChamps): FragmentConsigne[] {
-  return ec.aides[0]!;
-}
-
-function correctionDetaillee(e: ExerciceDiagrammesTrompeurs): EtapeCorrection[] {
-  const etapes: EtapeCorrection[] = [];
-  ecransExercice(e).forEach((ec, k) => {
-    const lettre = LETTRES[k]!;
-    if (ec.genre === "choix") {
-      etapes.push({ label: "Constat", sousQuestion: lettre, fragments: explicationManipulation(e as ExerciceTrompeurBarres | ExerciceTrompeurCirculaire) });
-      etapes.push({ label: "Conclusion", sousQuestion: lettre, fragments: [texte(`La manipulation : ${NOMS_MANIPULATIONS[ec.attendue]}.`)] });
-      return;
-    }
-    if (e.sousType === "batons" && k === 0) {
-      etapes.push({ label: "Lecture", sousQuestion: lettre, fragments: [texte(`Effectifs lus : ${e.valeurs.map((v) => `${nb(v.x)} → ${v.effectif}`).join(" ; ")}.`)], figureHtml: figureBatonsSvg(e, "corrige") });
-      return;
-    }
-    const lecture = estTrompeur(e) && k === 1 && e.sousType !== "total-faux";
-    if (!lecture && ec.champs.length > 0 && !(e.sousType === "batons" && k === 1)) etapes.push({ label: "Méthode", sousQuestion: lettre, fragments: methode(ec) });
-    ec.champs.forEach((_, i) => {
-      etapes.push({ label: lecture ? "Lecture" : "Calcul", sousQuestion: lettre, fragments: calculChamp(e, k, i) });
-    });
-  });
-  if (e.sousType === "direct") {
-    etapes.push({
-      label: "Construction",
-      sousQuestion: "b",
-      fragments: [texte("Au rapporteur, un secteur par catégorie, d'angle calculé ci-dessus ; on vérifie que les angles totalisent 360°.")],
-      figureHtml: figureCirculaireSvg(e as ExerciceCirculaire, "corrige"),
-    });
-  }
-  etapes.push({ label: "Piège", sousQuestion: LETTRES[ecransExercice(e).length - 1], fragments: piege(e) });
-  return etapes;
+/** Niveau (grille commune) : écrans de pure lecture (effectifs lus sur les bâtons, vraies valeurs lues
+ * sur l'axe) ; méthode imposée (fréquences et angles d'un tableau, total, pourcentage d'un groupe) ou
+ * à choisir (sens inverse, part effacée, repérer la manipulation) ; piège dans les données : seuil
+ * inclus ou exclu (bâtons), graphique trompeur. */
+function criteresDifficulte(e: ExerciceDiagrammesTrompeurs): CriteresDifficulte {
+  const lecture = e.sousType === "batons" ? ["a"] : e.variante === "trompeur" && e.sousType !== "total-faux" ? ["b"] : [];
+  const methode = e.sousType === "direct" || e.sousType === "batons" ? 0 : 1;
+  const piege = e.sousType === "batons" || e.variante === "trompeur" ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeDiagrammesTrompeurs(e), lecture), methode, piege };
 }
 
 function construireCorrection(e: ExerciceDiagrammesTrompeurs): BlocCorrection[] {
@@ -238,11 +212,6 @@ function bareme(e: ExerciceDiagrammesTrompeurs): BaremeExercice {
   };
 }
 
-function difficulte(e: ExerciceDiagrammesTrompeurs): 1 | 2 | 3 {
-  if (e.variante === "trompeur") return 3;
-  return e.sousType === "circulaire" ? 1 : 2;
-}
-
 export const adaptateurEvaluationDiagrammesTrompeurs: AdaptateurFeuilleExercices<ExerciceDiagrammesTrompeurs> = {
   profilInstance: profilDiagrammesTrompeurs,
   titreDocument: "Diagrammes et graphiques trompeurs — Évaluation",
@@ -252,10 +221,9 @@ export const adaptateurEvaluationDiagrammesTrompeurs: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeDiagrammesTrompeurs,
   bareme,
   enoncePapier,
-  dureeMinutes: 7,
 };

@@ -1,4 +1,4 @@
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, ErreurFrequente, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, ErreurFrequente, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { ExerciceValeurManquante } from "../../core/valeurManquante.types";
 import {
@@ -6,16 +6,15 @@ import {
   conclusions,
   ecrans,
   inconnue,
-  justificationEquation,
   nombreLatex,
-  piegeCorrige,
   recit,
-  resolutionLatex,
   solution,
   tableauHtml,
 } from "../../ui/formatValeurManquante";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceValeurManquante } from "./index";
 import { profilValeurManquante } from "./profil";
+import { correctionDetailleeValeurManquante } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen109. Énoncé papier = récit, tableau éventuel
@@ -65,19 +64,6 @@ function enoncePapier(e: ExerciceValeurManquante): EnoncePapier {
     section: { enteteFragments: [texte(CONSIGNE_PAPIER)], enteteHtml: donneesHtml(e), questions: [] },
     reponseBreve: reponseBreve(e),
   };
-}
-
-function sousQuestionPiege(e: ExerciceValeurManquante): string {
-  return e.variante === "valeur-pour-mediane" ? "c" : "a";
-}
-
-function correctionDetaillee(e: ExerciceValeurManquante): EtapeCorrection[] {
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: justificationEquation(e) },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(resolutionLatex(e))] },
-    { label: "Conclusion", sousQuestion: "c", fragments: conclusions(e)[0]! },
-    { label: "Piège", sousQuestion: sousQuestionPiege(e), fragments: piegeCorrige(e) },
-  ];
 }
 
 function construireCorrection(e: ExerciceValeurManquante): BlocCorrection[] {
@@ -139,10 +125,14 @@ function bareme(e: ExerciceValeurManquante): BaremeExercice {
   };
 }
 
-function difficulte(e: ExerciceValeurManquante): 1 | 2 | 3 {
-  if (e.variante === "valeur-pour-mediane") return 3;
-  if (e.variante === "moyenne-groupes" && e.forme === "globale") return 1;
-  return 2;
+/** Niveau (grille commune) : trois écrans qui transforment ; méthode : formule de la moyenne à
+ * appliquer (notes, moyenne globale) ou modèle à construire (effectif inconnu, seuil de la médiane,
+ * moyenne d'un groupe) ; piège dans les données : note impossible (> 20), ou seuil seulement atteint
+ * (médiane « bas » : k₀ + 1). */
+function criteresDifficulte(e: ExerciceValeurManquante): CriteresDifficulte {
+  const formule = e.variante === "note-a-obtenir" || (e.variante === "moyenne-groupes" && e.forme === "globale");
+  const piege = (e.variante === "note-a-obtenir" && !e.possible) || (e.variante === "valeur-pour-mediane" && e.forme === "bas") ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeValeurManquante(e)), methode: formule ? 1 : 2, piege };
 }
 
 export const adaptateurEvaluationValeurManquante: AdaptateurFeuilleExercices<ExerciceValeurManquante> = {
@@ -154,10 +144,9 @@ export const adaptateurEvaluationValeurManquante: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeValeurManquante,
   bareme,
   enoncePapier,
-  dureeMinutes: 6,
 };

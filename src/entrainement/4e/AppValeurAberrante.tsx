@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import type { ExerciceValeurAberrante } from "./core/valeurAberrante.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceValeurAberrante } from "./generateurs/valeurAberrante";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeValeurAberrante } from "./generateurs/valeurAberrante/corrigeDetaille";
 import { activerAide, demarrer, ecranSuivant, soumettre, tentativesMaxEcran, type EtatValeurAberrante } from "./moteur/sessionValeurAberrante";
 import { diagnostiquerChamps, type StatutChamp } from "./moteur/verificationTransformationDonnees";
 import {
@@ -125,6 +128,7 @@ export function AppValeurAberrante() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeValeurAberrante(e), lettreEtape(ecran))} />,
       }
     : null;
 

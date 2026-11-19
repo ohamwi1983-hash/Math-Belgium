@@ -9,7 +9,7 @@ import type {
   ExerciceBienaymeTchebychevNombreVersXBar,
   ExerciceBienaymeTchebychevPourcentVersIntervalle,
 } from "../../core/bienaymeTchebychev.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EnoncePapier, ErreurFrequente, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, CriteresDifficulte, EnoncePapier, ErreurFrequente, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
@@ -46,6 +46,8 @@ import {
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBienaymeTchebychev } from "./index";
 import { avecVirgulesBelges, segmentEnVirgules } from "../../ui/nombreFr";
 import { profilBienaymeTchebychev } from "../profilsEvaluationStatistique";
+import { correctionDetailleeBienaymeTchebychev, etapesBienaymeTchebychev, type EtapeBT } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceBienaymeTchebychev>` pour gen37 (Inégalité de
@@ -146,29 +148,6 @@ function construireEnonceBienaymeTchebychev(instance: ExerciceBienaymeTchebychev
     enteteFragments: versFragments(formatEnonceSegments(instance)),
     questions: etapesBienaymeTchebychev(instance).map((etape) => ({ consigne: [texte(CONSIGNE_ETAPE[etape](instance))] })),
   };
-}
-
-type EtapeBT = "kIntervalle" | "kPourcent" | "pourcentFinal" | "nombreFinal" | "pourcentDepuisNombre" | "intervalleFinal" | "sigma" | "xBar";
-
-function etapesBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): EtapeBT[] {
-  switch (instance.variante) {
-    case "intervalleVersPourcent":
-      return ["kIntervalle", "pourcentFinal"];
-    case "pourcentVersIntervalle":
-      return ["kPourcent", "intervalleFinal"];
-    case "intervalleVersNombre":
-      return ["kIntervalle", "pourcentFinal", "nombreFinal"];
-    case "nombreVersIntervalle":
-      return ["pourcentDepuisNombre", "kPourcent", "intervalleFinal"];
-    case "intervalleVersSigma":
-      return ["kPourcent", "sigma"];
-    case "intervalleVersXBar":
-      return ["xBar"];
-    case "nombreVersSigma":
-      return ["pourcentDepuisNombre", "kPourcent", "sigma"];
-    case "nombreVersXBar":
-      return ["xBar"];
-  }
 }
 
 const CONSIGNE_ETAPE: Record<EtapeBT, (instance: ExerciceBienaymeTchebychev) => string> = {
@@ -401,11 +380,6 @@ function enoncePapierBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): E
   };
 }
 
-function difficulteBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): 1 | 2 | 3 {
-  const nombre = etapesBienaymeTchebychev(instance).length;
-  return nombre === 1 ? 1 : nombre === 2 ? 2 : 3;
-}
-
 function reponseBreveBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): FragmentConsigne[] {
   switch (instance.variante) {
     case "intervalleVersPourcent":
@@ -424,48 +398,12 @@ function reponseBreveBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): F
   }
 }
 
-function fragmentsEtape(instance: ExerciceBienaymeTchebychev, etape: EtapeBT): FragmentConsigne[] {
-  switch (etape) {
-    case "kIntervalle":
-      return etapeKDepuisIntervalle(instance as ExerciceBienaymeTchebychevIntervalleVersPourcent | ExerciceBienaymeTchebychevIntervalleVersNombre);
-    case "kPourcent": {
-      const avecK = instance as ExerciceBienaymeTchebychevAvecK & { pourcentDonne?: number; pourcentAttendu0?: number };
-      return etapeKDepuisPourcent(avecK, (avecK.pourcentDonne ?? avecK.pourcentAttendu0) as number);
-    }
-    case "pourcentFinal":
-      return etapePourcentFinal(
-        instance as ExerciceBienaymeTchebychevIntervalleVersPourcent | ExerciceBienaymeTchebychevIntervalleVersNombre,
-        instance.variante === "intervalleVersNombre" ? "intervalleVersNombre" : "intervalleVersPourcent",
-      );
-    case "nombreFinal":
-      return etapeNombreFinal(instance as ExerciceBienaymeTchebychevIntervalleVersNombre);
-    case "pourcentDepuisNombre":
-      return etapePourcentDepuisNombre(instance as ExerciceBienaymeTchebychevNombreVersIntervalle | ExerciceBienaymeTchebychevNombreVersSigma);
-    case "intervalleFinal":
-      return etapeIntervalleFinal(instance as ExerciceBienaymeTchebychevPourcentVersIntervalle | ExerciceBienaymeTchebychevNombreVersIntervalle);
-    case "sigma":
-      return etapeSigma(instance as ExerciceBienaymeTchebychevIntervalleVersSigma | ExerciceBienaymeTchebychevNombreVersSigma);
-    case "xBar":
-      return etapeXBar(instance as ExerciceBienaymeTchebychevIntervalleVersXBar | ExerciceBienaymeTchebychevNombreVersXBar);
-  }
-}
-
-const PIEGE_ETAPE: Partial<Record<EtapeBT, string>> = {
-  kIntervalle: "k se calcule avec la DEMI-largeur de l'intervalle (distance de x̄ à une borne), pas avec sa largeur totale.",
-  pourcentFinal: "La proportion garantie est 1 − 1/k², pas 1 − 1/k ; un minimum garanti s'arrondit vers le BAS.",
-  intervalleFinal: "Pour garantir le pourcentage, l'intervalle s'arrondit vers l'EXTÉRIEUR (borne inférieure vers le bas, supérieure vers le haut).",
-  nombreFinal: "Un nombre d'individus est entier : « au moins 18,75 » veut dire « au moins 19 » — on arrondit vers le haut, pas vers le bas.",
-};
-
-function correctionDetailleeBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): EtapeCorrection[] {
-  const etapes = etapesBienaymeTchebychev(instance);
-  const lignes: EtapeCorrection[] = [{ label: "Rappel", sousQuestion: "a", fragments: introFragments() }];
-  etapes.forEach((etape, i) => {
-    lignes.push({ label: etape === "xBar" ? "Méthode" : "Calcul", sousQuestion: LETTRES[i], fragments: fragmentsEtape(instance, etape) });
-    const piege = PIEGE_ETAPE[etape];
-    if (piege) lignes.push({ label: "Piège", sousQuestion: LETTRES[i], fragments: [texte(piege)] });
-  });
-  return lignes.map((l) => ({ ...l, fragments: enVirgules(l.fragments) }));
+/** Niveau (grille commune) : aucun écran de lecture ; méthode imposée (formule directe) pour
+ * intervalle → % ou nombre, choisie dans le cours (formule réciproque, centre de l'intervalle) pour
+ * les autres variantes ; aucun piège dans les données. */
+function criteresDifficulte(instance: ExerciceBienaymeTchebychev): CriteresDifficulte {
+  const directe = instance.variante === "intervalleVersPourcent" || instance.variante === "intervalleVersNombre";
+  return { ...etapesDuCorrige(correctionDetailleeBienaymeTchebychev(instance)), methode: directe ? 0 : 1, piege: 0 };
 }
 
 const LIBELLE_CRITERE: Record<EtapeBT, string> = {
@@ -523,12 +461,11 @@ const adaptateurEvaluationBienaymeTchebychevBrut: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceBienaymeTchebychev,
   construireCorrection: construireCorrectionBienaymeTchebychev,
-  difficulte: difficulteBienaymeTchebychev,
+  criteresDifficulte,
   reponseBreve: (instance) => enVirgules(reponseBreveBienaymeTchebychev(instance)),
-  correctionDetaillee: correctionDetailleeBienaymeTchebychev,
+  correctionDetaillee: (instance) => correctionDetailleeBienaymeTchebychev(instance).map((l) => ({ ...l, fragments: enVirgules(l.fragments) })),
   bareme: baremeBienaymeTchebychev,
   enoncePapier: enoncePapierBienaymeTchebychev,
-  dureeMinutes: 5,
   // 8 variantes structurellement différentes (donnée/inconnue échangées), consigne dépendante de
   // l'instance à chaque fois qu'une étape "sans aide" doit être réexpliquée — jamais une consigne
   // générique : voir le commentaire de tête.

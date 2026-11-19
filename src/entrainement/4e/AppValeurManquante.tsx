@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import type { ExerciceValeurManquante } from "./core/valeurManquante.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceValeurManquante } from "./generateurs/valeurManquante";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeValeurManquante } from "./generateurs/valeurManquante/corrigeDetaille";
 import { activerAide, demarrer, ecranSuivant, soumettre, tentativesMaxEcran, type EtatValeurManquante } from "./moteur/sessionValeurManquante";
 import { diagnostiquerChamps, type StatutChamp } from "./moteur/verificationTransformationDonnees";
 import { CONSIGNE_GENERALE, NOMBRE_ECRANS, TITRES_ECRANS, ecrans, recit, type Ecran } from "./ui/formatValeurManquante";
@@ -114,6 +117,7 @@ export function AppValeurManquante() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeValeurManquante(e), lettreEtape(ecran))} />,
       }
     : null;
 

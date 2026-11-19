@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { ExerciceEffectif, ExerciceGroupes, ExerciceMediane, ExerciceNote, ExerciceValeurManquante } from "../core/valeurManquante.types";
 import { contexteGroupes, contexteNoteAvecCoef, contexteNoteSansCoef, contexteTableau, PRENOMS, type ContexteGroupes, type ContexteTableau } from "../moteur/contextesValeurManquante";
 import { nombreTexteFr } from "../moteur/contextesTransformationDonnees";

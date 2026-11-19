@@ -2,24 +2,21 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDetectiveStatistique } from "../../core/detectiveStatistique.types";
-import { descriptionCorrecte, indiceLigneFausse, resolutionCorrecte } from "../../moteur/modeleDetectiveStatistique";
+import { indiceLigneFausse } from "../../moteur/modeleDetectiveStatistique";
 import {
   CONSIGNE_GENERALE,
   consignesEcrans,
-  constat,
-  descriptionFragments,
   lignesCopie,
   nomErreur,
-  piege,
   recitApres,
   recitAvant,
   reponseFragments,
@@ -29,6 +26,8 @@ import {
 import { tableauHtml } from "../../ui/formatValeurManquante";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveStatistique } from "./index";
 import { profilDetectiveStatistique } from "./profil";
+import { correctionDetailleeDetectiveStatistique } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen112 « Détective d'erreurs : statistique ».
@@ -85,37 +84,11 @@ function reponseBreve(e: ExerciceDetectiveStatistique): FragmentConsigne[] {
   return souderPonctuation([texte(`Ligne ${indiceLigneFausse(e) + 1} fausse (${nomErreur(e)}). `), ...reponseFragments(e)]);
 }
 
-/** « Moyenne : … » → « moyenne : … » après « Ligne n corrigée : ». */
-function enMinuscule(ligne: FragmentConsigne[]): FragmentConsigne[] {
-  return ligne.map((f, j) => (j === 0 && f.type === "texte" && /^[A-ZÉ][a-zé]/.test(f.valeur) ? { ...f, valeur: f.valeur[0]!.toLowerCase() + f.valeur.slice(1) } : f));
-}
-
-function correctionDetaillee(e: ExerciceDetectiveStatistique): EtapeCorrection[] {
-  const i = indiceLigneFausse(e);
-  const etapes: EtapeCorrection[] = [
-    { label: "Contrôle", sousQuestion: "a", fragments: constat(e) },
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte(`La ligne ${i + 1} est fausse.`)] },
-    { label: "Erreur", sousQuestion: "b", fragments: descriptionFragments(descriptionCorrecte(e), e) },
-  ];
-  const lignes = resolutionCorrecte(e).map(souderPonctuation);
-  /** Une dernière ligne « Conclusion : … » (dispersion, groupes) devient la ligne « Conclusion »
-   * du corrigé, sans son préfixe ; sinon la conclusion est la réponse rédigée. */
-  const derniere = lignes[lignes.length - 1]![0];
-  let conclusion = reponseFragments(e);
-  if (derniere?.type === "texte" && derniere.valeur.startsWith("Conclusion : ")) {
-    const reste = derniere.valeur.slice("Conclusion : ".length);
-    conclusion = [texte(reste[0]!.toUpperCase() + reste.slice(1)), ...lignes.pop()!.slice(1)];
-  }
-  lignes.slice(i).forEach((ligne, k) => {
-    etapes.push({
-      label: k === 0 ? "Correction" : "Calcul",
-      sousQuestion: "c",
-      fragments: souderPonctuation(k === 0 ? [texte(`Ligne ${i + 1} corrigée : `), ...enMinuscule(ligne)] : ligne),
-    });
-  });
-  etapes.push({ label: "Conclusion", sousQuestion: "c", fragments: conclusion });
-  etapes.push({ label: "Piège", sousQuestion: "b", fragments: piege(e) });
-  return etapes;
+/** Niveau (grille commune) : trois écrans qui transforment (la ligne et l'erreur se trouvent en
+ * refaisant le calcul) ; méthode : retrouver la règle du cours qui n'a pas été suivie (1) ; aucun
+ * piège dans les données (l'erreur est la question). */
+function criteresDifficulte(e: ExerciceDetectiveStatistique): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeDetectiveStatistique(e)), methode: 1, piege: 0 };
 }
 
 function construireCorrection(e: ExerciceDetectiveStatistique): BlocCorrection[] {
@@ -146,11 +119,6 @@ function bareme(e: ExerciceDetectiveStatistique): BaremeExercice {
   };
 }
 
-/** Difficulté selon le support (jamais selon le type d'erreur, qui est le verdict). */
-function difficulte(e: ExerciceDetectiveStatistique): 1 | 2 | 3 {
-  return e.variante === "dispersion" || e.variante === "cumules" ? 3 : 2;
-}
-
 export const adaptateurEvaluationDetectiveStatistique: AdaptateurFeuilleExercices<ExerciceDetectiveStatistique> = {
   profilInstance: profilDetectiveStatistique,
   titreDocument: "Détective d'erreurs : statistique — Évaluation",
@@ -161,10 +129,9 @@ export const adaptateurEvaluationDetectiveStatistique: AdaptateurFeuilleExercice
   calculatriceIndispensable: ["dispersion"],
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeDetectiveStatistique,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };
