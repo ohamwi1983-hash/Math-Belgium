@@ -1145,6 +1145,17 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             '$\\alpha = \\theta - \\theta_0$ (ou $\\theta_0 - \\theta$), avant de la convertir en durée.',
         },
         {
+          kind: 'atelier',
+          tag: 'roue-hauteur-widget',
+          label: 'Manipule toi-même : roue et hauteur',
+          caption:
+            'Choisis le départ et le sens de rotation, puis fais tourner le point P d\'un angle α : ' +
+            'sa position θ = θ₀ ± α et sa hauteur h + r sin θ se calculent en direct. Règle la hauteur ' +
+            'visée H : la droite verte montre les 0, 1 ou 2 positions où le point passe à cette hauteur, ' +
+            'et les angles parcourus pour y arriver. Le réglage de départ est celui de la grande roue ' +
+            'ci-dessus (r = 10 m, h = 12 m, départ en bas, α = 120°).',
+        },
+        {
           kind: 'entrainement',
           title: 'Le cercle dans le réel : rotations en contexte',
           generatorId: 'gen79',

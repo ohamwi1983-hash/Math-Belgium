@@ -94,6 +94,7 @@ export type InteractiveWidgetTag =
   | 'valeurs-remarquables-widget'
   | 'triangle-deformable-widget'
   | 'triangulation-widget'
+  | 'roue-hauteur-widget'
   | 'quelle-loi-widget'
   | 'optimisation-enclos-widget'
   | 'trois-formes-widget'

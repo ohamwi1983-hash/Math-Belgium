@@ -94,6 +94,7 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'valeurs-remarquables-widget': () => import('../../interactive/register-valeurs-remarquables-widget.js'),
   'triangle-deformable-widget': () => import('../../interactive/register-triangle-deformable-widget.js'),
   'triangulation-widget': () => import('../../interactive/register-triangulation-widget.js'),
+  'roue-hauteur-widget': () => import('../../interactive/register-roue-hauteur-widget.js'),
   'quelle-loi-widget': () => import('../../interactive/register-quelle-loi-widget.js'),
   'optimisation-enclos-widget': () => import('../../interactive/register-optimisation-enclos-widget.js'),
   'trois-formes-widget': () => import('../../interactive/register-trois-formes-widget.js'),
