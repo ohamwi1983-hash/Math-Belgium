@@ -2,18 +2,13 @@ import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import { latex, texte } from "../../export/corrigeTableau";
 import type { ExerciceAireTriangleSinus, NombreRadical } from "../core/aireTriangleSinus.types";
 import {
-  aireABC,
-  aireACD,
   aireExacte,
   anglesAttendus,
   calculExact,
-  coteAttendu,
   demiPerimetre,
   diagonale,
-  diagonaleCarree,
   etapes,
   nomsAngleCompris,
-  produitHeron,
   sinDeg,
   sinusAttendu,
   sinusExact,
@@ -54,8 +49,11 @@ function estEntier(v: number): boolean {
 }
 
 /** « = 8 » si la valeur est entière, sinon « ≈ 7,98 ». */
+/** « = » quand la valeur s'écrit exactement avec `decimales` décimales (« sin Ĉ = 0,875 »), sinon
+ * « ≈ » (avant : « ≈ » dès qu'elle n'était pas entière, « sin Ĉ ≈ 0,875 » pour une valeur exacte). */
 export function egalOuEnviron(v: number, decimales = 2): string {
-  return estEntier(v) ? `= ${n(v, 0)}` : `\\approx ${n(v, decimales)}`;
+  if (estEntier(v)) return `= ${n(v, 0)}`;
+  return Math.abs(v * 10 ** decimales - Math.round(v * 10 ** decimales)) < 1e-6 ? `= ${n(v, decimales)}` : `\\approx ${n(v, decimales)}`;
 }
 
 export function radicalLatex(x: NombreRadical): string {
@@ -506,50 +504,4 @@ export function messagePiegeAngles(piege: PiegeAngles): string {
     case "sansDeux":
       return "Revois le sinus : c'est le DOUBLE de l'aire qu'on divise par le produit des deux côtés.";
   }
-}
-
-// ---------------------------------------------------------------------------------------------
-// Corrigé (partagé par l'adaptateur papier)
-// ---------------------------------------------------------------------------------------------
-
-export function latexCalculAire(c1: number, c2: number, angle: number, nom: string, e: ExerciceAireTriangleSinus): string {
-  const v = 0.5 * c1 * c2 * sinDeg(angle);
-  const ex = aireExacte(c1, c2, angle);
-  const fin = ex ? `= ${radicalLatex(ex)}${ex.r === 1 && ex.d === 1 ? "" : ` \\approx ${n(v)}`}` : `\\approx ${n(v)}`;
-  return `${nom} = \\dfrac{1}{2} \\cdot ${c1} \\cdot ${c2} \\cdot \\sin ${angle}^\\circ ${fin}${uniteAire(e)}`;
-}
-
-export function latexCalculCote(e: Extract<ExerciceAireTriangleSinus, { famille: "cote" }>): string {
-  const { seg2 } = noms(e);
-  return `${seg2} = \\dfrac{2 \\cdot ${aireDonneeLatex(e)}}{${e.cote1} \\cdot \\sin ${e.angle}^\\circ} ${egalOuEnviron(coteAttendu(e))}${uniteLongueur(e)}`;
-}
-
-export function latexCalculSinus(e: FamilleAngle): string {
-  const { X } = noms(e);
-  const s = sinusAttendu(e);
-  const fin = e.aire.exacte ? `= ${radicalLatex(sinusExact(e.angle)!)}` : `\\approx ${n(s, 3)}`;
-  return `\\sin ${chapeau(X)} = \\dfrac{2 \\cdot ${aireDonneeLatex(e)}}{${e.cote1} \\cdot ${e.cote2}} ${fin}`;
-}
-
-export function latexDiagonale(q: Quadri): string {
-  const terme = q.angleB === 90 ? "" : ` - 2 \\cdot ${q.AB} \\cdot ${q.BC} \\cdot \\cos ${q.angleB}^\\circ`;
-  return `AC^2 = ${q.AB}^2 + ${q.BC}^2${terme} ${egalOuEnviron(diagonaleCarree(q))} \\quad\\Rightarrow\\quad AC ${egalOuEnviron(diagonale(q))}${uniteLongueur(q)}`;
-}
-
-export function latexAireACD(q: Quadri): string {
-  return `${AIRE}_{ACD} = \\dfrac{1}{2} \\cdot AC \\cdot ${q.CD} \\cdot \\sin ${q.angleACD}^\\circ \\approx ${n(aireACD(q))}${uniteAire(q)}`;
-}
-
-export function latexAireTotale(q: Quadri): string {
-  return `${AIRE}_{ABCD} = ${AIRE}_{ABC} + ${AIRE}_{ACD} \\approx ${n(aireABC(q))} + ${n(aireACD(q))} \\approx ${n(aireABC(q) + aireACD(q))}${uniteAire(q)}`;
-}
-
-export function latexDemiPerimetre(h: Heron): string {
-  return `p = \\dfrac{${h.a} + ${h.b} + ${h.c}}{2} = ${n(demiPerimetre(h), 1)}${uniteLongueur(h)}`;
-}
-
-export function latexHeron(h: Heron): string {
-  const p = n(demiPerimetre(h), 1);
-  const P = produitHeron(h);
-  return `${AIRE} = \\sqrt{${p} \\cdot ${n(demiPerimetre(h) - h.a, 1)} \\cdot ${n(demiPerimetre(h) - h.b, 1)} \\cdot ${n(demiPerimetre(h) - h.c, 1)}} = \\sqrt{${n(P, 4)}} ${egalOuEnviron(Math.sqrt(P))}${uniteAire(h)}`;
 }

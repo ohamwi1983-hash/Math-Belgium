@@ -319,7 +319,7 @@ export function lignesAire(o: { nom?: string; p: string; q: string; X: string; v
     ligne(`${relSubst(...vals)}\\dfrac{1}{2}\\cdot ${tex(o.vp)}\\cdot ${tex(o.vq)}\\cdot\\sin ${tex(o.vX)}`, justifSubst(vals)),
   ];
   if (exacte(o.vp) && exacte(o.vq)) lignes.push(ligne(`${relSubst(o.vX)}${nb((o.vp.v * o.vq.v) / 2)}\\cdot\\sin ${tex(o.vX)}`, "on calcule le demi-produit des côtés"));
-  lignes.push(ligne(`${apres(relApres(vals, o.aire, d), o.aire, d)}${u2(o.unite)}`, "calculatrice en degrés"));
+  lignes.push(ligne(`${apres(relApres(vals, o.aire, d), o.aire, d)}${u2(o.unite)}`, o.vX.v === 90 ? [latex("\\sin 90^\\circ=1")] : "calculatrice en degrés"));
   return lignes;
 }
 

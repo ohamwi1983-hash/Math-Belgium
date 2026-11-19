@@ -2,6 +2,9 @@ import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceAireTriangleSinus } from "./core/aireTriangleSinus.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceAireTriangleSinus } from "./generateurs/aireTriangleSinus";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeAireTriangleSinus } from "./generateurs/aireTriangleSinus/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { activerAide, demarrer, ecranSuivant, estChoixFerme, etapeCourante, soumettre, tentativesMax, type EtatAireTriangleSinus } from "./moteur/sessionAireTriangleSinus";
 import { etapes, type EtapeAireTriangle, type OptionFormule, type OptionNombre } from "./moteur/modeleAireTriangleSinus";
@@ -155,6 +158,7 @@ export function AppAireTriangleSinus() {
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAireTriangleSinus(e), lettreEtape(etat.ecran))} />,
         messageRevele: enAttente.messageRevele,
       }
     : null;

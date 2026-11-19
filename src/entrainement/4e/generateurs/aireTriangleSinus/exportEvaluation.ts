@@ -4,38 +4,26 @@ import type {
   BlocCorrection,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
+  CriteresDifficulte,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { ExerciceAireTriangleSinus } from "../../core/aireTriangleSinus.types";
-import { anglesAttendus, calculExact, etapes, sinusAttendu, sinusExact } from "../../moteur/modeleAireTriangleSinus";
+import { anglesAttendus, calculExact, etapes } from "../../moteur/modeleAireTriangleSinus";
 import {
-  AIRE,
-  chapeau,
   consigneEtape,
   consignePapier,
   donneesFragments,
-  egalOuEnviron,
-  latexAireACD,
-  latexAireTotale,
-  latexCalculAire,
-  latexCalculCote,
-  latexCalculSinus,
-  latexDemiPerimetre,
-  latexDiagonale,
-  latexHeron,
-  latexOptionFormule,
-  n,
   noms,
-  radicalLatex,
   reponseAnglesLatex,
   reponseNumeriqueLatex,
 } from "../../ui/formatAireTriangleSinus";
 import { figureSvgPapier } from "../../ui/figureAireTriangleSinus";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceAireTriangleSinus } from "./index";
 import { LIBELLE_CAS_AIRE_TRIANGLE, profilAireTriangleSinus } from "./profil";
+import { correctionDetailleeAireTriangleSinus } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen75. Énoncé papier = données + figure à
@@ -89,80 +77,8 @@ function reponseBreve(e: E): FragmentConsigne[] {
   }
 }
 
-function lignes(e: E): EtapeCorrection[] {
-  const L = (label: string, sousQuestion: string, fragments: FragmentConsigne[]): EtapeCorrection => ({ label, sousQuestion, fragments });
-  switch (e.famille) {
-    case "aire": {
-      const { X, seg1, seg2 } = noms(e);
-      const ex = sinusExact(e.angle);
-      return [
-        L("Méthode", "a", [texte(`Deux côtés et l'angle ${X} compris entre eux : `), latex(latexOptionFormule(e, "formuleAire", "correcte"))]),
-        L("Calcul", "b", [latex(latexCalculAire(e.cote1, e.cote2, e.angle, AIRE, e))]),
-        ex
-          ? L("Piège", "b", [texte("Valeur remarquable, sans calculatrice : "), latex(`\\sin ${e.angle}^\\circ = ${radicalLatex(ex)}`), texte(`. L'angle doit être celui compris entre ${seg1} et ${seg2}.`)])
-          : L("Piège", "a", [texte(`L'angle doit être celui compris entre ${seg1} et ${seg2} ; calculatrice en mode degrés.`)]),
-      ];
-    }
-    case "cote": {
-      const { X, seg1, seg2 } = noms(e);
-      return [
-        L("Méthode", "a", [texte("Formule de l'aire : "), latex(`${AIRE} = \\dfrac{1}{2} \\cdot ${seg1} \\cdot ${seg2} \\cdot \\sin ${chapeau(X)}`), texte(`, puis on isole ${seg2} : `), latex(latexOptionFormule(e, "formuleCote", "correcte"))]),
-        L("Calcul", "b", [latex(latexCalculCote(e))]),
-        L("Piège", "a", [texte("En isolant, le ½ devient un facteur 2 au numérateur, et le sinus divise.")]),
-      ];
-    }
-    case "angle": {
-      const { X, seg1, seg2 } = noms(e);
-      const x = chapeau(X);
-      const a = anglesAttendus(e);
-      const lignesC: EtapeCorrection[] =
-        a.length === 1
-          ? [L("Conclusion", "c", [latex(`${x} = 90^\\circ`)])]
-          : [
-              L("Calcul", "c", e.aire.exacte ? [texte("Valeur remarquable : "), latex(`${x}_1 = ${n(a[0]!, 1)}^\\circ`)] : [texte("Calculatrice en mode degrés : "), latex(`${x}_1 = \\sin^{-1}(${n(sinusAttendu(e), 3)}) ${egalOuEnviron(a[0]!, 1)}^\\circ`)]),
-              L("Calcul", "c", [latex(`${x}_2 = 180^\\circ - ${x}_1 ${egalOuEnviron(a[1]!, 1)}^\\circ`)]),
-              L("Conclusion", "c", [texte("Deux triangles conviennent : "), latex(reponseAnglesLatex(e)), texte(".")]),
-            ];
-      return [
-        L("Méthode", "a", [texte(`Dans la formule de l'aire, on isole le sinus de l'angle ${X} compris entre ${seg1} et ${seg2} : `), latex(`\\sin ${x} = \\dfrac{2${AIRE}}{${seg1} \\cdot ${seg2}}`)]),
-        L("Calcul", "a", [latex(latexCalculSinus(e))]),
-        a.length === 1
-          ? L("Méthode", "b", [texte("Un sinus égal à 1 ne correspond qu'à l'angle droit : une seule amplitude.")])
-          : L("Méthode", "b", [texte("Deux angles supplémentaires ont le même sinus, "), latex("\\sin(180^\\circ - x) = \\sin x"), texte(" : deux amplitudes conviennent, une aiguë et une obtuse.")]),
-        ...lignesC,
-        L("Piège", "b", [texte("La calculatrice (touche sin⁻¹) ne donne que l'angle aigu : ne pas oublier son supplémentaire.")]),
-      ];
-    }
-    case "quadrilatere":
-      return [
-        L("Méthode", "a", [texte("La diagonale AC découpe ABCD en deux triangles ABC et ACD : on additionne leurs aires.")]),
-        L("Calcul", "a", [latex(latexCalculAire(e.AB, e.BC, e.angleB, `${AIRE}_{ABC}`, e))]),
-        e.angleB === 90
-          ? L("Méthode", "b", [texte("Pour l'aire de ACD, il faut AC. ABC est rectangle en B : Pythagore.")])
-          : L("Méthode", "b", [texte("Pour l'aire de ACD, il faut AC : Al-Kashi dans ABC, "), latex("AC^2 = AB^2 + BC^2 - 2 \\cdot AB \\cdot BC \\cdot \\cos \\widehat{ABC}")]),
-        L("Calcul", "b", [latex(latexDiagonale(e))]),
-        L("Calcul", "c", [texte("Angle ACD compris entre CA et CD : "), latex(latexAireACD(e))]),
-        L("Conclusion", "c", [latex(latexAireTotale(e))]),
-        L("Piège", "b", [texte("Al-Kashi : ne pas oublier le terme en cosinus (négatif si l'angle est obtus) ni la racine carrée ; garder AC en mémoire de la calculatrice.")]),
-      ];
-    case "heron":
-      return [
-        L("Calcul", "a", [latex(latexDemiPerimetre(e))]),
-        L("Méthode", "b", [texte("Formule de Héron : "), latex(`${AIRE} = \\sqrt{p\\,(p-a)(p-b)(p-c)}`)]),
-        L("Calcul", "b", [latex(latexHeron(e))]),
-        L("Piège", "a", [texte("La formule utilise le DEMI-périmètre p, pas le périmètre.")]),
-      ];
-  }
-}
-
-function correctionDetaillee(e: E): EtapeCorrection[] {
-  return lignes(e);
-}
-
 function construireCorrection(e: E): BlocCorrection[] {
-  return lignes(e)
-    .filter((l) => l.label !== "Piège" && l.label !== "Méthode")
-    .map((l) => ({ type: "paragraphe", fragments: [texte(`${l.sousQuestion}) `), ...l.fragments] }));
+  return [{ type: "paragraphe", fragments: reponseBreve(e) }];
 }
 
 function bareme(e: E): BaremeExercice {
@@ -255,10 +171,15 @@ function bareme(e: E): BaremeExercice {
   }
 }
 
-function difficulte(e: E): 1 | 2 | 3 {
-  if (e.famille === "aire") return 1;
-  if (e.famille === "quadrilatere") return 3;
-  return 2;
+/** Niveau : méthode 0 (formule de l'aire imposée par les données ; Héron imposé par la consigne),
+ * 1 pour le quadrilatère (découpage par une diagonale, Pythagore ou Al-Kashi) ; piège seulement
+ * dans les données — famille « angle » (un sinus, deux amplitudes ou une seule : le cas est la
+ * question, toujours présent), angle B OBTUS du quadrilatère (cosinus négatif dans Al-Kashi) ;
+ * nombres : 0 pour les valeurs exactes (angles remarquables, Héron entier), sinon calculatrice.
+ * Aucun écran de lecture (les choix de formule sont des décisions). */
+function criteresDifficulte(e: E): CriteresDifficulte {
+  const piege = e.famille === "angle" || (e.famille === "quadrilatere" && e.angleB > 90) ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeAireTriangleSinus(e)), methode: e.famille === "quadrilatere" ? 1 : 0, piege, nombres: calculExact(e) ? 0 : 1 };
 }
 
 export const adaptateurEvaluationAireTriangleSinus: AdaptateurFeuilleExercices<ExerciceAireTriangleSinus> = {
@@ -272,11 +193,10 @@ export const adaptateurEvaluationAireTriangleSinus: AdaptateurFeuilleExercices<E
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeAireTriangleSinus,
   bareme,
   enoncePapier,
-  dureeMinutes: 6,
 };
 

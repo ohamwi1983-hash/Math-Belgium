@@ -257,8 +257,9 @@ function echapper(v: string): string {
   return v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 }
 
-export function figureSvgPapier(e: ExerciceAireTriangleSinus): string {
-  const f = calculerFigure(e, false);
+/** `deuxSolutions` (corrigé de la famille « angle ») : les deux configurations possibles. */
+export function figureSvgPapier(e: ExerciceAireTriangleSinus, deuxSolutions = false): string {
+  const f = calculerFigure(e, deuxSolutions);
   const trait = "#1f2933";
   const bleu = "#1971c2";
   const orange = "#d9480f";
@@ -274,5 +275,5 @@ export function figureSvgPapier(e: ExerciceAireTriangleSinus): string {
     morceaux.push(`<text x="${l.x.toFixed(1)}" y="${l.y.toFixed(1)}" font-size="${taille}" font-weight="bold" text-anchor="${l.ancre}" dominant-baseline="middle" fill="${couleur}">${echapper(l.texte)}</text>`);
   }
   const svg = `<svg width="${f.largeur}" height="${f.hauteur}" viewBox="0 0 ${f.largeur} ${f.hauteur}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Figure à l'échelle">${morceaux.join("")}</svg>`;
-  return `<div style="text-align:center;margin:0.6em 0;page-break-inside:avoid;break-inside:avoid;">${svg}<div style="font-size:0.85em;color:#57606a;">Figure à l'échelle</div></div>`;
+  return `<div style="text-align:center;margin:0.6em 0;page-break-inside:avoid;break-inside:avoid;">${svg}<div style="font-size:0.85em;color:#57606a;">${echapper(legendeFigure(e, deuxSolutions))}</div></div>`;
 }
