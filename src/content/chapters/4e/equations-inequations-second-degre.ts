@@ -881,6 +881,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 120. Construire une inéquation à partir de sa solution »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Parabole et droite : intersection et position',
+          generatorId: 'gen118',
+          description: [
+            'Trouve les points communs à une parabole et à une droite en ramenant f(x) = g(x) à 0, puis résous f(x) ≥ g(x) (ou ≤, <, >) grâce au signe de f − g.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 118. Parabole et droite : intersection et position »',
+        },
       ],
     },
     {

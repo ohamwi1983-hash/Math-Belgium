@@ -216,7 +216,7 @@ export function ensembleLatex(e: Ensemble): string {
 }
 
 export function symboleLatex(s: Relation): string {
-  return s === "≤" ? "\\leq" : s === "≥" ? "\\geq" : s;
+  return s === "≤" ? "\\leq " : s === "≥" ? "\\geq " : s;
 }
 
 /** Symbole retourné (on multiplie par un négatif ou on échange les membres). */

@@ -30,7 +30,7 @@ export function lignesDelta([a, b, c]: Poly2, nom = "\\Delta"): LigneCalcul[] {
 export function lignesRacines(p: Poly2, v = "x", nomDelta = "\\Delta", symboleDelta = "Δ"): LigneCalcul[] {
   const [a, b, c] = p;
   const delta = b * b - 4 * a * c;
-  if (delta < 0) return [ligne(`\\Delta=${q(delta)}<0`, "aucune racine réelle")];
+  if (delta < 0) return [ligne(`${q(delta)}<0`, "Δ < 0 : aucune racine réelle")];
   if (delta === 0) return [ligne(`${v}=\\dfrac{-b}{2a}`, "Δ = 0 : racine double"), ligne(`=\\dfrac{${q(-b)}}{${q(2 * a)}}`, "on remplace"), ligne(`=${nombreLatex(-b / (2 * a))}`)];
   const s = Math.sqrt(delta);
   const entier = Math.abs(s - Math.round(s)) < 1e-9;

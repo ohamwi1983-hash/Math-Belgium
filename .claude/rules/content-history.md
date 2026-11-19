@@ -4264,3 +4264,20 @@ paths:
   `core/equationParametre.types.ts`, `ui/formatEquationParametre.ts`,
   `ui/figuresTransfertSecondDegre.ts`, `generateurs/equationParametre/` (index, corrigeDetaille,
   profil, exportEvaluation).
+
+- **4e, Chapitre 2** (`equations-inequations-second-degre`), section `signe-trinome` (§ 2) : nouveau
+  générateur **gen118 « Parabole et droite : intersection et position »** (processus 2), carte après
+  gen120. f(x) = ax² + bx + c, g(x) = mx + p (variantes `oblique` et `horizontale` y = k). Le nombre
+  de points communs est un VERDICT tiré avant les nombres (2 : 70 %, 1 — tangente : 15 %, 0 : 15 %),
+  jamais dans le profil ; h = f − g est construit à racines entières (ou A[(x − x₀)² + q]), puis
+  f = g + h : coordonnées entières. Écrans : a) f(x) = g(x) ramené à 0 (toute équation
+  proportionnelle acceptée ; pièges : g ajouté, parenthèse −(mx + p) oubliée) ; b) solutions
+  (« aucune » accepté) ; c) ordonnées des points communs (écran absent s'il n'y en a pas : 3 ou 4
+  écrans) ; d) f(x) ◇ g(x) par le signe de f − g (ensemble construit), puis la figure parabole +
+  droite + points communs (aussi dans le corrigé, `figureHtml`). Corrigé : mise en évidence de x
+  quand h n'a pas de terme constant (raccourci du cours), Δ sinon. Papier : deux vraies questions
+  (points communs ; inéquation), `etapesParQuestion` [a, b, c] / [d] (ou [a, b] / [c]). Profil :
+  `forme` = variante, aucun cas particulier, pas de `calcul`. Niveau 3. Libellé de conception
+  « Parabole et droite : intersection et position (gen118) ». Fichiers : `AppParaboleDroite.tsx`,
+  `core/paraboleDroite.types.ts`, `ui/formatParaboleDroite.ts`, `generateurs/paraboleDroite/`
+  (index, corrigeDetaille, profil, exportEvaluation).
