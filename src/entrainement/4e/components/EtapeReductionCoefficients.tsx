@@ -42,6 +42,8 @@ interface Props {
   /** Bloc "état actuel" (prompt-corrections-moteur-partage.md, point 1) — absent/null par défaut :
    * rien de rendu. */
   etatActuel?: string | null;
+  /** Remplace le libellé « État actuel » (gen5 : « Facteur à étudier »). */
+  etatActuelLabel?: string;
   /**
    * Préfixe LaTeX devant l'expression affichée par défaut (ex. "D(x)"/"N(x)" pour le numérateur/
    * dénominateur d'une fraction rationnelle, gen3) — absent par défaut : bloc rendu nu, comme avant
@@ -109,6 +111,7 @@ export function EtapeReductionCoefficients({
   recapitulatif,
   expressionAfficheeTermes,
   etatActuel,
+  etatActuelLabel,
   variante = "reduction",
   prefixeExpression,
   masquerBlocDonnees = false,
@@ -139,7 +142,7 @@ export function EtapeReductionCoefficients({
             />
           </div>
         ))}
-      {etatActuel !== undefined && <EtatActuelPanel latex={etatActuel} />}
+      {etatActuel !== undefined && <EtatActuelPanel latex={etatActuel} label={etatActuelLabel} />}
       <p className="prompt-text">
         {variante === "miseEnEvidence"
           ? `Mets ce ${nom} en évidence : fais apparaître un facteur commun entier (le plus grand possible) devant une parenthèse à coefficients premiers entre eux.`

@@ -13,6 +13,9 @@ import { formatTermesApercuSolution } from "../ui/apercuIntervalle";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { MESSAGE_BORNE_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { RenduFragments } from "./RenduFragments";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 type Forme = SolutionEnsemble["forme"];
 
@@ -32,6 +35,10 @@ interface Props {
   recapitulatif: EntreeRecapitulatif[];
   aideActivee: boolean;
   onActiverAide: () => void;
+  /** Aide de niveau 1 (KaTeX) : la règle du signe du trinôme ; le niveau 2 colore la parabole. */
+  aideTexte?: FragmentConsigne[];
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse. */
+  messageCible?: (reponse: SolutionEnsemble) => FragmentConsigne[] | null;
   onValider: (reponse: SolutionEnsemble) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -65,10 +72,17 @@ export function EtapeInequation({
   recapitulatif,
   aideActivee,
   onActiverAide,
+  aideTexte,
+  messageCible,
   onValider,
   validation,
 }: Props) {
   const [forme, setForme] = useState<Forme | null>(null);
+  const saisie = useTentativeLisible<SolutionEnsemble>();
+  /** Aide à 2 niveaux : 1 = la règle (texte KaTeX), 2 = la parabole colorée (drapeau du moteur). */
+  const [niveauAide, setNiveauAide] = useState(aideActivee ? 2 : 0);
+  const niveauMax = aideTexte ? 2 : 1;
+  const couleurVisible = aideTexte ? niveauAide >= 2 : aideActivee;
   const [valeurPoint, setValeurPoint] = useState("");
   const [morceau, setMorceau] = useState<EtatMorceau>(etatMorceauInitial());
   const [morceau1, setMorceau1] = useState<EtatMorceau>(etatMorceauInitial());
@@ -103,7 +117,7 @@ export function EtapeInequation({
 
   const reponse = construireReponse();
   const croquisVrai = calculerCroquisVrai(exercice);
-  const croquisColore = aideActivee ? calculerCroquisColore(exercice) : undefined;
+  const croquisColore = couleurVisible ? calculerCroquisColore(exercice) : undefined;
   const termesApercu = formatTermesApercuSolution(forme, valeurPoint, morceau, morceau1, morceau2);
 
   return (
@@ -161,21 +175,37 @@ export function EtapeInequation({
 
       {!validation && (
         <>
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+        {aideTexte && niveauAide >= 1 && (
+          <div className="triangle-quelconque-aide">
+            <p>
+              <RenduFragments fragments={aideTexte} />
+            </p>
+          </div>
+        )}
+        {aideTexte && niveauAide >= 2 && (
+          <div className="triangle-quelconque-aide">
+            <p>La parabole est colorée en vert là où l'inégalité est vraie.</p>
+          </div>
+        )}
+        <BoutonAide
+          niveauAide={aideTexte ? niveauAide : aideActivee ? 1 : 0}
+          niveauAideMax={niveauMax}
+          onActiverAide={() => {
+            if (!aideTexte) return onActiverAide();
+            if (niveauAide + 1 >= 2) onActiverAide();
+            setNiveauAide((n) => Math.min(2, n + 1));
+          }}
+        />
 
         <button
           type="button"
           className="btn btn-primary"
-          disabled={reponse === null}
-          onClick={() => reponse !== null && onValider(reponse)}
+          disabled={forme === null}
+          onClick={() => saisie.tenter(reponse ?? { forme: "vide" }, reponse !== null, onValider)}
         >
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour texteIllisible={MESSAGE_BORNE_ILLISIBLE} illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={saisie.soumise !== null ? messageCible?.(saisie.soumise) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

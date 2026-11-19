@@ -26,7 +26,10 @@ interface Parametres {
  * racine qui coïnciderait avec une CE (p2 ou p4), pour garantir "généralement aucun rejet" à la
  * construction plutôt que par coïncidence.
  */
-function tirerParametres(plage: number): Parametres | null {
+/** `racineEtrangere` : les deux dénominateurs ont la même racine (p4 = p2) — le produit en croix
+ * fait alors apparaître x = p2, valeur interdite, à rejeter (audit G12 : le rejet n'est plus fixé par
+ * la variante) ; le dénominateur commun donne directement une équation du 1er degré. */
+function tirerParametres(plage: number, racineEtrangere = false): Parametres | null {
   const k1 = randomNonZeroInt(-4, 4);
   const k2 = randomNonZeroInt(-4, 4);
   const k3 = randomNonZeroInt(-4, 4);
@@ -37,8 +40,11 @@ function tirerParametres(plage: number): Parametres | null {
   while (p4 === p3) p4 = randomInt(-plage, plage);
   let p1 = randomInt(-plage, plage);
   while (p1 === p3) p1 = randomInt(-plage, plage);
-  let p2 = randomInt(-plage, plage);
-  while (p2 === p1) p2 = randomInt(-plage, plage);
+  let p2 = racineEtrangere ? p4 : randomInt(-plage, plage);
+  while (p2 === p1) {
+    if (racineEtrangere) return null;
+    p2 = randomInt(-plage, plage);
+  }
 
   const a = k1 * k4 - k3 * k2;
   if (a === 0) return null;
@@ -56,7 +62,10 @@ function tirerParametres(plage: number): Parametres | null {
 
   const r1 = (-b - racineDelta) / deuxA;
   const r2 = (-b + racineDelta) / deuxA;
-  if (r1 === p2 || r1 === p4 || r2 === p2 || r2 === p4) return null;
+  if (racineEtrangere) {
+    // exactement une racine étrangère (x = p2 = p4), l'autre valide et distincte
+    if (r1 === r2 || (r1 !== p2 && r2 !== p2) || (r1 === p2 && r2 === p2)) return null;
+  } else if (r1 === p2 || r1 === p4 || r2 === p2 || r2 === p4) return null;
 
   return { k1, p1, k2, p2, k3, p3, k4, p4, r1, r2 };
 }
@@ -77,9 +86,10 @@ const PLAGES = [6, 10, 15, 20];
  * aux sous-variantes (a)/(b).
  */
 export function construireSousVarianteC(): ExerciceDeuxFractionsLineaires {
+  const racineEtrangere = Math.random() < 0.4;
   for (const plage of PLAGES) {
     for (let i = 0; i < TENTATIVES_PAR_PLAGE; i++) {
-      const resultat = tirerParametres(plage);
+      const resultat = tirerParametres(plage, racineEtrangere);
       if (!resultat) continue;
 
       const { k1, p1, k2, p2, k3, p3, k4, p4, r1, r2 } = resultat;
@@ -105,7 +115,7 @@ export function construireSousVarianteC(): ExerciceDeuxFractionsLineaires {
         reductionGauche.kNumerateurEffectif * reductionDroite.kDenominateurEffectif -
         reductionDroite.kNumerateurEffectif * reductionGauche.kDenominateurEffectif;
       const equationIsolee = construireExerciceClassifie(a, r1, r2);
-      const ce = ([p2, p4] as [number, number]).sort((x, y) => x - y);
+      const ce = [...new Set([p2, p4])].sort((x, y) => x - y);
 
       return {
         construction: "deux_fractions_lineaires",

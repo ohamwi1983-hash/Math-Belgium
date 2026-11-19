@@ -36,6 +36,7 @@ import { formatEquationDenominateur, formatEquationNumerateur } from "../../ui/f
 import { racinesDistinctes } from "../../moteur/verificationEquationRationnelle";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationRationnelle, type VarianteEquationRationnelleId } from "./index";
 import { profilEquationRationnelle, LIBELLE_CAS_EQUATION_RATIONNELLE } from "../profilsEvaluation4eCh2Ch3";
+import { avecDenominateurCommun } from "../../moteur/denominateurCommun";
 
 /**
  * Corrigé détaillé et barème : UNE étape par écran (`moteur/session*.ts::phasesExercice`), corrigé
@@ -285,13 +286,12 @@ function reponseBreveEquationRationnelle(instance: ExerciceEquationRationnelle):
   return [latex(ensembleSolutionsLatex(instance))];
 }
 
-/** Critères du niveau (grille commune) : étapes = écrans du corrigé ; comptés comme lectures (1 min,
- * sans niveau) : la reconnaissance de la méthode (coup d'œil sur a, b, c) et la CE d'un seul
- * dénominateur x − p ; méthode : choisir parmi les méthodes du cours ; piège dans les données : une
- * solution à rejeter (racine étrangère). */
+/** Critères du niveau (grille commune) : étapes = écrans du corrigé ; comptée comme lecture (1 min,
+ * sans niveau) : la CE d'un seul dénominateur x − p, déjà factorisé ; la reconnaissance de la
+ * méthode est une DÉCISION et compte comme une étape (lot E de l'audit) ; méthode : choisir parmi
+ * les méthodes du cours ; piège dans les données : une solution à rejeter (racine étrangère). */
 function criteresDifficulteEquationRationnelle(instance: ExerciceEquationRationnelle): CriteresDifficulte {
-  const phases = phasesEquationRationnelle(instance);
-  const lecture = (["simplifierReconnaissance", "reconnaissance"] as const).filter((ph) => phases.includes(ph)).map((ph) => lettrePhaseEquationRationnelle(instance, ph));
+  const lecture: string[] = [];
   if (instance.construction === "un_denominateur") lecture.push(lettrePhaseEquationRationnelle(instance, "ce"));
   const piege = decisionsRacines(instance).some((d) => d.rejetee) ? 1 : 0;
   return { ...etapesDuCorrige(correctionDetailleeEquationRationnelle(instance), lecture), methode: 1, piege };
@@ -368,12 +368,14 @@ export const adaptateurEvaluationEquationRationnelle: AdaptateurFeuilleExercices
   genererInstance: genererExerciceEquationRationnelle,
   catalogueVariantes: CATALOGUE_VARIANTES,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteEquationRationnelleId),
-  construireEnonce: construireEnonceEquationRationnelle,
-  construireCorrection: construireCorrectionEquationRationnelle,
-  criteresDifficulte: criteresDifficulteEquationRationnelle,
+  // Papier : la méthode du dénominateur commun quand elle raccourcit (cours § 5, audit G5) ; l'appli
+  // accepte les deux et suit celle de l'élève (même corrigé, `avecDenominateurCommun`).
+  construireEnonce: (i) => construireEnonceEquationRationnelle(avecDenominateurCommun(i)),
+  construireCorrection: (i) => construireCorrectionEquationRationnelle(avecDenominateurCommun(i)),
+  criteresDifficulte: (i) => criteresDifficulteEquationRationnelle(avecDenominateurCommun(i)),
   reponseBreve: reponseBreveEquationRationnelle,
-  correctionDetaillee: correctionDetailleeEquationRationnelle,
-  bareme: baremeEquationRationnelle,
+  correctionDetaillee: (i) => correctionDetailleeEquationRationnelle(avecDenominateurCommun(i)),
+  bareme: (i) => baremeEquationRationnelle(avecDenominateurCommun(i)),
   enoncePapier: enoncePapierEquationRationnelle,
   // `regroupable` exclu : la consigne mentionne l'équation tirée, jamais générique.
 };

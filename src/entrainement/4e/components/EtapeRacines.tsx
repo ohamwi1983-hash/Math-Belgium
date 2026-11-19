@@ -5,6 +5,8 @@ import { Katex } from "./Katex";
 import { formatEquationAssocieeLatex } from "../ui/formatInequation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { AidesNiveaux, MESSAGE_BORNE_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 type Choix = "auMoinsUne" | "pasDeSolutions";
 
@@ -14,6 +16,10 @@ interface Props {
   exercice: ExerciceInequation;
   tentativesUtilisees: number;
   tentativesMax: number;
+  /** Aides à 2 niveaux (KaTeX). */
+  aides?: FragmentConsigne[][];
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse. */
+  messageCible?: (reponse: ReponseRacines) => FragmentConsigne[] | null;
   onValider: (reponse: ReponseRacines) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -34,8 +40,9 @@ interface Props {
  * onValider, exactement comme verifierRacines l'attend déjà — aucun changement côté moteur.
  * Pas de RecapitulatifPanel : toujours la première étape, il serait vide.
  */
-export function EtapeRacines({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeRacines({ exercice, tentativesUtilisees, tentativesMax, aides, messageCible, onValider, validation }: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
+  const saisie = useTentativeLisible<ReponseRacines>();
   const [valeurs, setValeurs] = useState<string[]>([""]);
 
   function choisir(nouveauChoix: Choix) {
@@ -121,19 +128,16 @@ export function EtapeRacines({ exercice, tentativesUtilisees, tentativesMax, onV
 
       {!validation && (
         <>
+        {aides && <AidesNiveaux aides={aides} />}
         <button
           type="button"
           className="btn btn-primary"
-          disabled={reponse === null}
-          onClick={() => reponse !== null && onValider(reponse)}
+          disabled={choix === null || (choix === "auMoinsUne" && valeurs.some((v) => v.trim() === ""))}
+          onClick={() => saisie.tenter(reponse ?? { type: "aucune" }, reponse !== null, onValider)}
         >
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour texteIllisible={MESSAGE_BORNE_ILLISIBLE} illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={saisie.soumise !== null ? messageCible?.(saisie.soumise) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

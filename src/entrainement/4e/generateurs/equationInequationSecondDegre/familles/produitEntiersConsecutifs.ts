@@ -13,9 +13,9 @@ const SKINS: string[] = [
   "Dans un jeu de devinette, deux entiers naturels consécutifs (tous deux inférieurs à 100) ont été choisis. Le premier des deux entiers est x, le second est x+1.",
 ];
 
-const R1_MIN = 10;
-const R1_MAX = 35;
-const DOMAINE_SUP = 100;
+const R1_MIN = 8;
+const R1_MAX = 45;
+const DOMAINE_SUP = 98; // « tous deux inférieurs à 100 » : x + 1 ≤ 99
 
 export const construireProduitEntiersConsecutifs = construireAvecParametresNombre(() => ({
   famille: "produitEntiersConsecutifs",

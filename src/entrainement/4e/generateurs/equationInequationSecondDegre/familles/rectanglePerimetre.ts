@@ -39,7 +39,7 @@ const SKINS: SkinRectanglePerimetre[] = [
 ];
 
 const X_S_MIN = 12;
-const X_S_MAX = 16;
+const X_S_MAX = 25;
 
 export const construireRectanglePerimetre = construireAvecParametres(() => {
   const xS = randomInt(X_S_MIN, X_S_MAX);

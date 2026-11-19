@@ -1,3 +1,4 @@
+import { lireNombreSaisi } from "./lireNombre";
 import type { Crochet, Morceau } from "../core/inequation.types";
 
 /**
@@ -64,7 +65,7 @@ export function crochetDroitEffectif(etat: EtatMorceau): Crochet | null {
 
 /** Accepte la virgule comme séparateur décimal (notation française), en plus du point. */
 function parseNombreFr(texte: string): number {
-  return Number(texte.trim().replace(",", "."));
+  return lireNombreSaisi(texte) ?? NaN;
 }
 
 function borneGaucheValide(etat: EtatMorceau): boolean {

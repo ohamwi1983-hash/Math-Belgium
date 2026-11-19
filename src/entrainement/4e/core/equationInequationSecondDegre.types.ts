@@ -162,9 +162,19 @@ export interface ExerciceEquationSecondDegre extends ExerciceEquationInequationC
  * construction. */
 export interface ExerciceInequationSecondDegre extends ExerciceEquationInequationCommun {
   variante: "inequation";
+  /** Sens et symbole TIRÉS dans chaque famille (audit G14) : `large` = ≥ / ≤. */
   sens: "gt" | "lt";
+  large: boolean;
+  /** Solution entre les racines (sinon à l'extérieur, une seule partie dans le domaine). */
+  entreRacines: boolean;
+  /** Racines de f(x) = k, dans l'ordre (bornes de la résolution sur ℝ). */
   intervalleBrut: IntervalleBorne;
+  /** Intervalle-solution dans le domaine de validité, avec ses crochets. */
   intervalleValide: IntervalleBorne;
+  inclusInf: boolean;
+  inclusSup: boolean;
+  /** Variable ENTIÈRE (décision 5) : la réponse est l'ensemble des entiers de `min` à `max`. */
+  entiers?: { min: number; max: number };
 }
 
 export type ExerciceEquationInequationSecondDegre = ExerciceEquationSecondDegre | ExerciceInequationSecondDegre;

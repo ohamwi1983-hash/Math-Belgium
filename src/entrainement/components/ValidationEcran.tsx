@@ -23,6 +23,9 @@ export interface ValidationEtapeProps {
    * réponse attendue quand elle est révélée — les MÊMES lignes que le corrigé papier
    * (`correctionDetaillee` de l'adaptateur, rendu `CorrigeDetailleEcran.tsx`). */
   corrigeDetaille?: ReactNode;
+  /** Optionnel (rétrocompatible) : figure montrée une fois l'écran validé, réussi OU révélé (ex. 4e
+   * ch. 2 : courbe et tableau de signes de gen5/gen6). */
+  figureApres?: ReactNode;
 }
 
 type Props = ValidationEtapeProps;
@@ -33,7 +36,7 @@ type Props = ValidationEtapeProps;
  * `ResumeSessionXxx` — convention CLAUDE.md, "validation/invalidation avant de passer à l'écran
  * suivant"). Partagé par 4e/5e-4h/6e-6h (comme `BoutonExportWord.tsx`), jamais dupliqué par niveau.
  */
-export function ValidationEcran({ revele, reponseAttendue, labelSuivant, onSuivant, messageRevele, corrigeDetaille }: Props) {
+export function ValidationEcran({ revele, reponseAttendue, labelSuivant, onSuivant, messageRevele, corrigeDetaille, figureApres }: Props) {
   return (
     <div className="validation-ecran">
       <p className={revele ? "alert-error" : "alert-success"} role="alert">
@@ -45,6 +48,7 @@ export function ValidationEcran({ revele, reponseAttendue, labelSuivant, onSuiva
           {reponseAttendue}
         </div>
       )}
+      {figureApres}
       {revele && corrigeDetaille}
       <button type="button" className="btn btn-primary" onClick={onSuivant}>
         {labelSuivant}

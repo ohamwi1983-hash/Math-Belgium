@@ -11,6 +11,8 @@ import {
   soumettreReponseSimplification,
 } from "./moteur/sessionInequation";
 import type { EtatSessionInequation, PhaseInequation } from "./moteur/sessionInequation";
+import { TENTATIVES_CHOIX_FERME_INEQUATION } from "./moteur/sessionInequation";
+import { aidesRacinesInequation, aidesSigneTrinome, aidesSimplification, aideTexteIntervalle, messageInequation, messageRacinesInequation } from "./ui/aidesSecondDegre";
 import { diagnostiquerSimplification } from "./moteur/verificationInequation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceInequation, type VarianteInequationId } from "./generateurs/inequations";
 import { EtapeRacines } from "./components/EtapeRacines";
@@ -31,7 +33,8 @@ import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleeInequations, lettrePhaseInequation } from "./generateurs/inequations/corrigeDetaille";
 
-const CONSIGNE_GENERALE = "Détermine le signe de ce trinôme du second degré.";
+/** Consigne d'écran = la tâche réelle (audit G11) : résoudre l'inéquation (le papier dit de même). */
+const CONSIGNE_GENERALE = "Résous l'inéquation.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -62,7 +65,7 @@ function nombreEcrans(etat: EtatSessionInequation): number {
 const TITRES: Record<PhaseInequation, string> = {
   simplification: "Inéquation simplifiée",
   racines: "Racines",
-  signe_a: "Signe de a",
+  signe_a: "Signe de a et du trinôme",
   intervalle: "Ensemble des solutions",
 };
 
@@ -97,7 +100,7 @@ export function AppInequation() {
     const ex = etat.exerciceCourant;
     if (phase === "simplification") return <Katex expression={formatInequationLatex(nouvelEtat.exerciceCourant.enonce, nouvelEtat.exerciceCourant.symbole)} />;
     if (phase === "racines") return formatRacines(ex.racines);
-    if (phase === "signe_a") return ex.enonce.a > 0 ? "a > 0" : "a < 0";
+    if (phase === "signe_a") return ex.enonce.a > 0 ? "a > 0 : le trinôme est positif à l'extérieur des racines" : "a < 0 : le trinôme est négatif à l'extérieur des racines";
     return <>S = {formatSolutionEnsemble(ex.solution)}</>;
   }
 
@@ -150,6 +153,7 @@ export function AppInequation() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        messageRevele: etat.phase === "signe_a" ? "Ce n'était pas la bonne réponse." : undefined,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec
           ? undefined
           : etat.phase === "simplification"
@@ -157,7 +161,7 @@ export function AppInequation() {
             : etat.phase === "racines"
               ? <>Zéros attendus : {formatRacines(exercice.racines)}</>
               : etat.phase === "signe_a"
-                ? <>Signe de a attendu : {exercice.enonce.a > 0 ? "a > 0" : "a < 0"}</>
+                ? <>Réponse attendue : {reponseAttendueEcran("signe_a", enAttente.etatSuivant)}</>
                 : <>Réponse attendue : S = {formatSolutionEnsemble(exercice.solution)}</>,
         // Corrigé de l'exercice COURANT : après la simplification, il est déjà réduit (mêmes étapes
         // suivantes, sans l'écran de simplification — `phasesInequation`).
@@ -194,6 +198,7 @@ export function AppInequation() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               diagnostiquer={(v) => diagnostiquerSimplification(exercice, v)}
+              aides={aidesSimplification("inéquation")}
               aideActivee={etat.aideSimplificationUtilisee}
               onActiverAide={() => setEtat(activerAideSimplification(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseSimplification(etat, reponse), saisieEnLatex(reponse))}
@@ -204,6 +209,8 @@ export function AppInequation() {
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              aides={aidesRacinesInequation(exercice)}
+              messageCible={(r) => messageRacinesInequation(exercice, r)}
               onValider={(reponse) =>
                 terminerEtape(
                   soumettreReponseRacines(etat, reponse),
@@ -216,8 +223,9 @@ export function AppInequation() {
             <EtapeSigneA
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME_INEQUATION}
               recapitulatif={recapitulatif}
+              aides={aidesSigneTrinome()}
               onValider={(reponse) => terminerEtape(soumettreReponseSigneA(etat, reponse), reponse === "+" ? "a > 0" : "a < 0")}
               validation={validation}
             />
@@ -228,6 +236,8 @@ export function AppInequation() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               aideActivee={etat.aideUtilisee}
+              aideTexte={aideTexteIntervalle(exercice)}
+              messageCible={(r) => messageInequation(exercice, r)}
               onActiverAide={() => setEtat(activerAideIntervalle(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseIntervalle(etat, reponse), <>S = {formatSolutionEnsemble(reponse)}</>)}
               validation={validation}

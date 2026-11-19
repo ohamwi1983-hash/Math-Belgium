@@ -32,6 +32,9 @@ import {
 import { necessiteSimplification } from "./simplificationEquation";
 import type { EtatSessionSimplification, PhaseSimplification, ResultatExerciceSimplification } from "./typesSimplification";
 
+/** Choix fermé (catégorie, signe) : UNE tentative (convention du site, audit 4e ch. 2 G3). */
+export const TENTATIVES_CHOIX_FERME = 1;
+
 const POINTS_DE_BASE = 100;
 
 function estPolynomeLineaire(poly: Exercice | PolynomeLineaire): poly is PolynomeLineaire {
@@ -272,6 +275,7 @@ export function soumettreChoixDenomCategorie(etat: EtatSessionSimplification, ch
 
   const etapeCourante = soumettreEtapeTentatives<Categorie>(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (c) => c === denominateurP2(etat.exerciceCourant).categorie,
     revelerReponse: () => {},
   });
@@ -470,6 +474,7 @@ export function soumettreChoixNumCategorie(etat: EtatSessionSimplification, choi
 
   const etapeCourante = soumettreEtapeTentatives<Categorie>(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (c) => c === numerateurP2(etat.exerciceCourant).categorie,
     revelerReponse: () => {},
   });

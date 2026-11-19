@@ -3,7 +3,6 @@ import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ExerciceSimplification } from "../core/simplification.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { expressionLibreVersLatex } from "../ui/formatExpressionLatex";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { FractionHeader } from "./FractionHeader";
@@ -11,6 +10,8 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   /** Requis sauf si expressionAffichee est fourni (voir plus bas) — sert uniquement au FractionHeader par défaut. */
@@ -49,6 +50,8 @@ interface Props {
   diagnostiquer?: (numerateur: string, denominateur: string) => StatutVerification;
   aideActivee: boolean;
   onActiverAide: () => void;
+  /** Aides à 2 niveaux (KaTeX). */
+  aides?: FragmentConsigne[][];
   onValider: (numerateur: string, denominateur: string) => void;
   /** Exemples de saisie [numérateur, dénominateur] — absents par défaut : comportement inchangé
    * (gen6, audit). */
@@ -60,6 +63,7 @@ interface Props {
  * Étape finale : deux champs libres, vérifiés par produit en croix (section 4 de la spec).
  */
 export function EtapeSimplification({
+  aides,
   exercice,
   tentativesUtilisees,
   tentativesMax,
@@ -76,6 +80,7 @@ export function EtapeSimplification({
   validation,
 }: Props) {
   const [numerateur, setNumerateur] = useState("");
+  const saisie = useTentativeLisible<[string, string]>();
   const [denominateur, setDenominateur] = useState("");
 
   /**
@@ -162,27 +167,27 @@ export function EtapeSimplification({
       </div>
       {!validation && (
         <>
-          <div>
-            {aideActivee && (
-              <div className="triangle-quelconque-aide">
-                <p>Simplifie en divisant numérateur et dénominateur par leur facteur commun.</p>
-              </div>
-            )}
-            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-          </div>
+          {aides ? (
+            <AidesNiveaux aides={aides} onPremiereAide={onActiverAide} />
+          ) : (
+            <div>
+              {aideActivee && (
+                <div className="triangle-quelconque-aide">
+                  <p>Simplifie en divisant numérateur et dénominateur par leur facteur commun.</p>
+                </div>
+              )}
+              <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+            </div>
+          )}
           <button
             type="button"
             className="btn btn-primary"
             disabled={numerateur.trim() === "" || denominateur.trim() === ""}
-            onClick={() => onValider(numerateur, denominateur)}
+            onClick={() => saisie.tenter([numerateur, denominateur] as [string, string], diagnostiquer?.(numerateur, denominateur) !== "parse_error", ([n, d]) => onValider(n, d))}
           >
             Valider
           </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer?.(numerateur, denominateur))}
-            </p>
-          )}
+          <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

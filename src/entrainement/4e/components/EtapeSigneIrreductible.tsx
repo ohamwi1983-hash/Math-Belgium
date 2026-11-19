@@ -6,6 +6,8 @@ import { EtatActuelPanel } from "./EtatActuelPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   tentativesUtilisees: number;
@@ -13,8 +15,12 @@ interface Props {
   recapitulatif: EntreeRecapitulatif[];
   /** Bloc "état actuel" isolant ce facteur — absent/null par défaut : rien de rendu. */
   etatActuel?: string | null;
+  /** Remplace le libellé « État actuel » (gen5 : « Facteur à étudier »). */
+  etatActuelLabel?: string;
   aideActivee: boolean;
   onActiverAide: () => void;
+  /** Aides à 2 niveaux (KaTeX) — remplacent l'aide historique à 1 niveau. */
+  aides?: FragmentConsigne[][];
   onValider: (reponse: SigneA) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -34,10 +40,12 @@ interface Props {
  * moteur/sessionSignesProduit.ts), cet écran pouvant se répéter 0 à 2 fois par exercice.
  */
 export function EtapeSigneIrreductible({
+  aides,
   tentativesUtilisees,
   tentativesMax,
   recapitulatif,
   etatActuel,
+  etatActuelLabel,
   aideActivee,
   onActiverAide,
   onValider,
@@ -48,7 +56,7 @@ export function EtapeSigneIrreductible({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <EtatActuelPanel latex={etatActuel ?? null} />
+      <EtatActuelPanel latex={etatActuel ?? null} label={etatActuelLabel} />
       <p className="prompt-text">Ce facteur est-il toujours positif ou toujours négatif ?</p>
       <div className="options-grid">
         <button type="button" className={signe === "+" ? "btn toggle-active" : "btn"} onClick={() => setSigne("+")}>
@@ -59,30 +67,31 @@ export function EtapeSigneIrreductible({
         </button>
       </div>
 
-      {aideActivee && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            Un facteur quadratique irréductible (Δ&lt;0) ne s'annule jamais : il garde toujours le signe de son propre a,
-            sur toute la droite réelle.
-          </p>
-        </div>
-      )}
       {!validation && (
         <>
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={signe === null}
-          onClick={() => signe !== null && onValider(signe)}
-        >
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+          {aides ? (
+            <AidesNiveaux aides={aides} onPremiereAide={onActiverAide} />
+          ) : (
+            <>
+              {aideActivee && (
+                <div className="triangle-quelconque-aide">
+                  <p>
+                    Un facteur quadratique irréductible (Δ&lt;0) ne s'annule jamais : il garde toujours le signe de son propre a,
+                    sur toute la droite réelle.
+                  </p>
+                </div>
+              )}
+              <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+            </>
+          )}
+          <button type="button" className="btn btn-primary" disabled={signe === null} onClick={() => signe !== null && onValider(signe)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && tentativesUtilisees < tentativesMax && (
+            <p className="alert-error" role="alert">
+              Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            </p>
+          )}
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -20,6 +20,7 @@ import type {
   VarianteEquationInequationSecondDegre,
 } from "../../core/equationInequationSecondDegre.types";
 import { construireOptionsInterpretationEquationInequation, formatQuestionFinaleEquationInequation } from "./interpretation";
+import { construireInequationContexte, solutionDansDomaine, tirerSensEtSymbole } from "./solutionInequation";
 
 export interface ParametresProblemeNombre {
   famille: FamilleEquationInequationSecondDegre;
@@ -117,42 +118,10 @@ export function construireDepuisRacine(p: ParametresProblemeNombre, variante: Va
    * avec le domaine `x≥0` (`r2<0` toujours), ça donne exactement `[0,r1]`, un intervalle BORNÉ sans
    * avoir besoin d'inventer une borne supérieure artificielle pour la partie ">" (qui, elle,
    * n'aurait pas de borne supérieure naturelle — voir en-tête de fichier). */
-  const sens = "lt" as const;
-  const intervalleBrut = { inf: Math.min(r1, r2), sup: Math.max(r1, r2) };
-  const intervalleValide = { inf: Math.max(intervalleBrut.inf, domaine.inf), sup: Math.min(intervalleBrut.sup, domaine.sup) };
-  return {
-    variante: "inequation",
-    famille: p.famille,
-    base,
-    k,
-    voieSysteme: false,
-    systeme: null,
-    sens,
-    intervalleBrut,
-    intervalleValide,
-    questionFinale: formatQuestionFinaleEquationInequation({
-      variante: "inequation",
-      sens,
-      labelVariable: p.labelVariable,
-      nomGrandeur: p.nomGrandeur,
-      genreGrandeur: p.genreGrandeur,
-      k,
-      uniteGrandeur: p.uniteGrandeur,
-    }),
-    optionsInterpretation: construireOptionsInterpretationEquationInequation({
-      variante: "inequation",
-      sens,
-      labelVariable: p.labelVariable,
-      nomGrandeur: p.nomGrandeur,
-      genreGrandeur: p.genreGrandeur,
-      uniteVariable: p.uniteVariable,
-      uniteGrandeur: p.uniteGrandeur,
-      uniteGrandeurFautive: p.uniteGrandeurFautive,
-      k,
-      intervalleValide,
-      intervalleBrut,
-    }),
-  };
+  // Sens et symbole tirés (G14) : x² + bx > k donne ]r₁ ; sup], x² + bx < k donne [0 ; r₁[.
+  const { sens, large } = tirerSensEtSymbole();
+  const solution = solutionDansDomaine(a, [r1, r2], domaine, sens, large)!;
+  return construireInequationContexte({ famille: p.famille, base, k, voieSysteme: false, systeme: null, racines: [r1, r2], sens, large, solution, entiers: true });
 }
 
 /** Même rôle que `vertexForm.ts::construireAvecParametres`. */

@@ -275,7 +275,7 @@ function etapeSigneA(t: Travail, l: string): EtapeCorrection[] {
   return [
     utilise(l, [texte(`Le signe de a, coefficient de x², est le signe du trinôme à l'extérieur des racines (partout s'il n'y a pas de racine) ${COURS_SIGNE}.`)]),
     calcul(l, [ligne(`a=${q(a)}${a > 0 ? ">" : "<"}0`, [texte("coefficient de "), latex("x^2"), texte(" dans "), latex(formatMembreGauche(t.enonce))])]),
-    resultat(l, [texte("Signe de a : "), latex(a > 0 ? "a>0" : "a<0")]),
+    resultat(l, [texte("Signe de a : "), latex(a > 0 ? "a>0" : "a<0"), texte(t.racines.length === 2 ? ` ; le trinôme est ${a > 0 ? "positif" : "négatif"} à l'extérieur des racines.` : t.racines.length === 1 ? ` ; le trinôme est ${a > 0 ? "positif" : "négatif"} sauf en sa racine.` : ` ; le trinôme est ${a > 0 ? "positif" : "négatif"} pour tout x.`)]),
   ];
 }
 
@@ -361,7 +361,7 @@ export function consigneEtapeInequation(instance: ExerciceInequation, phase: Pha
     case "racines":
       return [texte("Résous l'équation associée "), latex(formatEquationAssocieeLatex(t.enonce)), texte(".")];
     case "signe_a":
-      return [texte("Donne le signe de a.")];
+      return [texte("Donne le signe de a, donc le signe du trinôme à l'extérieur des racines.")];
     case "intervalle":
       return [texte("Donne l'ensemble des solutions de l'inéquation.")];
   }

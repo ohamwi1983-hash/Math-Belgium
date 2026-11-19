@@ -40,6 +40,14 @@ export function correctionDetailleeRelationsRacines(e: E): EtapeCorrection[] {
   const M = formatMembreGauche(e.enonce);
   const forme = formatFormeFactoriseeDepuisRacines(e.enonce, e.racines);
   const substitue = double ? `${prefixe(a)}(x-${qp(x1)})^2` : `${prefixe(a)}(x-${qp(x1)})(x-${qp(x2)})`;
+  // Racines retrouvées à partir de S et P (papier : b) ne les donne plus ; écran : vérification).
+  const lignesRacines: LigneCalcul[] = double
+    ? [ligne(`x_0+x_0=${q(s)}`, "somme S de la question a)"), ligne(`x_0=${q(x1)}`, "on divise par 2"), ligne(`x_0\\cdot x_0=${qp(x1)}\\cdot ${qp(x1)}=${q(p)}`, "produit P : ✓")]
+    : [
+        ligne(`x_1+x_2=${q(s)}`, "somme S de la question a)"),
+        ligne(`x_1\\cdot x_2=${q(p)}`, "produit P de la question a)"),
+        ligne(`${qp(x1)}+${qp(x2)}=${q(s)}`, [texte("deux nombres qui conviennent : "), latex(`${q(x1)}\\cdot ${qp(x2)}=${q(p)}`)]),
+      ];
   const lignesB: LigneCalcul[] = [ligne(double ? `${M}=a(x-x_0)^2` : `${M}=a(x-x_1)(x-x_2)`, "forme factorisée à partir des racines"), ligne(`=${substitue}`, "on remplace a et les racines")];
   if (substitue.replace(/\s/g, "") !== forme.replace(/\s/g, "")) lignesB.push(ligne(`=${forme}`, "on simplifie les signes"));
   const unitaire = formatMembreGauche({ a: 1, b: -s, c: p });
@@ -52,8 +60,9 @@ export function correctionDetailleeRelationsRacines(e: E): EtapeCorrection[] {
     calcul("a", [ligne("S=-\\dfrac{b}{a}"), ligne(`=-\\dfrac{${q(b)}}{${q(a)}}`, "on remplace a et b"), ligne(`=${q(s)}`), ligne("P=\\dfrac{c}{a}"), ligne(`=\\dfrac{${q(c)}}{${q(a)}}`, "on remplace a et c"), ligne(`=${q(p)}`)]),
     resultat("a", [latex(`S = ${q(s)}`), texte(" et "), latex(`P = ${q(p)}`)]),
     piege("a", [texte("Le signe moins de "), latex("S = -\\dfrac{b}{a}"), texte(" : S n'est pas "), latex("\\dfrac{b}{a}"), texte(".")]),
-    utilise("b", [texte("Factorisation à partir des racines, avec le même coefficient a que l'équation : "), latex(double ? "a(x-x_0)^2=0" : "a(x-x_1)(x-x_2)=0"), texte(` ${COURS_RESOUDRE}.`)]),
-    calcul("b", lignesB),
+    utilise("b", [texte("Les racines sont les deux nombres de somme S et de produit P ; puis factorisation à partir des racines, avec le même coefficient a que l'équation : "), latex(double ? "a(x-x_0)^2=0" : "a(x-x_1)(x-x_2)=0"), texte(` ${COURS_RESOUDRE}.`)]),
+    calcul("b", lignesRacines, [texte(double ? "Racine double : " : "Racines : deux nombres de somme S et de produit P.")], "Racines"),
+    calcul("b", lignesB, [], "Factorisation"),
     resultat("b", [latex(factorisationLatex(e))]),
     verification("b", [texte("En développant, on retrouve l'équation : ")], [ligne(`${forme}=${prefixe(a)}(${unitaire})`, "produit des deux facteurs"), ligne(`=${M}`, "on distribue a")]),
     piege("b", [texte(a === 1 ? "Une racine négative donne un facteur avec un signe plus : " : "Oublier le coefficient a devant le produit change l'équation : "), latex(a === 1 ? "x - (-3) = x + 3" : `a = ${q(a)}`), texte(".")]),

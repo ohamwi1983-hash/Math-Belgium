@@ -38,8 +38,8 @@ const SKINS: SkinFacadeMaisonToit[] = [
 ];
 
 const X_S_MIN = 13;
-const X_S_MAX = 16;
-const HAUTEURS_TOIT = [2, 4];
+const X_S_MAX = 22;
+const HAUTEURS_TOIT = [2, 4, 6];
 
 export const construireFacadeMaisonToit = construireAvecParametres(() => {
   const xS = randomInt(X_S_MIN, X_S_MAX);

@@ -247,6 +247,7 @@ export function AppMethodeRapide() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        messageRevele: phase === "reconnaissance" ? "Ce n'était pas la bonne réponse." : undefined,
         reponseAttendue,
         corrigeDetaille: (
           <CorrigeDetailleEcran

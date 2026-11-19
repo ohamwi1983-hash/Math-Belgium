@@ -62,6 +62,9 @@ import {
 } from "./verificationInequationRationnelle";
 import { verifierSolutionSignesProduit } from "./verificationSignesProduit";
 
+/** Choix fermé (catégorie, signe) : UNE tentative (convention du site, audit 4e ch. 2 G3). */
+export const TENTATIVES_CHOIX_FERME = 1;
+
 const POINTS_DE_BASE = 100;
 
 /**
@@ -551,6 +554,7 @@ export function soumettreReponseDenomReconnaissance(
 
   const etapeCourante = soumettreEtapeTentatives<Categorie>(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (c) => c === exerciceCourant.denominateur.categorie,
     revelerReponse: () => {},
   });
@@ -855,6 +859,7 @@ export function soumettreReponseReconnaissance(
 
   const etapeCourante = soumettreEtapeTentatives<Categorie>(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (c) => c === exerciceCourant.numerateur.categorie,
     revelerReponse: () => {},
   });
@@ -1057,6 +1062,7 @@ export function soumettreChoixSimplifierDenomCategorie(
 
   const etapeCourante = soumettreEtapeTentatives<Categorie>(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (c) => c === fractionDenominateurP2(exerciceCourant.fraction).categorie,
     revelerReponse: () => {},
   });
@@ -1231,6 +1237,7 @@ export function soumettreChoixSimplifierNumCategorie(
 
   const etapeCourante = soumettreEtapeTentatives<Categorie>(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (c) => c === fractionNumerateurP2(exerciceCourant.fraction).categorie,
     revelerReponse: () => {},
   });

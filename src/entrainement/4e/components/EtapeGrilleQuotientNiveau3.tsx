@@ -15,12 +15,16 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { AidesNiveaux } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   exercice: ExerciceInequationRationnelleNiveau3;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
+  /** Aides à 2 niveaux (KaTeX) : règle des signes, jamais la grille. */
+  aides?: FragmentConsigne[][];
   onValider: (reponse: GrilleQuotientNiveau3) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -34,7 +38,7 @@ interface Props {
  * + la ligne finale "signe du quotient" (4 états, ∄ en plus) — au lieu de 3, et un nombre de
  * colonnes variable (7 pour 3 racines distinctes) plutôt que fixe (toujours 5).
  */
-export function EtapeGrilleQuotientNiveau3({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
+export function EtapeGrilleQuotientNiveau3({ aides, exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
   const entete = formatEnTeteInterieur(exercice.racines);
   const nbColonnes = entete.length;
   // 2 lignes N (x − r₁, x − r₂), ou une seule « (x − r)² » pour une racine double (audit gen6).
@@ -158,6 +162,7 @@ export function EtapeGrilleQuotientNiveau3({ exercice, tentativesUtilisees, tent
 
       {!validation && (
         <>
+        {aides && <AidesNiveaux aides={aides} />}
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>

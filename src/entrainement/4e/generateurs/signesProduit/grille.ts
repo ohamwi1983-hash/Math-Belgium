@@ -218,3 +218,12 @@ export function calculerAideGrille(exercice: ExerciceSignesProduit): { colonnes:
   const racines = exercice.racines.map((_, j) => colonnes[2 * j + 1]);
   return { colonnes, racines };
 }
+
+/** Valeur du produit des facteurs en x (figure « courbe et signes » de l'écran, `CourbeSignes`). */
+export function valeurProduit(facteurs: FacteurSignesProduit[], x: number): number {
+  return facteurs.reduce((acc, f) => {
+    if (f.type === "lineaire") return acc * f.polynome.k * (x - f.polynome.p);
+    const { a, b, c } = f.type === "quadratique_factorisable" ? f.exercice.enonce : f.enonce;
+    return acc * (a * x * x + b * x + c);
+  }, 1);
+}

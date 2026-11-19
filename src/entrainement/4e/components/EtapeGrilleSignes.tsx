@@ -9,6 +9,8 @@ import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   exercice: ExerciceSignesProduit;
@@ -17,6 +19,8 @@ interface Props {
   recapitulatif: EntreeRecapitulatif[];
   aideActivee: boolean;
   onActiverAide: () => void;
+  /** Aides à 2 niveaux (KaTeX) — remplacent l'aide historique à 1 niveau. */
+  aides?: FragmentConsigne[][];
   onValider: (reponse: Grille) => void;
   validation?: ValidationEtapeProps | null;
 }
@@ -36,6 +40,7 @@ interface Props {
  * l'élève corrige) ; les cellules correctes restent en noir, sans mise en valeur positive.
  */
 export function EtapeGrilleSignes({
+  aides,
   exercice,
   tentativesUtilisees,
   tentativesMax,
@@ -144,6 +149,10 @@ export function EtapeGrilleSignes({
       {!validation && (
         <>
           <div>
+            {aides ? (
+              <AidesNiveaux aides={aides} onPremiereAide={onActiverAide} />
+            ) : (
+              <>
             {aideActivee && (
               <div className="triangle-quelconque-aide">
                 <p>
@@ -156,6 +165,8 @@ export function EtapeGrilleSignes({
               </div>
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+              </>
+            )}
           </div>
           <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
             Valider

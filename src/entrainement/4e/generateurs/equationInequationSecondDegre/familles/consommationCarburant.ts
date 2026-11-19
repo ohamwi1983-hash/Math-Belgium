@@ -13,41 +13,52 @@ import { randomInt } from "../aleatoire";
 
 interface SkinConsommationCarburant {
   phraseEnonce: (a: number, b: number, c: number) => string;
+  /** Consommation minimale (sommet) et consommation au bord du domaine, en L/100 km : réalistes pour le véhicule. */
+  ySMin: number;
+  ySMax: number;
+  plafondMin: number;
+  plafondMax: number;
 }
 
 const SKINS: SkinConsommationCarburant[] = [
   {
     phraseEnonce: (a, b, c) =>
       `Un constructeur automobile mesure la consommation de carburant d'un de ses modèles en fonction de la vitesse de croisière ; la consommation C (en L/100km) en fonction de la vitesse x (en km/h) vaut $C(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$.`,
+    ySMin: 4,
+    ySMax: 7,
+    plafondMin: 16,
+    plafondMax: 22,
   },
   {
     phraseEnonce: (a, b, c) =>
       `Une société de transport routier étudie la consommation de ses camions selon leur vitesse de croisière sur autoroute ; la consommation C (en L/100km) en fonction de la vitesse x (en km/h) vaut $C(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$.`,
+    ySMin: 25,
+    ySMax: 40,
+    plafondMin: 45,
+    plafondMax: 60,
   },
   {
     phraseEnonce: (a, b, c) =>
       `Un motard souhaite connaître la vitesse la plus économique pour sa moto ; la consommation C (en L/100km) en fonction de la vitesse x (en km/h) vaut $C(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$.`,
+    ySMin: 3,
+    ySMax: 6,
+    plafondMin: 12,
+    plafondMax: 18,
   },
 ];
 
 const X_S_MIN = 70;
 const X_S_MAX = 100;
 const X_MIN_POSSIBLE = 20;
-const Y_S_MIN = 4;
-const Y_S_MAX = 7;
-/** Consommation maximale réaliste tolérée en bord de domaine (même un poids lourd dépasse
- * rarement cette valeur) — voir en-tête de fichier. */
-const PLAFOND_MIN = 16;
-const PLAFOND_MAX = 22;
 
 export const construireConsommationCarburant = construireAvecParametres(() => {
   const skin = SKINS[randomInt(0, SKINS.length - 1)]!;
-  const yS = randomInt(Y_S_MIN, Y_S_MAX);
+  const yS = randomInt(skin.ySMin, skin.ySMax);
 
   return {
     famille: "consommationCarburant",
     xS: randomInt(X_S_MIN, X_S_MAX),
-    aAbs: deriveAAbsVersPlafond(yS, randomInt(PLAFOND_MIN, PLAFOND_MAX)),
+    aAbs: deriveAAbsVersPlafond(yS, randomInt(skin.plafondMin, skin.plafondMax)),
     signe: 1,
     yS,
     xMinPossible: X_MIN_POSSIBLE,

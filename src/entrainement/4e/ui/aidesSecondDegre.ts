@@ -4,7 +4,11 @@ import { latex, texte } from "../../export/corrigeTableau";
 import { q, qp } from "./corrigeChapitre3";
 import type { ChoixMethode } from "../moteur/methodeSecondDegre";
 import type { ReponseZeros } from "../moteur/types";
+import type { ExerciceInequation, Morceau, ReponseRacines, SolutionEnsemble } from "../core/inequation.types";
+import type { SolutionEnsembleProduit } from "../core/signesProduit.types";
 import { racLatex, racPuissance, trinomeDe } from "./corrigeSecondDegre1";
+import type { ExerciceRelationsRacines } from "../core/relationsRacines.types";
+import { diagnostiquerFormeFactorisee } from "../moteur/expressionAlgebrique";
 
 /**
  * Aides à deux niveaux (formule en KaTeX) et messages ciblés des générateurs du chapitre 2 de 4e
@@ -178,3 +182,301 @@ export function messageZeros(ex: Exercice, reponse: ReponseZeros): FragmentConsi
   return null;
 }
 
+
+// ---------------------------------------------------------------------------------------------
+// gen2 — inéquation du second degré
+// ---------------------------------------------------------------------------------------------
+
+export function aidesRacinesInequation(e: ExerciceInequation): Aides {
+  const { a, b, c } = e.enonce;
+  return [
+    [texte("Résous l'équation associée par un raccourci du cours, sinon avec "), latex("\\Delta=b^2-4ac"), texte(" et "), latex("x_{1,2}=\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}"), texte(".")],
+    [texte("Ici "), latex(`a=${q(a)},\\ b=${q(b)},\\ c=${q(c)}`), texte(". Regarde d'abord le signe de Δ : négatif, aucune solution ; nul, une racine double "), latex("-\\dfrac{b}{2a}"), texte(".")],
+  ];
+}
+
+export function messageRacinesInequation(e: ExerciceInequation, rep: ReponseRacines): FragmentConsigne[] | null {
+  const r = e.racines;
+  if (!r) return rep.type === "aucune" ? null : [texte("Regarde le signe de "), latex("\\Delta"), texte(" avant de chercher des solutions.")];
+  if (rep.type === "aucune") return [texte("Relis le signe de "), latex("\\Delta"), texte(" : cette équation a des solutions.")];
+  const v = [rep.x1, rep.x2].sort((x, y) => x - y);
+  const opp = [-r[1], -r[0]];
+  if (r[0] !== r[1] && egal(v[0]!, opp[0]!) && egal(v[1]!, opp[1]!)) return [texte("Dans la formule, c'est "), latex("-b"), texte(", l'opposé de b : tes deux solutions ont le mauvais signe.")];
+  if (r[0] !== r[1] && egal(v[0]!, 2 * r[0]) && egal(v[1]!, 2 * r[1])) return [texte("Le dénominateur de la formule est "), latex("2a"), texte(", pas a.")];
+  return null;
+}
+
+export function aidesSigneTrinome(): Aides {
+  return [
+    [texte("Le signe du trinôme "), latex("ax^2+bx+c"), texte(" est celui de "), latex("a"), texte(" à l'extérieur des racines (partout s'il n'y en a pas), le signe opposé entre elles.")],
+    [texte("Lis le coefficient de "), latex("x^2"), texte(" dans l'inéquation simplifiée : seul son signe compte.")],
+  ];
+}
+
+export function aideTexteIntervalle(e: ExerciceInequation): FragmentConsigne[] {
+  const large = e.symbole === "≤" || e.symbole === "≥";
+  return [
+    texte("On garde les x pour lesquels le trinôme a le signe demandé par "),
+    latex(e.symbole === "≤" ? "\\leq" : e.symbole === "≥" ? "\\geq" : e.symbole),
+    texte(large ? " ; inégalité large : les racines sont solutions (crochets fermés)." : " ; inégalité stricte : les racines sont exclues (crochets ouverts)."),
+  ];
+}
+
+function bornesMorceau(m: Morceau): [number, number] {
+  const v = (b: Morceau["borneGauche"]) => (b === "-inf" ? -Infinity : b === "+inf" ? Infinity : b);
+  return [v(m.borneGauche), v(m.borneDroite)];
+}
+
+const memeNombre = (x: number, y: number) => x === y || egal(x, y);
+
+/** Signe de a lu entre les racines (intervalle ↔ union), crochets, Δ < 0 / racine double. */
+export function messageInequation(e: ExerciceInequation, rep: SolutionEnsemble): FragmentConsigne[] | null {
+  const sol = e.solution;
+  const exterieur: FragmentConsigne[] = [texte("Le trinôme a le signe de a à l'extérieur des racines, le signe opposé entre elles : relis le signe de "), latex("a"), texte(" et le symbole.")];
+  if (sol.forme === "union" && rep.forme === "intervalle") {
+    const [g, d] = bornesMorceau(rep.morceau);
+    if (memeNombre(g, bornesMorceau(sol.morceau1)[1]) && memeNombre(d, bornesMorceau(sol.morceau2)[0])) return exterieur;
+  }
+  if (sol.forme === "intervalle" && rep.forme === "union") {
+    const [g, d] = bornesMorceau(sol.morceau);
+    if (memeNombre(bornesMorceau(rep.morceau1)[1], g) && memeNombre(bornesMorceau(rep.morceau2)[0], d)) return exterieur;
+  }
+  if (sol.forme === rep.forme && (sol.forme === "intervalle" || sol.forme === "union")) {
+    const ms = sol.forme === "intervalle" ? [sol.morceau] : [sol.morceau1, sol.morceau2];
+    const mr = rep.forme === "intervalle" ? [rep.morceau] : rep.forme === "union" ? [rep.morceau1, rep.morceau2] : [];
+    const memesBornes = ms.every((m, i) => mr[i] && bornesMorceau(m).every((x, j) => memeNombre(x, bornesMorceau(mr[i]!)[j]!)));
+    if (memesBornes) return [texte("Les bornes sont justes : relis les crochets. Inégalité large → racines comprises ; stricte → exclues ; l'infini a toujours un crochet ouvert.")];
+  }
+  if ((sol.forme === "vide" || sol.forme === "reel") && (rep.forme === "vide" || rep.forme === "reel")) return [texte("Sans racine, le trinôme garde le signe de a pour tout x : compare ce signe au symbole.")];
+  if ((sol.forme === "point" || sol.forme === "reel_sauf_point") && (rep.forme === "point" || rep.forme === "reel_sauf_point" || rep.forme === "vide" || rep.forme === "reel")) return [texte("Racine double : le trinôme a le signe de a partout, sauf en la racine où il est nul.")];
+  return null;
+}
+
+// ---------------------------------------------------------------------------------------------
+// gen3–gen6 — écrans communs des fractions, produits et quotients
+// ---------------------------------------------------------------------------------------------
+
+/** Reconnaissance de la méthode d'un facteur (gen3–gen6 : pas de racine évidente à ces écrans). */
+export function aidesMethodeFacteur(): Aides {
+  return [
+    [texte("Teste les raccourcis du cours dans l'ordre : "), latex("c=0"), texte(" (x en évidence), "), latex("b=0"), texte(" avec a et c de signes opposés (différence de deux carrés), "), latex("b^2=4ac"), texte(" (carré parfait) ; sinon la formule du discriminant (Δ < 0 : non factorisable).")],
+    [texte("Repère d'abord les termes absents du polynôme, puis compare "), latex("b^2"), texte(" et "), latex("4ac"), texte(".")],
+  ];
+}
+
+/** Écran « Δ = » ou « factorise » d'un polynôme du 2nd degré (gen3–gen6). */
+export function aidesChamp1Categorie(ex: Exercice): Aides {
+  if (ex.categorie === "cas_general") return aidesDelta(ex);
+  if (ex.categorie === "mise_en_evidence" || ex.categorie === "binome_conjugue" || ex.categorie === "produit_remarquable") return aidesFactorisation(ex, ex.categorie);
+  return aidesFactorisation(ex, "mise_en_evidence_generalisee");
+}
+
+/** Factorisation après Δ : a(x − x₁)(x − x₂). */
+export function aidesFactorisationApresDelta(): Aides {
+  return [
+    [texte("Avec deux racines "), latex("x_1"), texte(" et "), latex("x_2"), texte(" (ou une racine double) :"), latex("ax^2+bx+c=a(x-x_1)(x-x_2)")],
+    [texte("Reprends les racines trouvées à l'écran précédent ; n'oublie pas le coefficient "), latex("a"), texte(" devant les parenthèses, ni le signe de chaque racine.")],
+  ];
+}
+
+/** Racines lues sur une forme factorisée (produit nul) ou par la formule. */
+export function aidesRacinesFacteur(ex: Exercice): Aides {
+  if (ex.categorie === "cas_general" || ex.categorie === "irreductible")
+    return [
+      [texte("Formule : "), latex("x_{1,2}=\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}"), texte(" ; si Δ < 0, pas de racine.")],
+      [texte("Regarde le signe de Δ, puis remplace : "), latex("-b"), texte(" au numérateur, "), latex("2a"), texte(" au dénominateur.")],
+    ];
+  return [
+    [texte("Produit nul : "), latex("A\\cdot B=0\\iff A=0\\ \\text{ou}\\ B=0"), texte(".")],
+    [texte("Égale chaque facteur de la forme factorisée à 0 ; un carré nul donne une seule racine.")],
+  ];
+}
+
+/** Conditions d'existence d'une fraction. */
+export function aidesCE(): Aides {
+  return [
+    [texte("Une fraction n'existe que si son dénominateur est non nul : "), latex("\\dfrac{A}{B}"), texte(" existe "), latex("\\iff B\\neq 0"), texte(".")],
+    [texte("Factorise le dénominateur (ou lis sa forme factorisée) : chaque facteur égal à 0 donne une valeur interdite, à exclure.")],
+  ];
+}
+
+export function aidesReduction(miseEnEvidence: boolean): Aides {
+  return miseEnEvidence
+    ? [
+        [texte("Facteur commun numérique : "), latex("ka^{\\prime}x^2+kb^{\\prime}x+kc^{\\prime}=k(a^{\\prime}x^2+b^{\\prime}x+c^{\\prime})"), texte(".")],
+        [texte("Cherche le plus grand diviseur commun aux trois coefficients et mets-le devant une parenthèse : il doit rester visible (on ne divise pas un polynôme seul).")],
+      ]
+    : aidesSimplification();
+}
+
+export function aidesSimplificationFraction(): Aides {
+  return [
+    [texte("On simplifie une fraction par un facteur commun au numérateur et au dénominateur :"), latex("\\dfrac{A\\cdot C}{B\\cdot C}=\\dfrac{A}{B}"), texte(" pour "), latex("C\\neq 0"), texte(".")],
+    [texte("Écris les deux formes factorisées, barre le facteur commun ; la condition d'existence reste celle de la fraction de départ.")],
+  ];
+}
+
+export function aidesRacineLineaire(): Aides {
+  return [
+    [texte("Racine d'un facteur du premier degré : "), latex("kx+c=0\\iff x=-\\dfrac{c}{k}"), texte(".")],
+    [texte("Isole x : passe la constante dans l'autre membre, puis divise par le coefficient de x (avec son signe).")],
+  ];
+}
+
+export function aidesSigneIrreductible(): Aides {
+  return [
+    [texte("Un trinôme sans racine (Δ < 0) garde le même signe pour tout x : celui de "), latex("a"), texte(".")],
+    [texte("Lis le coefficient de "), latex("x^2"), texte(" du facteur étudié : seul son signe compte.")],
+  ];
+}
+
+export function aidesGrilleSignes(quotient: boolean): Aides {
+  return [
+    [
+      texte("Dans chaque colonne, le signe du "),
+      texte(quotient ? "quotient" : "produit"),
+      texte(" suit la règle des signes ; en une racine d'un facteur, ce facteur vaut 0"),
+      texte(quotient ? " ; une valeur qui annule le dénominateur est interdite (double barre)." : "."),
+    ],
+    [texte("Un facteur "), latex("kx+c"), texte(" a le signe de k à droite de sa racine, le signe opposé à gauche ; un trinôme, le signe de a à l'extérieur de ses racines.")],
+  ];
+}
+
+export function aideTexteIntervalleProduit(symbole: string, quotient: boolean): FragmentConsigne[] {
+  const large = symbole === "≤" || symbole === "≥";
+  return [
+    texte("On garde les colonnes où le signe convient au symbole "),
+    latex(symbole === "≤" ? "\\leq" : symbole === "≥" ? "\\geq" : symbole),
+    texte(large ? " ; inégalité large : les racines du numérateur sont solutions" : " ; inégalité stricte : les racines sont exclues"),
+    texte(quotient ? ", une valeur interdite est toujours exclue." : "."),
+  ];
+}
+
+function dansMorceau(m: Morceau, x: number): boolean {
+  const g = m.borneGauche === "-inf" ? -Infinity : m.borneGauche === "+inf" ? Infinity : m.borneGauche;
+  const d = m.borneDroite === "-inf" ? -Infinity : m.borneDroite === "+inf" ? Infinity : m.borneDroite;
+  const okG = m.crochetGauche === "[" ? x >= g - 1e-9 : x > g + 1e-9;
+  const okD = m.crochetDroit === "]" ? x <= d + 1e-9 : x < d - 1e-9;
+  return okG && okD;
+}
+
+export function appartientProduit(s: SolutionEnsembleProduit, x: number): boolean {
+  switch (s.forme) {
+    case "vide":
+      return false;
+    case "reel":
+      return true;
+    case "point":
+      return egal(s.valeur, x);
+    case "reel_sauf_points":
+      return !s.valeurs.some((v) => egal(v, x));
+    case "intervalle":
+      return dansMorceau(s.morceau, x);
+    case "union":
+      return s.morceaux.some((m) => dansMorceau(m, x));
+    case "mixte":
+      return s.morceaux.some((m) => dansMorceau(m, x)) || s.points.some((p) => egal(p, x));
+  }
+}
+
+function bornesProduit(s: SolutionEnsembleProduit): number[] {
+  const finies = (m: Morceau) => [m.borneGauche, m.borneDroite].filter((b): b is number => typeof b === "number");
+  switch (s.forme) {
+    case "point":
+      return [s.valeur];
+    case "reel_sauf_points":
+      return s.valeurs;
+    case "intervalle":
+      return finies(s.morceau);
+    case "union":
+      return s.morceaux.flatMap(finies);
+    case "mixte":
+      return [...s.morceaux.flatMap(finies), ...s.points];
+    default:
+      return [];
+  }
+}
+
+/** Valeur interdite incluse, signe opposé gardé, crochets (gen5, gen6). */
+export function messageIntervalleProduit(solution: SolutionEnsembleProduit, rep: SolutionEnsembleProduit, interdites: number[] = []): FragmentConsigne[] | null {
+  if (interdites.some((v) => appartientProduit(rep, v))) return [texte("Une valeur qui annule le dénominateur est toujours exclue, même avec une inégalité large : crochet ouvert.")];
+  const bornes = [...new Set([...bornesProduit(solution), ...bornesProduit(rep), ...interdites])].sort((x, y) => x - y);
+  const tests = bornes.length === 0 ? [0] : [bornes[0]! - 1, ...bornes.slice(1).map((b, i) => (b + bornes[i]!) / 2), bornes[bornes.length - 1]! + 1];
+  const zonesSol = tests.map((x) => appartientProduit(solution, x));
+  const zonesRep = tests.map((x) => appartientProduit(rep, x));
+  if (zonesSol.every((v, i) => v === zonesRep[i])) return [texte("Les zones sont justes : relis ce qui se passe aux bornes (crochets, racines comprises ou exclues).")];
+  if (zonesSol.every((v, i) => v !== zonesRep[i])) return [texte("Tu as gardé les zones du signe opposé : relis le symbole de l'inéquation.")];
+  return null;
+}
+
+/** Valeurs interdites (CE) d'une inéquation rationnelle, quel que soit son niveau (`ce` : nombre ou liste). */
+export function valeursInterditesQuotient(ex: object): number[] {
+  const plat = (v: unknown): number[] => (Array.isArray(v) ? v.flatMap(plat) : typeof v === "number" ? [v] : []);
+  return plat((ex as { ce?: unknown }).ce);
+}
+
+/** gen4, écran « Élimine les dénominateurs ». */
+export function aidesEliminerDenominateurs(): Aides {
+  return [
+    [
+      texte("On multiplie les deux membres par un dénominateur commun, non nul sous les conditions d'existence. Si les dénominateurs ont un facteur commun, prends le plus petit dénominateur commun : "),
+      latex("\\dfrac{A}{x-p}=\\dfrac{N}{(x-p)(x-s)}\\iff A(x-s)=N"),
+      texte(" ; sinon le produit en croix "),
+      latex("\\dfrac{A}{B}=\\dfrac{C}{D}\\iff AD=CB"),
+      texte("."),
+    ],
+    [texte("Développe chaque membre, puis ramène tout dans le membre de gauche pour obtenir "), latex("\\ldots=0"), texte(".")],
+  ];
+}
+
+// ————————————————————————— gen67 : relations entre racines et coefficients —————————————————————————
+
+export function aidesSommeProduit(e: ExerciceRelationsRacines): Aides {
+  const { a, b, c } = e.enonce;
+  return [
+    [texte("Relations entre racines et coefficients : "), latex("S = x_1 + x_2 = -\\dfrac{b}{a}"), texte(" et "), latex("P = x_1 \\cdot x_2 = \\dfrac{c}{a}"), texte(".")],
+    [texte("Ici "), latex(`a = ${q(a)},\\; b = ${q(b)},\\; c = ${q(c)}`), texte(" : remplace dans les deux formules, sans oublier le signe « − » devant "), latex("\\dfrac{b}{a}"), texte(" dans S.")],
+  ];
+}
+
+/** Message ciblé : signe de S oublié, signe ajouté dans P, division par a oubliée. */
+export function messageSommeProduit(e: ExerciceRelationsRacines, rep: { s: number; p: number }): FragmentConsigne[] | null {
+  const { a, b, c } = e.enonce;
+  const s = -b / a;
+  const p = c / a;
+  if (!egal(rep.s, s) && s !== 0 && egal(rep.s, -s)) return [texte("Vérifie le signe de S : la formule est "), latex("S = -\\dfrac{b}{a}"), texte(", avec un « − » devant.")];
+  if (!egal(rep.p, p) && p !== 0 && egal(rep.p, -p)) return [texte("Vérifie le signe de P : la formule "), latex("P = \\dfrac{c}{a}"), texte(" n'a pas de « − ».")];
+  if (!egal(rep.s, s) && egal(rep.s, -b) && a !== 1) return [texte("N'oublie pas de diviser par "), latex(`a = ${q(a)}`), texte(" dans S.")];
+  if (!egal(rep.p, p) && egal(rep.p, c) && a !== 1) return [texte("N'oublie pas de diviser par "), latex(`a = ${q(a)}`), texte(" dans P.")];
+  return null;
+}
+
+export function aidesFactorisationRacines(e: ExerciceRelationsRacines): Aides {
+  const double = e.racines[0] === e.racines[1];
+  return [
+    double
+      ? [texte("Avec une racine double "), latex("x_0"), texte(", le membre de gauche s'écrit "), latex("a(x - x_0)^2"), texte(".")]
+      : [texte("Si "), latex("x_1"), texte(" et "), latex("x_2"), texte(" sont les racines, le membre de gauche s'écrit "), latex("a(x - x_1)(x - x_2)"), texte(".")],
+    [texte("Garde le même coefficient "), latex(`a = ${q(e.enonce.a)}`), texte(" que l'équation, et pour chaque racine écris « x moins la racine » : une racine négative donne un « + » dans la parenthèse.")],
+  ];
+}
+
+export function aidesEquationDepuisRacines(): Aides {
+  return [
+    [texte("L'équation la plus simple qui a ces racines a pour coefficient "), latex("a = 1"), texte(" : "), latex("(x - x_1)(x - x_2) = 0"), texte(", ou en développant "), latex("x^2 - Sx + P = 0"), texte(".")],
+    [texte("Reprends S et P trouvés en a) : le coefficient de "), latex("x"), texte(" est "), latex("-S"), texte(" et le terme constant est "), latex("P"), texte(".")],
+  ];
+}
+
+/** Factorisation (gen67 b) ou équation (gen67 c, `unitaire`) : signes des racines inversés, coefficient a oublié ou gardé. */
+export function messageFormeRacines(e: ExerciceRelationsRacines, saisie: string, unitaire: boolean): FragmentConsigne[] | null {
+  const { a, b, c } = e.enonce;
+  const cible = unitaire ? { a: 1, b: b / a, c: c / a } : e.enonce;
+  if (cible.b !== 0 && diagnostiquerFormeFactorisee(saisie, { a: cible.a, b: -cible.b, c: cible.c }) === "correct")
+    return [texte("Les signes des racines sont inversés : pour la racine "), latex("x_1"), texte(", la parenthèse est "), latex("(x - x_1)"), texte(".")];
+  if (a !== 1 && !unitaire && diagnostiquerFormeFactorisee(saisie, { a: 1, b: b / a, c: c / a }) === "correct")
+    return [texte("Il manque le coefficient "), latex(`a = ${q(a)}`), texte(" devant le produit.")];
+  if (a !== 1 && unitaire && diagnostiquerFormeFactorisee(saisie, e.enonce) === "correct")
+    return [texte("Ton équation a bien ces racines, mais la plus simple a pour coefficient "), latex("a = 1"), texte(".")];
+  return null;
+}

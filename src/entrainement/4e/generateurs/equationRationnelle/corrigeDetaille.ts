@@ -319,8 +319,71 @@ function etapeSimplifierFraction(e: E, l: string): EtapeCorrection[] {
   ];
 }
 
+/** Quotient de `a` par (x − c), ou null si c n'est pas racine (division synthétique). */
+function divParRacine(a: P, c: number): P | null {
+  const n = degre(a);
+  if (n < 1 || Math.abs(valeur(a, c)) > 1e-9) return null;
+  const desc = Array.from({ length: n + 1 }, (_, i) => a[n - i] ?? 0);
+  const quotient: number[] = [];
+  let acc = 0;
+  for (let i = 0; i < n; i++) {
+    acc = acc * c + desc[i]!;
+    quotient.push(acc);
+  }
+  return quotient.reverse();
+}
+
+/**
+ * Méthode du dénominateur commun (G5, recommandée par le cours § 5) : quand les deux dénominateurs
+ * ont le facteur x − c en commun, on multiplie par le plus petit dénominateur commun au lieu du
+ * produit en croix ; l'équation obtenue est du premier degré (`equationIsolee` linéaire, voir
+ * `moteur/denominateurCommun.ts`). null si l'instance n'est pas dans ce cas.
+ */
+function etapeIsolementDenominateurCommun(e: E, l: string, g: Membre, d: Membre): EtapeCorrection[] | null {
+  const cible = exP(e.equationIsolee);
+  const c = e.construction === "deux_denominateurs" ? e.p : e.ce.find((v) => divParRacine(g.den, v) && divParRacine(d.den, v));
+  if (c === undefined) return null;
+  const gq = divParRacine(g.den, c);
+  const dq = divParRacine(d.den, c);
+  if (!gq || !dq) return null;
+  const gqL = polyLatex(gq);
+  const dqL = polyLatex(dq);
+  const A = { p: mul(g.num, dq), l: produit(g.num, g.numL, dq, dqL) };
+  const B = { p: mul(d.num, gq), l: produit(d.num, d.numL, gq, gqL) };
+  let diff = sub(A.p, B.p);
+  if (degre(diff) !== 1 || degre(cible) !== 1) return null;
+  let [M, N] = [A, B];
+  if (Math.sign(diff[1]!) !== Math.sign(cible[1]!)) {
+    [M, N] = [B, A];
+    diff = sub(M.p, N.p);
+  }
+  const k = diff[1]! / cible[1]!;
+  if (Math.abs(diff[0]! - k * cible[0]!) > 1e-9) return null;
+  const commun = mul(mul(gq, dq), [-c, 1]);
+  const communL = produit(mul(gq, dq), polyLatex(mul(gq, dq)), [-c, 1], xMoinsL(c));
+  const lignes: LigneCalcul[] = [
+    ligne(papier(formatEquationRationnelleLatexApresSimplification(e)).replace(/\s+/g, "")),
+    ligne(`${M.l}=${N.l}`, [texte("on multiplie les deux membres par le dénominateur commun "), latex(degre(commun) >= 1 ? communL : q(commun[0]!)), texte(" (non nul sous les CE)")]),
+  ];
+  const devM = polyLatex(M.p);
+  const devN = polyLatex(N.p);
+  if (`${devM}=${devN}` !== `${M.l}=${N.l}`) lignes.push(ligne(`${devM}=${devN}`, "on développe les deux membres"));
+  lignes.push(ligne(`${polyLatex(diff)}=0`, [texte("on soustrait "), latex(devN), texte(" aux deux membres et on réduit")]));
+  if (Math.abs(k - 1) > 1e-9) lignes.push(ligne(`${polyLatex(cible)}=0`, `on divise les deux membres par ${nombreTexte(k)}`));
+  return [
+    utilise(l, [texte(`Les deux dénominateurs ont le facteur commun ${"x"} ${c >= 0 ? "−" : "+"} ${nombreTexte(Math.abs(c))} : on multiplie par le plus petit dénominateur commun ${COURS_DENOMINATEUR}. L'équation obtenue est du premier degré.`)]),
+    calcul(l, lignes),
+    resultat(l, [texte("Équation obtenue : "), latex(formatEnonceLatex(e.equationIsolee.enonce))]),
+    piege(l, [texte("Le produit en croix donnerait une équation du second degré dont "), latex(`x=${q(c)}`), texte(" est racine : une valeur interdite, à rejeter. Le dénominateur commun évite cette racine étrangère.")]),
+  ];
+}
+
 function etapeIsolement(e: E, l: string): EtapeCorrection[] {
   const [g, d] = membresApresSimplification(e);
+  if (e.equationIsolee.enonce.a === 0) {
+    const dc = etapeIsolementDenominateurCommun(e, l, g, d);
+    if (dc) return dc;
+  }
   const cible = exP(e.equationIsolee);
   // Produit en croix (ou multiplication par le seul dénominateur quand l'autre membre est entier).
   const gauche = { p: mul(g.num, d.den), l: produit(g.num, g.numL, d.den, d.denL) };

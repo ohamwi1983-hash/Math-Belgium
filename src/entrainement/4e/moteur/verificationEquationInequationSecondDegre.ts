@@ -64,26 +64,56 @@ const TOLERANCE = 0.005;
  * `symboleTrouve` pilote le découpage gauche/droite (jamais `parse_error` pour un symbole
  * simplement erroné, tant qu'il est interprétable), `symboleAttendu` n'intervient qu'à la toute
  * fin pour distinguer `"correct"` de `"not_equivalent"`. */
+type Relation = "eq" | "gt" | "lt" | "ge" | "le";
+const SYMBOLES_SAISIE: [string, Relation][] = [
+  ["≥", "ge"],
+  [">=", "ge"],
+  ["≤", "le"],
+  ["<=", "le"],
+  [">", "gt"],
+  ["<", "lt"],
+  ["=", "eq"],
+];
+const RELATION_INVERSE: Record<Relation, Relation> = { eq: "eq", gt: "lt", lt: "gt", ge: "le", le: "ge" };
+
+/**
+ * Écran « poser » (audit G6, G14) : toute écriture équivalente est juste — f(x) ◇ k, mais aussi
+ * f(x) − k ◇ 0 (le cours et le quiz raisonnent sur le signe de f(x) − k), membres échangés
+ * (k ◇ f(x), symbole retourné) ou multipliés par une constante (sens retourné si elle est
+ * négative). Les symboles larges ≥ / ≤ (ou >= / <=) sont lus.
+ */
 export function diagnostiquerPoserEquationInequation(exercice: ExerciceEquationInequationSecondDegre, texte: string): StatutVerification {
-  const symboleAttendu = exercice.variante === "equation" ? "=" : exercice.sens === "gt" ? ">" : "<";
-  const symboleTrouve = texte.includes("=") ? "=" : texte.includes(">") ? ">" : texte.includes("<") ? "<" : null;
-  if (symboleTrouve === null) return "parse_error";
-  const cotes = texte.split(symboleTrouve);
+  const attendu: Relation = exercice.variante === "equation" ? "eq" : exercice.sens === "gt" ? (exercice.large ? "ge" : "gt") : exercice.large ? "le" : "lt";
+  const trouve = SYMBOLES_SAISIE.find(([s]) => texte.includes(s));
+  if (!trouve) return "parse_error";
+  const [symbole, relation] = trouve;
+  const cotes = texte.split(symbole);
   if (cotes.length !== 2) return "parse_error";
   const [gauche, droite] = cotes;
 
+  // (gauche − droite) = λ·(f(x) − k), λ constant non nul.
+  let lambda: number | null = null;
   try {
     for (const x of POINTS_ECHANTILLON) {
       const g = evaluerExpressionGenerale(gauche, x);
       const d = evaluerExpressionGenerale(droite, x);
       if (!Number.isFinite(g) || !Number.isFinite(d)) return "parse_error";
-      if (Math.abs(g - evaluerQuadratiqueLocal(exercice.base.fonction, x)) > TOLERANCE_EQUATION) return "not_equivalent";
-      if (Math.abs(d - exercice.k) > TOLERANCE_EQUATION) return "not_equivalent";
+      const cible = evaluerQuadratiqueLocal(exercice.base.fonction, x) - exercice.k;
+      const saisie = g - d;
+      if (Math.abs(cible) < 1e-9) {
+        if (Math.abs(saisie) > TOLERANCE_EQUATION) return "not_equivalent";
+        continue;
+      }
+      const l = saisie / cible;
+      if (lambda === null) lambda = l;
+      else if (Math.abs(l - lambda) > TOLERANCE_EQUATION * Math.max(1, Math.abs(lambda))) return "not_equivalent";
     }
   } catch {
     return "parse_error";
   }
-  return symboleTrouve === symboleAttendu ? "correct" : "not_equivalent";
+  if (lambda === null || Math.abs(lambda) < 1e-9) return "not_equivalent";
+  const relationNormalisee = lambda < 0 ? RELATION_INVERSE[relation] : relation;
+  return relationNormalisee === attendu ? "correct" : "not_equivalent";
 }
 
 export function verifierPoserEquationInequation(exercice: ExerciceEquationInequationSecondDegre, texte: string): boolean {
@@ -137,7 +167,9 @@ function statutBorne(texte: string, cible: number): StatutVerification {
 }
 
 export function diagnostiquerValidationInequation(exercice: ExerciceEquationInequationSecondDegre, reponse: ReponseIntervalle): { inf: StatutVerification; sup: StatutVerification } {
-  const cible: IntervalleBorne = exercice.variante === "inequation" ? exercice.intervalleValide : { inf: NaN, sup: NaN };
+  // Variable entière (décision 5) : le plus petit et le plus grand ENTIER de l'ensemble-solution.
+  const cible: IntervalleBorne =
+    exercice.variante === "inequation" ? (exercice.entiers ? { inf: exercice.entiers.min, sup: exercice.entiers.max } : exercice.intervalleValide) : { inf: NaN, sup: NaN };
   return { inf: statutBorne(reponse.inf, cible.inf), sup: statutBorne(reponse.sup, cible.sup) };
 }
 

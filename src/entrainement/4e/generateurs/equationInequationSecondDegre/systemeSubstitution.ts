@@ -26,6 +26,7 @@ import type {
   VarianteEquationInequationSecondDegre,
 } from "../../core/equationInequationSecondDegre.types";
 import { construireOptionsInterpretationEquationInequation, formatQuestionFinaleEquationInequation } from "./interpretation";
+import { construireInequationContexte, solutionDansDomaine } from "./solutionInequation";
 
 export interface ParametresSystemeSubstitution {
   famille: FamilleEquationInequationSecondDegre;
@@ -135,42 +136,12 @@ export function construireDepuisSysteme(p: ParametresSystemeSubstitution, varian
 
   /** `f(x)=x(S-x)` concave (`a=-1`) : `f(x)>k` entre les racines — toujours `"gt"`, voir en-tête de
    * fichier. */
+  // Sens « > » (x(S − x) < P donnerait deux intervalles disjoints, hors du format de réponse) ;
+  // symbole large ou strict tiré (G14).
   const sens = "gt" as const;
-  const intervalleBrut = { inf: racinesCandidates[0], sup: racinesCandidates[1] };
-  const intervalleValide = { inf: Math.max(intervalleBrut.inf, domaine.inf), sup: Math.min(intervalleBrut.sup, domaine.sup) };
-  return {
-    variante: "inequation",
-    famille: p.famille,
-    base,
-    k,
-    voieSysteme: true,
-    systeme,
-    sens,
-    intervalleBrut,
-    intervalleValide,
-    questionFinale: formatQuestionFinaleEquationInequation({
-      variante: "inequation",
-      sens,
-      labelVariable: p.labelVariable,
-      nomGrandeur: p.nomGrandeur,
-      genreGrandeur: p.genreGrandeur,
-      k,
-      uniteGrandeur: p.uniteGrandeur,
-    }),
-    optionsInterpretation: construireOptionsInterpretationEquationInequation({
-      variante: "inequation",
-      sens,
-      labelVariable: p.labelVariable,
-      nomGrandeur: p.nomGrandeur,
-      genreGrandeur: p.genreGrandeur,
-      uniteVariable: p.uniteVariable,
-      uniteGrandeur: p.uniteGrandeur,
-      uniteGrandeurFautive: p.uniteGrandeurFautive,
-      k,
-      intervalleValide,
-      intervalleBrut,
-    }),
-  };
+  const large = Math.random() < 0.5;
+  const solution = solutionDansDomaine(a, racinesCandidates, domaine, sens, large)!;
+  return construireInequationContexte({ famille: p.famille, base, k, voieSysteme: true, systeme, racines: racinesCandidates, sens, large, solution, entiers: p.famille === "sommeProduit" });
 }
 
 /** Même rôle que `vertexForm.ts::construireAvecParametres`. */

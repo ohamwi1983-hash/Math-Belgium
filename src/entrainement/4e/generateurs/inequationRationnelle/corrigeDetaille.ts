@@ -572,6 +572,12 @@ function fractionEtudiee(e: E): { n: Poly; d: Poly } {
   }
 }
 
+/** Valeur du quotient étudié en x (figure « courbe et signes » de l'écran, `CourbeSignes`). */
+export function valeurQuotientEtudie(e: E, x: number): number {
+  const { n, d } = fractionEtudiee(e);
+  return valeur(n, x) / valeur(d, x);
+}
+
 function etapeGrille(sq: string, e: E): EtapeCorrection[] {
   const t = valeurTest(e.racines);
   const { n, d } = fractionEtudiee(e);

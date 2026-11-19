@@ -80,15 +80,16 @@ export function profilEquationRationnelle(e: ExerciceEquationRationnelle): Profi
   return { casParticulier: toutesRejetees ? "aucune-solution" : null };
 }
 
-export const LIBELLE_CAS_RELATIONS_RACINES = "Inclure un cas particulier (a = ±1, racine nulle ou racines opposées)";
+export const LIBELLE_CAS_RELATIONS_RACINES = "Inclure un cas particulier (racines opposées : S = 0)";
 
-/** gen67 — relations de Viète. a = ±1 : S et P se lisent sans division et « l'équation de
- * coefficient a = 1 » est (au signe près) celle de l'énoncé ; racine nulle (c = 0, P = 0) et racines
- * opposées (b = 0, S = 0) : équation incomplète. Une racine double reste un cas complet. */
+/** gen67 — relations de Viète. Depuis le lot C (audit 4e ch. 2 G15), a = ±1, la racine double et la
+ * racine nulle sont des VARIANTES choisies dans le panneau (lignes distinctes) : elles ne sont plus
+ * des cas particuliers, sans quoi la variante « racines distinctes (a = ±1) » n'aurait jamais de cas
+ * complet. Reste le cas particulier des racines opposées (b = 0, S = 0 : équation incomplète). */
 export function profilRelationsRacines(e: ExerciceRelationsRacines): ProfilInstance {
   const [x1, x2] = e.racines;
   return {
-    casParticulier: cas([Math.abs(e.enonce.a) === 1 && "coefficient-a-1", (x1 === 0 || x2 === 0) && "racine-nulle", x1 !== 0 && x1 === -x2 && "racines-opposees"]),
+    casParticulier: cas([x1 !== 0 && x1 === -x2 && "racines-opposees"]),
   };
 }
 

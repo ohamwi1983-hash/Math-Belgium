@@ -57,8 +57,8 @@ export function EtapeFactorisationRacines({
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
       <p className="prompt-text">
-        Les racines de cette équation sont <Katex expression={formatRacinesRevelees(exercice.racines)} /> — écris la
-        factorisation générale de cette équation à partir de ces racines.
+        Les racines de cette équation sont <Katex expression={formatRacinesRevelees(exercice.racines)} /> — factorise le
+        membre de gauche à partir de ces racines.
       </p>
       <ApercuExpressionLatex texte={reponse} label="Factorisation =" />
       <div className="field">

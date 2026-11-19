@@ -13,6 +13,9 @@ import { BoutonAide } from "./BoutonAide";
  * - aides à deux niveaux, formule en KaTeX (`FragmentConsigne[]`).
  */
 
+export const MESSAGE_BORNE_ILLISIBLE =
+  "Valeur non reconnue : écris chaque nombre (ou choisis l'infini) avant de valider. Cette saisie ne compte pas comme une tentative.";
+
 export const MESSAGE_ILLISIBLE =
   "Expression non reconnue : vérifie les parenthèses, les signes et la place de x. Cette saisie ne compte pas comme une tentative.";
 
@@ -42,13 +45,15 @@ interface PropsMessage {
   tentativesMax: number;
   /** Message ciblé sur l'erreur trahie par la dernière réponse fausse (null : message générique). */
   cible?: FragmentConsigne[] | null;
+  /** Texte de la saisie illisible (défaut : expression ; `MESSAGE_BORNE_ILLISIBLE` pour un nombre). */
+  texteIllisible?: string;
 }
 
-export function MessageRetour({ illisible, tentativesUtilisees, tentativesMax, cible }: PropsMessage) {
+export function MessageRetour({ illisible, tentativesUtilisees, tentativesMax, cible, texteIllisible = MESSAGE_ILLISIBLE }: PropsMessage) {
   if (illisible) {
     return (
       <p className="alert-error" role="alert">
-        {MESSAGE_ILLISIBLE}
+        {texteIllisible}
       </p>
     );
   }

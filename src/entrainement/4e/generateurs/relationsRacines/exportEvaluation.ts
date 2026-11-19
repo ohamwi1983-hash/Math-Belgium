@@ -13,7 +13,7 @@ import { formatEnonceLatex } from "../../ui/formatEquation";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { correctionDetailleeRelationsRacines, equationUnitaireLatex, factorisationLatex } from "./corrigeDetaille";
 import { sommeEtProduitAttendus } from "../../moteur/verificationRelationsRacines";
-import { genererExerciceRelationsRacines } from "./index";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRelationsRacines, type VarianteRelationsRacinesId } from "./index";
 import { profilRelationsRacines, LIBELLE_CAS_RELATIONS_RACINES } from "../profilsEvaluation4eCh2Ch3";
 
 /**
@@ -37,13 +37,24 @@ function equationLatex(exercice: ExerciceRelationsRacines): string {
 
 /** Consignes des trois questions (= des trois écrans) — utilisées telles quelles par l'énoncé
  * papier ET comme étapes du corrigé. */
+/** Consignes de l'ÉCRAN (le générateur révèle les racines à l'écran b, voir EtapeFactorisationRacines). */
 function consignes(exercice: ExerciceRelationsRacines): FragmentConsigne[][] {
   const [x1, x2] = exercice.racines;
   const racines: FragmentConsigne[] =
     x1 === x2 ? [texte("Cette équation a une racine double, "), latex(`x_1 = x_2 = ${x1}`)] : [texte("Les racines de cette équation sont "), latex(`x_1 = ${x1}`), texte(" et "), latex(`x_2 = ${x2}`)];
   return [
     [texte("Calcule la somme S et le produit P des racines de cette équation, sans calculer les racines elles-mêmes.")],
-    [...racines, texte(". Écris la factorisation de l'équation à partir de ces racines.")],
+    [...racines, texte(". Factorise le membre de gauche à partir de ces racines.")],
+    [texte("Écris l'équation du second degré la plus simple (de coefficient a = 1) qui admet ces mêmes racines.")],
+  ];
+}
+
+/** Consignes PAPIER : b) ne donne plus les racines — elles répondaient à a) (audit P1, 100 % des
+ * tirages) ; l'élève les retrouve à partir de S et P. */
+function consignesPapier(): FragmentConsigne[][] {
+  return [
+    [texte("Calcule la somme S et le produit P des racines de cette équation, sans calculer les racines elles-mêmes.")],
+    [texte("À l'aide de a), retrouve les racines (deux nombres de somme S et de produit P), puis factorise le membre de gauche.")],
     [texte("Écris l'équation du second degré la plus simple (de coefficient a = 1) qui admet ces mêmes racines.")],
   ];
 }
@@ -58,7 +69,7 @@ function construireEnonce(exercice: ExerciceRelationsRacines): SectionExercice {
 
 function enoncePapier(exercice: ExerciceRelationsRacines): EnoncePapier {
   return {
-    section: { enteteFragments: enteteFragments(exercice), questions: consignes(exercice).map((consigne) => ({ consigne })) },
+    section: { enteteFragments: enteteFragments(exercice), questions: consignesPapier().map((consigne) => ({ consigne })) },
     etapesParQuestion: [["a"], ["b"], ["c"]],
   };
 }
@@ -105,6 +116,8 @@ export const adaptateurEvaluationRelationsRacines: AdaptateurFeuilleExercices<Ex
   titreDocument: "Relations entre racines et coefficients — Évaluation",
   nomFichierBase: "relations-racines-coefficients",
   genererInstance: genererExerciceRelationsRacines,
+  catalogueVariantes: CATALOGUE_VARIANTES,
+  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteRelationsRacinesId),
   construireEnonce,
   construireCorrection,
   criteresDifficulte,

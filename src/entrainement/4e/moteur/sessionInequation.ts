@@ -21,6 +21,9 @@ import { verifierRacines, verifierSigneA, verifierSimplification, verifierSoluti
 
 const POINTS_DE_BASE = 100;
 
+/** Choix fermé (signe de a / du trinôme, 2 boutons) : UNE tentative (audit 4e ch. 2 G3). */
+export const TENTATIVES_CHOIX_FERME_INEQUATION = 1;
+
 export type PhaseInequation = "simplification" | "racines" | "signe_a" | "intervalle";
 
 export interface ResultatExerciceInequation {
@@ -179,6 +182,7 @@ export function soumettreReponseSigneA(etat: EtatSessionInequation, reponse: Sig
 
   const etapeCourante = soumettreEtapeTentatives<SigneA>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME_INEQUATION,
     verifier: (r) => verifierSigneA(r, etat.exerciceCourant),
     revelerReponse: () => {},
   });

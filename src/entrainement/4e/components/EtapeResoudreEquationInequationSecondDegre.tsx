@@ -5,7 +5,6 @@ import { diagnostiquerResoudre } from "../moteur/verificationEquationInequationS
 import { NIVEAU_AIDE_MAX_RESOUDRE } from "../moteur/sessionEquationInequationSecondDegre";
 import { consigneResoudre, texteAideResoudreNiveau1, texteAideResoudreNiveau2 } from "../ui/formatEquationInequationSecondDegre";
 import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { Katex } from "./Katex";
 import { QuestionFinale } from "./QuestionFinale";
@@ -13,6 +12,7 @@ import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { MessageRetour, useTentativeLisible } from "./RetourSaisie";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -31,6 +31,7 @@ interface Props {
  * les 2 bornes de l'intervalle BRUT pour `inequation`). */
 export function EtapeResoudreEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [valeurs, setValeurs] = useState<[string, string]>(["", ""]);
+  const saisie = useTentativeLisible<[string, string]>();
   const complet = valeurs.every((v) => v.trim() !== "");
   const statut = complet ? diagnostiquerResoudre(exercice, valeurs) : undefined;
 
@@ -76,14 +77,10 @@ export function EtapeResoudreEquationInequationSecondDegre({ exercice, tentative
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_RESOUDRE} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeurs)}>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(valeurs, statut !== "parse_error", onValider)}>
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

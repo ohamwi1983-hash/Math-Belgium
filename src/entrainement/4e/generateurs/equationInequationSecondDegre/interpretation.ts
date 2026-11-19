@@ -28,8 +28,28 @@ interface ParametresEquation extends ParametresCommuns {
 interface ParametresInequation extends ParametresCommuns {
   variante: "inequation";
   sens: "gt" | "lt";
+  large: boolean;
   intervalleValide: IntervalleBorne;
+  inclusInf: boolean;
+  inclusSup: boolean;
   intervalleBrut: IntervalleBorne;
+  entiers?: { min: number; max: number };
+}
+
+/** Relation en toutes lettres (phrase de conclusion) : > dépasse, ≥ atteint au moins, < est en
+ * dessous de, ≤ ne dépasse pas. */
+export function relationTexte(sens: "gt" | "lt", large: boolean): string {
+  return sens === "gt" ? (large ? "atteint au moins" : "dépasse") : large ? "ne dépasse pas" : "est en dessous de";
+}
+
+/** « x ∈ [8 ; 15[ » ou, pour une variable entière, « x ∈ {0 ; 1 ; … ; 30} ». */
+export function ensembleTexte(labelVariable: string, intervalle: IntervalleBorne, inclusInf: boolean, inclusSup: boolean, entiers?: { min: number; max: number }): string {
+  if (entiers) {
+    const { min, max } = entiers;
+    const liste = max - min <= 3 ? Array.from({ length: max - min + 1 }, (_, i) => nombre(min + i)).join(" ; ") : `${nombre(min)} ; ${nombre(min + 1)} ; … ; ${nombre(max)}`;
+    return `${labelVariable} ∈ {${liste}}`;
+  }
+  return `${labelVariable} ∈ ${inclusInf ? "[" : "]"}${nombre(intervalle.inf)} ; ${nombre(intervalle.sup)}${inclusSup ? "]" : "["}`;
 }
 
 export type ParametresInterpretationEquationInequation = ParametresEquation | ParametresInequation;
@@ -60,8 +80,10 @@ function phraseAtteintValeurs(p: ParametresCommuns, valeurs: number[], uniteGran
   return `${capitaliser(p.nomGrandeur)} atteint ${avecUnite(p.k, uniteGrandeur)} pour ${avecUnite(formatValeurs(valeurs, p.labelVariable), p.uniteVariable)}.`;
 }
 
-function phraseIntervalle(p: ParametresCommuns, sens: string, intervalle: IntervalleBorne, uniteGrandeur: string): string {
-  return `${capitaliser(p.nomGrandeur)} ${sens} ${avecUnite(p.k, uniteGrandeur)} pour ${p.labelVariable} compris entre ${nombre(intervalle.inf)} et ${avecUnite(intervalle.sup, p.uniteVariable)}.`;
+function phraseIntervalle(p: ParametresInequation, sens: string, intervalle: IntervalleBorne, uniteGrandeur: string, avecEntiers = true, inclusInf = p.inclusInf, inclusSup = p.inclusSup): string {
+  const entiers = avecEntiers ? p.entiers : undefined;
+  const unite = p.uniteVariable ? ` (${p.uniteVariable})` : "";
+  return `${capitaliser(p.nomGrandeur)} ${sens} ${avecUnite(p.k, uniteGrandeur)} pour ${ensembleTexte(p.labelVariable, intervalle, inclusInf, inclusSup, entiers)}${unite}.`;
 }
 
 function choisirTexteDistinct(candidats: string[], dejaUtilises: Set<string>, filet: string): string {
@@ -84,6 +106,7 @@ function pronom(genre: "masculin" | "feminin"): string {
 export interface ParametresQuestionFinaleEquationInequation {
   variante: "equation" | "inequation";
   sens?: "gt" | "lt";
+  large?: boolean;
   labelVariable: string;
   nomGrandeur: string;
   genreGrandeur: "masculin" | "feminin";
@@ -99,10 +122,13 @@ export interface ParametresQuestionFinaleEquationInequation {
 export function formatQuestionFinaleEquationInequation(p: ParametresQuestionFinaleEquationInequation): string {
   const pro = pronom(p.genreGrandeur);
   const v = p.labelVariable;
+  // Toujours « Pour quelles valeurs » (audit G14, P2) : le singulier était faux avec deux solutions,
+  // et le pluriel ne trahit pas le nombre de solutions valides.
   if (p.variante === "equation") {
-    return `Pour quelle valeur de ${v} ${p.nomGrandeur} vaut-${pro} exactement ${avecUnite(p.k, p.uniteGrandeur)} ?`;
+    return `Pour quelles valeurs de ${v} ${p.nomGrandeur} vaut-${pro} exactement ${avecUnite(p.k, p.uniteGrandeur)} ?`;
   }
-  const relation = p.sens === "gt" ? `dépasse-t-${pro}` : `est-${pro} en dessous de`;
+  const relation =
+    p.sens === "gt" ? (p.large ? `atteint-${pro} au moins` : `dépasse-t-${pro}`) : p.large ? `ne dépasse-t-${pro} pas` : `est-${pro} en dessous de`;
   return `Pour quelles valeurs de ${v} ${p.nomGrandeur} ${relation} ${avecUnite(p.k, p.uniteGrandeur)} ?`;
 }
 
@@ -134,15 +160,16 @@ function optionsInequation(p: ParametresInequation): OptionInterpretationEquatio
    * dur "dépasse" quelle que soit `sens`, produisant une phrase correcte contredisant
    * l'inéquation réellement posée pour toute famille `"lt"` — ex. `distanceFreinage`/
    * `triangleRectanglePerimetre`, déjà présentes avant cette refonte). */
-  const sensTexte = p.sens === "gt" ? "dépasse" : "est en dessous de";
+  const sensTexte = relationTexte(p.sens, p.large);
   const correcte = phraseIntervalle(p, sensTexte, p.intervalleValide, p.uniteGrandeur);
   const dejaUtilises = new Set([correcte]);
 
   // "sens inverse" — le piège central de la spec : oublier la validation contextuelle (intersection
-  // avec le domaine) et donner l'intervalle BRUT tel quel.
+  // avec le domaine) et donner l'intervalle BRUT tel quel (ou le sens contraire).
   const candidatsSensInverse = [
-    phraseIntervalle(p, sensTexte, p.intervalleBrut, p.uniteGrandeur),
-    phraseIntervalle(p, sensTexte, { inf: -p.intervalleValide.sup, sup: -p.intervalleValide.inf }, p.uniteGrandeur),
+    phraseIntervalle(p, sensTexte, p.intervalleBrut, p.uniteGrandeur, false, p.large, p.large),
+    phraseIntervalle(p, relationTexte(p.sens === "gt" ? "lt" : "gt", p.large), p.intervalleValide, p.uniteGrandeur),
+    phraseIntervalle(p, sensTexte, { inf: -p.intervalleValide.sup, sup: -p.intervalleValide.inf }, p.uniteGrandeur, false),
   ];
   const sensInverse = choisirTexteDistinct(candidatsSensInverse, dejaUtilises, phraseIntervalle(p, sensTexte, p.intervalleBrut, p.uniteGrandeur) + " ");
 

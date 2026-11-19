@@ -6,7 +6,6 @@ import { diagnostiquerRelation1, diagnostiquerRelation2 } from "../moteur/verifi
 import { NIVEAU_AIDE_MAX_POSER_SYSTEME } from "../moteur/sessionEquationInequationSecondDegre";
 import { consignePoserSysteme, texteAidePoserSystemeNiveau1, texteAidePoserSystemeNiveau2 } from "../ui/formatEquationInequationSecondDegre";
 import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { CroquisEquationInequationSecondDegre } from "./CroquisEquationInequationSecondDegre";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { Katex } from "./Katex";
@@ -16,6 +15,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
+import { MessageRetour, useTentativeLisible } from "./RetourSaisie";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -36,6 +36,7 @@ interface Props {
 export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [relation1, setRelation1] = useState("");
   const [relation2, setRelation2] = useState("");
+  const saisie = useTentativeLisible<{ relation1: string; relation2: string }>();
   const complet = relation1.trim() !== "" && relation2.trim() !== "";
   const statut1 = complet ? diagnostiquerRelation1(exercice, relation1) : undefined;
   const statut2 = complet ? diagnostiquerRelation2(exercice, relation2) : undefined;
@@ -91,14 +92,10 @@ export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tenta
         <>
           <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POSER_SYSTEME} onActiverAide={onActiverAide} />
 
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ relation1, relation2 })}>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter({ relation1, relation2 }, statut1 !== "parse_error" && statut2 !== "parse_error", onValider)}>
             Valider
           </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut1 !== "correct" ? statut1 : statut2)}
-            </p>
-          )}
+          <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

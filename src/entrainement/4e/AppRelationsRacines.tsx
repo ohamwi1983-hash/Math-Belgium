@@ -12,7 +12,9 @@ import {
 } from "./moteur/sessionRelationsRacines";
 import type { EtatSessionRelationsRacines, PhaseRelationsRacines } from "./moteur/sessionRelationsRacines";
 import { diagnostiquerEquationDepuisRacines, diagnostiquerFactorisation } from "./moteur/verificationRelationsRacines";
-import { genererExerciceRelationsRacines } from "./generateurs/relationsRacines";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRelationsRacines, type VarianteRelationsRacinesId } from "./generateurs/relationsRacines";
+import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
+import { aidesEquationDepuisRacines, aidesFactorisationRacines, aidesSommeProduit, messageFormeRacines, messageSommeProduit } from "./ui/aidesSecondDegre";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { EtapeSommeProduit } from "./components/EtapeSommeProduit";
 import { EtapeFactorisationRacines } from "./components/EtapeFactorisationRacines";
@@ -43,12 +45,12 @@ function nouvelleSession(): EtatSessionRelationsRacines {
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
  * feuille), son exercice est cette instance — tirée avec la MÊME fonction que l'adaptateur d'export
- * (`generateurs/relationsRacines/exportEvaluation.ts`, sans catalogue de variantes) ; la suite reste
+ * (`generateurs/relationsRacines/exportEvaluation.ts`, même catalogue de variantes) ; la suite reste
  * un tirage normal. */
 function sessionInitiale(): EtatSessionRelationsRacines {
   const code = lireCodeDepuisUrl();
   if (!code) return nouvelleSession();
-  return demarrerSessionRelationsRacines(REGLAGES_DEMO, () => genererAvecCode(code, undefined, genererExerciceRelationsRacines, undefined));
+  return demarrerSessionRelationsRacines(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceRelationsRacines, (id) => construireAvecVarianteId(id as VarianteRelationsRacinesId)));
 }
 
 /** Les 3 écrans existent toujours, dans cet ordre. */
@@ -113,6 +115,14 @@ export function AppRelationsRacines() {
     setEnAttente(null);
   }
 
+  function forcerVariante(varianteId: string) {
+    setEnAttente(null);
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
+    setEtat(demarrerSessionRelationsRacines(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteRelationsRacinesId)));
+  }
+
   const exercice = etat.exerciceCourant;
   const recapitulatif = calculerRecapitulatifRelationsRacines(etat);
 
@@ -132,6 +142,7 @@ export function AppRelationsRacines() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Relations entre racines et coefficients</h1>
         <p className="app-subtitle">Équations et inéquations du second degré</p>
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
 
       <main className="card">
@@ -153,6 +164,8 @@ export function AppRelationsRacines() {
               tentativesMax={etat.reglages.tentativesMax}
               aideActivee={etat.aideSommeProduitUtilisee}
               onActiverAide={() => setEtat(activerAideSommeProduit(etat))}
+              aides={aidesSommeProduit(exercice)}
+              messageCible={(r) => messageSommeProduit(exercice, r)}
               onValider={(reponse) => terminerEtape(soumettreReponseSommeProduit(etat, reponse), `S = ${nombreSaisi(reponse.s)} ; P = ${nombreSaisi(reponse.p)}`)}
               validation={validation}
             />
@@ -164,6 +177,8 @@ export function AppRelationsRacines() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideFactorisationUtilisee}
               onActiverAide={() => setEtat(activerAideFactorisation(etat))}
+              aides={aidesFactorisationRacines(exercice)}
+              messageCible={(v) => messageFormeRacines(exercice, v, false)}
               diagnostiquer={(v) => diagnostiquerFactorisation(v, exercice)}
               onValider={(reponse) => terminerEtape(soumettreReponseFactorisation(etat, reponse), saisieEnLatex(reponse.includes("=") ? reponse : `${reponse}=0`))}
               validation={validation}
@@ -176,6 +191,8 @@ export function AppRelationsRacines() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideEquationDepuisRacinesUtilisee}
               onActiverAide={() => setEtat(activerAideEquationDepuisRacines(etat))}
+              aides={aidesEquationDepuisRacines()}
+              messageCible={(v) => messageFormeRacines(exercice, v, true)}
               diagnostiquer={(v) => diagnostiquerEquationDepuisRacines(v, exercice)}
               onValider={(reponse) => terminerEtape(soumettreReponseEquationDepuisRacines(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}

@@ -25,7 +25,7 @@ export function calculerEtatActuelSignesProduit(etat: EtatSessionSignesProduit):
   if (!facteur) return null;
 
   if (facteur.type !== "quadratique_factorisable") {
-    return `${formatFacteurLatex(facteur)} = 0`;
+    return formatFacteurLatex(facteur);
   }
 
   const { categorie, enonce, solution } = facteur.exercice;
@@ -35,7 +35,7 @@ export function calculerEtatActuelSignesProduit(etat: EtatSessionSignesProduit):
       : etat.scoreFactorisationChamp1Exercice !== null;
 
   if (factoriseeConnue) {
-    return `${formatFormeFactoriseeSignesProduit(enonce, solution.racines)} = 0`;
+    return formatFormeFactoriseeSignesProduit(enonce, solution.racines);
   }
-  return `${formatFacteurLatex(facteur)} = 0`;
+  return formatFacteurLatex(facteur);
 }
