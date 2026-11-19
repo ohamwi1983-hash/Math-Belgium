@@ -297,6 +297,7 @@ Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feui
 évaluations ne saute plus d'étape. **Chapitres migrés** : 6e ch. 5 (pilote, 6gen34–42, 6gen93–99) ;
 4e ch. 3 (gen10–13, gen68–72 — voir « Lectures graphiques et décisions » plus bas). Les autres
 adaptateurs s'affichent comme avant (contrat rétrocompatible).
+6e ch. 4, seconde moitié (6gen77–84) : briques `6e-6h/ui6e/corrigeIntegrales2.ts` (renvois `COURS_*` § 1–7, `crochet`, `integraleTexte`, `lignesDepuisJustification` — justification rédigée éclatée en lignes, condition « pour / sur / car » rattachée à la ligne précédente) ; collecteur `corrige-6e4-m2` : ∫ par quadrature (Simpson, découpée aux entiers), crochets [F]ₐᵇ, ≤/≥/≈ contrôlés, unités converties (kW·h, Mt, m³, h).
 
 **Chaque étape (= écran du générateur, lettre `sousQuestion`) contient, dans cet ordre :**
 1. **Ce qu'on utilise** (`utilise`) : propriété / formule / méthode, avec le renvoi « (cours, § n) »

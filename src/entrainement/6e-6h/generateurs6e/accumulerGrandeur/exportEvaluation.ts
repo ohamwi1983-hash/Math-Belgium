@@ -4,7 +4,6 @@ import type {
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -12,10 +11,11 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import { PHASES_ACCUMULER_GRANDEUR } from "../../moteur6e/typesAccumulerGrandeur";
 import type { PhaseAccumulerGrandeur } from "../../moteur6e/typesAccumulerGrandeur";
 import { fiche, formatReponseAttenduePhaseLatex } from "../../ui6e/formatAccumulerGrandeur";
-import { figureAccumulerGrandeurSvg, figureEnonceAccumulerGrandeur, legendeAire } from "../../ui6e/figureAccumulerGrandeur";
+import { figureEnonceAccumulerGrandeur } from "../../ui6e/figureAccumulerGrandeur";
 import { VARIANTES_CALCULATRICE_ACCUMULER, profilAccumulerGrandeur } from "./profilEvaluation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAccumulerGrandeur } from "./index";
 import type { IdVarianteAccumulerGrandeur } from "./index";
+import { correctionDetailleeAccumulerGrandeur } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceAccumulerGrandeur>` de `6gen80` « Accumuler une
@@ -70,29 +70,7 @@ function enoncePapier(e: ExerciceAccumulerGrandeur): EnoncePapier {
   };
 }
 
-function methode(e: ExerciceAccumulerGrandeur, phase: PhaseAccumulerGrandeur): FragmentConsigne[] {
-  const aide = fiche(e).aides[phase][0];
-  return aide.latex ? [t(`${aide.texte} `), f(aide.latex)] : [t(aide.texte)];
-}
-
-function correctionDetaillee(e: ExerciceAccumulerGrandeur): EtapeCorrection[] {
-  const fi = fiche(e);
-  return PHASES_ACCUMULER_GRANDEUR.flatMap((phase) => {
-    const sousQuestion = LETTRES[phase];
-    const lignes: EtapeCorrection[] = [];
-    if (phase === "quantite") {
-      lignes.push({ label: "Méthode", sousQuestion, fragments: [...methode(e, phase), t(`. L'aire hachurée du graphique représente ${legendeAire(e)}.`)], figureHtml: figureAccumulerGrandeurSvg(e, true) });
-    } else {
-      lignes.push({ label: "Méthode", sousQuestion, fragments: methode(e, phase) });
-    }
-    const calcul = fi.calculs[phase];
-    if (calcul) lignes.push({ label: "Calcul", sousQuestion, fragments: [f(calcul)] });
-    const piege = fi.pieges[phase];
-    if (piege) lignes.push({ label: "Piège", sousQuestion, fragments: [t(piege)] });
-    lignes.push({ label: "Conclusion", sousQuestion, fragments: reponse(e, phase) });
-    return lignes;
-  });
-}
+const correctionDetaillee = correctionDetailleeAccumulerGrandeur;
 
 function difficulte(e: ExerciceAccumulerGrandeur): 1 | 2 | 3 {
   return VARIANTES_CALCULATRICE_ACCUMULER.includes(e.variante) ? 3 : 2;

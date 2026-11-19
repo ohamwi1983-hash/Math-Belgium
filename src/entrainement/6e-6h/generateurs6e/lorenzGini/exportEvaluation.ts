@@ -1,11 +1,9 @@
-import { aireConcentration, coefficientGini, courbesSeCroisent } from "../../core6e/lorenzGini";
-import type { ExerciceLorenzComparaison, ExerciceLorenzGini, ExerciceLorenzLecture, ExerciceLorenzParametre } from "../../core6e/lorenzGini";
+import type { ExerciceLorenzGini, ExerciceLorenzLecture } from "../../core6e/lorenzGini";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -13,26 +11,18 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur6e/typesLorenzGini";
 import type { PhaseLorenz } from "../../moteur6e/typesLorenzGini";
 import {
-  aireEnALatex,
-  aireEgaleLatex,
-  aireSousCourbeLatex,
   blocDonnees,
-  calculAireLatex,
   consigneEcran,
   consigneGenerale,
   formatReponseAttenduePhaseLatex,
-  giniEgalLatex,
-  giniEnALatex,
-  indiceCourbe,
-  phraseCroisement,
   reponseChoix,
-  substitutionLatex,
 } from "../../ui6e/formatLorenzGini";
-import { decimalLatex, decimalTexte } from "../../ui6e/nombresExactsIntegrales";
-import { figuresCorrigeSvg, figureEnonceSvg } from "../../ui6e/figureLorenzGini";
+import { decimalLatex } from "../../ui6e/nombresExactsIntegrales";
+import { figureEnonceSvg } from "../../ui6e/figureLorenzGini";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLorenzGini } from "./index";
 import type { IdVarianteLorenzGini } from "./index";
 import { VARIANTES_CALCULATRICE_LORENZ, profilLorenzGini } from "./profilEvaluation";
+import { correctionDetailleeLorenzGini } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceLorenzGini>` de `6gen82` « Courbe de Lorenz et
@@ -130,122 +120,7 @@ function enoncePapier(e: ExerciceLorenzGini): EnoncePapier {
 // Corrigé détaillé.
 // ============================================================================
 
-const METHODE_AIRE: FragmentConsigne[] = [
-  t("Sur [0 ; 1], la diagonale "),
-  f("y=x"),
-  t(" est au-dessus de la courbe de Lorenz : l'aire de la région comprise entre elles est "),
-  f("\\displaystyle\\int_0^1\\left(x-L(x)\\right)dx"),
-  t("."),
-];
-
-const METHODE_GINI: FragmentConsigne[] = [
-  t("Le coefficient de Gini rapporte cette aire à celle du triangle sous la diagonale, qui vaut "),
-  f("\\frac{1}{2}"),
-  t(" : "),
-  f("G=2\\displaystyle\\int_0^1\\left(x-L(x)\\right)dx"),
-  t(", toujours compris entre 0 (égalité parfaite) et 1."),
-];
-
-function lignesLecture(e: ExerciceLorenzLecture): EtapeCorrection[] {
-  const c = e.courbe;
-  const p = decimalLatex(e.p, 3);
-  const figure = figuresCorrigeSvg(e)[0];
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [t(`La part des revenus détenue par les ${decimalTexte(e.p * 100, 1)} % ${e.contexte === "pays" ? "les plus pauvres" : "les moins bien payés"} est l'image de `), f(p), t(" par L.")] },
-    { label: "Calcul", sousQuestion: "a", fragments: [f(substitutionLatex(e))] },
-    { label: "Conclusion", sousQuestion: "a", fragments: reponseEtape(e, "valeur") },
-    { label: "Conclusion", sousQuestion: "b", fragments: reponseChoix(e, "interpretation") },
-    { label: "Piège", sousQuestion: "b", fragments: [t("Lire à l'envers : "), f(p), t(" est une part de la POPULATION (en abscisse), "), f(`L(${p})`), t(" une part des REVENUS (en ordonnée). Les plus riches détiennent le reste, "), f(`1-L(${p})`), t(".")] },
-    { label: "Méthode", sousQuestion: "c", fragments: METHODE_AIRE },
-    { label: "Calcul", sousQuestion: "c", fragments: [f(calculAireLatex(c))] },
-    { label: "Conclusion", sousQuestion: "c", fragments: reponseEtape(e, "aire"), figureHtml: figure },
-    {
-      label: "Piège",
-      sousQuestion: "c",
-      fragments: [
-        t("Intégrer L au lieu de x − L(x) : on obtient l'aire SOUS la courbe, "),
-        f(`\\displaystyle\\int_0^1 L(x)\\,dx=${aireSousCourbeLatex(c)}`),
-        t(Math.abs(aireConcentration(c) - 0.25) < 1e-9 ? " — ici égale à l'aire cherchée par pure coïncidence (les deux aires valent un quart du carré), mais la méthode est fausse." : ", et non l'aire entre la diagonale et la courbe."),
-      ],
-    },
-    { label: "Méthode", sousQuestion: "d", fragments: METHODE_GINI },
-    { label: "Calcul", sousQuestion: "d", fragments: [f(`G=2\\times\\mathcal{A}${giniEgalLatex(c)}`)] },
-    { label: "Conclusion", sousQuestion: "d", fragments: [...reponseEtape(e, "gini"), t(" : valeur bien comprise entre 0 et 1.")] },
-    { label: "Piège", sousQuestion: "d", fragments: [t("Oublier le facteur 2 (donner l'aire "), f(`\\mathcal{A}${aireEgaleLatex(c)}`), t(" comme coefficient de Gini). Un coefficient supérieur à 1 ou négatif signale toujours une erreur.")] },
-  ];
-}
-
-/** « = » devant un décimal exact au millième, « ≈ » devant un arrondi. */
-function rel(v: number): string {
-  return Math.abs(Math.round(v * 1000) / 1000 - v) < 1e-12 ? "=" : "\\approx ";
-}
-
-function lignesComparaison(e: ExerciceLorenzComparaison): EtapeCorrection[] {
-  const figures = figuresCorrigeSvg(e);
-  const ind = (i: number) => indiceCourbe(e, i as 0 | 1);
-  const [g1, g2] = e.courbes.map(coefficientGini);
-  const croisent = courbesSeCroisent(e.courbes[0], e.courbes[1]);
-  const signe = g1 > g2 ? ">" : "<";
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: METHODE_AIRE },
-    ...e.courbes.map((c, i) => ({ label: "Calcul", sousQuestion: "a", fragments: [f(`\\mathcal{A}_{${ind(i)}}=${calculAireLatex(c)}`)], figureHtml: figures[i] })),
-    { label: "Conclusion", sousQuestion: "a", fragments: reponseEtape(e, "aires") },
-    { label: "Méthode", sousQuestion: "b", fragments: METHODE_GINI },
-    { label: "Calcul", sousQuestion: "b", fragments: liste(e.courbes.map((c, i) => `G_{${ind(i)}}=2\\,\\mathcal{A}_{${ind(i)}}${giniEgalLatex(c)}`)) },
-    { label: "Piège", sousQuestion: "b", fragments: [t("Oublier le facteur 2 : on compare alors les aires, ce qui donne le même classement, mais les coefficients de Gini sont faux.")] },
-    { label: "Méthode", sousQuestion: "c", fragments: [t("Plus le coefficient de Gini est grand, plus la répartition est inégalitaire. "), t(phraseCroisement(e))] },
-    { label: "Calcul", sousQuestion: "c", fragments: [f(`G_{${ind(0)}}${rel(g1)}${decimalLatex(g1)}${signe}${decimalLatex(g2)}${rel(g2)}G_{${ind(1)}}`)] },
-    { label: "Conclusion", sousQuestion: "c", fragments: [...reponseChoix(e, "verdict")] },
-    {
-      label: "Piège",
-      sousQuestion: "c",
-      fragments: croisent
-        ? [t("Comparer les deux courbes en un seul point (par exemple en x = 0,5) : comme elles se croisent, la comparaison en un point peut donner la conclusion inverse.")]
-        : [t("Croire que la courbe la plus éloignée de la diagonale est la plus égalitaire : c'est l'inverse, plus elle s'en éloigne, plus l'aire et G sont grands.")],
-    },
-  ];
-}
-
-function lignesParametre(e: ExerciceLorenzParametre): EtapeCorrection[] {
-  const n = e.famille === "mixte2" ? 2 : 3;
-  const primitive = n === 2 ? "\\dfrac{x^{3}}{3}" : "\\dfrac{x^{4}}{4}";
-  const facteur = n === 2 ? "\\dfrac{1}{6}" : "\\dfrac{1}{4}";
-  const multiplicateur = n === 2 ? 3 : 2;
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [t("On met a en évidence dans la différence entre la diagonale et la courbe : "), f(`x-L(x)=x-ax^{${n}}-(1-a)x=a\\left(x-x^{${n}}\\right)`), t(".")] },
-    { label: "Calcul", sousQuestion: "a", fragments: [f(`\\mathcal{A}(a)=a\\displaystyle\\int_0^1\\left(x-x^{${n}}\\right)dx=a\\left[\\dfrac{x^{2}}{2}-${primitive}\\right]_0^1=a\\times ${facteur}`)] },
-    { label: "Conclusion", sousQuestion: "a", fragments: reponseEtape(e, "aireA") },
-    { label: "Méthode", sousQuestion: "b", fragments: METHODE_GINI },
-    { label: "Conclusion", sousQuestion: "b", fragments: [f(`G(a)=2\\times ${aireEnALatex(e)}=${giniEnALatex(e)}`)] },
-    { label: "Calcul", sousQuestion: "c", fragments: [f(`${giniEnALatex(e)}=${decimalLatex(e.giniVise)}\\iff a=${multiplicateur}\\times ${decimalLatex(e.giniVise)}=${decimalLatex(e.a, 6)}`)] },
-    { label: "Condition", sousQuestion: "c", fragments: [f(`0\\leq ${decimalLatex(e.a, 6)}\\leq 1`), t(" : la courbe obtenue est bien une courbe de Lorenz.")] },
-    { label: "Conclusion", sousQuestion: "c", fragments: reponseEtape(e, "valeurA"), figureHtml: figuresCorrigeSvg(e)[0] },
-    {
-      label: "Piège",
-      sousQuestion: "c",
-      fragments: [
-        t("Égaler l'aire (et non G) à la valeur visée : "),
-        f(`${aireEnALatex(e)}=${decimalLatex(e.giniVise)}`),
-        t(" donne "),
-        f(`a=${decimalLatex(2 * e.a, 6)}`),
-        ...(2 * e.a > 1
-          ? [t(", impossible : avec a > 1, L n'est plus une courbe de Lorenz.")]
-          : [t(", pour lequel le coefficient de Gini vaut en réalité "), f(decimalLatex(2 * e.giniVise)), t(", le double de la valeur visée.")]),
-      ],
-    },
-  ];
-}
-
-function correctionDetaillee(e: ExerciceLorenzGini): EtapeCorrection[] {
-  switch (e.variante) {
-    case "lecture":
-      return lignesLecture(e);
-    case "comparaison":
-      return lignesComparaison(e);
-    case "parametre":
-      return lignesParametre(e);
-  }
-}
+const correctionDetaillee = correctionDetailleeLorenzGini;
 
 function difficulte(e: ExerciceLorenzGini): 1 | 2 | 3 {
   if (e.variante === "lecture") return e.courbe.famille === "expo" ? 3 : 2;

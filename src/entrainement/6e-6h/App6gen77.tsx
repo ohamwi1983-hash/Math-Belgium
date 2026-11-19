@@ -20,6 +20,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { PHASES_INTEGRALE_GRAPHIQUE } from "./moteur6e/typesIntegraleGraphique";
+import { correctionDetailleeIntegraleGraphique } from "./generateurs6e/integraleGraphique/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen77` — « L'intégrale lue sur un graphique (aire signée) » (chapitre 4, section
@@ -137,6 +141,7 @@ export function App6gen77() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeIntegraleGraphique(exercice), lettreEtape(PHASES_INTEGRALE_GRAPHIQUE.indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(choix ? { messageRevele: "Ce n'était pas la bonne sélection (une seule tentative sur un choix fermé)." } : {}),

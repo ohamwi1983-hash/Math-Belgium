@@ -17,6 +17,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { phasesExercice } from "./moteur6e/modeleAiresFormesReelles";
+import { correctionDetailleeAiresFormesReelles } from "./generateurs6e/airesFormesReelles/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen81` — « Aires de formes réelles » (chapitre 4, section `aires`, processus 3 TRANSFÉRER) :
@@ -116,6 +120,7 @@ export function App6gen81() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAiresFormesReelles(exercice), lettreEtape(phasesExercice(exercice).indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

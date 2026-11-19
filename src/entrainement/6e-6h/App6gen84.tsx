@@ -30,6 +30,9 @@ import { EtapeCorrectionDetectiveIntegrales } from "./components6e/EtapeCorrecti
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { correctionDetailleeDetectiveIntegrales } from "./generateurs6e/detectiveIntegrales/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * 6gen84 — « Le détective d'erreurs : intégrales et primitives » (6e, chapitre 4, section
@@ -158,6 +161,7 @@ export function App6gen84() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveIntegrales(e), lettreEtape(ecran))} />,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,

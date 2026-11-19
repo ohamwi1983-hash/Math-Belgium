@@ -21,6 +21,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { PHASES_ACCUMULER_GRANDEUR } from "./moteur6e/typesAccumulerGrandeur";
+import { correctionDetailleeAccumulerGrandeur } from "./generateurs6e/accumulerGrandeur/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen80` — « Accumuler une grandeur : débits, puissances, consommations » (6e, chapitre 4,
@@ -130,6 +134,7 @@ export function App6gen80() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAccumulerGrandeur(exercice), lettreEtape(PHASES_ACCUMULER_GRANDEUR.indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(choix ? { messageRevele: "Ce n'était pas la bonne expression (une seule tentative sur un choix fermé)." } : {}),
