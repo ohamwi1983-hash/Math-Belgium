@@ -32,6 +32,9 @@ import {
   nomFonctionFinale,
 } from "./ui/formatUnSansLautre";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeUnSansLautre, lettreEcranUnSansLautre } from "./generateurs/unSansLautre/corrigeDetaille";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -152,6 +155,8 @@ export function AppUnSansLautre() {
     ? {
         revele: enAttente.revele,
         reponseAttendue,
+        // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeUnSansLautre(etat.exerciceCourant), lettreEcranUnSansLautre(etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

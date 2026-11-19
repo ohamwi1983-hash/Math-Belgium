@@ -1,5 +1,5 @@
 import type { ExerciceUnSansLautre } from "../../core/unSansLautre.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   formatCarreCibleLatex,
@@ -16,6 +16,8 @@ import {
 } from "../../ui/formatUnSansLautre";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceUnSansLautre } from "./index";
 import { LIBELLE_CAS_QUADRANT_I, PARAMETRES_UN_SANS_LAUTRE, profilUnSansLautre } from "../profilsEvaluation4eCh5";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeUnSansLautre } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceUnSansLautre>` pour gen16 ("L'un sans l'autre",
@@ -215,43 +217,6 @@ function lignesCorrectionTangente(instance: ExerciceUnSansLautre): EtapeCorrecti
   ];
 }
 
-function lignesCorrection(instance: ExerciceUnSansLautre): EtapeCorrection[] {
-  if (instance.fonctionConnue === "tan") return lignesCorrectionTangente(instance);
-  const { fonctionConnue, fonctionCible, quadrant, p, q, carreCibleNum, carreCibleDen } = instance;
-  const cible = formatFonctionCibleLatex(instance);
-  const cibleSimplifiee = formatValeurCibleSimplifieeLatex(instance);
-  const sinL = fonctionConnue === "sin" ? valeurConnueSeuleLatex(instance) : cibleSimplifiee;
-  const cosL = fonctionConnue === "cos" ? valeurConnueSeuleLatex(instance) : cibleSimplifiee;
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("Identité fondamentale : "), latex("\\cos^2\\theta + \\sin^2\\theta = 1"), texte(".")] },
-    {
-      label: "Calcul",
-      sousQuestion: "a",
-      fragments: [latex(`${formatCarreLatex(fonctionCible)} = 1 - ${formatCarreLatex(fonctionConnue)} = 1 - \\dfrac{${p * p}}{${q * q}} = \\dfrac{${carreCibleNum}}{${carreCibleDen}}`)],
-    },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(`${cible} = \\pm\\sqrt{${formatCarreCibleLatex(instance)}} = \\pm\\dfrac{\\sqrt{${carreCibleNum}}}{${q}}`)] },
-    {
-      label: "Conclusion",
-      sousQuestion: "b",
-      fragments: [texte(`θ est dans le quadrant ${libelleQuadrantUnSansLautre(quadrant)}, donc `), latex(formatSigneCibleLatex(instance)), texte(" : "), latex(`${cible} = ${cibleSimplifiee}`)],
-    },
-    {
-      label: "Calcul",
-      sousQuestion: "c",
-      fragments: [latex(`\\tan\\theta = \\dfrac{\\sin\\theta}{\\cos\\theta} = \\dfrac{${sinL}}{${cosL}} = ${formatValeurTangenteSimplifieeLatex(instance)}`)],
-    },
-    {
-      label: "Piège",
-      sousQuestion: "b",
-      fragments: [
-        quadrant === "I"
-          ? texte("La racine carrée donne deux valeurs opposées : c'est l'intervalle de θ qui choisit le signe (ici, tout est positif).")
-          : texte(`La racine carrée donne deux valeurs opposées : dans le quadrant ${quadrant}, le signe de ${fonctionCible} θ est ${instance.signeCible === 1 ? "positif" : "négatif"}, ce n'est pas le signe de la valeur donnée qui décide.`),
-      ],
-    },
-  ];
-}
-
 function reponseBreve(instance: ExerciceUnSansLautre): FragmentConsigne[] {
   return [
     latex(`${formatFonctionCibleLatex(instance)} = ${formatValeurCibleSimplifieeLatex(instance)}`),
@@ -296,8 +261,15 @@ function bareme(instance: ExerciceUnSansLautre): BaremeExercice {
 }
 
 /** ★ triplet pythagoricien au quadrant I ; ★★ sinon. */
-function difficulte(instance: ExerciceUnSansLautre): 1 | 2 | 3 {
-  return instance.typeValeur === "triplet" && instance.quadrant === "I" ? 1 : 2;
+/** Niveau (grille commune) : aucun écran de lecture ; méthode imposée (identité fondamentale), à
+ * choisir pour « tan θ donné » (1 + tan²θ = 1/cos²θ) ; piège dans les données : quadrant II, III ou
+ * IV (le signe ne vient pas de la valeur donnée). */
+function criteresDifficulte(instance: ExerciceUnSansLautre): CriteresDifficulte {
+  return {
+    ...etapesDuCorrige(correctionDetailleeUnSansLautre(instance)),
+    methode: instance.fonctionConnue === "tan" ? 1 : 0,
+    piege: instance.quadrant === "I" ? 0 : 1,
+  };
 }
 
 export const adaptateurEvaluationUnSansLautre: AdaptateurFeuilleExercices<ExerciceUnSansLautre> = {
@@ -308,12 +280,11 @@ export const adaptateurEvaluationUnSansLautre: AdaptateurFeuilleExercices<Exerci
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceUnSansLautre,
   construireCorrection: construireCorrectionUnSansLautre,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee: lignesCorrection,
+  correctionDetaillee: correctionDetailleeUnSansLautre,
   bareme,
   enoncePapier,
-  dureeMinutes: 4,
   profilInstance: profilUnSansLautre,
   libelleCasParticulier: LIBELLE_CAS_QUADRANT_I,
   parametresAuChoix: PARAMETRES_UN_SANS_LAUTRE,

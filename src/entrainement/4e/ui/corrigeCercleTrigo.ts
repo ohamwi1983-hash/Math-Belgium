@@ -341,3 +341,17 @@ export function fractionLatex(n: number, d: number): string {
 export function lettresDuCorrige(etapes: EtapeCorrection[]): string[] {
   return [...new Set(etapes.map((e) => e.sousQuestion).filter((l): l is string => !!l))];
 }
+
+function normaliser(l: string): string {
+  return l.replace(/\\dfrac|\\tfrac/g, "\\frac").replace(/\\left|\\right/g, "").replace(/\s+/g, "");
+}
+
+/** Ajoute « = finale » (forme de l'écran) sauf si la dernière ligne y arrive déjà. */
+export function avecFinale(lignes: LigneCalcul[], finale: string, justification?: string | Fragments): LigneCalcul[] {
+  const der = lignes[lignes.length - 1];
+  if (der) {
+    const i = der.latex.lastIndexOf("=");
+    if (i >= 0 && normaliser(der.latex.slice(i + 1)) === normaliser(finale)) return lignes;
+  }
+  return [...lignes, ligne(`=${finale}`, justification)];
+}
