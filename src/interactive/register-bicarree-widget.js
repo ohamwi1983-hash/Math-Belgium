@@ -1,0 +1,1 @@
+import './bicarree-widget.js'
