@@ -4456,3 +4456,48 @@ après Δ = étapes), barème gen57 (forme « f(x) − k ◇ 0 », ensemble d'en
 route : « S = ∅ » du cas b = 0 rendu « S=arnothing » (`"\v"` dans une chaîne TS), justification
 « x · y \geq 70 » en texte (gen57), aide « racines du numérateur » pour un produit (gen5),
 `<div>` dans `<p>` (aide niveau 2 de la validation gen57). Mesures : feuilles-evaluations.md.
+
+
+## 4e, Chapitre 5 — lots A, E, F et G de l'audit (cours, quiz gen63, figures, atelier)
+
+Lot A (cours) : tableau des caps (écart pris entre 0° et 180°, sinon 360° − différence : faux
+dans 45 % des gen77 « trajets ») ; § 8 « un thème par grande partie » ; renvoi « rappel du début
+du chapitre » (et non « section 1 ») ; « angle du premier quadrant » partout (cours, énoncés de
+démonstration, et SEULEMENT ce texte dans gen14 et gen76 — chantiers parallèles sur leurs
+fichiers) ; notation Â (kicker § 6, descriptions) ; « avant », « un seul triangle » en
+minuscules ; « al-Kashi » en minuscule dans le nom complet, comme « al-Tusi » (« Al-Kashi » seul
+reste en capitale) ; « des centaines de millions de côtés » (3·2²⁸) ; fractions clavier des
+étapes d'exemples (3/5, 1/√2, CH/AC, BS/sin Â…) passées en KaTeX. Formulaire complété (tangentes
+des angles associés, 90° + θ, 1 + tan²θ, ±, angles sur les axes, |k| > 1, sin²α = k, produit
+nul, mouvement circulaire, Al-Kashi en b² et c², test du cas ambigu, aire, Héron, forces, caps,
+élévation, dépression) ; récapitulatif : 3 puces de plus, dans l'ordre des sections.
+
+Lot F : six figures en kinds existants, coordonnées calculées (script, jamais à l'œil) —
+`circleAngles` tan α = 1 (étiquettes en `freeLabels` pour ne pas toucher la tangente), cas
+ambigu en `illustrationGroup` de trois `vectorPlane` (arc de compas = `curves`
+y = 4 − √(a² − (x − 6,928)²), domaine isotrope 320/300), deux triangles de même aire, quadrilatère
++ exemple résolu (aire ≈ 24,09), grande roue, caps. Démonstrations « Démonstration — … »
+(1 + tan²θ, règles des angles associés par symétrie, nombre de triangles en SSA) ; les
+démonstrations existantes (loi des sinus — qui était un `exemple` —, Al-Kashi, aire) n'étaient
+PAS reconnues par `estBlocDemonstration` (labels « Loi des cosinus », « Aire ») : relabellisées,
+énoncés sans méthode. Exemples 90° + θ (120°) et sin α = sin 200°. **Piège** : `vectorPlane` en
+`illustrationGroup` → étiquettes à ≈ 8 px sur téléphone (deux colonnes de 170 px) ; garder des
+étiquettes d'une lettre. Contrôle « étiquette SVG hors cadre » (`getBoundingClientRect` de chaque
+`<text>` contre sa `<svg>`) : il a trouvé deux défauts anciens, corrigés — étiquettes
+« α₁ = 30° » et « sin α = k » rognées (figure sin α = 0,5) ; composant `Triangulation` : arcs
+d'élévation dessinés SOUS le sol (facteur −1 sur l'angle), « d = 40 m » sur la visée, jambages de
+« appareil 1 » coupés.
+
+Lot E (quiz gen63) : banque en `$…$` (`TexteRiche` à l'écran, `banquesVraiFaux` sur papier),
+plus aucune écriture clavier ; « variante » → « façon de relier » ; six « jamais / uniquement »
+de « triangles liés » remplacés (les nouveaux restent sur papier : jamais « l'exemple du cours ») ;
+trois thèmes nouveaux (équations à transformer et rotations, aire et cas ambigu, forces / caps /
+visées) : 350 affirmations, 10 × 35, 18 V / 17 F partout ; catalogue dans l'ordre des sections ;
+`QUIZ_THEMES` avec un libellé par thème quand une section en a deux. Contrôle automatique :
+`check_banque.mjs` du dossier de travail (KaTeX `throwOnError`, barre de fraction / `sin(` / `^`
+/ `√` hors formule, majuscules, doublons, équilibre).
+
+Lot G : `roue-hauteur-widget` (§ 5, avant gen79) : θ₀, sens, α, r ∈ [2 ; 12], h ∈ [12 ; 20], H ;
+fenêtre fixe −1 à 34 m (pire cas h + r = 32) ; couleurs par rôle reprises dans le texte et les
+curseurs. Vérifié : 8 réglages × 2 tailles × 2 thèmes, valeurs recoupées à la main, axes
+identiques après chaque réglage, scrollWidth 390, 0 étiquette rognée.
