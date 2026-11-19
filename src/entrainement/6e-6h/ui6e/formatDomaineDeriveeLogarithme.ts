@@ -103,6 +103,13 @@ export function fractionSignee(numerateur: number, reste: string, denominateur: 
   return numerateur < 0 ? `-${corps}` : corps;
 }
 
+/** Quotient `num / (mx + n)` réécrit avec un dénominateur de coefficient de x positif (signe reporté
+ * sur le numérateur) : `-\dfrac{2}{-2x+3}` devient `\dfrac{2}{2x-3}`. Le logarithme garde, lui,
+ * l'argument de la fonction donnée. Même valeur : la vérification (numérique) est inchangée. */
+export function surAffinePositif(num: number, m: number, n: number): { num: number; arg: string } {
+  return m < 0 ? { num: -num, arg: formatAffine(-m, -n) } : { num, arg: formatAffine(m, n) };
+}
+
 /** `· ln(base)` dans un dénominateur — rien si la base est e (ln(e)=1, audit 6e ch. 3, point 28 :
  * le corrigé affichait « ·ln(e) »). */
 function facteurLnBase(base: number, baseEstE: boolean): string {
@@ -130,8 +137,8 @@ function deriveeLatexA(exercice: ExerciceDomaineDeriveeLogA): string {
   const lnB = facteurLnBase(exercice.base, exercice.baseEstE);
   if (exercice.sousType === "puissance") return exercice.baseEstE ? `\\ln(${exercice.k})` : `\\dfrac{\\ln(${exercice.k})}{\\ln(${exercice.base})}`;
   if (exercice.sousType === "carre") return lnB === "" ? `\\dfrac{2x}{x^2+${exercice.c}}` : `\\dfrac{2x}{(x^2+${exercice.c})${lnB}}`;
-  const arg = formatAffine(exercice.m, exercice.n);
-  return fractionSignee(exercice.m, "", lnB === "" ? arg : `(${arg})${lnB}`);
+  const d = surAffinePositif(exercice.m, exercice.m, exercice.n);
+  return fractionSignee(d.num, "", lnB === "" ? d.arg : `(${d.arg})${lnB}`);
 }
 
 function consigneA(phase: "aDomaine" | "aDerivee"): FragmentConsigne[] {
@@ -166,7 +173,8 @@ function deriveeLatexB(exercice: ExerciceDomaineDeriveeLogB): string {
   const b = exercice.base;
   if (exercice.sousType === "doubleContrainte") {
     const arg = formatAffine(exercice.m, exercice.n);
-    return fractionSignee(-exercice.m, "", `2(${arg})\\ln(${b})\\sqrt{1-\\log_{${b}}(${arg})}`);
+    const d = surAffinePositif(-exercice.m, exercice.m, exercice.n);
+    return fractionSignee(d.num, "", `2(${d.arg})\\ln(${b})\\sqrt{1-\\log_{${b}}(${arg})}`);
   }
   if (exercice.sousType === "racineInterne") return `-\\dfrac{x}{(1-x^2)\\ln(${b})}`;
   if (exercice.sousType === "quadratique") return `\\dfrac{2x}{(x^2-${exercice.k * exercice.k})\\ln(${b})}`;
@@ -200,7 +208,7 @@ function aideBNiveau2(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineD
   const b = exercice.base;
   if (exercice.sousType === "doubleContrainte") {
     const arg = formatAffine(exercice.m, exercice.n);
-    return { texte: "Fonction intérieure et sa dérivée (règle de la chaîne, pas encore assemblées) :", latex: `w(x) = 1-\\log_{${b}}(${arg}),\\qquad w'(x) = ${fractionSignee(-exercice.m, "", `(${arg})\\ln(${b})`)}` };
+    return { texte: "Fonction intérieure et sa dérivée (règle de la chaîne, pas encore assemblées) :", latex: `w(x) = 1-\\log_{${b}}(${arg}),\\qquad w'(x) = ${((d) => fractionSignee(d.num, "", `(${d.arg})\\ln(${b})`))(surAffinePositif(-exercice.m, exercice.m, exercice.n))}` };
   }
   if (exercice.sousType === "racineInterne") return { texte: "Argument et sa dérivée — il reste à les placer dans la formule :", latex: `u(x) = \\sqrt{1-x^2},\\qquad u'(x) = -\\dfrac{x}{\\sqrt{1-x^2}}` };
   if (exercice.sousType === "quadratique") return { texte: "Argument et sa dérivée — il reste à les placer dans la formule :", latex: `u(x) = ${carreMoinsCarreLatex(exercice.k)},\\qquad u'(x) = 2x` };
@@ -227,7 +235,8 @@ export function facteursLatexC(exercice: ExerciceDomaineDeriveeLogC): { u: strin
   }
   if (exercice.sousType === "carreLn") {
     const arg = formatAffine(exercice.m, exercice.n);
-    return { u: "x^2", uPrime: "2x", v: `\\ln(${arg})`, vPrime: fractionSignee(exercice.m, "", arg) };
+    const d = surAffinePositif(exercice.m, exercice.m, exercice.n);
+    return { u: "x^2", uPrime: "2x", v: `\\ln(${arg})`, vPrime: fractionSignee(d.num, "", d.arg) };
   }
   const { k } = exercice;
   return { u: "\\ln(x)", uPrime: "\\dfrac{1}{x}", v: `\\sqrt{${carreMoinsCarreLatex(k)}}`, vPrime: `\\dfrac{x}{\\sqrt{${carreMoinsCarreLatex(k)}}}` };
@@ -253,7 +262,8 @@ function deriveeLatexC(exercice: ExerciceDomaineDeriveeLogC): string {
       return exercice.baseEstE ? "e^x\\ln(x)+\\dfrac{e^x}{x}" : `\\ln(${exercice.base})\\cdot ${exercice.base}^x\\ln(x)+\\dfrac{${exercice.base}^x}{x}`;
     case "carreLn": {
       const arg = formatAffine(exercice.m, exercice.n);
-      const second = fractionSignee(exercice.m, "x^2", arg);
+      const d = surAffinePositif(exercice.m, exercice.m, exercice.n);
+      const second = fractionSignee(d.num, "x^2", d.arg);
       return `2x\\ln(${arg})${second.startsWith("-") ? "" : "+"}${second}`;
     }
     case "lnRacine":
@@ -389,15 +399,21 @@ export function formeSimplifieeLatexE(exercice: ExerciceDomaineDeriveeLogE): str
   }
 }
 
+/** Dérivée de ln(mx + n) − ln(px + q), sous-type « quotientDifference » : m/(mx + n) − p/(px + q).
+ * Le second quotient est écrit avec un dénominateur de coefficient positif et le signe sorti
+ * (« -\dfrac{3}{3x-18} », jamais « +\dfrac{3}{-3x+18} ») ; même valeur, vérification numérique inchangée. */
+export function deriveeQuotientDifferenceLatex(m: number, n: number, p: number, q: number): string {
+  const premier = fractionSignee(m, "", formatAffine(m, n));
+  const second = p < 0 ? fractionSignee(p, "", formatAffine(-p, -q)) : fractionSignee(-p, "", formatAffine(p, q));
+  return `${premier}${second.startsWith("-") ? "" : "+"}${second}`;
+}
+
 function deriveeSimplifieeLatexE(exercice: ExerciceDomaineDeriveeLogE): string {
   switch (exercice.sousType) {
     case "puissanceAbs":
       return "\\dfrac{2e^x}{e^x-1}";
-    case "quotientDifference": {
-      const premier = fractionSignee(exercice.m, "", formatAffine(exercice.m, exercice.n));
-      const second = fractionSignee(-exercice.p, "", formatAffine(exercice.p, exercice.q));
-      return `${premier}${second.startsWith("-") ? "" : "+"}${second}`;
-    }
+    case "quotientDifference":
+      return deriveeQuotientDifferenceLatex(exercice.m, exercice.n, exercice.p, exercice.q);
     case "puissanceSimple":
       return "\\dfrac{1}{2x}";
     case "combinaison":

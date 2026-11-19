@@ -3,7 +3,7 @@ import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorr
 import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { CONSIGNE_GENERALE, configDiagnosticPartiesC, consigneEcran, formatCategorieLabel, formatCibleTexte, formatLimiteEnonceLatex, formatReformulationBLatex } from "../../ui6e/formatLimitesLogarithmiques";
+import { CONSIGNE_GENERALE, configDiagnosticPartiesC, consigneEcran, formatCategorieLabel, formatCibleTexte, formatLimiteEnonceLatex, formatReformulationBLatex, multipleLnNonReduitLatex } from "../../ui6e/formatLimitesLogarithmiques";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLimiteLogarithmique } from "./index";
 import { approche, correctionDetailleeLimitesLog as correctionDetaillee } from "./corrigeDetaille";
 import { reponseAttendueDLatex } from "../../ui6e/formatLimitesPuissances";
@@ -251,7 +251,8 @@ function bareme(exercice: ExerciceLimiteLogarithmique): BaremeExercice {
   const reponsesAcceptees: FragmentConsigne[][] = [];
   if (limite.type === "valeur" && !Number.isInteger(limite.valeur)) reponsesAcceptees.push([texte("Valeur approchée "), latex(exercice.famille === "D" ? approche(limite.valeur) : formatApproche(limite.valeur)), texte(" si la forme exacte est aussi donnée dans la démarche")]);
   if (exercice.famille === "D" && exercice.limiteProduit.type === "valeur") reponsesAcceptees.push([texte("Limite de l'exposant non simplifiée (même valeur), à condition que la conclusion soit "), latex(formatCibleTexte(exercice.limiteFinale))]);
-  if (exercice.famille === "A" && exercice.sousType === "sous3") reponsesAcceptees.push([latex(`\\dfrac{${exercice.p1}\\ln(${exercice.base})}{${exercice.p2}}`), texte(" non simplifiée")]);
+  if (exercice.famille === "A" && exercice.sousType === "sous3" && multipleLnNonReduitLatex(exercice.p1, exercice.p2, exercice.base) !== formatCibleTexte(limite))
+    reponsesAcceptees.push([latex(multipleLnNonReduitLatex(exercice.p1, exercice.p2, exercice.base)), texte(" non simplifiée")]);
   return { reponseFinale: finale, criteres, erreursFrequentes, ...(reponsesAcceptees.length > 0 ? { reponsesAcceptees } : {}) };
 }
 

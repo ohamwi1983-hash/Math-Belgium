@@ -188,6 +188,31 @@ function aideA2(phase: "aDominance" | "aConclure", exercice: ExerciceLimiteLogA)
   return { texte: "Mets en évidence le terme dominant en haut et en bas (calcul final non fait) :", latex: formeFactoriseeA(exercice) };
 }
 
+/** Coefficient écrit devant une expression : « 1 » omis, « -1 » réduit au signe, sinon « k\cdot ». */
+export function coefDevantLatex(k: number, expr: string): string {
+  if (k === 1) return expr;
+  if (k === -1) return `-${expr}`;
+  return `${k}\\cdot ${expr}`;
+}
+
+/** « \frac{n}{den} » avec le signe sorti (« -\frac{3}{2} », jamais « \frac{-3}{2} »). */
+export function fractionSigneeLatex(n: number, den: string): string {
+  return `${n < 0 ? "-" : ""}\\frac{${Math.abs(n)}}{${den}}`;
+}
+
+/** p·ln(b)/q NON réduite, signe sorti (« -\dfrac{2\ln(3)}{4} », « 2\ln(3) » si |q| = 1) — jamais
+ * « \dfrac{2\ln 3}{-1} » ni « \dfrac{-1\ln(4)}{-2} ». */
+export function multipleLnNonReduitLatex(p: number, q: number, base: number): string {
+  const signe = p * q < 0 ? "-" : "";
+  const corps = `${Math.abs(p) === 1 ? "" : Math.abs(p)}\\ln(${base})`;
+  return Math.abs(q) === 1 ? `${signe}${corps}` : `${signe}\\dfrac{${corps}}{${Math.abs(q)}}`;
+}
+
+/** « \log_b(x) − 4 » (constante après le logarithme, jamais « -4 + \log_b(x) »). */
+export function logPlusConstanteLatex(base: number, c: number): string {
+  return `\\log_{${base}}(x)${c === 0 ? "" : c < 0 ? ` - ${-c}` : ` + ${c}`}`;
+}
+
 /** ` + \frac{n}{d}` / ` - \frac{|n|}{d}` / rien si n = 0 — jamais `+ \frac{-3}{x}`. */
 function plusFraction(numerateur: number, denominateur: string): string {
   if (numerateur === 0) return "";
@@ -197,7 +222,7 @@ function plusFraction(numerateur: number, denominateur: string): string {
 export function formeFactoriseeA(exercice: ExerciceLimiteLogA): string {
   switch (exercice.sousType) {
     case "sous1":
-      return `\\frac{\\ln(x)}{${formatPuissance("x", exercice.d)}} \\cdot \\frac{${exercice.k}}{${exercice.a}${plusFraction(exercice.b, formatPuissance("x", exercice.d))}}`;
+      return `${exercice.k < 0 ? "-" : ""}\\frac{\\ln(x)}{${formatPuissance("x", exercice.d)}} \\cdot \\frac{${Math.abs(exercice.k)}}{${exercice.a}${plusFraction(exercice.b, formatPuissance("x", exercice.d))}}`;
     case "sous2":
       if (exercice.orientation === "expSurPoly") {
         const facteur = exercice.q === 1 ? "" : ` \\cdot \\frac{1}{${exercice.q}}`;
@@ -205,18 +230,18 @@ export function formeFactoriseeA(exercice: ExerciceLimiteLogA): string {
       }
       return `${exercice.q === 1 ? "" : `${exercice.q} \\cdot `}\\frac{${formatPuissance("x", exercice.d)}}{${exercice.base}^x}`;
     case "sous3":
-      return `\\frac{\\ln(x)\\left(${exercice.p1}${plusFraction(exercice.c1, "\\ln(x)")}\\right)}{\\ln(x)\\left(\\frac{${exercice.p2}}{\\ln(${exercice.base})}${plusFraction(exercice.c2, "\\ln(x)")}\\right)}`;
+      return `\\frac{\\ln(x)\\left(${exercice.p1}${plusFraction(exercice.c1, "\\ln(x)")}\\right)}{\\ln(x)\\left(${fractionSigneeLatex(exercice.p2, `\\ln(${exercice.base})`)}${plusFraction(exercice.c2, "\\ln(x)")}\\right)}`;
     case "sous4": {
       const px = formatSommeTermes([{ valeur: exercice.a, suffixe: formatPuissance("x", exercice.d) }]);
-      const reste = (base: number) => (exercice.c === 0 ? `\\log_{${base}}(x)` : `${exercice.c} + \\log_{${base}}(x)`);
+      const reste = (base: number) => logPlusConstanteLatex(base, exercice.c);
       return `\\frac{${px}\\left(1 + \\frac{${reste(exercice.base1)}}{${px}}\\right)}{${px}\\left(1 + \\frac{${reste(exercice.base2)}}{${px}}\\right)}`;
     }
     case "sous5": {
       const px1 = formatPuissance("x", exercice.d1);
       const px2 = formatPuissance("x", exercice.d2);
-      const terme1 = formatSommeTermes([{ valeur: exercice.c1, suffixe: `${formatBaseDecimale(exercice.base1)}^x`, cdot: true }]);
-      const terme2 = formatSommeTermes([{ valeur: exercice.a2, suffixe: px2 }]);
-      return `\\frac{${px1}}{${exercice.base2}^x} \\cdot \\frac{${exercice.a1} + \\frac{${terme1}}{${px1}}}{${exercice.c2} + \\frac{${terme2}}{${exercice.base2}^x}}`;
+      const terme1 = formatSommeTermes([{ valeur: Math.abs(exercice.c1), suffixe: `${formatBaseDecimale(exercice.base1)}^x`, cdot: true }]);
+      const terme2 = formatSommeTermes([{ valeur: Math.abs(exercice.a2), suffixe: px2 }]);
+      return `\\frac{${px1}}{${exercice.base2}^x} \\cdot \\frac{${exercice.a1} ${exercice.c1 < 0 ? "-" : "+"} \\frac{${terme1}}{${px1}}}{${exercice.c2} ${exercice.a2 < 0 ? "-" : "+"} \\frac{${terme2}}{${exercice.base2}^x}}`;
     }
   }
 }
@@ -267,9 +292,9 @@ function aideB2(phase: "bReformuler" | "bConclure", exercice: ExerciceLimiteLogB
   if (phase === "bConclure") {
     if (exercice.sousType === "quotient") {
       const c = exercice.m * exercice.x0;
-      return { texte: "Fais apparaître la limite de référence en haut et en bas (calcul final non fait) :", latex: `\\dfrac{${c}\\cdot\\dfrac{\\ln(${formatUnPlusKU(c)})}{${formatKU(c)}}}{${exercice.k}\\cdot\\dfrac{\\ln(1+u)}{u}}` };
+      return { texte: "Fais apparaître la limite de référence en haut et en bas (calcul final non fait) :", latex: `\\dfrac{${coefDevantLatex(c, `\\dfrac{\\ln(${formatUnPlusKU(c)})}{${formatKU(c)}}`)}}{${coefDevantLatex(exercice.k, "\\dfrac{\\ln(1+u)}{u}")}}` };
     }
-    return { texte: "Fais apparaître la limite de référence (calcul final non fait) :", latex: `${exercice.x0}\\ln(${exercice.k})\\cdot\\dfrac{u}{\\ln(1+u)}` };
+    return { texte: "Fais apparaître la limite de référence (calcul final non fait) :", latex: `${exercice.x0 === 1 ? "" : exercice.x0}\\ln(${exercice.k})\\cdot\\dfrac{u}{\\ln(1+u)}` };
   }
   if (exercice.sousType === "quotient") {
     return { texte: "Substitution amorcée (base et argument réécrits en u, non terminée) :", latex: `\\log_{${exercice.k === 1 ? "1+u" : `(1+u)^{${exercice.k}}`}}\\left(${formatUnPlusKU(exercice.m * exercice.x0)}\\right)` };

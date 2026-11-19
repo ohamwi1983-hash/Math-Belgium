@@ -19,7 +19,7 @@ import {
   uLatexD,
   xPlus,
 } from "../../ui6e/formatLimitesPuissances";
-import { formatBaseB, formatBaseDecimale, formatCategorieLabel, formatCibleTexte, formatDirectionC, formatKU, formatLimiteEnonceLatex, formatPuissance, formatReformulationBLatex, formatSommeTermes, formatUnPlusKU, formeFactoriseeA } from "../../ui6e/formatLimitesLogarithmiques";
+import { coefDevantLatex, formatBaseB, formatBaseDecimale, formatCategorieLabel, formatCibleTexte, formatDirectionC, formatKU, formatLimiteEnonceLatex, formatPuissance, formatReformulationBLatex, formatSommeTermes, formatUnPlusKU, formeFactoriseeA, fractionSigneeLatex, logPlusConstanteLatex, multipleLnNonReduitLatex } from "../../ui6e/formatLimitesLogarithmiques";
 import { finaliserCorrige, frac, justif, parN } from "../../ui6e/corrigeLogarithmes1";
 
 /**
@@ -103,6 +103,11 @@ function etapeForme(e: ExerciceLimiteLogD): EtapeCorrection[] {
   return etapes;
 }
 
+/** « coef · quotient » sans coefficient 1 ni « -1\cdot ». */
+function coefDevantQuotient(coef: string, quotient: string): string {
+  return coef === "1" || coef === "-1" ? coefDevantLatex(Number(coef), quotient) : `${coef}\\cdot ${quotient}`;
+}
+
 /** Lignes du calcul de g(x)·ln f(x) (identités, vraies pour tout x du voisinage) et lignes des
  * limites, plus l'outil utilisé. */
 function calculExposant(e: ExerciceLimiteLogD): { identites: LigneCalcul[]; limites: LigneCalcul[]; outil: FragmentConsigne[] } {
@@ -122,10 +127,10 @@ function calculExposant(e: ExerciceLimiteLogD): { identites: LigneCalcul[]; limi
       const identites = [
         ligne(debut),
         ligne(`=${gLatexD(e)}\\cdot ${parSigne(u)}\\cdot ${quotient}`, [texte("on multiplie et on divise par "), latex(`u=${u}`)]),
-        ligne(`=${coef}\\cdot ${quotient}`, "on simplifie"),
+        ligne(`=${coefDevantQuotient(coef, quotient)}`, "on simplifie"),
       ];
       const limites = [ligne(`${L} ${quotient}=1`, [texte("limite de référence, car "), latex(`${u}\\to0`)])];
-      if (r === 0) limites.push(ligne(`${finale}=${coef}\\cdot 1=${issueLatex}`, "produit des limites"));
+      if (r === 0) limites.push(coef === "1" || coef === "-1" ? ligne(`${finale}=${issueLatex}`, "le quotient tend vers 1") : ligne(`${finale}=${coef}\\cdot 1=${issueLatex}`, "produit des limites"));
       else limites.push(ligne(`${finale}=${issueLatex}`, [texte("car "), latex(`${coef}\\to${issueLatex}`), texte(" et le quotient tend vers 1")]));
       return { identites, limites, outil: referenceOutil };
     }
@@ -142,12 +147,12 @@ function calculExposant(e: ExerciceLimiteLogD): { identites: LigneCalcul[]; limi
         ligne(debut),
         ligne(`=${gLatexD(e)}\\cdot ${lnU}`, [texte("car "), latex(`${fLatexD(e)}=1${u.startsWith("-") ? "" : "+"}${u}`)]),
         ligne(`=${gLatexD(e)}\\cdot ${parSigne(u)}\\cdot ${quotient}`, [texte("on multiplie et on divise par "), latex(`u=${u}`)]),
-        ligne(`=${coef}\\cdot ${quotient}`, "on regroupe"),
+        ligne(`=${coefDevantQuotient(coef, quotient)}`, "on regroupe"),
       ];
       const limites = [ligne(`${L} ${quotient}=1`, [texte("limite de référence, car "), latex(`${u}\\to0`)])];
       if (e.q === 1) {
         if (e.c !== 0) limites.push(ligne(`${L} ${parSomme(coef)}=${K}`, "quotient des termes de plus haut degré"));
-        limites.push(ligne(`${finale}=${K}\\cdot 1=${issueLatex}`, "produit des limites"));
+        limites.push(Math.abs(K) === 1 ? ligne(`${finale}=${issueLatex}`, "le quotient tend vers 1") : ligne(`${finale}=${K}\\cdot 1=${issueLatex}`, "produit des limites"));
       } else if (e.q === 0.5) {
         limites.push(ligne(`${L} ${parSomme(coef)}=0`, e.c === 0 ? [texte("car "), latex("\\sqrt{x}\\to+\\infty")] : "le dénominateur l'emporte sur la racine"));
         limites.push(ligne(`${finale}=0\\cdot 1=0`, "produit des limites"));
@@ -171,13 +176,13 @@ function calculExposant(e: ExerciceLimiteLogD): { identites: LigneCalcul[]; limi
         const identites = [ligne(debut)];
         if (e.q === 2) identites.push(ligne(`=${monome(e.a, 1)}\\cdot x\\ln x`, [texte("on fait apparaître "), latex("x\\ln x")]));
         const limites = [ligne("\\lim_{x\\to0^+} x\\ln x=0", `croissance comparée ${COURS}`)];
-        limites.push(ligne(e.q === 2 ? `${finale}=0\\cdot 0=0` : `${finale}=${e.a}\\cdot 0=0`, "produit des limites"));
+        limites.push(e.q === 2 ? ligne(`${finale}=0\\cdot 0=0`, "produit des limites") : Math.abs(e.a) === 1 ? ligne(`${finale}=0`, [texte("car "), latex("x\\ln x\\to 0")]) : ligne(`${finale}=${e.a}\\cdot 0=0`, "produit des limites"));
         return { identites, limites, outil: [texte("Forme « 0 fois l'infini », levée par la croissance comparée "), latex("\\lim_{x\\to0^+}x\\ln x=0"), texte(` ${COURS}.`)] };
       }
       const quotient = `\\dfrac{\\ln x}{${puissanceX(e.q)}}`;
       return {
-        identites: [ligne(debut), ligne(`=${e.a}\\cdot ${quotient}`, "on réécrit le produit")],
-        limites: [ligne(`\\lim_{x\\to+\\infty} ${quotient}=0`, `croissance comparée ${COURS}`), ligne(`${finale}=${e.a}\\cdot 0=0`, "produit des limites")],
+        identites: [ligne(debut), ligne(`=${coefDevantLatex(e.a, quotient)}`, "on réécrit le produit")],
+        limites: [ligne(`\\lim_{x\\to+\\infty} ${quotient}=0`, `croissance comparée ${COURS}`), Math.abs(e.a) === 1 ? ligne(`${finale}=0`, "le quotient tend vers 0") : ligne(`${finale}=${e.a}\\cdot 0=0`, "produit des limites")],
         outil: [texte("Forme « 0 fois l'infini », levée par la croissance comparée "), latex("\\lim_{x\\to+\\infty}\\dfrac{\\ln x}{x^{k}}=0\\ (k>0)"), texte(` ${COURS}.`)],
       };
     }
@@ -318,6 +323,12 @@ function axd(a: number, d: number): string {
   return formatSommeTermes([{ valeur: a, suffixe: xd(d) }]);
 }
 
+/** « c / (k·terme) » avec le signe sorti devant (« -\dfrac{3}{\ln(x)} », jamais « \dfrac{3}{-\ln(x)} »
+ * ni « \dfrac{-3}{2x} »). */
+function quotientSigne(c: number, k: number, terme: string): string {
+  return `${c * k < 0 ? "-" : ""}\\dfrac{${Math.abs(c)}}{${formatSommeTermes([{ valeur: Math.abs(k), suffixe: terme }])}}`;
+}
+
 /** Étape a (dominance) de la famille A : chaque partie, ses termes comparés ligne à ligne. */
 function dominanceA(e: ExerciceLimiteLogA): LigneCalcul[] {
   switch (e.sousType) {
@@ -325,7 +336,7 @@ function dominanceA(e: ExerciceLimiteLogA): LigneCalcul[] {
       return [
         ligne(`N(x)=${formatSommeTermes([{ valeur: e.k, suffixe: "\\ln(x)" }])}`, "numérateur : un seul terme, un logarithme"),
         ligne(`D(x)=${formatSommeTermes([{ valeur: e.a, suffixe: xd(e.d) }, { valeur: e.b, suffixe: "" }])}`, justif("dénominateur : terme dominant ", { l: axd(e.a, e.d) })),
-        ...(e.b === 0 ? [] : [ligne(`${LIM}\\dfrac{${e.b}}{${axd(e.a, e.d)}}=0`, "la constante est négligeable devant le polynôme")]),
+        ...(e.b === 0 ? [] : [ligne(`${LIM}${quotientSigne(e.b, e.a, xd(e.d))}=0`, "la constante est négligeable devant le polynôme")]),
       ];
     case "sous2": {
       const exp = `${e.base}^x`;
@@ -338,13 +349,13 @@ function dominanceA(e: ExerciceLimiteLogA): LigneCalcul[] {
     case "sous3":
       return [
         ligne(`N(x)=${formatSommeTermes([{ valeur: e.p1, suffixe: "\\ln(x)" }, { valeur: e.c1, suffixe: "" }])}`, "numérateur : terme dominant, le logarithme"),
-        ...(e.c1 === 0 ? [] : [ligne(`${LIM}\\dfrac{${e.c1}}{${formatSommeTermes([{ valeur: e.p1, suffixe: "\\ln(x)" }])}}=0`, "la constante est négligeable devant le logarithme")]),
+        ...(e.c1 === 0 ? [] : [ligne(`${LIM}${quotientSigne(e.c1, e.p1, "\\ln(x)")}=0`, "la constante est négligeable devant le logarithme")]),
         ligne(`D(x)=${formatSommeTermes([{ valeur: e.p2, suffixe: `\\log_{${e.base}}(x)` }, { valeur: e.c2, suffixe: "" }])}`, "dénominateur : terme dominant, le logarithme"),
-        ...(e.c2 === 0 ? [] : [ligne(`${LIM}\\dfrac{${e.c2}}{${formatSommeTermes([{ valeur: e.p2, suffixe: `\\log_{${e.base}}(x)` }])}}=0`, "la constante est négligeable devant le logarithme")]),
+        ...(e.c2 === 0 ? [] : [ligne(`${LIM}${quotientSigne(e.c2, e.p2, `\\log_{${e.base}}(x)`)}=0`, "la constante est négligeable devant le logarithme")]),
       ];
     case "sous4": {
       const px = axd(e.a, e.d);
-      const reste = (b: number) => (e.c === 0 ? `\\log_{${b}}(x)` : `${e.c}+\\log_{${b}}(x)`);
+      const reste = (b: number) => logPlusConstanteLatex(b, e.c);
       return [
         ligne(`${LIM}\\dfrac{${reste(e.base1)}}{${px}}=0`, "croissance comparée : le polynôme l'emporte sur le logarithme et la constante"),
         ligne(`${LIM}\\dfrac{${reste(e.base2)}}{${px}}=0`, "même raison au dénominateur"),
@@ -373,26 +384,28 @@ function conclusionA(e: ExerciceLimiteLogA): LigneCalcul[] {
     }
     case "sous2":
       if (e.orientation === "expSurPoly") l.push(ligne(`${LIM}\\dfrac{${e.base}^x}{${xd(e.d)}}=+\\infty`, "croissance comparée : l'exponentielle l'emporte"), ligne(`${LIM}f(x)=${fin}`, e.q > 0 ? "facteur positif" : "facteur négatif : le signe change"));
-      else l.push(ligne(`${LIM}\\dfrac{${xd(e.d)}}{${e.base}^x}=0`, "croissance comparée : l'exponentielle l'emporte"), ligne(`${LIM}f(x)=${parN(e.q)}\\cdot 0`, "produit des limites"), ligne(`=${fin}`));
+      else l.push(ligne(`${LIM}\\dfrac{${xd(e.d)}}{${e.base}^x}=0`, "croissance comparée : l'exponentielle l'emporte"), ...(e.q === 1 ? [ligne(`${LIM}f(x)=${fin}`, "le quotient tend vers 0")] : [ligne(`${LIM}f(x)=${parN(e.q)}\\cdot 0`, "produit des limites"), ligne(`=${fin}`)]));
       break;
     case "sous3": {
       const haut = `${e.p1}${e.c1 === 0 ? "" : `${e.c1 < 0 ? "-" : "+"}\\dfrac{${Math.abs(e.c1)}}{\\ln(x)}`}`;
-      const bas = `\\dfrac{${e.p2}}{\\ln(${e.base})}${e.c2 === 0 ? "" : `${e.c2 < 0 ? "-" : "+"}\\dfrac{${Math.abs(e.c2)}}{\\ln(x)}`}`;
+      const bas = `${fractionSigneeLatex(e.p2, `\\ln(${e.base})`).replace("\\frac", "\\dfrac")}${e.c2 === 0 ? "" : `${e.c2 < 0 ? "-" : "+"}\\dfrac{${Math.abs(e.c2)}}{\\ln(x)}`}`;
+      // Signe du quotient sorti devant : jamais de dénominateur négatif (« \dfrac{2\ln 3}{-1} »).
+      const nonReduit = multipleLnNonReduitLatex(e.p1, e.p2, e.base);
       l.push(
         ligne(`=\\dfrac{${haut}}{${bas}}`, justif("on simplifie par ", { l: "\\ln(x)" })),
-        ligne(`${LIM}f(x)=\\dfrac{${e.p1}}{\\frac{${e.p2}}{\\ln(${e.base})}}`, justif("", { l: "\\dfrac{c}{\\ln(x)}\\to 0" })),
-        ligne(`=\\dfrac{${e.p1 === 1 ? "" : e.p1 === -1 ? "-" : e.p1}\\ln(${e.base})}{${e.p2}}`, "diviser par une fraction, c'est multiplier par son inverse"),
+        ligne(`${LIM}f(x)=${e.p1 * e.p2 < 0 ? "-" : ""}\\dfrac{${Math.abs(e.p1)}}{\\frac{${Math.abs(e.p2)}}{\\ln(${e.base})}}`, justif("", { l: "\\dfrac{c}{\\ln(x)}\\to 0" })),
+        ligne(`=${nonReduit}`, "diviser par une fraction, c'est multiplier par son inverse"),
       );
-      if (`\\dfrac{${e.p1 === 1 ? "" : e.p1 === -1 ? "-" : e.p1}\\ln(${e.base})}{${e.p2}}` !== fin) l.push(ligne(`=${fin}`, "on simplifie"));
+      if (nonReduit !== fin) l.push(ligne(`=${fin}`, "on simplifie"));
       break;
     }
     case "sous4":
-      l.push(ligne(`=\\dfrac{1+\\frac{${e.c === 0 ? "" : `${e.c}+`}\\log_{${e.base1}}(x)}{${axd(e.a, e.d)}}}{1+\\frac{${e.c === 0 ? "" : `${e.c}+`}\\log_{${e.base2}}(x)}{${axd(e.a, e.d)}}}`, justif("on simplifie par ", { l: axd(e.a, e.d) })), ligne(`${LIM}f(x)=\\dfrac{1+0}{1+0}`, "les deux quotients tendent vers 0 (étape 1)"), ligne(`=${fin}`));
+      l.push(ligne(`=\\dfrac{1+\\frac{${logPlusConstanteLatex(e.base1, e.c)}}{${axd(e.a, e.d)}}}{1+\\frac{${logPlusConstanteLatex(e.base2, e.c)}}{${axd(e.a, e.d)}}}`, justif("on simplifie par ", { l: axd(e.a, e.d) })), ligne(`${LIM}f(x)=\\dfrac{1+0}{1+0}`, "les deux quotients tendent vers 0 (étape 1)"), ligne(`=${fin}`));
       break;
     case "sous5":
       l.push(
         ligne(`${LIM}\\dfrac{${xd(e.d1)}}{${e.base2}^x}=0`, "croissance comparée"),
-        ligne(`${LIM}\\dfrac{${e.a1}+\\frac{${formatSommeTermes([{ valeur: e.c1, suffixe: `${formatBaseDecimale(e.base1)}^x`, cdot: true }])}}{${xd(e.d1)}}}{${e.c2}+\\frac{${axd(e.a2, e.d2)}}{${e.base2}^x}}=${frac(e.a1, e.c2)}`, "les quotients tendent vers 0"),
+        ligne(`${LIM}\\dfrac{${e.a1}${e.c1 < 0 ? "-" : "+"}\\frac{${formatSommeTermes([{ valeur: Math.abs(e.c1), suffixe: `${formatBaseDecimale(e.base1)}^x`, cdot: true }])}}{${xd(e.d1)}}}{${e.c2}${e.a2 < 0 ? "-" : "+"}\\frac{${axd(Math.abs(e.a2), e.d2)}}{${e.base2}^x}}=${frac(e.a1, e.c2)}`, "les quotients tendent vers 0"),
         ligne(`${LIM}f(x)=0\\cdot ${parN(e.a1 / e.c2)}`, "produit des limites"),
         ligne(`=${fin}`),
       );
@@ -439,13 +452,17 @@ function correctionB(e: ExerciceLimiteLogB): EtapeCorrection[] {
       ...(e.k === 1 ? [] : [ligne(`=\\dfrac{\\ln(${arg})}{${e.k}\\ln\\left(${formatBaseB(x0, 1)}\\right)}`, justif("", { l: "\\ln(a^k)=k\\ln(a)" }))]),
       ligne(`=${reform}`, "on remplace en fonction de u"),
     );
+    const fr = frac(c, e.k);
+    // Coefficient 1 omis, −1 réduit au signe (jamais « 1\cdot », « -1\cdot »).
+    const devant = (expr: string) => (fr === "1" ? expr : fr === "-1" ? `-${expr}` : `${fr}\\cdot ${expr}`);
+    const produitLimites = devant("\\dfrac{1}{1}");
     b = [
       ligne(`f(x)=${reform}`, "forme de l'étape 1"),
-      ligne(`=${frac(c, e.k)}\\cdot\\dfrac{\\dfrac{\\ln(${formatUnPlusKU(c)})}{${formatKU(c)}}}{\\dfrac{\\ln(1+u)}{u}}`, justif("on multiplie et on divise par ", { l: formatKU(c) }, " et par u")),
+      ligne(`=${devant(`\\dfrac{\\dfrac{\\ln(${formatUnPlusKU(c)})}{${formatKU(c)}}}{\\dfrac{\\ln(1+u)}{u}}`)}`, justif("on multiplie et on divise par ", { l: formatKU(c) }, " et par u")),
       ligne(`${lu}\\dfrac{\\ln(${formatUnPlusKU(c)})}{${formatKU(c)}}=1`, justif("limite de référence, car ", { l: `${formatKU(c)}\\to 0` })),
       ligne(`${lu}\\dfrac{\\ln(1+u)}{u}=1`, "limite de référence"),
-      ligne(`${lx}f(x)=${frac(c, e.k)}\\cdot\\dfrac{1}{1}`, "produit et quotient des limites"),
-      ...(e.limiteLatex === frac(c, e.k) ? [] : [ligne(`=${e.limiteLatex}`, "on simplifie")]),
+      ligne(`${lx}f(x)=${produitLimites}`, "produit et quotient des limites"),
+      ...(e.limiteLatex === produitLimites ? [] : [ligne(`=${e.limiteLatex}`, "on simplifie")]),
     ];
   } else {
     a.push(

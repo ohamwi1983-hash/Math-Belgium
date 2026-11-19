@@ -14,6 +14,9 @@ import { phaseApres, phaseInitiale, type PhaseDomaineDeriveeLogarithme } from ".
 import {
   argumentA,
   carreMoinsCarreLatex,
+  deriveeQuotientDifferenceLatex,
+  fractionSignee,
+  surAffinePositif,
   facteursLatexC,
   formatAffine,
   formatFonctionEOrigine,
@@ -138,12 +141,13 @@ function correctionB(e: ExerciceDomaineDeriveeLogB): EtapeCorrection[] {
       ligne(`x${e.m === 1 ? "\\leq " : "\\geq "}${borne}`, e.m === 1 ? (e.n > 0 ? `on soustrait ${e.n}` : `on ajoute ${-e.n}`) : "on multiplie par −1 : le sens change"),
     ];
     const w = `1-\\log_{${b}}(${arg})`;
-    const wp = `${e.m < 0 ? "" : "-"}\\dfrac{1}{(${arg})\\ln(${b})}`;
+    // w′ = −m/((mx + n) ln b), dénominateur au coefficient de x positif (`surAffinePositif`, comme l'écran).
+    const dw = surAffinePositif(-e.m, e.m, e.n);
+    const wp = fractionSignee(dw.num, "", `(${dw.arg})\\ln(${b})`);
     formule = [texte("Racine d'une fonction et dérivée d'un logarithme : "), latex("\\left(\\sqrt{w}\\right)'=\\dfrac{w'}{2\\sqrt{w}}"), texte(" et "), latex(REGLE_LOG)];
     der = [
       ligne(`w(x)=${w}`, "sous la racine"),
-      ligne(`w'(x)=-\\dfrac{${e.m}}{(${arg})\\ln(${b})}`, justif("", { l: REGLE_LOG })),
-      ...(e.m < 0 ? [ligne(`=${wp}`, "règle des signes")] : []),
+      ligne(`w'(x)=${wp}`, e.m < 0 ? justif("", { l: REGLE_LOG }, ", u′ = −1, puis on multiplie par −1 le numérateur et le dénominateur") : justif("", { l: REGLE_LOG })),
       ligne(`f'(x)=\\dfrac{w'(x)}{2\\sqrt{w(x)}}`, justif("", { l: "\\left(\\sqrt{w}\\right)'=\\dfrac{w'}{2\\sqrt{w}}" })),
       ligne(`=\\dfrac{${wp}}{2\\sqrt{${w}}}`, "on remplace w et w′"),
       ...finale(rep, "", "on regroupe en une seule fraction"),
@@ -278,7 +282,12 @@ function correctionE(e: ExerciceDomaineDeriveeLogE): EtapeCorrection[] {
       const B = formatAffine(e.p, e.q);
       dom = [ligne(`\\dfrac{${A}}{${B}}>0`, "argument strictement positif"), ligne(`${A}=0\\iff x=${frac(-e.n, e.m)}`, "racine du numérateur"), ligne(`${B}=0\\iff x=${frac(-e.q, e.p)}`, "racine du dénominateur"), ligne(`x\\in ${domaineL(e)}`, "tableau de signes : numérateur et dénominateur de même signe")];
       simpl = [ligne(`f(x)=${origine}`), ligne(`=${simple}`, justif("propriété du quotient (", { l: A }, " et ", { l: B }, " positifs sur le domaine)"))];
-      der = [ligne(`f'(x)=\\dfrac{${e.m}}{${A}}-\\dfrac{${e.p}}{${B}}`, justif("", { l: REGLE_LN }))];
+      der = [
+        ligne(
+          `f'(x)=${deriveeQuotientDifferenceLatex(e.m, e.n, e.p, e.q)}`,
+          e.p < 0 ? justif("", { l: REGLE_LN }, ", puis on multiplie par −1 le numérateur et le dénominateur du second quotient") : justif("", { l: REGLE_LN }),
+        ),
+      ];
       break;
     }
     case "puissanceSimple":
