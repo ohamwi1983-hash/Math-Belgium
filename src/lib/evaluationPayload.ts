@@ -930,6 +930,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'sin θ = 3/5', enonce: "Sachant que $\\sin\\theta = \\dfrac{3}{5}$ et que $\\theta \\in\\ ]90°\\,;\\,180°[$, calcule la valeur exacte de $\\cos\\theta$ et de $\\tan\\theta$." },
       { cle: 'cos θ = −1/3', enonce: "Sachant que $\\cos\\theta = -\\dfrac{1}{3}$ et que $\\theta \\in\\ ]180°\\,;\\,270°[$, calcule la valeur exacte de $\\sin\\theta$ et de $\\tan\\theta$." },
       { cle: 'à partir de tan θ', enonce: "Sachant que $\\tan\\theta = 2$ et que $\\theta \\in\\ ]180°\\,;\\,270°[$, calcule la valeur exacte de $\\cos\\theta$ et de $\\sin\\theta$ à l'aide de la relation $1 + \\tan^2\\theta = \\dfrac{1}{\\cos^2\\theta}$." },
+      { cle: 'Démonstration — la relation entre tan θ et cos θ', enonce: "Démontre que, pour tout angle $\\theta$ tel que $\\cos\\theta \\neq 0$, $1 + \\tan^2\\theta = \\dfrac{1}{\\cos^2\\theta}$." },
     ],
     remarquables: [
       { cle: 'triangle rectangle isocèle', enonce: "À l'aide d'un triangle rectangle isocèle dont les côtés de l'angle droit mesurent 1, démontre que $\\sin 45° = \\cos 45° = \\dfrac{\\sqrt{2}}{2}$, puis déduis-en $\\tan 45°$." },
@@ -938,9 +939,11 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'quadrants II et IV', enonce: "Calcule sans calculatrice la valeur exacte de $\\tan 150°$ et de $\\sin 315°$." },
     ],
     associes: [
+      { cle: 'Démonstration — les règles des angles associés', enonce: "Démontre que, pour tout angle $\\theta$ : $\\sin(180°-\\theta)=\\sin\\theta$ et $\\cos(180°-\\theta)=-\\cos\\theta$ ; $\\sin(-\\theta)=-\\sin\\theta$ et $\\cos(-\\theta)=\\cos\\theta$ ; $\\sin(180°+\\theta)=-\\sin\\theta$ et $\\cos(180°+\\theta)=-\\cos\\theta$ ; $\\sin(90°-\\theta)=\\cos\\theta$ et $\\cos(90°-\\theta)=\\sin\\theta$. Déduis-en $\\tan(180°-\\theta)$ et $\\tan(90°-\\theta)$." },
       { cle: 'à partir de sin 35°', enonce: "Sachant que $\\sin 35° \\approx 0{,}574$ et $\\cos 35° \\approx 0{,}819$, détermine sans calculatrice $\\sin 145°$ et $\\cos 215°$, en nommant la famille d'angles associés utilisée." },
       { cle: 'enchaîner deux familles', enonce: "Sachant que $\\sin 67° \\approx 0{,}921$ et $\\cos 67° \\approx 0{,}391$, détermine $\\sin 157°$ sans calculatrice, en enchaînant deux familles d'angles associés." },
       { cle: 'retrouver la règle de 90° + θ', enonce: "Exprime $\\sin(90°+\\theta)$ et $\\cos(90°+\\theta)$ en fonction de $\\sin\\theta$ et $\\cos\\theta$, en enchaînant deux familles d'angles associés, puis applique le résultat à $\\theta = 35°$." },
+      { cle: 'appliquer 90° + θ', enonce: "Sans calculatrice, calcule les valeurs exactes de $\\sin 120°$, $\\cos 120°$ et $\\tan 120°$ en écrivant $120° = 90° + 30°$." },
       { cle: "valeur exacte d'une expression", enonce: "Calcule sans calculatrice la valeur exacte de $\\sin 150° + \\cos 240° \\cdot \\tan 315°$." },
     ],
     equations: [
@@ -948,17 +951,20 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'sin α = −√2/2', enonce: "Résous l'équation $\\sin\\alpha = -\\dfrac{\\sqrt{2}}{2}$ pour $\\alpha \\in [0°\\,;\\,360°[$." },
       { cle: 'tan α = −√3', enonce: "Résous l'équation $\\tan\\alpha = -\\sqrt{3}$ pour $\\alpha \\in [0°\\,;\\,360°[$." },
       { cle: 'sin α = sin 40°', enonce: "Résous l'équation $\\sin\\alpha = \\sin 40°$ pour $\\alpha \\in [0°\\,;\\,360°[$." },
+      { cle: 'sin α = sin 200°', enonce: "Résous l'équation $\\sin\\alpha = \\sin 200°$ pour $\\alpha \\in [0°\\,;\\,360°[$." },
       { cle: 'cos α = 0,3', enonce: "À l'aide de la calculatrice, résous l'équation $\\cos\\alpha = 0{,}3$ pour $\\alpha \\in [0°\\,;\\,360°[$ (angles au dixième de degré)." },
       { cle: '4 sin² α − 3 = 0', enonce: "Résous l'équation $4\\sin^2\\alpha - 3 = 0$ pour $\\alpha \\in [0°\\,;\\,360°[$." },
       { cle: 'sin α · (2 cos α − 1) = 0', enonce: "Résous l'équation $\\sin\\alpha \\cdot (2\\cos\\alpha - 1) = 0$ pour $\\alpha \\in [0°\\,;\\,360°[$." },
     ],
     triangle: [
-      { cle: 'démonstration — la loi des sinus', enonce: "Démontre la loi des sinus $\\dfrac{a}{\\sin\\hat{A}} = \\dfrac{b}{\\sin\\hat{B}}$ en abaissant, dans le triangle $ABC$, la hauteur issue de $C$ jusqu'en $H$ sur $[AB]$." },
+      { cle: 'Démonstration — la loi des sinus', enonce: "Démontre la loi des sinus : dans tout triangle $ABC$, $\\dfrac{a}{\\sin\\hat{A}} = \\dfrac{b}{\\sin\\hat{B}} = \\dfrac{c}{\\sin\\hat{C}}$." },
       { cle: 'AAS —', enonce: "Dans le triangle $ABC$, on donne $\\hat{A} = 40°$, $\\hat{B} = 75°$ et $c = 10$. Calcule $\\hat{C}$, puis les côtés $a$ et $b$ (au centième)." },
+      { cle: 'Démonstration — combien de triangles en SSA ?', enonce: "Dans le triangle $ABC$, on donne un angle aigu $\\hat{A}$ et les côtés $b = AC$ et $a = BC$ ; on note $h = b\\sin\\hat{A}$. Démontre qu'aucun triangle ne convient si $a < h$, qu'un seul convient si $a = h$ ou si $a \\geq b$, et que deux conviennent si $h < a < b$." },
       { cle: 'SSA —', enonce: "Dans le triangle $ABC$, on donne $\\hat{A} = 30°$, $b = 8$ et $a = 5$. Détermine combien de triangles conviennent, puis calcule pour chacun $\\hat{B}$, $\\hat{C}$ (au dixième de degré) et $c$ (au centième)." },
       { cle: 'SSS —', enonce: "Dans le triangle $ABC$, on donne $a = 7$, $b = 5$ et $c = 8$. Calcule ses trois angles (au dixième de degré)." },
-      { cle: 'Loi des cosinus', enonce: "Démontre la loi des cosinus $a^2 = b^2+c^2-2bc\\cos\\hat{A}$ en plaçant $A$ à l'origine d'un repère, $B$ sur l'axe horizontal à distance $c$, et $C$ au point $(b\\cos\\hat{A}\\,;\\,b\\sin\\hat{A})$, puis en appliquant le théorème de Pythagore au côté $BC=a$." },
-      { cle: 'Aire', enonce: "Démontre que l'aire du triangle $ABC$ vaut $\\dfrac{1}{2}bc\\sin\\hat{A}$, en exprimant la hauteur issue de $C$ au-dessus de $[AB]$ sous la forme $b\\sin\\hat{A}$." },
+      { cle: 'Démonstration — la loi des cosinus', enonce: "Démontre la loi des cosinus : dans tout triangle $ABC$, $a^2 = b^2+c^2-2bc\\cos\\hat{A}$." },
+      { cle: "Démonstration — l'aire d'un triangle", enonce: "Démontre que l'aire de tout triangle $ABC$ vaut $\\dfrac{1}{2}\\,bc\\sin\\hat{A}$." },
+      { cle: "aire d'un quadrilatère", enonce: "Le quadrilatère convexe $ABCD$ a pour côtés $AB = 6$, $AD = 5$, $BC = 4$ et $CD = 5$, avec $\\hat{A} = 70°$. Calcule son aire (au centième)." },
       { cle: 'SAS', enonce: "Dans le triangle $ABC$, on donne $b=8$, $c=6$ et $\\hat{A}=60°$. Calcule le côté $a$, les angles $\\hat{B}$ et $\\hat{C}$, puis l'aire du triangle (longueurs et aire au centième, angles au dixième de degré)." },
     ],
     triangulation: [

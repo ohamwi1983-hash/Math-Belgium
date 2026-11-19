@@ -370,9 +370,34 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Divise l\'identité fondamentale par $\\cos^2\\theta$ (non nul) : ' +
+            'Une autre relation permet de partir de tan θ : ' +
             '$1 + \\tan^2\\theta = \\dfrac{1}{\\cos^2\\theta}$. Connaissant tan θ, tu obtiens donc ' +
             '$\\cos^2\\theta$, puis cos θ (signe tranché par le quadrant), puis sin θ = tan θ · cos θ.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la relation entre tan θ et cos θ',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'On suppose $\\cos\\theta \\neq 0$, pour que $\\tan\\theta$ existe, et on part de ' +
+                'l\'identité fondamentale : $\\cos^2\\theta + \\sin^2\\theta = 1$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'On divise les deux membres par $\\cos^2\\theta$ : ' +
+                '$\\dfrac{\\cos^2\\theta}{\\cos^2\\theta} + \\dfrac{\\sin^2\\theta}{\\cos^2\\theta} = \\dfrac{1}{\\cos^2\\theta}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Le premier quotient vaut 1, et $\\dfrac{\\sin^2\\theta}{\\cos^2\\theta} = ' +
+                '\\left(\\dfrac{\\sin\\theta}{\\cos\\theta}\\right)^2 = \\tan^2\\theta$. Donc ' +
+                '$1 + \\tan^2\\theta = \\dfrac{1}{\\cos^2\\theta}$.',
+            },
+          ],
         },
         {
           kind: 'exemple',
@@ -624,6 +649,52 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — les règles des angles associés',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Note $M(\\theta) = (x\\,;\\,y)$, avec $x = \\cos\\theta$ et $y = \\sin\\theta$. Chaque ' +
+                'angle associé arrive au symétrique de $M(\\theta)$ par une symétrie du cercle : il suffit de ' +
+                'lire les coordonnées de ce symétrique.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Axe vertical.** Le symétrique de M est $(-x\\,;\\,y)$. Il fait avec la moitié gauche de ' +
+                'l\'axe horizontal le même angle θ que M avec la moitié droite : c\'est $M(180°-\\theta)$. ' +
+                'Donc $\\cos(180°-\\theta) = -\\cos\\theta$ et $\\sin(180°-\\theta) = \\sin\\theta$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Axe horizontal.** Le symétrique est $(x\\,;\\,-y)$ : on tourne de θ dans l\'autre sens, ' +
+                'c\'est $M(-\\theta)$. Donc $\\cos(-\\theta) = \\cos\\theta$ et $\\sin(-\\theta) = -\\sin\\theta$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Centre O.** Le symétrique est $(-x\\,;\\,-y)$ : un demi-tour de plus, c\'est ' +
+                '$M(180°+\\theta)$. Donc $\\cos(180°+\\theta) = -\\cos\\theta$ et $\\sin(180°+\\theta) = -\\sin\\theta$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Diagonale y = x.** Le symétrique est $(y\\,;\\,x)$ : il fait l\'angle θ avec la moitié ' +
+                'haute de l\'axe vertical, donc l\'angle $90°-\\theta$ avec l\'axe horizontal. C\'est ' +
+                '$M(90°-\\theta)$ : $\\cos(90°-\\theta) = \\sin\\theta$ et $\\sin(90°-\\theta) = \\cos\\theta$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**La tangente** suit, comme quotient : par exemple ' +
+                '$\\tan(180°-\\theta) = \\dfrac{\\sin\\theta}{-\\cos\\theta} = -\\tan\\theta$ et ' +
+                '$\\tan(90°-\\theta) = \\dfrac{\\cos\\theta}{\\sin\\theta} = \\dfrac{1}{\\tan\\theta}$.',
+            },
+          ],
+        },
+        {
           kind: 'rappel',
           label: '360° − θ, c\'est −θ',
           items: [
@@ -689,6 +760,18 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             { tag: 'famille complémentaire', text: 'sin(90° − θ) = cos θ et cos(90° − θ) = sin θ' },
           ],
           result: { tag: 'résultat', text: 'sin(90° + θ) = cos θ et cos(90° + θ) = −sin θ — par exemple sin 125° = cos 35° ≈ 0,819 et cos 125° = −sin 35° ≈ −0,574' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'appliquer 90° + θ — valeurs exactes de 120°',
+          formula: 'Sans calculatrice, calcule $\\sin 120°$, $\\cos 120°$ et $\\tan 120°$ en écrivant $120° = 90° + 30°$.',
+          steps: [
+            { tag: 'sin(90° + θ) = cos θ', text: '$\\sin 120° = \\cos 30° = \\dfrac{\\sqrt{3}}{2}$' },
+            { tag: 'cos(90° + θ) = −sin θ', text: '$\\cos 120° = -\\sin 30° = -\\dfrac{1}{2}$' },
+            { tag: 'tan 120°, quotient', text: '$\\tan 120° = \\dfrac{\\frac{\\sqrt{3}}{2}}{-\\frac{1}{2}} = -\\sqrt{3}$' },
+            { tag: 'contrôle', text: '120° est dans le quadrant II : sin positif, cos et tan négatifs. Et 120° = 180° − 60° redonne les mêmes valeurs.' },
+          ],
+          result: { tag: 'résultat', text: '$\\sin 120° = \\dfrac{\\sqrt{3}}{2}$, $\\cos 120° = -\\dfrac{1}{2}$, $\\tan 120° = -\\sqrt{3}$' },
         },
         {
           kind: 'entrainement',
@@ -758,10 +841,10 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           illustration: {
             kind: 'circleAngles',
             points: [
-              { angle: 30 * D2R, label: 'α₁ = 30°', tone: 'accent' },
-              { angle: 150 * D2R, label: 'α₂ = 150°', tone: 'accent' },
+              { angle: 30 * D2R, label: 'α₁', tone: 'accent' },
+              { angle: 150 * D2R, label: 'α₂', tone: 'accent' },
             ],
-            horizontalLine: { y: 0.5, label: 'sin α = k' },
+            horizontalLine: { y: 0.5, label: 'y = k' },
             angleArcs: [
               { from: 0, to: 30 * D2R, tone: 'good', radiusPx: 24 },
               { from: 150 * D2R, to: 180 * D2R, tone: 'good', radiusPx: 24 },
@@ -853,6 +936,31 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           result: { tag: 'résultat', text: 'α = 120° ou α = 300°' },
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'circleAngles',
+            points: [
+              { angle: 45 * D2R, label: '', tone: 'accent' },
+              { angle: 225 * D2R, label: '', tone: 'accent' },
+            ],
+            connectPoints: true,
+            tangentConstruction: { angle: 45 * D2R },
+            angleArcs: [
+              { from: 0, to: 45 * D2R, tone: 'good', radiusPx: 30, arrow: true, label: 'α₁' },
+              { from: 0, to: 225 * D2R, tone: 'accent', radiusPx: 48, arrow: true, label: 'α₂' },
+            ],
+            freeLabels: [
+              { x: 0.42, y: 0.8, text: 'M₁', tone: 'accent' },
+              { x: -0.45, y: -0.86, text: 'M₂', tone: 'accent' },
+              { x: 0.75, y: 1.12, text: 'P(1 ; 1)', tone: 'good' },
+            ],
+            caption:
+              'tan α = 1 sur [0° ; 360°[ : la droite (OM₁) prolongée coupe la tangente verticale en ' +
+              'P(1 ; 1) et recoupe le cercle en M₂, diamétralement opposé à M₁. D\'où α₁ = 45° et ' +
+              'α₂ = 45° + 180° = 225° : deux solutions espacées de 180°, pour toute valeur de k.',
+          },
+        },
+        {
           kind: 'exemple',
           badge: 'sin α = sin 40°',
           steps: [
@@ -860,6 +968,25 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             { tag: 'la seconde, par la famille supplémentaire', text: 'sin(180° − 40°) = sin 40°, donc α = 140° convient aussi' },
           ],
           result: { tag: 'résultat', text: 'α = 40° ou α = 140°' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'sin α = sin 200° — l\'angle donné n\'est pas aigu',
+          steps: [
+            { tag: 'une solution évidente', text: 'α = 200°' },
+            { tag: 'la seconde, par la famille supplémentaire', text: '$\\sin(180° - 200°) = \\sin 200°$, donc $\\alpha = 180° - 200° = -20°$ convient aussi' },
+            { tag: 'ramener dans [0° ; 360°[', text: '−20° + 360° = 340°' },
+            { tag: 'contrôle', text: 'sin 200° est négatif (quadrant III) : les deux solutions sont bien dans les quadrants III et IV' },
+          ],
+          result: { tag: 'résultat', text: 'α = 200° ou α = 340°' },
+        },
+        {
+          kind: 'astuce',
+          label: 'Et cos α = cos β ?',
+          text:
+            'Même idée, avec la famille « opposé » : $\\cos(-\\beta) = \\cos\\beta$, donc les solutions ' +
+            'sont β et −β, ramenés dans [0° ; 360°[. Par exemple, $\\cos\\alpha = \\cos 70°$ donne ' +
+            'α = 70° ou α = −70° + 360° = 290°.',
         },
         {
           kind: 'rappel',
@@ -971,6 +1098,42 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             '$\\sin\\theta = k$ : en général deux solutions.',
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -12,
+            xMax: 18,
+            yMin: -2,
+            yMax: 26.125,
+            showAxes: false,
+            circle: { cx: 0, cy: 12, r: 10, tone: 'faint' },
+            vectors: [
+              { from: { x: -12, y: 0 }, to: { x: 18, y: 0 }, tone: 'ink', arrow: false },
+              { from: { x: -11.5, y: 12 }, to: { x: 11.5, y: 12 }, tone: 'faint', dashed: true },
+              { from: { x: 0, y: 0 }, to: { x: 0, y: 23 }, tone: 'faint', dashed: true },
+              { from: { x: 0, y: 12 }, to: { x: 8.66, y: 17 }, tone: 'accent', arrow: false },
+              { from: { x: 8.66, y: 17 }, to: { x: 8.66, y: 0 }, tone: 'attn', dashed: true },
+            ],
+            points: [
+              { x: 0, y: 12, label: '', tone: 'ink' },
+              { x: 0, y: 2, label: 'départ', tone: 'ink', labelPos: 'left' },
+              { x: 8.66, y: 17, label: 'P', tone: 'accent', labelPos: 'above' },
+              { x: 4.33, y: 14.5, label: 'r', tone: 'accent', labelPos: 'above', node: false },
+              { x: 0, y: 6, label: 'h', tone: 'ink', labelPos: 'left', node: false },
+              { x: 8.66, y: 8.5, label: 'h + r sin θ', tone: 'attn', labelPos: 'right', node: false },
+              { x: -9, y: 0, label: 'sol', tone: 'ink', labelPos: 'above', node: false },
+            ],
+            angleArcs: [
+              { cx: 0, cy: 12, fromDeg: 270, toDeg: 390, radiusPx: 40, label: 'α', tone: 'attn' },
+              { cx: 0, cy: 12, fromDeg: 0, toDeg: 30, radiusPx: 64, label: 'θ', tone: 'accent' },
+            ],
+            caption:
+              'Grande roue de rayon r = 10 m, centre à h = 12 m du sol. Partie du bas (θ₀ = 270°) et ' +
+              'tournée de α = 120° dans le sens trigonométrique, la nacelle est en θ = 270° + 120° = 390°, ' +
+              'soit 30°. Sa hauteur vaut $h + r\\sin\\theta = 12 + 10\\sin 30° = 17$ m.',
+          },
+        },
+        {
           kind: 'attention',
           label: 'Le contexte ne part pas de 0°',
           text:
@@ -1058,7 +1221,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             '$\\sin \\hat{A}/a = \\sin \\hat{B}/b = \\sin \\hat{C}/c$. C\'est strictement ' +
             'équivalent — les deux écritures répondent exactement aux mêmes questions.',
         },
-        { kind: 'subheading', text: 'Démonstration — la loi des sinus' },
+        { kind: 'subheading', text: 'D\'où vient la loi des sinus ?' },
         {
           kind: 'para',
           text:
@@ -1079,19 +1242,30 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           },
         },
         {
-          kind: 'exemple',
-          badge: 'démonstration — la loi des sinus',
-          steps: [
-            { tag: 'dans ACH, rectangle en H', text: '$\\sin\\hat{A} = \\dfrac{CH}{AC} = \\dfrac{h}{b}$, donc $h = b\\sin\\hat{A}$' },
-            { tag: 'dans BCH, rectangle en H', text: '$\\sin\\hat{B} = \\dfrac{CH}{BC} = \\dfrac{h}{a}$, donc $h = a\\sin\\hat{B}$' },
-            { tag: 'en égalant les deux expressions de h', text: 'a sin B̂ = b sin Â' },
+          kind: 'exempleLibre',
+          label: 'Démonstration — la loi des sinus',
+          blocks: [
+            {
+              kind: 'para',
+              text: 'Dans le triangle ACH, rectangle en H : $\\sin\\hat{A} = \\dfrac{CH}{AC} = \\dfrac{h}{b}$, donc $h = b\\sin\\hat{A}$.',
+            },
+            {
+              kind: 'para',
+              text: 'Dans le triangle BCH, rectangle en H : $\\sin\\hat{B} = \\dfrac{CH}{BC} = \\dfrac{h}{a}$, donc $h = a\\sin\\hat{B}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'On égale les deux expressions de h : $a\\sin\\hat{B} = b\\sin\\hat{A}$. On divise par ' +
+                '$\\sin\\hat{A} \\cdot \\sin\\hat{B}$, non nul : $\\dfrac{a}{\\sin\\hat{A}} = \\dfrac{b}{\\sin\\hat{B}}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Le même raisonnement, avec la hauteur issue d\'un autre sommet, donne aussi l\'égalité avec ' +
+                '$\\dfrac{c}{\\sin\\hat{C}}$.',
+            },
           ],
-          result: {
-            tag: 'résultat',
-            text:
-              '$\\dfrac{a}{\\sin\\hat{A}} = \\dfrac{b}{\\sin\\hat{B}}$. Fais le même raisonnement en abaissant la hauteur depuis un ' +
-              'autre sommet : tu obtiens aussi l\'égalité avec $\\dfrac{c}{\\sin\\hat{C}}$.',
-          },
         },
         {
           kind: 'rappel',
@@ -1143,6 +1317,122 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'Garde chaque candidat qui laisse de la place au troisième angle : il faut Â + B̂ < 180°. ' +
               'Quand Â est aigu, B̂₁ convient toujours ; B̂₂ convient seulement si Â + B̂₂ < 180°.',
             'Pour chaque triangle retenu : Ĉ = 180° − Â − B̂, puis c par la loi des sinus.',
+          ],
+        },
+        {
+          kind: 'illustrationGroup',
+          items: [
+              {
+                kind: 'vectorPlane',
+                xMin: -0.8,
+                xMax: 11.6,
+                yMin: -2.4,
+                yMax: 9.225,
+                showAxes: false,
+                curves: [{ fn: (x: number) => 4 - Math.sqrt(Math.max(0, 9 - (x - 6.928) ** 2)), tone: 'bad', xMin: 3.978, xMax: 9.878 }],
+                vectors: [
+                  { from: { x: 0, y: 0 }, to: { x: 11.2, y: 0 }, tone: 'faint' },
+                  { from: { x: 0, y: 0 }, to: { x: 6.928, y: 4 }, tone: 'accent', arrow: false },
+                  { from: { x: 6.928, y: 4 }, to: { x: 6.928, y: 0 }, tone: 'faint', dashed: true },
+                ],
+                points: [
+                  { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
+                  { x: 6.928, y: 4, label: 'C', tone: 'ink', labelPos: 'above' },
+                  { x: 1.8, y: 1.04, label: 'b', tone: 'accent', labelPos: 'above', node: false },
+                  { x: 6.928, y: 2.3, label: 'h', tone: 'ink', labelPos: 'right', node: false },
+                ],
+                angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 30, radiusPx: 34, label: 'Â', tone: 'accent' }],
+                caption: 'Â = 30°, b = 8, donc h = b sin Â = 4. Si a = 3 < h, l\'arc de rayon a ne touche pas la demi-droite : aucun triangle.',
+              },
+              {
+                kind: 'vectorPlane',
+                xMin: -0.8,
+                xMax: 11.6,
+                yMin: -2.4,
+                yMax: 9.225,
+                showAxes: false,
+                curves: [{ fn: (x: number) => 4 - Math.sqrt(Math.max(0, 16 - (x - 6.928) ** 2)), tone: 'attn', xMin: 3.028, xMax: 10.828 }],
+                vectors: [
+                  { from: { x: 0, y: 0 }, to: { x: 11.2, y: 0 }, tone: 'faint' },
+                  { from: { x: 0, y: 0 }, to: { x: 6.928, y: 4 }, tone: 'accent', arrow: false },
+                  { from: { x: 6.928, y: 4 }, to: { x: 6.928, y: 0 }, tone: 'faint', dashed: true },
+                  { from: { x: 6.928, y: 4 }, to: { x: 6.928, y: 0 }, tone: 'good', arrow: false },
+                ],
+                points: [
+                  { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
+                  { x: 6.928, y: 4, label: 'C', tone: 'ink', labelPos: 'above' },
+                  { x: 1.8, y: 1.04, label: 'b', tone: 'accent', labelPos: 'above', node: false },
+                  { x: 6.928, y: 0, label: 'B', tone: 'good', labelPos: 'below' },
+                ],
+                angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 30, radiusPx: 34, label: 'Â', tone: 'accent' }],
+                rightAngleMarkers: [{ vertex: { x: 6.928, y: 0 }, arm1: { x: 5, y: 0 }, arm2: { x: 6.928, y: 2 } }],
+                caption: 'Si a = h = 4, l\'arc touche la demi-droite en un seul point : un triangle, rectangle en B.',
+              },
+              {
+                kind: 'vectorPlane',
+                xMin: -0.8,
+                xMax: 11.6,
+                yMin: -2.4,
+                yMax: 9.225,
+                showAxes: false,
+                curves: [{ fn: (x: number) => 4 - Math.sqrt(Math.max(0, 25 - (x - 6.928) ** 2)), tone: 'good', xMin: 2.728, xMax: 11.128 }],
+                vectors: [
+                  { from: { x: 0, y: 0 }, to: { x: 11.2, y: 0 }, tone: 'faint' },
+                  { from: { x: 0, y: 0 }, to: { x: 6.928, y: 4 }, tone: 'accent', arrow: false },
+                  { from: { x: 6.928, y: 4 }, to: { x: 6.928, y: 0 }, tone: 'faint', dashed: true },
+                  { from: { x: 6.928, y: 4 }, to: { x: 3.928, y: 0 }, tone: 'good', arrow: false },
+                  { from: { x: 6.928, y: 4 }, to: { x: 9.928, y: 0 }, tone: 'good', arrow: false },
+                ],
+                points: [
+                  { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
+                  { x: 6.928, y: 4, label: 'C', tone: 'ink', labelPos: 'above' },
+                  { x: 1.8, y: 1.04, label: 'b', tone: 'accent', labelPos: 'above', node: false },
+                  { x: 3.928, y: 0, label: 'B₁', tone: 'good', labelPos: 'below' },
+                  { x: 9.928, y: 0, label: 'B₂', tone: 'good', labelPos: 'below' },
+                ],
+                angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 30, radiusPx: 34, label: 'Â', tone: 'accent' }],
+                caption: 'Si h < a < b (ici a = 5), l\'arc coupe la demi-droite en B₁ et B₂ : deux triangles.',
+              },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — combien de triangles en SSA ?',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'On connaît un angle aigu Â, le côté b = AC et le côté a = BC, opposé à Â. Le sommet B est sur ' +
+                'la demi-droite issue de A qui fait l\'angle Â avec [AC], à la distance a de C : c\'est un point ' +
+                'commun à cette demi-droite et au cercle de centre C et de rayon a (l\'arc de compas).',
+            },
+            {
+              kind: 'para',
+              text:
+                'Soit H le pied de la perpendiculaire issue de C. Dans le triangle ACH, rectangle en H : ' +
+                '$CH = h = b\\sin\\hat{A}$ et $AH = b\\cos\\hat{A}$. Par Pythagore, un point de la droite (AH) est ' +
+                'à la distance a de C si et seulement s\'il est à la distance $\\sqrt{a^2 - h^2}$ de H, ce qui ' +
+                'exige $a \\geq h$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Si a < h**, le cercle ne touche pas la droite : aucun triangle. **Si a = h**, il la touche en ' +
+                'H seulement : un seul triangle, rectangle en B = H.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Si h < a < b**, il y a deux points, à la distance $d = \\sqrt{a^2 - h^2}$ de part et d\'autre ' +
+                'de H. Comme $a < b$, on a $d < \\sqrt{b^2 - h^2} = AH$ : les deux points sont à $AH - d > 0$ et ' +
+                '$AH + d$ de A, tous deux sur la demi-droite. Deux triangles.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Si a ≥ b**, alors $d \\geq AH$ : le point situé à $AH - d$ de A tombe en A ou derrière A, ' +
+                'hors de la demi-droite. Seul l\'autre convient : un seul triangle.',
+            },
           ],
         },
         {
@@ -1227,7 +1517,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'Ou les **3 côtés** (SSS, en isolant le cosinus). Pythagore n\'en est qu\'un cas ' +
             'particulier : si Â = 90°, alors cos Â = 0, et la formule redevient $a^2=b^2+c^2$.',
         },
-        { kind: 'subheading', text: 'Démonstration — la loi des cosinus' },
+        { kind: 'subheading', text: 'D\'où vient la loi des cosinus ?' },
         {
           kind: 'para',
           text:
@@ -1252,7 +1542,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Loi des cosinus',
+          label: 'Démonstration — la loi des cosinus',
           blocks: [
             {
               kind: 'para',
@@ -1377,7 +1667,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'Deux côtés et l\'angle compris entre eux suffisent. Pas besoin de construire une ' +
             'hauteur ! Et les trois écritures donnent bien sûr la même aire.',
         },
-        { kind: 'subheading', text: 'Démonstration — l\'aire' },
+        { kind: 'subheading', text: 'D\'où vient la formule de l\'aire ?' },
         {
           kind: 'para',
           text:
@@ -1386,7 +1676,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Aire',
+          label: 'Démonstration — l\'aire d\'un triangle',
           blocks: [
             {
               kind: 'para',
@@ -1428,11 +1718,101 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'ne donne que l\'angle aigu.',
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -4.4,
+            xMax: 7.4,
+            yMin: -3.2,
+            yMax: 7.8625,
+            showAxes: false,
+            vectors: [
+              { from: { x: -3.6, y: 0 }, to: { x: 0, y: 0 }, tone: 'faint', dashed: true },
+              { from: { x: -3.6, y: 4.096 }, to: { x: 3.6, y: 4.096 }, tone: 'faint', dashed: true },
+              { from: { x: 2.868, y: 4.096 }, to: { x: 2.868, y: 0 }, tone: 'faint', dashed: true },
+              { from: { x: -2.868, y: 4.096 }, to: { x: -2.868, y: 0 }, tone: 'faint', dashed: true },
+              { from: { x: 0, y: 0 }, to: { x: 6, y: 0 }, tone: 'ink', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 2.868, y: 4.096 }, tone: 'accent', arrow: false },
+              { from: { x: 6, y: 0 }, to: { x: 2.868, y: 4.096 }, tone: 'accent', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: -2.868, y: 4.096 }, tone: 'good', arrow: false },
+              { from: { x: 6, y: 0 }, to: { x: -2.868, y: 4.096 }, tone: 'good', arrow: false },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'C', tone: 'ink', labelPos: 'below' },
+              { x: 6, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
+              { x: 2.868, y: 4.096, label: 'B', tone: 'accent', labelPos: 'above' },
+              { x: -2.868, y: 4.096, label: 'B′', tone: 'good', labelPos: 'above' },
+              { x: 3.4, y: 0, label: 'b', tone: 'ink', labelPos: 'below', node: false },
+              { x: 2.2, y: 3.14, label: 'a', tone: 'accent', labelPos: 'left', node: false },
+              { x: -0.86, y: 1.23, label: 'a', tone: 'good', labelPos: 'left', node: false },
+              { x: 2.868, y: 1.6, label: 'h', tone: 'ink', labelPos: 'right', node: false },
+              { x: -2.868, y: 1.6, label: 'h', tone: 'ink', labelPos: 'left', node: false },
+              { x: 0, y: 1.3, label: '125°', tone: 'good', labelPos: 'above', node: false },
+            ],
+            angleArcs: [
+              { cx: 0, cy: 0, fromDeg: 0, toDeg: 55, radiusPx: 30, label: '55°', tone: 'accent' },
+              { cx: 0, cy: 0, fromDeg: 0, toDeg: 125, radiusPx: 18, tone: 'good' },
+            ],
+            caption:
+              'Deux triangles de côtés CA = b = 6 et CB = CB′ = a = 5 : l\'angle en C vaut Ĉ = 55° dans CAB ' +
+              '(orange), 180° − Ĉ = 125° dans CAB′ (vert). B et B′ sont à la même hauteur ' +
+              '$h = a\\sin\\hat{C}$ au-dessus de (CA), donc les deux aires sont égales : ' +
+              '$\\dfrac{1}{2} \\cdot 6 \\cdot 5 \\cdot \\sin 55° \\approx 12{,}29$.',
+          },
+        },
+        {
           kind: 'para',
           text:
             '**Aire d\'un quadrilatère.** Une diagonale le découpe en deux triangles : son aire est la somme ' +
             'de leurs aires. S\'il manque un côté à l\'un des triangles (souvent la diagonale elle-même), on ' +
             'le calcule d\'abord dans l\'autre triangle, avec Al-Kashi.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -1,
+            xMax: 8,
+            yMin: -1.2,
+            yMax: 7.2375,
+            showAxes: false,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 6, y: 0 }, tone: 'accent', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 1.71, y: 4.698 }, tone: 'accent', arrow: false },
+              { from: { x: 6, y: 0 }, to: { x: 6.653, y: 3.946 }, tone: 'good', arrow: false },
+              { from: { x: 6.653, y: 3.946 }, to: { x: 1.71, y: 4.698 }, tone: 'good', arrow: false },
+              { from: { x: 6, y: 0 }, to: { x: 1.71, y: 4.698 }, tone: 'ink', dashed: true },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'left' },
+              { x: 6, y: 0, label: 'B', tone: 'ink', labelPos: 'right' },
+              { x: 6.653, y: 3.946, label: 'C', tone: 'ink', labelPos: 'right' },
+              { x: 1.71, y: 4.698, label: 'D', tone: 'ink', labelPos: 'above' },
+              { x: 3, y: 0, label: '6', tone: 'accent', labelPos: 'below', node: false },
+              { x: 0.855, y: 2.349, label: '5', tone: 'accent', labelPos: 'left', node: false },
+              { x: 6.327, y: 1.973, label: '4', tone: 'good', labelPos: 'right', node: false },
+              { x: 4.182, y: 4.322, label: '5', tone: 'good', labelPos: 'above', node: false },
+              { x: 3.855, y: 2.349, label: 'BD', tone: 'ink', labelPos: 'right', node: false },
+            ],
+            angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 70, radiusPx: 28, label: '70°', tone: 'accent' }],
+            caption:
+              'La diagonale [BD] (pointillés) découpe ABCD en deux triangles : ABD (orange), dont on connaît ' +
+              'deux côtés et l\'angle compris, et BCD (vert), dont il manque le côté BD — calculé d\'abord dans ABD.',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'aire d\'un quadrilatère — une diagonale, deux triangles',
+          formula:
+            'Le quadrilatère convexe ABCD a pour côtés AB = 6, AD = 5, BC = 4 et CD = 5, avec ' +
+            '$\\hat{A} = 70°$. Calcule son aire.',
+          steps: [
+            { tag: 'découper par la diagonale [BD]', text: '$\\text{Aire}(ABCD) = \\text{Aire}(ABD) + \\text{Aire}(BCD)$' },
+            { tag: 'triangle ABD — deux côtés et l\'angle compris', text: '$\\text{Aire}(ABD) = \\dfrac{1}{2} \\cdot 6 \\cdot 5 \\cdot \\sin 70° \\approx 14{,}10$' },
+            { tag: 'côté BD — Al-Kashi dans ABD', text: '$BD^2 = 6^2 + 5^2 - 2 \\cdot 6 \\cdot 5 \\cdot \\cos 70° \\approx 40{,}48$, donc $BD \\approx 6{,}36$' },
+            { tag: 'triangle BCD — trois côtés, Héron', text: '$p = \\dfrac{BD + 4 + 5}{2} \\approx 7{,}68$ et $\\text{Aire}(BCD) = \\sqrt{p(p - BD)(p - 4)(p - 5)} \\approx 10{,}00$' },
+          ],
+          result: { tag: 'résultat', text: 'Aire(ABCD) ≈ 24,09 (calculatrice, sans arrondir les valeurs intermédiaires)' },
         },
         { kind: 'subheading', text: 'Choisir la bonne loi' },
         {
@@ -1939,6 +2319,42 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             ['Points A (loin) et B (près) vus d\'en haut', 'dépressions α et β', 'en A : α (alternes-internes) ; en B : 180° − β ; en haut : β − α'],
             ['Base [AB] orientée est-ouest', 'caps θA et θB vers C', 'en A : 90° − θA ; en B : θB − 270°'],
           ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -1.5,
+            xMax: 10.5,
+            yMin: -1.6,
+            yMax: 9.65,
+            showAxes: false,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 0, y: 3 }, tone: 'ink' },
+              { from: { x: 3.857, y: 4.596 }, to: { x: 3.857, y: 7.596 }, tone: 'ink' },
+              { from: { x: 3.857, y: 4.596 }, to: { x: 5.528, y: 6.588 }, tone: 'faint', dashed: true },
+              { from: { x: 0, y: 0 }, to: { x: 3.857, y: 4.596 }, tone: 'accent' },
+              { from: { x: 3.857, y: 4.596 }, to: { x: 8.187, y: 2.096 }, tone: 'accent' },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
+              { x: 3.857, y: 4.596, label: 'B', tone: 'ink', labelPos: 'left' },
+              { x: 8.187, y: 2.096, label: 'C', tone: 'ink', labelPos: 'right' },
+              { x: 0, y: 3, label: 'N', tone: 'ink', labelPos: 'above', node: false },
+              { x: 3.857, y: 7.596, label: 'N', tone: 'ink', labelPos: 'above', node: false },
+            ],
+            angleArcs: [
+              { cx: 0, cy: 0, fromDeg: 50, toDeg: 90, radiusPx: 40, label: 'θ₁', tone: 'accent' },
+              { cx: 3.857, cy: 4.596, fromDeg: -30, toDeg: 90, radiusPx: 22, label: 'θ₂', tone: 'accent' },
+              { cx: 3.857, cy: 4.596, fromDeg: -30, toDeg: 50, radiusPx: 56, label: 'écart', tone: 'attn' },
+              { cx: 3.857, cy: 4.596, fromDeg: 230, toDeg: 330, radiusPx: 26, label: '100°', tone: 'good' },
+            ],
+            caption:
+              'Deux trajets successifs : cap θ₁ = 40° de A à B, puis cap θ₂ = 120° de B à C, mesurés depuis le ' +
+              'nord (N) dans le sens des aiguilles d\'une montre. L\'écart des caps, 120° − 40° = 80°, est ' +
+              'l\'angle entre le prolongement de [AB] (pointillés) et [BC] ; l\'angle intérieur en B (vert) vaut ' +
+              '180° − 80° = 100°.',
+          },
         },
         {
           kind: 'piege',
