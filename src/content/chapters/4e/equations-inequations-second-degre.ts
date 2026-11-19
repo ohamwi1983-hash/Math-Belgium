@@ -794,6 +794,26 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 67. Relations entre racines et coefficients »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Équation à paramètre m',
+          generatorId: 'gen115',
+          description: [
+            'Calcule le discriminant Δ(m) d’une équation qui dépend d’un réel m, trouve les valeurs de m qui donnent une racine double, étudie le signe de Δ(m), puis discute le nombre de solutions selon m.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 115. Équation à paramètre m »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Bicarrées et changement de variable',
+          generatorId: 'gen116',
+          description: [
+            'Résous une équation bicarrée (x⁴, x²) ou du type (x² − 1)² − 5(x² − 1) + 4 = 0 : pose une nouvelle inconnue t, résous en t, rejette les valeurs impossibles (un carré n’est jamais négatif), puis reviens à x.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 116. Bicarrées et changement de variable »',
+        },
       ],
     },
     {
@@ -1221,6 +1241,28 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 2. Tableau de signes »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Construire une inéquation à partir de sa solution',
+          generatorId: 'gen120',
+          description: [
+            'La démarche à l’envers : on te donne l’ensemble des solutions, écris une inéquation ' +
+              '(ou une équation) du second degré qui l’a pour solution, puis la même avec un ' +
+              'coefficient de x² imposé, et retrouve une parabole à partir de ses racines et d’un point.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 120. Construire une inéquation à partir de sa solution »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Parabole et droite : intersection et position',
+          generatorId: 'gen118',
+          description: [
+            'Trouve les points communs à une parabole et à une droite en ramenant f(x) = g(x) à 0, puis résous f(x) ≥ g(x) (ou ≤, <, >) grâce au signe de f − g.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 118. Parabole et droite : intersection et position »',
         },
       ],
     },
@@ -2005,6 +2047,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 57. Équations/inéquations du second degré en contexte »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Problèmes avec une fraction',
+          generatorId: 'gen119',
+          description: [
+            'Prix et quantité, aller-retour à deux vitesses, deux robinets : mets le problème en ' +
+              'équation (x au dénominateur), pose la CE, résous, rejette la valeur impossible dans ' +
+              'le contexte, puis réponds à la question.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 119. Problèmes avec une fraction »',
         },
       ],
     },

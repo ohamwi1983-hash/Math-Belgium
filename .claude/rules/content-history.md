@@ -4238,3 +4238,109 @@ paths:
   comme dans le cours). gen10 : option `etiquettesLisibles` du graphe (pas de 1/3 → entiers écrits)
   et « − » typographique sur les axes et dans la légende. Détails et mesures :
   `.claude/rules/feuilles-evaluations.md` (sections « Corrigé détaillé » et gen11).
+
+- **4e, Chapitre 2 — Équations et inéquations du second degré** (`equations-inequations-second-degre`),
+  section `contexte` (§ 7) : nouveau générateur **gen119 « Problèmes avec une fraction »**
+  (processus 3), carte après gen57. Trois contextes = trois variantes, tous traduits par
+  N/x + σ·N/(x + s) = p/q : prix unitaire et quantité (« s'il coûtait d € de moins, j'en aurais k de
+  plus »), aller-retour à deux vitesses (w km/h de moins au retour, durée totale en h et min à
+  convertir en fraction), deux robinets / deux imprimantes / deux jardiniers (fractions du travail
+  faites en une unité de temps, durée ensemble en h ou en min). Racines rationnelles par
+  construction (Δ carré parfait), la racine gardée est un entier ; l'autre est rejetée par le
+  CONTEXTE (négative, ou vitesse au retour négative : la racine du trajet est positive mais
+  inférieure à w), jamais par la CE — l'écran « rejeter » fait constater que les deux respectent la
+  CE. Écrans : a) poser l'équation (choix fermé, 1 tentative ; fausses équations = pièges classiques :
+  différence des prix inversée, durées additionnées, « distance × vitesse », durée décimale 3,30 pour
+  3 h 30 min) ; b) valeurs interdites (liste) ; c) équation du second degré obtenue (toute équation
+  proportionnelle acceptée) + ses solutions ; d) rejet (choix fermé) ; e) réponse à la question,
+  avec l'unité (x lui-même en `directe`, grandeur déduite — prix, vitesse au retour, durée de l'autre
+  robinet — en `deduite`). Profil : `forme` = « variante:directe|deduite » tirée avant les nombres
+  (50/50), aucun cas particulier, pas de `calcul`. Niveau 6 (Avancé), ≈ 16 min. Libellé de conception
+  « Problèmes avec une fraction (gen119) ». **Socle commun des nouveaux générateurs du ch. 2**
+  (gen115, gen116, gen118, gen119, gen120) : écrans en DONNÉES (`ui/ecransTransfertSecondDegre.ts` :
+  choix, ou champs typés nombre / liste / expression / équation à un facteur près / relation jugée
+  par son ensemble-solution / ensemble construit), vérification `moteur/verificationTransfertSecondDegre.ts`
+  (« − », « ² », « √ », virgule ; illisible = aucune tentative), algèbre et ensembles
+  `moteur/algebreTransfertSecondDegre.ts` (forme canonique, comparaison d'ensembles, écriture KaTeX
+  `\mathopen{]}`…), session `moteur/sessionTransfertSecondDegre.ts`, écran
+  `components/EtapesTransfertSecondDegre.tsx` (saisie d'ensemble avec `ListeMorceauxInput` +
+  `ListePointsIsolesInput` du chapitre) et coquille `components/AppTransfertSecondDegre.tsx` (puces,
+  aides, corrigé de l'étape, `?code=`) ; briques de corrigé `ui/corrigeTransfertSecondDegre.ts`
+  (Δ et racines dans la variable de l'exercice). Fichiers de gen119 : `AppProblemesFraction.tsx`,
+  `core/problemesFraction.types.ts`, `ui/formatProblemesFraction.ts`, `generateurs/problemesFraction/`
+  (index, corrigeDetaille, profil, exportEvaluation).
+
+- **4e, Chapitre 2** (`equations-inequations-second-degre`), section `signe-trinome` (§ 2) : nouveau
+  générateur **gen120 « Construire une inéquation à partir de sa solution »** (processus 3), carte
+  après gen2. Démarche inverse : S est donné (variante `inequation` : ]r₁ ; r₂[, [r₁ ; r₂] ou
+  l'extérieur, ouvert ou fermé ; variante `equation` : {r₁ ; r₂}, deux entiers ou un entier et une
+  fraction de dénominateur 2 ou 3). Écrans : a) une (in)équation ax² + bx + c ◇ 0 de solution S —
+  **toute réponse juste est acceptée** : la saisie libre « membre ◇ membre » est ramenée à un
+  trinôme (degré 2 exigé) dont on calcule l'ensemble-solution, comparé à S (formes canoniques) ;
+  messages ciblés (complémentaire = intérieur/extérieur confondus, mêmes bornes = crochets, racines
+  opposées = facteur (x + r)) ; b) la même avec un coefficient de x² imposé (± 2, 3 ou 4, multiple
+  du dénominateur) — son signe est tiré à pile ou face, négatif = symbole à retourner ; c) la
+  parabole de racines r₁, r₂ qui passe par P(x₀ ; y₀) → a, b, c (champs, pièges de signe). Les trois
+  écrans sont de VRAIES questions distinctes : elles restent en a) b) c) sur papier
+  (`etapesParQuestion`). Profil : `forme` = « variante:allure:signe du coefficient imposé »
+  (4 formes à 25 %), aucun cas particulier, pas de `calcul`. Niveaux 4–5. Libellés de conception
+  « Tableau de signes (gen2) » (était vide) et « Construire une inéquation à partir de sa solution
+  (gen120) ». Bug corrigé dans le socle commun en écrivant gen120 : `proches(±∞, x)` était vrai
+  (∞ ≤ tol·∞), ce qui cassait les ensembles « extérieur ». Fichiers : `AppConstruireInequation.tsx`,
+  `core/construireInequation.types.ts`, `ui/formatConstruireInequation.ts`,
+  `generateurs/construireInequation/` (index, corrigeDetaille, profil, exportEvaluation).
+
+- **4e, Chapitre 2** (`equations-inequations-second-degre`), section `resoudre` (§ 1) : nouveau
+  générateur **gen115 « Équation à paramètre m »** (processus 3), carte après gen67. (E) :
+  a(m)x² + b(m)x + c(m) = 0, coefficients affines en m ; variantes `b-egal-m` (a x² + m x + c,
+  l'exemple du cours ; 22 énoncés distincts), `affine` (b et c dépendent de m), `a-egal-m` (a = m : en
+  m = 0, (E) est du premier degré — Δ(0) = b(0)² > 0, donc m = 0 tombe dans la zone « deux
+  solutions », où il n'y en a qu'une). Recherche au hasard : Δ(m) à racines entières distinctes
+  (|m| ≤ 12), racines doubles rationnelles lisibles. Écrans : a) Δ(m) (expression en m, toute forme
+  équivalente acceptée ; pièges : 4ac non soustrait en entier, double produit oublié) ; b) m₁ < m₂ et
+  la racine double −b/(2a) pour chacune (4 champs) ; c) ensemble des m tels que Δ(m) > 0 (saisie
+  d'ensemble en m), puis la parabole de Δ(m) (`ui/figuresTransfertSecondDegre.ts`, aussi dans le
+  corrigé en `figureHtml`) ; d) discussion (choix fermé, 1 tentative ; fausses discussions : zones
+  inversées, Δ = 0 lu « aucune solution », nombres de solutions décalés, cas m = 0 oublié). Corrigé :
+  Δ(m) substitué puis développé, Δ(m) = 0 divisé par le PGCD (et par −1) avant d'être résolu
+  (mise en évidence de m si le terme constant est nul), discussion zone par zone (m = 0 résolu à
+  part). Profil : `forme` = « variante:exterieur|interieur » (signe du coefficient de m², seule
+  `a-egal-m` peut l'avoir négatif : 43 % / 57 %), aucun cas particulier, pas de `calcul`. Niveaux
+  3–4. Libellé de conception « Équation à paramètre m (gen115) ». Fichiers : `AppEquationParametre.tsx`,
+  `core/equationParametre.types.ts`, `ui/formatEquationParametre.ts`,
+  `ui/figuresTransfertSecondDegre.ts`, `generateurs/equationParametre/` (index, corrigeDetaille,
+  profil, exportEvaluation).
+
+- **4e, Chapitre 2** (`equations-inequations-second-degre`), section `signe-trinome` (§ 2) : nouveau
+  générateur **gen118 « Parabole et droite : intersection et position »** (processus 2), carte après
+  gen120. f(x) = ax² + bx + c, g(x) = mx + p (variantes `oblique` et `horizontale` y = k). Le nombre
+  de points communs est un VERDICT tiré avant les nombres (2 : 70 %, 1 — tangente : 15 %, 0 : 15 %),
+  jamais dans le profil ; h = f − g est construit à racines entières (ou A[(x − x₀)² + q]), puis
+  f = g + h : coordonnées entières. Écrans : a) f(x) = g(x) ramené à 0 (toute équation
+  proportionnelle acceptée ; pièges : g ajouté, parenthèse −(mx + p) oubliée) ; b) solutions
+  (« aucune » accepté) ; c) ordonnées des points communs (écran absent s'il n'y en a pas : 3 ou 4
+  écrans) ; d) f(x) ◇ g(x) par le signe de f − g (ensemble construit), puis la figure parabole +
+  droite + points communs (aussi dans le corrigé, `figureHtml`). Corrigé : mise en évidence de x
+  quand h n'a pas de terme constant (raccourci du cours), Δ sinon. Papier : deux vraies questions
+  (points communs ; inéquation), `etapesParQuestion` [a, b, c] / [d] (ou [a, b] / [c]). Profil :
+  `forme` = variante, aucun cas particulier, pas de `calcul`. Niveau 3. Libellé de conception
+  « Parabole et droite : intersection et position (gen118) ». Fichiers : `AppParaboleDroite.tsx`,
+  `core/paraboleDroite.types.ts`, `ui/formatParaboleDroite.ts`, `generateurs/paraboleDroite/`
+  (index, corrigeDetaille, profil, exportEvaluation).
+
+- **4e, Chapitre 2** (`equations-inequations-second-degre`), section `resoudre` (§ 1, « pour aller
+  plus loin ») : nouveau générateur **gen116 « Bicarrées et changement de variable »** (processus 2),
+  carte après gen115. (E) : a·u² + b·u + c = 0 avec u = x² (variante `bicarree`, ax⁴ + bx² + c = 0)
+  ou u = x² + k (variante `changement`, comme l'exemple (x² − 1)² − 5(x² − 1) + 4 = 0). Le nombre de
+  valeurs de t gardées est un VERDICT tiré avant les nombres (2 : 50 %, 1 : 40 %, 0 : 10 %) ; une
+  valeur gardée donne x² = t − k > 0, carré parfait (70 %) ou non (solutions ±√n). Écrans : a)
+  équation en t (toute équation proportionnelle ; une saisie en x est signalée « mauvaise lettre ») ;
+  b) ses solutions ; c) valeurs de t gardées (choix fermé parmi les 4 sous-ensembles, 1 tentative) ;
+  d) solutions en x (« ±√3 » accepté pour deux valeurs opposées, « aucune » possible ; piège : seules
+  les racines positives). Corrigé : t = x², x⁴ = (x²)² = t², Δ en t, tri par x² = t − k ≥ 0, x² = a
+  ⟺ x = ±√a, vérification en remplaçant x dans (E). Papier : « Résous dans ℝ l'équation … » (jamais
+  la méthode). Profil : `forme` = variante (le verdict et les radicaux, qui n'existent que si une
+  valeur est gardée, restent hors profil), aucun cas particulier, pas de `calcul`. Niveaux 3–4.
+  Libellé de conception « Bicarrées et changement de variable (gen116) ». Fichiers :
+  `AppBicarree.tsx`, `core/bicarree.types.ts`, `ui/formatBicarree.ts`, `generateurs/bicarree/`
+  (index, corrigeDetaille, profil, exportEvaluation).
