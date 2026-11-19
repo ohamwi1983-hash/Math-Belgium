@@ -121,27 +121,37 @@ export function segmentsEtatActuelArcSecteur(exercice: ExerciceModeDeuxVersTrois
   return segmentsDonneesConnues(exercice, dejaResolues);
 }
 
-interface FormuleArcSecteur {
+export interface FormuleArcSecteur {
   requiert: QuantiteArcSecteur[];
   latexGeneral: string;
   latexSubstitue: (exercice: ExerciceModeDeuxVersTrois) => string;
 }
 
+/** Valeur d'une quantité écrite À L'INTÉRIEUR d'une fraction (`\frac` au lieu de `\dfrac`, comme le
+ * cours : jamais deux `\dfrac` empilés). */
+function valeurInterieureLatex(quantite: QuantiteArcSecteur, exercice: ExerciceModeDeuxVersTrois): string {
+  return formatValeurQuantiteLatex(quantite, exercice).replace(/\\dfrac/g, "\\frac");
+}
+
+/** Formules et leurs substitutions : aide de niveau 2 ET première ligne du calcul du corrigé détaillé
+ * (`generateurs5e/arcsSecteurs/corrigeDetaille.ts`). Le nombre de degrés multiplie π/180 SANS le
+ * symbole ° (« 75 × π/180 », comme le cours — « 75° × π/180 » mélangeait l'angle et son nombre de
+ * degrés) ; une valeur fractionnaire DANS une fraction s'écrit en `\frac`. */
 const FORMULES: Record<QuantiteArcSecteur, FormuleArcSecteur[]> = {
   thetaDeg: [{ requiert: ["thetaRad"], latexGeneral: "\\theta° = \\theta_{rad} \\times \\dfrac{180}{\\pi}", latexSubstitue: (ex) => `\\theta° = ${formatValeurQuantiteLatex("thetaRad", ex)} \\times \\dfrac{180}{\\pi}` }],
   thetaRad: [
-    { requiert: ["thetaDeg"], latexGeneral: "\\theta_{rad} = \\theta° \\times \\dfrac{\\pi}{180}", latexSubstitue: (ex) => `\\theta_{rad} = ${formatValeurQuantiteLatex("thetaDeg", ex)} \\times \\dfrac{\\pi}{180}` },
-    { requiert: ["r", "l"], latexGeneral: "\\theta_{rad} = \\dfrac{s}{r}", latexSubstitue: (ex) => `\\theta_{rad} = \\dfrac{${formatValeurQuantiteLatex("l", ex)}}{${formatValeurQuantiteLatex("r", ex)}}` },
-    { requiert: ["r", "A"], latexGeneral: "\\theta_{rad} = \\dfrac{2A}{r^2}", latexSubstitue: (ex) => `\\theta_{rad} = \\dfrac{2 \\times ${formatValeurQuantiteLatex("A", ex)}}{${ex.valeurs.r}^2}` },
+    { requiert: ["thetaDeg"], latexGeneral: "\\theta_{rad} = \\theta° \\times \\dfrac{\\pi}{180}", latexSubstitue: (ex) => `\\theta_{rad} = ${ex.valeurs.thetaDeg} \\times \\dfrac{\\pi}{180}` },
+    { requiert: ["r", "l"], latexGeneral: "\\theta_{rad} = \\dfrac{s}{r}", latexSubstitue: (ex) => `\\theta_{rad} = \\dfrac{${valeurInterieureLatex("l", ex)}}{${formatValeurQuantiteLatex("r", ex)}}` },
+    { requiert: ["r", "A"], latexGeneral: "\\theta_{rad} = \\dfrac{2A}{r^2}", latexSubstitue: (ex) => `\\theta_{rad} = \\dfrac{2 \\times ${valeurInterieureLatex("A", ex)}}{${ex.valeurs.r}^2}` },
   ],
   r: [
-    { requiert: ["thetaRad", "l"], latexGeneral: "r = \\dfrac{s}{\\theta_{rad}}", latexSubstitue: (ex) => `r = \\dfrac{${formatValeurQuantiteLatex("l", ex)}}{${formatValeurQuantiteLatex("thetaRad", ex)}}` },
-    { requiert: ["thetaRad", "A"], latexGeneral: "r = \\sqrt{\\dfrac{2A}{\\theta_{rad}}}", latexSubstitue: (ex) => `r = \\sqrt{\\dfrac{2 \\times ${formatValeurQuantiteLatex("A", ex)}}{${formatValeurQuantiteLatex("thetaRad", ex)}}}` },
-    { requiert: ["l", "A"], latexGeneral: "r = \\dfrac{2A}{s}", latexSubstitue: (ex) => `r = \\dfrac{2 \\times ${formatValeurQuantiteLatex("A", ex)}}{${formatValeurQuantiteLatex("l", ex)}}` },
+    { requiert: ["thetaRad", "l"], latexGeneral: "r = \\dfrac{s}{\\theta_{rad}}", latexSubstitue: (ex) => `r = \\dfrac{${valeurInterieureLatex("l", ex)}}{${valeurInterieureLatex("thetaRad", ex)}}` },
+    { requiert: ["thetaRad", "A"], latexGeneral: "r = \\sqrt{\\dfrac{2A}{\\theta_{rad}}}", latexSubstitue: (ex) => `r = \\sqrt{\\dfrac{2 \\times ${valeurInterieureLatex("A", ex)}}{${valeurInterieureLatex("thetaRad", ex)}}}` },
+    { requiert: ["l", "A"], latexGeneral: "r = \\dfrac{2A}{s}", latexSubstitue: (ex) => `r = \\dfrac{2 \\times ${valeurInterieureLatex("A", ex)}}{${valeurInterieureLatex("l", ex)}}` },
   ],
   l: [
     { requiert: ["r", "thetaRad"], latexGeneral: "s = r \\times \\theta_{rad}", latexSubstitue: (ex) => `s = ${ex.valeurs.r} \\times ${formatValeurQuantiteLatex("thetaRad", ex)}` },
-    { requiert: ["r", "A"], latexGeneral: "s = \\dfrac{2A}{r}", latexSubstitue: (ex) => `s = \\dfrac{2 \\times ${formatValeurQuantiteLatex("A", ex)}}{${ex.valeurs.r}}` },
+    { requiert: ["r", "A"], latexGeneral: "s = \\dfrac{2A}{r}", latexSubstitue: (ex) => `s = \\dfrac{2 \\times ${valeurInterieureLatex("A", ex)}}{${ex.valeurs.r}}` },
   ],
   A: [
     { requiert: ["r", "thetaRad"], latexGeneral: "A = \\dfrac{1}{2} r^2 \\theta_{rad}", latexSubstitue: (ex) => `A = \\dfrac{1}{2} \\times ${ex.valeurs.r}^2 \\times ${formatValeurQuantiteLatex("thetaRad", ex)}` },
@@ -208,9 +218,26 @@ export function latexEnonceConversion(exercice: ExerciceModeConversion): string 
 
 export const TEXTE_AIDE_CONVERSION_NIVEAU1 = "\\theta_{rad} = \\theta° \\times \\dfrac{\\pi}{180} \\qquad \\theta° = \\theta_{rad} \\times \\dfrac{180}{\\pi}";
 
+/** Le nombre de degrés multiplie π/180 SANS le symbole ° (comme le cours : « 60 × π/180 »). */
 export function latexAideConversionNiveau2(exercice: ExerciceModeConversion): string {
-  const depart = formatValeurDepartConversionLatex(exercice);
-  return exercice.direction === "degVersRad" ? `\\theta_{rad} = ${depart} \\times \\dfrac{\\pi}{180}` : `\\theta° = ${depart} \\times \\dfrac{180}{\\pi}`;
+  if (exercice.direction === "degVersRad") return `\\theta_{rad} = ${nombreLatex(exercice.valeurDepart)} \\times \\dfrac{\\pi}{180}`;
+  return `\\theta° = ${formatValeurDepartConversionLatex(exercice)} \\times \\dfrac{180}{\\pi}`;
+}
+
+/** Relation de la valeur attendue d'une conversion : « = » pour une valeur exacte, « ≈ » pour une
+ * valeur arrondie au centième (une conversion décimale n'est jamais exacte). */
+export function relationCibleConversionLatex(exercice: ExerciceModeConversion): string {
+  return exercice.type === "exacte" ? "=" : "\\approx";
+}
+
+/** Fraction kπ/36 de la valeur de départ d'une conversion EXACTE radians → degrés (réduite). */
+export function departRadiansExact(exercice: ExerciceModeConversion): { n: number; d: number } {
+  const k = Math.round(exercice.valeurDepart / (Math.PI / 36));
+  const a = Math.abs(k);
+  let x = a;
+  let y = 36;
+  while (y) [x, y] = [y, x % y];
+  return { n: k / x, d: 36 / x };
 }
 
 /** LaTeX de la valeur cible attendue (récapitulatif final uniquement — jamais consommée par
