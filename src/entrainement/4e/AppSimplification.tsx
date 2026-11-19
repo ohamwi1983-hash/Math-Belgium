@@ -55,6 +55,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { ecranClos, entreeAjoutee, nombreSaisi, saisieEnLatex, segmentsDepuisHistorique, valeurRecap, type EcranClos } from "./ui/historiqueProgression";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeSimplification, lettrePhaseSimplification } from "./generateurs/simplification/corrigeDetaille";
 
 /**
  * Questions/libellés de factorisation, adaptés au dénominateur ou au numérateur
@@ -237,6 +240,7 @@ export function AppSimplification() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttendueEcran(etat.phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSimplification(exercice), lettrePhaseSimplification(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
