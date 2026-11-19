@@ -47,7 +47,8 @@ import {
 type E = ExerciceComposerForces;
 
 function figureCorrige(e: E): string {
-  return construireFigureComposerForces(e, { theme: "papier", triangle: true, angleTriangle: true, resolue: true });
+  // Triangle surligné seulement : ni angle du triangle ni intensité, réponses des écrans suivants.
+  return construireFigureComposerForces(e, { theme: "papier", triangle: true });
 }
 
 function etapeTriangle(e: E): EtapeCorrection[] {

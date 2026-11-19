@@ -147,7 +147,7 @@ function etapePont(e: E): EtapeCorrection[] {
     utilise("a", [texte(`${regle} Le triangle « pont » fournit l'élément commun aux deux triangles ${COURS_TRIANGULATION}.`)]),
     ...(blocs ?? [calcul("a", lignes)]),
     resultat("a", [texte(`${formatPontConfirme(e).replace(/^./, (c) => c.toUpperCase())}.`)]),
-    piege("a", [texte("Le côté commun se calcule dans le triangle pont : il ne se mesure pas sur le croquis, qui n'est pas à l'échelle. On le garde en mémoire de la calculatrice.")]),
+    piege("a", [texte("Les éléments du triangle pont se calculent : ils ne se mesurent pas sur le croquis, qui n'est pas à l'échelle. On garde les valeurs exactes en mémoire de la calculatrice.")]),
   ];
 }
 
