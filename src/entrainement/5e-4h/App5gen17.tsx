@@ -47,6 +47,9 @@ import {
   tentativesMaxSuiteClassique,
 } from "./moteur5e/sessionSuiteClassique";
 import { ordreComplet } from "./moteur5e/typesSuiteClassique";
+import { correctionDetailleeSuiteClassique } from "./generateurs5e/suitesClassiques/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import type { EtatSessionSuiteClassique, PhaseSuiteClassique } from "./moteur5e/typesSuiteClassique";
 import {
   diagnostiquerAiresB,
@@ -451,6 +454,7 @@ export function App5gen17() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePourPhase(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSuiteClassique(exercice), lettreEtape(ordreComplet(exercice).indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

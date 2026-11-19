@@ -8,7 +8,6 @@ import type {
   CritereBareme,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -19,11 +18,9 @@ import {
   formatTermesDonneesLatex,
   formatTermesReponseAttendueSuiteGeometrique,
   labelsCalculerTermesAlgebrique,
-  noteAideNiveau1,
-  texteAideNiveau1,
-  texteAideNiveau2,
 } from "../../ui5e/formatSuiteGeometrique";
-import { diviserFractionQ, entierVersFractionQ, puissanceFractionQ, sommeInfinieExisteQ, sommeInfinieQ } from "./fraction";
+import { sommeInfinieExisteQ } from "./fraction";
+import { correctionDetailleeSuiteGeometrique } from "./corrigeDetaille";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceSuiteGeometrique } from "./index";
 import type { FamilleSuiteGeometriqueId } from "./index";
 import { profilSuiteGeometrique, LIBELLE_CAS_GEOMETRIQUE } from "../profilsEvaluationSuites";
@@ -57,13 +54,6 @@ function s(indice: number | string): string {
 function fractionLatex(f: FractionQ): string {
   if (f.den === 1) return `${f.num}`;
   return f.num < 0 ? `-\\dfrac{${-f.num}}{${f.den}}` : `\\dfrac{${f.num}}{${f.den}}`;
-}
-/** Valeur négative entre parenthèses dans un calcul substitué. */
-function jeton(f: FractionQ): string {
-  return f.num < 0 ? `\\left(${fractionLatex(f)}\\right)` : fractionLatex(f);
-}
-function puissance(q: FractionQ, exposant: number | string): string {
-  return `\\left(${fractionLatex(q)}\\right)^{${exposant}}`;
 }
 function virgules(l: string): string {
   return l.replace(/(\d)\.(\d)/g, "$1{,}$2");
@@ -229,60 +219,6 @@ function reponseBreveSuiteGeometrique(exercice: ExerciceSuiteGeometrique): Fragm
   return listeFr(parties, texte(" ; "), texte(" ; "));
 }
 
-/** Calcul substitué d'une étape (`null` : la conclusion suffit). */
-function calculEtape(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGeometrique): FragmentConsigne[] | null {
-  if (exercice.famille === "principal") {
-    const { u1, q } = branche(exercice, phase);
-    switch (base(phase)) {
-      case "trouverQ": {
-        const d = exercice.donnees;
-        const k = exercice.k as number;
-        const quotient = puissanceFractionQ(exercice.branches[0].q, k);
-        let rapport: string;
-        if (d.combo === "u1_up") rapport = `\\dfrac{${u(d.up.indice)}}{${u(1)}}`;
-        else if (d.combo === "up_um") rapport = d.um.indice > d.up.indice ? `\\dfrac{${u(d.um.indice)}}{${u(d.up.indice)}}` : `\\dfrac{${u(d.up.indice)}}{${u(d.um.indice)}}`;
-        else return null;
-        return [
-          latex(`q^{${k}}=${rapport}=${fractionLatex(quotient)}`),
-          texte(k % 2 === 0 ? ` : l'exposant ${k} est pair, q a deux valeurs opposées.` : ` : l'exposant ${k} est impair, q a une seule valeur, du signe du quotient.`),
-        ];
-      }
-      case "trouverU1":
-      case "termesProches":
-      case "sommeSn": {
-        const l = texteAideNiveau2(exercice, phase);
-        if (!l) return null;
-        if (base(phase) === "trouverU1") return [latex(`${l}=${fractionLatex(u1)}`)];
-        return [latex(l)];
-      }
-      case "termeEloigne": {
-        const n = exercice.indiceTermeEloigne;
-        return [latex(`${u(n)}=${jeton(u1)}\\times ${puissance(q, n - 1)}`)];
-      }
-      case "sommeInfinie": {
-        const qAbs = { num: Math.abs(q.num), den: q.den };
-        if (!sommeInfinieExisteQ(q)) return [latex(`|q|=${fractionLatex(qAbs)}\\geqslant 1`), texte(" : la somme infinie n'existe pas.")];
-        const sInf = sommeInfinieQ(u1, q) as FractionQ;
-        return [latex(`|q|=${fractionLatex(qAbs)}<1`), texte(" : la somme infinie existe, "), latex(`S_\\infty=\\dfrac{${fractionLatex(u1)}}{1-${jeton(q)}}=${fractionLatex(sInf)}`), texte(".")];
-      }
-      default:
-        return null;
-    }
-  }
-  if (exercice.famille === "algebriqueRangN" && phase === "resoudreRangN") {
-    const { u1, q, k, m, n } = exercice;
-    const quotient = diviserFractionQ(entierVersFractionQ(k), entierVersFractionQ(u1));
-    // Quotient écrit réduit seulement s'il diffère de k/u₁ tel quel.
-    const reduit = quotient.num === k && quotient.den === u1 ? "" : `=${fractionLatex(quotient)}`;
-    return [latex(`${puissance(q, "n-1")}=\\dfrac{${k}}{${u1}}${reduit}=${puissance(q, m)}\\ \\Rightarrow\\ n-1=${m}\\ \\Rightarrow\\ n=${n}`)];
-  }
-  if (exercice.famille === "algebriqueSommeSn" && exercice.sousCas === "B" && phase === "calculerSn") {
-    const { u1, q, n, k } = exercice;
-    return [latex(`${s(n)}=${u1}\\times\\dfrac{1-${puissance(q, n)}}{1-${jeton(q)}}=${fractionLatex(k)}`)];
-  }
-  return null;
-}
-
 function piege(exercice: ExerciceSuiteGeometrique): { phase: PhaseSuiteGeometrique; fragments: FragmentConsigne[] } {
   switch (exercice.famille) {
     case "principal": {
@@ -304,42 +240,6 @@ function piege(exercice: ExerciceSuiteGeometrique): { phase: PhaseSuiteGeometriq
     case "algebriqueRangN":
       return { phase: "resoudreRangN", fragments: [texte("On compare les exposants une fois les deux membres écrits comme puissances de la MÊME base ; l'exposant obtenu est n − 1, pas n.")] };
   }
-}
-
-const METHODE_SANS_FORMULE: Partial<Record<PhaseSuiteGeometrique, string>> = {
-  resoudreXAlgebrique: "On développe, on regroupe les termes en x d'un côté et les constantes de l'autre, puis on isole x.",
-  calculerTermesAlgebrique: "On remplace x par sa valeur dans chaque expression.",
-  resoudreRangN: "On divise par u₁, on écrit le quotient comme une puissance de q, puis on compare les exposants.",
-};
-
-function correctionDetailleeSuiteGeometrique(exercice: ExerciceSuiteGeometrique): EtapeCorrection[] {
-  const p = piege(exercice);
-  let formulePrecedente = "";
-  return ordreComplet(exercice).flatMap((phase, i): EtapeCorrection[] => {
-    const sousQuestion = LETTRES[i];
-    const lignes: EtapeCorrection[] = [];
-    const methode = METHODE_SANS_FORMULE[phase];
-    if (methode) {
-      lignes.push({ label: "Méthode", sousQuestion, fragments: [texte(methode)] });
-    } else {
-      // Formule de l'aide 1 de l'écran ; pas répétée d'une étape à la suivante.
-      // L'aide de l'écran du rang n parle de « k », que l'énoncé papier ne nomme pas.
-      const note = phase === "poserEquationRangN" ? "On écrit que uₙ vaut la valeur donnée :" : noteAideNiveau1(exercice, phase);
-      const formule = texteAideNiveau1(exercice, phase);
-      if (formule !== formulePrecedente) lignes.push({ label: "Méthode", sousQuestion, fragments: [...(note ? [texte(`${note} `)] : []), latex(formule)] });
-      formulePrecedente = formule;
-    }
-    const calcul = calculEtape(exercice, phase);
-    if (calcul) lignes.push({ label: "Calcul", sousQuestion, fragments: calcul.map((f) => (f.type === "latex" ? { ...f, valeur: virgules(f.valeur) } : f)) });
-    const r = reponse(exercice, phase);
-    lignes.push({
-      label: "Conclusion",
-      sousQuestion,
-      fragments: base(phase) === "sommeInfinie" && r[0].startsWith("\\text") ? [texte("Pas de somme infinie.")] : [latex(r.join(",\\quad "))],
-    });
-    if (p.phase === phase) lignes.push({ label: "Piège", sousQuestion, fragments: p.fragments });
-    return lignes;
-  });
 }
 
 function critere(sousQuestion: string, fragments: FragmentConsigne[], points: number): CritereBareme {

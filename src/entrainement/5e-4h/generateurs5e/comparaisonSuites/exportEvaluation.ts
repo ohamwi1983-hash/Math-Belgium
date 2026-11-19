@@ -5,12 +5,12 @@ import type {
   BlocCorrection,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { consigneConclusion, consigneGenerale, consigneTableau, formatConclusionNLatex, formatTraductionAttendueTexte, formuleU, formuleV, labelU, labelV } from "../../ui5e/formatComparaisonSuites";
+import { correctionDetailleeComparaisonSuites, reponseTexteComparaison as reponseTexte } from "./corrigeDetaille";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceComparaisonSuites } from "./index";
 
 /**
@@ -31,34 +31,8 @@ import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceComparaison
  * `uTable`/`vTable` arrondis à l'unité comme à l'écran, `nSeuil`, `traductionValeur`).
  */
 
-/** Entier arrondi pour KaTeX, groupes de milliers séparés par `\,` (même rendu que l'écran). */
-function entierLatex(valeur: number): string {
-  const n = Math.round(valeur);
-  return (n < 0 ? "-" : "") + String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, "\\,");
-}
-
-function ordinal(n: number): string {
-  return n === 1 ? "1er" : `${n}e`;
-}
-
 function enAnnees(exercice: ExerciceComparaisonSuites): boolean {
   return exercice.contexte.periode === "an";
-}
-
-function symboleCondition(exercice: ExerciceComparaisonSuites): { cond: string; contraire: string } {
-  return exercice.condition === "aDepasseB" ? { cond: "A_n>B_n", contraire: "A_n\\leq B_n" } : { cond: "B_n>A_n", contraire: "B_n\\leq A_n" };
-}
-
-/** Tableau n / Aₙ / Bₙ sur les 4 rangs de la fenêtre de l'écran, valeurs arrondies à l'unité. */
-function tableauLatex(exercice: ExerciceComparaisonSuites): string {
-  const ligne = (tete: string, valeurs: string[]) => `${tete} & ${valeurs.join(" & ")}`;
-  return (
-    `\\begin{array}{c|${"c".repeat(exercice.nTable.length)}}` +
-    `${ligne("n", exercice.nTable.map(String))} \\\\ \\hline ` +
-    `${ligne("A_n", exercice.uTable.map(entierLatex))} \\\\ ` +
-    `${ligne("B_n", exercice.vTable.map(entierLatex))}` +
-    "\\end{array}"
-  );
 }
 
 function construireEnonceComparaisonSuites(exercice: ExerciceComparaisonSuites): SectionExercice {
@@ -89,51 +63,8 @@ function construireCorrectionComparaisonSuites(exercice: ExerciceComparaisonSuit
   ];
 }
 
-/** Réponse dans les mots de la question (« À partir de 2027 » / « Au cours du 7e mois »). */
-function reponseTexte(exercice: ExerciceComparaisonSuites): string {
-  const t = Math.round(exercice.traductionValeur);
-  return enAnnees(exercice) ? `À partir de ${t}` : `Au cours du ${ordinal(t)} mois`;
-}
-
 function reponseBreveComparaisonSuites(exercice: ExerciceComparaisonSuites): FragmentConsigne[] {
   return [texte(`${reponseTexte(exercice)} (rang `), latex(formatConclusionNLatex(exercice)), texte(").")];
-}
-
-function correctionDetailleeComparaisonSuites(exercice: ExerciceComparaisonSuites): EtapeCorrection[] {
-  const { cond, contraire } = symboleCondition(exercice);
-  const i = exercice.nTable.indexOf(exercice.nSeuil);
-  const nAvant = exercice.nTable[i - 1];
-  // « = » quand la valeur est exacte (suites arithmétiques), « ≈ » quand elle est arrondie.
-  const egal = (v: number) => (Number.isInteger(v) ? "=" : "\\approx");
-  const valeursRang = (k: number) =>
-    `A_{${exercice.nTable[k]}}${egal(exercice.uTable[k])} ${entierLatex(exercice.uTable[k])}\\ \\text{et}\\ B_{${exercice.nTable[k]}}${egal(exercice.vTable[k])} ${entierLatex(exercice.vTable[k])}`;
-  const etapes: EtapeCorrection[] = [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("On écrit la formule de chaque suite (rang 1 = valeur de départ) :")] },
-    { label: "Formules", sousQuestion: "a", fragments: [latex(formuleU(exercice)), texte(" et "), latex(formuleV(exercice)), texte(".")] },
-    {
-      label: "Calcul",
-      sousQuestion: "a",
-      fragments: [texte("On calcule les termes rang par rang (balayage) jusqu'à la bascule ; autour de celle-ci, arrondis à l'unité : "), latex(tableauLatex(exercice))],
-    },
-    { label: "Méthode", sousQuestion: "b", fragments: [texte("On cherche le premier rang où "), latex(cond), texte(" ; au rang précédent, on doit encore avoir "), latex(contraire), texte(".")] },
-  ];
-  if (nAvant !== undefined) {
-    etapes.push({ label: "Lecture", sousQuestion: "b", fragments: [texte(`Rang ${nAvant} : `), latex(valeursRang(i - 1)), texte(` ; rang ${exercice.nSeuil} : `), latex(valeursRang(i)), texte(".")] });
-  }
-  etapes.push({
-    label: "Conclusion",
-    sousQuestion: "b",
-    fragments: enAnnees(exercice)
-      ? [latex(formatConclusionNLatex(exercice)), texte(" ; le rang 1 correspond à "), latex(`${exercice.anneeDepart}`), texte(", donc l'année est "), latex(`${exercice.anneeDepart}+(${exercice.nSeuil}-1)=${Math.round(exercice.traductionValeur)}`), texte(`. ${reponseTexte(exercice)}.`)]
-      : [latex(formatConclusionNLatex(exercice)), texte(` : le rang n est le n-ième mois. ${reponseTexte(exercice)}.`)],
-  });
-  etapes.push({
-    label: "Piège",
-    fragments: enAnnees(exercice)
-      ? [texte("Le rang 1 est l'année de départ : l'année cherchée est "), latex(`${exercice.anneeDepart}+(n-1)`), texte(", pas "), latex(`${exercice.anneeDepart}+n`), texte(".")]
-      : [texte("Le dépassement est strict : le rang cherché est le premier où "), latex(cond), texte(", pas le dernier où "), latex(contraire), texte(".")],
-  });
-  return etapes;
 }
 
 function baremeComparaisonSuites(exercice: ExerciceComparaisonSuites): BaremeExercice {

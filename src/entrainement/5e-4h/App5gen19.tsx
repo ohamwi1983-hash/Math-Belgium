@@ -36,6 +36,9 @@ import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { Katex } from "./components/Katex";
+import { correctionDetailleeSuiteRecurrenteAffine } from "./generateurs5e/suiteRecurrenteAffine/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -169,6 +172,7 @@ export function App5gen19() {
             ))}
           </span>
         ),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSuiteRecurrenteAffine(exercice), { poserRecurrence: "a", regimePermanent: "b", termesSuccessifs: "c" }[etat.phase])} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

@@ -14,6 +14,9 @@ import {
   tentativesMaxConvergenceSuite,
 } from "./moteur5e/sessionConvergenceSuites";
 import { ordreComplet } from "./moteur5e/typesConvergenceSuites";
+import { correctionDetailleeConvergenceSuite } from "./generateurs5e/convergenceSuites/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import type { EtatSessionConvergenceSuite, PhaseConvergenceSuite } from "./moteur5e/typesConvergenceSuites";
 import { diagnostiquerClassifierQuelconque, diagnostiquerDiviserQuelconque, erreurMethodeDiviserQuelconque, MESSAGE_ERREUR_DIVISION } from "./moteur5e/verificationConvergenceSuites";
 import { diagnostiquerNombre } from "./moteur5e/verificationSuiteArithmetique";
@@ -173,6 +176,7 @@ export function App5gen16() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePourPhase(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConvergenceSuite(exercice), lettreEtape(ordreComplet(exercice).indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

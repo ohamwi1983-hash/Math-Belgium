@@ -49,6 +49,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { Katex } from "./components/Katex";
+import { correctionDetailleeSuiteArithmetique } from "./generateurs5e/suitesArithmetiques/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 type PhaseChampSimple =
   | "trouverR"
@@ -317,6 +320,7 @@ export function App5gen14() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendueFiche(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSuiteArithmetique(exercice, ordreComplet(exercice)), lettreEtape(ordreComplet(exercice).indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

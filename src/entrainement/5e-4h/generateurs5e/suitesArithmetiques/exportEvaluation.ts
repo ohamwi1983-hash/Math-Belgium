@@ -12,7 +12,6 @@ import type {
   CritereBareme,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -23,10 +22,8 @@ import {
   formatReponseAttenduePhaseLatex,
   formatTermesDonneesLatex,
   labelsCalculerTermesAlgebrique,
-  noteAideNiveau1,
-  texteAideNiveau1,
-  texteAideNiveau2,
 } from "../../ui5e/formatSuiteArithmetique";
+import { correctionDetailleeSuiteArithmetique, etapesPapierSuiteArithmetique as etapes } from "./corrigeDetaille";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceSuiteArithmetique } from "./index";
 import type { FamilleSuiteArithmetiqueId } from "./index";
 import { profilSuiteArithmetique, LIBELLE_CAS_ARITHMETIQUE } from "../profilsEvaluationSuites";
@@ -104,13 +101,6 @@ function avecBase(exercice: ExerciceSuiteArithmetique): ExercicePrincipalSuiteAr
 // ============================================================================
 // Étapes (une par écran) et énoncé papier.
 // ============================================================================
-
-/** Étapes réellement demandées sur papier : la séquence de l'écran, sauf pour la famille
- * « cohérence » (jugement, puis u₁ et la formule générale si les données sont cohérentes). */
-function etapes(exercice: ExerciceSuiteArithmetique): PhaseSuiteArithmetique[] {
-  if (exercice.famille === "coherence") return exercice.coherent ? ["coherenceJugement", "trouverU1", "formuleGenerale"] : ["coherenceJugement"];
-  return ordreComplet(exercice);
-}
 
 /** Consigne d'une étape, en version papier (voir l'en-tête de fichier). */
 function consigneEtape(exercice: ExerciceSuiteArithmetique, phase: PhaseSuiteArithmetique): FragmentConsigne[] {
@@ -269,53 +259,6 @@ function reponseBreveSuiteArithmetique(exercice: ExerciceSuiteArithmetique): Fra
   return listeFr(parties, texte(" ; "), texte(" ; "));
 }
 
-/** Calcul substitué d'une étape (`null` : la conclusion suffit). */
-function calculEtape(exercice: ExerciceSuiteArithmetique, phase: PhaseSuiteArithmetique): string | null {
-  if (exercice.famille === "principal" || exercice.famille === "coherence") {
-    const { u1, r } = exercice.base;
-    switch (phase) {
-      case "trouverR": {
-        if (exercice.famille !== "principal") return null;
-        const d = exercice.donnees;
-        if (d.combo === "u1_up") return `r=\\dfrac{${nombreLatex(d.up.valeur)}-${par(u1)}}{${d.up.indice}-1}=${nombreLatex(r)}`;
-        if (d.combo === "up_uq") return `r=\\dfrac{${nombreLatex(d.uq.valeur)}-${par(d.up.valeur)}}{${d.uq.indice}-${d.up.indice}}=${nombreLatex(r)}`;
-        if (d.combo === "un_sn") return `r=\\dfrac{${nombreLatex(d.un.valeur)}-${par(u1)}}{${d.un.indice}-1}=${nombreLatex(r)}`;
-        return null;
-      }
-      case "trouverU1": {
-        if (exercice.famille === "coherence") return `${u(1)}=${nombreLatex(exercice.p.valeur)}-(${exercice.p.indice}-1)\\times ${par(r)}=${nombreLatex(u1)}`;
-        const d = exercice.donnees;
-        if (d.combo === "un_sn") return `${u(1)}=\\dfrac{2\\times ${par(d.sn)}}{${d.un.indice}}-${par(d.un.valeur)}=${nombreLatex(u1)}`;
-        if (d.combo === "r_up" || d.combo === "up_uq") return `${u(1)}=${nombreLatex(d.up.valeur)}-(${d.up.indice}-1)\\times ${par(r)}=${nombreLatex(u1)}`;
-        return null;
-      }
-      case "termesProches": {
-        const [a] = exercice.indicesTermesProches as number[];
-        return `${u(a)}=${nombreLatex(u1)}+(${a}-1)\\times ${par(r)}=${nombreLatex(u1 + (a - 1) * r)}`;
-      }
-      case "termeEloigne": {
-        const n = exercice.indiceTermeEloigne as number;
-        return `${u(n)}=${nombreLatex(u1)}+(${n}-1)\\times ${par(r)}=${nombreLatex(u1 + (n - 1) * r)}`;
-      }
-      case "sommeSn": {
-        const n = exercice.indiceSn as number;
-        return `${s(n)}=\\dfrac{${n}}{2}\\left(2\\times ${par(u1)}+(${n}-1)\\times ${par(r)}\\right)=${nombreLatex((n / 2) * (2 * u1 + (n - 1) * r))}`;
-      }
-      default:
-        return null;
-    }
-  }
-  if (exercice.famille === "algebriqueSommeSn" && exercice.sousCas === "D" && phase === "calculerSn") {
-    const { u1, r, n, k } = exercice;
-    return `${s(n)}=\\dfrac{${n}}{2}\\left(2\\times ${par(u1)}+(${n}-1)\\times ${par(r)}\\right)=${nombreLatex(k)}`;
-  }
-  if (exercice.famille === "algebriqueRangN" && phase === "resoudreRangN") {
-    const { u1, r, k, n } = exercice;
-    return `(n-1)\\times ${par(r)}=${nombreLatex(k)}-${par(u1)}\\ \\Rightarrow\\ n-1=${nombreLatex((k - u1) / r)}\\ \\Rightarrow\\ n=${n}`;
-  }
-  return null;
-}
-
 /** La ligne « Piège » de l'exercice : l'étape où elle se place et son texte. */
 function piege(exercice: ExerciceSuiteArithmetique): { phase: PhaseSuiteArithmetique; fragments: FragmentConsigne[] } {
   switch (exercice.famille) {
@@ -334,42 +277,6 @@ function piege(exercice: ExerciceSuiteArithmetique): { phase: PhaseSuiteArithmet
     case "algebriqueRangN":
       return { phase: "resoudreRangN", fragments: [texte("On trouve d'abord n − 1 : ne pas oublier d'ajouter 1 pour obtenir le rang n.")] };
   }
-}
-
-/** Étapes dont la méthode est une manipulation (pas une formule du cours). */
-const METHODE_SANS_FORMULE: Partial<Record<PhaseSuiteArithmetique, string>> = {
-  resoudreXAlgebrique: "On développe, on regroupe les termes en x d'un côté et les constantes de l'autre, puis on isole x.",
-  calculerTermesAlgebrique: "On remplace x par sa valeur dans chaque expression.",
-  resoudreRangN: "On isole (n − 1), puis n.",
-};
-
-function correctionDetailleeSuiteArithmetique(exercice: ExerciceSuiteArithmetique): EtapeCorrection[] {
-  const p = piege(exercice);
-  let formulePrecedente = "";
-  return etapes(exercice).flatMap((phase, i): EtapeCorrection[] => {
-    const sousQuestion = LETTRES[i];
-    const lignes: EtapeCorrection[] = [];
-    const methode = METHODE_SANS_FORMULE[phase];
-    if (methode) {
-      lignes.push({ label: "Méthode", sousQuestion, fragments: [texte(methode)] });
-    } else {
-      // La formule de l'aide 1 de l'écran ; pas répétée d'une étape à la suivante.
-      const note = noteAideNiveau1(exercice, phase);
-      const formule = texteAideNiveau1(exercice, phase);
-      if (note || formule !== formulePrecedente) lignes.push({ label: "Méthode", sousQuestion, fragments: [...(note ? [texte(`${note} `)] : []), latex(formule)] });
-      formulePrecedente = formule;
-    }
-    if (phase === "coherenceJugement" && exercice.famille === "coherence") {
-      lignes.push({ label: "Calcul", sousQuestion, fragments: [latex(texteAideNiveau2(exercice, phase))] });
-      lignes.push({ label: "Conclusion", sousQuestion, fragments: conclusionCoherence(exercice) });
-    } else {
-      const calcul = calculEtape(exercice, phase);
-      if (calcul) lignes.push({ label: "Calcul", sousQuestion, fragments: [latex(virgules(calcul)), ...(phase === "termesProches" ? [texte(", puis on ajoute r pour passer d'un terme au suivant.")] : [])] });
-      lignes.push({ label: "Conclusion", sousQuestion, fragments: [latex(reponse(exercice, phase).join(",\\quad "))] });
-    }
-    if (p.phase === phase) lignes.push({ label: "Piège", sousQuestion, fragments: p.fragments });
-    return lignes;
-  });
 }
 
 function critere(sousQuestion: string, fragments: FragmentConsigne[], points: number): CritereBareme {

@@ -12,7 +12,6 @@ import type {
   CritereBareme,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -23,12 +22,10 @@ import {
   formatExpressionDiviseeLatex,
   formatTermesDonneesLatex,
   libelleClassificationAttendue,
-  lignesAideNiveau1,
-  lignesAideNiveau2,
   texteAideNiveau1,
   texteAideNiveau2,
-  type LigneAide,
 } from "../../ui5e/formatConvergenceSuites";
+import { correctionDetailleeConvergenceSuite } from "./corrigeDetaille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceConvergenceSuite } from "./index";
 import { profilConvergenceSuite } from "../profilsEvaluationSuites";
 
@@ -158,73 +155,6 @@ function reponseBreveConvergenceSuite(exercice: ExerciceConvergenceSuite): Fragm
   const libelle = libelleClassificationAttendue(exercice, phaseConclusion(exercice));
   const lim = limiteLatex(exercice);
   return lim === null ? [texte(`${libelle} : pas de limite.`)] : [texte(`${libelle} : `), latex(lim), texte(".")];
-}
-
-/** Lignes d'aide de l'écran (même source que l'appli) → fragments d'une phrase. */
-function fragmentsLignes(lignes: LigneAide[]): FragmentConsigne[] {
-  return lignes.flatMap((l, i) => {
-    const f: FragmentConsigne[] = [];
-    if (i > 0) f.push(texte(" "));
-    if (l.texte) f.push(texte(l.texte));
-    if (l.latex) f.push(latex(l.latex));
-    if (l.texteApres) f.push(texte(l.texteApres));
-    return f;
-  });
-}
-
-function piegeGeometrique(exercice: ExerciceConvergenceGeometrique): string {
-  const q = exercice.q.num / exercice.q.den;
-  switch (exercice.classification) {
-    case "divergeMoinsInfini":
-      return "Avec q > 1, la suite ne diverge pas toujours vers +∞ : c'est le signe de u₁ qui décide (ici u₁ < 0, donc −∞).";
-    case "oscilleNeConvergePas":
-      return "q = −1 : la suite reste bornée (elle oscille entre u₁ et −u₁) mais ne converge pas.";
-    case "oscilleDivergeSansLimite":
-      return "q < −1 : les termes changent de signe et grandissent en valeur absolue — ni +∞ ni −∞, la suite n'a pas de limite.";
-    case "convergeVersZero":
-      return q < 0 ? "q est négatif, mais |q| < 1 : les termes alternent de signe et tendent quand même vers 0." : "C'est |q| qu'on compare à 1 : ici |q| < 1, les termes se rapprochent de 0.";
-    default:
-      return "C'est |q| qu'on compare à 1, puis le signe de q (et celui de u₁ si q > 1).";
-  }
-}
-
-function correctionDetailleeConvergenceSuite(exercice: ExerciceConvergenceSuite): EtapeCorrection[] {
-  const libelle = libelleClassificationAttendue(exercice, phaseConclusion(exercice));
-  const lim = limiteLatex(exercice);
-  const conclusion: FragmentConsigne[] = lim === null ? [texte(`${libelle} : la suite n'a pas de limite.`)] : [texte(`${libelle} : `), latex(lim), texte(".")];
-  if (exercice.variante === "arithmetique") {
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: fragmentsLignes(lignesAideNiveau1(exercice, "classificationArithmetique")) },
-      { label: "Lecture", sousQuestion: "a", fragments: [latex(raisonArithmetiqueLatex(exercice))] },
-      { label: "Conclusion", sousQuestion: "a", fragments: conclusion },
-      {
-        label: "Piège",
-        sousQuestion: "a",
-        fragments: [texte(exercice.r === 0 ? "r = 0 : la suite est constante — elle converge (vers u₁), même si elle « ne bouge pas »." : "Une suite arithmétique de raison non nulle n'a jamais de limite finie : elle ne converge pas, même si sa raison est petite.")],
-      },
-    ];
-  }
-  if (exercice.variante === "geometrique") {
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: fragmentsLignes(lignesAideNiveau1(exercice, "classificationGeometrique")) },
-      { label: "Lecture", sousQuestion: "a", fragments: [latex(raisonGeometriqueLatex(exercice))] },
-      { label: "Conclusion", sousQuestion: "a", fragments: conclusion },
-      { label: "Piège", sousQuestion: "a", fragments: [texte(piegeGeometrique(exercice))] },
-    ];
-  }
-  const exo: ExerciceConvergenceQuelconque = exercice;
-  const calculLimite: EtapeCorrection[] =
-    exo.classification === "limiteValeur"
-      ? [{ label: "Calcul", sousQuestion: "b", fragments: [texte("Quotient des coefficients dominants : "), latex(texteAideNiveau2(exo, "classifierQuelconque"))] }]
-      : [];
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: fragmentsLignes([...lignesAideNiveau1(exo, "diviserQuelconque"), ...lignesAideNiveau2(exo, "diviserQuelconque")]) },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(formatExpressionDiviseeLatex(exo))] },
-    { label: "Piège", sousQuestion: "a", fragments: [texte("On divise par la plus haute puissance du dénominateur, pas du numérateur : sinon le dénominateur tend vers 0 et on ne peut pas conclure.")] },
-    { label: "Méthode", sousQuestion: "b", fragments: fragmentsLignes(lignesAideNiveau1(exo, "classifierQuelconque")) },
-    ...calculLimite,
-    { label: "Conclusion", sousQuestion: "b", fragments: conclusion },
-  ];
 }
 
 function baremeConvergenceSuite(exercice: ExerciceConvergenceSuite): BaremeExercice {
