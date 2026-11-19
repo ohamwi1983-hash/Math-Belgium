@@ -4243,3 +4243,24 @@ paths:
   (∞ ≤ tol·∞), ce qui cassait les ensembles « extérieur ». Fichiers : `AppConstruireInequation.tsx`,
   `core/construireInequation.types.ts`, `ui/formatConstruireInequation.ts`,
   `generateurs/construireInequation/` (index, corrigeDetaille, profil, exportEvaluation).
+
+- **4e, Chapitre 2** (`equations-inequations-second-degre`), section `resoudre` (§ 1) : nouveau
+  générateur **gen115 « Équation à paramètre m »** (processus 3), carte après gen67. (E) :
+  a(m)x² + b(m)x + c(m) = 0, coefficients affines en m ; variantes `b-egal-m` (a x² + m x + c,
+  l'exemple du cours ; 22 énoncés distincts), `affine` (b et c dépendent de m), `a-egal-m` (a = m : en
+  m = 0, (E) est du premier degré — Δ(0) = b(0)² > 0, donc m = 0 tombe dans la zone « deux
+  solutions », où il n'y en a qu'une). Recherche au hasard : Δ(m) à racines entières distinctes
+  (|m| ≤ 12), racines doubles rationnelles lisibles. Écrans : a) Δ(m) (expression en m, toute forme
+  équivalente acceptée ; pièges : 4ac non soustrait en entier, double produit oublié) ; b) m₁ < m₂ et
+  la racine double −b/(2a) pour chacune (4 champs) ; c) ensemble des m tels que Δ(m) > 0 (saisie
+  d'ensemble en m), puis la parabole de Δ(m) (`ui/figuresTransfertSecondDegre.ts`, aussi dans le
+  corrigé en `figureHtml`) ; d) discussion (choix fermé, 1 tentative ; fausses discussions : zones
+  inversées, Δ = 0 lu « aucune solution », nombres de solutions décalés, cas m = 0 oublié). Corrigé :
+  Δ(m) substitué puis développé, Δ(m) = 0 divisé par le PGCD (et par −1) avant d'être résolu
+  (mise en évidence de m si le terme constant est nul), discussion zone par zone (m = 0 résolu à
+  part). Profil : `forme` = « variante:exterieur|interieur » (signe du coefficient de m², seule
+  `a-egal-m` peut l'avoir négatif : 43 % / 57 %), aucun cas particulier, pas de `calcul`. Niveaux
+  3–4. Libellé de conception « Équation à paramètre m (gen115) ». Fichiers : `AppEquationParametre.tsx`,
+  `core/equationParametre.types.ts`, `ui/formatEquationParametre.ts`,
+  `ui/figuresTransfertSecondDegre.ts`, `generateurs/equationParametre/` (index, corrigeDetaille,
+  profil, exportEvaluation).

@@ -648,6 +648,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 67. Relations entre racines et coefficients »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Équation à paramètre m',
+          generatorId: 'gen115',
+          description: [
+            'Calcule le discriminant Δ(m) d’une équation qui dépend d’un réel m, trouve les valeurs de m qui donnent une racine double, étudie le signe de Δ(m), puis discute le nombre de solutions selon m.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 115. Équation à paramètre m »',
+        },
       ],
     },
     {

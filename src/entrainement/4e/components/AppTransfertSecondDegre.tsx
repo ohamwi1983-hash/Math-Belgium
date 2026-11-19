@@ -53,7 +53,9 @@ function reponseAttendue(def: EcranTSD): ReactNode {
 }
 
 function Figure({ svg }: { svg: string }) {
-  return <div className="figure-transfert-second-degre" style={{ margin: "10px auto 4px", maxWidth: 420 }} dangerouslySetInnerHTML={{ __html: svg }} />;
+  // Largeur fixe du SVG papier → pleine largeur disponible à l'écran (jamais de défilement horizontal).
+  const adapte = svg.replace(/<svg([^>]*?) width="(\d+)" height="(\d+)"/, '<svg$1 width="100%" style="max-width:$2px;height:auto;display:block;margin:0 auto"');
+  return <div className="figure-transfert-second-degre" style={{ margin: "10px auto 4px", maxWidth: 420 }} dangerouslySetInnerHTML={{ __html: adapte }} />;
 }
 
 export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {

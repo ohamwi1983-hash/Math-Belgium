@@ -21,13 +21,13 @@ export function lignesDelta([a, b, c]: Poly2, nom = "\\Delta"): LigneCalcul[] {
   const delta = b * b - quatreAC;
   const lignes = [ligne(`${nom}=b^2-4ac`, "discriminant"), ligne(`=${qp(b)}^2-4\\cdot ${qp(a)}\\cdot ${qp(c)}`, "on remplace a, b et c")];
   const milieu = `=${q(b * b)}${quatreAC < 0 ? "+" : "-"}${q(Math.abs(quatreAC))}`;
-  if (milieu !== `=${q(delta)}`) lignes.push(ligne(milieu));
+  if (milieu !== `=${q(delta)}` && quatreAC !== 0 && b !== 0) lignes.push(ligne(milieu));
   lignes.push(ligne(`=${q(delta)}`));
   return lignes;
 }
 
 /** Racines par la formule (Δ > 0 : deux ; Δ = 0 : racine double ; Δ < 0 : une ligne « aucune »). */
-export function lignesRacines(p: Poly2, v = "x"): LigneCalcul[] {
+export function lignesRacines(p: Poly2, v = "x", nomDelta = "\\Delta", symboleDelta = "Δ"): LigneCalcul[] {
   const [a, b, c] = p;
   const delta = b * b - 4 * a * c;
   if (delta < 0) return [ligne(`\\Delta=${q(delta)}<0`, "aucune racine réelle")];
@@ -46,7 +46,7 @@ export function lignesRacines(p: Poly2, v = "x"): LigneCalcul[] {
     out.push(
       ligne(
         `${v}_${i}=\\dfrac{${q(-b)}${sg}${rac}}{${q(2 * a)}}`,
-        i === 1 ? [latex(`${v}=\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}`), texte(entier ? `, avec √Δ = ${nombreTexte(Math.round(s))}` : "")] : undefined,
+        i === 1 ? [latex(`${v}=\\dfrac{-b\\pm\\sqrt{${nomDelta}}}{2a}`), texte(entier ? `, avec √${symboleDelta} = ${nombreTexte(Math.round(s))}` : "")] : undefined,
       ),
     );
     out.push(ligne(`=${nombreLatex(val)}`));
