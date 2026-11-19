@@ -7,10 +7,12 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDetectiveIntegrales } from "../../core6e/detectiveIntegrales.types";
-import { indiceLigneFausse, typeErreur, valeursAttendues } from "../../moteur6e/modeleDetectiveIntegrales";
+import { indiceLigneFausse, valeursAttendues } from "../../moteur6e/modeleDetectiveIntegrales";
 import { CONSIGNE_GENERALE, consignesEcrans, enonceExercice, lignesCopie, nomErreur, valeurFragments } from "../../ui6e/formatDetectiveIntegrales";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveIntegrales } from "./index";
 import { profilDetectiveIntegrales } from "./profil";
@@ -109,9 +111,10 @@ function bareme(e: ExerciceDetectiveIntegrales): BaremeExercice {
   };
 }
 
-function difficulte(e: ExerciceDetectiveIntegrales): 1 | 2 | 3 {
-  const type = typeErreur(e);
-  return type === "aire" || type === "lnAbs" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceDetectiveIntegrales): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: 1 };
 }
 
 export const adaptateurEvaluationDetectiveIntegrales: AdaptateurFeuilleExercices<ExerciceDetectiveIntegrales> = {
@@ -123,10 +126,9 @@ export const adaptateurEvaluationDetectiveIntegrales: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };

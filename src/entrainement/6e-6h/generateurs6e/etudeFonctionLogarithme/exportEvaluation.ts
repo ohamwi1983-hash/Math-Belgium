@@ -7,6 +7,8 @@ import type {
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { construireSvgFonction } from "../../../export/svgGraph";
@@ -180,8 +182,13 @@ const PIEGE: Record<ExerciceEtudeFonctionLogarithme["famille"], { phase: PhaseEt
 
 const POIDS: Record<PhaseEtudeFonctionLogarithme, number> = { domaine: 1, limites: 2, asymptotes: 1, croissance: 2, concavite: 1, graphique: 1 };
 
-function difficulteEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme): 1 | 2 | 3 {
-  return exercice.famille === "B" || exercice.famille === "C" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceEtudeFonctionLogarithme): CriteresDifficulte {
+  // Étude complète en six écrans : le corrigé (pas encore « comme au tableau ») résume en une ligne
+  // les limites (b), la dérivée et son signe (d), la dérivée seconde et son signe (e) — lignes
+  // qu'aurait chacune de ces étapes au tableau.
+  return { ...etapesDuCorrige(correctionDetailleeEtudeFonctionLogarithme(e)), methode: e.famille === "B" ? 1 : 0, piege: 1, lignesMinimales: { b: 10, d: 16, e: 10 } };
 }
 
 function reponseBreveEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme): FragmentConsigne[] {
@@ -271,10 +278,9 @@ export const adaptateurEvaluationEtudeFonctionLogarithme: AdaptateurFeuilleExerc
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0]),
   construireEnonce: construireEnonceEtudeFonctionLogarithme,
   construireCorrection: construireCorrectionEtudeFonctionLogarithme,
-  difficulte: difficulteEtudeFonctionLogarithme,
+  criteresDifficulte,
   reponseBreve: reponseBreveEtudeFonctionLogarithme,
   correctionDetaillee: correctionDetailleeEtudeFonctionLogarithme,
   bareme: baremeEtudeFonctionLogarithme,
   enoncePapier: enoncePapierEtudeFonctionLogarithme,
-  dureeMinutes: 25,
 };

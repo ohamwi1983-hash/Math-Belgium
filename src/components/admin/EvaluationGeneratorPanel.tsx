@@ -4,6 +4,7 @@ import type { ChapterContent } from '../../content/types'
 import { declencherTelechargement } from '../../entrainement/export/telechargerBlob'
 import { RichText } from '../Math'
 import { EVALUATION_ADAPTER_REGISTRY } from '../../lib/evaluationAdapterRegistry'
+import { dureeEstimeeVariante } from '../../entrainement/export/niveauDifficulte'
 import {
   codesDuPlan,
   construirePlan,
@@ -137,11 +138,20 @@ function aujourdhui(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-/** Durée indicative d'une ligne, en minutes — `dureeMinutes` de l'adaptateur quand il la fournit,
+/** Durée indicative d'une ligne, en minutes — exercice d'un chapitre noté : durée par exercice de la
+ * grille commune, ESTIMÉE par variante avant tout tirage (moyenne de quelques tirages, en cache —
+ * `dureeEstimeeVariante`) ; chapitre pas encore noté : constante `dureeMinutes` de l'adaptateur ;
  * sinon ≈ 2,5 min par point (même règle que la durée imprimée sur la copie). */
 function dureeLigne(ligne: LigneSelection, points: number): number {
-  if (ligne.type === 'exercice') {
-    const d = EVALUATION_ADAPTER_REGISTRY[ligne.cle ?? '']?.dureeMinutes
+  const adaptateur = ligne.type === 'exercice' ? EVALUATION_ADAPTER_REGISTRY[ligne.cle ?? ''] : undefined
+  if (adaptateur) {
+    const parVariante = Object.entries(ligne.parVariante ?? {}).filter(([, n]) => n > 0)
+    const durees = parVariante.map(([cle, n]) => {
+      const d = dureeEstimeeVariante(adaptateur, varianteDeCle(cle))
+      return d === undefined ? undefined : d * n
+    })
+    if (parVariante.length > 0 && durees.every((d): d is number => d !== undefined)) return durees.reduce((t, d) => t + d, 0)
+    const d = dureeEstimeeVariante(adaptateur, null)
     if (d !== undefined) return d * ligne.nombre
   }
   if (ligne.type === 'vraiFaux') return 2 * ligne.nombre

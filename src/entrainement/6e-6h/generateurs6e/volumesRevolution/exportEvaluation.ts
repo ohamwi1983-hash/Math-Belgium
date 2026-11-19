@@ -8,6 +8,8 @@ import type {
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   blocDonnees,
@@ -114,8 +116,11 @@ function enoncePapier(exercice: ExerciceVolumesRevolution): EnoncePapier {
 // Corrigé détaillé.
 // ============================================================================
 
-function difficulte(exercice: ExerciceVolumesRevolution): 1 | 2 | 3 {
-  return exercice.famille === "C" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceVolumesRevolution): CriteresDifficulte {
+  const d = e.famille === "D" ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeVolumesRevolution(e)), methode: d, piege: d };
 }
 
 function reponseBreve(exercice: ExerciceVolumesRevolution): FragmentConsigne[] {
@@ -159,12 +164,11 @@ export const adaptateurEvaluationVolumesRevolution: AdaptateurFeuilleExercices<E
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteVolumesRevolution),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeVolumesRevolution,
   bareme,
   enoncePapier,
-  dureeMinutes: 10,
   profilInstance: profilVolumesRevolution,
   libelleCasParticulier: LIBELLE_CAS_VOLUMES_REVOLUTION,
 };

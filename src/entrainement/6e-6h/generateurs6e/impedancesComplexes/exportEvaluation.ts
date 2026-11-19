@@ -1,5 +1,7 @@
 import type { ExerciceImpedances } from "../../core6e/impedancesComplexes";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { PHASES_IMPEDANCES } from "../../moteur6e/typesImpedances";
 import type { PhaseImpedances } from "../../moteur6e/typesImpedances";
@@ -96,8 +98,10 @@ function enoncePapier(e: ExerciceImpedances): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeImpedances;
 
-function difficulte(e: ExerciceImpedances): 1 | 2 | 3 {
-  return e.variante === "parallele" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceImpedances): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 0, piege: 1, anglesEnPi: true };
 }
 
 // ============================================================================
@@ -134,12 +138,11 @@ export const adaptateurEvaluationImpedances: AdaptateurFeuilleExercices<Exercice
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteImpedances),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 15,
   profilInstance: profilImpedances,
   calculatriceIndispensable: CATALOGUE_VARIANTES.map((v) => v.id),
 };

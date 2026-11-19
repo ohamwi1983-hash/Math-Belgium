@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { LIBELLE_PHASE, blocDonnees, consigneEcran, consigneGenerale, entierComplexeLatex, formatReponseAttenduePhaseLatex } from "../../ui6e/formatAffixesRacines";
 import { phasesPourExercice } from "../../moteur6e/typesAffixesRacines";
@@ -119,16 +121,11 @@ function reponseBreve(e: ExerciceAffixesRacines): FragmentConsigne[] {
   }
 }
 
-function difficulte(e: ExerciceAffixesRacines): 1 | 2 | 3 {
-  switch (e.famille) {
-    case "A":
-      return 1;
-    case "B":
-    case "D":
-      return 2;
-    case "C":
-      return 3;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceAffixesRacines): CriteresDifficulte {
+  const piege = e.famille === "B" || e.famille === "C" ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 0, piege, anglesEnPi: true };
 }
 
 const crit = (sousQuestion: string, points: number, ...critere: FragmentConsigne[]) => ({ sousQuestion, points, critere });
@@ -200,10 +197,9 @@ export const adaptateurEvaluationAffixesRacines: AdaptateurFeuilleExercices<Exer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteAffixesRacines),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 6,
 };

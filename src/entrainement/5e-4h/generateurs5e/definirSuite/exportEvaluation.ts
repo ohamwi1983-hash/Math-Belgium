@@ -1,6 +1,8 @@
 import { valeursOptions } from "../../core5e/definirSuite";
 import type { ExerciceDefinirSuite, ExerciceNature } from "../../core5e/definirSuite";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur5e/typesDefinirSuite";
 import type { PhaseDefinirSuite } from "../../moteur5e/typesDefinirSuite";
@@ -107,17 +109,11 @@ function enoncePapier(e: ExerciceDefinirSuite): EnoncePapier {
 }
 
 /** Jamais fonction du verdict (variantes `nature-*`). */
-function difficulte(e: ExerciceDefinirSuite): 1 | 2 | 3 {
-  switch (e.variante) {
-    case "notations":
-      return e.famille === "affine" ? 1 : 2;
-    case "recurrence":
-    case "nature-termes":
-      return 2;
-    case "nature-formule":
-    case "nature-recurrence":
-      return 3;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceDefinirSuite): CriteresDifficulte {
+  const [methode, piege]: [0 | 1, 0 | 1] = e.variante === "notations" ? [0, 1] : e.variante === "recurrence" ? [0, 0] : [1, 1];
+  return { ...etapesDuCorrige(correctionDetailleeDefinirSuite(e)), methode, piege };
 }
 
 // ============================================================================
@@ -196,11 +192,10 @@ export const adaptateurEvaluationDefinirSuite: AdaptateurFeuilleExercices<Exerci
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteDefinirSuite),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeDefinirSuite,
   bareme,
   enoncePapier,
-  dureeMinutes: 6,
   profilInstance: profilDefinirSuite,
 };

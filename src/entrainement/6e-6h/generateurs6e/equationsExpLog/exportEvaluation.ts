@@ -10,6 +10,8 @@ import type {
 } from "../../core6e/equationsExpLog.types";
 import type { PhaseEquationsExpLog } from "../../moteur6e/typesEquationsExpLog";
 import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, CritereBareme, ErreurFrequente, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
@@ -158,27 +160,15 @@ function reponseBreveEquationsExpLog(exercice: ExerciceEquationsExpLog): Fragmen
   }
 }
 
-function difficulteEquationsExpLog(exercice: ExerciceEquationsExpLog): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "A":
-      return exercice.estPuissancePropre && (exercice.p as number) > 0 ? 1 : 2;
-    case "B":
-      return 2;
-    case "C":
-      return 3;
-    case "D":
-      return 1;
-    case "E":
-      return 3;
-    case "G":
-      return exercice.type === "discriminantNegatif" ? 2 : 3;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceEquationsExpLog): CriteresDifficulte {
+  const r = e.famille === "C" || e.famille === "E" || e.famille === "G" ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeEquationsExpLog(e)), methode: r, piege: r };
 }
 
 /** Durée indicative par instance (minutes), moyenne pondérée des familles : A 4, B 6, C 8, D 3,
  * E 8, G 6. */
-const DUREE_MINUTES_EQUATIONS_EXP_LOG = 6;
-
 // ---------------------------------------------------------------------------- Famille A
 
 function correctionA(ex: ExerciceEqLogA): EtapeCorrection[] {
@@ -568,10 +558,9 @@ export const adaptateurEvaluationEquationsExpLog: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id as FamilleEquationsExpLog),
   construireEnonce: construireEnonceEquationsExpLog,
   construireCorrection: construireCorrectionEquationsExpLog,
-  difficulte: difficulteEquationsExpLog,
+  criteresDifficulte,
   reponseBreve: reponseBreveEquationsExpLog,
   correctionDetaillee: correctionDetailleeEquationsExpLog,
   bareme: baremeEquationsExpLog,
   enoncePapier: enoncePapierEquationsExpLog,
-  dureeMinutes: DUREE_MINUTES_EQUATIONS_EXP_LOG,
 };

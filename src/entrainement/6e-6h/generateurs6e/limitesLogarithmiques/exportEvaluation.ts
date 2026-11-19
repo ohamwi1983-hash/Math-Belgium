@@ -1,5 +1,7 @@
 import type { CibleLimiteLog, ExerciceLimiteLogarithmique, ExerciceLimiteLogA, ExerciceLimiteLogB, ExerciceLimiteLogC } from "../../core6e/limitesLogarithmiques.types";
 import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, ProfilInstance, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { CONSIGNE_GENERALE, configDiagnosticPartiesC, consigneEcran, formatCategorieLabel, formatCibleTexte, formatLimiteEnonceLatex, formatReformulationBLatex, formeFactoriseeA } from "../../ui6e/formatLimitesLogarithmiques";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLimiteLogarithmique } from "./index";
@@ -163,20 +165,12 @@ function limiteLatexAvecApproche(cible: CibleLimiteLog): string {
   return exacte;
 }
 
-function difficulte(exercice: ExerciceLimiteLogarithmique): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "A":
-      // Comparaison directe (1), même polynôme ou mélange de termes (2), changement de base (3).
-      return exercice.sousType === "sous1" || exercice.sousType === "sous2" ? 1 : exercice.sousType === "sous3" ? 3 : 2;
-    case "B":
-      return 3;
-    case "C":
-      // c3 : forme 0/0 apparente qui n'en est pas une (piège central).
-      return exercice.sousType === "c3" ? 3 : 2;
-    case "D":
-      // Forme 1^∞ (limite de référence à faire apparaître) : 3 ; base x ou exponentielle : 2.
-      return exercice.forme === "un_infini" ? 3 : 2;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceLimiteLogarithmique): CriteresDifficulte {
+  const [methode, piege]: [0 | 1, 0 | 1] =
+    e.famille === "A" ? [e.sousType === "sous1" || e.sousType === "sous2" ? 0 : 1, 0] : e.famille === "C" ? [1, e.sousType === "c3" ? 1 : 0] : e.famille === "D" ? [1, 1] : [1, 0];
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode, piege };
 }
 
 function reponseBreve(exercice: ExerciceLimiteLogarithmique): FragmentConsigne[] {
@@ -405,11 +399,10 @@ export const adaptateurEvaluationLimitesLogarithmiques: AdaptateurFeuilleExercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceLimitesLogarithmiques,
   construireCorrection: construireCorrectionLimitesLogarithmiques,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier: enoncePapier,
-  dureeMinutes: 5,
   profilInstance,
 };

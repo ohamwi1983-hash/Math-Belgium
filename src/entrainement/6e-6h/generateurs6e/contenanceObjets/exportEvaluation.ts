@@ -1,5 +1,7 @@
 import type { ExerciceContenanceObjets } from "../../core6e/contenanceObjets.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { contenanceUnite, rayonProfil, uniteContenance, valeur, volumeCm3, volumeSecond } from "../../core6e/contenanceObjetsCalcul";
 import { PHASES_CONTENANCE } from "../../moteur6e/typesContenanceObjets";
@@ -95,8 +97,10 @@ const correctionDetaillee = correctionDetailleeContenanceObjets;
 // Difficulté, réponse brève, barème.
 // ============================================================================
 
-function difficulte(e: ExerciceContenanceObjets): 1 | 2 | 3 {
-  return e.transfert === "hauteur" || e.objet === "pot" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceContenanceObjets): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: 1 };
 }
 
 function reponseTransfertBreve(e: ExerciceContenanceObjets): FragmentConsigne[] {
@@ -137,12 +141,11 @@ export const adaptateurEvaluationContenanceObjets: AdaptateurFeuilleExercices<Ex
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteContenanceObjets),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 15,
   // Tonneau et pot : aucune instance à valeur exacte → exclus d'une évaluation sans calculatrice.
   calculatriceIndispensable: ["tonneau", "pot"],
   profilInstance: profilContenanceObjets,

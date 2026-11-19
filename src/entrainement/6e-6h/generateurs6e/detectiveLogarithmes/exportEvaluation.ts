@@ -8,6 +8,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDetectiveLogarithmes } from "../../core6e/detectiveLogarithmes.types";
@@ -137,9 +139,10 @@ function bareme(e: ExerciceDetectiveLogarithmes): BaremeExercice {
   };
 }
 
-function difficulte(e: ExerciceDetectiveLogarithmes): 1 | 2 | 3 {
-  const type = typeErreur(e);
-  return type === "carre" || type === "domaine" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceDetectiveLogarithmes): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: 1 };
 }
 
 export const adaptateurEvaluationDetectiveLogarithmes: AdaptateurFeuilleExercices<ExerciceDetectiveLogarithmes> = {
@@ -151,10 +154,9 @@ export const adaptateurEvaluationDetectiveLogarithmes: AdaptateurFeuilleExercice
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };

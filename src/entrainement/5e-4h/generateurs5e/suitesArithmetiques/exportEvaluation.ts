@@ -15,6 +15,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   consigneGenerale,
@@ -225,16 +227,12 @@ function enoncePapierSuiteArithmetique(exercice: ExerciceSuiteArithmetique): Eno
 
 /** ★ données u₁ et r directes ; ★★ une ou deux grandeurs à retrouver d'abord, jugement de
  * cohérence, rang n ; ★★★ inconnue x (équation à poser avec une somme ou une relation entre termes). */
-function difficulteSuiteArithmetique(exercice: ExerciceSuiteArithmetique): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "principal":
-      return exercice.donnees.combo === "direct" ? 1 : 2;
-    case "coherence":
-    case "algebriqueRangN":
-      return 2;
-    default:
-      return 3;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceSuiteArithmetique): CriteresDifficulte {
+  const [methode, piege]: [0 | 1, 0 | 1] =
+    e.famille === "principal" ? [0, 0] : e.famille === "coherence" ? [1, 1] : e.famille === "algebriqueRangN" ? [0, 1] : [1, 0];
+  return { ...etapesDuCorrige(correctionDetailleeSuiteArithmetique(e)), methode, piege };
 }
 
 function conclusionCoherence(exercice: ExerciceCoherenceSuiteArithmetique): FragmentConsigne[] {
@@ -354,10 +352,9 @@ export const adaptateurEvaluationSuitesArithmetiques: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id as FamilleSuiteArithmetiqueId),
   construireEnonce: construireEnonceSuiteArithmetique,
   construireCorrection: construireCorrectionSuiteArithmetique,
-  difficulte: difficulteSuiteArithmetique,
+  criteresDifficulte,
   reponseBreve: reponseBreveSuiteArithmetique,
   correctionDetaillee: correctionDetailleeSuiteArithmetique,
   bareme: baremeSuiteArithmetique,
   enoncePapier: enoncePapierSuiteArithmetique,
-  dureeMinutes: 10,
 };

@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { argumentCLatex } from "../../moteur6e/modeleLirePlacerPlanComplexe";
 import { PHASES_LIRE_PLACER } from "../../moteur6e/typesLirePlacerPlanComplexe";
 import type { PhaseLirePlacer } from "../../moteur6e/typesLirePlacerPlanComplexe";
@@ -127,8 +129,11 @@ function enoncePapier(e: ExerciceLirePlacer): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeLirePlacer;
 
-function difficulte(e: ExerciceLirePlacer): 1 | 2 | 3 {
-  return e.variante === "symetries" ? 1 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceLirePlacer): CriteresDifficulte {
+  // Lire l'affixe de A, placer P et Q : écrans de pure lecture.
+  return { ...etapesDuCorrige(correctionDetaillee(e), ["a", "b", "c"]), methode: 0, piege: 0, anglesEnPi: true };
 }
 
 const POIDS: Record<PhaseLirePlacer, number> = { lire: 0.5, placer1: 0.75, placer2: 0.75, associer: 1, moduleArgument: 1 };
@@ -173,12 +178,11 @@ export const adaptateurEvaluationLirePlacerPlanComplexe: AdaptateurFeuilleExerci
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 10,
   profilInstance: profilLirePlacer,
   libelleCasParticulier: LIBELLE_CAS_LIRE_PLACER,
 };

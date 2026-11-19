@@ -1,4 +1,6 @@
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, ErreurFrequente, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDetectiveSuites } from "../../core5e/detectiveSuites.types";
@@ -86,8 +88,10 @@ function bareme(e: ExerciceDetectiveSuites): BaremeExercice {
 }
 
 /** Difficulté selon le support (jamais selon le type d'erreur, qui est le verdict). */
-function difficulte(e: ExerciceDetectiveSuites): 1 | 2 | 3 {
-  return e.variante === "convergence" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceDetectiveSuites): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeDetectiveSuites(e)), methode: 1, piege: 1 };
 }
 
 export const adaptateurEvaluationDetectiveSuites: AdaptateurFeuilleExercices<ExerciceDetectiveSuites> = {
@@ -99,10 +103,9 @@ export const adaptateurEvaluationDetectiveSuites: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeDetectiveSuites,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };

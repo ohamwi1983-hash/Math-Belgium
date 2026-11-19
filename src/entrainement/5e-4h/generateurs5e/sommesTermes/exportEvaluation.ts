@@ -1,6 +1,8 @@
-import { donneesSomme, estFraction } from "../../core5e/sommesTermes.types";
+import { donneesSomme } from "../../core5e/sommesTermes.types";
 import type { ExerciceSommesTermes } from "../../core5e/sommesTermes.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EnoncePapier, ErreurFrequente, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur5e/typesSommesTermes";
 import { consigneEcran, consigneGenerale, libellePhase, nb, reponseFragments, reponseRecap } from "../../ui5e/formatSommesTermes";
@@ -50,17 +52,10 @@ function construireCorrection(e: ExerciceSommesTermes): BlocCorrection[] {
 
 /** ★★ application des formules ; ★★★ multiples (bornes à trouver), raison fractionnaire, formule
  * géométrique en qⁿ (rang à substituer sans décalage), raison négative en extension. */
-function difficulte(e: ExerciceSommesTermes): 1 | 2 | 3 {
-  switch (e.variante) {
-    case "arith-indices":
-      return 2;
-    case "arith-extension":
-      return e.sousCas === "multiples" ? 3 : 2;
-    case "geom-indices":
-      return estFraction(e.q) || e.exposant === "n" ? 3 : 2;
-    case "geom-extension":
-      return estFraction(e.q) || e.q.num < 0 ? 3 : 2;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceSommesTermes): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeSommesTermes(e)), methode: e.variante === "arith-extension" || e.variante === "geom-extension" ? 1 : 0, piege: 1 };
 }
 
 // ============================================================================
@@ -111,11 +106,10 @@ export const adaptateurEvaluationSommesTermes: AdaptateurFeuilleExercices<Exerci
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteSommesTermes),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeSommesTermes,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
   profilInstance: profilSommesTermes,
 };

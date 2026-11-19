@@ -8,6 +8,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fractionQVersNombre } from "../suitesGeometriques/fraction";
 import {
@@ -139,8 +141,10 @@ function baremeSuiteRecurrenteAffine(exercice: ExerciceSuiteRecurrenteAffine): B
   };
 }
 
-function difficulteSuiteRecurrenteAffine(exercice: ExerciceSuiteRecurrenteAffine): 1 | 2 | 3 {
-  return exercice.regime === "divergent" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceSuiteRecurrenteAffine): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeSuiteRecurrenteAffine(e)), methode: 2, piege: 1 };
 }
 
 export const adaptateurEvaluationSuiteRecurrenteAffine: AdaptateurFeuilleExercices<ExerciceSuiteRecurrenteAffine> = {
@@ -152,10 +156,9 @@ export const adaptateurEvaluationSuiteRecurrenteAffine: AdaptateurFeuilleExercic
   genererInstanceAvecVariante: (id) => construireAvecRegime(id as RegimeSuiteRecurrenteAffine),
   construireEnonce: construireEnonceSuiteRecurrenteAffine,
   construireCorrection: construireCorrectionSuiteRecurrenteAffine,
-  difficulte: difficulteSuiteRecurrenteAffine,
+  criteresDifficulte,
   reponseBreve: reponseBreveSuiteRecurrenteAffine,
   correctionDetaillee: correctionDetailleeSuiteRecurrenteAffine,
   bareme: baremeSuiteRecurrenteAffine,
   enoncePapier: enoncePapierSuiteRecurrenteAffine,
-  dureeMinutes: 10,
 };

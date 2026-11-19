@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { LIBELLE_RELATION_C, blocDonnees, formatReponseAttenduePhaseLatex } from "../../ui6e/formatRacinesNiemes";
 import { phasesPourExercice } from "../../moteur6e/typesRacinesNiemes";
@@ -120,8 +122,11 @@ function enoncePapier(e: ExerciceRacinesNiemes): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeRacinesNiemes;
 
-function difficulte(e: ExerciceRacinesNiemes): 1 | 2 | 3 {
-  return e.famille === "C" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceRacinesNiemes): CriteresDifficulte {
+  const piege = e.famille === "B" && e.a < 0 ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 0, piege, anglesEnPi: true };
 }
 
 /** Poids par critère (somme 4, aucun critère sous 0,5). */
@@ -173,12 +178,11 @@ export const adaptateurEvaluationRacinesNiemes: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteRacinesNiemes),
   construireEnonce: avecFractionsNormalisees(construireEnonce),
   construireCorrection: avecFractionsNormalisees(construireCorrection),
-  difficulte: avecFractionsNormalisees(difficulte),
+  criteresDifficulte: avecFractionsNormalisees(criteresDifficulte),
   reponseBreve: avecFractionsNormalisees(reponseBreve),
   correctionDetaillee: avecFractionsNormalisees(correctionDetaillee),
   bareme: avecFractionsNormalisees(bareme),
   enoncePapier: avecFractionsNormalisees(enoncePapier),
-  dureeMinutes: 12,
   profilInstance: profilRacinesNiemes,
   libelleCasParticulier: LIBELLE_CAS_RACINES_NIEMES,
   // Famille B : racine n-ième de r et arguments arrondis — calculatrice pour toute instance complète

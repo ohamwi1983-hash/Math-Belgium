@@ -1,5 +1,6 @@
 import type { BaremeExercice, BlocCorrection, EtapeCorrection, FragmentConsigne, LigneCalcul, SectionExercice } from "./genererFeuilleExercices";
 import { decouperLigneCalcul, estLignePiege } from "./corrigeTableau";
+import { LIBELLE_PALIER, type Palier } from "./niveauDifficulte";
 import { blocCorrectionHtml, echapperHtml, fragmentsEnteteHtml, fragmentsVersHtml, grillesLisiblesAImpression } from "./genererFeuilleExercicesHtml";
 import { obtenirCssKatexAutonome } from "./katexImage";
 import { qrCodeSvg } from "./qrSvg";
@@ -43,7 +44,10 @@ export interface ItemEvaluation {
   notion?: string;
   /** Section du cours à relire (page « Je fais le point »). */
   sectionCours?: { numero: number; titre: string };
-  difficulte?: 1 | 2 | 3;
+  /** Niveau de difficulté 1–7 et son palier (grille commune, `niveauDifficulte.ts`), affichés
+   * « numéro + palier » en tête de l'exercice (feuille d'exercices et sa version aménagée). */
+  niveau?: number;
+  palier?: Palier;
   reponseBreve?: FragmentConsigne[];
   correctionDetaillee?: EtapeCorrection[];
   bareme?: BaremeExercice;
@@ -51,6 +55,7 @@ export interface ItemEvaluation {
    * globale (`AdaptateurFeuilleExercices.enoncePapier`) : le corrigé les affiche en titre de chaque
    * groupe de lignes `EtapeCorrection.etape`. `question` : lettre de la question papier couverte. */
   etapesCorrige?: { consigne: FragmentConsigne[]; question?: string }[];
+  /** Durée estimée de l'item = somme des durées par exercice (`niveauDifficulte.ts`). */
   dureeMinutes?: number;
   /** Code reproductible de l'exercice (QR code de la feuille d'exercices, rappel dans la grille). */
   code?: { code: string; url: string };
@@ -335,7 +340,11 @@ const STYLE_FEUILLE = `
 .identite .valeur { color: var(--encre); }
 .legende { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 4px; font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; color: var(--gris); }
 .legende .droite { margin-left: auto; }
-.etoiles { color: var(--accent); }
+/* Niveau de difficulté « numéro + palier » (maquette E validée) : deux petits cadres, lisibles en
+   noir et blanc — aucune couleur indispensable. */
+.niveau { display: inline-flex; align-items: center; gap: 4px; font-family: Archivo, Arial, sans-serif; font-size: 8pt; font-weight: 700; color: var(--encre); line-height: 1.35; white-space: nowrap; vertical-align: middle; }
+.niveau .num { border: 1.4px solid var(--encre); border-radius: 3px; padding: 0 5px; }
+.niveau .pal { border: 1.2px solid var(--encre); border-radius: 4px; padding: 0 7px; font-weight: 600; }
 .ex { margin: 14px 0 0; break-inside: avoid; page-break-inside: avoid; }
 .ex-tete { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
 .ex-tete h3 { font-family: Archivo, Arial, sans-serif; font-size: 12pt; font-weight: 700; }
@@ -431,6 +440,9 @@ body { font-family: 'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif; font-s
 .tete-am .droite { font-size: 11pt; color: var(--gris); text-align: right; }
 .q-am { break-inside: avoid; }
 .q-am h2 { font-size: 16pt; display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.niveau { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; font-size: 11pt; font-weight: 700; color: var(--encre); line-height: 1.35; white-space: nowrap; vertical-align: middle; }
+.niveau .num { border: 1.6px solid var(--encre); border-radius: 3px; padding: 0 6px; }
+.niveau .pal { border: 1.4px solid var(--encre); border-radius: 4px; padding: 0 8px; }
 .enonce-am { padding: 10px 14px; background: var(--fond-doux); border-radius: 8px; margin-bottom: 12px; }
 .enonce-am .entete + p, .enonce-am p { margin: 0.5em 0; }
 .identite-am { display: flex; gap: 24px; font-size: 11pt; color: var(--gris); margin-bottom: 10px; }
@@ -629,9 +641,15 @@ function correctionHtml(item: ItemEvaluation): string {
   return `<div class="reponse-ancienne">${item.correction.map(blocCorrectionHtml).join("")}</div>`;
 }
 
-function etoiles(n: 1 | 2 | 3 | undefined): string {
-  return n ? `<span class="etoiles" aria-label="difficulté ${n} sur 3">${"★".repeat(n)}</span>` : "";
+/** Badge « numéro + palier » (« 5 » « Avancé ») — rien si l'exercice n'a pas de niveau. */
+function niveauHtml(item: ItemEvaluation): string {
+  if (!item.niveau || !item.palier) return "";
+  const palier = LIBELLE_PALIER[item.palier];
+  return `<span class="niveau" aria-label="niveau ${item.niveau} sur 7, ${palier}"><span class="num">${item.niveau}</span><span class="pal">${palier}</span></span>`;
 }
+
+/** Légende de la feuille d'exercices : l'échelle et ce qui fait monter le niveau. */
+const LEGENDE_NIVEAUX = `<span>Niveau 1 à 7 : <span class="niveau"><span class="pal">Base</span></span> 1–2 · <span class="niveau"><span class="pal">Intermédiaire</span></span> 3–4 · <span class="niveau"><span class="pal">Avancé</span></span> 5–7. Il monte avec le nombre d'étapes, le choix de la méthode, un piège dans les données et les nombres (calculatrice, valeurs approchées).</span>`;
 
 function calculatriceHtml(calculatrice: "interdite" | "autorisee" | undefined): string {
   if (!calculatrice) return "";
@@ -674,7 +692,7 @@ function exerciceFeuilleHtml(item: ItemEvaluation, numero: number, deuxColonnes 
     : "";
   const corps = corpsQuestionHtml(item);
   return `<section class="ex${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 260)}">
-  <div class="ex-tete"><h3>Exercice ${numero}</h3>${etoiles(item.difficulte)}${tag ? `<span class="tag">${echapperHtml(tag)}</span>` : ""}</div>
+  <div class="ex-tete"><h3>Exercice ${numero}</h3>${niveauHtml(item)}${tag ? `<span class="tag">${echapperHtml(tag)}</span>` : ""}</div>
   <div class="ex-corps"><div class="ex-texte">${corps}</div>${qr}</div>
 </section>`;
 }
@@ -743,12 +761,8 @@ export async function genererFeuilleExercicesComplete(entete: EnteteEvaluation, 
   const cssKatex = await obtenirCssKatexAutonome();
   const numerotes = itemsNumerotes(items);
   const deuxColonnes = !!entete.deuxColonnes;
-  const auMoinsUneDifficulte = items.some((it) => it.difficulte);
-  const legende = `<div class="legende">${
-    auMoinsUneDifficulte
-      ? `<span><span class="etoiles">★</span> application directe</span><span><span class="etoiles">★★</span> plusieurs étapes</span><span><span class="etoiles">★★★</span> réflexion</span>`
-      : ""
-  }<span class="droite">Réponses brèves et corrigé : en fin de feuille</span></div>`;
+  const auMoinsUnNiveau = items.some((it) => it.niveau);
+  const legende = `<div class="legende">${auMoinsUnNiveau ? LEGENDE_NIVEAUX : ""}<span class="droite">Réponses brèves et corrigé : en fin de feuille</span></div>`;
   const exercices = numerotes.map(({ item, numero }) => exerciceFeuilleHtml(item, numero, deuxColonnes)).join("");
   const enonce = `${enteteFeuilleHtml(entete, "Feuille d'exercices")}
 ${legende}
@@ -895,7 +909,7 @@ export async function genererEvaluationHtml(entete: EnteteEvaluation, items: Ite
  * globale, vraies questions d'un problème avec leurs points) — jamais découpé en étapes (décision de
  * l'utilisateur : l'aménagement porte sur la mise en page, pas sur le contenu). */
 function questionAmenageeHtml(item: ItemEvaluation, numero: number, estExercice: boolean): string {
-  const titre = estExercice ? `Exercice ${numero} ${etoiles(item.difficulte)}` : `Question ${numero}`;
+  const titre = estExercice ? `Exercice ${numero} ${niveauHtml(item)}` : `Question ${numero}`;
   const corps = corpsQuestionHtml(item, estExercice ? undefined : pointsParSousQuestion(item));
   return `<section class="q-am"><h2><span>${titre}</span>${estExercice ? "" : `<span class="pts">${pointsTexte(item.points)}</span>`}</h2><div class="enonce-am">${corps}</div></section>`;
 }

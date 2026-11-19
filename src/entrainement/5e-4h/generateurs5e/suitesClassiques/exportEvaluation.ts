@@ -10,6 +10,8 @@ import type {
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { construireSvgCarresEmboites, construireSvgZigzag } from "../../export5e/svgSuiteClassique";
 import type { PhaseSuiteClassique } from "../../moteur5e/typesSuiteClassique";
@@ -212,15 +214,11 @@ function baremeSuiteClassique(exercice: ExerciceSuiteClassique): BaremeExercice 
   };
 }
 
-function difficulteSuiteClassique(exercice: ExerciceSuiteClassique): 1 | 2 | 3 {
-  switch (exercice.scenario) {
-    case "echiquier":
-    case "vitesse":
-    case "fibonacci":
-      return 2;
-    default:
-      return 3;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceSuiteClassique): CriteresDifficulte {
+  const methode = e.scenario === "suitesCombinees" || e.scenario === "fibonacci" ? 1 : 2;
+  return { ...etapesDuCorrige(correctionDetailleeSuiteClassique(e)), methode, piege: e.scenario === "vitesse" ? 0 : 1 };
 }
 
 export const adaptateurEvaluationSuitesClassiques: AdaptateurFeuilleExercices<ExerciceSuiteClassique> = {
@@ -231,10 +229,9 @@ export const adaptateurEvaluationSuitesClassiques: AdaptateurFeuilleExercices<Ex
   genererInstanceAvecVariante: (id) => construireAvecScenarioId(id as ScenarioSuiteClassique),
   construireEnonce: construireEnonceSuiteClassique,
   construireCorrection: construireCorrectionSuiteClassique,
-  difficulte: difficulteSuiteClassique,
+  criteresDifficulte,
   reponseBreve: reponseBreveSuiteClassique,
   correctionDetaillee: correctionDetailleeSuiteClassique,
   bareme: baremeSuiteClassique,
   enoncePapier: enoncePapierSuiteClassique,
-  dureeMinutes: 15,
 };

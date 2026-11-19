@@ -8,6 +8,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { cibleFinale } from "../../moteur/verificationFormeCanoniqueFonctionsReference";
 import {
@@ -97,11 +99,10 @@ function construireCorrectionFormeCanoniqueFonctionsReference(exercice: Exercice
   ];
 }
 
-function difficulteFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): 1 | 2 | 3 {
-  const forme = exercice.formeDepart;
-  if (forme.type === "inverse") return 3;
-  if (forme.type === "carre") return forme.a === 1 && Number.isInteger(forme.b / 2) ? 2 : 3;
-  return [forme.a, forme.b].every(Number.isInteger) ? 2 : 3;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceFormeCanoniqueFonctionReference): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeFormeCanoniqueFonctionsReference(e)), methode: 0, piege: 1 };
 }
 
 function reponseBreveFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): FragmentConsigne[] {
@@ -156,11 +157,10 @@ export const adaptateurEvaluationFormeCanoniqueFonctionsReference: AdaptateurFeu
   genererInstanceAvecVariante: (id) => construireAvecFamille(id as FamilleReference),
   construireEnonce: construireEnonceFormeCanoniqueFonctionsReference,
   construireCorrection: construireCorrectionFormeCanoniqueFonctionsReference,
-  difficulte: difficulteFormeCanoniqueFonctionsReference,
+  criteresDifficulte,
   reponseBreve: reponseBreveFormeCanoniqueFonctionsReference,
   correctionDetaillee: correctionDetailleeFormeCanoniqueFonctionsReference,
   bareme: baremeFormeCanoniqueFonctionsReference,
   enoncePapier: enoncePapierFormeCanoniqueFonctionsReference,
-  dureeMinutes: 5,
   regroupable: true,
 };

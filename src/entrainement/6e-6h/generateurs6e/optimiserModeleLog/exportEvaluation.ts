@@ -8,6 +8,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { PHASES_OPTIMISER_LOG } from "../../moteur6e/typesOptimiserModeleLog";
 import type { PhaseOptimiserLog } from "../../moteur6e/typesOptimiserModeleLog";
@@ -86,8 +88,10 @@ function correctionDetaillee(e: ExerciceOptimiserLog): EtapeCorrection[] {
   });
 }
 
-function difficulte(e: ExerciceOptimiserLog): 1 | 2 | 3 {
-  return e.variante === "rendement-moyen" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceOptimiserLog): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: 1 };
 }
 
 function reponseBreve(e: ExerciceOptimiserLog): FragmentConsigne[] {
@@ -129,12 +133,11 @@ export const adaptateurEvaluationOptimiserModeleLog: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 15,
   profilInstance: profilOptimiserLog,
   calculatriceIndispensable: VARIANTES_CALCULATRICE_OPTIMISER_LOG,
 };

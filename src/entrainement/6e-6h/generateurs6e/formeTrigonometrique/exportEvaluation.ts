@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   LIBELLE_CONDITION,
@@ -159,10 +161,12 @@ function enoncePapier(e: ExerciceFormeTrigonometrique): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeFormeTrigonometrique;
 
-function difficulte(e: ExerciceFormeTrigonometrique): 1 | 2 | 3 {
-  if (e.famille === "A") return 1;
-  if (e.famille === "B" || e.famille === "C") return 2;
-  return 3;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceFormeTrigonometrique): CriteresDifficulte {
+  const [methode, piege]: [0 | 1, 0 | 1] =
+    e.famille === "A" ? [0, e.a.numerique < 0 ? 1 : 0] : e.famille === "B" ? [0, e.sousType === "quotient" ? 1 : 0] : e.famille === "D" ? [1, 1] : [0, 0];
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode, piege, anglesEnPi: true };
 }
 
 function criteres(e: ExerciceFormeTrigonometrique): { sq: string; critere: FragmentConsigne[]; points: number }[] {
@@ -228,12 +232,11 @@ export const adaptateurEvaluationFormeTrigonometrique: AdaptateurFeuilleExercice
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteFormeTrigonometrique),
   construireEnonce: avecFractionsNormalisees(construireEnonce),
   construireCorrection: avecFractionsNormalisees(construireCorrection),
-  difficulte: avecFractionsNormalisees(difficulte),
+  criteresDifficulte: avecFractionsNormalisees(criteresDifficulte),
   reponseBreve: avecFractionsNormalisees(reponseBreve),
   correctionDetaillee: avecFractionsNormalisees(correctionDetaillee),
   bareme: avecFractionsNormalisees(bareme),
   enoncePapier: avecFractionsNormalisees(enoncePapier),
-  dureeMinutes: 10,
   profilInstance: profilFormeTrigonometrique,
   libelleCasParticulier: LIBELLE_CAS_FORME_TRIGONOMETRIQUE,
 };

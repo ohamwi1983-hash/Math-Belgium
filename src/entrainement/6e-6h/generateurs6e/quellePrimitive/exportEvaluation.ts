@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   consigneEcranQuellePrimitive,
@@ -19,7 +21,7 @@ import type { PhaseQuellePrimitive } from "../../moteur6e/typesQuellePrimitive";
 import type { PhaseCalculPrimitives } from "../../moteur6e/typesCalculPrimitives";
 import {
   definitionFPrimitive,
-  difficultePrimitive,
+  jugementPrimitive,
   erreursFrequentesPrimitive,
   methodePapierPrimitive,
   poidsEtapesPrimitive,
@@ -89,8 +91,10 @@ function enoncePapier(e: ExerciceQuellePrimitive): EnoncePapier {
 
 const PIEGE_FINAL = PIEGE_FINAL_QUELLE_PRIMITIVE;
 
-function difficulte(e: ExerciceQuellePrimitive): 1 | 2 | 3 {
-  return Math.max(2, difficultePrimitive(e.exerciceBase)) as 2 | 3;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceQuellePrimitive): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeQuellePrimitive(e)), ...jugementPrimitive(e.exerciceBase) };
 }
 
 function bareme(e: ExerciceQuellePrimitive): BaremeExercice {
@@ -120,12 +124,11 @@ export const adaptateurEvaluationQuellePrimitive: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteQuellePrimitive),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve: (e) => reponse(e, "final"),
   correctionDetaillee: correctionDetailleeQuellePrimitive,
   bareme,
   enoncePapier,
-  dureeMinutes: 10,
   profilInstance: profilQuellePrimitive,
   libelleCasParticulier: LIBELLE_CAS_QUELLE_PRIMITIVE,
   // C irrationnel dans 5 000 tirages sur 5 000 (ln, racine ou arctan au point imposé).

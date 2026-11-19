@@ -8,6 +8,8 @@ import type {
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { blocDonnees, formatReponseAttenduePhaseLatex } from "../../ui6e/formatTrianglesComplexes";
 import { phasesPourExercice } from "../../moteur6e/typesTrianglesComplexes";
@@ -159,17 +161,11 @@ function enoncePapier(e: ExerciceTrianglesComplexes): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeTriangles;
 
-function difficulte(e: ExerciceTrianglesComplexes): 1 | 2 | 3 {
-  switch (e.famille) {
-    case "A":
-    case "E":
-      return 2;
-    case "C":
-      return 2;
-    case "B":
-    case "D":
-      return 3;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceTrianglesComplexes): CriteresDifficulte {
+  const methode = e.famille === "A" || e.famille === "B" || e.famille === "E" ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode, piege: 1, anglesEnPi: true };
 }
 
 function reponseBreve(e: ExerciceTrianglesComplexes): FragmentConsigne[] {
@@ -197,12 +193,11 @@ export const adaptateurEvaluationTrianglesComplexes: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteTrianglesComplexes),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 12,
   profilInstance: profilTrianglesComplexes,
   // Angles en degrés (loi des cosinus) : calculatrice dans 5 000 tirages sur 5 000.
   calculatriceIndispensable: ["B"],

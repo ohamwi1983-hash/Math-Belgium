@@ -1,6 +1,8 @@
 import { argumentZ, cosZ, sinZ } from "../../core6e/deuxEcrituresComplexe";
 import type { ExerciceDeuxEcritures } from "../../core6e/deuxEcrituresComplexe";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { PHASES_DEUX_ECRITURES } from "../../moteur6e/typesDeuxEcritures";
 import {
@@ -76,8 +78,10 @@ function enoncePapier(e: ExerciceDeuxEcritures): EnoncePapier {
 
 const correctionDetaillee = correctionDetailleeDeuxEcritures;
 
-function difficulte(): 1 | 2 | 3 {
-  return 3;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceDeuxEcritures): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 0, piege: e.variante === "quotient" ? 1 : 0, anglesEnPi: true };
 }
 
 // ============================================================================
@@ -114,11 +118,10 @@ export const adaptateurEvaluationDeuxEcritures: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteDeuxEcritures),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 15,
   profilInstance: profilDeuxEcritures,
 };

@@ -1,5 +1,7 @@
 import type { CourbeLog, ExerciceAssocierCourbesLog, ExerciceLectureCourbeLog, ExerciceLireCourbeLogarithmique } from "../../core6e/lireCourbeLogarithmique.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, ErreurFrequente, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   LETTRES_EXPRESSIONS,
@@ -228,10 +230,17 @@ function reponseBreve(e: ExerciceLireCourbeLogarithmique): FragmentConsigne[] {
   return [texte(e.expressionDeCourbe.map((i, j) => `${j + 1} → ${LETTRES_EXPRESSIONS[i]}`).join(" ; "))];
 }
 
-function difficulte(e: ExerciceLireCourbeLogarithmique): 1 | 2 | 3 {
-  // Base < 1 : lecture du point une unité plus BAS, puis a = 1/k — l'étape la plus délicate.
-  if (e.variante === "lecture") return estCroissante(e.courbe.base) ? 2 : 3;
-  return 2;
+/** Lettres d'étapes du corrigé (toutes les étapes, quand elles sont toutes des lectures). */
+function lettresDe(etapes: { sousQuestion?: string }[]): string[] {
+  return [...new Set(etapes.map((x) => x.sousQuestion).filter((l): l is string => !!l))];
+}
+
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceLireCourbeLogarithmique): CriteresDifficulte {
+  // Lire l'asymptote et le domaine (lecture) ; associer une expression à chaque courbe (lecture).
+  const etapes = correctionDetaillee(e);
+  return { ...etapesDuCorrige(etapes, e.variante === "lecture" ? ["a", "b"] : lettresDe(etapes)), methode: 1, piege: 1 };
 }
 
 function bareme(e: ExerciceLireCourbeLogarithmique): BaremeExercice {
@@ -288,10 +297,9 @@ export const adaptateurEvaluationLireCourbeLogarithmique: AdaptateurFeuilleExerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 6,
 };

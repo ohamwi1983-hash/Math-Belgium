@@ -9,6 +9,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { Caracteristique } from "../../core6e/decompositionLogarithme";
 import { arbreVersLatexLogA, calculerEtatsArgument, etatVersLatex, resteVersLatexLogA } from "../../core6e/decompositionLogarithme";
@@ -115,10 +117,10 @@ function reponseBreveProprietesLogarithme(exercice: ExerciceProprieteLogarithme)
   return fragments;
 }
 
-function difficulteProprietesLogarithme(exercice: ExerciceProprieteLogarithme): 1 | 2 | 3 {
-  // 3 propriétés d'argument sans changement de base : plusieurs étapes routinières ; 4 étapes, ou
-  // un changement de base (il faut réutiliser tout le résultat précédent), demandent davantage.
-  return nombreEtapesAlgebriques(exercice) >= 4 || exercice.avecChangementBase ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceProprieteLogarithme): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeProprietesLogarithme(e)), methode: 0, piege: 0 };
 }
 
 function piegeProprietesLogarithme(exercice: ExerciceProprieteLogarithme): FragmentConsigne[] {
@@ -221,12 +223,11 @@ export const adaptateurEvaluationProprietesLogarithme: AdaptateurFeuilleExercice
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceProprietesLogarithme,
   construireCorrection: construireCorrectionProprietesLogarithme,
-  difficulte: difficulteProprietesLogarithme,
+  criteresDifficulte,
   reponseBreve: reponseBreveProprietesLogarithme,
   correctionDetaillee: correctionDetailleeProprietesLogarithme,
   bareme: baremeProprietesLogarithme,
   enoncePapier: enoncePapierProprietesLogarithme,
-  dureeMinutes: 7,
   // Nombre de questions VARIABLE par instance (3 ou 4, selon la combinaison tirée) et consigne de
   // chaque écran dépendante de la caractéristique réellement testée — ni "1 seule question", ni
   // "consigne générique" : `regroupable` reste absent (voir `AdaptateurFeuilleExercices.regroupable`).

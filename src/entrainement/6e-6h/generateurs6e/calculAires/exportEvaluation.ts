@@ -7,6 +7,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatCalculAires";
 import { CONSIGNE_PRECISION } from "../../ui6e/nombresExactsIntegrales";
@@ -83,17 +85,13 @@ function enoncePapier(exercice: ExerciceCalculAires): EnoncePapier {
 // Corrigé détaillé : par étape, Méthode, Calcul, Piège éventuel, Conclusion.
 // ============================================================================
 
-function difficulte(exercice: ExerciceCalculAires): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "A":
-      return 1;
-    case "B":
-      return 2;
-    case "C":
-      return 3;
-    case "D":
-      return exercice.sousType === "parametre" ? 3 : 2;
-  }
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceCalculAires): CriteresDifficulte {
+  // A et B : piège seulement quand f est négative sur le domaine (aire = opposé de l'intégrale).
+  const [methode, piege]: [0 | 1, 0 | 1] =
+    e.famille === "A" || e.famille === "B" ? [0, e.signe === "negatif" ? 1 : 0] : e.famille === "C" ? [1, 1] : e.sousType === "parametre" ? [1, 0] : [0, 1];
+  return { ...etapesDuCorrige(correctionDetailleeCalculAires(e)), methode, piege };
 }
 
 function reponseBreve(exercice: ExerciceCalculAires): FragmentConsigne[] {
@@ -141,12 +139,11 @@ export const adaptateurEvaluationCalculAires: AdaptateurFeuilleExercices<Exercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteCalculAires),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correctionDetailleeCalculAires,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
   profilInstance: profilCalculAires,
   libelleCasParticulier: LIBELLE_CAS_CALCUL_AIRES,
 };

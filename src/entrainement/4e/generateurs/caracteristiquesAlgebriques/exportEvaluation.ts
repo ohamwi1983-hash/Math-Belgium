@@ -11,6 +11,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   ceAttendues,
@@ -40,7 +42,6 @@ import {
   baremeNiveau2,
   construireCorrectionNiveau2,
   construireEnonceNiveau2,
-  difficulteNiveau2,
   enoncePapierNiveau2,
   reponseBreveNiveau2,
 } from "./exportEvaluationNiveau2";
@@ -303,9 +304,11 @@ function reponseBreveCaracteristiquesAlgebriques(instance: ExerciceCaracteristiq
   ];
 }
 
-function difficulteCaracteristiquesAlgebriques(instance: ExerciceCaracteristiquesAlgebriquesNiveau1): 1 | 2 | 3 {
-  // CE effective (et donc domaine restreint, ordonnée parfois inexistante) : plus de pièges.
-  return instance.famille === "racine_carree" || instance.famille === "inverse" ? 3 : 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: Instance): CriteresDifficulte {
+  const piege = e.famille === "racine_carree" || e.famille === "inverse" || e.famille === "valeur_absolue" || (e.famille === "carre" && e.niveau === "niveau1") ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeTableau(e)), methode: e.niveau === "niveau2" ? 1 : 0, piege };
 }
 
 function baremeCaracteristiquesAlgebriques(instance: ExerciceCaracteristiquesAlgebriquesNiveau1): BaremeExercice {
@@ -382,10 +385,9 @@ export const adaptateurEvaluationCaracteristiquesAlgebriques: AdaptateurFeuilleE
   genererInstanceAvecVariante: construireAvecVarianteFamilleNiveau,
   construireEnonce: selonNiveau(construireEnonceCaracteristiquesAlgebriques, construireEnonceNiveau2),
   construireCorrection: selonNiveau(construireCorrectionCaracteristiquesAlgebriques, construireCorrectionNiveau2),
-  difficulte: selonNiveau(difficulteCaracteristiquesAlgebriques, difficulteNiveau2),
+  criteresDifficulte,
   reponseBreve: selonNiveau(reponseBreveCaracteristiquesAlgebriques, reponseBreveNiveau2),
   correctionDetaillee: correctionDetailleeTableau,
   bareme: selonNiveau(baremeCaracteristiquesAlgebriques, baremeNiveau2),
   enoncePapier: selonNiveau(enoncePapierCaracteristiquesAlgebriques, enoncePapierNiveau2),
-  dureeMinutes: 10,
 };

@@ -1,6 +1,8 @@
 import { AGE_UNIVERS_ANNEES, DUREES, basesCommunes, donneesTaille, ecritureScientifique, logPuissance, logsDuree } from "../../core6e/grandsNombresLog";
 import type { ExerciceChiffres, ExerciceComparer, ExerciceGrandsNombres, ExercicePremierChiffre, ExerciceTempsDuree, ExerciceTempsTaille } from "../../core6e/grandsNombresLog";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur6e/typesGrandsNombresLog";
 import type { PhaseGrandsNombres } from "../../moteur6e/typesGrandsNombresLog";
@@ -284,10 +286,10 @@ function correctionDetaillee(e: ExerciceGrandsNombres): EtapeCorrection[] {
   }
 }
 
-function difficulte(e: ExerciceGrandsNombres): 1 | 2 | 3 {
-  if (e.variante === "temps") return 3;
-  if (e.variante === "comparer" && e.sousCas === "exact") return 3;
-  return 2;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceGrandsNombres): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: 1 };
 }
 
 // ============================================================================
@@ -394,12 +396,11 @@ export const adaptateurEvaluationGrandsNombres: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteGrandsNombres),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
   profilInstance: profilGrandsNombres,
   calculatriceIndispensable: VARIANTES_CALCULATRICE_GRANDS_NOMBRES,
 };

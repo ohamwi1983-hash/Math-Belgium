@@ -9,6 +9,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur6e/typesLinearisation";
 import type { PhaseLinearisation } from "../../moteur6e/typesLinearisation";
@@ -268,8 +270,10 @@ function correctionDetaillee(e: ExerciceLinearisation): EtapeCorrection[] {
   return [...lignesLogs(e), ...lignesDroite(e), ...lignesModele(e), ...lignesPrevision(e)];
 }
 
-function difficulte(e: ExerciceLinearisation): 1 | 2 | 3 {
-  return e.variante === "semilog" ? 2 : 3;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceLinearisation): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: e.variante === "choisir" ? 1 : 0 };
 }
 
 // ============================================================================
@@ -324,12 +328,11 @@ export const adaptateurEvaluationLinearisationDonnees: AdaptateurFeuilleExercice
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteLinearisation),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 12,
   profilInstance: profilLinearisation,
   calculatriceIndispensable: true,
 };

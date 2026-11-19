@@ -15,6 +15,8 @@ import type {
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
+import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   consigneGenerale,
@@ -193,10 +195,12 @@ function baremeConvergenceSuite(exercice: ExerciceConvergenceSuite): BaremeExerc
   return { reponseFinale: reponseBreveConvergenceSuite(exercice), criteres, erreursFrequentes: erreurs, reponsesAcceptees: acceptees };
 }
 
-function difficulteConvergenceSuite(exercice: ExerciceConvergenceSuite): 1 | 2 | 3 {
-  if (exercice.variante === "arithmetique") return 1;
-  if (exercice.variante === "geometrique") return exercice.classification === "convergeVersU1" || exercice.classification === "divergePlusInfini" ? 1 : 2;
-  return exercice.classification === "limiteValeur" ? 2 : 3;
+/** Critères du niveau de difficulté (grille commune, `export/niveauDifficulte.ts`) : méthode et
+ * piège jugés par variante (analyse des cinq chapitres), étapes lues sur le corrigé détaillé. */
+function criteresDifficulte(e: ExerciceConvergenceSuite): CriteresDifficulte {
+  // Suite géométrique qui oscille (q ≤ −1) : piège selon l'instance.
+  const piege = e.variante === "geometrique" && String(e.classification).startsWith("oscille") ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeConvergenceSuite(e)), methode: 0, piege };
 }
 
 function construireCorrectionConvergenceSuite(exercice: ExerciceConvergenceSuite): BlocCorrection[] {
@@ -236,12 +240,11 @@ export const adaptateurEvaluationConvergenceSuites: AdaptateurFeuilleExercices<E
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteConvergenceSuite),
   construireEnonce: construireEnonceConvergenceSuite,
   construireCorrection: construireCorrectionConvergenceSuite,
-  difficulte: difficulteConvergenceSuite,
+  criteresDifficulte,
   reponseBreve: reponseBreveConvergenceSuite,
   correctionDetaillee: correctionDetailleeConvergenceSuite,
   bareme: baremeConvergenceSuite,
   enoncePapier: enoncePapierConvergenceSuite,
-  dureeMinutes: 4,
   // NON regroupable : la variante "quelconque" produit 2 questions par instance (les 2 autres n'en
   // ont qu'1), condition explicitement exclue par `AdaptateurFeuilleExercices.regroupable`.
 };
