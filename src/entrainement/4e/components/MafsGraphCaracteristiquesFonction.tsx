@@ -18,6 +18,7 @@ import {
   EPAISSEUR_TRAIT_DISCRETE,
   EPAISSEUR_TRAIT_STANDARD,
   etendreViewBoxPourEtiquettes,
+  formatEtiquetteGrilleTypo,
 } from "../ui/mafsTransformation";
 import { FenetreVisibleXY, GrilleAdaptative } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
@@ -93,7 +94,9 @@ export function MafsGraphCaracteristiquesFonction({ exercice, surlignage }: Prop
         pan={true}
         zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}
       >
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} />
+        {/* Option `etiquettesLisibles` (comme gen10/gen11) : au zoom, un nombre X pouvait se poser sur un
+            nombre Y au croisement des axes. La grille ne change pas : les valeurs à lire restent sur ses lignes. */}
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} etiquettesLisibles formatEtiquette={formatEtiquetteGrilleTypo} />
         {surlignage?.map((morceau, index) => {
           const gauche = borneVersX(morceau.borneGauche, viewBox.x[0], viewBox.x[1]);
           const droite = borneVersX(morceau.borneDroite, viewBox.x[0], viewBox.x[1]);

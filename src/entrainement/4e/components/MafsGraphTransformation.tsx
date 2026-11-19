@@ -8,6 +8,7 @@ import {
   ZOOM_MIN,
   calculerViewBoxTransformation,
   evaluerCourbe,
+  formatEtiquetteGrilleTypo,
   pointUnitaire,
 } from "../ui/mafsTransformation";
 import type { ParametresCourbe } from "../ui/mafsTransformation";
@@ -85,7 +86,10 @@ export function MafsGraphTransformation({ cible, live }: Props) {
         pan={true}
         zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}
       >
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} />
+        {/* Option `etiquettesLisibles` (comme gen10/gen11) : au zoom, un nombre X se posait sur un nombre Y
+            au croisement des axes (26 états / 240 mesurés), et le pas de 1/3 écrivait « 6,666666666 ».
+            La grille (et donc l'indicateur de pas) ne change pas. */}
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} etiquettesLisibles formatEtiquette={formatEtiquetteGrilleTypo} />
         <DomaineTraceX largeur={largeur}>
           {(domaine) => <Plot.OfX y={(x) => evaluerCourbe(cible, x)} domain={domaine} color={COULEUR_CIBLE} weight={EPAISSEUR_TRAIT_ACCENTUE} />}
         </DomaineTraceX>
