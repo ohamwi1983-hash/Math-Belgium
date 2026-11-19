@@ -17,6 +17,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeLongueurArc } from "./generateurs6e/longueurArc/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige28 } from "./moteur6e/typesLongueurArc";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen28` — Longueur d'un arc de courbe (chapitre 4, "Intégrales et primitives"). Même patron que
@@ -143,6 +147,9 @@ export function App6gen28() {
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs6e/longueurArc/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLongueurArc(exercice), lettreEtape(phasesCorrige28(exercice).indexOf(phase)))} />,
       }
     : null;
 

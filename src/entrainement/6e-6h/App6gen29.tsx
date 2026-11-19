@@ -16,6 +16,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeIntegralesProblemes } from "./generateurs6e/integralesProblemes/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige29 } from "./moteur6e/typesIntegralesProblemes";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen29` — Intégrales et primitives : problèmes (chapitre 4, générateur DE CLÔTURE). Même patron
@@ -145,6 +149,9 @@ export function App6gen29() {
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs6e/integralesProblemes/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeIntegralesProblemes(exercice), lettreEtape(phasesCorrige29(exercice).indexOf(phase)))} />,
       }
     : null;
 

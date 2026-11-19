@@ -19,6 +19,10 @@ import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { correctionDetailleeIntegralesDefinies } from "./generateurs6e/integralesDefinies/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige25 } from "./moteur6e/typesIntegralesDefinies";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen25` — Intégrales définies, paramètre et valeur moyenne (chapitre 4, "Intégrales et
@@ -145,6 +149,9 @@ export function App6gen25() {
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs6e/integralesDefinies/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeIntegralesDefinies(exercice), lettreEtape(phasesCorrige25(exercice).indexOf(phase)))} />,
       }
     : null;
 

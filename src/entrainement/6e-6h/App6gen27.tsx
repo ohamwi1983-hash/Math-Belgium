@@ -19,6 +19,10 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeVolumesRevolution } from "./generateurs6e/volumesRevolution/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige27 } from "./moteur6e/typesVolumesRevolution";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 /**
  * `6gen27` — Volumes de révolution (chapitre 4, "Intégrales et primitives"). Même patron que
@@ -151,6 +155,9 @@ export function App6gen27() {
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs6e/volumesRevolution/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeVolumesRevolution(exercice), lettreEtape(phasesCorrige27(exercice).indexOf(phase)))} />,
       }
     : null;
 

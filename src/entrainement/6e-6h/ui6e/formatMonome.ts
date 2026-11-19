@@ -185,7 +185,10 @@ export function valeurExacteLatex(v: number): string | null {
           if (pgcdEntier(n1, d1) !== 1) continue;
           const reste = v - r1 * K.valeur;
           const r0 = Math.abs(reste) < 1e-9 ? ([0, 1] as [number, number]) : rationnelProche(reste, 24);
-          if (r0) {
+          // Contrôle serré (erreur relative 1e-12) : la tolérance de `rationnelProche` (1e-9 relatif)
+          // acceptait de fausses formes pour les grandes valeurs (e¹⁰ ≈ 22026,47 « reconnu » comme
+          // 88037/4 + 19e/3, écart 1e-5) — trouvé par le contrôle numérique du corrigé de 6gen24.
+          if (r0 && Math.abs(v - (r0[0] / r0[1] + r1 * K.valeur)) <= 1e-12 * Math.max(1, Math.abs(v))) {
             resultat = combinaisonLatex(r0, [n1, d1], K.latex);
             break externe;
           }

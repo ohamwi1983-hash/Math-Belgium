@@ -13,41 +13,28 @@ import type {
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur6e/typesIntegralesProblemes";
-import type { PhaseIntegralesProblemes } from "../../moteur6e/typesIntegralesProblemes";
 import {
-  aideNiveau1,
-  aideNiveau2,
   afficheAffine,
   blocDonnees,
-  cLatexD,
   coefRacineLatex,
   consigneEcran,
   consigneGenerale,
   decimalLatex,
   demandeLatexF,
   fLatexE,
-  formatReponseAttenduePhaseLatex,
   fractionLatex,
-  multiplePiLatex,
   rationnelExactLatex,
-  rationnelLatex,
-  sommeAffineExacteLatex,
-  sommeVolumeSimpleLatex,
-  travailC,
-  volumeSoustractionLatex,
-  xLatexB,
 } from "../../ui6e/formatIntegralesProblemes";
-import { figureSurplusSvg, figureTrapezesSvg } from "../../ui6e/figureIntegralesProblemes";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntegralesProblemes } from "./index";
 import type { IdVarianteIntegralesProblemes } from "./index";
 import { LIBELLE_CAS_INTEGRALES_PROBLEMES, profilIntegralesProblemes } from "./profilEvaluation";
+import { correctionDetailleeIntegralesProblemes, piegeIntegralesProblemes, reponseIntegralesProblemes } from "./corrigeDetaille";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceIntegralesProblemes>` pour `6gen29` (Intégrales et
@@ -72,18 +59,7 @@ const LETTRES = "abcdefgh";
 const f = (valeur: string): FragmentConsigne => latex(valeur);
 const t = (valeur: string): FragmentConsigne => texte(valeur);
 
-function reponse(exercice: ExerciceIntegralesProblemes, phase: PhaseIntegralesProblemes): FragmentConsigne[] {
-  // Trapèzes (famille A) : le résultat final avec son unité (m² pour un terrain, m³ pour un mur).
-  if (exercice.famille === "A" && phase === "aEcran2") {
-    return [latex(`${formatReponseAttenduePhaseLatex(exercice, phase).join("")}\\ \\text{${exercice.contexte === "terrain" ? "m}^2" : "m}^3"}`)];
-  }
-  // Interprétation (famille E) : sur papier, la phrase rédigée de la bonne option de l'écran.
-  if (exercice.famille === "E" && phase === "eEcran3") {
-    const correcte = exercice.optionsInterpretation.find((o) => o.valeur === exercice.interpretationCorrecte);
-    if (correcte) return [texte(correcte.label)];
-  }
-  return [latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\quad "))];
-}
+const reponse = reponseIntegralesProblemes;
 
 const PRECISION = " Donne chaque résultat sous forme exacte, ou arrondi au centième.";
 
@@ -281,210 +257,6 @@ function enoncePapier(exercice: ExerciceIntegralesProblemes): EnoncePapier {
 // Corrigé détaillé : par étape, Méthode, Calcul, Piège éventuel, Conclusion.
 // ============================================================================
 
-interface ContenuEtape {
-  methode: FragmentConsigne[];
-  calcul?: string;
-  piege?: string;
-  figure?: string;
-}
-
-function aide1(exercice: ExerciceIntegralesProblemes, phase: PhaseIntegralesProblemes): FragmentConsigne[] | null {
-  const a = aideNiveau1(exercice, phase);
-  if (!a.texte) return null;
-  return a.latex === null ? [t(a.texte)] : [t(`${a.texte} `), f(a.latex)];
-}
-
-function contenuA(e: ExerciceFamilleA_Problemes, phase: PhaseIntegralesProblemes): ContenuEtape {
-  const n = e.y.length - 1;
-  if (phase === "aEcran1") {
-    const milieu = e.y.slice(1, n).join("+");
-    return {
-      methode: [t("Chaque bande de largeur Δx est approchée par un trapèze ; les hauteurs extrêmes comptent une demi-fois, les autres une fois.")],
-      calcul: `S=\\dfrac{${e.y[0]}+${e.y[n]}}{2}+${milieu}`,
-      figure: figureTrapezesSvg(e),
-    };
-  }
-  const p = e.dimensionSupplementaire;
-  return {
-    methode: p === null ? [t("L'aire vaut Δx fois la somme S.")] : [t("L'aire de la coupe vaut Δx fois S ; le volume s'obtient en la multipliant par la profondeur p.")],
-    calcul: p === null ? `\\text{Aire}\\approx ${e.deltaX}\\times ${rationnelLatex(e.sommeAttendue).split("\\approx")[0]}` : `V\\approx ${e.deltaX}\\times ${rationnelLatex(e.sommeAttendue).split("\\approx")[0]}\\times ${p}`,
-    piege: "Compter les hauteurs extrêmes en entier : elles ne comptent qu'une demi-fois.",
-  };
-}
-
-function contenuB(e: ExerciceFamilleB_Problemes, phase: PhaseIntegralesProblemes): ContenuEtape {
-  if (phase === "bEcran1") {
-    const sansConstante = sommeAffineExacteLatex([
-      { num: e.k, den: 2, corps: "t^2" },
-      { num: e.p, den: 1, corps: "t" },
-    ]);
-    return {
-      methode: [t("La vitesse est une primitive de l'accélération ; la condition "), f("v(0)"), t(" fixe sa constante.")],
-      calcul: `v(t)=${sansConstante}+C_1\\quad\\text{et}\\quad v(0)=C_1=${e.v0}`,
-    };
-  }
-  if (phase === "bEcran2") {
-    const sansConstante = sommeAffineExacteLatex([
-      { num: e.k, den: 6, corps: "t^3" },
-      { num: e.p, den: 2, corps: "t^2" },
-      { num: e.v0, den: 1, corps: "t" },
-    ]);
-    return {
-      methode: [t("La position est une primitive de la vitesse ; sa propre constante est fixée par "), f("x(0)"), t(".")],
-      calcul: `x(t)=${sansConstante}+C_2\\quad\\text{et}\\quad x(0)=C_2=${e.x0}`,
-      piege: "Réutiliser la constante de v(t) pour x(t) : chaque intégration introduit sa propre constante.",
-    };
-  }
-  if (e.sousType === "evaluer") {
-    return { methode: [t("On remplace t par "), f(`${e.t1}`), t(" dans "), f("x(t)"), t(".")], calcul: `x(${e.t1})=${xLatexB(e).replace(/t/g, `(${e.t1})`)}` };
-  }
-  return {
-    methode: [t("Comme "), f("v(t)\\geq 0"), t(", la position "), f("x(t)"), t(" est croissante : l'équation a une seule solution positive, que l'on trouve en testant des valeurs entières de t.")],
-    calcul: `x(${e.tSolution})=${rationnelExactLatex(e.cible as number)}`,
-  };
-}
-
-function contenuC(e: ExerciceFamilleC_Problemes, phase: PhaseIntegralesProblemes): ContenuEtape {
-  const k = e.k === 1 ? "" : `${e.k}`;
-  const travail = (a: number, b: number, nom: string) => `${nom}=\\displaystyle\\int_{${a}}^{${b}} ${k}x\\,dx=\\left[\\dfrac{${k}x^2}{2}\\right]_{${a}}^{${b}}=\\dfrac{${e.k === 1 ? "" : `${e.k}\\left(`}${b}^2-${a}^2${e.k === 1 ? "" : "\\right)"}}{2}`;
-  if (phase === "cEcran1") return { methode: [t("D'après la loi de Hooke, "), f("F(x_0)=k\\cdot x_0"), t(".")], calcul: `k=\\dfrac{${e.F0}}{${e.x0}}` };
-  if (phase === "cEcran2") return { methode: [t("Une primitive de "), f("kx"), t(" est "), f("\\dfrac{kx^2}{2}"), t(".")], calcul: travail(e.a, e.b, "W"), piege: "Oublier le facteur 1/2 de la primitive de kx." };
-  if (phase === "cEcran3") return { methode: [t("Même calcul sur le second intervalle.")], calcul: travail(e.a2 as number, e.b2 as number, "W_2") };
-  return {
-    methode: [t("La force "), f("F(x)=kx"), t(" augmente avec l'allongement : à longueur égale, le travail est plus grand sur l'intervalle le plus éloigné de 0.")],
-    calcul: `W=${rationnelLatex(travailC(e.k, e.a, e.b))}\\qquad W_2=${rationnelLatex(travailC(e.k, e.a2 as number, e.b2 as number))}`,
-    piege: "Le travail ne dépend pas que de la longueur de l'intervalle, mais aussi de sa position.",
-  };
-}
-
-function contenuD(e: ExerciceFamilleD_Problemes, phase: PhaseIntegralesProblemes): ContenuEtape {
-  if (phase === "dEcran1") {
-    return {
-      methode: [t("Le coût total est la primitive du coût marginal qui vaut "), f("C(0)"), t(" en 0.")],
-      calcul: `C(q)=${e.a}q-${fractionLatex(e.bNum, 2 * e.bDen)}q^2+K\\quad\\text{et}\\quad C(0)=K=${e.F0}`,
-    };
-  }
-  if (phase === "dEcran2") return { methode: [t("On remplace q par "), f(`${e.q1}`), t(" dans "), f("C(q)"), t(".")] };
-  if (phase === "dEcran3") return { methode: aide1(e, phase) ?? [], calcul: aideNiveau2(e, phase).latex ?? undefined, piege: "Donner C(q₂) au lieu de la différence C(q₂) − C(q₁)." };
-  return { methode: [t("On divise le coût total par la quantité produite.")], calcul: `C_{\\text{moy}}(q)=\\dfrac{C(q)}{q}=\\dfrac{${cLatexD(e)}}{q}` };
-}
-
-function contenuE(e: ExerciceFamilleE_Problemes, phase: PhaseIntegralesProblemes): ContenuEtape {
-  const { a, b } = e.exerciceMoyenne;
-  const termes = e.exerciceMoyenne.primitive.famille === "A" && e.exerciceMoyenne.primitive.sousType === "direct" ? e.exerciceMoyenne.primitive.termes : [];
-  const m = termes.find((x) => x.type === "puissance")?.coef ?? 0;
-  const c = termes.find((x) => x.type === "constante")?.coef ?? 0;
-  const primitive = sommeAffineExacteLatex([
-    { num: m, den: 2, corps: "t^2" },
-    { num: c, den: 1, corps: "t" },
-  ]);
-  if (phase === "eEcran1") {
-    return {
-      methode: [t("La variation totale d'une grandeur est l'intégrale de son taux de variation.")],
-      calcul: `\\displaystyle\\int_{${a}}^{${b}} f(t)\\,dt=\\left[${primitive}\\right]_{${a}}^{${b}}`,
-    };
-  }
-  if (phase === "eEcran2") {
-    const integrale = e.exerciceMoyenne.primitive.primitiveReference(b) - e.exerciceMoyenne.primitive.primitiveReference(a);
-    return { methode: [t("La valeur moyenne est l'intégrale divisée par la longueur de l'intervalle.")], calcul: `\\dfrac{1}{${b}-${a}}\\displaystyle\\int_{${a}}^{${b}} f(t)\\,dt=\\dfrac{${rationnelLatex(integrale).split("\\approx")[0]}}{${b - a}}` };
-  }
-  return {
-    methode: [t("f n'est pas la grandeur elle-même mais son taux de variation : sa valeur moyenne est un taux moyen, exprimé dans la même unité que f.")],
-    piege: "Confondre avec le niveau moyen : f n'est pas la grandeur elle-même, mais sa vitesse de variation.",
-  };
-}
-
-function contenuF(e: ExerciceFamilleF_Problemes, phase: PhaseIntegralesProblemes): ContenuEtape {
-  if (phase === "fEcran1") {
-    return {
-      methode: [t("Le point d'équilibre est l'intersection de la demande et de l'offre : on résout "), f("f(x)=g(x)"), t(" à la calculatrice (graphiquement ou avec le solveur), puis "), f("P=g(Q)"), t(".")],
-    };
-  }
-  const aSurK = fractionLatex(e.A * e.kDen, e.kNum);
-  return {
-    methode: [t("Le surplus est l'aire entre la courbe de demande et la droite du prix d'équilibre, de 0 à Q ; une primitive de "), f(`${demandeLatexF(e)}`), t(" est "), f(`-${aSurK}${demandeLatexF(e).slice(String(e.A).length)}`), t(".")],
-    calcul: aideNiveau2(e, phase).latex ?? undefined,
-    piege: "Arrondir Q et P trop tôt : garde au moins deux décimales jusqu'au calcul de S.",
-    figure: figureSurplusSvg(e),
-  };
-}
-
-function contenuG(e: ExerciceFamilleG_Problemes, phase: PhaseIntegralesProblemes): ContenuEtape {
-  if (e.sousType === "soustraction") {
-    const vt = e.volumeTotal;
-    if (phase === "gSoustractionEcran1") {
-      return {
-        methode: [t("Méthode des disques : "), f("V=\\pi\\displaystyle\\int_a^b [f(x)]^2\\,dx"), t(".")],
-        calcul: `V=\\pi\\displaystyle\\int_{${vt.a}}^{${vt.b}}\\left(${sommeVolumeSimpleLatex(vt.termes)}\\right)^2dx${volumeSoustractionLatex(e, e.volumeTotalAttendu)}`,
-      };
-    }
-    return {
-      methode: [t("Le trou est un cylindre de rayon "), f("\\rho"), t(" et de longueur "), f("b-a"), t(" : son volume vaut "), f("\\pi\\rho^2(b-a)"), t(". On le retire du volume de la pièce pleine.")],
-      calcul: `V_{\\text{trou}}=\\pi\\cdot\\left(${fractionLatex(e.rayonTrouNum, e.rayonTrouDen)}\\right)^2\\cdot ${e.longueurTrou}`,
-      piege: "Soustraire les rayons (ou les fonctions) au lieu des volumes.",
-    };
-  }
-  if (e.sousType === "archimede") {
-    const p = e.paraboloide;
-    if (phase === "gArchimedeEcran1") {
-      return {
-        methode: [t("Méthode des disques : le carré fait disparaître la racine.")],
-        calcul: `V_{\\text{verre}}=\\pi\\displaystyle\\int_0^{${p.L}}\\left(${coefRacineLatex(p.kNum, p.kDen)}\\sqrt{x}\\right)^2dx=\\pi\\cdot ${fractionLatex(p.kNum * p.kNum, p.kDen * p.kDen)}\\cdot\\dfrac{${p.L}^2}{2}`,
-      };
-    }
-    if (phase === "gArchimedeEcran2") return { methode: aide1(e, phase) ?? [], calcul: `V_{\\text{bille}}=\\dfrac{4}{3}\\pi\\cdot ${decimalLatex(e.r)}^3` };
-    return {
-      methode: [t("Fraction débordée : volume de la bille divisé par le volume du verre (π se simplifie).")],
-      calcul: `\\dfrac{V_{\\text{bille}}}{V_{\\text{verre}}}=\\dfrac{${multiplePiLatex((4 / 3) * e.r ** 3).split("\\approx")[0]}}{${multiplePiLatex(p.volumeParaboloide / Math.PI).split("\\approx")[0]}}`,
-    };
-  }
-  const r = e.r;
-  const h = e.hDemande;
-  if (phase === "gCalotteEcran1") return { methode: [t("On remplace r par "), f(`${r}`), t(" dans l'intégrande.")] };
-  if (phase === "gCalotteEcran2") return { methode: [t("En développant, "), f(`${r}^2-(y-${r})^2=${2 * r}y-y^2`), t(", dont une primitive est la fonction ci-dessous.")] };
-  return {
-    methode: [t("On évalue la primitive entre 0 et h, puis on multiplie par π.")],
-    calcul: `V(${h})=\\pi\\left[${r}y^2-\\dfrac{y^3}{3}\\right]_0^{${h}}=\\pi\\left(${r}\\cdot ${h}^2-\\dfrac{${h}^3}{3}\\right)`,
-    piege: "Oublier le facteur π devant l'intégrale.",
-  };
-}
-
-function contenuEtape(exercice: ExerciceIntegralesProblemes, phase: PhaseIntegralesProblemes): ContenuEtape {
-  switch (exercice.famille) {
-    case "A":
-      return contenuA(exercice, phase);
-    case "B":
-      return contenuB(exercice, phase);
-    case "C":
-      return contenuC(exercice, phase);
-    case "D":
-      return contenuD(exercice, phase);
-    case "E":
-      return contenuE(exercice, phase);
-    case "F":
-      return contenuF(exercice, phase);
-    case "G":
-      return contenuG(exercice, phase);
-  }
-}
-
-function correctionDetaillee(exercice: ExerciceIntegralesProblemes): EtapeCorrection[] {
-  return phasesPourExercice(exercice).flatMap((phase, i) => {
-    const sousQuestion = LETTRES[i];
-    const contenu = contenuEtape(exercice, phase);
-    const etapes: EtapeCorrection[] = [];
-    if (contenu.methode.length > 0) etapes.push({ label: "Méthode", sousQuestion, fragments: contenu.methode, ...(contenu.figure ? { figureHtml: contenu.figure } : {}) });
-    if (contenu.calcul) etapes.push({ label: "Calcul", sousQuestion, fragments: [f(contenu.calcul)] });
-    if (contenu.piege) etapes.push({ label: "Piège", sousQuestion, fragments: [t(contenu.piege)] });
-    etapes.push({ label: "Conclusion", sousQuestion, fragments: reponse(exercice, phase) });
-    return etapes;
-  });
-}
-
-// ============================================================================
-// Difficulté, réponse brève, barème.
-// ============================================================================
-
 function difficulte(exercice: ExerciceIntegralesProblemes): 1 | 2 | 3 {
   switch (exercice.famille) {
     case "A":
@@ -535,7 +307,7 @@ function poids(exercice: ExerciceIntegralesProblemes): number[] {
 function erreursFrequentes(exercice: ExerciceIntegralesProblemes): { texte: string; cout: string }[] {
   const liste: { texte: string; cout: string }[] = [];
   for (const phase of phasesPourExercice(exercice)) {
-    const piege = contenuEtape(exercice, phase).piege;
+    const piege = piegeIntegralesProblemes(exercice, phase);
     if (piege) liste.push({ texte: piege, cout: "−1" });
   }
   liste.push({ texte: "Oublier l'unité du résultat ou arrondir trop tôt une valeur intermédiaire", cout: "−0,5" });
@@ -566,7 +338,7 @@ export const adaptateurEvaluationIntegralesProblemes: AdaptateurFeuilleExercices
   construireCorrection,
   difficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeIntegralesProblemes,
   bareme,
   enoncePapier,
   dureeMinutes: 12,

@@ -295,8 +295,11 @@ codes, aménagée si cochée) intitulée « Remédiation — <titre sans « Éva
 
 Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feuilles d'exercices et des
 évaluations ne saute plus d'étape. **Chapitres migrés** : 6e ch. 5 (pilote, 6gen34–42, 6gen93–99) ;
-4e ch. 3 (gen10–13, gen68–72 — voir « Lectures graphiques et décisions » plus bas). Les autres
-adaptateurs s'affichent comme avant (contrat rétrocompatible).
+4e ch. 3 (gen10–13, gen68–72 — voir « Lectures graphiques et décisions » plus bas) ;
+6e ch. 4, moitié 1 (6gen23–29 : briques `6e-6h/ui6e/corrigeIntegrales1.ts` — substitution `substituer`,
+`[F]ₐᵇ` en `\Big[…\Big]` puis F(b) − F(a) substitué (`lignesCrochet`, `lignesIntegralePoly`), rationnels
+`Q`, trinôme, carré développé, `entoure` (`\Big(` au-delà de 14 caractères) ; 6gen23 réutilisé par
+6gen24/25 via `etapesPhasePrimitive`). Les autres adaptateurs s'affichent comme avant (contrat rétrocompatible).
 
 **Chaque étape (= écran du générateur, lettre `sousQuestion`) contient, dans cet ordre :**
 1. **Ce qu'on utilise** (`utilise`) : propriété / formule / méthode, avec le renvoi « (cours, § n) »
