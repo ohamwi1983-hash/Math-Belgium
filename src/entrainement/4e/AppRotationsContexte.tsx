@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import type { ExerciceRotationsContexte, OrigineRotation, RotationSens } from "./core/rotationsContexte.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceRotationsContexte } from "./generateurs/rotationsContexte";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeRotationsContexte, lettreEcranRotationsContexte } from "./generateurs/rotationsContexte/corrigeDetaille";
 import { activerAide, demarrer, ecranSuivant, soumettre, tentativesMaxEcran, type EtatRotationsContexte } from "./moteur/sessionRotationsContexte";
 import {
   diagnostiquerHauteur,
@@ -206,6 +209,8 @@ export function AppRotationsContexte() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
+        // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeRotationsContexte(e), lettreEcranRotationsContexte(ecran))} />,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
