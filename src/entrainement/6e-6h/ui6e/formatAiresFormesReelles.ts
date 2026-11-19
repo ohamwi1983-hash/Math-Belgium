@@ -1,15 +1,22 @@
 import type { ExerciceAiresFormesReelles, ExerciceMurFormesReelles, ExerciceSectionFormesReelles } from "../core6e/airesFormesReelles.types";
-import type { Arc, PhaseFormesReelles } from "../moteur6e/modeleAiresFormesReelles";
+import type { Arc, FractionExacte, PhaseFormesReelles } from "../moteur6e/modeleAiresFormesReelles";
 import {
   aireCourbe,
+  aireExacte,
   arcExercice,
   bornesArc,
   bornesCorrige,
   coefArc,
   coefficientsArc,
+  coefficientsExacts,
   coefficientsParcelle,
   coefficientsVitrail,
+  fMul,
+  fVal,
+  fraction,
+  integraleExacte,
   integraleSignee,
+  primitiveExacte,
   litresPeinture,
   nombrePots,
   valeurCout,
@@ -114,6 +121,45 @@ export function polyTex(coeffs: number[], prefereFraction: boolean, denMax = 100
     morceaux.push(monome(r.tex, n, morceaux.length === 0));
   }
   return { tex: morceaux.length === 0 ? "0" : morceaux.join(""), exact };
+}
+
+/** Fraction EXACTE en LaTeX : entier, décimal court (au plus 4 décimales, régime calculatrice) ou
+ * fraction — jamais un arrondi. */
+export function fractionTex(fr: FractionExacte, prefereFraction: boolean): string {
+  if (fr.d === 1) return `${fr.n}`;
+  if (!prefereFraction && 10000 % fr.d === 0) return decimalLatex(fVal(fr), 4);
+  return fractionLatex(fr.n, fr.d);
+}
+
+/** Polynôme EXACT (coefficients croissants) en LaTeX, degrés décroissants. */
+export function polyExactTex(coeffs: FractionExacte[], prefereFraction: boolean): string {
+  const morceaux: string[] = [];
+  for (let n = coeffs.length - 1; n >= 0; n--) {
+    if (coeffs[n].n === 0) continue;
+    morceaux.push(monome(fractionTex(coeffs[n], prefereFraction), n, morceaux.length === 0));
+  }
+  return morceaux.length === 0 ? "0" : morceaux.join("");
+}
+
+/** « = exacte » (entier, décimal exact), « = fraction ≈ décimal » (dénominateur ≤ 240) ou « ≈ décimal »
+ * d'une valeur EXACTE — l'arrondi n'apparaît qu'ici, à `decimales` chiffres. */
+export function egalExactTex(fr: FractionExacte, decimales: number): string {
+  const v = fVal(fr);
+  if (fr.d === 1) return `=${fr.n}`;
+  if (10000 % fr.d === 0) return `=${decimalLatex(v, 4)}`;
+  if (fr.d <= 240) return `=${fractionLatex(fr.n, fr.d)}\\approx ${decimalLatex(v, decimales)}`;
+  return `\\approx ${decimalLatex(v, decimales)}`;
+}
+
+/** Précision de l'aire demandée par la consigne de la parcelle (« arrondie au centième ») ; les autres
+ * situations gardent leurs 3 décimales. */
+export function decimalesAire(e: ExerciceAiresFormesReelles): number {
+  return e.situation === "parcelle" ? 2 : 3;
+}
+
+/** Aire de la parcelle en m², EXACTE (100 × aire en u.a.). */
+export function totalParcelleExact(e: Extract<ExerciceAiresFormesReelles, { situation: "parcelle" }>): FractionExacte {
+  return fMul(fraction(100), aireExacte(e)!);
 }
 
 /** Primitive (constante nulle) d'un polynôme, coefficients croissants. */
@@ -348,13 +394,23 @@ export function modeleCorrigeTex(e: ExerciceAiresFormesReelles): string[] {
 export function fonctionCorrigeTex(e: ExerciceAiresFormesReelles): string {
   if (e.situation === "vitrail") return "";
   if (e.situation === "parcelle") {
-    const c = representer(e.alpha, prefere(e));
+    const c = coefficientParcelleTex(e);
     const m = representer(e.m, false).tex;
     const k = representer(e.k, false).tex;
     return `f(x)${c.exact ? "=" : "\\approx"}${c.tex === "-1" ? "-" : c.tex}(x-${m})^2+${k}`;
   }
   const r = arcTex(arcExercice(e), e.repere, prefere(e));
   return `f(x)${r.exact ? "=" : "\\approx"}${r.tex}`;
+}
+
+/** Coefficient c de la berge, depuis sa valeur EXACTE : fraction (régime exact ou dénominateur ≤ 100),
+ * décimal court, sinon décimal à 4 chiffres marqué `exact: false` (« ≈ », comme `representer`). */
+export function coefficientParcelleTex(e: Extract<ExerciceAiresFormesReelles, { situation: "parcelle" }>): { tex: string; exact: boolean } {
+  const c = coefficientsExacts(e)![2];
+  if (prefere(e)) return { tex: fractionTex(c, true), exact: true };
+  if (10000 % c.d === 0) return { tex: fractionTex(c, false), exact: true };
+  if (c.d <= 100) return { tex: fractionTex(c, true), exact: true };
+  return { tex: decimalLatex(fVal(c), 4), exact: false };
 }
 
 /** Bornes du vitrail : entiers, ou m ± √s (simplifiée). */
@@ -379,6 +435,10 @@ function aireExacteTex(e: ExerciceAiresFormesReelles): string | null {
 }
 
 export function aireTex(e: ExerciceAiresFormesReelles): string {
+  // Valeur EXACTE (rationnelle) quand elle existe : relire le flottant en fraction trouvait parfois une
+  // fraction voisine mais fausse (« 2895/68 » pour 42,5735…).
+  const exacte = aireExacte(e);
+  if (exacte) return `\\mathcal{A}${egalExactTex(exacte, decimalesAire(e))}${uniteAireTex(e)}`;
   return `\\mathcal{A}${egalExactPuisApprox(aireCourbe(e), aireExacteTex(e))}${uniteAireTex(e)}`;
 }
 
@@ -391,9 +451,21 @@ function decimalGroupeLatex(v: number): string {
 }
 
 function valeurContexteTex(v: number): string {
-  const fr = fractionDepuisValeur(v, 12);
+  // Fraction relue seulement si elle est JUSTE (à 1e-9 près, la précision du calcul) : la tolérance
+  // 1e-7 de `fractionDepuisValeur` acceptait 204374/11 pour 18 579,456 (volume d'un tunnel).
+  const lue = fractionDepuisValeur(v, 12);
+  const fr = lue && Math.abs(lue.num / lue.den - v) < 1e-9 * Math.max(1, Math.abs(v)) ? lue : null;
   const auCentieme = Math.abs(v * 100 - Math.round(v * 100)) < 1e-6;
   if (fr && fr.den !== 1 && !auCentieme) return `=${fractionLatex(fr.num, fr.den)}\\approx ${decimalGroupeLatex(v)}`;
+  return auCentieme ? `=${decimalGroupeLatex(v)}` : `\\approx ${decimalGroupeLatex(v)}`;
+}
+
+/** `valeurContexteTex` d'une valeur EXACTE (parcelle) : fraction (dénominateur ≤ 12) ou décimal au
+ * centième, sans relire le flottant. */
+function valeurContexteExacteTex(fr: FractionExacte): string {
+  const v = fVal(fr);
+  const auCentieme = 100 % fr.d === 0;
+  if (fr.d !== 1 && fr.d <= 12 && !auCentieme) return `=${fractionLatex(fr.n, fr.d)}\\approx ${decimalGroupeLatex(v)}`;
   return auCentieme ? `=${decimalGroupeLatex(v)}` : `\\approx ${decimalGroupeLatex(v)}`;
 }
 
@@ -401,6 +473,7 @@ export function totalTex(e: ExerciceAiresFormesReelles): string {
   const v = valeurTotal(e);
   if (e.situation === "mur") return `S${valeurContexteTex(v)}\\text{ m}^2`;
   if (e.situation === "vitrail") return `\\mathcal{A}_{\\text{clair}}${valeurContexteTex(v)}\\text{ dm}^2`;
+  if (e.situation === "parcelle") return `\\mathcal{A}${valeurContexteExacteTex(totalParcelleExact(e))}\\text{ m}^2`;
   return `\\mathcal{A}${valeurContexteTex(v)}\\text{ m}^2`;
 }
 
@@ -408,7 +481,8 @@ export function coutTex(e: ExerciceAiresFormesReelles): string {
   const v = valeurCout(e);
   if (e.situation === "parcelle") {
     const arrondiEuro = Math.round(v);
-    return `\\text{valeur}${Math.abs(v - arrondiEuro) < 1e-6 ? "=" : "\\approx "}${eurosLatex(arrondiEuro)}\\text{ €}`;
+    const exacte = fMul(totalParcelleExact(e), fraction(Math.round(e.prix * 100), 100));
+    return `\\text{valeur}${exacte.d === 1 ? "=" : "\\approx "}${eurosLatex(arrondiEuro)}\\text{ €}`;
   }
   const exact = Math.abs(v * 100 - Math.round(v * 100)) < 1e-6;
   return `\\text{coût}${exact ? "=" : "\\approx "}${eurosLatex(v)}\\text{ €}`;
@@ -455,6 +529,12 @@ export function integrandeCoeffs(e: ExerciceAiresFormesReelles): number[] {
 export function calculIntegraleTex(e: ExerciceAiresFormesReelles): string {
   const coeffs = integrandeCoeffs(e);
   const [a, b] = bornesCorrige(e);
+  const exacts = coefficientsExacts(e);
+  if (exacts) {
+    const aT = representer(a, prefere(e)).tex;
+    const bT = representer(b, prefere(e)).tex;
+    return `\\int_{${aT}}^{${bT}}\\left(${polyExactTex(exacts, prefere(e))}\\right)dx=\\left[${polyExactTex(primitiveExacte(exacts), prefere(e))}\\right]_{${aT}}^{${bT}}${egalExactTex(integraleExacte(e)!, decimalesAire(e))}`;
+  }
   // Coefficients exacts (fractions jusqu'au dénominateur 1000) : l'égalité du calcul reste vraie.
   const integrande = polyTex(coeffs, prefere(e), 1000).tex;
   const prim = polyTex(primitiveCoeffs(coeffs), true, 1000).tex;
@@ -527,7 +607,9 @@ export function aideNiveau2(e: ExerciceAiresFormesReelles, phase: PhaseFormesRee
       return { texte: "Équation à résoudre :", latex: `${fonctionDonneeArc(e)}=0` };
     }
     case "aire": {
-      const prim = polyTex(primitiveCoeffs(integrandeCoeffs(e)), true).tex;
+      // Primitive EXACTE (jamais « −0,0159x³ » pour −55/3456) ; le vitrail garde ses coefficients décimaux.
+      const exacts = coefficientsExacts(e);
+      const prim = exacts ? polyExactTex(primitiveExacte(exacts), prefere(e)) : polyTex(primitiveCoeffs(integrandeCoeffs(e)), true).tex;
       return { texte: e.situation === "vitrail" ? "Une primitive de f − g :" : "Une primitive de f :", latex: `F(x)=${prim}` };
     }
     case "total":

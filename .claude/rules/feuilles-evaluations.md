@@ -369,6 +369,20 @@ Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feui
   imprimé est TOUJOURS exact — tirage refait si c = a·(W/2)² a plus de 4 décimales (8,26875 était
   imprimé 8,2688 : les pieds ±5,25 n'étaient plus racines) ; contrôle sur 3 000 tirages par variante :
   coefficients imprimés relus en rationnels = coefficients du modèle, f(pieds annoncés) = 0 exactement.
+  6gen81, intégrale (mur, section, parcelle) : coefficients, primitive, F(b), F(a) et aire EXACTS,
+  calculés en rationnels depuis les données (`moteur6e/modeleAiresFormesReelles.ts::coefficientsExacts`,
+  `integraleExacte`, `aireExacte` ; `aireCourbe` de la parcelle = cette fraction) — relire un flottant
+  en fraction (tolérance 1e-7) donnait des fractions VOISINES mais fausses (F(6,5) « 11953/321 »,
+  aire « 2895/68 »), et la parcelle « à retrouver » écrivait la primitive avec −0,0159x³ (écart de
+  0,006 à 0,009 sur l'aire). Corrigé : « f(x) = » développée, « F(x) = », 𝒜 = ∫ f, = F(b) − F(a),
+  = valeurs (fractions), = fraction réduite ≈ arrondi (au centième pour la parcelle, comme la
+  consigne) ; c écrit « = −55/1152 ≈ −0,0477 » ; conversion en m² et valeur du terrain à partir de
+  la fraction. Écran (réponse attendue, aide « une primitive de f ») : mêmes fonctions. Collecteur en
+  mode strict (« = » à 1e-11 près, F(x) = ∫₀ˣ f recalculée à part) : 0 égalité fausse sur 400 tirages
+  de la variante et 3 500 tirages (500 par variante) ; niveaux et durées inchangés (2 100 tirages).
+  Trouvés par le même contrôle : volume de la gouttière en cm³ écrit au centième avec « = » → « ≈ »
+  s'il n'est pas exact ; fraction de `valeurContexteTex` gardée seulement si elle est juste à 1e-9
+  (« 204374/11 » pour un volume de tunnel de 18 579,456 m³).
   6gen23/24/25, sous-type G3 : coefficients A, B, **D** de `A/x + (Bx + D)/(x² + 1)` (champ `D` du
   type) — C reste la constante d'intégration, comme dans le cours ; la saisie « Bx + C » de la
   décomposition (sans D) reste acceptée, « + C » / « + K » en fin de primitive aussi.
@@ -554,9 +568,12 @@ Outils du pilote : `collecteur.ts`, `evalLatex.ts` (dossier de travail du chanti
   gen47 (`DistanceDroiteGraph`, 24–30 états / 240), gen38 (`ComparaisonSeriesGraph`, 5 / 96),
   gen33 (`PolygoneEffectifsGraph` / `LectureQuartileGraph`, 1 / 168) → option activée (gen35
   partage les deux graphes de gen33), formats `formatEtiquetteGrilleTypo` / `nombreFrTypo` : 0
-  chevauchement après. gen8, gen9, gen12 : aucun chevauchement d'un même axe (240 états chacun) —
-  option non activée ; restent, au zoom, quelques nombres X posés sur un nombre Y au croisement des
-  axes (gen8 26 / 240, gen12 1 / 240), à traiter de la même façon si l'utilisateur le souhaite.
+  chevauchement après. gen8 (`MafsGraphTransformation`) et gen12 (`MafsGraphCaracteristiquesFonction`) :
+  aucun chevauchement d'un même axe, mais au zoom un nombre X posé sur un nombre Y au croisement des
+  axes (gen8 26 / 240 états à 390 px, 17 / 240 à 1 280 px ; gen12 1 / 240 et 1 / 240) et des nombres
+  rognés au bord (gen8 214 et 173 états, gen12 213 et 135) → option activée + `formatEtiquetteGrilleTypo`,
+  grille inchangée (valeurs à lire sur ses lignes) : 0 chevauchement, 0 nombre rogné après (même mesure).
+  gen9 : option non activée (aucun chevauchement).
   Graphes à pas fixe (`EquationCercleGraph`, `EquationParaboleGraph`, `ConstructionDroiteGraph`,
   `LectureGraphiqueDroiteGraph`) ou à mantisses propres (`BoiteMoustachesGraph`) : pas de 1/3 impossible.
 - Briques partagées sans `docx` : `4e/ui/corrigeChapitre3.ts` (`q` exact, `plusQ`, `mono`,

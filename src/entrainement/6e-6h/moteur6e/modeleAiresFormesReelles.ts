@@ -101,6 +101,123 @@ export function coefficientsParcelle(e: Extract<ExerciceAiresFormesReelles, { si
 }
 
 // ============================================================================
+// Valeurs EXACTES (rationnels) — source unique de l'intégrale, du corrigé et de l'écran.
+// ============================================================================
+
+/**
+ * Rationnel irréductible (dénominateur > 0). Les coefficients de l'intégrande se calculent EXACTEMENT
+ * depuis les données de l'instance (cotes décimales courtes, coefficient c de la berge) : relire un
+ * flottant en fraction (`fractionDepuisValeur`, tolérance 1e-7) trouvait des fractions VOISINES mais
+ * fausses (−0,0159143… lu −49/3079 au lieu de −55/3456, F(6,5) lu 11953/321…), et le corrigé de la
+ * parcelle « à retrouver » finissait par écrire la primitive avec −0,0159x³ (écart de 0,006 à 0,009
+ * sur l'aire).
+ */
+export interface FractionExacte {
+  n: number;
+  d: number;
+}
+
+function pgcdEntiers(a: number, b: number): number {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y) [x, y] = [y, x % y];
+  return x || 1;
+}
+
+export function fraction(n: number, d = 1): FractionExacte {
+  if (!Number.isSafeInteger(n) || !Number.isSafeInteger(d) || d === 0) throw new Error(`fraction hors limites : ${n}/${d}`);
+  const g = pgcdEntiers(n, d);
+  const s = d < 0 ? -1 : 1;
+  return { n: (s * n) / g || 0, d: (s * d) / g };
+}
+
+export const fAdd = (a: FractionExacte, b: FractionExacte): FractionExacte => fraction(a.n * b.d + b.n * a.d, a.d * b.d);
+export const fSub = (a: FractionExacte, b: FractionExacte): FractionExacte => fraction(a.n * b.d - b.n * a.d, a.d * b.d);
+export const fMul = (a: FractionExacte, b: FractionExacte): FractionExacte => fraction(a.n * b.n, a.d * b.d);
+export const fDiv = (a: FractionExacte, b: FractionExacte): FractionExacte => fraction(a.n * b.d, a.d * b.n);
+export const fVal = (a: FractionExacte): number => a.n / a.d;
+
+/** Donnée décimale courte de l'instance (au plus 6 décimales : cotes, bornes, prix) en fraction exacte. */
+export function fractionDecimale(v: number): FractionExacte {
+  return fraction(Math.round(v * 1e6), 1e6);
+}
+
+/** Coefficient c de la parcelle : (y₀ − k)/m² si la berge est à retrouver (y₀ = distance au pont, décimale
+ * courte), sinon le coefficient imprimé (décimal court ou −1/4, −1/5, −1/8, −1/10). */
+function coefficientParcelleExact(e: Extract<ExerciceAiresFormesReelles, { situation: "parcelle" }>): FractionExacte {
+  if (e.modele === "retrouver") {
+    const m = fractionDecimale(e.m);
+    const y0 = fractionDecimale(e.alpha * e.m * e.m + e.k);
+    return fDiv(fSub(y0, fractionDecimale(e.k)), fMul(m, m));
+  }
+  for (let d = 1; d <= 1000; d++) {
+    const n = Math.round(e.alpha * d);
+    if (Math.abs(n / d - e.alpha) < 1e-12) return fraction(n, d);
+  }
+  return fractionDecimale(e.alpha);
+}
+
+/** Coefficients EXACTS (puissances croissantes) de l'intégrande du corrigé ; `null` pour le vitrail
+ * (bornes irrationnelles, l'aire passe par la formule (4/3)·A·s^{3/2}). */
+export function coefficientsExacts(e: ExerciceAiresFormesReelles): FractionExacte[] | null {
+  switch (e.situation) {
+    case "vitrail":
+      return null;
+    case "parcelle": {
+      const c = coefficientParcelleExact(e);
+      const m = fractionDecimale(e.m);
+      return [fAdd(fMul(c, fMul(m, m)), fractionDecimale(e.k)), fMul(fraction(-2), fMul(c, m)), c];
+    }
+    case "mur":
+    case "section": {
+      const arc = arcExercice(e);
+      const L = fractionDecimale(arc.largeur);
+      const fl = fractionDecimale(arc.fleche);
+      const c = fDiv(fMul(fraction(-arc.sens * 4), fl), fMul(L, L));
+      return e.repere === "pied" ? [fraction(0), fMul(fraction(-1), fMul(c, L)), c] : [fMul(fraction(arc.sens), fl), fraction(0), c];
+    }
+  }
+}
+
+/** Primitive (constante nulle) d'un polynôme exact, coefficients croissants. */
+export function primitiveExacte(coeffs: FractionExacte[]): FractionExacte[] {
+  return [fraction(0), ...coeffs.map((c, i) => fDiv(c, fraction(i + 1)))];
+}
+
+export function evaluerExact(coeffs: FractionExacte[], x: FractionExacte): FractionExacte {
+  let s = fraction(0);
+  let p = fraction(1);
+  for (const c of coeffs) {
+    s = fAdd(s, fMul(c, p));
+    p = fMul(p, x);
+  }
+  return s;
+}
+
+/** Bornes exactes du corrigé (`null` pour le vitrail). */
+export function bornesExactes(e: ExerciceAiresFormesReelles): [FractionExacte, FractionExacte] | null {
+  if (e.situation === "vitrail") return null;
+  const [a, b] = bornesCorrige(e);
+  return [fractionDecimale(a), fractionDecimale(b)];
+}
+
+/** Intégrale SIGNÉE exacte F(b) − F(a) (`null` pour le vitrail). */
+export function integraleExacte(e: ExerciceAiresFormesReelles): FractionExacte | null {
+  const coeffs = coefficientsExacts(e);
+  const bornes = bornesExactes(e);
+  if (!coeffs || !bornes) return null;
+  const F = primitiveExacte(coeffs);
+  return fSub(evaluerExact(F, bornes[1]), evaluerExact(F, bornes[0]));
+}
+
+/** Aire exacte de la partie courbe, en u.a. (`null` pour le vitrail). */
+export function aireExacte(e: ExerciceAiresFormesReelles): FractionExacte | null {
+  const v = integraleExacte(e);
+  if (!v) return null;
+  return v.n < 0 ? fraction(-v.n, v.d) : v;
+}
+
+// ============================================================================
 // Valeurs attendues.
 // ============================================================================
 
@@ -126,7 +243,8 @@ export function aireCourbe(e: ExerciceAiresFormesReelles): number {
     case "vitrail":
       return (4 / 3) * e.A * Math.pow(e.s, 1.5);
     case "parcelle":
-      return (e.alpha * ((e.b - e.m) ** 3 - (e.a - e.m) ** 3)) / 3 + e.k * (e.b - e.a);
+      // Valeur exacte (rationnelle) : la même que le corrigé écrit, aucun arrondi intermédiaire.
+      return fVal(aireExacte(e)!);
   }
 }
 
