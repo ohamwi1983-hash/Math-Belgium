@@ -2,6 +2,9 @@ import { Fragment, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceComposerForces, NomTriangle, UniteComposerForces } from "./core/composerForces.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceComposerForces } from "./generateurs/composerForces";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeComposerForces } from "./generateurs/composerForces/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { activerAide, demarrer, ecranSuivant, soumettre, tentativesMaxEcran, type EtatComposerForces } from "./moteur/sessionComposerForces";
 import { diagnostiquerSaisie, lireNombre, verifierTriangle } from "./moteur/verificationComposerForces";
@@ -119,6 +122,7 @@ export function AppComposerForces() {
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComposerForces(e), lettreEtape(ecran))} />,
         messageRevele: enAttente.messageRevele,
       }
     : null;
