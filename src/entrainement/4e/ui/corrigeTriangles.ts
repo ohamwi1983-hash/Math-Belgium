@@ -226,7 +226,7 @@ export function lignesArcsin(o: { X: string; angle: number; d?: number; suppleme
     const { X2, angle2 } = o.supplementaire;
     lignes.push(
       ligne(`${X2}=180^\\circ-${o.X}`, `deux angles supplémentaires ont le même sinus ${COURS_ANGLES_ASSOCIES}`),
-      ligne(`${relSubst(angleMemoire(o.angle, d))}180^\\circ-${deg(o.angle, d)}`, justifSubst([angleMemoire(o.angle, d)])),
+      ligne(`${relSubst(angleMemoire(o.angle, d))}180^\\circ-${tex(angleMemoire(o.angle, d))}`, justifSubst([angleMemoire(o.angle, d)])),
       ligne(`${apres(relApres([angleMemoire(o.angle, d)], angle2, d), angle2, d)}^\\circ`),
     );
   }

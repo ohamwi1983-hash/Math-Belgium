@@ -51,7 +51,7 @@ export function enonceTriangle(e: ExerciceDetectiveErreurs): FragmentConsigne[] 
   let demandes: string[];
   switch (configuration(e)) {
     case "SAS":
-      donnees = [`b = ${cm(d.b!)}`, `c = ${cm(d.c!)}`, `\\hat{A} = ${d.A}°`];
+      donnees = [`b = ${cm(d.b!)}`, `c = ${cm(d.c!)}`, `\\hat{A} = ${d.A}^\\circ`];
       demandes = ["a", "\\hat{B}", "\\hat{C}"];
       break;
     case "SSS":
@@ -59,11 +59,11 @@ export function enonceTriangle(e: ExerciceDetectiveErreurs): FragmentConsigne[] 
       demandes = ["\\hat{A}", "\\hat{B}", "\\hat{C}"];
       break;
     case "AAS":
-      donnees = [`\\hat{A} = ${d.A}°`, `\\hat{B} = ${d.B}°`, `c = ${cm(d.c!)}`];
+      donnees = [`\\hat{A} = ${d.A}^\\circ`, `\\hat{B} = ${d.B}^\\circ`, `c = ${cm(d.c!)}`];
       demandes = ["\\hat{C}", "a", "b", "\\mathcal{A}"];
       break;
     case "SSA":
-      donnees = [`\\hat{A} = ${d.A}°`, `a = ${cm(d.a!)}`, `b = ${cm(d.b!)}`];
+      donnees = [`\\hat{A} = ${d.A}^\\circ`, `a = ${cm(d.a!)}`, `b = ${cm(d.b!)}`];
       demandes = ["\\hat{B}", "\\hat{C}", "c"];
       break;
   }
@@ -72,9 +72,23 @@ export function enonceTriangle(e: ExerciceDetectiveErreurs): FragmentConsigne[] 
 }
 
 /** Une ligne de la copie (ou du corrigé), sans son numéro. */
+/** Membres d'une ligne joints par « = », ou par « ≈ » devant un membre qui contient une valeur
+ * recopiée ARRONDIE d'une ligne précédente (nombre décimal : les données sont entières) — l'égalité
+ * stricte y serait fausse (« a ≈ √52,42 », « cos B̂ ≈ (7,24² + …)/… »). */
+export function membresLatex(membres: string[]): string {
+  return membres.map((m, k) => (k === 0 ? m : `${/\d\{,\}\d/.test(m) ? "\\approx" : "="} ${m}`)).join(" ");
+}
+
+/** Relation devant le résultat : « ≈ » dès que le dernier membre contient une valeur arrondie (le
+ * résultat vient de la valeur exacte : « 180° − sin⁻¹(0,8660) ≈ 120° », jamais « = 120° »). */
+export function relationResultat(l: LigneResolution): "=" | "\\approx" {
+  const dernier = l.membres[l.membres.length - 1] ?? "";
+  return l.relation === "=" && /\d\{,\}\d/.test(dernier) ? "\\approx" : l.relation;
+}
+
 export function fragmentsLigne(l: LigneResolution): FragmentConsigne[] {
   if (l.fragmentsLibres) return l.fragmentsLibres.map((f) => (f.type === "texte" ? texte(f.valeur) : latex(f.valeur)));
-  const formule = l.resultat === null ? l.membres.join(" = ") : `${l.membres.join(" = ")} ${l.relation} ${l.resultat}`;
+  const formule = l.resultat === null ? membresLatex(l.membres) : `${membresLatex(l.membres)} ${relationResultat(l)} ${l.resultat}`;
   const f: FragmentConsigne[] = [];
   if (l.prefixe) f.push(texte(l.prefixe));
   f.push(latex(formule));
@@ -90,7 +104,7 @@ export function lignesCopie(e: ExerciceDetectiveErreurs): FragmentConsigne[][] {
 // Valeurs
 // ---------------------------------------------------------------------------------------------
 
-const UNITE_LATEX: Record<NatureValeur, string> = { cote: "\\text{ cm}", carre: "", angle: "°", trig: "", aire: "\\text{ cm}^2", aucune: "" };
+const UNITE_LATEX: Record<NatureValeur, string> = { cote: "\\text{ cm}", carre: "", angle: "^\\circ", trig: "", aire: "\\text{ cm}^2", aucune: "" };
 export const UNITE_TEXTE: Record<NatureValeur, string> = { cote: "cm", carre: "", angle: "°", trig: "", aire: "cm²", aucune: "" };
 const PRECISION: Record<NatureValeur, string> = {
   cote: "au centième",
@@ -155,15 +169,15 @@ function trigLigneFausse(e: ExerciceDetectiveErreurs): string | null {
   switch (e.scenario) {
     case "R1":
     case "K1":
-      return `\\cos ${d.A}°`;
+      return `\\cos ${d.A}^\\circ`;
     case "R2":
     case "A4":
-      return `\\sin ${180 - d.A! - d.B!}°`;
+      return `\\sin ${180 - d.A! - d.B!}^\\circ`;
     case "C1":
     case "C2":
     case "C3": {
       const angle = { A: d.A!, B: d.B!, C: 180 - d.A! - d.B! }[e.sousVariante as "A" | "B" | "C"];
-      return `\\sin ${angle}°`;
+      return `\\sin ${angle}^\\circ`;
     }
     case "O1":
     case "O2":
@@ -185,9 +199,9 @@ export function descriptionFragments(id: IdDescription, e: ExerciceDetectiveErre
   const q = copieEleve(e)[indiceLigneFausse(e)]!.quantite;
   switch (id) {
     case "obtus":
-      return [texte("La touche "), latex(reciproque(e)), texte(" ne donne qu'un angle aigu, or "), latex(q), texte(" est obtus : il fallait prendre son supplémentaire, "), latex("180°"), texte(" moins cet angle.")];
+      return [texte("La touche "), latex(reciproque(e)), texte(" ne donne qu'un angle aigu, or "), latex(q), texte(" est obtus : il fallait prendre son supplémentaire, "), latex("180^\\circ"), texte(" moins cet angle.")];
     case "ambigu":
-      return [texte("Deux angles entre "), latex("0°"), texte(" et "), latex("180°"), texte(" ont ce sinus et les deux conviennent : il y a deux triangles, la copie en oublie un.")];
+      return [texte("Deux angles entre "), latex("0^\\circ"), texte(" et "), latex("180^\\circ"), texte(" ont ce sinus et les deux conviennent : il y a deux triangles, la copie en oublie un.")];
     case "radians": {
       const t = trigLigneFausse(e);
       return t ? [texte("La calculatrice était en mode radians au lieu de degrés pour calculer "), latex(t), texte(".")] : [texte("La calculatrice était en mode radians au lieu de degrés sur cette ligne.")];
@@ -243,7 +257,7 @@ function aidesLigne(e: ExerciceDetectiveErreurs): FragmentConsigne[][] {
   return [
     [
       texte("Contrôle d'abord la cohérence de la copie : une longueur est positive, la somme des angles vaut "),
-      latex("180°"),
+      latex("180^\\circ"),
       texte(", et le plus grand côté fait face au plus grand angle. Refais ensuite les calculs ligne par ligne à la calculatrice."),
     ],
     [texte(`L'erreur se trouve à la ligne ${p + 1} ou à la ligne ${q + 1}.`)],
@@ -252,12 +266,12 @@ function aidesLigne(e: ExerciceDetectiveErreurs): FragmentConsigne[][] {
 
 const AIDES_ERREUR: Record<TypeErreur, FragmentConsigne[][]> = {
   obtus: [
-    [texte("Combien d'angles entre "), latex("0°"), texte(" et "), latex("180°"), texte(" ont un même sinus ? Lequel la calculatrice donne-t-elle ?")],
-    [texte("Le plus grand côté fait face au plus grand angle, et la somme des angles vaut "), latex("180°"), texte(" : vérifie ces deux contrôles avec l'angle de cette ligne.")],
+    [texte("Combien d'angles entre "), latex("0^\\circ"), texte(" et "), latex("180^\\circ"), texte(" ont un même sinus ? Lequel la calculatrice donne-t-elle ?")],
+    [texte("Le plus grand côté fait face au plus grand angle, et la somme des angles vaut "), latex("180^\\circ"), texte(" : vérifie ces deux contrôles avec l'angle de cette ligne.")],
   ],
   ambigu: [
-    [texte("Combien d'angles entre "), latex("0°"), texte(" et "), latex("180°"), texte(" ont ce sinus ?")],
-    [texte("Teste le second candidat : la somme de "), latex("\\hat{A}"), texte(" et de cet angle reste-t-elle inférieure à "), latex("180°"), texte(" ?")],
+    [texte("Combien d'angles entre "), latex("0^\\circ"), texte(" et "), latex("180^\\circ"), texte(" ont ce sinus ?")],
+    [texte("Teste le second candidat : la somme de "), latex("\\hat{A}"), texte(" et de cet angle reste-t-elle inférieure à "), latex("180^\\circ"), texte(" ?")],
   ],
   radians: [
     [texte("Refais le calcul de cette ligne à ta calculatrice, en vérifiant le mode d'angle.")],
@@ -282,14 +296,14 @@ function aidesCorrection(e: ExerciceDetectiveErreurs): FragmentConsigne[][] {
   const i = indiceLigneFausse(e);
   const premiere: FragmentConsigne[] =
     e.scenario === "G1"
-      ? [texte("Le second candidat se calcule ainsi :"), latex(`\\hat{B}_2 = 180° - \\hat{B}_1 = 180° - ${nombreLatex(solutionAmbigue(e).B1, 1)}°`)]
-      : [texte(`La ligne ${i + 1} corrigée se calcule ainsi :`), latex(correcte[i]!.membres.join(" = "))];
+      ? [texte("Le second candidat se calcule ainsi :"), latex(`\\hat{B}_2 = 180^\\circ - \\hat{B}_1 = 180^\\circ - ${nombreLatex(solutionAmbigue(e).B1, 1)}^\\circ`)]
+      : [texte(`La ligne ${i + 1} corrigée se calcule ainsi :`), latex(membresLatex(correcte[i]!.membres))];
   if (champsAttendus(e).length === 1) {
-    return [premiere, [texte("Contrôle ensuite ta réponse : la somme des trois angles doit valoir "), latex("180°"), texte(".")]];
+    return [premiere, [texte("Contrôle ensuite ta réponse : la somme des trois angles doit valoir "), latex("180^\\circ"), texte(".")]];
   }
   const derniere =
     e.scenario === "G1"
-      ? `c_2 = \\dfrac{a\\sin\\hat{C}_2}{\\sin\\hat{A}}, \\quad \\hat{C}_2 = 180° - \\hat{A} - \\hat{B}_2`
+      ? `c_2 = \\dfrac{a\\sin\\hat{C}_2}{\\sin\\hat{A}}, \\quad \\hat{C}_2 = 180^\\circ - \\hat{A} - \\hat{B}_2`
       : correcte[correcte.length - 1]!.membres.slice(0, 2).join(" = ");
   return [premiere, [texte("Reprends ensuite les lignes suivantes avec cette valeur, jusqu'à la dernière :"), latex(derniere)]];
 }
@@ -318,13 +332,13 @@ export function constat(e: ExerciceDetectiveErreurs): FragmentConsigne[] {
     const s = solutionAmbigue(e);
     return [
       texte("Un sinus correspond à deux angles entre "),
-      latex("0°"),
+      latex("0^\\circ"),
       texte(" et "),
-      latex("180°"),
+      latex("180^\\circ"),
       texte(" : "),
-      latex(`${nombreLatex(s.B1, 1)}°`),
+      latex(`${nombreLatex(s.B1, 1)}^\\circ`),
       texte(" et "),
-      latex(`180° - ${nombreLatex(s.B1, 1)}° \\approx ${nombreLatex(s.B2, 1)}°`),
+      latex(`180^\\circ - ${nombreLatex(s.B1, 1)}^\\circ \\approx ${nombreLatex(s.B2, 1)}^\\circ`),
       texte(`. Or la ligne ${n} n'essaie pas le second, qui convient pourtant.`),
     ];
   }
@@ -340,7 +354,7 @@ export function constat(e: ExerciceDetectiveErreurs): FragmentConsigne[] {
   if (e.scenario === "O2") {
     const t = triangleDeLaCopie(e)!;
     const somme = t.angles[0] + t.angles[1] + t.angles[2];
-    return [texte("Dans la copie, la somme des angles vaut "), latex(`${nombreLatex(somme, 1)}°`), texte(" et non "), latex("180°"), texte(`. La ligne ${n} prend l'angle aigu donné par `), latex("\\sin^{-1}"), texte(".")];
+    return [texte("Dans la copie, la somme des angles vaut "), latex(`${nombreLatex(somme, 1)}^\\circ`), texte(" et non "), latex("180^\\circ"), texte(`. La ligne ${n} prend l'angle aigu donné par `), latex("\\sin^{-1}"), texte(".")];
   }
   if (e.scenario === "O1" || e.scenario === "O3") {
     const t = triangleDeLaCopie(e)!;
@@ -350,9 +364,9 @@ export function constat(e: ExerciceDetectiveErreurs): FragmentConsigne[] {
       texte(" est le plus grand côté, donc "),
       latex("\\hat{B}"),
       texte(" doit être le plus grand angle ; or la copie donne "),
-      latex(`\\hat{B} \\approx ${nombreLatex(t.angles[1], 1)}°`),
+      latex(`\\hat{B} \\approx ${nombreLatex(t.angles[1], 1)}^\\circ`),
       texte(" et "),
-      latex(`${ANGLES[j]} \\approx ${nombreLatex(t.angles[j]!, 1)}°`),
+      latex(`${ANGLES[j]} \\approx ${nombreLatex(t.angles[j]!, 1)}^\\circ`),
       texte(`. La ligne ${n} prend l'angle aigu donné par `),
       latex("\\sin^{-1}"),
       texte("."),
@@ -371,7 +385,7 @@ export function constat(e: ExerciceDetectiveErreurs): FragmentConsigne[] {
           texte(" : le plus grand côté doit faire face au plus grand angle."),
         ]
       : inc?.nature === "angle"
-        ? [texte("La copie obtient "), latex(`${ANGLES[inc.i]} \\approx ${nombreLatex(t.angles[inc.i]!, 1)}°`), texte(" : un angle négatif ou nul est impossible.")]
+        ? [texte("La copie obtient "), latex(`${ANGLES[inc.i]} \\approx ${nombreLatex(t.angles[inc.i]!, 1)}^\\circ`), texte(" : un angle négatif ou nul est impossible.")]
         : [texte("Les résultats de la copie ne forment pas un triangle cohérent.")];
   return [...debut, texte(` En refaisant les calculs, la ligne ${n} ne donne pas le même résultat en mode degrés.`)];
 }
@@ -382,7 +396,7 @@ export function piege(e: ExerciceDetectiveErreurs): FragmentConsigne[] {
     case "obtus":
       return [latex("\\sin^{-1}"), texte(" ne renvoie que l'angle aigu. Après Al-Kashi, calcule les autres angles avec "), latex("\\cos^{-1}"), texte(" : aucune ambiguïté.")];
     case "ambigu":
-      return [texte("Deux côtés et un angle non compris : teste toujours les deux candidats "), latex("\\hat{B}"), texte(" et "), latex("180° - \\hat{B}"), texte(".")];
+      return [texte("Deux côtés et un angle non compris : teste toujours les deux candidats "), latex("\\hat{B}"), texte(" et "), latex("180^\\circ - \\hat{B}"), texte(".")];
     case "radians":
       return [texte("Vérifie toujours le mode degrés de la calculatrice avant un calcul de trigonométrie.")];
     case "arrondi":
