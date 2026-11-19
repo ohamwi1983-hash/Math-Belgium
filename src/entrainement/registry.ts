@@ -97,6 +97,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen71: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppPortraitRobotFonction').then((m) => ({ default: m.AppPortraitRobotFonction }))),
   gen72: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppTransformationsEnsembles').then((m) => ({ default: m.AppTransformationsEnsembles }))),
   gen73: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppResoudreTriangle').then((m) => ({ default: m.AppResoudreTriangle }))),
+  gen122: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppLectureCercle').then((m) => ({ default: m.AppLectureCercle }))),
   gen76: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppValeurExacte').then((m) => ({ default: m.AppValeurExacte }))),
   gen80: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppComposerForces').then((m) => ({ default: m.AppComposerForces }))),
   gen75: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppAireTriangleSinus').then((m) => ({ default: m.AppAireTriangleSinus }))),
