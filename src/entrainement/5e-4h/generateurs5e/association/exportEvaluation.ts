@@ -24,6 +24,7 @@ import { consigneAssociation } from "../../ui5e/formatAssociation";
 import { evaluerPolynome } from "../domaineDefinition/polynome";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, derivee, formeCubique, genererExerciceAssociation } from "./index";
 import { profilAssociation } from "../profilsEvaluationDerivees25-27";
+import { normaliserLimites } from "../../../../lib/notationLog";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceAssociation>` pour 5gen25 (Association
@@ -98,7 +99,7 @@ function titreListe(titre: string): string {
 }
 
 function rendreLatex(expression: string): string {
-  return katex.renderToString(`\\displaystyle ${expression}`, { throwOnError: false });
+  return katex.renderToString(normaliserLimites(`\\displaystyle ${expression}`), { throwOnError: false });
 }
 
 // ============================================================================

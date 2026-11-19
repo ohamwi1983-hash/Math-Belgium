@@ -3,6 +3,7 @@ import { arrondir, chaineLinearisation, DECIMALES_ETAPE, defContexte, logsAttend
 import type { ExerciceLinearisation, ModeleDonnees } from "../core6e/linearisationDonnees";
 import type { PhaseLinearisation } from "../moteur6e/typesLinearisation";
 import { OPTIONS_CHOIX, unitePrevision } from "../moteur6e/verificationLinearisation";
+import { normaliserLimites } from "../../../lib/notationLog";
 
 /**
  * Couche C (6e) — textes de `6gen89` « Linéariser des données : du tableau au modèle ». SOURCE
@@ -135,7 +136,7 @@ function ligneLatex(e: ExerciceLinearisation, indice: number): string {
 // ============================================================================
 
 function rendre(expr: string): string {
-  return katex.renderToString(expr, { throwOnError: false, output: "html" });
+  return katex.renderToString(normaliserLimites(expr), { throwOnError: false, output: "html" });
 }
 
 const BORD = "border:1px solid #888;padding:0.3em 0.55em;text-align:center;white-space:nowrap";

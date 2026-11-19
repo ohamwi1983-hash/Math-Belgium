@@ -15,6 +15,7 @@ import { formatDomfLatex, formatEnsembleReelLatex, formatSlotConditionLatex, for
 import { phaseApresCE } from "../../moteur5e/typesDomaineDefinition";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDomaineDefinition } from "./index";
 import { LIBELLE_CAS_DOMAINE_DEFINITION, profilDomaineDefinition } from "../profilsEvaluationFonctions1-2";
+import { normaliserLimites } from "../../../../lib/notationLog";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceDomaineDefinition>` pour 5gen1 (domaine de
@@ -178,7 +179,7 @@ function resolutionRadicande(slot: SlotCE, ensemble: EnsembleReelGuide): Fragmen
 }
 
 const CELLULE = "border:1px solid #555;padding:4px 10px;text-align:center;";
-const k = (s: string) => katex.renderToString(s, { throwOnError: false });
+const k = (s: string) => katex.renderToString(normaliserLimites(s), { throwOnError: false });
 
 /** Tableau de signes de N, D et N/D (figure du corrigé, `figureHtml`). */
 function tableauSignesHtml(e: ExerciceFractionSousRacine): string {

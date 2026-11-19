@@ -28,6 +28,7 @@ import { COULEURS } from "../../ui6e/figureRepereIntegrales";
 import { LIBELLE_CAS_PROBABILITES_ENSEMBLES, profilProbabilitesEnsembles } from "../profilsEvaluationProbabilitesEnsembles";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabilitesEnsembles } from "./index";
 import type { IdVarianteProbabilitesEnsembles } from "./index";
+import { normaliserLimites } from "../../../../lib/notationLog";
 
 /**
  * Adaptateur feuille d'exercices / évaluation de `6gen30` (Probabilités et ensembles) — méthode
@@ -90,7 +91,7 @@ function quotient(n: number, d: number): string {
 }
 
 function rendre(expr: string): string {
-  return katex.renderToString(expr, { throwOnError: false });
+  return katex.renderToString(normaliserLimites(expr), { throwOnError: false });
 }
 
 // ============================================================================
