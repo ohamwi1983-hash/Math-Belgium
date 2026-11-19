@@ -30,6 +30,9 @@ import type { ReponseAnglesTriangleLies, ReponsePontSommetPartage, ReponseSoustr
 import { calculerRecapitulatifTriangleLies, entreeRecapPourPhase } from "./ui/recapitulatifTriangleLies";
 import { formatValeurUnite, libellesSommetPartage, uniteLongueurPont } from "./ui/formatTriangleLies";
 import type { ExerciceTriangleLies } from "./core/triangleLies.types";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeTriangleLies } from "./generateurs/triangleLies/corrigeDetaille";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -189,6 +192,7 @@ export function AppTriangleLies() {
         reponseAttendue,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTriangleLies(exercice), lettreEtape(sequencePourVariante(exercice).indexOf(etat.phase)))} />,
       }
     : null;
 
