@@ -1942,6 +1942,19 @@ export const trigonometrie: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 13. Modéliser une fonction sinusoïdale en contexte »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Modéliser des relevés réels par une sinusoïde',
+          generatorId: '5gen57',
+          description: [
+            'Annuaire des marées d\'un port, durée du jour au fil de l\'année dans une ville ou ' +
+              'températures moyennes de chaque mois : lis le maximum, le minimum et la période, ' +
+              'construis le modèle A sin(ωt + φ) + b (φ par le maximum), puis prévois une valeur ' +
+              'et calcule pendant combien de temps la grandeur dépasse un seuil.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 57. Modéliser des relevés réels par une sinusoïde »',
+        },
       ],
     },
   ],
