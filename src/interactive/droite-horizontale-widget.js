@@ -278,7 +278,7 @@
     }
 
     _repere(svg) {
-      var fn = this._fn, w = fn.win, self = this;
+      var fn = this._fn, self = this;
       var defs = svgEl("defs", {});
       var m = svgEl("marker", { id: "fl", markerWidth: "8", markerHeight: "8", refX: "6", refY: "4", orient: "auto" });
       m.appendChild(svgEl("path", { d: "M0,0 L8,4 L0,8 Z", class: "fleche" }));

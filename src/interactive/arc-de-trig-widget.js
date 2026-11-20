@@ -276,7 +276,7 @@
     }
 
     _graphe(theta, phi) {
-      var m = this._m, w = m.yWin, self = this, svg = this._s.getElementById("graphe");
+      var m = this._m, self = this, svg = this._s.getElementById("graphe");
       svg.innerHTML = "";
       var defs = marqueur(svg, "flg");
       var clip = svgEl("clipPath", { id: "cadre-g" });

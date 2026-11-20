@@ -80,7 +80,6 @@
     return el;
   }
   function intervalles(d) { return d === null ? [] : Array.isArray(d[0]) ? d : [d]; }
-  function dans(d, x) { return intervalles(d).some(function (iv) { return x >= iv[0] - 1e-12 && x <= iv[1] + 1e-12; }); }
 
   var TEMPLATE = document.createElement("template");
   TEMPLATE.innerHTML =
