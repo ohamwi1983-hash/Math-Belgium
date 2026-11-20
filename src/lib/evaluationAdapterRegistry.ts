@@ -409,6 +409,7 @@ import { adaptateurEvaluationDetectiveComplexes } from '../entrainement/6e-6h/ge
 import { adaptateurEvaluationLireCourbeExpo } from '../entrainement/6e-6h/generateurs6e/lireCourbeExponentielle/exportEvaluation'
 import { adaptateurEvaluationTangenteExpo } from '../entrainement/6e-6h/generateurs6e/tangenteExponentielle/exportEvaluation'
 import { adaptateurEvaluationModeleSaturation } from '../entrainement/6e-6h/generateurs6e/modeleSaturation/exportEvaluation'
+import { adaptateurEvaluationInteretsComposes } from '../entrainement/6e-6h/generateurs6e/interetsComposes/exportEvaluation'
 import { adaptateurEvaluationProbabilitesEnsembles } from '../entrainement/6e-6h/generateurs6e/probabilitesEnsembles/exportEvaluation'
 import { adaptateurEvaluationTiragesArbres } from '../entrainement/6e-6h/generateurs6e/tiragesArbres/exportEvaluation'
 import { adaptateurEvaluationIndependanceBayes } from '../entrainement/6e-6h/generateurs6e/independanceBayes/exportEvaluation'
@@ -448,6 +449,7 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen148': versionPapier(adaptateurEvaluationLireCourbeExpo) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen149': versionPapier(adaptateurEvaluationTangenteExpo) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen150': versionPapier(adaptateurEvaluationModeleSaturation) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen151': versionPapier(adaptateurEvaluationInteretsComposes) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen13': versionPapier(adaptateurEvaluationProprietesLogarithme) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen86': versionPapier(adaptateurEvaluationComparerEncadrerLog) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen92': versionPapier(adaptateurEvaluationGrandsNombres) as unknown as AdaptateurFeuilleExercices<never>,

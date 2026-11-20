@@ -850,6 +850,17 @@ export const fonctionsExponentielles: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 7. Domaine et dérivée »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Intérêts composés et nombre e',
+          generatorId: '6gen151',
+          description: [
+            'Le problème de Bernoulli : verser les intérêts plus souvent rapporte plus, mais le capital ' +
+              'reste borné — il tend vers K₀·eʳᵗ. Calcule trois capitaux, la limite et le taux équivalent.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 151. Intérêts composés et nombre e »',
+        },
       ],
     },
     {
