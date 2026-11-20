@@ -1,4 +1,5 @@
 import type { ExerciceInequationExponentielle } from "../../core6e/inequationsExponentielles.types";
+import { GROUPES_VERDICT_INEQUATIONS_EXPONENTIELLES, LIBELLE_CAS_INEQUATIONS_EXPONENTIELLES, profilInequationsExponentielles } from "../profilsEvaluationExponentielles";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, ErreurFrequente, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/corrigeTableau";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
@@ -71,7 +72,10 @@ function criteresDifficulte(e: ExerciceInequationExponentielle): CriteresDifficu
       piege = e.baseSuperieureA1 ? 0 : 1;
       break;
     case "B":
-      methode = 0;
+      // Lot E (groupe à verdict B / C-f) : reconnaître l'inéquation impossible est un choix de méthode,
+      // comme reconnaître C-f toujours vraie — niveau 2, 4 min pour les deux : le niveau imprimé ne
+      // trahit pas le verdict.
+      methode = 1;
       break;
     case "C":
       piege = e.sousType === "k" ? 1 : 0;
@@ -110,6 +114,9 @@ function enoncePapier(e: ExerciceInequationExponentielle): EnoncePapier {
 }
 
 export const adaptateurEvaluationInequationsExponentielles: AdaptateurFeuilleExercices<ExerciceInequationExponentielle> = {
+  profilInstance: profilInequationsExponentielles,
+  libelleCasParticulier: LIBELLE_CAS_INEQUATIONS_EXPONENTIELLES,
+  groupesVerdict: GROUPES_VERDICT_INEQUATIONS_EXPONENTIELLES,
   titreDocument: "Résoudre une inéquation exponentielle — Évaluation",
   nomFichierBase: "inequations-exponentielles",
   genererInstance: genererExerciceInequationExponentielle,

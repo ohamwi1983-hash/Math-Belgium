@@ -1,4 +1,5 @@
 import type { ExerciceDomaineDeriveeExponentielle } from "../../core6e/domaineDeriveeExponentielles.types";
+import { profilDomaineDeriveeExponentielles } from "../profilsEvaluationExponentielles";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/corrigeTableau";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
@@ -86,6 +87,7 @@ function criteresDifficulte(e: ExerciceDomaineDeriveeExponentielle): CriteresDif
 }
 
 export const adaptateurEvaluationDomaineDeriveeExponentielles: AdaptateurFeuilleExercices<ExerciceDomaineDeriveeExponentielle> = {
+  profilInstance: profilDomaineDeriveeExponentielles,
   titreDocument: "Domaine et dérivée (fonctions exponentielles) — Évaluation",
   nomFichierBase: "domaine-derivee-exponentielles",
   genererInstance: genererExerciceDomaineDeriveeExponentielle,

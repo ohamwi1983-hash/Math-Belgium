@@ -1,4 +1,5 @@
 import type { ExerciceExponentiellesProblemes } from "../../core6e/exponentiellesProblemes.types";
+import { profilExponentiellesProblemes, VARIANTES_CALCULATRICE_PROBLEMES } from "../profilsEvaluationExponentielles";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, ErreurFrequente, FragmentConsigne, QuestionExercice, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/corrigeTableau";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
@@ -209,6 +210,8 @@ function bareme(e: E): BaremeExercice {
 }
 
 export const adaptateurEvaluationExponentiellesProblemes: AdaptateurFeuilleExercices<E> = {
+  profilInstance: profilExponentiellesProblemes,
+  calculatriceIndispensable: VARIANTES_CALCULATRICE_PROBLEMES,
   titreDocument: "Exponentielles : problèmes contextualisés — Évaluation",
   nomFichierBase: "exponentielles-problemes",
   genererInstance: genererExerciceExponentiellesProblemes,

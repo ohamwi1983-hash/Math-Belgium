@@ -1,4 +1,5 @@
 import type { ExerciceLimiteExponentielle } from "../../core6e/limitesExponentielles.types";
+import { profilLimitesExponentielles } from "../profilsEvaluationExponentielles";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/corrigeTableau";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
@@ -143,7 +144,9 @@ function criteresDifficulte(e: ExerciceLimiteExponentielle): CriteresDifficulte 
       piege = e.sousCas === "puissance" ? (e.baseSuperieureA1 ? 0 : 1) : e.s % 2 === 1 && e.directionZero === "zero_moins" ? 1 : 0;
       break;
     case "B":
-      piege = e.baseSuperieureA1 && e.limitePolynomiale.type === "moins_infini" ? 1 : 0;
+      // Lot E : piège CONSTANT — « +∞ − ∞ » ou non est le verdict de l'écran « forme » ; un niveau 3 / 4
+      // selon l'issue le trahissait sur la feuille.
+      piege = 1;
       break;
     case "H":
     case "I":
@@ -166,6 +169,7 @@ function criteresDifficulte(e: ExerciceLimiteExponentielle): CriteresDifficulte 
 }
 
 export const adaptateurEvaluationLimitesExponentielles: AdaptateurFeuilleExercices<ExerciceLimiteExponentielle> = {
+  profilInstance: profilLimitesExponentielles,
   titreDocument: "Calcul de limites (fonctions exponentielles) — Évaluation",
   nomFichierBase: "limites-exponentielles",
   genererInstance: genererExerciceLimiteExponentielle,

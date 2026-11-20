@@ -1,4 +1,5 @@
 import type { ExerciceGraphiqueDeriveeExponentielle } from "../../core6e/graphiquesDeriveeExponentielles.types";
+import { profilGraphiquesDeriveeExponentielles } from "../profilsEvaluationExponentielles";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/corrigeTableau";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
@@ -96,6 +97,7 @@ function criteresDifficulte(e: ExerciceGraphiqueDeriveeExponentielle): CriteresD
 }
 
 export const adaptateurEvaluationGraphiquesDeriveeExponentielles: AdaptateurFeuilleExercices<ExerciceGraphiqueDeriveeExponentielle> = {
+  profilInstance: profilGraphiquesDeriveeExponentielles,
   titreDocument: "Graphique de la dérivée (fonctions exponentielles) — Évaluation",
   nomFichierBase: "graphiques-derivee-exponentielles",
   genererInstance: genererExerciceGraphiqueDeriveeExponentielle,

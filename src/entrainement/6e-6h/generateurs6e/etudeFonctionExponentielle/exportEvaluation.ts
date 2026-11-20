@@ -1,4 +1,5 @@
 import type { ExerciceEtudeFonctionExponentielle } from "../../core6e/etudeFonctionExponentielle.types";
+import { profilEtudeFonctionExponentielle } from "../profilsEvaluationExponentielles";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/corrigeTableau";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
@@ -132,6 +133,7 @@ function enoncePapier(e: ExerciceEtudeFonctionExponentielle): EnoncePapier {
 }
 
 export const adaptateurEvaluationEtudeFonctionExponentielle: AdaptateurFeuilleExercices<ExerciceEtudeFonctionExponentielle> = {
+  profilInstance: profilEtudeFonctionExponentielle,
   titreDocument: "Étude complète d'une fonction exponentielle — Évaluation",
   nomFichierBase: "etude-fonction-exponentielle",
   genererInstance: genererExerciceEtudeFonctionExponentielle,
