@@ -9,11 +9,11 @@
  * « Ni l'un ni l'autre » n'a pas d'écran 4 : la coquille garde quatre puces (`nombrePuces`) pour
  * que leur nombre ne trahisse pas le verdict.
  *
- * VARIANTE = le verdict (second degré à a entier, second degré à a demi-entier, premier degré, ni
- * l'un ni l'autre) : groupe à verdict `groupe_degre` dans le panneau d'évaluation.
+ * VARIANTE = le verdict (second degré, premier degré, ni l'un ni l'autre ; a demi-entier = issue tirée à
+ * 40 % dans « second ») : groupe à verdict `groupe_degre` dans le panneau d'évaluation.
  */
 
-export type VarianteDifferences = "secondEntier" | "secondDemi" | "premier" | "aucun";
+export type VarianteDifferences = "second" | "premier" | "aucun";
 
 export type Verdict = "premier" | "second" | "aucun";
 

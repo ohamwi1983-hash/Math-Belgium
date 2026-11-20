@@ -1,6 +1,6 @@
 import type { CatalogueVarianteEntree } from "../../../export/genererFeuilleExercices";
 import type { ExerciceDifferences, FamilleAucun, VarianteDifferences } from "../../core/differencesSecondes.types";
-import { choisir, entierAlea, melanger } from "../../moteur/algebreTransfertSecondDegre";
+import { choisir, entierAlea, melanger, tirerPondere } from "../../moteur/algebreTransfertSecondDegre";
 
 /**
  * Générateur de gen124 « Premier ou second degré ? Différences secondes ». Tout le hasard passe par
@@ -17,8 +17,7 @@ import { choisir, entierAlea, melanger } from "../../moteur/algebreTransfertSeco
  */
 
 export const CATALOGUE_VARIANTES: CatalogueVarianteEntree[] = [
-  { id: "secondEntier", label: "Second degré (différence seconde paire)" },
-  { id: "secondDemi", label: "Second degré (différence seconde impaire : a fractionnaire)" },
+  { id: "second", label: "Second degré (a entier ou demi-entier)" },
   { id: "premier", label: "Premier degré (différences premières constantes)" },
   { id: "aucun", label: "Ni du premier ni du second degré" },
 ];
@@ -41,9 +40,12 @@ function tirer(variante: VarianteDifferences): ExerciceDifferences {
   const ordreVerdicts = melanger(["premier", "second", "aucun"] as const).slice();
   for (;;) {
     let xs = abscisses(choisir([0, -1, -2]));
-    if (variante === "secondEntier" || variante === "secondDemi") {
-      const a = variante === "secondEntier" ? choisir([1, -1, 2, -2, 3, -3]) : choisir([0.5, -0.5, 1.5, -1.5]);
-      const b = variante === "secondEntier" ? entierAlea(-6, 6) : choisir([1, 3, 5, 7]) * choisir([1, -1]) / 2;
+    if (variante === "second") {
+      // a demi-entier (différence seconde impaire) dans 40 % des cas : issue tirée, pas une variante —
+      // deux variantes « second degré » dans le groupe à verdict donnaient le même verdict en A et B.
+      const demi = Math.random() < 0.4;
+      const a = demi ? choisir([0.5, -0.5, 1.5, -1.5]) : choisir([1, -1, 2, -2, 3, -3]);
+      const b = demi ? (choisir([1, 3, 5, 7]) * choisir([1, -1])) / 2 : entierAlea(-6, 6);
       const c = entierAlea(-9, 9);
       const valeurs = xs.map((x) => trinome(a, b, c, x));
       if (!valide(valeurs)) continue;
@@ -87,6 +89,8 @@ export function construireAvecVariante(id: string): ExerciceDifferences {
   return tirer(id as VarianteDifferences);
 }
 
+/** Tirage libre : second degré une fois sur deux (c'est le cas le plus riche), premier degré et
+ * « ni l'un ni l'autre » une fois sur quatre chacun. */
 export function genererExerciceDifferences(): ExerciceDifferences {
-  return tirer(choisir(CATALOGUE_VARIANTES).id as VarianteDifferences);
+  return tirer(tirerPondere<VarianteDifferences>([["second", 2], ["premier", 1], ["aucun", 1]]));
 }

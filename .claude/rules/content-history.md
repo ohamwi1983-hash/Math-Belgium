@@ -2267,6 +2267,17 @@ paths:
   `differences-secondes-widget` (§ 1), `completer-le-carre-widget` (réutilisé du ch. 2),
   `trois-formes-widget`, `parabole-par-points-widget` (mode Défi) (§ 2), `optimisation-enclos-widget`
   (enclos, prix, trajectoire ; domaine restreint) (§ 3).
+  **Lot H (audit 4e ch. 1), gen123–gen125** — trois cartes ajoutées : gen123 « Lire une parabole sur un
+  graphique » (§ 1, après le piège « le signe de b ne se lit jamais seul »), gen124 « Premier ou second
+  degré ? Différences secondes » (§ 1, après l'atelier `differences-secondes-widget`), gen125
+  « Retrouver l'équation d'une parabole » (§ 2, après l'atelier `parabole-par-points-widget`). Tous
+  trois sur la coquille `AppTransfertSecondDegre` (4e ch. 2), étendue de deux options additives :
+  `messagesOptions` (message ciblé par option fausse d'un choix fermé) et `nombrePuces` (structure fixe :
+  « ni l'un ni l'autre » de gen124 a trois écrans, la 4e puce passe « sans objet »). Champs d'expression
+  du socle : préfixe « f(x) = » / « y = » recopié ignoré. Figure partagée `4e/ui/figureParaboleGrille.ts`
+  (grille d'une unité, échelle unique, courbe redessinée par-dessus les graduations : leur fond blanc la
+  masquait à l'ordonnée à l'origine). Notation du cours (sommet a(x − x_S)² + y_S), ni « Δ » ni
+  « discriminant ». Détail papier / niveaux : `.claude/rules/feuilles-evaluations.md` (« 4e ch. 1, lot H »).
 
 - **4e, Chapitre 5 — Cercle trigonométrique & triangles quelconques** (`cercle-trigonometrique-triangles`) :
   audit puis enrichissement validé par l'utilisateur (toutes les recommandations). Corrections : ligne

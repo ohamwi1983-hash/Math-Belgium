@@ -74,7 +74,7 @@ function bareme(e: E): BaremeExercice {
   };
 }
 
-const GROUPES_VERDICT: GroupeVerdict[] = [{ id: "groupe_degre", label: "Degré à reconnaître (au hasard : premier, second, ni l'un ni l'autre)", variantes: ["secondEntier", "secondDemi", "premier", "aucun"] }];
+const GROUPES_VERDICT: GroupeVerdict[] = [{ id: "groupe_degre", label: "Degré à reconnaître (au hasard : premier, second, ni l'un ni l'autre)", variantes: ["second", "premier", "aucun"] }];
 
 export const adaptateurEvaluationDifferences: AdaptateurFeuilleExercices<E> = {
   profilInstance: profilDifferences,
