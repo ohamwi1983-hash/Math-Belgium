@@ -31,15 +31,37 @@ import { COURS_DERIVEE, COURS_LIMITES, coefDevant, finaliser, justif, lim, sansR
 
 type Fragments = FragmentConsigne[];
 
+/** Vrai si l'écriture a un « + » ou un « − » hors parenthèses (après son premier caractère) :
+ * il faut alors la mettre entre parenthèses devant un facteur. */
+function sommeNiveau0(u: string): boolean {
+  let prof = 0;
+  for (let i = 0; i < u.length; i++) {
+    const c = u[i];
+    if (c === "(" || c === "{") prof++;
+    else if (c === ")" || c === "}") prof--;
+    else if (prof === 0 && i > 0 && (c === "+" || c === "-")) return true;
+  }
+  return false;
+}
+
 /** Écrans réellement traversés par l'exercice (ordre du moteur). */
 export function sequenceLimitesExponentielles(e: ExerciceLimiteExponentielle): PhaseLimiteExponentielle[] {
   const phases: PhaseLimiteExponentielle[] = [];
   let p: PhaseLimiteExponentielle | "termine" = phaseInitiale(e);
   while (p !== "termine") {
-    phases.push(p);
+    // Les écrans « forme » de B et de C n'ont pas d'étape propre : la forme est établie dans
+    // l'étape de la limite finale (`lettrePhaseLimitesExpo`).
+    if (p !== "bForme" && p !== "cForme") phases.push(p);
     p = phaseApres(p);
   }
   return phases;
+}
+
+/** Lettre de l'étape du corrigé qui correspond à un écran (l'écran « forme » de B et de C partage
+ * l'étape de la limite finale, où la forme est écrite). */
+export function lettrePhaseLimitesExpo(e: ExerciceLimiteExponentielle, phase: PhaseLimiteExponentielle): string {
+  const cible = phase === "bForme" ? "bGlobale" : phase === "cForme" ? "cGlobale" : phase;
+  return String.fromCharCode(97 + Math.max(0, sequenceLimitesExponentielles(e).indexOf(cible)));
 }
 
 const cible = (c: CibleLimite) => formatCibleTexte(c);
@@ -197,6 +219,21 @@ function etapesC(e: ExerciceLimiteC): EtapeCorrection[] {
   const L = lim("+\\infty");
   const xr = e.r === 1 ? "x" : `x^{${e.r}}`;
   const xs = `x^{${e.s}}`;
+  if (e.quotient)
+    return [
+      utilise("a", [texte("On calcule la limite du numérateur et celle du dénominateur ; "), latex("e^{t}\\to+\\infty"), texte(" quand "), latex("t\\to+\\infty"), texte(` ${COURS_LIMITES}.`)]),
+      calcul("a", [
+        ligne(`${L}\\,${xr}=+\\infty`, "puissance positive de x"),
+        ligne(`${L}\\,${xs}=+\\infty`),
+        ligne(`${L}\\,e^{${xs}}=${lim("+\\infty", "t")}\\,e^{t}`, justif("on pose ", { l: `t=${xs}` })),
+        ligne("=+\\infty", justif("base ", { l: "e>1" })),
+      ]),
+      resultat("a", [latex(`${L}\\,${xr}=+\\infty`), texte(" et "), latex(`${L}\\,e^{${xs}}=+\\infty`)]),
+      utilise("b", [texte("Forme indéterminée "), latex("\\dfrac{\\infty}{\\infty}"), texte(" : croissances comparées, l'exponentielle l'emporte sur toute puissance de x "), texte(`${COURS_LIMITES}.`)]),
+      calcul("b", [ligne(`${L}\\dfrac{${xr}}{e^{${xs}}}=0`, "croissances comparées")]),
+      resultat("b", [latex(`${L}\\dfrac{${xr}}{e^{${xs}}}=0`)]),
+      piege("b", [latex("\\dfrac{\\infty}{\\infty}"), texte(" ne vaut pas 1 d'office : le dénominateur exponentiel grandit beaucoup plus vite que le numérateur.")]),
+    ];
   return [
     utilise("a", [texte("On calcule la limite de chaque facteur séparément ; "), latex("e^{t}\\to0"), texte(" quand "), latex("t\\to-\\infty"), texte(` ${COURS_LIMITES}.`)]),
     calcul("a", [
@@ -213,43 +250,7 @@ function etapesC(e: ExerciceLimiteC): EtapeCorrection[] {
   ];
 }
 
-// ============================================================================
-// Famille G — instance unique, développements à l'ordre 2.
-// ============================================================================
 
-function etapesG(): EtapeCorrection[] {
-  const D = "1-e^{\\frac{\\pi}{2}-x}";
-  const f = `\\dfrac{1}{\\cos(x)}+\\dfrac{1}{${D}}`;
-  const Lu = lim("0", "u");
-  return [
-    utilise("a", [texte("Somme de deux fractions : on les réduit au même dénominateur ; on note "), latex(`D(x)=${D}`), texte(".")]),
-    calcul("a", [
-      ligne(`D(x)=${D}`),
-      ligne("f(x)=\\dfrac{1}{\\cos(x)}+\\dfrac{1}{D(x)}", "on remplace"),
-      ligne("=\\dfrac{D(x)+\\cos(x)}{D(x)\\cos(x)}", "même dénominateur"),
-    ]),
-    resultat("a", [latex("f(x)=\\dfrac{D(x)+\\cos(x)}{D(x)\\cos(x)}"), texte(" avec "), latex(`D(x)=${D}`)]),
-    utilise("b", [texte("On pose "), latex("u=\\dfrac{\\pi}{2}-x"), texte(" ("), latex("u\\to0"), texte(") et on remplace chaque terme par son développement à l'ordre 1 : "), latex("\\sin(u)\\approx u"), texte(", "), latex("e^{u}\\approx1+u"), texte(".")]),
-    calcul("b", [
-      ligne("\\cos(x)=\\sin(u)", justif("car ", { l: "\\cos\\left(\\frac{\\pi}{2}-u\\right)=\\sin(u)" })),
-      ligne(`${D}=1-e^{u}`),
-      ligne("\\dfrac{1}{u}+\\dfrac{1}{-u}=0", justif("ordre 1 : ", { l: "\\sin(u)\\approx u" }, " et ", { l: "1-e^{u}\\approx-u" })),
-    ]),
-    resultat("b", [texte("Non : à l'ordre 1, les termes "), latex("\\dfrac{1}{u}"), texte(" et "), latex("-\\dfrac{1}{u}"), texte(" s'annulent, il reste une forme indéterminée ; il faut l'ordre 2.")]),
-    piege("b", [texte("Une somme qui s'annule à l'ordre 1 ne prouve pas que la limite vaut 0 : les termes d'ordre 2 décident.")]),
-    utilise("c", [texte("Développements à l'ordre 2 : "), latex("\\sin(u)\\approx u"), texte(", "), latex("e^{u}\\approx1+u+\\dfrac{u^2}{2}"), texte(", puis on simplifie par "), latex("u^2"), texte(".")]),
-    calcul("c", [
-      ligne(`${f}=\\dfrac{1-e^{u}+\\sin(u)}{\\sin(u)\\left(1-e^{u}\\right)}`, "forme de l'étape 1, écrite en u"),
-      ligne("1-e^{u}+\\sin(u)\\approx1-\\left(1+u+\\dfrac{u^2}{2}\\right)+u", "ordre 2"),
-      ligne("=-\\dfrac{u^2}{2}", "on réduit"),
-      ligne("\\sin(u)\\left(1-e^{u}\\right)\\approx u\\cdot(-u)", "ordre 1 suffit au dénominateur"),
-      ligne("=-u^2"),
-      ligne(`${Lu}\\dfrac{1-e^{u}+\\sin(u)}{\\sin(u)\\left(1-e^{u}\\right)}=${Lu}\\dfrac{-\\frac{u^2}{2}}{-u^2}`, "on remplace par les développements"),
-      ligne("=\\dfrac{1}{2}", justif("on simplifie par ", { l: "-u^2" })),
-    ]),
-    resultat("c", [latex(`${lim("\\frac{\\pi}{2}")}\\left(${f}\\right)=\\dfrac{1}{2}`)]),
-  ];
-}
 
 // ============================================================================
 // Familles H, I, J, K — règle de L'Hôpital.
@@ -328,7 +329,7 @@ function lignesDerivee(p: Partie, e: ExerciceLH, nom: string, expression: string
         lignes: sansRepetition([
           ligne(`${w}(x)=${u}`),
           ligne(`${w}'(x)=${p.coef}`),
-          ligne(`${fp}=${w}'(x)\\cdot\\ln(${base})\\cdot ${base}^{${w}(x)}${p.coef < 0 ? "+" : "-"}${Math.abs(p.coef) === 1 ? "" : Math.abs(p.coef)}\\ln(${base})`, justif("chaîne ; dérivée de ", { l: `${u}\\ln(${base})` })),
+          ligne(`${fp}=${w}'(x)\\cdot\\ln(${base})\\cdot ${base}^{${w}(x)}${p.coef < 0 ? "+" : "-"}${Math.abs(p.coef) === 1 ? "" : Math.abs(p.coef)}\\ln(${base})`, justif("chaîne ; dérivée de ", { l: `${sommeNiveau0(u) ? `\\left(${u}\\right)` : u}\\ln(${base})` })),
           ligne(`=${coefDevant(p.coef)}\\ln(${base})\\cdot ${base}^{${u}}${p.coef < 0 ? "+" : "-"}${Math.abs(p.coef) === 1 ? "" : Math.abs(p.coef)}\\ln(${base})`, `on remplace ${w} et ${w}′`),
           ligne(`=${derivee}`, justif("on met ", { l: `${coefDevant(p.coef) === "-" ? "-" : coefDevant(p.coef)}\\ln(${base})` }, " en évidence")),
         ]),
@@ -400,7 +401,7 @@ function etapesLHopital(e: ExerciceLH): EtapeCorrection[] {
         const u = kFoisDecalageLatex(k, x0);
         return sansRepetition([
           ligne(`${nom}''(x)=${coefDevant(k)}${ln}\\cdot\\left(${base}^{${nom === "f" ? "u" : "v"}(x)}\\right)'`, justif("le facteur ", { l: `${coefDevant(k) === "-" ? "-" : coefDevant(k)}${ln}` }, " reste, la constante −1 disparaît")),
-          ligne(`=${coefDevant(k)}${ln}\\cdot ${k < 0 ? `(${k})` : k}${ln}\\cdot ${base}^{${u}}`, "règle de la chaîne"),
+          ligne(`=${coefDevant(k)}${ln}\\cdot ${k < 0 ? `(${k})` : k}\\cdot ${ln}\\cdot ${base}^{${u}}`, "règle de la chaîne"),
           ligne(`=${d2}`, justif("car ", { l: `${k < 0 ? `(${k})` : k}^2=${k * k}` })),
         ]);
       }
@@ -553,9 +554,6 @@ export function correctionDetailleeLimitesExponentielles(e: ExerciceLimiteExpone
       break;
     case "C":
       etapes = etapesC(e);
-      break;
-    case "G":
-      etapes = etapesG();
       break;
     case "H":
     case "I":

@@ -343,3 +343,15 @@ export function verifierFDerivee(exercice: ExerciceDomaineDeriveeF, texte: strin
   const points = exercice.trig === "cos" ? [-1.4, -0.5, 0.5, 1.4] : [-Math.sqrt(exercice.k) * 0.6, -Math.sqrt(exercice.k) * 0.2, Math.sqrt(exercice.k) * 0.2, Math.sqrt(exercice.k) * 0.6];
   return equivalent(texte, referenceFDerivee(exercice), points);
 }
+
+/** Dérivée de référence et points d'échantillonnage des écrans « dérivée » à une seule puissance
+ * a^u (familles A et B) — pour les messages ciblés de l'écran (facteur ln a ou u′ oublié, signe),
+ * jamais pour le verdict (`verifierADerivee` / `verifierBDerivee`). */
+export function referenceDeriveePuissance(exercice: ExerciceDomaineDeriveeA | ExerciceDomaineDeriveeB): { ref: (x: number) => number; points: number[] } {
+  if (exercice.famille === "A") return { ref: referenceADerivee(exercice), points: POINTS_GENERIQUES };
+  const points =
+    exercice.sousType === "racine"
+      ? [exercice.k + 0.6, exercice.k + 1.4, -(exercice.k + 0.6), -(exercice.k + 1.4)]
+      : POINTS_B_FRACTION_OFFSETS.map((d) => -exercice.q / exercice.p + d);
+  return { ref: referenceBDerivee(exercice), points };
+}

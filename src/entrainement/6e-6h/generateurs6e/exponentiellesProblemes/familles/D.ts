@@ -12,7 +12,10 @@ import { tirerParmi } from "../aleatoire";
  * EXACTEMENT ρ et L = a − (a − b)²/((a − b) − (b − c)) EXACTEMENT L — jamais de tirage dégénéré
  * (a − b = C(1 − ρ) ≠ C·ρ(1 − ρ) = b − c, puisque 0 < ρ < 1). Seul r = ρ^{1/d} est irrationnel
  * pour d ≥ 2 (écrit au millième dans le modèle) ; la prévision T(3d) = L + C·ρ³ est rationnelle.
- * « bas » (approche par en dessous, C < 0) : a = L − |C| ≥ 0 (pas de vitesse ni de score négatifs).
+ * Bornes PAR CONTEXTE (`contextes.ts`, audit 6e ch. 2) : L, |C|, pas d (5 ou 10 min pour un café,
+ * 2 à 4 s pour un parachutiste…) et valeur initiale minimale pour une approche « par le bas »
+ * (C < 0, a = L − |C|) — plus de score négatif, de parachutiste à 0 m/s ni de vitesse limite de
+ * 10 m/s.
  */
 
 /** ρ = num/den, à écriture décimale finie. */
@@ -23,21 +26,17 @@ const RAPPORTS: readonly { num: number; den: number }[] = [
   { num: 3, den: 5 },
   { num: 2, den: 5 },
 ];
-const L_POOL = [10, 15, 20, 25] as const;
-const D_POOL = [1, 2, 3] as const;
-const C_MIN = 8;
-const C_MAX = 40;
 
 export function construireD(): ExerciceExpoProbD {
   const positif = tirerParmi([true, false]);
   const contexte = tirerParmi(CONTEXTES_D.filter((ctx) => ctx.signe === (positif ? "haut" : "bas")));
-  const d = tirerParmi(D_POOL);
+  const d = tirerParmi(contexte.dPool);
   for (;;) {
     const rho = tirerParmi(RAPPORTS);
-    const L = tirerParmi(L_POOL);
+    const L = tirerParmi(contexte.lPool);
     const pas = rho.den * rho.den;
     const magnitudes: number[] = [];
-    for (let m = pas; m <= C_MAX; m += pas) if (m >= C_MIN && (positif || m <= L)) magnitudes.push(m);
+    for (let m = pas; m <= contexte.cMax; m += pas) if (m >= contexte.cMin && (positif || L - m >= contexte.aMin)) magnitudes.push(m);
     if (magnitudes.length === 0) continue;
     const magnitude = tirerParmi(magnitudes);
     const C = positif ? magnitude : -magnitude;

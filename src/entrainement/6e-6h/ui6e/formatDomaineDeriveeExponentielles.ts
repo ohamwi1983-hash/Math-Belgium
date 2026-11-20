@@ -95,19 +95,18 @@ function consigneA(phase: "aDomaine" | "aDerivee"): FragmentConsigne[] {
 }
 
 function aideANiveau1(phase: "aDomaine" | "aDerivee"): AideAvecLatex {
-  if (phase === "aDomaine") return { texte: "Une exponentielle est toujours définie, quel que soit son exposant — aucune restriction ici.", latex: null };
-  return { texte: "Rappel de la formule générique — attention, ln(e)=1 (cas particulier si la base est e) :", latex: "\\frac{d}{dx}\\left[\\text{base}^{u(x)}\\right] = u'(x)\\cdot\\text{base}^{u(x)}\\cdot\\ln(\\text{base})" };
+  if (phase === "aDomaine") return { texte: "Une exponentielle est définie quel que soit son exposant : cherche seulement une racine, un dénominateur ou un logarithme dans l'expression.", latex: null };
+  return { texte: "Dérivée d'une exponentielle composée (règle de la chaîne ; pour la base e, $\\ln e = 1$) :", latex: "\\left(a^{u(x)}\\right)'=u'(x)\\cdot\\ln a\\cdot a^{u(x)}\\qquad \\left(e^{u(x)}\\right)'=u'(x)\\cdot e^{u(x)}" };
 }
 
 function aideANiveau2(phase: "aDomaine" | "aDerivee", exercice: ExerciceDomaineDeriveeA): AideAvecLatex {
-  if (phase === "aDomaine") return { texte: "Le domaine d'une exponentielle composée est toujours ℝ.", latex: "\\mathbb{R}" };
+  if (phase === "aDomaine") return { texte: "Ici, l'expression ne contient ni racine, ni dénominateur, ni logarithme.", latex: null };
   const b = formatBase(exercice.base, exercice.baseEstE);
   if (exercice.sousType === "direct") {
-    const gPrime = exercice.g.type === "affine" ? String(exercice.g.m) : `${exercice.g.exposant}${formatPuissance("x", exercice.g.exposant - 1)}`;
-    return { texte: "Forme substituée (non simplifiée) :", latex: `\\left(${gPrime}\\right)\\cdot ${b}^{${formatGA(exercice.g)}}\\cdot\\ln(${b})` };
+    return { texte: "Ici, l'exposant est :", latex: `u(x)=${formatGA(exercice.g)}` };
   }
   const puissance = formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }]);
-  return { texte: "Forme substituée (non simplifiée, u=le facteur entre parenthèses) :", latex: `2\\left(${b}^{${puissance}} - ${exercice.c}\\right)\\cdot ${exercice.m}\\cdot\\ln(${b})\\cdot ${b}^{${puissance}}` };
+  return { texte: "Ici, f est le carré d'une différence : dérive d'abord le carré, puis la puissance (règle de la chaîne) :", latex: `\\left(v^{2}\\right)'=2v\\cdot v',\\qquad v(x)=${b}^{${puissance}}-${exercice.c}` };
 }
 
 // ============================================================================
@@ -133,8 +132,8 @@ function aideBNiveau1(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineD
       : { texte: "Une fraction n'est définie que si son dénominateur est non nul :", latex: `${formatSommeTermes([{ valeur: exercice.p, suffixe: "x" }, { valeur: exercice.q, suffixe: "" }])}\\neq 0` };
   }
   return {
-    texte: "Il y a ICI deux dérivations imbriquées : l'exponentielle base^u, ET la dérivée de u elle-même (règle de la chaîne) — ne traite jamais base^u seule.",
-    latex: "\\frac{d}{dx}\\left[\\text{base}^{u(x)}\\right] = u'(x)\\cdot\\text{base}^{u(x)}\\cdot\\ln(\\text{base})",
+    texte: "Deux dérivations s'enchaînent : celle de l'exponentielle et celle de son exposant u (règle de la chaîne) :",
+    latex: "\\left(a^{u(x)}\\right)'=u'(x)\\cdot\\ln a\\cdot a^{u(x)}",
   };
 }
 
@@ -145,21 +144,13 @@ function aideBNiveau2(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineD
       : { texte: "Valeur qui annule le dénominateur, à exclure :", latex: `${formatSommeTermes([{ valeur: exercice.p, suffixe: "x" }, { valeur: exercice.q, suffixe: "" }])}=0` };
   if (exercice.sousType === "racine") {
     const u = `\\sqrt{x^2-${exercice.k * exercice.k}}`;
-    return { texte: "u et u', rappelés séparément (pas encore assemblés) :", latex: `\\begin{gathered} u(x) = ${u} \\\\ u'(x) = \\dfrac{x}{${u}} \\end{gathered}` };
+    return { texte: "Ici, l'exposant est une racine carrée ; sa dérivée suit la règle :", latex: `u(x)=${u},\\qquad \\left(\\sqrt{v}\\right)'=\\dfrac{v'}{2\\sqrt{v}}` };
   }
   const num = formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }]);
   const den = formatSommeTermes([{ valeur: exercice.p, suffixe: "x" }, { valeur: exercice.q, suffixe: "" }]);
-  // Parenthèses autour de `num`/`den` UNIQUEMENT quand ils sont composés — jamais autour de la
-  // variable nue "x", qui donnerait "(x)²"/"m(x)" superflu (audit transversal,
-  // `promptauditparenthesessuperflues.md`).
-  const numAtomique = exercice.m === 1 && exercice.n === 0;
-  const denAtomique = exercice.p === 1 && exercice.q === 0;
-  const numGroupe = numAtomique ? num : `(${num})`;
-  const denGroupe = denAtomique ? den : `(${den})`;
-  const denCarre = denAtomique ? `${den}^2` : `(${den})^2`;
   return {
-    texte: "u et u' (règle du quotient), rappelés séparément (pas encore assemblés) :",
-    latex: `\\begin{gathered} u(x) = \\dfrac{${num}}{${den}} \\\\ u'(x) = \\dfrac{${exercice.m}${denGroupe}-${exercice.p}${numGroupe}}{${denCarre}} \\end{gathered}`,
+    texte: "Ici, l'exposant est un quotient ; sa dérivée suit la règle du quotient :",
+    latex: `u(x)=\\dfrac{${num}}{${den}},\\qquad \\left(\\dfrac{N}{D}\\right)'=\\dfrac{N'D-ND'}{D^{2}}`,
   };
 }
 
@@ -207,21 +198,21 @@ function formatFonctionC(exercice: ExerciceDomaineDeriveeC): string {
 
 function consigneC(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): FragmentConsigne[] {
   if (phase === "cDomaine") return [texte(CONSIGNE_DOMAINE)];
-  if (phase === "cFacteurs") return [texte("Dérive chaque facteur SÉPARÉMENT ("), latex("u'(x)"), texte(" et "), latex("v'(x)"), texte(").")];
-  return [texte("Assemble via "), latex("u'v+uv'"), texte(", à partir des dérivées CORRECTES de l'étape précédente.")];
+  if (phase === "cFacteurs") return [texte("Dérive chaque facteur séparément : "), latex("u'(x)"), texte(" et "), latex("v'(x)"), texte(".")];
+  return [texte("Assemble la dérivée du produit avec "), latex("u'v+uv'"), texte(".")];
 }
 
 function aideCNiveau1(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): AideAvecLatex {
-  if (phase === "cDomaine") return { texte: "Un produit d'exponentielle(s)/de fonctions déjà définies partout reste défini partout (ou hérite du domaine du facteur le plus restrictif).", latex: null };
-  if (phase === "cFacteurs") return { texte: "Identifie u(x) et v(x) séparément à partir de f(x)=u(x)·v(x), puis dérive chacun indépendamment (chaîne si besoin).", latex: "f(x)=u(x)\\cdot v(x)" };
+  if (phase === "cDomaine") return { texte: "Un produit est défini là où chacun de ses facteurs l'est : cherche une racine, un dénominateur ou un logarithme dans chaque facteur.", latex: null };
+  if (phase === "cFacteurs") return { texte: "Écris f comme un produit de deux facteurs, puis dérive chacun (règle de la chaîne si besoin) :", latex: "f(x)=u(x)\\cdot v(x)" };
   return { texte: "Rappel de la formule du produit (non substituée) :", latex: "(uv)' = u'v + uv'" };
 }
 
 function aideCNiveau2(phase: "cDomaine" | "cFacteurs" | "cAssemblage", exercice: ExerciceDomaineDeriveeC): AideAvecLatex {
-  if (phase === "cDomaine") return { texte: "Domaine :", latex: exercice.sousType === "e" ? "[0\\,;\\,+\\infty[" : "\\mathbb{R}" };
+  if (phase === "cDomaine") return exercice.sousType === "e" ? { texte: "Ici, une racine carrée apparaît dans l'exposant : son radicande doit être positif ou nul :", latex: "x\\geq 0" } : { texte: "Ici, chacun des deux facteurs est défini pour tout réel.", latex: null };
   const { u, v } = nomsFacteursC(exercice);
   if (phase === "cFacteurs") return { texte: "u(x) et v(x), pour t'aider à identifier ce que tu dois dériver :", latex: `\\begin{gathered} u(x) = ${u} \\\\ v(x) = ${v} \\end{gathered}` };
-  return { texte: "u, v, u' et v' (déjà confirmés à l'étape précédente) :", latex: `u(x)=${u},\\ v(x)=${v}` };
+  return { texte: "Ici, les deux facteurs sont :", latex: `u(x)=${u},\\qquad v(x)=${v}` };
 }
 
 // ============================================================================
@@ -254,21 +245,21 @@ function deriveesND(exercice: ExerciceDomaineDeriveeD): { nPrime: string; dPrime
 
 function consigneD(phase: "dDomaine" | "dND" | "dAssemblage"): FragmentConsigne[] {
   if (phase === "dDomaine") return [texte(CONSIGNE_DOMAINE)];
-  if (phase === "dND") return [texte("Dérive le numérateur N ET le dénominateur D SÉPARÉMENT ("), latex("N'(x)"), texte(" et "), latex("D'(x)"), texte(").")];
-  return [texte("Assemble via "), latex("(N'D-ND')/D^2"), texte(", à partir des valeurs "), latex("N'/D'"), texte(" CORRECTES de l'étape précédente.")];
+  if (phase === "dND") return [texte("Dérive séparément le numérateur et le dénominateur : "), latex("N'(x)"), texte(" et "), latex("D'(x)"), texte(".")];
+  return [texte("Assemble la dérivée du quotient avec "), latex("\\dfrac{N'D-ND'}{D^{2}}"), texte(".")];
 }
 
 function aideDNiveau1(phase: "dDomaine" | "dND" | "dAssemblage"): AideAvecLatex {
-  if (phase === "dDomaine") return { texte: "Vérifie si le dénominateur peut s'annuler — ne conclus jamais ℝ par réflexe.", latex: null };
-  if (phase === "dND") return { texte: "Identifie N(x) et D(x) séparément à partir de f(x)=N(x)/D(x), puis dérive chacun indépendamment.", latex: "f(x)=\\dfrac{N(x)}{D(x)}" };
+  if (phase === "dDomaine") return { texte: "Un quotient est défini là où son dénominateur ne s'annule pas : cherche si le dénominateur peut valoir 0.", latex: null };
+  if (phase === "dND") return { texte: "Écris f comme un quotient, puis dérive le numérateur et le dénominateur séparément :", latex: "f(x)=\\dfrac{N(x)}{D(x)}" };
   return { texte: "Rappel de la formule du quotient (non substituée) :", latex: "\\left(\\frac{N}{D}\\right)' = \\frac{N'D - ND'}{D^2}" };
 }
 
 function aideDNiveau2(phase: "dDomaine" | "dND" | "dAssemblage", exercice: ExerciceDomaineDeriveeD): AideAvecLatex {
-  if (phase === "dDomaine") return { texte: "Résous D(x)=0 (ou vérifie qu'il ne s'annule jamais).", latex: "D(x)=0" };
+  if (phase === "dDomaine") return { texte: "Résous l'équation « dénominateur = 0 », ou montre qu'elle n'a pas de solution :", latex: "D(x)=0" };
   const { n, d } = nomsNDdeD(exercice);
   if (phase === "dND") return { texte: "N(x) et D(x), pour t'aider à identifier ce que tu dois dériver :", latex: `\\begin{gathered} N(x) = ${n} \\\\ D(x) = ${d} \\end{gathered}` };
-  return { texte: "N, D, N' et D' (déjà confirmés à l'étape précédente) :", latex: `N(x)=${n},\\ D(x)=${d}` };
+  return { texte: "Ici, le numérateur et le dénominateur sont :", latex: `N(x)=${n},\\qquad D(x)=${d}` };
 }
 
 // ============================================================================
@@ -327,18 +318,18 @@ function formeSimplifieeLatexE(exercice: ExerciceDomaineDeriveeE): string {
 
 function consigneE(phase: "eDomaine" | "eSimplifier" | "eDerivee"): FragmentConsigne[] {
   if (phase === "eDomaine") return [texte(CONSIGNE_DOMAINE)];
-  if (phase === "eSimplifier") return [texte("Simplifie l'écriture de f(x) AVANT toute dérivation (utilise les propriétés des exposants).")];
-  return [texte("Dérive la forme SIMPLIFIÉE et CORRECTE de l'étape précédente (dérivée directe, nettement plus simple).")];
+  if (phase === "eSimplifier") return [texte("Avant de dériver, simplifie l'écriture de f(x) avec les propriétés des puissances.")];
+  return [texte("Dérive la forme simplifiée de f(x).")];
 }
 
 function texteProprieteE(exercice: ExerciceDomaineDeriveeE): string {
-  if (exercice.sousType === "j") return "Propriété : a^m/a^n = a^(m-n) — soustrais les exposants, ne simplifie rien d'autre.";
-  if (exercice.sousType === "m") return "Sépare la fraction en 2 termes : (A-B)/C = A/C - B/C.";
-  return "Sépare la fraction en 2 termes, puis regroupe chaque puissance : a^x/b^x = (a/b)^x.";
+  if (exercice.sousType === "j") return "Le quotient de deux puissances de même base est une puissance dont l'exposant est la différence des exposants :";
+  if (exercice.sousType === "m") return "Sépare la fraction en deux termes de même dénominateur :";
+  return "Sépare la fraction en deux termes, puis regroupe chaque quotient de puissances de même exposant :";
 }
 
 function aideENiveau1(phase: "eDomaine" | "eSimplifier" | "eDerivee", exercice: ExerciceDomaineDeriveeE): AideAvecLatex {
-  if (phase === "eDomaine") return { texte: "Le domaine d'une exponentielle (et de tout quotient d'exponentielles, jamais nulles) est toujours ℝ.", latex: null };
+  if (phase === "eDomaine") return { texte: "Un quotient est défini là où son dénominateur ne s'annule pas ; une exponentielle ne s'annule jamais :", latex: "a^{x}>0" };
   if (phase === "eSimplifier") {
     const latexProprieteE: Record<ExerciceDomaineDeriveeE["sousType"], string> = {
       j: "\\dfrac{a^m}{a^n}=a^{m-n}",
@@ -347,17 +338,17 @@ function aideENiveau1(phase: "eDomaine" | "eSimplifier" | "eDerivee", exercice: 
     };
     return { texte: texteProprieteE(exercice), latex: latexProprieteE[exercice.sousType] };
   }
-  return { texte: "La forme simplifiée est une simple exponentielle (ou somme de 2 exponentielles) — dérive-la directement, sans repasser par la règle du quotient.", latex: null };
+  return { texte: "La forme simplifiée est une exponentielle, ou une somme d'exponentielles : dérive-la terme par terme, sans règle du quotient.", latex: null };
 }
 
 function aideENiveau2(phase: "eDomaine" | "eSimplifier" | "eDerivee", exercice: ExerciceDomaineDeriveeE): AideAvecLatex {
-  if (phase === "eDomaine") return { texte: "Domaine :", latex: "\\mathbb{R}" };
+  if (phase === "eDomaine") return { texte: "Ici, le dénominateur est une exponentielle (ou en contient une) : vérifie s'il peut valoir 0.", latex: null };
   if (phase === "eSimplifier") {
     if (exercice.sousType === "j") return { texte: "Première étape (exposants pas encore combinés) :", latex: `${formatBase(exercice.base, exercice.baseEstE)}^{${formatGA(exercice.g)}-${formatGA(exercice.h)}}` };
     if (exercice.sousType === "m") return { texte: "Première étape (fraction séparée, pas encore simplifiée) :", latex: `\\frac{${formatBase(exercice.base, exercice.baseEstE)}^x}{${formatBase(exercice.base, exercice.baseEstE)}^x} - \\frac{1}{${formatBase(exercice.base, exercice.baseEstE)}^x}` };
     return { texte: "Première étape (fraction séparée, pas encore regroupée) :", latex: `\\frac{${exercice.base1}^x}{${exercice.base2}^x} - ${exercice.c}\\cdot\\frac{1}{${exercice.base2}^x}` };
   }
-  return { texte: "Rappel de la dérivée d'une exponentielle simple :", latex: "\\frac{d}{dx}\\left[\\text{base}^{x}\\right] = \\ln(\\text{base})\\cdot\\text{base}^{x}" };
+  return { texte: "Dérivée d'une exponentielle :", latex: "\\left(a^{u(x)}\\right)'=u'(x)\\cdot\\ln a\\cdot a^{u(x)}\\qquad \\left(e^{u(x)}\\right)'=u'(x)\\cdot e^{u(x)}" };
 }
 
 // ============================================================================
@@ -370,30 +361,30 @@ function formatFonctionF(exercice: ExerciceDomaineDeriveeF): string {
 }
 
 function consigneF(phase: "fDomaine" | "fDerivee"): FragmentConsigne[] {
-  return [texte(phase === "fDomaine" ? CONSIGNE_DOMAINE : "Calcule la dérivée de cette fonction (chaîne à 3 niveaux : fonction extérieure, exponentielle, exposant).")];
+  return [texte(phase === "fDomaine" ? CONSIGNE_DOMAINE : "Calcule la dérivée de cette fonction : trois fonctions s'enchaînent (la fonction extérieure, l'exponentielle, son exposant).")];
 }
 
 function aideFNiveau1(phase: "fDomaine" | "fDerivee", exercice: ExerciceDomaineDeriveeF): AideAvecLatex {
   if (phase === "fDomaine") {
-    if (exercice.trig === "cos") return { texte: "cos est défini partout — aucune restriction ici.", latex: null };
+    if (exercice.trig === "cos") return { texte: "Le cosinus est défini pour tout réel ; une exponentielle aussi.", latex: null };
     return {
-      texte: "arccos(w) exige -1≤w≤1. Une exponentielle est TOUJOURS strictement positive — donc TOUJOURS > -1 : cette condition est automatique, seule w≤1 reste à résoudre.",
+      texte: "$\\arccos(w)$ n'existe que si w est compris entre −1 et 1 ; une exponentielle est toujours strictement positive, donc seule la condition $w\\leq 1$ reste à résoudre :",
       latex: "-1\\leq w\\leq 1",
     };
   }
-  return { texte: "3 niveaux de chaîne à enchaîner, énumérés de l'extérieur vers l'intérieur (sans encore substituer) :", latex: "\\text{trig}(w),\\quad w=e^{v},\\quad v=x^2-k" };
+  return { texte: "Applique la règle de la chaîne deux fois, de l'extérieur vers l'intérieur :", latex: "\\bigl(g(w(x))\\bigr)'=g'(w(x))\\cdot w'(x),\\qquad w(x)=e^{v(x)}" };
 }
 
 function aideFNiveau2(phase: "fDomaine" | "fDerivee", exercice: ExerciceDomaineDeriveeF): AideAvecLatex {
   if (phase === "fDomaine") {
-    if (exercice.trig === "cos") return { texte: "Domaine :", latex: "\\mathbb{R}" };
+    if (exercice.trig === "cos") return { texte: "Ici, aucune racine, aucun dénominateur, aucun logarithme : rien n'est exclu.", latex: null };
     return { texte: "Inéquation restante (non résolue) :", latex: `e^{x^2-${exercice.k}} \\leq 1` };
   }
   const w = `e^{x^2-${exercice.k}}`;
   const wPrime = `2x\\cdot ${w}`;
   return {
-    texte: "Dérivée de chaque niveau séparément — assemblage final laissé à toi :",
-    latex: `\\begin{gathered} w'(x) = ${wPrime} \\\\ \\text{trig}'(w) = ${exercice.trig === "cos" ? "-\\sin(w)" : "-\\dfrac{1}{\\sqrt{1-w^2}}"} \\end{gathered}`,
+    texte: "Ici, chaque fonction se dérive ainsi (assemble ensuite) :",
+    latex: `w(x)=${w},\\quad w'(x)=${wPrime},\\quad ${exercice.trig === "cos" ? "(\\cos w)'=-\\sin w\\cdot w'" : "(\\arccos w)'=-\\dfrac{w'}{\\sqrt{1-w^{2}}}"}`,
   };
 }
 

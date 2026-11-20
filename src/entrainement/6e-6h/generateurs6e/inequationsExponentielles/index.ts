@@ -15,10 +15,10 @@ import { construireE } from "./familles/E";
 export type IdVarianteInequationExponentielle = "A" | "B" | "C-f" | "C-k" | "D-constant" | "D-variable" | "E";
 
 export const CATALOGUE_FAMILLES: { id: IdVarianteInequationExponentielle; label: string }[] = [
-  { id: "A", label: "A — Même base, sens préservé/inversé" },
-  { id: "B", label: "B — Toujours ∅" },
-  { id: "C-f", label: "C — Toujours ℝ (produit de signes coïncidents)" },
-  { id: "C-k", label: "C — Toujours ℝ (regroupement, discriminant négatif)" },
+  { id: "A", label: "A — Même base" },
+  { id: "B", label: "B — Multiple d'une puissance comparé à un nombre" },
+  { id: "C-f", label: "C — Produit x·(aˣ − 1)" },
+  { id: "C-k", label: "C — Deux bases, trinôme en exposant" },
   { id: "D-constant", label: "D — Produit, 1 facteur à signe constant" },
   { id: "D-variable", label: "D — Produit, 2 facteurs variables (tableau de signes)" },
   { id: "E", label: "E — Bases différentes, même exposant" },

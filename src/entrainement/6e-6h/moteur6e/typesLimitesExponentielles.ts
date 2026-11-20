@@ -15,12 +15,11 @@ export type PhaseLimiteExponentielle =
   | "aGlobale"
   | "bExponentielle"
   | "bPolynomiale"
+  | "bForme"
   | "bGlobale"
   | "cFacteurs"
+  | "cForme"
   | "cGlobale"
-  | "gCombiner"
-  | "gOrdre1"
-  | "gConclure"
   | "hForme"
   | "hNumerateur"
   | "hDenominateur"
@@ -52,8 +51,6 @@ export function phaseInitiale(exercice: ExerciceLimiteExponentielle): PhaseLimit
       return "bExponentielle";
     case "C":
       return "cFacteurs";
-    case "G":
-      return "gCombiner";
     case "H":
       return "hForme";
     case "I":
@@ -78,18 +75,16 @@ export function phaseApres(phase: PhaseLimiteExponentielle): PhaseLimiteExponent
     case "bExponentielle":
       return "bPolynomiale";
     case "bPolynomiale":
+      return "bForme";
+    case "bForme":
       return "bGlobale";
     case "bGlobale":
       return "termine";
     case "cFacteurs":
+      return "cForme";
+    case "cForme":
       return "cGlobale";
     case "cGlobale":
-      return "termine";
-    case "gCombiner":
-      return "gOrdre1";
-    case "gOrdre1":
-      return "gConclure";
-    case "gConclure":
       return "termine";
     case "hForme":
       return "hNumerateur";
@@ -160,14 +155,6 @@ export type ResultatExerciceLimiteExponentielle =
       details: Partial<Record<PhaseLimiteExponentielle, DetailPhaseLimiteExponentielle>>;
     }
   | { famille: "C"; exercice: ExerciceLimiteExponentielle; scoreFacteurs: number; scoreGlobale: number; details: Partial<Record<PhaseLimiteExponentielle, DetailPhaseLimiteExponentielle>> }
-  | {
-      famille: "G";
-      exercice: ExerciceLimiteExponentielle;
-      scoreCombiner: number;
-      scoreOrdre1: number;
-      scoreConclure: number;
-      details: Partial<Record<PhaseLimiteExponentielle, DetailPhaseLimiteExponentielle>>;
-    }
   | {
       famille: "H";
       exercice: ExerciceLimiteExponentielle;

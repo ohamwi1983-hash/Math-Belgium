@@ -340,6 +340,23 @@ régulier dont les lignes passent par les valeurs remarquables elles-mêmes.
   toujours vraie/fausse), `forme` 5gen11 (mode) et 5gen13 (type de 2ᵉ partie). Niveau et durée
   diffèrent d'une technique à l'autre du groupe (directe 10,6 min, produit 15,2) : sans effet, la
   copie d'évaluation n'imprime ni l'un ni l'autre.
+- **6e ch. 2 (lots B, C, E, 6gen6–12)** : `6e-6h/components6e/RetourSaisieExpo.tsx` (hook du 4e,
+  `MESSAGES_ILLISIBLE_EXPO` par nature de champ, `AidesExpo` en KaTeX en ligne), lecture
+  `moteur6e/lectureSaisieExpo.ts`, messages ciblés `ui6e/retoursExponentielles.ts` ; choix fermés à
+  1 tentative (`PHASES_CHOIX_FERME`, `tentativesMaxCourant`), un choix qui ouvre un champ garde 3.
+  Écran « existence » (impossible / vraie pour tout x / à résoudre) en tête de 6gen9 A–C et 6gen10
+  A, C-k, D, E ; écrans « forme » de 6gen6 B et C (cinq options KaTeX partout). 6gen6 G retirée en
+  gardant l'entrée `retiree: true` (`CatalogueVarianteEntree.retiree`, filtrée du panneau et du
+  sélecteur) : les indices des autres variantes et les `?code=` imprimés restent valables, un code G
+  rouvre un tirage libre. 6gen12 G : objectif « rester » / « atteindre » du contexte, `verdictOui`
+  équilibré 50/50. Profils `generateurs6e/profilsEvaluationExponentielles.ts` : `forme` = famille
+  + sous-type structurel (jamais la forme indéterminée, le signe ni l'issue) ; cas particuliers
+  `aucune-solution` (6gen9 D, B contradictoire, A3 Δ < 0, C sans t > 0) et `inequation-triviale`
+  (6gen10 B, C-f, C-k — variantes entières tirées par le palier de repli quand le professeur les
+  choisit) ; `calcul` + `calculatriceIndispensable` en 6gen12 seulement (A doublement exact) ;
+  `groupe_triviale` (6gen10 B, C-f : B ≠ A 30 / 30 plans ; C-k laissé à part, il donnait le même ℝ
+  que C-f une fois sur trois). Niveau constant dans un verdict : 6gen10 B et C-f (2, 4 min), 6gen6 B
+  (piège constant, 4, 8 min). Mesures, outils et captures : rapport du lot (dossier de travail).
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 

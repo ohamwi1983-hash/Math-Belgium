@@ -9,13 +9,15 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, tousLisibles, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
   latex: string | null;
 }
 
-interface Props {
+interface Props extends PropsRetourChamp<{ a: string; b: string }> {
   consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   etatActuel: string[] | null;
@@ -41,14 +43,15 @@ interface Props {
  * reste toujours `null` ici — "cFacteurs"/"dND" sont le 2e écran, immédiatement après le domaine (une
  * tâche indépendante, jamais rappelée) — la prop est acceptée pour uniformité avec les 2 autres
  * écrans génériques du même générateur. */
-export function EtapeDeuxChampsDomaineDerivee({ consigneEcran, enonceLatex, etatActuel, labelA, labelB, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDeuxChampsDomaineDerivee({ consigneEcran, enonceLatex, etatActuel, labelA, labelB, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, lire, messageIllisible, cible}: Props) {
   const [a, setA] = useState("");
   const [b, setB] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<{ a: string; b: string }>();
 
   function valider() {
     if (a.trim() === "" || b.trim() === "") return;
-    onValider({ a, b });
+    retour.tenter({ a, b }, tousLisibles(lire, [a, b]), onValider);
   }
 
   return (
@@ -78,36 +81,21 @@ export function EtapeDeuxChampsDomaineDerivee({ consigneEcran, enonceLatex, etat
       <div className="field-row">
         <div className="field field-inline">
           <label className="field-label field-label-minuscule">{labelA}</label>
-          <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={a} onChange={(e) => setA(e.target.value)} />
+          <input type="text" className={`text-input ${montrerErreurs && a === retour.soumise?.a ? "is-erronee" : ""}`} value={a} onChange={(e) => setA(e.target.value)} />
         </div>
         <div className="field field-inline">
           <label className="field-label field-label-minuscule">{labelB}</label>
-          <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={b} onChange={(e) => setB(e.target.value)} />
+          <input type="text" className={`text-input ${montrerErreurs && b === retour.soumise?.b ? "is-erronee" : ""}`} value={b} onChange={(e) => setB(e.target.value)} />
         </div>
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={a.trim() === "" || b.trim() === ""} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

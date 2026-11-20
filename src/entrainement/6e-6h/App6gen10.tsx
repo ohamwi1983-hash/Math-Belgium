@@ -5,6 +5,7 @@ import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceInequationE
 import {
   NIVEAU_AIDE_MAX,
   activerAideSuivante,
+  tentativesMaxCourant,
   demarrerSessionInequationExponentielle,
   soumettreReponseAReconnaitre,
   soumettreReponseAResoudre,
@@ -18,6 +19,7 @@ import {
   soumettreReponseDVariableSigne2,
   soumettreReponseDVariableTableau,
   soumettreReponseERegrouper,
+  soumettreReponseExistence,
   soumettreReponseEResoudre,
 } from "./moteur6e/sessionInequationsExponentielles";
 import { phaseApres, phaseInitiale } from "./moteur6e/typesInequationsExponentielles";
@@ -36,7 +38,11 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
-import { correctionDetailleeInequationsExpo, lettrePhaseInequationExpo } from "./generateurs6e/inequationsExponentielles/corrigeDetaille";
+import { MESSAGES_ILLISIBLE_EXPO } from "./components6e/RetourSaisieExpo";
+import { lisibleNombre, lisibleRelation } from "./moteur6e/lectureSaisieExpo";
+import { cibleInequationsExpo, cibleSigneUnZero } from "./ui6e/retoursExponentielles";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeInequationsExpo, etapesExistenceIneqExpo, lettrePhaseInequationExpo } from "./generateurs6e/inequationsExponentielles/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
 
@@ -49,15 +55,36 @@ function sequencePourExercice(exercice: Parameters<typeof phaseInitiale>[0]): Ph
   let phase: PhaseInequationExponentielle | "termine" = phaseInitiale(exercice);
   while (phase !== "termine") {
     phases.push(phase);
-    phase = phaseApres(phase);
+    phase = phaseApres(phase, exercice);
   }
   return phases;
+}
+
+/** Trois verdicts de l'écran « existence » et des premiers écrans de B et de C-f (même question,
+ * mêmes options : l'écran ne trahit pas la famille). */
+const VERDICTS = [
+  { id: "vide", label: "Aucune solution" },
+  { id: "reel", label: "Vraie pour tout réel x" },
+  { id: "resoudre", label: "Il faut la résoudre" },
+];
+
+function libelleVerdict(id: string): string {
+  return VERDICTS.find((v) => v.id === id)?.label ?? id;
 }
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionInequationExponentielle {
   return demarrerSessionInequationExponentielle(REGLAGES_DEMO, genererExerciceInequationExponentielle);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son premier
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs6e/inequationsExponentielles/exportEvaluation.ts`), comme `App6gen14.tsx`. */
+function sessionInitiale(): EtatSessionInequationExponentielle {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionInequationExponentielle(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceInequationExponentielle, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -70,7 +97,10 @@ interface TransitionEnAttente {
 }
 
 export function App6gen10() {
-  const [etat, setEtat] = useState<EtatSessionInequationExponentielle>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionInequationExponentielle>(sessionInitiale);
+  /** Compteur d'exercices affichés : dans la `key` des écrans, pour vider la saisie même quand deux
+   * exercices successifs commencent par le même écran. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionInequationExponentielle`, jamais dans le moteur. Remis à vide à
@@ -113,6 +143,7 @@ export function App6gen10() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroExercice((n) => n + 1);
       setHistorique([]);
       setAideUtiliseeParPhase({});
     } else {
@@ -123,6 +154,7 @@ export function App6gen10() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setHistorique([]);
     setAideUtiliseeParPhase({});
     setEtat(
@@ -134,7 +166,9 @@ export function App6gen10() {
   const phase = etat.phase;
   const enonceLatex = formatEnonceLatex(exercice);
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxCourant(etat);
+  const cle = `${numeroExercice}-${phase}`;
+  const champNombre = phase === "aReconnaitre";
   const niveauAide = etat.niveauAide;
   const aide1 = aideNiveau1(phase, exercice);
   const aide2 = aideNiveau2(phase, exercice);
@@ -158,7 +192,7 @@ export function App6gen10() {
         onSuivant: passerEcranSuivant,
         // Corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier, `corrigeDetaille.ts`),
         // affiché sous la réponse attendue quand elle est révélée.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeInequationsExpo(exercice), lettrePhaseInequationExpo(exercice, phase))} />,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={phase === "existence" ? lignesDeLEtape(etapesExistenceIneqExpo(exercice), "a") : lignesDeLEtape(correctionDetailleeInequationsExpo(exercice), lettrePhaseInequationExpo(exercice, phase))} />,
       }
     : null;
 
@@ -184,10 +218,12 @@ export function App6gen10() {
         <div className="card-body">
           {phase === "aReconnaitre" && (
                 <EtapeChampSimpleIneqExpo
-                  key={phase}
+                  key={cle}
+                  lire={champNombre ? lisibleNombre : (texte) => lisibleRelation(texte, "x")}
+                  messageIllisible={champNombre ? MESSAGES_ILLISIBLE_EXPO.nombre : MESSAGES_ILLISIBLE_EXPO.inequation}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  placeholder="ex : 3, -2, 1/2..."
+                  placeholder="exposant, ex : −2"
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -201,7 +237,8 @@ export function App6gen10() {
               )}
               {phase === "aResoudre" && (
                 <EtapeIntervalleIneqExpo
-                  key={phase}
+                  key={cle}
+                  cible={(ensemble) => cibleInequationsExpo(exercice, phase, ensemble)}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
@@ -216,13 +253,14 @@ export function App6gen10() {
                 />
               )}
 
-              {phase === "bReconnaitre" && (
+              {phase === "existence" && (
                 <EtapeChoixDeuxIneqExpo
-                  key={phase}
+                  key={cle}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  optionGauche={{ id: "existe", label: "Il existe une solution" }}
-                  optionDroite={{ id: "vide", label: "∅ — Aucune solution" }}
+                  optionGauche={VERDICTS[0]}
+                  optionDroite={VERDICTS[1]}
+                  optionTroisieme={VERDICTS[2]}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -230,18 +268,38 @@ export function App6gen10() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={onActiverAide}
-                  onValider={(id) => terminerEtape(soumettreReponseBReconnaitre(etat, id === "vide"), id === "vide" ? "∅ — Aucune solution" : "Il existe une solution")}
+                  onValider={(id) => terminerEtape(soumettreReponseExistence(etat, id === "resoudre"), libelleVerdict(id))}
+                  validation={validation}
+                />
+              )}
+              {phase === "bReconnaitre" && (
+                <EtapeChoixDeuxIneqExpo
+                  key={cle}
+                  consigneEcran={consigne}
+                  enonceLatex={enonceLatex}
+                  optionGauche={VERDICTS[0]}
+                  optionDroite={VERDICTS[1]}
+                  optionTroisieme={VERDICTS[2]}
+                  aideNiveau1={aide1}
+                  aideNiveau2={aide2}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={niveauAide}
+                  niveauAideMax={NIVEAU_AIDE_MAX}
+                  onActiverAide={onActiverAide}
+                  onValider={(id) => terminerEtape(soumettreReponseBReconnaitre(etat, id === "vide"), libelleVerdict(id))}
                   validation={validation}
                 />
               )}
 
               {phase === "cfReconnaitre" && (
                 <EtapeChoixDeuxIneqExpo
-                  key={phase}
+                  key={cle}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  optionGauche={{ id: "reel", label: "Vraie pour tout x réel (ℝ)" }}
-                  optionDroite={{ id: "pasToujours", label: "Ce n'est pas toujours vrai" }}
+                  optionGauche={VERDICTS[0]}
+                  optionDroite={VERDICTS[1]}
+                  optionTroisieme={VERDICTS[2]}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -249,17 +307,19 @@ export function App6gen10() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={onActiverAide}
-                  onValider={(id) => terminerEtape(soumettreReponseCfReconnaitre(etat, id === "reel"), id === "reel" ? "Vraie pour tout x réel (ℝ)" : "Ce n'est pas toujours vrai")}
+                  onValider={(id) => terminerEtape(soumettreReponseCfReconnaitre(etat, id === "reel"), libelleVerdict(id))}
                   validation={validation}
                 />
               )}
 
               {phase === "ckRegrouper" && (
                 <EtapeChampSimpleIneqExpo
-                  key={phase}
+                  key={cle}
+                  lire={champNombre ? lisibleNombre : (texte) => lisibleRelation(texte, "x")}
+                  messageIllisible={champNombre ? MESSAGES_ILLISIBLE_EXPO.nombre : MESSAGES_ILLISIBLE_EXPO.inequation}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  placeholder="ex : (2/9)^(x^2+5)<=1"
+                  placeholder="inéquation comparée à 1"
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -273,7 +333,7 @@ export function App6gen10() {
               )}
               {phase === "ckConclure" && (
                 <EtapeChoixDeuxIneqExpo
-                  key={phase}
+                  key={cle}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   optionGauche={{ id: "reel", label: "Vraie pour tout x réel (ℝ)" }}
@@ -292,7 +352,7 @@ export function App6gen10() {
 
               {phase === "dConstantSigne" && (
                 <EtapeChoixDeuxIneqExpo
-                  key={phase}
+                  key={cle}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   optionGauche={{ id: "positif", label: "Toujours positif" }}
@@ -310,7 +370,8 @@ export function App6gen10() {
               )}
               {phase === "dConstantResoudre" && (
                 <EtapeIntervalleIneqExpo
-                  key={phase}
+                  key={cle}
+                  cible={(ensemble) => cibleInequationsExpo(exercice, phase, ensemble)}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
@@ -327,7 +388,10 @@ export function App6gen10() {
 
               {phase === "dVariableSigne1" && (
                 <EtapeSigneUnZeroIneqExpo
-                  key={phase}
+                  key={cle}
+                  lire={lisibleNombre}
+                  messageIllisible={MESSAGES_ILLISIBLE_EXPO.nombre}
+                  cible={(r) => cibleSigneUnZero(exercice, phase, r.zeroTexte)}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
@@ -348,7 +412,10 @@ export function App6gen10() {
               )}
               {phase === "dVariableSigne2" && (
                 <EtapeSigneUnZeroIneqExpo
-                  key={phase}
+                  key={cle}
+                  lire={lisibleNombre}
+                  messageIllisible={MESSAGES_ILLISIBLE_EXPO.nombre}
+                  cible={(r) => cibleSigneUnZero(exercice, phase, r.zeroTexte)}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
@@ -369,7 +436,8 @@ export function App6gen10() {
               )}
               {phase === "dVariableTableau" && (
                 <EtapeIntervalleIneqExpo
-                  key={phase}
+                  key={cle}
+                  cible={(ensemble) => cibleInequationsExpo(exercice, phase, ensemble)}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
@@ -386,10 +454,12 @@ export function App6gen10() {
 
               {phase === "eRegrouper" && (
                 <EtapeChampSimpleIneqExpo
-                  key={phase}
+                  key={cle}
+                  lire={champNombre ? lisibleNombre : (texte) => lisibleRelation(texte, "x")}
+                  messageIllisible={champNombre ? MESSAGES_ILLISIBLE_EXPO.nombre : MESSAGES_ILLISIBLE_EXPO.inequation}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  placeholder="ex : (2/5)^x<1"
+                  placeholder="inéquation comparée à 1"
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -403,7 +473,8 @@ export function App6gen10() {
               )}
               {phase === "eResoudre" && (
                 <EtapeIntervalleIneqExpo
-                  key={phase}
+                  key={cle}
+                  cible={(ensemble) => cibleInequationsExpo(exercice, phase, ensemble)}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}

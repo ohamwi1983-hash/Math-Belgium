@@ -6,13 +6,15 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import type { FragmentConsigne } from "../ui6e/formatExponentiellesProblemes";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
   latex: string | null;
 }
 
-interface Props {
+interface Props extends PropsRetourChamp<boolean> {
   consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
   consigneEcran: FragmentConsigne[];
@@ -23,7 +25,7 @@ interface Props {
   niveauAide: number;
   niveauAideMax: number;
   onActiverAide: () => void;
-  onValider: (atteignable: boolean) => void;
+  onValider: (oui: boolean) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -33,13 +35,14 @@ interface Props {
 /** Écran GÉNÉRIQUE "statut oui/non" — famille G écran 3 uniquement (décision atteignable/non
  * atteignable). Choix véritable présenté à l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS
  * `.btn-primary` (réservé à "Valider", convention CLAUDE.md). */
-export function EtapeChoixOuiNonExpoProblemes({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixOuiNonExpoProblemes({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, messageIllisible, cible}: Props) {
   const [choix, setChoix] = useState<boolean | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<boolean>();
 
   function valider() {
     if (choix === null) return;
-    onValider(choix);
+    retour.tenter(choix, true, onValider);
   }
 
   return (
@@ -61,35 +64,20 @@ export function EtapeChoixOuiNonExpoProblemes({ consigneGenerale, blocDonnees, c
       </p>
       <div className="options-grid-compact">
         <button type="button" className={`btn ${choix === true ? "toggle-active" : ""} ${montrerErreurs && choix === true ? "is-erronee" : ""}`} onClick={() => setChoix(true)}>
-          Oui, atteignable
+          Oui
         </button>
         <button type="button" className={`btn ${choix === false ? "toggle-active" : ""} ${montrerErreurs && choix === false ? "is-erronee" : ""}`} onClick={() => setChoix(false)}>
-          Non, pas atteignable
+          Non
         </button>
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={choix === null} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

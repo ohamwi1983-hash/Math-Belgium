@@ -177,6 +177,11 @@ export interface ExerciceExpoProbF {
 export interface ExerciceExpoProbG {
   famille: "G";
   contexteId: string;
+  /** Objectif du contexte : « rester » au-dessus du seuil pendant D, ou « atteindre » le seuil
+   * avant la fin de D (audit 6e ch. 2 : objectif explicite). */
+  objectif: "rester" | "atteindre";
+  /** Réponse attendue à la question de décision (écran 3). */
+  verdictOui: boolean;
   c: number;
   k: number;
   a: number;
@@ -186,8 +191,8 @@ export interface ExerciceExpoProbG {
   /** Temps seuil EXACT recalculé depuis `sAffiche` — réponse attendue de l'écran 2, jamais la
    * valeur cible utilisée pour construire `sAffiche` (qui a pu bouger avec l'arrondi). */
   tSeuil: number;
-  /** Durée à comparer au temps seuil — atteignable ⟺ `duree >= tSeuil` (grandeur décroissante :
-   * le seuil est franchi puis dépassé, jamais retrouvé). */
+  /** Durée à comparer au temps seuil (grandeur décroissante : au-dessus du seuil avant `tSeuil`,
+   * en dessous après) ; |duree − tSeuil| ≥ 0,3. Verdict selon `objectif` : voir `verdictOui`. */
   duree: number;
   /** 2 temps distincts évalués à l'écran 1. */
   tEval1: number;

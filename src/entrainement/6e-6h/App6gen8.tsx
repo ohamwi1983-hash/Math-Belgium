@@ -8,6 +8,7 @@ import {
 import {
   NIVEAU_AIDE_MAX,
   activerAideSuivante,
+  tentativesMaxCourant,
   demarrerSessionGraphiqueDeriveeExponentielle,
   soumettreReponseDerivee,
   soumettreReponseSelection,
@@ -39,11 +40,24 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { MESSAGES_ILLISIBLE_EXPO } from "./components6e/RetourSaisieExpo";
+import { lisibleExpression } from "./moteur6e/lectureSaisieExpo";
+import { cibleDeriveeGraphique } from "./ui6e/retoursExponentielles";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionGraphiqueDeriveeExponentielle {
   return demarrerSessionGraphiqueDeriveeExponentielle(REGLAGES_DEMO, genererExerciceGraphiqueDeriveeExponentielle);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son premier
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs6e/graphiquesDeriveeExponentielles/exportEvaluation.ts`), comme `App6gen14.tsx`. */
+function sessionInitiale(): EtatSessionGraphiqueDeriveeExponentielle {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionGraphiqueDeriveeExponentielle(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceGraphiqueDeriveeExponentielle, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
 }
 
 interface TransitionEnAttente {
@@ -52,7 +66,10 @@ interface TransitionEnAttente {
 }
 
 export function App6gen8() {
-  const [etat, setEtat] = useState<EtatSessionGraphiqueDeriveeExponentielle>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionGraphiqueDeriveeExponentielle>(sessionInitiale);
+  /** Compteur d'exercices affichés : dans la `key` des écrans, pour vider la saisie même quand deux
+   * exercices successifs commencent par le même écran. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule de l'écran "derivee" déjà clos (familles B/D uniquement — voir
    * `typesGraphiquesDeriveeExponentielles.ts`) — tenu ICI, à part de
@@ -97,6 +114,7 @@ export function App6gen8() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroExercice((n) => n + 1);
       setHistoriqueDerivee(null);
       setAideDeriveeUtilisee(false);
     } else {
@@ -107,6 +125,7 @@ export function App6gen8() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setHistoriqueDerivee(null);
     setAideDeriveeUtilisee(false);
     setEtat(
@@ -117,13 +136,13 @@ export function App6gen8() {
   const exercice = etat.exerciceCourant;
 
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
-  // Inclut `indexExercice` dans la clé — la phase seule peut rester identique entre 2 exercices
+  const tentativesMax = tentativesMaxCourant(etat);
+  // Inclut le numéro d'exercice affiché (`indexExercice` reste à 0 : une session = un exercice) dans la clé — la phase seule peut rester identique entre 2 exercices
   // consécutifs (ex. familles A puis C, toutes deux à un seul écran "selection"), ce qui
   // empêcherait React de remonter le composant et laisserait la saisie/sélection de l'exercice
   // précédent persister visuellement (leçon déjà retenue à plusieurs reprises sur ce projet — voir
   // CLAUDE.md, "5gen6/5gen7").
-  const cle = `${etat.indexExercice}-${etat.phase}`;
+  const cle = `${numeroExercice}-${etat.phase}`;
 
   const modeDevActif = import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1";
   if (modeDevActif) {
@@ -183,6 +202,9 @@ export function App6gen8() {
               fonctionLatex={formatFonctionLatex(exercice)}
               rappelDomaine={rappelDomaineDerivee(exercice)}
               placeholder={placeholderDerivee(exercice)}
+              lire={(texte) => lisibleExpression(texte, ["x"])}
+              messageIllisible={MESSAGES_ILLISIBLE_EXPO.expressionX}
+              cible={(texte) => cibleDeriveeGraphique(exercice, texte)}
               aideNiveau1={aideDeriveeNiveau1(exercice)}
               aideNiveau2={aideDeriveeNiveau2(exercice)}
               tentativesUtilisees={tentativesUtilisees}

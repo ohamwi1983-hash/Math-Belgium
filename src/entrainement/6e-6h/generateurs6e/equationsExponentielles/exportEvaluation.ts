@@ -1,4 +1,5 @@
 import type { ExerciceEquationExponentielle } from "../../core6e/equationsExponentielles.types";
+import { LIBELLE_CAS_EQUATIONS_EXPONENTIELLES, profilEquationsExponentielles } from "../profilsEvaluationExponentielles";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/corrigeTableau";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
@@ -103,6 +104,8 @@ function criteresDifficulte(e: ExerciceEquationExponentielle): CriteresDifficult
 }
 
 export const adaptateurEvaluationEquationsExponentielles: AdaptateurFeuilleExercices<ExerciceEquationExponentielle> = {
+  profilInstance: profilEquationsExponentielles,
+  libelleCasParticulier: LIBELLE_CAS_EQUATIONS_EXPONENTIELLES,
   titreDocument: "Résoudre une équation exponentielle — Évaluation",
   nomFichierBase: "equations-exponentielles",
   genererInstance: genererExerciceEquationExponentielle,

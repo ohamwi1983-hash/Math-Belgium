@@ -14,6 +14,8 @@ import {
   soumettreReponseCEcran2,
   soumettreReponseCEcran3,
   soumettreReponseDEcran,
+  soumettreReponseExistence,
+  tentativesMaxCourant,
 } from "./moteur6e/sessionEquationsExponentielles";
 import type { EtatSessionEquationExponentielle, PhaseEquationExponentielle } from "./moteur6e/typesEquationsExponentielles";
 import { phaseApres, phaseInitiale } from "./moteur6e/typesEquationsExponentielles";
@@ -24,7 +26,7 @@ import { EtapeValeurOuVideEquExpo } from "./components6e/EtapeValeurOuVideEquExp
 import type { ReponseValeurOuVide } from "./moteur6e/verificationEquationsExponentielles";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { correctionDetailleeEquationsExponentielles, sequenceEquationsExponentielles } from "./generateurs6e/equationsExponentielles/corrigeDetaille";
+import { correctionDetailleeEquationsExponentielles, etapesExistenceEquExpo, sequenceEquationsExponentielles } from "./generateurs6e/equationsExponentielles/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { Katex } from "./components/Katex";
@@ -34,6 +36,10 @@ import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { MESSAGES_ILLISIBLE_EXPO } from "./components6e/RetourSaisieExpo";
+import { lisibleExpression, lisibleNombre, lisibleRelation } from "./moteur6e/lectureSaisieExpo";
+import { cibleEquationsExpo } from "./ui6e/retoursExponentielles";
 
 /**
  * `6gen9` — Résoudre une équation exponentielle. Validation INLINE même écran (rollout UX
@@ -46,6 +52,15 @@ const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionEquationExponentielle {
   return demarrerSessionEquationExponentielle(REGLAGES_DEMO, genererExerciceEquationExponentielle);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son premier
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs6e/equationsExponentielles/exportEvaluation.ts`), comme `App6gen14.tsx`. */
+function sessionInitiale(): EtatSessionEquationExponentielle {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEquationExponentielle(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceEquationExponentielle, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -66,7 +81,7 @@ function sequencePourExercice(exercice: EtatSessionEquationExponentielle["exerci
   let phase: PhaseEquationExponentielle | "termine" = phaseInitiale(exercice);
   while (phase !== "termine") {
     phases.push(phase);
-    phase = phaseApres(phase);
+    phase = phaseApres(phase, exercice);
   }
   return phases;
 }
@@ -83,7 +98,10 @@ function formatValeurOuVide(reponse: ReponseValeurOuVide): string {
 }
 
 export function App6gen9() {
-  const [etat, setEtat] = useState<EtatSessionEquationExponentielle>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEquationExponentielle>(sessionInitiale);
+  /** Compteur d'exercices affichés : dans la `key` des écrans, pour vider la saisie même quand deux
+   * exercices successifs commencent par le même écran. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionEquationExponentielle`, jamais dans le moteur (même principe que la référence 4e,
@@ -140,6 +158,7 @@ export function App6gen9() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroExercice((n) => n + 1);
       setHistorique([]);
       setAideUtiliseeParPhase({});
     } else {
@@ -150,6 +169,7 @@ export function App6gen9() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setHistorique([]);
     setAideUtiliseeParPhase({});
     setEtat(demarrerSessionEquationExponentielle(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
@@ -160,7 +180,10 @@ export function App6gen9() {
 
   const enonceLatex = formatEnonceLatex(exercice);
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxCourant(etat);
+  const cle = `${numeroExercice}-${phase}`;
+  const cibleTexte = (texte: string) => cibleEquationsExpo(exercice, phase, texte);
+  const cibleListe = (textes: string[]) => cibleEquationsExpo(exercice, phase, textes);
   const niveauAide = etat.niveauAide;
   const aide1 = aideNiveau1(phase, exercice);
   const aide2 = aideNiveau2(phase, exercice);
@@ -177,7 +200,8 @@ export function App6gen9() {
   }
 
   // Corrigé détaillé « comme au tableau » de l'écran (source unique avec le papier).
-  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationsExponentielles(exercice), lettreEtape(sequenceEquationsExponentielles(exercice).indexOf(phase)))} />;
+  // L'écran de verdict « existence » (familles A, B, C) a son propre corrigé (positivité des termes).
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={phase === "existence" ? lignesDeLEtape(etapesExistenceEquExpo(exercice), "a") : lignesDeLEtape(correctionDetailleeEquationsExponentielles(exercice), lettreEtape(sequenceEquationsExponentielles(exercice).indexOf(phase)))} />;
 
   const validation = enAttente
     ? {
@@ -214,10 +238,13 @@ export function App6gen9() {
         <div className="card-body">
           {phase === "aEcran1" && (
             <EtapeChampEquExpo
-              key={phase}
+              key={cle}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              placeholder={exercice.famille === "A" && exercice.sousType === "A2" ? "ex : 2^(3*x-1)-2^5=0" : "ex : 3, -2, 1/2..."}
+              placeholder={exercice.famille === "A" && exercice.sousType === "A2" ? "équation « … = 0 »" : "exposant, ex : −2"}
+              lire={(texte) => (exercice.famille === "A" && exercice.sousType === "A2" ? lisibleRelation(texte, "x") : lisibleNombre(texte))}
+              messageIllisible={exercice.famille === "A" && exercice.sousType === "A2" ? MESSAGES_ILLISIBLE_EXPO.equationX : MESSAGES_ILLISIBLE_EXPO.nombre}
+              cible={cibleTexte}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
               tentativesUtilisees={tentativesUtilisees}
@@ -231,10 +258,13 @@ export function App6gen9() {
           )}
           {phase === "aEcran2" && exercice.famille === "A" && exercice.sousType !== "A3" && (
             <EtapeChampEquExpo
-              key={phase}
+              key={cle}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              placeholder="ex : 4/3, -1.5..."
+              placeholder="ex : −3/4"
+              lire={lisibleNombre}
+              messageIllisible={MESSAGES_ILLISIBLE_EXPO.nombre}
+              cible={cibleTexte}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
               tentativesUtilisees={tentativesUtilisees}
@@ -248,12 +278,15 @@ export function App6gen9() {
           )}
           {phase === "aEcran2" && exercice.famille === "A" && exercice.sousType === "A3" && (
             <EtapeListeEquExpo
-              key={phase}
+              key={cle}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
-              placeholder="ex : -1"
+              placeholder="ex : −1"
+              lire={lisibleNombre}
+              messageIllisible={MESSAGES_ILLISIBLE_EXPO.liste}
+              cible={cibleListe}
               labelAjout="+ Ajouter une solution"
               labelAucune="∅ — Aucune solution"
               tentativesUtilisees={tentativesUtilisees}
@@ -268,10 +301,13 @@ export function App6gen9() {
 
           {phase === "bEcran1" && (
             <EtapeChampEquExpo
-              key={phase}
+              key={cle}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              placeholder="ex : (3*x+1)/2"
+              placeholder="exposant en x"
+              lire={(texte) => lisibleExpression(texte, ["x"])}
+              messageIllisible={MESSAGES_ILLISIBLE_EXPO.expressionX}
+              cible={cibleTexte}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
               tentativesUtilisees={tentativesUtilisees}
@@ -285,10 +321,12 @@ export function App6gen9() {
           )}
           {phase === "bEcran2" && (
             <EtapeValeurOuVideEquExpo
-              key={phase}
+              key={cle}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              placeholder="ex : 1, -2/3..."
+              placeholder="ex : −2/3"
+              lire={lisibleNombre}
+              messageIllisible={MESSAGES_ILLISIBLE_EXPO.nombre}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
               tentativesUtilisees={tentativesUtilisees}
@@ -303,10 +341,12 @@ export function App6gen9() {
 
           {phase === "cEcran1" && (
             <EtapeChampEquExpo
-              key={phase}
+              key={cle}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              placeholder="ex : 2*t^2-3*t-5=0"
+              placeholder="équation en t"
+              lire={(texte) => lisibleRelation(texte, "t")}
+              messageIllisible={MESSAGES_ILLISIBLE_EXPO.equationT}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
               tentativesUtilisees={tentativesUtilisees}
@@ -320,12 +360,15 @@ export function App6gen9() {
           )}
           {phase === "cEcran2" && (
             <EtapeListeEquExpo
-              key={phase}
+              key={cle}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
-              placeholder="ex : -3, 5..."
+              placeholder="ex : −3"
+              lire={lisibleNombre}
+              messageIllisible={MESSAGES_ILLISIBLE_EXPO.liste}
+              cible={cibleListe}
               labelAjout="+ Ajouter une valeur de t"
               labelAucune="Aucune valeur de t"
               tentativesUtilisees={tentativesUtilisees}
@@ -339,12 +382,15 @@ export function App6gen9() {
           )}
           {phase === "cEcran3" && (
             <EtapeListeEquExpo
-              key={phase}
+              key={cle}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
-              placeholder="ex : 1, 2.5..."
+              placeholder="ex : 2"
+              lire={lisibleNombre}
+              messageIllisible={MESSAGES_ILLISIBLE_EXPO.liste}
+              cible={cibleListe}
               labelAjout="+ Ajouter une solution"
               labelAucune="∅ — Aucune solution"
               tentativesUtilisees={tentativesUtilisees}
@@ -358,9 +404,9 @@ export function App6gen9() {
           )}
           {phase === "cEcran3" && <CalculatriceScientifique />}
 
-          {phase === "dEcran" && (
+          {(phase === "dEcran" || phase === "existence") && (
             <EtapeReconnaitreImpossibleEquExpo
-              key={phase}
+              key={cle}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               aideNiveau1={aide1}
@@ -370,7 +416,7 @@ export function App6gen9() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(existeUneSolution) => terminerEtape(soumettreReponseDEcran(etat, existeUneSolution), existeUneSolution ? "Oui" : "Non")}
+              onValider={(ilFautResoudre) => terminerEtape(phase === "existence" ? soumettreReponseExistence(etat, ilFautResoudre) : soumettreReponseDEcran(etat, ilFautResoudre), ilFautResoudre ? "Il faut résoudre pour conclure" : "Aucune solution, sans calcul")}
               validation={validation}
             />
           )}

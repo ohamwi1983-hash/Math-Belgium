@@ -33,14 +33,32 @@ import type { Q } from "../../ui6e/corrigeExponentielles2";
  * chaque division par un négatif).
  */
 
+/** Étapes du corrigé papier : les écrans réellement traversés, sans l'écran de verdict
+ * « existence » des familles A, C-k, D et E (son corrigé à l'écran : `etapesExistenceIneqExpo`). */
 export function phasesInequationExpo(exercice: ExerciceInequationExponentielle): PhaseInequationExponentielle[] {
   const phases: PhaseInequationExponentielle[] = [];
   let phase: PhaseInequationExponentielle | "termine" = phaseInitiale(exercice);
   while (phase !== "termine") {
-    phases.push(phase);
-    phase = phaseApres(phase);
+    if (phase !== "existence") phases.push(phase);
+    phase = phaseApres(phase, exercice);
   }
   return phases;
+}
+
+/** Corrigé de l'écran « existence » (A, C-k, D, E), lettre « a » : pourquoi le signe ne suffit pas. */
+export function etapesExistenceIneqExpo(exercice: ExerciceInequationExponentielle): EtapeCorrection[] {
+  const raison =
+    exercice.famille === "A"
+      ? "Les deux membres sont strictement positifs : comparer leurs signes ne suffit pas, il faut comparer les exposants."
+      : exercice.famille === "C"
+        ? "Les deux membres sont des exponentielles strictement positives : il faut les comparer après regroupement."
+        : exercice.famille === "D"
+          ? "Le premier membre est un produit dont un facteur peut changer de signe : il faut étudier son signe."
+          : "Les deux membres sont des exponentielles strictement positives : il faut les comparer après regroupement.";
+  return [
+    utilise("a", [texte("Une exponentielle de base positive est toujours strictement positive "), texte(`${COURS_INEQUATIONS}.`)]),
+    resultat("a", [texte(raison)]),
+  ];
 }
 
 const ens = formatEnsembleReelLatex;
@@ -325,10 +343,10 @@ function correctionDConstant(e: ExerciceIneqDConstant): EtapeCorrection[] {
   return etapes;
 }
 
-/** Exposant du facteur exponentiel (« x-2 », « -\left(x+1\right) », « -x ») — même écriture que l'énoncé. */
+/** Exposant du facteur exponentiel (« x-2 », « -x-1 », « -x ») — même écriture que l'énoncé. */
 function exposantFacteur(f: Extract<FacteurUnZero, { type: "exponentiel" }>): string {
   if (f.sgn === 1) return formatXMoinsZero(f.zero);
-  return f.zero === 0 ? "-x" : `-\\left(${formatXMoinsZero(f.zero)}\\right)`;
+  return f.zero === 0 ? "-x" : `-x${f.zero > 0 ? `+${f.zero}` : `-${-f.zero}`}`;
 }
 
 function isoleX(zero: number): string | FragmentConsigne[] {
@@ -382,7 +400,7 @@ function etapeFacteur(sq: string, f: FacteurUnZero, zero: number, sens: Directio
     calcul(sq, signeL, [], "Signe"),
     resultat(sq, [texte(`${texteSensLisible(sens)} ; zéro en `), latex(`x=${zero}`)]),
   ];
-  if (sens === "positif_puis_negatif") etapes.push(piege(sq, [texte("Ce facteur est positif AVANT son zéro : on ne lit pas le signe « − puis + » par habitude.")]));
+  if (sens === "positif_puis_negatif") etapes.push(piege(sq, [texte("Ce facteur est positif avant son zéro : on ne lit pas le signe « − puis + » par habitude.")]));
   return etapes;
 }
 

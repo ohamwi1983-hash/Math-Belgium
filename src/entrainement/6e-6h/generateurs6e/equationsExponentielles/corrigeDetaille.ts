@@ -1,7 +1,7 @@
 import type { BaseExpo, ExerciceEqExpoA, ExerciceEqExpoB, ExerciceEqExpoC, ExerciceEqExpoD, ExerciceEquationExponentielle, ValeurExacteExpo } from "../../core6e/equationsExponentielles.types";
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
-import { phaseApres, phaseInitiale, type PhaseEquationExponentielle } from "../../moteur6e/typesEquationsExponentielles";
+import type { PhaseEquationExponentielle } from "../../moteur6e/typesEquationsExponentielles";
 import { baseEquExpoLatex, baseEquExpoPourExposant, estExactExpo, exposantLineaireEquExpoLatex, formatEnonceLatex, nombreExactEquExpoLatex, sommeTermesEquExpo, valeurExacteEquExpoLatex } from "../../ui6e/formatEquationsExponentielles";
 import { baseValeur } from "./rationnel";
 import { COURS_EQUATIONS, finaliser, frac, justif, parN, sansRepetition } from "../../ui6e/corrigeExponentielles1";
@@ -19,14 +19,43 @@ import { COURS_EQUATIONS, finaliser, frac, justif, parN, sansRepetition } from "
 
 type Fragments = FragmentConsigne[];
 
+/** Étapes du corrigé papier (une lettre par écran de résolution) : l'écran de verdict
+ * « existence » des familles A, B, C n'en fait pas partie (son corrigé à l'écran :
+ * `etapesExistenceEquExpo`) ; pour la famille D, c'est l'unique étape. */
 export function sequenceEquationsExponentielles(e: ExerciceEquationExponentielle): PhaseEquationExponentielle[] {
-  const phases: PhaseEquationExponentielle[] = [];
-  let p: PhaseEquationExponentielle | "termine" = phaseInitiale(e);
-  while (p !== "termine") {
-    phases.push(p);
-    p = phaseApres(p);
+  switch (e.famille) {
+    case "A":
+      return ["aEcran1", "aEcran2"];
+    case "B":
+      return ["bEcran1", "bEcran2"];
+    case "C":
+      return ["cEcran1", "cEcran2", "cEcran3"];
+    case "D":
+      return ["dEcran"];
   }
-  return phases;
+}
+
+/** Corrigé de l'écran « existence » (familles A, B, C), lettre « a » : positivité des termes. */
+export function etapesExistenceEquExpo(e: ExerciceEquationExponentielle): EtapeCorrection[] {
+  const regle = utilise("a", [texte("Une exponentielle de base positive est toujours strictement positive "), texte(`${COURS_EQUATIONS}.`)]);
+  if (e.famille === "C" && e.solutionsT.every((t) => t < 0)) {
+    const bp = baseEquExpoPourExposant(e.base);
+    return [
+      regle,
+      calcul("a", [ligne(`${bp}^{x}>0`, "exponentielle strictement positive"), ligne(`${formatEnonceLatex(e).replace(/\s*=\s*0$/, "")}>0`, "tous les coefficients sont positifs : somme de nombres strictement positifs")]),
+      resultat("a", [texte("Aucune solution : "), latex("S=\\varnothing")]),
+    ];
+  }
+  if (e.famille === "D") return etapesD(e);
+  const raison =
+    e.famille === "A" && e.sousType === "A2"
+      ? "Une racine carrée peut être nulle : le signe ne permet pas de conclure, il faut résoudre."
+      : e.famille === "A"
+        ? "Les deux membres sont strictement positifs : le signe ne permet pas de conclure, il faut résoudre."
+        : e.famille === "B"
+          ? "Les deux membres sont des exponentielles strictement positives : le signe ne permet pas de conclure, il faut résoudre."
+          : "Un coefficient est négatif : la somme peut s'annuler, il faut résoudre.";
+  return [regle, resultat("a", [texte(raison)])];
 }
 
 const INJECTIVITE: Fragments = [texte("Deux puissances d'une même base (positive, différente de 1) sont égales si et seulement si leurs exposants sont égaux "), texte(`${COURS_EQUATIONS}.`)];

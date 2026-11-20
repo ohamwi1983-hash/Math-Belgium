@@ -45,6 +45,9 @@ function construireJ(): ExerciceDomaineDeriveeEJ {
     const g = tirerFormeGA2();
     const h = tirerFormeGA2();
     if (memesFormesGA(g, h)) continue;
+    // Audit 6e ch. 2 (E6) : deux exposants affines de même coefficient de x donnent une fonction
+    // CONSTANTE (b^(g−h) = b^(n₁−n₂)), dont la dérivée nulle s'écrivait « (0)·ln 7·7⁻¹ » : on retire.
+    if (g.type === "affine" && h.type === "affine" && g.m === h.m) continue;
     return { famille: "E", sousType: "j", domaine: ensembleReel(), base, baseEstE, g, h };
   }
   throw new Error("construireJ : aucune paire (g,h) distincte trouvée après retirage");

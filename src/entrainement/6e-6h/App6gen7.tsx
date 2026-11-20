@@ -8,6 +8,7 @@ import {
 import {
   NIVEAU_AIDE_MAX,
   activerAideSuivante,
+  tentativesMaxCourant,
   demarrerSessionDomaineDeriveeExponentielle,
   soumettreReponseADerivee,
   soumettreReponseBDerivee,
@@ -45,11 +46,24 @@ import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { MESSAGES_ILLISIBLE_EXPO } from "./components6e/RetourSaisieExpo";
+import { lisibleExpression } from "./moteur6e/lectureSaisieExpo";
+import { cibleDomaineDerivee } from "./ui6e/retoursExponentielles";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionDomaineDeriveeExponentielle {
   return demarrerSessionDomaineDeriveeExponentielle(REGLAGES_DEMO, genererExerciceDomaineDeriveeExponentielle);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son premier
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs6e/domaineDeriveeExponentielles/exportEvaluation.ts`), comme `App6gen14.tsx`. */
+function sessionInitiale(): EtatSessionDomaineDeriveeExponentielle {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionDomaineDeriveeExponentielle(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceDomaineDeriveeExponentielle, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -75,7 +89,10 @@ function sequencePourExercice(exercice: EtatSessionDomaineDeriveeExponentielle["
 }
 
 export function App6gen7() {
-  const [etat, setEtat] = useState<EtatSessionDomaineDeriveeExponentielle>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionDomaineDeriveeExponentielle>(sessionInitiale);
+  /** Compteur d'exercices affichés : dans la `key` des écrans, pour vider la saisie même quand deux
+   * exercices successifs commencent par le même écran. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionDomaineDeriveeExponentielle`, jamais dans le moteur (même principe que la
@@ -129,6 +146,7 @@ export function App6gen7() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroExercice((n) => n + 1);
       setHistorique([]);
     } else {
       setEtat(enAttente.etatSuivant);
@@ -138,6 +156,7 @@ export function App6gen7() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setHistorique([]);
     setEtat(
       demarrerSessionDomaineDeriveeExponentielle(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])),
@@ -149,7 +168,8 @@ export function App6gen7() {
 
   const enonceLatex = formatFonctionLatex(exercice);
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxCourant(etat);
+  const cle = `${numeroExercice}-${phase}`;
   const niveauAide = etat.niveauAide;
   const aide1 = aideNiveau1(phase, exercice);
   const aide2 = aideNiveau2(phase, exercice);
@@ -168,14 +188,9 @@ export function App6gen7() {
   const phasesDeuxChamps = new Set(["cFacteurs", "dND"]);
   const phasesChampUnique = new Set(["aDerivee", "bDerivee", "cAssemblage", "dAssemblage", "eSimplifier", "eDerivee", "fDerivee"]);
 
+  // Placeholders sans notation clavier ni rapport avec l'instance (audit 6e ch. 2, G7).
   const PLACEHOLDERS: Record<string, string> = {
-    aDerivee: "ex : 2*x*3^(x^2)*ln(3)",
-    bDerivee: "ex : ln(2)*2^sqrt(x^2-4)*(x/sqrt(x^2-4))",
-    cAssemblage: "ex : (3*x^2-4*x)*e^(x^3-2*x^2)*(1+x^3-2*x^2)",
-    dAssemblage: "ex : (ln(2)*2^x*x-(2^x+1))/x^2",
-    eSimplifier: "ex : 1-2^(-x)",
-    eDerivee: "ex : ln(2)*2^(-x)",
-    fDerivee: "ex : -sin(e^(x^2-2))*2*x*e^(x^2-2)",
+    eSimplifier: "forme simplifiée de f(x)",
   };
 
   // Réplique exactement le contenu (par écran RÉELLEMENT traversé) de l'ancien
@@ -229,7 +244,7 @@ export function App6gen7() {
         <div className="card-body">
           {phasesDomaine.has(phase) && (
             <EtapeDomaineDomaineDerivee
-              key={phase}
+              key={cle}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={etatActuelEcran}
@@ -247,12 +262,14 @@ export function App6gen7() {
 
           {phasesDeuxChamps.has(phase) && (
             <EtapeDeuxChampsDomaineDerivee
-              key={phase}
+              key={cle}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={etatActuelEcran}
               labelA={labels.a}
               labelB={labels.b}
+              lire={(texte) => lisibleExpression(texte, ["x"])}
+              messageIllisible={MESSAGES_ILLISIBLE_EXPO.expressionX}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
               tentativesUtilisees={tentativesUtilisees}
@@ -272,11 +289,14 @@ export function App6gen7() {
 
           {phasesChampUnique.has(phase) && (
             <EtapeChampDomaineDerivee
-              key={phase}
+              key={cle}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={etatActuelEcran}
-              placeholder={PLACEHOLDERS[phase] ?? "ex : 2*x*3^(x^2)*ln(3)"}
+              placeholder={PLACEHOLDERS[phase] ?? "dérivée f′(x)"}
+              lire={(texte) => lisibleExpression(texte, ["x"])}
+              messageIllisible={MESSAGES_ILLISIBLE_EXPO.expressionX}
+              cible={(texte) => cibleDomaineDerivee(exercice, phase, texte)}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
               tentativesUtilisees={tentativesUtilisees}

@@ -8,13 +8,15 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
   latex: string | null;
 }
 
-interface Props {
+interface Props extends PropsRetourChamp<CategorieFI> {
   consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -31,19 +33,23 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
+/** Mêmes cinq options sur chaque écran « forme » (B, C, H–K) : l'écran ne trahit pas le verdict. */
 const OPTIONS: { id: CategorieFI; label: string }[] = [
-  { id: "zero_sur_zero", label: "0/0" },
-  { id: "infini_sur_infini", label: "∞/∞" },
-  { id: "pas_une_fi", label: "Pas une FI" },
+  { id: "zero_sur_zero", label: "\\dfrac{0}{0}" },
+  { id: "infini_sur_infini", label: "\\dfrac{\\infty}{\\infty}" },
+  { id: "zero_fois_infini", label: "0\\cdot\\infty" },
+  { id: "infini_moins_infini", label: "\\infty-\\infty" },
+  { id: "pas_une_fi", label: "\\text{Pas une forme indéterminée}" },
 ];
 
 /** Écran de diagnostic AVANT toute dérivation, partagé par les familles L'Hôpital (H/I/J/K,
  * `6gen6`) — classer la forme (0/0, ∞/∞, ou aucune FI) avant d'appliquer la règle, pour éviter le
  * piège classique "appliquer L'Hôpital sans vérifier la forme". `App6gen6.tsx` doit le rendre avec
  * `key={phase}`. */
-export function EtapeFormeFI({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeFormeFI({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, messageIllisible, cible}: Props) {
   const [choix, setChoix] = useState<CategorieFI | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<CategorieFI>();
 
   return (
     <div>
@@ -66,33 +72,18 @@ export function EtapeFormeFI({ consigneEcran, enonceLatex, aideNiveau1, aideNive
             className={`btn ${choix === o.id ? "toggle-active" : ""} ${montrerErreurs && choix === o.id ? "is-erronee" : ""}`}
             onClick={() => setChoix(o.id)}
           >
-            {o.label}
+            <Katex expression={o.label} />
           </button>
         ))}
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix)}>
+        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && retour.tenter(choix, true, onValider)}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

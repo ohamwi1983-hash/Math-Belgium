@@ -18,9 +18,7 @@ import {
   verifierBPolynomiale,
   verifierCFacteurs,
   verifierCGlobale,
-  verifierGCombiner,
-  verifierGConclure,
-  verifierGOrdre1,
+  verifierFormeBC,
   verifierHConclure,
   verifierHDenominateur,
   verifierHForme,
@@ -60,8 +58,17 @@ export function demarrerSessionLimiteExponentielle(reglages: ReglagesSession6e, 
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Choix fermés (verdict, catégorie, graphique) : 1 seule tentative — un choix parmi deux ou trois
+ * options rejoué trois fois ne mesure plus rien (audit 6e ch. 2, lot B). Champs : réglage de la
+ * session (3 tentatives). */
+const PHASES_CHOIX_FERME: ReadonlySet<PhaseLimiteExponentielle> = new Set<PhaseLimiteExponentielle>(["aExposant", "aGlobale", "bExponentielle", "bPolynomiale", "bForme", "bGlobale", "cFacteurs", "cForme", "hForme", "iForme", "jForme", "kForme"]);
+
+export function tentativesMaxCourant(etat: EtatSessionLimiteExponentielle): number {
+  return PHASES_CHOIX_FERME.has(etat.phase) ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionLimiteExponentielle): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxCourant(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionLimiteExponentielle): EtatSessionLimiteExponentielle {
@@ -91,8 +98,6 @@ function construireResultat(
       return { famille: "B", exercice, scoreExponentielle: scores.bExponentielle as number, scorePolynomiale: scores.bPolynomiale as number, scoreGlobale: scores.bGlobale as number, details };
     case "C":
       return { famille: "C", exercice, scoreFacteurs: scores.cFacteurs as number, scoreGlobale: scores.cGlobale as number, details };
-    case "G":
-      return { famille: "G", exercice, scoreCombiner: scores.gCombiner as number, scoreOrdre1: scores.gOrdre1 as number, scoreConclure: scores.gConclure as number, details };
     case "H":
       return {
         famille: "H",
@@ -208,25 +213,19 @@ export function soumettreReponseCFacteurs(etat: EtatSessionLimiteExponentielle, 
   return avancerPhase(etat, reponse, (e, r) => (e.famille === "C" ? verifierCFacteurs(e, r) : false), "cFacteurs");
 }
 
+/** Écran « forme » de B et de C (verdict, 1 tentative). */
+export function soumettreReponseFormeBC(etat: EtatSessionLimiteExponentielle, reponse: CategorieFI): EtatSessionLimiteExponentielle {
+  const phase = etat.phase === "bForme" ? "bForme" : "cForme";
+  return avancerPhase(etat, reponse, (e, r) => (e.famille === "B" || e.famille === "C" ? verifierFormeBC(e, r) : false), phase);
+}
+
 export function soumettreReponseCGlobale(etat: EtatSessionLimiteExponentielle, texte: string): EtatSessionLimiteExponentielle {
   return avancerPhase(etat, texte, (e, r) => (e.famille === "C" ? verifierCGlobale(e, r) : false), "cGlobale");
 }
 
-// ============================================================================
-// Famille G
-// ============================================================================
 
-export function soumettreReponseGCombiner(etat: EtatSessionLimiteExponentielle, texte: string): EtatSessionLimiteExponentielle {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "G" ? verifierGCombiner(e, r) : false), "gCombiner");
-}
 
-export function soumettreReponseGOrdre1(etat: EtatSessionLimiteExponentielle, ordre1Suffit: boolean): EtatSessionLimiteExponentielle {
-  return avancerPhase(etat, ordre1Suffit, (e, r) => (e.famille === "G" ? verifierGOrdre1(e, r) : false), "gOrdre1");
-}
 
-export function soumettreReponseGConclure(etat: EtatSessionLimiteExponentielle, texte: string): EtatSessionLimiteExponentielle {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "G" ? verifierGConclure(e, r) : false), "gConclure");
-}
 
 // ============================================================================
 // Famille H

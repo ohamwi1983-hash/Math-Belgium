@@ -105,7 +105,7 @@ function etapesB(e: ExerciceExpoProbB): Etapes {
   const quot = `\\dfrac{${tolL}}{${e.Q0}}`;
   return {
     bEcran1: [
-      utilise("a", [texte("Ce qui diminue de p % par période, c'est ce qui RESTE : il est multiplié par "), latex("q=1-\\dfrac{p}{100}"), texte(" à chaque période, donc "), latex("\\text{reste}(t)=Q_0\\cdot q^{t}"), texte(` ${COURS_PROBLEMES}.`)]),
+      utilise("a", [texte("Ce qui diminue de p % par période, c'est ce qui reste : il est multiplié par "), latex("q=1-\\dfrac{p}{100}"), texte(" à chaque période, donc "), latex("\\text{reste}(t)=Q_0\\cdot q^{t}"), texte(` ${COURS_PROBLEMES}.`)]),
       calcul("a", [
         ligne(`q=1-\\dfrac{${e.p}}{100}`, `il reste ${100 - e.p} % à chaque période`),
         ligne(`=${qL}`),
@@ -384,7 +384,7 @@ function etapesG(e: ExerciceExpoProbG): Etapes {
     return [ligne(`f(${t})=${cPlus}e^{${subst}}`, `on remplace t par ${t}`), ...(ex === 0 ? [ligne(`=${cPlus}e^{0}`), ligne(`=${e.c + 1}`)] : [ligne(`=${cPlus}e^{${formatDecimal(ex, 2)}}`), ...lignesArrondi(v, 4, 2, "arrondi au centième")])];
   };
   const tSeuilL = formatDecimal(e.tSeuil, 2);
-  const atteint = e.duree >= e.tSeuil;
+  const avant = e.duree <= e.tSeuil;
   const resolution: LigneCalcul[] = [ligne(`${modele}=${sL}`, justif("", { l: `f(t)=S` }))];
   if (e.c !== 0) resolution.push(ligne(`e^{${expo}}=${sL}-${e.c}`, `on soustrait ${e.c}`), ligne(`=${smc}`));
   resolution.push(ligne(`${expo}=\\ln(${smc})`, justif("on prend ln des deux membres (", { l: `${smc}>0` }, ")")));
@@ -404,9 +404,20 @@ function etapesG(e: ExerciceExpoProbG): Etapes {
       piege("b", [texte("On isole d'abord l'exponentielle : le logarithme ne se « distribue » pas sur une somme.")]),
     ],
     gEcran3: [
-      utilise("c", [texte("La grandeur décroît : elle passe sous le seuil au temps trouvé à l'étape 2 et n'y revient plus. On compare ce temps à la durée D.")]),
-      calcul("c", [ligne(`t_{\\text{seuil}}\\approx ${tSeuilL}`, "étape 2"), ligne(`${tSeuilL}${atteint ? "\\leq" : ">"} ${e.duree}`, justif("comparé à ", { l: `D=${e.duree}` }))]),
-      resultat("c", [latex(rep(e, "gEcran3")[0]!), texte(atteint ? " : le seuil est franchi avant la fin de la durée D" : " : la durée D se termine avant que le seuil soit franchi")]),
+      utilise("c", [texte("La grandeur décroît : elle reste au-dessus du seuil jusqu'au temps trouvé à l'étape 2, puis passe en dessous et n'y revient plus. On compare ce temps à la durée D.")]),
+      calcul("c", [ligne(`t_{\\text{seuil}}\\approx ${tSeuilL}`, "étape 2"), ligne(`D=${e.duree}${avant ? "<" : ">"}${tSeuilL}`, justif("comparé à ", { l: "t_{\\text{seuil}}" }))]),
+      resultat("c", [
+        latex(rep(e, "gEcran3")[0]!),
+        texte(
+          avant
+            ? e.objectif === "rester"
+              ? " : la durée D se termine avant le temps seuil, la grandeur reste au-dessus du seuil pendant toute cette durée"
+              : " : la durée D se termine avant le temps seuil, la grandeur n'est pas encore passée sous le seuil"
+            : e.objectif === "rester"
+              ? " : le temps seuil arrive avant la fin de la durée D, la grandeur passe sous le seuil avant la fin"
+              : " : le temps seuil arrive avant la fin de la durée D, la grandeur est passée sous le seuil",
+        ),
+      ]),
     ],
   };
 }

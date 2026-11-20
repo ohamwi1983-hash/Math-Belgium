@@ -9,13 +9,15 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, tousLisibles, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
   latex: string | null;
 }
 
-interface Props {
+interface Props extends PropsRetourChamp<ReponseSigneUnZero> {
   consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -37,15 +39,16 @@ interface Props {
  * un champ numérique (le zéro) + un choix binaire (le sens du changement de signe, lu de gauche à
  * droite). `App6gen10.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, lire, messageIllisible, cible}: Props) {
   const [zeroTexte, setZeroTexte] = useState("");
   const [sens, setSens] = useState<DirectionSigne | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<ReponseSigneUnZero>();
   const complet = zeroTexte.trim() !== "" && sens !== null;
 
   function valider() {
     if (!complet) return;
-    onValider({ zeroTexte, sens: sens as DirectionSigne });
+    retour.tenter({ zeroTexte, sens: sens as DirectionSigne }, tousLisibles(lire, [zeroTexte]), onValider);
   }
 
   return (
@@ -64,7 +67,7 @@ export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, aideNivea
 
       <div className="field">
         <label className="field-label field-label-minuscule">Zéro du facteur, x =</label>
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={zeroTexte} placeholder="ex : -2" onChange={(e) => setZeroTexte(e.target.value)} />
+        <input type="text" className={`text-input ${montrerErreurs && zeroTexte === retour.soumise?.zeroTexte ? "is-erronee" : ""}`} value={zeroTexte} placeholder="ex : 3/2" onChange={(e) => setZeroTexte(e.target.value)} />
       </div>
 
       <div className="options-grid-compact">
@@ -84,18 +87,7 @@ export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, aideNivea
         </button>
       </div>
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -103,11 +95,7 @@ export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, aideNivea
           Valider
         </button>
 
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

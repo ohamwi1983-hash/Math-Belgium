@@ -11,5 +11,6 @@ import { tirerParmi } from "../aleatoire";
 export function construireC(): ExerciceLimiteC {
   const r = tirerParmi([1, 2] as const);
   const s = tirerParmi([2, 3] as const);
-  return { famille: "C", r, s, limiteFacteur1: { type: "plus_infini" }, limiteFacteur2: { type: "zero" }, limiteGlobale: 0 };
+  const quotient = Math.random() < 0.5;
+  return { famille: "C", r, s, quotient, limiteFacteur1: { type: "plus_infini" }, limiteFacteur2: quotient ? { type: "plus_infini" } : { type: "zero" }, limiteGlobale: 0 };
 }

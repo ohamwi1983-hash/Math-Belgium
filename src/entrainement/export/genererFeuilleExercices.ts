@@ -72,6 +72,9 @@ export type BlocCorrection =
 export interface CatalogueVarianteEntree {
   id: string;
   label: string;
+  /** Variante RETIRÉE : jamais proposée (panneau, sélecteur), gardée à sa place pour que l'indice
+   * des variantes suivantes — donc leurs `?code=` déjà imprimés — ne change pas (6gen6, famille G). */
+  retiree?: boolean;
 }
 
 /** Groupe de variantes « à verdict » (voir `AdaptateurFeuilleExercices.groupesVerdict`). `id` ne doit

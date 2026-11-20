@@ -26,7 +26,7 @@ interface Props {
  * délégué à `EtapeSelectionGraphiqueQCM`, partagé avec 6gen5/6gen8/6gen20/6gen21. Les 5 écrans
  * précédents (domaine, limites, asymptotes, croissance, concavité) sont listés dans le
  * récapitulatif "Ce qu'on sait déjà" (`ui6e/recapitulatifEtudeFonctionExponentielle.ts`). */
-export function EtapeSelectionGraphiqueEtudeFonction({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeSelectionGraphiqueEtudeFonction({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const viewBox = calculerViewBox(exercice);
 
   return (

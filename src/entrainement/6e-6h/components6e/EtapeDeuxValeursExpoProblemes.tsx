@@ -7,13 +7,15 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import type { FragmentConsigne } from "../ui6e/formatExponentiellesProblemes";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, tousLisibles, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
   latex: string | null;
 }
 
-interface Props {
+interface Props extends PropsRetourChamp<[string, string]> {
   consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
   consigneEcran: FragmentConsigne[];
@@ -39,15 +41,16 @@ interface Props {
 /** Écran GÉNÉRIQUE à 2 champs numériques FIXES, un par temps demandé — famille G écran 1
  * uniquement (2 valeurs déjà `f(tEval1)`/`f(tEval2)`, jamais une taille variable — pas de pattern
  * add-as-needed ici, contrairement à `EtapeListeExpoProblemes.tsx`). */
-export function EtapeDeuxValeursExpoProblemes({ consigneGenerale, blocDonnees, consigneEcran, labelChamp1, labelChamp2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDeuxValeursExpoProblemes({ consigneGenerale, blocDonnees, consigneEcran, labelChamp1, labelChamp2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, lire, messageIllisible, cible}: Props) {
   const [texte1, setTexte1] = useState("");
   const [texte2, setTexte2] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<[string, string]>();
   const complet = texte1.trim() !== "" && texte2.trim() !== "";
 
   function valider() {
     if (!complet) return;
-    onValider(texte1, texte2);
+    retour.tenter([texte1, texte2], tousLisibles(lire, [texte1, texte2]), ([a, b]) => onValider(a, b));
   }
 
   return (
@@ -72,38 +75,23 @@ export function EtapeDeuxValeursExpoProblemes({ consigneGenerale, blocDonnees, c
         <p className="field-label field-label-minuscule">
           <Katex expression={labelChamp1} />
         </p>
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte1} placeholder="valeur" onChange={(e) => setTexte1(e.target.value)} />
+        <input type="text" className={`text-input ${montrerErreurs && texte1 === retour.soumise?.[0] ? "is-erronee" : ""}`} value={texte1} placeholder="valeur" onChange={(e) => setTexte1(e.target.value)} />
       </div>
       <ApercuExpressionLatex texte={texte2} label={labelChamp2} />
       <div className="field-row">
         <p className="field-label field-label-minuscule">
           <Katex expression={labelChamp2} />
         </p>
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte2} placeholder="valeur" onChange={(e) => setTexte2(e.target.value)} />
+        <input type="text" className={`text-input ${montrerErreurs && texte2 === retour.soumise?.[1] ? "is-erronee" : ""}`} value={texte2} placeholder="valeur" onChange={(e) => setTexte2(e.target.value)} />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

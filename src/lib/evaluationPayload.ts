@@ -689,7 +689,9 @@ export function catalogueVariantesExercice(generatorId: IdGenerateurPilote, mode
   const adaptateur = EVALUATION_ADAPTER_REGISTRY[generatorId]
   if (!adaptateur) return []
   if (adaptateur.catalogueVariantes && adaptateur.catalogueVariantes.length > 0) {
-    return mode === 'evaluation' ? catalogueAvecGroupes(adaptateur.catalogueVariantes, adaptateur.groupesVerdict, clesActives) : adaptateur.catalogueVariantes
+    // Une entrée `retiree` (variante retirée, gardée pour les indices des `?code=`) n'est jamais proposée.
+    const catalogue = adaptateur.catalogueVariantes.filter((v) => !v.retiree)
+    return mode === 'evaluation' ? catalogueAvecGroupes(catalogue, adaptateur.groupesVerdict, clesActives) : catalogue
   }
   return CATALOGUE_VARIANTE_PAR_DEFAUT
 }

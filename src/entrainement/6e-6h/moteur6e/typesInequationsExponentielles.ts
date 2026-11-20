@@ -7,7 +7,12 @@ import type { ExerciceInequationExponentielle } from "../core6e/inequationsExpon
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
+/** `existence` : écran de verdict posé en tête des familles A, C-k, D et E (décision de
+ * l'utilisateur, audit 6e ch. 2) — « impossible, vraie pour tout réel x, ou à résoudre ? ». Les
+ * familles B et C-f posent la même question sur leur premier écran (`bReconnaitre`,
+ * `cfReconnaitre`). */
 export type PhaseInequationExponentielle =
+  | "existence"
   | "aReconnaitre"
   | "aResoudre"
   | "bReconnaitre"
@@ -24,21 +29,35 @@ export type PhaseInequationExponentielle =
 
 export function phaseInitiale(exercice: ExerciceInequationExponentielle): PhaseInequationExponentielle {
   switch (exercice.famille) {
-    case "A":
-      return "aReconnaitre";
     case "B":
       return "bReconnaitre";
     case "C":
-      return exercice.sousType === "f" ? "cfReconnaitre" : "ckRegrouper";
+      return exercice.sousType === "f" ? "cfReconnaitre" : "existence";
+    default:
+      return "existence";
+  }
+}
+
+/** Premier écran de résolution, après le verdict « existence ». */
+function premierEcranResolution(exercice: ExerciceInequationExponentielle): PhaseInequationExponentielle | "termine" {
+  switch (exercice.famille) {
+    case "A":
+      return "aReconnaitre";
+    case "C":
+      return exercice.sousType === "k" ? "ckRegrouper" : "termine";
     case "D":
       return exercice.sousType === "constant" ? "dConstantSigne" : "dVariableSigne1";
     case "E":
       return "eRegrouper";
+    default:
+      return "termine";
   }
 }
 
-export function phaseApres(phase: PhaseInequationExponentielle): PhaseInequationExponentielle | "termine" {
+export function phaseApres(phase: PhaseInequationExponentielle, exercice: ExerciceInequationExponentielle): PhaseInequationExponentielle | "termine" {
   switch (phase) {
+    case "existence":
+      return premierEcranResolution(exercice);
     case "aReconnaitre":
       return "aResoudre";
     case "aResoudre":

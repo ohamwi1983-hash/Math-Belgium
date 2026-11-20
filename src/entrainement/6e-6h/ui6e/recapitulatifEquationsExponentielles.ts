@@ -10,6 +10,7 @@ import { formatReponseAttenduePhaseLatex } from "./formatEquationsExponentielles
  * réexportés ailleurs. `formatReponseAttenduePhaseLatex` existe en revanche sous ce nom exact.
  */
 const LIBELLE_PHASE: Record<PhaseEquationExponentielle, string> = {
+  existence: "Existence d'une solution",
   aEcran1: "Écran 1 (mise en exposant)",
   aEcran2: "Écran 2 (résolution)",
   bEcran1: "Écran 1 (simplification)",
@@ -28,7 +29,7 @@ function sequencePourExercice(exercice: ExerciceEquationExponentielle): PhaseEqu
   let phase: PhaseEquationExponentielle | "termine" = phaseInitiale(exercice);
   while (phase !== "termine") {
     phases.push(phase);
-    phase = phaseApres(phase);
+    phase = phaseApres(phase, exercice);
   }
   return phases;
 }

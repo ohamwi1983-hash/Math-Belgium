@@ -279,7 +279,7 @@ function fenetreX(exercice: ExerciceEtudeFonctionExponentielle): [number, number
  * et corrigé là-bas pour la croissance exponentielle non bornée, appliqué ici DÈS LA CONCEPTION. */
 const PLAFOND_STATS: Record<ExerciceEtudeFonctionExponentielle["famille"], number> = {
   A: 30,
-  B: 40,
+  B: 5,
   C: 60,
   D: 30,
 };
@@ -380,7 +380,7 @@ export function consigneAsymptotes(exercice: ExerciceEtudeFonctionExponentielle)
 }
 
 export function consigneAsymptotesB(p: number): FragmentConsigne[] {
-  return [texte("L'asymptote verticale "), latex(`x=${p}`), texte(" n'est valable que d'UN SEUL côté — lequel ? Et quelle est l'équation de l'asymptote horizontale (commune aux deux infinis) ?")];
+  return [texte("L'asymptote verticale "), latex(`x=${p}`), texte(" n'existe que d'un seul côté : lequel ? Et quelle est l'équation de l'asymptote horizontale (commune aux deux infinis) ?")];
 }
 
 export function consigneCroissance(): FragmentConsigne[] {
@@ -400,42 +400,42 @@ export function consigneGraphique(): FragmentConsigne[] {
 // ============================================================================
 
 function texteFamilleAsymptoteC(): string {
-  return "Nouvelle méthode — une asymptote OBLIQUE existe si la différence entre f(x) et cette droite tend vers 0. Ici, cherche quelle partie de f(x) tend vers 0.";
+  return "La droite d'équation y = ax + b est une asymptote oblique si la différence entre f(x) et ax + b tend vers 0 : cherche quelle partie de f(x) tend vers 0.";
 }
 
 export function aideDomaineNiveau1(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "B") return { texte: "Une exponentielle est toujours définie, sauf si son exposant lui-même est indéfini — repère la valeur qui annule le dénominateur de l'exposant.", latex: null };
-  return { texte: "Une exponentielle (base positive, exposant quelconque) est toujours définie sur tout ℝ.", latex: null };
+  if (exercice.famille === "B") return { texte: "Une exponentielle est définie dès que son exposant l'est : repère la valeur qui annule le dénominateur de l'exposant.", latex: null };
+  return { texte: "Une exponentielle est définie quel que soit son exposant : cherche seulement une racine, un dénominateur ou un logarithme dans l'expression.", latex: null };
 }
 
 export function aideDomaineNiveau2(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
   if (exercice.famille === "B") return { texte: "L'exposant s'écrit sous forme d'une fraction :", latex: `\\dfrac{${exercice.k}}{${formatXMoinsP(exercice.p)}}` };
-  return { texte: "Aucune restriction à chercher pour cette famille.", latex: null };
+  return { texte: "Ici, l'expression ne contient ni racine, ni dénominateur, ni logarithme.", latex: null };
 }
 
 export function aideLimitesNiveau1(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
   if (exercice.famille === "A") return { texte: "Étudie d'abord la limite de l'exposant dans chaque direction, puis utilise les limites de référence de l'exponentielle :", latex: "e^{u}\\to+\\infty \\text{ si } u\\to+\\infty, \\quad e^{u}\\to 0 \\text{ si } u\\to-\\infty" };
-  if (exercice.famille === "B") return { texte: "Près du point exclu, distingue soigneusement les 2 côtés : le signe de l'exposant n'est PAS le même des deux côtés. Aux deux infinis, l'exposant tend vers 0. L'exposant :", latex: `\\dfrac{${exercice.k}}{${formatXMoinsP(exercice.p)}}` };
-  if (exercice.famille === "C") return { texte: "Piège : les deux limites sont infinies, mais cela ne signifie pas 'pas d'asymptote' — regarde l'étape suivante avant de conclure.", latex: null };
-  return { texte: "En +∞, le produit tend vers l'infini (signe de a) ; en −∞, l'exponentielle l'emporte sur x : le produit tend vers 0 (croissance comparée), pas vers −∞.", latex: null };
+  if (exercice.famille === "B") return { texte: "Près de la valeur exclue, distingue les deux côtés : l'exposant n'y a pas le même signe. Aux deux infinis, l'exposant tend vers 0. L'exposant est :", latex: `\\dfrac{${exercice.k}}{${formatXMoinsP(exercice.p)}}` };
+  if (exercice.famille === "C") return { texte: "Calcule chaque limite séparément : regarde ce que devient le terme exponentiel, puis le terme en x.", latex: null };
+  return { texte: "En −∞, l'exponentielle l'emporte sur toute puissance de x (croissances comparées) :", latex: "\\lim_{x\\to-\\infty}x^{n}e^{x}=0" };
 }
 
 export function aideLimitesNiveau2(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Signe de m et direction :", latex: `m=${exercice.m}` };
-  if (exercice.famille === "B") return { texte: "Signe de k (détermine quel côté explose) :", latex: `k=${exercice.k},\\quad p=${exercice.p}` };
+  if (exercice.famille === "A") return { texte: "Ici, l'exposant a pour coefficient de x :", latex: `m=${exercice.m}` };
+  if (exercice.famille === "B") return { texte: "Ici, le signe de k décide de quel côté l'exposant tend vers l'infini :", latex: `k=${exercice.k},\\quad p=${exercice.p}` };
   if (exercice.famille === "C") {
     const exposant = formatSommeTermes([
       { valeur: exercice.m, suffixe: "x" },
       { valeur: exercice.n, suffixe: "" },
     ]);
-    return { texte: "En +∞, le terme exponentiel domine ; en −∞, il s'annule complètement.", latex: `${exercice.base}^{${exposant}} \\to 0 \\text{ quand } x\\to-\\infty` };
+    return { texte: "Ici, en −∞, le terme exponentiel tend vers 0 :", latex: `${exercice.base}^{${exposant}} \\to 0 \\text{ quand } x\\to-\\infty` };
   }
-  return { texte: "Signe de a :", latex: `a=${exercice.a}` };
+  return { texte: "Ici, le coefficient a vaut :", latex: `a=${exercice.a}` };
 }
 
 export function aideAsymptotesNiveau1(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
   if (exercice.famille === "C") return { texte: texteFamilleAsymptoteC(), latex: "y=ax+b \\quad\\text{si}\\quad f(x)-(ax+b)\\to 0" };
-  if (exercice.famille === "A" || exercice.famille === "D") return { texte: "Une limite finie (0 ou une valeur) donne une asymptote HORIZONTALE ; une limite infinie ne donne AUCUNE asymptote dans cette direction.", latex: null };
+  if (exercice.famille === "A" || exercice.famille === "D") return { texte: "Une limite finie à l'infini donne une asymptote horizontale ; une limite infinie n'en donne aucune de ce côté.", latex: "\\lim_{x\\to+\\infty}f(x)=L\\ \\Rightarrow\\ y=L" };
   return { texte: "", latex: null };
 }
 
@@ -445,19 +445,12 @@ export function aideAsymptotesNiveau1(exercice: ExerciceEtudeFonctionExponentiel
  * principe que les gardes de `sessionEtudeFonctionExponentielle.ts`). */
 export function aideAsymptotesNiveau2(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
   if (exercice.famille === "B") return { texte: "", latex: null };
-  if (exercice.famille === "C") {
-    // Affiché SYMBOLIQUEMENT (`-K·ln(base)·x`), jamais en décimal (`cible.a` est un nombre brut
-    // irrationnel en général — bug trouvé par vérification Playwright, `y=-80.47...x` affiché à tort
-    // avant ce correctif, voir CLAUDE.md).
-    const cLatex = formatCoefficientCLatex(exercice.m, exercice.base, exercice.p);
-    return { texte: "Le terme exponentiel s'annule quand x→−∞ ; il ne reste que le terme linéaire, qui devient la droite candidate (sans vérification finale donnée ici) :", latex: `y=-${cLatex}\\,x` };
-  }
-  const cible = exercice.asymptotePlusInfini.type !== "aucune" ? exercice.asymptotePlusInfini : exercice.asymptoteMoinsInfini;
-  return { texte: "Équation attendue (une seule des deux directions a une asymptote) :", latex: formatEquationAsymptoteLatex(cible) };
+  if (exercice.famille === "C") return { texte: "Ici, en −∞, le terme exponentiel tend vers 0 : il ne reste que le terme en x, qui donne la droite.", latex: null };
+  return { texte: "Ici, une seule des deux limites à l'infini est finie : sa valeur donne l'asymptote horizontale, de ce côté seulement.", latex: null };
 }
 
 export function aideAsymptotesBNiveau1(): AideAvecLatex {
-  return { texte: "Rappel : une asymptote verticale requiert une limite INFINIE. Si un seul côté donne une limite infinie, l'asymptote n'est valable que de CE côté — l'autre côté n'a aucune asymptote verticale.", latex: null };
+  return { texte: "Une asymptote verticale demande une limite infinie : si la limite n'est infinie que d'un côté de la valeur exclue, l'asymptote ne vaut que de ce côté.", latex: null };
 }
 
 export function aideAsymptotesBNiveau2(exercice: ExerciceEtudeB): AideAvecLatex {
@@ -468,61 +461,61 @@ export function aideAsymptotesBNiveau2(exercice: ExerciceEtudeB): AideAvecLatex 
 }
 
 export function aideCroissanceNiveau1(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "B") return { texte: "Calcule f'(x) — son signe ne dépend QUE du signe de −k (le carré du dénominateur est toujours strictement positif), jamais de x lui-même.", latex: null };
-  if (exercice.famille === "C") return { texte: "f'(x) = 0 exactement une fois — repère cette position, puis étudie le signe de f' avant/après pour confirmer un minimum.", latex: null };
-  return { texte: "Calcule f'(x) puis étudie son signe sur tout le domaine.", latex: null };
+  if (exercice.famille === "B") return { texte: "Calcule f′(x) : le carré du dénominateur et l'exponentielle sont positifs, le signe de f′ est celui du facteur restant.", latex: "\\left(e^{u}\\right)'=u'\\,e^{u}" };
+  if (exercice.famille === "C") return { texte: "Cherche où f′ s'annule, puis étudie son signe de part et d'autre :", latex: "f'(x)=0" };
+  return { texte: "Calcule f′(x), puis étudie son signe sur tout le domaine.", latex: null };
 }
 
 export function aideCroissanceNiveau2(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "La dérivée est le produit de m par une exponentielle (toujours positive) : son signe est celui de m.", latex: `f'(x)=${formatCoefFois(exercice.m, `e^{${exposantAffineLatex(exercice.m, exercice.n)}}`)}` };
-  if (exercice.famille === "B") return { texte: "La dérivée a le signe de −k :", latex: `f'(x)=e^{\\frac{${exercice.k}}{${formatXMoinsP(exercice.p)}}}\\cdot\\dfrac{${-exercice.k}}{(${formatXMoinsP(exercice.p)})^{2}}` };
+  if (exercice.famille === "A") return { texte: "Ici, la dérivée est le produit d'un nombre par une exponentielle, toujours positive :", latex: `f'(x)=${formatCoefFois(exercice.m, `e^{${exposantAffineLatex(exercice.m, exercice.n)}}`)}` };
+  if (exercice.famille === "B") return { texte: "Ici :", latex: `f'(x)=e^{\\frac{${exercice.k}}{${formatXMoinsP(exercice.p)}}}\\cdot\\dfrac{${-exercice.k}}{(${formatXMoinsP(exercice.p)})^{2}}` };
   if (exercice.famille === "C") {
     const mln = mLnBaseLatex(exercice.m, exercice.base);
     return {
-      texte: "La dérivée s'annule quand l'exposant vaut p :",
-      latex: `f'(x)=${mln}\\cdot ${exercice.base}^{${exposantAffineLatex(exercice.m, exercice.n)}}-${formatCoefficientCLatex(exercice.m, exercice.base, exercice.p)}\\qquad x=${positionLatex((exercice.p - exercice.n) / exercice.m)}`,
+      texte: "Ici, résous l'équation f′(x) = 0 (les deux membres seront des puissances de même base) :",
+      latex: `f'(x)=${mln}\\cdot ${exercice.base}^{${exposantAffineLatex(exercice.m, exercice.n)}}-${formatCoefficientCLatex(exercice.m, exercice.base, exercice.p)}`,
     };
   }
-  return { texte: "Dérivée déjà établie pour ce type de fonction, nulle en x = −1 :", latex: `f'(x)=${formatCoefFois(exercice.a, "e^{x}")}(1+x)` };
+  return { texte: "Ici, la dérivée se factorise :", latex: `f'(x)=${formatCoefFois(exercice.a, "e^{x}")}(1+x)` };
 }
 
 /** Rappel EXPLICITE de la méthode de concavité — voir la note de conception en tête de fichier :
  * TOUJOURS énoncé, sur chaque instance de chaque famille, jamais seulement "la première fois". */
 export function aideConcaviteNiveau1(_exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
   return {
-    texte:
-      "Méthode (nouvelle dans ce chapitre) — étudie le signe de la dérivée SECONDE f'' : si f'' est POSITIVE, f est CONVEXE ; si f'' est NÉGATIVE, f est CONCAVE ; si f'' CHANGE DE SIGNE en un point, ce point est un POINT D'INFLEXION.",
-    latex: "f''(x) > 0 \\Rightarrow \\text{convexe} \\qquad f''(x) < 0 \\Rightarrow \\text{concave}",
+    texte: "Étudie le signe de la dérivée seconde : positive, f est convexe ; négative, f est concave ; si elle change de signe en un point, c'est un point d'inflexion :",
+    latex: "f''(x)>0\\ \\Rightarrow\\ \\text{convexe}\\qquad f''(x)<0\\ \\Rightarrow\\ \\text{concave}",
   };
 }
 
 export function aideConcaviteNiveau2(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Dérivée seconde : le carré de m multiplié par une exponentielle, toujours strictement positif :", latex: `f''(x)=${formatCoefFois(exercice.m * exercice.m, `e^{${exposantAffineLatex(exercice.m, exercice.n)}}`)}` };
+  if (exercice.famille === "A") return { texte: "Ici, la dérivée seconde est un nombre positif multiplié par une exponentielle :", latex: `f''(x)=${formatCoefFois(exercice.m * exercice.m, `e^{${exposantAffineLatex(exercice.m, exercice.n)}}`)}` };
   if (exercice.famille === "B") {
     const k = exercice.k;
-    return { texte: "Position du point d'inflexion :", latex: `x=p-\\dfrac{k}{2}=${exercice.p}${k > 0 ? "-" : "+"}\\dfrac{${Math.abs(k)}}{2}=${positionLatex(exercice.p - k / 2)}` };
+    const xp = formatXMoinsP(exercice.p);
+    return { texte: "Ici, la dérivée seconde a le signe de son dernier facteur du numérateur : cherche où il s'annule.", latex: `f''(x)=e^{\\frac{${k}}{${xp}}}\\cdot\\dfrac{${k}\\left(2(${xp})${k > 0 ? "+" : "-"}${Math.abs(k)}\\right)}{(${xp})^{4}}` };
   }
   if (exercice.famille === "C") {
     return {
-      texte: "Dérivée seconde : le terme linéaire disparaît (sa dérivée seconde est nulle) ; il reste un carré multiplié par une exponentielle, toujours positif :",
+      texte: "Ici, le terme en x disparaît à la dérivée seconde ; il reste un carré multiplié par une exponentielle :",
       latex: `f''(x)=\\left(${mLnBaseLatex(exercice.m, exercice.base)}\\right)^{2}\\cdot ${exercice.base}^{${exposantAffineLatex(exercice.m, exercice.n)}}`,
     };
   }
-  return { texte: "Dérivée seconde déjà établie pour ce type de fonction (quel que soit le signe de a), nulle en x = −2 :", latex: `f''(x)=${formatCoefFois(exercice.a, "e^{x}")}(2+x)` };
+  return { texte: "Ici, la dérivée seconde se factorise :", latex: `f''(x)=${formatCoefFois(exercice.a, "e^{x}")}(2+x)` };
 }
 
 export function aideGraphiqueNiveau1(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Le graphique doit rester CONVEXE sur toute son étendue — jamais de point d'inflexion pour cette famille.", latex: null };
-  if (exercice.famille === "B") return { texte: "Le graphique doit présenter une asymptote verticale D'UN SEUL CÔTÉ du point exclu, jamais des deux.", latex: null };
-  if (exercice.famille === "C") return { texte: "Le graphique doit se RAPPROCHER d'une droite oblique en −∞ (jamais s'en éloigner), et n'avoir qu'un seul minimum.", latex: null };
-  return { texte: "Le graphique doit présenter à la fois l'extremum en x=−1 ET le point d'inflexion en x=−2, dans le bon ordre.", latex: null };
+  if (exercice.famille === "A") return { texte: "Compare chaque graphique à ton étude : sens de variation, concavité (sans point d'inflexion ici) et asymptote.", latex: null };
+  if (exercice.famille === "B") return { texte: "Compare chaque graphique à ton étude : l'asymptote verticale n'existe que d'un seul côté de la valeur exclue.", latex: null };
+  if (exercice.famille === "C") return { texte: "Compare chaque graphique à ton étude : la courbe se rapproche d'une droite oblique en −∞ et n'a qu'un seul minimum.", latex: null };
+  return { texte: "Compare chaque graphique à ton étude : l'extremum et le point d'inflexion doivent être aux bonnes abscisses, dans le bon ordre.", latex: null };
 }
 
 export function aideGraphiqueNiveau2(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
   if (exercice.famille === "A") return { texte: "Sens de variation attendu :", latex: exercice.croissance.type === "croissante_partout" ? "\\nearrow" : "\\searrow" };
   if (exercice.famille === "B") return { texte: "Côté de l'asymptote verticale :", latex: `x \\to ${exercice.p}^{${exercice.coteAsymptoteVerticale === "plus" ? "+" : "-"}}` };
   if (exercice.famille === "C") return { texte: "Position du minimum :", latex: `x=${positionLatex(exercice.croissance.position ?? 0)}` };
-  return { texte: exercice.a > 0 ? "Minimum en x=−1." : "Maximum en x=−1.", latex: null };
+  return { texte: exercice.a > 0 ? "Ici, f a un minimum en −1." : "Ici, f a un maximum en −1.", latex: null };
 }
 
 export { formatXMoinsP };
@@ -592,15 +585,15 @@ export function contenuRecapPhase(exercice: ExerciceEtudeFonctionExponentielle, 
       const c = exercice.croissance;
       // Famille B : monotone sur CHAQUE intervalle du domaine, pas « partout » (f n'est pas monotone sur
       // ℝ \ {p} : elle repart de +∞ ou de 0 de l'autre côté du point exclu).
-      const ou = exercice.famille === "B" ? "sur chaque intervalle du domaine" : "(partout)";
+      const ou = exercice.famille === "B" ? "sur chaque intervalle du domaine" : "sur ℝ";
       if (c.type === "croissante_partout") return { texte: `Croissante ${ou}`, latex: null };
       if (c.type === "decroissante_partout") return { texte: `Décroissante ${ou}`, latex: null };
       return { texte: null, latex: `\\text{${c.type === "minimum" ? "Minimum" : "Maximum"} en } x=${positionLatex(c.position ?? 0)}` };
     }
     case "concavite": {
       const c = exercice.concavite;
-      if (c.type === "convexe_partout") return { texte: "Convexe (partout)", latex: null };
-      if (c.type === "concave_partout") return { texte: "Concave (partout)", latex: null };
+      if (c.type === "convexe_partout") return { texte: exercice.famille === "B" ? "Convexe sur chaque intervalle du domaine" : "Convexe sur ℝ", latex: null };
+      if (c.type === "concave_partout") return { texte: exercice.famille === "B" ? "Concave sur chaque intervalle du domaine" : "Concave sur ℝ", latex: null };
       return { texte: null, latex: `\\text{Point d'inflexion en } x=${positionLatex(c.position ?? 0)}` };
     }
     case "graphique":
