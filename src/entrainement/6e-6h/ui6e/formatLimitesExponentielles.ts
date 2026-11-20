@@ -285,7 +285,8 @@ function formatDecalageX(x0: number): string {
 function formatKFoisDecalage(k: number, x0: number): string {
   if (x0 === 0) return formatKx(k);
   const dec = formatDecalageX(x0);
-  if (k === 1) return dec;
+  // k = 1 : « x-3 » sans parenthèses (sinon « \\sin((x-3)) », « 3^{(x+2)} », « \\dfrac{…}{(x+2)} »).
+  if (k === 1) return dec.slice(1, -1);
   if (k === -1) return `-${dec}`;
   return `${k}${dec}`;
 }
