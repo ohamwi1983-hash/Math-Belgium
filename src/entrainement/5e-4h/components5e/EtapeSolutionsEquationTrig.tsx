@@ -74,7 +74,7 @@ export function EtapeSolutionsEquationTrig({ exercice, tentativesUtilisees, tent
         <div key={i}>
           <ApercuExpressionLatex texte={ligne} />
           <div className="field-row">
-            <input type="text" className={`text-input${lignesErronee ? " is-erronee" : ""}`} value={ligne} onChange={(e) => modifierLigne(i, e.target.value)} placeholder="ex : 2*pi/5" />
+            <input type="text" className={`text-input${lignesErronee ? " is-erronee" : ""}`} value={ligne} onChange={(e) => modifierLigne(i, e.target.value)} placeholder="ex : 2π/5" />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => retirerLigne(i)}>
                 ×

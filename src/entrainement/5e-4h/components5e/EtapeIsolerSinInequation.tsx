@@ -109,7 +109,7 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
       )}
       {!validation && <RetourSaisieTrig
         illisible={saisie.illisible}
-        champ={question.casSpecial !== null ? "nombre" : "expression"}
+        champ={question.casSpecial !== null ? "nombre" : "inequation"}
         tentativesUtilisees={tentativesUtilisees}
         tentativesMax={tentativesMax}
         cible={montrerErreurs && saisie.soumise ? messageCibleModelisation(exercice, "isolerSinInequation", saisie.soumise) : null}

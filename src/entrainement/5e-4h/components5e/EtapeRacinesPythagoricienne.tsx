@@ -73,7 +73,7 @@ export function EtapeRacinesPythagoricienne({ exercice, tentativesUtilisees, ten
         <label className="field-label field-label-minuscule">
           <Katex expression="t_2" />
         </label>
-        <input type="text" className={`text-input${champsErronee ? " is-erronee" : ""}`} value={t2} onChange={(e) => setT2(e.target.value)} placeholder="ex : -2/7" />
+        <input type="text" className={`text-input${champsErronee ? " is-erronee" : ""}`} value={t2} onChange={(e) => setT2(e.target.value)} placeholder="ex : −2/7" />
       </div>
       <AidesTrig niveauAide={niveauAide} aides={aidesRacinesPythagoricienne(equationEnTLatex(exercice))} />
       {!validation && (

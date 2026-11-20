@@ -58,7 +58,7 @@ export function EtapePrefacteurProduit({ exercice, tentativesUtilisees, tentativ
       />
       <p className="prompt-text">{CONSIGNE_PREFACTEUR}</p>
       <ApercuExpressionLatex texte={texte} />
-      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : sin(5x)*(sin(5x)-3/7)" />
+      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : sin(5x)(sin(5x) − 3/7)" />
       <AidesTrig niveauAide={niveauAide} aides={aidesPrefacteur(`\\${exercice.facteur2.fonction}\\left(${formatArgumentLatex(exercice.facteur2.a, exercice.facteur2.b)}\\right)`, exercice.facteur2.k.latex)} />
       {!validation && (
         <>

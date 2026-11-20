@@ -60,7 +60,7 @@ export function EtapeConversionPythagoricienne({ exercice, tentativesUtilisees, 
         className={`text-input${texteErronee ? " is-erronee" : ""}`}
         value={texte}
         onChange={(e) => setTexte(e.target.value)}
-        placeholder={`ex : 7*${exercice.fonctionCible}(x)^2-3*${exercice.fonctionCible}(x)+5`}
+        placeholder={`ex : 7${exercice.fonctionCible}²(x) − 3${exercice.fonctionCible}(x) + 5`}
       />
       <AidesTrig niveauAide={niveauAide} aides={aidesConversionPythagoricienne(latexAideConversionNiveau1(exercice), exercice.fonctionCible)} />
       {!validation && (

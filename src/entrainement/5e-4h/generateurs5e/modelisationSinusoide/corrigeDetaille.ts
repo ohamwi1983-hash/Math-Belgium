@@ -304,7 +304,7 @@ function etapesArgumentResoudre(e: E, q2: QuestionResoudre, sq: string): EtapeCo
     ligne(`\\approx ${n4(Math.PI - alpha)}+2k\\pi`),
   );
   return [
-    utilise(sq, [texte(`On pose u = ωt + φ et on isole le sinus ; puis deux angles supplémentaires ont le même sinus ${COURS_MODELISER} : `), latex("\\sin u=m\\iff u=\\arcsin m+2k\\pi\\ \\text{ou}\\ u=\\pi-\\arcsin m+2k\\pi"), texte(".")]),
+    utilise(sq, [texte(`On pose u = ωt + φ et on isole le sinus ; puis deux angles supplémentaires ont le même sinus ${COURS_MODELISER} : `), latex("\\sin u=m\\iff u=\\arcsin m+2k\\pi"), texte(" ou "), latex("u=\\pi-\\arcsin m+2k\\pi"), texte(".")]),
     calcul(sq, lignes),
     resultat(sq, reponse(e, "argumentResoudre")),
     piege(sq, [texte("Deux séries de solutions : n'oublie pas u = π − arcsin m + 2kπ.")]),

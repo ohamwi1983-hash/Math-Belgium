@@ -64,7 +64,7 @@ export function EtapeResoudreEgalite({ exercice, tentativesUtilisees, tentatives
               className={`text-input${lignesErronee ? " is-erronee" : ""}`}
               value={ligne}
               onChange={(e) => setLignes((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-              placeholder="ex : pi/5 + k*2*pi/7"
+              placeholder="ex : π/5 + 2kπ/7"
             />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes((arr) => arr.filter((_, j) => j !== i))}>

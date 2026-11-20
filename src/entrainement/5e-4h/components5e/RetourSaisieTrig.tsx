@@ -19,7 +19,7 @@ import type { AideTrig } from "../ui5e/aidesTrigonometrie";
 export { useTentativeLisible };
 
 /** Genre du champ, pour le message d'illisible. */
-export type ChampTrig = "angleRad" | "angleDeg" | "longueur" | "aire" | "nombre" | "expression" | "equation" | "solutions" | "intervalles";
+export type ChampTrig = "angleRad" | "angleDeg" | "longueur" | "aire" | "nombre" | "expression" | "expressionT" | "serie" | "equation" | "inequation" | "solutions" | "intervalles";
 
 const FIN = " Cette saisie ne compte pas comme une tentative.";
 
@@ -30,7 +30,10 @@ export const MESSAGES_ILLISIBLE_TRIG: Record<ChampTrig, string> = {
   aire: "Nombre non reconnu : écris une aire, par exemple 25π/6 ou 13,09." + FIN,
   nombre: "Nombre non reconnu : écris un nombre, par exemple −3/2, 5π/6 ou 2,5." + FIN,
   expression: "Expression non reconnue : vérifie les parenthèses, les signes et la place de x." + FIN,
+  expressionT: "Expression non reconnue : vérifie les parenthèses, les signes et la place de t." + FIN,
+  serie: "Série non reconnue : écris une valeur, puis + et un multiple de k, par exemple 1,2 + kπ/4." + FIN,
   equation: "Équation non reconnue : écris un membre, le signe =, puis l'autre membre." + FIN,
+  inequation: "Inéquation non reconnue : écris sin(u), le signe ⩾ ou ⩽, puis un nombre, par exemple sin(u) ⩾ 0,42." + FIN,
   solutions: "Solutions non reconnues : écris chaque valeur (par exemple π/6 ou 0,52), séparées par « ; »." + FIN,
   intervalles: "Bornes non reconnues : écris chaque borne comme un nombre, par exemple 2,5 ou 8/3." + FIN,
 };
@@ -55,6 +58,15 @@ export function estLisible(statut: StatutVerification | null | undefined): boole
   return statut !== "parse_error";
 }
 
+/** Formule d'aide en KaTeX EN LIGNE (style display forcé), centrée : une formule display ne se coupe
+ * jamais et sortait du bloc sur téléphone (« A sin(ωtᵢ + φ) + b = fᵢ ⟺ … » rognée à 390 px) ; en ligne,
+ * elle passe à la ligne après un signe de relation ou d'opération de niveau 0, et aussi après les
+ * espaces qui séparent deux formules (`\qquad`, « ou »). */
+function formuleSecable(f: string): string {
+  const coupures = f.replace(/\\qquad/g, "\\qquad\\allowbreak ").replace(/\\ \\text\{ ou \} \\ /g, "\\ \\allowbreak\\text{ou}\\ \\allowbreak ");
+  return `\\displaystyle ${coupures}`;
+}
+
 /** Aides progressives (le niveau est tenu par le moteur, plafonné à 2) — rend les niveaux déjà
  * ouverts. Jamais la réponse. */
 export function AidesTrig({ niveauAide, aides }: { niveauAide: number; aides: AideTrig[] }) {
@@ -67,7 +79,9 @@ export function AidesTrig({ niveauAide, aides }: { niveauAide: number; aides: Ai
             <RenduFragments fragments={aide.texte} />
           </p>
           {(aide.formules ?? []).map((f, j) => (
-            <Katex key={j} expression={f} block />
+            <div key={j} style={{ textAlign: "center", margin: "4px 0" }}>
+              <Katex expression={formuleSecable(f)} />
+            </div>
           ))}
         </Fragment>
       ))}

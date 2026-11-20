@@ -91,7 +91,7 @@ export function EtapeChampSimpleModelisation({ exercice, phase, tentativesUtilis
         </button>
         <RetourSaisieTrig
           illisible={saisie.illisible}
-          champ={phase === "fonctionFinale" || phase === "poserExtremum" || phase === "isolerTExtremum" ? "expression" : "nombre"}
+          champ={phase === "fonctionFinale" ? "expressionT" : phase === "poserExtremum" || phase === "isolerTExtremum" ? "serie" : "nombre"}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           cible={montrerErreurs && saisie.soumise ? messageCibleModelisation(exercice, phase, saisie.soumise) : null}

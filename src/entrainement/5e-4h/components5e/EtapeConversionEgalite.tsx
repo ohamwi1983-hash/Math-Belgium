@@ -55,7 +55,7 @@ export function EtapeConversionEgalite({ exercice, tentativesUtilisees, tentativ
       />
       <p className="prompt-text">{CONSIGNE_CONVERSION_EGALITE}</p>
       <ApercuExpressionLatex texte={texte} />
-      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : cos(pi/2-5x-pi/7)" />
+      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : cos(π/2 − 5x − π/7)" />
       <AidesTrig niveauAide={niveauAide} aides={aidesConversionEgalite(texteAideConversionEgaliteNiveau1(exercice), latexAideConversionEgaliteNiveau1(exercice), argumentDroitEgaliteLatex(exercice))} />
       {!validation && (
         <>
