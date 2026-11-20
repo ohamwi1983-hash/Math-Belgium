@@ -53,6 +53,7 @@ export function MenuCompte() {
           <Link to="/exercice">Feuilles d'exercices</Link>
           <Link to="/evaluation">Évaluations et examens</Link>
           <Link to="/coffre">Mon coffre</Link>
+          <Link to="/carnet">Carnet de matière vue</Link>
           <Link to="/profil">Mon profil</Link>
           {admin && <Link to="/admin">Administration</Link>}
           <button
