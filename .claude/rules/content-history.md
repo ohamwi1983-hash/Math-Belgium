@@ -4703,3 +4703,43 @@ correction enveloppée dans un `<span>` (`.triangle-quelconque-aide` est flex : 
 KaTeX devenait une colonne — même défaut dans les 8 autres panneaux de quiz de 6e, non touchés).
 Contrôle `check_banque.ts` (KaTeX `strict: 'error'`, notation clavier, majuscules, doublons,
 équilibre, session sans répétition, fragments papier sans `$`) : 0 problème.
+
+## 4e, Chapitre 1 — lots A, E et F de l'audit (cours, quiz gen60, figures)
+
+Lot A (cours) : sous-titre brut « x_S = -b/(2a) » → « D'où vient la formule de l'abscisse du
+sommet ? », « graphe Mafs » retiré de la carte gen8, « MÊME », checklist (« le sommet ou la borne
+retenue », x_S en KaTeX — la checklist passe par `RichText`). Notation (décision 3) : sommet
+S(x_S ; y_S) et a(x − x_S)² + y_S partout ; p et q seulement pour les translations (légende de
+`transformations-widget` : « sommet (TH ; TV) »). Trois démonstrations « Démonstration — … » :
+abscisse du sommet (§ 1, ancienne dérivation mise en bloc), forme canonique générale
+a(x + b/2a)² + c − b²/4a sans Δ et image par un carré ≥ 0 (§ 2) ; énoncés par clé sans méthode
+(et méthode retirée de 4 énoncés existants). Astuce « lire a » (point (x_S + 1 ; y_S + a),
+|a| = EV/CV). Formulaire : 9 groupes dans l'ordre des sections (tableau de valeurs, milieu des
+zéros, sens des translations, compléter le carré, forme générale, retrouver l'équation, domaine
+de validité) ; récapitulatif : 2 puces de plus (lire et reconnaître, transformations). Plus de
+« Δ » dans le § 4 ni le forward. Tableau de variation du § 1 raccourci (↘/↗ : 443 px sur
+iPhone). `QUIZ_THEMES` : « optimisation » (section `utiliser`) et les 4 thèmes nouveaux.
+Décision 4 : les widgets gen7/gen8 n'ont jamais été fusionnés (règles et commentaires corrigés).
+
+Lot F : figures en kinds existants, valeurs calculées — « lire a » (`vectorPlane` quadrillé
+ISOTROPE 8 × 7,5, rapport 320/300 : un carreau = 1 dans les deux sens), cas 2 de l'optimisation
+(domaine [12 ; 20[ en `shadedRegions`, borne 20 ouverte, étiquette de l'optimum en `textLabels`
+au-dessus : posée à droite du point, elle chevauchait la courbe), trajectoire h(t), tableaux de
+signes à un zéro double et sans zéro, exemples « sommet + point » / « zéros + point » dessinés.
+`CurvePlot` : graduations « − » et virgule (`nombreTick`, tout le site). **Piège** : une formule
+de `featureTable` sans groupe `{…}` se coupe à chaque opérateur dans une colonne étroite.
+
+Lot E (quiz gen60) : banque réécrite en `$…$` (`TexteRiche` dans la question, la correction et
+le résumé ; `banquesVraiFaux` sur papier) ; 2 affirmations fausses corrigées (EV et CV se
+combinent : |a| = EV/CV, comme gen8/gen9 ; signe de a et y_S donnent le NOMBRE de zéros, pas le
+tableau complet), 2 imprécises (p ≠ 0 ; un bénéfice peut être négatif) ; ni « concavité »,
+« coefficient dominant », « Δ », « discriminant », « irréductible », ni majuscules. 4 thèmes
+nouveaux (lire a, b, c ; différences secondes ; compléter le carré ; trois écritures et retrouver
+l'équation) : 350 affirmations, 10 × 35, 18 V / 17 F (formeCanoniqueSommet 17 / 18), catalogue
+dans l'ordre des sections ; accueil calculé depuis la banque. Banque écrite dans un texte source
+(dossier de travail `lotE/banque60.txt`, séparateur « ¦ » : « | » sert à |a|) puis générée
+(`json.dumps`). Contrôle `check_banque.cjs` (KaTeX `strict: 'error'`, notation clavier, Unicode
+hors formule, majuscules, mots interdits, doublons, équilibre) : 0 problème ; fragments papier des
+10 thèmes : 0 « $ ». Vérifié : page en clair/sombre, iPhone 13 et 1 280 px (scrollWidth 390,
+0 `$` isolé, 0 `.katex-error`, 0 NaN) ; quiz parcouru (un thème en entier : 35 / 35 distinctes,
+3 affirmations dans chacun des autres).

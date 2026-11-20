@@ -1197,11 +1197,11 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'featureTable',
           caption: 'Une même parabole, trois écritures',
-          headers: ['Écriture', 'Forme', 'Ce qu\'elle montre directement'],
+          headers: ['Écriture', 'Forme', 'Ce qu\'on y lit'],
           rows: [
-            ['développée', '${ax^2+bx+c}$', 'l\'ordonnée à l\'origine c, le point $(0\\,;\\,c)$'],
-            ['canonique', '${a(x-x_S)^2+y_S}$', 'le sommet $S(x_S\\,;\\,y_S)$ et l\'axe $x = x_S$'],
-            ['factorisée', '${a(x-x_1)(x-x_2)}$', 'les zéros $x_1$ et $x_2$ (seulement s\'il y en a)'],
+            ['développée', '${ax^2+bx+c}$', 'le point $(0\\,;\\,c)$'],
+            ['canonique', '${a(x-x_S)^2+y_S}$', 'le sommet $S(x_S\\,;\\,y_S)$, l\'axe $x = x_S$'],
+            ['factorisée', '${a(x-x_1)(x-x_2)}$', 'les zéros $x_1$ et $x_2$ (s\'il y en a)'],
           ],
         },
         {
