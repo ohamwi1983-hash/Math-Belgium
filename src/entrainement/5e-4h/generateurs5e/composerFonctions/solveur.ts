@@ -197,16 +197,20 @@ export function resoudreConditionSeuil(g: FonctionComposable, comparateur: Compa
   }
   const strict = comparateur === "gt" || comparateur === "lt";
   const veutGE = comparateur === "ge" || comparateur === "gt";
+  // Le produit (N − s²D)·D a le signe du quotient (N − s²D)/D, mais s'annule AUSSI là où D = 0, où le
+  // quotient n'existe pas : ces valeurs sont retirées (corrigé détaillé, 5e ch. 1 — l'écran « c2 »
+  // attendait « [−1 ; +∞[ » au lieu de « ]−1 ; +∞[ » quand −1 annule le dénominateur).
+  const horsZerosD = (e: EnsembleReelGuide) => intersecterEnsembles(e, resoudrePolynomeComparateur(D, "ne"));
   if (veutGE) {
     if (strict ? seuil < 0 : seuil <= 0) return ensembleReel();
     const p = seuil === 0 ? multiplierPoly(N, D) : multiplierPoly(soustrairePoly(N, multiplierScalairePoly(seuil * seuil, D)), D);
-    return resoudrePolynomeComparateur(p, comparateur);
+    return horsZerosD(resoudrePolynomeComparateur(p, comparateur));
   }
   if (strict ? seuil <= 0 : seuil < 0) return ensembleVide();
   const p = seuil === 0 ? multiplierPoly(N, D) : multiplierPoly(soustrairePoly(N, multiplierScalairePoly(seuil * seuil, D)), D);
   // seuil===0 && comparateur "le" : Q(x) <= 0, combiné à Q(x) >= 0 (implicite dom(g)) => Q(x)=0
   if (seuil === 0 && comparateur === "le") return resoudrePolynomeComparateur(N, "eq");
-  return resoudrePolynomeComparateur(p, comparateur);
+  return horsZerosD(resoudrePolynomeComparateur(p, comparateur));
 }
 
 /**

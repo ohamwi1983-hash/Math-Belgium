@@ -4,6 +4,9 @@ import type { CompositionDirigee, ExerciceComposerFonctions, SensComposition } f
 import type { EnsembleReelGuide } from "./core5e/domaineDefinition.types";
 import { CATALOGUE_COMBOS, CATALOGUE_SENS, construireAvecCombos, construireAvecComboSensTire, genererExerciceComposerFonctions } from "./generateurs5e/composerFonctions";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeComposerFonctions, lettrePhaseComposer } from "./generateurs5e/composerFonctions/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import {
   NIVEAU_AIDE_MAX_COMPOSER_FONCTIONS,
@@ -181,6 +184,7 @@ export function App5gen3() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendueComposerFonctions(exercice, etat.phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComposerFonctions(exercice), lettrePhaseComposer(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -273,7 +277,7 @@ export function App5gen3() {
               key={`${generation}-${etat.phase}`}
               consigne={consigneDomaine(dir)}
               donnees={donnees}
-              prefixApercu={`\\text{dom}(${estPhaseFRondG(etat.phase) ? "f\\circ g" : "g\\circ f"}) =`}
+              prefixApercu={`\\operatorname{dom}(${estPhaseFRondG(etat.phase) ? "f\\circ g" : "g\\circ f"}) =`}
               attendu={dir.domaine}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}

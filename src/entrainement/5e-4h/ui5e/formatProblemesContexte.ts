@@ -333,19 +333,22 @@ export function formatTermeABLatex(a: number, b: number): string {
 
 /** Réponse attendue de l'écran "formule" — générique sur a/b (retenus ou attendus). */
 export function formatTermeFormuleBLatex(a: number, b: number, modele: ModeleCoutUnitaire): string {
+  // Coefficient 1 devant x omis (« x^2 + 22 », jamais « 1x^2 ») — corrigé détaillé, 5e ch. 1.
   const aA = nombreLatex(a);
+  const aX = a === 1 ? "" : aA;
+  const bX = b === 1 ? "" : nombreLatex(b);
   const bA = nombreLatex(b);
   switch (modele) {
     case "B1":
-      return `f(x)=${aA}x+${bA}`;
+      return `f(x)=${aX}x+${bA}`;
     case "B2":
-      return `f(x)=${aA}x+${bA}x^2`;
+      return `f(x)=${aX}x+${bX}x^2`;
     case "B3":
-      return `f(x)=${aA}x+\\dfrac{${bA}}{x}`;
+      return `f(x)=${aX}x+\\dfrac{${bA}}{x}`;
     case "B4":
       return `f(x)=${aA}+\\dfrac{${bA}}{x}`;
     case "B5":
-      return `f(x)=${aA}x^2+${bA}`;
+      return `f(x)=${aX}x^2+${bA}`;
   }
 }
 
@@ -353,7 +356,9 @@ export function formatTermeFormuleBLatex(a: number, b: number, modele: ModeleCou
 export function formatTermesEvaluationBLatex(exercice: ExerciceScenarioB, aRetenu: number, bRetenu: number): string[] {
   const f1 = coutTotalTheorique(exercice.modele, aRetenu, bRetenu, exercice.xEval1);
   const f2 = coutTotalTheorique(exercice.modele, aRetenu, bRetenu, exercice.xEval2);
-  return [`f(${exercice.xEval1})\\approx${nombreLatex(f1, 0)}`, `f(${exercice.xEval2})\\approx${nombreLatex(f2, 0)}`];
+  // « = » quand la valeur est entière (exacte), « ≈ » seulement pour un arrondi (corrigé détaillé, 5e ch. 1).
+  const rel = (v: number) => (Math.abs(v - Math.round(v)) < 1e-9 ? "=" : "\\approx");
+  return [`f(${exercice.xEval1})${rel(f1)}${nombreLatex(f1, 0)}`, `f(${exercice.xEval2})${rel(f2)}${nombreLatex(f2, 0)}`];
 }
 
 // --- Scénario C ---
@@ -370,7 +375,7 @@ function coutTotalTableau(exercice: ExerciceScenarioC, x: number): number {
 }
 
 function formuleCVLatex(formeCV: FormeCoutVariableC, k: number): string {
-  const kL = nombreLatex(k);
+  const kL = k === 1 ? "" : nombreLatex(k);
   switch (formeCV) {
     case "racineCarree":
       return `${kL}\\sqrt{x}`;
@@ -393,7 +398,9 @@ export function formatTermesLectureC(exercice: ExerciceScenarioC): string[] {
 /** Réponse attendue de l'écran "coutMoyen" (CT en milliers d'euros, CM en euros). */
 export function formatTermeCoutMoyenC(exercice: ExerciceScenarioC): string {
   const ct = coutTotalTableau(exercice, exercice.xLecture);
-  return `\\text{CM}=\\dfrac{${nombreLatex(ct)}\\times 1000}{${exercice.xLecture}}\\approx${nombreLatex((ct * 1000) / exercice.xLecture)}\\text{ €}`;
+  const cm = (ct * 1000) / exercice.xLecture;
+  const exact = Math.abs(cm * 100 - Math.round(cm * 100)) < 1e-6;
+  return `\\text{CM}=\\dfrac{${nombreLatex(ct)}\\times 1000}{${exercice.xLecture}}${exact ? "=" : "\\approx"}${nombreLatex(cm)}\\text{ €}`;
 }
 
 export function formatTermesReconnaissanceC(exercice: ExerciceScenarioC): string[] {

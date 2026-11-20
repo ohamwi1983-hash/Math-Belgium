@@ -10,18 +10,13 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { construireSvgFonction, type ViewBoxSvg } from "../../../export/svgGraph";
 import {
-  TEXTE_AIDE_BENEFICE_C_1,
-  TEXTE_AIDE_COUT_MOYEN_C_1,
-  TEXTE_AIDE_EGALITE_AIRES_A_1,
-  TEXTE_AIDE_RESOLUTION_B_1,
   formatTermeABLatex,
   formatTermeBeneficeC,
   formatTermeCoutMoyenC,
@@ -37,25 +32,12 @@ import {
   formatTermesFormulesGeneralisationSimpleA,
   formatTermesLectureC,
   formatTermesReconnaissanceC,
-  formatTermesSystemeBLatex,
-  latexAideEgaliteAiresA2,
-  latexCoutTotalB,
   latexFormuleCuB,
-  latexFormuleFB,
   nombreFr,
-  nombreLatex,
-  texteAideGeneralisationA2F,
-  texteAideGeneralisationA2G,
-  texteAideGeneralisationA2H,
-  texteAideGeneralisationSimpleA1,
-  texteAideLectureC1,
-  texteAideReconnaissanceC1,
 } from "../../ui5e/formatProblemesContexte";
-import { domaineGrapheScenarioA } from "../../ui5e/scenarioAGraph";
-import { domaineGrapheScenarioAReduit } from "../../ui5e/scenarioAGraphReduit";
-import { domaineGrapheScenarioC } from "../../ui5e/scenarioCGraph";
-import { aireBasesCylindre, aireLateraleCylindre, fStockCommande, gStockCommande } from "./scenarioA";
-import { chiffreAffaires, coutProportionnel, coutTotal, coutVariable } from "./scenarioC";
+import { grapheA1, grapheA2, grapheC } from "./graphes";
+import { correctionDetailleeProblemesContexte, lettresLectureContexte } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { CATALOGUE_PROBLEMES_CONTEXTE, construireProblemeContexteAvecVariante, genererExerciceProblemeContexte } from "./index";
 import { profilProblemesContexte } from "../profilsEvaluationFonctions5";
 
@@ -103,25 +85,6 @@ function sansEuro(latexSource: string): string {
   return latexSource.replace(/\\text\{\s*€\}/g, "");
 }
 
-function pgcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) [a, b] = [b, a % b];
-  return a || 1;
-}
-
-function fractionLatex(num: number, den: number): string {
-  const g = pgcd(num, den);
-  let n = num / g;
-  let d = den / g;
-  if (d < 0) {
-    n = -n;
-    d = -d;
-  }
-  if (d === 1) return `${n}`;
-  return `${n < 0 ? "-" : ""}\\dfrac{${Math.abs(n)}}{${d}}`;
-}
-
 const STYLE_TABLE = 'style="border-collapse:collapse;margin:6px auto;font-size:13px"';
 const STYLE_CASE = 'style="border:1px solid #868e96;padding:3px 10px;text-align:center"';
 const STYLE_ENTETE = 'style="border:1px solid #868e96;padding:3px 10px;text-align:center;background:#f1f3f5;font-weight:600"';
@@ -130,130 +93,6 @@ function tableauHtml(entetes: string[], lignes: string[][]): string {
   const tetes = entetes.map((t) => `<th ${STYLE_ENTETE}>${t}</th>`).join("");
   const corps = lignes.map((l) => `<tr>${l.map((c) => `<td ${STYLE_CASE}>${c}</td>`).join("")}</tr>`).join("");
   return `<table ${STYLE_TABLE}><thead><tr>${tetes}</tr></thead><tbody>${corps}</tbody></table>`;
-}
-
-const COULEUR_F = "#1971c2";
-const COULEUR_G = "#e8590c";
-const COULEUR_SOMME = "#2f9e44";
-const COULEUR_CV = "#7048e8";
-const COULEUR_CP = "#e8590c";
-const COULEUR_CT = "#2f9e44";
-const COULEUR_CA = "#d6336c";
-
-function centrer(svg: string): string {
-  return `<div style="display:flex;justify-content:center;margin:0.5em 0">${svg}</div>`;
-}
-
-/** Une courbe coupée hors du cadre (évite les tracés géants près d'une asymptote). */
-function borne(f: (x: number) => number, vb: ViewBoxSvg): (x: number) => number | null {
-  return (x) => {
-    if (x <= 0) return null;
-    const y = f(x);
-    return Number.isFinite(y) && y <= vb.yMax * 1.02 && y >= vb.yMin ? y : null;
-  };
-}
-
-/** Fenêtre avec une marge à gauche et en bas pour les graduations (x ≥ 0, y ≥ 0). */
-function fenetre(xMax: number, yMax: number): ViewBoxSvg {
-  return { xMin: -0.1 * xMax, xMax, yMin: -0.08 * yMax, yMax };
-}
-
-const LARGEUR_GRAPHE = 400;
-const HAUTEUR_GRAPHE = 280;
-
-// ============================================================================
-// Graphiques (énoncé : données à lire ; corrigé : même graphique, lecture marquée).
-// ============================================================================
-
-function grapheA1(e: ExA1, marquerMinimum: boolean): string {
-  const { xMax, yMax } = domaineGrapheScenarioA(e);
-  const vb = fenetre(xMax, yMax);
-  const f = (x: number) => aireLateraleCylindre(e.volumeCm3, x);
-  const g = (x: number) => aireBasesCylindre(x);
-  const somme = (x: number) => f(x) + g(x);
-  const xOpt = Math.round(e.xOptimal);
-  return centrer(
-    construireSvgFonction(borne(somme, vb), vb, {
-      largeur: LARGEUR_GRAPHE,
-      hauteur: HAUTEUR_GRAPHE,
-      divisionsX: 16,
-      divisionsY: 8,
-      couleurCourbe: COULEUR_SOMME,
-      courbesSecondaires: [
-        { evaluer: borne(f, vb), couleur: COULEUR_F, pointilles: false },
-        { evaluer: borne(g, vb), couleur: COULEUR_G, pointilles: false },
-      ],
-      legende: [
-        { texte: "f(x) : aire latérale (cm²)", couleur: COULEUR_F },
-        { texte: "g(x) : aire des bases (cm²)", couleur: COULEUR_G },
-        { texte: "(f + g)(x)", couleur: COULEUR_SOMME },
-      ],
-      points: marquerMinimum ? [{ x: xOpt, y: somme(xOpt), label: `minimum vers x = ${xOpt}`, couleur: COULEUR_SOMME, labelPosition: "dessous" }] : [],
-    }),
-  );
-}
-
-function grapheA2(e: ExA2, marquerMinimum: boolean): string {
-  const { xMax, yMax } = domaineGrapheScenarioAReduit(e);
-  const vb = fenetre(xMax, yMax);
-  const f = (x: number) => fStockCommande(e.a, e.b, x);
-  const g = (x: number) => gStockCommande(e.k, x);
-  const somme = (x: number) => f(x) + g(x);
-  const xExt = Math.round(e.xExtremum);
-  return centrer(
-    construireSvgFonction(borne(somme, vb), vb, {
-      largeur: LARGEUR_GRAPHE,
-      hauteur: HAUTEUR_GRAPHE,
-      divisionsX: 16,
-      divisionsY: 8,
-      couleurCourbe: COULEUR_SOMME,
-      courbesSecondaires: [
-        { evaluer: borne(f, vb), couleur: COULEUR_F, pointilles: false },
-        { evaluer: borne(g, vb), couleur: COULEUR_G, pointilles: false },
-      ],
-      legende: [
-        { texte: `f(x) : ${e.contexte.labelF} (€)`, couleur: COULEUR_F },
-        { texte: `g(x) : ${e.contexte.labelG} (€)`, couleur: COULEUR_G },
-        { texte: "(f + g)(x) : coût total (€)", couleur: COULEUR_SOMME },
-      ],
-      points: marquerMinimum ? [{ x: xExt, y: somme(xExt), label: `minimum vers x = ${xExt}`, couleur: COULEUR_SOMME, labelPosition: "dessous" }] : [],
-    }),
-  );
-}
-
-function grapheC(e: ExerciceScenarioC, marquerSeuil: boolean): string {
-  const { xMax, yMax } = domaineGrapheScenarioC(e);
-  const vb = fenetre(xMax, yMax);
-  const ct = (x: number) => coutTotal(e.cf, e.formeCV, e.k, e.m, x);
-  const ca = (x: number) => chiffreAffaires(e.formeCA, e.p, x);
-  const cv = (x: number) => coutVariable(e.formeCV, e.k, x);
-  const cp = (x: number) => coutProportionnel(e.m, x);
-  const dansCadre = (f: (x: number) => number) => (x: number) => {
-    if (x < 0) return null;
-    const y = f(x);
-    return Number.isFinite(y) && y <= vb.yMax * 1.02 ? y : null;
-  };
-  return centrer(
-    construireSvgFonction(dansCadre(ct), vb, {
-      largeur: LARGEUR_GRAPHE,
-      hauteur: HAUTEUR_GRAPHE,
-      divisionsX: 16,
-      divisionsY: 8,
-      couleurCourbe: COULEUR_CT,
-      courbesSecondaires: [
-        { evaluer: dansCadre(cv), couleur: COULEUR_CV, pointilles: false },
-        { evaluer: dansCadre(cp), couleur: COULEUR_CP, pointilles: false },
-        { evaluer: dansCadre(ca), couleur: COULEUR_CA, pointilles: false },
-      ],
-      legende: [
-        { texte: "CV(x)", couleur: COULEUR_CV },
-        { texte: "CP(x)", couleur: COULEUR_CP },
-        { texte: "CT(x)", couleur: COULEUR_CT },
-        { texte: "CA(x)", couleur: COULEUR_CA },
-      ],
-      points: marquerSeuil ? [{ x: e.xSeuil, y: ca(e.xSeuil), label: `seuil vers x = ${nombreFr(e.xSeuil, 1)}`, couleur: COULEUR_CA, labelPosition: "dessus" }] : [],
-    }),
-  );
 }
 
 // ============================================================================
@@ -267,7 +106,9 @@ interface EtapePapier {
 
 function etapes(e: ExerciceProblemeContexte): EtapePapier[] {
   if (e.scenario === "A" && e.combo === "kInverseXAxCarre") {
+    const rayons = e.lignesTableau.map((l) => l.r);
     return [
+      { id: "tableau", consigne: riche(`Pour ${rayons.map((r) => `$r = ${r}$`).join(rayons.length > 2 ? ", " : " et ").replace(/, ([^,]*)$/, " et $1")} cm, calcule la hauteur $h$, l'aire des deux bases et l'aire latérale (arrondies à l'unité).`) },
       { id: "generalisation", consigne: riche("Exprime la hauteur $h(x)$, l'aire latérale $f(x)$ et l'aire des deux bases $g(x)$ en fonction du rayon $x$ (garde $V$ comme paramètre).") },
       { id: "egaliteAires", consigne: riche("Résous $f(x) = g(x)$ (arrondi à l'unité).") },
       { id: "graphique", consigne: riche("Lis sur le graphique le rayon qui minimise $(f+g)(x)$.") },
@@ -320,7 +161,7 @@ function enonceA1(e: ExA1): { entete: FragmentConsigne[]; html: string; question
       riche("Détermine par calcul le rayon pour lequel l'aire latérale est égale à l'aire des bases (arrondi au centimètre)."),
       riche("Lis sur le graphique le rayon qui minimise la quantité totale de matériau $(f+g)(x)$, puis calcule la hauteur correspondante (arrondie au centimètre). Que constates-tu ?"),
     ],
-    etapesParQuestion: [["a"], ["b"], ["c", "d"]],
+    etapesParQuestion: [["a", "b"], ["c"], ["d", "e"]],
   };
 }
 
@@ -401,107 +242,6 @@ function sectionPapier(e: ExerciceProblemeContexte): EnoncePapier {
 }
 
 // ============================================================================
-// Corrigé détaillé.
-// ============================================================================
-
-/** Constat de l'étape « justification » : au rayon optimal EXACT, h = 2x (le diamètre) — avec le
- * rayon lu ARRONDI, h et 2x ne sont que voisins (la correction de l'écran,
- * `texteCorrectionJustificationA`, dit « coïncident » sur les valeurs arrondies : faux dès que
- * l'arrondi s'écarte, ex. V = 2 500 : h(7) ≈ 16, 2·7 = 14). */
-function constatJustificationA(e: ExA1): string {
-  return (
-    `La hauteur est (presque) égale au diamètre. Au rayon optimal exact $x = \\sqrt[3]{\\dfrac{V}{2\\pi}} \\approx ${nombreLatex(e.xOptimal, 2)}$ cm, on a $V = 2\\pi x^3$, donc ` +
-    "$h(x) = \\dfrac{2\\pi x^3}{\\pi x^2} = 2x$ : la hauteur égale exactement le diamètre, quelle que soit la contenance $V$ (l'écart vient de l'arrondi de la lecture)."
-  );
-}
-
-function correctionA1(e: ExA1): EtapeCorrection[] {
-  const l = (id: string, label: string, fragments: FragmentConsigne[], figureHtml?: string): EtapeCorrection => ({ label, sousQuestion: lettre(e, id), fragments, ...(figureHtml ? { figureHtml } : {}) });
-  const xRet = Math.round(e.xOptimal);
-  return [
-    l("generalisation", "Méthode", [...riche(texteAideGeneralisationA2H()), texte(" "), ...riche(texteAideGeneralisationA2F()), texte(" "), ...riche(texteAideGeneralisationA2G())]),
-    l("generalisation", "Conclusion", [...joindre(formatTermesFormulesGeneralisationA()), texte(".")]),
-    l("egaliteAires", "Méthode", riche(TEXTE_AIDE_EGALITE_AIRES_A_1)),
-    l("egaliteAires", "Calcul", [latex(latexAideEgaliteAiresA2(e)), texte(", d'où "), latex(formatTermeXEgaliteAiresA(e)), texte(" cm.")]),
-    l("egaliteAires", "Piège", [texte("Le rayon où les deux aires sont égales n'est pas celui qui minimise la quantité totale de matériau.")]),
-    l("graphique", "Lecture", [...riche("Le point le plus bas de la courbe de $f+g$ : "), latex(formatTermeXOptimalA(e)), texte(" cm.")], grapheA1(e, true)),
-    l("justification", "Calcul", [
-      latex(`h(${xRet})=\\dfrac{${e.volumeCm3}}{\\pi\\times ${xRet}^2}`),
-      texte(", donc "),
-      latex(formatTermeHJustificationA(e, xRet)),
-      texte(" cm, et le diamètre vaut "),
-      latex(`2x=${2 * xRet}`),
-      texte(" cm."),
-    ]),
-    l("justification", "Conclusion", riche(constatJustificationA(e))),
-  ];
-}
-
-function correctionA2(e: ExA2): EtapeCorrection[] {
-  const l = (id: string, label: string, fragments: FragmentConsigne[], figureHtml?: string): EtapeCorrection => ({ label, sousQuestion: lettre(e, id), fragments, ...(figureHtml ? { figureHtml } : {}) });
-  const [r1, r2] = e.releves;
-  const aCalc = `a=\\dfrac{${nombreLatex(r2.f)}-${nombreLatex(r1.f)}}{${r2.x}-${r1.x}}=${e.a}`;
-  const bCalc = `b=${nombreLatex(r1.f)}-${e.a}\\times ${r1.x}=${e.b}`;
-  const kCalc = `k=${r1.x}\\times ${nombreLatex(r1.g)}=${e.k}`;
-  const autreRacine = fractionLatex(-(e.a * e.xIntersection + e.b), e.a);
-  return [
-    l("generalisationSimple", "Méthode", riche(texteAideGeneralisationSimpleA1(e))),
-    l("generalisationSimple", "Calcul", [latex(aCalc), texte(" ; "), latex(bCalc), texte(" ; "), latex(kCalc), texte(".")]),
-    l("generalisationSimple", "Conclusion", [...joindre(formatTermesFormulesGeneralisationSimpleA(e)), texte(".")]),
-    l("intersectionSimple", "Méthode", riche("On pose $f(x) = g(x)$ et on multiplie les deux membres par $x$ ($x > 0$) : on obtient une équation du second degré.")),
-    l("intersectionSimple", "Calcul", [
-      latex(`${e.a === 1 ? "" : e.a}x^2+${e.b}x-${e.k}=0`),
-      texte(" : solutions "),
-      latex(`x=${e.xIntersection}`),
-      texte(" et "),
-      latex(`x=${autreRacine}`),
-      texte(", négative, rejetée (une taille de lot est positive)."),
-    ]),
-    l("intersectionSimple", "Conclusion", [latex(formatTermeIntersectionSimpleA(e)), texte(` ${e.contexte.unite}.`)]),
-    l("extremumSimple", "Lecture", [...riche("Le point le plus bas de la courbe de $f+g$ : "), latex(formatTermeExtremumSimpleA(e)), texte(` ${e.contexte.unite}.`)], grapheA2(e, true)),
-    l("extremumSimple", "Piège", [texte("Le lot où les deux coûts sont égaux n'est pas celui qui minimise le coût total : on lit le minimum de f + g, pas l'intersection de f et g.")]),
-  ];
-}
-
-function correctionB(e: ExerciceScenarioB): EtapeCorrection[] {
-  const l = (id: string, label: string, fragments: FragmentConsigne[]): EtapeCorrection => ({ label, sousQuestion: lettre(e, id), fragments });
-  const [eq1, eq2] = formatTermesSystemeBLatex(e);
-  const a = e.aArrondiAttendu;
-  const b = e.bArrondiAttendu;
-  return [
-    l("systeme", "Méthode", [...riche("Pour chaque relevé, le coût total vaut le coût unitaire multiplié par $x$ : "), latex(latexCoutTotalB(e.modele)), texte(".")]),
-    l("systeme", "Calcul", [latex(`\\begin{cases} ${eq1} \\\\ ${eq2} \\end{cases}`)]),
-    l("systeme", "Piège", riche("Le relevé donne le coût UNITAIRE : on peut aussi écrire directement $\\text{cu}(x)$ = valeur relevée, mais jamais égaler le coût unitaire au coût total.")),
-    l("resolution", "Méthode", riche(TEXTE_AIDE_RESOLUTION_B_1)),
-    l("resolution", "Conclusion", [latex(formatTermeABLatex(a, b)), texte(".")]),
-    l("formule", "Calcul", [latex(latexFormuleFB(e.modele)), texte(", donc "), latex(formatTermeFormuleBLatex(a, b, e.modele)), texte(".")]),
-    l("evaluation", "Conclusion", [...joindre(formatTermesEvaluationBLatex(e, a, b)), texte(" (en euros).")]),
-  ];
-}
-
-function correctionC(e: ExerciceScenarioC): EtapeCorrection[] {
-  const l = (id: string, label: string, fragments: FragmentConsigne[], figureHtml?: string): EtapeCorrection => ({ label, sousQuestion: lettre(e, id), fragments, ...(figureHtml ? { figureHtml } : {}) });
-  return [
-    l("lecture", "Méthode", riche(texteAideLectureC1(e))),
-    l("lecture", "Calcul", [latex(formatTermesLectureC(e)[0]), texte(" milliers d'euros.")]),
-    l("coutMoyen", "Méthode", riche(TEXTE_AIDE_COUT_MOYEN_C_1)),
-    l("coutMoyen", "Calcul", [latex(sansEuro(formatTermeCoutMoyenC(e))), texte(" €.")]),
-    l("coutMoyen", "Piège", [texte("Le tableau est en milliers d'euros : sans la multiplication par 1 000, le coût moyen est mille fois trop petit.")]),
-    l("reconnaissance", "Méthode", riche(texteAideReconnaissanceC1(e))),
-    l("reconnaissance", "Conclusion", [...joindre(formatTermesReconnaissanceC(e)), texte(".")]),
-    l("benefice", "Méthode", riche(TEXTE_AIDE_BENEFICE_C_1)),
-    l("benefice", "Calcul", [latex(formatTermeBeneficeC(e)), texte(" milliers d'euros.")]),
-    l("seuil", "Lecture", [...riche("Abscisse du point où la courbe de $\\text{CA}$ croise celle de $\\text{CT}$ : "), latex(formatTermeSeuilC(e)), texte(".")], grapheC(e, true)),
-  ];
-}
-
-function correctionDetailleeProblemesContexte(e: ExerciceProblemeContexte): EtapeCorrection[] {
-  if (e.scenario === "A") return e.combo === "kInverseXAxCarre" ? correctionA1(e) : correctionA2(e);
-  if (e.scenario === "B") return correctionB(e);
-  return correctionC(e);
-}
-
-// ============================================================================
 // Réponse brève, barème, difficulté.
 // ============================================================================
 
@@ -572,7 +312,7 @@ function baremeProblemesContexte(e: ExerciceProblemeContexte): BaremeExercice {
         c("extremumSimple", "Taille de lot du coût total minimal lue sur le graphique", 1),
       ],
       erreursFrequentes: [
-        { description: [texte("Calculer k comme g(x)/x au lieu de x·g(x)")], cout: "−0,5" },
+        { description: [texte("Calculer k par "), latex("\\dfrac{g(x)}{x}"), texte(" au lieu de "), latex("x\\cdot g(x)")], cout: "−0,5" },
         { description: [texte("Donner l'intersection de f et g comme minimum du coût total")], cout: "0 pt sur la lecture" },
       ],
       reponsesAcceptees: [[texte("Lecture du minimum à une unité près")]],
@@ -611,16 +351,29 @@ function baremeProblemesContexte(e: ExerciceProblemeContexte): BaremeExercice {
   };
 }
 
-function difficulteProblemesContexte(e: ExerciceProblemeContexte): 1 | 2 | 3 {
-  if (e.scenario === "B") return 2;
-  if (e.scenario === "A" && e.combo === "stockCommande") return 2;
-  return 3;
+/** Critères du niveau (grille commune), jugés sur l'énoncé papier (vraies questions) :
+ * - écrans de lecture : minimum lu (A1 « graphique », A2), expressions de CV et CP lues (allure +
+ *   ligne x = 1), seuil lu (C) — `lettresLectureContexte` ;
+ * - méthode : 2 quand l'élève construit le modèle (A1 : h, f et g, sans formule d'aire donnée), 1 sinon (B : forme de
+ *   cu(x) et f = cu × x données ; A2 et C :
+ *   formes données) ;
+ * - piège dans les données : A2 solution négative à rejeter ; C conversion des milliers d'euros ;
+ *   B coût UNITAIRE relevé (à multiplier par x) ; A1 0 (le minimum n'est pas l'égalité des aires :
+ *   c'est la méthode) ;
+ * - nombres : 1 pour A1 (π, racine cubique, calculatrice), 1 si une valeur est arrondie (≈), 0 sinon. */
+function criteresDifficulteProblemesContexte(e: ExerciceProblemeContexte): CriteresDifficulte {
+  const corrige = correctionDetailleeProblemesContexte(e);
+  const etapes = etapesDuCorrige(corrige, lettresLectureContexte(e));
+  if (e.scenario === "A" && e.combo === "kInverseXAxCarre") return { ...etapes, methode: 2, piege: 0, nombres: 1 };
+  if (e.scenario === "A") return { ...etapes, methode: 1, piege: 1 };
+  if (e.scenario === "B") return { ...etapes, methode: 1, piege: 1 };
+  return { ...etapes, methode: 1, piege: 1 };
 }
 
 /** Repli (documents Word) : les lignes du corrigé détaillé, en paragraphes. */
 function construireCorrectionProblemesContexte(e: ExerciceProblemeContexte): BlocCorrection[] {
   return correctionDetailleeProblemesContexte(e)
-    .filter((l) => l.label !== "Piège")
+    .filter((l) => l.type !== "piege")
     .map((l) => ({ type: "paragraphe", fragments: l.fragments }));
 }
 
@@ -632,12 +385,11 @@ export const adaptateurEvaluationProblemesContexte: AdaptateurFeuilleExercices<E
   genererInstanceAvecVariante: (id) => construireProblemeContexteAvecVariante(id),
   construireEnonce: construireEnonceProblemesContexte,
   construireCorrection: construireCorrectionProblemesContexte,
-  difficulte: difficulteProblemesContexte,
+  criteresDifficulte: criteresDifficulteProblemesContexte,
   reponseBreve: reponseBreveProblemesContexte,
   correctionDetaillee: correctionDetailleeProblemesContexte,
   bareme: baremeProblemesContexte,
   enoncePapier: sectionPapier,
-  dureeMinutes: 20,
   profilInstance: profilProblemesContexte,
   calculatriceIndispensable: ["A1"],
 };

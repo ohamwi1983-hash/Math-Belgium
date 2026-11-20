@@ -32,6 +32,18 @@ export function texteResultat(question: QuestionComposeeGraphique, valeur: numbe
   return `${imageCherchee(question)} = ${typeof valeur === "number" ? nombreTypo(valeur) : valeur}`;
 }
 
+/** « f(g(-7)) » en LaTeX (KaTeX rend le « − »). */
+export function imageChercheeLatex(question: QuestionComposeeGraphique): string {
+  return `${nomExterne(question.composition)}(${nomInterne(question.composition)}(${question.a}))`;
+}
+
+/** Résultat en LaTeX : « f(g(-7))=3 », ou `existe: false` (« … n'existe pas » écrit en texte par
+ * l'appelant) — réponse attendue de l'écran, réponse brève et corrigé. */
+export function resultatLatex(question: QuestionComposeeGraphique): { latex: string; existe: boolean } {
+  if (!question.resultatExiste || question.resultatAttendu === null) return { latex: imageChercheeLatex(question), existe: false };
+  return { latex: `${imageChercheeLatex(question)}=${question.resultatAttendu}`, existe: true };
+}
+
 /** Aide en 2 paliers, UNIQUEMENT pour la lecture de la valeur intermédiaire : palier 1 un rappel,
  * palier 2 le point révélé sur le graphe de la fonction interne (pointillés violets vers les axes). */
 export function texteAideNiveau1(question: QuestionComposeeGraphique): string {

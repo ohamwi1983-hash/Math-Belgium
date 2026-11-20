@@ -57,15 +57,16 @@ export function consigneConditions(dir: CompositionDirigee): string {
   const ext = nomExterieure(dir);
   const int = dir.nomInterieure;
   const pluriel = dir.conditions.length > 1;
-  return `Sachant que ${int}(x) doit tomber dans dom(${ext}) pour que (${ext}∘${int})(x) soit défini, pose ${pluriel ? "les 2 conditions" : "la condition"} que ${int}(x) doit vérifier (arrondis au centième près si besoin).`;
+  // Corrigé détaillé (5e ch. 1) : plus de « dom(f) » écrit au clavier ni de « arrondis au centième près ».
+  return `Pour que (${ext}∘${int})(x) existe, ${int}(x) doit appartenir au domaine de ${ext} : écris ${pluriel ? "les deux conditions" : "la condition"} que ${int}(x) doit vérifier (valeur exacte, ou arrondie au centième si besoin).`;
 }
 
 export function texteAideConditionsNiveau1(dir: CompositionDirigee): string {
-  return `dom(${nomExterieure(dir)}) impose une (ou plusieurs) restriction(s) sur son argument — remplace cet argument par ${dir.nomInterieure}(x).`;
+  return `Le domaine de ${nomExterieure(dir)} impose une ou plusieurs restrictions à son argument : remplace cet argument par ${dir.nomInterieure}(x).`;
 }
 
 export function latexAideConditionsNiveau2(dir: CompositionDirigee): string {
-  return `\\text{dom}(${nomExterieure(dir)}) = ${formatEnsembleReelLatex(dir.exterieure.domaine)}`;
+  return `\\operatorname{dom}(${nomExterieure(dir)}) = ${formatEnsembleReelLatex(dir.exterieure.domaine)}`;
 }
 
 const LATEX_COMPARATEUR: Record<ComparateurSeuil, string> = { eq: "=", ne: "\\neq", ge: "\\geq", gt: ">", le: "\\leq", lt: "<" };
@@ -100,7 +101,7 @@ function argumentSousRacineLatex(f: FonctionComposable): string | null {
 /** Libellé partagé entre l'aide de C1/C2 et le bloc "état actuel" (bug 2), pour rester cohérent
  * d'un écran à l'autre. */
 function libelleDomainePropre(dir: CompositionDirigee): string {
-  return `\\text{dom}(${dir.nomInterieure})`;
+  return `\\operatorname{dom}(${dir.nomInterieure})`;
 }
 
 export function consigneC1(dir: CompositionDirigee): string {
@@ -173,21 +174,21 @@ export function latexAideC2Niveau2(dir: CompositionDirigee): string | null {
 // ============================================================================
 
 export function consigneDomaine(dir: CompositionDirigee): string {
-  return `Exprime le domaine de définition de ${nomExterieure(dir)}∘${dir.nomInterieure}, dom(${nomExterieure(dir)}∘${dir.nomInterieure}).`;
+  return `Exprime le domaine de définition de ${nomExterieure(dir)}∘${dir.nomInterieure}.`;
 }
 
 export function texteAideDomaineNiveau1(dir: CompositionDirigee): string {
-  if (dir.riche) return "Combine ce que tu as trouvé aux 2 écrans précédents — le domaine final est leur intersection.";
-  return `dom(${nomExterieure(dir)}∘${dir.nomInterieure}) = dom(${dir.nomInterieure}) ∩ {x : ${dir.nomInterieure}(x) ∈ dom(${nomExterieure(dir)})} — il faut d'abord que x soit dans dom(${dir.nomInterieure}), ET que ${dir.nomInterieure}(x) tombe dans dom(${nomExterieure(dir)}).`;
+  if (dir.riche) return "Combine ce que tu as trouvé aux deux écrans précédents : le domaine final est leur intersection.";
+  return `Il faut d'abord que x appartienne au domaine de ${dir.nomInterieure}, ET que ${dir.nomInterieure}(x) appartienne au domaine de ${nomExterieure(dir)} : le domaine de ${nomExterieure(dir)}∘${dir.nomInterieure} est l'intersection de ces deux conditions.`;
 }
 
 export function latexAideDomaineNiveau2(dir: CompositionDirigee): string {
   if (dir.riche && dir.domaineApresCarre !== null) {
     const ext = nomExterieure(dir);
     const int = dir.nomInterieure;
-    return `\\text{dom}(${ext}\\circ ${int}) = \\text{dom}(${int}) \\cap \\{\\, x : ${int}(x) \\in \\text{dom}(${ext}) \\,\\}`;
+    return `\\operatorname{dom}(${ext}\\circ ${int}) = \\operatorname{dom}(${int}) \\cap \\{\\, x : ${int}(x) \\in \\operatorname{dom}(${ext}) \\,\\}`;
   }
-  return `\\text{dom}(${dir.nomInterieure}) = ${formatEnsembleReelLatex(dir.interieure.domaine)} \\qquad \\text{dom}(${nomExterieure(dir)}) = ${formatEnsembleReelLatex(dir.exterieure.domaine)}`;
+  return `\\operatorname{dom}(${dir.nomInterieure}) = ${formatEnsembleReelLatex(dir.interieure.domaine)} \\qquad \\operatorname{dom}(${nomExterieure(dir)}) = ${formatEnsembleReelLatex(dir.exterieure.domaine)}`;
 }
 
 // ============================================================================
@@ -231,7 +232,7 @@ export function formatTermesEtatActuelComposerFonctions(exercice: ExerciceCompos
     } else if (phase.startsWith("c2") && memeDirection && dir.domaineApresCarre !== null) {
       termes.push(...formatTermesDomaineAvecPrefixe(`${formatTermesConditionsLatex(dir).join(",\\ ")} \\iff x \\in`, dir.domaineApresCarre));
     } else if (phase.startsWith("domaine")) {
-      termes.push(...formatTermesDomaineAvecPrefixe(`\\text{dom}(${nom}) =`, dir.domaine));
+      termes.push(...formatTermesDomaineAvecPrefixe(`\\operatorname{dom}(${nom}) =`, dir.domaine));
     }
   }
   return termes;

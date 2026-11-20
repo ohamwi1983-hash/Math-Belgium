@@ -402,6 +402,11 @@ function nettoyerLatexReference(brut: string): string {
     .replace(/\{\s+/g, "{")
     .replace(/\s+\}/g, "}")
     .replace(/-\s+(?=[a-zA-Z0-9\\])/g, "-")
+    // Corrigé détaillé (5e ch. 1) : « +- » écrit « - », « {x}^{2} » écrit « x^{2} », et un terme
+    // « -\left(15\sqrt{…}\right) » sans parenthèses inutiles (vus dans la réponse attendue de l'écran).
+    .replace(/\{x\}(?=\^)/g, "x")
+    .replace(/-\\left\((\d*\\sqrt\{[^{}]*\})\\right\)/g, "-$1")
+    .replace(/\+\s*-/g, "-")
     .trim();
 }
 

@@ -4,15 +4,17 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { CouleursGrapheComposee } from "../../ui5e/composeeGraphiqueGraph";
-import { nombreTypo, svgGrapheComposee } from "../../ui5e/composeeGraphiqueGraph";
-import { nomInterne, texteResultat } from "../../ui5e/formatComposeeGraphique";
+import { svgGrapheComposee } from "../../ui5e/composeeGraphiqueGraph";
+import { nomInterne } from "../../ui5e/formatComposeeGraphique";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeComposeeGraphique, fragmentsResultat } from "./corrigeDetaille";
 import { profilComposeeGraphique } from "../profilsEvaluationFonctions3-4";
 import { CATALOGUE_RESTREINTE, construireAvecRestreinte, genererExerciceComposeeGraphique } from "./index";
 
@@ -29,7 +31,7 @@ import { CATALOGUE_RESTREINTE, construireAvecRestreinte, genererExerciceComposee
  *
  * Graphes : `svgGrapheComposee` (le MÊME tracé que l'écran : grille unitaire fixe, segments droits
  * entre nœuds entiers, extrémités pleines, graduations avec « − »), couleurs en dur pour le papier
- * (aucune variable CSS du site dans le document téléchargé). Valeurs : `texteResultat`,
+ * (aucune variable CSS du site dans le document téléchargé). Valeurs : `resultatLatex` (via le corrigé),
  * `nombreTypo`, champs de la question (`bAttendu`, `resultatAttendu`) — rien n'est relu ici.
  *
  * Variante forcée = courbe restreinte (`CATALOGUE_RESTREINTE`), la même que le `?code=` de l'appli
@@ -86,48 +88,19 @@ function enoncePapierComposeeGraphique(exercice: ExerciceComposeeGraphique): Eno
   };
 }
 
-function valeurResultat(q: QuestionComposeeGraphique): string {
-  return texteResultat(q, q.resultatExiste ? q.resultatAttendu : null);
-}
-
+/** Réponses en KaTeX (« f(g(−7)) = 3 », « f(g(5)) n'existe pas »), mêmes écritures que l'écran. */
 function reponseBreveComposeeGraphique(exercice: ExerciceComposeeGraphique): FragmentConsigne[] {
-  return [texte(exercice.questions.map(valeurResultat).join(" ; "))];
+  return exercice.questions.flatMap((q, i) => [...(i > 0 ? [texte(" ; ")] : []), ...fragmentsResultat(q)]);
 }
 
-const PIEGE =
-  "On lit d'abord la fonction INTÉRIEURE (celle écrite à droite) ; si l'image obtenue sort du domaine de l'extérieure (aucun point de son graphe à cette abscisse), la composée n'existe pas — on ne prolonge jamais la courbe.";
-
-function lignesQuestion(q: QuestionComposeeGraphique, lettre: string, avecPiege: boolean): EtapeCorrection[] {
-  const interne = nomInterne(q.composition);
-  const externe = nomExterne(q);
-  const lignes: EtapeCorrection[] = [
-    {
-      label: "Lecture",
-      sousQuestion: lettre,
-      fragments: [texte(`Sur le graphe de ${interne}, au point d'abscisse ${nombreTypo(q.a)} : ${interne}(${nombreTypo(q.a)}) = ${nombreTypo(q.bAttendu)}.`)],
-    },
-  ];
-  if (q.resultatExiste && q.resultatAttendu !== null) {
-    lignes.push({
-      label: "Lecture",
-      sousQuestion: lettre,
-      fragments: [texte(`Sur le graphe de ${externe}, au point d'abscisse ${nombreTypo(q.bAttendu)} : ${externe}(${nombreTypo(q.bAttendu)}) = ${nombreTypo(q.resultatAttendu)}.`)],
-    });
-  } else {
-    lignes.push({
-      label: "Condition",
-      sousQuestion: lettre,
-      fragments: [texte(`${nombreTypo(q.bAttendu)} n'appartient pas au domaine de ${externe} : son graphe n'a aucun point d'abscisse ${nombreTypo(q.bAttendu)}.`)],
-    });
-  }
-  if (avecPiege) lignes.push({ label: "Piège", sousQuestion: lettre, fragments: [texte(PIEGE)] });
-  lignes.push({ label: "Conclusion", sousQuestion: lettre, fragments: [texte(`${valeurResultat(q)}.`)] });
-  return lignes;
-}
-
-function correctionDetailleeComposeeGraphique(exercice: ExerciceComposeeGraphique): EtapeCorrection[] {
-  const indexPiege = exercice.questions.findIndex((q) => !q.resultatExiste);
-  return exercice.questions.flatMap((q, i) => lignesQuestion(q, LETTRES[i], i === indexPiege));
+/** Critères du niveau (grille commune) : chaque écran est une LECTURE (lire g(a) puis f(g(a)) sur les
+ * graphes, ou constater que g(a) sort du domaine) — aucune étape de calcul ; méthode 0 ; piège 1
+ * (une image intermédiaire hors du domaine de l'extérieure est toujours dans les données) ;
+ * nombres 0. */
+function criteresDifficulteComposeeGraphique(exercice: ExerciceComposeeGraphique): CriteresDifficulte {
+  const corrige = correctionDetailleeComposeeGraphique(exercice);
+  const lettres = [...new Set(corrige.map((e) => e.sousQuestion).filter((l): l is string => !!l))];
+  return { ...etapesDuCorrige(corrige, lettres), methode: 0, piege: exercice.questions.some((q) => !q.resultatExiste) ? 1 : 0, nombres: 0 };
 }
 
 function baremeComposeeGraphique(exercice: ExerciceComposeeGraphique): BaremeExercice {
@@ -136,8 +109,8 @@ function baremeComposeeGraphique(exercice: ExerciceComposeeGraphique): BaremeExe
   const criteres: CritereBareme[] = exercice.questions.map((q, i) => ({
     sousQuestion: LETTRES[i],
     critere: q.resultatExiste
-      ? [texte(`${valeurResultat(q)} : lecture de ${nomInterne(q.composition)} puis de ${nomExterne(q)}`)]
-      : [texte(`${valeurResultat(q)} : image intermédiaire hors du domaine de ${nomExterne(q)}, justifiée`)],
+      ? [...fragmentsResultat(q), texte(` : lecture de ${nomInterne(q.composition)} puis de ${nomExterne(q)}`)]
+      : [...fragmentsResultat(q), texte(` : image intermédiaire hors du domaine de ${nomExterne(q)}, justifiée`)],
     points: poids,
   }));
   return {
@@ -154,7 +127,7 @@ function baremeComposeeGraphique(exercice: ExerciceComposeeGraphique): BaremeExe
 /** Ancien corrigé (repli, documents Word) : les lignes du corrigé détaillé, sans le piège. */
 function construireCorrectionComposeeGraphique(exercice: ExerciceComposeeGraphique): BlocCorrection[] {
   return correctionDetailleeComposeeGraphique(exercice)
-    .filter((l) => l.label !== "Piège")
+    .filter((l) => l.type !== "piege")
     .map((l) => ({ type: "paragraphe", fragments: l.fragments }));
 }
 
@@ -166,12 +139,11 @@ export const adaptateurEvaluationComposeeGraphique: AdaptateurFeuilleExercices<E
   genererInstanceAvecVariante: (id) => construireAvecRestreinte(id as "f" | "g"),
   construireEnonce: construireEnonceComposeeGraphique,
   construireCorrection: construireCorrectionComposeeGraphique,
-  difficulte: () => 2,
+  criteresDifficulte: criteresDifficulteComposeeGraphique,
   reponseBreve: reponseBreveComposeeGraphique,
   correctionDetaillee: correctionDetailleeComposeeGraphique,
   bareme: baremeComposeeGraphique,
   enoncePapier: enoncePapierComposeeGraphique,
-  dureeMinutes: 6,
   profilInstance: profilComposeeGraphique,
   regroupable: false,
 };

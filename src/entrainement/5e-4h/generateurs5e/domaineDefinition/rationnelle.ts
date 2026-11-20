@@ -84,7 +84,8 @@ function construireCarreParfait(): ExerciceRationnelle {
 function construireFactoriseAvecCarre(): ExerciceRationnelle {
   const [r1, r2] = deuxEntiersDistincts(-6, 6);
   const coeffs = multiplierPolynomes(polynomeLineaire(1, -r1), polynomeCarreParfait(1, r2));
-  const denLatex = `${formatFacteurLineaireLatex(r1)}${formatFacteurLineaireLatex(r2)}^2`;
+  // Un facteur nul s'écrit x (ou x², placé devant) — jamais « (x) » ni « (x)^2 » (audit 5e ch. 1, corrigé détaillé).
+  const denLatex = r2 === 0 ? `x^2${formatFacteurLineaireLatex(r1)}` : r1 === 0 ? `x${formatFacteurLineaireLatex(r2)}^2` : `${formatFacteurLineaireLatex(r1)}${formatFacteurLineaireLatex(r2)}^2`;
   const resolution = ensemblePrivePoints([r1, r2]);
   return {
     famille: "rationnelle",
