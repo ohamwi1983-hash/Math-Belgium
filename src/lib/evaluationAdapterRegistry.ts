@@ -272,6 +272,9 @@ import { adaptateurEvaluationTroisTermes } from '../entrainement/5e-4h/generateu
 import { adaptateurEvaluationModeliserSuite } from '../entrainement/5e-4h/generateurs5e/modeliserSuite/exportEvaluation'
 import { adaptateurEvaluationSommeInfinie } from '../entrainement/5e-4h/generateurs5e/sommeInfinieSituation/exportEvaluation'
 import { adaptateurEvaluationDetectiveSuites } from '../entrainement/5e-4h/generateurs5e/detectiveSuites/exportEvaluation'
+import { adaptateurEvaluationComposerPolynomes } from '../entrainement/5e-4h/generateurs5e/composerPolynomes/exportEvaluation'
+import { adaptateurEvaluationDomaineParImage } from '../entrainement/5e-4h/generateurs5e/domaineParImage/exportEvaluation'
+import { adaptateurEvaluationComposeeDiagonale } from '../entrainement/5e-4h/generateurs5e/composeeDiagonale/exportEvaluation'
 import { adaptateurEvaluationRelevesSinusoide } from '../entrainement/5e-4h/generateurs5e/relevesSinusoide/exportEvaluation'
 import { adaptateurEvaluationArchimedePi } from '../entrainement/5e-4h/generateurs5e/archimedePi/exportEvaluation'
 import { adaptateurEvaluationInequationTrigo } from '../entrainement/5e-4h/generateurs5e/inequationsTrigo/exportEvaluation'
@@ -299,6 +302,9 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen3': versionPapier(adaptateurEvaluationComposerFonctions) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen4': versionPapier(adaptateurEvaluationComposeeGraphique) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen5': versionPapier(adaptateurEvaluationProblemesContexte) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen61': versionPapier(adaptateurEvaluationComposerPolynomes) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen62': versionPapier(adaptateurEvaluationDomaineParImage) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen63': versionPapier(adaptateurEvaluationComposeeDiagonale) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen6': versionPapier(adaptateurEvaluationArcSecteur) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen7': versionPapier(adaptateurEvaluationPolygonesArcsSecteurs) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen8': versionPapier(adaptateurEvaluationParametresSinusoide) as unknown as AdaptateurFeuilleExercices<never>,

@@ -5,7 +5,7 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { AideEcran, Frag, LigneIntervalle, ModeEcran, TableauDonnees } from "../ui5e/ecransTrigo.types";
-import { decoderLigne, encoderLigne } from "../ui5e/ecransTrigo.types";
+import { decoderLigne, encoderLigne, VALEUR_VIDE } from "../ui5e/ecransTrigo.types";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
@@ -96,6 +96,8 @@ interface Props {
   onValider: (valeurs: string[]) => void;
   diagnostiquer: (valeurs: string[]) => StatutVerification[];
   piege: (valeurs: string[]) => Frag[] | null;
+  /** Forme à reprendre (juste en valeur) : message, aucune tentative (optionnel). */
+  aReprendre?: (valeurs: string[]) => Frag[] | null;
   messageIllisible: string;
   validation?: ValidationEtapeProps | null;
 }
@@ -115,6 +117,7 @@ function BlocAide({ aide }: { aide: AideEcran }) {
         <Fragments fragments={aide.texte} />
       </p>
       {aide.latex && <Katex expression={aide.latex} block />}
+      {aide.figure && <FigureSvg svg={aide.figure} />}
     </>
   );
 }
@@ -141,6 +144,7 @@ export function EtapeEcransTrigo({
   onValider,
   diagnostiquer,
   piege,
+  aReprendre,
   messageIllisible,
   validation,
 }: Props) {
@@ -148,13 +152,16 @@ export function EtapeEcransTrigo({
   const [statutsSoumis, setStatutsSoumis] = useState<StatutVerification[] | null>(null);
   const [messagePiege, setMessagePiege] = useState<Frag[] | null>(null);
   const [erreurLecture, setErreurLecture] = useState<string | null>(null);
+  const [formeAReprendre, setFormeAReprendre] = useState<Frag[] | null>(null);
+  const estVide = mode.type === "intervalles" && valeurs.length === 1 && valeurs[0] === VALEUR_VIDE;
   const montrerErreurs = tentativesUtilisees > 0 && statutsSoumis !== null;
   const gele = !!validation;
   const decalage = mode.type === "champs" && mode.symboles ? 1 : 0;
 
   const toutRempli =
     mode.type === "intervalles"
-      ? valeurs.every((v) => {
+      ? estVide ||
+        valeurs.every((v) => {
           const l = decoderLigne(v);
           return l.gauche.trim() !== "" && l.droite.trim() !== "";
         })
@@ -163,11 +170,13 @@ export function EtapeEcransTrigo({
   function changer(index: number, valeur: string) {
     setValeurs((prev) => prev.map((v, i) => (i === index ? normaliserSigneMoins(valeur) : v)));
     setErreurLecture(null);
+    setFormeAReprendre(null);
   }
 
   function changerLigne(index: number, modif: Partial<LigneIntervalle>) {
     setValeurs((prev) => prev.map((v, i) => (i === index ? encoderLigne({ ...decoderLigne(v), ...modif }) : v)));
     setErreurLecture(null);
+    setFormeAReprendre(null);
   }
 
   function valider() {
@@ -175,9 +184,16 @@ export function EtapeEcransTrigo({
     const statuts = diagnostiquer(valeurs);
     if (statuts.includes("parse_error")) {
       setErreurLecture(messageIllisible);
+      setFormeAReprendre(null);
       return;
     }
     setErreurLecture(null);
+    const reprendre = aReprendre ? aReprendre(valeurs) : null;
+    if (reprendre) {
+      setFormeAReprendre(reprendre);
+      return;
+    }
+    setFormeAReprendre(null);
     setStatutsSoumis(statuts);
     setMessagePiege(statuts.every((s) => s === "correct") ? null : piege(valeurs));
     onValider(valeurs);
@@ -275,7 +291,26 @@ export function EtapeEcransTrigo({
 
       {mode.type === "intervalles" && (
         <div>
-          {valeurs.map((v, i) => {
+          {mode.vide && (
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "6px 0" }}>
+              <button
+                type="button"
+                className={`btn ${estVide ? "toggle-active" : ""} ${estVide && faux(0) ? "is-erronee" : ""}`}
+                style={{ minHeight: 44 }}
+                aria-pressed={estVide}
+                disabled={gele}
+                onClick={() => {
+                  setValeurs(estVide ? [encoderLigne(LIGNE_VIDE)] : [VALEUR_VIDE]);
+                  setErreurLecture(null);
+                  setFormeAReprendre(null);
+                }}
+              >
+                <Katex expression={"\\varnothing"} />
+                <span>&nbsp;ensemble vide</span>
+              </button>
+            </div>
+          )}
+          {!estVide && valeurs.map((v, i) => {
             const l = decoderLigne(v);
             const crochet = (cote: "ouvrant" | "fermant") => (
               <button
@@ -296,7 +331,7 @@ export function EtapeEcransTrigo({
                 className={`text-input ${faux(0) ? "is-erronee" : ""}`}
                 style={{ flex: "1 1 0", minWidth: 0, margin: 0 }}
                 value={l[cote]}
-                placeholder={cote === "gauche" ? "ex. : π/12" : "ex. : 5π/12"}
+                placeholder={mode.placeholders ? mode.placeholders[cote === "gauche" ? 0 : 1] : cote === "gauche" ? "ex. : π/12" : "ex. : 5π/12"}
                 disabled={gele}
                 autoComplete="off"
                 autoCapitalize="off"
@@ -320,7 +355,7 @@ export function EtapeEcransTrigo({
               </div>
             );
           })}
-          {!gele && (
+          {!gele && !estVide && (
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "6px 0 10px" }}>
               <button type="button" className="btn" style={{ minHeight: 44 }} onClick={() => setValeurs((p) => [...p, encoderLigne(LIGNE_VIDE)])}>
                 + Ajouter un intervalle
@@ -332,7 +367,11 @@ export function EtapeEcransTrigo({
               )}
             </div>
           )}
-          <p style={{ fontSize: "0.85rem", color: "var(--muted, #666)", margin: "2px 0 8px" }}>Touche un crochet pour le retourner. Un intervalle par ligne, de gauche à droite.</p>
+          {!estVide && (
+            <p style={{ fontSize: "0.85rem", color: "var(--muted, #666)", margin: "2px 0 8px" }}>
+              Touche un crochet pour le retourner. Un intervalle par ligne, de gauche à droite.{mode.vide ? " Infini : « +inf » ou « -inf »." : ""}
+            </p>
+          )}
         </div>
       )}
 
@@ -354,7 +393,14 @@ export function EtapeEcransTrigo({
               {erreurLecture}
             </p>
           )}
-          {!erreurLecture && montrerErreurs && (
+          {!erreurLecture && formeAReprendre && (
+            <p className="alert-error" role="alert">
+              <span>
+                <Fragments fragments={formeAReprendre} />
+              </span>
+            </p>
+          )}
+          {!erreurLecture && !formeAReprendre && montrerErreurs && (
             <p className="alert-error" role="alert">
               <span>
                 {formatMessageErreur(tentativesUtilisees, tentativesMax, "not_equivalent")}

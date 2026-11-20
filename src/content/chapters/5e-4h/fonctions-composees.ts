@@ -868,6 +868,28 @@ export const fonctionsComposees: ChapterContent = {
           ],
           whereLabel: '5e (4h) → « 3. Composer f et g — expressions et domaines »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Composer des polynômes',
+          generatorId: '5gen61',
+          chantier: '5e-4h',
+          description: [
+            'Deux fonctions affines, ou une affine et une du second degré (comme x² + 1 et 2x − 3 dans l’exemple du cours) : écris f(g(x)), développe et réduis (f∘g)(x) puis (g∘f)(x), et vérifie ton développement en un point, étage par étage.',
+            'Pour deux affines, décide enfin si f∘g et g∘f sont égales : parfois oui, souvent non.',
+          ],
+          whereLabel: '5e (4h) → « 61. Composer des polynômes »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Domaine d’une composée par l’image',
+          generatorId: '5gen62',
+          chantier: '5e-4h',
+          description: [
+            'Fonctions simples (racine, inverse, carré, opposé du carré, valeur absolue, affine) : détermine l’image de la fonction intérieure, le domaine de l’extérieure, les valeurs que f peut recevoir, puis le domaine de la composée.',
+            'Il arrive que l’image de g ne rencontre jamais le domaine de f : la composée n’est alors définie nulle part.',
+          ],
+          whereLabel: '5e (4h) → « 62. Domaine d’une composée par l’image »',
+        },
       ],
     },
 
@@ -976,6 +998,16 @@ export const fonctionsComposees: ChapterContent = {
             'L’exercice demande aussi si l’image existe réellement : exactement le piège vu ci-dessus, quand la valeur intermédiaire sort du domaine de la seconde fonction (son graphe complet s’arrête avant).',
           ],
           whereLabel: '5e (4h) → « 4. Composée de fonctions — lecture graphique »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Composée sur un seul repère (droite y = x)',
+          generatorId: '5gen63',
+          chantier: '5e-4h',
+          description: [
+            'Les courbes de f et de g sont tracées dans le même repère, avec la droite y = x. Lis la première image, reporte-la sur l’axe horizontal en passant par la diagonale, décide si la composée existe, puis lis sa valeur.',
+          ],
+          whereLabel: '5e (4h) → « 63. Composée sur un seul repère (droite y = x) »',
         },
       ],
     },

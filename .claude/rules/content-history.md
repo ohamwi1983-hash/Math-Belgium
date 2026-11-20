@@ -4927,3 +4927,20 @@ scrollWidth 390, 0 `$` / `.katex-error`, Shadow DOM sans `^ $ NaN Infinity undef
 `test-epingle` 0 échec ; valeurs recoupées à la main ; `tsc`, `oxlint`, `npm run build` propres.
 Captures : `scratchpad/ateliers-6e1/`. Machine saturée par d'autres agents : manipulations faites
 en partie sur un banc d'essai léger (`harness/index.html`, mêmes fichiers et `index.css`).
+## 5e (4h), Chapitre 1 — lot G de l'audit (5gen61–5gen63, nouveaux générateurs)
+
+Trois cartes ajoutées sans toucher au reste du cours (un autre chantier crée 5gen58–60). **5gen61
+« Composer des polynômes »** (§ 3, après 5gen3) : f et g affines, ou une affine et une du second degré
+(exemple du cours x² + 1 ∘ 2x − 3) ; f(g(x)), (f∘g)(x) et (g∘f)(x) développées et réduites,
+vérification en un point, verdict f∘g = g∘f pour deux affines. **5gen62 « Domaine d'une composée par
+l'image »** (§ 3, après 5gen61) : g ∈ {x² + k, −x² + k, |x| + k, mx + p, √x + k, 1/x + k}, f ∈ {√(x − c),
+√(c − x), 1/(x − c), 1/√(x − c), 1/√(c − x)} ; Im g, dom f, Im g ∩ dom f, dom(f∘g) ; domaine vide en cas
+particulier (décision de l'utilisateur). **5gen63 « Composée sur un seul repère (droite y = x) »**
+(§ 4, après 5gen4) : Cf, Cg et y = x sur la même grille, report par la diagonale (astuce du § 4),
+variantes (f∘g)(a), (g∘f)(a), (f∘f)(a). Socle d'écrans du 5e ch. 2 étendu (options additives, voir
+`feuilles-evaluations.md`). Vérifié : 2 000 tirages par variante (réponses recalculées à part —
+composées évaluées en 7 points, domaines par échantillonnage de f(g(x)) sur la grille n/60, lectures
+sur les sommets des courbes ; saisies justes autrement écrites, « − – — », illisible, formes à
+reprendre, pièges) : 0 anomalie ; parcours iPhone 13 des trois applis (bonnes réponses, erreurs
+ciblées, aides à deux niveaux, domaine vide, composée qui existe) : scrollWidth 390, 0 erreur
+console, `?code=` identique ; captures dans le dossier de travail `5gen61-63`.
