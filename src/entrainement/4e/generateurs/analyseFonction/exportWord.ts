@@ -12,6 +12,7 @@ import type {
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { profilAnalyseFonction } from "../profilsEvaluation4eCh1";
 import { formatFonctionOrdreLatex } from "../../ui/formatAnalyseFonction";
 import { pointLatex, q } from "../../ui/corrigeParabole";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAnalyseFonction, type VarianteAnalyseFonctionId } from "./index";
@@ -141,6 +142,15 @@ function criteresDifficulteAnalyseFonction(instance: E): CriteresDifficulte {
 }
 
 export const adaptateurExportWordAnalyseFonction: AdaptateurFeuilleExercices<E> = {
+  profilInstance: profilAnalyseFonction,
+  // La variante EST la réponse de l'écran « méthode » (audit 4e ch. 1, V1 ; comme gen1).
+  groupesVerdict: [
+    {
+      id: "groupe_methode",
+      label: "Méthode à reconnaître (mise en évidence, binôme conjugué, produit remarquable ou non factorisable, au hasard)",
+      variantes: ["mise_en_evidence", "binome_conjugue", "produit_remarquable", "irreductible"],
+    },
+  ],
   titreDocument: "Analyse d'une fonction du second degré — Évaluation",
   nomFichierBase: "analyse-fonction-second-degre",
   genererInstance: genererExerciceAnalyseFonction,

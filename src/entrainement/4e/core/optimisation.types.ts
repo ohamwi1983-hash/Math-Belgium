@@ -253,6 +253,10 @@ export interface ExerciceOptimisationModelisation extends ExerciceOptimisationCo
   variante: "modelisation";
   famille: FamilleOptimisationModelisation;
   contrainte: ContrainteOptimisation;
+  /** Domaine AVANT la contrainte supplémentaire de l'énoncé (« On ne retient que les cas où… »,
+   * `generateurs/optimisation/contrainteSupplementaire.ts`) ; absent sans contrainte. Sert au message
+   * ciblé de l'écran « domaine » (condition oubliée). */
+  domaineSansContrainte?: DomaineOptimisation;
   /** RHS texte (PAS du LaTeX — même convention que `texteAideConstructionNiveau1`/`2`, rendu en
    * texte brut, jamais `<Katex>`) de la formule substituée-mais-non-développée (aide niveau 2 de
    * l'écran "construction"), ex. `"(P0+x) · (-kx+Q0)"` — nécessaire dès que la vraie formule n'est

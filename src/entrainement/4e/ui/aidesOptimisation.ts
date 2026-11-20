@@ -56,7 +56,7 @@ export function aidesDomaine(e: ExerciceOptimisationModelisation): Aides {
     [
       texte(`Écris une inéquation par grandeur (par exemple `),
       latex(`${e.contrainte.lettreCherchee}\\geq 0`),
-      texte(`, puis remplace ${e.contrainte.lettreCherchee} par son expression en ${e.contexte.labelVariable}) et résous chacune ; le domaine est l'intersection des solutions.`),
+      texte(`, puis remplace ${e.contrainte.lettreCherchee} par son expression en ${e.contexte.labelVariable}) et résous chacune ; le domaine est l'intersection des solutions${e.domaineSansContrainte ? ", à laquelle tu ajoutes la condition de la dernière phrase de l'énoncé" : ""}.`),
     ],
   ];
 }
@@ -118,6 +118,8 @@ export function messageDomaine(e: ExerciceOptimisationModelisation, inf: string,
   const b = parserNombreOuFraction(sup);
   if (a === null || b === null) return null;
   if (egal(a, e.domaine.sup) && egal(b, e.domaine.inf)) return [texte("Les bornes sont inversées : la plus petite d'abord.")];
+  const sans = e.domaineSansContrainte;
+  if (sans && egal(a, sans.inf) && egal(b, sans.sup)) return [texte("Ces bornes viennent des grandeurs qui doivent rester positives, mais la dernière phrase de l'énoncé ajoute une condition : elle réduit le domaine.")];
   if (egal(b, e.domaine.sup) && !egal(a, e.domaine.inf)) return [texte("La borne de droite est juste ; relis la condition sur l'autre grandeur pour la borne de gauche.")];
   if (egal(a, e.domaine.inf) && !egal(b, e.domaine.sup)) return [texte("La borne de gauche est juste ; relis la condition qui empêche l'autre grandeur de devenir négative.")];
   return null;

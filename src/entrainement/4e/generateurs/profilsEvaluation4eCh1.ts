@@ -8,12 +8,18 @@
  * Mesures (5 000 tirages par variante, `scratchpad/refonte-4e-ch1/mesure0.txt`) :
  * - gen8 / gen9 (p, q ∈ [−5 ; 5], EV, CV ∈ [1 ; 5]) : p = 0 ≈ 9 %, q = 0 ≈ 9 %, |a| = 1 (EV = CV)
  *   20 %, a entier ≠ ±1 20 %, a fractionnaire 60 %.
- * - gen7 : aucun raccourci (la variante EST la méthode de factorisation ; a = ±1 ≈ 17 % n'abrège
- *   aucune étape) → pas de profil.
- * - gen55 : le sommet hors du domaine (≈ 25 % des familles « fonction donnée », jamais pour les
- *   familles « modélisation ») est un VERDICT (« le sommet appartient-il au domaine ? ») : jamais un
- *   cas particulier ni une forme. La forme est le MODE de la famille (configuration de la clôture,
- *   triangle rectangle, sous-habillage) : il change la relation à poser et la fonction obtenue.
+ * - gen7 : la variante EST la réponse de l'écran « méthode » → groupe à verdict `groupe_methode`
+ *   (les 4 variantes, « non factorisable » comprise : audit 4e ch. 1, V1). Aucun cas particulier
+ *   (a = ±1 n'abrège aucune étape). `forme` = ordre d'écriture des termes (usuel ou mélangé) : c'est
+ *   le seul piège du niveau, reproduit d'une série à l'autre ; jamais le signe de a (réponse de
+ *   l'écran « allure »).
+ * - gen8 / gen9 : pas de `forme` (une seule structure ; le signe de a est la réponse du choix SOX).
+ * - gen55 : le sommet hors du domaine est un VERDICT (« le sommet appartient-il au domaine ? ») :
+ *   jamais un cas particulier ni une forme. Lot D : ≈ 40 % dans CHAQUE famille (contrainte
+ *   supplémentaire en modélisation, `optimisation/contrainteSupplementaire.ts`). La présence de cette
+ *   contrainte n'entre pas dans la forme (sans elle, le sommet est toujours dans le domaine). La forme
+ *   est le MODE de la famille (configuration de la clôture, triangle rectangle, sous-habillage) : il
+ *   change la relation à poser et la fonction obtenue.
  * - gen57 : racines rejetées (≈ 50 %) et intervalle coupé par le domaine (≈ 50 %) sont des verdicts
  *   (étape « validation ») → pas de cas particulier. Les familles A (fonction donnée) ont toujours
  *   des coefficients décimaux (seuil décimal dans plus de 93 % des cas) : calculatrice indispensable.
@@ -25,10 +31,19 @@ import type { ProfilInstance } from "../../export/genererFeuilleExercices";
 import type { ExerciceTransformationGraphique } from "../core/transformationsGraphiques.types";
 import type { ExerciceFormeCanoniqueTransformation } from "../core/formeCanoniqueTransformations.types";
 import type { ExerciceOptimisation } from "../core/optimisation.types";
+import type { ExerciceAnalyseFonction } from "../core/analyseFonction.types";
 
 function cas(liste: (string | false)[]): string | null {
   const presents = liste.filter((c): c is string => !!c);
   return presents.length === 0 ? null : presents.join("+");
+}
+
+// ---------------------------------------------------------------------------------------------
+// gen7 — analyse d'une fonction du second degré (groupe à verdict `groupe_methode`)
+// ---------------------------------------------------------------------------------------------
+
+export function profilAnalyseFonction(e: ExerciceAnalyseFonction): ProfilInstance {
+  return { casParticulier: null, forme: e.ordreTermes[0] === "a" ? "ordre-usuel" : "ordre-melange" };
 }
 
 // ---------------------------------------------------------------------------------------------

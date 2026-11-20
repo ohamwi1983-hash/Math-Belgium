@@ -13,6 +13,7 @@ import { formatFonctionNarrativeLatex } from "../formatNarratif";
 import { genererDomaine, optimumSurDomaine } from "../optimum";
 import { construireOptionsInterpretation, formatQuestionFinale } from "../interpretation";
 import { randomInt } from "../aleatoire";
+import { decalerHorsDuSommetSiTire } from "../contrainteSupplementaire";
 import type { GenreGrandeur } from "../interpretation";
 
 type TypeGrandeurTemps = "meteo" | "benefice";
@@ -115,7 +116,7 @@ export function construireGrandeurTemps(): ExerciceOptimisationFonctionDonnee {
 
   const skin = p.skins[randomInt(0, p.skins.length - 1)];
 
-  return {
+  const exercice: ExerciceOptimisationFonctionDonnee = {
     variante: "fonctionDonnee",
     famille: "grandeurTemps",
     sens: "max",
@@ -145,4 +146,6 @@ export function construireGrandeurTemps(): ExerciceOptimisationFonctionDonnee {
       optimal,
     }),
   };
+  // Verdict « hors du domaine » ≈ 40 % (lot D) : tirage fait en dernier (même ?code= sinon).
+  return decalerHorsDuSommetSiTire(exercice, (d) => skin(fonction.a, fonction.b, fonction.c, d.inf, d.sup), 0);
 }

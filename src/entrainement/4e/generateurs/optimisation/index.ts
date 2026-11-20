@@ -31,6 +31,7 @@ import { construireSommeDeuxCarres } from "./familles/sommeDeuxCarres";
 import { construireRectangleInscrit } from "./familles/rectangleInscrit";
 import { construireGrandeurTemps } from "./familles/grandeurTemps";
 import { randomInt } from "./aleatoire";
+import { ajouterContrainteSupplementaire } from "./contrainteSupplementaire";
 
 /**
  * Les 7 familles RÉELLES de CE générateur (A/B/C/E/G/T/V de la spec — voir CLAUDE.md, "Création —
@@ -81,7 +82,10 @@ const CONSTRUCTEURS: Record<FamilleOptimisationGen55, () => ExerciceOptimisation
 };
 
 export function construireAvecFamilleId(familleId: FamilleOptimisationGen55): ExerciceOptimisation {
-  return CONSTRUCTEURS[familleId]();
+  const e = CONSTRUCTEURS[familleId]();
+  // Modélisation : contrainte supplémentaire (massif de fleurs du cours, « cas 2 ») — sommet hors du
+  // domaine ≈ 40 % par famille (lot D). Tirage fait APRÈS celui de la famille.
+  return e.variante === "modelisation" ? ajouterContrainteSupplementaire(e) : e;
 }
 
 export function construireAvecVarianteId(varianteId: VarianteOptimisation): ExerciceOptimisation {

@@ -11,6 +11,7 @@ import { formatFonctionNarrativeLatex } from "../formatNarratif";
 import { genererDomaine, optimumSurDomaine } from "../optimum";
 import { construireOptionsInterpretation, formatQuestionFinale } from "../interpretation";
 import { randomInt } from "../aleatoire";
+import { decalerHorsDuSommetSiTire } from "../contrainteSupplementaire";
 
 /**
  * Domaine justifié narrativement (`spec-gen55-optimisation-second-degre.md`, section 2) — `inf`/`sup`
@@ -45,7 +46,7 @@ export function construireCoutProduction(): ExerciceOptimisationFonctionDonnee {
 
   const skin = SKINS[randomInt(0, SKINS.length - 1)];
 
-  return {
+  const exercice: ExerciceOptimisationFonctionDonnee = {
     variante: "fonctionDonnee",
     famille: "coutProduction",
     sens: "min",
@@ -75,4 +76,6 @@ export function construireCoutProduction(): ExerciceOptimisationFonctionDonnee {
       optimal,
     }),
   };
+  // Verdict « hors du domaine » ≈ 40 % (lot D) : tirage fait en dernier (même ?code= sinon).
+  return decalerHorsDuSommetSiTire(exercice, (d) => skin.phraseEnonce(fonction.a, fonction.b, fonction.c, d.inf, d.sup), 0);
 }
