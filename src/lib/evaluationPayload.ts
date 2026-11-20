@@ -522,10 +522,12 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'fonctions-composees', sectionId: 'graphique', quizTheme: 'lectureGraphique', label: '', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'contexte', quizTheme: 'problemesContexte', label: '', quizChapitre: 1 },
   { chapitreSlug: 'trigonometrie', sectionId: 'arcs-secteurs', quizTheme: 'arcsEtSecteurs', label: '', quizChapitre: 2 },
+  // Le thème « Radians, arcs, secteurs et polygones » couvre aussi le § 2 (polygones, arcs sur k côtés).
+  { chapitreSlug: 'trigonometrie', sectionId: 'polygones', quizTheme: 'arcsEtSecteurs', label: '', quizChapitre: 2 },
   { chapitreSlug: 'trigonometrie', sectionId: 'parametres', quizTheme: 'parametresSinusoide', label: '', quizChapitre: 2 },
   { chapitreSlug: 'trigonometrie', sectionId: 'lecture-graphique', quizTheme: 'graphesSinusoides', label: '', quizChapitre: 2 },
   { chapitreSlug: 'trigonometrie', sectionId: 'equations', quizTheme: 'equationsTrigonometriques', label: 'Équations trigonométriques', quizChapitre: 2 },
-  { chapitreSlug: 'trigonometrie', sectionId: 'equations', quizTheme: 'identitesEtFactorisation', label: 'Identités et factorisation', quizChapitre: 2 },
+  { chapitreSlug: 'trigonometrie', sectionId: 'equations', quizTheme: 'identitesEtFactorisation', label: 'Produit nul, substitution, égalité', quizChapitre: 2 },
   { chapitreSlug: 'trigonometrie', sectionId: 'extremums', quizTheme: 'extremumsSinusoide', label: '', quizChapitre: 2 },
   { chapitreSlug: 'trigonometrie', sectionId: 'geometrie-cercle', quizTheme: 'geometrieEtModelisation', label: '', quizChapitre: 2 },
   { chapitreSlug: 'trigonometrie', sectionId: 'modeliser', quizTheme: 'geometrieEtModelisation', label: '', quizChapitre: 2 },

@@ -2556,10 +2556,10 @@ export const trigonometrie: ChapterContent = {
       title: 'Quiz vrai ou faux — tout le chapitre',
       generatorId: '5gen40',
       description: [
-        '7 thèmes de 20 affirmations chacun (arcs et secteurs, paramètres d\'une sinusoïde, ' +
-          'graphes de sinusoïdes, équations trigonométriques, identités et factorisation, ' +
-          'extremums, géométrie et modélisation) — choisis un thème, réponds vrai ou faux, la ' +
-          'justification est toujours révélée.',
+        '7 thèmes de 35 affirmations chacun (radians, arcs et polygones ; paramètres d\'une ' +
+          'sinusoïde ; lecture graphique ; extremums ; équations trigonométriques ; produit nul, ' +
+          'substitution et égalité de deux expressions ; géométrie du cercle et modélisation) — ' +
+          'choisis un thème, réponds vrai ou faux, la justification est toujours révélée.',
       ],
       chantier: '5e-4h',
       whereLabel: '5e (4h) → « 40. Trigonométrie — quiz vrai/faux »',
