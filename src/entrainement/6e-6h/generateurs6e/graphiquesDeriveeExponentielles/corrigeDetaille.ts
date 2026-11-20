@@ -122,10 +122,14 @@ function etapeDerivee(e: ExerciceGraphiqueDeriveeExponentielle): EtapeCorrection
     return [
       utilise("a", [texte("Règle du quotient "), latex("\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^2}"), texte(" avec "), latex(`u=${ux}`), texte(", "), latex(`v=${ux}+1`), texte(" et "), latex("(a^{x})'=\\ln(a)\\,a^{x}"), texte(` ${COURS_DERIVEE}.`)]),
       calcul("a", [
+        ligne(`u(x)=${ux}`),
+        ligne(`v(x)=${ux}+1`),
         ligne(`u'(x)=${lnB}\\,${ux}`),
         ligne(`v'(x)=${lnB}\\,${ux}`, "la constante 1 a une dérivée nulle"),
-        ligne(`f'(x)=\\dfrac{${lnB}\\,${ux}\\left(${ux}+1\\right)-${ux}\\cdot${lnB}\\,${ux}}{\\left(${ux}+1\\right)^2}`, "règle du quotient"),
-        ligne(`=\\dfrac{${lnB}\\,${ux}}{\\left(${ux}+1\\right)^2}`, justif("on développe : les termes en ", { l: `${bp}^{2x}` }, " s'annulent")),
+        ligne("f'(x)=\\dfrac{u'(x)\\,v(x)-u(x)\\,v'(x)}{v(x)^2}", "règle du quotient"),
+        ligne(`=\\dfrac{${lnB}\\,u(x)\\big(u(x)+1\\big)-u(x)\\cdot ${lnB}\\,u(x)}{\\big(u(x)+1\\big)^2}`, justif("car ", { l: `u'=v'=${lnB}\\,u` }, " et ", { l: "v=u+1" })),
+        ligne(`=\\dfrac{${lnB}\\,u(x)}{\\big(u(x)+1\\big)^2}`, justif("on développe : les termes en ", { l: "u(x)^2" }, " s'annulent")),
+        ligne(`=\\dfrac{${lnB}\\,${ux}}{\\left(${ux}+1\\right)^2}`, justif("on remplace ", { l: `u(x)=${ux}` })),
       ]),
       resultat("a", [latex(rep)]),
       piege("a", [texte("u et v ont la même dérivée : après développement, il ne reste qu'un terme au numérateur.")]),

@@ -220,15 +220,15 @@ function etapesC(e: ExerciceLimiteC): EtapeCorrection[] {
 function etapesG(): EtapeCorrection[] {
   const D = "1-e^{\\frac{\\pi}{2}-x}";
   const f = `\\dfrac{1}{\\cos(x)}+\\dfrac{1}{${D}}`;
-  const combinee = formeReformuleeLatex({ famille: "G", limiteFinale: 0.5 }) as string;
   const Lu = lim("0", "u");
   return [
-    utilise("a", [texte("Somme de deux fractions : on les réduit au même dénominateur "), latex(`\\cos(x)\\left(${D}\\right)`), texte(".")]),
+    utilise("a", [texte("Somme de deux fractions : on les réduit au même dénominateur ; on note "), latex(`D(x)=${D}`), texte(".")]),
     calcul("a", [
-      ligne(`${f}=\\dfrac{${D}}{\\cos(x)\\left(${D}\\right)}+\\dfrac{\\cos(x)}{\\cos(x)\\left(${D}\\right)}`, "même dénominateur"),
-      ligne(`=${combinee.replace(/\\frac\{\\left/, "\\dfrac{\\left")}`, "on additionne les numérateurs"),
+      ligne(`D(x)=${D}`),
+      ligne("f(x)=\\dfrac{1}{\\cos(x)}+\\dfrac{1}{D(x)}", "on remplace"),
+      ligne("=\\dfrac{D(x)+\\cos(x)}{D(x)\\cos(x)}", "même dénominateur"),
     ]),
-    resultat("a", [latex(`f(x)=${combinee}`)]),
+    resultat("a", [latex("f(x)=\\dfrac{D(x)+\\cos(x)}{D(x)\\cos(x)}"), texte(" avec "), latex(`D(x)=${D}`)]),
     utilise("b", [texte("On pose "), latex("u=\\dfrac{\\pi}{2}-x"), texte(" ("), latex("u\\to0"), texte(") et on remplace chaque terme par son développement à l'ordre 1 : "), latex("\\sin(u)\\approx u"), texte(", "), latex("e^{u}\\approx1+u"), texte(".")]),
     calcul("b", [
       ligne("\\cos(x)=\\sin(u)", justif("car ", { l: "\\cos\\left(\\frac{\\pi}{2}-u\\right)=\\sin(u)" })),

@@ -312,8 +312,12 @@ function etapesC(e: ExerciceDomaineDeriveeC): EtapeCorrection[] {
     vp = `(${up})\\,e^{${u}}`;
     ligneUp = [ligne(`u(x)=${u}`), ligne(`u'(x)=${up}`, "dérivée d'un polynôme")];
     ligneVp = [ligne(`v(x)=${v}`), ligne(`v'(x)=${vp}`, justif("car ", { l: "(e^{w})'=w'\\,e^{w}" }, " avec ", { l: `w=${u}` }))];
-    subst = `(${up})\\,e^{${u}}+(${u})(${up})\\,e^{${u}}`;
-    lignesFin.push(ligne(`=${fin}`, justif("on met ", { l: `(${up})\\,e^{${u}}` }, " en évidence")));
+    subst = "";
+    lignesFin.push(
+      ligne("=u'(x)\\,v(x)+u(x)\\,u'(x)\\,v(x)", justif("car ", { l: "v'(x)=u'(x)\\,v(x)" })),
+      ligne("=u'(x)\\,v(x)\\,\\big(1+u(x)\\big)", justif("on met ", { l: "u'(x)\\,v(x)" }, " en évidence")),
+      ligne(`=${fin}`, "on remplace u, u′ et v"),
+    );
   } else if (e.sousType === "e") {
     u = e.r === 1 ? "x" : "x^{2}";
     v = "e^{\\sqrt{x}}";
@@ -340,7 +344,7 @@ function etapesC(e: ExerciceDomaineDeriveeC): EtapeCorrection[] {
     calcul("b", [...ligneUp, ...ligneVp]),
     resultat("b", [latex(`u'(x)=${up}`), texte(" et "), latex(`v'(x)=${vp}`)]),
     utilise("c", [texte("Règle du produit "), latex("(uv)'=u'v+uv'"), texte(` ${COURS_DERIVEE}.`)]),
-    calcul("c", sansRepetition([ligne("f'(x)=u'(x)\\,v(x)+u(x)\\,v'(x)", "règle du produit"), ligne(`=${subst}`, "on remplace"), ...lignesFin])),
+    calcul("c", sansRepetition([ligne("f'(x)=u'(x)\\,v(x)+u(x)\\,v'(x)", "règle du produit"), ...(subst ? [ligne(`=${subst}`, "on remplace")] : []), ...lignesFin])),
     resultat("c", [latex(`f'(x)=${fin}`)]),
   ];
   if (e.sousType === "d") etapes.push(piege("c", [texte("Le même polynôme sert de facteur et d'exposant : sa dérivée apparaît dans les deux termes, d'où la mise en évidence.")]));

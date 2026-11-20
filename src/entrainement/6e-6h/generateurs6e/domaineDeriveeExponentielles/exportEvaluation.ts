@@ -1,5 +1,5 @@
 import type { ExerciceDomaineDeriveeExponentielle } from "../../core6e/domaineDeriveeExponentielles.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/corrigeTableau";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { formatEnsembleReelLatex } from "../../ui6e/formatEnsembleReel";
@@ -36,6 +36,40 @@ function enoncePapier(exercice: ExerciceDomaineDeriveeExponentielle): EnoncePapi
   return { section: { enteteFragments: [texte(`${CONSIGNE_GENERALE} `), latex(formatFonctionLatex(exercice))], questions: [] } };
 }
 
+
+/** Grille de correction (somme 4 points), critères rattachés aux étapes (écrans). */
+function bareme(e: ExerciceDomaineDeriveeExponentielle): BaremeExercice {
+  const dom = [texte("Domaine : "), latex(`\\mathrm{dom}\\,f=${formatEnsembleReelLatex(e.domaine)}`)];
+  const fp = [texte("Dérivée : "), latex(`f'(x)=${deriveeFinaleLatex(e)}`)];
+  let criteres: CritereBareme[];
+  if (e.famille === "C" || e.famille === "D") {
+    criteres = [
+      { sousQuestion: "a", critere: dom, points: 1 },
+      { sousQuestion: "b", critere: [texte(e.famille === "C" ? "Dérivées des deux facteurs u′ et v′" : "Dérivées N′ et D′")], points: 1 },
+      { sousQuestion: "c", critere: [texte(e.famille === "C" ? "Règle du produit u′v + uv′ appliquée" : "Règle du quotient (N′D − ND′)/D² appliquée")], points: 1 },
+      { sousQuestion: "c", critere: fp, points: 1 },
+    ];
+  } else if (e.famille === "E") {
+    criteres = [
+      { sousQuestion: "a", critere: dom, points: 1 },
+      { sousQuestion: "b", critere: [texte("Forme simplifiée avant de dériver")], points: 1 },
+      { sousQuestion: "c", critere: fp, points: 2 },
+    ];
+  } else {
+    criteres = [
+      { sousQuestion: "a", critere: dom, points: 1 },
+      { sousQuestion: "b", critere: [texte("Règle de la chaîne : dérivée de l'exposant (ou de la fonction intérieure)")], points: 1.5 },
+      { sousQuestion: "b", critere: fp, points: 1.5 },
+    ];
+  }
+  const erreursFrequentes: BaremeExercice["erreursFrequentes"] = [
+    { description: [texte("Facteur "), latex("\\ln(a)"), texte(" oublié (base différente de e)")], cout: "−1" },
+    { description: [texte("Dérivée de l'exposant oubliée (règle de la chaîne)")], cout: "−1" },
+    ...(e.domaine.forme === "reel" ? [] : [{ description: [texte("Domaine ℝ donné par réflexe, sans la condition de la racine, du dénominateur ou de arccos")], cout: "0 pt sur l'étape 1" }]),
+  ];
+  return { reponseFinale: reponseBreve(e), criteres, erreursFrequentes, reponsesAcceptees: [[texte("Toute forme équivalente de f′(x), non développée ou factorisée autrement")]] };
+}
+
 /**
  * Niveau 1–7 — méthode et piège jugés sur l'énoncé papier : méthode 0 (règle imposée par la forme de
  * f), 1 pour E (simplifier avant de dériver : choix de l'élève). Piège dans les données : racine
@@ -62,5 +96,6 @@ export const adaptateurEvaluationDomaineDeriveeExponentielles: AdaptateurFeuille
   criteresDifficulte,
   reponseBreve,
   correctionDetaillee: correction,
+  bareme,
   enoncePapier,
 };
