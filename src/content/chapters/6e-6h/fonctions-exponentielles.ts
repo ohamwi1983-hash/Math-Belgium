@@ -1982,6 +1982,19 @@ export const fonctionsExponentielles: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 12. Problèmes d\'exponentielles »',
         },
+        {
+          kind: 'entrainement',
+          title: "Détective d'erreurs : exponentielles",
+          generatorId: '6gen144',
+          description: [
+            "La résolution d'un élève contient une seule ligne fausse : trouve-la, nomme l'erreur " +
+              '(facteur ln a oublié, signe de e^(−kx) perdu, sens non inversé pour une base entre 0 et 1, ' +
+              'racine négative gardée après t = aˣ, règles des puissances, dominance renversée, ' +
+              'r = 1 + p pour une baisse, différence prise pour un rapport) et corrige le résultat.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: "6e (6h) → « 144. Détective d'erreurs : exponentielles »",
+        },
       ],
     },
   ],

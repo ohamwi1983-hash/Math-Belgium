@@ -80,6 +80,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
+  | '6gen144'
   | '6gen147'
   | '6gen145'
   | '6gen146'
@@ -153,6 +154,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'inequations', generatorId: '6gen10', label: '' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'etude', generatorId: '6gen11', label: '' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'problemes', generatorId: '6gen12', label: '', processus: 3 },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'problemes', generatorId: '6gen144', label: 'Détective d\'erreurs : exponentielles (6gen144)', processus: 3 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'problemes', generatorId: '6gen147', label: 'Modèle exponentiel lu dans un tableau (6gen147)', processus: 2 },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'proprietes', generatorId: '6gen13', label: 'Propriétés du logarithme (6gen13)' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'proprietes', generatorId: '6gen86', label: 'Comparer et encadrer des logarithmes sans calculatrice (6gen86)', processus: 2 },
