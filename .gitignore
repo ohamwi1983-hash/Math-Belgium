@@ -25,3 +25,11 @@ dist-ssr
 
 # Worktrees for background subagents (ephemeral, cleaned up when agents finish)
 .claude/worktrees/
+
+# Variables d'environnement locales (Supabase : URL + clé publique « anon » — jamais de clé
+# secrète « service_role » ici ni ailleurs dans le dépôt). Seul `.env.example` (sans valeurs) est suivi.
+.env
+.env.local
+.env*.local
+.env.*
+!.env.example
