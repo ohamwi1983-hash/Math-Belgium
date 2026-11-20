@@ -611,6 +611,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             "$f$ — le théorème qui suit ne fait que traduire cette image en formule.",
         },
         {
+          kind: 'atelier',
+          tag: 'pentes-inverses-widget',
+          label: 'Manipule toi-même — des pentes inverses',
+          caption:
+            'Déplace le point A(a ; b) sur f (en orange) : son reflet A′(b ; a) sur f⁻¹ (en ' +
+            'vert) porte une tangente dont la pente est l\'inverse de celle de f en A. Le ' +
+            'petit triangle de pente montre pourquoi : le miroir y = x échange ses deux ' +
+            'côtés. Amène A là où la tangente à f est horizontale : celle de f⁻¹ devient ' +
+            'verticale.',
+        },
+        {
           kind: 'methode',
           items: [
             "Si $f$ est injective, dérivable en $f^{-1}(x)$, et si $f'(f^{-1}(x)) \\neq 0$, alors :",

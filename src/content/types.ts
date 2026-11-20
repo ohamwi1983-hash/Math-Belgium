@@ -18,6 +18,7 @@ export type InteractiveWidgetTag =
   | 'cyclometrique-tangente-widget'
   | 'droite-horizontale-widget'
   | 'machine-reciproque-widget'
+  | 'pentes-inverses-widget'
   | 'discriminant-racines-widget'
   | 'signe-trinome-widget'
   | 'signe-produit-widget'
