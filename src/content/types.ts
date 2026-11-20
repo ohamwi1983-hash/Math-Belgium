@@ -17,6 +17,7 @@ export type InteractiveWidgetTag =
   | 'cyclometrique-miroir-widget'
   | 'cyclometrique-tangente-widget'
   | 'droite-horizontale-widget'
+  | 'machine-reciproque-widget'
   | 'discriminant-racines-widget'
   | 'signe-trinome-widget'
   | 'signe-produit-widget'

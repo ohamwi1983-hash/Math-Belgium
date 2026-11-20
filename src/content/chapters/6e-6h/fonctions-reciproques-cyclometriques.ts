@@ -478,6 +478,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'machine-reciproque-widget',
+          label: 'Manipule toi-même — la machine qui défait',
+          caption:
+            'À gauche, la chaîne d\'opérations de f, lue de haut en bas ; à droite, la ' +
+            'chaîne réciproque, qui défait chaque opération dans l\'ordre inverse, lue de ' +
+            'bas en haut. Fais varier x : sur chaque ligne, les deux colonnes affichent la ' +
+            'même valeur, et le retour rend le x de départ. Avec 5/(x − 1), essaie x = 1.',
+        },
+        {
           kind: 'methode',
           label: 'Méthode 2 — permutation',
           items: ['Dans $y = f(x)$, permute $x$ et $y$, puis isole $y$.'],
