@@ -5,6 +5,7 @@ import type {
   ExerciceIneqA,
   ExerciceIneqB,
   ExerciceIneqC,
+  ExerciceIneqCf,
   ExerciceIneqCk,
   ExerciceIneqD,
   ExerciceIneqDConstant,
@@ -86,7 +87,7 @@ function formatSommeTermesAvecCdot(termes: TermeSigne[]): string {
     .join(" ");
 }
 
-function baseLatex(base: BaseIneq): string {
+export function baseLatex(base: BaseIneq): string {
   if (base.estE) return "e";
   if (base.den === 1) return String(base.num);
   return `\\frac{${base.num}}{${base.den}}`;
@@ -95,7 +96,7 @@ function baseLatex(base: BaseIneq): string {
 /** Base entre PARENTHÈSES quand elle est une fraction et immédiatement suivie d'un exposant —
  * même piège déjà documenté pour 6gen9 (`\frac{5}{2}^{-4x}` attache visuellement l'exposant au
  * SEUL dénominateur). */
-function baseLatexPourExposant(base: BaseIneq): string {
+export function baseLatexPourExposant(base: BaseIneq): string {
   if (base.estE || base.den === 1) return baseLatex(base);
   return `\\left(${baseLatex(base)}\\right)`;
 }
@@ -111,13 +112,13 @@ function formatDecimalFrancaisLatex(valeur: number): string {
   return String(valeur).replace(".", "{,}");
 }
 
-function formatValeurExacteLatex(v: ValeurExacteIneq): string {
+export function formatValeurExacteLatex(v: ValeurExacteIneq): string {
   if (v.den === 1) return String(v.num);
   if (denominateurDecimalFini(v.den)) return formatDecimalFrancaisLatex(v.num / v.den);
   return `\\frac{${v.num}}{${v.den}}`;
 }
 
-function symboleComparateurLatex(cmp: Comparateur): string {
+export function symboleComparateurLatex(cmp: Comparateur): string {
   switch (cmp) {
     case ">":
       return ">";
@@ -130,7 +131,7 @@ function symboleComparateurLatex(cmp: Comparateur): string {
   }
 }
 
-function formatXMoinsZero(zero: number): string {
+export function formatXMoinsZero(zero: number): string {
   if (zero === 0) return "x";
   return zero > 0 ? `x-${zero}` : `x+${-zero}`;
 }
@@ -139,7 +140,7 @@ function formatXMoinsZero(zero: number): string {
 // Famille A — 2 écrans.
 // ============================================================================
 
-function formatExposantLineaireLatex(m: number, n: number): string {
+export function formatExposantLineaireLatex(m: number, n: number): string {
   return formatSommeTermes([
     { valeur: m, suffixe: "x" },
     { valeur: n, suffixe: "" },
@@ -169,17 +170,25 @@ function aideA2(phase: "aReconnaitre" | "aResoudre", exercice: ExerciceIneqA): A
     return { texte: "La base ici est :", latex: `${baseLatex(exercice.base)} \\quad \\left(${exercice.baseSuperieureA1 ? ">1" : "<1"}\\right)` };
   }
   const comparateurExposants = exercice.baseSuperieureA1 ? exercice.comparateur : inverserComparateur(exercice.comparateur);
-  return { texte: `Base ${exercice.baseSuperieureA1 ? ">1" : "<1"} : sens ${exercice.baseSuperieureA1 ? "conservé" : "inversé"}. L'inéquation d'exposants devient :`, latex: `${formatExposantLineaireLatex(exercice.m, exercice.n)} ${symboleComparateurLatex(comparateurExposants)} ${exercice.p}` };
+  return {
+    texte: `Base ${exercice.baseSuperieureA1 ? "supérieure à 1 : sens conservé" : "comprise entre 0 et 1 : sens inversé"}. L'inéquation d'exposants devient :`,
+    latex: `${formatExposantLineaireLatex(exercice.m, exercice.n)} ${symboleComparateurLatex(comparateurExposants)} ${exercice.p}`,
+  };
 }
 
 // ============================================================================
 // Famille B — TOUJOURS ∅, 1 écran.
 // ============================================================================
 
-function formatEnonceB(exercice: ExerciceIneqB): string {
+/** Premier membre de la famille B, `c·base^(±x)` — jamais « 1·2^x » quand c = 1. */
+export function formatMembreGaucheB(exercice: ExerciceIneqB): string {
   const bl = baseLatexPourExposant(exercice.base);
   const expo = exercice.exposantNegatif ? "-x" : "x";
-  return `${exercice.c}\\cdot ${bl}^{${expo}} ${symboleComparateurLatex(exercice.comparateur)} ${-exercice.k}`;
+  return formatSommeTermesAvecCdot([{ valeur: exercice.c, suffixe: `${bl}^{${expo}}` }]);
+}
+
+function formatEnonceB(exercice: ExerciceIneqB): string {
+  return `${formatMembreGaucheB(exercice)} ${symboleComparateurLatex(exercice.comparateur)} ${-exercice.k}`;
 }
 
 function consigneB(): FragmentConsigne[] {
@@ -191,11 +200,9 @@ function aideB1(): AideAvecLatex {
 }
 
 function aideB2(exercice: ExerciceIneqB): AideAvecLatex {
-  const bl = baseLatexPourExposant(exercice.base);
-  const expo = exercice.exposantNegatif ? "-x" : "x";
   return {
-    texte: "Reformulation : un multiple STRICTEMENT POSITIF ne peut jamais être ≤/< un nombre négatif.",
-    latex: `\\underbrace{${exercice.c}\\cdot ${bl}^{${expo}}}_{>0} \\;\\not${exercice.comparateur === "<=" ? "\\leq" : "<"}\\; ${-exercice.k}`,
+    texte: "Reformulation : un nombre STRICTEMENT POSITIF n'est jamais inférieur (ni égal) à un nombre négatif :",
+    latex: `\\underbrace{${formatMembreGaucheB(exercice)}}_{>0} \\;\\not${exercice.comparateur === "<=" ? "\\leq" : "<"}\\; ${-exercice.k}`,
   };
 }
 
@@ -212,18 +219,20 @@ function consigneCf(): FragmentConsigne[] {
   return [txt("Sans résoudre d'inéquation classique : cette expression est-elle vraie pour TOUT x réel ?")];
 }
 
-function aideCf1(): AideAvecLatex {
-  return { texte: "Compare le signe de x et le signe de (baseˣ − 1) séparément, pour x<0, x=0 et x>0 (base>1).", latex: "\\text{Signe de }x\\text{ et de }(\\text{base}^{x}-1)\\text{ pour }x<0,\\ x=0,\\ x>0\\ (\\text{base}>1)" };
+function aideCf1(base: BaseIneq): AideAvecLatex {
+  const b = baseLatex(base);
+  return { texte: "Compare séparément le signe de x et celui du second facteur, pour x < 0, x = 0 et x > 0 (la base est supérieure à 1) :", latex: `x\\quad\\text{et}\\quad ${b}^{x}-1` };
 }
 
-function aideCf2(): AideAvecLatex {
+function aideCf2(base: BaseIneq): AideAvecLatex {
+  const b = baseLatex(base);
   return {
-    texte: "Pour x<0, baseˣ<1 donc (baseˣ−1)<0, ET x<0 : produit de 2 négatifs, positif. Pour x>0, les deux facteurs sont positifs : produit positif. En x=0, le produit est nul.",
-    latex: "x<0:\\ \\text{base}^{x}<1\\Rightarrow(\\text{base}^{x}-1)<0,\\ \\text{et }x<0\\Rightarrow\\text{produit}>0\\qquad x>0:\\ \\text{produit}>0\\qquad x=0:\\ \\text{produit}=0",
+    texte: "Pour x < 0, les deux facteurs sont négatifs ; pour x > 0, ils sont positifs ; en x = 0, le produit est nul :",
+    latex: `x<0 : ${b}^{x}<1 \\Rightarrow ${b}^{x}-1<0\\qquad x>0 : ${b}^{x}-1>0\\qquad x=0 : x\\cdot\\left(${b}^{x}-1\\right)=0`,
   };
 }
 
-function formatGCkLatex(exercice: ExerciceIneqCk, facteur: number): string {
+export function formatGCkLatex(exercice: ExerciceIneqCk, facteur: number): string {
   return formatSommeTermes([
     { valeur: facteur * exercice.a, suffixe: "x^2" },
     { valeur: facteur * exercice.b, suffixe: "x" },
@@ -237,45 +246,48 @@ function formatEnonceCk(exercice: ExerciceIneqCk): string {
   return `${b1}^{${formatGCkLatex(exercice, 1)}} ${symboleComparateurLatex(exercice.comparateur)} ${b2}^{${formatGCkLatex(exercice, 2)}}`;
 }
 
-function consigneCk(phase: "ckRegrouper" | "ckConclure"): FragmentConsigne[] {
+function consigneCk(phase: "ckRegrouper" | "ckConclure", exercice: ExerciceIneqCk): FragmentConsigne[] {
   if (phase === "ckRegrouper")
     return [
-      txt("Regroupe l'inéquation sous la forme "),
-      ltx("\\left(\\dfrac{\\text{base}_1}{\\text{base}_2^{2}}\\right)^{g(x)}"),
-      txt(" [symbole] 1, en divisant les deux membres par "),
-      ltx("\\text{base}_2^{2g(x)}"),
-      txt("."),
+      txt("On note "),
+      ltx(`g(x)=${formatGCkLatex(exercice, 1)}`),
+      txt(". Divise les deux membres par "),
+      ltx(`${baseLatexPourExposant(exercice.base2)}^{2g(x)}`),
+      txt(", puis écris le membre de gauche comme une seule puissance d'exposant "),
+      ltx("g(x)"),
+      txt(" : donne l'inéquation obtenue, comparée à 1."),
     ];
   return [txt("À partir du regroupement CORRECT de l'étape précédente : cette inéquation est-elle vraie pour TOUT x réel ?")];
 }
 
 function aideCk1(phase: "ckRegrouper" | "ckConclure", _exercice: ExerciceIneqCk): AideAvecLatex {
-  if (phase === "ckRegrouper") return { texte: "Rappel : diviser les deux membres par base2^{2g(x)} (toujours strictement positif) ne change jamais le sens de l'inégalité.", latex: "\\text{base}_2^{2g(x)}>0" };
-  return { texte: "Rappel : le rapport base1/base2² est-il supérieur ou inférieur à 1 ? Quel sens en résulte pour g(x) [symbole] 0 ?", latex: "\\dfrac{\\text{base}_1}{\\text{base}_2^{2}}" };
+  if (phase === "ckRegrouper") return { texte: "Rappel : diviser les deux membres par un nombre strictement positif ne change jamais le sens de l'inégalité ; ici :", latex: `${baseLatexPourExposant(_exercice.base2)}^{2g(x)}>0` };
+  return { texte: "Rappel : le rapport des bases est-il supérieur ou inférieur à 1 ? Quel sens en résulte pour l'inégalité sur g(x) ?", latex: `\\dfrac{${baseLatex(_exercice.base1)}}{${baseLatex(_exercice.base2)}^{2}}` };
 }
 
 function aideCk2(phase: "ckRegrouper" | "ckConclure", exercice: ExerciceIneqCk): AideAvecLatex {
   if (phase === "ckRegrouper") {
     return { texte: "Membre de gauche après division :", latex: `\\left(\\dfrac{${baseLatex(exercice.base1)}}{${baseLatex(exercice.base2)}^2}\\right)^{${formatGCkLatex(exercice, 1)}}` };
   }
-  return { texte: "g(x) est un polynôme du second degré à coefficient dominant positif ET à discriminant NÉGATIF — donc toujours strictement positif :", latex: `\\Delta = ${exercice.b}^2-4\\cdot ${exercice.a}\\cdot ${exercice.c} < 0` };
+  const bCarre = exercice.b < 0 ? `(${exercice.b})^{2}` : `${exercice.b}^{2}`;
+  return { texte: "g(x) est un polynôme du second degré à coefficient dominant positif ET à discriminant NÉGATIF — donc toujours strictement positif :", latex: `\\Delta = ${bCarre}-4\\cdot ${exercice.a}\\cdot ${exercice.c} < 0` };
 }
 
 function formatEnonceC(exercice: ExerciceIneqC): string {
   return exercice.sousType === "f" ? formatEnonceCf(exercice.base) : formatEnonceCk(exercice);
 }
 
-function consigneC(phase: "cfReconnaitre" | "ckRegrouper" | "ckConclure"): FragmentConsigne[] {
-  return phase === "cfReconnaitre" ? consigneCf() : consigneCk(phase);
+function consigneC(phase: "cfReconnaitre" | "ckRegrouper" | "ckConclure", exercice: ExerciceIneqC): FragmentConsigne[] {
+  return phase === "cfReconnaitre" ? consigneCf() : consigneCk(phase, exercice as ExerciceIneqCk);
 }
 
 function aideC1(phase: "cfReconnaitre" | "ckRegrouper" | "ckConclure", exercice: ExerciceIneqC): AideAvecLatex {
-  if (phase === "cfReconnaitre") return aideCf1();
+  if (phase === "cfReconnaitre") return aideCf1((exercice as ExerciceIneqCf).base);
   return aideCk1(phase, exercice as ExerciceIneqCk);
 }
 
 function aideC2(phase: "cfReconnaitre" | "ckRegrouper" | "ckConclure", exercice: ExerciceIneqC): AideAvecLatex {
-  if (phase === "cfReconnaitre") return aideCf2();
+  if (phase === "cfReconnaitre") return aideCf2((exercice as ExerciceIneqCf).base);
   return aideCk2(phase, exercice as ExerciceIneqCk);
 }
 
@@ -283,15 +295,15 @@ function aideC2(phase: "cfReconnaitre" | "ckRegrouper" | "ckConclure", exercice:
 // Famille D — sous-type constant (2 écrans) / variable (3 écrans).
 // ============================================================================
 
-function formatPremierFacteurLatex(pf: PremierFacteurD): string {
+export function formatPremierFacteurLatex(pf: PremierFacteurD): string {
   const bl = baseLatexPourExposant(pf.base);
   const puissance = `${bl}^{${formatExposantLineaireLatex(pf.m, pf.n)}}`;
   if (pf.positif) return formatSommeTermesAvecCdot([{ valeur: pf.c, suffixe: puissance }]);
   return `-${formatSommeTermesAvecCdot([{ valeur: pf.c, suffixe: puissance }])}-${pf.d}`;
 }
 
-function formatSecondFacteurConstantLatex(sf: SecondFacteurDConstant): string {
-  if (sf.type === "quadratique") return `${formatSommeTermesAvecCdot([{ valeur: sf.d, suffixe: "x^2" }])}-${sf.e}`;
+export function formatSecondFacteurConstantLatex(sf: SecondFacteurDConstant): string {
+  if (sf.type === "quadratique") return `${formatSommeTermes([{ valeur: sf.d, suffixe: "x^2" }])}-${sf.e}`;
   const bl = baseLatexPourExposant(sf.base);
   return `${bl}^{x}-${sf.k}`;
 }
@@ -322,10 +334,11 @@ function aideDConstant2(phase: "dConstantSigne" | "dConstantResoudre", exercice:
   return { texte: "Inéquation sur le second facteur seul (sens déjà corrigé) :", latex: `${p2} ${symboleComparateurLatex(sensCorrige)} 0` };
 }
 
-function formatFacteurUnZeroLatex(f: FacteurUnZero): string {
-  if (f.type === "lineaire") return f.pente === 1 ? formatXMoinsZero(f.zero) : `${f.zero}-x`;
+/** Facteur à un seul zéro — jamais « 0-x » ni « -\left(x\right) » quand le zéro vaut 0 (« -x »). */
+export function formatFacteurUnZeroLatex(f: FacteurUnZero): string {
+  if (f.type === "lineaire") return f.pente === 1 ? formatXMoinsZero(f.zero) : f.zero === 0 ? "-x" : `${f.zero}-x`;
   const bl = baseLatexPourExposant(f.base);
-  const argExpo = f.sgn === 1 ? formatXMoinsZero(f.zero) : `-\\left(${formatXMoinsZero(f.zero)}\\right)`;
+  const argExpo = f.sgn === 1 ? formatXMoinsZero(f.zero) : f.zero === 0 ? "-x" : `-\\left(${formatXMoinsZero(f.zero)}\\right)`;
   return `${formatSommeTermesAvecCdot([{ valeur: f.c, suffixe: `${bl}^{${argExpo}}` }])}-${f.c}`;
 }
 
@@ -390,21 +403,19 @@ function formatEnonceE(exercice: ExerciceIneqE): string {
   return `${b1}^{${expo}} ${symboleComparateurLatex(exercice.comparateur)} ${b2}^{${expo}}`;
 }
 
-function consigneE(phase: "eRegrouper" | "eResoudre"): FragmentConsigne[] {
+function consigneE(phase: "eRegrouper" | "eResoudre", exercice: ExerciceIneqE): FragmentConsigne[] {
   if (phase === "eRegrouper")
     return [
-      txt("Regroupe l'inéquation sous la forme "),
-      ltx("\\left(\\dfrac{\\text{base}_1}{\\text{base}_2}\\right)^{mx+n}"),
-      txt(" [symbole] 1, en divisant les deux membres par "),
-      ltx("\\text{base}_2^{mx+n}"),
-      txt("."),
+      txt("Divise les deux membres par "),
+      ltx(`${baseLatexPourExposant(exercice.base2)}^{${formatExposantLineaireLatex(exercice.m, exercice.n)}}`),
+      txt(", puis écris le membre de gauche comme une seule puissance : donne l'inéquation obtenue, comparée à 1."),
     ];
-  return [txt("À partir du regroupement CORRECT de l'étape précédente, résous — attention au sens selon que le rapport base1/base2 est supérieur ou inférieur à 1.")];
+  return [txt("À partir du regroupement CORRECT de l'étape précédente, résous — attention au sens selon que le rapport des bases est supérieur ou inférieur à 1.")];
 }
 
-function aideE1(phase: "eRegrouper" | "eResoudre"): AideAvecLatex {
-  if (phase === "eRegrouper") return { texte: "Rappel : diviser les deux membres par base2^{mx+n} (toujours strictement positif) ne change jamais le sens.", latex: "\\text{base}_2^{mx+n}>0" };
-  return { texte: "Rappel de la règle base>1 (sens préservé) / base<1 (sens inversé), appliquée ici au RAPPORT base1/base2.", latex: "\\text{base}>1\\ (\\text{sens préservé})\\qquad \\text{base}<1\\ (\\text{sens inversé})\\qquad \\dfrac{\\text{base}_1}{\\text{base}_2}" };
+function aideE1(phase: "eRegrouper" | "eResoudre", exercice: ExerciceIneqE): AideAvecLatex {
+  if (phase === "eRegrouper") return { texte: "Rappel : diviser les deux membres par un nombre strictement positif ne change jamais le sens ; ici :", latex: `${baseLatexPourExposant(exercice.base2)}^{${formatExposantLineaireLatex(exercice.m, exercice.n)}}>0` };
+  return { texte: "Rappel : si la base est supérieure à 1, le sens est conservé ; si elle est comprise entre 0 et 1, il s'inverse. Ici, la base est le rapport :", latex: `\\dfrac{${baseLatex(exercice.base1)}}{${baseLatex(exercice.base2)}}` };
 }
 
 function aideE2(phase: "eRegrouper" | "eResoudre", exercice: ExerciceIneqE): AideAvecLatex {
@@ -413,7 +424,7 @@ function aideE2(phase: "eRegrouper" | "eResoudre", exercice: ExerciceIneqE): Aid
   }
   const comparateurExposants = exercice.ratioSuperieurA1 ? exercice.comparateur : inverserComparateur(exercice.comparateur);
   return {
-    texte: `Rapport base1/base2 ${exercice.ratioSuperieurA1 ? ">1" : "<1"} : sens ${exercice.ratioSuperieurA1 ? "conservé" : "inversé"}. L'inéquation d'exposants devient :`,
+    texte: `Rapport des bases ${exercice.ratioSuperieurA1 ? "supérieur à 1 : sens conservé" : "compris entre 0 et 1 : sens inversé"}. L'inéquation d'exposants devient :`,
     latex: `${formatExposantLineaireLatex(exercice.m, exercice.n)} ${symboleComparateurLatex(comparateurExposants)} 0`,
   };
 }
@@ -446,11 +457,11 @@ export function consigneEcran(phase: PhaseInequationExponentielle, exercice: Exe
     case "B":
       return consigneB();
     case "C":
-      return consigneC(phase as "cfReconnaitre" | "ckRegrouper" | "ckConclure");
+      return consigneC(phase as "cfReconnaitre" | "ckRegrouper" | "ckConclure", exercice);
     case "D":
       return consigneD(phase, exercice);
     case "E":
-      return consigneE(phase as "eRegrouper" | "eResoudre");
+      return consigneE(phase as "eRegrouper" | "eResoudre", exercice);
   }
 }
 
@@ -465,7 +476,7 @@ export function aideNiveau1(phase: PhaseInequationExponentielle, exercice: Exerc
     case "D":
       return aideD1(phase, exercice);
     case "E":
-      return aideE1(phase as "eRegrouper" | "eResoudre");
+      return aideE1(phase as "eRegrouper" | "eResoudre", exercice);
   }
 }
 
@@ -591,7 +602,7 @@ export interface ContenuRecap {
   latex: string | null;
 }
 
-function texteSensLisible(sens: DirectionSigne): string {
+export function texteSensLisible(sens: DirectionSigne): string {
   return sens === "negatif_puis_positif" ? "Négatif avant, positif après" : "Positif avant, négatif après";
 }
 
@@ -617,8 +628,8 @@ export function contenuRecapPhase(exercice: ExerciceInequationExponentielle, pha
         if (phase === "dConstantSigne") return { texte: exercice.premierFacteur.positif ? "Toujours positif" : "Toujours négatif", latex: null };
         return { texte: null, latex: formatEnsembleReelLatex(exercice.solutionEcran2) };
       }
-      if (phase === "dVariableSigne1") return { texte: `${texteSensLisible(exercice.sens1)} (zéro en x=${exercice.zero1})`, latex: null };
-      if (phase === "dVariableSigne2") return { texte: `${texteSensLisible(exercice.sens2)} (zéro en x=${exercice.zero2})`, latex: null };
+      if (phase === "dVariableSigne1") return { texte: `${texteSensLisible(exercice.sens1)} (zéro en x = ${String(exercice.zero1).replace("-", "−")})`, latex: null };
+      if (phase === "dVariableSigne2") return { texte: `${texteSensLisible(exercice.sens2)} (zéro en x = ${String(exercice.zero2).replace("-", "−")})`, latex: null };
       return { texte: null, latex: formatEnsembleReelLatex(exercice.solutionEcran3) };
     case "E": {
       if (phase === "eRegrouper") {
