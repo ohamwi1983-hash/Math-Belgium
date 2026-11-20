@@ -1,4 +1,6 @@
 import type { Arcfonction } from "../core6e/cyclometrique.types";
+import type { ExerciceDeriveesCyclometriques } from "../core6e/deriveesCyclometriques.types";
+import type { PhaseDeriveesCyclometriques } from "../moteur6e/typesDeriveesCyclometriques";
 import type {
   ExerciceDeriveeA,
   ExerciceDeriveeB,
@@ -46,7 +48,7 @@ function formatSomme(termes: TermeAffiche[]): string {
   return termes.map((t, i) => (i === 0 ? (t.signe < 0 ? `-${t.corps}` : t.corps) : `${t.signe < 0 ? "-" : "+"} ${t.corps}`)).join(" ");
 }
 
-function formatAffineLatex(a: number, b: number, variable = "x"): string {
+export function formatAffineLatex(a: number, b: number, variable = "x"): string {
   const termeA: TermeAffiche = { signe: a >= 0 ? 1 : -1, corps: Math.abs(a) === 1 ? variable : `${Math.abs(a)}${variable}` };
   if (b === 0) return formatSomme([termeA]);
   return formatSomme([termeA, { signe: b >= 0 ? 1 : -1, corps: String(Math.abs(b)) }]);
@@ -60,7 +62,7 @@ function formatCoefFois(k: number, corpsBase: string): string {
 /** Dérivée de arcsin/arccos/arctan par rapport à SON ARGUMENT, avec l'argument RÉEL déjà
  * substitué (jamais la lettre générique "u"/"v" seule) — "formule substituée, non simplifiée",
  * spec explicite pour toutes les aides niveau 2 du générateur. */
-function formatDeriveeArcfonctionLatex(arcfonction: Arcfonction, argLatex: string): string {
+export function formatDeriveeArcfonctionLatex(arcfonction: Arcfonction, argLatex: string): string {
   switch (arcfonction) {
     case "arcsin":
       return `\\dfrac{1}{\\sqrt{1-\\left(${argLatex}\\right)^2}}`;
@@ -75,7 +77,7 @@ function formatDeriveeArcfonctionLatex(arcfonction: Arcfonction, argLatex: strin
 // Famille A — f(x) = c + k·arcfonction(u(x)).
 // ============================================================================
 
-function formatULatexA(e: ExerciceDeriveeA): string {
+export function formatULatexA(e: ExerciceDeriveeA): string {
   switch (e.uType) {
     case "affine":
       return formatAffineLatex(e.a, e.b);
@@ -114,7 +116,7 @@ export function texteAideADeriveeUNiveau2(e: ExerciceDeriveeA): AideAvecLatex {
       : e.uType === "puissance"
         ? `u'(x) = ${e.n}x^{${e.n - 1}}`
         : e.uType === "racine"
-          ? `u'(x) = \\dfrac{${e.a}}{2\\sqrt{${e.a}x}}`
+          ? `u'(x) = \\dfrac{${e.a}}{2\\sqrt{${axL(e.a)}}}`
           : `u'(x) = -\\dfrac{${e.kPrime}}{x^{2}}`;
   return { texte: "Avec u(x) tel qu'affiché ci-dessus :", latex: `u(x) = ${uLatex} \\quad\\Rightarrow\\quad ${formeGenerale}` };
 }
@@ -135,17 +137,17 @@ export function texteAideADeriveeFinaleNiveau2(e: ExerciceDeriveeA): AideAvecLat
       : e.uType === "puissance"
         ? `${e.n}x^{${e.n - 1}}`
         : e.uType === "racine"
-          ? `\\dfrac{${e.a}}{2\\sqrt{${e.a}x}}`
+          ? `\\dfrac{${e.a}}{2\\sqrt{${axL(e.a)}}}`
           : `-\\dfrac{${e.kPrime}}{x^{2}}`;
   const deriveeBase = formatDeriveeArcfonctionLatex(e.arcfonction, uLatex);
-  return { texte: "u et u' déjà substitués (non simplifié) :", latex: `f'(x) = ${e.k}\\cdot\\left[${deriveeBase}\\right]\\cdot\\left(${uPrimeLatex}\\right)` };
+  return { texte: "u et u' déjà substitués (non simplifié) :", latex: `f'(x) = ${coefFacteur(e.k)}\\left[${deriveeBase}\\right]\\cdot\\left(${uPrimeLatex}\\right)` };
 }
 
 // ============================================================================
 // Famille B — f(x) = u(x)·arcfonction(v(x)), u(x)=m·x.
 // ============================================================================
 
-function formatVLatexB(e: ExerciceDeriveeB): string {
+export function formatVLatexB(e: ExerciceDeriveeB): string {
   return e.vType === "simple" ? "x" : formatSomme([{ signe: 1, corps: `${e.a}x^{2}` }, { signe: e.b >= 0 ? 1 : -1, corps: String(Math.abs(e.b)) }]);
 }
 
@@ -169,7 +171,7 @@ export function texteAideBDeriveeArcNiveau1(e: ExerciceDeriveeB): AideAvecLatex 
 export function texteAideBDeriveeArcNiveau2(e: ExerciceDeriveeB): AideAvecLatex {
   const deriveeBase = formatDeriveeArcfonctionLatex(e.arcfonction, formatVLatexB(e));
   const vPrime = e.vType === "simple" ? "1" : `${2 * e.a}x`;
-  return { texte: "v et v' déjà substitués (non simplifié) :", latex: `\\left[${deriveeBase}\\right]\\cdot\\left(${vPrime}\\right)` };
+  return { texte: "v et v' déjà substitués (non simplifié) :", latex: e.vType === "simple" ? deriveeBase : `\\left[${deriveeBase}\\right]\\cdot\\left(${vPrime}\\right)` };
 }
 
 export function texteAideBDeriveeFinaleNiveau1(): string {
@@ -181,7 +183,7 @@ export function texteAideBDeriveeFinaleNiveau2(e: ExerciceDeriveeB): AideAvecLat
   const vPrime = e.vType === "simple" ? "1" : `${2 * e.a}x`;
   return {
     texte: "Substitue (non simplifié) :",
-    latex: `f'(x) = ${e.m}\\cdot${NOM_LATEX[e.arcfonction]}\\left(${formatVLatexB(e)}\\right) + ${uLatex}\\cdot\\left[${deriveeBase}\\right]\\cdot\\left(${vPrime}\\right)`,
+    latex: `f'(x) = ${e.m}${NOM_LATEX[e.arcfonction]}\\left(${formatVLatexB(e)}\\right) + ${uLatex}\\cdot\\left[${deriveeBase}\\right]${e.vType === "simple" ? "" : `\\cdot\\left(${vPrime}\\right)`}`,
   };
 }
 
@@ -199,14 +201,14 @@ export function texteAideCNumerateurNiveau1(): string {
 }
 export function texteAideCNumerateurNiveau2(e: ExerciceDeriveeC): AideAvecLatex {
   const deriveeBase = formatDeriveeArcfonctionLatex(e.arcfonction, `${e.a}x`);
-  return { texte: "k et a déjà substitués :", latex: `N'(x) = ${e.k}\\cdot\\left[${deriveeBase}\\right]\\cdot ${e.a}` };
+  return { texte: "k et a déjà substitués :", latex: `N'(x) = ${coefFacteur(e.k)}\\left[${deriveeBase}\\right]\\cdot ${e.a}` };
 }
 
 export function texteAideCDenominateurNiveau1(): AideAvecLatex {
   return { texte: "Dénominateur — écris-le sous forme d'une puissance 1/2 puis applique la chaîne :", latex: "D(x) = \\sqrt{1-(ax)^2} = \\left(1-(ax)^2\\right)^{1/2}" };
 }
 export function texteAideCDenominateurNiveau2(e: ExerciceDeriveeC): AideAvecLatex {
-  return { texte: "Substitue a :", latex: `D'(x) = \\dfrac{-${e.a}^{2}x}{\\sqrt{1-(${e.a}x)^{2}}}` };
+  return { texte: "Substitue a :", latex: `D'(x) = -\\dfrac{${e.a * e.a}x}{\\sqrt{1-(${e.a}x)^{2}}}` };
 }
 
 export function texteAideCDeriveeFinaleNiveau1(): AideAvecLatex {
@@ -218,10 +220,10 @@ export function texteAideCDeriveeFinaleNiveau1(): AideAvecLatex {
 export function texteAideCDeriveeFinaleNiveau2(e: ExerciceDeriveeC): AideAvecLatex {
   const arcTexteLatex = NOM_LATEX[e.arcfonction];
   const deriveeBase = formatDeriveeArcfonctionLatex(e.arcfonction, `${e.a}x`);
-  const nLatex = `${e.k}${arcTexteLatex}\\left(${e.a}x\\right)`;
-  const nPrimeLatex = `${e.k}\\cdot\\left[${deriveeBase}\\right]\\cdot ${e.a}`;
+  const nLatex = `${e.k === 1 ? "" : e.k}${arcTexteLatex}\\left(${e.a}x\\right)`;
+  const nPrimeLatex = `${coefFacteur(e.k)}\\left[${deriveeBase}\\right]\\cdot ${e.a}`;
   const dLatex = `\\sqrt{1-(${e.a}x)^{2}}`;
-  const dPrimeLatex = `\\dfrac{-${e.a}^{2}x}{${dLatex}}`;
+  const dPrimeLatex = `-\\dfrac{${e.a * e.a}x}{${dLatex}}`;
   return {
     texte: "N, N', D, D' déjà substitués (non résolu) :",
     latex: `f'(x) = \\dfrac{\\left(${nPrimeLatex}\\right)\\left(${dLatex}\\right) - \\left(${nLatex}\\right)\\left(${dPrimeLatex}\\right)}{\\left(${dLatex}\\right)^{2}}`,
@@ -306,7 +308,7 @@ export function texteAideEDeriveeInterneNiveau1(): string {
 export function texteAideEDeriveeInterneNiveau2(e: ExerciceDeriveeE): AideAvecLatex {
   const vLatex = e.a === 1 ? "x" : `${e.a}x`;
   const deriveeBase = formatDeriveeArcfonctionLatex(e.arcfonction, vLatex);
-  return { texte: "v déjà substitué :", latex: `w'(x) = \\left[${deriveeBase}\\right]\\cdot ${e.a}` };
+  return { texte: "v déjà substitué :", latex: `w'(x) = \\left[${deriveeBase}\\right]${e.a === 1 ? "" : `\\cdot ${e.a}`}` };
 }
 
 export function texteAideEDeriveeFinaleNiveau1(e: ExerciceDeriveeE): string {
@@ -339,7 +341,7 @@ export function texteAideFBruteNiveau2(e: ExerciceDeriveeF): AideAvecLatex {
   const vLatex = e.a === 1 ? "x" : `${e.a}x`;
   const u = `${NOM_LATEX[e.arcfonction]}\\left(${vLatex}\\right)`;
   const trigPrime = e.trig === "sin" ? `\\cos\\left(${u}\\right)` : `-\\sin\\left(${u}\\right)`;
-  const uPrime = `\\left[${formatDeriveeArcfonctionLatex(e.arcfonction, vLatex)}\\right]\\cdot ${e.a}`;
+  const uPrime = `\\left[${formatDeriveeArcfonctionLatex(e.arcfonction, vLatex)}\\right]${e.a === 1 ? "" : `\\cdot ${e.a}`}`;
   return { texte: "Substitue (non simplifié) :", latex: `f'(x) = ${trigPrime}\\cdot\\left(${uPrime}\\right)` };
 }
 
@@ -373,7 +375,7 @@ export function texteAideGDeriveeInterneNiveau1(e: ExerciceDeriveeG): string {
 }
 export function texteAideGDeriveeInterneNiveau2(e: ExerciceDeriveeG): AideAvecLatex {
   if (e.sousCas === "h") return { texte: "v(x)=x²+c, donc :", latex: "v'(x) = 2x" };
-  return { texte: "u = k/(x+c), donc :", latex: `u'(x) = -\\dfrac{${e.k}}{(x+${e.c >= 0 ? e.c : `(${e.c})`})^{2}}` };
+  return { texte: "On dérive la fraction interne :", latex: `u'(x) = -\\dfrac{${e.k}}{${denominateurCarreG(e.c)}}` };
 }
 
 export function texteAideGDeriveeFinaleNiveau1(e: ExerciceDeriveeG): string {
@@ -393,8 +395,70 @@ export function texteAideGDeriveeFinaleNiveau2(e: ExerciceDeriveeG): AideAvecLat
   }
   const denomLatex = e.c === 0 ? "x" : formatSomme([{ signe: 1, corps: "x" }, { signe: e.c >= 0 ? 1 : -1, corps: String(Math.abs(e.c)) }]);
   const uLatex = `\\dfrac{${e.k}}{${denomLatex}}`;
-  const uPrimeLatex = `-\\dfrac{${e.k}}{(x+${e.c >= 0 ? e.c : `(${e.c})`})^{2}}`;
+  const uPrimeLatex = `-\\dfrac{${e.k}}{${denominateurCarreG(e.c)}}`;
   const deriveeBase = formatDeriveeArcfonctionLatex(e.arcfonction, uLatex);
   return { texte: "u et u' déjà substitués (non résolu) :", latex: `f'(x) = \\left[${deriveeBase}\\right]\\cdot\\left(${uPrimeLatex}\\right)` };
 }
 
+// ============================================================================
+// Outils d'écriture des aides (coefficients 1, carré du dénominateur de la famille G).
+// ============================================================================
+
+/** « 2x » (a = 1 : « x »). */
+function axL(a: number): string {
+  return a === 1 ? "x" : `${a}x`;
+}
+
+/** Facteur numérique devant un crochet : « » (1), « - » (−1), « 3\\cdot » sinon. */
+function coefFacteur(k: number): string {
+  return k === 1 ? "" : k === -1 ? "-" : `${k}\\cdot`;
+}
+
+/** Carré du dénominateur x + c de la famille G (« (x - 2)^{2} », « x^{2} » si c = 0). */
+function denominateurCarreG(c: number): string {
+  return c === 0 ? "x^{2}" : `\\left(${formatAffineLatex(1, c)}\\right)^{2}`;
+}
+
+// ============================================================================
+// Consignes des écrans — partagées par l'appli (`App6gen4.tsx`) et les titres d'étapes du corrigé papier.
+// ============================================================================
+
+export function consigneEcranDerivee(e: ExerciceDeriveesCyclometriques, phase: PhaseDeriveesCyclometriques): FragmentConsigne[] {
+  const f = latex("f'(x)");
+  switch (phase) {
+    case "aDeriveeU":
+      return e.famille === "A" ? [texte("Dérive "), latex(`u(x)=${formatULatexA(e)}`), texte(".")] : [];
+    case "aDeriveeFinale":
+      return [texte("Assemble "), f, texte(" avec u(x) et u′(x) de l'étape précédente ; simplifie si possible.")];
+    case "bDeriveeU":
+      return e.famille === "B" ? [texte("Dérive "), latex(`u(x)=${e.m === 1 ? "x" : `${e.m}x`}`), texte(".")] : [];
+    case "bDeriveeArc":
+      return e.famille === "B" ? [texte("Dérive "), latex(`${NOM_LATEX[e.arcfonction]}\\left(${formatVLatexB(e)}\\right)`), texte(" séparément.")] : [];
+    case "bDeriveeFinale":
+      return [texte("Assemble "), f, texte(" avec la règle du produit.")];
+    case "cNumerateur":
+    case "dNumerateur":
+      return [texte("Dérive le numérateur N(x).")];
+    case "cDenominateur":
+    case "dDenominateur":
+      return [texte("Dérive le dénominateur D(x).")];
+    case "cDeriveeFinale":
+      return [texte("Assemble "), f, texte(" avec la règle du quotient.")];
+    case "dBrut":
+      return [texte("Assemble "), f, texte(" avec la règle du quotient (résultat brut, sans simplifier).")];
+    case "dSimplifiee":
+      return [texte("Simplifie le résultat précédent grâce à l'identité "), latex("\\arcsin(u)+\\arccos(u)=\\dfrac{\\pi}{2}"), texte(".")];
+    case "eDeriveeInterne":
+      return e.famille === "E" ? [texte("Dérive la fonction intérieure "), latex(`w(x)=${NOM_LATEX[e.arcfonction]}\\left(${axL(e.a)}\\right)`), texte(".")] : [];
+    case "eDeriveeFinale":
+      return [texte("Assemble "), f, texte(" avec la règle de la chaîne extérieure.")];
+    case "fBrute":
+      return [texte("Dérive "), latex("f(x)"), texte(" avec la règle de la chaîne (résultat brut accepté).")];
+    case "fSimplifiee":
+      return [texte("Donne la forme simplifiée de "), f, texte(" grâce à l'identité trigonométrique adéquate.")];
+    case "gDeriveeInterne":
+      return e.famille === "G" && e.sousCas === "h" ? [texte("Dérive "), latex(`v(x)=${formatSomme([{ signe: 1, corps: "x^{2}" }, { signe: e.c >= 0 ? 1 : -1, corps: String(Math.abs(e.c)) }])}`), texte(".")] : e.famille === "G" ? [texte("Dérive la fraction intérieure "), latex(`u(x)=\\dfrac{${e.k}}{${e.c === 0 ? "x" : formatAffineLatex(1, e.c)}}`), texte(".")] : [];
+    case "gDeriveeFinale":
+      return [texte("Assemble "), f, texte(".")];
+  }
+}
