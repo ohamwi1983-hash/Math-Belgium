@@ -7,8 +7,10 @@
 import type { ExerciceSecteurBalaye } from "../../core5e/geometrieCercle.types";
 import { calculerValeursExactes } from "../arcsSecteurs";
 
-const THETA_DEG_MIN = 10;
-const THETA_DEG_MAX = 350;
+/** Angle d'un essuie-glace réaliste (décision de l'utilisateur, audit 5e ch. 2, P10) : de 30° à
+ * 170°, multiple de 5 (avant : 10° à 350°, 49 % des tirages au-delà de 180°). */
+const THETA_DEG_MIN = 30;
+const THETA_DEG_MAX = 170;
 const R_MIN = 3;
 const R_MAX = 15;
 /** Écart minimal entre r1/r2 — évite un secteur balayé quasi nul (r1≈r2), peu lisible. */

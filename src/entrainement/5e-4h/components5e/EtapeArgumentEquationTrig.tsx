@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceEquationTrig } from "../core5e/equationsTrigonometriques.types";
 import type { ReponseArgument } from "../moteur5e/verificationEquationTrig5gen10";
-import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, formatEquationEnonceLatex, latexAideArgumentNiveau2, texteAideArgumentNiveau1, texteAideArgumentNiveau2 } from "../ui5e/formatEquationTrig";
+import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, formatArgumentLatex, formatEquationEnonceLatex } from "../ui5e/formatEquationTrig";
 import { formatQuestionArgumentTexte } from "../ui5e/formatEquationTrigonometrique";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -9,7 +9,8 @@ import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesArgument, messageCibleArgument } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -41,12 +42,12 @@ export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tenta
   const gateActif = exercice.fonction !== "tan";
   const [choixAucuneSolution, setChoixAucuneSolution] = useState<boolean | null>(gateActif ? null : false);
   const [lignes, setLignes] = useState<string[]>([""]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<ReponseArgument>();
   const montrerErreurs = tentativesUtilisees > 0;
   const lignesVisibles = choixAucuneSolution === false;
   const complet = choixAucuneSolution === true || (lignesVisibles && lignes.length > 0 && lignes.every((l) => l.trim() !== ""));
   const reponseCourante: ReponseArgument = choixAucuneSolution === true ? { aucuneSolution: true } : { aucuneSolution: false, lignes };
-  const lignesErronee = montrerErreurs && lignesVisibles && !!diagnostiquer && diagnostiquer(reponseCourante) !== "correct";
+  const lignesErronee = (saisie.illisible || montrerErreurs) && lignesVisibles && !!diagnostiquer && diagnostiquer(reponseCourante) !== "correct";
 
   function ajouterLigne() {
     setLignes((arr) => [...arr, ""]);
@@ -60,8 +61,8 @@ export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tenta
   function valider() {
     if (!complet) return;
     const reponse: ReponseArgument = choixAucuneSolution === true ? { aucuneSolution: true } : { aucuneSolution: false, lignes };
-    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
-    onValider(reponse);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(reponse, estLisible(diagnostiquer?.(reponse)), onValider);
   }
 
   return (
@@ -100,7 +101,7 @@ export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tenta
                 className={`text-input${lignesErronee ? " is-erronee" : ""}`}
                 value={ligne}
                 onChange={(e) => modifierLigne(i, e.target.value)}
-                placeholder="ex : 2*pi/5 + 2*k*pi"
+                placeholder="ex : 2π/5 + 2kπ"
               />
               {lignes.length > 1 && (
                 <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => retirerLigne(i)}>
@@ -115,28 +116,20 @@ export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tenta
           </button>
         </div>
       )}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideArgumentNiveau1(exercice.fonction)}</p>
-          {niveauAide >= 2 && (
-            <>
-              <p>{texteAideArgumentNiveau2(exercice.fonction)}</p>
-              <Katex expression={latexAideArgumentNiveau2(exercice.fonction)} block />
-            </>
-          )}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesArgument(exercice.fonction, formatArgumentLatex(exercice.a, exercice.b), exercice.k.latex)} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="solutions"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleArgument(exercice.fonction, exercice.branchesU, exercice.aucuneSolution, saisie.soumise) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

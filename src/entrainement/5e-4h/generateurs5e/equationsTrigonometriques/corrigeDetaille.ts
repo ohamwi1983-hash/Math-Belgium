@@ -9,7 +9,7 @@ import type {
   FonctionTrig,
   ValeurPiOuDecimale,
 } from "../../core5e/equationsTrigonometriques.types";
-import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
+import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import { formatArgumentLatex, formatBrancheLatex, formatEquationEnonceLatex, latexAideArgumentNiveau2, relationBranche } from "../../ui5e/formatEquationTrig";
 import {
@@ -209,7 +209,13 @@ function utiliseArgument(f: ExerciceEquationTrig, sq: string): EtapeCorrection {
   if (f.aucuneSolution) return utilise(sq, [texte(`Un ${NOM_FR[f.fonction]} est toujours compris entre −1 et 1 ${COURS_EQUATIONS} : si la valeur visée n'est pas dans [−1 ; 1], l'équation n'a pas de solution.`)]);
   if (f.casSpecial) return utilise(sq, [texte(`Pour la valeur ${f.k.valeur > 0 ? "1" : "−1"}, les deux séries de la formule du cours sont confondues ${COURS_EQUATIONS} : une seule série, de période 2π.`)]);
   const intro = f.fonction === "sin" ? "Deux angles supplémentaires ont le même sinus" : f.fonction === "cos" ? "Deux angles opposés ont le même cosinus" : "La tangente a une seule série de solutions, de période π";
-  return utilise(sq, [texte(`${intro} ${COURS_EQUATIONS} : `), latex(latexAideArgumentNiveau2(f.fonction).replace(/\\ \\text\{ ou \} \\ /g, "\\ \\text{ou}\\ ")), texte(".")]);
+  return utilise(sq, [texte(`${intro} ${COURS_EQUATIONS} : `), ...formulesOu(latexAideArgumentNiveau2(f.fonction).split(/\\ \\text\{ ou \} \\ /)), texte(".")]);
+}
+
+/** Les deux séries d'une formule du cours en DEUX formules reliées par le texte « ou » : d'un seul
+ * tenant, la formule ne se coupe pas et sortait de l'écran du téléphone (457 px pour 390). */
+function formulesOu(series: string[]): FragmentConsigne[] {
+  return series.flatMap((s, i) => (i === 0 ? [latex(s.trim())] : [texte(" ou "), latex(s.trim())]));
 }
 
 /** x isolé dans chaque série, une transformation par ligne ; fin = la forme de l'écran. */
@@ -282,7 +288,7 @@ function etapesReconnaissance(e: T): EtapeCorrection[] {
 // ---------------------------------------------------------------------------------------------
 
 const UTILISE_SOLUTIONS = "On donne à k des valeurs entières successives dans chaque série et on garde les valeurs de [0 ; 2π[ (0 compris, 2π exclu), chacune une seule fois.";
-const UTILISE_ISOLER = `Dans chaque série, on fait passer la constante de l'argument dans l'autre membre, puis on divise tout par le coefficient de x — la constante ET la période ${COURS_EQUATIONS}.`;
+const UTILISE_ISOLER = `Dans chaque série, on fait passer la constante de l'argument dans l'autre membre, puis on divise tout par le coefficient de x — la constante et la période ${COURS_EQUATIONS}.`;
 
 interface BlocSeries {
   label: string;
@@ -603,7 +609,7 @@ function correctionEgalite(e: ExerciceEgaliteExpressions): EtapeCorrection[] {
     famille("2ᵉ série", droite, debut, e.branches[1]!);
   }
   etapes.push(
-    utilise(sc, [texte(`Deux ${tan ? "tangentes" : e.identite === "cosVersCos" ? "cosinus" : "sinus"} égaux ${COURS_EQUATIONS} : `), latex(tan ? "\\tan A=\\tan B\\iff A=B+k\\pi" : e.identite === "cosVersCos" ? "\\cos A=\\cos B\\iff A=B+2k\\pi\\ \\text{ou}\\ A=-B+2k\\pi" : "\\sin A=\\sin B\\iff A=B+2k\\pi\\ \\text{ou}\\ A=\\pi-B+2k\\pi"), texte(" ; dans chaque série, on isole x.")]),
+    utilise(sc, [texte(`Deux ${tan ? "tangentes" : e.identite === "cosVersCos" ? "cosinus" : "sinus"} égaux ${COURS_EQUATIONS} : `), ...formulesOu(tan ? ["\\tan A=\\tan B\\iff A=B+k\\pi"] : e.identite === "cosVersCos" ? ["\\cos A=\\cos B\\iff A=B+2k\\pi", "A=-B+2k\\pi"] : ["\\sin A=\\sin B\\iff A=B+2k\\pi", "A=\\pi-B+2k\\pi"]), texte(" ; dans chaque série, on isole x.")]),
     ...blocs.map((b) => calcul(sc, b.lignes, [], b.label)),
     resultat(sc, ouLatex(formatAideResoudreEgaliteNiveau2Latex(e))),
   );

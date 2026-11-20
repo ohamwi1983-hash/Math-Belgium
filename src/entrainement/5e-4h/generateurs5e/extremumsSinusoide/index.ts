@@ -19,7 +19,7 @@ import type { AmplitudeSinusoide } from "../../core5e/parametresSinusoide.types"
 import type { BrancheExtremum, ExerciceExtremumsSinusoide, FonctionExtremum, ModeExtremum } from "../../core5e/extremumsSinusoide.types";
 import { tirerAmplitude, tirerDecalageVertical, tirerPhi, tirerT } from "../parametresSinusoide/parametres";
 import type { RationnelPi } from "../parametresSinusoide/rationnelPi";
-import { additionnerRationnelPi, calculerB, calculerC, inverseRationnelPi, multiplierRationnelPi, negatifRationnelPi, valeurNumerique } from "../parametresSinusoide/rationnelPi";
+import { additionnerRationnelPi, calculerB, calculerC, inverseRationnelPi, multiplierParEntier, multiplierRationnelPi, negatifRationnelPi, reduireRationnelPi, valeurNumerique } from "../parametresSinusoide/rationnelPi";
 
 const FONCTIONS: FonctionExtremum[] = ["sin", "cos"];
 
@@ -88,6 +88,22 @@ function construireBrancheX(brancheU: BrancheExtremum, a: RationnelPi, bArg: Rat
   return { constante: diviserParA(uMoinsBArg, a), periode: diviserParA(brancheU.periode, a) };
 }
 
+/** Borne b de la fenêtre [0 ; b[ des positions demandées (audit 5e ch. 2, P11) : 2π quand les positions
+ * s'écrivent avec π (T multiple de π) ; deux périodes, 2T, quand elles s'écrivent sans π (T entier,
+ * ω rationnel en π — « x = 3 + 4k » cherché dans [0 ; 2π[ ≈ [0 ; 6,28[ ne laissait souvent qu'une
+ * position). Source unique : écran, vérification, corrigé, papier et `?code=`. */
+export function borneFenetreExtremums(exercice: { a: RationnelPi }): RationnelPi {
+  const T = reduireRationnelPi(multiplierRationnelPi(DEUX_PI_UNITE, inverseRationnelPi(exercice.a)));
+  return T.degrePi === 0 ? reduireRationnelPi(multiplierParEntier(T, 2)) : DEUX_PI_UNITE;
+}
+
+/** Fenêtre en texte (« [0 ; 2π[ », « [0 ; 8[ »), pour les consignes et le corrigé. */
+export function fenetreExtremumsTexte(exercice: { a: RationnelPi }): string {
+  const b = borneFenetreExtremums(exercice);
+  if (b.degrePi === 1) return "[0 ; 2π[";
+  return `[0 ; ${b.denominateur === 1 ? b.numerateur : `${b.numerateur}/${b.denominateur}`}[`;
+}
+
 const N_MIN = -30;
 const N_MAX = 30;
 const TOLERANCE = 1e-6;
@@ -98,13 +114,13 @@ const DEUX_PI = 2 * Math.PI;
  * `equationsTrigonometriques/solveur.ts::solutionsDistinctes` : jamais de réduction modulo 2π (la
  * période réelle en x ne divise pas toujours exactement 2π), seulement un filtrage des valeurs
  * BRUTES qui tombent directement dans [0;2π[. */
-function solutionsBrancheUnique(brancheX: BrancheExtremum): number[] {
+function solutionsBrancheUnique(brancheX: BrancheExtremum, borne: number = DEUX_PI): number[] {
   const constante = valeurNumerique(brancheX.constante);
   const periode = valeurNumerique(brancheX.periode);
   const brut: number[] = [];
   for (let k = N_MIN; k <= N_MAX; k++) {
     const v = constante + periode * k;
-    if (v >= -TOLERANCE && v < DEUX_PI - TOLERANCE) brut.push(v < 0 ? 0 : v);
+    if (v >= -TOLERANCE && v < borne - TOLERANCE) brut.push(v < 0 ? 0 : v);
   }
   const triees = [...brut].sort((a, b) => a - b);
   const resultat: number[] = [];
@@ -130,7 +146,7 @@ export function construireAvecFonction(fonction: FonctionExtremum, mode: ModeExt
   let a = calculerB(T);
   let bArg = reduireConstantePhase(calculerC(a, phi));
   let brancheX = construireBrancheX(brancheU, a, bArg);
-  let solutions = solutionsBrancheUnique(brancheX);
+  let solutions = solutionsBrancheUnique(brancheX, valeurNumerique(borneFenetreExtremums({ a })));
   let tentative = 0;
   while ((solutions.length === 0 || solutions.length > MAX_SOLUTIONS) && tentative < TENTATIVES_MAX) {
     T = tirerT();
@@ -138,7 +154,7 @@ export function construireAvecFonction(fonction: FonctionExtremum, mode: ModeExt
     a = calculerB(T);
     bArg = reduireConstantePhase(calculerC(a, phi));
     brancheX = construireBrancheX(brancheU, a, bArg);
-    solutions = solutionsBrancheUnique(brancheX);
+    solutions = solutionsBrancheUnique(brancheX, valeurNumerique(borneFenetreExtremums({ a })));
     tentative++;
   }
 

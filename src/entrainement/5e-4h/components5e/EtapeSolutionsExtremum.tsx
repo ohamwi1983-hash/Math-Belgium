@@ -1,11 +1,10 @@
 import { useState } from "react";
 import type { ExerciceExtremumsSinusoide } from "../core5e/extremumsSinusoide.types";
 import {
-  TEXTE_AIDE_SOLUTIONS_NIVEAU1,
-  TEXTE_AIDE_SOLUTIONS_NIVEAU2,
   consigneGeneraleExtremums,
   consigneSolutionsExtremums,
   formatFonctionSourceLatex,
+  formatTermesEtatActuelExtremums,
 } from "../ui5e/formatExtremumsSinusoide";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -14,7 +13,10 @@ import { CercleTrigEquationSketch } from "./CercleTrigEquationSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesSolutionsExtremums, messageCibleSolutions } from "../ui5e/aidesTrigonometrie";
+import { borneFenetreExtremums, fenetreExtremumsTexte } from "../generateurs5e/extremumsSinusoide";
+import { valeurNumerique } from "../generateurs5e/parametresSinusoide/rationnelPi";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -43,7 +45,7 @@ interface Props {
  * régime décimal). */
 export function EtapeSolutionsExtremum({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>([""]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string[]>();
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
   const apresEchec = tentativesUtilisees > 0;
@@ -51,7 +53,7 @@ export function EtapeSolutionsExtremum({ exercice, tentativesUtilisees, tentativ
   // — `diagnostiquerSolutionsExtremum` n'isole pas une ligne fautive en particulier), appliqué
   // uniformément à tous les champs de la liste tant que la réponse globale n'est pas correcte.
   const statutActuel = apresEchec && diagnostiquer ? diagnostiquer(lignes) : undefined;
-  const ligneErronee = statutActuel !== undefined && statutActuel !== "correct";
+  const ligneErronee = saisie.illisible || (statutActuel !== undefined && statutActuel !== "correct");
 
   function ajouterLigne() {
     setLignes((arr) => [...arr, ""]);
@@ -64,10 +66,13 @@ export function EtapeSolutionsExtremum({ exercice, tentativesUtilisees, tentativ
   }
   function valider() {
     if (!complet) return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(lignes));
-    onValider(lignes);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(lignes, estLisible(diagnostiquer?.(lignes)), onValider);
   }
 
+  /** Cercle trigonométrique seulement quand les positions sont des angles de [0 ; 2π[ (pas quand x
+   * s'écrit sans π, fenêtre [0 ; 2T[ — audit 5e ch. 2, P11). */
+  const cercle = borneFenetreExtremums(exercice).degrePi === 1;
   const pointsAffiches = niveauAide >= 2 && exercice.solutions.length > 0 ? [exercice.solutions[0]] : [];
 
   return (
@@ -83,7 +88,7 @@ export function EtapeSolutionsExtremum({ exercice, tentativesUtilisees, tentativ
         }
       />
       <p className="prompt-text">{consigneSolutionsExtremums(exercice)}</p>
-      {niveauAide >= 2 && <CercleTrigEquationSketch points={pointsAffiches} regime="exact" />}
+      {niveauAide >= 2 && cercle && <CercleTrigEquationSketch points={pointsAffiches} regime="exact" />}
       {lignes.map((ligne, i) => (
         <div key={i}>
           <ApercuExpressionLatex texte={ligne} />
@@ -93,7 +98,7 @@ export function EtapeSolutionsExtremum({ exercice, tentativesUtilisees, tentativ
               className={`text-input${ligneErronee ? " is-erronee" : ""}`}
               value={ligne}
               onChange={(e) => modifierLigne(i, e.target.value)}
-              placeholder="ex : 2*pi/5"
+              placeholder="ex : 2π/5"
             />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => retirerLigne(i)}>
@@ -106,23 +111,20 @@ export function EtapeSolutionsExtremum({ exercice, tentativesUtilisees, tentativ
       <button type="button" className="btn" onClick={ajouterLigne}>
         + Ajouter une solution
       </button>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_SOLUTIONS_NIVEAU1}</p>
-          {niveauAide >= 2 && <p>{TEXTE_AIDE_SOLUTIONS_NIVEAU2}</p>}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesSolutionsExtremums(formatTermesEtatActuelExtremums(exercice, "solutions")[1], fenetreExtremumsTexte(exercice), cercle)} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="solutions"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleSolutions(saisie.soumise, exercice.solutions, [], valeurNumerique(borneFenetreExtremums(exercice)), fenetreExtremumsTexte(exercice)) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

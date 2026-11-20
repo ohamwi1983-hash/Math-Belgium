@@ -21,6 +21,7 @@ import {
 import { correctionDetailleePolygonesArcsSecteurs } from "./corrigeDetaille";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { approche } from "../../ui5e/corrigeTrigonometrie1";
+import { profilPolygonesArcsSecteurs } from "../profilsEvaluationTrigonometrie";
 import { aireSecteur, CATALOGUE_VARIANTES_POLYGONES, genererExercicePolygonesArcsSecteurs, genererPolygonesAvecVariante, longueurArc } from "./index";
 
 /**
@@ -169,8 +170,7 @@ function baremePolygonesArcsSecteurs(exercice: ExercicePolygonesArcsSecteurs): B
 }
 
 export const adaptateurEvaluationPolygonesArcsSecteurs: AdaptateurFeuilleExercices<ExercicePolygonesArcsSecteurs> = {
-  // Toutes les instances exigent une calculatrice (valeurs décimales) : avertissement du panneau.
-  calculatriceIndispensable: true,
+  profilInstance: profilPolygonesArcsSecteurs,
   titreDocument: "Polygones, arcs et secteurs — Évaluation",
   nomFichierBase: "polygones-arcs-secteurs",
   genererInstance: genererExercicePolygonesArcsSecteurs,

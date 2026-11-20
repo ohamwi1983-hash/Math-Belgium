@@ -1,21 +1,14 @@
 import { useState } from "react";
 import type { ExerciceParametresSinusoideGraphique } from "../core5e/parametresSinusoideGraphique.types";
 import type { PhaseParametresSinusoideGraphique } from "../moteur5e/typesParametresSinusoideGraphique";
-import {
-  aideNiveau1,
-  consigneGenerale,
-  consignePhase,
-  labelPhase,
-  placeholderPhase,
-  texteAideNiveau2,
-} from "../ui5e/formatParametresSinusoideGraphique";
-import { Katex } from "../components/Katex";
+import { consigneGenerale, consignePhase, labelPhase, placeholderPhase } from "../ui5e/formatParametresSinusoideGraphique";
 import { SinusoideGraph } from "./SinusoideGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesParametreGraphique, messageCibleParametreGraphique, valeursGraphique } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -52,15 +45,17 @@ interface Props {
  */
 export function EtapeParametreSinusoideGraphique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string>();
   const montrerErreurs = tentativesUtilisees > 0;
   const apresEchec = tentativesUtilisees > 0;
-  const texteErronee = apresEchec && !!diagnostiquer && diagnostiquer(texte) !== "correct";
+  const texteErronee = saisie.illisible || (apresEchec && !!diagnostiquer && diagnostiquer(texte) !== "correct");
+
+  const valeurs = valeursGraphique(exercice);
 
   function valider() {
     if (texte.trim() === "") return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
-    onValider(texte);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(texte, estLisible(diagnostiquer?.(texte)), onValider);
   }
 
   return (
@@ -81,24 +76,20 @@ export function EtapeParametreSinusoideGraphique({ exercice, phase, tentativesUt
           placeholder={placeholderPhase(phase)}
         />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1(phase).texte}</p>
-          {aideNiveau1(phase).latex && <Katex expression={aideNiveau1(phase).latex!} block />}
-          {niveauAide >= 2 && <p>{texteAideNiveau2(phase)}</p>}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesParametreGraphique(phase, valeurs.latex)} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="nombre"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleParametreGraphique(saisie.soumise, phase, valeurs.nombres) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

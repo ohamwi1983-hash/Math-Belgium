@@ -18,7 +18,7 @@ import {
   formatSolutionsExtremumsLatex,
   formatTermesEtatActuelExtremums,
 } from "../../ui5e/formatExtremumsSinusoide";
-import { CATALOGUE_FONCTIONS_EXTREMUMS, construireAvecFonction, genererExerciceExtremumsSinusoide } from "./index";
+import { CATALOGUE_FONCTIONS_EXTREMUMS, construireAvecFonction, fenetreExtremumsTexte, genererExerciceExtremumsSinusoide } from "./index";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { correctionDetailleeExtremumsSinusoide } from "./corrigeDetaille";
 import { profilExtremumsSinusoide, PARAMETRES_SINUSOIDE } from "../profilsEvaluationTrigonometrie";
@@ -66,7 +66,7 @@ function serieXLatex(exercice: ExerciceExtremumsSinusoide): string {
 }
 
 function reponseBreve(exercice: ExerciceExtremumsSinusoide): FragmentConsigne[] {
-  return [texte("Pour tout x réel : "), latex(serieXLatex(exercice)), texte(" ; dans [0 ; 2π[ : "), latex(formatSolutionsExtremumsLatex(exercice.solutions))];
+  return [texte("Pour tout x réel : "), latex(serieXLatex(exercice)), texte(` ; dans ${fenetreExtremumsTexte(exercice)} : `), latex(formatSolutionsExtremumsLatex(exercice.solutions))];
 }
 
 const NOM_MODE = { maximums: "les maximums", minimums: "les minimums", extremums: "les extremums" } as const;
@@ -76,7 +76,7 @@ function construireCorrection(exercice: ExerciceExtremumsSinusoide): BlocCorrect
   return [
     { type: "paragraphe", fragments: [latex(formatEquationSubstitueeLatex(exercice)), texte(".")] },
     { type: "paragraphe", fragments: [latex(serieXLatex(exercice))] },
-    { type: "paragraphe", fragments: [texte("Dans [0 ; 2π[ : "), latex(formatSolutionsExtremumsLatex(exercice.solutions))] },
+    { type: "paragraphe", fragments: [texte(`Dans ${fenetreExtremumsTexte(exercice)} : `), latex(formatSolutionsExtremumsLatex(exercice.solutions))] },
   ];
 }
 
@@ -94,7 +94,7 @@ function bareme(exercice: ExerciceExtremumsSinusoide): BaremeExercice {
     criteres: [
       { sousQuestion: "a", critere: [texte(`Équation des positions ${exercice.mode === "extremums" ? "des extremums (période π)" : `${NOM_MODE[exercice.mode].replace("les ", "des ")} (valeur visée, période 2π)`}`)], points: 1.5 },
       { sousQuestion: "b", critere: [texte("x isolé, période divisée par le coefficient de x")], points: 1.5 },
-      { sousQuestion: "c", critere: [texte("Positions dans [0 ; 2π[, toutes et une seule fois")], points: 1 },
+      { sousQuestion: "c", critere: [texte(`Positions dans ${fenetreExtremumsTexte(exercice)}, toutes et une seule fois`)], points: 1 },
     ],
     erreursFrequentes,
     reponsesAcceptees: [[texte("Toute écriture équivalente de la série (k parcouru dans l'autre sens, constante décalée d'une période)")], [texte("Valeurs approchées au centième")]],

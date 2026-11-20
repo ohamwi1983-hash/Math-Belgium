@@ -1,12 +1,12 @@
 import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
-import { consignePhaseFragments, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { consignePhaseFragments, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { FragmentsConsigneSinusoide } from "./FragmentsConsigneSinusoide";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesModelisation,   messageCibleModelisation } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -33,22 +33,14 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
   const question = exercice.phase2;
   const [texte, setTexte] = useState("");
   const [choixCasSpecial, setChoixCasSpecial] = useState<"toujoursVrai" | "toujoursFaux" | null>(null);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
-  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
-  const [ecritureIllisible, setEcritureIllisible] = useState(false);
+  const saisie = useTentativeLisible<string>();
   const montrerErreurs = tentativesUtilisees > 0;
-  const apresEchec = tentativesUtilisees > 0;
-  const texteErronee = apresEchec && !!diagnostiquer && texte.trim() !== "" && diagnostiquer(texte) !== "correct";
+  const texteErronee = (saisie.illisible || montrerErreurs) && !!diagnostiquer && texte.trim() !== "" && diagnostiquer(texte) !== "correct";
 
   return (
     <div>
       <p className="prompt-text"><FragmentsConsigneSinusoide fragments={consignePhaseFragments(exercice, "isolerSinInequation")} /></p>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "isolerSinInequation")}</p>
-          {niveauAide >= 2 && question.casSpecial === null && <Katex expression={texteAideNiveau2(exercice, "isolerSinInequation")} block />}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesModelisation(exercice, "isolerSinInequation", texteAideNiveau2(exercice, "isolerSinInequation"))} />
       {question.casSpecial !== null ? (
         <>
           <div className="options-grid">
@@ -76,14 +68,8 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
                 disabled={choixCasSpecial === null}
                 onClick={() => {
                   if (choixCasSpecial === null) return;
-                  const statut = diagnostiquer ? diagnostiquer(choixCasSpecial) : null;
-                  if (statut === "parse_error") {
-                    setEcritureIllisible(true);
-                    return;
-                  }
-                  setEcritureIllisible(false);
-                  if (statut !== null) setDernierStatut(statut);
-                  onValider(choixCasSpecial);
+                  // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+                  saisie.tenter(choixCasSpecial, estLisible(diagnostiquer?.(choixCasSpecial)), onValider);
                 }}
               >
                 Valider
@@ -111,14 +97,8 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
                 disabled={texte.trim() === ""}
                 onClick={() => {
                   if (texte.trim() === "") return;
-                  const statut = diagnostiquer ? diagnostiquer(texte) : null;
-                  if (statut === "parse_error") {
-                    setEcritureIllisible(true);
-                    return;
-                  }
-                  setEcritureIllisible(false);
-                  if (statut !== null) setDernierStatut(statut);
-                  onValider(texte);
+                  // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+                  saisie.tenter(texte, estLisible(diagnostiquer?.(texte)), onValider);
                 }}
               >
                 Valider
@@ -127,16 +107,13 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
           )}
         </>
       )}
-      {!validation && ecritureIllisible && (
-        <p className="alert-error" role="alert">
-          Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
-        </p>
-      )}
-      {!validation && montrerErreurs && !ecritureIllisible && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
-      )}
+      {!validation && <RetourSaisieTrig
+        illisible={saisie.illisible}
+        champ={question.casSpecial !== null ? "nombre" : "inequation"}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={montrerErreurs && saisie.soumise ? messageCibleModelisation(exercice, "isolerSinInequation", saisie.soumise) : null}
+      />}
       {validation && <ValidationEcran {...validation} />}
     </div>
   );

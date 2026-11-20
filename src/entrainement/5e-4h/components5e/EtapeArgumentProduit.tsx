@@ -3,14 +3,15 @@ import type { ExerciceEquationTrig, ExerciceProduitFacteurs } from "../core5e/eq
 import { diagnostiquerArgument, type ReponseArgument, type ReponseDeuxFacteursArgument } from "../moteur5e/verificationEquationTrig5gen10";
 import { CONSIGNE_ARGUMENT_PRODUIT, formatEnonceProduitLatex, formatQuestionArgumentTexte } from "../ui5e/formatEquationTrigonometrique";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
-import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, latexAideArgumentNiveau2, texteAideArgumentNiveau1, texteAideArgumentNiveau2 } from "../ui5e/formatEquationTrig";
+import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesArgumentProduit, messageCibleArgument, messageFacteur } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -80,7 +81,7 @@ function BlocFacteurArgument({
                   className={`text-input${erronee ? " is-erronee" : ""}`}
                   value={ligne}
                   onChange={(e) => setLignes((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-                  placeholder="ex : 2*pi/5 + 2*k*pi"
+                  placeholder="ex : 2π/5 + 2kπ"
                 />
                 {lignes.length > 1 && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes((arr) => arr.filter((_, j) => j !== i))}>
@@ -108,7 +109,7 @@ export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentatives
   const [lignes1, setLignes1] = useState<string[]>([""]);
   const [choix2, setChoix2] = useState<boolean | null>(exercice.facteur2.fonction === "tan" ? false : null);
   const [lignes2, setLignes2] = useState<string[]>([""]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<ReponseDeuxFacteursArgument>();
   const montrerErreurs = tentativesUtilisees > 0;
 
   const complet1 = choix1 === true || (choix1 === false && lignes1.length > 0 && lignes1.every((l) => l.trim() !== ""));
@@ -117,8 +118,8 @@ export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentatives
 
   const reponseFacteur1: ReponseArgument = choix1 === true ? { aucuneSolution: true } : { aucuneSolution: false, lignes: lignes1 };
   const reponseFacteur2: ReponseArgument = choix2 === true ? { aucuneSolution: true } : { aucuneSolution: false, lignes: lignes2 };
-  const facteur1Erronee = montrerErreurs && choix1 === false && diagnostiquerArgument(exercice.facteur1, reponseFacteur1) !== "correct";
-  const facteur2Erronee = montrerErreurs && choix2 === false && diagnostiquerArgument(exercice.facteur2, reponseFacteur2) !== "correct";
+  const facteur1Erronee = (saisie.illisible || montrerErreurs) && choix1 === false && diagnostiquerArgument(exercice.facteur1, reponseFacteur1) !== "correct";
+  const facteur2Erronee = (saisie.illisible || montrerErreurs) && choix2 === false && diagnostiquerArgument(exercice.facteur2, reponseFacteur2) !== "correct";
 
   function valider() {
     if (!complet) return;
@@ -126,8 +127,8 @@ export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentatives
       facteur1: (choix1 === true ? { aucuneSolution: true } : { aucuneSolution: false, lignes: lignes1 }) as ReponseArgument,
       facteur2: (choix2 === true ? { aucuneSolution: true } : { aucuneSolution: false, lignes: lignes2 }) as ReponseArgument,
     };
-    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
-    onValider(reponse);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(reponse, estLisible(diagnostiquer?.(reponse)), onValider);
   }
 
   return (
@@ -147,31 +148,20 @@ export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentatives
       <BlocFacteurArgument facteur={exercice.facteur1} numero={1} choix={choix1} setChoix={setChoix1} lignes={lignes1} setLignes={setLignes1} erronee={facteur1Erronee} />
       <BlocFacteurArgument facteur={exercice.facteur2} numero={2} choix={choix2} setChoix={setChoix2} lignes={lignes2} setLignes={setLignes2} erronee={facteur2Erronee} />
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>Facteur 1 — {texteAideArgumentNiveau1(exercice.facteur1.fonction)}</p>
-          <p>Facteur 2 — {texteAideArgumentNiveau1(exercice.facteur2.fonction)}</p>
-          {niveauAide >= 2 && (
-            <>
-              <p>Facteur 1 — {texteAideArgumentNiveau2(exercice.facteur1.fonction)}</p>
-              <Katex expression={latexAideArgumentNiveau2(exercice.facteur1.fonction)} block />
-              <p>Facteur 2 — {texteAideArgumentNiveau2(exercice.facteur2.fonction)}</p>
-              <Katex expression={latexAideArgumentNiveau2(exercice.facteur2.fonction)} block />
-            </>
-          )}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesArgumentProduit(exercice.facteur1, exercice.facteur2)} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="solutions"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? (messageFacteur(1, messageCibleArgument(exercice.facteur1.fonction, exercice.facteur1.branchesU, exercice.facteur1.aucuneSolution, saisie.soumise.facteur1)) ?? messageFacteur(2, messageCibleArgument(exercice.facteur2.fonction, exercice.facteur2.branchesU, exercice.facteur2.aucuneSolution, saisie.soumise.facteur2))) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

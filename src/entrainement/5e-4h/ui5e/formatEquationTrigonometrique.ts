@@ -77,6 +77,9 @@ export function simplifierAffichageProduit(latex: string): string {
   s = s.replace(/(?<![\d,}-])1\\cdot\s*/g, "");
   // 5. « -1\cdot » isolé (« −1·tan(x) ») → « - » : jamais devant une décimale (« -1{,}7\cdot »).
   s = s.replace(/(?<![\d,}])-1\\cdot\s*/g, "-");
+  // 6. Facteur réduit à la fonction seule (« − 0 » retiré) : plus de parenthèses autour
+  // (« (\sin(x))(…) » → « \sin(x)(…) », audit 5e ch. 2, P2).
+  s = s.replace(/\\left\((\\(?:sin|cos|tan)(?:\^2)?\\left\((?:(?!\\left\(|\\right\)).)*\\right\))\\right\)/g, "$1");
   return s;
 }
 
@@ -162,9 +165,6 @@ export function formatEnonceEquationTrigonometriqueLatex(exercice: ExerciceEquat
 // ============================================================================
 
 export const CONSIGNE_PREFACTEUR = "Factorise cette équation.";
-export const TEXTE_AIDE_PREFACTEUR_NIVEAU1 =
-  "Les deux termes partagent un même facteur — la fonction trigonométrique elle-même. Mets-la en évidence, comme pour un polynôme :";
-export const LATEX_AIDE_PREFACTEUR_NIVEAU1 = "X^2 - aX = X(X - a)";
 export function formatAidePrefacteurNiveau2Latex(exercice: ExerciceProduitFacteurs): string {
   const fn = NOM_FONCTION_LATEX[exercice.facteur2.fonction];
   const arg = formatArgumentLatex(exercice.facteur2.a, exercice.facteur2.b);
@@ -172,8 +172,6 @@ export function formatAidePrefacteurNiveau2Latex(exercice: ExerciceProduitFacteu
 }
 
 export const CONSIGNE_SEPARER_FACTEURS = "Écris les 2 équations correspondantes.";
-export const TEXTE_AIDE_SEPARER_FACTEURS_NIVEAU1 = "Un produit est nul si et seulement si l'un de ses facteurs est nul — on écrit deux équations, jamais une somme :";
-export const LATEX_AIDE_SEPARER_FACTEURS_NIVEAU1 = "A\\cdot B = 0 \\iff A = 0 \\ \\text{ ou } \\ B = 0";
 export function formatAideSepararFacteursNiveau2Latex(exercice: ExerciceProduitFacteurs): string[] {
   return [formatEquationEnonceLatex(exercice.facteur1), formatEquationEnonceLatex(exercice.facteur2)];
 }
@@ -222,25 +220,19 @@ export function regimeProduit(exercice: ExerciceProduitFacteurs): RegimeEquation
 export function consigneConversionPythagoricienne(exercice: ExercicePythagoricienne): string {
   return `Grâce à sin²(x) + cos²(x) = 1, réécris cette équation avec ${exercice.fonctionCible}(x) seulement.`;
 }
-export const TEXTE_AIDE_CONVERSION_NIVEAU1 = "Remplace le carré de l'autre fonction grâce à la relation fondamentale, puis développe et réduis :";
 export function latexAideConversionNiveau1(exercice: ExercicePythagoricienne): string {
   return exercice.fonctionCible === "cos" ? "\\sin^2(x) = 1 - \\cos^2(x)" : "\\cos^2(x) = 1 - \\sin^2(x)";
-}
-export function formatAideConversionNiveau2Latex(exercice: ExercicePythagoricienne): string {
-  return formatPolynomeCibleLatex(exercice);
 }
 
 /** Point 34 : t est introduit explicitement (t = cos(x) ou sin(x)). */
 export function consigneRacinesPythagoricienne(exercice: ExercicePythagoricienne): string {
   return `Pose t = ${exercice.fonctionCible}(x) : l'équation devient une équation du second degré en t. Donne ses deux racines t₁ et t₂.`;
 }
-export const TEXTE_AIDE_RACINES_NIVEAU1 = "C'est une équation du second degré ordinaire — discriminant, ou toute autre technique déjà connue (mise en évidence, produit remarquable...).";
 
 export function consigneRacinesResolution(exercice: ExercicePythagoricienne): string {
   const f = `${exercice.fonctionCible}(x)`;
   return `Pour chaque racine t, résous ${f} = t (séries avec k entier) — ou rejette-la si ${f} ne peut pas valoir t.`;
 }
-export const TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1 = "cos(x) et sin(x) restent TOUJOURS compris entre −1 et 1 — une racine hors de cet intervalle ne correspond à AUCUNE valeur réelle de x : elle doit être rejetée.";
 
 export const CONSIGNE_SOLUTIONS_PYTHAGORICIENNE = "Donne toutes les solutions de l'équation dans [0 ; 2π[ (celles des racines gardées), chaque valeur une seule fois.";
 
@@ -248,7 +240,7 @@ export const CONSIGNE_SOLUTIONS_PYTHAGORICIENNE = "Donne toutes les solutions de
 // Famille "egalite" — écrans "conversionEgalite"/"resoudreEgalite"/"solutionsEgalite".
 // ============================================================================
 
-export const CONSIGNE_CONVERSION_EGALITE = "Convertis l'un des 2 membres pour que les 2 côtés utilisent la MÊME fonction trigonométrique.";
+export const CONSIGNE_CONVERSION_EGALITE = "Convertis l'un des 2 membres pour que les 2 côtés utilisent la même fonction trigonométrique.";
 
 const TEXTE_AIDE_CONVERSION_EGALITE_NIVEAU1: Record<"cosVersCos" | "sinVersSin" | "tanVersTan", string> = {
   cosVersCos: "Remplace le membre en sinus par un membre en cosinus (angles complémentaires) :",
@@ -279,23 +271,7 @@ export function formatAideConversionEgaliteNiveau2Latex(exercice: ExerciceEgalit
 }
 
 export const CONSIGNE_RESOUDRE_EGALITE = "Égale les arguments (une ou deux séries selon la fonction, k entier), puis isole x dans chaque série.";
-const TEXTE_AIDE_RESOUDRE_EGALITE_NIVEAU1: Record<"cosVersCos" | "sinVersSin" | "tanVersTan", string> = {
-  cosVersCos: "Deux cosinus égaux : deux séries (k entier).",
-  sinVersSin: "Deux sinus égaux : deux séries (k entier).",
-  tanVersTan: "Deux tangentes égales : une seule série, de période π (k entier).",
-};
-const LATEX_AIDE_RESOUDRE_EGALITE_NIVEAU1: Record<ExerciceEgaliteExpressions["identite"], string> = {
-  cosVersCos: "\\cos A = \\cos B \\iff A = B + 2k\\pi \\ \\text{ ou } \\ A = -B + 2k\\pi",
-  sinVersSin: "\\sin A = \\sin B \\iff A = B + 2k\\pi \\ \\text{ ou } \\ A = \\pi - B + 2k\\pi",
-  tanVersTan: "\\tan A = \\tan B \\iff A = B + k\\pi",
-};
-export function latexAideResoudreEgaliteNiveau1(exercice: ExerciceEgaliteExpressions): string {
-  return LATEX_AIDE_RESOUDRE_EGALITE_NIVEAU1[exercice.identite];
-}
 
-export function texteAideResoudreEgaliteNiveau1(exercice: ExerciceEgaliteExpressions): string {
-  return TEXTE_AIDE_RESOUDRE_EGALITE_NIVEAU1[exercice.identite];
-}
 export function formatAideResoudreEgaliteNiveau2Latex(exercice: ExerciceEgaliteExpressions): string[] {
   return exercice.branches.map((b: BrancheX) => `x ${relationBranche(b)} ${formatBrancheLatex(b)}`);
 }
@@ -493,3 +469,32 @@ export function ensembleApproche(solutions: number[]): boolean {
 
 export { formatValeurLatex };
 export type { CoefficientRationnel, ValeurPiOuDecimale };
+
+// ============================================================================
+// Aides (audit 5e ch. 2, lot B) — morceaux d'instance utilisés par `ui5e/aidesTrigonometrie.ts`.
+// ============================================================================
+
+/** Équation en t de la substitution (t = cos x ou sin x) : le polynôme cible écrit avec t. */
+export function equationEnTLatex(exercice: ExercicePythagoricienne): string {
+  return formatPolynomeCibleLatex(exercice).replace(/\\(cos|sin)\^2\(x\)/g, "t^2").replace(/\\(cos|sin)\(x\)/g, "t");
+}
+
+/** Argument θ du membre à convertir (égalité) : celui du membre de droite. */
+export function argumentDroitEgaliteLatex(exercice: ExerciceEgaliteExpressions): string {
+  return `\\theta = ${formatArgumentLatex(exercice.a2, exercice.b2)}`;
+}
+
+/** Fonction commune aux deux membres après conversion. */
+export function fonctionEgalite(exercice: ExerciceEgaliteExpressions): FonctionTrig {
+  return exercice.identite === "cosVersCos" ? "cos" : exercice.identite === "sinVersSin" ? "sin" : "tan";
+}
+
+/** « A = B + 2kπ » avec les arguments de l'instance (membre de droite déjà converti) — la première
+ * série seulement, avant d'isoler x. */
+export function egaliteArgumentsLatex(exercice: ExerciceEgaliteExpressions): string {
+  const argA = formatArgumentLatex(exercice.a1, exercice.b1);
+  const argB = formatArgumentLatex(exercice.a2, exercice.b2);
+  const b = exercice.b2.decimal === 0 ? argB : `\\left(${argB}\\right)`;
+  const B = exercice.identite === "tanVersTan" ? `-${b}` : `\\dfrac{\\pi}{2}-${b}`;
+  return `${argA} = ${B} + ${exercice.identite === "tanVersTan" ? "k\\pi" : "2k\\pi"}`;
+}

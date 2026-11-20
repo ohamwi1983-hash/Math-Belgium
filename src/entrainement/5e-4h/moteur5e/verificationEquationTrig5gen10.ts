@@ -18,7 +18,7 @@ import type {
   ExercicePythagoricienne,
   RacinePythagoricienne,
 } from "../core5e/equationsTrigonometriques.types";
-import { diagnostiquerReunionReseaux } from "./reseauxSolutionsTrig";
+import { diagnostiquerReunionReseaux, lireReseau } from "./reseauxSolutionsTrig";
 import type { Reseau } from "./reseauxSolutionsTrig";
 import type { ReponseArgument, ReponseDeuxFacteursArgument, ReponseDeuxFacteursLignes, ReponseRacine, ReponseRacinesPythagoricienne } from "./verificationEquationTrig";
 
@@ -46,8 +46,15 @@ function combiner2(a: StatutVerification, b: StatutVerification): StatutVerifica
 }
 
 /** Écran « argument » (famille directe) — séries pour u = ax + b. */
+/** Une ligne illisible est `parse_error` AVANT tout verdict (elle ne doit jamais coûter de tentative,
+ * même quand la bonne réponse était « aucune solution » ou « rejeter »). */
+function lignesIllisibles(lignes: string[]): boolean {
+  return lignes.some((l) => lireReseau(l) === null);
+}
+
 export function diagnostiquerArgument(exercice: ExerciceEquationTrig, reponse: ReponseArgument): StatutVerification {
   if (reponse.aucuneSolution) return exercice.aucuneSolution ? "correct" : "not_equivalent";
+  if (lignesIllisibles(reponse.lignes)) return "parse_error";
   if (exercice.aucuneSolution) return "not_equivalent";
   return diagnostiquerReunionReseaux(reponse.lignes, versReseaux(exercice.branchesU));
 }
@@ -68,6 +75,7 @@ export function diagnostiquerIsolerXProduit(exercice: ExerciceProduitFacteurs, r
 /** Une racine t de la substitution pythagoricienne : rejet (|t| > 1) ou séries de trig(x) = t. */
 export function diagnostiquerUneRacine(racine: RacinePythagoricienne, reponse: ReponseRacine): StatutVerification {
   if (reponse.rejeter) return racine.invalide ? "correct" : "not_equivalent";
+  if (lignesIllisibles(reponse.lignes)) return "parse_error";
   if (racine.invalide || racine.resolution === null) return "not_equivalent";
   return diagnostiquerReunionReseaux(reponse.lignes, versReseaux(racine.resolution.branchesU));
 }

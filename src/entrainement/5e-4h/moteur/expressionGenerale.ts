@@ -1,3 +1,5 @@
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+
 /**
  * Évaluateur générique d'expressions algébriques à une variable (x), généralisation de
  * expressionAlgebrique.ts (qui reste polynomial-only, utilisé par les exercices 1-6) pour couvrir
@@ -84,7 +86,8 @@ function decomposerMotColle(mot: string, variables: Record<string, number>): str
 /**
  * Saisie « naturelle » ramenée à la syntaxe du tokeniseur (audit 5e ch. 2, point 1) — l'élève recopie
  * ce que l'écran affiche :
- * - « − » (U+2212, moins typographique) et « – » (tiret demi-cadratin) → « - » ;
+ * - « − » (U+2212, moins typographique), « – » et « — » (tirets, appui long sur certains claviers)
+ *   → « - » (`normaliserSigneMoins`) ;
  * - « π » → « pi » (entouré d'espaces : « 2π », « kπ », « πx » restent des produits implicites) ;
  * - « √2 », « √x », « √π », « √(…) » → « sqrt(2) », « sqrt(x) », « sqrt(pi) », « sqrt(…) » (la racine
  *   porte sur le seul nombre ou nom qui suit, comme à l'écrit) ;
@@ -95,8 +98,7 @@ function decomposerMotColle(mot: string, variables: Record<string, number>): str
  * « · » et « × » sont déjà des opérateurs de multiplication du tokeniseur.
  */
 function normaliserSaisie(expression: string): string {
-  return expression
-    .replace(/[\u2212\u2013]/g, "-")
+  return normaliserSigneMoins(expression)
     .replace(/°/g, "")
     .replace(/√\s*(\(|\d+(?:[.,]\d+)?|π|[a-zA-Z]+)/g, (_, cible: string) => (cible === "(" ? "sqrt(" : `sqrt(${cible})`))
     .replace(/√/g, "sqrt")
@@ -473,3 +475,4 @@ export function evaluerExpressionGenerale(expression: string, x: number, variabl
   const noeud = new Parseur(tokeniser(normaliserSaisie(expression), variables)).analyser();
   return evaluer(noeud, x);
 }
+

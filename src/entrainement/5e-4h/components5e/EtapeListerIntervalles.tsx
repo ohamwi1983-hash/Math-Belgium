@@ -1,12 +1,12 @@
 import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
-import { consignePhaseFragments, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { consignePhaseFragments, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { FragmentsConsigneSinusoide } from "./FragmentsConsigneSinusoide";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesModelisation } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -30,16 +30,13 @@ interface Props {
  * indifférent (équivalence d'ensembles côté vérification). */
 export function EtapeListerIntervalles({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [paires, setPaires] = useState<[string, string][]>([["", ""]]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
-  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
-  const [ecritureIllisible, setEcritureIllisible] = useState(false);
+  const saisie = useTentativeLisible<[string, string][]>();
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = paires.length > 0 && paires.every(([inf, sup]) => inf.trim() !== "" && sup.trim() !== "");
-  const apresEchec = tentativesUtilisees > 0;
   /** Les paires forment UNE seule réponse (l'ensemble d'intervalles, équivalence d'ensembles côté
    * vérification), jamais des champs indépendants — même flag partagé par toute la liste que
    * "pointsErronee" dans `EnsembleReelGuideBuilder.tsx` (A.2). */
-  const pairesErronee = apresEchec && !!diagnostiquer && complet && diagnostiquer(paires) !== "correct";
+  const pairesErronee = (saisie.illisible || montrerErreurs) && !!diagnostiquer && complet && diagnostiquer(paires) !== "correct";
 
   function ajouterPaire() {
     setPaires((arr) => [...arr, ["", ""]]);
@@ -52,14 +49,8 @@ export function EtapeListerIntervalles({ exercice, tentativesUtilisees, tentativ
   }
   function valider() {
     if (!complet) return;
-    const statut = diagnostiquer ? diagnostiquer(paires) : null;
-    if (statut === "parse_error") {
-      setEcritureIllisible(true);
-      return;
-    }
-    setEcritureIllisible(false);
-    if (statut !== null) setDernierStatut(statut);
-    onValider(paires);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(paires, estLisible(diagnostiquer?.(paires)), onValider);
   }
 
   return (
@@ -91,28 +82,20 @@ export function EtapeListerIntervalles({ exercice, tentativesUtilisees, tentativ
       <button type="button" className="btn" onClick={ajouterPaire}>
         + Ajouter un intervalle
       </button>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "listerIntervallesInequation")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "listerIntervallesInequation")} block />}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesModelisation(exercice, "listerIntervallesInequation", texteAideNiveau2(exercice, "listerIntervallesInequation"))} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {ecritureIllisible && (
-          <p className="alert-error" role="alert">
-            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
-          </p>
-        )}
-        {montrerErreurs && !ecritureIllisible && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="intervalles"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? null : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

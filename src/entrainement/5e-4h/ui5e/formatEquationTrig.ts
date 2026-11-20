@@ -19,15 +19,6 @@ export const ANNONCE_PRECISION_DECIMAL = " (arrondis au centième près)";
 
 const NOM_FONCTION_LATEX: Record<FonctionTrig, string> = { sin: "\\sin", cos: "\\cos", tan: "\\tan" };
 
-/** Arrondi à la PREMIÈRE décimale (D.1 — "convention arrondie à la première décimale quand la
- * valeur n'est pas un angle particulier") — n'affecte QUE l'affichage (valeurs générées/attendues
- * montrées à l'élève) ; la vérification (`moteur5e/verificationEquationTrig.ts`) reste en précision
- * complète, totalement indépendante de cet arrondi. */
-function arrondi1(v: number): number {
-  const r = Math.round(v * 10) / 10;
-  return Object.is(r, -0) ? 0 : r;
-}
-
 /** Arrondi au CENTIÈME — la précision annoncée par la consigne (« arrondis au centième près ») et
  * la tolérance de la vérification (`TOLERANCE_EQUATION_TRIG = 0.01`). L'ancien affichage au dixième
  * (« 1,3 + 6,3k ») ne passait même pas sa propre vérification (6,3 au lieu de 2π ≈ 6,28). */
@@ -68,8 +59,11 @@ export function relationBranche(branche: { constante: ValeurPiOuDecimale }): str
 }
 
 /** Décimal en texte brut (étiquettes `<text>` SVG du cercle) : virgule simple. */
+/** Valeur approchée d'une étiquette (cercle trigonométrique) : au CENTIÈME, avec ses deux décimales,
+ * comme les réponses attendues (audit 5e ch. 2 : au dixième, « 2,6 » ne correspondait pas à « 2,62 »). */
 function formatDecimalTexte(v: number): string {
-  return arrondi1(v).toString().replace(".", ",");
+  const r = Math.round(v * 100) / 100;
+  return (Object.is(r, -0) ? 0 : r).toFixed(2).replace(".", ",").replace("-", "−");
 }
 
 function formatMagnitudePiLatex(numerateur: number, denominateur: number): string {
@@ -87,6 +81,9 @@ export function formatValeurLatex(v: ValeurPiOuDecimale): string {
     const signe = numerateur < 0 ? "-" : "";
     return `${signe}${formatMagnitudePiLatex(Math.abs(numerateur), denominateur)}`;
   }
+  // Valeur approchée : toujours ses deux décimales (« ≈ 0{,}40 », jamais « ≈ 0{,}4 », P4) ; une
+  // donnée décimale exacte (« x + 1{,}4 ») reste telle quelle.
+  if (valeurApprochee(v)) return (Math.round(v.decimal * 100) / 100).toFixed(2).replace(".", "{,}");
   return formatDecimalLatex(v.decimal);
 }
 
@@ -139,13 +136,6 @@ function formatCoefficientRationnelLatex(a: CoefficientRationnel): string {
   return a.denominateur === 1 ? `${a.numerateur}` : `\\frac{${a.numerateur}}{${a.denominateur}}`;
 }
 
-/** Aide 1 (D.1) — rappel de l'identité selon la fonction, jamais la valeur résolue. */
-export function texteAideArgumentNiveau1(fonction: FonctionTrig): string {
-  if (fonction === "sin") return "Deux angles supplémentaires ont le même sinus.";
-  if (fonction === "cos") return "Deux angles opposés ont le même cosinus.";
-  return "La tangente ne donne qu'une seule famille de solutions par période — pas de second angle à chercher, contrairement à sin et cos.";
-}
-
 /** Aide 2 (D.1) — formule générale selon la fonction, SANS jamais donner la valeur résolue. Fixe
  * par fonction, jamais conditionnée par `aucuneSolution`/`casSpecial` (simplification assumée —
  * voir CLAUDE.md section 5gen10). */
@@ -161,9 +151,6 @@ export function latexAideArgumentNiveau2(fonction: FonctionTrig): string {
   return "\\tan X = a \\iff X = \\arctan a + k\\pi";
 }
 
-export const TEXTE_AIDE_ISOLER_X_NIVEAU1 =
-  "Divise TOUT le membre de droite par a : la constante ET le terme en k — la période est elle aussi divisée par a, jamais seulement la constante.";
-
 /** Aide 2 — formule x=(u-b)/a SUBSTITUÉE (les vraies valeurs de u, a, b) mais PAS calculée/simplifiée
  * — une entrée par branche de `branchesU`. */
 export function formatAideIsolerXNiveau2Latex(exercice: { a: CoefficientRationnel; b: ValeurPiOuDecimale; branchesU: BrancheAngle[] }): string[] {
@@ -171,9 +158,6 @@ export function formatAideIsolerXNiveau2Latex(exercice: { a: CoefficientRationne
   const bLatex = formatValeurLatex(exercice.b);
   return exercice.branchesU.map((u) => `x = \\dfrac{(${formatBrancheLatex(u)}) - (${bLatex})}{${aLatex}}`);
 }
-
-export const TEXTE_AIDE_SOLUTIONS_NIVEAU1 = "Donne à k des valeurs entières successives (…, −1, 0, 1, 2, …) et garde toutes les valeurs de x comprises dans [0 ; 2π[ — pas seulement celles obtenues pour k = −1, 0 et 1.";
-export const TEXTE_AIDE_SOLUTIONS_NIVEAU2 = "Le premier point est déjà placé sur le cercle, à titre d'exemple. Retrouve les autres en faisant varier k.";
 
 /** Cherche p/q (q≤24) tel que v≈(p/q)·π, à tolérance serrée — reconstruction du label texte (pas
  * KaTeX, un `<text>` SVG brut ne peut pas rendre de LaTeX réel) du cercle trigonométrique en régime

@@ -45,6 +45,14 @@ function tirerDansIntervalle(min: number, max: number): number {
   return arrondi1(min + Math.random() * (max - min));
 }
 
+/** Valeur décimale tirée qui n'est pas une valeur remarquable (0, ±0,5 pour sin et cos ; ±1 pour
+ * tan) : celles-ci sont écrites en fraction, dans le régime exact (audit 5e ch. 2, P5). */
+function tirerDecimaleNonRemarquable(min: number, max: number, remarquables: number[]): number {
+  let k = tirerDansIntervalle(min, max);
+  while (remarquables.some((r) => Math.abs(Math.abs(k) - r) < 1e-9)) k = tirerDansIntervalle(min, max);
+  return k;
+}
+
 function choisirDansCatalogue<T>(catalogue: T[]): T {
   return catalogue[Math.floor(Math.random() * catalogue.length)];
 }
@@ -63,7 +71,7 @@ function tirerCasCos(): CasGenereEquationTrig {
     const entree = choisirDansCatalogue(CATALOGUE_COS);
     return { k: entree.k, kLatex: entree.kLatex, regime: "exact", aucuneSolution: false, casSpecial: false, branchesU: branchesGeneralesCos(entree.B, valeurNumerique(entree.B)) };
   }
-  const k = tirerDansIntervalle(-0.9, 0.9);
+  const k = tirerDecimaleNonRemarquable(-0.9, 0.9, [0, 0.5]);
   const B = Math.acos(k);
   return { k, kLatex: formatDecimalLatex(k), regime: "decimal", aucuneSolution: false, casSpecial: false, branchesU: branchesGeneralesCos(null, B) };
 }
@@ -82,7 +90,7 @@ function tirerCasSin(): CasGenereEquationTrig {
     const entree = choisirDansCatalogue(CATALOGUE_SIN);
     return { k: entree.k, kLatex: entree.kLatex, regime: "exact", aucuneSolution: false, casSpecial: false, branchesU: branchesGeneralesSin(entree.B, valeurNumerique(entree.B)) };
   }
-  const k = tirerDansIntervalle(-0.9, 0.9);
+  const k = tirerDecimaleNonRemarquable(-0.9, 0.9, [0, 0.5]);
   const B = Math.asin(k);
   return { k, kLatex: formatDecimalLatex(k), regime: "decimal", aucuneSolution: false, casSpecial: false, branchesU: branchesGeneralesSin(null, B) };
 }
@@ -92,7 +100,7 @@ function tirerCasTan(): CasGenereEquationTrig {
     const entree = choisirDansCatalogue(CATALOGUE_TAN);
     return { k: entree.k, kLatex: entree.kLatex, regime: "exact", aucuneSolution: false, casSpecial: false, branchesU: brancheTan(entree.B, valeurNumerique(entree.B)) };
   }
-  const k = tirerSigne() * tirerDansIntervalle(0.3, 3.8);
+  const k = tirerSigne() * tirerDecimaleNonRemarquable(0.3, 3.8, [1]);
   const B = Math.atan(k);
   return { k, kLatex: formatDecimalLatex(k), regime: "decimal", aucuneSolution: false, casSpecial: false, branchesU: brancheTan(null, B) };
 }

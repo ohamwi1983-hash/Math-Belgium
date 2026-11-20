@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
-import { CONSIGNE_SEPARER_FACTEURS, LATEX_AIDE_SEPARER_FACTEURS_NIVEAU1, TEXTE_AIDE_SEPARER_FACTEURS_NIVEAU1, formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_SEPARER_FACTEURS, formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -8,7 +8,8 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesSeparerFacteurs } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -33,18 +34,18 @@ interface Props {
 export function EtapeSepararFacteursProduit({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [ligne1, setLigne1] = useState("");
   const [ligne2, setLigne2] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string[]>();
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = ligne1.trim() !== "" && ligne2.trim() !== "";
   // Ordre indifférent côté vérification (échange autorisé) — les 2 champs ne peuvent pas être
   // diagnostiqués séparément, un même statut combiné s'applique aux 2.
-  const lignesErronee = montrerErreurs && !!diagnostiquer && complet && diagnostiquer([ligne1, ligne2]) !== "correct";
+  const lignesErronee = (saisie.illisible || montrerErreurs) && !!diagnostiquer && complet && diagnostiquer([ligne1, ligne2]) !== "correct";
 
   function valider() {
     if (!complet) return;
     const lignes = [ligne1, ligne2];
-    if (diagnostiquer) setDernierStatut(diagnostiquer(lignes));
-    onValider(lignes);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(lignes, estLisible(diagnostiquer?.(lignes)), onValider);
   }
 
   return (
@@ -70,23 +71,20 @@ export function EtapeSepararFacteursProduit({ exercice, tentativesUtilisees, ten
         <label className="field-label field-label-minuscule">Équation 2</label>
         <input type="text" className={`text-input${lignesErronee ? " is-erronee" : ""}`} value={ligne2} onChange={(e) => setLigne2(e.target.value)} placeholder="ex : cos(5x)=3/7" />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_SEPARER_FACTEURS_NIVEAU1}</p>
-          <Katex expression={LATEX_AIDE_SEPARER_FACTEURS_NIVEAU1} block />
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesSeparerFacteurs()} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="equation"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? null : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -25,13 +25,10 @@ const POINTS_DE_BASE = 100;
  * de la campagne "Variante A3/A3b" appliquées). */
 export const NIVEAU_AIDE_MAX_GEOMETRIE_CERCLE = 2;
 
-/** Écrans dont l'aide niveau 2 a été retirée (donnait la soustraction déjà posée par l'aide niveau
- * 1 — "secteur − triangle" — sans rien ajouter) : l'écran segment de `segmentCirculaire` et les 2
- * écrans segment de `lentille` (un par cercle). Tout autre écran garde le plafond uniforme. */
-const PHASES_AIDE_MAX_1: ReadonlySet<PhaseGeometrieCercle> = new Set(["aireSegment", "segmentAire1", "segmentAire2"]);
-
-export function niveauAideMaxGeometrieCercle(phase: PhaseGeometrieCercle): number {
-  return PHASES_AIDE_MAX_1.has(phase) ? 1 : NIVEAU_AIDE_MAX_GEOMETRIE_CERCLE;
+export function niveauAideMaxGeometrieCercle(_phase: PhaseGeometrieCercle): number {
+  // Audit 5e ch. 2, lot B : deux niveaux partout (le niveau 2 des écrans « segment » pose la
+  // soustraction avec les aires déjà trouvées).
+  return NIVEAU_AIDE_MAX_GEOMETRIE_CERCLE;
 }
 
 function etatInitial(

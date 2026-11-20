@@ -1,14 +1,14 @@
 import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
 import type { PhaseModelisationSinusoide } from "../moteur5e/typesModelisationSinusoide";
-import { consignePhaseFragments, labelPhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { consignePhaseFragments, labelPhase, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { FragmentsConsigneSinusoide } from "./FragmentsConsigneSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesModelisation,   messageCibleModelisation } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -43,10 +43,10 @@ const PLACEHOLDERS: Partial<Record<PhaseModelisationSinusoide, string>> = {
   amplitude: "ex : 2,5",
   decalage: "ex : 7,5",
   pulsation: "ex : 1,3",
-  phi: "ex : 3*pi/5",
-  fonctionFinale: "ex : 7*sin(0,4*t-0,9)+2",
-  poserExtremum: "ex : 1,2 + k*pi/4",
-  isolerTExtremum: "ex : 4,7 + k*2,5",
+  phi: "ex : 3π/5",
+  fonctionFinale: "ex : 7sin(0,4t − 0,9) + 2",
+  poserExtremum: "ex : 1,2 + kπ/4",
+  isolerTExtremum: "ex : 4,7 + 2,5k",
 };
 
 /**
@@ -57,24 +57,15 @@ const PLACEHOLDERS: Partial<Record<PhaseModelisationSinusoide, string>> = {
  */
 export function EtapeChampSimpleModelisation({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
-  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
-  const [ecritureIllisible, setEcritureIllisible] = useState(false);
+  const saisie = useTentativeLisible<string>();
   const montrerErreurs = tentativesUtilisees > 0;
-  const apresEchec = tentativesUtilisees > 0;
-  const texteErronee = apresEchec && !!diagnostiquer && diagnostiquer(texte) !== "correct";
+  const texteErronee = (saisie.illisible || montrerErreurs) && !!diagnostiquer && diagnostiquer(texte) !== "correct";
   const placeholder = PLACEHOLDERS[phase] ?? "ex : 2,5";
 
   function valider() {
     if (texte.trim() === "") return;
-    const statut = diagnostiquer ? diagnostiquer(texte) : null;
-    if (statut === "parse_error") {
-      setEcritureIllisible(true);
-      return;
-    }
-    setEcritureIllisible(false);
-    if (statut !== null) setDernierStatut(statut);
-    onValider(texte);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(texte, estLisible(diagnostiquer?.(texte)), onValider);
   }
 
   return (
@@ -91,28 +82,20 @@ export function EtapeChampSimpleModelisation({ exercice, phase, tentativesUtilis
           placeholder={placeholder}
         />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, phase)}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, phase)} block />}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesModelisation(exercice, phase, texteAideNiveau2(exercice, phase))} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
           Valider
         </button>
-        {ecritureIllisible && (
-          <p className="alert-error" role="alert">
-            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
-          </p>
-        )}
-        {montrerErreurs && !ecritureIllisible && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ={phase === "fonctionFinale" ? "expressionT" : phase === "poserExtremum" || phase === "isolerTExtremum" ? "serie" : "nombre"}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleModelisation(exercice, phase, saisie.soumise) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

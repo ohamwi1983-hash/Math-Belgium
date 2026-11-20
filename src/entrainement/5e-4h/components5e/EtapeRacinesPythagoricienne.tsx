@@ -1,13 +1,14 @@
 import { useState } from "react";
 import type { ExercicePythagoricienne } from "../core5e/equationsTrigonometriques.types";
-import { TEXTE_AIDE_RACINES_NIVEAU1, consigneRacinesPythagoricienne, formatEnonceMixteLatex } from "../ui5e/formatEquationTrigonometrique";
+import { consigneRacinesPythagoricienne, equationEnTLatex, formatEnonceMixteLatex } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesRacinesPythagoricienne, messageCibleRacines } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -36,18 +37,18 @@ interface Props {
 export function EtapeRacinesPythagoricienne({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [t1, setT1] = useState("");
   const [t2, setT2] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string[]>();
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = t1.trim() !== "" && t2.trim() !== "";
   // Ensemble {t1;t2} vérifié à l'ORDRE INDIFFÉRENT — les 2 champs ne peuvent pas être
   // diagnostiqués séparément, un même statut combiné s'applique aux 2.
-  const champsErronee = montrerErreurs && !!diagnostiquer && complet && diagnostiquer([t1, t2]) !== "correct";
+  const champsErronee = (saisie.illisible || montrerErreurs) && !!diagnostiquer && complet && diagnostiquer([t1, t2]) !== "correct";
 
   function valider() {
     if (!complet) return;
     const textes = [t1, t2];
-    if (diagnostiquer) setDernierStatut(diagnostiquer(textes));
-    onValider(textes);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(textes, estLisible(diagnostiquer?.(textes)), onValider);
   }
 
 
@@ -72,24 +73,22 @@ export function EtapeRacinesPythagoricienne({ exercice, tentativesUtilisees, ten
         <label className="field-label field-label-minuscule">
           <Katex expression="t_2" />
         </label>
-        <input type="text" className={`text-input${champsErronee ? " is-erronee" : ""}`} value={t2} onChange={(e) => setT2(e.target.value)} placeholder="ex : -2/7" />
+        <input type="text" className={`text-input${champsErronee ? " is-erronee" : ""}`} value={t2} onChange={(e) => setT2(e.target.value)} placeholder="ex : −2/7" />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_RACINES_NIVEAU1}</p>
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesRacinesPythagoricienne(equationEnTLatex(exercice))} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="nombre"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleRacines(saisie.soumise, exercice.racine1.t, exercice.racine2.t) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -1,14 +1,14 @@
 import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
 import type { ReponseArgumentResoudre } from "../moteur5e/verificationModelisationSinusoide";
-import { consignePhaseFragments, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { consignePhaseFragments, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { FragmentsConsigneSinusoide } from "./FragmentsConsigneSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesModelisation, messageCibleArgumentModelisation } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -37,17 +37,14 @@ interface Props {
 export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choixAucunAngle, setChoixAucunAngle] = useState<boolean | null>(null);
   const [lignes, setLignes] = useState<string[]>([""]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
-  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
-  const [ecritureIllisible, setEcritureIllisible] = useState(false);
+  const saisie = useTentativeLisible<ReponseArgumentResoudre>();
   const montrerErreurs = tentativesUtilisees > 0;
   const lignesVisibles = choixAucunAngle === false;
   const complet = choixAucunAngle === true || (lignesVisibles && lignes.length > 0 && lignes.every((l) => l.trim() !== ""));
-  const apresEchec = tentativesUtilisees > 0;
   const reponseCourante: ReponseArgumentResoudre = choixAucunAngle === true ? { aucuneSolution: true, lignes: [] } : { aucuneSolution: false, lignes };
   /** Les lignes forment UNE seule réponse (l'ensemble des branches), jamais des champs indépendants
    * — même flag partagé par toute la liste que "pointsErronee" dans `EnsembleReelGuideBuilder.tsx`. */
-  const lignesErronee = apresEchec && lignesVisibles && !!diagnostiquer && lignes.every((l) => l.trim() !== "") && diagnostiquer(reponseCourante) !== "correct";
+  const lignesErronee = (saisie.illisible || montrerErreurs) && lignesVisibles && !!diagnostiquer && lignes.every((l) => l.trim() !== "") && diagnostiquer(reponseCourante) !== "correct";
   const placeholder = "ex : asin(0,37) + 2*k*pi";
 
   function ajouterLigne() {
@@ -62,14 +59,8 @@ export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentative
   function valider() {
     if (!complet) return;
     const reponse: ReponseArgumentResoudre = choixAucunAngle === true ? { aucuneSolution: true, lignes: [] } : { aucuneSolution: false, lignes };
-    const statut = diagnostiquer ? diagnostiquer(reponse) : null;
-    if (statut === "parse_error") {
-      setEcritureIllisible(true);
-      return;
-    }
-    setEcritureIllisible(false);
-    if (statut !== null) setDernierStatut(statut);
-    onValider(reponse);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(reponse, estLisible(diagnostiquer?.(reponse)), onValider);
   }
 
   return (
@@ -109,28 +100,20 @@ export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentative
           </button>
         </div>
       )}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "argumentResoudre")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "argumentResoudre")} block />}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesModelisation(exercice, "argumentResoudre", texteAideNiveau2(exercice, "argumentResoudre"))} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {ecritureIllisible && (
-          <p className="alert-error" role="alert">
-            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
-          </p>
-        )}
-        {montrerErreurs && !ecritureIllisible && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="solutions"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleArgumentModelisation(exercice, saisie.soumise) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

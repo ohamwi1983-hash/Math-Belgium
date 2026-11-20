@@ -34,6 +34,7 @@ const OPTIONS_TECHNIQUE_PHASE2 = [
 ];
 import {
   niveauAideMaxModelisation,
+  tentativesMaxModelisation,
   activerAideSuivante,
   demarrerSessionModelisationSinusoide,
   soumettreReponseAmplitude,
@@ -357,7 +358,7 @@ export function App5gen13() {
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxModelisation(etat);
   const cleEcran = `${numeroExercice}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
   const technique = exercice.phase1.technique;

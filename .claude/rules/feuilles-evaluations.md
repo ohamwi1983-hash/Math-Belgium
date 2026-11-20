@@ -324,6 +324,22 @@ régulier dont les lignes passent par les valeurs remarquables elles-mêmes.
   niveau 2. Même contrôle pour un verdict DANS une variante (`verdictniv.ts`) : gen75 « angle » (nombres
   constant → 4, 9 min) et gen79 inverse (constants : 5, 12 min). Plans réels (`construirePlan`,
   30 × 2 séries) : verdict B ≠ A 30/30 par groupe.
+- **5e ch. 2 (lots B, C, D, 5gen6–13)** : `5e-4h/components5e/RetourSaisieTrig.tsx` (hook du 4e,
+  illisible par nature de champ `MESSAGES_ILLISIBLE_TRIG`, `AidesTrig` : formule en KaTeX EN LIGNE
+  `\displaystyle`, sécable après une relation, `\qquad` ou « ou » — en display elle sortait du bloc à
+  390 px) ; textes `ui5e/aidesTrigonometrie.ts`. **Le moteur lit la saisie AVANT tout verdict**
+  (« aucune solution », racine à rejeter, φ absent de B1) : sinon une saisie illisible coûtait une
+  tentative. Appel trig reconnu par `(?<![a-z])(sin|cos|tan)\s*\(`, jamais `\b` (« 13sin(…) » était
+  jugé FAUX, 5gen10 / 5gen13). Toute notation AFFICHÉE (placeholder, réponse attendue) doit être
+  lisible : `cos^2(x)`, `cos²(x)` et « = 0 » final (5gen10, `normaliserPuissanceTrig`), « f(t) = »
+  recopié, ω, φ et `arcsin` (5gen13 ; le placeholder du système B3 était illisible).
+  « — » lu comme « − » dans tout le 5e (`expressionGenerale`). φ ramené
+  dans ]−π ; π] (5gen8 ; 5gen13 B2 : minimum −π/2 ; B3 : φ₀ puis « φ = φ₀ − 2π »). Tirage : profils
+  `calcul` 5gen7 (exacte) et 5gen12 (calculatrice), `groupe_technique` 5gen10 (technique B ≠ A
+  30/30 plans), cas particuliers 5gen10 directe/produit et 5gen13 (aucune solution, inéquation
+  toujours vraie/fausse), `forme` 5gen11 (mode) et 5gen13 (type de 2ᵉ partie). Niveau et durée
+  diffèrent d'une technique à l'autre du groupe (directe 10,6 min, produit 15,2) : sans effet, la
+  copie d'évaluation n'imprime ni l'un ni l'autre.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 

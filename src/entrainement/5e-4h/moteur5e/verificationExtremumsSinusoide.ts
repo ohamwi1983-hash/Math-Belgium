@@ -38,30 +38,45 @@ function differenceEquation(texte: string): ((x: number, k: number) => number) |
  * côtés éventuellement inversés, k parcouru dans un sens ou l'autre, constante décalée d'un nombre
  * entier de périodes (point 40 : « k·π = 2x/3 − 5π/6 », « 2x − 5π/2 = 3kπ » acceptés) ? La différence
  * D(x, k) doit être affine : D = α·x + β·k + γ avec α ≠ 0, |β/α| = |p| et −γ/α ≡ c (mod p). */
-function equivalenteASerieEnX(texte: string, c: number, p: number): StatutVerification {
+/** Série en x décrite par une équation affine en (x, k) : D = α·x + β·k + γ, x = −γ/α + k·(β/α).
+ * `null` : illisible ; "nonAffine" : pas de cette forme (ou α nul). Sert aussi aux messages ciblés. */
+export function lireSerieEnX(texte: string): { constante: number; periode: number } | null | "nonAffine" {
   const D = differenceEquation(texte);
-  if (D === null) return "parse_error";
+  if (D === null) return null;
   let valeurs: number[];
   try {
     valeurs = [D(0, 0), D(1, 0), D(0, 1), D(1, 1), D(2, 3), D(-1, 2)];
   } catch {
-    return "parse_error";
+    return null;
   }
-  if (valeurs.some((v) => !Number.isFinite(v))) return "parse_error";
+  if (valeurs.some((v) => !Number.isFinite(v))) return null;
   const [d00, d10, d01] = valeurs;
   const alpha = d10 - d00;
   const beta = d01 - d00;
   const gamma = d00;
   const affine = (x: number, k: number) => alpha * x + beta * k + gamma;
   const pointsTest: [number, number, number][] = [[1, 1, valeurs[3]], [2, 3, valeurs[4]], [-1, 2, valeurs[5]]];
-  if (pointsTest.some(([x, k, v]) => Math.abs(affine(x, k) - v) > 1e-6 * (1 + Math.abs(v)))) return "not_equivalent";
-  if (Math.abs(alpha) < 1e-9) return "not_equivalent";
-  const periode = beta / alpha;
-  const constante = -gamma / alpha;
-  if (Math.abs(Math.abs(periode) - Math.abs(p)) > TOLERANCE_EQUATION_TRIG) return "not_equivalent";
-  const ecart = constante - c;
+  if (pointsTest.some(([x, k, v]) => Math.abs(affine(x, k) - v) > 1e-6 * (1 + Math.abs(v)))) return "nonAffine";
+  if (Math.abs(alpha) < 1e-9) return "nonAffine";
+  return { constante: -gamma / alpha, periode: beta / alpha };
+}
+
+/** Deux séries en x identiques (même période au signe près, constantes égales à une période près). */
+export function memesSeriesEnX(a: { constante: number; periode: number }, c: number, p: number): boolean {
+  if (Math.abs(Math.abs(a.periode) - Math.abs(p)) > TOLERANCE_EQUATION_TRIG) return false;
+  const ecart = a.constante - c;
   const tours = Math.round(ecart / p);
-  return Math.abs(ecart - tours * p) <= TOLERANCE_EQUATION_TRIG ? "correct" : "not_equivalent";
+  return Math.abs(ecart - tours * p) <= TOLERANCE_EQUATION_TRIG;
+}
+
+/** L'équation soumise est-elle ÉQUIVALENTE à « x = c + k·p » (k entier) — à un facteur non nul près,
+ * côtés éventuellement inversés, k parcouru dans un sens ou l'autre, constante décalée d'un nombre
+ * entier de périodes (point 40 : « k·π = 2x/3 − 5π/6 », « 2x − 5π/2 = 3kπ » acceptés) ? */
+function equivalenteASerieEnX(texte: string, c: number, p: number): StatutVerification {
+  const serie = lireSerieEnX(texte);
+  if (serie === null) return "parse_error";
+  if (serie === "nonAffine") return "not_equivalent";
+  return memesSeriesEnX(serie, c, p) ? "correct" : "not_equivalent";
 }
 
 /** Écran 1 — poser l'équation des positions cherchées : toute équation ÉQUIVALENTE à

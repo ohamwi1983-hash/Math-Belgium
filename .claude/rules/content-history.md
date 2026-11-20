@@ -4645,3 +4645,17 @@ isolé, 0 `.katex-error`.
   (leurs sections ont maintenant deux générateurs). Vérifié : 2 000 tirages par variante (recalcul
   indépendant, saisies justes autrement écrites, « − », illisible), parcours iPhone 13 (390 px,
   0 erreur console), documents réels 2 séries + aménagée sans débordement, collecteur 0 égalité fausse.
+## 5e (4h), Chapitre 2 — lots B, C et D de l'audit (générateurs 5gen6–5gen13)
+
+Lot B (retours de saisie) : illisible sans tentative et message par nature de champ, messages ciblés,
+aides à deux niveaux en KaTeX (`ui5e/aidesTrigonometrie.ts`, `components5e/RetourSaisieTrig.tsx`),
+« Ici u = … », « — » lu comme « − ». Bugs trouvés au parcours : illisible jugé « faux » avant d'être
+lu sur les écrans « aucune solution » / racine à rejeter / φ de B1 ; « 13sin(…) » (coefficient collé)
+jugé faux en 5gen10 et 5gen13 (`\b` devant sin) ; formules d'aide et du corrigé (« cos X = a ⟺ … »)
+sorties de l'écran à 390 px ; notations affichées illisibles (cos²(x), « = 0 », « f(t) = », ω/φ/arcsin
+du placeholder du système B3) ; placeholders 5gen10 sans « * » ni « pi ». Lot C : 5gen10 sans famille entièrement exclue, ni 0·sin x, ni −1·, ni
+doublon, décimales au centième ; φ dans ]−π ; π] (5gen8, 5gen13) ; libellés 5gen8 ; 5gen7 sans
+`calculatriceIndispensable` ; « question b) » fantôme de 5gen13 retirée ; essuie-glace 30°–170° ;
+fenêtre 5gen11 [0 ; 2T[ quand T n'a pas π ; étiquettes du cercle au dixième. Lot D : profils 5gen7,
+5gen12, cas particuliers et `groupe_technique` de 5gen10, `forme` de 5gen11 et 5gen13 (détail :
+`feuilles-evaluations.md`, « Textes : écran vs papier »).

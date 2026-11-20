@@ -121,8 +121,11 @@ export function diagnostiquerArgument(exercice: ExerciceEquationTrig, reponse: R
   if (reponse.aucuneSolution) {
     return exercice.aucuneSolution ? "correct" : "not_equivalent";
   }
+  // Lignes lues AVANT le verdict « aucune solution » : une saisie illisible ne coûte jamais de tentative.
+  const statut = diagnostiquerBranches(reponse.lignes, exercice.branchesU);
+  if (statut === "parse_error") return statut;
   if (exercice.aucuneSolution) return "not_equivalent";
-  return diagnostiquerBranches(reponse.lignes, exercice.branchesU);
+  return statut;
 }
 
 export function verifierArgument(exercice: ExerciceEquationTrig, reponse: ReponseArgument): boolean {
@@ -143,7 +146,8 @@ export function verifierIsolerX(exercice: ExerciceEquationTrig, lignes: string[]
  * réutilisée par `diagnostiquerSolutions` (famille "directe") ET directement par les écrans finaux
  * des familles 2/3/4 et l'écran "racines" de la famille 3. */
 export function diagnostiquerEnsembleNumerique(textes: string[], cible: number[]): StatutVerification {
-  if (textes.length !== cible.length) return "not_equivalent";
+  // Lecture AVANT le compte : une valeur illisible est toujours `parse_error` (jamais comptée comme
+  // tentative), même quand le nombre de valeurs est faux.
   const valeurs: number[] = [];
   for (const texte of textes) {
     try {
@@ -154,6 +158,7 @@ export function diagnostiquerEnsembleNumerique(textes: string[], cible: number[]
       return "parse_error";
     }
   }
+  if (valeurs.length !== cible.length) return "not_equivalent";
   const restantes = [...cible];
   for (const v of valeurs) {
     const index = restantes.findIndex((s) => Math.abs(s - v) <= TOLERANCE_EQUATION_TRIG);
@@ -193,7 +198,9 @@ export function diagnostiquerReconnaissance(exercice: ExerciceEquationTrigonomet
 // ============================================================================
 
 const TRIG_MATH: Record<FonctionTrig, (x: number) => number> = { cos: Math.cos, sin: Math.sin, tan: Math.tan };
-const DEBUT_APPEL_TRIG = /\b(sin|cos|tan)\s*\(/i;
+// Jamais `\b` (il ne coupe pas entre un chiffre et une lettre : « 2sin(x) » n'était pas reconnu) ;
+// une lettre devant (arcsin) reste exclue.
+const DEBUT_APPEL_TRIG = /(?<![a-z])(sin|cos|tan)\s*\(/i;
 const GARDE_APPELS_TRIG_MAX = 10;
 
 interface AppelTrigTrouve {
@@ -249,7 +256,30 @@ const X_ECHANTILLONS_TRIG = [0.3, 0.9, 1.7, 2.6, -0.5];
 /** Compare la VALEUR d'une expression soumise (contenant potentiellement sin/cos/tan) à une
  * fonction de référence RÉELLE, sur plusieurs x — jamais une vérification "solves the equation",
  * une équivalence D'EXPRESSIONS (vraie pour tout x, pas seulement les solutions). */
-function diagnostiquerEquivalenceTrig(texte: string, reference: (x: number) => number): StatutVerification {
+/** Écritures du cours acceptées en plus de « cos(x)^2 » : « cos^2(x) », « cos²(x) » (la forme de la
+ * réponse attendue affichée) et un « = 0 » final (ou « 0 = » initial) recopié de l'équation — sinon
+ * elles restaient illisibles et l'élève qui recopiait la forme écrite était bloqué. */
+export function normaliserPuissanceTrig(texte: string): string {
+  let s = texte.trim().replace(/\s*=\s*0$/, "").replace(/^0\s*=\s*/, "");
+  const motif = /(?<![a-z])(sin|cos|tan)\s*(?:\^\s*2|²)\s*\(/i;
+  for (let garde = 0; garde < GARDE_APPELS_TRIG_MAX; garde++) {
+    const m = motif.exec(s);
+    if (m === null) break;
+    const ouvrante = m.index + m[0].length - 1;
+    let profondeur = 0;
+    let fermante = -1;
+    for (let i = ouvrante; i < s.length; i++) {
+      if (s[i] === "(") profondeur++;
+      else if (s[i] === ")" && --profondeur === 0) { fermante = i; break; }
+    }
+    if (fermante === -1) break;
+    s = `${s.slice(0, m.index)}(${m[1]}${s.slice(ouvrante, fermante + 1)})^2${s.slice(fermante + 1)}`;
+  }
+  return s;
+}
+
+function diagnostiquerEquivalenceTrig(texteBrut: string, reference: (x: number) => number): StatutVerification {
+  const texte = normaliserPuissanceTrig(texteBrut);
   for (const x of X_ECHANTILLONS_TRIG) {
     let valeur: number;
     try {
@@ -398,8 +428,11 @@ export interface ReponseRacinesPythagoricienne {
  * combine pour le score global, jamais l'inverse. */
 export function diagnostiquerUneRacine(racine: RacinePythagoricienne, reponse: ReponseRacine): StatutVerification {
   if (reponse.rejeter) return racine.invalide ? "correct" : "not_equivalent";
+  // Lignes lues AVANT le verdict « racine à rejeter » : une saisie illisible ne coûte jamais de tentative.
+  const statut = diagnostiquerBranches(reponse.lignes, racine.resolution?.branchesU ?? []);
+  if (statut === "parse_error") return statut;
   if (racine.invalide) return "not_equivalent";
-  return diagnostiquerBranches(reponse.lignes, racine.resolution!.branchesU);
+  return statut;
 }
 
 /** Écran 3 (famille 3) — pour chaque racine, rejeter (|t|>1) ou résoudre trig(x)=t (a=1,b=0). */

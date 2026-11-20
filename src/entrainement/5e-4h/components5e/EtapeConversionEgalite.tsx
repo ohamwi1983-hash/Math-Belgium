@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceEgaliteExpressions } from "../core5e/equationsTrigonometriques.types";
-import { CONSIGNE_CONVERSION_EGALITE, formatEnonceEgaliteLatex, latexAideConversionEgaliteNiveau1, texteAideConversionEgaliteNiveau1 } from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_CONVERSION_EGALITE, argumentDroitEgaliteLatex, formatEnonceEgaliteLatex, latexAideConversionEgaliteNiveau1, texteAideConversionEgaliteNiveau1 } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -8,7 +8,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesConversionEgalite } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -31,15 +32,15 @@ interface Props {
  * champ de texte libre. */
 export function EtapeConversionEgalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string>();
   const montrerErreurs = tentativesUtilisees > 0;
-  const texteErronee = montrerErreurs && !!diagnostiquer && diagnostiquer(texte) !== "correct";
+  const texteErronee = (saisie.illisible || montrerErreurs) && !!diagnostiquer && diagnostiquer(texte) !== "correct";
   const complet = texte.trim() !== "";
 
   function valider() {
     if (!complet) return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
-    onValider(texte);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(texte, estLisible(diagnostiquer?.(texte)), onValider);
   }
 
   return (
@@ -54,24 +55,21 @@ export function EtapeConversionEgalite({ exercice, tentativesUtilisees, tentativ
       />
       <p className="prompt-text">{CONSIGNE_CONVERSION_EGALITE}</p>
       <ApercuExpressionLatex texte={texte} />
-      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : cos(pi/2-5x-pi/7)" />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideConversionEgaliteNiveau1(exercice)}</p>
-          <Katex expression={latexAideConversionEgaliteNiveau1(exercice)} block />
-        </div>
-      )}
+      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : cos(π/2 − 5x − π/7)" />
+      <AidesTrig niveauAide={niveauAide} aides={aidesConversionEgalite(texteAideConversionEgaliteNiveau1(exercice), latexAideConversionEgaliteNiveau1(exercice), argumentDroitEgaliteLatex(exercice))} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="equation"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? null : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

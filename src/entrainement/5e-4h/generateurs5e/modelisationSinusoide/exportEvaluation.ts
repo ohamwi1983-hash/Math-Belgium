@@ -13,7 +13,7 @@ import type {
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { LIBELLE_PHASE, consignePhase, consignePhaseFragments, formatTermesDonneesConstructionLatex, formatTermesReponseAttendueModelisationSinusoide, nombreLatex } from "../../ui5e/formatModelisationSinusoide";
+import { LIBELLE_PHASE, consignePhase, consignePhaseFragments, formatTermesDonneesConstructionLatex, formatTermesReponseAttendueModelisationSinusoide, nombreApprocheLatex, nombreLatex } from "../../ui5e/formatModelisationSinusoide";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { correctionDetailleeModelisationSinusoide, lettresLectureModelisation, lettresSansChargeModelisation } from "./corrigeDetaille";
 import { CATALOGUE_TECHNIQUES, construireAvecTechnique, genererExerciceModelisationSinusoide } from "./index";
@@ -96,7 +96,7 @@ function introduction(technique: TechniquePhase1): FragmentConsigne[] {
         latex(MODELE),
         texte(", avec "),
         latex("\\omega>0"),
-        texte(" ; A et b sont connus. On connaît deux points de la courbe, situés sur une même montée : en chacun d'eux, l'argument ωt + φ est compris entre −π/2 et π/2."),
+        texte(" ; A et b sont connus. On connaît deux points de la courbe, situés sur une même montée : en chacun d'eux, l'argument ωt + φ est compris entre −π/2 et π/2, à un multiple de 2π près."),
       ];
     case "donnee":
       return [];
@@ -175,13 +175,13 @@ function joindre(termes: string[], separateur = " ; "): FragmentConsigne[] {
 function reponseExploitation(q: QuestionPhase2): FragmentConsigne[] {
   switch (q.type) {
     case "resoudre":
-      return q.aucuneSolution || q.solutions.length === 0 ? [texte("aucune solution")] : joindre(q.solutions.map((s) => `t\\approx ${nombreLatex(s, 2)}`));
+      return q.aucuneSolution || q.solutions.length === 0 ? [texte("aucune solution")] : joindre(q.solutions.map((s) => `t\\approx ${nombreApprocheLatex(s, 2)}`));
     case "extremum":
-      return joindre(q.solutions.map((s) => `t\\approx ${nombreLatex(s, 2)}`));
+      return joindre(q.solutions.map((s) => `t\\approx ${nombreApprocheLatex(s, 2)}`));
     case "inequation":
       if (q.casSpecial === "toujoursVrai") return [texte("toujours vraie : "), latex(fenetreLatex(q))];
       if (q.casSpecial === "toujoursFaux") return [texte("aucune solution")];
-      return joindre(q.intervalles.map((iv) => `[${nombreLatex(iv.inf, 2)}\\,;\\,${nombreLatex(iv.sup, 2)}]`), " ∪ ");
+      return joindre(q.intervalles.map((iv) => `[${nombreApprocheLatex(iv.inf, 2)}\\,;\\,${nombreApprocheLatex(iv.sup, 2)}]`), " ∪ ");
   }
 }
 
@@ -215,10 +215,12 @@ function baremeModelisationSinusoide(exercice: ExerciceModelisationSinusoide): B
   const erreurs: ErreurFrequente[] = [];
   if (d.technique === "b1") erreurs.push({ description: [texte("Valeur numérique inventée pour φ")], cout: "0 pt sur l'étape" });
   if (d.technique === "b1" || d.technique === "b2") erreurs.push({ description: [texte("ω = 2πT ou ω = T/(2π) au lieu de 2π/T")], cout: "0 pt sur l'étape, suite notée sans double pénalité" });
-  if (d.technique === "b2" && !d.estMax) erreurs.push({ description: [texte("Argument π/2 utilisé pour un minimum (au lieu de 3π/2)")], cout: "0 pt sur l'étape" });
+  if (d.technique === "b2" && !d.estMax) erreurs.push({ description: [texte("Argument π/2 utilisé pour un minimum (au lieu de −π/2)")], cout: "0 pt sur l'étape" });
   if (d.technique === "b3") erreurs.push({ description: [texte("Calculatrice en degrés pour arcsin")], cout: "0 pt sur l'étape" });
-  if (q !== null && q.type === "resoudre" && !q.aucuneSolution) erreurs.push({ description: [texte("Une seule des deux séries de solutions")], cout: "moitié des points de la question b)" });
-  if (q !== null && q.type === "extremum") erreurs.push({ description: [texte("Seulement les maximums, ou période 2π au lieu de π")], cout: "moitié des points de la question b)" });
+  // « question b) » seulement quand le papier a une partie a) (technique « donnée » : une seule question, P9).
+  const renvoiB = d.technique === "donnee" ? "moitié des points" : "moitié des points de la question b)";
+  if (q !== null && q.type === "resoudre" && !q.aucuneSolution) erreurs.push({ description: [texte("Une seule des deux séries de solutions")], cout: renvoiB });
+  if (q !== null && q.type === "extremum") erreurs.push({ description: [texte("Seulement les maximums, ou période 2π au lieu de π")], cout: renvoiB });
   if (q !== null && q.type === "inequation" && q.casSpecial === null) erreurs.push({ description: [texte("Arc complémentaire choisi (sens de l'inégalité inversé)")], cout: "0 pt sur l'étape" });
 
   const acceptees: FragmentConsigne[][] = [[texte("Valeurs qui diffèrent de quelques centièmes quand ω et φ ont été arrondis en cours de calcul")]];

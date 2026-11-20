@@ -1,12 +1,6 @@
 import { useState } from "react";
 import type { ExerciceEgaliteExpressions } from "../core5e/equationsTrigonometriques.types";
-import {
-  CONSIGNE_RESOUDRE_EGALITE,
-  formatAideResoudreEgaliteNiveau2Latex,
-  formatEnonceEgaliteLatex,
-  latexAideResoudreEgaliteNiveau1,
-  texteAideResoudreEgaliteNiveau1,
-} from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_RESOUDRE_EGALITE, egaliteArgumentsLatex, fonctionEgalite, formatEnonceEgaliteLatex } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -14,7 +8,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesResoudreEgalite, messageCibleSeriesX } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -38,16 +33,15 @@ interface Props {
  * sinon). */
 export function EtapeResoudreEgalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: Math.max(1, exercice.branches.length) }, () => ""));
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string[]>();
   const montrerErreurs = tentativesUtilisees > 0;
-  const lignesErronee = montrerErreurs && !!diagnostiquer && diagnostiquer(lignes) !== "correct";
+  const lignesErronee = (saisie.illisible || montrerErreurs) && !!diagnostiquer && diagnostiquer(lignes) !== "correct";
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
-  const aide2 = formatAideResoudreEgaliteNiveau2Latex(exercice);
 
   function valider() {
     if (!complet) return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(lignes));
-    onValider(lignes);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(lignes, estLisible(diagnostiquer?.(lignes)), onValider);
   }
 
   return (
@@ -70,7 +64,7 @@ export function EtapeResoudreEgalite({ exercice, tentativesUtilisees, tentatives
               className={`text-input${lignesErronee ? " is-erronee" : ""}`}
               value={ligne}
               onChange={(e) => setLignes((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-              placeholder="ex : pi/5 + k*2*pi/7"
+              placeholder="ex : π/5 + 2kπ/7"
             />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes((arr) => arr.filter((_, j) => j !== i))}>
@@ -83,24 +77,20 @@ export function EtapeResoudreEgalite({ exercice, tentativesUtilisees, tentatives
       <button type="button" className="btn" onClick={() => setLignes((arr) => [...arr, ""])}>
         + Ajouter une série
       </button>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideResoudreEgaliteNiveau1(exercice)}</p>
-          <Katex expression={latexAideResoudreEgaliteNiveau1(exercice)} block />
-          {niveauAide >= 2 && aide2.map((formule, i) => <Katex key={i} expression={formule} block />)}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesResoudreEgalite(fonctionEgalite(exercice), egaliteArgumentsLatex(exercice))} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="solutions"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleSeriesX(saisie.soumise, exercice.branches, fonctionEgalite(exercice)) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

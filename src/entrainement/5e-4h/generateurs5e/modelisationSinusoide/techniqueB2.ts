@@ -18,6 +18,17 @@ function entierAleatoire(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));
 }
 
+/** Numérateur n de φ = nπ/(2T) : argument visé π/2 (maximum) ou −π/2 (minimum), φ = cible − ωt₀
+ * ramené dans ]−π ; π] (décision de l'utilisateur, audit 5e ch. 2, P6 : « φ = 139π/98 » n'est plus
+ * imprimé). Source unique : générateur, affichage exact, corrigé. */
+export function numerateurPhiB2(periode: number, t0: number, estMax: boolean): number {
+  const d = 2 * periode;
+  let n = (estMax ? periode : -periode) - 4 * t0;
+  while (n > d) n -= 2 * d;
+  while (n <= -d) n += 2 * d;
+  return n;
+}
+
 export function genererDonneesB2(): DonneesB2 {
   const min = entierAleatoire(MIN_MIN, MIN_MAX);
   const amplitude = entierAleatoire(AMPLITUDE_MIN, AMPLITUDE_MAX);
@@ -29,8 +40,8 @@ export function genererDonneesB2(): DonneesB2 {
   const A = (max - min) / 2;
   const b = (max + min) / 2;
   const omega = (2 * Math.PI) / periode;
-  const argumentCible = estMax ? Math.PI / 2 : (3 * Math.PI) / 2;
-  const phi = argumentCible - omega * t0;
+  const argumentCible = estMax ? Math.PI / 2 : -Math.PI / 2;
+  const phi = (numerateurPhiB2(periode, t0, estMax) * Math.PI) / (2 * periode);
 
   return { technique: "b2", max, min, periode, t0, estMax, argumentCible, fonction: { A, omega, phi, b } };
 }

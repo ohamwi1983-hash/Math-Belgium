@@ -9,6 +9,7 @@
 import type { BrancheModelisation, DonneesPhase1, ExerciceModelisationSinusoide, QuestionInequation } from "../core5e/modelisationSinusoide.types";
 import type { PhaseModelisationSinusoide } from "../moteur5e/typesModelisationSinusoide";
 import { ordreComplet } from "../moteur5e/typesModelisationSinusoide";
+import { numerateurPhiB2 } from "../generateurs5e/modelisationSinusoide/techniqueB2";
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 
 export function arrondi(v: number): number {
@@ -42,6 +43,13 @@ export function nombreLatex(v: number, decimales: number): string {
   const f = 10 ** decimales;
   const r = Math.round(v * f) / f;
   return String(Object.is(r, -0) ? 0 : r).replace(".", "{,}");
+}
+
+/** Valeur APPROCHÉE en LaTeX avec un nombre FIXE de décimales (« ≈ 10{,}50 », « ≈ 0{,}7140 ») :
+ * jamais « ≈ 10{,}5 », qui se lit comme une valeur exacte (audit 5e ch. 2, P4). */
+export function nombreApprocheLatex(v: number, decimales: number): string {
+  const r = Math.round(v * 10 ** decimales) / 10 ** decimales;
+  return (Object.is(r, -0) ? 0 : r).toFixed(decimales).replace(".", "{,}");
 }
 
 /** « + 3 » / « − 3 » devant un terme (jamais « +-3 » ni « --3 », point 55). */
@@ -90,8 +98,7 @@ export function formatOmegaExactPiLatex(N: number): string {
  * — TOUJOURS un multiple rationnel exact de π puisque `periode`/`t0` sont des entiers tirés,
  * reconstruit depuis ces entiers SOURCE, jamais depuis le flottant `fonction.phi`. */
 export function formatPhiExactPiLatex(periode: number, t0: number, estMax: boolean): string {
-  const numerateur = estMax ? periode - 4 * t0 : 3 * periode - 4 * t0;
-  return formatFractionPiLatex(numerateur, 2 * periode);
+  return formatFractionPiLatex(numerateurPhiB2(periode, t0, estMax), 2 * periode);
 }
 
 /** Nombre dans une consigne (texte) : virgule, « − » typographique (« u=0,16t−2,03 », jamais « -2,03 »). */
@@ -114,7 +121,9 @@ function formatDecimalFrPrecis(v: number): string {
  * n'utilise JAMAIS cette fonction — ω/φ n'y sont pas des multiples exacts de π (2 points quelconques
  * de la courbe), seule la valeur décimale y est affichée (`arrondiPrecis`). */
 function formatAvecApprox(exactLatex: string, valeurDecimale: number): string {
-  return `${exactLatex} \\approx ${nombreLatex(valeurDecimale, 4)}`;
+  // « φ = 0 » : pas de « ≈ 0 » derrière une valeur exacte entière.
+  if (/^-?\d+$/.test(exactLatex)) return exactLatex;
+  return `${exactLatex} \\approx ${nombreApprocheLatex(valeurDecimale, 4)}`;
 }
 
 /** u=ωt+φ, ω et φ substitués en DÉCIMAL (jamais en fraction exacte, cohérent avec le style déjà
@@ -123,8 +132,9 @@ function formatAvecApprox(exactLatex: string, valeurDecimale: number): string {
  * (`prompt5gen13B1B2B3.md`, écrans "poser u"/"isoler t" reformulés identiquement pour les 2
  * techniques). */
 function formatArgumentUTexte(omega: number, phi: number): string {
-  const termePhi = phi >= 0 ? `+${formatDecimalFr(phi)}` : formatDecimalFr(phi);
-  return `u=${formatDecimalFr(omega)}t${termePhi}`;
+  // Une seule précision pour u sur tous les écrans (audit 5e ch. 2, G6 : « Ici u=0,24t+1,33 » puis
+  // « Où u=0,24166t+1,32914 ») : celle du modèle, au cent-millième.
+  return formatArgumentUTextePrecis(omega, phi);
 }
 
 /** Même formule que `formatArgumentUTexte`, à 5 décimales — réservée aux 2 écrans où l'élève
@@ -153,7 +163,7 @@ export function consigneGeneralePartie1(exercice: ExerciceModelisationSinusoide)
     case "b2":
       return "Construis le modèle sinusoïdal f(t)=A·sin(ωt+φ)+b à partir du maximum, du minimum et d'un point extremum connu.";
     case "b3":
-      return "Construis le modèle sinusoïdal f(t)=A·sin(ωt+φ)+b (ω > 0) à partir de deux points connus de la courbe. Les deux points sont sur une même montée de la courbe : en chacun d'eux, l'argument ωt+φ est compris entre −π/2 et π/2.";
+      return "Construis le modèle sinusoïdal f(t)=A·sin(ωt+φ)+b (ω > 0) à partir de deux points connus de la courbe. Les deux points sont sur une même montée de la courbe : en chacun d'eux, l'argument ωt+φ est compris entre −π/2 et π/2, à un multiple de 2π près.";
     case "donnee":
       return "Cette fonction sinusoïdale est déjà connue — réponds aux questions suivantes.";
   }
@@ -313,10 +323,10 @@ function fragmentsEtatActuelPourPhase(exercice: ExerciceModelisationSinusoide, p
       return [`\\varphi=${formatAvecApprox(formatPhiExactPiLatex(donnees.periode, donnees.t0, donnees.estMax), donnees.fonction.phi as number)}`];
     case "systeme":
       if (donnees.technique !== "b3") return [];
-      return [`${argumentSysteme(donnees.t1)}\\approx ${nombreLatex(donnees.alpha1, 4)}`, `${argumentSysteme(donnees.t2)}\\approx ${nombreLatex(donnees.alpha2, 4)}`];
+      return [`${argumentSysteme(donnees.t1)}\\approx ${nombreApprocheLatex(donnees.alpha1, 4)}`, `${argumentSysteme(donnees.t2)}\\approx ${nombreApprocheLatex(donnees.alpha2, 4)}`];
     case "resolution":
       if (donnees.technique !== "b3") return [];
-      return [`\\omega\\approx ${nombreLatex(donnees.fonction.omega, 4)}`, `\\varphi\\approx ${nombreLatex(donnees.fonction.phi as number, 4)}`];
+      return [`\\omega\\approx ${nombreApprocheLatex(donnees.fonction.omega, 4)}`, `\\varphi\\approx ${nombreApprocheLatex(donnees.fonction.phi as number, 4)}`];
     case "fonctionFinale":
       if (donnees.technique === "donnee") return [];
       if (donnees.technique === "b1") return [formatFonctionB1Latex(donnees.rayon, donnees.dureeTour, donnees.fonction.b)];
@@ -387,15 +397,15 @@ export function formatTermesReponseAttendueModelisationSinusoide(exercice: Exerc
     }
     case "solutionsResoudre": {
       if (exercice.phase2 === null || exercice.phase2.type !== "resoudre") return [];
-      return exercice.phase2.solutions.map((s) => `t\\approx ${nombreLatex(s, 2)}`);
+      return exercice.phase2.solutions.map((s) => `t\\approx ${nombreApprocheLatex(s, 2)}`);
     }
     case "solutionsExtremum": {
       if (exercice.phase2 === null || exercice.phase2.type !== "extremum") return [];
-      return exercice.phase2.solutions.map((s) => `t\\approx ${nombreLatex(s, 2)}`);
+      return exercice.phase2.solutions.map((s) => `t\\approx ${nombreApprocheLatex(s, 2)}`);
     }
     case "listerIntervallesInequation": {
       if (exercice.phase2 === null || exercice.phase2.type !== "inequation") return [];
-      return exercice.phase2.intervalles.map((iv) => `[${nombreLatex(iv.inf, 2)}\\,;\\,${nombreLatex(iv.sup, 2)}]`);
+      return exercice.phase2.intervalles.map((iv) => `[${nombreApprocheLatex(iv.inf, 2)}\\,;\\,${nombreApprocheLatex(iv.sup, 2)}]`);
     }
     default:
       return fragmentsEtatActuelPourPhase(exercice, phase);
@@ -456,7 +466,7 @@ const CONSIGNES_FIXES: Partial<Record<PhaseModelisationSinusoide, string>> = {
   amplitude: "Quelle est l'amplitude A du mouvement ?",
   decalage: "Quel est le décalage vertical b ?",
   systeme: "Pose le système : une équation linéarisée en (ω,φ) pour chacun des 2 points.",
-  resolution: "Résous le système par COMBINAISON (addition puis soustraction membre à membre) pour trouver ω puis φ.",
+  resolution: "Résous le système par combinaison (soustraction puis addition membre à membre) pour trouver ω puis φ.",
   solutionsExtremum: "Liste toutes les positions d'extremum t dans la fenêtre demandée (arrondi au centième accepté si besoin).",
   isolerTInequation: "Isole t depuis les 2 bornes en u (divise par ω, translate par φ) (arrondi au centième accepté si besoin).",
   listerIntervallesInequation: "Balaie et liste tous les sous-intervalles de t contenus dans la fenêtre (arrondi au centième accepté si besoin).",
@@ -486,7 +496,7 @@ function consigneIsolerTExtremum(exercice: ExerciceModelisationSinusoide): strin
 function consigneIsolerSin(exercice: ExerciceModelisationSinusoide, question: QuestionInequation): string {
   const { omega, phi } = exercice.phase1.fonction;
   const symbole = question.sens === "ge" ? "≥" : "≤";
-  return `Isole sin(u)${symbole}m (m=(y₀−b)/A, où y₀ est la valeur visée ; arrondi au centième accepté si besoin) — où ${formatArgumentUTexte(omega, phi as number)}. Si |m|>1, l'inéquation est TOUJOURS vraie ou TOUJOURS fausse sur tout l'intervalle.`;
+  return `Isole sin(u)${symbole}m (m=(y₀−b)/A, où y₀ est la valeur visée ; arrondi au centième accepté si besoin) — où ${formatArgumentUTexte(omega, phi as number)}. Si |m|>1, l'inéquation est toujours vraie ou toujours fausse sur tout l'intervalle.`;
 }
 
 /** Écran "pulsation" PARTAGÉ entre B1 (ω=2π/dureeTour calculé DIRECTEMENT, jamais via une étape
@@ -588,51 +598,6 @@ export function consignePhase(exercice: ExerciceModelisationSinusoide, phase: Ph
 // Aides — niveau 1 (méthode), niveau 2 (formule/valeurs substituées, jamais le résultat).
 // ============================================================================
 
-const AIDES_NIVEAU1_FIXES: Partial<Record<PhaseModelisationSinusoide, string>> = {
-  amplitude: "A = (max−min)/2 — la moitié de l'écart entre le point le plus haut et le plus bas.",
-  decalage: "b = (max+min)/2 — la position d'équilibre, à mi-hauteur.",
-  pulsation: "ω = 2π/T (T = période, la durée d'un cycle complet).",
-  systeme: "Isole d'abord sin(ωt+φ) dans chaque équation, puis prends l'arcsin — tu obtiens 2 équations LINÉAIRES en (ω,φ).",
-  resolution: "SOUSTRAIS les 2 équations membre à membre pour éliminer φ et isoler ω, puis ADDITIONNE-les pour isoler φ.",
-  argumentResoudre: "sin(u)=m ⟺ u=arcsin(m)+k·2π OU u=π−arcsin(m)+k·2π.",
-  isolerTResoudre: "t=(u−φ)/ω — divise CHAQUE terme de la branche (constante ET période) par ω. N'arrondis pas ω/φ davantage lors du calcul — utilise la calculatrice ou recopie-les tels quels.",
-  solutionsResoudre: "Balaie k dans chaque branche en t, ne garde que les valeurs dans la fenêtre.",
-  poserExtremum: "sin(u)=±1 ⟺ u=π/2+k·π — UNE SEULE branche fusionnée, de période π.",
-  isolerTExtremum: "t=(u−φ)/ω — divise CHAQUE terme (constante ET période) par ω. N'arrondis pas ω/φ davantage lors du calcul — utilise la calculatrice ou recopie-les tels quels.",
-  solutionsExtremum: "Balaie k dans la série en t, ne garde que les valeurs dans la fenêtre.",
-  resoudreUInequation: "sin(u)≥m ⟺ u∈[arcsin(m);π−arcsin(m)] — l'arc contenant π/2, où sin est le plus grand. Pour ≤m, c'est l'arc complémentaire.",
-  isolerTInequation: "t=(u−φ)/ω sur CHAQUE borne. N'arrondis pas ω/φ davantage lors du calcul — utilise la calculatrice ou recopie-les tels quels.",
-  listerIntervallesInequation: "Les bornes en t se répètent tous les 2π/ω — ajoute des multiples entiers de cette période jusqu'à sortir de la fenêtre.",
-};
-
-function aideNiveau1FonctionFinale(donnees: DonneesPhase1): string {
-  return donnees.technique === "b1"
-    ? "Aucune donnée ne permet de déterminer φ ici : garde-le SYMBOLIQUE dans la formule (écris littéralement \"phi\"), n'invente jamais de valeur numérique."
-    : "Substitue A/ω/φ/b, déjà tous connus, dans f(t)=A·sin(ω·t+φ)+b.";
-}
-
-function aideNiveau1IsolerSin(question: QuestionInequation): string {
-  return question.casSpecial !== null
-    ? "|m|>1 : sin(u) ne peut jamais atteindre m (sin(u)∈[−1;1]) — l'inéquation est donc soit toujours vraie, soit toujours fausse, quel que soit t."
-    : "Isole d'abord sin(ωt+φ) seul d'un côté, puis calcule m=(y₀−b)/A de l'autre (y₀ : la valeur visée).";
-}
-
-export function texteAideNiveau1(exercice: ExerciceModelisationSinusoide, phase: PhaseModelisationSinusoide): string {
-  if (phase === "phi") {
-    const donnees = exercice.phase1;
-    if (donnees.technique !== "b2") throw new Error("texteAideNiveau1 : 'phi' hors contexte 'b2'");
-    return donnees.estMax
-      ? "Le point donné est un MAXIMUM ⟹ l'argument (l'angle) du sinus vaut π/2 (jamais 3π/2)."
-      : "Le point donné est un MINIMUM ⟹ l'argument (l'angle) du sinus vaut 3π/2 (jamais π/2).";
-  }
-  if (phase === "fonctionFinale") return aideNiveau1FonctionFinale(exercice.phase1);
-  if (phase === "isolerSinInequation") {
-    if (exercice.phase2 === null || exercice.phase2.type !== "inequation") throw new Error("texteAideNiveau1 : 'isolerSinInequation' hors contexte 'inequation'");
-    return aideNiveau1IsolerSin(exercice.phase2);
-  }
-  return AIDES_NIVEAU1_FIXES[phase] as string;
-}
-
 /** m = (y₀ − b)/A substitué — y₀ (valeur visée) et non « k », réservé à l'entier libre (point 56) ;
  * jamais de double signe (point 55). */
 function aideM(y0: number, b: number, A: number): string {
@@ -667,7 +632,7 @@ export function texteAideNiveau2(exercice: ExerciceModelisationSinusoide, phase:
     }
     case "phi": {
       if (donnees.technique !== "b2") return "";
-      const cible = donnees.estMax ? "\\dfrac{\\pi}{2}" : "\\dfrac{3\\pi}{2}";
+      const cible = donnees.estMax ? "\\dfrac{\\pi}{2}" : "-\\dfrac{\\pi}{2}";
       return `\\omega \\cdot ${donnees.t0} + \\varphi = ${cible}`;
     }
     case "systeme": {

@@ -226,7 +226,9 @@ function variablesOmegaPhi(omega: number, phi: number): Record<string, number> {
 }
 
 const INVERSE_TRIG_MATH: Record<"asin" | "acos" | "atan", (x: number) => number> = { asin: Math.asin, acos: Math.acos, atan: Math.atan };
-const DEBUT_APPEL_INVERSE_TRIG = /\b(asin|acos|atan)\s*\(/i;
+// « arcsin » (notation du cours et du placeholder de l'écran « système ») comme « asin » ; jamais `\b`
+// (« 2asin(…) » collé à un coefficient) — une lettre devant reste exclue.
+const DEBUT_APPEL_INVERSE_TRIG = /(?<![a-z])(?:arc|a)(sin|cos|tan)\s*\(/i;
 const GARDE_APPELS_INVERSE_TRIG_MAX = 10;
 
 interface AppelInverseTrigTrouve {
@@ -246,7 +248,7 @@ function trouverAppelInverseTrig(expr: string): AppelInverseTrigTrouve | null {
     else if (expr[i] === ")") {
       profondeur--;
       if (profondeur === 0) {
-        return { debut: debutMatch.index, fin: i, fonction: debutMatch[1].toLowerCase() as "asin" | "acos" | "atan", interieur: expr.slice(indexParenOuvrante + 1, i) };
+        return { debut: debutMatch.index, fin: i, fonction: `a${debutMatch[1].toLowerCase()}` as "asin" | "acos" | "atan", interieur: expr.slice(indexParenOuvrante + 1, i) };
       }
     }
   }
@@ -276,7 +278,9 @@ function resoudreInverseTrig(texte: string): string {
 }
 
 function evaluerExpressionOmegaPhi(texte: string, omega: number, phi: number): number {
-  return evaluerExpressionGenerale(resoudreInverseTrig(texte), 0, variablesOmegaPhi(omega, phi));
+  // ω et φ tels qu'affichés (placeholder, consigne, aides) lus comme « omega » et « phi ».
+  const lettres = texte.replace(/ω/g, "omega").replace(/[φϕ]/g, "phi");
+  return evaluerExpressionGenerale(resoudreInverseTrig(lettres), 0, variablesOmegaPhi(omega, phi));
 }
 
 /** Vérifie qu'une équation LIBRE en (ω,φ) (`gauche`/`droite`, textes séparés) représente la MÊME
@@ -326,7 +330,10 @@ export function diagnostiquerSysteme(gauche: string, droite: string, t: number, 
 // ============================================================================
 
 const TRIG_MATH: Record<"sin" | "cos" | "tan", (x: number) => number> = { sin: Math.sin, cos: Math.cos, tan: Math.tan };
-const DEBUT_APPEL_TRIG = /\b(sin|cos|tan)\s*\(/i;
+// Jamais `\b` : il ne coupe pas entre un chiffre et une lettre, « 13sin(…) » (coefficient collé, comme
+// le modèle s'écrit) n'était pas reconnu et la bonne réponse jugée fausse. Une lettre devant (arcsin)
+// reste exclue.
+const DEBUT_APPEL_TRIG = /(?<![a-z])(sin|cos|tan)\s*\(/i;
 const GARDE_APPELS_TRIG_MAX = 10;
 
 interface AppelTrigTrouve {
@@ -399,9 +406,11 @@ function diagnostiquerEquivalenceEnT(texte: string, cible: (t: number) => number
  * tokeniseur la reconnaisse. */
 export function diagnostiquerFonctionFinaleSymbolique(texte: string, A: number, omega: number, b: number): StatutVerification {
   const contientPhiSymbolique = /\bphi\b/i.test(texte) || texte.includes("φ");
-  if (!contientPhiSymbolique) return "not_equivalent";
   const normalise = texte.replace(/φ/g, "phi");
-  return diagnostiquerEquivalenceEnT(normalise, (t) => A * Math.sin(omega * t) + b, A, { phi: 0 });
+  // Saisie lue AVANT le verdict « φ absent » : une saisie illisible ne coûte jamais de tentative.
+  const statut = diagnostiquerEquivalenceEnT(normalise, (t) => A * Math.sin(omega * t) + b, A, { phi: 0 });
+  if (statut === "parse_error") return statut;
+  return contientPhiSymbolique ? statut : "not_equivalent";
 }
 
 /** Techniques B2/B3/donnée — φ NUMÉRIQUEMENT connu, équivalence algébrique complète. */
@@ -409,8 +418,10 @@ export function diagnostiquerFonctionFinaleNumerique(texte: string, A: number, o
   return diagnostiquerEquivalenceEnT(texte, (t) => A * Math.sin(omega * t + phi) + b, A);
 }
 
-export function diagnostiquerFonctionFinale(donnees: DonneesPhase1, texte: string): StatutVerification {
+export function diagnostiquerFonctionFinale(donnees: DonneesPhase1, texteBrut: string): StatutVerification {
   const { A, omega, phi, b } = donnees.fonction;
+  // « f(t) = » recopié de la réponse affichée : accepté (il rendait la saisie illisible).
+  const texte = texteBrut.replace(/^\s*f\s*\(\s*t\s*\)\s*=\s*/i, "");
   if (donnees.technique === "b1") return diagnostiquerFonctionFinaleSymbolique(texte, A, omega, b);
   return diagnostiquerFonctionFinaleNumerique(texte, A, omega, phi as number, b);
 }
@@ -426,8 +437,11 @@ export interface ReponseArgumentResoudre {
 
 export function diagnostiquerArgumentResoudre(question: QuestionResoudre, reponse: ReponseArgumentResoudre): StatutVerification {
   if (reponse.aucuneSolution) return question.aucuneSolution ? "correct" : "not_equivalent";
+  // Lignes lues AVANT le verdict « aucune solution » : une saisie illisible ne coûte jamais de tentative.
+  const statut = diagnostiquerBranchesTolerance(reponse.lignes, question.branchesU, TOLERANCE_U + ARRONDI_CENTIEME, ARRONDI_CENTIEME);
+  if (statut === "parse_error") return statut;
   if (question.aucuneSolution) return "not_equivalent";
-  return diagnostiquerBranchesTolerance(reponse.lignes, question.branchesU, TOLERANCE_U + ARRONDI_CENTIEME, ARRONDI_CENTIEME);
+  return statut;
 }
 
 export function diagnostiquerIsolerTResoudre(question: QuestionResoudre, lignes: string[], omega: number): StatutVerification {
@@ -521,7 +535,7 @@ export function diagnostiquerIsolerTInequation(question: QuestionInequation, inf
  * borne_t + n·(2π/ω) et reçoit la marge propagée correspondante. */
 export function diagnostiquerListerIntervalles(paires: [string, string][], question: QuestionInequation, omega: number): StatutVerification {
   const cible = question.intervalles;
-  if (paires.length !== cible.length) return "not_equivalent";
+  // Bornes lues AVANT de compter les intervalles : une saisie illisible ne coûte jamais de tentative.
   const valeurs: IntervalleModelisation[] = [];
   for (const [infTexte, supTexte] of paires) {
     const inf = valeurOuErreur(infTexte);
@@ -529,6 +543,7 @@ export function diagnostiquerListerIntervalles(paires: [string, string][], quest
     if (inf === "parse_error" || sup === "parse_error") return "parse_error";
     valeurs.push({ inf, sup });
   }
+  if (paires.length !== cible.length) return "not_equivalent";
   const periode = (2 * Math.PI) / Math.abs(omega);
   const marge = (borne: number, base: number) =>
     Math.abs(borne) < 1e-9 || Math.abs(borne - question.fenetre) < 1e-9 ? 2 * ARRONDI_CENTIEME : toleranceSolution(omega, Math.round((borne - base) / periode));
