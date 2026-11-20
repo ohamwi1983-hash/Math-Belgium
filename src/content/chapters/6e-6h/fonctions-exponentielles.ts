@@ -1966,6 +1966,17 @@ export const fonctionsExponentielles: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 12. Problèmes d\'exponentielles »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Modèle L + C·qᵗ : se rapprocher d\'une valeur limite',
+          generatorId: '6gen150',
+          description: [
+            'Un thé qui refroidit, une bouteille qui se réchauffe, des inscrits qui plafonnent : trois ' +
+              'mesures, le rapport des écarts, la valeur limite L, le facteur q, une prévision et un seuil.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 150. Modèle L + C·qᵗ »',
+        },
       ],
     },
   ],
