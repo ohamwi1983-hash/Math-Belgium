@@ -775,3 +775,26 @@ depuis `lignesInitiales`, lignes enregistrées reprises telles quelles).
 - **Sans choix**, « Formule » et « Formule + démonstration » sont aussi tirées une seule fois pour
   toutes les séries (équité : jamais une démonstration longue pour A et une courte pour B). La
   « compréhension » garde un tirage par série.
+
+## 5e ch. 2, lot G — 5gen50–5gen53 (nouveaux, notés)
+
+Corrigés `generateurs5e/{detectiveTrig,anglesRadians,sinusoidePoints,associerCourbes}/corrigeDetaille.ts`
+(partagés avec l'appli, une lettre par écran). 5gen50 : a) contrôle de la ligne (règle face à la
+copie, « ≠ »), b) la règle, c) résolution reprise, vérification (proportion du disque, f(x) = max,
+une solution remise dans l'équation). 5gen51 : tours retirés / ajoutés au même dénominateur, repères
+π/2, π, 3π/2 au dénominateur commun, angle de référence et signe, cos² + sin² = 1, quotient de tan ;
+figure avec M en `figureHtml` (énoncé papier : cercle sans M). 5gen52 : T et Φ substitués (ω « en
+ligne », jamais \dfrac{2π}{1}), une abscisse par ligne (+ T/4, ordonnée en justification), report
+± T ; figures période puis courbe complète (la réponse est un graphique ; énoncé sans repère : aucune
+place de réponse). 5gen53 : lectures ligne à ligne (y_max, y_min, b, |A|, T puis ω, Φ puis φ = −ωΦ),
+figure annotée ; énoncé = 4 expressions + 4 courbes. Profils : 5gen50 `forme` = support (type
+d'erreur = verdict tiré dans la série) ; 5gen51 cas particulier « quadrant-I » (axe et tan non définie
+restent des verdicts) ; 5gen52 `forme` = variante (+ signe de A en « sansPi ») ; 5gen53 `forme` =
+variante, l'association est le verdict (aucun groupe à verdict : aucun nom de variante ne donne la
+réponse). Aucun `calcul` (tout exact). Niveaux (200 tirages libres + 30 par variante) : 5gen50 niv. 4,
+8 min ; 5gen51 niv. 1–2, 8 min (lectures b, c) ; 5gen52 niv. 2–3, 8 min ; 5gen53 niv. 2, 6 min
+(quatre lectures). Collecteur (outils de `corrige-5e2-m2` recopiés, `env.ts` : x = chaque solution,
+plus π/2 + kπ pour les valeurs écartées) : 1 190 tirages, ≈ 12 600 égalités, 0 fausse. Documents réels
+(2 graines, évaluation 2 séries + aménagée + feuille) : 0 débordement à 680 et 1 280 px, 0 formule
+coupée, 0 `.katex-error`. Plan réel `construirePlan` (2 séries, calculatrice interdite / autorisée,
+cas particulier coché) : même structure, verdicts différents, QR `?code=` 26 / 26 identiques.
