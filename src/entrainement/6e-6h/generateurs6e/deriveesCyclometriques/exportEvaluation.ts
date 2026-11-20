@@ -5,6 +5,7 @@ import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { CONSIGNE_GENERALE, consigneEcranDerivee } from "../../ui6e/formatDeriveesCyclometriques";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDeriveesCyclometriques } from "./index";
 import { correctionDetailleeDeriveesCyclometriques as correction, fonctionDeriveeLatex, lettresLectureDerivees, resultatsEcransDerivees, sequenceDeriveesCyclometriques } from "./corrigeDetaille";
+import { profilDeriveesCyclometriques } from "../profilsEvaluationCyclometriques";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceDeriveesCyclometriques>` pour `6gen4` (dérivées
@@ -71,6 +72,7 @@ function criteresDifficulte(e: E): CriteresDifficulte {
 }
 
 export const adaptateurEvaluationDeriveesCyclometriques: AdaptateurFeuilleExercices<E> = {
+  profilInstance: profilDeriveesCyclometriques,
   titreDocument: "Dérivées de fonctions cyclométriques — Évaluation",
   nomFichierBase: "derivees-cyclometriques",
   genererInstance: genererExerciceDeriveesCyclometriques,

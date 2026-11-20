@@ -14,6 +14,7 @@ import {
 } from "../../ui6e/formatInjectiviteFonctions";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceInjectiviteFonctions } from "./index";
 import { correctionDetailleeInjectiviteFonctions as correction, lettresLectureInjectivite } from "./corrigeDetaille";
+import { GROUPES_VERDICT_INJECTIVITE, profilInjectiviteFonctions } from "../profilsEvaluationCyclometriques";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceInjectiviteFonctions>` pour `6gen1` (fonctions
@@ -109,11 +110,20 @@ function bareme(e: E): BaremeExercice {
  */
 function criteresDifficulte(e: E): CriteresDifficulte {
   const p = e.parametres;
+  // Verdict « injective ? » (lot E de l'audit) : a) et c) le tirent, e) et f) forment avec eux le
+  // groupe `groupe_injectivite`. Niveau et durée CONSTANTS pour ces quatre familles (niveau 4,
+  // 11 min : quatre écrans qui transforment, la bijection lue, piège constant — l'injectivité est la
+  // question), sinon un « niv. 2 » trahissait une fonction injective et un « niv. 4 » l'inverse.
+  if (p.famille === "puissanceAffine" || p.famille === "puissanceMonome" || p.famille === "homographique" || p.famille === "quadratique") {
+    return { etapesTransformation: 4, etapesLecture: 1, lettresSansCharge: ["e"], sansCharge: true, methode: 1, piege: 1, nombres: 0 };
+  }
   const inequationNegative = (p.famille === "racinePlusConstante" || (p.famille === "racineNieme" && p.n % 2 === 0)) && p.a < 0;
   return { ...etapesDuCorrige(correction(e), lettresLectureInjectivite(e)), methode: 1, piege: !e.injective || inequationNegative ? 1 : 0, nombres: 0 };
 }
 
 export const adaptateurEvaluationInjectiviteFonctions: AdaptateurFeuilleExercices<E> = {
+  profilInstance: profilInjectiviteFonctions,
+  groupesVerdict: GROUPES_VERDICT_INJECTIVITE,
   titreDocument: "Fonctions injectives, surjectives, bijectives — Évaluation",
   nomFichierBase: "injectivite-fonctions",
   genererInstance: genererExerciceInjectiviteFonctions,

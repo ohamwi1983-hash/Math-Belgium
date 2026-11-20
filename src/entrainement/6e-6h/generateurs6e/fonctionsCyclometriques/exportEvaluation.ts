@@ -5,6 +5,7 @@ import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { CONSIGNE_GENERALE, formatExpressionLatex } from "../../ui6e/formatFonctionsCyclometriques";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceFonctionsCyclometriques } from "./index";
 import { correctionDetailleeFonctionsCyclometriques as correction, resultatFonctionsCyclometriquesLatex } from "./corrigeDetaille";
+import { GROUPES_VERDICT_FONCTIONS_CYCLOMETRIQUES, profilFonctionsCyclometriques } from "../profilsEvaluationCyclometriques";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceFonctionsCyclometriques>` pour `6gen2` (valeurs
@@ -63,6 +64,8 @@ function criteresDifficulte(e: E): CriteresDifficulte {
 }
 
 export const adaptateurEvaluationFonctionsCyclometriques: AdaptateurFeuilleExercices<E> = {
+  profilInstance: profilFonctionsCyclometriques,
+  groupesVerdict: GROUPES_VERDICT_FONCTIONS_CYCLOMETRIQUES,
   titreDocument: "Valeurs cyclométriques — Évaluation",
   nomFichierBase: "fonctions-cyclometriques",
   genererInstance: genererExerciceFonctionsCyclometriques,

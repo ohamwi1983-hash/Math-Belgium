@@ -162,8 +162,7 @@ export function aideReciproque2(exercice: ExerciceInjectiviteFonctions): AideInj
   return { texte: `Après l'échange de $x$ et $y$, il reste à isoler $y$ dans cette égalité${branche} :`, latex: `x = ${expressionEn(exercice, "y")}` };
 }
 
-function points(exercice: ExerciceInjectiviteFonctions): number[] {
-  const e = exercice.image;
+function points(e: EnsembleReelGuide): number[] {
   if (e.forme === "reel") return [-5, -2.3, -0.6, 0.7, 1.9, 4.4];
   if (e.forme === "prive_points") return [-5, -2.3, -0.6, 0.7, 1.9, 4.4].filter((v) => !e.points.some((q) => Math.abs(q - v) < 1e-6));
   const pts: number[] = [];
@@ -177,12 +176,13 @@ function points(exercice: ExerciceInjectiviteFonctions): number[] {
 }
 
 export function cibleReciproque(exercice: ExerciceInjectiviteFonctions, cote: CoteBranche, texte: string): FragmentConsigne[] | null {
-  const pts = points(exercice);
-  const vaut = (ref: (x: number) => number) => diagnostiquerEquivalenceFonction(texte, ref, pts) === "correct";
+  // 1/f et f se comparent sur le DOMAINE de f ; l'autre moitié de la réciproque, sur l'image.
+  const ptsDom = points(exercice.domaine);
+  const vaut = (ref: (x: number) => number, pts = ptsDom) => diagnostiquerEquivalenceFonction(texte, ref, pts) === "correct";
   if (vaut((x) => 1 / exercice.fReference(x))) return fragmentsDepuisTexte("Tu as écrit l'inverse $\\dfrac{1}{f(x)}$ : la réciproque s'obtient en échangeant $x$ et $y$, puis en isolant $y$.");
   if (vaut((x) => exercice.fReference(x))) return fragmentsDepuisTexte("C'est l'expression de f elle-même : échange $x$ et $y$ avant d'isoler $y$.");
   const autre = cote === "gauche" ? exercice.fInverseDroite : exercice.fInverseGauche;
-  if (!exercice.injective && vaut(autre)) return fragmentsDepuisTexte("C'est la réciproque sur l'autre moitié du domaine : sur l'intervalle choisi, garde le signe (ou la racine) qui lui correspond.");
+  if (!exercice.injective && vaut(autre, points(exercice.image))) return fragmentsDepuisTexte("C'est la réciproque sur l'autre moitié du domaine : sur l'intervalle choisi, garde le signe (ou la racine) qui lui correspond.");
   return null;
 }
 
