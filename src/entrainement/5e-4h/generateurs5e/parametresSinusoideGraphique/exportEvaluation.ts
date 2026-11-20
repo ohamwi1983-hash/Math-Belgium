@@ -3,8 +3,8 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   ErreurFrequente,
   FragmentConsigne,
   SectionExercice,
@@ -12,9 +12,11 @@ import type {
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { ORDRE_PHASES_SINUSOIDE_GRAPHIQUE, type PhaseParametresSinusoideGraphique } from "../../moteur5e/typesParametresSinusoideGraphique";
 import { evaluerY, formatRationnelPiTexte, pasAxeY, positionsTicksX, valeurAmplitudeSignee, viewBoxX, viewBoxY } from "../../ui5e/sinusoideGraph";
-import { additionnerRationnelPi, diviserParEntier, inverseRationnelPi, multiplierRationnelPi, negatifRationnelPi, reduireRationnelPi, valeurNumerique } from "../parametresSinusoide/rationnelPi";
-import { consignePhase, formatChampParametreGraphiqueLatex, formatMagnitudeAmplitudeLatex, formatRationnelPiLatex, phaseRetenue, phiRetenu } from "../../ui5e/formatParametresSinusoideGraphique";
+import { valeurNumerique } from "../parametresSinusoide/rationnelPi";
+import { consignePhase, formatChampParametreGraphiqueLatex } from "../../ui5e/formatParametresSinusoideGraphique";
 import { genererExerciceParametresSinusoideGraphique } from "./index";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeParametresSinusoideGraphique, LETTRES_LECTURE_SINUSOIDE_GRAPHIQUE } from "./corrigeDetaille";
 import { profilParametresSinusoideGraphique, PARAMETRES_SINUSOIDE_GRAPHIQUE } from "../profilsEvaluationTrigonometrie";
 
 /**
@@ -145,65 +147,6 @@ function listeParametres(exercice: ExerciceParametresSinusoideGraphique): Fragme
   return ORDRE_PHASES_SINUSOIDE_GRAPHIQUE.flatMap((champ, i) => [...(i === 0 ? [] : [texte(" ; ")]), latex(formatChampParametreGraphiqueLatex(exercice, champ))]);
 }
 
-/** b + s·|A| en valeur EXACTE (fraction réduite, ou « b + √r ») — ordonnée d'un maximum (s = 1) ou
- * d'un minimum (s = −1). */
-function ordonneeSommetLatex(exercice: ExerciceParametresSinusoideGraphique, s: 1 | -1): string {
-  const { A, b } = exercice;
-  if (A.radicande !== null) {
-    const racine = `\\sqrt{${A.radicande}}`;
-    if (b === 0) return s > 0 ? racine : `-${racine}`;
-    return `${b} ${s > 0 ? "+" : "-"} ${racine}`;
-  }
-  const { numerateur: n, denominateur: d } = A.rationnelle!;
-  return formatRationnelPiLatex(reduireRationnelPi({ numerateur: b * d + s * n, denominateur: d, degrePi: 0 }));
-}
-
-function entreParentheses(valeurLatex: string): string {
-  return valeurLatex.startsWith("-") ? `\\left(${valeurLatex}\\right)` : valeurLatex;
-}
-
-function correctionDetailleeParametresSinusoideGraphique(exercice: ExerciceParametresSinusoideGraphique): EtapeCorrection[] {
-  const max = ordonneeSommetLatex(exercice, 1);
-  const min = ordonneeSommetLatex(exercice, -1);
-  const absA = formatMagnitudeAmplitudeLatex(exercice.A);
-  const T = exercice.T;
-  const TLatex = formatRationnelPiLatex(T);
-  const x0 = phiRetenu(exercice);
-  const x0Latex = formatRationnelPiLatex(x0);
-  // Deux maximums consécutifs : un quart de période après le passage ascendant, puis une période plus loin.
-  const xMax1 = additionnerRationnelPi(x0, diviserParEntier(T, 4));
-  const xMax2 = additionnerRationnelPi(xMax1, T);
-  const omega = multiplierRationnelPi({ numerateur: 2, denominateur: 1, degrePi: 1 }, inverseRationnelPi(T));
-  const omegaLatex = formatRationnelPiLatex(omega);
-  const phaseBrute = negatifRationnelPi(multiplierRationnelPi(omega, x0));
-  const phaseLatex = formatRationnelPiLatex(phaseRetenue(exercice));
-  const phaseBruteLatex = formatRationnelPiLatex(phaseBrute);
-  const conclusion = (champ: PhaseParametresSinusoideGraphique): EtapeCorrection => ({ label: "Conclusion", sousQuestion: LETTRE[champ], fragments: [latex(formatChampParametreGraphiqueLatex(exercice, champ))] });
-  return [
-    { label: "Lecture", sousQuestion: "a", fragments: [texte("Maximum de la courbe : "), latex(`y = ${max}`), texte(" ; minimum : "), latex(`y = ${min}`), texte(".")] },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(`b = \\dfrac{\\max + \\min}{2} = \\dfrac{${max} + ${entreParentheses(min)}}{2} = ${exercice.b}`)] },
-    ...(exercice.b !== 0
-      ? [{ label: "Piège", sousQuestion: "a", fragments: [texte("La ligne médiane de la courbe n'est pas l'axe des abscisses : b ≠ 0.")] }]
-      : []),
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(`\\text{amplitude} = \\dfrac{\\max - \\min}{2} = \\dfrac{${max} - ${entreParentheses(min)}}{2} = ${absA}`)] },
-    { label: "Piège", sousQuestion: "b", fragments: [texte("L'amplitude est la MOITIÉ de l'écart entre le maximum et le minimum, pas l'écart complet.")] },
-    { label: "Lecture", sousQuestion: "c", fragments: [texte("Deux maximums consécutifs : "), latex(`x = ${formatRationnelPiLatex(xMax1)}`), texte(" et "), latex(`x = ${formatRationnelPiLatex(xMax2)}`), texte(".")] },
-    { label: "Calcul", sousQuestion: "c", fragments: [latex(`T = ${formatRationnelPiLatex(xMax2)} - ${entreParentheses(formatRationnelPiLatex(xMax1))} = ${TLatex}`)] },
-    { label: "Piège", sousQuestion: "c", fragments: [texte("Entre un maximum et le minimum voisin, il n'y a qu'une DEMI-période.")] },
-    { label: "Calcul", sousQuestion: "d", fragments: [latex(`\\omega = \\dfrac{2\\pi}{T} = \\dfrac{2\\pi}{${TLatex}} = ${omegaLatex}`)] },
-    { label: "Calcul", sousQuestion: "e", fragments: [latex(`f_{req} = \\dfrac{1}{T} = \\dfrac{1}{${TLatex}}`)] },
-    { label: "Méthode", sousQuestion: "f", fragments: [texte("On repère un point où la courbe traverse sa ligne médiane EN MONTANT (juste après un minimum) : son abscisse est x₀ = Φ.")] },
-    conclusion("phi"),
-    { label: "Piège", sousQuestion: "f", fragments: [texte("Un passage en descendant est décalé d'une demi-période : il ne donne pas Φ.")] },
-    { label: "Méthode", sousQuestion: "g", fragments: [texte("Formule du cours : "), latex("\\varphi = -\\omega\\cdot x_0"), texte(".")] },
-    {
-      label: "Calcul",
-      sousQuestion: "g",
-      fragments: [latex(`\\varphi = -${entreParentheses(omegaLatex)}\\cdot ${entreParentheses(x0Latex)} = ${phaseBruteLatex}`), ...(phaseBruteLatex === phaseLatex ? [] : [texte(", soit, à "), latex("2\\pi"), texte(" près, "), latex(`\\varphi = ${phaseLatex}`)])],
-    },
-  ];
-}
-
 /** Poids par étape (somme 4) : lire T et x₀ est le cœur de l'exercice. */
 const POIDS: Record<PhaseParametresSinusoideGraphique, number> = { decalage: 0.5, amplitude: 0.5, periode: 0.75, pulsation: 0.5, frequence: 0.25, phi: 0.75, dephasage: 0.75 };
 
@@ -226,10 +169,17 @@ function baremeParametresSinusoideGraphique(exercice: ExerciceParametresSinusoid
   };
 }
 
-/** ★★ : période multiple de π et amplitude rationnelle (lectures sur les graduations) ; ★★★ : période
- * sans π ou amplitude irrationnelle (lecture moins directe, x₀ fractionnaire). */
-function difficulteParametresSinusoideGraphique(exercice: ExerciceParametresSinusoideGraphique): 1 | 2 | 3 {
-  return exercice.T.degrePi === 0 || exercice.A.radicande !== null ? 3 : 2;
+/** Niveau (grille commune) : écrans de pure lecture a (b), b (|A|), c (T), f (Φ) — on lit le
+ * maximum, le minimum, deux maximums, un passage ascendant ; d, e, g appliquent une formule du cours.
+ * Méthode imposée (0). Piège dans les DONNÉES : ligne médiane décalée de l'axe (b ≠ 0). Nombres :
+ * angles kπ/n non remarquables (`anglesEnPi`). */
+function criteresDifficulteParametresSinusoideGraphique(exercice: ExerciceParametresSinusoideGraphique): CriteresDifficulte {
+  return {
+    ...etapesDuCorrige(correctionDetailleeParametresSinusoideGraphique(exercice), LETTRES_LECTURE_SINUSOIDE_GRAPHIQUE),
+    methode: 0,
+    piege: exercice.b !== 0 ? 1 : 0,
+    anglesEnPi: true,
+  };
 }
 
 export const adaptateurEvaluationParametresSinusoideGraphique: AdaptateurFeuilleExercices<ExerciceParametresSinusoideGraphique> = {
@@ -240,10 +190,9 @@ export const adaptateurEvaluationParametresSinusoideGraphique: AdaptateurFeuille
   genererInstance: genererExerciceParametresSinusoideGraphique,
   construireEnonce: construireEnonceParametresSinusoideGraphique,
   construireCorrection: construireCorrectionParametresSinusoideGraphique,
-  difficulte: difficulteParametresSinusoideGraphique,
+  criteresDifficulte: criteresDifficulteParametresSinusoideGraphique,
   reponseBreve: listeParametres,
   correctionDetaillee: correctionDetailleeParametresSinusoideGraphique,
   bareme: baremeParametresSinusoideGraphique,
   enoncePapier: enoncePapierParametresSinusoideGraphique,
-  dureeMinutes: 7,
 };

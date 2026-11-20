@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
 import type { PhaseModelisationSinusoide } from "../moteur5e/typesModelisationSinusoide";
-import { consignePhase, labelPhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { consignePhaseFragments, labelPhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { FragmentsConsigneSinusoide } from "./FragmentsConsigneSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -78,7 +79,7 @@ export function EtapeChampSimpleModelisation({ exercice, phase, tentativesUtilis
 
   return (
     <div>
-      <p className="prompt-text">{consignePhase(exercice, phase)}</p>
+      <p className="prompt-text"><FragmentsConsigneSinusoide fragments={consignePhaseFragments(exercice, phase)} /></p>
       <ApercuExpressionLatex texte={texte} label={labelPhase(phase)} />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">{labelPhase(phase)}</label>

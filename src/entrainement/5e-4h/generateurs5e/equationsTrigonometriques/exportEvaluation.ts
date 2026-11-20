@@ -1,43 +1,21 @@
-import type {
-  BrancheAngle,
-  BrancheX,
-  ExerciceEgaliteExpressions,
-  ExerciceEquationTrig,
-  ExerciceEquationTrigonometrique,
-  ExerciceProduitFacteurs,
-  ExercicePythagoricienne,
-  ValeurPiOuDecimale,
-} from "../../core5e/equationsTrigonometriques.types";
+import type { BrancheX, ExerciceEquationTrigonometrique } from "../../core5e/equationsTrigonometriques.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { formatArgumentLatex, formatValeurLatex, latexAideArgumentNiveau2, texteAideArgumentNiveau1 } from "../../ui5e/formatEquationTrig";
-import {
-  formatAidePrefacteurNiveau2Latex,
-  formatAideSepararFacteursNiveau2Latex,
-  formatEnonceEquationTrigonometriqueLatex,
-  formatEquationConvertieEgaliteLatex,
-  formatPolynomeCibleLatex,
-  LATEX_AIDE_PREFACTEUR_NIVEAU1,
-  LATEX_AIDE_SEPARER_FACTEURS_NIVEAU1,
-  latexAideConversionEgaliteNiveau1,
-  latexAideConversionNiveau1,
-  latexAideResoudreEgaliteNiveau1,
-  OPTIONS_FAMILLE,
-  produitContientTangente,
-  texteAideConversionEgaliteNiveau1,
-  texteAideResoudreEgaliteNiveau1,
-} from "../../ui5e/formatEquationTrigonometrique";
+import { formatBrancheLatex, relationBranche } from "../../ui5e/formatEquationTrig";
+import { ensembleApproche, formatEnonceEquationTrigonometriqueLatex, formatEnsembleSolutionsLatex, produitContientTangente } from "../../ui5e/formatEquationTrigonometrique";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeEquationTrig, lettresSolutionsEquationTrig } from "./corrigeDetaille";
 import { CATALOGUE_FAMILLES_EQUATION_TRIG, construireEquationTrigAvecFamille, genererExerciceEquationTrigonometrique } from "./index";
 import { solutionsDistinctes, unionSolutions } from "./solveur";
 import { profilEquationTrig, LIBELLE_CAS_EQUATIONS } from "../profilsEvaluationTrigonometrie";
@@ -58,80 +36,9 @@ import { profilEquationTrig, LIBELLE_CAS_EQUATIONS } from "../profilsEvaluationT
 
 const LETTRES = "abcdefghijklmnopqrstuvwxyz";
 
-// ============================================================================
-// Formatage papier des valeurs (fractions de π, sinon centième avec virgule).
-// ============================================================================
-
-function pgcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) [a, b] = [b, a % b];
-  return a || 1;
-}
-
-/** v = (n/d)·π avec d ≤ 48, réduit — `null` si v n'est pas une fraction simple de π. */
-function fractionDePi(v: number): { n: number; d: number } | null {
-  for (let d = 1; d <= 48; d++) {
-    const n = Math.round((v / Math.PI) * d);
-    if (Math.abs(v - (n * Math.PI) / d) < 1e-9) {
-      const g = pgcd(n, d);
-      return { n: n / g, d: d / g };
-    }
-  }
-  return null;
-}
-
-function decimalLatex(v: number): string {
-  const r = Math.round(v * 100) / 100;
-  const s = (Object.is(r, -0) ? 0 : r).toString();
-  return s.replace(".", "{,}");
-}
-
-/** Valeur seule (solution dans [0 ; 2π[, constante d'une série). */
-function valeurLatex(v: number): string {
-  if (Math.abs(v) < 1e-12) return "0";
-  const f = fractionDePi(v);
-  if (f === null) return decimalLatex(v);
-  const signe = f.n < 0 ? "-" : "";
-  const n = Math.abs(f.n);
-  const num = n === 1 ? "\\pi" : `${n}\\pi`;
-  return f.d === 1 ? `${signe}${num}` : `${signe}\\frac{${num}}{${f.d}}`;
-}
-
-/** Terme « k·période » (période > 0), en fraction de π quand c'en est une. */
-function termePeriodeLatex(periode: number): string {
-  const f = fractionDePi(periode);
-  if (f === null) return `${decimalLatex(periode)}k`;
-  const num = f.n === 1 ? "k\\pi" : `${f.n}k\\pi`;
-  return f.d === 1 ? num : `\\frac{${num}}{${f.d}}`;
-}
-
-/** Valeur seulement approchée : ni fraction de π, ni nombre exact au centième (ex. x = 1 + kπ, venu
- * de b = −1, reste une égalité). */
-function estDecimale(v: ValeurPiOuDecimale): boolean {
-  if (v.exact !== null || fractionDePi(v.decimal) !== null) return false;
-  return Math.abs(v.decimal * 100 - Math.round(v.decimal * 100)) > 1e-9;
-}
-
-/** « constante + k·période » — la constante omise si nulle. */
-function serieLatex(branche: { constante: ValeurPiOuDecimale; periode: ValeurPiOuDecimale }): string {
-  const c = branche.constante.exact !== null ? formatValeurLatex(branche.constante) : valeurLatex(branche.constante.decimal);
-  const p = termePeriodeLatex(branche.periode.decimal);
-  return c === "0" ? p : `${c} + ${p}`;
-}
-
-/** « x = … » ou « x ≈ … » selon que la constante est exacte ou arrondie. */
+/** « x = … » ou « x ≈ … » : MÊMES fonctions que l'écran (`relationBranche`, `formatBrancheLatex`). */
 function egaliteX(branche: BrancheX): string {
-  return `x ${estDecimale(branche.constante) ? "\\approx" : "="} ${serieLatex(branche)}`;
-}
-
-function ensembleLatex(solutions: number[]): string {
-  if (solutions.length === 0) return "S = \\varnothing";
-  return `S = \\left\\{ ${solutions.map(valeurLatex).join(" \\,;\\, ")} \\right\\}`;
-}
-
-function contientDecimale(solutions: number[]): boolean {
-  return solutions.some((v) => Math.abs(v) > 1e-12 && fractionDePi(v) === null);
+  return `x ${relationBranche(branche)} ${formatBrancheLatex(branche)}`;
 }
 
 /** Liste « A ou B ou C » de formules LaTeX, en fragments. */
@@ -147,15 +54,6 @@ function valeursEcartees(candidats: number[], gardees: number[]): number[] {
 // ============================================================================
 // Énoncé, étapes, énoncé papier.
 // ============================================================================
-
-const LIBELLE_TECHNIQUE: Record<ExerciceEquationTrigonometrique["famille"], string> = Object.fromEntries(OPTIONS_FAMILLE.map((o) => [o.id, o.label])) as Record<
-  ExerciceEquationTrigonometrique["famille"],
-  string
->;
-
-function nomFonction(f: "sin" | "cos" | "tan"): string {
-  return f === "sin" ? "\\sin" : f === "cos" ? "\\cos" : "\\tan";
-}
 
 /** Étapes de résolution — une par écran du générateur, dans le même ordre (`moteur5e/typesEquationTrig.ts`). */
 function etapes(exercice: ExerciceEquationTrigonometrique): FragmentConsigne[][] {
@@ -270,185 +168,8 @@ function reponseBreve(exercice: ExerciceEquationTrigonometrique): FragmentConsig
     ...ouLatex(series.map(egaliteX)),
     ...(ecartees.length > 0 ? [texte(" (sauf là où une tangente n'est pas définie)")] : []),
     texte(" ; dans [0 ; 2π[ : "),
-    latex(ensembleLatex(solutions)),
+    latex(formatEnsembleSolutionsLatex(solutions)),
   ];
-}
-
-// ============================================================================
-// Corrigé détaillé — une ou plusieurs lignes par étape (lettre = étape de `construireEnonce`).
-// ============================================================================
-
-const METHODE_ISOLER_X: FragmentConsigne[] = [texte("Dans chaque série, on retranche la constante de l'argument puis on divise TOUT par le coefficient de x — la période aussi.")];
-const METHODE_SOLUTIONS: FragmentConsigne[] = [texte("On donne à k des valeurs entières successives (…, −1, 0, 1, 2, …) et on garde les x de [0 ; 2π[.")];
-
-function argumentEgalSerie(e: ExerciceEquationTrig, u: BrancheAngle): string {
-  return `${formatArgumentLatex(e.a, e.b)} ${estDecimale(u.constante) ? "\\approx" : "="} ${serieLatex(u)}`;
-}
-
-function lignesArgument(e: ExerciceEquationTrig, sousQuestion: string, nom?: string): EtapeCorrection[] {
-  const prefixe = nom ? `${nom} : ` : "";
-  if (e.aucuneSolution) {
-    return [
-      {
-        label: "Conclusion",
-        sousQuestion,
-        fragments: [texte(`${prefixe}aucune solution, car un ${e.fonction === "sin" ? "sinus" : "cosinus"} est toujours compris entre −1 et 1, or `), latex(`${e.k.latex}`), texte(" n'est pas dans [−1 ; 1].")],
-      },
-    ];
-  }
-  return [{ label: "Calcul", sousQuestion, fragments: [texte(prefixe), ...ouLatex(e.branchesU.map((u) => argumentEgalSerie(e, u)))] }];
-}
-
-function lignesSolutions(exercice: ExerciceEquationTrigonometrique, sousQuestion: string): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion, fragments: METHODE_SOLUTIONS }];
-  const ecartees = ecarteesTangente(exercice);
-  if (ecartees.length > 0) {
-    lignes.push({ label: "Condition", sousQuestion, fragments: [texte("Valeurs écartées (une tangente n'y est pas définie) : "), latex(ecartees.map(valeurLatex).join(" \\,;\\, "))] });
-  }
-  const solutions = solutionsFinales(exercice);
-  lignes.push({
-    label: "Conclusion",
-    sousQuestion,
-    fragments: [latex(ensembleLatex(solutions)), ...(contientDecimale(solutions) ? [texte(" (valeurs arrondies au centième)")] : [])],
-  });
-  return lignes;
-}
-
-function correctionDirecte(e: ExerciceEquationTrig): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [
-    { label: "Technique", sousQuestion: "a", fragments: [texte(`${LIBELLE_TECHNIQUE.directe} : une seule fonction trigonométrique, égale à une constante.`)] },
-    { label: "Méthode", sousQuestion: "b", fragments: [texte(`${texteAideArgumentNiveau1(e.fonction)} Formule du cours : `), latex(latexAideArgumentNiveau2(e.fonction))] },
-    ...lignesArgument(e, "b"),
-  ];
-  if (e.aucuneSolution) return lignes;
-  return [
-    ...lignes,
-    { label: "Méthode", sousQuestion: "c", fragments: METHODE_ISOLER_X },
-    { label: "Calcul", sousQuestion: "c", fragments: ouLatex(e.branchesX.map(egaliteX)) },
-    ...lignesSolutions({ famille: "directe", exercice: e }, "d"),
-    {
-      label: "Piège",
-      sousQuestion: "c",
-      fragments: [
-        texte(
-          e.fonction === "tan"
-            ? "Une seule série pour la tangente, de période π — et la période se divise aussi par le coefficient de x."
-            : e.casSpecial
-              ? "Valeur ±1 : une seule série (les deux angles de la formule sont confondus) — et la période se divise aussi par le coefficient de x."
-              : "Deux séries pour le sinus et le cosinus — et la période se divise aussi par le coefficient de x.",
-        ),
-      ],
-    },
-  ];
-}
-
-function correctionProduit(e: ExerciceProduitFacteurs): EtapeCorrection[] {
-  const l = (i: number) => LETTRES[i];
-  let i = 0;
-  const lignes: EtapeCorrection[] = [{ label: "Technique", sousQuestion: l(i++), fragments: [texte(`${LIBELLE_TECHNIQUE.produit} : un produit est nul si et seulement si l'un de ses facteurs est nul.`)] }];
-  if (e.sousCas === "nonFactoree") {
-    const s = l(i++);
-    lignes.push(
-      { label: "Méthode", sousQuestion: s, fragments: [texte("On met en évidence le facteur commun, comme pour un polynôme : "), latex(LATEX_AIDE_PREFACTEUR_NIVEAU1)] },
-      { label: "Calcul", sousQuestion: s, fragments: [latex(formatAidePrefacteurNiveau2Latex(e))] },
-    );
-  }
-  const sSep = l(i++);
-  lignes.push(
-    { label: "Méthode", sousQuestion: sSep, fragments: [latex(LATEX_AIDE_SEPARER_FACTEURS_NIVEAU1)] },
-    { label: "Calcul", sousQuestion: sSep, fragments: ouLatex(formatAideSepararFacteursNiveau2Latex(e)) },
-  );
-  const sArg = l(i++);
-  lignes.push(
-    { label: "Méthode", sousQuestion: sArg, fragments: [texte("Pour chaque équation, la formule du cours (deux séries pour sin et cos, une seule pour tan).")] },
-    ...lignesArgument(e.facteur1, sArg, "Première équation"),
-    ...lignesArgument(e.facteur2, sArg, "Seconde équation"),
-  );
-  const sX = l(i++);
-  lignes.push({ label: "Méthode", sousQuestion: sX, fragments: METHODE_ISOLER_X });
-  const xs = [...e.facteur1.branchesX, ...e.facteur2.branchesX];
-  if (xs.length > 0) lignes.push({ label: "Calcul", sousQuestion: sX, fragments: ouLatex(xs.map(egaliteX)) });
-  lignes.push(...lignesSolutions(e, l(i++)));
-  lignes.push({
-    label: "Piège",
-    sousQuestion: e.sousCas === "nonFactoree" ? "b" : sSep,
-    fragments: [texte(e.sousCas === "nonFactoree" ? "Ne jamais diviser par le facteur commun : on perdrait toutes les solutions où il s'annule." : "Un produit nul donne DEUX équations à résoudre séparément, puis on réunit leurs solutions.")],
-  });
-  return lignes;
-}
-
-function correctionPythagoricienne(e: ExercicePythagoricienne): EtapeCorrection[] {
-  const f = e.fonctionCible;
-  const lignes: EtapeCorrection[] = [
-    { label: "Technique", sousQuestion: "a", fragments: [texte(`${LIBELLE_TECHNIQUE.pythagoricienne} : l'équation mélange sin et cos, dont un au carré.`)] },
-    { label: "Méthode", sousQuestion: "b", fragments: [texte("On remplace le carré de l'autre fonction grâce à la relation fondamentale : "), latex(latexAideConversionNiveau1(e))] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(formatPolynomeCibleLatex(e))] },
-    {
-      label: "Méthode",
-      sousQuestion: "c",
-      fragments: [texte(`On pose t = ${f}(x) : `), latex(polynomeEnT(e)), texte(" — équation du second degré (discriminant ou factorisation).")],
-    },
-    { label: "Calcul", sousQuestion: "c", fragments: ouLatex([e.racine1, e.racine2].map((r, i) => `t_${i + 1} = ${valeurT(r.t)}`)) },
-  ];
-  for (const r of [e.racine1, e.racine2]) {
-    if (r.invalide || r.resolution === null) {
-      lignes.push({ label: "Condition", sousQuestion: "d", fragments: [latex(`t = ${valeurT(r.t)}`), texte(` est rejetée : ${f}(x) est toujours compris entre −1 et 1.`)] });
-    } else {
-      lignes.push({
-        label: "Calcul",
-        sousQuestion: "d",
-        fragments: [latex(`${nomFonction(f)}(x) = ${valeurT(r.t)}`), texte(" : "), ...ouLatex(r.resolution.branchesX.map(egaliteX))],
-      });
-    }
-  }
-  lignes.push(...lignesSolutions(e, "e"));
-  lignes.push({ label: "Piège", sousQuestion: "d", fragments: [texte(`Une racine t hors de [−1 ; 1] ne donne aucune solution : ${f}(x) ne peut pas valoir t. Elle est rejetée, pas résolue.`)] });
-  return lignes;
-}
-
-function valeurT(t: number): string {
-  if (Number.isInteger(t)) return String(t);
-  return `${t < 0 ? "-" : ""}\\frac{${Math.round(Math.abs(t) * 2)}}{2}`;
-}
-
-function polynomeEnT(e: ExercicePythagoricienne): string {
-  return formatPolynomeCibleLatex(e).replace(/\\(cos|sin)\^2\(x\)/g, "t^2").replace(/\\(cos|sin)\(x\)/g, "t");
-}
-
-function correctionEgalite(e: ExerciceEgaliteExpressions): EtapeCorrection[] {
-  const ecartees = ecarteesTangente(e);
-  return [
-    { label: "Technique", sousQuestion: "a", fragments: [texte(`${LIBELLE_TECHNIQUE.egalite} : deux fonctions trigonométriques différentes, égales.`)] },
-    { label: "Méthode", sousQuestion: "b", fragments: [texte(`${texteAideConversionEgaliteNiveau1(e)} `), latex(latexAideConversionEgaliteNiveau1(e))] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(formatEquationConvertieEgaliteLatex(e))] },
-    { label: "Méthode", sousQuestion: "c", fragments: [texte(`${texteAideResoudreEgaliteNiveau1(e)} `), latex(latexAideResoudreEgaliteNiveau1(e))] },
-    { label: "Calcul", sousQuestion: "c", fragments: ouLatex(e.branches.map(egaliteX)) },
-    ...lignesSolutions(e, "d"),
-    {
-      label: "Piège",
-      sousQuestion: ecartees.length > 0 || e.identite === "tanVersTan" ? "d" : "c",
-      fragments: [
-        texte(
-          e.identite === "tanVersTan"
-            ? "Les valeurs où l'une des tangentes n'est pas définie ne sont pas solutions, même si elles apparaissent dans la série."
-            : "Deux séries : A = B + 2kπ ET l'autre série de la formule du cours — en oublier une fait perdre des solutions.",
-        ),
-      ],
-    },
-  ];
-}
-
-function correctionDetaillee(exercice: ExerciceEquationTrigonometrique): EtapeCorrection[] {
-  switch (exercice.famille) {
-    case "directe":
-      return correctionDirecte(exercice.exercice);
-    case "produit":
-      return correctionProduit(exercice);
-    case "pythagoricienne":
-      return correctionPythagoricienne(exercice);
-    case "egalite":
-      return correctionEgalite(exercice);
-  }
 }
 
 /** Corrigé historique (pipeline Word/PDF) : la réponse de chaque étape, en paragraphes. */
@@ -530,23 +251,41 @@ function bareme(exercice: ExerciceEquationTrigonometrique): BaremeExercice {
       else erreursFrequentes.push({ description: [texte("Garder une valeur où une tangente n'est pas définie")], cout: "−0,5" });
       break;
   }
-  if (contientDecimale(solutionsFinales(exercice))) reponsesAcceptees.push([texte("Valeurs approchées au centième")]);
+  if (ensembleApproche(solutionsFinales(exercice))) reponsesAcceptees.push([texte("Valeurs approchées au centième")]);
   return { reponseFinale, criteres, erreursFrequentes, reponsesAcceptees };
 }
 
-function difficulte(exercice: ExerciceEquationTrigonometrique): 1 | 2 | 3 {
+/** Niveau (grille commune) : aucun écran de lecture (la reconnaissance de la technique est une
+ * DÉCISION et compte comme une étape) ; les écrans « solutions » sont des étapes SANS charge (même
+ * substitution pour chaque k). Méthode : imposée pour l'application directe (0), à choisir parmi
+ * les techniques du cours sinon (1). Piège dans les DONNÉES : valeur ±1 (une seule série), facteur
+ * commun qu'on serait tenté de diviser (produit non factorisé), valeur où une tangente n'est pas
+ * définie, racine t à rejeter ; « aucune solution » est un cas particulier, pas un piège. Nombres :
+ * calculatrice (profil) ou angles kπ/n non remarquables (`anglesEnPi`). */
+function criteresDifficulte(exercice: ExerciceEquationTrigonometrique): CriteresDifficulte {
+  const base = etapesDuCorrige(correctionDetailleeEquationTrig(exercice));
+  let piege = false;
   switch (exercice.famille) {
-    case "directe": {
-      const e = exercice.exercice;
-      if (e.aucuneSolution) return 1;
-      const simple = e.a.numerateur === e.a.denominateur && e.b.decimal === 0 && e.regime === "exact";
-      return simple ? 1 : 2;
-    }
+    case "directe":
+      piege = exercice.exercice.casSpecial;
+      break;
     case "produit":
-      return exercice.sousCas === "nonFactoree" ? 3 : 2;
-    default:
-      return 3;
+      piege = exercice.sousCas === "nonFactoree" || ecarteesTangente(exercice).length > 0 || exercice.facteur1.casSpecial || exercice.facteur2.casSpecial;
+      break;
+    case "pythagoricienne":
+      piege = exercice.racine1.invalide || exercice.racine2.invalide;
+      break;
+    case "egalite":
+      piege = ecarteesTangente(exercice).length > 0;
+      break;
   }
+  return {
+    ...base,
+    lettresSansCharge: [...(base.lettresSansCharge ?? []), ...lettresSolutionsEquationTrig(exercice)],
+    methode: exercice.famille === "directe" ? 0 : 1,
+    piege: piege ? 1 : 0,
+    anglesEnPi: true,
+  };
 }
 
 export const adaptateurEvaluationEquationTrig: AdaptateurFeuilleExercices<ExerciceEquationTrigonometrique> = {
@@ -559,11 +298,10 @@ export const adaptateurEvaluationEquationTrig: AdaptateurFeuilleExercices<Exerci
   genererInstanceAvecVariante: construireEquationTrigAvecFamille,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeEquationTrig,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };
 

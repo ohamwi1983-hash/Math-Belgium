@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
 import type { ReponseArgumentResoudre } from "../moteur5e/verificationModelisationSinusoide";
-import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { consignePhaseFragments, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { FragmentsConsigneSinusoide } from "./FragmentsConsigneSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -73,7 +74,7 @@ export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentative
 
   return (
     <div>
-      <p className="prompt-text">{consignePhase(exercice, "argumentResoudre")}</p>
+      <p className="prompt-text"><FragmentsConsigneSinusoide fragments={consignePhaseFragments(exercice, "argumentResoudre")} /></p>
       <div className="options-grid">
         <button type="button" className={choixAucunAngle === true ? "btn toggle-active" : "btn"} onClick={() => setChoixAucunAngle(true)}>
           Aucun angle

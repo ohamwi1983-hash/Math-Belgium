@@ -38,9 +38,10 @@ function formatTermeDecalageLatex(b: number): string {
 function formatArgumentLatex(exercice: ExerciceExtremumsSinusoide): string {
   const coeffX = formatCoefficientDeXLatex(exercice.a);
   const termeBArg = formatTermeBArgLatex(exercice.bArg);
-  // `\cdot` requis quand le coefficient se termine par une commande LaTeX (ex. "\pi") — sinon
-  // "\pi"+"x" concatène en "\pix", une commande LaTeX invalide (bug trouvé par test KaTeX direct).
-  const termeX = coeffX === "" ? "x" : coeffX === "-" ? "-x" : coeffX.includes("\\") ? `${coeffX}\\cdot x` : `${coeffX}x`;
+  // Coefficient qui se termine par une commande LaTeX (ex. « 2\pi ») : une espace, sinon « \pi »+« x »
+  // concatène en « \pix », commande invalide. Plus de « \cdot » devant x (« ½·x » était maladroit) :
+  // « \dfrac{1}{2}x », « \dfrac{\pi}{3}x », « 2\pi x ».
+  const termeX = coeffX === "" ? "x" : coeffX === "-" ? "-x" : /\\[a-zA-Z]+$/.test(coeffX) ? `${coeffX} x` : `${coeffX}x`;
   return `${termeX}${termeBArg}`;
 }
 

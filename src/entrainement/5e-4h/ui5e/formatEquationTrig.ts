@@ -28,10 +28,43 @@ function arrondi1(v: number): number {
   return Object.is(r, -0) ? 0 : r;
 }
 
+/** Arrondi au CENTIÈME — la précision annoncée par la consigne (« arrondis au centième près ») et
+ * la tolérance de la vérification (`TOLERANCE_EQUATION_TRIG = 0.01`). L'ancien affichage au dixième
+ * (« 1,3 + 6,3k ») ne passait même pas sa propre vérification (6,3 au lieu de 2π ≈ 6,28). */
+function arrondi2(v: number): number {
+  const r = Math.round(v * 100) / 100;
+  return Object.is(r, -0) ? 0 : r;
+}
+
 /** Décimal en LaTeX : virgule protégée « {,} » (une virgule nue est une ponctuation pour KaTeX,
- * suivie d'une espace : « 2, 8 »). */
+ * suivie d'une espace : « 2, 8 »), au centième. */
 function formatDecimalLatex(v: number): string {
-  return arrondi1(v).toString().replace(".", "{,}");
+  return arrondi2(v).toString().replace(".", "{,}");
+}
+
+/** v = (n/d)·π (d ≤ 24) — une valeur du régime « decimal » peut être un angle remarquable
+ * (arccos 0,5 = π/3, π − 0 = π, 2π) : elle s'écrit alors exactement. */
+function fractionPiDe(v: number): { numerateur: number; denominateur: number } | null {
+  for (let denominateur = 1; denominateur <= 24; denominateur++) {
+    const numerateur = Math.round((v / Math.PI) * denominateur);
+    if (numerateur !== 0 && Math.abs(v - (numerateur * Math.PI) / denominateur) < 1e-9) {
+      const g = pgcd(Math.abs(numerateur), denominateur);
+      return { numerateur: numerateur / g, denominateur: denominateur / g };
+    }
+  }
+  return null;
+}
+
+/** Valeur seulement APPROCHÉE à l'écran (ni fraction de π, ni décimal exact au centième) : la
+ * relation qui la précède est « ≈ », jamais « = ». */
+export function valeurApprochee(v: ValeurPiOuDecimale): boolean {
+  if (v.exact !== null || Math.abs(v.decimal) < 1e-12 || fractionPiDe(v.decimal) !== null) return false;
+  return Math.abs(v.decimal * 100 - Math.round(v.decimal * 100)) > 1e-7;
+}
+
+/** « = » ou « \approx » devant une série dont la constante est `constante`. */
+export function relationBranche(branche: { constante: ValeurPiOuDecimale }): string {
+  return valeurApprochee(branche.constante) ? "\\approx" : "=";
 }
 
 /** Décimal en texte brut (étiquettes `<text>` SVG du cercle) : virgule simple. */
@@ -47,8 +80,9 @@ function formatMagnitudePiLatex(numerateur: number, denominateur: number): strin
 /** Valeur signée autonome (constante d'une branche, ou b dans l'argument) — "0" si nulle, jamais de
  * signe redondant. */
 export function formatValeurLatex(v: ValeurPiOuDecimale): string {
-  if (v.exact !== null) {
-    const { numerateur, denominateur } = v.exact;
+  const exact = v.exact ?? (Math.abs(v.decimal) < 1e-12 ? { numerateur: 0, denominateur: 1 } : fractionPiDe(v.decimal));
+  if (exact !== null) {
+    const { numerateur, denominateur } = exact;
     if (numerateur === 0) return "0";
     const signe = numerateur < 0 ? "-" : "";
     return `${signe}${formatMagnitudePiLatex(Math.abs(numerateur), denominateur)}`;
@@ -61,8 +95,9 @@ export function formatValeurLatex(v: ValeurPiOuDecimale): string {
  * de l'entier libre sur toute la plateforme (D.1/D.2/D.3 — remplace "n", propagé à toutes les
  * familles via `ui5e/formatEquationTrigonometrique.ts`). */
 function formatTermePeriodeLatex(periode: ValeurPiOuDecimale): string {
-  if (periode.exact !== null) {
-    const { numerateur, denominateur } = periode.exact;
+  const exact = periode.exact ?? fractionPiDe(periode.decimal);
+  if (exact !== null) {
+    const { numerateur, denominateur } = exact;
     if (denominateur === 1) return numerateur === 1 ? "k\\pi" : `${numerateur}k\\pi`;
     return numerateur === 1 ? `\\frac{k\\pi}{${denominateur}}` : `\\frac{${numerateur}k\\pi}{${denominateur}}`;
   }
@@ -71,7 +106,9 @@ function formatTermePeriodeLatex(periode: ValeurPiOuDecimale): string {
 
 /** "constante + période·n" — une branche complète (écran 1 : u, écran 2 : x — même forme). */
 export function formatBrancheLatex(branche: { constante: ValeurPiOuDecimale; periode: ValeurPiOuDecimale }): string {
-  return `${formatValeurLatex(branche.constante)} + ${formatTermePeriodeLatex(branche.periode)}`;
+  const c = formatValeurLatex(branche.constante);
+  // Constante nulle omise (« 2k\pi », jamais « 0 + 2k\pi »).
+  return c === "0" ? formatTermePeriodeLatex(branche.periode) : `${c} + ${formatTermePeriodeLatex(branche.periode)}`;
 }
 
 function formatCoefficientXLatex(a: CoefficientRationnel): string {

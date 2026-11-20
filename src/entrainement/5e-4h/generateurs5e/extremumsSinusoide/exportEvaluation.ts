@@ -3,9 +3,9 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -17,9 +17,10 @@ import {
   formatFonctionSourceLatex,
   formatSolutionsExtremumsLatex,
   formatTermesEtatActuelExtremums,
-  latexAideNiveau1Extremums,
 } from "../../ui5e/formatExtremumsSinusoide";
-import { CATALOGUE_FONCTIONS_EXTREMUMS, construireAvecFonction, genererExerciceExtremumsSinusoide, valeurTrigVisee } from "./index";
+import { CATALOGUE_FONCTIONS_EXTREMUMS, construireAvecFonction, genererExerciceExtremumsSinusoide } from "./index";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeExtremumsSinusoide } from "./corrigeDetaille";
 import { profilExtremumsSinusoide, PARAMETRES_SINUSOIDE } from "../profilsEvaluationTrigonometrie";
 
 /**
@@ -70,34 +71,6 @@ function reponseBreve(exercice: ExerciceExtremumsSinusoide): FragmentConsigne[] 
 
 const NOM_MODE = { maximums: "les maximums", minimums: "les minimums", extremums: "les extremums" } as const;
 
-
-/** Phrase de méthode de l'étape 1 (valeur visée par sin/cos), en clair — la formule suit en LaTeX. */
-function methodeEquation(exercice: ExerciceExtremumsSinusoide): string {
-  const f = exercice.fonction;
-  if (exercice.mode === "extremums") return `Les extremums sont atteints quand ${f}(u) vaut 1 ou −1 : les deux cas se réunissent en une seule série, de période π.`;
-  const vise = valeurTrigVisee(exercice.mode, exercice.amplitude);
-  const signe = exercice.amplitude.signe > 0 ? "positive" : "négative";
-  return `L'amplitude est ${signe} : ${NOM_MODE[exercice.mode]} sont atteints quand ${f}(u) = ${vise === 1 ? "1" : "−1"} — une seule série, de période 2π.`;
-}
-
-function correctionDetaillee(exercice: ExerciceExtremumsSinusoide): EtapeCorrection[] {
-  const piege =
-    exercice.mode === "extremums"
-      ? "Tous les extremums réunis : la période de la série en u est π (et non 2π) — une seule équation suffit."
-      : exercice.amplitude.signe < 0
-        ? `Amplitude négative : ${NOM_MODE[exercice.mode]} sont atteints quand ${exercice.fonction}(u) = ${exercice.mode === "maximums" ? "−1" : "1"}, et non l'inverse.`
-        : `${NOM_MODE[exercice.mode].charAt(0).toUpperCase()}${NOM_MODE[exercice.mode].slice(1)} seuls : une seule série, de période 2π — ne pas réunir avec l'autre valeur.`;
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte(`${methodeEquation(exercice)} `), latex(latexAideNiveau1Extremums(exercice).replace(/X/g, "u"))] },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(formatEquationSubstitueeLatex(exercice))] },
-    { label: "Méthode", sousQuestion: "b", fragments: [texte("On retranche la constante, puis on divise TOUT par le coefficient de x — la période aussi.")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(serieXLatex(exercice))] },
-    { label: "Méthode", sousQuestion: "c", fragments: [texte("On donne à k des valeurs entières successives (…, −1, 0, 1, 2, …) et on garde les x de [0 ; 2π[.")] },
-    { label: "Conclusion", sousQuestion: "c", fragments: [latex(formatSolutionsExtremumsLatex(exercice.solutions))] },
-    { label: "Piège", sousQuestion: "a", fragments: [texte(piege)] },
-  ];
-}
-
 /** Corrigé historique (pipeline Word/PDF). */
 function construireCorrection(exercice: ExerciceExtremumsSinusoide): BlocCorrection[] {
   return [
@@ -128,8 +101,16 @@ function bareme(exercice: ExerciceExtremumsSinusoide): BaremeExercice {
   };
 }
 
-function difficulte(exercice: ExerciceExtremumsSinusoide): 1 | 2 | 3 {
-  return exercice.mode !== "extremums" && exercice.amplitude.signe < 0 ? 3 : 2;
+/** Niveau (grille commune) : aucun écran de lecture ; méthode imposée (la série du cours) ; piège
+ * dans les DONNÉES : amplitude négative quand on cherche les maximums ou les minimums seuls (valeur
+ * visée inversée). Nombres : angles kπ/n non remarquables (`anglesEnPi`). */
+function criteresDifficulte(exercice: ExerciceExtremumsSinusoide): CriteresDifficulte {
+  return {
+    ...etapesDuCorrige(correctionDetailleeExtremumsSinusoide(exercice)),
+    methode: 0,
+    piege: exercice.mode !== "extremums" && exercice.amplitude.signe < 0 ? 1 : 0,
+    anglesEnPi: true,
+  };
 }
 
 export const adaptateurEvaluationExtremumsSinusoide: AdaptateurFeuilleExercices<ExerciceExtremumsSinusoide> = {
@@ -142,11 +123,10 @@ export const adaptateurEvaluationExtremumsSinusoide: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecFonction(id as FonctionExtremum),
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeExtremumsSinusoide,
   bareme,
   enoncePapier,
-  dureeMinutes: 6,
 };
 

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
 import type { ReponseResolution } from "../moteur5e/sessionModelisationSinusoide";
-import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { consignePhaseFragments, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { FragmentsConsigneSinusoide } from "./FragmentsConsigneSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -61,7 +62,7 @@ export function EtapeResolution({ exercice, tentativesUtilisees, tentativesMax, 
 
   return (
     <div>
-      <p className="prompt-text">{consignePhase(exercice, "resolution")}</p>
+      <p className="prompt-text"><FragmentsConsigneSinusoide fragments={consignePhaseFragments(exercice, "resolution")} /></p>
       <div className="field-row">
         <div>
           <ApercuExpressionLatex texte={omega} label="ω =" />

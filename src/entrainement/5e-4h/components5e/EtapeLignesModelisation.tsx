@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
-import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { consignePhaseFragments, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { FragmentsConsigneSinusoide } from "./FragmentsConsigneSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -71,7 +72,7 @@ export function EtapeLignesModelisation({ exercice, phase, tentativesUtilisees, 
 
   return (
     <div>
-      <p className="prompt-text">{consignePhase(exercice, phase)}</p>
+      <p className="prompt-text"><FragmentsConsigneSinusoide fragments={consignePhaseFragments(exercice, phase)} /></p>
       {lignes.map((ligne, i) => (
         <div key={i}>
           <ApercuExpressionLatex texte={ligne} />
