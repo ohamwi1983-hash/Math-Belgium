@@ -761,36 +761,56 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   graphiques: [],
   },
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge (ou le
+  // label, ou le début du contenu) du bloc d'exemple du cours (`src/content/chapters/6e-6h/fonctions-exponentielles.ts`).
   'fonctions-exponentielles': {
   limites: [
-    "Démontre que, pour une surface dont l'aire double chaque semaine, la formule $S(t) = S_0 \\cdot 2^t$ reste valable pour tout $t$ **rationnel** (pas seulement entier), en détaillant le raisonnement pour une durée exprimée en jours (facteur multiplicatif quotidien $k$ tel que $k^7=2$).",
+    { cle: 'comparer les deux modèles', enonce: "Une surface d'aire $S_0$ double chaque semaine. Démontre que, après $t$ semaines, elle vaut $S_0 \\cdot 2^t$ pour tout $t$ **rationnel**, positif ou négatif, et pas seulement pour un nombre entier de semaines." },
+    { cle: 'une exponentielle est toujours strictement positive', enonce: "Démontre que, pour $a \\in \\mathbb{R}_0^+$ et tout réel $x$, $a^x > 0$." },
+    { cle: 'forme ∞ · 0', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} x^2 \\cdot e^{-x}$." },
   ],
   derivee: [
-    "Calcule la dérivée de chacune des fonctions suivantes, en justifiant à chaque fois la présence ou l'absence d'un facteur $\\ln$ : $f(x)=5^x$, $g(x)=e^{3x-1}$, $k(x)=3^{x^4-x}$, $m(x)=e^{\\sin(x)}$.",
-    "Détermine le domaine de définition de $h(x) = e^{\\sqrt{x-2}}$, en justifiant la contrainte imposée par chacune des deux fonctions composées.",
-    "Démontre, à partir de la définition du nombre dérivé, que pour $a \\in \\mathbb{R}_0^+$ et $f(x)=a^x$, on a $f'(x) = f'(0) \\cdot a^x$.",
-    "Démontre que $(e^x)' = e^x$.",
+    { cle: "$f(x) = 5^x \\implies", enonce: "Calcule la dérivée de chacune des fonctions suivantes, en justifiant à chaque fois la présence ou l'absence d'un facteur $\\ln$ : $f(x)=5^x$, $g(x)=e^{3x-1}$, $k(x)=3^{x^4-x}$, $m(x)=e^{\\sin(x)}$." },
+    { cle: '$h(x) = e^{\\sqrt{x-2}}$', enonce: "Détermine le domaine de définition de $h(x) = e^{\\sqrt{x-2}}$, en justifiant la contrainte imposée par chacune des deux fonctions composées." },
+    { cle: 'la dérivée de aˣ est un multiple de aˣ', enonce: "Démontre, à partir de la définition du nombre dérivé, que pour $a \\in \\mathbb{R}_0^+$ et $f(x)=a^x$, on a $f'(x) = f'(0) \\cdot a^x$." },
+    { cle: 'pourquoi exp est sa propre dérivée', enonce: "En admettant que $\\ln(e) = 1$, démontre que $(e^x)' = e^x$." },
+    { cle: 'la limite de (1 + k/x)ˣ', enonce: "Démontre, à partir de la définition de $e$, que pour $k > 0$ : $\\displaystyle\\lim_{x \\to +\\infty} \\left(1+\\dfrac{k}{x}\\right)^x = e^k$." },
+    { cle: 'le signe de ln(a)', enonce: "Démontre que $\\ln(a) > 0$ si $a > 1$ et que $\\ln(a) < 0$ si $0 < a < 1$, puis déduis-en le sens de variation de $x \\mapsto a^x$." },
+    { cle: 'la limite fondamentale en 0', enonce: "Démontre que, pour $a \\in \\mathbb{R}_0^+$, $\\displaystyle\\lim_{x \\to 0} \\dfrac{a^x - 1}{x} = \\ln(a)$, puis déduis-en $\\displaystyle\\lim_{x \\to 0} \\dfrac{e^x - 1}{x}$." },
+    { cle: "l'exponentielle domine toute puissance de x", enonce: "Démontre que, pour $a > 1$ et tout entier naturel $n$, $\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{x^n}{a^x} = 0$." },
+    { cle: 'forme 0/0 — règle de L’Hôpital', enonce: "Calcule $\\displaystyle\\lim_{x \\to 0} \\dfrac{\\sin(4x)}{e^{2x} - 1}$ en vérifiant les conditions de la règle utilisée." },
+    { cle: 'deux applications successives', enonce: "Calcule $\\displaystyle\\lim_{x \\to 0} \\dfrac{e^{x} - 1 - x}{x^2}$." },
   ],
   graphique: [
-    "Pour $f(x) = \\dfrac{e^x+e^{-x}}{2}$, démontre que $f$ est paire et que sa dérivée $f'(x) = \\dfrac{e^x-e^{-x}}{2}$ est impaire.",
+    { cle: 'les variations de f lues sur le graphique de f′', enonce: "On donne le graphique de $f'(x) = x \\cdot e^x$, sans l'expression de $f$. Détermine, à partir de ce graphique, les variations de $f$, ses extremums, sa concavité et ses points d'inflexion." },
+    { cle: 'parité et dérivée', enonce: "Soit $f$ dérivable sur $\\mathbb{R}$. Démontre que si $f$ est paire, $f'$ est impaire, et que si $f$ est impaire, $f'$ est paire." },
+    { cle: '$f(x) = \\dfrac{e^x+e^{-x}}{2}$ (paire)', enonce: "Pour $f(x) = \\dfrac{e^x+e^{-x}}{2}$, démontre que $f$ est paire et que sa dérivée $f'(x) = \\dfrac{e^x-e^{-x}}{2}$ est impaire." },
   ],
   equations: [
-    "Démontre que, pour $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$, $a^x = a^y \\iff x = y$, puis explique pourquoi la condition $a \\neq 1$ est indispensable.",
+    { cle: "principe d'équivalence", enonce: "Démontre que, pour $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$, $a^x = a^y \\iff x = y$, puis explique pourquoi la condition $a \\neq 1$ est indispensable." },
+    { cle: '$3^{2x-1} = 3^5$', enonce: "Résous l'équation $3^{2x-1} = 3^5$." },
+    { cle: 'exposant du second degré', enonce: "Résous l'équation $5^{4t^2} = 5^{3t+1}$." },
+    { cle: '$4^x - 3 \\cdot 2^x + 2 = 0$', enonce: "Résous l'équation $4^x - 3 \\cdot 2^x + 2 = 0$." },
   ],
   inequations: [
-    undefined,
-    undefined,
-    "Démontre que, pour $0 < a < 1$, $a^x < a^y \\iff x > y$, puis déduis-en les trois autres cas ($\\le$, $>$, $\\ge$).",
-    "Démontre que, pour $a > 1$, $a^x < a^y \\iff x < y$, puis déduis-en les trois autres cas ($\\le$, $>$, $\\ge$).",
+    { cle: 'base 2 > 1', enonce: "Résous l'inéquation $2^{x-1} \\ge 8$." },
+    { cle: 'base 1/2, entre 0 et 1', enonce: "Résous l'inéquation $\\left(\\dfrac{1}{2}\\right)^x < 8$." },
+    { cle: 'cas 0 < a < 1', enonce: "Démontre que, pour $0 < a < 1$, $a^x < a^y \\iff x > y$, puis déduis-en les trois autres cas ($\\le$, $>$, $\\ge$)." },
+    { cle: 'cas a > 1', enonce: "Démontre que, pour $a > 1$, $a^x < a^y \\iff x < y$, puis déduis-en les trois autres cas ($\\le$, $>$, $\\ge$)." },
+    { cle: 'base entre 0 et 1, exposant du second degré', enonce: "Résous l'inéquation $0{,}315^{x^2} < 0{,}315^{2x+3}$." },
+    { cle: 'base e > 1', enonce: "Résous l'inéquation $e^{4t-2} < e^{6t-5}$." },
   ],
   etude: [
-    "Étudie complètement la fonction $f(x) = x \\cdot e^x$ : domaine, dérivée et son signe (extremum), dérivée seconde et son signe (point d'inflexion), limites en $-\\infty$ et $+\\infty$.",
-    "Étudie complètement la fonction $f(x) = e^{-x^2}$ : domaine, signe, dérivée première (extremum), dérivée seconde (points d'inflexion), limites en $-\\infty$ et $+\\infty$.",
+    { cle: '$f(x) = x \\cdot e^x$', enonce: "Étudie complètement la fonction $f(x) = x \\cdot e^x$ : domaine, limites et asymptotes, sens de variation et extremum, concavité et point d'inflexion." },
+    { cle: '$f(x) = e^{-x^2}$', enonce: "Étudie complètement la fonction $f(x) = e^{-x^2}$ : domaine, signe, limites et asymptote, sens de variation et extremum, concavité et points d'inflexion." },
+    { cle: 'une asymptote oblique', enonce: "Montre que la droite $y = 2x - 1$ est asymptote oblique à la courbe de $f(x) = 2x - 1 + e^{-x}$ en $+\\infty$, précise la position de la courbe par rapport à cette droite, et étudie la limite de $f$ en $-\\infty$." },
   ],
   problemes: [
-    "Démontre que, pour $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$ et $f(x) = k \\cdot a^x$ ($k \\neq 0$), le rapport $\\dfrac{f(s)}{f(r)}$ ne dépend que de l'écart $s-r$, et non des valeurs de $r$ et $s$ elles-mêmes.",
-    'Une population de 1000 individus croît de 5 % par an. Détermine une expression de $Q(t)$, puis calcule la population après 10 ans.',
-    "Pour le modèle de saturation $p(t) = 1 - e^{-0{,}1t}$, explique pourquoi $p(t)$ se rapproche de 100 % sans jamais l'atteindre, puis calcule $p(10)$.",
+    { cle: "le rapport ne dépend que de l'écart", enonce: "Démontre que, pour $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$ et $f(x) = k \\cdot a^x$ ($k \\neq 0$), le rapport $\\dfrac{f(s)}{f(r)}$ ne dépend que de l'écart $s-r$, et non des valeurs de $r$ et $s$ elles-mêmes." },
+    { cle: 'Une population de 1000 individus', enonce: 'Une population de 1000 individus croît de 5 % par an. Détermine une expression de $Q(t)$, puis calcule la population après 10 ans.' },
+    { cle: '$p(t) = 1 - e^{-0{,}1t}$', enonce: "Pour le modèle de saturation $p(t) = 1 - e^{-0{,}1t}$, explique pourquoi $p(t)$ se rapproche de 100 % sans jamais l'atteindre, puis calcule $p(10)$." },
+    { cle: 'un café qui refroidit', enonce: "Un café est servi à 84 °C ; il mesure 36 °C après une demi-heure et 24 °C après une heure. Avec $t$ en quarts d'heure et le modèle $T(t) = L + C \\cdot q^t$, détermine $q$, $C$ et $L$, puis prévois la température après une heure et demie." },
+    { cle: 'le pic de concentration', enonce: "La concentration d'un médicament vaut $C(t) = 5t \\cdot e^{-0{,}5t}$ (en mg/L, $t$ en heures, $t \\ge 0$). Détermine l'instant où elle est maximale et la valeur de ce maximum." },
   ],
   },
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge (ou le
@@ -1752,7 +1772,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites']
 
 /** Bloc de DÉMONSTRATION (« Démonstration — … », « Démonstration alternative — … ») : seuls ces
  * blocs alimentent le type « Formule + démonstration ». Les exemples résolus (calculs) ne sont plus
@@ -3530,7 +3550,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       {
         enonce: "Pourquoi e est-elle la seule base pour laquelle (aˣ)' vaut exactement aˣ, sans aucun facteur devant ?",
         corrige:
-          "La dérivée générale est (aˣ)' = ln(a)·aˣ, et ce facteur ln(a) est par définition la pente de la tangente à la courbe en (0;1). Chaque base a sa propre pente en ce point, et e est exactement, par construction, la base dont cette pente vaut 1 — ce n'est pas une coïncidence, c'est la raison même pour laquelle e est désignée comme particulière parmi toutes les bases possibles.",
+          "La dérivée générale est (aˣ)' = ln(a)·aˣ, et ce facteur ln(a) est par définition la pente de la tangente à la courbe en (0;1). Chaque base a sa propre pente en ce point, et l'on admet que e, défini par la limite de (1 + 1/x)ˣ, est la base dont cette pente vaut 1 : ln(e) = 1. C'est la raison pour laquelle e est particulière parmi toutes les bases possibles.",
       },
       {
         enonce: "Pourquoi le seul signe de ln(a) suffit-il à savoir si aˣ est croissante ou décroissante, sans tracer aucun graphique ?",
@@ -3540,14 +3560,14 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
     ],
     graphique: [
       {
-        enonce: "Pourquoi la dérivée d'une fonction paire est-elle toujours impaire, et réciproquement ?",
+        enonce: "Pourquoi la dérivée d'une fonction paire est-elle toujours impaire ?",
         corrige:
           "Une fonction paire est symétrique par rapport à l'axe y : sa courbe à droite de 0 est le reflet exact de sa courbe à gauche. Or réfléchir une courbe par rapport à un axe vertical inverse le signe de sa pente en chaque point symétrique — une pente positive à droite correspond à une pente négative au point miroir à gauche. C'est exactement ce que signifie f'(−x) = −f'(x), soit une dérivée impaire.",
       },
       {
         enonce: "En observant seulement le graphique de f' (sans connaître f), comment repérer un extremum de f, et pourquoi cette méthode fonctionne-t-elle ?",
         corrige:
-          "Un extremum de f correspond à une tangente horizontale, donc à un endroit où f' s'annule ET change de signe (passe de positif à négatif, ou l'inverse). C'est ce changement de signe, et non la seule annulation, qui garantit un vrai maximum ou minimum : si f' touche 0 sans changer de signe, ce n'est pas un extremum.",
+          "Un extremum de f correspond à une tangente horizontale, donc à un endroit où f' s'annule et change de signe (passe de positif à négatif, ou l'inverse). C'est ce changement de signe, et non la seule annulation, qui garantit un vrai maximum ou minimum : si f' touche 0 sans changer de signe, ce n'est pas un extremum.",
       },
     ],
     equations: [
