@@ -1078,6 +1078,18 @@ export const fonctionSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 126. Trois écritures d\'une parabole »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Associer paraboles et équations',
+          generatorId: 'gen128',
+          description: [
+            'Quatre équations, quatre paraboles dans le désordre : retrouve laquelle va avec ' +
+              'laquelle en lisant le sommet, le sens, les zéros ou l\'ordonnée à l\'origine. Les ' +
+              'pièges : le signe dans la parenthèse, a et −a, a et 1/a, les signes des zéros.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 128. Associer paraboles et équations »',
+        },
       ],
     },
     {
