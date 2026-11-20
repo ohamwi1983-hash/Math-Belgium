@@ -395,9 +395,10 @@ function etapesD(e: ExerciceDomaineDeriveeD): EtapeCorrection[] {
     lN = [ligne(`N(x)=${N}`), ligne(`N'(x)=-${derExp(1, "-x")}-${derExp(1, "x")}`, justif("car ", { l: `(${b}^{-x})'=-${ln === "" ? "" : `${ln}\\cdot `}${b}^{-x}` })), ligne(`=${Np}`, "on met le facteur commun en évidence")];
     lD = [ligne(`D(x)=${D}`), ligne(`D'(x)=${Dp}`, formuleChaine(b))];
     const lnF = ln === "" ? "" : `${ln}\\,`;
-    suite.push(ligne(`=\\dfrac{${Np}(${D})-(${N})\\cdot ${Dp}}{(${D})^2}`, "on remplace"));
-    suite.push(ligne(`=\\dfrac{-${lnF}\\left[(${b}^{-x}+${b}^{x})(${D})+2\\cdot ${b}^{2x}(${N})\\right]}{(${D})^2}`, ln === "" ? "on met −1 en évidence" : justif("on met ", { l: `-${ln}` }, " en évidence")));
-    suite.push(ligne(`=\\dfrac{-${lnF}(4\\cdot ${b}^{x}+${b}^{-x}-${b}^{3x})}{(${D})^2}`, justif("on développe : ", { l: `${b}^{-x}\\cdot ${b}^{2x}=${b}^{x}` })));
+    // Lignes en N(x), D(x) tant que possible : la substitution complète débordait à 680 px.
+    suite.push(ligne(`=\\dfrac{${Np}\\cdot D(x)-N(x)\\cdot ${Dp}}{D(x)^2}`, "on remplace N′ et D′"));
+    suite.push(ligne(`=\\dfrac{-${lnF}\\left[(${b}^{-x}+${b}^{x})\\,D(x)+2\\cdot ${b}^{2x}N(x)\\right]}{D(x)^2}`, ln === "" ? "on met −1 en évidence" : justif("on met ", { l: `-${ln}` }, " en évidence")));
+    suite.push(ligne(`=\\dfrac{-${lnF}(4\\cdot ${b}^{x}+${b}^{-x}-${b}^{3x})}{(${D})^2}`, justif("on remplace N et D, on développe : ", { l: `${b}^{-x}\\cdot ${b}^{2x}=${b}^{x}` })));
     suite.push(ligne(`=${fin}`, "on distribue le signe −"));
   }
   return [
