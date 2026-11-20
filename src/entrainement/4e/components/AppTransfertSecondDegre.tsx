@@ -5,7 +5,7 @@ import type { CatalogueVarianteEntree } from "../../export/genererFeuilleExercic
 import { genererAvecCode, lireCodeDepuisUrl } from "../../export/codeExercice";
 import { lettreEtape, lignesDeLEtape } from "../../export/corrigeTableau";
 import { CorrigeDetailleEcran } from "../../components/CorrigeDetailleEcran";
-import { ProgressionPuces } from "../../components/ProgressionPuces";
+import { ProgressionPuces, type EtatPuceProgression } from "../../components/ProgressionPuces";
 import { FicheReponseEcran } from "../../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import type { EcranTSD } from "../ui/ecransTransfertSecondDegre";
@@ -38,6 +38,9 @@ export interface PropsAppTransfert<E> {
   consigneGenerale: (e: E) => ReactNode;
   blocDonnees: (e: E) => ReactNode;
   correction: (e: E) => EtapeCorrection[];
+  /** Nombre FIXE de puces (gen124) : un verdict plus court (moins d'écrans) ne doit pas se lire dans
+   * le nombre de puces dès le premier écran — puces « à venir », puis « sans objet » à la fin. */
+  nombrePuces?: (e: E) => number;
 }
 
 interface TransitionEnAttente {
@@ -86,7 +89,7 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
     setGeneration((g) => g + 1);
   }
 
-  function conclure(correct: boolean, votreReponse: ReactNode) {
+  function conclure(correct: boolean, votreReponse: ReactNode, optionChoisie?: number) {
     const resultat = soumettre(etat, def, correct);
     setIllisible(false);
     if (!resultat.clos) {
@@ -99,7 +102,7 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
     setEnAttente({
       revele: resultat.revele,
       reponseAttendue: attendue,
-      messageRevele: def.type === "choix" ? def.messageFaux : undefined,
+      messageRevele: def.type === "choix" ? ((optionChoisie !== undefined ? def.messagesOptions?.[optionChoisie] : undefined) ?? def.messageFaux) : undefined,
       derniere: ecran >= tous.length - 1,
     });
   }
@@ -129,9 +132,17 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
 
   const communs = { niveauAide: etat.niveauAide, onActiverAide: () => setEtat(activerAide(etat, def.aides.length)), validation, aides: def.aides, consigne: def.consigne };
 
+  function segmentsPuces(): EtatPuceProgression[] {
+    const segments = segmentsDepuisHistorique(historique, tous.length, !enAttente);
+    const n = props.nombrePuces?.(e) ?? 0;
+    const fini = !!enAttente && ecran >= tous.length - 1;
+    for (let i = segments.length; i < n; i++) segments.push(fini ? "sans-objet" : "a-venir");
+    return segments;
+  }
+
   function ecranCourant(): ReactNode {
     if (def.type === "choix") {
-      return <EtapeChoixTransformation {...communs} options={def.options} bonne={def.bonne} onValider={(i) => conclure(i === def.bonne, <RenduFragments fragments={def.options[i]!} />)} />;
+      return <EtapeChoixTransformation {...communs} options={def.options} bonne={def.bonne} onValider={(i) => conclure(i === def.bonne, <RenduFragments fragments={def.options[i]!} />, i)} />;
     }
     return (
       <EtapeChampsTransfert
@@ -174,7 +185,7 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={segmentsDepuisHistorique(historique, tous.length, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+        <ProgressionPuces segments={segmentsPuces()} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={props.consigneGenerale(e)} blocDonnees={props.blocDonnees(e)} />

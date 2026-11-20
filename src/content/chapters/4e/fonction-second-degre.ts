@@ -262,6 +262,18 @@ export const fonctionSecondDegre: ChapterContent = {
             'Le signe de b ne se lit **jamais seul** : il dépend aussi de a. Un axe à gauche donne ' +
             '$b > 0$ si $a > 0$, mais $b < 0$ si $a < 0$.',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lire une parabole sur un graphique',
+          generatorId: 'gen123',
+          description: [
+            'Une parabole est tracée sur un quadrillage : retrouve les signes de a, b et c avec les ' +
+              'trois lectures du cours, puis lis le sommet et l’axe de symétrie, les zéros, ' +
+              'l’ordonnée à l’origine et l’image de la fonction.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 123. Lire une parabole sur un graphique »',
+        },
         { kind: 'subheading', text: "Reconnaître une fonction à partir d'un tableau de valeurs" },
         {
           kind: 'para',

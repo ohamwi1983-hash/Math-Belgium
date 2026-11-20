@@ -27,6 +27,7 @@ import { adaptateurExportWordAnalyseFonction } from '../entrainement/4e/generate
 import { adaptateurEvaluationTransformationsGraphiques } from '../entrainement/4e/generateurs/transformationsGraphiques/exportEvaluation'
 import { adaptateurEvaluationFormeCanoniqueTransformations } from '../entrainement/4e/generateurs/formeCanoniqueTransformations/exportEvaluation'
 import { adaptateurEvaluationOptimisation } from '../entrainement/4e/generateurs/optimisation/exportEvaluation'
+import { adaptateurEvaluationLectureParabole } from '../entrainement/4e/generateurs/lectureParabole/exportEvaluation'
 import { adaptateurEvaluationEquationInequationSecondDegre } from '../entrainement/4e/generateurs/equationInequationSecondDegre/exportEvaluation'
 import { adaptateurEvaluationRelationsRacines } from '../entrainement/4e/generateurs/relationsRacines/exportEvaluation'
 import { adaptateurEvaluationProblemesFraction } from '../entrainement/4e/generateurs/problemesFraction/exportEvaluation'
@@ -139,6 +140,7 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen8: versionPapier(adaptateurEvaluationTransformationsGraphiques) as unknown as AdaptateurFeuilleExercices<never>,
   gen9: versionPapier(adaptateurEvaluationFormeCanoniqueTransformations) as unknown as AdaptateurFeuilleExercices<never>,
   gen55: versionPapier(adaptateurEvaluationOptimisation) as unknown as AdaptateurFeuilleExercices<never>,
+  gen123: versionPapier(adaptateurEvaluationLectureParabole) as unknown as AdaptateurFeuilleExercices<never>,
   gen57: versionPapier(adaptateurEvaluationEquationInequationSecondDegre) as unknown as AdaptateurFeuilleExercices<never>,
   gen119: versionPapier(adaptateurEvaluationProblemesFraction) as unknown as AdaptateurFeuilleExercices<never>,
   gen120: versionPapier(adaptateurEvaluationConstruireInequation) as unknown as AdaptateurFeuilleExercices<never>,
