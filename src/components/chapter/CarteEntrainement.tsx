@@ -5,7 +5,7 @@ import { InteractiveWidget } from './InteractiveWidget'
 
 /**
  * Bloc "S'entraîner" en fin de section : renvoie vers le générateur d'exercices correspondant.
- * Quand `widgetTag` est fourni (gen7/gen8 seulement), le widget porté est monté directement
+ * Quand `widgetTag` est fourni (aucune carte aujourd'hui), le widget porté est monté directement
  * au-dessus de la description — le lien vers la version hébergée sur plateforme-maths reste
  * toujours affiché en dessous, c'est la version de référence maintenue.
  *

@@ -462,6 +462,7 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', quizTheme: 'domaineImageTableaux', label: 'Domaine, image et tableaux' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', quizTheme: 'formeCanoniqueSommet', label: 'Forme canonique, sommet et axe' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', quizTheme: 'transformationsGraphiques', label: 'Transformations graphiques' },
+  { chapitreSlug: 'fonction-second-degre', sectionId: 'utiliser', quizTheme: 'optimisation', label: '' },
   { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'resoudre', quizTheme: 'vocabulaire', label: 'Vocabulaire', quizChapitre: 2 },
   { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'resoudre', quizTheme: 'sansDiscriminant', label: 'Sans discriminant', quizChapitre: 2 },
   { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'resoudre', quizTheme: 'discriminant', label: 'Discriminant', quizChapitre: 2 },
@@ -819,16 +820,19 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   // label) du bloc d'exemple du cours (`src/content/chapters/4e/fonction-second-degre.ts`).
   'fonction-second-degre': {
   etudier: [
-    { cle: 'reconnaître via un tableau', enonce: "Détermine si la fonction donnée par le tableau de valeurs $x=0,1,2,3,4$ et $f(x)=1,2,5,10,17$ est du premier ou du second degré, en calculant ses accroissements successifs puis les accroissements de ces accroissements." },
-    { cle: 'application directe', enonce: "Détermine les coordonnées du sommet de la parabole d'équation $f(x)=2x^2-8x+3$ à l'aide de la formule $x_S=-\\dfrac{b}{2a}$." },
-    { cle: 'cas a > 0', enonce: "Détermine l'ensemble image de la fonction $f(x)=3(x+1)^2-3$, en justifiant à l'aide du sommet de sa parabole et du signe de $a$." },
+    { cle: 'reconnaître via un tableau', enonce: "Détermine si la fonction donnée par le tableau de valeurs $x=0,1,2,3,4$ et $f(x)=1,2,5,10,17$ est du premier ou du second degré, en justifiant." },
+    { cle: 'application directe', enonce: "Détermine les coordonnées du sommet de la parabole d'équation $f(x)=2x^2-8x+3$." },
+    { cle: "l'abscisse du sommet", enonce: "Démontre que le sommet de la parabole d'équation $f(x)=ax^2+bx+c$ (avec $a \\neq 0$) a pour abscisse $x_S=-\\dfrac{b}{2a}$." },
+    { cle: 'cas a > 0', enonce: "Détermine l'ensemble image de la fonction $f(x)=3(x+1)^2-3$, en justifiant." },
     { cle: 'zéros par factorisation', enonce: "Détermine les zéros de la fonction $f(x)=(x-1)(x-4)$ sans développer." },
     { cle: 'lire a, b, c sur un graphique', enonce: "Une parabole est ouverte vers le bas, coupe l'axe des y au point d'ordonnée 3, et son sommet a pour abscisse −1. Détermine le signe des coefficients a, b et c de son équation $f(x) = ax^2 + bx + c$." },
   ],
   transformer: [
     { cle: 'translations combinées', enonce: "Décris les translations qui transforment le graphe de $y=x^2$ en celui de $y=(x-3)^2+2$, puis calcule l'ordonnée du point d'abscisse 5 de ce graphe." },
-    { cle: 'a = 1', enonce: "Écris la fonction $f(x)=x^2-6x+5$ sous forme canonique en complétant le carré, puis donne les coordonnées du sommet de sa parabole." },
-    { cle: 'a ≠ 1', enonce: "Écris la fonction $f(x)=2x^2-8x+3$ sous forme canonique en complétant le carré (mets d'abord $a$ en évidence sur les termes en $x^2$ et en $x$), puis donne les coordonnées du sommet de sa parabole." },
+    { cle: 'a = 1', enonce: "Écris la fonction $f(x)=x^2-6x+5$ sous forme canonique, puis donne les coordonnées du sommet de sa parabole." },
+    { cle: 'a ≠ 1', enonce: "Écris la fonction $f(x)=2x^2-8x+3$ sous forme canonique, puis donne les coordonnées du sommet de sa parabole." },
+    { cle: 'la forme canonique générale', enonce: "Démontre que toute fonction $f(x)=ax^2+bx+c$ (avec $a \\neq 0$) peut s'écrire $f(x)=a(x-x_S)^2+y_S$, et exprime $x_S$ et $y_S$ en fonction de a, b et c." },
+    { cle: "l'image, grâce à un carré positif", enonce: "Soit $f(x)=a(x-x_S)^2+y_S$ avec $a>0$. Démontre que $\\operatorname{im} f=[y_S\\,;\\,{+\\infty}[$, puis donne l'image de f lorsque $a<0$." },
     { cle: 'de la forme canonique aux deux autres', enonce: "Écris la fonction $f(x) = 2(x-3)^2 - 8$ sous forme développée, puis sous forme factorisée." },
     { cle: 'sommet et un point', enonce: "Une parabole a pour sommet $S(2\\,;\\,-1)$ et passe par le point $(0\\,;\\,3)$. Détermine son équation, sous forme canonique puis développée." },
     { cle: 'deux zéros et un point', enonce: "Une parabole coupe l'axe des x en −1 et en 3, et passe par le point $(1\\,;\\,-8)$. Détermine son équation." },

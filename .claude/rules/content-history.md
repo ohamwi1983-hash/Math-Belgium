@@ -34,19 +34,18 @@ paths:
   jamais interchangé). Vérifié par rendu navigateur réel (`vite preview`, Playwright) : les deux
   nouvelles sous-sections et les 4 occurrences corrigées capturées à l'écran, aucun `$...$` non
   résolu, `npm run build` et `npm run lint` propres.
-  **Complété une 3e fois** : les 4 widgets interactifs de l'artifact d'origine (jusque-là laissés de
+  **Complété une 3e fois** : les widgets interactifs de l'artifact d'origine (jusque-là laissés de
   côté lors de la migration initiale) portés dans `src/interactive/` et embarqués dans le chapitre
   — voir « Widgets interactifs portés » (`.claude/rules/interactive-widgets.md`) pour le mécanisme.
   `parabole-widget` ("Manipule toi-même — fais varier a, b et c") inséré avant "Domaine et image" ;
   `transformations-widget` ("Manipule toi-même — fais varier TH, EV/CV et TV") inséré avant la
   vidéo "Transformations graphiques d'une parabole" dans "Étirement, compression et symétrie" ;
-  `gen7-widget` et `gen8-widget` embarqués directement dans les cartes `entrainement` gen7/gen8
-  existantes (`widgetTag`), en plus — jamais à la place — du lien vers la version hébergée sur
-  plateforme-maths. Vérifié par rendu navigateur réel (`vite preview`, Playwright) : les 4 widgets
-  présents dans le DOM et fonctionnels (captures à l'écran des 4 : sliders a/b/c et TH/EV/CV/TV
-  réactifs, exercice gen7 "coefficients" jouable, exercice gen8 "transformations graphiques" jouable
-  avec graphe Mafs cible et saisie), aucune erreur JS console, `tsc -b`/`npm run lint`/`npm run
-  build` propres.
+  **Correction (audit du 4e ch. 1)** : le portage de `gen7-widget` et `gen8-widget` dans les cartes
+  gen7/gen8 (`widgetTag`, commit `0d61389`) n'a **jamais été fusionné** dans la branche principale
+  — ni fichiers dans `src/interactive/`, ni `widgetTag` sur les cartes. L'utilisateur a décidé de
+  ne pas les porter (anciennes versions d'artifact, sans les règles communes) : les cartes gen7 et
+  gen8 renvoient seulement au générateur. Les deux ateliers `parabole-widget` et
+  `transformations-widget`, eux, sont bien en place.
 - **4e, Chapitre 2 — Équations et inéquations du second degré** (`equations-inequations-second-degre`) :
   chapitre déjà en place (5 techniques de résolution, tableau de signes, signe d'un produit,
   fractions rationnelles, inconnue au dénominateur, inéquations rationnelles — souvent plus complet
@@ -1119,8 +1118,9 @@ paths:
     `text-transform: none` existait déjà en override sur ce sous-élément précisément pour cette
     raison — piège déjà anticipé ailleurs dans le CSS) ; `.level-kicker`/`.chapter-card-eyebrow`/
     `.eyebrow`/`.toc-label`/`.generator-head .eyebrow2` (texte d'interface fixe ou généré, jamais
-    de variable mathématique authored) ; `.entete` de `gen7-widget.js`/`gen8-widget.js` (noms
-    d'étapes multi-mots type "Coefficients"/"Allure", jamais de variable seule).
+    de variable mathématique authored). (Une mention de `.entete` de `gen7-widget.js` /
+    `gen8-widget.js` figurait ici : ces fichiers n'ont jamais été fusionnés, voir la correction
+    de l'entrée « 4e, Chapitre 1 ».)
   Un exemple a révélé que la casse peut être **sémantiquement significative** et non un simple
   artefact de police : le kicker de `cercle-trigonometrique-triangles.ts` ("a/sinA = b/sinB =
   c/sinC...") mélange délibérément minuscules (côtés a, b, c) et majuscules (sommets/angles A, B,
