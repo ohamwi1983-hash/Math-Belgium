@@ -1437,6 +1437,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'equation-ce-widget',
+          label: 'Manipule toi-même — équation et condition d\'existence',
+          caption:
+            'Chaque membre n\'est tracé que là où il existe : les bandes sous le graphique ' +
+            'montrent la CE de chaque membre, la bande verte leur partie commune. Les ' +
+            'candidats de l\'équation simplifiée sont acceptés s\'ils tombent dans la CE, ' +
+            'rejetés sinon. Fais glisser x sur un candidat rejeté : au moins un des deux ' +
+            'membres n\'existe plus.',
+        },
+        {
           kind: 'entrainement',
           title: 'Équations avec fonctions cyclométriques',
           generatorId: '6gen3',

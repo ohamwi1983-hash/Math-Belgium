@@ -20,6 +20,7 @@ export type InteractiveWidgetTag =
   | 'machine-reciproque-widget'
   | 'pentes-inverses-widget'
   | 'arc-de-trig-widget'
+  | 'equation-ce-widget'
   | 'discriminant-racines-widget'
   | 'signe-trinome-widget'
   | 'signe-produit-widget'
