@@ -7,14 +7,16 @@ import type {
   BlocCorrection,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
+  CriteresDifficulte,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { construireSvgGeometrieCercle } from "../../export5e/svgGraphGeometrieCercle";
-import { blocDonneesLatex, consigneGenerale, consignePhase, formatValeurPhaseLatex, phasesDuScenario, texteAideNiveau2 } from "../../ui5e/formatGeometrieCercle";
+import { blocDonneesLatex, consigneGenerale, consignePhase, formatValeurPhaseLatex, phasesDuScenario } from "../../ui5e/formatGeometrieCercle";
 import { CATALOGUE_SCENARIOS, construireAvecScenarioId, genererExerciceGeometrieCercle } from "./index";
+import { correctionDetailleeGeometrieCercle } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceGeometrieCercle>` pour 5gen12 (Problèmes de
@@ -90,70 +92,14 @@ function reponseBreveGeometrieCercle(exercice: ExerciceGeometrieCercle): Fragmen
   return [texte(`${libelle} : `), latex(`A \\approx ${nombreLatex(valeur, 0)}`)];
 }
 
-const METHODE_SECTEUR: FragmentConsigne[] = [texte("Aire d'un secteur, θ en radians : "), latex("A=\\dfrac{1}{2}r^2\\theta")];
-const METHODE_TRIANGLE: FragmentConsigne[] = [texte("Triangle isocèle de côtés r, r et d'angle au sommet θ : "), latex("A=\\dfrac{1}{2}r^2\\sin\\theta")];
-const METHODE_ANGLE: FragmentConsigne[] = [texte("Loi des cosinus dans le triangle rayon–rayon–corde, calculatrice en radians : "), latex("\\cos\\theta=\\dfrac{2r^2-c^2}{2r^2}")];
-const METHODE_SEGMENT: FragmentConsigne[] = [texte("Le triangle est contenu dans le secteur : segment = secteur − triangle.")];
-
-function methode(phase: PhaseGeometrieCercle): FragmentConsigne[] {
-  switch (phase) {
-    case "conversionRad":
-      return [latex("\\theta_{rad}=\\theta_{°}\\times\\dfrac{\\pi}{180}")];
-    case "aireGrandSecteur":
-    case "airePetitSecteur":
-    case "aireSecteur":
-    case "secteur1":
-    case "secteur2":
-      return METHODE_SECTEUR;
-    case "aireBalayee":
-      return [texte("L'aire balayée est la différence des deux secteurs : "), latex("A=A_1-A_2")];
-    case "angleTheta":
-    case "angle1":
-    case "angle2":
-      return METHODE_ANGLE;
-    case "aireTriangle":
-    case "triangle1":
-    case "triangle2":
-      return METHODE_TRIANGLE;
-    case "aireSegment":
-    case "segmentAire1":
-    case "segmentAire2":
-      return METHODE_SEGMENT;
-    case "aireLentille":
-      return [texte("Les centres sont de part et d'autre de la corde : la lentille est la réunion des deux segments, on additionne.")];
-  }
-}
-
-/** Calcul substitué de l'étape — l'aide de niveau 2 de l'écran quand elle existe ; pour les segments
- * (aide retirée à l'écran), la soustraction avec les valeurs déjà obtenues. */
-function calcul(exercice: ExerciceGeometrieCercle, phase: PhaseGeometrieCercle): string | null {
-  const aide = texteAideNiveau2(exercice, phase);
-  if (aide) return aide;
-  if (exercice.scenario === "segmentCirculaire" && phase === "aireSegment") return `A_{segment}=${nombreLatex(exercice.aireSecteur, 2)}-${nombreLatex(exercice.aireTriangle, 2)}`;
-  if (exercice.scenario === "lentille" && phase === "segmentAire1") return `A_{segment,1}=${nombreLatex(exercice.segment1.aireSecteur, 2)}-${nombreLatex(exercice.segment1.aireTriangle, 2)}`;
-  if (exercice.scenario === "lentille" && phase === "segmentAire2") return `A_{segment,2}=${nombreLatex(exercice.segment2.aireSecteur, 2)}-${nombreLatex(exercice.segment2.aireTriangle, 2)}`;
-  return null;
-}
-
-function piege(exercice: ExerciceGeometrieCercle, phase: PhaseGeometrieCercle): string | null {
-  if (phase === "aireGrandSecteur" || phase === "aireSecteur" || phase === "secteur1") return "θ doit être en RADIANS dans ½r²θ : avec θ en degrés, l'aire est environ 57 fois trop grande.";
-  if (phase === "aireTriangle" || phase === "triangle1") return "L'aire du triangle n'est pas r·c/2 (c n'est pas la hauteur relative à r) : c'est ½r² sin θ.";
-  if (exercice.scenario === "lentille" && phase === "aireLentille") return "Les deux segments sont de part et d'autre de la corde commune : on les ADDITIONNE.";
-  return null;
-}
-
-function correctionDetailleeGeometrieCercle(exercice: ExerciceGeometrieCercle): EtapeCorrection[] {
-  return phasesDuScenario(exercice.scenario).flatMap((phase, i) => {
-    const sousQuestion = LETTRES[i];
-    // Le croquis de l'énoncé en tête du corrigé (comme dans l'ancien corrigé).
-    const etapes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion, fragments: methode(phase), figureHtml: i === 0 ? construireSvgGeometrieCercle(exercice) : undefined }];
-    const c = calcul(exercice, phase);
-    if (c !== null) etapes.push({ label: "Calcul", sousQuestion, fragments: [latex(c)] });
-    etapes.push({ label: "Conclusion", sousQuestion, fragments: [latex(formatValeurPhaseLatex(exercice, phase))] });
-    const p = piege(exercice, phase);
-    if (p !== null) etapes.push({ label: "Piège", sousQuestion, fragments: [texte(p)] });
-    return etapes;
-  });
+/** Critères du niveau (grille commune, `export/niveauDifficulte.ts`), jugés sur l'énoncé PAPIER :
+ * écrans tous de calcul (aucune pure lecture) ; méthode 1 pour le secteur balayé (différence de deux
+ * secteurs) et le segment (secteur − triangle, la méthode du cours § 3), 2 pour la lentille (l'élève
+ * décompose lui-même la figure en deux segments, chacun avec son rayon) ; piège 0 (la position des
+ * centres est dite dans l'énoncé, θ en degrés à convertir est la méthode) ; nombres 1 (calculatrice :
+ * arccos, sinus, arrondis). */
+function criteresDifficulteGeometrieCercle(exercice: ExerciceGeometrieCercle): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeGeometrieCercle(exercice)), methode: exercice.scenario === "lentille" ? 2 : 1, piege: 0, nombres: 1 };
 }
 
 /** Poids par étape (somme 4). */
@@ -222,9 +168,6 @@ function baremeGeometrieCercle(exercice: ExerciceGeometrieCercle): BaremeExercic
   };
 }
 
-function difficulteGeometrieCercle(exercice: ExerciceGeometrieCercle): 1 | 2 | 3 {
-  return exercice.scenario === "lentille" ? 3 : 2;
-}
 
 export const adaptateurEvaluationGeometrieCercle: AdaptateurFeuilleExercices<ExerciceGeometrieCercle> = {
   // Toutes les instances exigent une calculatrice (valeurs décimales) : avertissement du panneau.
@@ -236,10 +179,9 @@ export const adaptateurEvaluationGeometrieCercle: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: (id) => construireAvecScenarioId(id as ScenarioGeometrieCercle),
   construireEnonce: construireEnonceGeometrieCercle,
   construireCorrection: construireCorrectionGeometrieCercle,
-  difficulte: difficulteGeometrieCercle,
+  criteresDifficulte: criteresDifficulteGeometrieCercle,
   reponseBreve: reponseBreveGeometrieCercle,
   correctionDetaillee: correctionDetailleeGeometrieCercle,
   bareme: baremeGeometrieCercle,
   enoncePapier: enoncePapierGeometrieCercle,
-  dureeMinutes: 8,
 };

@@ -100,7 +100,8 @@ export function EtapeChampGeometrieCercle({ exercice, phase, tentativesUtilisees
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(phase)}</p>
+          <p>{texteAideNiveau1(phase).texte}</p>
+          <Katex expression={texteAideNiveau1(phase).latex} block />
           {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, phase)} block />}
         </div>
       )}

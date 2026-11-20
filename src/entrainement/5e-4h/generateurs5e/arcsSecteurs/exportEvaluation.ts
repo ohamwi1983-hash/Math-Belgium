@@ -1,4 +1,4 @@
-import type { ExerciceArcSecteur, ExerciceModeConversion, ExerciceModeDeuxVersTrois, QuantiteArcSecteur } from "../../core5e/arcsSecteurs.types";
+import type { ExerciceArcSecteur, ExerciceModeDeuxVersTrois, QuantiteArcSecteur } from "../../core5e/arcsSecteurs.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
@@ -6,7 +6,7 @@ import type {
   CritereBareme,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
+  CriteresDifficulte,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -15,16 +15,13 @@ import { quantitesManquantes } from "../../moteur5e/typesArcsSecteurs";
 import {
   consigneConversion,
   consigneQuantite,
-  formatValeurCibleConversionLatex,
   formatValeurQuantiteLatex,
-  formulesDisponibles,
-  LABELS_LATEX,
   labelQuantite,
-  latexAideConversionNiveau2,
   latexEnonceConversion,
-  quantitesConnuesJusqua,
 } from "../../ui5e/formatArcsSecteurs";
 import { CATALOGUE_VARIANTES_ARC_SECTEUR, genererArcSecteurAvecVariante, genererExerciceArcSecteur } from "./index";
+import { correctionDetailleeArcSecteur, etapeAvecThetaRadians, formuleDeLEtape, reponseConversionLatex, valeurAvecApprocheLatex } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { profilArcSecteur } from "../profilsEvaluationTrigonometrie";
 
 /**
@@ -48,21 +45,6 @@ const NOMS: Record<QuantiteArcSecteur, string> = {
   l: "la longueur s de l'arc",
   A: "l'aire A du secteur",
 };
-
-/** Valeur numérique d'une grandeur (pour l'arrondi au centième de la réponse brève). */
-function valeurNumerique(q: QuantiteArcSecteur, exercice: ExerciceModeDeuxVersTrois): number {
-  return exercice.valeurs[q];
-}
-
-/** « ≈ 2,62 » — arrondi au centième, virgule décimale. Vide pour une valeur entière (θ°, r). */
-function approcheLatex(x: number): string {
-  if (Number.isInteger(x)) return "";
-  return ` \\approx ${(Math.round(x * 100) / 100).toString().replace(".", "{,}")}`;
-}
-
-function valeurAvecApprocheLatex(q: QuantiteArcSecteur, exercice: ExerciceModeDeuxVersTrois): string {
-  return `${LABELS_LATEX[q]} = ${formatValeurQuantiteLatex(q, exercice)}${approcheLatex(valeurNumerique(q, exercice))}`;
-}
 
 function listeEnFrancais(elements: string[]): string {
   if (elements.length <= 1) return elements.join("");
@@ -89,7 +71,7 @@ function construireEnonceArcSecteur(exercice: ExerciceArcSecteur): SectionExerci
 
 function construireCorrectionArcSecteur(exercice: ExerciceArcSecteur): BlocCorrection[] {
   if (exercice.mode === "conversion") {
-    return [{ type: "paragraphe", fragments: [latex(`${exercice.direction === "degVersRad" ? LABELS_LATEX.thetaRad : LABELS_LATEX.thetaDeg} = ${formatValeurCibleConversionLatex(exercice)}`)] }];
+    return [{ type: "paragraphe", fragments: [latex(reponseConversionLatex(exercice))] }];
   }
   return quantitesManquantes(exercice).map((q) => ({ type: "paragraphe", fragments: [latex(valeurAvecApprocheLatex(q, exercice))] }));
 }
@@ -127,68 +109,24 @@ function enoncePapierArcSecteur(exercice: ExerciceArcSecteur): EnoncePapier {
   };
 }
 
-/** ★ conversion ; ★★ deux grandeurs → trois, formules directes ; ★★★ dès qu'il faut une racine
- * (r à partir de A et θ) ou r à partir de s et A (deux formules à combiner). */
-function difficulteArcSecteur(exercice: ExerciceArcSecteur): 1 | 2 | 3 {
-  if (exercice.mode === "conversion") return 1;
-  const c = exercice.connues;
-  const rDepuisAire = !c.includes("r") && c.includes("A") && (c.includes("thetaDeg") || c.includes("thetaRad"));
-  const rDepuisSA = c.includes("l") && c.includes("A");
-  return rDepuisAire || rDepuisSA ? 3 : 2;
-}
-
+/** « θ (radians) ≈ 2,15 » pour une conversion décimale (jamais « = » devant une valeur arrondie). */
 function reponseBreveArcSecteur(exercice: ExerciceArcSecteur): FragmentConsigne[] {
-  if (exercice.mode === "conversion") {
-    return [latex(`${exercice.direction === "degVersRad" ? LABELS_LATEX.thetaRad : LABELS_LATEX.thetaDeg} = ${formatValeurCibleConversionLatex(exercice)}`)];
-  }
-  return quantitesManquantes(exercice).flatMap((q, i) => [...(i > 0 ? [texte(" ; ")] : []), latex(valeurAvecApprocheLatex(q, exercice))]);
+  if (exercice.mode === "conversion") return [latex(reponseConversionLatex(exercice))];
+  return quantitesManquantes(exercice).flatMap((q, i) => [...(i > 0 ? [texte(" ; ")] : []), latex(`{${valeurAvecApprocheLatex(q, exercice)}}`)]);
 }
 
 const LETTRES = "abcdefghijklmnopqrstuvwxyz";
 
-/** Formule réellement utilisée à l'étape de `q` : la première applicable avec ce qui est connu à cet
- * écran — la même que celle que substitue l'aide de niveau 2 de l'appli. */
-function formuleDeLEtape(exercice: ExerciceModeDeuxVersTrois, q: QuantiteArcSecteur) {
-  const connues = quantitesConnuesJusqua(exercice, q);
-  return formulesDisponibles(q, connues)[0];
-}
-
-/** Étape où l'on utilise θ en radians dans s = rθ, A = ½r²θ (ou leurs réciproques) — c'est là que
- * se place le piège « θ en degrés ». `null` si aucune étape ne le fait. */
-function etapeAvecThetaRadians(exercice: ExerciceModeDeuxVersTrois): number | null {
-  const manquantes = quantitesManquantes(exercice);
-  const i = manquantes.findIndex((q) => q !== "thetaDeg" && q !== "thetaRad" && formuleDeLEtape(exercice, q).requiert.includes("thetaRad"));
-  return i >= 0 ? i : null;
-}
-
-function correctionConversion(exercice: ExerciceModeConversion): EtapeCorrection[] {
-  const versRad = exercice.direction === "degVersRad";
-  return [
-    { label: "Méthode", fragments: [texte(versRad ? "Pour passer des degrés aux radians, on multiplie par " : "Pour passer des radians aux degrés, on multiplie par "), latex(versRad ? "\\dfrac{\\pi}{180}" : "\\dfrac{180}{\\pi}"), texte(".")] },
-    { label: "Calcul", fragments: [latex(`${latexAideConversionNiveau2(exercice)} = ${formatValeurCibleConversionLatex(exercice)}`)] },
-    { label: "Piège", fragments: [texte("Ne pas inverser les deux facteurs : un angle en degrés est un « grand » nombre (360° pour un tour), le même angle en radians est petit (2π ≈ 6,28 pour un tour).")] },
-  ];
-}
-
-function correctionDetailleeArcSecteur(exercice: ExerciceArcSecteur): EtapeCorrection[] {
-  if (exercice.mode === "conversion") return correctionConversion(exercice);
-  const manquantes = quantitesManquantes(exercice);
-  const etapePiege = etapeAvecThetaRadians(exercice);
-  return manquantes.flatMap((q, i): EtapeCorrection[] => {
-    const sousQuestion = LETTRES[i];
-    const formule = formuleDeLEtape(exercice, q);
-    const lignes: EtapeCorrection[] = [
-      { label: "Formule", sousQuestion, fragments: [latex(formule.latexGeneral)] },
-      { label: "Calcul", sousQuestion, fragments: [latex(`${formule.latexSubstitue(exercice)} = ${formatValeurQuantiteLatex(q, exercice)}`)] },
-      { label: "Conclusion", sousQuestion, fragments: [latex(valeurAvecApprocheLatex(q, exercice))] },
-    ];
-    if (etapePiege === i) {
-      lignes.push({ label: "Piège", sousQuestion, fragments: [texte("Dans "), latex("s = r\\theta"), texte(" et "), latex("A = \\dfrac{1}{2}r^2\\theta"), texte(", l'angle θ est TOUJOURS en radians, jamais en degrés.")] });
-    } else if (etapePiege === null && q === "thetaDeg") {
-      lignes.push({ label: "Piège", sousQuestion, fragments: [texte("Pour revenir aux degrés, on multiplie par "), latex("\\dfrac{180}{\\pi}"), texte(", pas par "), latex("\\dfrac{\\pi}{180}"), texte(".")] });
-    }
-    return lignes;
-  });
+/** Critères du niveau (grille commune, `export/niveauDifficulte.ts`), jugés sur l'énoncé PAPIER :
+ * - conversion : un écran, méthode imposée, aucun piège dans les données ; nombres = 1 pour une
+ *   conversion décimale (calculatrice, profil), 0 pour une valeur exacte ;
+ * - deux grandeurs → trois : trois écrans de calcul (aucun écran de lecture), méthode 1 (choisir
+ *   l'ordre et la formule du cours qui s'applique), piège 0 (convertir θ en radians est la méthode,
+ *   pas un piège des données), nombres 0 (valeurs exactes en π demandées ou acceptées). */
+function criteresDifficulteArcSecteur(exercice: ExerciceArcSecteur): CriteresDifficulte {
+  const etapes = etapesDuCorrige(correctionDetailleeArcSecteur(exercice));
+  if (exercice.mode === "conversion") return { ...etapes, methode: 0, piege: 0, nombres: exercice.type === "decimale" ? 1 : 0 };
+  return { ...etapes, methode: 1, piege: 0, nombres: 0 };
 }
 
 function baremeArcSecteur(exercice: ExerciceArcSecteur): BaremeExercice {
@@ -237,10 +175,9 @@ export const adaptateurEvaluationArcSecteur: AdaptateurFeuilleExercices<Exercice
   genererInstanceAvecVariante: genererArcSecteurAvecVariante,
   construireEnonce: construireEnonceArcSecteur,
   construireCorrection: construireCorrectionArcSecteur,
-  difficulte: difficulteArcSecteur,
+  criteresDifficulte: criteresDifficulteArcSecteur,
   reponseBreve: reponseBreveArcSecteur,
   correctionDetaillee: correctionDetailleeArcSecteur,
   bareme: baremeArcSecteur,
   enoncePapier: enoncePapierArcSecteur,
-  dureeMinutes: 6,
 };

@@ -31,6 +31,9 @@ import { EnTeteExercice } from "./components5e/EnTeteExercice";
 const CONSIGNE_DEUX_VERS_TROIS = "Deux grandeurs de ce secteur circulaire sont données. Retrouve les trois autres parmi l'angle θ (en degrés et en radians), le rayon r, la longueur s de l'arc et l'aire A du secteur.";
 const CONSIGNE_CONVERSION = "Convertis cette mesure d'angle.";
 import { calculerRecapitulatifArcSecteur } from "./ui5e/recapitulatifArcSecteur";
+import { correctionDetailleeArcSecteur } from "./generateurs5e/arcsSecteurs/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -180,6 +183,7 @@ export function App5gen6() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeArcSecteur(exercice), lettreEtape(exercice.mode === "conversion" ? 0 : quantitesManquantes(exercice).indexOf(etat.phase as QuantiteArcSecteur)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

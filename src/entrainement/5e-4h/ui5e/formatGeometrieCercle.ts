@@ -17,11 +17,13 @@ function nombreLatex(v: number, decimales: number): string {
   return String(Object.is(r, -0) ? 0 : r).replace(".", "{,}");
 }
 
-/** Valeur arrondie COMME LA CONSIGNE LE DEMANDE (θ au dixième, aire à l'unité), suivie de la
- * valeur plus précise entre parenthèses — l'élève voit la réponse attendue au bon arrondi et peut
- * réutiliser la valeur précise aux écrans suivants (audit 5e ch. 2, point 44). */
+/** Valeur plus précise (réutilisable aux écrans suivants), puis l'arrondi DEMANDÉ par la consigne
+ * (θ au dixième, aire à l'unité) : « θ ≈ 1,6961 ≈ 1,7 » (audit 5e ch. 2, point 44). Avant :
+ * « θ ≈ 1,7 (1,6961) », deux nombres juxtaposés qui se lisaient comme un produit. */
 function valeurArrondieLatex(v: number, decimales: number, decimalesPrecises: number): string {
-  return `\\approx ${nombreLatex(v, decimales)}\\ \\ (${nombreLatex(v, decimalesPrecises)})`;
+  const precise = nombreLatex(v, decimalesPrecises);
+  const arrondi = nombreLatex(v, decimales);
+  return precise === arrondi ? `\\approx ${arrondi}` : `\\approx ${precise} \\approx ${arrondi}`;
 }
 function angleLatex(v: number): string {
   return valeurArrondieLatex(v, 1, 4);
@@ -120,27 +122,40 @@ export function consignePhase(_exercice: ExerciceGeometrieCercle, phase: PhaseGe
   return CONSIGNES[phase];
 }
 
-const AIDES_NIVEAU1: Record<PhaseGeometrieCercle, string> = {
-  conversionRad: "θ(rad) = θ(°) × π/180.",
-  aireGrandSecteur: "Aire d'un secteur circulaire : A=½r²θ, avec θ en RADIANS.",
-  airePetitSecteur: "Aire d'un secteur circulaire : A=½r²θ, avec θ en RADIANS.",
-  aireBalayee: "L'aire balayée est la différence entre les 2 secteurs déjà calculés.",
-  angleTheta: "Loi des cosinus : cos θ=(2r²−c²)/(2r²), puis θ=acos(...).",
-  aireSecteur: "Aire d'un secteur circulaire : A=½r²θ, avec θ en RADIANS.",
-  aireTriangle: "A=½r²sin θ, avec θ en RADIANS.",
-  aireSegment: "Le segment circulaire = secteur − triangle (le triangle est TOUJOURS à l'intérieur du secteur).",
-  angle1: "Loi des cosinus : cos θ₁=(2r₁²−c²)/(2r₁²), puis θ₁=acos(...).",
-  secteur1: "Aire d'un secteur circulaire : A=½r₁²θ₁, avec θ₁ en RADIANS.",
-  triangle1: "A=½r₁²sin θ₁, avec θ₁ en RADIANS.",
-  segmentAire1: "Le segment = secteur − triangle.",
-  angle2: "Loi des cosinus : cos θ₂=(2r₂²−c²)/(2r₂²), puis θ₂=acos(...).",
-  secteur2: "Aire d'un secteur circulaire : A=½r₂²θ₂, avec θ₂ en RADIANS.",
-  triangle2: "A=½r₂²sin θ₂, avec θ₂ en RADIANS.",
-  segmentAire2: "Le segment = secteur − triangle.",
-  aireLentille: "La lentille est la réunion des 2 segments circulaires, un par cercle.",
+/** Aide de niveau 1 : une phrase qui se termine par « : », la formule en KaTeX — jamais écrite au
+ * clavier (l'ancienne version affichait « θ(rad) = θ(°) × π/180 », « A=½r²θ », « θ=acos(...) » en
+ * texte brut). Mêmes formules que « Ce qu'on utilise » du corrigé détaillé. */
+export interface AideAvecLatexGeometrieCercle {
+  texte: string;
+  latex: string;
+}
+
+const SECTEUR = "Aire d'un secteur circulaire, avec l'angle en radians :";
+const TRIANGLE = "Aire du triangle formé par les deux rayons et la corde (angle en radians) :";
+const SEGMENT = "Le segment circulaire est le secteur moins le triangle (le triangle est toujours à l'intérieur du secteur) :";
+const COSINUS = "Loi des cosinus dans le triangle rayon–rayon–corde, puis la touche cos⁻¹ de la calculatrice (en mode radian) :";
+
+const AIDES_NIVEAU1: Record<PhaseGeometrieCercle, AideAvecLatexGeometrieCercle> = {
+  conversionRad: { texte: "Conversion des degrés en radians :", latex: "\\theta_{rad}=\\theta°\\times\\dfrac{\\pi}{180}" },
+  aireGrandSecteur: { texte: SECTEUR, latex: "A_1=\\dfrac{1}{2}r_1^2\\theta" },
+  airePetitSecteur: { texte: SECTEUR, latex: "A_2=\\dfrac{1}{2}r_2^2\\theta" },
+  aireBalayee: { texte: "L'aire balayée est la différence entre les deux secteurs déjà calculés :", latex: "A=A_1-A_2" },
+  angleTheta: { texte: COSINUS, latex: "\\cos\\theta=\\dfrac{2r^2-c^2}{2r^2}" },
+  aireSecteur: { texte: SECTEUR, latex: "A_{secteur}=\\dfrac{1}{2}r^2\\theta" },
+  aireTriangle: { texte: TRIANGLE, latex: "A_{triangle}=\\dfrac{1}{2}r^2\\sin\\theta" },
+  aireSegment: { texte: SEGMENT, latex: "A_{segment}=A_{secteur}-A_{triangle}" },
+  angle1: { texte: COSINUS, latex: "\\cos\\theta_1=\\dfrac{2r_1^2-c^2}{2r_1^2}" },
+  secteur1: { texte: SECTEUR, latex: "A_{secteur,1}=\\dfrac{1}{2}r_1^2\\theta_1" },
+  triangle1: { texte: TRIANGLE, latex: "A_{triangle,1}=\\dfrac{1}{2}r_1^2\\sin\\theta_1" },
+  segmentAire1: { texte: SEGMENT, latex: "A_{segment,1}=A_{secteur,1}-A_{triangle,1}" },
+  angle2: { texte: COSINUS, latex: "\\cos\\theta_2=\\dfrac{2r_2^2-c^2}{2r_2^2}" },
+  secteur2: { texte: SECTEUR, latex: "A_{secteur,2}=\\dfrac{1}{2}r_2^2\\theta_2" },
+  triangle2: { texte: TRIANGLE, latex: "A_{triangle,2}=\\dfrac{1}{2}r_2^2\\sin\\theta_2" },
+  segmentAire2: { texte: SEGMENT, latex: "A_{segment,2}=A_{secteur,2}-A_{triangle,2}" },
+  aireLentille: { texte: "La lentille est la réunion des deux segments circulaires, un par cercle :", latex: "A_{lentille}=A_{segment,1}+A_{segment,2}" },
 };
 
-export function texteAideNiveau1(phase: PhaseGeometrieCercle): string {
+export function texteAideNiveau1(phase: PhaseGeometrieCercle): AideAvecLatexGeometrieCercle {
   return AIDES_NIVEAU1[phase];
 }
 
@@ -265,7 +280,7 @@ export function texteAideNiveau2(exercice: ExerciceGeometrieCercle, phase: Phase
         case "airePetitSecteur":
           return `A_2 = \\dfrac{1}{2} \\times ${exercice.r2}^2 \\times \\theta`;
         case "aireBalayee":
-          return `A_1 - A_2 = ${nombreLatex(exercice.aireGrandSecteur, 2)} - ${nombreLatex(exercice.airePetitSecteur, 2)}`;
+          return `A_1 - A_2 \\approx ${nombreLatex(exercice.aireGrandSecteur, 2)} - ${nombreLatex(exercice.airePetitSecteur, 2)}`;
         default:
           return "";
       }
@@ -276,7 +291,7 @@ export function texteAideNiveau2(exercice: ExerciceGeometrieCercle, phase: Phase
         case "aireSecteur":
           return `A = \\dfrac{1}{2} \\times ${exercice.r}^2 \\times \\theta_{rad}`;
         case "aireTriangle":
-          return `A = \\dfrac{1}{2} \\times ${exercice.r}^2 \\times \\sin(${nombreLatex(exercice.thetaRad, 2)})`;
+          return `A \\approx \\dfrac{1}{2} \\times ${exercice.r}^2 \\times \\sin(${nombreLatex(exercice.thetaRad, 4)})`;
         default:
           return "";
       }
@@ -287,13 +302,13 @@ export function texteAideNiveau2(exercice: ExerciceGeometrieCercle, phase: Phase
         case "secteur1":
           return `A = \\dfrac{1}{2} \\times ${exercice.segment1.r}^2 \\times \\theta_{1,rad}`;
         case "triangle1":
-          return `A = \\dfrac{1}{2} \\times ${exercice.segment1.r}^2 \\times \\sin(${nombreLatex(exercice.segment1.thetaRad, 2)})`;
+          return `A \\approx \\dfrac{1}{2} \\times ${exercice.segment1.r}^2 \\times \\sin(${nombreLatex(exercice.segment1.thetaRad, 4)})`;
         case "angle2":
           return `\\cos\\theta_2 = \\dfrac{2\\times${exercice.segment2.r}^2 - ${nombreLatex(exercice.c, 2)}^2}{2\\times${exercice.segment2.r}^2}`;
         case "secteur2":
           return `A = \\dfrac{1}{2} \\times ${exercice.segment2.r}^2 \\times \\theta_{2,rad}`;
         case "triangle2":
-          return `A = \\dfrac{1}{2} \\times ${exercice.segment2.r}^2 \\times \\sin(${nombreLatex(exercice.segment2.thetaRad, 2)})`;
+          return `A \\approx \\dfrac{1}{2} \\times ${exercice.segment2.r}^2 \\times \\sin(${nombreLatex(exercice.segment2.thetaRad, 4)})`;
         case "aireLentille":
           return `${nombreLatex(exercice.segment1.aireSegment, 2)} + ${nombreLatex(exercice.segment2.aireSegment, 2)}`;
         default:
