@@ -1818,6 +1818,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 153. Identités trig∘arc et arc∘trig »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Restreindre pour inverser',
+          generatorId: '6gen159',
+          description: [
+            'Restreins un trinôme, sin, cos ou tan au plus grand intervalle monotone contenant un point donné, ' +
+              'puis exprime la réciproque (π − arcsin x, 2π − arccos x, arctan x + π…).',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 159. Restreindre pour inverser »',
+        },
       ],
     },
     {
@@ -2691,6 +2702,18 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 4. Dérivées de fonctions cyclométriques »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Problèmes avec arcfonctions',
+          generatorId: '6gen156',
+          description: [
+            'Réfraction et angle limite (existe-t-il un rayon réfracté ?), meilleure distance pour ' +
+              'regarder un tableau, échelle contre un mur : modélise, choisis l\'arcfonction qui convient ' +
+              'et calcule l\'angle à la calculatrice.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 156. Problèmes avec arcfonctions »',
+        },
       ],
     },
     {
@@ -2946,6 +2969,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: "6e (6h) → « 152. Détective d'erreurs : réciproques et arcfonctions »",
         },
+        {
+          kind: 'entrainement',
+          title: 'Lire une transformée c + k·arc(mx + n)',
+          generatorId: '6gen158',
+          description: [
+            'Sur une grille aux multiples de π/4 : lis le domaine et l\'image d\'une transformée d\'arcsin, ' +
+              'arccos ou arctan, puis retrouve m, n, k, c et l\'expression.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 158. Lire une transformée c + k·arc(mx + n) »',
+        },
       ],
     },
     {
@@ -3170,6 +3204,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               '$y = \\dfrac{\\pi}{2}x - 1$ en $+\\infty$ et $y = -\\dfrac{\\pi}{2}x - 1$ en $-\\infty$ ' +
               '(pointillés), dont la courbe se rapproche par au-dessus.',
           },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Étude d\'une fonction cyclométrique',
+          generatorId: '6gen157',
+          description: [
+            'Domaine, dérivée (règle de la chaîne, du produit), zéros de f′, variations intervalle par intervalle ' +
+              'et tableau de variation avec extremums, valeurs aux bornes et limites exacts.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 157. Étude d\'une fonction cyclométrique »',
         },
       ],
     },

@@ -99,6 +99,8 @@ interface Props {
   /** Forme à reprendre (juste en valeur) : message, aucune tentative (optionnel). */
   aReprendre?: (valeurs: string[]) => Frag[] | null;
   messageIllisible: string;
+  /** Valeur lisible mais approchée alors que la forme exacte est demandée (message) : aucune tentative. */
+  approchee?: (valeurs: string[]) => string | null;
   validation?: ValidationEtapeProps | null;
   /** Valeur lisible mais approchée alors que la forme exacte est demandée (message) : aucune tentative. */
   approchee?: (valeurs: string[]) => string | null;
@@ -159,6 +161,7 @@ export function EtapeEcransTrigo({
   piege,
   aReprendre,
   messageIllisible,
+  approchee,
   validation,
   approchee,
 }: Props) {
@@ -199,6 +202,11 @@ export function EtapeEcransTrigo({
     if (statuts.includes("parse_error")) {
       setErreurLecture(messageIllisible);
       setFormeAReprendre(null);
+      return;
+    }
+    const approx = approchee ? approchee(valeurs) : null;
+    if (approx) {
+      setErreurLecture(approx);
       return;
     }
     const approx = approchee ? approchee(valeurs) : null;

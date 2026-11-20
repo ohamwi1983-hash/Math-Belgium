@@ -977,6 +977,39 @@ scientifique comprise ; candidats de 6gen144 = solutions de la copie corrigée) 
 ≈ 14 500 égalités, ≈ 1 700 relations, 0 fausse. Documents réels (`construirePlan`, évaluation 2 séries
 + aménagée + feuille, calculatrice interdite / autorisée) : 0 débordement à 680, 820 et 1 280 px,
 0 `.katex-error`, groupes : verdict de B ≠ A ; QR `?code=` 25 / 25 identiques.
+## 6e ch. 1, lot G — 6gen156–6gen159 (nouveaux, notés)
+
+Socle d'écrans du 5e (`AppEcransTrigo`) avec deux options additives, sans effet ailleurs : `approchee`
+(valeur décimale proche d'une valeur exacte, angle en radians ou arrondi à l'unité : message, AUCUNE
+tentative) et `placeholders` des intervalles. Saisie commune `moteur6e/lectureCycloLotG.ts` (évaluateur
+du chapitre : π, √, fractions, arcsin/arccos/arctan, « sin⁻¹ », « arcsinx » collé, unité finale,
+préfixes « θ = », « f′(x) = », « g(x) = », ±∞ des bornes, listes « ; » ou « aucune »,
+`diagnostiquerEnsemble` : crochets, ±∞ ouverts, ordre libre), écritures `ui6e/nombresCycloLotG.ts`,
+figure `ui6e/figureCycloLotG.ts` (une même échelle ; lignes d'un axe en multiples de π/4 ou π/2, de
+l'autre entières). Corrigés `generateurs6e/{problemesArcfonctions,etudeCyclometrique,lireTransformeeArc,restreindreInverser}/corrigeDetaille.ts`,
+une lettre par écran. **6gen156** (problèmes, Transférer) : réfraction, angle limite (verdict « rayon
+réfracté ? » en choix fermé 50/50, à 3° au moins de θ_L, jamais cas particulier : piège constant 1 →
+niveau 5, 9 min dans les deux issues), angle de vue (méthode 2 : l'élève construit θ(x) = arctan(b/x) −
+arctan(a/x), dérivée, √(ab)), échelle ; trois vraies questions papier, schéma sans valeur cherchée,
+degrés au dixième ; `calculatriceIndispensable`, `calcul: "calculatrice"`. **6gen157** (étude, Transférer) :
+domaine, dérivée, zéros, variations (choix fermé, « décroissante sur ℝ₀ » parmi les leurres), valeurs du
+tableau ; énoncé papier = fonction + consigne globale, tableau de variation SVG en `figureHtml`
+(`ui6e/tableauVariationsCyclo.ts` : double barre d'une valeur interdite, bornes sans f′) ; lecture : a
+pour k·arctan x − x et x·arctan(x/k) (domaine ℝ) ; piège 1 pour le domaine fermé et ℝ₀. **6gen158**
+(lire c + k·arc(mx + n), Appliquer) : forme donnée avec m > 0 ; bornes de l'image, centre et nœuds
+marqués sur les lignes (testé sur 2 000 tirages par variante) ; arctan : k, c AVANT m, n ; énoncé
+papier = courbe sans coordonnée (les nœuds marqués sont dits nœuds), figure annotée dans le corrigé ;
+lectures a, b ; piège = k < 0 ou arccos. **6gen159** (restreindre, Appliquer) : trinôme (x₀ d'un côté du
+sommet, piège si à gauche) ou sin / cos / tan hors restriction principale (piège 1) ; trois vraies
+questions ; g(y₀) = angle DE L'INTERVALLE. Profils : `forme` = variante, aucun cas particulier, aucun
+groupe à verdict (aucun nom de variante ne donne une réponse). Mesuré (`niveauEtDuree`, 300 tirages par
+variante) : 6gen156 niv. 4 (réfraction, échelle) / 5 (réflexion, angle de vue), 9–11 min ; 6gen157 niv. 3–4,
+11–12 min ; 6gen158 niv. 2–3, 8 min ; 6gen159 niv. 3–4, 8 min. Moteurs : 2 000 tirages par variante
+(réponses recalculées numériquement, écritures justes variées, « − », illisible, approchée, pièges),
+0 anomalie. Collecteur (outils de `6gen148-151/corrige` recopiés ; `^{\circ}` → × π/180 et tolérance des
+« ≈ » en degrés convertie, `\limits` ignoré, variables indicées `\theta_2`) : 0 égalité fausse. Documents
+réels (`construirePlan` 2 séries + aménagée + feuille, calculatrice interdite / autorisée ; Word du
+corrigé) : 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error`.
 ## 4e ch. 1, lot H — gen123–gen125 (nouveaux, notés)
 
 Corrigés `4e/generateurs/{lectureParabole,differencesSecondes,equationParabolePoints}/corrigeDetaille.ts`

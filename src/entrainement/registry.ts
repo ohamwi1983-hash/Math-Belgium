@@ -281,6 +281,10 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen154': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen154').then((m) => ({ default: m.App6gen154 }))),
   '6gen155': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen155').then((m) => ({ default: m.App6gen155 }))),
   '6gen64': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen64').then((m) => ({ default: m.App6gen64 }))),
+  '6gen156': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen156').then((m) => ({ default: m.App6gen156 }))),
+  '6gen157': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen157').then((m) => ({ default: m.App6gen157 }))),
+  '6gen158': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen158').then((m) => ({ default: m.App6gen158 }))),
+  '6gen159': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen159').then((m) => ({ default: m.App6gen159 }))),
 
   // --- 6e, chapitre 2 : Fonctions exponentielles ---
   '6gen6': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen6').then((m) => ({ default: m.App6gen6 }))),

@@ -90,6 +90,14 @@ paths:
   la source n'ait que des liens minimalistes, et la petite illustration décorative d'en-tête de
   l'artifact a été omise — deux décisions éditoriales confirmées avant rédaction, pas des
   raccourcis pris silencieusement.
+  **Lot G (nouveaux générateurs, audit du 6e ch. 1), 6gen156–6gen159** : cartes 6gen159 « Restreindre
+  pour inverser » en § 2 (après 6gen2), 6gen156 « Problèmes avec arcfonctions » en § 4 (après 6gen4),
+  6gen158 « Lire une transformée c + k·arc(mx + n) » puis 6gen157 « Étude d'une fonction
+  cyclométrique » en fin de § 5 (après 6gen5 ; le § 6 « étudier une fonction cyclométrique » n'existait
+  pas encore dans la branche de ce lot : la carte de 6gen157 est à déplacer quand il sera créé) ;
+  registres (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts`,
+  processus 3 / 3 / 2 / 2, sections `derivees`, `graphiques`, `graphiques`, `cyclometriques`).
+  Détail papier : `.claude/rules/feuilles-evaluations.md`, « 6e ch. 1, lot G — 6gen156–6gen159 ».
 - **4e, Chapitre 7 — Géométrie analytique plane** (`geometrie-analytique-plane`) : migré en
   intégralité (10 sections, ~19 illustrations) depuis l'artifact d'origine, suite directe du
   chapitre 6 (Calcul vectoriel) — le vecteur directeur d'une droite y revient au centre. Aucun
