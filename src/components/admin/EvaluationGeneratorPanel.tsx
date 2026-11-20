@@ -29,6 +29,19 @@ import {
   type TypeDocx,
 } from '../../lib/evaluationLocal'
 import { construirePlanRemediation, questionsRemediables, titreSansPrefixe } from '../../lib/evaluationRemediation'
+import { normaliserSigneMoins } from '../../lib/normaliserSaisie'
+import {
+  horaireExamen,
+  lireDuree,
+  lireHeure,
+  lireTotal,
+  mettreAEchelle,
+  partiesExamen,
+  sessionParDefaut,
+  titreCourtChapitre,
+  type OrganisationExamen,
+  type TotalExamen,
+} from '../../entrainement/export/examen'
 import {
   CHAPITRE_FONCTIONNEL_SLUG,
   HEURES_PAR_NIVEAU,
@@ -147,6 +160,11 @@ function titreRemediation(e: PlanEnregistre): string {
   return titreSansPrefixe(e.plan)
 }
 
+/** « 32,5 » (virgule décimale). */
+function nombreFrPanneau(x: number): string {
+  return String(Math.round(x * 100) / 100).replace('.', ',')
+}
+
 function slugFichier(texte: string): string {
   return texte.replace(/[\\/:*?"<>|]/g, '-').trim()
 }
@@ -166,7 +184,7 @@ function CompteurFlottant({ nombre, points, duree, masque }: { nombre: number; p
       </span>
       {points !== undefined && (
         <span>
-          · <strong>{points}</strong> point{points > 1 ? 's' : ''}
+          · <strong>{nombreFrPanneau(points)}</strong> point{points > 1 ? "s" : ""}
         </span>
       )}
       {duree !== undefined && (
@@ -257,6 +275,21 @@ export function EvaluationGeneratorPanel({
   // un plan enregistré sans ces champs se recharge avec « non ».
   const [joindreFormulaire, setJoindreFormulaire] = useState(false)
   const [deuxColonnes, setDeuxColonnes] = useState(false)
+  /** Type de document d'évaluation (décision de l'utilisateur, maquette X3) : évaluation ou EXAMEN —
+   * bandeau « Examen · session », tableau des points par partie, parties par chapitre ou par
+   * processus (`entrainement/export/examen.ts`). Réglages d'examen : saisies LIBRES (texte), lues
+   * sans jamais bloquer la frappe ; une saisie illisible est signalée sous son champ, jamais effacée. */
+  const [typeDocument, setTypeDocument] = useState<'evaluation' | 'examen'>('evaluation')
+  const estExamen = !estExercice && typeDocument === 'examen'
+  const [organisationExamen, setOrganisationExamen] = useState<OrganisationExamen>('chapitre')
+  const [modeTotalExamen, setModeTotalExamen] = useState<'libre' | 'fixe'>('libre')
+  /** Totaux saisis par partie (clé = `PartieExamen.cle`), texte tel que tapé. */
+  const [totauxSaisis, setTotauxSaisis] = useState<Record<string, string>>({})
+  const [heureDepart, setHeureDepart] = useState('')
+  const [dureeExamen, setDureeExamen] = useState('')
+  /** Vide = session déduite de la date (« Session de juin 2027 »). */
+  const [session, setSession] = useState('')
+  const [consignesSupplementaires, setConsignesSupplementaires] = useState('')
   /** Dernière génération locale : plan figé (graines) + documents produits. */
   const [planCourant, setPlanCourant] = useState<PlanDocument | null>(null)
   const [documents, setDocuments] = useState<DocumentGenere[]>([])
@@ -570,6 +603,54 @@ export function EvaluationGeneratorPanel({
   )
   const dureeEstimee = Math.max(5, Math.ceil(dureesParProcessus.reduce((t, d) => t + d, 0) / 5) * 5)
 
+  /** Examen : parties de la sélection, avec la MÊME fonction que les documents (`partiesExamen`) —
+   * une ligne active = un élément (ses questions et ses points), tous les vrai/faux = UNE question
+   * (comme `itemVraiFauxRegroupe`, au rang du premier). Totaux en direct : libre → somme des points ;
+   * fixé → total saisi (lisible et possible : au moins 0,5 pt par question), sinon la somme. */
+  const chapitresDuPanneau = chapitres.map((c) => ({ slug: c.slug, titre: c.title, titreCourt: titreCourtChapitre(c.slug, c.title) }))
+  const partiesPanneau = (() => {
+    if (!estExamen) return []
+    type El = { processus: Processus; chapitres: string[]; points: number; questions: number }
+    const elements: El[] = []
+    let vraiFaux: El | null = null
+    for (const l of lignes) {
+      if (nombreLigne(l) === 0) continue
+      if (l.type === 'vraiFaux') {
+        if (!vraiFaux) elements.push((vraiFaux = { processus: l.processus, chapitres: [], points: 0, questions: 1 }))
+        if (!vraiFaux.chapitres.includes(l.chapitreSlug)) vraiFaux.chapitres.push(l.chapitreSlug)
+        vraiFaux.points += pointsLigne(l)
+        continue
+      }
+      const regroupe = l.type === 'exercice' && !!EVALUATION_ADAPTER_REGISTRY[l.cle ?? '']?.regroupable
+      elements.push({ processus: l.processus, chapitres: [l.chapitreSlug], points: pointsLigne(l), questions: regroupe ? 1 : nombreLigne(l) })
+    }
+    return partiesExamen(elements, (e) => e, organisationExamen, chapitresDuPanneau).map((p) => {
+      const somme = p.questions.reduce((t, q) => t + q.element.points, 0)
+      const nombreQuestions = p.questions.reduce((t, q) => t + q.element.questions, 0)
+      const saisie = totauxSaisis[p.cle] ?? ''
+      const lecture = lireTotal(saisie)
+      let message: string | null = null
+      let total = somme
+      if (modeTotalExamen === 'fixe') {
+        if (lecture.etat === 'illisible') message = `${lecture.message} Points de la partie gardés tels quels.`
+        else if (lecture.etat === 'ok') {
+          // Même contrôle que le pipeline : chaque question garde au moins 0,5 pt.
+          if (mettreAEchelle(Array.from({ length: nombreQuestions }, () => 1), lecture.valeur) === null)
+            message = `Trop peu de points : ${nombreQuestions} question${nombreQuestions > 1 ? 's' : ''} demandent au moins ${String(nombreQuestions * 0.5).replace('.', ',')} pts (0,5 pt chacune). Points gardés tels quels.`
+          else total = lecture.valeur
+        }
+      }
+      return { cle: p.cle, romain: p.romain, titre: p.titre, somme, total, message, saisie, valeurFixee: modeTotalExamen === 'fixe' && lecture.etat === 'ok' && !message ? lecture.valeur : null }
+    })
+  })()
+  const totalExamen = partiesPanneau.reduce((t, p) => t + p.total, 0)
+  /** Total affiché (badge flottant, barre du bas) : celui de l'examen (mis à l'échelle si fixé). */
+  const totalAffiche = estExamen ? totalExamen : totalPoints
+  const lectureHeure = lireHeure(heureDepart)
+  const lectureDuree = lireDuree(dureeExamen)
+  const apercuHoraire = horaireExamen(heureDepart, dureeExamen)
+  const sessionDefaut = sessionParDefaut(date)
+
   /** Bouton « Aller au réglage » des variantes exclues faute de calculatrice : fait défiler jusqu'au
    * sélecteur « Calculatrice », lui donne le focus et le surligne un instant. Choix : on ne bascule PAS
    * le réglage d'office — il vaut pour toute l'évaluation (« autorisée » ne tire plus que des cas qui
@@ -728,6 +809,16 @@ export function EvaluationGeneratorPanel({
     setAfficherDuree(!!plan.entete.afficherDuree)
     setJoindreFormulaire(!!plan.entete.joindreFormulaire)
     setDeuxColonnes(!!plan.entete.deuxColonnes)
+    // Examen : un plan enregistré sans ces champs se recharge comme une évaluation.
+    const ex = plan.entete
+    setTypeDocument(ex.typeDocument === 'examen' ? 'examen' : 'evaluation')
+    setOrganisationExamen(ex.organisationExamen ?? 'chapitre')
+    setModeTotalExamen(ex.totalExamen?.mode === 'fixe' ? 'fixe' : 'libre')
+    setTotauxSaisis(ex.totalExamen?.mode === 'fixe' ? Object.fromEntries(Object.entries(ex.totalExamen.parPartie).map(([k, v]) => [k, String(v).replace('.', ',')])) : {})
+    setHeureDepart(ex.heureDepart ?? '')
+    setDureeExamen(ex.dureeExamen ?? '')
+    setSession(ex.session ?? '')
+    setConsignesSupplementaires(ex.consignesSupplementaires ?? '')
     void rendrePlan(plan, false)
   }
 
@@ -761,6 +852,7 @@ export function EvaluationGeneratorPanel({
     if (chapitres.length === 0 || !levelSlug) return
     const titreFinal =
       titre ||
+      (estExamen ? `Examen — ${session.trim() || sessionDefaut}` : '') ||
       (chapitres.length === 1
         ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres[0].title}`
         : `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres.length} chapitres`)
@@ -783,6 +875,22 @@ export function EvaluationGeneratorPanel({
       surtitre: chapitres.length === 1 ? `${niveauLabel} · Chapitre ${chapitres[0].chapterNumber}` : niveauLabel,
       titreChapitre: chapitres.length === 1 ? chapitres[0].title : undefined,
       urlChapitre: chapitres.length === 1 ? `https://math-belgium.vercel.app/${levelSlug}/${chapitres[0].slug}` : undefined,
+      // Examen seulement (une évaluation garde exactement son en-tête d'avant) : textes tels que
+      // saisis, lus à l'impression ; totaux fixés = ceux qui sont lisibles et possibles.
+      ...(estExamen
+        ? {
+            typeDocument: 'examen' as const,
+            numero: undefined,
+            organisationExamen,
+            totalExamen: (modeTotalExamen === 'fixe'
+              ? { mode: 'fixe', parPartie: Object.fromEntries(partiesPanneau.filter((p) => p.valeurFixee !== null).map((p) => [p.cle, p.valeurFixee!])) }
+              : { mode: 'libre' }) satisfies TotalExamen,
+            heureDepart: heureDepart.trim() || undefined,
+            dureeExamen: dureeExamen.trim() || undefined,
+            session: session.trim() || undefined,
+            consignesSupplementaires: consignesSupplementaires.trim() ? consignesSupplementaires : undefined,
+          }
+        : {}),
     }
     const chapitresPayload: ChapitreAvecSections[] = chapitres.map((c) => ({ chapitreSlug: c.slug, chapterNumber: c.chapterNumber, title: c.title, sections: c.sections, formulaire: c.formulaire }))
     const items = construireItemsPayload(entete, lignes, chapitresPayload)
@@ -912,6 +1020,20 @@ export function EvaluationGeneratorPanel({
         )}
 
         {!estExercice && (
+          <div className="admin-eval-tf">
+            <span className="admin-eval-tf-label" id="eval-type-document-label">
+              Document
+            </span>
+            <div className="admin-eval-segments" role="radiogroup" aria-labelledby="eval-type-document-label">
+              {(['evaluation', 'examen'] as const).map((t) => (
+                <button key={t} type="button" role="radio" aria-checked={typeDocument === t} className="admin-eval-segment" onClick={() => setTypeDocument(t)}>
+                  {t === 'evaluation' ? 'Évaluation' : 'Examen'}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {!estExercice && !estExamen && (
           <div className="admin-eval-tf" style={{ width: '4.5em' }}>
             <label htmlFor="eval-numero">N°</label>
             <input id="eval-numero" type="text" value={numero} onChange={(e) => setNumero(e.target.value)} />
@@ -922,12 +1044,14 @@ export function EvaluationGeneratorPanel({
           <input id="eval-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
         <div className="admin-eval-tf" style={{ flex: '1 1 220px', minWidth: '180px' }}>
-          <label htmlFor="eval-titre">Titre {estExercice ? "de la feuille d'exercices" : "de l'évaluation"}</label>
+          <label htmlFor="eval-titre">{estExamen ? "Nom de l'examen (fichiers)" : `Titre ${estExercice ? "de la feuille d'exercices" : "de l'évaluation"}`}</label>
           <input
             id="eval-titre"
             type="text"
             placeholder={
-              chapitres.length === 1
+              estExamen
+                ? `Examen — ${session.trim() || sessionDefaut}`
+                : chapitres.length === 1
                 ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres[0].title}`
                 : chapitres.length > 1
                   ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres.length} chapitres`
@@ -1005,10 +1129,121 @@ export function EvaluationGeneratorPanel({
         {!estExercice && (
           <label className="admin-eval-checkbox-field" htmlFor="eval-afficher-duree" title={`Imprime « ≈ ${dureeEstimee} minutes » dans l'en-tête de l'évaluation.`}>
             <input id="eval-afficher-duree" type="checkbox" checked={afficherDuree} onChange={(e) => setAfficherDuree(e.target.checked)} />
-            Afficher la durée estimée sur l'évaluation
+            Afficher la durée estimée sur {estExamen ? "l'examen (sans durée saisie)" : "l'évaluation"}
           </label>
         )}
       </div>
+
+      {estExamen && (
+        <fieldset className="admin-eval-examen">
+          <legend>Réglages de l'examen</legend>
+          <div className="admin-eval-examen-ligne">
+            <div className="admin-eval-tf">
+              <span className="admin-eval-tf-label" id="eval-organisation-label">
+                Parties
+              </span>
+              <div className="admin-eval-segments" role="radiogroup" aria-labelledby="eval-organisation-label">
+                {(['chapitre', 'processus'] as const).map((o) => (
+                  <button key={o} type="button" role="radio" aria-checked={organisationExamen === o} className="admin-eval-segment" onClick={() => setOrganisationExamen(o)}>
+                    {o === 'chapitre' ? 'Par chapitre' : 'Par processus'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="admin-eval-tf admin-eval-examen-session">
+              <label htmlFor="eval-session">Session</label>
+              <input id="eval-session" type="text" value={session} placeholder={sessionDefaut} onChange={(e) => setSession(e.target.value)} />
+            </div>
+            <div className="admin-eval-tf admin-eval-examen-court">
+              <label htmlFor="eval-heure">Heure de départ</label>
+              <input id="eval-heure" type="text" value={heureDepart} placeholder="08h50" autoComplete="off" onChange={(e) => setHeureDepart(normaliserSigneMoins(e.target.value))} aria-describedby="eval-heure-aide" />
+              <span id="eval-heure-aide" className={`admin-eval-aide${lectureHeure.etat === 'illisible' ? ' admin-eval-aide-erreur' : ''}`} role={lectureHeure.etat === 'illisible' ? 'alert' : undefined}>
+                {lectureHeure.etat === 'illisible' ? lectureHeure.message : 'Facultative'}
+              </span>
+            </div>
+            <div className="admin-eval-tf admin-eval-examen-court">
+              <label htmlFor="eval-duree">Durée</label>
+              <input id="eval-duree" type="text" value={dureeExamen} placeholder="1h30" autoComplete="off" onChange={(e) => setDureeExamen(normaliserSigneMoins(e.target.value))} aria-describedby="eval-duree-aide" />
+              <span id="eval-duree-aide" className={`admin-eval-aide${lectureDuree.etat === 'illisible' ? ' admin-eval-aide-erreur' : ''}`} role={lectureDuree.etat === 'illisible' ? 'alert' : undefined}>
+                {lectureDuree.etat === 'illisible' ? lectureDuree.message : apercuHoraire.horaire ? `Imprimé : ${apercuHoraire.horaire}` : apercuHoraire.duree ? `Imprimé : Durée : ${apercuHoraire.duree}` : '60, 1h, 1h30…'}
+              </span>
+            </div>
+          </div>
+
+          <div className="admin-eval-tf">
+            <span className="admin-eval-tf-label" id="eval-total-label">
+              Total des points
+            </span>
+            <div className="admin-eval-segments" role="radiogroup" aria-labelledby="eval-total-label">
+              {(['libre', 'fixe'] as const).map((m) => (
+                <button key={m} type="button" role="radio" aria-checked={modeTotalExamen === m} className="admin-eval-segment" onClick={() => setModeTotalExamen(m)}>
+                  {m === 'libre' ? 'Total libre' : 'Total fixé par partie'}
+                </button>
+              ))}
+            </div>
+          </div>
+          {partiesPanneau.length === 0 ? (
+            <p className="admin-eval-variante-label">Les parties apparaissent dès qu'une question est choisie dans le tableau.</p>
+          ) : (
+            <ul className="admin-eval-parties">
+              {partiesPanneau.map((p) => (
+                <li key={p.cle}>
+                  <span className="admin-eval-partie-nom">
+                    Partie {p.romain} · {p.titre}
+                  </span>
+                  {modeTotalExamen === 'fixe' ? (
+                    <span className="admin-eval-partie-total">
+                      <input
+                        type="text"
+                        aria-label={`Total voulu pour la partie ${p.romain}`}
+                        value={p.saisie}
+                        placeholder={nombreFrPanneau(p.somme)}
+                        autoComplete="off"
+                        onChange={(e) => {
+                          const v = normaliserSigneMoins(e.target.value)
+                          setTotauxSaisis((prev) => ({ ...prev, [p.cle]: v }))
+                        }}
+                      />{' '}
+                      pts <span className="admin-eval-variante-label">(questions : {nombreFrPanneau(p.somme)} pts)</span>
+                    </span>
+                  ) : (
+                    <span className="admin-eval-partie-total">
+                      <strong>{nombreFrPanneau(p.total)}</strong> pts
+                    </span>
+                  )}
+                  {p.message && (
+                    <span className="admin-eval-aide admin-eval-aide-erreur" role="alert">
+                      {p.message}
+                    </span>
+                  )}
+                </li>
+              ))}
+              <li className="admin-eval-parties-total">
+                <span className="admin-eval-partie-nom">Total de l'examen</span>
+                <span className="admin-eval-partie-total">
+                  <strong>{nombreFrPanneau(totalExamen)}</strong> pts
+                </span>
+              </li>
+            </ul>
+          )}
+          {modeTotalExamen === 'fixe' && partiesPanneau.length > 0 && (
+            <p className="admin-eval-variante-label">
+              Points des questions de chaque partie mis à l'échelle (demi-points, jamais 0 pt, somme exacte) ; barème, grille et corrigé suivent. Champ vide : points tels quels.
+            </p>
+          )}
+
+          <div className="admin-eval-tf">
+            <label htmlFor="eval-consignes">Consignes supplémentaires (une par ligne)</label>
+            <textarea
+              id="eval-consignes"
+              rows={3}
+              value={consignesSupplementaires}
+              placeholder={'Commence chaque partie sur une nouvelle feuille.\nFormules en $…$ : $\\sqrt{2}$'}
+              onChange={(e) => setConsignesSupplementaires(e.target.value)}
+            />
+          </div>
+        </fieldset>
+      )}
       {!estExercice && nombreSeries > 1 && (
         <p className="admin-eval-indisponible">
           {nombreSeries} versions anti-triche (A à {String.fromCharCode(64 + nombreSeries)}) seront générées — mêmes questions, exercices/vrai-faux/questions
@@ -1043,7 +1278,7 @@ export function EvaluationGeneratorPanel({
             ))}
           </div>
 
-          <CompteurFlottant nombre={totalNombre} points={estExercice ? undefined : totalPoints} duree={totalNombre > 0 ? dureeEstimee : undefined} masque={compteurMasque} />
+          <CompteurFlottant nombre={totalNombre} points={estExercice ? undefined : totalAffiche} duree={totalNombre > 0 ? dureeEstimee : undefined} masque={compteurMasque} />
 
           {totalNombre > 0 && (
             <div className="admin-eval-repartition" aria-live="polite">
@@ -1430,7 +1665,7 @@ export function EvaluationGeneratorPanel({
           <div className="admin-eval-bottombar" ref={barreDuBas}>
             {!estExercice && (
               <p className="admin-eval-total">
-                Total : {totalPoints} point{totalPoints > 1 ? 's' : ''}
+                {estExamen ? "Total de l'examen" : 'Total'} : {nombreFrPanneau(totalAffiche)} point{totalAffiche > 1 ? 's' : ''}
               </p>
             )}
             <button type="button" className="admin-gate-submit" onClick={genererEvaluation} disabled={genereEnCours}>
@@ -1440,7 +1675,9 @@ export function EvaluationGeneratorPanel({
                   ? 'Générer la feuille d’exercices'
                   : nombreSeries > 1
                     ? `Générer les ${nombreSeries} séries`
-                    : "Générer l'évaluation"}
+                    : estExamen
+                      ? "Générer l'examen"
+                      : "Générer l'évaluation"}
             </button>
           </div>
           {erreur && <p className="admin-gate-error">{erreur}</p>}
