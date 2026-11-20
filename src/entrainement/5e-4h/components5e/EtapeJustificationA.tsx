@@ -2,12 +2,12 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioAConteneur } from "../core5e/problemesContexte.types";
 import { diagnostiquerJustificationA, type ReponseJustificationA } from "../moteur5e/verificationProblemesContexte";
-import { TEXTE_AIDE_JUSTIFICATION_A_1, consigneJustificationA, texteCorrectionJustificationA } from "../ui5e/formatProblemesContexte";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import { consigneJustificationA, texteCorrectionJustificationA } from "../ui5e/formatProblemesContexte";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { TexteRiche5e } from "./TexteRiche5e";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexte, cibleContexte, illisibleContexte, lireNombre5e, texteIllisibleContexte } from "../ui5e/aidesProblemesContexte";
 
 interface Props {
   exercice: ExerciceScenarioAConteneur;
@@ -35,13 +35,23 @@ export function EtapeJustificationA({ exercice, donnees, xOptimalRetenu, tentati
   const [h, setH] = useState("");
   const [aSoumis, setASoumis] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<unknown>(null);
   const complet = h.trim() !== "";
-  const hErronee = montrerErreurs && complet && diagnostiquerJustificationA(exercice, xOptimalRetenu, { h: Number(h.replace(",", ".")) }) !== "correct";
+  const hErronee = montrerErreurs && complet && diagnostiquerJustificationA(exercice, xOptimalRetenu, { h: lireNombre5e(h) }) !== "correct";
 
   function valider() {
     if (!complet) return;
     setASoumis(true);
-    onValider({ h: Number(h.replace(",", ".")) });
+    const reponseSoumise = { h: lireNombre5e(h) };
+    // Saisie illisible : message, rien n'est transmis (aucune tentative — audit 5e ch. 1, lot B).
+    if (illisibleContexte("justification", exercice, reponseSoumise)) {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    setSoumise(reponseSoumise);
+    onValider(reponseSoumise);
   }
 
   return (
@@ -52,26 +62,21 @@ export function EtapeJustificationA({ exercice, donnees, xOptimalRetenu, tentati
         <label className="field-label field-label-minuscule">h ≈</label>
         <input type="text" className={`text-input${hErronee ? " is-erronee" : ""}`} value={h} onChange={(e) => setH(normaliserSigneMoins(e.target.value))} />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={TEXTE_AIDE_JUSTIFICATION_A_1} /></p>
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-      {aSoumis && (
+      <PiedEcranFonctions
+        aides={aidesContexte("justification", exercice, { xOptimalRetenu })}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={illisible}
+        texteIllisible={texteIllisibleContexte("justification")}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumise !== null && montrerErreurs ? cibleContexte("justification", exercice, soumise, { xOptimalRetenu }) : null}
+        validation={validation}
+      />
+      {validation && aSoumis && (
         <div className="aide-5e">
           <p><TexteRiche5e texte={texteCorrectionJustificationA(exercice, xOptimalRetenu)} /></p>
         </div>

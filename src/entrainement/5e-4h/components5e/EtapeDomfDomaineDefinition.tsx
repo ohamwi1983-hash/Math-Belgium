@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { ReactNode } from "react";
 import type { EnsembleReelGuide, ExerciceDomaineDefinition } from "../core5e/domaineDefinition.types";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
@@ -5,7 +6,10 @@ import { GrilleQuotientDomfRecap } from "./GrilleQuotientDomfRecap";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CONSIGNE_GENERALE_DOMAINE_DEFINITION, calculerAideGrilleDomf, formatTermesEtatActuelCELatex, LATEX_DOM_F } from "../ui5e/formatDomaineDefinition";
+import { aidesDomf5gen1, cibleEnsemble } from "../ui5e/retoursFonctions1";
 import { Katex } from "../components/Katex";
+import { MessageRetour } from "../../4e/components/RetourSaisie";
+import { AidesTrig } from "./RetourSaisieTrig";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -28,9 +32,11 @@ interface Props {
  * gen6 4e). */
 export function EtapeDomfDomaineDefinition({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, donnees, onValider, validation }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
+  const [soumis, setSoumis] = useState<EnsembleReelGuide | null>(null);
   const termesEtatActuel = formatTermesEtatActuelCELatex(exercice);
   const aFractionSousRacine = exercice.famille === "fractionSousRacine" && !exercice.aucuneCE;
-  const highlight = aFractionSousRacine && niveauAide >= 1 ? calculerAideGrilleDomf(exercice.grille, exercice.racines) : undefined;
+  // Surlignage du tableau : niveau 2 (le niveau 1 rappelle la propriété du cours).
+  const highlight = aFractionSousRacine && niveauAide >= 2 ? calculerAideGrilleDomf(exercice.grille, exercice.racines) : undefined;
 
   return (
     <div>
@@ -47,17 +53,23 @@ export function EtapeDomfDomaineDefinition({ exercice, tentativesUtilisees, tent
       {aFractionSousRacine && <GrilleQuotientDomfRecap exercice={exercice} highlight={highlight} />}
       <p className="prompt-text">Exprime le domaine de définition de f en notation ensembliste.</p>
       <EnsembleReelGuideBuilder
-        onValider={onValider}
+        onValider={(e) => {
+          setSoumis(e);
+          onValider(e);
+        }}
         prefixApercu={`${LATEX_DOM_F} =`}
-        contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
+        contenuAvantValider={
+          <>
+            <AidesTrig niveauAide={niveauAide} aides={aidesDomf5gen1(exercice)} />
+            <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+          </>
+        }
         attendu={exercice.domf}
         apresEchec={montrerErreurs}
         validation={validation}
       />
       {!validation && montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+        <MessageRetour illisible={false} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={soumis ? cibleEnsemble(soumis, exercice.domf) : null} />
       )}
     </div>
   );

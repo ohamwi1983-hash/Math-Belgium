@@ -1,16 +1,14 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { diagnostiquerFGeneralisationSimpleA, diagnostiquerGGeneralisationSimpleA, diagnostiquerGeneralisationSimpleA } from "../moteur5e/verificationProblemesContexte";
+import { diagnostiquerFGeneralisationSimpleA, diagnostiquerGGeneralisationSimpleA } from "../moteur5e/verificationProblemesContexte";
 import type { ReponseGeneralisationSimpleA } from "../moteur5e/verificationProblemesContexte";
-import { consigneGeneralisationSimpleA, texteAideGeneralisationSimpleA1 } from "../ui5e/formatProblemesContexte";
+import { consigneGeneralisationSimpleA } from "../ui5e/formatProblemesContexte";
 import type { ExerciceScenarioAReduit } from "../ui5e/scenarioAGraphReduit";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
-import type { StatutVerification } from "../moteur/statutVerification";
 import { TexteRiche5e } from "./TexteRiche5e";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexte, cibleContexte, illisibleContexte, texteIllisibleContexte } from "../ui5e/aidesProblemesContexte";
 
 interface Props {
   exercice: ExerciceScenarioAReduit;
@@ -30,8 +28,9 @@ interface Props {
 export function EtapeGeneralisationSimpleA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [f, setF] = useState("");
   const [g, setG] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<unknown>(null);
   const complet = f.trim() !== "" && g.trim() !== "";
   const fErronee = montrerErreurs && f.trim() !== "" && diagnostiquerFGeneralisationSimpleA(exercice, f) !== "correct";
   const gErronee = montrerErreurs && g.trim() !== "" && diagnostiquerGGeneralisationSimpleA(exercice, g) !== "correct";
@@ -39,8 +38,15 @@ export function EtapeGeneralisationSimpleA({ exercice, donnees, tentativesUtilis
   function valider() {
     if (!complet) return;
     const reponse = { f, g };
-    setDernierStatut(diagnostiquerGeneralisationSimpleA(exercice, reponse));
-    onValider(reponse);
+    const reponseSoumise = reponse;
+    // Saisie illisible : message, rien n'est transmis (aucune tentative — audit 5e ch. 1, lot B).
+    if (illisibleContexte("generalisationSimple", exercice, reponseSoumise)) {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    setSoumise(reponseSoumise);
+    onValider(reponseSoumise);
   }
 
   return (
@@ -57,25 +63,20 @@ export function EtapeGeneralisationSimpleA({ exercice, donnees, tentativesUtilis
         <label className="field-label field-label-minuscule">g(x) =</label>
         <input type="text" className={`text-input${gErronee ? " is-erronee" : ""}`} value={g} onChange={(e) => setG(e.target.value)} placeholder="ex : 1500/x" />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={texteAideGeneralisationSimpleA1(exercice)} /></p>
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesContexte("generalisationSimple", exercice, {})}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={illisible}
+        texteIllisible={texteIllisibleContexte("generalisationSimple")}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumise !== null && montrerErreurs ? cibleContexte("generalisationSimple", exercice, soumise, {}) : null}
+        validation={validation}
+      />
     </div>
   );
 }

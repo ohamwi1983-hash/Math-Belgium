@@ -32,6 +32,10 @@ export interface ContexteConteneurA {
   id: string;
   nomObjetIndefini: string;
   nomObjetDefini: string;
+  /** Rayons optimaux n (cm) plausibles pour cet objet : la contenance vaut V = 2πn³ (1 à 3 L),
+   * le minimum de f + g tombe sur x = n (une ligne de la grille) et h(n) = 2n EXACTEMENT
+   * (audit 5e ch. 1, G1–G2). */
+  rayons: number[];
 }
 
 /** Contexte narratif du combo réduit `stockCommande` — bassin de 10 entrées. `intro` mentionne f et
@@ -55,6 +59,10 @@ export interface ExerciceScenarioAConteneur extends ExerciceScenarioABase {
   contexte: ContexteConteneurA;
   /** contenance de l'objet, en cm³ (V = πr²h) — TOUJOURS affichée explicitement (traçabilité). */
   volumeCm3: number;
+  /** V = kπ cm³, k = 2n³ (affiché « 432π cm³ »). */
+  volumeKPi: number;
+  /** Rayon optimal n (entier) : xOptimal === n. */
+  rayonOptimal: number;
   lignesTableau: LigneTableauScenarioA[];
   /** x tel que f(x)=g(x) (aire latérale = aire des bases) — PAS le rayon optimal, un calcul distinct. */
   xEgaliteAires: number;

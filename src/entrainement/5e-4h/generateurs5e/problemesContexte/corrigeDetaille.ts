@@ -21,11 +21,13 @@ import {
   formatTermesTableauA,
   latexFormuleFB,
   nombreLatex,
+  volumeKPiLatex,
 } from "../../ui5e/formatProblemesContexte";
 import { finaliserCorrige, sansDoublons } from "../../ui5e/corrigeTrigonometrie1";
 import { COURS_CONTEXTE, etudeTrinome, etListe, jf, nb, t, f } from "../../ui5e/corrigeFonctions1";
 import { coeffA, coeffB, coutTotalTheorique } from "./scenarioB";
 import { hauteurCylindre } from "./scenarioA";
+import { chiffreAffaires, coutTotal } from "./scenarioC";
 import { grapheA1, grapheA2, grapheC } from "./graphes";
 
 /**
@@ -120,17 +122,21 @@ const d = (v: number) => nombreLatex(v, 4);
 function correctionA1(e: ExerciceScenarioAConteneur, r: RetenusContexte): EtapeCorrection[] {
   const [la, lb, lc, ld, le] = LETTRES.slice(0, 5).split("");
   const V = e.volumeCm3;
+  // V = kπ cm³ (k = 2n³), écrit « 432\pi » (audit 5e ch. 1, G2).
+  const VL = volumeKPiLatex(e);
+  const k = e.volumeKPi;
+  const exact = (v: number) => Math.abs(v * 100 - Math.round(v * 100)) < 1e-6;
   // a) Tableau : h, aire des bases, aire latérale pour chaque rayon.
   const tab: LigneCalcul[] = [];
   for (const l of e.lignesTableau) {
-    tab.push(ligne(`h=\\dfrac{${V}}{\\pi\\cdot ${l.r}^2}\\approx ${nombreLatex(l.hAttendu, 2)}`, jf("rayon ", { l: `r=${l.r}` }, " : on isole h dans ", { l: "V=\\pi r^2 h" })));
+    tab.push(ligne(`h=\\dfrac{${VL}}{\\pi\\cdot ${l.r}^2}=\\dfrac{${nombreLatex(k, 0)}}{${l.r * l.r}}`, jf("rayon ", { l: `r=${l.r}` }, " : on isole h dans ", { l: "V=\\pi r^2 h" })));
+    tab.push(ligne(`${exact(l.hAttendu) ? "=" : "\\approx "}${nombreLatex(l.hAttendu, 2)}`));
     tab.push(ligne(`A_{\\text{bases}}=2\\pi\\cdot ${l.r}^2\\approx ${nombreLatex(l.aireBasesAttendue, 2)}`, "deux disques de rayon r"));
-    const exactLat = Math.abs(l.aireLateraleAttendue * 100 - Math.round(l.aireLateraleAttendue * 100)) < 1e-6;
-    tab.push(ligne(`A_{\\text{lat}}=\\dfrac{2\\cdot ${V}}{${l.r}}${exactLat ? "=" : "\\approx "}${nombreLatex(l.aireLateraleAttendue, 2)}`, jf("périmètre × hauteur avec h non arrondi : ", { l: "2\\pi r\\cdot\\frac{V}{\\pi r^2}=\\frac{2V}{r}" })));
+    tab.push(ligne(`A_{\\text{lat}}=\\dfrac{2\\cdot ${VL}}{${l.r}}\\approx ${nombreLatex(l.aireLateraleAttendue, 2)}`, jf("périmètre × hauteur avec h non arrondi : ", { l: "2\\pi r\\cdot\\frac{V}{\\pi r^2}=\\frac{2V}{r}" })));
   }
   const xRet = r.xOptimalRetenu ?? Math.round(e.xOptimal);
-  const xExact = e.xOptimal;
   const hRet = hauteurCylindre(V, xRet);
+  const hExacte = Math.abs(hRet - Math.round(hRet)) < 1e-9;
   return [
     utilise(la, [t("Contenance d'un cylindre "), f("V=\\pi r^2 h"), t(", aire des deux bases "), f("2\\pi r^2"), t(", aire latérale "), f("2\\pi r\\cdot h"), t(` (périmètre × hauteur) ${COURS_CONTEXTE}.`)]),
     calcul(la, tab),
@@ -157,24 +163,24 @@ function correctionA1(e: ExerciceScenarioAConteneur, r: RetenusContexte): EtapeC
       ligne("\\iff x^3=\\dfrac{V}{\\pi}", jf("on divise par ", { l: "2\\pi" })),
       ligne("\\iff x=\\sqrt[3]{\\dfrac{V}{\\pi}}", "racine cubique"),
     ]),
-    calcul(lc, [ligne(`x=\\sqrt[3]{\\dfrac{${V}}{\\pi}}\\approx ${nombreLatex(e.xEgaliteAires, 2)}`, jf("avec ", { l: `V=${V}` }, ", à la calculatrice"))], [], "Valeur"),
+    calcul(lc, [ligne(`x=\\sqrt[3]{\\dfrac{${VL}}{\\pi}}=\\sqrt[3]{${nombreLatex(k, 0)}}`, jf("avec ", { l: `V=${VL}` })), ligne(`\\approx ${nombreLatex(e.xEgaliteAires, 2)}`, "à la calculatrice")], [], "Valeur"),
     resultat(lc, [f(formatTermeXEgaliteAiresA(e)), t(" cm")]),
     piege(lc, [t("Le rayon où les deux aires sont égales n'est pas celui qui minimise la quantité totale de matériau.")]),
     // d) Lecture du minimum.
     utilise(ld, [t("Le rayon qui minimise "), f("(f+g)(x)"), t(` est l'abscisse du point le plus bas de sa courbe ${COURS_CONTEXTE}.`)]),
-    { ...calcul(ld, [ligne(`x\\approx ${Math.round(e.xOptimal)}`, "abscisse du point le plus bas de la courbe verte (sur une ligne du quadrillage)")]), figureHtml: grapheA1(e, true) },
+    { ...calcul(ld, [ligne(`x=${Math.round(e.xOptimal)}`, "abscisse du point le plus bas de la courbe verte (sur une ligne du quadrillage)")]), figureHtml: grapheA1(e, true) },
     resultat(ld, [f(formatTermeXOptimalA(e)), t(" cm")]),
     piege(ld, [t("On lit le minimum de "), f("f+g"), t(", pas l'intersection des courbes de "), f("f"), t(" et de "), f("g"), t(".")]),
     // e) Justification.
     utilise(le, [t("On reprend "), f("h(x)=\\dfrac{V}{\\pi x^2}"), t(" au rayon lu, puis on compare au diamètre "), f("2x"), t(` ${COURS_CONTEXTE}.`)]),
     calcul(le, [
-      ligne(`h(${xRet})=\\dfrac{${V}}{\\pi\\cdot ${xRet}^2}\\approx ${nombreLatex(hRet, 2)}`, "au rayon lu"),
+      ligne(`h(${xRet})=\\dfrac{${VL}}{\\pi\\cdot ${xRet}^2}=\\dfrac{${nombreLatex(k, 0)}}{${xRet * xRet}}${hExacte ? "=" : "\\approx "}${nombreLatex(hRet, 2)}`, "au rayon lu"),
       ligne(`2x=2\\cdot ${xRet}=${2 * xRet}`, "le diamètre"),
     ]),
-    resultat(le, [f(formatTermeHJustificationA(e, xRet)), t(" cm : la hauteur est (presque) égale au diamètre.")]),
+    resultat(le, [f(formatTermeHJustificationA(e, xRet)), t(hExacte && Math.round(hRet) === 2 * xRet ? " cm : la hauteur est égale au diamètre." : " cm : la hauteur est proche du diamètre.")]),
     verification(
       le,
-      [t("Au rayon optimal exact "), f(`x=\\sqrt[3]{\\dfrac{V}{2\\pi}}\\approx ${nombreLatex(xExact, 2)}`), t(", on a "), f("V=2\\pi x^3"), t(" : la hauteur égale exactement le diamètre, quelle que soit V (l'écart vient de l'arrondi de la lecture).")],
+      [t("Au rayon optimal "), f(`x=${e.rayonOptimal}`), t(", on a "), f(`V=${VL}=2\\pi\\cdot ${e.rayonOptimal}^3`), t(", c'est-à-dire "), f("V=2\\pi x^3"), t(" : la hauteur égale exactement le diamètre, et cela quelle que soit V.")],
       [ligne("h(x)=\\dfrac{V}{\\pi x^2}"), ligne("=\\dfrac{2\\pi x^3}{\\pi x^2}", jf("car ", { l: "V=2\\pi x^3" })), ligne("=2x", "on simplifie")],
     ),
   ];
@@ -220,7 +226,7 @@ function correctionA2(e: ExerciceScenarioAStockCommande): EtapeCorrection[] {
     resultat(lb, [f(formatTermeIntersectionSimpleA(e)), t(` ${e.contexte.unite}`)]),
     verification(lb, [f(`f(${x0})=${nb(e.a)}\\cdot ${x0}+${nb(e.b)}=${e.a * x0 + e.b}`), t(" et "), f(`g(${x0})=\\dfrac{${e.k}}{${x0}}=${nb(e.k / x0)}`), t(" : les deux coûts sont égaux.")]),
     utilise(lc, [t("Le coût total minimal se lit au point le plus bas de la courbe de "), f("f+g"), t(` ${COURS_CONTEXTE}.`)]),
-    { ...calcul(lc, [ligne(`x\\approx ${Math.round(e.xExtremum)}`, "abscisse du point le plus bas de la courbe verte (sur une ligne du quadrillage)")]), figureHtml: grapheA2(e, true) },
+    { ...calcul(lc, [ligne(`x=${Math.round(e.xExtremum)}`, "abscisse du point le plus bas de la courbe verte (sur une ligne du quadrillage)")]), figureHtml: grapheA2(e, true) },
     resultat(lc, [f(formatTermeExtremumSimpleA(e)), t(` ${e.contexte.unite}`)]),
     piege(lc, [t("Le lot où les deux coûts sont égaux n'est pas celui qui minimise le coût total : on lit le minimum de "), f("f+g"), t(", pas l'intersection de "), f("f"), t(" et "), f("g"), t(".")]),
   ];
@@ -273,7 +279,7 @@ function correctionB(e: ExerciceScenarioB, r: RetenusContexte): EtapeCorrection[
   const bR = r.bRetenu ?? b;
   // a) système
   const sys: LigneCalcul[] = [
-    ligne(`${latexFormuleFB(e.modele).replace(/^f\(x\)=/, "\\text{cu}(x)\\times x=")}`, "coût total = coût unitaire × nombre d'unités"),
+    ligne(`${latexFormuleFB(e.modele).replace(/^f\(x\)=/, "\\text{cu}(x)\\times x=")}`, "coût total (en centaines d'euros) = coût unitaire × nombre de centaines d'unités"),
     ligne(eq1!, jf("relevé ", { l: `x=${p1.x}` }, " : le coût unitaire vaut ", { l: d(p1.coutUnitaire) })),
     ligne(eq2!, jf("relevé ", { l: `x=${p2.x}` }, " : le coût unitaire vaut ", { l: d(p2.coutUnitaire) })),
   ];
@@ -315,7 +321,7 @@ function correctionB(e: ExerciceScenarioB, r: RetenusContexte): EtapeCorrection[
     const lignes: LigneCalcul[] = [ligne(`f(${x})=${substitue(x, aR, bR)}`, jf("on remplace x par ", { l: `${x}` }))];
     if (exact(ta) && exact(tb)) lignes.push(ligne(`=${d(ta)}+${d(tb)}`));
     else lignes.push(ligne(`\\approx ${nombreLatex(ta, 2)}+${nombreLatex(tb, 2)}`));
-    lignes.push(Math.abs(val - Math.round(val)) < 1e-9 ? ligne(`=${Math.round(val)}`) : ligne(`\\approx ${nombreLatex(val, 0)}`, "arrondi à l'euro"));
+    lignes.push(Math.abs(val - Math.round(val)) < 1e-9 ? ligne(`=${nombreLatex(Math.round(val), 0)}`) : ligne(`\\approx ${nombreLatex(val, 0)}`, "arrondi à l'unité"));
     return sansDoublons(lignes);
   };
   return [
@@ -336,7 +342,7 @@ function correctionB(e: ExerciceScenarioB, r: RetenusContexte): EtapeCorrection[
     utilise(ld, [t("On remplace "), f("x"), t(" par la valeur demandée dans "), f("f(x)"), t(` ${COURS_CONTEXTE}.`)]),
     calcul(ld, evaluation(e.xEval1), [], `Pour x = ${e.xEval1}`),
     calcul(ld, evaluation(e.xEval2), [], `Pour x = ${e.xEval2}`),
-    resultat(ld, [...etListe(formatTermesEvaluationBLatex(e, aR, bR)), t(" (en euros)")]),
+    resultat(ld, [...etListe(formatTermesEvaluationBLatex(e, aR, bR)), t(" (en centaines d'euros)")]),
     piege(ld, [t("On calcule le coût total "), f("f(x)"), t(", pas le coût unitaire.")]),
   ];
 }
@@ -376,13 +382,25 @@ function correctionC(e: ExerciceScenarioC): EtapeCorrection[] {
     ]),
     resultat(lc, etListe(formatTermesReconnaissanceC(e))),
     utilise(ld, [t("Bénéfice "), f("=\\text{CA}(x)-\\text{CT}(x)"), t(` ; un résultat négatif est une perte ${COURS_CONTEXTE}.`)]),
-    calcul(ld, [ligne(`\\text{CT}(${e.xBenefice})=${e.cf}+${d(lb_.cv)}+${d(lb_.cp)}`, "coût fixe et ligne du tableau"), ligne(`=${d(ctB)}`)], [], "Coût total"),
+    calcul(ld, [ligne(`\\text{CT}(${e.xBenefice})=${d(e.cf)}+${d(lb_.cv)}+${d(lb_.cp)}`, "coût fixe et ligne du tableau"), ligne(`=${d(ctB)}`)], [], "Coût total"),
     calcul(ld, lignesDepuisChaine(formatTermeBeneficeC(e), ["chiffre d'affaires du tableau, coût total calculé", "on soustrait"]), [], "Bénéfice"),
     resultat(ld, [f(premierEtDernier(formatTermeBeneficeC(e))), t(" milliers d'euros")]),
     utilise(le, [t("L'entreprise devient rentable quand le chiffre d'affaires dépasse le coût total : seuil = abscisse du point où les courbes de "), f("\\text{CA}"), t(" et de "), f("\\text{CT}"), t(` se croisent ${COURS_CONTEXTE}.`)]),
     { ...calcul(le, [ligne(formatTermeSeuilC(e), "abscisse du croisement des courbes rose et verte")]), figureHtml: grapheC(e, true) },
     resultat(le, [f(formatTermeSeuilC(e))]),
+    ...verificationSeuilC(e, le),
   ];
+}
+
+/** Seuil entier construit (audit G12) : CA(x₀) = CT(x₀), affiché quand les deux valeurs sont exactes
+ * au centième. */
+function verificationSeuilC(e: ExerciceScenarioC, le: string): EtapeCorrection[] {
+  const x0 = e.xSeuil;
+  const ca = chiffreAffaires(e.formeCA, e.p, x0);
+  const ct = coutTotal(e.cf, e.formeCV, e.k, e.m, x0);
+  const exact = (v: number) => Math.abs(v * 100 - Math.round(v * 100)) < 1e-6;
+  if (!Number.isInteger(x0) || !exact(ca) || !exact(ct) || Math.abs(ca - ct) > 1e-6) return [];
+  return [verification(le, [f(`\\text{CA}(${x0})=${d(ca)}`), t(" et "), f(`\\text{CT}(${x0})=${d(ct)}`), t(" : le chiffre d'affaires égale le coût total.")])];
 }
 
 export function correctionDetailleeProblemesContexte(e: ExerciceProblemeContexte, retenus: RetenusContexte = {}): EtapeCorrection[] {

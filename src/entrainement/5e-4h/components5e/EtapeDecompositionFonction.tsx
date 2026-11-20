@@ -1,13 +1,12 @@
 import { useState } from "react";
 import type { ExerciceDecompositionFonction } from "../core5e/decompositionFonction.types";
-import { TEXTE_AIDE_NIVEAU1, TEXTE_AIDE_NIVEAU3_AFFINE_FINALE, labelLigne, texteAideNiveau2 } from "../ui5e/formatDecompositionFonction";
+import { aidesDecomposition, labelLigne } from "../ui5e/formatDecompositionFonction";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { MESSAGES_ILLISIBLE_FONCTIONS, cibleDecomposition, decompositionIllisible } from "../ui5e/retoursFonctions1";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
 
 interface Props {
   exercice: ExerciceDecompositionFonction;
@@ -40,8 +39,9 @@ interface Props {
  * réellement tirées à la génération). */
 export function EtapeDecompositionFonction({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, motifStructure, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(["", ""]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const [messageStructure, setMessageStructure] = useState<string | null>(null);
+  const [illisible, setIllisible] = useState(false);
+  const [soumises, setSoumises] = useState<string[] | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
   /** La décomposition (toutes les lignes ensemble) forme UNE seule réponse — jamais une ligne
@@ -58,16 +58,23 @@ export function EtapeDecompositionFonction({ exercice, tentativesUtilisees, tent
   function modifierLigne(i: number, valeur: string) {
     setLignes((arr) => arr.map((v, j) => (j === i ? valeur : v)));
     setMessageStructure(null);
+    setIllisible(false);
   }
   function valider() {
     if (!complet) return;
+    // Une ligne illisible : message, rien n'est transmis (aucune tentative consommée).
+    if (decompositionIllisible(lignes) || diagnostiquer?.(lignes) === "parse_error") {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
     const motif = motifStructure?.(lignes) ?? null;
     if (motif) {
       setMessageStructure(motif);
       return;
     }
     setMessageStructure(null);
-    if (diagnostiquer) setDernierStatut(diagnostiquer(lignes));
+    setSoumises(lignes);
     onValider(lignes);
   }
 
@@ -104,37 +111,21 @@ export function EtapeDecompositionFonction({ exercice, tentativesUtilisees, tent
         + Ajouter une fonction
       </button>
       <p className="prompt-text" style={{ fontSize: "0.85rem", opacity: 0.8 }}>Saisie : sqrt(…) ou √ pour la racine carrée, cbrt(…) ou ∛ pour la racine cubique, abs(…) ou |…| pour la valeur absolue, ^ pour une puissance.</p>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_NIVEAU1}</p>
-          {niveauAide >= 2 && (
-            <p>
-              {texteAideNiveau2(exercice).avant}
-              <Katex expression={texteAideNiveau2(exercice).latex} />
-            </p>
-          )}
-          {niveauAide >= 3 && <p>{TEXTE_AIDE_NIVEAU3_AFFINE_FINALE}</p>}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {messageStructure && (
-          <p className="alert-error" role="alert">
-            {messageStructure} (Aucune tentative n'est comptée.)
-          </p>
-        )}
-        {montrerErreurs && !messageStructure && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesDecomposition(exercice)}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={illisible}
+        texteIllisible={MESSAGES_ILLISIBLE_FONCTIONS.decomposition}
+        messageSansTentative={messageStructure ? `${messageStructure} Aucune tentative n'est comptée.` : undefined}
+        tentativesUtilisees={montrerErreurs ? tentativesUtilisees : 0}
+        tentativesMax={tentativesMax}
+        cible={soumises ? cibleDecomposition(exercice, soumises) : null}
+        validation={validation}
+      />
     </div>
   );
 }

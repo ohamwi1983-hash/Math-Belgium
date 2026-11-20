@@ -389,6 +389,34 @@ régulier dont les lignes passent par les valeurs remarquables elles-mêmes.
   plans réels B ≠ A : groupes 6gen1 et 6gen2 arc∘trig 30/30, trig∘arc 22/30 (deux causes) ;
   iPhone 13 (bonnes réponses et erreurs) scrollWidth 390, 0 erreur console ; documents (2 plans,
   cas particulier coché ou non, interdite / autorisée) 0 débordement, 0 `.katex-error`.
+- **5e ch. 1 (lots B, C, D, 5gen1–5)** : pied d'écran commun `5e-4h/components5e/PiedEcranFonctions.tsx`
+  (`AidesTrig` + `BoutonAide` + « Valider » + `MessageRetour`, `messageSansTentative`) ; textes
+  `ui5e/retoursFonctions1.ts` (illisible par champ `MESSAGES_ILLISIBLE_FONCTIONS`, aides 2 niveaux
+  5gen1/5gen2/5gen4, `cibleEnsemble` générique — crochet sur valeur interdite, sens inversé, réunion
+  au lieu d'intersection —, ordre inversé / étage manquant de 5gen2, composition inversée et
+  condition 2 oubliée de 5gen3, valeur intermédiaire / ordre / lecture directe de 5gen4) et
+  `ui5e/aidesProblemesContexte.ts` (16 écrans de 5gen5, `lireNombre5e`, coût unitaire pour coût
+  total, coût fixe oublié, × 1 000 oublié, intersection lue au lieu du minimum, x³ sans racine).
+  `parserNombreOuFraction` du 5e lit « − – — », « + » et les milliers espacés. **Le moteur refuse
+  l'illisible** (`soumettre*` rend l'état inchangé : 5gen2, 5gen3 formule et seuil NaN, 5gen4,
+  5gen5 `estSaisieIllisible`) ; constructeur d'ensembles et grille de signes : message au lieu
+  d'un bouton grisé muet ; choix fermés (CE de 5gen1, existence de 5gen4) : message ciblé sous la
+  réponse révélée (`ValidationEcran.messageRevele` accepte un `ReactNode`). Domaine vide de 5gen3 =
+  cas particulier `domaine-vide` (`PROBA_VIDE` 0,22 parmi les (combo, sens) qui le permettent,
+  ≈ 11 % du tirage libre), bouton « ∅ » (`EnsembleReelGuideBuilder.avecVide`), formule d'une
+  composée vide comparée en remplaçant √ par ∛ (`diagnostiquerFormuleDomaineVide`), corrigé « racine
+  ≥ 0 face à un seuil négatif » sans élévation au carré ; LaTeX des directions calculé à la première
+  lecture (getter) : plan d'évaluation 1 s → 0,1–0,5 s, cas particulier trouvé dans chaque série.
+  Combinaisons `retiree` (racine sur fraction + racine sur fraction / + fraction sous racine) :
+  hors tirage libre et panneau, gardées au sélecteur. 5gen4 : existence ≈ 30 % par question
+  (0 à 3), `forme` = restreinte + nombre de questions, piège constant (niveau 2, 6–7 min dans
+  les deux verdicts). 5gen5 : B4 `retiree`, x en centaines, V = 2πn³ écrit « kπ cm³ », minimum A2
+  et seuil C construits entiers, fenêtre C ≤ 40, `svgGraph` `legendeSous` (ajout pur).
+  Mesuré : moteurs 2 000 tirages par variante, 0 anomalie ; collecteur 3 380 tirages ≈ 17 900
+  équivalences, 0 fausse ; Playwright iPhone 13 ≈ 140 parcours, 0 erreur console, scrollWidth 390 ;
+  documents réels 26 (2 séries + aménagée + feuille, cas coché ou non) : même structure B = A, 0
+  débordement à 680 / 1 280 px. Durées 5gen3 : libre 8–34 min (moy. 17), combinaisons retirées
+  jusqu'à 38.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 

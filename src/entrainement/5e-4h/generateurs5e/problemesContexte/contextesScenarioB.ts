@@ -36,7 +36,7 @@ export const CONTEXTES_B2: ContexteScenarioB[] = [
   { id: "constructionMainOeuvre", sujet: "la construction réalisée avec de la main-d'œuvre supplémentaire", unite: "m²" },
   { id: "impression3DUrgence", sujet: "l'impression 3D réalisée en urgence", unite: "pièces" },
   { id: "coutureUrgente", sujet: "la couture réalisée sur commande urgente", unite: "vêtements" },
-  { id: "reparationAuto", sujet: "la réparation automobile réalisée en horaires étendus", unite: "véhicules" },
+  { id: "pneusRechapes", sujet: "le rechapage de pneus réalisé en horaires étendus", unite: "pneus" },
   { id: "livraisonExpress", sujet: "la livraison express de colis", unite: "colis" },
   { id: "vaccinsUrgence", sujet: "la production de vaccins en urgence", unite: "doses" },
   { id: "extractionPetroliere", sujet: "le pétrole extrait d'un puits vieillissant", unite: "barils" },
@@ -46,12 +46,12 @@ export const CONTEXTES_B3: ContexteScenarioB[] = [
   { id: "pucesElectroniques", sujet: "la fabrication de puces électroniques", unite: "puces" },
   { id: "productionPharma", sujet: "la production de médicaments", unite: "boîtes" },
   { id: "editionLogiciels", sujet: "l'édition de logiciels", unite: "licences" },
-  { id: "productionSerie", sujet: "la production d'épisodes de série (tournage amorti)", unite: "épisodes" },
+  { id: "lentillesOptiques", sujet: "la fabrication de lentilles optiques", unite: "lentilles" },
   { id: "moulesIndustriels", sujet: "la fabrication de moules industriels", unite: "moules" },
   { id: "circuitsImprimes", sujet: "la conception de circuits imprimés", unite: "circuits" },
   { id: "jeuxVideo", sujet: "le développement de jeux vidéo", unite: "copies" },
   { id: "patronsMode", sujet: "la création de patrons de mode", unite: "patrons" },
-  { id: "rechercheAppliquee", sujet: "la recherche scientifique appliquée", unite: "projets" },
+  { id: "cartesElectroniques", sujet: "l'assemblage de cartes électroniques", unite: "cartes" },
   { id: "certifAeronautique", sujet: "la certification de pièces aéronautiques", unite: "pièces" },
 ];
 

@@ -2,13 +2,13 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerificationFormuleSimplifiee } from "../moteur5e/verificationComposerFonctions";
 import { CONSIGNE_GENERALE_COMPOSER_FONCTIONS } from "../ui5e/formatComposerFonctions";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
+import { MESSAGES_ILLISIBLE_FONCTIONS, t } from "../ui5e/retoursFonctions1";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
 
 /** Message dédié pour `correct_non_simplifie` (2e palier, `verificationComposerFonctions.ts`) —
  * jamais confondu avec le message générique "Incorrect" (`formatMessageErreur`, `ui/messageErreur.ts`,
@@ -48,6 +48,8 @@ interface Props {
    * Optionnel : un appelant qui ne le fournit pas garde le message générique historique.
    */
   diagnostiquer?: (texte: string) => StatutVerificationFormuleSimplifiee;
+  /** Message ciblé sur la dernière réponse fausse (composition dans l'autre sens…). */
+  cible?: (texte: string) => FragmentConsigne[] | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -67,9 +69,10 @@ function EtatActuelComposerFonctions({ termes }: { termes: string[] }) {
 
 /** Écran à champ de texte libre, réutilisé pour "fRondG" ET "gRondF" (même structure, seuls le
  * texte de consigne/placeholder/aide diffèrent selon l'appelant). */
-export function EtapeFormuleComposerFonctions({ consigne, donnees, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, diagnostiquer, validation}: Props) {
+export function EtapeFormuleComposerFonctions({ consigne, donnees, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, diagnostiquer, cible, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerificationFormuleSimplifiee | null>(null);
+  const [soumis, setSoumis] = useState<string | null>(null);
   /** Une réponse équivalente mais pas simplifiée ne consomme pas de tentative (décision E) : son
    * message s'affiche donc aussi quand `tentativesUtilisees` vaut encore 0. */
   const montrerErreurs = tentativesUtilisees > 0 || dernierStatut === "correct_non_simplifie";
@@ -79,16 +82,12 @@ export function EtapeFormuleComposerFonctions({ consigne, donnees, placeholder, 
 
   function valider() {
     if (texte.trim() === "") return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
+    const statut = diagnostiquer ? diagnostiquer(texte) : null;
+    setDernierStatut(statut);
+    // Illisible : message, rien n'est transmis (aucune tentative consommée — audit 5e ch. 1, lot B).
+    if (statut === "parse_error") return;
+    setSoumis(texte);
     onValider(texte);
-  }
-
-  /** `correct_non_simplifie` a son propre message (piste : pas encore simplifiée) — jamais confondu
-   * avec le message générique "Incorrect" de `formatMessageErreur`, qui ne connaît que le statut à 3
-   * valeurs partagé par toute la plateforme (voir la note d'architecture, `verificationComposerFonctions.ts`). */
-  function messageErreurAffiche(): string {
-    if (dernierStatut === "correct_non_simplifie") return MESSAGE_CORRECT_NON_SIMPLIFIE;
-    return formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut);
   }
 
   return (
@@ -101,29 +100,27 @@ export function EtapeFormuleComposerFonctions({ consigne, donnees, placeholder, 
         type="text"
         className={`text-input${texteErronee ? " is-erronee" : ""}`}
         value={texte}
-        onChange={(e) => setTexte(e.target.value)}
+        onChange={(e) => {
+          setTexte(e.target.value);
+          if (dernierStatut === "parse_error") setDernierStatut(null);
+        }}
         placeholder={placeholder}
       />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1}</p>
-          {niveauAide >= 2 && latexAideNiveau2 !== null && <Katex expression={latexAideNiveau2} block />}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {messageErreurAffiche()}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={[{ texte: [t(texteAideNiveau1)] }, { texte: [t("La substitution, encore à simplifier :")], formules: latexAideNiveau2 ? [latexAideNiveau2] : [] }]}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={texte.trim() === ""}
+        illisible={dernierStatut === "parse_error"}
+        texteIllisible={MESSAGES_ILLISIBLE_FONCTIONS.expression}
+        messageSansTentative={dernierStatut === "correct_non_simplifie" ? MESSAGE_CORRECT_NON_SIMPLIFIE : undefined}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumis && cible ? cible(soumis) : null}
+        validation={validation}
+      />
     </div>
   );
 }

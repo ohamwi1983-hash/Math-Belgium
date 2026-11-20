@@ -8,12 +8,20 @@ import { Katex } from "../components/Katex";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { CONSIGNE_GENERALE_DOMAINE_DEFINITION, formatEnsembleReelLatex, formatSlotConditionLatex, formatTermesEtatActuelCELatex } from "../ui5e/formatDomaineDefinition";
 import { verifierEnsembleReelGuide } from "../moteur5e/verificationDomaineDefinition";
+import { aidesResolution5gen1, cibleEnsemble } from "../ui5e/retoursFonctions1";
+import { MessageRetour } from "../../4e/components/RetourSaisie";
+import { AidesTrig } from "./RetourSaisieTrig";
+import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDomaineDefinition;
   tentativesUtilisees: number;
   tentativesMax: number;
+  /** Aides à deux niveaux (audit 5e ch. 1, lot B — l'écran n'en avait aucune). */
+  niveauAide: number;
+  niveauAideMax: number;
+  onActiverAide: () => void;
   /** Bloc "données" redondant (f(x)), rendu juste APRÈS la consigne générale (A.9, ordre standard
    * des blocs) — jamais avant, contrairement au montage précédent d'`App5gen1.tsx`. */
   donnees: ReactNode;
@@ -50,8 +58,14 @@ function EtatActuelLignes({ termes }: { termes: string[] }) {
  * n'existe donc plus que pour "fractionSousRacine" — le tableau de signes — et
  * "racineSurFraction"/"racineSurD" — 2 CE indépendantes). Aucune aide sur cet écran (jamais
  * spécifiée par la spec pour ces 2 cas, voir `niveauAideMaxResolution`). */
-export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees, tentativesMax, donnees, onValider, validation }: Props) {
+export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, donnees, onValider, validation }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
+  const aides = (
+    <>
+      <AidesTrig niveauAide={niveauAide} aides={aidesResolution5gen1(exercice)} />
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+    </>
+  );
 
   if (exercice.famille === "fractionSousRacine") {
     return (
@@ -61,6 +75,8 @@ export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees
         <GrilleQuotientDomfBuilder
           exercice={exercice}
           tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          avantValider={aides}
           onValider={(grille) => onValider({ famille: "fractionSousRacine", grille })}
           validation={validation}
         />
@@ -72,7 +88,7 @@ export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees
     return (
       <div>
         <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_DOMAINE_DEFINITION} blocDonnees={donnees} />
-        <ResolutionRacineSurFraction exercice={exercice} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} onValider={onValider} validation={validation} />
+        <ResolutionRacineSurFraction exercice={exercice} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} aides={aides} onValider={onValider} validation={validation} />
       </div>
     );
   }
@@ -107,6 +123,7 @@ interface ResolutionRacineSurFractionProps {
   exercice: Extract<ExerciceDomaineDefinition, { famille: "racineSurFraction" }>;
   tentativesUtilisees: number;
   tentativesMax: number;
+  aides: ReactNode;
   onValider: (reponse: ReponseResolution) => void;
   validation?: ValidationEtapeProps | null;
 }
@@ -140,8 +157,9 @@ interface ResolutionRacineSurFractionProps {
  * futur composant de ce type (sélection guidée d'ensemble/intervalle avec state interne) réutilisé
  * plus d'une fois à la même position JSX pour des cibles différentes.
  */
-function ResolutionRacineSurFraction({ exercice, tentativesUtilisees, tentativesMax, onValider, validation }: ResolutionRacineSurFractionProps) {
+function ResolutionRacineSurFraction({ exercice, tentativesUtilisees, tentativesMax, aides, onValider, validation }: ResolutionRacineSurFractionProps) {
   const [radicande, setRadicande] = useState<EnsembleReelGuide | null>(null);
+  const [cible, setCible] = useState<ReturnType<typeof cibleEnsemble>>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const [slotRadicande, slotDenominateur] = exercice.slots as [SlotCE, SlotCE];
   // `resolutionDenominateur` n'est `null` que pour "nSurRacineD" — jamais atteinte ici en pratique
@@ -158,8 +176,10 @@ function ResolutionRacineSurFraction({ exercice, tentativesUtilisees, tentatives
   function validerRadicande(ensemble: EnsembleReelGuide) {
     if (verifierEnsembleReelGuide(ensemble, exercice.resolutionRadicande)) {
       setRadicande(ensemble);
+      setCible(null);
       return;
     }
+    setCible(cibleEnsemble(ensemble, exercice.resolutionRadicande));
     onValider({ famille: "racineSurFraction", radicande: ensemble, denominateur: { forme: "intervalles", points: [], morceaux: [] } });
   }
 
@@ -172,15 +192,12 @@ function ResolutionRacineSurFraction({ exercice, tentativesUtilisees, tentatives
           key="radicande"
           onValider={validerRadicande}
           prefixApercu="x\in"
+          contenuAvantValider={aides}
           attendu={exercice.resolutionRadicande}
           apresEchec={montrerErreurs}
           validation={validation}
         />
-        {!validation && montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        {!validation && montrerErreurs && <MessageRetour illisible={false} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={cible} />}
       </div>
     );
   }
@@ -191,17 +208,17 @@ function ResolutionRacineSurFraction({ exercice, tentativesUtilisees, tentatives
       <p className="prompt-text">Résous maintenant la condition du dénominateur (valeur exclue).</p>
       <EnsembleReelGuideBuilder
         key="denominateur"
-        onValider={(denominateur) => onValider({ famille: "racineSurFraction", radicande, denominateur })}
+        onValider={(denominateur) => {
+          setCible(attenduDenominateur ? cibleEnsemble(denominateur, attenduDenominateur) : null);
+          onValider({ famille: "racineSurFraction", radicande, denominateur });
+        }}
         prefixApercu="x\in"
+        contenuAvantValider={aides}
         attendu={attenduDenominateur}
         apresEchec={montrerErreurs}
         validation={validation}
       />
-      {!validation && montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
-      )}
+      {!validation && montrerErreurs && <MessageRetour illisible={false} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={cible} />}
     </div>
   );
 }

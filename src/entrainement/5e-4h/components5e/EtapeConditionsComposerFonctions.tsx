@@ -5,11 +5,35 @@ import type { ReponseCondition } from "../moteur5e/verificationComposerFonctions
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { TOLERANCE_SEUIL } from "../moteur5e/verificationComposerFonctions";
 import { Katex } from "../components/Katex";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { CONSIGNE_GENERALE_COMPOSER_FONCTIONS } from "../ui5e/formatComposerFonctions";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
+import { MESSAGES_ILLISIBLE_FONCTIONS, t } from "../ui5e/retoursFonctions1";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+
+const INVERSE: Record<ComparateurSeuil, ComparateurSeuil> = { ge: "le", le: "ge", gt: "lt", lt: "gt", ne: "ne", eq: "eq" };
+const LARGE_STRICT: Record<ComparateurSeuil, ComparateurSeuil> = { ge: "gt", gt: "ge", le: "lt", lt: "le", ne: "ne", eq: "eq" };
+
+/** Message ciblé (audit 5e ch. 1, lot B) : bon seuil mais comparateur inversé, ou large au lieu de
+ * strict (et l'inverse) — le reste reçoit le message générique. */
+function cibleConditions(dir: CompositionDirigee, reponse: ReponseCondition[]): FragmentConsigne[] | null {
+  for (const c of dir.conditions) {
+    const memeSeuil = reponse.filter((r) => Math.abs(r.seuil - c.seuil) < TOLERANCE_SEUIL);
+    if (memeSeuil.length === 0) continue;
+    if (memeSeuil.some((r) => r.comparateur === c.comparateur)) continue;
+    if (memeSeuil.some((r) => r.comparateur === INVERSE[c.comparateur])) {
+      return [t("Le sens d'une condition est inversé : relis le domaine de la fonction extérieure (de quel côté du seuil son argument doit-il être ?).")];
+    }
+    if (memeSeuil.some((r) => r.comparateur === LARGE_STRICT[c.comparateur])) {
+      return [t("Une condition est large au lieu de stricte (ou l'inverse) : la borne appartient-elle au domaine de la fonction extérieure ? Une valeur qui annule un dénominateur en est exclue.")];
+    }
+  }
+  if (reponse.some((r) => dir.conditions.some((c) => Math.abs(r.seuil + c.seuil) < TOLERANCE_SEUIL && Math.abs(c.seuil) > TOLERANCE_SEUIL))) {
+    return [t("Un seuil a le mauvais signe : il se lit sur le domaine de la fonction extérieure (là où son argument est permis).")];
+  }
+  return null;
+}
 
 const OPTIONS_COMPARATEUR: { id: ComparateurSeuil; texte: string }[] = [
   { id: "ge", texte: "≥" },
@@ -64,12 +88,16 @@ function EtatActuelComposerFonctions({ termes }: { termes: string[] }) {
  */
 export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<Ligne[]>(() => dir.conditions.map(() => ({ comparateur: null, seuil: "" })));
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<ReponseCondition[] | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
   function modifierComparateur(i: number, comparateur: string) {
+    setIllisible(false);
     setLignes((arr) => arr.map((l, j) => (j === i ? { ...l, comparateur: comparateur as ComparateurSeuil } : l)));
   }
   function modifierSeuil(i: number, seuil: string) {
+    setIllisible(false);
     setLignes((arr) => arr.map((l, j) => (j === i ? { ...l, seuil } : l)));
   }
 
@@ -83,8 +111,15 @@ export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tenta
   }
 
   function valider() {
-    if (!complet) return;
-    onValider(lignes.map((l, i) => ({ comparateur: l.comparateur as ComparateurSeuil, seuil: valeurs[i] as number })));
+    // Comparateur manquant ou seuil illisible : message, rien n'est transmis (aucune tentative).
+    if (!complet) {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    const reponse = lignes.map((l, i) => ({ comparateur: l.comparateur as ComparateurSeuil, seuil: valeurs[i] as number }));
+    setSoumise(reponse);
+    onValider(reponse);
   }
 
   return (
@@ -118,26 +153,20 @@ export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tenta
           />
         </div>
       ))}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1}</p>
-          {niveauAide >= 2 && latexAideNiveau2 !== null && <Katex expression={latexAideNiveau2} block />}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={[{ texte: [t(texteAideNiveau1)] }, { texte: [t("Ici :")], formules: latexAideNiveau2 ? [latexAideNiveau2] : [] }]}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={lignes.every((l) => l.comparateur === null && l.seuil.trim() === "")}
+        illisible={illisible}
+        texteIllisible={MESSAGES_ILLISIBLE_FONCTIONS.seuil}
+        tentativesUtilisees={montrerErreurs ? tentativesUtilisees : 0}
+        tentativesMax={tentativesMax}
+        cible={soumise ? cibleConditions(dir, soumise) : null}
+        validation={validation}
+      />
     </div>
   );
 }

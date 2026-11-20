@@ -37,10 +37,13 @@ const LABEL_MODELE_B: Record<ModeleCoutUnitaire, string> = {
   B5: "B5 — coût unitaire cu(x)=ax+b/x",
 };
 
-export const CATALOGUE_PROBLEMES_CONTEXTE: { id: string; label: string }[] = [
-  { id: "A1", label: "A1 — bidons cylindriques (k/x vs ax²)" },
+/** `retiree` : B4 (coût total décroissant, audit 5e ch. 1, G3) — jamais proposé (sélecteur,
+ * panneau), gardé à sa place pour les indices des `?code=` déjà imprimés (un code B4 rouvre encore
+ * l'ancien tirage B4). */
+export const CATALOGUE_PROBLEMES_CONTEXTE: { id: string; label: string; retiree?: boolean }[] = [
+  { id: "A1", label: "A1 — récipients cylindriques (k/x vs ax²)" },
   { id: "A2", label: "A2 — stock/commande (ax+b vs k/x)" },
-  ...MODELES_B.map((m) => ({ id: m, label: LABEL_MODELE_B[m] })),
+  ...MODELES_B.map((m) => ({ id: m, label: m === "B4" ? `${LABEL_MODELE_B[m]} (retiré)` : LABEL_MODELE_B[m], ...(m === "B4" ? { retiree: true } : {}) })),
   ...FORMES_CV_C.flatMap((cv) => FORMES_CA_C.map((ca) => ({ id: `C-${cv}-${ca}`, label: `C — ${LABEL_FORME_CV[cv]} / ${LABEL_FORME_CA[ca]}` }))),
 ];
 

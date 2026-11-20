@@ -38,45 +38,60 @@ function melanger<T>(t: T[]): T[] {
 
 /** Au plus ce nombre de questions « n'existe pas » par exercice (audit du chapitre 1 de 5e,
  * décision H : 14 % des exercices en avaient 4 sur 4). */
-export const MAX_HORS_DOMAINE = 2;
+export const MAX_HORS_DOMAINE = 3;
+/** Audit 5e ch. 1 (V3) : l'existence est un VERDICT tiré question par question (≈ 30 %), de 0 à 3
+ * « n'existe pas » par exercice — avant, toujours 1 ou 2, et l'élève savait qu'au moins une valeur
+ * n'existait pas. Le nombre n'est plus dans la `forme` du profil (la série B ne le recopie plus). */
+export const PROBA_HORS_DOMAINE = 0.3;
 
 /**
- * Sélectionne 4-5 questions : 1 ou 2 hors domaine (« n'existe pas »), le reste avec un résultat qui
- * existe, les 2 sens de composition représentés, puis l'ORDRE est mélangé (le piège était toujours en
- * question 1). Retourne `null` si les courbes ne permettent pas ce dosage (l'appelant tire alors
- * d'autres courbes).
+ * Sélectionne 4-5 questions : 0 à 3 hors domaine (« n'existe pas », chaque question l'est avec la
+ * probabilité `PROBA_HORS_DOMAINE`), le reste avec un résultat qui existe, les 2 sens de composition
+ * représentés, jamais deux questions par la MÊME valeur intermédiaire d'une même composée (audit
+ * G11 : 25 % des exercices relisaient la même image), puis l'ORDRE est mélangé. Retourne `null` si
+ * les courbes ne permettent pas ce dosage (l'appelant tire alors d'autres courbes : jamais de
+ * troncature, qui fausserait la répartition).
  */
 function selectionnerQuestions(candidatsFRondG: Candidat[], candidatsGRondF: Candidat[]): QuestionComposeeGraphique[] | null {
   const tous = [...candidatsFRondG, ...candidatsGRondF];
   const horsDomaine = melanger(tous.filter((c) => !c.resultatExiste));
   const existants = melanger(tous.filter((c) => c.resultatExiste));
-  if (horsDomaine.length === 0) return null;
 
   const nombreTotal = entierAleatoire(4, 5);
-  const nombreHors = Math.min(entierAleatoire(1, MAX_HORS_DOMAINE), horsDomaine.length);
-  const questions: Candidat[] = horsDomaine.slice(0, nombreHors);
-  const pris = new Set<Candidat>(questions);
+  let nombreHors = 0;
+  for (let i = 0; i < nombreTotal; i++) if (Math.random() < PROBA_HORS_DOMAINE) nombreHors++;
+  nombreHors = Math.min(nombreHors, MAX_HORS_DOMAINE);
 
-  // Chaque sens absent des questions hors domaine reçoit une question dont le résultat existe.
+  const questions: Candidat[] = [];
+  const cles = new Set<string>();
+  const cle = (c: Candidat) => `${c.composition}:${c.bAttendu}`;
+  const prendre = (c: Candidat): boolean => {
+    if (cles.has(cle(c)) || questions.includes(c)) return false;
+    questions.push(c);
+    cles.add(cle(c));
+    return true;
+  };
+  for (const c of horsDomaine) {
+    if (questions.length >= nombreHors) break;
+    prendre(c);
+  }
+  if (questions.length < nombreHors) return null;
+
+  // Chaque sens absent reçoit une question dont le résultat existe.
   for (const sens of ["fRondG", "gRondF"] as Composition[]) {
     if (questions.some((q) => q.composition === sens)) continue;
-    const c = existants.find((e) => e.composition === sens && !pris.has(e));
-    if (!c) return null;
-    questions.push(c);
-    pris.add(c);
+    const c = existants.find((e) => e.composition === sens && !cles.has(cle(e)));
+    if (!c || !prendre(c)) return null;
   }
   for (const c of existants) {
     if (questions.length >= nombreTotal) break;
-    if (!pris.has(c)) {
-      questions.push(c);
-      pris.add(c);
-    }
+    prendre(c);
   }
-  if (questions.length < 4) return null;
+  if (questions.length !== nombreTotal) return null;
   return melanger(questions).map(versQuestion);
 }
 
-const TENTATIVES_MAX = 100;
+const TENTATIVES_MAX = 400;
 
 /** Force quelle courbe (f ou g) porte le domaine RESTREINT — le seul point de tirage de haut
  * niveau réellement présent dans ce générateur (voir le panneau dev-only `SelecteurVarianteDev`,

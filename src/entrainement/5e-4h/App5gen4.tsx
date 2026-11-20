@@ -26,6 +26,8 @@ import { Katex } from "./components/Katex";
 import { correctionDetailleeComposeeGraphique } from "./generateurs5e/composeeGraphique/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { cibleComposeeGraphique } from "./ui5e/retoursFonctions1";
+import { RenduFragments } from "../4e/components/RenduFragments";
 import { calculerRecapitulatifComposeeGraphique } from "./ui5e/recapitulatifComposeeGraphique";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -91,6 +93,8 @@ export function App5gen4() {
   /** Incrémenté à chaque nouvel exercice (« Générer », « Nouvel exercice ») : entre dans la `key` de
    * l'écran pour vider choix et champ — `indexQuestion` seul valait 0 avant et après. */
   const [generation, setGeneration] = useState(0);
+  /** Dernière réponse transmise : message ciblé sous la réponse révélée d'un choix « existe » faux. */
+  const [derniere, setDerniere] = useState<ReponseQuestionComposeeGraphique | null>(null);
 
   /** Réutilise `calculerRecapitulatifComposeeGraphique` (même mécanisme que `RecapitulatifPanel`)
    * pour la réponse ATTENDUE : la question qui vient de se clore est toujours la DERNIÈRE entrée du
@@ -158,9 +162,21 @@ export function App5gen4() {
   // Aide niveau 2 (E.7) : révèle le point (a;bAttendu) sur le graphe de la fonction INTERNE.
   const pointRevele = etat.niveauAide >= 2 ? { fonction: nomInterne(question.composition), point: { x: question.a, y: question.bAttendu } } : null;
 
+  const choixFaux = enAttente?.revele && derniere && derniere.resultatExiste !== question.resultatExiste;
+  const cibleChoix = choixFaux && derniere ? cibleComposeeGraphique(exercice, question, { resultatExiste: derniere.resultatExiste, valeur: null }) : null;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        ...(cibleChoix
+          ? {
+              messageRevele: (
+                <span>
+                  Ce n'était pas la bonne réponse (une seule tentative sur le choix « existe / n'existe pas »). <RenduFragments fragments={cibleChoix} />
+                </span>
+              ),
+            }
+          : {}),
         reponseAttendue: (
           <span>
             <Katex expression={resultatLatex(question).latex} />
@@ -192,6 +208,7 @@ export function App5gen4() {
           </p>
           <EtapeQuestionComposeeGraphique
             key={`${generation}-${etat.indexQuestion}`}
+            exercice={exercice}
             question={question}
             donnees={<PaireGraphesComposeeGraphique exercice={exercice} pointRevele={pointRevele} />}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
@@ -199,12 +216,10 @@ export function App5gen4() {
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) =>
-              terminerEtape(
-                soumettreReponseQuestion(etat, reponse),
-                <>{formatReponseQuestionTexte(question, reponse)}</>,
-              )
-            }
+            onValider={(reponse) => {
+              setDerniere(reponse);
+              terminerEtape(soumettreReponseQuestion(etat, reponse), <>{formatReponseQuestionTexte(question, reponse)}</>);
+            }}
             diagnostiquer={(reponse) => diagnostiquerReponseQuestion(question, reponse)}
             validation={validation}
           />

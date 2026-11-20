@@ -20,27 +20,41 @@ function arrondi(valeur: number, decimales = 2): number {
   return Math.round(valeur * facteur) / facteur;
 }
 
-/** Nombre arrondi, virgule décimale, signe « − » (texte brut). */
-export function nombreFr(valeur: number, decimales = 2): string {
-  const a = arrondi(valeur, decimales);
-  return (a < 0 ? "−" : "") + String(Math.abs(a)).replace(".", ",");
+/** Partie entière groupée par milliers (audit 5e ch. 1, G5 : « 1500 », « 12762 » sans espace). */
+function grouperMilliers(entier: string, separateur: string): string {
+  return entier.length < 4 ? entier : entier.replace(/\B(?=(\d{3})+(?!\d))/g, separateur);
 }
 
-/** Nombre arrondi pour KaTeX : virgule décimale `{,}`. */
+/** Nombre arrondi, virgule décimale, signe « − », milliers séparés par une espace fine insécable
+ * (texte brut). */
+export function nombreFr(valeur: number, decimales = 2): string {
+  const a = arrondi(valeur, decimales);
+  const [entier, dec] = String(Math.abs(a)).split(".");
+  return (a < 0 ? "−" : "") + grouperMilliers(entier, " ") + (dec ? `,${dec}` : "");
+}
+
+/** Nombre arrondi pour KaTeX : virgule décimale `{,}`, milliers séparés par `\,`. */
 export function nombreLatex(valeur: number, decimales = 2): string {
   const a = arrondi(valeur, decimales);
-  return (a < 0 ? "-" : "") + String(Math.abs(a)).replace(".", "{,}");
+  const [entier, dec] = String(Math.abs(a)).split(".");
+  return (a < 0 ? "-" : "") + grouperMilliers(entier, "\\,") + (dec ? `{,}${dec}` : "");
+}
+
+/** « 432\pi » — contenance A1 écrite en kπ cm³. */
+export function volumeKPiLatex(exercice: ExerciceScenarioAConteneur): string {
+  return `${nombreLatex(exercice.volumeKPi, 0)}\\pi`;
 }
 
 // ============================================================================
 // Scénario A — Bidons cylindriques
 // ============================================================================
 
+/** Même objet et mêmes lettres à l'écran et sur papier (audit 5e ch. 1, G6) : rayon r, puis x = r. */
 export function consigneVolumeA(exercice: ExerciceScenarioAConteneur): string {
-  return `Un bidon cylindrique de rayon $r$ et de hauteur $h$ a une contenance fixée à $V = ${exercice.volumeCm3}$ cm³ ($V = \\pi r^2 h$).`;
+  return `On fabrique ${exercice.contexte.nomObjetIndefini} en forme de cylindre, de rayon $r$ et de hauteur $h$ (en cm), dont la contenance est fixée à $V = ${volumeKPiLatex(exercice)}$ cm³, soit environ ${nombreFr(exercice.volumeCm3 / 1000, 2)} L ($V = \\pi r^2 h$).`;
 }
 
-export const CONSIGNE_TABLEAU_A = "Pour chaque rayon donné, calcule la hauteur $h$, l'aire des 2 bases et l'aire latérale du bidon (arrondis à l'unité).";
+export const CONSIGNE_TABLEAU_A = "Pour chaque rayon donné, calcule la hauteur $h$, l'aire des 2 bases et l'aire latérale du cylindre (arrondis à l'unité).";
 export const TEXTE_AIDE_TABLEAU_A_1 = "Isole d'abord $h$ dans $V = \\pi r^2 h$ : $h = \\dfrac{V}{\\pi r^2}$.";
 export const TEXTE_AIDE_TABLEAU_A_2 = "Aire des 2 bases : $2\\pi r^2$. Aire latérale : $2\\pi r \\cdot h$ (périmètre du cercle × hauteur).";
 
@@ -63,10 +77,10 @@ export function texteAideGeneralisationA2G(): string {
 export const CONSIGNE_EGALITE_AIRES_A = "Pour quelle valeur de $x$ l'aire latérale est-elle égale à l'aire des bases ($f(x) = g(x)$) ? (arrondis à l'unité)";
 export const TEXTE_AIDE_EGALITE_AIRES_A_1 = "Pose $f(x) = g(x)$ et simplifie : tu obtiens une équation du type $x^3 = c$, où $c$ est une constante.";
 export function latexAideEgaliteAiresA2(exercice: ExerciceScenarioAConteneur): string {
-  return `x^3 = \\dfrac{V}{\\pi} = \\dfrac{${exercice.volumeCm3}}{\\pi} \\approx ${nombreLatex(exercice.volumeCm3 / Math.PI, 1)}`;
+  return `x^3 = \\dfrac{V}{\\pi} = \\dfrac{${volumeKPiLatex(exercice)}}{\\pi} = ${nombreLatex(exercice.volumeKPi, 0)}`;
 }
 
-export const CONSIGNE_GRAPHIQUE_A = "Sur le graphique ci-dessous, estime le rayon $x$ qui minimise $(f+g)(x)$, la quantité totale de matériau utilisé (arrondis à l'unité).";
+export const CONSIGNE_GRAPHIQUE_A = "Sur le graphique ci-dessous, lis le rayon $x$ qui minimise $(f+g)(x)$, la quantité totale de matériau utilisé (il tombe sur une ligne de la grille).";
 export const TEXTE_AIDE_GRAPHIQUE_A_1 = "Cherche le point le plus bas de la courbe verte $(f+g)(x)$ : c'est là que la quantité de matériau est minimale.";
 
 /** Consigne — un calcul de h au rayon optimal ; le raisonnement algébrique est fourni par
@@ -76,14 +90,10 @@ export function consigneJustificationA(): string {
 }
 export const TEXTE_AIDE_JUSTIFICATION_A_1 = "Réutilise la formule $h(x) = \\dfrac{V}{\\pi x^2}$ avec le $x$ que tu as lu sur le graphique précédent.";
 export function texteCorrectionJustificationA(exercice: ExerciceScenarioAConteneur, _xOptimalRetenu: number): string {
-  // Rayon optimal EXACT x = ∛(V/(2π)) — jamais le rayon arrondi retenu à l'écran précédent : avec
-  // x arrondi (ex. 7 pour V = 2500), h(7) ≈ 16 et 2x = 14 ne « coïncident » pas (retour du lot
-  // de refonte des feuilles).
-  const xExact = Math.cbrt(exercice.volumeCm3 / (2 * Math.PI));
-  const virgule = (v: number) => v.toFixed(1).replace(".", "{,}");
-  const h = exercice.volumeCm3 / (Math.PI * xExact * xExact);
+  // V = 2πn³ : le rayon optimal vaut EXACTEMENT n, h(n) = 2n (audit 5e ch. 1, G2).
+  const n = exercice.rayonOptimal;
   return (
-    `Correction de référence : au rayon optimal exact $x = \\sqrt[3]{\\dfrac{V}{2\\pi}} \\approx ${virgule(xExact)}$ cm, la hauteur vaut $h \\approx ${virgule(h)}$ cm et le diamètre vaut $2x \\approx ${virgule(2 * xExact)}$ cm — les deux coïncident. ` +
+    `Correction de référence : au rayon optimal $x = ${n}$ cm, la hauteur vaut $h = \\dfrac{${volumeKPiLatex(exercice)}}{\\pi\\cdot ${n}^2} = ${2 * n}$ cm et le diamètre vaut $2x = ${2 * n}$ cm — les deux coïncident. ` +
     "Algébriquement : au minimum de $f+g$, $x^3 = \\dfrac{V}{2\\pi}$, donc $V = 2\\pi x^3$ ; en substituant dans $h(x) = \\dfrac{V}{\\pi x^2}$, on obtient " +
     "$h(x) = \\dfrac{2\\pi x^3}{\\pi x^2} = 2x$ : exactement le diamètre, quelle que soit la contenance $V$."
   );
@@ -127,14 +137,14 @@ export function formatTermeIntersectionSimpleA(exercice: ExerciceScenarioAReduit
 }
 
 export function consigneExtremumSimpleA(_exercice: ExerciceScenarioAReduit): string {
-  return "Sur le graphique ci-dessous, estime la taille de lot $x$ qui minimise le coût total $(f+g)(x)$ (arrondis à l'unité).";
+  return "Sur le graphique ci-dessous, lis la taille de lot $x$ qui minimise le coût total $(f+g)(x)$ (elle tombe sur une ligne de la grille).";
 }
 export function texteAideExtremumSimpleA1(_exercice: ExerciceScenarioAReduit): string {
   return "Cherche le point le plus bas de la courbe verte $(f+g)(x)$.";
 }
 
 export function formatTermeExtremumSimpleA(exercice: ExerciceScenarioAReduit): string {
-  return `x\\approx${arrondi(exercice.xExtremum, 0)}`;
+  return `x=${arrondi(exercice.xExtremum, 0)}`;
 }
 
 // ============================================================================
@@ -175,8 +185,15 @@ function formuleCuSymbolique(modele: ModeleCoutUnitaire): string {
 
 /** Prose SEULE (aucun LaTeX — reprise par la feuille papier) — la formule cu(x) est un fragment
  * KaTeX séparé, `latexFormuleCuB`. */
+/** Audit 5e ch. 1 (G4) : x compte des CENTAINES d'unités ; le coût unitaire est en euros par unité,
+ * le coût total f(x) = cu(x) × x en centaines d'euros. */
 export function consigneContexteBIntro(exercice: ExerciceScenarioB): string {
-  return `Pour ${exercice.contexte.sujet}, le coût unitaire (par unité produite) suit la loi cu(x) donnée ci-dessous.`;
+  return `Pour ${exercice.contexte.sujet}, x désigne la production, en centaines de ${exercice.contexte.unite}. Le coût unitaire (en euros par unité) suit la loi cu(x) donnée ci-dessous ; le coût total, en centaines d'euros, vaut cu(x) × x.`;
+}
+
+/** « 300 stylos (x = 3) » — quantité réelle, puis la valeur de x. */
+export function quantiteB(exercice: ExerciceScenarioB, x: number): string {
+  return `${nombreFr(100 * x, 0)} ${exercice.contexte.unite} (x = ${x})`;
 }
 
 /** Fragment PUR LaTeX — "cu(x)=..." du modèle. */
@@ -187,7 +204,8 @@ export function latexFormuleCuB(modele: ModeleCoutUnitaire): string {
 /** Prose SEULE (reprise par la feuille papier) — relevé de mesures, coûts EXACTS en virgule. */
 export function consigneContexteBReleve(exercice: ExerciceScenarioB): string {
   const { contexte, point1, point2 } = exercice;
-  return `Un relevé donne : pour x = ${point1.x} ${contexte.unite}, le coût unitaire est de ${nombreFr(point1.coutUnitaire)} € ; pour x = ${point2.x} ${contexte.unite}, il est de ${nombreFr(point2.coutUnitaire)} €.`;
+  void contexte;
+  return `Un relevé donne : pour ${quantiteB(exercice, point1.x)}, le coût unitaire est de ${nombreFr(point1.coutUnitaire)} € ; pour ${quantiteB(exercice, point2.x)}, il est de ${nombreFr(point2.coutUnitaire)} €.`;
 }
 
 /** Fragment PUR LaTeX — coût TOTAL cu(x)·x. */
@@ -199,7 +217,7 @@ export function latexCoutTotalB(modele: ModeleCoutUnitaire): string {
  * JUSTE APRÈS cette consigne (audit 5e ch. 1 : « ci-dessous » désignait une formule placée
  * au-dessus). */
 export function consigneSystemeB(): string {
-  return "Construis les 2 équations reliant a et b à partir des 2 relevés, sachant que le coût total vaut cu(x) × x :";
+  return "Construis les 2 équations reliant a et b à partir des 2 relevés, sachant que le coût total (en centaines d'euros) vaut cu(x) × x :";
 }
 export function texteAideSystemeB1(): string {
   return "Multiplie d'abord le coût unitaire par $x$ : c'est le coût total $\\text{cu}(x) \\times x$, et non le coût unitaire, qui vaut :";
@@ -218,9 +236,9 @@ function termeInconnueLatex(modele: ModeleCoutUnitaire, x: number, inconnue: "a"
 export const CONSIGNE_RESOLUTION_B = "Résous ce système pour trouver a et b.";
 export const TEXTE_AIDE_RESOLUTION_B_1 = "Combine les 2 équations pour éliminer une inconnue (multiplie-les si besoin pour aligner les coefficients), puis substitue pour trouver l'autre.";
 
-export const CONSIGNE_FORMULE_B = "Écris la fonction f(x) donnant le coût total de production, avec les valeurs de a et b que tu viens de trouver.";
+export const CONSIGNE_FORMULE_B = "Écris la fonction f(x) donnant le coût total de production (en centaines d'euros), avec les valeurs de a et b que tu viens de trouver.";
 export function texteAideFormuleB1(): string {
-  return "Remplace $a$ et $b$ par TES valeurs de l'écran précédent dans la formule ci-dessous.";
+  return "Remplace $a$ et $b$ par tes valeurs de l'écran précédent dans la formule ci-dessous.";
 }
 /** Fragment PUR LaTeX — "f(x)=..." du modèle. */
 export function latexFormuleFB(modele: ModeleCoutUnitaire): string {
@@ -228,7 +246,7 @@ export function latexFormuleFB(modele: ModeleCoutUnitaire): string {
 }
 
 export function consigneEvaluationB(exercice: ExerciceScenarioB): string {
-  return `Calcule le coût total de production pour x = ${exercice.xEval1} puis pour x = ${exercice.xEval2} (arrondis à l'unité).`;
+  return `Calcule le coût total de production, en centaines d'euros, pour x = ${exercice.xEval1} puis pour x = ${exercice.xEval2} (arrondis à l'unité).`;
 }
 export const TEXTE_AIDE_EVALUATION_B_1 = "Remplace $x$ par la valeur demandée dans ta formule $f(x)$ de l'écran précédent.";
 
@@ -239,8 +257,10 @@ export const TEXTE_AIDE_EVALUATION_B_1 = "Remplace $x$ par la valeur demandée d
 /** Vocabulaire aligné sur le quiz 5gen39 (« coût total = coût fixe + coût variable ») : le coût
  * proportionnel CP(x) est présenté comme une PARTIE du coût variable. */
 export function consigneContexteC(exercice: ExerciceScenarioC): string {
+  // Audit 5e ch. 1 (G6) : « un coût variable formé de deux parties : CV(x) et CP(x) » donnait le nom
+  // « coût variable » à une seule des deux parties.
   return (
-    `Une entreprise a un coût fixe $\\text{CF} = ${exercice.cf}$ et un coût variable formé de deux parties : $\\text{CV}(x)$ et un coût proportionnel $\\text{CP}(x)$ ($x$ = quantité produite). ` +
+    `Une entreprise a un coût fixe $\\text{CF} = ${nombreLatex(exercice.cf)}$ et des coûts qui dépendent de la quantité produite $x$ : une partie non proportionnelle $\\text{CV}(x)$ et une partie proportionnelle $\\text{CP}(x)$. ` +
     "Le coût total vaut donc $\\text{CT}(x) = \\text{CF} + \\text{CV}(x) + \\text{CP}(x)$ ; le chiffre d'affaires est $\\text{CA}(x)$. Toutes les valeurs sont en milliers d'euros."
   );
 }
@@ -255,7 +275,7 @@ export function texteAideLectureC1(exercice: ExerciceScenarioC): string {
 export function consigneCoutMoyenC(exercice: ExerciceScenarioC): string {
   return `Calcule le coût moyen par unité $\\text{CM} = \\dfrac{\\text{CT}(${exercice.xLecture})}{${exercice.xLecture}}$, exprimé en euros (le tableau est en milliers d'euros).`;
 }
-export const TEXTE_AIDE_COUT_MOYEN_C_1 = "$\\text{CT}$ est en milliers d'euros : multiplie-le par 1000 pour l'exprimer en euros, puis divise par $x$.";
+export const TEXTE_AIDE_COUT_MOYEN_C_1 = "$\\text{CT}$ est en milliers d'euros : multiplie-le par $1\\,000$ pour l'exprimer en euros, puis divise par $x$.";
 
 export const CONSIGNE_RECONNAISSANCE_C =
   "D'après l'allure des courbes de $\\text{CV}$ et de $\\text{CP}$, et la ligne $x = 1$ du tableau, donne les expressions de $\\text{CV}(x)$ et de $\\text{CP}(x)$.";
@@ -281,7 +301,7 @@ export function consigneBeneficeC(exercice: ExerciceScenarioC): string {
 export const TEXTE_AIDE_BENEFICE_C_1 =
   "Bénéfice $= \\text{CA}(x) - \\text{CT}(x)$, avec $\\text{CT}(x) = \\text{CF} + \\text{CV}(x) + \\text{CP}(x)$. Un résultat négatif signale une perte : vérifie le signe.";
 
-export const CONSIGNE_SEUIL_C = "Lis sur le graphique à partir de quelle quantité $x$ l'entreprise devient rentable ($\\text{CA}(x) = \\text{CT}(x)$) — une valeur approchée suffit.";
+export const CONSIGNE_SEUIL_C = "Lis sur le graphique à partir de quelle quantité $x$ l'entreprise devient rentable ($\\text{CA}(x) = \\text{CT}(x)$) — elle tombe sur une ligne de la grille.";
 export const TEXTE_AIDE_SEUIL_C_1 = "Le seuil de rentabilité est l'abscisse du point où la courbe de $\\text{CA}$ (rose) croise celle de $\\text{CT}$ (verte).";
 
 // ============================================================================
@@ -307,12 +327,14 @@ export function formatTermeXEgaliteAiresA(exercice: ExerciceScenarioAConteneur):
 }
 
 export function formatTermeXOptimalA(exercice: ExerciceScenarioAConteneur): string {
-  return `x\\approx${arrondi(exercice.xOptimal, 0)}`;
+  return `x=${arrondi(exercice.xOptimal, 0)}`;
 }
 
-/** Réponse attendue de l'écran "justification" — dérivée du rayon RETENU par continuité. */
+/** Réponse attendue de l'écran "justification" — dérivée du rayon RETENU par continuité (« = » si
+ * la hauteur est entière, ce qui est le cas au rayon optimal). */
 export function formatTermeHJustificationA(exercice: ExerciceScenarioAConteneur, xOptimalRetenu: number): string {
-  return `h\\approx${arrondi(hauteurCylindre(exercice.volumeCm3, xOptimalRetenu), 0)}`;
+  const h = hauteurCylindre(exercice.volumeCm3, xOptimalRetenu);
+  return `h${Math.abs(h - Math.round(h)) < 1e-9 ? "=" : "\\approx"}${arrondi(h, 0)}`;
 }
 
 // --- Scénario B ---
@@ -392,7 +414,7 @@ function formuleCVLatex(formeCV: FormeCoutVariableC, k: number): string {
 export function formatTermesLectureC(exercice: ExerciceScenarioC): string[] {
   const x = exercice.xLecture;
   const l = ligneTableau(exercice, x);
-  return [`\\text{CT}(${x})=${exercice.cf}+${nombreLatex(l.cv)}+${nombreLatex(l.cp)}=${nombreLatex(coutTotalTableau(exercice, x))}`];
+  return [`\\text{CT}(${x})=${nombreLatex(exercice.cf)}+${nombreLatex(l.cv)}+${nombreLatex(l.cp)}=${nombreLatex(coutTotalTableau(exercice, x))}`];
 }
 
 /** Réponse attendue de l'écran "coutMoyen" (CT en milliers d'euros, CM en euros). */
@@ -400,7 +422,7 @@ export function formatTermeCoutMoyenC(exercice: ExerciceScenarioC): string {
   const ct = coutTotalTableau(exercice, exercice.xLecture);
   const cm = (ct * 1000) / exercice.xLecture;
   const exact = Math.abs(cm * 100 - Math.round(cm * 100)) < 1e-6;
-  return `\\text{CM}=\\dfrac{${nombreLatex(ct)}\\times 1000}{${exercice.xLecture}}${exact ? "=" : "\\approx"}${nombreLatex(cm)}\\text{ €}`;
+  return `\\text{CM}=\\dfrac{${nombreLatex(ct)}\\times 1\\,000}{${exercice.xLecture}}${exact ? "=" : "\\approx"}${nombreLatex(cm)}\\text{ €}`;
 }
 
 export function formatTermesReconnaissanceC(exercice: ExerciceScenarioC): string[] {
@@ -415,6 +437,7 @@ export function formatTermeBeneficeC(exercice: ExerciceScenarioC): string {
   return `\\text{CA}(${x})-\\text{CT}(${x})=${nombreLatex(ca)}-${nombreLatex(ct)}=${nombreLatex(ca - ct)}`;
 }
 
+/** Seuil construit ENTIER (audit 5e ch. 1, G12) : lu sur une ligne de la grille, « = ». */
 export function formatTermeSeuilC(exercice: ExerciceScenarioC): string {
-  return `x\\approx${nombreLatex(exercice.xSeuil, 1)}`;
+  return Number.isInteger(exercice.xSeuil) ? `x=${exercice.xSeuil}` : `x\\approx${nombreLatex(exercice.xSeuil, 1)}`;
 }

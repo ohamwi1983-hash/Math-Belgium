@@ -1,14 +1,14 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioC } from "../core5e/problemesContexte.types";
-import { TEXTE_AIDE_COUT_MOYEN_C_1, consigneContexteC, consigneCoutMoyenC } from "../ui5e/formatProblemesContexte";
+import { consigneContexteC, consigneCoutMoyenC } from "../ui5e/formatProblemesContexte";
 import { diagnostiquerCoutMoyenC } from "../moteur5e/verificationProblemesContexte";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { TexteRiche5e } from "./TexteRiche5e";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexte, cibleContexte, illisibleContexte, lireNombre5e, texteIllisibleContexte } from "../ui5e/aidesProblemesContexte";
 
 interface Props {
   exercice: ExerciceScenarioC;
@@ -30,11 +30,21 @@ interface Props {
 export function EtapeCoutMoyenC({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
-  const valeurErronee = montrerErreurs && valeur.trim() !== "" && diagnostiquerCoutMoyenC(exercice, Number(valeur.replace(",", "."))) !== "correct";
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<unknown>(null);
+  const valeurErronee = montrerErreurs && valeur.trim() !== "" && diagnostiquerCoutMoyenC(exercice, lireNombre5e(valeur)) !== "correct";
 
   function valider() {
     if (valeur.trim() === "") return;
-    onValider(Number(valeur.replace(",", ".")));
+    const reponseSoumise = lireNombre5e(valeur);
+    // Saisie illisible : message, rien n'est transmis (aucune tentative — audit 5e ch. 1, lot B).
+    if (illisibleContexte("coutMoyen", exercice, reponseSoumise)) {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    setSoumise(reponseSoumise);
+    onValider(reponseSoumise);
   }
 
   return (
@@ -50,25 +60,20 @@ export function EtapeCoutMoyenC({ exercice, donnees, tentativesUtilisees, tentat
           onChange={(e) => setValeur(normaliserSigneMoins(e.target.value))}
         />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={TEXTE_AIDE_COUT_MOYEN_C_1} /></p>
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={valeur.trim() === ""} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesContexte("coutMoyen", exercice, {})}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={valeur.trim() === ""}
+        illisible={illisible}
+        texteIllisible={texteIllisibleContexte("coutMoyen")}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumise !== null && montrerErreurs ? cibleContexte("coutMoyen", exercice, soumise, {}) : null}
+        validation={validation}
+      />
     </div>
   );
 }

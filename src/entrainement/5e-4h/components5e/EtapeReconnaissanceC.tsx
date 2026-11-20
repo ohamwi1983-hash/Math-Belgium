@@ -4,19 +4,16 @@ import type { ExerciceScenarioC } from "../core5e/problemesContexte.types";
 import {
   diagnostiquerCpReconnaissanceC,
   diagnostiquerCvReconnaissanceC,
-  diagnostiquerReconnaissanceC,
   type ReponseReconnaissanceC,
 } from "../moteur5e/verificationProblemesContexte";
-import { CONSIGNE_RECONNAISSANCE_C, consigneContexteC, texteAideReconnaissanceC1 } from "../ui5e/formatProblemesContexte";
+import { CONSIGNE_RECONNAISSANCE_C, consigneContexteC } from "../ui5e/formatProblemesContexte";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ScenarioCGraph } from "./ScenarioCGraph";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
-import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { TexteRiche5e } from "./TexteRiche5e";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexte, cibleContexte, illisibleContexte, texteIllisibleContexte } from "../ui5e/aidesProblemesContexte";
 
 interface Props {
   exercice: ExerciceScenarioC;
@@ -38,8 +35,9 @@ interface Props {
 export function EtapeReconnaissanceC({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [cv, setCv] = useState("");
   const [cp, setCp] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<unknown>(null);
   const complet = cv.trim() !== "" && cp.trim() !== "";
   const cvErronee = montrerErreurs && cv.trim() !== "" && diagnostiquerCvReconnaissanceC(exercice, cv) !== "correct";
   const cpErronee = montrerErreurs && cp.trim() !== "" && diagnostiquerCpReconnaissanceC(exercice, cp) !== "correct";
@@ -47,8 +45,15 @@ export function EtapeReconnaissanceC({ exercice, donnees, tentativesUtilisees, t
   function valider() {
     if (!complet) return;
     const reponse = { cv, cp };
-    setDernierStatut(diagnostiquerReconnaissanceC(exercice, reponse));
-    onValider(reponse);
+    const reponseSoumise = reponse;
+    // Saisie illisible : message, rien n'est transmis (aucune tentative — audit 5e ch. 1, lot B).
+    if (illisibleContexte("reconnaissance", exercice, reponseSoumise)) {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    setSoumise(reponseSoumise);
+    onValider(reponseSoumise);
   }
 
   return (
@@ -73,25 +78,20 @@ export function EtapeReconnaissanceC({ exercice, donnees, tentativesUtilisees, t
         <label className="field-label field-label-minuscule">CP(x) =</label>
         <input type="text" className={`text-input${cpErronee ? " is-erronee" : ""}`} value={cp} onChange={(e) => setCp(e.target.value)} placeholder="ex : 12*x" />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={texteAideReconnaissanceC1(exercice)} /></p>
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesContexte("reconnaissance", exercice, {})}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={illisible}
+        texteIllisible={texteIllisibleContexte("reconnaissance")}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumise !== null && montrerErreurs ? cibleContexte("reconnaissance", exercice, soumise, {}) : null}
+        validation={validation}
+      />
     </div>
   );
 }

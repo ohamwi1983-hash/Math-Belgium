@@ -62,6 +62,8 @@ export function formatEnsembleReelLatex(ensemble: EnsembleReelGuide): string {
   if (ensemble.forme === "prive_points") {
     return `\\mathbb{R} \\setminus \\{${ensemble.points.map(formatValeurLatex).join("\\,;\\,")}\\}`;
   }
+  // Ensemble vide (5gen3 : domaine vide d'une composée, cas particulier du cours).
+  if (ensemble.morceaux.length === 0) return "\\varnothing";
   return ensemble.morceaux.map(formatMorceauLatex).join(" \\cup ");
 }
 

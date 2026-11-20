@@ -13,11 +13,16 @@ import type { ExerciceScenarioB, ModeleCoutUnitaire, PointRevele } from "../../c
 import { CONTEXTES_B1, CONTEXTES_B2, CONTEXTES_B3, CONTEXTES_B4, CONTEXTES_B5 } from "./contextesScenarioB";
 import { entierAleatoire, tirerElement } from "./utils";
 
-// x ≥ 2 : « pour x = 1 puces » était agrammatical, et cu(1) = F(1) rendait un relevé trivial.
+// x ≥ 2 : cu(1) = F(1) rendait un relevé trivial. Audit 5e ch. 1 (G4, décision 2) : x compte des
+// CENTAINES d'unités (200 à 1 000 stylos, barils…) — plus de « 3 barils de pétrole à 15 € » ; le
+// coût total f(x) = cu(x) × x est alors en centaines d'euros.
 const X_CANDIDATS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const ECART_MIN_POINTS = 3;
 
-const MODELES: ModeleCoutUnitaire[] = ["B1", "B2", "B3", "B4", "B5"];
+/** B4 (cu = a/x + b/x²) est RETIRÉ du tirage (audit 5e ch. 1, G3 : coût total a + b/x qui DIMINUE
+ * quand on produit plus, dans 100 % des tirages) ; son entrée reste au catalogue (`retiree`), pour
+ * que les `?code=` déjà imprimés gardent leurs indices. */
+const MODELES: ModeleCoutUnitaire[] = ["B1", "B2", "B3", "B5"];
 
 /** Coefficient de "a" dans F(x)=a·coeffA(x)+b·coeffB(x) (coût TOTAL), par modèle. */
 export function coeffA(modele: ModeleCoutUnitaire, x: number): number {
@@ -83,8 +88,12 @@ function tirerAB(modele: ModeleCoutUnitaire): { aVrai: number; bVrai: number } {
       return { aVrai: entierAleatoire(2, 8), bVrai: entierAleatoire(15, 80) };
     case "B2":
       return { aVrai: entierAleatoire(5, 20), bVrai: entierAleatoire(1, 6) };
-    case "B3":
-      return { aVrai: entierAleatoire(2, 8), bVrai: entierAleatoire(50, 200) };
+    case "B3": {
+      // Coût total f(x) = ax + b/x croissant sur toute la plage x ≥ 2 : son minimum, en √(b/a),
+      // reste ≤ 2 (b ≤ 4a) — un coût total ne diminue pas quand on produit plus (audit G3, 40 %).
+      const a = entierAleatoire(4, 12);
+      return { aVrai: a, bVrai: entierAleatoire(a, 4 * a) };
+    }
     case "B4":
       return { aVrai: entierAleatoire(10, 50), bVrai: entierAleatoire(10, 50) };
     case "B5":

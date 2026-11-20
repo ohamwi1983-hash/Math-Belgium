@@ -2642,6 +2642,20 @@ paths:
   documents réels 2 graines (0 erreur KaTeX, 0 débordement), `?code=` 62/62, plans à 2 séries,
   `npm run build` propre.
 
+- **5e (4h), Chapitre 1 — lots B, C, D de l'audit (5gen1–5)**. Règles communes : « − – — »,
+  fractions et milliers lus ; illisible et incomplet sans tentative (moteurs et écrans) ; aides à 2
+  niveaux en KaTeX partout ; messages ciblés ; ni points ni pénalités ; sélecteurs intacts.
+  Contenus : 5gen2 sans affine sur la couche brute (2 couches), |x|³ ; 5gen3 allégé (bornes de
+  dénominateur ≤ 12, plus de √u/u, deux combinaisons retirées du tirage, condition 2 sans effet
+  gardée 1 fois sur 5, plus de « x·−1 ») et domaine vide en cas particulier (≈ 11 %) ; 5gen4 graphes
+  déclarés complets, 0 à 3 « n'existe pas », valeurs intermédiaires distinctes ; 5gen5 B4 retiré
+  (`retiree`), quantités B en centaines (coût total en centaines d'euros), B3 croissant, objets A1
+  réalistes (boîte de conserve, bouteille, pot de peinture, cartouche, canette, bidon) avec
+  V = 432π ou 686π cm³ (h = 2r exact au rayon lu), minimum A2 et seuil C entiers sur la grille,
+  légende sous les graphiques, milliers espacés, même objet et même lettre à l'écran et sur papier,
+  « partie non proportionnelle CV(x) ». Ce qui reste ouvert de l'audit : lot A (cours), lot E (quiz),
+  graduations « 2000 » des axes de `svgGraph` (partagé, non espacées).
+
 - **5e (4h), Chapitre 1 — Fonctions composées : audit de contenu appliqué** (accepté en entier).
   Erreurs : coût unitaire c(x) = C(x)/x présenté comme un QUOTIENT, avec une vraie composition
   économique à la place (ventes ← budget publicitaire, recette ← ventes) ; « hors domaine » (n'existe

@@ -73,7 +73,7 @@ export function activerAideSuivante(etat: EtatSessionDomaineDefinition): EtatSes
     return { ...etat, niveauAideCE: etat.niveauAideCE + 1 };
   }
   if (etat.phase === "resolution") {
-    if (etat.niveauAideResolution >= niveauAideMaxResolution()) throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
+    if (etat.niveauAideResolution >= niveauAideMaxResolution(exercice)) throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
     return { ...etat, niveauAideResolution: etat.niveauAideResolution + 1 };
   }
   if (etat.niveauAideDomf >= niveauAideMaxDomf(exercice)) throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");

@@ -2,12 +2,12 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioB } from "../core5e/problemesContexte.types";
 import { diagnostiquerF1EvaluationB, diagnostiquerF2EvaluationB, type ReponseEvaluationB } from "../moteur5e/verificationProblemesContexte";
-import { TEXTE_AIDE_EVALUATION_B_1, consigneEvaluationB } from "../ui5e/formatProblemesContexte";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import { consigneEvaluationB } from "../ui5e/formatProblemesContexte";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { TexteRiche5e } from "./TexteRiche5e";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexte, cibleContexte, illisibleContexte, lireNombre5e, texteIllisibleContexte } from "../ui5e/aidesProblemesContexte";
 
 interface Props {
   exercice: ExerciceScenarioB;
@@ -33,13 +33,23 @@ export function EtapeEvaluationB({ exercice, donnees, aRetenu, bRetenu, tentativ
   const [f1, setF1] = useState("");
   const [f2, setF2] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<unknown>(null);
   const complet = f1.trim() !== "" && f2.trim() !== "";
-  const f1Erronee = montrerErreurs && f1.trim() !== "" && diagnostiquerF1EvaluationB(exercice, aRetenu, bRetenu, Number(f1.replace(",", "."))) !== "correct";
-  const f2Erronee = montrerErreurs && f2.trim() !== "" && diagnostiquerF2EvaluationB(exercice, aRetenu, bRetenu, Number(f2.replace(",", "."))) !== "correct";
+  const f1Erronee = montrerErreurs && f1.trim() !== "" && diagnostiquerF1EvaluationB(exercice, aRetenu, bRetenu, lireNombre5e(f1)) !== "correct";
+  const f2Erronee = montrerErreurs && f2.trim() !== "" && diagnostiquerF2EvaluationB(exercice, aRetenu, bRetenu, lireNombre5e(f2)) !== "correct";
 
   function valider() {
     if (!complet) return;
-    onValider({ f1: Number(f1.replace(",", ".")), f2: Number(f2.replace(",", ".")) });
+    const reponseSoumise = { f1: lireNombre5e(f1), f2: lireNombre5e(f2) };
+    // Saisie illisible : message, rien n'est transmis (aucune tentative — audit 5e ch. 1, lot B).
+    if (illisibleContexte("evaluation", exercice, reponseSoumise)) {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    setSoumise(reponseSoumise);
+    onValider(reponseSoumise);
   }
 
   return (
@@ -56,25 +66,20 @@ export function EtapeEvaluationB({ exercice, donnees, aRetenu, bRetenu, tentativ
           <input type="text" className={`text-input${f2Erronee ? " is-erronee" : ""}`} value={f2} onChange={(e) => setF2(normaliserSigneMoins(e.target.value))} />
         </div>
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={TEXTE_AIDE_EVALUATION_B_1} /></p>
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesContexte("evaluation", exercice, { aRetenu, bRetenu })}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={illisible}
+        texteIllisible={texteIllisibleContexte("evaluation")}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumise !== null && montrerErreurs ? cibleContexte("evaluation", exercice, soumise, { aRetenu, bRetenu }) : null}
+        validation={validation}
+      />
     </div>
   );
 }

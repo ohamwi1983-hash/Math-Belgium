@@ -11,17 +11,16 @@ import type { ContexteConteneurA, ContexteReduitA } from "../../core5e/problemes
 // Combo 1 (kInverseXAxCarre) — objets cylindriques (V=πr²h), f=aire latérale, g=aire des bases.
 // ============================================================================
 
+/** Audit 5e ch. 1 (décision 6, G1) : liste RÉDUITE d'objets réalistes pour une contenance de 1 à
+ * 3 L (V = 2πn³ : n = 6 → 432π ≈ 1 357 cm³, n = 7 → 686π ≈ 2 155 cm³) — plus de silo, citerne ou
+ * réservoir industriel de 2 litres. Au rayon optimal, diamètre = hauteur = 12 ou 14 cm. */
 export const CONTEXTES_CONTENEUR: ContexteConteneurA[] = [
-  { id: "boiteConserve", nomObjetIndefini: "une boîte de conserve", nomObjetDefini: "la boîte de conserve" },
-  { id: "reservoirIndustriel", nomObjetIndefini: "un réservoir de stockage industriel", nomObjetDefini: "le réservoir de stockage industriel" },
-  { id: "siloGrains", nomObjetIndefini: "un silo à grains", nomObjetDefini: "le silo à grains" },
-  { id: "bouteilleEau", nomObjetIndefini: "une bouteille d'eau", nomObjetDefini: "la bouteille d'eau" },
-  { id: "tuyauIsole", nomObjetIndefini: "un tuyau isolé", nomObjetDefini: "le tuyau isolé" },
-  { id: "potPeinture", nomObjetIndefini: "un pot de peinture", nomObjetDefini: "le pot de peinture" },
-  { id: "citernePropane", nomObjetIndefini: "une citerne de propane", nomObjetDefini: "la citerne de propane" },
-  { id: "futMetallique", nomObjetIndefini: "un fût métallique", nomObjetDefini: "le fût métallique" },
-  { id: "cylindreGaz", nomObjetIndefini: "un cylindre de gaz comprimé", nomObjetDefini: "le cylindre de gaz comprimé" },
-  { id: "cuveBrassage", nomObjetIndefini: "une cuve de brassage artisanale", nomObjetDefini: "la cuve de brassage artisanale" },
+  { id: "boiteConserve", nomObjetIndefini: "une grande boîte de conserve", nomObjetDefini: "la boîte de conserve", rayons: [6, 7] },
+  { id: "bouteille", nomObjetIndefini: "une bouteille de jus", nomObjetDefini: "la bouteille", rayons: [6, 7] },
+  { id: "potPeinture", nomObjetIndefini: "un pot de peinture", nomObjetDefini: "le pot de peinture", rayons: [6, 7] },
+  { id: "cartoucheGaz", nomObjetIndefini: "une cartouche de gaz de camping", nomObjetDefini: "la cartouche de gaz", rayons: [6] },
+  { id: "canette", nomObjetIndefini: "une grande canette (format familial)", nomObjetDefini: "la canette", rayons: [6] },
+  { id: "bidon", nomObjetIndefini: "un bidon d'huile", nomObjetDefini: "le bidon", rayons: [6, 7] },
 ];
 
 // ============================================================================

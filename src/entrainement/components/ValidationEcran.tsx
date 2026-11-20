@@ -18,7 +18,7 @@ export interface ValidationEtapeProps {
   onSuivant: () => void;
   /** Optionnel (rétrocompatible) : message affiché à la place de « Tentatives épuisées — … » quand
    * l'écran a été clos AVANT d'épuiser les tentatives (verdict fermé faux, qui ne se rejoue pas). */
-  messageRevele?: string;
+  messageRevele?: ReactNode;
   /** Optionnel (rétrocompatible) : corrigé détaillé « comme au tableau » de l'étape, affiché sous la
    * réponse attendue quand elle est révélée — les MÊMES lignes que le corrigé papier
    * (`correctionDetaillee` de l'adaptateur, rendu `CorrigeDetailleEcran.tsx`). */

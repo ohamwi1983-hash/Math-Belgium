@@ -406,6 +406,10 @@ function nettoyerLatexReference(brut: string): string {
     // « -\left(15\sqrt{…}\right) » sans parenthèses inutiles (vus dans la réponse attendue de l'écran).
     .replace(/\{x\}(?=\^)/g, "x")
     .replace(/-\\left\((\d*\\sqrt\{[^{}]*\})\\right\)/g, "-$1")
+    // Audit 5e ch. 1 (G7) : « x\cdot-1 » (produit de mathjs) écrit « -x », « x\cdot-3 » écrit « -3x ».
+    .replace(/(?<![0-9a-zA-Z}])(\{?x\}?)\s*\\cdot\s*-\s*1(?![0-9.])/g, "-$1")
+    .replace(/(?<![0-9a-zA-Z}])(\{?x\}?)\s*\\cdot\s*-\s*(\d+(?:\.\d+)?)/g, "-$2$1")
+    .replace(/(\d+(?:\.\d+)?)\s*\\cdot\s*-\s*(\{?x\}?)/g, "-$1$2")
     .replace(/\+\s*-/g, "-")
     .trim();
 }
@@ -428,14 +432,18 @@ export function formuleReferenceNormalisee(formule: string): string | null {
   }
 }
 
-/** Un domaine "pathologique" (vide, ou réduit à un ou des points isolés de largeur nulle) n'est pas
- * représentable proprement via `EnsembleReelGuideBuilder` (aucun bouton "ensemble vide" côté UI) ou
- * pédagogiquement peu intéressant — reroll plutôt qu'étendre `EnsembleReelGuide` pour ce cas rare
- * (voir CLAUDE.md section 5gen3, "reroll-on-degenerate-case"). */
+/** Un domaine "pathologique" : réduit à un ou des points isolés de largeur nulle (sans intérêt
+ * pédagogique, reroll). Le domaine VIDE n'en fait plus partie (audit 5e ch. 1, décision 1 : c'est un
+ * CAS PARTICULIER du cours, produit de temps en temps — voir `estDomaineVide`, `PROBA_VIDE`). */
 function estDomainePathologique(e: EnsembleReelGuide): boolean {
   const morceaux = normaliserEnMorceaux(e);
+  if (morceaux.length === 0) return false;
   const largeur = morceaux.filter((m) => m.inf !== m.sup);
   return largeur.length === 0;
+}
+
+export function estDomaineVide(e: EnsembleReelGuide): boolean {
+  return normaliserEnMorceaux(e).length === 0;
 }
 
 /** Racine d'une droite `ax+b` (coeffs ascendants `[b,a]`, `a≠0` garanti par construction — voir
@@ -512,7 +520,7 @@ const SEUIL_MIN_CONDITION = 1e-6;
 /** Dénominateur maximal pour qu'une borne soit considérée "saisissable" par l'élève (même seuil que
  * `formatFractionIrreductible`, `ui/formatFraction.ts` — jamais importé ici : Couche A ne dépend
  * jamais de `ui/`, la même petite recherche de fraction est répliquée localement, autonome). */
-const DENOMINATEUR_MAX_BORNE = 100;
+const DENOMINATEUR_MAX_BORNE = 12;
 const TOLERANCE_RATIONNEL = 1e-9;
 
 /** `true` ssi `v` s'écrit EXACTEMENT (à `TOLERANCE_RATIONNEL` près) comme une fraction de
@@ -568,12 +576,40 @@ function construireCoeurDirection(interieure: DonneeFonction, exterieure: Donnee
   const riche = estRiche(interieure.fonction);
   const conditions = riche ? conditionsExterieurSurG(exterieure) : [];
   const domaineApresCarre = riche ? domaineApresCarreDeConditions(interieure.fonction, conditions) : null;
-  return { riche, conditions, domaineApresCarre, domaine: domaineCompose(interieure, exterieure) };
+  // Ensemble vide sous sa forme canonique (aucun morceau) : affichage « ∅ », comparaisons.
+  const canonique = (e: EnsembleReelGuide): EnsembleReelGuide => (estDomaineVide(e) ? { forme: "intervalles", points: [], morceaux: [] } : e);
+  return { riche, conditions, domaineApresCarre: domaineApresCarre === null ? null : canonique(domaineApresCarre), domaine: canonique(domaineCompose(interieure, exterieure)) };
 }
 
-function coeurDirectionValide(coeur: CoeurDirection): boolean {
+/** Audit 5e ch. 1 (V2) : la deuxième condition (« intérieure(x) dans le domaine de l'extérieure »)
+ * ne changeait rien dans 16 % des composées (domaine = celui de l'intérieure). Elle doit en
+ * principe retirer quelque chose : un cas « sans effet » n'est gardé qu'avec cette probabilité
+ * (l'élève doit encore vérifier, sans que ce soit la situation courante). */
+const PROBA_CONDITION2_SANS_EFFET = 0.2;
+
+function memeEnsemble(a: EnsembleReelGuide, b: EnsembleReelGuide): boolean {
+  const ma = normaliserEnMorceaux(a);
+  const mb = normaliserEnMorceaux(b);
+  const proche = (x: number | null, y: number | null) => (x === null || y === null ? x === y : Math.abs(x - y) < 1e-9);
+  return ma.length === mb.length && ma.every((m, i) => proche(m.inf, mb[i].inf) && proche(m.sup, mb[i].sup) && m.infInclus === mb[i].infInclus && m.supInclus === mb[i].supInclus);
+}
+
+/** `vide` : la direction doit avoir un domaine vide (true), ne doit pas en avoir (false). Un domaine
+ * vide n'est accepté que pour une direction riche dont l'intérieure est une racine (toujours ≥ 0)
+ * comparée à un seuil négatif — « √(x+1) ≤ −2 » : le cas du cours. */
+function coeurDirectionValide(coeur: CoeurDirection, interieure: DonneeFonction, vide: boolean, probaSansEffet: number): boolean {
   if (estDomainePathologique(coeur.domaine)) return false;
-  if (!coeur.riche) return true;
+  const estVide = estDomaineVide(coeur.domaine);
+  if (estVide !== vide) return false;
+  if (estVide) {
+    if (!coeur.riche || interieure.fonction.type === "racineSurFraction") return false;
+    if (!coeur.conditions.some((c) => (c.comparateur === "le" || c.comparateur === "lt") && c.seuil < -SEUIL_MIN_CONDITION)) return false;
+    if (!coeur.conditions.every((c) => Math.abs(c.seuil) > SEUIL_MIN_CONDITION && estRationnelSaisissable(c.seuil))) return false;
+    return coeur.domaineApresCarre === null || bornesRationnellesSaisissables(coeur.domaineApresCarre);
+  }
+  if (memeEnsemble(coeur.domaine, interieure.domaine) && Math.random() >= probaSansEffet) return false;
+  // Bornes saisissables (dénominateur ≤ 12) pour TOUTES les directions, simples comprises.
+  if (!coeur.riche) return bornesRationnellesSaisissables(coeur.domaine);
   if (!coeur.conditions.every((c) => c.seuil > SEUIL_MIN_CONDITION)) return false;
   // Garde-fou génération (bug confirmé empiriquement, ~10% des tirages riche) — jamais atteint pour
   // `coeur.domaineApresCarre === null` (seulement possible si `!coeur.riche`, déjà exclu ci-dessus).
@@ -585,20 +621,22 @@ function coeurDirectionValide(coeur: CoeurDirection): boolean {
  * valide par `coeurDirectionValide` (jamais avant, voir la note de `CoeurDirection`). */
 function construireDirection(interieure: DonneeFonction, nomInterieure: "f" | "g", exterieure: DonneeFonction, coeur: CoeurDirection): CompositionDirigee {
   const formule = formuleComposee(exterieure, interieure);
+  // LaTeX simplifié (mathjs, coûteux) calculé à la PREMIÈRE lecture seulement : la recherche de graine
+  // des évaluations (profil, cas particulier « domaine vide ») ne le paie plus pour chaque essai.
+  // Aucun tirage aléatoire dedans : l'instance reste identique pour une même graine. Forme affichée :
+  // `latexReferenceNormalisee` (fraction unique réduite, B.1), sinon `simplifierLatex` (repli sur la
+  // substitution brute si mathjs échoue — jamais d'exception).
+  let latexCalcule: string | null = null;
   return {
     interieure,
     nomInterieure,
     exterieure,
     formule,
-    // B.1 (promptcorrectionsround2.md) — la substitution brute (latexCompose) empile des parenthèses
-    // et des fractions imbriquées jamais regroupées. `simplifierEnFractionUnique` (rationalize) est
-    // tentée EN PREMIER : elle seule sait regrouper une fraction de fractions en une fraction unique
-    // réduite (`9/(6/(-3x-2)-5)` → `(-27x-18)/(15x+16)`, le cas signalé pour 5gen3) — elle échoue vite
-    // (`null`) sur toute composition "riche" (racine non résoluble algébriquement), auquel cas
-    // `simplifierLatex` (distribue sans regrouper de fraction) prend le relais, avec son propre repli
-    // sur la substitution brute si mathjs échoue (jamais d'exception ici, dans un cas comme l'autre).
-    latex: latexReferenceNormalisee(formule) ?? simplifierLatex(formule, latexCompose(exterieure, interieure)),
     ...coeur,
+    get latex(): string {
+      if (latexCalcule === null) latexCalcule = latexReferenceNormalisee(formule) ?? simplifierLatex(formule, latexCompose(exterieure, interieure));
+      return latexCalcule;
+    },
   };
 }
 
@@ -614,11 +652,39 @@ function construireDirection(interieure: DonneeFonction, nomInterieure: "f" | "g
  * `simplifierLatex` (mathjs) — voir la note de `CoeurDirection` ci-dessus. */
 const TENTATIVES_MAX = 5000;
 
-function construireExercice(f: DonneeFonction, g: DonneeFonction, sens: SensComposition): ExerciceComposerFonctions | null {
+/** Une direction (intérieure, extérieure) PEUT-elle avoir un domaine vide ? Il faut une intérieure
+ * toujours positive (racine carrée, fraction sous racine) et une extérieure dont le domaine peut
+ * imposer « argument ≤ seuil négatif » (racine, racine sur fraction, fraction sous racine). */
+function directionPeutEtreVide(interieure: Formule, exterieure: Formule): boolean {
+  return (interieure === "irrationnelleSimple" || interieure === "fractionSousRacine") && exterieure !== "rationnelle";
+}
+
+/** Le (combo, sens) peut-il produire un domaine vide (au moins une direction) ? */
+export function comboPeutEtreVide(comboId: string, sens: SensComposition): boolean {
+  const combo = CATALOGUE_COMBOS.find((c) => c.id === comboId);
+  if (!combo) return false;
+  const [ff, fg] = combo.familles;
+  const fRondG = sens !== "gRondF" && directionPeutEtreVide(fg, ff);
+  const gRondF = sens !== "fRondG" && directionPeutEtreVide(ff, fg);
+  return fRondG || gRondF;
+}
+
+/** Audit 5e ch. 1, décision 1 : le domaine vide d'une composée est un CAS PARTICULIER (profil
+ * `domaine-vide`), produit de temps en temps — jamais filtré à 0, jamais tiré à parts égales. Parmi
+ * les (combo, sens) qui le permettent (≈ 46 % du tirage libre), il sort avec cette probabilité :
+ * ≈ 10 % des exercices au total (mesuré). */
+export const PROBA_VIDE = 0.22;
+
+function construireExercice(f: DonneeFonction, g: DonneeFonction, sens: SensComposition, vide: boolean, probaSansEffet = PROBA_CONDITION2_SANS_EFFET): ExerciceComposerFonctions | null {
+  // Avec `vide`, UNE direction au moins est vide (la première possible) ; l'autre ne l'est pas.
+  const peutVideFRondG = sens !== "gRondF" && directionPeutEtreVide(g.fonction.type, f.fonction.type);
+  const videFRondG = vide && peutVideFRondG;
+  const videGRondF = vide && !videFRondG;
   const coeurFRondG = sens === "gRondF" ? null : construireCoeurDirection(g, f);
-  if (coeurFRondG !== null && !coeurDirectionValide(coeurFRondG)) return null;
+  if (coeurFRondG !== null && !coeurDirectionValide(coeurFRondG, g, videFRondG, probaSansEffet)) return null;
   const coeurGRondF = sens === "fRondG" ? null : construireCoeurDirection(f, g);
-  if (coeurGRondF !== null && !coeurDirectionValide(coeurGRondF)) return null;
+  if (coeurGRondF !== null && !coeurDirectionValide(coeurGRondF, f, videGRondF, probaSansEffet)) return null;
+  if (vide && !videFRondG && coeurGRondF === null) return null;
   const fRondG = coeurFRondG !== null ? construireDirection(g, "g", f, coeurFRondG) : null;
   const gRondF = coeurGRondF !== null ? construireDirection(f, "f", g, coeurGRondF) : null;
   return { f, g, sens, fRondG, gRondF };
@@ -628,6 +694,9 @@ export interface ComboFamilles {
   id: string;
   label: string;
   familles: [Formule, Formule];
+  /** Audit 5e ch. 1 (décision 7) : combinaison trop lourde, sortie du tirage libre et de
+   * l'évaluation (panneau), gardée dans le sélecteur de l'appli et pour les `?code=` imprimés. */
+  retiree?: boolean;
 }
 
 const LABEL_FAMILLE: Record<Formule, string> = {
@@ -644,15 +713,18 @@ const LABEL_FAMILLE: Record<Formule, string> = {
 export const CATALOGUE_COMBOS: ComboFamilles[] = [
   { id: "rationnelle+rationnelle", label: `f ${LABEL_FAMILLE.rationnelle}, g ${LABEL_FAMILLE.rationnelle}`, familles: ["rationnelle", "rationnelle"] },
   { id: "irrationnelleSimple+irrationnelleSimple", label: `f ${LABEL_FAMILLE.irrationnelleSimple}, g ${LABEL_FAMILLE.irrationnelleSimple}`, familles: ["irrationnelleSimple", "irrationnelleSimple"] },
-  { id: "racineSurFraction+racineSurFraction", label: `f ${LABEL_FAMILLE.racineSurFraction}, g ${LABEL_FAMILLE.racineSurFraction}`, familles: ["racineSurFraction", "racineSurFraction"] },
+  { id: "racineSurFraction+racineSurFraction", label: `f ${LABEL_FAMILLE.racineSurFraction}, g ${LABEL_FAMILLE.racineSurFraction}`, familles: ["racineSurFraction", "racineSurFraction"], retiree: true },
   { id: "fractionSousRacine+fractionSousRacine", label: `f ${LABEL_FAMILLE.fractionSousRacine}, g ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["fractionSousRacine", "fractionSousRacine"] },
   { id: "rationnelle+irrationnelleSimple", label: `f ${LABEL_FAMILLE.rationnelle}, g ${LABEL_FAMILLE.irrationnelleSimple}`, familles: ["rationnelle", "irrationnelleSimple"] },
   { id: "rationnelle+racineSurFraction", label: `f ${LABEL_FAMILLE.rationnelle}, g ${LABEL_FAMILLE.racineSurFraction}`, familles: ["rationnelle", "racineSurFraction"] },
   { id: "rationnelle+fractionSousRacine", label: `f ${LABEL_FAMILLE.rationnelle}, g ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["rationnelle", "fractionSousRacine"] },
   { id: "irrationnelleSimple+racineSurFraction", label: `f ${LABEL_FAMILLE.irrationnelleSimple}, g ${LABEL_FAMILLE.racineSurFraction}`, familles: ["irrationnelleSimple", "racineSurFraction"] },
   { id: "irrationnelleSimple+fractionSousRacine", label: `f ${LABEL_FAMILLE.irrationnelleSimple}, g ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["irrationnelleSimple", "fractionSousRacine"] },
-  { id: "racineSurFraction+fractionSousRacine", label: `f ${LABEL_FAMILLE.racineSurFraction}, g ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["racineSurFraction", "fractionSousRacine"] },
+  { id: "racineSurFraction+fractionSousRacine", label: `f ${LABEL_FAMILLE.racineSurFraction}, g ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["racineSurFraction", "fractionSousRacine"], retiree: true },
 ];
+
+/** Combinaisons du tirage libre et du panneau d'évaluation (les retirées restent au sélecteur). */
+export const COMBOS_TIRAGE = CATALOGUE_COMBOS.filter((c) => !c.retiree);
 
 export interface OptionSens {
   id: SensComposition;
@@ -669,15 +741,24 @@ export const CATALOGUE_SENS: OptionSens[] = [
 /** Panneau dev-only (`SelecteurVarianteDev`) — force la combinaison de familles ET le sens à la
  * fois (2 axes indépendants, jamais un seul catalogue combiné — même principe que gen57, 4e, pour
  * un générateur à 2 axes de tirage). */
-export function construireAvecCombos(comboId: string, sens: SensComposition): ExerciceComposerFonctions {
+/** `vide` absent : tiré (`PROBA_VIDE`) quand le (combo, sens) le permet. Repli sans domaine vide si
+ * aucun tirage vide n'aboutit (jamais d'échec à cause du cas particulier). */
+export function construireAvecCombos(comboId: string, sens: SensComposition, vide?: boolean): ExerciceComposerFonctions {
   const combo = CATALOGUE_COMBOS.find((c) => c.id === comboId);
   if (!combo) throw new Error(`construireAvecCombos : combinaison inconnue "${comboId}"`);
   const [familleF, familleG] = combo.familles;
-  for (let tentative = 0; tentative < TENTATIVES_MAX; tentative++) {
-    const f = genererDonneeFonction("f", familleF);
-    const g = genererDonneeFonction("g", familleG);
-    const exercice = construireExercice(f, g, sens);
-    if (exercice !== null) return exercice;
+  const veutVide = vide ?? (comboPeutEtreVide(comboId, sens) && Math.random() < PROBA_VIDE);
+  // Repli (combinaisons rares, ex. racine sur fraction des deux côtés au sélecteur) : la condition 2
+  // « sans effet » est alors acceptée — jamais un échec du générateur.
+  for (const essaiVide of veutVide ? [true, false] : [false]) {
+    for (const probaSansEffet of [PROBA_CONDITION2_SANS_EFFET, 1]) {
+      for (let tentative = 0; tentative < (combo.retiree ? 6 * TENTATIVES_MAX : TENTATIVES_MAX); tentative++) {
+        const f = genererDonneeFonction("f", familleF);
+        const g = genererDonneeFonction("g", familleG);
+        const exercice = construireExercice(f, g, sens, essaiVide, probaSansEffet);
+        if (exercice !== null) return exercice;
+      }
+    }
   }
   throw new Error(`construireAvecCombos : impossible d'obtenir une instance non dégénérée pour "${comboId}"/"${sens}" après ${TENTATIVES_MAX} tentatives`);
 }
@@ -696,7 +777,7 @@ export function construireAvecComboSensTire(comboId: string): ExerciceComposerFo
  * (`construireAvecCombos`). Repli, en cas d'échec improbable après 5 000 essais, sur un autre tirage. */
 export function genererExerciceComposerFonctions(): ExerciceComposerFonctions {
   for (let essai = 0; essai < 20; essai++) {
-    const combo = CATALOGUE_COMBOS[entierAleatoire(0, CATALOGUE_COMBOS.length - 1)];
+    const combo = COMBOS_TIRAGE[entierAleatoire(0, COMBOS_TIRAGE.length - 1)];
     const sens = CATALOGUE_SENS[entierAleatoire(0, CATALOGUE_SENS.length - 1)].id;
     try {
       return construireAvecCombos(combo.id, sens);

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { ReactNode } from "react";
 import type { EnsembleReelGuide } from "../core5e/domaineDefinition.types";
 import { Katex } from "../components/Katex";
@@ -5,6 +6,10 @@ import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CONSIGNE_GENERALE_COMPOSER_FONCTIONS } from "../ui5e/formatComposerFonctions";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
+import { t } from "../ui5e/retoursFonctions1";
+import { MessageRetour } from "../../4e/components/RetourSaisie";
+import { AidesTrig } from "./RetourSaisieTrig";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -32,6 +37,8 @@ interface Props {
   termesEtatActuel?: string[];
   onValider: (reponse: EnsembleReelGuide) => void;
   validation?: ValidationEtapeProps | null;
+  /** Message ciblé sur le dernier ensemble faux (condition 2 oubliée, crochet…). */
+  cible?: (saisi: EnsembleReelGuide) => FragmentConsigne[] | null;
 }
 
 function EtatActuelComposerFonctions({ termes }: { termes: string[] }) {
@@ -47,32 +54,32 @@ function EtatActuelComposerFonctions({ termes }: { termes: string[] }) {
 
 /** Écran guidé, réutilisé pour "domFRondG" ET "domGRondF" — même builder que 5gen1
  * (`EnsembleReelGuideBuilder`), seuls consigne/aides diffèrent selon l'appelant. */
-export function EtapeDomaineComposerFonctions({ consigne, donnees, prefixApercu, attendu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, validation }: Props) {
+export function EtapeDomaineComposerFonctions({ consigne, donnees, prefixApercu, attendu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, validation, cible }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
+  const [soumis, setSoumis] = useState<EnsembleReelGuide | null>(null);
   return (
     <div>
       <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_COMPOSER_FONCTIONS} blocDonnees={donnees} />
       {termesEtatActuel !== undefined && <EtatActuelComposerFonctions termes={termesEtatActuel} />}
       <p className="prompt-text">{consigne}</p>
       <EnsembleReelGuideBuilder
-        onValider={onValider}
+        onValider={(e) => {
+          setSoumis(e);
+          onValider(e);
+        }}
         prefixApercu={prefixApercu}
-        contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
+        avecVide
+        contenuAvantValider={
+          <>
+            <AidesTrig niveauAide={niveauAide} aides={[{ texte: [t(texteAideNiveau1)] }, { texte: [t("Ici :")], formules: latexAideNiveau2 ? [latexAideNiveau2] : [] }]} />
+            <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+          </>
+        }
         attendu={attendu}
         apresEchec={montrerErreurs}
         validation={validation}
       />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1}</p>
-          {niveauAide >= 2 && latexAideNiveau2 !== null && <Katex expression={latexAideNiveau2} block />}
-        </div>
-      )}
-      {!validation && montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
-      )}
+      {!validation && montrerErreurs && <MessageRetour illisible={false} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={soumis && cible ? cible(soumis) : null} />}
     </div>
   );
 }

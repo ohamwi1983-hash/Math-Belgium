@@ -31,26 +31,21 @@ export function phaseApresCE(exercice: ExerciceDomaineDefinition): PhaseDomaineD
  * paliers selon le nombre de conditions à identifier) ; l'écran "resolution"/"domf" n'a d'aide que
  * pour "fractionSousRacine" (surlignage vert du tableau, 1 palier, écran "domf" uniquement).
  */
-export function niveauAideMaxCE(exercice: ExerciceDomaineDefinition): number {
-  if (exercice.famille === "pasDeCE") return 0;
-  // "fractionSousRacine" a normalement 2 paliers d'aide sur l'écran "ce", mais `texteAideCE`
-  // (`ui5e/formatDomaineDefinition.ts`) ne retourne qu'un seul texte générique dès que
-  // `aucuneCE===true` (~10% des instances de cette famille) — sans ce garde, le bouton "Aide
-  // supplémentaire" restait cliquable/pénalisant pour un niveau 2 vide (B.3, audit 18 générateurs).
-  if (exercice.famille === "fractionSousRacine") return exercice.aucuneCE ? 1 : 2;
-  if (exercice.famille === "racineSurFraction") return 2;
-  return 1;
+/** Audit 5e ch. 1 (lot B) : DEUX niveaux d'aide sur chaque écran, pour toutes les familles (« pas
+ * de CE » comprise) — niveau 1 la propriété du cours, niveau 2 son application à l'instance
+ * (`ui5e/retoursFonctions1.ts` : `aidesCE5gen1`, `aidesResolution5gen1`, `aidesDomf5gen1`). */
+export const NIVEAU_AIDE_MAX_5GEN1 = 2;
+
+export function niveauAideMaxCE(_exercice: ExerciceDomaineDefinition): number {
+  return NIVEAU_AIDE_MAX_5GEN1;
 }
 
-export function niveauAideMaxResolution(): number {
-  // Aucun texte d'aide spécifié pour l'écran "resolution" par la spec (ni le tableau de signes de
-  // "fractionSousRacine" — son aide vit sur l'écran "domf" suivant — ni les 2 sous-conditions de
-  // "racineSurFraction"/"racineSurD") — jamais atteinte pour les autres familles (écran sauté).
-  return 0;
+export function niveauAideMaxResolution(_exercice?: ExerciceDomaineDefinition): number {
+  return NIVEAU_AIDE_MAX_5GEN1;
 }
 
-export function niveauAideMaxDomf(exercice: ExerciceDomaineDefinition): number {
-  return exercice.famille === "fractionSousRacine" && !exercice.aucuneCE ? 1 : 0;
+export function niveauAideMaxDomf(_exercice: ExerciceDomaineDefinition): number {
+  return NIVEAU_AIDE_MAX_5GEN1;
 }
 
 export interface ResultatExerciceDomaineDefinition {

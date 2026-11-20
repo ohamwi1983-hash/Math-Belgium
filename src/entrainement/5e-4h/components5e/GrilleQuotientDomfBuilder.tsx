@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ExerciceFractionSousRacine } from "../core5e/domaineDefinition.types";
 import type { ValeurCellule } from "../core/signesProduit.types";
 import type { ValeurCelluleQuotient } from "../core/inequationRationnelle.types";
@@ -23,9 +24,28 @@ interface Props {
    * par le bloc `ValidationEcran` (convention CLAUDE.md, "validation/invalidation avant de passer à
    * l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Aides et bouton « Aide », rendus juste avant « Valider ». */
+  avantValider?: ReactNode;
+  tentativesMax?: number;
 }
 
-export function GrilleQuotientDomfBuilder({ exercice, tentativesUtilisees, onValider, validation }: Props) {
+/** Message ciblé (audit 5e ch. 1, lot B) : un « 0 » au quotient là où le dénominateur s'annule, ou
+ * une ligne du quotient qui ne suit pas la règle des signes des deux lignes saisies. */
+function cibleGrille(n: (ValeurCellule | null)[], d: (ValeurCellule | null)[], q: (ValeurCelluleQuotient | null)[], attenduD: ValeurCellule[]): string | null {
+  if (attenduD.some((v, j) => v === "0" && q[j] === "0")) return "Là où le dénominateur s'annule, le quotient n'existe pas (double barre) : il ne vaut pas 0.";
+  const regle = q.every((v, j) => {
+    if (j % 2 === 1) return true;
+    if (n[j] === null || d[j] === null || v === null) return true;
+    const attendu = n[j] === d[j] ? "+" : "-";
+    return v === attendu;
+  });
+  if (!regle) return "Le signe du quotient suit la règle des signes de tes deux lignes : même signe → +, signes contraires → −.";
+  return null;
+}
+
+export function GrilleQuotientDomfBuilder({ exercice, tentativesUtilisees, onValider, validation, avantValider, tentativesMax = 3 }: Props) {
+  const [incomplet, setIncomplet] = useState(false);
+  const [cible, setCible] = useState<string | null>(null);
   const nbColonnes = 2 * exercice.racines.length + 1;
   const [ligneN, setLigneN] = useState<(ValeurCellule | null)[]>(() => Array(nbColonnes).fill(null));
   const [ligneD, setLigneD] = useState<(ValeurCellule | null)[]>(() => Array(nbColonnes).fill(null));
@@ -35,12 +55,15 @@ export function GrilleQuotientDomfBuilder({ exercice, tentativesUtilisees, onVal
   exercice.racines.forEach((r, j) => (entete[2 * j + 1] = String(r)));
 
   function cyclerN(j: number) {
+    setIncomplet(false);
     setLigneN((etat) => etat.map((v, i) => (i === j ? cyclerValeurCellule(v) : v)));
   }
   function cyclerD(j: number) {
+    setIncomplet(false);
     setLigneD((etat) => etat.map((v, i) => (i === j ? cyclerValeurCellule(v) : v)));
   }
   function cyclerQ(j: number) {
+    setIncomplet(false);
     setLigneQ((etat) => etat.map((v, i) => (i === j ? cyclerValeurCelluleQuotient(v) : v)));
   }
 
@@ -55,7 +78,13 @@ export function GrilleQuotientDomfBuilder({ exercice, tentativesUtilisees, onVal
   }
 
   function valider() {
-    if (!complet) return;
+    // Tableau incomplet : message, rien n'est transmis (aucune tentative consommée).
+    if (!complet) {
+      setIncomplet(true);
+      return;
+    }
+    setIncomplet(false);
+    setCible(cibleGrille(ligneN, ligneD, ligneQ, exercice.grille.ligneDenominateur));
     onValider({ ligneNumerateur: ligneN as ValeurCellule[], ligneDenominateur: ligneD as ValeurCellule[], ligneQuotient: ligneQ as ValeurCelluleQuotient[] });
   }
 
@@ -128,13 +157,22 @@ export function GrilleQuotientDomfBuilder({ exercice, tentativesUtilisees, onVal
       </div>
       {!validation && (
         <>
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          {avantValider}
+          <button type="button" className="btn btn-primary" onClick={valider}>
             Valider
           </button>
-          {montrerErreurs && (
+          {incomplet ? (
             <p className="alert-error" role="alert">
-              Incorrect — réessaie.
+              Complète chaque case du tableau (« ? » restant) avant de valider. Cette saisie ne compte pas comme une tentative.
             </p>
+          ) : (
+            montrerErreurs && (
+              <p className="alert-error" role="alert">
+                <span>
+                  {cible ? `${cible} ` : ""}Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+                </span>
+              </p>
+            )
           )}
         </>
       )}

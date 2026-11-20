@@ -137,11 +137,17 @@ export function latexAideC1Niveau2(dir: CompositionDirigee): string | null {
 
 /** Audit 5e ch. 1, décision F : l'écran attend l'ensemble des x qui vérifient la ou les conditions
  * une fois élevées au carré — SANS l'intersection avec dom(intérieure), faite à l'écran suivant. */
+/** Audit 5e ch. 1, décision F : l'écran attend l'ensemble des x qui vérifient la ou les conditions
+ * — SANS l'intersection avec dom(intérieure), faite à l'écran suivant. Le domaine vide (cas
+ * particulier) : une racine comparée à un seuil NÉGATIF ne s'élève pas au carré — la consigne,
+ * identique pour toutes les instances d'une même intérieure, invite à regarder le signe d'abord
+ * (elle ne trahit pas le cas). */
 export function consigneC2(dir: CompositionDirigee): string {
+  const signe = dir.interieure.fonction.type === "racineSurFraction" ? "" : "regarde d'abord le signe du seuil (une racine carrée est positive ou nulle), puis ";
   if (dir.conditions.length > 1) {
-    return "Élève chaque condition de l'écran précédent au carré, résous chacune, puis donne les x qui vérifient les 2 à la fois (l'intersection avec le domaine se fait à l'écran suivant).";
+    return `Résous chaque condition de l'écran précédent : ${signe}élève au carré si les deux membres sont positifs. Donne les x qui vérifient les 2 à la fois (l'intersection avec le domaine se fait à l'écran suivant).`;
   }
-  return "Élève la condition de l'écran précédent au carré et résous-la (l'intersection avec le domaine se fait à l'écran suivant).";
+  return `Résous la condition de l'écran précédent : ${signe}élève au carré si les deux membres sont positifs (l'intersection avec le domaine se fait à l'écran suivant).`;
 }
 
 export function texteAideC2Niveau1(dir: CompositionDirigee): string {
@@ -150,7 +156,7 @@ export function texteAideC2Niveau1(dir: CompositionDirigee): string {
   if (f.type === "racineSurFraction") {
     return `Ici, ${int}(x) est un quotient (racine carrée divisée par une expression) : son signe dépend du dénominateur, distingue 2 cas. Là où le dénominateur est positif, élever au carré ne change pas le sens de la condition. Là où il est négatif, ${int}(x) est négatif : la condition est alors automatiquement vraie ou fausse, sans rien résoudre.`;
   }
-  return `Le seuil de chaque condition est strictement positif et ${int}(x) est une racine carrée, donc toujours ≥ 0 : élever au carré ne change pas le sens de la condition.`;
+  return `${int}(x) est une racine carrée, donc toujours positive ou nulle. Face à un seuil positif, élever au carré ne change pas le sens de la condition ; face à un seuil négatif, on n'élève pas au carré : on compare directement les signes.`;
 }
 
 export function latexAideC2Niveau2(dir: CompositionDirigee): string | null {
@@ -163,7 +169,12 @@ export function latexAideC2Niveau2(dir: CompositionDirigee): string | null {
   }
   const argument = argumentSousRacineLatex(f);
   if (argument === null) return null;
-  const lignes = dir.conditions.map((c) => `${argument} ${LATEX_COMPARATEUR[c.comparateur]} ${formatValeurLatex(c.seuil * c.seuil)}`);
+  // Seuil négatif : on rappelle le signe de la racine à côté de la condition (rien n'est élevé au carré).
+  const lignes = dir.conditions.map((c) =>
+    c.seuil < 0
+      ? `${dir.nomInterieure}(x) ${LATEX_COMPARATEUR[c.comparateur]} ${formatValeurLatex(c.seuil)} \\quad\\text{avec}\\quad ${dir.nomInterieure}(x)\\geq 0`
+      : `${argument} ${LATEX_COMPARATEUR[c.comparateur]} ${formatValeurLatex(c.seuil * c.seuil)}`,
+  );
   if (lignes.length <= 1) return lignes[0] ?? null;
   return `\\begin{gathered} ${lignes.join(" \\\\ ")} \\end{gathered}`;
 }

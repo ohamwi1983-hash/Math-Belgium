@@ -1,14 +1,13 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioAConteneur } from "../core5e/problemesContexte.types";
-import { CONSIGNE_EGALITE_AIRES_A, TEXTE_AIDE_EGALITE_AIRES_A_1, latexAideEgaliteAiresA2 } from "../ui5e/formatProblemesContexte";
+import { CONSIGNE_EGALITE_AIRES_A } from "../ui5e/formatProblemesContexte";
 import { diagnostiquerEgaliteAiresA } from "../moteur5e/verificationProblemesContexte";
-import { Katex } from "../components/Katex";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { TexteRiche5e } from "./TexteRiche5e";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexte, cibleContexte, illisibleContexte, lireNombre5e, texteIllisibleContexte } from "../ui5e/aidesProblemesContexte";
 
 interface Props {
   exercice: ExerciceScenarioAConteneur;
@@ -30,11 +29,21 @@ interface Props {
 export function EtapeEgaliteAiresA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
-  const valeurErronee = montrerErreurs && valeur.trim() !== "" && diagnostiquerEgaliteAiresA(exercice, Number(valeur.replace(",", "."))) !== "correct";
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<unknown>(null);
+  const valeurErronee = montrerErreurs && valeur.trim() !== "" && diagnostiquerEgaliteAiresA(exercice, lireNombre5e(valeur)) !== "correct";
 
   function valider() {
     if (valeur.trim() === "") return;
-    onValider(Number(valeur.replace(",", ".")));
+    const reponseSoumise = lireNombre5e(valeur);
+    // Saisie illisible : message, rien n'est transmis (aucune tentative — audit 5e ch. 1, lot B).
+    if (illisibleContexte("egaliteAires", exercice, reponseSoumise)) {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    setSoumise(reponseSoumise);
+    onValider(reponseSoumise);
   }
 
   return (
@@ -50,26 +59,20 @@ export function EtapeEgaliteAiresA({ exercice, donnees, tentativesUtilisees, ten
           onChange={(e) => setValeur(normaliserSigneMoins(e.target.value))}
         />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={TEXTE_AIDE_EGALITE_AIRES_A_1} /></p>
-          {niveauAide >= 2 && <Katex expression={latexAideEgaliteAiresA2(exercice)} block />}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={valeur.trim() === ""} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesContexte("egaliteAires", exercice, {})}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={valeur.trim() === ""}
+        illisible={illisible}
+        texteIllisible={texteIllisibleContexte("egaliteAires")}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumise !== null && montrerErreurs ? cibleContexte("egaliteAires", exercice, soumise, {}) : null}
+        validation={validation}
+      />
     </div>
   );
 }

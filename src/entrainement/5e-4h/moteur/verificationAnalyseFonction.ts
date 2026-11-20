@@ -11,6 +11,7 @@ import type {
 import type { Morceau } from "../core/inequation.types";
 import type { ValeurCellule } from "../core/signesProduit.types";
 import type { StatutVerification } from "./statutVerification";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 const TOLERANCE = 0.005;
 
@@ -59,7 +60,14 @@ const REGEX_FRACTION = /^(-?\d+)\s*\/\s*(-?\d+)$/;
  * existante. Utilisé à la fois par analyserAxeSymetrie et par les champs x_S/y_S (composant).
  */
 export function parserNombreOuFraction(texte: string): number | null {
-  const t = texte.trim();
+  // Audit 5e ch. 1 (lot B) : « − – — » lus comme « - » (« −3 », juste, coûtait une tentative dans
+  // 5gen4 et grisait « Valider » dans 5gen1), « + » initial toléré, espaces des milliers retirés
+  // (« 1 500 », espace fine ou insécable comprises) — jamais aucun caractère filtré à la frappe.
+  const t = normaliserSigneMoins(texte)
+    .replace(/(\d)[\s\u00a0\u202f]+(?=\d{3}(?!\d))/g, "$1")
+    .trim()
+    .replace(/^\+\s*/, "")
+    .replace(/^(-)\s+/, "$1");
   const fraction = REGEX_FRACTION.exec(t);
   if (fraction) {
     const numerateur = Number(fraction[1]);

@@ -2,12 +2,12 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioB } from "../core5e/problemesContexte.types";
 import { diagnostiquerAResolutionB, diagnostiquerBResolutionB, type ReponseResolutionB } from "../moteur5e/verificationProblemesContexte";
-import { CONSIGNE_RESOLUTION_B, TEXTE_AIDE_RESOLUTION_B_1 } from "../ui5e/formatProblemesContexte";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import { CONSIGNE_RESOLUTION_B } from "../ui5e/formatProblemesContexte";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { TexteRiche5e } from "./TexteRiche5e";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexte, cibleContexte, illisibleContexte, lireNombre5e, texteIllisibleContexte } from "../ui5e/aidesProblemesContexte";
 
 interface Props {
   exercice: ExerciceScenarioB;
@@ -30,13 +30,23 @@ export function EtapeResolutionB({ exercice, donnees, tentativesUtilisees, tenta
   const [a, setA] = useState("");
   const [b, setB] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<unknown>(null);
   const complet = a.trim() !== "" && b.trim() !== "";
-  const aErronee = montrerErreurs && a.trim() !== "" && diagnostiquerAResolutionB(exercice, Number(a.replace(",", "."))) !== "correct";
-  const bErronee = montrerErreurs && b.trim() !== "" && diagnostiquerBResolutionB(exercice, Number(b.replace(",", "."))) !== "correct";
+  const aErronee = montrerErreurs && a.trim() !== "" && diagnostiquerAResolutionB(exercice, lireNombre5e(a)) !== "correct";
+  const bErronee = montrerErreurs && b.trim() !== "" && diagnostiquerBResolutionB(exercice, lireNombre5e(b)) !== "correct";
 
   function valider() {
     if (!complet) return;
-    onValider({ a: Number(a.replace(",", ".")), b: Number(b.replace(",", ".")) });
+    const reponseSoumise = { a: lireNombre5e(a), b: lireNombre5e(b) };
+    // Saisie illisible : message, rien n'est transmis (aucune tentative — audit 5e ch. 1, lot B).
+    if (illisibleContexte("resolution", exercice, reponseSoumise)) {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    setSoumise(reponseSoumise);
+    onValider(reponseSoumise);
   }
 
   return (
@@ -53,25 +63,20 @@ export function EtapeResolutionB({ exercice, donnees, tentativesUtilisees, tenta
           <input type="text" className={`text-input${bErronee ? " is-erronee" : ""}`} value={b} onChange={(e) => setB(normaliserSigneMoins(e.target.value))} />
         </div>
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={TEXTE_AIDE_RESOLUTION_B_1} /></p>
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesContexte("resolution", exercice, {})}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={illisible}
+        texteIllisible={texteIllisibleContexte("resolution")}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumise !== null && montrerErreurs ? cibleContexte("resolution", exercice, soumise, {}) : null}
+        validation={validation}
+      />
     </div>
   );
 }

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { diagnostiquerIntersectionSimpleA } from "../moteur5e/verificationProblemesContexte";
-import { TEXTE_AIDE_INTERSECTION_SIMPLE_A_1, consigneIntersectionSimpleA } from "../ui5e/formatProblemesContexte";
+import { consigneIntersectionSimpleA } from "../ui5e/formatProblemesContexte";
 import type { ExerciceScenarioAReduit } from "../ui5e/scenarioAGraphReduit";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { TexteRiche5e } from "./TexteRiche5e";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexte, cibleContexte, illisibleContexte, lireNombre5e, texteIllisibleContexte } from "../ui5e/aidesProblemesContexte";
 
 interface Props {
   exercice: ExerciceScenarioAReduit;
@@ -27,11 +27,21 @@ interface Props {
 export function EtapeIntersectionSimpleA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
-  const valeurErronee = montrerErreurs && valeur.trim() !== "" && diagnostiquerIntersectionSimpleA(exercice, Number(valeur.replace(",", "."))) !== "correct";
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<unknown>(null);
+  const valeurErronee = montrerErreurs && valeur.trim() !== "" && diagnostiquerIntersectionSimpleA(exercice, lireNombre5e(valeur)) !== "correct";
 
   function valider() {
     if (valeur.trim() === "") return;
-    onValider(Number(valeur.replace(",", ".")));
+    const reponseSoumise = lireNombre5e(valeur);
+    // Saisie illisible : message, rien n'est transmis (aucune tentative — audit 5e ch. 1, lot B).
+    if (illisibleContexte("intersectionSimple", exercice, reponseSoumise)) {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    setSoumise(reponseSoumise);
+    onValider(reponseSoumise);
   }
 
   return (
@@ -47,25 +57,20 @@ export function EtapeIntersectionSimpleA({ exercice, donnees, tentativesUtilisee
           onChange={(e) => setValeur(normaliserSigneMoins(e.target.value))}
         />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={TEXTE_AIDE_INTERSECTION_SIMPLE_A_1} /></p>
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={valeur.trim() === ""} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesContexte("intersectionSimple", exercice, {})}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={valeur.trim() === ""}
+        illisible={illisible}
+        texteIllisible={texteIllisibleContexte("intersectionSimple")}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumise !== null && montrerErreurs ? cibleContexte("intersectionSimple", exercice, soumise, {}) : null}
+        validation={validation}
+      />
     </div>
   );
 }

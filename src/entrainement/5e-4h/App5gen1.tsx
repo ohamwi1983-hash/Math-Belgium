@@ -9,6 +9,7 @@ import {
   demarrerSessionDomaineDefinition,
   niveauAideMaxCE,
   niveauAideMaxDomf,
+  niveauAideMaxResolution,
   soumettreReponseCE,
   TENTATIVES_ECRAN_CE,
   soumettreReponseDomf,
@@ -31,6 +32,8 @@ import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { correctionDetailleeDomaineDefinition, lettrePhaseDomaine } from "./generateurs5e/domaineDefinition/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
+import { cibleCE5gen1 } from "./ui5e/retoursFonctions1";
+import { RenduFragments } from "../4e/components/RenduFragments";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -176,6 +179,8 @@ export function App5gen1() {
    * comme `enAttente`/`generationExercice`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Dernière réponse de l'écran « CE » (choix fermés, une tentative) : message ciblé sous la réponse révélée. */
+  const [derniereCE, setDerniereCE] = useState<ReponseCE | null>(null);
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
    * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (voir le commentaire
@@ -215,10 +220,20 @@ export function App5gen1() {
   }
 
   const exercice: ExerciceDomaineDefinition = etat.exerciceCourant;
+  const cibleCE = enAttente?.revele && etat.phase === "ce" && derniereCE ? cibleCE5gen1(exercice, derniereCE) : null;
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        ...(cibleCE
+          ? {
+              messageRevele: (
+                <span>
+                  Ce n'était pas la bonne réponse (une seule tentative sur un choix fermé). <RenduFragments fragments={cibleCE} />
+                </span>
+              ),
+            }
+          : {}),
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDomaineDefinition(exercice), lettrePhaseDomaine(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
@@ -258,7 +273,10 @@ export function App5gen1() {
                   <Katex expression={exercice.fLatex} block />
                 </div>
               }
-              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), formatReponseCE(exercice, reponse))}
+              onValider={(reponse) => {
+                setDerniereCE(reponse);
+                terminerEtape(soumettreReponseCE(etat, reponse), formatReponseCE(exercice, reponse));
+              }}
               validation={validation}
             />
           )}
@@ -268,6 +286,9 @@ export function App5gen1() {
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAideResolution}
+              niveauAideMax={niveauAideMaxResolution(exercice)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
               donnees={
                 <div className="equation-box">
                   <Katex expression={exercice.fLatex} block />
