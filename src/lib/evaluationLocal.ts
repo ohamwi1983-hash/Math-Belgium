@@ -881,6 +881,8 @@ function enteteSerie(entete: EnTeteEvaluation, serieLettre: string, examen?: Exa
     titreChapitre: entete.titreChapitre,
     urlChapitre: entete.urlChapitre,
     deuxColonnes: entete.deuxColonnes,
+    // Comptes professeurs : absent (pas de session / plan d'avant) = cartouche historique.
+    ...(entete.cartouche ? { cartouche: entete.cartouche } : {}),
   }
 }
 

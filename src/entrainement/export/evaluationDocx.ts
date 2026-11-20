@@ -42,6 +42,7 @@ import {
 import { etiquetteQuestion, fragmentsConsigne, lignePartie, NOM_PROCESSUS_EXAMEN, type PartieExamen } from "./examen";
 import type { BlocCorrection, EtapeCorrection, LigneCalcul } from "./genererFeuilleExercices";
 import { decouperLigneCalcul, estLignePiege } from "./corrigeTableau";
+import { cartoucheEffectif, morceauxSurtitre } from "./cartouche";
 
 /**
  * Export Word (.docx) d'une série d'évaluation, pour que le professeur puisse retoucher les
@@ -64,8 +65,14 @@ import { decouperLigneCalcul, estLignePiege } from "./corrigeTableau";
 
 const NOM_PROCESSUS: Record<1 | 2 | 3, string> = { 1: "Connaître", 2: "Appliquer", 3: "Transférer" };
 const LETTRES = "abcdefghijklmnopqrstuvwxyz";
-const ECOLE = "Collège Saint-Pierre · Rue J.B. Verbeyst 25, 1090 Bruxelles";
-const PROFESSEUR = "M. Hamwi";
+/** « École · adresse · Mathématiques 4h/sem · Professeur » : profil et école choisie
+ * (`EnteteEvaluation.cartouche`), sinon valeurs historiques (`cartouche.ts`) — texte identique à
+ * avant les comptes quand il n'y a pas de cartouche. `docx` échappe lui-même le XML. */
+function surtitreDocx(entete: EnteteEvaluation): string {
+  const c = cartoucheEffectif(entete.cartouche);
+  const ecole = [c.ecoleNom, c.ecoleAdresse].filter((m) => m !== "").join(" · ");
+  return morceauxSurtitre({ ...c, ecoleNom: ecole }, `Mathématiques ${entete.heuresSemaine}h/sem`).join(" · ");
+}
 
 const PROPRIETES_SVG = ["fill", "stroke", "stroke-width", "stroke-dasharray", "opacity", "fill-opacity", "stroke-opacity", "font-size", "font-family", "font-weight", "text-anchor", "dominant-baseline"];
 
@@ -174,7 +181,7 @@ const LARGEUR_UTILE = 9906;
 /** En-tête commun (école, titre, date · série en gras · durée, champs Nom/Classe/N°). */
 function enteteDocx(entete: EnteteEvaluation, items: ItemEvaluation[], suffixe?: string): FileChild[] {
   return [
-    new Paragraph({ children: [new TextRun({ text: `${ECOLE} · Mathématiques ${entete.heuresSemaine}h/sem · ${PROFESSEUR}`, size: 16, color: ACCENT })] }),
+    new Paragraph({ children: [new TextRun({ text: surtitreDocx(entete), size: 16, color: ACCENT })] }),
     new Paragraph({ children: [new TextRun({ text: `${titreEvaluation(entete)}${suffixe ? ` — ${suffixe}` : ""}`, bold: true, size: 32 })], spacing: { before: 60 } }),
     new Paragraph({
       children: [
@@ -408,7 +415,7 @@ function bandeauExamenDocx(examen: ExamenDocument): Paragraph {
 function enteteExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument, suffixe?: string): FileChild[] {
   return [
     bandeauExamenDocx(examen),
-    new Paragraph({ children: [new TextRun({ text: `${ECOLE} · Mathématiques ${entete.heuresSemaine}h/sem · ${PROFESSEUR}`, size: 16, color: ACCENT })] }),
+    new Paragraph({ children: [new TextRun({ text: surtitreDocx(entete), size: 16, color: ACCENT })] }),
     new Paragraph({ children: [new TextRun({ text: `${titreExamen(entete)}${suffixe ? ` — ${suffixe}` : ""}`, bold: true, size: 32 })], spacing: { before: 60 } }),
     new Paragraph({
       children: [new TextRun({ text: `${dateEnToutesLettres(entete.date)} · Série `, size: 18, color: GRIS }), new TextRun({ text: entete.serieLettre, size: 18, color: "1F2937", bold: true })],

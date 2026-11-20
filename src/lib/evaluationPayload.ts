@@ -1,6 +1,7 @@
 import type { Block, ChapterSection, FormulaireData } from '../content/types'
 import type { CatalogueVarianteEntree } from '../entrainement/export/genererFeuilleExercices'
 import type { OrganisationExamen, TotalExamen } from '../entrainement/export/examen'
+import type { CartoucheEcole } from '../entrainement/export/cartouche'
 import { EVALUATION_ADAPTER_REGISTRY } from './evaluationAdapterRegistry'
 
 /**
@@ -4768,6 +4769,11 @@ export interface EnTeteEvaluation {
   session?: string
   /** Examen : consignes ajoutées après les consignes par défaut, une par ligne non vide (`$…$` en KaTeX). */
   consignesSupplementaires?: string
+  /** Comptes professeurs : école (nom, adresse) choisie dans le panneau et nom du professeur (profil)
+   * imprimés dans le cartouche de la copie, de l'aménagée, du corrigé, de la grille, du Word et de
+   * l'examen. Absent (pas de session, plans enregistrés avant) : valeurs historiques
+   * (`entrainement/export/cartouche.ts::CARTOUCHE_DEFAUT`), rendu inchangé. */
+  cartouche?: CartoucheEcole
 }
 
 /**

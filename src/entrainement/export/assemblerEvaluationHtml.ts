@@ -4,6 +4,7 @@ import { LIBELLE_PALIER, type Palier } from "./niveauDifficulte";
 import { blocCorrectionHtml, echapperHtml, fragmentsEnteteHtml, fragmentsVersHtml, grillesLisiblesAImpression } from "./genererFeuilleExercicesHtml";
 import { obtenirCssKatexAutonome } from "./katexImage";
 import { qrCodeSvg } from "./qrSvg";
+import { cartoucheEffectif, morceauxSurtitre, type CartoucheEcole } from "./cartouche";
 import { etiquetteQuestion, examenDeSession, fragmentsConsigne, lignePartie, partiesExamen, NOM_PROCESSUS_EXAMEN, type ChapitreExamen, type OrganisationExamen, type PartieExamen, type QuestionOrdonnable } from "./examen";
 
 /**
@@ -65,10 +66,18 @@ export interface ItemEvaluation {
   chapitres?: string[];
 }
 
-/** École et professeur : fixes (décision prise avec l'utilisateur — aucun champ dans le formulaire). */
-const ECOLE_NOM = "Collège Saint-Pierre";
-const ECOLE_ADRESSE = "Rue J.B. Verbeyst 25, 1090 Bruxelles";
-const PROFESSEUR = "M. Hamwi";
+/** École, adresse et professeur du cartouche : profil du professeur connecté et école choisie dans
+ * le panneau (`EnteteEvaluation.cartouche`) ; sans eux, valeurs historiques (`cartouche.ts`,
+ * `CARTOUCHE_DEFAUT` : rendu identique à avant les comptes). Textes saisis : toujours échappés. */
+function surtitreCartoucheHtml(entete: EnteteEvaluation): string {
+  return morceauxSurtitre(cartoucheEffectif(entete.cartouche), `Mathématiques ${entete.heuresSemaine}h/sem`).map(echapperHtml).join(" · ");
+}
+
+/** « · adresse » en fin de ligne méta (rien si l'école n'a pas d'adresse). */
+function adresseCartoucheHtml(entete: EnteteEvaluation): string {
+  const adresse = cartoucheEffectif(entete.cartouche).ecoleAdresse;
+  return adresse ? ` · ${echapperHtml(adresse)}` : "";
+}
 
 export interface EnteteEvaluation {
   numero?: string;
@@ -97,6 +106,8 @@ export interface EnteteEvaluation {
    * (copie d'évaluation et énoncé de la feuille d'exercices seulement ; jamais l'aménagée, le
    * corrigé, la grille ni la page « Je vérifie »). Absent = non. */
   deuxColonnes?: boolean;
+  /** École, adresse et nom du professeur (comptes professeurs). Absent : valeurs historiques. */
+  cartouche?: CartoucheEcole;
   /** Document « Examen » (maquette X3) : présent seulement pour un examen — l'évaluation est rendue
    * exactement comme avant quand il est absent. Points des items DÉJÀ mis à l'échelle si le total
    * est fixé (`evaluationLocal.ts::itemsDuDocument`). */
@@ -825,9 +836,9 @@ export function titreEvaluation(entete: EnteteEvaluation): string {
 function cartoucheEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation[], suffixe?: string): string {
   const duree = entete.afficherDuree ? ` · ${dureeEstimeeMinutes(items)} minutes` : "";
   return `<div class="cartouche">
-  <div class="g"><span class="surtitre">${echapperHtml(ECOLE_NOM)} · Mathématiques ${echapperHtml(entete.heuresSemaine)}h/sem · ${echapperHtml(PROFESSEUR)}</span>
+  <div class="g"><span class="surtitre">${surtitreCartoucheHtml(entete)}</span>
     <h1>${echapperHtml(titreEvaluation(entete))}${suffixe ? ` — ${echapperHtml(suffixe)}` : ""}</h1>
-    <span class="meta">${echapperHtml(dateEnToutesLettres(entete.date))} · Série <strong>${echapperHtml(entete.serieLettre)}</strong>${duree} · ${echapperHtml(ECOLE_ADRESSE)}</span></div>
+    <span class="meta">${echapperHtml(dateEnToutesLettres(entete.date))} · Série <strong>${echapperHtml(entete.serieLettre)}</strong>${duree}${adresseCartoucheHtml(entete)}</span></div>
   <div class="d"><span>Nom</span><span class="champ"></span><span>Classe</span><span class="champ"></span><span>N°</span><span class="champ"></span></div>
 </div>`;
 }
@@ -1021,9 +1032,9 @@ function bandeHtml(examen: ExamenDocument): string {
 
 function cartoucheExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, suffixe?: string): string {
   return `${bandeHtml(examen)}<div class="cartouche examen">
-  <div class="g"><span class="surtitre">${echapperHtml(ECOLE_NOM)} · Mathématiques ${echapperHtml(entete.heuresSemaine)}h/sem · ${echapperHtml(PROFESSEUR)}</span>
+  <div class="g"><span class="surtitre">${surtitreCartoucheHtml(entete)}</span>
     <h1>${echapperHtml(titreExamen(entete))}${suffixe ? ` — ${echapperHtml(suffixe)}` : ""}</h1>
-    <span class="meta">${echapperHtml(dateEnToutesLettres(entete.date))} · Série <strong>${echapperHtml(entete.serieLettre)}</strong> · ${echapperHtml(ECOLE_ADRESSE)}</span></div>
+    <span class="meta">${echapperHtml(dateEnToutesLettres(entete.date))} · Série <strong>${echapperHtml(entete.serieLettre)}</strong>${adresseCartoucheHtml(entete)}</span></div>
   <div class="d"><span>Nom</span><span class="champ"></span><span>Classe</span><span class="champ"></span><span>N°</span><span class="champ"></span></div>
 </div>`;
 }
