@@ -240,7 +240,17 @@ function etapeCondition(e: ExerciceArcfonctionsDifferentes, sq: string): EtapeCo
 // Étape « equation ».
 // ============================================================================
 
+/** Parenthèses simples (une ligne longue ne se coupe pas dans un groupe « \\left…\\right »). */
+function simples(t: string): string {
+  return t.replace(/\\left\(/g, "(").replace(/\\right\)/g, ")");
+}
+
 function etapeEquation(e: E, sq: string): EtapeCorrection[] {
+  if (e.variante === "arcfonctionsDifferentes") return etapeEquation4(e, sq).map((x) => (x.type === "calcul" ? { ...x, calcul: x.calcul?.map((l) => ({ ...l, latex: simples(l.latex) })) } : x.type === "resultat" ? { ...x, fragments: x.fragments.map((f) => (f.type === "latex" ? { ...f, valeur: simples(f.valeur) } : f)) } : x));
+  return etapeEquation4(e, sq);
+}
+
+function etapeEquation4(e: E, sq: string): EtapeCorrection[] {
   const res = resultat(sq, [latex(formatEquationNonCycloLatex(e))]);
   switch (e.variante) {
     case "angleLineaire":
@@ -266,41 +276,43 @@ function etapeEquation(e: E, sq: string): EtapeCorrection[] {
         res,
       ];
     case "arcfonctionsDifferentes": {
-      const u = lin(e.arg1);
-      const v = lin(e.arg2);
-      const U = `\\left(${u}\\right)^{2}`;
-      const V = `\\left(${v}\\right)^{2}`;
+      // Calcul mené avec les LETTRES u et v (définies en tête) : un produit de deux carrés de binômes
+      // en x est insécable et sortait de la colonne sur papier ; le résultat remplace u et v.
+      const defs: LigneCalcul[] = [ligne(`u=${lin(e.arg1)}`, "on nomme l'argument du premier membre"), ligne(`v=${lin(e.arg2)}`, "et celui du second membre")];
       if (e.sousCas === "asin_acos")
         return [
-          utilise(sq, [texte("On applique cos aux deux membres, avec "), latex("\\cos(\\arcsin u)=\\sqrt{1-u^{2}}"), texte(" et "), latex("\\cos(\\arccos v)=v"), texte(`, puis on élève au carré ${COURS_EQUATIONS}.`)]),
+          utilise(sq, [texte("On applique cos aux deux membres, avec "), latex("\\cos(\\arcsin u)=\\sqrt{1-u^{2}}"), texte(" et "), latex("\\cos(\\arccos v)=v"), texte(`, puis on élève au carré ${COURS_EQUATIONS}. Le résultat remplace u et v par leurs expressions en x.`)]),
           calcul(sq, [
-            ligne(`\\sqrt{1-${U}}=${v}`, justif("on applique cos aux deux membres")),
-            ligne(`1-${U}=${V}`, "on élève au carré"),
-            ligne(`${V}=1-${U}`, "on échange les membres"),
+            ...defs,
+            ligne("\\sqrt{1-u^{2}}=v", justif("on applique cos aux deux membres")),
+            ligne("1-u^{2}=v^{2}", "on élève au carré"),
+            ligne("v^{2}=1-u^{2}", "on échange les membres"),
           ]),
           res,
           piege(sq, [texte("Élever au carré peut ajouter des solutions : la condition de l'étape b les écartera.")]),
         ];
       if (e.sousCas === "asin_atan")
         return [
-          utilise(sq, [texte("On applique tan aux deux membres, avec "), latex("\\tan(\\arcsin u)=\\dfrac{u}{\\sqrt{1-u^{2}}}"), texte(" et "), latex("\\tan(\\arctan v)=v"), texte(`, puis on élève au carré ${COURS_EQUATIONS}.`)]),
+          utilise(sq, [texte("On applique tan aux deux membres, avec "), latex("\\tan(\\arcsin u)=\\dfrac{u}{\\sqrt{1-u^{2}}}"), texte(" et "), latex("\\tan(\\arctan v)=v"), texte(`, puis on élève au carré ${COURS_EQUATIONS}. Le résultat remplace u et v par leurs expressions en x.`)]),
           calcul(sq, [
-            ligne(`\\dfrac{${u}}{\\sqrt{1-${U}}}=${v}`, justif("on applique tan aux deux membres")),
-            ligne(`\\dfrac{${U}}{1-${U}}=${V}`, "on élève au carré"),
-            ligne(`${U}=${V}\\left(1-${U}\\right)`, "produit en croix"),
-            ligne(`${V}\\left(1-${U}\\right)=${U}`, "on échange les membres"),
+            ...defs,
+            ligne("\\dfrac{u}{\\sqrt{1-u^{2}}}=v", justif("on applique tan aux deux membres")),
+            ligne("\\dfrac{u^{2}}{1-u^{2}}=v^{2}", "on élève au carré"),
+            ligne("u^{2}=v^{2}(1-u^{2})", "produit en croix"),
+            ligne("v^{2}(1-u^{2})=u^{2}", "on échange les membres"),
           ]),
           res,
           piege(sq, [texte("Élever au carré peut ajouter des solutions : la condition de l'étape b les écartera.")]),
         ];
       return [
-        utilise(sq, [texte("On applique tan aux deux membres, avec "), latex("\\tan(\\arccos u)=\\dfrac{\\sqrt{1-u^{2}}}{u}"), texte(" et "), latex("\\tan(\\arctan v)=v"), texte(`, puis on élève au carré ${COURS_EQUATIONS}.`)]),
+        utilise(sq, [texte("On applique tan aux deux membres, avec "), latex("\\tan(\\arccos u)=\\dfrac{\\sqrt{1-u^{2}}}{u}"), texte(" et "), latex("\\tan(\\arctan v)=v"), texte(`, puis on élève au carré ${COURS_EQUATIONS}. Le résultat remplace u et v par leurs expressions en x.`)]),
         calcul(sq, [
-          ligne(`\\dfrac{\\sqrt{1-${U}}}{${u}}=${v}`, justif("on applique tan aux deux membres")),
-          ligne(`\\dfrac{1-${U}}{${U}}=${V}`, "on élève au carré"),
-          ligne(`1-${U}=${U}${V}`, "produit en croix"),
-          ligne(`${U}+${U}${V}=1`, "on regroupe"),
-          ligne(`${U}\\left(1+${V}\\right)=1`, "on met le carré de u en évidence"),
+          ...defs,
+          ligne("\\dfrac{\\sqrt{1-u^{2}}}{u}=v", justif("on applique tan aux deux membres")),
+          ligne("\\dfrac{1-u^{2}}{u^{2}}=v^{2}", "on élève au carré"),
+          ligne("1-u^{2}=u^{2}v^{2}", "produit en croix"),
+          ligne("u^{2}+u^{2}v^{2}=1", "on regroupe"),
+          ligne("u^{2}(1+v^{2})=1", justif("on met ", { l: "u^{2}" }, " en évidence")),
         ]),
         res,
         piege(sq, [texte("Élever au carré peut ajouter des solutions : la CE et la condition de l'étape b les écarteront.")]),
@@ -371,6 +383,34 @@ function valeurNum(e: Extract<E, { variante: "angleLineaire" | "angleQuadratique
   return L === "-1" ? -1 : L === "1" ? 1 : 0;
 }
 
+/**
+ * `lignesTrinome` (brique partagée), mais le discriminant est calculé en trois morceaux courts (b², 4ac,
+ * puis Δ = b² − 4ac) quand sa substitution dépasserait 20 caractères visibles : avec des coefficients comme
+ * 4225 et 20736, « Δ = 20736² − 4 · 4225 · (−20736) » passait à la ligne dans la colonne étroite du papier.
+ */
+function trinome(p: Poly, variable = "x"): { lignes: LigneCalcul[]; racines: Q[] } {
+  const t = lignesTrinome(p, variable);
+  const a = p.get(2) ?? q(0);
+  const b = p.get(1) ?? q(0);
+  const c = p.get(0) ?? q(0);
+  const premiere = t.lignes[0]?.latex ?? "";
+  const visibles = premiere.replace(/\\cdot|\\Delta/g, "x").replace(/[{}^\s]/g, "").length;
+  if (visibles <= 20 || b.n === 0) return t;
+  const b2 = qMul(b, b);
+  const ac4 = qMul(q(4), qMul(a, c));
+  const D = qSub(b2, ac4);
+  const courtes: LigneCalcul[] = [
+    ligne(`b^{2}=${qP(b)}^{2}`, justif("discriminant ", { l: "\\Delta=b^{2}-4ac" }, " : on calcule les deux termes")),
+    ligne(`=${qL(b2)}`),
+    ligne(`4ac=4\\cdot ${qP(a)}\\cdot ${qP(c)}`),
+    ligne(`=${qL(ac4)}`),
+    ligne(`\\Delta=b^{2}-4ac`),
+    ligne(`=${qL(b2)}${ac4.n < 0 ? "+" : "-"}${qL(q(Math.abs(ac4.n), ac4.d))}`),
+    ligne(`=${qL(D)}`),
+  ];
+  return { lignes: [...courtes, ...t.lignes.slice(2)], racines: t.racines };
+}
+
 function etapeSolutionsV4(e: ExerciceArcfonctionsDifferentes, sq: string, res: EtapeCorrection): EtapeCorrection[] {
   if (e.sousCas === "asin_acos") {
     const U = polyLin(e.arg1);
@@ -390,7 +430,7 @@ function etapeSolutionsV4(e: ExerciceArcfonctionsDifferentes, sq: string, res: E
       ligne(`${polyL(P)}=0`, "on regroupe tout dans le premier membre"),
     ];
     if (!(facteur.n === 1 && facteur.d === 1)) l.push(ligne(`${polyL(Pk)}=0`, justif("on multiplie par ", { l: qL(facteur) })));
-    const t = lignesTrinome(Pk);
+    const t = trinome(Pk);
     l.push(...t.lignes);
     return [utilise(sq, [texte(`Équation du second degré : on développe, on regroupe, puis discriminant ${COURS_EQUATIONS}.`)]), calcul(sq, lignesPropres(l)), res];
   }
@@ -427,7 +467,7 @@ function etapeSolutionsV4(e: ExerciceArcfonctionsDifferentes, sq: string, res: E
     [1, q(k)],
     [0, q(-k)],
   ]);
-  const t = lignesTrinome(P, "T");
+  const t = trinome(P, "T");
   const Tpos = t.racines.filter((r) => r.n > 0)[0];
   const Tneg = t.racines.filter((r) => r.n < 0)[0];
   const u0 = Qx(Math.sqrt(qVal(Tpos)));

@@ -363,7 +363,9 @@ export function lettreCorrecteGraphiquesCyclo(e: E): string {
 /** Réponse de l'écran (graphique + propriétés), en fragments. */
 export function reponseGraphiquesCyclo(e: E): Fragments {
   const a = analyse(e);
-  return [texte(`Graphique ${lettreCorrecteGraphiquesCyclo(e)} : `), latex(a.dom), texte(" ; "), latex(a.im), texte(` ; ${libelleParite(a.parite)} ; `), latex(a.f0), texte(" ; "), latex(a.max), texte(" ; "), latex(a.min), texte(".")];
+  // Chaque formule en groupe {…} : elle ne se coupe jamais au milieu (« f(0) = … ≈ 1,11 » se coupait).
+  const g = (x: string) => latex(`{${x}}`);
+  return [texte(`Graphique ${lettreCorrecteGraphiquesCyclo(e)} : `), g(a.dom), texte(" ; "), g(a.im), texte(` ; ${libelleParite(a.parite)} ; `), g(a.f0), texte(" ; "), g(a.max), texte(" ; "), g(a.min), texte(".")];
 }
 
 export function correctionDetailleeGraphiquesCyclometriques(e: E): EtapeCorrection[] {

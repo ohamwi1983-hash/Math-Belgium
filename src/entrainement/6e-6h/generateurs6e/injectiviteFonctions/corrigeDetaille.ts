@@ -609,7 +609,7 @@ function etapeBijection(e: E, cote: CoteBranche): EtapeCorrection[] {
   return [
     utilise(sq, [texte("Une fonction injective sur X est une bijection de X sur son image "), latex("Y=f(X)"), texte(` ${COURS_RECIPROQUE}.`)]),
     calcul(sq, [ligne(`X=${X}`, e.injective ? "f est injective sur tout son domaine (étape b)" : "intervalle d'injectivité retenu (étape b)"), ligne(`Y=${Y}`, "image (étape d)")]),
-    resultat(sq, [texte("f est une bijection de "), latex(X), texte(" sur "), latex(Y), texte(" : "), latex(`f : ${X}\\to ${Y}`), texte(".")]),
+    resultat(sq, [texte("f est une bijection de "), latex(X), texte(" sur "), latex(Y), texte(".")]),
     piege(sq, e.injective ? [texte("L'ensemble d'arrivée est l'image de f, pas ℝ : sinon f ne serait pas surjective.")] : [texte("X est la moitié retenue à l'étape b (celle de la réciproque), et l'arrivée est l'image, pas ℝ.")]),
   ];
 }

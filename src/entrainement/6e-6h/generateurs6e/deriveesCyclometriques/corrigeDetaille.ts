@@ -226,13 +226,16 @@ function ecransB(e: Extract<E, { famille: "B" }>): Ecran[] {
   lignesArc.push(ligne(`\\left(${NOM_ARC[arc]}\\left(${V}\\right)\\right)'=${derArcSubst(arc, vp, V)}`, formuleArc(arc)));
   if (derArcSubst(arc, vp, V) !== derV) lignesArc.push(ligne(`=${derV}`, "on simplifie"));
   const ux = ax(e.m);
-  const fin: LigneCalcul[] = [
-    ligne(`f'(x)=u'(x)\\,${NOM_ARC[arc]}\\left(${V}\\right)+u(x)\\left(${NOM_ARC[arc]}\\left(${V}\\right)\\right)'`, justif("règle du produit, ", { l: "(uv)'=u'v+uv'" })),
-    ligne(`=${e.m}${NOM_ARC[arc]}\\left(${V}\\right)+${ux}\\cdot ${derV.startsWith("-") ? `\\left(${derV}\\right)` : derV}`, "on remplace par les résultats des étapes a et b"),
-  ];
   const second = simple ? fracK(q(s * e.m), "x", denArc(arc, carre)) : fracK(q(s * 2 * e.a * e.m), "x^{2}", denArc(arc, carre));
   const res = `${e.m}${NOM_ARC[arc]}\\left(${V}\\right)${second.startsWith("-") ? "" : "+"}${second}`;
-  fin.push(ligne(`=${res}`, simple ? "on multiplie" : "on multiplie : x · x = x²"));
+  const fin: LigneCalcul[] = [
+    ligne(`g(x)=${NOM_ARC[arc]}\\left(${V}\\right)`),
+    ligne(`f'(x)=u'(x)\\,g(x)+u(x)\\,g'(x)`, justif("règle du produit, ", { l: "(ug)'=u'g+ug'" })),
+    ligne(`u'(x)\\,g(x)=${e.m}${NOM_ARC[arc]}\\left(${V}\\right)`, "étape a"),
+    ligne(`u(x)\\,g'(x)=${ux}\\cdot ${derV.startsWith("-") ? `\\left(${derV}\\right)` : derV}`, "étape b"),
+    ligne(`=${second}`, simple ? "on multiplie" : "on multiplie : x · x = x²"),
+    ligne(`f'(x)=${res}`, "on additionne les deux termes"),
+  ];
   return [
     { ut: [texte(`u(x) est une fonction linéaire : sa dérivée est son coefficient ${COURS_DERIVEES}.`)], lignes: [ligne(`u(x)=${ux}`), ligne(`u'(x)=${e.m}`, "dérivée d'une fonction linéaire")], res: `u'(x)=${e.m}` },
     { ut: [texte("Règle de la chaîne : "), latex(DERIVEE_ARC_U[arc]), texte(` ${COURS_DERIVEES}.`)], lignes: lignesPropres(lignesArc), res: `\\left(${NOM_ARC[arc]}\\left(${V}\\right)\\right)'=${derV}`, pg: simple ? undefined : [texte("La règle de la chaîne fait apparaître le facteur "), latex(`v'(x)=${vp}`), texte(" au numérateur.")] },
@@ -316,18 +319,28 @@ function ecransD(e: Extract<E, { famille: "D" }>): Ecran[] {
   ];
   const Nn = `${NOM_ARC[haut]}\\left(${U}\\right)`;
   const Dd = `${NOM_ARC[bas]}\\left(${U}\\right)`;
-  // forme brute : a[arccos + arcsin] / (√(1−u²) · D²)
-  const brut = sinHaut ? `\\dfrac{${e.a === 1 ? "" : e.a}\\left[${Dd}+${Nn}\\right]}{${R}\\left(${Dd}\\right)^{2}}` : `-\\dfrac{${e.a === 1 ? "" : e.a}\\left[${Nn}+${Dd}\\right]}{${R}\\left(${Dd}\\right)^{2}}`;
+  // forme brute : a/√(1−u²) · (arccos + arcsin)/D², écrite en PRODUIT de deux fractions : la ligne se
+  // coupe au « · » (une seule fraction, insécable, débordait de la colonne à 680 px).
+  const Ds = `${NOM_ARC[bas]}(${U})`;
+  const somme = sinHaut ? `${Ds}+${NOM_ARC[haut]}(${U})` : `${NOM_ARC[haut]}(${U})+${Ds}`;
+  const brut = `${fracK(q(sinHaut ? e.a : -e.a), "", R)}\\cdot\\dfrac{${somme}}{(${Ds})^{2}}`;
   const lignesBrut: LigneCalcul[] = [
     ligne(`f'(x)=\\dfrac{N'(x)D(x)-N(x)D'(x)}{D(x)^{2}}`, justif("règle du quotient, ", { l: "\\left(\\dfrac{N}{D}\\right)'=\\dfrac{N'D-ND'}{D^{2}}" })),
-    ligne(`=\\dfrac{${nP}\\cdot ${Dd}-${Nn}\\cdot\\left(${dP}\\right)}{\\left(${Dd}\\right)^{2}}`, "on remplace par les étapes a et b"),
-    ligne(`=${brut}`, justif("on met ", { l: `\\dfrac{${e.a}}{${R}}` }, " en évidence au numérateur")),
+    ligne(`N'(x)\\,D(x)=${fracK(q(signeArc(haut) * e.a), Dd, R)}`, "étape a"),
+    ligne(`N(x)\\,D'(x)=${fracK(q(signeArc(bas) * e.a), Nn, R)}`, "étape b"),
+    // Lignes courtes (0 formule coupée ni débordement sur papier) : la racine est nommée R(x), la somme
+    // des arcfonctions S(x), D(x) garde son nom ; le Résultat encadré (pleine largeur) écrit
+    // l'expression complète.
+    ligne(`R(x)=${R}`, "on nomme la racine commune"),
+    ligne("S(x)=N(x)+D(x)", "on nomme la somme des deux arcfonctions"),
+    ligne(`N'(x)D(x)-N(x)D'(x)=${fracK(q(sinHaut ? e.a : -e.a), "", "R(x)")}\\,S(x)`, justif("on met ", { l: fracK(q(sinHaut ? e.a : -e.a), "", "R(x)") }, " en évidence")),
+    ligne(`f'(x)=${fracK(q(sinHaut ? e.a : -e.a), "S(x)", "R(x)\\,D(x)^{2}")}`, "on remplace dans la règle du quotient"),
   ];
-  const simpl = fracK(q(sinHaut ? e.a : -e.a, 2), "\\pi", `${R}\\left(${Dd}\\right)^{2}`);
+  const simpl = `${fracK(q(sinHaut ? e.a : -e.a, 2), "\\pi", R)}\\cdot\\dfrac{1}{(${Ds})^{2}}`;
   const lignesSimpl: LigneCalcul[] = [
     ligne(`${NOM_ARC.arcsin}\\left(${U}\\right)+${NOM_ARC.arccos}\\left(${U}\\right)=\\dfrac{\\pi}{2}`, "identité du cours"),
-    ligne(`f'(x)=${sinHaut ? "" : "-"}\\dfrac{${e.a === 1 ? "" : e.a}\\cdot\\dfrac{\\pi}{2}}{${R}\\left(${Dd}\\right)^{2}}`, "on remplace la somme par π/2"),
-    ligne(`=${simpl}`, "on simplifie la fraction"),
+    ligne(`S(x)=\\dfrac{\\pi}{2}`, "la somme de l'étape c"),
+    ligne(`f'(x)=${fracK(q(sinHaut ? e.a : -e.a, 2), "\\pi", "R(x)\\,D(x)^{2}")}`, "on remplace S(x) dans la forme brute de l'étape c et on simplifie"),
   ];
   return [
     { ut: [texte("Règle de la chaîne : "), latex(DERIVEE_ARC_U[haut]), texte(` ${COURS_DERIVEES}.`)], lignes: lignesPropres(lignesUn("N", haut, nP)), res: `N'(x)=${nP}` },
