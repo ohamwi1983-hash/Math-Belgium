@@ -34,6 +34,8 @@ export interface ConfigAppEcrans<E, P extends string> {
   genererVariante: (id: string) => E;
   /** Largeur maximale de la figure de l'énoncé (px). */
   largeurFigure?: number;
+  /** Nombre de puces affichées quand un cas particulier a moins d'écrans (structure fixe). */
+  nombrePuces?: number;
 }
 
 interface TransitionEnAttente<E, P extends string> {
@@ -189,6 +191,12 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
     if (etat.revelesPartiels[p]) return "revele";
     return aideParPhase[p] ? "aide" : "correcte";
   });
+  // Structure FIXE (cas particulier plus court) : puces « à venir », puis « sans objet » une fois
+  // le dernier écran validé — le nombre de puces ne trahit jamais le cas dès le premier écran.
+  if (config.nombrePuces && config.nombrePuces > phases.length) {
+    const fini = !!enAttente && indexPhase === phases.length - 1;
+    for (let i = phases.length; i < config.nombrePuces; i++) segments.push(fini ? "sans-objet" : "a-venir");
+  }
 
   const figure = def.figure?.(e, phase) ?? null;
   const tableau = def.tableau?.(e) ?? null;

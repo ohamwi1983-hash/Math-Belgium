@@ -1874,6 +1874,16 @@ export const trigonometrie: ChapterContent = {
             'horizontale $y = m$ avant de choisir l\'arc.',
         },
         {
+          kind: 'entrainement',
+          title: 'Inéquations trigonométriques',
+          generatorId: '5gen55',
+          description: [
+            'Résous dans [0 ; 2π[ une inéquation sin(ax + b) ou cos(ax + b) comparée à une valeur, parfois avec un coefficient à isoler (attention au sens quand il est négatif) : lis l\'arc solution sur le cercle, reviens à x en divisant aussi la période par a, puis écris les intervalles de la fenêtre avec leurs crochets.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 55. Inéquations trigonométriques »',
+        },
+        {
           kind: 'atelier',
           tag: 'modele-sinusoidal-widget',
           label: 'Manipule toi-même — construis le modèle pas à pas',
