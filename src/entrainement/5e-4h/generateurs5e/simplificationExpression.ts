@@ -200,11 +200,42 @@ function fusionnerAtomesRecursif(noeud: MathNode): MathNode {
   const coquille = extraireAtomes(noeud, atomes, atomesParTexte, { n: 0 });
   let rationalisee: MathNode;
   try {
-    rationalisee = remplacerDecimalesParFractions(math.rationalize(coquille.toString()));
+    rationalisee = quotientMemeDenominateur(coquille) ?? remplacerDecimalesParFractions(math.rationalize(coquille.toString()));
   } catch {
     rationalisee = coquille;
   }
   return substituerAtomes(rationalisee, atomes);
+}
+
+/** Division (sans les parenthèses qui l'entourent), sinon `null`. */
+function argumentsDivision(noeud: MathNode): [MathNode, MathNode] | null {
+  let n = noeud;
+  while (n.type === "ParenthesisNode") n = (n as unknown as NoeudParenthese).content;
+  const op = n as unknown as { type: string; fn?: string; args?: MathNode[] };
+  return op.type === "OperatorNode" && op.fn === "divide" && op.args ? [op.args[0], op.args[1]] : null;
+}
+
+/**
+ * « (A/D)/(B/D) » → « A/B » (5e ch. 1, corrigé détaillé) : `rationalize` sur le quotient entier
+ * multiplie numérateur ET dénominateur par D sans jamais simplifier — « (3√… + 12x + 36)/(−√… − 10x − 30) »
+ * sortait développé en « (−24x² − 6x√… − …)/(120x + 2x√… + …) », trop long pour l'écran et sans rapport
+ * avec le calcul au tableau. On regroupe chaque membre en une fraction ; même dénominateur (ou
+ * opposé) → on simplifie par lui. `null` si la forme ne s'y prête pas (chemin habituel).
+ */
+function quotientMemeDenominateur(coquille: MathNode): MathNode | null {
+  const division = argumentsDivision(coquille);
+  if (division === null) return null;
+  try {
+    const haut = argumentsDivision(remplacerDecimalesParFractions(math.rationalize(division[0].toString())));
+    const bas = argumentsDivision(remplacerDecimalesParFractions(math.rationalize(division[1].toString())));
+    if (haut === null || bas === null) return null;
+    const difference = (signe: string) => math.simplify(`(${haut[1].toString()}) ${signe} (${bas[1].toString()})`).toString();
+    if (difference("-") === "0") return new math.OperatorNode("/", "divide", [haut[0], bas[0]]);
+    if (difference("+") === "0") return new math.OperatorNode("/", "divide", [haut[0], math.parse(`-(${bas[0].toString()})`)]);
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 /**
