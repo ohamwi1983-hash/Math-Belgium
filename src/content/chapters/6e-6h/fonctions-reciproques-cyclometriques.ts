@@ -1282,6 +1282,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           domaines: ['Physique', 'Optique'],
         },
         {
+          kind: 'atelier',
+          tag: 'refraction-widget',
+          label: 'Manipule toi-même — réfraction et angle limite',
+          caption:
+            'Choisis les deux milieux et fais varier l\'angle d\'incidence θ₁. L\'angle ' +
+            'réfracté θ₂ se calcule avec arcsin, qui n\'existe que si n₁ sin θ₁ / n₂ ne ' +
+            'dépasse pas 1. Fais passer la lumière du verre vers l\'air : au-delà de l\'angle ' +
+            'limite, il n\'y a plus de rayon réfracté, c\'est la réflexion totale.',
+        },
+        {
           kind: 'entrainement',
           title: 'arcsin, arccos, arctan',
           generatorId: '6gen2',

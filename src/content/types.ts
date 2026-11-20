@@ -23,6 +23,7 @@ export type InteractiveWidgetTag =
   | 'equation-ce-widget'
   | 'transformees-arc-widget'
   | 'angle-de-vue-widget'
+  | 'refraction-widget'
   | 'discriminant-racines-widget'
   | 'signe-trinome-widget'
   | 'signe-produit-widget'

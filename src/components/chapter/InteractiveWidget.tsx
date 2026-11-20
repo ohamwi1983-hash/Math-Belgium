@@ -23,6 +23,7 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'equation-ce-widget': () => import('../../interactive/register-equation-ce-widget.js'),
   'transformees-arc-widget': () => import('../../interactive/register-transformees-arc-widget.js'),
   'angle-de-vue-widget': () => import('../../interactive/register-angle-de-vue-widget.js'),
+  'refraction-widget': () => import('../../interactive/register-refraction-widget.js'),
   'discriminant-racines-widget': () => import('../../interactive/register-discriminant-racines-widget.js'),
   'signe-trinome-widget': () => import('../../interactive/register-signe-trinome-widget.js'),
   'signe-produit-widget': () => import('../../interactive/register-signe-produit-widget.js'),
