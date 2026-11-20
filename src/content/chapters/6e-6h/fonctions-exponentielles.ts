@@ -324,6 +324,17 @@ export const fonctionsExponentielles: ChapterContent = {
             'autour de a=1.',
         },
         {
+          kind: 'entrainement',
+          title: 'Lire une courbe exponentielle',
+          generatorId: '6gen148',
+          description: [
+            'À partir du graphique de f(x) = k·aˣ + c, retrouve l\'asymptote, k (par f(0)), la base a ' +
+              '(par le rapport des écarts à l\'asymptote) et l\'expression de f.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 148. Lire une courbe exponentielle »',
+        },
+        {
           kind: 'astuce',
           label: '💡 Le cas de e',
           text:

@@ -42,7 +42,7 @@ export function demarrerSessionEcrans<E, P extends string>(def: DefinitionEcrans
 }
 
 export function niveauAideMaxEcran<E, P extends string>(def: DefinitionEcrans<E, P>, etat: EtatSessionEcrans<E, P>): number {
-  if (def.estChoix(etat.exerciceCourant, etat.phase)) return 1;
+  if (def.estChoix(etat.exerciceCourant, etat.phase)) return def.aidesChoixDeuxNiveaux && def.aide2(etat.exerciceCourant, etat.phase) ? 2 : 1;
   return def.aide2(etat.exerciceCourant, etat.phase) ? 2 : 1;
 }
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { Katex } from "../components/Katex";
+import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { AideEcran, Frag, LigneIntervalle, ModeEcran, TableauDonnees } from "../ui5e/ecransTrigo.types";
@@ -238,12 +239,15 @@ export function EtapeEcransTrigo({
             </div>
           )}
           {mode.champs.map((champ, k) => (
-            <div className="field" key={k}>
+            <div key={k}>
+              {champ.apercu && !gele && <ApercuExpressionLatex texte={valeurs[k + decalage]} label={champ.label} />}
+            <div className="field">
               <label className="field-label field-label-minuscule">
                 {champ.labelLatex ? <Katex expression={champ.labelLatex} /> : champ.label}
                 {champ.unite && <span> (en {champ.unite})</span>}
               </label>
               {saisie(k + decalage, champ.label, champ.placeholder)}
+            </div>
             </div>
           ))}
         </div>
