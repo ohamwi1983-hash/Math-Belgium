@@ -162,26 +162,8 @@ function etapeCE(e: E, sq: string): EtapeCorrection[] {
         ];
       }
       if (e.sousCas === "asin_atan") return [ut([texte(" ; arctan est définie sur ℝ")]), calcul(sq, lignesEncadrement(e.arg1)), res];
-      // acos_atan : −1 ≤ u ≤ 1 et u > 0 (arccos u doit être un angle de ]−π/2 ; π/2[)
-      return [
-        utilise(sq, [
-          texte("arccos n'est définie que sur "),
-          latex("[-1\\,;\\,1]"),
-          texte(" ; de plus "),
-          latex("\\arccos u"),
-          texte(" doit être une valeur de arctan, donc un angle de "),
-          latex(IMAGE_ARC.arctan),
-          texte(" : "),
-          latex("\\arccos u<\\dfrac{\\pi}{2}"),
-          texte(", c'est-à-dire "),
-          latex("u>0"),
-          texte(` ${COURS_EQUATIONS}.`),
-        ]),
-        calcul(sq, lignesEncadrement(e.arg1), [], "Domaine de arccos"),
-        calcul(sq, lignesSigne(e.arg1, true), [], "Argument strictement positif"),
-        calcul(sq, [ligne(`\\text{CE}=${ensembleL(e.ce)}`, "partie commune")], [], "Intersection"),
-        res,
-      ];
+      // acos_atan : seul le domaine de arccos (u > 0 relève de la condition de l'étape b)
+      return [ut([texte(" ; arctan est définie sur ℝ")]), calcul(sq, lignesEncadrement(e.arg1)), res];
     }
   }
 }
@@ -238,13 +220,19 @@ function etapeCondition(e: ExerciceArcfonctionsDifferentes, sq: string): EtapeCo
   return [
     utilise(sq, [
       texte("arccos u est un angle de "),
-      latex("\\left]0\\,;\\,\\dfrac{\\pi}{2}\\right]"),
-      texte(" (CE : u > 0) ; arctan v doit valoir cet angle, positif ou nul : v ≥ 0 "),
+      latex(IMAGE_ARC.arccos),
+      texte(", arctan v un angle de "),
+      latex(IMAGE_ARC.arctan),
+      texte(" : s'ils sont égaux, l'angle est dans "),
+      latex("\\left[0\\,;\\,\\dfrac{\\pi}{2}\\right["),
+      texte(", où le cosinus (u) est strictement positif et la tangente (v) positive ou nulle "),
       texte(`${COURS_EQUATIONS}.`),
     ]),
+    calcul(sq, lignesSigne(e.arg1, true), [], "Argument de arccos strictement positif"),
     calcul(sq, lignesSigne(e.arg2, false), [], "Argument de arctan positif"),
+    calcul(sq, [ligne(`x\\in ${ensembleL(e.conditionParasite)}`, "partie commune")], [], "Intersection"),
     res,
-    piege(sq, [texte("La condition u > 0 est déjà dans la CE : celle qui reste porte sur l'argument de arctan.")]),
+    piege(sq, [texte("La condition « u > 0 » ne fait pas partie de la CE (arccos est définie sur [−1 ; 1]) : elle vient de la compatibilité des deux images.")]),
   ];
 }
 

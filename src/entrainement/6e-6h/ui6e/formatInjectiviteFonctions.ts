@@ -125,7 +125,8 @@ export function aideDomaineNiveau2(exercice: ExerciceInjectiviteFonctions): Aide
         ? { texte: "Résous cette équation pour trouver la valeur exclue du domaine.", latex: `${formatAffineLatex(p.a, p.b)} = 0` }
         : { texte: "Il n'existe aucune valeur interdite : le domaine est ℝ tout entier.", latex: null };
     case "racineNieme":
-      if (p.n % 2 === 0) return { texte: "Résous cette inéquation pour trouver le domaine.", latex: `${formatAffineLatex(p.a, p.b)} \\geq 0` };
+      // n < 0 : la racine est au dénominateur, l'inégalité est stricte (audit du 6e ch. 1, E8).
+      if (p.n % 2 === 0) return { texte: "Résous cette inéquation pour trouver le domaine.", latex: `${formatAffineLatex(p.a, p.b)} ${p.n < 0 ? ">" : "\\geq"} 0` };
       if (p.n < 0) return { texte: "Résous cette équation pour trouver la valeur exclue du domaine.", latex: `${formatAffineLatex(p.a, p.b)} = 0` };
       return { texte: "Il n'existe aucune valeur interdite : le domaine est ℝ tout entier.", latex: null };
     case "puissanceMonome":
@@ -146,13 +147,19 @@ export function aideDomaineNiveau2(exercice: ExerciceInjectiviteFonctions): Aide
 
 export function texteAideOuiNonNiveau1(exercice: ExerciceInjectiviteFonctions): string {
   return exercice.injective
-    ? "Le graphique de f possède-t-il un axe de symétrie vertical ? Vérifie plutôt si f est strictement monotone (toujours croissante, ou toujours décroissante) sur tout son domaine."
+    ? exercice.domaine.forme === "prive_points"
+      ? "Le graphique de f possède-t-il un axe de symétrie vertical ? Regarde si f est strictement monotone sur chacun des intervalles de son domaine, et si ses images sur ces intervalles se chevauchent."
+      : "Le graphique de f possède-t-il un axe de symétrie vertical ? Vérifie plutôt si f est strictement monotone (toujours croissante, ou toujours décroissante) sur son domaine."
     : "Représente-toi le graphique de f : semble-t-il symétrique par rapport à une droite verticale x=... ? Si deux valeurs distinctes de x donnent la même image, f n'est pas injective.";
 }
 
 export function aideOuiNonNiveau2(exercice: ExerciceInjectiviteFonctions): AideAvecLatex {
   if (exercice.injective) {
-    return { texte: "f est strictement monotone sur tout son domaine (jamais de partie où elle stagne ou change de sens) : deux valeurs distinctes de x donnent donc toujours 2 images distinctes.", latex: null };
+    // Domaine troué (ℝ privé d'un point) : f n'est PAS monotone sur la réunion, seulement sur chacun
+    // des deux intervalles, dont les images ne se chevauchent pas (audit du 6e ch. 1, E6).
+    return exercice.domaine.forme === "prive_points"
+      ? { texte: "f est strictement monotone sur chacun des deux intervalles de son domaine, et ses images sur ces deux intervalles ne se chevauchent pas : deux valeurs distinctes de x donnent donc toujours deux images distinctes.", latex: null }
+      : { texte: "f est strictement monotone sur son domaine (jamais de partie où elle stagne ou change de sens) : deux valeurs distinctes de x donnent donc toujours deux images distinctes.", latex: null };
   }
   const pivot = approxFractionLatex(exercice.pivot as number);
   return { texte: `f est symétrique par rapport à la droite verticale d'équation :`, latex: `x = ${pivot}` };

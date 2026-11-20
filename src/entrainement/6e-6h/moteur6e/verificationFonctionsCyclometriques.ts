@@ -10,6 +10,14 @@ import { evaluerValeurCyclometrique } from "./expressionCyclometrique";
  */
 const TOLERANCE = 0.001;
 
+/** « Donne sa valeur EXACTE » (consigne) : une écriture décimale (« 1,047 ») ou une fonction
+ * trigonométrique / cyclométrique recopiée (« arccos(1/2) ») n'est pas une valeur exacte — audit
+ * du 6e ch. 1 (E5) : elles étaient acceptées par la seule tolérance numérique. */
+export function estFormeExacte(texte: string): boolean {
+  if (/\d\s*[.,]\s*\d/.test(texte)) return false;
+  return !/(arc|a)?(sin|cos|tan)/i.test(texte);
+}
+
 /** "N'existe pas" est une réponse correcte À PART ENTIÈRE quand `exercice.existe===false`, jamais
  * une variante de "faux" (même principe que 5gen4 / l'ancien écran "appliquerArc" de ce même
  * générateur). */
@@ -24,7 +32,7 @@ export function verifierReponseFonctionsCyclometriques(exercice: ExerciceFonctio
   if (!exercice.existe) return true;
   if (reponse.texte === null) return false;
   const v = evaluerValeurCyclometrique(reponse.texte);
-  return v !== null && Math.abs(v - (exercice.valeurNumerique as number)) <= TOLERANCE;
+  return v !== null && estFormeExacte(reponse.texte) && Math.abs(v - (exercice.valeurNumerique as number)) <= TOLERANCE;
 }
 
 /** Statut à 3 valeurs (convention CLAUDE.md) sur le SEUL champ de saisie libre de l'écran (le champ
@@ -36,5 +44,5 @@ export function diagnostiquerValeurFonctionsCyclometriques(exercice: ExerciceFon
   const v = evaluerValeurCyclometrique(texte);
   if (v === null) return "parse_error";
   if (!exercice.existe) return "not_equivalent"; // l'élève a choisi "Existe" alors que ce n'est pas le cas — jamais "correct"
-  return Math.abs(v - (exercice.valeurNumerique as number)) <= TOLERANCE ? "correct" : "not_equivalent";
+  return estFormeExacte(texte) && Math.abs(v - (exercice.valeurNumerique as number)) <= TOLERANCE ? "correct" : "not_equivalent";
 }

@@ -67,7 +67,7 @@ export function aideNiveau1(exercice: ExerciceFonctionsCyclometriques): AideAvec
       const base = phraseDomaine(exercice.arcfonction, "ce nombre");
       if (!aUneSecondeCondition(exercice)) return { texte: base, latex: null };
       return {
-        texte: `${base} Si ce nombre est valide, vérifie ENSUITE si l'angle obtenu (${NOM_FRANCAIS[exercice.arcfonction]}(nombre)) vaut exactement π/2 : la tangente n'y est pas définie à cet angle.`,
+        texte: `${base} Si ce nombre est valide, vérifie ENSUITE si l'angle obtenu (${NOM_FRANCAIS[exercice.arcfonction]}(nombre)) vaut π/2 ou −π/2 : la tangente n'y est pas définie.`,
         latex: null,
       };
     }
@@ -97,7 +97,7 @@ export function aideNiveau2(exercice: ExerciceFonctionsCyclometriques): AideAvec
       }
       // à partir d'ici, le nombre de départ est DANS le domaine.
       if (aUneSecondeCondition(exercice)) {
-        const dans = exercice.causeInexistence === "anglePiSur2" ? "vaut exactement π/2 : la tangente n'y est pas définie" : "ne vaut PAS π/2 : la tangente y est bien définie";
+        const dans = exercice.causeInexistence === "anglePiSur2" ? "vaut π/2 ou −π/2 : la tangente n'y est pas définie" : "ne vaut ni π/2 ni −π/2 : la tangente y est bien définie";
         return { texte: `Le nombre de départ appartient bien au domaine — et l'angle intermédiaire obtenu ${dans}.`, latex: null };
       }
       if (exercice.arcfonction === "arctan") return { texte: "arctan est toujours définie, quelle que soit la valeur de départ : la condition est automatiquement vérifiée.", latex: null };
