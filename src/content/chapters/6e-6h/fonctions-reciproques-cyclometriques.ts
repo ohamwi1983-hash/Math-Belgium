@@ -1912,6 +1912,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'entrainement',
+          title: 'Lire une transformée c + k·arc(mx + n)',
+          generatorId: '6gen158',
+          description: [
+            'Sur une grille aux multiples de π/4 : lis le domaine et l\'image d\'une transformée d\'arcsin, ' +
+              'arccos ou arctan, puis retrouve m, n, k, c et l\'expression.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 158. Lire une transformée c + k·arc(mx + n) »',
+        },
+        {
+          kind: 'entrainement',
           title: 'Étude d\'une fonction cyclométrique',
           generatorId: '6gen157',
           description: [
