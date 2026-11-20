@@ -57,7 +57,7 @@ function bareme(e: E): BaremeExercice {
       { description: [texte("Carré développé sans le double produit ("), latex("(x-p)^2=x^2-p^2"), texte(" ou "), latex("x^2+p^2"), texte(")")], cout: "0 pt sur a)" },
       { description: [texte("a non multiplié par le terme constant du carré")], cout: "−0,5" },
       z.length === 2
-        ? { description: [texte("Une seule racine carrée gardée, ou x_S oublié (valeurs de x − x_S données comme zéros)")], cout: "moitié des points de b)" }
+        ? { description: [texte("Une seule racine carrée gardée, ou "), latex("x_S"), texte(" oublié (valeurs de "), latex("x-x_S"), texte(" données comme zéros)")], cout: "moitié des points de b)" }
         : { description: [texte("Racine carrée d'un nombre négatif « calculée », ou conclusion sans justification")], cout: "0 pt sur b)" },
     ];
     if (z.length === 2) erreurs.push({ description: [texte("Facteurs (x + r) au lieu de (x − r), ou a oublié devant le produit")], cout: "0 pt sur c)" });

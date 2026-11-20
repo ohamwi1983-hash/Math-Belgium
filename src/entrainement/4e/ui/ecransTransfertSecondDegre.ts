@@ -82,6 +82,8 @@ export interface ChampRelation extends ChampBase {
 export interface ChampEnsemble extends ChampBase {
   type: "ensemble";
   variable: Variable;
+  /** Préfixe LaTeX de l'aperçu et de la réponse affichée (défaut « S= ») — gen127 : « \operatorname{im} f= ». */
+  prefixeApercu?: string;
   cible: Ensemble;
   pieges: { ensemble: Ensemble; message: string }[];
 }

@@ -33,7 +33,7 @@ export function saisieInitiale(c: Champ): Saisie {
 export function saisieAffichee(saisie: Saisie, c: Champ): ReactNode {
   if (typeof saisie !== "string") {
     const e = lireEnsemble(saisie);
-    return e ? <Katex expression={`S=${ensembleLatex(e)}`} /> : "—";
+    return e ? <Katex expression={`${c.type === "ensemble" && c.prefixeApercu ? c.prefixeApercu : "S="}${ensembleLatex(e)}`} /> : "—";
   }
   if (c.type === "nombre" || c.type === "liste") return saisie.trim().replace(/-/g, "−").replace(/(\d)\.(\d)/g, "$1,$2");
   return saisieEnLatex(normaliserExpression(saisie));
@@ -127,7 +127,7 @@ function ChampEnsembleSaisie({ champ, valeur, onChange, erronee, fige }: { champ
       )}
       {apercu && (
         <p style={{ margin: "8px 0 0" }}>
-          <Katex expression={`${champ.type === "ensemble" && champ.variable !== "x" ? `${champ.variable}\\in ` : "S="}${ensembleLatex(apercu)}`} />
+          <Katex expression={`${champ.type === "ensemble" && champ.prefixeApercu ? champ.prefixeApercu : champ.type === "ensemble" && champ.variable !== "x" ? `${champ.variable}\\in ` : "S="}${ensembleLatex(apercu)}`} />
         </p>
       )}
     </div>

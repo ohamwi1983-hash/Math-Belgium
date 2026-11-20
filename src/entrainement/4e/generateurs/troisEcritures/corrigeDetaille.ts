@@ -132,7 +132,7 @@ function etapesDepuisDeveloppee(e: E): EtapeCorrection[] {
     piege("b", [texte("Le nombre "), latex(`-${q(h * h)}`), texte(" sorti du crochet est multiplié par a : "), latex(`${qp(a)}\\cdot(-${q(h * h)})=${q(-a * h * h)}`), texte(", et non "), latex(`-${q(h * h)}`), texte(".")]),
     utilise("c", [texte("La forme canonique "), latex("a(x-x_S)^2+y_S"), texte(" donne directement le sommet "), latex("S(x_S\\,;y_S)"), texte(` ${COURS_TRANSFORMER}.`)]),
     calcul("c", [
-      ...(h < 0 ? [ligne(`${moinsH(h)}=x-(${q(h)})`, "on écrit la parenthèse sous la forme x − x_S")] : []),
+      ...(h < 0 ? [ligne(`${moinsH(h)}=x-(${q(h)})`, [texte("on écrit la parenthèse sous la forme "), latex("x-x_S")])] : []),
       ligne(`x_S=${q(h)}`, "le nombre soustrait à x dans la parenthèse"),
       ligne(`y_S=${q(k)}`, "la constante ajoutée au carré"),
     ]),

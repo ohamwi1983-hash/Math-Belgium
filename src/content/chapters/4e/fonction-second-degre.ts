@@ -1292,6 +1292,19 @@ export const fonctionSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 60. Quiz vrai/faux — La fonction du second degré »',
         },
+        {
+          kind: 'entrainement',
+          title: "Détective d'erreurs : fonction du second degré",
+          generatorId: 'gen127',
+          description: [
+            'Un élève a cherché un sommet, une forme canonique, une image ou un maximum, et une ' +
+              'ligne de sa copie est fausse : trouve-la, nomme l\'erreur (b recopié sans son signe, ' +
+              '« − » de la formule oublié, nombre non multiplié par a, (x + 2)² lu S(2 ; …), image ' +
+              'avec l\'abscisse du sommet, sommet hors du domaine…), puis donne le résultat correct.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 127. Détective d\'erreurs : fonction du second degré »',
+        },
       ],
     },
   ],
