@@ -262,6 +262,18 @@ export const fonctionSecondDegre: ChapterContent = {
             'Le signe de b ne se lit **jamais seul** : il dépend aussi de a. Un axe à gauche donne ' +
             '$b > 0$ si $a > 0$, mais $b < 0$ si $a < 0$.',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lire une parabole sur un graphique',
+          generatorId: 'gen123',
+          description: [
+            'Une parabole est tracée sur un quadrillage : retrouve les signes de a, b et c avec les ' +
+              'trois lectures du cours, puis lis le sommet et l’axe de symétrie, les zéros, ' +
+              'l’ordonnée à l’origine et l’image de la fonction.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 123. Lire une parabole sur un graphique »',
+        },
         { kind: 'subheading', text: "Reconnaître une fonction à partir d'un tableau de valeurs" },
         {
           kind: 'para',
@@ -313,6 +325,18 @@ export const fonctionSecondDegre: ChapterContent = {
             'constantes signalent une fonction du premier degré ; des différences secondes ' +
             'constantes, une fonction du second degré. Dans ce cas, la différence seconde ' +
             'vaut 2a, ce qui permet de retrouver a, puis b et c.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Premier ou second degré ? Différences secondes',
+          generatorId: 'gen124',
+          description: [
+            'Un tableau de valeurs : calcule les différences premières, puis secondes, décide si la ' +
+              'fonction est du premier degré, du second degré ou ni l’un ni l’autre, et retrouve son ' +
+              'expression (la différence seconde vaut 2a, c = f(0), f(1) = a + b + c).',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 124. Premier ou second degré ? Différences secondes »',
         },
         { kind: 'subheading', text: 'Sommet et axe de symétrie' },
         {
@@ -1288,6 +1312,18 @@ export const fonctionSecondDegre: ChapterContent = {
             'Un sommet (ou deux zéros) et un point suffisent pour retrouver l\'équation ' +
             'd\'une parabole : suis le calcul de a pas à pas. En mode Défi, lis S et P sur ' +
             'le quadrillage et trouve a du premier coup.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Retrouver l’équation d’une parabole',
+          generatorId: 'gen125',
+          description: [
+            'Un sommet et un point, deux zéros et un point, trois points ou une parabole tracée : ' +
+              'choisis la forme de départ (canonique, factorisée ou développée), calcule a (ou a et b ' +
+              'par un système), puis écris l’équation sous forme développée.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 125. Retrouver l’équation d’une parabole »',
         },
         {
           kind: 'entrainement',

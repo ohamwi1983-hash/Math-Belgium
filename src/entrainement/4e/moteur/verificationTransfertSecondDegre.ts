@@ -301,7 +301,9 @@ function diagListe(saisie: string, c: ChampListe): StatutChamp {
 }
 
 function diagExpression(saisie: string, c: ChampExpression): StatutChamp {
-  const l = lirePolynome(saisie, c.variable);
+  // « f(x) = … » ou « y = … » recopié devant l'expression (gen125) : préfixe ignoré.
+  const sansPrefixeFonction = saisie.replace(new RegExp(`^\\s*(?:[a-zA-Z]\\s*\\(\\s*${c.variable}\\s*\\)|y)\\s*=\\s*`), "");
+  const l = lirePolynome(sansPrefixeFonction, c.variable);
   if ("erreur" in l) return statutLecture(l.erreur);
   if (egauxPoly(l.poly, c.cible)) return { etat: "correct" };
   const p = c.pieges.find((x) => egauxPoly(l.poly, x.poly));

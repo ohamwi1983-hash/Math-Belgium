@@ -93,6 +93,8 @@ export type EcranTSD =
       bonne: number;
       aides: Fragments[];
       messageFaux: string;
+      /** Message ciblé par option fausse (même ordre que `options`), sinon `messageFaux`. */
+      messagesOptions?: (string | undefined)[];
       /** Figure SVG autonome affichée avec l'écran (jamais une figure qui trahit la réponse). */
       figure?: string;
       /** Figure montrée seulement une fois l'écran clos. */

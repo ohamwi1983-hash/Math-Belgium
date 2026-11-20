@@ -896,3 +896,26 @@ scientifique comprise ; candidats de 6gen144 = solutions de la copie corrigée) 
 ≈ 14 500 égalités, ≈ 1 700 relations, 0 fausse. Documents réels (`construirePlan`, évaluation 2 séries
 + aménagée + feuille, calculatrice interdite / autorisée) : 0 débordement à 680, 820 et 1 280 px,
 0 `.katex-error`, groupes : verdict de B ≠ A ; QR `?code=` 25 / 25 identiques.
+## 4e ch. 1, lot H — gen123–gen125 (nouveaux, notés)
+
+Corrigés `4e/generateurs/{lectureParabole,differencesSecondes,equationParabolePoints}/corrigeDetaille.ts`
+(partagés avec l'appli, une lettre par écran). **gen123** (Connaître) : a) a, puis `c=f(0)=…>0`, puis
+`x_S=…<0`, `-\dfrac{b}{2a}<0`, `\dfrac{b}{2a}>0`, `b<0` (règle du cours) ; b) `x_S`, `y_S`, `x=…`,
+vérification `f(x_S−2)=f(x_S+2)` ; c) `f(z)=0` par zéro (ou `y_S>0` « ne coupe jamais »), `f(0)=c`,
+milieu des zéros ; d) image, figure annotée (S, zéros, (0 ; c), axe). Énoncé papier = figure + consigne
+globale ; lectures b, c, d → niveau 1, 7 min (constants : le nombre de zéros est le verdict,
+`groupe_zeros`). **gen124** : une ligne par différence `d_1=f(1)-f(0)=5-2=3`, puis `s_1=d_2-d_1=…`,
+tableau en escalier (SVG, `tableauSvg(e, 2)`) en figure ; verdict testé (`d_j\neq d_{j+1}`,
+`s_1=s_2=s_3`, `s_1\neq 0`) ; `2a=s`, `a`, `c=f(0)`, `a+b+c=f(1)` résolu ligne à ligne, vérification sur
+la dernière valeur. Variantes second / premier / aucun dans `groupe_degre` (a demi-entier = issue à 40 %
+dans « second » : deux variantes « second » donnaient le même verdict en A et B dans 7 plans sur 30) ;
+niveau 2, 10 min CONSTANTS (`sansCharge`, comme gen74). **gen125** : données une par ligne, forme de
+départ ; a par P une opération par ligne, ou système (1) B, (2) C, (1) × x₂, soustraction (b disparaît),
+a, b par substitution ; développement ligne à ligne, vérification par un point ; énoncé papier = données
+(ou figure, P marqué) avec la consigne, aucune question. Méthode 0 (sommet, zéros) / 1 (graphique, trois
+points) → niveaux 2–3, 8 min ; pas de groupe à verdict (la forme découle des données ; en « graphique »,
+sommet ou zéros lisibles tiré 50/50, hors `forme`). Mesures : moteurs 2 000 tirages par variante
+(réponses recalculées depuis les données, écritures équivalentes, « − – — », illisible) 0 erreur ;
+collecteur (outils de `corrige-4e2-m1`, relations =, <, >, ≠ évaluées) 1 300 tirages, ≈ 35 000
+relations, 0 fausse ; plans réels (1 question, 30 × 2 séries) verdict B ≠ A 30/30 (gen123, gen124) ;
+documents (feuille, évaluation 2 séries, aménagée) 0 débordement à 680 et 1 280 px, 0 `.katex-error`.
