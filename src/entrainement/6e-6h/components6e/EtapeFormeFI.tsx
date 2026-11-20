@@ -33,10 +33,13 @@ interface Props extends PropsRetourChamp<CategorieFI> {
   validation?: ValidationEtapeProps | null;
 }
 
+/** Mêmes cinq options sur chaque écran « forme » (B, C, H–K) : l'écran ne trahit pas le verdict. */
 const OPTIONS: { id: CategorieFI; label: string }[] = [
-  { id: "zero_sur_zero", label: "0/0" },
-  { id: "infini_sur_infini", label: "∞/∞" },
-  { id: "pas_une_fi", label: "Pas une FI" },
+  { id: "zero_sur_zero", label: "\\dfrac{0}{0}" },
+  { id: "infini_sur_infini", label: "\\dfrac{\\infty}{\\infty}" },
+  { id: "zero_fois_infini", label: "0\\cdot\\infty" },
+  { id: "infini_moins_infini", label: "\\infty-\\infty" },
+  { id: "pas_une_fi", label: "\\text{Pas une forme indéterminée}" },
 ];
 
 /** Écran de diagnostic AVANT toute dérivation, partagé par les familles L'Hôpital (H/I/J/K,
@@ -69,7 +72,7 @@ export function EtapeFormeFI({ consigneEcran, enonceLatex, aideNiveau1, aideNive
             className={`btn ${choix === o.id ? "toggle-active" : ""} ${montrerErreurs && choix === o.id ? "is-erronee" : ""}`}
             onClick={() => setChoix(o.id)}
           >
-            {o.label}
+            <Katex expression={o.label} />
           </button>
         ))}
       </div>

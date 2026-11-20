@@ -25,6 +25,8 @@ interface Props extends PropsRetourChamp<string> {
   enonceLatex: string;
   optionGauche: Option;
   optionDroite: Option;
+  /** Troisième option facultative (écrans de verdict : aucune solution / ℝ / à résoudre). */
+  optionTroisieme?: Option;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -47,7 +49,7 @@ interface Props extends PropsRetourChamp<string> {
  * PARAMÉTRÉS par l'appelant (`optionGauche`/`optionDroite`) — chaque famille pose une question
  * différente, jamais le même texte de bouton. `App6gen10.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChoixDeuxIneqExpo({ consigneEcran, enonceLatex, optionGauche, optionDroite, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, messageIllisible, cible}: Props) {
+export function EtapeChoixDeuxIneqExpo({ consigneEcran, enonceLatex, optionGauche, optionDroite, optionTroisieme, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, messageIllisible, cible}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const retour = useTentativeLisible<string>();
@@ -86,6 +88,15 @@ export function EtapeChoixDeuxIneqExpo({ consigneEcran, enonceLatex, optionGauch
         >
           {optionDroite.label}
         </button>
+        {optionTroisieme && (
+          <button
+            type="button"
+            className={`btn ${choix === optionTroisieme.id ? "toggle-active" : ""} ${montrerErreurs && choix === optionTroisieme.id ? "is-erronee" : ""}`}
+            onClick={() => setChoix(optionTroisieme.id)}
+          >
+            {optionTroisieme.label}
+          </button>
+        )}
       </div>
 
       <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />

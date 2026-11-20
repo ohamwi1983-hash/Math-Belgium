@@ -2,12 +2,12 @@ import type { ExerciceLimiteExponentielle } from "../core6e/limitesExponentielle
 import { phaseApres, phaseInitiale } from "../moteur6e/typesLimitesExponentielles";
 import type { EtatSessionLimiteExponentielle, PhaseLimiteExponentielle } from "../moteur6e/typesLimitesExponentielles";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { formatCibleTexte, formatLimiteFinaleLatex } from "./formatLimitesExponentielles";
+import { formatCibleTexte, formatLimiteFinaleLatex, formeAttendue, formeLatex } from "./formatLimitesExponentielles";
 
 /**
  * Libellés courts du récapitulatif "Ce qu'on sait déjà", famille par famille — `6gen6` n'a (contrairement
  * à `equationsExpLog`/`6gen14`) ni `LIBELLE_PHASE` ni `PHASES_PAR_FAMILLE` préexistants : les 10 familles
- * (A, B, C, G, H, I, J, K, L, N) sont STRUCTURELLEMENT DISJOINTES (voir `typesLimitesExponentielles.ts`),
+ * (A, B, C, H, I, J, K, L, N) sont STRUCTURELLEMENT DISJOINTES (voir `typesLimitesExponentielles.ts`),
  * `Record<PhaseLimiteExponentielle, string>` ci-dessous est donc construit ici, exhaustivité garantie par
  * TypeScript (`Record` complet, jamais de `Partial`/cast).
  */
@@ -19,16 +19,13 @@ export const LIBELLE_PHASE: Record<PhaseLimiteExponentielle, string> = {
   // Famille B — 3 écrans.
   bExponentielle: "Limite du terme exponentiel",
   bPolynomiale: "Limite du terme polynomial",
+  bForme: "Forme de la limite",
   bGlobale: "Limite globale",
 
   // Famille C — 2 écrans.
   cFacteurs: "Limites des deux facteurs",
-  cGlobale: "Limite du produit",
-
-  // Famille G — 3 écrans (instance unique).
-  gCombiner: "Fraction combinée",
-  gOrdre1: "Ordre 1 suffisant ?",
-  gConclure: "Limite finale",
+  cForme: "Forme de la limite",
+  cGlobale: "Limite finale",
 
   // Famille H — 4 écrans (L'Hôpital, une application, 0/0 pur exponentiel).
   hForme: "Forme indéterminée",
@@ -93,20 +90,17 @@ function valeurPhase(exercice: ExerciceLimiteExponentielle, phase: PhaseLimiteEx
     if (phase === "bExponentielle") return { valeur: formatCibleTexte(exercice.limiteExponentielle), estLatex: true };
     if (phase === "bPolynomiale") return { valeur: formatCibleTexte(exercice.limitePolynomiale), estLatex: true };
     if (phase === "bGlobale") return { valeur: formatCibleTexte(exercice.limiteGlobale), estLatex: true };
+    if (phase === "bForme") return { valeur: formeLatex(formeAttendue(exercice, phase) ?? "pas_une_fi"), estLatex: true };
   }
   if (exercice.famille === "C") {
     if (phase === "cFacteurs") {
       return { valeur: `${formatCibleTexte(exercice.limiteFacteur1)} \\quad , \\quad ${formatCibleTexte(exercice.limiteFacteur2)}`, estLatex: true };
     }
     if (phase === "cGlobale") return { valeur: String(exercice.limiteGlobale), estLatex: true };
-  }
-  if (exercice.famille === "G") {
-    if (phase === "gCombiner") return { valeur: "Les deux termes combinés en une seule fraction, équivalente à f(x).", estLatex: false };
-    if (phase === "gOrdre1") return { valeur: "Non — un développement à l'ordre 1 ne suffit pas ici (les termes dominants s'annulent).", estLatex: false };
-    if (phase === "gConclure") return { valeur: formatLimiteFinaleLatex(exercice), estLatex: true };
+    if (phase === "cForme") return { valeur: formeLatex(formeAttendue(exercice, phase) ?? "pas_une_fi"), estLatex: true };
   }
   if (exercice.famille === "H") {
-    if (phase === "hForme") return { valeur: "0/0", estLatex: false };
+    if (phase === "hForme") return { valeur: formeLatex("zero_sur_zero"), estLatex: true };
     if (phase === "hNumerateur") {
       return exercice.expAuNumerateur
         ? { valeur: "Forme équivalente à f'(x), vérifiée par équivalence numérique.", estLatex: false }
@@ -120,19 +114,19 @@ function valeurPhase(exercice: ExerciceLimiteExponentielle, phase: PhaseLimiteEx
     if (phase === "hConclure") return { valeur: formatLimiteFinaleLatex(exercice), estLatex: true };
   }
   if (exercice.famille === "I") {
-    if (phase === "iForme") return { valeur: "0/0", estLatex: false };
+    if (phase === "iForme") return { valeur: formeLatex("zero_sur_zero"), estLatex: true };
     if (phase === "iNumerateur") return { valeur: "Forme équivalente à f'(x), vérifiée par équivalence numérique.", estLatex: false };
     if (phase === "iDenominateur") return { valeur: "Forme équivalente à g'(x), vérifiée par équivalence numérique.", estLatex: false };
     if (phase === "iConclure") return { valeur: formatLimiteFinaleLatex(exercice), estLatex: true };
   }
   if (exercice.famille === "J") {
-    if (phase === "jForme") return { valeur: "0/0", estLatex: false };
+    if (phase === "jForme") return { valeur: formeLatex("zero_sur_zero"), estLatex: true };
     if (phase === "jNumerateur") return { valeur: "Forme équivalente à f'(x), vérifiée par équivalence numérique.", estLatex: false };
     if (phase === "jDenominateur") return { valeur: "Forme équivalente à g'(x), vérifiée par équivalence numérique.", estLatex: false };
     if (phase === "jConclure") return { valeur: formatLimiteFinaleLatex(exercice), estLatex: true };
   }
   if (exercice.famille === "K") {
-    if (phase === "kForme") return { valeur: "0/0", estLatex: false };
+    if (phase === "kForme") return { valeur: formeLatex("zero_sur_zero"), estLatex: true };
     if (phase === "kNumerateur1") return { valeur: "Forme équivalente à f'(x), vérifiée par équivalence numérique.", estLatex: false };
     if (phase === "kDenominateur1") return { valeur: "Forme équivalente à g'(x), vérifiée par équivalence numérique.", estLatex: false };
     if (phase === "kNumerateur2") {

@@ -13,9 +13,7 @@ import {
   soumettreReponseBPolynomiale,
   soumettreReponseCFacteurs,
   soumettreReponseCGlobale,
-  soumettreReponseGCombiner,
-  soumettreReponseGConclure,
-  soumettreReponseGOrdre1,
+  soumettreReponseFormeBC,
   soumettreReponseHConclure,
   soumettreReponseHDenominateur,
   soumettreReponseHForme,
@@ -46,14 +44,13 @@ import type { CategorieFI } from "./core6e/limitesExponentielles.types";
 import { EtapeChampLimiteExpo } from "./components6e/EtapeChampLimiteExpo";
 import { EtapeFacteursC } from "./components6e/EtapeFacteursC";
 import { EtapeFormeFI } from "./components6e/EtapeFormeFI";
-import { EtapeOrdre1G } from "./components6e/EtapeOrdre1G";
 import { EtapeReponseLimite } from "./components6e/EtapeReponseLimite";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { correctionDetailleeLimitesExponentielles, reponseAttendueLimitesExpoLatex, sequenceLimitesExponentielles } from "./generateurs6e/limitesExponentielles/corrigeDetaille";
+import { correctionDetailleeLimitesExponentielles, lettrePhaseLimitesExpo, reponseAttendueLimitesExpoLatex } from "./generateurs6e/limitesExponentielles/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
-import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import { Katex } from "./components/Katex";
-import { aideNiveau1, aideNiveau2, consigneEcran, formatCibleTexte, formatLimiteEnonceLatex } from "./ui6e/formatLimitesExponentielles";
+import { aideNiveau1, aideNiveau2, consigneEcran, facteursCLatex, formatCibleTexte, formatLimiteEnonceLatex, formeAttendue, formeLatex } from "./ui6e/formatLimitesExponentielles";
 import { calculerRecapitulatifLimitesExponentielles, calculerSegmentsProgressionLimitesExponentielles } from "./ui6e/recapitulatifLimitesExponentielles";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -115,7 +112,7 @@ function formatReponseLimiteTexte(r: ReponseLimite): string {
 }
 
 function formatCategorieFITexte(c: CategorieFI): string {
-  return c === "zero_sur_zero" ? "0/0" : c === "infini_sur_infini" ? "∞/∞" : "Pas une FI";
+  return { zero_sur_zero: "0 sur 0", infini_sur_infini: "∞ sur ∞", zero_fois_infini: "0 · ∞", infini_moins_infini: "∞ − ∞", pas_une_fi: "Pas une forme indéterminée" }[c];
 }
 
 export function App6gen6() {
@@ -231,8 +228,8 @@ export function App6gen6() {
     // Réponse attendue = « Résultat » du corrigé détaillé de l'écran (même source que le papier) :
     // valeurs EXACTES (« -\dfrac{2}{3}\ln(3) \approx -0{,}7324 »), dérivées écrites — plus de flottant
     // brut ni de « forme équivalente, vérifiée par équivalence numérique ».
-    if (phase === "hForme" || phase === "iForme" || phase === "jForme" || phase === "kForme") return <Katex expression={"\\text{forme } \\dfrac{0}{0}"} />;
-    if (phase === "gOrdre1") return "Non — à l'ordre 1, les termes dominants s'annulent : il faut l'ordre 2.";
+    const forme = formeAttendue(exercice, phase);
+    if (forme) return <Katex expression={forme === "pas_une_fi" ? formeLatex(forme) : `\\text{forme } ${formeLatex(forme)}`} />;
     if (exercice.famille === "C" && phase === "cFacteurs")
       return <Katex expression={`${formatCibleTexte(exercice.limiteFacteur1)} \\quad , \\quad ${formatCibleTexte(exercice.limiteFacteur2)}`} />;
     const l = reponseAttendueLimitesExpoLatex(exercice, phase);
@@ -241,7 +238,7 @@ export function App6gen6() {
 
   // Corrigé détaillé « comme au tableau » de l'écran (source unique avec le papier,
   // `limitesExponentielles/corrigeDetaille.ts`), affiché sous la réponse attendue.
-  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLimitesExponentielles(exercice), lettreEtape(sequenceLimitesExponentielles(exercice).indexOf(phase)))} />;
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLimitesExponentielles(exercice), lettrePhaseLimitesExpo(exercice, phase))} />;
 
   const validation = enAttente
     ? {
@@ -267,7 +264,7 @@ export function App6gen6() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Calcul de limites (fonctions exponentielles)</h1>
         <p className="app-subtitle">Chapitre 2 — Fonctions exponentielles</p>
-        <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <SelecteurVarianteDev options={CATALOGUE_FAMILLES.filter((v) => !v.retiree)} onGenerer={forcerVariante} />
         <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
@@ -319,6 +316,22 @@ export function App6gen6() {
                   validation={validation}
                 />
               )}
+              {(phase === "bForme" || phase === "cForme") && (
+                <EtapeFormeFI
+                  key={cle}
+                  consigneEcran={consigne}
+                  enonceLatex={enonceLatex}
+                  aideNiveau1={aide1}
+                  aideNiveau2={aide2}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={niveauAide}
+                  niveauAideMax={NIVEAU_AIDE_MAX}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseFormeBC(etat, reponse), formatCategorieFITexte(reponse))}
+                  validation={validation}
+                />
+              )}
               {(phase === "bPolynomiale" || phase === "bGlobale") && (
                 <EtapeReponseLimite
                   key={cle}
@@ -348,7 +361,7 @@ export function App6gen6() {
               {phase === "cFacteurs" && (
                 <EtapeFacteursC
                   key={cle}
-                  labelsFacteurs={exercice.famille === "C" ? [exercice.r === 1 ? "x" : `x^{${exercice.r}}`, `e^{-x^{${exercice.s}}}`] : ["x", "x"]}
+                  labelsFacteurs={exercice.famille === "C" ? facteursCLatex(exercice) : ["x", "x"]}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
@@ -381,57 +394,6 @@ export function App6gen6() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseCGlobale(etat, texte), texte)}
-                  validation={validation}
-                />
-              )}
-
-              {phase === "gCombiner" && (
-                <EtapeChampLimiteExpo
-                  key={cle}
-                  {...retourChamp}
-                  consigneEcran={consigne}
-                  enonceLatex={enonceLatex}
-                  aideNiveau1={aide1}
-                  aideNiveau2={aide2}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseGCombiner(etat, texte), texte)}
-                  validation={validation}
-                />
-              )}
-              {phase === "gOrdre1" && (
-                <EtapeOrdre1G
-                  key={cle}
-                  consigneEcran={consigne}
-                  enonceLatex={enonceLatex}
-                  aideNiveau1={aide1}
-                  aideNiveau2={aide2}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(ordre1Suffit) => terminerEtape(soumettreReponseGOrdre1(etat, ordre1Suffit), ordre1Suffit ? "Oui" : "Non")}
-                  validation={validation}
-                />
-              )}
-              {phase === "gConclure" && (
-                <EtapeChampLimiteExpo
-                  key={cle}
-                  {...retourChamp}
-                  consigneEcran={consigne}
-                  enonceLatex={enonceLatex}
-                  aideNiveau1={aide1}
-                  aideNiveau2={aide2}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseGConclure(etat, texte), texte)}
                   validation={validation}
                 />
               )}

@@ -17,8 +17,8 @@ interface AideAvecLatex {
 }
 
 const OPTIONS: { id: ReponseConcavite["type"]; label: string; requiertPosition: boolean }[] = [
-  { id: "convexe_partout", label: "Convexe (partout)", requiertPosition: false },
-  { id: "concave_partout", label: "Concave (partout)", requiertPosition: false },
+  { id: "convexe_partout", label: "Convexe sur chaque intervalle du domaine", requiertPosition: false },
+  { id: "concave_partout", label: "Concave sur chaque intervalle du domaine", requiertPosition: false },
   { id: "inflexion", label: "Un point d'inflexion", requiertPosition: true },
 ];
 
@@ -82,7 +82,7 @@ export function EtapeConcavite({ enonceLatex, aideNiveau1, aideNiveau2, tentativ
         <>
           <ApercuExpressionLatex texte={position} />
           <div className="field contenu-conditionnel">
-            <label className="field-label field-label-minuscule">Position du point d'inflexion (x=...)</label>
+            <label className="field-label field-label-minuscule">Abscisse du point d'inflexion</label>
             <input type="text" className={`text-input ${montrerErreurs && position === retour.soumise?.position ? "is-erronee" : ""}`} value={position} placeholder="ex : 5/2" onChange={(e) => setPosition(e.target.value)} />
           </div>
         </>

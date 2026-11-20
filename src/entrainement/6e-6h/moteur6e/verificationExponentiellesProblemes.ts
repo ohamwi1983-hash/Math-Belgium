@@ -264,8 +264,8 @@ export function diagnostiquerGEcran2(exercice: ExerciceExpoProbG, texte: string)
 
 /** Écran 3 — statut oui/non pur (jamais un champ libre) : comparaison directe, jamais de
  * `StatutVerification` (pas de risque de `parse_error` sur un choix binaire). */
-export function verifierGEcran3(exercice: ExerciceExpoProbG, atteignable: boolean): boolean {
-  return atteignable === exercice.duree >= exercice.tSeuil;
+export function verifierGEcran3(exercice: ExerciceExpoProbG, oui: boolean): boolean {
+  return oui === exercice.verdictOui;
 }
 
 export function verifierGEcran1(exercice: ExerciceExpoProbG, texte1: string, texte2: string): boolean {

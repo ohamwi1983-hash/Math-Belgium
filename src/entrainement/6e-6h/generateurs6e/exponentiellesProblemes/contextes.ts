@@ -32,6 +32,12 @@ export interface ContexteExpoProbAEvaluer {
   label: string;
   direction: "croissance" | "decroissance";
   unite: string;
+  /** Bornes réalistes du contexte (audit 6e ch. 2 : plus de dose de 180 000 mg ni de voiture neuve
+   * à 180 000 €) : valeur initiale, pourcentage, durée. */
+  q0Pool: readonly number[];
+  pPool: readonly number[];
+  nMin: number;
+  nMax: number;
   phrase: (Q0: number, p: number) => string;
 }
 
@@ -41,47 +47,71 @@ export const CONTEXTES_A_EVALUER: ContexteExpoProbAEvaluer[] = [
     label: "Population d'une ville",
     direction: "croissance",
     unite: "ans",
-    phrase: (Q0, p) => `Une ville compte actuellement ${Q0} habitants. Sa population augmente de ${p} % chaque année.`,
+    q0Pool: [8000, 12000, 25000, 40000],
+    pPool: [1, 2, 3],
+    nMin: 5,
+    nMax: 15,
+    phrase: (Q0, p) => `Une ville compte actuellement ${milliers(Q0)} habitants. Sa population augmente de ${p} % chaque année.`,
   },
   {
     id: "placement",
     label: "Placement financier",
     direction: "croissance",
     unite: "ans",
-    phrase: (Q0, p) => `Un capital de ${Q0} € est placé sur un compte qui rapporte ${p} % d'intérêts composés chaque année.`,
+    q0Pool: [500, 1000, 2000, 5000],
+    pPool: [2, 3, 4, 5],
+    nMin: 3,
+    nMax: 10,
+    phrase: (Q0, p) => `Un capital de ${milliers(Q0)} € est placé sur un compte qui rapporte ${p} % d'intérêts composés chaque année.`,
   },
   {
     id: "bacteries",
     label: "Culture de bactéries",
     direction: "croissance",
     unite: "heures",
-    phrase: (Q0, p) => `Une culture de bactéries compte ${Q0} individus. Elle croît de ${p} % chaque heure.`,
+    q0Pool: [200, 500, 1000, 2000],
+    pPool: [8, 10, 15, 20],
+    nMin: 3,
+    nMax: 8,
+    phrase: (Q0, p) => `Une culture de bactéries compte ${milliers(Q0)} individus. Elle croît de ${p} % chaque heure.`,
   },
   {
     id: "vehicule",
     label: "Dépréciation d'un véhicule",
     direction: "decroissance",
     unite: "ans",
-    phrase: (Q0, p) => `Une voiture neuve vaut ${Q0} €. Sa valeur diminue de ${p} % chaque année.`,
+    q0Pool: [12000, 18000, 25000, 32000],
+    pPool: [10, 12, 15, 20],
+    nMin: 3,
+    nMax: 8,
+    phrase: (Q0, p) => `Une voiture neuve vaut ${milliers(Q0)} €. Sa valeur diminue de ${p} % chaque année.`,
   },
   {
     id: "medicament",
     label: "Élimination d'un médicament",
     direction: "decroissance",
     unite: "heures",
-    phrase: (Q0, p) => `Une dose de ${Q0} mg d'un médicament est injectée. L'organisme en élimine ${p} % chaque heure.`,
+    q0Pool: [200, 400, 500, 1000],
+    pPool: [10, 15, 20, 25],
+    nMin: 2,
+    nMax: 8,
+    phrase: (Q0, p) => `Une dose de ${milliers(Q0)} mg d'un médicament est injectée. L'organisme en élimine ${p} % chaque heure.`,
   },
 ];
 
 // ============================================================================
-// Famille A — sous-type "doublement/fraction" (propagation périodique).
+// Famille A — sous-type "doublement" (propagation périodique, lue à rebours).
 // ============================================================================
 
 export interface ContexteExpoProbADoublement {
   id: string;
   label: string;
   unite: string;
+  /** Instants de référence réalistes (audit : plus de doublements sur 100 périodes). */
+  tPool: readonly number[];
   phrase: (T: number) => string;
+  /** Question de l'écran 2 : à quel instant la quantité valait-elle 1/2^k de sa valeur en T ? */
+  question: (k: number, T: number) => string;
 }
 
 export const CONTEXTES_A_DOUBLEMENT: ContexteExpoProbADoublement[] = [
@@ -89,21 +119,42 @@ export const CONTEXTES_A_DOUBLEMENT: ContexteExpoProbADoublement[] = [
     id: "algues",
     label: "Prolifération d'algues",
     unite: "jours",
-    phrase: (T) => `Une algue envahissante double sa surface chaque jour. Elle recouvre tout l'étang (100 % de sa surface) après ${T} jours.`,
+    tPool: [12, 15, 18, 20],
+    phrase: (T) => `Une algue envahissante double sa surface chaque jour. Elle recouvre tout l'étang au bout de ${T} jours.`,
+    question: (k) => `Au bout de combien de jours recouvrait-elle ${fractionTexte(k)} de l'étang ?`,
   },
   {
     id: "epidemie",
     label: "Propagation d'une épidémie",
     unite: "jours",
-    phrase: (T) => `Le nombre de personnes contaminées par une épidémie double chaque jour. L'épidémie atteint son pic actuel (100 %) après ${T} jours.`,
+    tPool: [10, 12, 14, 16],
+    phrase: (T) => `Au début d'une épidémie, le nombre de personnes contaminées double chaque jour. Au jour ${T}, on compte 6 400 personnes contaminées.`,
+    question: (k, T) => `Quel jour le nombre de personnes contaminées valait-il ${fractionTexte(k)} de celui du jour ${T} ?`,
   },
   {
     id: "rumeur",
     label: "Propagation d'une rumeur",
     unite: "heures",
-    phrase: (T) => `Le nombre de personnes ayant entendu une rumeur double chaque heure. Toute l'école est au courant (100 %) après ${T} heures.`,
+    tPool: [6, 8, 10, 12],
+    phrase: (T) => `Le nombre d'élèves qui ont entendu une rumeur double chaque heure. Toute l'école est au courant au bout de ${T} heures.`,
+    question: (k) => `Au bout de combien d'heures ${fractionTexte(k)} de l'école était-elle au courant ?`,
   },
 ];
+
+/** « la moitié », « le quart », « le huitième » de… (k = 1, 2, 3). */
+function fractionTexte(k: number): string {
+  return k === 1 ? "la moitié" : k === 2 ? "le quart" : k === 3 ? "le huitième" : `1/${2 ** k}`;
+}
+
+/** Entier écrit avec une espace fine pour les milliers (« 12 000 »). */
+function milliers(n: number): string {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
+}
+
+/** « 1 semaine », « 2 semaines ». */
+function pluriel(n: number, mot: string): string {
+  return `${fr(n)} ${mot}${n > 1 ? "s" : ""}`;
+}
 
 // ============================================================================
 // Famille B — modèle complémentaire.
@@ -237,6 +288,15 @@ export interface ContexteExpoProbD {
   signe: "haut" | "bas";
   unite: string;
   grandeur: string;
+  /** Bornes réalistes (audit 6e ch. 2 : plus de score négatif, de parachutiste à 0 m/s ni de
+   * vitesse limite de 10 m/s) : valeur de stabilisation L, écart initial |C| (multiple de den²
+   * pour des données exactes, voir `familles/D.ts`), pas de temps d, valeur initiale minimale. */
+  lPool: readonly number[];
+  cMin: number;
+  cMax: number;
+  dPool: readonly number[];
+  /** Valeur initiale minimale (contextes « par le bas » : L − |C| ≥ ce seuil). */
+  aMin: number;
   phrase: (aAffiche: number, bAffiche: number, cAffiche: number, d: number) => string;
 }
 
@@ -247,6 +307,11 @@ export const CONTEXTES_D: ContexteExpoProbD[] = [
     signe: "haut",
     unite: "minutes",
     grandeur: "la température (en °C)",
+    lPool: [18, 20, 22],
+    cMin: 40,
+    cMax: 64,
+    dPool: [5, 10],
+    aMin: 0,
     phrase: (aAffiche, bAffiche, cAffiche, d) => `Une tasse de café refroidit dans une pièce. On mesure sa température : ${aAffiche} °C au début, ${bAffiche} °C après ${d} min, ${cAffiche} °C après ${2 * d} min. Elle se stabilise ensuite vers la température de la pièce.`,
   },
   {
@@ -255,6 +320,11 @@ export const CONTEXTES_D: ContexteExpoProbD[] = [
     signe: "haut",
     unite: "heures",
     grandeur: "la concentration (en mg/L)",
+    lPool: [2, 4, 5],
+    cMin: 8,
+    cMax: 40,
+    dPool: [1, 2, 3],
+    aMin: 0,
     phrase: (aAffiche, bAffiche, cAffiche, d) => `La concentration d'un médicament dans le sang évolue : ${aAffiche} mg/L au début, ${bAffiche} mg/L après ${d} h, ${cAffiche} mg/L après ${2 * d} h, puis elle se stabilise vers un résidu constant.`,
   },
   {
@@ -263,7 +333,12 @@ export const CONTEXTES_D: ContexteExpoProbD[] = [
     signe: "bas",
     unite: "secondes",
     grandeur: "la vitesse de chute (en m/s)",
-    phrase: (aAffiche, bAffiche, cAffiche, d) => `Un parachutiste en chute libre accélère puis se stabilise. Sa vitesse vaut ${aAffiche} m/s au début du saut, ${bAffiche} m/s après ${d} s, ${cAffiche} m/s après ${2 * d} s, avant de tendre vers sa vitesse limite.`,
+    lPool: [50, 55, 60],
+    cMin: 32,
+    cMax: 50,
+    dPool: [2, 3, 4],
+    aMin: 5,
+    phrase: (aAffiche, bAffiche, cAffiche, d) => `Un parachutiste saute d'un avion ; on déclenche le chronomètre quand sa vitesse de chute vaut ${aAffiche} m/s. Elle vaut ${bAffiche} m/s après ${d} s et ${cAffiche} m/s après ${2 * d} s, puis elle se stabilise vers sa vitesse limite.`,
   },
   {
     id: "apprentissagePlafond",
@@ -271,7 +346,12 @@ export const CONTEXTES_D: ContexteExpoProbD[] = [
     signe: "bas",
     unite: "semaines",
     grandeur: "le score au test (en %)",
-    phrase: (aAffiche, bAffiche, cAffiche, d) => `Le score d'un élève à un test répété progresse puis plafonne : ${aAffiche} % au début, ${bAffiche} % après ${d} semaines, ${cAffiche} % après ${2 * d} semaines.`,
+    lPool: [80, 85, 90],
+    cMin: 40,
+    cMax: 64,
+    dPool: [1, 2, 3],
+    aMin: 15,
+    phrase: (aAffiche, bAffiche, cAffiche, d) => `Le score d'un élève à un test répété progresse puis plafonne : ${aAffiche} % au début, ${bAffiche} % après ${pluriel(d, "semaine")}, ${cAffiche} % après ${pluriel(2 * d, "semaine")}.`,
   },
 ];
 
@@ -352,7 +432,13 @@ export interface ContexteExpoProbG {
   label: string;
   unite: string;
   grandeur: string;
+  /** Objectif explicite (audit 6e ch. 2) : « rester » au-dessus du seuil pendant la durée D, ou
+   * l'« atteindre » (passer sous le seuil) avant la fin de D. */
+  objectif: "rester" | "atteindre";
+  /** Couples (c, k) du modèle f(t) = c + e^{k − at} qui donnent des valeurs réalistes. */
+  combinaisons: readonly { c: number; k: number }[];
   phrase: (sAffiche: number) => string;
+  question: (duree: number, sAffiche: number) => string;
 }
 
 export const CONTEXTES_G: ContexteExpoProbG[] = [
@@ -360,21 +446,33 @@ export const CONTEXTES_G: ContexteExpoProbG[] = [
     id: "pneuPerce",
     label: "Pression d'un pneu percé",
     unite: "heures",
-    grandeur: "la pression du pneu (en bars)",
-    phrase: (sAffiche) => `Un pneu percé perd de la pression au cours du temps. En dessous de ${fr(sAffiche)} bars, le pneu est considéré comme dangereux à rouler.`,
+    grandeur: "la pression du pneu (en bar)",
+    objectif: "rester",
+    // c ≥ 1 : pression de départ 3 à 3,7 bar, seuil de danger au-dessus de 1 bar.
+    combinaisons: [{ c: 1, k: 1 }, { c: 2, k: 0 }],
+    phrase: (sAffiche) => `Un pneu de camion fuit lentement : sa pression vaut f(t) bar au bout de t heures de route. En dessous de ${fr(sAffiche)} bar, rouler devient dangereux.`,
+    question: (duree, sAffiche) => `Le chauffeur doit encore rouler ${pluriel(duree, "heure")} avant d'atteindre un garage. La pression restera-t-elle au-dessus de ${fr(sAffiche)} bar pendant tout ce trajet ?`,
   },
   {
-    id: "batterieDecharge",
-    label: "Décharge d'une batterie",
+    id: "antibiotique",
+    label: "Concentration d'un antibiotique",
     unite: "heures",
-    grandeur: "le niveau de charge de la batterie (en %)",
-    phrase: (sAffiche) => `La charge d'une batterie diminue au cours du temps. En dessous de ${fr(sAffiche)} %, l'appareil se met automatiquement en veille.`,
+    grandeur: "la concentration de l'antibiotique (en mg/L)",
+    objectif: "rester",
+    // c = 0 : la concentration tend vers 0 (pas de résidu permanent).
+    combinaisons: [{ c: 0, k: 1 }, { c: 0, k: 2 }],
+    phrase: (sAffiche) => `La concentration d'un antibiotique dans le sang vaut f(t) mg/L, t heures après la prise. Il n'est efficace qu'au-dessus de ${fr(sAffiche)} mg/L.`,
+    question: (duree, sAffiche) => `La prise suivante est prévue ${pluriel(duree, "heure")} plus tard. La concentration restera-t-elle au-dessus de ${fr(sAffiche)} mg/L jusque-là ?`,
   },
   {
-    id: "moteurRefroidissement",
-    label: "Refroidissement d'un moteur",
-    unite: "minutes",
-    grandeur: "la température du moteur (en °C)",
-    phrase: (sAffiche) => `La température d'un moteur diminue après son arrêt. En dessous de ${fr(sAffiche)} °C, il est possible de le redémarrer sans risque de surchauffe.`,
+    id: "citerneVidange",
+    label: "Vidange d'une citerne",
+    unite: "heures",
+    grandeur: "la hauteur d'eau (en m)",
+    objectif: "atteindre",
+    // c = 0 : la citerne se vide complètement (hauteur limite nulle).
+    combinaisons: [{ c: 0, k: 1 }, { c: 0, k: 2 }],
+    phrase: (sAffiche) => `Une citerne se vide : la hauteur d'eau vaut f(t) mètres au bout de t heures. On ne peut la nettoyer que lorsque la hauteur est descendue sous ${fr(sAffiche)} m.`,
+    question: (duree, sAffiche) => `L'équipe de nettoyage arrive dans ${pluriel(duree, "heure")}. La hauteur sera-t-elle alors descendue sous ${fr(sAffiche)} m ?`,
   },
 ];

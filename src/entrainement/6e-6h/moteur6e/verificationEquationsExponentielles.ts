@@ -1,4 +1,6 @@
 import type { ExerciceEqExpoA, ExerciceEqExpoB, ExerciceEqExpoC, ExerciceEqExpoD } from "../core6e/equationsExponentielles.types";
+import type { ExerciceEquationExponentielle } from "../core6e/equationsExponentielles.types";
+import { aucuneSolutionEvidente } from "./typesEquationsExponentielles";
 import { diagnostiquerEnsembleValeurs, diagnostiquerEquationDifference, diagnostiquerEquationTexte, diagnostiquerEquivalenceFonction, diagnostiquerValeur } from "./equivalenceExponentielle";
 
 /**
@@ -86,4 +88,10 @@ export function verifierCEcran3(exercice: ExerciceEqExpoC, textes: string[]): bo
 
 export function verifierDEcran(_exercice: ExerciceEqExpoD, existeUneSolution: boolean): boolean {
   return existeUneSolution === false;
+}
+
+/** Écran `existence` (familles A, B, C) : « il faut résoudre » (`true`) sauf si l'absence de
+ * solution se voit sans calcul (famille C à racines en t négatives). */
+export function verifierExistence(exercice: ExerciceEquationExponentielle, ilFautResoudre: boolean): boolean {
+  return ilFautResoudre === !aucuneSolutionEvidente(exercice);
 }

@@ -9,7 +9,7 @@ import { construireG } from "./familles/G";
 import { tirerParmi } from "./aleatoire";
 
 export const CATALOGUE_FAMILLES: { id: FamilleExponentiellesProblemes; label: string }[] = [
-  { id: "A", label: "A — Évaluer/résoudre Q(t)=Q0·r^t" },
+  { id: "A", label: "A — Évaluer ou dater, Q(t) = Q₀·rᵗ" },
   { id: "B", label: "B — Modèle complémentaire (asymptote-objectif)" },
   { id: "C", label: "C — 2 points, taux inconnu" },
   { id: "D", label: "D — Asymptote non nulle, 3 points" },

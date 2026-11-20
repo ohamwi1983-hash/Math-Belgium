@@ -1,6 +1,7 @@
 import type { BaseExpo, ExerciceEqExpoA, ExerciceEqExpoB, ExerciceEqExpoC, ExerciceEqExpoD, ExerciceEquationExponentielle, ValeurExacteExpo } from "../core6e/equationsExponentielles.types";
 import { baseValeur } from "../generateurs6e/equationsExponentielles/rationnel";
 import type { PhaseEquationExponentielle } from "../moteur6e/typesEquationsExponentielles";
+import { aucuneSolutionEvidente } from "../moteur6e/typesEquationsExponentielles";
 
 /**
  * Textes de consigne/aide + formatage LaTeX pour `6gen9`. `src/ui6e/` peut dépendre de
@@ -278,13 +279,19 @@ function formatEnonceD(exercice: ExerciceEqExpoD): string {
   return `${formatSommeTermes([{ valeur: 1, suffixe: t1 }, { valeur: 1, suffixe: t2 }, { valeur: exercice.k, suffixe: "" }])} = 0`;
 }
 
+/** Écran de verdict « existence » (familles A, B, C) et écran unique de D : même question. */
 function consigneD(): FragmentConsigne[] {
-  return [texte("Sans calcul : cette équation a-t-elle au moins une solution réelle ?")];
+  return [texte("Avant de résoudre : peut-on voir, sans calcul, que cette équation n'a aucune solution ?")];
+}
+
+function aideExistence2(exercice: ExerciceEquationExponentielle): AideAvecLatex {
+  if (exercice.famille === "D") return aideD2(exercice);
+  return { texte: "Ici, regarde le signe de chaque membre, ou de chaque terme : une puissance de base positive est positive, mais un coefficient peut être négatif et un membre peut valoir 0.", latex: null };
 }
 
 /** Même message pour D1 et D2 (le fait fondamental invoqué est identique) — `exercice` non utilisé,
  * gardé en paramètre pour une signature uniforme avec `aideD2`. */
-function aideD1(_exercice: ExerciceEqExpoD): AideAvecLatex {
+function aideD1(): AideAvecLatex {
   return { texte: "Une puissance de base strictement positive est toujours strictement positive, quel que soit l'exposant :", latex: "a>0\\ \\Rightarrow\\ a^{x}>0" };
 }
 
@@ -348,6 +355,7 @@ function formatEnsembleValeursLatex(valeurs: number[], variable: string): string
  * dérivée de ce que l'élève a soumis, toujours reconstruite depuis les champs déjà résolus à la
  * génération de `exercice` (mêmes valeurs que `verificationEquationsExponentielles.ts`). */
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceEquationExponentielle, phase: PhaseEquationExponentielle): string[] {
+  if (phase === "existence") return [aucuneSolutionEvidente(exercice) ? "\\text{Aucune solution : }S=\\varnothing" : "\\text{Il faut résoudre pour conclure}"];
   switch (exercice.famille) {
     case "A": {
       if (phase === "aEcran1") {
@@ -423,6 +431,7 @@ function etatActuelC(exercice: ExerciceEqExpoC, phase: "cEcran1" | "cEcran2" | "
 /** D n'a qu'un SEUL écran (`dEcran`, toujours le premier — et unique — de la famille) : jamais
  * rien à rappeler, `etatActuel` reste `null` sans exception. */
 export function etatActuel(exercice: ExerciceEquationExponentielle, phase: PhaseEquationExponentielle): string[] | null {
+  if (phase === "existence") return null;
   switch (exercice.famille) {
     case "A":
       return etatActuelA(exercice, phase as "aEcran1" | "aEcran2");
@@ -455,6 +464,7 @@ export function formatEnonceLatex(exercice: ExerciceEquationExponentielle): stri
 }
 
 export function consigneEcran(phase: PhaseEquationExponentielle, exercice: ExerciceEquationExponentielle): FragmentConsigne[] {
+  if (phase === "existence") return consigneD();
   switch (exercice.famille) {
     case "A":
       return consigneA(phase as "aEcran1" | "aEcran2", exercice);
@@ -468,6 +478,7 @@ export function consigneEcran(phase: PhaseEquationExponentielle, exercice: Exerc
 }
 
 export function aideNiveau1(phase: PhaseEquationExponentielle, exercice: ExerciceEquationExponentielle): AideAvecLatex {
+  if (phase === "existence" || exercice.famille === "D") return aideD1();
   switch (exercice.famille) {
     case "A":
       return aideA1(phase as "aEcran1" | "aEcran2", exercice);
@@ -475,12 +486,11 @@ export function aideNiveau1(phase: PhaseEquationExponentielle, exercice: Exercic
       return aideB1(phase as "bEcran1" | "bEcran2");
     case "C":
       return aideC1(phase as "cEcran1" | "cEcran2" | "cEcran3", exercice);
-    case "D":
-      return aideD1(exercice);
   }
 }
 
 export function aideNiveau2(phase: PhaseEquationExponentielle, exercice: ExerciceEquationExponentielle): AideAvecLatex {
+  if (phase === "existence") return aideExistence2(exercice);
   switch (exercice.famille) {
     case "A":
       return aideA2(phase as "aEcran1" | "aEcran2", exercice);

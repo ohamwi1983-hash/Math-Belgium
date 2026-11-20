@@ -243,6 +243,13 @@ function finaliserViewBox(x: [number, number], y: [number, number]): ViewBoxGrap
 /** Calcule la fenêtre d'affichage commune aux 4 candidats d'une instance — même échelle imposée
  * (contrainte de la spec). */
 export function calculerViewBoxGraphique(exercice: ExerciceGraphiqueDeriveeExponentielle): ViewBoxGraphiqueDeriveeExpo {
+  if (exercice.famille === "A") {
+    // Audit 6e ch. 2 (lot C) : l'extremum de f′ = a·eˣ(1 + x), en x = −2, vaut ±|a|e⁻² ≈ ±0,14|a| ;
+    // une échelle réglée sur la croissance à droite l'écrasait en un trait plat. Échelle réglée sur
+    // CET extremum (la courbe sort du cadre en montant, après son zéro en x = −1), fenêtre [−6 ; 1].
+    const e = Math.abs(exercice.a) * Math.exp(-2);
+    return finaliserViewBox([-6, 1], exercice.a > 0 ? [-2.5 * e, 4 * e] : [-4 * e, 2.5 * e]);
+  }
   const [xMin, xMax] = fenetreX(exercice);
   const plafond = PLAFOND_STATS[exercice.famille];
   const valeurs: number[] = [];

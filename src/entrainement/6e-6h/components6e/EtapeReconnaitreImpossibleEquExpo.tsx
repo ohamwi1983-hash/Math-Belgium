@@ -59,11 +59,11 @@ export function EtapeReconnaitreImpossibleEquExpo({ consigneEcran, enonceLatex, 
       </p>
 
       <div className="options-grid-compact">
-        <button type="button" className={`btn ${choix === true ? "toggle-active" : ""} ${montrerErreurs && choix === true ? "is-erronee" : ""}`} onClick={() => setChoix(true)}>
-          Il existe au moins une solution réelle
-        </button>
         <button type="button" className={`btn ${choix === false ? "toggle-active" : ""} ${montrerErreurs && choix === false ? "is-erronee" : ""}`} onClick={() => setChoix(false)}>
-          ∅ — Aucune solution
+          Oui : aucune solution, sans calcul
+        </button>
+        <button type="button" className={`btn ${choix === true ? "toggle-active" : ""} ${montrerErreurs && choix === true ? "is-erronee" : ""}`} onClick={() => setChoix(true)}>
+          Non : il faut résoudre pour conclure
         </button>
       </div>
 

@@ -10,23 +10,33 @@ import type { ExerciceEquationExponentielle } from "../core6e/equationsExponenti
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
-export type PhaseEquationExponentielle = "aEcran1" | "aEcran2" | "bEcran1" | "bEcran2" | "cEcran1" | "cEcran2" | "cEcran3" | "dEcran";
+/** `existence` : écran de verdict posé en tête des familles A, B et C (décision de l'utilisateur,
+ * audit 6e ch. 2) — « peut-on voir sans calcul qu'il n'y a aucune solution ? ». La famille D pose la
+ * même question sur son unique écran `dEcran`. */
+export type PhaseEquationExponentielle = "existence" | "aEcran1" | "aEcran2" | "bEcran1" | "bEcran2" | "cEcran1" | "cEcran2" | "cEcran3" | "dEcran";
+
+/** « Aucune solution » visible sans calcul : famille D (positivité), famille C dont les deux racines
+ * en t sont négatives (tous les coefficients sont alors positifs). */
+export function aucuneSolutionEvidente(exercice: ExerciceEquationExponentielle): boolean {
+  return exercice.famille === "D" || (exercice.famille === "C" && exercice.solutionsT.every((t) => t < 0));
+}
 
 export function phaseInitiale(exercice: ExerciceEquationExponentielle): PhaseEquationExponentielle {
   switch (exercice.famille) {
     case "A":
-      return "aEcran1";
     case "B":
-      return "bEcran1";
     case "C":
-      return "cEcran1";
+      return "existence";
     case "D":
       return "dEcran";
   }
 }
 
-export function phaseApres(phase: PhaseEquationExponentielle): PhaseEquationExponentielle | "termine" {
+export function phaseApres(phase: PhaseEquationExponentielle, exercice: ExerciceEquationExponentielle): PhaseEquationExponentielle | "termine" {
   switch (phase) {
+    case "existence":
+      if (aucuneSolutionEvidente(exercice)) return "termine";
+      return exercice.famille === "A" ? "aEcran1" : exercice.famille === "B" ? "bEcran1" : "cEcran1";
     case "aEcran1":
       return "aEcran2";
     case "aEcran2":

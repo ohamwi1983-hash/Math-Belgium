@@ -1,4 +1,4 @@
-import type { CategorieFI, CibleLimite, ExerciceLimiteA, ExerciceLimiteB, ExerciceLimiteC, ExerciceLimiteG, ExerciceLimiteH, ExerciceLimiteI, ExerciceLimiteJ, ExerciceLimiteK, ExerciceLimiteL, ExerciceLimiteN } from "../core6e/limitesExponentielles.types";
+import type { CategorieFI, CibleLimite, ExerciceLimiteA, ExerciceLimiteB, ExerciceLimiteC, ExerciceLimiteH, ExerciceLimiteI, ExerciceLimiteJ, ExerciceLimiteK, ExerciceLimiteL, ExerciceLimiteN } from "../core6e/limitesExponentielles.types";
 import { diagnostiquerValeur, evaluerExpressionExponentielle } from "./equivalenceExponentielle";
 
 /**
@@ -57,7 +57,7 @@ function equivalenteAReference(texte: string, reference: (x: number) => number, 
 /**
  * ⚠️ **Vigilance documentée** (même famille de risque que gen50/gen52, chapitre 6 4e — voir
  * CLAUDE.md, "Sixième révision — audit puis correctif de vérification structurelle") : pour
- * l'écran "combiner" de la famille G, la cible demandée est ALGÉBRIQUEMENT IDENTIQUE (pour tout x
+ * l'écran "combiner" de la famille N (et de l'ancienne famille G, retirée), la cible demandée est ALGÉBRIQUEMENT IDENTIQUE (pour tout x
  * hors des points exclus) à l'expression f(x) déjà affichée dans l'énoncé — combiner en une seule
  * fraction ne change JAMAIS la valeur de la fonction là où elle est définie. Une pure équivalence
  * NUMÉRIQUE ne peut donc PAS distinguer "réponse déjà correctement transformée" de "recopie brute
@@ -117,35 +117,25 @@ export function verifierCFacteurs(exercice: ExerciceLimiteC, reponse: ReponseFac
   return verifierReponseLimite(exercice.limiteFacteur1, reponse.facteur1) && verifierReponseLimite(exercice.limiteFacteur2, reponse.facteur2);
 }
 
+/** Forme attendue à l'écran « forme » de B (somme) et de C (produit ou quotient). */
+export function formeAttendueBC(exercice: ExerciceLimiteB | ExerciceLimiteC): CategorieFI {
+  if (exercice.famille === "C") return exercice.quotient ? "infini_sur_infini" : "zero_fois_infini";
+  return exercice.baseSuperieureA1 && exercice.limitePolynomiale.type === "moins_infini" ? "infini_moins_infini" : "pas_une_fi";
+}
+
+export function verifierFormeBC(exercice: ExerciceLimiteB | ExerciceLimiteC, reponse: CategorieFI): boolean {
+  return reponse === formeAttendueBC(exercice);
+}
+
 export function verifierCGlobale(exercice: ExerciceLimiteC, texte: string): boolean {
   return memeValeur(texte, exercice.limiteGlobale);
 }
 
-// ============================================================================
-// Famille G — 3 écrans (combiner, ordre1, conclure). Instance unique.
-// ============================================================================
 
-function referenceG(): (x: number) => number {
-  return (x: number) => 1 / Math.cos(x) + 1 / (1 - Math.exp(Math.PI / 2 - x));
-}
 
-const TEXTE_SOURCE_G = "1/cos(x)+1/(1-exp(pi/2-x))";
-const POINTS_G = [Math.PI / 2 + 0.3, Math.PI / 2 - 0.3, Math.PI / 2 + 0.7, Math.PI / 2 - 0.7, Math.PI / 2 + 1.1, Math.PI / 2 - 1.1, Math.PI / 2 + 1.9, Math.PI / 2 - 1.9];
 
-export function verifierGCombiner(_exercice: ExerciceLimiteG, texte: string): boolean {
-  if (texteEstRecopieLitterale(texte, TEXTE_SOURCE_G)) return false;
-  return equivalenteAReference(texte, referenceG(), POINTS_G);
-}
 
-/** Écran "ordre1" — QCM booléen "l'ordre 1 suffit-il à conclure ?" — TOUJOURS "Non" pour cette
- * instance (voir la note de conception dans `core6e/limitesExponentielles.types.ts`). */
-export function verifierGOrdre1(_exercice: ExerciceLimiteG, ordre1Suffit: boolean): boolean {
-  return ordre1Suffit === false;
-}
 
-export function verifierGConclure(exercice: ExerciceLimiteG, texte: string): boolean {
-  return memeValeur(texte, exercice.limiteFinale);
-}
 
 // ============================================================================
 // Famille H — L'Hôpital, 0/0 pur exponentiel (4 écrans : forme, numérateur, dénominateur,
@@ -363,7 +353,7 @@ function texteSourceN(exercice: ExerciceLimiteN): string {
   return `(${base}^(${k}/x))^(${m}*x+x^2)`;
 }
 
-/** Même vigilance que la famille G ci-dessus : combiner via la loi des puissances ne change jamais
+/** Même vigilance que ci-dessus : combiner via la loi des puissances ne change jamais
  * la valeur de f(x), une recopie littérale est donc rejetée. */
 export function verifierNCombiner(exercice: ExerciceLimiteN, texte: string): boolean {
   if (texteEstRecopieLitterale(texte, texteSourceN(exercice))) return false;

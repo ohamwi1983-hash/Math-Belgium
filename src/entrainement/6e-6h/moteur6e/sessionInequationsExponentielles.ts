@@ -55,7 +55,7 @@ export function demarrerSessionInequationExponentielle(
 /** Choix fermés (verdict, catégorie, graphique) : 1 seule tentative — un choix parmi deux ou trois
  * options rejoué trois fois ne mesure plus rien (audit 6e ch. 2, lot B). Champs : réglage de la
  * session (3 tentatives). */
-const PHASES_CHOIX_FERME: ReadonlySet<PhaseInequationExponentielle> = new Set<PhaseInequationExponentielle>(["bReconnaitre", "cfReconnaitre", "ckConclure", "dConstantSigne"]);
+const PHASES_CHOIX_FERME: ReadonlySet<PhaseInequationExponentielle> = new Set<PhaseInequationExponentielle>(["existence", "bReconnaitre", "cfReconnaitre", "ckConclure", "dConstantSigne"]);
 
 export function tentativesMaxCourant(etat: EtatSessionInequationExponentielle): number {
   return PHASES_CHOIX_FERME.has(etat.phase) ? 1 : etat.reglages.tentativesMax;
@@ -130,7 +130,7 @@ function avancerPhase<TReponse>(
   const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: revele };
-  const phaseSuivante = phaseApres(etat.phase);
+  const phaseSuivante = phaseApres(etat.phase, exercice);
 
   if (phaseSuivante === "termine") {
     return cloturerExerciceOuSuivant({ ...etat, revelesPartiels }, construireResultat(exercice, scoresPartiels), revele);
@@ -145,6 +145,11 @@ export function soumettreReponseAReconnaitre(etat: EtatSessionInequationExponent
 
 export function soumettreReponseAResoudre(etat: EtatSessionInequationExponentielle, reponse: EnsembleReelGuide): EtatSessionInequationExponentielle {
   return avancerPhase(etat, reponse, (e, r) => (e.famille === "A" ? verifierAResoudre(e, r) : false), "aResoudre");
+}
+
+/** Écran « existence » (A, C-k, D, E) : la seule réponse juste est « il faut la résoudre ». */
+export function soumettreReponseExistence(etat: EtatSessionInequationExponentielle, ilFautResoudre: boolean): EtatSessionInequationExponentielle {
+  return avancerPhase(etat, ilFautResoudre, (_e, r) => r === true, "existence");
 }
 
 export function soumettreReponseBReconnaitre(etat: EtatSessionInequationExponentielle, estImpossible: boolean): EtatSessionInequationExponentielle {

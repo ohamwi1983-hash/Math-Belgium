@@ -279,7 +279,7 @@ function fenetreX(exercice: ExerciceEtudeFonctionExponentielle): [number, number
  * et corrigé là-bas pour la croissance exponentielle non bornée, appliqué ici DÈS LA CONCEPTION. */
 const PLAFOND_STATS: Record<ExerciceEtudeFonctionExponentielle["famille"], number> = {
   A: 30,
-  B: 40,
+  B: 5,
   C: 60,
   D: 30,
 };
@@ -380,7 +380,7 @@ export function consigneAsymptotes(exercice: ExerciceEtudeFonctionExponentielle)
 }
 
 export function consigneAsymptotesB(p: number): FragmentConsigne[] {
-  return [texte("L'asymptote verticale "), latex(`x=${p}`), texte(" n'est valable que d'UN SEUL côté — lequel ? Et quelle est l'équation de l'asymptote horizontale (commune aux deux infinis) ?")];
+  return [texte("L'asymptote verticale "), latex(`x=${p}`), texte(" n'existe que d'un seul côté : lequel ? Et quelle est l'équation de l'asymptote horizontale (commune aux deux infinis) ?")];
 }
 
 export function consigneCroissance(): FragmentConsigne[] {
@@ -585,15 +585,15 @@ export function contenuRecapPhase(exercice: ExerciceEtudeFonctionExponentielle, 
       const c = exercice.croissance;
       // Famille B : monotone sur CHAQUE intervalle du domaine, pas « partout » (f n'est pas monotone sur
       // ℝ \ {p} : elle repart de +∞ ou de 0 de l'autre côté du point exclu).
-      const ou = exercice.famille === "B" ? "sur chaque intervalle du domaine" : "(partout)";
+      const ou = exercice.famille === "B" ? "sur chaque intervalle du domaine" : "sur ℝ";
       if (c.type === "croissante_partout") return { texte: `Croissante ${ou}`, latex: null };
       if (c.type === "decroissante_partout") return { texte: `Décroissante ${ou}`, latex: null };
       return { texte: null, latex: `\\text{${c.type === "minimum" ? "Minimum" : "Maximum"} en } x=${positionLatex(c.position ?? 0)}` };
     }
     case "concavite": {
       const c = exercice.concavite;
-      if (c.type === "convexe_partout") return { texte: "Convexe (partout)", latex: null };
-      if (c.type === "concave_partout") return { texte: "Concave (partout)", latex: null };
+      if (c.type === "convexe_partout") return { texte: exercice.famille === "B" ? "Convexe sur chaque intervalle du domaine" : "Convexe sur ℝ", latex: null };
+      if (c.type === "concave_partout") return { texte: exercice.famille === "B" ? "Concave sur chaque intervalle du domaine" : "Concave sur ℝ", latex: null };
       return { texte: null, latex: `\\text{Point d'inflexion en } x=${positionLatex(c.position ?? 0)}` };
     }
     case "graphique":

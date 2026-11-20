@@ -14,6 +14,7 @@ import {
   soumettreReponseCEcran2,
   soumettreReponseCEcran3,
   soumettreReponseDEcran,
+  soumettreReponseExistence,
   tentativesMaxCourant,
 } from "./moteur6e/sessionEquationsExponentielles";
 import type { EtatSessionEquationExponentielle, PhaseEquationExponentielle } from "./moteur6e/typesEquationsExponentielles";
@@ -25,7 +26,7 @@ import { EtapeValeurOuVideEquExpo } from "./components6e/EtapeValeurOuVideEquExp
 import type { ReponseValeurOuVide } from "./moteur6e/verificationEquationsExponentielles";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { correctionDetailleeEquationsExponentielles, sequenceEquationsExponentielles } from "./generateurs6e/equationsExponentielles/corrigeDetaille";
+import { correctionDetailleeEquationsExponentielles, etapesExistenceEquExpo, sequenceEquationsExponentielles } from "./generateurs6e/equationsExponentielles/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { Katex } from "./components/Katex";
@@ -80,7 +81,7 @@ function sequencePourExercice(exercice: EtatSessionEquationExponentielle["exerci
   let phase: PhaseEquationExponentielle | "termine" = phaseInitiale(exercice);
   while (phase !== "termine") {
     phases.push(phase);
-    phase = phaseApres(phase);
+    phase = phaseApres(phase, exercice);
   }
   return phases;
 }
@@ -199,7 +200,8 @@ export function App6gen9() {
   }
 
   // Corrigé détaillé « comme au tableau » de l'écran (source unique avec le papier).
-  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationsExponentielles(exercice), lettreEtape(sequenceEquationsExponentielles(exercice).indexOf(phase)))} />;
+  // L'écran de verdict « existence » (familles A, B, C) a son propre corrigé (positivité des termes).
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={phase === "existence" ? lignesDeLEtape(etapesExistenceEquExpo(exercice), "a") : lignesDeLEtape(correctionDetailleeEquationsExponentielles(exercice), lettreEtape(sequenceEquationsExponentielles(exercice).indexOf(phase)))} />;
 
   const validation = enAttente
     ? {
@@ -402,7 +404,7 @@ export function App6gen9() {
           )}
           {phase === "cEcran3" && <CalculatriceScientifique />}
 
-          {phase === "dEcran" && (
+          {(phase === "dEcran" || phase === "existence") && (
             <EtapeReconnaitreImpossibleEquExpo
               key={cle}
               consigneEcran={consigne}
@@ -414,7 +416,7 @@ export function App6gen9() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(existeUneSolution) => terminerEtape(soumettreReponseDEcran(etat, existeUneSolution), existeUneSolution ? "Oui" : "Non")}
+              onValider={(ilFautResoudre) => terminerEtape(phase === "existence" ? soumettreReponseExistence(etat, ilFautResoudre) : soumettreReponseDEcran(etat, ilFautResoudre), ilFautResoudre ? "Il faut résoudre pour conclure" : "Aucune solution, sans calcul")}
               validation={validation}
             />
           )}

@@ -251,6 +251,6 @@ export function soumettreReponseGEcran1(etat: EtatSessionExponentiellesProblemes
 export function soumettreReponseGEcran2(etat: EtatSessionExponentiellesProblemes, texte: string): EtatSessionExponentiellesProblemes {
   return avancerPhase(etat, texte, (e, r) => (e.famille === "G" ? verifierGEcran2(e, r) : false), "gEcran2");
 }
-export function soumettreReponseGEcran3(etat: EtatSessionExponentiellesProblemes, atteignable: boolean): EtatSessionExponentiellesProblemes {
-  return avancerPhase(etat, atteignable, (e, r) => (e.famille === "G" ? verifierGEcran3(e, r) : false), "gEcran3");
+export function soumettreReponseGEcran3(etat: EtatSessionExponentiellesProblemes, oui: boolean): EtatSessionExponentiellesProblemes {
+  return avancerPhase(etat, oui, (e, r) => (e.famille === "G" ? verifierGEcran3(e, r) : false), "gEcran3");
 }

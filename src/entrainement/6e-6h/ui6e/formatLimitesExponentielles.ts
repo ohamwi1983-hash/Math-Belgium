@@ -1,4 +1,4 @@
-import type { ExerciceLimiteA, ExerciceLimiteB, ExerciceLimiteC, ExerciceLimiteExponentielle, ExerciceLimiteH, ExerciceLimiteI, ExerciceLimiteJ, ExerciceLimiteK, ExerciceLimiteL, ExerciceLimiteN } from "../core6e/limitesExponentielles.types";
+import type { CategorieFI, ExerciceLimiteA, ExerciceLimiteB, ExerciceLimiteC, ExerciceLimiteExponentielle, ExerciceLimiteH, ExerciceLimiteI, ExerciceLimiteJ, ExerciceLimiteK, ExerciceLimiteL, ExerciceLimiteN } from "../core6e/limitesExponentielles.types";
 import type { PhaseLimiteExponentielle } from "../moteur6e/typesLimitesExponentielles";
 import { fusionnerOperateurSigne } from "./formatOperateurSigne";
 
@@ -179,10 +179,12 @@ function etatActuelB(exercice: ExerciceLimiteB, phase: "bExponentielle" | "bPoly
 // ============================================================================
 
 function formatFonctionC(exercice: ExerciceLimiteC): string {
+  if (exercice.quotient) return `\\dfrac{${formatPuissance("x", exercice.r)}}{e^{${formatPuissance("x", exercice.s)}}}`;
   return `${formatPuissance("x", exercice.r)} \\cdot e^{-${formatPuissance("x", exercice.s)}}`;
 }
 
-function consigneC(phase: "cFacteurs" | "cGlobale"): FragmentConsigne[] {
+function consigneC(phase: "cFacteurs" | "cGlobale", exercice: ExerciceLimiteC): FragmentConsigne[] {
+  if (exercice.quotient) return [fragTexte(phase === "cFacteurs" ? "Détermine la limite du numérateur et celle du dénominateur." : "Conclus la limite du quotient.")];
   return [fragTexte(phase === "cFacteurs" ? "Détermine la limite de chacun des deux facteurs." : "Conclus la limite du produit.")];
 }
 
@@ -192,7 +194,11 @@ function aideC1(phase: "cFacteurs" | "cGlobale"): AideAvecLatex {
 }
 
 function aideC2(phase: "cFacteurs" | "cGlobale", exercice: ExerciceLimiteC): AideAvecLatex {
-  if (phase === "cFacteurs") return { texte: "Ici, les exposants de x sont positifs :", latex: `r=${exercice.r},\\qquad s=${exercice.s}` };
+  if (phase === "cFacteurs") {
+    const [f1, f2] = facteursCLatex(exercice);
+    return { texte: exercice.quotient ? "Ici, le numérateur et le dénominateur sont :" : "Ici, les deux facteurs sont :", latex: `${f1}\\qquad\\text{et}\\qquad ${f2}` };
+  }
+  if (exercice.quotient) return { texte: "Ici, le quotient compare une puissance de x à une exponentielle :", latex: formatFonctionC(exercice) };
   return { texte: "Ici, écris le produit comme un quotient :", latex: `\\frac{${formatPuissance("x", exercice.r)}}{e^{${formatPuissance("x", exercice.s)}}} \\to 0` };
 }
 
@@ -201,59 +207,8 @@ function aideC2(phase: "cFacteurs" | "cGlobale", exercice: ExerciceLimiteC): Aid
  * plutôt qu'une accumulation à 2 pas. */
 function etatActuelC(exercice: ExerciceLimiteC, phase: "cFacteurs" | "cGlobale"): string[] | null {
   if (phase === "cFacteurs") return null;
-  return [`x^r \\to ${formatCibleTexte(exercice.limiteFacteur1)}\\ \\text{(étape 1)}`, `e^{-x^s} \\to ${formatCibleTexte(exercice.limiteFacteur2)}\\ \\text{(étape 1)}`];
-}
-
-// ============================================================================
-// Famille G — instance unique
-// ============================================================================
-
-function formatFonctionG(): string {
-  return "\\frac{1}{\\cos(x)} + \\frac{1}{1 - e^{\\frac{\\pi}{2}-x}}";
-}
-
-function consigneG(phase: "gCombiner" | "gOrdre1" | "gConclure"): FragmentConsigne[] {
-  if (phase === "gCombiner") return [fragTexte("Combine les deux termes en une seule fraction (dénominateur commun).")];
-  if (phase === "gOrdre1") return [fragTexte("Un développement à l'ordre 1 (en "), fragLatex("u=\\pi/2-x"), fragTexte(") suffit-il à conclure la limite ?")];
-  return [fragTexte("Pousse le développement au second ordre, puis conclus la valeur exacte de la limite.")];
-}
-
-function aideG1(phase: "gCombiner" | "gOrdre1" | "gConclure"): AideAvecLatex {
-  if (phase === "gCombiner") return { texte: "Mets les deux fractions au même dénominateur commun cos(x)·(1−e^(π/2−x)), puis additionne les numérateurs — ne simplifie rien d'autre à cette étape.", latex: "\\cos(x)\\cdot\\left(1-e^{\\frac{\\pi}{2}-x}\\right)" };
-  if (phase === "gOrdre1") {
-    return {
-      texte: "Pose u=π/2−x (x→π/2 ⟺ u→0). Développements limités à l'ordre 1 :",
-      latex: "\\begin{gathered} \\cos(x) = \\cos\\left(\\frac{\\pi}{2}-u\\right) = \\sin(u) \\approx u \\\\ 1-e^{\\frac{\\pi}{2}-x} = 1-e^u \\approx -u \\end{gathered}",
-    };
-  }
-  return {
-    texte: "Développements limités à l'ordre 2 (u=π/2−x→0) :",
-    latex: "\\begin{gathered} \\sin(u) \\approx u - \\frac{u^3}{6} \\\\ 1-e^u \\approx -u-\\frac{u^2}{2}-\\frac{u^3}{6} \\end{gathered}",
-  };
-}
-
-function aideG2(phase: "gCombiner" | "gOrdre1" | "gConclure"): AideAvecLatex {
-  if (phase === "gCombiner") return { texte: "Numérateur combiné :", latex: "\\left(1-e^{\\frac{\\pi}{2}-x}\\right) + \\cos(x)" };
-  if (phase === "gOrdre1") return { texte: "À l'ordre 1, les DEUX termes se comportent comme 1/u et −1/u : ils s'annulent EXACTEMENT — il faut pousser plus loin.", latex: "\\frac{1}{u} + \\frac{1}{-u} = 0" };
-  return { texte: "Numérateur et dénominateur substitués (non simplifiés) :", latex: "\\frac{1}{u-\\frac{u^3}{6}} + \\frac{1}{-u-\\frac{u^2}{2}-\\frac{u^3}{6}}" };
-}
-
-/** Forme canonique complète attendue à l'écran "combiner" (numérateur combiné, voir `aideG2`
- * ci-dessus, SUR le dénominateur commun annoncé par `aideG1`) — instance unique, aucun paramètre. */
-function formatFormeCombineeG(): string {
-  return "\\frac{\\left(1-e^{\\frac{\\pi}{2}-x}\\right) + \\cos(x)}{\\cos(x)\\left(1-e^{\\frac{\\pi}{2}-x}\\right)}";
-}
-
-/** Bloc "état actuel" — ACCUMULE (plus ancien en premier) : `gOrdre1` rappelle la forme combinée
- * confirmée à l'écran 1 ; `gConclure` y ajoute le constat "ordre 1 insuffisant" confirmé à l'écran
- * 2 (réponse TOUJOURS "Non" pour cette instance unique, voir `verifierGOrdre1`) — jamais seulement
- * le dernier écran. */
-function etatActuelG(phase: "gCombiner" | "gOrdre1" | "gConclure"): string[] | null {
-  if (phase === "gCombiner") return null;
-  const combinee = `${formatFormeCombineeG()}\\ \\text{(étape 1)}`;
-  if (phase === "gOrdre1") return [combinee];
-  const ordre1 = "\\text{Ordre 1 seul} \\Rightarrow \\text{insuffisant (les termes s'annulent)}\\ \\text{(étape 2)}";
-  return [combinee, ordre1];
+  const [f1, f2] = facteursCLatex(exercice);
+  return [`${f1} \\to ${formatCibleTexte(exercice.limiteFacteur1)}\\ \\text{(étape 1)}`, `${f2} \\to ${formatCibleTexte(exercice.limiteFacteur2)}\\ \\text{(étape 1)}`];
 }
 
 // ============================================================================
@@ -318,8 +273,6 @@ function consigneH(phase: "hForme" | "hNumerateur" | "hDenominateur" | "hConclur
   return [fragTexte("Applique la règle de L'Hôpital : calcule la limite du rapport des dérivées en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(".")];
 }
 
-
-
 /** Bloc "état actuel" — ACCUMULE (plus ancien en premier) : `hNumerateur` rappelle la forme 0/0
  * confirmée à l'écran 1 ; `hDenominateur` y ajoute la dérivée du numérateur confirmée à l'écran 2 ;
  * `hConclure` y ajoute la dérivée du dénominateur confirmée à l'écran 3. */
@@ -380,8 +333,6 @@ function consigneI(phase: "iForme" | "iNumerateur" | "iDenominateur" | "iConclur
   return [fragTexte("Applique la règle de L'Hôpital : calcule la limite du rapport des dérivées en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(".")];
 }
 
-
-
 /** Bloc "état actuel" — ACCUMULE (plus ancien en premier), même principe que `etatActuelH`. */
 function etatActuelI(exercice: ExerciceLimiteI, phase: "iForme" | "iNumerateur" | "iDenominateur" | "iConclure"): string[] | null {
   if (phase === "iForme") return null;
@@ -441,8 +392,6 @@ function consigneJ(phase: "jForme" | "jNumerateur" | "jDenominateur" | "jConclur
   if (phase === "jDenominateur") return [fragTexte("Dérive le dénominateur "), fragLatex("g(x)"), fragTexte(".")];
   return [fragTexte("Applique la règle de L'Hôpital : calcule la limite du rapport des dérivées en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(".")];
 }
-
-
 
 /** Bloc "état actuel" — ACCUMULE (plus ancien en premier), même principe que `etatActuelH`/`etatActuelI`. */
 function etatActuelJ(exercice: ExerciceLimiteJ, phase: "jForme" | "jNumerateur" | "jDenominateur" | "jConclure"): string[] | null {
@@ -507,12 +456,10 @@ function consigneK(phase: "kForme" | "kNumerateur1" | "kDenominateur1" | "kNumer
   if (phase === "kForme") return [fragTexte("Quelle est la forme indéterminée de cette limite en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(" ?")];
   if (phase === "kNumerateur1") return [fragTexte("Dérive une première fois le numérateur "), fragLatex("f(x)"), fragTexte(".")];
   if (phase === "kDenominateur1") return [fragTexte("Dérive une première fois le dénominateur "), fragLatex("g(x)"), fragTexte(".")];
-  if (phase === "kNumerateur2") return [fragTexte("Le rapport des dérivées précédentes est ENCORE une forme indéterminée "), fragLatex("0/0"), fragTexte(" en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(" — dérive le numérateur UNE SECONDE FOIS.")];
+  if (phase === "kNumerateur2") return [fragTexte("Le rapport des dérivées précédentes est encore une forme indéterminée "), fragLatex("\\dfrac{0}{0}"), fragTexte(" en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(" — dérive le numérateur une seconde fois.")];
   if (phase === "kDenominateur2") return [fragTexte("Dérive le dénominateur une seconde fois.")];
   return [fragTexte("Applique la règle de L'Hôpital (2 applications) : calcule la limite du rapport des dérivées secondes en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(".")];
 }
-
-
 
 /** Bloc "état actuel" — ACCUMULE (plus ancien en premier) les 5 écrans précédents, même principe
  * que les autres familles L'Hôpital. */
@@ -658,8 +605,6 @@ export function formatLimiteEnonceLatex(exercice: ExerciceLimiteExponentielle): 
       return `\\lim_{${formatDirectionB(exercice)}} \\left(${formatFonctionB(exercice)}\\right)`;
     case "C":
       return `\\lim_{x \\to +\\infty} \\left(${formatFonctionC(exercice)}\\right)`;
-    case "G":
-      return `\\lim_{x \\to \\frac{\\pi}{2}} \\left(${formatFonctionG()}\\right)`;
     case "H":
       return `\\lim_{x \\to ${formatPointLimite(exercice.x0)}} ${formatFonctionH(exercice)}`;
     case "I":
@@ -675,16 +620,66 @@ export function formatLimiteEnonceLatex(exercice: ExerciceLimiteExponentielle): 
   }
 }
 
+// ============================================================================
+// Écran « forme » (B : somme ; C : produit ou quotient ; H–K : quotient de L'Hôpital) — verdict
+// varié (décision de l'utilisateur, audit 6e ch. 2). Mêmes cinq options partout.
+// ============================================================================
+
+/** Libellé KaTeX d'une forme (bouton, réponse attendue). */
+export function formeLatex(c: CategorieFI): string {
+  switch (c) {
+    case "zero_sur_zero":
+      return "\\dfrac{0}{0}";
+    case "infini_sur_infini":
+      return "\\dfrac{\\infty}{\\infty}";
+    case "zero_fois_infini":
+      return "0\\cdot\\infty";
+    case "infini_moins_infini":
+      return "\\infty-\\infty";
+    case "pas_une_fi":
+      return "\\text{pas une forme indéterminée}";
+  }
+}
+
+/** Forme attendue à un écran « forme » (null hors de ces écrans). */
+export function formeAttendue(exercice: ExerciceLimiteExponentielle, phase: PhaseLimiteExponentielle): CategorieFI | null {
+  if (phase === "bForme" && exercice.famille === "B") return exercice.baseSuperieureA1 && exercice.limitePolynomiale.type === "moins_infini" ? "infini_moins_infini" : "pas_une_fi";
+  if (phase === "cForme" && exercice.famille === "C") return exercice.quotient ? "infini_sur_infini" : "zero_fois_infini";
+  if (phase === "hForme" || phase === "iForme" || phase === "jForme" || phase === "kForme") return "zero_sur_zero";
+  return null;
+}
+
+function consigneFormeBC(exercice: ExerciceLimiteB | ExerciceLimiteC): FragmentConsigne[] {
+  if (exercice.famille === "B") return [fragTexte("Avec les limites des deux termes : quelle forme a la limite de la somme ?")];
+  return [fragTexte(`Avec ces deux limites : quelle forme a la limite du ${exercice.quotient ? "quotient" : "produit"} ?`)];
+}
+
+function aideForme1(): AideAvecLatex {
+  return { texte: "Une forme est indéterminée quand les règles de calcul sur les limites ne permettent pas de conclure ; il y en a quatre ici :", latex: "\\infty-\\infty,\\quad 0\\cdot\\infty,\\quad \\dfrac{0}{0},\\quad \\dfrac{\\infty}{\\infty}" };
+}
+
+function aideForme2(exercice: ExerciceLimiteB | ExerciceLimiteC): AideAvecLatex {
+  if (exercice.famille === "B") return { texte: "Ici, les deux termes tendent vers :", latex: `${formatCibleTexte(exercice.limiteExponentielle)}\\quad\\text{et}\\quad ${formatCibleTexte(exercice.limitePolynomiale)}` };
+  const [f1, f2] = facteursCLatex(exercice);
+  return { texte: exercice.quotient ? "Ici, le numérateur et le dénominateur tendent vers :" : "Ici, les deux facteurs tendent vers :", latex: `${f1}\\to ${formatCibleTexte(exercice.limiteFacteur1)},\\qquad ${f2}\\to ${formatCibleTexte(exercice.limiteFacteur2)}` };
+}
+
+/** Les deux facteurs de C (numérateur et dénominateur pour le quotient), en LaTeX. */
+export function facteursCLatex(exercice: ExerciceLimiteC): [string, string] {
+  const xr = formatPuissance("x", exercice.r);
+  const xs = formatPuissance("x", exercice.s);
+  return [xr, exercice.quotient ? `e^{${xs}}` : `e^{-${xs}}`];
+}
+
 export function consigneEcran(phase: PhaseLimiteExponentielle, exercice: ExerciceLimiteExponentielle): FragmentConsigne[] {
+  if ((phase === "bForme" || phase === "cForme") && (exercice.famille === "B" || exercice.famille === "C")) return consigneFormeBC(exercice);
   switch (exercice.famille) {
     case "A":
       return consigneA(phase as "aExposant" | "aGlobale");
     case "B":
       return consigneB(phase as "bExponentielle" | "bPolynomiale" | "bGlobale");
     case "C":
-      return consigneC(phase as "cFacteurs" | "cGlobale");
-    case "G":
-      return consigneG(phase as "gCombiner" | "gOrdre1" | "gConclure");
+      return consigneC(phase as "cFacteurs" | "cGlobale", exercice);
     case "H":
       return consigneH(phase as "hForme" | "hNumerateur" | "hDenominateur" | "hConclure", exercice);
     case "I":
@@ -707,6 +702,8 @@ export function consigneEcran(phase: PhaseLimiteExponentielle, exercice: Exercic
  * composants d'écran (`EtapeChampLimiteExpo`/`EtapeFacteursC`/`EtapeOrdre1G`/`EtapeReponseLimite`)
  * ne référençait `etatActuel` avant ce correctif. */
 export function etatActuel(exercice: ExerciceLimiteExponentielle, phase: PhaseLimiteExponentielle): string[] | null {
+  if (phase === "bForme" && exercice.famille === "B") return etatActuelB(exercice, "bGlobale");
+  if (phase === "cForme" && exercice.famille === "C") return etatActuelC(exercice, "cGlobale");
   switch (exercice.famille) {
     case "A":
       return etatActuelA(exercice, phase as "aExposant" | "aGlobale");
@@ -714,8 +711,6 @@ export function etatActuel(exercice: ExerciceLimiteExponentielle, phase: PhaseLi
       return etatActuelB(exercice, phase as "bExponentielle" | "bPolynomiale" | "bGlobale");
     case "C":
       return etatActuelC(exercice, phase as "cFacteurs" | "cGlobale");
-    case "G":
-      return etatActuelG(phase as "gCombiner" | "gOrdre1" | "gConclure");
     case "H":
       return etatActuelH(exercice, phase as "hForme" | "hNumerateur" | "hDenominateur" | "hConclure");
     case "I":
@@ -804,6 +799,7 @@ function aideLHopital2(phase: PhaseLimiteExponentielle, e: ExerciceLimiteH | Exe
 }
 
 export function aideNiveau1(phase: PhaseLimiteExponentielle, exercice: ExerciceLimiteExponentielle): AideAvecLatex {
+  if (phase === "bForme" || phase === "cForme") return aideForme1();
   switch (exercice.famille) {
     case "A":
       return aideA1(phase as "aExposant" | "aGlobale");
@@ -811,8 +807,6 @@ export function aideNiveau1(phase: PhaseLimiteExponentielle, exercice: ExerciceL
       return aideB1(phase as "bExponentielle" | "bPolynomiale" | "bGlobale", exercice);
     case "C":
       return aideC1(phase as "cFacteurs" | "cGlobale");
-    case "G":
-      return aideG1(phase as "gCombiner" | "gOrdre1" | "gConclure");
     case "H":
       return aideLHopital1(phase, exercice);
     case "I":
@@ -829,6 +823,7 @@ export function aideNiveau1(phase: PhaseLimiteExponentielle, exercice: ExerciceL
 }
 
 export function aideNiveau2(phase: PhaseLimiteExponentielle, exercice: ExerciceLimiteExponentielle): AideAvecLatex {
+  if ((phase === "bForme" || phase === "cForme") && (exercice.famille === "B" || exercice.famille === "C")) return aideForme2(exercice);
   switch (exercice.famille) {
     case "A":
       return aideA2(phase as "aExposant" | "aGlobale", exercice);
@@ -836,8 +831,6 @@ export function aideNiveau2(phase: PhaseLimiteExponentielle, exercice: ExerciceL
       return aideB2(phase as "bExponentielle" | "bPolynomiale" | "bGlobale", exercice);
     case "C":
       return aideC2(phase as "cFacteurs" | "cGlobale", exercice);
-    case "G":
-      return aideG2(phase as "gCombiner" | "gOrdre1" | "gConclure");
     case "H":
       return aideLHopital2(phase, exercice);
     case "I":
@@ -852,7 +845,6 @@ export function aideNiveau2(phase: PhaseLimiteExponentielle, exercice: ExerciceL
       return aideN2(phase as "nCombiner" | "nConclure", exercice);
   }
 }
-
 
 // ============================================================================
 // Écritures EXACTES partagées par l'écran (réponse attendue), le corrigé détaillé et la réponse
@@ -906,7 +898,7 @@ export function approcheLimiteLatex(v: number): string {
   return `${String(m).replace(".", "{,}")}\\cdot 10^{${e}}`;
 }
 
-/** Limite finale EXACTE des familles à valeur finie (C, G, H, I, J, K, L, N) ; `null` pour A et B
+/** Limite finale EXACTE des familles à valeur finie (C, H, I, J, K, L, N) ; `null` pour A et B
  * (limite catégorielle, voir `formatCibleTexte`). */
 export function formatLimiteExacteLatex(exercice: ExerciceLimiteExponentielle): string | null {
   switch (exercice.famille) {
@@ -915,8 +907,6 @@ export function formatLimiteExacteLatex(exercice: ExerciceLimiteExponentielle): 
       return null;
     case "C":
       return "0";
-    case "G":
-      return "\\dfrac{1}{2}";
     case "H": {
       const ln = `\\ln(${exercice.base})`;
       return exercice.expAuNumerateur ? coefFoisPartieLatex(exercice.k, exercice.m, ln) : coefSurPartieLatex(exercice.m, exercice.k, ln);
@@ -943,7 +933,7 @@ export function formatLimiteExacteLatex(exercice: ExerciceLimiteExponentielle): 
 export function formatLimiteFinaleLatex(exercice: ExerciceLimiteExponentielle): string {
   if (exercice.famille === "A" || exercice.famille === "B") return formatCibleTexte(exercice.limiteGlobale);
   const exacte = formatLimiteExacteLatex(exercice) as string;
-  if (exercice.famille === "C" || exercice.famille === "G" || exercice.famille === "N") return exacte;
+  if (exercice.famille === "C" || exercice.famille === "N") return exacte;
   return `${exacte}\\approx ${approcheLimiteLatex(exercice.limiteFinale)}`;
 }
 
@@ -984,11 +974,10 @@ export function partiesLHopital(exercice: ExerciceLimiteH | ExerciceLimiteI | Ex
   }
 }
 
-/** Formes reformulées confirmées par l'écran (L : pivot, N : une seule puissance, G : fraction unique). */
+/** Formes reformulées confirmées par l'écran (L : pivot, N : une seule puissance). */
 export function formeReformuleeLatex(exercice: ExerciceLimiteExponentielle): string | null {
   if (exercice.famille === "L") return formatFormeReformuleeL(exercice);
   if (exercice.famille === "N") return formatFormeCombineeN(exercice);
-  if (exercice.famille === "G") return formatFormeCombineeG();
   return null;
 }
 

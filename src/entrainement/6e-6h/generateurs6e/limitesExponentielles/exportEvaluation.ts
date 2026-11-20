@@ -69,21 +69,18 @@ function bareme(e: ExerciceLimiteExponentielle): BaremeExercice {
       erreursFrequentes = [{ description: [texte("Conclure « forme indéterminée » ou suivre le terme polynomial alors que l'exponentielle l'emporte")], cout: "0 pt sur l'étape 3" }];
       break;
     case "C":
-      criteres = [
-        { sousQuestion: "a", critere: [texte("Limites des facteurs : "), latex("+\\infty"), texte(" et 0")], points: 1 },
-        { sousQuestion: "b", critere: [texte("Produit écrit en quotient, croissances comparées")], points: 2 },
-        { sousQuestion: "b", critere: lim, points: 1 },
-      ];
-      erreursFrequentes = [{ description: [texte("Conclure 0 sans lever la forme "), latex("\\infty\\cdot 0")], cout: "−1" }];
-      break;
-    case "G":
-      criteres = [
-        { sousQuestion: "a", critere: [texte("Fraction unique (même dénominateur)")], points: 1 },
-        { sousQuestion: "b", critere: [texte("L'ordre 1 ne suffit pas (les termes dominants s'annulent)")], points: 1 },
-        { sousQuestion: "c", critere: [texte("Développements à l'ordre 2 et simplification")], points: 1 },
-        { sousQuestion: "c", critere: lim, points: 1 },
-      ];
-      erreursFrequentes = [{ description: [texte("Conclure 0 après l'ordre 1")], cout: "0 pt sur l'étape 3" }];
+      criteres = e.quotient
+        ? [
+            { sousQuestion: "a", critere: [texte("Limites du numérateur et du dénominateur : "), latex("+\\infty"), texte(" et "), latex("+\\infty")], points: 1 },
+            { sousQuestion: "b", critere: [texte("Forme "), latex("\\dfrac{\\infty}{\\infty}"), texte(" reconnue, croissances comparées")], points: 2 },
+            { sousQuestion: "b", critere: lim, points: 1 },
+          ]
+        : [
+            { sousQuestion: "a", critere: [texte("Limites des facteurs : "), latex("+\\infty"), texte(" et 0")], points: 1 },
+            { sousQuestion: "b", critere: [texte("Produit écrit en quotient, croissances comparées")], points: 2 },
+            { sousQuestion: "b", critere: lim, points: 1 },
+          ];
+      erreursFrequentes = e.quotient ? [{ description: [texte("Conclure 1 sans lever la forme "), latex("\\dfrac{\\infty}{\\infty}")], cout: "−1" }] : [{ description: [texte("Conclure 0 sans lever la forme "), latex("\\infty\\cdot 0")], cout: "−1" }];
       break;
     case "K":
       criteres = [
@@ -131,8 +128,7 @@ function bareme(e: ExerciceLimiteExponentielle): BaremeExercice {
 /**
  * Niveau 1–7 (grille commune) — méthode et piège jugés sur l'énoncé papier (« Calcule la limite ») :
  * A directe (méthode 0, piège : base entre 0 et 1, ou x → 0⁻ sous une puissance impaire) ; B somme
- * (méthode 1, piège : forme +∞ − ∞ d'apparence « −∞ ») ; C produit ∞·0 (méthode 1) ; G (méthode 2 :
- * développements construits par l'élève, piège : l'ordre 1 s'annule) ; H, I, J L'Hôpital
+ * (méthode 1, piège : forme +∞ − ∞ d'apparence « −∞ ») ; C produit ou quotient (méthode 1) ; H, I, J L'Hôpital
  * (méthode 1) ; K (piège : la forme persiste après une application) ; L 1^∞ et N ∞⁰/0⁰ (piège : la
  * forme n'est pas 1). Nombres : ln(a) ou e^{km} non remarquables (H, I, J, K, L). Aucun écran de
  * pure lecture.
@@ -148,10 +144,6 @@ function criteresDifficulte(e: ExerciceLimiteExponentielle): CriteresDifficulte 
       break;
     case "B":
       piege = e.baseSuperieureA1 && e.limitePolynomiale.type === "moins_infini" ? 1 : 0;
-      break;
-    case "G":
-      methode = 2;
-      piege = 1;
       break;
     case "H":
     case "I":

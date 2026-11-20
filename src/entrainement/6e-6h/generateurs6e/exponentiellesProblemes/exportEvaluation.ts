@@ -45,9 +45,9 @@ function questionsPapier(e: E): { questions: QuestionExercice[]; etapes: string[
     case "A":
       if (e.sousType === "evaluer") return { questions: [{ consigne: [texte(`Détermine la valeur au bout de ${e.n} ${u}, arrondie à l'unité.`)] }], etapes: [["a", "b"]], donnees, enPlus: [] };
       return {
-        questions: [{ consigne: [texte("Détermine l'instant t où la quantité valait "), latex(`\\dfrac{1}{2^{${e.k}}}`), texte(" de sa valeur à l'instant "), latex(`T=${e.T}`), texte(".")] }],
+        questions: [{ consigne: consigneEcran(e, "aEcran2") }],
         etapes: [["a", "b"]],
-        donnees: donnees.slice(0, 1),
+        donnees,
         enPlus: [],
       };
     case "B":
@@ -113,7 +113,7 @@ function questionsPapier(e: E): { questions: QuestionExercice[]; etapes: string[
         questions: [
           { consigne: [texte("Évalue "), latex(`f(${e.tEval1})`), texte(" et "), latex(`f(${e.tEval2})`), texte(", au centième.")] },
           { consigne: [texte("Résous "), latex(`f(t)=${formatDecimal(e.sAffiche, 1)}`), texte(", au centième.")] },
-          { consigne: [texte("Compare ce temps à la durée "), latex(`D=${e.duree}`), texte(" : l'objectif est-il atteignable ?")] },
+          { consigne: [...consigneEcran(e, "gEcran3"), texte(" Justifie en comparant le temps trouvé à la durée.")] },
         ],
         etapes: [["a"], ["b"], ["c"]],
         donnees,

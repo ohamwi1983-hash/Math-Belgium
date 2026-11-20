@@ -17,7 +17,7 @@ function sequencePourExercice(exercice: ExerciceInequationExponentielle): PhaseI
   let phase: PhaseInequationExponentielle | "termine" = phaseInitiale(exercice);
   while (phase !== "termine") {
     phases.push(phase);
-    phase = phaseApres(phase);
+    phase = phaseApres(phase, exercice);
   }
   return phases;
 }

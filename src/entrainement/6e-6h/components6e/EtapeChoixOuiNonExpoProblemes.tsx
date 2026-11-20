@@ -25,7 +25,7 @@ interface Props extends PropsRetourChamp<boolean> {
   niveauAide: number;
   niveauAideMax: number;
   onActiverAide: () => void;
-  onValider: (atteignable: boolean) => void;
+  onValider: (oui: boolean) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -64,10 +64,10 @@ export function EtapeChoixOuiNonExpoProblemes({ consigneGenerale, blocDonnees, c
       </p>
       <div className="options-grid-compact">
         <button type="button" className={`btn ${choix === true ? "toggle-active" : ""} ${montrerErreurs && choix === true ? "is-erronee" : ""}`} onClick={() => setChoix(true)}>
-          Oui, atteignable
+          Oui
         </button>
         <button type="button" className={`btn ${choix === false ? "toggle-active" : ""} ${montrerErreurs && choix === false ? "is-erronee" : ""}`} onClick={() => setChoix(false)}>
-          Non, pas atteignable
+          Non
         </button>
       </div>
       <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />

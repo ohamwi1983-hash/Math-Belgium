@@ -9,7 +9,7 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesEquationsExponentielles";
 import type { EtatSessionEquationExponentielle, PhaseEquationExponentielle, ResultatExerciceEquationExponentielle } from "./typesEquationsExponentielles";
-import { verifierAEcran1, verifierAEcran2Liste, verifierAEcran2Valeur, verifierBEcran1, verifierBEcran2, verifierCEcran1, verifierCEcran2, verifierCEcran3, verifierDEcran } from "./verificationEquationsExponentielles";
+import { verifierAEcran1, verifierAEcran2Liste, verifierAEcran2Valeur, verifierBEcran1, verifierBEcran2, verifierCEcran1, verifierCEcran2, verifierCEcran3, verifierDEcran, verifierExistence } from "./verificationEquationsExponentielles";
 import type { ReponseValeurOuVide } from "./verificationEquationsExponentielles";
 
 const POINTS_DE_BASE = 100;
@@ -41,7 +41,7 @@ export function demarrerSessionEquationExponentielle(reglages: ReglagesSession6e
 /** Choix fermés (verdict, catégorie, graphique) : 1 seule tentative — un choix parmi deux ou trois
  * options rejoué trois fois ne mesure plus rien (audit 6e ch. 2, lot B). Champs : réglage de la
  * session (3 tentatives). */
-const PHASES_CHOIX_FERME: ReadonlySet<PhaseEquationExponentielle> = new Set<PhaseEquationExponentielle>(["dEcran"]);
+const PHASES_CHOIX_FERME: ReadonlySet<PhaseEquationExponentielle> = new Set<PhaseEquationExponentielle>(["existence", "dEcran"]);
 
 export function tentativesMaxCourant(etat: EtatSessionEquationExponentielle): number {
   return PHASES_CHOIX_FERME.has(etat.phase) ? 1 : etat.reglages.tentativesMax;
@@ -100,7 +100,7 @@ function avancerPhase<TReponse>(
   const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: revele };
-  const phaseSuivante = phaseApres(etat.phase);
+  const phaseSuivante = phaseApres(etat.phase, exercice);
 
   if (phaseSuivante === "termine") {
     return { ...cloturerExerciceOuSuivant(etat, construireResultat(exercice, scoresPartiels)), derniereTransitionRevelee: revele };
@@ -162,6 +162,14 @@ export function soumettreReponseCEcran2(etat: EtatSessionEquationExponentielle, 
 
 export function soumettreReponseCEcran3(etat: EtatSessionEquationExponentielle, textes: string[]): EtatSessionEquationExponentielle {
   return avancerPhase(etat, textes, (e, r) => (e.famille === "C" ? verifierCEcran3(e, r) : false), "cEcran3");
+}
+
+// ============================================================================
+// Écran de verdict « existence » (familles A, B, C) — même question que l'écran de la famille D.
+// ============================================================================
+
+export function soumettreReponseExistence(etat: EtatSessionEquationExponentielle, ilFautResoudre: boolean): EtatSessionEquationExponentielle {
+  return avancerPhase(etat, ilFautResoudre, (e, r) => verifierExistence(e, r), "existence");
 }
 
 // ============================================================================

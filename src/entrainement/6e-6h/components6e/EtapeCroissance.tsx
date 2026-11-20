@@ -17,8 +17,8 @@ interface AideAvecLatex {
 }
 
 const OPTIONS: { id: ReponseCroissance["type"]; label: string; requiertPosition: boolean }[] = [
-  { id: "croissante_partout", label: "Croissante (partout)", requiertPosition: false },
-  { id: "decroissante_partout", label: "Décroissante (partout)", requiertPosition: false },
+  { id: "croissante_partout", label: "Croissante sur chaque intervalle du domaine", requiertPosition: false },
+  { id: "decroissante_partout", label: "Décroissante sur chaque intervalle du domaine", requiertPosition: false },
   { id: "minimum", label: "Un minimum", requiertPosition: true },
   { id: "maximum", label: "Un maximum", requiertPosition: true },
 ];
@@ -82,7 +82,7 @@ export function EtapeCroissance({ enonceLatex, aideNiveau1, aideNiveau2, tentati
         <>
           <ApercuExpressionLatex texte={position} />
           <div className="field contenu-conditionnel">
-            <label className="field-label field-label-minuscule">Position de l'extremum (x=...)</label>
+            <label className="field-label field-label-minuscule">Abscisse de l'extremum</label>
             <input type="text" className={`text-input ${montrerErreurs && position === retour.soumise?.position ? "is-erronee" : ""}`} value={position} placeholder="ex : 3/2" onChange={(e) => setPosition(e.target.value)} />
           </div>
         </>

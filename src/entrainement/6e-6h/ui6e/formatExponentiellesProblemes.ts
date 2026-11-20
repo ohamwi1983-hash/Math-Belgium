@@ -38,7 +38,10 @@ function latex(valeur: string): FragmentConsigne {
 export function formatDecimal(v: number, decimales = 2): string {
   const f = Math.pow(10, decimales);
   const r = Math.round(v * f) / f;
-  return String(r).replace(".", "{,}").replace("-{,}", "-0{,}");
+  // Espace fine des milliers dans la partie entière (« 12\,000 », jamais « 12000 ») — audit 6e ch. 2.
+  const [ent, dec] = String(r).split(".");
+  const groupe = ent!.replace(/\B(?=(\d{3})+(?!\d))/g, "\\,");
+  return (dec === undefined ? groupe : `${groupe}{,}${dec}`).replace("-{,}", "-0{,}");
 }
 
 /** `base^{exposant}` LaTeX, sauf si `exposant===1` (retourne `base` seul) — même primitive que
@@ -140,13 +143,13 @@ function consigneGeneraleA(exercice: ExerciceExpoProbA): FragmentConsigne[] {
 }
 
 function blocDonneesA(exercice: ExerciceExpoProbA): string[] {
-  if (exercice.sousType === "evaluer") return [`Q_0 = ${exercice.Q0}`, `p = ${exercice.p}\\,\\%`, `n = ${exercice.n}\\ (\\text{${contexteA(exercice).unite}})`];
-  return [`T = ${exercice.T}\\ (\\text{${contexteA(exercice).unite}})`, `k = ${exercice.k}`];
+  if (exercice.sousType === "evaluer") return [`Q_0 = ${formatDecimal(exercice.Q0, 0)}`, `p = ${exercice.p}\\,\\%`, `n = ${exercice.n}\\ (\\text{${contexteA(exercice).unite}})`];
+  return [`T = ${exercice.T}\\ (\\text{${contexteA(exercice).unite}})`];
 }
 
 function etatActuelA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): string[] | null {
   if (phase === "aEcran1") return null;
-  return exercice.sousType === "evaluer" ? [`Q(t) = ${exercice.Q0}\\cdot ${formatDecimal(exercice.r, 3)}^{\\,t}`] : [`${exercice.T}-t`];
+  return exercice.sousType === "evaluer" ? [`Q(t) = ${formatDecimal(exercice.Q0, 0)}\\cdot ${formatDecimal(exercice.r, 3)}^{\\,t}`] : [`${exercice.T}-t`];
 }
 
 function consigneEcranA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): FragmentConsigne[] {
@@ -157,7 +160,7 @@ function consigneEcranA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2
   }
   return exercice.sousType === "evaluer"
     ? [texte("Avec ce modèle, calcule la valeur au temps demandé (arrondie).")]
-    : [texte("Déduis l'instant t où la quantité valait "), latex(`\\dfrac{1}{2^{${exercice.k}}}`), texte(" de sa valeur en T.")];
+    : [texte((contexteA(exercice) as (typeof CONTEXTES_A_DOUBLEMENT)[number]).question(exercice.k, exercice.T))];
 }
 
 function aideA1(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): AideAvecLatex {
@@ -177,7 +180,7 @@ function aideA2(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): Aide
 }
 
 function formatReponseA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): string[] {
-  if (phase === "aEcran1") return exercice.sousType === "evaluer" ? [`Q(t) = ${exercice.Q0}\\cdot ${formatDecimal(exercice.r, 3)}^{\\,t}`] : [`${exercice.T}-t`];
+  if (phase === "aEcran1") return exercice.sousType === "evaluer" ? [`Q(t) = ${formatDecimal(exercice.Q0, 0)}\\cdot ${formatDecimal(exercice.r, 3)}^{\\,t}`] : [`${exercice.T}-t`];
   return exercice.sousType === "evaluer" ? [formatDecimal(exercice.valeurFinale, 0)] : [formatDecimal(exercice.t, 0)];
 }
 
@@ -540,7 +543,7 @@ function consigneGeneraleG(exercice: ExerciceExpoProbG): FragmentConsigne[] {
 }
 
 function blocDonneesG(exercice: ExerciceExpoProbG): string[] {
-  return [`f(t) = ${formatModeleG(exercice.c, exercice.k, formatDecimal(exercice.a, 1))}`, `S = ${formatDecimal(exercice.sAffiche, 1)}`, `D = ${exercice.duree}\\ (\\text{${contexteG(exercice).unite}})`];
+  return [`f(t) = ${formatModeleG(exercice.c, exercice.k, formatDecimal(exercice.a, 1))}`, `S = ${formatDecimal(exercice.sAffiche, 1)}`, `D = ${exercice.duree}\\ (\\text{${exercice.duree < 2 ? contexteG(exercice).unite.replace(/s$/, "") : contexteG(exercice).unite}})`];
 }
 
 // Correctif transversal (même bug que `etatActuelB`/`etatActuelE`/`etatActuelF` ci-dessus, voir
@@ -564,7 +567,7 @@ function consigneEcranG(exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2
     case "gEcran2":
       return [texte("Résous "), latex(`f(t)=${formatDecimal(exercice.sAffiche, 1)}`), texte(" (isole l'exponentielle puis passe au logarithme).")];
     case "gEcran3":
-      return [texte("Compare le temps seuil à "), latex(`D=${exercice.duree}`), texte(" : l'objectif est-il atteignable ?")];
+      return [texte(contexteG(exercice).question(exercice.duree, exercice.sAffiche))];
   }
 }
 
@@ -575,7 +578,7 @@ function aideG1(_exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2" | "gE
     case "gEcran2":
       return { texte: "Isole l'exponentielle avant de passer au logarithme :", latex: "e^{k-at}=S-c" };
     case "gEcran3":
-      return { texte: "La grandeur est décroissante : le seuil est franchi puis dépassé, jamais retrouvé.", latex: null };
+      return { texte: "La grandeur décroît : elle est au-dessus du seuil avant le temps seuil, en dessous après. Situe la durée D par rapport au temps seuil.", latex: null };
   }
 }
 
@@ -586,7 +589,9 @@ function aideG2(exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2" | "gEc
     case "gEcran2":
       return { texte: "Équation prête pour le logarithme (non résolue) :", latex: `${formatExposantG(exercice.k, formatDecimal(exercice.a, 1))} = \\ln(${formatSoustraction(formatDecimal(exercice.sAffiche, 1), exercice.c)})` };
     case "gEcran3":
-      return { texte: "Temps seuil et durée, côte à côte :", latex: `t_{seuil} \\approx ${formatDecimal(exercice.tSeuil, 2)}, \\quad D = ${exercice.duree}` };
+      return exercice.objectif === "rester"
+        ? { texte: "Rester au-dessus du seuil pendant toute la durée D, c'est finir avant le temps seuil : la réponse est « oui » exactement quand", latex: "D\\leqslant t_{seuil}" }
+        : { texte: "Être passé sous le seuil à la fin de la durée D, c'est avoir dépassé le temps seuil : la réponse est « oui » exactement quand", latex: "t_{seuil}\\leqslant D" };
   }
 }
 
@@ -594,7 +599,7 @@ function formatReponseG(exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2
   const rel = (v: number) => (Math.abs(Math.round(v * 100) / 100 - v) < 1e-9 ? "=" : "\\approx ");
   if (phase === "gEcran1") return [`f(${exercice.tEval1})${rel(exercice.fEval1)}${formatDecimal(exercice.fEval1, 2)}`, `f(${exercice.tEval2})${rel(exercice.fEval2)}${formatDecimal(exercice.fEval2, 2)}`];
   if (phase === "gEcran2") return [formatDecimal(exercice.tSeuil, 2)];
-  return [exercice.duree >= exercice.tSeuil ? "\\text{Atteignable}" : "\\text{Non atteignable}"];
+  return [exercice.verdictOui ? "\\text{Oui}" : "\\text{Non}"];
 }
 
 // ============================================================================

@@ -20,12 +20,12 @@ export const CATALOGUE_FAMILLES: { id: IdVarianteEquationExponentielle; label: s
   { id: "A1", label: "A1 — Même base, direct" },
   { id: "A2", label: "A2 — Même base, avec racine" },
   { id: "A3", label: "A3 — Même base, second degré en x" },
-  { id: "B", label: "B — √(baseᵘ)=baseᵛ (∅ possible)" },
+  { id: "B", label: "B — Racine d'une puissance : √(aᵘ) = aᵛ" },
   { id: "C-direct", label: "C — Changement de variable (présentation directe)" },
-  { id: "C-carreDeguise", label: "C — Changement de variable (base² déguisée)" },
+  { id: "C-carreDeguise", label: "C — Changement de variable (carré déguisé)" },
   { id: "C-regroupement", label: "C — Changement de variable (regroupement de coefficient)" },
-  { id: "D1", label: "D1 — c·baseᶠ⁽ˣ⁾=0, toujours ∅" },
-  { id: "D2", label: "D2 — somme de puissances +k=0, toujours ∅" },
+  { id: "D1", label: "D1 — Multiple d'une puissance égal à 0" },
+  { id: "D2", label: "D2 — Somme de puissances égale à 0" },
 ];
 
 export function construireAvecFamilleId(id: IdVarianteEquationExponentielle): ExerciceEquationExponentielle {

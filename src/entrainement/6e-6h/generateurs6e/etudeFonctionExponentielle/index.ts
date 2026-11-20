@@ -7,10 +7,10 @@ import { construireD } from "./familles/D";
 /** Catalogue de variantes (convention permanente, voir CLAUDE.md) — 4 familles, tirage
  * ÉQUIPROBABLE (spec explicite : "Tirage aléatoire d'1 famille parmi 4 (A à D, équiprobable)"). */
 export const CATALOGUE_FAMILLES: { id: FamilleEtudeFonctionExponentielle; label: string }[] = [
-  { id: "A", label: "A. Exponentielle simple, e^(mx+n)" },
+  { id: "A", label: "A. Exponentielle d'exposant affine" },
   { id: "B", label: "B. Point exclu, asymptote asymétrique" },
   { id: "C", label: "C. Asymptote oblique" },
-  { id: "D", label: "D. Produit a·x·eˣ (réutilise 6gen8)" },
+  { id: "D", label: "D. Produit a·x·eˣ" },
 ];
 
 const CONSTRUCTEURS: Record<FamilleEtudeFonctionExponentielle, () => ExerciceEtudeFonctionExponentielle> = {

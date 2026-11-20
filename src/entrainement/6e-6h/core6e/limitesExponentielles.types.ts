@@ -42,12 +42,18 @@
  * le contrat lui-même reste générique, un seul type pour les 7 familles.
  */
 
-export type FamilleLimiteExponentielle = "A" | "B" | "C" | "G" | "H" | "I" | "J" | "K" | "L" | "N";
+/** La famille G (développement limité d'ordre 2, instance unique) a été RETIRÉE (décision de
+ * l'utilisateur, audit 6e ch. 2 : le développement limité n'est pas enseigné) ; son entrée de
+ * catalogue reste réservée (`retiree`) pour que les indices `?code=` des autres variantes ne
+ * changent pas. */
+export type FamilleLimiteExponentielle = "A" | "B" | "C" | "H" | "I" | "J" | "K" | "L" | "N";
 
 /** Classification partagée par H/I/J/K (écran de diagnostic AVANT toute dérivation) — jamais
  * "l'autre" ou une 4e valeur : les 3 cas couvrent exhaustivement ce qu'une limite de quotient peut
  * présenter à ce niveau. */
-export type CategorieFI = "zero_sur_zero" | "infini_sur_infini" | "pas_une_fi";
+/** Forme d'une limite (écran « forme », familles B, C, H, I, J, K — décision de l'utilisateur, audit
+ * 6e ch. 2 : verdict varié, plus seulement 0/0). */
+export type CategorieFI = "zero_sur_zero" | "infini_sur_infini" | "zero_fois_infini" | "infini_moins_infini" | "pas_une_fi";
 
 /** Cible catégorielle ou valeur exacte — voir la note de conception ci-dessus. */
 export type CibleLimite = { type: "plus_infini" } | { type: "moins_infini" } | { type: "zero" } | { type: "valeur"; valeur: number };
@@ -119,31 +125,14 @@ export interface ExerciceLimiteC {
   famille: "C";
   r: 1 | 2;
   s: 2 | 3;
+  /** Présentation : `false` produit x^r·e^{−x^s} (forme 0·∞), `true` quotient x^r / e^{x^s} (forme
+   * ∞/∞) — même limite 0. Tirée en DERNIER (les autres paramètres d'un `?code=` imprimé restent). */
+  quotient: boolean;
   limiteFacteur1: CibleLimite;
   limiteFacteur2: CibleLimite;
   limiteGlobale: number;
 }
 
-// ============================================================================
-// Famille G — ∞−∞ avancée, développement à l'ordre 2 (3 écrans : combiner, ordre1, conclure).
-// INSTANCE UNIQUE codée en dur (voir en-tête du générateur, `generateurs6e/limitesExponentielles/
-// familles/G.ts`, pour la justification — non généralisable sans un calcul de vérification
-// explicite pour d'autres coefficients). f(x) = 1/cos(x) + 1/(1−e^(π/2−x)), x→π/2. Limite = 1/2.
-//
-// **Décision de conception — écran 2 ("ordre 1 insuffisant"), laissé ouvert par la spec** : QCM
-// booléen "L'ordre 1 suffit-il à conclure ? Oui / Non", réponse TOUJOURS "Non" pour cette instance
-// (les termes dominants s'annulent à l'ordre 1, cf. développement limité en u=π/2−x : cos(x)≈u,
-// 1−e^u≈−u, la substitution directe donne une forme 0/0 non résolue). Choix retenu plutôt qu'un
-// champ de texte libre : la question posée par la spec ("un développement à l'ordre 1 suffit-il ?")
-// est un CONSTAT catégoriel, pas un calcul — un QCM à 2 boutons est la forme la plus honnête et la
-// plus simple à vérifier, cohérent avec le principe "champ texte libre réservé aux calculs/
-// expressions" déjà en place sur le reste du générateur.
-// ============================================================================
-
-export interface ExerciceLimiteG {
-  famille: "G";
-  limiteFinale: number;
-}
 
 // ============================================================================
 // Famille H — L'Hôpital, 0/0 pur exponentiel, une application (4 écrans : forme, numérateur,
@@ -281,7 +270,6 @@ export type ExerciceLimiteExponentielle =
   | ExerciceLimiteA
   | ExerciceLimiteB
   | ExerciceLimiteC
-  | ExerciceLimiteG
   | ExerciceLimiteH
   | ExerciceLimiteI
   | ExerciceLimiteJ

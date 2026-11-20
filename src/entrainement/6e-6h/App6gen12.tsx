@@ -458,7 +458,7 @@ export function App6gen12() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(atteignable) => terminerEtape(soumettreReponseGEcran3(etat, atteignable), atteignable ? "Oui" : "Non")}
+              onValider={(oui) => terminerEtape(soumettreReponseGEcran3(etat, oui), oui ? "Oui" : "Non")}
               validation={validation}
             />
           )}

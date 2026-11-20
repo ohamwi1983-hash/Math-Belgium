@@ -191,8 +191,17 @@ function formatEnonceB(exercice: ExerciceIneqB): string {
   return `${formatMembreGaucheB(exercice)} ${symboleComparateurLatex(exercice.comparateur)} ${-exercice.k}`;
 }
 
+/** Écran de verdict « existence » (A, C-k, D, E) et premier écran de B : même question. */
 function consigneB(): FragmentConsigne[] {
-  return [txt("Sans calcul : cette inéquation a-t-elle au moins une solution réelle ?")];
+  return [txt("Avant de résoudre : cette inéquation est-elle impossible, vraie pour tout réel x, ou faut-il la résoudre ?")];
+}
+
+function aideExistence1(): AideAvecLatex {
+  return { texte: "Une puissance de base positive est toujours strictement positive, quel que soit l'exposant :", latex: "a>0\\ \\Rightarrow\\ a^{x}>0" };
+}
+
+function aideExistence2(): AideAvecLatex {
+  return { texte: "Ici, écris le signe de ce que tu connais sans calcul (chaque puissance, chaque coefficient), puis demande-toi si la comparaison est déjà décidée.", latex: null };
 }
 
 function aideB1(): AideAvecLatex {
@@ -338,14 +347,16 @@ function aideDConstant2(phase: "dConstantSigne" | "dConstantResoudre", exercice:
 export function formatFacteurUnZeroLatex(f: FacteurUnZero): string {
   if (f.type === "lineaire") return f.pente === 1 ? formatXMoinsZero(f.zero) : f.zero === 0 ? "-x" : `${f.zero}-x`;
   const bl = baseLatexPourExposant(f.base);
-  const argExpo = f.sgn === 1 ? formatXMoinsZero(f.zero) : f.zero === 0 ? "-x" : `-\\left(${formatXMoinsZero(f.zero)}\\right)`;
+  // Exposant −(x − z) écrit développé (« −x−2 », « −x+3 ») : l'énoncé D-variable débordait de 20 à
+  // 51 px son cadre sur iPhone 13 avec « −\left(x+2\right) » (audit 6e ch. 2, mesure lot C).
+  const argExpo = f.sgn === 1 ? formatXMoinsZero(f.zero) : f.zero === 0 ? "-x" : `-x${f.zero > 0 ? `+${f.zero}` : `-${-f.zero}`}`;
   return `${formatSommeTermesAvecCdot([{ valeur: f.c, suffixe: `${bl}^{${argExpo}}` }])}-${f.c}`;
 }
 
 function formatEnonceDVariable(exercice: ExerciceIneqDVariable): string {
   const f1 = formatFacteurUnZeroLatex(exercice.facteur1);
   const f2 = formatFacteurUnZeroLatex(exercice.facteur2);
-  return `\\left(${f1}\\right)\\cdot\\left(${f2}\\right) ${symboleComparateurLatex(exercice.comparateur)} 0`;
+  return `(${f1})(${f2}) ${symboleComparateurLatex(exercice.comparateur)} 0`;
 }
 
 function consigneDVariable(phase: "dVariableSigne1" | "dVariableSigne2" | "dVariableTableau"): FragmentConsigne[] {
@@ -451,6 +462,7 @@ export function formatEnonceLatex(exercice: ExerciceInequationExponentielle): st
 }
 
 export function consigneEcran(phase: PhaseInequationExponentielle, exercice: ExerciceInequationExponentielle): FragmentConsigne[] {
+  if (phase === "existence") return consigneB();
   switch (exercice.famille) {
     case "A":
       return consigneA(phase as "aReconnaitre" | "aResoudre");
@@ -466,6 +478,7 @@ export function consigneEcran(phase: PhaseInequationExponentielle, exercice: Exe
 }
 
 export function aideNiveau1(phase: PhaseInequationExponentielle, exercice: ExerciceInequationExponentielle): AideAvecLatex {
+  if (phase === "existence") return aideExistence1();
   switch (exercice.famille) {
     case "A":
       return aideA1(phase as "aReconnaitre" | "aResoudre");
@@ -481,6 +494,7 @@ export function aideNiveau1(phase: PhaseInequationExponentielle, exercice: Exerc
 }
 
 export function aideNiveau2(phase: PhaseInequationExponentielle, exercice: ExerciceInequationExponentielle): AideAvecLatex {
+  if (phase === "existence") return aideExistence2();
   switch (exercice.famille) {
     case "A":
       return aideA2(phase as "aReconnaitre" | "aResoudre", exercice);
@@ -560,6 +574,7 @@ function etatActuelE(exercice: ExerciceIneqE, phase: "eRegrouper" | "eResoudre")
  * `App6gen10.tsx` passe `etatActuel(exercice, phase)` à chacun des 4 composants d'écran.
  */
 export function etatActuel(exercice: ExerciceInequationExponentielle, phase: PhaseInequationExponentielle): string[] | null {
+  if (phase === "existence") return null;
   switch (exercice.famille) {
     case "A":
       return etatActuelA(exercice, phase as "aReconnaitre" | "aResoudre");
@@ -582,6 +597,7 @@ export function etatActuel(exercice: ExerciceInequationExponentielle, phase: Pha
 // ============================================================================
 
 export const LIBELLE_PHASE_INEQ: Record<PhaseInequationExponentielle, string> = {
+  existence: "Verdict avant résolution",
   aReconnaitre: "Exposant cible",
   aResoudre: "Résolution (ensemble-solution)",
   bReconnaitre: "Reconnaissance",
@@ -610,6 +626,7 @@ export function texteSensLisible(sens: DirectionSigne): string {
  * écran, jamais recalculée depuis un score (voir CLAUDE.md). Dérivée UNIQUEMENT des champs déjà
  * figés à la génération (`solutionEcranX`, `p`, `zeroX`/`sensX`...), jamais de la saisie élève. */
 export function contenuRecapPhase(exercice: ExerciceInequationExponentielle, phase: PhaseInequationExponentielle): ContenuRecap {
+  if (phase === "existence") return { texte: "Il faut la résoudre", latex: null };
   switch (exercice.famille) {
     case "A":
       if (phase === "aReconnaitre") return { texte: null, latex: `p=${exercice.p}` };
