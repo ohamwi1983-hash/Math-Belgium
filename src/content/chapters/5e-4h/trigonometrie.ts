@@ -1728,6 +1728,16 @@ export const trigonometrie: ChapterContent = {
             'vérification donne un minimum au lieu d\'un maximum, ou l\'inverse.',
         },
         {
+          kind: 'entrainement',
+          title: 'Choisir φ quand le départ n\'est pas un extremum',
+          generatorId: '5gen54',
+          description: [
+            'Grande roue, roue à aubes, pédalier, marée, ressort ou lac : la grandeur ne part pas d\'un extremum. Calcule A, b et ω, isole sin φ, trouve les deux candidats arcsin m et π − arcsin m, garde celui que le sens de variation impose (monte ou descend ?), puis vérifie le modèle par l\'instant du premier maximum.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 54. Choisir φ quand le départ n\'est pas un extremum »',
+        },
+        {
           kind: 'application',
           titre: "Modéliser la durée du jour au fil de l'année",
           illustrations: [
