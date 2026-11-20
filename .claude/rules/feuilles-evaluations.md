@@ -357,6 +357,37 @@ régulier dont les lignes passent par les valeurs remarquables elles-mêmes.
   `groupe_triviale` (6gen10 B, C-f : B ≠ A 30 / 30 plans ; C-k laissé à part, il donnait le même ℝ
   que C-f une fois sur trois). Niveau constant dans un verdict : 6gen10 B et C-f (2, 4 min), 6gen6 B
   (piège constant, 4, 8 min). Mesures, outils et captures : rapport du lot (dossier de travail).
+- **6e ch. 1 (lots B, C, E, 6gen1–5)** : `6e-6h/components6e/RetourSaisieCyclo.tsx` (hook du 4e et
+  aides du 6e ch. 2 réutilisés, `useRetourCyclo` : blocage AVEC message — illisible par nature de
+  champ `MESSAGES_ILLISIBLE_CYCLO`, valeur approchée, fonction trig/arc recopiée — sans tentative),
+  `EtapeEnsembleCyclo` (domaine, image, CE, condition ; `diagnostiquerEnsembleReelGuide` : correct /
+  approchée / crochet / faux, toute écriture équivalente acceptée), `EnsembleReelGuideBuilder.onIllisible`
+  (saisie complète mais borne illisible : « Valider » reste actif, message — plus de bouton grisé muet).
+  Évaluateur du chapitre délégué à celui du ch. 2 (`expressionCyclometrique.ts` : π, √, ·, ×, |…|,
+  sin⁻¹ = arcsin) ; seule une erreur de SYNTAXE est illisible (`equivalenceCyclometrique`). Aides et
+  cibles `ui6e/aides{InjectiviteFonctions,FonctionsCyclometriques,EquationsCyclometriques,DeriveesCyclometriques,GraphiquesCyclometriques}.ts` :
+  niveau 2 = propriété posée pour l'instance, jamais le verdict ni le résultat (6gen1 f(x₁) = f(x₂)
+  posée, 6gen2 « trig α = … et α ∈ image », 6gen3 aide de tri qui montre la CE — elle montrait
+  l'équation —, 6gen4 plus de dérivée « déjà substituée », 6gen5 conditions sans domaine ni image).
+  Choix fermés à 1 tentative : verdict de 6gen1 (« Non » juste ouvre l'intervalle à 3 tentatives) et
+  bijection, « Existe » de 6gen2 (la valeur garde 3), « À accepter / À rejeter » de 6gen3, graphique
+  de 6gen5 (validé SEUL, `soumettreLettre`) puis parité jugée une fois, figée et révélée
+  (`pariteRevelee`, message « La parité était fausse… »). 6gen2 : valeur exacte à 1e-9 (« 0,5 » exact
+  accepté). Lot C : 6gen3 4b/4c triplet 3-4-5 seul, 4a un seul cercle (dénominateur ≤ 26 ; 156/25 et
+  1/195 disparus) ; 6gen5 E c = −k·w₀, w₀ remarquable (`CandidatE.cPi`, corrigé exact, plus de
+  calculatrice ; domaine ≥ 0,29), petit graphe de la réponse attendue (180 px, `etiquettesLisibles`
+  de la grille du 4e). Tirage (`generateurs6e/profilsEvaluationCyclometriques.ts`) : `forme` sans le
+  verdict ; cas particulier `aucune-solution` (6gen3 variante 3) ; groupes 6gen1 `groupe_injectivite`
+  (e, f), 6gen2 `groupe_existence_arc_trig` et `groupe_existence_trig_arc` (« existe » doublé) ;
+  verdicts dans la variante : 6gen1 a, c injectives 50 %, 6gen2 libre « existe » 61 %, 6gen5 A, B, D
+  impaires et F paire ≈ 35 %, C arctan 50 % (un seul extremum) ; E et C : parité forcée par la
+  fonction. Niveau constant dans un verdict : 6gen1 a, c, e, f (4, 11 min), 6gen5 (2 étapes
+  `sansCharge`, nombres 1 : 3–4, 7 min, selon k < 0 seulement). Mesures : moteur 82 000 tirages
+  (2 000 par variante + 4 000 libres par générateur ; réponses recalculées par balayage, saisies
+  autrement écrites, « − », illisible, ?code= 200/200) 0 anomalie ; collecteur 0 égalité fausse ;
+  plans réels B ≠ A : groupes 6gen1 et 6gen2 arc∘trig 30/30, trig∘arc 22/30 (deux causes) ;
+  iPhone 13 (bonnes réponses et erreurs) scrollWidth 390, 0 erreur console ; documents (2 plans,
+  cas particulier coché ou non, interdite / autorisée) 0 débordement, 0 `.katex-error`.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 

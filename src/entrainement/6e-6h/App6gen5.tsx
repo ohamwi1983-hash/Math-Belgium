@@ -104,6 +104,15 @@ export function App6gen5() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        // Clôture « révélée » par la parité seule (choix fermé faux, le reste juste) ou par le choix
+        // du graphique : le message le dit, au lieu de « Tentatives épuisées ».
+        messageRevele: !enAttente.etatSuivant.resultats.length
+          ? undefined
+          : !etat.lettreValidee
+            ? "Ce n'était pas le bon graphique (choix fermé : une seule tentative)."
+            : enAttente.etatSuivant.pariteRevelee && enAttente.etatSuivant.etapeCourante.tentativesUtilisees < etat.reglages.tentativesMax
+              ? "La parité était fausse (une seule tentative) ; le reste de la justification est juste."
+              : undefined,
         reponseAttendue,
         // Corrigé détaillé « comme au tableau » (source unique avec le papier) — écran unique « a ».
         corrigeDetaille: <CorrigeDetailleEcran etapes={correctionDetailleeGraphiquesCyclometriques(exercice)} />,

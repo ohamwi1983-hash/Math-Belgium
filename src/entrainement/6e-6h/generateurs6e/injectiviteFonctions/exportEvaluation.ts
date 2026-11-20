@@ -110,7 +110,7 @@ function bareme(e: E): BaremeExercice {
  */
 function criteresDifficulte(e: E): CriteresDifficulte {
   const p = e.parametres;
-  // Verdict « injective ? » (lot E de l'audit) : a) et c) le tirent, e) et f) forment avec eux le
+  // Verdict « injective ? » (lot E de l'audit) : a) et c) le tirent une fois sur deux, e) et f) forment le
   // groupe `groupe_injectivite`. Niveau et durée CONSTANTS pour ces quatre familles (niveau 4,
   // 11 min : quatre écrans qui transforment, la bijection lue, piège constant — l'injectivité est la
   // question), sinon un « niv. 2 » trahissait une fonction injective et un « niv. 4 » l'inverse.

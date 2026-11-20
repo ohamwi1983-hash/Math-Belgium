@@ -83,5 +83,5 @@ export function soumettreReponseEcranUnique(
     revelerReponse: () => {},
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, pariteRevelee, derniereRevelee: false };
-  return cloturerExerciceOuSuivant({ ...etat, pariteRevelee, derniereRevelee: true }, { exercice, score: 0 });
+  return cloturerExerciceOuSuivant({ ...etat, etapeCourante, pariteRevelee, derniereRevelee: true }, { exercice, score: 0 });
 }

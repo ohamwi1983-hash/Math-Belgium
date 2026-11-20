@@ -11,7 +11,9 @@
  *   ligne (variante 3, a(x − h)² égal à un négatif). L'ensemble vide obtenu APRÈS le rejet des
  *   candidates (variantes 2 et 4) est l'issue de l'écran « À accepter / À rejeter » : un verdict,
  *   jamais filtré.
- * - Groupes à verdict (décisions V1, V2) : 6gen1 `groupe_injectivite` (a, c, e, f), 6gen2
+ * - Groupes à verdict (décisions V1, V2) : 6gen1 `groupe_injectivite` (e toujours injective, f
+ *   jamais : le nom de la variante donne le verdict ; a et c, injectives une fois sur deux, restent à
+ *   part — dans le groupe, leur tirage interne ramenait « B ≠ A » à 20 plans sur 30), 6gen2
  *   `groupe_existence_arc_trig` et `groupe_existence_trig_arc` (le nom de la variante dit
  *   « existe » ou « n'existe pas » ; « existe » doublé dans le second pour un verdict 50/50).
  * - Tout est exact (6gen5 E : constantes multiples de π) : aucun `calcul`.
@@ -32,7 +34,7 @@ export function profilInjectiviteFonctions(e: ExerciceInjectiviteFonctions): Pro
 }
 
 export const GROUPES_VERDICT_INJECTIVITE: GroupeVerdict[] = [
-  { id: "groupe_injectivite", label: "Injective ou non : a), c), e), f) (verdict tiré)", variantes: ["puissanceAffine", "puissanceMonome", "homographique", "quadratique"] },
+  { id: "groupe_injectivite", label: "e) ou f) : injective ou non (verdict tiré)", variantes: ["homographique", "quadratique"] },
 ];
 
 /** 6gen2 — la mécanique de calcul (lecture directe, arc∘trig, trig∘arc), jamais l'existence. */
