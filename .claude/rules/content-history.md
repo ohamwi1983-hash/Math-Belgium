@@ -4764,6 +4764,34 @@ Contrôle `check_banque.ts` (KaTeX `strict: 'error'`, notation clavier, majuscul
   équivalentes, « − », illisible), parcours iPhone 13 (390 px, 0 erreur console), documents réels sans
   débordement, collecteur 0 égalité fausse.
 
+- **6e (6h), Chapitre 2 — 4 ateliers de l'audit et structure du § 3** (validés par l'utilisateur ;
+  conventions des retours « 14 widgets », « couleurs », « tableaux tronqués » dès la première passe).
+  **`rattrapage-exponentielle-widget`** (§ 1, après la figure eˣ / x³) : aˣ contre xⁿ, a ∈ [1,05 ; 3]
+  (bouton « a = e »), n de 1 à 8 ; croisements par bissection de x·ln a − n·ln x (minimum en n/ln a),
+  le plus grand = dernier dépassement ; zone « xⁿ devant » ombrée ; fenêtre réglée UNIQUEMENT par
+  sélecteurs (abscisses 5 à 2 000, échelle log par défaut ou normale avec hauteur au choix ; haut de
+  l'échelle log fixé par fenêtre). Défaut a = e, n = 3 : 1,86 et 4,54 (comme la figure). **`vers-e-widget`**
+  (§ 2, après l'encadré Bernoulli) : (1 + 1/n)ⁿ, curseur logarithmique jusqu'à 10⁹, chiffres justes en
+  vert, écart à e, tableau de repères ; mode « intérêts composés » (1 000 € à 100 %, de l'année à la
+  seconde, escalier + courbe K₀·eᵗ). **Piège** : `Math.pow(1 + 1/n, n)` dépasse e à n = 10⁹
+  (2,7182820520) — calcul par `exp(n·log1p(1/n))`. **`f-fprime-exponentielle-widget`** (§ 3, sous-titre
+  « f et f′ côte à côte », après le piège « croissance, jamais signe ») : 6 fonctions du chapitre
+  ((x − 1)eˣ, x·eˣ, e⁻ˣ², ch, x·e⁻ˣ, eˣ − 2), deux graphiques superposés, un seul code couleur (vert
+  f′ > 0 / rouge f′ < 0 sur f, f′, tangente et points ; extremum cercle foncé, inflexion cercle violet),
+  glisser sur le graphique (`touch-action: pan-y`, `preventDefault` à la souris : sinon le glissement
+  sélectionne le texte de la page). **`rapports-differences-widget`** (§ 7, avant 6gen147) : 9 tableaux
+  (3 linéaires, 4 exponentiels, 2 ni l'un ni l'autre ; pas de 1, 2 ou 3 ; départ en t = 1), tableau
+  VERTICAL avec écarts entre deux lignes (l'horizontal débordait sur iPhone : 338 px pour 308),
+  verdict et modèle calculés (r = rapport^(1/pas), Q₀ = v₀ / r^t₀ ; m, p), fenêtre écrite par
+  tableau. § 3 : méthode « Lire le graphique de f′, étape par étape » et sous-titre « Ce que le
+  graphique de f′ dit, et ce qu'il ne dit pas ». Vérifié (Vite, iPhone 13 et 1 280 px, clair et
+  sombre) : 0 erreur console, scrollWidth 390, 0 `$` / `.katex-error`, Shadow DOM sans `^ $ NaN
+  Infinity undefined`, 0 étiquette SVG rognée, tableaux ≤ 301 / 308 px, axes identiques après chaque
+  curseur, `test-epingle` 0 échec. Captures : `scratchpad/ateliers-6e2/`. **Piège de vérification** :
+  avec `node_modules` lié hors du worktree, `vite` refuse les polices KaTeX (403) — serveur lancé par
+  l'API (`createServer`, `server.fs.allow`) ; captures d'atelier épinglé faussées → fenêtre agrandie
+  le temps de la capture.
+
 ## 4e, Chapitre 1 — lots A, E et F de l'audit (cours, quiz gen60, figures)
 
 Lot A (cours) : sous-titre brut « x_S = -b/(2a) » → « D'où vient la formule de l'abscisse du
