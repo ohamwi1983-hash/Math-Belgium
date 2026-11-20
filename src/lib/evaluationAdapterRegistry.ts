@@ -452,7 +452,7 @@ import { adaptateurEvaluationProprietesOptiquesConiques } from '../entrainement/
 export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExercices<never>> = {
   '6gen1': versionPapier(adaptateurEvaluationInjectiviteFonctions) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen2': versionPapier(adaptateurEvaluationFonctionsCyclometriques) as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen3': adaptateurEvaluationEquationsCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen3': versionPapier(adaptateurEvaluationEquationsCyclometriques) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen4': adaptateurEvaluationDeriveesCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
   '6gen5': adaptateurEvaluationGraphiquesCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
   '6gen6': versionPapier(adaptateurEvaluationLimitesExponentielles) as unknown as AdaptateurFeuilleExercices<never>,

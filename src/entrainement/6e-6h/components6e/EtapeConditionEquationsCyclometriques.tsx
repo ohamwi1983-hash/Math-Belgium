@@ -50,7 +50,7 @@ export function EtapeConditionEquationsCyclometriques({ exercice, tentativesUtil
       />
       <p className="prompt-text">
         La méthode utilisée à l'étape suivante (application d'une fonction trigonométrique directe des deux côtés) n'est valable que si les CODOMAINES des deux arcfonctions restent compatibles.
-        Établis cette condition supplémentaire sous forme de x∈[intervalle].
+        Établis cette condition supplémentaire, sous la forme d'un intervalle pour x.
       </p>
       <EnsembleReelGuideBuilder onChange={setCondition} label="x\in" erronee={montrerErreurs} />
       {niveauAide >= 1 && (

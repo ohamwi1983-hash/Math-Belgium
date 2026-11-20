@@ -40,11 +40,23 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeEquationsCyclometriques } from "./generateurs6e/equationsCyclometriques/corrigeDetaille";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionEquationsCyclometriques {
   return demarrerSessionEquationsCyclometriques(REGLAGES_DEMO, genererExerciceEquationsCyclometriques);
+}
+
+/** Première session : `?code=XXXXXX` (QR code d'une feuille) rouvre l'exercice imprimé — mêmes
+ * fonctions de tirage que l'adaptateur d'export, comme `App6gen14.tsx`. */
+function sessionInitiale(): EtatSessionEquationsCyclometriques {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEquationsCyclometriques(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceEquationsCyclometriques, (id) => construireAvecVarianteId(id as IdVarianteDev)));
 }
 
 /** Même libellé que `LIBELLE_PHASE` (`ui6e/recapitulatifEquationsCyclometriques.ts`, privé à ce
@@ -94,7 +106,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen3() {
-  const [etat, setEtat] = useState<EtatSessionEquationsCyclometriques>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEquationsCyclometriques>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionEquationsCyclometriques`, jamais dans le moteur : la saisie de
@@ -186,9 +198,15 @@ export function App6gen3() {
     }
   };
 
+  // Corrigé détaillé « comme au tableau » de l'écran (source unique avec le papier).
+  const corrigeDetaille = (
+    <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationsCyclometriques(exercice), lettreEtape(sequenceReellePhases(exercice).indexOf(etat.phase)))} />
+  );
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: reponseAttenduePhase(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

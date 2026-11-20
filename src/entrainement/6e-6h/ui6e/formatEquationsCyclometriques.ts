@@ -47,14 +47,14 @@ function formatSommeTermes(termes: TermeSigne[]): string {
     .join(" ");
 }
 
-function formatLineaireLatex(arg: ArgumentLineaire): string {
+export function formatLineaireLatex(arg: ArgumentLineaire): string {
   return formatSommeTermes([
     { valeur: arg.a, suffixe: "x" },
     { valeur: arg.b, suffixe: "" },
   ]);
 }
 
-function formatQuadratiqueLatex(arg: ArgumentQuadratique): string {
+export function formatQuadratiqueLatex(arg: ArgumentQuadratique): string {
   return formatSommeTermes([
     { valeur: arg.a, suffixe: "x^{2}" },
     { valeur: arg.b, suffixe: "x" },
@@ -73,7 +73,7 @@ const TOLERANCE_RECHERCHE_ANGLE = 1e-9;
  * connue (`entree.valeur`, ex. `-1`) par recherche inverse dans la banque plutôt que de construire
  * `\cos(\pi)` en LaTeX brut non résolu.
  */
-function valeurTrigDepuisAngle(arcfonction: Arcfonction, angle: { latex: string; numerique: number }): string {
+export function valeurTrigDepuisAngle(arcfonction: Arcfonction, angle: { latex: string; numerique: number }): string {
   const entree = BANQUES_ARC[arcfonction].find((e) => Math.abs(e.angle.numerique - angle.numerique) < TOLERANCE_RECHERCHE_ANGLE);
   if (!entree) throw new Error(`valeurTrigDepuisAngle : aucune entrée trouvée pour ${arcfonction}(${angle.latex}) — ne devrait jamais arriver`);
   return entree.valeur.latex;

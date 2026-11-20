@@ -46,7 +46,7 @@ export function EtapeCEEquationsCyclometriques({ exercice, tentativesUtilisees, 
           </div>
         }
       />
-      <p className="prompt-text">Établis la condition d'existence (CE) de x∈[intervalle] pour cette équation.</p>
+      <p className="prompt-text">Établis la condition d'existence (CE) de cette équation, sous la forme d'un intervalle pour x.</p>
       <EnsembleReelGuideBuilder onChange={setCe} label="x\in" erronee={montrerErreurs} />
       {niveauAide >= 1 && (
         <div className="aide-5e">
