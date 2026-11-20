@@ -9,6 +9,12 @@ paths:
 
 ## Programme : notions hors programme à ne jamais employer
 
+- **4e : pas de radian** (décision de l'utilisateur) : le radian est une matière de 5e. En 4e, tous les
+  angles sont en degrés — cours, générateurs (variantes, consignes, saisies acceptées, aides, corrigés,
+  barèmes), quiz, ateliers et énoncés de démonstration. Seule mention admise : le piège de la
+  calculatrice réglée en mode RAD au lieu de DEG (sans enseigner ce qu'est un radian), et le renvoi
+  « les radians arrivent en 5e ».
+
 - **4e : pas de « déterminant »** (décision de l'utilisateur). Le déterminant relève du calcul
   matriciel, absent du programme de 4e. Pour la colinéarité de deux vecteurs, dire « critère de
   colinéarité » : $x_u \cdot y_v - y_u \cdot x_v = 0$, autrement dit « les produits en croix sont
