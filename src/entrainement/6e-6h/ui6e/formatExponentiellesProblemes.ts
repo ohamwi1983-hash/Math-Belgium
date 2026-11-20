@@ -137,9 +137,23 @@ export function aTLatexE(a: number): string {
 // Famille A.
 // ============================================================================
 
+/** Phrase de contexte en fragments : « f(t) », « t=11 » et la variable t isolée passent en KaTeX
+ * (audit 6e ch. 2, lot C : « vaut f(t) mètres au bout de t heures » s'affichait en texte brut). */
+function prose(brut: string): FragmentConsigne[] {
+  const res: FragmentConsigne[] = [];
+  let i = 0;
+  for (const m of brut.matchAll(/f\(t\)|t=\d+(?:,\d+)?|(?<=[\s(])t(?=[\s,.)])/g)) {
+    if (m.index! > i) res.push(texte(brut.slice(i, m.index)));
+    res.push(latex(m[0].replace(",", "{,}")));
+    i = m.index! + m[0].length;
+  }
+  if (i < brut.length) res.push(texte(brut.slice(i)));
+  return res;
+}
+
 function consigneGeneraleA(exercice: ExerciceExpoProbA): FragmentConsigne[] {
   const brut = exercice.sousType === "evaluer" ? contexteA(exercice).phrase(exercice.Q0, exercice.p) : (contexteA(exercice) as (typeof CONTEXTES_A_DOUBLEMENT)[number]).phrase(exercice.T);
-  return [texte(brut)];
+  return prose(brut);
 }
 
 function blocDonneesA(exercice: ExerciceExpoProbA): string[] {
@@ -189,7 +203,7 @@ function formatReponseA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2
 // ============================================================================
 
 function consigneGeneraleB(exercice: ExerciceExpoProbB): FragmentConsigne[] {
-  return [texte(contexteB(exercice).phrase(exercice.Q0, exercice.p))];
+  return prose(contexteB(exercice).phrase(exercice.Q0, exercice.p));
 }
 
 function blocDonneesB(exercice: ExerciceExpoProbB): string[] {
@@ -270,7 +284,7 @@ function formatReponseB(exercice: ExerciceExpoProbB, phase: "bEcran1" | "bEcran2
 // ============================================================================
 
 function consigneGeneraleC(exercice: ExerciceExpoProbC): FragmentConsigne[] {
-  return [texte(contexteC(exercice).phrase(exercice.t1, exercice.v1, exercice.t2, exercice.v2Affiche))];
+  return prose(contexteC(exercice).phrase(exercice.t1, exercice.v1, exercice.t2, exercice.v2Affiche));
 }
 
 function blocDonneesC(exercice: ExerciceExpoProbC): string[] {
@@ -315,7 +329,7 @@ function formatReponseC(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2
 // ============================================================================
 
 function consigneGeneraleD(exercice: ExerciceExpoProbD): FragmentConsigne[] {
-  return [texte(contexteD(exercice).phrase(exercice.aAffiche, exercice.bAffiche, exercice.cAffiche, exercice.d))];
+  return prose(contexteD(exercice).phrase(exercice.aAffiche, exercice.bAffiche, exercice.cAffiche, exercice.d));
 }
 
 function blocDonneesD(exercice: ExerciceExpoProbD): string[] {
@@ -459,8 +473,8 @@ function consigneGeneraleF(exercice: ExerciceExpoProbF): FragmentConsigne[] {
   const brut = contexteF(exercice).phrase(exercice.N, exercice.g, exercice.F, exercice.V);
   const marqueur = "p(t)=1-e^(-kt)";
   const index = brut.indexOf(marqueur);
-  if (index === -1) return [texte(brut)];
-  return [texte(brut.slice(0, index)), latex("p(t)=1-e^{-kt}"), texte(brut.slice(index + marqueur.length))];
+  if (index === -1) return prose(brut);
+  return [...prose(brut.slice(0, index)), latex("p(t)=1-e^{-kt}"), ...prose(brut.slice(index + marqueur.length))];
 }
 
 function blocDonneesF(exercice: ExerciceExpoProbF): string[] {
@@ -539,7 +553,7 @@ function formatReponseF(exercice: ExerciceExpoProbF, phase: "fEcran1" | "fEcran2
 // ============================================================================
 
 function consigneGeneraleG(exercice: ExerciceExpoProbG): FragmentConsigne[] {
-  return [texte(contexteG(exercice).phrase(exercice.sAffiche))];
+  return prose(contexteG(exercice).phrase(exercice.sAffiche));
 }
 
 function blocDonneesG(exercice: ExerciceExpoProbG): string[] {

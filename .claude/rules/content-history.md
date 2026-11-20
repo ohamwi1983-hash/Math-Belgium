@@ -4700,6 +4700,18 @@ plus « définition » ; base → a/b ; 0 majuscule ; deux thèmes (`puissancesN
 `q("…$…$…", rep, "…")` (helper local `rt`). `nombreExercices` = `nombreQuestions(theme)`, accueil
 calculé ; `QUIZ_THEMES` avec libellés (deux thèmes en § 1 et en § 7). Justification de l'écran de
 correction enveloppée dans un `<span>` (`.triangle-quelconque-aide` est flex : chaque fragment
-KaTeX devenait une colonne — même défaut dans les 8 autres panneaux de quiz de 6e, non touchés).
+KaTeX devenait une colonne — même défaut corrigé ensuite dans les 8 autres panneaux, 6gen66–73).
 Contrôle `check_banque.ts` (KaTeX `strict: 'error'`, notation clavier, majuscules, doublons,
 équilibre, session sans répétition, fragments papier sans `$`) : 0 problème.
+
+## 6e (6h), Chapitre 2 — lots B, C, E de l'audit (générateurs 6gen6–6gen12)
+
+Lot B : `?code=` lu par les 7 applis, saisie illisible sans tentative (message par nature de champ),
+choix fermés à 1 tentative, aides à deux niveaux en KaTeX, messages ciblés (ln a oublié ou doublé,
+côté opposé, reste / complément, ordre T − t…), placeholders sans notation clavier. Lot C : 6gen6 G
+retirée (entrée `retiree` gardée pour les codes), écrans « forme » B / C ; écran « existence » de
+6gen9 / 6gen10 ; 6gen9 C en puissances exactes de 2, 3, 5 ; 6gen7 E sans fonction constante ; 6gen8 A
+cadré sur l'extremum de f′ ; 6gen10 D-variable compacté (exposant −x−2, produit sans `\cdot` : il
+débordait de 51 px à 390 px) ; 6gen12 contextes réécrits (`contextes.ts` : bornes par contexte,
+objectif de G, question explicite du doublement), phrases de contexte en fragments KaTeX (`prose`),
+espace fine des milliers (`formatDecimal`, `milliers`). Lot E : voir `feuilles-evaluations.md`.

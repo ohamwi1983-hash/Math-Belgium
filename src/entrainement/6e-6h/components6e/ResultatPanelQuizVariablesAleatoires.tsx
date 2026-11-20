@@ -45,8 +45,11 @@ export function ResultatPanelQuizVariablesAleatoires({ resultat, labelBouton, on
           <span className={classeScore(resultat.score)}>{resultat.score === 100 ? "Correct" : "Incorrect"}</span>
         </li>
       </ul>
+      {/* Un seul <span> : `.triangle-quelconque-aide` est un conteneur flex (voir 6gen65). */}
       <div className="triangle-quelconque-aide">
-        <RenduFragments fragments={resultat.question.justification} />
+        <span>
+          <RenduFragments fragments={resultat.question.justification} />
+        </span>
       </div>
       <button type="button" className="btn btn-primary" onClick={onContinuer}>
         {labelBouton}

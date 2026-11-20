@@ -407,19 +407,19 @@ export const CONTEXTES_F: ContexteExpoProbF[] = [
     id: "campagneReseauSocial",
     label: "Campagne publicitaire sur les réseaux sociaux",
     unite: "jours",
-    phrase: (N, g, F, V) => `Une entreprise lance une campagne publicitaire visant ${N} personnes. La proportion de personnes touchées après t jours est modélisée par p(t)=1-e^(-kt). Chaque réaction positive rapporte ${fr(g)} € ; la campagne coûte ${F} € de frais fixes, plus ${V} € par jour de diffusion.`,
+    phrase: (N, g, F, V) => `Une entreprise lance une campagne publicitaire visant ${milliers(N)} personnes. La proportion de personnes touchées après t jours est modélisée par p(t)=1-e^(-kt). Chaque réaction positive rapporte ${fr(g)} € ; la campagne coûte ${milliers(F)} € de frais fixes, plus ${milliers(V)} € par jour de diffusion.`,
   },
   {
     id: "sensibilisationSante",
     label: "Campagne de sensibilisation santé publique",
     unite: "jours",
-    phrase: (N, g, F, V) => `Une campagne de sensibilisation vise une population de ${N} personnes. La proportion sensibilisée après t jours suit p(t)=1-e^(-kt). Chaque personne sensibilisée fait économiser ${fr(g)} € en soins évités ; la campagne coûte ${F} € de mise en place, plus ${V} € par jour de diffusion.`,
+    phrase: (N, g, F, V) => `Une campagne de sensibilisation vise une population de ${milliers(N)} personnes. La proportion sensibilisée après t jours suit p(t)=1-e^(-kt). Chaque personne sensibilisée fait économiser ${fr(g)} € en soins évités ; la campagne coûte ${milliers(F)} € de mise en place, plus ${milliers(V)} € par jour de diffusion.`,
   },
   {
     id: "lancementInfluenceurs",
     label: "Lancement produit avec influenceurs",
     unite: "jours",
-    phrase: (N, g, F, V) => `Un lancement produit cible ${N} clients potentiels via des influenceurs. La proportion de clients touchés après t jours vaut p(t)=1-e^(-kt). Chaque client acquis rapporte ${fr(g)} € ; le partenariat coûte ${F} € de frais fixes, plus ${V} € par jour de campagne.`,
+    phrase: (N, g, F, V) => `Un lancement produit cible ${milliers(N)} clients potentiels via des influenceurs. La proportion de clients touchés après t jours vaut p(t)=1-e^(-kt). Chaque client acquis rapporte ${fr(g)} € ; le partenariat coûte ${milliers(F)} € de frais fixes, plus ${milliers(V)} € par jour de campagne.`,
   },
 ];
 
