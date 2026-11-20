@@ -1,7 +1,6 @@
 import type { ExerciceInequationExponentielle } from "../../core6e/inequationsExponentielles.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, ErreurFrequente, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/corrigeTableau";
-import { versionPapier } from "../../../export/consignePapier";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import type { PhaseInequationExponentielle } from "../../moteur6e/typesInequationsExponentielles";
 import { CONSIGNE_GENERALE, LIBELLE_PHASE_INEQ, consigneEcran, contenuRecapPhase, formatEnonceLatex } from "../../ui6e/formatInequationsExponentielles";
@@ -110,7 +109,7 @@ function enoncePapier(e: ExerciceInequationExponentielle): EnoncePapier {
   return { section: { enteteFragments: [texte(`${CONSIGNE_GENERALE} `), latex(formatEnonceLatex(e)), texte(".")], questions: [] } };
 }
 
-export const adaptateurEvaluationInequationsExponentielles: AdaptateurFeuilleExercices<ExerciceInequationExponentielle> = versionPapier({
+export const adaptateurEvaluationInequationsExponentielles: AdaptateurFeuilleExercices<ExerciceInequationExponentielle> = {
   titreDocument: "Résoudre une inéquation exponentielle — Évaluation",
   nomFichierBase: "inequations-exponentielles",
   genererInstance: genererExerciceInequationExponentielle,
@@ -123,4 +122,4 @@ export const adaptateurEvaluationInequationsExponentielles: AdaptateurFeuilleExe
   correctionDetaillee: correctionDetailleeInequationsExpo,
   bareme,
   enoncePapier,
-});
+};

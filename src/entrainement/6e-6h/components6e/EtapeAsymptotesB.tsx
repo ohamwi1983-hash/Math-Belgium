@@ -60,7 +60,7 @@ export function EtapeAsymptotesB({ enonceLatex, p, aideNiveau1, aideNiveau2, ten
         }
       />
       <p className="prompt-text">
-        <RenduFragments fragments={consigneAsymptotesB()} />
+        <RenduFragments fragments={consigneAsymptotesB(p)} />
       </p>
 
       <div className="field">
