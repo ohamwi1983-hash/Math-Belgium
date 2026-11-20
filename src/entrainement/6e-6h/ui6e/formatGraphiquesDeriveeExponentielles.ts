@@ -37,6 +37,19 @@ function formatBaseLatex(base: number): string {
   return base.toFixed(2);
 }
 
+/** Base d'une puissance : une fraction est mise entre parenthèses (« \\left(\\dfrac{1}{2}\\right)^{x} »,
+ * jamais « \\dfrac{1}{2}^{x} », où l'exposant semble porter sur le seul dénominateur). */
+export function basePuissanceLatex(base: number): string {
+  return Number.isInteger(base) ? String(base) : `\\left(${formatBaseLatex(base)}\\right)`;
+}
+
+export { formatBaseLatex };
+
+/** « \\ln(3) », ou « \\ln\\left(\\dfrac{1}{4}\\right) » pour une base fractionnaire. */
+export function lnBaseLatex(base: number): string {
+  return Number.isInteger(base) ? `\\ln(${base})` : `\\ln\\left(${formatBaseLatex(base)}\\right)`;
+}
+
 /** `${coef}${corps}` sans jamais afficher un coefficient `±1` littéral. */
 function formatCoefFois(coef: number, corps: string): string {
   if (coef === 1) return corps;
@@ -58,8 +71,8 @@ export function formatFonctionLatex(exercice: ExerciceGraphiqueDeriveeExponentie
       return `f(x) = ${corpsSigne}\\,e^{x}`;
     }
     case "B": {
-      const b = formatBaseLatex(exercice.base);
-      return `f(x) = \\dfrac{${b}^{x}}{${b}^{x}+1}`;
+      const bp = basePuissanceLatex(exercice.base);
+      return `f(x) = \\dfrac{${bp}^{x}}{${bp}^{x}+1}`;
     }
     case "C": {
       const kx = formatCoeffX(exercice.k);
@@ -293,10 +306,10 @@ export function aideDeriveeNiveau1(exercice: ExerciceGraphiqueDeriveeExponentiel
 export function aideDeriveeNiveau2(exercice: ExerciceGraphiqueDeriveeExponentielle): AideAvecLatex {
   switch (exercice.famille) {
     case "B": {
-      const b = formatBaseLatex(exercice.base);
+      const bp = basePuissanceLatex(exercice.base);
       return {
-        texte: "Numérateur du quotient, AVANT simplification (u=base^x, v=base^x+1, u'=v'=ln(base)·base^x) :",
-        latex: `u'v-uv' = \\ln(${b})\\,${b}^{x}\\left(${b}^{x}+1\\right) - ${b}^{x}\\cdot\\ln(${b})\\,${b}^{x}`,
+        texte: "Numérateur du quotient, avant simplification (u au numérateur, v au dénominateur, u′ = v′) :",
+        latex: `u'v-uv' = ${lnBaseLatex(exercice.base)}\\,${bp}^{x}\\left(${bp}^{x}+1\\right) - ${bp}^{x}\\cdot${lnBaseLatex(exercice.base)}\\,${bp}^{x}`,
       };
     }
     case "D": {
@@ -319,8 +332,8 @@ export function aideDeriveeNiveau2(exercice: ExerciceGraphiqueDeriveeExponentiel
 export function formatDeriveeCorrecteLatex(exercice: ExerciceGraphiqueDeriveeExponentielle): string | null {
   switch (exercice.famille) {
     case "B": {
-      const b = formatBaseLatex(exercice.base);
-      return `f'(x) = \\dfrac{\\ln(${b})\\,${b}^{x}}{\\left(${b}^{x}+1\\right)^2}`;
+      const bp = basePuissanceLatex(exercice.base);
+      return `f'(x) = \\dfrac{${lnBaseLatex(exercice.base)}\\,${bp}^{x}}{\\left(${bp}^{x}+1\\right)^2}`;
     }
     case "D": {
       const kx = formatCoeffX(exercice.k);
@@ -366,8 +379,7 @@ export function aideSelectionNiveau2(exercice: ExerciceGraphiqueDeriveeExponenti
     case "A":
       return { texte: "Valeur de f'(-2) — le signe indique un minimum ou un maximum, pas laquelle :", latex: `f'(-2) = ${formatValeurEnMoins2A(exercice.a)}` };
     case "B": {
-      const b = formatBaseLatex(exercice.base);
-      return { texte: "Valeur de f' en x=0 :", latex: `f'(0) = \\dfrac{\\ln(${b})}{4}` };
+      return { texte: "Valeur de f' en x=0 :", latex: `f'(0) = \\dfrac{${lnBaseLatex(exercice.base)}}{4}` };
     }
     case "C":
       return { texte: "Valeur de f'(0) et pente de f' à l'origine (c'est-à-dire f''(0)) :", latex: `f'(0) = 0, \\quad f''(0) = ${exercice.k * exercice.k}` };

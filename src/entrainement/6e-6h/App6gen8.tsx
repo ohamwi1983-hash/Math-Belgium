@@ -18,6 +18,9 @@ import { EtapeDeriveeGraphExpo } from "./components6e/EtapeDeriveeGraphExpo";
 import { EtapeSelectionGraphiqueDeriveeExpo } from "./components6e/EtapeSelectionGraphiqueDeriveeExpo";
 import { GrapheOptionDeriveeExpo } from "./components6e/GrapheOptionDeriveeExpo";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { correctionDetailleeGraphiquesDeriveeExponentielles, sequenceGraphiquesDeriveeExponentielles } from "./generateurs6e/graphiquesDeriveeExponentielles/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import {
   aideDeriveeNiveau1,
   aideDeriveeNiveau2,
@@ -127,9 +130,15 @@ export function App6gen8() {
     (window as unknown as { __debug6gen8?: unknown }).__debug6gen8 = { exercice, phase: etat.phase };
   }
 
+  // Corrigé détaillé « comme au tableau » de l'écran (source unique avec le papier).
+  const corrigeDetaille = (
+    <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeGraphiquesDeriveeExponentielles(exercice), lettreEtape(sequenceGraphiquesDeriveeExponentielles(exercice).indexOf(etat.phase)))} />
+  );
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue:
           etat.phase === "derivee" ? (
             formatDeriveeCorrecteLatex(exercice) && <Katex expression={formatDeriveeCorrecteLatex(exercice) as string} />

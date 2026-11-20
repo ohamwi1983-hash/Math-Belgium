@@ -2,7 +2,6 @@ import type { ExerciceLimiteExponentielle } from "../../core6e/limitesExponentie
 import type { AdaptateurFeuilleExercices, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/corrigeTableau";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
-import { versionPapier } from "../../../export/consignePapier";
 import { CONSIGNE_GENERALE, consigneEcran, formatLimiteEnonceLatex, formatLimiteFinaleLatex } from "../../ui6e/formatLimitesExponentielles";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLimiteExponentielle } from "./index";
 import { correctionDetailleeLimitesExponentielles as correction, sequenceLimitesExponentielles } from "./corrigeDetaille";
@@ -86,7 +85,7 @@ function criteresDifficulte(e: ExerciceLimiteExponentielle): CriteresDifficulte 
   return { ...etapesDuCorrige(correction(e)), methode, piege, nombres };
 }
 
-export const adaptateurEvaluationLimitesExponentielles: AdaptateurFeuilleExercices<ExerciceLimiteExponentielle> = versionPapier({
+export const adaptateurEvaluationLimitesExponentielles: AdaptateurFeuilleExercices<ExerciceLimiteExponentielle> = {
   titreDocument: "Calcul de limites (fonctions exponentielles) — Évaluation",
   nomFichierBase: "limites-exponentielles",
   genererInstance: genererExerciceLimiteExponentielle,
@@ -98,4 +97,4 @@ export const adaptateurEvaluationLimitesExponentielles: AdaptateurFeuilleExercic
   reponseBreve,
   correctionDetaillee: correction,
   enoncePapier,
-});
+};

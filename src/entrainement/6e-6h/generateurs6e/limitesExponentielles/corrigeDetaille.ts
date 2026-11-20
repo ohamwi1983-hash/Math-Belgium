@@ -421,7 +421,7 @@ function etapesLHopital(e: ExerciceLH): EtapeCorrection[] {
     const sub = `\\dfrac{${n2[0]}}{${d2[0]}}`;
     const simple = `\\dfrac{${n2[n2.length - 1]}}{${d2[d2.length - 1]}}`;
     etapes.push(
-      utilise("f", [texte("Règle de L'Hôpital appliquée deux fois : "), latex("\\lim\\dfrac{f(x)}{g(x)}=\\lim\\dfrac{f''(x)}{g''(x)}"), texte(", puis on remplace x par "), latex(`${x0}`), texte(".")]),
+      utilise("f", [texte("Règle de L'Hôpital appliquée deux fois : "), latex("\\lim\\dfrac{f(x)}{g(x)}=\\lim\\dfrac{f''(x)}{g''(x)}"), texte(` ${COURS_LIMITES}, puis on remplace x par `), latex(`${x0}`), texte(".")]),
       calcul(
         "f",
         sansRepetition([
@@ -442,7 +442,7 @@ function etapesLHopital(e: ExerciceLH): EtapeCorrection[] {
   const simple = `\\dfrac{${n[n.length - 1]}}{${d[d.length - 1]}}`;
   const sq = lettres[3];
   etapes.push(
-    utilise(sq, [texte("Règle de L'Hôpital : pour une forme "), latex("\\dfrac{0}{0}"), texte(", "), latex("\\lim\\dfrac{f(x)}{g(x)}=\\lim\\dfrac{f'(x)}{g'(x)}"), texte(" ; on remplace ensuite x par "), latex(`${x0}`), texte(".")]),
+    utilise(sq, [texte("Règle de L'Hôpital : pour une forme "), latex("\\dfrac{0}{0}"), texte(", "), latex("\\lim\\dfrac{f(x)}{g(x)}=\\lim\\dfrac{f'(x)}{g'(x)}"), texte(` ${COURS_LIMITES} ; on remplace ensuite x par `), latex(`${x0}`), texte(".")]),
     calcul(
       sq,
       sansRepetition([

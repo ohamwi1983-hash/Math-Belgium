@@ -2,7 +2,6 @@ import type { ExerciceDomaineDeriveeExponentielle } from "../../core6e/domaineDe
 import type { AdaptateurFeuilleExercices, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/corrigeTableau";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
-import { versionPapier } from "../../../export/consignePapier";
 import { formatEnsembleReelLatex } from "../../ui6e/formatEnsembleReel";
 import { CONSIGNE_GENERALE, consigneEcran, formatFonctionLatex } from "../../ui6e/formatDomaineDeriveeExponentielles";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDomaineDeriveeExponentielle } from "./index";
@@ -52,7 +51,7 @@ function criteresDifficulte(e: ExerciceDomaineDeriveeExponentielle): CriteresDif
   return { ...etapesDuCorrige(correction(e), lecture), methode, piege, nombres };
 }
 
-export const adaptateurEvaluationDomaineDeriveeExponentielles: AdaptateurFeuilleExercices<ExerciceDomaineDeriveeExponentielle> = versionPapier({
+export const adaptateurEvaluationDomaineDeriveeExponentielles: AdaptateurFeuilleExercices<ExerciceDomaineDeriveeExponentielle> = {
   titreDocument: "Domaine et dérivée (fonctions exponentielles) — Évaluation",
   nomFichierBase: "domaine-derivee-exponentielles",
   genererInstance: genererExerciceDomaineDeriveeExponentielle,
@@ -64,4 +63,4 @@ export const adaptateurEvaluationDomaineDeriveeExponentielles: AdaptateurFeuille
   reponseBreve,
   correctionDetaillee: correction,
   enoncePapier,
-});
+};
