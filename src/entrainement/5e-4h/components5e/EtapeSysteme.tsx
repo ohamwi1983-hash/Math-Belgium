@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
 import type { ReponseSysteme } from "../moteur5e/sessionModelisationSinusoide";
-import { arrondiPrecis, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { arrondiPrecis, consignePhaseFragments, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { FragmentsConsigneSinusoide } from "./FragmentsConsigneSinusoide";
 
 const virgule = (v: number) => String(v).replace(".", ",").replace("-", "−");
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -69,7 +70,7 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
 
   return (
     <div>
-      <p className="prompt-text">{consignePhase(exercice, "systeme")}</p>
+      <p className="prompt-text"><FragmentsConsigneSinusoide fragments={consignePhaseFragments(exercice, "systeme")} /></p>
       <ApercuExpressionLatex texte={equation1} />
       <div className="field">
         <label className="field-label field-label-minuscule">équation pour t₁={donnees.t1}, f₁={virgule(arrondiPrecis(donnees.v1))} :</label>

@@ -60,9 +60,16 @@ export function genererDonneesB3(): DonneesB3 {
     if (omega >= OMEGA_MIN && omega <= OMEGA_MAX) break;
   }
 
+  // f₁, f₂ sont IMPRIMÉS au dix-millième (énoncé, écran) : on les arrondit ici et on recalcule α₁,
+  // α₂, ω, φ depuis ces valeurs — le modèle, la vérification, la réponse affichée et le corrigé
+  // partent alors des MÊMES données que l'élève (sinon « 7 sin(3ω + φ) + 3 = 8,1234 » n'était
+  // qu'approché).
+  const v1 = Math.round((A * Math.sin(alpha1) + b) * 1e4) / 1e4;
+  const v2 = Math.round((A * Math.sin(alpha2) + b) * 1e4) / 1e4;
+  alpha1 = Math.asin((v1 - b) / A);
+  alpha2 = Math.asin((v2 - b) / A);
+  omega = (alpha1 - alpha2) / (t1 - t2);
   const phi = alpha1 - omega * t1;
-  const v1 = A * Math.sin(alpha1) + b;
-  const v2 = A * Math.sin(alpha2) + b;
 
   return { technique: "b3", A, b, t1, v1, t2, v2, alpha1, alpha2, fonction: { A, omega, phi, b } };
 }

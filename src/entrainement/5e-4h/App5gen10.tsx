@@ -108,14 +108,13 @@ import {
   formatAideSepararFacteursNiveau2Latex,
   formatEquationConvertieEgaliteLatex,
   formatPolynomeCibleLatex,
-  formatSolutionsTexte,
+  formatEnsembleSolutionsLatex,
   formatTermesArgumentDirecteLatex,
   formatTermesArgumentProduitLatex,
   formatTermesRacinesResolutionLatex,
   formatTermesRacinesTLatex,
   formatTermesXDirecteLatex,
   formatTermesXProduitLatex,
-  regimeProduit,
 } from "./ui5e/formatEquationTrigonometrique";
 import { calculerRecapitulatifEquationTrig } from "./ui5e/recapitulatifEquationTrig";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
@@ -123,6 +122,9 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { correctionDetailleeEquationTrig } from "./generateurs5e/equationsTrigonometriques/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -197,7 +199,7 @@ function reponseAttenduePhase(exercice: ExerciceEquationTrigonometrique, phase: 
     const ex = commeDirecte(exercice);
     if (phase === "argument") return ex.aucuneSolution ? TEXTE_ARGUMENT_AUCUNE_SOLUTION : <TermesInline termes={formatTermesArgumentDirecteLatex(ex)} />;
     if (phase === "isolerX") return <TermesInline termes={formatTermesXDirecteLatex(ex)} />;
-    if (phase === "solutions") return formatSolutionsTexte(ex.solutions, ex.regime);
+    if (phase === "solutions") return <Katex expression={formatEnsembleSolutionsLatex(ex.solutions)} />;
   }
   if (exercice.famille === "produit") {
     const ex = commeProduit(exercice);
@@ -205,20 +207,20 @@ function reponseAttenduePhase(exercice: ExerciceEquationTrigonometrique, phase: 
     if (phase === "separerFacteurs") return <TermesInline termes={formatAideSepararFacteursNiveau2Latex(ex)} />;
     if (phase === "argumentProduit") return <TermesInline termes={formatTermesArgumentProduitLatex(ex)} />;
     if (phase === "isolerXProduit") return <TermesInline termes={formatTermesXProduitLatex(ex)} />;
-    if (phase === "solutionsProduit") return formatSolutionsTexte(ex.solutionsUnion, regimeProduit(ex));
+    if (phase === "solutionsProduit") return <Katex expression={formatEnsembleSolutionsLatex(ex.solutionsUnion)} />;
   }
   if (exercice.famille === "pythagoricienne") {
     const ex = commePythagoricienne(exercice);
     if (phase === "conversionPythagoricienne") return <Katex expression={formatPolynomeCibleLatex(ex)} />;
     if (phase === "racinesPythagoricienne") return <TermesInline termes={formatTermesRacinesTLatex(ex)} />;
     if (phase === "racinesResolution") return <TermesInline termes={formatTermesRacinesResolutionLatex(ex)} />;
-    if (phase === "solutionsPythagoricienne") return formatSolutionsTexte(ex.solutionsUnion, "exact");
+    if (phase === "solutionsPythagoricienne") return <Katex expression={formatEnsembleSolutionsLatex(ex.solutionsUnion)} />;
   }
   if (exercice.famille === "egalite") {
     const ex = commeEgalite(exercice);
     if (phase === "conversionEgalite") return <Katex expression={formatEquationConvertieEgaliteLatex(ex)} />;
     if (phase === "resoudreEgalite") return <TermesInline termes={formatAideResoudreEgaliteNiveau2Latex(ex)} />;
-    if (phase === "solutionsEgalite") return formatSolutionsTexte(ex.solutions, "exact");
+    if (phase === "solutionsEgalite") return <Katex expression={formatEnsembleSolutionsLatex(ex.solutions)} />;
   }
   return null;
 }
@@ -342,6 +344,7 @@ export function App5gen10() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationTrig(exercice), lettreEtape(ordrePhasesPourExercice(exercice).indexOf(etat.phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

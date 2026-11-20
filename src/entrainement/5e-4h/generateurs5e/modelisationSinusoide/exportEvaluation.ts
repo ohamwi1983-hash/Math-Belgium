@@ -5,15 +5,17 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { LIBELLE_PHASE, consignePhase, formatTermesDonneesConstructionLatex, formatTermesReponseAttendueModelisationSinusoide, nombreLatex, texteAideNiveau2 } from "../../ui5e/formatModelisationSinusoide";
+import { LIBELLE_PHASE, consignePhase, consignePhaseFragments, formatTermesDonneesConstructionLatex, formatTermesReponseAttendueModelisationSinusoide, nombreLatex } from "../../ui5e/formatModelisationSinusoide";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeModelisationSinusoide, lettresLectureModelisation, lettresSansChargeModelisation } from "./corrigeDetaille";
 import { CATALOGUE_TECHNIQUES, construireAvecTechnique, genererExerciceModelisationSinusoide } from "./index";
 import { profilModelisationSinusoide, LIBELLE_CAS_MODELISATION } from "../profilsEvaluationTrigonometrie";
 
@@ -56,7 +58,7 @@ function consigneEtape(exercice: ExerciceModelisationSinusoide, phase: PhaseMode
 function construireEnonceModelisationSinusoide(exercice: ExerciceModelisationSinusoide): SectionExercice {
   return {
     enteteFragments: enteteFragments(exercice),
-    questions: ordreComplet(exercice).map((phase): QuestionExercice => ({ consigne: [texte(consigneEtape(exercice, phase))] })),
+    questions: ordreComplet(exercice).map((phase): QuestionExercice => ({ consigne: consignePhaseFragments(exercice, phase, consigneEtape(exercice, phase)) })),
   };
 }
 
@@ -199,81 +201,6 @@ function reponseBreveModelisationSinusoide(exercice: ExerciceModelisationSinusoi
   return [texte("a) "), ...construction, texte(" ; b) "), ...exploitation];
 }
 
-function methode(exercice: ExerciceModelisationSinusoide, phase: PhaseModelisationSinusoide): FragmentConsigne[] {
-  const d = exercice.phase1;
-  const q = exercice.phase2;
-  switch (phase) {
-    case "amplitude":
-      return d.technique === "b1"
-        ? [texte("L'amplitude est le rayon de la roue : "), latex("A=R")]
-        : [texte("La moitié de l'écart entre maximum et minimum : "), latex("A=\\dfrac{\\max-\\min}{2}")];
-    case "decalage":
-      return d.technique === "b1"
-        ? [texte("La hauteur de l'axe de la roue : "), latex("b=R+h_{sol}")]
-        : [texte("La position d'équilibre, à mi-hauteur : "), latex("b=\\dfrac{\\max+\\min}{2}")];
-    case "pulsation":
-      return [texte("Une période complète correspond à un tour : "), latex("\\omega=\\dfrac{2\\pi}{T}")];
-    case "phi": {
-      const max = d.technique === "b2" && d.estMax;
-      return [texte(`En t₀, f atteint son ${max ? "maximum" : "minimum"} : l'argument du sinus vaut `), latex(max ? "\\dfrac{\\pi}{2}" : "\\dfrac{3\\pi}{2}"), texte(", d'où "), latex(`\\omega t_0+\\varphi=${max ? "\\dfrac{\\pi}{2}" : "\\dfrac{3\\pi}{2}"}`), texte(".")];
-    }
-    case "systeme":
-      return [texte("En chaque point, on isole le sinus puis on prend l'arcsin (argument entre −π/2 et π/2) : "), latex("\\omega t_i+\\varphi=\\arcsin\\!\\left(\\dfrac{f_i-b}{A}\\right)")];
-    case "resolution":
-      return [texte("On soustrait les deux équations pour éliminer φ, puis on les additionne pour trouver φ.")];
-    case "fonctionFinale":
-      return d.technique === "b1" ? [texte("Aucune donnée ne fixe φ : il reste sous forme littérale.")] : [texte("On remplace A, ω, φ et b dans le modèle.")];
-    case "argumentResoudre":
-      if (q !== null && q.type === "resoudre" && q.aucuneSolution) return [texte("On pose u = ωt + φ et "), latex("m=\\dfrac{y_0-b}{A}"), texte(" : ici |m| > 1, et un sinus reste entre −1 et 1.")];
-      return [texte("On pose u = ωt + φ et "), latex("m=\\dfrac{y_0-b}{A}"), texte(" : "), latex("\\sin u=m\\iff u=\\arcsin m+2k\\pi\\ \\text{ou}\\ u=\\pi-\\arcsin m+2k\\pi")];
-    case "isolerTResoudre":
-    case "isolerTExtremum":
-    case "isolerTInequation":
-      return [texte("On isole t : "), latex("t=\\dfrac{u-\\varphi}{\\omega}"), texte(" — on divise chaque terme (constante et période) par ω.")];
-    case "solutionsResoudre":
-    case "solutionsExtremum":
-      return [texte("On donne à k les valeurs entières qui placent t dans la fenêtre.")];
-    case "poserExtremum":
-      return [texte("Un maximum ou un minimum correspond à "), latex("\\sin u=\\pm1\\iff u=\\dfrac{\\pi}{2}+k\\pi"), texte(" (une seule série, de période π).")];
-    case "isolerSinInequation":
-      return [texte("On isole le sinus : "), latex(q !== null && q.type === "inequation" && q.sens === "le" ? "\\sin u\\leqslant m" : "\\sin u\\geqslant m"), texte(" avec "), latex("m=\\dfrac{y_0-b}{A}"), texte(" ; si |m| > 1, l'inéquation est toujours vraie ou toujours fausse.")];
-    case "resoudreUInequation":
-      return q !== null && q.type === "inequation" && q.sens === "le"
-        ? [latex("\\sin u\\leqslant m\\iff u\\in[\\pi-\\arcsin m\\,;\\,2\\pi+\\arcsin m]+2k\\pi")]
-        : [latex("\\sin u\\geqslant m\\iff u\\in[\\arcsin m\\,;\\,\\pi-\\arcsin m]+2k\\pi")];
-    case "listerIntervallesInequation":
-      return [texte("Les bornes se répètent tous les "), latex("\\dfrac{2\\pi}{\\omega}"), texte(" ; on garde les morceaux contenus dans la fenêtre.")];
-  }
-}
-
-/** Calcul substitué (aide de niveau 2 de l'écran), seulement là où il apporte une valeur de
- * l'instance — pas pour les formules générales déjà données en méthode. */
-const PHASES_AVEC_CALCUL = new Set<PhaseModelisationSinusoide>(["amplitude", "decalage", "pulsation", "phi", "systeme", "argumentResoudre", "isolerSinInequation"]);
-
-function piege(exercice: ExerciceModelisationSinusoide, phase: PhaseModelisationSinusoide): string | null {
-  const d = exercice.phase1;
-  if (phase === "fonctionFinale" && d.technique === "b1") return "N'invente pas de valeur pour φ : rien dans l'énoncé ne fixe la position de la nacelle à t = 0.";
-  if (phase === "phi" && d.technique === "b2" && !d.estMax) return "Au minimum, l'argument vaut 3π/2, pas π/2.";
-  if (phase === "poserExtremum") return "Maximums ET minimums : la série a une période π, pas 2π.";
-  if (phase === "argumentResoudre" && exercice.phase2 !== null && exercice.phase2.type === "resoudre" && !exercice.phase2.aucuneSolution) return "Deux séries de solutions : n'oublie pas u = π − arcsin m + 2kπ.";
-  if (phase === "resoudreUInequation") return "Choisis le bon arc du cercle : pour ≥, celui qui contient π/2 ; pour ≤, l'arc complémentaire.";
-  return null;
-}
-
-function correctionDetailleeModelisationSinusoide(exercice: ExerciceModelisationSinusoide): EtapeCorrection[] {
-  return ordreComplet(exercice).flatMap((phase, i) => {
-    const sousQuestion = LETTRES[i];
-    const etapes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion, fragments: methode(exercice, phase) }];
-    const calcul = PHASES_AVEC_CALCUL.has(phase) ? texteAideNiveau2(exercice, phase) : "";
-    if (calcul) etapes.push({ label: "Calcul", sousQuestion, fragments: [latex(calcul)] });
-    const reponse = formatTermesReponseAttendueModelisationSinusoide(exercice, phase);
-    if (reponse.length > 0) etapes.push({ label: "Conclusion", sousQuestion, fragments: joindre(reponse) });
-    const p = piege(exercice, phase);
-    if (p !== null) etapes.push({ label: "Piège", sousQuestion, fragments: [texte(p)] });
-    return etapes;
-  });
-}
-
 function baremeModelisationSinusoide(exercice: ExerciceModelisationSinusoide): BaremeExercice {
   // Un poids égal par étape (au plus 8 étapes : aucune ne tombe à 0 point une fois le total
   // ramené au demi-point) — chaque question pèse ainsi son nombre d'étapes.
@@ -302,13 +229,24 @@ function baremeModelisationSinusoide(exercice: ExerciceModelisationSinusoide): B
   return { reponseFinale: reponse, criteres, erreursFrequentes: erreurs, reponsesAcceptees: acceptees };
 }
 
-function difficulteModelisationSinusoide(exercice: ExerciceModelisationSinusoide): 1 | 2 | 3 {
-  const { technique } = exercice.phase1;
+/** Niveau (grille commune). Écran de pure lecture : « amplitude » de la grande roue (A = R) ; écrans
+ * « solutions » et « intervalles » sans charge (même calcul pour chaque k). Méthode : le modèle
+ * f(t) = A sin(ωt + φ) + b est donné dans l'énoncé (au plus 1) — 1 pour B2/B3 (choisir comment
+ * obtenir φ, ou ω et φ par un système) et pour l'inéquation (choisir l'arc), 0 sinon. Piège dans
+ * les DONNÉES : φ indéterminé (grande roue), extremum donné qui est un minimum (3π/2), inéquation
+ * « ≤ » (arc complémentaire) ; « aucune solution » / « toujours vraie » sont des cas particuliers. */
+function criteresDifficulteModelisationSinusoide(exercice: ExerciceModelisationSinusoide): CriteresDifficulte {
+  const base = etapesDuCorrige(correctionDetailleeModelisationSinusoide(exercice), lettresLectureModelisation(exercice));
+  const d = exercice.phase1;
   const q = exercice.phase2;
-  if (technique === "b3" && q !== null) return 3;
-  if (technique === "b2") return 3;
-  if (q !== null && q.type !== "extremum") return 3;
-  return 2;
+  const inequation = q !== null && q.type === "inequation" && q.casSpecial === null;
+  const piege = d.technique === "b1" || (d.technique === "b2" && !d.estMax) || (inequation && q.sens === "le");
+  return {
+    ...base,
+    lettresSansCharge: [...(base.lettresSansCharge ?? []), ...lettresSansChargeModelisation(exercice)],
+    methode: d.technique === "b2" || d.technique === "b3" || inequation ? 1 : 0,
+    piege: piege ? 1 : 0,
+  };
 }
 
 function construireCorrectionModelisationSinusoide(exercice: ExerciceModelisationSinusoide): BlocCorrection[] {
@@ -327,10 +265,9 @@ export const adaptateurEvaluationModelisationSinusoide: AdaptateurFeuilleExercic
   genererInstanceAvecVariante: (id) => construireAvecTechnique(id as TechniquePhase1),
   construireEnonce: construireEnonceModelisationSinusoide,
   construireCorrection: construireCorrectionModelisationSinusoide,
-  difficulte: difficulteModelisationSinusoide,
+  criteresDifficulte: criteresDifficulteModelisationSinusoide,
   reponseBreve: reponseBreveModelisationSinusoide,
   correctionDetaillee: correctionDetailleeModelisationSinusoide,
   bareme: baremeModelisationSinusoide,
   enoncePapier: enoncePapierModelisationSinusoide,
-  dureeMinutes: 12,
 };

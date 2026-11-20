@@ -14,14 +14,13 @@ import {
   formatAideSepararFacteursNiveau2Latex,
   formatEquationConvertieEgaliteLatex,
   formatPolynomeCibleLatex,
-  formatSolutionsTexte,
+  formatEnsembleSolutionsLatex,
   formatTermesArgumentDirecteLatex,
   formatTermesArgumentProduitLatex,
   formatTermesRacinesResolutionLatex,
   formatTermesRacinesTLatex,
   formatTermesXDirecteLatex,
   formatTermesXProduitLatex,
-  regimeProduit,
   TEXTE_ARGUMENT_AUCUNE_SOLUTION,
 } from "./formatEquationTrigonometrique";
 
@@ -98,7 +97,7 @@ export function calculerRecapitulatifEquationTrig(etat: EtatSessionEquationTrigo
       }
     }
     if (close("isolerX")) entrees.push(entreeMultiple("x isolé", formatTermesXDirecteLatex(ex), revele("isolerX")));
-    if (close("solutions")) entrees.push(entreeUnique("Solutions", formatSolutionsTexte(ex.solutions, ex.regime), false, revele("solutions")));
+    if (close("solutions")) entrees.push(entreeUnique("Solutions", formatEnsembleSolutionsLatex(ex.solutions), true, revele("solutions")));
   } else if (exercice.famille === "produit") {
     const ex = commeProduit(exercice);
     if (close("prefacteur")) entrees.push(entreeUnique("Préfacteur / factorisation", formatAidePrefacteurNiveau2Latex(ex), true, revele("prefacteur")));
@@ -106,19 +105,19 @@ export function calculerRecapitulatifEquationTrig(etat: EtatSessionEquationTrigo
     if (close("argumentProduit")) entrees.push(entreeMultiple("Argument", formatTermesArgumentProduitLatex(ex), revele("argumentProduit")));
     if (close("isolerXProduit")) entrees.push(entreeMultiple("x isolé", formatTermesXProduitLatex(ex), revele("isolerXProduit")));
     if (close("solutionsProduit"))
-      entrees.push(entreeUnique("Solutions", formatSolutionsTexte(ex.solutionsUnion, regimeProduit(ex)), false, revele("solutionsProduit")));
+      entrees.push(entreeUnique("Solutions", formatEnsembleSolutionsLatex(ex.solutionsUnion), true, revele("solutionsProduit")));
   } else if (exercice.famille === "pythagoricienne") {
     const ex = commePythagoricienne(exercice);
     if (close("conversionPythagoricienne")) entrees.push(entreeUnique("Polynôme cible", formatPolynomeCibleLatex(ex), true, revele("conversionPythagoricienne")));
     if (close("racinesPythagoricienne")) entrees.push(entreeMultiple("Racines t₁ et t₂", formatTermesRacinesTLatex(ex), revele("racinesPythagoricienne")));
     if (close("racinesResolution")) entrees.push(entreeMultiple("Résolution", formatTermesRacinesResolutionLatex(ex), revele("racinesResolution")));
     if (close("solutionsPythagoricienne"))
-      entrees.push(entreeUnique("Solutions", formatSolutionsTexte(ex.solutionsUnion, "exact"), false, revele("solutionsPythagoricienne")));
+      entrees.push(entreeUnique("Solutions", formatEnsembleSolutionsLatex(ex.solutionsUnion), true, revele("solutionsPythagoricienne")));
   } else {
     const ex = commeEgalite(exercice);
     if (close("conversionEgalite")) entrees.push(entreeUnique("Équation convertie", formatEquationConvertieEgaliteLatex(ex), true, revele("conversionEgalite")));
     if (close("resoudreEgalite")) entrees.push(entreeMultiple("Résolution", formatAideResoudreEgaliteNiveau2Latex(ex), revele("resoudreEgalite")));
-    if (close("solutionsEgalite")) entrees.push(entreeUnique("Solutions", formatSolutionsTexte(ex.solutions, "exact"), false, revele("solutionsEgalite")));
+    if (close("solutionsEgalite")) entrees.push(entreeUnique("Solutions", formatEnsembleSolutionsLatex(ex.solutions), true, revele("solutionsEgalite")));
   }
 
   return entrees;

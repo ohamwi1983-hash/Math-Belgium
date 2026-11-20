@@ -8,7 +8,7 @@
  * primitive existante n'est pas exportée — même principe de petite duplication déjà établi ailleurs
  * sur la plateforme.
  */
-import { formatAngleLabelTexte, formatArgumentLatex, formatBrancheLatex, formatEquationEnonceLatex, formatValeurLatex } from "./formatEquationTrig";
+import { formatAngleLabelTexte, formatArgumentLatex, formatBrancheLatex, formatEquationEnonceLatex, formatValeurLatex, relationBranche } from "./formatEquationTrig";
 import type {
   BrancheX,
   CoefficientRationnel,
@@ -75,6 +75,8 @@ export function simplifierAffichageProduit(latex: string): string {
   // 4. "1\cdot " isolé — jamais précédé d'un chiffre, d'une virgule décimale ou d'un signe "-"
   // (qui en ferait respectivement le "1" final d'une décimale comme "2,1", ou un "-1\cdot " réel).
   s = s.replace(/(?<![\d,}-])1\\cdot\s*/g, "");
+  // 5. « -1\cdot » isolé (« −1·tan(x) ») → « - » : jamais devant une décimale (« -1{,}7\cdot »).
+  s = s.replace(/(?<![\d,}])-1\\cdot\s*/g, "-");
   return s;
 }
 
@@ -295,7 +297,7 @@ export function texteAideResoudreEgaliteNiveau1(exercice: ExerciceEgaliteExpress
   return TEXTE_AIDE_RESOUDRE_EGALITE_NIVEAU1[exercice.identite];
 }
 export function formatAideResoudreEgaliteNiveau2Latex(exercice: ExerciceEgaliteExpressions): string[] {
-  return exercice.branches.map((b: BrancheX) => `x = ${formatBrancheLatex(b)}`);
+  return exercice.branches.map((b: BrancheX) => `x ${relationBranche(b)} ${formatBrancheLatex(b)}`);
 }
 
 export const CONSIGNE_SOLUTIONS_EGALITE = "Donne toutes les solutions de l'équation dans [0 ; 2π[, chaque valeur une seule fois.";
@@ -318,12 +320,12 @@ export const CONSIGNE_SOLUTIONS_EGALITE = "Donne toutes les solutions de l'équa
  * plus jamais introduit à l'élève, D.1 ayant retiré toute mention de "u" de la consigne). */
 export function formatTermesArgumentDirecteLatex(exercice: ExerciceEquationTrig): string[] {
   const argument = formatArgumentLatex(exercice.a, exercice.b);
-  return exercice.branchesU.map((b) => `${argument} = ${formatBrancheLatex(b)}`);
+  return exercice.branchesU.map((b) => `${argument} ${relationBranche(b)} ${formatBrancheLatex(b)}`);
 }
 
 /** Réponse attendue de l'écran "isolerX". */
 export function formatTermesXDirecteLatex(exercice: ExerciceEquationTrig): string[] {
-  return exercice.branchesX.map((b) => `x = ${formatBrancheLatex(b)}`);
+  return exercice.branchesX.map((b) => `x ${relationBranche(b)} ${formatBrancheLatex(b)}`);
 }
 
 /** "isolerX" rappelle l'argument déjà posé (écran "argument") ; "solutions" rappelle en plus les
@@ -350,14 +352,14 @@ function formatTermesFacteursSeparesConfirmes(exercice: ExerciceProduitFacteurs)
 export function formatTermesArgumentProduitLatex(exercice: ExerciceProduitFacteurs): string[] {
   const arg1 = formatArgumentLatex(exercice.facteur1.a, exercice.facteur1.b);
   const arg2 = formatArgumentLatex(exercice.facteur2.a, exercice.facteur2.b);
-  return [...exercice.facteur1.branchesU.map((b) => `${arg1} = ${formatBrancheLatex(b)}`), ...exercice.facteur2.branchesU.map((b) => `${arg2} = ${formatBrancheLatex(b)}`)];
+  return [...exercice.facteur1.branchesU.map((b) => `${arg1} ${relationBranche(b)} ${formatBrancheLatex(b)}`), ...exercice.facteur2.branchesU.map((b) => `${arg2} ${relationBranche(b)} ${formatBrancheLatex(b)}`)];
 }
 
 /** Réponse attendue de l'écran "isolerXProduit" — x, les 2 facteurs traités ensemble. */
 export function formatTermesXProduitLatex(exercice: ExerciceProduitFacteurs): string[] {
   return [
-    ...exercice.facteur1.branchesX.map((b) => `x = ${formatBrancheLatex(b)}`),
-    ...exercice.facteur2.branchesX.map((b) => `x = ${formatBrancheLatex(b)}`),
+    ...exercice.facteur1.branchesX.map((b) => `x ${relationBranche(b)} ${formatBrancheLatex(b)}`),
+    ...exercice.facteur2.branchesX.map((b) => `x ${relationBranche(b)} ${formatBrancheLatex(b)}`),
   ];
 }
 
@@ -387,7 +389,7 @@ export function formatTermesEtatActuelProduit(
 function formatRacineTLatex(t: number): string {
   const r = Math.round(t * 10) / 10;
   const norm = Object.is(r, -0) ? 0 : r;
-  return Number.isInteger(norm) ? String(norm) : norm.toString().replace(".", ",");
+  return Number.isInteger(norm) ? String(norm) : norm.toString().replace(".", "{,}");
 }
 
 /** Réponse attendue de l'écran "racinesPythagoricienne" — les 2 racines t1/t2. */
@@ -396,18 +398,20 @@ export function formatTermesRacinesTLatex(exercice: ExercicePythagoricienne): st
 }
 
 /** Réponse attendue de l'écran "racinesResolution" — pour CHAQUE racine, "rejetée" (si invalide)
- * ou ses branches x résolues. */
+ * ou ses séries x (« t_1=0{,}5 :\ x=… » ; deux séries confondues — t = ±1 — écrites une fois). */
 export function formatTermesRacinesResolutionLatex(exercice: ExercicePythagoricienne): string[] {
-  return [exercice.racine1, exercice.racine2].flatMap((r) => {
-    if (r.invalide || r.resolution === null) return [`${formatRacineTLatex(r.t)} : \\text{rejetée}`];
-    return r.resolution.branchesX.map((b) => `${formatRacineTLatex(r.t)} : x = ${formatBrancheLatex(b)}`);
+  return [exercice.racine1, exercice.racine2].flatMap((r, i) => {
+    const t = `t_${i + 1}=${formatRacineTLatex(r.t)}`;
+    if (r.invalide || r.resolution === null) return [`${t} :\\ \\text{rejetée}`];
+    const series = [...new Set(r.resolution.branchesX.map((b) => formatBrancheLatex(b)))];
+    return series.map((serie) => `${t} :\\ x = ${serie}`);
   });
 }
 
 function formatTermesXPythagoricienneConfirmes(exercice: ExercicePythagoricienne): string[] {
   return [exercice.racine1, exercice.racine2]
     .filter((r) => !r.invalide && r.resolution !== null)
-    .flatMap((r) => r.resolution!.branchesX.map((b) => `x = ${formatBrancheLatex(b)}`));
+    .flatMap((r) => [...new Set(r.resolution!.branchesX.map((b) => `x = ${formatBrancheLatex(b)}`))]);
 }
 
 /** "racinesPythagoricienne" rappelle la conversion déjà faite ; "racinesResolution" rappelle en
@@ -463,7 +467,8 @@ export function formatTermesEtatActuelEgalite(exercice: ExerciceEgaliteExpressio
 
 /** Texte affiché à la place des branches en u quand `exercice.aucuneSolution` (l'écran "argument"
  * n'a alors aucune branche à montrer — la bonne réponse était le bouton "Aucune solution"). */
-export const TEXTE_ARGUMENT_AUCUNE_SOLUTION = "Aucune solution — |k| > 1.";
+/** « |k| > 1 » prêtait à confusion : k désigne aussi l'entier des séries. */
+export const TEXTE_ARGUMENT_AUCUNE_SOLUTION = "Aucune solution : la valeur visée n'est pas dans [−1 ; 1].";
 
 /** Liste texte (PLAIN, jamais du LaTeX à passer à `<Katex>`) des solutions distinctes — réutilise
  * `formatAngleLabelTexte` (déjà utilisé pour les labels du cercle trigonométrique). `"Aucune
@@ -471,6 +476,19 @@ export const TEXTE_ARGUMENT_AUCUNE_SOLUTION = "Aucune solution — |k| > 1.";
 export function formatSolutionsTexte(solutions: number[], regime: RegimeEquationTrig): string {
   if (solutions.length === 0) return "Aucune solution.";
   return solutions.map((s) => formatAngleLabelTexte(s, regime)).join(", ");
+}
+
+/** Ensemble des solutions de [0 ; 2π[ en LaTeX (réponse de l'écran « solutions », papier et corrigé) :
+ * fractions de π exactes, sinon valeurs au centième ; « S = \\varnothing » si vide. */
+export function formatEnsembleSolutionsLatex(solutions: number[]): string {
+  if (solutions.length === 0) return "S=\\varnothing";
+  const valeur = (v: number) => formatValeurLatex({ exact: null, decimal: v });
+  return `S=\\left\\{${solutions.map(valeur).join("\\,;\\,")}\\right\\}`;
+}
+
+/** Une valeur au moins de l'ensemble est arrondie (ni fraction de π, ni exacte au centième). */
+export function ensembleApproche(solutions: number[]): boolean {
+  return solutions.some((v) => formatValeurLatex({ exact: null, decimal: v }).includes("{,}") && Math.abs(v * 100 - Math.round(v * 100)) > 1e-7);
 }
 
 export { formatValeurLatex };

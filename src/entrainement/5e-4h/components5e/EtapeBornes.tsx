@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
 import type { ReponseBornes } from "../moteur5e/sessionModelisationSinusoide";
-import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { consignePhaseFragments, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { FragmentsConsigneSinusoide } from "./FragmentsConsigneSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { CercleTrigEquationSketch } from "./CercleTrigEquationSketch";
@@ -70,7 +71,7 @@ export function EtapeBornes({ exercice, phase, tentativesUtilisees, tentativesMa
 
   return (
     <div>
-      <p className="prompt-text">{consignePhase(exercice, phase)}</p>
+      <p className="prompt-text"><FragmentsConsigneSinusoide fragments={consignePhaseFragments(exercice, phase)} /></p>
       <div className="field-row">
         <div>
           <ApercuExpressionLatex texte={inf} label={phase === "resoudreUInequation" ? "u_inf =" : "t_inf ="} />
