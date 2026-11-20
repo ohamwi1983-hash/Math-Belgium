@@ -158,9 +158,9 @@ export const fonctionsComposees: ChapterContent = {
           text:
             'Une racine paire impose $\\text{radicande} \\ge 0$ : c’est une inégalité **large**, ' +
             'le 0 lui-même est accepté. Un dénominateur impose $\\text{dénominateur} \\ne 0$ : ce ' +
-            'n’est **pas** une inégalité, mais une seule valeur ponctuelle qu’on retire — pas ' +
-            'tout un côté de la droite. Ne recopie jamais « ≠ 0 » là où il fallait « ≥ 0 », ou ' +
-            "l'inverse.",
+            'n’est **pas** une inégalité : on retire seulement des valeurs isolées (les zéros du ' +
+            'dénominateur, comme 2 et 3 pour $x^2-5x+6$), jamais tout un côté de la droite. Ne ' +
+            "recopie jamais « ≠ 0 » là où il fallait « ≥ 0 », ou l'inverse.",
         },
         {
           kind: 'methode',
@@ -217,7 +217,7 @@ export const fonctionsComposees: ChapterContent = {
             { tag: 'CE 2 — le dénominateur', text: '$x+1 \\ne 0 \\iff x \\ne -1$' },
           ],
           result: {
-            tag: 'dom f — intersection : on retire x=−1, qui tombe DANS [−3;3]',
+            tag: 'dom f — intersection : on retire x = −1, qui tombe dans [−3 ; 3]',
             text: '$\\operatorname{dom} f = [-3\\,;\\,-1[\\ \\cup\\ ]-1\\,;\\,3]$',
           },
           illustration: {
@@ -291,7 +291,7 @@ export const fonctionsComposees: ChapterContent = {
                   ],
                 },
                 {
-                  label: '(x − 1)/(x + 2)',
+                  label: 'quotient',
                   cells: [
                     { text: '', tone: 'plain' },
                     { text: '+', tone: 'pos' },
@@ -332,6 +332,27 @@ export const fonctionsComposees: ChapterContent = {
             tag: 'dom f — inégalité stricte, 3 est exclu',
             text: '$\\operatorname{dom} f = \\mathopen{]}-\\infty\\,;\\,3\\mathclose{[}$',
           },
+          illustration: {
+            kind: 'domainLine',
+            min: -3,
+            max: 5,
+            segments: [{ from: 'min', to: 3 }],
+            points: [{ value: 3, closed: false, label: '3', tone: 'bad' }],
+            extraTicks: [{ value: 0, label: '0' }],
+            axisLabel: 'dom f',
+            caption: 'rond vide en 3 : le radicande y vaut 0, et l’on diviserait par $\\sqrt{0} = 0$',
+          },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — une racine au dénominateur impose radicande > 0',
+          blocks: [
+            { kind: 'para', text: "**Ce qu'il faut montrer.** Pour $f(x) = \\dfrac{N(x)}{\\sqrt{u(x)}}$, avec un numérateur $N$ défini pour tout réel (un polynôme, par exemple), les deux conditions « $u(x) \\ge 0$ » et « $\\sqrt{u(x)} \\ne 0$ » reviennent à la seule condition $u(x) > 0$." },
+            { kind: 'para', text: "**Étape 1 — la racine.** $\\sqrt{u(x)}$ existe si et seulement si $u(x) \\ge 0$." },
+            { kind: 'para', text: "**Étape 2 — quand une racine vaut-elle 0 ?** Si $\\sqrt{a} = 0$, on élève au carré : $a = \\left(\\sqrt{a}\\right)^2 = 0^2 = 0$. Inversement, $\\sqrt{0} = 0$. Donc $\\sqrt{a} = 0 \\iff a = 0$, et la condition du dénominateur s'écrit $\\sqrt{u(x)} \\ne 0 \\iff u(x) \\ne 0$." },
+            { kind: 'para', text: "**Étape 3 — combiner.** Les deux conditions doivent être vraies en même temps : $u(x) \\ge 0$ **et** $u(x) \\ne 0$. Un nombre positif ou nul qui n'est pas nul est strictement positif : il reste $u(x) > 0$." },
+            { kind: 'para', text: "**Conclusion.** $\\operatorname{dom} f = \\{x : u(x) > 0\\}$, avec une inégalité **stricte**. Écrire « $u(x) \\ge 0$ » garderait les valeurs qui annulent $u$, où l'on diviserait par $\\sqrt{0} = 0$ : pour $\\dfrac{x+4}{\\sqrt{6-2x}}$, ce serait garder $x = 3$. Si le numérateur a lui-même une condition, on l'ajoute par intersection." },
+          ],
         },
         {
           kind: 'exemple',
@@ -375,24 +396,26 @@ export const fonctionsComposees: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Traite **toujours** la condition du dénominateur séparément de celle de la racine, même quand ' +
-            'la racine est justement AU dénominateur (comme ci-dessus). Beaucoup d’erreurs viennent ' +
-            'd’avoir fusionné les deux réflexes en une seule condition « radicande > 0 » — alors ' +
-            'qu’il s’agit bien de deux conditions distinctes (une large, une stricte) à combiner ensuite.',
+            'Même quand la racine est au dénominateur (comme ci-dessus), pose **d’abord** les deux ' +
+            'conditions, radicande $\\ge 0$ et dénominateur $\\ne 0$, puis combine-les : c’est leur ' +
+            'intersection qui donne « radicande $> 0$ ». Écrire directement « radicande $\\ge 0$ » oublie ' +
+            'la seconde condition et laisse dans le domaine la valeur qui annule le dénominateur.',
         },
         {
           kind: 'historique',
           titre: 'Qui a le droit de diviser par zéro ?',
           text:
-            'Le mathématicien indien **Brahmagupta**, au 7e siècle, est l\'un des premiers à ' +
-            'donner des règles de calcul explicites pour le nombre 0 — additions, soustractions, ' +
-            'multiplications. Mais sur la division par zéro, il se trompe : il affirme que ' +
-            '$n/0 = 0$, une règle qui semble raisonnable mais qui est en réalité incohérente ' +
-            '(elle impliquerait que $0\\times0=n$, pour n\'importe quel n !). Il faudra attendre ' +
-            'des siècles, et les travaux d\'autres mathématiciens indiens comme Bhāskara II au ' +
-            '12e siècle, puis la formalisation moderne de l\'analyse, pour comprendre que $n/0$ ' +
-            'n\'est tout simplement **pas défini** — exactement la raison pour laquelle un ' +
-            'dénominateur ne peut jamais valoir 0 dans le domaine d\'une fonction.',
+            'Le mathématicien indien **Brahmagupta**, en 628, est l\'un des premiers à donner des ' +
+            'règles de calcul explicites pour le nombre 0 — additions, soustractions, ' +
+            'multiplications. Sur la division, il hésite : il pose $0 \\div 0 = 0$, et laisse ' +
+            '$n \\div 0$ sous la forme d\'une fraction « de dénominateur nul », sans lui donner de ' +
+            'valeur. Cinq siècles plus tard, **Bhāskara II** affirme que $n \\div 0$ est une ' +
+            'quantité infinie. Aucune de ces deux règles ne tient : $n \\div 0 = q$ voudrait dire ' +
+            '$q \\times 0 = n$, impossible si $n \\ne 0$ ; et $0 \\div 0 = q$ marcherait pour ' +
+            '**tous** les nombres $q$ à la fois, puisque $q \\times 0 = 0$ toujours. Il faudra la ' +
+            'formalisation moderne de l\'analyse pour trancher : diviser par 0 n\'est tout ' +
+            'simplement **pas défini** — exactement la raison pour laquelle un dénominateur ne peut ' +
+            'jamais valoir 0 dans le domaine d\'une fonction.',
         },
         {
           kind: 'entrainement',
@@ -401,7 +424,7 @@ export const fonctionsComposees: ChapterContent = {
           chantier: '5e-4h',
           description: [
             'Détermine le domaine de définition de fonctions variées : fractions, racines carrées seules ou combinées à une fraction, racines d’indice impair, valeurs absolues.',
-            "L'exercice guide la construction du domaine (aucun CE / au moins une CE, puis construction pas à pas), exactement comme dans les exemples ci-dessus.",
+            "L'exercice guide la construction du domaine (aucune CE / au moins une CE, puis construction pas à pas), exactement comme dans les exemples ci-dessus.",
           ],
           whereLabel: '5e (4h) → « 1. Domaine de définition »',
         },
@@ -426,7 +449,7 @@ export const fonctionsComposees: ChapterContent = {
           kind: 'intuition',
           label: "Pour retenir l'ordre",
           text:
-            'Le matin, tu mets tes chaussettes, **PUIS** tes chaussures. Jamais l\'inverse ! ' +
+            'Le matin, tu mets tes chaussettes, **puis** tes chaussures. Jamais l\'inverse ! ' +
             '$(f\\circ g)(x)$, c\'est pareil : on fait g d\'abord (les chaussettes), puis f (les ' +
             'chaussures). L\'ordre compte, toujours.',
         },
@@ -465,6 +488,17 @@ export const fonctionsComposees: ChapterContent = {
             tag: 'deux formules différentes',
             text: '$(f\\circ g)(x) = 4x^2-12x+10 \\ne (g\\circ f)(x) = 2x^2-1$',
           },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la composée de deux fonctions affines est affine',
+          blocks: [
+            { kind: 'para', text: "**Ce qu'il faut montrer.** Pour $f(x) = mx + p$ et $g(x) = m'x + p'$ (où $m$, $p$, $m'$, $p'$ sont des réels), $f\\circ g$ est encore une fonction affine, dont la pente est le produit $m\\cdot m'$ des deux pentes." },
+            { kind: 'para', text: "**Étape 1 — substituer.** On remplace la variable de $f$ par l'expression complète de $g(x)$ : $(f\\circ g)(x) = f(g(x)) = m\\,(m'x + p') + p$." },
+            { kind: 'para', text: "**Étape 2 — distribuer, puis regrouper.** $m\\,(m'x + p') + p = mm'x + mp' + p = (mm')\\,x + (mp' + p)$." },
+            { kind: 'para', text: "**Étape 3 — reconnaître la forme.** C'est la forme $Mx + P$, avec $M = mm'$ et $P = mp' + p$ : $f\\circ g$ est affine, sa pente est le **produit des pentes**, et son ordonnée à l'origine vaut $mp' + p = f(p')$, l'image par $f$ de l'ordonnée à l'origine de $g$ (normal : $(f\\circ g)(0) = f(g(0)) = f(p')$). Elle est définie sur $\\mathbb{R}$ : aucune condition d'existence." },
+            { kind: 'para', text: "**Et dans l'autre ordre ?** De la même façon, $(g\\circ f)(x) = m'(mx + p) + p' = (mm')\\,x + (m'p + p')$ : même pente, mais une ordonnée à l'origine en général différente. Avec $f(x) = 2x + 3$ et $g(x) = x - 1$ : $(f\\circ g)(x) = 2x + 1$ et $(g\\circ f)(x) = 2x + 2$, deux droites parallèles distinctes." },
+          ],
         },
         {
           kind: 'atelier',
@@ -518,17 +552,22 @@ export const fonctionsComposees: ChapterContent = {
         },
         {
           kind: 'attention',
-          label: 'Attention — un étage doit récupérer TOUT ce qu’il reste',
+          label: 'Attention — aucune opération ne doit disparaître',
           text:
-            'Une fois la dernière opération épluchée, ce qu’il reste « en dessous » doit être recopié ' +
-            '**intégralement**, pas seulement le morceau qui te saute aux yeux.',
+            'Chaque opération de $h$ doit se retrouver dans un étage, et ce qu’il reste « en dessous » ' +
+            'd’un étage doit être recopié **intégralement**, pas seulement le morceau qui te saute aux ' +
+            'yeux. Pour le vérifier, recompose ta chaîne à la fin : tu dois retrouver $h(x)$ exactement.',
         },
         {
           kind: 'wrongRight',
           wrongTag: '✗ décomposition incomplète',
-          wrong: 'u(t) = $\\sqrt[3]{t}$ — on a oublié de faire réapparaître le « 5 − » nulle part',
+          wrong:
+            '$g(x) = |x|$ puis $u(t) = \\sqrt[3]{t}$, et c’est tout : en recomposant, on obtient ' +
+            '$\\sqrt[3]{|x|}$, pas $h(x)$ — l’étage « 5 − » a été oublié',
           rightTag: '✓ décomposition correcte',
-          right: 'f(t) = 5 − t, appliquée APRÈS u(t) = $\\sqrt[3]{t}$ — le « 5 − » est bien un étage à part entière',
+          right:
+            '$g(x) = |x|$, $u(t) = \\sqrt[3]{t}$, puis $f(t) = 5 - t$ appliquée après u : on retrouve ' +
+            'bien $5 - \\sqrt[3]{|x|}$, le « 5 − » est un étage à part entière',
         },
         {
           kind: 'para',
@@ -582,7 +621,7 @@ export const fonctionsComposees: ChapterContent = {
           generatorId: '5gen2',
           chantier: '5e-4h',
           description: [
-            "C'est exactement la fonction du premier exemple ci-dessus qui apparaît dans l'exercice : à toi de retrouver, étage par étage, les fonctions intermédiaires qui la composent.",
+            "Des fonctions du même type que dans les exemples ci-dessus, tirées au hasard : à toi de retrouver, étage par étage, les fonctions intermédiaires qui les composent.",
             "Le nombre d'étages varie d'un exercice à l'autre (de 2 à 4) — le champ d'ajout de ligne s'adapte, sans jamais te donner le nombre exact à l'avance.",
           ],
           whereLabel: '5e (4h) → « 2. Décomposer une fonction composée »',
@@ -657,13 +696,13 @@ export const fonctionsComposees: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — pourquoi dom(f∘g) exige x ∈ dom g ET g(x) ∈ dom f',
+          label: 'Démonstration — pourquoi dom(f∘g) exige x ∈ dom g et g(x) ∈ dom f',
           blocks: [
             { kind: 'para', text: '**Étape 1 — ce que veut dire x ∈ dom(f∘g).** Par définition, $x \\in \\operatorname{dom}(f\\circ g)$ signifie que le nombre $(f\\circ g)(x) = f(g(x))$ existe : on peut le calculer jusqu\'au bout.' },
             { kind: 'para', text: '**Étape 2 — g d\'abord.** Pour calculer $f(g(x))$, on calcule d\'abord $g(x)$. Ce nombre n\'existe que si $x \\in \\operatorname{dom} g$ : sans lui, il n\'y a rien à donner à f. Donc, si $x \\in \\operatorname{dom}(f\\circ g)$, alors $x \\in \\operatorname{dom} g$.' },
             { kind: 'para', text: '**Étape 3 — puis f.** Le nombre $y = g(x)$ devient l\'entrée de f, et $f(y)$ n\'existe que si $y \\in \\operatorname{dom} f$, c\'est-à-dire $g(x) \\in \\operatorname{dom} f$. Donc, si $x \\in \\operatorname{dom}(f\\circ g)$, alors $g(x) \\in \\operatorname{dom} f$.' },
             { kind: 'para', text: '**Étape 4 — les deux conditions suffisent.** Inversement, si $x \\in \\operatorname{dom} g$ et $g(x) \\in \\operatorname{dom} f$, alors $g(x)$ existe et f peut le recevoir : $f(g(x))$ existe. Les deux conditions sont nécessaires **et** suffisantes : $\\operatorname{dom}(f\\circ g) = \\{x \\in \\operatorname{dom} g : g(x) \\in \\operatorname{dom} f\\}$.' },
-            { kind: 'para', text: '**Pourquoi la formule simplifiée ne suffit pas.** Une simplification peut effacer une condition. Pour $f(t) = t^2$ et $g(x) = \\sqrt{x}$, la formule simplifiée $f(g(x)) = x$ semble définie partout, alors que $g(x)$ n\'existe que pour $x \\ge 0$ : $\\operatorname{dom}(f\\circ g) = [0\\,;+\\infty[$. Le domaine se lit sur les DEUX conditions, jamais sur la seule formule finale.' },
+            { kind: 'para', text: '**Pourquoi la formule simplifiée ne suffit pas.** Une simplification peut effacer une condition. Pour $f(t) = t^2$ et $g(x) = \\sqrt{x}$, la formule simplifiée $f(g(x)) = x$ semble définie partout, alors que $g(x)$ n\'existe que pour $x \\ge 0$ : $\\operatorname{dom}(f\\circ g) = [0\\,;+\\infty[$. Le domaine se lit sur les **deux** conditions, jamais sur la seule formule finale.' },
           ],
         },
         {
@@ -796,19 +835,20 @@ export const fonctionsComposees: ChapterContent = {
           illustrations: [
             {
               kind: 'chain',
-              stages: ['fichier.txt', 'grep "erreur"', 'wc -l'],
-              highlightIndex: 2,
+              stages: ['grep', 'wc -l'],
+              highlightIndex: 1,
               outputLabel: 'nombre de lignes',
               caption:
-                "`fichier.txt | grep \"erreur\" | wc -l` : chaque commande reçoit la sortie de la " +
-                'précédente comme entrée — exactement la chaîne de composition $h=u\\circ v\\circ w$ ' +
-                "que tu lis de l'intérieur vers l'extérieur.",
+                '« grep "erreur" fichier.txt | wc -l » : grep (la fonction $v$) reçoit le fichier ' +
+                '(le $x$ de la chaîne) et ne garde que les lignes qui contiennent « erreur » ; wc -l ' +
+                '(la fonction $u$) compte les lignes qu\'il reçoit. Deux étages : $h = u\\circ v$, lue ' +
+                "de l'intérieur vers l'extérieur.",
             },
           ],
           text:
             'Sur un ordinateur, une commande Unix/Linux peut envoyer directement son résultat ' +
             'comme donnée d\'entrée à la commande suivante, grâce au symbole **|** (appelé ' +
-            '« pipe », tuyau en anglais). Écrire `commande1 | commande2` revient exactement à ' +
+            '« pipe », tuyau en anglais). Écrire « commande1 | commande2 » revient exactement à ' +
             'calculer $(g\\circ f)$ : la sortie de la première commande (f) devient l\'entrée de ' +
             'la seconde (g), sans étape intermédiaire visible. Les langages de programmation ' +
             'modernes généralisent cette idée sous le nom de « function chaining » ou « function ' +
@@ -888,9 +928,9 @@ export const fonctionsComposees: ChapterContent = {
           badge: 'lecture pas à pas',
           formula: 'Calcul de $(g\\circ f)(2)$ à partir des deux graphes ci-dessous, sans aucune formule.',
           steps: [
-            { tag: '① sur C_f, en x = 2', text: 'on lit l’ordonnée du point : f(2) = 4' },
-            { tag: '② report', text: '4 devient la nouvelle entrée, sur l’axe des x de C_g cette fois' },
-            { tag: '③ sur C_g, en x = 4', text: 'on lit l’ordonnée du point : g(4) = 1' },
+            { tag: '① sur la courbe de f, en x = 2', text: 'on lit l’ordonnée du point : f(2) = 4' },
+            { tag: '② report', text: '4 devient la nouvelle entrée, sur l’axe des x de $C_g$ cette fois' },
+            { tag: '③ sur la courbe de g, en x = 4', text: 'on lit l’ordonnée du point : g(4) = 1' },
           ],
           result: {
             tag: 'résultat',
@@ -906,7 +946,7 @@ export const fonctionsComposees: ChapterContent = {
             xMax: 6,
             topYMax: 4,
             bottomYMax: 2,
-            caption: 'graphes gradués — la même valeur (4) sert de sortie sur C_f et d’entrée sur C_g',
+            caption: 'graphes gradués — la même valeur (4) sert de sortie sur $C_f$ et d’entrée sur $C_g$',
           },
         },
         {
@@ -933,7 +973,7 @@ export const fonctionsComposees: ChapterContent = {
           chantier: '5e-4h',
           description: [
             'Deux graphes sont donnés, celui de f et celui de g. À partir d’une valeur de départ, calcule la composée demandée en deux lectures successives — sans aucune formule.',
-            'L’exercice précise aussi si l’image demandée existe réellement, exactement le piège vu ci-dessus, quand la valeur intermédiaire sort du domaine visible du second graphe.',
+            'L’exercice demande aussi si l’image existe réellement : exactement le piège vu ci-dessus, quand la valeur intermédiaire sort du domaine de la seconde fonction (son graphe complet s’arrête avant).',
           ],
           whereLabel: '5e (4h) → « 4. Composée de fonctions — lecture graphique »',
         },
@@ -966,21 +1006,21 @@ export const fonctionsComposees: ChapterContent = {
           kind: 'exemple',
           badge: 'un bidon cylindrique',
           formula:
-            'Un bidon cylindrique de rayon $r$ et de hauteur $h$ a une contenance fixée à $V = 1000$ cm³, avec $V = \\pi r^2 h$.',
+            'Un bidon cylindrique de rayon $r$ et de hauteur $h$ a une contenance fixée à $V = 1\\,000$ cm³, avec $V = \\pi r^2 h$.',
           steps: [
             {
               tag: 'isoler h : la hauteur devient une fonction de r',
-              text: '$h(r) = \\dfrac{V}{\\pi r^2} = \\dfrac{1000}{\\pi r^2}$',
+              text: '$h(r) = \\dfrac{V}{\\pi r^2} = \\dfrac{1\\,000}{\\pi r^2}$',
             },
-            { tag: 'pour r = 3 cm', text: '$h(3) = \\dfrac{1000}{9\\pi} \\approx 35{,}4$ cm' },
+            { tag: 'pour r = 3 cm', text: '$h(3) = \\dfrac{1\\,000}{9\\pi} \\approx 35{,}4$ cm' },
             {
               tag: 'l’aire latérale, elle, dépend de r ET de h(r) : une composition',
-              text: '$A_{lat}(r) = 2\\pi r \\cdot h(r) = 2\\pi r \\cdot \\dfrac{1000}{\\pi r^2} = \\dfrac{2000}{r}$',
+              text: '$A_{lat}(r) = 2\\pi r \\cdot h(r) = 2\\pi r \\cdot \\dfrac{1\\,000}{\\pi r^2} = \\dfrac{2\\,000}{r}$',
             },
           ],
           result: {
             tag: 'pour r = 3 cm',
-            text: '$A_{lat}(3) = \\dfrac{2000}{3} \\approx 666{,}7$ cm²',
+            text: '$A_{lat}(3) = \\dfrac{2\\,000}{3} \\approx 666{,}7$ cm²',
           },
           illustration: {
             kind: 'functionGraph',
@@ -992,7 +1032,7 @@ export const fonctionsComposees: ChapterContent = {
             markLabel: 'h≈35,4',
             xAxisLabel: 'r (cm)',
             yAxisLabel: 'h (cm)',
-            caption: 'h(r) = 1000/(πr²) : plus le bidon est large, plus il doit être bas pour garder le même volume',
+            caption: '$h(r) = \\dfrac{1\\,000}{\\pi r^2}$ : plus le bidon est large, plus il doit être bas pour garder le même volume',
           },
         },
         {
@@ -1016,12 +1056,26 @@ export const fonctionsComposees: ChapterContent = {
           kind: 'attention',
           label: 'Attention — le domaine « physique » est presque toujours plus restrictif',
           text:
-            'Purement algébriquement, $h(r) = 1000/(\\pi r^2)$ n’exclut que r = 0 (le dénominateur). ' +
+            'Purement algébriquement, $h(r) = \\dfrac{1\\,000}{\\pi r^2}$ n’exclut que r = 0 (le dénominateur). ' +
             'Mais dans le contexte, un **rayon** ne peut être ni nul ni négatif — le vrai domaine du ' +
             'modèle est donc $r > 0$, une restriction plus forte que la simple condition « ≠ 0 ». Relis toujours ' +
             'l’énoncé pour d’éventuelles bornes supplémentaires (hauteur maximale du bidon, ' +
             'quantité de matière première disponible, etc.) : le domaine mathématique n’est qu’un ' +
             'point de départ.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — le bidon le moins coûteux en métal a une hauteur égale à son diamètre',
+          blocks: [
+            { kind: 'para', text: "**La situation.** On fabrique un bidon cylindrique **fermé** (un fond et un couvercle) de volume fixé $V$. Plus son aire totale est grande, plus il faut de métal : on cherche le rayon $r > 0$ qui rend cette aire **minimale**." },
+            { kind: 'para', text: "**Étape 1 — l'aire en fonction de r seul : une composition.** Deux disques et la surface latérale : $A = 2\\pi r^2 + 2\\pi r h$. On réinjecte $h(r) = \\dfrac{V}{\\pi r^2}$ : $A(r) = 2\\pi r^2 + 2\\pi r\\cdot\\dfrac{V}{\\pi r^2} = 2\\pi r^2 + \\dfrac{2V}{r}$." },
+            { kind: 'para', text: "**Étape 2 — le candidat.** Appelons $r_0$ le rayon tel que $V = 2\\pi r_0^3$, c'est-à-dire $r_0 = \\sqrt[3]{\\dfrac{V}{2\\pi}}$. On va montrer que $A(r) \\ge A(r_0)$ pour tout $r > 0$, sans dérivée (elles arrivent au chapitre 5) : il suffit d'étudier le signe de la différence $A(r) - A(r_0)$." },
+            { kind: 'para', text: "**Étape 3 — écrire la différence.** $A(r) - A(r_0) = 2\\pi\\left(r^2 - r_0^2\\right) + 2V\\left(\\dfrac{1}{r} - \\dfrac{1}{r_0}\\right) = 2\\pi(r - r_0)(r + r_0) - \\dfrac{2V\\,(r - r_0)}{r\\,r_0}$." },
+            { kind: 'para', text: "**Étape 4 — remplacer V et mettre en évidence.** Avec $V = 2\\pi r_0^3$, on a $\\dfrac{2V}{r\\,r_0} = \\dfrac{4\\pi r_0^2}{r}$. On met $2\\pi(r - r_0)$ en évidence : $A(r) - A(r_0) = 2\\pi(r - r_0)\\left(r + r_0 - \\dfrac{2r_0^2}{r}\\right) = \\dfrac{2\\pi(r - r_0)}{r}\\left(r^2 + r_0 r - 2r_0^2\\right)$." },
+            { kind: 'para', text: "**Étape 5 — factoriser le trinôme.** $r^2 + r_0 r - 2r_0^2$ s'annule en $r = r_0$ (car $r_0^2 + r_0^2 - 2r_0^2 = 0$), et l'on vérifie en distribuant que $r^2 + r_0 r - 2r_0^2 = (r - r_0)(r + 2r_0)$. D'où $A(r) - A(r_0) = \\dfrac{2\\pi\\,(r - r_0)^2\\,(r + 2r_0)}{r}$." },
+            { kind: 'para', text: "**Étape 6 — le signe.** Pour $r > 0$ : $(r - r_0)^2 \\ge 0$, $r + 2r_0 > 0$ et $r > 0$. La différence est donc positive ou nulle, et elle ne vaut $0$ que pour $r = r_0$ : l'aire est **minimale** en $r_0$, et seulement là." },
+            { kind: 'para', text: "**Conclusion — la hauteur du bidon optimal.** $h(r_0) = \\dfrac{V}{\\pi r_0^2} = \\dfrac{2\\pi r_0^3}{\\pi r_0^2} = 2r_0$ : la hauteur est égale au **diamètre**. Pour $V = 1\\,000$ cm³ : $r_0 = \\sqrt[3]{\\dfrac{500}{\\pi}} \\approx 5{,}42$ cm et $h = 2r_0 \\approx 10{,}84$ cm." },
+          ],
         },
         {
           kind: 'application',
@@ -1049,7 +1103,7 @@ export const fonctionsComposees: ChapterContent = {
             'propre opération, puis la transmet au poste suivant — exactement le principe de la ' +
             'composition de fonctions appliqué à un objet physique plutôt qu\'à un nombre. Les ' +
             'ingénieurs qui conçoivent une chaîne de production réfléchissent précisément en ces ' +
-            'termes : la FORME finale de la pièce dépend de l\'ORDRE dans lequel les opérations ' +
+            'termes : la **forme** finale de la pièce dépend de l\'**ordre** dans lequel les opérations ' +
             'sont appliquées — changer cet ordre peut rendre une étape ultérieure impossible, ' +
             'exactement comme $f\\circ g \\ne g\\circ f$ en général.',
           domaines: ['Industrie', 'Production'],
@@ -1096,6 +1150,25 @@ export const fonctionsComposees: ChapterContent = {
             tag: 'modèle',
             text: '$c(x) = 6 + \\dfrac{200}{x}$ et $C(x) = 6x + 200$',
           },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x: number) => 6 + 200 / x, tone: 'accent', xMin: 5, xMax: 80 }],
+            xMin: 0,
+            xMax: 80,
+            xTicks: [0, 10, 20, 40, 60, 80],
+            yTicks: [6, 11, 26],
+            fixedYRange: { min: 0, max: 48 },
+            horizontalAsymptotes: [{ y: 6, label: 'y = 6' }],
+            points: [
+              { x: 10, y: 26, label: '(10 ; 26)', tone: 'accent', labelPos: 'right' },
+              { x: 40, y: 11, label: '(40 ; 11)', tone: 'accent', labelPos: 'above' },
+            ],
+            xAxisLabel: 'x (objets)',
+            yAxisLabel: 'c(x) (€)',
+            caption:
+              '$c(x) = 6 + \\dfrac{200}{x}$ passe par les deux relevés et décroît vers $6$ € : plus on fabrique ' +
+              'd’objets, plus le coût fixe de $200$ € se partage, sans jamais descendre sous le coût de $6$ € par objet.',
+          },
         },
         {
           kind: 'exemple',
@@ -1112,7 +1185,7 @@ export const fonctionsComposees: ChapterContent = {
             {
               tag: 'seuils : B(x) = 0',
               text:
-                '$x^2 - 100x + 1600 = 0$, $\\Delta = 10\\,000 - 6\\,400 = 3\\,600$, donc ' +
+                '$x^2 - 100x + 1\\,600 = 0$, $\\Delta = 10\\,000 - 6\\,400 = 3\\,600$, donc ' +
                 '$x = \\dfrac{100 \\pm 60}{2}$ : $x = 20$ ou $x = 80$',
             },
             {
@@ -1185,7 +1258,7 @@ export const fonctionsComposees: ChapterContent = {
       {
         title: "Domaine de définition — conditions d'existence",
         formulas: [
-          { text: 'dénominateur : $D(x) \\neq 0$', condition: 'une seule valeur retirée, jamais un intervalle' },
+          { text: 'dénominateur : $D(x) \\neq 0$', condition: 'on retire des valeurs isolées (les zéros de D), jamais un intervalle' },
           { text: "racine d'indice pair : radicande $\\ge 0$", condition: 'inégalité large, le 0 est accepté' },
           { text: 'racine au dénominateur : radicande $> 0$', condition: 'deux contraintes à la fois (≥ 0 et ≠ 0), donc stricte' },
           { text: 'diviser une inégalité par un négatif : le sens change', condition: '$-2x \\ge -6 \\iff x \\le 3$' },
@@ -1194,9 +1267,21 @@ export const fonctionsComposees: ChapterContent = {
         ],
       },
       {
+        title: 'Signe d’un quotient, signe d’un trinôme',
+        formulas: [
+          { text: 'signe de $\\dfrac{N(x)}{D(x)}$ : tableau de signes de $N$ et de $D$, règle des signes colonne par colonne', condition: 'double barre sous les zéros de D (valeurs interdites), 0 sous ceux de N' },
+          { text: '$\\sqrt{\\dfrac{N(x)}{D(x)}}$ : garder les colonnes « + » et les zéros de N', condition: 'jamais la double barre' },
+          { text: '$ax^2 + bx + c$ avec $\\Delta > 0$ : signe de $a$ à l’extérieur des racines, signe contraire entre elles', condition: '$\\Delta = b^2 - 4ac$, racines $\\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$' },
+          { text: '$\\Delta = 0$ : signe de $a$ partout sauf à la racine (où il vaut 0) ; $\\Delta < 0$ : signe de $a$ partout', condition: 'avec $\\Delta < 0$, le trinôme ne s’annule jamais' },
+        ],
+      },
+      {
         title: 'Composer deux fonctions',
         formulas: [
           { text: '$(f\\circ g)(x) = f(g(x))$', condition: 'g agit en premier, f en second' },
+          { text: '$\\operatorname{Im} f$ : l’ensemble des valeurs $f(x)$ atteintes quand x parcourt $\\operatorname{dom} f$', condition: 'sur un graphique : projection de la courbe sur l’axe des y' },
+          { text: 'fonctions de référence pour décomposer : affine, polynôme simple, puissance, racine, inverse, valeur absolue', condition: 'chaque étage est l’une d’elles' },
+          { text: '$f(x) = mx + p$, $g(x) = m\'x + p\'$ : $(f\\circ g)(x) = mm\'x + (mp\' + p)$', condition: 'composée de deux affines : affine, pente = produit des pentes' },
           { text: 'décomposer : repérer la dernière opération effectuée, l’éplucher, recommencer' },
           { text: '$(f\\circ g)\\circ h = f\\circ(g\\circ h)$', condition: "associativité : seule la place des parenthèses est libre, jamais l'ordre" },
         ],
@@ -1223,8 +1308,11 @@ export const fonctionsComposees: ChapterContent = {
         formulas: [
           { text: '$h(r) = \\dfrac{V}{\\pi r^2}$', condition: 'hauteur d’un cylindre de volume V, en fonction de son rayon r' },
           { text: '$A_{lat}(r) = 2\\pi r \\cdot h(r)$', condition: 'aire latérale : h(r) réinjectée, une composition' },
+          { text: '$A(r) = 2\\pi r^2 + \\dfrac{2V}{r}$', condition: 'aire totale d’un cylindre fermé ; minimale quand $h = 2r$, en $r = \\sqrt[3]{\\dfrac{V}{2\\pi}}$' },
           { text: 'domaine physique : plus restrictif que le domaine mathématique', condition: 'longueurs, durées, quantités positives' },
-          { text: '$c(x) = \\dfrac{C(x)}{x}$', condition: 'coût unitaire : un quotient, pas une composition' },
+          { text: '$c(x) = \\dfrac{C(x)}{x}$', condition: 'coût unitaire (ou coût moyen) : un quotient, pas une composition' },
+          { text: '$c(x) = a + \\dfrac{b}{x}$, $a + bx$, $a + \\dfrac{b}{x^2}$ ou $ax + \\dfrac{b}{x}$', condition: 'deux relevés → deux équations en a et b ; on soustrait pour éliminer une inconnue' },
+          { text: 'coût total = coût fixe + coûts qui dépendent de la quantité x', condition: 'le coût fixe ne dépend pas de x' },
           { text: '$B(x) = CA(x) - C(x)$', condition: 'bénéfice ; seuil de rentabilité : la plus petite solution de B(x) = 0' },
         ],
       },
@@ -1257,9 +1345,10 @@ export const fonctionsComposees: ChapterContent = {
       title: 'Quiz vrai ou faux — tout le chapitre',
       generatorId: '5gen39',
       description: [
-        '7 thèmes de 20 affirmations chacun (vocabulaire, domaine rationnel, domaine avec ' +
-          'racines, décomposition, composition, lecture graphique, problèmes-contexte) — choisis ' +
-          'un thème, réponds vrai ou faux, la justification est toujours révélée.',
+        '8 thèmes de 35 affirmations chacun (vocabulaire et image, domaine rationnel, domaine ' +
+          'avec racines, décomposition, composition, domaine d’une composée, lecture graphique, ' +
+          'problèmes-contexte) — choisis un thème, réponds vrai ou faux, la justification est ' +
+          'toujours révélée.',
       ],
       chantier: '5e-4h',
       whereLabel: '5e (4h) → « 39. Fonctions : rappels et compléments — quiz vrai/faux »',

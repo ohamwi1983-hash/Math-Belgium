@@ -1293,6 +1293,11 @@ table.tableau td.signe-neg { color: var(--bad); font-weight: 600; }
 table.tableau td.zero-cell { color: var(--ink-faint); }
 table.tableau td.indef-cell { color: var(--bad); font-weight: 700; }
 table.tableau tr:last-child td { border-bottom: none; }
+/* Téléphone : colonnes resserrées, pour qu'un tableau de signes à 3 valeurs remarquables (7 colonnes
+   de signes) tienne à 390 px sans défilement horizontal (audit du 5e ch. 1, § 1). */
+@media (max-width: 480px) {
+  table.tableau td { padding: 8px 6px; }
+}
 /* `FeatureTable` (colonnes nommées, souvent de la prose ou une description verbale — contrairement
    à `SignTable`, qui aligne des symboles courts colonne par colonne et a besoin du nowrap hérité
    ci-dessus) repasse en retour à la ligne normal : constaté à répétition (récapitulatifs finaux
