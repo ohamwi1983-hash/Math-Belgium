@@ -19,7 +19,7 @@ import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { correctionDetailleeEquationTrig, lettresSolutionsEquationTrig } from "./corrigeDetaille";
 import { CATALOGUE_FAMILLES_EQUATION_TRIG, construireEquationTrigAvecFamille, genererExerciceEquationTrigonometrique } from "./index";
 import { solutionsDistinctes, unionSolutions } from "./solveur";
-import { profilEquationTrig, LIBELLE_CAS_EQUATIONS } from "../profilsEvaluationTrigonometrie";
+import { GROUPES_VERDICT_EQUATIONS, profilEquationTrig, LIBELLE_CAS_EQUATIONS } from "../profilsEvaluationTrigonometrie";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceEquationTrigonometrique>` pour 5gen10 (Équations
@@ -348,6 +348,7 @@ function criteresDifficulte(exercice: ExerciceEquationTrigonometrique): Criteres
 export const adaptateurEvaluationEquationTrig: AdaptateurFeuilleExercices<ExerciceEquationTrigonometrique> = {
   profilInstance: profilEquationTrig,
   libelleCasParticulier: LIBELLE_CAS_EQUATIONS,
+  groupesVerdict: GROUPES_VERDICT_EQUATIONS,
   titreDocument: "Équations trigonométriques — Évaluation",
   nomFichierBase: "equations-trigonometriques",
   genererInstance: genererExerciceEquationTrigonometrique,

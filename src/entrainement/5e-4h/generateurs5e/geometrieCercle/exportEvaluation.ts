@@ -16,6 +16,7 @@ import { construireSvgGeometrieCercle } from "../../export5e/svgGraphGeometrieCe
 import { blocDonneesLatex, consigneGenerale, consignePhase, formatValeurPhaseLatex, phasesDuScenario } from "../../ui5e/formatGeometrieCercle";
 import { CATALOGUE_SCENARIOS, construireAvecScenarioId, genererExerciceGeometrieCercle } from "./index";
 import { correctionDetailleeGeometrieCercle } from "./corrigeDetaille";
+import { profilGeometrieCercle } from "../profilsEvaluationTrigonometrie";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
@@ -172,6 +173,7 @@ function baremeGeometrieCercle(exercice: ExerciceGeometrieCercle): BaremeExercic
 export const adaptateurEvaluationGeometrieCercle: AdaptateurFeuilleExercices<ExerciceGeometrieCercle> = {
   // Toutes les instances exigent une calculatrice (valeurs décimales) : avertissement du panneau.
   calculatriceIndispensable: true,
+  profilInstance: profilGeometrieCercle,
   titreDocument: "Problèmes de géométrie du cercle — Évaluation",
   nomFichierBase: "geometrie-cercle",
   genererInstance: genererExerciceGeometrieCercle,

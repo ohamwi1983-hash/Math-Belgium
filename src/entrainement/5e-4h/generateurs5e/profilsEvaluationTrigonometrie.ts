@@ -69,9 +69,11 @@ export function profilParametresSinusoideGraphique(e: ExerciceParametresSinusoid
   };
 }
 
-/** 5gen11 — extremums de A·sin(ax + b) + d. */
+/** 5gen11 — extremums de A·sin(ax + b) + d. `forme` = le type de question (maximums, minimums ou
+ * tous les extremums) : la série B pose la même question que la série A (audit 5e ch. 2, V5). */
 export function profilExtremumsSinusoide(e: ExerciceExtremumsSinusoide): ProfilInstance {
   return {
+    forme: e.mode,
     casParticulier: cas([
       estNul(e.bArg) && "sans-dephasage",
       e.decalageVertical === 0 && "sans-decalage-vertical",
@@ -82,6 +84,12 @@ export function profilExtremumsSinusoide(e: ExerciceExtremumsSinusoide): ProfilI
 }
 
 export const LIBELLE_CAS_EQUATIONS = "Inclure un cas particulier (équation sans solution, ou sin, cos = 0 ou ±1)";
+
+/** 5gen10 : la variante EST la réponse de l'écran « Reconnais la technique » — groupe à verdict
+ * (panneau d'évaluation seulement ; décision de l'utilisateur, audit 5e ch. 2, V4). */
+export const GROUPES_VERDICT_EQUATIONS = [
+  { id: "groupe_technique", label: "Technique à reconnaître (application directe, produit, substitution pythagoricienne ou égalité, au hasard)", variantes: ["directe", "produit", "pythagoricienne", "egalite"] },
+];
 
 interface ResolutionLike {
   regime: "exact" | "decimal";
@@ -102,27 +110,44 @@ function resolutions(valeur: unknown, acc: ResolutionLike[] = []): ResolutionLik
   return acc;
 }
 
-/** 5gen10 — équations trigonométriques. Une racine rejetée (|t| > 1) dans la famille
- * pythagoricienne n'est PAS un cas particulier : c'est une étape de plus, pas un raccourci. */
+/** 5gen10 — équations trigonométriques. Ni une racine rejetée (|t| > 1) de la famille
+ * pythagoricienne, ni un facteur impossible d'un produit (l'autre facteur donne les solutions) ne
+ * sont des cas particuliers : c'est une étape de plus, pas un raccourci (décision de l'utilisateur,
+ * audit 5e ch. 2, V1). « Aucune solution » pour toute l'équation reste un cas particulier. */
 export function profilEquationTrig(e: unknown): ProfilInstance {
   const r = resolutions(e);
   const valides = r.filter((x) => !x.aucuneSolution);
   return {
-    casParticulier:
-      valides.length === 0 && r.length > 0
-        ? "aucune-solution"
-        : cas([r.some((x) => x.aucuneSolution) && "facteur-impossible", valides.some((x) => x.casSpecial) && "valeur-remarquable-0-1"]),
-    calcul: valides.some((x) => x.regime === "decimal") ? "calculatrice" : valides.length > 0 ? "exacte" : undefined,
+    casParticulier: valides.length === 0 && r.length > 0 ? "aucune-solution" : cas([valides.some((x) => x.casSpecial) && "valeur-remarquable-0-1"]),
+    // Égalité de deux expressions : réponses toujours exactes (fractions de π), sans résolution
+    // élémentaire stockée.
+    calcul: valides.some((x) => x.regime === "decimal") ? "calculatrice" : valides.length > 0 || (e as { famille?: string }).famille === "egalite" ? "exacte" : undefined,
   };
 }
 
-export const LIBELLE_CAS_MODELISATION = "Inclure un cas particulier (équation de la 2e partie sans solution)";
+export const LIBELLE_CAS_MODELISATION = "Inclure un cas particulier (2e partie sans solution, ou inéquation toujours vraie / toujours fausse)";
 
-/** 5gen13 — modéliser en contexte : la 2e partie peut finir par « aucune solution ». Toujours des
+/** 5gen13 — modéliser en contexte : la 2e partie peut finir par « aucune solution » ou par une
+ * inéquation toujours vraie / toujours fausse (|m| > 1, conclue directement) — même raccourci, donc
+ * cas particulier (décision de l'utilisateur, audit 5e ch. 2, V3). `forme` = le type de 2e partie
+ * (résoudre, extremums, inéquation ou aucune) : la série B pose la même question (V5). Toujours des
  * valeurs décimales (contexte réel) : `calcul` sans objet. */
 export function profilModelisationSinusoide(e: ExerciceModelisationSinusoide): ProfilInstance {
-  const phase2 = (e as { phase2?: { aucuneSolution?: boolean } }).phase2;
-  return { casParticulier: phase2?.aucuneSolution ? "aucune-solution" : null };
+  const phase2 = e.phase2;
+  const particulier = phase2 === null ? null : phase2.type === "resoudre" && phase2.aucuneSolution ? "aucune-solution" : phase2.type === "inequation" && phase2.casSpecial !== null ? "inequation-triviale" : null;
+  return { casParticulier: particulier, forme: phase2 === null ? "aucune" : phase2.type };
+}
+
+/** 5gen7 — polygones, arcs et secteurs : toutes les réponses sont exactes en π (valeur exacte
+ * acceptée sur papier) ; aucun raccourci possible (audit 5e ch. 2, P8). */
+export function profilPolygonesArcsSecteurs(): ProfilInstance {
+  return { casParticulier: null, calcul: "exacte" };
+}
+
+/** 5gen12 — géométrie du cercle : arccos ou aire arrondie à l'unité, la calculatrice est toujours
+ * nécessaire ; aucun raccourci (V6). */
+export function profilGeometrieCercle(): ProfilInstance {
+  return { casParticulier: null, calcul: "calculatrice" };
 }
 
 /** 5gen6 — conversion « exacte » (angle remarquable, sans calculatrice) ou « décimale »
