@@ -97,7 +97,7 @@ export type IdGenerateurPilote =
   | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103' | 'gen102' | 'gen105' | 'gen104' | 'gen107' | 'gen106'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
-  | '5gen50' | '5gen51' | '5gen52' | '5gen53'
+  | '5gen50' | '5gen51' | '5gen52' | '5gen53' | '5gen54' | '5gen55' | '5gen56' | '5gen57'
   | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19' | '5gen44' | '5gen45' | '5gen46' | '5gen47' | '5gen48' | '5gen49'
   | '5gen20' | '5gen21' | '5gen22' | '5gen23' | '5gen24'
   | '5gen25' | '5gen26' | '5gen27' | '5gen28' | '5gen29' | '5gen30' | '5gen31' | '5gen32' | '5gen33' | '5gen34' | '5gen35'
@@ -337,7 +337,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-composees', sectionId: 'composer', generatorId: '5gen3', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'graphique', generatorId: '5gen4', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'contexte', generatorId: '5gen5', label: '', processus: 3 },
-  { chapitreSlug: 'trigonometrie', sectionId: 'arcs-secteurs', generatorId: '5gen6', label: '' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'arcs-secteurs', generatorId: '5gen6', label: 'Arcs et secteurs (5gen6)' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'arcs-secteurs', generatorId: '5gen56', label: 'Encadrer π comme Archimède (5gen56)' },
   { chapitreSlug: 'trigonometrie', sectionId: 'polygones', generatorId: '5gen7', label: '' },
   { chapitreSlug: 'trigonometrie', sectionId: 'geometrie-cercle', generatorId: '5gen12', label: '', processus: 3 },
   { chapitreSlug: 'trigonometrie', sectionId: 'parametres', generatorId: '5gen8', label: '' },
@@ -346,8 +347,11 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'trigonometrie', sectionId: 'lecture-graphique', generatorId: '5gen9', label: '' },
   { chapitreSlug: 'trigonometrie', sectionId: 'lecture-graphique', generatorId: '5gen53', label: 'Associer formules et courbes (5gen53)', processus: 1 },
   { chapitreSlug: 'trigonometrie', sectionId: 'extremums', generatorId: '5gen11', label: '' },
-  { chapitreSlug: 'trigonometrie', sectionId: 'modeliser', generatorId: '5gen13', label: '' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'modeliser', generatorId: '5gen13', label: 'Modéliser une fonction sinusoïdale en contexte (5gen13)' },
   { chapitreSlug: 'trigonometrie', sectionId: 'modeliser', generatorId: '5gen50', label: "Détective d'erreurs : trigonométrie (5gen50)", processus: 3 },
+  { chapitreSlug: 'trigonometrie', sectionId: 'modeliser', generatorId: '5gen54', label: "Choisir φ hors d'un extremum (5gen54)" },
+  { chapitreSlug: 'trigonometrie', sectionId: 'modeliser', generatorId: '5gen55', label: 'Inéquations trigonométriques (5gen55)' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'modeliser', generatorId: '5gen57', label: 'Modéliser des relevés réels (5gen57)', processus: 3 },
   { chapitreSlug: 'trigonometrie', sectionId: 'equations', generatorId: '5gen10', label: '' },
   { chapitreSlug: 'suites', sectionId: 'suites-arithmetiques', generatorId: '5gen14', label: '' },
   { chapitreSlug: 'suites', sectionId: 'suites-geometriques', generatorId: '5gen15', label: 'Suites géométriques, formule générale et termes (5gen15)' },

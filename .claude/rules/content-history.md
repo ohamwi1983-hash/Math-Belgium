@@ -4627,3 +4627,21 @@ isolé, 0 `.katex-error`.
   solutions, points clés sur la courbe et sur une intersection, une seule expression par courbe),
   0 problème ; parcours iPhone 13 des quatre applis (bonnes réponses, erreurs ciblées, illisible),
   scrollWidth 390, 0 erreur console ; captures dans le dossier de travail `5gen50-53`.
+- **5e (4h), Chapitre 2 — Trigonométrie** (`trigonometrie`), lot G de l'audit (moitié 2) : quatre
+  nouveaux générateurs, cartes ajoutées sans toucher au reste du cours. **5gen56 « Encadrer π comme
+  Archimède »** (§ 1, carte juste après l'atelier `archimede-widget`) : α = 180°/n, côtés 2r sin α et
+  2r tan α, encadrement n sin α ≤ π ≤ n tan α, doublement, nombre de côtés pour une largeur sous un
+  seuil (départ hexagone, carré ou autre polygone ; figure du cours). **5gen54 « Choisir φ quand le
+  départ n'est pas un extremum »** (§ 8, après l'astuce « vérifie sur une deuxième donnée ») : A, b,
+  ω ; sin φ ; deux candidats de ]−π ; π] (à 2π près) ; le sens de variation tranche (choix fermé à
+  trois options, dont « les deux conviennent ») ; premier maximum. **5gen55 « Inéquations
+  trigonométriques »** (§ 8, après le piège « arc où le sinus est le plus grand ») : sin ou cos(ax + b),
+  exact, coefficient parfois négatif, intervalles saisis ligne par ligne avec leurs crochets ;
+  inéquation toujours vraie / sans solution = cas particulier (décision de l'utilisateur).
+  **5gen57 « Modéliser des relevés réels par une sinusoïde »** (§ 8, après 5gen13, processus 3) :
+  marée, durée du jour (six villes), températures mensuelles (cinq villes), ordres de grandeur réels,
+  relevés = modèle arrondi. Socle partagé (`AppEcransTrigo`, `EtapeEcransTrigo`, `sessionEcransTrigo`,
+  `lectureValeurTrigo`). Libellés de 5gen6 et 5gen13 ajoutés dans `GENERATEURS_EVALUATION_PILOTE`
+  (leurs sections ont maintenant deux générateurs). Vérifié : 2 000 tirages par variante (recalcul
+  indépendant, saisies justes autrement écrites, « − », illisible), parcours iPhone 13 (390 px,
+  0 erreur console), documents réels 2 séries + aménagée sans débordement, collecteur 0 égalité fausse.

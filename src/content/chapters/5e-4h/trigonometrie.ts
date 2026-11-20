@@ -156,6 +156,16 @@ export const trigonometrie: ChapterContent = {
             'côtés, Archimède obtenait 3 + 10/71 < π < 3 + 1/7.',
         },
         {
+          kind: 'entrainement',
+          title: 'Encadrer π comme Archimède',
+          generatorId: '5gen56',
+          description: [
+            'Refais la démarche d\'Archimède avec un carré, un hexagone ou un autre polygone régulier : demi-angle au centre α, côtés 2r sin α et 2r tan α des polygones inscrit et circonscrit, encadrement n sin α ≤ π ≤ n tan α, puis doublement du nombre de côtés jusqu\'à la précision demandée (calculatrice en mode degré).',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 56. Encadrer π comme Archimède »',
+        },
+        {
           kind: 'intuition',
           label: 'Pourquoi ne pas garder les degrés ?',
           text:
@@ -2232,6 +2242,16 @@ export const trigonometrie: ChapterContent = {
             'l\'argument serait $\\pi - \\alpha_i$, comme pour les deux candidats de φ plus haut.',
         },
         {
+          kind: 'entrainement',
+          title: 'Choisir φ quand le départ n\'est pas un extremum',
+          generatorId: '5gen54',
+          description: [
+            'Grande roue, roue à aubes, pédalier, marée, ressort ou lac : la grandeur ne part pas d\'un extremum. Calcule A, b et ω, isole sin φ, trouve les deux candidats arcsin m et π − arcsin m, garde celui que le sens de variation impose (monte ou descend ?), puis vérifie le modèle par l\'instant du premier maximum.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 54. Choisir φ quand le départ n\'est pas un extremum »',
+        },
+        {
           kind: 'application',
           titre: "Modéliser la durée du jour au fil de l'année",
           illustrations: [
@@ -2400,6 +2420,16 @@ export const trigonometrie: ChapterContent = {
             'horizontale $y = m$ avant de choisir l\'arc.',
         },
         {
+          kind: 'entrainement',
+          title: 'Inéquations trigonométriques',
+          generatorId: '5gen55',
+          description: [
+            'Résous dans [0 ; 2π[ une inéquation sin(ax + b) ou cos(ax + b) comparée à une valeur, parfois avec un coefficient à isoler (attention au sens quand il est négatif) : lis l\'arc solution sur le cercle, reviens à x en divisant aussi la période par a, puis écris les intervalles de la fenêtre avec leurs crochets.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 55. Inéquations trigonométriques »',
+        },
+        {
           kind: 'atelier',
           tag: 'modele-sinusoidal-widget',
           label: 'Manipule toi-même — construis le modèle pas à pas',
@@ -2461,6 +2491,19 @@ export const trigonometrie: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 50. Détective d\'erreurs : trigonométrie »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Modéliser des relevés réels par une sinusoïde',
+          generatorId: '5gen57',
+          description: [
+            'Annuaire des marées d\'un port, durée du jour au fil de l\'année dans une ville ou ' +
+              'températures moyennes de chaque mois : lis le maximum, le minimum et la période, ' +
+              'construis le modèle A sin(ωt + φ) + b (φ par le maximum), puis prévois une valeur ' +
+              'et calcule pendant combien de temps la grandeur dépasse un seuil.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 57. Modéliser des relevés réels par une sinusoïde »',
         },
       ],
     },
