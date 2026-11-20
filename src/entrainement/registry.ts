@@ -208,6 +208,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '5gen5': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen5').then((m) => ({ default: m.App5gen5 }))),
   '5gen60': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen60').then((m) => ({ default: m.App5gen60 }))),
   '5gen59': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen59').then((m) => ({ default: m.App5gen59 }))),
+  '5gen58': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen58').then((m) => ({ default: m.App5gen58 }))),
   '5gen39': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen39').then((m) => ({ default: m.App5gen39 }))),
 
   // --- 5e, chapitre 2 : Trigonométrie ---

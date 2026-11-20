@@ -81,7 +81,7 @@ function etapeB(e: E): EtapeCorrection[] {
       ? [t("Une racine carrée n'existe que si le nombre sous la racine est positif ou nul (cours, § 1).")]
       : ext.genre === "inverse"
         ? [t("Une fraction n'existe que si son dénominateur n'est pas nul (cours, § 1).")]
-        : [t("Racine au dénominateur : le nombre sous la racine doit être positif ou nul ET la racine non nulle, donc strictement positif (cours, § 1).")];
+        : [t("Racine au dénominateur : le nombre sous la racine doit être positif ou nul et la racine non nulle, donc strictement positif (cours, § 1).")];
   const brut = radicandeSubstitueL(e);
   // Substitution sans opération (√x, c/x : « 5 ») : pas de « 5 = 5 ».
   const direct = brut === `${r}` || brut === `(${r})`;

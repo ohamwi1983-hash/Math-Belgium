@@ -141,7 +141,7 @@ export function aide2(e: E, p: PhaseComposeePoint): AideEcran | null {
     return { texte: [tx(`${debut} vérifie la condition pour x = `), lx(`${e.m}`), tx(".")], latex: conditionL(e) };
   }
   // Niveau 2 de l'écran « valeur » : la règle de simplification de la forme obtenue, jamais la
-  // substitution (avec √x ou c/x, la substitution EST déjà la réponse).
+  // substitution (avec √x ou c/x, la substitution est déjà la réponse).
   if (e.ext.genre === "racineDen") return { texte: [tx("Calcule le nombre sous la racine ; si sa racine ne tombe pas juste, multiplie le numérateur et le dénominateur par cette racine :")], latex: "\\dfrac{c}{\\sqrt{n}}=\\dfrac{c\\sqrt{n}}{n}" };
   if (e.ext.genre === "inverse") return { texte: [tx("Calcule le dénominateur, puis simplifie la fraction par un diviseur commun :")], latex: "\\dfrac{k\\times a}{k\\times b}=\\dfrac{a}{b}" };
   return { texte: [tx("Calcule le nombre sous la racine, puis sors-en un carré parfait s'il y en a un :")], latex: "\\sqrt{a^2\\times b}=a\\sqrt{b}" };

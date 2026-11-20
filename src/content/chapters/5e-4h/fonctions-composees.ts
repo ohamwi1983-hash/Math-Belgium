@@ -962,6 +962,19 @@ export const fonctionsComposees: ChapterContent = {
           ],
           whereLabel: '5e (4h) → « 4. Composée de fonctions — lecture graphique »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Détective d’erreurs : fonctions et composées',
+          generatorId: '5gen58',
+          chantier: '5e-4h',
+          description: [
+            'Un élève a résolu un exercice du chapitre (domaine, composée, lecture d’une composée) ' +
+              'et une seule de ses lignes est fausse : trouve-la, nomme l’erreur (sens de ' +
+              'l’inégalité, « ≥ » au lieu de « > », réunion au lieu d’intersection, condition ' +
+              'oubliée, ordre de la composée, « hors de la portion tracée ») puis corrige le résultat.',
+          ],
+          whereLabel: '5e (4h) → « 58. Détective d’erreurs : fonctions et composées »',
+        },
       ],
     },
 
