@@ -1940,6 +1940,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'transformees-arc-widget',
+          label: 'Manipule toi-même — les transformées c + k·arc(mx + n)',
+          caption:
+            'Choisis arcsin, arccos ou arctan, puis règle k, m, n et c. Le domaine (en ' +
+            'vert, sur l\'axe des abscisses) et l\'image (en violet, sur l\'axe des ordonnées) ' +
+            'se recalculent en direct, en valeurs exactes. Observe ce qui change le domaine ' +
+            '(seulement m et n) et ce qui change l\'image (seulement k et c), et quand le ' +
+            'sens de variation s\'inverse.',
+        },
+        {
           kind: 'entrainement',
           title: 'Associer graphique et expression',
           generatorId: '6gen5',

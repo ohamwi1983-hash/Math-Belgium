@@ -21,6 +21,7 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'pentes-inverses-widget': () => import('../../interactive/register-pentes-inverses-widget.js'),
   'arc-de-trig-widget': () => import('../../interactive/register-arc-de-trig-widget.js'),
   'equation-ce-widget': () => import('../../interactive/register-equation-ce-widget.js'),
+  'transformees-arc-widget': () => import('../../interactive/register-transformees-arc-widget.js'),
   'discriminant-racines-widget': () => import('../../interactive/register-discriminant-racines-widget.js'),
   'signe-trinome-widget': () => import('../../interactive/register-signe-trinome-widget.js'),
   'signe-produit-widget': () => import('../../interactive/register-signe-produit-widget.js'),
