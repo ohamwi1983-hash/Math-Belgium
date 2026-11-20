@@ -1081,8 +1081,9 @@ export type Block =
       whereLabel: string
       /**
        * Widget interactif gradé, porté (Web Component autonome, Shadow DOM) depuis l'artifact
-       * d'origine et monté directement dans la carte, au-dessus de la description — seuls gen7 et
-       * gen8 (4e, chapitre "La fonction du second degré") en ont un port aujourd'hui. Le lien vers
+       * d'origine et monté directement dans la carte, au-dessus de la description. Aucune carte ne
+       * s'en sert aujourd'hui : le portage de gen7/gen8 (4e, chapitre 1) n'a jamais été fusionné, et
+       * l'utilisateur a décidé de ne pas les porter (les cartes renvoient aux générateurs). Le lien vers
        * la version hébergée sur plateforme-maths (`whereLabel`) reste toujours affiché en dessous :
        * c'est la version de référence maintenue, le widget embarqué est une commodité, pas un
        * remplacement.

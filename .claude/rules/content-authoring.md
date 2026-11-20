@@ -156,7 +156,7 @@ kinds de `Block` :
 - `{ kind: 'atelier', tag, label, caption? }` — atelier libre "Manipule toi-même", sans notion de
   correction ni de score, sans générateur `genN` équivalent (rien à lier en plus du widget).
 - `{ kind: 'entrainement', ..., widgetTag? }` — extension additive de l'`entrainement` existant :
-  le widget gradé (gen7, gen8) est monté AU-DESSUS de la description, dans `CarteEntrainement`,
-  mais le lien "S'entraîner ↗" vers la version hébergée sur plateforme-maths reste toujours affiché
-  en dessous — c'est la version de référence maintenue, le widget embarqué est une commodité, pas
-  un remplacement du principe "lien vers le générateur" ci-dessus.
+  un widget gradé serait monté AU-DESSUS de la description, dans `CarteEntrainement`, le lien
+  "S'entraîner ↗" restant affiché en dessous. **Aucune carte ne s'en sert** : le portage de
+  `gen7-widget` / `gen8-widget` n'a jamais été fusionné, et l'utilisateur a décidé de ne pas les
+  porter (audit du 4e ch. 1) — ne pas poser de `widgetTag` sur les cartes gen7 / gen8.

@@ -34,19 +34,18 @@ paths:
   jamais interchangé). Vérifié par rendu navigateur réel (`vite preview`, Playwright) : les deux
   nouvelles sous-sections et les 4 occurrences corrigées capturées à l'écran, aucun `$...$` non
   résolu, `npm run build` et `npm run lint` propres.
-  **Complété une 3e fois** : les 4 widgets interactifs de l'artifact d'origine (jusque-là laissés de
+  **Complété une 3e fois** : les widgets interactifs de l'artifact d'origine (jusque-là laissés de
   côté lors de la migration initiale) portés dans `src/interactive/` et embarqués dans le chapitre
   — voir « Widgets interactifs portés » (`.claude/rules/interactive-widgets.md`) pour le mécanisme.
   `parabole-widget` ("Manipule toi-même — fais varier a, b et c") inséré avant "Domaine et image" ;
   `transformations-widget` ("Manipule toi-même — fais varier TH, EV/CV et TV") inséré avant la
   vidéo "Transformations graphiques d'une parabole" dans "Étirement, compression et symétrie" ;
-  `gen7-widget` et `gen8-widget` embarqués directement dans les cartes `entrainement` gen7/gen8
-  existantes (`widgetTag`), en plus — jamais à la place — du lien vers la version hébergée sur
-  plateforme-maths. Vérifié par rendu navigateur réel (`vite preview`, Playwright) : les 4 widgets
-  présents dans le DOM et fonctionnels (captures à l'écran des 4 : sliders a/b/c et TH/EV/CV/TV
-  réactifs, exercice gen7 "coefficients" jouable, exercice gen8 "transformations graphiques" jouable
-  avec graphe Mafs cible et saisie), aucune erreur JS console, `tsc -b`/`npm run lint`/`npm run
-  build` propres.
+  **Correction (audit du 4e ch. 1)** : le portage de `gen7-widget` et `gen8-widget` dans les cartes
+  gen7/gen8 (`widgetTag`, commit `0d61389`) n'a **jamais été fusionné** dans la branche principale
+  — ni fichiers dans `src/interactive/`, ni `widgetTag` sur les cartes. L'utilisateur a décidé de
+  ne pas les porter (anciennes versions d'artifact, sans les règles communes) : les cartes gen7 et
+  gen8 renvoient seulement au générateur. Les deux ateliers `parabole-widget` et
+  `transformations-widget`, eux, sont bien en place.
 - **4e, Chapitre 2 — Équations et inéquations du second degré** (`equations-inequations-second-degre`) :
   chapitre déjà en place (5 techniques de résolution, tableau de signes, signe d'un produit,
   fractions rationnelles, inconnue au dénominateur, inéquations rationnelles — souvent plus complet
@@ -1119,8 +1118,9 @@ paths:
     `text-transform: none` existait déjà en override sur ce sous-élément précisément pour cette
     raison — piège déjà anticipé ailleurs dans le CSS) ; `.level-kicker`/`.chapter-card-eyebrow`/
     `.eyebrow`/`.toc-label`/`.generator-head .eyebrow2` (texte d'interface fixe ou généré, jamais
-    de variable mathématique authored) ; `.entete` de `gen7-widget.js`/`gen8-widget.js` (noms
-    d'étapes multi-mots type "Coefficients"/"Allure", jamais de variable seule).
+    de variable mathématique authored). (Une mention de `.entete` de `gen7-widget.js` /
+    `gen8-widget.js` figurait ici : ces fichiers n'ont jamais été fusionnés, voir la correction
+    de l'entrée « 4e, Chapitre 1 ».)
   Un exemple a révélé que la casse peut être **sémantiquement significative** et non un simple
   artefact de police : le kicker de `cercle-trigonometrique-triangles.ts` ("a/sinA = b/sinB =
   c/sinC...") mélange délibérément minuscules (côtés a, b, c) et majuscules (sommets/angles A, B,
@@ -4739,3 +4739,43 @@ Contrôle `check_banque.ts` (KaTeX `strict: 'error'`, notation clavier, majuscul
   maintenant deux générateurs. Vérifié : 2 000 tirages par variante (recalcul indépendant, écritures
   équivalentes, « − », illisible), parcours iPhone 13 (390 px, 0 erreur console), documents réels sans
   débordement, collecteur 0 égalité fausse.
+
+## 4e, Chapitre 1 — lots A, E et F de l'audit (cours, quiz gen60, figures)
+
+Lot A (cours) : sous-titre brut « x_S = -b/(2a) » → « D'où vient la formule de l'abscisse du
+sommet ? », « graphe Mafs » retiré de la carte gen8, « MÊME », checklist (« le sommet ou la borne
+retenue », x_S en KaTeX — la checklist passe par `RichText`). Notation (décision 3) : sommet
+S(x_S ; y_S) et a(x − x_S)² + y_S partout ; p et q seulement pour les translations (légende de
+`transformations-widget` : « sommet (TH ; TV) »). Trois démonstrations « Démonstration — … » :
+abscisse du sommet (§ 1, ancienne dérivation mise en bloc), forme canonique générale
+a(x + b/2a)² + c − b²/4a sans Δ et image par un carré ≥ 0 (§ 2) ; énoncés par clé sans méthode
+(et méthode retirée de 4 énoncés existants). Astuce « lire a » (point (x_S + 1 ; y_S + a),
+|a| = EV/CV). Formulaire : 9 groupes dans l'ordre des sections (tableau de valeurs, milieu des
+zéros, sens des translations, compléter le carré, forme générale, retrouver l'équation, domaine
+de validité) ; récapitulatif : 2 puces de plus (lire et reconnaître, transformations). Plus de
+« Δ » dans le § 4 ni le forward. Tableau de variation du § 1 raccourci (↘/↗ : 443 px sur
+iPhone). `QUIZ_THEMES` : « optimisation » (section `utiliser`) et les 4 thèmes nouveaux.
+Décision 4 : les widgets gen7/gen8 n'ont jamais été fusionnés (règles et commentaires corrigés).
+
+Lot F : figures en kinds existants, valeurs calculées — « lire a » (`vectorPlane` quadrillé
+ISOTROPE 8 × 7,5, rapport 320/300 : un carreau = 1 dans les deux sens), cas 2 de l'optimisation
+(domaine [12 ; 20[ en `shadedRegions`, borne 20 ouverte, étiquette de l'optimum en `textLabels`
+au-dessus : posée à droite du point, elle chevauchait la courbe), trajectoire h(t), tableaux de
+signes à un zéro double et sans zéro, exemples « sommet + point » / « zéros + point » dessinés.
+`CurvePlot` : graduations « − » et virgule (`nombreTick`, tout le site). **Piège** : une formule
+de `featureTable` sans groupe `{…}` se coupe à chaque opérateur dans une colonne étroite.
+
+Lot E (quiz gen60) : banque réécrite en `$…$` (`TexteRiche` dans la question, la correction et
+le résumé ; `banquesVraiFaux` sur papier) ; 2 affirmations fausses corrigées (EV et CV se
+combinent : |a| = EV/CV, comme gen8/gen9 ; signe de a et y_S donnent le NOMBRE de zéros, pas le
+tableau complet), 2 imprécises (p ≠ 0 ; un bénéfice peut être négatif) ; ni « concavité »,
+« coefficient dominant », « Δ », « discriminant », « irréductible », ni majuscules. 4 thèmes
+nouveaux (lire a, b, c ; différences secondes ; compléter le carré ; trois écritures et retrouver
+l'équation) : 350 affirmations, 10 × 35, 18 V / 17 F (formeCanoniqueSommet 17 / 18), catalogue
+dans l'ordre des sections ; accueil calculé depuis la banque. Banque écrite dans un texte source
+(dossier de travail `lotE/banque60.txt`, séparateur « ¦ » : « | » sert à |a|) puis générée
+(`json.dumps`). Contrôle `check_banque.cjs` (KaTeX `strict: 'error'`, notation clavier, Unicode
+hors formule, majuscules, mots interdits, doublons, équilibre) : 0 problème ; fragments papier des
+10 thèmes : 0 « $ ». Vérifié : page en clair/sombre, iPhone 13 et 1 280 px (scrollWidth 390,
+0 `$` isolé, 0 `.katex-error`, 0 NaN) ; quiz parcouru (un thème en entier : 35 / 35 distinctes,
+3 affirmations dans chacun des autres).

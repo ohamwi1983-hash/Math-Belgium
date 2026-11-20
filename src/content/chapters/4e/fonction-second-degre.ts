@@ -359,38 +359,53 @@ export const fonctionSecondDegre: ChapterContent = {
             '$f(6) = 5$. L\'axe est $x = \\dfrac{0+6}{2} = 3$ — sans avoir besoin de connaître ' +
             'a, b ni c !',
         },
-        { kind: 'subheading', text: "D'où vient la formule x_S = -b/(2a) ?" },
+        { kind: 'subheading', text: "D'où vient la formule de l'abscisse du sommet ?" },
         {
           kind: 'para',
           text:
             'Cette même astuce du milieu permet de retrouver $x_S$ directement, à partir de a, b ' +
-            'et c. Regarde une parabole générale $f(x) = ax^2+bx+c$. Compare-la à ' +
-            '$g(x) = ax^2+bx$ — la même parabole, mais avec c remplacé par 0. Pour tout x : ' +
-            '$f(x) = g(x) + c$. Les deux courbes ont exactement la même forme. Elles sont juste ' +
-            'décalées verticalement de c.',
+            'et c, sans dessiner la courbe.',
         },
         {
-          kind: 'para',
-          text:
-            'Un décalage vertical ne change **jamais** l\'abscisse du sommet — seule son ' +
-            'ordonnée bouge. Donc $x_S(f) = x_S(g)$. Trouver $x_S$ de n\'importe quelle parabole ' +
-            'revient à trouver $x_S$ de $g(x)=ax^2+bx$, où $c=0$.',
-        },
-        {
-          kind: 'para',
-          text:
-            '$g(x)=ax^2+bx=0$ se résout par mise en évidence de x (vue en 3e) : ' +
-            '$x(ax+b)=0 \\iff x_1 = 0$ ou $x_2 = -\\dfrac{b}{a}$ — deux racines, donc deux points ' +
-            'de même hauteur (0) ! Exactement la situation de l\'astuce du dessus. Leur milieu ' +
-            'donne $x_S$ :',
-        },
-        { kind: 'para', text: '$x_S = \\dfrac{0 + (-b/a)}{2} = -\\dfrac{b}{2a}$' },
-        {
-          kind: 'para',
-          text:
-            'Cette valeur de $x_S$ est la même pour f et pour g : le décalage vertical ne la ' +
-            'change pas. Mais $y_S$, lui, dépend bien de c ! Pour le calculer, remplace x par ' +
-            '$x_S$ dans le f **original**.',
+          kind: 'exempleLibre',
+          label: "Démonstration — l'abscisse du sommet",
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'On veut démontrer que la parabole de $f(x) = ax^2+bx+c$ (avec $a \\neq 0$) a son ' +
+                'sommet en $x_S = -\\dfrac{b}{2a}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1 — on se débarrasse de c.** Pose $g(x) = ax^2+bx$ : la même expression, ' +
+                'avec c remplacé par 0. Pour tout x, $f(x) = g(x) + c$. La courbe de f est donc ' +
+                'celle de g décalée verticalement de c. Un décalage vertical ne change **jamais** ' +
+                'l\'abscisse du sommet : f et g ont le même $x_S$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2 — les zéros de g.** On met x en évidence (vu en 3e) : ' +
+                '$ax^2+bx = x(ax+b)$, et $x(ax+b) = 0 \\iff x = 0$ ou $x = -\\dfrac{b}{a}$. Ce sont ' +
+                'deux points de la courbe de g à la même hauteur : 0.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 3 — le milieu.** Deux points de même hauteur sont symétriques par rapport à ' +
+                'l\'axe : l\'axe passe par leur milieu (astuce ci-dessus). Donc ' +
+                '$x_S = \\dfrac{0 + \\left(-\\frac{b}{a}\\right)}{2} = -\\dfrac{b}{2a}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** Ce $x_S$ est celui de g, donc aussi celui de f (étape 1). ' +
+                'L\'ordonnée $y_S$, elle, dépend de c : on la calcule en remplaçant x par $x_S$ ' +
+                'dans f, $y_S = f(x_S)$.',
+            },
+          ],
         },
         {
           kind: 'rappel',
@@ -429,7 +444,7 @@ export const fonctionSecondDegre: ChapterContent = {
             yAxisLabel: 'y',
             caption:
               'g(x) = x² − 4x (racines 0 et 4) et f(x) = x² − 4x + 6 (aucune racine réelle) : ' +
-              'ajouter c translate la courbe verticalement, sans jamais déplacer x_S = 2',
+              'ajouter c translate la courbe verticalement, sans jamais déplacer $x_S = 2$',
           },
         },
         {
@@ -654,8 +669,62 @@ export const fonctionSecondDegre: ChapterContent = {
           ],
         },
         {
+          kind: 'para',
+          text:
+            'Avec un seul zéro (double) ou sans zéro, il n\'y a pas d\'« entre les zéros » : f(x) a ' +
+            'le signe de a partout, sauf au zéro double où il vaut 0.',
+        },
+        {
           kind: 'signTable',
-          caption: 'Variation, sommet en x = 2,5 (minimum)',
+          caption: 'Signe de f(x) = (x − 2)², a > 0, un zéro double',
+          rows: [
+            {
+              label: 'x',
+              cells: [
+                { text: '−∞', tone: 'plain' },
+                { text: '', tone: 'plain' },
+                { text: '2', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '+∞', tone: 'plain' },
+              ],
+            },
+            {
+              label: 'f(x)',
+              cells: [
+                { text: '', tone: 'plain' },
+                { text: '+', tone: 'pos' },
+                { text: '0', tone: 'zero' },
+                { text: '+', tone: 'pos' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+          ],
+        },
+        {
+          kind: 'signTable',
+          caption: 'Signe de f(x) = −x² − 1, a < 0, aucun zéro',
+          rows: [
+            {
+              label: 'x',
+              cells: [
+                { text: '−∞', tone: 'plain' },
+                { text: '', tone: 'plain' },
+                { text: '+∞', tone: 'plain' },
+              ],
+            },
+            {
+              label: 'f(x)',
+              cells: [
+                { text: '', tone: 'plain' },
+                { text: '−', tone: 'neg' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+          ],
+        },
+        {
+          kind: 'signTable',
+          caption: 'Variation de f(x) = (x − 1)(x − 4) : décroissante (↘) puis croissante (↗), minimum en x = 2,5',
           rows: [
             {
               label: 'x',
@@ -671,9 +740,9 @@ export const fonctionSecondDegre: ChapterContent = {
               label: 'f',
               cells: [
                 { text: '', tone: 'plain' },
-                { text: 'décroissante ↘', tone: 'plain' },
+                { text: '↘', tone: 'plain' },
                 { text: 'min', tone: 'zero' },
-                { text: 'croissante ↗', tone: 'plain' },
+                { text: '↗', tone: 'plain' },
                 { text: '', tone: 'plain' },
               ],
             },
@@ -840,12 +909,52 @@ export const fonctionSecondDegre: ChapterContent = {
           },
         },
         {
+          kind: 'astuce',
+          label: 'Astuce — lire a sur le graphique',
+          text:
+            'Pars du sommet et avance de 1 vers la droite : la courbe monte de a (elle descend si ' +
+            '$a < 0$). Pourquoi ? Sur $y = ax^2$, le point d\'abscisse 1 est $(1\\,;\\,a)$, à 1 vers ' +
+            'la droite et a vers le haut du sommet $(0\\,;\\,0)$ ; les translations déplacent ce ' +
+            'point avec le sommet. Le point « croix » est donc $(x_S+1\\,;\\,y_S+a)$. Un EV et une ' +
+            'CV peuvent aussi se combiner : seul leur rapport compte, $|a| = \\dfrac{\\text{EV}}{\\text{CV}}$ ' +
+            '(EV = 2 et CV = 4 donnent $|a| = \\dfrac{1}{2}$).',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            // f(x) = 2(x − 1)² − 3 : S(1 ; −3), point croix (2 ; −1) = (x_S + 1 ; y_S + a).
+            // Domaine isotrope (8 × 7,5, rapport 320/300 du cadre) : un carreau = 1 dans les deux
+            // directions, sinon a paraîtrait plus grand ou plus petit qu'il n'est.
+            kind: 'vectorPlane',
+            xMin: -3,
+            xMax: 5,
+            yMin: -4,
+            yMax: 3.5,
+            grid: true,
+            curves: [{ fn: (x) => 2 * (x - 1) * (x - 1) - 3, tone: 'accent', xMin: -0.78, xMax: 2.78 }],
+            vectors: [
+              { from: { x: 1, y: -3 }, to: { x: 2, y: -3 }, tone: 'attn' },
+              { from: { x: 2, y: -3 }, to: { x: 2, y: -1 }, tone: 'good' },
+            ],
+            points: [
+              { x: 1, y: -3, label: 'S(1 ; −3)', tone: 'accent', labelPos: 'left' },
+              { x: 2, y: -1, label: '(2 ; −1)', tone: 'good', labelPos: 'right' },
+              { x: 1.5, y: -3, label: '1', tone: 'attn', labelPos: 'below', node: false },
+              { x: 2, y: -2, label: '2', tone: 'good', labelPos: 'right', node: false },
+            ],
+            caption:
+              'Du sommet S(1 ; −3), 1 vers la droite puis 2 vers le haut : la courbe passe par (2 ; −1), ' +
+              'donc a = 2 et f(x) = 2(x − 1)² − 3. Pour y = x², on ne monterait que de 1.',
+          },
+        },
+        {
           kind: 'atelier',
           tag: 'transformations-widget',
           label: 'Manipule toi-même — fais varier TH, EV/CV et TV',
           caption:
             'Règle TH, EV/CV (a négatif retourne la courbe) et TV, et compare la forme ' +
-            'canonique a(x − p)² + q avec la forme développée ax² + bx + c. Le mode Pas à ' +
+            'canonique, dont le sommet est le point (TH ; TV), avec la forme développée ' +
+            'ax² + bx + c. Le mode Pas à ' +
             'pas reconstruit la parabole depuis y = x², une transformation à la fois, en ' +
             'suivant le sommet.',
         },
@@ -854,8 +963,8 @@ export const fonctionSecondDegre: ChapterContent = {
           title: 'Transformations graphiques',
           generatorId: 'gen8',
           description: [
-            'Lis p, q, l’étirement/la compression (EV/CV) et la symétrie (SOX) directement sur ' +
-              'un graphe Mafs interactif.',
+            'Lis les translations p et q, l’étirement/la compression (EV/CV) et la symétrie (SOX) ' +
+              'directement sur un graphique interactif.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 8. Transformations graphiques »',
@@ -972,6 +1081,97 @@ export const fonctionSecondDegre: ChapterContent = {
             '$x + 2 = x - (-2)$. C\'est le même piège du signe que pour la translation horizontale.',
         },
         {
+          kind: 'para',
+          text:
+            'La méthode marche-t-elle pour **toutes** les fonctions du second degré ? Oui : refais ' +
+            'les mêmes étapes avec des lettres à la place des nombres.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la forme canonique générale',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'On veut démontrer que toute fonction $f(x) = ax^2+bx+c$ (avec $a \\neq 0$) peut ' +
+                's\'écrire $f(x) = a(x-x_S)^2+y_S$, et trouver $x_S$ et $y_S$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1 — a mis en évidence sur les deux premiers termes** (possible car ' +
+                '$a \\neq 0$) : $f(x) = a\\left(x^2+\\dfrac{b}{a}x\\right)+c$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2 — carré complété dans la parenthèse.** La moitié du coefficient de x vaut ' +
+                '$\\dfrac{b}{2a}$. Comme $\\left(x+\\dfrac{b}{2a}\\right)^2 = x^2+\\dfrac{b}{a}x+\\dfrac{b^2}{4a^2}$, ' +
+                'on a $x^2+\\dfrac{b}{a}x = \\left(x+\\dfrac{b}{2a}\\right)^2-\\dfrac{b^2}{4a^2}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 3 — a redistribué** sur les deux termes : ' +
+                '$f(x) = a\\left(x+\\dfrac{b}{2a}\\right)^2 - a \\cdot \\dfrac{b^2}{4a^2} + c ' +
+                '= a\\left(x+\\dfrac{b}{2a}\\right)^2 + c - \\dfrac{b^2}{4a}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** On écrit $x + \\dfrac{b}{2a} = x - \\left(-\\dfrac{b}{2a}\\right)$ : ' +
+                'c\'est la forme canonique, avec $x_S = -\\dfrac{b}{2a}$ (la formule de la section 1, ' +
+                'retrouvée autrement) et $y_S = c - \\dfrac{b^2}{4a}$.',
+            },
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            'La forme canonique explique aussi la règle de l\'image vue en section 1 : tout ' +
+            'repose sur un carré, qui n\'est jamais négatif.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: "Démonstration — l'image, grâce à un carré positif",
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'On veut démontrer que si $f(x) = a(x-x_S)^2+y_S$ avec $a > 0$, alors ' +
+                '$\\operatorname{im} f = [y_S\\,;\\,{+\\infty}[$ (et ' +
+                '$\\operatorname{im} f = ]{-\\infty}\\,;\\,y_S]$ si $a < 0$).',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1 — un carré n\'est jamais négatif.** Pour tout x, $(x-x_S)^2 \\geq 0$, et ' +
+                'il vaut 0 seulement pour $x = x_S$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2 — on multiplie par a.** Comme $a > 0$, le sens de l\'inégalité ne change pas : ' +
+                '$a(x-x_S)^2 \\geq 0$, puis on ajoute $y_S$ : $f(x) \\geq y_S$ pour tout x. Et ' +
+                '$f(x_S) = a \\cdot 0 + y_S = y_S$ : la valeur $y_S$ est atteinte, c\'est le minimum.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 3 — toute valeur au-dessus est atteinte.** Prends un nombre $k \\geq y_S$. ' +
+                'Pour $x = x_S + \\sqrt{\\dfrac{k-y_S}{a}}$, on a $(x-x_S)^2 = \\dfrac{k-y_S}{a}$, donc ' +
+                '$f(x) = a \\cdot \\dfrac{k-y_S}{a} + y_S = k$. Donc $\\operatorname{im} f = [y_S\\,;\\,{+\\infty}[$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Autre cas.** Si $a < 0$, multiplier par a renverse l\'inégalité : $a(x-x_S)^2 \\leq 0$, donc ' +
+                '$f(x) \\leq y_S$ : $y_S$ est le maximum et, de la même façon, ' +
+                '$\\operatorname{im} f = ]{-\\infty}\\,;\\,y_S]$.',
+            },
+          ],
+        },
+        {
           kind: 'historique',
           titre: "Le mathématicien qui a donné son nom à l'algèbre",
           text:
@@ -997,11 +1197,11 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'featureTable',
           caption: 'Une même parabole, trois écritures',
-          headers: ['Écriture', 'Forme', 'Ce qu\'elle montre directement'],
+          headers: ['Écriture', 'Forme', 'Ce qu\'on y lit'],
           rows: [
-            ['développée', 'ax² + bx + c', 'l\'ordonnée à l\'origine c, le point (0 ; c)'],
-            ['canonique', 'a(x − x_S)² + y_S', 'le sommet S(x_S ; y_S) et l\'axe x = x_S'],
-            ['factorisée', 'a(x − x₁)(x − x₂)', 'les zéros x₁ et x₂ (seulement s\'il y en a)'],
+            ['développée', '${ax^2+bx+c}$', 'le point $(0\\,;\\,c)$'],
+            ['canonique', '${a(x-x_S)^2+y_S}$', 'le sommet $S(x_S\\,;\\,y_S)$, l\'axe $x = x_S$'],
+            ['factorisée', '${a(x-x_1)(x-x_2)}$', 'les zéros $x_1$ et $x_2$ (s\'il y en a)'],
           ],
         },
         {
@@ -1033,6 +1233,23 @@ export const fonctionSecondDegre: ChapterContent = {
             { tag: 'le point donne a', text: '$f(0) = 4a - 1 = 3 \\iff a = 1$' },
           ],
           result: { tag: 'résultat', text: '$f(x) = (x-2)^2 - 1 = x^2 - 4x + 3$' },
+          illustration: {
+            // f(x) = (x − 2)² − 1 : S(2 ; −1), P(0 ; 3), zéros 1 et 3.
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => (x - 2) * (x - 2) - 1, tone: 'accent', xMin: -0.4, xMax: 4.4 }],
+            xMin: -1,
+            xMax: 5,
+            xTicks: [-1, 1, 2, 3, 4, 5],
+            yTicks: [-1, 1, 2, 3, 4],
+            fixedYRange: { min: -2, max: 5 },
+            points: [
+              { x: 2, y: -1, label: 'S(2 ; −1)', tone: 'accent', labelPos: 'below' },
+              { x: 0, y: 3, label: 'P(0 ; 3)', tone: 'good', labelPos: 'right' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption: 'le sommet donne la forme a(x − 2)² − 1, le point P donne a = 1',
+          },
         },
         {
           kind: 'exemple',
@@ -1043,6 +1260,25 @@ export const fonctionSecondDegre: ChapterContent = {
             { tag: 'le point donne a', text: '$f(1) = a \\cdot 2 \\cdot (-2) = -4a = -8 \\iff a = 2$' },
           ],
           result: { tag: 'résultat', text: '$f(x) = 2(x+1)(x-3) = 2x^2 - 4x - 6$' },
+          illustration: {
+            // f(x) = 2(x + 1)(x − 3) : zéros −1 et 3, P(1 ; −8) (c'est aussi le sommet : 1 est le
+            // milieu de −1 et 3).
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => 2 * (x + 1) * (x - 3), tone: 'accent', xMin: -1.7, xMax: 3.7 }],
+            xMin: -2,
+            xMax: 4,
+            xTicks: [-2, 1, 2, 4],
+            yTicks: [-8, -6, -4, -2, 2, 4, 6],
+            fixedYRange: { min: -10, max: 8 },
+            roots: [
+              { x: -1, label: '−1' },
+              { x: 3, label: '3' },
+            ],
+            points: [{ x: 1, y: -8, label: 'P(1 ; −8)', tone: 'good', labelPos: 'right' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption: 'les zéros −1 et 3 donnent la forme a(x + 1)(x − 3), le point P donne a = 2',
+          },
         },
         {
           kind: 'atelier',
@@ -1164,6 +1400,31 @@ export const fonctionSecondDegre: ChapterContent = {
             { tag: 'optimum à la borne gauche', text: '$A(12) = -288 + 480 = 192$' },
           ],
           result: { tag: 'aire maximale', text: '192 m², atteinte en $x = 12$ — moins que les 200 m² du sommet, jamais plus.' },
+          illustration: {
+            // A(x) = −2x² + 40x : sommet (10 ; 200) hors de [12 ; 20[, A(12) = 192, A(20) = 0 (exclu).
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => -2 * x * x + 40 * x, tone: 'faint', xMin: 0, xMax: 12 },
+              { fn: (x) => -2 * x * x + 40 * x, tone: 'accent', xMin: 12, xMax: 20 },
+            ],
+            shadedRegions: [{ from: 12, to: 20, upper: (x) => -2 * x * x + 40 * x, tone: 'good' }],
+            xMin: 0,
+            xMax: 23,
+            xTicks: [5, 10, 12, 15, 20],
+            yTicks: [50, 100, 150, 200],
+            fixedYRange: { min: -15, max: 250 },
+            points: [
+              { x: 10, y: 200, label: 'sommet (10 ; 200)', tone: 'bad', labelPos: 'above' },
+              { x: 12, y: 192, label: '', tone: 'good' },
+              { x: 20, y: 0, label: '', tone: 'accent', style: 'open' },
+            ],
+            textLabels: [{ x: 14, y: 222, text: 'optimum (12 ; 192)', tone: 'good', anchor: 'start' }],
+            xAxisLabel: 'x (m)',
+            yAxisLabel: 'aire (m²)',
+            caption:
+              'Domaine de validité [12 ; 20[ (zone verte) : la courbe y descend tout du long. Le ' +
+              'sommet x = 10 est hors du domaine, l\'optimum réel est à la borne x = 12 : 192 m².',
+          },
         },
         {
           kind: 'exemple',
@@ -1176,6 +1437,23 @@ export const fonctionSecondDegre: ChapterContent = {
             { tag: 'ordonnée du sommet', text: '$h(2) = -20 + 40 + 25 = 45$' },
           ],
           result: { tag: 'résultat', text: '45 m, au bout de 2 s. Quand touche-t-il le sol ? Il faut résoudre $h(t) = 0$ : ce sera au chapitre 2.' },
+          illustration: {
+            // h(t) = −5t² + 20t + 25 sur [0 ; 5] : départ (0 ; 25), sommet (2 ; 45), sol en t = 5.
+            kind: 'curvePlot',
+            curves: [{ fn: (t) => -5 * t * t + 20 * t + 25, tone: 'accent', xMin: 0, xMax: 5 }],
+            xMin: 0,
+            xMax: 5.5,
+            xTicks: [1, 2, 3, 4, 5],
+            yTicks: [10, 20, 25, 30, 40, 45],
+            fixedYRange: { min: -4, max: 52 },
+            points: [
+              { x: 0, y: 25, label: 'départ (0 ; 25)', tone: 'good', labelPos: 'right' },
+              { x: 2, y: 45, label: 'S(2 ; 45)', tone: 'accent', labelPos: 'above' },
+            ],
+            xAxisLabel: 't (s)',
+            yAxisLabel: 'h (m)',
+            caption: 'la hauteur monte jusqu\'au sommet S(2 ; 45), puis redescend jusqu\'au sol en t = 5',
+          },
         },
         {
           kind: 'atelier',
@@ -1207,7 +1485,7 @@ export const fonctionSecondDegre: ChapterContent = {
               caption:
                 'Exemple avec une demande $q(p)=80-2p$ : le revenu $R(p)=p(80-2p)=-2p^2+80p$ ' +
                 'culmine à $p=20\\,€$ (revenu de 800 €). À 10 € comme à 30 € — deux prix très ' +
-                'différents de part et d\'autre du sommet — le revenu retombe au MÊME niveau ' +
+                'différents de part et d\'autre du sommet — le revenu retombe au même niveau' +
                 '(600 €) : s\'éloigner du sommet dans un sens ou dans l\'autre coûte toujours.',
             },
           ],
@@ -1249,31 +1527,33 @@ export const fonctionSecondDegre: ChapterContent = {
       id: 'revision',
       number: 4,
       title: 'Révision — vrai ou faux',
-      kicker: '206 affirmations, 6 thèmes, tout le chapitre en révision transversale',
+      kicker: '350 affirmations, 10 thèmes, tout le chapitre en révision transversale',
       blocks: [
         { kind: 'video', title: 'Révision : la synthèse du chapitre en 2 minutes', youtubeId: 'vpgVztac-9g' },
         {
           kind: 'para',
           text:
-            '206 affirmations. 6 thèmes. Ils reprennent les 3 parties de ce chapitre : ' +
-            'coefficients et allure, forme canonique et sommet, transformations, racines par ' +
-            'factorisation, domaine/image et tableaux, optimisation. Les équations et inéquations ' +
-            'en contexte sont révisées au chapitre 2. Un seul essai par question. La justification ' +
-            'est toujours donnée.',
+            '350 affirmations. 10 thèmes de 35, dans l\'ordre des 3 parties de ce chapitre : ' +
+            'coefficients et allure, lecture de a, b et c sur un graphique, tableau de valeurs et ' +
+            'différences secondes, zéros par factorisation, domaine, image et tableaux (section 1) ; ' +
+            'transformations, forme canonique et sommet, compléter le carré, trois écritures et ' +
+            'retrouver l\'équation (section 2) ; optimisation (section 3). Les équations et ' +
+            'inéquations en contexte sont révisées au chapitre 2. Un seul essai par question. La ' +
+            'justification est toujours donnée.',
         },
         {
           kind: 'astuce',
           text:
-            'Aucune affirmation n\'utilise le discriminant Δ. Tu ne l\'as pas encore vu à ce ' +
-            'stade ! Toutes les racines s\'obtiennent par factorisation. Ou en réfléchissant à ' +
-            'la position du sommet.',
+            'Aucune affirmation ne demande de formule générale pour les zéros : tu ne l\'as pas ' +
+            'encore vue à ce stade ! Tous les zéros s\'obtiennent par factorisation, ou en ' +
+            'réfléchissant à la position du sommet.',
         },
         {
           kind: 'entrainement',
           title: 'La fonction du second degré — quiz vrai/faux',
           generatorId: 'gen60',
           description: [
-            'Choisis un thème et teste-toi : 206 affirmations pré-écrites, une seule tentative ' +
+            'Choisis un thème et teste-toi : 350 affirmations pré-écrites, une seule tentative ' +
               'par question, justification toujours révélée.',
           ],
           chantier: '4e',
@@ -1289,9 +1569,17 @@ export const fonctionSecondDegre: ChapterContent = {
         title: 'Coefficients et allure',
         formulas: [
           { text: '$a>0$ → minimum — $a<0$ → maximum' },
-          { text: '$c = f(0)$ : ordonnée à l\'origine' },
-          { text: 'axe à gauche de Oy ⟺ a et b de même signe' },
+          { text: '$c = f(0)$ : ordonnée à l\'origine, point $(0\\,;\\,c)$' },
+          { text: 'axe à gauche de Oy ⟺ a et b de même signe ; axe à droite ⟺ signes opposés ; axe = Oy ⟺ $b = 0$' },
           { text: '$|a|$ grand → parabole resserrée, $|a|$ proche de 0 → aplatie' },
+        ],
+      },
+      {
+        title: 'Tableau de valeurs',
+        formulas: [
+          { text: 'différences premières constantes → premier degré ; différences secondes constantes → second degré' },
+          { text: 'différence seconde $= 2a$', condition: 'x de 1 en 1' },
+          { text: '$c = f(0)$, puis $f(1) = a + b + c$ donne b' },
         ],
       },
       {
@@ -1300,6 +1588,7 @@ export const fonctionSecondDegre: ChapterContent = {
           { text: '$x_S = -\\dfrac{b}{2a}$' },
           { text: '$y_S = f(x_S)$' },
           { text: 'axe de symétrie : $x = x_S$' },
+          { text: '$x_S = \\dfrac{x_1+x_2}{2}$', condition: 'si $f(x_1) = f(x_2)$, par exemple deux zéros' },
         ],
       },
       {
@@ -1313,24 +1602,45 @@ export const fonctionSecondDegre: ChapterContent = {
       {
         title: 'Zéros et signe',
         formulas: [
+          { text: '$f(x) = a(x-x_1)(x-x_2)$ : zéros $x_1$ et $x_2$', condition: 'un produit est nul si un facteur l\'est' },
           { text: 'entre les zéros : signe opposé à $a$' },
           { text: 'à l\'extérieur des zéros : signe de $a$' },
+          { text: 'aucun zéro : signe de $a$ partout ; un zéro double : signe de $a$ des deux côtés' },
         ],
       },
       {
-        title: 'Forme canonique et transformations',
+        title: 'Transformations',
         formulas: [
-          { text: '$f(x)=a(x-x_S)^2+y_S$' },
-          { text: '$ax^2+bx+c$ (lit c) — $a(x-x_S)^2+y_S$ (lit S) — $a(x-x_1)(x-x_2)$ (lit les zéros)', condition: 'trois écritures' },
           { text: '$y=(x-p)^2+q$ — translation horizontale $p$, verticale $q$' },
-          { text: '$|a|>1$ étire, $0<|a|<1$ comprime ; $a<0$ retourne la courbe (SOX)' },
+          { text: '$(x-p)^2$ : vers la droite si $p>0$, vers la gauche si $p<0$ ; $(x+3)^2 = (x-(-3))^2$' },
+          { text: '$|a|>1$ étire (EV), $0<|a|<1$ comprime (CV) ; $a<0$ retourne la courbe (SOX)' },
+          { text: '$|a| = \\dfrac{\\text{EV}}{\\text{CV}}$', condition: 'EV et CV combinés' },
+          { text: 'du sommet, 1 vers la droite : la courbe passe par $(x_S+1\\,;\\,y_S+a)$', condition: 'lire a sur un graphique' },
+        ],
+      },
+      {
+        title: 'Forme canonique',
+        formulas: [
+          { text: '$f(x)=a(x-x_S)^2+y_S$, sommet $S(x_S\\,;\\,y_S)$' },
+          { text: '$x^2+bx = \\left(x+\\dfrac{b}{2}\\right)^2-\\left(\\dfrac{b}{2}\\right)^2$', condition: 'compléter le carré' },
+          { text: '$ax^2+bx+c = a\\left(x^2+\\dfrac{b}{a}x\\right)+c$', condition: 'si $a \\neq 1$ : a mis en évidence d\'abord' },
+          { text: '$ax^2+bx+c = a\\left(x+\\dfrac{b}{2a}\\right)^2+c-\\dfrac{b^2}{4a}$' },
+        ],
+      },
+      {
+        title: 'Trois écritures et équation',
+        formulas: [
+          { text: '$ax^2+bx+c$ (lit c) — $a(x-x_S)^2+y_S$ (lit S) — $a(x-x_1)(x-x_2)$ (lit les zéros)', condition: 'trois écritures' },
+          { text: 'sommet connu : $f(x) = a(x-x_S)^2+y_S$, puis un point donne a' },
+          { text: 'zéros connus : $f(x) = a(x-x_1)(x-x_2)$, puis un point donne a' },
         ],
       },
       {
         title: 'Optimiser en contexte',
         formulas: [
+          { text: 'domaine de validité : chaque longueur, prix, durée… $> 0$ (ex. $x>0$ et $40-2x>0$)' },
           { text: 'optimum réel $=$ sommet', condition: 'si $x_S$ appartient au domaine de validité' },
-          { text: 'sinon, optimum réel à une borne du domaine de validité' },
+          { text: 'sinon, optimum réel à une borne du domaine de validité : comparer les valeurs aux bornes' },
         ],
       },
     ],
@@ -1340,13 +1650,18 @@ export const fonctionSecondDegre: ChapterContent = {
     items: [
       '**Coefficient a** — son signe donne le sens d\'ouverture (minimum ou maximum). Sa valeur ' +
         'absolue donne l\'allure (resserrée ou aplatie). b et c n\'y changent rien.',
+      '**Lire et reconnaître** — sur un graphique : a par l\'ouverture, $c = f(0)$, b par la ' +
+        'position de l\'axe et le signe de a. Dans un tableau de valeurs (x de 1 en 1) : ' +
+        'différences secondes constantes, égales à $2a$.',
       '**Sommet et axe** — $S(x_S\\,;\\,y_S)$ est le point extrémal, $x=x_S$ son axe de ' +
-        'symétrie. $x_S = -b/(2a)$, $y_S = f(x_S)$. Deux points de même hauteur suffisent aussi ' +
+        'symétrie. $x_S = -\\dfrac{b}{2a}$, $y_S = f(x_S)$. Deux points de même hauteur suffisent aussi ' +
         'à le retrouver par leur milieu.',
       '**Domaine et image** — $\\operatorname{dom} f = \\mathbb{R}$, toujours. ' +
         '$\\operatorname{im} f = [y_S\\,;\\,{+\\infty}[$ si $a>0$, $]{-\\infty}\\,;\\,y_S]$ si $a<0$.',
       '**Zéros et signe** — 0, 1 ou 2 racines réelles. Entre les racines : signe opposé à a. À ' +
         'l\'extérieur : signe de a.',
+      '**Transformations** — $y = a(x-p)^2+q$ : translation horizontale p (vers la droite si ' +
+        '$p > 0$), verticale q ; $|a| > 1$ étire, $0 < |a| < 1$ comprime, $a < 0$ retourne la courbe.',
       '**Forme canonique** — $f(x)=a(x-x_S)^2+y_S$. On l\'obtient en complétant le carré. Si ' +
         '$a \\neq 1$, on met a en évidence avant.',
       '**Trois écritures** — développée (lit c), canonique (lit le sommet), factorisée (lit les ' +
@@ -1359,15 +1674,15 @@ export const fonctionSecondDegre: ChapterContent = {
         "Ai-je développé l'expression, avant de dire que c'est bien une fonction du second degré ?",
         'Ai-je vérifié le signe de a, avant de parler de minimum ou de maximum ?',
         'Pour lire le signe de b sur un graphique, ai-je tenu compte du signe de a ?',
-        'Dans a(x + 2)² − 1, ai-je bien lu x_S = −2, et non 2 ?',
+        'Dans $a(x+2)^2-1$, ai-je bien lu $x_S = -2$, et non 2 ?',
         'En complétant le carré, ai-je bien redistribué a sur le terme sorti de la parenthèse ?',
-        'En contexte, ai-je vérifié chaque solution avec le domaine de validité réel — pas ' +
-          'seulement le domaine mathématique ?',
+        'En contexte, ai-je vérifié que le sommet (ou la borne retenue) est dans le domaine de ' +
+          'validité réel — pas seulement dans le domaine mathématique ?',
       ],
     },
     forward:
       'La forme canonique et les racines reviennent dans le chapitre sur les équations du ' +
-      'second degré. Le discriminant Δ y généralise la recherche des zéros, même quand la ' +
-      'factorisation directe n\'est pas évidente.',
+      'second degré. Une formule générale y donne les zéros, même quand la factorisation ' +
+      'directe n\'est pas évidente.',
   },
 }

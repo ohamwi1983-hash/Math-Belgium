@@ -11,6 +11,12 @@ const WIDE = { viewBox: '0 0 640 290', xLeft: 70, xRight: 610, yTop: 20, yBottom
 const COMPACT = { viewBox: '0 0 320 260', xLeft: 45, xRight: 300, yTop: 20, yBottom: 220 }
 const SAMPLES = 100
 
+/** Graduation écrite à la française : « − » typographique et virgule décimale (« −1 », « 0,5 »),
+ * jamais le « -1 » / « 0.5 » de `String(t)`. */
+function nombreTick(t: number): string {
+  return String(t).replace('-', '−').replace('.', ',')
+}
+
 const TONE_CLASS: Record<'accent' | 'faint' | 'good' | 'bad', string> = {
   accent: 'svg-accent',
   faint: 'svg-line',
@@ -179,7 +185,7 @@ export function CurvePlot({
             <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
               {xTicks.map((t) => (
                 <text key={t} x={xScale(t)} y={xAxisAnchorY + 16} textAnchor="middle">
-                  {xTickLabels?.[t] ?? t}
+                  {xTickLabels?.[t] ?? nombreTick(t)}
                 </text>
               ))}
             </g>
@@ -193,7 +199,7 @@ export function CurvePlot({
         <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
           {yTicks.map((t) => (
             <text key={t} x={zeroX - 8} y={yScale(t) + 4} textAnchor="end">
-              {yTickLabels?.[t] ?? t}
+              {yTickLabels?.[t] ?? nombreTick(t)}
             </text>
           ))}
         </g>

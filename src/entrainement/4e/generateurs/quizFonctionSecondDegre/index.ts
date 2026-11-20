@@ -8,12 +8,17 @@ import type { ExerciceQuizFonctionSecondDegre, GenerateurExerciceQuizFonctionSec
 import { randomInt } from "./aleatoire";
 import { BANQUE_QUIZ_FONCTION_SECOND_DEGRE } from "./banque";
 
+/** Dans l'ordre des sections du cours (§ 1 : cinq thèmes, § 2 : quatre, § 3 : un). */
 export const CATALOGUE_VARIANTES: { id: VarianteQuizFonctionSecondDegre; label: string }[] = [
-  { id: "coefficientsAllure", label: "Coefficients, concavité et allure" },
-  { id: "formeCanoniqueSommet", label: "Forme canonique, sommet et axe de symétrie" },
-  { id: "transformationsGraphiques", label: "Transformations graphiques (TH/TV/EV/CV/SOX)" },
-  { id: "racinesFactorisation", label: "Racines par factorisation (sans discriminant)" },
+  { id: "coefficientsAllure", label: "Coefficients et allure" },
+  { id: "lectureGraphique", label: "Lire a, b et c sur un graphique" },
+  { id: "differencesSecondes", label: "Tableau de valeurs et différences secondes" },
+  { id: "racinesFactorisation", label: "Zéros par factorisation" },
   { id: "domaineImageTableaux", label: "Domaine, image et tableaux" },
+  { id: "transformationsGraphiques", label: "Transformations graphiques (TH, TV, EV, CV, SOX)" },
+  { id: "formeCanoniqueSommet", label: "Forme canonique, sommet et axe de symétrie" },
+  { id: "completerCarre", label: "Compléter le carré" },
+  { id: "troisEcritures", label: "Trois écritures et retrouver l'équation" },
   { id: "optimisation", label: "Problèmes d'optimisation" },
 ];
 
@@ -37,9 +42,8 @@ export function genererExerciceQuizFonctionSecondDegre(): ExerciceQuizFonctionSe
   return construireAvecVarianteId(varianteId);
 }
 
-/** Taille réelle de la banque d'un thème — 33 à 35 selon le thème depuis le retrait de 5
- * affirmations demandant un vrai calcul à plusieurs étapes (audit du chapitre 1), jamais une
- * constante 35 fixe. `AppQuizFonctionSecondDegre.tsx` l'utilise pour fixer `nombreExercices`,
+/** Taille réelle de la banque d'un thème (35 partout depuis le lot E de l'audit du 4e ch. 1),
+ * jamais une constante fixe : un thème peut changer de taille. `AppQuizFonctionSecondDegre.tsx` l'utilise pour fixer `nombreExercices`,
  * seule façon pour `creerGenerateurSansRepetition` ci-dessous de garder sa garantie "jamais de
  * répétition dans une session" quel que soit le thème choisi. */
 export function nombreQuestions(varianteId: VarianteQuizFonctionSecondDegre): number {
@@ -57,9 +61,9 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (35) : sans
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème : sans
  * cette précaution, le tirage indépendant habituel (`genererExerciceQuizFonctionSecondDegre`)
- * pourrait répéter une question avant d'avoir couvert les 34 autres. État interne (file mélangée,
+ * pourrait répéter une question avant d'avoir couvert toutes les autres. État interne (file mélangée,
  * ré-mélangée à chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de
  * cette fonction — voir `AppQuizFonctionSecondDegre.tsx`, qui en crée une par session démarrée.
  */
