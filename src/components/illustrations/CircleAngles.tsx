@@ -188,10 +188,32 @@ export function CircleAngles({
         // les regrouper par quadrant.
         const cosA = Math.cos(p.angle)
         const sinA = Math.sin(p.angle)
-        const lx = pointLabelStyle === 'mono' ? CX + (R + 34) * cosA : p.x + (p.x > CX ? 10 : -10)
-        const ly = pointLabelStyle === 'mono' ? CY - (R + 34) * sinA + (p.sublabel ? 3 : 0) : p.y + (p.y > CY ? 14 : -8)
-        const anchor =
-          pointLabelStyle === 'mono' ? (cosA > 0.15 ? 'start' : cosA < -0.15 ? 'end' : 'middle') : p.x > CX ? 'start' : 'end'
+        // Mode 'mono' : l'étiquette ancrée à gauche ou à droite s'étend vers le bord du cadre. On la
+        // rapproche du cercle quand |cos| > 0,5 (R + 34 → R + 24), et un point SUR un axe a son
+        // étiquette à côté de lui (sous l'axe horizontal, à droite de l'axe vertical) : sinon
+        // « 180° » et « 3π/2 » sortaient du cadre de 300 px, « 0° » et « π/2 » couvraient la flèche
+        // de l'axe.
+        const surAxeH = Math.abs(sinA) < 0.1
+        const surAxeV = Math.abs(cosA) < 0.1
+        const ecart = 34 - 10 * Math.max(0, (Math.abs(cosA) - 0.5) / 0.5)
+        let lx = p.x + (p.x > CX ? 10 : -10)
+        let ly = p.y + (p.y > CY ? 14 : -8)
+        let anchor: 'start' | 'end' | 'middle' = p.x > CX ? 'start' : 'end'
+        if (pointLabelStyle === 'mono') {
+          if (surAxeH) {
+            lx = p.x + (cosA > 0 ? 6 : -6)
+            ly = CY + 18
+            anchor = cosA > 0 ? 'start' : 'end'
+          } else if (surAxeV) {
+            lx = CX + 8
+            ly = sinA > 0 ? p.y - 10 : p.y + 16
+            anchor = 'start'
+          } else {
+            lx = CX + (R + ecart) * cosA
+            ly = CY - (R + ecart) * sinA + (p.sublabel ? 3 : 0)
+            anchor = cosA > 0.15 ? 'start' : cosA < -0.15 ? 'end' : 'middle'
+          }
+        }
         return (
           <text
             key={i}

@@ -390,6 +390,23 @@ export const trigonometrie: ChapterContent = {
             tag: 'aire du secteur — A = ½r²θ',
             text: '$A = \\dfrac{1}{2} \\times 6^2 \\times \\dfrac{3\\pi}{4} = \\dfrac{27\\pi}{2} \\approx 42{,}41$ cm²',
           },
+          // Sommets de l'octogone inscrit en π/8 + k·π/4 (CircleDiagram) : le secteur part du
+          // sommet π/8 et couvre 3 côtés, jusqu'au sommet π/8 + 3π/4 = 7π/8.
+          illustration: {
+            kind: 'circleDiagram',
+            inscribedPolygon: 8,
+            startAngle: PI / 8,
+            sectorAngle: 3 * (PI / 4),
+            highlight: 'sector',
+            centerLabel: 'O',
+            radiusLabel: 'r',
+            pointALabel: 'A',
+            pointBLabel: 'B',
+            angleLabel: 'θ',
+            caption:
+              'le secteur AOB couvre 3 des 8 côtés de l\'octogone : son angle au centre vaut ' +
+              '$\\theta = 3 \\times \\dfrac{2\\pi}{8} = \\dfrac{3\\pi}{4}$, et non $\\dfrac{2\\pi}{8}$',
+          },
         },
         {
           kind: 'astuce',
@@ -582,6 +599,41 @@ export const trigonometrie: ChapterContent = {
             tag: 'surface balayée — grand secteur moins petit secteur',
             text: '$A = \\dfrac{2500\\pi}{3} - \\dfrac{100\\pi}{3} = 800\\pi \\approx 2513{,}27$ cm²',
           },
+          // Unité = 10 cm. Bras de 0° à 120° autour du pivot O : arcs y = √(r² − x²) de rayons 1 et 5,
+          // extrémités (1 ; 0), (5 ; 0), (cos 120° ; sin 120°) = (−0,5 ; 0,866), 5·(…) = (−2,5 ; 4,330).
+          // Domaine isotrope : 8,8 × 8,25 (rapport 320/300). Près de l'axe horizontal, l'arc est
+          // tracé en x = √(r² − y²) (`curvesOfY`) : en y = √(r² − x²), la tangente verticale en
+          // (r ; 0) donnait un dernier segment rectiligne visible.
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -3, xMax: 5.8, yMin: -1.6, yMax: 6.65,
+            showAxes: false,
+            curves: [
+              { fn: (x) => Math.sqrt(Math.max(0, 25 - x * x)), tone: 'accent', xMin: -2.5, xMax: 4 },
+              { fn: (x) => Math.sqrt(Math.max(0, 1 - x * x)), tone: 'accent', xMin: -0.5, xMax: 0.8 },
+            ],
+            curvesOfY: [
+              { fn: (y) => Math.sqrt(Math.max(0, 25 - y * y)), tone: 'accent', yMin: 0, yMax: 3 },
+              { fn: (y) => Math.sqrt(Math.max(0, 1 - y * y)), tone: 'accent', yMin: 0, yMax: 0.6 },
+            ],
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 1, y: 0 }, tone: 'faint', dashed: true },
+              { from: { x: 0, y: 0 }, to: { x: -0.5, y: 0.866 }, tone: 'faint', dashed: true },
+              { from: { x: 1, y: 0 }, to: { x: 5, y: 0 }, tone: 'ink', arrow: false },
+              { from: { x: -0.5, y: 0.866 }, to: { x: -2.5, y: 4.33 }, tone: 'ink', arrow: false },
+            ],
+            angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 120, radiusPx: 13, label: 'θ', tone: 'accent' }],
+            points: [
+              { x: 0, y: 0, label: 'O', tone: 'ink', labelPos: 'left' },
+              { x: 1, y: 0, label: '10 cm', tone: 'ink', node: false, labelPos: 'below' },
+              { x: 5, y: 0, label: '50 cm', tone: 'ink', node: false, labelPos: 'below' },
+              { x: 1.9, y: 2.95, label: 'surface balayée', tone: 'accent', node: false, labelPos: 'above' },
+            ],
+            caption:
+              'le balai racle la vitre entre 10 cm et 50 cm du pivot O (distances lues depuis O), sur un ' +
+              'angle $\\theta = 120°$ : ' +
+              'la surface balayée (entre les deux arcs) est le grand secteur moins le petit',
+          },
         },
         {
           kind: 'exemple',
@@ -596,6 +648,31 @@ export const trigonometrie: ChapterContent = {
             { tag: 'secteur et triangle', text: '$A_{secteur} = \\frac{1}{2} \\times 100 \\times 1{,}2870 \\approx 64{,}35$ cm² ; $A_{triangle} = 50\\sin\\theta = 50 \\times 0{,}96 = 48$ cm²' },
           ],
           result: { tag: 'aire du segment — secteur moins triangle', text: '$A_{segment} \\approx 64{,}35 - 48 = 16{,}35$ cm²' },
+          // Corde horizontale de longueur 12 dans le cercle de rayon 10 : A(6 ; 8), B(−6 ; 8)
+          // (6² + 8² = 100). Angle au centre de 53,13° à 126,87° (θ ≈ 73,74°). Domaine 24 × 22,5.
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -12, xMax: 12, yMin: -11.5, yMax: 11,
+            showAxes: false,
+            circle: { cx: 0, cy: 0, r: 10, tone: 'faint' },
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 6, y: 8 }, tone: 'ink', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: -6, y: 8 }, tone: 'ink', arrow: false },
+              { from: { x: -6, y: 8 }, to: { x: 6, y: 8 }, tone: 'accent', arrow: false },
+            ],
+            angleArcs: [{ cx: 0, cy: 0, fromDeg: 53.13, toDeg: 126.87, radiusPx: 22, label: 'θ', tone: 'accent' }],
+            points: [
+              { x: 0, y: 0, label: 'O', tone: 'ink', labelPos: 'below' },
+              { x: 6, y: 8, label: 'A', tone: 'ink', labelPos: 'right' },
+              { x: -6, y: 8, label: 'B', tone: 'ink', labelPos: 'left' },
+              { x: 0, y: 8, label: 'c = 12', tone: 'accent', node: false, labelPos: 'above' },
+              { x: 3, y: 4, label: 'r = 10', tone: 'ink', node: false, labelPos: 'right' },
+            ],
+            caption:
+              'la corde [AB] (12 cm) et les deux rayons forment un triangle isocèle ; l\'angle au centre ' +
+              '$\\theta$ se retrouve par la loi des cosinus « à l\'envers », le segment est la région entre ' +
+              'la corde et l\'arc AB',
+          },
         },
         {
           kind: 'exemple',
@@ -610,6 +687,39 @@ export const trigonometrie: ChapterContent = {
             { tag: 'segment du petit cercle', text: '$A_{seg,2} = \\frac{1}{2} \\times 64 \\times (1{,}6961 - \\sin\\theta_2) \\approx 54{,}28 - 31{,}75 \\approx 22{,}53$ cm²' },
           ],
           result: { tag: 'lentille — somme des deux segments', text: '$A_{lentille} \\approx 16{,}35 + 22{,}53 = 38{,}88$ cm²' },
+          // Corde commune verticale x = 0, de (0 ; −6) à (0 ; 6). O₁ à √(10² − 6²) = 8 à gauche,
+          // O₂ à √(8² − 6²) = √28 ≈ 5,2915 à droite. Angles : θ₁ de −36,87° à 36,87° ; en O₂,
+          // directions vers A et B à 180° ∓ 48,59° (tan = 6/√28). Domaine 33,6 × 31,5.
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -19, xMax: 14.6, yMin: -15.75, yMax: 15.75,
+            showAxes: false,
+            circles: [
+              { cx: -8, cy: 0, r: 10, tone: 'accent' },
+              { cx: 5.2915, cy: 0, r: 8, tone: 'good' },
+            ],
+            vectors: [
+              { from: { x: 0, y: -6 }, to: { x: 0, y: 6 }, tone: 'ink', arrow: false },
+              { from: { x: -8, y: 0 }, to: { x: 0, y: 6 }, tone: 'accent', arrow: false },
+              { from: { x: -8, y: 0 }, to: { x: 0, y: -6 }, tone: 'accent', arrow: false },
+              { from: { x: 5.2915, y: 0 }, to: { x: 0, y: 6 }, tone: 'good', arrow: false },
+              { from: { x: 5.2915, y: 0 }, to: { x: 0, y: -6 }, tone: 'good', arrow: false },
+            ],
+            angleArcs: [
+              { cx: -8, cy: 0, fromDeg: -36.87, toDeg: 36.87, radiusPx: 20, label: 'θ₁', tone: 'accent' },
+              { cx: 5.2915, cy: 0, fromDeg: 131.41, toDeg: 228.59, radiusPx: 16, label: 'θ₂', tone: 'good' },
+            ],
+            points: [
+              { x: -8, y: 0, label: 'O₁', tone: 'accent', labelPos: 'left' },
+              { x: 5.2915, y: 0, label: 'O₂', tone: 'good', labelPos: 'right' },
+              { x: 0, y: 6, label: 'A', tone: 'ink', labelPos: 'above' },
+              { x: 0, y: -6, label: 'B', tone: 'ink', labelPos: 'below' },
+            ],
+            caption:
+              'la corde commune [AB] (12 cm) coupe chaque disque en deux ; la lentille réunit le segment ' +
+              'du grand cercle (centre $O_1$, rayon 10, angle $\\theta_1$) situé à droite de la corde et le ' +
+              'segment du petit cercle (centre $O_2$, rayon 8, angle $\\theta_2$) situé à gauche',
+          },
         },
         {
           kind: 'attention',
@@ -760,7 +870,7 @@ export const trigonometrie: ChapterContent = {
             projectToXAxis: true,
             projectToYAxis: true,
             freeLabels: [
-              { x: 0.34, y: 1.46, text: 'sin', tone: 'ink' },
+              { x: 0.34, y: 1.32, text: 'sin', tone: 'ink' },
               { x: 1.28, y: 0.16, text: 'cos', tone: 'ink' },
             ],
             points: [
@@ -1156,6 +1266,7 @@ export const trigonometrie: ChapterContent = {
             xMin: -1,
             xMax: 7,
             xTicks: [0.5, 1.5, 3.5, 5.5],
+            xTickLabels: { [0.5]: '0,5', [1.5]: '1,5', [3.5]: '3,5', [5.5]: '5,5' },
             horizontalAsymptotes: [{ y: 2, label: 'b = 2' }],
             points: [
               { x: 1.5, y: 5, label: 'max', tone: 'accent' },
@@ -1422,7 +1533,10 @@ export const trigonometrie: ChapterContent = {
               { angle: PI - 0.6, label: 'π−α', tone: 'accent' },
             ],
             connectPoints: true,
-            horizontalLine: { y: Math.sin(0.6), label: 'y = c' },
+            // Étiquette de la droite en `freeLabels` près de l'axe vertical : à gauche du cercle,
+            // « y = c » chevauchait l'étiquette « π−α ».
+            horizontalLine: { y: Math.sin(0.6), label: '' },
+            freeLabels: [{ x: -0.09, y: 0.64, text: 'c', tone: 'accent' }],
             caption: 'sin x = c : deux points de même ordonnée, symétriques par rapport à l\'axe vertical',
           },
         },
@@ -1547,8 +1661,42 @@ export const trigonometrie: ChapterContent = {
               { angle: -PI / 3, label: 'u=−π/3', tone: 'accent' },
             ],
             connectPoints: true,
-            verticalLine: { x: 0.5, label: 'cos(u)=1/2' },
+            // « cos(u)=1/2 » au-dessus du cercle chevauchait « u=π/3 » : la valeur 1/2 est écrite
+            // sous l'axe horizontal, au pied de la droite verticale.
+            verticalLine: { x: 0.5, label: '' },
+            freeLabels: [{ x: 0.66, y: -0.15, text: '1/2', tone: 'accent' }],
             caption: 'les deux points du cercle où l\'abscisse (cosinus) vaut 1/2 — symétriques par rapport à l\'axe horizontal',
+          },
+        },
+        {
+          kind: 'illustration',
+          // Solutions en x (et non plus en u) : 7π/36 = 35°, 31π/36 = 155°, 55π/36 = 275° (première
+          // famille) ; 23π/36 = 115°, 47π/36 = 235°, 71π/36 = 355° (seconde famille).
+          illustration: {
+            kind: 'circleAngles',
+            // Étiquettes en `freeLabels` (centrées, ≈ 50 px de large) : une étiquette de point
+            // ancrée à droite de 71π/36 (355°) ou à gauche de 31π/36 (155°) sortait du cadre.
+            points: [
+              { angle: (7 * PI) / 36, label: '', tone: 'accent' },
+              { angle: (31 * PI) / 36, label: '', tone: 'accent' },
+              { angle: (55 * PI) / 36, label: '', tone: 'accent' },
+              { angle: (23 * PI) / 36, label: '', tone: 'good' },
+              { angle: (47 * PI) / 36, label: '', tone: 'good' },
+              { angle: (71 * PI) / 36, label: '', tone: 'good' },
+            ],
+            freeLabels: [
+              { x: 1.08, y: 0.8, text: '7π/36', tone: 'accent' },
+              { x: -1.2, y: 0.62, text: '31π/36', tone: 'accent' },
+              { x: 0.32, y: -1.22, text: '55π/36', tone: 'accent' },
+              { x: -0.62, y: 1.12, text: '23π/36', tone: 'good' },
+              { x: -0.84, y: -1.08, text: '47π/36', tone: 'good' },
+              { x: 1.22, y: -0.31, text: '71π/36', tone: 'good' },
+            ],
+            caption:
+              'les 6 solutions en x dans $[0\\,;2\\pi[$ : en orange la famille ' +
+              '$\\dfrac{7\\pi}{36} + \\dfrac{2k\\pi}{3}$, en vert la famille $-\\dfrac{\\pi}{36} + \\dfrac{2k\\pi}{3}$. ' +
+              'Dans chaque famille, deux solutions voisines sont à $\\dfrac{2\\pi}{3}$ (un tiers de tour) ' +
+              'l\'une de l\'autre : avec $a = 3$, chaque famille donne 3 solutions par tour',
           },
         },
         {
@@ -2013,6 +2161,29 @@ export const trigonometrie: ChapterContent = {
             tag: 'modèle — période T = 2π/ω = 24 h',
             text: '$f(t) = 4\\sin\\left(\\dfrac{\\pi}{12}t - \\dfrac{\\pi}{12}\\right) + 10$',
           },
+          // f(1) = 10 (argument 0), f(3) = 4 sin(π/6) + 10 = 12, maximum 14 en t = 7 (argument π/2),
+          // retour à 10 en t = 13, minimum 6 en t = 19.
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (t) => 4 * Math.sin((PI / 12) * t - PI / 12) + 10, tone: 'accent' }],
+            xMin: 0,
+            xMax: 25,
+            xTicks: [1, 3, 7, 13, 19],
+            yTicks: [6, 10, 12, 14],
+            fixedYRange: { min: 4, max: 16 },
+            horizontalAsymptotes: [{ y: 10 }],
+            points: [
+              { x: 1, y: 10, label: 'P₁', tone: 'good', labelPos: 'below' },
+              { x: 3, y: 12, label: 'P₂', tone: 'good', labelPos: 'right' },
+              { x: 7, y: 14, label: 'max', tone: 'accent', labelPos: 'above' },
+            ],
+            xAxisLabel: 't (h)',
+            yAxisLabel: 'f(t) (°C)',
+            caption:
+              'les deux points connus $P_1(1\\,;10)$ et $P_2(3\\,;12)$ sont sur la même montée de la courbe : ' +
+              'leurs arguments, 0 et $\\dfrac{\\pi}{6}$, sont bien entre $-\\dfrac{\\pi}{2}$ et $\\dfrac{\\pi}{2}$. ' +
+              'Le modèle trouvé atteint son maximum en $t = 7$ et a une période de 24 h',
+          },
         },
         {
           kind: 'attention',
@@ -2039,10 +2210,10 @@ export const trigonometrie: ChapterContent = {
               xTickLabels: { [80]: '80', [171.31]: '171', [262.62]: '263', [353.93]: '354' },
               yTicks: [7.5, 12, 16.5],
               yTickLabels: { [7.5]: '7,5', [12]: '12', [16.5]: '16,5' },
-              fixedYRange: { min: 6, max: 18 },
+              fixedYRange: { min: 4, max: 18 },
               horizontalAsymptotes: [{ y: 12 }],
               points: [
-                { x: 80, y: 12, label: 'équinoxe', tone: 'accent', labelPos: 'left' },
+                { x: 80, y: 12, label: '', tone: 'accent' },
                 { x: 171.31, y: 16.5, label: 'max : 16,5 h', tone: 'good', labelPos: 'above' },
                 { x: 353.93, y: 7.5, label: 'min : 7,5 h', tone: 'bad', labelPos: 'left' },
               ],
@@ -2135,9 +2306,42 @@ export const trigonometrie: ChapterContent = {
               { angle: (5 * PI) / 6, label: 'u=5π/6', tone: 'accent' },
             ],
             connectPoints: true,
-            horizontalLine: { y: 0.5, label: 'sin u = 1/2' },
+            // « sin u = 1/2 », à gauche du cercle, sortait du cadre : la valeur 1/2 est écrite
+            // près de l'axe vertical, au-dessus de la droite.
+            horizontalLine: { y: 0.5, label: '' },
+            freeLabels: [{ x: -0.17, y: 0.58, text: '1/2', tone: 'accent' }],
             angleArcs: [{ from: PI / 6, to: (5 * PI) / 6, tone: 'good', radiusPx: 100 }],
             caption: 'sin(u) ≥ 1/2 : tout l\'arc du haut, entre u = π/6 et u = 5π/6 (en vert)',
+          },
+        },
+        {
+          kind: 'illustration',
+          // h(8/3) = 15 sin(π/6) + 17 = 24,5 et h(16/3) = 15 sin(5π/6) + 17 = 24,5 ; maximum 32 en t = 4.
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (t) => 15 * Math.sin((PI / 4) * t - PI / 2) + 17, tone: 'accent' }],
+            shadedRegions: [
+              { from: 8 / 3, to: 16 / 3, upper: (t) => 15 * Math.sin((PI / 4) * t - PI / 2) + 17, lower: () => 24.5, tone: 'good' },
+            ],
+            xMin: 0,
+            xMax: 8,
+            xTicks: [8 / 3, 4, 16 / 3, 8],
+            xTickLabels: { [8 / 3]: '8/3', [4]: '4', [16 / 3]: '16/3', [8]: '8' },
+            yTicks: [2, 17, 24.5, 32],
+            yTickLabels: { [2]: '2', [17]: '17', [24.5]: '24,5', [32]: '32' },
+            fixedYRange: { min: 0, max: 36 },
+            horizontalAsymptotes: [{ y: 24.5 }],
+            verticalAsymptotes: [{ x: 8 / 3 }, { x: 16 / 3 }],
+            points: [
+              { x: 8 / 3, y: 24.5, label: '', tone: 'good' },
+              { x: 16 / 3, y: 24.5, label: '', tone: 'good' },
+            ],
+            xAxisLabel: 't (min)',
+            yAxisLabel: 'hauteur (m)',
+            caption:
+              'la même inéquation lue sur la courbe : la hauteur dépasse 24,5 m (droite horizontale) ' +
+              'exactement entre $t = \\dfrac{8}{3}$ et $t = \\dfrac{16}{3}$, la partie verte — l\'arc du cercle ' +
+              'devient un intervalle de temps',
           },
         },
         {
