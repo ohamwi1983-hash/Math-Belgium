@@ -48,7 +48,7 @@ export interface LigneIntervalle {
 export type ModeEcran =
   | { type: "champs"; champs: ChampEcran[]; symboles?: { label: string; options: { id: string; latex: string }[] } }
   | { type: "choix"; options: OptionEcran[] }
-  | { type: "intervalles"; variable: string };
+  | { type: "intervalles"; variable: string; placeholders?: [string, string] };
 
 /** Tableau de données affiché sous l'énoncé (relevés…). */
 export interface TableauDonnees {
@@ -68,6 +68,9 @@ export interface DefinitionEcrans<E, P extends string> {
   figure?(e: E, phase: P): string | null;
   tableau?(e: E): TableauDonnees | null;
   consigne(e: E, phase: P): Frag[];
+  /** Saisie lisible mais APPROCHÉE (ou dans une autre unité) alors que la forme exacte est demandée :
+   * message, AUCUNE tentative consommée (`null` sinon) — ajout 6gen156–6gen159, sans effet ailleurs. */
+  approchee?(e: E, phase: P, valeurs: string[]): string | null;
   aide1(e: E, phase: P): AideEcran;
   aide2(e: E, phase: P): AideEcran | null;
   /** Statut champ par champ (choix : une seule valeur ; intervalles : une valeur globale). */

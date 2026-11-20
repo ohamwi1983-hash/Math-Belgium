@@ -37,7 +37,8 @@ export interface ConfigAppEcrans<E, P extends string> {
   /** Nombre de puces affichées quand un cas particulier a moins d'écrans (structure fixe). */
   nombrePuces?: number;
   /** En-tête (défaut : « 5e — Entraînement » / « Chapitre 2 — Trigonométrie ») : le même socle sert
-   * aux générateurs 6gen148–6gen151 (6e ch. 2, « Fonctions exponentielles »). */
+   * aux générateurs 6gen148–6gen151 (6e ch. 2, « Fonctions exponentielles ») et 6gen156–6gen159
+   * (6e ch. 1, « Fonctions réciproques & cyclométriques »). */
   eyebrow?: string;
   sousTitre?: string;
 }
@@ -240,6 +241,7 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
           diagnostiquer={(v) => def.diagnostiquer(e, phase, v)}
           piege={(v) => def.piege(e, phase, v)}
           messageIllisible={def.messageIllisible(e, phase)}
+          approchee={def.approchee ? (v) => def.approchee!(e, phase, v) : undefined}
           onValider={(v) => terminerEtape(soumettreEcran(def, etat, v), v)}
         />
       </main>

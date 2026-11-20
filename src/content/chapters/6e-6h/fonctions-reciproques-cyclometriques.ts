@@ -1809,6 +1809,18 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 4. Dérivées de fonctions cyclométriques »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Problèmes avec arcfonctions',
+          generatorId: '6gen156',
+          description: [
+            'Réfraction et angle limite (existe-t-il un rayon réfracté ?), meilleure distance pour ' +
+              'regarder un tableau, échelle contre un mur : modélise, choisis l\'arcfonction qui convient ' +
+              'et calcule l\'angle à la calculatrice.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 156. Problèmes avec arcfonctions »',
+        },
       ],
     },
     {

@@ -97,6 +97,8 @@ interface Props {
   diagnostiquer: (valeurs: string[]) => StatutVerification[];
   piege: (valeurs: string[]) => Frag[] | null;
   messageIllisible: string;
+  /** Valeur lisible mais approchée alors que la forme exacte est demandée (message) : aucune tentative. */
+  approchee?: (valeurs: string[]) => string | null;
   validation?: ValidationEtapeProps | null;
 }
 
@@ -142,6 +144,7 @@ export function EtapeEcransTrigo({
   diagnostiquer,
   piege,
   messageIllisible,
+  approchee,
   validation,
 }: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => valeursInitiales(mode));
@@ -175,6 +178,11 @@ export function EtapeEcransTrigo({
     const statuts = diagnostiquer(valeurs);
     if (statuts.includes("parse_error")) {
       setErreurLecture(messageIllisible);
+      return;
+    }
+    const approx = approchee ? approchee(valeurs) : null;
+    if (approx) {
+      setErreurLecture(approx);
       return;
     }
     setErreurLecture(null);
@@ -296,7 +304,7 @@ export function EtapeEcransTrigo({
                 className={`text-input ${faux(0) ? "is-erronee" : ""}`}
                 style={{ flex: "1 1 0", minWidth: 0, margin: 0 }}
                 value={l[cote]}
-                placeholder={cote === "gauche" ? "ex. : π/12" : "ex. : 5π/12"}
+                placeholder={mode.placeholders ? mode.placeholders[cote === "gauche" ? 0 : 1] : cote === "gauche" ? "ex. : π/12" : "ex. : 5π/12"}
                 disabled={gele}
                 autoComplete="off"
                 autoCapitalize="off"
