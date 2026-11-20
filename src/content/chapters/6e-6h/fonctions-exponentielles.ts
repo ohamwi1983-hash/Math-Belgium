@@ -302,6 +302,19 @@ export const fonctionsExponentielles: ChapterContent = {
           ],
         },
         {
+          kind: 'entrainement',
+          title: 'Puissances à exposant réel sans calculatrice',
+          generatorId: '6gen146',
+          description: [
+            'Applique les règles (1) à (4) à des exposants irrationnels : 2^√3 · 2^(1−√3), ' +
+              '(5^√2)^√2, 4^√2 · 2^(3−2√2)… écrits comme une seule puissance, puis leur valeur exacte. ' +
+              'Compare 3^√2 et 3^1,4 sans calculatrice (et attention aux bases entre 0 et 1), et ' +
+              'réécris (1/2)^(−x), 0,5ˣ · 8ˣ ou 9ˣ/3^(x+1) comme une puissance de 2 ou de 3.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 146. Puissances à exposant réel sans calculatrice »',
+        },
+        {
           kind: 'para',
           text:
             "En l'infini, le comportement d'une fonction exponentielle $a^x$ ($a>0$, " +
@@ -522,6 +535,18 @@ export const fonctionsExponentielles: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 6. Calcul de limites »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Limites de référence et croissances comparées',
+          generatorId: '6gen145',
+          description: [
+            'Reconnais la forme (0/0, ∞/∞, 0·∞, ∞ − ∞… ou pas indéterminée du tout), choisis la ' +
+              'limite de référence qui conclut — (eᵘ − 1)/u → 1, (aˣ − 1)/x → ln a, xⁿ/aˣ → 0 en +∞, ' +
+              'xⁿ·aˣ → 0 en −∞ — puis donne la valeur exacte de la limite.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 145. Limites de référence et croissances comparées »',
         },
       ],
     },
@@ -2463,6 +2488,19 @@ export const fonctionsExponentielles: ChapterContent = {
           },
         },
         {
+          kind: 'entrainement',
+          title: 'Modèle exponentiel lu dans un tableau',
+          generatorId: '6gen147',
+          description: [
+            'Quatre mesures prises à intervalles égaux (bactéries, médicament, capital, machine…) : ' +
+              'calcule les rapports successifs, décide entre modèle exponentiel et modèle linéaire, ' +
+              'trouve b et a de f(t) = b·aᵗ (attention : mesures toutes les deux unités → le rapport vaut a²), ' +
+              'puis prévois une valeur.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 147. Modèle exponentiel lu dans un tableau »',
+        },
+        {
           kind: 'exempleLibre',
           blocks: [
             {
@@ -2737,6 +2775,19 @@ export const fonctionsExponentielles: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 150. Modèle L + C·qᵗ »',
+        },
+        {
+          kind: 'entrainement',
+          title: "Détective d'erreurs : exponentielles",
+          generatorId: '6gen144',
+          description: [
+            "La résolution d'un élève contient une seule ligne fausse : trouve-la, nomme l'erreur " +
+              '(facteur ln a oublié, signe de e^(−kx) perdu, sens non inversé pour une base entre 0 et 1, ' +
+              'racine négative gardée après t = aˣ, règles des puissances, dominance renversée, ' +
+              'r = 1 + p pour une baisse, différence prise pour un rapport) et corrige le résultat.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: "6e (6h) → « 144. Détective d'erreurs : exponentielles »",
         },
       ],
     },

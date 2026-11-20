@@ -81,6 +81,10 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
   | '6gen148' | '6gen149' | '6gen150' | '6gen151'
+  | '6gen144'
+  | '6gen147'
+  | '6gen145'
+  | '6gen146'
   | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22' | '6gen90' | '6gen85' | '6gen91' | '6gen88' | '6gen86' | '6gen92' | '6gen89' | '6gen87'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
@@ -142,7 +146,9 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'equations', generatorId: '6gen3', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'derivees', generatorId: '6gen4', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen5', label: '', processus: 3 },
-  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen6', label: 'Limites de fonctions exponentielles (6gen6)' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen6', label: 'Calcul de limites (6gen6)' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen145', label: 'Limites de référence et croissances comparées (6gen145)', processus: 2 },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen146', label: 'Puissances à exposant réel sans calculatrice (6gen146)', processus: 1 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'derivee', generatorId: '6gen7', label: '' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'graphique', generatorId: '6gen8', label: '' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'equations', generatorId: '6gen9', label: '' },
@@ -153,6 +159,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'derivee', generatorId: '6gen149', label: 'Tangente à une exponentielle et nombre ln a (6gen149)', processus: 2 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'problemes', generatorId: '6gen150', label: 'Modèle L + C·qᵗ (6gen150)', processus: 3 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'derivee', generatorId: '6gen151', label: 'Intérêts composés et nombre e (6gen151)', processus: 3 },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'problemes', generatorId: '6gen144', label: 'Détective d\'erreurs : exponentielles (6gen144)', processus: 3 },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'problemes', generatorId: '6gen147', label: 'Modèle exponentiel lu dans un tableau (6gen147)', processus: 2 },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'proprietes', generatorId: '6gen13', label: 'Propriétés du logarithme (6gen13)' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'proprietes', generatorId: '6gen86', label: 'Comparer et encadrer des logarithmes sans calculatrice (6gen86)', processus: 2 },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'proprietes', generatorId: '6gen92', label: 'Grands nombres et logarithme décimal (6gen92)', processus: 3 },
