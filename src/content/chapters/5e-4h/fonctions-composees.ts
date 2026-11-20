@@ -959,6 +959,16 @@ export const fonctionsComposees: ChapterContent = {
           ],
           whereLabel: '5e (4h) → « 4. Composée de fonctions — lecture graphique »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Composée sur un seul repère (droite y = x)',
+          generatorId: '5gen63',
+          chantier: '5e-4h',
+          description: [
+            'Les courbes de f et de g sont tracées dans le même repère, avec la droite y = x. Lis la première image, reporte-la sur l’axe horizontal en passant par la diagonale, décide si la composée existe, puis lis sa valeur.',
+          ],
+          whereLabel: '5e (4h) → « 63. Composée sur un seul repère (droite y = x) »',
+        },
       ],
     },
 
