@@ -9,6 +9,12 @@ paths:
   intégralité, texte et illustrations. Les illustrations graphiques (droites graduées du domaine,
   diagrammes $C_f$/$C_g$, graphe de $h(r)$) ont été reconstituées à partir de l'artifact original
   (et non redessinées à l'aveugle depuis une extraction de texte).
+  **Lot G (nouveaux générateurs, audit du 5e ch. 1)** : cartes 5gen59 « Lire domaine et image sur un
+  graphique » en § 1 (après 5gen1), 5gen60 « Composée en un point » en § 2 (après 5gen2), 5gen58
+  « Détective d'erreurs : fonctions et composées » en § 4 (après 5gen4) ; registres (`registry.ts`,
+  `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts`, processus 1 / 2 / 3).
+  Descriptions de carte en Unicode (f∘g, ∞), jamais de `$…$`. Détail : `.claude/rules/feuilles-evaluations.md`,
+  « 5e ch. 1, lot G ».
 - **4e, Chapitre 1 — La fonction du second degré** (`fonction-second-degre`) : migré en intégralité
   depuis l'artifact d'origine. A nécessité, découverts en cours de migration (absents du schéma
   initial) : les kinds `list`, `signTable`, `illustrationGroup`, `video`, et les deux kinds

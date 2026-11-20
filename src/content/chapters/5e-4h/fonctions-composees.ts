@@ -428,6 +428,18 @@ export const fonctionsComposees: ChapterContent = {
           ],
           whereLabel: '5e (4h) → « 1. Domaine de définition »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lire domaine et image sur un graphique',
+          generatorId: '5gen59',
+          chantier: '5e-4h',
+          description: [
+            'Une courbe sur un quadrillage d’une unité, avec ses points pleins, ses points creux et ' +
+              'parfois des flèches : lis dom f en projetant sur l’axe des x, Im f en projetant sur ' +
+              'l’axe des y (crochets, réunions, ∞), puis décide si f(a) existe.',
+          ],
+          whereLabel: '5e (4h) → « 59. Lire domaine et image sur un graphique »',
+        },
       ],
     },
 
@@ -625,6 +637,19 @@ export const fonctionsComposees: ChapterContent = {
             "Le nombre d'étages varie d'un exercice à l'autre (de 2 à 4) — le champ d'ajout de ligne s'adapte, sans jamais te donner le nombre exact à l'avance.",
           ],
           whereLabel: '5e (4h) → « 2. Décomposer une fonction composée »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Composée en un point',
+          generatorId: '5gen60',
+          chantier: '5e-4h',
+          description: [
+            'Deux fonctions f et g sont données ; calcule (f∘g)(a) ou (g∘f)(a) : ' +
+              'choisis la fonction qui s’applique en premier et calcule la valeur intermédiaire, ' +
+              'décide si la seconde fonction peut la recevoir (racine, dénominateur), puis donne la ' +
+              'valeur exacte — ou conclus que la composée n’existe pas, exactement le piège ci-dessus.',
+          ],
+          whereLabel: '5e (4h) → « 60. Composée en un point »',
         },
       ],
     },
@@ -1008,6 +1033,19 @@ export const fonctionsComposees: ChapterContent = {
             'Les courbes de f et de g sont tracées dans le même repère, avec la droite y = x. Lis la première image, reporte-la sur l’axe horizontal en passant par la diagonale, décide si la composée existe, puis lis sa valeur.',
           ],
           whereLabel: '5e (4h) → « 63. Composée sur un seul repère (droite y = x) »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Détective d’erreurs : fonctions et composées',
+          generatorId: '5gen58',
+          chantier: '5e-4h',
+          description: [
+            'Un élève a résolu un exercice du chapitre (domaine, composée, lecture d’une composée) ' +
+              'et une seule de ses lignes est fausse : trouve-la, nomme l’erreur (sens de ' +
+              'l’inégalité, « ≥ » au lieu de « > », réunion au lieu d’intersection, condition ' +
+              'oubliée, ordre de la composée, « hors de la portion tracée ») puis corrige le résultat.',
+          ],
+          whereLabel: '5e (4h) → « 58. Détective d’erreurs : fonctions et composées »',
         },
       ],
     },
