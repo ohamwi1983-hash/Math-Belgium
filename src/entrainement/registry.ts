@@ -215,6 +215,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '5gen50': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen50').then((m) => ({ default: m.App5gen50 }))),
   '5gen51': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen51').then((m) => ({ default: m.App5gen51 }))),
   '5gen52': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen52').then((m) => ({ default: m.App5gen52 }))),
+  '5gen53': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen53').then((m) => ({ default: m.App5gen53 }))),
 
   // --- 5e, chapitre 3 : Suites ---
   '5gen14': entree(CH_5E_SUITES, () => import('./5e-4h/App5gen14').then((m) => ({ default: m.App5gen14 }))),

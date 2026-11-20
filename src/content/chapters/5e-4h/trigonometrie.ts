@@ -1100,6 +1100,19 @@ export const trigonometrie: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 9. Paramètres — lecture graphique »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Associer formules et courbes',
+          generatorId: '5gen53',
+          description: [
+            'Quatre expressions A sin(ωx + φ) + b et leurs quatre courbes, dans le désordre : ' +
+              'retrouve l\'expression de chaque courbe en lisant la ligne moyenne, l\'amplitude, la ' +
+              'période et le décalage. Pièges : φ n\'est pas le décalage, A < 0 retourne la courbe, ' +
+              'ω n\'est pas la période.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 53. Associer formules et courbes »',
+        },
       ],
     },
     {

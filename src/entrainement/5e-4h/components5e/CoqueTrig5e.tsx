@@ -27,7 +27,8 @@ export interface ContexteEcranTrig<E> {
   tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
-  conclure: (correct: boolean, votreReponse: ReactNode) => void;
+  /** `explication` : texte ajouté au message d'un choix fermé faux (ce que donnerait le choix fait). */
+  conclure: (correct: boolean, votreReponse: ReactNode, explication?: string) => void;
   validation: ValidationEtapeProps | null;
 }
 
@@ -81,7 +82,7 @@ export function CoqueTrig5e<E>(props: Props<E>) {
     setGeneration((g) => g + 1);
   }
 
-  function conclure(correct: boolean, votreReponse: ReactNode) {
+  function conclure(correct: boolean, votreReponse: ReactNode, explication?: string) {
     const r = soumettre(etat, correct, tentativesMax);
     if (!r.clos) {
       setEtat(r.etat);
@@ -93,7 +94,7 @@ export function CoqueTrig5e<E>(props: Props<E>) {
     setEnAttente({
       revele: r.revele,
       reponseAttendue: attendue,
-      messageRevele: r.revele && tentativesMax === 1 ? props.messageRevele?.(e, ecran) : undefined,
+      messageRevele: r.revele && tentativesMax === 1 ? [props.messageRevele?.(e, ecran), explication].filter(Boolean).join(" ") || undefined : undefined,
       derniere: ecran >= total - 1,
     });
   }
