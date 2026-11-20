@@ -19,7 +19,7 @@
  * (aucune solution — `construireHorsDomaine`).
  */
 import type { AngleRemarquable } from "../../core/valeursRemarquables.types";
-import type { ExerciceQuelAngle, FonctionTrig, GenerateurExerciceQuelAngle } from "../../core/quelAngle.types";
+import type { ExerciceQuelAngle, FonctionTrig, GenerateurExerciceQuelAngle, IdVarianteQuelAngle } from "../../core/quelAngle.types";
 import { randomInt } from "../cercleTrigonometrique/aleatoire";
 
 const REF_POOL: Record<FonctionTrig, AngleRemarquable[]> = {
@@ -72,16 +72,44 @@ const REF_K_NUL: Record<FonctionTrig, AngleRemarquable> = { sin: 0, cos: 90, tan
 const PROBA_HORS_DOMAINE_SIN_COS = 0.18;
 const PROBA_K_NUL = 0.09;
 
-export const CATALOGUE_VARIANTES: { id: FonctionTrig; label: string }[] = [
+export const CATALOGUE_VARIANTES: { id: IdVarianteQuelAngle; label: string }[] = [
   { id: "sin", label: "sin α = k" },
   { id: "cos", label: "cos α = k" },
   { id: "tan", label: "tan α = k" },
+  // Fin de catalogue (les `?code=` imprimés gardent leur indice) ; hors du tirage libre.
+  { id: "egalite", label: "sin α = sin β, cos α = cos β" },
 ];
 
+/** sin α = sin β (famille supplémentaire : β et 180° − β) ou cos α = cos β (famille des opposés :
+ * β et −β), solutions ramenées dans [0° ; 360°[ (cours, § 5). β entier, à au moins 10° des axes
+ * (deux solutions distinctes, hors axes) ; une fois sur cinq négatif, sinon dans ]0° ; 360°[. */
+export function construireEgalite(fonction: "sin" | "cos", beta: number): ExerciceQuelAngle {
+  const r = normaliserAngle(beta);
+  const autre = fonction === "sin" ? normaliserAngle(180 - beta) : normaliserAngle(-beta);
+  const solutions = [...new Set([r, autre])].sort((a, b) => a - b);
+  return { fonction, angleReference: null, magnitudeHorsDomaineLatex: null, signeK: 1, solutions, angleEgal: beta };
+}
+
+function procheAxe(a: number): boolean {
+  const m = ((a % 90) + 90) % 90;
+  return m < 10 || m > 80;
+}
+
+function tirerBeta(): number {
+  for (;;) {
+    const b = Math.random() < 0.2 ? -randomInt(10, 170) : randomInt(10, 350);
+    if (!procheAxe(b)) return b;
+  }
+}
+
 export function construireAvecVarianteId(
-  varianteId: FonctionTrig,
+  varianteId: IdVarianteQuelAngle,
   overrides?: { angleReference?: AngleRemarquable; signeK?: 1 | -1 },
 ): ExerciceQuelAngle {
+  if (varianteId === "egalite") {
+    const fonction: "sin" | "cos" = Math.random() < 0.5 ? "sin" : "cos";
+    return construireEgalite(fonction, tirerBeta());
+  }
   const signeK = overrides?.signeK ?? (Math.random() < 0.5 ? 1 : -1);
   if (overrides?.angleReference !== undefined) return construireAvecParametres(varianteId, overrides.angleReference, signeK);
 

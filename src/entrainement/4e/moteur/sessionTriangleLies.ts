@@ -21,7 +21,7 @@ const POINTS_DE_BASE = 100;
 export const NIVEAU_AIDE_MAX_PONT = 2;
 export const NIVEAU_AIDE_MAX_ANGLES = 3;
 export const NIVEAU_AIDE_MAX_SOUSTRACTION = 2;
-export const NIVEAU_AIDE_MAX_INTERPRETATION = 1;
+export const NIVEAU_AIDE_MAX_INTERPRETATION = 2;
 
 /** Plafond d'aide DYNAMIQUE de l'écran "cible" (même principe que `niveauAideMax` de gen17,
  * `verificationAnglesAssocies.ts` — premier précédent d'un plafond calculé par exercice plutôt

@@ -25,9 +25,8 @@ function memeMultiensemble(a: number[], b: number[]): boolean {
 }
 
 /**
- * `reponse.aucune` reste structurellement acceptable (0 solution) mais n'est, en pratique, jamais
- * correcte — `exercice.solutions` a toujours au moins 1 élément (`|k|>1` n'est jamais généré, voir
- * `core/quelAngle.types.ts`). Un `parse_error` ne peut survenir QUE côté "au moins une solution" :
+ * `reponse.aucune` est correcte quand `exercice.solutions` est vide (|k| > 1, tiré environ 18 % du
+ * temps pour sin et cos — audit 4e ch. 5, G10). Un `parse_error` ne peut survenir QUE côté "au moins une solution" :
  * chaque valeur de `reponse.valeurs` doit être un nombre fini (le composant d'appel parse chaque
  * champ texte avant d'appeler cette fonction, même convention que le reste du projet — voir
  * `EtapeQuelAngle.tsx`).

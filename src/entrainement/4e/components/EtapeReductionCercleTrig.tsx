@@ -1,16 +1,12 @@
-import { useState } from "react";
-import type { ExerciceCercleTrigonometrique } from "../core/cercleTrigonometrique.types";
+import type { AngleAvecPremierQuadrant } from "../core/cercleTrigonometrique.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
-import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { diagnostiquerReduction } from "../moteur/verificationCercleTrigonometrique";
-import { formatMessageErreur } from "../ui/messageErreur";
-import { AideReductionCercleTrig } from "./AideReductionCercleTrig";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AideReductionCercleTrig } from "./AideReductionCercleTrig";
+import { ChampAngleTrig } from "./ChampAngleTrig";
+import { aidesReduction, messageReduction } from "../ui/aidesCercleTrigo";
 
 interface Props {
-  exercice: ExerciceCercleTrigonometrique;
+  exercice: AngleAvecPremierQuadrant;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
@@ -18,57 +14,28 @@ interface Props {
   onActiverAide: () => void;
   onValider: (valeur: number) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
+   * champ, remplace "Valider" par le bloc `ValidationEcran`. */
   validation?: ValidationEtapeProps | null;
 }
 
-/** Premier écran rencontré si une réduction est nécessaire : valeur numérique simple. */
-export function EtapeReductionCercleTrig({
-  exercice,
-  tentativesUtilisees,
-  tentativesMax,
-  recapitulatif,
-  aideActivee,
-  onActiverAide,
-  onValider,
-  validation,
-}: Props) {
-  const [texte, setTexte] = useState("");
-
-  const complet = texte.trim() !== "";
-  const valeur = Number(texte.replace(",", "."));
-  const statut = complet ? diagnostiquerReduction(exercice, valeur) : undefined;
-
+/** Premier écran rencontré si une réduction est nécessaire : un angle en degrés (règles communes,
+ * `ChampAngleTrig`). Aide : propriété des tours (niveau 1), application + trajet sur le cercle
+ * (niveau 2). */
+export function EtapeReductionCercleTrig({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onActiverAide, onValider, validation }: Props) {
   return (
-    <div>
-      <RecapitulatifPanel entrees={recapitulatif} />
-      <p className="prompt-text">Quel est l'angle entre 0° et 360° qui donne le même point sur le cercle trigonométrique ?</p>
-      <div className="field">
-        <label className="field-label" htmlFor="cercle-trig-reduction">
-          Angle équivalent en degrés
-        </label>
-        <input
-          id="cercle-trig-reduction"
-          className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
-          value={texte}
-          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
-        />
-      </div>
-      <AideReductionCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
-      {!validation && (
-        <>
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
+    <ChampAngleTrig
+      id="cercle-trig-reduction"
+      question="Quel est l'angle entre 0° et 360° qui donne le même point sur le cercle trigonométrique ?"
+      label="Angle équivalent en degrés"
+      tentativesUtilisees={tentativesUtilisees}
+      tentativesMax={tentativesMax}
+      recapitulatif={recapitulatif}
+      aides={aidesReduction(exercice)}
+      figure={(n) => (n >= 2 ? <AideReductionCercleTrig exercice={exercice} aideActivee sansBouton onActiverAide={() => {}} /> : null)}
+      onPremiereAide={onActiverAide}
+      messageCible={(v) => messageReduction(exercice, v)}
+      onValider={onValider}
+      validation={validation}
+    />
   );
 }

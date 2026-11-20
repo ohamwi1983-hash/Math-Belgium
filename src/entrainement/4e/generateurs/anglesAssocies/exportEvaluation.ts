@@ -184,8 +184,32 @@ function construireCorrectionQuadrantsIIaIV(instance: ExerciceAnglesAssociesSinC
   return blocs;
 }
 
+/** Variante « 90° + α » : règle directe du cours. */
+function construireCorrectionPlus90(instance: ExerciceAnglesAssociesSinCos): BlocCorrection[] {
+  const { alpha, theta, fonctionCible, valeurCible } = instance;
+  const cf = cofonction(fonctionCible);
+  return [
+    { type: "paragraphe", fragments: [texte(texteAide2(instance))] },
+    {
+      type: "paragraphe",
+      fragments: [
+        texte("Règle de 90° + θ : "),
+        latex(fonctionCible === "sin" ? "\\sin(90^\\circ + x) = \\cos x" : "\\cos(90^\\circ + x) = -\\sin x"),
+        texte(" : "),
+        latex(`\\${fonctionCible}(${theta}^\\circ) = ${fonctionCible === "cos" ? "-" : ""}\\${cf}(${alpha}^\\circ) \\approx ${decimal3Latex(valeurCible)}.`),
+      ],
+    },
+  ];
+}
+
 function construireCorrectionSinCos(instance: ExerciceAnglesAssociesSinCos): BlocCorrection[] {
+  if (instance.relation === "plus90") return construireCorrectionPlus90(instance);
   return instance.quadrant === "I" ? construireCorrectionQuadrantI(instance) : construireCorrectionQuadrantsIIaIV(instance);
+}
+
+/** Sinus et cosinus échangés (complémentaire, 90° − α ou 90° + α). */
+function echangeSinCos(instance: ExerciceAnglesAssocies): boolean {
+  return instance.variante === "sinCos" && (necessiteAide3(instance) || instance.quadrant === "I" || instance.relation === "plus90");
 }
 
 /**
@@ -242,7 +266,7 @@ function reponseBreve(instance: ExerciceAnglesAssocies): FragmentConsigne[] {
 }
 
 function bareme(instance: ExerciceAnglesAssocies): BaremeExercice {
-  const cofonctionUtile = instance.variante === "sinCos" && (necessiteAide3(instance) || instance.quadrant === "I");
+  const cofonctionUtile = echangeSinCos(instance);
   const signe = SIGNE_LIBELLE[instance.quadrant][instance.variante === "sinCos" ? instance.fonctionCible : "tan"];
   return {
     reponseFinale: reponseBreve(instance),
@@ -269,7 +293,7 @@ function criteresDifficulte(instance: ExerciceAnglesAssocies): CriteresDifficult
   return {
     ...etapesDuCorrige(correctionDetailleeAnglesAssocies(instance)),
     methode: 1,
-    piege: instance.variante === "sinCos" && (necessiteAide3(instance) || instance.quadrant === "I") ? 1 : 0,
+    piege: echangeSinCos(instance) ? 1 : 0,
     nombres: 0,
   };
 }

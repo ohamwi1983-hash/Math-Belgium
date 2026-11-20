@@ -4,11 +4,14 @@ import { calculerAidePremierQuadrant } from "../ui/cerclePremierQuadrantAide";
 import { CENTRE_CERCLE_TRIG } from "../ui/cercleTrigGeometrie";
 import { CercleTrigTrajetBase } from "./CercleTrigTrajetBase";
 import { BoutonAide } from "./BoutonAide";
+import { angleTexte } from "../ui/aidesCercleTrigo";
 
 interface Props {
   exercice: AngleAvecPremierQuadrant;
   aideActivee: boolean;
   onActiverAide: () => void;
+  /** Figure seule, sans bouton (aides à deux niveaux d'`AidesNiveaux`, audit 4e ch. 5). */
+  sansBouton?: boolean;
 }
 
 /**
@@ -21,7 +24,7 @@ interface Props {
  * Prop typée structurellement (`AngleAvecPremierQuadrant`) — réutilisée telle quelle par le
  * générateur 15 ("Valeurs remarquables"), même écran de même nom, même mécanique.
  */
-export function AideAnglePremierQuadrantCercleTrig({ exercice, aideActivee, onActiverAide }: Props) {
+export function AideAnglePremierQuadrantCercleTrig({ exercice, aideActivee, onActiverAide, sansBouton = false }: Props) {
   const trajet = calculerTrajetCercleTrig(exercice.angleDepart, exercice.angleReduit);
   const aidePQ = calculerAidePremierQuadrant(exercice.anglePremierQuadrant, exercice.quadrant, exercice.angleReduit);
 
@@ -30,7 +33,7 @@ export function AideAnglePremierQuadrantCercleTrig({ exercice, aideActivee, onAc
       {aideActivee && (
         <CercleTrigTrajetBase
           trajet={trajet}
-          labelAngleBrutTexte={`${exercice.angleDepart}°`}
+          labelAngleBrutTexte={angleTexte(exercice.angleDepart)}
           ariaLabel="Cercle trigonométrique montrant l'angle brut et le point symétrique du premier quadrant"
         >
           {aidePQ.afficherLignePointillee && (
@@ -61,7 +64,7 @@ export function AideAnglePremierQuadrantCercleTrig({ exercice, aideActivee, onAc
           )}
         </CercleTrigTrajetBase>
       )}
-      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+      {!sansBouton && <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />}
     </div>
   );
 }

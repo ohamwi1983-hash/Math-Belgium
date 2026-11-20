@@ -2,11 +2,14 @@ import type { AngleSurCercle } from "../core/cercleTrigonometrique.types";
 import { calculerTrajetCercleTrig } from "../ui/cercleTrigTrajet";
 import { CercleTrigTrajetBase } from "./CercleTrigTrajetBase";
 import { BoutonAide } from "./BoutonAide";
+import { angleTexte } from "../ui/aidesCercleTrigo";
 
 interface Props {
   exercice: AngleSurCercle;
   aideActivee: boolean;
   onActiverAide: () => void;
+  /** Figure seule, sans bouton (aides à deux niveaux d'`AidesNiveaux`, audit 4e ch. 5). */
+  sansBouton?: boolean;
 }
 
 /**
@@ -19,17 +22,17 @@ interface Props {
  * réutilisée telle quelle par le générateur 15 ("Valeurs remarquables") pour l'écran "Quadrant",
  * qui n'a pas d'écran "Réduction" propre (voir sa section dédiée dans CLAUDE.md).
  */
-export function AideReductionCercleTrig({ exercice, aideActivee, onActiverAide }: Props) {
+export function AideReductionCercleTrig({ exercice, aideActivee, onActiverAide, sansBouton = false }: Props) {
   return (
     <div>
       {aideActivee && (
         <CercleTrigTrajetBase
           trajet={calculerTrajetCercleTrig(exercice.angleDepart, exercice.angleReduit)}
-          labelAngleBrutTexte={`${exercice.angleDepart}°`}
+          labelAngleBrutTexte={angleTexte(exercice.angleDepart)}
           ariaLabel={`Cercle trigonométrique montrant le trajet de l'angle ${exercice.angleDepart}° jusqu'à sa position réduite`}
         />
       )}
-      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+      {!sansBouton && <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />}
     </div>
   );
 }

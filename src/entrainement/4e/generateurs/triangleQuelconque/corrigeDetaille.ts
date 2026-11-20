@@ -86,8 +86,8 @@ function etapeDonneeManquante(e: E): EtapeCorrection[] {
         resultat("a", [texte("Angle "), latex(resultatDonneeManquante(e))]),
         verification("a", [
           ...(t.A > 90
-            ? [texte("Le cosinus est négatif : l'angle A est obtus, et il fait bien face au plus grand côté, "), latex("BC"), texte(".")]
-            : [texte("Le cosinus est positif : l'angle A est aigu.")]),
+            ? [texte("Le cosinus est négatif : l'angle Â est obtus, et il fait bien face au plus grand côté, "), latex("BC"), texte(".")]
+            : [texte("Le cosinus est positif : l'angle Â est aigu.")]),
         ]),
         piege("a", [texte("Le côté opposé à A, BC, est celui qu'on retranche ; ne pas oublier la touche "), latex("\\cos^{-1}"), texte(" pour passer de "), latex("\\cos A"), texte(" à A.")]),
       ];
@@ -96,7 +96,7 @@ function etapeDonneeManquante(e: E): EtapeCorrection[] {
         utilise("a", [texte(`Deux côtés et l'angle compris entre eux : loi des cosinus (Al-Kashi) ${COURS_TRIANGLE} : `), latex("BC^2=AC^2+AB^2-2\\cdot AC\\cdot AB\\cdot\\cos A")]),
         calcul("a", lignesAlKashiCote({ x: "BC", p: "AC", q: "AB", X: "A", vp: val(e, "b"), vq: val(e, "c"), vX: val(e, "A"), resultat: t.a, unite: e.unite })),
         resultat("a", [latex(resultatDonneeManquante(e))]),
-        ...(t.A > 90 ? [verification("a", [texte("L'angle A est obtus : le côté BC qui lui fait face est le plus grand, "), latex(`BC > AC`), texte(" et "), latex("BC > AB"), texte(".")])] : []),
+        ...(t.A > 90 ? [verification("a", [texte("L'angle Â est obtus : le côté BC qui lui fait face est le plus grand, "), latex(`BC > AC`), texte(" et "), latex("BC > AB"), texte(".")])] : []),
         piege("a", [
           texte("Ne pas oublier le terme "),
           latex("-2\\cdot AC\\cdot AB\\cdot\\cos A"),
@@ -159,8 +159,8 @@ function etapeAire(e: E): EtapeCorrection[] {
     piege("b", [
       texte(
         e.configuration === "loiSinus"
-          ? "L'angle de la formule est celui COMPRIS entre les deux côtés utilisés : C, entre BC et AC — pas l'angle A ou B donné. L'aire s'exprime en unité au carré."
-          : "L'angle de la formule est celui COMPRIS entre les deux côtés utilisés : A, entre AC et AB. L'aire s'exprime en unité au carré.",
+          ? "L'angle de la formule est celui compris entre les deux côtés utilisés : Ĉ, entre BC et AC — pas l'angle Â ou B̂ donné. L'aire s'exprime en unité au carré."
+          : "L'angle de la formule est celui compris entre les deux côtés utilisés : Â, entre AC et AB. L'aire s'exprime en unité au carré.",
       ),
     ]),
   );

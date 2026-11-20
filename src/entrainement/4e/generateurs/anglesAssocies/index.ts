@@ -212,6 +212,28 @@ function construireTangente(quadrant: "II" | "III" | "IV", alphaImpose?: number)
   };
 }
 
+/** Variante « 90° + α » (fin de catalogue) : θ = 90° + α (quadrant II), règle directe du cours
+ * sin(90° + α) = cos α, cos(90° + α) = −sin α — pas de second palier. */
+function construirePlus90(fonctionCible: FonctionSinCos, alphaImpose?: number): ExerciceAnglesAssociesSinCos {
+  const alpha = alphaImpose ?? tirerAlphaValide(MARGE_MULTIPLE_90, 90 - MARGE_MULTIPLE_90, true);
+  const rad = (alpha * Math.PI) / 180;
+  const sinAlpha = arrondir3(Math.sin(rad));
+  const cosAlpha = arrondir3(Math.cos(rad));
+  return {
+    variante: "sinCos",
+    alpha,
+    quadrant: "II",
+    relation: "plus90",
+    theta: 90 + alpha,
+    xReference: alpha,
+    sinAlpha,
+    cosAlpha,
+    fonctionCible,
+    sousCas: "directe",
+    valeurCible: fonctionCible === "sin" ? cosAlpha : arrondir3(-sinAlpha),
+  };
+}
+
 export interface OverridesAnglesAssocies {
   alpha?: number;
   fonctionCible?: FonctionSinCos;
@@ -255,6 +277,8 @@ export function construireAvecVarianteId(
       return construireTangente("III", overrides?.alpha);
     case "tangente-oppose":
       return construireTangente("IV", overrides?.alpha);
+    case "sinCos-plus90":
+      return construirePlus90(overrides?.fonctionCible ?? tirerFonctionCible(), overrides?.alpha);
     default: {
       const exhaustif: never = varianteId;
       throw new Error(`variante inconnue : ${String(exhaustif)}`);
@@ -270,6 +294,9 @@ export const CATALOGUE_VARIANTES: { id: IdVarianteAnglesAssocies; label: string 
   { id: "tangente-supplementaire", label: "Tangente — Supplémentaire (Q2)" },
   { id: "tangente-antiSupplementaire", label: "Tangente — Anti-supplémentaire (Q3)" },
   { id: "tangente-oppose", label: "Tangente — Opposé (Q4)" },
+  // Fin de catalogue : les `?code=` déjà imprimés gardent leur indice de variante. Hors du tirage
+  // libre (`genererExerciceAnglesAssocies` inchangé : les codes « libres » imprimés restent valides).
+  { id: "sinCos-plus90", label: "Sin/Cos — 90° + α (Q2)" },
 ];
 
 const QUADRANTS_SIN_COS: QuadrantAnglesAssocies[] = ["I", "II", "III", "IV"];

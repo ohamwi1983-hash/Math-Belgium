@@ -1,12 +1,14 @@
 import { useState } from "react";
-import type { ExerciceCercleTrigonometrique, ReponseSignes, Signe, SigneTan } from "../core/cercleTrigonometrique.types";
+import type { ExerciceCercleTrigonometrique, ReponseSignes } from "../core/cercleTrigonometrique.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
 import type { EtatCelluleSigne, EtatCelluleTan } from "../ui/cycleSigneCercleTrigonometrique";
-import { celluleSigneErronee, cyclerSigneSinCos, cyclerSigneTan } from "../ui/cycleSigneCercleTrigonometrique";
+import { cyclerSigneSinCos, cyclerSigneTan } from "../ui/cycleSigneCercleTrigonometrique";
 import { AideSignesCercleTrig } from "./AideSignesCercleTrig";
 import { ValidationEcran } from "../../components/ValidationEcran";
+import { AidesNiveaux } from "./RetourSaisie";
+import { aidesSignes } from "../ui/aidesCercleTrigo";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 /** Couleurs de la construction géométrique de l'aide "Signes" (section 8) — mêmes hex que les
@@ -64,12 +66,14 @@ export function EtapeSignesCercleTrig({
   const [cos, setCos] = useState<EtatCelluleSigne>("?");
   const [tan, setTan] = useState<EtatCelluleTan>("?");
 
-  const montrerErreurs = tentativesUtilisees > 0;
+  const [niveauAide, setNiveauAide] = useState(0);
+  const coloration = niveauAide >= 2;
   const complet = sin !== "?" && cos !== "?" && tan !== "?";
-
-  function classeCellule(saisie: EtatCelluleSigne | EtatCelluleTan, attendu: Signe | SigneTan): string {
-    return montrerErreurs && celluleSigneErronee(saisie, attendu) ? "btn toggle-signe is-erronee" : "btn toggle-signe";
-  }
+  // Choix fermé à UNE tentative (audit 4e ch. 5, G3) : jamais de correction case par case.
+  const classeCellule = () => "btn toggle-signe";
+  void tentativesUtilisees;
+  void tentativesMax;
+  void aideActivee;
 
   return (
     <div>
@@ -81,30 +85,30 @@ export function EtapeSignesCercleTrig({
           <thead>
             <tr>
               <th className="grille-signes-zone">
-                <Katex expression={aideActivee ? `\\textcolor{${COULEUR_SIN}}{\\sin(\\theta)}` : "\\sin(\\theta)"} />
+                <Katex expression={coloration ? `\\textcolor{${COULEUR_SIN}}{\\sin(\\theta)}` : "\\sin(\\theta)"} />
               </th>
               <th className="grille-signes-zone">
-                <Katex expression={aideActivee ? `\\textcolor{${COULEUR_COS}}{\\cos(\\theta)}` : "\\cos(\\theta)"} />
+                <Katex expression={coloration ? `\\textcolor{${COULEUR_COS}}{\\cos(\\theta)}` : "\\cos(\\theta)"} />
               </th>
               <th className="grille-signes-zone">
-                <Katex expression={aideActivee ? `\\textcolor{${COULEUR_TAN}}{\\tan(\\theta)}` : "\\tan(\\theta)"} />
+                <Katex expression={coloration ? `\\textcolor{${COULEUR_TAN}}{\\tan(\\theta)}` : "\\tan(\\theta)"} />
               </th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td className="grille-signes-zone">
-                <button type="button" className={classeCellule(sin, exercice.signeSin)} onClick={() => setSin(cyclerSigneSinCos)}>
+                <button type="button" className={classeCellule()} onClick={() => setSin(cyclerSigneSinCos)}>
                   {libelle(sin)}
                 </button>
               </td>
               <td className="grille-signes-zone">
-                <button type="button" className={classeCellule(cos, exercice.signeCos)} onClick={() => setCos(cyclerSigneSinCos)}>
+                <button type="button" className={classeCellule()} onClick={() => setCos(cyclerSigneSinCos)}>
                   {libelle(cos)}
                 </button>
               </td>
               <td className="grille-signes-zone">
-                <button type="button" className={classeCellule(tan, exercice.signeTan)} onClick={() => setTan(cyclerSigneTan)}>
+                <button type="button" className={classeCellule()} onClick={() => setTan(cyclerSigneTan)}>
                   {libelle(tan)}
                 </button>
               </td>
@@ -113,18 +117,17 @@ export function EtapeSignesCercleTrig({
         </table>
       </div>
 
-      <AideSignesCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
-
       {!validation && (
         <>
+        <AidesNiveaux
+          aides={aidesSignes()}
+          figure={(n) => (n >= 2 ? <AideSignesCercleTrig exercice={exercice} aideActivee sansBouton onActiverAide={() => {}} /> : null)}
+          onPremiereAide={onActiverAide}
+          onNiveau={setNiveauAide}
+        />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider({ sin, cos, tan })}>
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

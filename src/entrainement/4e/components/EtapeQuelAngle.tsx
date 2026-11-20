@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Katex } from "./Katex";
 import type { ExerciceQuelAngle, ReponseQuelAngle } from "../core/quelAngle.types";
-import { diagnostiquerReponseQuelAngle } from "../moteur/verificationQuelAngle";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { MESSAGE_ANGLE_ILLISIBLE, AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { lireAngle } from "../moteur/verificationValeurExacte";
+import { aidesQuelAngle, messageQuelAngle } from "../ui/aidesQuelAngle";
 import { DOMAINE_LATEX, formatEnonceLatex } from "../ui/formatQuelAngle";
 import { AideQuelAngle } from "./AideQuelAngle";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -37,7 +38,7 @@ interface Props {
  * numérique (ex. un simple "-") reste soumissible : c'est précisément ce cas que le statut à 3
  * valeurs (`parse_error`) doit détecter, jamais bloqué en amont par le bouton lui-même.
  */
-export function EtapeQuelAngle({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation}: Props) {
+export function EtapeQuelAngle({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
 
@@ -59,17 +60,21 @@ export function EtapeQuelAngle({ exercice, tentativesUtilisees, tentativesMax, a
     setValeurs(valeurs.map((v, i) => (i === index ? normaliserSigneMoins(valeur) : v)));
   }
 
+  // Règles communes (audit 4e ch. 5, lot B) : une valeur illisible n'est jamais transmise (aucune
+  // tentative) ; message adapté à un angle.
+  const saisie = useTentativeLisible<ReponseQuelAngle>();
+
   function construireReponse(): ReponseQuelAngle | null {
     if (choix === "aucune") return { aucune: true, valeurs: [] };
     if (choix === "auMoinsUne") {
       if (valeurs.some((v) => v.trim() === "")) return null;
-      return { aucune: false, valeurs: valeurs.map((v) => Number(v.trim().replace(",", "."))) };
+      return { aucune: false, valeurs: valeurs.map((v) => lireAngle(v) ?? Number.NaN) };
     }
     return null;
   }
 
   const reponse = construireReponse();
-  const statut = reponse !== null ? diagnostiquerReponseQuelAngle(exercice, reponse) : undefined;
+  const derniere = saisie.soumise;
 
   return (
     <div>
@@ -94,7 +99,7 @@ export function EtapeQuelAngle({ exercice, tentativesUtilisees, tentativesMax, a
           {valeurs.map((valeur, index) => (
             <div key={index} className="liste-morceaux-ligne">
               <input
-                className={`text-input${tentativesUtilisees > 0 && statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
+                className={`text-input${tentativesUtilisees > 0 && !saisie.illisible ? " is-erronee" : ""}`}
                 value={valeur}
                 onChange={(e) => modifierChamp(index, e.target.value)}
                 placeholder={`solution ${index + 1} (degrés)`}
@@ -118,23 +123,28 @@ export function EtapeQuelAngle({ exercice, tentativesUtilisees, tentativesMax, a
         </div>
       )}
 
-      <AideQuelAngle exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
-
       {!validation && (
         <>
+        <AidesNiveaux
+          aides={aidesQuelAngle(exercice)}
+          figure={(n) => (n >= 2 && exercice.solutions.length > 0 ? <AideQuelAngle exercice={exercice} aideActivee sansBouton onActiverAide={() => {}} /> : null)}
+          onPremiereAide={onActiverAide}
+        />
         <button
           type="button"
           className="btn btn-primary"
           disabled={reponse === null}
-          onClick={() => reponse !== null && onValider(reponse)}
+          onClick={() => reponse !== null && saisie.tenter(reponse, reponse.valeurs.every((v) => Number.isFinite(v)), onValider)}
         >
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour
+          illisible={saisie.illisible}
+          texteIllisible={MESSAGE_ANGLE_ILLISIBLE}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={derniere !== null && !derniere.aucune ? messageQuelAngle(exercice, derniere.valeurs) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

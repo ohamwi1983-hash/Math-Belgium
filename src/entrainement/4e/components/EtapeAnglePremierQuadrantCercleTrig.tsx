@@ -1,74 +1,40 @@
-import { useState } from "react";
-import type { ExerciceCercleTrigonometrique } from "../core/cercleTrigonometrique.types";
+import type { AngleAvecPremierQuadrant } from "../core/cercleTrigonometrique.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
-import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { diagnostiquerAnglePremierQuadrant } from "../moteur/verificationCercleTrigonometrique";
-import { formatMessageErreur } from "../ui/messageErreur";
-import { AideAnglePremierQuadrantCercleTrig } from "./AideAnglePremierQuadrantCercleTrig";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AideAnglePremierQuadrantCercleTrig } from "./AideAnglePremierQuadrantCercleTrig";
+import { ChampAngleTrig } from "./ChampAngleTrig";
+import { aidesAnglePremierQuadrant, messageAnglePremierQuadrant } from "../ui/aidesCercleTrigo";
 
 interface Props {
-  exercice: ExerciceCercleTrigonometrique;
+  exercice: AngleAvecPremierQuadrant;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (valeur: number) => void;
-  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Identifiant du champ (gen14 / gen15). */
+  idChamp?: string;
 }
 
-/** Angle du premier quadrant (angle de référence), toujours entre 0° et 90°. */
-export function EtapeAnglePremierQuadrantCercleTrig({
-  exercice,
-  tentativesUtilisees,
-  tentativesMax,
-  recapitulatif,
-  aideActivee,
-  onActiverAide,
-  onValider,
-  validation,
-}: Props) {
-  const [texte, setTexte] = useState("");
-
-  const complet = texte.trim() !== "";
-  const valeur = Number(texte.replace(",", "."));
-  const statut = complet ? diagnostiquerAnglePremierQuadrant(exercice, valeur) : undefined;
-
+/** Angle du premier quadrant (angle de référence), toujours entre 0° et 90° — partagé par gen14 et
+ * gen15 (règles communes, `ChampAngleTrig`). */
+export function EtapeAnglePremierQuadrantCercleTrig({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onActiverAide, onValider, validation, idChamp = "cercle-trig-premier-quadrant" }: Props) {
   return (
-    <div>
-      <RecapitulatifPanel entrees={recapitulatif} />
-      <p className="prompt-text">Quel est l'angle du premier quadrant associé à cet angle ?</p>
-      <div className="field">
-        <label className="field-label" htmlFor="cercle-trig-premier-quadrant">
-          Angle du premier quadrant en degrés
-        </label>
-        <input
-          id="cercle-trig-premier-quadrant"
-          className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
-          value={texte}
-          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
-        />
-      </div>
-      <AideAnglePremierQuadrantCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
-      {!validation && (
-        <>
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
+    <ChampAngleTrig
+      id={idChamp}
+      question="Quel est l'angle du premier quadrant associé à cet angle ?"
+      label="Angle du premier quadrant en degrés"
+      tentativesUtilisees={tentativesUtilisees}
+      tentativesMax={tentativesMax}
+      recapitulatif={recapitulatif}
+      aides={aidesAnglePremierQuadrant(exercice)}
+      figure={(n) => (n >= 2 ? <AideAnglePremierQuadrantCercleTrig exercice={exercice} aideActivee sansBouton onActiverAide={() => {}} /> : null)}
+      onPremiereAide={onActiverAide}
+      messageCible={(v) => messageAnglePremierQuadrant(exercice, v)}
+      onValider={onValider}
+      validation={validation}
+    />
   );
 }

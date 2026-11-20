@@ -9,6 +9,8 @@ interface Props {
   exercice: ExerciceQuelAngle;
   aideActivee: boolean;
   onActiverAide: () => void;
+  /** Figure seule, sans bouton ni texte (aides à deux niveaux, audit 4e ch. 5). */
+  sansBouton?: boolean;
 }
 
 /**
@@ -40,7 +42,7 @@ interface Props {
  * seul le marqueur plein doit alors disparaître, jamais la ligne elle-même — même règle round 7 déjà
  * appliquée à l'aide "Signes" du générateur 14 (`AideSignesCercleTrig.tsx`).
  */
-export function AideQuelAngle({ exercice, aideActivee, onActiverAide }: Props) {
+export function AideQuelAngle({ exercice, aideActivee, onActiverAide, sansBouton = false }: Props) {
   const { cheminsQuadrants, rayonsAxes } = calculerAideQuadrants(exercice.solutions);
   const candidats = calculerAideCandidats(exercice.solutions);
   const projections = calculerAideProjections(exercice.fonction, exercice.solutions);
@@ -51,7 +53,7 @@ export function AideQuelAngle({ exercice, aideActivee, onActiverAide }: Props) {
     <div>
       {aideActivee && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideQuadrants(exercice)}</p>
+          {!sansBouton && <p>{texteAideQuadrants(exercice)}</p>}
           <CercleTrigBase ariaLabel="Cercle trigonométrique montrant les quadrants concernés, les points candidats et leurs projections">
             {exercice.fonction === "tan" && (
               <line x1={xTangente} y1={0} x2={xTangente} y2={HAUTEUR_CERCLE_TRIG} className="cercle-trig-tangente" />
@@ -98,7 +100,7 @@ export function AideQuelAngle({ exercice, aideActivee, onActiverAide }: Props) {
           </CercleTrigBase>
         </div>
       )}
-      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+      {!sansBouton && <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />}
     </div>
   );
 }

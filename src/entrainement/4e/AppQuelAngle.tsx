@@ -3,7 +3,7 @@ import type { ReglagesSession } from "./core/session.types";
 import { activerAide, demarrerSessionQuelAngle, soumettreReponse } from "./moteur/sessionQuelAngle";
 import type { EtatSessionQuelAngle } from "./moteur/typesQuelAngle";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceQuelAngle } from "./generateurs/quelAngle";
-import type { FonctionTrig } from "./core/quelAngle.types";
+import type { IdVarianteQuelAngle } from "./core/quelAngle.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuelAngle } from "./components/EtapeQuelAngle";
 import { Katex } from "./components/Katex";
@@ -33,7 +33,7 @@ function nouvelleSession(): EtatSessionQuelAngle {
 function sessionInitiale(): EtatSessionQuelAngle {
   const code = lireCodeDepuisUrl();
   if (!code) return nouvelleSession();
-  return demarrerSessionQuelAngle(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceQuelAngle, (id) => construireAvecVarianteId(id as FonctionTrig)));
+  return demarrerSessionQuelAngle(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceQuelAngle, (id) => construireAvecVarianteId(id as IdVarianteQuelAngle)));
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -75,7 +75,7 @@ export function AppQuelAngle() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
-    setEtat(demarrerSessionQuelAngle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as FonctionTrig)));
+    setEtat(demarrerSessionQuelAngle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as IdVarianteQuelAngle)));
     setNumeroExercice((n) => n + 1);
   }
 

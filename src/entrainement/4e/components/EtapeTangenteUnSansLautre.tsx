@@ -1,20 +1,10 @@
-import { useState } from "react";
 import type { ExerciceUnSansLautre } from "../core/unSansLautre.types";
 import { Katex } from "./Katex";
-import {
-  formatCarreCibleLatex,
-  formatCarreLatex,
-  formatFonctionCibleLatex,
-  formatFonctionFinaleLatex,
-  formatValeurCibleSimplifieeLatex,
-  PLACEHOLDER_TANGENTE,
-} from "../ui/formatUnSansLautre";
-import { diagnostiquerTangente } from "../moteur/verificationUnSansLautre";
-import { formatMessageErreur } from "../ui/messageErreur";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import { formatCarreCibleLatex, formatCarreLatex, formatFonctionCibleLatex, formatFonctionFinaleLatex, formatValeurCibleSimplifieeLatex, PLACEHOLDER_TANGENTE } from "../ui/formatUnSansLautre";
+import { statutTangente } from "../moteur/verificationUnSansLautre";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
-import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { ChampValeurExacte } from "./ChampValeurExacte";
+import { aidesFinaleUnSansLautre, messageFinaleUnSansLautre } from "../ui/aidesUnSansLautre";
 
 interface Props {
   exercice: ExerciceUnSansLautre;
@@ -26,66 +16,32 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Troisième et dernière étape (tan θ ; sin θ pour la variante « tan θ donné ») — l'énoncé (valeur donnée + intervalle sur θ) est affiché une seule
- * fois dans l'en-tête de l'exercice (`EnTeteExercice`, blocDonnees) ; le bloc local ne garde que
- * les deux résultats confirmés précédents (carré, puis valeur signée). */
-export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation }: Props) {
-  const [texte, setTexte] = useState("");
-
-  const complet = texte.trim() !== "";
-  const statut = complet ? diagnostiquerTangente(exercice, texte) : undefined;
-
+/** Troisième étape : tan θ (ou sin θ pour la variante « tan θ donné »). Le bloc local garde les
+ * deux résultats confirmés précédents. Valeur exacte seulement (`ChampValeurExacte`). */
+export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   return (
-    <div>
-      <div className="equation-box">
-        <Katex expression={`${formatCarreLatex(exercice.fonctionCible)} = ${formatCarreCibleLatex(exercice)}`} block />
-        <Katex expression={`${formatFonctionCibleLatex(exercice)} = ${formatValeurCibleSimplifieeLatex(exercice)}`} block />
-      </div>
-      <p className="prompt-text">
-        Quelle est la valeur de <Katex expression={formatFonctionFinaleLatex(exercice)} /> ? (forme exacte ou décimale arrondie au centième)
-      </p>
-      <div className="field">
-        <label className="field-label" htmlFor="un-sans-lautre-tangente">
-          Réponse
-        </label>
-        <input
-          id="un-sans-lautre-tangente"
-          className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
-          placeholder={PLACEHOLDER_TANGENTE}
-          value={texte}
-          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
-        />
-      </div>
-
-      {!validation && (
+    <ChampValeurExacte
+      id="un-sans-lautre-tangente"
+      enTete={
+        <div className="equation-box">
+          <Katex expression={`${formatCarreLatex(exercice.fonctionCible)} = ${formatCarreCibleLatex(exercice)}`} block />
+          <Katex expression={`${formatFonctionCibleLatex(exercice)} = ${formatValeurCibleSimplifieeLatex(exercice)}`} block />
+        </div>
+      }
+      question={
         <>
-          <div>
-            {aideActivee && (
-              exercice.fonctionConnue === "tan" ? (
-                <div className="triangle-quelconque-aide">
-                  <p>Multiplie les deux membres de la définition de la tangente par cos θ :</p>
-                  <Katex expression="\tan\theta = \dfrac{\sin\theta}{\cos\theta} \iff \sin\theta = \tan\theta \cdot \cos\theta" block />
-                </div>
-              ) : (
-                <div className="triangle-quelconque-aide">
-                  <Katex expression="\tan\theta = \dfrac{\sin\theta}{\cos\theta}" block />
-                </div>
-              )
-            )}
-            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-          </div>
-
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-            Valider
-          </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-            </p>
-          )}
+          Quelle est la valeur exacte de <Katex expression={formatFonctionFinaleLatex(exercice)} /> ?
         </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
+      }
+      placeholder={PLACEHOLDER_TANGENTE}
+      tentativesUtilisees={tentativesUtilisees}
+      tentativesMax={tentativesMax}
+      diagnostiquer={(t) => statutTangente(exercice, t)}
+      messageCible={(v) => messageFinaleUnSansLautre(exercice, v)}
+      aides={aidesFinaleUnSansLautre(exercice)}
+      onPremiereAide={onActiverAide}
+      onValider={onValider}
+      validation={validation}
+    />
   );
 }

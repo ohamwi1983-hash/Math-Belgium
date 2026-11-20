@@ -2,10 +2,11 @@ import { useState } from "react";
 import type { ExerciceTriangleLies } from "../core/triangleLies.types";
 import { verifierInterpretation } from "../moteur/verificationTriangleLies";
 import { NIVEAU_AIDE_MAX_INTERPRETATION } from "../moteur/sessionTriangleLies";
-import { consigneInterpretation, texteAideInterpretationNiveau1 } from "../ui/formatTriangleLies";
+import { consigneInterpretation } from "../ui/formatTriangleLies";
+import { aidesInterpretation } from "../ui/aidesTrianglesLies";
+import { RenduFragments } from "./RenduFragments";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { QuestionFinale } from "./QuestionFinale";
 import { TriangleLiesSketch } from "./TriangleLiesSketch";
@@ -30,10 +31,13 @@ interface Props {
 
 /** Écran commun aux 2 variantes, toujours TERMINAL — QCM, choisir la phrase de conclusion correcte
  * parmi `exercice.optionsInterpretation` (ordre déjà mélangé à la génération, jamais retrié). */
-export function EtapeInterpretationTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, recapitulatif, onValider, validation }: Props) {
+export function EtapeInterpretationTriangleLies({ exercice, tentativesUtilisees, niveauAide, onActiverAide, recapitulatif, onValider, validation }: Props) {
   const [choix, setChoix] = useState<number | null>(null);
   const apresEchec = tentativesUtilisees > 0;
-  const erronee = apresEchec && choix !== null && !verifierInterpretation(exercice, choix);
+  // Choix fermé à UNE tentative : jamais de correction avant la clôture.
+  void apresEchec;
+  void verifierInterpretation;
+  const erronee = false;
 
   return (
     <div>
@@ -64,7 +68,11 @@ export function EtapeInterpretationTriangleLies({ exercice, tentativesUtilisees,
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideInterpretationNiveau1()}</p>
+          {aidesInterpretation().slice(0, niveauAide).map((fragments, i) => (
+            <p key={i}>
+              <RenduFragments fragments={fragments} />
+            </p>
+          ))}
         </div>
       )}
       {!validation && (
@@ -74,11 +82,6 @@ export function EtapeInterpretationTriangleLies({ exercice, tentativesUtilisees,
         <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => onValider(choix)}>
           Valider
         </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-          </p>
-        )}
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

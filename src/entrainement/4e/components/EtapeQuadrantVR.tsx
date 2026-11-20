@@ -3,7 +3,8 @@ import type { ExerciceValeursRemarquables } from "../core/valeursRemarquables.ty
 import type { Quadrant } from "../core/cercleTrigonometrique.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux } from "./RetourSaisie";
+import { aidesQuadrant } from "../ui/aidesCercleTrigo";
 import { CercleQuadrantSelecteur } from "./CercleQuadrantSelecteur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -31,7 +32,7 @@ interface Props {
  * (`AideReductionCercleTrig`) plaçait l'angle dans son quadrant et donnait donc directement la
  * réponse de cet écran (audit du chapitre 5).
  */
-export function EtapeQuadrantVR({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, aideActivee, onActiverAide, onValider, validation}: Props) {
+export function EtapeQuadrantVR({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onActiverAide, onValider, validation}: Props) {
   const [selection, setSelection] = useState<Quadrant | null>(null);
 
   return (
@@ -41,23 +42,9 @@ export function EtapeQuadrantVR({ exercice, tentativesUtilisees, tentativesMax, 
 
       <CercleQuadrantSelecteur selection={selection} onSelectionner={setSelection} />
 
-      <div>
-        {aideActivee && (
-          <div className="triangle-quelconque-aide">
-            {(exercice.angleDepart < 0 || exercice.angleDepart >= 360) && (
-              <p>Ramène d'abord l'angle entre 0° et 360° : ajoute ou retire 360° autant de fois que nécessaire.</p>
-            )}
-            <p>
-              Repère entre quels multiples de 90° tombe l'angle : entre 0° et 90°, quadrant I ; entre 90° et 180°,
-              quadrant II ; entre 180° et 270°, quadrant III ; entre 270° et 360°, quadrant IV. Un angle égal à 0°,
-              90°, 180° ou 270° se trouve sur un axe.
-            </p>
-          </div>
-        )}
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-      </div>
       {!validation && (
         <>
+        <AidesNiveaux aides={aidesQuadrant(exercice)} onPremiereAide={onActiverAide} />
         <button
           type="button"
           className="btn btn-primary"

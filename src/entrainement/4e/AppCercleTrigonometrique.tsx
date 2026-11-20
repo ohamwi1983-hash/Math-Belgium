@@ -9,6 +9,7 @@ import {
   soumettreReponseReduction,
   soumettreReponseSignes,
   soumettreReponseValeursAxe,
+  TENTATIVES_CHOIX_FERME,
 } from "./moteur/sessionCercleTrigonometrique";
 import type { EtatSessionCercleTrigonometrique, PhaseCercleTrigonometrique } from "./moteur/typesCercleTrigonometrique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCercleTrigonometrique } from "./generateurs/cercleTrigonometrique";
@@ -195,6 +196,8 @@ export function AppCercleTrigonometrique() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        // Choix fermés (une tentative) : clos dès la première erreur.
+        messageRevele: etat.phase === "quadrant" || etat.phase === "signes" || etat.phase === "valeursAxe" ? "Ce n'était pas la bonne réponse." : undefined,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec
           ? undefined
           : etat.phase === "reduction" ? (
@@ -205,13 +208,20 @@ export function AppCercleTrigonometrique() {
               <>{exercice.anglePremierQuadrant}°</>
             ) : etat.phase === "valeursAxe" ? (
               <>
-                sin(θ) = {libelleValeurAxe(attenduAxe.sin)} ; cos(θ) = {libelleValeurAxe(attenduAxe.cos)} ; tan(θ){" "}
-                {attenduAxe.tan === "indefini" ? "n'existe pas" : `= ${libelleValeurAxe(attenduAxe.tan)}`}
+                <Katex expression={`\\sin\\theta = ${libelleValeurAxe(attenduAxe.sin).replace("−", "-")}`} /> ;{" "}
+                <Katex expression={`\\cos\\theta = ${libelleValeurAxe(attenduAxe.cos).replace("−", "-")}`} /> ;{" "}
+                {attenduAxe.tan === "indefini" ? (
+                  <>
+                    <Katex expression="\tan\theta" /> n'existe pas
+                  </>
+                ) : (
+                  <Katex expression={`\\tan\\theta = ${libelleValeurAxe(attenduAxe.tan).replace("−", "-")}`} />
+                )}
               </>
             ) : (
               <>
-                sin(θ) : {libelleSigne(exercice.signeSin)} ; cos(θ) : {libelleSigne(exercice.signeCos)} ; tan(θ) :{" "}
-                {exercice.signeTan === "indefini" ? "∄" : libelleSigne(exercice.signeTan)}
+                <Katex expression="\sin\theta" /> : {libelleSigne(exercice.signeSin)} ; <Katex expression="\cos\theta" /> : {libelleSigne(exercice.signeCos)} ;{" "}
+                <Katex expression="\tan\theta" /> : {exercice.signeTan === "indefini" ? "n'existe pas" : libelleSigne(exercice.signeTan)}
               </>
             ),
         // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
@@ -279,7 +289,7 @@ export function AppCercleTrigonometrique() {
               key={`${numeroExercice}-${etat.phase}`}
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME}
               recapitulatif={recapitulatif}
               aideActivee={etat.aideValeursAxeUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
@@ -291,7 +301,7 @@ export function AppCercleTrigonometrique() {
               key={`${numeroExercice}-${etat.phase}`}
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME}
               recapitulatif={recapitulatif}
               aideActivee={etat.aideSignesUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}

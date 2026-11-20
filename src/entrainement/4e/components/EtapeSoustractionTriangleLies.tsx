@@ -1,12 +1,15 @@
 import { useState } from "react";
 import type { ExerciceTriangleLies } from "../core/triangleLies.types";
-import { diagnostiquerSoustraction } from "../moteur/verificationTriangleLies";
 import type { ReponseSoustractionTriangleLies } from "../moteur/verificationTriangleLies";
 import { NIVEAU_AIDE_MAX_SOUSTRACTION } from "../moteur/sessionTriangleLies";
-import { consigneSoustraction, formatDistancesParcouruesTexte, libellesSommetPartage, texteAideSoustractionNiveau1, texteAideSoustractionNiveau2, uniteLongueurPont } from "../ui/formatTriangleLies";
+import { consigneSoustraction, formatDistancesParcouruesTexte, libellesSommetPartage, uniteLongueurPont } from "../ui/formatTriangleLies";
+import { aidesSoustraction, messageSoustraction } from "../ui/aidesTrianglesLies";
+import { MESSAGE_LONGUEUR_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { RenduFragments } from "./RenduFragments";
+import { lireNombreSaisi } from "../ui/lireNombre";
+
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { QuestionFinale } from "./QuestionFinale";
@@ -37,8 +40,10 @@ export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, t
   const [cote1, setCote1] = useState("");
   const [cote2, setCote2] = useState("");
   const complet = cote1.trim() !== "" && cote2.trim() !== "";
-  const reponse: ReponseSoustractionTriangleLies = { cote1: Number(cote1.replace(",", ".")), cote2: Number(cote2.replace(",", ".")) };
-  const statut = complet ? diagnostiquerSoustraction(exercice, reponse) : undefined;
+  const lus = [lireNombreSaisi(cote1), lireNombreSaisi(cote2)];
+  const reponse: ReponseSoustractionTriangleLies = { cote1: lus[0] ?? 0, cote2: lus[1] ?? 0 };
+  // Règles communes (audit 4e ch. 5, lot B) : saisie illisible jamais transmise (aucune tentative).
+  const saisie = useTentativeLisible<ReponseSoustractionTriangleLies>();
   const apresEchec = tentativesUtilisees > 0;
   const uniteCote = uniteLongueurPont(exercice);
   const libelles = libellesSommetPartage(exercice);
@@ -65,7 +70,7 @@ export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, t
           <div className="champ-avec-unite">
             <input
               id="triangle-lies-soustraction-cote1"
-              className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
+              className={`text-input${apresEchec && !saisie.illisible ? " is-erronee" : ""}`}
               value={cote1}
               onChange={(e) => setCote1(normaliserSigneMoins(e.target.value))}
             />
@@ -79,7 +84,7 @@ export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, t
           <div className="champ-avec-unite">
             <input
               id="triangle-lies-soustraction-cote2"
-              className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
+              className={`text-input${apresEchec && !saisie.illisible ? " is-erronee" : ""}`}
               value={cote2}
               onChange={(e) => setCote2(normaliserSigneMoins(e.target.value))}
             />
@@ -90,22 +95,27 @@ export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, t
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideSoustractionNiveau1()}</p>
-          {niveauAide >= 2 && <p>{texteAideSoustractionNiveau2(exercice)}</p>}
+          {aidesSoustraction(exercice).slice(0, niveauAide).map((fragments, i) => (
+            <p key={i}>
+              <RenduFragments fragments={fragments} />
+            </p>
+          ))}
         </div>
       )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SOUSTRACTION} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(reponse, lus.every((x) => x !== null), onValider)}>
           Valider
         </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour
+          illisible={saisie.illisible}
+          texteIllisible={MESSAGE_LONGUEUR_ILLISIBLE}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={saisie.soumise !== null ? messageSoustraction(exercice, saisie.soumise) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

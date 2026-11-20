@@ -23,6 +23,11 @@ import type { EtatSessionCercleTrigonometrique, PhaseCercleTrigonometrique, Resu
 
 const POINTS_DE_BASE = 100;
 
+/** Choix fermés (signes, valeurs sur un axe) : UNE tentative (audit 4e ch. 5, G3) — sinon le
+ * tableau se gagne au 2e essai en changeant les cases. Champs (réduction, angle du premier
+ * quadrant) : `reglages.tentativesMax`. */
+export const TENTATIVES_CHOIX_FERME = 1;
+
 /** Première phase de la séquence pour cet exercice — "reduction" si nécessaire, "quadrant" sinon. */
 function phaseInitiale(exercice: ExerciceCercleTrigonometrique): PhaseCercleTrigonometrique {
   return necessiteReduction(exercice) ? "reduction" : "quadrant";
@@ -212,6 +217,7 @@ export function soumettreReponseSignes(etat: EtatSessionCercleTrigonometrique, r
 
   const etapeCourante = soumettreEtapeTentatives<ReponseSignes>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (r) => verifierSignes(etat.exerciceCourant, r),
     revelerReponse: () => {},
   });
@@ -249,6 +255,7 @@ export function soumettreReponseValeursAxe(etat: EtatSessionCercleTrigonometriqu
 
   const etapeCourante = soumettreEtapeTentatives<ReponseValeursAxe>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (r) => verifierValeursAxe(etat.exerciceCourant, r),
     revelerReponse: () => {},
   });

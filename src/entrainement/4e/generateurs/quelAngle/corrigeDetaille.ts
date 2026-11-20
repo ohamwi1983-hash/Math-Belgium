@@ -1,7 +1,7 @@
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceQuelAngle } from "../../core/quelAngle.types";
-import { DOMAINE_LATEX, formatEnonceLatex, formatTermesSolutionsLatex } from "../../ui/formatQuelAngle";
+import { DOMAINE_LATEX, estEgalite, formatEnonceLatex, formatTermesSolutionsLatex, membreEgaliteLatex } from "../../ui/formatQuelAngle";
 import {
   COURS_EQUATIONS,
   COURS_REMARQUABLES,
@@ -28,7 +28,67 @@ function kLatex(e: E): string {
   return formatEnonceLatex(e).split("=")[1]!.trim().replace(/\\frac/g, "\\dfrac");
 }
 
+/** « α = −20° + 360° = 340° » : ramène un angle dans [0° ; 360°[ en une ligne (rien si déjà dedans). */
+function ramener(a: number): string {
+  if (a >= 0 && a < 360) return "";
+  const k = a < 0 ? Math.ceil(-a / 360) : -Math.floor(a / 360);
+  const r = a + 360 * k;
+  const tours = Math.abs(k) === 1 ? "360^\\circ" : `${Math.abs(k)}\\times 360^\\circ`;
+  return `${k > 0 ? "+" : "-"}${tours}=${deg(r)}`;
+}
+
+/** Variante « sin α = sin β, cos α = cos β » (décision 4 de l'utilisateur, fin de catalogue). */
+function correctionEgalite(e: E & { angleEgal: number }): EtapeCorrection[] {
+  const f = e.fonction as "sin" | "cos";
+  const b = e.angleEgal;
+  const membre = membreEgaliteLatex(e);
+  const autre = f === "sin" ? 180 - b : -b;
+  const lignes: LigneCalcul[] = [];
+  const r1 = ramener(b);
+  lignes.push(
+    ligne(
+      `\\alpha_1=${deg(b)}${r1}`,
+      r1 === "" ? [texte("une solution évidente : "), latex(`\\${f}\\alpha=${membre}`)] : [texte("une solution évidente, ramenée dans "), latex(DOMAINE_LATEX)],
+    ),
+  );
+  const ecriture = f === "sin" ? `180^\\circ-${b < 0 ? `(${deg(b)})` : deg(b)}` : `-${b < 0 ? `(${deg(b)})` : deg(b)}`;
+  const r2 = ramener(autre);
+  lignes.push(
+    ligne(
+      `\\alpha_2=${ecriture}=${deg(autre)}${r2}`,
+      f === "sin"
+        ? [texte("angles supplémentaires : "), latex("\\sin(180^\\circ-\\beta)=\\sin\\beta")]
+        : [texte("angles opposés : "), latex("\\cos(-\\beta)=\\cos\\beta")],
+    ),
+  );
+  const etapes: EtapeCorrection[] = [
+    utilise("a", [
+      texte(
+        f === "sin"
+          ? `Deux angles supplémentaires ont le même sinus ${COURS_EQUATIONS} : les solutions sont β et 180° − β, ramenés dans `
+          : `Deux angles opposés ont le même cosinus ${COURS_EQUATIONS} : les solutions sont β et −β, ramenés dans `,
+      ),
+      latex(DOMAINE_LATEX),
+      texte("."),
+    ]),
+    calcul("a", lignes),
+    resultat("a", formatTermesSolutionsLatex(e).map((t) => latex(t))),
+    verification(
+      "a",
+      [texte(`Chaque solution a bien le même ${f === "sin" ? "sinus" : "cosinus"} que `), latex(b < 0 ? `${deg(b)}` : deg(b)), texte(" :")],
+      e.solutions.map((sol) => ligne(`${fonctionLatex(f, sol)}=${membre}`)),
+    ),
+    piege("a", [
+      f === "sin"
+        ? texte("Pour le sinus, la deuxième solution est 180° − β (famille supplémentaire), pas −β.")
+        : texte("Pour le cosinus, la deuxième solution est −β (famille des opposés), pas 180° − β."),
+    ]),
+  ];
+  return finaliserCorrige(etapes);
+}
+
 export function correctionDetailleeQuelAngle(e: E): EtapeCorrection[] {
+  if (estEgalite(e)) return correctionEgalite(e);
   const f = e.fonction;
   const k = kLatex(e);
   const etapes: EtapeCorrection[] = [];

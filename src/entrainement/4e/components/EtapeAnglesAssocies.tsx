@@ -3,9 +3,12 @@ import type { ExerciceAnglesAssocies } from "../core/anglesAssocies.types";
 import { CercleTrigTrajetBase } from "./CercleTrigTrajetBase";
 import { calculerAideCercleAnglesAssocies, fonctionCible, texteLabelQuestion } from "../ui/cercleAnglesAssociesAide";
 import { CENTRE_CERCLE_TRIG, HAUTEUR_CERCLE_TRIG, RAYON_CERCLE_TRIG } from "../ui/cercleTrigGeometrie";
-import { PLACEHOLDER_VALEUR_FINALE, texteAide2, texteAide3Intro } from "../ui/formatAnglesAssocies";
-import { diagnostiquerValeurFinale, niveauAideMax } from "../moteur/verificationAnglesAssocies";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { PLACEHOLDER_VALEUR_FINALE } from "../ui/formatAnglesAssocies";
+import { niveauAideMax } from "../moteur/verificationAnglesAssocies";
+import { MESSAGE_VALEUR_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { RenduFragments } from "./RenduFragments";
+import { lireNombreSaisi } from "../ui/lireNombre";
+import { aideAnglesAssociesNiveau1, aideAnglesAssociesNiveau2, aideAnglesAssociesNiveau3, messageAnglesAssocies } from "../ui/aidesAnglesAssocies";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -57,9 +60,9 @@ const X_TANGENTE = CENTRE_CERCLE_TRIG.x + RAYON_CERCLE_TRIG;
 export function EtapeAnglesAssocies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
-  const nombre = Number(texte.trim().replace(",", ".").replace(/[−–]/g, "-"));
   const complet = texte.trim() !== "";
-  const statut = complet ? diagnostiquerValeurFinale(exercice, nombre) : undefined;
+  // Règles communes (audit 4e ch. 5, lot B) : saisie illisible jamais transmise (aucune tentative).
+  const saisie = useTentativeLisible<number>();
 
   const max = niveauAideMax(exercice);
   const aide = calculerAideCercleAnglesAssocies(exercice);
@@ -72,7 +75,7 @@ export function EtapeAnglesAssocies({ exercice, tentativesUtilisees, tentativesM
         </label>
         <input
           id="angles-associes-valeur-finale"
-          className={`text-input${tentativesUtilisees > 0 && statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
+          className={`text-input${tentativesUtilisees > 0 && !saisie.illisible ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_VALEUR_FINALE}
           value={texte}
           onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
@@ -81,6 +84,9 @@ export function EtapeAnglesAssocies({ exercice, tentativesUtilisees, tentativesM
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
+          <p>
+            <RenduFragments fragments={aideAnglesAssociesNiveau1(exercice)} />
+          </p>
           <CercleTrigTrajetBase
             trajet={aide.trajetTheta}
             labelAngleBrutTexte={`${exercice.theta}°`}
@@ -144,22 +150,40 @@ export function EtapeAnglesAssocies({ exercice, tentativesUtilisees, tentativesM
               </>
             )}
           </CercleTrigTrajetBase>
-          {niveauAide >= 2 && <p>{texteAide2(exercice)}</p>}
-          {niveauAide >= 3 && <p>{texteAide3Intro(exercice)}</p>}
+          {niveauAide >= 2 && (
+            <p>
+              <RenduFragments fragments={aideAnglesAssociesNiveau2(exercice)} />
+            </p>
+          )}
+          {niveauAide >= 3 && (
+            <p>
+              <RenduFragments fragments={aideAnglesAssociesNiveau3(exercice)} />
+            </p>
+          )}
         </div>
       )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider(nombre)}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => {
+            const v = lireNombreSaisi(texte);
+            saisie.tenter(v ?? 0, v !== null, onValider);
+          }}
+        >
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour
+          illisible={saisie.illisible}
+          texteIllisible={MESSAGE_VALEUR_ILLISIBLE}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={saisie.soumise !== null ? messageAnglesAssocies(exercice, saisie.soumise) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

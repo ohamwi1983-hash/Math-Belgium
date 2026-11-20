@@ -75,7 +75,7 @@ export const LIBELLE_CAS_ANGLES_ASSOCIES = "Inclure un cas particulier (relation
  * déjà α (pas de second palier de co-fonction). Même test que l'écran (`xReference !== alpha`,
  * `necessiteAide3`). */
 export function profilAnglesAssocies(e: ExerciceAnglesAssocies): ProfilInstance {
-  const sansCofonction = e.variante === "sinCos" && e.quadrant !== "I" && e.xReference === e.alpha;
+  const sansCofonction = e.variante === "sinCos" && e.quadrant !== "I" && e.relation !== "plus90" && e.xReference === e.alpha;
   return { casParticulier: sansCofonction ? "sans-cofonction" : null };
 }
 
@@ -83,6 +83,13 @@ export const LIBELLE_CAS_QUEL_ANGLE = "Inclure un cas particulier (équation san
 
 /** gen18 — trouver l'angle : |k| > 1 se règle en une ligne ; k = 0 ou ±1 tombe sur un axe. */
 export function profilQuelAngle(e: ExerciceQuelAngle): ProfilInstance {
+  // Variante « sin α = sin β » : toujours deux solutions hors axes, aucun raccourci ; `forme` : β à
+  // ramener (négatif, ou solution 180° − β négative) ou non.
+  if (e.angleEgal !== undefined) {
+    const b = e.angleEgal;
+    const aRamener = b < 0 || (e.fonction === "sin" ? 180 - b < 0 : true);
+    return { casParticulier: null, forme: `${e.fonction}:${aRamener ? "a-ramener" : "direct"}` };
+  }
   const surAxe = e.angleReference === 0 || e.angleReference === 90;
   return { casParticulier: e.angleReference === null ? "aucune-solution" : surAxe ? "valeur-sur-axe" : null };
 }

@@ -1,11 +1,14 @@
 import { useState } from "react";
 import type { ExerciceTriangleLies } from "../core/triangleLies.types";
-import { diagnostiquerCible } from "../moteur/verificationTriangleLies";
 import { niveauAideMaxCible } from "../moteur/sessionTriangleLies";
-import { consigneCible, formatDonneesCibleEnonceTexte, texteAideCibleNiveau1, texteAideCibleNiveau2, texteAideCibleNiveau3 } from "../ui/formatTriangleLies";
+import { consigneCible, formatDonneesCibleEnonceTexte } from "../ui/formatTriangleLies";
+import { aidesCible, messageCible } from "../ui/aidesTrianglesLies";
+import { MESSAGE_ANGLE_ILLISIBLE, MESSAGE_LONGUEUR_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { RenduFragments } from "./RenduFragments";
+import { lireNombreSaisi } from "../ui/lireNombre";
+
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { QuestionFinale } from "./QuestionFinale";
@@ -36,8 +39,9 @@ interface Props {
 export function EtapeCibleTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, recapitulatif, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
-  const valeur = Number(texte.replace(",", "."));
-  const statut = complet ? diagnostiquerCible(exercice, valeur) : undefined;
+  const valeur = lireNombreSaisi(texte);
+  // Règles communes (audit 4e ch. 5, lot B) : saisie illisible jamais transmise (aucune tentative).
+  const saisie = useTentativeLisible<number>();
   const apresEchec = tentativesUtilisees > 0;
   const niveauAideMax = niveauAideMaxCible(exercice);
 
@@ -62,7 +66,7 @@ export function EtapeCibleTriangleLies({ exercice, tentativesUtilisees, tentativ
         <div className="champ-avec-unite">
           <input
             id="triangle-lies-cible"
-            className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
+            className={`text-input${apresEchec && !saisie.illisible ? " is-erronee" : ""}`}
             value={texte}
             onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
           />
@@ -72,23 +76,27 @@ export function EtapeCibleTriangleLies({ exercice, tentativesUtilisees, tentativ
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideCibleNiveau1(exercice)}</p>
-          {niveauAide >= 2 && <p>{texteAideCibleNiveau2(exercice)}</p>}
-          {niveauAide >= 3 && <p>{texteAideCibleNiveau3()}</p>}
+          {aidesCible(exercice).slice(0, niveauAide).map((fragments, i) => (
+            <p key={i}>
+              <RenduFragments fragments={fragments} />
+            </p>
+          ))}
         </div>
       )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(valeur ?? 0, valeur !== null, onValider)}>
           Valider
         </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour
+          illisible={saisie.illisible}
+          texteIllisible={exercice.uniteGrandeurCible === "°" ? MESSAGE_ANGLE_ILLISIBLE : MESSAGE_LONGUEUR_ILLISIBLE}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={saisie.soumise !== null ? messageCible(exercice, saisie.soumise) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -48,7 +48,7 @@ function estDecimalExact(x: NombreExact): boolean {
 }
 
 /** Valeur lue, ou `null` si la saisie est illisible (identifiant inconnu, x, π…). */
-function lireValeur(s: string): number | null {
+export function lireValeur(s: string): number | null {
   if (s === "") return null;
   if (/[a-z]/i.test(s.replace(/racine|rac|sqrt/gi, ""))) return null;
   try {

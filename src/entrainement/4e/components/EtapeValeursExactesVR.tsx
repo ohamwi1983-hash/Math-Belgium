@@ -4,8 +4,6 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
 import {
-  celluleSinCosErronee,
-  celluleTanErronee,
   cyclerValeurSinCos,
   cyclerValeurTan,
   formatCelluleSinCosLatex,
@@ -13,6 +11,8 @@ import {
 } from "../ui/cycleValeurTrigonometrique";
 import { AideSignesCercleTrig } from "./AideSignesCercleTrig";
 import { ValidationEcran } from "../../components/ValidationEcran";
+import { AidesNiveaux } from "./RetourSaisie";
+import { aidesValeursExactes } from "../ui/aidesCercleTrigo";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 /** Mêmes couleurs que l'aide "Signes" du générateur 14 (`App.css`,
@@ -59,16 +59,15 @@ export function EtapeValeursExactesVR({
   const [cos, setCos] = useState<CelluleSinCos>("?");
   const [tan, setTan] = useState<CelluleTan>("?");
 
-  const montrerErreurs = tentativesUtilisees > 0;
+  const [niveauAide, setNiveauAide] = useState(0);
+  const coloration = niveauAide >= 2;
   const complet = sin !== "?" && cos !== "?" && tan !== "?";
-
-  function classeCelluleSinCos(saisie: CelluleSinCos, attendu: number): string {
-    return montrerErreurs && celluleSinCosErronee(saisie, attendu) ? "btn toggle-signe is-erronee" : "btn toggle-signe";
-  }
-
-  function classeCelluleTan(saisie: CelluleTan, attendu: number | null): string {
-    return montrerErreurs && celluleTanErronee(saisie, attendu) ? "btn toggle-signe is-erronee" : "btn toggle-signe";
-  }
+  // Choix fermé à UNE tentative (audit 4e ch. 5, G3) : jamais de correction case par case.
+  const classeCelluleSinCos = () => "btn toggle-signe";
+  const classeCelluleTan = () => "btn toggle-signe";
+  void tentativesUtilisees;
+  void tentativesMax;
+  void aideActivee;
 
   return (
     <div>
@@ -80,30 +79,30 @@ export function EtapeValeursExactesVR({
           <thead>
             <tr>
               <th className="grille-signes-zone">
-                <Katex expression={aideActivee ? `\\textcolor{${COULEUR_SIN}}{\\sin(\\theta)}` : "\\sin(\\theta)"} />
+                <Katex expression={coloration ? `\\textcolor{${COULEUR_SIN}}{\\sin(\\theta)}` : "\\sin(\\theta)"} />
               </th>
               <th className="grille-signes-zone">
-                <Katex expression={aideActivee ? `\\textcolor{${COULEUR_COS}}{\\cos(\\theta)}` : "\\cos(\\theta)"} />
+                <Katex expression={coloration ? `\\textcolor{${COULEUR_COS}}{\\cos(\\theta)}` : "\\cos(\\theta)"} />
               </th>
               <th className="grille-signes-zone">
-                <Katex expression={aideActivee ? `\\textcolor{${COULEUR_TAN}}{\\tan(\\theta)}` : "\\tan(\\theta)"} />
+                <Katex expression={coloration ? `\\textcolor{${COULEUR_TAN}}{\\tan(\\theta)}` : "\\tan(\\theta)"} />
               </th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td className="grille-signes-zone">
-                <button type="button" className={classeCelluleSinCos(sin, exercice.sinValeur)} onClick={() => setSin(cyclerValeurSinCos)}>
+                <button type="button" className={classeCelluleSinCos()} onClick={() => setSin(cyclerValeurSinCos)}>
                   <Katex expression={`\\displaystyle ${formatCelluleSinCosLatex(sin)}`} />
                 </button>
               </td>
               <td className="grille-signes-zone">
-                <button type="button" className={classeCelluleSinCos(cos, exercice.cosValeur)} onClick={() => setCos(cyclerValeurSinCos)}>
+                <button type="button" className={classeCelluleSinCos()} onClick={() => setCos(cyclerValeurSinCos)}>
                   <Katex expression={`\\displaystyle ${formatCelluleSinCosLatex(cos)}`} />
                 </button>
               </td>
               <td className="grille-signes-zone">
-                <button type="button" className={classeCelluleTan(tan, exercice.tanValeur)} onClick={() => setTan(cyclerValeurTan)}>
+                <button type="button" className={classeCelluleTan()} onClick={() => setTan(cyclerValeurTan)}>
                   <Katex expression={`\\displaystyle ${formatCelluleTanLatex(tan)}`} />
                 </button>
               </td>
@@ -112,23 +111,17 @@ export function EtapeValeursExactesVR({
         </table>
       </div>
 
-      <AideSignesCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
-
       {!validation && (
         <>
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={!complet}
-          onClick={() => complet && onValider({ sin, cos, tan })}
-        >
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+          <AidesNiveaux
+            aides={aidesValeursExactes(exercice)}
+            figure={(n) => (n >= 2 ? <AideSignesCercleTrig exercice={exercice} aideActivee sansBouton onActiverAide={() => {}} /> : null)}
+            onPremiereAide={onActiverAide}
+            onNiveau={setNiveauAide}
+          />
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider({ sin, cos, tan })}>
+            Valider
+          </button>
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

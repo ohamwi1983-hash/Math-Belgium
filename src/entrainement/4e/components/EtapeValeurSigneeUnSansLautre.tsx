@@ -1,20 +1,10 @@
-import { useState } from "react";
 import type { ExerciceUnSansLautre } from "../core/unSansLautre.types";
 import { Katex } from "./Katex";
-import {
-  formatCarreCibleLatex,
-  formatCarreLatex,
-  formatFonctionCibleLatex,
-  formatSigneCibleLatex,
-  libelleQuadrantUnSansLautre,
-  PLACEHOLDER_VALEUR_SIGNEE,
-} from "../ui/formatUnSansLautre";
-import { diagnostiquerValeurSignee } from "../moteur/verificationUnSansLautre";
-import { formatMessageErreur } from "../ui/messageErreur";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import { formatCarreCibleLatex, formatCarreLatex, formatFonctionCibleLatex, PLACEHOLDER_VALEUR_SIGNEE } from "../ui/formatUnSansLautre";
+import { statutValeurSignee } from "../moteur/verificationUnSansLautre";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
-import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { ChampValeurExacte } from "./ChampValeurExacte";
+import { aidesValeurSigneeUnSansLautre, messageValeurSigneeUnSansLautre } from "../ui/aidesUnSansLautre";
 
 interface Props {
   exercice: ExerciceUnSansLautre;
@@ -26,63 +16,31 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Deuxième étape — l'énoncé (valeur donnée + intervalle sur θ) est affiché une seule fois dans
- * l'en-tête de l'exercice (`EnTeteExercice`, blocDonnees) ; le bloc local ne garde que le résultat
- * confirmé de l'écran 1 (le carré cible, toujours dérivé directement de l'exercice — jamais la
- * saisie de l'élève). */
-export function EtapeValeurSigneeUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation }: Props) {
-  const [texte, setTexte] = useState("");
-
-  const complet = texte.trim() !== "";
-  const statut = complet ? diagnostiquerValeurSignee(exercice, texte) : undefined;
-
+/** Deuxième étape — le bloc local garde le résultat confirmé de l'écran 1 (le carré cible, dérivé
+ * de l'exercice). Valeur exacte seulement (`ChampValeurExacte`). */
+export function EtapeValeurSigneeUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   return (
-    <div>
-      <div className="equation-box">
-        <Katex expression={`${formatCarreLatex(exercice.fonctionCible)} = ${formatCarreCibleLatex(exercice)}`} block />
-      </div>
-      <p className="prompt-text">
-        Quelle est la valeur de <Katex expression={formatFonctionCibleLatex(exercice)} /> ? (forme exacte ou décimale
-        arrondie au centième)
-      </p>
-      <div className="field">
-        <label className="field-label" htmlFor="un-sans-lautre-valeur-signee">
-          Réponse
-        </label>
-        <input
-          id="un-sans-lautre-valeur-signee"
-          className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
-          placeholder={PLACEHOLDER_VALEUR_SIGNEE}
-          value={texte}
-          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
-        />
-      </div>
-
-      {!validation && (
+    <ChampValeurExacte
+      id="un-sans-lautre-valeur-signee"
+      enTete={
+        <div className="equation-box">
+          <Katex expression={`${formatCarreLatex(exercice.fonctionCible)} = ${formatCarreCibleLatex(exercice)}`} block />
+        </div>
+      }
+      question={
         <>
-          <div>
-            {aideActivee && (
-              <div className="triangle-quelconque-aide">
-                <p>
-                  θ appartient au quadrant {libelleQuadrantUnSansLautre(exercice.quadrant)}, donc{" "}
-                  <Katex expression={formatSigneCibleLatex(exercice)} />.
-                </p>
-              </div>
-            )}
-            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-          </div>
-
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-            Valider
-          </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-            </p>
-          )}
+          Quelle est la valeur exacte de <Katex expression={formatFonctionCibleLatex(exercice)} /> ?
         </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
+      }
+      placeholder={PLACEHOLDER_VALEUR_SIGNEE}
+      tentativesUtilisees={tentativesUtilisees}
+      tentativesMax={tentativesMax}
+      diagnostiquer={(t) => statutValeurSignee(exercice, t)}
+      messageCible={(v) => messageValeurSigneeUnSansLautre(exercice, v)}
+      aides={aidesValeurSigneeUnSansLautre(exercice)}
+      onPremiereAide={onActiverAide}
+      onValider={onValider}
+      validation={validation}
+    />
   );
 }
