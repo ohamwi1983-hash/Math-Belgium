@@ -2,7 +2,7 @@ import type { ExerciceLimiteExponentielle } from "../core6e/limitesExponentielle
 import { phaseApres, phaseInitiale } from "../moteur6e/typesLimitesExponentielles";
 import type { EtatSessionLimiteExponentielle, PhaseLimiteExponentielle } from "../moteur6e/typesLimitesExponentielles";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { formatCibleTexte } from "./formatLimitesExponentielles";
+import { formatCibleTexte, formatLimiteFinaleLatex } from "./formatLimitesExponentielles";
 
 /**
  * Libellés courts du récapitulatif "Ce qu'on sait déjà", famille par famille — `6gen6` n'a (contrairement
@@ -103,7 +103,7 @@ function valeurPhase(exercice: ExerciceLimiteExponentielle, phase: PhaseLimiteEx
   if (exercice.famille === "G") {
     if (phase === "gCombiner") return { valeur: "Les deux termes combinés en une seule fraction, équivalente à f(x).", estLatex: false };
     if (phase === "gOrdre1") return { valeur: "Non — un développement à l'ordre 1 ne suffit pas ici (les termes dominants s'annulent).", estLatex: false };
-    if (phase === "gConclure") return { valeur: String(exercice.limiteFinale), estLatex: true };
+    if (phase === "gConclure") return { valeur: formatLimiteFinaleLatex(exercice), estLatex: true };
   }
   if (exercice.famille === "H") {
     if (phase === "hForme") return { valeur: "0/0", estLatex: false };
@@ -117,19 +117,19 @@ function valeurPhase(exercice: ExerciceLimiteExponentielle, phase: PhaseLimiteEx
         ? { valeur: String(exercice.m), estLatex: true }
         : { valeur: "Forme équivalente à g'(x), vérifiée par équivalence numérique.", estLatex: false };
     }
-    if (phase === "hConclure") return { valeur: String(exercice.limiteFinale), estLatex: true };
+    if (phase === "hConclure") return { valeur: formatLimiteFinaleLatex(exercice), estLatex: true };
   }
   if (exercice.famille === "I") {
     if (phase === "iForme") return { valeur: "0/0", estLatex: false };
     if (phase === "iNumerateur") return { valeur: "Forme équivalente à f'(x), vérifiée par équivalence numérique.", estLatex: false };
     if (phase === "iDenominateur") return { valeur: "Forme équivalente à g'(x), vérifiée par équivalence numérique.", estLatex: false };
-    if (phase === "iConclure") return { valeur: String(exercice.limiteFinale), estLatex: true };
+    if (phase === "iConclure") return { valeur: formatLimiteFinaleLatex(exercice), estLatex: true };
   }
   if (exercice.famille === "J") {
     if (phase === "jForme") return { valeur: "0/0", estLatex: false };
     if (phase === "jNumerateur") return { valeur: "Forme équivalente à f'(x), vérifiée par équivalence numérique.", estLatex: false };
     if (phase === "jDenominateur") return { valeur: "Forme équivalente à g'(x), vérifiée par équivalence numérique.", estLatex: false };
-    if (phase === "jConclure") return { valeur: String(exercice.limiteFinale), estLatex: true };
+    if (phase === "jConclure") return { valeur: formatLimiteFinaleLatex(exercice), estLatex: true };
   }
   if (exercice.famille === "K") {
     if (phase === "kForme") return { valeur: "0/0", estLatex: false };
@@ -145,7 +145,7 @@ function valeurPhase(exercice: ExerciceLimiteExponentielle, phase: PhaseLimiteEx
         ? { valeur: String(2 * exercice.m), estLatex: true }
         : { valeur: "Forme équivalente à g''(x), vérifiée par équivalence numérique.", estLatex: false };
     }
-    if (phase === "kConclure") return { valeur: String(exercice.limiteFinale), estLatex: true };
+    if (phase === "kConclure") return { valeur: formatLimiteFinaleLatex(exercice), estLatex: true };
   }
   if (exercice.famille === "L") {
     if (phase === "lReformuler") return { valeur: "Forme reformulée vers le pivot (1+1/u)^u, équivalente à f(x).", estLatex: false };

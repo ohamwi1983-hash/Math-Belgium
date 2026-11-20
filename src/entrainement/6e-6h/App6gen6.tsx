@@ -48,6 +48,9 @@ import { EtapeFormeFI } from "./components6e/EtapeFormeFI";
 import { EtapeOrdre1G } from "./components6e/EtapeOrdre1G";
 import { EtapeReponseLimite } from "./components6e/EtapeReponseLimite";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { correctionDetailleeLimitesExponentielles, reponseAttendueLimitesExpoLatex, sequenceLimitesExponentielles } from "./generateurs6e/limitesExponentielles/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { Katex } from "./components/Katex";
 import { aideNiveau1, aideNiveau2, consigneEcran, formatCibleTexte, formatLimiteEnonceLatex } from "./ui6e/formatLimitesExponentielles";
 import { calculerRecapitulatifLimitesExponentielles, calculerSegmentsProgressionLimitesExponentielles } from "./ui6e/recapitulatifLimitesExponentielles";
@@ -192,85 +195,25 @@ export function App6gen6() {
   // même si elle est garantie à l'exécution (préfixe de phase par lettre de famille — voir
   // `typesLimitesExponentielles.ts`).
   const reponseAttenduePhase = () => {
-    if (exercice.famille === "A") {
-      if (phase === "aExposant") return <Katex expression={formatCibleTexte(exercice.limiteExposant)} />;
-      if (phase === "aGlobale") return <Katex expression={formatCibleTexte(exercice.limiteGlobale)} />;
-    }
-    if (exercice.famille === "B") {
-      if (phase === "bExponentielle") return <Katex expression={formatCibleTexte(exercice.limiteExponentielle)} />;
-      if (phase === "bPolynomiale") return <Katex expression={formatCibleTexte(exercice.limitePolynomiale)} />;
-      if (phase === "bGlobale") return <Katex expression={formatCibleTexte(exercice.limiteGlobale)} />;
-    }
-    if (exercice.famille === "C") {
-      if (phase === "cFacteurs")
-        return <Katex expression={`${formatCibleTexte(exercice.limiteFacteur1)} \\quad , \\quad ${formatCibleTexte(exercice.limiteFacteur2)}`} />;
-      if (phase === "cGlobale") return <Katex expression={String(exercice.limiteGlobale)} />;
-    }
-    if (exercice.famille === "G") {
-      if (phase === "gCombiner") return "Les deux termes combinés en une seule fraction, équivalente à f(x).";
-      if (phase === "gOrdre1") return "Non — un développement à l'ordre 1 ne suffit pas ici (les termes dominants s'annulent).";
-      if (phase === "gConclure") return <Katex expression={String(exercice.limiteFinale)} />;
-    }
-    if (exercice.famille === "H") {
-      if (phase === "hForme") return "0/0";
-      if (phase === "hNumerateur")
-        return exercice.expAuNumerateur ? (
-          "Forme équivalente à f'(x), vérifiée par équivalence numérique."
-        ) : (
-          <Katex expression={String(exercice.m)} />
-        );
-      if (phase === "hDenominateur")
-        return exercice.expAuNumerateur ? (
-          <Katex expression={String(exercice.m)} />
-        ) : (
-          "Forme équivalente à g'(x), vérifiée par équivalence numérique."
-        );
-      if (phase === "hConclure") return <Katex expression={String(exercice.limiteFinale)} />;
-    }
-    if (exercice.famille === "I") {
-      if (phase === "iForme") return "0/0";
-      if (phase === "iNumerateur") return "Forme équivalente à f'(x), vérifiée par équivalence numérique.";
-      if (phase === "iDenominateur") return "Forme équivalente à g'(x), vérifiée par équivalence numérique.";
-      if (phase === "iConclure") return <Katex expression={String(exercice.limiteFinale)} />;
-    }
-    if (exercice.famille === "J") {
-      if (phase === "jForme") return "0/0";
-      if (phase === "jNumerateur") return "Forme équivalente à f'(x), vérifiée par équivalence numérique.";
-      if (phase === "jDenominateur") return "Forme équivalente à g'(x), vérifiée par équivalence numérique.";
-      if (phase === "jConclure") return <Katex expression={String(exercice.limiteFinale)} />;
-    }
-    if (exercice.famille === "K") {
-      if (phase === "kForme") return "0/0";
-      if (phase === "kNumerateur1") return "Forme équivalente à f'(x), vérifiée par équivalence numérique.";
-      if (phase === "kDenominateur1") return "Forme équivalente à g'(x), vérifiée par équivalence numérique.";
-      if (phase === "kNumerateur2")
-        return exercice.expAuNumerateur ? (
-          "Forme équivalente à f''(x), vérifiée par équivalence numérique."
-        ) : (
-          <Katex expression={String(2 * exercice.m)} />
-        );
-      if (phase === "kDenominateur2")
-        return exercice.expAuNumerateur ? (
-          <Katex expression={String(2 * exercice.m)} />
-        ) : (
-          "Forme équivalente à g''(x), vérifiée par équivalence numérique."
-        );
-      if (phase === "kConclure") return <Katex expression={String(exercice.limiteFinale)} />;
-    }
-    if (exercice.famille === "L") {
-      if (phase === "lReformuler") return "Forme reformulée vers le pivot (1+1/u)^u, équivalente à f(x).";
-      if (phase === "lConclure") return <Katex expression={`e^{${exercice.k * exercice.m}}`} />;
-    }
-    if (exercice.famille === "N") {
-      if (phase === "nCombiner") return "Forme combinée via la loi des puissances, équivalente à f(x).";
-      if (phase === "nConclure") return <Katex expression={`${exercice.base}^{${exercice.k * exercice.m}}`} />;
-    }
-    return null;
+    // Réponse attendue = « Résultat » du corrigé détaillé de l'écran (même source que le papier) :
+    // valeurs EXACTES (« -\dfrac{2}{3}\ln(3) \approx -0{,}7324 »), dérivées écrites — plus de flottant
+    // brut ni de « forme équivalente, vérifiée par équivalence numérique ».
+    if (phase === "hForme" || phase === "iForme" || phase === "jForme" || phase === "kForme") return <Katex expression={"\\text{forme } \\dfrac{0}{0}"} />;
+    if (phase === "gOrdre1") return "Non — à l'ordre 1, les termes dominants s'annulent : il faut l'ordre 2.";
+    if (exercice.famille === "C" && phase === "cFacteurs")
+      return <Katex expression={`${formatCibleTexte(exercice.limiteFacteur1)} \\quad , \\quad ${formatCibleTexte(exercice.limiteFacteur2)}`} />;
+    const l = reponseAttendueLimitesExpoLatex(exercice, phase);
+    return l ? <Katex expression={l} /> : null;
   };
+
+  // Corrigé détaillé « comme au tableau » de l'écran (source unique avec le papier,
+  // `limitesExponentielles/corrigeDetaille.ts`), affiché sous la réponse attendue.
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLimitesExponentielles(exercice), lettreEtape(sequenceLimitesExponentielles(exercice).indexOf(phase)))} />;
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: reponseAttenduePhase(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
