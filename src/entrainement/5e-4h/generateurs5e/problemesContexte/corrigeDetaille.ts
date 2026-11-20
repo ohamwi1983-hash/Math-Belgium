@@ -129,7 +129,8 @@ function correctionA1(e: ExerciceScenarioAConteneur, r: RetenusContexte): EtapeC
   // a) Tableau : h, aire des bases, aire latérale pour chaque rayon.
   const tab: LigneCalcul[] = [];
   for (const l of e.lignesTableau) {
-    tab.push(ligne(`h=\\dfrac{${VL}}{\\pi\\cdot ${l.r}^2}=\\dfrac{${nombreLatex(k, 0)}}{${l.r * l.r}}${exact(l.hAttendu) ? "=" : "\\approx "}${nombreLatex(l.hAttendu, 2)}`, jf("rayon ", { l: `r=${l.r}` }, " : on isole h dans ", { l: "V=\\pi r^2 h" })));
+    tab.push(ligne(`h=\\dfrac{${VL}}{\\pi\\cdot ${l.r}^2}=\\dfrac{${nombreLatex(k, 0)}}{${l.r * l.r}}`, jf("rayon ", { l: `r=${l.r}` }, " : on isole h dans ", { l: "V=\\pi r^2 h" })));
+    tab.push(ligne(`${exact(l.hAttendu) ? "=" : "\\approx "}${nombreLatex(l.hAttendu, 2)}`));
     tab.push(ligne(`A_{\\text{bases}}=2\\pi\\cdot ${l.r}^2\\approx ${nombreLatex(l.aireBasesAttendue, 2)}`, "deux disques de rayon r"));
     tab.push(ligne(`A_{\\text{lat}}=\\dfrac{2\\cdot ${VL}}{${l.r}}\\approx ${nombreLatex(l.aireLateraleAttendue, 2)}`, jf("périmètre × hauteur avec h non arrondi : ", { l: "2\\pi r\\cdot\\frac{V}{\\pi r^2}=\\frac{2V}{r}" })));
   }
@@ -162,7 +163,7 @@ function correctionA1(e: ExerciceScenarioAConteneur, r: RetenusContexte): EtapeC
       ligne("\\iff x^3=\\dfrac{V}{\\pi}", jf("on divise par ", { l: "2\\pi" })),
       ligne("\\iff x=\\sqrt[3]{\\dfrac{V}{\\pi}}", "racine cubique"),
     ]),
-    calcul(lc, [ligne(`x=\\sqrt[3]{\\dfrac{${VL}}{\\pi}}=\\sqrt[3]{${nombreLatex(k, 0)}}\\approx ${nombreLatex(e.xEgaliteAires, 2)}`, jf("avec ", { l: `V=${VL}` }, ", à la calculatrice"))], [], "Valeur"),
+    calcul(lc, [ligne(`x=\\sqrt[3]{\\dfrac{${VL}}{\\pi}}=\\sqrt[3]{${nombreLatex(k, 0)}}`, jf("avec ", { l: `V=${VL}` })), ligne(`\\approx ${nombreLatex(e.xEgaliteAires, 2)}`, "à la calculatrice")], [], "Valeur"),
     resultat(lc, [f(formatTermeXEgaliteAiresA(e)), t(" cm")]),
     piege(lc, [t("Le rayon où les deux aires sont égales n'est pas celui qui minimise la quantité totale de matériau.")]),
     // d) Lecture du minimum.

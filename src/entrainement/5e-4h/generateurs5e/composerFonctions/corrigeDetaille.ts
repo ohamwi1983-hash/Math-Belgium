@@ -368,7 +368,7 @@ function conditionSurInterieure(dir: CompositionDirigee, c: ConditionSurG): { bl
   // Seuil NÉGATIF (domaine vide, cas particulier) face à une racine, toujours positive ou nulle : on
   // n'élève pas au carré, on conclut par le signe (jamais vrai pour « ≤ / < », toujours vrai là où la
   // racine existe pour « ≥ / > »).
-  if ((fn.type === "irrationnelleSimple" || fn.type === "fractionSousRacine") && s < 0 && rel !== "≠" && rel !== "=") {
+  if ((fn.type === "irrationnelleSimple" || fn.type === "fractionSousRacine") && s < 0 && rel !== "=") {
     const racine = fn.type === "irrationnelleSimple" ? `\\sqrt{${P(fn.radicande)}}` : `\\sqrt{\\dfrac{${P(fn.numerateur)}}{${P(fn.denominateur)}}}`;
     const jamais = rel === "≤" || rel === "<";
     const lignes: LigneCalcul[] = [
@@ -376,7 +376,7 @@ function conditionSurInterieure(dir: CompositionDirigee, c: ConditionSurG): { bl
       ligne(`\\iff ${racine}${relLatex(rel)} ${S}`, "on remplace par l'expression"),
       jamais
         ? ligne("\\iff x\\in\\varnothing", jf("une racine carrée est positive ou nulle : elle n'est jamais inférieure à ", { l: S }))
-        : ligne("\\iff x\\in\\mathbb{R}", jf("une racine carrée est positive ou nulle : elle est toujours supérieure à ", { l: S }, " (là où elle existe)")),
+        : ligne("\\iff x\\in\\mathbb{R}", jf(rel === "≠" ? "une racine carrée est positive ou nulle : elle est toujours différente de " : "une racine carrée est positive ou nulle : elle est toujours supérieure à ", { l: S }, " (là où elle existe)")),
     ];
     blocs.push({ intro: [], lignes });
     return { blocs, ensemble: jamais ? { forme: "intervalles", points: [], morceaux: [] } : { forme: "reel", points: [], morceaux: [] } };

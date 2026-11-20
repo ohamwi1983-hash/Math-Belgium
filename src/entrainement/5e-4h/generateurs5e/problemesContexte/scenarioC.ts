@@ -207,6 +207,10 @@ export function construireScenarioCAvecFormes(formeCV: FormeCoutVariableC, forme
     else if (racines.length > 0) candidats = [4, 9, 16, 25];
     else if (cubiques.length > 0) candidats = [8, 27];
     else candidats = Array.from({ length: 27 }, (_, i) => i + 4);
+    // Repli et variété (ex. CV = kx³ et CA = p∛x, où x₀ = 8 ou 27 ne convient jamais ; sinon x₀ figé à 8
+    // pour certaines combinaisons) : x₀ entier quelconque,
+    // CF arrondi au centième, seuil à moins de 0,02 de x₀.
+    if (tentative > TENTATIVES_MAX / 4 || (candidats.length <= 4 && Math.random() < 0.35)) candidats = Array.from({ length: 27 }, (_, i) => i + 4);
     const x0 = tirerElement(candidats);
     const brut = chiffreAffaires(formeCA, p, x0) - coutVariable(formeCV, k, x0) - coutProportionnel(m, x0);
     const cf = auCentieme(brut) ?? Math.round(brut * 100) / 100;

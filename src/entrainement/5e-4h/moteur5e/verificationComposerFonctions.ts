@@ -66,8 +66,40 @@ function proches(a: number, b: number): boolean {
   return Math.abs(a - b) <= TOLERANCE_ABSOLUE + TOLERANCE_RELATIVE * Math.max(Math.abs(a), Math.abs(b));
 }
 
+/** Racines carrées remplacées par des racines CUBIQUES (définies sur ℝ, mêmes règles de calcul :
+ * produit, quotient) — seul moyen de comparer deux écritures d'une composée de domaine VIDE (cas
+ * particulier, audit 5e ch. 1), qui ne prend aucune valeur réelle. */
+function versRacinesCubiques(texte: string): string {
+  return texte.replace(/sqrt\s*\(/gi, "cbrt(").replace(/√\s*(\(|\d+(?:[.,]\d+)?|[a-zA-Z]+)/g, (_t, c: string) => (c === "(" ? "cbrt(" : `cbrt(${c})`));
+}
+
+function diagnostiquerFormuleDomaineVide(reference: string, texte: string): StatutVerification {
+  let comparaisonsValides = 0;
+  try {
+    evaluerExpressionGenerale(texte, 0.37);
+  } catch {
+    return "parse_error";
+  }
+  try {
+    for (let x = -10; x <= 10; x += 0.37) {
+      const soumisBrut = evaluerExpressionGenerale(versRacinesCubiques(texte), x);
+      const attenduBrut = evaluerExpressionGenerale(versRacinesCubiques(reference), x);
+      const soumis = Number.isFinite(soumisBrut) ? soumisBrut : null;
+      const attendu = Number.isFinite(attenduBrut) ? attenduBrut : null;
+      if (soumis === null && attendu === null) continue;
+      if ((soumis === null) !== (attendu === null)) return "not_equivalent";
+      if (!proches(soumis as number, attendu as number)) return "not_equivalent";
+      comparaisonsValides++;
+    }
+  } catch {
+    return "parse_error";
+  }
+  return comparaisonsValides >= MIN_COMPARAISONS_VALIDES ? "correct" : "not_equivalent";
+}
+
 export function diagnostiquerFormuleComposee(reference: string, texte: string, domaineReference: EnsembleReelGuide): StatutVerification {
   if (texte.trim() === "") return "parse_error";
+  if (domaineReference.forme === "intervalles" && domaineReference.morceaux.length === 0) return diagnostiquerFormuleDomaineVide(reference, texte);
   let comparaisonsValides = 0;
   try {
     for (const x of pointsEchantillonDomaine(domaineReference)) {

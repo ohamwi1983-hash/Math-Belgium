@@ -576,7 +576,9 @@ function construireCoeurDirection(interieure: DonneeFonction, exterieure: Donnee
   const riche = estRiche(interieure.fonction);
   const conditions = riche ? conditionsExterieurSurG(exterieure) : [];
   const domaineApresCarre = riche ? domaineApresCarreDeConditions(interieure.fonction, conditions) : null;
-  return { riche, conditions, domaineApresCarre, domaine: domaineCompose(interieure, exterieure) };
+  // Ensemble vide sous sa forme canonique (aucun morceau) : affichage « ∅ », comparaisons.
+  const canonique = (e: EnsembleReelGuide): EnsembleReelGuide => (estDomaineVide(e) ? { forme: "intervalles", points: [], morceaux: [] } : e);
+  return { riche, conditions, domaineApresCarre: domaineApresCarre === null ? null : canonique(domaineApresCarre), domaine: canonique(domaineCompose(interieure, exterieure)) };
 }
 
 /** Audit 5e ch. 1 (V2) : la deuxième condition (« intérieure(x) dans le domaine de l'extérieure »)
@@ -595,7 +597,7 @@ function memeEnsemble(a: EnsembleReelGuide, b: EnsembleReelGuide): boolean {
 /** `vide` : la direction doit avoir un domaine vide (true), ne doit pas en avoir (false). Un domaine
  * vide n'est accepté que pour une direction riche dont l'intérieure est une racine (toujours ≥ 0)
  * comparée à un seuil négatif — « √(x+1) ≤ −2 » : le cas du cours. */
-function coeurDirectionValide(coeur: CoeurDirection, interieure: DonneeFonction, vide: boolean): boolean {
+function coeurDirectionValide(coeur: CoeurDirection, interieure: DonneeFonction, vide: boolean, probaSansEffet: number): boolean {
   if (estDomainePathologique(coeur.domaine)) return false;
   const estVide = estDomaineVide(coeur.domaine);
   if (estVide !== vide) return false;
@@ -605,7 +607,7 @@ function coeurDirectionValide(coeur: CoeurDirection, interieure: DonneeFonction,
     if (!coeur.conditions.every((c) => Math.abs(c.seuil) > SEUIL_MIN_CONDITION && estRationnelSaisissable(c.seuil))) return false;
     return coeur.domaineApresCarre === null || bornesRationnellesSaisissables(coeur.domaineApresCarre);
   }
-  if (memeEnsemble(coeur.domaine, interieure.domaine) && Math.random() >= PROBA_CONDITION2_SANS_EFFET) return false;
+  if (memeEnsemble(coeur.domaine, interieure.domaine) && Math.random() >= probaSansEffet) return false;
   // Bornes saisissables (dénominateur ≤ 12) pour TOUTES les directions, simples comprises.
   if (!coeur.riche) return bornesRationnellesSaisissables(coeur.domaine);
   if (!coeur.conditions.every((c) => c.seuil > SEUIL_MIN_CONDITION)) return false;
@@ -619,20 +621,22 @@ function coeurDirectionValide(coeur: CoeurDirection, interieure: DonneeFonction,
  * valide par `coeurDirectionValide` (jamais avant, voir la note de `CoeurDirection`). */
 function construireDirection(interieure: DonneeFonction, nomInterieure: "f" | "g", exterieure: DonneeFonction, coeur: CoeurDirection): CompositionDirigee {
   const formule = formuleComposee(exterieure, interieure);
+  // LaTeX simplifié (mathjs, coûteux) calculé à la PREMIÈRE lecture seulement : la recherche de graine
+  // des évaluations (profil, cas particulier « domaine vide ») ne le paie plus pour chaque essai.
+  // Aucun tirage aléatoire dedans : l'instance reste identique pour une même graine. Forme affichée :
+  // `latexReferenceNormalisee` (fraction unique réduite, B.1), sinon `simplifierLatex` (repli sur la
+  // substitution brute si mathjs échoue — jamais d'exception).
+  let latexCalcule: string | null = null;
   return {
     interieure,
     nomInterieure,
     exterieure,
     formule,
-    // B.1 (promptcorrectionsround2.md) — la substitution brute (latexCompose) empile des parenthèses
-    // et des fractions imbriquées jamais regroupées. `simplifierEnFractionUnique` (rationalize) est
-    // tentée EN PREMIER : elle seule sait regrouper une fraction de fractions en une fraction unique
-    // réduite (`9/(6/(-3x-2)-5)` → `(-27x-18)/(15x+16)`, le cas signalé pour 5gen3) — elle échoue vite
-    // (`null`) sur toute composition "riche" (racine non résoluble algébriquement), auquel cas
-    // `simplifierLatex` (distribue sans regrouper de fraction) prend le relais, avec son propre repli
-    // sur la substitution brute si mathjs échoue (jamais d'exception ici, dans un cas comme l'autre).
-    latex: latexReferenceNormalisee(formule) ?? simplifierLatex(formule, latexCompose(exterieure, interieure)),
     ...coeur,
+    get latex(): string {
+      if (latexCalcule === null) latexCalcule = latexReferenceNormalisee(formule) ?? simplifierLatex(formule, latexCompose(exterieure, interieure));
+      return latexCalcule;
+    },
   };
 }
 
@@ -671,15 +675,15 @@ export function comboPeutEtreVide(comboId: string, sens: SensComposition): boole
  * ≈ 10 % des exercices au total (mesuré). */
 export const PROBA_VIDE = 0.22;
 
-function construireExercice(f: DonneeFonction, g: DonneeFonction, sens: SensComposition, vide: boolean): ExerciceComposerFonctions | null {
+function construireExercice(f: DonneeFonction, g: DonneeFonction, sens: SensComposition, vide: boolean, probaSansEffet = PROBA_CONDITION2_SANS_EFFET): ExerciceComposerFonctions | null {
   // Avec `vide`, UNE direction au moins est vide (la première possible) ; l'autre ne l'est pas.
   const peutVideFRondG = sens !== "gRondF" && directionPeutEtreVide(g.fonction.type, f.fonction.type);
   const videFRondG = vide && peutVideFRondG;
   const videGRondF = vide && !videFRondG;
   const coeurFRondG = sens === "gRondF" ? null : construireCoeurDirection(g, f);
-  if (coeurFRondG !== null && !coeurDirectionValide(coeurFRondG, g, videFRondG)) return null;
+  if (coeurFRondG !== null && !coeurDirectionValide(coeurFRondG, g, videFRondG, probaSansEffet)) return null;
   const coeurGRondF = sens === "fRondG" ? null : construireCoeurDirection(f, g);
-  if (coeurGRondF !== null && !coeurDirectionValide(coeurGRondF, f, videGRondF)) return null;
+  if (coeurGRondF !== null && !coeurDirectionValide(coeurGRondF, f, videGRondF, probaSansEffet)) return null;
   if (vide && !videFRondG && coeurGRondF === null) return null;
   const fRondG = coeurFRondG !== null ? construireDirection(g, "g", f, coeurFRondG) : null;
   const gRondF = coeurGRondF !== null ? construireDirection(f, "f", g, coeurGRondF) : null;
@@ -744,12 +748,16 @@ export function construireAvecCombos(comboId: string, sens: SensComposition, vid
   if (!combo) throw new Error(`construireAvecCombos : combinaison inconnue "${comboId}"`);
   const [familleF, familleG] = combo.familles;
   const veutVide = vide ?? (comboPeutEtreVide(comboId, sens) && Math.random() < PROBA_VIDE);
+  // Repli (combinaisons rares, ex. racine sur fraction des deux côtés au sélecteur) : la condition 2
+  // « sans effet » est alors acceptée — jamais un échec du générateur.
   for (const essaiVide of veutVide ? [true, false] : [false]) {
-    for (let tentative = 0; tentative < TENTATIVES_MAX; tentative++) {
-      const f = genererDonneeFonction("f", familleF);
-      const g = genererDonneeFonction("g", familleG);
-      const exercice = construireExercice(f, g, sens, essaiVide);
-      if (exercice !== null) return exercice;
+    for (const probaSansEffet of [PROBA_CONDITION2_SANS_EFFET, 1]) {
+      for (let tentative = 0; tentative < (combo.retiree ? 6 * TENTATIVES_MAX : TENTATIVES_MAX); tentative++) {
+        const f = genererDonneeFonction("f", familleF);
+        const g = genererDonneeFonction("g", familleG);
+        const exercice = construireExercice(f, g, sens, essaiVide, probaSansEffet);
+        if (exercice !== null) return exercice;
+      }
     }
   }
   throw new Error(`construireAvecCombos : impossible d'obtenir une instance non dégénérée pour "${comboId}"/"${sens}" après ${TENTATIVES_MAX} tentatives`);
