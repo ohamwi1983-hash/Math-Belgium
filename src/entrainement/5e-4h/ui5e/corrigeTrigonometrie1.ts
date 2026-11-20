@@ -18,10 +18,10 @@ import { decouperLigneCalcul, latex, ligne, texte } from "../../export/corrigeTa
  * Une transformation par ligne, égalités toujours VRAIES (« ≈ » seulement après une valeur approchée).
  */
 
-export const COURS_ARCS = "(cours, § 1)";
-export const COURS_POLYGONES = "(cours, § 2)";
-export const COURS_GEOMETRIE_CERCLE = "(cours, § 3)";
-export const COURS_PARAMETRES = "(cours, § 4)";
+export const COURS_ARCS = "(cours, §\u00a01)";
+export const COURS_POLYGONES = "(cours, §\u00a02)";
+export const COURS_GEOMETRIE_CERCLE = "(cours, §\u00a03)";
+export const COURS_PARAMETRES = "(cours, §\u00a04)";
 
 export type Fragments = FragmentConsigne[];
 
