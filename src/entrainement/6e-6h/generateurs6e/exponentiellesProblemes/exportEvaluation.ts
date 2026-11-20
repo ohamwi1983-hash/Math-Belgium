@@ -74,14 +74,20 @@ function questionsPapier(e: E): { questions: QuestionExercice[]; etapes: string[
     case "D":
       return {
         questions: [
-          { consigne: [texte("Calcule le rapport "), latex("\\dfrac{b-c}{a-b}"), texte(" des deux différences consécutives.")] },
+          { consigne: [texte("Calcule le rapport "), latex("\\dfrac{b-c}{a-b}"), texte(" des deux différences consécutives : il vaut "), latex(e.d === 1 ? "r" : `r^{${e.d}}`), texte(".")] },
           { consigne: [texte("Détermine la valeur de stabilisation L, arrondie au dixième.")] },
           { consigne: [texte("Donne l'expression complète de "), latex("T(t)"), texte(".")] },
           { consigne: [texte("Évalue le modèle en "), latex(`t=${e.tSuppl}`), texte(", arrondi au dixième.")] },
         ],
         etapes: [["a"], ["b"], ["c"], ["d"]],
         donnees,
-        enPlus: [texte(" On note a, b et c ces trois valeurs, et on modélise l'évolution par "), latex("T(t)=L+C\\cdot r^{t}"), texte(".")],
+        enPlus: [
+          texte(" On note a, b et c ces trois valeurs, mesurées à "),
+          latex(`d=${e.d}`),
+          texte(` ${e.d === 1 ? "unité" : "unités"} d'intervalle, et on modélise l'évolution par `),
+          latex("T(t)=L+C\\cdot r^{t}"),
+          texte(" : le rapport de deux différences consécutives porte sur d unités."),
+        ],
       };
     case "E":
       return {
@@ -140,7 +146,7 @@ function reponseBreve(e: E): FragmentConsigne[] {
  * est donnée (C, D, E, F, G) ; piège dans les DONNÉES : baisse en pourcentage (A), pourcentage du
  * reste (B), valeurs décroissantes r < 1 (C), approche par en dessous C < 0 (D) ; G : la décision
  * est le verdict, piège constant 0. Écran de pure lecture : G c (comparer deux nombres). Nombres :
- * calculatrice partout sauf A « doublement » (entiers exacts).
+ * calculatrice partout sauf A « doublement » et D avec d = 1 (données exactes).
  */
 function criteresDifficulte(e: E): CriteresDifficulte {
   let methode: 0 | 1 | 2 = 1;
@@ -161,7 +167,8 @@ function criteresDifficulte(e: E): CriteresDifficulte {
       piege = e.C < 0 ? 1 : 0;
       break;
   }
-  const nombres: 0 | 1 = e.famille === "A" && e.sousType === "doublement" ? 0 : 1;
+  // D : données entières exactes ; seule la racine d-ième (d ≥ 2) du rapport demande la calculatrice.
+  const nombres: 0 | 1 = (e.famille === "A" && e.sousType === "doublement") || (e.famille === "D" && e.d === 1) ? 0 : 1;
   return { ...etapesDuCorrige(correctionDetailleeExponentiellesProblemes(e), e.famille === "G" ? ["c"] : []), methode, piege, nombres };
 }
 

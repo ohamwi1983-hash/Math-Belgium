@@ -36,6 +36,9 @@ import { evaluerValeurExponentielle } from "./expressionExponentielle";
 const TOLERANCE_EXPRESSION = 0.05;
 const TOLERANCE_TAUX = 0.03;
 const TOLERANCE_EXACTE = 0.05;
+/** Famille D : données entières exactes, le rapport r^d vaut exactement 0,5 / 0,75 / 0,8 / 0,6 / 0,4
+ * (rapport des différences imprimées) — tolérance d'une saisie exacte. */
+const TOLERANCE_RAPPORT_EXACT_D = 0.005;
 
 function toleranceArrondie(cible: number): number {
   return Math.max(0.5, Math.abs(cible) * 0.01);
@@ -138,16 +141,19 @@ export function verifierCEcran3(exercice: ExerciceExpoProbC, textes: string[]): 
 // ============================================================================
 
 export function diagnostiquerDEcran1(exercice: ExerciceExpoProbD, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.rapport, TOLERANCE_TAUX);
+  return diagnostiquerValeur(texte, exercice.rapport, TOLERANCE_RAPPORT_EXACT_D);
 }
 
 export function diagnostiquerDEcran2(exercice: ExerciceExpoProbD, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.L, toleranceArrondie(exercice.L));
+  return diagnostiquerValeur(texte, exercice.L, TOLERANCE_EXACTE);
 }
 
 export function diagnostiquerDEcran3(exercice: ExerciceExpoProbD, texte: string): StatutVerification {
   const { L, C, r } = exercice;
-  return diagnostiquerEquivalenceFonction(texte, (t) => L + C * Math.pow(r, t), POINTS_T, TOLERANCE_EXPRESSION, "t");
+  // r = (r^d)^{1/d} est irrationnel pour d ≥ 2 et s'écrit au millième (réponse attendue, corrigé) :
+  // la tolérance couvre l'écart que produit un r arrondi au millième, en chaque point testé.
+  const ecartArrondiR = Math.max(...POINTS_T.map((t) => Math.abs(C * (Math.pow(r + 0.0005, t) - Math.pow(r, t)))));
+  return diagnostiquerEquivalenceFonction(texte, (t) => L + C * Math.pow(r, t), POINTS_T, TOLERANCE_EXPRESSION + ecartArrondiR, "t");
 }
 
 export function diagnostiquerDEcran4(exercice: ExerciceExpoProbD, texte: string): StatutVerification {

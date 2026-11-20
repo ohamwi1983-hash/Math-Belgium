@@ -195,13 +195,12 @@ function etapesC(e: ExerciceExpoProbC): Etapes {
 
 // ---------------------------------------------------------------------------- Famille D
 
-/** Rapport, L, C et r recalculés depuis les trois valeurs IMPRIMÉES (a, b, c). */
-export function parametresDepuisDonneesD(e: ExerciceExpoProbD): { d1: number; d2: number; rapport: number; aMoinsL: number; L: number; r: number } | null {
+/** Rapport, a − L (= C), L et r recalculés depuis les trois valeurs IMPRIMÉES a, b, c — entières et
+ * exactes par construction (`familles/D.ts`) : ils redonnent exactement ρ, C, L de l'instance. */
+export function parametresDepuisDonneesD(e: ExerciceExpoProbD): { d1: number; d2: number; rapport: number; aMoinsL: number; L: number; r: number } {
   const d1 = e.aAffiche - e.bAffiche;
   const d2 = e.bAffiche - e.cAffiche;
-  if (d1 === 0 || d1 === d2) return null;
   const rapport = d2 / d1;
-  if (!(rapport > 0)) return null;
   const aMoinsL = (d1 * d1) / (d1 - d2);
   return { d1, d2, rapport, aMoinsL, L: e.aAffiche - aMoinsL, r: Math.pow(rapport, 1 / e.d) };
 }
@@ -209,45 +208,71 @@ export function parametresDepuisDonneesD(e: ExerciceExpoProbD): { d1: number; d2
 function etapesD(e: ExerciceExpoProbD): Etapes {
   const { aAffiche: a, bAffiche: b, cAffiche: c, d } = e;
   const p = parametresDepuisDonneesD(e);
-  const nb = (v: number) => formatDecimal(v, 2);
-  const lignesA: LigneCalcul[] = [ligne(`a-b=${a}-${b < 0 ? `(${b})` : b}`, "valeurs imprimées à t = 0 et t = d"), ligne(`=${nb(a - b)}`), ligne(`b-c=${b}-${c < 0 ? `(${c})` : c}`, "valeurs imprimées à t = d et t = 2d"), ligne(`=${nb(b - c)}`)];
-  if (p) lignesA.push(ligne(`\\dfrac{b-c}{a-b}=\\dfrac{${nb(p.d2)}}{${nb(p.d1)}}`, "rapport des différences"), ligne(vautAbs(p.rapport, 4), "calculatrice"));
-  const lignesB: LigneCalcul[] = p
-    ? [
-        ligne("a-L=\\dfrac{a-b}{1-r^{d}}", justif("car ", { l: "a-L=C" }, " et ", { l: "a-b=C\\left(1-r^{d}\\right)" })),
-        ligne(`=\\dfrac{${nb(p.d1)}}{1-\\frac{${nb(p.d2)}}{${nb(p.d1)}}}`, justif("", { l: `r^{d}=\\dfrac{${nb(p.d2)}}{${nb(p.d1)}}` }, " (rapport non arrondi)")),
-        ligne(`=\\dfrac{${p.d1 < 0 ? `(${nb(p.d1)})` : nb(p.d1)}^{2}}{${nb(p.d1)}-${p.d2 < 0 ? `(${nb(p.d2)})` : nb(p.d2)}}`, justif("on multiplie haut et bas par ", { l: nb(p.d1) })),
-        ligne(vautAbs(p.aMoinsL, 3), "calculatrice"),
-        ligne(`L=${a}-(a-L)`, "on isole L"),
-        ligne(vautAbs(p.L, 3), ""),
-      ]
-    : [ligne(`a-b=b-c=${nb(a - b)}`, "les différences imprimées sont égales : le rapport vaut 1, les données ne permettent pas le calcul")];
-  const lignesC: LigneCalcul[] = p
-    ? [
-        ligne("C=a-L", "valeur en t = 0 moins la limite"),
-        ligne(vautAbs(p.aMoinsL, 3), "étape 2"),
-        ligne(`r=\\left(r^{${d}}\\right)^{\\frac{1}{${d}}}`, `racine ${d}-ième du rapport`),
-        ligne(vautAbs(p.r, 4), "calculatrice"),
-        ligne(`T(t)\\approx ${dec(p.L, 2)}${p.aMoinsL < 0 ? "-" : "+"}${dec(Math.abs(p.aMoinsL), 2)}\\cdot ${dec(p.r, 3)}^{\\,t}`, "on remplace L, C et r"),
-      ]
-    : [ligne("T(t)=L+C\\cdot r^{t}", "forme du modèle")];
-  const lignesD: LigneCalcul[] = p
-    ? [ligne(`T(${e.tSuppl})=L+C\\cdot r^{${e.tSuppl}}`, `on remplace t par ${e.tSuppl}`), ligne(vautAbs(p.L + p.aMoinsL * Math.pow(p.r, e.tSuppl), 3), "L, C et r non arrondis")]
-    : [ligne(`T(${e.tSuppl})=L+C\\cdot r^{${e.tSuppl}}`, `on remplace t par ${e.tSuppl}`)];
+  const par = (v: number) => (v < 0 ? `(${v})` : String(v));
+  const rapportL = formatDecimal(p.rapport, 3);
+  const rL = d === 1 ? `=${rapportL}` : vautAbs(p.r, 4);
+  const exactSuppl = Math.abs(Math.round(e.valeurSuppl * 10) / 10 - e.valeurSuppl) < 1e-9;
+  const signeC = p.aMoinsL < 0 ? "-" : "+";
+  const rd = d === 1 ? "r" : `r^{${d}}`;
   return {
     dEcran1: [
-      utilise("a", [texte("Pour "), latex("T(t)=L+C\\cdot r^{t}"), texte(", deux différences consécutives à d unités d'écart valent "), latex("C\\left(1-r^{d}\\right)"), texte(" et "), latex("C\\,r^{d}\\left(1-r^{d}\\right)"), texte(" : leur rapport vaut "), latex("r^{d}"), texte(`, même sans connaître L ${COURS_PROBLEMES}.`)]),
-      calcul("a", lignesA),
-      resultat("a", [latex(`r^{${d}}\\approx ${rep(e, "dEcran1")[0]!}`)]),
+      utilise("a", [
+        texte("Pour "),
+        latex("T(t)=L+C\\cdot r^{t}"),
+        texte(", deux différences consécutives, à "),
+        latex(`d=${d}`),
+        texte(" unités d'écart, valent "),
+        latex("C\\left(1-r^{d}\\right)"),
+        texte(" et "),
+        latex("C\\,r^{d}\\left(1-r^{d}\\right)"),
+        texte(" : leur rapport vaut "),
+        latex(rd),
+        texte(`, même sans connaître L ${COURS_PROBLEMES}.`),
+      ]),
+      calcul("a", [
+        ligne(`a-b=${a}-${par(b)}`, justif("mesures à ", { l: "t=0" }, " et ", { l: `t=${d}` })),
+        ligne(`=${p.d1}`),
+        ligne(`b-c=${b}-${par(c)}`, justif("mesures à ", { l: `t=${d}` }, " et ", { l: `t=${2 * d}` })),
+        ligne(`=${p.d2}`),
+        ligne(`\\dfrac{b-c}{a-b}=\\dfrac{${p.d2}}{${p.d1}}`, "rapport des différences"),
+        ligne(`=${rapportL}`, "on simplifie"),
+      ]),
+      resultat("a", [latex(`${rd}=${rep(e, "dEcran1")[0]!}`)]),
     ],
-    dEcran2: [utilise("b", [texte("La valeur de départ dépasse la limite de "), latex("C=a-L"), texte(", et "), latex("a-b=C\\left(1-r^{d}\\right)"), texte(` ${COURS_PROBLEMES}.`)]), calcul("b", lignesB), resultat("b", [latex(`L\\approx ${rep(e, "dEcran2")[0]!}`)])],
+    dEcran2: [
+      utilise("b", [texte("La valeur de départ s'écarte de la limite de "), latex("C=a-L"), texte(", et "), latex("a-b=C\\left(1-r^{d}\\right)"), texte(` ${COURS_PROBLEMES}.`)]),
+      calcul("b", [
+        ligne("a-L=\\dfrac{a-b}{1-r^{d}}", justif("car ", { l: "a-L=C" }, " et ", { l: "a-b=C\\left(1-r^{d}\\right)" })),
+        ligne(`=\\dfrac{${p.d1}}{1-${rapportL}}`, "étape 1"),
+        ligne(`=\\dfrac{${p.d1}}{${formatDecimal(1 - p.rapport, 3)}}`),
+        ligne(`=${formatDecimal(p.aMoinsL, 3)}`),
+        ligne(`L=${a}-${par(p.aMoinsL)}`, "on isole L"),
+        ligne(`=${formatDecimal(p.L, 3)}`),
+      ]),
+      resultat("b", [latex(`L=${rep(e, "dEcran2")[0]!}`)]),
+      verification("b", [texte("Avec ces valeurs, la troisième mesure est retrouvée :")], [ligne(`L+C\\cdot\\left(${rd}\\right)^{2}=${formatDecimal(p.L, 3)}${signeC}${Math.abs(p.aMoinsL)}\\cdot ${rapportL}^{2}`, justif("", { l: `C=a-L=${formatDecimal(p.aMoinsL, 3)}` })), ligne(`=${c}`, justif("c'est bien ", { l: "c" }))]),
+    ],
     dEcran3: [
-      utilise("c", [latex("C=T(0)-L=a-L"), texte(" et r est la racine d-ième du rapport ; valeurs non arrondies "), texte(`${COURS_PROBLEMES}.`)]),
-      calcul("c", lignesC),
-      resultat("c", [latex(`T(t)\\approx ${rep(e, "dEcran3")[0]!}`)]),
+      utilise("c", [latex("C=T(0)-L=a-L"), texte(" et r est la racine d-ième du rapport "), texte(`${COURS_PROBLEMES}.`)]),
+      calcul("c", [
+        ligne("C=a-L", "valeur en t = 0 moins la limite"),
+        ligne(`=${formatDecimal(p.aMoinsL, 3)}`, "étape 2"),
+        ...(d === 1 ? [ligne(`r=${rapportL}`, "d = 1 : r est le rapport lui-même")] : [ligne(`r=${rapportL}^{\\frac{1}{${d}}}`, `racine ${d}-ième du rapport`), ligne(rL, "calculatrice")]),
+        ligne(`T(t)${d === 1 ? "=" : "\\approx "}${formatDecimal(p.L, 1)}${signeC}${Math.abs(p.aMoinsL)}\\cdot ${formatDecimal(p.r, 3)}^{\\,t}`, "on remplace L, C et r"),
+      ]),
+      resultat("c", [latex(`T(t)${d === 1 ? "=" : "\\approx "}${rep(e, "dEcran3")[0]!}`)]),
       ...(e.C < 0 ? [piege("c", [texte("Les valeurs montent vers la limite : "), latex("C<0"), texte(" ; le modèle s'écrit avec un signe « − » devant le terme exponentiel.")])] : []),
     ],
-    dEcran4: [utilise("d", [texte(`On remplace t dans le modèle complet (valeurs non arrondies de L, C et r) ${COURS_PROBLEMES}.`)]), calcul("d", lignesD), resultat("d", [latex(`T(${e.tSuppl})\\approx ${rep(e, "dEcran4")[0]!}`)])],
+    dEcran4: [
+      utilise("d", [texte("On remplace t dans le modèle ; comme "), latex(`t=${e.tSuppl}=3\\times ${d}`), texte(", "), latex(`r^{${e.tSuppl}}=\\left(${rd}\\right)^{3}`), texte(` est exact ${COURS_PROBLEMES}.`)]),
+      calcul("d", [
+        ligne(`T(${e.tSuppl})=L+C\\cdot r^{${e.tSuppl}}`, `on remplace t par ${e.tSuppl}`),
+        ligne(`=${formatDecimal(p.L, 3)}${signeC}${Math.abs(p.aMoinsL)}\\cdot ${rapportL}^{3}`, justif("", { l: `r^{${e.tSuppl}}=\\left(${rd}\\right)^{3}` })),
+        ligne(vautAbs(e.valeurSuppl, 3), "on calcule"),
+        ...(exactSuppl ? [] : [ligne(`\\approx ${formatDecimal(e.valeurSuppl, 1)}`, "arrondi au dixième")]),
+      ]),
+      resultat("d", [latex(`T(${e.tSuppl})${exactSuppl ? "=" : "\\approx "}${rep(e, "dEcran4")[0]!}`)]),
+    ],
   };
 }
 

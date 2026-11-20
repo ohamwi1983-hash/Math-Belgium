@@ -316,7 +316,8 @@ function consigneGeneraleD(exercice: ExerciceExpoProbD): FragmentConsigne[] {
 }
 
 function blocDonneesD(exercice: ExerciceExpoProbD): string[] {
-  return [`t=0:\\ ${exercice.aAffiche}`, `t=${exercice.d}:\\ ${exercice.bAffiche}`, `t=${2 * exercice.d}:\\ ${exercice.cAffiche}`];
+  // Les trois valeurs sont nommées a, b, c (consignes, aides, corrigé) : on les nomme dans les données.
+  return [`a=${exercice.aAffiche}\\ (t=0)`, `b=${exercice.bAffiche}\\ (t=${exercice.d})`, `c=${exercice.cAffiche}\\ (t=${2 * exercice.d})`];
 }
 
 // Correctif transversal (voir `etatActuelB` ci-dessus) : chaque écran ne montrait QUE le fait de
@@ -324,9 +325,9 @@ function blocDonneesD(exercice: ExerciceExpoProbD): string[] {
 // écrans précédents, jamais seulement T(t)).
 function etatActuelD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dEcran3" | "dEcran4"): string[] | null {
   if (phase === "dEcran1") return null;
-  const lignes = [`\\text{rapport} \\approx ${formatDecimal(exercice.rapport, 3)}\\ \\text{(étape 1)}`];
+  const lignes = [`\\text{rapport} = ${formatDecimal(exercice.rapport, 3)}\\ \\text{(étape 1)}`];
   if (phase === "dEcran2") return lignes;
-  lignes.push(`L \\approx ${formatDecimal(exercice.L, 1)}\\ \\text{(étape 2)}`);
+  lignes.push(`L = ${formatDecimal(exercice.L, 1)}\\ \\text{(étape 2)}`);
   if (phase === "dEcran3") return lignes;
   lignes.push(`T(t) \\approx ${formatModeleD(exercice)}\\ \\text{(étape 3)}`);
   return lignes;
@@ -335,7 +336,17 @@ function etatActuelD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" |
 function consigneEcranD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dEcran3" | "dEcran4"): FragmentConsigne[] {
   switch (phase) {
     case "dEcran1":
-      return [texte("Calcule les deux différences consécutives "), latex("(a-b)"), texte(" et "), latex("(b-c)"), texte(", puis leur rapport.")];
+      return [
+        texte("Calcule les deux différences consécutives "),
+        latex("(a-b)"),
+        texte(" et "),
+        latex("(b-c)"),
+        texte(", puis leur rapport "),
+        latex("\\dfrac{b-c}{a-b}"),
+        texte(" : il vaut "),
+        latex(exercice.d === 1 ? "r" : `r^{${exercice.d}}`),
+        texte(`, car deux mesures successives sont séparées de ${exercice.d} ${exercice.d === 1 ? "unité" : "unités"} de temps.`),
+      ];
     case "dEcran2":
       return [texte("À partir du rapport CORRECT de l'étape précédente, détermine la valeur de stabilisation L.")];
     case "dEcran3":
@@ -361,11 +372,11 @@ function aideD1(_exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dE
 function aideD2(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dEcran3" | "dEcran4"): AideAvecLatex {
   switch (phase) {
     case "dEcran1":
-      return { texte: "Les deux différences, côte à côte (rapport non calculé) :", latex: `(a-b) \\approx ${formatDecimal(exercice.a - exercice.b, 2)}, \\quad (b-c) \\approx ${formatDecimal(exercice.b - exercice.c, 2)}` };
+      return { texte: "Les deux différences, côte à côte (rapport non calculé) :", latex: `(a-b) = ${formatDecimal(exercice.a - exercice.b, 2)}, \\quad (b-c) = ${formatDecimal(exercice.b - exercice.c, 2)}` };
     case "dEcran2":
-      return { texte: "Valeur calculée (soustraction finale non faite) :", latex: `\\dfrac{a-b}{1-\\text{rapport}} \\approx ${formatDecimal((exercice.a - exercice.b) / (1 - exercice.rapport), 2)}` };
+      return { texte: "Valeur calculée (soustraction finale non faite) :", latex: `\\dfrac{a-b}{1-\\text{rapport}} = ${formatDecimal((exercice.a - exercice.b) / (1 - exercice.rapport), 2)}` };
     case "dEcran3":
-      return { texte: "Valeurs déjà connues :", latex: `C = a-L \\approx ${formatDecimal(exercice.C, 2)}, \\quad r \\approx ${formatDecimal(exercice.r, 3)}` };
+      return { texte: "Valeurs déjà connues :", latex: `C = a-L = ${formatDecimal(exercice.C, 2)}, \\quad r ${exercice.d === 1 ? "=" : "\\approx"} ${formatDecimal(exercice.r, 3)}` };
     case "dEcran4":
       return { texte: "Modèle confirmé :", latex: `T(t) \\approx ${formatModeleD(exercice)}` };
   }
