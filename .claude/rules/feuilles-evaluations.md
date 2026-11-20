@@ -816,3 +816,37 @@ plus π/2 + kπ pour les valeurs écartées) : 1 190 tirages, ≈ 12 600 égalit
 (2 graines, évaluation 2 séries + aménagée + feuille) : 0 débordement à 680 et 1 280 px, 0 formule
 coupée, 0 `.katex-error`. Plan réel `construirePlan` (2 séries, calculatrice interdite / autorisée,
 cas particulier coché) : même structure, verdicts différents, QR `?code=` 26 / 26 identiques.
+
+## 6e ch. 2, lot G — 6gen144–6gen147 (nouveaux, notés)
+
+Socle d'écrans de 5gen54–57 recopié dans le 6e (`ui6e/ecransExp.types.ts`, `moteur6e/sessionEcransExp.ts`,
+`components6e/EtapeEcransExp.tsx` + `AppEcransExp.tsx`) avec quatre ajouts : `copie?` (copie numérotée de
+6gen88, `CopieEleve`), `approchee?` (valeur décimale proche d'une valeur exacte : message, AUCUNE
+tentative), aide à deux niveaux aussi sur un choix fermé, et `piege` ciblé affiché sous un choix fermé
+révélé. Saisie `moteur6e/lectureValeurExp.ts` (équivalence numérique sur l'évaluateur du chapitre :
+puissances, e, ln, fractions, ±∞, ensembles, « − »), écritures `ui6e/nombresExp.ts`. Corrigés
+`generateurs6e/{puissancesSansCalculatrice,limitesReference,modeleTableau,detectiveExponentielles}/corrigeDetaille.ts`,
+une lettre par écran. **6gen146** (puissances sans calculatrice, AUCUN logarithme) : simplifier
+(exposant puis valeur), comparer (exposants, sens de la base, conclusion ; verdict <, =, > tiré
+20/40/40), exposant en x puis valeur en x₀. **6gen145** (limites de référence) : forme de chaque
+morceau, référence (R1 (eᵘ−1)/u, R2 (aˣ−1)/x, R3 xⁿ/aˣ, R4 xⁿaˣ en −∞, R5 « aucune ») — R1 et R2
+acceptées l'une pour l'autre en expo0, R3 pour R4 —, valeur exacte ; L'Hôpital accepté au barème ;
+`groupe_reference` (le nom de la variante = la référence). **6gen147** (tableau → modèle) : rapports
+(exacts ou au centième), verdict exponentiel / linéaire 50/50 (choix fermé, pas un cas particulier),
+paramètres exacts, prévision arrondie (« = » quand l'arrondi est la valeur exacte) ; tableau
+`tableauHtml` dans l'énoncé ; deux vraies questions papier (modèle / prévision) ;
+`calculatriceIndispensable`, `calcul: "calculatrice"`. **6gen144** (détective, mécanique de 6gen88) :
+ligne, erreur (4 descriptions), correction ; huit types d'erreur = variantes, `groupe_erreur` ; énoncé
+papier = copie numérotée (marge rouge) + consigne globale, étapes a, b, c dans le corrigé ; la saisie
+qui reprend la valeur de la copie reçoit le piège ciblé. Lecture : 6gen146 comparer b (base comparée
+à 1). Méthode 0 (6gen146, règles imposées) / 1 ailleurs ; piège : 6gen146 base < 1 (comparer) ou
+inverse hors quotient, 6gen145 1 (constant dans le groupe), 6gen147 pas 2, 6gen144 0 (le type
+d'erreur est la réponse de l'écran 2) ; nombres 1 pour 6gen147 seulement.
+Mesuré (`niveauEtDuree`, 2 000 tirages par variante) : 6gen146 niv. 1–2, 6–7 min ; 6gen145 niv. 4,
+8 min (constant dans le groupe) ; 6gen147 niv. 4 (pas 1) / 5 (pas 2), 11 min ; 6gen144 niv. 3, 8 min
+(constant). Collecteur (outils de `corrige-6e3-m1` recopiés ; `\lim` évaluée en x = 400 — les
+exponentielles débordent plus loin —, « ≈ » toléré à la demi-unité du dernier chiffre écrit, notation
+scientifique comprise ; candidats de 6gen144 = solutions de la copie corrigée) : 2 280 tirages,
+≈ 14 500 égalités, ≈ 1 700 relations, 0 fausse. Documents réels (`construirePlan`, évaluation 2 séries
++ aménagée + feuille, calculatrice interdite / autorisée) : 0 débordement à 680, 820 et 1 280 px,
+0 `.katex-error`, groupes : verdict de B ≠ A ; QR `?code=` 25 / 25 identiques.

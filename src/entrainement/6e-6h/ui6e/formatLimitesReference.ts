@@ -214,9 +214,9 @@ export const FORMES_L: Record<FormeLimite, Frag[]> = {
 
 export const REFERENCES_L: Record<ReferenceLimite, Frag[]> = {
   R1: [lx("\\displaystyle\\lim_{u\\to 0}\\dfrac{e^{u}-1}{u}=1")],
-  R2: [lx("\\displaystyle\\lim_{x\\to 0}\\dfrac{a^{x}-1}{x}=\\ln a"), tx(" (a > 0)")],
-  R3: [lx("\\displaystyle\\lim_{x\\to +\\infty}\\dfrac{x^{n}}{a^{x}}=0"), tx(" (a > 1)")],
-  R4: [lx("\\displaystyle\\lim_{x\\to -\\infty}x^{n}a^{x}=0"), tx(" (a > 1)")],
+  R2: [lx("\\displaystyle\\lim_{x\\to 0}\\dfrac{a^{x}-1}{x}=\\ln a"), tx(" ("), lx("a>0"), tx(")")],
+  R3: [lx("\\displaystyle\\lim_{x\\to +\\infty}\\dfrac{x^{n}}{a^{x}}=0"), tx(" ("), lx("a>1"), tx(")")],
+  R4: [lx("\\displaystyle\\lim_{x\\to -\\infty}x^{n}a^{x}=0"), tx(" ("), lx("a>1"), tx(")")],
   R5: [tx("Aucune : les règles de calcul des limites suffisent")],
 };
 

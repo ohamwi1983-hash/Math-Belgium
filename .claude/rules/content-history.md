@@ -4645,3 +4645,19 @@ isolé, 0 `.katex-error`.
   (leurs sections ont maintenant deux générateurs). Vérifié : 2 000 tirages par variante (recalcul
   indépendant, saisies justes autrement écrites, « − », illisible), parcours iPhone 13 (390 px,
   0 erreur console), documents réels 2 séries + aménagée sans débordement, collecteur 0 égalité fausse.
+
+- **6e (6h), Chapitre 2 — Fonctions exponentielles**, lot G de l'audit (6gen144–6gen147, nouveaux) :
+  quatre cartes `entrainement` ajoutées, chacune à l'endroit où sa notion est enseignée. **6gen146
+  « Puissances à exposant réel sans calculatrice »** (§ 1, après l'intuition « Pourquoi a⁰ vaut-il 1 ? ») :
+  règles des puissances, comparaison par l'exposant et le sens de la base, exposant en x ; valeurs
+  exactes seulement (ln reste une touche de calculatrice, décision de l'utilisateur). **6gen145
+  « Limites de référence et croissances comparées »** (fin du § 1, après 6gen6) : forme, limite de
+  référence, valeur ; L'Hôpital accepté. **6gen147 « Modèle exponentiel lu dans un tableau »** (§ 7,
+  après l'illustration Q(t) = 100·1,5ᵗ) : rapports, verdict exponentiel / linéaire, paramètres,
+  prévision. **6gen144 « Le détective d'erreurs : exponentielles »** (fin du § 7, après 6gen12) : huit
+  erreurs relevées par l'audit (ln a oublié, signe de e^{−kx}, sens d'une inéquation de base < 1,
+  racine t < 0 gardée, règles des puissances, dominance, baisse en 1 + p, facteur pris comme une
+  différence). Libellé pilote de 6gen6 précisé (« Calcul de limites (6gen6) ») : sa section a
+  maintenant deux générateurs. Vérifié : 2 000 tirages par variante (recalcul indépendant, écritures
+  équivalentes, « − », illisible), parcours iPhone 13 (390 px, 0 erreur console), documents réels sans
+  débordement, collecteur 0 égalité fausse.
