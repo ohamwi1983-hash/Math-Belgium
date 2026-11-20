@@ -1031,7 +1031,10 @@ Socle `AppEcransExp` du 6e ch. 2 réutilisé (ajouts sans effet sur 6gen144–14
 dénominateur rationnel). Corrigés `generateurs6e/{detectiveCyclometriques,identitesCyclometriques,grapheReciproque,deriveeReciproquePoint}/corrigeDetaille.ts`,
 une lettre par écran. **6gen152** (détective, mécanique de 6gen144) : neuf types d'erreur = variantes,
 `groupe_erreur`, énoncé papier = copie numérotée + consigne globale, `sansCharge` (niveau 3, 8 min
-constants). **6gen153** (identités) : arcTrig (θ dans l'image ? verdict 50/50, puis angle ramené :
+constants). « Quelle ligne ? » est un verdict : 0 à 3 lignes justes (préliminaires du scénario puis
+début de la copie canonique) précèdent la ligne fausse, tiré 1/4 chacun (`donnees.av`) — positions 1–4
+à 25 % ± 3 dans chaque type (18 000 tirages), copies de 2 à 6 lignes ; `forme` = type d'erreur seul
+(jamais la ligne). **6gen153** (identités) : arcTrig (θ dans l'image ? verdict 50/50, puis angle ramené :
 bornes au même dénominateur, angle supplémentaire / opposé, tour retiré), trigArc (signe 50/50 — le
 piège « a < 0 » pour cos∘arcsin… —, puis identité substituée et racine simplifiée ligne à ligne),
 littéral (domaine parmi quatre, puis forme en x : deux vraies questions papier) ; une saisie qui

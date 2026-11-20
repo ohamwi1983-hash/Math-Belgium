@@ -75,7 +75,10 @@ function donnees(v: VarianteDetectiveCyclo): Record<string, number> {
 
 export function construireAvecVariante(id: string): ExerciceDetectiveCyclo {
   const variante = (CATALOGUE_VARIANTES.some((v) => v.id === id) ? id : "inverse") as VarianteDetectiveCyclo;
-  return { variante, donnees: donnees(variante), options: melanger([variante as string, ...LEURRES[variante]]) };
+  // Position de la ligne fausse (0 à 3 lignes justes avant elle) tirée 1/4 chacune : « quelle ligne ? »
+  // est un verdict, sa réponse ne se déduit pas du type d'erreur.
+  const av = entier(0, 3);
+  return { variante, donnees: { ...donnees(variante), av }, options: melanger([variante as string, ...LEURRES[variante]]) };
 }
 
 export function genererExerciceDetectiveCyclo(): ExerciceDetectiveCyclo {

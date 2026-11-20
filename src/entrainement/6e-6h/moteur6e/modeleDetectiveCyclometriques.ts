@@ -6,7 +6,7 @@ import type { Frag } from "../ui6e/ecransExp.types";
 import { lx, tx } from "../ui6e/ecransExp.types";
 import { affineL, termeL } from "../ui6e/nombresExp";
 import type { Q } from "../ui6e/nombresRecip";
-import { piL, q, qL, qLi, racineQ, radL, radDiv, radQ, radV } from "../ui6e/nombresRecip";
+import { piL, q, qL, qLi, racineQ, radL, radDiv, radQ, radV, trigExact } from "../ui6e/nombresRecip";
 import { IMAGE_L, lignesComparaison, lignesRamener, phiK12 } from "./modeleIdentitesCyclometriques";
 
 /**
@@ -67,7 +67,12 @@ export interface CopieDetectiveCyclo {
   corrigeC: BlocCorrigeCyclo & { verification?: BlocCorrigeCyclo };
   /** Valeurs des variables pour le contrôle numérique du corrigé (x, y…). */
   candidats: Record<string, number>[];
+  /** Lignes JUSTES qui peuvent précéder la copie canonique (la position de la ligne fausse varie). */
+  preliminaires?: { ligne: Frag[]; regle: string }[];
 }
+
+/** Numéro (1, 2…) de la ligne fausse : `av` lignes justes la précèdent (0 à 3, tiré à la génération). */
+const numeroFausse = (e: E, defaut: number): number => (e.donnees.av ?? defaut) + 1;
 
 // ============================================================================
 // Descriptions (écran 2).
@@ -237,6 +242,10 @@ function scenarioInverse(e: E): CopieDetectiveCyclo {
       verification: { utilise: [t("On applique "), l("f"), t(" au résultat :")], lignes: [ligne(`f(${xs})=${a}\\cdot ${parN(xs)}${termeL(b)}=${c}`)] },
     },
     candidats: [{ x: xs, y: c }],
+    preliminaires: [
+      { ligne: [l("\\mathrm{dom}\\,f=\\mathbb{R}")], regle: "domaine d'une fonction affine" },
+      { ligne: [l("f"), t(` est strictement ${a > 0 ? "croissante" : "décroissante"} sur `), l("\\mathbb{R}"), t(" (pente "), l(`${a}`), t(")")], regle: "sens de variation d'une fonction affine" },
+    ],
   };
 }
 
@@ -274,9 +283,13 @@ function scenarioArcsinSin(e: E): CopieDetectiveCyclo {
     },
     corrigeC: {
       utilise: [t("On ramène l'angle dans l'image (même "), t(fn === "sin" ? "sinus" : "cosinus"), t("), puis on refait la somme.")],
-      lignes: [...lignesRamener(ex).lignes, ligne(`A=${plusL(piL(phi, 12), psiL)}`, "ligne 3 reprise"), ligne(`=${piL(somme, 12)}`)],
+      lignes: [...lignesRamener(ex).lignes, ligne(`A=${plusL(piL(phi, 12), psiL)}`, `ligne ${numeroFausse(e, 1) + 1} reprise`), ligne(`=${piL(somme, 12)}`)],
     },
     candidats: [],
+    preliminaires: [
+      { ligne: [t("On calcule séparément les deux termes de "), l("A"), t(".")], regle: "organisation du calcul" },
+      { ligne: [l(`\\${autre}${piL(k12b, 12).startsWith("\\dfrac") ? piL(k12b, 12) : `\\left(${piL(k12b, 12)}\\right)`}=${radL(trigExact(autre, k12b)!)}`)], regle: "valeur remarquable" },
+    ],
   };
 }
 
@@ -391,8 +404,8 @@ function scenarioDerivee(e: E): CopieDetectiveCyclo {
     corrigeA:
       v === "carre"
         ? {
-            utilise: [t("On contrôle la ligne 3 : "), l("u^{2}"), t(" doit être remplacé par le carré de "), l(`u=${k}x`), t(".")],
-            lignes: [ligne(`u^{2}=(${k}x)^{2}`, "u remplacé"), ligne(`=${k2}x^{2}`), ligne(`${k2}x^{2}\\neq ${k}x^{2}`, "la ligne 3 a écrit kx²")],
+            utilise: [t(`On contrôle la ligne ${numeroFausse(e, 2)} : `), l("u^{2}"), t(" doit être remplacé par le carré de "), l(`u=${k}x`), t(".")],
+            lignes: [ligne(`u^{2}=(${k}x)^{2}`, "u remplacé"), ligne(`=${k2}x^{2}`), ligne(`${k2}x^{2}\\neq ${k}x^{2}`, `la ligne ${numeroFausse(e, 2)} a écrit ${k}x²`)],
           }
         : v === "signeArccos"
           ? {
@@ -400,12 +413,16 @@ function scenarioDerivee(e: E): CopieDetectiveCyclo {
               lignes: [ligne(`\\dfrac{${k}}{\\sqrt{1-0}}=${k}`, "formule de la copie en 0"), ligne(`${k}>0`, "positif : impossible pour une fonction décroissante")],
             }
           : {
-              utilise: [t("On contrôle la ligne 2 par la règle de dérivation d'une composée :")],
-              lignes: [ligne(`(\\arctan u)'=\\arctan'(u)\\cdot u'`, "dérivée d'une composée"), ligne(`u'=${k}\\neq 1`, "le facteur u′ manque à la ligne 2")],
+              utilise: [t(`On contrôle la ligne ${numeroFausse(e, 1)} par la règle de dérivation d'une composée :`)],
+              lignes: [ligne(`(\\arctan u)'=\\arctan'(u)\\cdot u'`, "dérivée d'une composée"), ligne(`u'=${k}\\neq 1`, `le facteur u′ manque à la ligne ${numeroFausse(e, 1)}`)],
             },
     corrigeB: { utilise: regleCours.texte.concat(regleCours.latex ? [t(" "), l(regleCours.latex)] : []), lignes: [ligne(`${ligneRegleCopie(v, k)}\\neq ${regleJuste(v, k)}`, "copie face au cours")] },
     corrigeC: { utilise: [t("On applique la bonne formule avec "), l(`u=${k}x`), t(", "), l(`u'=${k}`), t(", puis "), l(`x=${x0L}`), t(".")], lignes: lignesC },
     candidats: [{ x: x0.n / x0.d }],
+    preliminaires: [
+      { ligne: [t("f est la composée de "), l(`\\${nomFn}`), t(" et de "), l(`u(x)=${k}x`), t(".")], regle: "décomposition" },
+      { ligne: [l(`\\mathrm{dom}\\,f=${v === "uprime" ? "\\mathbb{R}" : `\\left[-\\dfrac{1}{${k}}\\,;\\,\\dfrac{1}{${k}}\\right]`}`)], regle: "domaine" },
+    ],
   };
 }
 
@@ -438,9 +455,10 @@ function scenarioCe(e: E): CopieDetectiveCyclo {
       [l(`${tri}=0`)],
       [l(`x=${s[0]}`), t(" ou "), l(`x=${s[1]}`)],
       [l(`S=\\{${s[0]}\\,;\\,${s[1]}\\}`)],
+      [t("L'équation admet donc deux solutions.")],
     ],
     ligneFausse: 3,
-    regles: [`arc${fn} injective : arguments égaux`, "on réduit à un trinôme", "racines du trinôme", "ensemble des solutions"],
+    regles: [`arc${fn} injective : arguments égaux`, "on réduit à un trinôme", "racines du trinôme", "ensemble des solutions", "conclusion"],
     regleCours: { texte: [t(`arc${fn} A = arc${fn} B ⟺ A = B, à condition que A et B soient dans [−1 ; 1] (cours, § 3) :`)], latex: `\\text{CE : }-1\\leq ${vL}\\leq 1` },
     aideCorrection: { texte: [t("Remplace chaque candidat dans "), l(vL), t(" : l'argument doit être entre "), l("-1"), t(" et "), l("1"), t(".")] },
     valeurs: [{ genre: "ensemble", label: "S", labelLatex: "S=", placeholder: "ex. : 5 ; −1   (ou ∅)", ensemble: [x1], latex: `S=\\{${x1}\\}` }],
@@ -477,20 +495,21 @@ function scenarioSens(e: E): CopieDetectiveCyclo {
     ligneFausse: 2,
     regles: ["domaine de arcsin", retirer(a), `on divise par −${k}`, "conclusion"],
     regleCours: { texte: [t("Diviser une inégalité par un nombre négatif change son sens :")], latex: "u\\leq v\\iff\\dfrac{u}{c}\\geq\\dfrac{v}{c}\\quad(c<0)" },
-    aideCorrection: { texte: [t("Divise la ligne 2 par "), l(`-${k}`), t(" en retournant les deux symboles, puis écris l'intervalle de la plus petite borne à la plus grande.")] },
+    aideCorrection: { texte: [t("Divise l'encadrement de "), l(`-${k}x`), t(" par "), l(`-${k}`), t(" en retournant les deux symboles, puis écris l'intervalle de la plus petite borne à la plus grande.")] },
     valeurs: [{ genre: "intervalle", label: "dom f", labelLatex: "\\mathrm{dom}\\,f=", placeholder: "", intervalle: { gauche: g.n / g.d, droite: d.n / d.d, gaucheFermee: true, droiteFermee: true }, latex: `\\mathrm{dom}\\,f=\\left[${qL(g)}\\,;\\,${qL(d)}\\right]` }],
     valeursCopie: [],
     piege: [t("Garder le sens des inégalités en divisant par "), l(`-${k}`), t(" : le domaine paraît vide.")],
     corrigeA: {
       utilise: [t("On teste une valeur : "), l(`x=${qL(q(a, k))}`), t(" annule l'argument, donc "), l("\\arcsin 0"), t(" existe et le domaine n'est pas vide.")],
-      lignes: [ligne(`${a === 0 ? "" : a}-${k}\\cdot ${parL(qL(q(a, k)))}=0`, "argument nul"), ligne("0\\in[-1\\,;\\,1]", "arcsin(0) existe : la ligne 4 se trompe dès la ligne 3")],
+      lignes: [ligne(`${a === 0 ? "" : a}-${k}\\cdot ${parL(qL(q(a, k)))}=0`, "argument nul"), ligne("0\\in[-1\\,;\\,1]", `arcsin(0) existe : la ligne ${numeroFausse(e, 2) + 1} se trompe dès la ligne ${numeroFausse(e, 2)}`)],
     },
     corrigeB: { utilise: [t("Diviser par un nombre négatif change le sens des inégalités.")], lignes: [ligne(`-${k}<0`, "on divise par un négatif : ≤ devient ≥")] },
     corrigeC: {
-      utilise: [t("On divise la ligne 2 par "), l(`-${k}`), t(" en changeant le sens.")],
+      utilise: [t("On divise l'encadrement de "), l(`-${k}x`), t(" par "), l(`-${k}`), t(" en changeant le sens.")],
       lignes: [ligne(`\\dfrac{${-1 - a}}{-${k}}\\geq x\\geq\\dfrac{${1 - a}}{-${k}}`, "sens changé"), ligne(`${qL(g)}\\leq x\\leq ${qL(d)}`, "dans l'ordre croissant")],
     },
     candidats: [{ x: a / k }],
+    preliminaires: [{ ligne: [l("\\arcsin u"), t(" existe si et seulement si "), l("-1\\leq u\\leq 1"), t(".")], regle: "domaine de arcsin" }],
   };
 }
 
@@ -521,10 +540,14 @@ function scenarioArctan(e: E): CopieDetectiveCyclo {
     },
     corrigeB: { utilise: [t("Image de arctan : intervalle ouvert (cours, § 2).")], lignes: [ligne(`\\mathrm{im}\\,\\arctan=${IMAGE_L.tan}`, "asymptotes y = ±π/2")] },
     corrigeC: {
-      utilise: [t("On reprend à partir de la ligne 2 avec l'intervalle ouvert.")],
+      utilise: [t(`On reprend à partir de la ligne ${numeroFausse(e, 1)} avec l'intervalle ouvert.`)],
       lignes: [ligne(`-\\dfrac{\\pi}{2}<\\arctan x<\\dfrac{\\pi}{2}`, "image de arctan"), ligne(`-${kpi}<${kL}\\arctan x<${kpi}`, `on multiplie par ${k} > 0`), ligne(`${bg}<f(x)<${bd}`, ajouter(c))],
     },
     candidats: [{ x: 0.37 }],
+    preliminaires: [
+      { ligne: [l("\\mathrm{dom}\\,f=\\mathbb{R}")], regle: "domaine" },
+      { ligne: [t("On part de l'image de "), l("\\arctan"), t(", puis on applique les transformations.")], regle: "méthode" },
+    ],
   };
 }
 
@@ -579,7 +602,26 @@ function scenarioInjectivite(e: E): CopieDetectiveCyclo {
   };
 }
 
+/** Copie finale : `av` lignes justes (préliminaires puis lignes justes de la copie canonique, les
+ * dernières d'abord gardées) avant la ligne fausse, puis ses conséquences. */
+function assembler(c: CopieDetectiveCyclo, av: number | undefined): CopieDetectiveCyclo {
+  if (av === undefined) return c;
+  const pool = [...(c.preliminaires ?? []).map((x) => x.ligne), ...c.lignes.slice(0, c.ligneFausse)];
+  const poolR = [...(c.preliminaires ?? []).map((x) => x.regle), ...c.regles.slice(0, c.ligneFausse)];
+  const k = Math.min(av, pool.length);
+  return {
+    ...c,
+    lignes: [...pool.slice(pool.length - k), ...c.lignes.slice(c.ligneFausse)],
+    regles: [...poolR.slice(poolR.length - k), ...c.regles.slice(c.ligneFausse)],
+    ligneFausse: k,
+  };
+}
+
 export function copie(e: E): CopieDetectiveCyclo {
+  return assembler(copieCanonique(e), e.donnees.av);
+}
+
+function copieCanonique(e: E): CopieDetectiveCyclo {
   switch (e.variante) {
     case "inverse":
       return scenarioInverse(e);

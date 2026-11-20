@@ -81,10 +81,11 @@ function bareme(e: E): BaremeExercice {
   };
 }
 
-/** Même type d'erreur et même ligne dans toutes les séries d'une même variante ; aucun cas
+/** Même type d'erreur dans toutes les séries d'une même variante ; la position de la ligne fausse
+ * (réponse de l'écran 1, un verdict) reste tirée au hasard : jamais dans la forme. Aucun cas
  * particulier ; tout est exact. */
 export function profilDetectiveCyclo(e: E): ProfilInstance {
-  return { casParticulier: null, calcul: "exacte", forme: `${e.variante}|L${numeroLigneFausse(e)}` };
+  return { casParticulier: null, calcul: "exacte", forme: e.variante };
 }
 
 export const adaptateurEvaluationDetectiveCyclo: AdaptateurFeuilleExercices<E> = {
