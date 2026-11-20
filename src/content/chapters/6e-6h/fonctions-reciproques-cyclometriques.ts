@@ -147,6 +147,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'droite-horizontale-widget',
+          label: 'Manipule toi-même — la droite horizontale',
+          caption:
+            'Fais glisser la droite horizontale y = k et compte ses intersections avec le ' +
+            'graphe. Choisis ensuite une restriction du domaine : la partie jetée passe en ' +
+            'gris, et le verdict dit si la fonction restreinte est injective. Une ' +
+            'restriction est bonne quand plus aucune horizontale ne coupe deux fois.',
+        },
+        {
           kind: 'para',
           text:
             "Seule une fonction bijective (entre un domaine et un ensemble d'arrivée bien " +
