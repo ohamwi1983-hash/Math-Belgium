@@ -4851,3 +4851,47 @@ cadré sur l'extremum de f′ ; 6gen10 D-variable compacté (exposant −x−2, 
 débordait de 51 px à 390 px) ; 6gen12 contextes réécrits (`contextes.ts` : bornes par contexte,
 objectif de G, question explicite du doublement), phrases de contexte en fragments KaTeX (`prose`),
 espace fine des milliers (`formatDecimal`, `milliers`). Lot E : voir `feuilles-evaluations.md`.
+
+## 6e (6h), Chapitre 1 — lots A et F de l'audit (cours, quiz 6gen64)
+
+Lot A (cours) : C1 (angle de vue : trop près, angle presque nul ; exemple résolu θ′ = 0 en x = √(ab)),
+C2 (arcsin impaire, arccos(−x), arcsin + arccos réécrites par la caractérisation : « sin y = x **et**
+y dans l'image », la condition de l'intervalle vérifiée en ligne), C3 (f⁻¹ = f quand a = −d ou f = id,
+ad − bc ≠ 0), C4 (théorème : continue et strictement monotone sur un intervalle), C5 (incidence
+normale ; angle limite eau → air ≈ 48,8°, réflexion totale = CE de arcsin), C6 (carte 6gen1 sans
+dérivée). Décisions 1 et 2 : § 2 « Composer une arcfonction et une fonction trigonométrique »
+(trig∘arc toujours, arc∘trig seulement sur l'image ; démonstrations arcsin(sin θ) = θ ⟺ θ ∈
+[−π/2 ; π/2], cos(arcsin x), cos(arctan x) ; méthode ; figure `circleAngles` 5π/6 / π/6) et tableaux
+VERTICAUX des valeurs remarquables ; § 3 arctan injective sans CE, « arcfonction = angle » (∅ si
+l'angle sort de l'image), « arcfonctions différentes » (compatibilité des images, mise au carré,
+arcsin(4x) = arccos(3x) : −1/5 dans la CE mais parasite ; arctan(x) = arcsin(x/√2) : sin injective sur
+[−π/2 ; π/2], équivalence) ; § 4 méthode de dérivation, domaine ]0 ; 1[, arctan x + arctan(1/x) = π/2
+(x > 0) ; § 5 caractéristiques, figure unique des trois arcfonctions, méthode c + k·arc(mx + n)
+(domaine, image, sens selon k·m, extremums, centre (−n/m ; c), jamais paire), deux exemples sur
+grille en π/2 (g(x) = π/2 − 2 arctan(x + 1) passe par l'origine sans être impaire) ; nouveau § 6
+« Étudier une fonction cyclométrique » (arctan x − x/2 ; x·arctan x avec asymptotes obliques).
+§ 1 : méthode « étudier la réciproque », trinôme restreint (2 + √(x + 3)), (f⁻¹)′(2) pour x³ + x avec
+figure des tangentes 4 et 1/4 (réciproque par dichotomie). Formulaire : 8 groupes, 46 formules, ordre
+des sections. Énoncés par clé (arccos′ : même énoncé pour ses deux démonstrations), chapitre dans
+`CHAPITRES_ENONCES_VERIFIES`. Tableaux à 2 colonnes sur iPhone (restrictions, caractéristiques,
+récapitulatif) ; tableau de variations de g sur [0 ; +∞[ (fonction impaire). **Ajouts de composant
+(optionnels, sans effet ailleurs)** : `curvePlot.grid` (lignes aux graduations, y compris en π/2) et
+`obliqueAsymptotes[].from/to` (une asymptote en +∞ ne traverse plus tout le graphe ni ne sort du
+cadre). **Piège** : `tone: 'faint'` d'un `vectorPlane` est aussi foncé qu'un axe — y = x en vecteur
+pointillé.
+
+Lot F (quiz 6gen64, porté de plateforme-maths) : 175 affirmations réécrites en `$…$` (texte source
+`banque64.txt`, séparateur « ¦ », généré en `q(…)`), majuscules retirées, 4 grands calculs remplacés,
+homographique complétée ; deux thèmes ajoutés (`compositionsArcTrig` § 2, `etudeFonctionCyclometrique`
+§ 6), équations « = angle » / arcfonctions différentes et transformées intégrées : 245 affirmations,
+7 × 35, 18–19 vraies. Appli, moteur, composants calqués sur 6gen65 ; registre, carte de fin de
+chapitre, `QUIZ_THEMES` (deux thèmes en § 2, un en § 6), `banquesVraiFaux` (le vrai/faux du ch. 1 ne
+part plus sur plateforme-maths). Vérifié : contrôle de la banque (KaTeX `strict: 'error'`,
+notation clavier, majuscules hors « CE », doublons, équilibre, sessions sans répétition, fragments
+papier sans `$`) 0 problème ; quiz parcouru sur iPhone 13 (thème 3 en entier : 35/35 distinctes,
+« Question 35 / 35 », 19 « Vrai » = 19 vraies ; 3 affirmations des autres thèmes ; sombre) ; page en
+clair/sombre, iPhone 13 et 1 280 px : scrollWidth 390, 0 `$`, 0 `.katex-error`, 0 NaN, 0 tableau qui
+déborde ; évaluation locale 2 séries : « Vrai ou faux » présent (6 affirmations du ch. 1).
+**Piège de vérification** : machine chargée (plusieurs `tsc` en parallèle) → `tsc` tué (OOM) ou
+`locator.click` hors délai ; relancer avec `NODE_OPTIONS=--max-old-space-size=3072` et des délais
+Playwright longs (`setDefaultTimeout`), en attendant chaque bouton (`waitFor`) plutôt qu'un délai fixe.
