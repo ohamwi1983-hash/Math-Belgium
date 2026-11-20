@@ -2,13 +2,15 @@
  * Contrat — "Fonctions exponentielles" (quiz vrai/faux), 6gen65, ajout ultérieur au chapitre 2 du
  * chantier 6e (6h) déjà complet (6gen6-12). Même principe que 6gen64 (`quizFonctionsReciproquesCyclometriques`,
  * chapitre 1) et les 4 quiz vrai/faux du chantier 4e (gen59-62) — banque de 245 affirmations
- * vrai/faux PRÉ-ÉCRITES (jamais générées procéduralement), 7 thèmes de 35 questions chacun — mais
+ * vrai/faux PRÉ-ÉCRITES (jamais générées procéduralement), 9 thèmes de 35 questions chacun — mais
  * contrat entièrement indépendant, jamais partagé entre chantiers ni avec 6gen64 (voir CLAUDE.md,
  * "3 chantiers indépendants").
  *
- * Les 7 thèmes reprennent exactement les 7 générateurs déjà établis du chapitre 2 : calcul de
- * limites (6gen6), domaine et dérivée (6gen7), graphique de la dérivée (6gen8), équations (6gen9),
- * inéquations (6gen10), étude complète de fonction (6gen11), problèmes (6gen12).
+ * 7 thèmes reprennent les 7 générateurs déjà établis du chapitre 2 : calcul de limites (6gen6),
+ * domaine et dérivée (6gen7), graphique de la dérivée (6gen8), équations (6gen9), inéquations
+ * (6gen10), étude complète de fonction (6gen11), problèmes (6gen12) ; deux thèmes ajoutés à l'audit
+ * couvrent des notions du cours sans affirmation jusque-là : puissances à exposant réel et nombre e
+ * (sections 1 et 2), reconnaître et construire un modèle exponentiel (section 7).
  *
  * SEULE différence réelle avec 6gen64 : `enonce`/`justification` sont ici des `FragmentConsigne[]`
  * (texte/LaTeX mêlés), pas de simples `string` — les affirmations de ce chapitre contiennent
@@ -23,13 +25,15 @@
 export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
 
 export type VarianteQuizFonctionsExponentielles =
+  | "puissancesNombreE"
   | "limitesExponentielles"
   | "domaineDeriveeExponentielles"
   | "graphiquesDeriveeExponentielles"
   | "equationsExponentielles"
   | "inequationsExponentielles"
   | "etudeFonctionExponentielle"
-  | "exponentiellesProblemes";
+  | "exponentiellesProblemes"
+  | "modeleExponentiel";
 
 /** Une affirmation pré-écrite, sa réponse correcte et sa justification pédagogique — jamais
  * générée à partir de valeurs numériques tirées (même contrat que 6gen64 et les 4 quiz vrai/faux

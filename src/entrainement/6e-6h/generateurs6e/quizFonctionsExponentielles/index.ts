@@ -14,7 +14,10 @@ import type {
 import { randomInt } from "./aleatoire";
 import { BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES } from "./banque";
 
+/** Dans l'ordre des sections du cours (les deux thèmes ajoutés à l'audit à leur place : puissances et
+ * nombre e en tête, section 1 ; modèle exponentiel en fin, section 7). */
 export const CATALOGUE_VARIANTES: { id: VarianteQuizFonctionsExponentielles; label: string }[] = [
+  { id: "puissancesNombreE", label: "Puissances à exposant réel et nombre e" },
   { id: "limitesExponentielles", label: "Calcul de limites (fonctions exponentielles)" },
   { id: "domaineDeriveeExponentielles", label: "Domaine et dérivée de fonctions exponentielles" },
   { id: "graphiquesDeriveeExponentielles", label: "Graphique de la dérivée (fonctions exponentielles)" },
@@ -22,7 +25,21 @@ export const CATALOGUE_VARIANTES: { id: VarianteQuizFonctionsExponentielles; lab
   { id: "inequationsExponentielles", label: "Résoudre une inéquation exponentielle" },
   { id: "etudeFonctionExponentielle", label: "Étudier une fonction exponentielle (synthèse)" },
   { id: "exponentiellesProblemes", label: "Exponentielles : problèmes" },
+  { id: "modeleExponentiel", label: "Reconnaître et construire un modèle exponentiel" },
 ];
+
+/** Taille réelle de la banque d'un thème — jamais une constante en dur (convention
+ * `.claude/rules/quiz-generators.md`) : une session parcourt exactement toutes les questions du
+ * thème sans répétition. */
+export function nombreQuestions(varianteId: VarianteQuizFonctionsExponentielles): number {
+  return BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES[varianteId].length;
+}
+
+/** Bornes min/max des tailles de thèmes, pour un texte d'accueil toujours exact. */
+export function etendueNombreQuestions(): { min: number; max: number } {
+  const tailles = CATALOGUE_VARIANTES.map((v) => nombreQuestions(v.id));
+  return { min: Math.min(...tailles), max: Math.max(...tailles) };
+}
 
 function tirerQuestion(varianteId: VarianteQuizFonctionsExponentielles): QuestionVraiFaux {
   const banque = BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES[varianteId];
@@ -55,10 +72,10 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (35) : sans
- * cette précaution, le tirage indépendant habituel
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème
+ * (`nombreQuestions`) : sans cette précaution, le tirage indépendant habituel
  * (`genererExerciceQuizFonctionsExponentielles`) pourrait répéter une question avant d'avoir
- * couvert les 34 autres. État interne (file mélangée, ré-mélangée à chaque épuisement) enfermé
+ * couvert toutes les autres. État interne (file mélangée, ré-mélangée à chaque épuisement) enfermé
  * dans la fermeture, jamais partagé entre deux appels de cette fonction — voir `App6gen65.tsx`,
  * qui en crée une par session démarrée.
  */
