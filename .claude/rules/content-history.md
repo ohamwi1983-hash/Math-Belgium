@@ -46,6 +46,19 @@ paths:
   ne pas les porter (anciennes versions d'artifact, sans les règles communes) : les cartes gen7 et
   gen8 renvoient seulement au générateur. Les deux ateliers `parabole-widget` et
   `transformations-widget`, eux, sont bien en place.
+  `gen7-widget` et `gen8-widget` embarqués directement dans les cartes `entrainement` gen7/gen8
+  existantes (`widgetTag`), en plus — jamais à la place — du lien vers la version hébergée sur
+  plateforme-maths. Vérifié par rendu navigateur réel (`vite preview`, Playwright) : les 4 widgets
+  présents dans le DOM et fonctionnels (captures à l'écran des 4 : sliders a/b/c et TH/EV/CV/TV
+  réactifs, exercice gen7 "coefficients" jouable, exercice gen8 "transformations graphiques" jouable
+  avec graphe Mafs cible et saisie), aucune erreur JS console, `tsc -b`/`npm run lint`/`npm run
+  build` propres.
+  **Lot H (nouveaux générateurs, audit du 4e ch. 1)** : cartes gen126 « Trois écritures d'une
+  parabole » et gen128 « Associer paraboles et équations » en § 2 (après gen9), gen127 « Détective
+  d'erreurs : fonction du second degré » en § 4 (après le quiz gen60) ; registres
+  (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts`,
+  processus 2 / 3 / 2). Notation du cours : a(x − x_S)² + y_S, S(x_S ; y_S), im f ; aucun « Δ ».
+  Détail papier : `.claude/rules/feuilles-evaluations.md`, « 4e ch. 1, lot H ».
 - **4e, Chapitre 2 — Équations et inéquations du second degré** (`equations-inequations-second-degre`) :
   chapitre déjà en place (5 techniques de résolution, tableau de signes, signe d'un produit,
   fractions rationnelles, inconnue au dénominateur, inéquations rationnelles — souvent plus complet

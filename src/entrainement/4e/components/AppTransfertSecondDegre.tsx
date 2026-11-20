@@ -41,6 +41,9 @@ export interface PropsAppTransfert<E> {
   /** Nombre FIXE de puces (gen124) : un verdict plus court (moins d'écrans) ne doit pas se lire dans
    * le nombre de puces dès le premier écran — puces « à venir », puis « sans objet » à la fin. */
   nombrePuces?: (e: E) => number;
+  /** Nom du crochet de débogage (DEV ou `?dev=1`) : `window[idDebug] = { exercice, ecran }` pour les
+   * parcours Playwright (gen126, gen128). */
+  idDebug?: string;
 }
 
 interface TransitionEnAttente {
@@ -73,6 +76,8 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
   const [generation, setGeneration] = useState(0);
   const [statuts, setStatuts] = useState<StatutChamp[] | null>(null);
   const [illisible, setIllisible] = useState(false);
+  /** Écriture juste mais pas dans la forme demandée (gen126) : message, aucune tentative comptée. */
+  const [messageForme, setMessageForme] = useState<string | null>(null);
 
   const e = etat.exercice;
   const tous = props.ecrans(e);
@@ -86,12 +91,14 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
     setFicheOuverteIndex(null);
     setStatuts(null);
     setIllisible(false);
+    setMessageForme(null);
     setGeneration((g) => g + 1);
   }
 
   function conclure(correct: boolean, votreReponse: ReactNode, optionChoisie?: number) {
     const resultat = soumettre(etat, def, correct);
     setIllisible(false);
+    setMessageForme(null);
     if (!resultat.clos) {
       setEtat(resultat.etat);
       return;
@@ -102,7 +109,7 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
     setEnAttente({
       revele: resultat.revele,
       reponseAttendue: attendue,
-      messageRevele: def.type === "choix" ? ((optionChoisie !== undefined ? def.messagesOptions?.[optionChoisie] : undefined) ?? def.messageFaux) : undefined,
+      messageRevele: def.type === "choix" ? ((optionChoisie !== undefined ? (def.explications?.[optionChoisie] ?? def.messagesOptions?.[optionChoisie]) : undefined) ?? def.messageFaux) : undefined,
       derniere: ecran >= tous.length - 1,
     });
   }
@@ -116,7 +123,12 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
     setEtat(ecranSuivant(etat));
     setStatuts(null);
     setIllisible(false);
+    setMessageForme(null);
     setEnAttente(null);
+  }
+
+  if (props.idDebug && (import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1")) {
+    (window as unknown as Record<string, unknown>)[props.idDebug] = { exercice: e, ecran };
   }
 
   const validation: ValidationEtapeProps | null = enAttente
@@ -152,10 +164,18 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
         tentativesMax={tentativesMax(def)}
         statuts={statuts}
         illisible={illisible}
+        messageForme={messageForme}
         onValider={(saisies) => {
           const diagnostic = diagnostiquerChamps(saisies, def.champs);
           if (diagnostic.some((s) => s.etat === "parse_error")) {
             setIllisible(true);
+            setMessageForme(null);
+            return;
+          }
+          const forme = diagnostic.find((s) => s.etat === "forme");
+          if (forme) {
+            setIllisible(false);
+            setMessageForme(forme.message ?? "Ton expression est juste, mais pas dans la forme demandée.");
             return;
           }
           setStatuts(diagnostic);

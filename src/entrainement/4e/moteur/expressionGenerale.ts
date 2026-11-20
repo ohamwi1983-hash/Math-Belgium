@@ -420,3 +420,11 @@ export function evaluerExpressionGenerale(expression: string, x: number, variabl
   const noeud = new Parseur(tokeniser(expression, variables)).analyser();
   return evaluer(noeud, x);
 }
+
+/** Arbre syntaxique d'une expression (mêmes règles de lecture que `evaluerExpressionGenerale`) —
+ * sert à contrôler la FORME d'une écriture (développée, canonique, factorisée : gen126), jamais sa
+ * valeur. Lève une erreur si l'expression est illisible. */
+export type NoeudExpression = Noeud;
+export function arbreExpressionGenerale(expression: string, variables: Record<string, number> = {}): NoeudExpression {
+  return new Parseur(tokeniser(expression, variables)).analyser();
+}

@@ -1337,6 +1337,31 @@ export const fonctionSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 9. Forme canonique et transformations »',
         },
+        {
+          kind: 'entrainement',
+          title: "Trois écritures d'une parabole",
+          generatorId: 'gen126',
+          description: [
+            'Passe d\'une écriture à l\'autre : développer une forme canonique ou factorisée, ' +
+              'chercher les zéros sur la forme canonique (ou constater qu\'il n\'y en a pas), ' +
+              'mettre a en évidence et compléter le carré, lire ou calculer le sommet. Toute ' +
+              'écriture juste est acceptée, mais la forme demandée est contrôlée.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 126. Trois écritures d\'une parabole »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Associer paraboles et équations',
+          generatorId: 'gen128',
+          description: [
+            'Quatre équations, quatre paraboles dans le désordre : retrouve laquelle va avec ' +
+              'laquelle en lisant le sommet, le sens, les zéros ou l\'ordonnée à l\'origine. Les ' +
+              'pièges : le signe dans la parenthèse, a et −a, a et 1/a, les signes des zéros.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 128. Associer paraboles et équations »',
+        },
       ],
     },
     {
@@ -1594,6 +1619,19 @@ export const fonctionSecondDegre: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 60. Quiz vrai/faux — La fonction du second degré »',
+        },
+        {
+          kind: 'entrainement',
+          title: "Détective d'erreurs : fonction du second degré",
+          generatorId: 'gen127',
+          description: [
+            'Un élève a cherché un sommet, une forme canonique, une image ou un maximum, et une ' +
+              'ligne de sa copie est fausse : trouve-la, nomme l\'erreur (b recopié sans son signe, ' +
+              '« − » de la formule oublié, nombre non multiplié par a, (x + 2)² lu S(2 ; …), image ' +
+              'avec l\'abscisse du sommet, sommet hors du domaine…), puis donne le résultat correct.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 127. Détective d\'erreurs : fonction du second degré »',
         },
       ],
     },

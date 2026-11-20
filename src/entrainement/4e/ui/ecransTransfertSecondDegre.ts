@@ -1,5 +1,6 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import type { Ensemble, Poly2, Relation } from "../moteur/algebreTransfertSecondDegre";
+import type { FormeEcriture } from "../moteur/formeEcriturePolynome";
 
 /**
  * Écrans « en données » des nouveaux générateurs du chapitre 2 de 4e (gen115, gen116, gen118,
@@ -54,6 +55,9 @@ export interface ChampExpression extends ChampBase {
   variable: Variable;
   cible: Poly2;
   pieges: { poly: Poly2; message: string }[];
+  /** Forme d'écriture EXIGÉE (gen126) : une écriture juste dans une autre forme reçoit un message
+   * sans perte de tentative (statut `forme`). Absent : toute écriture juste est acceptée. */
+  forme?: FormeEcriture;
 }
 
 export interface ChampEquation extends ChampBase {
@@ -78,6 +82,8 @@ export interface ChampRelation extends ChampBase {
 export interface ChampEnsemble extends ChampBase {
   type: "ensemble";
   variable: Variable;
+  /** Préfixe LaTeX de l'aperçu et de la réponse affichée (défaut « S= ») — gen127 : « \operatorname{im} f= ». */
+  prefixeApercu?: string;
   cible: Ensemble;
   pieges: { ensemble: Ensemble; message: string }[];
 }
@@ -95,6 +101,9 @@ export type EcranTSD =
       messageFaux: string;
       /** Message ciblé par option fausse (même ordre que `options`), sinon `messageFaux`. */
       messagesOptions?: (string | undefined)[];
+      /** Explication d'un choix faux, option par option (gen128 : ce que donnerait l'équation
+       * choisie) ; à défaut, `messageFaux`. */
+      explications?: string[];
       /** Figure SVG autonome affichée avec l'écran (jamais une figure qui trahit la réponse). */
       figure?: string;
       /** Figure montrée seulement une fois l'écran clos. */

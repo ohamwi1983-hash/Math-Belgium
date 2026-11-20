@@ -33,7 +33,7 @@ export function saisieInitiale(c: Champ): Saisie {
 export function saisieAffichee(saisie: Saisie, c: Champ): ReactNode {
   if (typeof saisie !== "string") {
     const e = lireEnsemble(saisie);
-    return e ? <Katex expression={`S=${ensembleLatex(e)}`} /> : "—";
+    return e ? <Katex expression={`${c.type === "ensemble" && c.prefixeApercu ? c.prefixeApercu : "S="}${ensembleLatex(e)}`} /> : "—";
   }
   if (c.type === "nombre" || c.type === "liste") return saisie.trim().replace(/-/g, "−").replace(/(\d)\.(\d)/g, "$1,$2");
   return saisieEnLatex(normaliserExpression(saisie));
@@ -127,7 +127,7 @@ function ChampEnsembleSaisie({ champ, valeur, onChange, erronee, fige }: { champ
       )}
       {apercu && (
         <p style={{ margin: "8px 0 0" }}>
-          <Katex expression={`${champ.type === "ensemble" && champ.variable !== "x" ? `${champ.variable}\\in ` : "S="}${ensembleLatex(apercu)}`} />
+          <Katex expression={`${champ.type === "ensemble" && champ.prefixeApercu ? champ.prefixeApercu : champ.type === "ensemble" && champ.variable !== "x" ? `${champ.variable}\\in ` : "S="}${ensembleLatex(apercu)}`} />
         </p>
       )}
     </div>
@@ -163,11 +163,14 @@ interface PropsChamps extends PropsAides {
   statuts: StatutChamp[] | null;
   /** Dernière soumission illisible : aucune tentative comptée. */
   illisible: boolean;
+  /** Dernière soumission juste mais pas dans la forme demandée (gen126) : message, aucune tentative
+   * comptée. */
+  messageForme?: string | null;
   onValider: (saisies: Saisie[]) => void;
   validation?: ValidationEtapeProps | null;
 }
 
-export function EtapeChampsTransfert({ consigne, champs, tentativesUtilisees, tentativesMax, statuts, illisible, onValider, validation, ...aides }: PropsChamps) {
+export function EtapeChampsTransfert({ consigne, champs, tentativesUtilisees, tentativesMax, statuts, illisible, messageForme, onValider, validation, ...aides }: PropsChamps) {
   const [saisies, setSaisies] = useState<Saisie[]>(() => champs.map(saisieInitiale));
   const fige = !!validation;
   const complet = saisies.every((s) => (typeof s === "string" ? s.trim() !== "" : saisieEnsembleComplete(s)));
@@ -208,7 +211,14 @@ export function EtapeChampsTransfert({ consigne, champs, tentativesUtilisees, te
               Une saisie n'est pas lisible (ou est incomplète) : vérifie l'écriture. Aucune tentative n'est comptée.
             </p>
           )}
-          {!illisible && tentativesUtilisees > 0 && (
+          {!illisible && messageForme && (
+            <div className="alert-error" role="alert">
+              <span>
+                <RenduFragments fragments={messageFragments(`${messageForme} Aucune tentative n'est comptée.`)} />
+              </span>
+            </div>
+          )}
+          {!illisible && !messageForme && tentativesUtilisees > 0 && (
             <div className="alert-error" role="alert">
               <div>
                 <p style={{ margin: 0 }}>{`Incorrect — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`}</p>
