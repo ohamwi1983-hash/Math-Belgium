@@ -27,9 +27,11 @@ dist-ssr
 .claude/worktrees/
 
 # Variables d'environnement locales (Supabase : URL + clé publique « anon » — jamais de clé
-# secrète « service_role » ici ni ailleurs dans le dépôt). Seul `.env.example` (sans valeurs) est suivi.
+# secrète « service_role » ici ni ailleurs dans le dépôt). Suivis : `.env.example` (sans valeurs) et `.env.production` (URL + clé publique
+# du projet, lues au build de production).
 .env
 .env.local
 .env*.local
 .env.*
 !.env.example
+!.env.production

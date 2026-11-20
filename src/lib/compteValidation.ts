@@ -137,6 +137,8 @@ interface ErreurBrute {
  */
 export function messageErreur(erreur: unknown): string {
   const e = (erreur ?? {}) as ErreurBrute
+  // Déjà traduite (`compteDonnees.ts::ErreurCompte`) : telle quelle.
+  if (e.name === 'ErreurCompte' && e.message) return e.message
   const message = String(e.message ?? erreur ?? '')
   const code = String(e.code ?? '')
   const m = message.toLowerCase()

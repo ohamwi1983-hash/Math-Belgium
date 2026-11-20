@@ -44,6 +44,9 @@ cherchant le chapitre correspondant dans `chaptersIndex.ts`.
   `content/chaptersIndex.ts`) listant ses chapitres.
 - `/{levelSlug}/{chapterSlug}` — page d'un chapitre (`routes/ChapterRoute.tsx`), résolue via
   `findChapter()`.
+- Comptes professeurs (`.claude/rules/comptes.md`) : `/connexion`, `/inscription`, `/mot-de-passe`,
+  `/profil`, `/coffre`, `/admin` ; le panneau de conception (`/exercice`, `/evaluation`,
+  `/{levelSlug}/{chapterSlug}/exercices`) exige une session. Cours et générateurs restent publics.
 
 ## Règles détaillées (chargées seulement quand pertinentes)
 
@@ -60,6 +63,7 @@ tâches :
 | `.claude/rules/export-pipeline.md` | `src/lib/export/**`, `src/components/chapter/ExportSection.tsx` | Pipeline d'export Word/PDF/PowerPoint (`collectBlocks`, `captureBlocks`, `buildPdf`/`buildDocx`/`buildPptx`). |
 | `.claude/rules/content-history.md` | `src/content/chapters/**` | Historique détaillé, chapitre par chapitre, des migrations/enrichissements déjà réalisés (choix éditoriaux, bugs trouvés et corrigés, kinds ajoutés). |
 | `.claude/rules/quiz-generators.md` | `src/entrainement/**/generateurs/quiz*/**` | Convention des bancs d'affirmations vrai/faux : jamais de « grand calcul » (seulement vérification rapide), critère de tri, et le piège `nombreExercices` fixe si le compte varie par thème. |
+| `.claude/rules/comptes.md` | `src/lib/supabase.ts`, `src/lib/compte*`, `src/components/compte/**`, `src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation}*`, `supabase/**`, `.env*` | Comptes professeurs (Supabase) : schéma, RLS, inscription par code d'invitation (déclencheur sur `auth.users`), RPC admin, coffre des plans, cartouche école/professeur, garde des routes réservées, configuration (`.env.production` versionné, clé publique seulement), mise en service, limites de l'offre gratuite. |
 | `.claude/rules/feuilles-evaluations.md` | `src/entrainement/export/**`, `**/exportEvaluation.ts`, `src/lib/evaluation*.ts`, `src/lib/banquesVraiFaux.ts` | Méthode des feuilles d'exercices et évaluations (pilote 6e ch. 3) : décisions de l'utilisateur (pas de place de réponse, énoncé papier sans sous-questions, version aménagée, sélecteurs intacts), champs d'adaptateur à remplir, niveau de difficulté 1–7 et durée par exercice (`criteresDifficulte`, `niveauDifficulte.ts`), `versionPapier`, `?code=`, vrai/faux, mise en page A4 (points à droite, minuscules d'insistance, pied de page, consignes), options du document (annexe formulaire, deux colonnes, Word corrigé/grille), document « Examen » (parties, total fixé, horaire, `examen.ts`), vérifications. À relire avant d'étendre la refonte à un chapitre. |
 
 ## Champs de saisie libre : jamais de blocage

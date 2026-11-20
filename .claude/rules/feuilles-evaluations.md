@@ -373,6 +373,10 @@ comptent pas comme figures (`balisesFigures` ; trois racines carrées faisaient 
 figures »).
 
 Décisions de l'utilisateur (maquettes validées, lots A1–A4) :
+- **Cartouche (école, adresse, professeur)** : plus de constantes — `EnTeteEvaluation.cartouche`
+  (école choisie dans le panneau + nom du profil, comptes professeurs : `.claude/rules/comptes.md`),
+  rendu par `export/cartouche.ts` (copie, corrigé, examen, Word ; textes échappés, morceau vide =
+  rien). Absent → `CARTOUCHE_DEFAUT` (anciennes valeurs), documents identiques à avant.
 - **Points d'une sous-question / affirmation dans une colonne à droite** (`.sq-pts` : texte en
   `flex: 1`, points `white-space: nowrap` ; colonne `td.pts-col` dans un tableau regroupé), jamais en
   fin de phrase où ils passaient seuls à la ligne. Copie, aménagée et copie Word (taquet droit).
