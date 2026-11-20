@@ -436,7 +436,14 @@ function conditionSurInterieure(dir: CompositionDirigee, c: ConditionSurG): { bl
   const etude = etudeTrinome(W);
   // Racine irrationnelle de W : écrite par son nom (x₁, x₂ des lignes de Δ), jamais en décimal.
   const nomme = (latex: string) =>
-    etude.racines.reduce((acc, r, i) => (/\./.test(nb(r)) ? acc.split(nb(r)).join(etude.racines.length === 1 ? "x_0" : `x_${i + 1}`) : acc), latex);
+    latex.replace(/-?\d+\.\d+/g, (m) => {
+      const v = Number(m);
+      let i = 0;
+      etude.racines.forEach((r, j) => {
+        if (Math.abs(r - v) < Math.abs(etude.racines[i]! - v)) i = j;
+      });
+      return etude.racines.length === 1 ? "x_0" : `x_${i + 1}`;
+    });
   const zoneV = `${V}>0`;
   const posV = (x: number) => valeurPoly(fn.denominateur, x) > 1e-12;
   const Z = ensembleDepuisPredicat((x) => posV(x) && comparer(valeurPoly(W, x), rel, 0), [rV, ...racinesReelles(W)]);
