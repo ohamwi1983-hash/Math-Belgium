@@ -75,7 +75,7 @@ function etapePrevision(e: E): EtapeCorrection[] {
     utilise(sq, [t("On remplace "), f("t"), t(` par ${e.tPrev} dans le modèle (calculatrice en mode radian, sans arrondir φ ni ω).`)]),
     calcul(sq, [
       ligne(`${nom}(${e.tPrev})=${pL(e.A)}\\sin\\left(${omegaExactL(e)}\\cdot ${e.tPrev}+\\varphi\\right)+${pL(e.b)}`, "le modèle"),
-      ligne(`\\approx ${pL(e.A)}\\sin(${nbL(arg, 4, true)})+${pL(e.b)}`, "argument en radians"),
+      ligne(`\\approx ${pL(e.A)}\\sin(${nbL(arg, 5, true)})+${pL(e.b)}`, "argument en radians"),
       ligne(`\\approx ${nbL(e.prevision, d, true)}`),
     ]),
     resultat(sq, reponse(e, "prevision")),

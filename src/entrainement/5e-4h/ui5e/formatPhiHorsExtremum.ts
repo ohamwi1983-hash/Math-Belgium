@@ -28,7 +28,7 @@ export const omegaL = (e: E) => piL(e.omegaPi);
 /** ω devant t : « \dfrac{\pi}{4}t », « \pi t ». */
 export function omegaTL(e: E): string {
   const o = omegaL(e);
-  return /\\pi$/.test(o) ? `${o} t` : `${o}t`;
+  return o.endsWith("\\pi") ? `${o} t` : `${o}t`;
 }
 
 /** sin φ = m : exacte (fraction ou décimal court), sinon fraction ≈ décimal. */
