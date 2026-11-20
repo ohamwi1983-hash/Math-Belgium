@@ -3,6 +3,9 @@ import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES_DECOMPOSITION, construireAvecVariante, genererExerciceDecompositionFonction } from "./generateurs5e/decompositionFonction";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeDecompositionFonction } from "./generateurs5e/decompositionFonction/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 
 /** Même catalogue que l'adaptateur d'export (le QR code d'une feuille rouvre la même instance). */
 const OPTIONS_PROFONDEUR = CATALOGUE_VARIANTES_DECOMPOSITION;
@@ -90,6 +93,7 @@ export function App5gen2() {
               </p>
             </div>
           ),
+          corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDecompositionFonction(dernierResultat.exercice), "a")} />,
           labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
           onSuivant: passerEcranSuivant,
         }

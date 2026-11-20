@@ -1,17 +1,19 @@
-import type { CoucheGeneree, ExerciceDecompositionFonction, TypeCoucheCatalogue } from "../../core5e/decompositionFonction.types";
+import type { ExerciceDecompositionFonction } from "../../core5e/decompositionFonction.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { labelLigne } from "../../ui5e/formatDecompositionFonction";
 import { CATALOGUE_VARIANTES_DECOMPOSITION, construireAvecVariante, genererExerciceDecompositionFonction } from "./index";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { chaineComposee, correctionDetailleeDecompositionFonction, piegeDecomposition } from "./corrigeDetaille";
 import { profilDecompositionFonction } from "../profilsEvaluationFonctions1-2";
 
 /**
@@ -28,23 +30,6 @@ import { profilDecompositionFonction } from "../profilsEvaluationFonctions1-2";
  * Catalogue = `CATALOGUE_VARIANTES_DECOMPOSITION`, le MÊME que le sélecteur de l'appli (le QR code de
  * la feuille rouvre la même instance).
  */
-
-const LETTRES = ["g", "h", "i", "j", "k", "l", "m", "n"];
-
-function nomCouche(couche: CoucheGeneree): string {
-  if (couche.estAffineFinale) return "on multiplie le résultat précédent par un nombre puis on ajoute une constante (fonction affine)";
-  const noms: Record<TypeCoucheCatalogue, string> = {
-    affine: "une fonction affine",
-    carre: "on élève au carré",
-    cube: "on élève au cube",
-    racineCarree: "on prend la racine carrée",
-    racineCubique: "on prend la racine cubique",
-    inverse: "on prend l'inverse",
-    valeurAbsolue: "on prend la valeur absolue",
-    brute: "un polynôme, gardé en une seule couche",
-  };
-  return noms[couche.type];
-}
 
 function entete(exercice: ExerciceDecompositionFonction): FragmentConsigne[] {
   return [texte("On considère la fonction "), latex(exercice.fLatex), texte(".")];
@@ -68,10 +53,6 @@ function enoncePapierDecompositionFonction(exercice: ExerciceDecompositionFoncti
   };
 }
 
-function chaineComposee(n: number): string {
-  return Array.from({ length: n }, (_, i) => LETTRES[n - 1 - i] ?? `f_{${n - 1 - i}}`).join(" \\circ ");
-}
-
 function reponseBreveDecompositionFonction(exercice: ExerciceDecompositionFonction): FragmentConsigne[] {
   const fr: FragmentConsigne[] = [];
   exercice.couches.forEach((couche, i) => {
@@ -80,43 +61,6 @@ function reponseBreveDecompositionFonction(exercice: ExerciceDecompositionFoncti
   });
   fr.push(texte(" ; "), latex(`f = ${chaineComposee(exercice.couches.length)}`));
   return fr;
-}
-
-function piege(exercice: ExerciceDecompositionFonction): string {
-  const derniere = exercice.couches[exercice.couches.length - 1];
-  if (derniere.estAffineFinale) return "La dernière couche affine s'applique au résultat de la couche précédente, pas directement à x.";
-  if (exercice.couches[0].type === "brute") return "Le polynôme intérieur forme une seule couche : il est appliqué en premier, on ne le découpe pas.";
-  return "L'ordre compte : la fonction la plus intérieure est appliquée en premier, et f = h ∘ g se lit « h après g ».";
-}
-
-function correctionDetailleeDecompositionFonction(exercice: ExerciceDecompositionFonction): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [texte("On suit le calcul de f(x) pour un x donné : chaque opération, de la première à la dernière, est une couche. Une décomposition possible :")],
-    },
-  ];
-  exercice.couches.forEach((couche, i) => {
-    lignes.push({
-      label: `Couche ${i + 1}`,
-      sousQuestion: "a",
-      fragments: [
-        texte(i === 0 ? "Appliquée en premier, à x : " : "Appliquée ensuite, au résultat précédent : "),
-        texte(nomCouche(couche)),
-        texte(" — "),
-        latex(`${labelLigne(i)} ${couche.propreLatex}`),
-        texte("."),
-      ],
-    });
-  });
-  lignes.push({
-    label: "Vérification",
-    sousQuestion: "a",
-    fragments: [texte("En remplaçant à chaque fois x par la couche précédente, on retrouve "), latex(exercice.fLatex), texte(", donc "), latex(`f = ${chaineComposee(exercice.couches.length)}`), texte(".")],
-  });
-  lignes.push({ label: "Piège", sousQuestion: "a", fragments: [texte(piege(exercice))] });
-  return lignes;
 }
 
 function baremeDecompositionFonction(exercice: ExerciceDecompositionFonction): BaremeExercice {
@@ -130,16 +74,20 @@ function baremeDecompositionFonction(exercice: ExerciceDecompositionFonction): B
     reponseFinale: reponseBreveDecompositionFonction(exercice),
     criteres,
     erreursFrequentes: [
-      { description: [texte(piege(exercice))], cout: "−1" },
+      { description: [texte(piegeDecomposition(exercice))], cout: "−1" },
       { description: [texte("Une seule « couche » égale à f, ou une couche « x » : rien n'est décomposé")], cout: "0 pt" },
     ],
     reponsesAcceptees: [[texte("Toute décomposition en fonctions simples (affine, polynôme simple, puissance, racine, inverse, valeur absolue) qui reconstitue f, même avec un autre nombre de couches")]],
   };
 }
 
-function difficulteDecompositionFonction(exercice: ExerciceDecompositionFonction): 1 | 2 | 3 {
-  const n = exercice.couches.length;
-  return n <= 2 ? 1 : n === 3 ? 2 : 3;
+/** Critères du niveau (grille commune), jugés sur l'énoncé papier : un seul écran (la
+ * décomposition) ; méthode 1 (l'élève choisit lui-même le découpage : plusieurs décompositions
+ * acceptées) ; piège dans les données : dernière couche affine (elle s'applique au RÉSULTAT) ou
+ * polynôme intérieur à garder d'un bloc ; nombres 0. */
+function criteresDifficulteDecompositionFonction(exercice: ExerciceDecompositionFonction): CriteresDifficulte {
+  const piege: 0 | 1 = exercice.couches[exercice.couches.length - 1]!.estAffineFinale || exercice.couches[0]!.type === "brute" ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeDecompositionFonction(exercice)), methode: 1, piege, nombres: 0 };
 }
 
 /** Ancien corrigé (repli, documents Word) : les lignes du corrigé détaillé, sans le piège. */
@@ -157,12 +105,11 @@ export const adaptateurEvaluationDecompositionFonction: AdaptateurFeuilleExercic
   genererInstanceAvecVariante: (id) => construireAvecVariante(id),
   construireEnonce: construireEnonceDecompositionFonction,
   construireCorrection: construireCorrectionDecompositionFonction,
-  difficulte: difficulteDecompositionFonction,
+  criteresDifficulte: criteresDifficulteDecompositionFonction,
   reponseBreve: reponseBreveDecompositionFonction,
   correctionDetaillee: correctionDetailleeDecompositionFonction,
   bareme: baremeDecompositionFonction,
   enoncePapier: enoncePapierDecompositionFonction,
-  dureeMinutes: 4,
   profilInstance: profilDecompositionFonction,
   regroupable: false,
 };
