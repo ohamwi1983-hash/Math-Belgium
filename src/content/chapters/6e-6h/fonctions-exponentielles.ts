@@ -1427,6 +1427,17 @@ export const fonctionsExponentielles: ChapterContent = {
             "**signe** : $f(x) = e^x - 2$ a une dérivée partout positive, et pourtant " +
             '$f(0) = -1 < 0$.',
         },
+        { kind: 'subheading', text: 'f et f′ côte à côte' },
+        {
+          kind: 'atelier',
+          tag: 'f-fprime-exponentielle-widget',
+          label: 'Manipule toi-même — f et f′ côte à côte',
+          caption:
+            'Déplace le point sur f (curseur, ou glisse le doigt sur un graphique) : sa tangente et sa pente ' +
+            "s'affichent, et le point de même abscisse sur f′ a cette pente pour ordonnée. Vert : f′ > 0 et f " +
+            'croissante ; rouge : f′ < 0 et f décroissante. La dernière fonction, eˣ − 2, reprend le piège ' +
+            'ci-dessus.',
+        },
         { kind: 'subheading', text: 'Parité et dérivée' },
         {
           kind: 'methode',
