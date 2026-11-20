@@ -20,9 +20,15 @@ function formatPuissanceAffineAffichage(a: number, b: number, n: number): string
   return n >= 0 ? `(${base})^{${n}}` : `\\dfrac{1}{(${base})^{${-n}}}`;
 }
 
+/** Racine |n|-ième : « \\sqrt{…} » pour l'indice 2 (jamais « \\sqrt[2]{…} »), « \\sqrt[3]{…} »… sinon. */
+export function racineIndice(n: number, contenu: string): string {
+  const m = Math.abs(n);
+  return m === 2 ? `\\sqrt{${contenu}}` : `\\sqrt[${m}]{${contenu}}`;
+}
+
 function formatRacineNiemeAffichage(a: number, b: number, n: number): string {
   const base = formatAffineLatex(a, b);
-  const racine = `\\sqrt[${Math.abs(n)}]{${base}}`;
+  const racine = racineIndice(n, base);
   return n > 0 ? racine : `\\dfrac{1}{${racine}}`;
 }
 
@@ -73,7 +79,7 @@ export const CONSIGNE_ECRAN_DOMAINE: FragmentConsigne[] = [texte("Détermine le 
 export const CONSIGNE_ECRAN_INJECTIVE: FragmentConsigne[] = [texte("f est-elle injective sur son domaine de définition ?")];
 export const CONSIGNE_SOUS_QUESTION_INTERVALLE: FragmentConsigne[] = [texte("Quel est le plus grand intervalle sur lequel f est injective ?")];
 export const CONSIGNE_ECRAN_RECIPROQUE: FragmentConsigne[] = [texte("Détermine l'expression de la fonction réciproque "), latex("f^{-1}(x)"), texte(".")];
-export const CONSIGNE_ECRAN_IMAGE: FragmentConsigne[] = [texte("Détermine le plus grand intervalle dans lequel f est surjective.")];
+export const CONSIGNE_ECRAN_IMAGE: FragmentConsigne[] = [texte("Détermine l'image de f, l'ensemble sur lequel f est surjective.")];
 export const CONSIGNE_ECRAN_BIJECTION: FragmentConsigne[] = [texte("Complète la phrase suivante :")];
 
 export interface AideAvecLatex {
@@ -177,7 +183,8 @@ function membreDroiteAvecYPourX(fLatex: string): string {
 export function aideReciproqueNiveau2(exercice: ExerciceInjectiviteFonctions): AideAvecLatex {
   return {
     texte: "On pose y=f(x), puis on échange x et y (étape déjà faite ci-dessous) — il ne reste plus qu'à isoler y :",
-    latex: `x = ${membreDroiteAvecYPourX(exercice.fLatex)}`,
+    // Forme AFFICHÉE (jamais d'exposant négatif ou fractionnaire littéral, comme le bloc données).
+    latex: `x = ${membreDroiteAvecYPourX(formatFLatexAffichage(exercice))}`,
   };
 }
 
@@ -192,25 +199,25 @@ export function aideReciproqueNiveau2(exercice: ExerciceInjectiviteFonctions): A
 // ============================================================================
 
 /** x^{1/n} — racine n-ième de x si n>0, inverse de la racine |n|-ième si n<0. */
-function reciproqueRacineDeX(n: number): string {
-  const racine = `\\sqrt[${Math.abs(n)}]{x}`;
+export function reciproqueRacineDeX(n: number): string {
+  const racine = racineIndice(n, "x");
   return n > 0 ? racine : `\\dfrac{1}{${racine}}`;
 }
 
 /** Enveloppe `inner` dans une racine n-ième réelle (n>0) ou son inverse (n<0). */
-function reciproqueEnvelopperRacine(inner: string, n: number): string {
-  const racine = `\\sqrt[${Math.abs(n)}]{${inner}}`;
+export function reciproqueEnvelopperRacine(inner: string, n: number): string {
+  const racine = racineIndice(n, inner);
   return n > 0 ? racine : `\\dfrac{1}{${racine}}`;
 }
 
 /** x^{n} — jamais un exposant négatif littéral (fraction si n<0, comme `formatFLatexAffichage`). */
-function reciproqueXPuissanceN(n: number): string {
+export function reciproqueXPuissanceN(n: number): string {
   return n > 0 ? `x^{${n}}` : `\\dfrac{1}{x^{${-n}}}`;
 }
 
 /** `terme` (déjà signé) moins la constante b — jamais de double signe : "- b" si b>0, "+ |b|" si
  * b<0, rien si b=0. */
-function reciproqueMoinsConstante(terme: string, b: number): string {
+export function reciproqueMoinsConstante(terme: string, b: number): string {
   if (b === 0) return terme;
   return b > 0 ? `${terme} - ${b}` : `${terme} + ${Math.abs(b)}`;
 }
@@ -222,9 +229,9 @@ function reciproqueMoinsConstante(terme: string, b: number): string {
  * filet de sécurité flottant brut de `approxFractionLatex` (ex. `k=-3.0625=-49/16`), violation de
  * CLAUDE.md ("Fraction irréductible, jamais de décimal") détectée par
  * `formatReciproqueLatex.test.ts`. */
-const MAX_DENOMINATEUR_IMAGE_QUADRATIQUE = 24;
+export const MAX_DENOMINATEUR_IMAGE_QUADRATIQUE = 24;
 
-function reciproqueMoinsConstanteFraction(terme: string, valeur: number): string {
+export function reciproqueMoinsConstanteFraction(terme: string, valeur: number): string {
   if (Math.abs(valeur) < 1e-9) return terme;
   return valeur > 0
     ? `${terme} - ${approxFractionLatex(valeur, MAX_DENOMINATEUR_IMAGE_QUADRATIQUE)}`
@@ -234,10 +241,11 @@ function reciproqueMoinsConstanteFraction(terme: string, valeur: number): string
 /** `numerateur` divisé par l'entier a — jamais de "/1" ni de double signe pour a=-1, jamais de
  * dénominateur littéralement négatif pour a<0 (signe reporté au numérateur à la place — sinon
  * `\dfrac{...}{-4}` reste affiché tel quel, non simplifié, voir `formatReciproqueLatex.test.ts`). */
-function reciproqueDiviserParA(numerateur: string, a: number): string {
+export function reciproqueDiviserParA(numerateur: string, a: number): string {
   if (a === 1) return numerateur;
   if (a === -1) return `-\\left(${numerateur}\\right)`;
-  if (a < 0) return `\\dfrac{-\\left(${numerateur}\\right)}{${Math.abs(a)}}`;
+  // Signe devant la fraction (« −\\dfrac{x + 1}{5} », jamais « \\dfrac{−(x + 1)}{5} »).
+  if (a < 0) return `-\\dfrac{${numerateur}}{${Math.abs(a)}}`;
   return `\\dfrac{${numerateur}}{${a}}`;
 }
 
