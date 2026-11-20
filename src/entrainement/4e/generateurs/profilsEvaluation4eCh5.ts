@@ -26,6 +26,13 @@
  *   raccourci mesuré. Le nombre de triangles (cas ambigu de la loi des sinus) n'est jamais demandé
  *   ici ; s'il l'était, ce serait un verdict, jamais un cas particulier.
  *
+ * Lot D de l'audit (décisions de l'utilisateur) : « aucune solution » reste un CAS PARTICULIER en
+ * gen18 et le devient en gen78 ; « une seule amplitude » (gen75, famille « angle ») et « une seule
+ * solution » (gen79, sens inverse) sont des VERDICTS (≈ 25 % et ≈ 20 % des tirages). Groupes à verdict
+ * (panneau d'évaluation) : gen17 (famille), gen19 (loi), gen73 (configuration), gen81 (type
+ * d'erreur) — niveau et durée constants dans gen73 et gen81, piège constant en gen19. gen18
+ * « sin α = sin β » : jamais de cas particulier, `forme` = fonction et β à ramener ou non.
+ *
  * `calcul` : absent pour gen14–gen18 — toutes leurs réponses sont exactes (valeurs remarquables,
  * signes, fractions ; gen17 donne les valeurs approchées dans l'énoncé et interdit la calculatrice) :
  * la calculatrice n'y est jamais un critère de tirage (un `'exacte'` partout ferait perdre le cas

@@ -59,7 +59,8 @@ export const CONVERSIONS: Record<SituationRotation, [OrigineRotation, RotationSe
 };
 
 const PROBA_EXACTE = 0.45;
-const PROBA_UNIQUE = 1 / 12;
+/** « Deux / une seule solution » est un VERDICT de l'écran (audit 4e ch. 5, V3) : ≈ 20 %. */
+const PROBA_UNIQUE = 0.2;
 const PROBA_PLUS_D_UN_TOUR = 0.25;
 
 export interface OptionsGeneration {

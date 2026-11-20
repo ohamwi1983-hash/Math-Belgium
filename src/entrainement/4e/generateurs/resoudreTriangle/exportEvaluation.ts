@@ -29,7 +29,6 @@ import {
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceResoudreTriangle } from "./index";
 import { profilResoudreTriangle } from "./profil";
 import { correctionDetailleeResoudreTriangle } from "./corrigeDetaille";
-import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen73. Énoncé papier = données + figure aux
@@ -104,10 +103,18 @@ function bareme(e: ExerciceResoudreTriangle): BaremeExercice {
 /** Niveau : l'écran « configuration » est une lecture des données ; méthode 1 (choisir les lois) ;
  * piège seulement dans les données — un angle OBTUS à calculer en SAS/SSS (la loi des sinus
  * donnerait l'angle aigu) ; nombres : calculatrice. */
+/** Groupe à verdict (audit 4e ch. 5, lot D) : la configuration est la réponse de l'écran 1 — le
+ * niveau et la durée imprimés ne doivent pas la trahir (SSS : 14 min, angle obtus calculé : niveau 5).
+ * Niveau ET durée CONSTANTS, comme gen74 : 4 · Intermédiaire, 12 min (trois calculs, une lecture,
+ * méthode à choisir, calculatrice). */
 function criteresDifficulte(e: ExerciceResoudreTriangle): CriteresDifficulte {
-  const piegeObtus = positionObtus(e.triangle, e.donnees) === "calcule" && (e.configuration === "SAS" || e.configuration === "SSS");
-  return { ...etapesDuCorrige(correctionDetailleeResoudreTriangle(e), ["a"]), methode: 1, piege: piegeObtus ? 1 : 0, nombres: 1 };
+  void e;
+  return { etapesTransformation: 4, etapesLecture: 1, sansCharge: true, methode: 1, piege: 0, nombres: 1 };
 }
+
+/** Groupe à verdict (décision 2, audit 4e ch. 5, V5) : la configuration (AAS, SAS, SSS, SSA) est
+ * reconnue à l'écran 1 — panneau d'évaluation seulement. */
+const GROUPES_VERDICT = [{ id: "groupe_configuration", label: "Configuration à reconnaître (AAS, SAS, SSS ou SSA, au hasard)", variantes: ["AAS", "SAS", "SSS", "SSA"] }];
 
 export const adaptateurEvaluationResoudreTriangle: AdaptateurFeuilleExercices<ExerciceResoudreTriangle> = {
   profilInstance: profilResoudreTriangle,
@@ -116,6 +123,7 @@ export const adaptateurEvaluationResoudreTriangle: AdaptateurFeuilleExercices<Ex
   nomFichierBase: "resoudre-triangle",
   genererInstance: genererExerciceResoudreTriangle,
   catalogueVariantes: CATALOGUE_VARIANTES,
+  groupesVerdict: GROUPES_VERDICT,
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,

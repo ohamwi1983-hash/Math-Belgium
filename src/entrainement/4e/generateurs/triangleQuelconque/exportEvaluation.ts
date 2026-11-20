@@ -289,16 +289,23 @@ function criteresDifficulte(instance: ExerciceTriangleQuelconque): CriteresDiffi
   return {
     ...etapesDuCorrige(correctionDetailleeTriangleQuelconque(instance)),
     methode: 1,
-    piege: instance.configuration === "alKashiCote" && instance.triangle.A > 90 ? 1 : 0,
+    // Groupe à verdict « loi » (audit 4e ch. 5, lot D) : un niveau 4 ne sortait que pour Al-Kashi
+    // (angle compris obtus) et trahissait la loi — piège constant 0.
+    piege: 0,
     nombres: 1,
   };
 }
+
+/** Groupe à verdict (décision 2, audit 4e ch. 5, V5) : la variante fixe la loi (sinus ou Al-Kashi)
+ * — panneau d'évaluation seulement. */
+const GROUPES_VERDICT = [{ id: "groupe_loi", label: "Loi à choisir (loi des sinus ou Al-Kashi, au hasard)", variantes: ["loiSinus", "alKashi", "alKashiCote"] }];
 
 export const adaptateurEvaluationTriangleQuelconque: AdaptateurFeuilleExercices<ExerciceTriangleQuelconque> = avecVirgulesBelges({
   titreDocument: "Triangle quelconque — Évaluation",
   nomFichierBase: "triangle-quelconque",
   genererInstance: genererExerciceTriangleQuelconque,
   catalogueVariantes: CATALOGUE_VARIANTES,
+  groupesVerdict: GROUPES_VERDICT,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceTriangleQuelconque,
   construireCorrection: construireCorrectionTriangleQuelconque,

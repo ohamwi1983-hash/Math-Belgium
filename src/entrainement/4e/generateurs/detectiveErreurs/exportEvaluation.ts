@@ -26,7 +26,6 @@ import {
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveErreurs } from "./index";
 import { profilDetectiveErreurs } from "./profil";
 import { correctionDetailleeDetectiveErreurs } from "./corrigeDetaille";
-import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen81. Énoncé papier = les données du triangle,
@@ -111,9 +110,18 @@ function bareme(e: ExerciceDetectiveErreurs): BaremeExercice {
 /** Niveau : méthode 1 (refaire la résolution avec les lois du cours) ; piège 0, CONSTANT — le type
  * d'erreur est la réponse de l'écran 2 (un piège « angle obtus » ou « cas ambigu » le trahirait
  * sur la feuille), comme gen112 ; aucun écran de lecture ; calculatrice. */
+/** Groupe à verdict (audit 4e ch. 5, lot D) : le type d'erreur ne doit pas se lire dans la durée
+ * imprimée (9 ou 11 min selon le type) — niveau ET durée CONSTANTS : 4 · Intermédiaire, 11 min. */
 function criteresDifficulte(e: ExerciceDetectiveErreurs): CriteresDifficulte {
-  return { ...etapesDuCorrige(correctionDetailleeDetectiveErreurs(e)), methode: 1, piege: 0, nombres: 1 };
+  void e;
+  return { etapesTransformation: 4, etapesLecture: 0, sansCharge: true, methode: 1, piege: 0, nombres: 1 };
 }
+
+/** Groupe à verdict (décision 2 de l'utilisateur, audit 4e ch. 5, V4) : le type d'erreur est la
+ * réponse de l'écran 2 — panneau d'évaluation seulement, feuille et sélecteurs intacts. */
+const GROUPES_VERDICT = [
+  { id: "groupe_erreur", label: "Type d'erreur à reconnaître (au hasard parmi les six)", variantes: ["obtus", "radians", "arrondi", "coteOppose", "alKashi", "ambigu"] },
+];
 
 export const adaptateurEvaluationDetectiveErreurs: AdaptateurFeuilleExercices<ExerciceDetectiveErreurs> = {
   profilInstance: profilDetectiveErreurs,
@@ -122,6 +130,7 @@ export const adaptateurEvaluationDetectiveErreurs: AdaptateurFeuilleExercices<Ex
   nomFichierBase: "detective-erreurs-triangle",
   genererInstance: genererExerciceDetectiveErreurs,
   catalogueVariantes: CATALOGUE_VARIANTES,
+  groupesVerdict: GROUPES_VERDICT,
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,

@@ -298,11 +298,23 @@ function criteresDifficulte(instance: ExerciceAnglesAssocies): CriteresDifficult
   };
 }
 
+/** Groupes à verdict (décision 2, audit 4e ch. 5, V6) : la famille d'angles associés est ce que
+ * l'élève reconnaît — panneau d'évaluation seulement. */
+const GROUPES_VERDICT = [
+  {
+    id: "groupe_famille_sincos",
+    label: "Sin/Cos — famille à reconnaître (complémentaire, supplémentaire, anti-supplémentaire, opposé ou 90° + α, au hasard)",
+    variantes: ["sinCos-complementaireDirecte", "sinCos-supplementaire", "sinCos-antiSupplementaire", "sinCos-oppose", "sinCos-plus90"],
+  },
+  { id: "groupe_famille_tan", label: "Tangente — famille à reconnaître (supplémentaire, anti-supplémentaire ou opposé, au hasard)", variantes: ["tangente-supplementaire", "tangente-antiSupplementaire", "tangente-oppose"] },
+];
+
 export const adaptateurEvaluationAnglesAssocies: AdaptateurFeuilleExercices<ExerciceAnglesAssocies> = {
   titreDocument: "Angles associés — Évaluation",
   nomFichierBase: "angles-associes",
   genererInstance: genererExerciceAnglesAssocies,
   catalogueVariantes: CATALOGUE_VARIANTES,
+  groupesVerdict: GROUPES_VERDICT,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteAnglesAssocies),
   construireEnonce: construireEnonceAnglesAssocies,
   construireCorrection: construireCorrectionAnglesAssocies,
