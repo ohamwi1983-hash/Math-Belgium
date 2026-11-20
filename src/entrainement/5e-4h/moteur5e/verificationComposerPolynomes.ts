@@ -46,8 +46,11 @@ export function aReprendre(e: E, phase: P, valeurs: string[]): Frag[] | null {
   const p = lirePolynome(valeurs[0]);
   if (!p || !egauxP(p, attendu(e, phase))) return null;
   const forme = formePolynome(valeurs[0]);
+  const carre = (phase === "fog" ? e.f : e.g).length === 3;
   if (forme === "non-developpee")
-    return [tx("Ton expression est juste, mais elle n'est pas encore développée : supprime les parenthèses (distributivité, "), lx("(A+B)^2=A^2+2AB+B^2"), tx("). Cette saisie ne compte pas comme une tentative.")];
+    return carre
+      ? [tx("Ton expression est juste, mais elle n'est pas encore développée : supprime les parenthèses ("), lx("(A+B)^2=A^2+2AB+B^2"), tx(", puis distributivité). Cette saisie ne compte pas comme une tentative.")]
+      : [tx("Ton expression est juste, mais elle n'est pas encore développée : supprime les parenthèses (distributivité, "), lx("k(A+B)=kA+kB"), tx("). Cette saisie ne compte pas comme une tentative.")];
   if (forme === "non-reduite") return [tx("Ton expression est juste, mais elle n'est pas encore réduite : regroupe les termes de même degré (un seul terme en "), lx("x^2"), tx(", un seul en "), lx("x"), tx(", une seule constante). Cette saisie ne compte pas comme une tentative.")];
   return null;
 }

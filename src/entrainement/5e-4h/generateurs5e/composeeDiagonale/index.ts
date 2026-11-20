@@ -10,7 +10,8 @@ export type IdVarianteComposeeDiagonale = VarianteComposeeDiagonale;
  * (jamais un segment posé sur y = x, pas plus de deux paliers), extrémités creuses 20 % du temps
  * (tirées AVANT le verdict : leur présence ne trahit rien). Verdict « existe » tiré 50/50 ; sinon
  * v = I(a) hors du domaine de l'extérieure (sur une extrémité creuse dans ≈ 30 % des cas où il y en
- * a une). Lectures non ambiguës : v ≠ a, et pour « existe » O(v) ≠ v, O(v) ≠ O(a), O(v) ≠ I(v).
+ * a une). Lectures non ambiguës : v ≠ a, O(a) ≠ I(a), et pour « existe » O(v) ≠ v, O(v) ≠ O(a),
+ * O(v) ≠ I(v).
  */
 
 const ent = (a: number, b: number) => a + Math.floor(Math.random() * (b - a + 1));
@@ -48,7 +49,8 @@ function courbe(): CourbeEntiere {
   }
 }
 
-/** Les deux courbes ne se confondent pas (au plus deux abscisses entières communes en même point). */
+/** Les deux courbes ne se confondent pas : au plus un nœud commun (donc aucun segment commun), et
+ * deux extrémités droites d'une même abscisse écartées d'au moins 2 (place des noms Cf, Cg). */
 function distinctes(f: CourbeEntiere, g: CourbeEntiere): boolean {
   let communs = 0;
   for (let x = -6; x <= 6; x++) {
@@ -56,7 +58,10 @@ function distinctes(f: CourbeEntiere, g: CourbeEntiere): boolean {
     const b = valeurCourbe(g, x);
     if (a !== null && a === b) communs++;
   }
-  return communs <= 2;
+  const finF = finCourbe(f);
+  const finG = finCourbe(g);
+  if (Math.abs(finF - finG) <= 1 && Math.abs(f.valeurs[f.valeurs.length - 1] - g.valeurs[g.valeurs.length - 1]) < 2) return false;
+  return communs <= 1;
 }
 
 function construire(variante: VarianteComposeeDiagonale): ExerciceComposeeDiagonale {
@@ -71,7 +76,10 @@ function construire(variante: VarianteComposeeDiagonale): ExerciceComposeeDiagon
     const candidats: { a: number; v: number; w: number | null; extremite: boolean }[] = [];
     for (let a = I.debut; a <= finCourbe(I); a++) {
       const v = valeurCourbe(variante === "ff" ? f : I, a);
-      if (v === null || v === a) continue;
+      // v = 0 : le report tomberait sur l'origine, au milieu des graduations.
+      if (v === null || v === a || v === 0) continue;
+      // Première lecture discriminante : Cf et Cg ne passent pas par le même point en a.
+      if (variante !== "ff" && valeurCourbe(O, a) === v) continue;
       const w = valeurCourbe(O, v);
       if ((w !== null) !== existe) continue;
       if (existe) {

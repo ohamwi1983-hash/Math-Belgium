@@ -40,7 +40,7 @@ function etape(e: E, phase: PhaseComposerPolynomes, sq: string): EtapeCorrection
     case "substitution":
       return [
         utilise(sq, [t("Dans "), f("f\\circ g"), t(", g agit d'abord : "), f("(f\\circ g)(x)=f\\big(g(x)\\big)"), t(". On remplace chaque "), f("x"), t(" de f par l'expression de "), f("g(x)"), t(", entre parenthèses "), t(COURS), t(".")]),
-        calcul(sq, [ligne(`(f\\circ g)(x)=f\\big(${polyL(e.g)}\\big)`, "définition de f∘g"), ligne(`=${substL(e.f, e.g)}`, "chaque x de f remplacé par g(x)")]),
+        calcul(sq, [ligne(`(f\\circ g)(x)=f\\left(${polyL(e.g)}\\right)`, "définition de f∘g"), ligne(`=${substL(e.f, e.g)}`, "chaque x de f remplacé par g(x)")]),
         resultat(sq, reponse(e, phase)),
         piege(sq, [t("Remplacer "), f("x"), t(" dans g par f(x) : c'est "), f("g\\circ f"), t(", une autre fonction.")]),
       ];
@@ -56,7 +56,7 @@ function etape(e: E, phase: PhaseComposerPolynomes, sq: string): EtapeCorrection
       return [
         utilise(sq, [t("Cette fois, f agit d'abord : "), f("(g\\circ f)(x)=g\\big(f(x)\\big)"), t(" ; on remplace chaque "), f("x"), t(" de g par "), f("f(x)"), t(", puis on développe et on réduit "), t(COURS), t(".")]),
         ...blocCarre(sq, e.g, e.f),
-        calcul(sq, [ligne(`(g\\circ f)(x)=g\\big(${polyL(e.f)}\\big)`, "définition de g∘f"), ...lignesDev("", e.g, e.f).map((l, i) => (i === 0 ? { ...l, latex: l.latex } : l))]),
+        calcul(sq, [ligne(`(g\\circ f)(x)=g\\left(${polyL(e.f)}\\right)`, "définition de g∘f"), ...lignesDev("", e.g, e.f)]),
         resultat(sq, reponse(e, phase)),
         piege(sq, [t("Recopier "), f("(f\\circ g)(x)"), t(" : l'ordre compte, en général "), f("g\\circ f\\neq f\\circ g"), t(".")]),
       ];

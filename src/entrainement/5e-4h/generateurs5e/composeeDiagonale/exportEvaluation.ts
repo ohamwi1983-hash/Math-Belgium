@@ -45,12 +45,12 @@ function construireCorrection(e: E): BlocCorrection[] {
   return phases(e).map((p, i) => ({ type: "paragraphe", fragments: [t(`${"abc"[i]}) `), ...reponse(e, p)] }));
 }
 
-/** a et c sont des lectures (même dans le cas « n'existe pas », c est une conclusion de lecture) :
- * niveau et durée ne dépendent pas du verdict. Piège dans les données : une extrémité creuse
- * (tirée avant le verdict). */
+/** a et c sont des lectures (même dans le cas « n'existe pas », c est une conclusion de lecture).
+ * Piège CONSTANT 1 : l'extrémité du graphe complet (domaine de l'extérieure) est toujours dans les
+ * données ; le lier aux ronds vides le corrélait au verdict (63 % / 54 % en (f∘g), 2 000 tirages) —
+ * niveau 2 et 6 min dans les deux issues. */
 function criteresDifficulte(e: E): CriteresDifficulte {
-  const creuse = e.f.ouverteG || e.f.ouverteD || e.g.ouverteG || e.g.ouverteD;
-  return { ...etapesDuCorrige(correctionDetailleeComposeeDiagonale(e), ["a", "c"]), methode: 0, piege: creuse ? 1 : 0, nombres: 0 };
+  return { ...etapesDuCorrige(correctionDetailleeComposeeDiagonale(e), ["a", "c"]), methode: 0, piege: 1, nombres: 0 };
 }
 
 function bareme(e: E): BaremeExercice {

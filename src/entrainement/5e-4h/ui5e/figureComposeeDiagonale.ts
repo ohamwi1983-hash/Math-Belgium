@@ -67,7 +67,7 @@ export function figureDiagonaleSvg(e: ExerciceComposeeDiagonale, o: OptionsFigur
   s.push(`<text x="${f1(sx(0) - 3)}" y="${f1(sy(0) + p + 2)}" font-size="${p}" text-anchor="end" fill="${AXE}" ${POLICE} ${HALO}>0</text>`);
   // Diagonale y = x.
   s.push(`<line x1="${f1(sx(min))}" y1="${f1(sy(min))}" x2="${f1(sx(max))}" y2="${f1(sy(max))}" stroke="${DIAGONALE}" stroke-width="1.6" stroke-dasharray="6 4"/>`);
-  s.push(`<text x="${f1(sx(max) - 4)}" y="${f1(sy(max) + p * 1.9)}" font-size="${p}" text-anchor="end" fill="${DIAGONALE}" ${POLICE} ${HALO}><tspan font-style="italic" font-family="Times New Roman, serif">y</tspan> = <tspan font-style="italic" font-family="Times New Roman, serif">x</tspan></text>`);
+  s.push(`<text x="${f1(sx(min) + 3)}" y="${f1(sy(min + 2.6))}" font-size="${p}" text-anchor="start" fill="${DIAGONALE}" ${POLICE} ${HALO}><tspan font-style="italic" font-family="Times New Roman, serif">y</tspan> = <tspan font-style="italic" font-family="Times New Roman, serif">x</tspan></text>`);
   // Construction (sous les courbes).
   const dash = `stroke="${CONSTRUCTION}" stroke-width="1.8" stroke-dasharray="5 3"`;
   if (o.complete) s.push(`<line x1="${f1(sx(e.a))}" y1="${f1(sy(0))}" x2="${f1(sx(e.a))}" y2="${f1(sy(e.v))}" ${dash}/>`);

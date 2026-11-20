@@ -182,7 +182,7 @@ export function aide2(e: E, phase: PhaseDomaineParImage): AideEcran | null {
     case "valeurs":
       return { texte: [tx("Ici, place les deux ensembles sur une même droite graduée et garde leur partie commune :")], latex: `${ensembleL(e.imG)}\\ \\cap\\ ${ensembleL(e.domF)}` };
     case "composee": {
-      const t: Frag[] = [tx("Ici, résous en "), lx("x"), tx(" la condition « g(x) dans dom f » :")];
+      const t: Frag[] = [tx("Ici, résous en "), lx("x"), tx(" la condition "), lx("g(x)\\in\\operatorname{dom} f"), tx(" :")];
       if (e.g.famille === "racine") t.push(tx(" (avec "), lx("x\\geq 0"), tx(")"));
       if (e.g.famille === "inverse") t.push(tx(" (avec "), lx("x\\neq 0"), tx(")"));
       return { texte: t, latex: conditionDomF(e.f, `\\left(${expressionG(e.g)}\\right)`) };

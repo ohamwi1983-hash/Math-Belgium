@@ -1023,3 +1023,36 @@ pièges, faux), collecteur (outils de `gen122` recopiés, `env.ts` : x génériq
 g, h, p) 1 260 tirages, ≈ 17 700 égalités, 0 fausse ; documents réels `construirePlan` (2 graines,
 évaluation 2 séries + aménagée + feuille + Word du corrigé) : 0 débordement à 680, 820 et 1 280 px,
 0 `.katex-error` ; `?code=` 25 / 25.
+
+## 5e ch. 1, lot G — 5gen61–5gen63 (nouveaux, notés)
+
+Socle d'écrans du 5e ch. 2 (`AppEcransTrigo` + `DefinitionEcrans`) réutilisé, options ADDITIVES sans
+effet sur 5gen54–57 et 6gen148–151 : `aReprendre?` (saisie juste en valeur mais pas sous la forme
+demandée — polynôme non développé / non réduit, infini fermé, bornes dans le désordre : message,
+AUCUNE tentative), `AideEcran.figure` (figure d'aide de niveau 2), écran « intervalles » avec
+`placeholders` et `vide` (bouton ∅ → `VALEUR_VIDE`). Saisies : `moteur5e/polynomeSaisi.ts`
+(coefficients + forme de l'écriture ; « x² », « x^2 », produits implicites, « − – — »),
+`moteur5e/ensembleSaisi.ts` (réunions d'intervalles à bornes `Q` en forme normale, ∅, ℝ, ℝ∖{…},
+« +inf », « ∞ », fractions ; écriture `ensembleL`). Corrigés `generateurs5e/{composerPolynomes,
+domaineParImage,composeeDiagonale}/corrigeDetaille.ts`, une lettre par écran. **5gen61** (composer des
+polynômes) : vraies questions papier a) (f∘g)(x) [étapes a, b], b) (g∘f)(x), c) vérification en un
+point, d) f∘g = g∘f ? (deux affines seulement : une parabole et une affine non identité ne commutent
+jamais) ; bloc « Carré » (A + B)² puis distributivité et réduction ligne à ligne, `f\left(…\right)`
+(jamais `\big(` devant un moins) ; verdict « égales » 50/50 (même point fixe ou deux translations).
+**5gen62** (domaine par l'image) : énoncé papier = f, g + consigne globale ; Im g, dom f,
+Im g ∩ dom f et dom(f∘g) dans le corrigé (condition g(x) ∈ dom f résolue en x, vérification sur un x
+entier du domaine) ; cas particulier `domaine-vide` (≈ 10 %, jamais filtré par le générateur),
+Im g ⊂ dom f ≈ 25 % ; `forme` = famille de g. **5gen63** (composée sur un seul repère, y = x) :
+`ui5e/figureComposeeDiagonale.ts` (même échelle en x et y, carreaux d'une unité, valeurs entières aux
+nœuds, extrémités pleines / creuses, graphes complets, au plus un nœud commun entre Cf et Cg), énoncé
+papier = figure + consigne ; TOUJOURS trois étapes au corrigé (c = seconde lecture ou conclusion
+« n'existe pas »), figure de la construction en `figureHtml` (7 cm) ; « existe » 50/50 (verdict),
+`forme` = variante. Niveaux (`niveauEtDuree`, 2 000 tirages par variante) : 5gen61 niv. 2, 12 min
+(affines) / 10 min (second degré), identiques dans les deux verdicts ; 5gen62 niv. 2–3 (piège = valeur
+exclue : 1/(x − c), racine au dénominateur, 1/x), 10 min ; 5gen63 niv. 2, 6 min (lectures a et c,
+piège CONSTANT 1 : lié aux ronds vides, il était corrélé au verdict, 63 % / 54 %). Collecteur (outils
+de `corrige-6e2-m2` recopiés, `env.ts` : f et g de l'instance, x générique et points du domaine, y
+pour les identités « g(…) = y », étape d ignorée quand le domaine est vide) : 920 tirages, ≈ 8 300
+relations, 0 fausse. Documents réels (`construirePlan`, 2 plans, évaluation 2 séries + aménagée +
+corrigé + grille + feuille, calculatrice interdite / autorisée, cas particulier coché) : même
+structure d'une série à l'autre, 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error`.

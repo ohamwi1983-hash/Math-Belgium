@@ -63,7 +63,8 @@ export function piege(e: E, phase: P, valeurs: string[]): Frag[] | null {
     }
     case "domaine":
       if (crochet) return e.f.famille === "inverseRacine" || e.f.famille === "inverseRacineMoins" ? [tx("En "), lx(`${e.f.c}`), tx(", la racine vaut 0 et elle est au dénominateur : cette valeur est exclue.")] : [tx("En "), lx(`${e.f.c}`), tx(", le radicande vaut 0 et "), lx("\\sqrt{0}=0"), tx(" existe : cette valeur est comprise.")];
-      if (s.length === 1 && attendu.length === 1 && (s[0].g.inf === -1) !== (attendu[0].g.inf === -1)) return [tx("Vérifie le sens de l'inégalité : multiplier ou diviser par un nombre négatif le change.")];
+      // Demi-droite du mauvais côté de c (sens de l'inégalité).
+      if (s.length === 1 && attendu.length === 1 && (s[0].g.inf === -1) !== (attendu[0].g.inf === -1) && (s[0].g.inf === 0 || s[0].d.inf === 0) && [s[0].g, s[0].d].some((b) => b.inf === 0 && b.q.n === e.f.c * b.q.d)) return [tx("Vérifie le sens de l'inégalité : multiplier ou diviser par un nombre négatif le change.")];
       return null;
     case "valeurs":
       if (!egalEns(attendu, reunion(e.imG, e.domF)) && eq(reunion(e.imG, e.domF))) return [tx("C'est la réunion des deux ensembles : il faut les valeurs qui sont dans les deux à la fois (intersection).")];
