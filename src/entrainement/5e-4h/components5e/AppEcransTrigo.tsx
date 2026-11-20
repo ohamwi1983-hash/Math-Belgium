@@ -21,6 +21,7 @@ import { FicheReponseEcran } from "../../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../../export/codeExercice";
 import { CorrigeDetailleEcran } from "../../components/CorrigeDetailleEcran";
 import { lettreEtape, lignesDeLEtape } from "../../export/corrigeTableau";
+import { CopieEleve } from "../../4e/components/EtapesDetectiveErreurs";
 
 const REGLAGES: ReglagesSession5e = { nombreExercices: 1, tentativesMax: TENTATIVES_CHAMP };
 
@@ -45,6 +46,8 @@ export interface ConfigAppEcrans<E, P extends string> {
 interface TransitionEnAttente<E, P extends string> {
   etatSuivant: EtatSessionEcrans<E, P>;
   revele: boolean;
+  /** Dernière saisie (choix fermé faux : message ciblé avec la réponse, `piegeChoixRevele`). */
+  valeurs: string[];
 }
 
 /** « Ce qu'on sait déjà » : valeurs CONFIRMÉES des écrans clos (jamais la saisie de l'élève). */
@@ -157,7 +160,7 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
         reponseAttendue: revele ? <ReponseAttendue fragments={def.reponseAttendue(e, phase)} /> : undefined,
       },
     ]);
-    setEnAttente({ etatSuivant: nouvel, revele });
+    setEnAttente({ etatSuivant: nouvel, revele, valeurs });
   }
 
   function suivant() {
@@ -175,6 +178,8 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
 
   const choix = def.estChoix(e, phase);
   const indexPhase = phases.indexOf(phase);
+  // Choix fermé faux (une seule tentative) : message ciblé de `piege` avec la réponse (opt-in).
+  const piegeChoix = def.piegeChoixRevele && choix && enAttente?.revele ? def.piege(e, phase, enAttente.valeurs) : null;
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -184,6 +189,15 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(def.correction(e), lettreEtape(indexPhase))} />,
         ...(choix && enAttente.revele
           ? { messageRevele: `Ce n'était pas le bon choix (une seule tentative sur un choix fermé).${def.explicationChoix ? ` ${def.explicationChoix(e, phase)}` : ""}` }
+          : {}),
+        ...(piegeChoix
+          ? {
+              figureApres: (
+                <p style={{ margin: "8px 0", lineHeight: 1.6 }}>
+                  <Fragments fragments={piegeChoix} />
+                </p>
+              ),
+            }
           : {}),
       }
     : null;
@@ -204,10 +218,12 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
 
   const figure = def.figure?.(e, phase) ?? null;
   const tableau = def.tableau?.(e) ?? null;
+  const copie = def.copie?.(e, phase) ?? null;
   const blocDonnees =
-    figure || tableau ? (
+    figure || tableau || copie ? (
       <>
         {tableau && <TableauDonneesVue tableau={tableau} />}
+        {copie && <CopieEleve lignes={copie.lignes} ligneSignalee={copie.signalee} />}
         {figure && <FigureSvg svg={figure} largeurMax={config.largeurFigure} />}
       </>
     ) : null;
@@ -240,6 +256,7 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
           diagnostiquer={(v) => def.diagnostiquer(e, phase, v)}
           piege={(v) => def.piege(e, phase, v)}
           messageIllisible={def.messageIllisible(e, phase)}
+          approchee={def.approchee ? (v) => def.approchee!(e, phase, v) : undefined}
           onValider={(v) => terminerEtape(soumettreEcran(def, etat, v), v)}
         />
       </main>

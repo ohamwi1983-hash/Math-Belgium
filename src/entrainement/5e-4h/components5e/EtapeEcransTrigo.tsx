@@ -98,6 +98,8 @@ interface Props {
   piege: (valeurs: string[]) => Frag[] | null;
   messageIllisible: string;
   validation?: ValidationEtapeProps | null;
+  /** Valeur lisible mais approchée alors que la forme exacte est demandée (message) : aucune tentative. */
+  approchee?: (valeurs: string[]) => string | null;
 }
 
 const LIGNE_VIDE: LigneIntervalle = { ouvrant: "[", gauche: "", droite: "", fermant: "]" };
@@ -106,6 +108,17 @@ function valeursInitiales(mode: ModeEcran): string[] {
   if (mode.type === "champs") return Array.from({ length: mode.champs.length + (mode.symboles ? 1 : 0) }, () => "");
   if (mode.type === "intervalles") return [encoderLigne(LIGNE_VIDE)];
   return [""];
+}
+
+/** Aperçu KaTeX fourni par le générateur (`ChampEcran.apercuLatex`) : rien tant que la saisie est
+ * illisible (jamais un aperçu trompeur). */
+function ApercuPropre({ latex }: { latex: string | null }) {
+  if (!latex) return null;
+  return (
+    <div className="apercu-expression-latex contenu-conditionnel" style={{ overflowX: "auto", maxWidth: "100%" }}>
+      <Katex expression={latex} />
+    </div>
+  );
 }
 
 function BlocAide({ aide }: { aide: AideEcran }) {
@@ -143,6 +156,7 @@ export function EtapeEcransTrigo({
   piege,
   messageIllisible,
   validation,
+  approchee,
 }: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => valeursInitiales(mode));
   const [statutsSoumis, setStatutsSoumis] = useState<StatutVerification[] | null>(null);
@@ -175,6 +189,11 @@ export function EtapeEcransTrigo({
     const statuts = diagnostiquer(valeurs);
     if (statuts.includes("parse_error")) {
       setErreurLecture(messageIllisible);
+      return;
+    }
+    const approx = approchee ? approchee(valeurs) : null;
+    if (approx) {
+      setErreurLecture(approx);
       return;
     }
     setErreurLecture(null);
@@ -241,12 +260,22 @@ export function EtapeEcransTrigo({
           {mode.champs.map((champ, k) => (
             <div key={k}>
               {champ.apercu && !gele && <ApercuExpressionLatex texte={valeurs[k + decalage]} label={champ.label} />}
+              {champ.apercuLatex && !gele && <ApercuPropre latex={champ.apercuLatex(valeurs[k + decalage] ?? "")} />}
             <div className="field">
               <label className="field-label field-label-minuscule">
                 {champ.labelLatex ? <Katex expression={champ.labelLatex} /> : champ.label}
                 {champ.unite && <span> (en {champ.unite})</span>}
               </label>
               {saisie(k + decalage, champ.label, champ.placeholder)}
+              {champ.raccourcis && !gele && (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 6 }} role="group" aria-label={`Raccourcis de saisie : ${champ.label}`}>
+                  {champ.raccourcis.map((r) => (
+                    <button key={r.libelle} type="button" className="btn" style={{ minWidth: 44, minHeight: 44, padding: "0 10px" }} onClick={() => changer(k + decalage, (valeurs[k + decalage] ?? "") + r.texte)}>
+                      {r.libelle}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             </div>
           ))}

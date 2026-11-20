@@ -24,6 +24,11 @@ export interface ChampEcran {
   placeholder: string;
   /** Aperçu KaTeX en direct au-dessus du champ (saisie d'une expression : 6gen148, 6gen149). */
   apercu?: boolean;
+  /** Aperçu KaTeX propre au champ (ensemble, nombre… : 5gen58–5gen60) — `null` : rien d'affiché. */
+  apercuLatex?: (texte: string) => string | null;
+  /** Boutons qui AJOUTENT un texte en fin de champ (« [ », « ∞ », « ∪ », « ℝ »…) : 5gen58–5gen60.
+   * Ils ne restreignent jamais ce qu'on tape. */
+  raccourcis?: { libelle: string; texte: string }[];
 }
 
 export interface OptionEcran {
@@ -83,6 +88,15 @@ export interface DefinitionEcrans<E, P extends string> {
   aidesChoixDeuxNiveaux?: boolean;
   /** Choix fermé faux : explication affichée avec la réponse. */
   explicationChoix?(e: E, phase: P): string;
+  /** Copie d'un élève fictif (lignes numérotées) et ligne signalée — détective 5gen58 (même rendu
+   * que 6gen144). Absent : aucune copie (5gen54–5gen57 inchangés). */
+  copie?(e: E, phase: P): { lignes: Frag[][]; signalee: number | null } | null;
+  /** Saisie lisible mais APPROCHÉE alors que la forme exacte est demandée : message, AUCUNE tentative
+   * consommée (`null` sinon) — 5gen58–5gen60. */
+  approchee?(e: E, phase: P, valeurs: string[]): string | null;
+  /** Choix fermé faux : le message ciblé de `piege` s'affiche avec la réponse révélée (5gen58–5gen60 ;
+   * absent : rien, comme avant). */
+  piegeChoixRevele?: boolean;
   correction(e: E): EtapeCorrection[];
 }
 

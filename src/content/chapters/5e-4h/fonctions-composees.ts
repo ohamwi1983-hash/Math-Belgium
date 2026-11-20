@@ -587,6 +587,19 @@ export const fonctionsComposees: ChapterContent = {
           ],
           whereLabel: '5e (4h) → « 2. Décomposer une fonction composée »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Composée en un point',
+          generatorId: '5gen60',
+          chantier: '5e-4h',
+          description: [
+            'Deux fonctions f et g sont données ; calcule (f∘g)(a) ou (g∘f)(a) : ' +
+              'choisis la fonction qui s’applique en premier et calcule la valeur intermédiaire, ' +
+              'décide si la seconde fonction peut la recevoir (racine, dénominateur), puis donne la ' +
+              'valeur exacte — ou conclus que la composée n’existe pas, exactement le piège ci-dessus.',
+          ],
+          whereLabel: '5e (4h) → « 60. Composée en un point »',
+        },
       ],
     },
 

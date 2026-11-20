@@ -104,6 +104,7 @@ export type IdGenerateurPilote =
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
   | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103' | 'gen102' | 'gen105' | 'gen104' | 'gen107' | 'gen106'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
+  | '5gen60'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
   | '5gen50' | '5gen51' | '5gen52' | '5gen53' | '5gen54' | '5gen55' | '5gen56' | '5gen57'
   | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19' | '5gen44' | '5gen45' | '5gen46' | '5gen47' | '5gen48' | '5gen49'
@@ -356,6 +357,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'revision', generatorId: 'gen107', label: 'Détective d\'erreurs : géométrie dans l\'espace (gen107)', processus: 3 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', generatorId: '5gen1', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', generatorId: '5gen2', label: '' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', generatorId: '5gen60', label: 'Composée en un point (5gen60)', processus: 2 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'composer', generatorId: '5gen3', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'graphique', generatorId: '5gen4', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'contexte', generatorId: '5gen5', label: '', processus: 3 },
