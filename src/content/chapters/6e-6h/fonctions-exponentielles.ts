@@ -484,6 +484,16 @@ export const fonctionsExponentielles: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'rattrapage-exponentielle-widget',
+          label: 'Manipule toi-même — le rattrapage : aˣ contre xⁿ',
+          caption:
+            "Choisis la base a et l'exposant n. Les points verts marquent les croisements ; le plus à " +
+            'droite est le dernier dépassement : à partir de lui, aˣ reste au-dessus de xⁿ. En échelle ' +
+            'logarithmique, aˣ devient une droite et le rattrapage reste visible même quand il arrive très ' +
+            'loin. La fenêtre ne change que par les sélecteurs, jamais par a ou n.',
+        },
+        {
           kind: 'piege',
           text:
             "$\\displaystyle\\lim_{x \\to +\\infty} (2^x - x^{1000}) = +\\infty$, **pas** $-\\infty$ ! Même " +
@@ -891,6 +901,15 @@ export const fonctionsExponentielles: ChapterContent = {
             alt: 'Portrait de Jacob Bernoulli',
             caption: 'Jacob Bernoulli (1655–1705), portrait d\'époque.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'vers-e-widget',
+          label: 'Manipule toi-même — vers e : (1 + 1/n)ⁿ et les intérêts composés',
+          caption:
+            "Premier mode : fais grandir n jusqu'à un milliard avec le curseur logarithmique et regarde les " +
+            'chiffres de e apparaître un à un. Second mode : 1 000 € placés un an à 100 %, intérêts versés ' +
+            'de plus en plus souvent : le capital grandit, mais ne dépasse jamais 1 000·e ≈ 2 718,28 €.',
         },
         {
           kind: 'exempleLibre',
@@ -1312,6 +1331,22 @@ export const fonctionsExponentielles: ChapterContent = {
         },
         { kind: 'subheading', text: 'Lire le graphique de f′ pour connaître f' },
         {
+          kind: 'methode',
+          label: 'Lire le graphique de f′, étape par étape',
+          items: [
+            "Repère les **zéros** de $f'$ : les abscisses où la courbe de $f'$ coupe ou touche l'axe des " +
+              'abscisses.',
+            "Entre deux zéros, lis le **signe** de $f'$ (courbe au-dessus ou en dessous de l'axe) : il donne " +
+              'le sens de variation de $f$ sur cet intervalle.',
+            "En chaque zéro, regarde si $f'$ **change de signe** : de $+$ à $-$, maximum de $f$ ; de $-$ à " +
+              "$+$, minimum ; sans changement de signe, tangente horizontale mais pas d'extremum.",
+            "Lis ensuite les **variations** de $f'$ : là où $f'$ croît, $f$ est convexe ; là où elle décroît, " +
+              "$f$ est concave ; un extremum de $f'$ donne un point d'inflexion de $f$.",
+            'Résume le tout dans le tableau de variation de $f$. Pour placer la courbe de $f$ en hauteur, il ' +
+              "faut **en plus** une valeur de $f$ : le graphique de $f'$ ne la donne pas.",
+          ],
+        },
+        {
           kind: 'featureTable',
           caption: "Méthode : ce que dit le graphique de f′, et ce qu'on en déduit pour f (sur un intervalle)",
           headers: ['Sur le graphique de f′', 'Pour la fonction f'],
@@ -1362,6 +1397,7 @@ export const fonctionsExponentielles: ChapterContent = {
               "point d'inflexion de $f$ : à sa droite $f'$ monte et $f$ est convexe.",
           },
         },
+        { kind: 'subheading', text: "Ce que le graphique de f′ dit, et ce qu'il ne dit pas" },
         {
           kind: 'exempleLibre',
           label: "Exemple résolu — les variations de f lues sur le graphique de f′",
@@ -1407,6 +1443,17 @@ export const fonctionsExponentielles: ChapterContent = {
             "Le graphique de $f'$ renseigne sur la **croissance** de $f$, jamais sur son " +
             "**signe** : $f(x) = e^x - 2$ a une dérivée partout positive, et pourtant " +
             '$f(0) = -1 < 0$.',
+        },
+        { kind: 'subheading', text: 'f et f′ côte à côte' },
+        {
+          kind: 'atelier',
+          tag: 'f-fprime-exponentielle-widget',
+          label: 'Manipule toi-même — f et f′ côte à côte',
+          caption:
+            'Déplace le point sur f (curseur, ou glisse le doigt sur un graphique) : sa tangente et sa pente ' +
+            "s'affichent, et le point de même abscisse sur f′ a cette pente pour ordonnée. Vert : f′ > 0 et f " +
+            'croissante ; rouge : f′ < 0 et f décroissante. La dernière fonction, eˣ − 2, reprend le piège ' +
+            'ci-dessus.',
         },
         { kind: 'subheading', text: 'Parité et dérivée' },
         {
@@ -2486,6 +2533,16 @@ export const fonctionsExponentielles: ChapterContent = {
               "facteur $a = 1{,}5$ et de valeur initiale $b = 100$ — d'où $Q(t) = 100 \\cdot 1{,}5^t$, la courbe " +
               'qui passe exactement par les quatre points.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'rapports-differences-widget',
+          label: 'Manipule toi-même — rapports ou différences ?',
+          caption:
+            'Pour chaque tableau de mesures prises à pas constant, compare la ligne des différences et celle ' +
+            'des rapports : laquelle est constante ? Le verdict et le modèle, f(t) = m·t + p ou Q(t) = Q₀·rᵗ, ' +
+            "s'affichent quand l'un des deux existe. Attention aux pas de 2 ou 3 unités et aux tableaux qui " +
+            'commencent en t = 1.',
         },
         {
           kind: 'entrainement',
