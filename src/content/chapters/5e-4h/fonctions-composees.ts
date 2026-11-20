@@ -828,6 +828,17 @@ export const fonctionsComposees: ChapterContent = {
           ],
           whereLabel: '5e (4h) → « 3. Composer f et g — expressions et domaines »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Composer des polynômes',
+          generatorId: '5gen61',
+          chantier: '5e-4h',
+          description: [
+            'Deux fonctions affines, ou une affine et une du second degré (comme x² + 1 et 2x − 3 dans l’exemple du cours) : écris f(g(x)), développe et réduis (f∘g)(x) puis (g∘f)(x), et vérifie ton développement en un point, étage par étage.',
+            'Pour deux affines, décide enfin si f∘g et g∘f sont égales : parfois oui, souvent non.',
+          ],
+          whereLabel: '5e (4h) → « 61. Composer des polynômes »',
+        },
       ],
     },
 

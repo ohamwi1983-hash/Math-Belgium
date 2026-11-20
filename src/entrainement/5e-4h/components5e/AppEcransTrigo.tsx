@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import type { DefinitionEcrans, Frag } from "../ui5e/ecransTrigo.types";
-import { decoderLigne } from "../ui5e/ecransTrigo.types";
+import { decoderLigne, VALEUR_VIDE } from "../ui5e/ecransTrigo.types";
 import {
   activerAideEcran,
   demarrerSessionEcrans,
@@ -81,6 +81,7 @@ function texteSaisie<E, P extends string>(def: DefinitionEcrans<E, P>, e: E, pha
     return o ? <Fragments fragments={o.fragments} /> : valeurs[0];
   }
   if (mode.type === "intervalles") {
+    if (valeurs.length === 1 && valeurs[0] === VALEUR_VIDE) return "∅";
     return valeurs
       .map((v) => {
         const l = decoderLigne(v);
@@ -239,6 +240,7 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
           validation={validation}
           diagnostiquer={(v) => def.diagnostiquer(e, phase, v)}
           piege={(v) => def.piege(e, phase, v)}
+          aReprendre={def.aReprendre ? (v) => def.aReprendre!(e, phase, v) : undefined}
           messageIllisible={def.messageIllisible(e, phase)}
           onValider={(v) => terminerEtape(soumettreEcran(def, etat, v), v)}
         />

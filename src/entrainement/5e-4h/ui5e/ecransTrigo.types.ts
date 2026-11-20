@@ -35,6 +35,9 @@ export interface OptionEcran {
 export interface AideEcran {
   texte: Frag[];
   latex?: string;
+  /** Figure SVG (chaîne) sous le texte de l'aide (5gen63 : report par la diagonale) ; jamais la
+   * réponse de l'écran. */
+  figure?: string;
 }
 
 /** Une ligne d'intervalle saisie (écran « intervalles ») : crochets + deux bornes. */
@@ -48,7 +51,15 @@ export interface LigneIntervalle {
 export type ModeEcran =
   | { type: "champs"; champs: ChampEcran[]; symboles?: { label: string; options: { id: string; latex: string }[] } }
   | { type: "choix"; options: OptionEcran[] }
-  | { type: "intervalles"; variable: string };
+  | {
+      type: "intervalles";
+      variable: string;
+      /** Repères des deux bornes (défaut : angles en π, 5gen55). */
+      placeholders?: [string, string];
+      /** Bouton « ∅ » (ensemble vide) proposé à côté des intervalles (5gen62 : toujours présent sur
+       * ses écrans d'ensemble, pour ne jamais trahir le cas particulier). */
+      vide?: boolean;
+    };
 
 /** Tableau de données affiché sous l'énoncé (relevés…). */
 export interface TableauDonnees {
@@ -72,6 +83,10 @@ export interface DefinitionEcrans<E, P extends string> {
   aide2(e: E, phase: P): AideEcran | null;
   /** Statut champ par champ (choix : une seule valeur ; intervalles : une valeur globale). */
   diagnostiquer(e: E, phase: P, valeurs: string[]): StatutVerification[];
+  /** Saisie LISIBLE et JUSTE en valeur, mais pas sous la forme demandée (polynôme non développé ou
+   * non réduit, crochet fermé sur un infini…) : message, AUCUNE tentative consommée (`null` sinon).
+   * Absent : rien (5gen54–5gen57, 6gen148–6gen151 inchangés). */
+  aReprendre?(e: E, phase: P, valeurs: string[]): Frag[] | null;
   /** Message ciblé sur une erreur du cours trahie par la réponse fausse (jamais la réponse). */
   piege(e: E, phase: P, valeurs: string[]): Frag[] | null;
   messageIllisible(e: E, phase: P): string;
@@ -85,6 +100,9 @@ export interface DefinitionEcrans<E, P extends string> {
   explicationChoix?(e: E, phase: P): string;
   correction(e: E): EtapeCorrection[];
 }
+
+/** Valeur unique transmise au moteur quand l'élève choisit « ∅ » (écran « intervalles » avec `vide`). */
+export const VALEUR_VIDE = "\u0002vide";
 
 /** Encodage d'une ligne d'intervalle dans le tableau `valeurs: string[]` du moteur. */
 const SEP = "\u0001";
