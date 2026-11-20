@@ -94,14 +94,19 @@ function baremeComposerFonctions(exercice: ExerciceComposerFonctions): BaremeExe
   const lettres = lettresComposee(exercice);
   const deux = lettres.length === 2;
   const criteres: CritereBareme[] = lettres.flatMap(({ dir, formule, domaine, c2 }) => {
-    const nom = `${nomExterieure(dir)}∘${dir.nomInterieure}`;
-    const c = (sousQuestion: string, t: string, points: number): CritereBareme => ({ sousQuestion, critere: [texte(t)], points });
+    const nom = `${nomExterieure(dir)}\\circ ${dir.nomInterieure}`;
+    const c = (sousQuestion: string, critere: FragmentConsigne[], points: number): CritereBareme => ({ sousQuestion, critere, points });
+    const i = dir.nomInterieure;
     return deux
-      ? [c(formule, `Expression de ${nom} substituée et simplifiée`, 1), c(c2 ?? domaine, `Les deux conditions posées et résolues pour ${nom}`, 0.5), c(domaine, `Domaine de ${nom} (intersection)`, 0.5)]
+      ? [
+          c(formule, [texte("Expression de "), latex(nom), texte(" substituée et simplifiée")], 1),
+          c(c2 ?? domaine, [texte("Les deux conditions posées et résolues pour "), latex(nom)], 0.5),
+          c(domaine, [texte("Domaine de "), latex(nom), texte(" (intersection)")], 0.5),
+        ]
       : [
-          c(formule, `Expression de ${nom} substituée et simplifiée`, 1.5),
-          c(c2 ?? domaine, `Conditions : x dans le domaine de ${dir.nomInterieure}, et ${dir.nomInterieure}(x) dans le domaine de ${nomExterieure(dir)}, résolues`, 1.5),
-          c(domaine, `Domaine de ${nom} (intersection)`, 1),
+          c(formule, [texte("Expression de "), latex(nom), texte(" substituée et simplifiée")], 1.5),
+          c(c2 ?? domaine, [texte(`Conditions : x dans le domaine de ${i}, et `), latex(`${i}(x)`), texte(` dans le domaine de ${nomExterieure(dir)}, résolues`)], 1.5),
+          c(domaine, [texte("Domaine de "), latex(nom), texte(" (intersection)")], 1),
         ];
   });
   const dirs = directionsActives(exercice);
