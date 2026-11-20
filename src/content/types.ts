@@ -22,6 +22,7 @@ export type InteractiveWidgetTag =
   | 'arc-de-trig-widget'
   | 'equation-ce-widget'
   | 'transformees-arc-widget'
+  | 'angle-de-vue-widget'
   | 'discriminant-racines-widget'
   | 'signe-trinome-widget'
   | 'signe-produit-widget'

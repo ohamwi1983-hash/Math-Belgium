@@ -1851,6 +1851,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           domaines: ['Physique', 'Optimisation'],
         },
         {
+          kind: 'atelier',
+          tag: 'angle-de-vue-widget',
+          label: 'Manipule toi-même — l\'angle de vue',
+          caption:
+            'Avance ou recule face au mur : l\'angle θ sous lequel tu vois l\'écran se lit ' +
+            'sur la scène (à l\'échelle) et sur le graphique. Tout près du mur, θ tend vers ' +
+            '0 ; très loin aussi. Le maximum est atteint en x = √(ab) : change la hauteur ' +
+            'de l\'écran et sa position pour voir la meilleure place se déplacer.',
+        },
+        {
           kind: 'entrainement',
           title: 'Dérivées de fonctions cyclométriques',
           generatorId: '6gen4',
