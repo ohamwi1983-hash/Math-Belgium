@@ -909,6 +909,18 @@ export const trigonometrie: ChapterContent = {
           ],
         },
         {
+          kind: 'entrainement',
+          title: 'Angles en radians sur le cercle',
+          generatorId: '5gen51',
+          description: [
+            'Un angle en radians (17π/6, −5π/4, 7π/2…) : ramène-le dans [0 ; 2π[, place son point ' +
+              'image dans le bon quadrant, puis lis les valeurs exactes de cos et sin sur le cercle ' +
+              'quadrillé et calcule tan (ou dis pourquoi elle n\'existe pas).',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 51. Angles en radians sur le cercle »',
+        },
+        {
           kind: 'historique',
           titre: "Le premier catalogue d'étoiles... et les premières tables trigonométriques",
           text:
@@ -1214,6 +1226,18 @@ export const trigonometrie: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 8. Paramètres d\'une fonction sinusoïdale »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Construire une sinusoïde point par point',
+          generatorId: '5gen52',
+          description: [
+            'La méthode de construction pas à pas : trouve A, b, T et Φ, place les cinq points ' +
+              'd\'une période à partir de Φ sur un quadrillage gradué en fractions de π (minimum ' +
+              'd\'abord si A < 0), puis prolonge la courbe par périodicité.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 52. Construire une sinusoïde point par point »',
+        },
       ],
     },
     {
@@ -1319,6 +1343,19 @@ export const trigonometrie: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 9. Paramètres — lecture graphique »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Associer formules et courbes',
+          generatorId: '5gen53',
+          description: [
+            'Quatre expressions A sin(ωx + φ) + b et leurs quatre courbes, dans le désordre : ' +
+              'retrouve l\'expression de chaque courbe en lisant la ligne moyenne, l\'amplitude, la ' +
+              'période et le décalage. Pièges : φ n\'est pas le décalage, A < 0 retourne la courbe, ' +
+              'ω n\'est pas la période.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 53. Associer formules et courbes »',
         },
       ],
     },
@@ -2410,6 +2447,20 @@ export const trigonometrie: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 13. Modéliser une fonction sinusoïdale en contexte »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Détective d\'erreurs : trigonométrie',
+          generatorId: '5gen50',
+          description: [
+            'La copie d\'un élève — aire d\'un secteur, maximum d\'une sinusoïde, équation ' +
+              'sin(2x) = c ou cos(2x) = c, produit nul avec une tangente — contient une erreur : ' +
+              'trouve la ligne fausse, nomme l\'erreur (π perdu, ½ oublié, degrés au lieu de ' +
+              'radians, T = π/ω, φ pris pour Φ, seconde famille oubliée, 2kπ non divisé, valeur ' +
+              'interdite de la tangente…), puis donne le bon résultat.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 50. Détective d\'erreurs : trigonométrie »',
         },
       ],
     },

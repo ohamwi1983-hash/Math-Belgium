@@ -244,6 +244,10 @@ import { adaptateurEvaluationEquationTrig } from '../entrainement/5e-4h/generate
 import { adaptateurEvaluationExtremumsSinusoide } from '../entrainement/5e-4h/generateurs5e/extremumsSinusoide/exportEvaluation'
 import { adaptateurEvaluationGeometrieCercle } from '../entrainement/5e-4h/generateurs5e/geometrieCercle/exportEvaluation'
 import { adaptateurEvaluationModelisationSinusoide } from '../entrainement/5e-4h/generateurs5e/modelisationSinusoide/exportEvaluation'
+import { adaptateurEvaluationDetectiveTrig } from '../entrainement/5e-4h/generateurs5e/detectiveTrig/exportEvaluation'
+import { adaptateurEvaluationAnglesRadians } from '../entrainement/5e-4h/generateurs5e/anglesRadians/exportEvaluation'
+import { adaptateurEvaluationSinusoidePoints } from '../entrainement/5e-4h/generateurs5e/sinusoidePoints/exportEvaluation'
+import { adaptateurEvaluationAssocierCourbes } from '../entrainement/5e-4h/generateurs5e/associerCourbes/exportEvaluation'
 import { adaptateurEvaluationSuitesArithmetiques } from '../entrainement/5e-4h/generateurs5e/suitesArithmetiques/exportEvaluation'
 import { adaptateurEvaluationSuitesGeometriques } from '../entrainement/5e-4h/generateurs5e/suitesGeometriques/exportEvaluation'
 import { adaptateurEvaluationConvergenceSuites } from '../entrainement/5e-4h/generateurs5e/convergenceSuites/exportEvaluation'
@@ -287,6 +291,10 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen11': versionPapier(adaptateurEvaluationExtremumsSinusoide) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen12': versionPapier(adaptateurEvaluationGeometrieCercle) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen13': versionPapier(adaptateurEvaluationModelisationSinusoide) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen50': versionPapier(adaptateurEvaluationDetectiveTrig) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen51': versionPapier(adaptateurEvaluationAnglesRadians) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen52': versionPapier(adaptateurEvaluationSinusoidePoints) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen53': versionPapier(adaptateurEvaluationAssocierCourbes) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen14': versionPapier(adaptateurEvaluationSuitesArithmetiques) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen15': versionPapier(adaptateurEvaluationSuitesGeometriques) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen16': versionPapier(adaptateurEvaluationConvergenceSuites) as unknown as AdaptateurFeuilleExercices<never>,

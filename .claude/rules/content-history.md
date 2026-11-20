@@ -4603,3 +4603,27 @@ isolé, 0 `.katex-error`.
   restante, le piège de la calculatrice réglée en mode RAD (gen19/58/73/75/80/81 ; gen81 écrit
   « (mode RAD) », plus « rad » comme unité).
 
+- **5e (4h), Chapitre 2 — Trigonométrie, lot G (5gen50–5gen53)** : quatre nouveaux générateurs, cartes
+  ajoutées seules (aucun autre bloc du cours touché) — 5gen51 après le tableau des valeurs exactes (§ 4),
+  5gen52 après 5gen8 (§ 4), 5gen53 après 5gen9 (§ 5), 5gen50 après 5gen13 (§ 8). Socle commun
+  (`moteur5e/trigExact.ts` : rationnels et multiples de π exacts, valeurs remarquables ;
+  `moteur5e/sinusoideExacte.ts` ; `moteur5e/saisieTrig.ts` : lecture des saisies — « − » « – » « — »,
+  π, √, fractions, listes « ; » —, aperçu KaTeX, `DiagnosticSaisie` dont `illisible` / `approchee` /
+  `nonCompte` ne consomment jamais de tentative ; `components5e/CoqueTrig5e.tsx`, `EtapesTrig5e.tsx`
+  (champs, choix fermé à 1 tentative avec explication du choix faux), `EtapePlacerPointsTrig5e.tsx`).
+  - **5gen50 détective** (Transférer) : supports secteur / maximum d'une sinusoïde / sin(2x) = c ou
+    cos(2x) = c / (tan x − c)·cos x = 0 ; erreurs du cours (π perdu, ½ oublié, degrés, T = π/ω, Φ = φ,
+    ordre des extremums, mauvaise table, seconde famille oubliée ou fausse, 2kπ non divisé, période 2π
+    de tan, cos x = 0 ⟺ kπ, valeur interdite gardée) ; abscisse d'un maximum juste à une période près ;
+    ensembles comparés comme ensembles, solution hors de [0 ; 2π[ signalée sans compter.
+  - **5gen51 radians sur le cercle** (Connaître) : réduction, quadrant, cos/sin lus sur le cercle
+    quadrillé aux valeurs remarquables (comme gen122, M placé après le quadrant), tan ou « n'existe
+    pas » ; cas particulier = quadrant I, axes et tan non définie = verdicts.
+  - **5gen52 construction point par point** (Appliquer) : A, b, T, Φ, puis cinq points d'une période
+    et quatre points reportés touchés sur un quadrillage au pas T/4 ou T/8 étiqueté en multiples de π.
+  - **5gen53 associer formules et courbes** (Connaître) : un écran par courbe, variantes par paramètre
+    piège (φ/Φ, signe de A, ω/T, mélange), même quadrillage pour les quatre courbes.
+  Vérifié : 2 000 tirages par variante (réponses recalculées à part : balayage numérique des
+  solutions, points clés sur la courbe et sur une intersection, une seule expression par courbe),
+  0 problème ; parcours iPhone 13 des quatre applis (bonnes réponses, erreurs ciblées, illisible),
+  scrollWidth 390, 0 erreur console ; captures dans le dossier de travail `5gen50-53`.
