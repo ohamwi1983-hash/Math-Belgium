@@ -762,35 +762,59 @@ export interface EnonceDemonstrationCle {
 type EntreeEnonceDemonstration = string | undefined | EnonceDemonstrationCle
 
 const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstration[]>> = {
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est un morceau du
+  // label du bloc d'exemple du cours (`src/content/chapters/6e-6h/fonctions-reciproques-cyclometriques.ts`).
+  // Énoncés de démonstration sans méthode ; les deux démonstrations de arccos′ ont le même énoncé.
   'fonctions-reciproques-cyclometriques': {
   reciproques: [
-    "Démontre que si $f$ est injective, sa relation réciproque est une fonction.",
-    "Démontre que, pour $f$ injective, $(f^{-1})^{-1} = f$, et que $g = f^{-1} \\iff f = g^{-1}$.",
-    "Détermine l'expression de $f^{-1}$ pour $f(x) = \\dfrac{5}{x-1}$, en décomposant $f$ en une chaîne d'opérations élémentaires puis en la défaisant dans l'ordre inverse.",
-    "Retrouve $f^{-1}$ pour $f(x) = \\dfrac{5}{x-1}$ par la méthode de la permutation (échanger $x$ et $y$, puis isoler $y$).",
-    "Explique pourquoi $f : \\mathbb{R} \\to \\mathbb{R} : x \\mapsto x^2$ n'a pas de relation réciproque fonctionnelle, et détermine la réciproque de sa restriction à $\\mathbb{R}^+$.",
-    "Pour $f(x) = x^3$, calcule $(\\sqrt[3]{x})'$ à l'aide du théorème de la dérivée d'une réciproque.",
-    "Pour $f(x) = \\dfrac{5}{x-1}$ et $f^{-1}(x) = 1 + \\dfrac{5}{x}$, calcule $(f^{-1})'(-5)$ de deux façons différentes, et vérifie que les deux méthodes concordent.",
+    { cle: 'si f est injective, sa relation réciproque est une fonction', enonce: "Démontre que si $f$ est injective, sa relation réciproque est une fonction." },
+    { cle: 'la réciproque de f⁻¹ est f', enonce: "Soit $f$ injective. Démontre que $f^{-1}$ est injective, que $(f^{-1})^{-1} = f$, et que, pour $g$ injective, $g = f^{-1} \\iff f = g^{-1}$." },
+    { cle: 'décomposition de f', enonce: "Détermine l'expression de $f^{-1}$ pour $f(x) = \\dfrac{5}{x-1}$, en décomposant $f$ en une chaîne d'opérations élémentaires puis en la défaisant dans l'ordre inverse." },
+    { cle: 'Exemple résolu — permutation', enonce: "Retrouve $f^{-1}$ pour $f(x) = \\dfrac{5}{x-1}$ par la méthode de la permutation (échanger $x$ et $y$, puis isoler $y$)." },
+    { cle: 'retour sur y = x²', enonce: "Explique pourquoi $f : \\mathbb{R} \\to \\mathbb{R} : x \\mapsto x^2$ n'a pas de relation réciproque fonctionnelle, et détermine la réciproque de sa restriction à $\\mathbb{R}^+$." },
+    { cle: "restreindre un trinôme pour l'inverser", enonce: "Pour $f(x) = x^2 - 4x + 1$, détermine une restriction de $f$ qui admet une réciproque, puis l'expression, le domaine et l'image de cette réciproque." },
+    { cle: 'dérivée de la racine cubique', enonce: "Pour $f(x) = x^3$, calcule $(\\sqrt[3]{x})'$ à l'aide du théorème de la dérivée d'une réciproque." },
+    { cle: 'vérification croisée', enonce: "Pour $f(x) = \\dfrac{5}{x-1}$ et $f^{-1}(x) = 1 + \\dfrac{5}{x}$, calcule $(f^{-1})'(-5)$ de deux façons différentes, et vérifie que les deux méthodes concordent." },
+    { cle: "nombre dérivé d'une réciproque sans connaître son expression", enonce: "Soit $f(x) = x^3 + x$. Justifie que $f$ admet une réciproque dérivable en $2$, puis calcule $(f^{-1})'(2)$." },
   ],
   cyclometriques: [
-    'Démontre que arcsin est une fonction impaire.',
-    "Démontre la relation suivante : $\\arccos(x) + \\arccos(-x) = \\pi$.",
-    'Démontre que arctan est une fonction impaire.',
+    { cle: 'arcsin est impaire', enonce: 'Démontre que arcsin est une fonction impaire.' },
+    { cle: 'arccos(x) + arccos(−x) = π', enonce: "Démontre que, pour tout $x \\in [-1;1]$, $\\arccos(x) + \\arccos(-x) = \\pi$." },
+    { cle: 'arctan est impaire', enonce: 'Démontre que arctan est une fonction impaire.' },
+    { cle: 'arcsin(sin θ) = θ exactement', enonce: "Démontre que, pour tout réel $\\theta$, $\\arcsin(\\sin\\theta) = \\theta \\iff \\theta \\in [-\\pi/2 ; \\pi/2]$." },
+    { cle: "ramener l'angle dans l'image", enonce: "Calcule, si elles existent : $\\arcsin\\left(\\sin \\dfrac{5\\pi}{6}\\right)$, $\\arccos\\left(\\cos\\left(-\\dfrac{\\pi}{3}\\right)\\right)$, $\\arctan\\left(\\tan \\dfrac{3\\pi}{4}\\right)$ et $\\arcsin\\left(\\tan \\dfrac{\\pi}{3}\\right)$." },
+    { cle: 'cos(arcsin x) = √(1 − x²) et sin(arccos x)', enonce: "Démontre que, pour tout $x \\in [-1;1]$, $\\cos(\\arcsin x) = \\sqrt{1-x^2}$ et $\\sin(\\arccos x) = \\sqrt{1-x^2}$, puis déduis-en $\\tan(\\arcsin x)$ et $\\tan(\\arccos x)$." },
+    { cle: 'cos(arctan x) = 1/√(1 + x²)', enonce: "Démontre que, pour tout réel $x$, $\\cos(\\arctan x) = \\dfrac{1}{\\sqrt{1+x^2}}$, puis déduis-en $\\sin(\\arctan x)$." },
+    { cle: "fonction trigonométrique d'une arcfonction", enonce: "Calcule $\\cos\\left(\\arcsin \\dfrac{3}{5}\\right)$, $\\tan\\left(\\arccos\\left(-\\dfrac{1}{2}\\right)\\right)$ et $\\sin(\\arctan 2)$, puis exprime $\\cos(\\arcsin 3x)$ en fonction de $x$." },
   ],
   equations: [
-    "Démontre la relation suivante : $\\arcsin(x) + \\arccos(x) = \\pi/2$.",
-    "Résous l'équation $\\arcsin(2x-1) = \\arcsin(x)$, en posant la condition d'existence.",
-    "Résous l'équation $\\arccos(x^2-1) = \\arccos(1-x)$, en vérifiant si les solutions trouvées respectent la condition d'existence.",
+    { cle: 'arcsin(u) + arccos(u) = π/2', enonce: "Démontre que, pour tout $u \\in [-1;1]$, $\\arcsin(u) + \\arccos(u) = \\pi/2$." },
+    { cle: 'la même arcfonction des deux côtés', enonce: "Résous l'équation $\\arcsin(2x-1) = \\arcsin(x)$." },
+    { cle: 'quand la CE rejette une solution', enonce: "Résous l'équation $\\arccos(x^2-1) = \\arccos(1-x)$." },
+    { cle: "avec arctan, aucune condition d'existence", enonce: "Résous l'équation $\\arctan(x^2 - 2) = \\arctan(x)$." },
+    { cle: 'une arcfonction égale à un angle', enonce: "Résous les équations $\\arccos(2x-1) = \\dfrac{2\\pi}{3}$, $\\arcsin(x^2-1) = -\\dfrac{\\pi}{6}$, $\\arctan(3x+1) = \\dfrac{\\pi}{2}$ et $\\arccos(x+1) = -\\dfrac{\\pi}{4}$." },
+    { cle: 'une solution parasite', enonce: "Résous l'équation $\\arcsin(4x) = \\arccos(3x)$." },
+    { cle: 'appliquer sin sans perdre de solution', enonce: "Résous l'équation $\\arctan(x) = \\arcsin\\left(\\dfrac{x}{\\sqrt{2}}\\right)$." },
   ],
   derivees: [
-    "Démontre que $\\arcsin'(x) = \\dfrac{1}{\\sqrt{1-x^2}}$.",
-    "Démontre que $\\arccos'(x) = -\\dfrac{1}{\\sqrt{1-x^2}}$.",
-    "Démontre que $\\arccos'(x) = -\\dfrac{1}{\\sqrt{1-x^2}}$.",
-    "Démontre que $\\arctan'(x) = \\dfrac{1}{1+x^2}$.",
-    'Démontre que arcsin n\'est dérivable ni en $1$, ni en $-1$.',
-    "Calcule la dérivée de $\\arcsin(2x-1)$.",
+    { cle: 'dérivée de arcsin', enonce: "Démontre que $\\arcsin'(x) = \\dfrac{1}{\\sqrt{1-x^2}}$ pour tout $x \\in \\; ]-1;1[$." },
+    { cle: "dérivée de arccos par l'identité complémentaire", enonce: "Démontre que $\\arccos'(x) = -\\dfrac{1}{\\sqrt{1-x^2}}$ pour tout $x \\in \\; ]-1;1[$." },
+    { cle: 'dérivée de arccos par la méthode directe', enonce: "Démontre que $\\arccos'(x) = -\\dfrac{1}{\\sqrt{1-x^2}}$ pour tout $x \\in \\; ]-1;1[$." },
+    { cle: 'dérivée de arctan', enonce: "Démontre que $\\arctan'(x) = \\dfrac{1}{1+x^2}$ pour tout réel $x$." },
+    { cle: 'dérivable ni en 1, ni en −1', enonce: "Démontre que arcsin n'est dérivable ni en $1$, ni en $-1$." },
+    { cle: 'Exemple résolu — dérivée composée', enonce: "Calcule la dérivée de $\\arcsin(2x-1)$ et précise où elle est valable." },
+    { cle: 'arctan(3x) et arccos(x²)', enonce: "Calcule les dérivées de $\\arctan(3x)$ et de $\\arccos(x^2)$, en précisant où elles sont valables." },
+    { cle: 'arctan(x) + arctan(1/x) = π/2', enonce: "Démontre que, pour tout $x > 0$, $\\arctan(x) + \\arctan\\left(\\dfrac{1}{x}\\right) = \\dfrac{\\pi}{2}$." },
+    { cle: "la meilleure distance pour regarder l'écran", enonce: "Un écran est accroché entre les hauteurs $1$ et $4$ au-dessus des yeux d'un spectateur, placé à la distance $x > 0$ du mur. Il le voit sous l'angle $\\theta(x) = \\arctan\\left(\\dfrac{4}{x}\\right) - \\arctan\\left(\\dfrac{1}{x}\\right)$. Détermine la distance qui rend cet angle maximal." },
   ],
-  graphiques: [],
+  graphiques: [
+    { cle: 'lire f(x) = π/2 + 2·arcsin(x − 1)', enonce: "Pour $f(x) = \\dfrac{\\pi}{2} + 2\\arcsin(x-1)$, détermine le domaine, l'image, le sens de variation, les extremums, la parité et l'ordonnée à l'origine." },
+    { cle: 'lire g(x) = π/2 − 2·arctan(x + 1)', enonce: "Pour $g(x) = \\dfrac{\\pi}{2} - 2\\arctan(x+1)$, détermine le domaine, l'image, le sens de variation, les asymptotes et l'ordonnée à l'origine, puis dis si $g$ est impaire." },
+  ],
+  etude: [
+    { cle: 'étude de g(x) = arctan(x) − x/2', enonce: "Étudie complètement la fonction $g(x) = \\arctan(x) - \\dfrac{x}{2}$ : domaine, parité, limites et asymptotes, sens de variation et extremums." },
+    { cle: 'étude de f(x) = x·arctan(x)', enonce: "Étudie complètement la fonction $f(x) = x\\arctan(x)$ : domaine, parité, limites et asymptotes, sens de variation et extremum." },
+  ],
   },
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge (ou le
   // label, ou le début du contenu) du bloc d'exemple du cours (`src/content/chapters/6e-6h/fonctions-exponentielles.ts`).
@@ -1806,7 +1830,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-reciproques-cyclometriques', 'fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites']
 
 /** Bloc de DÉMONSTRATION (« Démonstration — … », « Démonstration alternative — … ») : seuls ces
  * blocs alimentent le type « Formule + démonstration ». Les exemples résolus (calculs) ne sont plus
