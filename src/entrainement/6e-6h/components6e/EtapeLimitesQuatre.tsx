@@ -8,6 +8,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, tousLisibles, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 import type { EtatLimiteLocal } from "./EtapeLimitesDeux";
 import { GroupeLimite } from "./EtapeLimitesDeux";
 
@@ -16,7 +18,7 @@ interface AideAvecLatex {
   latex: string | null;
 }
 
-interface Props {
+interface Props extends PropsRetourChamp<ReponseLimites> {
   enonceLatex: string;
   consigneEcran: FragmentConsigne[];
   labels: DirectionLabel[];
@@ -44,12 +46,13 @@ const VIDE: EtatLimiteLocal = { statut: null, texte: "" };
  * indépendante — l'écran le plus dense du générateur, spec explicite. `App6gen11.tsx` doit le
  * rendre avec `key={indexExercice}`.
  */
-export function EtapeLimitesQuatre({ enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeLimitesQuatre({ enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, lire, messageIllisible, cible}: Props) {
   const [pointPlus, setPointPlus] = useState<EtatLimiteLocal>(VIDE);
   const [pointMoins, setPointMoins] = useState<EtatLimiteLocal>(VIDE);
   const [plusInfini, setPlusInfini] = useState<EtatLimiteLocal>(VIDE);
   const [moinsInfini, setMoinsInfini] = useState<EtatLimiteLocal>(VIDE);
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<ReponseLimites>();
 
   function complet(e: EtatLimiteLocal): boolean {
     return e.statut !== null && (e.statut !== "valeur" || e.texte.trim() !== "");
@@ -63,7 +66,7 @@ export function EtapeLimitesQuatre({ enonceLatex, consigneEcran, labels, aideNiv
 
   function valider() {
     if (!tousComplets) return;
-    onValider({ type: "quatre", pointPlus: versReponse(pointPlus), pointMoins: versReponse(pointMoins), plusInfini: versReponse(plusInfini), moinsInfini: versReponse(moinsInfini) });
+    retour.tenter({ type: "quatre", pointPlus: versReponse(pointPlus), pointMoins: versReponse(pointMoins), plusInfini: versReponse(plusInfini), moinsInfini: versReponse(moinsInfini) }, tousLisibles(lire, [pointPlus, pointMoins, plusInfini, moinsInfini].filter((e) => e.statut === "valeur").map((e) => e.texte)), onValider);
   }
 
   return (
@@ -83,29 +86,14 @@ export function EtapeLimitesQuatre({ enonceLatex, consigneEcran, labels, aideNiv
       <GroupeLimite label={labels[1].latex} etat={pointMoins} erreur={montrerErreurs} onChange={setPointMoins} />
       <GroupeLimite label={labels[2].latex} etat={plusInfini} erreur={montrerErreurs} onChange={setPlusInfini} />
       <GroupeLimite label={labels[3].latex} etat={moinsInfini} erreur={montrerErreurs} onChange={setMoinsInfini} />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!tousComplets} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

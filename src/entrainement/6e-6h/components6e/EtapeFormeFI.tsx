@@ -8,13 +8,15 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
   latex: string | null;
 }
 
-interface Props {
+interface Props extends PropsRetourChamp<CategorieFI> {
   consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -41,9 +43,10 @@ const OPTIONS: { id: CategorieFI; label: string }[] = [
  * `6gen6`) — classer la forme (0/0, ∞/∞, ou aucune FI) avant d'appliquer la règle, pour éviter le
  * piège classique "appliquer L'Hôpital sans vérifier la forme". `App6gen6.tsx` doit le rendre avec
  * `key={phase}`. */
-export function EtapeFormeFI({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeFormeFI({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, messageIllisible, cible}: Props) {
   const [choix, setChoix] = useState<CategorieFI | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<CategorieFI>();
 
   return (
     <div>
@@ -70,29 +73,14 @@ export function EtapeFormeFI({ consigneEcran, enonceLatex, aideNiveau1, aideNive
           </button>
         ))}
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix)}>
+        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && retour.tenter(choix, true, onValider)}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

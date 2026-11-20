@@ -9,13 +9,15 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, tousLisibles, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
   latex: string | null;
 }
 
-interface Props {
+interface Props extends PropsRetourChamp {
   consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   etatActuel: string[] | null;
@@ -39,13 +41,14 @@ interface Props {
  * `App6gen7.tsx` doit le rendre avec `key={phase}`. `etatActuel` (non-`null` pour cAssemblage/
  * dAssemblage/eDerivee UNIQUEMENT, voir `ui6e/formatDomaineDeriveeExponentielles.ts::etatActuel`)
  * rappelle les réponses de dérivée CONFIRMÉES d'un écran précédent de la même famille. */
-export function EtapeChampDomaineDerivee({ consigneEcran, enonceLatex, etatActuel, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChampDomaineDerivee({ consigneEcran, enonceLatex, etatActuel, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, lire, messageIllisible, cible}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<string>();
 
   function valider() {
     if (texte.trim() === "") return;
-    onValider(texte);
+    retour.tenter(texte, tousLisibles(lire, [texte]), onValider);
   }
 
   return (
@@ -72,31 +75,16 @@ export function EtapeChampDomaineDerivee({ consigneEcran, enonceLatex, etatActue
       </p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
+        <input type="text" className={`text-input ${montrerErreurs && texte === retour.soumise ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

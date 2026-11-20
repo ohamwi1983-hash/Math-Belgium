@@ -9,6 +9,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, tousLisibles, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
@@ -19,7 +21,7 @@ type OptionCategorielle = "plus_infini" | "moins_infini" | "zero";
 
 const LABELS: Record<OptionCategorielle, string> = { plus_infini: "+\\infty", moins_infini: "-\\infty", zero: "0" };
 
-interface Props {
+interface Props extends PropsRetourChamp<ReponseLimite> {
   consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   /** Sous-ensemble des 3 boutons catégoriels pertinents pour CET écran (voir la note de
@@ -49,15 +51,16 @@ interface Props {
  * `EtapeFacteursC`, qui réutilise le même jeu de boutons en interne). `App6gen6.tsx` doit le
  * rendre avec `key={phase}`.
  */
-export function EtapeReponseLimite({ consigneEcran, enonceLatex, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReponseLimite({ consigneEcran, enonceLatex, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, lire, messageIllisible, cible}: Props) {
   const [statut, setStatut] = useState<ReponseLimite["type"] | null>(null);
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<ReponseLimite>();
 
   function valider() {
     if (statut === null) return;
     if (statut === "valeur" && texte.trim() === "") return;
-    onValider(statut === "valeur" ? { type: "valeur", texte } : { type: statut });
+    retour.tenter(statut === "valeur" ? { type: "valeur", texte } : { type: statut }, statut !== "valeur" || tousLisibles(lire, [texte]), onValider);
   }
 
   return (
@@ -89,33 +92,18 @@ export function EtapeReponseLimite({ consigneEcran, enonceLatex, optionsCategori
         <>
           <ApercuExpressionLatex texte={texte} />
           <div className="field contenu-conditionnel">
-            <input type="text" className="text-input" value={texte} placeholder="ex : 0, 1/2, sqrt(2)..." onChange={(e) => setTexte(e.target.value)} />
+            <input type="text" className="text-input" value={texte} placeholder="ex : 3/2" onChange={(e) => setTexte(e.target.value)} />
           </div>
         </>
       )}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={statut === null || (statut === "valeur" && texte.trim() === "")} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

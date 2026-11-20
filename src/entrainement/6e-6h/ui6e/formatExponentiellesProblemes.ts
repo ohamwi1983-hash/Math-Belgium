@@ -156,7 +156,7 @@ function consigneEcranA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2
       : [texte("Reculer d'une période divise la quantité par 2. Exprime, en fonction de t, le nombre de reculs qui séparent l'instant t de l'instant de référence T.")];
   }
   return exercice.sousType === "evaluer"
-    ? [texte("À partir du modèle CORRECT de l'étape précédente, calcule la valeur au temps demandé (arrondie).")]
+    ? [texte("Avec ce modèle, calcule la valeur au temps demandé (arrondie).")]
     : [texte("Déduis l'instant t où la quantité valait "), latex(`\\dfrac{1}{2^{${exercice.k}}}`), texte(" de sa valeur en T.")];
 }
 
@@ -164,16 +164,16 @@ function aideA1(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): Aide
   if (phase === "aEcran1") {
     return exercice.sousType === "evaluer"
       ? { texte: "Rappel : une hausse de p % correspond à un facteur multiplicateur, une baisse de p % aussi :", latex: "r=1+\\dfrac{p}{100} \\quad\\text{ou}\\quad r=1-\\dfrac{p}{100}" }
-      : { texte: "Rappel : reculer d'une période divise la quantité par 2 — le nombre de reculs entre l'instant t et T est T−t.", latex: "T-t" };
+      : { texte: "Reculer d'une période divise la quantité par 2 : compte les périodes entre l'instant t et l'instant de référence T.", latex: null };
   }
-  return exercice.sousType === "evaluer" ? { texte: "Substitue t=n dans le modèle correct de l'étape précédente, puis calcule.", latex: null } : { texte: "Un recul d'une période correspond exactement à une division par 2.", latex: null };
+  return exercice.sousType === "evaluer" ? { texte: "Remplace t par le temps demandé dans le modèle, puis calcule.", latex: null } : { texte: "k reculs d'une période divisent la quantité par 2 puissance k :", latex: "Q(T-k)=\\dfrac{Q(T)}{2^{k}}" };
 }
 
 function aideA2(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): AideAvecLatex {
   if (phase === "aEcran1") {
-    return exercice.sousType === "evaluer" ? { texte: "Taux déjà calculé (modèle non posé) :", latex: `r = ${formatDecimal(exercice.r, 3)}` } : { texte: "Modèle amorcé (le −t final reste à toi) :", latex: `T-t = ${exercice.T}-\\ldots` };
+    return exercice.sousType === "evaluer" ? { texte: "Ici, le facteur multiplicateur vaut :", latex: `r = ${formatDecimal(exercice.r, 3)}` } : { texte: "Ici, l'instant de référence est :", latex: `T = ${exercice.T}` };
   }
-  return exercice.sousType === "evaluer" ? { texte: "Calcul intermédiaire (reste à multiplier par Q0) :", latex: `r^{n} = ${formatDecimal(Math.pow(exercice.r, exercice.n), 3)}` } : { texte: "Nombre de reculs nécessaires :", latex: `k = ${exercice.k}` };
+  return exercice.sousType === "evaluer" ? { texte: "Ici, calcule d'abord la puissance, puis multiplie par la valeur initiale :", latex: `r^{n} = ${formatDecimal(Math.pow(exercice.r, exercice.n), 3)}` } : { texte: "Nombre de reculs nécessaires :", latex: `k = ${exercice.k}` };
 }
 
 function formatReponseA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): string[] {
@@ -215,22 +215,22 @@ function consigneEcranB(exercice: ExerciceExpoProbB, phase: "bEcran1" | "bEcran2
     case "bEcran1":
       return [texte("Pose l'expression de "), latex("\\text{reste}(t)"), texte(` — ${ctx.nomReste}, en fonction de t.`)];
     case "bEcran2":
-      return [texte("À partir du "), latex("\\text{reste}(t)"), texte(" CORRECT de l'étape précédente, écris l'expression de "), latex("\\text{complément}(t) = Q_0 - \\text{reste}(t)"), texte(` — ${ctx.nomComplement}.`)];
+      return [texte("Écris l'expression de "), latex("\\text{complément}(t) = Q_0 - \\text{reste}(t)"), texte(` — ${ctx.nomComplement}.`)];
     case "bEcran3":
       return [texte("Calcule "), latex(`\\text{complément}(${exercice.n})`), texte(" (arrondi).")];
     case "bEcran4":
-      return [texte("À partir de l'expression CORRECTE de l'étape 2, détermine à partir de quel temps t le complément atteint "), latex(`Q_0 - ${formatDecimal(exercice.toleranceSeuil, 1)}`), texte(" (arrondi).")];
+      return [texte("Détermine à partir de quel temps t le complément atteint "), latex(`Q_0 - ${formatDecimal(exercice.toleranceSeuil, 1)}`), texte(" (arrondi).")];
   }
 }
 
 function aideB1(_exercice: ExerciceExpoProbB, phase: "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4"): AideAvecLatex {
   switch (phase) {
     case "bEcran1":
-      return { texte: "Rappel : ce qui décroît réellement en pourcentage constant, c'est ce qu'il RESTE — pas ce qui a déjà progressé.", latex: null };
+      return { texte: "Ce qui diminue d'un pourcentage constant, c'est ce qui reste, pas ce qui a déjà été retiré :", latex: "\\text{reste}(t)=Q_0\\cdot\\left(1-\\dfrac{p}{100}\\right)^{t}" };
     case "bEcran2":
-      return { texte: "La quantité demandée n'est pas directement le modèle posé à l'étape 1 — c'est ce qui a été RETIRÉ de la quantité initiale.", latex: null };
+      return { texte: "La quantité demandée est ce qui a été retiré de la quantité initiale :", latex: "\\text{complément}(t)=Q_0-\\text{reste}(t)" };
     case "bEcran3":
-      return { texte: "Substitue t=n dans le complément(t) CORRECT de l'étape précédente.", latex: null };
+      return { texte: "Remplace t par le temps demandé dans l'expression du complément.", latex: null };
     case "bEcran4":
       return { texte: "Pose l'équation ci-dessous, isole la puissance, puis utilise le logarithme (même technique qu'une équation exponentielle) :", latex: "\\text{complément}(t) = Q_0-\\text{tolérance}" };
   }
@@ -285,14 +285,14 @@ function etatActuelC(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" |
 
 function consigneEcranC(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): FragmentConsigne[] {
   if (phase === "cEcran1") return [texte("Déduis le taux multiplicateur r entre les deux instants connus.")];
-  if (phase === "cEcran2") return [texte("À partir du taux r CORRECT de l'étape précédente, détermine "), latex("Q_0"), texte(" (la valeur qui correspondrait à "), latex("t=0"), texte(").")];
-  return [texte("À partir du modèle CORRECT de l'étape précédente, calcule la valeur à chacun des temps suivants : "), latex(exercice.tempsDemandes.map((t) => `t=${t}`).join(",\\ ")), texte(".")];
+  if (phase === "cEcran2") return [texte("Détermine "), latex("Q_0"), texte(", la valeur qui correspond à "), latex("t=0"), texte(".")];
+  return [texte("Avec le modèle complet, calcule la valeur à chacun des temps suivants : "), latex(exercice.tempsDemandes.map((t) => `t=${t}`).join(",\\ ")), texte(".")];
 }
 
 function aideC1(_exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
-  if (phase === "cEcran1") return { texte: "Rappel :", latex: "v_2 = v_1\\cdot r^{\\Delta t} \\ \\Longrightarrow\\ r = \\left(\\dfrac{v_2}{v_1}\\right)^{\\frac{1}{\\Delta t}}" };
-  if (phase === "cEcran2") return { texte: "Un point connu et r suffisent à reconstituer Q0.", latex: null };
-  return { texte: "Utilise le modèle confirmé à l'étape précédente et substitue chaque temps demandé :", latex: "Q(t)=Q_0\\cdot r^{t}" };
+  if (phase === "cEcran1") return { texte: "Entre deux instants séparés de Δt, la valeur est multipliée par r puissance Δt :", latex: "v_2 = v_1\\cdot r^{\\Delta t} \\ \\Longrightarrow\\ r = \\left(\\dfrac{v_2}{v_1}\\right)^{\\frac{1}{\\Delta t}}" };
+  if (phase === "cEcran2") return { texte: "Un instant connu et le facteur r suffisent pour retrouver la valeur initiale :", latex: "v_1=Q_0\\cdot r^{t_1}" };
+  return { texte: "Remplace t par chaque temps demandé dans le modèle :", latex: "Q(t)=Q_0\\cdot r^{t}" };
 }
 
 function aideC2(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
@@ -348,11 +348,11 @@ function consigneEcranD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2
         texte(`, car deux mesures successives sont séparées de ${exercice.d} ${exercice.d === 1 ? "unité" : "unités"} de temps.`),
       ];
     case "dEcran2":
-      return [texte("À partir du rapport CORRECT de l'étape précédente, détermine la valeur de stabilisation L.")];
+      return [texte("Avec ce rapport, détermine la valeur de stabilisation L.")];
     case "dEcran3":
-      return [texte("Complète le modèle : donne l'expression complète "), latex("T(t)"), texte(", en fonction de t, à partir du L CORRECT de l'étape précédente.")];
+      return [texte("Complète le modèle : donne l'expression de "), latex("T(t)"), texte(" en fonction de t.")];
     case "dEcran4":
-      return [texte("Évalue le modèle CORRECT à "), latex(`t=${exercice.tSuppl}`), texte(".")];
+      return [texte("Évalue le modèle en "), latex(`t=${exercice.tSuppl}`), texte(".")];
   }
 }
 
@@ -361,11 +361,11 @@ function aideD1(_exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dE
     case "dEcran1":
       return { texte: "Pour le modèle ci-dessous, les différences entre valeurs équidistantes (écart d) forment une suite géométrique de raison rᵈ — même si L est encore inconnu :", latex: "T(t)=L+C\\cdot r^{t}" };
     case "dEcran2":
-      return { texte: "Rappel :", latex: "a-L = \\dfrac{a-b}{1-r^{d}}" };
+      return { texte: "Les écarts à L sont dans le rapport donné, ce qui permet d'isoler L :", latex: "a-L = \\dfrac{a-b}{1-r^{d}}" };
     case "dEcran3":
       return { texte: "C s'obtient avec a et L, et r à partir du rapport (racine d-ième) :", latex: "C=a-L,\\qquad r=\\left(r^{d}\\right)^{\\frac{1}{d}}" };
     case "dEcran4":
-      return { texte: "Substitue t dans le modèle complet CORRECT de l'étape précédente.", latex: null };
+      return { texte: "Remplace t par le temps demandé dans le modèle complet.", latex: null };
   }
 }
 
@@ -421,8 +421,8 @@ function etatActuelE(exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2" |
 
 function consigneEcranE(_exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2" | "eEcran3"): FragmentConsigne[] {
   if (phase === "eEcran1") return [texte("Calcule "), latex("f'(t)"), texte(" et factorise-la complètement.")];
-  if (phase === "eEcran2") return [texte("À partir de la forme factorisée CORRECTE de l'étape précédente, détermine le temps t du maximum.")];
-  return [texte("Évalue f au temps t du maximum trouvé à l'étape précédente.")];
+  if (phase === "eEcran2") return [texte("Avec la forme factorisée, détermine le temps t du maximum.")];
+  return [texte("Évalue f au temps du maximum.")];
 }
 
 function aideE1(_exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2" | "eEcran3"): AideAvecLatex {
@@ -486,7 +486,7 @@ function consigneEcranF(exercice: ExerciceExpoProbF, phase: "fEcran1" | "fEcran2
     case "fEcran2":
       return [texte("Calcule "), latex(`p(${exercice.n1})`), texte(".")];
     case "fEcran3":
-      return [texte("Calcule le nombre de personnes touchées après "), latex(`t=${exercice.n2}`), texte(" — recalcule "), latex(`p(${exercice.n2})`), texte(", n'utilise PAS "), latex(`p(${exercice.n1})`), texte(".")];
+      return [texte("Calcule le nombre de personnes touchées en "), latex(`t=${exercice.n2}`), texte(".")];
     case "fEcran4":
       return [texte("Calcule le bénéfice net après "), latex(`t=${exercice.n2}`), texte(" : "), latex("\\text{bénéfice} = \\text{revenu} - (\\text{coûts fixes} + \\text{coûts variables})")];
   }
@@ -499,9 +499,9 @@ function aideF1(_exercice: ExerciceExpoProbF, phase: "fEcran1" | "fEcran2" | "fE
     case "fEcran2":
       return { texte: "Substitue directement le temps demandé dans le modèle :", latex: "p(t)=1-e^{-kt}" };
     case "fEcran3":
-      return { texte: "N'utilise jamais p(n₁) ici — recalcule p au bon temps (n₂), puis multiplie par N.", latex: null };
+      return { texte: "Calcule la proportion au temps demandé, puis multiplie-la par l'effectif total :", latex: "N\\cdot p(t)" };
     case "fEcran4":
-      return { texte: "Rappel : bénéfice net = revenu − (coûts fixes + coûts variables).", latex: "\\text{bénéfice net} = \\text{revenu} - (\\text{coûts fixes} + \\text{coûts variables})" };
+      return { texte: "Le bénéfice net est le revenu diminué de tous les coûts :", latex: "\\text{bénéfice net} = \\text{revenu} - (\\text{coûts fixes} + \\text{coûts variables})" };
   }
 }
 
@@ -564,7 +564,7 @@ function consigneEcranG(exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2
     case "gEcran2":
       return [texte("Résous "), latex(`f(t)=${formatDecimal(exercice.sAffiche, 1)}`), texte(" (isole l'exponentielle puis passe au logarithme).")];
     case "gEcran3":
-      return [texte("Compare le temps seuil CORRECT de l'étape précédente à "), latex(`D=${exercice.duree}`), texte(" : l'objectif est-il atteignable ?")];
+      return [texte("Compare le temps seuil à "), latex(`D=${exercice.duree}`), texte(" : l'objectif est-il atteignable ?")];
   }
 }
 

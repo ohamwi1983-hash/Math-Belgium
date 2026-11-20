@@ -7,6 +7,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
@@ -18,7 +20,7 @@ interface Option {
   label: string;
 }
 
-interface Props {
+interface Props extends PropsRetourChamp<string> {
   consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   optionGauche: Option;
@@ -45,13 +47,14 @@ interface Props {
  * PARAMÉTRÉS par l'appelant (`optionGauche`/`optionDroite`) — chaque famille pose une question
  * différente, jamais le même texte de bouton. `App6gen10.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChoixDeuxIneqExpo({ consigneEcran, enonceLatex, optionGauche, optionDroite, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixDeuxIneqExpo({ consigneEcran, enonceLatex, optionGauche, optionDroite, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, messageIllisible, cible}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<string>();
 
   function valider() {
     if (choix === null) return;
-    onValider(choix);
+    retour.tenter(choix, true, onValider);
   }
 
   return (
@@ -85,18 +88,7 @@ export function EtapeChoixDeuxIneqExpo({ consigneEcran, enonceLatex, optionGauch
         </button>
       </div>
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -104,11 +96,7 @@ export function EtapeChoixDeuxIneqExpo({ consigneEcran, enonceLatex, optionGauch
           Valider
         </button>
 
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

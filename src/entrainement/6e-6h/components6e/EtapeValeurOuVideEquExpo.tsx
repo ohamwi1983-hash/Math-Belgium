@@ -9,13 +9,15 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, tousLisibles, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
   latex: string | null;
 }
 
-interface Props {
+interface Props extends PropsRetourChamp<ReponseValeurOuVide> {
   consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   placeholder: string;
@@ -36,15 +38,16 @@ interface Props {
 /** Écran "existe/n'existe pas" (famille B, écran 2) — même patron que 5gen4/6gen3
  * (`EtapeAppliquerArcFonctionsCyclometriques.tsx`) : le toggle gate le champ numérique, jamais une
  * variante de "faux" en cas de "n'existe pas". `App6gen9.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeValeurOuVideEquExpo({ consigneEcran, enonceLatex, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeValeurOuVideEquExpo({ consigneEcran, enonceLatex, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, lire, messageIllisible, cible}: Props) {
   const [existe, setExiste] = useState<boolean | null>(null);
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<ReponseValeurOuVide>();
   const complet = existe === true ? texte.trim() !== "" : existe === false;
 
   function valider() {
     if (!complet) return;
-    onValider({ existe: existe as boolean, texte: existe ? texte : null });
+    retour.tenter({ existe: existe as boolean, texte: existe ? texte : null }, !existe || tousLisibles(lire, [texte]), onValider);
   }
 
   return (
@@ -74,23 +77,12 @@ export function EtapeValeurOuVideEquExpo({ consigneEcran, enonceLatex, placehold
         <>
           <ApercuExpressionLatex texte={texte} />
           <div className="field contenu-conditionnel">
-            <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
+            <input type="text" className={`text-input ${montrerErreurs && texte === retour.soumise?.texte ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
           </div>
         </>
       )}
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -98,11 +90,7 @@ export function EtapeValeurOuVideEquExpo({ consigneEcran, enonceLatex, placehold
           Valider
         </button>
 
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

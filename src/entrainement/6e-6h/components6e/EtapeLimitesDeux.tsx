@@ -8,6 +8,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, tousLisibles, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
@@ -43,13 +45,13 @@ function GroupeLimite({ label, etat, erreur, onChange }: { label: string; etat: 
         </button>
       </div>
       {etat.statut === "valeur" && (
-        <input type="text" className={`text-input contenu-conditionnel ${erreur ? "is-erronee" : ""}`} value={etat.texte} placeholder="ex : 1, 0.5..." onChange={(e) => onChange({ statut: "valeur", texte: e.target.value })} />
+        <input type="text" className={`text-input contenu-conditionnel ${erreur ? "is-erronee" : ""}`} value={etat.texte} placeholder="ex : 3/2" onChange={(e) => onChange({ statut: "valeur", texte: e.target.value })} />
       )}
     </div>
   );
 }
 
-interface Props {
+interface Props extends PropsRetourChamp<ReponseLimites> {
   enonceLatex: string;
   consigneEcran: FragmentConsigne[];
   labels: DirectionLabel[];
@@ -71,10 +73,11 @@ interface Props {
  * pour la famille B (4 directions, l'écran le plus dense). `App6gen11.tsx` doit le rendre avec
  * `key={indexExercice}`. Le domaine confirmé à l'écran précédent est listé dans le récapitulatif
  * "Ce qu'on sait déjà" (`ui6e/recapitulatifEtudeFonctionExponentielle.ts`). */
-export function EtapeLimitesDeux({ enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeLimitesDeux({ enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, lire, messageIllisible, cible}: Props) {
   const [plusInfini, setPlusInfini] = useState<EtatLocal>({ statut: null, texte: "" });
   const [moinsInfini, setMoinsInfini] = useState<EtatLocal>({ statut: null, texte: "" });
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<ReponseLimites>();
 
   function complet(e: EtatLocal): boolean {
     return e.statut !== null && (e.statut !== "valeur" || e.texte.trim() !== "");
@@ -83,7 +86,7 @@ export function EtapeLimitesDeux({ enonceLatex, consigneEcran, labels, aideNivea
   function valider() {
     if (!complet(plusInfini) || !complet(moinsInfini)) return;
     const versReponse = (e: EtatLocal) => (e.statut === "valeur" ? { type: "valeur" as const, texte: e.texte } : { type: e.statut as "plus_infini" | "moins_infini" | "zero" });
-    onValider({ type: "deux", plusInfini: versReponse(plusInfini), moinsInfini: versReponse(moinsInfini) });
+    retour.tenter({ type: "deux", plusInfini: versReponse(plusInfini), moinsInfini: versReponse(moinsInfini) }, tousLisibles(lire, [plusInfini, moinsInfini].filter((e) => e.statut === "valeur").map((e) => e.texte)), onValider);
   }
 
   return (
@@ -101,29 +104,14 @@ export function EtapeLimitesDeux({ enonceLatex, consigneEcran, labels, aideNivea
       </p>
       <GroupeLimite label={labels[0].latex} etat={plusInfini} erreur={montrerErreurs} onChange={setPlusInfini} />
       <GroupeLimite label={labels[1].latex} etat={moinsInfini} erreur={montrerErreurs} onChange={setMoinsInfini} />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet(plusInfini) || !complet(moinsInfini)} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

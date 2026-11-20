@@ -5,6 +5,7 @@ import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeFoncti
 import {
   NIVEAU_AIDE_MAX,
   activerAideSuivante,
+  tentativesMaxCourant,
   demarrerSessionEtudeFonctionExponentielle,
   soumettreReponseAsymptotes,
   soumettreReponseConcavite,
@@ -56,6 +57,10 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { MESSAGES_ILLISIBLE_EXPO } from "./components6e/RetourSaisieExpo";
+import { lisibleDroite, lisibleNombre } from "./moteur6e/lectureSaisieExpo";
+import { cibleAsymptotesEtude, cibleCroissanceEtude } from "./ui6e/retoursExponentielles";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { correctionDetailleeEtudeFonctionExpo, lettrePhaseEtudeExpo } from "./generateurs6e/etudeFonctionExponentielle/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
@@ -64,6 +69,15 @@ const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionEtudeFonctionExponentielle {
   return demarrerSessionEtudeFonctionExponentielle(REGLAGES_DEMO, genererExerciceEtudeFonctionExponentielle);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son premier
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs6e/etudeFonctionExponentielle/exportEvaluation.ts`), comme `App6gen14.tsx`. */
+function sessionInitiale(): EtatSessionEtudeFonctionExponentielle {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEtudeFonctionExponentielle(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceEtudeFonctionExponentielle, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
 }
 
 /** Séquence FIXE à 6 écrans (`typesEtudeFonctionExponentielle.ts`) — répliquée ICI à partir de
@@ -126,7 +140,10 @@ interface TransitionEnAttente {
 }
 
 export function App6gen11() {
-  const [etat, setEtat] = useState<EtatSessionEtudeFonctionExponentielle>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEtudeFonctionExponentielle>(sessionInitiale);
+  /** Compteur d'exercices affichés : dans la `key` des écrans, pour vider la saisie même quand deux
+   * exercices successifs commencent par le même écran. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionEtudeFonctionExponentielle`, jamais dans le moteur. Remis à
@@ -169,6 +186,7 @@ export function App6gen11() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroExercice((n) => n + 1);
       setHistorique([]);
       setAideUtiliseeParPhase({});
     } else {
@@ -179,6 +197,7 @@ export function App6gen11() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setHistorique([]);
     setAideUtiliseeParPhase({});
     setEtat(
@@ -199,15 +218,15 @@ export function App6gen11() {
   }
 
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxCourant(etat);
   const niveauAide = etat.niveauAide;
   const enonceLatex = formatFonctionLatex(exercice);
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
-  // Inclut `indexExercice` dans la clé — la phase seule peut rester identique entre 2 exercices
+  // Inclut le numéro d'exercice affiché (`indexExercice` reste à 0 : une session = un exercice) dans la clé — la phase seule peut rester identique entre 2 exercices
   // consécutifs, ce qui empêcherait React de remonter le composant et laisserait la saisie/
   // sélection de l'exercice précédent persister visuellement (leçon retenue à de nombreuses
   // reprises sur ce chantier — voir CLAUDE.md, "5gen6/5gen7", "6gen8").
-  const cle = `${etat.indexExercice}-${etat.phase}`;
+  const cle = `${numeroExercice}-${etat.phase}`;
 
   const contenuRecap = contenuRecapPhase(exercice, etat.phase);
   const validation = enAttente
@@ -259,6 +278,8 @@ export function App6gen11() {
               {etat.phase === "limites" && exercice.famille === "B" && (
                 <EtapeLimitesQuatre
                   key={cle}
+                  lire={lisibleNombre}
+                  messageIllisible={MESSAGES_ILLISIBLE_EXPO.nombre}
                   enonceLatex={enonceLatex}
                   consigneEcran={consigneLimites(exercice)}
                   labels={directionLabels(exercice)}
@@ -276,6 +297,8 @@ export function App6gen11() {
               {etat.phase === "limites" && exercice.famille !== "B" && (
                 <EtapeLimitesDeux
                   key={cle}
+                  lire={lisibleNombre}
+                  messageIllisible={MESSAGES_ILLISIBLE_EXPO.nombre}
                   enonceLatex={enonceLatex}
                   consigneEcran={consigneLimites(exercice)}
                   labels={directionLabels(exercice)}
@@ -294,6 +317,9 @@ export function App6gen11() {
               {etat.phase === "asymptotes" && exercice.famille === "B" && (
                 <EtapeAsymptotesB
                   key={cle}
+                  lire={lisibleDroite}
+                  messageIllisible={"Équation non reconnue : écris y = … (une valeur, ou une expression en x) ou x = … (une valeur). Cette saisie ne compte pas comme une tentative."}
+                  cible={(r) => cibleAsymptotesEtude(exercice, r)}
                   enonceLatex={enonceLatex}
                   p={exercice.p}
                   aideNiveau1={aideAsymptotesBNiveau1()}
@@ -310,6 +336,9 @@ export function App6gen11() {
               {etat.phase === "asymptotes" && exercice.famille !== "B" && (
                 <EtapeAsymptotesDeux
                   key={cle}
+                  lire={lisibleDroite}
+                  messageIllisible={"Équation non reconnue : écris y = … (une valeur, ou une expression en x) ou x = … (une valeur). Cette saisie ne compte pas comme une tentative."}
+                  cible={(r) => cibleAsymptotesEtude(exercice, r)}
                   enonceLatex={enonceLatex}
                   consigneEcran={consigneAsymptotes(exercice)}
                   labels={directionLabels(exercice)}
@@ -328,6 +357,9 @@ export function App6gen11() {
               {etat.phase === "croissance" && (
                 <EtapeCroissance
                   key={cle}
+                  lire={lisibleNombre}
+                  messageIllisible={MESSAGES_ILLISIBLE_EXPO.nombre}
+                  cible={(r) => cibleCroissanceEtude(exercice, r, "croissance")}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aideCroissanceNiveau1(exercice)}
                   aideNiveau2={aideCroissanceNiveau2(exercice)}
@@ -344,6 +376,9 @@ export function App6gen11() {
               {etat.phase === "concavite" && (
                 <EtapeConcavite
                   key={cle}
+                  lire={lisibleNombre}
+                  messageIllisible={MESSAGES_ILLISIBLE_EXPO.nombre}
+                  cible={(r) => cibleCroissanceEtude(exercice, r, "concavite")}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aideConcaviteNiveau1(exercice)}
                   aideNiveau2={aideConcaviteNiveau2(exercice)}

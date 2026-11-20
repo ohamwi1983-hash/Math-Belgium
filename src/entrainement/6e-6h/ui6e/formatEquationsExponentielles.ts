@@ -145,22 +145,22 @@ function formatEnonceA(exercice: ExerciceEqExpoA): string {
 function consigneA(phase: "aEcran1" | "aEcran2", exercice: ExerciceEqExpoA): FragmentConsigne[] {
   if (phase === "aEcran1") {
     return exercice.sousType === "A2"
-      ? [texte("Un radical est nul SI ET SEULEMENT SI son radicande est nul. Écris l'équation \"radicande = 0\" (pas encore résolue en x).")]
-      : [texte("Réécris le second membre comme une puissance de la MÊME base que le premier membre — donne l'exposant cible.")];
+      ? [texte("Une racine carrée est nulle si et seulement si son radicande est nul : écris l'équation « radicande = 0 », sans la résoudre.")]
+      : [texte("Écris le second membre comme une puissance de la même base que le premier membre : donne son exposant.")];
   }
   return exercice.sousType === "A3"
-    ? [texte("À partir de l'exposant CORRECT de l'étape précédente, résous l'équation du second degré en x (0, 1 ou 2 solutions selon le cas).")]
+    ? [texte("Égale les exposants, puis résous l'équation du second degré en x (0, 1 ou 2 solutions).")]
     : exercice.sousType === "A2"
-      ? [texte("À partir de l'équation CORRECTE de l'étape précédente, résous pour x.")]
-      : [texte("À partir de l'exposant CORRECT de l'étape précédente, résous pour x.")];
+      ? [texte("Résous cette équation : donne x.")]
+      : [texte("Égale les exposants et résous l'équation : donne x.")];
 }
 
 function aideA1(phase: "aEcran1" | "aEcran2", exercice: ExerciceEqExpoA): AideAvecLatex {
   if (phase === "aEcran1") {
-    if (exercice.sousType === "A2") return { texte: "Isole le radicande : pose-le égal à 0, sans simplifier davantage à cette étape.", latex: null };
-    return { texte: "Toute valeur numérique de l'équation doit être réécrite comme une puissance de la même base que le membre de gauche.", latex: null };
+    if (exercice.sousType === "A2") return { texte: "Une racine carrée est nulle si et seulement si ce qui est sous la racine est nul :", latex: "\\sqrt{A}=0\\iff A=0" };
+    return { texte: "Écris le nombre comme un produit de facteurs tous égaux à la base ; un exposant négatif donne l'inverse :", latex: "a^{n}=\\underbrace{a\\cdot a\\cdots a}_{n\\text{ facteurs}},\\qquad a^{-n}=\\dfrac{1}{a^{n}}" };
   }
-  return { texte: "Deux puissances de la MÊME base sont égales si et seulement si leurs exposants sont égaux (injectivité de l'exponentielle).", latex: null };
+  return { texte: "Deux puissances d'une même base (positive et différente de 1) sont égales si et seulement si leurs exposants sont égaux :", latex: "a^{u}=a^{v}\\iff u=v" };
 }
 
 function aideA2(phase: "aEcran1" | "aEcran2", exercice: ExerciceEqExpoA): AideAvecLatex {
@@ -192,13 +192,13 @@ function formatEnonceB(exercice: ExerciceEqExpoB): string {
 // `consigneC` ci-dessous pour un cas qui, lui, en a réellement besoin.
 function consigneB(phase: "bEcran1" | "bEcran2"): FragmentConsigne[] {
   return phase === "bEcran1"
-    ? [texte("Simplifie le radical de gauche : réécris son exposant après division par 2.")]
-    : [texte("À partir de l'exposant simplifié CORRECT de l'étape précédente, résous l'équation — ou indique qu'il n'y a AUCUNE solution si les deux membres se réduisent à une égalité fausse indépendante de x.")];
+    ? [texte("Écris la racine carrée du premier membre comme une puissance de la même base : donne son exposant.")]
+    : [texte("Égale les exposants et résous l'équation, ou indique qu'elle n'a aucune solution si les termes en x s'annulent en laissant une égalité fausse.")];
 }
 
 function aideB1(phase: "bEcran1" | "bEcran2"): AideAvecLatex {
-  if (phase === "bEcran1") return { texte: "Rappel : une puissance de base strictement positive reste toujours strictement positive, donc la racine carrée est toujours définie.", latex: "\\sqrt{\\text{base}^{u}} = \\text{base}^{\\frac{u}{2}}" };
-  return { texte: "Si les deux membres se simplifient en une égalité fausse INDÉPENDANTE de x (ex. \"1=-4\"), l'équation n'a AUCUNE solution.", latex: "1=-4" };
+  if (phase === "bEcran1") return { texte: "Une racine carrée est une puissance d'exposant $\\frac{1}{2}$ (la puissance est positive, la racine existe toujours) :", latex: "\\sqrt{a^{u}}=\\left(a^{u}\\right)^{\\frac{1}{2}}=a^{\\frac{u}{2}}" };
+  return { texte: "Égale les exposants. Si les termes en x s'annulent, il reste une égalité entre deux nombres : si elle est fausse, l'équation n'a aucune solution.", latex: null };
 }
 
 function aideB2(phase: "bEcran1" | "bEcran2", exercice: ExerciceEqExpoB): AideAvecLatex {
@@ -226,24 +226,29 @@ function formatEnonceC(exercice: ExerciceEqExpoC): string {
 
 function consigneC(phase: "cEcran1" | "cEcran2" | "cEcran3", exercice: ExerciceEqExpoC): FragmentConsigne[] {
   const puissance = `${baseLatexPourExposant(exercice.base)}^{x}`;
-  if (phase === "cEcran1") return [texte("Pose "), latex(`t=${puissance}`), texte(" et réécris l'équation en t (reconnais la structure éventuellement déguisée).")];
-  if (phase === "cEcran2") return [texte("Résous l'équation du second degré en t — donne TOUTES les valeurs de t, y compris négatives (elles seront filtrées à l'étape suivante).")];
-  return [texte("Parmi les valeurs de t CORRECTES de l'étape précédente, REJETTE celles qui sont ≤ 0 ("), latex(puissance), texte(" ne peut jamais l'être), puis convertis les valeurs positives restantes en x.")];
+  if (phase === "cEcran1") return [texte("Pose "), latex(`t=${puissance}`), texte(" et écris l'équation en t.")];
+  if (phase === "cEcran2") return [texte("Résous l'équation du second degré en t : donne toutes ses racines, même négatives.")];
+  return [texte("Rejette les valeurs de t négatives ou nulles ("), latex(puissance), texte(" est toujours strictement positif), puis donne les solutions x.")];
 }
 
 function aideC1(phase: "cEcran1" | "cEcran2" | "cEcran3", exercice: ExerciceEqExpoC): AideAvecLatex {
   if (phase === "cEcran1") {
-    if (exercice.style === "regroupement") return { texte: "Relation entre les puissances en jeu, à recomposer :", latex: `\\text{base}^{2x+1} = \\text{base}\\cdot(\\text{base}^{x})^2` };
-    return { texte: "Relation entre les puissances en jeu :", latex: `(\\text{base}^2)^{x} = (\\text{base}^{x})^2` };
+    if (exercice.style === "regroupement") return { texte: "Une puissance d'exposant $2x + 1$ est la base fois le carré de la puissance d'exposant x :", latex: "a^{2x+1}=a\\cdot\\left(a^{x}\\right)^{2},\\qquad \\left(a^{2}\\right)^{x}=\\left(a^{x}\\right)^{2}" };
+    return { texte: "Une puissance d'exposant 2x est le carré de la puissance d'exposant x :", latex: "\\left(a^{2}\\right)^{x}=a^{2x}=\\left(a^{x}\\right)^{2}" };
   }
-  if (phase === "cEcran2") return { texte: "Résous comme une équation du second degré ORDINAIRE en t (discriminant, formule quadratique) — aucune restriction de signe à ce stade.", latex: null };
-  return { texte: "Rappel : baseˣ est TOUJOURS STRICTEMENT POSITIF, donc toute valeur de t ≤ 0 doit être rejetée avant de convertir en x.", latex: "\\text{base}^x>0" };
+  if (phase === "cEcran2") return { texte: "C'est une équation du second degré en t : discriminant, puis formule des racines, sans condition de signe à ce stade :", latex: "t=\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}" };
+  return { texte: "Une exponentielle est toujours strictement positive : une valeur de t négative ou nulle est rejetée. Une valeur positive s'écrit comme une puissance de la base :", latex: `${baseLatexPourExposant(exercice.base)}^{x}>0` };
 }
 
 function aideC2(phase: "cEcran1" | "cEcran2" | "cEcran3", exercice: ExerciceEqExpoC): AideAvecLatex {
   if (phase === "cEcran1") {
-    const enTPartiel = exercice.style === "regroupement" ? `(\\text{base}+1)\\cdot t^2` : formatSommeTermes([{ valeur: exercice.A, suffixe: "t^2" }, { valeur: exercice.B, suffixe: "t" }]);
-    return { texte: "Équation partiellement réécrite en t (terme constant laissé à toi) :", latex: `${enTPartiel} + \\ldots = 0` };
+    const bl = baseLatexPourExposant(exercice.base);
+    if (exercice.style === "regroupement") return { texte: "Ici :", latex: `${bl}^{2x+1}=${bl}\\,t^{2},\\qquad \\left(${bl}^{2}\\right)^{x}=t^{2}` };
+    if (exercice.style === "carreDeguise") {
+      const b2 = Math.round(baseValeur(exercice.base) * baseValeur(exercice.base));
+      return { texte: `Ici, ${b2} est le carré de ${bl} :`, latex: `${b2}^{x}=\\left(${bl}^{2}\\right)^{x}=\\left(${bl}^{x}\\right)^{2}=t^{2}` };
+    }
+    return { texte: "Ici :", latex: `${bl}^{2x}=\\left(${bl}^{x}\\right)^{2}=t^{2}` };
   }
   if (phase === "cEcran2") {
     const enT = formatSommeTermes([
@@ -253,7 +258,7 @@ function aideC2(phase: "cEcran1" | "cEcran2" | "cEcran3", exercice: ExerciceEqEx
     ]);
     return { texte: "Équation en t déjà réécrite :", latex: `${enT} = 0` };
   }
-  return { texte: "Valeurs de t trouvées à l'étape précédente (sans indiquer lesquelles sont rejetées) :", latex: `t = ${exercice.solutionsT[0]} \\text{ ou } t = ${exercice.solutionsT[1]}` };
+  return { texte: "Racines de l'équation en t (à trier) ; pour une valeur positive, cherche l'exposant n tel que la base puissance n donne cette valeur :", latex: `t = ${exercice.solutionsT[0]} \\text{ ou } t = ${exercice.solutionsT[1]}` };
 }
 
 // ============================================================================
@@ -274,20 +279,20 @@ function formatEnonceD(exercice: ExerciceEqExpoD): string {
 }
 
 function consigneD(): FragmentConsigne[] {
-  return [texte("Sans AUCUN calcul : cette équation a-t-elle au moins une solution réelle ?")];
+  return [texte("Sans calcul : cette équation a-t-elle au moins une solution réelle ?")];
 }
 
 /** Même message pour D1 et D2 (le fait fondamental invoqué est identique) — `exercice` non utilisé,
  * gardé en paramètre pour une signature uniforme avec `aideD2`. */
 function aideD1(_exercice: ExerciceEqExpoD): AideAvecLatex {
-  return { texte: "Rappel fondamental : une puissance de base strictement positive (base>0, ≠1) reste TOUJOURS strictement positive, quel que soit l'exposant — jamais nulle ni négative.", latex: "\\text{base}>0,\\ \\text{base}\\neq 1 \\;\\Rightarrow\\; \\text{base}^{x}>0" };
+  return { texte: "Une puissance de base strictement positive est toujours strictement positive, quel que soit l'exposant :", latex: "a>0\\ \\Rightarrow\\ a^{x}>0" };
 }
 
 function aideD2(exercice: ExerciceEqExpoD): AideAvecLatex {
   if (exercice.sousType === "D1") {
-    return { texte: "Reformulation : un produit d'un nombre NON NUL par un terme STRICTEMENT POSITIF ne peut jamais être nul.", latex: `\\underbrace{${exercice.c}}_{\\neq 0} \\cdot \\underbrace{${baseLatexPourExposant(exercice.base)}^{\\ldots}}_{>0} \\neq 0` };
+    return { texte: "Ici, un nombre non nul multiplie un nombre strictement positif :", latex: `\\underbrace{${exercice.c}}_{\\neq 0} \\cdot \\underbrace{${baseLatexPourExposant(exercice.base)}^{\\ldots}}_{>0} \\neq 0` };
   }
-  return { texte: "Reformulation : une SOMME de 2 termes strictement positifs plus une constante NON-NÉGATIVE ne peut jamais être nulle.", latex: `\\underbrace{${baseLatexPourExposant(exercice.base1)}^{\\ldots}}_{>0} + \\underbrace{${baseLatexPourExposant(exercice.base2)}^{\\ldots}}_{>0} + \\underbrace{${exercice.k}}_{\\geq 0} > 0` };
+  return { texte: "Ici, deux nombres strictement positifs et un nombre positif ou nul s'additionnent :", latex: `\\underbrace{${baseLatexPourExposant(exercice.base1)}^{\\ldots}}_{>0} + \\underbrace{${baseLatexPourExposant(exercice.base2)}^{\\ldots}}_{>0} + \\underbrace{${exercice.k}}_{\\geq 0} > 0` };
 }
 
 // ============================================================================

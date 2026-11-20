@@ -53,3 +53,11 @@ export function verifierEcranDerivee(exercice: ExerciceGraphiqueDeriveeExponenti
 export function verifierEcranSelection(exercice: ExerciceGraphiqueDeriveeExponentielle, indexChoisi: number): boolean {
   return indexChoisi === exercice.indexCorrect;
 }
+
+/** Dérivée de référence et points d'échantillonnage de l'écran « derivee » (familles B et D) — pour
+ * les messages ciblés de l'écran, jamais pour le verdict. */
+export function referenceDeriveeGraphique(exercice: ExerciceGraphiqueDeriveeExponentielle): { ref: (x: number) => number; points: number[]; base: number } | null {
+  if (exercice.famille === "B") return { ref: referenceBDerivee(exercice.base), points: POINTS_B, base: exercice.base };
+  if (exercice.famille === "D") return { ref: referenceDDerivee(exercice.k), points: POINTS_D, base: Math.E };
+  return null;
+}

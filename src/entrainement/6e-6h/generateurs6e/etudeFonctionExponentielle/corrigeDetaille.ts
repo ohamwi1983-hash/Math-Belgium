@@ -161,7 +161,7 @@ function etudeB(e: ExerciceEtudeB): Etude {
         ligne(`f'(x)${decr ? "<" : ">"}0`, justif("signe de ", { l: `-k=${-k}` }, ", sur chaque intervalle du domaine")),
       ],
       concavite: [
-        ligne(`f'(x)=${coefFp}`, "étape précédente, réécrite"),
+        ligne(`f'(x)=${coefFp}`, "dérivée calculée pour la croissance"),
         ligne(`f''(x)=${coefDevant(-k, `\\dfrac{\\left(${eU}\\right)'\\cdot ${xp2}-${eU}\\cdot ${deuxXP}}{${xp4}}`)}`, justif("règle du quotient, ", { l: `\\left(${xp2}\\right)'=${deuxXP}` })),
         ligne(`=${coefDevant(-k, `\\dfrac{${coefDevant(-k, eU)}-${deuxXP}\\,${eU}}{${xp4}}`)}`, justif("car ", { l: `\\left(${eU}\\right)'\\cdot ${xp2}=${coefDevant(-k, eU)}` })),
         ligne(`=${coefDevant(-k, `\\dfrac{-${eU}\\,(${k}+${deuxXP})}{${xp4}}`)}`, justif("on met ", { l: `-${eU}` }, " en évidence")),

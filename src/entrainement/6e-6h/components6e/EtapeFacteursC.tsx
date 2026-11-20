@@ -8,6 +8,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
@@ -18,7 +20,7 @@ type OptionCategorielle = "plus_infini" | "moins_infini" | "zero";
 const OPTIONS: OptionCategorielle[] = ["plus_infini", "moins_infini", "zero"];
 const LABELS: Record<OptionCategorielle, string> = { plus_infini: "+\\infty", moins_infini: "-\\infty", zero: "0" };
 
-interface Props {
+interface Props extends PropsRetourChamp<ReponseFacteursC> {
   consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -33,12 +35,16 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Les deux facteurs (ou numérateur et dénominateur), en LaTeX, tels qu'écrits dans l'énoncé. */
+  labelsFacteurs: [string, string];
 }
 
 function GroupeBoutons({ label, valeur, erreur, onChange }: { label: string; valeur: OptionCategorielle | null; erreur: boolean; onChange: (v: OptionCategorielle) => void }) {
   return (
     <div className="field">
-      <p className="field-label field-label-minuscule">{label}</p>
+      <p className="field-label field-label-minuscule">
+        <Katex expression={`${label}\\to`} />
+      </p>
       <div className="options-grid-compact">
         {OPTIONS.map((option) => (
           <button key={option} type="button" className={`btn ${valeur === option ? "toggle-active" : ""} ${erreur && valeur === option ? "is-erronee" : ""}`} onClick={() => onChange(option)}>
@@ -53,16 +59,17 @@ function GroupeBoutons({ label, valeur, erreur, onChange }: { label: string; val
 /** Écran "cFacteurs" (`6gen6`, famille C) — 2 sous-réponses catégorielles indépendantes (limite de
  * chaque facteur), combinées derrière UN SEUL bouton "Valider" (spec : "Champ : 2 valeurs").
  * `App6gen6.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeFacteursC({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeFacteursC({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, messageIllisible, cible, labelsFacteurs}: Props) {
   const [facteur1, setFacteur1] = useState<OptionCategorielle | null>(null);
   const [facteur2, setFacteur2] = useState<OptionCategorielle | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<ReponseFacteursC>();
 
   function valider() {
     if (facteur1 === null || facteur2 === null) return;
     const r1: ReponseLimite = { type: facteur1 };
     const r2: ReponseLimite = { type: facteur2 };
-    onValider({ facteur1: r1, facteur2: r2 });
+    retour.tenter({ facteur1: r1, facteur2: r2 }, true, onValider);
   }
 
   return (
@@ -78,31 +85,16 @@ export function EtapeFacteursC({ consigneEcran, enonceLatex, aideNiveau1, aideNi
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
-      <GroupeBoutons label="x^r →" valeur={facteur1} erreur={montrerErreurs} onChange={setFacteur1} />
-      <GroupeBoutons label="e^(-x^s) →" valeur={facteur2} erreur={montrerErreurs} onChange={setFacteur2} />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <GroupeBoutons label={labelsFacteurs[0]} valeur={facteur1} erreur={montrerErreurs && retour.soumise !== null} onChange={setFacteur1} />
+      <GroupeBoutons label={labelsFacteurs[1]} valeur={facteur2} erreur={montrerErreurs && retour.soumise !== null} onChange={setFacteur2} />
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={facteur1 === null || facteur2 === null} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

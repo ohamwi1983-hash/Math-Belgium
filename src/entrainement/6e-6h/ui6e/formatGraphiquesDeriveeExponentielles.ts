@@ -267,21 +267,22 @@ export function calculerViewBoxGraphique(exercice: ExerciceGraphiqueDeriveeExpon
 // ============================================================================
 
 export function consigneEcranDerivee(): string {
-  return "Calcule f'(x).";
+  return "Calcule la dérivée f′(x).";
 }
 
 /** Rappel du domaine — UNIQUEMENT pour la famille D (point exclu x=0, quel que soit k), toujours
  * affiché (jamais gagné par une aide) — spec explicite : "Domaine rappelé : x≠0". */
 export function rappelDomaineDerivee(exercice: ExerciceGraphiqueDeriveeExponentielle): string | null {
-  return exercice.famille === "D" ? "Rappel : le domaine de f exclut x=0." : null;
+  return exercice.famille === "D" ? "Rappel : le domaine de f exclut 0." : null;
 }
 
 export function consigneEcranSelection(): string {
-  return "Sélectionne le graphique qui représente la dérivée f'(x).";
+  return "Choisis le graphique qui représente la dérivée f′.";
 }
 
 export function placeholderDerivee(exercice: ExerciceGraphiqueDeriveeExponentielle): string {
-  return exercice.famille === "D" ? "ex : -1*e^(2*x)/(e^(2*x)-1)^2" : "ex : 2^x*ln(2)/(2^x+1)^2";
+  void exercice;
+  return "dérivée f′(x)";
 }
 
 function formatValeurEnMoins2A(a: number): string {
@@ -295,9 +296,9 @@ function formatValeurEnMoins2A(a: number): string {
 export function aideDeriveeNiveau1(exercice: ExerciceGraphiqueDeriveeExponentielle): AideAvecLatex {
   switch (exercice.famille) {
     case "B":
-      return { texte: "Rappel de la règle de dérivation d'un quotient :", latex: "\\left(\\dfrac{u}{v}\\right)' = \\dfrac{u'v-uv'}{v^2}" };
+      return { texte: "Dérivée d'un quotient :", latex: "\\left(\\dfrac{u}{v}\\right)' = \\dfrac{u'v-uv'}{v^2}" };
     case "D":
-      return { texte: "Rappel de la règle de dérivation de 1/u :", latex: "\\left(\\dfrac{1}{u}\\right)' = -\\dfrac{u'}{u^2}" };
+      return { texte: "Dérivée de l'inverse d'une fonction :", latex: "\\left(\\dfrac{1}{u}\\right)' = -\\dfrac{u'}{u^2}" };
     default:
       return { texte: "", latex: null };
   }
@@ -308,14 +309,14 @@ export function aideDeriveeNiveau2(exercice: ExerciceGraphiqueDeriveeExponentiel
     case "B": {
       const bp = basePuissanceLatex(exercice.base);
       return {
-        texte: "Numérateur du quotient, avant simplification (u au numérateur, v au dénominateur, u′ = v′) :",
-        latex: `u'v-uv' = ${lnBaseLatex(exercice.base)}\\,${bp}^{x}\\left(${bp}^{x}+1\\right) - ${bp}^{x}\\cdot${lnBaseLatex(exercice.base)}\\,${bp}^{x}`,
+        texte: "Ici, le numérateur et le dénominateur ont la même dérivée :",
+        latex: `u=${bp}^{x},\\quad v=${bp}^{x}+1,\\quad u'=v'=${lnBaseLatex(exercice.base)}\\,${bp}^{x}`,
       };
     }
     case "D": {
       const kx = formatCoeffX(exercice.k);
       const uPrimeCoef = exercice.k === 1 ? `e^{${kx}}` : exercice.k === -1 ? `-e^{${kx}}` : `${exercice.k}\\,e^{${kx}}`;
-      return { texte: "u et u', séparément — non encore assemblés :", latex: `u = e^{${kx}}-1, \\quad u' = ${uPrimeCoef}` };
+      return { texte: "Ici :", latex: `u = e^{${kx}}-1, \\quad u' = ${uPrimeCoef}` };
     }
     default:
       return { texte: "", latex: null };
@@ -364,26 +365,26 @@ export function etatActuel(exercice: ExerciceGraphiqueDeriveeExponentielle, phas
 export function aideSelectionNiveau1(exercice: ExerciceGraphiqueDeriveeExponentielle): AideAvecLatex {
   switch (exercice.famille) {
     case "A":
-      return { texte: "Dériver un produit crée un terme supplémentaire qui peut introduire un extremum absent de l'exponentielle seule.", latex: null };
+      return { texte: "Dériver un produit crée un terme de plus : la dérivée peut s'annuler, et donc changer de signe, là où f a un extremum.", latex: "(uv)'=u'v+uv'" };
     case "B":
-      return { texte: "Le signe de f' est déterminé UNIQUEMENT par le signe de ln(base) — il ne change jamais.", latex: "\\text{signe}(f') = \\text{signe}(\\ln(\\text{base}))" };
+      return { texte: "Le dénominateur de f′ est un carré, donc positif : f′ a le signe du nombre suivant, le même pour tout x :", latex: "\\ln a" };
     case "C":
-      return { texte: "Dériver une somme de deux exponentielles symétriques inverse la parité : une fonction PAIRE (f) donne une dérivée IMPAIRE (f').", latex: null };
+      return { texte: "La dérivée d'une fonction paire est impaire : son graphique est symétrique par rapport à l'origine.", latex: null };
     case "D":
-      return { texte: "Le graphique doit présenter DEUX branches distinctes, séparées par une asymptote verticale en x=0 — jamais une courbe continue à cet endroit.", latex: null };
+      return { texte: "f n'est pas définie en 0, sa dérivée non plus : le bon graphique a deux branches, de part et d'autre de la droite verticale d'équation :", latex: "x=0" };
   }
 }
 
 export function aideSelectionNiveau2(exercice: ExerciceGraphiqueDeriveeExponentielle): AideAvecLatex {
   switch (exercice.famille) {
     case "A":
-      return { texte: "Valeur de f'(-2) — le signe indique un minimum ou un maximum, pas laquelle :", latex: `f'(-2) = ${formatValeurEnMoins2A(exercice.a)}` };
+      return { texte: "Ici, calcule la dérivée en −2 :", latex: `f'(-2) = ${formatValeurEnMoins2A(exercice.a)}` };
     case "B": {
-      return { texte: "Valeur de f' en x=0 :", latex: `f'(0) = \\dfrac{${lnBaseLatex(exercice.base)}}{4}` };
+      return { texte: "Ici, la dérivée en 0 vaut :", latex: `f'(0) = \\dfrac{${lnBaseLatex(exercice.base)}}{4}` };
     }
     case "C":
-      return { texte: "Valeur de f'(0) et pente de f' à l'origine (c'est-à-dire f''(0)) :", latex: `f'(0) = 0, \\quad f''(0) = ${exercice.k * exercice.k}` };
+      return { texte: "Ici, la dérivée s'annule en 0 et sa pente en 0 (la dérivée seconde) vaut :", latex: `f'(0) = 0, \\quad f''(0) = ${exercice.k * exercice.k}` };
     case "D":
-      return { texte: "Signe de f' (déterminé par -k) :", latex: `\\text{signe de } f'(x) = \\text{signe de } (${-exercice.k})` };
+      return { texte: "Ici, le dénominateur de f′ est un carré et son numérateur est le suivant : f′ garde le même signe sur chaque branche :", latex: formatCoefFois(-exercice.k, `e^{${formatCoeffX(exercice.k)}}`) };
   }
 }

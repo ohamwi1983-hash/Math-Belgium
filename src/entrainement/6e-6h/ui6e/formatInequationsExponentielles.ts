@@ -153,21 +153,21 @@ function formatEnonceA(exercice: ExerciceIneqA): string {
 }
 
 function consigneA(phase: "aReconnaitre" | "aResoudre"): FragmentConsigne[] {
-  if (phase === "aReconnaitre") return [txt("Réécris le second membre comme une puissance de la MÊME base que le premier membre — donne l'exposant cible.")];
-  return [txt("À partir de l'exposant CORRECT de l'étape précédente, résous l'inéquation en x — attention au sens selon que la base est supérieure ou inférieure à 1.")];
+  if (phase === "aReconnaitre") return [txt("Écris le second membre comme une puissance de la même base que le premier membre : donne son exposant.")];
+  return [txt("Compare les exposants et résous l'inéquation en x : attention au sens, selon que la base est supérieure à 1 ou comprise entre 0 et 1.")];
 }
 
 function aideA1(phase: "aReconnaitre" | "aResoudre"): AideAvecLatex {
-  if (phase === "aReconnaitre") return { texte: "Toute valeur numérique de l'inéquation doit être réécrite comme une puissance de la même base que le membre de gauche.", latex: null };
+  if (phase === "aReconnaitre") return { texte: "Écris le nombre comme un produit de facteurs tous égaux à la base ; un exposant négatif donne l'inverse :", latex: "a^{n}=\\underbrace{a\\cdot a\\cdots a}_{n\\text{ facteurs}},\\qquad a^{-n}=\\dfrac{1}{a^{n}}" };
   return {
-    texte: "Rappel : si la base est supérieure à 1, le sens de l'inégalité est conservé en passant aux exposants ; si elle est inférieure à 1, le sens s'inverse.",
-    latex: null,
+    texte: "En passant aux exposants, le sens se conserve si la base est supérieure à 1 et s'inverse si elle est comprise entre 0 et 1 :",
+    latex: "a>1 :\\ a^{u}<a^{v}\\iff u<v\\qquad 0<a<1 :\\ a^{u}<a^{v}\\iff u>v",
   };
 }
 
 function aideA2(phase: "aReconnaitre" | "aResoudre", exercice: ExerciceIneqA): AideAvecLatex {
   if (phase === "aReconnaitre") {
-    return { texte: "La base ici est :", latex: `${baseLatex(exercice.base)} \\quad \\left(${exercice.baseSuperieureA1 ? ">1" : "<1"}\\right)` };
+    return { texte: `Ici, la base vaut $${baseLatex(exercice.base)}$ : cherche l'exposant n tel que cette base puissance n donne le second membre.`, latex: null };
   }
   const comparateurExposants = exercice.baseSuperieureA1 ? exercice.comparateur : inverserComparateur(exercice.comparateur);
   return {
@@ -192,16 +192,16 @@ function formatEnonceB(exercice: ExerciceIneqB): string {
 }
 
 function consigneB(): FragmentConsigne[] {
-  return [txt("Sans AUCUN calcul : cette inéquation a-t-elle au moins une solution réelle ?")];
+  return [txt("Sans calcul : cette inéquation a-t-elle au moins une solution réelle ?")];
 }
 
 function aideB1(): AideAvecLatex {
-  return { texte: "Rappel fondamental : une puissance de base strictement positive reste TOUJOURS strictement positive, quel que soit l'exposant.", latex: null };
+  return { texte: "Une puissance de base strictement positive est toujours strictement positive, quel que soit l'exposant :", latex: "a>0\\ \\Rightarrow\\ a^{x}>0" };
 }
 
 function aideB2(exercice: ExerciceIneqB): AideAvecLatex {
   return {
-    texte: "Reformulation : un nombre STRICTEMENT POSITIF n'est jamais inférieur (ni égal) à un nombre négatif :",
+    texte: "Ici, le premier membre est strictement positif et le second négatif :",
     latex: `\\underbrace{${formatMembreGaucheB(exercice)}}_{>0} \\;\\not${exercice.comparateur === "<=" ? "\\leq" : "<"}\\; ${-exercice.k}`,
   };
 }
@@ -216,7 +216,7 @@ function formatEnonceCf(base: BaseIneq): string {
 }
 
 function consigneCf(): FragmentConsigne[] {
-  return [txt("Sans résoudre d'inéquation classique : cette expression est-elle vraie pour TOUT x réel ?")];
+  return [txt("Étudie le signe de chaque facteur : cette inéquation est-elle vraie pour tout réel x ?")];
 }
 
 function aideCf1(base: BaseIneq): AideAvecLatex {
@@ -257,12 +257,12 @@ function consigneCk(phase: "ckRegrouper" | "ckConclure", exercice: ExerciceIneqC
       ltx("g(x)"),
       txt(" : donne l'inéquation obtenue, comparée à 1."),
     ];
-  return [txt("À partir du regroupement CORRECT de l'étape précédente : cette inéquation est-elle vraie pour TOUT x réel ?")];
+  return [txt("Avec cette inéquation regroupée : est-elle vraie pour tout réel x ?")];
 }
 
 function aideCk1(phase: "ckRegrouper" | "ckConclure", _exercice: ExerciceIneqCk): AideAvecLatex {
-  if (phase === "ckRegrouper") return { texte: "Rappel : diviser les deux membres par un nombre strictement positif ne change jamais le sens de l'inégalité ; ici :", latex: `${baseLatexPourExposant(_exercice.base2)}^{2g(x)}>0` };
-  return { texte: "Rappel : le rapport des bases est-il supérieur ou inférieur à 1 ? Quel sens en résulte pour l'inégalité sur g(x) ?", latex: `\\dfrac{${baseLatex(_exercice.base1)}}{${baseLatex(_exercice.base2)}^{2}}` };
+  if (phase === "ckRegrouper") return { texte: "Diviser les deux membres par un nombre strictement positif ne change pas le sens de l'inégalité ; deux puissances de même exposant se regroupent :", latex: "\\dfrac{a^{u}}{b^{u}}=\\left(\\dfrac{a}{b}\\right)^{u}" };
+  return { texte: "Compare le rapport des bases à 1 pour savoir quel sens prend l'inégalité sur g(x), puis étudie le signe de g(x) :", latex: `\\dfrac{${baseLatex(_exercice.base1)}}{${baseLatex(_exercice.base2)}^{2}}` };
 }
 
 function aideCk2(phase: "ckRegrouper" | "ckConclure", exercice: ExerciceIneqCk): AideAvecLatex {
@@ -270,7 +270,7 @@ function aideCk2(phase: "ckRegrouper" | "ckConclure", exercice: ExerciceIneqCk):
     return { texte: "Membre de gauche après division :", latex: `\\left(\\dfrac{${baseLatex(exercice.base1)}}{${baseLatex(exercice.base2)}^2}\\right)^{${formatGCkLatex(exercice, 1)}}` };
   }
   const bCarre = exercice.b < 0 ? `(${exercice.b})^{2}` : `${exercice.b}^{2}`;
-  return { texte: "g(x) est un polynôme du second degré à coefficient dominant positif ET à discriminant NÉGATIF — donc toujours strictement positif :", latex: `\\Delta = ${bCarre}-4\\cdot ${exercice.a}\\cdot ${exercice.c} < 0` };
+  return { texte: "Ici, g(x) est un trinôme du second degré dont le coefficient de $x^2$ est positif et le discriminant négatif :", latex: `\\Delta = ${bCarre}-4\\cdot ${exercice.a}\\cdot ${exercice.c} < 0` };
 }
 
 function formatEnonceC(exercice: ExerciceIneqC): string {
@@ -315,13 +315,13 @@ function formatEnonceDConstant(exercice: ExerciceIneqDConstant): string {
 }
 
 function consigneDConstant(phase: "dConstantSigne" | "dConstantResoudre"): FragmentConsigne[] {
-  if (phase === "dConstantSigne") return [txt("Le premier facteur a un signe CONSTANT, quel que soit x — lequel ?")];
-  return [txt("À partir du signe CORRECT de l'étape précédente, résous l'inéquation sur le SECOND facteur seul — avec le bon sens (conservé si le 1er facteur est positif, inversé s'il est négatif).")];
+  if (phase === "dConstantSigne") return [txt("Le premier facteur garde le même signe pour tout réel x : lequel ?")];
+  return [txt("Résous l'inéquation sur le second facteur seul, avec le bon sens : conservé si le premier facteur est positif, inversé s'il est négatif.")];
 }
 
 function aideDConstant1(phase: "dConstantSigne" | "dConstantResoudre"): AideAvecLatex {
-  if (phase === "dConstantSigne") return { texte: "Une puissance de base strictement positive est toujours strictement positive — regarde uniquement le signe du coefficient/de la constante qui l'entoure.", latex: null };
-  return { texte: "Rappel : le signe du 1er facteur détermine si le sens de l'inéquation sur le second facteur doit être conservé ou inversé.", latex: null };
+  if (phase === "dConstantSigne") return { texte: "Une puissance de base strictement positive est toujours strictement positive : regarde seulement le signe du coefficient et de la constante qui l'entourent.", latex: null };
+  return { texte: "Diviser par un nombre positif conserve le sens de l'inégalité, diviser par un nombre négatif l'inverse :", latex: "c>0 :\\ c\\cdot B<0\\iff B<0\\qquad c<0 :\\ c\\cdot B<0\\iff B>0" };
 }
 
 function aideDConstant2(phase: "dConstantSigne" | "dConstantResoudre", exercice: ExerciceIneqDConstant): AideAvecLatex {
@@ -349,14 +349,14 @@ function formatEnonceDVariable(exercice: ExerciceIneqDVariable): string {
 }
 
 function consigneDVariable(phase: "dVariableSigne1" | "dVariableSigne2" | "dVariableTableau"): FragmentConsigne[] {
-  if (phase === "dVariableSigne1") return [txt("Étudie le signe du PREMIER facteur : en quel point s'annule-t-il, et quel est le sens du changement de signe ?")];
-  if (phase === "dVariableSigne2") return [txt("Étudie le signe du SECOND facteur : en quel point s'annule-t-il, et quel est le sens du changement de signe ?")];
-  return [txt("À partir des 2 signes CORRECTS des étapes précédentes, construis le tableau de signes du produit et donne l'ensemble-solution.")];
+  if (phase === "dVariableSigne1") return [txt("Étudie le signe du premier facteur : en quel point s'annule-t-il, et comment change son signe ?")];
+  if (phase === "dVariableSigne2") return [txt("Étudie le signe du second facteur : en quel point s'annule-t-il, et comment change son signe ?")];
+  return [txt("Avec le signe des deux facteurs, construis le tableau de signes du produit et donne l'ensemble des solutions.")];
 }
 
 function aideDVariable1(phase: "dVariableSigne1" | "dVariableSigne2" | "dVariableTableau"): AideAvecLatex {
-  if (phase === "dVariableTableau") return { texte: "Rappel : la règle des signes d'un produit — (+)×(+)=+, (−)×(−)=+, (+)×(−)=(−)×(+)=−.", latex: "(+)\\times(+)=+\\qquad(-)\\times(-)=+\\qquad(+)\\times(-)=(-)\\times(+)=-" };
-  return { texte: "Résous l'équation \"facteur = 0\" pour trouver le zéro, puis teste le signe juste avant et juste après ce zéro.", latex: "\\text{facteur}=0" };
+  if (phase === "dVariableTableau") return { texte: "Règle des signes d'un produit :", latex: "(+)\\times(+)=+\\qquad(-)\\times(-)=+\\qquad(+)\\times(-)=(-)\\times(+)=-" };
+  return { texte: "Le zéro est la solution de « facteur = 0 » ; une exponentielle de base a > 1 est croissante, de base comprise entre 0 et 1 décroissante :", latex: "a^{x}=a^{k}\\iff x=k" };
 }
 
 function signeAvantApres(sens: DirectionSigne, avant: boolean): string {
@@ -365,10 +365,10 @@ function signeAvantApres(sens: DirectionSigne, avant: boolean): string {
 }
 
 function aideDVariable2(phase: "dVariableSigne1" | "dVariableSigne2" | "dVariableTableau", exercice: ExerciceIneqDVariable): AideAvecLatex {
-  if (phase === "dVariableSigne1") return { texte: "Le premier facteur s'annule en :", latex: `x = ${exercice.zero1}` };
-  if (phase === "dVariableSigne2") return { texte: "Le second facteur s'annule en :", latex: `x = ${exercice.zero2}` };
+  if (phase === "dVariableSigne1") return { texte: "Résous d'abord, puis teste une valeur de x de chaque côté du zéro :", latex: `${formatFacteurUnZeroLatex(exercice.facteur1)}=0` };
+  if (phase === "dVariableSigne2") return { texte: "Résous d'abord, puis teste une valeur de x de chaque côté du zéro :", latex: `${formatFacteurUnZeroLatex(exercice.facteur2)}=0` };
   return {
-    texte: "Signe de chaque facteur, séparément (le produit reste à combiner toi-même) :",
+    texte: "Signe de chaque facteur (le produit reste à combiner) :",
     latex: `\\begin{gathered} \\text{facteur 1 : } ${signeAvantApres(exercice.sens1, true)} \\text{ avant } ${exercice.zero1}\\text{, } ${signeAvantApres(exercice.sens1, false)} \\text{ après} \\\\ \\text{facteur 2 : } ${signeAvantApres(exercice.sens2, true)} \\text{ avant } ${exercice.zero2}\\text{, } ${signeAvantApres(exercice.sens2, false)} \\text{ après} \\end{gathered}`,
   };
 }
@@ -410,12 +410,12 @@ function consigneE(phase: "eRegrouper" | "eResoudre", exercice: ExerciceIneqE): 
       ltx(`${baseLatexPourExposant(exercice.base2)}^{${formatExposantLineaireLatex(exercice.m, exercice.n)}}`),
       txt(", puis écris le membre de gauche comme une seule puissance : donne l'inéquation obtenue, comparée à 1."),
     ];
-  return [txt("À partir du regroupement CORRECT de l'étape précédente, résous — attention au sens selon que le rapport des bases est supérieur ou inférieur à 1.")];
+  return [txt("Résous l'inéquation regroupée : attention au sens, selon que le rapport des bases est supérieur à 1 ou compris entre 0 et 1.")];
 }
 
 function aideE1(phase: "eRegrouper" | "eResoudre", exercice: ExerciceIneqE): AideAvecLatex {
-  if (phase === "eRegrouper") return { texte: "Rappel : diviser les deux membres par un nombre strictement positif ne change jamais le sens ; ici :", latex: `${baseLatexPourExposant(exercice.base2)}^{${formatExposantLineaireLatex(exercice.m, exercice.n)}}>0` };
-  return { texte: "Rappel : si la base est supérieure à 1, le sens est conservé ; si elle est comprise entre 0 et 1, il s'inverse. Ici, la base est le rapport :", latex: `\\dfrac{${baseLatex(exercice.base1)}}{${baseLatex(exercice.base2)}}` };
+  if (phase === "eRegrouper") return { texte: "Diviser les deux membres par un nombre strictement positif ne change pas le sens de l'inégalité ; ici, ce nombre est :", latex: `${baseLatexPourExposant(exercice.base2)}^{${formatExposantLineaireLatex(exercice.m, exercice.n)}}>0` };
+  return { texte: "Le sens se conserve si la base est supérieure à 1 et s'inverse si elle est comprise entre 0 et 1. Ici, la base est le rapport :", latex: `\\dfrac{${baseLatex(exercice.base1)}}{${baseLatex(exercice.base2)}}` };
 }
 
 function aideE2(phase: "eRegrouper" | "eResoudre", exercice: ExerciceIneqE): AideAvecLatex {

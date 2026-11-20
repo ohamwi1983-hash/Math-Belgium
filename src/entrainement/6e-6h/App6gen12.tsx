@@ -5,6 +5,7 @@ import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceExponentiel
 import {
   NIVEAU_AIDE_MAX,
   activerAideSuivante,
+  tentativesMaxCourant,
   demarrerSessionExponentiellesProblemes,
   soumettreReponseAEcran1,
   soumettreReponseAEcran2,
@@ -45,6 +46,13 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { MESSAGES_ILLISIBLE_EXPO } from "./components6e/RetourSaisieExpo";
+import { lisibleExpression, lisibleNombre } from "./moteur6e/lectureSaisieExpo";
+import { cibleProblemesExpo } from "./ui6e/retoursExponentielles";
+
+/** Écrans dont la réponse est une expression en t (modèle, dérivée) ; les autres attendent un nombre. */
+const PHASES_EXPRESSION_T: ReadonlySet<string> = new Set(["aEcran1", "bEcran1", "bEcran2", "dEcran3", "eEcran1"]);
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { correctionDetailleeExponentiellesProblemes, lettrePhaseExponentiellesProblemes } from "./generateurs6e/exponentiellesProblemes/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
@@ -53,6 +61,15 @@ const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionExponentiellesProblemes {
   return demarrerSessionExponentiellesProblemes(REGLAGES_DEMO, genererExerciceExponentiellesProblemes);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son premier
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs6e/exponentiellesProblemes/exportEvaluation.ts`), comme `App6gen14.tsx`. */
+function sessionInitiale(): EtatSessionExponentiellesProblemes {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionExponentiellesProblemes(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceExponentiellesProblemes, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -65,7 +82,10 @@ interface TransitionEnAttente {
 }
 
 export function App6gen12() {
-  const [etat, setEtat] = useState<EtatSessionExponentiellesProblemes>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionExponentiellesProblemes>(sessionInitiale);
+  /** Compteur d'exercices affichés : dans la `key` des écrans, pour vider la saisie même quand deux
+   * exercices successifs commencent par le même écran. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionExponentiellesProblemes`, jamais dans le moteur. Remis à vide
@@ -114,6 +134,7 @@ export function App6gen12() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroExercice((n) => n + 1);
       setHistorique([]);
       setAideUtiliseeParPhase({});
     } else {
@@ -124,6 +145,7 @@ export function App6gen12() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setHistorique([]);
     setAideUtiliseeParPhase({});
     setEtat(
@@ -133,8 +155,16 @@ export function App6gen12() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+
+  // Hook de vérification Playwright (mode dev ou ?dev=1 seulement), comme les autres générateurs
+  // du chapitre : l'exercice tiré, pour contrôler qu'un `?code=` rouvre la même instance.
+  const modeDevActif = import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1";
+  if (modeDevActif) {
+    (window as unknown as { __debug6gen12?: unknown }).__debug6gen12 = { exercice, phase };
+  }
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxCourant(etat);
+  const cle = `${numeroExercice}-${phase}`;
   const niveauAide = etat.niveauAide;
   const aide1 = aideNiveau1(exercice, phase);
   const aide2 = aideNiveau2(exercice, phase);
@@ -171,6 +201,9 @@ export function App6gen12() {
     niveauAideMax: NIVEAU_AIDE_MAX,
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
     validation,
+    lire: (texte: string) => (PHASES_EXPRESSION_T.has(phase) ? lisibleExpression(texte, ["t"]) : lisibleNombre(texte)),
+    messageIllisible: PHASES_EXPRESSION_T.has(phase) ? MESSAGES_ILLISIBLE_EXPO.expressionT : MESSAGES_ILLISIBLE_EXPO.nombre,
+    cible: (texte: string) => cibleProblemesExpo(exercice, phase, texte),
   };
 
   // Wiring calculatrice scientifique — inventaire écran par écran (voir rapport de livraison) :
@@ -216,15 +249,15 @@ export function App6gen12() {
         <div className="card-body">
           {phase === "aEcran1" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
-              placeholder={exercice.famille === "A" && exercice.sousType === "evaluer" ? "ex : 5000*1.08^t" : "ex : 80-t"}
+              placeholder="expression en t"
               onValider={(texte) => terminerEtape(soumettreReponseAEcran1(etat, texte), texte)}
             />
           )}
           {phase === "aEcran2" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 12,5"
               onValider={(texte) => terminerEtape(soumettreReponseAEcran2(etat, texte), texte)}
@@ -233,23 +266,23 @@ export function App6gen12() {
 
           {phase === "bEcran1" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
-              placeholder="ex : 20*0.8^t"
+              placeholder="expression en t"
               onValider={(texte) => terminerEtape(soumettreReponseBEcran1(etat, texte), texte)}
             />
           )}
           {phase === "bEcran2" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
-              placeholder="ex : 20*(1-0.8^t)"
+              placeholder="expression en t"
               onValider={(texte) => terminerEtape(soumettreReponseBEcran2(etat, texte), texte)}
             />
           )}
           {phase === "bEcran3" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 12,5"
               onValider={(texte) => terminerEtape(soumettreReponseBEcran3(etat, texte), texte)}
@@ -257,7 +290,7 @@ export function App6gen12() {
           )}
           {phase === "bEcran4" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 8,3"
               onValider={(texte) => terminerEtape(soumettreReponseBEcran4(etat, texte), texte)}
@@ -266,7 +299,7 @@ export function App6gen12() {
 
           {phase === "cEcran1" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 0,9"
               onValider={(texte) => terminerEtape(soumettreReponseCEcran1(etat, texte), texte)}
@@ -274,7 +307,7 @@ export function App6gen12() {
           )}
           {phase === "cEcran2" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 15,2"
               onValider={(texte) => terminerEtape(soumettreReponseCEcran2(etat, texte), texte)}
@@ -282,9 +315,11 @@ export function App6gen12() {
           )}
           {phase === "cEcran3" && exercice.famille === "C" && (
             <EtapeListeExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 42,3"
+              messageIllisible={MESSAGES_ILLISIBLE_EXPO.liste}
+              cible={() => null}
               labelAjout="+ Ajouter une valeur"
               onValider={(textes) => terminerEtape(soumettreReponseCEcran3(etat, textes), textes.join(" ; "))}
             />
@@ -292,7 +327,7 @@ export function App6gen12() {
 
           {phase === "dEcran1" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 0,64"
               onValider={(texte) => terminerEtape(soumettreReponseDEcran1(etat, texte), texte)}
@@ -300,7 +335,7 @@ export function App6gen12() {
           )}
           {phase === "dEcran2" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 20"
               onValider={(texte) => terminerEtape(soumettreReponseDEcran2(etat, texte), texte)}
@@ -308,15 +343,15 @@ export function App6gen12() {
           )}
           {phase === "dEcran3" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
-              placeholder="ex : 20+25*0.8^t"
+              placeholder="expression en t"
               onValider={(texte) => terminerEtape(soumettreReponseDEcran3(etat, texte), texte)}
             />
           )}
           {phase === "dEcran4" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 25,4"
               onValider={(texte) => terminerEtape(soumettreReponseDEcran4(etat, texte), texte)}
@@ -325,15 +360,15 @@ export function App6gen12() {
 
           {phase === "eEcran1" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
-              placeholder="ex : 20*t*exp(-t)*(2-t)"
+              placeholder="dérivée f′(t) factorisée"
               onValider={(texte) => terminerEtape(soumettreReponseEEcran1(etat, texte), texte)}
             />
           )}
           {phase === "eEcran2" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 2"
               onValider={(texte) => terminerEtape(soumettreReponseEEcran2(etat, texte), texte)}
@@ -341,7 +376,7 @@ export function App6gen12() {
           )}
           {phase === "eEcran3" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 10,8"
               onValider={(texte) => terminerEtape(soumettreReponseEEcran3(etat, texte), texte)}
@@ -350,7 +385,7 @@ export function App6gen12() {
 
           {phase === "fEcran1" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 1"
               onValider={(texte) => terminerEtape(soumettreReponseFEcran1(etat, texte), texte)}
@@ -358,7 +393,7 @@ export function App6gen12() {
           )}
           {phase === "fEcran2" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 0,86"
               onValider={(texte) => terminerEtape(soumettreReponseFEcran2(etat, texte), texte)}
@@ -366,29 +401,31 @@ export function App6gen12() {
           )}
           {phase === "fEcran3" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
-              placeholder="ex : 950000"
+              placeholder="ex : 950 000"
               onValider={(texte) => terminerEtape(soumettreReponseFEcran3(etat, texte), texte)}
             />
           )}
           {phase === "fEcran4" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
-              placeholder="ex : 125000"
+              placeholder="ex : 125 000"
               onValider={(texte) => terminerEtape(soumettreReponseFEcran4(etat, texte), texte)}
             />
           )}
 
           {phase === "gEcran1" && exercice.famille === "G" && (
             <EtapeDeuxValeursExpoProblemes
-              key={phase}
+              key={cle}
               consigneGenerale={consigneG}
               blocDonnees={donnees}
               consigneEcran={consigne}
               labelChamp1={`f(${exercice.tEval1})=`}
               labelChamp2={`f(${exercice.tEval2})=`}
+              lire={lisibleNombre}
+              messageIllisible={MESSAGES_ILLISIBLE_EXPO.nombre}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
               tentativesUtilisees={tentativesUtilisees}
@@ -402,7 +439,7 @@ export function App6gen12() {
           )}
           {phase === "gEcran2" && (
             <EtapeChampExpoProblemes
-              key={phase}
+              key={cle}
               {...propsChampCommun}
               placeholder="ex : 4,2"
               onValider={(texte) => terminerEtape(soumettreReponseGEcran2(etat, texte), texte)}
@@ -410,7 +447,7 @@ export function App6gen12() {
           )}
           {phase === "gEcran3" && (
             <EtapeChoixOuiNonExpoProblemes
-              key={phase}
+              key={cle}
               consigneGenerale={consigneG}
               blocDonnees={donnees}
               consigneEcran={consigne}

@@ -8,14 +8,17 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
+import { evaluerValeurExponentielle } from "../moteur6e/expressionExponentielle";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
   latex: string | null;
 }
 
-interface Props {
+interface Props extends PropsRetourChamp<EnsembleReelGuide> {
   consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   etatActuel: string[] | null;
@@ -38,13 +41,14 @@ interface Props {
  * `App6gen7.tsx` doit le rendre avec `key={phase}`. `etatActuel` reste toujours `null` ici — le
  * domaine est TOUJOURS le premier écran de sa famille (voir `ui6e/formatDomaineDeriveeExponentielles.ts::etatActuel`)
  * — la prop est acceptée pour uniformité avec les 2 autres écrans génériques du même générateur. */
-export function EtapeDomaineDomaineDerivee({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDomaineDomaineDerivee({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, messageIllisible, cible}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<EnsembleReelGuide>();
 
   function valider() {
     if (reponse === null) return;
-    onValider(reponse);
+    retour.tenter(reponse, true, onValider);
   }
 
   return (
@@ -69,30 +73,15 @@ export function EtapeDomaineDomaineDerivee({ consigneEcran, enonceLatex, etatAct
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
-      <EnsembleReelGuideBuilder onChange={setReponse} label="domf =" />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <EnsembleReelGuideBuilder onChange={setReponse} label="\\text{dom}\\,f=" erronee={montrerErreurs && reponse === retour.soumise} parseurNombre={evaluerValeurExponentielle} />
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={reponse === null} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

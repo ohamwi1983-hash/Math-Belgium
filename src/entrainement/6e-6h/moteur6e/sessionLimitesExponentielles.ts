@@ -60,8 +60,17 @@ export function demarrerSessionLimiteExponentielle(reglages: ReglagesSession6e, 
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Choix fermés (verdict, catégorie, graphique) : 1 seule tentative — un choix parmi deux ou trois
+ * options rejoué trois fois ne mesure plus rien (audit 6e ch. 2, lot B). Champs : réglage de la
+ * session (3 tentatives). */
+const PHASES_CHOIX_FERME: ReadonlySet<PhaseLimiteExponentielle> = new Set<PhaseLimiteExponentielle>(["aExposant", "aGlobale", "bExponentielle", "bPolynomiale", "bGlobale", "cFacteurs", "hForme", "iForme", "jForme", "kForme"]);
+
+export function tentativesMaxCourant(etat: EtatSessionLimiteExponentielle): number {
+  return PHASES_CHOIX_FERME.has(etat.phase) ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionLimiteExponentielle): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxCourant(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionLimiteExponentielle): EtatSessionLimiteExponentielle {

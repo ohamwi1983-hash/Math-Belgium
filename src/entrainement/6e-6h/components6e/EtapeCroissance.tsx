@@ -8,6 +8,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, tousLisibles, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
@@ -21,7 +23,7 @@ const OPTIONS: { id: ReponseCroissance["type"]; label: string; requiertPosition:
   { id: "maximum", label: "Un maximum", requiertPosition: true },
 ];
 
-interface Props {
+interface Props extends PropsRetourChamp<ReponseCroissance> {
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -42,17 +44,18 @@ interface Props {
  * `App6gen11.tsx` doit le rendre avec `key={indexExercice}`. Le domaine, les limites et les
  * asymptotes confirmés aux 3 écrans précédents sont listés dans le récapitulatif "Ce qu'on sait
  * déjà" (`ui6e/recapitulatifEtudeFonctionExponentielle.ts`). */
-export function EtapeCroissance({ enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeCroissance({ enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, lire, messageIllisible, cible}: Props) {
   const [type, setType] = useState<ReponseCroissance["type"] | null>(null);
   const [position, setPosition] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<ReponseCroissance>();
 
   const requiertPosition = type === "minimum" || type === "maximum";
   const complet = type !== null && (!requiertPosition || position.trim() !== "");
 
   function valider() {
     if (!complet || type === null) return;
-    onValider({ type, position });
+    retour.tenter({ type, position }, !requiertPosition || tousLisibles(lire, [position]), onValider);
   }
 
   return (
@@ -80,33 +83,18 @@ export function EtapeCroissance({ enonceLatex, aideNiveau1, aideNiveau2, tentati
           <ApercuExpressionLatex texte={position} />
           <div className="field contenu-conditionnel">
             <label className="field-label field-label-minuscule">Position de l'extremum (x=...)</label>
-            <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={position} placeholder="ex : -1, 1/2..." onChange={(e) => setPosition(e.target.value)} />
+            <input type="text" className={`text-input ${montrerErreurs && position === retour.soumise?.position ? "is-erronee" : ""}`} value={position} placeholder="ex : 3/2" onChange={(e) => setPosition(e.target.value)} />
           </div>
         </>
       )}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

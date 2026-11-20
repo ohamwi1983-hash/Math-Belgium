@@ -38,8 +38,17 @@ export function demarrerSessionEquationExponentielle(reglages: ReglagesSession6e
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Choix fermés (verdict, catégorie, graphique) : 1 seule tentative — un choix parmi deux ou trois
+ * options rejoué trois fois ne mesure plus rien (audit 6e ch. 2, lot B). Champs : réglage de la
+ * session (3 tentatives). */
+const PHASES_CHOIX_FERME: ReadonlySet<PhaseEquationExponentielle> = new Set<PhaseEquationExponentielle>(["dEcran"]);
+
+export function tentativesMaxCourant(etat: EtatSessionEquationExponentielle): number {
+  return PHASES_CHOIX_FERME.has(etat.phase) ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionEquationExponentielle): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxCourant(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionEquationExponentielle): EtatSessionEquationExponentielle {

@@ -95,23 +95,23 @@ function formatDirectionA(exercice: ExerciceLimiteA): string {
 }
 
 function consigneA(phase: "aExposant" | "aGlobale"): FragmentConsigne[] {
-  return [fragTexte(phase === "aExposant" ? "Détermine la limite de l'exposant (ou de la fraction interne)." : "À partir de la limite CORRECTE de l'exposant, conclus la limite globale (règle base>1 / base<1).")];
+  return [fragTexte(phase === "aExposant" ? "Détermine la limite de l'exposant." : "Avec la limite de l'exposant, conclus la limite de la fonction (la base est-elle plus grande que 1 ou comprise entre 0 et 1 ?).")];
 }
 
 function aideA1(phase: "aExposant" | "aGlobale"): AideAvecLatex {
-  if (phase === "aExposant") return { texte: "Étudie séparément le signe/la croissance de l'exposant (ou de la fraction interne) selon la direction demandée.", latex: null };
+  if (phase === "aExposant") return { texte: "Étudie seulement l'exposant : un polynôme à l'infini se comporte comme son terme de plus haut degré ; un quotient dont le dénominateur tend vers 0 tend vers l'infini (règle des signes).", latex: null };
   return {
-    texte: "Rappel des deux règles génériques (sans dire laquelle s'applique ici) :",
-    latex: "\\begin{gathered} \\text{base}>1,\\ \\text{exposant}\\to+\\infty \\Rightarrow +\\infty \\\\ \\text{base}<1,\\ \\text{exposant}\\to+\\infty \\Rightarrow 0 \\end{gathered}",
+    texte: "Limites d'une exponentielle de base a quand l'exposant t tend vers l'infini :",
+    latex: "a>1 :\\ a^{t}\\xrightarrow[t\\to+\\infty]{}+\\infty,\\ a^{t}\\xrightarrow[t\\to-\\infty]{}0\\qquad 0<a<1 :\\ \\text{l'inverse}",
   };
 }
 
 function aideA2(phase: "aExposant" | "aGlobale", exercice: ExerciceLimiteA): AideAvecLatex {
   const baseNumerique = exercice.sousCas === "puissance" ? baseLimiteLatex(exercice.base) : "e";
   if (phase === "aExposant") {
-    return { texte: "Forme de l'exposant et direction :", latex: `${formatDirectionA(exercice)}` };
+    return { texte: "Ici, l'exposant et la direction sont :", latex: `${formatDirectionA(exercice)}` };
   }
-  return { texte: "Base et signe de la limite de l'exposant (déjà confirmée à l'étape précédente) :", latex: `\\text{base} = ${baseNumerique},\\quad \\text{exposant} \\to ${formatCibleTexte(exercice.limiteExposant)}` };
+  return { texte: "Ici, la base et la limite de l'exposant sont :", latex: `a = ${baseNumerique},\\qquad t \\to ${formatCibleTexte(exercice.limiteExposant)}` };
 }
 
 /** Bloc "état actuel" (`aGlobale` seulement — `aExposant` est le premier écran de la famille, rien
@@ -139,7 +139,7 @@ function formatDirectionB(exercice: ExerciceLimiteB): string {
 function consigneB(phase: "bExponentielle" | "bPolynomiale" | "bGlobale"): FragmentConsigne[] {
   if (phase === "bExponentielle") return [fragTexte("Détermine la limite du terme exponentiel seul.")];
   if (phase === "bPolynomiale") return [fragTexte("Détermine la limite du terme polynomial seul.")];
-  return [fragTexte("À partir des deux limites CORRECTES précédentes, conclus la limite globale.")];
+  return [fragTexte("Avec les limites des deux termes, conclus la limite de la somme.")];
 }
 
 function memeSigneB(exercice: ExerciceLimiteB): boolean {
@@ -150,16 +150,16 @@ function memeSigneB(exercice: ExerciceLimiteB): boolean {
 }
 
 function aideB1(phase: "bExponentielle" | "bPolynomiale" | "bGlobale", exercice: ExerciceLimiteB): AideAvecLatex {
-  if (phase === "bExponentielle") return { texte: "x²+p → +∞ quelle que soit la direction (x² domine toujours). Applique ensuite la règle base>1/base<1.", latex: "x^{2}+p \\to +\\infty \\qquad \\text{base}>1\\ /\\ \\text{base}<1" };
-  if (phase === "bPolynomiale") return { texte: "d est impair : x^d change de signe selon que x→+∞ ou x→−∞. Regarde le signe de q·x^d.", latex: "x\\to+\\infty\\quad\\text{ou}\\quad x\\to-\\infty\\qquad\\text{signe de }q\\cdot x^{d}" };
-  if (memeSigneB(exercice)) return { texte: "Les deux termes ont le même signe à l'infini (ou le terme exponentiel est négligeable) : la somme suit directement ce signe.", latex: null };
-  return { texte: "Les deux termes ont des signes opposés (forme ∞−∞) : une exponentielle qui diverge l'emporte TOUJOURS sur n'importe quelle puissance de x, quel que soit son degré.", latex: "\\infty-\\infty" };
+  if (phase === "bExponentielle") return { texte: "L'exposant $x^2 + p$ tend vers $+\\infty$ dans les deux directions ; la base décide ensuite :", latex: "a>1 :\\ a^{t}\\to+\\infty\\qquad 0<a<1 :\\ a^{t}\\to0\\qquad (t\\to+\\infty)" };
+  if (phase === "bPolynomiale") return { texte: "Un polynôme à l'infini se comporte comme son terme de plus haut degré ; une puissance impaire de x change de signe avec x.", latex: null };
+  if (memeSigneB(exercice)) return { texte: "Si les deux termes tendent vers des limites qui s'additionnent sans conflit, la somme suit ces limites.", latex: null };
+  return { texte: "Si les deux termes tendent vers $+\\infty$ et $-\\infty$, c'est une forme indéterminée : une exponentielle de base plus grande que 1 l'emporte sur toute puissance de x (croissances comparées).", latex: null };
 }
 
 function aideB2(phase: "bExponentielle" | "bPolynomiale" | "bGlobale", exercice: ExerciceLimiteB): AideAvecLatex {
-  if (phase === "bExponentielle") return { texte: "Base et exposant substitués :", latex: `\\text{base}=${baseLimiteLatex(exercice.base)},\\quad x^2+p \\to +\\infty` };
-  if (phase === "bPolynomiale") return { texte: "Terme polynomial substitué :", latex: formatSommeTermes([{ valeur: exercice.q, suffixe: formatPuissance("x", exercice.d) }, { valeur: exercice.r, suffixe: "" }]) };
-  return { texte: "Réécris le terme exponentiel comme un rapport, pour rendre la comparaison de croissance visible :", latex: "a^{u(x)} = \\frac{1}{a^{-u(x)}}" };
+  if (phase === "bExponentielle") return { texte: "Ici, la base vaut :", latex: `a=${baseLimiteLatex(exercice.base)}` };
+  if (phase === "bPolynomiale") return { texte: "Ici, le terme polynomial est :", latex: formatSommeTermes([{ valeur: exercice.q, suffixe: formatPuissance("x", exercice.d) }, { valeur: exercice.r, suffixe: "" }]) };
+  return { texte: "Si c'est une forme indéterminée, mets le terme exponentiel en évidence :", latex: "a^{u}+P(x)=a^{u}\\left(1+\\dfrac{P(x)}{a^{u}}\\right)" };
 }
 
 /** Bloc "état actuel" — ACCUMULE (plus ancien en premier, jamais un remplacement) : `bPolynomiale`
@@ -183,17 +183,17 @@ function formatFonctionC(exercice: ExerciceLimiteC): string {
 }
 
 function consigneC(phase: "cFacteurs" | "cGlobale"): FragmentConsigne[] {
-  return [fragTexte(phase === "cFacteurs" ? "Détermine la limite de chacun des deux facteurs séparément." : "Conclus la limite du produit (réécris-le mentalement en quotient pour comparer les vitesses de croissance).")];
+  return [fragTexte(phase === "cFacteurs" ? "Détermine la limite de chacun des deux facteurs." : "Conclus la limite du produit.")];
 }
 
 function aideC1(phase: "cFacteurs" | "cGlobale"): AideAvecLatex {
-  if (phase === "cFacteurs") return { texte: "x^r (r>0) diverge vers +∞. Attention au signe de l'exposant dans e^(−x^s) : −x^s → −∞ quand x→+∞, donc e^(−x^s) → 0.", latex: "x^{r}\\to+\\infty\\ (r>0)\\qquad -x^{s}\\to-\\infty\\ (x\\to+\\infty)\\Rightarrow e^{-x^{s}}\\to 0" };
-  return { texte: "Réécris mentalement le produit x^r·e^(−x^s) comme un quotient x^r / e^(x^s), pour rendre la comparaison de croissance visible.", latex: "x^{r}\\cdot e^{-x^{s}}=\\dfrac{x^{r}}{e^{x^{s}}}" };
+  if (phase === "cFacteurs") return { texte: "Une puissance positive de x tend vers $+\\infty$ ; pour l'exponentielle, regarde d'abord la limite de son exposant :", latex: "e^{t}\\xrightarrow[t\\to-\\infty]{}0\\qquad e^{t}\\xrightarrow[t\\to+\\infty]{}+\\infty" };
+  return { texte: "Une exponentielle l'emporte sur toute puissance de x (croissances comparées) :", latex: "\\lim_{x\\to+\\infty}\\dfrac{x^{n}}{e^{x}}=0" };
 }
 
 function aideC2(phase: "cFacteurs" | "cGlobale", exercice: ExerciceLimiteC): AideAvecLatex {
-  if (phase === "cFacteurs") return { texte: "Rappel : r et s sont tous deux STRICTEMENT POSITIFS.", latex: `r=${exercice.r},\\ s=${exercice.s}` };
-  return { texte: "L'exponentielle au dénominateur croît plus vite que n'importe quelle puissance de x au numérateur — le quotient tend donc vers 0.", latex: `\\frac{${formatPuissance("x", exercice.r)}}{e^{${formatPuissance("x", exercice.s)}}} \\to 0` };
+  if (phase === "cFacteurs") return { texte: "Ici, les exposants de x sont positifs :", latex: `r=${exercice.r},\\qquad s=${exercice.s}` };
+  return { texte: "Ici, écris le produit comme un quotient :", latex: `\\frac{${formatPuissance("x", exercice.r)}}{e^{${formatPuissance("x", exercice.s)}}} \\to 0` };
 }
 
 /** Bloc "état actuel" (`cGlobale` seulement) — les 2 limites de facteurs sont confirmées EN UNE
@@ -318,30 +318,7 @@ function consigneH(phase: "hForme" | "hNumerateur" | "hDenominateur" | "hConclur
   return [fragTexte("Applique la règle de L'Hôpital : calcule la limite du rapport des dérivées en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(".")];
 }
 
-function aideH1(phase: "hForme" | "hNumerateur" | "hDenominateur" | "hConclure", exercice: ExerciceLimiteH): AideAvecLatex {
-  if (phase === "hForme") return { texte: `Évalue séparément le numérateur et le dénominateur en x=${formatPointLimite(exercice.x0)}.`, latex: null };
-  if (phase === "hConclure") {
-    return {
-      texte: "Règle de L'Hôpital — si f(x)→0 et g(x)→0, alors (sous conditions) la limite du quotient est celle du quotient des dérivées :",
-      latex: "\\lim \\frac{f(x)}{g(x)} = \\lim \\frac{f'(x)}{g'(x)}",
-    };
-  }
-  const positionExponentielle = (phase === "hNumerateur") === exercice.expAuNumerateur;
-  if (positionExponentielle) return { texte: "Rappel : la dérivée de a^(u(x)) est u'(x)·ln(a)·a^(u(x)).", latex: "\\left(a^{u(x)}\\right)' = u'(x)\\cdot\\ln(a)\\cdot a^{u(x)}" };
-  return { texte: "L'autre partie est une fonction affine (du premier degré) — rappelle-toi sa règle de dérivation.", latex: "(ax)' = a" };
-}
 
-function aideH2(phase: "hForme" | "hNumerateur" | "hDenominateur" | "hConclure", exercice: ExerciceLimiteH): AideAvecLatex {
-  const deriveeExp = formatDeriveePartieExponentielleH(exercice);
-  if (phase === "hForme") return { texte: `Numérateur et dénominateur substitués en x=${formatPointLimite(exercice.x0)} :`, latex: `${exercice.base}^{0}-1 = 0,\\quad ${exercice.m}\\cdot 0 = 0` };
-  const positionExponentielle = (phase === "hNumerateur") === exercice.expAuNumerateur;
-  if (phase === "hNumerateur" || phase === "hDenominateur") {
-    return { texte: `Forme attendue (dérivée du ${phase === "hNumerateur" ? "numérateur" : "dénominateur"}) :`, latex: positionExponentielle ? deriveeExp : `${exercice.m}` };
-  }
-  const num = exercice.expAuNumerateur ? deriveeExp : `${exercice.m}`;
-  const den = exercice.expAuNumerateur ? `${exercice.m}` : deriveeExp;
-  return { texte: `Dérivées substituées en x=${formatPointLimite(exercice.x0)} (non simplifiées) :`, latex: `\\frac{${num}}{${den}}\\bigg|_{x=${formatPointLimite(exercice.x0)}}` };
-}
 
 /** Bloc "état actuel" — ACCUMULE (plus ancien en premier) : `hNumerateur` rappelle la forme 0/0
  * confirmée à l'écran 1 ; `hDenominateur` y ajoute la dérivée du numérateur confirmée à l'écran 2 ;
@@ -403,32 +380,7 @@ function consigneI(phase: "iForme" | "iNumerateur" | "iDenominateur" | "iConclur
   return [fragTexte("Applique la règle de L'Hôpital : calcule la limite du rapport des dérivées en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(".")];
 }
 
-function aideI1(phase: "iForme" | "iNumerateur" | "iDenominateur" | "iConclure", exercice: ExerciceLimiteI): AideAvecLatex {
-  if (phase === "iForme") return { texte: `Évalue séparément le numérateur et le dénominateur en x=${formatPointLimite(exercice.x0)}.`, latex: null };
-  if (phase === "iConclure") {
-    return {
-      texte: "Règle de L'Hôpital — si f(x)→0 et g(x)→0, alors (sous conditions) la limite du quotient est celle du quotient des dérivées :",
-      latex: "\\lim \\frac{f(x)}{g(x)} = \\lim \\frac{f'(x)}{g'(x)}",
-    };
-  }
-  const positionSin = (phase === "iNumerateur") === exercice.sinAuNumerateur;
-  if (positionSin) return { texte: "Rappel : la dérivée de sin(u(x)) est u'(x)·cos(u(x)).", latex: "(\\sin(u(x)))' = u'(x)\\cdot\\cos(u(x))" };
-  return { texte: "Rappel : la dérivée de a^(u(x)) est u'(x)·ln(a)·a^(u(x)).", latex: "\\left(a^{u(x)}\\right)' = u'(x)\\cdot\\ln(a)\\cdot a^{u(x)}" };
-}
 
-function aideI2(phase: "iForme" | "iNumerateur" | "iDenominateur" | "iConclure", exercice: ExerciceLimiteI): AideAvecLatex {
-  if (phase === "iForme") return { texte: `Numérateur et dénominateur substitués en x=${formatPointLimite(exercice.x0)} :`, latex: `\\sin(0) = 0,\\quad ${exercice.base}^{0}-1 = 0` };
-  const deriveeSin = formatDeriveeSinI(exercice);
-  const deriveeExp = formatDeriveePartieExponentielleI(exercice);
-  const deriveeNumerateur = exercice.sinAuNumerateur ? deriveeSin : deriveeExp;
-  const deriveeDenominateur = exercice.sinAuNumerateur ? deriveeExp : deriveeSin;
-  if (phase === "iNumerateur") return { texte: "Forme attendue (dérivée du numérateur) :", latex: deriveeNumerateur };
-  if (phase === "iDenominateur") return { texte: "Forme attendue (dérivée du dénominateur) :", latex: deriveeDenominateur };
-  return {
-    texte: `Dérivées substituées en x=${formatPointLimite(exercice.x0)} (non simplifiées) :`,
-    latex: `\\dfrac{${deriveeNumerateur}}{${deriveeDenominateur}}\\bigg|_{x=${formatPointLimite(exercice.x0)}}`,
-  };
-}
 
 /** Bloc "état actuel" — ACCUMULE (plus ancien en premier), même principe que `etatActuelH`. */
 function etatActuelI(exercice: ExerciceLimiteI, phase: "iForme" | "iNumerateur" | "iDenominateur" | "iConclure"): string[] | null {
@@ -490,38 +442,7 @@ function consigneJ(phase: "jForme" | "jNumerateur" | "jDenominateur" | "jConclur
   return [fragTexte("Applique la règle de L'Hôpital : calcule la limite du rapport des dérivées en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(".")];
 }
 
-function aideJ1(phase: "jForme" | "jNumerateur" | "jDenominateur" | "jConclure", exercice: ExerciceLimiteJ): AideAvecLatex {
-  if (phase === "jForme") return { texte: `Évalue séparément le numérateur et le dénominateur en x=${formatPointLimite(exercice.x0)}.`, latex: null };
-  if (phase === "jConclure") {
-    return {
-      texte: "Règle de L'Hôpital — si f(x)→0 et g(x)→0, alors (sous conditions) la limite du quotient est celle du quotient des dérivées :",
-      latex: "\\lim \\frac{f(x)}{g(x)} = \\lim \\frac{f'(x)}{g'(x)}",
-    };
-  }
-  const positionArc = (phase === "jNumerateur") === exercice.arcAuNumerateur;
-  if (positionArc) {
-    if (exercice.arcFn === "arctan") return { texte: "Rappel : la dérivée de arctan(u(x)) est u'(x)/(1+u(x)²).", latex: "(\\arctan(u(x)))' = \\dfrac{u'(x)}{1+u(x)^2}" };
-    return { texte: "Rappel : la dérivée de arcsin(u(x)) est u'(x)/√(1-u(x)²).", latex: "(\\arcsin(u(x)))' = \\dfrac{u'(x)}{\\sqrt{1-u(x)^2}}" };
-  }
-  return { texte: "Rappel : la dérivée de a^(u(x)) est u'(x)·ln(a)·a^(u(x)).", latex: "\\left(a^{u(x)}\\right)' = u'(x)\\cdot\\ln(a)\\cdot a^{u(x)}" };
-}
 
-function aideJ2(phase: "jForme" | "jNumerateur" | "jDenominateur" | "jConclure", exercice: ExerciceLimiteJ): AideAvecLatex {
-  if (phase === "jForme") {
-    const arcNom = exercice.arcFn === "arctan" ? "\\arctan" : "\\arcsin";
-    return { texte: `Numérateur et dénominateur substitués en x=${formatPointLimite(exercice.x0)} :`, latex: `${arcNom}(0) = 0,\\quad ${exercice.base}^{0}-1 = 0` };
-  }
-  const deriveeArc = formatDeriveeArcFnJ(exercice);
-  const deriveeExp = formatDeriveePartieExponentielleJ(exercice);
-  const deriveeNumerateur = exercice.arcAuNumerateur ? deriveeArc : deriveeExp;
-  const deriveeDenominateur = exercice.arcAuNumerateur ? deriveeExp : deriveeArc;
-  if (phase === "jNumerateur") return { texte: "Forme attendue (dérivée du numérateur) :", latex: deriveeNumerateur };
-  if (phase === "jDenominateur") return { texte: "Forme attendue (dérivée du dénominateur) :", latex: deriveeDenominateur };
-  return {
-    texte: `Dérivées substituées en x=${formatPointLimite(exercice.x0)} (non simplifiées) :`,
-    latex: `\\dfrac{${deriveeNumerateur}}{${deriveeDenominateur}}\\bigg|_{x=${formatPointLimite(exercice.x0)}}`,
-  };
-}
 
 /** Bloc "état actuel" — ACCUMULE (plus ancien en premier), même principe que `etatActuelH`/`etatActuelI`. */
 function etatActuelJ(exercice: ExerciceLimiteJ, phase: "jForme" | "jNumerateur" | "jDenominateur" | "jConclure"): string[] | null {
@@ -591,42 +512,7 @@ function consigneK(phase: "kForme" | "kNumerateur1" | "kDenominateur1" | "kNumer
   return [fragTexte("Applique la règle de L'Hôpital (2 applications) : calcule la limite du rapport des dérivées secondes en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(".")];
 }
 
-function aideK1(phase: "kForme" | "kNumerateur1" | "kDenominateur1" | "kNumerateur2" | "kDenominateur2" | "kConclure", exercice: ExerciceLimiteK): AideAvecLatex {
-  if (phase === "kForme") return { texte: `Évalue séparément le numérateur et le dénominateur en x=${formatPointLimite(exercice.x0)}.`, latex: null };
-  if (phase === "kConclure") {
-    return {
-      texte: "Règle de L'Hôpital, appliquée une SECONDE fois — la limite du quotient des dérivées secondes :",
-      latex: "\\lim \\frac{f(x)}{g(x)} = \\lim \\frac{f''(x)}{g''(x)}",
-    };
-  }
-  const positionExponentielle = (phase === "kNumerateur1" || phase === "kNumerateur2") === exercice.expAuNumerateur;
-  if (phase === "kNumerateur1" || phase === "kDenominateur1") {
-    if (positionExponentielle) return { texte: "Rappel : la dérivée de a^(u(x)) est u'(x)·ln(a)·a^(u(x)) ; la dérivée de u(x)·ln(a) est u'(x)·ln(a).", latex: "(a^{u(x)})'=u'(x)\\cdot\\ln(a)\\cdot a^{u(x)}\\qquad (u(x)\\cdot\\ln(a))'=u'(x)\\cdot\\ln(a)" };
-    return { texte: "Rappel : la dérivée de m(x-x0)² est 2m(x-x0).", latex: "(m(x-x_0)^2)' = 2m(x-x_0)" };
-  }
-  if (positionExponentielle) return { texte: `Vérifie : cette partie de l'écran précédent s'annule-t-elle bien en x=${formatPointLimite(exercice.x0)} ? Si oui, redérive-la (même règle a^(u(x)) que précédemment).`, latex: null };
-  return { texte: "Rappel : la dérivée de 2m(x-x0) est la constante 2m.", latex: "(2m(x-x_0))' = 2m" };
-}
 
-function aideK2(phase: "kForme" | "kNumerateur1" | "kDenominateur1" | "kNumerateur2" | "kDenominateur2" | "kConclure", exercice: ExerciceLimiteK): AideAvecLatex {
-  if (phase === "kForme") return { texte: `Numérateur et dénominateur substitués en x=${formatPointLimite(exercice.x0)} :`, latex: `${exercice.base}^{0}-1-0 = 0,\\quad ${exercice.m}\\cdot 0^2 = 0` };
-  const derivee1Exp = formatDerivee1ExpK(exercice);
-  const derivee1Poly = formatDerivee1PolyK(exercice);
-  const derivee1Numerateur = exercice.expAuNumerateur ? derivee1Exp : derivee1Poly;
-  const derivee1Denominateur = exercice.expAuNumerateur ? derivee1Poly : derivee1Exp;
-  if (phase === "kNumerateur1") return { texte: "Forme attendue (dérivée première du numérateur) :", latex: derivee1Numerateur };
-  if (phase === "kDenominateur1") return { texte: "Forme attendue (dérivée première du dénominateur) :", latex: derivee1Denominateur };
-  const derivee2Exp = formatDerivee2ExpK(exercice);
-  const derivee2PolyConstant = `${2 * exercice.m}`;
-  const derivee2Numerateur = exercice.expAuNumerateur ? derivee2Exp : derivee2PolyConstant;
-  const derivee2Denominateur = exercice.expAuNumerateur ? derivee2PolyConstant : derivee2Exp;
-  if (phase === "kNumerateur2") return { texte: "Forme attendue (dérivée seconde du numérateur) :", latex: derivee2Numerateur };
-  if (phase === "kDenominateur2") return { texte: "Forme attendue (dérivée seconde du dénominateur) :", latex: derivee2Denominateur };
-  return {
-    texte: `Dérivées secondes substituées en x=${formatPointLimite(exercice.x0)} (non simplifiées) :`,
-    latex: `\\dfrac{${derivee2Numerateur}}{${derivee2Denominateur}}\\bigg|_{x=${formatPointLimite(exercice.x0)}}`,
-  };
-}
 
 /** Bloc "état actuel" — ACCUMULE (plus ancien en premier) les 5 écrans précédents, même principe
  * que les autres familles L'Hôpital. */
@@ -692,9 +578,9 @@ function consigneL(phase: "lReformuler" | "lConclure", exercice: ExerciceLimiteL
 function aideL1(phase: "lReformuler" | "lConclure", exercice: ExerciceLimiteL): AideAvecLatex {
   if (phase === "lReformuler") {
     const variable = exercice.sousType === "L1" ? "u" : "t";
-    return { texte: `Remplace x par son expression en fonction de ${variable}, puis simplifie l'exposant en isolant la puissance ${variable}.`, latex: null };
+    return { texte: `Remplace x par son expression en fonction de ${variable}, puis écris l'exposant comme un produit dont l'un des facteurs est ${variable}${exercice.sousType === "L1" ? "" : " sous la forme 1/t"} :`, latex: exercice.sousType === "L1" ? "a^{pq}=\\left(a^{p}\\right)^{q}" : "a^{\\frac{c}{t}}=\\left(a^{\\frac{1}{t}}\\right)^{c}" };
   }
-  return { texte: "Résultat du pivot (vrai quelle que soit la direction, +∞ ou −∞ ou 0) :", latex: "\\left(1+\\dfrac{1}{u}\\right)^{u} \\to e" };
+  return { texte: "Limite de référence (définition du nombre e) :", latex: exercice.sousType === "L1" ? "\\lim_{u\\to+\\infty}\\left(1+\\dfrac{1}{u}\\right)^{u}=e" : "\\lim_{t\\to0}\\left(1+t\\right)^{\\frac{1}{t}}=e" };
 }
 
 /** Forme canonique attendue après reformulation COMPLÈTE — réutilisée par `aideL2` ET `etatActuelL`,
@@ -706,8 +592,8 @@ function formatFormeReformuleeL(exercice: ExerciceLimiteL): string {
 }
 
 function aideL2(phase: "lReformuler" | "lConclure", exercice: ExerciceLimiteL): AideAvecLatex {
-  if (phase === "lReformuler") return { texte: "Forme attendue après reformulation :", latex: formatFormeReformuleeL(exercice) };
-  return { texte: "La puissance du pivot substituée par continuité :", latex: `e^{${exercice.k * exercice.m}}` };
+  if (phase === "lReformuler") return exercice.sousType === "L1" ? { texte: "Ici, pose :", latex: `u=\\dfrac{x}{${exercice.k}},\\qquad x=${exercice.k}u` } : { texte: "Ici, pose :", latex: `t=${exercice.k}x,\\qquad x=\\dfrac{t}{${exercice.k}}` };
+  return { texte: "Ici, la forme obtenue est (la puissance extérieure reste quand le crochet tend vers e) :", latex: formatFormeReformuleeL(exercice) };
 }
 
 /** Bloc "état actuel" (`lConclure` seulement) — la forme reformulée canonique confirmée à l'écran
@@ -742,13 +628,13 @@ function consigneN(phase: "nCombiner" | "nConclure"): FragmentConsigne[] {
 }
 
 function aideN1(phase: "nCombiner" | "nConclure"): AideAvecLatex {
-  if (phase === "nCombiner") return { texte: "Rappel de la loi des puissances :", latex: "(a^p)^q = a^{pq}" };
-  return { texte: "Simplifie l'exposant combiné en x=0 (le terme en x s'annule) — ce n'est plus une forme indéterminée.", latex: null };
+  if (phase === "nCombiner") return { texte: "Une puissance de puissance multiplie les exposants :", latex: "\\left(a^{p}\\right)^{q}=a^{pq}" };
+  return { texte: "Simplifie l'exposant combiné : la fonction est une exponentielle dont l'exposant a une limite finie, ce n'est plus une forme indéterminée.", latex: null };
 }
 
 function aideN2(phase: "nCombiner" | "nConclure", exercice: ExerciceLimiteN): AideAvecLatex {
-  if (phase === "nCombiner") return { texte: "Forme attendue après combinaison :", latex: formatFormeCombineeN(exercice) };
-  return { texte: "Exposant substitué en x=0 (non simplifié) :", latex: `${exercice.base}^{${exercice.k * exercice.m} + ${exercice.k}\\cdot 0}` };
+  if (phase === "nCombiner") return { texte: "Ici, les deux exposants à multiplier sont :", latex: `\\dfrac{${exercice.k}}{x}\\quad\\text{et}\\quad ${exercice.m === 1 ? "" : exercice.m === -1 ? "-" : exercice.m}x+x^{2}` };
+  return { texte: "Ici, remplace x par 0 dans l'exposant simplifié :", latex: `${exercice.base}^{${exercice.k * exercice.m} + ${exercice.k}\\cdot 0}` };
 }
 
 /** Bloc "état actuel" (`nConclure` seulement) — la forme combinée canonique confirmée à l'écran
@@ -845,6 +731,78 @@ export function etatActuel(exercice: ExerciceLimiteExponentielle, phase: PhaseLi
   }
 }
 
+// ============================================================================
+// Aides des familles L'Hôpital (H, I, J, K) — deux niveaux : niveau 1 = la règle du cours (règle de
+// L'Hôpital, dérivée de la partie à dériver), niveau 2 = l'application à l'instance (la partie à
+// dériver, ou la dérivée déjà obtenue). Jamais la dérivée attendue elle-même.
+// ============================================================================
+
+type RoleLHopital = "forme" | "num1" | "den1" | "num2" | "den2" | "conclure";
+type NaturePartie = "exponentielle" | "affine" | "sinus" | "arctan" | "arcsin" | "carre";
+
+function roleLHopital(phase: PhaseLimiteExponentielle): RoleLHopital {
+  if (phase.endsWith("Forme")) return "forme";
+  if (phase.endsWith("Conclure")) return "conclure";
+  if (phase === "kNumerateur2") return "num2";
+  if (phase === "kDenominateur2") return "den2";
+  return phase.includes("Numerateur") ? "num1" : "den1";
+}
+
+/** Nature de la partie au numérateur (`numerateur`) ou au dénominateur. */
+function naturePartie(e: ExerciceLimiteH | ExerciceLimiteI | ExerciceLimiteJ | ExerciceLimiteK, numerateur: boolean): NaturePartie {
+  switch (e.famille) {
+    case "H":
+      return numerateur === e.expAuNumerateur ? "exponentielle" : "affine";
+    case "I":
+      return numerateur === e.sinAuNumerateur ? "sinus" : "exponentielle";
+    case "J":
+      return numerateur === e.arcAuNumerateur ? e.arcFn : "exponentielle";
+    case "K":
+      return numerateur === e.expAuNumerateur ? "exponentielle" : "carre";
+  }
+}
+
+const REGLE_DERIVEE: Record<NaturePartie, AideAvecLatex> = {
+  exponentielle: { texte: "Dérivée d'une exponentielle composée (règle de la chaîne) :", latex: "\\left(a^{u(x)}\\right)'=u'(x)\\cdot\\ln a\\cdot a^{u(x)}" },
+  affine: { texte: "Dérivée d'un multiple de $x - x_0$ :", latex: "\\bigl(m(x-x_0)\\bigr)'=m" },
+  sinus: { texte: "Dérivée d'un sinus composé :", latex: "\\bigl(\\sin u(x)\\bigr)'=u'(x)\\cdot\\cos u(x)" },
+  arctan: { texte: "Dérivée d'une arctangente composée :", latex: "\\bigl(\\arctan u(x)\\bigr)'=\\dfrac{u'(x)}{1+u(x)^{2}}" },
+  arcsin: { texte: "Dérivée d'un arcsinus composé :", latex: "\\bigl(\\arcsin u(x)\\bigr)'=\\dfrac{u'(x)}{\\sqrt{1-u(x)^{2}}}" },
+  carre: { texte: "Dérivée d'un multiple de $(x - x_0)^2$ :", latex: "\\bigl(m(x-x_0)^{2}\\bigr)'=2m(x-x_0)" },
+};
+
+function aideLHopital1(phase: PhaseLimiteExponentielle, e: ExerciceLimiteH | ExerciceLimiteI | ExerciceLimiteJ | ExerciceLimiteK): AideAvecLatex {
+  const role = roleLHopital(phase);
+  const x0 = formatPointLimite(e.x0);
+  if (role === "forme") return { texte: `Remplace x par ${x0.replace("-", "−")} dans le numérateur, puis dans le dénominateur, et compare le résultat aux formes indéterminées.`, latex: null };
+  if (role === "conclure")
+    return {
+      texte: "Règle de L'Hôpital : si numérateur et dénominateur tendent tous deux vers 0 (ou vers l'infini), la limite du quotient est celle du quotient des dérivées, si elle existe :",
+      latex: "\\lim_{x\\to a}\\dfrac{f(x)}{g(x)}=\\lim_{x\\to a}\\dfrac{f'(x)}{g'(x)}",
+    };
+  const nature = naturePartie(e, role === "num1" || role === "num2");
+  if (role === "num2" || role === "den2") {
+    if (nature === "carre") return { texte: "La dérivée d'un multiple de $x - x_0$ est une constante :", latex: "\\bigl(2m(x-x_0)\\bigr)'=2m" };
+    return { texte: "Dérive encore : le terme constant disparaît, la dérivée de l'exponentielle suit la même règle :", latex: "\\left(a^{u(x)}\\right)'=u'(x)\\cdot\\ln a\\cdot a^{u(x)}" };
+  }
+  if (e.famille === "K" && nature === "exponentielle") return { texte: "Dérive terme à terme ; la dérivée de l'exponentielle composée est :", latex: "\\left(a^{u(x)}\\right)'=u'(x)\\cdot\\ln a\\cdot a^{u(x)}" };
+  return REGLE_DERIVEE[nature];
+}
+
+function aideLHopital2(phase: PhaseLimiteExponentielle, e: ExerciceLimiteH | ExerciceLimiteI | ExerciceLimiteJ | ExerciceLimiteK): AideAvecLatex {
+  const role = roleLHopital(phase);
+  const parties = partiesLHopital(e);
+  const x0 = formatPointLimite(e.x0);
+  if (role === "forme") return { texte: "Ici, le numérateur et le dénominateur sont :", latex: `f(x)=${parties.f},\\qquad g(x)=${parties.g}` };
+  if (role === "num1") return { texte: "Ici, le numérateur à dériver est :", latex: `f(x)=${parties.f}` };
+  if (role === "den1") return { texte: "Ici, le dénominateur à dériver est :", latex: `g(x)=${parties.g}` };
+  if (role === "num2") return { texte: "Ici, la dérivée première du numérateur, à dériver encore, est :", latex: `f'(x)=${parties.f1}` };
+  if (role === "den2") return { texte: "Ici, la dérivée première du dénominateur, à dériver encore, est :", latex: `g'(x)=${parties.g1}` };
+  const num = e.famille === "K" ? parties.f2 : parties.f1;
+  const den = e.famille === "K" ? parties.g2 : parties.g1;
+  return { texte: `Ici, remplace x par ${x0.replace("-", "−")} dans le quotient des dérivées${e.famille === "K" ? " secondes" : ""} :`, latex: `\\dfrac{${num}}{${den}}` };
+}
+
 export function aideNiveau1(phase: PhaseLimiteExponentielle, exercice: ExerciceLimiteExponentielle): AideAvecLatex {
   switch (exercice.famille) {
     case "A":
@@ -856,13 +814,13 @@ export function aideNiveau1(phase: PhaseLimiteExponentielle, exercice: ExerciceL
     case "G":
       return aideG1(phase as "gCombiner" | "gOrdre1" | "gConclure");
     case "H":
-      return aideH1(phase as "hForme" | "hNumerateur" | "hDenominateur" | "hConclure", exercice);
+      return aideLHopital1(phase, exercice);
     case "I":
-      return aideI1(phase as "iForme" | "iNumerateur" | "iDenominateur" | "iConclure", exercice);
+      return aideLHopital1(phase, exercice);
     case "J":
-      return aideJ1(phase as "jForme" | "jNumerateur" | "jDenominateur" | "jConclure", exercice);
+      return aideLHopital1(phase, exercice);
     case "K":
-      return aideK1(phase as "kForme" | "kNumerateur1" | "kDenominateur1" | "kNumerateur2" | "kDenominateur2" | "kConclure", exercice);
+      return aideLHopital1(phase, exercice);
     case "L":
       return aideL1(phase as "lReformuler" | "lConclure", exercice);
     case "N":
@@ -881,13 +839,13 @@ export function aideNiveau2(phase: PhaseLimiteExponentielle, exercice: ExerciceL
     case "G":
       return aideG2(phase as "gCombiner" | "gOrdre1" | "gConclure");
     case "H":
-      return aideH2(phase as "hForme" | "hNumerateur" | "hDenominateur" | "hConclure", exercice);
+      return aideLHopital2(phase, exercice);
     case "I":
-      return aideI2(phase as "iForme" | "iNumerateur" | "iDenominateur" | "iConclure", exercice);
+      return aideLHopital2(phase, exercice);
     case "J":
-      return aideJ2(phase as "jForme" | "jNumerateur" | "jDenominateur" | "jConclure", exercice);
+      return aideLHopital2(phase, exercice);
     case "K":
-      return aideK2(phase as "kForme" | "kNumerateur1" | "kDenominateur1" | "kNumerateur2" | "kDenominateur2" | "kConclure", exercice);
+      return aideLHopital2(phase, exercice);
     case "L":
       return aideL2(phase as "lReformuler" | "lConclure", exercice);
     case "N":

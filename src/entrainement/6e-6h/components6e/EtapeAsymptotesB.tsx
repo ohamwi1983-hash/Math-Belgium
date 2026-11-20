@@ -8,13 +8,15 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesExpo, MESSAGES_ILLISIBLE_EXPO, MessageRetour, tousLisibles, useTentativeLisible } from "./RetourSaisieExpo";
+import type { PropsRetourChamp } from "./RetourSaisieExpo";
 
 interface AideAvecLatex {
   texte: string;
   latex: string | null;
 }
 
-interface Props {
+interface Props extends PropsRetourChamp<ReponseAsymptotes> {
   enonceLatex: string;
   p: number;
   aideNiveau1: AideAvecLatex;
@@ -37,16 +39,17 @@ interface Props {
  * horizontale (texte libre, commune aux deux infinis). `App6gen11.tsx` doit le rendre avec
  * `key={indexExercice}`. Le domaine et les limites confirmés aux 2 écrans précédents sont listés
  * dans le récapitulatif "Ce qu'on sait déjà" (`ui6e/recapitulatifEtudeFonctionExponentielle.ts`). */
-export function EtapeAsymptotesB({ enonceLatex, p, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeAsymptotesB({ enonceLatex, p, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, lire, messageIllisible, cible}: Props) {
   const [cote, setCote] = useState<"plus" | "moins" | null>(null);
   const [texteHorizontale, setTexteHorizontale] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useTentativeLisible<ReponseAsymptotes>();
 
   const complet = cote !== null && texteHorizontale.trim() !== "";
 
   function valider() {
     if (!complet || cote === null) return;
-    onValider({ type: "b", cote, texteHorizontale });
+    retour.tenter({ type: "b", cote, texteHorizontale }, tousLisibles(lire, [texteHorizontale]), onValider);
   }
 
   return (
@@ -80,32 +83,17 @@ export function EtapeAsymptotesB({ enonceLatex, p, aideNiveau1, aideNiveau2, ten
       <ApercuExpressionLatex texte={texteHorizontale} />
       <div className="field">
         <label className="field-label field-label-minuscule">Équation de l'asymptote horizontale</label>
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texteHorizontale} placeholder="ex : y=1" onChange={(e) => setTexteHorizontale(e.target.value)} />
+        <input type="text" className={`text-input ${montrerErreurs && retour.soumise?.type === "b" && texteHorizontale === retour.soumise.texteHorizontale ? "is-erronee" : ""}`} value={texteHorizontale} placeholder="ex : y = 3" onChange={(e) => setTexteHorizontale(e.target.value)} />
       </div>
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesExpo aide1={aideNiveau1} aide2={aideNiveau2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour illisible={retour.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={retour.soumise !== null && cible ? cible(retour.soumise) : null} texteIllisible={messageIllisible ?? MESSAGES_ILLISIBLE_EXPO.expressionX} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

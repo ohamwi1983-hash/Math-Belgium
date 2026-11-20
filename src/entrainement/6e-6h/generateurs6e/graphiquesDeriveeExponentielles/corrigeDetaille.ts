@@ -104,7 +104,7 @@ function etapeSelection(e: ExerciceGraphiqueDeriveeExponentielle, sq: string, av
   }
   return [
     utilise(sq, [
-      ...(avecDerivee ? [texte("On part de la dérivée obtenue à l'étape précédente, puis ")] : [texte(`On calcule f′ ${COURS_DERIVEE}, puis `)]),
+      ...(avecDerivee ? [texte("On part de la dérivée f′ calculée au point a), puis ")] : [texte(`On calcule f′ ${COURS_DERIVEE}, puis `)]),
       texte(`on relève ses caractéristiques (zéros, signe, extremum, limites, parité) et on cherche le graphique qui les a toutes ${COURS_GRAPHIQUE}.`),
     ]),
     calcul(sq, lignes),
