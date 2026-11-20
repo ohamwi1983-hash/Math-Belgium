@@ -1657,3 +1657,106 @@ table.feature-table td { white-space: normal; }
 .admin-eval-choix-points { margin-left: auto; flex: none; display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-soft); }
 .admin-eval-choix-points .admin-eval-points-input { width: 64px; }
 .admin-eval-points-somme { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
+
+/* ---------- comptes professeurs (connexion, inscription, profil, coffre, administration) ----------
+ * Pages réservées, mêmes jetons que le reste du site (clair / sombre). Champs à 16 px minimum :
+ * Safari iOS zoome sur un champ plus petit. Cibles tactiles ≥ 44 px (iPhone 13). */
+.site-header-inner.avec-compte { flex-wrap: wrap; row-gap: 8px; }
+.site-header-inner.avec-compte .breadcrumb { flex: 1 1 auto; text-align: right; }
+.menu-compte { position: relative; margin-left: auto; }
+.menu-compte-lien, .menu-compte-bouton {
+  font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft); text-decoration: none;
+  background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer;
+  min-height: 36px; display: inline-flex; align-items: center; gap: 4px; margin-left: auto;
+}
+.menu-compte-lien:hover, .menu-compte-bouton:hover { color: var(--accent-ink); border-color: var(--accent-soft-line); }
+.menu-compte-lien:focus-visible, .menu-compte-bouton:focus-visible, .menu-compte-liste a:focus-visible, .menu-compte-liste button:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+.menu-compte-liste {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 50; min-width: 220px;
+  display: flex; flex-direction: column; padding: 6px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+}
+.menu-compte-liste a, .menu-compte-liste button {
+  display: block; text-align: left; padding: 10px 12px; border-radius: 6px; color: var(--ink);
+  text-decoration: none; font: inherit; font-size: 0.95rem; background: none; border: 0; cursor: pointer; min-height: 44px;
+}
+.menu-compte-liste a:hover, .menu-compte-liste button:hover:not(:disabled) { background: var(--accent-soft); color: var(--accent-ink); }
+.menu-compte-liste button:disabled { opacity: 0.5; cursor: wait; }
+.menu-compte-nom { margin: 4px 12px 6px; font-size: 0.8rem; color: var(--ink-faint); font-family: var(--mono); }
+
+.page-compte { max-width: 680px; margin: 0 auto; padding: 48px 24px 96px; }
+@media (max-width: 480px) { .page-compte { padding: 32px 16px 72px; } }
+.compte-tete { margin-bottom: 28px; }
+.compte-intro { color: var(--ink-soft); font-size: 0.98rem; }
+.compte-chargement, .compte-vide { color: var(--ink-faint); font-style: italic; }
+.compte-form { display: flex; flex-direction: column; gap: 16px; max-width: 520px; }
+.compte-form-ligne { max-width: none; }
+.compte-champ { display: flex; flex-direction: column; gap: 6px; }
+.compte-champ label { font-weight: 700; font-size: 0.95rem; color: var(--ink); }
+.compte-champ input {
+  font: inherit; font-size: 16px; padding: 11px 12px; min-height: 46px; width: 100%;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+}
+.compte-champ input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.compte-champ input[aria-invalid="true"] { border-color: var(--bad); }
+.compte-champ-mdp { display: flex; gap: 8px; align-items: stretch; }
+.compte-champ-mdp input { flex: 1 1 auto; min-width: 0; }
+.compte-aide { margin: 0; font-size: 0.85rem; color: var(--ink-faint); }
+.compte-erreur-champ { margin: 0; font-size: 0.92rem; color: var(--bad); font-weight: 600; }
+.compte-message { margin: 0 0 12px; color: var(--good); font-weight: 600; }
+.compte-bouton, .compte-bouton-secondaire {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px;
+  border-radius: var(--radius); font: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+  text-decoration: none; transition: background-color .15s ease;
+}
+.compte-bouton { border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent-ink); align-self: flex-start; }
+.compte-bouton:hover:not(:disabled) { background: var(--accent-soft-line); }
+.compte-bouton-secondaire { border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 600; }
+.compte-bouton-secondaire:hover:not(:disabled) { border-color: var(--accent-soft-line); color: var(--accent-ink); }
+.compte-bouton:disabled, .compte-bouton-secondaire:disabled { opacity: 0.55; cursor: not-allowed; }
+.compte-bouton:focus-visible, .compte-bouton-secondaire:focus-visible, .compte-bouton-lien:focus-visible, .page-compte a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.compte-bouton-lien {
+  background: none; border: 0; padding: 6px 4px; min-height: 44px; font: inherit; font-size: 0.92rem;
+  color: var(--accent-ink); text-decoration: underline; cursor: pointer;
+}
+.compte-danger { color: var(--bad); border-color: var(--bad); }
+.compte-bouton.compte-danger { background: var(--bad-soft); }
+.compte-liens { display: flex; flex-direction: column; gap: 4px; margin: 0; font-size: 0.95rem; }
+.compte-encadre { padding: 18px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); margin: 0 0 20px; }
+.compte-encadre p:last-child { margin-bottom: 0; }
+.compte-encadre.compte-succes { border-color: var(--good); background: var(--good-soft); }
+.compte-encadre.compte-erreur { border-color: var(--bad); background: var(--bad-soft); }
+.compte-titre-encadre { font-size: 1.15rem; margin-bottom: 8px; }
+.compte-sections { display: flex; flex-direction: column; gap: 36px; }
+.compte-section h2 { font-size: 1.35rem; margin-bottom: 12px; }
+.compte-section h3 { font-size: 1.1rem; margin: 0; }
+.compte-sous-form { margin-top: 20px; padding-top: 16px; border-top: 1px dashed var(--line); }
+.compte-compte { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-faint); font-weight: 400; }
+.compte-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.compte-liste-item {
+  display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between;
+  padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.compte-liste-edition { display: block; }
+.compte-liste-texte { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-width: 0; flex: 1 1 240px; }
+.compte-detail { flex-basis: 100%; font-size: 0.85rem; color: var(--ink-faint); overflow-wrap: anywhere; }
+.compte-badge {
+  font-family: var(--mono); font-size: 0.72rem; padding: 2px 8px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent-ink); white-space: nowrap;
+}
+.compte-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.compte-zone-danger { margin-top: 16px; padding: 12px 14px; border: 1px solid var(--bad); border-radius: var(--radius); }
+.compte-zone-danger summary { cursor: pointer; color: var(--bad); font-weight: 700; min-height: 32px; }
+.compte-zone-danger p { margin: 10px 0; font-size: 0.92rem; color: var(--ink-soft); }
+.compte-grille-champs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+.admin-code { font-family: var(--mono); font-weight: 700; letter-spacing: 0.04em; }
+.admin-codes-nouveaux { list-style: none; padding: 0; margin: 8px 0 0; }
+.admin-codes-nouveaux code { font-family: var(--mono); font-size: 1.05rem; font-weight: 700; letter-spacing: 0.05em; }
+.admin-etat-utilise { background: var(--surface-2); color: var(--ink-soft); white-space: normal; }
+.admin-etat-revoque, .admin-etat-expire { background: var(--bad-soft); color: var(--bad); }
+.admin-etat-valide { background: var(--good-soft); color: var(--good); }
+/* Sélecteur d'école du panneau de conception. */
+.admin-eval-tf-ecole { min-width: 160px; max-width: 280px; }
+.admin-eval-ecole-unique { font-size: 0.85rem; padding: 7px 0; }

@@ -1,9 +1,35 @@
 import { useState, type FormEvent } from 'react'
 import { SiteHeader } from '../components/SiteHeader'
 import { EvaluationGeneratorPanel } from '../components/admin/EvaluationGeneratorPanel'
+import { PageCompte, PageReservee } from '../components/compte/PageReservee'
 import { checkAdminPassword, isAdminSessionAuthed, markAdminSessionAuthed } from '../lib/adminAuth'
+import { supabaseConfigure } from '../lib/supabase'
+import { usePageNonIndexee } from '../lib/useDocumentMeta'
+import { AdminComptes } from './AdminComptes'
 
+/**
+ * `/admin`.
+ * - Comptes configurés (Supabase) : administration des comptes (codes d'invitation, professeurs),
+ *   réservée à `profils.est_admin` — remplace le garde-fou `lib/adminAuth.ts`. Le panneau des
+ *   évaluations est sur `/evaluation` pour tous les professeurs connectés.
+ * - Sans configuration : comportement historique INCHANGÉ (mot de passe local, puis panneau des
+ *   évaluations), pour ne rien casser tant que Supabase n'est pas en service.
+ */
 export function AdminPage() {
+  if (supabaseConfigure()) {
+    return (
+      <PageCompte titre="Administration" large>
+        <PageReservee admin>
+          <AdminComptes />
+        </PageReservee>
+      </PageCompte>
+    )
+  }
+  return <AdminHistorique />
+}
+
+function AdminHistorique() {
+  usePageNonIndexee('Administration')
   const [authed, setAuthed] = useState(() => isAdminSessionAuthed())
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)

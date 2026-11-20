@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { HomePage } from './routes/HomePage'
 import { ChapterRoute } from './routes/ChapterRoute'
 import { EntrainementPage } from './routes/EntrainementPage'
+import { CompteProvider } from './lib/compteContexte'
 
 /** `AdminPage`/`ExercicePage`/`ChapterExercicePage` rendent toutes trois `EvaluationGeneratorPanel`,
  * qui embarque désormais `EVALUATION_ADAPTER_REGISTRY_4E` (55 adaptateurs + tout le pipeline
@@ -13,15 +14,30 @@ import { EntrainementPage } from './routes/EntrainementPage'
 const AdminPage = lazy(() => import('./routes/AdminPage').then((m) => ({ default: m.AdminPage })))
 const ExercicePage = lazy(() => import('./routes/ExercicePage').then((m) => ({ default: m.ExercicePage })))
 const ChapterExercicePage = lazy(() => import('./routes/ChapterExercicePage').then((m) => ({ default: m.ChapterExercicePage })))
+const EvaluationPage = lazy(() => import('./routes/EvaluationPage').then((m) => ({ default: m.EvaluationPage })))
+/** Pages de compte (Supabase, `.claude/rules/comptes.md`) : chargées à la demande, jamais pré-rendues
+ * (absentes de `scripts/routes.mjs`), non indexées (`usePageNonIndexee`). */
+const ConnexionPage = lazy(() => import('./routes/ConnexionPage').then((m) => ({ default: m.ConnexionPage })))
+const InscriptionPage = lazy(() => import('./routes/InscriptionPage').then((m) => ({ default: m.InscriptionPage })))
+const MotDePassePage = lazy(() => import('./routes/MotDePassePage').then((m) => ({ default: m.MotDePassePage })))
+const ProfilPage = lazy(() => import('./routes/ProfilPage').then((m) => ({ default: m.ProfilPage })))
+const CoffrePage = lazy(() => import('./routes/CoffrePage').then((m) => ({ default: m.CoffrePage })))
 
 function App() {
   return (
     <BrowserRouter>
+      <CompteProvider>
       <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/exercice" element={<ExercicePage />} />
+          <Route path="/evaluation" element={<EvaluationPage />} />
+          <Route path="/connexion" element={<ConnexionPage />} />
+          <Route path="/inscription" element={<InscriptionPage />} />
+          <Route path="/mot-de-passe" element={<MotDePassePage />} />
+          <Route path="/profil" element={<ProfilPage />} />
+          <Route path="/coffre" element={<CoffrePage />} />
           {/* Un seul générateur rapatrié depuis plateforme-maths = une entrée dans
            * `ENTRAINEMENT_REGISTRY` (voir `src/entrainement/registry.ts`), jamais une nouvelle route
            * ici — `EntrainementPage` charge le bon composant à la demande (`React.lazy`), lu depuis
@@ -35,6 +51,7 @@ function App() {
           <Route path="*" element={<HomePage />} />
         </Routes>
       </Suspense>
+      </CompteProvider>
     </BrowserRouter>
   )
 }

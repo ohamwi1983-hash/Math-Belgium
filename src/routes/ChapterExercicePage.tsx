@@ -1,15 +1,19 @@
 import { useParams, Navigate } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { EvaluationGeneratorPanel } from '../components/admin/EvaluationGeneratorPanel'
+import { PageReservee } from '../components/compte/PageReservee'
 import { LEVELS, findChapter } from '../content/chaptersIndex'
+import { usePageNonIndexee } from '../lib/useDocumentMeta'
 
-/** Page `/{levelSlug}/{chapterSlug}/exercices` — même panneau public que `/exercice`
- * (`ExercicePage.tsx`), mais pré-verrouillé sur LE chapitre dont vient l'élève (lien « Générer une
+/** Page `/{levelSlug}/{chapterSlug}/exercices` — même panneau que `/exercice`
+ * (`ExercicePage.tsx`), mais pré-verrouillé sur LE chapitre dont vient le visiteur (lien « Générer une
  * feuille d'exercices » en bas de `ChapterPage.tsx`) : pas de sélecteur niveau/heures/chapitre à
- * re-choisir, voir `EvaluationGeneratorPanel`'s prop `verrouille`. */
+ * re-choisir, voir `EvaluationGeneratorPanel`'s prop `verrouille`. Réservée aux professeurs
+ * connectés (comptes) : sans session, redirection vers `/connexion`, puis retour ici. */
 export function ChapterExercicePage() {
   const { levelSlug, chapterSlug } = useParams<{ levelSlug: string; chapterSlug: string }>()
   const chapter = levelSlug && chapterSlug ? findChapter(levelSlug, chapterSlug) : undefined
+  usePageNonIndexee(chapter ? `Feuille d'exercices — ${chapter.title}` : "Feuille d'exercices")
 
   if (!chapter || !levelSlug || !chapterSlug) return <Navigate to="/" replace />
 
@@ -30,7 +34,9 @@ export function ChapterExercicePage() {
           <h1 className="chapter-title">Feuille d'exercices — {chapter.title}</h1>
         </header>
 
-        <EvaluationGeneratorPanel mode="exercice" verrouille={{ levelSlug, chapitreSlug: chapterSlug }} />
+        <PageReservee>
+          <EvaluationGeneratorPanel mode="exercice" verrouille={{ levelSlug, chapitreSlug: chapterSlug }} />
+        </PageReservee>
       </div>
     </>
   )

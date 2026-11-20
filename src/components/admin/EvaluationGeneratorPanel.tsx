@@ -1,4 +1,9 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import type { CartoucheEcole } from '../../entrainement/export/cartouche'
+import { estConnecteActif, useCompte } from '../../lib/compteContexte'
+import { enregistrerPlanCoffre, importerPlansLocaux, lirePlanCoffre, listerPlans, supprimerPlanCoffre, type PlanCoffre } from '../../lib/compteDonnees'
+import { cartoucheDepuisCompte, ecoleParDefaut, messageErreur, plansLocauxAImporter } from '../../lib/compteValidation'
 import { LEVELS } from '../../content/chaptersIndex'
 import type { ChapterContent } from '../../content/types'
 import { declencherTelechargement } from '../../entrainement/export/telechargerBlob'
@@ -319,6 +324,18 @@ export function EvaluationGeneratorPanel({
    * `urlGeneree` : la génération locale ne produit aucune URL/redirection, juste des téléchargements
    * directs dans l'onglet courant. */
   const [genereLocalementCompte, setGenereLocalementCompte] = useState<number | null>(null)
+
+  /** Comptes professeurs : session, profil, écoles (`lib/compteContexte.tsx`). Connecté : école
+   * choisie (par défaut celle du profil) + nom du professeur → cartouche des copies ; coffre du
+   * compte au lieu du stockage du navigateur. Sans session (Supabase non configuré, `/admin`
+   * historique) : cartouche historique et stockage local, comme avant. */
+  const compte = useCompte()
+  const connecte = estConnecteActif(compte)
+  const [ecoleId, setEcoleId] = useState<string | null>(null)
+  const ecoleChoisie = connecte ? (compte.ecoles.find((e) => e.id === ecoleId) ?? ecoleParDefaut(compte.ecoles)) : null
+  const cartouche: CartoucheEcole | undefined = connecte ? cartoucheDepuisCompte(compte.profil, ecoleChoisie) : undefined
+  const [coffre, setCoffre] = useState<PlanCoffre[] | null>(null)
+  const [params, setParams] = useSearchParams()
 
   const levelSlug = resoudreLevelSlug(niveau, heures)
   const niveauEntry = levelSlug ? LEVELS.find((l) => l.slug === levelSlug) : undefined
@@ -701,7 +718,11 @@ export function EvaluationGeneratorPanel({
     for (const doc of docs) declencherTelechargement(doc.blob, nomFichier(plan, doc))
   }
 
-  async function rendrePlan(plan: PlanDocument, nouveau: boolean) {
+  async function rendrePlan(planBrut: PlanDocument, nouveau: boolean, cartoucheForce?: CartoucheEcole) {
+    // Connecté : le cartouche (école choisie, nom du profil) est celui du panneau, même pour un plan
+    // rechargé (mêmes exercices, école du moment). Sans session : plan tel quel.
+    const cartoucheRendu = cartoucheForce ?? cartouche
+    const plan: PlanDocument = cartoucheRendu ? { ...planBrut, entete: { ...planBrut.entete, cartouche: cartoucheRendu } } : planBrut
     setErreur(null)
     setMessage(null)
     setUrlGeneree(null)
@@ -775,10 +796,18 @@ export function EvaluationGeneratorPanel({
 
   /** Recharge un plan enregistré : la sélection du panneau ET les graines (mêmes exercices). */
   function chargerPlan(plan: PlanDocument) {
+    // Connecté : l'école enregistrée dans le plan est resélectionnée si elle est toujours dans le profil.
+    let cartoucheCharge: CartoucheEcole | undefined
+    if (connecte) {
+      const c = plan.entete.cartouche
+      const ecole = c ? compte.ecoles.find((e) => e.nom.trim() === c.ecoleNom && e.adresse.trim() === c.ecoleAdresse) : undefined
+      if (ecole) setEcoleId(ecole.id)
+      cartoucheCharge = cartoucheDepuisCompte(compte.profil, ecole ?? ecoleChoisie)
+    }
     // Feuille de remédiation : ses `lignes` sont celles de l'évaluation d'origine — on rend les
     // documents sans toucher à la sélection du panneau.
     if (plan.remediation) {
-      void rendrePlan(plan, false)
+      void rendrePlan(plan, false, cartoucheCharge)
       return
     }
     const nh = resoudreNiveauHeures(plan.levelSlug)
@@ -819,13 +848,95 @@ export function EvaluationGeneratorPanel({
     setDureeExamen(ex.dureeExamen ?? '')
     setSession(ex.session ?? '')
     setConsignesSupplementaires(ex.consignesSupplementaires ?? '')
-    void rendrePlan(plan, false)
+    void rendrePlan(plan, false, cartoucheCharge)
+  }
+
+  // Coffre du compte : chargé dès la connexion.
+  const clientCoffre = connecte ? compte.client : null
+  useEffect(() => {
+    if (!clientCoffre) return
+    let annule = false
+    listerPlans(clientCoffre)
+      .then((liste) => !annule && setCoffre(liste))
+      .catch((e) => !annule && setErreur(messageErreur(e)))
+    return () => {
+      annule = true
+    }
+  }, [clientCoffre])
+
+  // « Charger dans le panneau » depuis /coffre : `?plan=<id>`, lu une fois connecté.
+  const planDemande = params.get('plan')
+  const planDemandeTraite = useRef<string | null>(null)
+  useEffect(() => {
+    if (!clientCoffre || !planDemande || planDemandeTraite.current === planDemande) return
+    planDemandeTraite.current = planDemande
+    lirePlanCoffre(clientCoffre, planDemande)
+      .then((p) => {
+        if (!p) {
+          setErreur('Enregistrement introuvable dans ton coffre.')
+          return
+        }
+        chargerPlan(p.contenu)
+        setMessage(`« ${p.titre} » chargé depuis ton coffre.`)
+        const suivant = new URLSearchParams(params)
+        suivant.delete('plan')
+        setParams(suivant, { replace: true })
+      })
+      .catch((e) => setErreur(messageErreur(e)))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- une seule fois par plan demandé (garde `planDemandeTraite`).
+  }, [clientCoffre, planDemande])
+
+  function choisirEcole(id: string) {
+    setEcoleId(id)
+    const ecole = compte.ecoles.find((e) => e.id === id) ?? null
+    // Documents déjà générés : re-rendus avec la nouvelle école (mêmes exercices, mêmes graines).
+    if (planCourant && connecte) void rendrePlan(planCourant, false, cartoucheDepuisCompte(compte.profil, ecole))
+  }
+
+  /** Liste « Enregistrements » : coffre du compte (connecté) ou stockage du navigateur. */
+  const listeEnregistrements: PlanEnregistre[] = connecte
+    ? (coffre ?? []).map((p) => ({ id: p.id, nom: p.titre, enregistreLe: p.modifie_le, plan: p.contenu }))
+    : enregistrees
+  const locauxAImporter = connecte && coffre ? plansLocauxAImporter(enregistrees, coffre) : []
+
+  async function importerLocaux() {
+    if (!connecte || !coffre) return
+    try {
+      const r = await importerPlansLocaux(compte.client, enregistrees, coffre)
+      setCoffre(await listerPlans(compte.client))
+      setMessage(`${r.importes} enregistrement${r.importes > 1 ? 's importés' : ' importé'} dans ton coffre.`)
+    } catch (e) {
+      setErreur(messageErreur(e))
+    }
+  }
+
+  async function supprimerEnregistrement(id: string) {
+    if (!connecte) {
+      setEnregistrees(supprimerPlanEnregistre(id))
+      return
+    }
+    try {
+      await supprimerPlanCoffre(compte.client, id)
+      setCoffre(await listerPlans(compte.client))
+    } catch (e) {
+      setErreur(messageErreur(e))
+    }
   }
 
   function enregistrerPlanCourant() {
     if (!planCourant) return
     const nom = window.prompt('Nom de cet enregistrement :', planCourant.entete.titre)
     if (!nom) return
+    if (connecte) {
+      const client = compte.client
+      void enregistrerPlanCoffre(client, nom, planCourant)
+        .then(async () => {
+          setCoffre(await listerPlans(client))
+          setMessage(`« ${nom} » enregistré dans ton coffre.`)
+        })
+        .catch((e) => setErreur(messageErreur(e)))
+      return
+    }
     try {
       setEnregistrees(enregistrerPlan(nom, planCourant))
       setMessage(`« ${nom} » enregistré dans ce navigateur.`)
@@ -873,6 +984,8 @@ export function EvaluationGeneratorPanel({
       joindreFormulaire,
       deuxColonnes,
       surtitre: chapitres.length === 1 ? `${niveauLabel} · Chapitre ${chapitres[0].chapterNumber}` : niveauLabel,
+      // Comptes : école choisie + nom du profil (absent sans session : cartouche historique).
+      ...(cartouche ? { cartouche } : {}),
       titreChapitre: chapitres.length === 1 ? chapitres[0].title : undefined,
       urlChapitre: chapitres.length === 1 ? `https://math-belgium.vercel.app/${levelSlug}/${chapitres[0].slug}` : undefined,
       // Examen seulement (une évaluation garde exactement son en-tête d'avant) : textes tels que
@@ -1063,6 +1176,34 @@ export function EvaluationGeneratorPanel({
         </div>
         <span className="admin-eval-divider" />
 
+        {connecte && (
+          <div className="admin-eval-tf admin-eval-tf-ecole">
+            {compte.ecoles.length > 1 ? (
+              <>
+                <label htmlFor="eval-ecole">École</label>
+                <select id="eval-ecole" value={ecoleChoisie?.id ?? ''} onChange={(e) => choisirEcole(e.target.value)}>
+                  {compte.ecoles.map((e) => (
+                    <option key={e.id} value={e.id}>
+                      {e.nom}
+                      {e.par_defaut ? ' (par défaut)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </>
+            ) : (
+              <>
+                <span className="admin-eval-tf-label">École</span>
+                {ecoleChoisie ? (
+                  <span className="admin-eval-ecole-unique">{ecoleChoisie.nom}</span>
+                ) : (
+                  <Link className="admin-eval-ecole-unique" to="/profil">
+                    Ajouter mon école
+                  </Link>
+                )}
+              </>
+            )}
+          </div>
+        )}
         <div className="admin-eval-tf" style={{ width: '4.5em' }}>
           <label htmlFor="eval-heures-semaine">Vol./sem</label>
           <input
@@ -1726,7 +1867,7 @@ export function EvaluationGeneratorPanel({
                   Tout télécharger
                 </button>
                 <button type="button" onClick={enregistrerPlanCourant}>
-                  Enregistrer dans ce navigateur
+                  {connecte ? 'Enregistrer dans mon coffre' : 'Enregistrer dans ce navigateur'}
                 </button>
                 <button type="button" onClick={exporterPlanJson}>
                   Exporter la configuration (JSON)
@@ -1745,11 +1886,19 @@ export function EvaluationGeneratorPanel({
 
           <details className="admin-eval-enregistrees">
             <summary>
-              Enregistrements, import et historique ({enregistrees.length} enregistrement{enregistrees.length > 1 ? 's' : ''})
+              Enregistrements, import et historique ({listeEnregistrements.length} enregistrement{listeEnregistrements.length > 1 ? 's' : ''}
+              {connecte ? ' dans ton coffre' : ''})
             </summary>
-            {enregistrees.length > 0 ? (
+            {connecte && locauxAImporter.length > 0 && (
+              <p className="admin-eval-documents-pied">
+                <button type="button" onClick={() => void importerLocaux()}>
+                  Importer dans mon coffre les {locauxAImporter.length} enregistrement{locauxAImporter.length > 1 ? 's' : ''} de ce navigateur
+                </button>
+              </p>
+            )}
+            {listeEnregistrements.length > 0 ? (
               <ul>
-                {enregistrees.map((e) => (
+                {listeEnregistrements.map((e) => (
                   <li key={e.id} className={remediationId === e.id ? 'admin-eval-enregistree-ouverte' : undefined}>
                     <span>
                       {e.nom}{' '}
@@ -1772,7 +1921,12 @@ export function EvaluationGeneratorPanel({
                           Feuille de remédiation
                         </button>
                       )}
-                      <button type="button" onClick={() => setEnregistrees(supprimerPlanEnregistre(e.id))}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!connecte || window.confirm(`Supprimer « ${e.nom} » de ton coffre ?`)) void supprimerEnregistrement(e.id)
+                        }}
+                      >
                         Supprimer
                       </button>
                     </span>
@@ -1826,7 +1980,7 @@ export function EvaluationGeneratorPanel({
                 ))}
               </ul>
             ) : (
-              <p className="admin-eval-variante-label">Aucun enregistrement dans ce navigateur.</p>
+              <p className="admin-eval-variante-label">{connecte ? (coffre === null ? 'Chargement du coffre…' : 'Aucun enregistrement dans ton coffre.') : 'Aucun enregistrement dans ce navigateur.'}</p>
             )}
             <p className="admin-eval-documents-pied">
               <button type="button" onClick={() => entreeImport.current?.click()}>
@@ -1855,6 +2009,12 @@ export function EvaluationGeneratorPanel({
             </p>
             <p className="admin-eval-variante-label">
               L'historique évite de redonner un exercice déjà imprimé depuis ce navigateur : un tirage identique est automatiquement retiré.
+              {connecte && (
+                <>
+                  {' '}
+                  Gérer le coffre (renommer, dupliquer) : <Link to="/coffre">mon coffre</Link>.
+                </>
+              )}
             </p>
           </details>
         </>

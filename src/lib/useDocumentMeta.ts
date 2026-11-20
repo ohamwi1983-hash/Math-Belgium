@@ -122,3 +122,22 @@ export function useDocumentMeta({ title, description, path, type, image, jsonLd 
     }
   }, [title, description, path, type, image, jsonLd])
 }
+
+/** Pages réservées (connexion, profil, coffre, panneau de conception, administration) : titre de
+ * l'onglet et `<meta name="robots" content="noindex, nofollow">`, retirée en quittant la page. Ces
+ * pages ne sont pas pré-rendues (absentes de `scripts/routes.mjs`) ni dans le sitemap. */
+export function usePageNonIndexee(titre: string) {
+  useEffect(() => {
+    const titrePrecedent = document.title
+    document.title = `${titre} — Chapitres de maths`
+    const meta = document.createElement('meta')
+    meta.setAttribute('name', 'robots')
+    meta.setAttribute('content', 'noindex, nofollow')
+    meta.setAttribute('data-page-reservee', '')
+    document.head.appendChild(meta)
+    return () => {
+      meta.remove()
+      document.title = titrePrecedent
+    }
+  }, [titre])
+}
