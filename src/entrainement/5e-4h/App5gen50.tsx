@@ -8,10 +8,9 @@ import { diagnostiquerCorrection, verifierDescription, verifierLigne } from "./m
 import { TENTATIVES_CHAMP, TENTATIVES_CHOIX } from "./moteur5e/sessionEcransTrig";
 import { CONSIGNE_GENERALE, TITRES_ECRANS, aideSaisie, aidesEcran, consignesEcrans, descriptionFragments, enonceExercice, lignesCopie, prefixeChamp, reponseFragments } from "./ui5e/formatDetectiveTrig";
 import { CoqueTrig5e } from "./components5e/CoqueTrig5e";
-import { EtapeChampsTrig5e } from "./components5e/EtapesTrig5e";
+import { EtapeChampsTrig5e, SaisieTrig } from "./components5e/EtapesTrig5e";
 import { RenduFragments } from "../4e/components/RenduFragments";
 import { CopieEleve, EtapeDescriptionErreur, EtapeLigneFausse } from "../4e/components/EtapesDetectiveErreurs";
-import { saisieEnLatex } from "../4e/ui/historiqueProgression";
 
 /**
  * 5gen50 — « Détective d'erreurs : trigonométrie » (5e, chapitre 2, section `modeliser`, processus 3
@@ -103,7 +102,7 @@ export function App5gen50() {
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             diagnostiquer={(v) => diagnostiquerCorrection(e, v[0]!)}
-            onValider={(correct, v) => conclure(correct, <p style={{ margin: 0 }}>{saisieEnLatex(v[0]!)}</p>)}
+            onValider={(correct, v) => conclure(correct, <p style={{ margin: 0 }}><SaisieTrig texte={v[0]!} /></p>)}
             validation={validation}
             idChamp="detective-trig-champ"
           />

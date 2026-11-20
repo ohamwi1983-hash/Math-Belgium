@@ -76,6 +76,43 @@ export function lireListeTrig(texte: string): LectureNombre[] | null {
   return res;
 }
 
+/** Un morceau sans « / » de niveau 0 → LaTeX (π, √, virgule, « × »). */
+function morceauLatex(s: string): string {
+  return s
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/(sqrt|racine)\s*\(([^()]*)\)/gi, "\\sqrt{$2}")
+    .replace(/√\s*\(([^()]*)\)/g, "\\sqrt{$1}")
+    .replace(/√\s*(\d+(?:[.,]\d+)?|π|pi)/g, "\\sqrt{$1}")
+    .replace(/pi|π/gi, "\\pi ")
+    .replace(/\*/g, "")
+    .replace(/×/g, "\\times ")
+    .replace(/(\d),(\d)/g, "$1{,}$2")
+    .replace(/(\d)\.(\d)/g, "$1{,}$2")
+    .trim();
+}
+
+/**
+ * Aperçu LaTeX d'une saisie de 5gen50–53 (« 5π/6 » → \dfrac{5\pi}{6}, « −√3/2 », « S = {π/6 ; 5π/6} »).
+ * `null` si la saisie n'est pas lisible : jamais un aperçu trompeur. Ne vérifie rien.
+ */
+export function saisieTrigVersLatex(texte: string): string | null {
+  const brut = normaliserSigneMoins(texte).trim();
+  if (brut === "") return null;
+  const corps = brut.replace(/^[^={]*[=≈]/, "").trim().replace(/^\{/, "").replace(/\}$/, "");
+  const morceaux = corps.split(/\s*;\s*/);
+  const latex: string[] = [];
+  for (const m of morceaux) {
+    if (!lireNombreTrig(m)) return null;
+    const signe = m.trim().startsWith("-") ? "-" : "";
+    const sans = signe ? m.trim().slice(1) : m.trim();
+    const parts = sans.split("/");
+    if (parts.length === 2 && !/[()]/.test(sans)) latex.push(`${signe}\\dfrac{${morceauLatex(parts[0]!)}}{${morceauLatex(parts[1]!)}}`);
+    else latex.push(`${signe}${morceauLatex(sans)}`);
+  }
+  return morceaux.length > 1 || /\{/.test(brut) ? `\\left\\{${latex.join("\\,;\\,")}\\right\\}` : latex[0]!;
+}
+
 /** Deux réels égaux à 1e-9 près (valeurs exactes calculées en flottant). */
 export function egaux(a: number, b: number): boolean {
   return Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(b));

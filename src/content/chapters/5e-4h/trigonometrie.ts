@@ -701,6 +701,18 @@ export const trigonometrie: ChapterContent = {
           ],
         },
         {
+          kind: 'entrainement',
+          title: 'Angles en radians sur le cercle',
+          generatorId: '5gen51',
+          description: [
+            'Un angle en radians (17π/6, −5π/4, 7π/2…) : ramène-le dans [0 ; 2π[, place son point ' +
+              'image dans le bon quadrant, puis lis les valeurs exactes de cos et sin sur le cercle ' +
+              'quadrillé et calcule tan (ou dis pourquoi elle n\'existe pas).',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 51. Angles en radians sur le cercle »',
+        },
+        {
           kind: 'historique',
           titre: "Le premier catalogue d'étoiles... et les premières tables trigonométriques",
           text:

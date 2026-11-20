@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import { BlocAides } from "../../4e/components/EtapesDetectiveErreurs";
 import { RenduFragments } from "../../4e/components/RenduFragments";
-import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
+import { saisieTrigVersLatex } from "../moteur5e/saisieTrig";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -63,9 +63,23 @@ interface PropsChamps {
 const MESSAGE_ILLISIBLE = "Écriture non reconnue : écris un nombre exact, par exemple 5π/6, −√3/2 ou 1/2. Cette saisie ne compte pas comme une tentative.";
 const MESSAGE_APPROCHEE = "C'est une valeur approchée : donne la valeur exacte (avec π, une fraction ou une racine). Cette saisie ne compte pas comme une tentative.";
 
-function apercuUtile(texte: string): boolean {
-  const s = texte.replace(/^[^=≈]*[=≈]/, "");
-  return /[π√/]|pi|sqrt/i.test(s) && !/[a-oq-zA-OQ-Z]/.test(s.replace(/pi|sqrt/gi, ""));
+
+/** Aperçu KaTeX d'une saisie (π, √, fraction, liste) — rien tant qu'elle est illisible ou qu'elle
+ * n'est qu'un nombre simple (inutile de le répéter). */
+function ApercuTrig({ texte }: { texte: string }) {
+  const latex = saisieTrigVersLatex(texte);
+  if (!latex || /^-?[\d{},]+$/.test(latex)) return null;
+  return (
+    <div className="apercu-expression-latex contenu-conditionnel" style={{ overflowX: "auto", maxWidth: "100%" }}>
+      <Katex expression={latex} />
+    </div>
+  );
+}
+
+/** Saisie rendue en KaTeX pour la fiche d'un écran clos (texte brut si elle n'est pas lisible). */
+export function SaisieTrig({ texte }: { texte: string }) {
+  const latex = saisieTrigVersLatex(texte);
+  return <span>{latex ? <Katex expression={latex} /> : texte}</span>;
 }
 
 export function EtapeChampsTrig5e(p: PropsChamps) {
@@ -102,7 +116,7 @@ export function EtapeChampsTrig5e(p: PropsChamps) {
       <div style={{ display: "grid", gap: 12, margin: "12px 0", minWidth: 0 }}>
         {p.champs.map((c, i) => (
           <div key={i} style={{ display: "grid", gap: 4, minWidth: 0 }}>
-            {apercuUtile(valeurs[i] ?? "") && <ApercuExpressionLatex texte={valeurs[i]!.replace(/^[^=≈]*[=≈]/, "")} />}
+            <ApercuTrig texte={valeurs[i] ?? ""} />
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", minWidth: 0 }}>
               {c.prefixe && (
                 <span style={{ whiteSpace: "nowrap" }}>
