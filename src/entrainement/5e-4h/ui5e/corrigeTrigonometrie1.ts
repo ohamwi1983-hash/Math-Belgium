@@ -335,3 +335,44 @@ export function finaliserCorrige(etapes: EtapeCorrection[]): EtapeCorrection[] {
 export function jf(...morceaux: (string | { l: string })[]): Fragments {
   return morceaux.map((m) => (typeof m === "string" ? texte(m) : latex(m.l)));
 }
+
+// ============================================================================
+// Aire d'un secteur, θ exact (multiple de π) ; coefficient ½r² (5gen12).
+// ============================================================================
+
+/** ½r² écrit comme coefficient : « 72 », « \dfrac{169}{2} ». */
+export function demiCarreLatex(r: number): string {
+  return (r * r) % 2 === 0 ? `${(r * r) / 2}` : `\\dfrac{${r * r}}{2}`;
+}
+
+/** Justification « ½ × 12² = 72 ». */
+export function justifDemiCarre(r: number): Fragments {
+  return jf("on calcule ", { l: `\\frac{1}{2}\\times ${r}^2=${(r * r) % 2 === 0 ? (r * r) / 2 : `\\frac{${r * r}}{2}`}` });
+}
+
+/** A = ½ × r² × θ avec θ = nπ/d exact : substitution, carré, ½r², produit, simplification. */
+export function lignesAireSecteurExacte(gauche: string, r: number, theta: Q, justifSub: string | Fragments): LigneCalcul[] {
+  const r2 = r * r;
+  const demi = q(r2, 2);
+  return sansDoublons([
+    ligne(`${gauche}=\\dfrac{1}{2}\\times ${r}^2\\times ${piQ(theta)}`, justifSub),
+    ligne(`=\\dfrac{1}{2}\\times ${r2}\\times ${piQ(theta)}`, jf("on calcule ", { l: `${r}^2=${r2}` })),
+    ligne(`=${demi.d === 1 ? demi.n : `\\dfrac{${r2}}{2}`}\\times ${piQ(theta)}`, demi.d === 1 ? jf("on calcule ", { l: `\\frac{1}{2}\\times ${r2}=${demi.n}` }) : "on multiplie par ½"),
+    ...lignesProduitPi(demi, theta),
+  ]);
+}
+
+/** a − b (multiples de π, a > b) : réécriture au même dénominateur si besoin, puis la différence. */
+export function lignesDifferencePi(a: Q, b: Q): LigneCalcul[] {
+  const lignes: LigneCalcul[] = [];
+  if (a.d !== b.d) {
+    const d = (a.d * b.d) / pgcd(a.d, b.d);
+    lignes.push(ligne(`=${piBrut(a.n * (d / a.d), d)}-${piBrut(b.n * (d / b.d), d)}`, "même dénominateur"));
+  }
+  const diff = qSub(a, b);
+  const d = (a.d * b.d) / pgcd(a.d, b.d);
+  const brut = a.n * (d / a.d) - b.n * (d / b.d);
+  lignes.push(ligne(`=${piBrut(brut, d)}`, "on soustrait"));
+  if (brut !== diff.n || d !== diff.d) lignes.push(ligne(`=${piQ(diff)}`, `on simplifie par ${pgcd(brut, d)}`));
+  return sansDoublons(lignes);
+}
