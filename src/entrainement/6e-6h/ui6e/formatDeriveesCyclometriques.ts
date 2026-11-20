@@ -278,7 +278,7 @@ export function texteAideDBrutNiveau2(e: ExerciceDeriveeD): AideAvecLatex {
 
 export function texteAideDSimplifieeNiveau1(): AideAvecLatex {
   return {
-    texte: "Identité NOUVELLE à connaître : pour tout u∈[-1;1],",
+    texte: "Identité NOUVELLE à connaître : pour tout u ∈ [−1 ; 1],",
     latex: "\\arcsin(u) + \\arccos(u) = \\dfrac{\\pi}{2}",
   };
 }

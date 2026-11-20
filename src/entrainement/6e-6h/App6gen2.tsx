@@ -11,11 +11,22 @@ import type { EtatSessionFonctionsCyclometriques } from "./moteur6e/typesFonctio
 import { Katex } from "./components/Katex";
 import { EtapeFonctionsCyclometriques } from "./components6e/EtapeFonctionsCyclometriques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeFonctionsCyclometriques, resultatFonctionsCyclometriquesLatex } from "./generateurs6e/fonctionsCyclometriques/corrigeDetaille";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionFonctionsCyclometriques {
   return demarrerSessionFonctionsCyclometriques(REGLAGES_DEMO, genererExerciceFonctionsCyclometriques);
+}
+
+/** Première session : `?code=XXXXXX` (QR code d'une feuille) rouvre l'exercice imprimé — mêmes
+ * fonctions de tirage que l'adaptateur d'export, comme `App6gen14.tsx`. */
+function sessionInitiale(): EtatSessionFonctionsCyclometriques {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionFonctionsCyclometriques(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceFonctionsCyclometriques, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
 }
 
 /** État tenu en attente dès que l'écran unique se termine (bonne réponse, ou tentatives
@@ -34,7 +45,7 @@ interface TransitionEnAttente {
  * `resultats` grandit (= aucune machinerie de phase à surveiller).
  */
 export function App6gen2() {
-  const [etat, setEtat] = useState<EtatSessionFonctionsCyclometriques>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionFonctionsCyclometriques>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionFonctionsCyclometriques) {
@@ -67,7 +78,9 @@ export function App6gen2() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: exercice.existe ? <Katex expression={exercice.valeurLatex as string} /> : "N'existe pas",
+        reponseAttendue: exercice.existe ? <Katex expression={resultatFonctionsCyclometriquesLatex(exercice) as string} /> : "N'existe pas",
+        // Corrigé détaillé « comme au tableau » (source unique avec le papier) — écran unique « a ».
+        corrigeDetaille: <CorrigeDetailleEcran etapes={correctionDetailleeFonctionsCyclometriques(exercice)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

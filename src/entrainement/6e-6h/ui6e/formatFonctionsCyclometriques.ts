@@ -45,7 +45,7 @@ export function formatExpressionLatex(exercice: ExerciceFonctionsCyclometriques)
 
 function phraseDomaine(arcfonction: Arcfonction, sujet: string): string {
   if (arcfonction === "arctan") return "arctan est définie pour tout nombre réel : aucune condition de domaine à vérifier ici.";
-  return `Vérifie que ${sujet} appartient à l'intervalle [-1;1] (domaine de ${NOM_FRANCAIS[arcfonction]}).`;
+  return `Vérifie que ${sujet} appartient à l'intervalle [−1 ; 1] (domaine de ${NOM_FRANCAIS[arcfonction]}).`;
 }
 
 /** Combinaisons `tan∘arccos`/`tan∘arcsin` SEULES à avoir une 2e condition (angle intermédiaire =
@@ -83,17 +83,17 @@ export function aideNiveau2(exercice: ExerciceFonctionsCyclometriques): AideAvec
   switch (exercice.variante) {
     case "directe": {
       if (exercice.arcfonction === "arctan") return { texte: "arctan est toujours définie, quelle que soit la valeur de départ : la condition est automatiquement vérifiée.", latex: null };
-      return { texte: "Le nombre de départ appartient bien à l'intervalle [-1;1] :", latex: exercice.nombreLatex };
+      return { texte: "Le nombre de départ appartient bien à l'intervalle [−1 ; 1] :", latex: exercice.nombreLatex };
     }
     case "arcTrig": {
       if (exercice.arcfonction === "arctan") return { texte: "arctan est toujours définie, quelle que soit la valeur intermédiaire : la condition est automatiquement vérifiée.", latex: null };
       const valeurIntermediaire = exercice.theta[exercice.trigfonction] as ValeurExacte; // jamais null (garanti par la génération)
       const dans = exercice.existe ? "appartient bien" : "n'appartient PAS";
-      return { texte: `La valeur intermédiaire calculée ${dans} à l'intervalle [-1;1] :`, latex: valeurIntermediaire.latex };
+      return { texte: `La valeur intermédiaire calculée ${dans} à l'intervalle [−1 ; 1] :`, latex: valeurIntermediaire.latex };
     }
     case "trigArc": {
       if (exercice.causeInexistence === "horsDomaine") {
-        return { texte: "Le nombre de départ n'appartient PAS à l'intervalle [-1;1] :", latex: exercice.nombreLatex };
+        return { texte: "Le nombre de départ n'appartient PAS à l'intervalle [−1 ; 1] :", latex: exercice.nombreLatex };
       }
       // à partir d'ici, le nombre de départ est DANS le domaine.
       if (aUneSecondeCondition(exercice)) {
@@ -101,7 +101,7 @@ export function aideNiveau2(exercice: ExerciceFonctionsCyclometriques): AideAvec
         return { texte: `Le nombre de départ appartient bien au domaine — et l'angle intermédiaire obtenu ${dans}.`, latex: null };
       }
       if (exercice.arcfonction === "arctan") return { texte: "arctan est toujours définie, quelle que soit la valeur de départ : la condition est automatiquement vérifiée.", latex: null };
-      return { texte: "Le nombre de départ appartient bien à l'intervalle [-1;1] :", latex: exercice.nombreLatex };
+      return { texte: "Le nombre de départ appartient bien à l'intervalle [−1 ; 1] :", latex: exercice.nombreLatex };
     }
   }
 }

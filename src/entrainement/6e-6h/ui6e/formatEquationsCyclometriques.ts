@@ -150,13 +150,13 @@ export function texteAideCENiveau1(exercice: ExerciceEquationsCyclometriques): s
     const base =
       nom1 === "arctan"
         ? "arctan est toujours définie sur ℝ tout entier."
-        : `Le domaine de ${NOM_FR[nom1]} inverse (${NOM_LATEX[nom1]}) est [-1;1] : son argument doit y rester.`;
+        : `Le domaine de ${NOM_FR[nom1]} inverse (${NOM_LATEX[nom1]}) est [−1 ; 1] : son argument doit y rester.`;
     if (exercice.sousCas === "acos_atan") return `${base} En plus de cela, l'identité utilisée à l'étape suivante exige que cet argument soit STRICTEMENT POSITIF.`;
     return base;
   }
   const arcfonction = exercice.arcfonction;
   if (arcfonction === "arctan") return "arctan est définie sur ℝ tout entier ⟹ aucune condition d'existence à poser.";
-  return `Le domaine de ${NOM_FR[arcfonction]} inverse est [-1;1] : l'argument de ${NOM_LATEX[arcfonction]} doit rester dans cet intervalle.`;
+  return `Le domaine de ${NOM_FR[arcfonction]} inverse est [−1 ; 1] : l'argument de ${NOM_LATEX[arcfonction]} doit rester dans cet intervalle.`;
 }
 
 // ============================================================================
@@ -169,10 +169,10 @@ const NOM_FR_MAJ: Record<Arcfonction, string> = { arcsin: "sinus", arccos: "cosi
 
 export function texteAideConditionNiveau1(exercice: Extract<ExerciceEquationsCyclometriques, { variante: "arcfonctionsDifferentes" }>): string {
   const [nom1, nom2] = ARCFONCTIONS_SOUS_CAS[exercice.sousCas];
-  const base = `${NOM_LATEX[nom1].replace("\\", "")} a pour codomaine ${nom1 === "arcsin" ? "[-π/2;π/2]" : "[0;π]"}, ${NOM_LATEX[nom2].replace("\\", "")} a pour codomaine ${nom2 === "arccos" ? "[0;π]" : "(-π/2;π/2)"}.`;
-  if (exercice.sousCas === "asin_acos") return `${base} Sur l'intersection [0;π/2], ${NOM_FR_MAJ.arcsin} ET ${NOM_FR_MAJ.arccos} sont TOUS LES DEUX ≥0 : les 2 arguments doivent donc être ≥0.`;
+  const base = `${NOM_LATEX[nom1].replace("\\", "")} a pour codomaine ${nom1 === "arcsin" ? "[−π/2 ; π/2]" : "[0 ; π]"}, ${NOM_LATEX[nom2].replace("\\", "")} a pour codomaine ${nom2 === "arccos" ? "[0 ; π]" : "]−π/2 ; π/2["}.`;
+  if (exercice.sousCas === "asin_acos") return `${base} Sur l'intersection [0 ; π/2], ${NOM_FR_MAJ.arcsin} ET ${NOM_FR_MAJ.arccos} sont TOUS LES DEUX ≥0 : les 2 arguments doivent donc être ≥0.`;
   if (exercice.sousCas === "asin_atan") return `${base} arctan ⊂ arcsin en codomaine ; sur cet intervalle, sinus et tangente sont impaires : elles ont le MÊME SIGNE que l'angle. Les 2 arguments doivent donc avoir le même signe.`;
-  return `${base} Sur l'intersection [0;π/2), le cosinus ne s'annule pas et reste >0 — mais cette moitié de la condition est déjà dans la CE de l'étape 1 (regarde-la). La condition qui RESTE à poser porte sur l'AUTRE argument (celui de arctan) : il doit être ≥0.`;
+  return `${base} Sur l'intersection [0 ; π/2[, le cosinus ne s'annule pas et reste >0 — mais cette moitié de la condition est déjà dans la CE de l'étape 1 (regarde-la). La condition qui RESTE à poser porte sur l'AUTRE argument (celui de arctan) : il doit être ≥0.`;
 }
 
 export function texteAideConditionNiveau2(exercice: Extract<ExerciceEquationsCyclometriques, { variante: "arcfonctionsDifferentes" }>): { texte: string; latex: string } {

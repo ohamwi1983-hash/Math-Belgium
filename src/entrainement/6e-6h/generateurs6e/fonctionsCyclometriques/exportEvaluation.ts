@@ -1,155 +1,81 @@
-import type { Arcfonction, Trigfonction, ValeurExacte } from "../../core6e/cyclometrique.types";
-import type { ExerciceCycloArcTrig, ExerciceCycloDirecte, ExerciceCycloTrigArc, ExerciceFonctionsCyclometriques } from "../../core6e/fonctionsCyclometriques.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
+import type { ExerciceFonctionsCyclometriques } from "../../core6e/fonctionsCyclometriques.types";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { latex, texte } from "../../../export/corrigeTableau";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { CONSIGNE_GENERALE, formatExpressionLatex } from "../../ui6e/formatFonctionsCyclometriques";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceFonctionsCyclometriques } from "./index";
+import { correctionDetailleeFonctionsCyclometriques as correction, resultatFonctionsCyclometriquesLatex } from "./corrigeDetaille";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceFonctionsCyclometriques>` pour `6gen2` (Valeurs
- * cyclométriques : existence et calcul) — feuille d'évaluation, voir
- * `generateurs/analyseFonction/exportWord.ts` pour le mécanisme générique de référence.
+ * Adaptateur `AdaptateurFeuilleExercices<ExerciceFonctionsCyclometriques>` pour `6gen2` (valeurs
+ * cyclométriques : existence et calcul) — feuille d'exercices et évaluation.
  *
- * Un seul écran côté interactif (existence + valeur exacte) : une seule question ici aussi, en
- * reprenant `CONSIGNE_GENERALE` déjà écrite côté écran (`ui6e/formatFonctionsCyclometriques.ts`),
- * jamais reformulée indépendamment.
- *
- * Correction enrichie (par rapport à la version précédente qui n'affichait que la valeur finale,
- * sans aucune étape) : pour "arcTrig", la valeur intermédiaire trigfonction(θ) est déjà connue sur
- * l'instance (`exercice.theta[exercice.trigfonction]`) — jamais recalculée, simplement montrée.
- * Pour "trigArc", l'angle intermédiaire arcfonction(nombre) n'est volontairement JAMAIS montré
- * (spec explicite, voir `core6e/fonctionsCyclometriques.types.ts`) : on développe plutôt la
- * résolution via l'IDENTITÉ trigonométrique générique correspondant à la paire (trigfonction,
- * arcfonction) — un fait mathématique général, valable pour tout argument, jamais une
- * re-dérivation de la valeur cachée propre à cette instance — puis on affiche le résultat final
- * déjà connu et testé (`exercice.valeurLatex`).
+ * Un seul écran (existence + valeur exacte) : une seule question, consigne générique
+ * (`CONSIGNE_GENERALE`, celle de l'écran) — `regroupable` (plusieurs expressions sous une même
+ * question a) b) c)). Corrigé détaillé partagé avec l'appli (`corrigeDetaille.ts`).
  */
 
-const NOM_LATEX: Record<Arcfonction, string> = { arcsin: "\\arcsin", arccos: "\\arccos", arctan: "\\arctan" };
-const NOM_FRANCAIS: Record<Arcfonction, string> = { arcsin: "arcsin", arccos: "arccos", arctan: "arctan" };
-const NOM_TRIG_LATEX: Record<Trigfonction, string> = { sin: "\\sin", cos: "\\cos", tan: "\\tan" };
-const NOM_TRIG_FRANCAIS: Record<Trigfonction, string> = { sin: "sinus", cos: "cosinus", tan: "tangente" };
+type E = ExerciceFonctionsCyclometriques;
 
-function construireEnonceFonctionsCyclometriques(exercice: ExerciceFonctionsCyclometriques): SectionExercice {
+function construireEnonce(e: E): SectionExercice {
+  return { enteteFragments: [latex(formatExpressionLatex(e))], questions: [{ consigne: [texte(CONSIGNE_GENERALE)] }] };
+}
+
+function enoncePapier(e: E): EnoncePapier {
+  return { section: { enteteFragments: [texte(`${CONSIGNE_GENERALE} `), latex(formatExpressionLatex(e))], questions: [] } };
+}
+
+function reponseBreve(e: E): FragmentConsigne[] {
+  const r = resultatFonctionsCyclometriquesLatex(e);
+  return r ? [latex(r)] : [latex(formatExpressionLatex(e)), texte(" n'existe pas.")];
+}
+
+function construireCorrection(e: E): BlocCorrection[] {
+  return [{ type: "paragraphe", fragments: reponseBreve(e) }];
+}
+
+function bareme(e: E): BaremeExercice {
+  const condition = e.variante === "trigArc" && e.causeInexistence === "anglePiSur2" ? "Domaine vérifié, puis angle intermédiaire et tangente non définie" : "Condition d'existence vérifiée (domaine de l'arcfonction)";
   return {
-    enteteFragments: [latex(`${formatExpressionLatex(exercice)} = ?`)],
-    questions: [{ consigne: [texte(CONSIGNE_GENERALE)], reponse: { type: "lignes", nombre: 4 } }],
+    reponseFinale: reponseBreve(e),
+    criteres: [
+      { sousQuestion: "a", critere: [texte(condition)], points: 1.5 },
+      { sousQuestion: "a", critere: e.existe ? [texte("Valeur intermédiaire exacte (valeur remarquable ou angle dans l'intervalle de restriction)")] : [texte("Conclusion justifiée : l'expression n'existe pas")], points: 1.5 },
+      { sousQuestion: "a", critere: reponseBreve(e), points: 1 },
+    ],
+    erreursFrequentes: [
+      e.variante === "arcTrig"
+        ? { description: [texte("Simplifier en "), latex("\\arcsin(\\sin\\theta)=\\theta"), texte(" sans vérifier l'intervalle de restriction")], cout: "0 pt sur la valeur" }
+        : { description: [texte("Angle hors de l'intervalle de restriction (arccos d'un nombre négatif, par exemple)")], cout: "−1" },
+    ],
   };
 }
 
-function construireParagrapheDirecte(exercice: ExerciceCycloDirecte): FragmentConsigne[] {
-  if (exercice.arcfonction === "arctan") {
-    return [texte("arctan est définie sur ℝ tout entier : l'expression existe toujours, et vaut "), latex(`${formatExpressionLatex(exercice)} = ${exercice.valeurLatex}`), texte(".")];
-  }
-  return [
-    texte(`Le nombre de départ appartient bien à l'intervalle `),
-    latex("[-1\\,;\\,1]"),
-    texte(` (domaine de ${NOM_FRANCAIS[exercice.arcfonction]} inverse) : l'expression existe, et vaut `),
-    latex(`${formatExpressionLatex(exercice)} = ${exercice.valeurLatex}`),
-    texte("."),
-  ];
+/**
+ * Niveau 1–7 — méthode 0 (lecture directe d'une valeur remarquable) ou 1 (composée : valeur
+ * intermédiaire puis définition) ; piège : composée (intervalle de restriction, domaine, tangente
+ * en π/2 — le même que l'expression existe ou non, l'existence étant la question) ou arccos d'un
+ * nombre négatif. Nombres 0 (valeurs exactes).
+ */
+function criteresDifficulte(e: E): CriteresDifficulte {
+  const piege: 0 | 1 = e.variante !== "directe" || (e.arcfonction === "arccos" && e.nombreNumerique < 0) ? 1 : 0;
+  return { ...etapesDuCorrige(correction(e)), methode: e.variante === "directe" ? 0 : 1, piege, nombres: 0 };
 }
 
-function construireParagrapheArcTrig(exercice: ExerciceCycloArcTrig): FragmentConsigne[] {
-  const valeurIntermediaire = exercice.theta[exercice.trigfonction] as ValeurExacte;
-  const fragments: FragmentConsigne[] = [
-    texte(`On calcule d'abord la valeur intermédiaire ${NOM_TRIG_FRANCAIS[exercice.trigfonction]}(θ) : `),
-    latex(`${NOM_TRIG_LATEX[exercice.trigfonction]}\\left(${exercice.theta.angle.latex}\\right) = ${valeurIntermediaire.latex}`),
-    texte("."),
-  ];
-  if (exercice.arcfonction === "arctan") {
-    fragments.push(texte(" arctan est définie sur ℝ tout entier : l'expression existe toujours, et vaut "), latex(`${formatExpressionLatex(exercice)} = ${exercice.valeurLatex}`), texte("."));
-    return fragments;
-  }
-  if (exercice.existe) {
-    fragments.push(
-      texte(" Cette valeur appartient à l'intervalle "),
-      latex("[-1\\,;\\,1]"),
-      texte(` (domaine de ${NOM_FRANCAIS[exercice.arcfonction]} inverse) : l'expression existe, et vaut `),
-      latex(`${formatExpressionLatex(exercice)} = ${exercice.valeurLatex}`),
-      texte("."),
-    );
-  } else {
-    fragments.push(
-      texte(" Cette valeur n'appartient PAS à l'intervalle "),
-      latex("[-1\\,;\\,1]"),
-      texte(` (domaine de ${NOM_FRANCAIS[exercice.arcfonction]} inverse) : l'expression n'existe pas.`),
-    );
-  }
-  return fragments;
-}
-
-/** Identité trigonométrique GÉNÉRIQUE pour trigfonction(arcfonction(n)) — fait mathématique
- * valable pour tout n du domaine, jamais une valeur propre à cette instance (voir en-tête de
- * fichier). `null` pour les 3 couples triviaux (trigfonction = arcfonction de la même fonction). */
-function identiteTrigArcLatex(trigfonction: Trigfonction, arcfonction: Arcfonction, nombreLatex: string): string | null {
-  if ((trigfonction === "sin" && arcfonction === "arcsin") || (trigfonction === "cos" && arcfonction === "arccos") || (trigfonction === "tan" && arcfonction === "arctan")) {
-    return null;
-  }
-  if ((trigfonction === "cos" && arcfonction === "arcsin") || (trigfonction === "sin" && arcfonction === "arccos")) {
-    return `\\sqrt{1-\\left(${nombreLatex}\\right)^{2}}`;
-  }
-  if (trigfonction === "tan" && arcfonction === "arcsin") {
-    return `\\dfrac{${nombreLatex}}{\\sqrt{1-\\left(${nombreLatex}\\right)^{2}}}`;
-  }
-  if (trigfonction === "tan" && arcfonction === "arccos") {
-    return `\\dfrac{\\sqrt{1-\\left(${nombreLatex}\\right)^{2}}}{${nombreLatex}}`;
-  }
-  if (trigfonction === "sin" && arcfonction === "arctan") {
-    return `\\dfrac{${nombreLatex}}{\\sqrt{1+\\left(${nombreLatex}\\right)^{2}}}`;
-  }
-  return `\\dfrac{1}{\\sqrt{1+\\left(${nombreLatex}\\right)^{2}}}`;
-}
-
-function construireParagrapheTrigArc(exercice: ExerciceCycloTrigArc): FragmentConsigne[] {
-  if (exercice.causeInexistence === "horsDomaine") {
-    return [
-      texte("Le nombre de départ, "),
-      latex(exercice.nombreLatex),
-      texte(`, n'appartient pas à l'intervalle `),
-      latex("[-1\\,;\\,1]"),
-      texte(` (domaine de ${NOM_FRANCAIS[exercice.arcfonction]} inverse) : `),
-      latex(`${NOM_LATEX[exercice.arcfonction]}\\left(${exercice.nombreLatex}\\right)`),
-      texte(" n'est donc pas défini, et l'expression n'existe pas."),
-    ];
-  }
-
-  const identite = identiteTrigArcLatex(exercice.trigfonction, exercice.arcfonction, exercice.nombreLatex);
-
-  if (exercice.causeInexistence === "anglePiSur2") {
-    return [
-      texte(`Le nombre de départ appartient bien au domaine de ${NOM_FRANCAIS[exercice.arcfonction]} inverse, mais `),
-      latex(identite as string),
-      texte(" fait apparaître une division par 0 : l'angle intermédiaire vaut exactement π/2, où la tangente n'est pas définie. L'expression n'existe donc pas."),
-    ];
-  }
-
-  if (identite === null) {
-    return [
-      texte(`${NOM_TRIG_FRANCAIS[exercice.trigfonction]} et ${NOM_FRANCAIS[exercice.arcfonction]} sont des fonctions réciproques l'une de l'autre sur leur domaine commun : `),
-      latex(`${formatExpressionLatex(exercice)} = ${exercice.valeurLatex}`),
-      texte("."),
-    ];
-  }
-  return [texte("D'après l'identité trigonométrique correspondante : "), latex(`${formatExpressionLatex(exercice)} = ${identite} = ${exercice.valeurLatex}`), texte(".")];
-}
-
-function construireCorrectionFonctionsCyclometriques(exercice: ExerciceFonctionsCyclometriques): BlocCorrection[] {
-  const fragments =
-    exercice.variante === "directe" ? construireParagrapheDirecte(exercice) : exercice.variante === "arcTrig" ? construireParagrapheArcTrig(exercice) : construireParagrapheTrigArc(exercice);
-  return [{ type: "paragraphe", fragments }];
-}
-
-export const adaptateurEvaluationFonctionsCyclometriques: AdaptateurFeuilleExercices<ExerciceFonctionsCyclometriques> = {
+export const adaptateurEvaluationFonctionsCyclometriques: AdaptateurFeuilleExercices<E> = {
   titreDocument: "Valeurs cyclométriques — Évaluation",
   nomFichierBase: "fonctions-cyclometriques",
   genererInstance: genererExerciceFonctionsCyclometriques,
   catalogueVariantes: CATALOGUE_VARIANTES,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce: construireEnonceFonctionsCyclometriques,
-  construireCorrection: construireCorrectionFonctionsCyclometriques,
+  construireEnonce,
+  construireCorrection,
+  criteresDifficulte,
+  reponseBreve,
+  correctionDetaillee: correction,
+  bareme,
+  enoncePapier,
   // Une seule question par instance, consigne GÉNÉRIQUE (`CONSIGNE_GENERALE`, constante) — voir
-  // `AdaptateurFeuilleExercices.regroupable`, `AppEvaluation6e.tsx::construireItemRegroupe`.
+  // `AdaptateurFeuilleExercices.regroupable`.
   regroupable: true,
 };
