@@ -178,6 +178,10 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'venn-double-entree-widget': () => import('../../interactive/register-venn-double-entree-widget.js'),
   'bayes-test-medical-widget': () => import('../../interactive/register-bayes-test-medical-widget.js'),
   'binomiale-positions-widget': () => import('../../interactive/register-binomiale-positions-widget.js'),
+  'composer-en-un-point-widget': () => import('../../interactive/register-composer-en-un-point-widget.js'),
+  'projections-domaine-image-widget': () => import('../../interactive/register-projections-domaine-image-widget.js'),
+  'image-inter-domaine-widget': () => import('../../interactive/register-image-inter-domaine-widget.js'),
+  'commutent-affines-widget': () => import('../../interactive/register-commutent-affines-widget.js'),
 }
 
 /**

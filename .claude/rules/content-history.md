@@ -5014,3 +5014,40 @@ déborde ; évaluation locale 2 séries : « Vrai ou faux » présent (6 affirma
 **Piège de vérification** : machine chargée (plusieurs `tsc` en parallèle) → `tsc` tué (OOM) ou
 `locator.click` hors délai ; relancer avec `NODE_OPTIONS=--max-old-space-size=3072` et des délais
 Playwright longs (`setDefaultTimeout`), en attendant chaque bouton (`waitFor`) plutôt qu'un délai fixe.
+## 5e (4h), Chapitre 1 — lot F de l'audit (4 ateliers validés par l'utilisateur)
+
+`projections-domaine-image-widget` (intro, juste après la figure x² − 2x) : 3 courbes par nœuds
+ENTIERS interpolés en cubique monotone (Fritsch–Carlson : pas de dépassement, extremums toujours
+sur un nœud, donc bornes lues sur la grille), extrémités sur abscisses entières (glisser ou ◀ ▶),
+pleines / creuses ; dom f et Im f projetés et écrits en intervalles ; une borne de l'image n'est
+ouverte que si elle n'est atteinte qu'en une extrémité creuse (sinon « atteinte ailleurs : crochet
+fermé »). `composer-en-un-point-widget` (§ 2, après la machine à composer) : 4 couples (√x et
+4 − x², 1/x et x² − 4, √(x − 1) et 3 − x, 1/(x − 2) et √(x + 1)), ordre f∘g / g∘f, a de −5 à 5
+par pas de 0,5 ; réponse « existe / n'existe pas » AVANT la valeur ; calcul EXACT (rationnels et
+r + s√m, inverse rationalisé), raison écrite (radicande, dénominateur, ou première machine qui
+refuse) ; sans score : essais reportés sur une droite, domaine affichable. `commutent-affines-widget`
+(§ 2, après l'exemple « f∘g et g∘f en expressions ») : a, c ∈ [−3 ; 3], b, d ∈ [−4 ; 4] entiers,
+substitution écrite, droites parallèles de pente ac, confondues ⟺ ad + b = cb + d ; préréglages
+translations, linéaires, même point fixe. `image-inter-domaine-widget` (§ 3, après l'atelier de
+la double condition) : 8 intérieures × 7 extérieures, ensembles EXACTS (unions d'intervalles,
+image réciproque écrite fonction par fonction), règle des valeurs (Im g, dom f, zone commune) et
+règle des x (dom g, dom(f∘g)) ; cas vide (−x² et √(x − 1)) et un seul point (−x² et √x) commentés.
+**KaTeX dans un Shadow DOM** : module partagé `src/interactive/katex-shadow.js` (premier usage
+dans les ateliers) — `katex.min.css?inline` recopié dans chaque racine (sans les @font-face,
+déjà déclarés par le document), `tex()`, `texEgalites()` (un morceau KaTeX par membre : sur
+téléphone la ligne se coupe entre deux « = », jamais au milieu d'une formule), `CSS_BASE`
+(boutons ≥ 44 px, panneaux alignés à gauche : le cadre d'atelier centre le texte). **Piège** : la
+`caption` d'un bloc `atelier` est rendue en texte BRUT (pas de `RichText`) — `$…$` et `**…**`
+s'y affichaient tels quels ; Unicode seulement. **Faux débordement** : les `<svg>` internes de
+KaTeX (`\sqrt`, fractions, largeur 400em rognée) dépassent l'hôte au `getBoundingClientRect` —
+les exclure (`closest('.katex')`) des contrôles de débordement. **Piège** : une grille de réglages
+à deux colonnes posée par `@media (min-width…)` suit l'ÉCRAN, pas l'atelier (560 px de large à
+1 280 px) : les curseurs débordaient — `repeat(auto-fit, minmax(min(100%, 260px), 1fr))`.
+Vérifié (Vite, iPhone 13 et 1 280 px, clair et sombre) : 0 erreur console venant du site (seules
+les vidéos YouTube signalent parfois « compute-pressure »), scrollWidth = largeur, 0 `$`, 0
+`.katex-error`, Shadow DOM sans `^ $ \ NaN undefined Infinity`, 0 débordement interne, contrôles
+≥ 44 px ; balayage complet : 660 réglages de courbe (image recalculée sur la polyligne tracée),
+168 essais « en un point » confrontés au domaine attendu (54 « n'existe pas »), 1 323 réglages
+affines (101 confondus, verdict ⟺ ad + b = cb + d), 56 couples image ∩ domaine confrontés à
+1 201 x échantillonnés ; glisser à la souris ; `test-epingle` 0 échec. Captures :
+`scratchpad/5e1-ateliers/`.
