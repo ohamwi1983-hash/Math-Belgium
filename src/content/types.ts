@@ -170,6 +170,10 @@ export type InteractiveWidgetTag =
   | 'venn-double-entree-widget'
   | 'bayes-test-medical-widget'
   | 'binomiale-positions-widget'
+  | 'composer-en-un-point-widget'
+  | 'projections-domaine-image-widget'
+  | 'image-inter-domaine-widget'
+  | 'commutent-affines-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

@@ -91,6 +91,16 @@ export const fonctionsComposees: ChapterContent = {
         },
       },
       {
+        kind: 'atelier',
+        tag: 'projections-domaine-image-widget',
+        label: 'Manipule toi-même — projections : domaine et image',
+        caption:
+          'Déplace les extrémités de la courbe (glisse sur la figure, ou utilise ◀ ▶) et rends-les pleines ' +
+          'ou creuses. La projection sur l\'axe des x donne dom f, celle sur l\'axe des y ' +
+          'donne Im f. Observe quand un crochet s\'ouvre : une borne de l\'image n\'est exclue ' +
+          'que si elle n\'est atteinte qu\'en un point creux.',
+      },
+      {
         kind: 'para',
         text:
           '« Faire tourner la machine », concrètement, ça veut dire remplacer chaque x de la ' +
@@ -450,6 +460,15 @@ export const fonctionsComposees: ChapterContent = {
             'droite y = x ».',
         },
         {
+          kind: 'atelier',
+          tag: 'composer-en-un-point-widget',
+          label: 'Manipule toi-même — composer en un point',
+          caption:
+            'Choisis un couple de fonctions, l\'ordre et la valeur de a. La première machine affiche sa sortie : ' +
+            'décide si la composée existe avant de voir le résultat. Chaque essai est reporté sur la droite ' +
+            'du bas ; à force d\'essais, le domaine de la composée se dessine.',
+        },
+        {
           kind: 'exemple',
           badge: 'f∘g et g∘f en expressions',
           formula: '$f(x) = x^2+1 \\qquad g(x) = 2x-3$',
@@ -465,6 +484,15 @@ export const fonctionsComposees: ChapterContent = {
             tag: 'deux formules différentes',
             text: '$(f\\circ g)(x) = 4x^2-12x+10 \\ne (g\\circ f)(x) = 2x^2-1$',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'commutent-affines-widget',
+          label: 'Manipule toi-même — f∘g = g∘f ?',
+          caption:
+            'Règle a, b, c et d. Les droites de f∘g et de g∘f ont toujours la même pente ac ; ' +
+            'elles sont confondues exactement quand ad + b = cb + d. Essaie les préréglages : deux translations, ' +
+            'deux fonctions linéaires, même point fixe.',
         },
         {
           kind: 'atelier',
@@ -777,6 +805,15 @@ export const fonctionsComposees: ChapterContent = {
             'condition demande que la valeur tombe dans leur zone commune. Le préréglage « ' +
             'simplification piège » montre pourquoi on ne lit jamais un domaine sur la ' +
             'formule simplifiée.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'image-inter-domaine-widget',
+          label: 'Manipule toi-même — image ∩ domaine',
+          caption:
+            'Choisis la fonction intérieure g et la fonction extérieure f. La règle des valeurs compare ' +
+            'Im g et dom f ; la règle des x en déduit dom(f∘g). ' +
+            'Essaie g(x) = −x² avec f(x) = √(x − 1) (domaine vide), puis avec f(x) = √x (un seul point).',
         },
         { kind: 'subheading', text: 'Pour aller plus loin : l’associativité' },
         {
