@@ -97,16 +97,7 @@ export function formatFonctionALatex(e: ExerciceDeriveeA): string {
   return `f(x) = ${formatSomme(termes)}`;
 }
 
-const NOM_REGLE_U: Record<ExerciceDeriveeA["uType"], string> = {
-  affine: "une fonction affine (dérivée constante)",
-  puissance: "une puissance de x (règle : dériver x élevé à la puissance n donne n fois x élevé à la puissance n-1)",
-  racine: "une racine carrée composée (règle : dériver racine(v) donne v' divisé par 2·racine(v))",
-  reciproque: "un quotient k'/x (règle : dériver 1/x donne -1/x²)",
-};
 
-export function texteAideADeriveeUNiveau1(e: ExerciceDeriveeA): string {
-  return `Rappel : u(x) est ${NOM_REGLE_U[e.uType]}.`;
-}
 
 export function texteAideADeriveeUNiveau2(e: ExerciceDeriveeA): AideAvecLatex {
   const uLatex = formatULatexA(e);
@@ -121,13 +112,6 @@ export function texteAideADeriveeUNiveau2(e: ExerciceDeriveeA): AideAvecLatex {
   return { texte: "Avec u(x) tel qu'affiché ci-dessus :", latex: `u(x) = ${uLatex} \\quad\\Rightarrow\\quad ${formeGenerale}` };
 }
 
-export function texteAideADeriveeFinaleNiveau1(e: ExerciceDeriveeA): AideAvecLatex {
-  const noteSigne = e.arcfonction === "arccos" ? " Attention au signe MOINS devant la dérivée de arccos." : "";
-  return {
-    texte: `f'(x) = k fois la dérivée de l'arcfonction en u, fois u'(x).${noteSigne} Réutilise le u'(x) correct de l'étape précédente, pas ta propre saisie si elle était fausse.`,
-    latex: "\\arcsin'(u)=\\dfrac{1}{\\sqrt{1-u^2}} \\qquad \\arccos'(u)=-\\dfrac{1}{\\sqrt{1-u^2}} \\qquad \\arctan'(u)=\\dfrac{1}{1+u^2}",
-  };
-}
 
 export function texteAideADeriveeFinaleNiveau2(e: ExerciceDeriveeA): AideAvecLatex {
   const uLatex = formatULatexA(e);
@@ -156,27 +140,16 @@ export function formatFonctionBLatex(e: ExerciceDeriveeB): string {
   return `f(x) = ${uLatex}${NOM_LATEX[e.arcfonction]}\\left(${formatVLatexB(e)}\\right)`;
 }
 
-export function texteAideBDeriveeUNiveau1(): string {
-  return "u(x) = m·x est une fonction affine, sa dérivée est constante.";
-}
 export function texteAideBDeriveeUNiveau2(e: ExerciceDeriveeB): AideAvecLatex {
   return { texte: "u(x) = m·x, donc :", latex: `u'(x) = ${e.m}` };
 }
 
-export function texteAideBDeriveeArcNiveau1(e: ExerciceDeriveeB): AideAvecLatex {
-  return e.vType === "simple"
-    ? { texte: "Ici v(x)=x, la règle de chaîne se réduit à la dérivée directe de arcfonction.", latex: null }
-    : { texte: "N'oublie pas la règle de la chaîne : dérivée de arcfonction(v) fois v'(x), avec v(x) ici non triviale :", latex: "v(x) = ax^2+b" };
-}
 export function texteAideBDeriveeArcNiveau2(e: ExerciceDeriveeB): AideAvecLatex {
   const deriveeBase = formatDeriveeArcfonctionLatex(e.arcfonction, formatVLatexB(e));
   const vPrime = e.vType === "simple" ? "1" : `${2 * e.a}x`;
   return { texte: "v et v' déjà substitués (non simplifié) :", latex: e.vType === "simple" ? deriveeBase : `\\left[${deriveeBase}\\right]\\cdot\\left(${vPrime}\\right)` };
 }
 
-export function texteAideBDeriveeFinaleNiveau1(): string {
-  return "Règle du produit : f'(x) = u'(x)·arcfonction(v(x)) + u(x)·[dérivée de arcfonction(v(x)), l'étape précédente] — n'oublie aucun des 2 termes.";
-}
 export function texteAideBDeriveeFinaleNiveau2(e: ExerciceDeriveeB): AideAvecLatex {
   const uLatex = e.m === 1 ? "x" : `${e.m}x`;
   const deriveeBase = formatDeriveeArcfonctionLatex(e.arcfonction, formatVLatexB(e));
@@ -196,27 +169,15 @@ export function formatFonctionCLatex(e: ExerciceDeriveeC): string {
   return `f(x) = \\dfrac{${num}}{\\sqrt{1-(${e.a}x)^{2}}}`;
 }
 
-export function texteAideCNumerateurNiveau1(): string {
-  return "Numérateur : dérivée de k·arcfonction(ax) — n'oublie pas la chaîne sur l'argument ax.";
-}
 export function texteAideCNumerateurNiveau2(e: ExerciceDeriveeC): AideAvecLatex {
   const deriveeBase = formatDeriveeArcfonctionLatex(e.arcfonction, `${e.a}x`);
   return { texte: "k et a déjà substitués :", latex: `N'(x) = ${coefFacteur(e.k)}\\left[${deriveeBase}\\right]\\cdot ${e.a}` };
 }
 
-export function texteAideCDenominateurNiveau1(): AideAvecLatex {
-  return { texte: "Dénominateur — écris-le sous forme d'une puissance 1/2 puis applique la chaîne :", latex: "D(x) = \\sqrt{1-(ax)^2} = \\left(1-(ax)^2\\right)^{1/2}" };
-}
 export function texteAideCDenominateurNiveau2(e: ExerciceDeriveeC): AideAvecLatex {
   return { texte: "Substitue a :", latex: `D'(x) = -\\dfrac{${e.a * e.a}x}{\\sqrt{1-(${e.a}x)^{2}}}` };
 }
 
-export function texteAideCDeriveeFinaleNiveau1(): AideAvecLatex {
-  return {
-    texte: "Formule du quotient, avec les N', D' CORRECTS des étapes précédentes — attention, aucune simplification supplémentaire n'est garantie ici, ne force pas une forme plus courte qui n'existe pas :",
-    latex: "f' = \\dfrac{N'D-ND'}{D^2}",
-  };
-}
 export function texteAideCDeriveeFinaleNiveau2(e: ExerciceDeriveeC): AideAvecLatex {
   const arcTexteLatex = NOM_LATEX[e.arcfonction];
   const deriveeBase = formatDeriveeArcfonctionLatex(e.arcfonction, `${e.a}x`);
@@ -240,9 +201,6 @@ export function formatFonctionDLatex(e: ExerciceDeriveeD): string {
   return `f(x) = \\dfrac{${haut}\\left(${uLatex}\\right)}{${bas}\\left(${uLatex}\\right)}`;
 }
 
-export function texteAideDNumerateurNiveau1(): string {
-  return "Dérive le numérateur seul, en n'oubliant pas la chaîne sur u=ax+b.";
-}
 export function texteAideDNumerateurNiveau2(e: ExerciceDeriveeD): AideAvecLatex {
   const uLatex = formatAffineLatex(e.a, e.b);
   const arcfonctionHaut = e.orientation === "sinSurCos" ? "arcsin" : "arccos";
@@ -250,9 +208,6 @@ export function texteAideDNumerateurNiveau2(e: ExerciceDeriveeD): AideAvecLatex 
   return { texte: "u déjà substitué :", latex: `N'(x) = \\left[${deriveeBase}\\right]\\cdot ${e.a}` };
 }
 
-export function texteAideDDenominateurNiveau1(): string {
-  return "Dérive le dénominateur seul, même principe que le numérateur.";
-}
 export function texteAideDDenominateurNiveau2(e: ExerciceDeriveeD): AideAvecLatex {
   const uLatex = formatAffineLatex(e.a, e.b);
   const arcfonctionBas = e.orientation === "sinSurCos" ? "arccos" : "arcsin";
@@ -260,9 +215,6 @@ export function texteAideDDenominateurNiveau2(e: ExerciceDeriveeD): AideAvecLate
   return { texte: "u déjà substitué :", latex: `D'(x) = \\left[${deriveeBase}\\right]\\cdot ${e.a}` };
 }
 
-export function texteAideDBrutNiveau1(): AideAvecLatex {
-  return { texte: "Assemble via la formule du quotient avec les N,N',D,D' corrects — résultat BRUT, ne cherche pas encore à simplifier :", latex: "f' = \\dfrac{N'D-ND'}{D^2}" };
-}
 export function texteAideDBrutNiveau2(e: ExerciceDeriveeD): AideAvecLatex {
   const uLatex = formatAffineLatex(e.a, e.b);
   const [nomHaut, nomBas] = e.orientation === "sinSurCos" ? ["\\arcsin", "\\arccos"] : ["\\arccos", "\\arcsin"];
@@ -278,12 +230,6 @@ export function texteAideDBrutNiveau2(e: ExerciceDeriveeD): AideAvecLatex {
   };
 }
 
-export function texteAideDSimplifieeNiveau1(): AideAvecLatex {
-  return {
-    texte: "Identité NOUVELLE à connaître : pour tout u ∈ [−1 ; 1],",
-    latex: "\\arcsin(u) + \\arccos(u) = \\dfrac{\\pi}{2}",
-  };
-}
 export function texteAideDSimplifieeNiveau2(e: ExerciceDeriveeD): AideAvecLatex {
   const uLatex = formatAffineLatex(e.a, e.b);
   return {
@@ -302,19 +248,12 @@ export function formatFonctionELatex(e: ExerciceDeriveeE): string {
   return `f(x) = ${e.gType === "carre" ? `\\left(${interieur}\\right)^{2}` : `\\sqrt{${interieur}}`}`;
 }
 
-export function texteAideEDeriveeInterneNiveau1(): string {
-  return "Dérive l'arcfonction interne complète (arcfonction(v(x)), avec sa propre chaîne sur v).";
-}
 export function texteAideEDeriveeInterneNiveau2(e: ExerciceDeriveeE): AideAvecLatex {
   const vLatex = e.a === 1 ? "x" : `${e.a}x`;
   const deriveeBase = formatDeriveeArcfonctionLatex(e.arcfonction, vLatex);
   return { texte: "v déjà substitué :", latex: `w'(x) = \\left[${deriveeBase}\\right]${e.a === 1 ? "" : `\\cdot ${e.a}`}` };
 }
 
-export function texteAideEDeriveeFinaleNiveau1(e: ExerciceDeriveeE): string {
-  const nomG = e.gType === "carre" ? "la mise au carré" : "la racine carrée";
-  return `Attention : ici c'est ${nomG} qui est appliquée EN DERNIER, pas la fonction cyclométrique — identifie d'abord quelle opération encadre tout le reste.`;
-}
 export function texteAideEDeriveeFinaleNiveau2(e: ExerciceDeriveeE): AideAvecLatex {
   const vLatex = e.a === 1 ? "x" : `${e.a}x`;
   const w = `${NOM_LATEX[e.arcfonction]}\\left(${vLatex}\\right)`;
@@ -334,9 +273,6 @@ export function formatFonctionFLatex(e: ExerciceDeriveeF): string {
   return `f(x) = ${trigLatex}\\left(${NOM_LATEX[e.arcfonction]}\\left(${vLatex}\\right)\\right)`;
 }
 
-export function texteAideFBruteNiveau1(): string {
-  return "Chaîne à deux niveaux : dérivée de trig(u) fois dérivée de u=arcfonction(v) — le résultat peut contenir cos(arcfonction(v)) ou sin(arcfonction(v)) non simplifié, c'est normal à cette étape.";
-}
 export function texteAideFBruteNiveau2(e: ExerciceDeriveeF): AideAvecLatex {
   const vLatex = e.a === 1 ? "x" : `${e.a}x`;
   const u = `${NOM_LATEX[e.arcfonction]}\\left(${vLatex}\\right)`;
@@ -345,15 +281,6 @@ export function texteAideFBruteNiveau2(e: ExerciceDeriveeF): AideAvecLatex {
   return { texte: "Substitue (non simplifié) :", latex: `f'(x) = ${trigPrime}\\cdot\\left(${uPrime}\\right)` };
 }
 
-export function texteAideFSimplifieeNiveau1(): AideAvecLatex {
-  return {
-    texte: "Identités NOUVELLES possibles selon la combinaison (laquelle s'applique ici dépend de trig∘arcfonction) :",
-    latex: "\\cos(\\arccos u)=u \\quad \\sin(\\arccos u)=\\sqrt{1-u^2} \\quad \\cos(\\arcsin u)=\\sqrt{1-u^2} \\quad \\sin(\\arcsin u)=u",
-  };
-}
-export function texteAideFSimplifieeNiveau2(e: ExerciceDeriveeF): string {
-  return `Ici la combinaison est ${e.trig}∘${e.arcfonction} — repère laquelle des identités ci-dessus s'y applique, puis simplifie (avant OU après avoir dérivé, les deux stratégies sont acceptées).`;
-}
 
 // ============================================================================
 // Famille G — sous-cas h : f(x)=k/arcfonction(v(x)), v=x²+c ; sous-cas i : f(x)=arcfonction(k/(x+c)).
@@ -368,21 +295,11 @@ export function formatFonctionGLatex(e: ExerciceDeriveeG): string {
   return `f(x) = ${NOM_LATEX[e.arcfonction]}\\left(\\dfrac{${e.k}}{${denomLatex}}\\right)`;
 }
 
-export function texteAideGDeriveeInterneNiveau1(e: ExerciceDeriveeG): string {
-  return e.sousCas === "h"
-    ? "Dérive v(x) = x²+c, un simple monôme."
-    : "Dérive la fraction interne u = k/(x+c) — règle du quotient ou de la puissance -1 appliquée à (x+c).";
-}
 export function texteAideGDeriveeInterneNiveau2(e: ExerciceDeriveeG): AideAvecLatex {
   if (e.sousCas === "h") return { texte: "v(x)=x²+c, donc :", latex: "v'(x) = 2x" };
   return { texte: "On dérive la fraction interne :", latex: `u'(x) = -\\dfrac{${e.k}}{${denominateurCarreG(e.c)}}` };
 }
 
-export function texteAideGDeriveeFinaleNiveau1(e: ExerciceDeriveeG): string {
-  return e.sousCas === "h"
-    ? "Combine la règle de la puissance -1 avec la formule cyclométrique : f'=-k·v'·[dérivée-de-base]/[arcfonction(v)]² — jamais l'inverse (traiter cette structure comme arcfonction(k/v) serait une erreur)."
-    : "Applique la formule cyclométrique standard avec u et u' CORRECTS de l'étape précédente — jamais la structure k/arcfonction(u), une erreur différente.";
-}
 export function texteAideGDeriveeFinaleNiveau2(e: ExerciceDeriveeG): AideAvecLatex {
   if (e.sousCas === "h") {
     const vLatex = formatSomme([{ signe: 1, corps: "x^{2}" }, { signe: e.c >= 0 ? 1 : -1, corps: String(Math.abs(e.c)) }]);

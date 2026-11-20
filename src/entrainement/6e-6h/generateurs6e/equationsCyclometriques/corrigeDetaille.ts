@@ -34,7 +34,7 @@ export const CONSIGNES_ECRANS: Record<PhaseEquationsCyclometriques, string> = {
   ce: "Établis la condition d'existence (CE) de cette équation, sous la forme d'un intervalle pour x.",
   condition: "Établis la condition supplémentaire qui rend compatibles les images des deux arcfonctions, sous la forme d'un intervalle pour x.",
   equation: "Écris l'équation obtenue après avoir éliminé toutes les arcfonctions.",
-  solutions: "Cette équation a-t-elle des solutions ? Si oui, donne-les toutes (sans encore tenir compte de la CE).",
+  solutions: "Cette équation sans arcfonction a-t-elle des solutions ? Si oui, donne-les toutes (sans encore tenir compte de la CE).",
   acceptRejet: "Pour chaque solution trouvée à l'étape précédente, accepte-la ou rejette-la.",
 };
 

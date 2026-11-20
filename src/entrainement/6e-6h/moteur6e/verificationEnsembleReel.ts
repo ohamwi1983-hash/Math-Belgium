@@ -79,6 +79,26 @@ function formeCanonique(ensemble: EnsembleReelGuide): MorceauIntervalle[] {
   return resultat;
 }
 
+/**
+ * Diagnostic d'un ensemble saisi (règles communes du 6e ch. 1, lot B) : `correct` (toute écriture
+ * équivalente : ℝ \ {2} ou ]−∞ ; 2[ ∪ ]2 ; +∞[) ; `approchee` (mêmes intervalles, bornes à 1 % près
+ * mais pas exactes : valeur approchée d'une fraction, de π ou d'une racine — signalée sans perte de
+ * tentative) ; `crochet` (bonnes bornes, un crochet faux) ; `faux`.
+ */
+export function diagnostiquerEnsembleReelGuide(saisie: EnsembleReelGuide, attendu: EnsembleReelGuide): "correct" | "approchee" | "crochet" | "faux" {
+  if (verifierEnsembleReelGuide(saisie, attendu)) return "correct";
+  const a = formeCanonique(attendu);
+  const s = formeCanonique(saisie);
+  if (a.length !== s.length) return "faux";
+  // Une borne ENTIÈRE n'a pas de « valeur approchée » : seule une borne non entière (fraction, π,
+  // racine) peut être approchée.
+  const proche = (x: number | null, y: number | null) =>
+    x === null || y === null ? x === y : memeValeur(x, y) || (Math.abs(y - Math.round(y)) > 1e-9 && Math.abs(x - y) <= 0.01 * Math.max(1, Math.abs(y)));
+  if (!a.every((m, i) => proche(s[i].inf, m.inf) && proche(s[i].sup, m.sup))) return "faux";
+  if (a.every((m, i) => memeValeur(s[i].inf, m.inf) && memeValeur(s[i].sup, m.sup))) return "crochet";
+  return "approchee";
+}
+
 export function verifierEnsembleReelGuide(saisie: EnsembleReelGuide, attendu: EnsembleReelGuide): boolean {
   const a = formeCanonique(attendu);
   const s = formeCanonique(saisie);

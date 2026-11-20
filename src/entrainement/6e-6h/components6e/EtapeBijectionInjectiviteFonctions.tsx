@@ -3,7 +3,9 @@ import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import type { ExerciceInjectiviteFonctions } from "../core6e/injectiviteFonctions.types";
 import type { ReponseBijection } from "../moteur6e/verificationInjectiviteFonctions";
 import { diagnostiquerBijection } from "../moteur6e/verificationInjectiviteFonctions";
-import { CONSIGNE_ECRAN_BIJECTION, CONSIGNE_GENERALE, TEXTE_AIDE_BIJECTION_NIVEAU1, formatFLatexAffichage } from "../ui6e/formatInjectiviteFonctions";
+import { CONSIGNE_ECRAN_BIJECTION, CONSIGNE_GENERALE, formatFLatexAffichage } from "../ui6e/formatInjectiviteFonctions";
+import { AIDE_BIJECTION_1, AIDE_BIJECTION_2, cibleBijection } from "../ui6e/aidesInjectiviteFonctions";
+import { AidesCyclo, MessageRetourCyclo } from "./RetourSaisieCyclo";
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -79,11 +81,7 @@ export function EtapeBijectionInjectiviteFonctions({ exercice, tentativesUtilise
         erroneeY={statut !== null && !statut.yCorrect}
       />
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_BIJECTION_NIVEAU1}</p>
-        </div>
-      )}
+      <AidesCyclo aide1={AIDE_BIJECTION_1} aide2={AIDE_BIJECTION_2} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -91,11 +89,7 @@ export function EtapeBijectionInjectiviteFonctions({ exercice, tentativesUtilise
           Valider
         </button>
 
-        {montrerErreurs && !statut?.global && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetourCyclo blocage={null} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={statut ? cibleBijection(statut.xCorrect, statut.yCorrect) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

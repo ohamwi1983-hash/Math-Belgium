@@ -1,6 +1,19 @@
 import type { CandidatSolution, ExerciceArcfonctionsDifferentes, SousCasArcfonctionsDifferentes } from "../../../core6e/equationsCyclometriques.types";
 import type { EnsembleReelGuide } from "../../../core6e/ensembleReel.types";
 import { BANQUE_CERCLE_RATIONNEL, BANQUE_PYTHAGORE } from "../banquePythagore";
+
+/**
+ * Coefficients raisonnables (audit du 6e ch. 1, E10 et lot C) : les triplets 5-12-13 et 8-15-17
+ * donnaient des coefficients comme 156/25 et des discriminants à 8 ou 9 chiffres (4c), et le mélange
+ * des points 3-4-5 et 5-12-13 des dénominateurs 65 ou 195 (4a). 4b et 4c ne gardent que le triplet
+ * 3-4-5 (m ∈ {5/4, 5/3} en 4b, {15/16, 20/9} en 4c) ; 4a prend ses deux points sur UN seul cercle de
+ * dénominateur commun (5, ou 13 une fois sur quatre), avec |x₂ − x₁| ≤ 2.
+ */
+const TRIPLETS_SIMPLES = BANQUE_PYTHAGORE.filter((t) => t.r === 5);
+const POINTS_AXES = BANQUE_CERCLE_RATIONNEL.filter((pt) => pt.u === 0 || pt.v === 0);
+function pointsDuCercle(r: number) {
+  return [...POINTS_AXES, ...BANQUE_CERCLE_RATIONNEL.filter((pt) => pt.u !== 0 && pt.v !== 0 && Math.abs(Math.round(pt.u * r) - pt.u * r) < 1e-9 && Math.abs(Math.round(pt.v * r) - pt.v * r) < 1e-9)];
+}
 import { CE_REEL, domaineArcsinArccosLineaire, domaineSigneNonNegatif, domaineStrictementPositif, intersection, versGuide } from "../domaines";
 
 const EPS = 1e-9;
@@ -47,12 +60,13 @@ function trier(candidats: CandidatSolution[]): CandidatSolution[] {
  */
 function construireAsinAcos(): ExerciceArcfonctionsDifferentes {
   const TENTATIVES_MAX = 200;
+  const cercle = pointsDuCercle(Math.random() < 0.75 ? 5 : 13);
   for (let t = 0; t < TENTATIVES_MAX; t++) {
     const x1 = tirerEntier(-2, 2);
     let x2 = tirerEntier(-2, 2);
-    while (x2 === x1) x2 = tirerEntier(-2, 2);
-    const p1 = tirerParmi(BANQUE_CERCLE_RATIONNEL);
-    const p2 = tirerParmi(BANQUE_CERCLE_RATIONNEL);
+    while (x2 === x1 || Math.abs(x2 - x1) > 2) x2 = tirerEntier(-2, 2);
+    const p1 = tirerParmi(cercle);
+    const p2 = tirerParmi(cercle);
     if (Math.abs(p1.u - p2.u) < EPS || Math.abs(p1.v - p2.v) < EPS) continue;
 
     const a = (p2.u - p1.u) / (x2 - x1);
@@ -102,7 +116,7 @@ function construireAsinAcos(): ExerciceArcfonctionsDifferentes {
  * toujours), donc AUCUN reroll nécessaire ici (contrairement à asin_acos).
  */
 function construireAsinAtan(): ExerciceArcfonctionsDifferentes {
-  const { p, q, r } = tirerParmi(BANQUE_PYTHAGORE);
+  const { p, q, r } = tirerParmi(TRIPLETS_SIMPLES);
   const b = tirerEntier(-3, 3);
   const genuine = Math.random() < 0.5;
   const secTheta = r / q;
@@ -155,7 +169,7 @@ function construireAsinAtan(): ExerciceArcfonctionsDifferentes {
  * AUCUN reroll nécessaire ici non plus.
  */
 function construireAcosAtan(): ExerciceArcfonctionsDifferentes {
-  const { p, q, r } = tirerParmi(BANQUE_PYTHAGORE);
+  const { p, q, r } = tirerParmi(TRIPLETS_SIMPLES);
   const b = tirerEntier(-3, 3);
   // Audit du 6e ch. 1 (E1) : la CE est le seul domaine u ∈ [−1 ; 1] ; « u > 0 » appartient à la
   // condition de compatibilité (avec v ≥ 0). Avec m < 0, cette condition serait VIDE (v = m·u ≥ 0

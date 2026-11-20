@@ -1,15 +1,26 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import type { ExerciceFonctionsCyclometriques } from "../core6e/fonctionsCyclometriques.types";
-import { diagnostiquerValeurFonctionsCyclometriques } from "../moteur6e/verificationFonctionsCyclometriques";
 import type { ReponseFonctionsCyclometriques } from "../moteur6e/verificationFonctionsCyclometriques";
-import { CONSIGNE_GENERALE, aideNiveau1, aideNiveau2, formatExpressionLatex } from "../ui6e/formatFonctionsCyclometriques";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { evaluerValeurCyclometrique } from "../moteur6e/expressionCyclometrique";
+import { CONSIGNE_GENERALE, formatExpressionLatex } from "../ui6e/formatFonctionsCyclometriques";
+import { aideValeur1, aideValeur2, cibleValeur } from "../ui6e/aidesFonctionsCyclometriques";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import {
+  AidesCyclo,
+  MESSAGES_ILLISIBLE_CYCLO,
+  MESSAGE_APPROCHEE_CYCLO,
+  MESSAGE_RECOPIE_ARC,
+  MessageRetourCyclo,
+  cibleDepuisTexte,
+  contientFonctionTrig,
+  estApprocheeDe,
+  useRetourCyclo,
+} from "./RetourSaisieCyclo";
 
 interface Props {
   exercice: ExerciceFonctionsCyclometriques;
@@ -19,36 +30,41 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseFonctionsCyclometriques) => void;
-  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
 }
 
 /**
- * Écran UNIQUE de `6gen2` (REFONTE TOTALE) — mécanique identique quelle que soit la variante
- * réellement tirée (le détail du calcul composite n'est jamais montré, seul le résultat final
- * compte) : choix binaire Existe/N'existe pas (`.options-grid-compact`+`.btn.toggle-active`, JAMAIS
- * `.btn-primary`, réservé à "Valider" — le clic sur une option ne fait QUE sélectionner, jamais
- * valider) puis, seulement si "Existe" est sélectionné, un champ libre pour la valeur exacte
- * (`.contenu-conditionnel` — jamais collé directement sous le bouton qui l'a révélé). Bouton
- * "Valider" présent y compris pour la partie à choix. Pas de bloc "état actuel" : écran UNIQUE, rien
- * à dériver d'un écran précédent (voir `moteur6e/typesFonctionsCyclometriques.ts`).
+ * Écran UNIQUE de `6gen2` — verdict « Existe / N'existe pas » (choix fermé : un verdict faux clôt
+ * l'écran, une seule tentative), puis, après « Existe », la valeur exacte (champ : trois
+ * tentatives). Règles communes du 6e ch. 1 (lot B) : saisie illisible, valeur approchée
+ * (« 1,047 » pour π/3) ou fonction recopiée (« arccos(1/2) ») signalées SANS tentative ; π, √,
+ * fractions et « − » lus ; messages ciblés (arcsin(sin θ) = θ hors de l'image, angle hors de
+ * l'image, signe) ; aides KaTeX à deux niveaux sans la conclusion.
  */
-export function EtapeFonctionsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeFonctionsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const [existe, setExiste] = useState<boolean | null>(null);
   const [texte, setTexte] = useState("");
-  const montrerErreurs = tentativesUtilisees > 0;
+  const retour = useRetourCyclo<ReponseFonctionsCyclometriques>();
   const complet = existe === true ? texte.trim() !== "" : existe === false;
+  const derniere = retour.soumise;
 
   function valider() {
     if (!complet) return;
-    onValider({ existe: existe as boolean, texte: existe ? texte : null });
+    if (existe === false) return retour.tenter({ existe: false, texte: null }, null, onValider);
+    const v = evaluerValeurCyclometrique(texte);
+    const blocage =
+      v === null
+        ? MESSAGES_ILLISIBLE_CYCLO.valeurExacte
+        : contientFonctionTrig(texte)
+          ? MESSAGE_RECOPIE_ARC
+          : exercice.existe && exercice.valeurNumerique !== null && estApprocheeDe(texte, exercice.valeurNumerique)
+            ? MESSAGE_APPROCHEE_CYCLO
+            : null;
+    retour.tenter({ existe: true, texte }, blocage, onValider);
   }
 
-  const dernierStatut = montrerErreurs && existe === true ? diagnostiquerValeurFonctionsCyclometriques(exercice, texte) : null;
-  const a1 = aideNiveau1(exercice);
-  const a2 = aideNiveau2(exercice);
+  const valeurSoumise = derniere?.existe && derniere.texte !== null ? evaluerValeurCyclometrique(derniere.texte) : null;
+  const cible = valeurSoumise !== null ? cibleValeur(exercice, valeurSoumise) : null;
 
   return (
     <div>
@@ -62,18 +78,10 @@ export function EtapeFonctionsCyclometriques({ exercice, tentativesUtilisees, te
       />
 
       <div className="options-grid-compact">
-        <button
-          type="button"
-          className={`btn${existe === true ? " toggle-active" : ""}${montrerErreurs && existe === true ? " is-erronee" : ""}`}
-          onClick={() => setExiste(true)}
-        >
+        <button type="button" className={`btn${existe === true ? " toggle-active" : ""}`} disabled={!!validation} onClick={() => setExiste(true)}>
           Existe
         </button>
-        <button
-          type="button"
-          className={`btn${existe === false ? " toggle-active" : ""}${montrerErreurs && existe === false ? " is-erronee" : ""}`}
-          onClick={() => setExiste(false)}
-        >
+        <button type="button" className={`btn${existe === false ? " toggle-active" : ""}`} disabled={!!validation} onClick={() => setExiste(false)}>
           N'existe pas
         </button>
       </div>
@@ -84,43 +92,27 @@ export function EtapeFonctionsCyclometriques({ exercice, tentativesUtilisees, te
           <div className="field contenu-conditionnel">
             <input
               type="text"
-              className={`text-input ${montrerErreurs ? "is-erronee" : ""}`}
+              className={`text-input${tentativesUtilisees > 0 && derniere?.texte === texte ? " is-erronee" : ""}`}
               value={texte}
-              placeholder="ex : pi/3, sqrt(3)/3..."
+              disabled={!!validation}
+              placeholder="valeur exacte"
               onChange={(e) => setTexte(e.target.value)}
             />
           </div>
         </>
       )}
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{a1.texte}</p>
-          {a1.latex && <Katex expression={a1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{a2.texte}</p>
-              {a2.latex && <Katex expression={a2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesCyclo aide1={aideValeur1(exercice)} aide2={aideValeur2(exercice)} niveauAide={niveauAide} />
       {!validation && (
         <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+          <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+            Valider
+          </button>
+          <MessageRetourCyclo blocage={retour.blocage} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={cible ? cibleDepuisTexte(cible) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-
     </div>
   );
 }

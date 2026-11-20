@@ -36,8 +36,13 @@ export function demarrerSessionEquationsCyclometriques(reglages: ReglagesSession
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, derniereCloture: null, ...etatInitial(generateur()) };
 }
 
+/** « À accepter / À rejeter » : choix fermés, une seule tentative (audit du 6e ch. 1, G2). */
+export function tentativesMaxCourant(etat: EtatSessionEquationsCyclometriques): number {
+  return etat.phase === "acceptRejet" ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionEquationsCyclometriques): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxCourant(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionEquationsCyclometriques): EtatSessionEquationsCyclometriques {

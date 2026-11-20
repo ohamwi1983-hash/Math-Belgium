@@ -145,9 +145,12 @@ interface Props {
    * constantes symboliques (`pi`, `sqrt`, `atan`...) passe explicitement un analyseur plus général
    * (ex. `evaluerValeurCyclometrique`, déjà partagé 6gen2/6gen3/6gen4) — jamais réimplémenté ici. */
   parseurNombre?: (texte: string) => number | null;
+  /** Facultatif : appelé à chaque changement avec `true` quand la saisie est complète mais qu'une
+   * valeur est illisible (le parent affiche alors un message, sans consommer de tentative). */
+  onIllisible?: (illisible: boolean) => void;
 }
 
-export function EnsembleReelGuideBuilder({ onChange, label, disabled = false, erronee = false, parseurNombre = parserNombreOuFraction }: Props) {
+export function EnsembleReelGuideBuilder({ onChange, label, disabled = false, erronee = false, parseurNombre = parserNombreOuFraction, onIllisible }: Props) {
   const [forme, setForme] = useState<FormeEnsembleReel | null>(null);
   const [points, setPoints] = useState<string[]>([""]);
   const [morceaux, setMorceaux] = useState<EtatMorceauSaisie[]>([{ ...MORCEAU_VIDE }]);
@@ -155,6 +158,21 @@ export function EnsembleReelGuideBuilder({ onChange, label, disabled = false, er
   function emettre(nouvelleForme: FormeEnsembleReel | null, nouveauxPoints: string[], nouveauxMorceaux: EtatMorceauSaisie[]) {
     const pv = nouveauxPoints.map((p) => parseurNombre(p));
     const mv = nouveauxMorceaux.map((m) => morceauValide(m, parseurNombre));
+    // Saisie COMPLÈTE (chaque borne écrite, chaque crochet choisi) mais une valeur illisible : le
+    // parent garde « Valider » actif et affiche un message sans consommer de tentative (audit du 6e
+    // ch. 1, G1) — jamais un bouton grisé sans explication.
+    if (onIllisible) {
+      const rempli = (t: string) => t.trim() !== "";
+      const illisible =
+        nouvelleForme === "prive_points"
+          ? nouveauxPoints.length > 0 && nouveauxPoints.every(rempli) && pv.some((v) => v === null)
+          : nouvelleForme === "intervalles"
+            ? nouveauxMorceaux.length > 0 &&
+              nouveauxMorceaux.every((m) => (m.infMode === "-inf" || rempli(m.infValeur)) && (m.supMode === "+inf" || rempli(m.supValeur)) && crochetGaucheEffectif(m) !== null && crochetDroitEffectif(m) !== null) &&
+              mv.some((m) => m === null)
+            : false;
+      onIllisible(illisible);
+    }
     if (nouvelleForme === "reel") return onChange({ forme: "reel", points: [], morceaux: [] });
     if (nouvelleForme === "prive_points") {
       if (nouveauxPoints.length === 0 || pv.some((v) => v === null)) return onChange(null);

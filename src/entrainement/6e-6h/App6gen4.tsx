@@ -28,6 +28,11 @@ import {
 } from "./moteur6e/sessionDeriveesCyclometriques";
 import type { EtatSessionDeriveesCyclometriques, PhaseDeriveesCyclometriques } from "./moteur6e/typesDeriveesCyclometriques";
 import { EtapeChampDeriveeCyclo } from "./components6e/EtapeChampDeriveeCyclo";
+import { aidesDerivee, cibleDerivee, diagnostiquerPhaseDerivee } from "./ui6e/aidesDeriveesCyclometriques";
+
+/** Placeholder hors tirage (audit du 6e ch. 1, G8 : l'ancien « −2/√(1 − 4x²) » était la réponse
+ * d'un écran dans 5 % des tirages) : une forme, jamais une valeur. */
+const PLACEHOLDER_DERIVEE = "expression en x";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
 import {
@@ -38,42 +43,6 @@ import {
   formatFonctionELatex,
   formatFonctionFLatex,
   formatFonctionGLatex,
-  texteAideADeriveeFinaleNiveau1,
-  texteAideADeriveeFinaleNiveau2,
-  texteAideADeriveeUNiveau1,
-  texteAideADeriveeUNiveau2,
-  texteAideBDeriveeArcNiveau1,
-  texteAideBDeriveeArcNiveau2,
-  texteAideBDeriveeFinaleNiveau1,
-  texteAideBDeriveeFinaleNiveau2,
-  texteAideBDeriveeUNiveau1,
-  texteAideBDeriveeUNiveau2,
-  texteAideCDenominateurNiveau1,
-  texteAideCDenominateurNiveau2,
-  texteAideCDeriveeFinaleNiveau1,
-  texteAideCDeriveeFinaleNiveau2,
-  texteAideCNumerateurNiveau1,
-  texteAideCNumerateurNiveau2,
-  texteAideDBrutNiveau1,
-  texteAideDBrutNiveau2,
-  texteAideDDenominateurNiveau1,
-  texteAideDDenominateurNiveau2,
-  texteAideDNumerateurNiveau1,
-  texteAideDNumerateurNiveau2,
-  texteAideDSimplifieeNiveau1,
-  texteAideDSimplifieeNiveau2,
-  texteAideEDeriveeFinaleNiveau1,
-  texteAideEDeriveeFinaleNiveau2,
-  texteAideEDeriveeInterneNiveau1,
-  texteAideEDeriveeInterneNiveau2,
-  texteAideFBruteNiveau1,
-  texteAideFBruteNiveau2,
-  texteAideFSimplifieeNiveau1,
-  texteAideFSimplifieeNiveau2,
-  texteAideGDeriveeFinaleNiveau1,
-  texteAideGDeriveeFinaleNiveau2,
-  texteAideGDeriveeInterneNiveau1,
-  texteAideGDeriveeInterneNiveau2,
   consigneEcranDerivee,
 } from "./ui6e/formatDeriveesCyclometriques";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
@@ -210,7 +179,7 @@ export function App6gen4() {
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const niveauAide = etat.niveauAide;
-  const placeholderGenerique = "ex : -2/sqrt(1-4*x^2)...";
+  const aides = aidesDerivee(exercice, etat.phase);
 
   // Réponse attendue = « Résultat » de l'étape du corrigé détaillé (source unique avec le papier) :
   // forme substituée puis simplifiée, jamais l'aide de niveau 2 brute.
@@ -249,9 +218,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionALatex(exercice)}
-                  aideNiveau1={{ texte: texteAideADeriveeUNiveau1(exercice), latex: null }}
-                  aideNiveau2={texteAideADeriveeUNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -266,9 +237,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionALatex(exercice)}
-                  aideNiveau1={texteAideADeriveeFinaleNiveau1(exercice)}
-                  aideNiveau2={texteAideADeriveeFinaleNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -284,9 +257,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionBLatex(exercice)}
-                  aideNiveau1={{ texte: texteAideBDeriveeUNiveau1(), latex: null }}
-                  aideNiveau2={texteAideBDeriveeUNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -301,9 +276,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionBLatex(exercice)}
-                  aideNiveau1={texteAideBDeriveeArcNiveau1(exercice)}
-                  aideNiveau2={texteAideBDeriveeArcNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -318,9 +295,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionBLatex(exercice)}
-                  aideNiveau1={{ texte: texteAideBDeriveeFinaleNiveau1(), latex: null }}
-                  aideNiveau2={texteAideBDeriveeFinaleNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -336,9 +315,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionCLatex(exercice)}
-                  aideNiveau1={{ texte: texteAideCNumerateurNiveau1(), latex: null }}
-                  aideNiveau2={texteAideCNumerateurNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -353,9 +334,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionCLatex(exercice)}
-                  aideNiveau1={texteAideCDenominateurNiveau1()}
-                  aideNiveau2={texteAideCDenominateurNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -370,9 +353,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionCLatex(exercice)}
-                  aideNiveau1={texteAideCDeriveeFinaleNiveau1()}
-                  aideNiveau2={texteAideCDeriveeFinaleNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -388,9 +373,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionDLatex(exercice)}
-                  aideNiveau1={{ texte: texteAideDNumerateurNiveau1(), latex: null }}
-                  aideNiveau2={texteAideDNumerateurNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -405,9 +392,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionDLatex(exercice)}
-                  aideNiveau1={{ texte: texteAideDDenominateurNiveau1(), latex: null }}
-                  aideNiveau2={texteAideDDenominateurNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -422,9 +411,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionDLatex(exercice)}
-                  aideNiveau1={texteAideDBrutNiveau1()}
-                  aideNiveau2={texteAideDBrutNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -439,9 +430,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionDLatex(exercice)}
-                  aideNiveau1={texteAideDSimplifieeNiveau1()}
-                  aideNiveau2={texteAideDSimplifieeNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -457,9 +450,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionELatex(exercice)}
-                  aideNiveau1={{ texte: texteAideEDeriveeInterneNiveau1(), latex: null }}
-                  aideNiveau2={texteAideEDeriveeInterneNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -474,9 +469,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionELatex(exercice)}
-                  aideNiveau1={{ texte: texteAideEDeriveeFinaleNiveau1(exercice), latex: null }}
-                  aideNiveau2={texteAideEDeriveeFinaleNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -492,9 +489,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionFLatex(exercice)}
-                  aideNiveau1={{ texte: texteAideFBruteNiveau1(), latex: null }}
-                  aideNiveau2={texteAideFBruteNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -509,9 +508,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionFLatex(exercice)}
-                  aideNiveau1={texteAideFSimplifieeNiveau1()}
-                  aideNiveau2={{ texte: texteAideFSimplifieeNiveau2(exercice), latex: null }}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -527,9 +528,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionGLatex(exercice)}
-                  aideNiveau1={{ texte: texteAideGDeriveeInterneNiveau1(exercice), latex: null }}
-                  aideNiveau2={texteAideGDeriveeInterneNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}
@@ -544,9 +547,11 @@ export function App6gen4() {
                   key={etat.phase}
                   consigneEcran={consigneEcranDerivee(exercice, etat.phase)}
                   fonctionLatex={formatFonctionGLatex(exercice)}
-                  aideNiveau1={{ texte: texteAideGDeriveeFinaleNiveau1(exercice), latex: null }}
-                  aideNiveau2={texteAideGDeriveeFinaleNiveau2(exercice)}
-                  placeholder={placeholderGenerique}
+                  aideNiveau1={aides[0]}
+                  aideNiveau2={aides[1]}
+                  placeholder={PLACEHOLDER_DERIVEE}
+                  diagnostiquer={(t) => diagnostiquerPhaseDerivee(exercice, etat.phase, t)}
+                  cible={(t) => cibleDerivee(exercice, etat.phase, t)}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={niveauAide}

@@ -1,12 +1,9 @@
 import { useState } from "react";
 import type { ExerciceEquationsCyclometriques } from "../core6e/equationsCyclometriques.types";
-import {
-  CONSIGNE_GENERALE,
-  formatCandidatLatex,
-  formatEquationOriginaleLatex,
-  texteAideAcceptRejetNiveau1,
-  texteAideAcceptRejetNiveau2,
-} from "../ui6e/formatEquationsCyclometriques";
+import { CONSIGNE_GENERALE, formatCandidatLatex, formatEquationOriginaleLatex } from "../ui6e/formatEquationsCyclometriques";
+import { aideAcceptRejet1, aideAcceptRejet2 } from "../ui6e/aidesEquationsCyclometriques";
+import { CONSIGNES_ECRANS } from "../generateurs6e/equationsCyclometriques/corrigeDetaille";
+import { AidesCyclo, MessageRetourCyclo } from "./RetourSaisieCyclo";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -55,7 +52,7 @@ export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, tentativ
           </div>
         }
       />
-      <p className="prompt-text">Pour chaque solution trouvée à l'étape précédente, accepte-la ou rejette-la.</p>
+      <p className="prompt-text">{CONSIGNES_ECRANS.acceptRejet}</p>
       <div className="liste-morceaux">
         {exercice.candidats.map((cand, i) => (
           <div key={i} className="liste-morceaux-ligne">
@@ -66,14 +63,14 @@ export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, tentativ
               <button
                 type="button"
                 className={`btn${decisions[i] === true ? " toggle-active" : ""}${montrerErreurs && decisions[i] === true ? " is-erronee" : ""}`}
-                onClick={() => choisir(i, true)}
+                disabled={!!validation} onClick={() => choisir(i, true)}
               >
                 À accepter
               </button>
               <button
                 type="button"
                 className={`btn${decisions[i] === false ? " toggle-active" : ""}${montrerErreurs && decisions[i] === false ? " is-erronee" : ""}`}
-                onClick={() => choisir(i, false)}
+                disabled={!!validation} onClick={() => choisir(i, false)}
               >
                 À rejeter
               </button>
@@ -81,28 +78,14 @@ export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, tentativ
           </div>
         ))}
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideAcceptRejetNiveau1(exercice)}</p>
-          {niveauAide >= 2 && (
-            <>
-              <p>{texteAideAcceptRejetNiveau2(exercice).texte}</p>
-              <Katex expression={texteAideAcceptRejetNiveau2(exercice).latex} block />
-            </>
-          )}
-        </div>
-      )}
+      <AidesCyclo aide1={aideAcceptRejet1(exercice)} aide2={aideAcceptRejet2(exercice)} niveauAide={niveauAide} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetourCyclo blocage={null} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
