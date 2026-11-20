@@ -17,27 +17,33 @@
   var FONCTIONS = {
     arcsin: {
       label: 'arcsin(x)',
-      formuleLabel: "arcsin'(x) = 1 / √(1−x²)",
+      formuleLabel: '(arcsin <i>x</i>)′ = <span class="frac"><span>1</span><span><span class="rad">√<span class="sous">1 − <i>x</i>²</span></span></span></span>',
       f: Math.asin,
       derivee: function (x) { return 1 / Math.sqrt(1 - x * x); },
       xMin: -0.99, xMax: 0.99, step: 0.001,
       win: { xMin: -1.5, xMax: 1.5, yMin: -2.6, yMax: 2.6 },
+      xTicks: [[-1, "−1"], [-0.5, "−0,5"], [0.5, "0,5"], [1, "1"]],
+      yTicks: [[-Math.PI / 2, "−π/2"], [-1, "−1"], [1, "1"], [Math.PI / 2, "π/2"]],
     },
     arccos: {
       label: 'arccos(x)',
-      formuleLabel: "arccos'(x) = −1 / √(1−x²)",
+      formuleLabel: '(arccos <i>x</i>)′ = −<span class="frac"><span>1</span><span><span class="rad">√<span class="sous">1 − <i>x</i>²</span></span></span></span>',
       f: Math.acos,
       derivee: function (x) { return -1 / Math.sqrt(1 - x * x); },
       xMin: -0.99, xMax: 0.99, step: 0.001,
       win: { xMin: -1.5, xMax: 1.5, yMin: -1.1, yMax: 4.4 },
+      xTicks: [[-1, "−1"], [-0.5, "−0,5"], [0.5, "0,5"], [1, "1"]],
+      yTicks: [[1, "1"], [Math.PI / 2, "π/2"], [Math.PI, "π"], [4, "4"]],
     },
     arctan: {
       label: 'arctan(x)',
-      formuleLabel: "arctan'(x) = 1 / (1+x²)",
+      formuleLabel: '(arctan <i>x</i>)′ = <span class="frac"><span>1</span><span>1 + <i>x</i>²</span></span>',
       f: Math.atan,
       derivee: function (x) { return 1 / (1 + x * x); },
       xMin: -6, xMax: 6, step: 0.01,
       win: { xMin: -6.5, xMax: 6.5, yMin: -2.6, yMax: 2.6 },
+      xTicks: [[-6, "−6"], [-4, "−4"], [-2, "−2"], [2, "2"], [4, "4"], [6, "6"]],
+      yTicks: [[-Math.PI / 2, "−π/2"], [-1, "−1"], [1, "1"], [Math.PI / 2, "π/2"]],
     },
   };
 
@@ -61,8 +67,16 @@
     ':host{display:block;font-family:var(--sans,system-ui,sans-serif);}' +
     '*{box-sizing:border-box;}' +
     '.select-row{display:flex;justify-content:center;margin-bottom:10px;}' +
-    '.select-row select{font-family:inherit;font-size:0.92rem;font-weight:600;color:var(--ink,#241f1a);background:var(--surface,#fff);border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:6px 10px;cursor:pointer;}' +
-    '.formule{text-align:center;font-family:var(--mono,monospace);font-size:0.92rem;color:var(--ink-soft,#6b6055);margin:0 0 14px;min-height:1.3rem;}' +
+    '.select-row select{min-height:44px;font-family:inherit;font-size:0.92rem;font-weight:600;color:var(--ink,#241f1a);background:var(--surface,#fff);border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:6px 10px;cursor:pointer;}' +
+    '.formule{text-align:center;font-family:var(--serif,Georgia,serif);font-size:1.05rem;color:var(--ink,#241f1a);margin:0 0 14px;min-height:1.3rem;white-space:nowrap;}' +
+    '.formule i{margin-right:0.06em;}' +
+    '.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.2;font-size:0.92em;}' +
+    '.frac>span:first-child{border-bottom:1px solid currentColor;padding:0 3px 1px;}' +
+    '.frac>span:last-child{padding:2px 3px 0;}' +
+    '.rad .sous{border-top:1px solid currentColor;padding:0 2px 0 1px;}' +
+    '.grille{stroke:var(--line-soft,#dfe7ec);stroke-width:1;}' +
+    '.tick{stroke:var(--ink-soft,#6b6055);stroke-width:1;}' +
+    '.tick-label{font-size:10px;font-family:var(--sans,sans-serif);fill:var(--ink-soft,#6b6055);paint-order:stroke;stroke:var(--surface-2,#faf6f0);stroke-width:3px;}' +
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:16px;}' +
     'svg{width:100%;max-width:400px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.4;}' +
@@ -76,12 +90,12 @@
     '.legende-tangente{fill:var(--plan,#5b4ea3);}' +
     '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;margin-top:20px;}' +
     '.stat{flex:1 1 0;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
-    '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
+    '.stat-label{display:block;font-family:var(--sans,sans-serif);font-size:0.78rem;color:var(--ink-soft,#6b6055);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.98rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
     '.curseur{display:flex;flex-direction:column;gap:6px;}' +
     '.curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);text-align:center;}' +
-    '.curseur-row{display:flex;align-items:center;gap:12px;}' +
-    '.curseur-row input[type="range"]{flex:1 1 auto;accent-color:var(--accent,#a8471f);}' +
+    '.curseur-row{display:flex;align-items:center;gap:12px;min-height:44px;}' +
+    '.curseur-row input[type="range"]{flex:1 1 auto;accent-color:var(--accent,#a8471f);min-height:44px;}' +
     '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:60px;text-align:right;font-size:0.92rem;}' +
     '</style>' +
     '<div class="select-row"><select id="fonction">' +
@@ -196,7 +210,7 @@
     var y = def.f(x);
     var pente = def.derivee(x);
 
-    this._formule.textContent = def.formuleLabel;
+    this._formule.innerHTML = def.formuleLabel;
     this._valeurX.textContent = formatNombreFr(x, 3);
     this._valX.textContent = formatNombreFr(x, 3);
     this._valPente.textContent = formatNombreFr(pente, 3);
@@ -224,6 +238,25 @@
     etiqY.textContent = "y";
     svg.appendChild(etiqY);
 
+    // Graduations (et quadrillage léger, sous tout le reste).
+    var avant = svg.firstChild.nextSibling;
+    def.xTicks.forEach(function (tk) {
+      var p = self._toPx(win, tk[0], 0);
+      svg.insertBefore(svgEl(ns, "line", { x1: p[0].toFixed(2), x2: p[0].toFixed(2), y1: MARGE, y2: HAUTEUR - MARGE, class: "grille" }), avant);
+      svg.appendChild(svgEl(ns, "line", { x1: p[0].toFixed(2), x2: p[0].toFixed(2), y1: (origine[1] - 3).toFixed(2), y2: (origine[1] + 3).toFixed(2), class: "tick" }));
+      var tx = svgEl(ns, "text", { x: p[0].toFixed(2), y: (origine[1] + 14).toFixed(2), "text-anchor": "middle", class: "tick-label" });
+      tx.textContent = tk[1];
+      svg.appendChild(tx);
+    });
+    def.yTicks.forEach(function (tk) {
+      var p = self._toPx(win, 0, tk[0]);
+      svg.insertBefore(svgEl(ns, "line", { x1: MARGE, x2: LARGEUR - MARGE, y1: p[1].toFixed(2), y2: p[1].toFixed(2), class: "grille" }), avant);
+      svg.appendChild(svgEl(ns, "line", { x1: (origine[0] - 3).toFixed(2), x2: (origine[0] + 3).toFixed(2), y1: p[1].toFixed(2), y2: p[1].toFixed(2), class: "tick" }));
+      var ty = svgEl(ns, "text", { x: (origine[0] - 5).toFixed(2), y: (p[1] + 3.5).toFixed(2), "text-anchor": "end", class: "tick-label" });
+      ty.textContent = tk[1];
+      svg.appendChild(ty);
+    });
+
     // Tangente (trait plein, clippée au cadre) — dessinée avant la courbe pour
     // que celle-ci reste au premier plan si les deux se superposent.
     var seg = self._segmentTangente(win, x, y, pente);
@@ -248,6 +281,9 @@
     var legT = svgEl(ns, "text", { x: MARGE + 4, y: yLegende + 15, class: "legende legende-tangente" });
     legT.textContent = "tangente";
     svg.appendChild(legT);
+
+    // Étiquettes de graduation au premier plan.
+    svg.querySelectorAll("text.tick-label").forEach(function (t) { svg.appendChild(t); });
   };
 
   if (!customElements.get("cyclometrique-tangente-widget")) {

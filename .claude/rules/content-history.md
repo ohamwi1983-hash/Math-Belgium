@@ -4886,3 +4886,44 @@ Lot E (`quizFonctions5e`) : 8 thèmes de 35 (280), +15 par thème et thème nouv
 milliers avec `\,`. `nombreQuestions` / `etendueNombreQuestions` (accueil calculé, plus « 7 thèmes,
 20 affirmations »). Contrôle : script d'échantillonnage (98 vérifications numériques : domaines,
 images, composées en un point, identité du bidon), typographie hors `$` et équilibre — 0 erreur.
+## 6e (6h), Chapitre 1 — 8 ateliers de l'audit et remise à niveau des 3 existants
+
+Conventions « 14 widgets », « couleurs », « tableaux tronqués » dès la première passe. Huit
+ateliers (blocs `atelier` seuls dans le chapitre) :
+- **`droite-horizontale-widget`** (§ 1, après les deux figures du test) : horizontale y = k,
+  intersections comptées sur la restriction choisie (x² − 2x, x³ − 3x, sin, x³/4 ; 2 à 5
+  restrictions), verdict injective / bijective avec l'image, horizontale témoin ; points verts
+  (≤ 1 intersection) ou rouges ; sin sur ℝ : « une infinité ».
+- **`machine-reciproque-widget`** (§ 1, après l'exemple de la méthode 1) : aller de haut en bas,
+  retour de bas en haut, même valeur sur chaque ligne ; x = 1 interdit pour 5/(x − 1) ;
+  2√x − 3 (retour par le carré, y ≥ −3). Sans SVG (pas d'épinglage).
+- **`pentes-inverses-widget`** (§ 1, après l'intuition « Pourquoi la pente s'inverse ») :
+  tangentes en A(a ; b) et A′(b ; a), triangles de pente aux côtés échangés, produit 1, tangente
+  verticale si f′(a) = 0 (x², x³, sin) ; repère orthonormé. Défaut a = 1,5 (a = 1 est sur y = x).
+- **`arc-de-trig-widget`** (§ 2, après le piège « l'unique angle ») : θ = kπ/48 sur [−2π ; 2π],
+  résultat EXACT en entiers (réduction modulo 2π puis symétrie), relation affichée (π − θ,
+  2π − θ, θ − π…), tan θ inexistante, graphique en dents de scie.
+- **`equation-ce-widget`** (§ 3, après l'exemple « la CE rejette ») : membres tracés seulement sur
+  leur CE, bandes « CE gauche / droite », bande verte commune, candidats acceptés / rejetés,
+  balayage de x ; 4 équations (cours, arccos du cours, arctan sans CE, CE vide).
+- **`transformees-arc-widget`** (§ 5, après les trois graphes de référence) : c + k·arc(mx + n),
+  domaine et image exacts (fractions, c ± aπ) ; fenêtre fixe −6,5 à 6,5 × −8,6 à 8,6
+  (|c| + |k|π ≤ 2 + 2π). **Piège** : aux bornes du domaine, mx + n vaut 1,0000000002 → NaN dans
+  le `d` du chemin ; argument borné à [−1 ; 1].
+- **`angle-de-vue-widget`** (après l'application de l'écran) : scène à l'échelle et θ(x) en
+  degrés, maximum √(ab), vert tant que θ′ > 0, θ → 0 près du mur ; fenêtre 0–90° (θ* ≤ 65,4°).
+- **`refraction-widget`** (après l'application de la réfraction) : θ₂ = arcsin(n₁ sin θ₁ / n₂),
+  angle limite arcsin(n₂ / n₁), réflexion totale (air, eau, verre, diamant).
+Remise à niveau de `reciproque-miroir-widget`, `cyclometrique-miroir-widget`,
+`cyclometrique-tangente-widget` (comportement inchangé) : graduations et quadrillage, légende en
+HTML sous la figure (fractions, radicaux), (arcsin x)′ en fraction au lieu du monospace
+« arcsin'(x) = 1 / √(1−x²) », libellés sans monospace, cibles de 44 px. Dans tous ces ateliers,
+les étiquettes de graduation sont ramenées au premier plan après les courbes. **Pièges** : une
+formule longue dans un `.fm` (`white-space: nowrap`) déborde à 390 px — la couper en deux blocs
+(θ(x) de l'angle de vue, CE vide de l'équation) ; graduation 3 et π superposées (garder π).
+Vérifié (Vite, page réelle, iPhone 13 et 1 280 px, clair et sombre) : 0 erreur console,
+scrollWidth 390, 0 `$` / `.katex-error`, Shadow DOM sans `^ $ NaN Infinity undefined`, 0
+étiquette rognée, 0 débordement, axes identiques après chaque curseur (bornes comprises),
+`test-epingle` 0 échec ; valeurs recoupées à la main ; `tsc`, `oxlint`, `npm run build` propres.
+Captures : `scratchpad/ateliers-6e1/`. Machine saturée par d'autres agents : manipulations faites
+en partie sur un banc d'essai léger (`harness/index.html`, mêmes fichiers et `index.css`).

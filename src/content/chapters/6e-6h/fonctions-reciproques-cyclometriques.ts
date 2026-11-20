@@ -147,6 +147,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'droite-horizontale-widget',
+          label: 'Manipule toi-même — la droite horizontale',
+          caption:
+            'Fais glisser la droite horizontale y = k et compte ses intersections avec le ' +
+            'graphe. Choisis ensuite une restriction du domaine : la partie jetée passe en ' +
+            'gris, et le verdict dit si la fonction restreinte est injective. Une ' +
+            'restriction est bonne quand plus aucune horizontale ne coupe deux fois.',
+        },
+        {
           kind: 'para',
           text:
             "Seule une fonction bijective (entre un domaine et un ensemble d'arrivée bien " +
@@ -468,6 +478,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'machine-reciproque-widget',
+          label: 'Manipule toi-même — la machine qui défait',
+          caption:
+            'À gauche, la chaîne d\'opérations de f, lue de haut en bas ; à droite, la ' +
+            'chaîne réciproque, qui défait chaque opération dans l\'ordre inverse, lue de ' +
+            'bas en haut. Fais varier x : sur chaque ligne, les deux colonnes affichent la ' +
+            'même valeur, et le retour rend le x de départ. Avec 5/(x − 1), essaie x = 1.',
+        },
+        {
           kind: 'methode',
           label: 'Méthode 2 — permutation',
           items: ['Dans $y = f(x)$, permute $x$ et $y$, puis isole $y$.'],
@@ -589,6 +609,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             "une tangente de pente $m$ devient, après le miroir, une tangente de pente $1/m$. " +
             "C'est exactement pour ça que la dérivée de $f^{-1}$ est **l'inverse** de celle de " +
             "$f$ — le théorème qui suit ne fait que traduire cette image en formule.",
+        },
+        {
+          kind: 'atelier',
+          tag: 'pentes-inverses-widget',
+          label: 'Manipule toi-même — des pentes inverses',
+          caption:
+            'Déplace le point A(a ; b) sur f (en orange) : son reflet A′(b ; a) sur f⁻¹ (en ' +
+            'vert) porte une tangente dont la pente est l\'inverse de celle de f en A. Le ' +
+            'petit triangle de pente montre pourquoi : le miroir y = x échange ses deux ' +
+            'côtés. Amène A là où la tangente à f est horizontale : celle de f⁻¹ devient ' +
+            'verticale.',
         },
         {
           kind: 'methode',
@@ -1080,6 +1111,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             'avec sa propre image.',
         },
         {
+          kind: 'atelier',
+          tag: 'arc-de-trig-widget',
+          label: 'Manipule toi-même — arcsin(sin θ), arccos(cos θ), arctan(tan θ)',
+          caption:
+            'Fais tourner θ n\'importe où sur le cercle, de −2π à 2π. Le résultat (en vert) ' +
+            'est toujours l\'angle de l\'image de l\'arcfonction qui a le même sinus, le même ' +
+            'cosinus ou la même tangente que θ : il ne vaut θ que si θ est déjà dans cette ' +
+            'image. Le graphique de droite montre la courbe « en dents de scie » obtenue.',
+        },
+        {
           kind: 'exempleLibre',
           label: 'Démonstration — arcsin est impaire',
           blocks: [
@@ -1241,6 +1282,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           domaines: ['Physique', 'Optique'],
         },
         {
+          kind: 'atelier',
+          tag: 'refraction-widget',
+          label: 'Manipule toi-même — réfraction et angle limite',
+          caption:
+            'Choisis les deux milieux et fais varier l\'angle d\'incidence θ₁. L\'angle ' +
+            'réfracté θ₂ se calcule avec arcsin, qui n\'existe que si n₁ sin θ₁ / n₂ ne ' +
+            'dépasse pas 1. Fais passer la lumière du verre vers l\'air : au-delà de l\'angle ' +
+            'limite, il n\'y a plus de rayon réfracté, c\'est la réflexion totale.',
+        },
+        {
           kind: 'entrainement',
           title: 'arcsin, arccos, arctan',
           generatorId: '6gen2',
@@ -1394,6 +1445,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             },
             { kind: 'para', text: "Solution finale : $S = \\{1\\}$." },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'equation-ce-widget',
+          label: 'Manipule toi-même — équation et condition d\'existence',
+          caption:
+            'Chaque membre n\'est tracé que là où il existe : les bandes sous le graphique ' +
+            'montrent la CE de chaque membre, la bande verte leur partie commune. Les ' +
+            'candidats de l\'équation simplifiée sont acceptés s\'ils tombent dans la CE, ' +
+            'rejetés sinon. Fais glisser x sur un candidat rejeté : au moins un des deux ' +
+            'membres n\'existe plus.',
         },
         {
           kind: 'entrainement',
@@ -1799,6 +1861,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           domaines: ['Physique', 'Optimisation'],
         },
         {
+          kind: 'atelier',
+          tag: 'angle-de-vue-widget',
+          label: 'Manipule toi-même — l\'angle de vue',
+          caption:
+            'Avance ou recule face au mur : l\'angle θ sous lequel tu vois l\'écran se lit ' +
+            'sur la scène (à l\'échelle) et sur le graphique. Tout près du mur, θ tend vers ' +
+            '0 ; très loin aussi. Le maximum est atteint en x = √(ab) : change la hauteur ' +
+            'de l\'écran et sa position pour voir la meilleure place se déplacer.',
+        },
+        {
           kind: 'entrainement',
           title: 'Dérivées de fonctions cyclométriques',
           generatorId: '6gen4',
@@ -1886,6 +1958,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             yAxisLabel: 'y',
             caption: 'y = arctan(x)',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'transformees-arc-widget',
+          label: 'Manipule toi-même — les transformées c + k·arc(mx + n)',
+          caption:
+            'Choisis arcsin, arccos ou arctan, puis règle k, m, n et c. Le domaine (en ' +
+            'vert, sur l\'axe des abscisses) et l\'image (en violet, sur l\'axe des ordonnées) ' +
+            'se recalculent en direct, en valeurs exactes. Observe ce qui change le domaine ' +
+            '(seulement m et n) et ce qui change l\'image (seulement k et c), et quand le ' +
+            'sens de variation s\'inverse.',
         },
         {
           kind: 'entrainement',
