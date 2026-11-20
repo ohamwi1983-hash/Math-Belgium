@@ -326,6 +326,18 @@ export const fonctionSecondDegre: ChapterContent = {
             'constantes, une fonction du second degré. Dans ce cas, la différence seconde ' +
             'vaut 2a, ce qui permet de retrouver a, puis b et c.',
         },
+        {
+          kind: 'entrainement',
+          title: 'Premier ou second degré ? Différences secondes',
+          generatorId: 'gen124',
+          description: [
+            'Un tableau de valeurs : calcule les différences premières, puis secondes, décide si la ' +
+              'fonction est du premier degré, du second degré ou ni l’un ni l’autre, et retrouve son ' +
+              'expression (la différence seconde vaut 2a, c = f(0), f(1) = a + b + c).',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 124. Premier ou second degré ? Différences secondes »',
+        },
         { kind: 'subheading', text: 'Sommet et axe de symétrie' },
         {
           kind: 'intuition',
