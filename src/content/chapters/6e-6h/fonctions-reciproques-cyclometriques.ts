@@ -788,6 +788,18 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 1. Fonctions injectives / surjectives / bijectives »',
         },
+        {
+          kind: 'entrainement',
+          title: "Dérivée d'une réciproque en un point",
+          generatorId: '6gen155',
+          description: [
+            'Sans expression de f⁻¹ (x³ + x, eˣ + x, x + sin x…) : trouve x₀ = f⁻¹(y₀) par une valeur ' +
+              "évidente, calcule f′(x₀), décide si le théorème s'applique (f′(x₀) ≠ 0) et conclus " +
+              "(f⁻¹)′(y₀) = 1/f′(x₀) — ou une tangente verticale.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: "6e (6h) → « 155. Dérivée d'une réciproque en un point »",
+        },
       ],
     },
     {
