@@ -245,6 +245,17 @@ function substitution(l: Lin, v: Expr, nomAlpha = "\\alpha"): string {
 
 const LIBELLE: Record<T["famille"], string> = Object.fromEntries(OPTIONS_FAMILLE.map((o) => [o.id, o.label])) as Record<T["famille"], string>;
 
+/** Produit non factorisé à argument non réduit à x : écrit avec u (la ligne complète sortait de sa cellule). */
+function ligneReconnaissance(e: T, enonce: string, pourquoi: string): LigneCalcul {
+  if (e.famille !== "produit" || e.sousCas !== "nonFactoree") return ligne(enonce, pourquoi);
+  const f2 = e.facteur2;
+  const arg = formatArgumentLatex(f2.a, f2.b).replace(/\s+/g, "");
+  if (arg === "x") return ligne(enonce, pourquoi);
+  const fn = NOM[f2.fonction];
+  const l = simplifierAffichageProduit(`${fn}\\left(u\\right)^2 = ${f2.k.latex}\\cdot ${fn}\\left(u\\right)`);
+  return ligne(dfrac(l).replace(/\s*=\s*/, "="), [texte("avec "), latex(`u=${arg}`), texte(` : ${pourquoi}`)]);
+}
+
 function etapesReconnaissance(e: T): EtapeCorrection[] {
   const enonce = formatEnonceEquationTrigonometriqueLatex(e).replace(/\s*=\s*/, "=");
   const pourquoi =
@@ -261,7 +272,7 @@ function etapesReconnaissance(e: T): EtapeCorrection[] {
             : "deux fonctions trigonométriques différentes de part et d'autre";
   return [
     utilise("a", [texte(`Les quatre techniques du cours ${COURS_EQUATIONS} : application directe (une fonction égale à une constante), produit nul, substitution pythagoricienne (`), latex("\\sin^2 x+\\cos^2 x=1"), texte("), égalité de deux fonctions après conversion.")]),
-    calcul("a", [ligne(enonce, pourquoi)]),
+    calcul("a", [ligneReconnaissance(e, enonce, pourquoi)]),
     resultat("a", [texte(LIBELLE[e.famille])]),
   ];
 }
@@ -367,18 +378,28 @@ function correctionProduit(e: ExerciceProduitFacteurs): EtapeCorrection[] {
   if (e.sousCas === "nonFactoree") {
     const sq = lettre(e, "prefacteur");
     const fn = NOM[f2.fonction];
-    const arg = formatArgumentLatex(f2.a, f2.b);
+    const argComplet = formatArgumentLatex(f2.a, f2.b);
+    // Argument non réduit à x : on pose u (la ligne complète, insécable, sortait de sa cellule).
+    const avecU = argComplet.replace(/\s+/g, "") !== "x";
+    const arg = avecU ? "u" : argComplet;
+    const enonceU = simplifierAffichageProduit(`${fn}\\left(${arg}\\right)^2 = ${f2.k.latex}\\cdot ${fn}\\left(${arg}\\right)`);
+    const factoriseU = simplifierAffichageProduit(`${fn}\\left(${arg}\\right)\\left(${fn}\\left(${arg}\\right) - ${f2.k.latex}\\right) = 0`);
     const tout = simplifierAffichageProduit(`${fn}\\left(${arg}\\right)^2 - ${f2.k.latex}\\cdot ${fn}\\left(${arg}\\right) = 0`);
     etapes.push(
-      utilise(sq, [texte("Les deux termes ont un facteur commun, la fonction trigonométrique elle-même : on ramène tout dans un membre, puis on la met en évidence, comme pour un polynôme ("), latex("X^2-aX=X(X-a)"), texte(").")]),
+      utilise(sq, [
+        ...(avecU ? [texte("On pose "), latex(`u=${argComplet.replace(/\s+/g, "")}`), texte(". ")] : []),
+        texte("Les deux termes ont un facteur commun, la fonction trigonométrique elle-même : on ramène tout dans un membre, puis on la met en évidence, comme pour un polynôme ("),
+        latex("X^2-aX=X(X-a)"),
+        texte(")."),
+      ]),
       calcul(sq, [
-        ligne(dfrac(formatEnonceProduitLatex(e)).replace(/\s*=\s*/, "="), "équation de départ"),
+        ligne(dfrac(enonceU).replace(/\s*=\s*/, "="), avecU ? "équation de départ, écrite avec u" : "équation de départ"),
         ligne(dfrac(tout).replace(/\s*=\s*/, "="), [
           texte(f2.k.valeur < 0 ? "on ajoute " : "on retranche "),
           latex(simplifierAffichageProduit(`${kPropre(f2.k.latex).replace(/^-/, "")}\\cdot ${fn}\\left(${arg}\\right)`)),
           texte(" aux deux membres"),
         ]),
-        ligne(dfrac(formatAidePrefacteurNiveau2Latex(e)).replace(/\s*=\s*/, "="), [texte("on met "), latex(`${fn}\\left(${arg}\\right)`), texte(" en évidence")]),
+        ligne(dfrac(factoriseU).replace(/\s*=\s*/, "="), [texte("on met "), latex(`${fn}\\left(${arg}\\right)`), texte(" en évidence")]),
       ]),
       resultat(sq, [latex(formatAidePrefacteurNiveau2Latex(e))]),
       piege(sq, [texte("Ne jamais diviser par le facteur commun : on perdrait toutes les solutions où il s'annule.")]),
