@@ -1331,6 +1331,22 @@ export const fonctionsExponentielles: ChapterContent = {
         },
         { kind: 'subheading', text: 'Lire le graphique de f′ pour connaître f' },
         {
+          kind: 'methode',
+          label: 'Lire le graphique de f′, étape par étape',
+          items: [
+            "Repère les **zéros** de $f'$ : les abscisses où la courbe de $f'$ coupe ou touche l'axe des " +
+              'abscisses.',
+            "Entre deux zéros, lis le **signe** de $f'$ (courbe au-dessus ou en dessous de l'axe) : il donne " +
+              'le sens de variation de $f$ sur cet intervalle.',
+            "En chaque zéro, regarde si $f'$ **change de signe** : de $+$ à $-$, maximum de $f$ ; de $-$ à " +
+              "$+$, minimum ; sans changement de signe, tangente horizontale mais pas d'extremum.",
+            "Lis ensuite les **variations** de $f'$ : là où $f'$ croît, $f$ est convexe ; là où elle décroît, " +
+              "$f$ est concave ; un extremum de $f'$ donne un point d'inflexion de $f$.",
+            'Résume le tout dans le tableau de variation de $f$. Pour placer la courbe de $f$ en hauteur, il ' +
+              "faut **en plus** une valeur de $f$ : le graphique de $f'$ ne la donne pas.",
+          ],
+        },
+        {
           kind: 'featureTable',
           caption: "Méthode : ce que dit le graphique de f′, et ce qu'on en déduit pour f (sur un intervalle)",
           headers: ['Sur le graphique de f′', 'Pour la fonction f'],
@@ -1381,6 +1397,7 @@ export const fonctionsExponentielles: ChapterContent = {
               "point d'inflexion de $f$ : à sa droite $f'$ monte et $f$ est convexe.",
           },
         },
+        { kind: 'subheading', text: "Ce que le graphique de f′ dit, et ce qu'il ne dit pas" },
         {
           kind: 'exempleLibre',
           label: "Exemple résolu — les variations de f lues sur le graphique de f′",
