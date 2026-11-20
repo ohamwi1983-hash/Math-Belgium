@@ -1,0 +1,61 @@
+import type { ResultatExerciceQuizFonctionsReciproquesCyclometriques } from "../moteur6e/typesQuizFonctionsReciproquesCyclometriques";
+import { RenduFragments } from "../components/RenduFragments";
+
+interface Props {
+  resultat: ResultatExerciceQuizFonctionsReciproquesCyclometriques;
+  labelBouton: string;
+  onContinuer: () => void;
+}
+
+function classeScore(score: number): string {
+  return score === 100 ? "score-value is-good" : "score-value is-bad";
+}
+
+function libelleVraiFaux(reponse: boolean): string {
+  return reponse ? "Vrai" : "Faux";
+}
+
+/** Mono-écran, une seule note (comme 6gen65 et les 4 quiz vrai/faux du chantier 4e, gen59-62). La
+ * justification s'affiche TOUJOURS — même en cas de bonne réponse, jamais seulement
+ * `afficherReponseApresEchec && score === 0` — puisqu'il s'agit d'un quiz de révision où le
+ * renforcement pédagogique compte autant après une réussite qu'après un échec. Titre "Bonne
+ * réponse !"/"Mauvaise réponse", jamais "Vrai !"/"Faux !" : ces mots désignent déjà la valeur de
+ * vérité de l'AFFIRMATION, les réutiliser pour qualifier la performance de l'élève créerait une
+ * collision de sens (même choix que 6gen65/gen59-62). Énoncé/justification rendus via
+ * `RenduFragments` (texte/LaTeX mêlés). */
+export function ResultatPanelQuizFonctionsReciproquesCyclometriques({ resultat, labelBouton, onContinuer }: Props) {
+  const correct = resultat.score === 100;
+
+  return (
+    <div>
+      <h2 className="result-title">{correct ? "Bonne réponse !" : "Mauvaise réponse"}</h2>
+      <p className="result-subtitle">
+        <RenduFragments fragments={resultat.question.enonce} />
+      </p>
+      <ul className="score-list">
+        <li className="score-item">
+          <span>Ta réponse</span>
+          <span>{libelleVraiFaux(resultat.reponseChoisie)}</span>
+        </li>
+        <li className="score-item">
+          <span>Réponse correcte</span>
+          <span>{libelleVraiFaux(resultat.question.reponse)}</span>
+        </li>
+        <li className="score-item">
+          <span>Résultat</span>
+          <span className={classeScore(resultat.score)}>{resultat.score === 100 ? "Correct" : "Incorrect"}</span>
+        </li>
+      </ul>
+      {/* Un seul <span> : `.triangle-quelconque-aide` est un conteneur flex, chaque fragment KaTeX y
+          devenait sinon une colonne (justification éclatée en morceaux). */}
+      <div className="triangle-quelconque-aide">
+        <span>
+          <RenduFragments fragments={resultat.question.justification} />
+        </span>
+      </div>
+      <button type="button" className="btn btn-primary" onClick={onContinuer}>
+        {labelBouton}
+      </button>
+    </div>
+  );
+}

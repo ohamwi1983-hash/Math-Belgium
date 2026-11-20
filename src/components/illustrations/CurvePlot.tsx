@@ -67,6 +67,7 @@ export function CurvePlot({
   showYAxis = true,
   fixedYRange,
   compact = false,
+  grid = false,
 }: Props) {
   const { viewBox, xLeft: X_LEFT, xRight: X_RIGHT, yTop: Y_TOP, yBottom: Y_BOTTOM } = compact ? COMPACT : WIDE
 
@@ -143,6 +144,19 @@ export function CurvePlot({
         const toneClass = r.tone === 'good' ? 'svg-band-good' : r.tone === 'bad' ? 'svg-band-bad' : 'svg-band'
         return <polygon key={i} points={[...upperPts, ...lowerPts].join(' ')} className={toneClass} />
       })}
+      {/* Quadrillage aux graduations (`grid`) : une ligne fine par valeur de xTicks / yTicks, pour
+          un graphique à LIRE (bornes, asymptotes, points remarquables sur une ligne de la grille,
+          même à des multiples de π/2 que le quadrillage entier de `vectorPlane` ne sait pas tracer). */}
+      {grid && (
+        <g className="svg-grid" strokeWidth="1">
+          {xTicks.filter((t) => t >= xMin && t <= xMax).map((t) => (
+            <line key={`gx-${t}`} x1={xScale(t)} y1={Y_TOP} x2={xScale(t)} y2={Y_BOTTOM} />
+          ))}
+          {(yTicks ?? []).filter((t) => t >= yBottom && t <= yTop).map((t) => (
+            <line key={`gy-${t}`} x1={X_LEFT} y1={yScale(t)} x2={X_RIGHT} y2={yScale(t)} />
+          ))}
+        </g>
+      )}
       {imageBand &&
         (() => {
           const topValue = imageBand.direction === 'up' ? yTop : imageBand.from
@@ -284,14 +298,18 @@ export function CurvePlot({
       })}
 
       {obliqueAsymptotes?.map((asym, i) => {
-        const y1 = asym.a * xMin + asym.b
-        const y2 = asym.a * xMax + asym.b
+        // `from`/`to` : tronçon de la droite à tracer (par défaut tout le cadre) — une asymptote
+        // en +∞ seulement n'a pas à traverser tout le graphe, ni à sortir du cadre par le bas.
+        const xa = asym.from ?? xMin
+        const xb = asym.to ?? xMax
+        const y1 = asym.a * xa + asym.b
+        const y2 = asym.a * xb + asym.b
         // Étiquette près de l'extrémité droite de la droite, légèrement au-dessus si la pente
         // est positive (pour ne pas chevaucher le trait), en-dessous sinon.
         const labelY = yScale(y2) + (asym.a >= 0 ? -8 : 16)
         return (
           <g key={i}>
-            <line x1={xScale(xMin)} y1={yScale(y1)} x2={xScale(xMax)} y2={yScale(y2)} className="svg-good-outline" strokeWidth="1.6" strokeDasharray="5 4" />
+            <line x1={xScale(xa)} y1={yScale(y1)} x2={xScale(xb)} y2={yScale(y2)} className="svg-good-outline" strokeWidth="1.6" strokeDasharray="5 4" />
             {asym.label && (
               <text x={X_RIGHT - 4} y={labelY} textAnchor="end" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
                 {mathLabelTspans(asym.label, 13.5)}

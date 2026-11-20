@@ -1,0 +1,88 @@
+/**
+ * Couche B (6e) — moteur de session pour "Fonctions réciproques et cyclométriques" (quiz
+ * vrai/faux, 6gen64, chapitre 1). N'importe jamais rien de `src/generateurs6e/` — voir
+ * `sessionQuizFonctionsReciproquesCyclometriques.test.ts` pour la preuve avec un générateur factice, même
+ * principe que tous les autres moteurs du projet. Structure identique à 6gen65.
+ *
+ * **Mono-écran, une seule tentative** — jamais `etat.reglages.tentativesMax` : avec exactement 2
+ * réponses possibles (Vrai/Faux), un second essai après un échec serait trivialement deviné, donc
+ * pédagogiquement sans valeur. Pas d'aide progressive non plus (`niveauAide` inexistant).
+ */
+import type { ExerciceQuizFonctionsReciproquesCyclometriques, GenerateurExerciceQuizFonctionsReciproquesCyclometriques } from "../core6e/quizFonctionsReciproquesCyclometriques.types";
+import type { ReglagesSession6e } from "../core6e/session6e.types";
+import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
+import type { ReglagesEtape } from "../moteur/etapeTentatives";
+import { verifierReponseVraiFaux } from "./verificationQuizFonctionsReciproquesCyclometriques";
+import type { EtatSessionQuizFonctionsReciproquesCyclometriques, ResultatExerciceQuizFonctionsReciproquesCyclometriques } from "./typesQuizFonctionsReciproquesCyclometriques";
+
+const POINTS_DE_BASE = 100;
+const TENTATIVES_MAX_VRAI_FAUX = 1;
+
+function reglagesEtape(): ReglagesEtape {
+  return {
+    pointsDeBase: POINTS_DE_BASE,
+    tentativesMax: TENTATIVES_MAX_VRAI_FAUX,
+  };
+}
+
+export function demarrerSessionQuizFonctionsReciproquesCyclometriques(
+  reglages: ReglagesSession6e,
+  generateur: GenerateurExerciceQuizFonctionsReciproquesCyclometriques,
+): EtatSessionQuizFonctionsReciproquesCyclometriques {
+  return {
+    reglages,
+    generateur,
+    indexExercice: 0,
+    exerciceCourant: generateur(),
+    etapeCourante: demarrerEtapeTentatives(),
+    resultats: [],
+    terminee: false,
+  };
+}
+
+function cloturerExerciceOuSuivant(
+  etat: EtatSessionQuizFonctionsReciproquesCyclometriques,
+  resultat: ResultatExerciceQuizFonctionsReciproquesCyclometriques,
+): EtatSessionQuizFonctionsReciproquesCyclometriques {
+  const resultats = [...etat.resultats, resultat];
+  const indexExercice = etat.indexExercice + 1;
+
+  if (indexExercice >= etat.reglages.nombreExercices) {
+    return { ...etat, resultats, indexExercice, terminee: true };
+  }
+
+  return {
+    ...etat,
+    resultats,
+    indexExercice,
+    exerciceCourant: etat.generateur(),
+    etapeCourante: demarrerEtapeTentatives(),
+  };
+}
+
+export function soumettreReponseQuizFonctionsReciproquesCyclometriques(
+  etat: EtatSessionQuizFonctionsReciproquesCyclometriques,
+  reponse: boolean,
+): EtatSessionQuizFonctionsReciproquesCyclometriques {
+  if (etat.terminee) {
+    throw new Error("soumettreReponseQuizFonctionsReciproquesCyclometriques : la session est déjà terminée");
+  }
+  const { question, variante } = etat.exerciceCourant as ExerciceQuizFonctionsReciproquesCyclometriques;
+
+  const etapeCourante = soumettreEtapeTentatives<boolean>(etat.etapeCourante, reponse, {
+    ...reglagesEtape(),
+    verifier: (r) => verifierReponseVraiFaux(question, r),
+    revelerReponse: () => {},
+  });
+
+  if (!etapeCourante.terminee) return { ...etat, etapeCourante };
+
+  const resultat: ResultatExerciceQuizFonctionsReciproquesCyclometriques = {
+    variante,
+    question,
+    reponseChoisie: reponse,
+    score: etapeCourante.score as number,
+    revele: etapeCourante.revelee,
+  };
+  return cloturerExerciceOuSuivant(etat, resultat);
+}

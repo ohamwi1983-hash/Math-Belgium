@@ -285,7 +285,14 @@ export type IllustrationSpec =
       /** Asymptote oblique (y=ax+b, a≠0) — droite penchée en pointillés, distincte d'une
        * horizontale (a=0) : jamais interchangeables, une horizontale mal utilisée pour une
        * pente non nulle dessinerait une ligne plate au mauvais endroit. */
-      obliqueAsymptotes?: { a: number; b: number; label?: string }[]
+      obliqueAsymptotes?: {
+        a: number
+        b: number
+        label?: string
+        /** Tronçon tracé, en abscisses (par défaut tout le cadre) — ex. une asymptote en +∞ seulement. */
+        from?: number
+        to?: number
+      }[]
       /** Asymptotes verticales (ex. x = ±π/2 pour tan avant restriction). */
       verticalAsymptotes?: { x: number; label?: string }[]
       /** Fenêtre y fixe : désactive l'échelle automatique (nécessaire près d'une asymptote, où
@@ -322,6 +329,10 @@ export type IllustrationSpec =
        * arcsin/arccos seuls) — le cadre large par défaut, étiré, les rend disproportionnellement
        * bas/tassés une fois contraints à une largeur d'écran mobile. */
       compact?: boolean
+      /** Quadrillage fin aux graduations (une ligne par valeur de `xTicks` et de `yTicks`) — pour
+       * un graphique à lire, dont les valeurs utiles (bornes, asymptotes) tombent sur une ligne de
+       * la grille, y compris à des multiples de π/2. Par défaut false (aucun changement). */
+      grid?: boolean
       caption: string
     }
   | {

@@ -2,6 +2,19 @@ import type { ChapterContent } from '../../types'
 
 const PI = Math.PI
 
+/** Réciproque de x ↦ x³ + x (strictement croissante sur ℝ), calculée par dichotomie : aucune
+ * expression simple n'existe, c'est justement l'intérêt de l'exemple « en un point ». */
+function reciproqueCubePlusX(y: number): number {
+  let bas = -10
+  let haut = 10
+  for (let i = 0; i < 60; i++) {
+    const milieu = (bas + haut) / 2
+    if (milieu * milieu * milieu + milieu < y) bas = milieu
+    else haut = milieu
+  }
+  return (bas + haut) / 2
+}
+
 export const fonctionsReciproquesCyclometriques: ChapterContent = {
   level: '6e (6h)',
   levelSlug: '6e-6h',
@@ -22,6 +35,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       blocks: [
         { kind: 'video', title: 'Fonction réciproque d\'une fonction bijective (1/2)', youtubeId: 'cljx_XgPpeE' },
         { kind: 'video', title: 'Fonction réciproque : trouver f⁻¹ et la dériver (2/2)', youtubeId: 'fzLkgKdVM3g' },
+        { kind: 'subheading', text: 'Injective, surjective, bijective' },
         {
           kind: 'para',
           text:
@@ -35,7 +49,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               'entrées différentes ne donnent jamais la même image.',
             '$f$ est **surjective** sur $B$ si Image($f$) = $B$ : tout élément de $B$ est ' +
               'atteint, pas seulement une partie de $B$.',
-            '$f$ est **bijective** sur $B$ si elle est les deux à la fois : injective ET ' +
+            '$f$ est **bijective** sur $B$ si elle est les deux à la fois : injective **et** ' +
               'surjective sur $B$.',
           ],
         },
@@ -84,7 +98,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
                 { from: 1, to: 1 },
                 { from: 2, to: 2 },
               ],
-              caption: 'Bijective : injective ET surjective — chaque élément de B est atteint exactement une fois.',
+              caption: 'Bijective : injective et surjective — chaque élément de B est atteint exactement une fois.',
             },
           ],
         },
@@ -146,6 +160,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             },
           ],
         },
+        { kind: 'subheading', text: 'Relation réciproque et fonction réciproque' },
         {
           kind: 'atelier',
           tag: 'droite-horizontale-widget',
@@ -281,13 +296,13 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           titre: 'Qu\'est-ce qu\'une fonction, au juste ?',
           text:
             'Ce que tu viens de démontrer — qu\'une relation réciproque n\'est une fonction ' +
-            'que si elle associe UNE SEULE valeur à chaque $x$ — repose sur une définition ' +
+            'que si elle associe **une seule** valeur à chaque $x$ — repose sur une définition ' +
             'qui n\'a rien d\'évident historiquement. Pendant longtemps, une « fonction » ' +
             'désignait seulement une expression algébrique explicite, comme $x^2$ ou ' +
             '$\\sin(x)$. C\'est le mathématicien allemand **Peter Gustav Lejeune Dirichlet** ' +
             'qui, en 1837, propose la définition moderne que ce chapitre utilise sans le ' +
             'dire : une fonction est simplement une correspondance qui associe, à chaque ' +
-            'élément d\'un ensemble de départ, UN SEUL élément d\'un ensemble d\'arrivée — ' +
+            'élément d\'un ensemble de départ, **un seul** élément d\'un ensemble d\'arrivée — ' +
             'peu importe que cette correspondance s\'exprime par une formule, un graphique ' +
             'ou même un tableau de valeurs. Cette définition, bien plus large que ' +
             'l\'ancienne, est exactement ce qui permet de parler proprement d\'injectivité, ' +
@@ -298,6 +313,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             caption: 'Peter Gustav Lejeune Dirichlet (1805–1859), lithographie d\'époque.',
           },
         },
+        { kind: 'subheading', text: 'Domaine, image et graphe de la réciproque' },
         {
           kind: 'definition',
           label: 'Domaine et ensemble-image de la réciproque',
@@ -373,7 +389,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — les deux propriétés ci-dessus',
+          label: 'Démonstration — la réciproque de f⁻¹ est f',
           blocks: [
             {
               kind: 'para',
@@ -494,6 +510,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
+          label: 'Exemple résolu — permutation',
           blocks: [
             { kind: 'para', text: '$f(x) = \\dfrac{5}{x - 1}$' },
             { kind: 'para', text: 'Permutation : $x = \\dfrac{5}{y - 1}$.' },
@@ -509,8 +526,10 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Cas particulier des fonctions homographiques $f(x) = \\dfrac{ax+b}{cx+d}$ : la même ' +
-            'méthode donne $f^{-1}(x) = \\dfrac{-dx+b}{cx-a}$, et $f^{-1} = f$ exactement quand $a = -d$.',
+            'Cas particulier des fonctions homographiques $f(x) = \\dfrac{ax+b}{cx+d}$, avec ' +
+            '$ad - bc \\neq 0$ (sinon $f$ est constante, donc pas injective) : la même méthode donne ' +
+            '$f^{-1}(x) = \\dfrac{-dx+b}{cx-a}$. Et $f^{-1} = f$ exactement quand $a = -d$, ou quand ' +
+            '$f$ est l\'identité ($b = c = 0$ et $a = d$, soit $f(x) = x$).',
         },
         { kind: 'subheading', text: 'Réparer une fonction non injective en restreignant son domaine' },
         {
@@ -587,6 +606,80 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             },
           ],
         },
+        {
+          kind: 'methode',
+          label: "Méthode — étudier la réciproque d'une fonction",
+          items: [
+            'Détermine le **domaine** de $f$.',
+            "Vérifie que $f$ est **injective** : $f(x_1) = f(x_2) \\implies x_1 = x_2$, ou $f$ " +
+              'strictement monotone sur un intervalle, ou le test de la droite horizontale. Si elle ' +
+              "ne l'est pas, **restreins** son domaine à un intervalle où elle l'est.",
+            "Détermine l'**image** de $f$ : c'est le domaine de $f^{-1}$.",
+            "Trouve l'**expression** de $f^{-1}$, par décomposition ou par permutation.",
+            'Contrôle sur une valeur : si $f(a) = b$, alors $f^{-1}(b)$ doit redonner $a$.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: "Exemple résolu — restreindre un trinôme pour l'inverser",
+          blocks: [
+            { kind: 'para', text: '$f(x) = x^2 - 4x + 1$' },
+            {
+              kind: 'para',
+              text:
+                '**Forme canonique.** $f(x) = (x-2)^2 - 3$ : une parabole de sommet $(2 ; -3)$. ' +
+                "Elle n'est pas injective sur $\\mathbb{R}$ : $f(0) = f(4) = 1$, deux réels " +
+                "symétriques par rapport à $x = 2$ ont la même image.",
+            },
+            {
+              kind: 'para',
+              text:
+                '**Restriction.** Sur $[2 ; +\\infty[$, $f$ est strictement croissante, donc ' +
+                'injective. Son image y est $[-3 ; +\\infty[$ : $(x-2)^2$ prend toutes les valeurs ' +
+                'positives, et seulement elles.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Permutation.** $x = (y-2)^2 - 3$ avec $y \\ge 2$, soit $(y-2)^2 = x + 3$. Comme ' +
+                '$y - 2 \\ge 0$, on garde la racine positive : $y - 2 = \\sqrt{x+3}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "D'où $f^{-1}(x) = 2 + \\sqrt{x+3}$, de domaine $[-3 ; +\\infty[$ et d'image " +
+                '$[2 ; +\\infty[$. Contrôle : $f(4) = 1$ et $f^{-1}(1) = 2 + \\sqrt{4} = 4$ ✓.',
+            },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'vectorPlane',
+                xMin: -4,
+                xMax: 6.6667,
+                yMin: -4,
+                yMax: 6,
+                grid: true,
+                curves: [
+                  { fn: (x) => (x - 2) * (x - 2) - 3, tone: 'faint', xMin: -1, xMax: 2 },
+                  { fn: (x) => (x - 2) * (x - 2) - 3, tone: 'accent', xMin: 2, xMax: 5 },
+                  { fn: (x) => 2 + Math.sqrt(Math.max(0, x + 3)), tone: 'good', xMin: -3, xMax: 6.6667 },
+                ],
+                vectors: [{ from: { x: -4, y: -4 }, to: { x: 6, y: 6 }, tone: 'faint', dashed: true, arrow: false }],
+                points: [
+                  { x: 4, y: 1, label: '(4 ; 1)', tone: 'accent', labelPos: 'right' },
+                  { x: 1, y: 4, label: '(1 ; 4)', tone: 'good', labelPos: 'above' },
+                  { x: 2, y: -3, label: '(2 ; −3)', tone: 'accent', labelPos: 'right' },
+                  { x: -3, y: 2, label: '(−3 ; 2)', tone: 'good', labelPos: 'below' },
+                ],
+                caption:
+                  'En orange : la restriction de $f$ à $[2 ; +\\infty[$ (la branche grise est ' +
+                  'écartée). En vert : $f^{-1}(x) = 2 + \\sqrt{x+3}$. Chaque point $(a ; b)$ de ' +
+                  "l'une a son symétrique $(b ; a)$ sur l'autre, par rapport à $y = x$ (pointillés) : le " +
+                  'sommet $(2 ; -3)$ devient le point de départ $(-3 ; 2)$ de $f^{-1}$.',
+              },
+            },
+          ],
+        },
         { kind: 'subheading', text: "Dérivée d'une fonction réciproque" },
         {
           kind: 'para',
@@ -623,8 +716,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'methode',
+          label: "Théorème — dérivée d'une fonction réciproque",
           items: [
-            "Si $f$ est injective, dérivable en $f^{-1}(x)$, et si $f'(f^{-1}(x)) \\neq 0$, alors :",
+            'Si $f$ est **continue et strictement monotone sur un intervalle** $I$, et si $f$ est ' +
+              "dérivable en $f^{-1}(x)$ avec $f'(f^{-1}(x)) \\neq 0$, alors $f^{-1}$ est dérivable " +
+              'en $x$ et :',
             '$(f^{-1})\'(x) = \\dfrac{1}{f\'(f^{-1}(x))}$',
             'Les nombres dérivés de $f$ en $a$ et de $f^{-1}$ en $f(a)$ sont donc inverses ' +
               "l'un de l'autre — ce théorème explique les formules d'arcsin, arccos et arctan " +
@@ -634,6 +730,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'para',
           text:
+            'L\'hypothèse « sur un intervalle » n\'est pas décorative : c\'est elle qui garantit ' +
+            'que $f^{-1}$ est continue, sans quoi elle ne pourrait pas être dérivable. ' +
             'Ce théorème est **admis sans démonstration** : c\'est le seul résultat du chapitre ' +
             'qui ne soit pas établi ici. Tu peux quand même le vérifier sur des cas où les ' +
             'deux membres se calculent séparément — c\'est tout l\'objet de la vérification ' +
@@ -641,6 +739,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
+          label: 'Exemple résolu — dérivée de la racine cubique',
           blocks: [
             {
               kind: 'para',
@@ -738,6 +837,64 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'exempleLibre',
+          label: "Exemple résolu — nombre dérivé d'une réciproque sans connaître son expression",
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                "Soit $f(x) = x^3 + x$. Calcule $(f^{-1})'(2)$, sans chercher l'expression de " +
+                '$f^{-1}$ (il n\'en existe pas de simple).',
+            },
+            {
+              kind: 'para',
+              text:
+                "**Hypothèses.** $f'(x) = 3x^2 + 1 > 0$ : $f$ est continue et strictement " +
+                'croissante sur l\'intervalle $\\mathbb{R}$, donc injective.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Antécédent de 2.** On cherche $a$ tel que $f(a) = 2$ : $a = 1$ convient, car ' +
+                '$1^3 + 1 = 2$. Donc $f^{-1}(2) = 1$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**Théorème.** $f'(1) = 3 + 1 = 4 \\neq 0$, d'où " +
+                "$(f^{-1})'(2) = \\dfrac{1}{f'(f^{-1}(2))} = \\dfrac{1}{f'(1)} = \\dfrac{1}{4}$.",
+            },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'vectorPlane',
+                xMin: -1,
+                xMax: 3.2667,
+                yMin: -1,
+                yMax: 3,
+                grid: true,
+                curves: [
+                  { fn: (x) => x * x * x + x, tone: 'accent', xMin: -0.68, xMax: 1.21 },
+                  { fn: reciproqueCubePlusX, tone: 'good', xMin: -1, xMax: 3.2667 },
+                ],
+                vectors: [
+                  { from: { x: -1, y: -1 }, to: { x: 3, y: 3 }, tone: 'faint', dashed: true, arrow: false },
+                  { from: { x: 0.25, y: -1 }, to: { x: 1.25, y: 3 }, tone: 'accent', dashed: true, arrow: false },
+                  { from: { x: -1, y: 0.25 }, to: { x: 3.2667, y: 1.3167 }, tone: 'good', dashed: true, arrow: false },
+                ],
+                points: [
+                  { x: 1, y: 2, label: '(1 ; 2)', tone: 'accent', labelPos: 'left' },
+                  { x: 2, y: 1, label: '(2 ; 1)', tone: 'good', labelPos: 'below' },
+                ],
+                caption:
+                  'En orange : $f(x) = x^3 + x$ et sa tangente en $(1 ; 2)$, de pente $4$. En ' +
+                  "vert : $f^{-1}$ et sa tangente en $(2 ; 1)$, de pente $\\dfrac{1}{4}$. Le miroir " +
+                  "$y = x$ échange les deux tangentes : la pente s'inverse.",
+              },
+            },
+          ],
+        },
+        {
           kind: 'attention',
           label: 'Remarque — le théorème donne une condition suffisante, pas nécessaire',
           text:
@@ -770,9 +927,9 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               yAxisLabel: 'position',
               caption:
                 "La fonction qui transforme un angle θ en position (sin, restreinte pour être " +
-                'bijective) — lire de gauche à droite donne la cinématique DIRECTE (angle connu ' +
+                'bijective) — lire de gauche à droite donne la cinématique **directe** (angle connu ' +
                 '→ position calculée) ; lire de droite à gauche, à partir d\'une position ' +
-                "cible, donne la cinématique INVERSE — c'est arcsin qui fait cette lecture.",
+                "cible, donne la cinématique **inverse** — c'est arcsin qui fait cette lecture.",
             },
             {
               kind: 'vectorPlane',
@@ -798,7 +955,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             'En robotique, un bras articulé doit souvent atteindre une position précise dans ' +
             "l'espace — attraper un objet, souder un point donné. Calculer la position de la " +
             'pince à partir des angles des articulations est facile (c\'est une fonction ' +
-            'directe, de la trigonométrie classique). Mais le problème INVERSE — retrouver ' +
+            'directe, de la trigonométrie classique). Mais le problème **inverse** — retrouver ' +
             "les angles qu'il faut donner à chaque articulation pour atteindre une position " +
             'voulue — est exactement le problème de la fonction réciproque : on connaît la ' +
             'sortie, on cherche l\'entrée. Ce calcul, appelé **cinématique inverse**, utilise ' +
@@ -813,8 +970,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           title: 'Fonctions injectives / surjectives / bijectives',
           generatorId: '6gen1',
           description: [
-            "Détermine si une fonction est injective, surjective ou bijective, retrouve sa " +
-              "réciproque par décomposition ou permutation, et calcule sa dérivée au point voulu.",
+            "Détermine le domaine d'une fonction, décide si elle est injective, trouve son " +
+              'image, puis retrouve sa réciproque par décomposition ou permutation.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 1. Fonctions injectives / surjectives / bijectives »',
@@ -851,6 +1008,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       title: 'Les fonctions cyclométriques : arcsin, arccos, arctan',
       blocks: [
         { kind: 'video', title: 'arcsin, arccos, arctan', youtubeId: 'Z6mRx1Lzgoc' },
+        { kind: 'subheading', text: 'Restreindre sin, cos et tan pour les inverser' },
         {
           kind: 'para',
           text:
@@ -934,11 +1092,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'featureTable',
-          headers: ['Fonction', 'Restriction bijective', 'Réciproque', 'Domaine', 'Image'],
+          headers: ['Restriction bijective', 'Réciproque : domaine → image'],
           rows: [
-            ['sin', '[−π/2 ; π/2]', 'arcsin', '[−1 ; 1]', '[−π/2 ; π/2]'],
-            ['cos', '[0 ; π]', 'arccos', '[−1 ; 1]', '[0 ; π]'],
-            ['tan', ']−π/2 ; π/2[', 'arctan', 'ℝ', ']−π/2 ; π/2['],
+            ['sin sur $\\left[-\\frac{\\pi}{2} ; \\frac{\\pi}{2}\\right]$', 'arcsin : $[-1 ; 1] \\to \\left[-\\frac{\\pi}{2} ; \\frac{\\pi}{2}\\right]$'],
+            ['cos sur $[0 ; \\pi]$', 'arccos : $[-1 ; 1] \\to [0 ; \\pi]$'],
+            ['tan sur $\\left]-\\frac{\\pi}{2} ; \\frac{\\pi}{2}\\right[$', 'arctan : $\\mathbb{R} \\to \\left]-\\frac{\\pi}{2} ; \\frac{\\pi}{2}\\right[$'],
           ],
         },
         {
@@ -953,7 +1111,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             '$1/\\sin(x)$, qui est une fonction complètement différente (la cosécante) ! ' +
             'C\'est pour éviter cette ambiguïté que la notation $\\arcsin$, $\\arccos$, ' +
             '$\\arctan$ s\'est peu à peu imposée en parallèle — « arc » rappelle que le ' +
-            'résultat est un ANGLE (un arc de cercle), pas l\'inverse d\'un nombre. Les deux ' +
+            'résultat est un **angle** (un arc de cercle), pas l\'inverse d\'un nombre. Les deux ' +
             'notations cohabitent encore aujourd\'hui : ta calculatrice affiche sans doute ' +
             '$\\sin^{-1}$, mais $\\arcsin$ reste la notation la plus sûre dès que la ' +
             'confusion est possible.',
@@ -1028,19 +1186,19 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               kind: 'unitCircleArc',
               mode: 'sin',
               angle: 0.75,
-              caption: "y = arcsin(x) : l'arc, mesuré depuis 0, dont l'ordonnée du point d'arrivée vaut x.",
+              caption: "$y = \\arcsin(x)$ : l'arc, mesuré depuis $0$, dont l'ordonnée du point d'arrivée vaut $x$.",
             },
             {
               kind: 'unitCircleArc',
               mode: 'cos',
               angle: 0.75,
-              caption: "y = arccos(x) : l'arc, mesuré depuis 0, dont l'abscisse du point d'arrivée vaut x.",
+              caption: "$y = \\arccos(x)$ : l'arc, mesuré depuis $0$, dont l'abscisse du point d'arrivée vaut $x$.",
             },
             {
               kind: 'unitCircleArc',
               mode: 'tan',
               angle: Math.atan(0.9),
-              caption: "y = arctan(x) : l'arc dont la tangente géométrique (droite verticale) vaut x.",
+              caption: "$y = \\arctan(x)$ : l'arc dont la tangente géométrique (droite verticale) vaut $x$.",
             },
           ],
         },
@@ -1053,12 +1211,13 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             'même question à l\'envers. Tu savais lire sin(π/6) = 1/2 ; tu sais donc déjà, sans ' +
             'aucun calcul supplémentaire, qu\'arcsin(1/2) = π/6.',
         },
+        { kind: 'subheading', text: 'Caractérisation, limites et graphes' },
         {
           kind: 'definition',
           label: 'Caractérisation',
           items: [
             '$\\forall x \\in [-1;1], \\forall y \\in \\mathbb{R} : \\quad y = \\arcsin(x) \\iff x = \\sin(y)$ et $y \\in [-\\pi/2 ; \\pi/2]$',
-            '$y = \\arccos(x) \\iff x = \\cos(y)$ et $y \\in [0 ; \\pi]$',
+            '$\\forall x \\in [-1;1], \\forall y \\in \\mathbb{R} : \\quad y = \\arccos(x) \\iff x = \\cos(y)$ et $y \\in [0 ; \\pi]$',
             '$\\forall x, y \\in \\mathbb{R} : \\quad y = \\arctan(x) \\iff x = \\tan(y)$ et $y \\in ]-\\pi/2 ; \\pi/2[$',
           ],
         },
@@ -1087,7 +1246,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             fixedYRange: { min: -1.9, max: 1.9 },
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'y = arcsin(x) — domaine [−1 ; 1], image [−π/2 ; π/2].',
+            caption: '$y = \\arcsin(x)$ — domaine $[-1 ; 1]$, image $[-\\pi/2 ; \\pi/2]$.',
           },
         },
         {
@@ -1105,7 +1264,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             fixedYRange: { min: -0.3, max: 3.5 },
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'y = arccos(x) — domaine [−1 ; 1], image [0 ; π].',
+            caption: '$y = \\arccos(x)$ — domaine $[-1 ; 1]$, image $[0 ; \\pi]$.',
           },
         },
         {
@@ -1123,7 +1282,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             fixedYRange: { min: -2.1, max: 2.1 },
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'y = arctan(x) — domaine ℝ, image ]−π/2 ; π/2[ (asymptotes en pointillés).',
+            caption: '$y = \\arctan(x)$ — domaine $\\mathbb{R}$, image $]-\\pi/2 ; \\pi/2[$ (asymptotes en pointillés).',
           },
         },
         {
@@ -1133,6 +1292,15 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             'possibles (il y en a une infinité par périodicité) ! C\'est **l\'unique** angle de ' +
             '[−π/2 ; π/2] dont le sinus vaut $x$. Même logique pour arccos et arctan, chacune ' +
             'avec sa propre image.',
+        },
+        { kind: 'subheading', text: 'Parité et sens de variation' },
+        {
+          kind: 'para',
+          text:
+            'Les trois démonstrations qui suivent reposent toutes sur la caractérisation : pour ' +
+            'prouver que $y$ **est** $\\arcsin(x)$, il faut vérifier **deux** choses, ' +
+            '$\\sin(y) = x$ **et** $y \\in [-\\pi/2 ; \\pi/2]$. Oublier la seconde, c\'est ' +
+            'exactement le piège ci-dessus.',
         },
         {
           kind: 'atelier',
@@ -1148,78 +1316,86 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'exempleLibre',
           label: 'Démonstration — arcsin est impaire',
           blocks: [
-            { kind: 'para', text: 'Soit $f(x) = \\arcsin(x)$. Montre que $f(-x) = -f(x)$.' },
             {
               kind: 'para',
               text:
-                '$f(-x) = \\arcsin(-x) \\underset{\\text{déf}}{\\iff} \\sin(f(-x)) = ' +
-                '\\sin(\\arcsin(-x)) \\underset{\\text{calc}}{\\iff} \\sin(f(-x)) = -x$',
+                'Le domaine $[-1 ; 1]$ est symétrique : si $x$ y est, $-x$ aussi. Soit ' +
+                '$x \\in [-1 ; 1]$ et $y = \\arcsin(x)$. Par la caractérisation, ' +
+                '$\\sin(y) = x$ et $y \\in [-\\pi/2 ; \\pi/2]$.',
             },
             {
               kind: 'para',
               text:
-                '$\\underset{\\text{calc}}{\\iff} -\\sin(f(-x)) = x \\underset{\\text{sin impaire}}' +
-                '{\\iff} \\sin(-f(-x)) = x$',
+                '**Le sinus.** sin est impaire : $\\sin(-y) = -\\sin(y) = -x$.',
             },
             {
               kind: 'para',
               text:
-                '$\\underset{\\text{déf}}{\\iff} \\arcsin(\\sin(-f(-x))) = \\arcsin(x) ' +
-                '\\underset{\\text{calc}}{\\iff} -f(-x) = \\arcsin(x) = f(x)$',
+                "**L'intervalle.** $-\\pi/2 \\le y \\le \\pi/2$ donne, en multipliant par $-1$, " +
+                '$-\\pi/2 \\le -y \\le \\pi/2$ : l\'intervalle est symétrique, $-y$ y est aussi.',
             },
-            { kind: 'para', text: 'D\'où $f(-x) = -f(x)$ : arcsin est bien impaire.' },
+            {
+              kind: 'para',
+              text:
+                "**Conclusion.** $-y$ vérifie les deux conditions de la caractérisation pour " +
+                '$-x$ : $-y = \\arcsin(-x)$, c\'est-à-dire $\\arcsin(-x) = -\\arcsin(x)$. ' +
+                'arcsin est impaire. $\\qquad \\blacksquare$',
+            },
           ],
         },
         {
           kind: 'exempleLibre',
           label: 'Démonstration — arccos(x) + arccos(−x) = π',
           blocks: [
-            { kind: 'para', text: 'Soit $y = \\arccos(-x)$.' },
             {
               kind: 'para',
               text:
-                '$\\underset{\\text{déf}}{\\iff} \\cos(y) = \\cos(\\arccos(-x)) ' +
-                '\\underset{\\text{calc}}{\\iff} \\cos(y) = -x \\underset{\\text{calc}}{\\iff} -\\cos(y) = x$',
-            },
-            { kind: 'para', text: '$\\iff \\cos(\\pi - y) = x$' },
-            {
-              kind: 'para',
-              text:
-                '$\\underset{\\text{calc}}{\\iff} \\arccos(\\cos(\\pi-y)) = \\arccos(x) ' +
-                '\\underset{\\text{déf}}{\\iff} \\pi - y = \\arccos(x)$',
+                'Soit $x \\in [-1 ; 1]$ (alors $-x$ y est aussi) et $y = \\arccos(x)$. Par la ' +
+                'caractérisation, $\\cos(y) = x$ et $y \\in [0 ; \\pi]$.',
             },
             {
               kind: 'para',
               text:
-                '$\\underset{\\text{calc}}{\\iff} y = \\pi - \\arccos(x) \\iff \\arccos(-x) = \\pi - \\arccos(x)$',
+                '**Le cosinus.** Les angles $y$ et $\\pi - y$ sont supplémentaires : ' +
+                '$\\cos(\\pi - y) = -\\cos(y) = -x$.',
             },
-            { kind: 'para', text: 'D\'où $\\arccos(x) + \\arccos(-x) = \\pi$.' },
+            {
+              kind: 'para',
+              text:
+                "**L'intervalle.** $0 \\le y \\le \\pi$ donne $-\\pi \\le -y \\le 0$, puis, en " +
+                'ajoutant $\\pi$, $0 \\le \\pi - y \\le \\pi$ : $\\pi - y \\in [0 ; \\pi]$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** $\\pi - y$ vérifie les deux conditions pour $-x$ : ' +
+                '$\\pi - y = \\arccos(-x)$, soit $\\arccos(-x) = \\pi - \\arccos(x)$, ' +
+                'c\'est-à-dire $\\arccos(x) + \\arccos(-x) = \\pi$. $\\qquad \\blacksquare$',
+            },
           ],
         },
         {
           kind: 'exempleLibre',
           label: 'Démonstration — arctan est impaire',
           blocks: [
-            { kind: 'para', text: 'Soit $f(x) = \\arctan(x)$. Même structure que pour arcsin :' },
             {
               kind: 'para',
               text:
-                '$f(-x) = \\arctan(-x) \\underset{\\text{déf}}{\\iff} \\tan(f(-x)) = ' +
-                '\\tan(\\arctan(-x)) \\underset{\\text{calc}}{\\iff} \\tan(f(-x)) = -x$',
+                'Même plan que pour arcsin. Soit $x \\in \\mathbb{R}$ et $y = \\arctan(x)$ : ' +
+                '$\\tan(y) = x$ et $y \\in \\; ]-\\pi/2 ; \\pi/2[$.',
             },
             {
               kind: 'para',
               text:
-                '$\\underset{\\text{calc}}{\\iff} -\\tan(f(-x)) = x \\underset{\\text{tan impaire}}' +
-                '{\\iff} \\tan(-f(-x)) = x$',
+                'tan est impaire : $\\tan(-y) = -\\tan(y) = -x$. Et $-\\pi/2 < y < \\pi/2$ donne ' +
+                '$-\\pi/2 < -y < \\pi/2$ : $-y$ est encore dans l\'image de arctan.',
             },
             {
               kind: 'para',
               text:
-                '$\\underset{\\text{déf}}{\\iff} \\arctan(\\tan(-f(-x))) = \\arctan(x) ' +
-                '\\underset{\\text{calc}}{\\iff} -f(-x) = \\arctan(x) = f(x)$',
+                "**Conclusion.** $-y = \\arctan(-x)$, soit $\\arctan(-x) = -\\arctan(x)$ : " +
+                'arctan est impaire. $\\qquad \\blacksquare$',
             },
-            { kind: 'para', text: 'D\'où $f(-x) = -f(x)$ : arctan est bien impaire.' },
           ],
         },
         {
@@ -1232,13 +1408,312 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               'démontré ci-dessus.',
           ],
         },
+        { kind: 'subheading', text: 'Valeurs remarquables, sans calculatrice' },
+        {
+          kind: 'methode',
+          label: 'Méthode — calculer arcsin(a), arccos(a) ou arctan(a)',
+          items: [
+            "Vérifie que $a$ est dans le domaine : $a \\in [-1 ; 1]$ pour arcsin et arccos. " +
+              "Sinon, l'expression n'existe pas.",
+            "Cherche sur le cercle trigonométrique un angle dont le sinus (le cosinus, la " +
+              'tangente) vaut $a$.',
+            "Garde **le seul** de ces angles qui est dans l'image : $[-\\pi/2 ; \\pi/2]$ pour " +
+              'arcsin, $[0 ; \\pi]$ pour arccos, $]-\\pi/2 ; \\pi/2[$ pour arctan.',
+          ],
+        },
+        {
+          kind: 'featureTable',
+          caption: 'Valeurs remarquables de arcsin et arccos',
+          headers: ['x', 'arcsin x', 'arccos x'],
+          rows: [
+            ['$-1$', '$-\\dfrac{\\pi}{2}$', '$\\pi$'],
+            ['$-\\dfrac{\\sqrt{3}}{2}$', '$-\\dfrac{\\pi}{3}$', '$\\dfrac{5\\pi}{6}$'],
+            ['$-\\dfrac{\\sqrt{2}}{2}$', '$-\\dfrac{\\pi}{4}$', '$\\dfrac{3\\pi}{4}$'],
+            ['$-\\dfrac{1}{2}$', '$-\\dfrac{\\pi}{6}$', '$\\dfrac{2\\pi}{3}$'],
+            ['$0$', '$0$', '$\\dfrac{\\pi}{2}$'],
+            ['$\\dfrac{1}{2}$', '$\\dfrac{\\pi}{6}$', '$\\dfrac{\\pi}{3}$'],
+            ['$\\dfrac{\\sqrt{2}}{2}$', '$\\dfrac{\\pi}{4}$', '$\\dfrac{\\pi}{4}$'],
+            ['$\\dfrac{\\sqrt{3}}{2}$', '$\\dfrac{\\pi}{3}$', '$\\dfrac{\\pi}{6}$'],
+            ['$1$', '$\\dfrac{\\pi}{2}$', '$0$'],
+          ],
+        },
+        {
+          kind: 'featureTable',
+          caption: 'Valeurs remarquables de arctan',
+          headers: ['x', 'arctan x'],
+          rows: [
+            ['$-\\sqrt{3}$', '$-\\dfrac{\\pi}{3}$'],
+            ['$-1$', '$-\\dfrac{\\pi}{4}$'],
+            ['$-\\dfrac{\\sqrt{3}}{3}$', '$-\\dfrac{\\pi}{6}$'],
+            ['$0$', '$0$'],
+            ['$\\dfrac{\\sqrt{3}}{3}$', '$\\dfrac{\\pi}{6}$'],
+            ['$1$', '$\\dfrac{\\pi}{4}$'],
+            ['$\\sqrt{3}$', '$\\dfrac{\\pi}{3}$'],
+          ],
+        },
         {
           kind: 'astuce',
-          label: '💡 Valeurs remarquables (sans calculatrice)',
+          label: '💡 Deux contrôles rapides',
           text:
-            '$\\arcsin(0) = 0 \\quad \\arcsin(\\frac{\\sqrt{2}}{2}) = \\pi/4 \\quad ' +
-            '\\arcsin(-\\frac{\\sqrt{3}}{2}) = -\\pi/3 \\quad \\arcsin(-1) = -\\pi/2$',
+            'arccos ne donne **jamais** un angle négatif : $\\arccos\\left(-\\dfrac{1}{2}\\right) = ' +
+            '\\dfrac{2\\pi}{3}$, pas $-\\dfrac{\\pi}{3}$. Et chaque ligne du premier tableau vérifie ' +
+            '$\\arcsin(x) + \\arccos(x) = \\dfrac{\\pi}{2}$ (section 3).',
           items: ['$\\arcsin(2)$ n\'existe pas : $2 \\notin [-1;1]$ (hors du domaine).'],
+        },
+        { kind: 'subheading', text: 'Composer une arcfonction et une fonction trigonométrique' },
+        {
+          kind: 'para',
+          text:
+            'Une arcfonction « défait » la fonction trigonométrique correspondante… mais pas de ' +
+            'la même façon dans les deux sens.',
+        },
+        {
+          kind: 'definition',
+          label: 'Les deux compositions',
+          items: [
+            "**Fonction trigonométrique d'une arcfonction : toujours.** " +
+              '$\\sin(\\arcsin x) = x$ et $\\cos(\\arccos x) = x$ pour tout $x \\in [-1 ; 1]$ ; ' +
+              '$\\tan(\\arctan x) = x$ pour tout $x \\in \\mathbb{R}$.',
+            "**Arcfonction d'une fonction trigonométrique : seulement sur l'image.** " +
+              '$\\arcsin(\\sin \\theta) = \\theta \\iff \\theta \\in [-\\pi/2 ; \\pi/2]$ ; ' +
+              '$\\arccos(\\cos \\theta) = \\theta \\iff \\theta \\in [0 ; \\pi]$ ; ' +
+              '$\\arctan(\\tan \\theta) = \\theta \\iff \\theta \\in \\; ]-\\pi/2 ; \\pi/2[$.',
+          ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi un seul sens est automatique',
+          text:
+            "$\\arcsin(x)$ est, par définition, un angle dont le sinus vaut $x$ : en reprenant " +
+            'son sinus, tu retrouves forcément $x$. Dans l\'autre sens, arcsin ne sait rendre ' +
+            'que des angles de $[-\\pi/2 ; \\pi/2]$ : si $\\theta$ n\'y est pas, ' +
+            '$\\arcsin(\\sin \\theta)$ ne peut pas valoir $\\theta$. Il rend l\'angle de ' +
+            "l'image qui a **le même sinus** que $\\theta$.",
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — arcsin(sin θ) = θ exactement quand θ ∈ [−π/2 ; π/2]',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $\\theta$ un réel. $\\sin(\\theta) \\in [-1 ; 1]$, donc ' +
+                '$\\arcsin(\\sin \\theta)$ existe toujours. Par la caractérisation, c\'est ' +
+                'l\'unique $y \\in [-\\pi/2 ; \\pi/2]$ tel que $\\sin(y) = \\sin(\\theta)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Si** $\\theta \\in [-\\pi/2 ; \\pi/2]$, $y = \\theta$ convient : il est dans ' +
+                "l'intervalle et a le bon sinus. Par unicité, $\\arcsin(\\sin \\theta) = \\theta$.",
+            },
+            {
+              kind: 'para',
+              text:
+                "**Si** $\\theta \\notin [-\\pi/2 ; \\pi/2]$, $\\arcsin(\\sin \\theta)$, qui est " +
+                'toujours dans $[-\\pi/2 ; \\pi/2]$, ne peut pas être égal à $\\theta$. ' +
+                'Les deux cas réunis donnent l\'équivalence. Même raisonnement pour arccos ' +
+                '(intervalle $[0 ; \\pi]$) et arctan ($]-\\pi/2 ; \\pi/2[$). $\\qquad \\blacksquare$',
+            },
+          ],
+        },
+        {
+          kind: 'methode',
+          label: "Méthode — calculer arcsin(sin θ), arccos(cos θ) ou arctan(tan θ)",
+          items: [
+            "Si $\\theta$ est dans l'image de l'arcfonction, le résultat est $\\theta$.",
+            'Sinon, calcule la valeur trigonométrique de $\\theta$ (cercle, valeurs remarquables).',
+            "Cherche l'angle de l'image qui a cette valeur. Outils : " +
+              '$\\sin(\\pi - \\theta) = \\sin(\\theta)$, $\\cos(-\\theta) = \\cos(\\theta)$, ' +
+              '$\\tan(\\theta - \\pi) = \\tan(\\theta)$, et retirer des tours de $2\\pi$.',
+            "Pour un mélange comme $\\arcsin(\\tan \\theta)$, vérifie d'abord l'existence : une " +
+              'tangente peut sortir de $[-1 ; 1]$.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: "Exemple résolu — ramener l'angle dans l'image",
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '**a)** $\\arcsin\\left(\\sin \\dfrac{5\\pi}{6}\\right)$ : $\\dfrac{5\\pi}{6} ' +
+                '\\notin [-\\pi/2 ; \\pi/2]$. Or $\\sin \\dfrac{5\\pi}{6} = \\dfrac{1}{2} = ' +
+                '\\sin \\dfrac{\\pi}{6}$, et $\\dfrac{\\pi}{6}$ est dans l\'image : le résultat ' +
+                'vaut $\\dfrac{\\pi}{6}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**b)** $\\arccos\\left(\\cos\\left(-\\dfrac{\\pi}{3}\\right)\\right)$ : ' +
+                '$-\\dfrac{\\pi}{3} \\notin [0 ; \\pi]$. Or $\\cos\\left(-\\dfrac{\\pi}{3}\\right) = ' +
+                '\\cos \\dfrac{\\pi}{3} = \\dfrac{1}{2}$ : le résultat vaut $\\dfrac{\\pi}{3}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**c)** $\\arctan\\left(\\tan \\dfrac{3\\pi}{4}\\right)$ : $\\tan \\dfrac{3\\pi}{4} = ' +
+                '-1$, et $\\arctan(-1) = -\\dfrac{\\pi}{4}$ (c\'est $\\dfrac{3\\pi}{4} - \\pi$).',
+            },
+            {
+              kind: 'para',
+              text:
+                '**d)** $\\arcsin\\left(\\tan \\dfrac{\\pi}{3}\\right)$ : $\\tan \\dfrac{\\pi}{3} = ' +
+                '\\sqrt{3} \\approx 1{,}73 > 1$. L\'expression **n\'existe pas**.',
+            },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'circleAngles',
+                points: [
+                  { angle: (5 * PI) / 6, label: '5π/6', tone: 'bad' },
+                  { angle: PI / 6, label: 'π/6', tone: 'good' },
+                ],
+                connectPoints: true,
+                angleArcs: [
+                  { from: -PI / 2, to: PI / 2, tone: 'good', radiusPx: 112 },
+                  { from: 0, to: (5 * PI) / 6, tone: 'bad', radiusPx: 30, arrow: true },
+                  { from: 0, to: PI / 6, tone: 'good', radiusPx: 48, arrow: true },
+                ],
+                caption:
+                  'Les angles $\\dfrac{5\\pi}{6}$ (rouge) et $\\dfrac{\\pi}{6}$ (vert) ont le même ' +
+                  'sinus $\\dfrac{1}{2}$ : la corde qui les relie est horizontale. Seul ' +
+                  '$\\dfrac{\\pi}{6}$ est sur l\'arc vert $[-\\pi/2 ; \\pi/2]$, l\'image de arcsin : ' +
+                  "c'est lui que rend $\\arcsin\\left(\\sin \\dfrac{5\\pi}{6}\\right)$.",
+              },
+            },
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            "Reste l'autre famille : une fonction trigonométrique **différente** appliquée à une " +
+            'arcfonction, comme $\\cos(\\arcsin x)$. Le calcul se fait sans aucun angle, grâce à ' +
+            '$\\cos^2 + \\sin^2 = 1$.',
+        },
+        {
+          kind: 'definition',
+          label: "Fonction trigonométrique d'une autre arcfonction",
+          items: [
+            '$\\cos(\\arcsin x) = \\sqrt{1 - x^2}$ et $\\sin(\\arccos x) = \\sqrt{1 - x^2}$, pour ' +
+              '$x \\in [-1 ; 1]$.',
+            '$\\tan(\\arcsin x) = \\dfrac{x}{\\sqrt{1 - x^2}}$ pour $x \\in \\; ]-1 ; 1[$, et ' +
+              '$\\tan(\\arccos x) = \\dfrac{\\sqrt{1 - x^2}}{x}$ pour $x \\in [-1 ; 1]$, $x \\neq 0$.',
+            '$\\cos(\\arctan x) = \\dfrac{1}{\\sqrt{1 + x^2}}$ et ' +
+              '$\\sin(\\arctan x) = \\dfrac{x}{\\sqrt{1 + x^2}}$, pour tout $x \\in \\mathbb{R}$.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — cos(arcsin x) = √(1 − x²) et sin(arccos x) = √(1 − x²)',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $x \\in [-1 ; 1]$ et $\\theta = \\arcsin(x)$ : $\\sin(\\theta) = x$ et ' +
+                '$\\theta \\in [-\\pi/2 ; \\pi/2]$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Le carré.** $\\cos^2(\\theta) = 1 - \\sin^2(\\theta) = 1 - x^2$, donc ' +
+                '$\\cos(\\theta) = \\sqrt{1 - x^2}$ ou $\\cos(\\theta) = -\\sqrt{1 - x^2}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**Le signe.** Sur $[-\\pi/2 ; \\pi/2]$ (moitié droite du cercle), le cosinus est " +
+                'positif ou nul : $\\cos(\\arcsin x) = \\sqrt{1 - x^2}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**De même** avec $\\theta = \\arccos(x) \\in [0 ; \\pi]$ : $\\sin^2(\\theta) = 1 - x^2$, " +
+                'et le sinus est positif ou nul sur $[0 ; \\pi]$ (moitié haute) : ' +
+                '$\\sin(\\arccos x) = \\sqrt{1 - x^2}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Les tangentes** en découlent par $\\tan = \\dfrac{\\sin}{\\cos}$, là où le ' +
+                'dénominateur ne s\'annule pas : $\\tan(\\arcsin x) = \\dfrac{x}{\\sqrt{1 - x^2}}$ ' +
+                '($x \\neq \\pm 1$) et $\\tan(\\arccos x) = \\dfrac{\\sqrt{1 - x^2}}{x}$ ' +
+                '($x \\neq 0$). $\\qquad \\blacksquare$',
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — cos(arctan x) = 1/√(1 + x²)',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $x \\in \\mathbb{R}$ et $\\theta = \\arctan(x)$ : $\\tan(\\theta) = x$ et ' +
+                '$\\theta \\in \\; ]-\\pi/2 ; \\pi/2[$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Le carré.** En divisant $\\cos^2 + \\sin^2 = 1$ par $\\cos^2(\\theta)$, qui ' +
+                'n\'est pas nul : $1 + \\tan^2(\\theta) = \\dfrac{1}{\\cos^2(\\theta)}$, d\'où ' +
+                '$\\cos^2(\\theta) = \\dfrac{1}{1 + x^2}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**Le signe.** Sur $]-\\pi/2 ; \\pi/2[$, le cosinus est strictement positif : " +
+                '$\\cos(\\arctan x) = \\dfrac{1}{\\sqrt{1 + x^2}}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Le sinus** suit : $\\sin(\\theta) = \\tan(\\theta) \\cdot \\cos(\\theta) = ' +
+                '\\dfrac{x}{\\sqrt{1 + x^2}}$. $\\qquad \\blacksquare$',
+            },
+          ],
+        },
+        {
+          kind: 'piege',
+          text:
+            '$\\cos(\\arcsin x)$ vaut $\\sqrt{1 - x^2}$, **jamais** $-\\sqrt{1 - x^2}$, même ' +
+            'quand $x$ est négatif : le signe ne dépend pas de $x$, mais de l\'image de ' +
+            'l\'arcfonction (ici $[-\\pi/2 ; \\pi/2]$, où le cosinus est positif).',
+        },
+        {
+          kind: 'exempleLibre',
+          label: "Exemple résolu — fonction trigonométrique d'une arcfonction",
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '**a)** $\\cos\\left(\\arcsin \\dfrac{3}{5}\\right) = \\sqrt{1 - \\dfrac{9}{25}} = ' +
+                '\\sqrt{\\dfrac{16}{25}} = \\dfrac{4}{5}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**b)** $\\tan\\left(\\arccos\\left(-\\dfrac{1}{2}\\right)\\right) = ' +
+                '\\dfrac{\\sqrt{1 - \\frac{1}{4}}}{-\\frac{1}{2}} = ' +
+                '\\dfrac{\\frac{\\sqrt{3}}{2}}{-\\frac{1}{2}} = -\\sqrt{3}$. Contrôle : ' +
+                '$\\arccos\\left(-\\dfrac{1}{2}\\right) = \\dfrac{2\\pi}{3}$ et ' +
+                '$\\tan \\dfrac{2\\pi}{3} = -\\sqrt{3}$ ✓.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**c)** $\\sin(\\arctan 2) = \\dfrac{2}{\\sqrt{1 + 4}} = \\dfrac{2}{\\sqrt{5}} = ' +
+                '\\dfrac{2\\sqrt{5}}{5}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**d)** Avec une variable : $\\cos(\\arcsin 3x) = \\sqrt{1 - (3x)^2} = ' +
+                '\\sqrt{1 - 9x^2}$, pour $3x \\in [-1 ; 1]$, soit ' +
+                '$x \\in \\left[-\\dfrac{1}{3} ; \\dfrac{1}{3}\\right]$. C\'est $3x$ tout entier ' +
+                'qui est mis au carré.',
+            },
+          ],
         },
         {
           kind: 'application',
@@ -1270,9 +1745,9 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
                 { x: -1.05, y: -0.5, label: 'eau', tone: 'ink', node: false },
               ],
               caption:
-                "Le rayon incident (orange, angle θ₁=40° par rapport à la normale pointillée) " +
+                "Le rayon incident (orange, angle $\\theta_1 = 40^\\circ$ par rapport à la normale pointillée) " +
                 'se rapproche de la normale en entrant dans l\'eau — le rayon réfracté (vert) ' +
-                'fait un angle θ₂ plus petit, exactement ce que calcule la formule ci-dessous.',
+                'fait un angle $\\theta_2$ plus petit, exactement ce que calcule la formule ci-dessous.',
             },
             {
               kind: 'curvePlot',
@@ -1284,12 +1759,13 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               fixedYRange: { min: 0, max: 70 },
               points: [{ x: 40, y: 28.93, label: '', tone: 'accent' }],
               textLabels: [{ x: 45, y: 12, text: 'θ₁=40° → θ₂≈28,9°', tone: 'accent', anchor: 'start' }],
-              xAxisLabel: 'θ1 (air)',
-              yAxisLabel: 'θ2 (eau)',
+              xAxisLabel: 'θ₁ (air)',
+              yAxisLabel: 'θ₂ (eau)',
               caption:
-                'θ₂ en fonction de θ₁ pour un passage air→eau (n₁=1 ; n₂=1,33) : ' +
-                'θ₂ = arcsin(sin(θ₁)/1,33). Le rayon réfracté fait toujours un angle plus ' +
-                'petit que le rayon incident.',
+                '$\\theta_2$ en fonction de $\\theta_1$ pour un passage air → eau ($n_1 = 1$ ; $n_2 = 1{,}33$) : ' +
+                '$\\theta_2 = \\arcsin\\left(\\dfrac{\\sin(\\theta_1)}{1{,}33}\\right)$. Le rayon ' +
+                'réfracté fait un angle plus petit que le rayon incident, sauf en incidence ' +
+                'normale ($\\theta_1 = 0$ : le rayon n\'est pas dévié).',
             },
           ],
           text:
@@ -1298,11 +1774,15 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             'Snell-Descartes relie les deux angles (par rapport à la normale) et les indices ' +
             'de réfraction des deux milieux : $n_1\\sin(\\theta_1) = n_2\\sin(\\theta_2)$. ' +
             'Pour calculer directement l\'angle de réfraction $\\theta_2$ à partir de ' +
-            "l'angle d'incidence $\\theta_1$, il faut ISOLER $\\theta_2$ — et donc appliquer " +
+            "l'angle d'incidence $\\theta_1$, il faut **isoler** $\\theta_2$ — et donc appliquer " +
             'arcsin aux deux membres : $\\theta_2 = \\arcsin\\left(\\dfrac{n_1\\sin(\\theta_1)}' +
             '{n_2}\\right)$. C\'est exactement arcsin qui permet aux opticiens et aux ' +
             'fabricants de lentilles de calculer la trajectoire précise d\'un rayon lumineux ' +
-            'à travers un système optique.',
+            'à travers un système optique. Dans l\'autre sens, de l\'eau vers l\'air ' +
+            '($n_1 = 1{,}33$ ; $n_2 = 1$), l\'argument $1{,}33\\sin(\\theta_1)$ dépasse $1$ dès que ' +
+            '$\\theta_1 > \\arcsin\\left(\\dfrac{1}{1{,}33}\\right) \\approx 48{,}8^\\circ$ : arcsin ' +
+            'n\'existe plus, il n\'y a **pas de rayon réfracté**. C\'est la réflexion totale — la ' +
+            'condition d\'existence de arcsin, vue comme un phénomène physique.',
           domaines: ['Physique', 'Optique'],
         },
         {
@@ -1320,8 +1800,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           title: 'arcsin, arccos, arctan',
           generatorId: '6gen2',
           description: [
-            'Identifie la restriction bijective correspondant à chaque arcfonction, calcule des ' +
-              'valeurs remarquables sans calculatrice, et relie domaine/image à chaque fonction.',
+            "Décide si une expression avec arcsin, arccos ou arctan existe — seule ou composée " +
+              'avec sin, cos, tan — puis donne sa valeur exacte, sans calculatrice.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 2. arcsin, arccos, arctan »',
@@ -1346,6 +1826,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       title: 'Équations avec fonctions cyclométriques',
       blocks: [
         { kind: 'video', title: 'Équations avec fonctions cyclométriques', youtubeId: 'xt5WElsrQ5A' },
+        { kind: 'subheading', text: "La condition d'existence d'abord" },
         {
           kind: 'methode',
           label: "Condition d'existence",
@@ -1354,14 +1835,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             'arctan($u$) existe pour tout $u \\in \\mathbb{R}$ — **aucune CE** à poser.',
           ],
         },
+        { kind: 'subheading', text: 'La même arcfonction des deux côtés' },
         {
           kind: 'para',
           text:
-            'arcsin et arccos sont injectives sur leur domaine : deux images égales entraînent ' +
-            'que les arguments eux-mêmes sont égaux.',
+            'arcsin, arccos et arctan sont injectives sur leur domaine : deux images égales ' +
+            'entraînent que les arguments eux-mêmes sont égaux.',
         },
-        { kind: 'para', text: '$\\arcsin(A) = \\arcsin(B) \\iff A = B \\quad$ (si A, B respectent la CE)' },
-        { kind: 'para', text: '$\\arccos(A) = \\arccos(B) \\iff A = B \\quad$ (si A, B respectent la CE)' },
+        { kind: 'para', text: '$\\arcsin(A) = \\arcsin(B) \\iff A = B \\quad$ (si $A$, $B$ respectent la CE)' },
+        { kind: 'para', text: '$\\arccos(A) = \\arccos(B) \\iff A = B \\quad$ (si $A$, $B$ respectent la CE)' },
+        { kind: 'para', text: '$\\arctan(A) = \\arctan(B) \\iff A = B \\quad$ (sans aucune CE)' },
         {
           kind: 'para',
           text:
@@ -1379,33 +1862,39 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         { kind: 'para', text: '$\\arcsin(u) + \\arccos(u) = \\pi/2 \\quad \\forall u \\in [-1;1]$' },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration',
+          label: 'Démonstration — arcsin(u) + arccos(u) = π/2',
           blocks: [
-            { kind: 'para', text: 'Soit $y = \\arccos(x)$.' },
             {
               kind: 'para',
               text:
-                '$\\underset{\\text{déf}}{\\iff} \\cos(y) = \\cos(\\arccos(x)) ' +
-                '\\underset{\\text{calc}}{\\iff} \\cos(y) = x$',
-            },
-            { kind: 'para', text: '$\\underset{\\text{calc}}{\\iff} \\sin(\\pi/2 - y) = x$' },
-            {
-              kind: 'para',
-              text:
-                '$\\underset{\\text{calc}}{\\iff} \\arcsin(\\sin(\\pi/2-y)) = \\arcsin(x) ' +
-                '\\underset{\\text{calc}}{\\iff} \\pi/2 - y = \\arcsin(x)$',
+                'Soit $u \\in [-1 ; 1]$ et $y = \\arccos(u)$. Par la caractérisation (section 2), ' +
+                '$\\cos(y) = u$ et $y \\in [0 ; \\pi]$.',
             },
             {
               kind: 'para',
               text:
-                '$\\underset{\\text{calc}}{\\iff} y = \\pi/2 - \\arcsin(x) \\iff \\arccos(x) = \\pi/2 - \\arcsin(x)$',
+                "**Le sinus.** Les angles $y$ et $\\pi/2 - y$ sont complémentaires : " +
+                '$\\sin(\\pi/2 - y) = \\cos(y) = u$.',
             },
-            { kind: 'para', text: 'D\'où $\\arccos(x) + \\arcsin(x) = \\pi/2$.' },
+            {
+              kind: 'para',
+              text:
+                "**L'intervalle.** $0 \\le y \\le \\pi$ donne $-\\pi \\le -y \\le 0$, puis, en " +
+                'ajoutant $\\pi/2$, $-\\pi/2 \\le \\pi/2 - y \\le \\pi/2$ : ' +
+                '$\\pi/2 - y \\in [-\\pi/2 ; \\pi/2]$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** $\\pi/2 - y$ vérifie les deux conditions de la caractérisation de ' +
+                '$\\arcsin(u)$ : $\\pi/2 - y = \\arcsin(u)$, soit ' +
+                '$\\arcsin(u) + \\arccos(u) = \\pi/2$. $\\qquad \\blacksquare$',
+            },
           ],
         },
         {
           kind: 'methode',
-          label: 'Méthode en 3 temps',
+          label: 'Méthode en 3 temps — la même arcfonction des deux côtés',
           items: [
             "1) Pose la CE de chaque arcfonction. 2) Résous l'équation « simplifiée » " +
               "obtenue en enlevant les arcfonctions. 3) Vérifie que la solution trouvée " +
@@ -1414,6 +1903,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
+          label: 'Exemple résolu — la même arcfonction des deux côtés',
           blocks: [
             { kind: 'para', text: '$\\arcsin(2x-1) = \\arcsin(x)$' },
             { kind: 'para', text: 'CE : $2x - 1 \\in [-1;1]$ et $x \\in [-1;1]$, soit $x \\in [0;1]$.' },
@@ -1483,6 +1973,194 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'exempleLibre',
+          label: "Exemple résolu — avec arctan, aucune condition d'existence",
+          blocks: [
+            { kind: 'para', text: '$\\arctan(x^2 - 2) = \\arctan(x)$' },
+            {
+              kind: 'para',
+              text:
+                'arctan est définie sur $\\mathbb{R}$ : pas de CE. Par injectivité, ' +
+                '$x^2 - 2 = x$, soit $x^2 - x - 2 = (x-2)(x+1) = 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Les deux racines sont acceptées telles quelles : $S = \\{-1 ; 2\\}$. Attention, ' +
+                "l'absence de CE ne garantit pas de solution : $\\arctan(x^2 + 1) = \\arctan(x)$ " +
+                'mène à $x^2 - x + 1 = 0$, de discriminant $-3$, donc $S = \\varnothing$.',
+            },
+          ],
+        },
+        { kind: 'subheading', text: 'Une arcfonction égale à un angle' },
+        {
+          kind: 'methode',
+          label: 'Méthode — résoudre arcsin(u) = α (de même avec arccos et arctan)',
+          items: [
+            "Vérifie que l'angle $\\alpha$ est dans l'**image** de l'arcfonction : " +
+              '$[-\\pi/2 ; \\pi/2]$ pour arcsin, $[0 ; \\pi]$ pour arccos, $]-\\pi/2 ; \\pi/2[$ ' +
+              "pour arctan. Sinon, l'équation n'a **aucune solution**.",
+            'Si oui, applique la fonction trigonométrique : $\\arcsin(u) = \\alpha \\iff ' +
+              'u = \\sin(\\alpha)$ (caractérisation, section 2).',
+            "Résous $u = \\sin(\\alpha)$. Aucune CE à vérifier en plus : $\\sin(\\alpha)$ est " +
+              'forcément dans $[-1 ; 1]$.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — une arcfonction égale à un angle',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '**a)** $\\arccos(2x - 1) = \\dfrac{2\\pi}{3}$ : $\\dfrac{2\\pi}{3} \\in [0 ; \\pi]$ ✓. ' +
+                'Donc $2x - 1 = \\cos \\dfrac{2\\pi}{3} = -\\dfrac{1}{2}$, soit $x = \\dfrac{1}{4}$ : ' +
+                '$S = \\left\\{\\dfrac{1}{4}\\right\\}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**b)** $\\arcsin(x^2 - 1) = -\\dfrac{\\pi}{6}$ : $-\\dfrac{\\pi}{6} \\in ' +
+                '[-\\pi/2 ; \\pi/2]$ ✓. Donc $x^2 - 1 = \\sin\\left(-\\dfrac{\\pi}{6}\\right) = ' +
+                '-\\dfrac{1}{2}$, soit $x^2 = \\dfrac{1}{2}$ : ' +
+                '$S = \\left\\{-\\dfrac{\\sqrt{2}}{2} ; \\dfrac{\\sqrt{2}}{2}\\right\\}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**c)** $\\arctan(3x + 1) = \\dfrac{\\pi}{2}$ : l\'image de arctan est ' +
+                "l'intervalle **ouvert** $]-\\pi/2 ; \\pi/2[$, la valeur $\\dfrac{\\pi}{2}$ n'est " +
+                'jamais atteinte : $S = \\varnothing$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**d)** $\\arccos(x + 1) = -\\dfrac{\\pi}{4}$ : arccos ne prend jamais de valeur ' +
+                'négative : $S = \\varnothing$, sans aucun calcul.',
+            },
+          ],
+        },
+        { kind: 'subheading', text: 'Deux arcfonctions différentes' },
+        {
+          kind: 'intuition',
+          label: "Pourquoi on ne peut plus « enlever » les arcfonctions",
+          text:
+            '$\\arcsin\\left(\\dfrac{1}{2}\\right) = \\dfrac{\\pi}{6}$ et ' +
+            '$\\arccos\\left(\\dfrac{\\sqrt{3}}{2}\\right) = \\dfrac{\\pi}{6}$ : les deux membres ' +
+            'sont égaux, et pourtant $\\dfrac{1}{2} \\neq \\dfrac{\\sqrt{3}}{2}$. L\'injectivité ' +
+            'ne sert que pour **la même** arcfonction des deux côtés. Avec deux arcfonctions ' +
+            'différentes, on applique une fonction trigonométrique aux deux membres, puis les ' +
+            'identités de la section 2.',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — arcsin(A) = arccos(B), et les autres mélanges',
+          items: [
+            '**CE** : $A$ et $B$ dans $[-1 ; 1]$ (rien pour un argument de arctan).',
+            "**Compatibilité des images** : la valeur commune $\\theta$ est dans les deux images. " +
+              'Pour arcsin et arccos, $\\theta \\in [0 ; \\pi/2]$, donc $A = \\sin\\theta \\ge 0$ ' +
+              'et $B = \\cos\\theta \\ge 0$.',
+            "**Une fonction trigonométrique des deux côtés** : $\\cos(\\arcsin A) = B$, soit " +
+              '$\\sqrt{1 - A^2} = B$, puis, au carré, $1 - A^2 = B^2$.',
+            '**Tri des candidats** : les solutions obtenues ne sont que des candidates. Garde ' +
+              'celles qui respectent la CE **et** la compatibilité ; les autres sont des ' +
+              'solutions parasites.',
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Quand appliquer sin ou cos est-il une équivalence ?',
+          text:
+            'Seulement si cette fonction est injective sur un intervalle qui contient les deux ' +
+            'membres. sin est injective sur $[-\\pi/2 ; \\pi/2]$, qui contient arcsin et arctan : ' +
+            '$\\arctan(A) = \\arcsin(B) \\iff \\sin(\\arctan A) = B$. Pour arcsin et arccos, ' +
+            "aucune des deux fonctions n'est injective sur un intervalle contenant les deux " +
+            'images : appliquer cos, puis élever au carré, peut **ajouter** des solutions.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — arcsin et arccos : une solution parasite',
+          blocks: [
+            { kind: 'para', text: '$\\arcsin(4x) = \\arccos(3x)$' },
+            {
+              kind: 'para',
+              text:
+                '**CE.** $4x \\in [-1 ; 1]$ donne $x \\in \\left[-\\dfrac{1}{4} ; \\dfrac{1}{4}\\right]$, ' +
+                'et $3x \\in [-1 ; 1]$ donne $x \\in \\left[-\\dfrac{1}{3} ; \\dfrac{1}{3}\\right]$ : ' +
+                'CE $\\equiv x \\in \\left[-\\dfrac{1}{4} ; \\dfrac{1}{4}\\right]$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Compatibilité.** La valeur commune est dans $[0 ; \\pi/2]$ : $4x \\ge 0$ et ' +
+                '$3x \\ge 0$, soit $x \\ge 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Cosinus des deux membres.** $\\cos(\\arcsin 4x) = 3x$ donne ' +
+                '$\\sqrt{1 - 16x^2} = 3x$ ; au carré, $1 - 16x^2 = 9x^2$, soit ' +
+                '$x^2 = \\dfrac{1}{25}$ : deux candidats, $x = \\dfrac{1}{5}$ et $x = -\\dfrac{1}{5}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Tri.** Les deux candidats sont dans la CE. Mais $-\\dfrac{1}{5} < 0$ : en ' +
+                '$x = -\\dfrac{1}{5}$, $\\arcsin\\left(-\\dfrac{4}{5}\\right)$ est négatif alors que ' +
+                '$\\arccos\\left(-\\dfrac{3}{5}\\right)$ dépasse $\\dfrac{\\pi}{2}$ — candidat ' +
+                'parasite, créé par la mise au carré. Reste $S = \\left\\{\\dfrac{1}{5}\\right\\}$, ' +
+                'et en effet $\\arcsin\\left(\\dfrac{4}{5}\\right) = \\arccos\\left(\\dfrac{3}{5}\\right) ' +
+                '\\approx 0{,}927$.',
+            },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'domainLine',
+                min: -0.36,
+                max: 0.36,
+                segments: [{ from: 0, to: 0.25 }],
+                points: [
+                  { value: -0.2, closed: true, label: '−1/5', tone: 'bad', sublabel: 'rejeté' },
+                  { value: 0.2, closed: true, label: '1/5', tone: 'good', sublabel: 'accepté' },
+                ],
+                extraTicks: [{ value: 0, label: '0' }],
+                axisLabel: 'CE et compatibilité : x ∈ [0 ; 1/4]',
+                caption:
+                  'La CE est $\\left[-\\dfrac{1}{4} ; \\dfrac{1}{4}\\right]$ ; la compatibilité des ' +
+                  "images ne garde que sa moitié positive (trait vert). $x = -\\dfrac{1}{5}$ est " +
+                  'dans la CE, mais pas dans le trait vert : il est rejeté.',
+              },
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — arctan et arcsin : appliquer sin sans perdre de solution',
+          blocks: [
+            { kind: 'para', text: '$\\arctan(x) = \\arcsin\\left(\\dfrac{x}{\\sqrt{2}}\\right)$' },
+            {
+              kind: 'para',
+              text:
+                '**CE.** $\\dfrac{x}{\\sqrt{2}} \\in [-1 ; 1]$, soit $x \\in [-\\sqrt{2} ; \\sqrt{2}]$. ' +
+                'Les deux membres sont dans $[-\\pi/2 ; \\pi/2]$, où sin est injective : appliquer ' +
+                'sin est une équivalence.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Sinus des deux membres.** $\\sin(\\arctan x) = \\dfrac{x}{\\sqrt{2}}$, soit ' +
+                '$\\dfrac{x}{\\sqrt{1 + x^2}} = \\dfrac{x}{\\sqrt{2}}$ : $x = 0$, ou ' +
+                '$\\sqrt{1 + x^2} = \\sqrt{2}$, c\'est-à-dire $x^2 = 1$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** $S = \\{-1 ; 0 ; 1\\}$, les trois dans la CE. Contrôle : ' +
+                '$\\arctan(1) = \\dfrac{\\pi}{4} = \\arcsin\\left(\\dfrac{\\sqrt{2}}{2}\\right)$ ✓.',
+            },
+          ],
+        },
+        {
           kind: 'atelier',
           tag: 'equation-ce-widget',
           label: 'Manipule toi-même — équation et condition d\'existence',
@@ -1498,8 +2176,9 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           title: 'Équations avec fonctions cyclométriques',
           generatorId: '6gen3',
           description: [
-            'Résous des équations combinant arcsin, arccos et arctan, en posant systématiquement ' +
-              'la condition d\'existence puis en la confrontant à la solution trouvée.',
+            'Résous des équations avec arcsin, arccos et arctan — même arcfonction des deux ' +
+              'côtés, arcfonction égale à un angle, arcfonctions différentes — en posant la ' +
+              'condition d\'existence puis en triant les candidats.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 3. Équations avec fonctions cyclométriques »',
@@ -1512,6 +2191,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       title: 'Dérivées des fonctions cyclométriques',
       blocks: [
         { kind: 'video', title: 'Dérivées des fonctions cyclométriques', youtubeId: 'UvcxAUJF9d0' },
+        { kind: 'subheading', text: 'Les trois formules' },
         { kind: 'para', text: 'Pour $u = u(x)$ une fonction dérivable :' },
         {
           kind: 'featureTable',
@@ -1521,6 +2201,13 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             ['arccos($u$)', "$-\\dfrac{u'}{\\sqrt{1-u^2}}$"],
             ['arctan($u$)', "$\\dfrac{u'}{1+u^2}$"],
           ],
+        },
+        {
+          kind: 'para',
+          text:
+            'Pour arcsin et arccos, la formule n\'est valable que là où $u(x) \\in \\; ]-1 ; 1[$ : ' +
+            'en $u = \\pm 1$, le dénominateur s\'annule (et arcsin n\'y est pas dérivable, ' +
+            'démontré plus bas). Pour arctan, aucune restriction.',
         },
         {
           kind: 'piege',
@@ -1547,7 +2234,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             'Les trois formules du tableau se démontrent toutes de la même façon, en trois ' +
             'temps : appliquer le théorème de la dérivée d\'une réciproque (section 1), faire ' +
             'disparaître la fonction trigonométrique parasite grâce à ' +
-            '$\\cos^2 + \\sin^2 = 1$, puis **choisir le bon signe** en regardant sur quel ' +
+            '$\\cos^2 + \\sin^2 = 1$ (les identités de la section 2), puis **choisir le bon signe** en regardant sur quel ' +
             'intervalle vit l\'arcfonction. C\'est ce troisième temps qui distingue arcsin de ' +
             'arccos, et qui produit le signe moins.',
         },
@@ -1606,7 +2293,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration 1 (rapide) — dérivée de arccos par l\'identité complémentaire',
+          label: 'Démonstration — dérivée de arccos par l\'identité complémentaire',
           blocks: [
             {
               kind: 'para',
@@ -1632,7 +2319,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration 2 (méthode directe) — dérivée de arccos',
+          label: 'Démonstration — dérivée de arccos par la méthode directe',
           blocks: [
             {
               kind: 'para',
@@ -1768,43 +2455,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                '**Premier cas — la dérivée supposée est non nulle**, $\\arcsin\'(1) \\neq 0$. ' +
-                'arcsin est injective et, par la ' +
-                'propriété $(f^{-1})^{-1} = f$ de la section 1, sa propre réciproque est ' +
-                '$\\sin|_{[-\\pi/2;\\pi/2]}$. Le théorème de la dérivée d\'une réciproque, ' +
-                'appliqué cette fois à arcsin au point $\\pi/2$, donne :',
+                '**La contradiction.** L\'identité $\\sin(\\arcsin(x)) = x$ est valable sur tout ' +
+                '$[-1 ; 1]$. Si arcsin était dérivable en 1, on pourrait dériver les deux membres ' +
+                'en $x = 1$ ; la règle de la chaîne donnerait ' +
+                '$\\cos(\\arcsin(1)) \\cdot \\arcsin\'(1) = 1$, c\'est-à-dire ' +
+                '$\\cos(\\pi/2) \\cdot \\arcsin\'(1) = 1$, soit $0 \\cdot \\arcsin\'(1) = 1$.',
             },
             {
               kind: 'para',
               text:
-                '$\\left(\\sin|_{[-\\pi/2;\\pi/2]}\\right)\'\\!\\left(\\frac{\\pi}{2}\\right) = ' +
-                '\\dfrac{1}{\\arcsin\'\\!\\left(\\sin\\frac{\\pi}{2}\\right)} = ' +
-                '\\dfrac{1}{\\arcsin\'(1)}$',
-            },
-            {
-              kind: 'para',
-              text:
-                'L\'inverse d\'un réel non nul n\'est jamais nul, donc ce nombre est différent ' +
-                'de 0. Or on sait le calculer autrement : ' +
-                '$\\left(\\sin|_{[-\\pi/2;\\pi/2]}\\right)\'(\\pi/2) = \\cos(\\pi/2) = 0$. Le ' +
-                'même nombre serait à la fois nul et non nul : contradiction.',
-            },
-            {
-              kind: 'para',
-              text:
-                '**Second cas — la dérivée supposée est nulle**, $\\arcsin\'(1) = 0$. Le ' +
-                'théorème ne s\'applique plus, mais ' +
-                'une ligne suffit : en dérivant en $x = 1$ l\'identité ' +
-                '$\\sin(\\arcsin(x)) = x$ (valable sur tout $[-1;1]$), la règle de la chaîne ' +
-                'donne $\\cos(\\arcsin(1)) \\cdot \\arcsin\'(1) = 1$, c\'est-à-dire ' +
-                '$\\cos(\\pi/2) \\cdot \\arcsin\'(1) = 1$, soit $0 = 1$. Absurde.',
-            },
-            {
-              kind: 'para',
-              text:
-                'Ce second calcul couvre d\'ailleurs les deux cas à lui seul : quelle que soit ' +
-                'la valeur supposée de $\\arcsin\'(1)$, la multiplier par ' +
-                '$\\cos(\\pi/2) = 0$ ne pourra jamais donner 1.',
+                'Quelle que soit la valeur supposée de $\\arcsin\'(1)$, la multiplier par ' +
+                '$0$ ne donnera jamais $1$ : absurde.',
             },
             {
               kind: 'para',
@@ -1827,16 +2488,93 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             '(contre-exemple de $\\sqrt[5]{x}$). Seul le raisonnement par l\'absurde ci-dessus ' +
             'établit réellement que arcsin n\'est pas dérivable en $\\pm 1$.',
         },
-        { kind: 'subheading', text: 'Exemple résolu — dérivée composée' },
+        { kind: 'subheading', text: 'Dériver une expression avec une arcfonction' },
+        {
+          kind: 'methode',
+          label: 'Méthode — dériver arcsin(u), arccos(u) ou arctan(u)',
+          items: [
+            "Repère l'argument $u$ et calcule $u'$.",
+            "Applique la formule du tableau, sans oublier le facteur $u'$ ni le signe moins de " +
+              'arccos. C\'est $u$ **tout entier** qui est mis au carré.',
+            'Simplifie (mise en évidence sous la racine, puissances).',
+            "Pour arcsin et arccos, donne l'intervalle de validité : $u(x) \\in \\; ]-1 ; 1[$.",
+          ],
+        },
         {
           kind: 'exempleLibre',
+          label: 'Exemple résolu — dérivée composée',
           blocks: [
             { kind: 'para', text: '$(\\arcsin(2x-1))\'$' },
             { kind: 'para', text: 'Règle de la chaîne avec $u = 2x-1$, $u\' = 2$ :' },
             {
               kind: 'para',
               text:
-                '$(\\arcsin(2x-1))\' = \\dfrac{2}{\\sqrt{1-(2x-1)^2}} = \\dfrac{2}{\\sqrt{-4x^2+4x}} = \\dfrac{1}{\\sqrt{-x^2+x}}$',
+                '$(\\arcsin(2x-1))\' = \\dfrac{2}{\\sqrt{1-(2x-1)^2}} = \\dfrac{2}{\\sqrt{-4x^2+4x}} = \\dfrac{2}{2\\sqrt{x-x^2}} = \\dfrac{1}{\\sqrt{x-x^2}}$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Validité.** $2x - 1 \\in \\; ]-1 ; 1[$ donne $0 < 2x < 2$, soit ' +
+                '$x \\in \\; ]0 ; 1[$ : c\'est là, et là seulement, que la formule vaut. On le ' +
+                'retrouve sur le résultat, $x - x^2 = x(1-x) > 0$ exactement sur $]0 ; 1[$.',
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — arctan(3x) et arccos(x²)',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '**a)** $u = 3x$, $u\' = 3$ : $(\\arctan(3x))\' = \\dfrac{3}{1 + (3x)^2} = ' +
+                '\\dfrac{3}{1 + 9x^2}$, valable sur $\\mathbb{R}$ — et non $\\dfrac{3}{1 + 3x^2}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**b)** $u = x^2$, $u\' = 2x$ : $(\\arccos(x^2))\' = -\\dfrac{2x}{\\sqrt{1 - x^4}}$, ' +
+                'valable pour $x^2 < 1$, soit $x \\in \\; ]-1 ; 1[$.',
+            },
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            "Une dérivée nulle sur un intervalle signifie une fonction constante : c'est une " +
+            'autre façon d\'établir une identité entre arcfonctions.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — arctan(x) + arctan(1/x) = π/2 pour x > 0',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $g(x) = \\arctan(x) + \\arctan\\left(\\dfrac{1}{x}\\right)$ sur ' +
+                "l'intervalle $]0 ; +\\infty[$.",
+            },
+            {
+              kind: 'para',
+              text:
+                '**La dérivée.** Avec $u = \\dfrac{1}{x}$, $u\' = -\\dfrac{1}{x^2}$ : ' +
+                "$g'(x) = \\dfrac{1}{1 + x^2} + \\dfrac{-\\frac{1}{x^2}}{1 + \\frac{1}{x^2}} = " +
+                '\\dfrac{1}{1 + x^2} - \\dfrac{1}{x^2 + 1} = 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Constante.** $g$ a une dérivée nulle sur un **intervalle** : elle y est ' +
+                "constante. Sa valeur en $x = 1$ : $g(1) = \\dfrac{\\pi}{4} + \\dfrac{\\pi}{4} = " +
+                '\\dfrac{\\pi}{2}$. Donc $\\arctan(x) + \\arctan\\left(\\dfrac{1}{x}\\right) = ' +
+                '\\dfrac{\\pi}{2}$ pour tout $x > 0$. $\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                'Pour $x < 0$, l\'imparité de arctan donne $-\\dfrac{\\pi}{2}$ : la somme ' +
+                "n'est pas la même sur $]-\\infty ; 0[$, c'est pourquoi le mot « intervalle » " +
+                'compte.',
             },
           ],
         },
@@ -1875,11 +2613,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               xTicks: [2, 4, 6, 8, 10],
               fixedYRange: { min: 0, max: 40 },
               points: [{ x: 2, y: 36.87, label: '', tone: 'bad' }],
-              textLabels: [{ x: 2.6, y: 30, text: 'maximum en x=2 (θ≈36,9°)', tone: 'bad', anchor: 'start' }],
+              textLabels: [{ x: 4.5, y: 37, text: 'maximum en x = 2 (θ ≈ 36,9°)', tone: 'bad', anchor: 'start' }],
               xAxisLabel: 'distance x',
               yAxisLabel: 'angle θ (°)',
               caption:
-                'θ(x) = arctan(4/x) − arctan(1/x), pour a=1 et b=4 (en unités de hauteur ' +
+                '$\\theta(x) = \\arctan\\left(\\dfrac{4}{x}\\right) - \\arctan\\left(\\dfrac{1}{x}\\right)$, pour $a = 1$ et $b = 4$ (en unités de hauteur ' +
                 "d'yeux) : l'angle est maximal à une distance précise — ni trop près ni trop " +
                 'loin — exactement le sommet de cette courbe, trouvé en dérivant.',
             },
@@ -1887,14 +2625,50 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           text:
             "Au cinéma ou devant un grand panneau publicitaire, l'angle sous lequel tu vois " +
             "l'écran — et donc ton confort visuel — dépend de ta distance au mur. Trop près, " +
-            "l'angle est grand mais déformé ; trop loin, l'angle devient minuscule. Ce " +
+            "l'écran se voit sous un angle très rasant, presque nul ; trop loin, l'angle " +
+            'devient minuscule : entre les deux, une distance le rend maximal. Ce ' +
             "problème classique d'optimisation se modélise avec arctan : si l'écran est " +
             'accroché entre les hauteurs $a$ et $b$ au-dessus de tes yeux, l\'angle sous ' +
             'lequel tu le vois depuis une distance $x$ vaut $\\theta(x) = \\arctan(b/x) - ' +
-            '\\arctan(a/x)$. Trouver la distance qui MAXIMISE cet angle — la meilleure place ' +
+            '\\arctan(a/x)$. Trouver la distance qui **maximise** cet angle — la meilleure place ' +
             'dans la salle — demande exactement ce que tu viens d\'apprendre : dériver une ' +
             'expression contenant arctan, puis chercher où cette dérivée s\'annule.',
           domaines: ['Physique', 'Optimisation'],
+        },
+        {
+          kind: 'exempleLibre',
+          label: "Exemple résolu — la meilleure distance pour regarder l'écran",
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Écran entre les hauteurs $a = 1$ et $b = 4$ au-dessus des yeux : ' +
+                '$\\theta(x) = \\arctan\\left(\\dfrac{4}{x}\\right) - \\arctan\\left(\\dfrac{1}{x}\\right)$, ' +
+                'pour $x > 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Dérivée.** Pour $\\arctan\\left(\\dfrac{k}{x}\\right)$, $u = \\dfrac{k}{x}$ et ' +
+                "$u' = -\\dfrac{k}{x^2}$, d'où $\\left(\\arctan \\dfrac{k}{x}\\right)' = " +
+                '\\dfrac{-\\frac{k}{x^2}}{1 + \\frac{k^2}{x^2}} = -\\dfrac{k}{x^2 + k^2}$. Donc ' +
+                "$\\theta'(x) = -\\dfrac{4}{x^2 + 16} + \\dfrac{1}{x^2 + 1}$.",
+            },
+            {
+              kind: 'para',
+              text:
+                "**Signe.** $\\theta'(x) = \\dfrac{-4(x^2 + 1) + (x^2 + 16)}{(x^2 + 16)(x^2 + 1)} = " +
+                '\\dfrac{12 - 3x^2}{(x^2 + 16)(x^2 + 1)}$ : positif pour $x < 2$, nul en ' +
+                '$x = 2$, négatif ensuite.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** L\'angle est maximal à la distance $x = 2$, et vaut ' +
+                '$\\theta(2) = \\arctan(2) - \\arctan\\left(\\dfrac{1}{2}\\right) \\approx 36{,}9^\\circ$. ' +
+                'En général, le même calcul donne $x = \\sqrt{ab}$.',
+            },
+          ],
         },
         {
           kind: 'atelier',
@@ -1925,6 +2699,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       title: 'Reconnaître une fonction cyclométrique à son graphe',
       blocks: [
         { kind: 'video', title: 'Reconnaître une fonction cyclométrique à son graphe', youtubeId: 'dCyJByIOeso' },
+        { kind: 'subheading', text: 'Les trois graphes de référence' },
         {
           kind: 'para',
           text: 'Face à un graphe inconnu, trois questions suffisent presque toujours à trouver la bonne arcfonction :',
@@ -1940,60 +2715,200 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               "un domaine ℝ sans asymptote n'est pas une arcfonction seule.",
           ],
         },
-        { kind: 'para', text: 'Les trois graphes de référence à mémoriser :' },
+        {
+          kind: 'featureTable',
+          caption: 'Les caractéristiques des trois arcfonctions',
+          headers: ['Fonction', 'Domaine, image, sens, parité, asymptotes, extremums'],
+          rows: [
+            ['arcsin', 'domaine $[-1 ; 1]$, image $\\left[-\\frac{\\pi}{2} ; \\frac{\\pi}{2}\\right]$ ; croissante ; impaire ; aucune asymptote ; minimum $-\\frac{\\pi}{2}$ en $-1$, maximum $\\frac{\\pi}{2}$ en $1$'],
+            ['arccos', 'domaine $[-1 ; 1]$, image $[0 ; \\pi]$ ; décroissante ; ni paire ni impaire ; aucune asymptote ; maximum $\\pi$ en $-1$, minimum $0$ en $1$'],
+            ['arctan', 'domaine $\\mathbb{R}$, image $\\left]-\\frac{\\pi}{2} ; \\frac{\\pi}{2}\\right[$ ; croissante ; impaire ; asymptotes $y = \\pm\\frac{\\pi}{2}$ ; aucun extremum'],
+          ],
+        },
         {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            curves: [{ fn: Math.asin, tone: 'accent', xMin: -1, xMax: 1 }],
-            xMin: -1.3,
-            xMax: 1.3,
-            xTicks: [-1, 1],
+            curves: [
+              { fn: Math.atan, tone: 'bad' },
+              { fn: Math.asin, tone: 'accent', xMin: -1, xMax: 1 },
+              { fn: Math.acos, tone: 'good', xMin: -1, xMax: 1 },
+            ],
+            xMin: -4,
+            xMax: 4,
+            xTicks: [-3, -2, -1, 1, 2, 3],
+            yTicks: [-PI / 2, PI / 2, PI],
+            yTickLabels: { [-PI / 2]: '−π/2', [PI / 2]: 'π/2', [PI]: 'π' },
+            grid: true,
+            fixedYRange: { min: -2.1, max: 3.7 },
             points: [
               { x: -1, y: -PI / 2, label: '', tone: 'accent' },
               { x: 1, y: PI / 2, label: '', tone: 'accent' },
+              { x: -1, y: PI, label: '', tone: 'good' },
+              { x: 1, y: 0, label: '', tone: 'good' },
             ],
-            fixedYRange: { min: -1.9, max: 1.9 },
+            textLabels: [
+              { x: 1.15, y: 1.95, text: 'arcsin', tone: 'accent', anchor: 'start' },
+              { x: -1.15, y: 3.3, text: 'arccos', tone: 'good', anchor: 'end' },
+              { x: 3.9, y: 0.9, text: 'arctan', tone: 'bad', anchor: 'end' },
+            ],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'y = arcsin(x)',
+            caption:
+              'Les trois arcfonctions sur un même repère : arcsin (orange) et arccos (vert) ' +
+              'vivent sur $[-1 ; 1]$, arctan (rouge) sur $\\mathbb{R}$, coincée entre les droites ' +
+              '$y = -\\pi/2$ et $y = \\pi/2$ de la grille. arccos est la seule décroissante.',
           },
         },
+        { kind: 'subheading', text: 'Fonctions transformées : f(x) = c + k·arc(mx + n)' },
         {
-          kind: 'illustration',
-          illustration: {
-            kind: 'curvePlot',
-            curves: [{ fn: Math.acos, tone: 'accent', xMin: -1, xMax: 1 }],
-            xMin: -1.3,
-            xMax: 1.3,
-            xTicks: [-1, 1],
-            points: [
-              { x: -1, y: PI, label: '', tone: 'accent' },
-              { x: 1, y: 0, label: '', tone: 'accent' },
-            ],
-            fixedYRange: { min: -0.3, max: 3.5 },
-            xAxisLabel: 'x',
-            yAxisLabel: 'y',
-            caption: 'y = arccos(x)',
-          },
+          kind: 'para',
+          text:
+            'Les graphes rencontrés en exercice sont rarement ceux des arcfonctions seules : ils ' +
+            'sont décalés, étirés ou retournés. Chaque paramètre a un effet précis, qui se lit ' +
+            'sans tracer la courbe.',
         },
         {
-          kind: 'illustration',
-          illustration: {
-            kind: 'curvePlot',
-            curves: [{ fn: Math.atan, tone: 'accent' }],
-            xMin: -10,
-            xMax: 10,
-            xTicks: [-8, -4, 4, 8],
-            horizontalAsymptotes: [
-              { y: PI / 2, label: 'AH ≡ y = π/2' },
-              { y: -PI / 2, label: 'AH ≡ y = −π/2' },
-            ],
-            fixedYRange: { min: -2.1, max: 2.1 },
-            xAxisLabel: 'x',
-            yAxisLabel: 'y',
-            caption: 'y = arctan(x)',
-          },
+          kind: 'methode',
+          label: 'Méthode — étudier f(x) = c + k·arcsin(mx + n) (de même avec arccos, arctan)',
+          items: [
+            '**Domaine** : résous $-1 \\le mx + n \\le 1$ pour arcsin et arccos ; $\\mathbb{R}$ ' +
+              'pour arctan.',
+            "**Image** : multiplie l'image de l'arcfonction par $k$ (les bornes s'échangent si " +
+              '$k < 0$), puis ajoute $c$. Pour arctan, l\'intervalle reste **ouvert**.',
+            '**Sens de variation** : pour arcsin et arctan, $f$ est croissante si $k \\cdot m > 0$, ' +
+              'décroissante si $k \\cdot m < 0$ ; pour arccos, c\'est l\'inverse.',
+            '**Extremums** : pour arcsin et arccos, aux deux bornes du domaine (leurs valeurs ' +
+              "sont les bornes de l'image). Pour arctan, aucun extremum, mais deux asymptotes " +
+              'horizontales $y = c \\pm k\\dfrac{\\pi}{2}$.',
+            '**Symétrie et parité** : le graphe est symétrique par rapport au point ' +
+              '$\\left(-\\dfrac{n}{m} ; c\\right)$ (arcsin, arctan) ou ' +
+              '$\\left(-\\dfrac{n}{m} ; c + k\\dfrac{\\pi}{2}\\right)$ (arccos). $f$ est impaire ' +
+              'seulement si ce centre est l\'origine ; elle n\'est jamais paire, puisqu\'elle est ' +
+              'strictement monotone.',
+            "**Ordonnée à l'origine** : $f(0)$, si $0$ est dans le domaine.",
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — lire f(x) = π/2 + 2·arcsin(x − 1)',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '**Domaine.** $-1 \\le x - 1 \\le 1$, soit $x \\in [0 ; 2]$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Image.** $2 \\cdot \\left[-\\dfrac{\\pi}{2} ; \\dfrac{\\pi}{2}\\right] = [-\\pi ; \\pi]$, ' +
+                'puis $+\\dfrac{\\pi}{2}$ : $\\left[-\\dfrac{\\pi}{2} ; \\dfrac{3\\pi}{2}\\right]$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Variations et extremums.** $k = 2 > 0$ et $m = 1 > 0$ : $f$ est croissante. ' +
+                'Minimum $f(0) = \\dfrac{\\pi}{2} + 2\\arcsin(-1) = -\\dfrac{\\pi}{2}$, maximum ' +
+                '$f(2) = \\dfrac{3\\pi}{2}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**Symétrie, parité, ordonnée à l'origine.** Centre de symétrie " +
+                '$\\left(1 ; \\dfrac{\\pi}{2}\\right)$. Le domaine $[0 ; 2]$ n\'est pas symétrique ' +
+                "par rapport à 0 : $f$ n'est ni paire ni impaire. Ordonnée à l'origine : " +
+                '$f(0) = -\\dfrac{\\pi}{2}$.',
+            },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'curvePlot',
+                curves: [{ fn: (x) => PI / 2 + 2 * Math.asin(x - 1), tone: 'accent', xMin: 0, xMax: 2 }],
+                xMin: -0.8,
+                xMax: 2.8,
+                xTicks: [1, 2],
+                yTicks: [-PI / 2, PI / 2, PI, (3 * PI) / 2],
+                yTickLabels: { [-PI / 2]: '−π/2', [PI / 2]: 'π/2', [PI]: 'π', [(3 * PI) / 2]: '3π/2' },
+                grid: true,
+                fixedYRange: { min: -2.3, max: 5.4 },
+                points: [
+                  { x: 0, y: -PI / 2, label: '(0 ; −π/2)', tone: 'accent', labelPos: 'right' },
+                  { x: 1, y: PI / 2, label: '', tone: 'good' },
+                  { x: 2, y: (3 * PI) / 2, label: '(2 ; 3π/2)', tone: 'accent', labelPos: 'left' },
+                ],
+                xAxisLabel: 'x',
+                yAxisLabel: 'y',
+                caption:
+                  '$f(x) = \\dfrac{\\pi}{2} + 2\\arcsin(x - 1)$ : domaine $[0 ; 2]$ et image ' +
+                  '$\\left[-\\dfrac{\\pi}{2} ; \\dfrac{3\\pi}{2}\\right]$, lus sur les lignes de la ' +
+                  'grille. Le point vert $\\left(1 ; \\dfrac{\\pi}{2}\\right)$ est le centre de symétrie.',
+              },
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — lire g(x) = π/2 − 2·arctan(x + 1)',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '**Domaine et image.** Domaine $\\mathbb{R}$. $-2 \\cdot \\left]-\\dfrac{\\pi}{2} ; ' +
+                '\\dfrac{\\pi}{2}\\right[ = \\; ]-\\pi ; \\pi[$, puis $+\\dfrac{\\pi}{2}$ : ' +
+                '$\\left]-\\dfrac{\\pi}{2} ; \\dfrac{3\\pi}{2}\\right[$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Variations et asymptotes.** $k \\cdot m = -2 < 0$ : $g$ est décroissante, sans ' +
+                'extremum. En $+\\infty$, $\\arctan(x + 1) \\to \\dfrac{\\pi}{2}$, donc ' +
+                '$g(x) \\to -\\dfrac{\\pi}{2}$ ; en $-\\infty$, $g(x) \\to \\dfrac{3\\pi}{2}$ : deux ' +
+                'asymptotes horizontales.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**Ordonnée à l'origine et parité.** $g(0) = \\dfrac{\\pi}{2} - 2 \\cdot " +
+                '\\dfrac{\\pi}{4} = 0$ : la courbe passe par l\'origine. Pourtant $g$ n\'est pas ' +
+                'impaire : son centre de symétrie est $\\left(-1 ; \\dfrac{\\pi}{2}\\right)$, et par ' +
+                'exemple $g(-2) = \\pi$ alors que $g(2) = \\dfrac{\\pi}{2} - 2\\arctan(3) \\neq -\\pi$.',
+            },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'curvePlot',
+                curves: [{ fn: (x) => PI / 2 - 2 * Math.atan(x + 1), tone: 'accent' }],
+                xMin: -7,
+                xMax: 5,
+                xTicks: [-6, -5, -4, -3, -2, -1, 1, 2, 3, 4],
+                yTicks: [-PI / 2, PI / 2, PI, (3 * PI) / 2],
+                yTickLabels: { [-PI / 2]: '−π/2', [PI / 2]: 'π/2', [PI]: 'π', [(3 * PI) / 2]: '3π/2' },
+                grid: true,
+                horizontalAsymptotes: [{ y: -PI / 2 }, { y: (3 * PI) / 2 }],
+                fixedYRange: { min: -2.4, max: 5.6 },
+                points: [
+                  { x: -1, y: PI / 2, label: '', tone: 'good' },
+                  { x: -2, y: PI, label: '(−2 ; π)', tone: 'accent', labelPos: 'above' },
+                  { x: 0, y: 0, label: '', tone: 'bad' },
+                ],
+                xAxisLabel: 'x',
+                yAxisLabel: 'y',
+                caption:
+                  '$g(x) = \\dfrac{\\pi}{2} - 2\\arctan(x + 1)$ : décroissante, entre les asymptotes ' +
+                  '$y = \\dfrac{3\\pi}{2}$ (en $-\\infty$) et $y = -\\dfrac{\\pi}{2}$ (en $+\\infty$). ' +
+                  "Elle passe par l'origine (point rouge), mais son centre de symétrie est le point " +
+                  'vert $\\left(-1 ; \\dfrac{\\pi}{2}\\right)$ : elle n\'est pas impaire.',
+              },
+            },
+          ],
+        },
+        {
+          kind: 'piege',
+          text:
+            "Passer par l'origine ne suffit pas pour être impaire (exemple ci-dessus) ; et une " +
+            'transformée de arccos peut l\'être : $\\arccos(x) - \\dfrac{\\pi}{2} = -\\arcsin(x)$, ' +
+            'de centre $(0 ; 0)$. Le seul test fiable est le centre de symétrie, ou le calcul de ' +
+            '$f(-x)$.',
         },
         {
           kind: 'atelier',
@@ -2011,8 +2926,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           title: 'Associer graphique et expression',
           generatorId: '6gen5',
           description: [
-            "Identifie la bonne arcfonction à partir d'un graphe inconnu, en s'appuyant sur le " +
-              'domaine, le sens de variation et la présence éventuelle d\'asymptotes.',
+            "Associe un graphique à l'expression d'une fonction cyclométrique transformée, puis " +
+              "lis son domaine, son image, sa parité, son ordonnée à l'origine et ses extremums.",
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 5. Associer graphique et expression »',
@@ -2033,6 +2948,231 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
       ],
     },
+    {
+      id: 'etude',
+      number: 6,
+      title: 'Étudier une fonction cyclométrique',
+      blocks: [
+        { kind: 'video', title: 'Étudier une fonction cyclométrique' },
+        {
+          kind: 'para',
+          text:
+            "Étudier complètement une fonction qui contient une arcfonction suit le même ordre " +
+            'que pour toute fonction. Ce chapitre fournit les outils de chaque étape : la CE pour ' +
+            'le domaine, la parité de arcsin et arctan, les limites $\\pm\\dfrac{\\pi}{2}$ de ' +
+            'arctan, et les dérivées de la section 4.',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — étude complète',
+          items: [
+            '**Domaine** : CE de chaque arcfonction, dénominateurs, racines.',
+            '**Parité** : si le domaine est symétrique, compare $f(-x)$ à $f(x)$. Une fonction ' +
+              "paire ou impaire s'étudie sur $[0 ; +\\infty[$, puis se complète par symétrie.",
+            '**Limites et asymptotes** : $\\displaystyle\\lim_{x \\to \\pm\\infty} \\arctan(x) = ' +
+              '\\pm\\dfrac{\\pi}{2}$ ; arcsin et arccos sont bornées, et prennent leurs valeurs ' +
+              'extrêmes aux bornes de leur domaine. Asymptote oblique $y = ax + b$ : ' +
+              '$a = \\displaystyle\\lim_{x \\to \\infty} \\dfrac{f(x)}{x}$, ' +
+              '$b = \\displaystyle\\lim_{x \\to \\infty} \\big(f(x) - ax\\big)$.',
+            "**Dérivée et signe** : formules de la section 4 (valables sur $]-1 ; 1[$ pour arcsin " +
+              'et arccos), puis tableau de signes.',
+            '**Tableau de variations** : extremums, valeurs aux bornes, asymptotes.',
+            '**Graphe** : il doit confirmer chaque ligne du tableau.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — étude de g(x) = arctan(x) − x/2',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '**1) Domaine :** $\\mathbb{R}$. **2) Parité :** $g(-x) = -\\arctan(x) + ' +
+                '\\dfrac{x}{2} = -g(x)$ : $g$ est impaire, son graphe est symétrique par rapport à ' +
+                "l'origine.",
+            },
+            {
+              kind: 'para',
+              text:
+                '**3) Limites et asymptotes :** en $+\\infty$, $\\arctan(x) \\to \\dfrac{\\pi}{2}$ ' +
+                'et $-\\dfrac{x}{2} \\to -\\infty$, donc $g(x) \\to -\\infty$. Comme ' +
+                '$g(x) - \\left(-\\dfrac{x}{2}\\right) = \\arctan(x) \\to \\dfrac{\\pi}{2}$, la droite ' +
+                '$y = -\\dfrac{x}{2} + \\dfrac{\\pi}{2}$ est asymptote oblique en $+\\infty$ ; par ' +
+                'imparité, $y = -\\dfrac{x}{2} - \\dfrac{\\pi}{2}$ l\'est en $-\\infty$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**4) Dérivée :** $g'(x) = \\dfrac{1}{1 + x^2} - \\dfrac{1}{2} = " +
+                '\\dfrac{1 - x^2}{2(1 + x^2)}$ : du signe de $1 - x^2$, positive sur $]-1 ; 1[$, ' +
+                'négative en dehors.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**5) Extremums :** minimum en $x = -1$, $g(-1) = \\dfrac{1}{2} - \\dfrac{\\pi}{4} ' +
+                '\\approx -0{,}29$ ; maximum en $x = 1$, $g(1) = \\dfrac{\\pi}{4} - \\dfrac{1}{2} ' +
+                '\\approx 0{,}29$.',
+            },
+          ],
+        },
+        {
+          kind: 'signTable',
+          caption: 'Tableau de variations de g(x) = arctan(x) − x/2 sur [0 ; +∞[ (g impaire : le reste par symétrie)',
+          rows: [
+            {
+              label: 'x',
+              cells: [
+                { text: '0', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '1', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '+∞', tone: 'zero' },
+              ],
+            },
+            {
+              label: 'signe de g′(x)',
+              cells: [
+                { text: '+', tone: 'pos' },
+                { text: '+', tone: 'pos' },
+                { text: '0', tone: 'zero' },
+                { text: '−', tone: 'neg' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+            {
+              label: 'variations de g',
+              cells: [
+                { text: '0', tone: 'plain' },
+                { text: '↗', tone: 'plain' },
+                { text: '≈ 0,29', tone: 'zero' },
+                { text: '↘', tone: 'plain' },
+                { text: '−∞', tone: 'plain' },
+              ],
+            },
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => Math.atan(x) - x / 2, tone: 'accent' }],
+            xMin: -6,
+            xMax: 6,
+            xTicks: [-4, -2, 2, 4],
+            obliqueAsymptotes: [
+              { a: -0.5, b: PI / 2, from: 0.5, to: 6 },
+              { a: -0.5, b: -PI / 2, from: -6, to: -0.5 },
+            ],
+            fixedYRange: { min: -2.6, max: 2.6 },
+            points: [
+              { x: 1, y: PI / 4 - 0.5, label: 'max', tone: 'good', labelPos: 'above' },
+              { x: -1, y: 0.5 - PI / 4, label: 'min', tone: 'bad', labelPos: 'below' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              '$g(x) = \\arctan(x) - \\dfrac{x}{2}$, impaire : un minimum en $x = -1$, un maximum ' +
+              'en $x = 1$, et deux asymptotes obliques parallèles (pointillés) : ' +
+              '$y = -\\dfrac{x}{2} + \\dfrac{\\pi}{2}$ en $+\\infty$, $y = -\\dfrac{x}{2} - \\dfrac{\\pi}{2}$ en $-\\infty$.',
+          },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — étude de f(x) = x·arctan(x)',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '**1) Domaine :** $\\mathbb{R}$. **2) Parité :** $f(-x) = (-x) \\cdot \\arctan(-x) = ' +
+                'x \\cdot \\arctan(x) = f(x)$ : $f$ est paire (produit de deux fonctions impaires).',
+            },
+            {
+              kind: 'para',
+              text:
+                '**3) Limites :** en $+\\infty$, $x \\to +\\infty$ et $\\arctan(x) \\to ' +
+                '\\dfrac{\\pi}{2} > 0$ : $f(x) \\to +\\infty$, et de même en $-\\infty$ par parité.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Asymptote oblique** en $+\\infty$ : $a = \\displaystyle\\lim_{x \\to +\\infty} ' +
+                '\\dfrac{f(x)}{x} = \\lim_{x \\to +\\infty} \\arctan(x) = \\dfrac{\\pi}{2}$. Puis, ' +
+                'avec $\\arctan(x) - \\dfrac{\\pi}{2} = -\\arctan\\left(\\dfrac{1}{x}\\right)$ ' +
+                '(section 4) et $t = \\dfrac{1}{x} \\to 0^+$ : $f(x) - \\dfrac{\\pi}{2}x = ' +
+                '-\\dfrac{\\arctan(t)}{t} \\to -\\arctan\'(0) = -1$ (définition du nombre dérivé ' +
+                'en 0). D\'où l\'asymptote $y = \\dfrac{\\pi}{2}x - 1$ en $+\\infty$, et ' +
+                '$y = -\\dfrac{\\pi}{2}x - 1$ en $-\\infty$ par parité.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**4) Dérivée :** $f'(x) = \\arctan(x) + \\dfrac{x}{1 + x^2}$. Pour $x > 0$, les " +
+                'deux termes sont positifs ; pour $x < 0$, les deux sont négatifs ; ' +
+                "$f'(0) = 0$. **5) Extremum :** $f$ décroît puis croît : minimum $f(0) = 0$.",
+            },
+          ],
+        },
+        {
+          kind: 'signTable',
+          caption: 'Tableau de variations de f(x) = x·arctan(x)',
+          rows: [
+            {
+              label: 'x',
+              cells: [
+                { text: '−∞', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '0', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '+∞', tone: 'zero' },
+              ],
+            },
+            {
+              label: 'signe de f′(x)',
+              cells: [
+                { text: '', tone: 'plain' },
+                { text: '−', tone: 'neg' },
+                { text: '0', tone: 'zero' },
+                { text: '+', tone: 'pos' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+            {
+              label: 'variations de f',
+              cells: [
+                { text: '+∞', tone: 'plain' },
+                { text: '↘', tone: 'plain' },
+                { text: 'min 0', tone: 'zero' },
+                { text: '↗', tone: 'plain' },
+                { text: '+∞', tone: 'plain' },
+              ],
+            },
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => x * Math.atan(x), tone: 'accent' }],
+            xMin: -5,
+            xMax: 5,
+            xTicks: [-4, -2, 2, 4],
+            obliqueAsymptotes: [
+              { a: PI / 2, b: -1, from: 0.6, to: 5 },
+              { a: -PI / 2, b: -1, from: -5, to: -0.6 },
+            ],
+            fixedYRange: { min: -1.6, max: 7.6 },
+            points: [{ x: 0, y: 0, label: '', tone: 'good' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              '$f(x) = x\\arctan(x)$, paire : minimum en l\'origine, et deux asymptotes obliques ' +
+              '$y = \\dfrac{\\pi}{2}x - 1$ en $+\\infty$ et $y = -\\dfrac{\\pi}{2}x - 1$ en $-\\infty$ ' +
+              '(pointillés), dont la courbe se rapproche par au-dessus.',
+          },
+        },
+      ],
+    },
   ],
 
   formulaire: {
@@ -2040,18 +3180,25 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       {
         title: 'Fonction réciproque',
         formulas: [
+          { text: '$f^{-1}(f(x)) = x$ et $f(f^{-1}(y)) = y$', condition: 'pour $f$ injective' },
           {
             text: '$\\text{dom}(f^{-1}) = \\text{Im}(f) \\quad \\text{Im}(f^{-1}) = \\text{dom}(f)$',
           },
           { text: '$(f^{-1})^{-1} = f$' },
+          { text: '$(a ; b) \\in$ graphe de $f \\iff (b ; a) \\in$ graphe de $f^{-1}$', condition: 'symétrie par rapport à $y = x$' },
+          {
+            text: '$f(x) = \\dfrac{ax+b}{cx+d} \\implies f^{-1}(x) = \\dfrac{-dx+b}{cx-a}$',
+            condition: 'si $ad - bc \\neq 0$',
+          },
           {
             text: "$(f^{-1})'(x) = \\dfrac{1}{f'(f^{-1}(x))}$",
-            condition: "si $f'(f^{-1}(x)) \\neq 0$",
+            condition: "$f$ continue et strictement monotone sur un intervalle, $f'(f^{-1}(x)) \\neq 0$",
           },
+          { text: "$(f^{-1})'(f(a)) = \\dfrac{1}{f'(a)}$", condition: "mêmes hypothèses, $f'(a) \\neq 0$" },
         ],
       },
       {
-        title: 'Restrictions bijectives de sin, cos, tan',
+        title: 'Restrictions bijectives et caractérisation',
         formulas: [
           {
             text: 'sin sur $[-\\pi/2;\\pi/2]$ $\\to$ arcsin',
@@ -2063,19 +3210,42 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           },
           {
             text: 'tan sur $]-\\pi/2;\\pi/2[$ $\\to$ arctan',
-            condition: 'dom $\\mathbb{R}$, image $]-\\pi/2;\\pi/2[$, asymptotes $y=\\pm\\pi/2$',
+            condition: 'dom $\\mathbb{R}$, image $]-\\pi/2;\\pi/2[$',
+          },
+          { text: '$y = \\arcsin(x) \\iff \\sin(y) = x$ et $y \\in [-\\pi/2 ; \\pi/2]$', condition: 'pour $x \\in [-1;1]$' },
+          { text: '$y = \\arccos(x) \\iff \\cos(y) = x$ et $y \\in [0 ; \\pi]$', condition: 'pour $x \\in [-1;1]$' },
+          { text: '$y = \\arctan(x) \\iff \\tan(y) = x$ et $y \\in \\; ]-\\pi/2 ; \\pi/2[$', condition: 'pour $x \\in \\mathbb{R}$' },
+          {
+            text: '$\\displaystyle\\lim_{x \\to -\\infty} \\arctan(x) = -\\dfrac{\\pi}{2} \\quad \\displaystyle\\lim_{x \\to +\\infty} \\arctan(x) = \\dfrac{\\pi}{2}$',
+            condition: 'asymptotes $y = \\pm\\pi/2$',
           },
         ],
       },
       {
-        title: 'Identités et parité',
+        title: 'Parité et valeurs remarquables',
         formulas: [
-          { text: '$\\arcsin(u) + \\arccos(u) = \\pi/2$', condition: 'pour tout $u \\in [-1;1]$' },
           {
             text: '$\\arcsin(-x) = -\\arcsin(x) \\quad \\arctan(-x) = -\\arctan(x)$',
             condition: 'arcsin et arctan sont impaires',
           },
-          { text: '$\\arccos(-x) = \\pi - \\arccos(x)$' },
+          { text: '$\\arccos(-x) = \\pi - \\arccos(x)$', condition: 'pour $x \\in [-1;1]$' },
+          { text: '$\\arcsin\\dfrac{1}{2} = \\dfrac{\\pi}{6} \\quad \\arcsin\\dfrac{\\sqrt{2}}{2} = \\dfrac{\\pi}{4} \\quad \\arcsin\\dfrac{\\sqrt{3}}{2} = \\dfrac{\\pi}{3}$' },
+          { text: '$\\arccos\\dfrac{1}{2} = \\dfrac{\\pi}{3} \\quad \\arccos\\left(-\\dfrac{1}{2}\\right) = \\dfrac{2\\pi}{3} \\quad \\arccos(-1) = \\pi$' },
+          { text: '$\\arctan 1 = \\dfrac{\\pi}{4} \\quad \\arctan \\sqrt{3} = \\dfrac{\\pi}{3} \\quad \\arctan\\dfrac{\\sqrt{3}}{3} = \\dfrac{\\pi}{6}$' },
+        ],
+      },
+      {
+        title: 'Composer arcfonction et fonction trigonométrique',
+        formulas: [
+          { text: '$\\sin(\\arcsin x) = x \\quad \\cos(\\arccos x) = x$', condition: 'pour tout $x \\in [-1;1]$' },
+          { text: '$\\tan(\\arctan x) = x$', condition: 'pour tout $x \\in \\mathbb{R}$' },
+          { text: '$\\arcsin(\\sin\\theta) = \\theta$', condition: 'seulement si $\\theta \\in [-\\pi/2 ; \\pi/2]$' },
+          { text: '$\\arccos(\\cos\\theta) = \\theta$', condition: 'seulement si $\\theta \\in [0 ; \\pi]$' },
+          { text: '$\\arctan(\\tan\\theta) = \\theta$', condition: 'seulement si $\\theta \\in \\; ]-\\pi/2 ; \\pi/2[$' },
+          { text: '$\\cos(\\arcsin x) = \\sqrt{1-x^2} \\quad \\sin(\\arccos x) = \\sqrt{1-x^2}$', condition: 'pour $x \\in [-1;1]$' },
+          { text: '$\\tan(\\arcsin x) = \\dfrac{x}{\\sqrt{1-x^2}}$', condition: 'pour $x \\in \\; ]-1;1[$' },
+          { text: '$\\tan(\\arccos x) = \\dfrac{\\sqrt{1-x^2}}{x}$', condition: 'pour $x \\in [-1;1]$, $x \\neq 0$' },
+          { text: '$\\cos(\\arctan x) = \\dfrac{1}{\\sqrt{1+x^2}} \\quad \\sin(\\arctan x) = \\dfrac{x}{\\sqrt{1+x^2}}$', condition: 'pour tout $x \\in \\mathbb{R}$' },
         ],
       },
       {
@@ -2083,16 +3253,39 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         formulas: [
           { text: 'arcsin($u$), arccos($u$) existent', condition: 'ssi $u \\in [-1;1]$' },
           { text: 'arctan($u$) existe', condition: 'pour tout $u \\in \\mathbb{R}$' },
+          { text: '$\\arcsin(u) + \\arccos(u) = \\pi/2$', condition: 'pour tout $u \\in [-1;1]$' },
           { text: '$\\arcsin(A)=\\arcsin(B) \\iff A=B$', condition: 'si $A$, $B$ respectent la CE' },
           { text: '$\\arccos(A)=\\arccos(B) \\iff A=B$', condition: 'si $A$, $B$ respectent la CE' },
+          { text: '$\\arctan(A)=\\arctan(B) \\iff A=B$', condition: 'sans CE' },
+          { text: '$\\arcsin(u) = \\alpha \\iff u = \\sin(\\alpha)$', condition: 'si $\\alpha \\in [-\\pi/2;\\pi/2]$ ; sinon aucune solution' },
+          { text: '$\\arcsin(A) = \\arccos(B) \\implies A \\ge 0$ et $B \\ge 0$', condition: 'compatibilité des images' },
         ],
       },
       {
         title: 'Dérivées des fonctions cyclométriques',
         formulas: [
-          { text: "$\\arcsin(u)' = \\dfrac{u'}{\\sqrt{1-u^2}}$" },
-          { text: "$\\arccos(u)' = -\\dfrac{u'}{\\sqrt{1-u^2}}$" },
-          { text: "$\\arctan(u)' = \\dfrac{u'}{1+u^2}$" },
+          { text: "$(\\arcsin u)' = \\dfrac{u'}{\\sqrt{1-u^2}}$", condition: 'là où $u \\in \\; ]-1;1[$' },
+          { text: "$(\\arccos u)' = -\\dfrac{u'}{\\sqrt{1-u^2}}$", condition: 'là où $u \\in \\; ]-1;1[$' },
+          { text: "$(\\arctan u)' = \\dfrac{u'}{1+u^2}$", condition: 'partout où $u$ est dérivable' },
+          { text: '$\\arctan(x) + \\arctan\\left(\\dfrac{1}{x}\\right) = \\dfrac{\\pi}{2}$', condition: 'pour $x > 0$' },
+        ],
+      },
+      {
+        title: 'Fonctions transformées',
+        formulas: [
+          { text: 'dom de $c + k\\arcsin(mx+n)$ : $-1 \\le mx + n \\le 1$', condition: 'de même pour arccos ; $\\mathbb{R}$ pour arctan' },
+          { text: 'image de $c + k\\arcsin(mx+n)$ : $\\left[c - |k|\\dfrac{\\pi}{2} ; c + |k|\\dfrac{\\pi}{2}\\right]$' },
+          { text: 'asymptotes de $c + k\\arctan(mx+n)$ : $y = c \\pm k\\dfrac{\\pi}{2}$' },
+          { text: 'centre de symétrie de $c + k\\arcsin(mx+n)$ : $\\left(-\\dfrac{n}{m} ; c\\right)$', condition: 'de même pour arctan' },
+        ],
+      },
+      {
+        title: 'Étude de fonction',
+        formulas: [
+          { text: 'domaine → parité → limites et asymptotes → dérivée et signe → variations → graphe' },
+          {
+            text: 'asymptote oblique $y = ax + b$ : $a = \\displaystyle\\lim_{x \\to \\infty} \\dfrac{f(x)}{x}$, $b = \\displaystyle\\lim_{x \\to \\infty} \\big(f(x) - ax\\big)$',
+          },
         ],
       },
     ],
@@ -2100,13 +3293,26 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
 
   recap: {
     table: {
-      headers: ['Fonction', 'Domaine', 'Image', 'Dérivée (en u)'],
+      headers: ['Fonction', 'Domaine → image ; dérivée'],
       rows: [
-        ['arcsin($u$)', '[−1 ; 1]', '[−π/2 ; π/2]', "$\\dfrac{u'}{\\sqrt{1-u^2}}$"],
-        ['arccos($u$)', '[−1 ; 1]', '[0 ; π]', "$-\\dfrac{u'}{\\sqrt{1-u^2}}$"],
-        ['arctan($u$)', 'ℝ', ']−π/2 ; π/2[', "$\\dfrac{u'}{1+u^2}$"],
+        ['arcsin($u$)', "$[-1 ; 1] \\to \\left[-\\frac{\\pi}{2} ; \\frac{\\pi}{2}\\right]$ ; $\\dfrac{u'}{\\sqrt{1-u^2}}$"],
+        ['arccos($u$)', "$[-1 ; 1] \\to [0 ; \\pi]$ ; $-\\dfrac{u'}{\\sqrt{1-u^2}}$"],
+        ['arctan($u$)', "$\\mathbb{R} \\to \\left]-\\frac{\\pi}{2} ; \\frac{\\pi}{2}\\right[$ ; $\\dfrac{u'}{1+u^2}$"],
       ],
     },
-    forward: 'Identité à connaître : $\\arcsin(u) + \\arccos(u) = \\pi/2$ pour tout $u \\in [-1;1]$.',
+    forward:
+      'À connaître aussi : $\\arcsin(u) + \\arccos(u) = \\pi/2$ pour tout $u \\in [-1;1]$, et ' +
+      '$\\arcsin(\\sin\\theta) = \\theta$ **seulement** si $\\theta \\in [-\\pi/2 ; \\pi/2]$.',
+    entrainement: {
+      kind: 'entrainement',
+      title: 'Quiz vrai/faux : réviser tout le chapitre',
+      generatorId: '6gen64',
+      description: [
+        'Choisis un thème et teste-toi sur tout le chapitre : affirmations pré-écrites, une ' +
+          'seule tentative par question, justification toujours révélée.',
+      ],
+      chantier: '6e-6h',
+      whereLabel: '6e (6h) → « 64. Quiz vrai/faux — Fonctions réciproques et cyclométriques »',
+    },
   },
 }

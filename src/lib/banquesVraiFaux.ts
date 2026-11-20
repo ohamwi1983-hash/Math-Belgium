@@ -12,8 +12,7 @@ import type { FragmentConsigne } from '../entrainement/export/genererFeuilleExer
  * Import dynamique par chapitre : une banque pèse plusieurs centaines d'affirmations, inutile de
  * les embarquer toutes dans le bundle du panneau.
  *
- * Chapitre absent de cette table (ex. « Fonctions réciproques et cyclométriques », dont la banque
- * 6gen64 n'existe pas encore ici) ou thème absent de la banque chargée : l'appelant retombe sur
+ * Chapitre absent de cette table ou thème absent de la banque chargée : l'appelant retombe sur
  * plateforme-maths (`peutGenererLocalement`).
  */
 
@@ -43,6 +42,7 @@ const CHARGEURS: Record<string, () => Promise<BanqueBrute>> = {
   'limites-asymptotes': () => import('../entrainement/5e-4h/generateurs5e/quizLimites5e/banque').then((m) => m.BANQUE_QUIZ_LIMITES_5E),
   'derivees-applications': () => import('../entrainement/5e-4h/generateurs5e/quizDerivees5e/banque').then((m) => m.BANQUE_QUIZ_DERIVEES_5E),
   // 6e (6h)
+  'fonctions-reciproques-cyclometriques': () => import('../entrainement/6e-6h/generateurs6e/quizFonctionsReciproquesCyclometriques/banque').then((m) => m.BANQUE_QUIZ_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES),
   'fonctions-exponentielles': () => import('../entrainement/6e-6h/generateurs6e/quizFonctionsExponentielles/banque').then((m) => m.BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES),
   'fonctions-logarithmes': () => import('../entrainement/6e-6h/generateurs6e/quizFonctionsLogarithmes/banque').then((m) => m.BANQUE_QUIZ_FONCTIONS_LOGARITHMES),
   'primitives-integrales': () => import('../entrainement/6e-6h/generateurs6e/quizIntegralesPrimitives/banque').then((m) => m.BANQUE_QUIZ_INTEGRALES_PRIMITIVES),
