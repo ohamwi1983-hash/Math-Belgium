@@ -4703,3 +4703,11 @@ correction enveloppée dans un `<span>` (`.triangle-quelconque-aide` est flex : 
 KaTeX devenait une colonne — même défaut dans les 8 autres panneaux de quiz de 6e, non touchés).
 Contrôle `check_banque.ts` (KaTeX `strict: 'error'`, notation clavier, majuscules, doublons,
 équilibre, session sans répétition, fragments papier sans `$`) : 0 problème.
+
+- **4e ch. 1 — corrigé « comme au tableau », niveaux 1–7 et lots B, C, D de l'audit (gen7, gen8,
+  gen9, gen55)** : corrigés `generateurs/{analyseFonction,transformationsGraphiques,formeCanoniqueTransformations,optimisation}/corrigeDetaille.ts`
+  (partagés avec l'appli), détail dans `feuilles-evaluations.md`. Corrections à la source :
+  gen7 mise en évidence de a·x, binôme borné pour |a| ≥ 5, libellés sans Δ ; gen8 a devant la
+  parenthèse et graphique papier à une échelle ; gen55 « forme parabolique » réécrite, unités
+  réalistes (cm / dm), espace fine des milliers, condition supplémentaire (sommet hors du domaine
+  ≈ 40 % par famille), « coupée » accordé ; étiquette « c = −13 » du croquis d'allure de gen7.

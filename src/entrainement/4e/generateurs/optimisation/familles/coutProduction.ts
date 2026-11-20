@@ -20,9 +20,9 @@ import { decalerHorsDuSommetSiTire } from "../contrainteSupplementaire";
  * n'ont pas le même type de contrainte de capacité).
  */
 const SKINS = [
-  { phraseEnonce: (a: number, b: number, c: number, inf: number, sup: number) => `Le coût total C (en €) de production de q unités dans un atelier vaut $C(q)=${formatFonctionNarrativeLatex(a, b, c, "q")}$. L'atelier ne peut fonctionner qu'entre q=${inf} unités (le minimum pour justifier son ouverture) et q=${sup} unités (sa capacité de production maximale).` },
-  { phraseEnonce: (a: number, b: number, c: number, inf: number, sup: number) => `Le coût total C (en €) de production de q unités dans une usine vaut $C(q)=${formatFonctionNarrativeLatex(a, b, c, "q")}$. L'usine ne peut produire qu'entre q=${inf} unités (son seuil minimal de fonctionnement) et q=${sup} unités (sa capacité de production maximale).` },
-  { phraseEnonce: (a: number, b: number, c: number, inf: number, sup: number) => `Le coût total C (en €) de production de q unités dans une exploitation vaut $C(q)=${formatFonctionNarrativeLatex(a, b, c, "q")}$. L'exploitation ne peut produire qu'entre q=${inf} unités (le minimum pour rester active) et q=${sup} unités (sa capacité de production maximale).` },
+  { phraseEnonce: (a: number, b: number, c: number, inf: number, sup: number) => `Le coût total C (en €) de production de q unités dans un atelier vaut $C(q)=${formatFonctionNarrativeLatex(a, b, c, "q")}$. L'atelier ne peut fonctionner qu'entre $q=${inf}$ unités (le minimum pour justifier son ouverture) et $q=${sup}$ unités (sa capacité de production maximale).` },
+  { phraseEnonce: (a: number, b: number, c: number, inf: number, sup: number) => `Le coût total C (en €) de production de q unités dans une usine vaut $C(q)=${formatFonctionNarrativeLatex(a, b, c, "q")}$. L'usine ne peut produire qu'entre $q=${inf}$ unités (son seuil minimal de fonctionnement) et $q=${sup}$ unités (sa capacité de production maximale).` },
+  { phraseEnonce: (a: number, b: number, c: number, inf: number, sup: number) => `Le coût total C (en €) de production de q unités dans une exploitation vaut $C(q)=${formatFonctionNarrativeLatex(a, b, c, "q")}$. L'exploitation ne peut produire qu'entre $q=${inf}$ unités (le minimum pour rester active) et $q=${sup}$ unités (sa capacité de production maximale).` },
 ];
 
 const Q_S_MIN = 20;
