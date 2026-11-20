@@ -53,14 +53,16 @@ function correctionEgalite(e: E & { angleEgal: number }): EtapeCorrection[] {
   );
   const ecriture = f === "sin" ? `180^\\circ-${b < 0 ? `(${deg(b)})` : deg(b)}` : `-${b < 0 ? `(${deg(b)})` : deg(b)}`;
   const r2 = ramener(autre);
+  // Ligne courte sur papier : la réduction dans [0° ; 360°[ va sur une ligne à part.
   lignes.push(
     ligne(
-      `\\alpha_2=${ecriture}=${deg(autre)}${r2}`,
+      `\\alpha_2=${ecriture}=${deg(autre)}`,
       f === "sin"
         ? [texte("angles supplémentaires : "), latex("\\sin(180^\\circ-\\beta)=\\sin\\beta")]
         : [texte("angles opposés : "), latex("\\cos(-\\beta)=\\cos\\beta")],
     ),
   );
+  if (r2 !== "") lignes.push(ligne(`\\alpha_2=${deg(autre)}${r2}`, [texte("ramené dans "), latex(DOMAINE_LATEX)]));
   const etapes: EtapeCorrection[] = [
     utilise("a", [
       texte(

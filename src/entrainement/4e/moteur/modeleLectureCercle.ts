@@ -3,7 +3,7 @@ import type { ExerciceLectureCercle, Grandeur, PositionCercle, ValeurExacteSigne
 /**
  * Modèle de gen122 « Lire sur le cercle trigonométrique » : valeurs EXACTES (jamais de flottant
  * relu) de cos θ, sin θ et tan θ pour les 16 angles remarquables, position de M, candidats de
- * l'écran 2 et écritures LaTeX (degrés, radians, valeurs). Une seule source pour l'écran, les aides,
+ * l'écran 2 et écritures LaTeX (degrés, valeurs). Une seule source pour l'écran, les aides,
  * le papier et le corrigé.
  */
 
@@ -115,28 +115,19 @@ export function candidatsCosinus(e: E): number[] {
   return autre === a ? [a] : [Math.min(a, autre), Math.max(a, autre)];
 }
 
-function pgcd(a: number, b: number): number {
-  return b === 0 ? Math.abs(a) : pgcd(b, a % b);
-}
-
-/** « 120^\circ » ou « \dfrac{2\pi}{3} » (θ en degrés entiers, radians en kπ/n réduit). */
+/** « 120^\\circ » (θ en degrés entiers ; le radian n'est pas enseigné en 4e). */
 export function angleLatexUnite(degres: number, unite: E["variante"]): string {
-  if (unite === "degres") return `${degres}^\\circ`;
-  if (degres === 0) return "0";
-  const g = pgcd(degres, 180);
-  const p = degres / g;
-  const q = 180 / g;
-  const num = p === 1 ? "\\pi" : `${p}\\pi`;
-  return q === 1 ? num : `\\dfrac{${num}}{${q}}`;
+  void unite;
+  return `${degres}^\\circ`;
 }
 
 export function angleLatex(e: E, degres = e.angle): string {
   return angleLatexUnite(degres, e.variante);
 }
 
-/** Valeur numérique attendue à l'écran 2 (degrés ou radians). */
+/** Valeur numérique attendue à l'écran 2 (degrés). */
 export function angleAttendu(e: E): number {
-  return e.variante === "degres" ? e.angle : (e.angle * Math.PI) / 180;
+  return e.angle;
 }
 
 /** Coordonnées de M (flottants, pour la figure seulement). */

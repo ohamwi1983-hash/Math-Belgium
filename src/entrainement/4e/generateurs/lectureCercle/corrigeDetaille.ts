@@ -31,7 +31,6 @@ function lignesAngle(e: E): LigneCalcul[] {
   const p = position(e);
   const cos = cosExact(e);
   const sin = sinExact(e);
-  const deg = e.variante === "degres";
   const cands = candidatsCosinus(e);
   if (p === "axe-horizontal") {
     return [
@@ -55,7 +54,7 @@ function lignesAngle(e: E): LigneCalcul[] {
     ligne(`\\cos\\theta=${valeurLatex(cos)}`, [texte("deux candidats de même cosinus : "), latex(angleLatex(e, cands[0]!)), texte(` (quadrant ${quadrantDe(cands[0]!)}) et `), latex(angleLatex(e, cands[1]!)), texte(` (quadrant ${quadrantDe(cands[1]!)})`)]),
     ligne(`\\sin\\theta=${valeurLatex(sin)}`, sin.signe > 0 ? `positif : M au-dessus de l'axe horizontal, quadrant ${p}` : `négatif : M en dessous de l'axe horizontal, quadrant ${p}`),
   ];
-  const [tour, demi] = deg ? ["360^\\circ", "180^\\circ"] : ["2\\pi", "\\pi"];
+  const [tour, demi] = ["360^\\circ", "180^\\circ"];
   if (p === "I") {
     lignes.push(ligne("\\theta=\\alpha", "formule du quadrant I (§ 1)"), ligne(`=${angleLatex(e)}`));
     return lignes;
@@ -89,7 +88,6 @@ export function correctionDetailleeLectureCercle(e: E): EtapeCorrection[] {
   const sin = sinExact(e);
   const t = tanExact(e);
   const p = position(e);
-  const deg = e.variante === "degres";
   const ref = angleReference(e);
   const etapes: EtapeCorrection[] = [
     utilise("a", [
@@ -113,13 +111,13 @@ export function correctionDetailleeLectureCercle(e: E): EtapeCorrection[] {
     calcul("b", lignesAngle(e)),
     resultat("b", reponseAngle(e)),
     verification("b", [texte("Les valeurs du tableau redonnent la lecture :")], [
-      ligne(`\\cos ${deg ? angleLatex(e) : `\\left(${angleLatex(e)}\\right)`}=${valeurLatex(cos)}`),
-      ligne(`\\sin ${deg ? angleLatex(e) : `\\left(${angleLatex(e)}\\right)`}=${valeurLatex(sin)}`),
+      ligne(`\\cos ${angleLatex(e)}=${valeurLatex(cos)}`),
+      ligne(`\\sin ${angleLatex(e)}=${valeurLatex(sin)}`),
     ]),
     piege(
       "b",
       p.startsWith("axe")
-        ? [texte("Sur un axe, pas d'angle du premier quadrant : "), latex("\\theta"), texte(" vaut "), latex(deg ? "0^\\circ,\\ 90^\\circ,\\ 180^\\circ" : "0,\\ \\dfrac{\\pi}{2},\\ \\pi"), texte(" ou "), latex(deg ? "270^\\circ" : "\\dfrac{3\\pi}{2}"), texte(".")]
+        ? [texte("Sur un axe, pas d'angle du premier quadrant : "), latex("\\theta"), texte(" vaut "), latex("0^\\circ,\\ 90^\\circ,\\ 180^\\circ"), texte(" ou "), latex("270^\\circ"), texte(".")]
         : [
             latex(angleLatex(e, candidatsCosinus(e)[0]!)),
             texte(" et "),

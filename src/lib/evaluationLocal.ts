@@ -292,7 +292,11 @@ export function varianteAdmetCasParticulier(generatorId: string, varianteId: str
  * contrainte et n'a pas encore été imprimée. Recherche par paliers : contrainte complète, puis (cas
  * particulier introuvable) un exercice complet, puis sans la calculatrice (une variante sans aucun cas « à la calculatrice » ne bloque pas la génération),
  * puis sans contrainte. Renvoie aussi le cas particulier obtenu, pour l'imposer aux autres séries. */
-export function graineInedite(generatorId: string, adaptateur: Adaptateur, varianteId: string, dejaVues: Set<string>, contrainte?: ContrainteTirage, strict = false): { graine: number; casParticulier: string | null } {
+/** `vuesSerie` (facultatif) : empreintes déjà tirées dans la MÊME série. Quand toutes les instances
+ * possibles ont déjà servi (générateur à peu d'énoncés, ex. gen122 : 13 énoncés complets), le repli
+ * prend en priorité une instance absente de la série — jamais deux questions identiques dans une
+ * série tant que c'est possible (audit 4e ch. 5, lot D). */
+export function graineInedite(generatorId: string, adaptateur: Adaptateur, varianteId: string, dejaVues: Set<string>, contrainte?: ContrainteTirage, strict = false, vuesSerie?: Set<string>): { graine: number; casParticulier: string | null } {
   const profilDe = adaptateur.profilInstance
   const paliers: { essais: number; filtre: ((p: ProfilInstance) => boolean) | null }[] =
     profilDe && contrainte
@@ -310,6 +314,7 @@ export function graineInedite(generatorId: string, adaptateur: Adaptateur, varia
   // échec = on essaie la question précédente de la ligne, pas de repli coûteux).
   if (strict) paliers.splice(1)
   let repli: { graine: number; casParticulier: string | null } | null = null
+  let repliHorsSerie: { graine: number; casParticulier: string | null; empreinte: string } | null = null
   for (const palier of paliers) {
     // Budget de temps par palier (un tirage coûte de quelques µs à ~1 ms selon le générateur) : les
     // cas rares (σ entier, combinaison précise de paramètres) sont trouvés sans bloquer le panneau.
@@ -334,8 +339,14 @@ export function graineInedite(generatorId: string, adaptateur: Adaptateur, varia
       }
       if (!dejaVues.has(empreinte)) {
         dejaVues.add(empreinte)
+        vuesSerie?.add(empreinte)
         return resultat
       }
+      if (vuesSerie && !repliHorsSerie && !vuesSerie.has(empreinte)) repliHorsSerie = { ...resultat, empreinte }
+    }
+    if (repliHorsSerie) {
+      vuesSerie?.add(repliHorsSerie.empreinte)
+      return { graine: repliHorsSerie.graine, casParticulier: repliHorsSerie.casParticulier }
     }
     if (repli) return repli
   }
@@ -380,6 +391,8 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
 
   for (let s = 0; s < nombreSeries; s++) {
     const elements: ElementPlan[] = []
+    /** Empreintes de la série en cours (jamais deux questions identiques dans une série). */
+    const vuesSerie = new Set<string>()
     for (const item of items) {
       const base: ElementBase = { processus: item.processus, titreSection: item.titreSection, section: item.section }
       if (item.exercice) {
@@ -418,10 +431,10 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
             // particulier (oui / non) mais pas la forme, propre à la variante.
             const meme = structureA[k].varianteId === varianteId
             const cas = meme ? (structureA[k].cas ?? 'complet') : structureA[k].cas ? 'particulier' : 'complet'
-            return { varianteId, points, graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe(cas, exclus, meme ? structureA[k].forme : undefined)).graine }
+            return { varianteId, points, graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe(cas, exclus, meme ? structureA[k].forme : undefined), false, vuesSerie).graine }
           })
         } else {
-          instances = questions.map(({ varianteId, points, exclus }) => ({ varianteId, points, graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe('complet', exclus)).graine }))
+          instances = questions.map(({ varianteId, points, exclus }) => ({ varianteId, points, graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe('complet', exclus), false, vuesSerie).graine }))
           // « Inclure un cas particulier » (par variante) : la DERNIÈRE question de CETTE variante qui
           // peut en recevoir un.
           if (equilibre && adaptateur.libelleCasParticulier) {
@@ -429,7 +442,7 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
               if (!casDe(e, indexEntree)) return
               for (let k = questions.length - 1; k >= 0; k--) {
                 if (questions[k].indexEntree !== indexEntree) continue
-                const essai = graineInedite(generatorId, adaptateur, instances[k].varianteId, dejaVues, contrainteDe('particulier', questions[k].exclus), true)
+                const essai = graineInedite(generatorId, adaptateur, instances[k].varianteId, dejaVues, contrainteDe('particulier', questions[k].exclus), true, vuesSerie)
                 if (essai.casParticulier && casRespecte(essai.casParticulier, 'particulier')) {
                   instances[k] = { ...instances[k], graine: essai.graine }
                   break

@@ -15,7 +15,7 @@ import { valeurAffichee } from "./formatTriangleQuelconque";
 const RAD = Math.PI / 180;
 const prochePct = (v: number, x: number, pct = 0.01) => Number.isFinite(x) && Math.abs(v - x) <= Math.max(0.01, Math.abs(x) * pct);
 
-export const MESSAGE_RADIANS = "Ta calculatrice est-elle en mode degrés (DEG) ? Ce résultat correspond à un calcul en radians.";
+export const MESSAGE_RADIANS = "Ta calculatrice est-elle en mode degrés (DEG) ? Ce résultat est celui d'une calculatrice réglée en mode RAD.";
 
 export interface ErreurConnue {
   valeur: number;

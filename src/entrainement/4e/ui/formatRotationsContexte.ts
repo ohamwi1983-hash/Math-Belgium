@@ -294,7 +294,7 @@ export function consignesEcrans(e: ExerciceRotationsContexte): FragmentConsigne[
   if (e.sens === "direct") {
     return [
       premiere,
-      [texte(`${phraseAlpha(e)} l'angle trigonométrique θ de la position atteinte, réduit à `), latex("[0^\\circ ; 360^\\circ\\mathclose{[}"), texte(".")],
+      [texte(`${phraseAlpha(e)} l'angle trigonométrique θ de la position atteinte, réduit à `), latex("[0^\\circ \\,;\\, 360^\\circ\\mathclose{[}"), texte(".")],
       [texte(`Calcule les coordonnées (x ; y) de ${objet(e)} dans ce repère (en ${e.unite}, arrondies au centième).`)],
       [texte(`Réponds à la question : à quelle hauteur au-dessus ${reference(e)} se trouve ${objet(e)} ? (En ${e.unite}, arrondie au centième.)`)],
     ];
@@ -313,7 +313,7 @@ export function consignesEcrans(e: ExerciceRotationsContexte): FragmentConsigne[
   return [
     premiere,
     [texte(`Mets le problème en équation : quelle valeur doit prendre sin θ pour que ${objet(e)} soit à ${nombreFr(e.hauteurCible ?? 0)} ${e.unite} au-dessus ${reference(e)} ?`)],
-    [texte("Résous cette équation : donne toutes ses solutions dans "), latex("[0^\\circ ; 360^\\circ\\mathclose{[}"), texte(" (arrondies au dixième de degré).")],
+    [texte("Résous cette équation : donne toutes ses solutions dans "), latex("[0^\\circ \\,;\\, 360^\\circ\\mathclose{[}"), texte(" (arrondies au dixième de degré).")],
     [texte(nbSol === 1 ? retour.replace("chaque solution", "la solution").replace(", dans l'ordre chronologique", "").replace(", du plus petit au plus grand", "") : retour)],
   ];
 }

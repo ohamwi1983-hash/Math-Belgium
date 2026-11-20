@@ -33,7 +33,7 @@ function consignePapier(e: ExerciceLectureCercle): FragmentConsigne[] {
     latex("\\sin\\theta"),
     texte(", déduis-en l'angle "),
     latex("\\theta"),
-    texte(e.variante === "degres" ? " en degrés, dans " : " en radians, dans "),
+    texte(" en degrés, dans "),
     latex(intervalleLatex(e)),
     texte(", puis lis "),
     latex("\\tan\\theta"),

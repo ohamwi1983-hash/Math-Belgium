@@ -54,9 +54,9 @@ export function correctionDetailleeAnglesAssocies(e: E): EtapeCorrection[] {
     const cf = cofonction(e.fonctionCible);
     const donnee = cf === "cos" ? e.cosAlpha : e.sinAlpha;
     lignes.push(
-      ligne(`\${f} ${deg(theta)}=\${f}(90^\circ+${deg(alpha)})`, `${theta}° = 90° + ${alpha}°`),
-      ligne(`=${moins}\${cf} ${deg(alpha)}`, [texte("règle de 90° + θ : "), latex(f === "sin" ? "\sin(90^\circ+x)=\cos x" : "\cos(90^\circ+x)=-\sin x")]),
-      ligne(`\approx ${valeur}`, [texte("valeur donnée : "), latex(`\${cf} ${deg(alpha)}\approx ${decimal3Latex(donnee)}`)]),
+      ligne(`\\${f} ${deg(theta)}=\\${f}(90^\\circ+${deg(alpha)})`, `${theta}° = 90° + ${alpha}°`),
+      ligne(`=${moins}\\${cf} ${deg(alpha)}`, [texte("règle de 90° + θ : "), latex(f === "sin" ? "\\sin(90^\\circ+x)=\\cos x" : "\\cos(90^\\circ+x)=-\\sin x")]),
+      ligne(`\\approx ${valeur}`, [texte("valeur donnée : "), latex(`\\${cf} ${deg(alpha)}\\approx ${decimal3Latex(donnee)}`)]),
     );
   } else if (q === "I" && e.variante === "sinCos") {
     // θ = 90° − α : co-fonction directe.
