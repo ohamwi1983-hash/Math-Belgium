@@ -179,7 +179,7 @@ export function listeApprochee(brut: string, attendu: number[]): boolean {
 }
 
 function preparerExpression(brut: string): string {
-  return normaliserCyclo(brut).replace(/^\s*([a-zA-Z]{1,3}\s*(⁻¹|\^\s*\(?-1\)?)?\s*\(\s*[xy]\s*\)|y)\s*=\s*/i, "");
+  return normaliserCyclo(brut).replace(/^\s*([a-zA-Z]{1,3}\s*('|′|⁻¹|\^\s*\(?-1\)?)?\s*\(\s*[xy]\s*\)|y)\s*=\s*/i, "");
 }
 
 /** Évalue une expression de x (`null` : hors domaine ; « illisible » : syntaxe). */

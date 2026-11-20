@@ -1910,6 +1910,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 5. Associer graphique et expression »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Étude d\'une fonction cyclométrique',
+          generatorId: '6gen157',
+          description: [
+            'Domaine, dérivée (règle de la chaîne, du produit), zéros de f′, variations intervalle par intervalle ' +
+              'et tableau de variation avec extremums, valeurs aux bornes et limites exacts.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 157. Étude d\'une fonction cyclométrique »',
+        },
       ],
     },
   ],
