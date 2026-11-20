@@ -34,7 +34,7 @@ export function AllureSketch({ croquis }: Props) {
       />
       <circle cx={croquis.pointContactC.x} cy={croquis.pointContactC.y} r={4} className="allure-point-c" />
       <text x={croquis.pointContactC.x + 8} y={croquis.pointContactC.y + 4} className="allure-label-c">
-        c = {croquis.valeurC}
+        c = {String(croquis.valeurC).replace("-", "−").replace(".", ",")}
       </text>
     </svg>
   );

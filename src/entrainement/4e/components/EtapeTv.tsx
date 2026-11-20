@@ -3,7 +3,9 @@ import type { ExerciceFormeCanoniqueTransformation, ReponseTv } from "../core/fo
 import { calculerA } from "../moteur/verificationTransformationsGraphiques";
 import { diagnostiquerTv, fonctionCanoniqueReelle } from "../moteur/verificationFormeCanoniqueTransformations";
 import { fonctionCanoniqueVersParametresCourbe, formatFonctionCanoniqueLatex } from "../ui/formatFormeCanoniqueTransformations";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { aidesTv, messageTranslation, MESSAGE_FONCTION_ILLISIBLE } from "../ui/aidesParabole";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { MafsGraphFormeCanoniqueTransformations } from "./MafsGraphFormeCanoniqueTransformations";
 import { Katex } from "./Katex";
@@ -36,11 +38,11 @@ export function EtapeTv({ exercice, tentativesUtilisees, tentativesMax, onValide
   const [tv, setTv] = useState(0);
   const [fonctionIntermediaire, setFonctionIntermediaire] = useState("");
 
-  const montrerErreur = tentativesUtilisees > 0 && tv !== exercice.yS;
+  const saisie = useTentativeLisible<ReponseTv>();
   const complet = fonctionIntermediaire.trim() !== "";
+  const lisible = diagnostiquerTv(exercice, { tv, fonctionIntermediaire }) !== "parse_error";
   const aReel = calculerA(exercice);
-  const statut = tentativesUtilisees > 0 ? diagnostiquerTv(exercice, { tv, fonctionIntermediaire }) : undefined;
-  const fonctionErronee = statut !== undefined && statut !== "correct";
+  const fonctionErronee = tentativesUtilisees > 0 && !validation;
 
   const formeCanoniqueComplete = formatFonctionCanoniqueLatex(fonctionCanoniqueReelle(exercice, exercice.yS));
   const fonctionTh = { numA: 1, denA: 1, p: exercice.xS, q: 0 };
@@ -61,8 +63,8 @@ export function EtapeTv({ exercice, tentativesUtilisees, tentativesMax, onValide
       </p>
       <MafsGraphFormeCanoniqueTransformations confirmees={[confirmeeTh, confirmeeEvCvSox]} live={live} />
       <div className="curseur-row">
-        <label className={montrerErreur ? "curseur-champ is-erronee" : "curseur-champ"} htmlFor="curseur-tv">
-          <span>TV : {tv}</span>
+        <label className="curseur-champ" htmlFor="curseur-tv">
+          <span>TV : {String(tv).replace("-", "−")}</span>
           <input
             id="curseur-tv"
             type="range"
@@ -84,24 +86,27 @@ export function EtapeTv({ exercice, tentativesUtilisees, tentativesMax, onValide
           className={`text-input${fonctionErronee ? " is-erronee" : ""}`}
           placeholder="ex : -7/6(x+8)^2+9"
           value={fonctionIntermediaire}
-          onChange={(e) => setFonctionIntermediaire(e.target.value)}
+          onChange={(e) => setFonctionIntermediaire(normaliserSigneMoins(e.target.value))}
         />
       </div>
       {!validation && (
         <>
+        <AidesNiveaux aides={aidesTv()} />
         <button
           type="button"
           className="btn btn-primary"
           disabled={!complet}
-          onClick={() => onValider({ tv, fonctionIntermediaire })}
+          onClick={() => saisie.tenter({ tv, fonctionIntermediaire }, lisible, onValider)}
         >
           Valider
         </button>
-        {statut !== undefined && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour
+          illisible={saisie.illisible}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={MESSAGE_FONCTION_ILLISIBLE}
+          cible={saisie.soumise ? messageTranslation(exercice.yS, saisie.soumise.tv, "verticale") : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

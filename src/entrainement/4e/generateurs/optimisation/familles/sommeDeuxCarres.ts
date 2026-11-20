@@ -110,7 +110,7 @@ function construirePierre(): ExerciceOptimisationModelisation {
     // Champ 2 (grandeur) — règle propre au contexte, jamais une formule géométrique universelle :
     // override nécessaire (voir `core/optimisation.types.ts::texteAideGrandeurNiveau1`).
     texteAideGrandeurNiveau1: `Rappel : la valeur de chaque morceau est proportionnelle au carré de sa masse (coefficient ${k} €/g²), pas à la masse elle-même.`,
-    texteAideGrandeurNiveau2: `Additionne la valeur du premier morceau (∝ x²) et celle du second (∝ y²).`,
+    texteAideGrandeurNiveau2: `Additionne la valeur du premier morceau (proportionnelle à $x^2$) et celle du second (proportionnelle à $y^2$).`,
     // "Identifier x et y" (spec section 4, écran 1) — piège : confondre la MASSE (x/y, ce qu'on
     // cherche) avec la VALEUR de chaque morceau, une grandeur DÉRIVÉE (∝ masse²), pas la masse
     // elle-même.
@@ -167,7 +167,7 @@ function construireMateriau(): ExerciceOptimisationModelisation {
     famille: "sommeDeuxCarres",
     sens: "min",
     contexte: {
-      phraseEnonce: `${capitaliser(nomMateriau)} de ${L} cm de long doit être coupé en 2 morceaux : le premier sera plié pour former un carré, le second pour former un triangle rectangle dont les côtés restent toujours dans le rapport 3-4-5.`,
+      phraseEnonce: `${capitaliser(nomMateriau)} de ${L} cm de long doit être ${nomMateriau.startsWith("une ") ? "coupée" : "coupé"} en 2 morceaux : le premier sera plié pour former un carré, le second pour former un triangle rectangle dont les côtés restent toujours dans le rapport 3-4-5.`,
       labelVariable: "x",
       nomVariable: "la longueur destinée au carré",
       nomGrandeur: "l'aire totale des 2 formes",
@@ -200,8 +200,8 @@ function construireMateriau(): ExerciceOptimisationModelisation {
     texteAideContrainteNiveau2: `La somme des deux longueurs x et y est constante, égale à la longueur totale de ${L} cm donnée dans l'énoncé.`,
     // Champ 2 (grandeur) — coefficients fixes propres à ce contexte (carré de côté x/4, triangle
     // rectangle 3-4-5 d'aire proportionnelle à y²), jamais une formule géométrique universelle.
-    texteAideGrandeurNiveau1: "Rappel : le carré de côté x/4 a pour aire x²/16 ; le triangle rectangle 3-4-5 de périmètre y a pour aire y²/24 (coefficients fixes, donnés par la forme).",
-    texteAideGrandeurNiveau2: "Additionne l'aire du carré (x²/16) et celle du triangle (y²/24).",
+    texteAideGrandeurNiveau1: "Rappel : le carré de côté $\\dfrac{x}{4}$ a pour aire $\\dfrac{x^2}{16}$ ; le triangle rectangle 3-4-5 de périmètre $y$ a pour aire $\\dfrac{y^2}{24}$ (coefficients fixes, donnés par la forme).",
+    texteAideGrandeurNiveau2: "Additionne l'aire du carré, $\\dfrac{x^2}{16}$, et celle du triangle, $\\dfrac{y^2}{24}$.",
     // "Identifier x et y" (spec section 4, écran 1, exemple LITTÉRAL de la spec) — piège : confondre
     // la LONGUEUR de fil allouée à chaque forme (x/y) avec un CÔTÉ de la forme obtenue, une grandeur
     // DÉRIVÉE (côté du carré = x/4, PAS x lui-même).

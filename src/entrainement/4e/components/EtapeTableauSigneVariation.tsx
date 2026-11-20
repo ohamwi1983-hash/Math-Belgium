@@ -18,7 +18,8 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux } from "./RetourSaisie";
+import { aidesTableau } from "../ui/aidesParabole";
 
 interface Props {
   exercice: ExerciceAnalyseFonction;
@@ -50,7 +51,6 @@ export function EtapeTableauSigneVariation({
   tentativesUtilisees,
   tentativesMax,
   recapitulatif,
-  aideActivee,
   onActiverAide,
   onValider,
   validation,
@@ -96,9 +96,7 @@ export function EtapeTableauSigneVariation({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <p className="prompt-text">Complète le tableau de signe et de variation.</p>
-
-      {aideActivee && <SketchAxeSommet geom={geom} courbe={courbe} signeA={signeA} surlignage={surlignage} marquesOx={marquesOx} />}
+      <p className="prompt-text">Complète le tableau de signes et de variation.</p>
 
       <div className="grille-signes-scroll">
         <table className="grille-signes">
@@ -170,7 +168,11 @@ export function EtapeTableauSigneVariation({
 
       {!validation && (
         <>
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+        <AidesNiveaux
+          aides={aidesTableau(exercice)}
+          onPremiereAide={onActiverAide}
+          figure={(niveau) => (niveau >= 2 ? <SketchAxeSommet geom={geom} courbe={courbe} signeA={signeA} surlignage={surlignage} marquesOx={marquesOx} /> : null)}
+        />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>

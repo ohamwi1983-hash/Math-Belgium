@@ -17,6 +17,9 @@ interface Jeton {
 }
 
 function tokeniser(expression: string): Jeton[] {
+  // Signes moins typographiques « − », « – », « — » (clavier mobile, copier-coller) lus comme « - »
+  // (audit 4e ch. 1, R2 : ils étaient refusés, « Caractère inattendu »).
+  expression = expression.replace(/[\u2212\u2013\u2014]/g, "-");
   // Point de multiplication « . » (notation belge : « (x+2).x ») : décimal seulement entre chiffres
   // (« 2.5 », « .5 ») ; suivi d'une lettre/parenthèse, ou collé à droite d'une lettre/parenthèse
   // fermante devant un chiffre, c'est une multiplication.

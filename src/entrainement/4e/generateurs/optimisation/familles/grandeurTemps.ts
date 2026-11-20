@@ -13,6 +13,7 @@ import { formatFonctionNarrativeLatex } from "../formatNarratif";
 import { genererDomaine, optimumSurDomaine } from "../optimum";
 import { construireOptionsInterpretation, formatQuestionFinale } from "../interpretation";
 import { randomInt } from "../aleatoire";
+import { decalerHorsDuSommetSiTire } from "../contrainteSupplementaire";
 import type { GenreGrandeur } from "../interpretation";
 
 type TypeGrandeurTemps = "meteo" | "benefice";
@@ -25,8 +26,8 @@ const TYPES: TypeGrandeurTemps[] = ["meteo", "benefice"];
  * comptable (bénéfice), jamais affichés comme $t\in[\text{inf};\text{sup}]$ nu.
  */
 const METEO_SKINS = [
-  (a: number, b: number, c: number, inf: number, sup: number) => `Un relevé météo indique que la température T (en °C) au cours d'une journée, t heures après minuit, vaut $T(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. Le relevé n'est disponible qu'entre t=${inf} h et t=${sup} h (la plage horaire couverte par la station ce jour-là).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Dans une station météo, la température T (en °C) au cours d'une journée, t heures après minuit, vaut $T(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. Le relevé n'est disponible qu'entre t=${inf} h et t=${sup} h (la plage horaire couverte par la station ce jour-là).`,
+  (a: number, b: number, c: number, inf: number, sup: number) => `Un relevé météo indique que la température T (en °C) au cours d'une journée, t heures après minuit, vaut $T(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. Le relevé n'est disponible qu'entre $t=${inf}$ h et $t=${sup}$ h (la plage horaire couverte par la station ce jour-là).`,
+  (a: number, b: number, c: number, inf: number, sup: number) => `Dans une station météo, la température T (en °C) au cours d'une journée, t heures après minuit, vaut $T(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. Le relevé n'est disponible qu'entre $t=${inf}$ h et $t=${sup}$ h (la plage horaire couverte par la station ce jour-là).`,
 ];
 
 const BENEFICE_SKINS = [
@@ -115,7 +116,7 @@ export function construireGrandeurTemps(): ExerciceOptimisationFonctionDonnee {
 
   const skin = p.skins[randomInt(0, p.skins.length - 1)];
 
-  return {
+  const exercice: ExerciceOptimisationFonctionDonnee = {
     variante: "fonctionDonnee",
     famille: "grandeurTemps",
     sens: "max",
@@ -145,4 +146,6 @@ export function construireGrandeurTemps(): ExerciceOptimisationFonctionDonnee {
       optimal,
     }),
   };
+  // Verdict « hors du domaine » ≈ 40 % (lot D) : tirage fait en dernier (même ?code= sinon).
+  return decalerHorsDuSommetSiTire(exercice, (d) => skin(fonction.a, fonction.b, fonction.c, d.inf, d.sup), 0);
 }

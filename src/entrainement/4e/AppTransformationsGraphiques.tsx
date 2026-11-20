@@ -8,6 +8,8 @@ import { formatEquationTransformationLatex } from "./ui/formatTransformationsGra
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeTransformationsGraphiques } from "./generateurs/transformationsGraphiques/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Étudie les transformations graphiques de cette parabole.";
 
@@ -51,7 +53,7 @@ export function AppTransformationsGraphiques() {
   function terminerEtape(nouvelEtat: EtatSessionTransformationGraphique) {
     if (nouvelEtat.terminee !== etat.terminee) {
       const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!;
-      setEnAttente({ etatSuivant: nouvelEtat, revele: resultat.equationRevele || resultat.curseursRevele });
+      setEnAttente({ etatSuivant: nouvelEtat, revele: resultat.equationRevele || resultat.curseursRevele || resultat.soxRevele });
       return;
     }
     setEtat(nouvelEtat);
@@ -79,12 +81,13 @@ export function AppTransformationsGraphiques() {
             )}
             {resultatEnAttente.curseursRevele && (
               <p>
-                Curseurs attendus : TH = {exercice.p} ; TV = {exercice.q} ; EV = {exercice.ev} ; CV = {exercice.cv} ; SOX ={" "}
-                {exercice.sox ? "Oui" : "Non"}
+                Curseurs attendus : TH = {String(exercice.p).replace("-", "−")} ; TV = {String(exercice.q).replace("-", "−")} ; EV/CV = {exercice.ev}/{exercice.cv} (ou un rapport égal)
               </p>
             )}
+            {resultatEnAttente.soxRevele && <p>Symétrie d'axe Ox : {exercice.sox ? "oui" : "non"}</p>}
           </>
         ),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={correctionDetailleeTransformationsGraphiques(exercice)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -109,6 +112,8 @@ export function AppTransformationsGraphiques() {
             tentativesMax={etat.reglages.tentativesMax}
             equationFermee={etat.etapeEquation.terminee}
             curseursFermee={etat.etapeCurseurs.terminee}
+            soxFerme={etat.etapeSox.terminee}
+            soxRevele={etat.etapeSox.revelee}
             aideActivee={etat.aideUtilisee}
             onActiverAide={() => setEtat(activerAide(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponse(etat, reponse))}

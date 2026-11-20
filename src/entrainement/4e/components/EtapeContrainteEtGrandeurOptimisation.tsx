@@ -2,16 +2,16 @@ import { useState } from "react";
 import type { ExerciceOptimisationModelisation } from "../core/optimisation.types";
 import type { ReponseContrainteEtGrandeur } from "../moteur/verificationOptimisation";
 import { diagnostiquerContrainteEtGrandeur } from "../moteur/verificationOptimisation";
-import { NIVEAU_AIDE_MAX_CONTRAINTE_ET_GRANDEUR } from "../moteur/sessionOptimisation";
-import { consigneContrainteEtGrandeur, segmentsPhraseEnonce, texteAideContrainteNiveau1, texteAideContrainteNiveau2, texteAideGrandeurNiveau1, texteAideGrandeurNiveau2 } from "../ui/formatOptimisation";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { consigneContrainteEtGrandeur, segmentsPhraseEnonce } from "../ui/formatOptimisation";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { aidesContrainteEtGrandeur, MESSAGE_EXPRESSION_OPTIMISATION_ILLISIBLE } from "../ui/aidesOptimisation";
 import { CroquisOptimisation } from "./CroquisOptimisation";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 
 interface Props {
@@ -39,13 +39,13 @@ export function EtapeContrainteEtGrandeurOptimisation({
   exercice,
   tentativesUtilisees,
   tentativesMax,
-  niveauAide,
   onActiverAide,
   onValider,
   validation,
 }: Props) {
   const [texteEquation, setTexteEquation] = useState("");
   const [texteGrandeur, setTexteGrandeur] = useState("");
+  const saisie = useTentativeLisible<ReponseContrainteEtGrandeur>();
 
   const complet = texteEquation.trim() !== "" && texteGrandeur.trim() !== "";
   const reponse: ReponseContrainteEtGrandeur = { texteEquation, texteGrandeur };
@@ -58,6 +58,7 @@ export function EtapeContrainteEtGrandeurOptimisation({
         ? "correct"
         : "not_equivalent"
     : undefined;
+  const lisible = statutGlobal !== "parse_error";
 
   return (
     <div>
@@ -78,7 +79,7 @@ export function EtapeContrainteEtGrandeurOptimisation({
           className={`text-input${apresEchec && statut && statut.equation !== "correct" ? " is-erronee" : ""}`}
           placeholder={`ex : 3${exercice.contexte.labelVariable}+5${exercice.contrainte.lettreCherchee}=17`}
           value={texteEquation}
-          onChange={(e) => setTexteEquation(e.target.value)}
+          onChange={(e) => setTexteEquation(normaliserSigneMoins(e.target.value))}
         />
       </div>
 
@@ -92,42 +93,17 @@ export function EtapeContrainteEtGrandeurOptimisation({
           className={`text-input${apresEchec && statut && statut.grandeur !== "correct" ? " is-erronee" : ""}`}
           placeholder={`ex : 3*${exercice.contexte.labelVariable}*${exercice.contrainte.lettreCherchee}`}
           value={texteGrandeur}
-          onChange={(e) => setTexteGrandeur(e.target.value)}
+          onChange={(e) => setTexteGrandeur(normaliserSigneMoins(e.target.value))}
         />
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            <SegmentsInline segments={segmentsPhraseEnonce(texteAideContrainteNiveau1(exercice))} />
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              <SegmentsInline segments={segmentsPhraseEnonce(texteAideContrainteNiveau2(exercice))} />
-            </p>
-          )}
-          <p>
-            <SegmentsInline segments={segmentsPhraseEnonce(texteAideGrandeurNiveau1(exercice))} />
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              <SegmentsInline segments={segmentsPhraseEnonce(texteAideGrandeurNiveau2(exercice))} />
-            </p>
-          )}
-        </div>
-      )}
       {!validation && (
         <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONTRAINTE_ET_GRANDEUR} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
+        <AidesNiveaux aides={aidesContrainteEtGrandeur(exercice)} onPremiereAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(reponse, lisible, onValider)}>
           Valider
         </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-          </p>
-        )}
+        <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} texteIllisible={MESSAGE_EXPRESSION_OPTIMISATION_ILLISIBLE} cible={null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

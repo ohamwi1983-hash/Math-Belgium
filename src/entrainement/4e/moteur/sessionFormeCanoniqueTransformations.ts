@@ -21,7 +21,9 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentat
 import type { ReglagesEtape } from "./etapeTentatives";
 import {
   verifierCanonique,
-  verifierEvCvSox,
+  diagnostiquerFormeCanoniqueComplete,
+  evaluerEvCvSox,
+  fonctionCanoniqueReelle,
   verifierTh,
   verifierTv,
 } from "./verificationFormeCanoniqueTransformations";
@@ -49,6 +51,7 @@ export function demarrerSessionFormeCanoniqueTransformation(
     thRevele: false,
     scoreEvCvSoxExercice: null,
     evCvSoxRevele: false,
+    soxCorrect: null,
     resultats: [],
     terminee: false,
   };
@@ -126,22 +129,28 @@ export function soumettreReponseEvCvSox(
     throw new Error("soumettreReponseEvCvSox : la session n'est pas à l'étape evCvSox");
   }
 
+  // Choix fermé SOX : joué une seule fois (première soumission), verdict figé ensuite.
+  const soxCorrect = etat.soxCorrect ?? reponse.sox === etat.exerciceCourant.sox;
   const etapeCourante = soumettreEtapeTentatives<ReponseEvCvSox>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
-    verifier: (r) => verifierEvCvSox(etat.exerciceCourant, r),
+    verifier: (r) => {
+      const ev = evaluerEvCvSox(etat.exerciceCourant, r);
+      return ev.ev && ev.cv && diagnostiquerFormeCanoniqueComplete(r.fonctionIntermediaire, fonctionCanoniqueReelle(etat.exerciceCourant, 0)) === "correct";
+    },
     revelerReponse: () => {},
   });
 
   if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
+    return { ...etat, etapeCourante, soxCorrect };
   }
 
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "tv",
+    soxCorrect,
     scoreEvCvSoxExercice: etapeCourante.score,
-    evCvSoxRevele: etapeCourante.revelee,
+    evCvSoxRevele: etapeCourante.revelee || !soxCorrect,
   };
 }
 
@@ -170,6 +179,7 @@ function cloturerExerciceOuSuivant(
     thRevele: false,
     scoreEvCvSoxExercice: null,
     evCvSoxRevele: false,
+    soxCorrect: null,
   };
 }
 

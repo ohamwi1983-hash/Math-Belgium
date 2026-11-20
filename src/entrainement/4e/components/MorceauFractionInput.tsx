@@ -1,4 +1,5 @@
 import type { EtatMorceauFraction } from "../ui/morceauFraction";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import {
   crochetDroitEffectifFraction,
   crochetDroitVerrouilleFraction,
@@ -55,7 +56,7 @@ export function MorceauFractionInput({ etat, onChange }: Props) {
         value={etat.borneGaucheMode === "-inf" ? "" : etat.borneGaucheValeur}
         disabled={etat.borneGaucheMode === "-inf"}
         aria-label="Borne gauche"
-        onChange={(e) => onChange({ ...etat, borneGaucheMode: "nombre", borneGaucheValeur: e.target.value })}
+        onChange={(e) => onChange({ ...etat, borneGaucheMode: "nombre", borneGaucheValeur: normaliserSigneMoins(e.target.value) })}
       />
       <button type="button" className={etat.borneGaucheMode === "-inf" ? "btn toggle-active" : "btn"} onClick={toggleMoinsInfini}>
         −∞
@@ -69,7 +70,7 @@ export function MorceauFractionInput({ etat, onChange }: Props) {
         value={etat.borneDroiteMode === "+inf" ? "" : etat.borneDroiteValeur}
         disabled={etat.borneDroiteMode === "+inf"}
         aria-label="Borne droite"
-        onChange={(e) => onChange({ ...etat, borneDroiteMode: "nombre", borneDroiteValeur: e.target.value })}
+        onChange={(e) => onChange({ ...etat, borneDroiteMode: "nombre", borneDroiteValeur: normaliserSigneMoins(e.target.value) })}
       />
       <button type="button" className="btn bracket-btn" disabled={verrouilleDroit} onClick={toggleCrochetDroit} aria-label="Crochet droit">
         {crochetDroitEffectifFraction(etat) ?? "?"}

@@ -78,6 +78,7 @@ const ETAT_TRANSITOIRE_INITIAL = {
   sommetRevele: false,
   scoreDecisionExercice: null,
   decisionRevele: false,
+  choixDomaineCorrect: null,
 } as const;
 
 export function demarrerSessionOptimisation(reglages: ReglagesSession, generateur: GenerateurExerciceOptimisation): EtatSessionOptimisation {
@@ -337,15 +338,17 @@ export function soumettreReponseDecision(etat: EtatSessionOptimisation, reponse:
     throw new Error("soumettreReponseDecision : la session n'est pas à l'étape decision");
   }
   const exerciceCourant = etat.exerciceCourant;
+  // Choix fermé « dans le domaine ? » : joué à la première soumission, verdict figé ensuite.
+  const choixDomaineCorrect = etat.choixDomaineCorrect ?? reponse.dansDomaine === exerciceCourant.sommetDansDomaine;
 
   const etapeCourante = soumettreEtapeTentatives<ReponseDecision>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
-    verifier: (r) => verifierDecision(exerciceCourant, r),
+    verifier: (r) => verifierDecision(exerciceCourant, { ...r, dansDomaine: exerciceCourant.sommetDansDomaine }),
     revelerReponse: () => {},
   });
 
   if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
+    return { ...etat, etapeCourante, choixDomaineCorrect };
   }
 
   const score = etapeCourante.score as number;
@@ -354,8 +357,9 @@ export function soumettreReponseDecision(etat: EtatSessionOptimisation, reponse:
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "interpretation",
+    choixDomaineCorrect,
     scoreDecisionExercice: score,
-    decisionRevele: etapeCourante.revelee,
+    decisionRevele: etapeCourante.revelee || !choixDomaineCorrect,
   };
 }
 

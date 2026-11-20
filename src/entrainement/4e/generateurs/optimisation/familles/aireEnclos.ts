@@ -143,6 +143,9 @@ interface SkinCloture {
   nomMateriau: string;
   genreLieu: GenreGrandeur;
   typesApplicables: TypeCloture[];
+  /** Unité de longueur à l'échelle de l'objet (audit 4e ch. 1, G7) : 40 à 120 m de profilé pour un
+   * vitrail était absurde. */
+  unite?: "m" | "dm" | "cm";
 }
 
 const SKINS_CLOTURE: SkinCloture[] = [
@@ -150,33 +153,35 @@ const SKINS_CLOTURE: SkinCloture[] = [
   { nomLieu: "un jardin potager", nomVariable: "la largeur du jardin", nomMateriau: "clôture", genreLieu: "masculin", typesApplicables: TOUS_TYPES_CLOTURE },
   { nomLieu: "un enclos à chien", nomVariable: "la largeur de l'enclos", nomMateriau: "clôture", genreLieu: "masculin", typesApplicables: TOUS_TYPES_CLOTURE },
   { nomLieu: "un parc à moutons", nomVariable: "la largeur du parc", nomMateriau: "clôture", genreLieu: "masculin", typesApplicables: TOUS_TYPES_CLOTURE },
-  { nomLieu: "un tableau", nomVariable: "la largeur du cadre", nomMateriau: "baguette de bois", genreLieu: "masculin", typesApplicables: TOUS_TYPES_CLOTURE },
+  { nomLieu: "un tableau", nomVariable: "la largeur du cadre", nomMateriau: "baguette de bois", genreLieu: "masculin", typesApplicables: TOUS_TYPES_CLOTURE , unite: "cm" },
   { nomLieu: "une piscine", nomVariable: "la largeur du bassin", nomMateriau: "margelle carrelée", genreLieu: "feminin", typesApplicables: TOUS_TYPES_CLOTURE },
-  { nomLieu: "une baie vitrée", nomVariable: "la largeur de la baie vitrée", nomMateriau: "profilé métallique", genreLieu: "feminin", typesApplicables: TOUS_TYPES_CLOTURE },
-  { nomLieu: "une boucle d'antenne", nomVariable: "la largeur de la boucle", nomMateriau: "fil métallique", genreLieu: "feminin", typesApplicables: TOUS_TYPES_CLOTURE },
-  { nomLieu: "un cadeau", nomVariable: "la largeur de l'emballage", nomMateriau: "ruban", genreLieu: "masculin", typesApplicables: ["libre"] },
-  { nomLieu: "une voile", nomVariable: "la largeur de la voile", nomMateriau: "ourlet renforcé", genreLieu: "feminin", typesApplicables: ["libre"] },
+  { nomLieu: "une baie vitrée", nomVariable: "la largeur de la baie vitrée", nomMateriau: "profilé métallique", genreLieu: "feminin", typesApplicables: TOUS_TYPES_CLOTURE , unite: "dm" },
+  { nomLieu: "une boucle d'antenne", nomVariable: "la largeur de la boucle", nomMateriau: "fil métallique", genreLieu: "feminin", typesApplicables: TOUS_TYPES_CLOTURE , unite: "cm" },
+  { nomLieu: "un cadeau", nomVariable: "la largeur de l'emballage", nomMateriau: "ruban", genreLieu: "masculin", typesApplicables: ["libre"] , unite: "cm" },
+  { nomLieu: "une voile", nomVariable: "la largeur de la voile", nomMateriau: "ourlet renforcé", genreLieu: "feminin", typesApplicables: ["libre"] , unite: "dm" },
   { nomLieu: "un parterre de fleurs", nomVariable: "la largeur du parterre", nomMateriau: "bordurette", genreLieu: "masculin", typesApplicables: TOUS_TYPES_CLOTURE },
   { nomLieu: "un court de tennis", nomVariable: "la largeur du court", nomMateriau: "grillage", genreLieu: "masculin", typesApplicables: TOUS_TYPES_CLOTURE },
-  { nomLieu: "un tapis", nomVariable: "la largeur du tapis", nomMateriau: "bordure cousue", genreLieu: "masculin", typesApplicables: TOUS_TYPES_CLOTURE },
-  { nomLieu: "un vitrail", nomVariable: "la largeur du vitrail", nomMateriau: "profilé de plomb", genreLieu: "masculin", typesApplicables: TOUS_TYPES_CLOTURE },
+  { nomLieu: "un tapis", nomVariable: "la largeur du tapis", nomMateriau: "bordure cousue", genreLieu: "masculin", typesApplicables: TOUS_TYPES_CLOTURE , unite: "dm" },
+  { nomLieu: "un vitrail", nomVariable: "la largeur du vitrail", nomMateriau: "profilé de plomb", genreLieu: "masculin", typesApplicables: TOUS_TYPES_CLOTURE , unite: "cm" },
   { nomLieu: "un chantier", nomVariable: "la largeur du chantier", nomMateriau: "clôture de sécurité", genreLieu: "masculin", typesApplicables: TOUS_TYPES_CLOTURE },
 ];
 
 function construirePhraseEnonceCloture(type: TypeCloture, skin: SkinCloture, L: number): string {
   const adosse = skin.genreLieu === "feminin" ? "adossée" : "adossé";
+  const u = skin.unite ?? "m";
   switch (type) {
     case "libre":
-      return `On dispose de ${L} m de ${skin.nomMateriau} pour délimiter ${skin.nomLieu} rectangulaire.`;
+      return `On dispose de ${L} ${u} de ${skin.nomMateriau} pour délimiter ${skin.nomLieu} rectangulaire.`;
     case "mur":
-      return `${capitaliser(skin.nomLieu)} rectangulaire est ${adosse} à un mur, et on dispose de ${L} m de ${skin.nomMateriau} pour les 3 autres côtés.`;
+      return `${capitaliser(skin.nomLieu)} rectangulaire est ${adosse} à un mur, et on dispose de ${L} ${u} de ${skin.nomMateriau} pour les 3 autres côtés.`;
     case "deuxMurs":
-      return `${capitaliser(skin.nomLieu)} rectangulaire est ${adosse} à 2 murs formant un angle droit, et on dispose de ${L} m de ${skin.nomMateriau} pour les 2 côtés restants.`;
+      return `${capitaliser(skin.nomLieu)} rectangulaire est ${adosse} à 2 murs formant un angle droit, et on dispose de ${L} ${u} de ${skin.nomMateriau} pour les 2 côtés restants.`;
   }
 }
 
 function construireDepuisSkinCloture(skin: SkinCloture): ExerciceOptimisationModelisation {
   const quart = randomInt(QUART_MIN, QUART_MAX);
+  const u = skin.unite ?? "m";
   const L = 4 * quart;
   const type = skin.typesApplicables[randomInt(0, skin.typesApplicables.length - 1)];
   const { enonceLatex, pente, ordonnee, sommetX, sommetY } = construireContrainte(type, quart, L);
@@ -214,8 +219,8 @@ function construireDepuisSkinCloture(skin: SkinCloture): ExerciceOptimisationMod
       nomVariable: skin.nomVariable,
       nomGrandeur: "l'aire",
       genreGrandeur: "feminin",
-      uniteVariable: "m",
-      uniteGrandeur: "m²",
+      uniteVariable: u,
+      uniteGrandeur: `${u}²`,
       questionFinale: formatQuestionFinale("max", "l'aire", "feminin"),
       // Croquis SVG (`prompt-implementation-3-diagrammes-svg.md`) — `type` porte déjà la vraie
       // configuration tirée (libre/mur/deuxMurs), mathématiquement indiscernable de `contrainte`/
@@ -240,10 +245,10 @@ function construireDepuisSkinCloture(skin: SkinCloture): ExerciceOptimisationMod
       sens: "max",
       nomGrandeur: "l'aire",
       genreGrandeur: "feminin",
-      uniteGrandeur: "m²",
-      uniteGrandeurFautive: "m",
+      uniteGrandeur: `${u}²`,
+      uniteGrandeurFautive: u,
       labelVariable: "x",
-      uniteVariable: "m",
+      uniteVariable: u,
       optimal,
       // Piège supplémentaire propre à la famille A (spec section 4, écran 8) : les 3 configurations
       // de clôture partagent un cas d'égalité à l'optimum (x=y, "libre"/"deuxMurs" — un carré au
@@ -380,20 +385,25 @@ function construireDepuisSkinDirect(skin: SkinDirect): ExerciceOptimisationModel
 interface SkinTriangleRectangle {
   phraseEnonce: (L: number) => string;
   nomVariable: string;
+  /** Unité à l'échelle de l'objet (audit 4e ch. 1, G7 : une équerre de 44 m). */
+  unite: "m" | "dm" | "cm";
 }
 
 const SKINS_TRIANGLE_RECTANGLE: SkinTriangleRectangle[] = [
   {
-    phraseEnonce: (L) => `La grand-voile triangulaire d'une planche à voile a la forme d'un triangle rectangle : ses 2 côtés de l'angle droit, x et y, ont une somme fixée à ${L} m (longueur totale de mât et de bôme disponible).`,
+    phraseEnonce: (L) => `La grand-voile triangulaire d'une planche à voile a la forme d'un triangle rectangle : ses 2 côtés de l'angle droit, x et y, ont une somme fixée à ${L} dm (longueur totale de mât et de bôme disponible).`,
     nomVariable: "la longueur du premier côté de l'angle droit",
+    unite: "dm",
   },
   {
-    phraseEnonce: (L) => `Un gousset métallique triangulaire, en forme de triangle rectangle, renforce un assemblage : ses 2 côtés de l'angle droit, x et y, ont une somme fixée à ${L} m (longueur totale de matériau disponible).`,
+    phraseEnonce: (L) => `Un gousset métallique triangulaire, en forme de triangle rectangle, renforce un assemblage : ses 2 côtés de l'angle droit, x et y, ont une somme fixée à ${L} cm (longueur totale de matériau disponible).`,
     nomVariable: "la longueur du premier côté de l'angle droit",
+    unite: "cm",
   },
   {
-    phraseEnonce: (L) => `Une équerre de menuisier a la forme d'un triangle rectangle : ses 2 côtés de l'angle droit, x et y, ont une somme fixée à ${L} m (barre de métal utilisée pour la fabriquer).`,
+    phraseEnonce: (L) => `Une équerre de menuisier a la forme d'un triangle rectangle : ses 2 côtés de l'angle droit, x et y, ont une somme fixée à ${L} cm (barre de métal utilisée pour la fabriquer).`,
     nomVariable: "la longueur du premier côté de l'angle droit",
+    unite: "cm",
   },
 ];
 
@@ -425,8 +435,8 @@ function construireDepuisSkinTriangleRectangle(skin: SkinTriangleRectangle): Exe
       nomVariable: skin.nomVariable,
       nomGrandeur: "l'aire du triangle rectangle",
       genreGrandeur: "feminin",
-      uniteVariable: "m",
-      uniteGrandeur: "m²",
+      uniteVariable: skin.unite,
+      uniteGrandeur: `${skin.unite}²`,
       questionFinale: formatQuestionFinale("max", "l'aire du triangle rectangle", "feminin"),
     },
     fonction,
@@ -448,10 +458,10 @@ function construireDepuisSkinTriangleRectangle(skin: SkinTriangleRectangle): Exe
       sens: "max",
       nomGrandeur: "l'aire du triangle rectangle",
       genreGrandeur: "feminin",
-      uniteGrandeur: "m²",
-      uniteGrandeurFautive: "m",
+      uniteGrandeur: `${skin.unite}²`,
+      uniteGrandeurFautive: skin.unite,
       labelVariable: "x",
-      uniteVariable: "m",
+      uniteVariable: skin.unite,
       optimal,
     }),
   };

@@ -11,6 +11,7 @@ import { formatFonctionNarrativeLatex } from "../formatNarratif";
 import { genererDomaine, optimumSurDomaine } from "../optimum";
 import { construireOptionsInterpretation, formatQuestionFinale } from "../interpretation";
 import { randomInt } from "../aleatoire";
+import { decalerHorsDuSommetSiTire } from "../contrainteSupplementaire";
 
 /**
  * Domaine justifié narrativement (`spec-gen55-optimisation-second-degre.md`, section 2) — `inf`/`sup`
@@ -19,9 +20,9 @@ import { randomInt } from "../aleatoire";
  * n'ont pas le même type de contrainte de capacité).
  */
 const SKINS = [
-  { phraseEnonce: (a: number, b: number, c: number, inf: number, sup: number) => `Le coût total C (en €) de production de q unités dans un atelier vaut $C(q)=${formatFonctionNarrativeLatex(a, b, c, "q")}$. L'atelier ne peut fonctionner qu'entre q=${inf} unités (le minimum pour justifier son ouverture) et q=${sup} unités (sa capacité de production maximale).` },
-  { phraseEnonce: (a: number, b: number, c: number, inf: number, sup: number) => `Le coût total C (en €) de production de q unités dans une usine vaut $C(q)=${formatFonctionNarrativeLatex(a, b, c, "q")}$. L'usine ne peut produire qu'entre q=${inf} unités (son seuil minimal de fonctionnement) et q=${sup} unités (sa capacité de production maximale).` },
-  { phraseEnonce: (a: number, b: number, c: number, inf: number, sup: number) => `Le coût total C (en €) de production de q unités dans une exploitation vaut $C(q)=${formatFonctionNarrativeLatex(a, b, c, "q")}$. L'exploitation ne peut produire qu'entre q=${inf} unités (le minimum pour rester active) et q=${sup} unités (sa capacité de production maximale).` },
+  { phraseEnonce: (a: number, b: number, c: number, inf: number, sup: number) => `Le coût total C (en €) de production de q unités dans un atelier vaut $C(q)=${formatFonctionNarrativeLatex(a, b, c, "q")}$. L'atelier ne peut fonctionner qu'entre $q=${inf}$ unités (le minimum pour justifier son ouverture) et $q=${sup}$ unités (sa capacité de production maximale).` },
+  { phraseEnonce: (a: number, b: number, c: number, inf: number, sup: number) => `Le coût total C (en €) de production de q unités dans une usine vaut $C(q)=${formatFonctionNarrativeLatex(a, b, c, "q")}$. L'usine ne peut produire qu'entre $q=${inf}$ unités (son seuil minimal de fonctionnement) et $q=${sup}$ unités (sa capacité de production maximale).` },
+  { phraseEnonce: (a: number, b: number, c: number, inf: number, sup: number) => `Le coût total C (en €) de production de q unités dans une exploitation vaut $C(q)=${formatFonctionNarrativeLatex(a, b, c, "q")}$. L'exploitation ne peut produire qu'entre $q=${inf}$ unités (le minimum pour rester active) et $q=${sup}$ unités (sa capacité de production maximale).` },
 ];
 
 const Q_S_MIN = 20;
@@ -45,7 +46,7 @@ export function construireCoutProduction(): ExerciceOptimisationFonctionDonnee {
 
   const skin = SKINS[randomInt(0, SKINS.length - 1)];
 
-  return {
+  const exercice: ExerciceOptimisationFonctionDonnee = {
     variante: "fonctionDonnee",
     famille: "coutProduction",
     sens: "min",
@@ -75,4 +76,6 @@ export function construireCoutProduction(): ExerciceOptimisationFonctionDonnee {
       optimal,
     }),
   };
+  // Verdict « hors du domaine » ≈ 40 % (lot D) : tirage fait en dernier (même ?code= sinon).
+  return decalerHorsDuSommetSiTire(exercice, (d) => skin.phraseEnonce(fonction.a, fonction.b, fonction.c, d.inf, d.sup), 0);
 }

@@ -3,14 +3,14 @@ import type { ExerciceAnalyseFonction, ReponseAxeSommet } from "../core/analyseF
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
-import { consigneAxeSommet } from "../ui/formatAnalyseFonction";
 import { calculerCourbeAxeSommet, calculerSketchAxeSommet } from "../ui/sketchAxeSommet";
 import { SketchAxeSommet } from "./SketchAxeSommet";
-import { diagnostiquerAxeSommet, parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { analyserAxeSymetrie, parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { aidesAxeSommet, consigneAxeSommetEcran, messageAxeSommet, MESSAGE_SOMMET_ILLISIBLE } from "../ui/aidesParabole";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceAnalyseFonction;
@@ -39,7 +39,6 @@ export function EtapeAxeSommet({
   tentativesUtilisees,
   tentativesMax,
   recapitulatif,
-  aideActivee,
   onActiverAide,
   onValider,
   validation,
@@ -48,14 +47,15 @@ export function EtapeAxeSommet({
   const [xS, setXS] = useState("");
   const [yS, setYS] = useState("");
 
+  const saisie = useTentativeLisible<ReponseAxeSommet>();
   const complet = axeTexte.trim() !== "" && xS.trim() !== "" && yS.trim() !== "";
   const reponse = {
     axeTexte,
     xS: parserNombreOuFraction(xS) ?? NaN,
     yS: parserNombreOuFraction(yS) ?? NaN,
   };
-  const statut = complet ? diagnostiquerAxeSommet(exercice, reponse) : undefined;
-  const erronee = tentativesUtilisees > 0 && statut !== undefined && statut !== "correct";
+  const lisible = analyserAxeSymetrie(axeTexte) !== null && Number.isFinite(reponse.xS) && Number.isFinite(reponse.yS);
+  const erronee = tentativesUtilisees > 0 && !validation;
   const { enonce } = exercice.exercice;
   const recapitulatifSansAllure = recapitulatif.filter((entree) => entree.libelle !== "Allure");
   const geom = calculerSketchAxeSommet(exercice.xS, exercice.yS, enonce.c);
@@ -65,8 +65,7 @@ export function EtapeAxeSommet({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatifSansAllure} />
-      <p className="prompt-text">{consigneAxeSommet()}</p>
-      {aideActivee && <SketchAxeSommet geom={geom} courbe={courbe} signeA={signeA} />}
+      <p className="prompt-text">{consigneAxeSommetEcran()}</p>
       <div className="field">
         <label className="field-label" htmlFor="axe-symetrie">
           Axe de symétrie AS ≡
@@ -74,9 +73,9 @@ export function EtapeAxeSommet({
         <input
           id="axe-symetrie"
           className={`text-input${erronee ? " is-erronee" : ""}`}
-          placeholder="x = ... (fraction p/q acceptée)"
+          placeholder="x = …"
           value={axeTexte}
-          onChange={(e) => setAxeTexte(e.target.value)}
+          onChange={(e) => setAxeTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
       <div className="field-row">
@@ -84,31 +83,28 @@ export function EtapeAxeSommet({
           <label className="field-label field-label-minuscule" htmlFor="xs">
             <Katex expression="x_S =" />
           </label>
-          <input id="xs" className={`text-input${erronee ? " is-erronee" : ""}`} value={xS} onChange={(e) => setXS(e.target.value)} />
+          <input id="xs" className={`text-input${erronee ? " is-erronee" : ""}`} value={xS} onChange={(e) => setXS(normaliserSigneMoins(e.target.value))} />
         </div>
         <div className="field field-inline">
           <label className="field-label field-label-minuscule" htmlFor="ys">
             <Katex expression="y_S =" />
           </label>
-          <input id="ys" className={`text-input${erronee ? " is-erronee" : ""}`} value={yS} onChange={(e) => setYS(e.target.value)} />
+          <input id="ys" className={`text-input${erronee ? " is-erronee" : ""}`} value={yS} onChange={(e) => setYS(normaliserSigneMoins(e.target.value))} />
         </div>
       </div>
       {!validation && (
         <>
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={!complet}
-          onClick={() => onValider(reponse)}
-        >
+        <AidesNiveaux aides={aidesAxeSommet(exercice)} onPremiereAide={onActiverAide} figure={(niveau) => (niveau >= 2 ? <SketchAxeSommet geom={geom} courbe={courbe} signeA={signeA} /> : null)} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(reponse, lisible, onValider)}>
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour
+          illisible={saisie.illisible}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={MESSAGE_SOMMET_ILLISIBLE}
+          cible={saisie.soumise ? messageAxeSommet(exercice, saisie.soumise) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -6,6 +6,9 @@ import { calculerAllureSketch } from "../ui/allureSketch";
 import { AllureSketch } from "./AllureSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { Katex } from "./Katex";
+import { AidesNiveaux } from "./RetourSaisie";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 
 interface Props {
   exercice: ExerciceAnalyseFonction;
@@ -13,6 +16,9 @@ interface Props {
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
   onValider: (reponse: ChoixAllure) => void;
+  /** Aides à deux niveaux (KaTeX). */
+  aides?: FragmentConsigne[][];
+  onActiverAide?: () => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -20,7 +26,7 @@ interface Props {
 }
 
 /** Étape 2 : signe de a et signe de a·b, croquis (Oy seul) mis à jour en direct. */
-export function EtapeAllure({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
+export function EtapeAllure({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, aides, onActiverAide, validation }: Props) {
   const [signeA, setSigneA] = useState<SigneAllure | null>(null);
   const [signeAB, setSigneAB] = useState<SigneProduitAB | null>(null);
 
@@ -36,22 +42,24 @@ export function EtapeAllure({ exercice, tentativesUtilisees, tentativesMax, reca
       <p className="prompt-text prompt-text--question-multiple">Quel est le signe de a ?</p>
       <div className="options-grid-compact">
         <button type="button" className={signeA === "+" ? "btn toggle-active" : "btn"} onClick={() => setSigneA("+")}>
-          a &gt; 0
+          <Katex expression="a>0" />
         </button>
         <button type="button" className={signeA === "-" ? "btn toggle-active" : "btn"} onClick={() => setSigneA("-")}>
-          a &lt; 0
+          <Katex expression="a<0" />
         </button>
       </div>
-      <p className="prompt-text prompt-text--question-multiple">Quel est le signe de a·b ?</p>
+      <p className="prompt-text prompt-text--question-multiple">
+        Quel est le signe de <Katex expression="a\cdot b" /> ?
+      </p>
       <div className="options-grid-compact">
         <button type="button" className={signeAB === "+" ? "btn toggle-active" : "btn"} onClick={() => setSigneAB("+")}>
-          a·b &gt; 0
+          <Katex expression="a\cdot b>0" />
         </button>
         <button type="button" className={signeAB === "-" ? "btn toggle-active" : "btn"} onClick={() => setSigneAB("-")}>
-          a·b &lt; 0
+          <Katex expression="a\cdot b<0" />
         </button>
         <button type="button" className={signeAB === "0" ? "btn toggle-active" : "btn"} onClick={() => setSigneAB("0")}>
-          a·b = 0
+          <Katex expression="a\cdot b=0" />
         </button>
       </div>
 
@@ -59,6 +67,7 @@ export function EtapeAllure({ exercice, tentativesUtilisees, tentativesMax, reca
 
       {!validation && (
         <>
+        {aides && <AidesNiveaux aides={aides} onPremiereAide={onActiverAide} />}
         <button
           type="button"
           className="btn btn-primary"

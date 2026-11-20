@@ -2,16 +2,17 @@ import { useState } from "react";
 import type { ExerciceOptimisationModelisation } from "../core/optimisation.types";
 import { diagnostiquerDomaine } from "../moteur/verificationOptimisation";
 import type { ReponseDomaine } from "../moteur/verificationOptimisation";
-import { NIVEAU_AIDE_MAX_DOMAINE } from "../moteur/sessionOptimisation";
-import { consigneDomaine, segmentsPhraseEnonce, texteAideDomaineNiveau1, texteAideDomaineNiveau2, texteAideDomaineNiveau3 } from "../ui/formatOptimisation";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { consigneDomaine, segmentsPhraseEnonce } from "../ui/formatOptimisation";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
+import { aidesDomaine, messageDomaine, MESSAGE_VALEUR_OPTIMISATION_ILLISIBLE } from "../ui/aidesOptimisation";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { Katex } from "./Katex";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
@@ -27,20 +28,15 @@ interface Props {
 }
 
 /** Écran 3 (`modelisation` uniquement) — déterminer le domaine de validité de la variable. */
-export function EtapeDomaineOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeDomaineOptimisation({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation}: Props) {
   const [inf, setInf] = useState("");
   const [sup, setSup] = useState("");
+  const saisie = useTentativeLisible<ReponseDomaine>();
+  const lisible = parserNombreOuFraction(inf) !== null && parserNombreOuFraction(sup) !== null;
   const complet = inf.trim() !== "" && sup.trim() !== "";
   const reponse: ReponseDomaine = { inf, sup };
   const statut = complet ? diagnostiquerDomaine(exercice, reponse) : undefined;
   const apresEchec = tentativesUtilisees > 0;
-  const statutGlobal = statut
-    ? statut.inf === "parse_error" || statut.sup === "parse_error"
-      ? "parse_error"
-      : statut.inf === "correct" && statut.sup === "correct"
-        ? "correct"
-        : "not_equivalent"
-    : undefined;
 
   return (
     <div>
@@ -58,7 +54,7 @@ export function EtapeDomaineOptimisation({ exercice, tentativesUtilisees, tentat
             id="optimisation-domaine-inf"
             className={`text-input${apresEchec && statut && statut.inf !== "correct" ? " is-erronee" : ""}`}
             value={inf}
-            onChange={(e) => setInf(e.target.value)}
+            onChange={(e) => setInf(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -69,30 +65,18 @@ export function EtapeDomaineOptimisation({ exercice, tentativesUtilisees, tentat
             id="optimisation-domaine-sup"
             className={`text-input${apresEchec && statut && statut.sup !== "correct" ? " is-erronee" : ""}`}
             value={sup}
-            onChange={(e) => setSup(e.target.value)}
+            onChange={(e) => setSup(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>{texteAideDomaineNiveau1(exercice)}</p>
-          {niveauAide >= 2 && <p>{texteAideDomaineNiveau2(exercice)}</p>}
-          {niveauAide >= 3 && <p>{texteAideDomaineNiveau3(exercice)}</p>}
-        </div>
-      )}
       {!validation && (
         <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_DOMAINE} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
+        <AidesNiveaux aides={aidesDomaine(exercice)} onPremiereAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(reponse, lisible, onValider)}>
           Valider
         </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-          </p>
-        )}
+        <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} texteIllisible={MESSAGE_VALEUR_OPTIMISATION_ILLISIBLE} cible={saisie.soumise ? messageDomaine(exercice, saisie.soumise.inf, saisie.soumise.sup) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

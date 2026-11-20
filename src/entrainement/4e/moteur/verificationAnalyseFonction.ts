@@ -61,7 +61,8 @@ const REGEX_FRACTION = /^(-?\d+)\s*\/\s*(-?\d+)$/;
 export function parserNombreOuFraction(texte: string): number | null {
   // Signes moins typographiques (« − », « – », « — ») convertis en « - » — audit chapitre 7,
   // point 4 : « −2 » était jugé illisible au lieu d'être lu comme -2.
-  const t = texte.trim().replace(/[\u2212\u2013\u2014]/g, "-");
+  // Espace (fine) des milliers entre deux groupes de chiffres : « 11 532 » = 11532 (audit 4e ch. 1, G8).
+  const t = texte.trim().replace(/[\u2212\u2013\u2014]/g, "-").replace(/(\d)[\s\u202f\u00a0](?=\d{3}(?!\d))/g, "$1");
   const fraction = REGEX_FRACTION.exec(t);
   if (fraction) {
     const numerateur = Number(fraction[1]);

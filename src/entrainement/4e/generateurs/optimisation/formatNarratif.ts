@@ -16,10 +16,15 @@ export function formatFonctionNarrativeLatex(a: number, b: number, c: number, va
     .map((terme, index) => {
       const abs = Math.abs(terme.valeur);
       // Virgule décimale (« 0{,}5 », jamais « 0.5 ») ; arrondi d'affichage contre les artefacts flottants.
-      const coefficient = abs === 1 && terme.suffixe !== "" ? "" : String(Number(abs.toFixed(6))).replace(".", "{,}");
+      const coefficient = abs === 1 && terme.suffixe !== "" ? "" : milliersLatex(String(Number(abs.toFixed(6))).replace(".", "{,}"));
       const corps = `${coefficient}${terme.suffixe}`;
       if (index === 0) return terme.valeur < 0 ? `-${corps}` : corps;
       return terme.valeur < 0 ? ` - ${corps}` : ` + ${corps}`;
     })
     .join("");
+}
+
+/** Espace fine des milliers (« 12\,500 », audit 4e ch. 1, G8) sur la partie entière d'un nombre ≥ 1 000. */
+export function milliersLatex(nombre: string): string {
+  return nombre.replace(/^(\d+)/, (entier) => (entier.length > 3 ? entier.replace(/\B(?=(\d{3})+$)/g, "\\,") : entier));
 }

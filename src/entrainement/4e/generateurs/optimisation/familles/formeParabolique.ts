@@ -1,164 +1,211 @@
 /**
- * Couche A — famille "formeParabolique" (variante `fonctionDonnee`, spec section 3, famille C
- * "Forme/trajectoire parabolique") : FUSION de deux anciennes familles séparées (`trajectoire`
- * `archePont`, corrigée par `promptverificationfusionsmanquantesgen55.md` — la spec ne prévoyait
- * qu'UNE seule famille C, "fusion de l'ancienne famille D"). 2 sous-skins à variable distincte,
- * jamais mélangés (colonne "Variable" de la spec : "Temps ou position horizontale") — même principe
- * que `grandeurTemps.ts` (`TypeGrandeurTemps`, méteo/bénéfice) :
- * - `temps` (ex-`trajectoire`) — un objet lancé, hauteur h(t) en fonction du temps t.
- * - `position` (ex-`archePont`) — une forme statique, hauteur h(x) en fonction de la position
- *   horizontale x.
- * Mécanique IDENTIQUE dans les 2 cas (`formeSommet.ts`, sens toujours "max") — seuls les skins et
- * les plages numériques diffèrent (position : marge resserrée par rapport à temps, structures
- * statiques moins "hautes" proportionnellement que des trajectoires de projectiles).
+ * Couche A — famille "formeParabolique" (variante `fonctionDonnee`, famille C de la spec), RÉÉCRITE
+ * (décision de l'utilisateur, audit 4e ch. 1, G6 : contextes incohérents dans 100 % des tirages —
+ * trajectoires suivies « juste après le lancer » à partir de t = 2 à 13 s, smash à 423 m, arches
+ * dont le « pied gauche » était en x = 11 et dont les pieds ne touchaient pas le sol). Deux
+ * sous-habillages :
+ * - `temps` : un objet lancé vers le haut à t = 0 depuis une hauteur h₀ (0 à 10 m), h(t) = −5t² + v·t + h₀
+ *   (coefficient physique 5 ≈ g/2, comme l'exemple du cours) ; observation de t = 0 à t = T (objet
+ *   encore en l'air). Hauteurs maximales réalistes par objet (6 à 30 m ; fusées et feux d'artifice
+ *   jusqu'à 85 m).
+ * - `position` : une arche posée au sol, x mesuré depuis son pied gauche : h(x) = a·x·(x − W), pieds en
+ *   x = 0 et x = W (h = 0), hauteur |a|·W²/4 de 4 à 18 m et au plus la portée. Un projecteur (une
+ *   guirlande, un capteur…) ne peut être fixé qu'entre x = k et le pied droit : domaine [k ; W].
  *
- * **Skins EXCLUS de la banque proposée par la spec, signalés plutôt que réintroduits silencieusement**
- * (`promptverificationfusionsmanquantesgen55.md` demande "tous les skins des deux réunis" mais la
- * spec d'origine en propose une liste plus large, ~22 items) :
- * - "Chute libre d'un objet lâché" — hauteur MONOTONE décroissante dès t=0 (vitesse initiale nulle),
- *   contredit la forme "monte puis descend" que ce générateur suppose partout (le sommet y serait
- *   toujours en bord de domaine, cas dégénéré cassant la pédagogie sommet-dans/hors-domaine).
- * - "Antenne parabolique"/"miroir ou four solaire parabolique" — un vrai réflecteur parabolique est
- *   concave vers le HAUT (un minimum, au foyer), contredit `sens:"max"` fixé pour toute cette
- *   famille (aucune des 2 anciennes familles fusionnées n'avait de variante `sens:"min"`).
+ * **Sommet hors du domaine ≈ 40 %** (décision de l'utilisateur, lot D) : l'observation s'arrête AVANT
+ * le sommet (T < t_S) ou la zone de fixation commence APRÈS lui (k > W/2) — jamais un début tardif.
+ * Le texte ne le dit jamais (verdict de l'écran « décision »). Toutes les valeurs sont exactes :
+ * entières pour `temps`, au plus deux décimales (a = −1/4, −1/2) pour `position`.
  */
 import type { ExerciceOptimisationFonctionDonnee } from "../../../core/optimisation.types";
-import { fonctionDepuisSommet } from "../formeSommet";
 import { formatFonctionNarrativeLatex } from "../formatNarratif";
-import { genererDomaine, optimumSurDomaine } from "../optimum";
-import { construireOptionsInterpretation, formatQuestionFinale } from "../interpretation";
+import { optimumSurDomaine, sommetDansIntervalle } from "../optimum";
+import { construireOptionsInterpretation } from "../interpretation";
 import { randomInt } from "../aleatoire";
 
-type TypeFormeParabolique = "temps" | "position";
+/** Part des tirages dont le sommet est hors du domaine (lot D). */
+export const PART_HORS_DOMAINE_FORME = 0.4;
 
-const TYPES: TypeFormeParabolique[] = ["temps", "position"];
-
-/**
- * Chaque skin reçoit désormais aussi `inf`/`sup` (bornes réelles du domaine, tirées par
- * `genererDomaine`) pour justifier narrativement le domaine (`spec-gen55-optimisation-second-degre.md`,
- * section 2 : "domaine justifié dans le texte narratif, pas seulement affiché comme donnée
- * mathématique nue") — chaque skin nomme l'évènement de l'histoire qui correspond à `inf` et à
- * `sup`, jamais une formulation générique unique plaquée sur les 22 skins.
- */
-const SKINS_TEMPS = [
-  (a: number, b: number, c: number, inf: number, sup: number) => `Un ballon est lancé en l'air ; sa hauteur h (en m) après t secondes vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. On filme sa trajectoire entre t=${inf} s (juste après qu'il ait quitté la main) et t=${sup} s (avant qu'il ne retombe au sol).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Une fusée à eau est propulsée verticalement ; sa hauteur h (en m) après t secondes vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. On l'observe entre t=${inf} s (juste après le décollage) et t=${sup} s (avant la fin de la phase de propulsion visible).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Lors d'un saut, la hauteur h (en m) du sauteur après t secondes vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. Le saut est étudié entre t=${inf} s (juste après l'impulsion) et t=${sup} s (juste avant la réception).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Un joueur tire au panier ; la hauteur h (en m) du ballon après t secondes vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. On suit le ballon entre t=${inf} s (juste après le tir) et t=${sup} s (avant qu'il n'atteigne le panier ou ne retombe).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Un athlète effectue un lancer de poids ; la hauteur h (en m) du poids après t secondes vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. Le lancer est suivi entre t=${inf} s (juste après le lâcher) et t=${sup} s (avant que le poids ne touche le sol).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Une balle de golf est frappée ; sa hauteur h (en m) après t secondes vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. On la suit entre t=${inf} s (juste après l'impact du club) et t=${sup} s (avant qu'elle ne retombe sur le green).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Une balle de tennis est frappée en cloche ; sa hauteur h (en m) après t secondes vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. On la suit entre t=${inf} s (juste après la frappe) et t=${sup} s (avant qu'elle ne retombe côté adverse).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Un plongeur s'élance depuis un plongeoir ; sa hauteur h (en m) après t secondes vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. Le plongeon est étudié entre t=${inf} s (juste après l'impulsion) et t=${sup} s (juste avant l'entrée dans l'eau).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Un frisbee est lancé en l'air ; sa hauteur h (en m) après t secondes vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. On le suit entre t=${inf} s (juste après le lancer) et t=${sup} s (avant qu'il ne soit rattrapé ou touche le sol).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Lors d'un smash au volleyball, la hauteur h (en m) du ballon après t secondes vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. On le suit entre t=${inf} s (juste après la frappe) et t=${sup} s (avant qu'il ne touche le sol adverse).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Une flèche est tirée à l'arc ; sa hauteur h (en m) après t secondes vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. On la suit entre t=${inf} s (juste après le décochage) et t=${sup} s (avant qu'elle n'atteigne la cible).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Une fusée de feu d'artifice est tirée ; sa hauteur h (en m) après t secondes, avant l'explosion, vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. On la suit entre t=${inf} s (juste après la mise à feu) et t=${sup} s (juste avant l'explosion).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `L'eau d'une fontaine jaillit dynamiquement ; sa hauteur h (en m) après t secondes vaut $h(t)=${formatFonctionNarrativeLatex(a, b, c, "t")}$. Le jet est observé entre t=${inf} s (juste après la mise en route) et t=${sup} s (avant que l'eau ne retombe dans le bassin).`,
-];
-
-const SKINS_POSITION = [
-  (a: number, b: number, c: number, inf: number, sup: number) => `Un javelot est lancé ; sa hauteur h (en m) à une distance x (en m) du lanceur vaut $h(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$. Sa trajectoire est étudiée entre x=${inf} m (juste après le lancer) et x=${sup} m (avant qu'il ne touche le sol).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Un pont en arc a pour équation $h(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$, où h est la hauteur (en m) au-dessus de l'eau et x la position horizontale (en m) depuis la rive gauche. Le pont s'étend de x=${inf} m (la rive gauche, premier point d'ancrage) à x=${sup} m (la rive droite, second point d'ancrage).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Une arche décorative a pour équation $h(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$, où h est la hauteur (en m) et x la position horizontale (en m) depuis son pied gauche. L'arche s'étend de x=${inf} m (son pied gauche) à x=${sup} m (son pied droit).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `L'entrée d'un tunnel parabolique a pour équation $h(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$, où h est la hauteur (en m) et x la position horizontale (en m) depuis son bord gauche. L'entrée s'étend de x=${inf} m (son bord gauche visible) à x=${sup} m (son bord droit visible).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Le câble d'un pont suspendu a pour équation $h(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$, où h est la hauteur (en m) au-dessus du tablier et x la position horizontale (en m) depuis le premier pylône. Le câble est tendu entre x=${inf} m (le premier pylône) et x=${sup} m (le second pylône).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Un toboggan a la forme d'une glissière incurvée d'équation $h(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$, où h est la hauteur (en m) et x la position horizontale (en m) depuis son point de départ. Le toboggan s'étend de x=${inf} m (son point de départ, en haut) à x=${sup} m (son point d'arrivée, en bas).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `La voûte d'une grotte artificielle a pour équation $h(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$, où h est la hauteur (en m) et x la position horizontale (en m) depuis son entrée. La voûte s'étend de x=${inf} m (son entrée) à x=${sup} m (le fond visible de la voûte).`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Un dos d'âne (ou un tremplin de ski) a pour profil $h(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$, où h est la hauteur (en m) et x la position horizontale (en m) depuis son bord gauche. On étudie le relief entre son pied, à x=${inf} m, et son autre extrémité visible, à x=${sup} m.`,
-  (a: number, b: number, c: number, inf: number, sup: number) => `Le jet d'une fontaine dessine une courbe figée d'équation $h(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$, où h est la hauteur (en m) et x la position horizontale (en m) depuis la buse. Le jet est visible de x=${inf} m (la buse d'où jaillit l'eau) à x=${sup} m (le point où il retombe dans le bassin).`,
-];
-
-interface ParametresType {
-  tSMin: number;
-  tSMax: number;
-  aAbsChoix: number[];
-  extraMin: number;
-  extraMax: number;
-  margeMin: number;
-  margeMax: number;
-  skins: ((a: number, b: number, c: number, inf: number, sup: number) => string)[];
-  labelVariable: string;
-  nomVariable: string;
-  uniteVariable: string;
-  uniteGrandeurFautive: string;
+interface SkinTemps {
+  /** Phrase d'introduction, avec la fonction et la fin d'observation. */
+  phrase: (fonction: string, h0: number, T: number) => string;
+  /** Hauteurs de départ possibles (m). */
+  h0: number[];
+  /** Instants du sommet possibles (s) : v = 10·t_S. */
+  tS: number[];
 }
 
-const PARAMETRES: Record<TypeFormeParabolique, ParametresType> = {
-  temps: {
-    tSMin: 4,
-    tSMax: 10,
-    aAbsChoix: [1, 2, 4, 5],
-    extraMin: 5,
-    extraMax: 30,
-    margeMin: 1,
-    margeMax: 3,
-    skins: SKINS_TEMPS,
-    labelVariable: "t",
-    nomVariable: "le temps",
-    uniteVariable: "s",
-    uniteGrandeurFautive: "s",
+const SKINS_TEMPS: SkinTemps[] = [
+  {
+    phrase: (f, h0, T) => `Une balle est lancée verticalement vers le haut, d'une hauteur de ${h0} m. Sa hauteur h (en m), t secondes après le lancer, vaut $h(t)=${f}$. Une caméra la filme de t = 0 s (le lancer) à t = ${T} s.`,
+    h0: [1, 2],
+    tS: [1, 2],
   },
-  position: {
-    tSMin: 4,
-    tSMax: 12,
-    aAbsChoix: [1, 2],
-    extraMin: 3,
-    extraMax: 15,
-    margeMin: 1,
-    margeMax: 3,
-    skins: SKINS_POSITION,
-    labelVariable: "x",
-    nomVariable: "la position horizontale",
-    uniteVariable: "m",
-    uniteGrandeurFautive: "m²",
+  {
+    phrase: (f, _h0, T) => `Une fusée à eau décolle du sol. Sa hauteur h (en m), t secondes après le décollage, vaut $h(t)=${f}$. Un capteur enregistre son altitude de t = 0 s (le décollage) à t = ${T} s.`,
+    h0: [0],
+    tS: [2, 3],
   },
-};
+  {
+    phrase: (f, h0, T) => `Une fusée de feu d'artifice est tirée depuis une plateforme de ${h0} m de haut. Sa hauteur h (en m), t secondes après la mise à feu, vaut $h(t)=${f}$. On suit sa montée de t = 0 s (la mise à feu) à t = ${T} s.`,
+    h0: [2, 3, 4, 5],
+    tS: [3, 4],
+  },
+  {
+    phrase: (f, _h0, T) => `Une balle de golf est frappée en cloche depuis le sol. Sa hauteur h (en m), t secondes après la frappe, vaut $h(t)=${f}$. Un radar la suit de t = 0 s (la frappe) à t = ${T} s.`,
+    h0: [0],
+    tS: [1, 2],
+  },
+  {
+    phrase: (f, h0, T) => `Depuis un pont situé à ${h0} m au-dessus d'une rivière, on lance un caillou vers le haut. Sa hauteur h (en m) au-dessus de l'eau, t secondes après le lancer, vaut $h(t)=${f}$. On le filme de t = 0 s (le lancer) à t = ${T} s.`,
+    h0: [6, 8, 10],
+    tS: [1, 2],
+  },
+  {
+    phrase: (f, h0, T) => `Au tennis, une chandelle est frappée à ${h0} m du sol. La hauteur h (en m) de la balle, t secondes après la frappe, vaut $h(t)=${f}$. On l'observe de t = 0 s (la frappe) à t = ${T} s.`,
+    h0: [1],
+    tS: [1, 2],
+  },
+];
 
-export function construireFormeParabolique(): ExerciceOptimisationFonctionDonnee {
-  const type = TYPES[randomInt(0, TYPES.length - 1)];
-  const p = PARAMETRES[type];
+interface SkinPosition {
+  /** Phrase : la structure, sa fonction, puis la zone de fixation [k ; W]. */
+  phrase: (fonction: string, W: number, k: number) => string;
+  question: string;
+  /** Couples (a, W) autorisés : hauteur |a|·W²/4 et rapport hauteur / portée réalistes. */
+  formes: { a: number; W: number }[];
+}
 
-  const xS = randomInt(p.tSMin, p.tSMax);
-  const aAbs = p.aAbsChoix[randomInt(0, p.aAbsChoix.length - 1)];
-  const extra = randomInt(p.extraMin, p.extraMax);
-  const hS = aAbs * xS * xS + extra;
+const FORMES_PETITES = [
+  { a: -1, W: 4 },
+  { a: -0.5, W: 6 },
+  { a: -0.5, W: 8 },
+];
+const FORMES_GRANDES = [
+  { a: -0.25, W: 8 },
+  { a: -0.25, W: 12 },
+  { a: -0.25, W: 16 },
+];
 
-  const fonction = fonctionDepuisSommet("max", xS, hS, aAbs);
-  const sommet = { x: xS, y: hS };
+const SKINS_POSITION: SkinPosition[] = [
+  {
+    phrase: (f, W, k) => `Une arche de jardin, posée sur le sol, a pour profil $h(x)=${f}$, où h est la hauteur (en m) et x la distance horizontale (en m) à son pied gauche ; son pied droit est en x = ${W}. On veut y suspendre une lanterne, sur la partie de l'arche comprise entre x = ${k} m et x = ${W} m.`,
+    question: "À quelle hauteur maximale peut-on suspendre la lanterne ?",
+    formes: FORMES_PETITES,
+  },
+  {
+    phrase: (f, W, k) => `L'entrée d'un tunnel a la forme d'une parabole posée sur la route : $h(x)=${f}$, où h est la hauteur (en m) et x la distance horizontale (en m) au bord gauche de l'entrée ; le bord droit est en x = ${W}. Un panneau lumineux ne peut être fixé que sur la partie de la voûte comprise entre x = ${k} m et x = ${W} m.`,
+    question: "À quelle hauteur maximale peut-on fixer le panneau lumineux ?",
+    formes: FORMES_GRANDES,
+  },
+  {
+    phrase: (f, W, k) => `L'arc d'un pont repose sur les deux rives : $h(x)=${f}$, où h est la hauteur (en m) au-dessus de l'eau et x la distance horizontale (en m) à la rive gauche ; la rive droite est en x = ${W}. Un capteur ne peut être installé que sur la portion de l'arc comprise entre x = ${k} m et x = ${W} m.`,
+    question: "À quelle hauteur maximale peut-on installer le capteur ?",
+    formes: FORMES_GRANDES,
+  },
+  {
+    phrase: (f, W, k) => `Le portail d'une grange a une ouverture en forme de parabole posée au sol : $h(x)=${f}$, où h est la hauteur (en m) et x la distance horizontale (en m) au montant gauche ; le montant droit est en x = ${W}. Une poulie ne peut être accrochée que sur la partie de l'arc comprise entre x = ${k} m et x = ${W} m.`,
+    question: "À quelle hauteur maximale peut-on accrocher la poulie ?",
+    formes: FORMES_PETITES,
+  },
+];
 
-  const { domaine, sommetDansDomaine } = genererDomaine(xS, 0, p.margeMin, p.margeMax);
-  const optimal = optimumSurDomaine(fonction, domaine, sommet, sommetDansDomaine);
+function choisir<T>(liste: T[]): T {
+  return liste[randomInt(0, liste.length - 1)]!;
+}
 
-  const skin = p.skins[randomInt(0, p.skins.length - 1)];
-
+function construireTemps(hors: boolean): ExerciceOptimisationFonctionDonnee {
+  // Hors du domaine : il faut un sommet à t_S ≥ 2 (observation arrêtée à T entre 1 et t_S − 1).
+  const candidats = SKINS_TEMPS.filter((s) => !hors || s.tS.some((t) => t >= 2));
+  const skin = choisir(candidats);
+  const tS = choisir(hors ? skin.tS.filter((t) => t >= 2) : skin.tS);
+  const h0 = choisir(skin.h0);
+  const fonction = { a: -5, b: 10 * tS, c: h0 };
+  const hS = 5 * tS * tS + h0;
+  // Dernier instant entier où l'objet est encore en l'air (h ≥ 0).
+  let tFin = tS;
+  while (-5 * (tFin + 1) ** 2 + 10 * tS * (tFin + 1) + h0 >= 0) tFin++;
+  const T = hors ? randomInt(1, tS - 1) : randomInt(tS, Math.max(tS, tFin));
+  const domaine = { inf: 0, sup: T };
+  const sommet = { x: tS, y: hS };
+  const dans = sommetDansIntervalle(tS, domaine);
+  const optimal = optimumSurDomaine(fonction, domaine, sommet, dans);
   return {
     variante: "fonctionDonnee",
     famille: "formeParabolique",
     sens: "max",
     contexte: {
-      phraseEnonce: skin(fonction.a, fonction.b, fonction.c, domaine.inf, domaine.sup),
-      labelVariable: p.labelVariable,
-      nomVariable: p.nomVariable,
+      phraseEnonce: skin.phrase(formatFonctionNarrativeLatex(fonction.a, fonction.b, fonction.c, "t"), h0, T),
+      labelVariable: "t",
+      nomVariable: "le temps",
       nomGrandeur: "la hauteur",
       genreGrandeur: "feminin",
-      uniteVariable: p.uniteVariable,
+      uniteVariable: "s",
       uniteGrandeur: "m",
-      questionFinale: formatQuestionFinale("max", "la hauteur", "feminin"),
+      questionFinale: "Quelle est la hauteur maximale atteinte pendant l'observation ?",
     },
     fonction,
     domaine,
     sommet,
-    sommetDansDomaine,
+    sommetDansDomaine: dans,
     optimal,
     optionsInterpretation: construireOptionsInterpretation({
       sens: "max",
       nomGrandeur: "la hauteur",
       genreGrandeur: "feminin",
       uniteGrandeur: "m",
-      uniteGrandeurFautive: p.uniteGrandeurFautive,
-      labelVariable: p.labelVariable,
-      uniteVariable: p.uniteVariable,
+      uniteGrandeurFautive: "s",
+      labelVariable: "t",
+      uniteVariable: "s",
       optimal,
     }),
   };
+}
+
+function construirePosition(hors: boolean): ExerciceOptimisationFonctionDonnee {
+  const skin = choisir(SKINS_POSITION);
+  const { a, W } = choisir(skin.formes);
+  const demi = W / 2;
+  // Zone de fixation [k ; W] : k ≤ W/2 (sommet dedans) ou k > W/2 (sommet avant la zone).
+  const k = hors ? randomInt(demi + 1, W - 1) : randomInt(0, demi);
+  const fonction = { a, b: -a * W, c: 0 };
+  const sommet = { x: demi, y: -a * demi * demi };
+  const domaine = { inf: k, sup: W };
+  const dans = sommetDansIntervalle(demi, domaine);
+  const optimal = optimumSurDomaine(fonction, domaine, sommet, dans);
+  return {
+    variante: "fonctionDonnee",
+    famille: "formeParabolique",
+    sens: "max",
+    contexte: {
+      phraseEnonce: skin.phrase(formatFonctionNarrativeLatex(fonction.a, fonction.b, fonction.c, "x"), W, k),
+      labelVariable: "x",
+      nomVariable: "la position horizontale",
+      nomGrandeur: "la hauteur",
+      genreGrandeur: "feminin",
+      uniteVariable: "m",
+      uniteGrandeur: "m",
+      questionFinale: skin.question,
+    },
+    fonction,
+    domaine,
+    sommet,
+    sommetDansDomaine: dans,
+    optimal,
+    optionsInterpretation: construireOptionsInterpretation({
+      sens: "max",
+      nomGrandeur: "la hauteur",
+      genreGrandeur: "feminin",
+      uniteGrandeur: "m",
+      uniteGrandeurFautive: "m²",
+      labelVariable: "x",
+      uniteVariable: "m",
+      optimal,
+    }),
+  };
+}
+
+export function construireFormeParabolique(): ExerciceOptimisationFonctionDonnee {
+  const hors = Math.random() < PART_HORS_DOMAINE_FORME;
+  return Math.random() < 0.5 ? construireTemps(hors) : construirePosition(hors);
 }

@@ -24,7 +24,18 @@ import { construireGrilleSigneVariation } from "./grilleSigneVariation";
  * audités) — leurs plages par défaut, utilisées par tous les autres appelants, restent inchangées.
  */
 const construireMiseEnEvidenceEtendue = () => construireMiseEnEvidence({ aRange: [-5, 5], rRange: [-6, 6] });
-const construireBinomeConjugueEtendu = () => construireBinomeConjugue({ aRange: [-6, 6], rMax: 8 });
+/** Binôme conjugué : |y_S| = |c| = |a|·r² resté sous 150 (audit 4e ch. 1, G3 : 320 − 5x² sortait
+ * dans 33 % des tirages). Pour |a| ≥ 5, r est ramené de 7–8 à 5–6 SANS nouveau tirage : les autres
+ * instances (et leurs codes `?code=`) restent identiques. */
+function construireBinomeConjugueEtendu(): Omit<Exercice, "formeAffichage"> {
+  const brut = construireBinomeConjugue({ aRange: [-6, 6], rMax: 8 });
+  const { a } = brut.enonce;
+  const r = Math.abs(brut.solution.racines[1]!);
+  if (Math.abs(a) < 5 || r <= 6) return brut;
+  const r2 = r - 2;
+  const pre = a === 1 ? "" : a === -1 ? "-" : String(a);
+  return { ...brut, enonce: { a, b: 0, c: -a * r2 * r2 }, solution: { ...brut.solution, racines: [-r2, r2], formeFactorisee: `${pre}(x - ${r2})(x + ${r2})` } };
+}
 const construireProduitRemarquableEtendu = () => construireProduitRemarquable({ aRange: [-6, 6], rRange: [-7, 7] });
 
 const CONSTRUCTEURS: Array<() => Omit<Exercice, "formeAffichage">> = [
@@ -69,8 +80,8 @@ export interface VarianteAnalyseFonction {
 export const CATALOGUE_VARIANTES: VarianteAnalyseFonction[] = [
   { id: "mise_en_evidence", label: "Mise en évidence (c=0)" },
   { id: "binome_conjugue", label: "Binôme conjugué (b=0, différence de deux carrés)" },
-  { id: "produit_remarquable", label: "Produit remarquable (Δ=0, carré parfait)" },
-  { id: "irreductible", label: "Irréductible (Δ<0, aucune racine réelle)" },
+  { id: "produit_remarquable", label: "Produit remarquable (carré parfait)" },
+  { id: "irreductible", label: "Non factorisable (sommet du côté de l'ouverture)" },
 ];
 
 const CONSTRUCTEURS_PAR_ID: Record<VarianteAnalyseFonctionId, () => Omit<Exercice, "formeAffichage">> = {
@@ -85,7 +96,24 @@ const CONSTRUCTEURS_PAR_ID: Record<VarianteAnalyseFonctionId, () => Omit<Exercic
  * d'un P2 déjà construit — factorisé hors de `construireAvecVarianteId`/`genererExerciceAnalyseFonction`
  * pour que les deux partagent exactement la même logique d'assemblage, jamais dupliquée.
  */
-function assemblerExercice(construit: Omit<Exercice, "formeAffichage">): ExerciceAnalyseFonction {
+/** Forme factorisée écrite comme le cours, a(x − x₁)(x − x₂) (audit 4e ch. 1, G2) : mise en évidence
+ * de a·x (« −4x(x + 6) », plus « x(−4x − 24) ») ; jamais « 1(… » ni « −1(… ». Affichage seulement :
+ * la vérification accepte toute factorisation juste (les deux écritures restent acceptées). */
+function formeFactoriseeDuCours(construit: Omit<Exercice, "formeAffichage">): Omit<Exercice, "formeAffichage"> {
+  let forme = construit.solution.formeFactorisee;
+  if (forme === undefined) return construit;
+  if (construit.categorie === "mise_en_evidence") {
+    const { a } = construit.enonce;
+    const r = construit.solution.racines.find((x) => x !== 0) ?? 0;
+    const pre = a === 1 ? "" : a === -1 ? "-" : String(a);
+    forme = `${pre}x(${r >= 0 ? `x - ${r}` : `x + ${-r}`})`;
+  }
+  forme = forme.replace(/^-1\(/, "-(").replace(/^1\(/, "(");
+  return { ...construit, solution: { ...construit.solution, formeFactorisee: forme } };
+}
+
+function assemblerExercice(construitBrut: Omit<Exercice, "formeAffichage">): ExerciceAnalyseFonction {
+  const construit = formeFactoriseeDuCours(construitBrut);
   const exercice: Exercice = { ...construit, formeAffichage: "canonique" };
   const { a, b, c } = exercice.enonce;
   const xS = -b / (2 * a);
