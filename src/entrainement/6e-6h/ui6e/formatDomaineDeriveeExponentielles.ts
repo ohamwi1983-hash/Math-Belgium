@@ -116,7 +116,7 @@ function aideANiveau2(phase: "aDomaine" | "aDerivee", exercice: ExerciceDomaineD
 
 function formatFonctionB(exercice: ExerciceDomaineDeriveeB): string {
   const b = String(exercice.base);
-  if (exercice.sousType === "racine") return `${b}^{\\sqrt{x^2-${exercice.k}^2}}`;
+  if (exercice.sousType === "racine") return `${b}^{\\sqrt{x^2-${exercice.k * exercice.k}}}`;
   const num = formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }]);
   const den = formatSommeTermes([{ valeur: exercice.p, suffixe: "x" }, { valeur: exercice.q, suffixe: "" }]);
   return `${b}^{\\frac{${num}}{${den}}}`;
@@ -129,8 +129,8 @@ function consigneB(phase: "bDomaine" | "bDerivee"): FragmentConsigne[] {
 function aideBNiveau1(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineDeriveeB): AideAvecLatex {
   if (phase === "bDomaine") {
     return exercice.sousType === "racine"
-      ? { texte: "La racine √(x²−k²) n'est définie que si son intérieur est ≥ 0.", latex: "x^2 - k^2 \\geq 0" }
-      : { texte: "Une fraction n'est définie que si son dénominateur est non nul.", latex: "px + q \\neq 0" };
+      ? { texte: "Une racine carrée n'est définie que si son radicande est positif ou nul :", latex: `x^2-${exercice.k * exercice.k}\\geq 0` }
+      : { texte: "Une fraction n'est définie que si son dénominateur est non nul :", latex: `${formatSommeTermes([{ valeur: exercice.p, suffixe: "x" }, { valeur: exercice.q, suffixe: "" }])}\\neq 0` };
   }
   return {
     texte: "Il y a ICI deux dérivations imbriquées : l'exponentielle base^u, ET la dérivée de u elle-même (règle de la chaîne) — ne traite jamais base^u seule.",
@@ -139,9 +139,12 @@ function aideBNiveau1(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineD
 }
 
 function aideBNiveau2(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineDeriveeB): AideAvecLatex {
-  if (phase === "bDomaine") return { texte: "Valeur(s) qui annule(nt) le dénominateur / borne(s) de la racine :", latex: exercice.sousType === "racine" ? `k=${exercice.k}` : `-\\dfrac{q}{p}` };
+  if (phase === "bDomaine")
+    return exercice.sousType === "racine"
+      ? { texte: "Inéquation à résoudre (on isole le carré) :", latex: `x^2\\geq ${exercice.k * exercice.k}` }
+      : { texte: "Valeur qui annule le dénominateur, à exclure :", latex: `${formatSommeTermes([{ valeur: exercice.p, suffixe: "x" }, { valeur: exercice.q, suffixe: "" }])}=0` };
   if (exercice.sousType === "racine") {
-    const u = `\\sqrt{x^2-${exercice.k}^2}`;
+    const u = `\\sqrt{x^2-${exercice.k * exercice.k}}`;
     return { texte: "u et u', rappelés séparément (pas encore assemblés) :", latex: `\\begin{gathered} u(x) = ${u} \\\\ u'(x) = \\dfrac{x}{${u}} \\end{gathered}` };
   }
   const num = formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }]);
@@ -198,7 +201,8 @@ function deriveesFacteursC(exercice: ExerciceDomaineDeriveeC): { uPrime: string;
 
 function formatFonctionC(exercice: ExerciceDomaineDeriveeC): string {
   const { u, v } = nomsFacteursC(exercice);
-  return `\\left(${u}\\right)\\cdot ${v}`;
+  // Parenthèses seulement autour d'un facteur composé (jamais « (x^{2})\\cdot e^{\\sqrt{x}} »).
+  return `${/[+-]/.test(u) ? `\\left(${u}\\right)` : u}\\cdot ${v}`;
 }
 
 function consigneC(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): FragmentConsigne[] {

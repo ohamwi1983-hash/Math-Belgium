@@ -27,6 +27,7 @@ const REECRITURES: [RegExp, string | ((...groupes: string[]) => string)][] = [
   // Choix dans une liste à l'écran → conclusion rédigée sur papier.
   [/, puis choisis le verdict qui s'applique\./g, ", puis conclus en donnant l'ensemble des solutions (justifie)."],
   [/^Sélectionne le graphique qui représente f\.$/g, "Indique lequel des graphiques A à D représente f. Justifie."],
+  [/^Sélectionne le graphique qui représente la dérivée f'\(x\)\.$/g, "Indique lequel des graphiques A à D représente f′. Justifie."],
   [/^Choisis le signe de ch\(x₀\)\.$/g, "Détermine le signe de ch(x₀)."],
   // Syntaxe de saisie au clavier.
   [/ \(écris une racine avec sqrt\(…\)\)/g, ""],

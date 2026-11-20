@@ -65,6 +65,11 @@ export function formatCibleTexte(cible: { type: string; valeur?: number }): stri
  * plateforme via `formatSommeTermes`. Bug trouvé par Playwright (familles A/C, capture "x^1"
  * affiché tel quel), corrigé puis étendu par précaution à toute autre puissance variable de x du
  * fichier (familles B/D). */
+/** Base numérique en LaTeX, virgule décimale (« 0{,}5 », jamais « 0.5 »). */
+export function baseLimiteLatex(base: number): string {
+  return String(base).replace(".", "{,}");
+}
+
 function formatPuissance(base: string, exposant: number): string {
   return exposant === 1 ? base : `${base}^{${exposant}}`;
 }
@@ -79,7 +84,7 @@ function formatGDeXLatex(exercice: ExerciceLimiteA & { sousCas: "puissance" }): 
 }
 
 function formatFonctionA(exercice: ExerciceLimiteA): string {
-  if (exercice.sousCas === "puissance") return `${exercice.base}^{${formatGDeXLatex(exercice)}}`;
+  if (exercice.sousCas === "puissance") return `${baseLimiteLatex(exercice.base)}^{${formatGDeXLatex(exercice)}}`;
   const nDeX = formatSommeTermes([{ valeur: exercice.a, suffixe: "x" }, { valeur: exercice.b, suffixe: "" }]);
   return `e^{\\frac{${nDeX}}{${formatPuissance("x", exercice.s)}}}`;
 }
@@ -102,7 +107,7 @@ function aideA1(phase: "aExposant" | "aGlobale"): AideAvecLatex {
 }
 
 function aideA2(phase: "aExposant" | "aGlobale", exercice: ExerciceLimiteA): AideAvecLatex {
-  const baseNumerique = exercice.sousCas === "puissance" ? String(exercice.base) : "e";
+  const baseNumerique = exercice.sousCas === "puissance" ? baseLimiteLatex(exercice.base) : "e";
   if (phase === "aExposant") {
     return { texte: "Forme de l'exposant et direction :", latex: `${formatDirectionA(exercice)}` };
   }
@@ -124,7 +129,7 @@ function etatActuelA(exercice: ExerciceLimiteA, phase: "aExposant" | "aGlobale")
 function formatFonctionB(exercice: ExerciceLimiteB): string {
   const poly = formatSommeTermes([{ valeur: exercice.q, suffixe: formatPuissance("x", exercice.d) }, { valeur: exercice.r, suffixe: "" }]);
   const exposant = formatSommeTermes([{ valeur: 1, suffixe: "x^2" }, { valeur: exercice.p, suffixe: "" }]);
-  return `${exercice.base}^{${exposant}} ${fusionnerOperateurSigne("+", poly)}`;
+  return `${baseLimiteLatex(exercice.base)}^{${exposant}} ${fusionnerOperateurSigne("+", poly)}`;
 }
 
 function formatDirectionB(exercice: ExerciceLimiteB): string {
@@ -152,7 +157,7 @@ function aideB1(phase: "bExponentielle" | "bPolynomiale" | "bGlobale", exercice:
 }
 
 function aideB2(phase: "bExponentielle" | "bPolynomiale" | "bGlobale", exercice: ExerciceLimiteB): AideAvecLatex {
-  if (phase === "bExponentielle") return { texte: "Base et exposant substitués :", latex: `\\text{base}=${exercice.base},\\quad x^2+p \\to +\\infty` };
+  if (phase === "bExponentielle") return { texte: "Base et exposant substitués :", latex: `\\text{base}=${baseLimiteLatex(exercice.base)},\\quad x^2+p \\to +\\infty` };
   if (phase === "bPolynomiale") return { texte: "Terme polynomial substitué :", latex: formatSommeTermes([{ valeur: exercice.q, suffixe: formatPuissance("x", exercice.d) }, { valeur: exercice.r, suffixe: "" }]) };
   return { texte: "Réécris le terme exponentiel comme un rapport, pour rendre la comparaison de croissance visible :", latex: "a^{u(x)} = \\frac{1}{a^{-u(x)}}" };
 }
@@ -280,7 +285,8 @@ function formatDecalageX(x0: number): string {
 function formatKFoisDecalage(k: number, x0: number): string {
   if (x0 === 0) return formatKx(k);
   const dec = formatDecalageX(x0);
-  if (k === 1) return dec;
+  // k = 1 : « x-3 » sans parenthèses (sinon « \\sin((x-3)) », « 3^{(x+2)} », « \\dfrac{…}{(x+2)} »).
+  if (k === 1) return dec.slice(1, -1);
   if (k === -1) return `-${dec}`;
   return `${k}${dec}`;
 }
@@ -463,7 +469,8 @@ function formatFonctionJ(exercice: ExerciceLimiteJ): string {
  * k/√(1-(k(x-x0))²). */
 function formatDeriveeArcFnJ(exercice: ExerciceLimiteJ): string {
   const kx = formatKFoisDecalage(exercice.k, exercice.x0);
-  const radical = exercice.arcFn === "arctan" ? `1+\\left(${kx}\\right)^2` : `\\sqrt{1-\\left(${kx}\\right)^2}`;
+  const carre = kx === "x" ? "x^2" : `\\left(${kx}\\right)^2`;
+  const radical = exercice.arcFn === "arctan" ? `1+${carre}` : `\\sqrt{1-${carre}}`;
   return `\\dfrac{${exercice.k}}{${radical}}`;
 }
 
@@ -548,7 +555,7 @@ function formatPartieExponentielleK(exercice: ExerciceLimiteK): string {
 function formatFonctionK(exercice: ExerciceLimiteK): string {
   const exp = formatPartieExponentielleK(exercice);
   const decalageCarre = exercice.x0 === 0 ? "x^2" : `${formatDecalageX(exercice.x0)}^2`;
-  const poly = `${exercice.m}${decalageCarre}`;
+  const poly = `${exercice.m === 1 ? "" : exercice.m === -1 ? "-" : exercice.m}${decalageCarre}`;
   return exercice.expAuNumerateur ? `\\frac{${exp}}{${poly}}` : `\\frac{${poly}}{${exp}}`;
 }
 
@@ -572,7 +579,7 @@ function formatDerivee2ExpK(exercice: ExerciceLimiteK): string {
   const kx = formatKFoisDecalage(k, x0);
   const k2 = k * k;
   const coef = k2 === 1 ? "" : `${k2}`;
-  return `${coef}\\ln(${base})^2\\cdot ${base}^{${kx}}`;
+  return `${coef}\\ln^{2}(${base})\\cdot ${base}^{${kx}}`;
 }
 
 function consigneK(phase: "kForme" | "kNumerateur1" | "kDenominateur1" | "kNumerateur2" | "kDenominateur2" | "kConclure", exercice: ExerciceLimiteK): FragmentConsigne[] {
@@ -649,6 +656,11 @@ function etatActuelK(exercice: ExerciceLimiteK, phase: "kForme" | "kNumerateur1"
 // Famille L — FI 1^∞ via pivot e (2 écrans : reformuler, conclure), dispatch par sous-type.
 // ============================================================================
 
+/** « \\frac{3}{x} » ou « -\\frac{3}{x} » (jamais « \\frac{-3}{x} »). */
+function fractionSurX(n: number): string {
+  return `${n < 0 ? "-" : ""}\\frac{${Math.abs(n)}}{x}`;
+}
+
 function formatBaseL1(k: number): string {
   return k >= 0 ? `1+\\dfrac{${k}}{x}` : `1-\\dfrac{${Math.abs(k)}}{x}`;
 }
@@ -662,7 +674,7 @@ function formatBaseL2(k: number): string {
 function formatFonctionL(exercice: ExerciceLimiteL): string {
   const { k, m } = exercice;
   if (exercice.sousType === "L1") return `\\left(${formatBaseL1(k)}\\right)^{${formatKx(m)}}`;
-  return `\\left(${formatBaseL2(k)}\\right)^{\\frac{${m}}{x}}`;
+  return `\\left(${formatBaseL2(k)}\\right)^{${fractionSurX(m)}}`;
 }
 
 function formatDirectionL(exercice: ExerciceLimiteL): string {
@@ -670,12 +682,11 @@ function formatDirectionL(exercice: ExerciceLimiteL): string {
 }
 
 function consigneL(phase: "lReformuler" | "lConclure", exercice: ExerciceLimiteL): FragmentConsigne[] {
-  if (phase === "lConclure") return [fragTexte("Applique le résultat du pivot "), fragLatex("(1+1/u)^u \\to e"), fragTexte(", puis conclus la valeur exacte de la limite.")];
+  if (phase === "lConclure") return [fragTexte("Applique le résultat du pivot "), fragLatex("\\left(1+\\dfrac{1}{u}\\right)^{u} \\to e"), fragTexte(", puis conclus la valeur exacte de la limite.")];
   if (exercice.sousType === "L1") {
-    const kDiv = exercice.k >= 0 ? `${exercice.k}` : `(${exercice.k})`;
-    return [fragTexte("Pose "), fragLatex(`u = x/${kDiv}`), fragTexte(" et réexprime f entièrement en fonction de u.")];
+    return [fragTexte("Pose "), fragLatex(`u = ${exercice.k < 0 ? "-" : ""}\\dfrac{x}{${Math.abs(exercice.k)}}`), fragTexte(" et réexprime f entièrement en fonction de u.")];
   }
-  return [fragTexte("Pose "), fragLatex(`t = ${exercice.k}x`), fragTexte(" et réexprime f entièrement en fonction de t.")];
+  return [fragTexte("Pose "), fragLatex(`t = ${formatKx(exercice.k)}`), fragTexte(" et réexprime f entièrement en fonction de t.")];
 }
 
 function aideL1(phase: "lReformuler" | "lConclure", exercice: ExerciceLimiteL): AideAvecLatex {
@@ -714,7 +725,7 @@ function etatActuelL(exercice: ExerciceLimiteL, phase: "lReformuler" | "lConclur
 function formatFonctionN(exercice: ExerciceLimiteN): string {
   const { base, k, m } = exercice;
   const exposantExterne = formatSommeTermes([{ valeur: m, suffixe: "x" }, { valeur: 1, suffixe: "x^2" }]);
-  return `\\left(${base}^{\\frac{${k}}{x}}\\right)^{${exposantExterne}}`;
+  return `\\left(${base}^{${fractionSurX(k)}}\\right)^{${exposantExterne}}`;
 }
 
 /** Forme canonique attendue après combinaison (loi des puissances) — réutilisée par `aideN2` ET
@@ -884,3 +895,143 @@ export function aideNiveau2(phase: PhaseLimiteExponentielle, exercice: ExerciceL
   }
 }
 
+
+// ============================================================================
+// Écritures EXACTES partagées par l'écran (réponse attendue), le corrigé détaillé et la réponse
+// brève — jamais un flottant brut (« 1.3862943611198906 » était affiché à l'écran).
+// ============================================================================
+
+function pgcdLimite(a: number, b: number): number {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y !== 0) [x, y] = [y, x % y];
+  return x || 1;
+}
+
+/** n/d réduit, signe porté par n, d > 0. */
+function reduire(n: number, d: number): [number, number] {
+  const g = pgcdLimite(n, d);
+  const s = d < 0 ? -1 : 1;
+  return [(s * n) / g, (s * d) / g];
+}
+
+/** (n/d)·partie : « 2\ln(3) », « -\ln(3) », « \dfrac{3}{2}\ln(3) », « -\dfrac{3}{2}\ln(3) ». */
+export function coefFoisPartieLatex(n: number, d: number, partie: string): string {
+  const [p, q] = reduire(n, d);
+  const signe = p < 0 ? "-" : "";
+  const a = Math.abs(p);
+  if (q === 1) return `${signe}${a === 1 ? "" : a}${partie}`;
+  return `${signe}\\dfrac{${a}}{${q}}${partie}`;
+}
+
+/** (n/d)/partie : « \dfrac{2}{\ln(3)} », « -\dfrac{3}{2\ln(3)} ». */
+export function coefSurPartieLatex(n: number, d: number, partie: string): string {
+  const [p, q] = reduire(n, d);
+  return `${p < 0 ? "-" : ""}\\dfrac{${Math.abs(p)}}{${q === 1 ? "" : q}${partie}}`;
+}
+
+/** Valeur approchée (4 chiffres significatifs, virgule décimale) d'une limite irrationnelle. */
+export function approcheLimiteLatex(v: number): string {
+  if (v === 0) return "0";
+  let e = Math.floor(Math.log10(Math.abs(v)));
+  const arr = (x: number, d: number) => {
+    const f = Math.pow(10, d);
+    const r = Math.round(x * f) / f;
+    return Object.is(r, -0) ? 0 : r;
+  };
+  let m = arr(v / Math.pow(10, e), 3);
+  if (Math.abs(m) >= 10) {
+    e += 1;
+    m = arr(v / Math.pow(10, e), 3);
+  }
+  if (e > -3 && e < 5) return String(arr(v, Math.max(0, 3 - e))).replace(".", "{,}");
+  return `${String(m).replace(".", "{,}")}\\cdot 10^{${e}}`;
+}
+
+/** Limite finale EXACTE des familles à valeur finie (C, G, H, I, J, K, L, N) ; `null` pour A et B
+ * (limite catégorielle, voir `formatCibleTexte`). */
+export function formatLimiteExacteLatex(exercice: ExerciceLimiteExponentielle): string | null {
+  switch (exercice.famille) {
+    case "A":
+    case "B":
+      return null;
+    case "C":
+      return "0";
+    case "G":
+      return "\\dfrac{1}{2}";
+    case "H": {
+      const ln = `\\ln(${exercice.base})`;
+      return exercice.expAuNumerateur ? coefFoisPartieLatex(exercice.k, exercice.m, ln) : coefSurPartieLatex(exercice.m, exercice.k, ln);
+    }
+    case "I":
+    case "J": {
+      const ln = `\\ln(${exercice.base})`;
+      const auNum = exercice.famille === "I" ? exercice.sinAuNumerateur : exercice.arcAuNumerateur;
+      return auNum ? coefSurPartieLatex(exercice.k, exercice.m, ln) : coefFoisPartieLatex(exercice.m, exercice.k, ln);
+    }
+    case "K": {
+      const ln2 = `\\ln^{2}(${exercice.base})`;
+      return exercice.expAuNumerateur ? coefFoisPartieLatex(exercice.k * exercice.k, 2 * exercice.m, ln2) : coefSurPartieLatex(2 * exercice.m, exercice.k * exercice.k, ln2);
+    }
+    case "L":
+      return `e^{${exercice.k * exercice.m}}`;
+    case "N":
+      return `${exercice.base}^{${exercice.k * exercice.m}}`;
+  }
+}
+
+/** Limite finale telle que l'écran l'attend : forme exacte, puis « ≈ » valeur approchée quand elle
+ * est irrationnelle (H, I, J, K, L). A et B : la cible catégorielle. */
+export function formatLimiteFinaleLatex(exercice: ExerciceLimiteExponentielle): string {
+  if (exercice.famille === "A" || exercice.famille === "B") return formatCibleTexte(exercice.limiteGlobale);
+  const exacte = formatLimiteExacteLatex(exercice) as string;
+  if (exercice.famille === "C" || exercice.famille === "G" || exercice.famille === "N") return exacte;
+  return `${exacte}\\approx ${approcheLimiteLatex(exercice.limiteFinale)}`;
+}
+
+/** Numérateur f(x), dénominateur g(x) et leurs dérivées (L'Hôpital, familles H, I, J, K) — mêmes
+ * écritures que les aides et le bloc « état actuel » de l'écran. */
+export function partiesLHopital(exercice: ExerciceLimiteH | ExerciceLimiteI | ExerciceLimiteJ | ExerciceLimiteK): { f: string; g: string; f1: string; g1: string; f2?: string; g2?: string } {
+  switch (exercice.famille) {
+    case "H": {
+      const exp = formatPartieExponentielleH(exercice);
+      const poly = formatKFoisDecalage(exercice.m, exercice.x0);
+      const dExp = formatDeriveePartieExponentielleH(exercice);
+      const dPoly = `${exercice.m}`;
+      return exercice.expAuNumerateur ? { f: exp, g: poly, f1: dExp, g1: dPoly } : { f: poly, g: exp, f1: dPoly, g1: dExp };
+    }
+    case "I": {
+      const sin = formatSinI(exercice);
+      const exp = formatPartieExponentielleI(exercice);
+      const dSin = formatDeriveeSinI(exercice);
+      const dExp = formatDeriveePartieExponentielleI(exercice);
+      return exercice.sinAuNumerateur ? { f: sin, g: exp, f1: dSin, g1: dExp } : { f: exp, g: sin, f1: dExp, g1: dSin };
+    }
+    case "J": {
+      const arc = formatArcFnJ(exercice);
+      const exp = formatPartieExponentielleJ(exercice);
+      const dArc = formatDeriveeArcFnJ(exercice);
+      const dExp = formatDeriveePartieExponentielleJ(exercice);
+      return exercice.arcAuNumerateur ? { f: arc, g: exp, f1: dArc, g1: dExp } : { f: exp, g: arc, f1: dExp, g1: dArc };
+    }
+    case "K": {
+      const exp = formatPartieExponentielleK(exercice);
+      const poly = `${exercice.m === 1 ? "" : exercice.m === -1 ? "-" : exercice.m}${exercice.x0 === 0 ? "x^2" : `${formatDecalageX(exercice.x0)}^2`}`;
+      const d1Exp = formatDerivee1ExpK(exercice);
+      const d1Poly = formatDerivee1PolyK(exercice);
+      const d2Exp = formatDerivee2ExpK(exercice);
+      const d2Poly = `${2 * exercice.m}`;
+      return exercice.expAuNumerateur ? { f: exp, g: poly, f1: d1Exp, g1: d1Poly, f2: d2Exp, g2: d2Poly } : { f: poly, g: exp, f1: d1Poly, g1: d1Exp, f2: d2Poly, g2: d2Exp };
+    }
+  }
+}
+
+/** Formes reformulées confirmées par l'écran (L : pivot, N : une seule puissance, G : fraction unique). */
+export function formeReformuleeLatex(exercice: ExerciceLimiteExponentielle): string | null {
+  if (exercice.famille === "L") return formatFormeReformuleeL(exercice);
+  if (exercice.famille === "N") return formatFormeCombineeN(exercice);
+  if (exercice.famille === "G") return formatFormeCombineeG();
+  return null;
+}
+
+export { formatDecalageX as decalageXLatex, formatKFoisDecalage as kFoisDecalageLatex, formatKx as kxLatex, fractionSurX as fractionSurXLatex, formatFonctionA as fonctionALatex, formatFonctionB as fonctionBLatex, formatGDeXLatex as gDeXLatex };

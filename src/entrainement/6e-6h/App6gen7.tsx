@@ -27,8 +27,11 @@ import { EtapeChampDomaineDerivee } from "./components6e/EtapeChampDomaineDerive
 import { EtapeDeuxChampsDomaineDerivee } from "./components6e/EtapeDeuxChampsDomaineDerivee";
 import { EtapeDomaineDomaineDerivee } from "./components6e/EtapeDomaineDomaineDerivee";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { correctionDetailleeDomaineDeriveeExponentielles, reponseAttendueDomaineDeriveeLatex, sequenceDomaineDeriveeExponentielles } from "./generateurs6e/domaineDeriveeExponentielles/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { Katex } from "./components/Katex";
-import { formatEnsembleReelLatex, formatEnsembleReelTexte } from "./ui6e/formatEnsembleReel";
+import { formatEnsembleReelTexte } from "./ui6e/formatEnsembleReel";
 import {
   aideNiveau1,
   aideNiveau2,
@@ -178,22 +181,26 @@ export function App6gen7() {
   // Réplique exactement le contenu (par écran RÉELLEMENT traversé) de l'ancien
   // `ResultatPanelDomaineDeriveeExponentielle.tsx` — jamais une cible recalculée séparément.
   const reponseAttenduePhase = () => {
-    if (phasesDomaine.has(phase)) return <Katex expression={formatEnsembleReelLatex(exercice.domaine)} />;
-    if (phase === "aDerivee" || phase === "bDerivee" || phase === "fDerivee") {
-      return "Dérivée calculée directement, vérifiée par équivalence numérique avec f'(x).";
-    }
-    if (phase === "cFacteurs") return "u'(x) et v'(x), vérifiées séparément par équivalence numérique.";
-    if (phase === "cAssemblage") return "f'(x) assemblée, vérifiée par équivalence numérique.";
-    if (phase === "dND") return "N'(x) et D'(x), vérifiées séparément par équivalence numérique.";
-    if (phase === "dAssemblage") return "f'(x) assemblée via (N'D−ND')/D², vérifiée par équivalence numérique.";
-    if (phase === "eSimplifier") return "Forme simplifiée, équivalente à f(x) (jamais une recopie brute de l'énoncé).";
-    if (phase === "eDerivee") return "Dérivée de la forme simplifiée, vérifiée par équivalence numérique avec f'(x).";
-    return null;
+    // Réponse attendue = « Résultat » du corrigé détaillé de l'écran (même source que le papier) :
+    // le domaine, ou la dérivée écrite en entier — plus de « vérifiée par équivalence numérique ».
+    const formules = reponseAttendueDomaineDeriveeLatex(exercice, phase);
+    if (formules.length === 0) return null;
+    return (
+      <span className="equation-box-termes">
+        {formules.map((f, i) => (
+          <Katex key={i} expression={f} />
+        ))}
+      </span>
+    );
   };
+
+  // Corrigé détaillé « comme au tableau » de l'écran (source unique avec le papier).
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDomaineDeriveeExponentielles(exercice), lettreEtape(sequenceDomaineDeriveeExponentielles(exercice).indexOf(phase)))} />;
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: reponseAttenduePhase(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

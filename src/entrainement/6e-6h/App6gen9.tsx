@@ -24,6 +24,9 @@ import { EtapeValeurOuVideEquExpo } from "./components6e/EtapeValeurOuVideEquExp
 import type { ReponseValeurOuVide } from "./moteur6e/verificationEquationsExponentielles";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { correctionDetailleeEquationsExponentielles, sequenceEquationsExponentielles } from "./generateurs6e/equationsExponentielles/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { Katex } from "./components/Katex";
 import { aideNiveau1, aideNiveau2, consigneEcran, formatEnonceLatex, formatReponseAttenduePhaseLatex } from "./ui6e/formatEquationsExponentielles";
 import { calculerRecapitulatifEquationsExponentielles, calculerSegmentsProgressionEquationsExponentielles } from "./ui6e/recapitulatifEquationsExponentielles";
@@ -173,9 +176,13 @@ export function App6gen9() {
     (window as unknown as { __debug6gen9?: unknown }).__debug6gen9 = { exercice, phase };
   }
 
+  // Corrigé détaillé « comme au tableau » de l'écran (source unique avec le papier).
+  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationsExponentielles(exercice), lettreEtape(sequenceEquationsExponentielles(exercice).indexOf(phase)))} />;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
