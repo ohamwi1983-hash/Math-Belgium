@@ -37,6 +37,10 @@ export interface ConfigAppEcrans<E, P extends string> {
   largeurFigure?: number;
   /** Nombre de puces affichées quand un cas particulier a moins d'écrans (structure fixe). */
   nombrePuces?: number;
+  /** En-tête (défaut : « 6e — Entraînement » / « Chapitre 2 — Fonctions exponentielles ») : le même
+   * socle sert aux générateurs 6gen152–6gen155 (6e ch. 1, « Fonctions réciproques & cyclométriques »). */
+  eyebrow?: string;
+  sousTitre?: string;
 }
 
 interface TransitionEnAttente<E, P extends string> {
@@ -228,9 +232,9 @@ export function AppEcransExp<E, P extends string>({ config }: { config: ConfigAp
   return (
     <div className="app-shell">
       <header className="app-header">
-        <p className="app-eyebrow">6e — Entraînement</p>
+        <p className="app-eyebrow">{config.eyebrow ?? "6e — Entraînement"}</p>
         <h1 className="app-title">{config.titre}</h1>
-        <p className="app-subtitle">Chapitre 2 — Fonctions exponentielles</p>
+        <p className="app-subtitle">{config.sousTitre ?? "Chapitre 2 — Fonctions exponentielles"}</p>
         <SelecteurVarianteDev options={config.catalogue} onGenerer={(id) => reinitialiser(demarrerSessionEcrans(def, REGLAGES, () => config.genererVariante(id)))} />
         <ProgressionPuces segments={segments} onSegmentClick={(i) => setFicheOuverte(i)} />
       </header>

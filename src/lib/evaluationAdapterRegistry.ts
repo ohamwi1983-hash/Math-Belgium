@@ -364,6 +364,7 @@ import { adaptateurEvaluationInequationsExponentielles } from '../entrainement/6
 import { adaptateurEvaluationEtudeFonctionExponentielle } from '../entrainement/6e-6h/generateurs6e/etudeFonctionExponentielle/exportEvaluation'
 import { adaptateurEvaluationExponentiellesProblemes } from '../entrainement/6e-6h/generateurs6e/exponentiellesProblemes/exportEvaluation'
 import { adaptateurEvaluationDetectiveExp } from '../entrainement/6e-6h/generateurs6e/detectiveExponentielles/exportEvaluation'
+import { adaptateurEvaluationIdentites } from '../entrainement/6e-6h/generateurs6e/identitesCyclometriques/exportEvaluation'
 import { adaptateurEvaluationModeleTableau } from '../entrainement/6e-6h/generateurs6e/modeleTableau/exportEvaluation'
 import { adaptateurEvaluationLimitesReference } from '../entrainement/6e-6h/generateurs6e/limitesReference/exportEvaluation'
 import { adaptateurEvaluationPuissancesSansCalculatrice } from '../entrainement/6e-6h/generateurs6e/puissancesSansCalculatrice/exportEvaluation'
@@ -455,6 +456,7 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen3': adaptateurEvaluationEquationsCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
   '6gen4': adaptateurEvaluationDeriveesCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
   '6gen5': adaptateurEvaluationGraphiquesCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen153': versionPapier(adaptateurEvaluationIdentites) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen6': versionPapier(adaptateurEvaluationLimitesExponentielles) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen7': versionPapier(adaptateurEvaluationDomaineDeriveeExponentielles) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen8': versionPapier(adaptateurEvaluationGraphiquesDeriveeExponentielles) as unknown as AdaptateurFeuilleExercices<never>,

@@ -10,6 +10,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 
 /** Espaces insécables avant « ? ! : ; » et après « « » : le signe ne passe jamais seul à la ligne. */
 function espacesInsecables(texte: string): string {
@@ -247,12 +248,15 @@ export function EtapeEcransExp({
             </div>
           )}
           {mode.champs.map((champ, k) => (
-            <div className="field" key={k}>
-              <label className="field-label field-label-minuscule">
-                {champ.labelLatex ? <Katex expression={champ.labelLatex} /> : champ.label}
-                {champ.unite && <span> (en {champ.unite})</span>}
-              </label>
-              {saisie(k + decalage, champ.label, champ.placeholder)}
+            <div key={k}>
+              {champ.apercu && !gele && <ApercuExpressionLatex texte={valeurs[k + decalage]} label={champ.label} />}
+              <div className="field">
+                <label className="field-label field-label-minuscule">
+                  {champ.labelLatex ? <Katex expression={champ.labelLatex} /> : champ.label}
+                  {champ.unite && <span> (en {champ.unite})</span>}
+                </label>
+                {saisie(k + decalage, champ.label, champ.placeholder)}
+              </div>
             </div>
           ))}
         </div>

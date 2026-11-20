@@ -81,6 +81,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
+  | '6gen153'
   | '6gen148' | '6gen149' | '6gen150' | '6gen151'
   | '6gen144'
   | '6gen147'
@@ -146,6 +147,7 @@ export interface QuizThemeConfig {
 export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'reciproques', generatorId: '6gen1', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', generatorId: '6gen2', label: '' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', generatorId: '6gen153', label: 'Identités trig∘arc et arc∘trig (6gen153)', processus: 2 },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'equations', generatorId: '6gen3', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'derivees', generatorId: '6gen4', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen5', label: '', processus: 3 },

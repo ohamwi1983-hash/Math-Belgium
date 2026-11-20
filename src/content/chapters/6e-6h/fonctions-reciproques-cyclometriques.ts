@@ -1251,6 +1251,18 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 2. arcsin, arccos, arctan »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Identités trig∘arc et arc∘trig',
+          generatorId: '6gen153',
+          description: [
+            "Décide si l'angle est dans l'image de l'arcfonction, puis ramène arcsin(sin θ), " +
+              'arccos(cos θ) ou arctan(tan θ) dans l\'image ; calcule cos(arcsin a), tan(arccos a), ' +
+              "sin(arctan a)… avec le bon signe, et simplifie cos(arcsin(kx)) en √(1 − k²x²).",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 153. Identités trig∘arc et arc∘trig »',
+        },
       ],
     },
     {
