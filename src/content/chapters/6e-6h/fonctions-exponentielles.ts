@@ -446,6 +446,18 @@ export const fonctionsExponentielles: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 6. Calcul de limites »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Limites de référence et croissances comparées',
+          generatorId: '6gen145',
+          description: [
+            'Reconnais la forme (0/0, ∞/∞, 0·∞, ∞ − ∞… ou pas indéterminée du tout), choisis la ' +
+              'limite de référence qui conclut — (eᵘ − 1)/u → 1, (aˣ − 1)/x → ln a, xⁿ/aˣ → 0 en +∞, ' +
+              'xⁿ·aˣ → 0 en −∞ — puis donne la valeur exacte de la limite.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 145. Limites de référence et croissances comparées »',
+        },
       ],
     },
     {

@@ -42,6 +42,8 @@ export interface ConfigAppEcrans<E, P extends string> {
 interface TransitionEnAttente<E, P extends string> {
   etatSuivant: EtatSessionEcrans<E, P>;
   revele: boolean;
+  /** Dernière saisie (choix fermé faux : message ciblé affiché avec la réponse). */
+  valeurs: string[];
 }
 
 /** « Ce qu'on sait déjà » : valeurs CONFIRMÉES des écrans clos (jamais la saisie de l'élève). */
@@ -154,7 +156,7 @@ export function AppEcransExp<E, P extends string>({ config }: { config: ConfigAp
         reponseAttendue: revele ? <ReponseAttendue fragments={def.reponseAttendue(e, phase)} /> : undefined,
       },
     ]);
-    setEnAttente({ etatSuivant: nouvel, revele });
+    setEnAttente({ etatSuivant: nouvel, revele, valeurs });
   }
 
   function suivant() {
@@ -172,6 +174,9 @@ export function AppEcransExp<E, P extends string>({ config }: { config: ConfigAp
 
   const choix = def.estChoix(e, phase);
   const indexPhase = phases.indexOf(phase);
+  // Choix fermé faux (une seule tentative) : le message ciblé de `piege` s'affiche avec la réponse,
+  // puisque l'écran ne se rejoue pas (sur un champ, il s'affiche à chaque tentative fausse).
+  const piegeChoix = choix && enAttente?.revele ? def.piege(e, phase, enAttente.valeurs) : null;
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -181,6 +186,15 @@ export function AppEcransExp<E, P extends string>({ config }: { config: ConfigAp
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(def.correction(e), lettreEtape(indexPhase))} />,
         ...(choix && enAttente.revele
           ? { messageRevele: `Ce n'était pas le bon choix (une seule tentative sur un choix fermé).${def.explicationChoix ? ` ${def.explicationChoix(e, phase)}` : ""}` }
+          : {}),
+        ...(piegeChoix
+          ? {
+              figureApres: (
+                <p style={{ margin: "8px 0", lineHeight: 1.6 }}>
+                  <Fragments fragments={piegeChoix} />
+                </p>
+              ),
+            }
           : {}),
       }
     : null;
