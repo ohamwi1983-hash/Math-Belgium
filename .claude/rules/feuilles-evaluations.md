@@ -836,3 +836,33 @@ plus π/2 + kπ pour les valeurs écartées) : 1 190 tirages, ≈ 12 600 égalit
 (2 graines, évaluation 2 séries + aménagée + feuille) : 0 débordement à 680 et 1 280 px, 0 formule
 coupée, 0 `.katex-error`. Plan réel `construirePlan` (2 séries, calculatrice interdite / autorisée,
 cas particulier coché) : même structure, verdicts différents, QR `?code=` 26 / 26 identiques.
+
+## 4e ch. 1, lot H — gen126–gen128 (nouveaux, notés)
+
+Corrigés `4e/generateurs/{troisEcritures,detectiveFonction,associerParaboles}/corrigeDetaille.ts`
+(partagés avec l'appli, une lettre par écran). Coquille commune `AppTransfertSecondDegre` pour
+gen126 et gen128 ; extensions additives sans effet sur gen115–120 : `ChampExpression.forme`
+(`developpee | canonique | factorisee | evidence`, `moteur/formeEcriturePolynome.ts` sur l'arbre de
+`expressionGenerale::arbreExpressionGenerale`) — écriture JUSTE dans une autre forme = statut
+`forme`, message sans perte de tentative (comme `parse_error`) ; préfixe « f(x) = » / « y = »
+toléré ; `EcranTSD.choix.explications` (choix faux expliqué, texte brut) ; `ChampEnsemble.prefixeApercu` ;
+`idDebug`. **gen126** (trois écritures) : développement (carré avec double produit, a distribué,
+réduction), zéros sur la forme canonique (carré isolé, deux racines opposées ou « carré = négatif »),
+forme factorisée revérifiée en développant ; a en évidence, carré complété, nombre sorti du crochet
+× a ; sommet par le milieu des zéros. Verdict « aucun zéro » (variante canonique, 1/3 des tirages,
+≈ 48 % dans 30 plans réels) : jamais cas particulier, l'écran factorisé disparaît, niveau et durée
+CONSTANTS (3, 8 min, `sansCharge`). Lecture : le sommet de la variante développée. **gen127**
+(détective, modèle gen121) : variante = support, type d'erreur tiré 50/50 (mêmes contraintes sur les
+nombres), écran 3 = champs de la coquille (sommet, image construite, extremum), résultat de la copie
+ciblé ; corrigé : ligne refaite « ≠ copie », règle, copie reprise bloc par bloc ; `sansCharge`
+(niveau 3, 8 min pour les deux types). **gen128** (associer, modèle 5gen53) : sommets, zéros et
+ordonnées à l'origine entiers, quadrillage d'une unité, MÊME échelle en x et y, fenêtre ≤ 14 × 14 ;
+énoncé papier sans point marqué, figure annotée (sommet, zéros) dans le corrigé ; lectures a–d,
+piège 1 → niveau 2, 6 min. Profils : `forme` = variante, aucun cas particulier, aucun groupe à
+verdict (aucun nom de variante ne donne la réponse). Barème : « moitié des points sur b) » (pas
+« de b) », que `reecrireRenvois` ne réécrit pas). Mesures : moteur 2 000 tirages par variante (0
+anomalie ; gen126 : 21 300 champs — juste autrement écrite, « − – — », illisible, autre forme,
+pièges, faux), collecteur (outils de `gen122` recopiés, `env.ts` : x générique + zéros, fonctions f,
+g, h, p) 1 260 tirages, ≈ 17 700 égalités, 0 fausse ; documents réels `construirePlan` (2 graines,
+évaluation 2 séries + aménagée + feuille + Word du corrigé) : 0 débordement à 680, 820 et 1 280 px,
+0 `.katex-error` ; `?code=` 25 / 25.

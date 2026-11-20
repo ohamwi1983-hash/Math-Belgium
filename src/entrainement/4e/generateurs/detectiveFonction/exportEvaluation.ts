@@ -66,7 +66,7 @@ function bareme(e: E): BaremeExercice {
     ],
     erreursFrequentes: [
       { description: [texte("Ligne signalée = la première valeur étrange (une conséquence de l'erreur) au lieu de la ligne qui la cause")], cout: "0 pt sur a)" },
-      { description: [texte("Erreur seulement constatée (« le calcul est faux ») sans être nommée")], cout: "moitié des points de b)" },
+      { description: [texte("Erreur seulement constatée (« le calcul est faux ») sans être nommée")], cout: "moitié des points sur b)" },
       { description: [texte("Résultat de la copie recopié : "), ...resultatCopieFragments(e)], cout: "0 pt sur c)" },
     ],
     reponsesAcceptees: [[texte("Toute écriture équivalente du résultat (sommet donné par son abscisse et son ordonnée, image décrite en mots si l’intervalle est juste)")]],

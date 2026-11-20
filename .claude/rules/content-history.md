@@ -47,6 +47,12 @@ paths:
   réactifs, exercice gen7 "coefficients" jouable, exercice gen8 "transformations graphiques" jouable
   avec graphe Mafs cible et saisie), aucune erreur JS console, `tsc -b`/`npm run lint`/`npm run
   build` propres.
+  **Lot H (nouveaux générateurs, audit du 4e ch. 1)** : cartes gen126 « Trois écritures d'une
+  parabole » et gen128 « Associer paraboles et équations » en § 2 (après gen9), gen127 « Détective
+  d'erreurs : fonction du second degré » en § 4 (après le quiz gen60) ; registres
+  (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts`,
+  processus 2 / 3 / 2). Notation du cours : a(x − x_S)² + y_S, S(x_S ; y_S), im f ; aucun « Δ ».
+  Détail papier : `.claude/rules/feuilles-evaluations.md`, « 4e ch. 1, lot H ».
 - **4e, Chapitre 2 — Équations et inéquations du second degré** (`equations-inequations-second-degre`) :
   chapitre déjà en place (5 techniques de résolution, tableau de signes, signe d'un produit,
   fractions rationnelles, inconnue au dénominateur, inéquations rationnelles — souvent plus complet

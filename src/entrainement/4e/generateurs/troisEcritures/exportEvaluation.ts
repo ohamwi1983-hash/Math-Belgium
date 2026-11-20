@@ -57,7 +57,7 @@ function bareme(e: E): BaremeExercice {
       { description: [texte("Carré développé sans le double produit ("), latex("(x-p)^2=x^2-p^2"), texte(" ou "), latex("x^2+p^2"), texte(")")], cout: "0 pt sur a)" },
       { description: [texte("a non multiplié par le terme constant du carré")], cout: "−0,5" },
       z.length === 2
-        ? { description: [texte("Une seule racine carrée gardée, ou "), latex("x_S"), texte(" oublié (valeurs de "), latex("x-x_S"), texte(" données comme zéros)")], cout: "moitié des points de b)" }
+        ? { description: [texte("Une seule racine carrée gardée, ou "), latex("x_S"), texte(" oublié (valeurs de "), latex("x-x_S"), texte(" données comme zéros)")], cout: "moitié des points sur b)" }
         : { description: [texte("Racine carrée d'un nombre négatif « calculée », ou conclusion sans justification")], cout: "0 pt sur b)" },
     ];
     if (z.length === 2) erreurs.push({ description: [texte("Facteurs (x + r) au lieu de (x − r), ou a oublié devant le produit")], cout: "0 pt sur c)" });
@@ -77,8 +77,8 @@ function bareme(e: E): BaremeExercice {
         { sousQuestion: "c", critere: [texte("Sommet lu avec les bons signes")], points: 1 },
       ],
       erreursFrequentes: [
-        { description: [texte("Nombre sorti du crochet non multiplié par a (ajouté tel quel à c)")], cout: "moitié des points de b)" },
-        { description: [texte("Sommet lu avec le mauvais signe pour x_S ("), latex("(x+p)^2"), texte(" lu "), latex("x_S=p"), texte(")")], cout: "0 pt sur c)" },
+        { description: [texte("Nombre sorti du crochet non multiplié par a (ajouté tel quel à c)")], cout: "moitié des points sur b)" },
+        { description: [texte("Sommet lu avec le mauvais signe pour "), latex("x_S"), texte(" ("), latex("(x+p)^2"), texte(" lu "), latex("x_S=p"), texte(")")], cout: "0 pt sur c)" },
         { description: [texte("c mis dans la parenthèse avec les termes en x")], cout: "0 pt sur a)" },
       ],
       reponsesAcceptees: [[texte("Toute écriture équivalente de la forme canonique (constante devant le carré, a écrit en dernier facteur…)")], [texte("Sommet trouvé par "), latex("x_S=-\\dfrac{b}{2a}"), texte(" puis "), latex("y_S=f(x_S)"), texte(", s'il est juste")]],
@@ -92,7 +92,7 @@ function bareme(e: E): BaremeExercice {
       { sousQuestion: "c", critere: [texte("Forme canonique avec a et le sommet")], points: 1 },
     ],
     erreursFrequentes: [
-      { description: [texte("Zéros lus avec le mauvais signe (milieu de −x₁ et −x₂)")], cout: "moitié des points de b)" },
+      { description: [texte("Zéros lus avec le mauvais signe (milieu de −x₁ et −x₂)")], cout: "moitié des points sur b)" },
       { description: [texte("a oublié sur certains termes du développement")], cout: "−0,5" },
       { description: [texte("Signe dans la parenthèse de la forme canonique")], cout: "0 pt sur c)" },
     ],
