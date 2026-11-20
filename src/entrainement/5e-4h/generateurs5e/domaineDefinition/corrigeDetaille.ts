@@ -102,7 +102,7 @@ function etapeConditions(e: ExerciceDomaineDefinition, l: string): EtapeCorrecti
     : [...etListe(formatConditionsLatex(e)), t(".")];
   const out: EtapeCorrection[] = [utilise(l, utiliseFr), calcul(l, lignes, intro), resultat(l, res)];
   if (e.famille === "racineImpaireDenominateur") out.push(piege(l, [t("La racine d'indice impair n'impose pas de radicande positif : seule la division compte.")]));
-  else if (e.famille === "racineSurFraction" && e.structure === "nSurRacineD") out.push(piege(l, [t("La racine est au dénominateur : la condition est stricte (> 0), car "), f("\\sqrt{0}=0"), t(" annulerait le dénominateur.")]));
+  else if (e.famille === "racineSurFraction" && e.structure === "nSurRacineD") out.push(piege(l, [t("La racine est au dénominateur : la condition est stricte ("), f(">0"), t("), car "), f("\\sqrt{0}=0"), t(" annulerait le dénominateur.")]));
   else if (e.famille === "fractionSousRacine") out.push(piege(l, [t("Écrire seulement le quotient positif ou nul ne suffit pas : le dénominateur non nul se pose à part.")]));
   return out;
 }
@@ -186,7 +186,7 @@ function etapeDomaine(e: ExerciceDomaineDefinition, l: string, avecResolution: b
   const res = resultat(l, [f(formatDomfLatex(e.domf))]);
   if (e.famille === "pasDeCE") {
     return [
-      utilise(l, [t(`Sans condition d'existence, f(x) se calcule pour tout réel ${COURS_DOMAINE}.`)]),
+      utilise(l, [t("Sans condition d'existence, "), f("f(x)"), t(` se calcule pour tout réel ${COURS_DOMAINE}.`)]),
       calcul(l, [ligne(`\\operatorname{dom}f=\\mathbb{R}`, "aucune valeur à exclure")]),
       res,
     ];
@@ -231,7 +231,7 @@ function etapeDomaine(e: ExerciceDomaineDefinition, l: string, avecResolution: b
     const n = lignesCondition(e.numerateur, e.numerateurLatex, ">");
     const d = lignesCondition(e.denominateur, e.denominateurLatex, ">");
     return [
-      utilise(l, [t(`Un trinôme sans racine (Δ < 0) garde le signe de son coefficient de x² ; un quotient de deux nombres positifs est positif ${COURS_DOMAINE}.`)]),
+      utilise(l, [t("Un trinôme sans racine ("), f("\\Delta<0"), t(") garde le signe de son coefficient de "), f("x^2"), t(` ; un quotient de deux nombres positifs est positif ${COURS_DOMAINE}.`)]),
       calcul(l, n.lignes, [], "Numérateur"),
       calcul(l, d.lignes, [], "Dénominateur"),
       calcul(l, [ligne(`\\dfrac{${e.numerateurLatex}}{${e.denominateurLatex}}>0`, "quotient de deux nombres positifs, pour tout réel"), ligne(`\\operatorname{dom}f=\\mathbb{R}`, "les deux conditions sont toujours vraies")], [], "Conclusion"),
@@ -261,7 +261,7 @@ function etapeDomaine(e: ExerciceDomaineDefinition, l: string, avecResolution: b
     if (relSlot(slot) === "≠") out.push(verification(l, [t("Pour "), f(`x=${nb(v)}`), t(" : "), f(`${substituer(slot.latex, v)}=0`), t(", cette valeur est bien exclue.")]));
     else out.push(verification(l, [t("Pour "), f(`x=${nb(v)}`), t(" : "), f(`${substituer(slot.latex, v)}=0`), t(relSlot(slot) === ">" ? " : la borne est exclue (on diviserait par 0)." : " : la borne est incluse, car la racine carrée de 0 existe.")]));
   }
-  if (e.aucuneCE) out.push(piege(l, [t("Ne pas exclure de valeur au hasard : ce dénominateur ne s'annule jamais (Δ < 0).")]));
+  if (e.aucuneCE) out.push(piege(l, [t("Ne pas exclure de valeur au hasard : ce dénominateur ne s'annule jamais ("), f("\\Delta<0"), t(").")]));
   else if (degre(slot.coeffs) === 1 && (slot.coeffs[1] ?? 0) < 0 && relSlot(slot) !== "≠") out.push(piege(l, [t("En divisant par le coefficient négatif de x, le sens de l'inégalité change.")]));
   else if (relSlot(slot) === "≥") out.push(piege(l, [t("Le radicande peut valoir 0 : la borne est incluse (crochet fermé).")]));
   else if (relSlot(slot) === ">") out.push(piege(l, [t("Condition stricte : la borne est exclue (crochet ouvert).")]));

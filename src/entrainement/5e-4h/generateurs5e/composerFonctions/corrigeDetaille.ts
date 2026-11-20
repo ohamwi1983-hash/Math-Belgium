@@ -229,10 +229,10 @@ function etapeFormule(dir: CompositionDirigee, l: string): EtapeCorrection[] {
     blocs.push(calcul(l, assemble, [], "Assemblage"));
   }
   return [
-    utilise(l, [f(`${composeeLatex(dir)}=${ext}\\big(${gx}\\big)`), t(` : dans ${ext}(x), on remplace chaque x par l'expression de ${gx}, puis on simplifie ${COURS_COMPOSER}.`)]),
+    utilise(l, [f(`${composeeLatex(dir)}=${ext}\\big(${gx}\\big)`), t(" : dans "), f(`${ext}(x)`), t(", on remplace chaque "), f("x"), t(" par l'expression de "), f(gx), t(`, puis on simplifie ${COURS_COMPOSER}.`)]),
     ...blocs,
     resultat(l, [f(expressionLatex(dir))]),
-    piege(l, [t(`Ne pas confondre ${ext}(${int}(x)) et ${int}(${ext}(x)) : la fonction écrite à droite (${int}) est appliquée en premier.`)]),
+    piege(l, [t("Ne pas confondre "), f(`${ext}\\big(${int}(x)\\big)`), t(" et "), f(`${int}\\big(${ext}(x)\\big)`), t(" : la fonction écrite à droite ("), f(int), t(") est appliquée en premier.")]),
   ];
 }
 
@@ -505,12 +505,12 @@ function etapeConditions(dir: CompositionDirigee, l: string): EtapeCorrection[] 
   const intN = dir.nomInterieure;
   const dExt = domaineFonction(dir.exterieure, ext);
   const conds = formatTermesConditionsLatex(dir);
-  const lignes: LigneCalcul[] = [ligne(`${intN}(x)\\in ${ens(dir.exterieure.domaine)}`, jf({ l: `${intN}(x)` }, ` doit appartenir au domaine de ${ext}`))];
+  const lignes: LigneCalcul[] = [ligne(`${intN}(x)\\in ${ens(dir.exterieure.domaine)}`, jf({ l: `${intN}(x)` }, " doit appartenir au domaine de ", { l: ext }))];
   if (conds.length === 1) lignes.push(ligne(`\\iff ${conds[0]!}`));
   const blocs: Bloc[] = [...dExt.blocs.map((b) => ({ ...b, label: b.label ?? `Domaine de ${ext}` })), { intro: [], lignes, label: "Condition" }];
   if (conds.length > 1) blocs.push({ intro: [t("Les deux bornes donnent deux conditions :")], lignes: conds.map((c, i) => ligne(c, i === 0 ? "première condition" : "seconde condition")) });
   return [
-    utilise(l, [t(`Pour que ${ext}(${intN}(x)) existe, ${intN}(x) doit appartenir au domaine de ${ext} : on résout d'abord les conditions d'existence de ${ext} ${COURS_COMPOSER}.`)]),
+    utilise(l, [t("Pour que "), f(`${ext}\\big(${intN}(x)\\big)`), t(" existe, "), f(`${intN}(x)`), t(" doit appartenir au domaine de "), f(ext), t(" : on résout d'abord les conditions d'existence de "), f(ext), t(` ${COURS_COMPOSER}.`)]),
     ...blocsVersEtapes(l, blocs),
     resultat(l, etListe(conds)),
   ];
@@ -521,7 +521,7 @@ function etapeC1(dir: CompositionDirigee, l: string): EtapeCorrection[] {
   const intN = dir.nomInterieure;
   const d = domaineFonction(dir.interieure, intN);
   return [
-    utilise(l, [t(`Première condition : x appartient au domaine de ${intN} (radicande positif ou nul, dénominateur non nul) ${COURS_COMPOSER}.`)]),
+    utilise(l, [t("Première condition : "), f("x"), t(" appartient au domaine de "), f(intN), t(` (radicande positif ou nul, dénominateur non nul) ${COURS_COMPOSER}.`)]),
     ...blocsVersEtapes(l, d.blocs),
     resultat(l, [f(`\\operatorname{dom}${intN}=${ens(dir.interieure.domaine)}`)]),
   ];
@@ -567,7 +567,7 @@ function etapeDomaine(dir: CompositionDirigee, l: string, avecPiege: boolean): E
     blocs.push(...dExt.blocs.map((b, i) => ({ ...b, label: i === 0 ? `Domaine de ${ext}` : b.label })));
     const conds = conditionsDe(dir);
     const res = conds.map((c) => conditionSurInterieure(dir, c));
-    const lignesCond: LigneCalcul[] = [ligne(`${intN}(x)\\in ${ens(dir.exterieure.domaine)}`, jf({ l: `${intN}(x)` }, ` doit appartenir au domaine de ${ext}`))];
+    const lignesCond: LigneCalcul[] = [ligne(`${intN}(x)\\in ${ens(dir.exterieure.domaine)}`, jf({ l: `${intN}(x)` }, " doit appartenir au domaine de ", { l: ext }))];
     if (conds.length === 1) lignesCond.push(ligne(`\\iff ${formatConditionLatex(dir, conds[0]!)}`));
     blocs.push({ intro: [], lignes: lignesCond, label: `2e condition : ${intN}(x) dans le domaine de ${ext}` });
     res.forEach((r) => blocs.push(...r.blocs));
@@ -583,12 +583,12 @@ function etapeDomaine(dir: CompositionDirigee, l: string, avecPiege: boolean): E
   return [
     utilise(l, [
       f(`\\operatorname{dom}(${nomC})`),
-      t(` : les x du domaine de ${intN} dont l'image ${intN}(x) appartient au domaine de ${ext} — une double condition, puis l'intersection ${COURS_COMPOSER}.`),
+      t(" : les "), f("x"), t(" du domaine de "), f(intN), t(" dont l'image "), f(`${intN}(x)`), t(" appartient au domaine de "), f(ext), t(` — une double condition, puis l'intersection ${COURS_COMPOSER}.`),
     ]),
     ...blocsVersEtapes(l, blocs),
     resultat(l, [f(`\\operatorname{dom}(${nomC})=${ens(dir.domaine)}`)]),
     ...verificationDomaine(dir, l),
-    ...(avecPiege ? [piege(l, [t(`Le domaine ne se lit pas sur l'expression simplifiée : une valeur interdite pour ${intN} reste interdite pour la composée, même si elle disparaît après simplification.`)])] : []),
+    ...(avecPiege ? [piege(l, [t("Le domaine ne se lit pas sur l'expression simplifiée : une valeur interdite pour "), f(intN), t(` reste interdite pour la composée, même si elle disparaît après simplification.`)])] : []),
   ];
 }
 

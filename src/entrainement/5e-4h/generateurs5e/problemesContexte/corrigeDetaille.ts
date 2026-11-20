@@ -149,7 +149,7 @@ function correctionA1(e: ExerciceScenarioAConteneur, r: RetenusContexte): EtapeC
     resultat(lb, etListe(formatTermesFormulesGeneralisationA())),
     piege(lb, [t("Garder V comme paramètre : les expressions valent pour toute contenance.")]),
     // c) Égalité des aires.
-    utilise(lc, [t("On pose "), f("f(x)=g(x)"), t(` et on isole x : on obtient une équation du type x³ = c ${COURS_CONTEXTE}.`)]),
+    utilise(lc, [t("On pose "), f("f(x)=g(x)"), t(" et on isole "), f("x"), t(" : on obtient une équation du type "), f("x^3=c"), t(` ${COURS_CONTEXTE}.`)]),
     calcul(lc, [
       ligne("f(x)=g(x)"),
       ligne("\\iff \\dfrac{2V}{x}=2\\pi x^2", "on remplace f et g"),
@@ -164,9 +164,9 @@ function correctionA1(e: ExerciceScenarioAConteneur, r: RetenusContexte): EtapeC
     utilise(ld, [t("Le rayon qui minimise "), f("(f+g)(x)"), t(` est l'abscisse du point le plus bas de sa courbe ${COURS_CONTEXTE}.`)]),
     { ...calcul(ld, [ligne(`x\\approx ${Math.round(e.xOptimal)}`, "abscisse du point le plus bas de la courbe verte (sur une ligne du quadrillage)")]), figureHtml: grapheA1(e, true) },
     resultat(ld, [f(formatTermeXOptimalA(e)), t(" cm")]),
-    piege(ld, [t("On lit le minimum de f + g, pas l'intersection des courbes de f et de g.")]),
+    piege(ld, [t("On lit le minimum de "), f("f+g"), t(", pas l'intersection des courbes de "), f("f"), t(" et de "), f("g"), t(".")]),
     // e) Justification.
-    utilise(le, [t("On reprend "), f("h(x)=\\dfrac{V}{\\pi x^2}"), t(` au rayon lu, puis on compare au diamètre 2x ${COURS_CONTEXTE}.`)]),
+    utilise(le, [t("On reprend "), f("h(x)=\\dfrac{V}{\\pi x^2}"), t(" au rayon lu, puis on compare au diamètre "), f("2x"), t(` ${COURS_CONTEXTE}.`)]),
     calcul(le, [
       ligne(`h(${xRet})=\\dfrac{${V}}{\\pi\\cdot ${xRet}^2}\\approx ${nombreLatex(hRet, 2)}`, "au rayon lu"),
       ligne(`2x=2\\cdot ${xRet}=${2 * xRet}`, "le diamètre"),
@@ -190,7 +190,7 @@ function correctionA2(e: ExerciceScenarioAStockCommande): EtapeCorrection[] {
   const df = r2.f - r1.f;
   const dx = r2.x - r1.x;
   const aCalc = sansDoublons([
-    ligne(`a=\\dfrac{f(${r2.x})-f(${r1.x})}{${r2.x}-${r1.x}}`, "f affine : variation de f divisée par celle de x"),
+    ligne(`a=\\dfrac{f(${r2.x})-f(${r1.x})}{${r2.x}-${r1.x}}`, jf({ l: "f" }, " affine : variation de ", { l: "f" }, " divisée par celle de ", { l: "x" })),
     ligne(dx === 1 ? `=${d(r2.f)}-${d(r1.f)}` : `=\\dfrac{${d(r2.f)}-${d(r1.f)}}{${dx}}`, "relevés du tableau"),
     ...(dx === 1 ? [] : [ligne(`=\\dfrac{${d(df)}}{${dx}}`)]),
     ligne(`=${nb(e.a)}`),
@@ -202,7 +202,7 @@ function correctionA2(e: ExerciceScenarioAStockCommande): EtapeCorrection[] {
   const etude = etudeTrinome(trinome);
   const x0 = e.xIntersection;
   return [
-    utilise(la, [f("f(x)=ax+b"), t(" : a est la variation de f divisée par celle de x ; "), f("g(x)=\\dfrac{k}{x}"), t(` : un relevé donne k ${COURS_CONTEXTE}.`)]),
+    utilise(la, [f("f(x)=ax+b"), t(" : "), f("a"), t(" est la variation de "), f("f"), t(" divisée par celle de "), f("x"), t(" ; "), f("g(x)=\\dfrac{k}{x}"), t(` : un relevé donne k ${COURS_CONTEXTE}.`)]),
     calcul(la, aCalc, [], "Coefficient a"),
     calcul(la, bCalc, [], "Constante b"),
     calcul(la, kCalc, [], "Constante k"),
@@ -222,7 +222,7 @@ function correctionA2(e: ExerciceScenarioAStockCommande): EtapeCorrection[] {
     utilise(lc, [t("Le coût total minimal se lit au point le plus bas de la courbe de "), f("f+g"), t(` ${COURS_CONTEXTE}.`)]),
     { ...calcul(lc, [ligne(`x\\approx ${Math.round(e.xExtremum)}`, "abscisse du point le plus bas de la courbe verte (sur une ligne du quadrillage)")]), figureHtml: grapheA2(e, true) },
     resultat(lc, [f(formatTermeExtremumSimpleA(e)), t(` ${e.contexte.unite}`)]),
-    piege(lc, [t("Le lot où les deux coûts sont égaux n'est pas celui qui minimise le coût total : on lit le minimum de f + g, pas l'intersection de f et g.")]),
+    piege(lc, [t("Le lot où les deux coûts sont égaux n'est pas celui qui minimise le coût total : on lit le minimum de "), f("f+g"), t(", pas l'intersection de "), f("f"), t(" et "), f("g"), t(".")]),
   ];
 }
 
@@ -333,11 +333,11 @@ function correctionB(e: ExerciceScenarioB, r: RetenusContexte): EtapeCorrection[
     utilise(lc, [t("On remplace a et b par leurs valeurs dans "), f(latexFormuleFB(e.modele)), t(` ${COURS_CONTEXTE}.`)]),
     calcul(lc, [ligne(latexFormuleFB(e.modele), "forme du coût total"), ligne(`=${formatTermeFormuleBLatex(aR, bR, e.modele).replace(/^f\(x\)=/, "")}`, jf("avec ", { l: `a=${d(aR)}` }, " et ", { l: `b=${d(bR)}` }))]),
     resultat(lc, [f(formatTermeFormuleBLatex(aR, bR, e.modele))]),
-    utilise(ld, [t(`On remplace x par la valeur demandée dans f(x) ${COURS_CONTEXTE}.`)]),
+    utilise(ld, [t("On remplace "), f("x"), t(" par la valeur demandée dans "), f("f(x)"), t(` ${COURS_CONTEXTE}.`)]),
     calcul(ld, evaluation(e.xEval1), [], `Pour x = ${e.xEval1}`),
     calcul(ld, evaluation(e.xEval2), [], `Pour x = ${e.xEval2}`),
     resultat(ld, [...etListe(formatTermesEvaluationBLatex(e, aR, bR)), t(" (en euros)")]),
-    piege(ld, [t("On calcule le coût TOTAL f(x), pas le coût unitaire.")]),
+    piege(ld, [t("On calcule le coût total "), f("f(x)"), t(", pas le coût unitaire.")]),
   ];
 }
 
@@ -366,7 +366,7 @@ function correctionC(e: ExerciceScenarioC): EtapeCorrection[] {
     calcul(lb, lignesDepuisChaine(sansEuro(formatTermeCoutMoyenC(e)), ["coût total en euros, divisé par le nombre d'unités"])),
     resultat(lb, [f(premierEtDernier(sansEuro(formatTermeCoutMoyenC(e)))), t(" €")]),
     piege(lb, [t("Le tableau est en milliers d'euros : sans la multiplication par 1 000, le coût moyen est mille fois trop petit.")]),
-    utilise(lc, [t(`CV a l'${allure[e.formeCV]} ; CP est une droite qui passe par l'origine. La ligne x = 1 du tableau donne les coefficients ${COURS_CONTEXTE}.`)]),
+    utilise(lc, [t(`CV a l'${allure[e.formeCV]} ; CP est une droite qui passe par l'origine. La ligne `), f("x=1"), t(` du tableau donne les coefficients ${COURS_CONTEXTE}.`)]),
     calcul(lc, [
       ligne(`\\text{CV}(x)=${formeCV[e.formeCV]}`, allure[e.formeCV]),
       ligne(`\\text{CV}(1)=${valeurEn1[e.formeCV]}=k`, "en x = 1"),

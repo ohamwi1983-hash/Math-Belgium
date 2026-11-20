@@ -79,9 +79,9 @@ export function correctionDetailleeDecompositionFonction(e: ExerciceDecompositio
   res.push(t(", donc "), f(`f=${chaineComposee(n)}`), t("."));
   return finaliserCorrige([
     utilise(L, [
-      t(`On suit le calcul de f(x) pour un x donné : chaque opération, appliquée au résultat précédent tout entier, est une fonction simple. La plus intérieure est appliquée en premier ; `),
+      t("On suit le calcul de "), f("f(x)"), t(" pour un "), f("x"), t(` donné : chaque opération, appliquée au résultat précédent tout entier, est une fonction simple. La plus intérieure est appliquée en premier ; `),
       f("h\\circ g"),
-      t(` se lit « h après g » ${COURS_DECOMPOSER}.`),
+      t(" se lit « "), f("h"), t(" après "), f("g"), t(` » ${COURS_DECOMPOSER}.`),
     ]),
     calcul(L, couches, [t("Une fonction par opération, de l'intérieur vers l'extérieur :")], "Fonctions"),
     calcul(L, recompo, [t("On recompose, une substitution par ligne :")], "Recomposition"),

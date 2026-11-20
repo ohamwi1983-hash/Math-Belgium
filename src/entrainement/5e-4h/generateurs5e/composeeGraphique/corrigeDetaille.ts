@@ -35,22 +35,22 @@ function etapeQuestion(e: ExerciceComposeeGraphique, q: QuestionComposeeGraphiqu
   const b = q.bAttendu;
   const lignes: LigneCalcul[] = [
     ligne(`(${ext}\\circ ${int})(${q.a})=${imageChercheeLatex(q)}`, "définition de la composée : on calcule d'abord l'intérieur"),
-    ligne(`${int}(${q.a})=${b}`, jf(`lu sur le graphe de ${int} : le point d'abscisse `, { l: `${q.a}` }, " a pour ordonnée ", { l: `${b}` })),
+    ligne(`${int}(${q.a})=${b}`, jf("lu sur le graphe de ", { l: int }, " : le point d'abscisse ", { l: `${q.a}` }, " a pour ordonnée ", { l: `${b}` })),
   ];
   if (q.resultatExiste && q.resultatAttendu !== null) {
-    lignes.push(ligne(`${ext}(${b})=${q.resultatAttendu}`, jf(`lu sur le graphe de ${ext} : le point d'abscisse `, { l: `${b}` }, " a pour ordonnée ", { l: `${q.resultatAttendu}` })));
+    lignes.push(ligne(`${ext}(${b})=${q.resultatAttendu}`, jf("lu sur le graphe de ", { l: ext }, " : le point d'abscisse ", { l: `${b}` }, " a pour ordonnée ", { l: `${q.resultatAttendu}` })));
     lignes.push(ligne(`${imageChercheeLatex(q)}=${ext}(${b})`, jf("on remplace ", { l: `${int}(${q.a})` }, " par ", { l: `${b}` })));
     lignes.push(ligne(`=${q.resultatAttendu}`));
   } else {
     const [xMin, xMax] = domaineCourbe(ext === "f" ? e.f : e.g);
     const dom = formatEnsembleReelLatex({ forme: "intervalles", points: [], morceaux: [{ inf: xMin, sup: xMax, infInclus: true, supInclus: true }] });
-    lignes.push(ligne(`\\operatorname{dom}${ext}=${dom}`, jf(`lu sur le graphe de ${ext} : il va de l'abscisse `, { l: `${xMin}` }, " à l'abscisse ", { l: `${xMax}` })));
-    lignes.push(ligne(`${b}\\notin\\operatorname{dom}${ext}`, jf(`le graphe de ${ext} n'a aucun point d'abscisse `, { l: `${b}` })));
+    lignes.push(ligne(`\\operatorname{dom}${ext}=${dom}`, jf("lu sur le graphe de ", { l: ext }, " : il va de l'abscisse ", { l: `${xMin}` }, " à l'abscisse ", { l: `${xMax}` })));
+    lignes.push(ligne(`${b}\\notin\\operatorname{dom}${ext}`, jf("le graphe de ", { l: ext }, " n'a aucun point d'abscisse ", { l: `${b}` })));
   }
   return [
     utilise(l, [
       f(`(${ext}\\circ ${int})(${q.a})=${imageChercheeLatex(q)}`),
-      t(` : on lit d'abord l'image par ${int} (la fonction intérieure, écrite à droite), puis l'image de ce nombre par ${ext} — s'il appartient au domaine de ${ext} ${COURS_GRAPHIQUE}.`),
+      t(" : on lit d'abord l'image par "), f(int), t(" (la fonction intérieure, écrite à droite), puis l'image de ce nombre par "), f(ext), t(" — s'il appartient au domaine de "), f(ext), t(` ${COURS_GRAPHIQUE}.`),
     ]),
     calcul(l, lignes),
     resultat(l, fragmentsResultat(q)),
