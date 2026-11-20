@@ -179,7 +179,9 @@ function bareme(e: E): BaremeExercice {
  * Aucun écran de lecture (les choix de formule sont des décisions). */
 function criteresDifficulte(e: E): CriteresDifficulte {
   const piege = e.famille === "angle" || (e.famille === "quadrilatere" && e.angleB > 90) ? 1 : 0;
-  return { ...etapesDuCorrige(correctionDetailleeAireTriangleSinus(e)), methode: e.famille === "quadrilatere" ? 1 : 0, piege, nombres: calculExact(e) ? 0 : 1 };
+  // Famille « angle » : une ou deux amplitudes est un VERDICT (audit 4e ch. 5, lot D) — l'angle droit
+  // (exact) sortait toujours au niveau 3, une amplitude calculée au niveau 4 : nombres constant.
+  return { ...etapesDuCorrige(correctionDetailleeAireTriangleSinus(e)), methode: e.famille === "quadrilatere" ? 1 : 0, piege, nombres: e.famille === "angle" || !calculExact(e) ? 1 : 0 };
 }
 
 export const adaptateurEvaluationAireTriangleSinus: AdaptateurFeuilleExercices<ExerciceAireTriangleSinus> = {

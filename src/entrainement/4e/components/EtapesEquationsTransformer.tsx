@@ -200,7 +200,7 @@ function PiedEcran({ complet, onValider, props }: { complet: boolean; onValider:
   );
 }
 
-const AIDE_SAISIE_K = "Valeur exacte (1/2, √3/2 ou racine(3)/2) ou décimale au centième.";
+const AIDE_SAISIE_K = "Valeur exacte (1/2, √3/2 ou racine(3)/2), ou décimal exact comme 0,6.";
 
 // ---------------------------------------------------------------------------------------------
 // Écran « équation(s) de base »

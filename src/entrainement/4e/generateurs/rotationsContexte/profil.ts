@@ -24,14 +24,17 @@ export const LIBELLE_CAS_ROTATIONS_CONTEXTE =
 
 export function formeRotationsContexte(e: ExerciceRotationsContexte): string {
   const conversion = `${e.origine}-${e.rotation === 1 ? "trigo" : "horaire"}`;
-  const suite = e.sens === "direct" ? (thetaBrut(e) === thetaDirect(e) ? "sans-reduction" : "reduction") : `sol${solutionsTheta(e).length}`;
+  // Sens inverse : le nombre de solutions est le verdict, il ne fait pas partie de la forme (sinon la
+  // série B reproduirait le verdict de la série A).
+  const suite = e.sens === "direct" ? (thetaBrut(e) === thetaDirect(e) ? "sans-reduction" : "reduction") : "inverse";
   return `${e.situation}-${e.sens}:${conversion}:${suite}`;
 }
 
 export function profilRotationsContexte(e: ExerciceRotationsContexte): ProfilInstance {
   const unique = e.sens === "inverse" && solutionsTheta(e).length === 1;
   return {
-    casParticulier: unique ? "une-solution" : null,
+    // Verdict (audit 4e ch. 5, V3) : jamais un cas particulier.
+    casParticulier: null,
     // Le cas particulier (sin θ = ±1) n'a pas besoin de calculatrice mais ne s'y oppose pas : sans
     // `calcul`, il reste tirable que la calculatrice soit interdite ou autorisée.
     calcul: unique ? undefined : calculExact(e) ? "exacte" : "calculatrice",

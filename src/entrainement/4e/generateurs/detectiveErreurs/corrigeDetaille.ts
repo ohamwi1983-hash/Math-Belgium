@@ -3,6 +3,7 @@ import { calcul, latex, ligne, piege as lignePiege, resultat, texte, utilise } f
 import type { ExerciceDetectiveErreurs, LigneResolution, Sommet } from "../../core/detectiveErreurs.types";
 import { DECIMALES, SCENARIOS, copieEleve, descriptionCorrecte, indiceLigneFausse, nombreLatex, resolutionCorrecte, solutionAmbigue, typeErreur, valeurAffichee } from "../../moteur/modeleDetectiveErreurs";
 import { champsAttendus } from "../../moteur/verificationDetectiveErreurs";
+import { noteSansArrondi } from "../../ui/formatDetectiveErreurs";
 import { constat, descriptionFragments, piege, relationResultat, valeurLatex } from "../../ui/formatDetectiveErreurs";
 import { COURS_ANGLES_ASSOCIES, COURS_TRIANGLE, finaliserCorrigeTriangles, fragmentsListe, lignesArcsin, nbFixe } from "../../ui/corrigeTriangles";
 
@@ -113,20 +114,20 @@ function lignesConstat(e: E): LigneCalcul[] {
     case "radians": {
       if (e.scenario === "R1") {
         return [
-          ligne(`\\cos(${d.A}\\text{ rad})\\approx ${nombreLatex(Math.cos(d.A!), 4)}`, "calculatrice en radians : le nombre utilisé par la copie"),
+          ligne(`\\cos(${d.A}\\text{ (mode RAD)})\\approx ${nombreLatex(Math.cos(d.A!), 4)}`, "calculatrice en radians : le nombre utilisé par la copie"),
           ligne(`\\cos ${d.A}^\\circ\\approx ${nombreLatex(Math.cos(d.A! * DEG), 4)}`, "calculatrice en degrés : la bonne valeur"),
         ];
       }
       if (e.scenario === "R2") {
         const C = 180 - d.A! - d.B!;
         return [
-          ligne(`\\sin(${C}\\text{ rad})\\approx ${nombreLatex(Math.sin(C), 4)}`, "calculatrice en radians : le nombre utilisé par la copie"),
+          ligne(`\\sin(${C}\\text{ (mode RAD)})\\approx ${nombreLatex(Math.sin(C), 4)}`, "calculatrice en radians : le nombre utilisé par la copie"),
           ligne(`\\sin ${C}^\\circ\\approx ${nombreLatex(Math.sin(C * DEG), 4)}`, "calculatrice en degrés : la bonne valeur"),
         ];
       }
       const x = resolutionCorrecte(e)[0]!.valeur!;
       return [
-        ligne(`\\cos^{-1}(${nombreLatex(x, 4)})\\approx ${nombreLatex(Math.acos(x), 1)}\\text{ rad}`, "calculatrice en radians : la copie a écrit ce nombre en degrés"),
+        ligne(`\\cos^{-1}(${nombreLatex(x, 4)})\\approx ${nombreLatex(Math.acos(x), 1)}\\text{ (mode RAD)}`, "calculatrice en radians : la copie a écrit ce nombre en degrés"),
         ligne(`\\cos^{-1}(${nombreLatex(x, 4)})\\approx ${nombreLatex(Math.acos(x) / DEG, 1)}^\\circ`, "calculatrice en degrés : la bonne valeur"),
       ];
     }
@@ -214,7 +215,7 @@ export function correctionDetailleeDetectiveErreurs(e: E): EtapeCorrection[] {
       ),
     ]),
     ...blocsCorrection(e),
-    resultat("c", fragmentsListe(champsAttendus(e).map(valeurLatex))),
+    resultat("c", [...fragmentsListe(champsAttendus(e).map(valeurLatex)), ...noteSansArrondi(e)]),
   ]);
 }
 

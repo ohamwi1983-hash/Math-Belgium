@@ -1,20 +1,18 @@
 /**
- * Couche B — vérification pour "L'un sans l'autre" (chapitre 3, seizième générateur) :
- * correction NUMÉRIQUE de la valeur (statut à 3 valeurs, `evaluerExpressionGenerale` — module
- * frère, jamais dupliqué). Une forme équivalente non simplifiée est acceptée telle quelle.
+ * Couche B — vérification pour "L'un sans l'autre" (gen16).
+ *
+ * Décision de l'utilisateur (audit 4e ch. 5, question 3) : la réponse est une valeur EXACTE (forme
+ * exacte, ou décimal exact comme 0,6). Une valeur décimale APPROCHÉE (« 0,94 » pour 2√2/3) est
+ * refusée avec un message, sans perte d'essai, comme gen76 (`verificationValeurExacte.ts`, dont la
+ * lecture de la saisie est reprise : « √3/2 », « rac(3)/2 », « sqrt(3)/2 », « − »). Une forme
+ * équivalente non simplifiée (« √8/3 ») est acceptée.
  */
 import type { ExerciceUnSansLautre } from "../core/unSansLautre.types";
-import { evaluerExpressionGenerale } from "./expressionGenerale";
 import type { StatutVerification } from "./statutVerification";
 import { valeurFinale } from "../ui/formatUnSansLautre";
+import { diagnostiquerExactNumerique, type StatutExactNumerique } from "./saisieExacteTrigo";
 
-const TOLERANCE = 0.005;
-
-/**
- * Notation « √ » tapée au clavier (ou via le clavier mobile) → `sqrt(…)`, LOCALEMENT à ce générateur :
- * le parseur partagé (`evaluerExpressionGenerale`) ne la connaît pas. `√(…)` → `sqrt(…)`, `√5` ou
- * `√2,5` → `sqrt(5)`/`sqrt(2,5)` ; le signe moins typographique « − » devient « - ».
- */
+/** Conservé pour les appelants historiques (tests) : `√` → `sqrt(…)`. */
 export function normaliserRacinesUnSansLautre(texte: string): string {
   return texte
     .replace(/[−–]/g, "-")
@@ -22,39 +20,47 @@ export function normaliserRacinesUnSansLautre(texte: string): string {
     .replace(/√\s*([0-9]+(?:[.,][0-9]+)?)/g, "sqrt($1)");
 }
 
-function diagnostiquerReponseNumerique(cible: number, texte: string): StatutVerification {
-  let valeur: number;
-  try {
-    valeur = evaluerExpressionGenerale(normaliserRacinesUnSansLautre(texte), 0);
-  } catch {
-    return "parse_error";
-  }
-  if (!Number.isFinite(valeur)) return "parse_error";
-  // Marge d'arrondi flottant : une réponse arrondie au centième pile à 0,005 de la cible reste acceptée.
-  return Math.abs(valeur - cible) <= TOLERANCE + 1e-9 ? "correct" : "not_equivalent";
+function versStatut(s: StatutExactNumerique): StatutVerification {
+  return s === "correct" ? "correct" : s === "parse_error" || s === "recopie" ? "parse_error" : "not_equivalent";
+}
+
+export function cibleCarre(exercice: ExerciceUnSansLautre): number {
+  return exercice.carreCibleNum / exercice.carreCibleDen;
+}
+
+export function statutCarre(exercice: ExerciceUnSansLautre, texte: string): StatutExactNumerique {
+  return diagnostiquerExactNumerique(texte, cibleCarre(exercice));
+}
+
+export function statutValeurSignee(exercice: ExerciceUnSansLautre, texte: string): StatutExactNumerique {
+  return diagnostiquerExactNumerique(texte, exercice.valeurCible);
+}
+
+export function statutTangente(exercice: ExerciceUnSansLautre, texte: string): StatutExactNumerique {
+  return diagnostiquerExactNumerique(texte, valeurFinale(exercice));
 }
 
 export function diagnostiquerCarre(exercice: ExerciceUnSansLautre, texte: string): StatutVerification {
-  return diagnostiquerReponseNumerique(exercice.carreCibleNum / exercice.carreCibleDen, texte);
+  return versStatut(statutCarre(exercice, texte));
 }
 
 export function verifierCarre(exercice: ExerciceUnSansLautre, texte: string): boolean {
-  return diagnostiquerCarre(exercice, texte) === "correct";
+  return statutCarre(exercice, texte) === "correct";
 }
 
 export function diagnostiquerValeurSignee(exercice: ExerciceUnSansLautre, texte: string): StatutVerification {
-  return diagnostiquerReponseNumerique(exercice.valeurCible, texte);
+  return versStatut(statutValeurSignee(exercice, texte));
 }
 
 export function verifierValeurSignee(exercice: ExerciceUnSansLautre, texte: string): boolean {
-  return diagnostiquerValeurSignee(exercice, texte) === "correct";
+  return statutValeurSignee(exercice, texte) === "correct";
 }
 
 /** Troisième écran : tan θ (variantes cos/sin données) ou sin θ (variante « tan θ donné »). */
 export function diagnostiquerTangente(exercice: ExerciceUnSansLautre, texte: string): StatutVerification {
-  return diagnostiquerReponseNumerique(valeurFinale(exercice), texte);
+  return versStatut(statutTangente(exercice, texte));
 }
 
 export function verifierTangente(exercice: ExerciceUnSansLautre, texte: string): boolean {
-  return diagnostiquerTangente(exercice, texte) === "correct";
+  return statutTangente(exercice, texte) === "correct";
 }

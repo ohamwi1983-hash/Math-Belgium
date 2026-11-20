@@ -1,13 +1,10 @@
-import { useState } from "react";
 import type { ExerciceUnSansLautre } from "../core/unSansLautre.types";
 import { Katex } from "./Katex";
 import { formatCarreLatex, PLACEHOLDER_CARRE } from "../ui/formatUnSansLautre";
-import { diagnostiquerCarre } from "../moteur/verificationUnSansLautre";
-import { formatMessageErreur } from "../ui/messageErreur";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import { statutCarre } from "../moteur/verificationUnSansLautre";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
-import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { ChampValeurExacte } from "./ChampValeurExacte";
+import { aidesCarreUnSansLautre, messageCarreUnSansLautre } from "../ui/aidesUnSansLautre";
 
 interface Props {
   exercice: ExerciceUnSansLautre;
@@ -19,67 +16,26 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Première étape (toujours la même, jamais d'écran "énoncé" séparé). La valeur donnée + intervalle
- * sur θ sont affichées une seule fois dans l'en-tête de l'exercice (`EnTeteExercice`, blocDonnees). */
-export function EtapeCarreUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation }: Props) {
-  const [texte, setTexte] = useState("");
-
-  const complet = texte.trim() !== "";
-  const statut = complet ? diagnostiquerCarre(exercice, texte) : undefined;
-
+/** Première étape. La valeur donnée + intervalle sur θ sont affichées une seule fois dans l'en-tête
+ * de l'exercice. Valeur exacte seulement (`ChampValeurExacte`, audit 4e ch. 5). */
+export function EtapeCarreUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   return (
-    <div>
-      <p className="prompt-text">
-        Quelle est la valeur de <Katex expression={formatCarreLatex(exercice.fonctionCible)} /> ? (forme exacte ou
-        décimale arrondie au centième)
-      </p>
-      <div className="field">
-        <label className="field-label" htmlFor="un-sans-lautre-carre">
-          Réponse
-        </label>
-        <input
-          id="un-sans-lautre-carre"
-          className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
-          placeholder={PLACEHOLDER_CARRE}
-          value={texte}
-          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
-        />
-      </div>
-
-      {!validation && (
+    <ChampValeurExacte
+      id="un-sans-lautre-carre"
+      question={
         <>
-          <div>
-            {aideActivee && (
-              exercice.fonctionConnue === "tan" ? (
-                <div className="triangle-quelconque-aide">
-                  <p>Divise l'identité fondamentale par cos²θ :</p>
-                  <Katex expression="1 + \tan^2\theta = \dfrac{1}{\cos^2\theta}" block />
-                  <Katex expression="\cos^2\theta = \dfrac{1}{1 + \tan^2\theta}" block />
-                </div>
-              ) : (
-                <div className="triangle-quelconque-aide">
-                  <Katex expression="\cos^2\theta + \sin^2\theta = 1" block />
-                  <Katex
-                    expression={`${formatCarreLatex(exercice.fonctionCible)} = 1 - ${formatCarreLatex(exercice.fonctionConnue)}`}
-                    block
-                  />
-                </div>
-              )
-            )}
-            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-          </div>
-
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-            Valider
-          </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-            </p>
-          )}
+          Quelle est la valeur exacte de <Katex expression={formatCarreLatex(exercice.fonctionCible)} /> ?
         </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
+      }
+      placeholder={PLACEHOLDER_CARRE}
+      tentativesUtilisees={tentativesUtilisees}
+      tentativesMax={tentativesMax}
+      diagnostiquer={(t) => statutCarre(exercice, t)}
+      messageCible={(v) => messageCarreUnSansLautre(exercice, v)}
+      aides={aidesCarreUnSansLautre(exercice)}
+      onPremiereAide={onActiverAide}
+      onValider={onValider}
+      validation={validation}
+    />
   );
 }

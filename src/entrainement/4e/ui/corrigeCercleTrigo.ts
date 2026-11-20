@@ -11,9 +11,7 @@ import { finaliserCorrige as finaliserSecondDegre } from "./corrigeSecondDegre1"
  * gen76 (valeur exacte), gen78 (équations à transformer), gen79 (rotations en contexte) — règle
  * `.claude/rules/feuilles-evaluations.md`, section « Corrigé détaillé — comme au tableau ».
  *
- * Angles en DEGRÉS (le chapitre de 4e ne travaille qu'en degrés : `deg`, `lignesReduction`) ; une
- * version en radians (`radiansLatex`, `lignesReductionRadians`, angles kπ/n) est fournie pour les
- * chapitres qui en ont besoin. Une transformation par ligne, égalités toujours VRAIES (réduction :
+ * Angles en DEGRÉS (le radian n'est pas enseigné en 4e : `deg`, `lignesReduction`). Une transformation par ligne, égalités toujours VRAIES (réduction :
  * une chaîne qui s'arrête à l'angle brut, puis une seconde qui retire / ajoute les tours), « − »
  * typographique (LaTeX « - »), virgule décimale `{,}`, valeurs remarquables exactes (`\dfrac`, √
  * simplifiées). Aucune dépendance à `docx` (importé par les générateurs interactifs).
@@ -78,16 +76,6 @@ export function dfrac(l: string): string {
   return l.replace(/\\frac/g, "\\dfrac");
 }
 
-/** Angle kπ/n en LaTeX : « \dfrac{5\pi}{6} », « -\pi », « 0 ». */
-export function radiansLatex(k: number, n: number): string {
-  const g = pgcd(k, n);
-  const [p, q] = [k / g, n / g];
-  if (p === 0) return "0";
-  const num = Math.abs(p) === 1 ? "\\pi" : `${Math.abs(p)}\\pi`;
-  const s = p < 0 ? "-" : "";
-  return q === 1 ? `${s}${num}` : `${s}\\dfrac{${num}}{${q}}`;
-}
-
 // ---------------------------------------------------------------------------------------------
 // Réduction d'un angle (même point du cercle)
 // ---------------------------------------------------------------------------------------------
@@ -119,20 +107,6 @@ export function lignesReduction(angle: number, intervalle: "0-360" | "-180-180" 
       : [ligne(`${deg(angle)}${op}${n}\\times 360^\\circ=${deg(angle)}${op}${deg(360 * n)}`, `${verbe} ${n} tours : même point du cercle`), ligne(`=${deg(r)}`)];
   lignes.push(intervalle === "0-360" ? ligne(`0^\\circ\\leq ${deg(r)}<360^\\circ`, "l'angle est bien dans [0° ; 360°[") : ligne(`-180^\\circ<${deg(r)}\\leq 180^\\circ`, "l'angle est bien dans ]−180° ; 180°]"));
   return lignes;
-}
-
-/** Même réduction pour un angle kπ/n (radians) : on ajoute / retire des tours de 2π = 2nπ/n. */
-export function lignesReductionRadians(k: number, n: number, intervalle: "0-2pi" | "-pi-pi" = "0-2pi"): LigneCalcul[] {
-  // Tours de 2π (en « nπ/n ») : t tours ajoutés.
-  const t = intervalle === "0-2pi" ? -Math.floor(k / (2 * n)) : -Math.ceil((k - n) / (2 * n));
-  if (t === 0) return [];
-  const r = k + 2 * n * t;
-  const deuxPi = Math.abs(t) === 1 ? "2\\pi" : `${Math.abs(t)}\\cdot 2\\pi`;
-  const op = t > 0 ? "+" : "-";
-  return [
-    ligne(`${radiansLatex(k, n)}${op}${deuxPi}=${radiansLatex(k, n)}${op}\\dfrac{${2 * n * Math.abs(t)}\\pi}{${n}}`, [texte(`${t > 0 ? "on ajoute" : "on retire"} ${Math.abs(t) === 1 ? "un tour" : `${Math.abs(t)} tours`}, `), latex(`2\\pi=\\dfrac{${2 * n}\\pi}{${n}}`)]),
-    ligne(`=${radiansLatex(r, n)}`),
-  ];
 }
 
 // ---------------------------------------------------------------------------------------------

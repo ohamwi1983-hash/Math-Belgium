@@ -1,5 +1,5 @@
 import type { ExerciceDetectiveErreurs, IdDescription } from "../core/detectiveErreurs.types";
-import { attenduFinal, attenduLigne, dansLaTolerance, descriptionCorrecte, indiceLigneFausse, type ValeurAttendue } from "./modeleDetectiveErreurs";
+import { attenduFinal, attenduLigne, dansLaTolerance, descriptionCorrecte, finalSansArrondi, indiceLigneFausse, type ValeurAttendue } from "./modeleDetectiveErreurs";
 
 /**
  * Vérification de gen81. Écran 1 : le numéro de la ligne fausse. Écran 2 : la description de
@@ -41,6 +41,7 @@ export function diagnostiquerCorrection(e: ExerciceDetectiveErreurs, saisies: st
   return champsAttendus(e).map((attendu, i) => {
     const lu = lireNombre(saisies[i] ?? "");
     if (lu === null) return "parse_error";
-    return dansLaTolerance(lu, attendu.valeur, attendu.nature) ? "correct" : "faux";
+    const alt = i === 1 ? finalSansArrondi(e) : null;
+    return dansLaTolerance(lu, attendu.valeur, attendu.nature) || (alt !== null && dansLaTolerance(lu, alt, attendu.nature)) ? "correct" : "faux";
   });
 }

@@ -35,7 +35,7 @@ export type FonctionSinCos = "sin" | "cos";
 
 /** Relation identifiée à l'écran 2 — toujours dérivée directement du quadrant de l'angle demandé,
  * jamais un second choix indépendant (voir la table quadrant→relation dans le générateur). */
-export type RelationAnglesAssocies = "complementaireDirecte" | "supplementaire" | "antiSupplementaire" | "oppose";
+export type RelationAnglesAssocies = "complementaireDirecte" | "supplementaire" | "antiSupplementaire" | "oppose" | "plus90";
 
 /**
  * Catalogue de variantes (convention CLAUDE.md) — combine `variante` ET `relation` en un seul id,
@@ -51,7 +51,10 @@ export type IdVarianteAnglesAssocies =
   | "sinCos-oppose"
   | "tangente-supplementaire"
   | "tangente-antiSupplementaire"
-  | "tangente-oppose";
+  | "tangente-oppose"
+  /** Ajoutée en FIN de catalogue (audit 4e ch. 5, lot F) : règle de 90° + θ du cours (§ 4),
+   * sin(90° + α) = cos α et cos(90° + α) = −sin α. */
+  | "sinCos-plus90";
 
 interface ExerciceAnglesAssociesBase {
   alpha: number; // angle de base, entier, toujours dans ]0°,90°[

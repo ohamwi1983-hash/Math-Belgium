@@ -11,6 +11,10 @@ import type { AngleRemarquable } from "./valeursRemarquables.types";
 
 export type FonctionTrig = "sin" | "cos" | "tan";
 
+/** Identifiant de variante du catalogue : les trois fonctions, puis « sin α = sin β, cos α = cos β »
+ * (ajoutée en FIN de catalogue, décision 4 de l'utilisateur, audit 4e ch. 5). */
+export type IdVarianteQuelAngle = FonctionTrig | "egalite";
+
 /**
  * `angleReference` (`réf`, tel que `|fonction(réf)| = |k|`) et `signeK` déterminent entièrement `k`
  * — jamais stocké comme un flottant à part, toujours recomposé à l'affichage depuis ces deux champs
@@ -35,6 +39,9 @@ export interface ExerciceQuelAngle {
   magnitudeHorsDomaineLatex: string | null;
   signeK: 1 | -1;
   solutions: number[];
+  /** Variante « égalité » seulement : β de l'équation sin α = sin β (ou cos α = cos β), en degrés
+   * (peut être négatif ou dépasser 180°). Absent pour sin/cos/tan α = k. */
+  angleEgal?: number;
 }
 
 /** Réponse "add-as-needed" (pattern déjà en place, ex. `EtapeZerosCaracteristiques.tsx`) : `aucune`

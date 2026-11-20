@@ -193,7 +193,7 @@ export function substitutionLatex(ex: ExerciceResoudreTriangle, etape: EtapeReso
 export function resultatLatex(ex: ExerciceResoudreTriangle, etape: EtapeResolution): string {
   const e = etape.inconnue;
   const t = ex.triangle;
-  const fin = `${elementLatex(e)} \\approx ${valeurLatex(ex, e)}`;
+  const fin = `${elementLatex(e)} ${egalOuEnvironElement(ex, e)} ${valeurLatex(ex, e)}`;
   if (etape.loi === "kashiCote") return `${e}^2 \\approx ${nombreFrLatex(Math.round(t[e as CoteTriangle] ** 2 * 100) / 100)} \\;\\Rightarrow\\; ${fin}`;
   if (etape.loi === "kashiAngle") return `\\cos ${elementLatex(e)} \\approx ${nombreFrLatex(Math.round(Math.cos((t[e] * Math.PI) / 180) * 10000) / 10000)} \\;\\Rightarrow\\; ${fin}`;
   if (etape.loi === "sinus" && !estCoteElement(e)) return `\\sin ${elementLatex(e)} \\approx ${nombreFrLatex(Math.round(Math.sin((t[e] * Math.PI) / 180) * 10000) / 10000)} \\;\\Rightarrow\\; ${fin}`;
@@ -303,8 +303,16 @@ export function reponsePremiereLoi(ex: ExerciceResoudreTriangle): FragmentConsig
   return [texte(LIBELLES_LOI[loi])];
 }
 
+/** « = » quand la valeur est EXACTE : un angle obtenu par la somme à partir de deux angles DONNÉS
+ * (configuration AAS) ; « ≈ » sinon (audit 4e ch. 5, G14). */
+export function egalOuEnvironElement(ex: ExerciceResoudreTriangle, e: ElementTriangle): "=" | "\\approx" {
+  if (estCoteElement(e)) return "\\approx";
+  const autres = (["A", "B", "C"] as SommetTriangle[]).filter((x) => x !== e);
+  return autres.every((x) => ex.donnees.includes(x)) && Number.isInteger(ex.triangle[e]) ? "=" : "\\approx";
+}
+
 export function resultatsLatex(ex: ExerciceResoudreTriangle, elements: ElementTriangle[]): string {
-  return elements.map((e) => `${elementLatex(e)} \\approx ${valeurLatex(ex, e)}`).join(" \\;;\\; ");
+  return elements.map((e) => `${elementLatex(e)} ${egalOuEnvironElement(ex, e)} ${valeurLatex(ex, e)}`).join(" \\;;\\; ");
 }
 
 export function messageStatut(statut: StatutChamp): string {

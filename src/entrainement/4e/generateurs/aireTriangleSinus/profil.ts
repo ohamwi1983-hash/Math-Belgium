@@ -34,8 +34,10 @@ export function formeAireTriangleSinus(e: ExerciceAireTriangleSinus): string {
 
 export function profilAireTriangleSinus(e: ExerciceAireTriangleSinus): ProfilInstance {
   const droit = angleCle(e) === 90;
+  // Famille « angle » : une ou deux amplitudes est le VERDICT de l'écran (audit 4e ch. 5, V2) —
+  // jamais un cas particulier. Ailleurs, l'angle droit raccourcit le calcul : cas particulier.
   return {
-    casParticulier: droit ? "angle-droit" : null,
+    casParticulier: droit && e.famille !== "angle" ? "angle-droit" : null,
     // Angle droit : `calcul` absent (sans objet), comme gen14–gen18 — sinon le cas coché serait
     // perdu dès que le professeur autorise la calculatrice (palier de repli « exercice complet »).
     calcul: droit ? undefined : calculExact(e) ? "exacte" : "calculatrice",

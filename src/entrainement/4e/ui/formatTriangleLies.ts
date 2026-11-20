@@ -103,40 +103,10 @@ export function consignePont(exercice: ExerciceTriangleLies): string {
   return `${exercice.questionPont} (une valeur approchée est acceptée, à environ 1 % près).`;
 }
 
-export function texteAidePontNiveau1(exercice: ExerciceTriangleLies): string {
-  return exercice.typeTrianglePont === "rectangle"
-    ? "Le triangle pont est rectangle : utilise le théorème de Pythagore, ou la trigonométrie du triangle rectangle (SOH-CAH-TOA) si un angle est donné."
-    : "Le triangle pont est quelconque : utilise la loi des cosinus (Al-Kashi) si tu connais 2 côtés et l'angle compris, ou la loi des sinus si tu connais 2 angles et un côté.";
-}
-
-export function texteAidePontNiveau2(exercice: ExerciceTriangleLies): string {
-  if (exercice.variante === "sommetPartage") {
-    return "Ici, 3 valeurs sont à trouver : l'angle au sommet commun ET les 2 côtés qui en partent — combine les données affichées ci-dessus (Pythagore si le triangle pont est rectangle, loi des sinus/des cosinus sinon).";
-  }
-  return exercice.typeTrianglePont === "rectangle"
-    ? `${exercice.labelCoteTransfere} est l'hypoténuse du triangle rectangle — combine les données affichées ci-dessus (Pythagore si 2 côtés connus, sinus/cosinus/tangente si un côté et un angle).`
-    : `${exercice.labelCoteTransfere} est le côté à calculer à partir des données affichées ci-dessus — identifie s'il s'agit d'un cas SAS (2 côtés + angle compris) ou AAS (2 angles + 1 côté).`;
-}
-
 // --- Écran "soustraction" (sommetPartage uniquement) ---
 
 export function consigneSoustraction(): string {
   return "Calcule les 2 côtés du triangle cible en soustrayant la distance déjà parcourue au côté correspondant du triangle pont (une valeur approchée est acceptée, à environ 1 % près).";
-}
-
-export function texteAideSoustractionNiveau1(): string {
-  return "Chaque côté du triangle cible s'obtient en retranchant la distance déjà parcourue au côté correspondant du triangle pont, issu du sommet commun.";
-}
-
-export function texteAideSoustractionNiveau2(exercice: ExerciceTriangleLies): string {
-  const [d1, d2] = exercice.distancesParcourues ?? [];
-  if (!d1 || !d2) return "";
-  const l = libellesSommetPartage(exercice);
-  const unite = uniteLongueurPont(exercice);
-  return (
-    `${l.coteCible1} = ${l.cote1} − ${formatValeurUnite(d1.valeur, unite)} = ${formatValeurUnite(exercice.trianglePont.b, unite)} − ${formatValeurUnite(d1.valeur, unite)} ; ` +
-    `${l.coteCible2} = ${l.cote2} − ${formatValeurUnite(d2.valeur, unite)} = ${formatValeurUnite(exercice.trianglePont.c, unite)} − ${formatValeurUnite(d2.valeur, unite)}`
-  );
 }
 
 // --- Écran "angles" (anglePartage uniquement) ---
@@ -145,44 +115,10 @@ export function consigneAngles(): string {
   return "Détermine les 2 angles qui ferment le triangle cible (une valeur approchée est acceptée, à environ 1 % près).";
 }
 
-export function texteAideAnglesNiveau1(): string {
-  return "Les 2 visées ont été prises depuis le MÊME point d'observation, vers 2 cibles différentes : l'angle utile du triangle cible est leur DIFFÉRENCE, jamais l'une des 2 valeurs brutes prise seule.";
-}
-
-export function texteAideAnglesNiveau2(exercice: ExerciceTriangleLies): string {
-  const [visee1, visee2] = exercice.anglesBrutsVisee ?? [];
-  if (!visee1 || !visee2) return "";
-  return `Les 2 visées brutes : ${visee1.label} = ${formatNombre(visee1.valeur)}° et ${visee2.label} = ${formatNombre(visee2.valeur)}° — la différence n'est pas encore calculée.`;
-}
-
-export function texteAideAnglesNiveau3(exercice: ExerciceTriangleLies): string {
-  return `Hypothèse annexe (pour le 2e angle) : ${exercice.hypotheseAnnexe ?? ""}`;
-}
-
 // --- Écran "cible" ---
 
 export function consigneCible(exercice: ExerciceTriangleLies): string {
   return `${exercice.questionCible} (une valeur approchée est acceptée, à environ 1 % près).`;
-}
-
-export function texteAideCibleNiveau1(exercice: ExerciceTriangleLies): string {
-  if (exercice.grandeurDemandee === "aire") {
-    return "L'aire d'un triangle est le demi-produit de deux côtés par le sinus de l'angle compris entre eux — identifie d'abord les 2 côtés et l'angle qui sont réellement connus ou calculables.";
-  }
-  return "Reconnais la formule adaptée aux données disponibles : loi des sinus si tu as 2 angles + 1 côté, loi des cosinus (Al-Kashi) si tu as 2 côtés + l'angle compris.";
-}
-
-export function texteAideCibleNiveau2(exercice: ExerciceTriangleLies): string {
-  if (exercice.variante === "sommetPartage") {
-    const l = libellesSommetPartage(exercice);
-    const unite = uniteLongueurPont(exercice);
-    return `Les 2 côtés déjà obtenus par soustraction valent ${l.coteCible1} ≈ ${formatValeurUnite(exercice.triangleCible.b, unite)} et ${l.coteCible2} ≈ ${formatValeurUnite(exercice.triangleCible.c, unite)}, et l'angle au sommet commun reste celui du triangle pont (${formatValeurUnite(exercice.trianglePont.A, "°")}) — réutilise ces valeurs (jamais celles que tu avais toi-même proposées si elles étaient fausses) pour résoudre le triangle cible.`;
-  }
-  return `Le côté transféré depuis l'écran précédent vaut ${exercice.labelCoteTransfere} ≈ ${formatValeurUnite(exercice.trianglePont.a, uniteLongueurPont(exercice))} — réutilise cette valeur (jamais celle que tu avais toi-même proposée si elle était fausse) pour résoudre le triangle cible.`;
-}
-
-export function texteAideCibleNiveau3(): string {
-  return "Une fois les 2 côtés adjacents à l'angle connu déterminés, substitue-les dans la formule d'aire avec l'angle compris entre eux.";
 }
 
 // --- Écran "interpretation" ---
@@ -191,6 +127,3 @@ export function consigneInterpretation(): string {
   return "Quelle est la bonne interprétation du résultat ?";
 }
 
-export function texteAideInterpretationNiveau1(): string {
-  return "Relis attentivement l'unité et la grandeur réellement demandée par l'énoncé.";
-}

@@ -31,7 +31,7 @@ export const CATALOGUE_FAMILLES: EntreeCatalogueTriangleLies[] = [
   { id: "hauteurInaccessible", label: "Hauteur d'un objet inaccessible" },
   { id: "distanceInaccessible", label: "Distance entre deux points inaccessibles" },
   { id: "terrainSportif", label: "Terrain sportif (triangle pont quelconque, aire demandée)" },
-  { id: "inclinaisonCable", label: "Inclinaison d'un câble de grue (angle demandé)" },
+  { id: "inclinaisonCable", label: "Longueur du câble d'une grue (triangulation verticale)" },
   { id: "hauteurArbre", label: "Hauteur d'un arbre inaccessible (triangulation via un repère)" },
   { id: "sectionFalaise", label: "Aire d'une section de paroi rocheuse (triangulation via un repère)" },
   { id: "naviresConvergents", label: "Distance entre 2 navires (sommet partagé)" },

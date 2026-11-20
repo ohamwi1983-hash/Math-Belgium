@@ -58,6 +58,9 @@ interface TransitionEnAttente {
 
 const MESSAGE_ILLISIBLE = "Une valeur n'est pas lisible : écris un nombre, une fraction comme 1/2 ou une racine comme √3/2. Aucune tentative n'est comptée.";
 
+const MESSAGE_APPROCHEE =
+  "C'est une valeur approchée : écris k sous forme exacte, avec une fraction ou une racine (par exemple √3/2), ou un décimal exact comme 0,6. Aucune tentative n'est comptée.";
+
 export function AppEquationsTransformer() {
   const [etat, setEtat] = useState<EtatEquationsTransformer>(() => demarrer(exerciceInitial()));
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
@@ -84,7 +87,7 @@ export function AppEquationsTransformer() {
 
   function conclure(d: Diagnostic, votreReponse: ReactNode) {
     if (d.statut === "parse_error") {
-      setMessage(MESSAGE_ILLISIBLE);
+      setMessage(d.approchee ? MESSAGE_APPROCHEE : MESSAGE_ILLISIBLE);
       return;
     }
     const correct = d.statut === "correct";

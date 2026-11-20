@@ -5,9 +5,10 @@ import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
 import type { EtatCelluleValeurAxe, EtatCelluleValeurAxeTan } from "../ui/cycleSigneCercleTrigonometrique";
 import { cyclerValeurAxe, cyclerValeurAxeTan, libelleValeurAxe } from "../ui/cycleSigneCercleTrigonometrique";
-import { valeursAxeAttendues } from "../moteur/verificationCercleTrigonometrique";
 import { AideSignesCercleTrig } from "./AideSignesCercleTrig";
 import { ValidationEcran } from "../../components/ValidationEcran";
+import { AidesNiveaux } from "./RetourSaisie";
+import { aidesValeursAxe } from "../ui/aidesCercleTrigo";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
@@ -42,13 +43,12 @@ export function EtapeValeursAxeCercleTrig({
   const [cos, setCos] = useState<EtatCelluleValeurAxe>("?");
   const [tan, setTan] = useState<EtatCelluleValeurAxeTan>("?");
 
-  const attendu = valeursAxeAttendues(exercice);
-  const montrerErreurs = tentativesUtilisees > 0;
   const complet = sin !== "?" && cos !== "?" && tan !== "?";
-
-  function classeCellule(saisie: EtatCelluleValeurAxe | EtatCelluleValeurAxeTan, valeurAttendue: string): string {
-    return montrerErreurs && saisie !== "?" && saisie !== valeurAttendue ? "btn toggle-signe is-erronee" : "btn toggle-signe";
-  }
+  // Choix fermé à UNE tentative (audit 4e ch. 5, G3) : jamais de correction case par case.
+  const classeCellule = () => "btn toggle-signe";
+  void tentativesUtilisees;
+  void tentativesMax;
+  void aideActivee;
 
   return (
     <div>
@@ -75,17 +75,17 @@ export function EtapeValeursAxeCercleTrig({
           <tbody>
             <tr>
               <td className="grille-signes-zone">
-                <button type="button" className={classeCellule(sin, attendu.sin)} onClick={() => setSin(cyclerValeurAxe)}>
+                <button type="button" className={classeCellule()} onClick={() => setSin(cyclerValeurAxe)}>
                   {libelleValeurAxe(sin)}
                 </button>
               </td>
               <td className="grille-signes-zone">
-                <button type="button" className={classeCellule(cos, attendu.cos)} onClick={() => setCos(cyclerValeurAxe)}>
+                <button type="button" className={classeCellule()} onClick={() => setCos(cyclerValeurAxe)}>
                   {libelleValeurAxe(cos)}
                 </button>
               </td>
               <td className="grille-signes-zone">
-                <button type="button" className={classeCellule(tan, attendu.tan)} onClick={() => setTan(cyclerValeurAxeTan)}>
+                <button type="button" className={classeCellule()} onClick={() => setTan(cyclerValeurAxeTan)}>
                   {libelleValeurAxe(tan)}
                 </button>
               </td>
@@ -94,27 +94,16 @@ export function EtapeValeursAxeCercleTrig({
         </table>
       </div>
 
-      {aideActivee && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            Sur le cercle trigonométrique, cos(θ) est l'abscisse du point M(θ) et sin(θ) son ordonnée. Sur un axe, M(θ) est
-            l'un des points (1 ; 0), (0 ; 1), (−1 ; 0) ou (0 ; −1). Enfin tan(θ) = sin(θ) / cos(θ) : elle n'existe pas quand
-            cos(θ) = 0.
-          </p>
-        </div>
-      )}
-      <AideSignesCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
-
       {!validation && (
         <>
+          <AidesNiveaux
+            aides={aidesValeursAxe()}
+            figure={(n) => (n >= 2 ? <AideSignesCercleTrig exercice={exercice} aideActivee sansBouton onActiverAide={() => {}} /> : null)}
+            onPremiereAide={onActiverAide}
+          />
           <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider({ sin, cos, tan })}>
             Valider
           </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-            </p>
-          )}
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

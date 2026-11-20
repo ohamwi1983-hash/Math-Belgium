@@ -9,23 +9,25 @@ import { VALEUR_GRANDEUR, angleReference, candidatsCosinus, cosExact, ramener, s
  * Lecture des saisies (jamais de blocage de frappe : la saisie est lue telle quelle) : toute forme
  * exacte juste est acceptée — « √3/2 », « sqrt(3)/2 », « racine(3)/2 », « \frac{\sqrt3}{2} »,
  * « \dfrac{\sqrt{3}}{2} », « 1/√3 », « 0,5 » = « 1/2 », « −1 » (« − », « – » lus), préfixe recopié
- * (« cos θ = … ») et unité (« ° », « rad ») ignorés ; angles en radians avec π (« 2π/3 », « 2pi/3 »,
- * « \frac{2\pi}{3} », « 2/3π »).
+ * (« cos θ = … ») et « ° » ignorés. Le radian n'est pas enseigné en 4e : un angle écrit avec π ou
+ * « rad » reçoit le message « En 4e, les angles s'écrivent en degrés » (état `radians`, sans
+ * tentative).
  *
  * Statuts qui ne consomment AUCUNE tentative (l'appli ne les transmet pas au moteur) :
  * - `parse_error` : saisie illisible ;
  * - `approchee` : décimal proche d'une valeur remarquable irrationnelle (« 0,87 » pour √3/2, « 2,09 »
- *   pour 2π/3) — la lecture est peut-être juste, seule la forme ne va pas (même décision que gen76) ;
- * - `recopie` : sin, cos ou tan tapé dans le champ.
+ *   pour une graduation) — la lecture est peut-être juste, seule la forme ne va pas (même décision que gen76) ;
+ * - `recopie` : sin, cos ou tan tapé dans le champ ;
+ * - `radians` : angle écrit avec π ou « rad » (écran 2).
  * Statuts qui consomment une tentative, avec un identifiant de piège (message ciblé dans
  * `ui/formatLectureCercle.ts`) : `correct`, `faux`, `piege`.
  */
 
 type E = ExerciceLectureCercle;
 
-export type EtatLecture = "correct" | "faux" | "piege" | "parse_error" | "approchee" | "recopie";
+export type EtatLecture = "correct" | "faux" | "piege" | "parse_error" | "approchee" | "recopie" | "radians";
 
-export const ETATS_SANS_TENTATIVE: readonly EtatLecture[] = ["parse_error", "approchee", "recopie"];
+export const ETATS_SANS_TENTATIVE: readonly EtatLecture[] = ["parse_error", "approchee", "recopie", "radians"];
 
 const TOL = 1e-9;
 
@@ -72,12 +74,15 @@ export interface LectureNombre {
   avecPi: boolean;
   /** Unité « ° » ou « degré » écrite par l'élève. */
   avecDegre: boolean;
+  /** « rad » écrit par l'élève. */
+  avecRad: boolean;
 }
 
 export function lireNombreLecture(texte: string): LectureNombre {
   const avecDegre = /°|degr/i.test(texte);
+  const avecRad = /\brad(ians?)?\b/i.test(texte);
   const s = normaliserSaisieLecture(texte);
-  const vide: LectureNombre = { etat: "parse_error", valeur: Number.NaN, decimal: false, avecPi: false, avecDegre };
+  const vide: LectureNombre = { etat: "parse_error", valeur: Number.NaN, decimal: false, avecPi: false, avecDegre, avecRad };
   if (s === "") return vide;
   if (/sin|cos|tan/i.test(s)) return { ...vide, etat: "recopie" };
   if (/[a-z]/i.test(s.replace(/sqrt|pi/gi, ""))) return vide;
@@ -89,7 +94,7 @@ export function lireNombreLecture(texte: string): LectureNombre {
     return vide;
   }
   if (!Number.isFinite(v)) return vide;
-  return { etat: "ok", valeur: v, decimal: /\d\.\d|(^|[^\d])\.\d/.test(s), avecPi: /pi/i.test(s), avecDegre };
+  return { etat: "ok", valeur: v, decimal: /\d\.\d|(^|[^\d])\.\d/.test(s), avecPi: /pi/i.test(s), avecDegre, avecRad };
 }
 
 /** Décimal proche (mais différent) d'une valeur remarquable irrationnelle, au signe près. */
@@ -151,7 +156,7 @@ export function diagnostiquerCoordonnees(e: E, saisieCos: string, saisieSin: str
 // Écran 2 — l'angle θ
 // ---------------------------------------------------------------------------------------------
 
-export type PiegeAngle = "unite" | "hors-intervalle" | "reference" | "candidat-cos" | "candidat-sin" | "oppose";
+export type PiegeAngle = "hors-intervalle" | "reference" | "candidat-cos" | "candidat-sin" | "oppose";
 
 export interface DiagnosticAngle {
   etat: EtatLecture;
@@ -165,21 +170,9 @@ function estEntier(x: number): boolean {
 export function diagnostiquerAngle(e: E, saisie: string): DiagnosticAngle {
   const l = lireNombreLecture(saisie);
   if (l.etat !== "ok") return { etat: l.etat };
-  let degres: number;
-  if (e.variante === "degres") {
-    if (l.avecPi) return { etat: "piege", piege: "unite" };
-    degres = l.valeur;
-  } else {
-    if (l.avecDegre) return { etat: "piege", piege: "unite" };
-    if (!l.avecPi) {
-      if (egal(l.valeur, 0) && e.angle === 0) return { etat: "correct" };
-      if (l.decimal && procheAngleRadian(l.valeur)) return { etat: "approchee" };
-      // Un entier plus grand qu'un tour en radians : c'est une mesure en degrés.
-      if (estEntier(l.valeur) && l.valeur >= 7) return { etat: "piege", piege: "unite" };
-      return { etat: "faux" };
-    }
-    degres = (l.valeur * 180) / Math.PI;
-  }
+  // En 4e, les angles s'écrivent en degrés : π ou « rad » → message, sans tentative.
+  if (l.avecPi || l.avecRad) return { etat: "radians" };
+  const degres = l.valeur;
   if (Math.abs(degres - e.angle) < 1e-7) return { etat: "correct" };
   if (!estEntier(degres)) return { etat: "faux" };
   const d = Math.round(degres);
@@ -191,16 +184,6 @@ export function diagnostiquerAngle(e: E, saisie: string): DiagnosticAngle {
   if (d === ramener(180 - e.angle)) return { etat: "piege", piege: "candidat-sin" };
   if (d === ramener(e.angle + 180)) return { etat: "piege", piege: "oppose" };
   return { etat: "faux" };
-}
-
-/** Décimal proche d'un angle remarquable en radians (kπ/6 ou kπ/4), mais pas égal. */
-function procheAngleRadian(v: number): boolean {
-  for (let d = 0; d < 360; d += 15) {
-    if (d % 30 !== 0 && d % 45 !== 0) continue;
-    const r = (d * Math.PI) / 180;
-    if (!egal(v, r) && Math.abs(v - r) <= 0.02) return true;
-  }
-  return false;
 }
 
 // ---------------------------------------------------------------------------------------------

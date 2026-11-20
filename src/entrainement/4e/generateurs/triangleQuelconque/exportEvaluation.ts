@@ -8,8 +8,8 @@ import {
   libelleDonneeManquante,
   valeurAffichee,
   libelleConfiguration,
-  texteAide2Aire,
-  texteAide2DonneeManquante,
+  latexAide2Aire,
+  latexAide2DonneeManquante,
   valeurAffichageDonneeManquante,
   valeursTriangleSketchDonneeManquante,
 } from "../../ui/formatTriangleQuelconque";
@@ -218,9 +218,10 @@ function construireCorrectionTriangleQuelconque(instance: ExerciceTriangleQuelco
   return [
     paragraphe("a", [
       texte(`On utilise ${libelleConfiguration(instance.configuration).toLowerCase()}. `),
-      texte(`${texteAide2DonneeManquante(instance)} → ${valeurAffichageDonneeManquante(instance)}.`),
+      ...latexAide2DonneeManquante(instance).map((l) => latex(l)),
+      texte(` ; d'où ${valeurAffichageDonneeManquante(instance)}.`),
     ]),
-    paragraphe("b", [texte(`${texteAide2Aire(instance)} ≈ ${formatAireAffichage(instance)}.`)]),
+    paragraphe("b", [...latexAide2Aire(instance).map((l) => latex(l)), texte(` ≈ ${formatAireAffichage(instance)}.`)]),
   ];
 }
 
@@ -240,9 +241,11 @@ function v(instance: ExerciceTriangleQuelconque, lettre: "a" | "b" | "c" | "A" |
 }
 
 function consignesPapier(instance: ExerciceTriangleQuelconque): FragmentConsigne[][] {
-  const premiere =
-    instance.donneeManquante === "A" ? "Calcule l'amplitude de l'angle A (au dixième de degré près)." : `Calcule la longueur du ${libelleDonneeManquante(instance).replace(/^le /, "")} (au centième près).`;
-  return [[texte(premiere)], [texte("Calcule l'aire du triangle ABC (au centième près).")]];
+  const premiere: FragmentConsigne[] =
+    instance.donneeManquante === "A"
+      ? [texte("Calcule l'amplitude de l'angle "), latex("\\hat{A}"), texte(" (au dixième de degré près).")]
+      : [texte(`Calcule la longueur du ${libelleDonneeManquante(instance).replace(/^le /, "")} (au centième près).`)];
+  return [premiere, [texte("Calcule l'aire du triangle ABC (au centième près).")]];
 }
 
 function enoncePapier(instance: ExerciceTriangleQuelconque): EnoncePapier {
@@ -255,7 +258,7 @@ function enoncePapier(instance: ExerciceTriangleQuelconque): EnoncePapier {
 
 function reponseBreve(instance: ExerciceTriangleQuelconque): FragmentConsigne[] {
   const lettre = instance.donneeManquante;
-  const nom = lettre === "A" ? "A" : SEGMENT[lettre as "a" | "b" | "c"];
+  const nom = lettre === "A" ? "\\hat{A}" : SEGMENT[lettre as "a" | "b" | "c"];
   return [texte("a) "), latex(`${nom} \\approx ${v(instance, lettre)}`), texte(" ; b) "), latex(`\\mathcal{A} \\approx ${nombreFrLatex(Math.round(aireInstance(instance) * 100) / 100)}\\text{ ${instance.unite}}^2`)];
 }
 
@@ -286,16 +289,23 @@ function criteresDifficulte(instance: ExerciceTriangleQuelconque): CriteresDiffi
   return {
     ...etapesDuCorrige(correctionDetailleeTriangleQuelconque(instance)),
     methode: 1,
-    piege: instance.configuration === "alKashiCote" && instance.triangle.A > 90 ? 1 : 0,
+    // Groupe à verdict « loi » (audit 4e ch. 5, lot D) : un niveau 4 ne sortait que pour Al-Kashi
+    // (angle compris obtus) et trahissait la loi — piège constant 0.
+    piege: 0,
     nombres: 1,
   };
 }
+
+/** Groupe à verdict (décision 2, audit 4e ch. 5, V5) : la variante fixe la loi (sinus ou Al-Kashi)
+ * — panneau d'évaluation seulement. */
+const GROUPES_VERDICT = [{ id: "groupe_loi", label: "Loi à choisir (loi des sinus ou Al-Kashi, au hasard)", variantes: ["loiSinus", "alKashi", "alKashiCote"] }];
 
 export const adaptateurEvaluationTriangleQuelconque: AdaptateurFeuilleExercices<ExerciceTriangleQuelconque> = avecVirgulesBelges({
   titreDocument: "Triangle quelconque — Évaluation",
   nomFichierBase: "triangle-quelconque",
   genererInstance: genererExerciceTriangleQuelconque,
   catalogueVariantes: CATALOGUE_VARIANTES,
+  groupesVerdict: GROUPES_VERDICT,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceTriangleQuelconque,
   construireCorrection: construireCorrectionTriangleQuelconque,

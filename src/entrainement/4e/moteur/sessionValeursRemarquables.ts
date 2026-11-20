@@ -13,6 +13,10 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentat
 import type { ReglagesEtape } from "./etapeTentatives";
 import { verifierAnglePremierQuadrant, verifierQuadrant, verifierValeursExactes } from "./verificationValeursRemarquables";
 import { estSurAxe } from "./verificationCercleTrigonometrique";
+
+/** Choix fermé (tableau des valeurs exactes) : UNE tentative, sans correction case par case (audit
+ * 4e ch. 5, G3). */
+export const TENTATIVES_CHOIX_FERME = 1;
 import type { EtatSessionValeursRemarquables, ResultatExerciceValeursRemarquables } from "./typesValeursRemarquables";
 
 const POINTS_DE_BASE = 100;
@@ -161,6 +165,7 @@ export function soumettreReponseValeursExactes(
 
   const etapeCourante = soumettreEtapeTentatives<ReponseValeursExactes>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_CHOIX_FERME,
     verifier: (r) => verifierValeursExactes(etat.exerciceCourant, r),
     revelerReponse: () => {},
   });

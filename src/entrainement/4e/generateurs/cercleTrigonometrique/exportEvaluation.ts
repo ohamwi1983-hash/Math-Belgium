@@ -273,7 +273,8 @@ function valeursAxeLatex(exercice: ExerciceCercleTrigonometrique): string {
 }
 
 function reponseBreve(exercice: ExerciceCercleTrigonometrique): FragmentConsigne[] {
-  const debut: FragmentConsigne[] = [latex(`\\theta \\equiv ${deg(exercice.angleReduit)}`), texte(` ; ${libelleQuadrant(exercice.quadrant)}`)];
+  // Audit 4e ch. 5, G12 : « ≡ » n'est pas enseigné.
+  const debut: FragmentConsigne[] = [texte("angle réduit : "), latex(deg(exercice.angleReduit)), texte(` ; ${libelleQuadrant(exercice.quadrant)}`)];
   if (estSurAxe(exercice)) return [...debut, texte(" ; "), latex(valeursAxeLatex(exercice))];
   return [...debut, texte(` ; angle du premier quadrant ${exercice.anglePremierQuadrant}° ; `), latex(ligneSignesLatex(exercice))];
 }

@@ -9,7 +9,8 @@ import type { ExerciceLectureCercle, VarianteLectureCercle } from "../../core/le
  * - axe horizontal (0°, 180° : tan θ = 0) : 10 % ;
  * - quadrant strict : 70 %, soit 17,5 % par quadrant, puis l'angle du premier quadrant 30°, 45° ou
  *   60° équiprobable.
- * VARIANTE = unité de la réponse de l'écran 2 (degrés, radians) ; la figure est la même.
+ * Une seule variante : θ en degrés (le radian n'est pas enseigné en 4e). Le tirage libre consomme
+ * toujours un `Math.random` pour la variante : les `?code=` déjà imprimés rouvrent le même point M.
  */
 
 function choisir<T>(liste: readonly T[]): T {
@@ -18,7 +19,6 @@ function choisir<T>(liste: readonly T[]): T {
 
 export const CATALOGUE_VARIANTES: { id: VarianteLectureCercle; label: string }[] = [
   { id: "degres", label: "Angle θ en degrés" },
-  { id: "radians", label: "Angle θ en radians" },
 ];
 
 /** Angle de M (degrés), selon la répartition ci-dessus. */

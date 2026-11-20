@@ -419,6 +419,7 @@ function figureStandard(e: ExerciceTexteTriangleStandard, p: PaletteFigure, reso
     d.nord(A(V));
     d.cap(A(D), e.angles.capDepart!, 16, p.donnee, `${e.angles.capDepart}°`, [A(V), A(noms[2]!)], aEviter(D));
     d.cap(A(V), e.angles.capVirage!, 16, p.donnee, `${e.angles.capVirage}°`, [A(D), A(noms[2]!)], aEviter(V));
+    if (e.angles.capReleve !== undefined) d.cap(A(D), e.angles.capReleve, 30, p.donnee, `${e.angles.capReleve}°`, [A(V), A(noms[2]!)], aEviter(D));
     // Rayon plus grand que l'arc de cap : les deux étiquettes restent séparées.
     if (resolue) d.angleInterieur(A(V), A(D), A(noms[2]!), 34, p.resolu, deg1(e.conversions[0]!.valeur));
   } else if (v === "deuxBateaux" || v === "parcelle") {
@@ -435,7 +436,10 @@ function figureStandard(e: ExerciceTexteTriangleStandard, p: PaletteFigure, reso
     const alpha = e.angles.alpha!;
     const beta = e.angles.beta!;
     const F = A("F");
-    if (v === "elevation") {
+    if (e.sousType === "telemetre") {
+      if (!resolue) d.angleInterieur(A("B"), F, A(haut), 18, p.donnee, `${beta}°`);
+      else d.angleInterieur(A("B"), A("A"), A(haut), 18, p.resolu, deg1(180 - beta));
+    } else if (v === "elevation") {
       d.angleInterieur(A("A"), F, A(haut), 22, p.donnee, `${alpha}°`);
       if (!resolue) d.angleInterieur(A("B"), F, A(haut), 18, p.donnee, `${beta}°`);
     } else {
@@ -446,7 +450,7 @@ function figureStandard(e: ExerciceTexteTriangleStandard, p: PaletteFigure, reso
         d.angleInterieur(A(haut), H, A("B"), 48, p.donnee, `${beta}°`);
       } else d.angleInterieur(A("A"), A("B"), A(haut), 22, p.resolu, deg1(alpha));
     }
-    if (resolue) {
+    if (resolue && e.sousType !== "telemetre") {
       d.angleInterieur(A("B"), A("A"), A(haut), 18, p.resolu, deg1(180 - beta));
       d.angleInterieur(A(haut), A("A"), A("B"), v === "depression" ? 18 : 26, p.resolu, deg1(beta - alpha));
     }

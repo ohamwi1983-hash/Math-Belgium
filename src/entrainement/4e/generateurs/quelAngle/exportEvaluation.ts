@@ -1,7 +1,7 @@
-import type { ExerciceQuelAngle, FonctionTrig } from "../../core/quelAngle.types";
+import type { ExerciceQuelAngle, IdVarianteQuelAngle } from "../../core/quelAngle.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { DOMAINE_LATEX, formatEnonceLatex, formatTermesSolutionsLatex, texteAideQuadrants } from "../../ui/formatQuelAngle";
+import { DOMAINE_LATEX, estEgalite, formatEnonceLatex, formatTermesSolutionsLatex, texteAideQuadrants } from "../../ui/formatQuelAngle";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceQuelAngle } from "./index";
 import { LIBELLE_CAS_QUEL_ANGLE, profilQuelAngle } from "../profilsEvaluation4eCh5";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
@@ -99,6 +99,21 @@ function reponseBreve(exercice: ExerciceQuelAngle): FragmentConsigne[] {
 }
 
 function bareme(exercice: ExerciceQuelAngle): BaremeExercice {
+  if (estEgalite(exercice)) {
+    const famille = exercice.fonction === "sin" ? "supplémentaire (180° − β)" : "des opposés (−β)";
+    return {
+      reponseFinale: reponseBreve(exercice),
+      criteres: [
+        { sousQuestion: "a", critere: [texte(`Famille reconnue : ${famille}`)], points: 1 },
+        { sousQuestion: "a", critere: [texte("Première solution, ramenée dans [0° ; 360°[")], points: 1.5 },
+        { sousQuestion: "a", critere: [texte("Deuxième solution, ramenée dans [0° ; 360°[")], points: 1.5 },
+      ],
+      erreursFrequentes: [
+        { description: [texte(exercice.fonction === "sin" ? "−β donné comme deuxième solution (famille du cosinus)" : "180° − β donné comme deuxième solution (famille du sinus)")], cout: "−1,5" },
+        { description: [texte("Solution hors de [0° ; 360°[ (angle négatif non ramené)")], cout: "−0,5" },
+      ],
+    };
+  }
   if (exercice.solutions.length === 0) {
     return {
       reponseFinale: reponseBreve(exercice),
@@ -138,6 +153,12 @@ function bareme(exercice: ExerciceQuelAngle): BaremeExercice {
  * solutions sur les axes, parfois une seule) ou k négatif (quadrants à changer). */
 function criteresDifficulte(exercice: ExerciceQuelAngle): CriteresDifficulte {
   const ref = exercice.angleReference;
+  if (estEgalite(exercice)) {
+    // Piège : β (ou la deuxième solution) à ramener dans [0° ; 360°[.
+    const b = exercice.angleEgal;
+    const aRamener = b < 0 || b >= 360 || (exercice.fonction === "sin" ? 180 - b < 0 : true);
+    return { ...etapesDuCorrige(correctionDetailleeQuelAngle(exercice)), methode: 1, piege: aRamener ? 1 : 0 };
+  }
   return {
     ...etapesDuCorrige(correctionDetailleeQuelAngle(exercice)),
     methode: 1,
@@ -150,7 +171,7 @@ export const adaptateurEvaluationQuelAngle: AdaptateurFeuilleExercices<ExerciceQ
   nomFichierBase: "quel-angle",
   genererInstance: genererExerciceQuelAngle,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as FonctionTrig),
+  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteQuelAngle),
   construireEnonce: construireEnonceQuelAngle,
   construireCorrection: construireCorrectionQuelAngle,
   criteresDifficulte,

@@ -1,12 +1,15 @@
 import { useState } from "react";
 import type { ExerciceTriangleLies } from "../core/triangleLies.types";
-import { diagnostiquerAngles } from "../moteur/verificationTriangleLies";
 import type { ReponseAnglesTriangleLies } from "../moteur/verificationTriangleLies";
 import { NIVEAU_AIDE_MAX_ANGLES } from "../moteur/sessionTriangleLies";
-import { consigneAngles, formatAnglesBrutsViseeTexte, texteAideAnglesNiveau1, texteAideAnglesNiveau2, texteAideAnglesNiveau3 } from "../ui/formatTriangleLies";
+import { consigneAngles, formatAnglesBrutsViseeTexte } from "../ui/formatTriangleLies";
+import { aidesAngles, messageAngles } from "../ui/aidesTrianglesLies";
+import { MESSAGE_ANGLE_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { RenduFragments } from "./RenduFragments";
+import { lireNombreSaisi } from "../ui/lireNombre";
+
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { QuestionFinale } from "./QuestionFinale";
@@ -37,8 +40,10 @@ export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentati
   const [utile, setUtile] = useState("");
   const [hypothese, setHypothese] = useState("");
   const complet = utile.trim() !== "" && hypothese.trim() !== "";
-  const reponse: ReponseAnglesTriangleLies = { angleUtile: Number(utile.replace(",", ".")), angleHypothese: Number(hypothese.replace(",", ".")) };
-  const statut = complet ? diagnostiquerAngles(exercice, reponse) : undefined;
+  const lus = [lireNombreSaisi(utile), lireNombreSaisi(hypothese)];
+  const reponse: ReponseAnglesTriangleLies = { angleUtile: lus[0] ?? 0, angleHypothese: lus[1] ?? 0 };
+  // Règles communes (audit 4e ch. 5, lot B) : saisie illisible jamais transmise (aucune tentative).
+  const saisie = useTentativeLisible<ReponseAnglesTriangleLies>();
   const apresEchec = tentativesUtilisees > 0;
 
   return (
@@ -63,7 +68,7 @@ export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentati
           <div className="champ-avec-unite">
             <input
               id="triangle-lies-angle-utile"
-              className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
+              className={`text-input${apresEchec && !saisie.illisible ? " is-erronee" : ""}`}
               value={utile}
               onChange={(e) => setUtile(normaliserSigneMoins(e.target.value))}
             />
@@ -77,7 +82,7 @@ export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentati
           <div className="champ-avec-unite">
             <input
               id="triangle-lies-angle-hypothese"
-              className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
+              className={`text-input${apresEchec && !saisie.illisible ? " is-erronee" : ""}`}
               value={hypothese}
               onChange={(e) => setHypothese(normaliserSigneMoins(e.target.value))}
             />
@@ -88,23 +93,27 @@ export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentati
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideAnglesNiveau1()}</p>
-          {niveauAide >= 2 && <p>{texteAideAnglesNiveau2(exercice)}</p>}
-          {niveauAide >= 3 && <p>{texteAideAnglesNiveau3(exercice)}</p>}
+          {aidesAngles(exercice).slice(0, niveauAide).map((fragments, i) => (
+            <p key={i}>
+              <RenduFragments fragments={fragments} />
+            </p>
+          ))}
         </div>
       )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_ANGLES} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(reponse, lus.every((x) => x !== null), onValider)}>
           Valider
         </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour
+          illisible={saisie.illisible}
+          texteIllisible={MESSAGE_ANGLE_ILLISIBLE}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={saisie.soumise !== null ? messageAngles(exercice, saisie.soumise) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

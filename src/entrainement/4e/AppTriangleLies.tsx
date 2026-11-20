@@ -189,6 +189,8 @@ export function AppTriangleLies() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        // Interprétation : choix fermé à une tentative, clos dès la première erreur.
+        messageRevele: etat.phase === "interpretation" ? "Ce n'était pas la bonne réponse." : undefined,
         reponseAttendue,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

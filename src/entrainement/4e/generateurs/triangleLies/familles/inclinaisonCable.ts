@@ -1,4 +1,8 @@
 /**
+ * Décision 5 de l'utilisateur (audit 4e ch. 5, G6) : la question porte sur la LONGUEUR du câble TO
+ * (côté du triangle cible, loi des sinus), plus sur l'angle en T (qui valait toujours 90° − élévation
+ * de T et se lisait sans triangulation). L'identifiant de famille est conservé (indice du catalogue).
+ *
  * Couche A — famille M "inclinaisonCable" (`anglePartage`, extension de la banque, spec section 4 —
  * `promptextensionbanquesgen57gen58.md`) : même mécanique EXACTE que `hauteurInaccessible.ts` (pont
  * O,F,M RECTANGLE en F, cible O,M,T avec hypothèse de verticalité F,M,T) — seule différence : la
@@ -50,9 +54,9 @@ export function construireInclinaisonCable(): ExerciceTriangleLies {
     famille: "inclinaisonCable",
     variante: "anglePartage",
     typeTrianglePont: "rectangle",
-    grandeurDemandee: "angle",
+    grandeurDemandee: "cote",
     contexte:
-      "Une grue de chantier est haubanée par un câble tendu depuis un point d'observation O au sol jusqu'au sommet T du mât. On vise depuis O un point de repère M situé à une hauteur connue sur le mât, puis le sommet T — inaccessible directement.",
+      "Une grue de chantier est haubanée par un câble tendu depuis un point d'ancrage O au sol jusqu'au sommet T du mât. Depuis O, on vise un point de repère M situé à une hauteur connue sur le mât, puis le sommet T, inaccessible directement.",
     trianglePont,
     donneesPont: [
       { label: "hauteur de M", valeur: hM, unite: "m" },
@@ -68,9 +72,9 @@ export function construireInclinaisonCable(): ExerciceTriangleLies {
     distancesParcourues: null,
     triangleCible,
     donneesCibleEnonce: [],
-    questionCible: "Calcule l'angle d'inclinaison du câble au sommet T, entre le câble [TO] et le mât [TM].",
-    valeurCibleAttendue: angleEnT,
-    uniteGrandeurCible: "°",
+    questionCible: "Calcule la longueur du câble [TO].",
+    valeurCibleAttendue: OT,
+    uniteGrandeurCible: "m",
     points: [
       { nom: "O", x: O_pt.x, y: O_pt.y },
       { nom: "F", x: F_pt.x, y: F_pt.y },
@@ -88,10 +92,10 @@ export function construireInclinaisonCable(): ExerciceTriangleLies {
       ["O", "T"],
     ],
     optionsInterpretation: construireOptionsInterpretationTriangleLies({
-      labelGrandeur: "L'angle d'inclinaison du câble en T",
-      valeurCorrecte: angleEnT,
-      uniteCorrecte: "°",
-      uniteFautive: "m",
+      labelGrandeur: "La longueur du câble TO",
+      valeurCorrecte: OT,
+      uniteCorrecte: "m",
+      uniteFautive: "°",
       valeurTransferee: OM,
       valeurPontAlternative: hM,
     }),

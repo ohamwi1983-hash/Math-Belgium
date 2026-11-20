@@ -46,7 +46,7 @@ export function libelleQuadrantUnSansLautre(quadrant: QuadrantOuvert): string {
 
 /** Aide écran 2 : signe déduit du quadrant, ex. `\sin(\theta) > 0`. */
 export function formatSigneCibleLatex(exercice: ExerciceUnSansLautre): string {
-  return `${NOM_FONCTION[exercice.fonctionCible]}(\\theta) ${exercice.signeCible === 1 ? ">" : "<"} 0`;
+  return `${NOM_FONCTION[exercice.fonctionCible]}\\theta ${exercice.signeCible === 1 ? ">" : "<"} 0`;
 }
 
 // --- Simplification exacte (partagée par la révélation et la présentation) --------------------
@@ -153,5 +153,5 @@ export function formatValeurFinaleSimplifieeLatex(exercice: ExerciceUnSansLautre
 }
 
 export const PLACEHOLDER_CARRE = "ex : 7/9";
-export const PLACEHOLDER_VALEUR_SIGNEE = "ex : -sqrt(7)/3";
-export const PLACEHOLDER_TANGENTE = "ex : -sqrt(7)/7";
+export const PLACEHOLDER_VALEUR_SIGNEE = "ex : −√7/3 (ou −rac(7)/3)";
+export const PLACEHOLDER_TANGENTE = "ex : −√7/7 (ou −rac(7)/7)";

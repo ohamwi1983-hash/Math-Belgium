@@ -37,6 +37,7 @@ const LIBELLES_RELATION: Record<RelationAnglesAssocies, string> = {
   supplementaire: "Supplémentaire",
   antiSupplementaire: "Anti-supplémentaire",
   oppose: "Opposé",
+  plus90: "90° + α",
 };
 
 /** Utilisé uniquement pour le libellé du récapitulatif final (résumé de session). */
@@ -55,6 +56,7 @@ const PHRASES_AIDE2: Record<RelationAnglesAssocies, (theta: number, xReference: 
   supplementaire: (theta, xReference) => `${theta}° est le supplémentaire de ${xReference}°.`,
   antiSupplementaire: (theta, xReference) => `${theta}° est l'anti-supplémentaire de ${xReference}°.`,
   oppose: (theta, xReference) => `${theta}° = 360° − ${xReference}° : c'est le même point que −${xReference}°, l'opposé de ${xReference}°.`,
+  plus90: (theta, xReference) => `${theta}° = 90° + ${xReference}°.`,
 };
 
 export function texteAide2(exercice: ExerciceAnglesAssocies): string {

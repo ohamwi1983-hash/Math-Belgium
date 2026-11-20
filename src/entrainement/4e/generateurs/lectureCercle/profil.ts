@@ -6,7 +6,6 @@ import { LIBELLE_CAS_QUADRANT_I } from "../profilsEvaluation4eCh5";
 /**
  * Profil d'instance de gen122 (tirage équilibré, `.claude/rules/feuilles-evaluations.md`).
  *
- * - `forme` = la variante (unité de θ) : la série B garde l'unité de la série A.
  * - Cas particulier = M dans le quadrant I (17,5 % des tirages) : aucun signe à chercher, θ est
  *   l'angle du premier quadrant — la lecture se raccourcit (même case que gen14 et gen15).
  * - Les angles sur un axe ne sont PAS un cas particulier : « tan θ n'est pas définie » (90°, 270°)
@@ -16,7 +15,7 @@ import { LIBELLE_CAS_QUADRANT_I } from "../profilsEvaluation4eCh5";
  *   exclurait gen122 des évaluations avec calculatrice).
  */
 export function profilLectureCercle(e: ExerciceLectureCercle): ProfilInstance {
-  return { casParticulier: position(e) === "I" ? "quadrant-I" : null, forme: e.variante };
+  return { casParticulier: position(e) === "I" ? "quadrant-I" : null };
 }
 
 export const LIBELLE_CAS_LECTURE_CERCLE = LIBELLE_CAS_QUADRANT_I;

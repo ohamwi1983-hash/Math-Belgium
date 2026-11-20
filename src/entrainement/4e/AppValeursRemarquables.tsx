@@ -7,7 +7,10 @@ import {
   soumettreReponseAnglePremierQuadrant,
   soumettreReponseQuadrant,
   soumettreReponseValeursExactes,
+  TENTATIVES_CHOIX_FERME,
 } from "./moteur/sessionValeursRemarquables";
+import { messageValeursExactes } from "./ui/aidesCercleTrigo";
+import type { ReponseValeursExactes } from "./core/valeursRemarquables.types";
 import type { EtatSessionValeursRemarquables, PhaseValeursRemarquables } from "./moteur/typesValeursRemarquables";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceValeursRemarquables } from "./generateurs/valeursRemarquables";
 import type { AngleRemarquable } from "./core/valeursRemarquables.types";
@@ -83,6 +86,28 @@ function calculerSegmentsProgression(etat: EtatSessionValeursRemarquables): Etat
 interface TransitionEnAttente {
   etatSuivant: EtatSessionValeursRemarquables;
   revele: boolean;
+  /** Choix fermés (une tentative) : message de clôture, ciblé si possible. */
+  messageRevele?: string;
+}
+
+/** Cellule du tableau → nombre (pour le message ciblé). */
+function valeurCellule(c: string): number | null | "indefini" {
+  if (c === "?") return null;
+  if (c === "indefini") return "indefini";
+  const signe = c.startsWith("-") ? -1 : 1;
+  const m = c.replace(/^-/, "");
+  const table: Record<string, number> = { "0": 0, "1": 1, "1/2": 0.5, "rac2/2": Math.SQRT2 / 2, "rac3/2": Math.sqrt(3) / 2, "rac3/3": Math.sqrt(3) / 3, rac3: Math.sqrt(3) };
+  return signe * (table[m] ?? NaN);
+}
+
+function messageClotureVR(exercice: { sinValeur: number; cosValeur: number; tanValeur: number | null }, r: ReponseValeursExactes): string {
+  const sin = valeurCellule(r.sin);
+  const cos = valeurCellule(r.cos);
+  const cible = messageValeursExactes(
+    { sin: exercice.sinValeur, cos: exercice.cosValeur, tan: exercice.tanValeur },
+    { sin: typeof sin === "number" ? sin : null, cos: typeof cos === "number" ? cos : null, tan: null },
+  );
+  return cible ?? "Ce n'était pas la bonne réponse.";
 }
 
 export function AppValeursRemarquables() {
@@ -113,7 +138,7 @@ export function AppValeursRemarquables() {
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
    * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (voir le commentaire détaillé
    * de AppAnalyseFonction.tsx::terminerEtape, même garde reproduit ici à l'identique). */
-  function terminerEtape(nouvelEtat: EtatSessionValeursRemarquables, votreReponse?: ReactNode) {
+  function terminerEtape(nouvelEtat: EtatSessionValeursRemarquables, votreReponse?: ReactNode, reponseVR?: ReponseValeursExactes) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       if (votreReponse !== undefined) {
@@ -125,7 +150,8 @@ export function AppValeursRemarquables() {
           : etat.phase === "anglePremierQuadrant"
             ? nouvelEtat.anglePremierQuadrantRevele
             : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.valeursExactesRevele;
-      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      const messageRevele = etat.phase === "quadrant" ? "Ce n'était pas la bonne réponse." : reponseVR ? messageClotureVR(etat.exerciceCourant, reponseVR) : undefined;
+      setEnAttente({ etatSuivant: nouvelEtat, revele, messageRevele });
       return;
     }
     setEtat(nouvelEtat);
@@ -156,15 +182,21 @@ export function AppValeursRemarquables() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        messageRevele: enAttente.messageRevele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "quadrant" ? (
           <>{libelleQuadrant(exercice.quadrant)}</>
         ) : etat.phase === "anglePremierQuadrant" ? (
           <>{exercice.anglePremierQuadrant}°</>
         ) : (
           <>
-            sin(θ) = <Katex expression={`\\displaystyle ${exercice.sinLatex}`} /> ; cos(θ) ={" "}
-            <Katex expression={`\\displaystyle ${exercice.cosLatex}`} /> ; tan(θ) ={" "}
-            {exercice.tanLatex === "n'existe pas" ? "n'existe pas" : <Katex expression={`\\displaystyle ${exercice.tanLatex}`} />}
+            <Katex expression={`\\displaystyle \\sin\\theta = ${exercice.sinLatex}`} /> ; <Katex expression={`\\displaystyle \\cos\\theta = ${exercice.cosLatex}`} /> ;{" "}
+            {exercice.tanLatex === "n'existe pas" ? (
+              <>
+                <Katex expression="\tan\theta" /> n'existe pas
+              </>
+            ) : (
+              <Katex expression={`\\displaystyle \\tan\\theta = ${exercice.tanLatex}`} />
+            )}
           </>
         ),
         // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
@@ -224,11 +256,11 @@ export function AppValeursRemarquables() {
               key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={TENTATIVES_CHOIX_FERME}
               recapitulatif={recapitulatif}
               aideActivee={etat.aideValeursExactesUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseValeursExactes(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseValeursExactes(etat, reponse), undefined, reponse)}
               validation={validation}
             />
           )}

@@ -124,8 +124,11 @@ function bareme(e: ExerciceRotationsContexte): BaremeExercice {
  * (θ = θ départ ± α, h + r sin θ) ; piège dans les données : sens horaire, angle à ramener dans
  * [0° ; 360°[ (direct) ou solution unique (inverse). Nombres : calculatrice (profil). */
 function criteresDifficulte(e: ExerciceRotationsContexte): CriteresDifficulte {
+  // Sens inverse : « deux / une seule solution » est un VERDICT (audit 4e ch. 5, lot D) — la solution
+  // unique sortait toujours au niveau 5 et en 11 min : niveau ET durée constants (5, 12 min), comme gen74.
+  if (e.sens === "inverse") return { etapesTransformation: 3, etapesLecture: 1, sansCharge: true, methode: 2, piege: 0, nombres: 1 };
   const brut = thetaBrut(e);
-  const piege = e.rotation === -1 || (e.sens === "direct" ? brut < 0 || brut >= 360 : solutionsTheta(e).length === 1);
+  const piege = e.rotation === -1 || brut < 0 || brut >= 360;
   return {
     ...etapesDuCorrige(correctionDetailleeRotationsContexte(e), LETTRES_LECTURE_ROTATIONS),
     methode: 2,

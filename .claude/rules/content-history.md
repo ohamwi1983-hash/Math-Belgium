@@ -4462,20 +4462,23 @@ route : « S = ∅ » du cas b = 0 rendu « S=arnothing » (`"\v"` dans une cha�
   dans un quadrillage dont les lignes passent par 0, ±1/2, ±√2/2, ±√3/2, ±1 (graduées sur les
   demi-axes positifs : la valeur se lit sur la ligne symétrique, le signe au quadrant) ; tangente
   x = 1 graduée en ±√3/3, ±1, ±√3. Écrans (3 tentatives chacun) : cos θ et sin θ (deux champs) ; θ
-  dans [0° ; 360°[ ou [0 ; 2π[ selon la variante (deux candidats de même cosinus, le signe de sin θ
+  dans [0° ; 360°[ (deux candidats de même cosinus, le signe de sin θ
   tranche) ; tan θ lue sur la tangente ou bouton « tan θ n'est pas définie » (verdict, jamais cas
   particulier). L'aide 2 de l'écran 3 trace (OM) ; l'aide 2 de l'écran 2 ne donne α que hors du
   quadrant I (sinon c'était θ). Saisie : toute forme exacte (√3/2, sqrt(3)/2, \frac{\sqrt3}{2},
-  1/√3, 0,5, 2π/3, 2pi/3, \frac{2\pi}{3}, préfixe « cos θ = » et unité ignorés) ; illisible,
-  décimal approché d'une valeur irrationnelle et sin/cos/tan recopié : aucune tentative. Pièges
-  ciblés : cos/sin échangés, signe, graduation voisine, coordonnée nulle ; unité, tour en trop,
+  1/√3, 0,5, préfixe « cos θ = » et « ° » ignorés) ; illisible, décimal approché d'une valeur
+  irrationnelle, sin/cos/tan recopié et angle écrit avec π ou « rad » (« En 4e, les angles
+  s'écrivent en degrés » — décision de l'utilisateur : le radian n'est pas enseigné en 4e, la
+  variante « radians », 2e du catalogue, a été retirée ; l'indice de « degrés » est inchangé) :
+  aucune tentative. Pièges
+  ciblés : cos/sin échangés, signe, graduation voisine, coordonnée nulle ; tour en trop,
   angle du premier quadrant, autre candidat de même cosinus / sinus, point opposé ; tan = sin θ,
   signe de T, inverse, cos θ, verdict à tort. Tirage : axe vertical 20 %, axe horizontal 10 %,
-  quadrants 17,5 % chacun ; profil `forme` = variante, cas particulier = quadrant I. Fichiers :
+  quadrants 17,5 % chacun ; profil sans `forme` (une seule variante), cas particulier = quadrant I. Fichiers :
   `AppLectureCercle.tsx`, `components/EtapeLectureCercle.tsx`, `core/lectureCercle.types.ts`,
   `moteur/{modele,verification,session}LectureCercle.ts`, `ui/formatLectureCercle.ts` (textes et
   figure écran = papier), `generateurs/lectureCercle/` (index, profil, corrigé, adaptateur).
-  Mesures : 4 000 tirages (2 000 par variante), ≈ 265 000 saisies justes écrites autrement toutes
+  Mesures (après retrait des radians) : 2 000 tirages, ≈ 129 000 saisies justes écrites autrement toutes
   acceptées, 0 anomalie ; parcours iPhone 13 (5 instances dont axes et tentatives épuisées),
   scrollWidth 390, 0 erreur console ; QR code : 12 / 12 codes de feuille rouvrent le même M.
 
@@ -4566,3 +4569,37 @@ Contrôle `check_banque5e2.mjs` (dossier de travail) : KaTeX `strict: 'error'`, 
 formule, majuscules, « trig(…) = k », point décimal, doublons, équilibre, session sans répétition,
 fragments papier sans `$` — 0 problème ; parcours Playwright : 35 / 35 énoncés distincts, 0 `$`
 isolé, 0 `.katex-error`.
+## 4e, Chapitre 5 — lots B, C et D de l'audit (gen14–19, gen58 ; gen73–81)
+
+- **Lot B (sept anciens générateurs)** : champs d'angle `ChampAngleTrig` (gen14 réduction et angle
+  du premier quadrant, gen15), de valeur exacte `ChampValeurExacte` (gen16) ; `useTentativeLisible`
+  partout (une saisie illisible n'est jamais transmise), messages d'illisible par nature de champ
+  (`MESSAGE_ANGLE_ILLISIBLE`, `_LONGUEUR_`, `_VALEUR_`, `_VALEUR_EXACTE_`, `MESSAGE_VALEUR_APPROCHEE`
+  dans `RetourSaisie.tsx`) ; `AidesNiveaux` reçoit `figure(niveau)` (le cercle d'aide s'affiche au
+  niveau 2, composants `Aide…CercleTrig` / `AideQuelAngle` avec `sansBouton`) et `onNiveau`. Textes
+  et messages ciblés : `ui/aidesCercleTrigo.ts`, `aidesUnSansLautre.ts`, `aidesAnglesAssocies.ts`,
+  `aidesQuelAngle.ts`, `aidesTriangles.ts` (gen19 : radians, côté non opposé, signe d'Al-Kashi, ½,
+  unité), `aidesTrianglesLies.ts` (anciens `texteAide…` de gen58 supprimés : « ET », « MÊME »).
+  Choix fermés à 1 tentative sans case rouge : gen14 signes et valeurs sur un axe, gen15 valeurs
+  exactes (message ciblé « sinus et cosinus échangés » / « signe » en `messageRevele`), gen58
+  interprétation (2 niveaux d'aide). gen16 : valeur exacte seulement (`moteur/saisieExacteTrigo.ts`,
+  repris par gen78 ; décimal exact accepté, approché refusé sans tentative, signe testé après la forme).
+- **Variantes en fin de catalogue, hors tirage libre** (les `?code=` « libres » imprimés restent
+  valides) : gen17 `sinCos-plus90` (relation `plus90`, θ = 90° + α, règle directe) ; gen18 `egalite`
+  (`angleEgal` = β, solutions β et 180° − β ou β et −β ramenées ; corrigé : réduction sur une ligne à
+  part, sinon > 48 caractères).
+- **Lot C** : gen58 câble = longueur TO (décision 5), R entre O et le pied (angle ORM ∈ [100° ;
+  165° − élévation]) avec l'élévation de M donnée une seule fois (même libellé, dédoublonné sur
+  papier), villes en km, réponse brève au centième avec zéros, « triangle ACD » ; gen15 0°/90° variés
+  (forme « axe:… ») ; gen14 sans « ≡ » ; gen19 Â/B̂/Ĉ (`ANGLE_CHAPEAU`) et ancienne correction en
+  KaTeX ; gen73 `egalOuEnvironElement` ; gen78 k exact, ∅ sans précision ; gen80 décimales fixes et
+  a) b) ; gen81 `finalSansArrondi` (acceptée, annoncée) ; gen77 sous-types `releve` (trajets, loi des
+  sinus, 3 conversions) et `telemetre` (élévation, Al-Kashi), une fois sur trois ; gen79 intervalle
+  `[0^\circ \,;\, 360^\circ\mathclose{[}` (espacé comme gen18). **Piège** : une chaîne Python non
+  brute écrivait `\${f}` dans un gabarit TS (« ${f} » littéral) — le collecteur l'a vu (KaTeX invalide).
+- **Lot D** : voir `feuilles-evaluations.md` (verdicts gen75/gen79, groupes gen17/19/73/81).
+- **Pas de radian en 4e** (décision de l'utilisateur) : gen122 sans variante « radians » ;
+  `radiansLatex` et `lignesReductionRadians` retirés de `corrigeCercleTrigo.ts` ; seule mention
+  restante, le piège de la calculatrice réglée en mode RAD (gen19/58/73/75/80/81 ; gen81 écrit
+  « (mode RAD) », plus « rad » comme unité).
+

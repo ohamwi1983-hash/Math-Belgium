@@ -5,16 +5,18 @@
  * (0, ±1/2, ±√2/2, ±√3/2, ±1 : M tombe toujours à l'intersection de deux lignes) ; les graduations
  * ne sont écrites que sur les demi-axes positifs (le signe se lit au quadrant). Trois écrans :
  * 1. cos θ et sin θ lus (deux champs, 3 tentatives) ;
- * 2. θ dans [0° ; 360°[ (ou [0 ; 2π[) : deux candidats de même cosinus, tranchés par le quadrant ;
+ * 2. θ dans [0° ; 360°[ : deux candidats de même cosinus, tranchés par le quadrant ;
  * 3. tan θ lue sur la tangente verticale x = 1 (graduée en ±√3/3, ±1, ±√3), ou le verdict
  *    « tan θ n'est pas définie » quand (OM) est parallèle à cette tangente.
  *
- * VARIANTE = l'unité de la réponse de l'écran 2 (degrés ou radians). La position de M (quatre
+ * Une seule variante, « degrés » (décision de l'utilisateur : le radian n'est pas enseigné en 4e ;
+ * l'ancienne variante « radians », en 2e position du catalogue, est retirée — l'indice de « degrés »
+ * ne change pas). La position de M (quatre
  * quadrants, deux axes) est une issue tirée au hasard ; « tan θ n'est pas définie » est un verdict
  * (jamais un cas particulier).
  */
 
-export type VarianteLectureCercle = "degres" | "radians";
+export type VarianteLectureCercle = "degres";
 
 /** Quadrant strict, ou axe sur lequel tombe M. */
 export type PositionCercle = "I" | "II" | "III" | "IV" | "axe-horizontal" | "axe-vertical";

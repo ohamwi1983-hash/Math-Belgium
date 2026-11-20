@@ -1,13 +1,7 @@
-import { useState } from "react";
 import type { ExerciceValeursRemarquables } from "../core/valeursRemarquables.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
-import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { diagnostiquerAnglePremierQuadrant } from "../moteur/verificationValeursRemarquables";
-import { formatMessageErreur } from "../ui/messageErreur";
-import { AideAnglePremierQuadrantCercleTrig } from "./AideAnglePremierQuadrantCercleTrig";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { EtapeAnglePremierQuadrantCercleTrig } from "./EtapeAnglePremierQuadrantCercleTrig";
 
 interface Props {
   exercice: ExerciceValeursRemarquables;
@@ -17,64 +11,10 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (valeur: number) => void;
-  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
 }
 
-/**
- * Angle du premier quadrant : toujours l'une des 5 valeurs remarquables 0/30/45/60/90. Aide
- * réutilisée telle quelle depuis le générateur 14 (même nom d'écran, même mécanique — point
- * symétrique + pointillé de symétrie selon le cas orthogonal/central), grâce à sa prop désormais
- * typée structurellement (`AngleAvecPremierQuadrant`). Champ libre sans blocage de frappe : seuls les
- * signes moins typographiques sont convertis (`lib/normaliserSaisie.ts`).
- */
-export function EtapeAnglePremierQuadrantVR({
-  exercice,
-  tentativesUtilisees,
-  tentativesMax,
-  recapitulatif,
-  aideActivee,
-  onActiverAide,
-  onValider,
-  validation,
-}: Props) {
-  const [texte, setTexte] = useState("");
-
-  const complet = texte.trim() !== "";
-  const valeur = Number(texte.replace(",", "."));
-  const statut = complet ? diagnostiquerAnglePremierQuadrant(exercice, valeur) : undefined;
-
-  return (
-    <div>
-      <RecapitulatifPanel entrees={recapitulatif} />
-      <p className="prompt-text">Quel est l'angle du premier quadrant associé à cet angle ?</p>
-      <div className="field">
-        <label className="field-label" htmlFor="valeurs-remarquables-premier-quadrant">
-          Angle du premier quadrant en degrés
-        </label>
-        <input
-          id="valeurs-remarquables-premier-quadrant"
-          className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
-          value={texte}
-          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
-        />
-      </div>
-      <AideAnglePremierQuadrantCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
-      {!validation && (
-        <>
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
-  );
+/** gen15 : même écran que gen14 (règles communes, audit 4e ch. 5 lot B). */
+export function EtapeAnglePremierQuadrantVR(props: Props) {
+  return <EtapeAnglePremierQuadrantCercleTrig {...props} idChamp="valeurs-remarquables-premier-quadrant" />;
 }

@@ -51,8 +51,11 @@ function libelleCote(cote: CoteTriangle): string {
   return `le côté ${SEGMENT_COTE[cote]}`;
 }
 
+/** Notation du cours : Â, B̂, Ĉ (audit 4e ch. 5, G13). */
+export const ANGLE_CHAPEAU: Record<SommetTriangle, string> = { A: "Â", B: "B\u0302", C: "Ĉ" };
+
 function libelleAngle(angle: SommetTriangle): string {
-  return `l'angle ${angle}`;
+  return `l'angle ${ANGLE_CHAPEAU[angle]}`;
 }
 
 function libelleLettre(lettre: LettreTriangle): string {
@@ -152,7 +155,7 @@ export function libelleDonneeManquante(exercice: ExerciceTriangleQuelconque): st
  * pour un angle (ex. « AC ≈ 17,94 mm », « angle A ≈ 37,2° »). */
 export function notationDonneeManquante(exercice: ExerciceTriangleQuelconque): string {
   const lettre = exercice.donneeManquante;
-  return estCote(lettre) ? SEGMENT_COTE[lettre] : `angle ${lettre}`;
+  return estCote(lettre) ? SEGMENT_COTE[lettre] : ANGLE_CHAPEAU[lettre];
 }
 
 const LIBELLE_CONFIGURATION: Record<ConfigurationTriangleQuelconque, string> = {
@@ -243,12 +246,12 @@ function valeurLettreLatex(exercice: ExerciceTriangleQuelconque, lettre: LettreT
 export function latexAide2DonneeManquante(exercice: ExerciceTriangleQuelconque): string[] {
   const v = (l: LettreTriangle) => valeurLettreLatex(exercice, l, exercice.configuration === "loiSinus");
   if (exercice.configuration === "loiSinus") {
-    return [`\\dfrac{BC}{\\sin A} = \\dfrac{AC}{\\sin B}`, `AC = \\dfrac{${v("a")} \\cdot \\sin ${v("B")}}{\\sin ${v("A")}}`];
+    return [`\\dfrac{BC}{\\sin\\hat{A}} = \\dfrac{AC}{\\sin\\hat{B}}`, `AC = \\dfrac{${v("a")} \\cdot \\sin ${v("B")}}{\\sin ${v("A")}}`];
   }
   if (exercice.configuration === "alKashi") {
-    return [`BC^2 = AC^2 + AB^2 - 2 \\cdot AC \\cdot AB \\cdot \\cos A`, `\\cos A = \\dfrac{${v("b")}^2 + ${v("c")}^2 - ${v("a")}^2}{2 \\cdot ${v("b")} \\cdot ${v("c")}}`];
+    return [`BC^2 = AC^2 + AB^2 - 2 \\cdot AC \\cdot AB \\cdot \\cos\\hat{A}`, `\\cos\\hat{A} = \\dfrac{${v("b")}^2 + ${v("c")}^2 - ${v("a")}^2}{2 \\cdot ${v("b")} \\cdot ${v("c")}}`];
   }
-  return [`BC^2 = AC^2 + AB^2 - 2 \\cdot AC \\cdot AB \\cdot \\cos A`, `BC = \\sqrt{${v("b")}^2 + ${v("c")}^2 - 2 \\cdot ${v("b")} \\cdot ${v("c")} \\cdot \\cos ${v("A")}}`];
+  return [`BC^2 = AC^2 + AB^2 - 2 \\cdot AC \\cdot AB \\cdot \\cos\\hat{A}`, `BC = \\sqrt{${v("b")}^2 + ${v("c")}^2 - 2 \\cdot ${v("b")} \\cdot ${v("c")} \\cdot \\cos ${v("A")}}`];
 }
 
 export const NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE = 2;
@@ -326,7 +329,7 @@ export function texteAide2Aire(exercice: ExerciceTriangleQuelconque): string {
 /** Formule substituée de l'aide 2 (écran 2), en LaTeX — mêmes valeurs que `texteAide2Aire`. */
 export function latexAide2Aire(exercice: ExerciceTriangleQuelconque): string[] {
   const { cote1, cote2, angleCompris } = donneesFormuleAire(exercice);
-  return [`\\mathcal{A} = \\dfrac{1}{2} \\cdot ${SEGMENT_COTE[cote1]} \\cdot ${SEGMENT_COTE[cote2]} \\cdot \\sin ${angleCompris}`, `\\mathcal{A} = \\dfrac{1}{2} \\cdot ${valeurLettreLatex(exercice, cote1)} \\cdot ${valeurLettreLatex(exercice, cote2)} \\cdot \\sin ${valeurLettreLatex(exercice, angleCompris)}`];
+  return [`\\mathcal{A} = \\dfrac{1}{2} \\cdot ${SEGMENT_COTE[cote1]} \\cdot ${SEGMENT_COTE[cote2]} \\cdot \\sin\\hat{${angleCompris}}`, `\\mathcal{A} = \\dfrac{1}{2} \\cdot ${valeurLettreLatex(exercice, cote1)} \\cdot ${valeurLettreLatex(exercice, cote2)} \\cdot \\sin ${valeurLettreLatex(exercice, angleCompris)}`];
 }
 
 export const NOMBRE_NIVEAUX_AIDE_AIRE = 2;

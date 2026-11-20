@@ -12,7 +12,8 @@
  *   90° » est déjà le cas « sur un axe » : c'est un choix de variante, pas un cas.
  * - gen15 : quadrant I ≈ 25 % des variantes 30°/45°/60° (aucune symétrie, aucun signe) → cas
  *   particulier ; la forme « à ramener dans [0° ; 360°[ » (≈ 24 %) est une `forme` (même structure
- *   d'une série à l'autre), sans objet pour 0° et 90° (jamais décalées).
+ *   d'une série à l'autre) ; depuis le lot C (G11), 0° et 90° tirent aussi les deux points de leur axe
+ *   et un angle à ramener une fois sur quatre (forme « axe:… »).
  * - gen16 : quadrant I ≈ 25 % (signe immédiat) → cas particulier ; valeur issue d'un triplet
  *   pythagoricien (résultat rationnel, ≈ 50 %) → paramètre au choix « résultat avec radical ».
  *   Même profil pour la variante « tan θ donné » (triplet ⟺ p² + q² carré parfait, ≈ 50 %).
@@ -24,6 +25,13 @@
  * - gen19, gen58 : valeurs décimales, toujours la calculatrice (`calculatriceIndispensable`), aucun
  *   raccourci mesuré. Le nombre de triangles (cas ambigu de la loi des sinus) n'est jamais demandé
  *   ici ; s'il l'était, ce serait un verdict, jamais un cas particulier.
+ *
+ * Lot D de l'audit (décisions de l'utilisateur) : « aucune solution » reste un CAS PARTICULIER en
+ * gen18 et le devient en gen78 ; « une seule amplitude » (gen75, famille « angle ») et « une seule
+ * solution » (gen79, sens inverse) sont des VERDICTS (≈ 25 % et ≈ 20 % des tirages). Groupes à verdict
+ * (panneau d'évaluation) : gen17 (famille), gen19 (loi), gen73 (configuration), gen81 (type
+ * d'erreur) — niveau et durée constants dans gen73 et gen81, piège constant en gen19. gen18
+ * « sin α = sin β » : jamais de cas particulier, `forme` = fonction et β à ramener ou non.
  *
  * `calcul` : absent pour gen14–gen18 — toutes leurs réponses sont exactes (valeurs remarquables,
  * signes, fractions ; gen17 donne les valeurs approchées dans l'énoncé et interdit la calculatrice) :
@@ -56,7 +64,7 @@ export function profilValeursRemarquables(e: ExerciceValeursRemarquables): Profi
   const surAxe = e.quadrant === "axeOx" || e.quadrant === "axeOy";
   return {
     casParticulier: e.quadrant === "I" ? "quadrant-I" : null,
-    forme: surAxe ? undefined : e.angleDepart === e.angleReduit ? "direct" : "a-reduire",
+    forme: `${surAxe ? "axe:" : ""}${e.angleDepart === e.angleReduit ? "direct" : "a-reduire"}`,
   };
 }
 
@@ -75,7 +83,7 @@ export const LIBELLE_CAS_ANGLES_ASSOCIES = "Inclure un cas particulier (relation
  * déjà α (pas de second palier de co-fonction). Même test que l'écran (`xReference !== alpha`,
  * `necessiteAide3`). */
 export function profilAnglesAssocies(e: ExerciceAnglesAssocies): ProfilInstance {
-  const sansCofonction = e.variante === "sinCos" && e.quadrant !== "I" && e.xReference === e.alpha;
+  const sansCofonction = e.variante === "sinCos" && e.quadrant !== "I" && e.relation !== "plus90" && e.xReference === e.alpha;
   return { casParticulier: sansCofonction ? "sans-cofonction" : null };
 }
 
@@ -83,6 +91,13 @@ export const LIBELLE_CAS_QUEL_ANGLE = "Inclure un cas particulier (équation san
 
 /** gen18 — trouver l'angle : |k| > 1 se règle en une ligne ; k = 0 ou ±1 tombe sur un axe. */
 export function profilQuelAngle(e: ExerciceQuelAngle): ProfilInstance {
+  // Variante « sin α = sin β » : toujours deux solutions hors axes, aucun raccourci ; `forme` : β à
+  // ramener (négatif, ou solution 180° − β négative) ou non.
+  if (e.angleEgal !== undefined) {
+    const b = e.angleEgal;
+    const aRamener = b < 0 || (e.fonction === "sin" ? 180 - b < 0 : true);
+    return { casParticulier: null, forme: `${e.fonction}:${aRamener ? "a-ramener" : "direct"}` };
+  }
   const surAxe = e.angleReference === 0 || e.angleReference === 90;
   return { casParticulier: e.angleReference === null ? "aucune-solution" : surAxe ? "valeur-sur-axe" : null };
 }

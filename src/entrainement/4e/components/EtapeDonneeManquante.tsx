@@ -1,11 +1,13 @@
 import { useState } from "react";
 import type { ExerciceTriangleQuelconque, UniteLongueur } from "../core/triangleQuelconque.types";
-import { diagnostiquerDonneeManquante } from "../moteur/verificationTriangleQuelconque";
+import { aide1DonneeManquanteTQ, messageDonneeManquanteTQ } from "../ui/aidesTriangles";
 import { consigneDonneeManquante, estCote, labelChampDonneeManquante, NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE, OPTIONS_UNITE_LONGUEUR, optionsCroquisDonneeManquante, placeholderDonneeManquante, textesAideDonneeManquante, valeursTriangleSketchDonneeManquante, latexAide2DonneeManquante } from "../ui/formatTriangleQuelconque";
 import { Katex } from "./Katex";
 import { calculerTriangleQuelconqueSketch } from "../ui/triangleQuelconqueSketch";
 import { TriangleQuelconqueSketch } from "./TriangleQuelconqueSketch";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { MESSAGE_ANGLE_ILLISIBLE, MESSAGE_LONGUEUR_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { RenduFragments } from "./RenduFragments";
+import { lireNombreSaisi } from "../ui/lireNombre";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -39,8 +41,8 @@ export function EtapeDonneeManquante({ exercice, tentativesUtilisees, tentatives
   const donneeEstCote = estCote(exercice.donneeManquante);
   const uniteChoisie: UniteLongueur | null = unite === "" ? null : unite;
   const complet = texte.trim() !== "" && (!donneeEstCote || uniteChoisie !== null);
-  const valeur = Number(texte.replace(",", "."));
-  const statut = complet ? diagnostiquerDonneeManquante(exercice, valeur, uniteChoisie) : undefined;
+  // Règles communes (audit 4e ch. 5, lot B) : saisie illisible jamais transmise (aucune tentative).
+  const saisie = useTentativeLisible<{ valeur: number; unite: UniteLongueur | null }>();
 
   const croquis = calculerTriangleQuelconqueSketch(
     valeursTriangleSketchDonneeManquante(exercice),
@@ -60,7 +62,7 @@ export function EtapeDonneeManquante({ exercice, tentativesUtilisees, tentatives
         <div className="champ-avec-unite">
           <input
             id="triangle-quelconque-donnee-manquante"
-            className={`text-input${tentativesUtilisees > 0 && statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
+            className={`text-input${tentativesUtilisees > 0 && !saisie.illisible ? " is-erronee" : ""}`}
             placeholder={placeholderDonneeManquante(exercice)}
             value={texte}
             onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
@@ -97,7 +99,9 @@ export function EtapeDonneeManquante({ exercice, tentativesUtilisees, tentatives
                 ))}
               </div>
             ) : (
-              <p key={texteAide}>{texteAide}</p>
+              <p key={texteAide}>
+                <RenduFragments fragments={aide1DonneeManquanteTQ(exercice)} />
+              </p>
             ),
           )}
         </div>
@@ -106,14 +110,24 @@ export function EtapeDonneeManquante({ exercice, tentativesUtilisees, tentatives
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur, uniteChoisie)}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => {
+            const v = lireNombreSaisi(texte);
+            saisie.tenter({ valeur: v ?? 0, unite: uniteChoisie }, v !== null, (r) => onValider(r.valeur, r.unite));
+          }}
+        >
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour
+          illisible={saisie.illisible}
+          texteIllisible={donneeEstCote ? MESSAGE_LONGUEUR_ILLISIBLE : MESSAGE_ANGLE_ILLISIBLE}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={saisie.soumise !== null ? messageDonneeManquanteTQ(exercice, saisie.soumise.valeur, !donneeEstCote || saisie.soumise.unite === exercice.unite) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

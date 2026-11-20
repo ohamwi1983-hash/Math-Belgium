@@ -32,10 +32,9 @@ const ANGLES_REMARQUABLES: AngleRemarquable[] = [0, 30, 45, 60, 90];
  * décalé de ±360° une fois sur 4.
  */
 function construireAngleDepart(ref: AngleRemarquable): number {
-  if (ref === 0) return randomInt(0, 1) === 0 ? 0 : 180;
-  if (ref === 90) return 270;
-
-  const bases = [ref, 180 - ref, 180 + ref, 360 - ref];
+  // Audit 4e ch. 5, G11 : les variantes « 0° » et « 90° » tirent aussi les deux points de leur axe
+  // et, une fois sur quatre, un angle à ramener (−90°, 450°, −180°…), comme les autres variantes.
+  const bases = ref === 0 ? [0, 180] : ref === 90 ? [90, 270] : [ref, 180 - ref, 180 + ref, 360 - ref];
   const base = bases[randomInt(0, bases.length - 1)];
   if (randomInt(0, 3) !== 0) return base;
   return randomInt(0, 1) === 0 ? base - 360 : base + 360;

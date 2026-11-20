@@ -17,11 +17,9 @@ import {
 } from "../../moteur/modeleComposerForces";
 import {
   angleCapNom,
-  angleLatex,
   consignesEcrans,
   deviationNom,
   enonceFragments,
-  intensiteLatex,
   intensiteNom,
   questionsPapier,
   uniteTexte,
@@ -66,14 +64,20 @@ function enoncePapier(e: ExerciceComposerForces): EnoncePapier {
   };
 }
 
-function resultatIntensite(e: ExerciceComposerForces): FragmentConsigne[] {
-  return [latex(`${intensiteNom(e, "R")} \\approx ${intensiteLatex(intensiteResultante(e))}`), texte(uniteTexte(e))];
+/** Valeurs avec les décimales demandées par l'énoncé (« 13,30 », « 41,0° ») — audit 4e ch. 5, G16. */
+function fixe(v: number, d: number): string {
+  return (Math.round(v * 10 ** d) / 10 ** d).toFixed(d).replace(".", "{,}");
 }
 
+function resultatIntensite(e: ExerciceComposerForces): FragmentConsigne[] {
+  return [latex(`${intensiteNom(e, "R")} \\approx ${fixe(intensiteResultante(e), 2)}`), texte(uniteTexte(e))];
+}
+
+/** Deux questions sur papier (direction, cap) : lettres a) b) dans la réponse brève. */
 function reponseBreve(e: ExerciceComposerForces): FragmentConsigne[] {
   if (e.question === "intensite") return resultatIntensite(e);
-  if (e.question === "direction") return [...resultatIntensite(e), texte(" ; "), latex(`${deviationNom(e)} \\approx ${angleLatex(deviation(e))}`)];
-  return [texte("angle entre le cap et la route : "), latex(`${angleCapNom(e)} \\approx ${angleLatex(angleCap(e))}`), texte(" ; "), ...resultatIntensite(e)];
+  if (e.question === "direction") return [texte("a) "), ...resultatIntensite(e), texte(" ; b) "), latex(`${deviationNom(e)} \\approx ${fixe(deviation(e), 1)}^\\circ`)];
+  return [texte("a) angle entre le cap et la route : "), latex(`${angleCapNom(e)} \\approx ${fixe(angleCap(e), 1)}^\\circ`), texte(" ; b) "), ...resultatIntensite(e)];
 }
 
 function construireCorrection(e: ExerciceComposerForces): BlocCorrection[] {

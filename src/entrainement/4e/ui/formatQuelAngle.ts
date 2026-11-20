@@ -21,7 +21,18 @@ export const DOMAINE_LATEX = "\\left[0^\\circ \\,;\\, 360^\\circ\\right[";
 
 /** Bloc énoncé fixe — `sin α = k` (valeur exacte, signée) — jamais recalculé depuis `Math.sin`/
  * `cos`/`tan`, toujours composé depuis les tables exactes de "Valeurs remarquables". */
+export function estEgalite(exercice: ExerciceQuelAngle): exercice is ExerciceQuelAngle & { angleEgal: number } {
+  return exercice.angleEgal !== undefined;
+}
+
+/** « \sin 40^\circ », « \cos(-20^\circ) ». */
+export function membreEgaliteLatex(exercice: ExerciceQuelAngle & { angleEgal: number }): string {
+  const b = exercice.angleEgal;
+  return b < 0 ? `${NOM_FONCTION_LATEX[exercice.fonction]}(-${-b}^\\circ)` : `${NOM_FONCTION_LATEX[exercice.fonction]} ${b}^\\circ`;
+}
+
 export function formatEnonceLatex(exercice: ExerciceQuelAngle): string {
+  if (estEgalite(exercice)) return `${NOM_FONCTION_LATEX[exercice.fonction]}\\alpha = ${membreEgaliteLatex(exercice)}`;
   const magnitude =
     exercice.angleReference === null
       ? (exercice.magnitudeHorsDomaineLatex as string)
@@ -43,6 +54,11 @@ export function formatEnonceLatex(exercice: ExerciceQuelAngle): string {
  * nombre de quadrants surlignés).
  */
 export function texteAideQuadrants(exercice: ExerciceQuelAngle): string {
+  if (estEgalite(exercice)) {
+    return exercice.fonction === "sin"
+      ? "Deux angles supplémentaires ont le même sinus : sin(180° − β) = sin β. Les solutions sont β et 180° − β, ramenés dans [0° ; 360°[."
+      : "Deux angles opposés ont le même cosinus : cos(−β) = cos β. Les solutions sont β et −β, ramenés dans [0° ; 360°[.";
+  }
   if (exercice.solutions.length === 0) {
     return `Pour tout angle α, ${exercice.fonction} α est compris entre −1 et 1.`;
   }

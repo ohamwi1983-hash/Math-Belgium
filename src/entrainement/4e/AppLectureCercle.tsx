@@ -14,6 +14,7 @@ import {
   MESSAGE_APPROCHEE,
   MESSAGE_APPROCHEE_ANGLE,
   MESSAGE_ILLISIBLE_ANGLE,
+  MESSAGE_RADIANS_ANGLE,
   MESSAGE_ILLISIBLE_VALEUR,
   MESSAGE_RECOPIE,
   TITRES_ECRANS,
@@ -74,6 +75,7 @@ const CHAMPS: ChampLecture[][] = [
 ];
 
 function messageSansTentative(etat: EtatLecture, ecran: number): string | null {
+  if (etat === "radians") return MESSAGE_RADIANS_ANGLE;
   if (etat === "parse_error") return ecran === 1 ? MESSAGE_ILLISIBLE_ANGLE : MESSAGE_ILLISIBLE_VALEUR;
   if (etat === "approchee") return ecran === 1 ? MESSAGE_APPROCHEE_ANGLE : MESSAGE_APPROCHEE;
   if (etat === "recopie") return MESSAGE_RECOPIE;
@@ -174,7 +176,7 @@ export function AppLectureCercle() {
         correct,
         <span>
           <Katex expression="\theta=" /> {saisieLisible(s.saisies[0]!)}
-          {e.variante === "degres" && !/°/.test(s.saisies[0]!) ? "°" : ""}
+          {!/°/.test(s.saisies[0]!) ? "°" : ""}
         </span>,
       );
       return;
@@ -254,7 +256,7 @@ export function AppLectureCercle() {
           <Fragment key={`${generation}-${ecran}`}>
             <EtapeLectureCercle
               consigne={<RenduFragments fragments={consignesEcrans(e)[ecran]!} />}
-              champs={CHAMPS[ecran]!.map((c) => (ecran === 1 && e.variante === "degres" ? { ...c, suffixe: "^\\circ" } : c))}
+              champs={CHAMPS[ecran]!.map((c) => (ecran === 1 ? { ...c, suffixe: "^\\circ" } : c))}
               aideSaisie={aideSaisie(ecran, e)}
               aides={aides}
               niveauAide={etat.niveauAide}

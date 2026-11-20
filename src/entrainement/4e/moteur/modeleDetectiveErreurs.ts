@@ -458,6 +458,28 @@ export function attenduFinal(e: ExerciceDetectiveErreurs): ValeurAttendue | null
   return { quantite: l.quantite, valeur: l.valeur!, nature: l.nature };
 }
 
+/** Audit 4e ch. 5, G17 : quand le résultat final est un angle obtenu par la somme des angles
+ * ARRONDIS (comme la copie), la valeur recalculée sans arrondir peut différer de 0,1° (45,1° au lieu
+ * de 45,0°). Renvoie cette seconde valeur quand elle s'écrit autrement au dixième, sinon `null` ;
+ * elle est acceptée à l'écran et annoncée dans le corrigé. */
+export function finalSansArrondi(e: ExerciceDetectiveErreurs): number | null {
+  const f = attenduFinal(e);
+  if (!f || f.nature !== "angle" || e.scenario === "G1") return null;
+  const lignesOk = resolutionCorrecte(e);
+  const derniere = lignesOk[lignesOk.length - 1]!;
+  if (!derniere.prefixe || !derniere.prefixe.startsWith("Somme")) return null;
+  const autres = ["\\hat{A}", "\\hat{B}", "\\hat{C}"].filter((x) => x !== derniere.quantite);
+  let somme = 0;
+  for (const x of autres) {
+    const l = lignesOk.find((m) => m.quantite === x && m.valeur !== null);
+    const v = l ? l.valeur : x === "\\hat{A}" ? e.donnees.A : x === "\\hat{B}" ? e.donnees.B : undefined;
+    if (v === undefined || v === null) return null;
+    somme += v;
+  }
+  const alt = 180 - somme;
+  return Math.abs(arrondir(alt, 1) - arrondir(f.valeur, 1)) >= 0.05 ? alt : null;
+}
+
 /** Valeur de la copie pour la même grandeur que `attenduFinal` (cas ambigu : sans objet). */
 export function finalCopie(e: ExerciceDetectiveErreurs): number | null {
   if (e.scenario === "G1") return null;

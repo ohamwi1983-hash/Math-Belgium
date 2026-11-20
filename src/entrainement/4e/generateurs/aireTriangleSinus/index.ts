@@ -133,7 +133,14 @@ function genererCote(mode: ModeTirage = tirerMode()): ExerciceAireTriangleSinus 
   }
 }
 
-function genererAngle(mode: ModeTirage = tirerMode()): ExerciceAireTriangleSinus {
+/** Famille « angle » : « une ou deux amplitudes ? » est un VERDICT (audit 4e ch. 5, V2) — l'angle
+ * droit (une seule amplitude) sort environ une fois sur quatre. */
+function tirerModeAngle(): ModeTirage {
+  const r = Math.random();
+  return r < 0.25 ? "droit" : r < 0.6 ? "exacte" : "calculatrice";
+}
+
+function genererAngle(mode: ModeTirage = tirerModeAngle()): ExerciceAireTriangleSinus {
   for (;;) {
     const c1 = entier(3, 14);
     const c2 = entier(3, 14);

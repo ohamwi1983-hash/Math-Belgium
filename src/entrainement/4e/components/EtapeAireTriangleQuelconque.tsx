@@ -2,12 +2,15 @@ import { useState } from "react";
 import type { ExerciceTriangleQuelconque, UniteLongueur } from "../core/triangleQuelconque.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { diagnostiquerAire } from "../moteur/verificationTriangleQuelconque";
+import { valeurAire } from "../moteur/verificationTriangleQuelconque";
+import { aide1AireTQ, messageAireTQ } from "../ui/aidesTriangles";
 import { consigneAire, labelChampAire, NOMBRE_NIVEAUX_AIDE_AIRE, OPTIONS_UNITE_AIRE, optionsCroquisAire, placeholderAire, textesAideAire, valeursTriangleSketchAire, latexAide2Aire } from "../ui/formatTriangleQuelconque";
 import { Katex } from "./Katex";
 import { calculerTriangleQuelconqueSketch } from "../ui/triangleQuelconqueSketch";
 import { TriangleQuelconqueSketch } from "./TriangleQuelconqueSketch";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { MESSAGE_LONGUEUR_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { RenduFragments } from "./RenduFragments";
+import { lireNombreSaisi } from "../ui/lireNombre";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -47,8 +50,8 @@ export function EtapeAireTriangleQuelconque({
   const [unite, setUnite] = useState<UniteLongueur | "">("");
 
   const complet = texte.trim() !== "" && unite !== "";
-  const valeur = Number(texte.replace(",", "."));
-  const statut = complet ? diagnostiquerAire(exercice, valeur, unite as UniteLongueur) : undefined;
+  // Règles communes (audit 4e ch. 5, lot B) : saisie illisible jamais transmise (aucune tentative).
+  const saisie = useTentativeLisible<{ valeur: number; unite: UniteLongueur }>();
 
   const croquis = calculerTriangleQuelconqueSketch(valeursTriangleSketchAire(exercice), optionsCroquisAire(exercice, niveauAide));
   const textesAide = textesAideAire(exercice, niveauAide);
@@ -66,7 +69,7 @@ export function EtapeAireTriangleQuelconque({
         <div className="champ-avec-unite">
           <input
             id="triangle-quelconque-aire"
-            className={`text-input${tentativesUtilisees > 0 && statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
+            className={`text-input${tentativesUtilisees > 0 && !saisie.illisible ? " is-erronee" : ""}`}
             placeholder={placeholderAire(exercice)}
             value={texte}
             onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
@@ -96,7 +99,9 @@ export function EtapeAireTriangleQuelconque({
                 ))}
               </div>
             ) : (
-              <p key={texteAide}>{texteAide}</p>
+              <p key={texteAide}>
+                <RenduFragments fragments={aide1AireTQ()} />
+              </p>
             ),
           )}
         </div>
@@ -105,14 +110,24 @@ export function EtapeAireTriangleQuelconque({
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={NOMBRE_NIVEAUX_AIDE_AIRE} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur, unite as UniteLongueur)}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => {
+            const v = lireNombreSaisi(texte);
+            saisie.tenter({ valeur: v ?? 0, unite: unite as UniteLongueur }, v !== null, (r) => onValider(r.valeur, r.unite));
+          }}
+        >
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour
+          illisible={saisie.illisible}
+          texteIllisible={MESSAGE_LONGUEUR_ILLISIBLE}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={saisie.soumise !== null ? messageAireTQ(exercice, saisie.soumise.valeur, valeurAire(exercice), saisie.soumise.unite === exercice.unite) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

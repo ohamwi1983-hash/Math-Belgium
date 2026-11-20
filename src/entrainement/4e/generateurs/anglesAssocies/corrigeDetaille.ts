@@ -49,7 +49,16 @@ export function correctionDetailleeAnglesAssocies(e: E): EtapeCorrection[] {
   const lignes: LigneCalcul[] = [];
   const co = e.variante === "sinCos" && (q === "I" || necessiteAide3(e));
 
-  if (q === "I" && e.variante === "sinCos") {
+  if (e.relation === "plus90" && e.variante === "sinCos") {
+    // θ = 90° + α : règle du cours (§ 4), sinus et cosinus s'échangent, le cosinus change de signe.
+    const cf = cofonction(e.fonctionCible);
+    const donnee = cf === "cos" ? e.cosAlpha : e.sinAlpha;
+    lignes.push(
+      ligne(`\\${f} ${deg(theta)}=\\${f}(90^\\circ+${deg(alpha)})`, `${theta}° = 90° + ${alpha}°`),
+      ligne(`=${moins}\\${cf} ${deg(alpha)}`, [texte("règle de 90° + θ : "), latex(f === "sin" ? "\\sin(90^\\circ+x)=\\cos x" : "\\cos(90^\\circ+x)=-\\sin x")]),
+      ligne(`\\approx ${valeur}`, [texte("valeur donnée : "), latex(`\\${cf} ${deg(alpha)}\\approx ${decimal3Latex(donnee)}`)]),
+    );
+  } else if (q === "I" && e.variante === "sinCos") {
     // θ = 90° − α : co-fonction directe.
     const cf = cofonction(e.fonctionCible);
     lignes.push(
@@ -76,10 +85,13 @@ export function correctionDetailleeAnglesAssocies(e: E): EtapeCorrection[] {
     }
   }
 
-  const utiliseFr: FragmentConsigne[] = [texte(`Angles associés ${COURS_ASSOCIES} : ${texteAide2(e)}`)];
+  const utiliseFr: FragmentConsigne[] =
+    e.relation === "plus90"
+      ? [texte(`Angles associés ${COURS_ASSOCIES} : ${texteAide2(e)} Règle de 90° + θ : le sinus devient le cosinus, le cosinus devient l'opposé du sinus.`)]
+      : [texte(`Angles associés ${COURS_ASSOCIES} : ${texteAide2(e)}`)];
   if (co && q !== "I") utiliseFr.push(texte(` Puis ${texteAide3Intro(e)} Le sinus de l'un est le cosinus de l'autre.`));
   if (q === "I" && e.variante === "sinCos") utiliseFr.push(texte(" Le sinus de l'un est le cosinus de l'autre."));
-  utiliseFr.push(texte(q === "I" ? "" : ` Le signe vient du quadrant de θ ${COURS_CERCLE}.`));
+  utiliseFr.push(texte(q === "I" || e.relation === "plus90" ? "" : ` Le signe vient du quadrant de θ ${COURS_CERCLE}.`));
 
   const etapes: EtapeCorrection[] = [
     utilise("a", utiliseFr.filter((fr) => fr.valeur !== "")),
@@ -90,7 +102,9 @@ export function correctionDetailleeAnglesAssocies(e: E): EtapeCorrection[] {
       texte(` est dans le quadrant ${q}, où ${NOM[f]} est ${signe === 1 ? (f === "tan" ? "positive" : "positif") : f === "tan" ? "négative" : "négatif"} : le signe trouvé est cohérent.`),
     ]),
     piege("a", [
-      co
+      e.relation === "plus90"
+        ? texte(`Avec 90° + α, sinus et cosinus s'échangent : on utilise ${f === "sin" ? "cos" : "sin"} ${alpha}°, pas ${f} ${alpha}°.`)
+        : co
         ? texte(`Passer par le complémentaire échange sinus et cosinus : on utilise ${f === "sin" ? "cos" : "sin"} ${alpha}°, pas ${f} ${alpha}°.`)
         : texte(`Le signe vient du quadrant de ${theta}° : la valeur de ${x}° est toujours positive.`),
     ]),

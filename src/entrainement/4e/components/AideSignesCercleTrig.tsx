@@ -4,11 +4,14 @@ import { calculerAideSignes } from "../ui/cercleTrigSignesAide";
 import { CENTRE_CERCLE_TRIG, HAUTEUR_CERCLE_TRIG, RAYON_CERCLE_TRIG } from "../ui/cercleTrigGeometrie";
 import { CercleTrigTrajetBase } from "./CercleTrigTrajetBase";
 import { BoutonAide } from "./BoutonAide";
+import { angleTexte } from "../ui/aidesCercleTrigo";
 
 interface Props {
   exercice: AngleSurCercle;
   aideActivee: boolean;
   onActiverAide: () => void;
+  /** Figure seule, sans bouton (aides à deux niveaux d'`AidesNiveaux`, audit 4e ch. 5). */
+  sansBouton?: boolean;
 }
 
 /**
@@ -29,7 +32,7 @@ interface Props {
  * Prop typée structurellement (`AngleSurCercle`) — réutilisée telle quelle par le générateur 15
  * ("Valeurs remarquables") pour l'aide de son écran "Valeurs exactes".
  */
-export function AideSignesCercleTrig({ exercice, aideActivee, onActiverAide }: Props) {
+export function AideSignesCercleTrig({ exercice, aideActivee, onActiverAide, sansBouton = false }: Props) {
   const trajet = calculerTrajetCercleTrig(exercice.angleDepart, exercice.angleReduit);
   const aideSignes = calculerAideSignes(exercice.angleReduit);
   const xTangente = CENTRE_CERCLE_TRIG.x + RAYON_CERCLE_TRIG;
@@ -39,7 +42,7 @@ export function AideSignesCercleTrig({ exercice, aideActivee, onActiverAide }: P
       {aideActivee && (
         <CercleTrigTrajetBase
           trajet={trajet}
-          labelAngleBrutTexte={`${exercice.angleDepart}°`}
+          labelAngleBrutTexte={angleTexte(exercice.angleDepart)}
           ariaLabel="Cercle trigonométrique montrant les projections de cos(θ), sin(θ) et tan(θ)"
         >
           <line x1={xTangente} y1={0} x2={xTangente} y2={HAUTEUR_CERCLE_TRIG} className="cercle-trig-tangente" />
@@ -78,7 +81,7 @@ export function AideSignesCercleTrig({ exercice, aideActivee, onActiverAide }: P
           )}
         </CercleTrigTrajetBase>
       )}
-      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+      {!sansBouton && <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />}
     </div>
   );
 }

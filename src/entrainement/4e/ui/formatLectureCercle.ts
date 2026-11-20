@@ -43,7 +43,8 @@ export const CONSIGNE_GENERALE =
   "Lis sur la figure les coordonnées de M(θ), déduis-en l'angle θ, puis lis tan θ sur la tangente au cercle en (1 ; 0).";
 
 export function intervalleLatex(e: E): string {
-  return e.variante === "degres" ? "[0^\\circ\\,;\\,360^\\circ\\mathclose{[}" : "[0\\,;\\,2\\pi\\mathclose{[}";
+  void e;
+  return "[0^\\circ\\,;\\,360^\\circ\\mathclose{[}";
 }
 
 export function enonceFragments(e: E): Fragments {
@@ -61,7 +62,7 @@ export function enonceFragments(e: E): Fragments {
 export function consignesEcrans(e: E): Fragments[] {
   return [
     [t("Lis sur la figure les valeurs exactes de "), l("\\cos\\theta"), t(" et de "), l("\\sin\\theta"), t(".")],
-    souderPonctuation([t(`Donne l'angle `), l("\\theta"), t(e.variante === "degres" ? " en degrés, dans " : " en radians, dans "), l(intervalleLatex(e)), t(".")]),
+    souderPonctuation([t(`Donne l'angle `), l("\\theta"), t(" en degrés, dans "), l(intervalleLatex(e)), t(".")]),
     souderPonctuation([t("La droite verticale "), l("x=1"), t(" est la tangente au cercle en "), l("(1\\,;\\,0)"), t(". Lis "), l("\\tan\\theta"), t(" sur cette tangente, ou indique que "), l("\\tan\\theta"), t(" n'est pas définie.")]),
   ];
 }
@@ -118,8 +119,8 @@ function quadrantsCandidats(e: E): string {
 // ---------------------------------------------------------------------------------------------
 
 function formulesQuadrant(e: E): Fragments {
-  const d = e.variante === "degres";
-  const [a, b, c, z] = d ? ["180^\\circ-\\alpha", "180^\\circ+\\alpha", "360^\\circ-\\alpha", "0^\\circ,\\ 90^\\circ,\\ 180^\\circ"] : ["\\pi-\\alpha", "\\pi+\\alpha", "2\\pi-\\alpha", "0,\\ \\dfrac{\\pi}{2},\\ \\pi"];
+  void e;
+  const [a, b, c, z] = ["180^\\circ-\\alpha", "180^\\circ+\\alpha", "360^\\circ-\\alpha", "0^\\circ,\\ 90^\\circ,\\ 180^\\circ"];
   return [
     l("\\alpha"),
     t(" (I), "),
@@ -133,7 +134,7 @@ function formulesQuadrant(e: E): Fragments {
     t(" vaut "),
     l(z),
     t(" ou "),
-    l(d ? "270^\\circ" : "\\dfrac{3\\pi}{2}"),
+    l("270^\\circ"),
     t("."),
   ];
 }
@@ -232,13 +233,15 @@ export function aidesEcran(e: E, ecran: number): Fragments[] {
 // ---------------------------------------------------------------------------------------------
 
 export const MESSAGE_ILLISIBLE_VALEUR = "Valeur non reconnue : écris un nombre exact (entier, fraction, racine). Cette saisie ne compte pas comme une tentative.";
-export const MESSAGE_ILLISIBLE_ANGLE = "Angle non reconnu : écris un nombre (en degrés) ou une expression avec π (en radians). Cette saisie ne compte pas comme une tentative.";
+export const MESSAGE_ILLISIBLE_ANGLE = "Angle non reconnu : écris un nombre de degrés, par exemple 120. Cette saisie ne compte pas comme une tentative.";
+export const MESSAGE_RADIANS_ANGLE = "En 4e, les angles s'écrivent en degrés : écris un nombre de degrés, sans π, par exemple 120. Cette saisie ne compte pas comme une tentative.";
 export const MESSAGE_APPROCHEE = "C'est une valeur approchée : écris la valeur exacte de la graduation (fraction ou racine). Cette saisie ne compte pas comme une tentative.";
-export const MESSAGE_APPROCHEE_ANGLE = "C'est une valeur approchée : écris l'angle exact, avec π. Cette saisie ne compte pas comme une tentative.";
+export const MESSAGE_APPROCHEE_ANGLE = "C'est une valeur approchée : écris l'angle exact, en degrés. Cette saisie ne compte pas comme une tentative.";
 export const MESSAGE_RECOPIE = "Écris seulement la valeur, sans sin, cos ni tan. Cette saisie ne compte pas comme une tentative.";
 
 export function aideSaisie(ecran: number, e: E): string {
-  if (ecran === 1) return e.variante === "degres" ? "Un nombre de degrés, sans π (par exemple 75)." : "Un angle avec π (par exemple 5π/12, ou 5pi/12).";
+  void e;
+  if (ecran === 1) return "Un nombre de degrés (par exemple 75).";
   return "Valeur exacte : entier, fraction (5/2), racine (√5/3 ou sqrt(5)/3) ; « − » devant un nombre négatif.";
 }
 
@@ -266,8 +269,6 @@ export function messageCoordonnees(e: E, piege: PiegeCoordonnees | undefined, ch
 export function messageAngle(e: E, piege: PiegeAngle | undefined): Fragments | null {
   const c = cote(e);
   switch (piege) {
-    case "unite":
-      return e.variante === "degres" ? [t("On demande "), l("\\theta"), t(" en degrés : écris un nombre de degrés, sans "), l("\\pi"), t(".")] : [t("On demande "), l("\\theta"), t(" en radians : écris-le avec "), l("\\pi"), t(" ("), l("180^\\circ=\\pi"), t(").")];
     case "hors-intervalle":
       return [t("Ton angle donne bien le point M, mais il n'est pas dans "), l(intervalleLatex(e)), t(" : ajoute ou retire un tour.")];
     case "reference":
