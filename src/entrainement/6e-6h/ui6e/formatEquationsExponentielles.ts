@@ -107,7 +107,8 @@ function formatDecimalFrancaisLatex(valeur: number): string {
  * permet (ex. spec : `(5/2)^{-2}=4/25=0{,}16`), fraction irréductible sinon, entier nu si `den=1`. */
 function formatValeurExacteLatex(v: ValeurExacteExpo): string {
   if (v.den === 1) return String(v.num);
-  if (denominateurDecimalFini(v.den)) return formatDecimalFrancaisLatex(v.num / v.den);
+  // Décimal seulement s'il reste court (au plus 3 décimales) : jamais « 0,001953125 » ni « 5,12e-7 ».
+  if (denominateurDecimalFini(v.den) && /^-?\d+(\.\d{1,3})?$/.test(String(v.num / v.den))) return formatDecimalFrancaisLatex(v.num / v.den);
   return `\\frac{${v.num}}{${v.den}}`;
 }
 
@@ -149,7 +150,9 @@ function consigneA(phase: "aEcran1" | "aEcran2", exercice: ExerciceEqExpoA): Fra
   }
   return exercice.sousType === "A3"
     ? [texte("À partir de l'exposant CORRECT de l'étape précédente, résous l'équation du second degré en x (0, 1 ou 2 solutions selon le cas).")]
-    : [texte("À partir de l'exposant/de l'équation CORRECT(E) de l'étape précédente, résous pour x.")];
+    : exercice.sousType === "A2"
+      ? [texte("À partir de l'équation CORRECTE de l'étape précédente, résous pour x.")]
+      : [texte("À partir de l'exposant CORRECT de l'étape précédente, résous pour x.")];
 }
 
 function aideA1(phase: "aEcran1" | "aEcran2", exercice: ExerciceEqExpoA): AideAvecLatex {
@@ -221,10 +224,11 @@ function formatEnonceC(exercice: ExerciceEqExpoC): string {
   return `${membreGauche} = 0`;
 }
 
-function consigneC(phase: "cEcran1" | "cEcran2" | "cEcran3"): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte("Pose "), latex("t=\\text{base}^x"), texte(" et réécris l'équation en t (reconnais la structure éventuellement déguisée).")];
+function consigneC(phase: "cEcran1" | "cEcran2" | "cEcran3", exercice: ExerciceEqExpoC): FragmentConsigne[] {
+  const puissance = `${baseLatexPourExposant(exercice.base)}^{x}`;
+  if (phase === "cEcran1") return [texte("Pose "), latex(`t=${puissance}`), texte(" et réécris l'équation en t (reconnais la structure éventuellement déguisée).")];
   if (phase === "cEcran2") return [texte("Résous l'équation du second degré en t — donne TOUTES les valeurs de t, y compris négatives (elles seront filtrées à l'étape suivante).")];
-  return [texte("Parmi les valeurs de t CORRECTES de l'étape précédente, REJETTE celles qui sont ≤ 0 ("), latex("\\text{base}^x"), texte(" ne peut jamais l'être), puis convertis les valeurs positives restantes en x.")];
+  return [texte("Parmi les valeurs de t CORRECTES de l'étape précédente, REJETTE celles qui sont ≤ 0 ("), latex(puissance), texte(" ne peut jamais l'être), puis convertis les valeurs positives restantes en x.")];
 }
 
 function aideC1(phase: "cEcran1" | "cEcran2" | "cEcran3", exercice: ExerciceEqExpoC): AideAvecLatex {
@@ -316,14 +320,22 @@ function formatNombreExactLatex(v: number): string {
       return `${signe}\\frac{${num / g}}{${den / g}}`;
     }
   }
-  return `${Number(v.toFixed(4))}`;
+  // Valeur irrationnelle (x tel que bˣ = t) : décimal à virgule, 3 décimales — jamais « 1.585 ».
+  return String(Number(v.toFixed(3))).replace(".", "{,}");
+}
+
+/** Vrai si `v` s'écrit exactement (entier ou fraction de dénominateur ≤ 24). */
+function estExactExpo(v: number): boolean {
+  if (Number.isInteger(v)) return true;
+  for (let den = 2; den <= 24; den++) if (Math.abs(Math.round(Math.abs(v) * den) / den - Math.abs(v)) < 1e-9) return true;
+  return false;
 }
 
 /** Un fragment par valeur (`variable = valeur`), ou un unique fragment `\varnothing` si la liste
  * est vide — jamais un score fractionnaire, jamais une liste vide silencieuse. */
 function formatEnsembleValeursLatex(valeurs: number[], variable: string): string[] {
   if (valeurs.length === 0) return ["\\varnothing"];
-  return valeurs.map((v) => `${variable} = ${formatNombreExactLatex(v)}`);
+  return valeurs.map((v) => `${variable} ${estExactExpo(v) ? "=" : "\\approx"} ${formatNombreExactLatex(v)}`);
 }
 
 /** Réponse RÉELLEMENT attendue d'un écran donné — un fragment LaTeX par élément (0 à N solutions).
@@ -444,7 +456,7 @@ export function consigneEcran(phase: PhaseEquationExponentielle, exercice: Exerc
     case "B":
       return consigneB(phase as "bEcran1" | "bEcran2");
     case "C":
-      return consigneC(phase as "cEcran1" | "cEcran2" | "cEcran3");
+      return consigneC(phase as "cEcran1" | "cEcran2" | "cEcran3", exercice);
     case "D":
       return consigneD();
   }
@@ -475,3 +487,5 @@ export function aideNiveau2(phase: PhaseEquationExponentielle, exercice: Exercic
       return aideD2(exercice);
   }
 }
+
+export { baseLatex as baseEquExpoLatex, baseLatexPourExposant as baseEquExpoPourExposant, formatValeurExacteLatex as valeurExacteEquExpoLatex, formatExposantLineaireLatex as exposantLineaireEquExpoLatex, formatNombreExactLatex as nombreExactEquExpoLatex, formatSommeTermes as sommeTermesEquExpo, estExactExpo };
