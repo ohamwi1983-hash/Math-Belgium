@@ -1,5 +1,6 @@
 import type { ExerciceTransformationGraphique } from "../core/transformationsGraphiques.types";
 import { expressionLibreVersLatex } from "./formatExpressionLatex";
+import { formatFonctionCanoniqueLatex } from "./formatFormeCanoniqueTransformations";
 
 /** Emplacement pas encore renseigné : tiret LaTeX (\_), même convention que apercuIntervalle.ts
  * (exercice "tableau de signes"). */
@@ -24,15 +25,7 @@ export function formatApercuEquation(equation: string): string {
 }
 
 /** (x-p)² développé : x nu si p=0 (jamais "(x-0)"), signe adapté. */
-function formatCorpsCarre(p: number): string {
-  if (p === 0) return "x^2";
-  const interieur = p > 0 ? `x - ${p}` : `x + ${-p}`;
-  return `(${interieur})^2`;
-}
 
-function pgcd(a: number, b: number): number {
-  return b === 0 ? a : pgcd(b, a % b);
-}
 
 /**
  * f(x) = a(x-p)²+q, rendu LaTeX — jamais un décimal arrondi pour la branche CV (1/cv peut être un
@@ -54,23 +47,7 @@ function pgcd(a: number, b: number): number {
  * ev=5,cv=5 → 1/1, jamais de fraction).
  */
 export function formatEquationTransformationLatex(exercice: ExerciceTransformationGraphique): string {
-  const { p, q, sox } = exercice;
-  const diviseur = pgcd(exercice.ev, exercice.cv);
-  const ev = exercice.ev / diviseur;
-  const cv = exercice.cv / diviseur;
-  const corpsCarre = formatCorpsCarre(p);
-  const signe = sox ? "-" : "";
-
-  let corps: string;
-  if (cv > 1) {
-    const numerateur = ev > 1 ? `${ev}${corpsCarre}` : corpsCarre;
-    corps = `${signe}\\frac{${numerateur}}{${cv}}`;
-  } else if (ev > 1) {
-    corps = `${signe}${ev}${corpsCarre}`;
-  } else {
-    corps = `${signe}${corpsCarre}`;
-  }
-
-  const termeQ = q === 0 ? "" : ` ${q > 0 ? "+" : "-"} ${Math.abs(q)}`;
-  return `f(x) = ${corps}${termeQ}`;
+  // Coefficient a écrit DEVANT la parenthèse (décision de l'utilisateur, audit 4e ch. 1, G4) :
+  // « \frac{4}{3}(x - 3)^2 - 5 », plus « \frac{4(x - 3)^2}{3} - 5 » — même écriture que gen9 et le cours.
+  return formatFonctionCanoniqueLatex({ numA: exercice.sox ? -exercice.ev : exercice.ev, denA: exercice.cv, p: exercice.p, q: exercice.q });
 }

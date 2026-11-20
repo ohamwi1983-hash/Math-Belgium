@@ -50,10 +50,15 @@ function motSens(sens: SensOptimisation, genre: GenreGrandeur): string {
 }
 
 
-/** Nombre en texte : virgule décimale, « − » typographique, au plus 2 décimales. */
-function nombre(valeur: number): string {
-  return String(Math.round(valeur * 100) / 100).replace(".", ",").replace("-", "−");
+/** Nombre en texte : virgule décimale, « − » typographique, au plus 2 décimales, espace fine
+ * insécable des milliers (audit 4e ch. 1, G8 : « 23805 W·min », « 3487 € »). */
+export function nombreInterpretation(valeur: number): string {
+  const [entier, decimales] = String(Math.round(valeur * 100) / 100).replace("-", "").split(".");
+  const groupe = entier!.replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
+  return `${valeur < 0 ? "−" : ""}${groupe}${decimales ? `,${decimales}` : ""}`;
 }
+
+const nombre = nombreInterpretation;
 
 /** « l'aire maximale », mais « la valeur minimale de l'aire totale des 2 formes » : derrière un nom
  * de grandeur qui a un complément (plus de 2 mots), l'adjectif se retrouvait loin de son nom

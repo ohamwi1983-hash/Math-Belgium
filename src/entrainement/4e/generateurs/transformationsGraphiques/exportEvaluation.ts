@@ -11,10 +11,8 @@ import type {
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
-import { correctionDetailleeTransformationsGraphiques, equationTransformationLatex } from "./corrigeDetaille";
-import { construireSvgFonction, type PointMarqueSvg } from "../../../export/svgGraph";
-import { cadrageLisible } from "../../../export/cadrageLisible";
-import { calculerViewBoxTransformation, evaluerCourbe, parametresDepuisExercice, pointUnitaire, RATIO_GRAPHE } from "../../ui/mafsTransformation";
+import { aTransformation, correctionDetailleeTransformationsGraphiques, equationTransformationLatex } from "./corrigeDetaille";
+import { svgParabole } from "../../ui/figureParabole";
 import { formatFractionIrreductible } from "../../ui/formatFraction";
 import { calculerA } from "../../moteur/verificationTransformationsGraphiques";
 import { genererExerciceTransformationGraphique } from "./index";
@@ -40,50 +38,11 @@ import { PARAMETRES_PARABOLE, profilTransformationsGraphiques } from "../profils
 
 const FORME_GENERALE = "f(x) = a(x-x_S)^2 + y_S";
 
-/** Graphique de l'ÉNONCÉ papier (décision de l'utilisateur) : la courbe seule, sans point marqué ni
- * coordonnée ; quadrillage et zoom choisis pour que le sommet ET le point croix (abscisse p + 1)
- * tombent sur des intersections (`cadrageLisible`). */
-function grapheEnonce(exercice: ExerciceTransformationGraphique): string {
-  const params = parametresDepuisExercice(exercice);
-  const cadrage = cadrageLisible({ x: params.p, y: params.q }, pointUnitaire(params), { symetrieX: true, symetrieY: false });
-  return construireSvgFonction((x) => evaluerCourbe(params, x), cadrage.viewBox, {
-    largeur: cadrage.largeur,
-    hauteur: cadrage.hauteur,
-    classe: "graphe-transformation",
-    grille: cadrage.grille,
-  });
-}
-
+/** Graphique papier (décision de l'utilisateur, audit 4e ch. 1, G5) : UNE seule échelle pour x et y
+ * (`figureParabole.ts`), sommet et point croix sur des intersections. Énoncé : la courbe seule ;
+ * corrigé : sommet et point croix étiquetés, y = x² en pointillés. */
 function graphe(exercice: ExerciceTransformationGraphique, estCorrige: boolean): string {
-  if (!estCorrige) return grapheEnonce(exercice);
-  const params = parametresDepuisExercice(exercice);
-  const reference = { p: 0, q: 0, a: 1 };
-  const viewBox = estCorrige ? calculerViewBoxTransformation(params, reference) : calculerViewBoxTransformation(params);
-  const croix = pointUnitaire(params);
-  const largeur = estCorrige ? 420 : 320;
-  const points: PointMarqueSvg[] = [
-    { x: params.p, y: params.q, forme: "point", label: estCorrige ? `S(${String(params.p).replace("-", "−")} ; ${String(params.q).replace("-", "−")})` : undefined, labelPosition: croix.y >= params.q ? "dessous" : "dessus" },
-    {
-      x: croix.x,
-      y: croix.y,
-      forme: "croix",
-      label: estCorrige ? `(${formatFractionIrreductible(croix.x)} ; ${formatFractionIrreductible(croix.y)})` : undefined,
-      labelPosition: croix.y >= params.q ? "dessus" : "dessous",
-    },
-  ];
-  return construireSvgFonction((x) => evaluerCourbe(params, x), { xMin: viewBox.x[0], xMax: viewBox.x[1], yMin: viewBox.y[0], yMax: viewBox.y[1] }, {
-    largeur,
-    hauteur: largeur / RATIO_GRAPHE,
-    classe: estCorrige ? "figure-corrige" : "graphe-transformation",
-    points,
-    courbesSecondaires: estCorrige ? [{ evaluer: (x) => evaluerCourbe(reference, x) }] : undefined,
-    legende: estCorrige
-      ? [
-          { texte: "parabole donnée", couleur: "#1971c2" },
-          { texte: "référence y = x²", couleur: "#8a8f98", pointilles: true },
-        ]
-      : undefined,
-  });
+  return svgParabole(aTransformation(exercice), exercice.p, exercice.q, { annote: estCorrige });
 }
 
 /** Nombre exact (entier ou fraction irréductible) en LaTeX. */

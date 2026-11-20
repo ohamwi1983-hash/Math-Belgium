@@ -16,17 +16,20 @@ import type {
 import { formatSommeTermes } from "./formatEquation";
 import { formatFractionIrreductible } from "./formatFraction";
 import { grandeurQualifiee } from "../generateurs/optimisation/interpretation";
+import { milliersLatex } from "../generateurs/optimisation/formatNarratif";
 import { CATALOGUE_FAMILLES } from "../generateurs/optimisation/index";
 import type { SegmentTexte } from "../components/SegmentsInline";
 
 /** Nombre en TEXTE : au plus 2 décimales, virgule décimale et « − » typographique. */
 function formatNombre(valeur: number): string {
-  return formatNombreLatex(valeur).replace("{,}", ",").replace("-", "−");
+  return formatNombreLatex(valeur).replace(/\\,/g, "\u202f").replace("{,}", ",").replace("-", "−");
 }
 
 /** Même nombre en LaTeX : virgule décimale « {,} » (jamais un point). */
 function formatNombreLatex(valeur: number): string {
-  return (Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "")).replace(".", "{,}");
+  const brut = (Number.isInteger(valeur) ? String(Math.abs(valeur)) : Math.abs(valeur).toFixed(2).replace(/\.?0+$/, "")).replace(".", "{,}");
+  // Espace fine des milliers dès 1 000 (audit 4e ch. 1, G8), comme `milliersLatex`.
+  return (valeur < 0 ? "-" : "") + milliersLatex(brut);
 }
 
 /** "de" + un nom de grandeur précédé de son article ("le"/"la"/"l'") — contracte "de le X" en

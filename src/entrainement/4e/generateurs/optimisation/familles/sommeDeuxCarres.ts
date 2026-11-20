@@ -167,7 +167,7 @@ function construireMateriau(): ExerciceOptimisationModelisation {
     famille: "sommeDeuxCarres",
     sens: "min",
     contexte: {
-      phraseEnonce: `${capitaliser(nomMateriau)} de ${L} cm de long doit être coupé en 2 morceaux : le premier sera plié pour former un carré, le second pour former un triangle rectangle dont les côtés restent toujours dans le rapport 3-4-5.`,
+      phraseEnonce: `${capitaliser(nomMateriau)} de ${L} cm de long doit être ${nomMateriau.startsWith("une ") ? "coupée" : "coupé"} en 2 morceaux : le premier sera plié pour former un carré, le second pour former un triangle rectangle dont les côtés restent toujours dans le rapport 3-4-5.`,
       labelVariable: "x",
       nomVariable: "la longueur destinée au carré",
       nomGrandeur: "l'aire totale des 2 formes",

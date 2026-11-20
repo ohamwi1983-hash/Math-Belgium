@@ -334,5 +334,24 @@ export function correctionDetailleeOptimisation(e: E): EtapeCorrection[] {
     etapes.push(...etapeRelation(e, L("relation")), ...etapeSysteme(e, L("systeme")), ...etapeDomaine(e, L("domaine")));
   }
   etapes.push(...etapeSommet(e, L("sommet")), ...etapeDecision(e, L("decision")), ...etapeConclusion(e, L("conclusion")));
-  return finaliserCorrige(etapes);
+  return finaliserCorrige(etapes).map(avecMilliers);
+}
+
+/** Espace fine des milliers (audit 4e ch. 1, G8) sur tout entier de 4 chiffres ou plus du corrigé —
+ * jamais dans une partie décimale (précédée de « {,} » ou « , »), un exposant ou un indice. */
+function milliers(t: string, sep: string): string {
+  return t.replace(/(?<![\d}^_,.\u202f])\d{4,}(?!\d)/g, (n) => n.replace(/\B(?=(\d{3})+$)/g, sep));
+}
+function fragmentsMilliers(f: FragmentConsigne[]): FragmentConsigne[] {
+  return f.map((x) => (x.type === "latex" ? { ...x, valeur: milliers(x.valeur, "\\,") } : { ...x, valeur: milliers(x.valeur, "\u202f") }));
+}
+function avecMilliers(etape: EtapeCorrection): EtapeCorrection {
+  return {
+    ...etape,
+    fragments: fragmentsMilliers(etape.fragments),
+    calcul: etape.calcul?.map((l: LigneCalcul) => ({
+      latex: milliers(l.latex, "\\,"),
+      justification: typeof l.justification === "string" ? milliers(l.justification, "\u202f") : l.justification && fragmentsMilliers(l.justification),
+    })),
+  };
 }

@@ -44,12 +44,14 @@ import { randomInt } from "../aleatoire";
 
 interface SkinRectangleInscrit {
   nomForme: string;
+  /** Unité à l'échelle de l'objet (audit 4e ch. 1, G7 : un toit ou une voile mesurés en cm). */
+  unite: "cm" | "dm";
 }
 
 const SKINS: SkinRectangleInscrit[] = [
-  { nomForme: "un panneau publicitaire triangulaire" },
-  { nomForme: "la voile triangulaire d'une planche à voile" },
-  { nomForme: "un pignon de toit triangulaire" },
+  { nomForme: "un panneau publicitaire triangulaire", unite: "cm" },
+  { nomForme: "la voile triangulaire d'une planche à voile", unite: "dm" },
+  { nomForme: "le pignon triangulaire d'une cabane", unite: "dm" },
 ];
 
 const DEMI_BASE_MIN = 8;
@@ -64,7 +66,9 @@ function capitaliser(texte: string): string {
 export function construireRectangleInscrit(): ExerciceOptimisationModelisation {
   const demiBase = randomInt(DEMI_BASE_MIN, DEMI_BASE_MAX);
   const base = 2 * demiBase;
-  const h0 = randomInt(H0_MIN, H0_MAX);
+  // Hauteur au plus double de la base (audit 4e ch. 1, G7 : des triangles 6 fois plus hauts que
+  // larges) — h0 ramené à 1 ou 2 SANS nouveau tirage (même suite aléatoire qu'avant).
+  const h0 = 1 + (randomInt(H0_MIN, H0_MAX) % 2);
   const hauteur = h0 * base;
 
   const fonction = { a: -h0, b: h0 * base, c: 0 };
@@ -91,13 +95,13 @@ export function construireRectangleInscrit(): ExerciceOptimisationModelisation {
     famille: "rectangleInscrit",
     sens: "max",
     contexte: {
-      phraseEnonce: `${capitaliser(skin.nomForme)} a la forme d'un triangle isocèle de base ${base} cm et de hauteur ${hauteur} cm. On y inscrit un rectangle dont un côté repose sur la base du triangle.`,
+      phraseEnonce: `${capitaliser(skin.nomForme)} a la forme d'un triangle isocèle de base ${base} ${skin.unite} et de hauteur ${hauteur} ${skin.unite}. On y inscrit un rectangle dont un côté repose sur la base du triangle.`,
       labelVariable: "x",
       nomVariable: "la largeur du rectangle",
       nomGrandeur: "l'aire du rectangle",
       genreGrandeur: "feminin",
-      uniteVariable: "cm",
-      uniteGrandeur: "cm²",
+      uniteVariable: skin.unite,
+      uniteGrandeur: `${skin.unite}²`,
       questionFinale: formatQuestionFinale("max", "l'aire du rectangle", "feminin"),
       // Croquis SVG (`prompt-implementation-3-diagrammes-svg.md`) — même géométrie sur les 3 skins
       // (habillages narratifs du MÊME triangle isocèle, voir en-tête de fichier), donc AUCUNE
@@ -133,10 +137,10 @@ export function construireRectangleInscrit(): ExerciceOptimisationModelisation {
       sens: "max",
       nomGrandeur: "l'aire du rectangle",
       genreGrandeur: "feminin",
-      uniteGrandeur: "cm²",
-      uniteGrandeurFautive: "cm",
+      uniteGrandeur: `${skin.unite}²`,
+      uniteGrandeurFautive: skin.unite,
       labelVariable: "x",
-      uniteVariable: "cm",
+      uniteVariable: skin.unite,
       optimal,
     }),
   };
