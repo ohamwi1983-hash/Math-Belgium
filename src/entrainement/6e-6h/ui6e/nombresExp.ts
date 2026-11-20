@@ -44,7 +44,8 @@ export const qLi = (x: Q): string => qL(x, "\\frac");
 /** Décimal exact (au plus `max` décimales, zéros inutiles retirés) en LaTeX : virgule `{,}`,
  * espace fine des milliers à partir de 10 000. */
 export function decL(x: number, max = 6): string {
-  const s = Math.abs(x).toFixed(max).replace(/\.?0+$/, "");
+  const brut = Math.abs(x).toFixed(max);
+  const s = brut.includes(".") ? brut.replace(/\.?0+$/, "") : brut;
   const [ent, dec] = s.split(".");
   const entier = ent.length > 4 ? ent.replace(/\B(?=(\d{3})+(?!\d))/g, "\\,") : ent;
   const corps = dec ? `${entier}{,}${dec}` : entier;

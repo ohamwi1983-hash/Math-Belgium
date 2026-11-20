@@ -1836,6 +1836,19 @@ export const fonctionsExponentielles: ChapterContent = {
           },
         },
         {
+          kind: 'entrainement',
+          title: 'Modèle exponentiel lu dans un tableau',
+          generatorId: '6gen147',
+          description: [
+            'Quatre mesures prises à intervalles égaux (bactéries, médicament, capital, machine…) : ' +
+              'calcule les rapports successifs, décide entre modèle exponentiel et modèle linéaire, ' +
+              'trouve b et a de f(t) = b·aᵗ (attention : mesures toutes les deux unités → le rapport vaut a²), ' +
+              'puis prévois une valeur.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 147. Modèle exponentiel lu dans un tableau »',
+        },
+        {
           kind: 'exempleLibre',
           blocks: [
             {
