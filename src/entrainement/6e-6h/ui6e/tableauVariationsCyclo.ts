@@ -60,7 +60,8 @@ export function svgTableauVariationsCyclo(d: DonneesTableauCyclo): string {
     s += texte(xn(i), y1 / 2 + 5, c.x);
     if (c.derivee === "zero") {
       s += texte(xn(i), y1 + h2 / 2 + 5, "0");
-      s += `<line x1="${xn(i)}" y1="${y2}" x2="${xn(i)}" y2="${H}" stroke="${DOUX}" stroke-width="0.8" stroke-dasharray="3 3"/>`;
+      // Pointillé sous le zéro, entre la valeur du haut et celle du bas (jamais à travers le texte).
+      s += `<line x1="${xn(i)}" y1="${y2 + 26}" x2="${xn(i)}" y2="${y2 + h3 - 26}" stroke="${DOUX}" stroke-width="0.8" stroke-dasharray="3 3"/>`;
     }
     if (c.derivee === "interdite") for (const dx of [-2, 2]) s += ligne(xn(i) + dx, y1, xn(i) + dx, H, 1);
   });

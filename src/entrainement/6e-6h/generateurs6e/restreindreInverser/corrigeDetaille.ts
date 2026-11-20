@@ -108,7 +108,7 @@ function etapesTrig(e: ExTrig): EtapeCorrection[] {
     utilise("c", [t("Même raisonnement pour tout "), f_("x"), t(" du domaine de g ("), f_(e.variante === "tangente" ? "\\mathbb{R}" : "[-1\\,;\\,1]"), t(") : "), f_(`\\${arc} x`), t(" est l'angle principal, l'identité donne l'angle de l'intervalle.")]),
     calcul("c", [ligne(`${fn}${P(gTrigL(e))}=${fn}(\\${arc} x)`, [f_(identite)]), ligne("=x", `${fn.slice(1)}(${arc} x) = x`), ligne(`g(x)=${gTrigL(e)}`, "cette valeur est dans l'intervalle")]),
     resultat("c", reponse(e, "expression")),
-    verification("c", [t("Avec la valeur de l'étape précédente, la formule redonne bien "), f_(`g${P(e.y0.l)}=${piL(gy)}`), t(".")]),
+    verification("c", [t("Avec la valeur trouvée plus haut, la formule redonne bien "), f_(`g${P(e.y0.l)}=${piL(gy)}`), t(".")]),
   ];
 }
 

@@ -36,7 +36,7 @@ export interface OptionsFigureCyclo {
 }
 
 const MARGE_G = 40;
-const MARGE = 12;
+const MARGE = 18;
 const GRILLE = "#d8dee6";
 const AXE = "#495057";
 const COURBE = "#1971c2";

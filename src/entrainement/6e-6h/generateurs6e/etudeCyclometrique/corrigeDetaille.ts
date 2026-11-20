@@ -2,7 +2,7 @@ import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuill
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExArcRacine, ExArctanDroite, ExArctanInverse, ExXArctan, ExerciceEtudeCyclo } from "../../core6e/etudeCyclometrique";
 import { q, qL } from "../../ui6e/nombresCycloLotG";
-import { deriveeL, domaineL, kAD, kAbsAR, kMoins1AD, reponse, valeursDemandees } from "../../ui6e/formatEtudeCyclometrique";
+import { deriveeL, domaineL, kAD, kAbsAR, kMoins1AD, parF, reponse, valeursDemandees } from "../../ui6e/formatEtudeCyclometrique";
 import type { ColonneTableau, DonneesTableauCyclo } from "../../ui6e/tableauVariationsCyclo";
 import { svgTableauVariationsCyclo } from "../../ui6e/tableauVariationsCyclo";
 
@@ -110,10 +110,10 @@ function etapesArctanDroite(e: ExArctanDroite): EtapeCorrection[] {
     ),
     utilise("e", [t("Valeurs remarquables "), t(COURS2), t(" : "), f(`\\arctan ${cArg}=${e.d.arctanC.l}`), t(" ; f est impaire ; "), f("\\lim\\limits_{x\\to\\pm\\infty}\\arctan x=\\pm\\dfrac{\\pi}{2}"), t(".")]),
     calcul("e", [
-      ligne(`f\\left(${c}\\right)=${k}\\arctan ${cArg}-${c}`),
+      ligne(`f${parF(c)}=${k}\\arctan ${cArg}-${c}`),
       ligne(`=${k}\\cdot ${e.d.arctanC.l}-${c}`, "valeur remarquable"),
       ligne(`=${e.d.fc.l}`),
-      ligne(`f\\left(-${c}\\right)=-f\\left(${c}\\right)`, "f est impaire"),
+      ligne(`f${parF(`-${c}`)}=-f${parF(c)}`, "f est impaire"),
       ligne(`=${e.d.fmc.l}`),
       ligne(`\\lim\\limits_{x\\to+\\infty}f(x)=-\\infty`, [f(`${k}\\arctan x`), t(" tend vers "), f(`${k}\\cdot\\dfrac{\\pi}{2}`), t(", et "), f("-x"), t(" vers "), f("-\\infty")]),
       ligne(`\\lim\\limits_{x\\to-\\infty}f(x)=+\\infty`, "même raisonnement"),
@@ -148,7 +148,7 @@ function etapesXArctan(e: ExXArctan): EtapeCorrection[] {
     ),
     ...etape(
       "d",
-      [t("f′ a le signe de "), f("x"), t(" (étape précédente) ; on le confirme par une valeur de chaque côté de 0.")],
+      [t("f′ a le signe de "), f("x"), t(", comme on l'a vu en cherchant les zéros ; on le confirme par une valeur de chaque côté de 0.")],
       [ligne(`f'(-1)=-${at("1")}-\\dfrac{${k}}{${k * k + 1}}<0`, "à gauche de 0"), ligne(`f'(1)=${at("1")}+\\dfrac{${k}}{${k * k + 1}}`, "à droite de 0"), ligne(`\\approx ${fp1.toFixed(2).replace(".", "{,}")}>0`)],
       e,
       "variations",

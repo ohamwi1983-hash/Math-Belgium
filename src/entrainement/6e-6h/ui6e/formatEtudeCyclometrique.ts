@@ -193,6 +193,9 @@ export function options(e: E): OptionEcran[] {
 }
 
 /** Champs de l'écran « valeurs » : libellé et valeur exacte attendue (ou ±∞). */
+/** Argument d'une fonction : parenthèses simples, `\\left…\\right` seulement autour d'une fraction. */
+export const parF = (arg: string): string => (arg.includes("\\dfrac") ? `\\left(${arg}\\right)` : `(${arg})`);
+
 export interface ValeurDemandee {
   label: string;
   labelLatex: string;
@@ -204,8 +207,8 @@ export function valeursDemandees(e: E): ValeurDemandee[] {
     case "arctan-droite": {
       const c = e.d.c;
       return [
-        { label: `f(${c.t})`, labelLatex: `f\\left(${c.l}\\right)=`, attendue: e.d.fc },
-        { label: `f(−${c.t})`, labelLatex: `f\\left(-${c.l}\\right)=`, attendue: e.d.fmc },
+        { label: `f(${c.t})`, labelLatex: `f${parF(c.l)}=`, attendue: e.d.fc },
+        { label: `f(−${c.t})`, labelLatex: `f${parF(`-${c.l}`)}=`, attendue: e.d.fmc },
       ];
     }
     case "x-arctan":
@@ -217,7 +220,7 @@ export function valeursDemandees(e: E): ValeurDemandee[] {
       const bas = e.d.arc === "arcsin" ? val(-PI2, "-\\dfrac{\\pi}{2}", "−π/2") : val(Math.PI, "\\pi", "π");
       const haut = e.d.arc === "arcsin" ? val(PI2, "\\dfrac{\\pi}{2}", "π/2") : val(0, "0", "0");
       return [
-        { label: `f(${e.d.x0.t})`, labelLatex: `f\\left(${e.d.x0.l}\\right)=`, attendue: e.d.fx0 },
+        { label: `f(${e.d.x0.t})`, labelLatex: `f${parF(e.d.x0.l)}=`, attendue: e.d.fx0 },
         { label: "f(−1)", labelLatex: "f(-1)=", attendue: bas },
         { label: "f(1)", labelLatex: "f(1)=", attendue: haut },
       ];
@@ -248,15 +251,15 @@ export function libelle(_e: E, phase: PhaseEtudeCyclo): string {
 export function consigne(e: E, phase: PhaseEtudeCyclo): Frag[] {
   switch (phase) {
     case "domaine":
-      return [tx("Détermine le domaine de "), lx("f"), tx(" (un intervalle par ligne).")];
+      return [tx("Détermine le domaine de "), lx("f"), tx(".")];
     case "derivee":
       return e.variante === "arc-racine"
         ? [tx("Calcule "), lx("f'(x)"), tx(" pour "), lx("x\\in\\,]-1\\,;\\,1["), tx(" (aux bornes, arcsin, arccos et la racine ne sont pas dérivables).")]
         : [tx("Calcule "), lx("f'(x)"), tx(" sur le domaine de "), lx("f"), tx(".")];
     case "zeros":
-      return [tx("Pour quelles valeurs de "), lx("x"), tx(" la dérivée "), lx("f'(x)"), tx(" s'annule-t-elle ? Sépare les valeurs par « ; », ou écris « aucune ».")];
+      return [tx("Pour quelles valeurs de "), lx("x"), tx(" la dérivée "), lx("f'(x)"), tx(" s'annule-t-elle ?")];
     case "variations":
-      return [tx("Choisis les variations de "), lx("f"), tx(".")];
+      return [tx("Quelles sont les variations de "), lx("f"), tx(" ?")];
     case "valeurs":
       switch (e.variante) {
         case "arctan-droite":

@@ -48,7 +48,10 @@ export function piege(e: E, phase: PhaseLireTransformee, v: string[]): Frag[] | 
     return null;
   }
   // kc
-  if (pres(x[0], -kV(e))) return [tx("Le signe de k : comme "), lx("m>0"), tx(", f est croissante si "), lx("k>0"), tx(" et décroissante si "), lx("k<0"), tx(e.variante === "arccos" ? " — et arccos est elle-même décroissante." : ".")];
+  if (pres(x[0], -kV(e)))
+    return e.variante === "arccos"
+      ? [tx("Le signe de k : arccos est décroissante et "), lx("m>0"), tx(", donc f est décroissante si "), lx("k>0"), tx(" et croissante si "), lx("k<0"), tx(".")]
+      : [tx("Le signe de k : comme "), lx("m>0"), tx(", f est croissante si "), lx("k>0"), tx(" et décroissante si "), lx("k<0"), tx(".")];
   if (pres(x[0], 2 * kV(e)) || pres(x[0], kV(e) / 2)) return [tx("L'image de f a pour longueur "), lx("|k|\\cdot\\pi"), tx(" : divise la longueur lue par "), lx("\\pi"), tx(".")];
   if (e.variante === "arccos") {
     const [lo, hi] = imageQ(e);
