@@ -24,6 +24,9 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { correctionDetailleeParametresSinusoide, LETTRE_SINUSOIDE } from "./generateurs5e/parametresSinusoide/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -177,6 +180,7 @@ export function App5gen8() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: <Katex expression={formatChampParametreLatex(exercice, etat.phase)} />,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeParametresSinusoide(exercice), LETTRE_SINUSOIDE[etat.phase])} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
