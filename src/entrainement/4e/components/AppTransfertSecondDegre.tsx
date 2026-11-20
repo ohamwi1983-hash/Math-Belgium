@@ -38,6 +38,9 @@ export interface PropsAppTransfert<E> {
   consigneGenerale: (e: E) => ReactNode;
   blocDonnees: (e: E) => ReactNode;
   correction: (e: E) => EtapeCorrection[];
+  /** Nom du crochet de débogage (DEV ou `?dev=1`) : `window[idDebug] = { exercice, ecran }` pour les
+   * parcours Playwright (gen126, gen128). */
+  idDebug?: string;
 }
 
 interface TransitionEnAttente {
@@ -70,6 +73,8 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
   const [generation, setGeneration] = useState(0);
   const [statuts, setStatuts] = useState<StatutChamp[] | null>(null);
   const [illisible, setIllisible] = useState(false);
+  /** Écriture juste mais pas dans la forme demandée (gen126) : message, aucune tentative comptée. */
+  const [messageForme, setMessageForme] = useState<string | null>(null);
 
   const e = etat.exercice;
   const tous = props.ecrans(e);
@@ -83,12 +88,14 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
     setFicheOuverteIndex(null);
     setStatuts(null);
     setIllisible(false);
+    setMessageForme(null);
     setGeneration((g) => g + 1);
   }
 
-  function conclure(correct: boolean, votreReponse: ReactNode) {
+  function conclure(correct: boolean, votreReponse: ReactNode, explicationChoix?: string) {
     const resultat = soumettre(etat, def, correct);
     setIllisible(false);
+    setMessageForme(null);
     if (!resultat.clos) {
       setEtat(resultat.etat);
       return;
@@ -99,7 +106,7 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
     setEnAttente({
       revele: resultat.revele,
       reponseAttendue: attendue,
-      messageRevele: def.type === "choix" ? def.messageFaux : undefined,
+      messageRevele: def.type === "choix" ? (explicationChoix ?? def.messageFaux) : undefined,
       derniere: ecran >= tous.length - 1,
     });
   }
@@ -113,7 +120,12 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
     setEtat(ecranSuivant(etat));
     setStatuts(null);
     setIllisible(false);
+    setMessageForme(null);
     setEnAttente(null);
+  }
+
+  if (props.idDebug && (import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1")) {
+    (window as unknown as Record<string, unknown>)[props.idDebug] = { exercice: e, ecran };
   }
 
   const validation: ValidationEtapeProps | null = enAttente
@@ -131,7 +143,14 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
 
   function ecranCourant(): ReactNode {
     if (def.type === "choix") {
-      return <EtapeChoixTransformation {...communs} options={def.options} bonne={def.bonne} onValider={(i) => conclure(i === def.bonne, <RenduFragments fragments={def.options[i]!} />)} />;
+      return (
+        <EtapeChoixTransformation
+          {...communs}
+          options={def.options}
+          bonne={def.bonne}
+          onValider={(i) => conclure(i === def.bonne, <RenduFragments fragments={def.options[i]!} />, i === def.bonne ? undefined : def.explications?.[i])}
+        />
+      );
     }
     return (
       <EtapeChampsTransfert
@@ -141,10 +160,18 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
         tentativesMax={tentativesMax(def)}
         statuts={statuts}
         illisible={illisible}
+        messageForme={messageForme}
         onValider={(saisies) => {
           const diagnostic = diagnostiquerChamps(saisies, def.champs);
           if (diagnostic.some((s) => s.etat === "parse_error")) {
             setIllisible(true);
+            setMessageForme(null);
+            return;
+          }
+          const forme = diagnostic.find((s) => s.etat === "forme");
+          if (forme) {
+            setIllisible(false);
+            setMessageForme(forme.message ?? "Ton expression est juste, mais pas dans la forme demandée.");
             return;
           }
           setStatuts(diagnostic);

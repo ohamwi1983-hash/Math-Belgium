@@ -163,11 +163,14 @@ interface PropsChamps extends PropsAides {
   statuts: StatutChamp[] | null;
   /** Dernière soumission illisible : aucune tentative comptée. */
   illisible: boolean;
+  /** Dernière soumission juste mais pas dans la forme demandée (gen126) : message, aucune tentative
+   * comptée. */
+  messageForme?: string | null;
   onValider: (saisies: Saisie[]) => void;
   validation?: ValidationEtapeProps | null;
 }
 
-export function EtapeChampsTransfert({ consigne, champs, tentativesUtilisees, tentativesMax, statuts, illisible, onValider, validation, ...aides }: PropsChamps) {
+export function EtapeChampsTransfert({ consigne, champs, tentativesUtilisees, tentativesMax, statuts, illisible, messageForme, onValider, validation, ...aides }: PropsChamps) {
   const [saisies, setSaisies] = useState<Saisie[]>(() => champs.map(saisieInitiale));
   const fige = !!validation;
   const complet = saisies.every((s) => (typeof s === "string" ? s.trim() !== "" : saisieEnsembleComplete(s)));
@@ -208,7 +211,14 @@ export function EtapeChampsTransfert({ consigne, champs, tentativesUtilisees, te
               Une saisie n'est pas lisible (ou est incomplète) : vérifie l'écriture. Aucune tentative n'est comptée.
             </p>
           )}
-          {!illisible && tentativesUtilisees > 0 && (
+          {!illisible && messageForme && (
+            <div className="alert-error" role="alert">
+              <span>
+                <RenduFragments fragments={messageFragments(`${messageForme} Aucune tentative n'est comptée.`)} />
+              </span>
+            </div>
+          )}
+          {!illisible && !messageForme && tentativesUtilisees > 0 && (
             <div className="alert-error" role="alert">
               <div>
                 <p style={{ margin: 0 }}>{`Incorrect — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`}</p>

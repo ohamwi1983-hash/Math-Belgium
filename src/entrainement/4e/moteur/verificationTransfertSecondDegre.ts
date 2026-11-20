@@ -1,5 +1,6 @@
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { evaluerExpressionGenerale } from "./expressionGenerale";
+import { controlerForme, sansPrefixeFonction } from "./formeEcriturePolynome";
 import type { EtatMorceau } from "../ui/morceauIntervalle";
 import type { Champ, ChampEnsemble, ChampEquation, ChampExpression, ChampListe, ChampNombre, ChampRelation, Variable } from "../ui/ecransTransfertSecondDegre";
 import {
@@ -25,7 +26,9 @@ import {
  * `piege` (erreur typique reconnue, message ciblé), `faux`, `correct`.
  */
 
-export type EtatChamp = "correct" | "faux" | "piege" | "parse_error";
+/** `forme` : écriture JUSTE mais pas dans la forme demandée (gen126) — comme `parse_error`, aucune
+ * tentative n'est comptée ; le message dit quelle forme est attendue. */
+export type EtatChamp = "correct" | "faux" | "piege" | "parse_error" | "forme";
 
 export interface StatutChamp {
   etat: EtatChamp;
@@ -300,10 +303,15 @@ function diagListe(saisie: string, c: ChampListe): StatutChamp {
   return { etat: "faux", message: c.messageSiFaux };
 }
 
-function diagExpression(saisie: string, c: ChampExpression): StatutChamp {
+function diagExpression(saisie0: string, c: ChampExpression): StatutChamp {
+  const saisie = c.forme ? sansPrefixeFonction(saisie0) : saisie0;
   const l = lirePolynome(saisie, c.variable);
   if ("erreur" in l) return statutLecture(l.erreur);
-  if (egauxPoly(l.poly, c.cible)) return { etat: "correct" };
+  if (egauxPoly(l.poly, c.cible)) {
+    if (!c.forme) return { etat: "correct" };
+    const f = controlerForme(normaliserExpression(saisie), c.forme);
+    return f.ok ? { etat: "correct" } : { etat: "forme", message: f.message };
+  }
   const p = c.pieges.find((x) => egauxPoly(l.poly, x.poly));
   if (p) return { etat: "piege", message: p.message };
   return { etat: "faux", message: c.messageSiFaux };

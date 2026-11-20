@@ -1065,6 +1065,19 @@ export const fonctionSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 9. Forme canonique et transformations »',
         },
+        {
+          kind: 'entrainement',
+          title: "Trois écritures d'une parabole",
+          generatorId: 'gen126',
+          description: [
+            'Passe d\'une écriture à l\'autre : développer une forme canonique ou factorisée, ' +
+              'chercher les zéros sur la forme canonique (ou constater qu\'il n\'y en a pas), ' +
+              'mettre a en évidence et compléter le carré, lire ou calculer le sommet. Toute ' +
+              'écriture juste est acceptée, mais la forme demandée est contrôlée.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 126. Trois écritures d\'une parabole »',
+        },
       ],
     },
     {
