@@ -1934,6 +1934,20 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 5. Associer graphique et expression »',
         },
+        {
+          kind: 'entrainement',
+          title: "Détective d'erreurs : réciproques et arcfonctions",
+          generatorId: '6gen152',
+          description: [
+            "La résolution d'un élève contient une seule ligne fausse : trouve-la, nomme l'erreur " +
+              '(f⁻¹ prise pour 1/f, arcsin(sin θ) = θ hors de l\'image, signe oublié devant la dérivée de ' +
+              "arccos, u′ oublié, (kx)² écrit kx², candidat hors condition d'existence, sens de " +
+              "l'inégalité non inversé, ±π/2 atteints par arctan, injectivité sur une réunion d'intervalles) " +
+              'et corrige le résultat.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: "6e (6h) → « 152. Détective d'erreurs : réciproques et arcfonctions »",
+        },
       ],
     },
   ],

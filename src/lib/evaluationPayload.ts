@@ -81,7 +81,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
-  | '6gen153' | '6gen154' | '6gen155'
+  | '6gen152' | '6gen153' | '6gen154' | '6gen155'
   | '6gen148' | '6gen149' | '6gen150' | '6gen151'
   | '6gen144'
   | '6gen147'
@@ -153,6 +153,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'equations', generatorId: '6gen3', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'derivees', generatorId: '6gen4', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen5', label: '', processus: 3 },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen152', label: "Détective d'erreurs : réciproques et arcfonctions (6gen152)", processus: 3 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen6', label: 'Calcul de limites (6gen6)' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen145', label: 'Limites de référence et croissances comparées (6gen145)', processus: 2 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen146', label: 'Puissances à exposant réel sans calculatrice (6gen146)', processus: 1 },
