@@ -17,8 +17,11 @@ const BASELINE_MIN = 15;
 const BASELINE_MAX = 40;
 const THETA_M_MIN = 20;
 const THETA_M_MAX = 50;
-const RHO_MIN = 40;
-const RHO_MAX = 90;
+/** Angle ORM OBTUS (audit 4e ch. 5, G7) : R est entre O et le pied, sur l'horizontale de O — l'angle
+ * ROM est alors l'angle d'élévation de M (donné une seule fois). Borne haute : l'angle en M garde au
+ * moins 15°. */
+const RHO_MIN = 100;
+const RHO_MARGE_M = 15;
 const ECART_ANGLE_MIN = 10;
 const ECART_ANGLE_MAX = 30;
 
@@ -29,7 +32,7 @@ function versRadians(degres: number): number {
 export function construireSectionFalaise(): ExerciceTriangleLies {
   const d = randomInt(BASELINE_MIN, BASELINE_MAX);
   const thetaM = randomInt(THETA_M_MIN, THETA_M_MAX);
-  const rho = randomInt(RHO_MIN, RHO_MAX);
+  const rho = randomInt(RHO_MIN, 180 - thetaM - RHO_MARGE_M);
   const thetaT = thetaM + randomInt(ECART_ANGLE_MIN, ECART_ANGLE_MAX);
 
   const { trianglePont, triangleCible, OM } = resoudrePontBaselineVerticalite(d, thetaM, rho, thetaT);
@@ -46,11 +49,11 @@ export function construireSectionFalaise(): ExerciceTriangleLies {
     typeTrianglePont: "quelconque",
     grandeurDemandee: "aire",
     contexte:
-      "Un grimpeur souhaite estimer l'aire de la section triangulaire visible d'une paroi rocheuse, entre un point de repère M et le sommet T de la voie. Depuis un point d'observation O et un point de repère atteignable R au pied de la paroi, on vise M puis T.",
+      "Un grimpeur souhaite estimer l'aire de la section triangulaire visible d'une paroi rocheuse, entre un point de repère M et le sommet T de la voie. Le point d'observation O et un point de repère R sont au sol, alignés avec le pied de la paroi (R entre O et la paroi). Depuis O et R, on vise M ; depuis O, on vise aussi T.",
     trianglePont,
     donneesPont: [
       { label: "distance OR", valeur: d, unite: "m" },
-      { label: "angle ROM", valeur: thetaM, unite: "°" },
+      { label: "angle d'élévation vers M", valeur: thetaM, unite: "°" },
       { label: "angle ORM", valeur: rho, unite: "°" },
     ],
     labelCoteTransfere: "OM",

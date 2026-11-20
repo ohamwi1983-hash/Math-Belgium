@@ -72,7 +72,7 @@ export function construireTerrainSportif(): ExerciceTriangleLies {
       { label: "angle DAC", valeur: angleDAC, unite: "°" },
       { label: "angle DCA", valeur: angleDCA, unite: "°" },
     ],
-    questionCible: "Calcule l'aire du terrain ACD.",
+    questionCible: "Calcule l'aire du triangle ACD.",
     valeurCibleAttendue: aire,
     uniteGrandeurCible: "m²",
     points: [

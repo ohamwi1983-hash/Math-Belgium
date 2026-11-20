@@ -40,14 +40,14 @@ const SKINS: SkinHauteurInaccessible[] = [
     contexte:
       "Depuis un point d'observation O, on vise un point de repère M situé à une hauteur connue sur un mât vertical, puis le sommet T du même mât — inaccessible directement.",
     hypotheseAnnexe: "Le pied F du mât, le point M et le sommet T sont alignés sur une même verticale.",
-    questionCible: (hM) => `Calcule la hauteur totale du mât (jusqu'au point T), sachant que M se trouve à ${hM} m de hauteur.`,
+    questionCible: () => "Calcule la hauteur totale du mât (jusqu'au point T).",
     labelGrandeur: "La hauteur totale du mât",
   },
   {
     contexte:
       "Depuis un point d'observation O, on vise un point de repère M situé à une hauteur connue sur un pylône télécom vertical, puis le sommet T de l'antenne fixée à son extrémité — inaccessible directement.",
     hypotheseAnnexe: "Le pied F du pylône, le point M et le sommet T (haut de l'antenne) sont alignés sur une même verticale.",
-    questionCible: (hM) => `Calcule la hauteur totale du pylône et de son antenne (jusqu'au point T), sachant que M se trouve à ${hM} m de hauteur.`,
+    questionCible: () => "Calcule la hauteur totale du pylône et de son antenne (jusqu'au point T).",
     labelGrandeur: "La hauteur totale du pylône et de son antenne",
   },
 ];

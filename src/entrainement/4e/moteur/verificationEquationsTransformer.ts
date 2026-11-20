@@ -4,6 +4,7 @@ import { evaluerExpressionGenerale } from "./expressionGenerale";
 import { normaliserRacinesUnSansLautre } from "./verificationUnSansLautre";
 import { referenceAffichee } from "../ui/formatEquationsTransformer";
 import { solutionsAvecTolerance, toleranceBase, valeurK } from "./modeleEquationsTransformer";
+import { diagnostiquerExactNumerique } from "./saisieExacteTrigo";
 
 /**
  * Vérification de gen78. Valeurs k : forme exacte (fraction, √) ou décimale au centième
@@ -18,6 +19,19 @@ const TOLERANCE_K = 0.005 + 1e-9;
 export interface Diagnostic {
   statut: StatutVerification;
   verdictFaux: boolean;
+  /** Décision 3 de l'utilisateur (audit 4e ch. 5) : une valeur de k décimale APPROCHÉE (« 0,87 »
+   * pour √3/2) est refusée sans perte d'essai, comme une saisie illisible. */
+  approchee?: boolean;
+}
+
+/** k saisi : forme exacte ou décimal exact (« 0,6 ») seulement. */
+function kJuste(saisie: string, k: number): boolean {
+  return diagnostiquerExactNumerique(saisie, k) === "correct";
+}
+
+/** Une des saisies est-elle une valeur approchée d'un k attendu ? */
+function kApproche(saisies: string[], ks: number[]): boolean {
+  return saisies.some((sa) => ks.some((k) => diagnostiquerExactNumerique(sa, k) === "approchee"));
 }
 
 /** Valeur numérique d'une saisie libre (fraction, racine « √ » ou « sqrt », virgule) ; `null` si illisible. */
@@ -59,13 +73,23 @@ export function diagnostiquerBases(e: ExerciceEquationsTransformer, aucune: bool
   const lus = valeurs.map(lireNombre);
   if (lus.some((v) => v === null)) return { statut: "parse_error", verdictFaux: false };
   const nombres = lus as number[];
+  const ks = e.bases.map((b) => valeurK(b.k));
+  if (kApproche(valeurs, ks)) return { statut: "parse_error", verdictFaux: false, approchee: true };
   if (e.forme.type === "carre") {
     // Une même valeur écrite deux fois (k = 0 : « 0 » et « −0 ») ne compte qu'une fois.
-    const uniques = nombres.filter((v, i) => nombres.findIndex((w) => Math.abs(w - v) <= TOLERANCE_K) === i);
-    const ok = memeMultiensemble(uniques, e.bases.map((b) => ({ valeur: valeurK(b.k), tolerance: TOLERANCE_K })));
+    const indices = nombres.map((_v, i) => i).filter((i) => nombres.findIndex((w) => Math.abs(w - nombres[i]!) <= TOLERANCE_K) === i);
+    const restants = [...ks];
+    const ok =
+      indices.length === ks.length &&
+      indices.every((i) => {
+        const j = restants.findIndex((k) => kJuste(valeurs[i]!, k));
+        if (j === -1) return false;
+        restants.splice(j, 1);
+        return true;
+      });
     return { statut: ok ? "correct" : "not_equivalent", verdictFaux: false };
   }
-  const ok = nombres.length === e.bases.length && nombres.every((v, i) => Math.abs(v - valeurK(e.bases[i]!.k)) <= TOLERANCE_K);
+  const ok = nombres.length === e.bases.length && valeurs.every((sa, i) => kJuste(sa, ks[i]!));
   return { statut: ok ? "correct" : "not_equivalent", verdictFaux: false };
 }
 
@@ -75,7 +99,7 @@ export function statutsLignesBases(e: ExerciceEquationsTransformer, valeurs: str
     const v = lireNombre(s);
     if (v === null) return "parse_error";
     const b = e.bases[i];
-    return b && Math.abs(v - valeurK(b.k)) <= TOLERANCE_K ? "correct" : "not_equivalent";
+    return b && kJuste(s, valeurK(b.k)) ? "correct" : "not_equivalent";
   });
 }
 

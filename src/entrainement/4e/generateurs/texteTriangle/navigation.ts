@@ -99,6 +99,97 @@ const CONTEXTES_TRAJETS: (ContexteLongueurs & {
   },
 ];
 
+/** Audit 4e ch. 5, V7 : la loi n'est plus fixée par la situation. Sous-type « relevé » : le second
+ * trajet est inconnu, la position finale A est relevée depuis le départ (troisième cap) — un côté et
+ * deux angles, loi des sinus pour la distance parcourue sur le second trajet. */
+const QUESTIONS_RELEVE: ((p: Precision) => string)[] = [
+  (p) => `Quelle distance le voilier a-t-il parcourue sur le second trajet ? Donne la distance BA ${p.texte}.`,
+  (p) => `Quelle distance l'avion a-t-il parcourue depuis la balise ? Donne la distance BA ${p.texte}.`,
+  (p) => `Quelle distance Léa a-t-elle parcourue depuis la balise B ? Donne la distance BA ${p.texte}.`,
+];
+
+const TEXTES_RELEVE: ((c1: number, d1: string, c2: number, c3: number) => string)[] = [
+  (c1, d1, c2, c3) => `Un voilier quitte le port P et navigue au cap ${c1}° sur ${d1} km, jusqu'à la bouée B. Il prend ensuite le cap ${c2}° et navigue jusqu'au point A. Depuis le port, on relève alors sa position A au cap ${c3}°. ${RAPPEL_CAP}`,
+  (c1, d1, c2, c3) => `Un petit avion décolle de l'aérodrome D et vole au cap ${c1}° sur ${d1} km, jusqu'à la balise radio B. Il vole ensuite au cap ${c2}° jusqu'au point A, où le radar de l'aérodrome le repère au cap ${c3}°. ${RAPPEL_CAP}`,
+  (c1, d1, c2, c3) => `Lors d'une course d'orientation, Léa part du poste de départ D. Elle marche ${d1} m au cap ${c1}°, jusqu'à la balise B, puis au cap ${c2}° jusqu'à la balise A. Depuis le départ, la balise A se trouve au cap ${c3}°. ${RAPPEL_CAP}`,
+];
+
+const PHRASES_RELEVE: Phrase[] = [
+  { avant: "Sur le second trajet, le voilier a parcouru environ ", apres: "." },
+  { avant: "Depuis la balise, l'avion a parcouru environ ", apres: "." },
+  { avant: "Depuis la balise B, Léa a parcouru environ ", apres: "." },
+];
+
+export function construireTrajetsReleve(): ExerciceTexteTriangleStandard {
+  const i = entier(0, CONTEXTES_TRAJETS.length - 1);
+  const ctx = CONTEXTES_TRAJETS[i]!;
+  const [D, V, A] = ctx.noms;
+  for (;;) {
+    const cap1 = capAuHasard();
+    const sens = Math.random() < 0.5 ? 1 : -1;
+    const ecart = entier(50, 140);
+    const p = entier(15, ecart - 25);
+    const cap2 = normaliserCap(cap1 + sens * ecart);
+    const cap3 = normaliserCap(cap1 + sens * p);
+    if (!capLisible(cap2) || !capLisible(cap3)) continue;
+    if (ecartCaps(cap1, cap2).nord || ecartCaps(cap1, cap3).nord) continue;
+    const angleV = 180 - ecart;
+    const angleD = p;
+    const angleA = 180 - angleV - angleD;
+    if (angleA < 25 || angleV < 30 || Math.abs(angleV - 90) <= 6) continue;
+    const d1 = longueur(ctx.min, ctx.max, ctx.pas);
+    const angV = `\\widehat{${D}${V}${A}}`;
+    const angD = `\\widehat{${V}${D}${A}}`;
+    const angA = `\\widehat{${D}${A}${V}}`;
+    const calcul = { loi: "sinus" as const, coteConnu: { latex: `${D}${V}`, valeur: d1 }, angleOpposeConnu: { latex: angA, valeur: angleA }, angleOpposeCherche: { latex: angD, valeur: angleD } };
+    const valeur = valeurCalcul(calcul);
+    // Piège : l'écart des caps (angle dont la route tourne) pris comme angle intérieur en B.
+    const angleAFaux = 180 - ecart - angleD;
+    const piege = angleAFaux > 5 ? (d1 * Math.sin((angleD * Math.PI) / 180)) / Math.sin((angleAFaux * Math.PI) / 180) : 0;
+    const u1 = direction(cap1);
+    const u2 = direction(cap2);
+    const pV = { x: d1 * u1.x, y: d1 * u1.y };
+    const pA = { x: pV.x + valeur * u2.x, y: pV.y + valeur * u2.y };
+    return {
+      variante: "trajets",
+      sousType: "releve",
+      contexte: TEXTES_RELEVE[i]!(cap1, fr(d1), cap2, cap3),
+      question: QUESTIONS_RELEVE[i]!(ctx.precision),
+      triangle: `${D}${V}${A}`,
+      points: [
+        { nom: D, x: 0, y: 0 },
+        { nom: V, ...pV },
+        { nom: A, ...pA },
+      ],
+      avecNord: true,
+      unite: ctx.unite,
+      precision: ctx.precision,
+      elements: melanger([
+        { latex: `${D}${V}`, role: "donne" as const },
+        { latex: angV, role: "convertir" as const },
+        { latex: angD, role: "convertir" as const },
+        { latex: angA, role: "convertir" as const },
+        { latex: `${V}${A}`, role: "cherche" as const },
+      ]),
+      conversions: [
+        conversion(angV, angleV, "virage", `180^\\circ - \\big(${ecartLatex(cap1, cap2)}\\big)`, `En ${V}, la route tourne de l'écart entre les deux caps. L'angle intérieur en ${V}, entre le chemin du retour vers ${D} et la nouvelle route, est le supplémentaire de cet écart :`),
+        conversion(angD, angleD, "ecartCaps", ecartLatex(cap1, cap3), `En ${D}, l'angle du triangle est l'écart entre le cap du premier trajet et le cap du relèvement de ${A} :`),
+        conversion(angA, angleA, "somme", `180^\\circ - ${angV} - ${angD}`, `La somme des angles du triangle ${D}${V}${A} vaut 180° :`, `180^\\circ - ${angleV}^\\circ - ${angleD}^\\circ`),
+      ],
+      calcul,
+      inconnue: { latex: `${V}${A}`, valeur },
+      piege: {
+        valeur: piege,
+        description: `L'écart des caps (${ecart}°) est l'angle dont la route tourne en ${V}, pas l'angle intérieur du triangle : celui-ci est son supplémentaire, 180° − ${ecart}° = ${angleV}°.`,
+      },
+      angles: { capDepart: cap1, capVirage: cap2, capReleve: cap3 },
+      longueurs: [[D, V, d1]],
+      segmentCherche: [V, A],
+      options: optionsReponse(valeur, [piege, (d1 * Math.sin((angleD * Math.PI) / 180)) / Math.sin((angleV * Math.PI) / 180)], ctx.unite, ctx.uniteFautive, ctx.precision, PHRASES_RELEVE[i]!),
+    };
+  }
+}
+
 export function construireTrajets(nord: boolean = Math.random() < 0.45): ExerciceTexteTriangleStandard {
   const ctx = choisir(CONTEXTES_TRAJETS);
   const [D, V, A] = ctx.noms;

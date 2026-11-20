@@ -27,13 +27,16 @@ import { estSurAxe } from "../../moteur/modeleEquationsTransformer";
  * chaque forme complète, sous chaque contrainte de calcul, reste tirée bien au-delà de 5
  * correspondances attendues en 20 000 essais.
  */
-export const LIBELLE_CAS_EQUATIONS_TRANSFORMER = "Inclure un cas particulier (une équation de base sur un axe : k = 0 ou ±1)";
+export const LIBELLE_CAS_EQUATIONS_TRANSFORMER = "Inclure un cas particulier (équation sans solution, ou une équation de base sur un axe : k = 0 ou ±1)";
 
 export function formeEquationsTransformer(e: ExerciceEquationsTransformer): string {
   return e.variante.startsWith("carre") ? e.variante : `${e.variante}:${e.bases.length}`;
 }
 
+/** Décision 1 de l'utilisateur (audit 4e ch. 5) : « aucune solution » est un CAS PARTICULIER (comme
+ * gen18), sans `calcul` (aucun angle à calculer). */
 export function profilEquationsTransformer(e: ExerciceEquationsTransformer): ProfilInstance {
+  if (e.solutions.length === 0) return { casParticulier: "aucune-solution", forme: formeEquationsTransformer(e) };
   const surAxe = e.variante !== "produit" && e.bases.some((b) => estSurAxe(b.fonction, b.k));
   if (surAxe) return { casParticulier: "valeur-sur-axe", forme: formeEquationsTransformer(e) };
   return { casParticulier: null, forme: formeEquationsTransformer(e), calcul: e.calculatrice ? "calculatrice" : "exacte" };

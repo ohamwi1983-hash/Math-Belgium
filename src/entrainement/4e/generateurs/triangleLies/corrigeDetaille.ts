@@ -104,7 +104,7 @@ function etapePont(e: E): EtapeCorrection[] {
     case "hauteurArbre":
     case "sectionFalaise": {
       const { O, R, M } = noms(e);
-      regle = `Dans le triangle ${P(O)}${P(R)}${P(M)}, on connaît un côté et deux angles : le troisième angle par la somme, puis la loi des sinus ${COURS_TRIANGLE}.`;
+      regle = `Dans le triangle ${P(O)}${P(R)}${P(M)}, on connaît un côté et deux angles : le troisième angle par la somme, puis la loi des sinus ${COURS_TRIANGLE}.${e.famille === "distanceInaccessible" ? "" : " R est au sol, sur l'horizontale de O : l'angle ROM est l'angle d'élévation vers M."}`;
       blocs = [
         calcul("a", lignesSommeAngles({ inconnu: ang(O, M, R), autres: [ang(R, O, M), ang(O, R, M)], valeurs: [angleDonne(d(1)), angleDonne(d(2))], resultat: t.B }), [], `Angle en ${P(M)}`),
         calcul(
@@ -166,7 +166,7 @@ function etapeAngles(e: E): EtapeCorrection[] {
       ]
     : [ligne(`${ang(O, M, T)}=90^\\circ`, [texte("hypothèse : "), latex(`(${seg(M, T)})\\perp(${seg(O, M)})`)])];
   return [
-    utilise("b", [texte(`Les deux visées partent du même point ${O} : l'angle du triangle cible en ${O} est leur DIFFÉRENCE ${COURS_TRIANGULATION}. L'hypothèse de l'énoncé donne le deuxième angle.`)]),
+    utilise("b", [texte(`Les deux visées partent du même point ${O} : l'angle du triangle cible en ${O} est leur différence ${COURS_TRIANGULATION}. L'hypothèse de l'énoncé donne le deuxième angle.`)]),
     calcul("b", [ligne(`${ang(M, O, T)}=${nb(v2.valeur)}^\\circ-${nb(v1.valeur)}^\\circ`, "différence des deux visées"), ligne(`=${nb(c.B)}^\\circ`)], [], `Angle en ${O}`),
     calcul("b", lignesHyp, [texte(`Hypothèse : ${(e.hypotheseAnnexe ?? "").replace(/\.$/, "").replace(/^./, (x) => x.toLowerCase())}.`)], `Angle en ${P(M)}`),
     resultat("b", [texte(`${formatAnglesConfirmes(e).replace(/^./, (x) => x.toUpperCase())}.`)]),
@@ -186,7 +186,7 @@ function etapeSoustraction(e: E): EtapeCorrection[] {
   ];
   const vb = e.famille === "avionsConvergents" ? donnee(t.b) : coteMemoire(t.b);
   return [
-    utilise("b", [texte(`Le triangle cible a le même angle au sommet ${S} ; ses côtés sont les distances qui RESTENT à parcourir.`)]),
+    utilise("b", [texte(`Le triangle cible a le même angle au sommet ${S} ; ses côtés sont les distances qui restent à parcourir.`)]),
     calcul("b", lignesCote(`${S}C`, `${S}A`, vb, d1!.valeur, e.triangleCible.b), [], `Côté ${S}C`),
     calcul("b", lignesCote(`${S}D`, `${S}B`, coteMemoire(t.c), d2!.valeur, e.triangleCible.c), [], `Côté ${S}D`),
     resultat("b", [texte(`${formatSoustractionConfirmee(e)} ; angle en ${S} inchangé.`)]),
@@ -218,7 +218,12 @@ function etapeCible(e: E, lettre: string): EtapeCorrection[] {
     const { O, M, T } = noms(e);
     regle = `Dans le triangle ${P(O)}${P(M)}${P(T)}, on connaît ${seg(O, M)} et deux angles : l'angle en ${P(T)} par la somme, puis la loi des sinus ${COURS_TRIANGLE}.`;
     blocs.push(calcul(lettre, lignesSommeAngles({ inconnu: ang(O, T, M), autres: [ang(M, O, T), ang(O, M, T)], valeurs: [angleDonne(c.B), angleDonne(c.C)], resultat: c.A }), [], `Angle en ${P(T)}`));
-    if (e.famille !== "inclinaisonCable") {
+    if (e.famille === "inclinaisonCable") {
+      regle = `Dans le triangle ${P(O)}${P(M)}${P(T)}, on connaît ${seg(O, M)} et deux angles : l'angle en ${P(T)} par la somme, puis la loi des sinus pour le câble ${seg(O, T)}, opposé à l'angle en ${P(M)} ${COURS_TRIANGLE}.`;
+      blocs.push(
+        calcul(lettre, lignesLoiSinusCote({ x: seg(O, T), X: ang(O, M, T), k: seg(O, M), K: ang(O, T, M), vk: coteMemoire(c.a), vX: angleDonne(c.C), vK: angleDonne(c.A), resultat: c.c, unite }), [], `Câble ${seg(O, T)}`),
+      );
+    } else {
       blocs.push(
         calcul(lettre, lignesLoiSinusCote({ x: seg(M, T), X: ang(M, O, T), k: seg(O, M), K: ang(O, T, M), vk: coteMemoire(c.a), vX: angleDonne(c.B), vK: angleDonne(c.A), resultat: c.b, unite }), [], `Côté ${seg(M, T).replace(/_/g, "")}`),
       );

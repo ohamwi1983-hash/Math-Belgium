@@ -3,6 +3,7 @@ import { calcul, latex, ligne, piege as lignePiege, resultat, texte, utilise } f
 import type { ExerciceDetectiveErreurs, LigneResolution, Sommet } from "../../core/detectiveErreurs.types";
 import { DECIMALES, SCENARIOS, copieEleve, descriptionCorrecte, indiceLigneFausse, nombreLatex, resolutionCorrecte, solutionAmbigue, typeErreur, valeurAffichee } from "../../moteur/modeleDetectiveErreurs";
 import { champsAttendus } from "../../moteur/verificationDetectiveErreurs";
+import { noteSansArrondi } from "../../ui/formatDetectiveErreurs";
 import { constat, descriptionFragments, piege, relationResultat, valeurLatex } from "../../ui/formatDetectiveErreurs";
 import { COURS_ANGLES_ASSOCIES, COURS_TRIANGLE, finaliserCorrigeTriangles, fragmentsListe, lignesArcsin, nbFixe } from "../../ui/corrigeTriangles";
 
@@ -214,7 +215,7 @@ export function correctionDetailleeDetectiveErreurs(e: E): EtapeCorrection[] {
       ),
     ]),
     ...blocsCorrection(e),
-    resultat("c", fragmentsListe(champsAttendus(e).map(valeurLatex))),
+    resultat("c", [...fragmentsListe(champsAttendus(e).map(valeurLatex)), ...noteSansArrondi(e)]),
   ]);
 }
 

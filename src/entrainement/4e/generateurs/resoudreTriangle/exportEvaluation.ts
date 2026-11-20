@@ -23,6 +23,7 @@ import {
   donneesFragments,
   elementLatex,
   resultatsLatex,
+  egalOuEnvironElement,
   valeurLatex,
 } from "../../ui/formatResoudreTriangle";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceResoudreTriangle } from "./index";
@@ -88,7 +89,7 @@ function bareme(e: ExerciceResoudreTriangle): BaremeExercice {
     criteres: [
       { sousQuestion: "a", critere: [texte(`Configuration reconnue : ${LIBELLES_CONFIGURATION[e.configuration].toLowerCase()}`)], points: 0.5 },
       { sousQuestion: "b", critere: [texte("Première loi adaptée aux données, justifiée")], points: 0.5 },
-      ...plan.map((etape, i) => ({ sousQuestion: "c", critere: [texte(`${i + 1}. `), latex(`${elementLatex(etape.inconnue)} \\approx ${valeurLatex(e, etape.inconnue)}`), texte(", calcul montré")], points: i === 0 ? 1 : 0.75 })),
+      ...plan.map((etape, i) => ({ sousQuestion: "c", critere: [texte(`${i + 1}. `), latex(`${elementLatex(etape.inconnue)} ${egalOuEnvironElement(e, etape.inconnue)} ${valeurLatex(e, etape.inconnue)}`), texte(", calcul montré")], points: i === 0 ? 1 : 0.75 })),
       { sousQuestion: "d", critere: [texte("Contrôle : "), latex(elementLatex(etapeControle(e).inconnue)), texte(" recalculé par Al-Kashi, somme des angles vérifiée")], points: 0.5 },
     ],
     erreursFrequentes: erreurs,

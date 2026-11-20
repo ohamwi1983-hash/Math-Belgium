@@ -12,6 +12,7 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDetectiveErreurs } from "../../core/detectiveErreurs.types";
 import { indiceLigneFausse, typeErreur } from "../../moteur/modeleDetectiveErreurs";
+import { noteSansArrondi } from "../../ui/formatDetectiveErreurs";
 import { champsAttendus } from "../../moteur/verificationDetectiveErreurs";
 import {
   CONSIGNE_GENERALE,
@@ -75,7 +76,7 @@ function enoncePapier(e: ExerciceDetectiveErreurs): EnoncePapier {
 
 function reponseBreve(e: ExerciceDetectiveErreurs): FragmentConsigne[] {
   const valeurs = champsAttendus(e).flatMap((v, i) => (i === 0 ? [latex(valeurLatex(v))] : [texte(" ; "), latex(valeurLatex(v))]));
-  return [texte(`Ligne ${indiceLigneFausse(e) + 1} fausse (${nomErreur(e)}) ; `), ...valeurs];
+  return [texte(`Ligne ${indiceLigneFausse(e) + 1} fausse (${nomErreur(e)}) ; `), ...valeurs, ...noteSansArrondi(e)];
 }
 
 function construireCorrection(e: ExerciceDetectiveErreurs): BlocCorrection[] {

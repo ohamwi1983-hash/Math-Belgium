@@ -12,7 +12,8 @@
  *   90° » est déjà le cas « sur un axe » : c'est un choix de variante, pas un cas.
  * - gen15 : quadrant I ≈ 25 % des variantes 30°/45°/60° (aucune symétrie, aucun signe) → cas
  *   particulier ; la forme « à ramener dans [0° ; 360°[ » (≈ 24 %) est une `forme` (même structure
- *   d'une série à l'autre), sans objet pour 0° et 90° (jamais décalées).
+ *   d'une série à l'autre) ; depuis le lot C (G11), 0° et 90° tirent aussi les deux points de leur axe
+ *   et un angle à ramener une fois sur quatre (forme « axe:… »).
  * - gen16 : quadrant I ≈ 25 % (signe immédiat) → cas particulier ; valeur issue d'un triplet
  *   pythagoricien (résultat rationnel, ≈ 50 %) → paramètre au choix « résultat avec radical ».
  *   Même profil pour la variante « tan θ donné » (triplet ⟺ p² + q² carré parfait, ≈ 50 %).
@@ -56,7 +57,7 @@ export function profilValeursRemarquables(e: ExerciceValeursRemarquables): Profi
   const surAxe = e.quadrant === "axeOx" || e.quadrant === "axeOy";
   return {
     casParticulier: e.quadrant === "I" ? "quadrant-I" : null,
-    forme: surAxe ? undefined : e.angleDepart === e.angleReduit ? "direct" : "a-reduire",
+    forme: `${surAxe ? "axe:" : ""}${e.angleDepart === e.angleReduit ? "direct" : "a-reduire"}`,
   };
 }
 

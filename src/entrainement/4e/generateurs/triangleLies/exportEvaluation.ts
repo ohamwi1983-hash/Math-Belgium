@@ -381,8 +381,15 @@ function enoncePapier(instance: ExerciceTriangleLies): EnoncePapier {
   };
 }
 
+/** Résultat au centième AVEC ses zéros (« 56,30 m² ») : l'énoncé demande d'arrondir au centième
+ * (audit 4e ch. 5, G9). */
+function valeurCentieme(instance: ExerciceTriangleLies): string {
+  const n = instance.valeurCibleAttendue.toFixed(2).replace(".", ",");
+  return instance.uniteGrandeurCible === "°" ? `${n}°` : `${n} ${instance.uniteGrandeurCible}`;
+}
+
 function reponseBreve(instance: ExerciceTriangleLies): FragmentConsigne[] {
-  return [texte(formatValeurUnite(instance.valeurCibleAttendue, instance.uniteGrandeurCible))];
+  return [texte(valeurCentieme(instance))];
 }
 
 function bareme(instance: ExerciceTriangleLies): BaremeExercice {
@@ -395,7 +402,7 @@ function bareme(instance: ExerciceTriangleLies): BaremeExercice {
         ? [{ sousQuestion: "b", critere: [texte(instance.variante === "anglePartage" ? "Les deux angles du triangle cible (différence des visées, hypothèse)" : "Les deux côtés du triangle cible (soustractions)")], points: 1 }]
         : []),
       { sousQuestion: trois ? "c" : "b", critere: [texte(instance.grandeurDemandee === "aire" ? "Formule de l'aire avec l'angle compris" : "Loi adaptée au triangle cible")], points: trois ? 0.5 : 1 },
-      { sousQuestion: trois ? "c" : "b", critere: [texte(`Résultat : ${formatValeurUnite(instance.valeurCibleAttendue, instance.uniteGrandeurCible)}`)], points: trois ? 1 : 1.5 },
+      { sousQuestion: trois ? "c" : "b", critere: [texte(`Résultat : ${valeurCentieme(instance)}`)], points: trois ? 1 : 1.5 },
     ],
     erreursFrequentes: [
       { description: [texte("Calculatrice en radians")], cout: "−1" },

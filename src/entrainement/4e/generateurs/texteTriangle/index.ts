@@ -1,6 +1,6 @@
 import type { ExerciceTexteTriangle } from "../../core/texteTriangle.types";
-import { construireDeuxBateaux, construireParcelle, construireTrajets } from "./navigation";
-import { construireDepression, construireDistanceInaccessible, construireElevation } from "./visees";
+import { construireDeuxBateaux, construireParcelle, construireTrajets, construireTrajetsReleve } from "./navigation";
+import { construireDepression, construireDistanceInaccessible, construireElevation, construireElevationTelemetre } from "./visees";
 import { construireDeuxPositions } from "./deuxPositions";
 import { choisir } from "./outils";
 
@@ -29,9 +29,10 @@ export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
 ];
 
 const CONSTRUCTEURS: Record<string, () => ExerciceTexteTriangle> = {
-  trajets: () => construireTrajets(),
+  // Audit 4e ch. 5, V7 : une fois sur trois, l'inconnue change et la loi avec elle.
+  trajets: () => (Math.random() < 1 / 3 ? construireTrajetsReleve() : construireTrajets()),
   deuxBateaux: () => construireDeuxBateaux(),
-  elevation: construireElevation,
+  elevation: () => (Math.random() < 1 / 3 ? construireElevationTelemetre() : construireElevation()),
   depression: construireDepression,
   distanceInaccessible: () => construireDistanceInaccessible(),
   parcelle: () => construireParcelle(),

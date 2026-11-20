@@ -53,7 +53,10 @@ export function construireTerrainQuelconque(): ExerciceTriangleLies {
   const C_pt = { x: BC * Math.cos(angleRad), y: BC * Math.sin(angleRad) };
   const D_pt = placerSommetOppose(A_pt, C_pt, angleDAC, AD, B_pt);
 
-  const contexte = SKINS[randomInt(0, SKINS.length - 1)]!;
+  const indexSkin = randomInt(0, SKINS.length - 1);
+  const contexte = SKINS[indexSkin]!;
+  // Audit 4e ch. 5, G8 : des villes sont à des kilomètres l'une de l'autre, pas à quelques mètres.
+  const unite = indexSkin === 2 ? "km" : "m";
 
   return {
     famille: "terrainQuelconque",
@@ -63,8 +66,8 @@ export function construireTerrainQuelconque(): ExerciceTriangleLies {
     contexte,
     trianglePont,
     donneesPont: [
-      { label: "AB", valeur: AB, unite: "m" },
-      { label: "BC", valeur: BC, unite: "m" },
+      { label: "AB", valeur: AB, unite },
+      { label: "BC", valeur: BC, unite },
       { label: "angle ABC", valeur: angleABC, unite: "°" },
     ],
     labelCoteTransfere: "AC",
@@ -79,7 +82,7 @@ export function construireTerrainQuelconque(): ExerciceTriangleLies {
     ],
     questionCible: "Calcule la longueur du côté [CD].",
     valeurCibleAttendue: CD,
-    uniteGrandeurCible: "m",
+    uniteGrandeurCible: unite,
     points: [
       { nom: "A", x: A_pt.x, y: A_pt.y },
       { nom: "B", x: B_pt.x, y: B_pt.y },
@@ -99,7 +102,7 @@ export function construireTerrainQuelconque(): ExerciceTriangleLies {
     optionsInterpretation: construireOptionsInterpretationTriangleLies({
       labelGrandeur: "Le côté CD",
       valeurCorrecte: CD,
-      uniteCorrecte: "m",
+      uniteCorrecte: unite,
       uniteFautive: "°",
       valeurTransferee: AC,
       valeurPontAlternative: AB,

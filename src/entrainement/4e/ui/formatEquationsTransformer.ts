@@ -128,7 +128,8 @@ export function ensembleLatex(solutions: number[]): string {
 }
 
 export function precisionTexte(e: ExerciceEquationsTransformer): string {
-  return e.calculatrice ? " Donne les angles au dixième de degré." : "";
+  // Audit 4e ch. 5, G15 : aucune précision d'arrondi quand l'équation n'a pas de solution.
+  return e.calculatrice && e.solutions.length > 0 ? " Donne les angles au dixième de degré." : "";
 }
 
 // ---------------------------------------------------------------------------------------------

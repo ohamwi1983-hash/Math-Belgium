@@ -157,6 +157,84 @@ function tirerVisee(ctx: ContexteVisee): { alpha: number; beta: number; d: numbe
   }
 }
 
+/** Audit 4e ch. 5, V7 : élévation avec télémètre — depuis B (le plus proche), un télémètre donne la
+ * distance au sommet et l'angle d'élévation ; on cherche la distance depuis A, plus loin : deux
+ * côtés et l'angle compris (supplémentaire de l'élévation), loi des cosinus. */
+const TEXTES_TELEMETRE: { haut: string; texte: (beta: number, L: string, d: string) => string; question: (p: Precision) => string; phrase: Phrase }[] = [
+  {
+    haut: "S",
+    texte: (b, L, d) =>
+      `Pour installer une tyrolienne, on veut tendre un câble entre le sommet S d'un rocher et le point d'arrivée A, au sol. ` +
+      `Depuis un point B, un télémètre laser indique que le sommet S est à ${L} m, sous un angle d'élévation de ${b}°. Le point A se trouve ${d} m plus loin que B, à l'opposé du rocher. ` +
+      `(Les points A et B et le pied F du rocher sont alignés, sur un sol horizontal.)`,
+    question: (p) => `Quelle longueur de câble faut-il ? Donne la longueur AS ${p.texte}.`,
+    phrase: { avant: "Le câble [AS] mesure environ ", apres: "." },
+  },
+  {
+    haut: "N",
+    texte: (b, L, d) =>
+      `Une technicienne veut connaître la distance entre un point A et la nacelle N d'une éolienne. ` +
+      `Depuis un point B, son télémètre laser indique que la nacelle est à ${L} m, sous un angle d'élévation de ${b}°. Le point A se trouve ${d} m plus loin que B, à l'opposé de l'éolienne. ` +
+      `(Les points A et B et le pied F de l'éolienne sont alignés, sur un sol horizontal.)`,
+    question: (p) => `Calcule la distance AN entre le point A et la nacelle, ${p.texte}.`,
+    phrase: { avant: "La nacelle est à environ ", apres: " du point A." },
+  },
+];
+
+export function construireElevationTelemetre(): ExerciceTexteTriangleStandard {
+  const ctx = choisir(TEXTES_TELEMETRE);
+  const X = ctx.haut;
+  const beta = entier(28, 64);
+  const L = entier(30, 150);
+  const d = entier(15, 90);
+  const angB = `\\widehat{AB${X}}`;
+  const angleB = 180 - beta;
+  const calcul = { loi: "cosinus" as const, cote1: { latex: "AB", valeur: d }, cote2: { latex: `B${X}`, valeur: L }, angle: { latex: angB, valeur: angleB } };
+  const valeur = valeurCalcul(calcul);
+  const piege = valeurCalcul({ ...calcul, angle: { ...calcul.angle, valeur: beta } });
+  const h = L * Math.sin(rad(beta));
+  const xF = d + L * Math.cos(rad(beta));
+  const cherche = `A${X}`;
+  return {
+    variante: "elevation",
+    sousType: "telemetre",
+    contexte: ctx.texte(beta, fr(L), fr(d)),
+    question: ctx.question(M_DIXIEME),
+    triangle: `AB${X}`,
+    points: [
+      { nom: "A", x: 0, y: 0 },
+      { nom: "B", x: d, y: 0 },
+      { nom: "F", x: xF, y: 0 },
+      { nom: X, x: xF, y: h },
+    ],
+    avecNord: false,
+    unite: "m",
+    precision: M_DIXIEME,
+    elements: melanger([
+      { latex: "AB", role: "donne" as const },
+      { latex: `B${X}`, role: "donne" as const },
+      { latex: angB, role: "convertir" as const },
+      { latex: cherche, role: "cherche" as const },
+    ]),
+    conversions: [
+      conversion(angB, angleB, "supplementaire", `180^\\circ - ${beta}^\\circ`, `En B, l'angle d'élévation (${beta}°) est mesuré entre le sol, du côté du pied F, et la visée. L'angle intérieur en B, du côté de A, est son supplémentaire :`),
+    ],
+    calcul,
+    inconnue: { latex: cherche, valeur },
+    piege: {
+      valeur: piege,
+      description: `Prendre l'angle d'élévation ${beta}° comme angle intérieur en B : l'angle du triangle en B, du côté de A, est le supplémentaire, 180° − ${beta}° = ${angleB}°.`,
+    },
+    angles: { beta },
+    longueurs: [
+      ["A", "B", d],
+      ["B", X, L],
+    ],
+    segmentCherche: ["A", X],
+    options: optionsReponse(valeur, [piege, Math.sqrt(d * d + L * L)], "m", "km", M_DIXIEME, ctx.phrase),
+  };
+}
+
 function construireVisee(variante: "elevation" | "depression", ctx: ContexteVisee): ExerciceTexteTriangleStandard {
   const { alpha, beta, d, h } = tirerVisee(ctx);
   const X = ctx.haut;

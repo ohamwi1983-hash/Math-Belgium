@@ -17,6 +17,15 @@ import {
   type ValeurAttendue,
 } from "../moteur/modeleDetectiveErreurs";
 import { champsAttendus } from "../moteur/verificationDetectiveErreurs";
+import { attenduFinal as attenduFinalG17, finalSansArrondi, nombreLatex as nombreLatexG17 } from "../moteur/modeleDetectiveErreurs";
+
+/** Seconde valeur acceptée (audit 4e ch. 5, G17) : « (ou … en recalculant sans arrondir les angles) ». */
+export function noteSansArrondi(e: ExerciceDetectiveErreurs): FragmentConsigne[] {
+  const alt = finalSansArrondi(e);
+  const f = attenduFinalG17(e);
+  if (alt === null || !f) return [];
+  return [texte(" (ou "), latex(`${f.quantite} \\approx ${nombreLatexG17(alt, 1)}^\\circ`), texte(" en recalculant sans arrondir les angles)")];
+}
 
 /**
  * Textes de gen81 (écran ET papier : une seule source). Formules toujours en LaTeX, jamais au
