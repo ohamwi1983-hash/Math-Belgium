@@ -903,6 +903,15 @@ export const fonctionsExponentielles: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'vers-e-widget',
+          label: 'Manipule toi-même — vers e : (1 + 1/n)ⁿ et les intérêts composés',
+          caption:
+            "Premier mode : fais grandir n jusqu'à un milliard avec le curseur logarithmique et regarde les " +
+            'chiffres de e apparaître un à un. Second mode : 1 000 € placés un an à 100 %, intérêts versés ' +
+            'de plus en plus souvent : le capital grandit, mais ne dépasse jamais 1 000·e ≈ 2 718,28 €.',
+        },
+        {
           kind: 'exempleLibre',
           label: 'Démonstration — la limite de (1 + k/x)ˣ',
           blocks: [
