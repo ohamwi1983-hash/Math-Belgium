@@ -1912,6 +1912,20 @@ export const trigonometrie: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 13. Modéliser une fonction sinusoïdale en contexte »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Détective d\'erreurs : trigonométrie',
+          generatorId: '5gen50',
+          description: [
+            'La copie d\'un élève — aire d\'un secteur, maximum d\'une sinusoïde, équation ' +
+              'sin(2x) = c ou cos(2x) = c, produit nul avec une tangente — contient une erreur : ' +
+              'trouve la ligne fausse, nomme l\'erreur (π perdu, ½ oublié, degrés au lieu de ' +
+              'radians, T = π/ω, φ pris pour Φ, seconde famille oubliée, 2kπ non divisé, valeur ' +
+              'interdite de la tangente…), puis donne le bon résultat.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 50. Détective d\'erreurs : trigonométrie »',
+        },
       ],
     },
   ],
