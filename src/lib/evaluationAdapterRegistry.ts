@@ -466,11 +466,11 @@ import { adaptateurEvaluationProprietesOptiquesConiques } from '../entrainement/
  * (`6gen13`-`6gen22`) — les 7 autres chapitres de 6e restent hors périmètre (générateurs pas
  * encore portés du tout, interactif compris). */
 export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExercices<never>> = {
-  '6gen1': adaptateurEvaluationInjectiviteFonctions as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen2': adaptateurEvaluationFonctionsCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen3': adaptateurEvaluationEquationsCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen4': adaptateurEvaluationDeriveesCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen5': adaptateurEvaluationGraphiquesCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen1': versionPapier(adaptateurEvaluationInjectiviteFonctions) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen2': versionPapier(adaptateurEvaluationFonctionsCyclometriques) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen3': versionPapier(adaptateurEvaluationEquationsCyclometriques) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen4': versionPapier(adaptateurEvaluationDeriveesCyclometriques) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen5': versionPapier(adaptateurEvaluationGraphiquesCyclometriques) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen152': versionPapier(adaptateurEvaluationDetectiveCyclo) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen153': versionPapier(adaptateurEvaluationIdentites) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen154': versionPapier(adaptateurEvaluationGrapheReciproque) as unknown as AdaptateurFeuilleExercices<never>,

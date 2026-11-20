@@ -27,7 +27,7 @@ export function construireA(): ExerciceGraphiqueA {
       : { ...reel, k: -k };
 
   const echelleIncorrecte: CandidatA =
-    Math.random() < 0.5 ? { ...reel, c: tirerAutre(c, C_VALEURS) } : { ...reel, k: tirerAutre(k, K_VALEURS) };
+    Math.random() < 0.5 ? { ...reel, c: tirerAutre(c, C_VALEURS) } : { ...reel, k: tirerAutre(k, K_VALEURS.filter((v) => v !== -k)) }; // jamais −k : c'est déjà le distracteur « sens inverse » (audit du 6e ch. 1, E3 : deux graphes identiques)
 
   const { candidats, indexCorrect } = melangerAvecIndexCorrect([reel, domaineDecale, sensInverse, echelleIncorrecte]);
   return { famille: "A", reel, proprietes: calculerProprietesA(reel), candidats, indexCorrect };

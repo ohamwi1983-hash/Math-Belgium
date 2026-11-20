@@ -28,6 +28,11 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeInjectiviteFonctions } from "./generateurs6e/injectiviteFonctions/corrigeDetaille";
+import { formatReciproqueLatex } from "./ui6e/formatInjectiviteFonctions";
 
 /** Libellé par phase pour la fiche de consultation (`FicheReponseEcran`) — même vocabulaire que
  * `LIBELLE_PHASE` de `ui6e/recapitulatifInjectiviteFonctions.ts`, complété pour "bijection" (seule
@@ -53,6 +58,15 @@ function nouvelleSession(): EtatSessionInjectiviteFonctions {
   return demarrerSessionInjectiviteFonctions(REGLAGES_DEMO, genererExerciceInjectiviteFonctions);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son premier
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs6e/injectiviteFonctions/exportEvaluation.ts`), comme `App6gen14.tsx`. */
+function sessionInitiale(): EtatSessionInjectiviteFonctions {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionInjectiviteFonctions(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceInjectiviteFonctions, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -63,7 +77,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen1() {
-  const [etat, setEtat] = useState<EtatSessionInjectiviteFonctions>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionInjectiviteFonctions>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionInjectiviteFonctions`, jamais dans le moteur : la saisie de
@@ -157,7 +171,7 @@ export function App6gen1() {
           </>
         );
       case "reciproque":
-        return "f⁻¹(x) — voir la méthode (poser y=f(x), échanger x/y, isoler y) appliquée à l'intervalle retenu.";
+        return <Katex expression={`f^{-1}(x)=${formatReciproqueLatex(exercice, etat.coteChoisi)}`} />;
       case "image":
         return <Katex expression={formatEnsembleReelLatex(exercice.image)} />;
       case "bijection":
@@ -173,9 +187,16 @@ export function App6gen1() {
     }
   };
 
+  // Corrigé détaillé « comme au tableau » de l'écran (source unique avec le papier) ; la réciproque
+  // est écrite sur la moitié choisie par l'élève à l'écran « injective ».
+  const corrigeDetaille = (
+    <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeInjectiviteFonctions(exercice, etat.coteChoisi), lettreEtape(ORDRE_PHASES_INJECTIVITE.indexOf(etat.phase)))} />
+  );
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille,
         reponseAttendue: reponseAttenduePhase(etat.phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

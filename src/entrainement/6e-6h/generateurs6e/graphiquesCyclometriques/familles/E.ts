@@ -14,9 +14,13 @@ const DECALAGES = [-0.6, -0.4, 0.4, 0.6] as const;
  */
 export function construireE(): ExerciceGraphiqueE {
   const arcfonction = tirerParmi(ARCFONCTIONS);
-  const w0 = arcfonction === "arcsin" ? -1.4 + Math.random() * 2.8 : 0.3 + Math.random() * 2.5;
+  const w0Tire = arcfonction === "arcsin" ? -1.4 + Math.random() * 2.8 : 0.3 + Math.random() * 2.5;
   const k = tirerParmi(K_VALEURS);
-  const c = -k * w0;
+  // Constante EXACTE (audit du 6e ch. 1, E2 ; même correction que plateforme-maths `57d06e0`) : c est
+  // arrondie au centième À LA GÉNÉRATION, puis le seuil w₀ = −c/k est recalculé — la fonction
+  // imprimée (c au centième) est exactement celle dont on calcule domaine, f(0) et extremums.
+  const c = Math.round(-k * w0Tire * 100) / 100;
+  const w0 = -c / k;
   const reel: CandidatE = { k, c, arcfonction, ignorerContrainteRacine: false, decalageAffichage: 0 };
 
   const x0 = arcfonction === "arcsin" ? Math.sin(w0) : Math.cos(w0);

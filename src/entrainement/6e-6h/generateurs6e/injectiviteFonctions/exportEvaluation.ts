@@ -1,152 +1,129 @@
-import type { EnsembleReelGuide } from "../../core6e/ensembleReel.types";
 import type { ExerciceInjectiviteFonctions } from "../../core6e/injectiviteFonctions.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { latex, texte } from "../../../export/corrigeTableau";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { formatEnsembleReelLatex } from "../../ui6e/formatEnsembleReel";
-import { approxFractionLatex } from "../../ui6e/formatFraction";
-import { aideDomaineNiveau2, aideImageNiveau2, aideReciproqueNiveau2, CONSIGNE_GENERALE, formatFLatexAffichage, formatReciproqueLatex } from "../../ui6e/formatInjectiviteFonctions";
+import {
+  CONSIGNE_ECRAN_DOMAINE,
+  CONSIGNE_ECRAN_IMAGE,
+  CONSIGNE_ECRAN_INJECTIVE,
+  CONSIGNE_ECRAN_RECIPROQUE,
+  CONSIGNE_SOUS_QUESTION_INTERVALLE,
+  formatFLatexAffichage,
+  formatReciproqueLatex,
+} from "../../ui6e/formatInjectiviteFonctions";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceInjectiviteFonctions } from "./index";
+import { correctionDetailleeInjectiviteFonctions as correction, lettresLectureInjectivite } from "./corrigeDetaille";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceInjectiviteFonctions>` pour `6gen1` (Fonctions
- * injectives/surjectives/bijectives) — feuille d'évaluation, voir
- * `generateurs/analyseFonction/exportWord.ts` pour le mécanisme générique de référence.
+ * Adaptateur `AdaptateurFeuilleExercices<ExerciceInjectiviteFonctions>` pour `6gen1` (fonctions
+ * injectives, surjectives, bijectives ; réciproque) — feuille d'exercices et évaluation.
  *
- * Même traitement "résolution rédigée hyper détaillée" que `generateurs/secondDegre/exportEvaluation.ts`
- * (chapitre 2 de 4e) : les 5 écrans interactifs (domaine → injective+intervalle → réciproque →
- * image → bijection) ne deviennent PAS 5 questions lettrées, mais une seule consigne ouverte
- * (`CONSIGNE_GENERALE`, déjà écrite côté écran) suivie d'une résolution rédigée en paragraphes
- * continus — chacun reprenant le couple {texte, latex} d'aide niveau 2 déjà écrit côté écran
- * (`ui6e/formatInjectiviteFonctions.ts`), jamais reformulé/recalculé indépendamment. Comme pour
- * gen2 de 4e, la branche "droite" est retenue par convention pour la réciproque quand f n'est pas
- * injective (voir l'en-tête de l'ancien fichier, et `core6e/injectiviteFonctions.types.ts`).
+ * `construireEnonce` : une question par ÉCRAN (domaine, injectivité, réciproque, image, bijection)
+ * — ce sont les titres « Étape n — … » du corrigé détaillé. Papier (`enoncePapier`) : la fonction
+ * et la consigne globale seulement. Corrigé détaillé partagé avec l'appli (`corrigeDetaille.ts`) ;
+ * quand f n'est pas injective, la réciproque est écrite sur la moitié de droite (l'autre moitié est
+ * signalée, elle est aussi acceptée).
  */
 
-function nombreLignesReponse(nombreParagraphes: number): number {
-  return Math.max(10, nombreParagraphes * 2 + 2);
+type E = ExerciceInjectiviteFonctions;
+
+function entete(e: E): FragmentConsigne[] {
+  return [texte("On considère la fonction "), latex(formatFLatexAffichage(e)), texte(".")];
 }
 
-function construireEnonceInjectiviteFonctions(exercice: ExerciceInjectiviteFonctions): SectionExercice {
-  const nombreParagraphes = construireParagraphesResolution(exercice).length;
+function construireEnonce(e: E): SectionExercice {
   return {
-    enteteFragments: [texte("On considère la fonction "), latex(formatFLatexAffichage(exercice))],
-    questions: [{ consigne: CONSIGNE_GENERALE, reponse: { type: "lignes", nombre: nombreLignesReponse(nombreParagraphes) } }],
+    enteteFragments: entete(e),
+    questions: [
+      { consigne: CONSIGNE_ECRAN_DOMAINE },
+      { consigne: e.injective ? CONSIGNE_ECRAN_INJECTIVE : [...CONSIGNE_ECRAN_INJECTIVE, texte(" "), ...CONSIGNE_SOUS_QUESTION_INTERVALLE] },
+      { consigne: CONSIGNE_ECRAN_RECIPROQUE },
+      { consigne: CONSIGNE_ECRAN_IMAGE },
+      { consigne: [texte("Conclus : f est une bijection de quel ensemble sur quel ensemble ?")] },
+    ],
   };
 }
 
-/** Valeur critique extraite du domaine DÉJÀ calculé (`EnsembleReelGuide`) — jamais recalculée : le
- * domaine est soit `prive_points` (un point exclu, familles à équation x=valeur) soit `morceaux`
- * (une demi-droite bornée d'un côté, familles à inéquation) — un seul cas pertinent dans chaque
- * cas pour ce générateur (jamais 2 points exclus ni 2 morceaux). */
-function valeurCritiqueDomaine(domaine: EnsembleReelGuide): number | null {
-  if (domaine.forme === "prive_points") return domaine.points[0];
-  if (domaine.forme === "intervalles") {
-    const m = domaine.morceaux[0];
-    return m.inf !== null ? m.inf : m.sup;
-  }
-  return null;
+const CONSIGNE_PAPIER: FragmentConsigne[] = [
+  texte(
+    " Détermine son domaine. Est-elle injective ? Si ce n'est pas le cas, donne un plus grand intervalle sur lequel elle l'est. Détermine ensuite l'expression de sa réciproque sur cet intervalle, puis son image, et conclus : f est une bijection de quel ensemble sur quel ensemble ?",
+  ),
+];
+
+function enoncePapier(e: E): EnoncePapier {
+  return { section: { enteteFragments: [...entete(e), ...CONSIGNE_PAPIER], questions: [] } };
 }
 
-function construireParagrapheDomaine(exercice: ExerciceInjectiviteFonctions): FragmentConsigne[] {
-  const aide = aideDomaineNiveau2(exercice);
-  const domaineLatex = formatEnsembleReelLatex(exercice.domaine);
-  if (!aide.latex) {
-    return [texte(`On commence par le domaine de définition de f : ${aide.texte} `), latex(`\\mathcal{D}_f = ${domaineLatex}`), texte(".")];
-  }
-  if (exercice.domaine.forme === "prive_points") {
-    const v = valeurCritiqueDomaine(exercice.domaine) as number;
-    return [
-      texte(`On commence par déterminer le domaine de définition de f. ${aide.texte} `),
-      latex(`${aide.latex} \\;\\Longrightarrow\\; x = ${approxFractionLatex(v)}`),
-      texte(", valeur exclue du domaine : "),
-      latex(`\\mathcal{D}_f = ${domaineLatex}`),
-      texte("."),
-    ];
-  }
+function reponseBreve(e: E): FragmentConsigne[] {
+  const X = formatEnsembleReelLatex(e.intervalleDroite, 24);
   return [
-    texte(`On commence par déterminer le domaine de définition de f. ${aide.texte} `),
-    latex(`${aide.latex} \\;\\Longrightarrow\\; \\mathcal{D}_f = ${domaineLatex}`),
+    latex(`\\text{dom}(f)=${formatEnsembleReelLatex(e.domaine, 24)}`),
+    texte(e.injective ? " ; f injective ; " : " ; f non injective, injective sur "),
+    ...(e.injective ? [] : [latex(X), texte(" (ou "), latex(formatEnsembleReelLatex(e.intervalleGauche, 24)), texte(") ; ")]),
+    latex(`f^{-1}(x)=${formatReciproqueLatex(e, "droite")}`),
+    texte(" ; "),
+    latex(`\\text{Im}(f)=${formatEnsembleReelLatex(e.image, 24)}`),
+    texte(" ; f est une bijection de "),
+    latex(X),
+    texte(" sur "),
+    latex(formatEnsembleReelLatex(e.image, 24)),
     texte("."),
   ];
 }
 
-function construireParagrapheInjectivite(exercice: ExerciceInjectiviteFonctions): FragmentConsigne[] {
-  if (exercice.injective) {
-    return [
-      texte("f est strictement monotone sur tout son domaine (jamais de partie où elle stagne ou change de sens) : deux valeurs distinctes de x donnent donc toujours deux images distinctes. f est donc injective sur "),
-      latex(formatEnsembleReelLatex(exercice.domaine)),
-      texte(" tout entier."),
-    ];
-  }
-  const pivot = approxFractionLatex(exercice.pivot as number);
-  const intervalleLatex = formatEnsembleReelLatex(exercice.intervalleDroite);
-  return [
-    texte("f n'est pas injective sur tout son domaine : son graphique est symétrique par rapport à la droite verticale "),
-    latex(`x = ${pivot}`),
-    texte(", donc deux valeurs symétriques par rapport à ce pivot ont la même image. Le plus grand intervalle sur lequel f redevient injective est l'une des deux moitiés de part et d'autre de ce pivot ; on retient ici "),
-    latex(intervalleLatex),
-    texte(" (l'autre moitié est tout aussi valable)."),
+function construireCorrection(e: E): BlocCorrection[] {
+  return [{ type: "paragraphe", fragments: reponseBreve(e) }];
+}
+
+function bareme(e: E): BaremeExercice {
+  const criteres: CritereBareme[] = [
+    { sousQuestion: "a", critere: [texte("Domaine : "), latex(`\\text{dom}(f)=${formatEnsembleReelLatex(e.domaine, 24)}`)], points: 0.5 },
+    {
+      sousQuestion: "b",
+      critere: e.injective ? [texte("Injectivité démontrée (f(x₁) = f(x₂) entraîne x₁ = x₂)")] : [texte("Contre-exemple (deux antécédents de même image) et plus grand intervalle d'injectivité")],
+      points: 1,
+    },
+    { sousQuestion: "c", critere: [texte("Réciproque isolée ligne à ligne : "), latex(`f^{-1}(x)=${formatReciproqueLatex(e, "droite")}`)], points: 1.5 },
+    { sousQuestion: "d", critere: [texte("Image : "), latex(`\\text{Im}(f)=${formatEnsembleReelLatex(e.image, 24)}`)], points: 0.5 },
+    { sousQuestion: "e", critere: [texte("Bijection de l'intervalle d'injectivité sur l'image")], points: 0.5 },
   ];
-}
-
-function construireParagrapheReciproque(exercice: ExerciceInjectiviteFonctions): FragmentConsigne[] {
-  const aide = aideReciproqueNiveau2(exercice);
-  const reciproqueLatex = formatReciproqueLatex(exercice, "droite");
-  return [
-    texte(`On détermine ensuite la réciproque sur cet intervalle. ${aide.texte} `),
-    latex(aide.latex as string),
-    texte(", d'où, en isolant y : "),
-    latex(`f^{-1}(x) = ${reciproqueLatex}`),
-    texte("."),
+  const erreursFrequentes: BaremeExercice["erreursFrequentes"] = [
+    e.injective
+      ? { description: [texte("Injectivité affirmée sans justification")], cout: "moitié des points sur b)" }
+      : { description: [texte("Signe de la racine sans lien avec l'intervalle retenu")], cout: "−1" },
+    { description: [texte("Ensemble d'arrivée ℝ au lieu de l'image")], cout: "0 pt sur e)" },
   ];
+  return {
+    reponseFinale: reponseBreve(e),
+    criteres,
+    erreursFrequentes,
+    reponsesAcceptees: e.injective ? [[texte("Toute écriture équivalente de la réciproque")]] : [[texte("L'autre moitié, "), latex(formatEnsembleReelLatex(e.intervalleGauche, 24)), texte(", avec la réciproque "), latex(`f^{-1}(x)=${formatReciproqueLatex(e, "gauche")}`)]],
+  };
 }
 
-function construireParagrapheImage(exercice: ExerciceInjectiviteFonctions): FragmentConsigne[] {
-  const aide = aideImageNiveau2(exercice);
-  const imageLatex = formatEnsembleReelLatex(exercice.image);
-  if (!aide.latex) {
-    return [texte(`Pour l'image : ${aide.texte} `), latex(`\\text{Im}(f) = ${imageLatex}`), texte(".")];
-  }
-  return [texte(`Pour l'image : ${aide.texte} `), latex(aide.latex), texte(", d'où : "), latex(`\\text{Im}(f) = ${imageLatex}`), texte(".")];
+/**
+ * Niveau 1–7 — méthode 1 (choisir comment prouver l'injectivité, isoler y), piège dans les données :
+ * fonction non injective (restriction et signe de la racine), coefficient négatif devant x dans une
+ * inéquation de domaine (sens qui change). Lectures : domaine ℝ (a), image ℝ (d), bijection (e).
+ */
+function criteresDifficulte(e: E): CriteresDifficulte {
+  const p = e.parametres;
+  const inequationNegative = (p.famille === "racinePlusConstante" || (p.famille === "racineNieme" && p.n % 2 === 0)) && p.a < 0;
+  return { ...etapesDuCorrige(correction(e), lettresLectureInjectivite(e)), methode: 1, piege: !e.injective || inequationNegative ? 1 : 0, nombres: 0 };
 }
 
-function construireParagrapheBijection(exercice: ExerciceInjectiviteFonctions): FragmentConsigne[] {
-  return [
-    texte("Par construction, f restreinte à "),
-    latex(formatEnsembleReelLatex(exercice.intervalleDroite)),
-    texte(" est donc bijective vers "),
-    latex(formatEnsembleReelLatex(exercice.image)),
-    texte(" : injective par restriction (étape précédente), et surjective sur son image par définition même de l'image."),
-  ];
-}
-
-/** Résolution rédigée et justifiée, un seul exercice ouvert sur la copie — jamais de sous-questions
- * a)/b)/c)/d)/e) comme avant : chaque paragraphe reprend le même enchaînement logique (domaine →
- * injectivité → réciproque → image → bijection), justifié comme un manuel scolaire le ferait.
- * Toutes les valeurs utilisées (domaine, pivot, intervalleDroite, image) sont déjà connues sur
- * l'instance ou issues des fonctions d'aide niveau 2 déjà écrites côté écran — jamais recalculées
- * indépendamment. */
-function construireParagraphesResolution(exercice: ExerciceInjectiviteFonctions): FragmentConsigne[][] {
-  return [
-    construireParagrapheDomaine(exercice),
-    construireParagrapheInjectivite(exercice),
-    construireParagrapheReciproque(exercice),
-    construireParagrapheImage(exercice),
-    construireParagrapheBijection(exercice),
-  ];
-}
-
-function construireCorrectionInjectiviteFonctions(exercice: ExerciceInjectiviteFonctions): BlocCorrection[] {
-  return construireParagraphesResolution(exercice).map((fragments) => ({ type: "paragraphe", fragments }));
-}
-
-export const adaptateurEvaluationInjectiviteFonctions: AdaptateurFeuilleExercices<ExerciceInjectiviteFonctions> = {
+export const adaptateurEvaluationInjectiviteFonctions: AdaptateurFeuilleExercices<E> = {
   titreDocument: "Fonctions injectives, surjectives, bijectives — Évaluation",
   nomFichierBase: "injectivite-fonctions",
   genererInstance: genererExerciceInjectiviteFonctions,
   catalogueVariantes: CATALOGUE_FAMILLES,
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0]),
-  construireEnonce: construireEnonceInjectiviteFonctions,
-  construireCorrection: construireCorrectionInjectiviteFonctions,
+  construireEnonce,
+  construireCorrection,
+  criteresDifficulte,
+  reponseBreve,
+  correctionDetaillee: (e) => correction(e),
+  bareme,
+  enoncePapier,
 };

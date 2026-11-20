@@ -47,14 +47,14 @@ function formatSommeTermes(termes: TermeSigne[]): string {
     .join(" ");
 }
 
-function formatLineaireLatex(arg: ArgumentLineaire): string {
+export function formatLineaireLatex(arg: ArgumentLineaire): string {
   return formatSommeTermes([
     { valeur: arg.a, suffixe: "x" },
     { valeur: arg.b, suffixe: "" },
   ]);
 }
 
-function formatQuadratiqueLatex(arg: ArgumentQuadratique): string {
+export function formatQuadratiqueLatex(arg: ArgumentQuadratique): string {
   return formatSommeTermes([
     { valeur: arg.a, suffixe: "x^{2}" },
     { valeur: arg.b, suffixe: "x" },
@@ -73,7 +73,7 @@ const TOLERANCE_RECHERCHE_ANGLE = 1e-9;
  * connue (`entree.valeur`, ex. `-1`) par recherche inverse dans la banque plutôt que de construire
  * `\cos(\pi)` en LaTeX brut non résolu.
  */
-function valeurTrigDepuisAngle(arcfonction: Arcfonction, angle: { latex: string; numerique: number }): string {
+export function valeurTrigDepuisAngle(arcfonction: Arcfonction, angle: { latex: string; numerique: number }): string {
   const entree = BANQUES_ARC[arcfonction].find((e) => Math.abs(e.angle.numerique - angle.numerique) < TOLERANCE_RECHERCHE_ANGLE);
   if (!entree) throw new Error(`valeurTrigDepuisAngle : aucune entrée trouvée pour ${arcfonction}(${angle.latex}) — ne devrait jamais arriver`);
   return entree.valeur.latex;
@@ -150,13 +150,12 @@ export function texteAideCENiveau1(exercice: ExerciceEquationsCyclometriques): s
     const base =
       nom1 === "arctan"
         ? "arctan est toujours définie sur ℝ tout entier."
-        : `Le domaine de ${NOM_FR[nom1]} inverse (${NOM_LATEX[nom1]}) est [-1;1] : son argument doit y rester.`;
-    if (exercice.sousCas === "acos_atan") return `${base} En plus de cela, l'identité utilisée à l'étape suivante exige que cet argument soit STRICTEMENT POSITIF.`;
+        : `Le domaine de ${NOM_FR[nom1]} inverse (${NOM_LATEX[nom1]}) est [−1 ; 1] : son argument doit y rester.`;
     return base;
   }
   const arcfonction = exercice.arcfonction;
   if (arcfonction === "arctan") return "arctan est définie sur ℝ tout entier ⟹ aucune condition d'existence à poser.";
-  return `Le domaine de ${NOM_FR[arcfonction]} inverse est [-1;1] : l'argument de ${NOM_LATEX[arcfonction]} doit rester dans cet intervalle.`;
+  return `Le domaine de ${NOM_FR[arcfonction]} inverse est [−1 ; 1] : l'argument de ${NOM_LATEX[arcfonction]} doit rester dans cet intervalle.`;
 }
 
 // ============================================================================
@@ -169,10 +168,10 @@ const NOM_FR_MAJ: Record<Arcfonction, string> = { arcsin: "sinus", arccos: "cosi
 
 export function texteAideConditionNiveau1(exercice: Extract<ExerciceEquationsCyclometriques, { variante: "arcfonctionsDifferentes" }>): string {
   const [nom1, nom2] = ARCFONCTIONS_SOUS_CAS[exercice.sousCas];
-  const base = `${NOM_LATEX[nom1].replace("\\", "")} a pour codomaine ${nom1 === "arcsin" ? "[-π/2;π/2]" : "[0;π]"}, ${NOM_LATEX[nom2].replace("\\", "")} a pour codomaine ${nom2 === "arccos" ? "[0;π]" : "(-π/2;π/2)"}.`;
-  if (exercice.sousCas === "asin_acos") return `${base} Sur l'intersection [0;π/2], ${NOM_FR_MAJ.arcsin} ET ${NOM_FR_MAJ.arccos} sont TOUS LES DEUX ≥0 : les 2 arguments doivent donc être ≥0.`;
+  const base = `${NOM_LATEX[nom1].replace("\\", "")} a pour codomaine ${nom1 === "arcsin" ? "[−π/2 ; π/2]" : "[0 ; π]"}, ${NOM_LATEX[nom2].replace("\\", "")} a pour codomaine ${nom2 === "arccos" ? "[0 ; π]" : "]−π/2 ; π/2["}.`;
+  if (exercice.sousCas === "asin_acos") return `${base} Sur l'intersection [0 ; π/2], ${NOM_FR_MAJ.arcsin} ET ${NOM_FR_MAJ.arccos} sont TOUS LES DEUX ≥0 : les 2 arguments doivent donc être ≥0.`;
   if (exercice.sousCas === "asin_atan") return `${base} arctan ⊂ arcsin en codomaine ; sur cet intervalle, sinus et tangente sont impaires : elles ont le MÊME SIGNE que l'angle. Les 2 arguments doivent donc avoir le même signe.`;
-  return `${base} Sur l'intersection [0;π/2), le cosinus ne s'annule pas et reste >0 — mais cette moitié de la condition est déjà dans la CE de l'étape 1 (regarde-la). La condition qui RESTE à poser porte sur l'AUTRE argument (celui de arctan) : il doit être ≥0.`;
+  return `${base} L'angle commun est donc dans [0 ; π/2[ : son cosinus (l'argument de arccos) est strictement positif, et sa tangente (l'argument de arctan) est positive ou nulle.`;
 }
 
 export function texteAideConditionNiveau2(exercice: Extract<ExerciceEquationsCyclometriques, { variante: "arcfonctionsDifferentes" }>): { texte: string; latex: string } {
@@ -180,7 +179,7 @@ export function texteAideConditionNiveau2(exercice: Extract<ExerciceEquationsCyc
   const v = formatLineaireLatex(exercice.arg2);
   if (exercice.sousCas === "asin_acos") return { texte: "Les 2 inégalités à poser (non résolues) :", latex: `\\begin{gathered} ${u} \\geq 0 \\\\ ${v} \\geq 0 \\end{gathered}` };
   if (exercice.sousCas === "asin_atan") return { texte: "Les 2 arguments doivent avoir le même signe :", latex: `\\operatorname{signe}\\left(${u}\\right) = \\operatorname{signe}\\left(${v}\\right)` };
-  return { texte: "La seule inégalité qui reste à poser (l'autre moitié est déjà dans la CE) :", latex: `${v} \\geq 0` };
+  return { texte: "Les 2 inégalités à poser (non résolues) :", latex: `\\begin{gathered} ${u} > 0 \\\\ ${v} \\geq 0 \\end{gathered}` };
 }
 
 export function texteAideCENiveau2(exercice: ExerciceEquationsCyclometriques): { texte: string; latex: string } | null {
@@ -201,7 +200,6 @@ export function texteAideCENiveau2(exercice: ExerciceEquationsCyclometriques): {
   const u = formatLineaireLatex(exercice.arg1);
   if (nom1 === "arctan") return null; // ne devrait jamais arriver (nom1 toujours asin/acos pour les 3 sous-cas actuels)
   const conditions = [`-1 \\leq ${u} \\leq 1`];
-  if (exercice.sousCas === "acos_atan") conditions.push(`${u} > 0`);
   return { texte: "La/les condition(s) à poser (non résolues) :", latex: conditions.length === 1 ? conditions[0] : `\\begin{gathered} ${conditions.join(" \\\\ ")} \\end{gathered}` };
 }
 

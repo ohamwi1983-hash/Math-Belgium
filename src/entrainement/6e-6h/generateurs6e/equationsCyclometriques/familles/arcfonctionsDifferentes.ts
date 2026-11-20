@@ -157,7 +157,12 @@ function construireAsinAtan(): ExerciceArcfonctionsDifferentes {
 function construireAcosAtan(): ExerciceArcfonctionsDifferentes {
   const { p, q, r } = tirerParmi(BANQUE_PYTHAGORE);
   const b = tirerEntier(-3, 3);
-  const genuine = Math.random() < 0.5;
+  // Audit du 6e ch. 1 (E1) : la CE est le seul domaine u ∈ [−1 ; 1] ; « u > 0 » appartient à la
+  // condition de compatibilité (avec v ≥ 0). Avec m < 0, cette condition serait VIDE (v = m·u ≥ 0
+  // impose u ≤ 0), irreprésentable à l'écran : m > 0 toujours. Le tirage est gardé (même suite de
+  // `Math.random`, donc mêmes `?code=` pour b et le triplet) ; x₋ (u < 0) reste la solution parasite.
+  Math.random();
+  const genuine = true;
   const u0 = q / r;
   const v0 = p / q;
   const m = genuine ? v0 / u0 : -v0 / u0;
@@ -174,14 +179,11 @@ function construireAcosAtan(): ExerciceArcfonctionsDifferentes {
     { x: xMinus, accepteAttendu: false },
   ]);
 
-  const domaineIntervalle = domaineArcsinArccosLineaire(a, b);
-  const domainePositif = domaineStrictementPositif(a, b);
-  const ce = intersection(domaineIntervalle, domainePositif);
-  if (ce === null) throw new Error("construireAcosAtan : CE vide (ne devrait jamais arriver)");
+  const ce = domaineArcsinArccosLineaire(a, b);
+  const condition = intersection(domaineStrictementPositif(a, b), domaineSigneNonNegatif(c, d));
+  if (condition === null) throw new Error("construireAcosAtan : condition vide (ne devrait jamais arriver, m > 0)");
 
-  const conditionParasite = versGuide(domaineSigneNonNegatif(c, d));
-
-  return { variante: "arcfonctionsDifferentes", sousCas: "acos_atan", arg1: { a, b }, arg2: { a: c, b: d }, ce: versGuide(ce), conditionParasite, candidats };
+  return { variante: "arcfonctionsDifferentes", sousCas: "acos_atan", arg1: { a, b }, arg2: { a: c, b: d }, ce: versGuide(ce), conditionParasite: versGuide(condition), candidats };
 }
 
 const CONSTRUCTEURS: Record<SousCasArcfonctionsDifferentes, () => ExerciceArcfonctionsDifferentes> = {

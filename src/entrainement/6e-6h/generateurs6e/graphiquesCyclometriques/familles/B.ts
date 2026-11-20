@@ -23,7 +23,7 @@ export function construireB(): ExerciceGraphiqueB {
   const sensInverse: CandidatB = Math.random() < 0.5 ? { ...reel, k: -k } : { ...reel, m: -m };
 
   const niveauxIncorrects: CandidatB =
-    Math.random() < 0.5 ? { ...reel, c: tirerAutre(c, C_VALEURS) } : { ...reel, k: tirerAutre(k, K_VALEURS) };
+    Math.random() < 0.5 ? { ...reel, c: tirerAutre(c, C_VALEURS) } : { ...reel, k: tirerAutre(k, K_VALEURS.filter((v) => v !== -k)) }; // jamais −k : c'est déjà le distracteur « sens inverse » (audit du 6e ch. 1, E3 : deux graphes identiques)
 
   const { candidats, indexCorrect } = melangerAvecIndexCorrect([reel, asymptotesDecalees, sensInverse, niveauxIncorrects]);
   return { famille: "B", reel, proprietes: calculerProprietesB(reel), candidats, indexCorrect };
