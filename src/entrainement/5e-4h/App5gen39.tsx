@@ -3,8 +3,7 @@ import type { VarianteQuizFonctions5e } from "./core5e/quizFonctions5e.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { demarrerSessionQuizFonctions5e, soumettreReponseQuizFonctions5e } from "./moteur5e/sessionQuizFonctions5e";
 import type { EtatSessionQuizFonctions5e, ResultatExerciceQuizFonctions5e } from "./moteur5e/typesQuizFonctions5e";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs5e/quizFonctions5e/index";
-import { BANQUE_QUIZ_FONCTIONS_5E } from "./generateurs5e/quizFonctions5e/banque";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition, etendueNombreQuestions, nombreQuestions } from "./generateurs5e/quizFonctions5e/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import { EtapeQuestionQuizFonctions5e } from "./components5e/EtapeQuestionQuizFonctions5e";
 import { ResultatPanelQuizFonctions5e } from "./components5e/ResultatPanelQuizFonctions5e";
@@ -14,8 +13,10 @@ import { ResumeSessionQuizFonctions5e } from "./components5e/ResumeSessionQuizFo
  * piège du nombre fixe) : couplé à `creerGenerateurSansRepetition`, une session parcourt toutes les
  * affirmations du thème choisi sans jamais en répéter une, même si la banque change de taille. */
 function reglagesPour(theme: VarianteQuizFonctions5e): ReglagesSession5e {
-  return { nombreExercices: BANQUE_QUIZ_FONCTIONS_5E[theme].length, tentativesMax: 1 };
+  return { nombreExercices: nombreQuestions(theme), tentativesMax: 1 };
 }
+
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizFonctions5e): EtatSessionQuizFonctions5e {
   return demarrerSessionQuizFonctions5e(reglagesPour(theme), creerGenerateurSansRepetition(theme));
@@ -26,8 +27,7 @@ function nouvelleSession(theme: VarianteQuizFonctions5e): EtatSessionQuizFonctio
  * (variante) n'est pas tiré au hasard : c'est l'ÉLÈVE qui le choisit sur un écran d'accueil dédié.
  * "Changer de thème" (`ResumeSessionQuizFonctions5e`) ramène à CET écran de choix, jamais à
  * l'accueil global de la plateforme (`onRetourAccueil`, réservé au bouton "← Accueil"). Le panneau
- * dev (`SelecteurVarianteDev`, 5e) reste réservé au développement, jamais visible sur l'écran
- * normal donné aux élèves. */
+ * des variantes (`SelecteurVarianteDev`, 5e) reste visible, comme dans tous les générateurs. */
 export function App5gen39() {
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizFonctions5e | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizFonctions5e | null>(null);
@@ -81,7 +81,13 @@ export function App5gen39() {
           {!etat ? (
             <div>
               <h2 className="result-title">Choisis un thème</h2>
-              <p className="result-subtitle">7 thèmes, 20 affirmations vrai/faux chacun — révision complète du chapitre.</p>
+              <p className="result-subtitle">
+                {CATALOGUE_VARIANTES.length} thèmes,{" "}
+                {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max
+                  ? `${ETENDUE_QUESTIONS.max} affirmations`
+                  : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max} affirmations`}{" "}
+                vrai/faux chacun — révision complète du chapitre.
+              </p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
                   <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

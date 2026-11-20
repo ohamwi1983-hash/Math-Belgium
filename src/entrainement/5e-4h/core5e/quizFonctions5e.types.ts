@@ -10,6 +10,7 @@ export type VarianteQuizFonctions5e =
   | "domaineRacines"
   | "decomposition"
   | "composition"
+  | "domaineComposee"
   | "lectureGraphique"
   | "problemesContexte";
 

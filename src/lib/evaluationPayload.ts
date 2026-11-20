@@ -557,7 +557,8 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRationnel', label: 'Domaine — fonctions rationnelles', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRacines', label: 'Domaine — racines', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', quizTheme: 'decomposition', label: '', quizChapitre: 1 },
-  { chapitreSlug: 'fonctions-composees', sectionId: 'composer', quizTheme: 'composition', label: '', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'composer', quizTheme: 'composition', label: 'Expressions', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'composer', quizTheme: 'domaineComposee', label: 'Domaine d’une composée', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'graphique', quizTheme: 'lectureGraphique', label: '', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'contexte', quizTheme: 'problemesContexte', label: '', quizChapitre: 1 },
   { chapitreSlug: 'trigonometrie', sectionId: 'arcs-secteurs', quizTheme: 'arcsEtSecteurs', label: '', quizChapitre: 2 },
@@ -1529,12 +1530,14 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'domaine non borné', enonce: "Détermine le domaine de définition de $f(x) = \\dfrac{\\sqrt{2x+6}}{x-1}$." },
       { cle: 'exclusion interne', enonce: "Détermine le domaine de définition de $f(x) = \\dfrac{\\sqrt{9-x^2}}{x+1}$." },
       { cle: 'une fraction sous une racine', enonce: "Détermine le domaine de définition de $f(x) = \\sqrt{\\dfrac{x-1}{x+2}}$ à l'aide d'un tableau de signes." },
-      { cle: 'racine au dénominateur', enonce: "Détermine le domaine de définition de $f(x) = \\dfrac{x+4}{\\sqrt{6-2x}}$." },
+      { cle: 'racine au dénominateur — condition stricte', enonce: "Détermine le domaine de définition de $f(x) = \\dfrac{x+4}{\\sqrt{6-2x}}$." },
+      { cle: 'impose radicande > 0', enonce: "Pour $f(x) = \\dfrac{N(x)}{\\sqrt{u(x)}}$, où le numérateur $N$ est défini pour tout réel, démontre que les conditions « $u(x) \\ge 0$ » et « $\\sqrt{u(x)} \\ne 0$ » reviennent à la seule condition $u(x) > 0$." },
       { cle: 'dénominateur du second degré', enonce: "Détermine le domaine de définition de $f(x) = \\dfrac{2x+1}{x^2-5x+6}$." },
     ],
     decomposer: [
       { cle: '3 étages', enonce: "Décompose $h(x) = 5 - \\sqrt[3]{|x|}$ en une suite de fonctions de référence, de l'intérieur vers l'extérieur." },
       { cle: '4 étages', enonce: "Décompose $h(x) = \\sqrt{|3x-5|+2}$ en une suite de fonctions de référence, de l'intérieur vers l'extérieur." },
+      { cle: 'deux fonctions affines est affine', enonce: "Démontre que la composée de deux fonctions affines $f(x) = mx + p$ et $g(x) = m'x + p'$ est une fonction affine ; donne sa pente et son ordonnée à l'origine." },
       { cle: 'f∘g et g∘f en expressions', enonce: "Pour $f(x) = x^2+1$ et $g(x) = 2x-3$, écris $(f\\circ g)(x)$ et $(g\\circ f)(x)$, puis vérifie tes deux formules en $x = 1$." },
     ],
     composer: [
@@ -1549,6 +1552,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     contexte: [
       { cle: 'un bidon cylindrique', enonce: "Un bidon cylindrique de rayon r et de hauteur h contient $V = 1000$ cm³, avec $V = \\pi r^2 h$. Exprime h en fonction de r, calcule $h(3)$, puis exprime l'aire latérale du bidon en fonction de r seulement." },
+      { cle: 'le bidon le moins coûteux', enonce: "Un bidon cylindrique fermé a un volume fixé $V$. Démontre que son aire totale $A(r) = 2\\pi r^2 + \\dfrac{2V}{r}$ est minimale lorsque sa hauteur est égale à son diamètre (sans dérivée)." },
       { cle: 'coût unitaire à partir de deux relevés', enonce: "Le coût unitaire d'un objet est modélisé par $c(x) = a + \\dfrac{b}{x}$ (en euros), où $x$ est le nombre d'objets fabriqués. Sachant que $c(10) = 26$ et $c(40) = 11$, détermine $a$ et $b$, puis exprime le coût total $C(x)$." },
       { cle: 'bénéfice et seuil de rentabilité', enonce: "Une entreprise vend chaque objet 16 € ; son coût total vaut $C(x) = 0{,}1x^2 + 6x + 160$ (en euros, pour $x$ objets). Détermine les quantités pour lesquelles elle est rentable et son seuil de rentabilité." },
     ],
@@ -3080,13 +3084,13 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Une condition « radicande ≥ 0 » et une condition « dénominateur ≠ 0 » sont-elles le même type de restriction ? Pourquoi ne faut-il jamais les confondre ?",
         corrige:
-          "Non : « ≥ 0 » est une inégalité large qui exclut tout un côté de la droite réelle (un intervalle entier), alors que « ≠ 0 » n'exclut qu'un seul point isolé, sans toucher au reste. Confondre les deux revient par exemple à retirer un intervalle entier là où une seule valeur devait disparaître — une erreur qui change complètement la forme du domaine trouvé.",
+          "Non : « ≥ 0 » est une inégalité large qui exclut tout un côté de la droite réelle (un intervalle entier), alors que « ≠ 0 » n'exclut que des valeurs isolées, les zéros du dénominateur (par exemple 2 et 3 pour $x^2-5x+6$), sans toucher au reste. Confondre les deux revient à retirer un intervalle entier là où seules quelques valeurs devaient disparaître, ou l'inverse — une erreur qui change complètement la forme du domaine trouvé.",
       },
       {
         enonce:
           "Pourquoi combine-t-on toujours plusieurs conditions d'existence par intersection, et jamais par union ?",
         corrige:
-          "Chaque condition d'existence (dénominateur, racine paire...) doit être vérifiée EN MÊME TEMPS que les autres pour que f(x) ait un sens : x doit satisfaire toutes les contraintes à la fois, pas seulement une d'entre elles. L'intersection garde exactement les valeurs communes à toutes les conditions ; une union, elle, accepterait une valeur qui ne vérifie qu'une seule condition sur plusieurs — ce qui ne garantit pas que f(x) soit calculable.",
+          "Chaque condition d'existence (dénominateur, racine paire...) doit être vérifiée en même temps que les autres pour que f(x) ait un sens : x doit satisfaire toutes les contraintes à la fois, pas seulement une d'entre elles. L'intersection garde exactement les valeurs communes à toutes les conditions ; une union, elle, accepterait une valeur qui ne vérifie qu'une seule condition sur plusieurs — ce qui ne garantit pas que f(x) soit calculable.",
       },
     ],
     decomposer: [
@@ -3098,7 +3102,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       },
       {
         enonce:
-          "Pour décomposer une écriture composée, pourquoi part-on de la DERNIÈRE opération effectuée plutôt que de la première qu'on lit en regardant x ?",
+          "Pour décomposer une écriture composée, pourquoi part-on de la dernière opération effectuée plutôt que de la première qu'on lit en regardant x ?",
         corrige:
           "La toute dernière opération appliquée est, par définition, celle qui agit sur tout ce qui précède — c'est donc la fonction la plus extérieure de la composée. Partir de l'intérieur (la première opération lue) ne dit rien sur l'ordre des étages tant qu'on n'a pas identifié ce qui enveloppe le reste ; éplucher depuis l'extérieur permet au contraire de retirer un étage à la fois, sans ambiguïté.",
       },
@@ -3126,9 +3130,9 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       },
       {
         enonce:
-          "Pourquoi une image lue graphiquement peut-elle « ne pas exister », alors qu'on a bien deux courbes tracées sous les yeux ?",
+          "Pourquoi une image lue graphiquement peut-elle « ne pas exister », alors qu'on a bien deux courbes tracées sous les yeux ? Est-ce la même chose qu'une valeur qui tombe hors de la portion tracée ?",
         corrige:
-          "La valeur intermédiaire f(a), une fois reportée comme nouvelle entrée sur le second graphe, peut tomber en dehors de la portion visible — ou du domaine réel — de ce second graphe. Dans ce cas, g ne peut tout simplement pas recevoir cette entrée : prolonger la courbe à l'œil pour deviner une valeur serait inventer un résultat qui n'existe pas réellement.",
+          "La valeur intermédiaire f(a), reportée comme nouvelle entrée sur le second graphe, peut tomber hors du domaine de g (l'énoncé le dit, ou le graphe complet de g s'arrête avant) : g ne peut pas recevoir cette entrée, et g(f(a)) n'existe pas. Ce n'est pas la même chose qu'une valeur qui tombe seulement hors de la portion tracée alors que g y est définie : g(f(a)) existe bien, mais n'est pas lisible sur ce graphique. Dans les deux cas, prolonger la courbe à l'œil pour deviner une valeur serait inventer un résultat.",
       },
     ],
     contexte: [

@@ -4851,3 +4851,38 @@ cadré sur l'extremum de f′ ; 6gen10 D-variable compacté (exposant −x−2, 
 débordait de 51 px à 390 px) ; 6gen12 contextes réécrits (`contextes.ts` : bornes par contexte,
 objectif de G, question explicite du doublement), phrases de contexte en fragments KaTeX (`prose`),
 espace fine des milliers (`formatDecimal`, `milliers`). Lot E : voir `feuilles-evaluations.md`.
+
+## 5e (4h), Chapitre 1 — lots A (cours) et E (quiz 5gen39) de l'audit complet
+
+Lot A (`fonctions-composees.ts`, `evaluationPayload.ts`) : astuce « racine au dénominateur » qui
+contredisait l'exemple (poser les deux conditions, puis leur intersection donne « > 0 ») ; « une
+seule valeur retirée » → « des valeurs isolées (les zéros du dénominateur) » (attention, formulaire,
+compréhension « domaine » n° 2) ; application « pipe » : `grep "erreur" fichier.txt | wc -l`, deux
+étages h = u∘v, guillemets français au lieu des accents graves (non lus par `RichText`) ;
+historique : Brahmagupta pose 0 ÷ 0 = 0 et laisse n ÷ 0 en fraction, Bhāskara II dit n ÷ 0 infini ;
+« C_f » des tags → « la courbe de f », `$C_f$` dans la légende ; 8 majuscules d'insistance ; étage
+oublié (wrongRight + attention cohérents) ; 3 descriptions de carte (aucune CE, 5gen2 « même type »,
+5gen4 « domaine de la seconde fonction ») ; corrigé de compréhension « graphique » n° 2 : « n'existe
+pas » (hors domaine) distinct de « pas lisible » (hors portion tracée). 3 démonstrations
+(`exempleLibre`, énoncés par clé) : racine au dénominateur ⟺ radicande > 0 (§ 1), composée de deux
+affines (pente mm′, ordonnée à l'origine mp′ + p = f(p′), § 2), bidon fermé optimal h = 2r (§ 5).
+**Bidon sans dérivée** : les dérivées n'arrivent qu'au ch. 5 de 5e, et 5gen5 A1 ne les utilise pas ;
+preuve par le signe de A(r) − A(r₀) = 2π(r − r₀)²(r + 2r₀)/r avec V = 2πr₀³ (factorisation d'un
+trinôme de racine connue, signe d'un produit — acquis de 4e). La clé d'énoncé de l'exemple « racine
+au dénominateur » est devenue le badge complet (sinon ambiguë avec la démonstration). Formulaire :
+signe d'un quotient et d'un trinôme, Im f, fonctions de référence admises (5gen2), composée de deux
+affines, A(r) = 2πr² + 2V/r, formes de coût unitaire (deux relevés), coût fixe / variable.
+2 figures : droite graduée de dom(N/√u) (3 exclu), c(x) = 6 + 200/x avec ses deux relevés et
+l'asymptote y = 6. Tableau de signes du § 1 : défilait à 390 px (391 / 316) ; ligne « quotient »
+(au lieu de « (x − 1)/(x + 2) », déjà dans la légende) et `table.tableau td` resserré sous 480 px
+(`index.css`, padding 8px 6px, tous les tableaux de signes du site) : 0 défilement. Milliers du
+bidon et du seuil avec `\,`, « 1000/(πr²) » en KaTeX.
+
+Lot E (`quizFonctions5e`) : 8 thèmes de 35 (280), +15 par thème et thème nouveau
+`domaineComposee` (« Domaine d'une composée — double condition et image », § 3, libellés
+« Expressions » / « Domaine d'une composée » dans `QUIZ_THEMES`) ; 18 V / 17 F par thème
+(17 / 18 pour le nouveau). Corrigées : « N/D ≥ 0 garantit D ≠ 0 » (logiquement vraie) remplacée par
+« sans exclure les zéros de D » (FAUX) ; « +10 € par objet » précisée « avec un coût total affine » ;
+milliers avec `\,`. `nombreQuestions` / `etendueNombreQuestions` (accueil calculé, plus « 7 thèmes,
+20 affirmations »). Contrôle : script d'échantillonnage (98 vérifications numériques : domaines,
+images, composées en un point, identité du bidon), typographie hors `$` et équilibre — 0 erreur.
