@@ -82,7 +82,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
   | '6gen148' | '6gen149' | '6gen150' | '6gen151'
-  | '6gen156' | '6gen157' | '6gen158'
+  | '6gen156' | '6gen157' | '6gen158' | '6gen159'
   | '6gen144'
   | '6gen147'
   | '6gen145'
@@ -153,6 +153,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'derivees', generatorId: '6gen156', label: 'Problèmes avec arcfonctions (6gen156)', processus: 3 },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen157', label: 'Étude d\'une fonction cyclométrique (6gen157)', processus: 3 },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen158', label: 'Lire une transformée c + k·arc(mx + n) (6gen158)', processus: 2 },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', generatorId: '6gen159', label: 'Restreindre pour inverser (6gen159)', processus: 2 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen6', label: 'Calcul de limites (6gen6)' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen145', label: 'Limites de référence et croissances comparées (6gen145)', processus: 2 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen146', label: 'Puissances à exposant réel sans calculatrice (6gen146)', processus: 1 },

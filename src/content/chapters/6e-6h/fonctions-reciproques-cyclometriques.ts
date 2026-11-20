@@ -1251,6 +1251,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 2. arcsin, arccos, arctan »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Restreindre pour inverser',
+          generatorId: '6gen159',
+          description: [
+            'Restreins un trinôme, sin, cos ou tan au plus grand intervalle monotone contenant un point donné, ' +
+              'puis exprime la réciproque (π − arcsin x, 2π − arccos x, arctan x + π…).',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 159. Restreindre pour inverser »',
+        },
       ],
     },
     {
