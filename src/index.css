@@ -1765,3 +1765,101 @@ table.feature-table td { white-space: normal; }
 /* Sélecteur d'école du panneau de conception. */
 .admin-eval-tf-ecole { min-width: 160px; max-width: 280px; }
 .admin-eval-ecole-unique { font-size: 0.85rem; padding: 7px 0; }
+
+/* ---------- carnet de matière vue (/carnet, phase 2 des comptes) ----------
+ * Téléphone d'abord (390 px sans débordement), mêmes jetons clair / sombre que les pages de compte.
+ * Champs à 16 px (pas de zoom Safari iOS), cibles tactiles ≥ 44 px. */
+.carnet .compte-section h4 { font-size: 1.02rem; margin: 0 0 8px; }
+.compte-champ select, .compte-champ textarea, .carnet-form input[type="date"], .carnet-form input[type="time"] {
+  font: inherit; font-size: 16px; padding: 10px 12px; min-height: 46px; width: 100%; max-width: 100%;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+}
+.compte-champ textarea { min-height: 72px; resize: vertical; line-height: 1.4; }
+.compte-champ select:focus-visible, .compte-champ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.compte-champ select[aria-invalid="true"], .compte-champ textarea[aria-invalid="true"] { border-color: var(--bad); }
+.carnet-champ-court { max-width: 260px; }
+.carnet-valeur-fixe { margin: 0; padding: 11px 0; min-height: 46px; color: var(--ink-soft); }
+.carnet-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px 16px; }
+.carnet-grille-heures { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; }
+.carnet-fleche { padding-bottom: 12px; font-size: 1.1rem; color: var(--ink-soft); }
+.carnet-form {
+  display: flex; flex-direction: column; gap: 16px; margin: 0 0 20px; padding: 16px;
+  background: var(--surface); border: 1px solid var(--accent-soft-line); border-radius: var(--radius);
+}
+.carnet-form h3 { font-size: 1.15rem; margin: 0; }
+.carnet-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.carnet-fieldset legend { font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; padding: 0; }
+.carnet-parties { gap: 4px; }
+.carnet-section { border-top: 1px solid var(--line); padding: 4px 0; }
+.carnet-section:first-of-type { border-top: 0; }
+.carnet-case { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; padding: 10px 2px; cursor: pointer; line-height: 1.35; }
+.carnet-case input { flex: none; width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--accent); }
+.carnet-case span { min-width: 0; overflow-wrap: anywhere; }
+.carnet-case-section { font-weight: 700; }
+.carnet-sous-parties { display: flex; flex-direction: column; padding-left: 30px; }
+.carnet-sous-parties .carnet-case { min-height: 40px; padding: 8px 2px; font-size: 0.95rem; }
+.carnet-generateurs { padding-left: 4px; }
+.carnet-deja-vu { font-weight: 400; font-size: 0.82rem; color: var(--ink-faint); white-space: nowrap; }
+.carnet-details { border: 1px solid var(--line); border-radius: var(--radius); padding: 0 14px; background: var(--surface); }
+.carnet-details > summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; gap: 6px; }
+.carnet-details[open] { padding-bottom: 14px; }
+.carnet-onglets-classes, .carnet-vues { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+.carnet-puce {
+  display: inline-flex; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 44px; padding: 6px 16px;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink);
+  font: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; line-height: 1.2;
+}
+.carnet-puce[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.carnet-puce:focus-visible, .carnet-case input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.carnet-puce-ecole { font-size: 0.72rem; font-weight: 400; color: var(--ink-faint); }
+.carnet-entete-classe { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-bottom: 14px; }
+.carnet-entete-classe h2 { margin: 0; }
+.carnet-seances { list-style: none; margin: 0 0 20px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.carnet-seance { padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); min-width: 0; }
+.carnet-seance-tete h4 { font-size: 1.02rem; margin: 0; }
+.carnet-horaire { font-family: var(--mono); font-size: 0.88rem; font-weight: 400; color: var(--ink-soft); white-space: nowrap; }
+.carnet-seance-chapitre { margin: 2px 0 8px; font-size: 0.92rem; }
+.carnet-seance-parties { margin: 0 0 8px; padding-left: 20px; font-size: 0.95rem; }
+.carnet-seance-parties li { margin: 2px 0; overflow-wrap: anywhere; }
+.carnet-seance-detail { margin: 0 0 6px; font-size: 0.92rem; overflow-wrap: anywhere; }
+.carnet-texte-libre { white-space: pre-line; }
+.carnet-remarque { color: var(--ink-soft); }
+.carnet-seance-actions { margin-top: 10px; }
+.carnet-copie { margin: 10px 0 0; }
+.carnet-texte-copie { width: 100%; font: inherit; font-size: 14px; padding: 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-2); color: var(--ink); }
+.carnet-evaluation { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+.carnet-evaluation .compte-titre-encadre { margin: 0; }
+.carnet-apercu { margin: 0; padding-left: 20px; font-size: 0.92rem; }
+.carnet-apercu li { margin: 2px 0; overflow-wrap: anywhere; }
+.carnet-progression { display: flex; flex-direction: column; gap: 16px; margin: 0 0 8px; }
+.carnet-prog-chapitre { padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.carnet-prog-chapitre h4 { margin: 0 0 2px; font-size: 1.02rem; }
+.carnet-prog-resume { margin: 0 0 8px; font-size: 0.88rem; color: var(--ink-soft); }
+.carnet-barre { height: 6px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; margin-bottom: 10px; }
+.carnet-barre span { display: block; height: 100%; background: var(--accent); }
+.carnet-prog-sections { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.carnet-prog-sections > li { border-top: 1px solid var(--line); padding-top: 6px; }
+.carnet-prog-section { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; margin: 0; font-weight: 700; font-size: 0.95rem; }
+.carnet-prog-section > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.carnet-prog-etat { font-family: var(--mono); font-size: 0.78rem; font-weight: 400; color: var(--ink-soft); white-space: nowrap; }
+.carnet-prog-sections > li.reste .carnet-prog-section > span:first-child { color: var(--ink-soft); font-weight: 600; }
+.carnet-prog-unites { list-style: none; margin: 4px 0 0; padding: 0 0 0 4px; display: flex; flex-direction: column; gap: 2px; font-size: 0.9rem; }
+.carnet-prog-unites li { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 2px 8px; align-items: baseline; }
+.carnet-prog-unites li.reste .carnet-prog-titre { color: var(--ink-soft); }
+.carnet-prog-marque { color: var(--good); font-weight: 700; }
+.carnet-prog-unites li.reste .carnet-prog-marque { color: var(--ink-faint); }
+.carnet-prog-titre { overflow-wrap: anywhere; }
+.carnet-prog-ailleurs { grid-column: 2 / -1; margin: 0; font-size: 0.78rem; color: var(--ink-faint); }
+.carnet-prog-pas-commences { margin: 0; padding-left: 20px; font-size: 0.92rem; }
+@media (max-width: 480px) {
+  .carnet-form { padding: 14px 12px; }
+  .carnet-sous-parties { padding-left: 22px; }
+  .carnet-seance-actions .compte-bouton, .carnet-seance-actions .compte-bouton-secondaire { flex: 1 1 auto; }
+}
+/* Trois outils dans l'en-tête « Ce chapitre » (bouton « Carnet » d'un professeur connecté) : dans le
+ * sommaire étroit de l'ordinateur, les outils passent sous le titre plutôt que d'être rognés. */
+.lecture-entete.avec-carnet { flex-wrap: wrap; row-gap: 4px; }
+.lecture-entete.avec-carnet .lecture-sheet-title { white-space: nowrap; }
+.lecture-entete.avec-carnet .lecture-outils { margin-left: auto; }
+/* Bandeau du panneau des évaluations ouvert depuis le carnet (`?matiere=`). */
+.admin-eval-carnet { margin: 0 0 16px; padding: 12px 14px; border: 1px solid var(--accent-soft-line); border-radius: var(--radius); background: var(--accent-soft); color: var(--accent-ink); font-size: 0.95rem; }

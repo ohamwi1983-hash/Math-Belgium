@@ -22,6 +22,7 @@ const InscriptionPage = lazy(() => import('./routes/InscriptionPage').then((m) =
 const MotDePassePage = lazy(() => import('./routes/MotDePassePage').then((m) => ({ default: m.MotDePassePage })))
 const ProfilPage = lazy(() => import('./routes/ProfilPage').then((m) => ({ default: m.ProfilPage })))
 const CoffrePage = lazy(() => import('./routes/CoffrePage').then((m) => ({ default: m.CoffrePage })))
+const CarnetPage = lazy(() => import('./routes/CarnetPage').then((m) => ({ default: m.CarnetPage })))
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
           <Route path="/mot-de-passe" element={<MotDePassePage />} />
           <Route path="/profil" element={<ProfilPage />} />
           <Route path="/coffre" element={<CoffrePage />} />
+          <Route path="/carnet" element={<CarnetPage />} />
           {/* Un seul générateur rapatrié depuis plateforme-maths = une entrée dans
            * `ENTRAINEMENT_REGISTRY` (voir `src/entrainement/registry.ts`), jamais une nouvelle route
            * ici — `EntrainementPage` charge le bon composant à la demande (`React.lazy`), lu depuis

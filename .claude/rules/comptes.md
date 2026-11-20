@@ -3,7 +3,9 @@ paths:
   - "src/lib/supabase.ts"
   - "src/lib/compte*"
   - "src/components/compte/**"
-  - "src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation}*"
+  - "src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation,Carnet}*"
+  - "src/lib/carnet*"
+  - "src/components/carnet/**"
   - "supabase/**"
   - ".env*"
 ---
@@ -15,7 +17,7 @@ Seul backend du site : **Supabase** (Postgres + Auth + Row Level Security), proj
 l'utilisateur, après mise en service : ses élèves préparent leurs évaluations avec les feuilles
 d'exercices) ; seuls le panneau des évaluations / examens (`/evaluation`), le coffre, le profil et
 l'administration sont derrière la connexion.
-Aucune donnée d'élève. Phase 2 (pas faite) : carnet de matière vue (classes rattachées aux écoles).
+Aucune donnée d'élève. Phase 2 (faite, section « Phase 2 » en fin de fichier) : carnet de matière vue (`/carnet`).
 Plus tard (pas fait) : partage entre collègues.
 
 ## Décisions de l'utilisateur
@@ -76,7 +78,7 @@ e-mail de l'utilisateur), `admin_lister_professeurs()` (inscription, dernière c
 et d'écoles), `admin_definir_actif(p_id, p_actif)` (jamais soi-même). Toutes vérifient `est_admin()`.
 
 Partage plus tard : table `partages (plan_id, destinataire, droit)` + politique SELECT AJOUTÉE sur
-`plans`. Phase 2 : `classes (ecole_id → ecoles.id, …)`.
+`plans`. Phase 2 : `classes`, `seances`, `carnet_reglages` (`0002_carnet.sql`, voir plus bas).
 
 ## Code
 
@@ -143,3 +145,97 @@ Partage plus tard : table `partages (plan_id, destinataire, droit)` + politique 
 - À tester contre le VRAI projet après exécution du SQL : voir le rapport du chantier (déclencheur sur
   `auth.users` et message de `signUp`, `delete from auth.users` dans `supprimer_mon_compte` avec le rôle
   `postgres` de Supabase, e-mails, redirections).
+
+## Phase 2 — carnet de matière vue (`/carnet`, `supabase/migrations/0002_carnet.sql`)
+
+Décisions de l'utilisateur : carnet rattaché au compte, page réservée (`PageReservee`), AUCUNE donnée
+d'élève (classes « 5e B » et séances seulement) ; partage entre collègues plus tard.
+
+**Schéma** (`0002_carnet.sql`, idempotent, à coller APRÈS 0001 dans SQL Editor → Run ; résultat
+attendu « Success. No rows returned ») :
+
+| Table | Colonnes | Contraintes |
+| --- | --- | --- |
+| `classes` | `proprietaire` (défaut `auth.uid()`), `ecole_id`, `nom` (1–40), `niveau` (levelSlug facultatif), dates | unique `(proprietaire, ecole_id, lower(btrim(nom)))` ; FK COMPOSÉE `(ecole_id, proprietaire) → ecoles (id, proprietaire)` on delete cascade |
+| `seances` | `proprietaire`, `classe_id`, `date_seance` (défaut aujourd'hui), `heure_debut` / `heure_fin` (time, nullables), `numero_heure` (1–15, nullable), `niveau` + `chapitre` (slugs), `parties` jsonb, `generateurs` jsonb, `devoir` / `remarque` (≤ 2 000), dates | fin > début, pas de fin sans début ; jsonb = tableau de textes (`tableau_de_textes` : parties ≤ 300 × 200 car., générateurs ≤ 100 × 40) ; FK COMPOSÉE `(classe_id, proprietaire) → classes (id, proprietaire)` on delete cascade |
+| `carnet_reglages` | `proprietaire` (clé), `format_horaire` (`plage` / `numero`), `duree_heure` (20–240 min) | une ligne par professeur |
+
+RLS des trois tables : `proprietaire = auth.uid() and est_actif()` (lecture ET écriture, comme `ecoles`
+et `plans`) ; `anon` sans aucun droit ; l'admin ne voit pas les carnets. **Cohérence propriétaire par
+les clés étrangères composées** (contrainte ajoutée `ecoles_id_proprietaire_uniq unique (id,
+proprietaire)`) : puisque le RLS impose `proprietaire = auth.uid()`, une classe ne peut viser qu'une
+école à soi, une séance qu'une classe à soi — vérifié par Postgres, sans rien révéler des lignes des
+autres. Cascade école → classes → séances ; `supprimer_mon_compte()` (0001) efface toujours tout, sans
+modification. Vérifié sur Postgres 16 local (faux schéma `auth`, 0001 puis 0002 exécutés deux fois,
+données conservées) : 66 vérifications (lecture / écriture croisées refusées, rattachement à la classe
+ou à l'école d'un autre refusé — 23503 —, propriétaire changé refusé — 42501 —, compte désactivé,
+`anon`, limites jsonb et textes, cascades, suppression de compte).
+
+**0002 pas encore appliqué** : `carnetDonnees.ts::ErreurCarnet.tableAbsente` (codes PGRST205 / PGRST204 /
+42P01 / PGRST202 ou « schema cache ») → la page affiche « Carnet pas encore activé : colle le fichier
+0002_carnet.sql… » ; tout le reste du site est inchangé (aucune autre page ne lit ces tables).
+
+**Parties cochées** (`seances.parties`) : `sectionId` (section entière) ou `sectionId/slug` (sous-partie =
+bloc `subheading` de premier niveau de la section ; slug du titre sans accents, `-2` en cas de doublon :
+stable si on insère une sous-partie ailleurs, à changer avec soin si on renomme un titre). Toutes les
+sous-parties cochées → enregistré comme section entière (`normaliserParties`) ; un id inconnu du contenu
+est conservé (rien n'est perdu si le cours change). Générateurs proposés = cartes « S'entraîner » du
+chapitre (`generateursChapitre`, ids `6gen13`, `gen7`…).
+
+**Code** :
+- `lib/carnet.ts` (PUR, testé par esbuild + node, 85 vérifications) : `structureChapitre`,
+  `normaliserParties`, `unitesCouvertes`, horaire (`plageTexte` « 08h50 → 09h40 » via
+  `examen.ts::heureTexte`, `numeroHeureTexte` « 3e heure », `horaireTexte(s, format)` avec repli sur
+  l'autre écriture, `horaireParDefaut` = horaire de la dernière séance de la classe le même jour de la
+  semaine, sinon l'heure actuelle arrondie à 5 min + durée), `erreursSeance`, `resoudreSeance` →
+  `texteSmartschool` (date, horaire, classe, chapitre, parties avec lien
+  `https://math-belgium.vercel.app/{niveau}/{chapitre}#{sectionId}` — ancres = `id` des sections de
+  `ChapterPage`, générateurs avec lien, devoir ; la REMARQUE n'est jamais copiée) et `htmlSmartschool`
+  (même contenu, liens cliquables si l'éditeur accepte le collage riche), `progressionClasse`
+  (première date par unité, reste), `matiereDepuis(seances, date)` (sections ayant au moins une
+  sous-partie cochée depuis la date incluse ; un seul niveau, le plus fréquent, les autres signalés).
+- `lib/carnetMatiere.ts` (sans dépendance, partagé avec le panneau) : `encoderMatiere` /
+  `decoderMatiere` (tolérant) / `urlEvaluationMatiere`.
+- `lib/carnetFiche.ts` : fiche A4 HTML autonome ; ouverte par un LIEN `target=_blank` sur une URL blob
+  (`#imprimer` → `print()` au chargement, jamais `window.open`) ou téléchargée (nom ASCII
+  `seance-6e-a-2026-11-16.html` : un accent dans `download` fait perdre le nom dans Chromium).
+- `lib/carnetDonnees.ts` : une fonction par opération (client injecté), `ErreurCarnet`.
+- `routes/CarnetPage.tsx` + `components/carnet/` (`GestionClasses`, `FormulaireSeance`, `CarteSeance`,
+  `ProgressionClasse`, `EvaluationMatiere`, `outilsCarnet` : presse-papiers avec repli texte à copier à
+  la main, classe active mémorisée en `localStorage` par appareil). Sans école : invitation à en
+  ajouter une dans `/profil`. Formulaire : date `type="date"`, heures `type="time"`, numéro d'heure en
+  liste, jamais de champ numérique libre ; « déjà vu le … » à côté des parties déjà vues par la classe ;
+  la case de section coche toutes ses sous-parties (état indéterminé si partiel). Progression : par
+  chapitre (ceux du niveau de la classe + ceux des séances), date de la première fois, « reste », et
+  pour chaque partie la date dans les AUTRES classes du même niveau.
+- Réglage du format d'horaire et de la durée d'une heure : `carnet_reglages` (mémorisé dans le compte).
+
+**Routes et liens** : `/carnet` (réservée, `noindex`, non pré-rendue, lien « Carnet de matière vue »
+dans `MenuCompte`). `?chapitre=<niveau>/<chapitre>` ouvre une nouvelle séance sur ce chapitre (classe
+du même niveau choisie). Bouton « Carnet » dans `OutilsChapitre` seulement si `useCompte().etat ===
+'connecte'` et profil actif — `useCompte()` SANS `demarrer` : un visiteur sans session stockée ne
+télécharge ni supabase-js ni le code du carnet (vérifié par Playwright).
+
+**Panneau des évaluations, `?matiere=`** (`EvaluationGeneratorPanel`, effet à côté de `?plan=`) :
+`/evaluation?matiere=6e-6h~fonctions-logarithmes:proprietes,limites&depuis=2026-11-01&classe=6e%20A`
+règle niveau / heures, coche ces chapitres et met UN exercice sur la première variante disponible
+(non exclue faute de calculatrice) de chaque générateur des sections listées ; processus affiché =
+celui du premier générateur retenu ; bandeau `.admin-eval-carnet` en tête (« Matière vue en 6e A
+depuis le 01/11/2026 : n sections, m générateurs pré-sélectionnés… ») ; les trois paramètres sont
+retirés de l'URL. Sans le paramètre, ou sur une page verrouillée (`/…/exercices`) : comportement
+inchangé.
+
+**Vérifications** (Playwright sur un build `NODE_ENV=development vite build --mode test` avec des
+variables Supabase factices et le faux client `window.__MB_FAUX_SUPABASE__`, iPhone 13 et 1 280 px,
+clair et sombre ; 240+ vérifications) : classes (ajout, doublon refusé, renommage, suppression),
+séance (création, modification, heure de fin refusée, numéro d'heure), copie Smartschool (presse-papiers
+relu), fiche (onglet ouvert, téléchargement), progression, évaluation → `/evaluation` pré-sélectionné
+(exercices seulement dans les sections vues), « 0002 non appliqué », sans école, page de cours en
+visiteur (aucun bouton, supabase-js non téléchargé) et en professeur (bouton → séance pré-remplie) ;
+0 erreur console, `scrollWidth` = largeur.
+
+**Mise en service** : SQL Editor → coller TOUT `0002_carnet.sql` → Run → « Success. No rows returned » ;
+recharger `/carnet` (Supabase peut mettre quelques secondes à voir les nouvelles tables). À vérifier
+contre le vrai projet : création de classe / séance, refus d'une école d'un autre (impossible depuis le
+site, à tester au besoin dans l'éditeur SQL avec deux comptes).
+

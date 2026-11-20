@@ -45,7 +45,7 @@ cherchant le chapitre correspondant dans `chaptersIndex.ts`.
 - `/{levelSlug}/{chapterSlug}` — page d'un chapitre (`routes/ChapterRoute.tsx`), résolue via
   `findChapter()`.
 - Comptes professeurs (`.claude/rules/comptes.md`) : `/connexion`, `/inscription`, `/mot-de-passe`,
-  `/profil`, `/coffre`, `/admin` ; le panneau des évaluations/examens (`/evaluation`) exige une
+  `/profil`, `/coffre`, `/carnet` (carnet de matière vue), `/admin` ; le panneau des évaluations/examens (`/evaluation`) exige une
   session. Cours, générateurs et feuilles d'exercices (`/exercice`, `/{levelSlug}/{chapterSlug}/exercices`)
   restent publics (décision de l'utilisateur : les élèves s'en servent pour préparer leurs évaluations).
 

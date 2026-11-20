@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ChapterContent } from '../../content/types'
+import { useCompte } from '../../lib/compteContexte'
 import { imprimerChapitre, imprimerChapitreAmenage, imprimerFormulaireAmenage, imprimerFormulaireSeul, prechargerPolicesImpression } from '../../lib/imprimer'
 
 /**
@@ -12,12 +13,17 @@ import { imprimerChapitre, imprimerChapitreAmenage, imprimerFormulaireAmenage, i
  * - « Imprimer » : petit menu « Chapitre entier » / « Chapitre — version aménagée » / « Formulaire
  *   seul » / « Formulaire — version aménagée » (les deux derniers seulement si le chapitre a un
  *   formulaire).
+ * - « Carnet » (professeur connecté SEULEMENT) : nouvelle séance du carnet de matière vue sur ce
+ *   chapitre (`/carnet?chapitre=…`). `useCompte()` sans `demarrer` : un visiteur sans session stockée
+ *   ne télécharge pas supabase-js et ne voit rien (même principe que `MenuCompte`).
  * `avantImpression` : ferme le tiroir du téléphone avant d'ouvrir la boîte d'impression.
  */
 export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterContent; avantImpression?: () => void }) {
   const [menuOuvert, setMenuOuvert] = useState(false)
   const conteneurRef = useRef<HTMLDivElement>(null)
   const aUnFormulaire = !!chapter.formulaire
+  const compte = useCompte()
+  const professeur = compte.etat === 'connecte' && compte.profil?.actif === true
 
   // Polices d'impression (Andika, Atkinson) chargées en tâche de fond : un Ctrl+P direct les trouve prêtes.
   useEffect(() => {
@@ -48,7 +54,7 @@ export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterC
   }
 
   return (
-    <div className="lecture-entete">
+    <div className={`lecture-entete${professeur ? ' avec-carnet' : ''}`}>
       <p className="lecture-sheet-title">Ce chapitre</p>
       <div className="lecture-outils" ref={conteneurRef}>
         <Link className="lecture-outil" to={`/${chapter.levelSlug}/${chapter.slug}/exercices`} title="Feuilles d'exercices et évaluations du chapitre">
@@ -60,6 +66,16 @@ export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterC
           </svg>
           <span>Feuilles</span>
         </Link>
+        {professeur && (
+          <Link className="lecture-outil" to={`/carnet?chapitre=${chapter.levelSlug}/${chapter.slug}`} title="Noter dans le carnet de matière vue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z" />
+              <path d="M6 3v18M4 7h4M4 12h4M4 17h4" />
+              <path d="M11 9h5M11 13h5" />
+            </svg>
+            <span>Carnet</span>
+          </Link>
+        )}
         <button
           type="button"
           className={`lecture-outil${menuOuvert ? ' actif' : ''}`}

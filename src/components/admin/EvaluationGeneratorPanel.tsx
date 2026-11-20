@@ -35,6 +35,7 @@ import {
 } from '../../lib/evaluationLocal'
 import { construirePlanRemediation, questionsRemediables, titreSansPrefixe } from '../../lib/evaluationRemediation'
 import { normaliserSigneMoins } from '../../lib/normaliserSaisie'
+import { decoderMatiere } from '../../lib/carnetMatiere'
 import {
   horaireExamen,
   lireDuree,
@@ -886,6 +887,56 @@ export function EvaluationGeneratorPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- une seule fois par plan demandé (garde `planDemandeTraite`).
   }, [clientCoffre, planDemande])
 
+  // « Créer une évaluation sur la matière vue » depuis le carnet (`/carnet`) : `?matiere=…`
+  // (`lib/carnetMatiere.ts`) coche les chapitres et met UN exercice (première variante disponible)
+  // sur chaque générateur des sections vues ; le professeur ajuste ensuite. Sans ce paramètre :
+  // comportement inchangé. Ignoré sur une page verrouillée (`/…/exercices`).
+  const matiereDemandee = verrouille ? null : params.get('matiere')
+  const matiereTraitee = useRef<string | null>(null)
+  const [bandeauCarnet, setBandeauCarnet] = useState<string | null>(null)
+  useEffect(() => {
+    if (!matiereDemandee || matiereTraitee.current === matiereDemandee) return
+    matiereTraitee.current = matiereDemandee
+    const m = decoderMatiere(matiereDemandee)
+    const nh = m ? resoudreNiveauHeures(m.levelSlug) : null
+    const niveauCarnet = m ? LEVELS.find((l) => l.slug === m.levelSlug) : undefined
+    const chapitresCarnet = m && niveauCarnet ? niveauCarnet.chapters.filter((c) => m.chapitres.some((x) => x.slug === c.slug) && estChapitreFonctionnel(m.levelSlug, c.slug)) : []
+    const suivant = new URLSearchParams(params)
+    const depuis = /^\d{4}-\d{2}-\d{2}$/.test(suivant.get('depuis') ?? '') ? (suivant.get('depuis') as string).split('-').reverse().join('/') : ''
+    const classe = (suivant.get('classe') ?? '').trim().slice(0, 40)
+    ;['matiere', 'depuis', 'classe'].forEach((k) => suivant.delete(k))
+    setParams(suivant, { replace: true })
+    if (!m || !nh || chapitresCarnet.length === 0) {
+      setErreur('Matière du carnet illisible : choisis les chapitres à la main.')
+      return
+    }
+    const lignesCarnet: LigneSelection[] = []
+    const processusChoisis: Processus[] = []
+    for (const l of lignesInitiales(chapitresCarnet)) {
+      const vue = l.type === 'exercice' && m.chapitres.find((x) => x.slug === l.chapitreSlug)?.sections.includes(l.sectionId)
+      const variante = vue ? catalogueVariantesExercice(l.cle as IdGenerateurPilote, 'evaluation', []).find((v) => !varianteExclue(l.cle ?? '', v.id)) : undefined
+      if (variante) processusChoisis.push(l.processus)
+      lignesCarnet.push(variante ? { ...l, parVariante: { [variante.id]: 1 }, nombre: 1 } : l)
+    }
+    const generateurs = processusChoisis.length
+    setNiveau(nh.niveau)
+    setHeures(nh.heures)
+    setHeuresSemaine(HEURES_SEMAINE_DEFAUT[nh.niveau])
+    setChapitresSlugs(chapitresCarnet.map((c) => c.slug))
+    setLignes(lignesCarnet)
+    setProcessusActif(processusChoisis[0] ?? 1)
+    setUrlGeneree(null)
+    setGenereLocalementCompte(null)
+    const sections = m.chapitres.reduce((t, c) => t + c.sections.length, 0)
+    setBandeauCarnet(
+      `Matière vue${classe ? ` en ${classe}` : ''}${depuis ? ` depuis le ${depuis}` : ''} : ${sections} section${sections > 1 ? 's' : ''}, ` +
+        (generateurs > 0
+          ? `${generateurs} générateur${generateurs > 1 ? 's' : ''} pré-sélectionné${generateurs > 1 ? 's' : ''} (un exercice chacun). Ajuste les nombres et ajoute d'autres questions si besoin.`
+          : 'aucun générateur dans ces sections : choisis les questions à la main.'),
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- une seule fois par matière demandée (garde `matiereTraitee`).
+  }, [matiereDemandee])
+
   function choisirEcole(id: string) {
     setEcoleId(id)
     const ecole = compte.ecoles.find((e) => e.id === id) ?? null
@@ -1053,6 +1104,11 @@ export function EvaluationGeneratorPanel({
 
   return (
     <div className="admin-eval">
+      {bandeauCarnet && (
+        <p className="admin-eval-carnet" role="status">
+          {bandeauCarnet}
+        </p>
+      )}
       {!verrouille && (
         <p className="admin-eval-intro">
           Sont fonctionnels : tous les chapitres de 4e, de 5e (4h) et de 6e (6h). Pour ces trois niveaux, la génération se fait désormais
