@@ -1,5 +1,6 @@
 import type { Block, ChapterSection, FormulaireData } from '../content/types'
 import type { CatalogueVarianteEntree } from '../entrainement/export/genererFeuilleExercices'
+import type { OrganisationExamen, TotalExamen } from '../entrainement/export/examen'
 import { EVALUATION_ADAPTER_REGISTRY } from './evaluationAdapterRegistry'
 
 /**
@@ -4748,6 +4749,23 @@ export interface EnTeteEvaluation {
    * énoncés en deux colonnes (copie d'évaluation, énoncé de la feuille d'exercices ; jamais
    * l'aménagée, le corrigé, la grille ni « Je vérifie »). Absent (plans enregistrés avant) = non. */
   deuxColonnes?: boolean
+  /** Génération locale uniquement — type de document d'évaluation : `'examen'` (maquette X3 validée :
+   * bandeau « Examen · session », tableau des points par PARTIE, parties par chapitre ou par
+   * processus, en-tête courant ; voir `entrainement/export/examen.ts`). Absent / `'evaluation'` =
+   * évaluation (plans enregistrés avant : rechargés comme avant). Ignoré en mode `exercice`. */
+  typeDocument?: 'evaluation' | 'examen'
+  /** Examen : parties par chapitre (défaut) ou par processus. */
+  organisationExamen?: OrganisationExamen
+  /** Examen : total libre (défaut) ou fixé par partie (points mis à l'échelle). */
+  totalExamen?: TotalExamen
+  /** Examen : heure de départ et durée TELLES QUE SAISIES (texte libre, lues à l'impression par
+   * `lireHeure` / `lireDuree` ; illisible → rien d'imprimé). */
+  heureDepart?: string
+  dureeExamen?: string
+  /** Examen : « Session de juin 2027 » (défaut déduit de la date, `sessionParDefaut`). */
+  session?: string
+  /** Examen : consignes ajoutées après les consignes par défaut, une par ligne non vide (`$…$` en KaTeX). */
+  consignesSupplementaires?: string
 }
 
 /**

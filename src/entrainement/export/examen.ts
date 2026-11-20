@@ -177,7 +177,7 @@ export function mettreAEchelle(points: number[], total: number): number[] | null
   if (res[k] < 1) {
     let deficit = 1 - res[k];
     res[k] = 1;
-    const ordre = res.map((r, i) => i).filter((i) => i !== k).sort((a, b) => res[b] - res[a] || a - b);
+    const ordre = res.map((_, i) => i).filter((i) => i !== k).sort((a, b) => res[b] - res[a] || a - b);
     while (deficit > 0) {
       let retire = false;
       for (const i of ordre) {
