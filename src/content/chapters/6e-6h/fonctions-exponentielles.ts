@@ -2518,6 +2518,16 @@ export const fonctionsExponentielles: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'rapports-differences-widget',
+          label: 'Manipule toi-même — rapports ou différences ?',
+          caption:
+            'Pour chaque tableau de mesures prises à pas constant, compare la ligne des différences et celle ' +
+            'des rapports : laquelle est constante ? Le verdict et le modèle, f(t) = m·t + p ou Q(t) = Q₀·rᵗ, ' +
+            "s'affichent quand l'un des deux existe. Attention aux pas de 2 ou 3 unités et aux tableaux qui " +
+            'commencent en t = 1.',
+        },
+        {
           kind: 'entrainement',
           title: 'Modèle exponentiel lu dans un tableau',
           generatorId: '6gen147',

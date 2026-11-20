@@ -122,6 +122,7 @@ export type InteractiveWidgetTag =
   | 'f-et-fprime-widget'
   | 'echelle-semi-log-widget'
   | 'croissance-comparee-log-widget'
+  | 'rapports-differences-widget'
   | 'f-fprime-exponentielle-widget'
   | 'vers-e-widget'
   | 'rattrapage-exponentielle-widget'

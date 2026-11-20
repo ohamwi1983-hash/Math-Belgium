@@ -122,6 +122,7 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'f-et-fprime-widget': () => import('../../interactive/register-f-et-fprime-widget.js'),
   'echelle-semi-log-widget': () => import('../../interactive/register-echelle-semi-log-widget.js'),
   'croissance-comparee-log-widget': () => import('../../interactive/register-croissance-comparee-log-widget.js'),
+  'rapports-differences-widget': () => import('../../interactive/register-rapports-differences-widget.js'),
   'f-fprime-exponentielle-widget': () => import('../../interactive/register-f-fprime-exponentielle-widget.js'),
   'vers-e-widget': () => import('../../interactive/register-vers-e-widget.js'),
   'rattrapage-exponentielle-widget': () => import('../../interactive/register-rattrapage-exponentielle-widget.js'),
