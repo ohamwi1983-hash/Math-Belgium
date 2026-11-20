@@ -839,6 +839,17 @@ export const fonctionsComposees: ChapterContent = {
           ],
           whereLabel: '5e (4h) → « 61. Composer des polynômes »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Domaine d’une composée par l’image',
+          generatorId: '5gen62',
+          chantier: '5e-4h',
+          description: [
+            'Fonctions simples (racine, inverse, carré, opposé du carré, valeur absolue, affine) : détermine l’image de la fonction intérieure, le domaine de l’extérieure, les valeurs que f peut recevoir, puis le domaine de la composée.',
+            'Il arrive que l’image de g ne rencontre jamais le domaine de f : la composée n’est alors définie nulle part.',
+          ],
+          whereLabel: '5e (4h) → « 62. Domaine d’une composée par l’image »',
+        },
       ],
     },
 
