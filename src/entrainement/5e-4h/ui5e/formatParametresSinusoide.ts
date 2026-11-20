@@ -300,6 +300,11 @@ function formuleAnnotee(exercice: ExerciceParametresSinusoide, phase: "amplitude
   return `f(x) = ${coeffA}\\sin\\!\\left(${argument}\\right)${termeDecalage}`;
 }
 
+/** Valeur écrite DANS une fraction : `\frac` (jamais deux `\dfrac` empilés — même règle que le corrigé). */
+function interieur(v: RationnelPi): string {
+  return formatRationnelPiLatex(v).replace(/\\dfrac/g, "\\frac");
+}
+
 export function latexAideNiveau2(exercice: ExerciceParametresSinusoide, phase: PhaseParametresSinusoide): string {
   switch (phase) {
     case "amplitude":
@@ -307,14 +312,14 @@ export function latexAideNiveau2(exercice: ExerciceParametresSinusoide, phase: P
     case "decalage":
       return formuleAnnotee(exercice, phase);
     case "periode":
-      return `T = \\dfrac{2\\pi}{\\omega} = \\dfrac{2\\pi}{${formatRationnelPiLatex(exercice.B)}}`;
+      return `T = \\dfrac{2\\pi}{\\omega} = \\dfrac{2\\pi}{${interieur(exercice.B)}}`;
     case "frequence":
       return `f_{req} = \\dfrac{1}{T} = \\dfrac{1}{${formatRationnelPiLatex(exercice.T)}}`;
     case "dephasage":
       return exercice.forme === "developpee" ? formuleAnnotee(exercice, "dephasage") : `${formuleAnnotee(exercice, "dephasage")} \\qquad \\varphi = -\\omega\\cdot\\Phi`;
     case "phi":
       return exercice.forme === "developpee"
-        ? `\\Phi = -\\dfrac{\\varphi}{\\omega} = -\\dfrac{${formatRationnelPiLatex(exercice.C)}}{${formatRationnelPiLatex(exercice.B)}}`
+        ? `\\Phi = -\\dfrac{\\varphi}{\\omega} = -\\dfrac{${interieur(exercice.C)}}{${interieur(exercice.B)}}`
         : formuleAnnotee(exercice, "phi");
   }
 }
