@@ -275,6 +275,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen12': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen12').then((m) => ({ default: m.App6gen12 }))),
   '6gen65': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen65').then((m) => ({ default: m.App6gen65 }))),
   '6gen148': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen148').then((m) => ({ default: m.App6gen148 }))),
+  '6gen149': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen149').then((m) => ({ default: m.App6gen149 }))),
 
   // --- 6e, chapitre 3 : Fonctions logarithmes ---
   '6gen13': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen13').then((m) => ({ default: m.App6gen13 }))),

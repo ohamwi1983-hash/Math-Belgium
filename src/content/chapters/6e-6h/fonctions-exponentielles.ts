@@ -685,6 +685,17 @@ export const fonctionsExponentielles: ChapterContent = {
             "c'est e — la démonstration ci-dessous explique pourquoi.",
         },
         {
+          kind: 'entrainement',
+          title: 'Tangente à une exponentielle et nombre ln a',
+          generatorId: '6gen149',
+          description: [
+            'ln a est la pente de la tangente en (0 ; 1) à la courbe de aˣ : son signe, sa valeur, ' +
+              'puis l\'équation de la tangente à k·aˣ ou à k·eᵐˣ en un point d\'abscisse x₀.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 149. Tangente à une exponentielle et nombre ln a »',
+        },
+        {
           kind: 'exempleLibre',
           label: "Démonstration — pourquoi exp est sa propre dérivée",
           blocks: [
