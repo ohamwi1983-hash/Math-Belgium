@@ -1023,3 +1023,37 @@ pièges, faux), collecteur (outils de `gen122` recopiés, `env.ts` : x génériq
 g, h, p) 1 260 tirages, ≈ 17 700 égalités, 0 fausse ; documents réels `construirePlan` (2 graines,
 évaluation 2 séries + aménagée + feuille + Word du corrigé) : 0 débordement à 680, 820 et 1 280 px,
 0 `.katex-error` ; `?code=` 25 / 25.
+## 5e ch. 1, lot G — 5gen58–5gen60 (nouveaux, notés)
+
+Socle d'écrans du 5e ch. 2 réutilisé (`AppEcransTrigo` + `DefinitionEcrans`) avec des options
+ADDITIVES, sans effet sur 5gen54–57 et 6gen148–151 : `copie?` (copie numérotée, `CopieEleve`),
+`approchee?` (valeur décimale proche d'une valeur exacte : message, aucune tentative),
+`piegeChoixRevele` (message ciblé sous un choix fermé révélé), `ChampEcran.raccourcis` (boutons qui
+AJOUTENT « [ », « ∞ », « ∪ », « ℝ », « √ »…) et `ChampEcran.apercuLatex` (aperçu KaTeX propre au champ).
+Ensembles de réels : `moteur5e/ensemblesReels.ts` (lecture libre — crochets, ∪/U, ±∞/inf, ℝ/R,
+ℝ \ {a}, {a}, ∅, préfixe « dom f = » ignoré ; crochet fermé du côté de ∞ ou intervalle à l'envers =
+écriture FAUSSE lue, jamais illisible ; normalisation, égalité borne à borne et crochet par crochet,
+`ensembleL`). Corrigés `generateurs5e/{detectiveFonctions,lireDomaineImage,composeePoint}/corrigeDetaille.ts`,
+une lettre par écran. **5gen58** (détective, mécanique de 6gen144) : six types d'erreur = variantes,
+`groupe_erreur` ; énoncé papier = copie à marge rouge + consigne globale ; a) la ligne refaite ou une
+valeur que la copie garde à tort, b) la règle (illustration numérique « 2 < 3 », « −2 × 2 > −2 × 3 »),
+c) résolution reprise + vérification ; domaine vide de « union » = cas particulier `domaine-vide`
+(≈ 8 %) ; « n'existe pas » saisi dans le champ numérique (portion) = réponse lisible fausse, ciblée.
+**5gen59** (Connaître) : courbe affine par morceaux, sommets entiers, quadrillage d'une unité, axes
+fléchés, extrémités pleines / creuses, flèches sinon graphique déclaré complet (`phraseGraphique`) ;
+trois VRAIES questions papier (dom f, Im f, f(a) existe-t-il ?) ; figure des deux projections
+(domaine en vert sur Ox, image en orange sur Oy) en `figureHtml` du résultat b ; f(a) existe = verdict
+50/50, a pris en un endroit délicat (extrémité creuse ou pleine, trou, écart, saut, hors du graphe).
+**5gen60** : ordre f∘g / g∘f tiré, écran 1 = fonction appliquée d'abord (symboles f / g) + valeur
+intermédiaire, existence = verdict (« n'existe pas » ≈ 40 %, bord du domaine recherché : √0 existe,
+√0 au dénominateur non), valeur exacte (√8 = 2√2, 2/√5 = 2√5/5 acceptées) ; une seule question papier
+(« calcule, ou justifie que ce nombre n'existe pas ») ; écran 3 absent si la composée n'existe pas
+(trois puces, `nombrePuces`). Niveaux CONSTANTS (`sansCharge`, mesurés sur 2 000 tirages par variante) :
+5gen58 niv. 3, 8 min (groupe) ; 5gen59 niv. 2, 5 min (trois lectures) ; 5gen60 niv. 3, 8 min (les deux
+issues). Profils : `forme` = scénario | ligne (5gen58), variante (5gen59), variante | ordre (5gen60) ;
+tout exact. Mesures : moteurs 2 000 tirages par variante (réponses recalculées indépendamment —
+domaines et images par balayage, composées par évaluation directe —, écritures équivalentes, « − – — »,
+illisible, résultat de la copie) : 0 anomalie ; collecteur (outils de `corrige-6e2-m1` + relations
+d'ordre numériques) 2 200 tirages, ≈ 10 200 égalités, 0 fausse ; documents réels `construirePlan`
+(évaluation 2 séries + aménagée + feuille) : 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error` ;
+`groupe_erreur` : verdict B ≠ A 30 / 30 plans ; `?code=` 36 / 36.
