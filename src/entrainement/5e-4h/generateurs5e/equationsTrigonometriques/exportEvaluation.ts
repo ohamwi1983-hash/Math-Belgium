@@ -1,4 +1,5 @@
-import type { BrancheX, ExerciceEquationTrigonometrique } from "../../core5e/equationsTrigonometriques.types";
+import type { BrancheX, CoefficientRationnel, ExerciceEquationTrigonometrique, RationnelPi, ValeurPiOuDecimale } from "../../core5e/equationsTrigonometriques.types";
+import { additionnerRationnelPi, multiplierRationnelPi, negatifRationnelPi } from "../parametresSinusoide/rationnelPi";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
@@ -12,7 +13,7 @@ import type {
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { formatBrancheLatex, relationBranche } from "../../ui5e/formatEquationTrig";
+import { formatArgumentLatex, formatBrancheLatex, relationBranche } from "../../ui5e/formatEquationTrig";
 import { ensembleApproche, formatEnonceEquationTrigonometriqueLatex, formatEnsembleSolutionsLatex, produitContientTangente } from "../../ui5e/formatEquationTrigonometrique";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { correctionDetailleeEquationTrig, lettresSolutionsEquationTrig } from "./corrigeDetaille";
@@ -99,14 +100,12 @@ function construireEnonce(exercice: ExerciceEquationTrigonometrique): SectionExe
 
 /** Annonce d'arrondi quand une valeur attendue n'est pas une fraction de π. */
 function annoncePrecision(exercice: ExerciceEquationTrigonometrique): string {
-  switch (exercice.famille) {
-    case "directe":
-      return exercice.exercice.regime === "decimal" && !exercice.exercice.aucuneSolution ? " Arrondis au centième les valeurs qui ne sont pas exactes." : "";
-    case "produit":
-      return exercice.facteur1.regime === "decimal" || exercice.facteur2.regime === "decimal" ? " Arrondis au centième les valeurs qui ne sont pas des angles remarquables." : "";
-    default:
-      return "";
-  }
+  // Consigne d'arrondi seulement si une valeur de la réponse est approchée (P5 : un facteur
+  // impossible décimal, ou « cos x = 0 » tiré en régime décimal, ne donne rien à arrondir).
+  if (exercice.famille === "directe" && exercice.exercice.aucuneSolution) return "";
+  const approchee = seriesX(exercice).some((b) => relationBranche(b) !== "=") || ensembleApproche(solutionsFinales(exercice));
+  if (!approchee) return "";
+  return exercice.famille === "produit" ? " Arrondis au centième les valeurs qui ne sont pas des angles remarquables." : " Arrondis au centième les valeurs qui ne sont pas exactes.";
 }
 
 function enoncePapier(exercice: ExerciceEquationTrigonometrique): EnoncePapier {
@@ -158,19 +157,77 @@ function ecarteesTangente(exercice: ExerciceEquationTrigonometrique): number[] {
   return [];
 }
 
+/** Arguments a·x + b des tangentes de l'équation (là où ils valent π/2 + mπ, la tangente n'est pas
+ * définie). */
+function tangentesDeLEquation(exercice: ExerciceEquationTrigonometrique): { a: CoefficientRationnel; b: ValeurPiOuDecimale }[] {
+  if (exercice.famille === "produit") return [exercice.facteur1, exercice.facteur2].filter((f) => f.fonction === "tan").map((f) => ({ a: f.a, b: f.b }));
+  if (exercice.famille === "egalite" && exercice.identite === "tanVersTan") return [{ a: exercice.a1, b: exercice.b1 }, { a: exercice.a2, b: exercice.b2 }];
+  return [];
+}
+
+function tangenteNonDefinie(t: { a: CoefficientRationnel; b: ValeurPiOuDecimale }, x: number): boolean {
+  return Math.abs(Math.cos((t.a.numerateur / t.a.denominateur) * x + t.b.decimal)) < 1e-9;
+}
+
+function memeSerie(a: BrancheX, b: BrancheX): boolean {
+  if (Math.abs(Math.abs(a.periode.decimal) - Math.abs(b.periode.decimal)) > 1e-9) return false;
+  const e = (a.constante.decimal - b.constante.decimal) / a.periode.decimal;
+  return Math.abs(e - Math.round(e)) < 1e-9;
+}
+
+/** Série « x = π/6 + kπ/2 » où la tangente d'argument a·x + b n'est pas définie (a·x + b = π/2 + kπ). */
+function serieInterdite(t: { a: CoefficientRationnel; b: ValeurPiOuDecimale }): BrancheX {
+  const a = t.a.numerateur / t.a.denominateur;
+  const inverseA: RationnelPi = { numerateur: t.a.denominateur, denominateur: t.a.numerateur, degrePi: 0 };
+  const constanteExacte = t.b.exact !== null ? multiplierRationnelPi(additionnerRationnelPi({ numerateur: 1, denominateur: 2, degrePi: 1 }, negatifRationnelPi(t.b.exact)), inverseA) : null;
+  const periodeExacte = multiplierRationnelPi({ numerateur: 1, denominateur: 1, degrePi: 1 }, { numerateur: t.a.denominateur, denominateur: Math.abs(t.a.numerateur), degrePi: 0 });
+  return {
+    constante: { exact: constanteExacte, decimal: (Math.PI / 2 - t.b.decimal) / a },
+    periode: { exact: periodeExacte, decimal: Math.PI / Math.abs(a) },
+  };
+}
+
+/** Séries de x de la réponse dans ℝ (audit 5e ch. 2, P1) : une série dont AUCUNE valeur n'est
+ * solution (une tangente n'y est jamais définie) est retirée ; une série dont une partie seulement est
+ * écartée garde sa place, et les valeurs retirées sont nommées (série où la tangente n'est pas
+ * définie). */
+function seriesDansR(exercice: ExerciceEquationTrigonometrique): { series: BrancheX[]; retirees: { a: CoefficientRationnel; b: ValeurPiOuDecimale }[] } {
+  const tangentes = tangentesDeLEquation(exercice);
+  const series: BrancheX[] = [];
+  const retirees = new Set<number>();
+  for (const s of seriesX(exercice)) {
+    // Série déjà écrite (deux facteurs qui donnent la même série) : une seule fois.
+    if (series.some((t) => memeSerie(s, t))) continue;
+    let exclues = 0;
+    const parTangente = tangentes.map(() => 0);
+    for (let k = -40; k <= 40; k++) {
+      const x = s.constante.decimal + k * s.periode.decimal;
+      const idx = tangentes.findIndex((t) => tangenteNonDefinie(t, x));
+      if (idx >= 0) {
+        exclues++;
+        parTangente[idx]++;
+      }
+    }
+    if (exclues === 81) continue;
+    series.push(s);
+    parTangente.forEach((n, i) => {
+      if (n > 0) retirees.add(i);
+    });
+  }
+  return { series, retirees: [...retirees].map((i) => tangentes[i]) };
+}
+
 function reponseBreve(exercice: ExerciceEquationTrigonometrique): FragmentConsigne[] {
   if (exercice.famille === "directe" && exercice.exercice.aucuneSolution) return [texte("Aucune solution : "), latex("S = \\varnothing")];
-  const series = seriesX(exercice);
+  const { series, retirees } = seriesDansR(exercice);
   const solutions = solutionsFinales(exercice);
-  const ecartees = ecarteesTangente(exercice);
-  return [
-    texte("Dans ℝ : "),
-    ...ouLatex(series.map(egaliteX)),
-    ...(ecartees.length > 0 ? [texte(" (sauf là où une tangente n'est pas définie)")] : []),
-    texte(" ; dans [0 ; 2π[ : "),
-    latex(formatEnsembleSolutionsLatex(solutions)),
-  ];
+  const sauf: FragmentConsigne[] = [];
+  retirees.forEach((t, i) => {
+    sauf.push(texte(i === 0 ? ", sauf " : " et "), latex(egaliteX(serieInterdite(t))), texte(" (où "), latex(`\\tan\\left(${formatArgumentLatex(t.a, t.b)}\\right)`), texte(" n'est pas définie)"));
+  });
+  return [texte("Dans ℝ : "), ...ouLatex(series.map(egaliteX)), ...sauf, texte(" ; dans [0 ; 2π[ : "), latex(formatEnsembleSolutionsLatex(solutions))];
 }
+
 
 /** Corrigé historique (pipeline Word/PDF) : la réponse de chaque étape, en paragraphes. */
 function construireCorrection(exercice: ExerciceEquationTrigonometrique): BlocCorrection[] {

@@ -69,7 +69,10 @@ export function genererDonneesB3(): DonneesB3 {
   alpha1 = Math.asin((v1 - b) / A);
   alpha2 = Math.asin((v2 - b) / A);
   omega = (alpha1 - alpha2) / (t1 - t2);
-  const phi = alpha1 - omega * t1;
+  // φ ramené dans ]−π ; π] (P6) : même fonction, « −11,48 » n'est plus imprimé.
+  let phi = alpha1 - omega * t1;
+  while (phi > Math.PI) phi -= 2 * Math.PI;
+  while (phi <= -Math.PI) phi += 2 * Math.PI;
 
   return { technique: "b3", A, b, t1, v1, t2, v2, alpha1, alpha2, fonction: { A, omega, phi, b } };
 }

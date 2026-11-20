@@ -77,6 +77,9 @@ export function simplifierAffichageProduit(latex: string): string {
   s = s.replace(/(?<![\d,}-])1\\cdot\s*/g, "");
   // 5. « -1\cdot » isolé (« −1·tan(x) ») → « - » : jamais devant une décimale (« -1{,}7\cdot »).
   s = s.replace(/(?<![\d,}])-1\\cdot\s*/g, "-");
+  // 6. Facteur réduit à la fonction seule (« − 0 » retiré) : plus de parenthèses autour
+  // (« (\sin(x))(…) » → « \sin(x)(…) », audit 5e ch. 2, P2).
+  s = s.replace(/\\left\((\\(?:sin|cos|tan)(?:\^2)?\\left\((?:(?!\\left\(|\\right\)).)*\\right\))\\right\)/g, "$1");
   return s;
 }
 

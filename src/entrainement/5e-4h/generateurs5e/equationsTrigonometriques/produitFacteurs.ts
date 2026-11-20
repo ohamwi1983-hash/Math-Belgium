@@ -82,7 +82,10 @@ function construireFacteurIndependant(): ExerciceEquationTrig {
  * Reroll BORNÉ de `a` seul (comme la famille "directe") si l'union dépasse 5 solutions. */
 export function construireProduitNonFactoree(): ExerciceProduitFacteurs {
   const fonction = tirerFonction();
-  const cas2 = tirerCas(fonction);
+  // Second membre non nul (audit 5e ch. 2, P2) : « sin²(x) = 0·sin(x) » n'est plus une mise en
+  // évidence, et ses deux facteurs donnaient deux fois les mêmes séries.
+  let cas2 = tirerCas(fonction);
+  while (cas2.k === 0) cas2 = tirerCas(fonction);
   const b = tirerB(cas2.regime);
   const cas1 = casTrigZero(fonction, cas2.regime);
 

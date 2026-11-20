@@ -247,10 +247,11 @@ export function departRadiansExact(exercice: ExerciceModeConversion): { n: numbe
  * direction=degVersRad+exacte ; sinon arrondi au centième (même granularité que
  * `decimaleDeuxChiffres` côté génération), suffixé "°" uniquement pour une cible en degrés. */
 export function formatValeurCibleConversionLatex(exercice: ExerciceModeConversion): string {
+  // Valeur arrondie : toujours ses deux décimales (« ≈ 260{,}70° », audit 5e ch. 2, P4).
+  const approche = (v: number) => (Math.round(v * 100) / 100).toFixed(2).replace(".", "{,}");
   if (exercice.direction === "degVersRad") {
     if (exercice.type === "exacte") return fractionPiThetaRad(exercice.valeurDepart);
-    return nombreLatex(Math.round(exercice.valeurCible * 100) / 100);
+    return approche(exercice.valeurCible);
   }
-  const deg = exercice.type === "exacte" ? exercice.valeurCible : Math.round(exercice.valeurCible * 100) / 100;
-  return `${nombreLatex(deg)}^\\circ`;
+  return exercice.type === "exacte" ? `${nombreLatex(exercice.valeurCible)}^\\circ` : `${approche(exercice.valeurCible)}^\\circ`;
 }

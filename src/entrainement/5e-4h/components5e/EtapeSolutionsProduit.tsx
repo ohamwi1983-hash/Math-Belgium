@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
-import { ANNONCE_PRECISION_PRODUIT_SOLUTIONS, AVERTISSEMENT_TANGENTE_INDEFINIE, CONSIGNE_SOLUTIONS_PRODUIT, formatEnonceProduitLatex, produitContientTangente, regimeProduit } from "../ui5e/formatEquationTrigonometrique";
+import { ANNONCE_PRECISION_PRODUIT_SOLUTIONS, AVERTISSEMENT_TANGENTE_INDEFINIE, CONSIGNE_SOLUTIONS_PRODUIT, ensembleApproche, formatEnonceProduitLatex, produitContientTangente, regimeProduit } from "../ui5e/formatEquationTrigonometrique";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { CONSIGNE_GENERALE_EQUATION_TRIG, formatBrancheLatex, relationBranche } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -44,7 +44,8 @@ export function EtapeSolutionsProduit({ exercice, tentativesUtilisees, tentative
    * indépendamment — voir `produitFacteurs.ts`). Formulation générique qui reste correcte dans les
    * 2 cas (mélange OU tout-décimal) plutôt que d'affirmer à tort que TOUTES les valeurs listées sont
    * décimales quand certaines sont en réalité des angles remarquables exacts. */
-  const auMoinsUnFacteurDecimal = exercice.facteur1.regime === "decimal" || exercice.facteur2.regime === "decimal";
+  // Annonce d'arrondi seulement si une solution est approchée (P5).
+  const auMoinsUnFacteurDecimal = ensembleApproche(exercice.solutionsUnion);
 
   function valider() {
     if (!complet) return;

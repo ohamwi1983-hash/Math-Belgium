@@ -9,6 +9,7 @@
 import type { BrancheModelisation, DonneesPhase1, ExerciceModelisationSinusoide, QuestionInequation } from "../core5e/modelisationSinusoide.types";
 import type { PhaseModelisationSinusoide } from "../moteur5e/typesModelisationSinusoide";
 import { ordreComplet } from "../moteur5e/typesModelisationSinusoide";
+import { numerateurPhiB2 } from "../generateurs5e/modelisationSinusoide/techniqueB2";
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 
 export function arrondi(v: number): number {
@@ -42,6 +43,13 @@ export function nombreLatex(v: number, decimales: number): string {
   const f = 10 ** decimales;
   const r = Math.round(v * f) / f;
   return String(Object.is(r, -0) ? 0 : r).replace(".", "{,}");
+}
+
+/** Valeur APPROCHÉE en LaTeX avec un nombre FIXE de décimales (« ≈ 10{,}50 », « ≈ 0{,}7140 ») :
+ * jamais « ≈ 10{,}5 », qui se lit comme une valeur exacte (audit 5e ch. 2, P4). */
+export function nombreApprocheLatex(v: number, decimales: number): string {
+  const r = Math.round(v * 10 ** decimales) / 10 ** decimales;
+  return (Object.is(r, -0) ? 0 : r).toFixed(decimales).replace(".", "{,}");
 }
 
 /** « + 3 » / « − 3 » devant un terme (jamais « +-3 » ni « --3 », point 55). */
@@ -90,8 +98,7 @@ export function formatOmegaExactPiLatex(N: number): string {
  * — TOUJOURS un multiple rationnel exact de π puisque `periode`/`t0` sont des entiers tirés,
  * reconstruit depuis ces entiers SOURCE, jamais depuis le flottant `fonction.phi`. */
 export function formatPhiExactPiLatex(periode: number, t0: number, estMax: boolean): string {
-  const numerateur = estMax ? periode - 4 * t0 : 3 * periode - 4 * t0;
-  return formatFractionPiLatex(numerateur, 2 * periode);
+  return formatFractionPiLatex(numerateurPhiB2(periode, t0, estMax), 2 * periode);
 }
 
 /** Nombre dans une consigne (texte) : virgule, « − » typographique (« u=0,16t−2,03 », jamais « -2,03 »). */
@@ -114,7 +121,9 @@ function formatDecimalFrPrecis(v: number): string {
  * n'utilise JAMAIS cette fonction — ω/φ n'y sont pas des multiples exacts de π (2 points quelconques
  * de la courbe), seule la valeur décimale y est affichée (`arrondiPrecis`). */
 function formatAvecApprox(exactLatex: string, valeurDecimale: number): string {
-  return `${exactLatex} \\approx ${nombreLatex(valeurDecimale, 4)}`;
+  // « φ = 0 » : pas de « ≈ 0 » derrière une valeur exacte entière.
+  if (/^-?\d+$/.test(exactLatex)) return exactLatex;
+  return `${exactLatex} \\approx ${nombreApprocheLatex(valeurDecimale, 4)}`;
 }
 
 /** u=ωt+φ, ω et φ substitués en DÉCIMAL (jamais en fraction exacte, cohérent avec le style déjà
@@ -154,7 +163,7 @@ export function consigneGeneralePartie1(exercice: ExerciceModelisationSinusoide)
     case "b2":
       return "Construis le modèle sinusoïdal f(t)=A·sin(ωt+φ)+b à partir du maximum, du minimum et d'un point extremum connu.";
     case "b3":
-      return "Construis le modèle sinusoïdal f(t)=A·sin(ωt+φ)+b (ω > 0) à partir de deux points connus de la courbe. Les deux points sont sur une même montée de la courbe : en chacun d'eux, l'argument ωt+φ est compris entre −π/2 et π/2.";
+      return "Construis le modèle sinusoïdal f(t)=A·sin(ωt+φ)+b (ω > 0) à partir de deux points connus de la courbe. Les deux points sont sur une même montée de la courbe : en chacun d'eux, l'argument ωt+φ est compris entre −π/2 et π/2, à un multiple de 2π près.";
     case "donnee":
       return "Cette fonction sinusoïdale est déjà connue — réponds aux questions suivantes.";
   }
@@ -314,10 +323,10 @@ function fragmentsEtatActuelPourPhase(exercice: ExerciceModelisationSinusoide, p
       return [`\\varphi=${formatAvecApprox(formatPhiExactPiLatex(donnees.periode, donnees.t0, donnees.estMax), donnees.fonction.phi as number)}`];
     case "systeme":
       if (donnees.technique !== "b3") return [];
-      return [`${argumentSysteme(donnees.t1)}\\approx ${nombreLatex(donnees.alpha1, 4)}`, `${argumentSysteme(donnees.t2)}\\approx ${nombreLatex(donnees.alpha2, 4)}`];
+      return [`${argumentSysteme(donnees.t1)}\\approx ${nombreApprocheLatex(donnees.alpha1, 4)}`, `${argumentSysteme(donnees.t2)}\\approx ${nombreApprocheLatex(donnees.alpha2, 4)}`];
     case "resolution":
       if (donnees.technique !== "b3") return [];
-      return [`\\omega\\approx ${nombreLatex(donnees.fonction.omega, 4)}`, `\\varphi\\approx ${nombreLatex(donnees.fonction.phi as number, 4)}`];
+      return [`\\omega\\approx ${nombreApprocheLatex(donnees.fonction.omega, 4)}`, `\\varphi\\approx ${nombreApprocheLatex(donnees.fonction.phi as number, 4)}`];
     case "fonctionFinale":
       if (donnees.technique === "donnee") return [];
       if (donnees.technique === "b1") return [formatFonctionB1Latex(donnees.rayon, donnees.dureeTour, donnees.fonction.b)];
@@ -388,15 +397,15 @@ export function formatTermesReponseAttendueModelisationSinusoide(exercice: Exerc
     }
     case "solutionsResoudre": {
       if (exercice.phase2 === null || exercice.phase2.type !== "resoudre") return [];
-      return exercice.phase2.solutions.map((s) => `t\\approx ${nombreLatex(s, 2)}`);
+      return exercice.phase2.solutions.map((s) => `t\\approx ${nombreApprocheLatex(s, 2)}`);
     }
     case "solutionsExtremum": {
       if (exercice.phase2 === null || exercice.phase2.type !== "extremum") return [];
-      return exercice.phase2.solutions.map((s) => `t\\approx ${nombreLatex(s, 2)}`);
+      return exercice.phase2.solutions.map((s) => `t\\approx ${nombreApprocheLatex(s, 2)}`);
     }
     case "listerIntervallesInequation": {
       if (exercice.phase2 === null || exercice.phase2.type !== "inequation") return [];
-      return exercice.phase2.intervalles.map((iv) => `[${nombreLatex(iv.inf, 2)}\\,;\\,${nombreLatex(iv.sup, 2)}]`);
+      return exercice.phase2.intervalles.map((iv) => `[${nombreApprocheLatex(iv.inf, 2)}\\,;\\,${nombreApprocheLatex(iv.sup, 2)}]`);
     }
     default:
       return fragmentsEtatActuelPourPhase(exercice, phase);

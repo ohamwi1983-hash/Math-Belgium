@@ -3,7 +3,8 @@ import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuill
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import { ordreComplet, type PhaseModelisationSinusoide } from "../../moteur5e/typesModelisationSinusoide";
 import { formatTermesReponseAttendueModelisationSinusoide, nombreLatex } from "../../ui5e/formatModelisationSinusoide";
-import { COURS_MODELISER, dec, EPi, eSub, eMul, exprLatex, finaliserCorrige, kDansIntervalle, listeLatex, q, somme } from "../../ui5e/corrigeTrigonometrie2";
+import { numerateurPhiB2 } from "./techniqueB2";
+import { COURS_MODELISER, dec, EPi, eAdd, eSub, eMul, exprLatex, finaliserCorrige, kDansIntervalle, listeLatex, q, somme } from "../../ui5e/corrigeTrigonometrie2";
 
 /**
  * Corrigé détaillé « comme au tableau » de 5gen13 (modéliser une fonction sinusoïdale en contexte)
@@ -118,40 +119,65 @@ function etapesPulsation(e: E, sq: string): EtapeCorrection[] {
   ];
 }
 
+/** « on ajoute 2π » / « on retire 4π » : tours de 2π entre l'angle brut et φ ramené dans ]−π ; π]. */
+function libelleTours(tours: number): string {
+  const t = Math.abs(tours);
+  return `${tours > 0 ? "on ajoute" : "on retire"} ${t === 1 ? "un tour (2π)" : `${t} tours (${2 * t}π)`} : même déphasage, ramené dans ]−π ; π]`;
+}
+
 function etapesPhi(e: E, sq: string): EtapeCorrection[] {
   const d = e.phase1;
   if (d.technique !== "b2") return [];
-  const cible = d.estMax ? EPi(1, 2) : EPi(3, 2);
+  const cible = d.estMax ? EPi(1, 2) : EPi(-1, 2);
   const omega = EPi(2, d.periode);
   const produit = eMul(omega, q(d.t0));
-  const phi = eSub(cible, produit);
-  const lignes: LigneCalcul[] = [
-    ligne(`\\omega t_0+\\varphi=${exprLatex(cible)}`, `en t₀ = ${d.t0}, f est ${d.estMax ? "maximale : sin vaut 1" : "minimale : sin vaut −1"}`),
-    ligne(`\\varphi=${exprLatex(cible)}-\\omega t_0`, "on isole φ"),
-    ligne(`=${exprLatex(cible)}-${omegaPi(d.periode)}\\cdot ${d.t0}`, `ω (étape précédente) et t₀ = ${d.t0}`),
-  ];
-  if (d.t0 > 1) lignes.push(ligne(`=${somme([exprLatex(cible), `-${exprLatex(produit)}`])}`));
-  lignes.push(ligne(`=${exprLatex(phi)}`), ligne(`\\approx ${n4(d.fonction.phi as number)}`));
+  const brut = eSub(cible, produit);
+  const phi = EPi(numerateurPhiB2(d.periode, d.t0, d.estMax), 2 * d.periode);
+  const nbTours = Math.round(((d.fonction.phi as number) - ((d.estMax ? 1 : -1) * Math.PI) / 2 + (2 * Math.PI * d.t0) / d.periode) / (2 * Math.PI));
+  const lignes: LigneCalcul[] = [ligne(`\\omega t_0+\\varphi=${exprLatex(cible)}`, `en t₀ = ${d.t0}, f est ${d.estMax ? "maximale : sin vaut 1" : "minimale : sin vaut −1"}`)];
+  if (nbTours === 0) {
+    lignes.push(ligne(`\\varphi=${exprLatex(cible)}-\\omega t_0`, "on isole φ"), ligne(`=${exprLatex(cible)}-${omegaPi(d.periode)}\\cdot ${d.t0}`, `ω (étape précédente) et t₀ = ${d.t0}`));
+    if (d.t0 > 1) lignes.push(ligne(`=${somme([exprLatex(cible), `-${exprLatex(produit)}`])}`));
+    lignes.push(ligne(`=${exprLatex(phi)}`), ligne(`\\approx ${n4(d.fonction.phi as number)}`));
+  } else {
+    // La première chaîne s'arrête à l'angle brut (hors de ]−π ; π]) ; la seconde ajoute ou retire les tours.
+    lignes.push(ligne(`${exprLatex(cible)}-\\omega t_0=${exprLatex(cible)}-${omegaPi(d.periode)}\\cdot ${d.t0}`, `on isole φ : ω (étape précédente) et t₀ = ${d.t0}`));
+    if (d.t0 > 1) lignes.push(ligne(`=${somme([exprLatex(cible), `-${exprLatex(produit)}`])}`));
+    lignes.push(ligne(`=${exprLatex(brut)}`, "hors de ]−π ; π]"));
+    lignes.push(ligne(`\\varphi=${exprLatex(brut)}${nbTours > 0 ? "+" : "-"}${2 * Math.abs(nbTours)}\\pi`, libelleTours(nbTours)), ligne(`=${exprLatex(phi)}`), ligne(`\\approx ${n4(d.fonction.phi as number)}`));
+  }
+  const somme2 = eAdd(produit, phi);
   return [
     utilise(sq, [
       texte(`En un maximum, sin(ωt + φ) = 1, donc l'argument vaut `),
       latex("\\dfrac{\\pi}{2}"),
       texte(" ; en un minimum, sin(ωt + φ) = −1 et l'argument vaut "),
-      latex("\\dfrac{3\\pi}{2}"),
-      texte(` (à 2π près) ${COURS_MODELISER}.`),
+      latex("-\\dfrac{\\pi}{2}"),
+      texte(` (à 2π près) ${COURS_MODELISER}. On ramène φ dans ]−π ; π].`),
     ]),
     calcul(sq, lignes),
     resultat(sq, reponse(e, "phi")),
-    verification(sq, [texte("En t₀, l'argument redonne la valeur visée :")], [ligne(`\\omega t_0+\\varphi=${omegaPi(d.periode)}\\cdot ${d.t0}+${exprLatex(phi).startsWith("-") ? `\\left(${exprLatex(phi)}\\right)` : exprLatex(phi)}`), ligne(`=${exprLatex(cible)}`)]),
-    ...(d.estMax ? [] : [piege(sq, [texte("Au minimum, l'argument vaut 3π/2, pas π/2.")])]),
+    verification(sq, [texte(nbTours === 0 ? "En t₀, l'argument redonne la valeur visée :" : "En t₀, l'argument redonne la valeur visée, à 2π près :")], [ligne(`\\omega t_0+\\varphi=${omegaPi(d.periode)}\\cdot ${d.t0}+${exprLatex(phi).startsWith("-") ? `\\left(${exprLatex(phi)}\\right)` : exprLatex(phi)}`), ligne(`=${exprLatex(somme2)}`, nbTours === 0 ? undefined : `la valeur visée, ${nbTours > 0 ? "plus" : "moins"} ${Math.abs(nbTours) === 1 ? "un tour" : `${Math.abs(nbTours)} tours`} : même sinus`)]),
+    ...(d.estMax ? [] : [piege(sq, [texte("Au minimum, l'argument vaut −π/2 (à 2π près), pas π/2.")])]),
   ];
+}
+
+/** B3 : inconnue du système. Si la solution φ₀ du système (argument entre −π/2 et π/2 aux deux
+ * points) sort de ]−π ; π], elle est notée φ₀ et φ = φ₀ ± 2kπ est ramené à la fin (P6). */
+function toursB3(d: Extract<E["phase1"], { technique: "b3" }>): number {
+  const brut = d.alpha1 - d.fonction.omega * d.t1;
+  return Math.round(((d.fonction.phi as number) - brut) / (2 * Math.PI));
+}
+function phiSysteme(d: Extract<E["phase1"], { technique: "b3" }>): string {
+  return toursB3(d) === 0 ? "\\varphi" : "\\varphi_0";
 }
 
 function etapesSysteme(e: E, sq: string): EtapeCorrection[] {
   const d = e.phase1;
   if (d.technique !== "b3") return [];
+  const ph = phiSysteme(d);
   const bloc = (t: number, v: number, alpha: number, i: number): EtapeCorrection => {
-    const arg = somme([coefOmega(t), "\\varphi"]);
+    const arg = somme([coefOmega(t), ph]);
     const indice = i === 1 ? "₁" : "₂";
     return calcul(
       sq,
@@ -166,18 +192,37 @@ function etapesSysteme(e: E, sq: string): EtapeCorrection[] {
     );
   };
   return [
-    utilise(sq, [texte(`En chaque point, on isole le sinus, puis on prend l'arcsin : l'argument est entre −π/2 et π/2 ${COURS_MODELISER}. On obtient deux équations du premier degré en ω et φ.`)]),
+    utilise(sq, [
+      texte(`En chaque point, on isole le sinus, puis on prend l'arcsin : l'argument est entre −π/2 et π/2 ${COURS_MODELISER}. On obtient deux équations du premier degré en ω et φ`),
+      ...(ph === "\\varphi" ? [texte(".")] : [texte(" ; on note "), latex("\\varphi_0"), texte(" la valeur de φ qui donne ces arguments (elle sera ramenée dans ]−π ; π] à la fin).")]),
+    ]),
     bloc(d.t1, d.v1, d.alpha1, 1),
     bloc(d.t2, d.v2, d.alpha2, 2),
-    resultat(sq, reponse(e, "systeme")),
+    resultat(sq, ph === "\\varphi" ? reponse(e, "systeme") : listeLatex(formatTermesReponseAttendueModelisationSinusoide(e, "systeme").map((l) => l.replace(/\\varphi/g, "\\varphi_0")), " ; ")),
+  ];
+}
+
+/** φ de B3 : la formule, puis, si l'angle obtenu sort de ]−π ; π], une seconde chaîne qui ajoute ou
+ * retire les tours (φ affiché ramené dans ]−π ; π], P6). */
+function lignesPhiB3(d: Extract<E["phase1"], { technique: "b3" }>, sum: number): LigneCalcul[] {
+  const brut = (d.alpha1 + d.alpha2 - d.fonction.omega * sum) / 2;
+  const phi = d.fonction.phi as number;
+  const nbTours = Math.round((phi - brut) / (2 * Math.PI));
+  if (nbTours === 0) return [ligne(`\\varphi=\\dfrac{\\alpha_1+\\alpha_2-${coefOmega(sum)}}{2}`, "on isole φ"), ligne(`\\approx ${n4(phi)}`, "ω non arrondi")];
+  return [
+    ligne(`\\varphi_0=\\dfrac{\\alpha_1+\\alpha_2-${coefOmega(sum)}}{2}`, "on isole φ₀"),
+    ligne(`\\approx ${n4(brut)}`, "ω non arrondi : hors de ]−π ; π]"),
+    ligne(`\\varphi=\\varphi_0${nbTours > 0 ? "+" : "-"}${2 * Math.abs(nbTours)}\\pi`, libelleTours(nbTours)),
+    ligne(`\\approx ${n4(phi)}`),
   ];
 }
 
 function etapesResolution(e: E, sq: string): EtapeCorrection[] {
   const d = e.phase1;
   if (d.technique !== "b3") return [];
-  const a1 = somme([coefOmega(d.t1), "\\varphi"]);
-  const a2 = somme([coefOmega(d.t2), "\\varphi"]);
+  const ph = phiSysteme(d);
+  const a1 = somme([coefOmega(d.t1), ph]);
+  const a2 = somme([coefOmega(d.t2), ph]);
   const diff = d.t1 - d.t2;
   const sum = d.t1 + d.t2;
   return [
@@ -197,9 +242,8 @@ function etapesResolution(e: E, sq: string): EtapeCorrection[] {
       sq,
       [
         ligne(`(${a1})+(${a2})=\\alpha_1+\\alpha_2`, "on additionne membre à membre"),
-        ligne(`${somme([coefOmega(sum), "2\\varphi"])}=\\alpha_1+\\alpha_2`, "on réduit"),
-        ligne(`\\varphi=\\dfrac{\\alpha_1+\\alpha_2-${coefOmega(sum)}}{2}`, "on isole φ"),
-        ligne(`\\approx ${n4(d.fonction.phi as number)}`, "ω non arrondi"),
+        ligne(`${somme([coefOmega(sum), `2${ph}`])}=\\alpha_1+\\alpha_2`, "on réduit"),
+        ...lignesPhiB3(d, sum),
       ],
       [],
       "Phase φ",
@@ -215,7 +259,7 @@ function etapesFonction(e: E, sq: string): EtapeCorrection[] {
   const lignes: LigneCalcul[] = [ligne("f(t)=A\\sin(\\omega t+\\varphi)+b", "modèle")];
   if (d.technique === "b1") lignes.push(ligne(`=${rhs}`, "A, ω et b remplacés ; φ reste littéral"));
   else if (d.technique === "b2") {
-    const phi = eSub(d.estMax ? EPi(1, 2) : EPi(3, 2), eMul(EPi(2, d.periode), q(d.t0)));
+    const phi = EPi(numerateurPhiB2(d.periode, d.t0, d.estMax), 2 * d.periode);
     const phiL = exprLatex(phi);
     lignes.push(
       ligne(`=${d.fonction.A}\\sin\\left(${omegaPi(d.periode)}t${phiL.startsWith("-") ? phiL : phiL === "0" ? "" : `+${phiL}`}\\right)${d.fonction.b === 0 ? "" : d.fonction.b > 0 ? `+${d.fonction.b}` : d.fonction.b}`, "valeurs exactes"),

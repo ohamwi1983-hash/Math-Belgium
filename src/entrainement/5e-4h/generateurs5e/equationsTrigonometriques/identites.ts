@@ -34,7 +34,23 @@ export function brancheSpecialeSin(signe: 1 | -1): BrancheAngle {
 
 /** cos(u)=k, k≠±1 → u=±B+2nπ (2 branches), B=arccos(k). `B` non-null ⟹ régime exact (catalogue) ;
  * `B` null ⟹ régime décimal, `Bdecimal` seul porte la valeur. */
+/** Deux séries confondues (même angle à 2π près : cos = ±1, sin = ±1) n'en font qu'une — la
+ * « valeur sur un axe » de la variante directe (audit 5e ch. 2, P3 : « x = π + 2kπ ou x = −π + 2kπ »). */
+function sansDoublon(branches: BrancheAngle[]): BrancheAngle[] {
+  if (branches.length !== 2) return branches;
+  const e = branches[0].constante.decimal - branches[1].constante.decimal;
+  return Math.abs(e - Math.round(e / (2 * Math.PI)) * 2 * Math.PI) < 1e-9 ? [branches[0]] : branches;
+}
+
 export function branchesGeneralesCos(B: RationnelPi | null, Bdecimal: number): BrancheAngle[] {
+  return sansDoublon(branchesGeneralesCosBrutes(B, Bdecimal));
+}
+
+export function branchesGeneralesSin(B: RationnelPi | null, Bdecimal: number): BrancheAngle[] {
+  return sansDoublon(branchesGeneralesSinBrutes(B, Bdecimal));
+}
+
+function branchesGeneralesCosBrutes(B: RationnelPi | null, Bdecimal: number): BrancheAngle[] {
   if (B !== null) {
     return [
       { constante: exacte(B), periode: exacte(DEUX_PI) },
@@ -48,7 +64,7 @@ export function branchesGeneralesCos(B: RationnelPi | null, Bdecimal: number): B
 }
 
 /** sin(u)=k, k≠±1 → u=B+2nπ OU u=(π-B)+2nπ (2 branches), B=arcsin(k). */
-export function branchesGeneralesSin(B: RationnelPi | null, Bdecimal: number): BrancheAngle[] {
+function branchesGeneralesSinBrutes(B: RationnelPi | null, Bdecimal: number): BrancheAngle[] {
   if (B !== null) {
     const piMoinsB = additionnerRationnelPi(UNE_PI, negatifRationnelPi(B));
     return [

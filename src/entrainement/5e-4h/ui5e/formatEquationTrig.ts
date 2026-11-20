@@ -19,15 +19,6 @@ export const ANNONCE_PRECISION_DECIMAL = " (arrondis au centième près)";
 
 const NOM_FONCTION_LATEX: Record<FonctionTrig, string> = { sin: "\\sin", cos: "\\cos", tan: "\\tan" };
 
-/** Arrondi à la PREMIÈRE décimale (D.1 — "convention arrondie à la première décimale quand la
- * valeur n'est pas un angle particulier") — n'affecte QUE l'affichage (valeurs générées/attendues
- * montrées à l'élève) ; la vérification (`moteur5e/verificationEquationTrig.ts`) reste en précision
- * complète, totalement indépendante de cet arrondi. */
-function arrondi1(v: number): number {
-  const r = Math.round(v * 10) / 10;
-  return Object.is(r, -0) ? 0 : r;
-}
-
 /** Arrondi au CENTIÈME — la précision annoncée par la consigne (« arrondis au centième près ») et
  * la tolérance de la vérification (`TOLERANCE_EQUATION_TRIG = 0.01`). L'ancien affichage au dixième
  * (« 1,3 + 6,3k ») ne passait même pas sa propre vérification (6,3 au lieu de 2π ≈ 6,28). */
@@ -68,8 +59,11 @@ export function relationBranche(branche: { constante: ValeurPiOuDecimale }): str
 }
 
 /** Décimal en texte brut (étiquettes `<text>` SVG du cercle) : virgule simple. */
+/** Valeur approchée d'une étiquette (cercle trigonométrique) : au CENTIÈME, avec ses deux décimales,
+ * comme les réponses attendues (audit 5e ch. 2 : au dixième, « 2,6 » ne correspondait pas à « 2,62 »). */
 function formatDecimalTexte(v: number): string {
-  return arrondi1(v).toString().replace(".", ",");
+  const r = Math.round(v * 100) / 100;
+  return (Object.is(r, -0) ? 0 : r).toFixed(2).replace(".", ",").replace("-", "−");
 }
 
 function formatMagnitudePiLatex(numerateur: number, denominateur: number): string {
@@ -87,6 +81,9 @@ export function formatValeurLatex(v: ValeurPiOuDecimale): string {
     const signe = numerateur < 0 ? "-" : "";
     return `${signe}${formatMagnitudePiLatex(Math.abs(numerateur), denominateur)}`;
   }
+  // Valeur approchée : toujours ses deux décimales (« ≈ 0{,}40 », jamais « ≈ 0{,}4 », P4) ; une
+  // donnée décimale exacte (« x + 1{,}4 ») reste telle quelle.
+  if (valeurApprochee(v)) return (Math.round(v.decimal * 100) / 100).toFixed(2).replace(".", "{,}");
   return formatDecimalLatex(v.decimal);
 }
 
