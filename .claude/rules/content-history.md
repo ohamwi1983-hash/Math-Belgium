@@ -4944,3 +4944,16 @@ sur les sommets des courbes ; saisies justes autrement écrites, « − – — 
 reprendre, pièges) : 0 anomalie ; parcours iPhone 13 des trois applis (bonnes réponses, erreurs
 ciblées, aides à deux niveaux, domaine vide, composée qui existe) : scrollWidth 390, 0 erreur
 console, `?code=` identique ; captures dans le dossier de travail `5gen61-63`.
+## 6e (6h), Chapitre 1 — lot G de l'audit (générateurs 6gen152–6gen155, nouveaux)
+
+Quatre cartes `entrainement` ajoutées, chacune à l'endroit où sa notion est enseignée : **6gen155
+« Dérivée d'une réciproque en un point »** et **6gen154 « Graphe de la réciproque »** (fin du § 1,
+après 6gen1 — répond aussi à C6 : le cours annonçait une dérivée au point voulu que 6gen1 n'a pas) ;
+**6gen153 « Identités trig∘arc et arc∘trig »** (fin du § 2, après 6gen2 ; identités enseignées par le
+lot A, décision 1) ; **6gen152 « Détective d'erreurs : réciproques et arcfonctions »** (fin du § 5,
+après 6gen5). Pilote d'évaluation : 6gen154/155 dans `reciproques`, 6gen153 dans `cyclometriques`
+(processus 2), 6gen152 dans `graphiques` (processus 3). Décisions appliquées : « ∅ / existe ou non /
+lequel » = verdict (θ dans l'image, signe, domaine, f′(x₀) = 0, graphe, type d'erreur), jamais un cas
+particulier ; aides à deux niveaux sans la réponse ; choix fermés à une tentative. Vérifié : 2 000
+tirages par variante, parcours iPhone 13 (390 px, 0 erreur console), page du chapitre (4 liens, 390 et
+1 280 px, 0 erreur), documents réels sans débordement, collecteur 0 égalité fausse.

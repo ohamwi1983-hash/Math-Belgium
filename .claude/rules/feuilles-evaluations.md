@@ -1060,3 +1060,36 @@ pour les identités « g(…) = y », étape d ignorée quand le domaine est vid
 relations, 0 fausse. Documents réels (`construirePlan`, 2 plans, évaluation 2 séries + aménagée +
 corrigé + grille + feuille, calculatrice interdite / autorisée, cas particulier coché) : même
 structure d'une série à l'autre, 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error`.
+## 6e ch. 1, lot G — 6gen152–6gen155 (nouveaux, notés)
+
+Socle `AppEcransExp` du 6e ch. 2 réutilisé (ajouts sans effet sur 6gen144–147 : `eyebrow`/`sousTitre`,
+`ChampEcran.apercu`) ; saisie `moteur6e/lectureValeurExp.ts` (π, √, e, arcfonctions, fractions, « − ») ;
+écritures exactes `ui6e/nombresRecip.ts` (multiples de π, valeurs remarquables, c·√r simplifié et
+dénominateur rationnel). Corrigés `generateurs6e/{detectiveCyclometriques,identitesCyclometriques,grapheReciproque,deriveeReciproquePoint}/corrigeDetaille.ts`,
+une lettre par écran. **6gen152** (détective, mécanique de 6gen144) : neuf types d'erreur = variantes,
+`groupe_erreur`, énoncé papier = copie numérotée + consigne globale, `sansCharge` (niveau 3, 8 min
+constants). « Quelle ligne ? » est un verdict : 0 à 3 lignes justes (préliminaires du scénario puis
+début de la copie canonique) précèdent la ligne fausse, tiré 1/4 chacun (`donnees.av`) — positions 1–4
+à 25 % ± 3 dans chaque type (18 000 tirages), copies de 2 à 6 lignes ; `forme` = type d'erreur seul
+(jamais la ligne). **6gen153** (identités) : arcTrig (θ dans l'image ? verdict 50/50, puis angle ramené :
+bornes au même dénominateur, angle supplémentaire / opposé, tour retiré), trigArc (signe 50/50 — le
+piège « a < 0 » pour cos∘arcsin… —, puis identité substituée et racine simplifiée ligne à ligne),
+littéral (domaine parmi quatre, puis forme en x : deux vraies questions papier) ; une saisie qui
+recopie sin/cos/tan/arc ou une valeur approchée est arrêtée SANS tentative (`approchee`) ; `forme` =
+variante + arcfonction (jamais le verdict) ; piège constant par variante, trigArc `sansCharge`.
+**6gen154** (graphe) : spline d'Hermite monotone par trois nœuds entiers, fenêtre [−6 ; 6]², même
+échelle, pente p/q en A lue entre deux nœuds de la tangente ; domaine ≠ image (sinon l'échange ne se
+voit pas) ; quatre vraies questions papier (A′, domaine et image, graphe A–D, pentes), figure + quatre
+graphes dans l'énoncé, figure f / f⁻¹ / y = x annotée en `figureHtml` ; lectures a, b, c ; piège = rond
+vide ou f décroissante. **6gen155** (dérivée d'une réciproque) : verdict f′(x₀) = 0 tiré 50/50 dans
+chaque famille (jamais un cas particulier) ; l'appli n'a que trois écrans dans ce cas (quatre puces
+fixes) mais le corrigé garde une étape d « n'existe pas » (tangente verticale) : niveau 3 et 10 min
+constants (`sansCharge`) ; énoncé papier « Calcule (f⁻¹)′(y₀), ou justifie que ce nombre n'existe pas ».
+Aucun `calcul: "calculatrice"` (tout exact). Mesuré (`niveauEtDuree`, 2 000 tirages par variante) :
+6gen152 niv. 3, 8 min ; 6gen153 niv. 2 (arcTrig, littéral) / 3 (trigArc), 6 min ; 6gen154 niv. 1–2,
+7 min ; 6gen155 niv. 3, 10 min — constants dans chaque verdict. Moteurs : 38 000 tirages (réponses
+recalculées indépendamment, écritures équivalentes, « − – — », illisible, approchée, pièges) 0 erreur ;
+collecteur (outils de `6gen144-147/corrige` recopiés, variables α, x, y, fonction f de l'instance,
+`f'` par différence) 2 000 tirages, ≈ 12 400 égalités, ≈ 1 600 relations, 0 fausse ; plans réels
+`construirePlan` (2 séries, calculatrice interdite / autorisée, + aménagée + feuille) : 0 débordement
+à 680 et 1 280 px, 0 `.katex-error`, `groupe_erreur` B ≠ A, QR `?code=` 36 / 36.

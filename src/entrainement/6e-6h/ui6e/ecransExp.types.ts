@@ -26,6 +26,8 @@ export interface ChampEcran {
   labelLatex?: string;
   unite?: string;
   placeholder: string;
+  /** Aperçu KaTeX en direct au-dessus du champ (saisie d'une expression en x : 6gen152, 6gen153). */
+  apercu?: boolean;
 }
 
 export interface OptionEcran {

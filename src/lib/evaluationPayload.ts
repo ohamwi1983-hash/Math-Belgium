@@ -82,6 +82,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
+  | '6gen152' | '6gen153' | '6gen154' | '6gen155'
   | '6gen148' | '6gen149' | '6gen150' | '6gen151'
   | '6gen144'
   | '6gen147'
@@ -149,10 +150,14 @@ export interface QuizThemeConfig {
  * dans cette table DOIT filtrer sur les deux clés, jamais `sectionId` seul. */
 export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'reciproques', generatorId: '6gen1', label: '' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'reciproques', generatorId: '6gen154', label: 'Graphe de la réciproque (6gen154)', processus: 2 },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'reciproques', generatorId: '6gen155', label: "Dérivée d'une réciproque en un point (6gen155)", processus: 2 },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', generatorId: '6gen2', label: '' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', generatorId: '6gen153', label: 'Identités trig∘arc et arc∘trig (6gen153)', processus: 2 },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'equations', generatorId: '6gen3', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'derivees', generatorId: '6gen4', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen5', label: '', processus: 3 },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen152', label: "Détective d'erreurs : réciproques et arcfonctions (6gen152)", processus: 3 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen6', label: 'Calcul de limites (6gen6)' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen145', label: 'Limites de référence et croissances comparées (6gen145)', processus: 2 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen146', label: 'Puissances à exposant réel sans calculatrice (6gen146)', processus: 1 },

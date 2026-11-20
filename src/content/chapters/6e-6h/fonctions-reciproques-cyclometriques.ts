@@ -819,6 +819,30 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 1. Fonctions injectives / surjectives / bijectives »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Graphe de la réciproque',
+          generatorId: '6gen154',
+          description: [
+            'Sur un quadrillage à la même échelle en x et en y : point (a ; b) → (b ; a), domaine et ' +
+              "image échangés (crochets compris), graphe de f⁻¹ symétrique par rapport à y = x, et " +
+              'pente de la tangente à f⁻¹, inverse de celle de f.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 154. Graphe de la réciproque »',
+        },
+        {
+          kind: 'entrainement',
+          title: "Dérivée d'une réciproque en un point",
+          generatorId: '6gen155',
+          description: [
+            'Sans expression de f⁻¹ (x³ + x, eˣ + x, x + sin x…) : trouve x₀ = f⁻¹(y₀) par une valeur ' +
+              "évidente, calcule f′(x₀), décide si le théorème s'applique (f′(x₀) ≠ 0) et conclus " +
+              "(f⁻¹)′(y₀) = 1/f′(x₀) — ou une tangente verticale.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: "6e (6h) → « 155. Dérivée d'une réciproque en un point »",
+        },
       ],
     },
     {
@@ -1301,6 +1325,18 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 2. arcsin, arccos, arctan »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Identités trig∘arc et arc∘trig',
+          generatorId: '6gen153',
+          description: [
+            "Décide si l'angle est dans l'image de l'arcfonction, puis ramène arcsin(sin θ), " +
+              'arccos(cos θ) ou arctan(tan θ) dans l\'image ; calcule cos(arcsin a), tan(arccos a), ' +
+              "sin(arctan a)… avec le bon signe, et simplifie cos(arcsin(kx)) en √(1 − k²x²).",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 153. Identités trig∘arc et arc∘trig »',
         },
       ],
     },
@@ -1980,6 +2016,20 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 5. Associer graphique et expression »',
+        },
+        {
+          kind: 'entrainement',
+          title: "Détective d'erreurs : réciproques et arcfonctions",
+          generatorId: '6gen152',
+          description: [
+            "La résolution d'un élève contient une seule ligne fausse : trouve-la, nomme l'erreur " +
+              '(f⁻¹ prise pour 1/f, arcsin(sin θ) = θ hors de l\'image, signe oublié devant la dérivée de ' +
+              "arccos, u′ oublié, (kx)² écrit kx², candidat hors condition d'existence, sens de " +
+              "l'inégalité non inversé, ±π/2 atteints par arctan, injectivité sur une réunion d'intervalles) " +
+              'et corrige le résultat.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: "6e (6h) → « 152. Détective d'erreurs : réciproques et arcfonctions »",
         },
       ],
     },
