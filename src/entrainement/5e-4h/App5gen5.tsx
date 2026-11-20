@@ -5,6 +5,9 @@ import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_PROBLEMES_CONTEXTE, construireProblemeContexteAvecVariante, genererExerciceProblemeContexte } from "./generateurs5e/problemesContexte";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeProblemesContexte, lettrePhaseContexte } from "./generateurs5e/problemesContexte/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 
 /** Catalogue PARTAGÉ avec l'adaptateur papier et le `?code=` (même ordre partout). */
 const OPTIONS_SCENARIO = CATALOGUE_PROBLEMES_CONTEXTE;
@@ -487,6 +490,14 @@ export function App5gen5() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase, enAttente.etatSuivant),
+        corrigeDetaille: (
+          <CorrigeDetailleEcran
+            etapes={lignesDeLEtape(
+              correctionDetailleeProblemesContexte(exercice, { xOptimalRetenu: enAttente.etatSuivant.xOptimalRetenu, aRetenu: enAttente.etatSuivant.aRetenu, bRetenu: enAttente.etatSuivant.bRetenu }),
+              lettrePhaseContexte(exercice, etat.phase),
+            )}
+          />
+        ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
