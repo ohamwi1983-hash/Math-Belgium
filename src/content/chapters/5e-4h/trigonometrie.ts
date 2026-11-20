@@ -984,6 +984,18 @@ export const trigonometrie: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 8. Paramètres d\'une fonction sinusoïdale »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Construire une sinusoïde point par point',
+          generatorId: '5gen52',
+          description: [
+            'La méthode de construction pas à pas : trouve A, b, T et Φ, place les cinq points ' +
+              'd\'une période à partir de Φ sur un quadrillage gradué en fractions de π (minimum ' +
+              'd\'abord si A < 0), puis prolonge la courbe par périodicité.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 52. Construire une sinusoïde point par point »',
+        },
       ],
     },
     {

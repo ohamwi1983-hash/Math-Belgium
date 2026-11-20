@@ -60,7 +60,7 @@ export function omegaXLatex(s: SinusoideExacte): string {
   const w = s.omega;
   if (!s.enPi) {
     if (w.n === 1 && w.d === 1) return "\\pi x";
-    return `${piLatex(w)}x`;
+    return `${piLatex(w)} x`;
   }
   if (w.n === 1 && w.d === 1) return "x";
   return `${ratLatex(w)}x`;
