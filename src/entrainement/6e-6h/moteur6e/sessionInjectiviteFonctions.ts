@@ -25,8 +25,18 @@ export const NIVEAU_AIDE_MAX: Record<PhaseInjectiviteFonctions, number> = {
   injective: 2,
   reciproque: 2,
   image: 2,
-  bijection: 1,
+  bijection: 2,
 };
+
+/** Choix fermés (audit du 6e ch. 1, G2) : une seule tentative — un 2e essai donnerait la réponse
+ * par élimination. « bijection » (deux listes d'intervalles proposés) ; le verdict « injective ? »
+ * (Oui / Non) aussi, mais l'intervalle demandé après un « Non » juste est un champ : 3 tentatives
+ * (voir `soumettreReponseInjective`). */
+export const TENTATIVES_CHOIX_FERME = 1;
+
+export function tentativesMaxCourant(etat: EtatSessionInjectiviteFonctions): number {
+  return etat.phase === "bijection" ? TENTATIVES_CHOIX_FERME : etat.reglages.tentativesMax;
+}
 
 function etatInitial(
   exercice: ExerciceInjectiviteFonctions,
@@ -68,7 +78,7 @@ export function demarrerSessionInjectiviteFonctions(reglages: ReglagesSession6e,
 }
 
 function reglagesEtape(etat: EtatSessionInjectiviteFonctions): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxCourant(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionInjectiviteFonctions): EtatSessionInjectiviteFonctions {
@@ -98,6 +108,7 @@ function avancerPhase<TReponse>(
   verifier: (exercice: ExerciceInjectiviteFonctions, reponse: TReponse) => boolean,
   phaseAttendue: PhaseInjectiviteFonctions,
   apresTerminee?: (etat: EtatSessionInjectiviteFonctions, reponse: TReponse) => Partial<EtatSessionInjectiviteFonctions>,
+  tentativesMaxReponse?: number,
 ): EtatSessionInjectiviteFonctions {
   if (etat.terminee) throw new Error("soumettreReponse : la session est déjà terminée");
   if (etat.phase !== phaseAttendue) throw new Error(`soumettreReponse : attendu à la phase "${phaseAttendue}", trouvé "${etat.phase}"`);
@@ -105,6 +116,7 @@ function avancerPhase<TReponse>(
 
   const etapeCourante = soumettreEtapeTentatives<TReponse>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(tentativesMaxReponse !== undefined ? { tentativesMax: tentativesMaxReponse } : {}),
     verifier: (r) => verifier(exercice, r),
     revelerReponse: () => {},
   });
@@ -159,9 +171,18 @@ export function soumettreReponseDomaine(etat: EtatSessionInjectiviteFonctions, r
  * épuisement des tentatives (`detecterCoteBranche` retombe alors sur `"droite"` par défaut).
  */
 export function soumettreReponseInjective(etat: EtatSessionInjectiviteFonctions, reponse: ReponseInjective): EtatSessionInjectiviteFonctions {
-  return avancerPhase(etat, reponse, verifierInjective, "injective", (etatCourant, r) => ({
-    coteChoisi: detecterCoteBranche(etatCourant.exerciceCourant, r.intervalle) as CoteBranche,
-  }));
+  // Verdict Oui / Non faux : choix fermé, l'écran se clôt (une seule tentative).
+  const verdictFaux = reponse.ouiNon !== etat.exerciceCourant.injective;
+  return avancerPhase(
+    etat,
+    reponse,
+    verifierInjective,
+    "injective",
+    (etatCourant, r) => ({
+      coteChoisi: detecterCoteBranche(etatCourant.exerciceCourant, r.intervalle) as CoteBranche,
+    }),
+    verdictFaux ? TENTATIVES_CHOIX_FERME : undefined,
+  );
 }
 
 export function soumettreReponseReciproque(etat: EtatSessionInjectiviteFonctions, texte: string): EtatSessionInjectiviteFonctions {

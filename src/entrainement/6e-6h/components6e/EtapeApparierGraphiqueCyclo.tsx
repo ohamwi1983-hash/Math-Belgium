@@ -3,17 +3,19 @@ import { Katex } from "../components/Katex";
 import { useLargeurConteneur } from "../components/useLargeurConteneur";
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import type { ExerciceGraphiquesCyclometriques, ParticulariteParite } from "../core6e/graphiquesCyclometriques.types";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import { evaluerValeurCyclometrique } from "../moteur6e/expressionCyclometrique";
-import type { DiagnosticEcranUniqueGraphiquesCyclometriques, ReponseEcranUniqueGraphiquesCyclometriques, ReponseExtremum } from "../moteur6e/verificationGraphiquesCyclometriques";
+import type { ReponseEcranUniqueGraphiquesCyclometriques, ReponseExtremum } from "../moteur6e/verificationGraphiquesCyclometriques";
 import { diagnostiquerEcranUnique } from "../moteur6e/verificationGraphiquesCyclometriques";
-import type { AideAvecLatex } from "../ui6e/formatGraphiquesCyclometriques";
 import { CONSIGNE_GENERALE, LIBELLE_PARITE, calculerViewBoxGraphique, formatExpressionLatex } from "../ui6e/formatGraphiquesCyclometriques";
+import { aideGraphique1, aideGraphique2, cibleJustification } from "../ui6e/aidesGraphiquesCyclometriques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { GrapheOptionCyclo } from "./GrapheOptionCyclo";
+import { AidesCyclo, MESSAGES_ILLISIBLE_CYCLO, MessageRetourCyclo, useRetourCyclo } from "./RetourSaisieCyclo";
 
 const LETTRES = ["A", "B", "C", "D"] as const;
 
@@ -25,10 +27,14 @@ interface EtatExtremum {
 
 const EXTREMUM_VIDE: EtatExtremum = { existe: null, xTexte: "", yTexte: "" };
 
-function extremumComplet(e: EtatExtremum): boolean {
-  if (e.existe === null) return false;
-  if (e.existe === false) return true;
-  return evaluerValeurCyclometrique(e.xTexte) !== null && evaluerValeurCyclometrique(e.yTexte) !== null;
+const lisible = (t: string) => evaluerValeurCyclometrique(t) !== null;
+
+function extremumRempli(e: EtatExtremum): boolean {
+  return e.existe === false || (e.existe === true && e.xTexte.trim() !== "" && e.yTexte.trim() !== "");
+}
+
+function extremumLisible(e: EtatExtremum): boolean {
+  return e.existe !== true || (lisible(e.xTexte) && lisible(e.yTexte));
 }
 
 function extremumVersReponse(e: EtatExtremum): ReponseExtremum {
@@ -36,54 +42,24 @@ function extremumVersReponse(e: EtatExtremum): ReponseExtremum {
   return { existe: true, x: evaluerValeurCyclometrique(e.xTexte) as number, y: evaluerValeurCyclometrique(e.yTexte) as number };
 }
 
-function ChampExtremum({
-  titre,
-  etat,
-  onChange,
-  erroneeExistence,
-  erroneeValeurs,
-}: {
-  titre: string;
-  etat: EtatExtremum;
-  onChange: (e: EtatExtremum) => void;
-  erroneeExistence: boolean;
-  erroneeValeurs: boolean;
-}) {
+function ChampExtremum({ titre, etat, onChange, erronee, desactive }: { titre: string; etat: EtatExtremum; onChange: (e: EtatExtremum) => void; erronee: boolean; desactive: boolean }) {
   return (
     <div className="field">
       <p className="field-label">{titre}</p>
       <div className="options-grid-compact">
-        <button
-          type="button"
-          className={`btn${etat.existe === false ? " toggle-active" : ""}${erroneeExistence && etat.existe === false ? " is-erronee" : ""}`}
-          onClick={() => onChange({ ...etat, existe: false })}
-        >
+        <button type="button" className={`btn${etat.existe === false ? " toggle-active" : ""}`} disabled={desactive} onClick={() => onChange({ ...etat, existe: false })}>
           N'existe pas
         </button>
-        <button
-          type="button"
-          className={`btn${etat.existe === true ? " toggle-active" : ""}${erroneeExistence && etat.existe === true ? " is-erronee" : ""}`}
-          onClick={() => onChange({ ...etat, existe: true })}
-        >
+        <button type="button" className={`btn${etat.existe === true ? " toggle-active" : ""}`} disabled={desactive} onClick={() => onChange({ ...etat, existe: true })}>
           Existe
         </button>
       </div>
       {etat.existe === true && (
         <div className="field-row field-row-wrap contenu-conditionnel">
-          <label className="field-label field-label-minuscule">position x =</label>
-          <input
-            type="text"
-            className={`text-input${erroneeValeurs ? " is-erronee" : ""}`}
-            value={etat.xTexte}
-            onChange={(e) => onChange({ ...etat, xTexte: e.target.value })}
-          />
+          <label className="field-label field-label-minuscule">atteint en x =</label>
+          <input type="text" className={`text-input${erronee ? " is-erronee" : ""}`} value={etat.xTexte} disabled={desactive} onChange={(e) => onChange({ ...etat, xTexte: e.target.value })} />
           <label className="field-label field-label-minuscule">valeur y =</label>
-          <input
-            type="text"
-            className={`text-input${erroneeValeurs ? " is-erronee" : ""}`}
-            value={etat.yTexte}
-            onChange={(e) => onChange({ ...etat, yTexte: e.target.value })}
-          />
+          <input type="text" className={`text-input${erronee ? " is-erronee" : ""}`} value={etat.yTexte} disabled={desactive} onChange={(e) => onChange({ ...etat, yTexte: e.target.value })} />
         </div>
       )}
     </div>
@@ -92,70 +68,81 @@ function ChampExtremum({
 
 interface Props {
   exercice: ExerciceGraphiquesCyclometriques;
-  aideNiveau1: AideAvecLatex;
-  aideNiveau2: AideAvecLatex;
+  lettreValidee: boolean;
+  pariteRevelee: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
   niveauAideMax: number;
   onActiverAide: () => void;
+  onValiderLettre: (lettre: number) => void;
   onValider: (reponse: ReponseEcranUniqueGraphiquesCyclometriques) => void;
-  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
 }
 
 /**
- * Écran UNIQUE de `6gen5` (refonte complète, remplace l'ancienne séquence "calcul → sélection" à 1
- * ou 2 écrans) — toutes familles confondues : 4 graphiques Mafs empilés (réutilise `GrapheOptionCyclo`,
- * composant partagé, jamais un rendu ad hoc) + 4 boutons de choix A-D, puis, dès qu'une lettre est
- * sélectionnée, un bloc de justification à 6 sous-réponses (ordonnée à l'origine, domf, imf,
- * parité, maximum, minimum) — le tout soumis en UNE SEULE tentative combinée (même mécanique que
- * l'écran "bijection" à 2 comboboxes de 6gen1, `EtapeBijectionInjectiviteFonctions.tsx`, généralisée
- * à 7 sous-réponses). Chaque sous-réponse est diagnostiquée INDÉPENDAMMENT (`diagnostiquerEcranUnique`)
- * pour le surlignage rouge — jamais une tentative fausse sur un champ confondue avec une autre.
+ * Écran unique de `6gen5`, en deux temps (audit du 6e ch. 1, lot B, G2) : 1) choix du graphique
+ * (A–D), choix fermé à UNE tentative, validé seul ; 2) justification (ordonnée à l'origine, domaine,
+ * image, parité, extremums) en trois tentatives — la parité (choix fermé) est jugée une seule fois,
+ * puis figée et révélée si elle était fausse. Valeur illisible : message sans tentative ; π, √,
+ * fractions et « − » lus. Message ciblé : la liste des propriétés à revoir.
  */
-export function EtapeApparierGraphiqueCyclo({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeApparierGraphiqueCyclo({
+  exercice,
+  lettreValidee,
+  pariteRevelee,
+  tentativesUtilisees,
+  tentativesMax,
+  niveauAide,
+  niveauAideMax,
+  onActiverAide,
+  onValiderLettre,
+  onValider,
+  validation,
+}: Props) {
   const [lettre, setLettre] = useState<number | null>(null);
   const [ordonnee, setOrdonnee] = useState<EtatExtremum>(EXTREMUM_VIDE);
   const [domf, setDomf] = useState<EnsembleReelGuide | null>(null);
   const [imf, setImf] = useState<EnsembleReelGuide | null>(null);
+  const [domIllisible, setDomIllisible] = useState(false);
+  const [imIllisible, setImIllisible] = useState(false);
   const [parite, setParite] = useState<ParticulariteParite | "">("");
   const [maximum, setMaximum] = useState<EtatExtremum>(EXTREMUM_VIDE);
   const [minimum, setMinimum] = useState<EtatExtremum>(EXTREMUM_VIDE);
-  const [derniereReponse, setDerniereReponse] = useState<ReponseEcranUniqueGraphiquesCyclometriques | null>(null);
+  const retour = useRetourCyclo<ReponseEcranUniqueGraphiquesCyclometriques>();
 
   const [wrapperRef, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
   const largeur = Math.min(360, Math.max(200, largeurMesuree || 280));
   const viewBox = calculerViewBoxGraphique(exercice);
+  const desactive = !!validation;
 
-  const ordonneeComplete = ordonnee.existe !== null && (ordonnee.existe === false || evaluerValeurCyclometrique(ordonnee.xTexte) !== null);
-  const complet = lettre !== null && ordonneeComplete && domf !== null && imf !== null && parite !== "" && extremumComplet(maximum) && extremumComplet(minimum);
+  const pariteEffective: ParticulariteParite | "" = pariteRevelee ? exercice.proprietes.parite : parite;
+  const ordonneeRemplie = ordonnee.existe === false || (ordonnee.existe === true && ordonnee.xTexte.trim() !== "");
+  const complet = (domf !== null || domIllisible) && (imf !== null || imIllisible) && ordonneeRemplie && pariteEffective !== "" && extremumRempli(maximum) && extremumRempli(minimum);
 
-  const montrerErreurs = tentativesUtilisees > 0 && derniereReponse !== null;
-  const diagnostic: DiagnosticEcranUniqueGraphiquesCyclometriques | null = montrerErreurs ? diagnostiquerEcranUnique(exercice, derniereReponse as ReponseEcranUniqueGraphiquesCyclometriques) : null;
+  const derniere = retour.soumise;
+  const diagnostic = tentativesUtilisees > 0 && derniere !== null ? diagnostiquerEcranUnique(exercice, derniere) : null;
 
-  function valider() {
-    // Le seul garde-fou nécessaire : `complet` alias déjà toutes les conditions individuelles
-    // (lettre/domf/imf/parite non vides) — TypeScript 4.4+ narrowe `parite`/`lettre`/`domf`/`imf`
-    // en conséquence pour le reste de cette fonction (analyse de flux des conditions aliasées).
-    // Répéter ces conditions individuellement ici entre en contradiction avec cette narrowing (la
-    // 2e moitié d'un `||` court-circuité hérite déjà de la négation de la 1re) — jamais les
-    // dupliquer.
+  function validerJustification() {
     if (!complet) return;
+    const illisible = domIllisible || imIllisible || (ordonnee.existe === true && !lisible(ordonnee.xTexte)) || !extremumLisible(maximum) || !extremumLisible(minimum);
+    if (illisible || domf === null || imf === null) {
+      retour.tenter(derniere as ReponseEcranUniqueGraphiquesCyclometriques, domIllisible || imIllisible ? MESSAGES_ILLISIBLE_CYCLO.borne : MESSAGES_ILLISIBLE_CYCLO.extremum, onValider);
+      return;
+    }
     const reponse: ReponseEcranUniqueGraphiquesCyclometriques = {
-      lettre,
+      lettre: exercice.indexCorrect,
       ordonnee: ordonnee.existe ? { existe: true, valeur: evaluerValeurCyclometrique(ordonnee.xTexte) as number } : { existe: false },
       domf,
       imf,
-      parite,
+      parite: pariteEffective,
       maximum: extremumVersReponse(maximum),
       minimum: extremumVersReponse(minimum),
     };
-    setDerniereReponse(reponse);
-    onValider(reponse);
+    retour.tenter(reponse, null, onValider);
   }
+
+  const cible: FragmentConsigne[] | null = diagnostic ? cibleJustification(exercice, diagnostic) : null;
 
   return (
     <div>
@@ -177,12 +164,14 @@ export function EtapeApparierGraphiqueCyclo({ exercice, aideNiveau1, aideNiveau2
         ))}
       </div>
 
+      <p className="prompt-text">Quel graphique représente f ?</p>
       <div className="options-grid-compact">
         {LETTRES.slice(0, exercice.candidats.length).map((l, index) => (
           <button
             key={l}
             type="button"
-            className={`btn${lettre === index ? " toggle-active" : ""}${diagnostic && diagnostic.lettre !== "correct" && lettre === index ? " is-erronee" : ""}`}
+            className={`btn${(lettreValidee ? exercice.indexCorrect : lettre) === index ? " toggle-active" : ""}`}
+            disabled={desactive || lettreValidee}
             onClick={() => setLettre(index)}
           >
             {l}
@@ -190,25 +179,17 @@ export function EtapeApparierGraphiqueCyclo({ exercice, aideNiveau1, aideNiveau2
         ))}
       </div>
 
-      {lettre !== null && (
+      {lettreValidee && (
         <div className="contenu-conditionnel">
-          <p className="prompt-text">Pourquoi as-tu sélectionné {LETTRES[lettre]} ?</p>
+          <p className="prompt-text">Graphique {LETTRES[exercice.indexCorrect]} : c'est juste. Justifie ce choix.</p>
 
           <div className="field">
             <p className="field-label">Ordonnée à l'origine</p>
             <div className="options-grid-compact">
-              <button
-                type="button"
-                className={`btn${ordonnee.existe === false ? " toggle-active" : ""}${diagnostic && diagnostic.ordonnee !== "correct" && ordonnee.existe === false ? " is-erronee" : ""}`}
-                onClick={() => setOrdonnee({ ...ordonnee, existe: false })}
-              >
+              <button type="button" className={`btn${ordonnee.existe === false ? " toggle-active" : ""}`} disabled={desactive} onClick={() => setOrdonnee({ ...ordonnee, existe: false })}>
                 N'existe pas
               </button>
-              <button
-                type="button"
-                className={`btn${ordonnee.existe === true ? " toggle-active" : ""}${diagnostic && diagnostic.ordonnee !== "correct" && ordonnee.existe === true ? " is-erronee" : ""}`}
-                onClick={() => setOrdonnee({ ...ordonnee, existe: true })}
-              >
+              <button type="button" className={`btn${ordonnee.existe === true ? " toggle-active" : ""}`} disabled={desactive} onClick={() => setOrdonnee({ ...ordonnee, existe: true })}>
                 Existe
               </button>
             </div>
@@ -219,6 +200,7 @@ export function EtapeApparierGraphiqueCyclo({ exercice, aideNiveau1, aideNiveau2
                   type="text"
                   className={`text-input${diagnostic && diagnostic.ordonnee !== "correct" ? " is-erronee" : ""}`}
                   value={ordonnee.xTexte}
+                  disabled={desactive}
                   onChange={(e) => setOrdonnee({ ...ordonnee, xTexte: e.target.value })}
                 />
               </div>
@@ -227,77 +209,48 @@ export function EtapeApparierGraphiqueCyclo({ exercice, aideNiveau1, aideNiveau2
 
           <div className="field">
             <p className="field-label">Domaine de f</p>
-            <EnsembleReelGuideBuilder label="\text{dom} f=" onChange={setDomf} erronee={diagnostic !== null && diagnostic.domf !== "correct"} parseurNombre={evaluerValeurCyclometrique} />
+            <EnsembleReelGuideBuilder label="\text{dom}\,f=" onChange={setDomf} onIllisible={setDomIllisible} erronee={diagnostic !== null && diagnostic.domf !== "correct"} parseurNombre={evaluerValeurCyclometrique} disabled={desactive} />
           </div>
 
           <div className="field">
             <p className="field-label">Image de f</p>
-            <EnsembleReelGuideBuilder label="\text{Im}(f)=" onChange={setImf} erronee={diagnostic !== null && diagnostic.imf !== "correct"} parseurNombre={evaluerValeurCyclometrique} />
+            <EnsembleReelGuideBuilder label="\text{Im}\,f=" onChange={setImf} onIllisible={setImIllisible} erronee={diagnostic !== null && diagnostic.imf !== "correct"} parseurNombre={evaluerValeurCyclometrique} disabled={desactive} />
           </div>
 
           <div className="field">
-            <p className="field-label">Parité</p>
-            <span className="select-souligne-wrap">
-              <select
-                className={`ce-select${diagnostic && diagnostic.parite !== "correct" ? " is-erronee" : ""}`}
-                value={parite}
-                onChange={(e) => setParite(e.target.value as ParticulariteParite)}
-              >
-                <option value="" disabled>
-                  choisir…
-                </option>
-                <option value="paire">{LIBELLE_PARITE.paire}</option>
-                <option value="impaire">{LIBELLE_PARITE.impaire}</option>
-                <option value="aucune">{LIBELLE_PARITE.aucune}</option>
-              </select>
-            </span>
+            <p className="field-label">Parité (une seule tentative)</p>
+            <div className="options-grid-compact">
+              {(["paire", "impaire", "aucune"] as const).map((p) => (
+                <button key={p} type="button" className={`btn${pariteEffective === p ? " toggle-active" : ""}`} disabled={desactive || pariteRevelee} onClick={() => setParite(p)}>
+                  {LIBELLE_PARITE[p]}
+                </button>
+              ))}
+            </div>
+            {pariteRevelee && <p className="prompt-text">Parité révélée : {LIBELLE_PARITE[exercice.proprietes.parite].toLowerCase()}.</p>}
           </div>
 
-          <ChampExtremum
-            titre="Maximum"
-            etat={maximum}
-            onChange={setMaximum}
-            erroneeExistence={diagnostic !== null && diagnostic.maximum !== "correct"}
-            erroneeValeurs={diagnostic !== null && diagnostic.maximum !== "correct"}
-          />
-          <ChampExtremum
-            titre="Minimum"
-            etat={minimum}
-            onChange={setMinimum}
-            erroneeExistence={diagnostic !== null && diagnostic.minimum !== "correct"}
-            erroneeValeurs={diagnostic !== null && diagnostic.minimum !== "correct"}
-          />
+          <ChampExtremum titre="Maximum" etat={maximum} onChange={setMaximum} erronee={diagnostic !== null && diagnostic.maximum !== "correct"} desactive={desactive} />
+          <ChampExtremum titre="Minimum" etat={minimum} onChange={setMinimum} erronee={diagnostic !== null && diagnostic.minimum !== "correct"} desactive={desactive} />
         </div>
       )}
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
+      <AidesCyclo aide1={aideGraphique1(exercice)} aide2={aideGraphique2(exercice)} niveauAide={niveauAide} />
       {!validation && (
         <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+          <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+          {!lettreValidee ? (
+            <button type="button" className="btn btn-primary" disabled={lettre === null} onClick={() => lettre !== null && onValiderLettre(lettre)}>
+              Valider le choix
+            </button>
+          ) : (
+            <button type="button" className="btn btn-primary" disabled={!complet} onClick={validerJustification}>
+              Valider
+            </button>
+          )}
+          {lettreValidee && <MessageRetourCyclo blocage={retour.blocage} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={cible} />}
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-
     </div>
   );
 }

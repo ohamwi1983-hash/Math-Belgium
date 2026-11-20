@@ -12,11 +12,14 @@ const C_VALEURS = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5] as const;
  * (sélection directe) : les 3 distracteurs répliquent chacun l'un des 3 pièges nommés de la spec.
  */
 export function construireA(): ExerciceGraphiqueA {
-  const arcfonction = tirerParmi(["arcsin", "arccos"] as const);
+  // Verdict « parité » varié (audit du 6e ch. 1, V4 : « aucune parité » dans 90 à 100 % des tirages) :
+  // une fois sur trois environ, la fonction est impaire (arcsin, n = 0, c = 0 ; arccos n'est jamais impaire avec c entier).
+  const impaire = Math.random() < 0.35;
+  const arcfonction = impaire ? "arcsin" : tirerParmi(["arcsin", "arccos"] as const);
   const m = tirerParmi(M_VALEURS);
-  const n = tirerParmi(N_VALEURS);
+  const n = impaire ? 0 : tirerParmi(N_VALEURS);
   const k = tirerParmi(K_VALEURS);
-  const c = tirerParmi(C_VALEURS);
+  const c = impaire ? 0 : tirerParmi(C_VALEURS);
   const reel: CandidatA = { m, n, k, c, arcfonction };
 
   const domaineDecale: CandidatA = { ...reel, n: tirerAutre(n, N_VALEURS) };

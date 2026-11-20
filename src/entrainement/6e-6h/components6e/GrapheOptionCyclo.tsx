@@ -5,7 +5,9 @@ import type { ExerciceGraphiquesCyclometriques } from "../core6e/graphiquesCyclo
 import { CIBLE_NOMBRE_LIGNES_QCM, evaluerCandidat, type ViewBoxGraphiqueCyclo } from "../ui6e/formatGraphiquesCyclometriques";
 import { EPAISSEUR_TRAIT_ACCENTUE, EPAISSEUR_TRAIT_DISCRETE, ZOOM_MAX, ZOOM_MIN } from "../ui/mafsTransformation";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
-import { DomaineTraceX, GrilleAdaptative } from "../components/mafsGraphPartage";
+import { DomaineTraceX } from "../components/mafsGraphPartage";
+import { GrilleAdaptative } from "../../4e/components/mafsGraphPartage";
+import { formatEtiquetteGrilleTypo } from "../../4e/ui/mafsTransformation";
 
 const COULEUR_COURBE = "#1971c2";
 
@@ -84,6 +86,10 @@ export function GrapheOptionCyclo({ exercice, index, viewBox, largeur, hauteur }
   // correct après un pan/zoom) et en matérialisant le saut par un `Line.Segment` en pointillé entre
   // les 2 limites `c-π/2`/`c+π/2`, même convention que les asymptotes de `MafsGraphFonctionsReference.tsx`
   // (`style="dashed"`, `EPAISSEUR_TRAIT_DISCRETE`, opacité réduite — jamais l'élément principal du regard).
+  // Petit graphe (réponse attendue, 180 px) : moins de lignes, et nombres « lisibles » de la grille
+  // du 4e (espacés, jamais rognés au bord, virgule et « − ») — les graduations se chevauchaient
+  // (audit du 6e ch. 1, lot C) ; 6 lignes dès 240 px (QCM).
+  const cibleLignes = largeur < 240 ? 4 : CIBLE_NOMBRE_LIGNES_QCM;
   const discontinuite = exercice.famille === "D" && !exercice.candidats[index].continu ? exercice.candidats[index] : null;
   const courbe = (domaine: [number, number]) => (
     <Plot.OfX
@@ -106,7 +112,7 @@ export function GrapheOptionCyclo({ exercice, index, viewBox, largeur, hauteur }
         zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}
         preserveAspectRatio={false}
       >
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} cibleNombreLignes={CIBLE_NOMBRE_LIGNES_QCM} onPasChange={(x, y) => setPas({ x, y })} />
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} cibleNombreLignes={cibleLignes} etiquettesLisibles formatEtiquette={formatEtiquetteGrilleTypo} onPasChange={(x, y) => setPas({ x, y })} />
         {discontinuite ? (
           <>
             <DomaineTraceX largeur={largeur} borne={[-Infinity, discontinuite.p]}>

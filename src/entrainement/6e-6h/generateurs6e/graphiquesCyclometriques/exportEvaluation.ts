@@ -1,11 +1,11 @@
 import type { ExerciceGraphiquesCyclometriques } from "../../core6e/graphiquesCyclometriques.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/corrigeTableau";
-import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { construireGrilleSvgCandidatsCyclo } from "../../export6e/svgGraphCyclo";
 import { calculerViewBoxGraphique, formatExpressionLatex } from "../../ui6e/formatGraphiquesCyclometriques";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceGraphiquesCyclometriques } from "./index";
 import { correctionDetailleeGraphiquesCyclometriques as correction, lettreCorrecteGraphiquesCyclo, reponseGraphiquesCyclo } from "./corrigeDetaille";
+import { profilGraphiquesCyclometriques } from "../profilsEvaluationCyclometriques";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceGraphiquesCyclometriques>` pour `6gen5` (associer
@@ -64,10 +64,15 @@ function criteresDifficulte(e: E): CriteresDifficulte {
   let piege: 0 | 1 = 0;
   if (e.famille === "A" || e.famille === "B") piege = e.reel.k < 0 ? 1 : 0;
   else if (e.famille !== "C") piege = 1;
-  return { ...etapesDuCorrige(correction(e)), methode: 1, piege };
+  // Parité et extremums sont des verdicts tirés DANS la famille (lot E de l'audit) : charge et
+  // nombres étaient corrélés à l'issue (une fonction impaire n'a ni constante ni arctangente non
+  // remarquable : niv. 3 contre 4). Constants : deux étapes (choix du graphique, justification),
+  // sans charge, nombres 1 (valeurs exactes comparées au graphique par leur valeur approchée).
+  return { etapesTransformation: 2, etapesLecture: 0, sansCharge: true, methode: 1, piege, nombres: 1 };
 }
 
 export const adaptateurEvaluationGraphiquesCyclometriques: AdaptateurFeuilleExercices<E> = {
+  profilInstance: profilGraphiquesCyclometriques,
   titreDocument: "Propriétés de fonctions cyclométriques — Évaluation",
   nomFichierBase: "graphiques-cyclometriques",
   genererInstance: genererExerciceGraphiquesCyclometriques,

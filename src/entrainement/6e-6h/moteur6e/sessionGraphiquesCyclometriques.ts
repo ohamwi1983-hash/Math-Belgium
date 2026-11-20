@@ -1,12 +1,9 @@
 /**
- * Couche B (6e) — moteur de session pour `6gen5`. N'importe jamais rien de
- * `src/generateurs6e/` — voir `sessionGraphiquesCyclometriques.test.ts` pour la preuve avec un
- * exercice factice défini localement.
+ * Couche B (6e) — moteur de session pour `6gen5`. N'importe jamais rien de `src/generateurs6e/`.
  *
- * **REFONTE — écran unique** : un seul `soumettreReponseEcranUnique` par exercice (lettre + 6
- * sous-réponses de justification soumises ensemble, une seule tentative pour l'ensemble du bloc —
- * même mécanique que l'écran "bijection" de 6gen1). Remplace `soumettreReponseCalcul`/
- * `soumettreReponseSelection` et la notion de phase.
+ * Écran unique en deux temps (audit du 6e ch. 1, lot B, G2 — voir `typesGraphiquesCyclometriques.ts`) :
+ * `soumettreLettre` (choix du graphique, une tentative) puis `soumettreReponseEcranUnique`
+ * (justification, trois tentatives ; parité jugée une seule fois).
  */
 import type { ExerciceGraphiquesCyclometriques } from "../core6e/graphiquesCyclometriques.types";
 import type { ReglagesSession6e } from "../core6e/session6e.types";
@@ -21,8 +18,10 @@ const POINTS_DE_BASE = 100;
 /** 2 niveaux d'aide sur l'écran unique. */
 export const NIVEAU_AIDE_MAX = 2;
 
-function etatInitial(exercice: ExerciceGraphiquesCyclometriques): Pick<EtatSessionGraphiquesCyclometriques, "exerciceCourant" | "etapeCourante" | "niveauAide"> {
-  return { exerciceCourant: exercice, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0 };
+function etatInitial(
+  exercice: ExerciceGraphiquesCyclometriques,
+): Pick<EtatSessionGraphiquesCyclometriques, "exerciceCourant" | "etapeCourante" | "niveauAide" | "lettreValidee" | "pariteRevelee"> {
+  return { exerciceCourant: exercice, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, lettreValidee: false, pariteRevelee: false };
 }
 
 export function demarrerSessionGraphiquesCyclometriques(
@@ -51,22 +50,38 @@ function cloturerExerciceOuSuivant(etat: EtatSessionGraphiquesCyclometriques, re
   return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()) };
 }
 
+/**
+ * Temps 1 — choix du graphique (choix fermé, une tentative) : juste, la justification s'ouvre sans
+ * consommer de tentative ; faux, l'exercice se clôt, réponse révélée.
+ */
+export function soumettreLettre(etat: EtatSessionGraphiquesCyclometriques, lettre: number): EtatSessionGraphiquesCyclometriques {
+  if (etat.terminee) throw new Error("soumettreLettre : la session est déjà terminée");
+  if (lettre === etat.exerciceCourant.indexCorrect) return { ...etat, lettreValidee: true, derniereRevelee: false };
+  return cloturerExerciceOuSuivant({ ...etat, derniereRevelee: true }, { exercice: etat.exerciceCourant, score: 0 });
+}
+
+/**
+ * Temps 2 — justification (trois tentatives). La parité est un choix fermé : fausse une première
+ * fois, elle est figée et révélée (`pariteRevelee`) sans clore l'écran ; les autres champs gardent
+ * leurs tentatives. L'écran est « révélé » si la parité l'a été ou si les tentatives sont épuisées.
+ */
 export function soumettreReponseEcranUnique(
   etat: EtatSessionGraphiquesCyclometriques,
   reponse: ReponseEcranUniqueGraphiquesCyclometriques,
 ): EtatSessionGraphiquesCyclometriques {
   if (etat.terminee) throw new Error("soumettreReponseEcranUnique : la session est déjà terminée");
   const exercice = etat.exerciceCourant;
-
-  const etapeCourante = soumettreEtapeTentatives<ReponseEcranUniqueGraphiquesCyclometriques>(etat.etapeCourante, reponse, {
+  const pariteRevelee = etat.pariteRevelee || reponse.parite !== exercice.proprietes.parite;
+  // La lettre a été jugée au temps 1 ; la parité (choix fermé) ne l'est qu'une fois.
+  const aJuger: ReponseEcranUniqueGraphiquesCyclometriques = { ...reponse, lettre: exercice.indexCorrect, parite: exercice.proprietes.parite };
+  if (verifierEcranUnique(exercice, aJuger)) {
+    return cloturerExerciceOuSuivant({ ...etat, pariteRevelee, derniereRevelee: pariteRevelee }, { exercice, score: pariteRevelee ? 0 : POINTS_DE_BASE });
+  }
+  const etapeCourante = soumettreEtapeTentatives<ReponseEcranUniqueGraphiquesCyclometriques>(etat.etapeCourante, aJuger, {
     ...reglagesEtape(etat),
     verifier: (r) => verifierEcranUnique(exercice, r),
     revelerReponse: () => {},
   });
-  if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereRevelee: false };
-
-  const score = etapeCourante.score as number;
-  const etatAvecRevele = { ...etat, derniereRevelee: etapeCourante.revelee };
-  const resultat: ResultatExerciceGraphiquesCyclometriques = { exercice, score };
-  return cloturerExerciceOuSuivant(etatAvecRevele, resultat);
+  if (!etapeCourante.terminee) return { ...etat, etapeCourante, pariteRevelee, derniereRevelee: false };
+  return cloturerExerciceOuSuivant({ ...etat, etapeCourante, pariteRevelee, derniereRevelee: true }, { exercice, score: 0 });
 }

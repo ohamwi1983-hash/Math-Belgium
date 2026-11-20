@@ -9,12 +9,15 @@ import type { ExerciceGraphiquesCyclometriques } from "../core6e/graphiquesCyclo
  * évalue f en ce point plutôt que de comparer à une position figée — un extremum peut être atteint
  * en plusieurs points, ex. familles C/F paires).
  */
+/** Un argument d'arcsin / arccos à 1e-9 près d'une borne de [−1 ; 1] (borne EXACTE saisie, « √(3)/2 »
+ * relue à 1,0000000000000002 près) est ramené sur la borne : sinon un extremum juste était jugé faux. */
 export function evaluerReel(exercice: ExerciceGraphiquesCyclometriques, x: number): number | null {
   switch (exercice.famille) {
     case "A": {
       const r = exercice.reel;
-      const u = r.m * x + r.n;
-      if (u < -1 || u > 1) return null;
+      let u = r.m * x + r.n;
+      if (Math.abs(u) > 1 + 1e-9) return null;
+      u = Math.max(-1, Math.min(1, u));
       const w = r.arcfonction === "arcsin" ? Math.asin(u) : Math.acos(u);
       return r.c + r.k * w;
     }
@@ -24,9 +27,10 @@ export function evaluerReel(exercice: ExerciceGraphiquesCyclometriques, x: numbe
     }
     case "C": {
       const r = exercice.reel;
-      const u = r.a * x * x + r.b;
+      let u = r.a * x * x + r.b;
       if (r.arcfonction === "arctan") return Math.atan(u);
-      if (u < -1 || u > 1) return null;
+      if (Math.abs(u) > 1 + 1e-9) return null;
+      u = Math.max(-1, Math.min(1, u));
       return r.arcfonction === "arcsin" ? Math.asin(u) : Math.acos(u);
     }
     case "D": {
@@ -36,16 +40,20 @@ export function evaluerReel(exercice: ExerciceGraphiquesCyclometriques, x: numbe
     }
     case "E": {
       const r = exercice.reel;
-      if (x < -1 || x > 1) return null;
-      const w = r.arcfonction === "arcsin" ? Math.asin(x) : Math.acos(x);
+      if (Math.abs(x) > 1 + 1e-9) return null;
+      const xb = Math.max(-1, Math.min(1, x));
+      const w = r.arcfonction === "arcsin" ? Math.asin(xb) : Math.acos(xb);
       const radicande = r.k * w + r.c;
-      if (radicande < 0) return null;
-      return Math.sqrt(radicande);
+      // Tolérance d'arrondi : au zéro EXACT du radicande (x = √2/2 saisi), le calcul flottant donne
+      // parfois −4·10⁻¹⁶ (constante c exacte, multiple de π).
+      if (radicande < -1e-9) return null;
+      return Math.sqrt(Math.max(0, radicande));
     }
     case "F": {
       const r = exercice.reel;
-      const u = r.m * x + r.n;
-      if (u < -1 || u > 1) return null;
+      let u = r.m * x + r.n;
+      if (Math.abs(u) > 1 + 1e-9) return null;
+      u = Math.max(-1, Math.min(1, u));
       const w = r.arcfonction === "arcsin" ? Math.asin(u) : Math.acos(u);
       return w * w + r.c;
     }

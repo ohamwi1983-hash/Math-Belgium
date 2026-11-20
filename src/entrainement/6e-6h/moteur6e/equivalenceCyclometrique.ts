@@ -1,5 +1,5 @@
 import type { StatutVerification } from "../moteur/statutVerification";
-import { evaluerExpressionCyclometrique } from "./expressionCyclometrique";
+import { evaluerExpressionCyclometrique, evaluerValeurCyclometrique } from "./expressionCyclometrique";
 
 /**
  * Couche B (6e) — vérifications par ÉCHANTILLONNAGE NUMÉRIQUE (jamais de manipulation symbolique :
@@ -24,22 +24,25 @@ export function diagnostiquerEquivalenceFonction(
   points: number[],
   tolerance: number = TOLERANCE_DEFAUT,
 ): StatutVerification {
+  // Syntaxe d'abord (une seule évaluation) : seule une erreur de SYNTAXE est « illisible » (aucune
+  // tentative). Une expression lisible mais non définie là où la référence l'est (« 1/√(−1−x²) »)
+  // est FAUSSE, jamais illisible (audit du 6e ch. 1, G1).
+  try {
+    evaluerExpressionCyclometrique(texte, points[0] ?? 0.37);
+  } catch {
+    return "parse_error";
+  }
   let comparables = 0;
   for (const x of points) {
-    let soumis: number;
-    try {
-      soumis = evaluerExpressionCyclometrique(texte, x);
-    } catch {
-      return "parse_error";
-    }
-    if (!Number.isFinite(soumis)) return "parse_error";
+    const soumis = evaluerExpressionCyclometrique(texte, x);
     const attendu = reference(x);
     if (!Number.isFinite(attendu)) continue;
+    if (!Number.isFinite(soumis)) return "not_equivalent";
     comparables++;
-    if (Math.abs(soumis - attendu) > tolerance) return "not_equivalent";
+    if (Math.abs(soumis - attendu) > tolerance * Math.max(1, Math.abs(attendu))) return "not_equivalent";
   }
   const minimumRequis = Math.min(3, points.length);
-  if (comparables < minimumRequis) return "parse_error";
+  if (comparables < minimumRequis) return "not_equivalent";
   return "correct";
 }
 
@@ -49,18 +52,15 @@ export function diagnostiquerEquivalenceFonction(
  * Un texte qui ne parse pas → `"parse_error"` immédiat (jamais confondu avec un mismatch).
  */
 export function diagnostiquerEnsembleValeurs(textes: string[], cible: number[], tolerance: number = TOLERANCE_DEFAUT): StatutVerification {
-  if (textes.length !== cible.length) return "not_equivalent";
+  // Lecture AVANT tout verdict (une saisie illisible ne coûte aucune tentative, même si le nombre
+  // de valeurs est faux) ; « x = 2 » toléré.
   const valeurs: number[] = [];
   for (const t of textes) {
-    let v: number;
-    try {
-      v = evaluerExpressionCyclometrique(t, 0);
-    } catch {
-      return "parse_error";
-    }
-    if (!Number.isFinite(v)) return "parse_error";
+    const v = evaluerValeurCyclometrique(t.replace(/^\s*x\s*=\s*/i, ""));
+    if (v === null) return "parse_error";
     valeurs.push(v);
   }
+  if (valeurs.length !== cible.length) return "not_equivalent";
   const restantes = [...cible];
   for (const v of valeurs) {
     const index = restantes.findIndex((c) => Math.abs(c - v) <= tolerance);

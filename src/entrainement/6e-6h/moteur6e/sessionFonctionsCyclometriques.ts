@@ -49,8 +49,12 @@ export function soumettreReponseFonctionsCyclometriques(etat: EtatSessionFonctio
   if (etat.terminee) throw new Error("soumettreReponseFonctionsCyclometriques : la session est déjà terminée");
   const exercice = etat.exerciceCourant;
 
+  // Verdict « Existe / N'existe pas » faux : choix fermé, une seule tentative (audit du 6e ch. 1,
+  // G2) — l'écran se clôt. La valeur, champ ouvert après « Existe » juste, garde trois tentatives.
+  const verdictFaux = reponse.existe !== exercice.existe;
   const etapeCourante = soumettreEtapeTentatives<ReponseFonctionsCyclometriques>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(verdictFaux ? { tentativesMax: 1 } : {}),
     verifier: (r) => verifierReponseFonctionsCyclometriques(exercice, r),
     revelerReponse: () => {},
   });

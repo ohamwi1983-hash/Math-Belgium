@@ -98,6 +98,12 @@ paths:
   registres (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts`,
   processus 3 / 3 / 2 / 2, sections `derivees`, `graphiques`, `graphiques`, `cyclometriques`).
   Détail papier : `.claude/rules/feuilles-evaluations.md`, « 6e ch. 1, lot G — 6gen156–6gen159 ».
+  **Lots B, C, E de l'audit (6gen1–6gen5)** : règles communes (saisie illisible et valeur approchée
+  sans tentative, choix fermés à 1 tentative, aides KaTeX sans la réponse, messages ciblés, π et √
+  lus), 6gen5 en deux temps (graphique puis justification), constantes exactes en 6gen5 E,
+  coefficients bridés en 6gen3 variante 4, verdicts équilibrés (6gen1 a/c, 6gen2, 6gen5 parité),
+  libellé « C. Argument en x² » ; aucune carte du chapitre modifiée. Détail : `.claude/rules/feuilles-evaluations.md`,
+  « Textes : écran vs papier », paragraphe « 6e ch. 1 (lots B, C, E) ».
 - **4e, Chapitre 7 — Géométrie analytique plane** (`geometrie-analytique-plane`) : migré en
   intégralité (10 sections, ~19 illustrations) depuis l'artifact d'origine, suite directe du
   chapitre 6 (Calcul vectoriel) — le vecteur directeur d'une droite y revient au centre. Aucun

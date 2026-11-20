@@ -11,13 +11,17 @@ import {
   soumettreReponseImage,
   soumettreReponseInjective,
   soumettreReponseReciproque,
+  tentativesMaxCourant,
 } from "./moteur6e/sessionInjectiviteFonctions";
 import { ORDRE_PHASES_INJECTIVITE } from "./moteur6e/typesInjectiviteFonctions";
 import type { EtatSessionInjectiviteFonctions, PhaseInjectiviteFonctions } from "./moteur6e/typesInjectiviteFonctions";
 import { Katex } from "./components/Katex";
 import { EtapeBijectionInjectiviteFonctions } from "./components6e/EtapeBijectionInjectiviteFonctions";
-import { EtapeDomaineInjectiviteFonctions } from "./components6e/EtapeDomaineInjectiviteFonctions";
-import { EtapeImageInjectiviteFonctions } from "./components6e/EtapeImageInjectiviteFonctions";
+import { EtapeEnsembleCyclo } from "./components6e/EtapeEnsembleCyclo";
+import { RenduFragments } from "./components/RenduFragments";
+import { diagnostiquerEnsembleReelGuide } from "./moteur6e/verificationEnsembleReel";
+import { AIDE_IMAGE_1, aideDomaine1, aideDomaine2, aideImage2, cibleDomaine, cibleImage } from "./ui6e/aidesInjectiviteFonctions";
+import { CONSIGNE_ECRAN_DOMAINE, CONSIGNE_ECRAN_IMAGE, CONSIGNE_GENERALE, formatFLatexAffichage } from "./ui6e/formatInjectiviteFonctions";
 import { EtapeInjectiveInjectiviteFonctions } from "./components6e/EtapeInjectiveInjectiviteFonctions";
 import { EtapeReciproqueInjectiviteFonctions } from "./components6e/EtapeReciproqueInjectiviteFonctions";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
@@ -154,8 +158,13 @@ export function App6gen1() {
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxCourant(etat);
   const niveauAideMax = NIVEAU_AIDE_MAX[etat.phase];
+  const donnees = (
+    <div className="equation-box">
+      <Katex expression={formatFLatexAffichage(exercice)} />
+    </div>
+  );
 
   const reponseAttenduePhase = (phase: typeof etat.phase) => {
     switch (phase) {
@@ -223,9 +232,16 @@ export function App6gen1() {
         <RecapitulatifPanel entrees={calculerRecapitulatifInjectiviteFonctions(etat)} />
         <div className="card-body">
           {etat.phase === "domaine" && (
-            <EtapeDomaineInjectiviteFonctions
+            <EtapeEnsembleCyclo
               key={etat.phase}
-              exercice={exercice}
+              consigneGenerale={<RenduFragments fragments={CONSIGNE_GENERALE} />}
+              blocDonnees={donnees}
+              consigneEcran={CONSIGNE_ECRAN_DOMAINE}
+              label="\text{dom}\,f="
+              diagnostiquer={(r) => diagnostiquerEnsembleReelGuide(r, exercice.domaine)}
+              cible={(r) => cibleDomaine(exercice, r)}
+              aide1={aideDomaine1(exercice)}
+              aide2={aideDomaine2(exercice)}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -272,9 +288,16 @@ export function App6gen1() {
             />
           )}
           {etat.phase === "image" && (
-            <EtapeImageInjectiviteFonctions
+            <EtapeEnsembleCyclo
               key={etat.phase}
-              exercice={exercice}
+              consigneGenerale={<RenduFragments fragments={CONSIGNE_GENERALE} />}
+              blocDonnees={donnees}
+              consigneEcran={CONSIGNE_ECRAN_IMAGE}
+              label="\text{Im}\,f="
+              diagnostiquer={(r) => diagnostiquerEnsembleReelGuide(r, exercice.image)}
+              cible={(r) => cibleImage(exercice, r)}
+              aide1={AIDE_IMAGE_1}
+              aide2={aideImage2(exercice)}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}

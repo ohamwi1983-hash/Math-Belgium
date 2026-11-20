@@ -271,8 +271,16 @@ const VARIANTES_PRINCIPALES: VarianteFonctionsCyclometriques[] = ["directe", "ar
 /** Tirage ÉQUIPROBABLE parmi les 3 variantes de HAUT NIVEAU (spec : les 3 mécaniques de calcul) —
  * chacune décide ensuite elle-même, naturellement, si son exercice existe ou non. */
 export function genererExerciceFonctionsCyclometriques(): ExerciceFonctionsCyclometriques {
-  const variante = tirerParmi(VARIANTES_PRINCIPALES);
-  if (variante === "directe") return construireDirecte();
-  if (variante === "arcTrig") return construireArcTrig();
-  return construireTrigArc();
+  // Verdict « existe ? » équilibré (audit du 6e ch. 1, V1 : 80,6 % « existe » en tirage libre) : la
+  // lecture directe (qui existe toujours) une fois sur cinq, et, dans les composées, « existe » une
+  // fois sur deux (trig(arc) : hors domaine et angle ±π/2 à parts égales). « Existe » ≈ 60 %.
+  const r = Math.random();
+  if (r < 0.2) return construireDirecte();
+  const existe = Math.random() < 0.5;
+  if (r < 0.6) return construireArcTrigForce(existe);
+  if (existe) return construireTrigArcExisteForce();
+  return Math.random() < 0.5 ? construireTrigArcHorsDomaine() : construireTrigArcCausePiSur2();
 }
+
+/** Les trois mécaniques de calcul (lecture directe, arc∘trig, trig∘arc). */
+export const VARIANTES_FONCTIONS_CYCLOMETRIQUES = VARIANTES_PRINCIPALES;

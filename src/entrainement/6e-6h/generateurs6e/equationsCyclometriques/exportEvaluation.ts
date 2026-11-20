@@ -6,6 +6,7 @@ import { formatEnsembleReelLatex } from "../../ui6e/formatEnsembleReel";
 import { MAX_DEN, formatEquationNonCycloLatex, formatEquationOriginaleLatex } from "../../ui6e/formatEquationsCyclometriques";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationsCyclometriques } from "./index";
 import { CONSIGNES_ECRANS, correctionDetailleeEquationsCyclometriques as correction, ensembleSolutionsLatex, lettresLectureEquations, sequenceEquationsCyclometriques } from "./corrigeDetaille";
+import { LIBELLE_CAS_EQUATIONS_CYCLOMETRIQUES, profilEquationsCyclometriques } from "../profilsEvaluationCyclometriques";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceEquationsCyclometriques>` pour `6gen3` (équations
@@ -75,6 +76,8 @@ function criteresDifficulte(e: E): CriteresDifficulte {
 }
 
 export const adaptateurEvaluationEquationsCyclometriques: AdaptateurFeuilleExercices<E> = {
+  profilInstance: profilEquationsCyclometriques,
+  libelleCasParticulier: LIBELLE_CAS_EQUATIONS_CYCLOMETRIQUES,
   titreDocument: "Équations avec fonctions cyclométriques — Évaluation",
   nomFichierBase: "equations-cyclometriques",
   genererInstance: genererExerciceEquationsCyclometriques,

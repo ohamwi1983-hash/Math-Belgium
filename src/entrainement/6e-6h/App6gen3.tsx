@@ -12,14 +12,15 @@ import {
   soumettreReponseCondition,
   soumettreReponseEquation,
   soumettreReponseSolutions,
+  tentativesMaxCourant,
 } from "./moteur6e/sessionEquationsCyclometriques";
 import { PHASE_INITIALE, phaseApres } from "./moteur6e/typesEquationsCyclometriques";
 import type { EtatSessionEquationsCyclometriques, PhaseEquationsCyclometriques } from "./moteur6e/typesEquationsCyclometriques";
 import type { ExerciceEquationsCyclometriques } from "./core6e/equationsCyclometriques.types";
 import { EtapeAccepterRejeterEquationsCyclometriques } from "./components6e/EtapeAccepterRejeterEquationsCyclometriques";
-import { EtapeCEEquationsCyclometriques } from "./components6e/EtapeCEEquationsCyclometriques";
+import { EtapeEnsembleCyclo } from "./components6e/EtapeEnsembleCyclo";
+import { diagnostiquerEnsembleReelGuide } from "./moteur6e/verificationEnsembleReel";
 import { EtapeChampEquationCyclo } from "./components6e/EtapeChampEquationCyclo";
-import { EtapeConditionEquationsCyclometriques } from "./components6e/EtapeConditionEquationsCyclometriques";
 import { EtapeListeSolutionsCyclo } from "./components6e/EtapeListeSolutionsCyclo";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
@@ -29,11 +30,22 @@ import {
   formatCandidatLatex,
   formatEquationNonCycloLatex,
   formatEquationOriginaleLatex,
-  texteAideEquationNiveau1,
-  texteAideEquationNiveau2,
-  texteAideSolutionsNiveau1,
-  texteAideSolutionsNiveau2,
+  CONSIGNE_GENERALE,
 } from "./ui6e/formatEquationsCyclometriques";
+import {
+  aideCE1,
+  aideCE2,
+  aideCondition1,
+  aideCondition2,
+  aideEquation1,
+  aideEquation2,
+  aideSolutions1,
+  aideSolutions2,
+  cibleCE,
+  cibleCondition,
+  cibleEquation,
+  cibleSolutions,
+} from "./ui6e/aidesEquationsCyclometriques";
 import { calculerRecapitulatifEquationsCyclometriques, calculerSegmentsProgressionEquationsCyclometriques } from "./ui6e/recapitulatifEquationsCyclometriques";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -43,7 +55,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
-import { correctionDetailleeEquationsCyclometriques } from "./generateurs6e/equationsCyclometriques/corrigeDetaille";
+import { CONSIGNES_ECRANS, correctionDetailleeEquationsCyclometriques } from "./generateurs6e/equationsCyclometriques/corrigeDetaille";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -178,7 +190,12 @@ export function App6gen3() {
   }
 
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxCourant(etat);
+  const donnees = (
+    <div className="equation-box">
+      <Katex expression={formatEquationOriginaleLatex(exercice)} />
+    </div>
+  );
   const niveauAide = etat.niveauAide;
 
   const reponseAttenduePhase = () => {
@@ -233,33 +250,43 @@ export function App6gen3() {
         <RecapitulatifPanel entrees={calculerRecapitulatifEquationsCyclometriques(etat)} />
         <div className="card-body">
           {etat.phase === "ce" && (
-            <EtapeCEEquationsCyclometriques
+            <EtapeEnsembleCyclo
               key={etat.phase}
-              exercice={exercice}
+              consigneGenerale={CONSIGNE_GENERALE}
+              blocDonnees={donnees}
+              consigneEcran={[{ type: "texte", valeur: CONSIGNES_ECRANS.ce }]}
+              label="x\in"
+              diagnostiquer={(r) => diagnostiquerEnsembleReelGuide(r, exercice.ce)}
+              cible={(r) => cibleCE(exercice, r)}
+              aide1={aideCE1(exercice)}
+              aide2={aideCE2(exercice)}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) =>
-                terminerEtape(soumettreReponseCE(etat, reponse), <Katex expression={formatEnsembleReelLatex(reponse, MAX_DEN)} />)
-              }
+              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), <Katex expression={formatEnsembleReelLatex(reponse, MAX_DEN)} />)}
               validation={validation}
             />
           )}
 
           {etat.phase === "condition" && exercice.variante === "arcfonctionsDifferentes" && (
-            <EtapeConditionEquationsCyclometriques
+            <EtapeEnsembleCyclo
               key={etat.phase}
-              exercice={exercice}
+              consigneGenerale={CONSIGNE_GENERALE}
+              blocDonnees={donnees}
+              consigneEcran={[{ type: "texte", valeur: CONSIGNES_ECRANS.condition }]}
+              label="x\in"
+              diagnostiquer={(r) => diagnostiquerEnsembleReelGuide(r, exercice.conditionParasite)}
+              cible={(r) => cibleCondition(exercice, r)}
+              aide1={aideCondition1(exercice)}
+              aide2={aideCondition2(exercice)}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) =>
-                terminerEtape(soumettreReponseCondition(etat, reponse), <Katex expression={formatEnsembleReelLatex(reponse, MAX_DEN)} />)
-              }
+              onValider={(reponse) => terminerEtape(soumettreReponseCondition(etat, reponse), <Katex expression={formatEnsembleReelLatex(reponse, MAX_DEN)} />)}
               validation={validation}
             />
           )}
@@ -267,11 +294,12 @@ export function App6gen3() {
           {etat.phase === "equation" && (
             <EtapeChampEquationCyclo
               key={etat.phase}
-              consigneEcran="Écris l'équation obtenue après avoir éliminé toutes les arcfonctions."
+              consigneEcran={CONSIGNES_ECRANS.equation}
               equationLatex={formatEquationOriginaleLatex(exercice)}
-              aideNiveau1={{ texte: texteAideEquationNiveau1(exercice), latex: null }}
-              aideNiveau2={texteAideEquationNiveau2(exercice)}
-              placeholder="ex : 2x-1=1/2"
+              aideNiveau1={aideEquation1(exercice)}
+              aideNiveau2={aideEquation2(exercice)}
+              cible={(t) => cibleEquation(exercice, t)}
+              placeholder="membre en x = membre en x"
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={niveauAide}
@@ -285,11 +313,12 @@ export function App6gen3() {
           {etat.phase === "solutions" && (
             <EtapeListeSolutionsCyclo
               key={etat.phase}
-              consigneEcran="Cette équation a-t-elle des solutions ? Si oui, liste-les TOUTES (sans encore tenir compte de la CE)."
+              consigneEcran={CONSIGNES_ECRANS.solutions}
               equationLatex={formatEquationOriginaleLatex(exercice)}
-              aideNiveau1={{ texte: texteAideSolutionsNiveau1(exercice), latex: null }}
-              aideNiveau2={texteAideSolutionsNiveau2(exercice)}
-              placeholder="ex : 2, -2..."
+              aideNiveau1={aideSolutions1(exercice)}
+              aideNiveau2={aideSolutions2(exercice)}
+              cible={(t) => cibleSolutions(exercice, t)}
+              placeholder="une valeur"
               labelAjout="+ Ajouter une solution"
               labelAucune="Pas de solution"
               tentativesUtilisees={tentativesUtilisees}

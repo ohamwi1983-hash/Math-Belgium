@@ -4,7 +4,7 @@ import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../ex
 import { calcul, latex, piege, resultat, texte, utilise } from "../../../export/corrigeTableau";
 import { construireGrilleSvgCandidatsCyclo } from "../../export6e/svgGraphCyclo";
 import { calculerViewBoxGraphique, formatExpressionLatex } from "../../ui6e/formatGraphiquesCyclometriques";
-import { type Q, piL, q, qL, qMul, qNul, qVal } from "../../ui6e/corrigeIntegrales1";
+import { type Q, piL, q, qAdd, qL, qMul, qNul, qVal } from "../../ui6e/corrigeIntegrales1";
 import { COURS_GRAPHES, NOM_ARC, dec, finaliser, justif, ligne, lignesPropres } from "../../ui6e/corrigeReciproques";
 
 /**
@@ -241,45 +241,66 @@ function analyseD(e: Extract<E, { famille: "D" }>): Analyse {
   };
 }
 
+/** Valeur remarquable de sin ou cos en un multiple rationnel de π (« \dfrac{\sqrt{2}}{2} », « -\dfrac{1}{2} », « 0 »). */
+function trigRemarquable(trig: "sin" | "cos", w: Q): Val {
+  const v = trig === "sin" ? Math.sin(qVal(w) * Math.PI) : Math.cos(qVal(w) * Math.PI);
+  const table: [number, string][] = [
+    [0, "0"],
+    [0.5, "\\dfrac{1}{2}"],
+    [Math.SQRT2 / 2, "\\dfrac{\\sqrt{2}}{2}"],
+    [Math.sqrt(3) / 2, "\\dfrac{\\sqrt{3}}{2}"],
+    [1, "1"],
+  ];
+  const t = table.find(([x]) => Math.abs(Math.abs(v) - x) < 1e-9);
+  const tex = t ? (v < -1e-12 ? `-${t[1]}` : t[1]) : dec(v, 4);
+  return { tex, v };
+}
+
+/** Racine d'un multiple de π (« \sqrt{\dfrac{2\pi}{3}} », « 0 »). */
+function racinePi(r: Q): Val {
+  if (qNul(r)) return { tex: "0", v: 0 };
+  return { tex: `\\sqrt{${piL(r)}}`, v: Math.sqrt(qVal(r) * Math.PI) };
+}
+
 function analyseE(e: Extract<E, { famille: "E" }>): Analyse {
-  const { k, c, arcfonction: arc } = e.reel;
-  const cL = nbL(c);
-  const w0 = q(Math.round(-c * 100), k * 100); // −c/k exact (c au centième)
-  const w0Dec = Math.round(qVal(w0) * 10000) / 10000;
-  const w0L = Math.abs(w0Dec - qVal(w0)) < 1e-12 ? nbL(w0Dec) : qL(w0);
+  // Constante EXACTE c = cπ·π (décision de l'utilisateur, audit du 6e ch. 1, E11) : seuil
+  // w₀ = −c/k remarquable, bornes du domaine et valeurs de f exactes, plus aucune calculatrice.
+  const { k, arcfonction: arc } = e.reel;
+  const cq = q(e.reel.cPi.n, e.reel.cPi.d);
+  const cAbs = piL(q(Math.abs(cq.n), cq.d));
+  const w0 = qMul(cq, q(-1, k));
+  const w0L = piL(w0);
   const croissante = arc === "arcsin";
   const sensChange = k < 0;
   const rel = sensChange ? "\\leq " : "\\geq ";
-  const trig = arc === "arcsin" ? "\\sin" : "\\cos";
-  const x0 = arc === "arcsin" ? Math.sin(qVal(w0)) : Math.cos(qVal(w0));
+  const trig = arc === "arcsin" ? "sin" : "cos";
+  const x0 = trigRemarquable(trig, w0);
   // arcsin croissante : arcsin(x) ≥ w0 ⟺ x ≥ sin(w0) ; arccos décroissante : arccos(x) ≥ w0 ⟺ x ≤ cos(w0)
   const xRel = sensChange === croissante ? "\\leq " : "\\geq ";
+  const kL = k === 1 ? "" : k === -1 ? "-" : String(k);
   const lignes: LigneCalcul[] = [
     ligne(`-1\\leq x\\leq 1`, `domaine de ${arc}`),
-    ligne(`${k === 1 ? "" : k === -1 ? "-" : k}${NOM_ARC[arc]}(x)${c < 0 ? "" : "+"}${cL}\\geq 0`, "radicande positif ou nul"),
-    ligne(
-      `${NOM_ARC[arc]}(x)${rel}${w0L}`,
-      `${c >= 0 ? "on soustrait" : "on ajoute"} ${String(Math.abs(c)).replace(".", ",")}, on divise par ${String(k).replace("-", "−")}${sensChange ? " < 0 : le sens change" : ""}`,
-    ),
-    ligne(`x${xRel}${trig}\\left(${w0L}\\right)`, croissante ? "on applique sin, croissante sur l'image de arcsin" : "on applique cos, décroissante sur [0 ; π] : le sens change"),
-    ligne(`${trig}\\left(${w0L}\\right)\\approx ${dec(x0, 2)}`, "à la calculatrice"),
+    ligne(`${kL}${NOM_ARC[arc]}(x)${cq.n < 0 ? "-" : "+"}${cAbs}\\geq 0`, "radicande positif ou nul"),
+    ligne(`${NOM_ARC[arc]}(x)${rel}${w0L}`, justif(`${cq.n < 0 ? "on ajoute " : "on soustrait "}`, { l: cAbs }, `, on divise par ${String(k).replace("-", "−")}${sensChange ? " < 0 : le sens change" : ""}`)),
+    ligne(`x${xRel}\\${trig}\\left(${w0L}\\right)`, croissante ? "on applique sin, croissante sur l'image de arcsin" : "on applique cos, décroissante sur [0 ; π] : le sens change"),
+    ligne(`\\${trig}\\left(${w0L}\\right)=${x0.tex}`, "valeur remarquable"),
   ];
   const borne = e.domaineInf === -1 ? -1 : 1; // l'autre borne, celle de l'arcfonction
-  const r = cPlusKArc(c, k, arc, borne, String(borne));
-  const vMax: Val = { tex: `\\sqrt{${r.tex}}`, v: Math.sqrt(r.v) };
-  lignes.push(ligne(`f(${borne})${egal(vMax)}`, "à l'autre borne, le radicande est maximal"));
-  lignes.push(ligne(`f\\left(${trig}\\left(${w0L}\\right)\\right)=0`, "le radicande s'annule : minimum"));
+  const rBorne = arcRemarquable(arc, borne) as Q;
+  const vMax = racinePi(qAdd(cq, qMul(q(k), rBorne)));
+  lignes.push(ligne(`f(${borne})${egal(vMax)}`, justif("à l'autre borne, le radicande est maximal : ", { l: `${NOM_ARC[arc]}(${borne})=${piL(rBorne)}` })));
+  lignes.push(ligne(`f\\left(${x0.tex}\\right)=0`, "le radicande s'annule : minimum"));
   let f0: string;
   if (e.proprietes.ordonnee.existe) {
-    const r0 = cPlusKArc(c, k, arc, 0, "0");
-    const v0: Val = { tex: `\\sqrt{${r0.tex}}`, v: Math.sqrt(r0.v) };
-    lignes.push(ligne(`f(0)${egal(v0)}`, "0 est dans le domaine"));
+    const r0 = arcRemarquable(arc, 0) as Q;
+    const v0 = racinePi(qAdd(cq, qMul(q(k), r0)));
+    lignes.push(ligne(`f(0)${egal(v0)}`, justif("0 est dans le domaine, ", { l: `${NOM_ARC[arc]}(0)=${piL(r0)}` })));
     f0 = `f(0)${egal(v0)}`;
   } else {
     lignes.push(ligne("0\\notin\\text{dom}(f)", "0 est hors du domaine"));
     f0 = "f(0)\\text{ n'existe pas}";
   }
-  const domL = e.domaineInf === -1 ? `\\left[-1\\,;\\,${trig}\\left(${w0L}\\right)\\right]` : `\\left[${trig}\\left(${w0L}\\right)\\,;\\,1\\right]`;
+  const domL = e.domaineInf === -1 ? `\\left[-1\\,;\\,${x0.tex}\\right]` : `\\left[${x0.tex}\\,;\\,1\\right]`;
   return {
     lignes,
     dom: `\\text{dom}(f)=${domL}`,
@@ -288,7 +309,7 @@ function analyseE(e: Extract<E, { famille: "E" }>): Analyse {
     max: `\\max f=${vMax.tex}`,
     min: "\\min f=0",
     parite: "aucune",
-    pg: [texte("Deux conditions se croisent pour le domaine : celui de l'arcfonction, "), latex("[-1\\,;\\,1]"), texte(", ET le radicande positif ; le domaine n'est pas symétrique : aucune parité.")],
+    pg: [texte("Deux conditions se croisent pour le domaine : celui de l'arcfonction, "), latex("[-1\\,;\\,1]"), texte(", et le radicande positif ; le domaine n'est pas symétrique : aucune parité.")],
   };
 }
 

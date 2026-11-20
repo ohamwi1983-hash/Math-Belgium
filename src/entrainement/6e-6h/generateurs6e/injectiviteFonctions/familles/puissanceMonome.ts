@@ -21,7 +21,9 @@ const CANDIDATS_N = [-4, -3, -2, 2, 3, 4] as const;
 export function construirePuissanceMonome(): ExerciceInjectiviteFonctions {
   const a = tirerEntierNonNul(-5, 5);
   const b = tirerEntierNonNul(-5, 5);
-  const n = tirerParmi(CANDIDATS_N);
+  // Verdict « injective ? » équilibré (audit du 6e ch. 1, V2) : n impair (injective) ou pair (non
+  // injective) une fois sur deux — auparavant 2 exposants impairs sur 6.
+  const n = Math.random() < 0.5 ? tirerParmi(CANDIDATS_N.filter((v) => v % 2 !== 0)) : tirerParmi(CANDIDATS_N.filter((v) => v % 2 === 0));
   const impair = n % 2 !== 0;
   const parametres = { famille: "puissanceMonome" as const, a, b, n };
   const fLatex = `f(x) = ${formatPuissanceMonomeLatex(a, b, n)}`;

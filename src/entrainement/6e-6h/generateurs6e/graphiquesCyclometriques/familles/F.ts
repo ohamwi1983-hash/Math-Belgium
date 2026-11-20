@@ -14,9 +14,12 @@ const C_VALEURS = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5] as const;
  * valeur en `x0` vaut alors `c` dans les 2 cas (`arcfonction(0)=0`/`arcfonction(1)=0`).
  */
 export function construireF(): ExerciceGraphiqueF {
-  const arcfonction = tirerParmi(ARCFONCTIONS);
+  // Verdict « parité » varié (audit du 6e ch. 1, V4 : « aucune parité » dans 90 à 100 % des tirages) :
+  // une fois sur trois environ, la fonction est paire (arcsin, extremum en x = 0).
+  const paire = Math.random() < 0.35;
+  const arcfonction = paire ? "arcsin" : tirerParmi(ARCFONCTIONS);
   const m = tirerParmi(M_VALEURS);
-  const x0 = tirerParmi(X0_VALEURS);
+  const x0 = paire ? 0 : tirerParmi(X0_VALEURS);
   const c = tirerParmi(C_VALEURS);
   const z = arcfonction === "arcsin" ? 0 : 1;
   const n = z - m * x0;
