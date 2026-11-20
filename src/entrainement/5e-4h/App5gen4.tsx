@@ -21,7 +21,11 @@ import { diagnostiquerReponseQuestion } from "./moteur5e/verificationComposeeGra
 import type { ReponseQuestionComposeeGraphique } from "./moteur5e/verificationComposeeGraphique";
 import { PaireGraphesComposeeGraphique } from "./components5e/PaireGraphesComposeeGraphique";
 import { EtapeQuestionComposeeGraphique } from "./components5e/EtapeQuestionComposeeGraphique";
-import { nomInterne, texteResultat } from "./ui5e/formatComposeeGraphique";
+import { nomInterne, resultatLatex, texteResultat } from "./ui5e/formatComposeeGraphique";
+import { Katex } from "./components/Katex";
+import { correctionDetailleeComposeeGraphique } from "./generateurs5e/composeeGraphique/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { calculerRecapitulatifComposeeGraphique } from "./ui5e/recapitulatifComposeeGraphique";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -157,7 +161,13 @@ export function App5gen4() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: <span>{texteResultat(question, question.resultatAttendu)}</span>,
+        reponseAttendue: (
+          <span>
+            <Katex expression={resultatLatex(question).latex} />
+            {resultatLatex(question).existe ? null : " n'existe pas"}
+          </span>
+        ),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComposeeGraphique(exercice), lettreEtape(etat.indexQuestion))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
