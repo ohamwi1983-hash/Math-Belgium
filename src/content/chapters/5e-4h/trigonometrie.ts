@@ -156,6 +156,16 @@ export const trigonometrie: ChapterContent = {
             'côtés, Archimède obtenait 3 + 10/71 < π < 3 + 1/7.',
         },
         {
+          kind: 'entrainement',
+          title: 'Encadrer π comme Archimède',
+          generatorId: '5gen56',
+          description: [
+            'Refais la démarche d\'Archimède avec un carré, un hexagone ou un autre polygone régulier : demi-angle au centre α, côtés 2r sin α et 2r tan α des polygones inscrit et circonscrit, encadrement n sin α ≤ π ≤ n tan α, puis doublement du nombre de côtés jusqu\'à la précision demandée (calculatrice en mode degré).',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 56. Encadrer π comme Archimède »',
+        },
+        {
           kind: 'intuition',
           label: 'Pourquoi ne pas garder les degrés ?',
           text:
