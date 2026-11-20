@@ -376,6 +376,17 @@ export const fonctionsExponentielles: ChapterContent = {
             'autour de a=1.',
         },
         {
+          kind: 'entrainement',
+          title: 'Lire une courbe exponentielle',
+          generatorId: '6gen148',
+          description: [
+            'À partir du graphique de f(x) = k·aˣ + c, retrouve l\'asymptote, k (par f(0)), la base a ' +
+              '(par le rapport des écarts à l\'asymptote) et l\'expression de f.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 148. Lire une courbe exponentielle »',
+        },
+        {
           kind: 'astuce',
           label: '💡 Le cas de e',
           text:
@@ -753,6 +764,17 @@ export const fonctionsExponentielles: ChapterContent = {
             'x=0 » pour la voir, et « f\'(x) » pour voir la fonction dérivée tout entière. ' +
             'Peux-tu régler a pour que f\'(0) affiche exactement 1 ? La valeur que tu trouves, ' +
             "c'est e — le bloc ci-dessous explique pourquoi.",
+        },
+        {
+          kind: 'entrainement',
+          title: 'Tangente à une exponentielle et nombre ln a',
+          generatorId: '6gen149',
+          description: [
+            'ln a est la pente de la tangente en (0 ; 1) à la courbe de aˣ : son signe, sa valeur, ' +
+              'puis l\'équation de la tangente à k·aˣ ou à k·eᵐˣ en un point d\'abscisse x₀.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 149. Tangente à une exponentielle et nombre ln a »',
         },
         {
           kind: 'exempleLibre',
@@ -1235,6 +1257,17 @@ export const fonctionsExponentielles: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 7. Domaine et dérivée »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Intérêts composés et nombre e',
+          generatorId: '6gen151',
+          description: [
+            'Le problème de Bernoulli : verser les intérêts plus souvent rapporte plus, mais le capital ' +
+              'reste borné — il tend vers K₀·eʳᵗ. Calcule trois capitaux, la limite et le taux équivalent.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 151. Intérêts composés et nombre e »',
         },
       ],
     },
@@ -2693,6 +2726,17 @@ export const fonctionsExponentielles: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 12. Problèmes d\'exponentielles »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Modèle L + C·qᵗ : se rapprocher d\'une valeur limite',
+          generatorId: '6gen150',
+          description: [
+            'Un thé qui refroidit, une bouteille qui se réchauffe, des inscrits qui plafonnent : trois ' +
+              'mesures, le rapport des écarts, la valeur limite L, le facteur q, une prévision et un seuil.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 150. Modèle L + C·qᵗ »',
         },
       ],
     },

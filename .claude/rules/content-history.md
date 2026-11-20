@@ -4703,3 +4703,23 @@ correction enveloppée dans un `<span>` (`.triangle-quelconque-aide` est flex : 
 KaTeX devenait une colonne — même défaut dans les 8 autres panneaux de quiz de 6e, non touchés).
 Contrôle `check_banque.ts` (KaTeX `strict: 'error'`, notation clavier, majuscules, doublons,
 équilibre, session sans répétition, fragments papier sans `$`) : 0 problème.
+- **6e (6h), Chapitre 2 — Fonctions exponentielles** (`fonctions-exponentielles`), lot G de l'audit
+  (seconde moitié) : quatre nouveaux générateurs, cartes ajoutées sans toucher au reste du cours.
+  **6gen148 « Lire une courbe exponentielle »** (§ 1, carte juste après l'atelier
+  `exponentielle-widget`) : asymptote y = c, k par f(0), base par le rapport des ÉCARTS à
+  l'asymptote, expression ; points marqués d'abscisses 0 et 1 ou −1 et 0 (variantes), tous sur la
+  grille. **6gen149 « Tangente à une exponentielle et nombre ln a »** (§ 2, juste après l'atelier
+  `tangente-exponentielle-widget`) : ln a seulement comme pente en (0 ; 1) de aˣ (exacte ou touche ln,
+  décision de l'utilisateur) ; variantes en (0 ; 1) (verdict du signe), en x₀ pour k·aˣ, base e
+  (k·eᵐˣ). **6gen151 « Intérêts composés et nombre e »** (§ 2, après 6gen7) : Bernoulli (100 %, un
+  an) ou placement réaliste ; trois capitaux, limite K₀·eʳᵗ, taux équivalent eʳ − 1, sans logarithme.
+  **6gen150 « Modèle L + C·qᵗ »** (§ 7, après 6gen12, processus 3) : thé, bouteille, inscrits à une
+  appli ; trois mesures exactes, rapport des écarts, L et C, q, prévision, seuil (ln à la
+  calculatrice, astuce du § 7). Aides à deux niveaux (jamais la réponse), messages ciblés (k = f(0),
+  rapport des ordonnées, (k·a)ˣ, ln a oublié, aˣ dérivé comme xⁿ, ordonnée f(x₀), ln arrondi trop
+  tôt, rapport des mesures, dernière mesure prise pour L, q = r, taux non divisé par n, 1 non retiré).
+  Libellé de 6gen6 dans `GENERATEURS_EVALUATION_PILOTE` laissé vide (fichier hors périmètre de ce
+  lot) alors que § 1 a maintenant deux générateurs. Vérifié : 2 000 tirages par variante (recalcul
+  indépendant, saisies justes autrement écrites, « − », illisible, `?code=`), parcours iPhone 13
+  (390 px, 0 erreur console), page du chapitre (4 cartes, 0 erreur), documents réels 2 séries +
+  aménagée sans débordement, collecteur 0 égalité fausse.

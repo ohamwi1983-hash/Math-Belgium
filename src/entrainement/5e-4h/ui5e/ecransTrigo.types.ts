@@ -22,6 +22,8 @@ export interface ChampEcran {
   labelLatex?: string;
   unite?: string;
   placeholder: string;
+  /** Aperçu KaTeX en direct au-dessus du champ (saisie d'une expression : 6gen148, 6gen149). */
+  apercu?: boolean;
 }
 
 export interface OptionEcran {
@@ -76,6 +78,9 @@ export interface DefinitionEcrans<E, P extends string> {
   reponseAttendue(e: E, phase: P): Frag[];
   /** Valeur confirmée affichée dans « Ce qu'on sait déjà ». */
   recap(e: E, phase: P): Frag[];
+  /** Deux niveaux d'aide aussi sur un choix fermé (quand `aide2` n'est pas nul) — 6gen148–6gen151 ;
+   * absent : un seul niveau sur un choix fermé (5gen54–5gen57, inchangés). */
+  aidesChoixDeuxNiveaux?: boolean;
   /** Choix fermé faux : explication affichée avec la réponse. */
   explicationChoix?(e: E, phase: P): string;
   correction(e: E): EtapeCorrection[];
