@@ -12,10 +12,13 @@ const C_VALEURS = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5] as const;
  * répliquent chacun l'un des 3 pièges nommés de la spec (asymptotes/sens/niveaux).
  */
 export function construireB(): ExerciceGraphiqueB {
+  // Verdict « parité » varié (audit du 6e ch. 1, V4 : « aucune parité » dans 90 à 100 % des tirages) :
+  // une fois sur trois environ, la fonction est impaire (n = 0, c = 0).
+  const impaire = Math.random() < 0.35;
   const m = tirerParmi(M_VALEURS);
-  const n = tirerParmi(N_VALEURS);
+  const n = impaire ? 0 : tirerParmi(N_VALEURS);
   const k = tirerParmi(K_VALEURS);
-  const c = tirerParmi(C_VALEURS);
+  const c = impaire ? 0 : tirerParmi(C_VALEURS);
   const reel: CandidatB = { m, n, k, c };
 
   const asymptotesDecalees: CandidatB = { ...reel, n: tirerAutre(n, N_VALEURS) };

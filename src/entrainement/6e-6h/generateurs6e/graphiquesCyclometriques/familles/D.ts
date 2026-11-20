@@ -12,9 +12,12 @@ const C_VALEURS = [-3, -2, -1, 0, 1, 2, 3] as const;
  * remplace `k/(x-p)` par `k·(x-p)`, supprimant la singularité, jamais un simple clip visuel).
  */
 export function construireD(): ExerciceGraphiqueD {
+  // Verdict « parité » varié (audit du 6e ch. 1, V4 : « aucune parité » dans 90 à 100 % des tirages) :
+  // une fois sur trois environ, la fonction est impaire (p = 0, c = 0).
+  const impaire = Math.random() < 0.35;
   const k = tirerParmi(K_VALEURS);
-  const p = tirerParmi(P_VALEURS);
-  const c = tirerParmi(C_VALEURS);
+  const p = impaire ? 0 : tirerParmi(P_VALEURS);
+  const c = impaire ? 0 : tirerParmi(C_VALEURS);
   const reel: CandidatD = { k, p, c, continu: false };
 
   const domaineContinu: CandidatD = { ...reel, continu: true };

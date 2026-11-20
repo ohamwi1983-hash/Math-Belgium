@@ -39,8 +39,10 @@ export function evaluerReel(exercice: ExerciceGraphiquesCyclometriques, x: numbe
       if (x < -1 || x > 1) return null;
       const w = r.arcfonction === "arcsin" ? Math.asin(x) : Math.acos(x);
       const radicande = r.k * w + r.c;
-      if (radicande < 0) return null;
-      return Math.sqrt(radicande);
+      // Tolérance d'arrondi : au zéro EXACT du radicande (x = √2/2 saisi), le calcul flottant donne
+      // parfois −4·10⁻¹⁶ (constante c exacte, multiple de π).
+      if (radicande < -1e-9) return null;
+      return Math.sqrt(Math.max(0, radicande));
     }
     case "F": {
       const r = exercice.reel;

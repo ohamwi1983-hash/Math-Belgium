@@ -146,6 +146,9 @@ export interface CandidatE {
   ignorerContrainteRacine: boolean;
   /** Décalage vertical constant — `0` sauf pour le distracteur "mauvaise valeur à l'extrémité". */
   decalageAffichage: number;
+  /** Constante EXACTE : `c = (cPi.n / cPi.d)·π` (décision de l'utilisateur, audit du 6e ch. 1,
+   * question 2 : « constantes exactes en E » — c = −k·w₀, w₀ angle remarquable). */
+  cPi: { n: number; d: number };
 }
 
 export interface ExerciceGraphiqueE {

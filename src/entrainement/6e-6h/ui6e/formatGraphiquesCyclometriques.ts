@@ -11,6 +11,7 @@ import type {
 } from "../core6e/graphiquesCyclometriques.types";
 import { assurerAxesVisibles } from "../ui/mafsTransformation";
 import { fusionnerOperateurSigne } from "./formatOperateurSigne";
+import { piL, q } from "./corrigeIntegrales1";
 
 /**
  * Couche présentation (6e) — formatage LaTeX, évaluation des 4 candidats (pour le rendu Mafs) et
@@ -109,15 +110,10 @@ export function formatExpressionLatex(exercice: ExerciceGraphiquesCyclometriques
     case "E": {
       const r = exercice.reel;
       const corps = formatCoefFoisSigne(r.k, `${NOM_LATEX[r.arcfonction]}(x)`);
-      // `c` est DÉRIVÉ d'un seuil `w0` tiré en continu (génériquement irrationnel, voir
-      // `generateurs6e/graphiquesCyclometriques/familles/E.ts`) — arrondi à 2 décimales pour
-      // l'AFFICHAGE uniquement (jamais la valeur stockée dans `reel`/`domaineInf`/`domaineSup`,
-      // qui reste exacte pour la vérification et le tracé) : la précision flottante brute produit
-      // une chaîne bien plus large que le bloc de données à 375px (`.equation-box`, filet de
-      // sécurité `overflow-x:auto` sinon sollicité pour une simple constante). Même convention
-      // `.toFixed(2)` déjà utilisée pour les aides niveau 2 de cette famille.
-      const cAffiche = Math.round(r.c * 100) / 100;
-      return `\\sqrt{${formatCorpsPlusConstante(corps, cAffiche)}}`;
+      // Constante EXACTE, multiple de π (décision de l'utilisateur, audit du 6e ch. 1, E11) :
+      // « \sqrt{2\arcsin(x) - \dfrac{\pi}{3}} », plus jamais un décimal au centième.
+      const cTex = piL(q(r.cPi.n, r.cPi.d));
+      return `\\sqrt{${corps} ${cTex.startsWith("-") ? `- ${cTex.slice(1)}` : `+ ${cTex}`}}`;
     }
     case "F": {
       const r = exercice.reel;
@@ -167,8 +163,8 @@ export function evaluerE(c: CandidatE, x: number): number | null {
   const w = c.arcfonction === "arcsin" ? Math.asin(x) : Math.acos(x);
   let radicande = c.k * w + c.c;
   if (c.ignorerContrainteRacine) radicande = Math.max(0, radicande);
-  if (radicande < 0) return null;
-  return Math.sqrt(radicande) + c.decalageAffichage;
+  if (radicande < -1e-9) return null;
+  return Math.sqrt(Math.max(0, radicande)) + c.decalageAffichage;
 }
 
 export function evaluerF(c: CandidatF, x: number): number | null {
@@ -271,75 +267,6 @@ export function calculerViewBoxGraphique(exercice: ExerciceGraphiquesCyclometriq
   const yMaxBrut = Math.max(...valeurs);
   const marge = Math.max(0.4, (yMaxBrut - yMinBrut) * 0.15);
   return finaliserViewBox([xMin, xMax], [yMinBrut - marge, yMaxBrut + marge]);
-}
-
-// ============================================================================
-// Aides — 2 niveaux, communs à l'écran unique (choix du graphique + justification).
-// ============================================================================
-
-export function texteAideNiveau1(exercice: ExerciceGraphiquesCyclometriques): AideAvecLatex {
-  switch (exercice.famille) {
-    case "A":
-      return { texte: "Calcule le domaine et les deux valeurs extrêmes de l'image avant de regarder les graphiques.", latex: null };
-    case "B":
-      return { texte: "arctan a un domaine ℝ tout entier et deux asymptotes horizontales — jamais de cassure nette. Repère cette signature.", latex: null };
-    case "C":
-      return { texte: "La fonction est PAIRE (symétrique par rapport à l'axe des ordonnées) : pose -1 ≤ a·x²+b ≤ 1 pour trouver le domaine.", latex: "-1\\le a x^2+b \\le 1" };
-    case "D":
-      return { texte: "Le graphique doit présenter DEUX branches séparées, jamais une courbe continue — cherche où le dénominateur s'annule.", latex: null };
-    case "E":
-      return {
-        texte: "Il y a DEUX contraintes à croiser pour le domaine : le domaine propre de l'arcfonction, ET l'inéquation posée par la racine.",
-        latex: null,
-      };
-    case "F":
-      return {
-        texte: "La mise au carré transforme une courbe monotone en une courbe qui change de sens — le minimum est atteint là où l'intérieur vaut 0.",
-        latex: null,
-      };
-  }
-}
-
-export function texteAideNiveau2(exercice: ExerciceGraphiquesCyclometriques): AideAvecLatex {
-  switch (exercice.famille) {
-    case "A": {
-      const r = exercice.reel;
-      const bornes = [(-1 - r.n) / r.m, (1 - r.n) / r.m].sort((a, b) => a - b);
-      const base = r.arcfonction === "arcsin" ? [-Math.PI / 2, Math.PI / 2] : [0, Math.PI];
-      const image = [r.c + r.k * base[0], r.c + r.k * base[1]].sort((a, b) => a - b);
-      return {
-        texte: "Domaine et image de f :",
-        latex: `x \\in \\left[${formatNombreAffiche(bornes[0])}\\,;\\,${formatNombreAffiche(bornes[1])}\\right], \\quad f(x) \\in \\left[${formatNombreAffiche(image[0])}\\,;\\,${formatNombreAffiche(image[1])}\\right]`,
-      };
-    }
-    case "B": {
-      const r = exercice.reel;
-      const signe = Math.sign(r.m);
-      const l1 = r.c + r.k * signe * (Math.PI / 2);
-      const l2 = r.c - r.k * signe * (Math.PI / 2);
-      return { texte: "Valeurs des deux asymptotes horizontales :", latex: `y \\to ${formatNombreAffiche(l1)} \\text{ et } y \\to ${formatNombreAffiche(l2)}` };
-    }
-    case "C":
-      return { texte: "Valeur au sommet (x=0), sans dire si c'est un minimum ou un maximum :", latex: `f(0) = ${formatExpressionSommetC(exercice.reel)}` };
-    case "D": {
-      const r = exercice.reel;
-      const gauche = r.k > 0 ? r.c - Math.PI / 2 : r.c + Math.PI / 2;
-      const droite = r.k > 0 ? r.c + Math.PI / 2 : r.c - Math.PI / 2;
-      return { texte: "Valeurs d'approche à gauche et à droite du point exclu :", latex: `x\\to p^-:\\ y\\to ${formatNombreAffiche(gauche)} \\quad x\\to p^+:\\ y\\to ${formatNombreAffiche(droite)}` };
-    }
-    case "E": {
-      const r = exercice.reel;
-      const yInf = evaluerE(r, exercice.domaineInf);
-      return { texte: "Valeur de f à l'une des extrémités du domaine :", latex: `f(${formatNombreAffiche(exercice.domaineInf)}) \\approx ${formatNombreAffiche(yInf ?? 0)}` };
-    }
-    case "F":
-      return { texte: "Valeur de f à l'extremum :", latex: `f(${exercice.positionExtremum}) = ${exercice.reel.c}` };
-  }
-}
-
-function formatExpressionSommetC(r: CandidatC): string {
-  const val = evalArcfonction(r.arcfonction, r.b);
-  return val === null ? "\\text{indéfini}" : `${NOM_LATEX[r.arcfonction]}(${r.b}) \\approx ${formatNombreAffiche(val)}`;
 }
 
 // ============================================================================

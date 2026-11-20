@@ -10,7 +10,7 @@ import { construireF } from "./familles/F";
 export const CATALOGUE_FAMILLES: { id: FamilleGraphiquesCyclometriques; label: string }[] = [
   { id: "A", label: "A. arcsin/arccos, argument linéaire" },
   { id: "B", label: "B. arctan, argument linéaire" },
-  { id: "C", label: "C. Argument en x² (fonction paire)" },
+  { id: "C", label: "C. Argument en x²" },
   { id: "D", label: "D. arctan(k/(x-p)), point exclu isolé" },
   { id: "E", label: "E. Racine d'une expression affine en arcfonction(x)" },
   { id: "F", label: "F. Carré d'une arcfonction affine, décalé" },

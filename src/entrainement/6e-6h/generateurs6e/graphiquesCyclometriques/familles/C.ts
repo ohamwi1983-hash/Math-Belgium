@@ -34,7 +34,9 @@ function deriverBorneQuadratique(a: number): { b: number; xMax: number } {
  * graphique.
  */
 export function construireC(): ExerciceGraphiqueC {
-  const arcfonction = tirerParmi(ARCFONCTIONS);
+  // Verdict « extremums » varié (audit du 6e ch. 1, V4) : arctan (domaine ℝ, un seul extremum) une
+  // fois sur deux, arcsin / arccos (domaine borné, maximum et minimum) l'autre fois.
+  const arcfonction = Math.random() < 0.5 ? "arctan" : tirerParmi(ARCFONCTIONS.filter((a) => a !== "arctan"));
 
   if (arcfonction === "arctan") {
     const a = tirerParmi(A_VALEURS);

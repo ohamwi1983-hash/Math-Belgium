@@ -194,11 +194,11 @@ export function calculerProprietesE(r: CandidatE, domaineInf: number, domaineSup
   const radSup = radAt(domaineSup);
   const rMax = Math.max(radInf, radSup, 0);
 
-  const ordonneeExiste = domaineInf <= 0 && 0 <= domaineSup;
+  const ordonneeExiste = domaineInf <= 1e-12 && -1e-12 <= domaineSup;
   let ordonneeValeur: number | null = null;
   if (ordonneeExiste) {
     const rad0 = radAt(0);
-    ordonneeValeur = rad0 < 0 ? null : Math.sqrt(Math.max(0, rad0));
+    ordonneeValeur = rad0 < -1e-9 ? null : Math.sqrt(Math.max(0, rad0));
   }
 
   return {

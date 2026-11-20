@@ -5,27 +5,19 @@ import {
   NIVEAU_AIDE_MAX,
   activerAideSuivante,
   demarrerSessionGraphiquesCyclometriques,
+  soumettreLettre,
   soumettreReponseEcranUnique,
 } from "./moteur6e/sessionGraphiquesCyclometriques";
 import type { EtatSessionGraphiquesCyclometriques } from "./moteur6e/typesGraphiquesCyclometriques";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { EtapeApparierGraphiqueCyclo } from "./components6e/EtapeApparierGraphiqueCyclo";
 import { GrapheOptionCyclo } from "./components6e/GrapheOptionCyclo";
-import { LigneRecap } from "./components6e/LigneRecap";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { Katex } from "./components/Katex";
-import {
-  LIBELLE_PARITE,
-  calculerViewBoxGraphique,
-  formatEnsembleReelApproxLatex,
-  formatExtremumLatex,
-  formatOrdonneeLatex,
-  texteAideNiveau1,
-  texteAideNiveau2,
-} from "./ui6e/formatGraphiquesCyclometriques";
+import { RenduFragments } from "./components/RenduFragments";
+import { calculerViewBoxGraphique } from "./ui6e/formatGraphiquesCyclometriques";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
-import { correctionDetailleeGraphiquesCyclometriques } from "./generateurs6e/graphiquesCyclometriques/corrigeDetaille";
+import { correctionDetailleeGraphiquesCyclometriques, reponseGraphiquesCyclo } from "./generateurs6e/graphiquesCyclometriques/corrigeDetaille";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -97,33 +89,15 @@ export function App6gen5() {
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
 
-  // Rendu à plat des 7 sous-réponses de l'écran unique (lettre + 6 propriétés de justification) —
-  // jamais un score fractionnaire. Réutilise `LigneRecap` avec un statut "rouge" fixe : ce bloc
-  // n'est jamais affiché par `ValidationEcran` sauf si `revele===true` (réponse révélée après
-  // tentatives épuisées), donc toujours rouge quand il apparaît.
+  // Réponse attendue : le graphique (petit, graduations espacées) et les propriétés en valeurs
+  // EXACTES, mêmes fragments que le résultat du corrigé (audit du 6e ch. 1, E11 : l'écran montrait
+  // « [−1 ; −0,33] » au lieu de [−1 ; −1/3]).
   const reponseAttendue = enAttente ? (
     <>
-      <LigneRecap label="Graphique" statut="rouge">
-        <GrapheOptionCyclo exercice={exercice} index={exercice.indexCorrect} viewBox={calculerViewBoxGraphique(exercice)} largeur={150} hauteur={150} />
-      </LigneRecap>
-      <LigneRecap label="Ordonnée à l'origine" statut="rouge">
-        <Katex expression={formatOrdonneeLatex(exercice.proprietes.ordonnee)} />
-      </LigneRecap>
-      <LigneRecap label="Domaine de f" statut="rouge">
-        <Katex expression={`\\text{dom} f = ${formatEnsembleReelApproxLatex(exercice.proprietes.domf)}`} />
-      </LigneRecap>
-      <LigneRecap label="Image de f" statut="rouge">
-        <Katex expression={`\\text{Im}(f) = ${formatEnsembleReelApproxLatex(exercice.proprietes.imf)}`} />
-      </LigneRecap>
-      <LigneRecap label="Parité" statut="rouge">
-        {LIBELLE_PARITE[exercice.proprietes.parite]}
-      </LigneRecap>
-      <LigneRecap label="Maximum" statut="rouge">
-        <Katex expression={formatExtremumLatex(exercice.proprietes.maximum)} />
-      </LigneRecap>
-      <LigneRecap label="Minimum" statut="rouge">
-        <Katex expression={formatExtremumLatex(exercice.proprietes.minimum)} />
-      </LigneRecap>
+      <GrapheOptionCyclo exercice={exercice} index={exercice.indexCorrect} viewBox={calculerViewBoxGraphique(exercice)} largeur={180} hauteur={180} />
+      <p>
+        <RenduFragments fragments={reponseGraphiquesCyclo(exercice)} />
+      </p>
     </>
   ) : null;
 
@@ -154,8 +128,9 @@ export function App6gen5() {
             // Écran unique par exercice (pas de notion de `phase` ici, voir `6gen5`
             // REFONTE COMPLÈTE ci-dessus) : chaque montage de ce composant EST le premier
             // (et seul) écran de l'exercice — constante, pas besoin de `useRef`.
-            aideNiveau1={texteAideNiveau1(exercice)}
-            aideNiveau2={texteAideNiveau2(exercice)}
+            lettreValidee={etat.lettreValidee}
+            pariteRevelee={etat.pariteRevelee}
+            onValiderLettre={(lettre) => terminerEtape(soumettreLettre(etat, lettre))}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
