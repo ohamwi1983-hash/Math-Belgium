@@ -444,7 +444,7 @@ export const fonctionSecondDegre: ChapterContent = {
             yAxisLabel: 'y',
             caption:
               'g(x) = x² − 4x (racines 0 et 4) et f(x) = x² − 4x + 6 (aucune racine réelle) : ' +
-              'ajouter c translate la courbe verticalement, sans jamais déplacer x_S = 2',
+              'ajouter c translate la courbe verticalement, sans jamais déplacer $x_S = 2$',
           },
         },
         {
@@ -669,6 +669,60 @@ export const fonctionSecondDegre: ChapterContent = {
           ],
         },
         {
+          kind: 'para',
+          text:
+            'Avec un seul zéro (double) ou sans zéro, il n\'y a pas d\'« entre les zéros » : f(x) a ' +
+            'le signe de a partout, sauf au zéro double où il vaut 0.',
+        },
+        {
+          kind: 'signTable',
+          caption: 'Signe de f(x) = (x − 2)², a > 0, un zéro double',
+          rows: [
+            {
+              label: 'x',
+              cells: [
+                { text: '−∞', tone: 'plain' },
+                { text: '', tone: 'plain' },
+                { text: '2', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '+∞', tone: 'plain' },
+              ],
+            },
+            {
+              label: 'f(x)',
+              cells: [
+                { text: '', tone: 'plain' },
+                { text: '+', tone: 'pos' },
+                { text: '0', tone: 'zero' },
+                { text: '+', tone: 'pos' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+          ],
+        },
+        {
+          kind: 'signTable',
+          caption: 'Signe de f(x) = −x² − 1, a < 0, aucun zéro',
+          rows: [
+            {
+              label: 'x',
+              cells: [
+                { text: '−∞', tone: 'plain' },
+                { text: '', tone: 'plain' },
+                { text: '+∞', tone: 'plain' },
+              ],
+            },
+            {
+              label: 'f(x)',
+              cells: [
+                { text: '', tone: 'plain' },
+                { text: '−', tone: 'neg' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+          ],
+        },
+        {
           kind: 'signTable',
           caption: 'Variation de f(x) = (x − 1)(x − 4) : décroissante (↘) puis croissante (↗), minimum en x = 2,5',
           rows: [
@@ -864,6 +918,34 @@ export const fonctionSecondDegre: ChapterContent = {
             'point avec le sommet. Le point « croix » est donc $(x_S+1\\,;\\,y_S+a)$. Un EV et une ' +
             'CV peuvent aussi se combiner : seul leur rapport compte, $|a| = \\dfrac{\\text{EV}}{\\text{CV}}$ ' +
             '(EV = 2 et CV = 4 donnent $|a| = \\dfrac{1}{2}$).',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            // f(x) = 2(x − 1)² − 3 : S(1 ; −3), point croix (2 ; −1) = (x_S + 1 ; y_S + a).
+            // Domaine isotrope (8 × 7,5, rapport 320/300 du cadre) : un carreau = 1 dans les deux
+            // directions, sinon a paraîtrait plus grand ou plus petit qu'il n'est.
+            kind: 'vectorPlane',
+            xMin: -3,
+            xMax: 5,
+            yMin: -4,
+            yMax: 3.5,
+            grid: true,
+            curves: [{ fn: (x) => 2 * (x - 1) * (x - 1) - 3, tone: 'accent', xMin: -0.78, xMax: 2.78 }],
+            vectors: [
+              { from: { x: 1, y: -3 }, to: { x: 2, y: -3 }, tone: 'attn' },
+              { from: { x: 2, y: -3 }, to: { x: 2, y: -1 }, tone: 'good' },
+            ],
+            points: [
+              { x: 1, y: -3, label: 'S(1 ; −3)', tone: 'accent', labelPos: 'left' },
+              { x: 2, y: -1, label: '(2 ; −1)', tone: 'good', labelPos: 'right' },
+              { x: 1.5, y: -3, label: '1', tone: 'attn', labelPos: 'below', node: false },
+              { x: 2, y: -2, label: '2', tone: 'good', labelPos: 'right', node: false },
+            ],
+            caption:
+              'Du sommet S(1 ; −3), 1 vers la droite puis 2 vers le haut : la courbe passe par (2 ; −1), ' +
+              'donc a = 2 et f(x) = 2(x − 1)² − 3. Pour y = x², on ne monterait que de 1.',
+          },
         },
         {
           kind: 'atelier',
@@ -1117,9 +1199,9 @@ export const fonctionSecondDegre: ChapterContent = {
           caption: 'Une même parabole, trois écritures',
           headers: ['Écriture', 'Forme', 'Ce qu\'elle montre directement'],
           rows: [
-            ['développée', 'ax² + bx + c', 'l\'ordonnée à l\'origine c, le point (0 ; c)'],
-            ['canonique', 'a(x − x_S)² + y_S', 'le sommet S(x_S ; y_S) et l\'axe x = x_S'],
-            ['factorisée', 'a(x − x₁)(x − x₂)', 'les zéros x₁ et x₂ (seulement s\'il y en a)'],
+            ['développée', '${ax^2+bx+c}$', 'l\'ordonnée à l\'origine c, le point $(0\\,;\\,c)$'],
+            ['canonique', '${a(x-x_S)^2+y_S}$', 'le sommet $S(x_S\\,;\\,y_S)$ et l\'axe $x = x_S$'],
+            ['factorisée', '${a(x-x_1)(x-x_2)}$', 'les zéros $x_1$ et $x_2$ (seulement s\'il y en a)'],
           ],
         },
         {
@@ -1151,6 +1233,23 @@ export const fonctionSecondDegre: ChapterContent = {
             { tag: 'le point donne a', text: '$f(0) = 4a - 1 = 3 \\iff a = 1$' },
           ],
           result: { tag: 'résultat', text: '$f(x) = (x-2)^2 - 1 = x^2 - 4x + 3$' },
+          illustration: {
+            // f(x) = (x − 2)² − 1 : S(2 ; −1), P(0 ; 3), zéros 1 et 3.
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => (x - 2) * (x - 2) - 1, tone: 'accent', xMin: -0.4, xMax: 4.4 }],
+            xMin: -1,
+            xMax: 5,
+            xTicks: [-1, 1, 2, 3, 4, 5],
+            yTicks: [-1, 1, 2, 3, 4],
+            fixedYRange: { min: -2, max: 5 },
+            points: [
+              { x: 2, y: -1, label: 'S(2 ; −1)', tone: 'accent', labelPos: 'below' },
+              { x: 0, y: 3, label: 'P(0 ; 3)', tone: 'good', labelPos: 'right' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption: 'le sommet donne la forme a(x − 2)² − 1, le point P donne a = 1',
+          },
         },
         {
           kind: 'exemple',
@@ -1161,6 +1260,25 @@ export const fonctionSecondDegre: ChapterContent = {
             { tag: 'le point donne a', text: '$f(1) = a \\cdot 2 \\cdot (-2) = -4a = -8 \\iff a = 2$' },
           ],
           result: { tag: 'résultat', text: '$f(x) = 2(x+1)(x-3) = 2x^2 - 4x - 6$' },
+          illustration: {
+            // f(x) = 2(x + 1)(x − 3) : zéros −1 et 3, P(1 ; −8) (c'est aussi le sommet : 1 est le
+            // milieu de −1 et 3).
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => 2 * (x + 1) * (x - 3), tone: 'accent', xMin: -1.7, xMax: 3.7 }],
+            xMin: -2,
+            xMax: 4,
+            xTicks: [-2, 1, 2, 4],
+            yTicks: [-8, -6, -4, -2, 2, 4, 6],
+            fixedYRange: { min: -10, max: 8 },
+            roots: [
+              { x: -1, label: '−1' },
+              { x: 3, label: '3' },
+            ],
+            points: [{ x: 1, y: -8, label: 'P(1 ; −8)', tone: 'good', labelPos: 'right' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption: 'les zéros −1 et 3 donnent la forme a(x + 1)(x − 3), le point P donne a = 2',
+          },
         },
         {
           kind: 'atelier',
@@ -1282,6 +1400,31 @@ export const fonctionSecondDegre: ChapterContent = {
             { tag: 'optimum à la borne gauche', text: '$A(12) = -288 + 480 = 192$' },
           ],
           result: { tag: 'aire maximale', text: '192 m², atteinte en $x = 12$ — moins que les 200 m² du sommet, jamais plus.' },
+          illustration: {
+            // A(x) = −2x² + 40x : sommet (10 ; 200) hors de [12 ; 20[, A(12) = 192, A(20) = 0 (exclu).
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => -2 * x * x + 40 * x, tone: 'faint', xMin: 0, xMax: 12 },
+              { fn: (x) => -2 * x * x + 40 * x, tone: 'accent', xMin: 12, xMax: 20 },
+            ],
+            shadedRegions: [{ from: 12, to: 20, upper: (x) => -2 * x * x + 40 * x, tone: 'good' }],
+            xMin: 0,
+            xMax: 23,
+            xTicks: [5, 10, 12, 15, 20],
+            yTicks: [50, 100, 150, 200],
+            fixedYRange: { min: -15, max: 250 },
+            points: [
+              { x: 10, y: 200, label: 'sommet (10 ; 200)', tone: 'bad', labelPos: 'above' },
+              { x: 12, y: 192, label: '', tone: 'good' },
+              { x: 20, y: 0, label: '', tone: 'accent', style: 'open' },
+            ],
+            textLabels: [{ x: 14, y: 222, text: 'optimum (12 ; 192)', tone: 'good', anchor: 'start' }],
+            xAxisLabel: 'x (m)',
+            yAxisLabel: 'aire (m²)',
+            caption:
+              'Domaine de validité [12 ; 20[ (zone verte) : la courbe y descend tout du long. Le ' +
+              'sommet x = 10 est hors du domaine, l\'optimum réel est à la borne x = 12 : 192 m².',
+          },
         },
         {
           kind: 'exemple',
@@ -1294,6 +1437,23 @@ export const fonctionSecondDegre: ChapterContent = {
             { tag: 'ordonnée du sommet', text: '$h(2) = -20 + 40 + 25 = 45$' },
           ],
           result: { tag: 'résultat', text: '45 m, au bout de 2 s. Quand touche-t-il le sol ? Il faut résoudre $h(t) = 0$ : ce sera au chapitre 2.' },
+          illustration: {
+            // h(t) = −5t² + 20t + 25 sur [0 ; 5] : départ (0 ; 25), sommet (2 ; 45), sol en t = 5.
+            kind: 'curvePlot',
+            curves: [{ fn: (t) => -5 * t * t + 20 * t + 25, tone: 'accent', xMin: 0, xMax: 5 }],
+            xMin: 0,
+            xMax: 5.5,
+            xTicks: [1, 2, 3, 4, 5],
+            yTicks: [10, 20, 25, 30, 40, 45],
+            fixedYRange: { min: -4, max: 52 },
+            points: [
+              { x: 0, y: 25, label: 'départ (0 ; 25)', tone: 'good', labelPos: 'right' },
+              { x: 2, y: 45, label: 'S(2 ; 45)', tone: 'accent', labelPos: 'above' },
+            ],
+            xAxisLabel: 't (s)',
+            yAxisLabel: 'h (m)',
+            caption: 'la hauteur monte jusqu\'au sommet S(2 ; 45), puis redescend jusqu\'au sol en t = 5',
+          },
         },
         {
           kind: 'atelier',
