@@ -56,6 +56,9 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { correctionDetailleeEtudeFonctionExpo, lettrePhaseEtudeExpo } from "./generateurs6e/etudeFonctionExponentielle/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -213,6 +216,8 @@ export function App6gen11() {
         reponseAttendue: contenuRecap.latex !== null ? <Katex expression={contenuRecap.latex} /> : contenuRecap.texte,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier, `corrigeDetaille.ts`).
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEtudeFonctionExpo(exercice), lettrePhaseEtudeExpo(etat.phase))} />,
       }
     : null;
 
@@ -363,7 +368,7 @@ export function App6gen11() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={onActiverAide}
-                  onValider={(index) => terminerEtape(soumettreReponseGraphique(etat, index), `Graphique n°${index + 1}`)}
+                  onValider={(index) => terminerEtape(soumettreReponseGraphique(etat, index), `Graphique ${"ABCD"[index] ?? index + 1}`)}
                   validation={validation}
                 />
               )}

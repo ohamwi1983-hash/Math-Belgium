@@ -36,6 +36,9 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { correctionDetailleeInequationsExpo, lettrePhaseInequationExpo } from "./generateurs6e/inequationsExponentielles/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 
 /** Séquence RÉELLEMENT traversée par la famille de l'exercice courant — même reconstruction que
  * `sequencePourExercice` (`ui6e/recapitulatifInequationsExponentielles.ts`, non exporté), répliquée
@@ -153,6 +156,9 @@ export function App6gen10() {
         reponseAttendue: contenuRecap.latex !== null ? <Katex expression={contenuRecap.latex} /> : contenuRecap.texte,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier, `corrigeDetaille.ts`),
+        // affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeInequationsExpo(exercice), lettrePhaseInequationExpo(exercice, phase))} />,
       }
     : null;
 

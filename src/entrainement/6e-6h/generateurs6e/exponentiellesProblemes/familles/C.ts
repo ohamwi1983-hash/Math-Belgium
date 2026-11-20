@@ -39,10 +39,14 @@ export function construireC(): ExerciceExpoProbC {
 
   const v2 = v1 * Math.pow(r, delta);
   const v2Affiche = arrondiAffichage(v2);
-  const Q0 = v1 / Math.pow(r, t1);
+  // Le modèle part des DONNÉES IMPRIMÉES (v₂ arrondi) : taux, Q₀ et valeurs attendues recalculés
+  // depuis v2Affiche — sinon le corrigé, calculé sur l'énoncé, aboutissait à un autre Q₀ (écart
+  // jusqu'à 1,2 %) que la réponse attendue.
+  const rDonnees = Math.pow(v2Affiche / v1, 1 / delta);
+  const Q0 = v1 / Math.pow(rDonnees, t1);
 
   const tempsDemandes = tirerTempsDemandes(t2 + 8);
-  const valeursDemandees = tempsDemandes.map((t) => Q0 * Math.pow(r, t));
+  const valeursDemandees = tempsDemandes.map((t) => Q0 * Math.pow(rDonnees, t));
 
-  return { famille: "C", contexteId: contexte.id, t1, t2, v1, r, v2, v2Affiche, Q0, tempsDemandes, valeursDemandees };
+  return { famille: "C", contexteId: contexte.id, t1, t2, v1, r: rDonnees, v2, v2Affiche, Q0, tempsDemandes, valeursDemandees };
 }

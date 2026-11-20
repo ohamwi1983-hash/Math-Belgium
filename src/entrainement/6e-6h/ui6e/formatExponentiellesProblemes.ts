@@ -35,7 +35,7 @@ function latex(valeur: string): FragmentConsigne {
 /** Décimal FRANÇAIS (virgule) arrondi à `decimales` décimales — pour l'AFFICHAGE seulement (aides,
  * bloc "état actuel", récapitulatif) : jamais la valeur de comparaison utilisée par
  * `moteur6e/verificationExponentiellesProblemes.ts`, qui reste toujours la valeur EXACTE. */
-function formatDecimal(v: number, decimales = 2): string {
+export function formatDecimal(v: number, decimales = 2): string {
   const f = Math.pow(10, decimales);
   const r = Math.round(v * f) / f;
   return String(r).replace(".", "{,}").replace("-{,}", "-0{,}");
@@ -46,7 +46,7 @@ function formatDecimal(v: number, decimales = 2): string {
  * ici plutôt que partagée (chaque générateur garde son propre module `ui6e`, CLAUDE.md
  * "architecture"). Nécessaire pour la famille E (`t^{n-1}` littéral `t^{1}` quand `n=2`, un des 3
  * tirages possibles de `N_POOL` — piège déjà corrigé pour 6gen6/6gen7, reproduit ici sans garde). */
-function formatPuissance(base: string, exposant: number): string {
+export function formatPuissance(base: string, exposant: number): string {
   return exposant === 1 ? base : `${base}^{${exposant}}`;
 }
 
@@ -68,7 +68,7 @@ function contexteD(exercice: ExerciceExpoProbD) {
  * Playwright : un `C` négatif donnait littéralement "20+-25·0,8^t" (double signe), jamais
  * "20-25·0,8^t", contrairement à la convention "jamais de signe non simplifié à l'écran"
  * (CLAUDE.md). Même principe que `formatModeleG`/`formatSoustraction` ci-dessus. */
-function formatModeleD(exercice: ExerciceExpoProbD): string {
+export function formatModeleD(exercice: ExerciceExpoProbD): string {
   const signe = exercice.C < 0 ? "-" : "+";
   return `${formatDecimal(exercice.L, 1)}${signe}${formatDecimal(Math.abs(exercice.C), 1)}\\cdot ${formatDecimal(exercice.r, 3)}^{\\,t}`;
 }
@@ -92,15 +92,42 @@ function formatSoustraction(gaucheTexte: string, droite: number): string {
 }
 
 /** Exposant `k-at` de la famille G, en omettant le "0-" quand `k=0`. */
-function formatExposantG(k: number, aTexte: string): string {
-  return k === 0 ? `-${aTexte}t` : `${k}-${aTexte}t`;
+export function formatExposantG(k: number, aTexte: string): string {
+  // « -t », jamais « -1t » (a = 1).
+  const at = aTexte === "1" ? "t" : `${aTexte}t`;
+  return k === 0 ? `-${at}` : `${k}-${at}`;
 }
 
 /** Modèle complet de la famille G, `f(t)=c+e^{k-at}`, en omettant le "0+" quand `c=0` ET le "-0"
  * dans l'exposant quand `k=0` — même piège que `formatSoustraction` ci-dessus. */
-function formatModeleG(c: number, k: number, aTexte: string): string {
+export function formatModeleG(c: number, k: number, aTexte: string): string {
   const base = `e^{${formatExposantG(k, aTexte)}}`;
   return c === 0 ? base : `${c}+${base}`;
+}
+
+/** Unité de temps du contexte de l'exercice (« ans », « heures »…). */
+export function uniteTempsProblemes(exercice: ExerciceExponentiellesProblemes): string {
+  switch (exercice.famille) {
+    case "A":
+      return contexteA(exercice).unite;
+    case "B":
+      return contexteB(exercice).unite;
+    case "C":
+      return contexteC(exercice).unite;
+    case "D":
+      return contexteD(exercice).unite;
+    case "E":
+      return contexteE(exercice).unite;
+    case "F":
+      return contexteF(exercice).unite;
+    case "G":
+      return contexteG(exercice).unite;
+  }
+}
+
+/** « a·t » de la famille E (« 0{,}5t », « t » si a = 1 — jamais « 1t » ni « 0.5t »). */
+export function aTLatexE(a: number): string {
+  return a === 1 ? "t" : `${formatDecimal(a, 1)}t`;
 }
 
 // ============================================================================
@@ -113,8 +140,8 @@ function consigneGeneraleA(exercice: ExerciceExpoProbA): FragmentConsigne[] {
 }
 
 function blocDonneesA(exercice: ExerciceExpoProbA): string[] {
-  if (exercice.sousType === "evaluer") return [`Q_0 = ${exercice.Q0}`, `p = ${exercice.p}\\,\\%`, `n = ${exercice.n}\\ (${contexteA(exercice).unite})`];
-  return [`T = ${exercice.T}\\ (${contexteA(exercice).unite})`, `k = ${exercice.k}`];
+  if (exercice.sousType === "evaluer") return [`Q_0 = ${exercice.Q0}`, `p = ${exercice.p}\\,\\%`, `n = ${exercice.n}\\ (\\text{${contexteA(exercice).unite}})`];
+  return [`T = ${exercice.T}\\ (\\text{${contexteA(exercice).unite}})`, `k = ${exercice.k}`];
 }
 
 function etatActuelA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): string[] | null {
@@ -136,7 +163,7 @@ function consigneEcranA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2
 function aideA1(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): AideAvecLatex {
   if (phase === "aEcran1") {
     return exercice.sousType === "evaluer"
-      ? { texte: "Rappel : une hausse de p % correspond à un facteur multiplicateur r=1+p/100 ; une baisse de p % correspond à r=1-p/100.", latex: "r=1+\\dfrac{p}{100} \\quad\\text{ou}\\quad r=1-\\dfrac{p}{100}" }
+      ? { texte: "Rappel : une hausse de p % correspond à un facteur multiplicateur, une baisse de p % aussi :", latex: "r=1+\\dfrac{p}{100} \\quad\\text{ou}\\quad r=1-\\dfrac{p}{100}" }
       : { texte: "Rappel : reculer d'une période divise la quantité par 2 — le nombre de reculs entre l'instant t et T est T−t.", latex: "T-t" };
   }
   return exercice.sousType === "evaluer" ? { texte: "Substitue t=n dans le modèle correct de l'étape précédente, puis calcule.", latex: null } : { texte: "Un recul d'une période correspond exactement à une division par 2.", latex: null };
@@ -205,14 +232,14 @@ function aideB1(_exercice: ExerciceExpoProbB, phase: "bEcran1" | "bEcran2" | "bE
     case "bEcran3":
       return { texte: "Substitue t=n dans le complément(t) CORRECT de l'étape précédente.", latex: null };
     case "bEcran4":
-      return { texte: "Pose l'équation complément(t)=Q0−tolérance, isole la puissance, puis utilise le logarithme (même technique qu'une équation exponentielle).", latex: "\\text{complément}(t) = Q_0-\\text{tolérance}" };
+      return { texte: "Pose l'équation ci-dessous, isole la puissance, puis utilise le logarithme (même technique qu'une équation exponentielle) :", latex: "\\text{complément}(t) = Q_0-\\text{tolérance}" };
   }
 }
 
 function aideB2(exercice: ExerciceExpoProbB, phase: "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4"): AideAvecLatex {
   switch (phase) {
     case "bEcran1":
-      return { texte: "Modèle du reste :", latex: `\\text{reste}(t) = Q_0\\cdot(1-p/100)^t` };
+      return { texte: "Modèle du reste :", latex: `\\text{reste}(t) = Q_0\\cdot\\left(1-\\dfrac{p}{100}\\right)^{t}` };
     case "bEcran2":
       return { texte: "Expression du reste rappelée à côté de Q0 (soustraction non faite) :", latex: `Q_0 - \\text{reste}(t) = ${exercice.Q0} - ${exercice.Q0}\\cdot ${formatDecimal(exercice.q, 3)}^{\\,t}` };
     case "bEcran3":
@@ -258,14 +285,14 @@ function etatActuelC(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" |
 
 function consigneEcranC(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): FragmentConsigne[] {
   if (phase === "cEcran1") return [texte("Déduis le taux multiplicateur r entre les deux instants connus.")];
-  if (phase === "cEcran2") return [texte("À partir du taux r CORRECT de l'étape précédente, détermine Q0 (la valeur qui correspondrait à "), latex("t=0"), texte(").")];
+  if (phase === "cEcran2") return [texte("À partir du taux r CORRECT de l'étape précédente, détermine "), latex("Q_0"), texte(" (la valeur qui correspondrait à "), latex("t=0"), texte(").")];
   return [texte("À partir du modèle CORRECT de l'étape précédente, calcule la valeur à chacun des temps suivants : "), latex(exercice.tempsDemandes.map((t) => `t=${t}`).join(",\\ ")), texte(".")];
 }
 
 function aideC1(_exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
   if (phase === "cEcran1") return { texte: "Rappel :", latex: "v_2 = v_1\\cdot r^{\\Delta t} \\ \\Longrightarrow\\ r = \\left(\\dfrac{v_2}{v_1}\\right)^{\\frac{1}{\\Delta t}}" };
   if (phase === "cEcran2") return { texte: "Un point connu et r suffisent à reconstituer Q0.", latex: null };
-  return { texte: "Utilise le modèle Q(t)=Q0·r^t confirmé à l'étape précédente, substitue chaque temps demandé.", latex: "Q(t)=Q_0\\cdot r^{t}" };
+  return { texte: "Utilise le modèle confirmé à l'étape précédente et substitue chaque temps demandé :", latex: "Q(t)=Q_0\\cdot r^{t}" };
 }
 
 function aideC2(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
@@ -277,7 +304,7 @@ function aideC2(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEc
 function formatReponseC(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): string[] {
   if (phase === "cEcran1") return [formatDecimal(exercice.r, 3)];
   if (phase === "cEcran2") return [formatDecimal(exercice.Q0, 2)];
-  return exercice.tempsDemandes.map((t, i) => `t=${t}:\\ ${formatDecimal(exercice.valeursDemandees[i], 2)}`);
+  return exercice.tempsDemandes.map((t, i) => `Q(${t})\\approx ${formatDecimal(exercice.valeursDemandees[i], 2)}`);
 }
 
 // ============================================================================
@@ -289,7 +316,8 @@ function consigneGeneraleD(exercice: ExerciceExpoProbD): FragmentConsigne[] {
 }
 
 function blocDonneesD(exercice: ExerciceExpoProbD): string[] {
-  return [`t=0:\\ ${exercice.aAffiche}`, `t=${exercice.d}:\\ ${exercice.bAffiche}`, `t=${2 * exercice.d}:\\ ${exercice.cAffiche}`];
+  // Les trois valeurs sont nommées a, b, c (consignes, aides, corrigé) : on les nomme dans les données.
+  return [`a=${exercice.aAffiche}\\ (t=0)`, `b=${exercice.bAffiche}\\ (t=${exercice.d})`, `c=${exercice.cAffiche}\\ (t=${2 * exercice.d})`];
 }
 
 // Correctif transversal (voir `etatActuelB` ci-dessus) : chaque écran ne montrait QUE le fait de
@@ -297,9 +325,9 @@ function blocDonneesD(exercice: ExerciceExpoProbD): string[] {
 // écrans précédents, jamais seulement T(t)).
 function etatActuelD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dEcran3" | "dEcran4"): string[] | null {
   if (phase === "dEcran1") return null;
-  const lignes = [`\\text{rapport} \\approx ${formatDecimal(exercice.rapport, 3)}\\ \\text{(étape 1)}`];
+  const lignes = [`\\text{rapport} = ${formatDecimal(exercice.rapport, 3)}\\ \\text{(étape 1)}`];
   if (phase === "dEcran2") return lignes;
-  lignes.push(`L \\approx ${formatDecimal(exercice.L, 1)}\\ \\text{(étape 2)}`);
+  lignes.push(`L = ${formatDecimal(exercice.L, 1)}\\ \\text{(étape 2)}`);
   if (phase === "dEcran3") return lignes;
   lignes.push(`T(t) \\approx ${formatModeleD(exercice)}\\ \\text{(étape 3)}`);
   return lignes;
@@ -308,7 +336,17 @@ function etatActuelD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" |
 function consigneEcranD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dEcran3" | "dEcran4"): FragmentConsigne[] {
   switch (phase) {
     case "dEcran1":
-      return [texte("Calcule les deux différences consécutives "), latex("(a-b)"), texte(" et "), latex("(b-c)"), texte(", puis leur rapport.")];
+      return [
+        texte("Calcule les deux différences consécutives "),
+        latex("(a-b)"),
+        texte(" et "),
+        latex("(b-c)"),
+        texte(", puis leur rapport "),
+        latex("\\dfrac{b-c}{a-b}"),
+        texte(" : il vaut "),
+        latex(exercice.d === 1 ? "r" : `r^{${exercice.d}}`),
+        texte(`, car deux mesures successives sont séparées de ${exercice.d} ${exercice.d === 1 ? "unité" : "unités"} de temps.`),
+      ];
     case "dEcran2":
       return [texte("À partir du rapport CORRECT de l'étape précédente, détermine la valeur de stabilisation L.")];
     case "dEcran3":
@@ -321,11 +359,11 @@ function consigneEcranD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2
 function aideD1(_exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dEcran3" | "dEcran4"): AideAvecLatex {
   switch (phase) {
     case "dEcran1":
-      return { texte: "Pour L+C·r^t, la différence entre 2 valeurs équidistantes est une suite géométrique de raison r^d — même si L est encore inconnu.", latex: "L+C\\cdot r^{t}" };
+      return { texte: "Pour le modèle ci-dessous, les différences entre valeurs équidistantes (écart d) forment une suite géométrique de raison rᵈ — même si L est encore inconnu :", latex: "T(t)=L+C\\cdot r^{t}" };
     case "dEcran2":
       return { texte: "Rappel :", latex: "a-L = \\dfrac{a-b}{1-r^{d}}" };
     case "dEcran3":
-      return { texte: "C=a−L, et r s'obtient depuis le rapport r^d (racine d-ième).", latex: "C=a-L" };
+      return { texte: "C s'obtient avec a et L, et r à partir du rapport (racine d-ième) :", latex: "C=a-L,\\qquad r=\\left(r^{d}\\right)^{\\frac{1}{d}}" };
     case "dEcran4":
       return { texte: "Substitue t dans le modèle complet CORRECT de l'étape précédente.", latex: null };
   }
@@ -334,11 +372,11 @@ function aideD1(_exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dE
 function aideD2(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dEcran3" | "dEcran4"): AideAvecLatex {
   switch (phase) {
     case "dEcran1":
-      return { texte: "Les deux différences, côte à côte (rapport non calculé) :", latex: `(a-b) \\approx ${formatDecimal(exercice.a - exercice.b, 2)}, \\quad (b-c) \\approx ${formatDecimal(exercice.b - exercice.c, 2)}` };
+      return { texte: "Les deux différences, côte à côte (rapport non calculé) :", latex: `(a-b) = ${formatDecimal(exercice.a - exercice.b, 2)}, \\quad (b-c) = ${formatDecimal(exercice.b - exercice.c, 2)}` };
     case "dEcran2":
-      return { texte: "Valeur calculée (soustraction finale non faite) :", latex: `\\dfrac{a-b}{1-\\text{rapport}} \\approx ${formatDecimal((exercice.a - exercice.b) / (1 - exercice.rapport), 2)}` };
+      return { texte: "Valeur calculée (soustraction finale non faite) :", latex: `\\dfrac{a-b}{1-\\text{rapport}} = ${formatDecimal((exercice.a - exercice.b) / (1 - exercice.rapport), 2)}` };
     case "dEcran3":
-      return { texte: "Valeurs déjà connues :", latex: `C = a-L \\approx ${formatDecimal(exercice.C, 2)}, \\quad r \\approx ${formatDecimal(exercice.r, 3)}` };
+      return { texte: "Valeurs déjà connues :", latex: `C = a-L = ${formatDecimal(exercice.C, 2)}, \\quad r ${exercice.d === 1 ? "=" : "\\approx"} ${formatDecimal(exercice.r, 3)}` };
     case "dEcran4":
       return { texte: "Modèle confirmé :", latex: `T(t) \\approx ${formatModeleD(exercice)}` };
   }
@@ -366,7 +404,7 @@ function consigneGeneraleE(exercice: ExerciceExpoProbE): FragmentConsigne[] {
 }
 
 function blocDonneesE(exercice: ExerciceExpoProbE): string[] {
-  return [`f(t) = ${exercice.k}\\cdot t^{${exercice.n}}\\cdot e^{-${formatDecimal(exercice.a, 1)}t}`];
+  return [`f(t) = ${exercice.k}\\cdot t^{${exercice.n}}\\cdot e^{-${aTLatexE(exercice.a)}}`];
 }
 
 // Correctif transversal (même bug que `etatActuelB` ci-dessus, voir CLAUDE.md/`docs/historique-6e.md`) :
@@ -375,7 +413,7 @@ function blocDonneesE(exercice: ExerciceExpoProbE): string[] {
 function etatActuelE(exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2" | "eEcran3"): string[] | null {
   if (phase === "eEcran1") return null;
   const { k, n, a } = exercice;
-  const derivee = `f'(t) = ${k}\\cdot ${formatPuissance("t", n - 1)}\\cdot e^{-${a}t}\\cdot(${n}-${a}t)\\ \\text{(étape 1)}`;
+  const derivee = `f'(t) = ${k}\\cdot ${formatPuissance("t", n - 1)}\\cdot e^{-${aTLatexE(a)}}\\cdot(${n}-${aTLatexE(a)})\\ \\text{(étape 1)}`;
   if (phase === "eEcran2") return [derivee];
   const tMax = `t_{max} = ${formatDecimal(exercice.tMax, 2)}\\ \\text{(étape 2)}`;
   return [derivee, tMax];
@@ -388,21 +426,21 @@ function consigneEcranE(_exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran
 }
 
 function aideE1(_exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2" | "eEcran3"): AideAvecLatex {
-  if (phase === "eEcran1") return { texte: "Règle du produit, puis dérivée de e^(−at) — factorise ensuite par le terme commun.", latex: "e^{-at}" };
+  if (phase === "eEcran1") return { texte: "Règle du produit, puis dérivée de l'exponentielle — factorise ensuite par le terme commun :", latex: "\\left(e^{-at}\\right)'=-a\\,e^{-at}" };
   if (phase === "eEcran2") return { texte: "Un zéro de f' n'est pas automatiquement le maximum — vérifie le changement de signe autour de chaque zéro.", latex: null };
   return { texte: "Substitue le temps trouvé dans f(t).", latex: null };
 }
 
 function aideE2(exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2" | "eEcran3"): AideAvecLatex {
   const { k, n, a } = exercice;
-  if (phase === "eEcran1") return { texte: "Les deux termes non factorisés :", latex: `f'(t) = ${k}\\cdot ${n}\\cdot ${formatPuissance("t", n - 1)}\\cdot e^{-${a}t} \\ -\\ ${k}\\cdot ${a}\\cdot t^{${n}}\\cdot e^{-${a}t}` };
-  if (phase === "eEcran2") return { texte: "Les deux zéros de f' (sans indiquer lequel est le bon) :", latex: `t=0 \\ \\text{ou}\\ t=\\dfrac{${n}}{${a}}` };
+  if (phase === "eEcran1") return { texte: "Les deux termes non factorisés :", latex: `f'(t) = ${k}\\cdot ${n}\\cdot ${formatPuissance("t", n - 1)}\\cdot e^{-${aTLatexE(a)}} \\ -\\ ${k}\\cdot ${formatDecimal(a, 1)}\\cdot t^{${n}}\\cdot e^{-${aTLatexE(a)}}` };
+  if (phase === "eEcran2") return { texte: "Les deux zéros de f' (sans indiquer lequel est le bon) :", latex: `t=0 \\ \\text{ou}\\ t=\\dfrac{${n}}{${formatDecimal(a, 1)}}` };
   return { texte: "Temps du maximum confirmé :", latex: `t = ${formatDecimal(exercice.tMax, 2)}` };
 }
 
 function formatReponseE(exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2" | "eEcran3"): string[] {
   const { k, n, a } = exercice;
-  if (phase === "eEcran1") return [`${k}\\cdot ${formatPuissance("t", n - 1)}\\cdot e^{-${a}t}\\cdot(${n}-${a}t)`];
+  if (phase === "eEcran1") return [`${k}\\cdot ${formatPuissance("t", n - 1)}\\cdot e^{-${aTLatexE(a)}}\\cdot(${n}-${aTLatexE(a)})`];
   if (phase === "eEcran2") return [formatDecimal(exercice.tMax, 2)];
   return [formatDecimal(exercice.fMax, 2)];
 }
@@ -457,11 +495,11 @@ function consigneEcranF(exercice: ExerciceExpoProbF, phase: "fEcran1" | "fEcran2
 function aideF1(_exercice: ExerciceExpoProbF, phase: "fEcran1" | "fEcran2" | "fEcran3" | "fEcran4"): AideAvecLatex {
   switch (phase) {
     case "fEcran1":
-      return { texte: "e^(−kt) tend vers 0 quand t devient très grand.", latex: "e^{-kt}\\to 0" };
+      return { texte: "Quand t devient très grand :", latex: "e^{-kt}\\to 0" };
     case "fEcran2":
-      return { texte: "Substitue directement t=n1 dans p(t)=1−e^(−kt).", latex: "p(t)=1-e^{-kt}" };
+      return { texte: "Substitue directement le temps demandé dans le modèle :", latex: "p(t)=1-e^{-kt}" };
     case "fEcran3":
-      return { texte: "N'utilise jamais p(n1) ici — recalcule p au bon temps (n2), puis multiplie par N.", latex: null };
+      return { texte: "N'utilise jamais p(n₁) ici — recalcule p au bon temps (n₂), puis multiplie par N.", latex: null };
     case "fEcran4":
       return { texte: "Rappel : bénéfice net = revenu − (coûts fixes + coûts variables).", latex: "\\text{bénéfice net} = \\text{revenu} - (\\text{coûts fixes} + \\text{coûts variables})" };
   }
@@ -502,7 +540,7 @@ function consigneGeneraleG(exercice: ExerciceExpoProbG): FragmentConsigne[] {
 }
 
 function blocDonneesG(exercice: ExerciceExpoProbG): string[] {
-  return [`f(t) = ${formatModeleG(exercice.c, exercice.k, formatDecimal(exercice.a, 1))}`, `S = ${formatDecimal(exercice.sAffiche, 1)}`, `D = ${exercice.duree}\\ (${contexteG(exercice).unite})`];
+  return [`f(t) = ${formatModeleG(exercice.c, exercice.k, formatDecimal(exercice.a, 1))}`, `S = ${formatDecimal(exercice.sAffiche, 1)}`, `D = ${exercice.duree}\\ (\\text{${contexteG(exercice).unite}})`];
 }
 
 // Correctif transversal (même bug que `etatActuelB`/`etatActuelE`/`etatActuelF` ci-dessus, voir
@@ -533,9 +571,9 @@ function consigneEcranG(exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2
 function aideG1(_exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2" | "gEcran3"): AideAvecLatex {
   switch (phase) {
     case "gEcran1":
-      return { texte: "Substitue directement chaque temps dans f(t)=c+e^(k−at).", latex: "f(t)=c+e^{k-at}" };
+      return { texte: "Substitue directement chaque temps dans le modèle :", latex: "f(t)=c+e^{k-at}" };
     case "gEcran2":
-      return { texte: "Isole e^(k−at)=S−c avant de passer au logarithme.", latex: "e^{k-at}=S-c" };
+      return { texte: "Isole l'exponentielle avant de passer au logarithme :", latex: "e^{k-at}=S-c" };
     case "gEcran3":
       return { texte: "La grandeur est décroissante : le seuil est franchi puis dépassé, jamais retrouvé.", latex: null };
   }
@@ -553,9 +591,10 @@ function aideG2(exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2" | "gEc
 }
 
 function formatReponseG(exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2" | "gEcran3"): string[] {
-  if (phase === "gEcran1") return [`f(${exercice.tEval1})=${formatDecimal(exercice.fEval1, 2)}`, `f(${exercice.tEval2})=${formatDecimal(exercice.fEval2, 2)}`];
+  const rel = (v: number) => (Math.abs(Math.round(v * 100) / 100 - v) < 1e-9 ? "=" : "\\approx ");
+  if (phase === "gEcran1") return [`f(${exercice.tEval1})${rel(exercice.fEval1)}${formatDecimal(exercice.fEval1, 2)}`, `f(${exercice.tEval2})${rel(exercice.fEval2)}${formatDecimal(exercice.fEval2, 2)}`];
   if (phase === "gEcran2") return [formatDecimal(exercice.tSeuil, 2)];
-  return [exercice.duree >= exercice.tSeuil ? "Atteignable" : "Non atteignable"];
+  return [exercice.duree >= exercice.tSeuil ? "\\text{Atteignable}" : "\\text{Non atteignable}"];
 }
 
 // ============================================================================
@@ -709,7 +748,7 @@ export const LIBELLE_PHASE: Record<PhaseExponentiellesProblemes, string> = {
   bEcran3: "Étape 3 (évaluation)",
   bEcran4: "Étape 4 (seuil)",
   cEcran1: "Étape 1 (taux r)",
-  cEcran2: "Étape 2 (Q0)",
+  cEcran2: "Étape 2 (Q₀)",
   cEcran3: "Étape 3 (évaluations)",
   dEcran1: "Étape 1 (rapport)",
   dEcran2: "Étape 2 (stabilisation L)",

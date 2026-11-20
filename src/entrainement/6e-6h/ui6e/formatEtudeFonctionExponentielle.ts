@@ -123,6 +123,29 @@ export function formatCoefficientCLatex(m: number, base: number, p: number): str
   return `\\dfrac{${num}}{${den}}${lnPart}`;
 }
 
+/** Position (abscisse) en LaTeX : entier, ou demi-entier écrit en décimal à virgule (« -1{,}5 »). */
+export function positionLatex(v: number): string {
+  return String(Math.round(v * 1000) / 1000).replace(".", "{,}");
+}
+
+/** Exposant affine `mx+n` (familles A et C). */
+export function exposantAffineLatex(m: number, n: number): string {
+  return formatSommeTermes([
+    { valeur: m, suffixe: "x" },
+    { valeur: n, suffixe: "" },
+  ]);
+}
+
+/** `m\ln(base)` (« \ln(2) » si m = 1, « 2\ln(3) » sinon) — facteur de la dérivée de la famille C. */
+export function mLnBaseLatex(m: number, base: number): string {
+  return m === 1 ? `\\ln(${base})` : `${m}\\ln(${base})`;
+}
+
+/** Coefficient devant une exponentielle (« 2e^{x} », « -e^{x} »). */
+export function coefExpLatex(a: number, corps: string): string {
+  return formatCoefFois(a, corps);
+}
+
 // ============================================================================
 // f(x) — un helper par famille.
 // ============================================================================
@@ -356,8 +379,8 @@ export function consigneAsymptotes(exercice: ExerciceEtudeFonctionExponentielle)
   return [texte("À partir des limites CORRECTES précédentes, détermine l'asymptote de f dans chaque direction — ou l'absence d'asymptote.")];
 }
 
-export function consigneAsymptotesB(): FragmentConsigne[] {
-  return [texte("L'asymptote verticale "), latex("x=p"), texte(" n'est valable que d'UN SEUL côté — lequel ? Et quelle est l'équation de l'asymptote horizontale (commune aux deux infinis) ?")];
+export function consigneAsymptotesB(p: number): FragmentConsigne[] {
+  return [texte("L'asymptote verticale "), latex(`x=${p}`), texte(" n'est valable que d'UN SEUL côté — lequel ? Et quelle est l'équation de l'asymptote horizontale (commune aux deux infinis) ?")];
 }
 
 export function consigneCroissance(): FragmentConsigne[] {
@@ -391,10 +414,10 @@ export function aideDomaineNiveau2(exercice: ExerciceEtudeFonctionExponentielle)
 }
 
 export function aideLimitesNiveau1(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Étudie d'abord la limite de l'exposant mx+n dans chaque direction, puis applique e^u→+∞ si u→+∞, e^u→0 si u→−∞.", latex: "e^{u}\\to+\\infty \\text{ si } u\\to+\\infty, \\quad e^{u}\\to 0 \\text{ si } u\\to-\\infty" };
-  if (exercice.famille === "B") return { texte: "Près du point exclu, distingue soigneusement les 2 côtés : le signe de l'exposant k/(x−p) n'est PAS le même des deux côtés. Aux deux infinis, l'exposant tend vers 0.", latex: "\\dfrac{k}{x-p}" };
+  if (exercice.famille === "A") return { texte: "Étudie d'abord la limite de l'exposant dans chaque direction, puis utilise les limites de référence de l'exponentielle :", latex: "e^{u}\\to+\\infty \\text{ si } u\\to+\\infty, \\quad e^{u}\\to 0 \\text{ si } u\\to-\\infty" };
+  if (exercice.famille === "B") return { texte: "Près du point exclu, distingue soigneusement les 2 côtés : le signe de l'exposant n'est PAS le même des deux côtés. Aux deux infinis, l'exposant tend vers 0. L'exposant :", latex: `\\dfrac{${exercice.k}}{${formatXMoinsP(exercice.p)}}` };
   if (exercice.famille === "C") return { texte: "Piège : les deux limites sont infinies, mais cela ne signifie pas 'pas d'asymptote' — regarde l'étape suivante avant de conclure.", latex: null };
-  return { texte: "Le terme exponentiel l'emporte toujours sur le terme x en +∞ ; en −∞, l'exponentielle s'annule et x aussi (produit qui tend vers 0, pas vers −∞).", latex: null };
+  return { texte: "En +∞, le produit tend vers l'infini (signe de a) ; en −∞, l'exponentielle l'emporte sur x : le produit tend vers 0 (croissance comparée), pas vers −∞.", latex: null };
 }
 
 export function aideLimitesNiveau2(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
@@ -445,16 +468,22 @@ export function aideAsymptotesBNiveau2(exercice: ExerciceEtudeB): AideAvecLatex 
 }
 
 export function aideCroissanceNiveau1(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "B") return { texte: "Calcule f'(x) — son signe ne dépend QUE du signe de −k (le facteur (x−p)² est toujours strictement positif), jamais de x lui-même.", latex: null };
+  if (exercice.famille === "B") return { texte: "Calcule f'(x) — son signe ne dépend QUE du signe de −k (le carré du dénominateur est toujours strictement positif), jamais de x lui-même.", latex: null };
   if (exercice.famille === "C") return { texte: "f'(x) = 0 exactement une fois — repère cette position, puis étudie le signe de f' avant/après pour confirmer un minimum.", latex: null };
   return { texte: "Calcule f'(x) puis étudie son signe sur tout le domaine.", latex: null };
 }
 
 export function aideCroissanceNiveau2(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "f'(x) = m·e^(mx+n) — le facteur exponentiel est toujours positif, le signe de f' est donc celui de m.", latex: `m=${exercice.m}` };
-  if (exercice.famille === "B") return { texte: "f'(x) = e^(k/(x-p))·(−k/(x−p)²) — le signe est celui de −k.", latex: `-k=${-exercice.k}` };
-  if (exercice.famille === "C") return { texte: "f'(x) = m·ln(base)·base^(mx+n) − c, nul en mx+n=p :", latex: `x = \\dfrac{p-n}{m}` };
-  return { texte: "f'(x) = a·e^x·(1+x), nul en x=−1 (formule déjà établie pour ce type de fonction) :", latex: "x=-1" };
+  if (exercice.famille === "A") return { texte: "La dérivée est le produit de m par une exponentielle (toujours positive) : son signe est celui de m.", latex: `f'(x)=${formatCoefFois(exercice.m, `e^{${exposantAffineLatex(exercice.m, exercice.n)}}`)}` };
+  if (exercice.famille === "B") return { texte: "La dérivée a le signe de −k :", latex: `f'(x)=e^{\\frac{${exercice.k}}{${formatXMoinsP(exercice.p)}}}\\cdot\\dfrac{${-exercice.k}}{(${formatXMoinsP(exercice.p)})^{2}}` };
+  if (exercice.famille === "C") {
+    const mln = mLnBaseLatex(exercice.m, exercice.base);
+    return {
+      texte: "La dérivée s'annule quand l'exposant vaut p :",
+      latex: `f'(x)=${mln}\\cdot ${exercice.base}^{${exposantAffineLatex(exercice.m, exercice.n)}}-${formatCoefficientCLatex(exercice.m, exercice.base, exercice.p)}\\qquad x=${positionLatex((exercice.p - exercice.n) / exercice.m)}`,
+    };
+  }
+  return { texte: "Dérivée déjà établie pour ce type de fonction, nulle en x = −1 :", latex: `f'(x)=${formatCoefFois(exercice.a, "e^{x}")}(1+x)` };
 }
 
 /** Rappel EXPLICITE de la méthode de concavité — voir la note de conception en tête de fichier :
@@ -468,10 +497,18 @@ export function aideConcaviteNiveau1(_exercice: ExerciceEtudeFonctionExponentiel
 }
 
 export function aideConcaviteNiveau2(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "f''(x) = m²·e^(mx+n) — un carré multiplié par une exponentielle, toujours strictement positif.", latex: "f''(x)=m^2\\cdot e^{mx+n}" };
-  if (exercice.famille === "B") return { texte: "Position du point d'inflexion (voir en-tête du générateur pour la dérivation complète) :", latex: `x = p - \\dfrac{k}{2} = ${exercice.p} - \\dfrac{${exercice.k}}{2}` };
-  if (exercice.famille === "C") return { texte: "f''(x) = m²·ln(base)²·base^(mx+n) — le terme linéaire −c·x a une dérivée seconde nulle, il n'intervient jamais dans ce signe.", latex: "f''(x)=m^2\\cdot\\ln(\\text{base})^2\\cdot\\text{base}^{mx+n}" };
-  return { texte: "f''(x) = a·e^x·(2+x), nul en x=−2 (formule déjà établie pour ce type de fonction, quel que soit le signe de a).", latex: "x=-2" };
+  if (exercice.famille === "A") return { texte: "Dérivée seconde : le carré de m multiplié par une exponentielle, toujours strictement positif :", latex: `f''(x)=${formatCoefFois(exercice.m * exercice.m, `e^{${exposantAffineLatex(exercice.m, exercice.n)}}`)}` };
+  if (exercice.famille === "B") {
+    const k = exercice.k;
+    return { texte: "Position du point d'inflexion :", latex: `x=p-\\dfrac{k}{2}=${exercice.p}${k > 0 ? "-" : "+"}\\dfrac{${Math.abs(k)}}{2}=${positionLatex(exercice.p - k / 2)}` };
+  }
+  if (exercice.famille === "C") {
+    return {
+      texte: "Dérivée seconde : le terme linéaire disparaît (sa dérivée seconde est nulle) ; il reste un carré multiplié par une exponentielle, toujours positif :",
+      latex: `f''(x)=\\left(${mLnBaseLatex(exercice.m, exercice.base)}\\right)^{2}\\cdot ${exercice.base}^{${exposantAffineLatex(exercice.m, exercice.n)}}`,
+    };
+  }
+  return { texte: "Dérivée seconde déjà établie pour ce type de fonction (quel que soit le signe de a), nulle en x = −2 :", latex: `f''(x)=${formatCoefFois(exercice.a, "e^{x}")}(2+x)` };
 }
 
 export function aideGraphiqueNiveau1(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
@@ -484,7 +521,7 @@ export function aideGraphiqueNiveau1(exercice: ExerciceEtudeFonctionExponentiell
 export function aideGraphiqueNiveau2(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
   if (exercice.famille === "A") return { texte: "Sens de variation attendu :", latex: exercice.croissance.type === "croissante_partout" ? "\\nearrow" : "\\searrow" };
   if (exercice.famille === "B") return { texte: "Côté de l'asymptote verticale :", latex: `x \\to ${exercice.p}^{${exercice.coteAsymptoteVerticale === "plus" ? "+" : "-"}}` };
-  if (exercice.famille === "C") return { texte: "Position du minimum :", latex: `x=${exercice.croissance.position}` };
+  if (exercice.famille === "C") return { texte: "Position du minimum :", latex: `x=${positionLatex(exercice.croissance.position ?? 0)}` };
   return { texte: exercice.a > 0 ? "Minimum en x=−1." : "Maximum en x=−1.", latex: null };
 }
 
@@ -523,7 +560,7 @@ function formatLimitesRecapLatex(exercice: ExerciceEtudeFonctionExponentielle): 
     exercice.famille === "B"
       ? [exercice.limitePointPlus, exercice.limitePointMoins, exercice.limitePlusInfini, exercice.limiteMoinsInfini]
       : [exercice.limitePlusInfini, exercice.limiteMoinsInfini];
-  const lignes = labels.map((l, i) => `${l.latex} : ${formatCibleLimiteLatex(valeurs[i])}`);
+  const lignes = labels.map((l, i) => `\\lim\\limits_{${l.latex}}f(x)=${formatCibleLimiteLatex(valeurs[i])}`);
   return `\\begin{gathered} ${lignes.join(" \\\\ ")} \\end{gathered}`;
 }
 
@@ -533,7 +570,11 @@ function formatAsymptotesRecapLatex(exercice: ExerciceEtudeFonctionExponentielle
     return `\\begin{gathered} \\text{Verticale (}x\\to ${exercice.p}^{${cote}}\\text{)} : ${formatEquationAsymptoteLatex(exercice.asymptoteVerticale)} \\\\ \\text{Horizontale} : ${formatEquationAsymptoteLatex(exercice.asymptoteHorizontale)} \\end{gathered}`;
   }
   const labels = directionLabels(exercice);
-  return `\\begin{gathered} ${labels[0].latex} : ${formatEquationAsymptoteLatex(exercice.asymptotePlusInfini)} \\\\ ${labels[1].latex} : ${formatEquationAsymptoteLatex(exercice.asymptoteMoinsInfini)} \\end{gathered}`;
+  // Famille C : coefficient de l'asymptote oblique écrit SYMBOLIQUEMENT (« -2\ln(2)\,x »), jamais
+  // le flottant `cible.a` (« y=-1.386…x » s'affichait dans la réponse attendue et le récapitulatif).
+  const equation = (cible: CibleAsymptote) =>
+    exercice.famille === "C" && cible.type === "oblique" ? `y=-${formatCoefficientCLatex(exercice.m, exercice.base, exercice.p)}\\,x` : formatEquationAsymptoteLatex(cible);
+  return `\\begin{gathered} ${labels[0].latex} : ${equation(exercice.asymptotePlusInfini)} \\\\ ${labels[1].latex} : ${equation(exercice.asymptoteMoinsInfini)} \\end{gathered}`;
 }
 
 /** Contenu affiché par la `LigneRecap` d'un écran donné — LA RÉPONSE RÉELLEMENT ATTENDUE de cet
@@ -549,18 +590,22 @@ export function contenuRecapPhase(exercice: ExerciceEtudeFonctionExponentielle, 
       return { texte: null, latex: formatAsymptotesRecapLatex(exercice) };
     case "croissance": {
       const c = exercice.croissance;
-      if (c.type === "croissante_partout") return { texte: "Croissante (partout)", latex: null };
-      if (c.type === "decroissante_partout") return { texte: "Décroissante (partout)", latex: null };
-      return { texte: `${c.type === "minimum" ? "Minimum" : "Maximum"} en x=${c.position}`, latex: null };
+      // Famille B : monotone sur CHAQUE intervalle du domaine, pas « partout » (f n'est pas monotone sur
+      // ℝ \ {p} : elle repart de +∞ ou de 0 de l'autre côté du point exclu).
+      const ou = exercice.famille === "B" ? "sur chaque intervalle du domaine" : "(partout)";
+      if (c.type === "croissante_partout") return { texte: `Croissante ${ou}`, latex: null };
+      if (c.type === "decroissante_partout") return { texte: `Décroissante ${ou}`, latex: null };
+      return { texte: null, latex: `\\text{${c.type === "minimum" ? "Minimum" : "Maximum"} en } x=${positionLatex(c.position ?? 0)}` };
     }
     case "concavite": {
       const c = exercice.concavite;
       if (c.type === "convexe_partout") return { texte: "Convexe (partout)", latex: null };
       if (c.type === "concave_partout") return { texte: "Concave (partout)", latex: null };
-      return { texte: `Point d'inflexion en x=${c.position}`, latex: null };
+      return { texte: null, latex: `\\text{Point d'inflexion en } x=${positionLatex(c.position ?? 0)}` };
     }
     case "graphique":
-      return { texte: `Graphique n°${exercice.indexCorrect + 1}`, latex: null };
+      // Lettre des graphiques de l'écran (`EtapeSelectionGraphiqueQCM` : A, B, C, D) et du papier.
+      return { texte: `Graphique ${"ABCD"[exercice.indexCorrect] ?? exercice.indexCorrect + 1}`, latex: null };
   }
 }
 
