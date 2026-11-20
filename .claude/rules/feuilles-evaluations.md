@@ -816,3 +816,30 @@ plus π/2 + kπ pour les valeurs écartées) : 1 190 tirages, ≈ 12 600 égalit
 (2 graines, évaluation 2 séries + aménagée + feuille) : 0 débordement à 680 et 1 280 px, 0 formule
 coupée, 0 `.katex-error`. Plan réel `construirePlan` (2 séries, calculatrice interdite / autorisée,
 cas particulier coché) : même structure, verdicts différents, QR `?code=` 26 / 26 identiques.
+
+## 6e ch. 2, lot G — 6gen148–6gen151 (nouveaux, notés)
+
+Socle d'écrans de 5gen54–57 réutilisé (`AppEcransTrigo` + `DefinitionEcrans`, options ajoutées sans
+effet sur le 5e : `eyebrow`/`sousTitre`, `ChampEcran.apercu`, `aidesChoixDeuxNiveaux`) ; saisie
+`moteur6e/lectureExpoLotG.ts` (évaluateur du chapitre, milliers, unité finale, préfixe « k = »,
+`lireDroite` : toute équation de droite), écritures `ui6e/nombresExpoLotG.ts`, figure
+`ui6e/figureExpoLotG.ts` (quadrillage d'une unité, `clipPath` à identifiant dérivé du contenu).
+Corrigés `generateurs6e/{lireCourbeExponentielle,tangenteExponentielle,modeleSaturation,interetsComposes}/corrigeDetaille.ts`,
+une lettre par écran. **6gen148** (courbe k·aˣ + c) : énoncé papier = courbe + asymptote en
+pointillés, sans point marqué, l'énoncé dit que les points d'abscisses 0 et ±1 sont sur des nœuds ;
+figure annotée (points et coordonnées) en `figureHtml` sous l'étape b (7 cm) ; lectures « une relation
+par chose lue » (`y = c`, `f(0) = …`, `f(1) = …`) ; cas particulier `asymptote-axe` (c = 0). **6gen149**
+(tangente et ln a) : ln a = pente en (0 ; 1), écrit `\ln(a)` comme le cours, valeurs exactes jusqu'à
+la dernière ligne ; en `en-zero` le signe est le verdict (choix fermé, 50/50) → piège constant 0
+(niveau 3 dans les deux issues). **6gen150** (L + C·qᵗ) : trois vraies questions papier (modèle,
+prévision, seuil), mesures entières exactes, q^t écrit r^{t/d} (q jamais arrondi dans un calcul),
+seuil par ln à la calculatrice ; `calculatriceIndispensable`. **6gen151** (intérêts composés) : trois
+vraies questions, formule des intérêts composés dans l'énoncé, limite par m = n/r, aucun logarithme ;
+`calculatriceIndispensable`. Lectures : 6gen148 a seulement. Méthode 1 / 0 / 2 / 1 ; piège : 6gen148
+k < 0 ou a < 1, 6gen149 pente négative ou x₀ < 0 (sauf `en-zero`), 6gen150 C < 0. Mesuré (400 tirages
+libres + 50 par variante, `niveauEtDuree`) : 6gen148 niv. 3–4, 9 min ; 6gen149 3–4, 9 min ; 6gen150 5–6,
+15 min ; 6gen151 4, 9 min. Collecteur (outils de `corrige-6e3-m1` recopiés ; espace fine des milliers
+lue dans un nombre, « ≈ » toléré à la demi-unité du dernier chiffre écrit, × (1 + |x|) pour une droite
+à coefficients arrondis) : 2 100 tirages, ≈ 47 700 égalités, 0 fausse. Documents réels (2 graines,
+calculatrice interdite / autorisée, évaluation 2 séries + aménagée + feuille + Word du corrigé) :
+0 débordement à 680, 820 et 1 280 px, 0 `.katex-error`.

@@ -29,7 +29,7 @@ function etapeAsymptote(e: E): EtapeCorrection[] {
       ligne(`y=${n(e.c)}`, "droite en pointillés, lue sur l'axe vertical : la courbe s'en approche sans l'atteindre"),
     ]),
     resultat(sq, rep(e, "asymptote")),
-    piege(sq, [t("Confondre l'asymptote avec l'ordonnée à l'origine "), f("f(0)"), t(", ou écrire une droite verticale "), f("x=\\ldots"), t(".")]),
+    piege(sq, [t("Confondre l'asymptote avec l'ordonnée à l'origine "), f("f(0)"), t(", ou écrire l'équation d'une droite verticale.")]),
   ];
 }
 
@@ -45,7 +45,7 @@ function etapeK(e: E): EtapeCorrection[] {
   ]);
   return [
     utilise(sq, [t("En "), f("x=0"), t(", "), f("a^{0}=1"), t(" : l'ordonnée à l'origine vaut "), f("k+c"), t(" (cours, § 1).")]),
-    { ...appel, figureHtml: figure(e, "corrige") },
+    { ...appel, figureHtml: `<div style="max-width:7cm;margin:0 auto">${figure(e, "corrige")}</div>` },
     resultat(sq, rep(e, "k")),
     verification(sq, [t(`La courbe est ${e.k > 0 ? "au-dessus" : "en dessous"} de son asymptote : `), f(e.k > 0 ? "k>0" : "k<0"), t(".")]),
     piege(sq, [t("Prendre "), f("k=f(0)"), t(" en oubliant de retirer "), f("c"), t(".")]),

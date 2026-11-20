@@ -2,7 +2,7 @@ import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, Criter
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/corrigeTableau";
 import type { ExerciceInteretsComposes, VarianteInteretsComposes } from "../../core6e/interetsComposes";
-import { PHASES_INTERETS, consigne, consigneGenerale, questionCapitaux, questionLimite, questionTaux, reponse } from "../../ui6e/formatInteretsComposes";
+import { PHASES_INTERETS, consigne, consigneGenerale, questionCapitaux, questionTaux, reponse } from "../../ui6e/formatInteretsComposes";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceInteretsComposes } from "./index";
 import { correctionDetailleeInteretsComposes } from "./corrigeDetaille";
 
@@ -29,7 +29,7 @@ function enoncePapier(e: E): EnoncePapier {
   return {
     section: {
       enteteFragments: consigneGenerale(e),
-      questions: [{ consigne: [t(questionCapitaux(e))] }, { consigne: [t(questionLimite(e))] }, { consigne: [t(questionTaux(e))] }],
+      questions: [{ consigne: [t(questionCapitaux(e))] }, { consigne: consigne(e, "limite") }, { consigne: [t(questionTaux(e))] }],
     },
     etapesParQuestion: [["a"], ["b"], ["c"]],
     reponseBreve: reponseBreve(e),

@@ -67,7 +67,7 @@ export function figure(e: E, usage: UsageFigure): string {
   const commun = { ...k, courbe: (x: number) => evaluer(e, x), asymptoteY: e.c, points };
   return usage === "ecran"
     ? figureExpoSvg({ ...commun, largeurMax: 340, hauteurMax: 340, carreauMin: 18, carreauMax: 40, police: 12, fluide: true })
-    : figureExpoSvg({ ...commun, largeurMax: 300, hauteurMax: 280, carreauMin: 14, carreauMax: 26, police: 9 });
+    : figureExpoSvg({ ...commun, largeurMax: 340, hauteurMax: 300, carreauMin: 14, carreauMax: 30, police: 10 });
 }
 
 // ---------------------------------------------------------------------------

@@ -24,11 +24,11 @@ const centimes = (x: number) => milliersL(x, 2, true);
 /** K₀(1 + r/n)^{nt} substitué (exposant calculé). */
 export function capitalSubstL(e: E, n: number): string {
   const base = n === 1 ? `(1+${rL(e)})` : `\\left(1+\\dfrac{${rL(e)}}{${n}}\\right)`;
-  return `${kL(e)}\\cdot ${base}^{${n * e.t}}`;
+  return `${kL(e)}\\,${base}^{${n * e.t}}`;
 }
 
 export function consigneGenerale(e: E): Frag[] {
-  const formule: Frag[] = [tx(" Avec "), lx("n"), tx(" capitalisations par an au taux annuel "), lx("r"), tx(", le capital après "), lx("t"), tx(" ans vaut "), lx("K_n=K_0\\left(1+\\dfrac{r}{n}\\right)^{n\\,t}"), tx(".")];
+  const formule: Frag[] = [tx(" Avec "), lx("n"), tx(" capitalisations par an au taux annuel "), lx("r"), tx(", le capital après "), lx("t"), tx(" ans vaut "), lx("K_n=K_0\\left(1+\\dfrac{r}{n}\\right)^{n\\,t}.")];
   if (e.variante === "bernoulli")
     return [tx(`En 1683, Jacob Bernoulli se demande ce que devient un capital de ${milliersT(e.K0, 0)} florins placé un an au taux annuel de 100 %, si la banque verse les intérêts de plus en plus souvent.`), ...formule];
   return [tx(`On place ${milliersT(e.K0, 0)} € pendant ${e.t} an${e.t > 1 ? "s" : ""} au taux annuel de ${rPctT(e)}, intérêts composés.`), ...formule];
@@ -40,7 +40,6 @@ export function libelle(_e: E, phase: PhaseInteretsComposes): string {
 
 export const questionCapitaux = (e: E): string =>
   `Calcule le capital final si les intérêts sont versés ${nomFrequence(e.frequences[0])}, ${nomFrequence(e.frequences[1])}, puis ${nomFrequence(e.frequences[2])} (au centime).`;
-export const questionLimite = (_e: E): string => "Vers quel capital tend-on quand les intérêts sont versés de plus en plus souvent (n → +∞) ? Donne la valeur exacte, puis au centime.";
 export const questionTaux = (_e: E): string => "Avec cette capitalisation continue, quel taux annuel simple (versé une fois par an) donnerait le même capital au bout d'un an ? Exprime-le en %, au centième.";
 
 export function consigne(e: E, phase: PhaseInteretsComposes): Frag[] {

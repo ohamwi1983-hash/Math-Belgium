@@ -35,7 +35,7 @@ export function puissanceL(e: E, exp: string): string {
 }
 /** « \ln 3 », « \ln(0{,}5) », « \ln\left(\dfrac{1}{3}\right) ». */
 export function lnL(e: E): string {
-  if (baseEntiere(e)) return `\\ln ${aL(e)}`;
+  if (baseEntiere(e)) return `\\ln(${aL(e)})`;
   return aL(e).includes("frac") ? `\\ln\\left(${aL(e)}\\right)` : `\\ln(${aL(e)})`;
 }
 /** Coefficient devant un facteur : 1 → «  », −1 → « - », 3 → « 3 », 3/4 → « \dfrac{3}{4} ». */

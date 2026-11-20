@@ -1,7 +1,7 @@
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceTangenteExpo } from "../../core6e/tangenteExponentielle";
-import { aVal, coefPente, image, imageExacte, ordonneeOrigine, pente } from "../../core6e/tangenteExponentielle";
+import { aVal, coefPente, image, imageExacte, pente } from "../../core6e/tangenteExponentielle";
 import { nbL, rat, ratL, ratMul } from "../../ui6e/nombresExpoLotG";
 import { aL, expressionL, imageL, lnL, penteL, phases, puissanceL, reponse, tangenteApproxL, tangenteL } from "../../ui6e/formatTangenteExponentielle";
 
@@ -20,6 +20,14 @@ const par = (s: string) => (s.startsWith("-") ? `(${s})` : s);
 const approx = (v: number) => nbL(v, 2, true);
 const COURS = "(cours, § 2)";
 const eL = (p: number) => (p === 1 ? "e" : `e^{${p}}`);
+
+/** Facteurs k et u' = m devant e^{…} (le facteur 1 omis) : « 2\\cdot (-3)\\cdot  », « -1\\cdot  », «  ». */
+function facteursE(e: E): string {
+  const f: string[] = [];
+  if (e.k !== 1) f.push(n(e.k));
+  if (e.m !== 1) f.push(f.length ? par(n(e.m)) : n(e.m));
+  return f.length ? `${f.join("\\cdot ")}\\cdot ` : "";
+}
 
 function etapeSigne(e: E): EtapeCorrection[] {
   const sq = "a";
@@ -93,9 +101,9 @@ function etapePente(e: E): EtapeCorrection[] {
   return [
     utilise(sq, [t("Base "), f("e"), t(" : "), f("\\ln e=1"), t(", la règle de la chaîne suffit "), t(COURS), t(" : "), f("(e^{u})'=u'\\cdot e^{u}"), t(".")]),
     calcul(sq, [
-      ligne(`f'(x)=${n(e.k)}\\cdot ${par(n(e.m))}\\cdot e^{${e.m === 1 ? "x" : e.m === -1 ? "-x" : `${e.m}x`}}`, [f(`u=${e.m === 1 ? "x" : e.m === -1 ? "-x" : `${e.m}x`}`), t(", "), f(`u'=${e.m}`)]),
-      ligne(`f'(${n(e.x0)})=${n(e.k)}\\cdot ${par(n(e.m))}\\cdot ${eL(p)}`, "on remplace x"),
-      ligne(`=${penteL(e)}`),
+      ligne(`f'(x)=${facteursE(e)}e^{${e.m === 1 ? "x" : e.m === -1 ? "-x" : `${e.m}x`}}`, [f(`u=${e.m === 1 ? "x" : e.m === -1 ? "-x" : `${e.m}x`}`), t(", "), f(`u'=${e.m}`)]),
+      ligne(`f'(${n(e.x0)})=${facteursE(e)}${eL(p)}`, "on remplace x"),
+      ...(facteursE(e) === "" ? [] : [ligne(`=${penteL(e)}`)]),
       ligne(`\\approx ${approx(pente(e))}`, [t("touche "), f("e^{x}"), t(" de la calculatrice")]),
     ]),
     resultat(sq, reponse(e, "pente")),
@@ -131,13 +139,11 @@ function etapeTangente(e: E): EtapeCorrection[] {
           ligne(`y=${penteL(e) === "" ? "" : penteL(e)}\\,x${ordonneeExacteL(e) === "0" ? "" : ordonneeExacteL(e).startsWith("-") ? ordonneeExacteL(e) : `+${ordonneeExacteL(e)}`}`, "on distribue"),
           ligne(tangenteApproxL(e), "coefficients arrondis au centième"),
         ];
-  const verifs: LigneCalcul[] = e.variante === "en-zero" ? [ligne(`y(0)=1`, "la tangente passe par (0 ; 1)")] : [ligne(`y(${n(e.x0)})=${imageL(e)}=f(${n(e.x0)})`, "en x₀, le facteur (x − x₀) s'annule")];
-  void ordonneeOrigine;
   return [
     utilise(sq, [t("Tangente au point d'abscisse "), f("x_0"), t(" : "), f("y=f'(x_0)\\,(x-x_0)+f(x_0)"), t(".")]),
     calcul(sq, lignes),
     resultat(sq, reponse(e, "tangente")),
-    verification(sq, [t("La tangente passe bien par le point de contact :")], verifs),
+    verification(sq, e.variante === "en-zero" ? [t("En "), f("x=0"), t(", l'équation donne 1 : la tangente passe bien par le point "), f("(0\\,;1)"), t(".")] : [t("En "), f(`x=${n(e.x0)}`), t(", le facteur "), f("(x-x_0)"), t(" s'annule et l'équation redonne "), f(`f(${n(e.x0)})`), t(" : la tangente passe par le point de contact.")]),
     piege(sq, e.variante === "en-zero" ? [t("Prendre "), f("a"), t(" comme pente, ou oublier l'ordonnée à l'origine 1.")] : [t("Garder "), f("f(x_0)"), t(" comme ordonnée à l'origine sans développer, ou écrire "), f("x+x_0"), t(".")]),
   ];
 }

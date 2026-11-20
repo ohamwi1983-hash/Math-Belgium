@@ -25,8 +25,8 @@ function construireEnonce(e: E): SectionExercice {
 function enoncePapier(e: E): EnoncePapier {
   const section =
     e.variante === "en-zero"
-      ? { enteteFragments: [t("Soit "), f(fonctionL(e)), t(". Sans calculatrice, donne le signe de la pente de la tangente à la courbe de f au point "), f("(0\\,;1)"), t(" en justifiant, puis la valeur exacte de cette pente et l'équation de cette tangente.")], questions: [] }
-      : { enteteFragments: [t("Soit "), f(fonctionL(e)), t(". Détermine l'équation de la tangente à la courbe de f au point d'abscisse "), f(String(e.x0)), t(" (valeurs exactes, puis coefficients arrondis au centième).")], questions: [] };
+      ? { enteteFragments: [t("Soit "), f(fonctionL(e)), t(". Sans calculatrice, donne le signe de la pente de la tangente à la courbe de "), f("f"), t(" au point "), f("(0\\,;1)"), t(" en justifiant, puis la valeur exacte de cette pente et l'équation de cette tangente.")], questions: [] }
+      : { enteteFragments: [t("Soit "), f(fonctionL(e)), t(". Détermine l'équation de la tangente à la courbe de "), f("f"), t(" au point d'abscisse "), f(String(e.x0)), t(" (valeurs exactes, puis coefficients arrondis au centième).")], questions: [] };
   return { section };
 }
 
@@ -41,8 +41,10 @@ function construireCorrection(e: E): BlocCorrection[] {
 
 function criteresDifficulte(e: E): CriteresDifficulte {
   // Aucune lecture ; méthode imposée (formule de la tangente) ; piège dans les données : pente
-  // négative (base < 1, k < 0, m < 0) ou exposant négatif ; ln a / e^n → nombres 1.
-  const piege = (e.base && aVal(e) < 1) || e.k < 0 || e.m < 0 || e.x0 < 0 ? 1 : 0;
+  // négative (base < 1, k < 0, m < 0) ou exposant négatif ; ln a / e^n → nombres 1. En `en-zero`,
+  // le signe de la pente EST le verdict de l'écran a : piège constant 0, sinon le niveau imprimé
+  // (3 ou 4) trahirait le verdict (même règle que gen81).
+  const piege = e.variante === "en-zero" ? 0 : (e.base && aVal(e) < 1) || e.k < 0 || e.m < 0 || e.x0 < 0 ? 1 : 0;
   return { ...etapesDuCorrige(correctionDetailleeTangenteExpo(e), []), methode: 0, piege, nombres: 1 };
 }
 

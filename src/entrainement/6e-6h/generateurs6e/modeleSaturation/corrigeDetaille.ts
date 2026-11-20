@@ -34,7 +34,7 @@ function etapeRapport(e: E): EtapeCorrection[] {
   const brut = rat(d2, d1);
   if (!(d1 === e.r.den && d2 === e.r.num)) lignes.push(ligne(`=${ratL(brut)}`, "on simplifie"));
   return [
-    utilise(sq, [t("Dans la différence de deux mesures, L disparaît : "), f(`${N}(t+d)-${N}(t)=C\\,q^{t}\\,(q^{d}-1)`), t(". Deux écarts successifs sont donc dans le rapport "), f("q^{d}"), t(` ${COURS}.`)]),
+    utilise(sq, [t("Dans la différence de deux mesures, "), f("L"), t(" disparaît : "), f(`${N}(t+d)-${N}(t)=C\\,q^{t}\\,(q^{d}-1)`), t(". Deux écarts successifs sont donc dans le rapport "), f("q^{d}"), t(` ${COURS}.`)]),
     calcul(sq, lignes),
     resultat(sq, reponse(e, "rapport")),
     verification(sq, [t("Rapport compris entre 0 et 1 : les écarts rétrécissent, la grandeur se stabilise.")]),
@@ -70,7 +70,7 @@ function etapeQ(e: E): EtapeCorrection[] {
     calcul(sq, [ligne(`q^{${e.d}}=${rL(e)}`), ligne(`q=${puissR(e, `\\frac{1}{${e.d}}`)}`, "racine de r (touche de la calculatrice)"), ligne(`\\approx ${qL(e)}`)]),
     resultat(sq, reponse(e, "q")),
     verification(sq, [t("Le modèle complet : "), f(modeleL(e)), t(".")]),
-    piege(sq, [t("Prendre "), f("q=r"), t(" : r porte sur "), f(`${e.d}`), t(" unités de temps, pas sur une.")]),
+    piege(sq, [t("Prendre "), f("q=r"), t(" : "), f("r"), t(" porte sur "), f(`${e.d}`), t(" unités de temps, pas sur une.")]),
   ];
 }
 
@@ -86,7 +86,7 @@ function etapePrevision(e: E): EtapeCorrection[] {
     ]),
     resultat(sq, reponse(e, "prevision")),
     verification(sq, [t(`La prévision est entre la valeur limite et la mesure initiale${e.tPrev < 2 * e.d ? ", et entre les deux mesures qui l'encadrent" : ""}.`)]),
-    piege(sq, [t("Oublier L (calculer seulement "), f("C\\cdot q^{t}"), t(") ou utiliser r au lieu de q.")]),
+    piege(sq, [t("Oublier "), f("L"), t(" (calculer seulement "), f("C\\cdot q^{t}"), t(") ou utiliser "), f("r"), t(" au lieu de "), f("q"), t(".")]),
   ];
 }
 
@@ -108,7 +108,7 @@ function etapeSeuil(e: E): EtapeCorrection[] {
     ]),
     resultat(sq, reponse(e, "seuil")),
     verification(sq, [t("Le modèle donne bien le seuil à cet instant :")], [ligne(`${N}(${nbL(e.tSeuil, 1, true)})\\approx ${nbL(modele(e, Math.round(e.tSeuil * 10) / 10), 1, true)}`, "à un dixième près")]),
-    piege(sq, [t("Diviser S par C sans retirer L, ou utiliser r à la place de q.")]),
+    piege(sq, [t("Diviser "), f("S"), t(" par "), f("C"), t(" sans retirer "), f("L"), t(", ou utiliser "), f("r"), t(" à la place de "), f("q"), t(".")]),
   ];
 }
 
