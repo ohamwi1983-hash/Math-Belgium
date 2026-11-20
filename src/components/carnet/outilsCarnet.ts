@@ -1,8 +1,6 @@
 /**
  * Petits outils d'interface du carnet (presse-papiers, fiche, mémoire de la classe active).
  */
-import { declencherTelechargement } from '../../entrainement/export/telechargerBlob'
-
 /** Copie `texte` (et `html` quand le navigateur sait coller du texte riche). Faux si aucune méthode
  * n'a marché : l'appelant affiche alors le texte à copier à la main. */
 export async function copierTexte(texte: string, html?: string): Promise<boolean> {
@@ -57,8 +55,17 @@ export function ouvrirFiche(html: string): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
 
+/** Téléchargement de la fiche (`<a download>`) ; l'URL n'est libérée qu'après coup (la libérer
+ * aussitôt fait perdre le nom du fichier dans certains navigateurs). */
 export function telechargerFiche(html: string, nomFichier: string): void {
-  declencherTelechargement(new Blob([html], { type: 'text/html;charset=utf-8' }), nomFichier.replace(/[\\/:*?"<>|]/g, '-'))
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }))
+  const lien = document.createElement('a')
+  lien.href = url
+  lien.download = nomFichier.replace(/[\\/:*?"<>|]/g, '-')
+  document.body.appendChild(lien)
+  lien.click()
+  lien.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 30_000)
 }
 
 const CLE_CLASSE = 'math-belgium-carnet-classe'

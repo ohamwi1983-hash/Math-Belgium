@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { generatorLink } from '../../lib/generatorLink'
-import { dateLongue, htmlSmartschool, resoudreSeance, texteSmartschool, type Classe, type FormatHoraire, type Seance } from '../../lib/carnet'
+import { dateLongue, htmlSmartschool, resoudreSeance, slugTitre, texteSmartschool, type Classe, type FormatHoraire, type Seance } from '../../lib/carnet'
 import { ficheSeanceHtml } from '../../lib/carnetFiche'
 import { copierTexte, ouvrirFiche, telechargerFiche } from './outilsCarnet'
 
@@ -33,7 +33,8 @@ export function CarteSeance({
   const [copie, setCopie] = useState<'ok' | 'echec' | null>(null)
   const r = resoudreSeance(seance, classe, { format, ecole, lienGenerateur: generatorLink })
   const texte = texteSmartschool(r)
-  const nomFiche = `Séance ${classe.nom} ${seance.date_seance}.html`
+  // Nom ASCII : un accent dans l'attribut `download` fait perdre le nom du fichier dans Chromium.
+  const nomFiche = `seance-${slugTitre(classe.nom)}-${seance.date_seance}.html`
 
   async function copier() {
     const ok = await copierTexte(texte, htmlSmartschool(r))

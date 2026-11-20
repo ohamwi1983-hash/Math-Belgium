@@ -54,7 +54,7 @@ export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterC
   }
 
   return (
-    <div className="lecture-entete">
+    <div className={`lecture-entete${professeur ? ' avec-carnet' : ''}`}>
       <p className="lecture-sheet-title">Ce chapitre</p>
       <div className="lecture-outils" ref={conteneurRef}>
         <Link className="lecture-outil" to={`/${chapter.levelSlug}/${chapter.slug}/exercices`} title="Feuilles d'exercices et évaluations du chapitre">

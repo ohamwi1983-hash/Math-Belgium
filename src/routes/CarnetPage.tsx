@@ -186,8 +186,10 @@ function Carnet() {
   }
 
   async function changerReglages(r: ReglagesCarnet) {
-    if (!client || !profil) return
-    await agir(() => enregistrerReglages(client, r, donnees!.reglagesExiste, profil.id), 'Réglage enregistré.')
+    if (!client || !profil || !donnees) return
+    const existe = donnees.reglagesExiste
+    setDonnees({ ...donnees, reglages: r }) // affiché tout de suite ; relu après l'enregistrement
+    await agir(() => enregistrerReglages(client, r, existe, profil.id), 'Réglage enregistré.')
   }
 
   const prerempli = formulaire?.mode === 'nouveau' ? { classeId: classe?.id ?? '', chapitre: formulaire.chapitre } : { classeId: classe?.id ?? '', chapitre: '' }

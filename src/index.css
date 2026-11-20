@@ -1856,5 +1856,10 @@ table.feature-table td { white-space: normal; }
   .carnet-sous-parties { padding-left: 22px; }
   .carnet-seance-actions .compte-bouton, .carnet-seance-actions .compte-bouton-secondaire { flex: 1 1 auto; }
 }
+/* Trois outils dans l'en-tête « Ce chapitre » (bouton « Carnet » d'un professeur connecté) : dans le
+ * sommaire étroit de l'ordinateur, les outils passent sous le titre plutôt que d'être rognés. */
+.lecture-entete.avec-carnet { flex-wrap: wrap; row-gap: 4px; }
+.lecture-entete.avec-carnet .lecture-sheet-title { white-space: nowrap; }
+.lecture-entete.avec-carnet .lecture-outils { margin-left: auto; }
 /* Bandeau du panneau des évaluations ouvert depuis le carnet (`?matiere=`). */
 .admin-eval-carnet { margin: 0 0 16px; padding: 12px 14px; border: 1px solid var(--accent-soft-line); border-radius: var(--radius); background: var(--accent-soft); color: var(--accent-ink); font-size: 0.95rem; }
