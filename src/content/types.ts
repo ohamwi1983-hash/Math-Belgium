@@ -122,6 +122,7 @@ export type InteractiveWidgetTag =
   | 'f-et-fprime-widget'
   | 'echelle-semi-log-widget'
   | 'croissance-comparee-log-widget'
+  | 'rattrapage-exponentielle-widget'
   | 'datation-carbone14-widget'
   | 'chainette-widget'
   | 'gauss-double-echelle-widget'

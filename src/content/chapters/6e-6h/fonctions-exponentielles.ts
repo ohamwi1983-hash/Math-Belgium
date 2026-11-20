@@ -484,6 +484,16 @@ export const fonctionsExponentielles: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'rattrapage-exponentielle-widget',
+          label: 'Manipule toi-même — le rattrapage : aˣ contre xⁿ',
+          caption:
+            "Choisis la base a et l'exposant n. Les points verts marquent les croisements ; le plus à " +
+            'droite est le dernier dépassement : à partir de lui, aˣ reste au-dessus de xⁿ. En échelle ' +
+            'logarithmique, aˣ devient une droite et le rattrapage reste visible même quand il arrive très ' +
+            'loin. La fenêtre ne change que par les sélecteurs, jamais par a ou n.',
+        },
+        {
           kind: 'piege',
           text:
             "$\\displaystyle\\lim_{x \\to +\\infty} (2^x - x^{1000}) = +\\infty$, **pas** $-\\infty$ ! Même " +
