@@ -2,7 +2,9 @@ import { useState } from "react";
 import type { ExerciceFormeCanoniqueTransformation, ReponseTh } from "../core/formeCanoniqueTransformations.types";
 import { diagnostiquerTh, fonctionCanoniqueReelle } from "../moteur/verificationFormeCanoniqueTransformations";
 import { formatFonctionCanoniqueLatex } from "../ui/formatFormeCanoniqueTransformations";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { aidesTh, messageTranslation, MESSAGE_FONCTION_ILLISIBLE } from "../ui/aidesParabole";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { MafsGraphFormeCanoniqueTransformations } from "./MafsGraphFormeCanoniqueTransformations";
 import { Katex } from "./Katex";
@@ -33,10 +35,10 @@ export function EtapeTh({ exercice, tentativesUtilisees, tentativesMax, onValide
   const [th, setTh] = useState(0);
   const [fonctionIntermediaire, setFonctionIntermediaire] = useState("");
 
+  const saisie = useTentativeLisible<ReponseTh>();
   const complet = fonctionIntermediaire.trim() !== "";
-  const montrerErreur = tentativesUtilisees > 0;
-  const statut = montrerErreur ? diagnostiquerTh(exercice, { th, fonctionIntermediaire }) : undefined;
-  const fonctionErronee = statut !== undefined && statut !== "correct";
+  const lisible = diagnostiquerTh(exercice, { th, fonctionIntermediaire }) !== "parse_error";
+  const fonctionErronee = tentativesUtilisees > 0 && !validation;
 
   const formeCanoniqueComplete = formatFonctionCanoniqueLatex(fonctionCanoniqueReelle(exercice, exercice.yS));
 
@@ -50,8 +52,8 @@ export function EtapeTh({ exercice, tentativesUtilisees, tentativesMax, onValide
       </p>
       <MafsGraphFormeCanoniqueTransformations confirmees={[]} live={{ p: th, q: 0, a: 1 }} />
       <div className="curseur-row">
-        <label className={montrerErreur && th !== exercice.xS ? "curseur-champ is-erronee" : "curseur-champ"} htmlFor="curseur-th">
-          <span>TH : {th}</span>
+        <label className="curseur-champ" htmlFor="curseur-th">
+          <span>TH : {String(th).replace("-", "−")}</span>
           <input
             id="curseur-th"
             type="range"
@@ -73,24 +75,27 @@ export function EtapeTh({ exercice, tentativesUtilisees, tentativesMax, onValide
           className={`text-input${fonctionErronee ? " is-erronee" : ""}`}
           placeholder="ex : (x-8)^2"
           value={fonctionIntermediaire}
-          onChange={(e) => setFonctionIntermediaire(e.target.value)}
+          onChange={(e) => setFonctionIntermediaire(normaliserSigneMoins(e.target.value))}
         />
       </div>
       {!validation && (
         <>
+        <AidesNiveaux aides={aidesTh()} />
         <button
           type="button"
           className="btn btn-primary"
           disabled={!complet}
-          onClick={() => onValider({ th, fonctionIntermediaire })}
+          onClick={() => saisie.tenter({ th, fonctionIntermediaire }, lisible, onValider)}
         >
           Valider
         </button>
-        {statut !== undefined && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour
+          illisible={saisie.illisible}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={MESSAGE_FONCTION_ILLISIBLE}
+          cible={saisie.soumise ? messageTranslation(exercice.xS, saisie.soumise.th, "horizontale") : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

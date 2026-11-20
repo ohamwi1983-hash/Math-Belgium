@@ -1,13 +1,16 @@
 import { useState } from "react";
 import type { ExerciceTransformationGraphique, ReponseCurseurs, ReponseTransformationGraphique } from "../core/transformationsGraphiques.types";
-import { evaluerCurseurs } from "../moteur/verificationTransformationsGraphiques";
+import { diagnostiquerEquationTransformation } from "../moteur/verificationTransformationsGraphiques";
 import { parametresDepuisCurseurs, parametresDepuisExercice } from "../ui/mafsTransformation";
 import { formatApercuEquation } from "../ui/formatTransformationsGraphiques";
 import { MafsGraphTransformation } from "./MafsGraphTransformation";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { RenduFragments } from "./RenduFragments";
+import { aidesTransformation, messageCurseurs, messageEquationTransformation, MESSAGE_FONCTION_ILLISIBLE } from "../ui/aidesParabole";
 
 interface Props {
   exercice: ExerciceTransformationGraphique;
@@ -16,6 +19,9 @@ interface Props {
   tentativesMax: number;
   equationFermee: boolean;
   curseursFermee: boolean;
+  /** Choix fermé SOX déjà joué (une seule tentative) et son verdict. */
+  soxFerme: boolean;
+  soxRevele: boolean;
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (reponse: ReponseTransformationGraphique) => void;
@@ -34,14 +40,12 @@ const TERMINOLOGIE: { abbr: string; texte: string }[] = [
 ];
 
 /**
- * Écran unique de l'exercice (section 2 de la spec) : énoncé, graphe Mafs (courbe cible seule, ou
- * avec la courbe manipulable si l'aide est activée), bouton "?", les 4 curseurs + le toggle SOX,
- * l'aperçu en temps réel de l'équation puis le champ équation libre, un seul bouton "Valider" qui
- * soumet les deux à la fois — ordre imposé par la correction 3 du prompt (énoncé → graphe → "?" →
- * curseurs). Les deux notes ("équation"/"curseurs") évoluent indépendamment côté moteur (voir
- * sessionTransformationsGraphiques.ts) : une fois l'une des deux closes, ses champs sont désactivés
- * ici mais restent affichés (l'élève continue de travailler l'autre note jusqu'à ce qu'elle se
- * résolve aussi).
+ * Écran unique de l'exercice : graphique, curseurs TH, TV, EV, CV, choix fermé « symétrie d'axe
+ * Ox ? », puis l'équation. Trois notes indépendantes côté moteur (`sessionTransformationsGraphiques`) :
+ * curseurs (3 tentatives), SOX (1 tentative, audit 4e ch. 1, R6) et équation (3 tentatives). Règles
+ * communes (lot B) : aucune correction case par case avant la clôture (un message ciblé dit où
+ * regarder), une équation illisible n'est jamais transmise (aucune tentative consommée), « − »
+ * accepté, aides à deux niveaux (le niveau 2 affiche la courbe pilotée par les curseurs).
  */
 export function EtapeTransformationExercice({
   exercice,
@@ -50,7 +54,8 @@ export function EtapeTransformationExercice({
   tentativesMax,
   equationFermee,
   curseursFermee,
-  aideActivee,
+  soxFerme,
+  soxRevele,
   onActiverAide,
   onValider,
   validation,
@@ -59,39 +64,41 @@ export function EtapeTransformationExercice({
   const [tv, setTv] = useState(0);
   const [ev, setEv] = useState(1);
   const [cv, setCv] = useState(1);
-  const [sox, setSox] = useState(false);
+  const [sox, setSox] = useState<boolean | null>(null);
   const [equation, setEquation] = useState("");
   const [terminologieOuverte, setTerminologieOuverte] = useState(false);
+  const [niveauAide, setNiveauAide] = useState(0);
+  const saisie = useTentativeLisible<ReponseTransformationGraphique>();
 
-  const curseurs: ReponseCurseurs = { th, tv, ev, cv, sox };
-  const evaluation = evaluerCurseurs(exercice, curseurs);
-  const montrerErreursCurseurs = !curseursFermee && tentativesCurseurs > 0;
-
+  const curseurs: ReponseCurseurs = { th, tv, ev, cv, sox: sox ?? false };
   const cible = parametresDepuisExercice(exercice);
-  const live = aideActivee ? parametresDepuisCurseurs(curseurs) : null;
+  const live = niveauAide >= 2 ? parametresDepuisCurseurs(curseurs) : null;
 
-  const boutonValiderDesactive = !equationFermee && equation.trim() === "";
-  const equationErronee = tentativesEquation > 0 && !equationFermee;
+  const pret = (equationFermee || equation.trim() !== "") && (soxFerme || sox !== null);
+  const lisible = equationFermee || diagnostiquerEquationTransformation(exercice, equation) !== "parse_error";
+  const bloque = !!validation;
 
-  function classeCurseur(correct: boolean): string {
-    return montrerErreursCurseurs && !correct ? "curseur-champ is-erronee" : "curseur-champ";
-  }
+  const curseur = (id: string, nom: string, valeur: number, min: number, max: number, maj: (v: number) => void) => (
+    <label className="curseur-champ" htmlFor={id}>
+      <span>
+        {nom} : {String(valeur).replace("-", "−")}
+      </span>
+      <input id={id} type="range" min={min} max={max} step={1} value={valeur} disabled={curseursFermee || bloque} onChange={(e) => maj(Number(e.target.value))} />
+    </label>
+  );
+
+  const soumise = saisie.soumise;
+  const cibleCurseurs = soumise && !curseursFermee && tentativesCurseurs > 0 ? messageCurseurs(exercice, soumise.curseurs) : null;
+  const cibleEquation = soumise && !equationFermee && tentativesEquation > 0 ? messageEquationTransformation(exercice, soumise.equation) : null;
 
   return (
     <div>
-      <p className="prompt-text">
-        Retrouve, par lecture graphique, les paramètres de la transformation, puis écris l'équation complète.
-      </p>
+      <p className="prompt-text">Retrouve, par lecture graphique, les paramètres de la transformation, puis écris l'équation complète.</p>
 
       <MafsGraphTransformation cible={cible} live={live} />
 
       <div className="transformation-entete">
-        <button
-          type="button"
-          className="btn btn-terminologie"
-          onClick={() => setTerminologieOuverte((v) => !v)}
-          aria-label="Rappel de la terminologie"
-        >
+        <button type="button" className="btn btn-terminologie" onClick={() => setTerminologieOuverte((v) => !v)} aria-label="Rappel de la terminologie">
           ?
         </button>
       </div>
@@ -104,82 +111,41 @@ export function EtapeTransformationExercice({
               </li>
             ))}
           </ul>
-          {/* EV et CV ne sont jamais comparés séparément (voir `evaluerCurseurs`) : seul leur
-           * RAPPORT compte, car il représente |a|. Sans cette précision, rien dans l'écran
-           * n'indique qu'il existe plusieurs réglages corrects pour un même |a| — repéré lors de
-           * l'audit du chapitre 1 (le widget "Manipule toi-même" de la leçon utilise un seul
-           * curseur, jamais deux à combiner, ce qui ne prépare pas l'élève à ce mécanisme ici). */}
           <p className="prompt-fact">
-            EV et CV se combinent : seul leur rapport EV / CV compte, il représente |a|. Plusieurs réglages peuvent donc être corrects (ex. EV=2 et CV=4 équivaut à EV=1 et CV=2).
+            EV et CV se combinent : seul leur rapport EV / CV compte, il représente <Katex expression="|a|" />. Plusieurs réglages peuvent donc être corrects (EV = 2 et CV = 4
+            équivaut à EV = 1 et CV = 2).
           </p>
         </div>
       )}
 
       <div className="curseur-row">
-        <label className={classeCurseur(evaluation.th)} htmlFor="curseur-th">
-          <span>TH : {th}</span>
-          <input
-            id="curseur-th"
-            type="range"
-            min={-5}
-            max={5}
-            step={1}
-            value={th}
-            disabled={curseursFermee}
-            onChange={(e) => setTh(Number(e.target.value))}
-          />
-        </label>
-        <label className={classeCurseur(evaluation.tv)} htmlFor="curseur-tv">
-          <span>TV : {tv}</span>
-          <input
-            id="curseur-tv"
-            type="range"
-            min={-5}
-            max={5}
-            step={1}
-            value={tv}
-            disabled={curseursFermee}
-            onChange={(e) => setTv(Number(e.target.value))}
-          />
-        </label>
+        {curseur("curseur-th", "TH", th, -5, 5, setTh)}
+        {curseur("curseur-tv", "TV", tv, -5, 5, setTv)}
       </div>
       <div className="curseur-row">
-        <label className={classeCurseur(evaluation.ev)} htmlFor="curseur-ev">
-          <span>EV : {ev}</span>
-          <input
-            id="curseur-ev"
-            type="range"
-            min={1}
-            max={5}
-            step={1}
-            value={ev}
-            disabled={curseursFermee}
-            onChange={(e) => setEv(Number(e.target.value))}
-          />
-        </label>
-        <label className={classeCurseur(evaluation.cv)} htmlFor="curseur-cv">
-          <span>CV : {cv}</span>
-          <input
-            id="curseur-cv"
-            type="range"
-            min={1}
-            max={5}
-            step={1}
-            value={cv}
-            disabled={curseursFermee}
-            onChange={(e) => setCv(Number(e.target.value))}
-          />
-        </label>
+        {curseur("curseur-ev", "EV", ev, 1, 5, setEv)}
+        {curseur("curseur-cv", "CV", cv, 1, 5, setCv)}
       </div>
 
-      <button
-        type="button"
-        className={classeCurseur(evaluation.sox) + " btn"}
-        disabled={curseursFermee}
-        onClick={() => setSox((v) => !v)}
-      >
-        {sox ? "SOX : Oui" : "SOX : Non"}
-      </button>
+      <p className="prompt-text prompt-text--question-multiple">La parabole a-t-elle subi une symétrie d'axe Ox (SOX) ?</p>
+      <div className="options-grid-compact">
+        {[true, false].map((v) => (
+          <button
+            key={String(v)}
+            type="button"
+            className={`btn${sox === v ? " toggle-active" : ""}${soxFerme && soxRevele && sox === v ? " is-erronee" : ""}`}
+            disabled={soxFerme || bloque}
+            onClick={() => setSox(v)}
+          >
+            {v ? "Oui, symétrie d'axe Ox" : "Non, pas de symétrie"}
+          </button>
+        ))}
+      </div>
+      {soxFerme && !bloque && (
+        <p className={soxRevele ? "alert-error" : "alert-success"} role="status">
+          {soxRevele ? `Symétrie : ce n'était pas le bon choix — la parabole ${exercice.sox ? "a" : "n'a pas"} subi de symétrie d'axe Ox.` : "Symétrie : bonne réponse."}
+        </p>
+      )}
 
       <div className="template-box">
         <Katex expression={formatApercuEquation(equation)} block />
@@ -190,35 +156,50 @@ export function EtapeTransformationExercice({
         </label>
         <input
           id="transfo-equation"
-          className={`text-input${equationErronee ? " is-erronee" : ""}`}
+          className={`text-input${tentativesEquation > 0 && !equationFermee ? " is-erronee" : ""}`}
           placeholder="ex : 7/6(x-8)^2+9"
           value={equation}
-          disabled={equationFermee}
-          onChange={(e) => setEquation(e.target.value)}
+          disabled={equationFermee || bloque}
+          onChange={(e) => setEquation(normaliserSigneMoins(e.target.value))}
         />
       </div>
-      {tentativesEquation > 0 && !equationFermee && (
-        <p className="alert-error" role="alert">
-          Équation incorrecte — tentative {tentativesEquation}/{tentativesMax}, réessaie.
-        </p>
-      )}
-      {montrerErreursCurseurs && (
-        <p className="alert-error" role="alert">
-          Curseurs incorrects (en rouge) — tentative {tentativesCurseurs}/{tentativesMax}, réessaie.
-        </p>
-      )}
 
       {!validation && (
         <>
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={boutonValiderDesactive}
-          onClick={() => onValider({ equation, curseurs })}
-        >
-          Valider
-        </button>
+          <AidesNiveaux aides={aidesTransformation()} onPremiereAide={onActiverAide} onNiveau={setNiveauAide} />
+          <button type="button" className="btn btn-primary" disabled={!pret} onClick={() => saisie.tenter({ equation, curseurs }, lisible, onValider)}>
+            Valider
+          </button>
+          {saisie.illisible ? (
+            <MessageRetour illisible tentativesUtilisees={0} tentativesMax={tentativesMax} texteIllisible={MESSAGE_FONCTION_ILLISIBLE} />
+          ) : (
+            <>
+              {tentativesEquation > 0 && !equationFermee && (
+                <p className="alert-error" role="alert">
+                  <span>
+                    {cibleEquation && (
+                      <>
+                        <RenduFragments fragments={cibleEquation} />{" "}
+                      </>
+                    )}
+                    Équation incorrecte — tentative {tentativesEquation}/{tentativesMax}, réessaie.
+                  </span>
+                </p>
+              )}
+              {tentativesCurseurs > 0 && !curseursFermee && (
+                <p className="alert-error" role="alert">
+                  <span>
+                    {cibleCurseurs && (
+                      <>
+                        <RenduFragments fragments={cibleCurseurs} />{" "}
+                      </>
+                    )}
+                    Curseurs incorrects (TH, TV ou rapport EV/CV) — tentative {tentativesCurseurs}/{tentativesMax}, réessaie.
+                  </span>
+                </p>
+              )}
+            </>
+          )}
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

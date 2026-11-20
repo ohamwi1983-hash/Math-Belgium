@@ -15,7 +15,7 @@ export function calculerRecapitulatifAnalyseFonction(etat: EtatSessionAnalyseFon
 
   if (etat.scoreCoefficientsExercice !== null) {
     const { a, b, c } = exercice.enonce;
-    entrees.push({ libelle: "Coefficients", estLatex: false, valeur: `a = ${a} ; b = ${b} ; c = ${c}`, revele: etat.coefficientsRevele });
+    entrees.push({ libelle: "Coefficients", estLatex: false, valeur: `a = ${a} ; b = ${b} ; c = ${c}`.replace(/-/g, "−"), revele: etat.coefficientsRevele });
   }
 
   if (etat.scoreAllureExercice !== null) {
@@ -28,8 +28,8 @@ export function calculerRecapitulatifAnalyseFonction(etat: EtatSessionAnalyseFon
   if (etat.scoreAxeSommetExercice !== null) {
     // Fractions irréductibles (point 2, prompt-4-modifications-analyse-fonction.md) — jamais un
     // décimal, jamais "n/1" pour une valeur entière.
-    const xSFrac = formatFractionIrreductible(xS);
-    const ySFrac = formatFractionIrreductible(yS);
+    const xSFrac = formatFractionIrreductible(xS).replace("-", "−");
+    const ySFrac = formatFractionIrreductible(yS).replace("-", "−");
     entrees.push({
       libelle: "Axe de symétrie et sommet",
       estLatex: false,
@@ -39,8 +39,9 @@ export function calculerRecapitulatifAnalyseFonction(etat: EtatSessionAnalyseFon
   }
 
   if (etat.scoreDomaineImageExercice !== null) {
-    const imf = exercice.enonce.a > 0 ? `[${yS} ; +∞[` : `]-∞ ; ${yS}]`;
-    entrees.push({ libelle: "Domaine et image", estLatex: false, valeur: `domf = ℝ ; imf = ${imf}`, revele: etat.domaineImageRevele });
+    const y = formatFractionIrreductible(yS).replace("-", "−");
+    const imf = exercice.enonce.a > 0 ? `[${y} ; +∞[` : `]−∞ ; ${y}]`;
+    entrees.push({ libelle: "Domaine et image", estLatex: false, valeur: `dom f = ℝ ; im f = ${imf}`, revele: etat.domaineImageRevele });
   }
 
   if (etat.scoreRacinesReconnaissanceExercice !== null) {
@@ -63,8 +64,8 @@ export function calculerRecapitulatifAnalyseFonction(etat: EtatSessionAnalyseFon
 
   if (etat.scoreRacinesChamp2Exercice !== null) {
     const [r1, r2] = exercice.solution.racines;
-    const valeur = r1 === r2 ? String(r1) : exercice.solution.racines.join(" ; ");
-    entrees.push({ libelle: "Racines", estLatex: false, valeur, revele: etat.racinesChamp2Revele });
+    const valeur = (r1 === r2 ? String(r1) : [...exercice.solution.racines].sort((u, v) => u - v).join(" ; ")).replace(/-/g, "−");
+    entrees.push({ libelle: "Zéros", estLatex: false, valeur, revele: etat.racinesChamp2Revele });
   }
 
   return entrees;

@@ -29,6 +29,8 @@ export interface ResultatExerciceTransformationGraphique {
   scoreCurseurs: number;
   curseursRevele: boolean;
   curseursAideUtilisee: boolean;
+  /** Choix fermé « symétrie d'axe Ox ? » (audit 4e ch. 1, R6) : une seule tentative. */
+  soxRevele: boolean;
 }
 
 export interface EtatSessionTransformationGraphique {
@@ -38,6 +40,8 @@ export interface EtatSessionTransformationGraphique {
   exerciceCourant: ExerciceTransformationGraphique;
   etapeEquation: EtatEtapeTentatives;
   etapeCurseurs: EtatEtapeTentatives;
+  /** Choix fermé SOX (oui / non) : UNE tentative, note séparée des curseurs (qui restent des champs). */
+  etapeSox: EtatEtapeTentatives;
   /** Bouton "Aide" (section 2-3 de la spec) : révélation à sens unique, couvrant les DEUX notes. */
   aideUtilisee: boolean;
   /** Fixé au moment où etapeEquation se clôt ;

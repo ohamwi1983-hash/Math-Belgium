@@ -90,6 +90,10 @@ export interface EtatSessionOptimisation {
   sommetRevele: boolean;
   scoreDecisionExercice: number | null;
   decisionRevele: boolean;
+  /** Choix fermé « le sommet est-il dans le domaine ? » (audit 4e ch. 1, R6) : joué UNE fois — `null`
+   * tant qu'il ne l'a pas été, puis son verdict, figé (les tentatives suivantes ne portent que sur la
+   * valeur de la variable et la valeur optimale). */
+  choixDomaineCorrect: boolean | null;
   resultats: ResultatExerciceOptimisation[];
   terminee: boolean;
 }

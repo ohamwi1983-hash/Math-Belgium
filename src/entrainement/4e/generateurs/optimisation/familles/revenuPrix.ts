@@ -78,7 +78,7 @@ interface SkinRevenuPrix {
 }
 
 const AIDE_PRIX_CLIENTS_NIVEAU1 = "Rappel : chaque € de hausse x fait perdre un nombre fixe de clients — la quantité vendue y en dépend directement.";
-const AIDE_PRIX_CLIENTS_NIVEAU2 = "La perte totale de clients au fil de la hausse x et la quantité restante y sont liées par une somme constante, égale à Q0.";
+const AIDE_PRIX_CLIENTS_NIVEAU2 = "La perte totale de clients au fil de la hausse x et la quantité restante y sont liées par une somme constante, égale à la valeur moyenne de départ donnée dans l'énoncé.";
 
 const SKINS: SkinRevenuPrix[] = [
   {
@@ -160,7 +160,7 @@ const SKINS: SkinRevenuPrix[] = [
     uniteVariable: "représentations",
     uniteGrandeurFautive: "représentations",
     texteAideContrainteNiveau1: "Rappel : chaque représentation supplémentaire programmée fait baisser la fréquentation moyenne des autres — les 2 quantités sont liées directement.",
-    texteAideContrainteNiveau2: "La perte de fréquentation moyenne au fil des représentations ajoutées x et la fréquentation restante y sont liées par une somme constante, égale à Q0.",
+    texteAideContrainteNiveau2: "La perte de fréquentation moyenne au fil des représentations ajoutées x et la fréquentation restante y sont liées par une somme constante, égale à la valeur moyenne de départ donnée dans l'énoncé.",
   },
   // ===== Thème "densité de plantation agricole" — rendement total = densité × rendement par plant.
   // P0 = nombre de pieds plantés par hectare (x s'y ajoute), Q0 = rendement par pied, en grammes
@@ -176,7 +176,7 @@ const SKINS: SkinRevenuPrix[] = [
     uniteVariable: "pieds",
     uniteGrandeurFautive: "pieds",
     texteAideContrainteNiveau1: "Rappel : chaque pied planté en plus fait baisser le rendement moyen des autres pieds — les 2 quantités sont liées directement.",
-    texteAideContrainteNiveau2: "La perte de rendement moyen au fil des pieds ajoutés x et le rendement restant par pied y sont liés par une somme constante, égale à Q0.",
+    texteAideContrainteNiveau2: "La perte de rendement moyen au fil des pieds ajoutés x et le rendement restant par pied y sont liés par une somme constante, égale à la valeur moyenne de départ donnée dans l'énoncé.",
   },
   // ===== Thème "élevage" — nombre d'animaux vs croissance/santé par animal. P0 = nombre de bovins
   // (x s'y ajoute), Q0 = gain de poids quotidien par bovin, en grammes (perd k par bovin
@@ -192,7 +192,7 @@ const SKINS: SkinRevenuPrix[] = [
     uniteVariable: "bovins",
     uniteGrandeurFautive: "bovins",
     texteAideContrainteNiveau1: "Rappel : chaque bovin introduit en plus fait baisser le gain de poids moyen des autres — les 2 quantités sont liées directement.",
-    texteAideContrainteNiveau2: "La perte de gain moyen au fil des bovins ajoutés x et le gain restant par bovin y sont liés par une somme constante, égale à Q0.",
+    texteAideContrainteNiveau2: "La perte de gain moyen au fil des bovins ajoutés x et le gain restant par bovin y sont liés par une somme constante, égale à la valeur moyenne de départ donnée dans l'énoncé.",
   },
   // ===== Thème "puissance de chauffe et autonomie (batterie/gaz)". P0 = puissance de chauffe, en
   // watts (x s'y ajoute), Q0 = autonomie à pleine charge, en minutes (perd k minutes par watt
@@ -208,7 +208,7 @@ const SKINS: SkinRevenuPrix[] = [
     uniteVariable: "W",
     uniteGrandeurFautive: "min",
     texteAideContrainteNiveau1: "Rappel : chaque watt de puissance supplémentaire fait baisser l'autonomie restante — les 2 quantités sont liées directement.",
-    texteAideContrainteNiveau2: "La perte d'autonomie au fil de la puissance ajoutée x et l'autonomie restante y sont liées par une somme constante, égale à Q0.",
+    texteAideContrainteNiveau2: "La perte d'autonomie au fil de la puissance ajoutée x et l'autonomie restante y sont liées par une somme constante, égale à la valeur moyenne de départ donnée dans l'énoncé.",
   },
   // ===== Thème "vitesse et endurance sportive" — distance/performance = vitesse × temps tenu,
   // règle explicitée dans le texte (même convention que les skins "abstrait"/"révision"/"budget" de
@@ -225,7 +225,7 @@ const SKINS: SkinRevenuPrix[] = [
     uniteVariable: "km/h",
     uniteGrandeurFautive: "min",
     texteAideContrainteNiveau1: "Rappel : chaque km/h de vitesse supplémentaire fait baisser le temps que le cycliste peut tenir — les 2 quantités sont liées directement.",
-    texteAideContrainteNiveau2: "La perte de temps tenu au fil de la vitesse ajoutée x et le temps restant y sont liés par une somme constante, égale à Q0.",
+    texteAideContrainteNiveau2: "La perte de temps tenu au fil de la vitesse ajoutée x et le temps restant y sont liés par une somme constante, égale à la valeur moyenne de départ donnée dans l'énoncé.",
   },
   // ===== Thème "publicité/lassitude" — diffusions × efficacité par diffusion. P0 = nombre de
   // diffusions par semaine (x s'y ajoute), Q0 = points d'impact par diffusion (perd k par diffusion
@@ -241,7 +241,7 @@ const SKINS: SkinRevenuPrix[] = [
     uniteVariable: "diffusions",
     uniteGrandeurFautive: "diffusions",
     texteAideContrainteNiveau1: "Rappel : chaque diffusion supplémentaire fait baisser l'impact moyen des autres diffusions — les 2 quantités sont liées directement.",
-    texteAideContrainteNiveau2: "La perte d'impact moyen au fil des diffusions ajoutées x et l'impact restant par diffusion y sont liés par une somme constante, égale à Q0.",
+    texteAideContrainteNiveau2: "La perte d'impact moyen au fil des diffusions ajoutées x et l'impact restant par diffusion y sont liés par une somme constante, égale à la valeur moyenne de départ donnée dans l'énoncé.",
   },
   // ===== Thème "débit internet partagé entre connexions simultanées". P0 = nombre de connexions
   // simultanées (x s'y ajoute), Q0 = débit par connexion, en Mb/s (perd k Mb/s par connexion
@@ -257,7 +257,7 @@ const SKINS: SkinRevenuPrix[] = [
     uniteVariable: "connexions",
     uniteGrandeurFautive: "connexions",
     texteAideContrainteNiveau1: "Rappel : chaque connexion supplémentaire fait baisser le débit moyen des autres — les 2 quantités sont liées directement.",
-    texteAideContrainteNiveau2: "La perte de débit moyen au fil des connexions ajoutées x et le débit restant par connexion y sont liés par une somme constante, égale à Q0.",
+    texteAideContrainteNiveau2: "La perte de débit moyen au fil des connexions ajoutées x et le débit restant par connexion y sont liés par une somme constante, égale à la valeur moyenne de départ donnée dans l'énoncé.",
   },
   // ===== Thème "nombre de wagons d'une locomotive et vitesse maximale atteignable" — capacité de
   // transport = wagons × vitesse max, règle explicitée dans le texte. P0 = nombre de wagons
@@ -274,7 +274,7 @@ const SKINS: SkinRevenuPrix[] = [
     uniteVariable: "wagons",
     uniteGrandeurFautive: "km/h",
     texteAideContrainteNiveau1: "Rappel : chaque wagon supplémentaire attelé fait baisser la vitesse maximale atteignable — les 2 quantités sont liées directement.",
-    texteAideContrainteNiveau2: "La perte de vitesse maximale au fil des wagons ajoutés x et la vitesse restante y sont liées par une somme constante, égale à Q0.",
+    texteAideContrainteNiveau2: "La perte de vitesse maximale au fil des wagons ajoutés x et la vitesse restante y sont liées par une somme constante, égale à la valeur moyenne de départ donnée dans l'énoncé.",
   },
 ];
 

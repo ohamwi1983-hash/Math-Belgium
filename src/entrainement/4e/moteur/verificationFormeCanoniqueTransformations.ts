@@ -8,7 +8,7 @@ import type {
 import type { StatutVerification } from "./statutVerification";
 import { calculerA } from "./verificationTransformationsGraphiques";
 import { parserNombreOuFraction } from "./verificationAnalyseFonction";
-import { normaliserExposantsUnicode } from "./expressionAlgebrique";
+import { diagnostiquerFormeFactorisee, normaliserExposantsUnicode } from "./expressionAlgebrique";
 
 const TOLERANCE_RAPPORT = 1e-9;
 
@@ -127,7 +127,7 @@ export interface FormeCanoniqueParsee {
  * plutôt que de réinventer un parseur numérique.
  */
 export function analyserFormeCanoniqueComplete(texteBrut: string): FormeCanoniqueParsee | null {
-  const texte = normaliserExposantsUnicode(texteBrut.replace(/\s+/g, ""));
+  const texte = normaliserExposantsUnicode(texteBrut.replace(/\s+/g, "").replace(/[\u2212\u2013\u2014]/g, "-"));
   const indexCaret = texte.indexOf("^2");
   if (indexCaret === -1) return null;
 
@@ -185,7 +185,9 @@ const TOLERANCE_FORME_CANONIQUE = 1e-9;
  */
 export function diagnostiquerFormeCanoniqueComplete(texte: string, cible: FonctionCanonique): StatutVerification {
   const parsee = analyserFormeCanoniqueComplete(texte);
-  if (!parsee) return "parse_error";
+  // Structure non canonique : illisible seulement si l'expression ne se lit pas du tout ; une forme
+  // développée (ou autre écriture lisible) est une réponse FAUSSE, pas une saisie illisible.
+  if (!parsee) return diagnostiquerFormeFactorisee(texte, { a: 1, b: 0, c: 0 }) === "parse_error" ? "parse_error" : "not_equivalent";
   const aCible = cible.numA / cible.denA;
   const correct =
     Math.abs(parsee.a - aCible) < TOLERANCE_FORME_CANONIQUE &&

@@ -14,7 +14,10 @@ import type { ReponseTransformationGraphique, GenerateurExerciceTransformationGr
 import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
-import { verifierCurseurs, verifierEquationTransformation } from "./verificationTransformationsGraphiques";
+import { evaluerCurseurs, verifierEquationTransformation } from "./verificationTransformationsGraphiques";
+
+/** Choix fermé (symétrie d'axe Ox : oui / non) — une seule tentative (audit 4e ch. 1, R6). */
+export const TENTATIVES_CHOIX_FERME = 1;
 import type { EtatSessionTransformationGraphique, ResultatExerciceTransformationGraphique } from "./typesTransformationsGraphiques";
 
 const POINTS_DE_BASE = 100;
@@ -30,6 +33,7 @@ export function demarrerSessionTransformationGraphique(
     exerciceCourant: generateur(),
     etapeEquation: demarrerEtapeTentatives(),
     etapeCurseurs: demarrerEtapeTentatives(),
+    etapeSox: demarrerEtapeTentatives(),
     aideUtilisee: false,
     scoreEquationExercice: null,
     scoreCurseursExercice: null,
@@ -74,6 +78,7 @@ function cloturerExerciceOuSuivant(
     exerciceCourant: etat.generateur(),
     etapeEquation: demarrerEtapeTentatives(),
     etapeCurseurs: demarrerEtapeTentatives(),
+    etapeSox: demarrerEtapeTentatives(),
     aideUtilisee: false,
     scoreEquationExercice: null,
     scoreCurseursExercice: null,
@@ -118,7 +123,11 @@ export function soumettreReponse(
   if (!etapeCurseurs.terminee) {
     etapeCurseurs = soumettreEtapeTentatives<typeof reponse.curseurs>(etapeCurseurs, reponse.curseurs, {
       ...reglagesEtape(etat),
-      verifier: (r) => verifierCurseurs(etat.exerciceCourant, r),
+      // TH, TV et le rapport EV/CV ; la symétrie est le choix fermé à part (`etapeSox`).
+      verifier: (r) => {
+        const ev = evaluerCurseurs(etat.exerciceCourant, r);
+        return ev.th && ev.tv && ev.ev && ev.cv;
+      },
       revelerReponse: () => {},
     });
     if (etapeCurseurs.terminee) {
@@ -128,17 +137,28 @@ export function soumettreReponse(
     }
   }
 
+  let etapeSox = etat.etapeSox;
+  if (!etapeSox.terminee) {
+    etapeSox = soumettreEtapeTentatives<boolean>(etapeSox, reponse.curseurs.sox, {
+      pointsDeBase: POINTS_DE_BASE,
+      tentativesMax: TENTATIVES_CHOIX_FERME,
+      verifier: (r) => r === etat.exerciceCourant.sox,
+      revelerReponse: () => {},
+    });
+  }
+
   const etatMisAJour: EtatSessionTransformationGraphique = {
     ...etat,
     etapeEquation,
     etapeCurseurs,
+    etapeSox,
     scoreEquationExercice,
     scoreCurseursExercice,
     equationAideAppliquee,
     curseursAideAppliquee,
   };
 
-  if (scoreEquationExercice !== null && scoreCurseursExercice !== null) {
+  if (scoreEquationExercice !== null && scoreCurseursExercice !== null && etapeSox.terminee) {
     return cloturerExerciceOuSuivant(etatMisAJour, {
       scoreEquation: scoreEquationExercice,
       equationRevele: etapeEquation.revelee,
@@ -146,6 +166,7 @@ export function soumettreReponse(
       scoreCurseurs: scoreCurseursExercice,
       curseursRevele: etapeCurseurs.revelee,
       curseursAideUtilisee: curseursAideAppliquee,
+      soxRevele: etapeSox.revelee,
     });
   }
 

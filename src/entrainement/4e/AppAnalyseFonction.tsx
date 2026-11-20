@@ -42,7 +42,7 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { formatEnonceLatex } from "./ui/formatEquation";
-import { formatFonctionColoreeLatex, formatFonctionOrdreLatex } from "./ui/formatAnalyseFonction";
+import { formatFonctionOrdreLatex } from "./ui/formatAnalyseFonction";
 import { OPTIONS_CATEGORIE_SANS_CAS_GENERAL, libelleCategorie } from "./ui/categorieLabels";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
@@ -50,6 +50,9 @@ import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleeAnalyseFonction, lettrePhaseAnalyseFonction } from "./generateurs/analyseFonction/corrigeDetaille";
+import { RenduFragments } from "./components/RenduFragments";
+import { aidesAllure, aidesFactorisationCh1, aidesMethodeCh1, aidesZerosCh1, messageZerosCh1 } from "./ui/aidesParabole";
+import { diagnostiquerFormeFactorisee } from "./moteur/expressionAlgebrique";
 
 const CONSIGNE_GENERALE = "Étudie cette fonction du second degré.";
 
@@ -257,10 +260,16 @@ export function AppAnalyseFonction() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue:
-          !etat.reglages.affichageReponseApresEchec || etat.phase !== "coefficients" ? undefined : (
-            <Katex expression={formatFonctionColoreeLatex(exercice.exercice.enonce)} />
-          ),
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : (
+          <span>
+            <RenduFragments
+              fragments={correctionDetailleeAnalyseFonction(exercice)
+                .filter((l) => l.type === "resultat" && l.sousQuestion === lettrePhaseAnalyseFonction(exercice, etat.phase))
+                .flatMap((l) => l.fragments)}
+            />
+          </span>
+        ),
+        messageRevele: etat.phase === "allure" || etat.phase === "racinesReconnaissance" ? "Ce n'était pas la bonne réponse." : undefined,
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAnalyseFonction(exercice), lettrePhaseAnalyseFonction(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
@@ -307,6 +316,7 @@ export function AppAnalyseFonction() {
               key={`${generation}-${etat.phase}`}
               tentativesMax={tentativesMaxCourant(etat)}
               recapitulatif={recapitulatif}
+              aides={aidesAllure(exercice)}
               onValider={(reponse) => {
                 const texteAB = reponse.signeAB === "0" ? "a·b = 0" : reponse.signeAB === "+" ? "a·b > 0" : "a·b < 0";
                 terminerEtape(soumettreReponseAllure(etat, reponse), `${reponse.signeA === "+" ? "a > 0" : "a < 0"} ; ${texteAB}`);
@@ -353,8 +363,9 @@ export function AppAnalyseFonction() {
               tentativesMax={tentativesMaxCourant(etat)}
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
-              question="Quelle est la méthode la plus rapide pour trouver les racines de f ?"
+              question="Quelle est la méthode la plus rapide pour trouver les zéros de f ?"
               options={OPTIONS_CATEGORIE_SANS_CAS_GENERAL}
+              aides={aidesMethodeCh1()}
               onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixRacinesCategorie(etat, choix), libelleCategorie(choix))}
               validation={validation}
             />
@@ -367,6 +378,12 @@ export function AppAnalyseFonction() {
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
               diagnostiquer={(v) => diagnostiquerChampPrincipal(etat.exerciceCourant.exercice, v)}
+              aides={aidesFactorisationCh1(exercice)}
+              messageCible={(v) =>
+                diagnostiquerFormeFactorisee(v, exercice.exercice.enonce) === "correct" && diagnostiquerChampPrincipal(exercice.exercice, v) !== "correct"
+                  ? [{ type: "texte", valeur: "Ton expression est égale à f(x), mais elle n'est pas factorisée au maximum : mets en évidence tout le facteur commun." }]
+                  : null
+              }
               onValider={(reponse) => terminerEtape(soumettreReponseRacinesChamp1(etat, reponse), `${reponse} = 0`)}
               validation={validation}
             />
@@ -378,6 +395,8 @@ export function AppAnalyseFonction() {
               tentativesMax={tentativesMaxCourant(etat)}
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
+              aides={aidesZerosCh1()}
+              messageCible={(r) => messageZerosCh1(exercice, r)}
               onValider={(racines) => terminerEtape(soumettreReponseRacinesChamp2(etat, racines), racines.join(" ; "))}
               validation={validation}
             />

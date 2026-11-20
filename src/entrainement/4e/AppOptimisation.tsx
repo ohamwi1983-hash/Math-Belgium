@@ -250,6 +250,7 @@ export function AppOptimisation() {
     ? {
         revele: enAttente.revele,
         reponseAttendue,
+        messageRevele: phase === "identification" || phase === "interpretation" ? "Ce n'était pas la bonne réponse." : undefined,
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOptimisation(exercice), lettreEtapeOptimisation(exercice, etapeDePhaseOptimisation(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
@@ -337,6 +338,7 @@ export function AppOptimisation() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideDecision}
+              choixDomaineCorrect={etat.choixDomaineCorrect}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse) =>
                 terminerEtape(soumettreReponseDecision(etat, reponse), (

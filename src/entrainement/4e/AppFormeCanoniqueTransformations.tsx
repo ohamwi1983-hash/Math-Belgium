@@ -26,7 +26,8 @@ import { SaisieExpressionLatex } from "./components/SaisieExpressionLatex";
 import { calculerRecapitulatifFormeCanoniqueTransformations } from "./ui/recapitulatifFormeCanoniqueTransformations";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
-import { correctionDetailleeFormeCanoniqueTransformations, lettrePhaseFormeCanonique } from "./generateurs/formeCanoniqueTransformations/corrigeDetaille";
+import { aFormeCanonique, correctionDetailleeFormeCanoniqueTransformations, formeCanoniqueFinaleLatex, lettrePhaseFormeCanonique } from "./generateurs/formeCanoniqueTransformations/corrigeDetaille";
+import { carreTranslate, coefDevant } from "./ui/corrigeParabole";
 
 const CONSIGNE_GENERALE = "Détermine la forme canonique de cette fonction du second degré.";
 
@@ -156,15 +157,24 @@ export function AppFormeCanoniqueTransformations() {
           <span className="equation-box-termes">
             <Katex expression={`x_S = ${exercice.xS}`} />
             <Katex expression={`y_S = ${exercice.yS}`} />
+            <Katex expression={formeCanoniqueFinaleLatex(exercice)} />
           </span>
         ) : etat.phase === "th" ? (
-          <>TH attendu : {exercice.xS}</>
+          <span className="equation-box-termes">
+            <Katex expression={`\\text{TH}=${exercice.xS}`} />
+            <Katex expression={`y=${carreTranslate(exercice.xS)}`} />
+          </span>
         ) : etat.phase === "evCvSox" ? (
-          <>
-            EV = {exercice.ev} ; CV = {exercice.cv} ; SOX = {exercice.sox ? "Oui" : "Non"}
-          </>
+          <span className="equation-box-termes">
+            <Katex expression={`\\dfrac{\\text{EV}}{\\text{CV}}=\\dfrac{${exercice.ev}}{${exercice.cv}}`} />
+            <span>symétrie d'axe Ox : {exercice.sox ? "oui" : "non"}</span>
+            <Katex expression={`y=${coefDevant(aFormeCanonique(exercice))}${carreTranslate(exercice.xS)}`} />
+          </span>
         ) : (
-          <>TV attendu : {exercice.yS}</>
+          <span className="equation-box-termes">
+            <Katex expression={`\\text{TV}=${exercice.yS}`} />
+            <Katex expression={formeCanoniqueFinaleLatex(exercice)} />
+          </span>
         ),
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFormeCanoniqueTransformations(exercice), lettrePhaseFormeCanonique(etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
@@ -227,6 +237,7 @@ export function AppFormeCanoniqueTransformations() {
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              soxCorrect={etat.soxCorrect}
               onValider={(reponse) =>
                 terminerEtape(
                   soumettreReponseEvCvSox(etat, reponse),

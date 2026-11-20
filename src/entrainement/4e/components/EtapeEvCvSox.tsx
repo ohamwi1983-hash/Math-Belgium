@@ -1,9 +1,12 @@
 import { useState } from "react";
 import type { ExerciceFormeCanoniqueTransformation, ReponseEvCvSox } from "../core/formeCanoniqueTransformations.types";
 import { calculerA } from "../moteur/verificationTransformationsGraphiques";
-import { diagnostiquerEvCvSox, evaluerEvCvSox, fonctionCanoniqueReelle } from "../moteur/verificationFormeCanoniqueTransformations";
+import { diagnostiquerEvCvSox, fonctionCanoniqueReelle } from "../moteur/verificationFormeCanoniqueTransformations";
 import { fonctionCanoniqueVersParametresCourbe, formatFonctionCanoniqueLatex } from "../ui/formatFormeCanoniqueTransformations";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { aidesEvCvSox, MESSAGE_FONCTION_ILLISIBLE } from "../ui/aidesParabole";
+import type { FragmentConsigne } from "../ui/formatEquationDroite";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { MafsGraphFormeCanoniqueTransformations } from "./MafsGraphFormeCanoniqueTransformations";
 import { Katex } from "./Katex";
@@ -15,6 +18,8 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseEvCvSox) => void;
+  /** Choix fermé SOX déjà joué (une seule tentative) : son verdict, `null` sinon. */
+  soxCorrect: boolean | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -30,28 +35,28 @@ const COULEUR_ORANGE = "#f08c00";
  * vers a(x-xS)². Curseurs EV, CV, SOX inchangés, vérification par rapport EV/CV déjà en place,
  * complétée par la fonction intermédiaire de cette étape (structurelle + algébrique).
  */
-export function EtapeEvCvSox({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeEvCvSox({ exercice, tentativesUtilisees, tentativesMax, onValider, soxCorrect, validation }: Props) {
   const [ev, setEv] = useState(1);
   const [cv, setCv] = useState(1);
-  const [sox, setSox] = useState(false);
+  const [sox, setSox] = useState<boolean | null>(null);
   const [fonctionIntermediaire, setFonctionIntermediaire] = useState("");
+  const saisie = useTentativeLisible<ReponseEvCvSox>();
 
-  const evaluation = evaluerEvCvSox(exercice, { ev, cv, sox, fonctionIntermediaire });
-  const montrerErreurs = tentativesUtilisees > 0;
-  const complet = fonctionIntermediaire.trim() !== "";
-  const statut = montrerErreurs ? diagnostiquerEvCvSox(exercice, { ev, cv, sox, fonctionIntermediaire }) : undefined;
-  const fonctionErronee = statut !== undefined && statut !== "correct";
-
-  function classeCurseur(correct: boolean): string {
-    return montrerErreurs && !correct ? "curseur-champ is-erronee" : "curseur-champ";
-  }
+  const soxJoue = soxCorrect !== null;
+  const complet = fonctionIntermediaire.trim() !== "" && (soxJoue || sox !== null);
+  const reponse: ReponseEvCvSox = { ev, cv, sox: sox ?? false, fonctionIntermediaire };
+  const lisible = diagnostiquerEvCvSox(exercice, reponse) !== "parse_error";
+  const fonctionErronee = tentativesUtilisees > 0 && !validation;
+  const rapportInverse = saisie.soumise && exercice.ev !== exercice.cv && Math.abs(saisie.soumise.ev / saisie.soumise.cv - exercice.cv / exercice.ev) < 1e-9;
+  const cible: FragmentConsigne[] | null = rapportInverse ? [{ type: "texte", valeur: "EV et CV sont inversés : |a| plus grand que 1 donne un étirement, plus petit que 1 une compression." }] : null;
+  const classeCurseur = () => "curseur-champ";
 
   const formeCanoniqueComplete = formatFonctionCanoniqueLatex(fonctionCanoniqueReelle(exercice, exercice.yS));
   const fonctionThConfirmee = { numA: 1, denA: 1, p: exercice.xS, q: 0 };
   const fonctionThLatex = formatFonctionCanoniqueLatex(fonctionThConfirmee);
 
   const confirmee = { parametres: fonctionCanoniqueVersParametresCourbe(fonctionThConfirmee), couleur: COULEUR_ORANGE, labelLatex: fonctionThLatex };
-  const live = { p: exercice.xS, q: 0, a: calculerA({ ev, cv, sox }) };
+  const live = { p: exercice.xS, q: 0, a: calculerA({ ev, cv, sox: sox ?? false }) };
 
   return (
     <div>
@@ -74,7 +79,7 @@ export function EtapeEvCvSox({ exercice, tentativesUtilisees, tentativesMax, onV
         EV et CV se combinent : seul leur rapport EV / CV compte, il représente |a|. Plusieurs réglages peuvent donc être corrects (ex. EV=2 et CV=4 équivaut à EV=1 et CV=2).
       </p>
       <div className="curseur-row">
-        <label className={classeCurseur(evaluation.ev)} htmlFor="curseur-ev">
+        <label className={classeCurseur()} htmlFor="curseur-ev">
           <span>EV : {ev}</span>
           <input
             id="curseur-ev"
@@ -86,7 +91,7 @@ export function EtapeEvCvSox({ exercice, tentativesUtilisees, tentativesMax, onV
             onChange={(e) => setEv(Number(e.target.value))}
           />
         </label>
-        <label className={classeCurseur(evaluation.cv)} htmlFor="curseur-cv">
+        <label className={classeCurseur()} htmlFor="curseur-cv">
           <span>CV : {cv}</span>
           <input
             id="curseur-cv"
@@ -99,9 +104,19 @@ export function EtapeEvCvSox({ exercice, tentativesUtilisees, tentativesMax, onV
           />
         </label>
       </div>
-      <button type="button" className={classeCurseur(evaluation.sox) + " btn"} onClick={() => setSox((v) => !v)}>
-        {sox ? "SOX : Oui" : "SOX : Non"}
-      </button>
+      <p className="prompt-text prompt-text--question-multiple">Faut-il une symétrie d'axe Ox (SOX) ?</p>
+      <div className="options-grid-compact">
+        {[true, false].map((v) => (
+          <button key={String(v)} type="button" className={`btn${sox === v ? " toggle-active" : ""}${soxCorrect === false && sox === v ? " is-erronee" : ""}`} disabled={soxJoue || !!validation} onClick={() => setSox(v)}>
+            {v ? "Oui, symétrie d'axe Ox" : "Non, pas de symétrie"}
+          </button>
+        ))}
+      </div>
+      {soxJoue && !validation && (
+        <p className={soxCorrect ? "alert-success" : "alert-error"} role="status">
+          {soxCorrect ? "Symétrie : bonne réponse." : `Symétrie : ce n'était pas le bon choix — ${exercice.sox ? "a est négatif, il faut une symétrie d'axe Ox" : "a est positif, pas de symétrie"}.`}
+        </p>
+      )}
       <ApercuExpressionLatex texte={fonctionIntermediaire} label="f(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule" htmlFor="evcvsox-fonction-intermediaire">
@@ -112,26 +127,21 @@ export function EtapeEvCvSox({ exercice, tentativesUtilisees, tentativesMax, onV
           className={`text-input${fonctionErronee ? " is-erronee" : ""}`}
           placeholder="ex : -7/6(x+8)^2"
           value={fonctionIntermediaire}
-          onChange={(e) => setFonctionIntermediaire(e.target.value)}
+          onChange={(e) => setFonctionIntermediaire(normaliserSigneMoins(e.target.value))}
         />
       </div>
       {!validation && (
         <>
+        <AidesNiveaux aides={aidesEvCvSox()} />
         <button
           type="button"
           className="btn btn-primary"
           disabled={!complet}
-          onClick={() => onValider({ ev, cv, sox, fonctionIntermediaire })}
+          onClick={() => saisie.tenter(reponse, lisible, onValider)}
         >
           Valider
         </button>
-        {statut !== undefined && (
-          <p className="alert-error" role="alert">
-            {statut === "parse_error"
-              ? formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")
-              : `Incorrect (curseurs en rouge si fautifs) — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`}
-          </p>
-        )}
+        <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} texteIllisible={MESSAGE_FONCTION_ILLISIBLE} cible={cible} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

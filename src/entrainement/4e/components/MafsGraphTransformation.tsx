@@ -37,7 +37,7 @@ const LARGEUR_MAX = 480;
  * plutôt que partagée (`prompt-report-fonctionnalites-generateur-x2.md` : trop petite pour
  * justifier une extraction, même principe que d'autres petits helpers dupliqués du projet). */
 function formatLabelPoint(x: number, y: number): string {
-  return `(${formatFractionIrreductible(x)} ; ${formatFractionIrreductible(y)})`;
+  return `(${formatFractionIrreductible(x).replace("-", "−")} ; ${formatFractionIrreductible(y).replace("-", "−")})`;
 }
 
 /**

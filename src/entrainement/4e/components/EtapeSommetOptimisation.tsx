@@ -2,15 +2,16 @@ import { useState } from "react";
 import type { ExerciceOptimisation } from "../core/optimisation.types";
 import { diagnostiquerSommet } from "../moteur/verificationOptimisation";
 import type { ReponseSommet } from "../moteur/verificationOptimisation";
-import { NIVEAU_AIDE_MAX_SOMMET } from "../moteur/sessionOptimisation";
-import { consigneSommet, contexteLabelX, contexteLabelY, segmentsPhraseEnonce, texteAideSommetNiveau1, texteAideSommetNiveau2 } from "../ui/formatOptimisation";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { consigneSommet, contexteLabelX, contexteLabelY, segmentsPhraseEnonce } from "../ui/formatOptimisation";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
+import { aidesSommet, messageSommet, MESSAGE_VALEUR_OPTIMISATION_ILLISIBLE } from "../ui/aidesOptimisation";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisation;
@@ -41,20 +42,15 @@ interface Props {
  * textes d'aide contiennent leur propre notation à underscore ($x_S$...) rendue via
  * `<SegmentsInline>`, jamais en texte brut (point 2 du même prompt).
  */
-export function EtapeSommetOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeSommetOptimisation({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
+  const saisie = useTentativeLisible<ReponseSommet>();
+  const lisible = parserNombreOuFraction(x) !== null && parserNombreOuFraction(y) !== null;
   const complet = x.trim() !== "" && y.trim() !== "";
   const reponse: ReponseSommet = { x, y };
   const statut = complet ? diagnostiquerSommet(exercice, reponse) : undefined;
   const apresEchec = tentativesUtilisees > 0;
-  const statutGlobal = statut
-    ? statut.x === "parse_error" || statut.y === "parse_error"
-      ? "parse_error"
-      : statut.x === "correct" && statut.y === "correct"
-        ? "correct"
-        : "not_equivalent"
-    : undefined;
 
   const labelX = contexteLabelX(exercice) || "x_S";
   const labelY = contexteLabelY(exercice) || "y_S";
@@ -74,7 +70,7 @@ export function EtapeSommetOptimisation({ exercice, tentativesUtilisees, tentati
           id="optimisation-sommet-x"
           className={`text-input${apresEchec && statut && statut.x !== "correct" ? " is-erronee" : ""}`}
           value={x}
-          onChange={(e) => setX(e.target.value)}
+          onChange={(e) => setX(normaliserSigneMoins(e.target.value))}
         />
       </div>
       <div className="field">
@@ -85,34 +81,17 @@ export function EtapeSommetOptimisation({ exercice, tentativesUtilisees, tentati
           id="optimisation-sommet-y"
           className={`text-input${apresEchec && statut && statut.y !== "correct" ? " is-erronee" : ""}`}
           value={y}
-          onChange={(e) => setY(e.target.value)}
+          onChange={(e) => setY(normaliserSigneMoins(e.target.value))}
         />
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            <SegmentsInline segments={segmentsPhraseEnonce(texteAideSommetNiveau1(exercice))} />
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              <SegmentsInline segments={segmentsPhraseEnonce(texteAideSommetNiveau2(exercice))} />
-            </p>
-          )}
-        </div>
-      )}
       {!validation && (
         <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SOMMET} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
+        <AidesNiveaux aides={aidesSommet(exercice)} onPremiereAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(reponse, lisible, onValider)}>
           Valider
         </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-          </p>
-        )}
+        <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} texteIllisible={MESSAGE_VALEUR_OPTIMISATION_ILLISIBLE} cible={saisie.soumise ? messageSommet(exercice, saisie.soumise.x, saisie.soumise.y) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

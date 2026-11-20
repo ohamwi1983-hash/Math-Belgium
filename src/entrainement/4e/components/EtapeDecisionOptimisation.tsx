@@ -2,15 +2,16 @@ import { useState } from "react";
 import type { ExerciceOptimisation } from "../core/optimisation.types";
 import { diagnostiquerDecision } from "../moteur/verificationOptimisation";
 import type { ReponseDecision } from "../moteur/verificationOptimisation";
-import { NIVEAU_AIDE_MAX_DECISION } from "../moteur/sessionOptimisation";
-import { consigneDecision, contexteLabelX, contexteLabelY, segmentsPhraseEnonce, texteAideDecisionNiveau1, texteAideDecisionNiveau2, texteAideDecisionNiveau3 } from "../ui/formatOptimisation";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { consigneDecision, contexteLabelX, contexteLabelY, segmentsPhraseEnonce } from "../ui/formatOptimisation";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
+import { aidesDecision, messageDecision, MESSAGE_VALEUR_OPTIMISATION_ILLISIBLE } from "../ui/aidesOptimisation";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisation;
@@ -19,6 +20,8 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseDecision) => void;
+  /** Choix fermé « dans le domaine ? » déjà joué (une seule tentative) : son verdict, `null` sinon. */
+  choixDomaineCorrect: boolean | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -34,22 +37,19 @@ interface Props {
  * architecture-modelisation.md`, points 1-2) : `x_{opt}`/`valeur_{optimale}` REMPLACÉS par le nom
  * concret, aide rendue via `<SegmentsInline>` pour toute notation à underscore.
  */
-export function EtapeDecisionOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeDecisionOptimisation({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, choixDomaineCorrect, validation }: Props) {
   const [dansDomaine, setDansDomaine] = useState<boolean | null>(null);
   const [x, setX] = useState("");
   const [y, setY] = useState("");
-  const complet = dansDomaine !== null && x.trim() !== "" && y.trim() !== "";
+  const saisie = useTentativeLisible<ReponseDecision>();
+  const lisible = parserNombreOuFraction(x) !== null && parserNombreOuFraction(y) !== null;
+  const choixJoue = choixDomaineCorrect !== null;
+  const complet = (choixJoue || dansDomaine !== null) && x.trim() !== "" && y.trim() !== "";
   const reponse: ReponseDecision = { dansDomaine, x, y };
   const statut = complet ? diagnostiquerDecision(exercice, reponse) : undefined;
   const apresEchec = tentativesUtilisees > 0;
-  const statutGlobal = statut
-    ? statut.x === "parse_error" || statut.y === "parse_error"
-      ? "parse_error"
-      : statut.dansDomaine && statut.x === "correct" && statut.y === "correct"
-        ? "correct"
-        : "not_equivalent"
-    : undefined;
-  const dansDomaineErronee = apresEchec && statut !== undefined && !statut.dansDomaine;
+  // Choix fermé : aucune correction avant qu'il soit joué ; ensuite, le verdict figé.
+  const dansDomaineErronee = choixDomaineCorrect === false;
 
   const labelX = contexteLabelX(exercice) || "x_{opt}";
   const labelY = contexteLabelY(exercice) || "valeur_{optimale}";
@@ -66,6 +66,7 @@ export function EtapeDecisionOptimisation({ exercice, tentativesUtilisees, tenta
         <button
           type="button"
           className={`btn${dansDomaine === true ? " toggle-active" : ""}${dansDomaineErronee && dansDomaine === true ? " is-erronee" : ""}`}
+          disabled={choixJoue || !!validation}
           onClick={() => setDansDomaine(true)}
         >
           Oui, le sommet est dans le domaine
@@ -73,11 +74,19 @@ export function EtapeDecisionOptimisation({ exercice, tentativesUtilisees, tenta
         <button
           type="button"
           className={`btn${dansDomaine === false ? " toggle-active" : ""}${dansDomaineErronee && dansDomaine === false ? " is-erronee" : ""}`}
+          disabled={choixJoue || !!validation}
           onClick={() => setDansDomaine(false)}
         >
           Non, le sommet est hors du domaine
         </button>
       </div>
+      {choixJoue && !validation && (
+        <p className={choixDomaineCorrect ? "alert-success" : "alert-error"} role="status">
+          {choixDomaineCorrect
+            ? "Choix du domaine : bonne réponse."
+            : `Choix du domaine : ce n'était pas le bon — le sommet est ${exercice.sommetDansDomaine ? "dans le" : "hors du"} domaine. Donne maintenant l'optimum réel.`}
+        </p>
+      )}
 
       <div className="field">
         <label className="field-label" htmlFor="optimisation-decision-x">
@@ -87,7 +96,7 @@ export function EtapeDecisionOptimisation({ exercice, tentativesUtilisees, tenta
           id="optimisation-decision-x"
           className={`text-input${apresEchec && statut && statut.x !== "correct" ? " is-erronee" : ""}`}
           value={x}
-          onChange={(e) => setX(e.target.value)}
+          onChange={(e) => setX(normaliserSigneMoins(e.target.value))}
         />
       </div>
       <div className="field">
@@ -98,39 +107,17 @@ export function EtapeDecisionOptimisation({ exercice, tentativesUtilisees, tenta
           id="optimisation-decision-y"
           className={`text-input${apresEchec && statut && statut.y !== "correct" ? " is-erronee" : ""}`}
           value={y}
-          onChange={(e) => setY(e.target.value)}
+          onChange={(e) => setY(normaliserSigneMoins(e.target.value))}
         />
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            <SegmentsInline segments={segmentsPhraseEnonce(texteAideDecisionNiveau1(exercice))} />
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              <SegmentsInline segments={segmentsPhraseEnonce(texteAideDecisionNiveau2(exercice))} />
-            </p>
-          )}
-          {niveauAide >= 3 && (
-            <p>
-              <SegmentsInline segments={segmentsPhraseEnonce(texteAideDecisionNiveau3(exercice))} />
-            </p>
-          )}
-        </div>
-      )}
       {!validation && (
         <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_DECISION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
+        <AidesNiveaux aides={aidesDecision(exercice)} onPremiereAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(reponse, lisible, onValider)}>
           Valider
         </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-          </p>
-        )}
+        <MessageRetour illisible={saisie.illisible} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} texteIllisible={MESSAGE_VALEUR_OPTIMISATION_ILLISIBLE} cible={saisie.soumise ? messageDecision(exercice, saisie.soumise.x, saisie.soumise.y) : null} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

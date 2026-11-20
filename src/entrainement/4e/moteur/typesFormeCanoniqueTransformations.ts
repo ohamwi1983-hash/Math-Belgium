@@ -37,6 +37,10 @@ export interface EtatSessionFormeCanoniqueTransformation {
   thRevele: boolean;
   scoreEvCvSoxExercice: number | null;
   evCvSoxRevele: boolean;
+  /** Choix fermé SOX de l'écran evCvSox (audit 4e ch. 1, R6) : joué UNE fois — `null` tant qu'il ne
+   * l'a pas été, puis son verdict (figé ; les tentatives suivantes ne portent que sur EV/CV et la
+   * fonction). */
+  soxCorrect: boolean | null;
   resultats: ResultatExerciceFormeCanoniqueTransformation[];
   terminee: boolean;
 }

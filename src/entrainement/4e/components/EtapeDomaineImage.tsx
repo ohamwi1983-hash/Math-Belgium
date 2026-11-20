@@ -4,14 +4,15 @@ import type { Morceau } from "../core/inequation.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { MorceauFractionInput } from "./MorceauFractionInput";
-import { construireMorceauFraction, etatMorceauFractionInitial } from "../ui/morceauFraction";
+import { construireMorceauFraction, crochetDroitEffectifFraction, crochetGaucheEffectifFraction, etatMorceauFractionInitial } from "../ui/morceauFraction";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { aidesImage, messageImage, MESSAGE_INTERVALLE_ILLISIBLE } from "../ui/aidesParabole";
 import { formatApercuSolution } from "../ui/apercuIntervalle";
 import { calculerCourbeAxeSommet, calculerSketchAxeSommet, calculerSurlignageImf } from "../ui/sketchAxeSommet";
 import { SketchAxeSommet } from "./SketchAxeSommet";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceAnalyseFonction;
@@ -42,13 +43,19 @@ export function EtapeDomaineImage({
   tentativesUtilisees,
   tentativesMax,
   recapitulatif,
-  aideActivee,
   onActiverAide,
   onValider,
   validation,
 }: Props) {
   const [morceau, setMorceau] = useState(etatMorceauFractionInitial());
   const reponse = construireMorceauFraction(morceau);
+  const saisie = useTentativeLisible<Morceau>();
+  // Rempli (deux bornes écrites ou infinies, deux crochets) : une borne illisible ne coûte pas de tentative.
+  const rempli =
+    (morceau.borneGaucheMode === "-inf" || morceau.borneGaucheValeur.trim() !== "") &&
+    (morceau.borneDroiteMode === "+inf" || morceau.borneDroiteValeur.trim() !== "") &&
+    crochetGaucheEffectifFraction(morceau) !== null &&
+    crochetDroitEffectifFraction(morceau) !== null;
   const apercu = formatApercuSolution("intervalle", "", morceau, morceau, morceau);
 
   const { enonce } = exercice.exercice;
@@ -64,9 +71,10 @@ export function EtapeDomaineImage({
        * générateur), pas une question — une classe dédiée évite qu'il partage le style de la vraie
        * question ci-dessous (et la cascade `.prompt-text:not(:has(~ .prompt-text))` de theme.css,
        * qui met en avant la question, s'applique alors correctement à elle seule). */}
-      <p className="prompt-fact">domf = ℝ</p>
-      <p className="prompt-text">Quel est l'ensemble-image (imf) de cette fonction ?</p>
-      {aideActivee && <SketchAxeSommet geom={geom} courbe={courbe} signeA={signeA} surlignage={surlignage} />}
+      <p className="prompt-fact">
+        <Katex expression="\operatorname{dom} f=\mathbb{R}" />
+      </p>
+      <p className="prompt-text">Quelle est l'image de cette fonction ?</p>
       <div className="field">
         <MorceauFractionInput etat={morceau} onChange={setMorceau} />
       </div>
@@ -77,20 +85,17 @@ export function EtapeDomaineImage({
       )}
       {!validation && (
         <>
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={reponse === null}
-          onClick={() => reponse !== null && onValider(reponse)}
-        >
+        <AidesNiveaux aides={aidesImage(exercice)} onPremiereAide={onActiverAide} figure={(niveau) => (niveau >= 2 ? <SketchAxeSommet geom={geom} courbe={courbe} signeA={signeA} surlignage={surlignage} /> : null)} />
+        <button type="button" className="btn btn-primary" disabled={!rempli} onClick={() => saisie.tenter(reponse as Morceau, reponse !== null, onValider)}>
           Valider
         </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+        <MessageRetour
+          illisible={saisie.illisible}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={MESSAGE_INTERVALLE_ILLISIBLE}
+          cible={saisie.soumise ? messageImage(exercice, saisie.soumise) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

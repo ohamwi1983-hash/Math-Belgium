@@ -2,12 +2,14 @@ import { useState } from "react";
 import type { ExerciceFormeCanoniqueTransformation, ReponseCanonique } from "../core/formeCanoniqueTransformations.types";
 import { diagnostiquerCanonique } from "../moteur/verificationFormeCanoniqueTransformations";
 import { formatFormeGeneraleLatex } from "../ui/formatFormeCanoniqueTransformations";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
+import { aidesCanonique, messageCanonique, MESSAGE_FONCTION_ILLISIBLE, MESSAGE_NOMBRE_ILLISIBLE } from "../ui/aidesParabole";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceFormeCanoniqueTransformation;
@@ -34,10 +36,14 @@ export function EtapeCanonique({ exercice, tentativesUtilisees, tentativesMax, o
   const [yS, setYS] = useState("");
   const [formeCanonique, setFormeCanonique] = useState("");
 
+  const saisie = useTentativeLisible<ReponseCanonique>();
   const complet = xS.trim() !== "" && yS.trim() !== "" && formeCanonique.trim() !== "";
-  const reponse = { xS: Number(xS.replace(",", ".")), yS: Number(yS.replace(",", ".")), formeCanonique };
-  const statut = tentativesUtilisees > 0 ? diagnostiquerCanonique(exercice, reponse) : undefined;
-  const erronee = statut !== undefined && statut !== "correct";
+  const xLu = parserNombreOuFraction(xS);
+  const yLu = parserNombreOuFraction(yS);
+  const reponse = { xS: xLu ?? NaN, yS: yLu ?? NaN, formeCanonique };
+  const lisibleForme = diagnostiquerCanonique(exercice, reponse) !== "parse_error";
+  const lisible = xLu !== null && yLu !== null && lisibleForme;
+  const erronee = tentativesUtilisees > 0 && !validation;
 
   return (
     <div>
@@ -85,24 +91,27 @@ export function EtapeCanonique({ exercice, tentativesUtilisees, tentativesMax, o
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder="ex : -7/6(x-8)^2+9"
           value={formeCanonique}
-          onChange={(e) => setFormeCanonique(e.target.value)}
+          onChange={(e) => setFormeCanonique(normaliserSigneMoins(e.target.value))}
         />
       </div>
       {!validation && (
         <>
+        <AidesNiveaux aides={aidesCanonique()} />
         <button
           type="button"
           className="btn btn-primary"
           disabled={!complet}
-          onClick={() => onValider(reponse)}
+          onClick={() => saisie.tenter(reponse, lisible, onValider)}
         >
           Valider
         </button>
-        {statut !== undefined && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+        <MessageRetour
+          illisible={saisie.illisible}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={xLu === null || yLu === null ? MESSAGE_NOMBRE_ILLISIBLE : MESSAGE_FONCTION_ILLISIBLE}
+          cible={saisie.soumise ? messageCanonique(exercice, saisie.soumise.xS, saisie.soumise.formeCanonique) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

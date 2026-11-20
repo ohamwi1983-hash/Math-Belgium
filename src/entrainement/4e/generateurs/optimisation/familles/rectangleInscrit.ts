@@ -128,7 +128,7 @@ export function construireRectangleInscrit(): ExerciceOptimisationModelisation {
     // point 1, qui affirmait par erreur "à hauteur x").
     texteAideContrainteNiveau1:
       "Rappel : à hauteur y (la hauteur du rectangle), la largeur disponible du triangle (x, la largeur du rectangle) est proportionnelle à ce qu'il reste de hauteur, par rapport à la hauteur totale du triangle — utilise cette proportion (triangles semblables).",
-    texteAideContrainteNiveau2: "La proportion s'écrit : (largeur disponible) / (base du triangle) = (hauteur totale − y) / (hauteur totale).",
+    texteAideContrainteNiveau2: "La proportion s'écrit : $\\dfrac{x}{\\text{base du triangle}}=\\dfrac{\\text{hauteur du triangle}-y}{\\text{hauteur du triangle}}$.",
     optionsInterpretation: construireOptionsInterpretation({
       sens: "max",
       nomGrandeur: "l'aire du rectangle",

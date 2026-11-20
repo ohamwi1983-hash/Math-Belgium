@@ -2,12 +2,12 @@ import { useState } from "react";
 import type { ExerciceAnalyseFonction } from "../core/analyseFonction.types";
 import { Katex } from "./Katex";
 import { formatFonctionColoreeLatex } from "../ui/formatAnalyseFonction";
-import { diagnostiquerCoefficients } from "../moteur/verificationAnalyseFonction";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { aidesCoefficients, messageCoefficients, MESSAGE_COEFFICIENT_ILLISIBLE } from "../ui/aidesParabole";
 
 interface Props {
   exercice: ExerciceAnalyseFonction;
@@ -22,88 +22,64 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Étape 1 : f(x) affiché avec les termes non nuls dans l'ordre mélangé, 3 champs a/b/c, bouton "Aide" coloré. */
-export function EtapeCoefficients({
-  exercice,
-  tentativesUtilisees,
-  tentativesMax,
-  aideActivee,
-  onActiverAide,
-  onValider,
-  validation,
-}: Props) {
+/**
+ * Étape 1 : f(x) affiché avec les termes non nuls dans l'ordre mélangé, 3 champs a/b/c. Règles
+ * communes (audit 4e ch. 1, lot B) : un nombre illisible n'est jamais transmis au moteur (aucune
+ * tentative consommée), fractions et « − » acceptés (`parserNombreOuFraction`), aides à deux niveaux
+ * (le niveau 2 montre f(x) rangé, coefficients colorés), message ciblé (signes, ordre d'écriture).
+ */
+export function EtapeCoefficients({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [a, setA] = useState("");
   const [b, setB] = useState("");
   const [c, setC] = useState("");
+  const saisie = useTentativeLisible<{ a: number; b: number; c: number }>();
 
   const complet = a.trim() !== "" && b.trim() !== "" && c.trim() !== "";
-  const reponse = {
-    a: Number(a.replace(",", ".")),
-    b: Number(b.replace(",", ".")),
-    c: Number(c.replace(",", ".")),
-  };
-  const statut = complet ? diagnostiquerCoefficients(exercice, reponse) : undefined;
-  const erronee = tentativesUtilisees > 0 && statut !== undefined && statut !== "correct";
+  const lus = [a, b, c].map(parserNombreOuFraction);
+  const lisible = lus.every((v) => v !== null);
+  const reponse = { a: lus[0] ?? NaN, b: lus[1] ?? NaN, c: lus[2] ?? NaN };
+  const erronee = tentativesUtilisees > 0 && !validation;
+
+  const champ = (id: string, nom: string, valeur: string, maj: (v: string) => void) => (
+    <div className="field field-inline">
+      <label className="field-label field-label-minuscule" htmlFor={id}>
+        {nom} =
+      </label>
+      <input id={id} className={`text-input${erronee ? " is-erronee" : ""}`} value={valeur} disabled={!!validation} onChange={(e) => maj(normaliserSigneMoins(e.target.value))} />
+    </div>
+  );
 
   return (
     <div>
-      {aideActivee && (
-        <div className="template-box">
-          <Katex expression={formatFonctionColoreeLatex(exercice.exercice.enonce)} block />
-        </div>
-      )}
       <p className="prompt-text">Identifie les coefficients a, b et c.</p>
       <div className="field-row">
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule" htmlFor="coeff-a">
-            a =
-          </label>
-          <input
-            id="coeff-a"
-            className={`text-input${erronee ? " is-erronee" : ""}`}
-            value={a}
-            onChange={(e) => setA(normaliserSigneMoins(e.target.value))}
-          />
-        </div>
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule" htmlFor="coeff-b">
-            b =
-          </label>
-          <input
-            id="coeff-b"
-            className={`text-input${erronee ? " is-erronee" : ""}`}
-            value={b}
-            onChange={(e) => setB(normaliserSigneMoins(e.target.value))}
-          />
-        </div>
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule" htmlFor="coeff-c">
-            c =
-          </label>
-          <input
-            id="coeff-c"
-            className={`text-input${erronee ? " is-erronee" : ""}`}
-            value={c}
-            onChange={(e) => setC(normaliserSigneMoins(e.target.value))}
-          />
-        </div>
+        {champ("coeff-a", "a", a, setA)}
+        {champ("coeff-b", "b", b, setB)}
+        {champ("coeff-c", "c", c, setC)}
       </div>
       {!validation && (
         <>
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={!complet}
-          onClick={() => onValider(reponse)}
-        >
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+          <AidesNiveaux
+            aides={aidesCoefficients()}
+            onPremiereAide={onActiverAide}
+            figure={(niveau) =>
+              niveau >= 2 ? (
+                <div className="template-box">
+                  <Katex expression={formatFonctionColoreeLatex(exercice.exercice.enonce)} block />
+                </div>
+              ) : null
+            }
+          />
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(reponse, lisible, onValider)}>
+            Valider
+          </button>
+          <MessageRetour
+            illisible={saisie.illisible}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            texteIllisible={MESSAGE_COEFFICIENT_ILLISIBLE}
+            cible={saisie.soumise ? messageCoefficients(exercice, saisie.soumise) : null}
+          />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
