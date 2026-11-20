@@ -1,11 +1,11 @@
 import { SiteHeader } from '../components/SiteHeader'
 import { EvaluationGeneratorPanel } from '../components/admin/EvaluationGeneratorPanel'
-import { PageReservee } from '../components/compte/PageReservee'
 import { usePageNonIndexee } from '../lib/useDocumentMeta'
 
-/** `/exercice` — panneau des feuilles d'exercices (et remédiations). Réservé aux professeurs
- * connectés (décision de l'utilisateur : cours et générateurs publics, panneau de conception
- * derrière la connexion) ; sans Supabase configuré : « Connexion indisponible ». */
+/** `/exercice` — panneau des feuilles d'exercices (et remédiations). PUBLIC (décision de
+ * l'utilisateur : les élèves s'en servent pour préparer leurs évaluations). Connecté : école et nom
+ * du professeur sur les copies, enregistrements dans le coffre ; sans session : cartouche par défaut,
+ * enregistrements dans le navigateur. Seul `/evaluation` exige une session. */
 export function ExercicePage() {
   usePageNonIndexee("Feuilles d'exercices")
   return (
@@ -17,9 +17,7 @@ export function ExercicePage() {
           <h1 className="chapter-title">Feuilles d'exercices</h1>
         </header>
 
-        <PageReservee>
-          <EvaluationGeneratorPanel mode="exercice" />
-        </PageReservee>
+        <EvaluationGeneratorPanel mode="exercice" />
       </div>
     </>
   )

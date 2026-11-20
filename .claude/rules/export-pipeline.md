@@ -53,6 +53,11 @@ Décisions de l'utilisateur (choix fait sur de vraies impressions A4 comparées)
   (`lib/imprimer.ts::imprimerChapitreAmenage`, classe `print-amenage` sur `body`) — Atkinson
   Hyperlegible 14 pt, interligne 1,8, NON justifiée (dyslexie), pas d'italique, contraste et encadrés
   renforcés, figures pleine largeur, une section par page. Même contenu, mise en page seule.
+  Proposée PARTOUT où l'on imprime (demande de l'utilisateur) : menu « Imprimer » du sommaire, section
+  de fin de chapitre « Imprimer ou télécharger ce chapitre » (`ExportSection` : Imprimer / Imprimer —
+  version aménagée / HTML (A4) / HTML (A4) — version aménagée) et sous le formulaire. Le fichier HTML
+  aménagé (`buildHtmlBlob(chapter, true)`, suffixe `-amenage.html`) porte `<body class="print-amenage">` :
+  il s'affiche comme la version normale à l'écran et s'imprime en version aménagée.
 - **Formulaire** : même règles (« Formulaire seul » en Andika, formules et conditions justifiées ;
   « Formulaire — version aménagée », classes `print-formulaire-only` + `print-amenage`, en une seule
   colonne). Accessible depuis le menu « Imprimer » et par les deux boutons sous le formulaire.

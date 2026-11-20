@@ -11,8 +11,10 @@ paths:
 # Comptes professeurs (Supabase) — phase 1
 
 Seul backend du site : **Supabase** (Postgres + Auth + Row Level Security), projet `qklnpxofjsxyubdyyrgl`
-(région Europe, offre gratuite). Cours et générateurs restent PUBLICS ; seuls le panneau de conception
-(feuilles d'exercices, remédiation, évaluations, examens) et le coffre sont derrière la connexion.
+(région Europe, offre gratuite). Cours, générateurs ET feuilles d'exercices restent PUBLICS (décision de
+l'utilisateur, après mise en service : ses élèves préparent leurs évaluations avec les feuilles
+d'exercices) ; seuls le panneau des évaluations / examens (`/evaluation`), le coffre, le profil et
+l'administration sont derrière la connexion.
 Aucune donnée d'élève. Phase 2 (pas faite) : carnet de matière vue (classes rattachées aux écoles).
 Plus tard (pas fait) : partage entre collègues.
 
@@ -95,8 +97,9 @@ Partage plus tard : table `partages (plan_id, destinataire, droit)` + politique 
   passe ; jamais de filtre de frappe ni de champ numérique (règle CLAUDE.md). `MenuCompte.tsx` : en-tête.
 - Routes : `/connexion` (`?oubli=1` : lien de réinitialisation → `/mot-de-passe`), `/inscription`
   (`?code=` pré-rempli), `/mot-de-passe`, `/profil`, `/coffre`, `/evaluation` (panneau évaluations /
-  examens pour tous les professeurs), `/admin` (`AdminComptes`). `/exercice` et `/…/exercices` exigent
-  une session. Aucune n'est pré-rendue (`scripts/routes.mjs` ne liste que l'accueil et les chapitres) ;
+  examens pour tous les professeurs), `/admin` (`AdminComptes`). `/exercice` et `/…/exercices` sont
+  PUBLIQUES (pas de `PageReservee`) : sans session, cartouche par défaut et enregistrements dans le
+  navigateur ; connecté, école/nom et coffre comme sur `/evaluation`. Aucune n'est pré-rendue (`scripts/routes.mjs` ne liste que l'accueil et les chapitres) ;
   toutes `noindex`.
 - Panneau (`EvaluationGeneratorPanel`) : connecté → `cartouche` (école choisie + `nom_affiche`) dans
   `EnTeteEvaluation` et appliqué à tout rendu (`rendrePlan`, même un plan rechargé ; changer d'école

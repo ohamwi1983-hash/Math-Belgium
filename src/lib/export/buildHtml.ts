@@ -169,8 +169,10 @@ function echapperHtml(texte: string): string {
 
 /** Construit le fichier HTML A4 complet (`Blob`, type `text/html`) à partir du chapitre déjà
  * affiché à l'écran. `.no-export` (nav, cartes vers les générateurs, widgets interactifs) est
- * retiré du clone AVANT sérialisation. */
-export async function buildHtmlBlob(chapter: ChapterContent): Promise<Blob> {
+ * retiré du clone AVANT sérialisation. `amenage` : `<body class="print-amenage">` — le fichier
+ * s'affiche comme la version normale à l'écran mais s'imprime en version aménagée (mêmes règles
+ * `@media print` que `imprimerChapitreAmenage`, recopiées avec le reste du CSS du site). */
+export async function buildHtmlBlob(chapter: ChapterContent, amenage = false): Promise<Blob> {
   const page = document.querySelector('.page')
   if (!page) throw new Error('buildHtmlBlob : .page introuvable dans le DOM')
 
@@ -188,7 +190,7 @@ export async function buildHtmlBlob(chapter: ChapterContent): Promise<Blob> {
 <title>${titre}</title>
 <style>${css}${STYLE_IMPRESSION}${STYLE_DIAGRAMMES}</style>
 </head>
-<body>
+<body${amenage ? ' class="print-amenage"' : ''}>
 ${clone.outerHTML}
 </body>
 </html>`
