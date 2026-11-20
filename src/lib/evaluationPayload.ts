@@ -411,10 +411,12 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
  * pour la même raison. */
 export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'reciproques', quizTheme: 'injectiviteSurjectiviteBijectivite', label: '', quizChapitre: 1 },
-  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', quizTheme: 'fonctionsCyclometriques', label: '', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', quizTheme: 'fonctionsCyclometriques', label: 'arcsin, arccos, arctan', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', quizTheme: 'compositionsArcTrig', label: 'Composer arcfonction et fonction trigonométrique', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'equations', quizTheme: 'equationsCyclometriques', label: '', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'derivees', quizTheme: 'deriveesCyclometriques', label: '', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', quizTheme: 'graphiquesCyclometriques', label: '', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'etude', quizTheme: 'etudeFonctionCyclometrique', label: '', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', quizTheme: 'puissancesNombreE', label: 'Puissances à exposant réel et nombre e', quizChapitre: 2 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', quizTheme: 'limitesExponentielles', label: 'Calcul de limites', quizChapitre: 2 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'derivee', quizTheme: 'domaineDeriveeExponentielles', label: '', quizChapitre: 2 },

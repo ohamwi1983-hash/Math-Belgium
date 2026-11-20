@@ -3170,5 +3170,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
     forward:
       'À connaître aussi : $\\arcsin(u) + \\arccos(u) = \\pi/2$ pour tout $u \\in [-1;1]$, et ' +
       '$\\arcsin(\\sin\\theta) = \\theta$ **seulement** si $\\theta \\in [-\\pi/2 ; \\pi/2]$.',
+    entrainement: {
+      kind: 'entrainement',
+      title: 'Quiz vrai/faux : réviser tout le chapitre',
+      generatorId: '6gen64',
+      description: [
+        'Choisis un thème et teste-toi sur tout le chapitre : affirmations pré-écrites, une ' +
+          'seule tentative par question, justification toujours révélée.',
+      ],
+      chantier: '6e-6h',
+      whereLabel: '6e (6h) → « 64. Quiz vrai/faux — Fonctions réciproques et cyclométriques »',
+    },
   },
 }
