@@ -405,6 +405,18 @@ export const fonctionsComposees: ChapterContent = {
           ],
           whereLabel: '5e (4h) → « 1. Domaine de définition »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lire domaine et image sur un graphique',
+          generatorId: '5gen59',
+          chantier: '5e-4h',
+          description: [
+            'Une courbe sur un quadrillage d’une unité, avec ses points pleins, ses points creux et ' +
+              'parfois des flèches : lis dom f en projetant sur l’axe des x, Im f en projetant sur ' +
+              'l’axe des y (crochets, réunions, ∞), puis décide si f(a) existe.',
+          ],
+          whereLabel: '5e (4h) → « 59. Lire domaine et image sur un graphique »',
+        },
       ],
     },
 
