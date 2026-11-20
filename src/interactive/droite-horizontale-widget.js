@@ -359,6 +359,8 @@
       var ek = svgEl("text", { x: W - MR - 4, y: (procheHaut ? pk[1] + 14 : pk[1] - 6).toFixed(1), "text-anchor": "end", class: "etiq-k" });
       ek.textContent = "y = " + fmt(k, 2);
       svg.appendChild(ek);
+      // Étiquettes de graduation au premier plan (jamais masquées par une courbe).
+      svg.querySelectorAll("text.tick-label").forEach(function (t) { svg.appendChild(t); });
 
       // Boutons de restriction.
       var boutons = this._s.getElementById("restrictions").children;

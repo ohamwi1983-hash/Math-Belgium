@@ -1111,6 +1111,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             'avec sa propre image.',
         },
         {
+          kind: 'atelier',
+          tag: 'arc-de-trig-widget',
+          label: 'Manipule toi-même — arcsin(sin θ), arccos(cos θ), arctan(tan θ)',
+          caption:
+            'Fais tourner θ n\'importe où sur le cercle, de −2π à 2π. Le résultat (en vert) ' +
+            'est toujours l\'angle de l\'image de l\'arcfonction qui a le même sinus, le même ' +
+            'cosinus ou la même tangente que θ : il ne vaut θ que si θ est déjà dans cette ' +
+            'image. Le graphique de droite montre la courbe « en dents de scie » obtenue.',
+        },
+        {
           kind: 'exempleLibre',
           label: 'Démonstration — arcsin est impaire',
           blocks: [

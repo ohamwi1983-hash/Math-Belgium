@@ -300,7 +300,9 @@
       g.appendChild(svgEl("circle", { cx: pB[0].toFixed(1), cy: pB[1].toFixed(1), r: 5, class: "pt-inv" }));
       var memePoint = Math.abs(a - b) < 1e-9;
       this._etiquette(svg, a, b, "A", "etq-f", memePoint ? [a + 1, b - 1] : [b, a]);
-      this._etiquette(svg, b, a, memePoint ? "A′" : "A′", "etq-inv", memePoint ? [b - 1, a + 1] : [a, b]);
+      this._etiquette(svg, b, a, "A′", "etq-inv", memePoint ? [b - 1, a + 1] : [a, b]);
+      // Étiquettes de graduation au premier plan (jamais masquées par une courbe).
+      svg.querySelectorAll("text.tick-label").forEach(function (t) { svg.appendChild(t); });
 
       // Textes.
       var k = Math.round(this._i - fn.n / 2);

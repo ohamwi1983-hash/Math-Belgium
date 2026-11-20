@@ -19,6 +19,7 @@ export type InteractiveWidgetTag =
   | 'droite-horizontale-widget'
   | 'machine-reciproque-widget'
   | 'pentes-inverses-widget'
+  | 'arc-de-trig-widget'
   | 'discriminant-racines-widget'
   | 'signe-trinome-widget'
   | 'signe-produit-widget'
