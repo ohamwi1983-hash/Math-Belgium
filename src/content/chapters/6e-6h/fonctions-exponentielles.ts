@@ -250,6 +250,19 @@ export const fonctionsExponentielles: ChapterContent = {
             'juste une conséquence directe des règles de puissances.',
         },
         {
+          kind: 'entrainement',
+          title: 'Puissances à exposant réel sans calculatrice',
+          generatorId: '6gen146',
+          description: [
+            'Applique les règles (1) à (4) à des exposants irrationnels : 2^√3 · 2^(1−√3), ' +
+              '(5^√2)^√2, 4^√2 · 2^(3−2√2)… écrits comme une seule puissance, puis leur valeur exacte. ' +
+              'Compare 3^√2 et 3^1,4 sans calculatrice (et attention aux bases entre 0 et 1), et ' +
+              'réécris (1/2)^(−x), 0,5ˣ · 8ˣ ou 9ˣ/3^(x+1) comme une puissance de 2 ou de 3.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 146. Puissances à exposant réel sans calculatrice »',
+        },
+        {
           kind: 'para',
           text:
             "En l'infini, le comportement d'une fonction exponentielle $a^x$ ($a>0$, " +

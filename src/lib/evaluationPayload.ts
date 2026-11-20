@@ -80,6 +80,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
+  | '6gen146'
   | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22' | '6gen90' | '6gen85' | '6gen91' | '6gen88' | '6gen86' | '6gen92' | '6gen89' | '6gen87'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
@@ -141,7 +142,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'equations', generatorId: '6gen3', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'derivees', generatorId: '6gen4', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen5', label: '', processus: 3 },
-  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen6', label: '' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen6', label: 'Calcul de limites (6gen6)' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen146', label: 'Puissances à exposant réel sans calculatrice (6gen146)', processus: 1 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'derivee', generatorId: '6gen7', label: '' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'graphique', generatorId: '6gen8', label: '' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'equations', generatorId: '6gen9', label: '' },
