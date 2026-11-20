@@ -790,6 +790,18 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'entrainement',
+          title: 'Graphe de la réciproque',
+          generatorId: '6gen154',
+          description: [
+            'Sur un quadrillage à la même échelle en x et en y : point (a ; b) → (b ; a), domaine et ' +
+              "image échangés (crochets compris), graphe de f⁻¹ symétrique par rapport à y = x, et " +
+              'pente de la tangente à f⁻¹, inverse de celle de f.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 154. Graphe de la réciproque »',
+        },
+        {
+          kind: 'entrainement',
           title: "Dérivée d'une réciproque en un point",
           generatorId: '6gen155',
           description: [

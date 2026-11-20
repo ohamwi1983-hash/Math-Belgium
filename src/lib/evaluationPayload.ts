@@ -81,7 +81,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
-  | '6gen153' | '6gen155'
+  | '6gen153' | '6gen154' | '6gen155'
   | '6gen148' | '6gen149' | '6gen150' | '6gen151'
   | '6gen144'
   | '6gen147'
@@ -146,6 +146,7 @@ export interface QuizThemeConfig {
  * dans cette table DOIT filtrer sur les deux clés, jamais `sectionId` seul. */
 export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'reciproques', generatorId: '6gen1', label: '' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'reciproques', generatorId: '6gen154', label: 'Graphe de la réciproque (6gen154)', processus: 2 },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'reciproques', generatorId: '6gen155', label: "Dérivée d'une réciproque en un point (6gen155)", processus: 2 },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', generatorId: '6gen2', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', generatorId: '6gen153', label: 'Identités trig∘arc et arc∘trig (6gen153)', processus: 2 },
