@@ -85,7 +85,7 @@ export interface DefinitionEcrans<E, P extends string> {
   tableau?(e: E): TableauDonnees | null;
   consigne(e: E, phase: P): Frag[];
   /** Saisie lisible mais APPROCHÉE (ou dans une autre unité) alors que la forme exacte est demandée :
-   * message, AUCUNE tentative consommée (`null` sinon) — ajout 6gen156–6gen159, sans effet ailleurs. */
+   * message, AUCUNE tentative consommée (`null` sinon) — 5gen58–5gen60, 6gen156–6gen159. */
   approchee?(e: E, phase: P, valeurs: string[]): string | null;
   aide1(e: E, phase: P): AideEcran;
   aide2(e: E, phase: P): AideEcran | null;
@@ -109,9 +109,6 @@ export interface DefinitionEcrans<E, P extends string> {
   /** Copie d'un élève fictif (lignes numérotées) et ligne signalée — détective 5gen58 (même rendu
    * que 6gen144). Absent : aucune copie (5gen54–5gen57 inchangés). */
   copie?(e: E, phase: P): { lignes: Frag[][]; signalee: number | null } | null;
-  /** Saisie lisible mais APPROCHÉE alors que la forme exacte est demandée : message, AUCUNE tentative
-   * consommée (`null` sinon) — 5gen58–5gen60. */
-  approchee?(e: E, phase: P, valeurs: string[]): string | null;
   /** Choix fermé faux : le message ciblé de `piege` s'affiche avec la réponse révélée (5gen58–5gen60 ;
    * absent : rien, comme avant). */
   piegeChoixRevele?: boolean;

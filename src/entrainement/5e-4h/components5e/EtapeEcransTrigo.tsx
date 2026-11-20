@@ -102,8 +102,6 @@ interface Props {
   /** Valeur lisible mais approchée alors que la forme exacte est demandée (message) : aucune tentative. */
   approchee?: (valeurs: string[]) => string | null;
   validation?: ValidationEtapeProps | null;
-  /** Valeur lisible mais approchée alors que la forme exacte est demandée (message) : aucune tentative. */
-  approchee?: (valeurs: string[]) => string | null;
 }
 
 const LIGNE_VIDE: LigneIntervalle = { ouvrant: "[", gauche: "", droite: "", fermant: "]" };
@@ -163,7 +161,6 @@ export function EtapeEcransTrigo({
   messageIllisible,
   approchee,
   validation,
-  approchee,
 }: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => valeursInitiales(mode));
   const [statutsSoumis, setStatutsSoumis] = useState<StatutVerification[] | null>(null);
@@ -202,11 +199,6 @@ export function EtapeEcransTrigo({
     if (statuts.includes("parse_error")) {
       setErreurLecture(messageIllisible);
       setFormeAReprendre(null);
-      return;
-    }
-    const approx = approchee ? approchee(valeurs) : null;
-    if (approx) {
-      setErreurLecture(approx);
       return;
     }
     const approx = approchee ? approchee(valeurs) : null;
