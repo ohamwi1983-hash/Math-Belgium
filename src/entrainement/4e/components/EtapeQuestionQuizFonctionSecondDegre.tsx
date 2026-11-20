@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { QuestionVraiFaux } from "../core/quizFonctionSecondDegre.types";
+import { TexteRiche } from "./TexteRiche";
 
 interface Props {
   question: QuestionVraiFaux;
@@ -14,7 +15,9 @@ export function EtapeQuestionQuizFonctionSecondDegre({ question, onValider }: Pr
 
   return (
     <div>
-      <p className="prompt-text">{question.enonce}</p>
+      <p className="prompt-text">
+        <TexteRiche texte={question.enonce} />
+      </p>
 
       <div className="options-grid-compact">
         <button type="button" className={`btn${choix === true ? " toggle-active" : ""}`} onClick={() => setChoix(true)}>

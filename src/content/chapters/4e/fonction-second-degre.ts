@@ -1527,31 +1527,33 @@ export const fonctionSecondDegre: ChapterContent = {
       id: 'revision',
       number: 4,
       title: 'Révision — vrai ou faux',
-      kicker: '206 affirmations, 6 thèmes, tout le chapitre en révision transversale',
+      kicker: '350 affirmations, 10 thèmes, tout le chapitre en révision transversale',
       blocks: [
         { kind: 'video', title: 'Révision : la synthèse du chapitre en 2 minutes', youtubeId: 'vpgVztac-9g' },
         {
           kind: 'para',
           text:
-            '206 affirmations. 6 thèmes. Ils reprennent les 3 parties de ce chapitre : ' +
-            'coefficients et allure, forme canonique et sommet, transformations, racines par ' +
-            'factorisation, domaine/image et tableaux, optimisation. Les équations et inéquations ' +
-            'en contexte sont révisées au chapitre 2. Un seul essai par question. La justification ' +
-            'est toujours donnée.',
+            '350 affirmations. 10 thèmes de 35, dans l\'ordre des 3 parties de ce chapitre : ' +
+            'coefficients et allure, lecture de a, b et c sur un graphique, tableau de valeurs et ' +
+            'différences secondes, zéros par factorisation, domaine, image et tableaux (section 1) ; ' +
+            'transformations, forme canonique et sommet, compléter le carré, trois écritures et ' +
+            'retrouver l\'équation (section 2) ; optimisation (section 3). Les équations et ' +
+            'inéquations en contexte sont révisées au chapitre 2. Un seul essai par question. La ' +
+            'justification est toujours donnée.',
         },
         {
           kind: 'astuce',
           text:
-            'Aucune affirmation n\'utilise le discriminant Δ. Tu ne l\'as pas encore vu à ce ' +
-            'stade ! Toutes les racines s\'obtiennent par factorisation. Ou en réfléchissant à ' +
-            'la position du sommet.',
+            'Aucune affirmation ne demande de formule générale pour les zéros : tu ne l\'as pas ' +
+            'encore vue à ce stade ! Tous les zéros s\'obtiennent par factorisation, ou en ' +
+            'réfléchissant à la position du sommet.',
         },
         {
           kind: 'entrainement',
           title: 'La fonction du second degré — quiz vrai/faux',
           generatorId: 'gen60',
           description: [
-            'Choisis un thème et teste-toi : 206 affirmations pré-écrites, une seule tentative ' +
+            'Choisis un thème et teste-toi : 350 affirmations pré-écrites, une seule tentative ' +
               'par question, justification toujours révélée.',
           ],
           chantier: '4e',
