@@ -15,7 +15,7 @@ import { formatEnsembleReelLatex } from "../../ui5e/formatDomaineDefinition";
 import { consigneC1, consigneC2, consigneConditions, consigneDomaine, consigneFormule } from "../../ui5e/formatComposerFonctions";
 import { ordreComplet } from "../../moteur5e/typesComposerFonctions";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
-import { profilComposerFonctions } from "../profilsEvaluationFonctions3-4";
+import { LIBELLE_CAS_COMPOSER_FONCTIONS, aDomaineVide, profilComposerFonctions } from "../profilsEvaluationFonctions3-4";
 import { CATALOGUE_COMBOS, construireAvecComboSensTire, genererExerciceComposerFonctions } from "./index";
 import { composeeLatex, correctionDetailleeComposerFonctions, lettresComposee, signeDevantFraction } from "./corrigeDetaille";
 
@@ -129,7 +129,7 @@ function baremeComposerFonctions(exercice: ExerciceComposerFonctions): BaremeExe
  * nombres 0 (valeurs exactes). */
 function criteresDifficulteComposerFonctions(exercice: ExerciceComposerFonctions): CriteresDifficulte {
   const dirs = directionsActives(exercice);
-  const piege: 0 | 1 = dirs.some((d) => d.interieure.fonction.type === "racineSurFraction" || d.interieure.fonction.type === "rationnelle") ? 1 : 0;
+  const piege: 0 | 1 = aDomaineVide(exercice) || dirs.some((d) => d.interieure.fonction.type === "racineSurFraction" || d.interieure.fonction.type === "rationnelle") ? 1 : 0;
   return { ...etapesDuCorrige(correctionDetailleeComposerFonctions(exercice)), methode: 1, piege, nombres: 0 };
 }
 
@@ -154,5 +154,6 @@ export const adaptateurEvaluationComposerFonctions: AdaptateurFeuilleExercices<E
   bareme: baremeComposerFonctions,
   enoncePapier: enoncePapierComposerFonctions,
   profilInstance: profilComposerFonctions,
+  libelleCasParticulier: LIBELLE_CAS_COMPOSER_FONCTIONS,
   regroupable: false,
 };

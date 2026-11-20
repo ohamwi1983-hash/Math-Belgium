@@ -15,7 +15,7 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import type { EtatSessionComposeeGraphique, ResultatExerciceComposeeGraphique, ResultatQuestionComposeeGraphique } from "./typesComposeeGraphique";
 import type { ReponseQuestionComposeeGraphique } from "./verificationComposeeGraphique";
-import { verifierReponseQuestion } from "./verificationComposeeGraphique";
+import { diagnostiquerReponseQuestion, verifierReponseQuestion } from "./verificationComposeeGraphique";
 
 const POINTS_DE_BASE = 100;
 
@@ -65,6 +65,9 @@ export function soumettreReponseQuestion(etat: EtatSessionComposeeGraphique, rep
   if (etat.terminee) throw new Error("soumettreReponseQuestion : la session est déjà terminée");
   const exercice = etat.exerciceCourant;
   const question = questionCourante(exercice, etat.indexQuestion);
+  // Audit 5e ch. 1 (lot B) : une valeur ILLISIBLE ne consomme aucune tentative (l'écran affiche un
+  // message) — avant, 3 × « abc(( » révélait la réponse.
+  if (diagnostiquerReponseQuestion(question, reponse) === "parse_error") return etat;
 
   // Le choix « Existe / N'existe pas » est un choix FERMÉ : une seule tentative (règle du site, audit
   // du chapitre 1 de 5e, décision D). Un mauvais choix clôt la question ; les tentatives restantes ne

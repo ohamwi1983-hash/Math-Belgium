@@ -8,7 +8,7 @@ import type { ReglagesSession5e } from "../core5e/session5e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import type { EtatSessionDecompositionFonction, ResultatExerciceDecompositionFonction } from "./typesDecompositionFonction";
-import { verifierDecomposition } from "./verificationDecompositionFonction";
+import { diagnostiquerDecomposition, verifierDecomposition } from "./verificationDecompositionFonction";
 
 const POINTS_DE_BASE = 100;
 
@@ -40,6 +40,9 @@ export function activerAideSuivante(etat: EtatSessionDecompositionFonction): Eta
 export function soumettreReponseDecomposition(etat: EtatSessionDecompositionFonction, lignes: string[]): EtatSessionDecompositionFonction {
   if (etat.terminee) throw new Error("soumettreReponseDecomposition : la session est déjà terminée");
   const exercice = etat.exerciceCourant;
+  // Audit 5e ch. 1 (lot B) : une saisie ILLISIBLE ne consomme aucune tentative (l'écran affiche
+  // un message ; avant, 3 × « abc(( » révélait la réponse).
+  if (diagnostiquerDecomposition(exercice, lignes) === "parse_error") return etat;
 
   const etapeCourante = soumettreEtapeTentatives<string[]>(etat.etapeCourante, lignes, {
     ...reglagesEtape(etat),

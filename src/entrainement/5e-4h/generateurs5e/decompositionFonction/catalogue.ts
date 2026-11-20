@@ -10,6 +10,14 @@ export interface RenduCouche {
   estSomme?: boolean;
   /** Dénominateur d'un inverse « 1/(…) » : a·(1/u) s'affiche \dfrac{a}{u}, jamais 3\dfrac{1}{u}. */
   denominateurInverse?: string;
+  /** Expression déjà délimitée (valeur absolue |…|) : une puissance s'écrit |u|³, jamais (|u|)³
+   * (audit 5e ch. 1, G9). */
+  delimitee?: boolean;
+}
+
+/** Base d'une puissance : parenthèses sauf pour la variable nue ou une valeur absolue. */
+function basePuissance(arg: RenduCouche): string {
+  return estArgumentAtomique(arg.latex) || arg.delimitee ? arg.latex : `\\left(${arg.latex}\\right)`;
 }
 
 /** Un argument LaTeX "atomique" (un simple symbole, jamais une expression composée) n'a besoin
@@ -117,9 +125,9 @@ export function appliquerCouche(type: TypeCoucheCatalogue, arg: RenduCouche, par
       return { formule: `(${a})*(${arg.formule})+(${b})`, latex: formatAffineLatex(a, b, arg), estSomme: b !== 0 };
     }
     case "carre":
-      return { formule: `(${arg.formule})^2`, latex: estArgumentAtomique(arg.latex) ? `${arg.latex}^{2}` : `\\left(${arg.latex}\\right)^{2}` };
+      return { formule: `(${arg.formule})^2`, latex: `${basePuissance(arg)}^{2}` };
     case "cube":
-      return { formule: `(${arg.formule})^3`, latex: estArgumentAtomique(arg.latex) ? `${arg.latex}^{3}` : `\\left(${arg.latex}\\right)^{3}` };
+      return { formule: `(${arg.formule})^3`, latex: `${basePuissance(arg)}^{3}` };
     case "racineCarree":
       return { formule: `sqrt(${arg.formule})`, latex: `\\sqrt{${arg.latex}}` };
     case "racineCubique":
@@ -127,7 +135,7 @@ export function appliquerCouche(type: TypeCoucheCatalogue, arg: RenduCouche, par
     case "inverse":
       return { formule: `1/(${arg.formule})`, latex: `\\dfrac{1}{${arg.latex}}`, denominateurInverse: arg.latex };
     case "valeurAbsolue":
-      return { formule: `abs(${arg.formule})`, latex: `\\left|${arg.latex}\\right|` };
+      return { formule: `abs(${arg.formule})`, latex: `\\left|${arg.latex}\\right|`, delimitee: true };
     case "brute": {
       const a = params.a ?? 1;
       const n = params.n ?? 2;

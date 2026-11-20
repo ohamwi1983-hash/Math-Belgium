@@ -112,8 +112,15 @@ function construireIrrationnelleSimple(): FonctionComposable {
   return { type: "irrationnelleSimple", radicande: droiteNonNulle() };
 }
 
+/** Audit 5e ch. 1 (G8) : jamais un dénominateur proportionnel au radicande (√u/u = 1/√u, une
+ * fonction présentée sous une forme non simplifiée — 18,8 % des tirages avant). */
 function construireRacineSurFraction(): FonctionComposable {
-  return { type: "racineSurFraction", radicande: droiteNonNulle(), denominateur: droiteNonNulle() };
+  for (;;) {
+    const radicande = droiteNonNulle();
+    const denominateur = droiteNonNulle();
+    if (Math.abs(radicande[1] * denominateur[0] - denominateur[1] * radicande[0]) < 1e-9) continue;
+    return { type: "racineSurFraction", radicande, denominateur };
+  }
 }
 
 function construireFractionSousRacine(): FonctionComposable {

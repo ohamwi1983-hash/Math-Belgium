@@ -97,6 +97,29 @@ function statutNumerique(valeur: number, cible: number, tolerance: number): Stat
   return Math.abs(valeur - cible) <= tolerance ? "correct" : "not_equivalent";
 }
 
+/** Audit 5e ch. 1 (lot B) : une expression est ILLISIBLE si l'évaluateur ne la lit en aucun point
+ * (exception partout) — une expression lisible mais non définie en un point d'échantillon (« V/(x−1) »
+ * en x = 1) reste une réponse fausse ordinaire, jugée. */
+export function expressionIllisible(texte: string, variables: Record<string, number> = {}): boolean {
+  if (texte.trim() === "") return true;
+  for (const x of [1.3, 2.7, 4.1, 7.9]) {
+    try {
+      evaluerExpressionGenerale(texte, x, variables);
+      return false;
+    } catch {
+      // point suivant
+    }
+  }
+  return true;
+}
+
+/** Équation en a et b : un « = » et deux membres lisibles. */
+export function equationABIllisible(texte: string): boolean {
+  const i = texte.indexOf("=");
+  if (i < 0) return true;
+  return expressionIllisible(texte.slice(0, i), { a: 2, b: 3 }) || expressionIllisible(texte.slice(i + 1), { a: 2, b: 3 });
+}
+
 export function combinerStatuts(...statuts: StatutVerification[]): StatutVerification {
   if (statuts.some((s) => s === "parse_error")) return "parse_error";
   return statuts.every((s) => s === "correct") ? "correct" : "not_equivalent";

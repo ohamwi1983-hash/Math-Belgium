@@ -118,6 +118,9 @@ export interface OptionsSvgFonction {
   courbesSecondaires?: { evaluer: (x: number) => number | null; couleur?: string; pointilles?: boolean }[];
   /** Légende en haut à gauche, une ligne par courbe (trait d'échantillon + texte). */
   legende?: { texte: string; couleur: string; pointilles?: boolean }[];
+  /** Légende SOUS le graphique (hors du tracé) au lieu d'en haut à gauche — elle ne recouvre plus
+   * les courbes (audit 5e ch. 1, 5gen5). Additif : sans effet si absent. */
+  legendeSous?: boolean;
   /** Nombre de graduations visé sur chaque axe (défaut 5) — plus fin pour une LECTURE précise
    * (5gen5 : minimum de f + g, seuil de rentabilité). */
   divisionsX?: number;
@@ -214,17 +217,39 @@ export function construireSvgFonction(evaluer: (x: number) => number | null, vie
   };
   const cheminsSecondaires = (options.courbesSecondaires ?? []).map((c) => tracer(dansCadre(c.evaluer), c.couleur ?? "#8a8f98", 1.6, c.pointilles ?? true)).join("");
   const chemins = cheminsSecondaires + tracer(evaluer, couleurCourbe, 2.2, false);
+  // Légende sous le tracé : éléments placés en rangées de la largeur du graphique.
+  const positionsSous: { x: number; y: number }[] = [];
+  let hauteurLegendeSous = 0;
+  if (options.legendeSous && (options.legende ?? []).length > 0) {
+    let x = MARGE;
+    let rangee = 0;
+    for (const l of options.legende ?? []) {
+      const largeurItem = l.texte.length * 4.8 + 30;
+      if (x + largeurItem > largeur - 4 && x > MARGE) {
+        rangee++;
+        x = MARGE;
+      }
+      positionsSous.push({ x, y: hauteur + 12 + rangee * 13 });
+      x += largeurItem;
+    }
+    hauteurLegendeSous = 14 + (rangee + 1) * 13 - 6;
+  }
   const legende = (options.legende ?? [])
     .map((l, i) => {
+      if (options.legendeSous) {
+        const p = positionsSous[i]!;
+        return `<line x1="${p.x + 2}" y1="${p.y - 3}" x2="${p.x + 18}" y2="${p.y - 3}" stroke="${l.couleur}" stroke-width="2"${l.pointilles ? ' stroke-dasharray="4 3"' : ""}/><text x="${p.x + 22}" y="${p.y}" font-size="9" fill="${l.couleur}" font-family="Archivo, Arial, Helvetica, sans-serif">${echapperAttribut(l.texte)}</text>`;
+      }
       const y = 14 + i * 13;
       return `<rect x="${MARGE + 2}" y="${y - 9}" width="${(l.texte.length * 4.6 + 28).toFixed(0)}" height="12" fill="#ffffff" opacity="0.85"/><line x1="${MARGE + 4}" y1="${y - 3}" x2="${MARGE + 20}" y2="${y - 3}" stroke="${l.couleur}" stroke-width="2"${l.pointilles ? ' stroke-dasharray="4 3"' : ""}/><text x="${MARGE + 24}" y="${y}" font-size="9" fill="${l.couleur}" font-family="Archivo, Arial, Helvetica, sans-serif">${echapperAttribut(l.texte)}</text>`;
     })
     .join("");
+  const hauteurTotale = hauteur + hauteurLegendeSous;
 
   const lettreHtml = options.lettre ? `<text x="6" y="16" font-size="12" font-weight="bold" fill="${COULEUR_AXE}">${echapperAttribut(options.lettre)}</text>` : "";
   const cadre = options.estCorrect
-    ? `<rect x="1" y="1" width="${largeur - 2}" height="${hauteur - 2}" fill="none" stroke="#2f9e44" stroke-width="2.5"/>`
-    : `<rect x="0.5" y="0.5" width="${largeur - 1}" height="${hauteur - 1}" fill="none" stroke="#adb5bd" stroke-width="1"/>`;
+    ? `<rect x="1" y="1" width="${largeur - 2}" height="${hauteurTotale - 2}" fill="none" stroke="#2f9e44" stroke-width="2.5"/>`
+    : `<rect x="0.5" y="0.5" width="${largeur - 1}" height="${hauteurTotale - 1}" fill="none" stroke="#adb5bd" stroke-width="1"/>`;
   const coche = options.estCorrect ? `<text x="${largeur - 8}" y="16" font-size="13" text-anchor="end" fill="#2f9e44">✓</text>` : "";
 
   const points = (options.points ?? [])
@@ -244,8 +269,8 @@ export function construireSvgFonction(evaluer: (x: number) => number | null, vie
     })
     .join("");
 
-  return `<svg class="${classe}" width="${largeur}" height="${hauteur}" viewBox="0 0 ${largeur} ${hauteur}" xmlns="http://www.w3.org/2000/svg">
-<rect x="0" y="0" width="${largeur}" height="${hauteur}" fill="#ffffff"/>
+  return `<svg class="${classe}" width="${largeur}" height="${hauteurTotale}" viewBox="0 0 ${largeur} ${hauteurTotale}" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="${largeur}" height="${hauteurTotale}" fill="#ffffff"/>
 ${lignesGrilleX.join("")}${lignesGrilleY.join("")}
 ${axeX}${axeY}
 ${verticales}${chemins}

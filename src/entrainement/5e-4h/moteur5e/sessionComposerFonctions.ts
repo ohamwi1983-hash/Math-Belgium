@@ -110,13 +110,18 @@ function soumettreGenerique<T>(etat: EtatSessionComposerFonctions, prefixeAttend
  * `EtapeFormuleComposerFonctions.tsx` affiche un message dédié. Seule une réponse fausse ou illisible
  * consomme une tentative. */
 export function soumettreReponseFormule(etat: EtatSessionComposerFonctions, texte: string): EtatSessionComposerFonctions {
-  if (!etat.terminee && etat.phase.startsWith("formule") && diagnostiquerFormuleDirectionSimplifiee(direction(etat.exerciceCourant, etat.phase), texte) === "correct_non_simplifie") {
-    return etat;
+  // Audit 5e ch. 1 (lot B) : une saisie ILLISIBLE ne consomme pas non plus de tentative (avant,
+  // 3 × « abc(( » révélait la réponse).
+  if (!etat.terminee && etat.phase.startsWith("formule")) {
+    const statut = diagnostiquerFormuleDirectionSimplifiee(direction(etat.exerciceCourant, etat.phase), texte);
+    if (statut === "correct_non_simplifie" || statut === "parse_error") return etat;
   }
   return soumettreGenerique(etat, "formule", texte, verifierFormuleDirectionSimplifiee);
 }
 
 export function soumettreReponseConditions(etat: EtatSessionComposerFonctions, reponse: ReponseCondition[]): EtatSessionComposerFonctions {
+  // Un seuil illisible (NaN) n'est jamais jugé : aucune tentative consommée.
+  if (reponse.some((r) => !Number.isFinite(r.seuil))) return etat;
   return soumettreGenerique(etat, "conditions", reponse, verifierConditionsDirection);
 }
 

@@ -50,9 +50,60 @@ import {
   verifierSeuilC,
   verifierSystemeB,
   verifierTableauA,
+  equationABIllisible,
+  expressionIllisible,
 } from "./verificationProblemesContexte";
 
 const POINTS_DE_BASE = 100;
+
+const nombreIllisible = (v: unknown): boolean => typeof v !== "number" || !Number.isFinite(v);
+
+/**
+ * Audit 5e ch. 1 (lot B) : une saisie ILLISIBLE (nombre non reconnu, expression ou équation
+ * illisible) n'est JAMAIS jugée — aucune tentative consommée, l'écran affiche un message (avant,
+ * `Number(…)` envoyait NaN au moteur : 3 × « abc(( », ou une fraction « 7/2 », révélaient la réponse).
+ */
+export function estSaisieIllisible(phase: PhaseProblemeContexte, exercice: ExerciceProblemeContexte, reponse: unknown): boolean {
+  switch (phase) {
+    case "tableau":
+      return (reponse as ReponseTableauA).some((l) => nombreIllisible(l.h) || nombreIllisible(l.aireBases) || nombreIllisible(l.aireLaterale));
+    case "egaliteAires":
+    case "graphique":
+    case "intersectionSimple":
+    case "extremumSimple":
+    case "coutMoyen":
+    case "benefice":
+    case "seuil":
+      return nombreIllisible(reponse);
+    case "justification":
+      return nombreIllisible((reponse as ReponseJustificationA).h);
+    case "resolution":
+      return nombreIllisible((reponse as ReponseResolutionB).a) || nombreIllisible((reponse as ReponseResolutionB).b);
+    case "evaluation":
+      return nombreIllisible((reponse as ReponseEvaluationB).f1) || nombreIllisible((reponse as ReponseEvaluationB).f2);
+    case "lecture":
+      return nombreIllisible((reponse as ReponseLectureC).ct);
+    case "generalisation": {
+      const r = reponse as ReponseGeneralisationA;
+      const v = exercice.scenario === "A" && exercice.combo === "kInverseXAxCarre" ? exercice.volumeCm3 : 1000;
+      return [r.h, r.f, r.g].some((s) => expressionIllisible(s, { V: v }));
+    }
+    case "generalisationSimple": {
+      const r = reponse as ReponseGeneralisationSimpleA;
+      return expressionIllisible(r.f) || expressionIllisible(r.g);
+    }
+    case "systeme": {
+      const r = reponse as ReponseSystemeB;
+      return equationABIllisible(r.equation1) || equationABIllisible(r.equation2);
+    }
+    case "formule":
+      return expressionIllisible(reponse as string);
+    case "reconnaissance": {
+      const r = reponse as ReponseReconnaissanceC;
+      return expressionIllisible(r.cv) || expressionIllisible(r.cp);
+    }
+  }
+}
 
 /** B.3 (`promptcorrectionsround2.md`) — 9 des 14 écrans déclaraient `2` alors qu'un seul texte
  * d'aide (`TEXTE_AIDE_XXX_1`, `ui5e/formatProblemesContexte.ts`) existe réellement pour chacun :
@@ -61,30 +112,27 @@ const POINTS_DE_BASE = 100;
  * Plafond réduit à `1` pour ces 9 écrans (`tableau` reste à `2`, seul écran avec un authentique
  * 2e palier, `TEXTE_AIDE_TABLEAU_A_2`) — même convention "le plafond suit le contenu réellement
  * disponible" que la règle "max=0 → pas de bouton" déjà établie ailleurs sur la plateforme. */
+/** Audit 5e ch. 1 (lot B) : DEUX niveaux d'aide sur chacun des 16 écrans (15 n'en avaient qu'un) —
+ * niveau 1 la propriété ou la méthode du cours, niveau 2 son application à l'instance, en KaTeX
+ * (`ui5e/aidesProblemesContexte.ts`), jamais la réponse finale. */
 const NIVEAU_AIDE_MAX: Record<PhaseProblemeContexte, number> = {
   tableau: 2,
-  /** Repassé à 2 (D.1, `promptcorrectionsround2.md`) : `latexAideGeneralisationA2{H,F,G}` a été
-   * réécrit en 3 blocs h/f/g qui rappellent chacun la relation à utiliser SANS donner la forme
-   * finale (contrairement à l'ancienne version, qui donnait directement h(x)=V/(πx²) et f(x)=2V/x
-   * — la réponse exacte de l'écran — d'où le plafonnement à 1 décidé lors de l'audit B.3). Le
-   * niveau 2 a désormais un vrai contenu pédagogique distinct du niveau 1, plus une raison de le
-   * masquer. */
   generalisation: 2,
-  egaliteAires: 1,
-  graphique: 1,
-  justification: 1,
-  generalisationSimple: 1,
-  intersectionSimple: 1,
-  extremumSimple: 1,
-  systeme: 1,
-  resolution: 1,
-  formule: 1,
-  evaluation: 1,
-  lecture: 1,
-  coutMoyen: 1,
-  reconnaissance: 1,
-  benefice: 1,
-  seuil: 1,
+  egaliteAires: 2,
+  graphique: 2,
+  justification: 2,
+  generalisationSimple: 2,
+  intersectionSimple: 2,
+  extremumSimple: 2,
+  systeme: 2,
+  resolution: 2,
+  formule: 2,
+  evaluation: 2,
+  lecture: 2,
+  coutMoyen: 2,
+  reconnaissance: 2,
+  benefice: 2,
+  seuil: 2,
 };
 
 export function niveauAideMaxPhase(phase: PhaseProblemeContexte): number {
@@ -204,6 +252,7 @@ export function soumettreReponseTableauA(etat: EtatSessionProblemeContexte, repo
   assertPhaseEtScenario(etat, "tableau", "A", "soumettreReponseTableauA");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "A" || exercice.combo !== "kInverseXAxCarre") throw new Error("soumettreReponseTableauA : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const etapeCourante = soumettreEtapeTentatives<ReponseTableauA>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
@@ -227,6 +276,7 @@ export function soumettreReponseGeneralisationA(etat: EtatSessionProblemeContext
   assertPhaseEtScenario(etat, "generalisation", "A", "soumettreReponseGeneralisationA");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "A" || exercice.combo !== "kInverseXAxCarre") throw new Error("soumettreReponseGeneralisationA : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const etapeCourante = soumettreEtapeTentatives<ReponseGeneralisationA>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
@@ -250,6 +300,7 @@ export function soumettreReponseEgaliteAiresA(etat: EtatSessionProblemeContexte,
   assertPhaseEtScenario(etat, "egaliteAires", "A", "soumettreReponseEgaliteAiresA");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "A" || exercice.combo !== "kInverseXAxCarre") throw new Error("soumettreReponseEgaliteAiresA : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const etapeCourante = soumettreEtapeTentatives<number>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
@@ -273,6 +324,7 @@ export function soumettreReponseGraphiqueA(etat: EtatSessionProblemeContexte, re
   assertPhaseEtScenario(etat, "graphique", "A", "soumettreReponseGraphiqueA");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "A" || exercice.combo !== "kInverseXAxCarre") throw new Error("soumettreReponseGraphiqueA : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const reussie = verifierGraphiqueA(exercice, reponse);
   const etapeCourante = soumettreEtapeTentatives<number>(etat.etapeCourante, reponse, {
@@ -301,6 +353,7 @@ export function soumettreReponseJustificationA(etat: EtatSessionProblemeContexte
   assertPhaseEtScenario(etat, "justification", "A", "soumettreReponseJustificationA");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "A" || exercice.combo !== "kInverseXAxCarre") throw new Error("soumettreReponseJustificationA : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
   const xOptimalRetenu = etat.xOptimalRetenu as number;
 
   const etapeCourante = soumettreEtapeTentatives<ReponseJustificationA>(etat.etapeCourante, reponse, {
@@ -339,6 +392,7 @@ export function soumettreReponseGeneralisationSimpleA(etat: EtatSessionProblemeC
   assertPhaseEtScenario(etat, "generalisationSimple", "A", "soumettreReponseGeneralisationSimpleA");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "A" || exercice.combo === "kInverseXAxCarre") throw new Error("soumettreReponseGeneralisationSimpleA : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const etapeCourante = soumettreEtapeTentatives<ReponseGeneralisationSimpleA>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
@@ -362,6 +416,7 @@ export function soumettreReponseIntersectionSimpleA(etat: EtatSessionProblemeCon
   assertPhaseEtScenario(etat, "intersectionSimple", "A", "soumettreReponseIntersectionSimpleA");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "A" || exercice.combo === "kInverseXAxCarre") throw new Error("soumettreReponseIntersectionSimpleA : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const etapeCourante = soumettreEtapeTentatives<number>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
@@ -385,6 +440,7 @@ export function soumettreReponseExtremumSimpleA(etat: EtatSessionProblemeContext
   assertPhaseEtScenario(etat, "extremumSimple", "A", "soumettreReponseExtremumSimpleA");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "A" || exercice.combo === "kInverseXAxCarre") throw new Error("soumettreReponseExtremumSimpleA : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const etapeCourante = soumettreEtapeTentatives<number>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
@@ -415,6 +471,7 @@ export function soumettreReponseSystemeB(etat: EtatSessionProblemeContexte, repo
   assertPhaseEtScenario(etat, "systeme", "B", "soumettreReponseSystemeB");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "B") throw new Error("soumettreReponseSystemeB : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const etapeCourante = soumettreEtapeTentatives<ReponseSystemeB>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
@@ -438,6 +495,7 @@ export function soumettreReponseResolutionB(etat: EtatSessionProblemeContexte, r
   assertPhaseEtScenario(etat, "resolution", "B", "soumettreReponseResolutionB");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "B") throw new Error("soumettreReponseResolutionB : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const reussie = verifierResolutionB(exercice, reponse);
   const etapeCourante = soumettreEtapeTentatives<ReponseResolutionB>(etat.etapeCourante, reponse, {
@@ -466,6 +524,7 @@ export function soumettreReponseFormuleB(etat: EtatSessionProblemeContexte, repo
   assertPhaseEtScenario(etat, "formule", "B", "soumettreReponseFormuleB");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "B") throw new Error("soumettreReponseFormuleB : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
   const aRetenu = etat.aRetenu as number;
   const bRetenu = etat.bRetenu as number;
 
@@ -491,6 +550,7 @@ export function soumettreReponseEvaluationB(etat: EtatSessionProblemeContexte, r
   assertPhaseEtScenario(etat, "evaluation", "B", "soumettreReponseEvaluationB");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "B") throw new Error("soumettreReponseEvaluationB : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
   const aRetenu = etat.aRetenu as number;
   const bRetenu = etat.bRetenu as number;
 
@@ -526,6 +586,7 @@ export function soumettreReponseLectureC(etat: EtatSessionProblemeContexte, repo
   assertPhaseEtScenario(etat, "lecture", "C", "soumettreReponseLectureC");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "C") throw new Error("soumettreReponseLectureC : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const etapeCourante = soumettreEtapeTentatives<ReponseLectureC>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
@@ -549,6 +610,7 @@ export function soumettreReponseCoutMoyenC(etat: EtatSessionProblemeContexte, re
   assertPhaseEtScenario(etat, "coutMoyen", "C", "soumettreReponseCoutMoyenC");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "C") throw new Error("soumettreReponseCoutMoyenC : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const etapeCourante = soumettreEtapeTentatives<number>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
@@ -572,6 +634,7 @@ export function soumettreReponseReconnaissanceC(etat: EtatSessionProblemeContext
   assertPhaseEtScenario(etat, "reconnaissance", "C", "soumettreReponseReconnaissanceC");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "C") throw new Error("soumettreReponseReconnaissanceC : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const etapeCourante = soumettreEtapeTentatives<ReponseReconnaissanceC>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
@@ -595,6 +658,7 @@ export function soumettreReponseBeneficeC(etat: EtatSessionProblemeContexte, rep
   assertPhaseEtScenario(etat, "benefice", "C", "soumettreReponseBeneficeC");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "C") throw new Error("soumettreReponseBeneficeC : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const etapeCourante = soumettreEtapeTentatives<number>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
@@ -618,6 +682,7 @@ export function soumettreReponseSeuilC(etat: EtatSessionProblemeContexte, repons
   assertPhaseEtScenario(etat, "seuil", "C", "soumettreReponseSeuilC");
   const exercice = etat.exerciceCourant;
   if (exercice.scenario !== "C") throw new Error("soumettreReponseSeuilC : exercice inattendu");
+  if (estSaisieIllisible(etat.phase, exercice, reponse)) return etat;
 
   const etapeCourante = soumettreEtapeTentatives<number>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),

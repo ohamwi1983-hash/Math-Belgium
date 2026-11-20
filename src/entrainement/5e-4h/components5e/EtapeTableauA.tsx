@@ -2,12 +2,12 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioAConteneur } from "../core5e/problemesContexte.types";
 import { diagnostiquerCelluleTableauA, type ReponseTableauA } from "../moteur5e/verificationProblemesContexte";
-import { CONSIGNE_TABLEAU_A, TEXTE_AIDE_TABLEAU_A_1, TEXTE_AIDE_TABLEAU_A_2 } from "../ui5e/formatProblemesContexte";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import { CONSIGNE_TABLEAU_A } from "../ui5e/formatProblemesContexte";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { TexteRiche5e } from "./TexteRiche5e";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexte, cibleContexte, illisibleContexte, lireNombre5e, texteIllisibleContexte } from "../ui5e/aidesProblemesContexte";
 
 interface Props {
   exercice: ExerciceScenarioAConteneur;
@@ -29,6 +29,8 @@ interface Props {
 export function EtapeTableauA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lignes, setLignes] = useState(() => exercice.lignesTableau.map(() => ({ h: "", aireBases: "", aireLaterale: "" })));
   const montrerErreurs = tentativesUtilisees > 0;
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<unknown>(null);
   const complet = lignes.every((l) => l.h.trim() !== "" && l.aireBases.trim() !== "" && l.aireLaterale.trim() !== "");
 
   function modifier(i: number, champ: "h" | "aireBases" | "aireLaterale", valeur: string) {
@@ -38,12 +40,20 @@ export function EtapeTableauA({ exercice, donnees, tentativesUtilisees, tentativ
   function celluleErronee(i: number, champ: "h" | "aireBases" | "aireLaterale"): boolean {
     const brut = lignes[i][champ];
     if (!montrerErreurs || brut.trim() === "") return false;
-    return diagnostiquerCelluleTableauA(exercice, i, champ, Number(brut.replace(",", "."))) !== "correct";
+    return diagnostiquerCelluleTableauA(exercice, i, champ, lireNombre5e(brut)) !== "correct";
   }
 
   function valider() {
     if (!complet) return;
-    onValider(lignes.map((l) => ({ h: Number(l.h.replace(",", ".")), aireBases: Number(l.aireBases.replace(",", ".")), aireLaterale: Number(l.aireLaterale.replace(",", ".")) })));
+    const reponseSoumise = lignes.map((l) => ({ h: lireNombre5e(l.h), aireBases: lireNombre5e(l.aireBases), aireLaterale: lireNombre5e(l.aireLaterale) }));
+    // Saisie illisible : message, rien n'est transmis (aucune tentative — audit 5e ch. 1, lot B).
+    if (illisibleContexte("tableau", exercice, reponseSoumise)) {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    setSoumise(reponseSoumise);
+    onValider(reponseSoumise);
   }
 
   return (
@@ -91,26 +101,20 @@ export function EtapeTableauA({ exercice, donnees, tentativesUtilisees, tentativ
           ))}
         </tbody>
       </table>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={TEXTE_AIDE_TABLEAU_A_1} /></p>
-          {niveauAide >= 2 && <p><TexteRiche5e texte={TEXTE_AIDE_TABLEAU_A_2} /></p>}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesContexte("tableau", exercice, {})}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={illisible}
+        texteIllisible={texteIllisibleContexte("tableau")}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumise !== null && montrerErreurs ? cibleContexte("tableau", exercice, soumise, {}) : null}
+        validation={validation}
+      />
     </div>
   );
 }

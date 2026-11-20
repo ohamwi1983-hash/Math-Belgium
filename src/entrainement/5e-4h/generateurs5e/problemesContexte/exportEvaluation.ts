@@ -32,7 +32,9 @@ import {
   formatTermesFormulesGeneralisationSimpleA,
   formatTermesLectureC,
   formatTermesReconnaissanceC,
+  consigneVolumeA,
   latexFormuleCuB,
+  nombreLatex,
   nombreFr,
 } from "../../ui5e/formatProblemesContexte";
 import { grapheA1, grapheA2, grapheC } from "./graphes";
@@ -152,14 +154,14 @@ function enonceA1(e: ExA1): { entete: FragmentConsigne[]; html: string; question
   return {
     entete: [
       ...riche(
-        `On fabrique ${e.contexte.nomObjetIndefini}${e.contexte.nomObjetIndefini.includes("cylindre") ? "" : " en forme de cylindre"}, de rayon $x$ et de hauteur $h$ (en cm), dont la contenance est fixée à $V = ${e.volumeCm3}$ cm³ ($V = \\pi x^2 h$). On note $f(x)$ l'aire latérale et $g(x)$ l'aire des deux bases, en cm². Le graphique ci-dessous représente $f$, $g$ et $f + g$.`,
+        `${consigneVolumeA(e)} On note $x = r$ le rayon, $f(x)$ l'aire latérale et $g(x)$ l'aire des deux bases, en cm². Le graphique ci-dessous représente $f$, $g$ et $f + g$.`,
       ),
     ],
     html: grapheA1(e, false),
     questions: [
       riche("Exprime $h(x)$, $f(x)$ et $g(x)$ en fonction de $x$, en gardant $V$ comme paramètre."),
       riche("Détermine par calcul le rayon pour lequel l'aire latérale est égale à l'aire des bases (arrondi au centimètre)."),
-      riche("Lis sur le graphique le rayon qui minimise la quantité totale de matériau $(f+g)(x)$, puis calcule la hauteur correspondante (arrondie au centimètre). Que constates-tu ?"),
+      riche("Lis sur le graphique le rayon qui minimise la quantité totale de matériau $(f+g)(x)$, puis calcule la hauteur correspondante. Que constates-tu ?"),
     ],
     etapesParQuestion: [["a", "b"], ["c"], ["d", "e"]],
   };
@@ -179,7 +181,7 @@ function enonceA2(e: ExA2): { entete: FragmentConsigne[]; html: string; question
     questions: [
       riche("Écris les expressions de $f(x)$ et de $g(x)$."),
       riche("Détermine par calcul la taille de lot pour laquelle les deux coûts sont égaux."),
-      riche("Lis sur le graphique la taille de lot qui rend le coût total minimal (arrondie à l'unité)."),
+      riche("Lis sur le graphique la taille de lot qui rend le coût total minimal."),
     ],
     etapesParQuestion: [["a"], ["b"], ["c"]],
   };
@@ -189,19 +191,19 @@ function enonceB(e: ExerciceScenarioB): { entete: FragmentConsigne[]; html?: str
   const { contexte, point1: p1, point2: p2 } = e;
   return {
     entete: [
-      texte(`Pour ${contexte.sujet}, le coût unitaire (en euros par unité, pour une production de `),
+      texte(`Pour ${contexte.sujet}, `),
       latex("x"),
-      texte(` ${contexte.unite}) est de la forme `),
+      texte(` désigne la production, en centaines de ${contexte.unite}. Le coût unitaire (en euros par unité) est de la forme `),
       latex(latexFormuleCuB(e.modele)),
-      texte(", où a et b sont deux constantes. Le coût total de production vaut "),
+      texte(", où a et b sont deux constantes. Le coût total de production, en centaines d'euros, vaut "),
       latex("f(x)=\\text{cu}(x)\\times x"),
-      texte(". Un relevé donne : pour "),
+      texte(`. Un relevé donne : pour ${nombreFr(100 * p1.x, 0)} ${contexte.unite} (`),
       latex(`x=${p1.x}`),
-      texte(` ${contexte.unite}, le coût unitaire est de ${nombreFr(p1.coutUnitaire)} € ; pour `),
+      texte(`), le coût unitaire est de ${nombreFr(p1.coutUnitaire)} € ; pour ${nombreFr(100 * p2.x, 0)} ${contexte.unite} (`),
       latex(`x=${p2.x}`),
-      texte(` ${contexte.unite}, il est de ${nombreFr(p2.coutUnitaire)} €.`),
+      texte(`), il est de ${nombreFr(p2.coutUnitaire)} €.`),
     ],
-    questions: [riche("Détermine les constantes $a$ et $b$."), riche(`Exprime $f(x)$, puis calcule le coût total de production pour $x = ${e.xEval1}$ et pour $x = ${e.xEval2}$ (arrondi à l'euro).`)],
+    questions: [riche("Détermine les constantes $a$ et $b$."), riche(`Exprime $f(x)$, puis calcule le coût total de production pour $x = ${e.xEval1}$ et pour $x = ${e.xEval2}$ (en centaines d'euros, arrondi à l'unité).`)],
     etapesParQuestion: [["a", "b"], ["c", "d"]],
   };
 }
@@ -213,14 +215,14 @@ function enonceC(e: ExerciceScenarioC): { entete: FragmentConsigne[]; html: stri
   );
   return {
     entete: riche(
-      `Une entreprise a un coût fixe $\\text{CF} = ${e.cf}$ et un coût variable formé de deux parties : $\\text{CV}(x)$ et un coût proportionnel $\\text{CP}(x)$, où $x$ est la quantité produite. Le coût total vaut $\\text{CT}(x) = \\text{CF} + \\text{CV}(x) + \\text{CP}(x)$ et le chiffre d'affaires est $\\text{CA}(x)$. Toutes les valeurs sont en milliers d'euros : le tableau en donne quelques-unes, le graphique représente $\\text{CV}$, $\\text{CP}$, $\\text{CT}$ et $\\text{CA}$.`,
+      `Une entreprise a un coût fixe $\\text{CF} = ${nombreLatex(e.cf)}$ et des coûts qui dépendent de la quantité produite $x$ : une partie non proportionnelle $\\text{CV}(x)$ et une partie proportionnelle $\\text{CP}(x)$. Le coût total vaut $\\text{CT}(x) = \\text{CF} + \\text{CV}(x) + \\text{CP}(x)$ et le chiffre d'affaires est $\\text{CA}(x)$. Toutes les valeurs sont en milliers d'euros : le tableau en donne quelques-unes, le graphique représente $\\text{CV}$, $\\text{CP}$, $\\text{CT}$ et $\\text{CA}$.`,
     ),
     html: tableau + grapheC(e, false),
     questions: [
       riche(`Calcule le coût total pour $x = ${e.xLecture}$, puis le coût moyen par unité, en euros.`),
       riche("D'après l'allure des courbes et le tableau, donne les expressions de $\\text{CV}(x)$ et de $\\text{CP}(x)$."),
       riche(`Calcule le bénéfice réalisé pour $x = ${e.xBenefice}$ (en milliers d'euros).`),
-      riche("Lis sur le graphique à partir de quelle quantité l'entreprise devient rentable (valeur approchée)."),
+      riche("Lis sur le graphique à partir de quelle quantité l'entreprise devient rentable."),
     ],
     etapesParQuestion: [["a", "b"], ["c"], ["d"], ["e"]],
   };
@@ -257,9 +259,9 @@ function reponseBreveProblemesContexte(e: ExerciceProblemeContexte): FragmentCon
       latex(formatTermeXOptimalA(e)),
       texte(" cm, "),
       latex(formatTermeHJustificationA(e, xRet)),
-      texte(" cm : la hauteur est (presque) égale au diamètre ("),
+      texte(" cm : la hauteur est égale au diamètre ("),
       latex("h=2x"),
-      texte(" au rayon exact)"),
+      texte(")"),
     ];
   }
   if (e.scenario === "A") {
@@ -268,7 +270,7 @@ function reponseBreveProblemesContexte(e: ExerciceProblemeContexte): FragmentCon
   if (e.scenario === "B") {
     const a = e.aArrondiAttendu;
     const b = e.bArrondiAttendu;
-    return [texte("a) "), latex(formatTermeABLatex(a, b)), texte(" — b) "), latex(formatTermeFormuleBLatex(a, b, e.modele)), texte(" ; "), ...joindre(formatTermesEvaluationBLatex(e, a, b)), texte(" €")];
+    return [texte("a) "), latex(formatTermeABLatex(a, b)), texte(" — b) "), latex(formatTermeFormuleBLatex(a, b, e.modele)), texte(" ; "), ...joindre(formatTermesEvaluationBLatex(e, a, b)), texte(" (en centaines d'euros)")];
   }
   return [
     texte("a) "),

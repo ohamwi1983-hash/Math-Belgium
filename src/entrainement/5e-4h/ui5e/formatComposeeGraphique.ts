@@ -1,8 +1,11 @@
 import type { Composition, QuestionComposeeGraphique } from "../core5e/composeeGraphique.types";
 import { nombreTypo } from "./composeeGraphiqueGraph";
 
-/** Consigne générale redondante, affichée AU-DESSUS du bloc de données sur chaque écran de question. */
-export const CONSIGNE_GENERALE_COMPOSEE_GRAPHIQUE = "Soient les graphes des fonctions f et g.";
+/** Consigne générale redondante, affichée AU-DESSUS du bloc de données sur chaque écran de question.
+ * Audit 5e ch. 1 (G10) : les graphes sont déclarés COMPLETS — « n'existe pas » (hors du domaine) est
+ * alors une vraie réponse, distincte de « hors de la portion tracée ». */
+export const CONSIGNE_GENERALE_COMPOSEE_GRAPHIQUE =
+  "Soient les graphes des fonctions f et g. Ils sont complets : chaque fonction n'est définie que sur l'intervalle où elle est tracée (extrémités marquées par un point).";
 
 export function nomInterne(composition: Composition): "f" | "g" {
   return composition === "fRondG" ? "g" : "f";

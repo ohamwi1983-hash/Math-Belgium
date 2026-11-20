@@ -13,6 +13,7 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import type { CouleursGrapheComposee } from "../../ui5e/composeeGraphiqueGraph";
 import { svgGrapheComposee } from "../../ui5e/composeeGraphiqueGraph";
 import { nomInterne } from "../../ui5e/formatComposeeGraphique";
+import { PHRASE_GRAPHES_COMPLETS } from "../../ui5e/retoursFonctions1";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { correctionDetailleeComposeeGraphique, fragmentsResultat } from "./corrigeDetaille";
 import { profilComposeeGraphique } from "../profilsEvaluationFonctions3-4";
@@ -68,7 +69,7 @@ const LETTRES = "abcdefgh";
 
 function construireEnonceComposeeGraphique(exercice: ExerciceComposeeGraphique): SectionExercice {
   return {
-    enteteFragments: [texte("Voici les graphes des fonctions f et g.")],
+    enteteFragments: [texte(`Voici les graphes des fonctions f et g. ${PHRASE_GRAPHES_COMPLETS}`)],
     enteteHtml: graphesPapier(exercice),
     questions: exercice.questions.map((q) => ({ consigne: [texte("Calcule "), latex(composeeLatex(q)), texte(", si cette image existe.")] })),
   };
@@ -81,7 +82,7 @@ function listeComposees(exercice: ExerciceComposeeGraphique): FragmentConsigne[]
 function enoncePapierComposeeGraphique(exercice: ExerciceComposeeGraphique): EnoncePapier {
   return {
     section: {
-      enteteFragments: [texte("Voici les graphes des fonctions f et g. Calcule, si elles existent, les valeurs suivantes : "), ...listeComposees(exercice), texte(".")],
+      enteteFragments: [texte(`Voici les graphes des fonctions f et g. ${PHRASE_GRAPHES_COMPLETS} Calcule, si elles existent, les valeurs suivantes : `), ...listeComposees(exercice), texte(".")],
       enteteHtml: graphesPapier(exercice),
       questions: [],
     },
@@ -95,12 +96,13 @@ function reponseBreveComposeeGraphique(exercice: ExerciceComposeeGraphique): Fra
 
 /** Critères du niveau (grille commune) : chaque écran est une LECTURE (lire g(a) puis f(g(a)) sur les
  * graphes, ou constater que g(a) sort du domaine) — aucune étape de calcul ; méthode 0 ; piège 1
- * (une image intermédiaire hors du domaine de l'extérieure est toujours dans les données) ;
- * nombres 0. */
+ * CONSTANT (une courbe restreinte, donc une sortie de domaine possible, est toujours dans les
+ * données — et le niveau imprimé ne doit pas trahir le verdict « aucune valeur n'existe pas »,
+ * audit 5e ch. 1, lot D) ; nombres 0. */
 function criteresDifficulteComposeeGraphique(exercice: ExerciceComposeeGraphique): CriteresDifficulte {
   const corrige = correctionDetailleeComposeeGraphique(exercice);
   const lettres = [...new Set(corrige.map((e) => e.sousQuestion).filter((l): l is string => !!l))];
-  return { ...etapesDuCorrige(corrige, lettres), methode: 0, piege: exercice.questions.some((q) => !q.resultatExiste) ? 1 : 0, nombres: 0 };
+  return { ...etapesDuCorrige(corrige, lettres), methode: 0, piege: 1, nombres: 0 };
 }
 
 function baremeComposeeGraphique(exercice: ExerciceComposeeGraphique): BaremeExercice {

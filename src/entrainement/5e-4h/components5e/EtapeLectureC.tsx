@@ -2,13 +2,13 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioC } from "../core5e/problemesContexte.types";
 import { diagnostiquerCtLectureC, type ReponseLectureC } from "../moteur5e/verificationProblemesContexte";
-import { consigneContexteC, consigneLectureC, texteAideLectureC1 } from "../ui5e/formatProblemesContexte";
+import { consigneContexteC, consigneLectureC } from "../ui5e/formatProblemesContexte";
 import { TexteRiche5e } from "./TexteRiche5e";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexte, cibleContexte, illisibleContexte, lireNombre5e, texteIllisibleContexte } from "../ui5e/aidesProblemesContexte";
 
 interface Props {
   exercice: ExerciceScenarioC;
@@ -31,12 +31,22 @@ interface Props {
 export function EtapeLectureC({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [ct, setCt] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<unknown>(null);
   const complet = ct.trim() !== "";
-  const ctErronee = montrerErreurs && complet && diagnostiquerCtLectureC(exercice, Number(ct.replace(",", "."))) !== "correct";
+  const ctErronee = montrerErreurs && complet && diagnostiquerCtLectureC(exercice, lireNombre5e(ct)) !== "correct";
 
   function valider() {
     if (!complet) return;
-    onValider({ ct: Number(ct.replace(",", ".")) });
+    const reponseSoumise = { ct: lireNombre5e(ct) };
+    // Saisie illisible : message, rien n'est transmis (aucune tentative — audit 5e ch. 1, lot B).
+    if (illisibleContexte("lecture", exercice, reponseSoumise)) {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    setSoumise(reponseSoumise);
+    onValider(reponseSoumise);
   }
 
   return (
@@ -49,27 +59,20 @@ export function EtapeLectureC({ exercice, donnees, tentativesUtilisees, tentativ
         <label className="field-label field-label-minuscule">CT({exercice.xLecture}) =</label>
         <input type="text" className={`text-input${ctErronee ? " is-erronee" : ""}`} value={ct} onChange={(e) => setCt(normaliserSigneMoins(e.target.value))} />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>
-            <TexteRiche5e texte={texteAideLectureC1(exercice)} />
-          </p>
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesContexte("lecture", exercice, {})}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={illisible}
+        texteIllisible={texteIllisibleContexte("lecture")}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumise !== null && montrerErreurs ? cibleContexte("lecture", exercice, soumise, {}) : null}
+        validation={validation}
+      />
     </div>
   );
 }

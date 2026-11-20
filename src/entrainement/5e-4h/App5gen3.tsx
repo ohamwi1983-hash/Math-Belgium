@@ -47,6 +47,7 @@ import {
   texteAideFormuleNiveau1,
 } from "./ui5e/formatComposerFonctions";
 import { calculerRecapitulatifComposerFonctions } from "./ui5e/recapitulatifComposerFonctions";
+import { cibleDomaineComposee, cibleEnsemble, cibleFormuleComposee } from "./ui5e/retoursFonctions1";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -213,9 +214,10 @@ export function App5gen3() {
               niveauAideMax={NIVEAU_AIDE_MAX_COMPOSER_FONCTIONS}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               texteAideNiveau1={texteAideFormuleNiveau1(dir)}
-              latexAideNiveau2={etat.niveauAide >= 2 ? latexAideFormuleNiveau2(dir) : null}
+              latexAideNiveau2={latexAideFormuleNiveau2(dir)}
               onValider={(texte) => terminerEtape(soumettreReponseFormule(etat, texte))}
               diagnostiquer={(texte) => diagnostiquerFormuleDirectionSimplifiee(dir, texte)}
+              cible={(texte) => cibleFormuleComposee(dir, dir === exercice.fRondG ? exercice.gRondF : exercice.fRondG, texte)}
               validation={validation}
             />
           )}
@@ -231,7 +233,7 @@ export function App5gen3() {
               niveauAideMax={NIVEAU_AIDE_MAX_COMPOSER_FONCTIONS}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               texteAideNiveau1={texteAideConditionsNiveau1(dir)}
-              latexAideNiveau2={etat.niveauAide >= 2 ? latexAideConditionsNiveau2(dir) : null}
+              latexAideNiveau2={latexAideConditionsNiveau2(dir)}
               onValider={(reponse) => terminerEtape(soumettreReponseConditions(etat, reponse))}
               validation={validation}
             />
@@ -249,8 +251,9 @@ export function App5gen3() {
               niveauAideMax={NIVEAU_AIDE_MAX_COMPOSER_FONCTIONS}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               texteAideNiveau1={texteAideC1Niveau1(dir)}
-              latexAideNiveau2={etat.niveauAide >= 2 ? latexAideC1Niveau2(dir) : null}
+              latexAideNiveau2={latexAideC1Niveau2(dir)}
               onValider={(reponse) => terminerEtape(soumettreReponseC1(etat, reponse))}
+              cible={(saisi) => cibleEnsemble(saisi, dir.interieure.domaine)}
               validation={validation}
             />
           )}
@@ -267,8 +270,9 @@ export function App5gen3() {
               niveauAideMax={NIVEAU_AIDE_MAX_COMPOSER_FONCTIONS}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               texteAideNiveau1={texteAideC2Niveau1(dir)}
-              latexAideNiveau2={etat.niveauAide >= 2 ? latexAideC2Niveau2(dir) : null}
+              latexAideNiveau2={latexAideC2Niveau2(dir)}
               onValider={(reponse) => terminerEtape(soumettreReponseC2(etat, reponse))}
+              cible={(saisi) => (dir.domaineApresCarre ? cibleEnsemble(saisi, dir.domaineApresCarre) : null)}
               validation={validation}
             />
           )}
@@ -285,8 +289,9 @@ export function App5gen3() {
               niveauAideMax={NIVEAU_AIDE_MAX_COMPOSER_FONCTIONS}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               texteAideNiveau1={texteAideDomaineNiveau1(dir)}
-              latexAideNiveau2={etat.niveauAide >= 2 ? latexAideDomaineNiveau2(dir) : null}
+              latexAideNiveau2={latexAideDomaineNiveau2(dir)}
               onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+              cible={(saisi) => cibleDomaineComposee(dir, saisi)}
               validation={validation}
             />
           )}

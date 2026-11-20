@@ -101,18 +101,40 @@ interface Props {
    * remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md, "validation/
    * invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Bouton « ∅ » (ensemble vide) — 5gen3, où le domaine d'une composée peut être vide (cas
+   * particulier du cours). Toujours proposé sur les écrans concernés, jamais seulement quand la
+   * réponse est vide (il ne doit rien trahir). Absent par défaut (comportement inchangé ailleurs). */
+  avecVide?: boolean;
 }
 
-export function EnsembleReelGuideBuilder({ onValider, prefixApercu, disabled: disabledProp = false, contenuAvantValider, attendu, apresEchec = false, validation }: Props) {
+/** Audit 5e ch. 1 (lot B) : « Valider » n'est plus grisé sans explication — une saisie incomplète ou
+ * illisible affiche un message et n'est JAMAIS transmise (aucune tentative consommée). */
+const FIN_SANS_TENTATIVE = " Cette saisie ne compte pas comme une tentative.";
+function messageIncomplet(forme: FormeEnsemble | "vide" | null, points: string[], morceaux: EtatListeMorceauxFraction): string {
+  if (forme === null) return "Choisis d'abord la forme de l'ensemble (ℝ, ℝ privé de valeurs, ou intervalle(s))." + FIN_SANS_TENTATIVE;
+  if (forme === "prive_points") {
+    if (points.some((p) => p.trim() === "")) return "Écris chaque valeur exclue (ou retire la ligne vide avec ×)." + FIN_SANS_TENTATIVE;
+    return "Valeur non reconnue : écris chaque nombre, par exemple −3, 5/2 ou 2,5." + FIN_SANS_TENTATIVE;
+  }
+  const crochetManquant = morceaux.some((m) => crochetGaucheEffectifFraction(m) === null || crochetDroitEffectifFraction(m) === null);
+  const borneVide = morceaux.some((m) => (m.borneGaucheMode === "nombre" && m.borneGaucheValeur.trim() === "") || (m.borneDroiteMode === "nombre" && m.borneDroiteValeur.trim() === ""));
+  if (borneVide) return "Écris chaque borne (un nombre), ou choisis −∞ / +∞." + FIN_SANS_TENTATIVE;
+  if (crochetManquant) return "Choisis chaque crochet (« [ » ou « ] ») avant de valider." + FIN_SANS_TENTATIVE;
+  return "Borne non reconnue : écris chaque borne comme un nombre, par exemple −3, 5/2 ou 2,5." + FIN_SANS_TENTATIVE;
+}
+
+export function EnsembleReelGuideBuilder({ onValider, prefixApercu, disabled: disabledProp = false, contenuAvantValider, attendu, apresEchec = false, validation, avecVide = false }: Props) {
   const disabled = disabledProp || !!validation;
-  const [forme, setForme] = useState<FormeEnsemble | null>(null);
+  const [forme, setForme] = useState<FormeEnsemble | "vide" | null>(null);
   const [points, setPoints] = useState<string[]>([""]);
   const [morceaux, setMorceaux] = useState<EtatListeMorceauxFraction>(etatListeFractionInitiale());
+  const [message, setMessage] = useState<string | null>(null);
 
-  function choisirForme(nouvelleForme: FormeEnsemble) {
+  function choisirForme(nouvelleForme: FormeEnsemble | "vide") {
     setForme(nouvelleForme);
     setPoints([""]);
     setMorceaux(etatListeFractionInitiale());
+    setMessage(null);
   }
 
   const pointsValides = points.map((p) => parserNombreOuFraction(p));
@@ -128,17 +150,25 @@ export function EnsembleReelGuideBuilder({ onValider, prefixApercu, disabled: di
     apresEchec && attendu !== undefined && forme === "prive_points" && (saisieActuellePoints === null || !verifierEnsembleReelGuide(saisieActuellePoints, attendu));
   const complet =
     forme === "reel" ||
+    forme === "vide" ||
     (forme === "prive_points" && points.length > 0 && pointsValides.every((v) => v !== null)) ||
     (forme === "intervalles" && listeIntervalles !== null);
 
   function valider() {
-    if (forme === null || !complet) return;
+    if (forme === null || !complet) {
+      setMessage(messageIncomplet(forme, points, morceaux));
+      return;
+    }
+    setMessage(null);
     if (forme === "reel") return onValider({ forme: "reel", points: [], morceaux: [] });
+    // Ensemble vide : une réunion de ZÉRO intervalle (forme canonique déjà reconnue par
+    // `verifierEnsembleReelGuide`, rendue « ∅ » par `formatEnsembleReelLatex`).
+    if (forme === "vide") return onValider({ forme: "intervalles", points: [], morceaux: [] });
     if (forme === "prive_points") return onValider({ forme: "prive_points", points: pointsValides as number[], morceaux: [] });
     onValider({ forme: "intervalles", points: [], morceaux: (listeIntervalles as Morceau[]).map(morceauEnsembleDepuisMorceau) });
   }
 
-  const termesApercu = formatTermesApercuEnsemble(forme, points, morceaux);
+  const termesApercu = forme === "vide" ? ["\\varnothing"] : formatTermesApercuEnsemble(forme, points, morceaux);
 
   return (
     <div className="ensemble-reel-builder">
@@ -161,6 +191,11 @@ export function EnsembleReelGuideBuilder({ onValider, prefixApercu, disabled: di
         <button type="button" className={forme === "intervalles" ? "btn toggle-active" : "btn"} disabled={disabled} onClick={() => choisirForme("intervalles")}>
           Intervalle(s)
         </button>
+        {avecVide && (
+          <button type="button" className={forme === "vide" ? "btn toggle-active" : "btn"} disabled={disabled} onClick={() => choisirForme("vide")}>
+            ∅ (vide)
+          </button>
+        )}
       </div>
 
       {forme === "prive_points" && (
@@ -173,7 +208,10 @@ export function EnsembleReelGuideBuilder({ onValider, prefixApercu, disabled: di
                 placeholder="valeur exclue"
                 value={p}
                 disabled={disabled}
-                onChange={(e) => setPoints((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
+                onChange={(e) => {
+                  setMessage(null);
+                  setPoints((arr) => arr.map((v, j) => (j === i ? e.target.value : v)));
+                }}
               />
               {points.length > 1 && (
                 <button
@@ -196,16 +234,27 @@ export function EnsembleReelGuideBuilder({ onValider, prefixApercu, disabled: di
 
       {forme === "intervalles" && (
         <div className="contenu-conditionnel">
-          <ListeMorceauxFractionInput etat={morceaux} onChange={setMorceaux} />
+          <ListeMorceauxFractionInput
+            etat={morceaux}
+            onChange={(e) => {
+              setMessage(null);
+              setMorceaux(e);
+            }}
+          />
         </div>
       )}
 
       {!validation && (
         <>
           {contenuAvantValider}
-          <button type="button" className="btn btn-primary" disabled={disabled || forme === null || !complet} onClick={valider}>
+          <button type="button" className="btn btn-primary" disabled={disabled} onClick={valider}>
             Valider
           </button>
+          {message && (
+            <p className="alert-error" role="alert">
+              {message}
+            </p>
+          )}
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

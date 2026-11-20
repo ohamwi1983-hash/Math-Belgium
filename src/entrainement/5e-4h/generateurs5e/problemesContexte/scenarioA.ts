@@ -24,7 +24,6 @@ const TENTATIVES_MAX = 500;
 // Combo 1 (kInverseXAxCarre) — inchangé (bidons cylindriques).
 // ============================================================================
 
-const VOLUMES_CM3 = [1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000];
 const RAYON_MIN = 3;
 const RAYON_MAX = 12;
 
@@ -60,10 +59,17 @@ function tirerRayonsDistincts(nombre: number): number[] {
   return [...rayons].sort((a, b) => a - b);
 }
 
+/** Audit 5e ch. 1 (G2, décision 5) : V = 2πn³ avec n entier, écrit « kπ cm³ » (k = 2n³) — le
+ * rayon optimal vaut EXACTEMENT n (minimum lu sur une ligne de la grille) et h(n) = 2n : le constat
+ * « hauteur = diamètre » est exact (il était faux de 2 à 3 cm dans 46 % des tirages, rayon arrondi). */
 export function construireScenarioAConteneur(contexte: ContexteConteneurA = tirerElement(CONTEXTES_CONTENEUR)): ExerciceScenarioAConteneur {
-  const volumeCm3 = VOLUMES_CM3[Math.floor(Math.random() * VOLUMES_CM3.length)];
+  const n = tirerElement(contexte.rayons);
+  const volumeKPi = 2 * n * n * n;
+  const volumeCm3 = Math.PI * volumeKPi;
   const nombreLignes = 2 + Math.floor(Math.random() * 2); // 2 ou 3
-  const rayons = tirerRayonsDistincts(nombreLignes);
+  // Rayons du tableau différents du rayon optimal (l'écran « graphique » le fait LIRE).
+  let rayons = tirerRayonsDistincts(nombreLignes);
+  while (rayons.includes(n)) rayons = tirerRayonsDistincts(nombreLignes);
   const lignesTableau: LigneTableauScenarioA[] = rayons.map((r) => ({
     r,
     hAttendu: hauteurCylindre(volumeCm3, r),
@@ -76,9 +82,11 @@ export function construireScenarioAConteneur(contexte: ContexteConteneurA = tire
     combo: "kInverseXAxCarre",
     contexte,
     volumeCm3,
+    volumeKPi,
+    rayonOptimal: n,
     lignesTableau,
     xEgaliteAires: xEgaliteAires(volumeCm3),
-    xOptimal: xOptimalScenarioA(volumeCm3),
+    xOptimal: n,
   };
 }
 
@@ -95,13 +103,20 @@ export function gStockCommande(k: number, x: number): number {
   return k / x;
 }
 
+/** Audit 5e ch. 1 (G12, décision 5) : le minimum de f + g, en √(k/a), est construit ENTIER
+ * (k = a·m²) pour tomber sur une ligne de la grille, ET l'intersection x₀ reste entière
+ * (k = x₀(a·x₀ + b), d'où b = a(m² − x₀²)/x₀ entier). */
 export function construireScenarioAStockCommande(contexte: ContexteReduitA = tirerElement(CONTEXTES_STOCK_COMMANDE)): ExerciceScenarioAStockCommande {
   for (let tentative = 0; tentative < TENTATIVES_MAX; tentative++) {
     const a = entierAleatoire(2, 6);
-    const b = entierAleatoire(5, 20);
     const x0 = entierAleatoire(3, 10);
-    const k = x0 * (a * x0 + b);
-    const xExtremum = Math.sqrt(k / a);
+    const m = entierAleatoire(x0 + 1, 2 * x0);
+    const numerateurB = a * (m * m - x0 * x0);
+    if (numerateurB % x0 !== 0) continue;
+    const b = numerateurB / x0;
+    if (b < 4 || b > 40) continue;
+    const k = a * m * m;
+    const xExtremum = m;
     if (Math.abs(xExtremum - x0) < 1) continue; // distinction pédagogique intersection ≠ extremum
     const xMax = Math.max(x0, xExtremum) * 1.8;
     // 2 relevés à x DIVISEURS de k (g(x)=k/x entier), différents de x0 (le relevé donnerait sinon

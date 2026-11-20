@@ -365,6 +365,22 @@ function conditionSurInterieure(dir: CompositionDirigee, c: ConditionSurG): { bl
     blocs.push(...q.blocs);
     return { blocs, ensemble: q.ensemble };
   }
+  // Seuil NÉGATIF (domaine vide, cas particulier) face à une racine, toujours positive ou nulle : on
+  // n'élève pas au carré, on conclut par le signe (jamais vrai pour « ≤ / < », toujours vrai là où la
+  // racine existe pour « ≥ / > »).
+  if ((fn.type === "irrationnelleSimple" || fn.type === "fractionSousRacine") && s < 0 && rel !== "≠" && rel !== "=") {
+    const racine = fn.type === "irrationnelleSimple" ? `\\sqrt{${P(fn.radicande)}}` : `\\sqrt{\\dfrac{${P(fn.numerateur)}}{${P(fn.denominateur)}}}`;
+    const jamais = rel === "≤" || rel === "<";
+    const lignes: LigneCalcul[] = [
+      ligne(cond),
+      ligne(`\\iff ${racine}${relLatex(rel)} ${S}`, "on remplace par l'expression"),
+      jamais
+        ? ligne("\\iff x\\in\\varnothing", jf("une racine carrée est positive ou nulle : elle n'est jamais inférieure à ", { l: S }))
+        : ligne("\\iff x\\in\\mathbb{R}", jf("une racine carrée est positive ou nulle : elle est toujours supérieure à ", { l: S }, " (là où elle existe)")),
+    ];
+    blocs.push({ intro: [], lignes });
+    return { blocs, ensemble: jamais ? { forme: "intervalles", points: [], morceaux: [] } : { forme: "reel", points: [], morceaux: [] } };
+  }
   if (fn.type === "irrationnelleSimple") {
     const U = P(fn.radicande);
     const [b, a] = [fn.radicande[0] ?? 0, fn.radicande[1] ?? 0];
@@ -537,12 +553,15 @@ function etapeC2(dir: CompositionDirigee, l: string): EtapeCorrection[] {
     blocs.push({ intro: [t("Les deux conditions à la fois :")], lignes: sansDoublons([ligne(`S=${res[0]!.facteur ?? ensFacteur(res[0]!.ensemble)}\\cap${res[1]!.facteur ?? ensFacteur(res[1]!.ensemble)}`, "intersection"), ligne(`=${ens(dir.domaineApresCarre!)}`)]), label: "Intersection" });
   }
   const typeInt = dir.interieure.fonction.type;
+  const seuilNegatif = dir.conditions.some((c) => c.seuil < 0);
   return [
     utilise(l, [
       t(
         typeInt === "racineSurFraction"
           ? `${intN}(x) est un quotient : là où son dénominateur est positif, on multiplie par lui puis on élève au carré (deux membres positifs) ; là où il est négatif, ${intN}(x) est négatif ${COURS_COMPOSER}.`
-          : `${intN}(x) est une racine carrée, donc positive, et le seuil est positif : élever au carré ne change pas le sens ${COURS_COMPOSER}.`,
+          : seuilNegatif
+            ? `${intN}(x) est une racine carrée, donc positive ou nulle : face à un seuil négatif, on conclut par le signe, sans élever au carré ; face à un seuil positif, élever au carré ne change pas le sens ${COURS_COMPOSER}.`
+            : `${intN}(x) est une racine carrée, donc positive, et le seuil est positif : élever au carré ne change pas le sens ${COURS_COMPOSER}.`,
       ),
     ]),
     ...blocsVersEtapes(l, blocs),
@@ -596,6 +615,17 @@ function etapeDomaine(dir: CompositionDirigee, l: string, avecPiege: boolean): E
 function verificationDomaine(dir: CompositionDirigee, l: string): EtapeCorrection[] {
   const fnI = dir.interieure.fonction;
   const fnE = dir.exterieure.fonction;
+  // Domaine vide (cas particulier) : un x du domaine de l'intérieure, dont l'image (une racine,
+  // positive ou nulle) n'est pas dans le domaine de l'extérieure.
+  if (dir.domaine.forme === "intervalles" && dir.domaine.morceaux.length === 0) {
+    for (let x = -12; x <= 12; x++) {
+      if (valeur(fnI, x) === null) continue;
+      const i = dir.nomInterieure;
+      const e = nomExt(dir);
+      return [verification(l, [t("Pour "), f(`x=${x}`), t(", dans le domaine de "), f(i), t(" : "), f(`${i}${grp(x)}\geq 0`), t(" (une racine carrée) n'appartient pas au domaine de "), f(e), t(", donc "), f(`${e}(${i}${grp(x)})`), t(" n'existe pas — comme pour tout réel x.")])];
+    }
+    return [];
+  }
   for (let x = -12; x <= 12; x++) {
     const dedans = valeur(fnI, x);
     if (dedans !== null) continue;

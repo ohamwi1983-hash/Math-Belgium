@@ -2,13 +2,13 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceDomaineDefinition, SlotCE, SymboleCE } from "../core5e/domaineDefinition.types";
 import type { ReponseCE } from "../moteur5e/verificationDomaineDefinition";
-import { CONSIGNE_GENERALE_DOMAINE_DEFINITION, OPTIONS_SYMBOLE_CE, texteAideCE } from "../ui5e/formatDomaineDefinition";
+import { CONSIGNE_GENERALE_DOMAINE_DEFINITION, OPTIONS_SYMBOLE_CE } from "../ui5e/formatDomaineDefinition";
 import type { OptionPolynomeLatex } from "../ui5e/formatDomaineDefinition";
+import { aidesCE5gen1 } from "../ui5e/retoursFonctions1";
 import { Katex } from "../components/Katex";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
 
 interface LigneSaisie {
   /** Vide pour la famille "pasDeCE" (aucun vrai slot n'existe — `exercice.argumentLatex` sert de
@@ -117,8 +117,8 @@ export function EtapeCEDomaineDefinition({ exercice, tentativesUtilisees, tentat
   const argumentLatexPasDeCE = exercice.famille === "pasDeCE" ? exercice.argumentLatex : null;
   const [aBesoinDeCE, setABesoinDeCE] = useState<boolean | null>(null);
   const [lignes, setLignes] = useState<LigneSaisie[]>(() => [{ slotId: pasDeSlotReel ? "" : slots[0].id, symbole: null }]);
+  const [incomplet, setIncomplet] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
-  const textesAide = texteAideCE(exercice);
 
   /** Même formulaire add-as-needed pour TOUTE famille, y compris "pasDeCE" (A.1,
    * `promptcorrectionsround2.md`) — l'ancienne condition `slots.length > 0` masquait entièrement le
@@ -130,6 +130,7 @@ export function EtapeCEDomaineDefinition({ exercice, tentativesUtilisees, tentat
   const complet = aBesoinDeCE === false || (aBesoinDeCE === true && lignes.length > 0 && lignes.every((l) => l.symbole !== null));
 
   function ajouterLigne() {
+    setIncomplet(false);
     setLignes((arr) => [...arr, { slotId: pasDeSlotReel ? "" : slots[0].id, symbole: null }]);
   }
 
@@ -142,11 +143,17 @@ export function EtapeCEDomaineDefinition({ exercice, tentativesUtilisees, tentat
   }
 
   function modifierSymbole(i: number, symbole: string) {
+    setIncomplet(false);
     setLignes((arr) => arr.map((l, j) => (j === i ? { ...l, symbole: symbole as SymboleCE } : l)));
   }
 
   function valider() {
-    if (!complet) return;
+    // Choix incomplet : message, rien n'est transmis (aucune tentative consommée).
+    if (!complet) {
+      setIncomplet(true);
+      return;
+    }
+    setIncomplet(false);
     if (aBesoinDeCE === false) return onValider({ aucuneCE: true });
     onValider({ aucuneCE: false, lignes: lignes.map((l) => ({ slotId: l.slotId, symbole: l.symbole as SymboleCE })) });
   }
@@ -209,26 +216,19 @@ export function EtapeCEDomaineDefinition({ exercice, tentativesUtilisees, tentat
           </button>
         </div>
       )}
-      {niveauAide >= 1 && textesAide.length > 0 && (
-        <div className="aide-5e">
-          <p>{textesAide[0]}</p>
-          {niveauAide >= 2 && textesAide.length > 1 && <p>{textesAide[1]}</p>}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesCE5gen1(exercice)}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={aBesoinDeCE === null}
+        illisible={incomplet}
+        texteIllisible="Choisis le type de chaque condition (≠ 0, ≥ 0 ou > 0), ou retire la ligne inutile. Cette saisie ne compte pas comme une tentative."
+        tentativesUtilisees={montrerErreurs ? tentativesUtilisees : 0}
+        tentativesMax={tentativesMax}
+        validation={validation}
+      />
     </div>
   );
 }

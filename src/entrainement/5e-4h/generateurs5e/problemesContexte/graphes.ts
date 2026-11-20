@@ -83,7 +83,8 @@ export function grapheA1(e: ExerciceScenarioAConteneur, marquerMinimum: boolean)
         { texte: "g(x) : aire des bases (cm²)", couleur: COULEUR_G },
         { texte: "(f + g)(x)", couleur: COULEUR_SOMME },
       ],
-      points: marquerMinimum ? [{ x: xOpt, y: somme(xOpt), label: `minimum vers x = ${xOpt}`, couleur: COULEUR_SOMME, labelPosition: "dessous" }] : [],
+      legendeSous: true,
+      points: marquerMinimum ? [{ x: xOpt, y: somme(xOpt), label: `minimum en x = ${xOpt}`, couleur: COULEUR_SOMME, labelPosition: "dessous" }] : [],
       verticales: marquerMinimum ? [{ x: xOpt, couleur: COULEUR_SOMME }] : [],
     }),
   );
@@ -113,7 +114,8 @@ export function grapheA2(e: ExerciceScenarioAStockCommande, marquerMinimum: bool
         { texte: `g(x) : ${e.contexte.labelG} (€)`, couleur: COULEUR_G },
         { texte: "(f + g)(x) : coût total (€)", couleur: COULEUR_SOMME },
       ],
-      points: marquerMinimum ? [{ x: xExt, y: somme(xExt), label: `minimum vers x = ${xExt}`, couleur: COULEUR_SOMME, labelPosition: "dessous" }] : [],
+      legendeSous: true,
+      points: marquerMinimum ? [{ x: xExt, y: somme(xExt), label: `minimum en x = ${xExt}`, couleur: COULEUR_SOMME, labelPosition: "dessous" }] : [],
       verticales: marquerMinimum ? [{ x: xExt, couleur: COULEUR_SOMME }] : [],
     }),
   );
@@ -150,7 +152,8 @@ export function grapheC(e: ExerciceScenarioC, marquerSeuil: boolean): string {
         { texte: "CT(x)", couleur: COULEUR_CT },
         { texte: "CA(x)", couleur: COULEUR_CA },
       ],
-      points: marquerSeuil ? [{ x: e.xSeuil, y: ca(e.xSeuil), label: `seuil vers x = ${nombreFr(e.xSeuil, 1)}`, couleur: COULEUR_CA, labelPosition: "dessus" }] : [],
+      legendeSous: true,
+      points: marquerSeuil ? [{ x: e.xSeuil, y: ca(e.xSeuil), label: `seuil en x = ${nombreFr(e.xSeuil, 1)}`, couleur: COULEUR_CA, labelPosition: "dessus" }] : [],
       verticales: marquerSeuil ? [{ x: e.xSeuil, couleur: COULEUR_CA }] : [],
     }),
   );

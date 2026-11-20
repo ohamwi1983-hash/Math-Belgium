@@ -18,13 +18,13 @@
 import type { ExerciceScenarioC, FormeChiffreAffairesC, FormeCoutVariableC, LigneTableauC } from "../../core5e/problemesContexte.types";
 import { entierAleatoire, tirerElement } from "./utils";
 
-const CF_MIN = 20;
-const CF_MAX = 50;
+const CF_MIN = 10;
+const CF_MAX = 80;
 const M_MIN = 1;
 const M_MAX = 3;
 const MARGE_P_MIN = 2;
 const MARGE_P_MAX = 6;
-const TENTATIVES_MAX = 2000;
+const TENTATIVES_MAX = 20000;
 /** Le seuil doit tomber dans [20 % ; 80 %] de la fenêtre affichée (audit 5e ch. 1 : il tombait
  * TOUJOURS à 15 %, collé au bord gauche, et la réponse « 0 » passait la tolérance). */
 const FRACTION_FENETRE_MIN = 0.2;
@@ -178,48 +178,56 @@ export function construireTableauC(formeCV: FormeCoutVariableC, formeCA: FormeCh
     .map((x) => ({ x, cv: arrondiCentieme(coutVariable(formeCV, k, x)), cp: arrondiCentieme(coutProportionnel(m, x)), ca: arrondiCentieme(chiffreAffaires(formeCA, p, x)) }));
 }
 
+/** Valeur « exacte au centième » (tableau, CF) : `null` sinon. */
+function auCentieme(v: number): number | null {
+  const c = Math.round(v * 100);
+  return Math.abs(v * 100 - c) < 1e-6 ? c / 100 : null;
+}
+
+/** Fenêtre affichée au plus de 40 unités : le quadrillage des documents garde une ligne par unité
+ * de x (`graphes.ts::grilleUnite`), le seuil entier tombe donc sur une ligne. */
+const X_MAX_FENETRE = 40;
+
+/**
+ * Audit 5e ch. 1 (G12, décision 5) : le seuil de rentabilité est CONSTRUIT entier — on choisit x₀
+ * (entier, carré parfait si une forme est en √x, cube si en ∛x), puis CF = CA(x₀) − CV(x₀) − CP(x₀),
+ * pour que CA = CT exactement en x₀ (avant : seuil au dixième, « x ≈ 22,6 », sur une grille de 5 en
+ * 5). Seules les deux combinaisons √x / ∛x n'ont pas de x₀ commode : CF y est arrondi au centième et
+ * le seuil reste à moins de 0,02 de x₀ (vérifié par bissection).
+ */
 export function construireScenarioCAvecFormes(formeCV: FormeCoutVariableC, formeCA: FormeChiffreAffairesC): ExerciceScenarioC {
   for (let tentative = 0; tentative < TENTATIVES_MAX; tentative++) {
-    const cf = entierAleatoire(CF_MIN, CF_MAX);
-    const { k, xMax: xMaxParDefaut } = tirerKEtXMax(formeCV);
+    const { k } = tirerKEtXMax(formeCV);
     const m = entierAleatoire(M_MIN, M_MAX);
     const p = tirerP(formeCA, m);
+    const racines = [formeCV, formeCA].filter((fo) => fo === "racineCarree");
+    const cubiques = [formeCV, formeCA].filter((fo) => fo === "racineCubique");
+    let candidats: number[];
+    if (racines.length > 0 && cubiques.length > 0) candidats = Array.from({ length: 27 }, (_, i) => i + 4);
+    else if (racines.length > 0) candidats = [4, 9, 16, 25];
+    else if (cubiques.length > 0) candidats = [8, 27];
+    else candidats = Array.from({ length: 27 }, (_, i) => i + 4);
+    const x0 = tirerElement(candidats);
+    const brut = chiffreAffaires(formeCA, p, x0) - coutVariable(formeCV, k, x0) - coutProportionnel(m, x0);
+    const cf = auCentieme(brut) ?? Math.round(brut * 100) / 100;
+    if (cf < CF_MIN || cf > CF_MAX) continue;
     const f = (x: number) => benefice(cf, formeCV, k, m, formeCA, p, x);
-
-    if (f(1e-6) >= 0) continue; // devrait toujours être <0 (=-cf) — garde-fou défensif
+    if (f(1e-6) >= 0) continue;
     const xVertex = trouverVertexOuNull(f);
-    if (xVertex !== null && f(xVertex) <= 0) continue; // jamais rentable, quel que soit x — retirer
+    if (xVertex !== null && (f(xVertex) <= 0 || xVertex <= x0 + 1)) continue;
+    const xSeuil = bissectionSeuil(f, xVertex ?? X_MAX_FENETRE * 2);
+    if (Math.abs(xSeuil - x0) > 0.02) continue;
+    // Fenêtre : seuil entre 25 % et 65 % de la largeur, avant le sommet du bénéfice, au plus 40.
+    const fraction = 0.25 + Math.random() * 0.4;
+    const xMax = Math.min(X_MAX_FENETRE, Math.floor(Math.min(xVertex ?? Infinity, x0 / fraction)));
+    if (xMax < 7 || x0 < xMax * FRACTION_FENETRE_MIN || x0 > xMax * FRACTION_FENETRE_MAX) continue;
 
-    let xMax: number;
-    let xSeuil: number;
-    if (xVertex === null) {
-      // Bénéfice indéfiniment croissant (pas de second croisement) — domaine "par défaut" comme
-      // avant cette évolution, aucun risque de double traversée à filtrer.
-      xMax = xMaxParDefaut;
-      xSeuil = bissectionSeuil(f, xMax);
-    } else {
-      // Bénéfice concave/unimodal — xSeuil est structurellement TRÈS PROCHE de 0 pour certaines
-      // combinaisons (marge généreuse dès les premières unités) : plutôt qu'un xMax tiré au hasard
-      // dans une plage fixe (qui placerait alors xSeuil hors de la fenêtre lisible la plupart du
-      // temps), xMax est dérivé de xSeuil pour GARANTIR par construction qu'il tombe à la fraction
-      // basse de la fenêtre — jamais au-delà du sommet, seule vraie contrainte physique.
-      xSeuil = bissectionSeuil(f, xVertex);
-      // Position du seuil TIRÉE dans la fenêtre (25 % à 65 %), plafonnée par le sommet du bénéfice ;
-      // la fenêtre garde au moins 7 unités (2 quantités lisibles x ≥ 4 doivent y tenir).
-      const fractionMax = Math.min(0.65, xSeuil / 7);
-      if (fractionMax < FRACTION_FENETRE_MIN) continue;
-      const fractionMin = Math.min(0.25, fractionMax);
-      const fraction = fractionMin + Math.random() * (fractionMax - fractionMin);
-      xMax = Math.min(xVertex, xSeuil / fraction);
-    }
-    if (xSeuil < xMax * FRACTION_FENETRE_MIN || xSeuil > xMax * FRACTION_FENETRE_MAX) continue;
-
-    const candidats = candidatsLisibles(formeCV, xMax);
-    if (candidats.length < 2) continue;
-    const [xLecture, xBenefice] = tirerDeuxDistincts(candidats);
+    const lisibles = candidatsLisibles(formeCV, xMax).filter((v) => v !== x0);
+    if (lisibles.length < 2) continue;
+    const [xLecture, xBenefice] = tirerDeuxDistincts(lisibles);
     const tableau = construireTableauC(formeCV, formeCA, k, m, p, [1, xLecture, xBenefice]);
 
-    return { scenario: "C", formeCV, formeCA, cf, k, m, p, xMax, xLecture, xBenefice, xSeuil, tableau };
+    return { scenario: "C", formeCV, formeCA, cf, k, m, p, xMax, xLecture, xBenefice, xSeuil: x0, tableau };
   }
   throw new Error(`construireScenarioCAvecFormes(${formeCV},${formeCA}) : aucun tirage valide trouvé après ${TENTATIVES_MAX} tentatives.`);
 }

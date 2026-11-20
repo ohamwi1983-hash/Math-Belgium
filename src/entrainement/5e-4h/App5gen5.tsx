@@ -10,7 +10,9 @@ import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
 
 /** Catalogue PARTAGÉ avec l'adaptateur papier et le `?code=` (même ordre partout). */
-const OPTIONS_SCENARIO = CATALOGUE_PROBLEMES_CONTEXTE;
+/** Variantes proposées au sélecteur : B4 (retirée) exclue ; l'index des `?code=` reste celui du
+ * catalogue complet (`CATALOGUE_PROBLEMES_CONTEXTE`). */
+const OPTIONS_SCENARIO = CATALOGUE_PROBLEMES_CONTEXTE.filter((v) => !v.retiree);
 import {
   activerAideSuivante,
   demarrerSessionProblemeContexte,

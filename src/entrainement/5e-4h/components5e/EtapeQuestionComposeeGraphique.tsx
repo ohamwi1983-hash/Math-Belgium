@@ -1,16 +1,17 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import type { QuestionComposeeGraphique } from "../core5e/composeeGraphique.types";
+import type { ExerciceComposeeGraphique, QuestionComposeeGraphique } from "../core5e/composeeGraphique.types";
 import type { ReponseQuestionComposeeGraphique } from "../moteur5e/verificationComposeeGraphique";
-import { CONSIGNE_GENERALE_COMPOSEE_GRAPHIQUE, consigneQuestion, labelChampResultat, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatComposeeGraphique";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { CONSIGNE_GENERALE_COMPOSEE_GRAPHIQUE, consigneQuestion, labelChampResultat } from "../ui5e/formatComposeeGraphique";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
+import { MESSAGES_ILLISIBLE_FONCTIONS, aidesComposeeGraphique, cibleComposeeGraphique } from "../ui5e/retoursFonctions1";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
 
 interface Props {
+  exercice: ExerciceComposeeGraphique;
   question: QuestionComposeeGraphique;
   /** Bloc "données" persistant (`PaireGraphesComposeeGraphique`, les 2 courbes) — rendu APRÈS la
    * consigne générale (A.2/A.9), la question spécifique venant ENSUITE (E.3 : "sous le deuxième
@@ -41,12 +42,13 @@ interface Props {
  * aucun clavier restreint imposé (E.4) — jamais un filtrage de caractères, la validation se fait
  * entièrement à la soumission (`diagnostiquer`).
  */
-export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeQuestionComposeeGraphique({ exercice, question, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   // `null` tant que l'élève n'a pas encore cliqué — aucun choix pré-sélectionné au début de chaque
   // question (retour utilisateur direct : "Existe" restait sélectionné par défaut).
   const [resultatExiste, setResultatExiste] = useState<boolean | null>(null);
   const [resultatValeur, setResultatValeur] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<ReponseQuestionComposeeGraphique | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   // Après une tentative ratée, l'existence était forcément bien choisie (un mauvais choix clôt la
   // question) : le choix est figé, seule la valeur reste à corriger.
@@ -68,9 +70,19 @@ export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUt
       resultatExiste,
       resultatValeur: resultatExiste ? resultatValeur : null,
     };
-    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
+    // Valeur illisible : message, rien n'est transmis (aucune tentative consommée).
+    if (diagnostiquer?.(reponse) === "parse_error") {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    setSoumise(reponse);
     onValider(reponse);
   }
+  const cible =
+    soumise && soumise.resultatExiste === question.resultatExiste
+      ? cibleComposeeGraphique(exercice, question, { resultatExiste: soumise.resultatExiste, valeur: soumise.resultatValeur === null ? null : parserNombreOuFraction(soumise.resultatValeur) })
+      : null;
 
   return (
     <div>
@@ -93,31 +105,28 @@ export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUt
               className={`text-input${resultatValeurErronee ? " is-erronee" : ""}`}
               value={resultatValeur}
               disabled={!!validation}
-              onChange={(e) => setResultatValeur(e.target.value)}
+              onChange={(e) => {
+                setIllisible(false);
+                setResultatValeur(e.target.value);
+              }}
             />
           </div>
         </div>
       )}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(question)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(question)}</p>}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesComposeeGraphique(question)}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={illisible}
+        texteIllisible={MESSAGES_ILLISIBLE_FONCTIONS.nombre}
+        tentativesUtilisees={montrerErreurs ? tentativesUtilisees : 0}
+        tentativesMax={tentativesMax}
+        cible={cible}
+        validation={validation}
+      />
     </div>
   );
 }

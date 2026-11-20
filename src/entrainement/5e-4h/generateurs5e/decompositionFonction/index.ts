@@ -238,8 +238,15 @@ export interface OptionsConstruction {
  * ne peut structurellement jamais redevenir une simple fonction affine).
  */
 function tenterConstruireAvecProfondeur(profondeur: 2 | 3 | 4, options: OptionsConstruction = {}): TentativeConstruction {
-  const finaleEstAffine = options.finaleAffine ?? Math.random() < 0.5;
-  const couche1EstBrute = options.couche1Brute ?? Math.random() < POIDS_COUCHE1_BRUTE;
+  let finaleEstAffine = options.finaleAffine ?? Math.random() < 0.5;
+  let couche1EstBrute = options.couche1Brute ?? Math.random() < POIDS_COUCHE1_BRUTE;
+  // Audit 5e ch. 1 (G9) : jamais une affine appliquée DIRECTEMENT à la couche polynomiale brute
+  // (« 3(2x² + 4x) − 7 » n'est qu'un polynôme habillé, et 2x² + 4x n'est pas une fonction de
+  // référence) — à 2 couches, l'une des deux options non imposée cède.
+  if (profondeur === 2 && finaleEstAffine && couche1EstBrute) {
+    if (options.finaleAffine === undefined) finaleEstAffine = false;
+    else couche1EstBrute = false;
+  }
   let sansRedondance = true;
 
   const dejaUtilisees = new Set<TypeCoucheCatalogue>();
