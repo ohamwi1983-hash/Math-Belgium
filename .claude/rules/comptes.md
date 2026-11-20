@@ -109,7 +109,8 @@ Partage plus tard : table `partages (plan_id, destinataire, droit)` + politique 
 - Cartouche : `entrainement/export/cartouche.ts` (`CARTOUCHE_DEFAUT` = anciennes constantes
   « Collège Saint-Pierre… M. Hamwi », repli sans cartouche → documents IDENTIQUES à avant) ; utilisé
   par la copie, le corrigé, l'examen (HTML) et le Word. L'aménagée, la grille et la feuille d'exercices
-  n'impriment pas d'école (inchangé). Connecté sans école : rien à la place de l'école (jamais l'école
+  n'impriment pas d'école (inchangé) ; la feuille d'exercices et son aménagée impriment le NOM du
+  professeur en en-tête et en pied de page (« M. Hamwi » sans session). Connecté sans école : rien à la place de l'école (jamais l'école
   d'un autre professeur).
 
 ## Mise en service (guide détaillé pour l'utilisateur : rapport du chantier, `MISE-EN-SERVICE.md`)

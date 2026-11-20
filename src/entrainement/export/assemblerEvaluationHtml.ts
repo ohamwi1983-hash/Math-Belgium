@@ -322,13 +322,18 @@ td, th { font-size: inherit; }
  * la boîte `@bottom-left` — une boîte de marge n'a qu'un seul style de police), « page n / N » à
  * droite ; corrigé et grille d'évaluation (documents du professeur, `avecNom: false`) : « Série A »
  * en gras à gauche, sans « Nom », « page n / N » à droite ; feuille d'exercices (énoncé, « Je
- * vérifie » et corrigé détaillé forment UN document) : seulement « page n / N ». Firefox ignore les
- * boîtes de marge : la page s'imprime alors sans pied, jamais bloquant. */
-function stylePied(serieLettre: string | null, police: string, taille = "8.5pt", avecNom = true): string {
+ * vérifie » et corrigé détaillé forment UN document) et son aménagée : le nom du professeur à
+ * gauche (`professeur`, décision de l'utilisateur ; « M. Hamwi » par défaut pour un visiteur), « page
+ * n / N » à droite. Firefox ignore les boîtes de marge : la page s'imprime alors sans pied, jamais
+ * bloquant. */
+function stylePied(serieLettre: string | null, police: string, taille = "8.5pt", avecNom = true, professeur = ""): string {
   const commun = `font-family: ${police}; font-size: ${taille}; color: #333; vertical-align: middle;`;
   const serie = (serieLettre ?? "").replace(/["\\]/g, "");
+  const prof = professeur.replace(/["\\]/g, "");
   const gauche = !serieLettre
-    ? ""
+    ? prof
+      ? `@bottom-left { content: "${prof}"; ${commun} text-align: left; }`
+      : ""
     : avecNom
       ? `@bottom-left-corner { content: "Série ${serie}"; ${commun} font-weight: 700; text-align: right; }
   @bottom-left { content: "\\00a0· Nom : ……………………………………"; ${commun} text-align: left; }`
@@ -484,7 +489,7 @@ body { font-family: 'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif; font-s
 .niveau .pal { border: 1.4px solid var(--encre); border-radius: 4px; padding: 0 8px; }
 .enonce-am { padding: 10px 14px; background: var(--fond-doux); border-radius: 8px; margin-bottom: 12px; }
 .enonce-am .entete + p, .enonce-am p { margin: 0.5em 0; }
-.identite-am { display: flex; gap: 24px; font-size: 11pt; color: var(--gris); margin-bottom: 10px; }
+.identite-am { display: flex; flex-wrap: wrap; gap: 6px 24px; font-size: 11pt; color: var(--gris); margin-bottom: 10px; }
 .identite-am span.champ { display: inline-block; width: 5cm; border-bottom: 1px solid #8a8f98; }
 /* Annexes : une seule colonne, comme le formulaire aménagé du site. */
 .formulaire-papier { column-count: 1; }
@@ -716,11 +721,19 @@ function itemsNumerotes(items: ItemEvaluation[]): { item: ItemEvaluation; numero
  * Feuille d'exercices
  * -------------------------------------------------------------------------------------------- */
 
+/** Nom du professeur imprimé sur la feuille d'exercices (en-tête et pied de page) : celui du profil
+ * connecté, sinon « M. Hamwi » (`CARTOUCHE_DEFAUT`) — décision de l'utilisateur, la feuille est
+ * publique et ses élèves s'en servent. */
+function professeurFeuille(entete: EnteteEvaluation): string {
+  return cartoucheEffectif(entete.cartouche).professeur;
+}
+
 function enteteFeuilleHtml(entete: EnteteEvaluation, sousTitre: string): string {
   const surtitre = entete.surtitre ?? entete.niveauLabel;
+  const prof = professeurFeuille(entete);
   return `<header class="tete">
   <div><span class="surtitre">${echapperHtml(surtitre)}</span><h1>${echapperHtml(titreNettoye(entete))}</h1><span class="sous">${echapperHtml(sousTitre)}</span></div>
-  <div class="identite"><span>Nom</span><span class="champ"></span><span>Classe</span><span class="champ"></span><span>Date</span><span class="valeur">${echapperHtml(dateEnToutesLettres(entete.date))}</span></div>
+  <div class="identite"><span>Nom</span><span class="champ"></span><span>Classe</span><span class="champ"></span><span>Date</span><span class="valeur">${echapperHtml(dateEnToutesLettres(entete.date))}</span>${prof ? `<span>Professeur</span><span class="valeur">${echapperHtml(prof)}</span>` : ""}</div>
 </header>`;
 }
 
@@ -813,7 +826,7 @@ ${deuxColonnes ? `<div class="deux-colonnes">${exercices}</div>` : exercices}`;
 ${pageJeVerifieHtml(entete, numerotes)}
 <div class="saut-page"></div>
 ${pageCorrigeFeuilleHtml(numerotes)}`;
-  const css = `${stylePied(null, "Archivo, Arial, sans-serif")}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}`;
+  const css = `${stylePied(null, "Archivo, Arial, sans-serif", "8.5pt", true, professeurFeuille(entete))}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}`;
   const doc = documentHtml(`${titreNettoye(entete)} — Feuille d'exercices`, corps, STYLE_FEUILLE, cssKatex, "standard", css);
   return new Blob([doc], { type: "text/html;charset=utf-8" });
 }
@@ -1190,12 +1203,12 @@ export async function genererVersionAmenagee(entete: EnteteEvaluation, items: It
   const titre = estExercice ? titreNettoye(entete) : titreEvaluation(entete);
   const droite = estExercice ? "Mêmes exercices,<br>mise en page adaptée" : `Série <strong>${echapperHtml(entete.serieLettre)}</strong><br>Mêmes questions, même barème`;
   const tete = `<div class="tete-am"><div><span class="surtitre" style="color:#1d5b8f;font-weight:700">Version aménagée${estExercice ? " · Feuille d'exercices" : ""}</span><h1>${echapperHtml(titre)}</h1></div><span class="droite">${droite}</span></div>
-<div class="identite-am"><span>Nom <span class="champ"></span></span><span>Classe <span class="champ" style="width:2.5cm"></span></span><span>N° <span class="champ" style="width:1.2cm"></span></span><span>${echapperHtml(dateEnToutesLettres(entete.date))}</span></div>
+<div class="identite-am"><span>Nom <span class="champ"></span></span><span>Classe <span class="champ" style="width:2.5cm"></span></span><span>N° <span class="champ" style="width:1.2cm"></span></span><span>${echapperHtml(dateEnToutesLettres(entete.date))}</span>${estExercice && professeurFeuille(entete) ? `<span>Professeur : ${echapperHtml(professeurFeuille(entete))}</span>` : ""}</div>
 ${estExercice ? "" : consignesHtml(entete, items)}`;
   const pages = itemsNumerotes(items)
     .map(({ item, numero }, i) => `${i > 0 ? '<div class="saut-page"></div>' : ""}${i === 0 ? tete : ""}${questionAmenageeHtml(item, numero, estExercice)}`)
     .join("");
   const police = "'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif";
-  const doc = documentHtml(`${titre} — Version aménagée`, `${pages}${annexesHtml(annexes)}`, STYLE_AMENAGE, cssKatex, "amenagee", stylePied(estExercice ? null : entete.serieLettre, police, "10pt"));
+  const doc = documentHtml(`${titre} — Version aménagée`, `${pages}${annexesHtml(annexes)}`, STYLE_AMENAGE, cssKatex, "amenagee", stylePied(estExercice ? null : entete.serieLettre, police, "10pt", true, estExercice ? professeurFeuille(entete) : ""));
   return new Blob([doc], { type: "text/html;charset=utf-8" });
 }
