@@ -481,10 +481,10 @@ function scenarioP2(e: E): CopieDetective {
     aideCorrection: { texte: [t("Additionne les exposants : "), l(`${A}^{x}\\cdot ${A}^{${affineL(1, p)}}=${A}^{x+(${affineL(1, p)})}`), t(", puis égale les exposants.")] },
     valeurs: [{ genre: "ensemble", label: "S", labelLatex: "S=", placeholder: "ex. : 5/3", ensemble: [x], latex: ensembleL([x]), exacte: true }],
     valeursCopie: [],
-    piege: [t("Multiplier les exposants d'un produit : "), l("a^{x}\\cdot a^{y}=a^{x+y}"), t(".")],
+    piege: [t("Multiplier les exposants d'un produit : "), l("a^{x}\\cdot a^{y}"), t(" vaut "), l("a^{x+y}"), t(", pas "), l("a^{x\\cdot y}"), t(".")],
     corrigeA: {
       utilise: [t("On teste la ligne 1 avec "), l("x=1"), t(" :")],
-      lignes: [ligne(`${A}^{1}\\cdot ${A}^{${1 + p}}=${A}^{${2 + p}}`, "membre de gauche, règle (1)"), ligne(`${A}^{1\\cdot(${1 + p})}=${A}^{${1 + p}}`, "membre de droite de la ligne 1"), ligne(`${A}^{${2 + p}}\\neq ${A}^{${1 + p}}`, "la ligne 1 est fausse")],
+      lignes: [ligne(`${A}^{1}\\cdot ${A}^{${1 + p}}=${A}^{${2 + p}}`, "membre de gauche, règle (1)"), ligne(`${A}^{1\\cdot ${1 + p < 0 ? `(${1 + p})` : 1 + p}}=${A}^{${1 + p}}`, "membre de droite de la ligne 1"), ligne(`${A}^{${2 + p}}\\neq ${A}^{${1 + p}}`, "la ligne 1 est fausse")],
     },
     corrigeB: {
       utilise: [t("Règle (1) des puissances (cours, § 1).")],

@@ -43,7 +43,7 @@ export function correctionDetailleeModeleTableau(e: E): EtapeCorrection[] {
   // c) paramètres
   const lignesC: LigneCalcul[] = [];
   if (expo) {
-    lignesC.push(ligne(`b=${nombreL(e.b)}`, "valeur mesurée en t = 0"));
+    lignesC.push(ligne(`b=${nombreL(e.b)}`, [t("valeur mesurée en "), f("t=0")]));
     if (e.h === 1) lignesC.push(ligne(`a=${nombreL(r[0])}`, "rapport commun, sur un écart d'une unité"));
     else {
       lignesC.push(ligne(`a^{2}=${nombreL(r[0])}`, "rapport commun, sur un écart de deux unités"));
@@ -51,7 +51,7 @@ export function correctionDetailleeModeleTableau(e: E): EtapeCorrection[] {
       lignesC.push(ligne(`=${nombreL(e.a)}`));
     }
   } else {
-    lignesC.push(ligne(`p=${nombreL(e.b)}`, "valeur mesurée en t = 0"));
+    lignesC.push(ligne(`p=${nombreL(e.b)}`, [t("valeur mesurée en "), f("t=0")]));
     if (e.h === 1) lignesC.push(ligne(`m=${nombreL(d[0])}`, "différence commune, sur un écart d'une unité"));
     else {
       lignesC.push(ligne(`2m=${nombreL(d[0])}`, "différence commune, sur un écart de deux unités"));

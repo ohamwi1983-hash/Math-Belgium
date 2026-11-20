@@ -64,6 +64,11 @@ export function previsionL(e: E): string {
   return decL(previsionArrondie(e), ctx(e).entier ? 0 : 2);
 }
 
+/** « = » quand la prévision arrondie EST la valeur exacte du modèle (781,25), sinon « ≈ ». */
+export function relPrevisionL(e: E): "=" | "\\approx" {
+  return Math.abs(qVal(valeurModele(e, e.T)) - previsionArrondie(e)) < 1e-9 ? "=" : "\\approx";
+}
+
 // ============================================================================
 // Énoncé.
 // ============================================================================
@@ -143,7 +148,7 @@ export function reponse(e: E, phase: PhaseModeleTableau): Frag[] {
     case "parametres":
       return e.genre === "exponentiel" ? [lx(`b=${nombreL(e.b)}`), tx(" et "), lx(`a=${nombreL(e.a)}`), tx(", donc "), lx(`f(t)=${modeleL(e)}`)] : [lx(`m=${nombreL(e.m)}`), tx(" et "), lx(`p=${nombreL(e.b)}`), tx(", donc "), lx(`f(t)=${modeleL(e)}`)];
     case "prevision":
-      return [lx(`f(${e.T})\\approx ${previsionL(e)}`), tx(` ${ctx(e).unite}`)];
+      return [lx(`f(${e.T})${relPrevisionL(e)}${previsionL(e)}`), tx(` ${ctx(e).unite}`)];
   }
 }
 
