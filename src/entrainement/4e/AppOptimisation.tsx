@@ -37,6 +37,9 @@ import {
   libellePositionOptimum,
 } from "./ui/formatOptimisation";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeOptimisation, etapeDePhaseOptimisation, lettreEtapeOptimisation } from "./generateurs/optimisation/corrigeDetaille";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { expressionLibreVersLatex } from "./ui/formatExpressionLatex";
@@ -247,6 +250,7 @@ export function AppOptimisation() {
     ? {
         revele: enAttente.revele,
         reponseAttendue,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOptimisation(exercice), lettreEtapeOptimisation(exercice, etapeDePhaseOptimisation(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

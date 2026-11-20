@@ -270,7 +270,14 @@ export function texteAideGrandeurNiveau2(exercice: ExerciceOptimisationModelisat
  * (`verificationOptimisation.ts::diagnostiquerGrandeurXY`) : `*` devient `\cdot` (jamais un astérisque
  * littéral affiché à l'élève). */
 export function formatGrandeurXYLatex(exercice: ExerciceOptimisationModelisation): string {
-  return (exercice.formuleGrandeurXYTexte ?? "").replace(/\*/g, " \\cdot ");
+  const brut = (exercice.formuleGrandeurXYTexte ?? "").replace(/\s+/g, "");
+  // Écriture du cours (audit 4e ch. 1, R4) : fractions en \dfrac, jamais « x^2/16 » ni « 3*x^2 ».
+  const produitSur = /^x\*y\/(\d+)$/.exec(brut);
+  if (produitSur) return `\\dfrac{x \\cdot y}{${produitSur[1]}}`;
+  return brut
+    .replace(/([a-z]\^2)\/(\d+)/g, "\\dfrac{$1}{$2}")
+    .replace(/(\d)\*([a-z])/g, "$1$2")
+    .replace(/\*/g, " \\cdot ");
 }
 
 /** Les 2 équations validées à l'écran "contrainteEtGrandeur", rappelées ensemble avec une accolade

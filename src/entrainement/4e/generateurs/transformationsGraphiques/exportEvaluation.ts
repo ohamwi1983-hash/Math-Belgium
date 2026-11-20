@@ -3,17 +3,18 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeTransformationsGraphiques, equationTransformationLatex } from "./corrigeDetaille";
 import { construireSvgFonction, type PointMarqueSvg } from "../../../export/svgGraph";
 import { cadrageLisible } from "../../../export/cadrageLisible";
 import { calculerViewBoxTransformation, evaluerCourbe, parametresDepuisExercice, pointUnitaire, RATIO_GRAPHE } from "../../ui/mafsTransformation";
-import { formatEquationTransformationLatex } from "../../ui/formatTransformationsGraphiques";
 import { formatFractionIrreductible } from "../../ui/formatFraction";
 import { calculerA } from "../../moteur/verificationTransformationsGraphiques";
 import { genererExerciceTransformationGraphique } from "./index";
@@ -37,7 +38,7 @@ import { PARAMETRES_PARABOLE, profilTransformationsGraphiques } from "../profils
  * (réponse attendue), `pointUnitaire`/`evaluerCourbe`/`calculerViewBoxTransformation` (graphique).
  */
 
-const FORME_GENERALE = "f(x) = a(x-p)^2 + q";
+const FORME_GENERALE = "f(x) = a(x-x_S)^2 + y_S";
 
 /** Graphique de l'ÉNONCÉ papier (décision de l'utilisateur) : la courbe seule, sans point marqué ni
  * coordonnée ; quadrillage et zoom choisis pour que le sommet ET le point croix (abscisse p + 1)
@@ -100,20 +101,22 @@ const PHRASE_GRAPHIQUE = "Le graphique ci-dessous représente une parabole, obte
 
 /** Équation de l'écran, en `\\displaystyle` : la fraction de a reste lisible sur papier. */
 function equationLatex(exercice: ExerciceTransformationGraphique): string {
-  return `\\displaystyle ${formatEquationTransformationLatex(exercice)}`;
+  return `\\displaystyle ${equationTransformationLatex(exercice)}`;
 }
 
-function aLatex(exercice: ExerciceTransformationGraphique): string {
-  return nombreLatex(calculerA(exercice));
-}
 
 function construireEnonceTransformationsGraphiques(exercice: ExerciceTransformationGraphique): SectionExercice {
   return {
     enteteFragments: [texte(PHRASE_GRAPHIQUE), latex("y = x^2"), texte(".")],
     enteteHtml: graphe(exercice, false),
     questions: [
-      { consigne: [texte("Lis les paramètres de la transformation : les translations (TH, TV) au sommet, puis l'étirement ou la compression (rapport EV/CV) et la symétrie d'axe Ox (SOX) à l'aide du point de la courbe situé une unité à droite du sommet.")] },
-      { consigne: [texte("Écris l'équation complète de la parabole sous la forme "), latex(FORME_GENERALE), texte(".")] },
+      {
+        consigne: [
+          texte("Lis les paramètres de la transformation (translations, étirement ou compression, symétrie d'axe Ox), puis écris l'équation complète de la parabole sous la forme "),
+          latex(FORME_GENERALE),
+          texte("."),
+        ],
+      },
     ],
   };
 }
@@ -138,94 +141,43 @@ function enoncePapierTransformationsGraphiques(exercice: ExerciceTransformationG
 
 function construireCorrectionTransformationsGraphiques(exercice: ExerciceTransformationGraphique): BlocCorrection[] {
   return [
-    { type: "paragraphe", fragments: [texte("Sommet lu sur le graphique : "), latex(`S(${exercice.p} ; ${exercice.q})`), texte(", donc p et q sont connus.")] },
+    { type: "paragraphe", fragments: [texte("Sommet lu sur le graphique : "), latex(`S(${exercice.p} ; ${exercice.q})`), texte(" : les translations TH et TV sont connues.")] },
     { type: "html", html: graphe(exercice, true) },
     { type: "paragraphe", fragments: [texte("Équation : "), latex(equationLatex(exercice)), texte(".")] },
   ];
-}
-
-function translationTexte(valeur: number, sens: string, positif: string, negatif: string): string {
-  if (valeur === 0) return `pas de translation ${sens}`;
-  return `translation ${sens} de ${Math.abs(valeur)} unité${Math.abs(valeur) > 1 ? "s" : ""} vers ${valeur > 0 ? positif : negatif}`;
-}
-
-function lectureFacteur(exercice: ExerciceTransformationGraphique): FragmentConsigne[] {
-  const a = Math.abs(calculerA(exercice));
-  const morceaux: FragmentConsigne[] = [latex(`|a| = ${nombreLatex(a)}`)];
-  if (a > 1) morceaux.push(texte(` : étirement vertical (EV/CV = ${formatFractionIrreductible(a)})`));
-  else if (a < 1) morceaux.push(texte(` : compression verticale (EV/CV = ${formatFractionIrreductible(a)})`));
-  else morceaux.push(texte(" : ni étirement ni compression"));
-  morceaux.push(texte(exercice.sox ? " ; le point d'abscisse p + 1 est SOUS le sommet : symétrie d'axe Ox, a < 0." : " ; le point d'abscisse p + 1 est au-dessus du sommet : pas de symétrie, a > 0."));
-  return morceaux;
-}
-
-function difficulteTransformationsGraphiques(exercice: ExerciceTransformationGraphique): 1 | 2 | 3 {
-  if (exercice.ev % exercice.cv !== 0) return 3;
-  if (exercice.ev !== exercice.cv || exercice.sox) return 2;
-  return 1;
 }
 
 function reponseBreveTransformationsGraphiques(exercice: ExerciceTransformationGraphique): FragmentConsigne[] {
   return [latex(equationLatex(exercice))];
 }
 
-function correctionDetailleeTransformationsGraphiques(exercice: ExerciceTransformationGraphique): EtapeCorrection[] {
-  const params = parametresDepuisExercice(exercice);
-  const croix = pointUnitaire(params);
-  const dy = croix.y - params.q;
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [texte("Le sommet "), latex("(0\\,;\\,0)"), texte(" de "), latex("y = x^2"), texte(" a été amené en S par les translations : TH = p et TV = q.")],
-    },
-    {
-      label: "Lecture",
-      sousQuestion: "a",
-      fragments: [
-        texte("Sommet "),
-        latex(coordonneesLatex(exercice.p, exercice.q)),
-        texte(` : ${translationTexte(exercice.p, "horizontale", "la droite", "la gauche")}, ${translationTexte(exercice.q, "verticale", "le haut", "le bas")}.`),
-      ],
-      figureHtml: graphe(exercice, true),
-    },
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [texte("Pour "), latex("y = x^2"), texte(", le point d'abscisse 1 est "), latex("(1\\,;\\,1)"), texte(" : 1 unité au-dessus du sommet. Ici, le point de la courbe situé 1 unité à droite du sommet (sur une intersection du quadrillage) est à "), latex("a"), texte(" unité(s) du sommet en hauteur.")],
-    },
-    { label: "Calcul", sousQuestion: "a", fragments: [texte("Point lu "), latex(coordonneesLatex(croix.x, croix.y)), texte(" : "), latex(`a = ${nombreLatex(croix.y)} - ${exercice.q < 0 ? `(${exercice.q})` : exercice.q} = ${nombreLatex(dy)}`), texte(".")] },
-    { label: "Lecture", sousQuestion: "a", fragments: lectureFacteur(exercice) },
-    { label: "Conclusion", sousQuestion: "b", fragments: [texte("Avec "), latex(`a = ${aLatex(exercice)}`), texte(", "), latex(`p = ${exercice.p}`), texte(" et "), latex(`q = ${exercice.q}`), texte(" : "), latex(equationLatex(exercice)), texte(".")] },
-    {
-      label: "Piège",
-      sousQuestion: "b",
-      fragments: [texte("Dans la parenthèse, on soustrait l'abscisse du sommet : un sommet en x = 3 donne "), latex("(x - 3)^2"), texte(", un sommet en x = −2 donne "), latex("(x + 2)^2"), texte(" (et non "), latex("(x - 2)^2"), texte(").")],
-    },
-  ];
-}
-
 function baremeTransformationsGraphiques(exercice: ExerciceTransformationGraphique): BaremeExercice {
   const erreurs: ErreurFrequente[] = [];
   if (exercice.p !== 0) {
     erreurs.push({
-      description: [texte("Signe de p inversé : "), latex(exercice.p > 0 ? `(x + ${exercice.p})^2` : `(x - ${-exercice.p})^2`), texte(" au lieu de "), latex(exercice.p > 0 ? `(x - ${exercice.p})^2` : `(x + ${-exercice.p})^2`)],
+      description: [texte("Signe de l'abscisse du sommet inversé dans la parenthèse : "), latex(exercice.p > 0 ? `(x + ${exercice.p})^2` : `(x - ${-exercice.p})^2`), texte(" au lieu de "), latex(exercice.p > 0 ? `(x - ${exercice.p})^2` : `(x + ${-exercice.p})^2`)],
       cout: "−1",
     });
   }
-  if (exercice.ev !== exercice.cv) erreurs.push({ description: [texte("a lu comme l'ordonnée du point d'abscisse p + 1 (sans retrancher q) ou inversé (CV/EV au lieu de EV/CV)")], cout: "−1" });
+  if (exercice.ev !== exercice.cv) erreurs.push({ description: [texte("a lu comme l'ordonnée du point croix (sans retrancher l'ordonnée du sommet) ou inversé (CV/EV au lieu de EV/CV)")], cout: "−1" });
   if (exercice.sox) erreurs.push({ description: [texte("Signe « − » de a oublié (parabole tournée vers le bas)")], cout: "−1" });
   return {
     reponseFinale: [latex(equationLatex(exercice))],
     criteres: [
       { sousQuestion: "a", critere: [texte("Translations lues au sommet "), latex(coordonneesLatex(exercice.p, exercice.q))], points: 1 },
-      { sousQuestion: "a", critere: [texte("Valeur absolue de a déduite du point d'abscisse p + 1 : "), latex(`|a| = ${nombreLatex(Math.abs(calculerA(exercice)))}`)], points: 1 },
+      { sousQuestion: "a", critere: [texte("Valeur absolue de a déduite du point croix (une unité à droite du sommet) : "), latex(`|a| = ${nombreLatex(Math.abs(calculerA(exercice)))}`)], points: 1 },
       { sousQuestion: "a", critere: [texte(exercice.sox ? "Signe de a négatif (symétrie d'axe Ox) justifié" : "Signe de a positif (pas de symétrie) justifié")], points: 0.5 },
-      { sousQuestion: "b", critere: [texte("Équation complète et correcte (signes de p et q compris)")], points: 1.5 },
+      { sousQuestion: "a", critere: [texte("Équation complète et correcte (signes dans la parenthèse et translation verticale compris)")], points: 1.5 },
     ],
     erreursFrequentes: erreurs,
-    reponsesAcceptees: [[texte("Toute écriture équivalente de a (fraction non réduite, décimal exact, fraction devant ou dans la parenthèse)")], [texte("Forme développée correcte, si la forme demandée est aussi donnée")]],
+    reponsesAcceptees: [[texte("Toute écriture équivalente de a (fraction non réduite, décimal exact)")], [texte("Forme développée correcte, si la forme demandée est aussi donnée")]],
   };
+}
+
+/** Critères du niveau : un seul écran (lecture puis équation, une lettre) ; méthode 0 (imposée) ;
+ * piège dans les données : sommet d'abscisse négative (un « + » dans la parenthèse). */
+function criteresDifficulteTransformationsGraphiques(exercice: ExerciceTransformationGraphique): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeTransformationsGraphiques(exercice)), methode: 0, piege: exercice.p < 0 ? 1 : 0 };
 }
 
 export const adaptateurEvaluationTransformationsGraphiques: AdaptateurFeuilleExercices<ExerciceTransformationGraphique> = {
@@ -236,10 +188,9 @@ export const adaptateurEvaluationTransformationsGraphiques: AdaptateurFeuilleExe
   genererInstance: genererExerciceTransformationGraphique,
   construireEnonce: construireEnonceTransformationsGraphiques,
   construireCorrection: construireCorrectionTransformationsGraphiques,
-  difficulte: difficulteTransformationsGraphiques,
+  criteresDifficulte: criteresDifficulteTransformationsGraphiques,
   reponseBreve: reponseBreveTransformationsGraphiques,
   correctionDetaillee: correctionDetailleeTransformationsGraphiques,
   bareme: baremeTransformationsGraphiques,
   enoncePapier: enoncePapierTransformationsGraphiques,
-  dureeMinutes: 5,
 };

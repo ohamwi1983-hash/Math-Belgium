@@ -47,6 +47,9 @@ import { OPTIONS_CATEGORIE_SANS_CAS_GENERAL, libelleCategorie } from "./ui/categ
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeAnalyseFonction, lettrePhaseAnalyseFonction } from "./generateurs/analyseFonction/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Étudie cette fonction du second degré.";
 
@@ -258,6 +261,7 @@ export function AppAnalyseFonction() {
           !etat.reglages.affichageReponseApresEchec || etat.phase !== "coefficients" ? undefined : (
             <Katex expression={formatFonctionColoreeLatex(exercice.exercice.enonce)} />
           ),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAnalyseFonction(exercice), lettrePhaseAnalyseFonction(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

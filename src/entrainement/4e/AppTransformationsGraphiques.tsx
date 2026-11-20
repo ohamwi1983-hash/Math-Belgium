@@ -8,6 +8,8 @@ import { formatEquationTransformationLatex } from "./ui/formatTransformationsGra
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeTransformationsGraphiques } from "./generateurs/transformationsGraphiques/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Étudie les transformations graphiques de cette parabole.";
 
@@ -85,6 +87,7 @@ export function AppTransformationsGraphiques() {
             )}
           </>
         ),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={correctionDetailleeTransformationsGraphiques(exercice)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

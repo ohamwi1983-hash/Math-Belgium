@@ -3,25 +3,19 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   CritereBareme,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { consigneEtapeOptimisation, correctionDetailleeOptimisation, etapesOptimisation, lettreEtapeOptimisation, lettresLectureOptimisation, type EtapeGen55 } from "./corrigeDetaille";
 import {
-  consigneContrainteEtGrandeur,
-  consigneDecision,
-  consigneDomaine,
-  consigneSommet,
-  consigneSysteme,
   formatDomaineLatex,
-  formatGrandeurXYLatex,
-  formatIsolementLatex,
   segmentsPhraseEnonce,
-  texteAideSystemeNiveau3,
 } from "../../ui/formatOptimisation";
 import { formatFractionIrreductible } from "../../ui/formatFraction";
 import { croquisOptimisationSvg } from "../croquisPapierSecondDegre";
@@ -46,23 +40,6 @@ import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceOptimisatio
  * au centième (5/48 affiché « 0,1 » pour la famille « somme répartie en deux »).
  */
 
-type EtapeGen55 = "identification" | "relation" | "systeme" | "domaine" | "sommet" | "decision" | "conclusion";
-
-function etapes(e: ExerciceOptimisation): EtapeGen55[] {
-  if (e.variante === "fonctionDonnee") return ["sommet", "decision", "conclusion"];
-  return [...(e.identificationXY ? (["identification"] as EtapeGen55[]) : []), "relation", "systeme", "domaine", "sommet", "decision", "conclusion"];
-}
-
-function lettre(e: ExerciceOptimisation, etape: EtapeGen55): string {
-  return "abcdefg"[etapes(e).indexOf(etape)];
-}
-
-/** Retire la précision de saisie des consignes d'écran (« arrondi au centième accepté si besoin ») :
- * sur papier, les valeurs sont exactes. */
-function sansArrondi(consigne: string): string {
-  return consigne.replace(/ — arrondi au centième accepté si besoin/g, "").replace(/ \(arrondi au centième accepté si besoin\)/g, "");
-}
-
 /** Nombre exact (entier, décimal court ou fraction irréductible) en LaTeX. */
 function nombreLatex(valeur: number): string {
   const brut = formatFractionIrreductible(valeur);
@@ -76,9 +53,6 @@ function nombreLatex(valeur: number): string {
   return brut;
 }
 
-function entreParentheses(valeur: number): string {
-  return valeur < 0 ? `\\left(${nombreLatex(valeur)}\\right)` : nombreLatex(valeur);
-}
 
 /** f(x) développée, coefficients exacts. */
 function fonctionLatex(e: ExerciceOptimisation): string {
@@ -128,30 +102,11 @@ function enteteEnonce(e: ExerciceOptimisation, avecConsigne: boolean): FragmentC
   return fragments;
 }
 
-function consigneEtape(e: ExerciceOptimisation, etape: EtapeGen55): FragmentConsigne[] {
-  switch (etape) {
-    case "identification":
-      return e.variante === "modelisation" ? [texte(`Identifie ce que représentent ${e.contexte.labelVariable} et ${e.contrainte.lettreCherchee} dans cette situation.`)] : [];
-    case "relation":
-      return e.variante === "modelisation" ? [texte(consigneContrainteEtGrandeur(e))] : [];
-    case "systeme":
-      return e.variante === "modelisation" ? [texte(consigneSysteme(e))] : [];
-    case "domaine":
-      return e.variante === "modelisation" ? [texte(sansArrondi(consigneDomaine(e)))] : [];
-    case "sommet":
-      return [texte(sansArrondi(consigneSommet(e)))];
-    case "decision":
-      return [texte(sansArrondi(consigneDecision(e)))];
-    case "conclusion":
-      return [texte("Rédige la phrase de conclusion (valeur optimale, unité, valeur de la variable).")];
-  }
-}
-
 function construireEnonceOptimisation(e: ExerciceOptimisation): SectionExercice {
   return {
     enteteFragments: enteteEnonce(e, false),
     enteteHtml: croquisOptimisationSvg(e.contexte.croquis),
-    questions: etapes(e).map((etape) => ({ consigne: consigneEtape(e, etape) })),
+    questions: etapesOptimisation(e).map((etape) => ({ consigne: consigneEtapeOptimisation(e, etape) })),
   };
 }
 
@@ -170,100 +125,13 @@ function construireCorrectionOptimisation(e: ExerciceOptimisation): BlocCorrecti
   ];
 }
 
-function valeur(e: ExerciceOptimisation, x: number): number {
-  return e.fonction.a * x * x + e.fonction.b * x + e.fonction.c;
-}
-
-function difficulteOptimisation(e: ExerciceOptimisation): 1 | 2 | 3 {
-  if (e.variante === "fonctionDonnee") return e.sommetDansDomaine ? 1 : 2;
-  return e.famille === "aireEnclos" ? 2 : 3;
-}
 
 function reponseBreveOptimisation(e: ExerciceOptimisation): FragmentConsigne[] {
   return [texte(phraseConclusion(e))];
 }
 
-function correctionDetailleeOptimisation(e: ExerciceOptimisation): EtapeCorrection[] {
-  const L = (etape: EtapeGen55) => lettre(e, etape);
-  const v = e.contexte.labelVariable;
-  const lignes: EtapeCorrection[] = [];
-  if (e.variante === "modelisation") {
-    if (e.identificationXY) {
-      lignes.push({ label: "Variables", sousQuestion: L("identification"), fragments: [latex(v), texte(` : ${e.contexte.nomVariable} ; `), latex(e.contrainte.lettreCherchee), texte(` : ${nomY(e) ?? ""}.`)] });
-    }
-    lignes.push(
-      { label: "Relation", sousQuestion: L("relation"), fragments: [latex(e.contrainte.enonceLatex), texte(` ; ${e.contexte.nomGrandeur} = `), latex(formatGrandeurXYLatex(e)), texte(".")] },
-      { label: "Isoler", sousQuestion: L("systeme"), fragments: [latex(formatIsolementLatex(e.contrainte, v)), texte(".")] },
-      { label: "Substituer", sousQuestion: L("systeme"), fragments: phraseFragments(texteAideSystemeNiveau3(e).replace(/^Expression substituée, non développée : /, "")) },
-      { label: "Développer", sousQuestion: L("systeme"), fragments: [latex(`${nomFonction(e)} = ${fonctionLatex(e)}`), texte(".")] },
-      {
-        label: "Domaine",
-        sousQuestion: L("domaine"),
-        fragments: [
-          texte(e.famille === "revenuPrix" ? "Deux conditions, une par grandeur du contexte (aucune ne peut devenir négative), combinées : " : `Aucune grandeur du contexte ne peut être négative (ni ${v}, ni `),
-          ...(e.famille === "revenuPrix" ? [] : [latex(formatIsolementLatex(e.contrainte, v)), texte(") : ")]),
-          latex(formatDomaineLatex(e.domaine, v)),
-          texte("."),
-        ],
-      },
-    );
-  }
-  lignes.push({
-    label: "Sommet",
-    sousQuestion: L("sommet"),
-    fragments: [
-      latex(`${v}_S = -\\dfrac{b}{2a} = -\\dfrac{${entreParentheses(e.fonction.b)}}{2\\cdot ${entreParentheses(e.fonction.a)}} = ${nombreLatex(e.sommet.x)}`),
-      texte(" ; "),
-      latex(`f\\left(${nombreLatex(e.sommet.x)}\\right) = ${nombreLatex(e.sommet.y)}`),
-      texte(e.fonction.a < 0 ? " (a < 0 : maximum)." : " (a > 0 : minimum)."),
-    ],
-  });
-  if (e.sommetDansDomaine) {
-    lignes.push({ label: "Décision", sousQuestion: L("decision"), fragments: [latex(`${nombreLatex(e.sommet.x)} \\in [${nombreLatex(e.domaine.inf)}\\,;\\,${nombreLatex(e.domaine.sup)}]`), texte(" : l'optimum est atteint au sommet.")] });
-  } else {
-    lignes.push({
-      label: "Décision",
-      sousQuestion: L("decision"),
-      fragments: [
-        latex(`${nombreLatex(e.sommet.x)} \\notin [${nombreLatex(e.domaine.inf)}\\,;\\,${nombreLatex(e.domaine.sup)}]`),
-        texte(" : le sommet n'est pas atteignable, on compare les valeurs aux bornes : "),
-        latex(`f(${nombreLatex(e.domaine.inf)}) = ${nombreLatex(valeur(e, e.domaine.inf))}`),
-        texte(" et "),
-        latex(`f(${nombreLatex(e.domaine.sup)}) = ${nombreLatex(valeur(e, e.domaine.sup))}`),
-        texte("."),
-      ],
-    });
-  }
-  lignes.push({ label: "Conclusion", sousQuestion: L("conclusion"), fragments: [texte(phraseConclusion(e))] });
-  lignes.push(piege(e));
-  return lignes;
-}
-
-function piege(e: ExerciceOptimisation): EtapeCorrection {
-  const L = (etape: EtapeGen55) => lettre(e, etape);
-  if (e.variante === "fonctionDonnee") {
-    return e.sommetDansDomaine
-      ? { label: "Piège", sousQuestion: L("decision"), fragments: [texte("Vérifier que le sommet appartient au domaine AVANT de conclure : c'est ce qui autorise à y lire l'optimum.")] }
-      : { label: "Piège", sousQuestion: L("decision"), fragments: [texte("Le sommet est hors du domaine : sa valeur n'est jamais atteinte. L'optimum réel est à une borne du domaine.")] };
-  }
-  switch (e.famille) {
-    case "aireEnclos":
-      return e.contexte.croquis?.type === "aireEnclosCloture" && e.contexte.croquis.configuration !== "libre"
-        ? { label: "Piège", sousQuestion: L("relation"), fragments: [texte("Les côtés adossés à un mur ne sont pas clôturés : ils n'entrent pas dans la longueur de clôture.")] }
-        : { label: "Piège", sousQuestion: L("domaine"), fragments: [texte("Les deux dimensions doivent rester positives : le domaine se lit sur la relation, pas sur le sommet.")] };
-    case "revenuPrix":
-      return { label: "Piège", sousQuestion: L("domaine"), fragments: [texte("Deux conditions à poser, une pour chaque grandeur du contexte : en oublier une donne un domaine faux.")] };
-    case "sommeDeuxCarres":
-      return { label: "Piège", sousQuestion: L("relation"), fragments: [texte("La grandeur n'est pas x·y : elle se calcule avec les carrés des deux parts (aires des formes, ou valeur proportionnelle au carré de la masse).")] };
-    case "rectangleInscrit":
-      return { label: "Piège", sousQuestion: L("relation"), fragments: [texte("La relation entre x et y vient de triangles semblables (proportion), pas d'une somme constante.")] };
-    default:
-      return { label: "Piège", sousQuestion: L("decision"), fragments: [texte("Vérifier que le sommet appartient au domaine avant de conclure.")] };
-  }
-}
-
 function baremeOptimisation(e: ExerciceOptimisation): BaremeExercice {
-  const L = (etape: EtapeGen55) => lettre(e, etape);
+  const L = (etape: EtapeGen55) => lettreEtapeOptimisation(e, etape);
   const v = e.contexte.labelVariable;
   const criteres: CritereBareme[] =
     e.variante === "modelisation"
@@ -294,6 +162,14 @@ function baremeOptimisation(e: ExerciceOptimisation): BaremeExercice {
   };
 }
 
+/** Critères du niveau : étapes = écrans du corrigé ; lectures : identification de x et y, phrase de
+ * conclusion (choix fermés) ; méthode 2 en modélisation (l'élève construit le modèle), 1 pour une
+ * fonction donnée (décider sommet ou borne) ; piège constant 0 : le sommet hors du domaine est le
+ * VERDICT de l'écran « décision » (il ne doit pas transparaître dans le niveau). */
+function criteresDifficulteOptimisation(e: ExerciceOptimisation): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeOptimisation(e), lettresLectureOptimisation(e)), methode: e.variante === "modelisation" ? 2 : 1, piege: 0 };
+}
+
 export const adaptateurEvaluationOptimisation: AdaptateurFeuilleExercices<ExerciceOptimisation> = {
   profilInstance: profilOptimisation,
   titreDocument: "Problèmes d'optimisation — Évaluation",
@@ -303,10 +179,9 @@ export const adaptateurEvaluationOptimisation: AdaptateurFeuilleExercices<Exerci
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id as (typeof CATALOGUE_FAMILLES)[number]["id"]),
   construireEnonce: construireEnonceOptimisation,
   construireCorrection: construireCorrectionOptimisation,
-  difficulte: difficulteOptimisation,
+  criteresDifficulte: criteresDifficulteOptimisation,
   reponseBreve: reponseBreveOptimisation,
   correctionDetaillee: correctionDetailleeOptimisation,
   bareme: baremeOptimisation,
   enoncePapier: enoncePapierOptimisation,
-  dureeMinutes: 12,
 };

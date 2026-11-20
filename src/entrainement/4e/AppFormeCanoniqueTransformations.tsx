@@ -24,6 +24,9 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { SaisieExpressionLatex } from "./components/SaisieExpressionLatex";
 import { calculerRecapitulatifFormeCanoniqueTransformations } from "./ui/recapitulatifFormeCanoniqueTransformations";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeFormeCanoniqueTransformations, lettrePhaseFormeCanonique } from "./generateurs/formeCanoniqueTransformations/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Détermine la forme canonique de cette fonction du second degré.";
 
@@ -163,6 +166,7 @@ export function AppFormeCanoniqueTransformations() {
         ) : (
           <>TV attendu : {exercice.yS}</>
         ),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFormeCanoniqueTransformations(exercice), lettrePhaseFormeCanonique(etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
