@@ -1119,27 +1119,34 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   'trigonometrie': {
   'arcs-secteurs': [
     { cle: 'conversion + arc + secteur', enonce: "Un secteur circulaire a un rayon $r = 6$ cm et un angle au centre de $60°$. Convertis cet angle en radians, puis calcule la longueur de l'arc et l'aire du secteur (valeurs exactes, puis approchées au centième)." },
+    { cle: 'Démonstration — longueur d\'arc et aire d\'un secteur', enonce: "Démontre que, pour un secteur circulaire de rayon $r$ et d'angle au centre $\\theta$ (en radians), la longueur de l'arc vaut $s = r\\theta$ et l'aire du secteur vaut $A = \\dfrac{1}{2}r^2\\theta$." },
+    { cle: 'arc et aire donnés', enonce: "Un secteur circulaire a un arc de longueur $s = 10$ cm et une aire $A = 40$ cm². Calcule son rayon, puis son angle au centre en radians et en degrés (valeur approchée au centième)." },
   ],
   'polygones': [
     { cle: 'hexagone inscrit — segment circulaire', enonce: "Un hexagone régulier ABCDEF est inscrit dans un cercle de centre O et de rayon $r = 4$ cm. Calcule l'aire de la région comprise entre le côté [AB] et l'arc AB (valeur exacte, puis approchée au centième)." },
+    { cle: 'plusieurs côtés', enonce: "Un octogone régulier est inscrit dans un cercle de rayon $r = 6$ cm. Calcule la longueur de l'arc et l'aire du secteur qui couvrent trois côtés consécutifs du polygone (valeurs exactes, puis approchées au centième)." },
   ],
   'geometrie-cercle': [
     { cle: 'segment circulaire + corde', enonce: "Dans un cercle de centre O et de rayon $r = 10$ cm, deux rayons OA et OB forment un angle $\\theta = \\dfrac{2\\pi}{3}$. Calcule l'aire du segment circulaire délimité par la corde [AB], puis la longueur de cette corde (valeurs approchées au centième)." },
     { cle: 'essuie-glace — différence de deux secteurs', enonce: "Un essuie-glace pivote d'un angle de $120°$ ; son balai racle la vitre entre $10$ cm et $50$ cm du pivot. Calcule l'aire de la surface balayée (valeur exacte, puis approchée au centième)." },
     { cle: 'angle au centre à partir de la corde', enonce: "Dans un cercle de rayon $r = 10$ cm, une corde mesure $c = 12$ cm. Calcule l'angle au centre qui intercepte cette corde (en degrés et en radians), puis l'aire du segment circulaire correspondant (valeurs approchées au centième)." },
     { cle: 'lentille — deux segments circulaires', enonce: "Deux cercles de rayons $r_1 = 10$ cm et $r_2 = 8$ cm se coupent selon une corde commune de longueur $c = 12$ cm ; leurs centres sont de part et d'autre de cette corde. Calcule l'aire de la lentille, la région commune aux deux disques (valeur approchée au centième)." },
+    { cle: 'Démonstration — la corde et l\'aire du segment', enonce: "Dans un cercle de centre O et de rayon $r$, deux rayons OA et OB forment un angle au centre $\\theta$ (en radians, $0 < \\theta \\leq \\pi$). Démontre que la corde $c = |AB|$ vérifie $c^2 = 2r^2(1 - \\cos\\theta)$, puis que l'aire du segment circulaire délimité par la corde [AB] vaut $\\dfrac{1}{2}r^2(\\theta - \\sin\\theta)$." },
   ],
   'parametres': [
     { cle: 'identifier les paramètres', enonce: "On donne $f(x) = 3\\sin(2x - \\dfrac{\\pi}{3}) + 1$. Détermine l'amplitude A (puis le maximum et le minimum de f), la pulsation $\\omega$, la période T, la fréquence, le déphasage $\\varphi$, le décalage horizontal $\\Phi$ et le décalage vertical b." },
     { cle: 'construction complète', enonce: "On donne $f(x) = 3\\sin(2x + \\dfrac{\\pi}{4}) + 1$. Détermine A, b, la période T et le décalage horizontal $\\Phi$, puis donne les cinq points remarquables d'une période (en partant de $\\Phi$) qui permettent de tracer la courbe." },
+    { cle: 'Démonstration — la période et le décalage horizontal', enonce: "Soit $f(x) = A\\sin(\\omega x + \\varphi) + b$ avec $\\omega > 0$. Démontre que la période de $f$ vaut $T = \\dfrac{2\\pi}{\\omega}$, puis que $f(x) = A\\sin(\\omega(x - \\Phi)) + b$ avec $\\Phi = -\\dfrac{\\varphi}{\\omega}$." },
   ],
   'lecture-graphique': [
     { cle: 'lecture complète sur un graphique', enonce: "Le graphique d'une fonction $f(x) = A\\sin(\\omega x + \\varphi) + b$ (avec $A > 0$ et $\\omega > 0$) présente un maximum en $(1{,}5\\,;5)$, le maximum suivant en $x = 5{,}5$, et un minimum en $(3{,}5\\,;-1)$ ; la courbe traverse sa ligne moyenne en montant en $x = 0{,}5$. Détermine A, b, $\\omega$ et $\\varphi$, puis écris $f(x)$." },
   ],
   'extremums': [
     { cle: 'maximums, minimums, puis extremums réunis', enonce: "On donne $f(x) = 2\\sin(3x + \\dfrac{\\pi}{6}) - 1$. Détermine séparément les abscisses des maximums, puis celles des minimums, puis tous les extremums réunis ($k \\in \\mathbb{Z}$)." },
+    { cle: 'Démonstration — les extremums réunis reviennent tous les π', enonce: "Soit $f(x) = A\\sin(\\omega x + \\varphi) + b$ avec $A \\neq 0$ et $\\omega > 0$. Démontre que les abscisses de tous les extremums de $f$ (maximums et minimums réunis) forment une seule famille, de période $\\dfrac{\\pi}{\\omega}$." },
   ],
   'equations': [
+    { cle: 'Démonstration — les solutions de sin x = c par symétrie', enonce: "Soit $c \\in [-1\\,;1]$ et $\\alpha$ un réel tel que $\\sin\\alpha = c$. Démontre que $\\sin x = c \\iff x = \\alpha + 2k\\pi$ ou $x = (\\pi - \\alpha) + 2k\\pi$, avec $k \\in \\mathbb{Z}$." },
     { cle: 'deux familles de solutions', enonce: "Résous $2\\cos(3x - \\dfrac{\\pi}{4}) = 1$ dans $\\mathbb{R}$, puis donne les solutions qui appartiennent à $[0\\,;2\\pi[$." },
     { cle: 'tangente — une seule famille', enonce: "Résous $\\tan\\left(2x - \\dfrac{\\pi}{3}\\right) = 1$ dans $[0\\,;2\\pi[$." },
     { cle: 'produit nul — réunion des solutions', enonce: "Résous $\\sin(x)\\cdot\\left(2\\cos(x)-1\\right) = 0$ dans $[0\\,;2\\pi[$." },
@@ -1150,6 +1157,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   'modeliser': [
     { cle: 'Exemple résolu — une grande roue', enonce: "Une grande roue a un rayon de 15 m ; le centre de la roue est situé à 17 m du sol. Elle effectue un tour complet en 8 minutes. À l'instant $t=0$ (l'embarquement), une nacelle se trouve à son point le plus bas. Détermine le modèle complet $hauteur(t) = A\\sin(\\omega t + \\varphi) + b$ (avec $t$ en minutes), en justifiant chaque paramètre, puis vérifie ton résultat en calculant $hauteur(4)$." },
+    { cle: 'maximum atteint à un instant', enonce: "Dans une ville, la température moyenne mensuelle varie entre $-2$ °C et $14$ °C, avec une période de 12 mois ; le maximum est atteint en juillet, à $t_0 = 7$ ($t$ en mois). Détermine le modèle $f(t) = A\\sin(\\omega t + \\varphi) + b$, avec $\\varphi \\in \\, ]-\\pi\\,;\\pi]$, puis vérifie-le à l'aide du minimum." },
+    { cle: 'deux points de la courbe', enonce: "La température (en °C) dans une serre suit un modèle $f(t) = 4\\sin(\\omega t + \\varphi) + 10$, avec $t$ en heures et $\\omega > 0$. À $t = 1$, il fait 10 °C ; à $t = 3$, il fait 12 °C. En chacun de ces deux instants, l'argument $\\omega t + \\varphi$ est compris entre $-\\dfrac{\\pi}{2}$ et $\\dfrac{\\pi}{2}$. Détermine $\\omega$ et $\\varphi$, puis vérifie ton modèle." },
     { cle: 'départ hors d\'un extremum', enonce: "Une grande roue a un rayon de 15 m ; son centre est à 17 m du sol et elle fait un tour complet en 8 minutes. À l'instant $t = 0$, une nacelle est à $24{,}5$ m du sol et elle monte. Détermine le modèle $hauteur(t) = A\\sin(\\omega t + \\varphi) + b$ (avec $t$ en minutes) : justifie le choix de $\\varphi$ parmi les deux solutions possibles, puis vérifie ton modèle à l'aide du premier maximum." },
     { cle: 'un arc, puis retour à t', enonce: "Une grande roue a un rayon de 15 m, son centre est à 17 m du sol et elle fait un tour complet en 8 minutes ; la hauteur d'une nacelle (en m) est $hauteur(t) = 15\\sin\\left(\\dfrac{\\pi}{4}t - \\dfrac{\\pi}{2}\\right) + 17$, avec $t$ en minutes. Pendant les 8 premières minutes, quand la nacelle est-elle à au moins 24,5 m du sol ? Résous $hauteur(t) \\geq 24{,}5$ pour $t \\in [0\\,;8]$." },
   ],
