@@ -9,23 +9,32 @@ import type {
   EtatSessionQuizFonctionsExponentielles,
   ResultatExerciceQuizFonctionsExponentielles,
 } from "./moteur6e/typesQuizFonctionsExponentielles";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs6e/quizFonctionsExponentielles";
+import {
+  CATALOGUE_VARIANTES,
+  construireAvecVarianteId,
+  creerGenerateurSansRepetition,
+  etendueNombreQuestions,
+  nombreQuestions,
+} from "./generateurs6e/quizFonctionsExponentielles";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizFonctionsExponentielles } from "./components6e/EtapeQuestionQuizFonctionsExponentielles";
 import { ResultatPanelQuizFonctionsExponentielles } from "./components6e/ResultatPanelQuizFonctionsExponentielles";
 import { ResumeSessionQuizFonctionsExponentielles } from "./components6e/ResumeSessionQuizFonctionsExponentielles";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs6e/quizFonctionsExponentielles/banque.ts`) : couplé à `creerGenerateurSansRepetition`,
- * une session parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession6e = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-};
+/** `nombreExercices` = taille RÉELLE de la banque du thème choisi (`nombreQuestions`, jamais une
+ * constante : convention `.claude/rules/quiz-generators.md`) : couplé à
+ * `creerGenerateurSansRepetition`, une session parcourt toutes les questions du thème sans jamais en
+ * répéter une. */
+function reglages(theme: VarianteQuizFonctionsExponentielles): ReglagesSession6e {
+  return { nombreExercices: nombreQuestions(theme), tentativesMax: 1 };
+}
 
 function nouvelleSession(theme: VarianteQuizFonctionsExponentielles): EtatSessionQuizFonctionsExponentielles {
-  return demarrerSessionQuizFonctionsExponentielles(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizFonctionsExponentielles(reglages(theme), creerGenerateurSansRepetition(theme));
 }
+
+const ETENDUE = etendueNombreQuestions();
+const TEXTE_NOMBRE = ETENDUE.min === ETENDUE.max ? `${ETENDUE.min}` : `${ETENDUE.min} à ${ETENDUE.max}`;
 
 /** Contrairement à la plupart des générateurs, le thème (variante) n'est pas tiré au hasard : c'est
  * l'ÉLÈVE qui le choisit sur un écran d'accueil dédié — même principe que 6gen64 et les 4 quiz
@@ -53,7 +62,7 @@ export function App6gen65() {
     const theme = varianteId as VarianteQuizFonctionsExponentielles;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizFonctionsExponentielles(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizFonctionsExponentielles(reglages(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -84,7 +93,9 @@ export function App6gen65() {
           {!etat ? (
             <div>
               <h2 className="result-title">Choisis un thème</h2>
-              <p className="result-subtitle">7 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre 2.</p>
+              <p className="result-subtitle">
+                {CATALOGUE_VARIANTES.length} thèmes, {TEXTE_NOMBRE} affirmations vrai/faux chacun — révision complète du chapitre 2.
+              </p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
                   <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

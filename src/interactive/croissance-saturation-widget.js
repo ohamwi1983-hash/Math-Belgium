@@ -6,12 +6,12 @@
    * deux modèles de la section (croissance libre Q(t)=Q₀·rᵗ, et saturation
    * p(t)=L·(1−e⁻ᵏᵗ)), chacun avec ses propres curseurs et un curseur t
    * commun pour lire la valeur à un instant précis. Reprend les valeurs des
-   * exemples déjà résolus (Q₀=100, r=1,5 ; k=0,15) comme réglages par
+   * exemples déjà résolus (Q₀=100, r=1,5 ; k=0,1) comme réglages par
    * défaut. Web Component (Shadow DOM).
    * ================================================================ */
 
   var DEFAUT_CROISSANCE = { Q0: 100, r: 1.5, t: 3, tMax: 10 };
-  var DEFAUT_SATURATION = { L: 100, k: 0.15, t: 10, tMax: 40 };
+  var DEFAUT_SATURATION = { L: 100, k: 0.1, t: 10, tMax: 40 };
   var BORNES_Q0 = { min: 10, max: 500, step: 10 };
   var BORNES_R = { min: 0.5, max: 2, step: 0.01 };
   var BORNES_L = { min: 10, max: 200, step: 5 };

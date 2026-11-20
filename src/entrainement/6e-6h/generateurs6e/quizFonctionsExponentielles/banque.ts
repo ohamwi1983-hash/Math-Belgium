@@ -1,6 +1,6 @@
 /**
  * Couche A — banque de contenu pour "Fonctions exponentielles" (quiz vrai/faux), chapitre 2 du
- * chantier 6e (6h), ajout ultérieur (6gen65). 245 affirmations PRÉ-ÉCRITES (35 par thème, 7
+ * chantier 6e (6h), ajout ultérieur (6gen65). 315 affirmations PRÉ-ÉCRITES (35 par thème, 9
  * thèmes), chacune vérifiée mathématiquement à la rédaction — jamais générées procéduralement,
  * voir `core6e/quizFonctionsExponentielles.types.ts`. Enrichissement ultérieur de 20 à 35 par
  * thème (mêmes 20 premières questions, inchangées et dans le même ordre, puis 15 nouvelles) —
@@ -12,6 +12,15 @@
  * limite (fait du chapitre 2, ex. thème 1) ou via calculatrice dans un problème concret (thème 7),
  * jamais comme outil de résolution algébrique. Équilibre vrai/faux : proche de 50/50 par thème,
  * validé en artefact avant transcription ici.
+ *
+ * Audit du chapitre (lot F) : trois affirmations fausses marquées vraies corrigées (maximum de
+ * tⁿ·e^{−at} en n/a, asymptote oblique « base > 1 », monotonie « sur un intervalle ») ; les deux
+ * affirmations sur le développement limité retirées (notion hors cours), celles sur la règle de
+ * L'Hôpital gardées (enseignée à la section 2, avec ses conditions) ; grands calculs remplacés par
+ * des vérifications rapides ; deux affirmations « méta » sur la typographie remplacées ; « base »
+ * écrite a (et b) ; plus aucune majuscule d'insistance ; plus de « x = ln 2 » (le logarithme n'est
+ * qu'une touche de calculatrice dans ce chapitre) ; deux thèmes ajoutés (`puissancesNombreE`,
+ * `modeleExponentiel`). Les affirmations ajoutées ou réécrites passent par `q(…)` (chaîne `$…$`).
  *
  * `enonce`/`justification` sont des `FragmentConsigne[]` (texte/LaTeX mêlés, jamais de `string`
  * brute) — seule différence réelle avec 6gen64, motivée par la densité de notation mathématique de
@@ -28,7 +37,201 @@ function latex(valeur: string): FragmentConsigne {
   return { type: "latex", valeur };
 }
 
+/** Affirmation écrite en une seule chaîne `$…$` (texte + KaTeX), découpée en fragments — forme
+ * compacte des affirmations ajoutées ou réécrites à l'audit (les fragments texte ne contiennent
+ * jamais de `$`). */
+function rt(source: string): FragmentConsigne[] {
+  return source
+    .split(/\$([^$]+)\$/g)
+    .map((valeur, i): FragmentConsigne => (i % 2 === 1 ? latex(valeur) : texte(valeur)))
+    .filter((f) => f.valeur !== "");
+}
+function q(enonce: string, reponse: boolean, justification: string): QuestionVraiFaux {
+  return { enonce: rt(enonce), reponse, justification: rt(justification) };
+}
+
 export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsExponentielles, QuestionVraiFaux[]> = {
+  // ==========================================================================
+  // Thème ajouté à l'audit — Puissances à exposant réel et nombre e (section 1, section 2)
+  // ==========================================================================
+  puissancesNombreE: [
+    q(
+      "Pour $a>0$ et tous réels $r$ et $s$ : $a^r\\cdot a^s=a^{r+s}$.",
+      true,
+      "C'est la règle (1) des puissances, étendue des exposants rationnels aux exposants réels.",
+    ),
+    q(
+      "Pour $a>0$ et tous réels $r$ et $s$ : $a^r\\cdot a^s=a^{r\\cdot s}$.",
+      false,
+      "Un produit de puissances de même base additionne les exposants : $a^r\\cdot a^s=a^{r+s}$. Le produit des exposants correspond à $\\left(a^r\\right)^s$.",
+    ),
+    q(
+      "$2^{\\sqrt{3}}\\cdot2^{1-\\sqrt{3}}=2$.",
+      true,
+      "Les exposants s'additionnent : $\\sqrt{3}+1-\\sqrt{3}=1$, donc le produit vaut $2^1=2$.",
+    ),
+    q(
+      "$\\left(3^{\\sqrt{2}}\\right)^{\\sqrt{2}}=9^{\\sqrt{2}}$.",
+      false,
+      "Règle (4) : $\\left(3^{\\sqrt{2}}\\right)^{\\sqrt{2}}=3^{\\sqrt{2}\\cdot\\sqrt{2}}=3^2=9$, et non $9^{\\sqrt{2}}$.",
+    ),
+    q(
+      "$\\dfrac{5^{\\pi}}{5^{\\pi-2}}=25$.",
+      true,
+      "Règle (2) : on soustrait les exposants, $\\pi-(\\pi-2)=2$, d'où $5^2=25$.",
+    ),
+    q(
+      "$\\left(\\dfrac{1}{2}\\right)^{-x}=2^x$ pour tout réel $x$.",
+      true,
+      "$\\dfrac{1}{2}=2^{-1}$, donc $\\left(2^{-1}\\right)^{-x}=2^{(-1)\\cdot(-x)}=2^x$.",
+    ),
+    q(
+      "$2^{-3}=-8$.",
+      false,
+      "Un exposant négatif donne un inverse, jamais un nombre négatif : $2^{-3}=\\dfrac{1}{2^3}=\\dfrac{1}{8}$.",
+    ),
+    q(
+      "$a^0=1$ pour tout $a>0$.",
+      true,
+      "$\\dfrac{a^n}{a^n}=1$ et, par la règle (2), $\\dfrac{a^n}{a^n}=a^{n-n}=a^0$.",
+    ),
+    q(
+      "$0^x$ est défini pour tout réel $x$, comme $a^x$ pour $a>0$.",
+      false,
+      "La base doit être strictement positive : $0^{-1}$ demanderait de diviser par 0. C'est pourquoi une exponentielle a une base $a>0$.",
+    ),
+    q(
+      "$(2\\cdot5)^{\\sqrt{3}}=2^{\\sqrt{3}}\\cdot5^{\\sqrt{3}}$.",
+      true,
+      "C'est la règle (3), $(a\\cdot b)^r=a^r\\cdot b^r$, valable pour des bases strictement positives et tout exposant réel.",
+    ),
+    q(
+      "$2^{\\sqrt{3}}+2^{\\sqrt{3}}=4^{\\sqrt{3}}$.",
+      false,
+      "$2^{\\sqrt{3}}+2^{\\sqrt{3}}=2\\cdot2^{\\sqrt{3}}=2^{1+\\sqrt{3}}$, alors que $4^{\\sqrt{3}}=2^{2\\sqrt{3}}$ : les exposants $1+\\sqrt{3}$ et $2\\sqrt{3}$ sont différents.",
+    ),
+    q(
+      "$3^{\\sqrt{2}}<3^{1{,}5}$.",
+      true,
+      "$\\sqrt{2}\\approx1{,}414<1{,}5$ et la base 3 est supérieure à 1 : $x\\mapsto3^x$ est croissante et conserve l'ordre.",
+    ),
+    q(
+      "$0{,}5^{\\sqrt{2}}<0{,}5^{1{,}5}$.",
+      false,
+      "La base $0{,}5$ est comprise entre 0 et 1 : $x\\mapsto0{,}5^x$ est décroissante et inverse l'ordre. Comme $\\sqrt{2}<1{,}5$, $0{,}5^{\\sqrt{2}}>0{,}5^{1{,}5}$.",
+    ),
+    q(
+      "$\\left(2^{1/12}\\right)^{12}=2$ : $2^{1/12}$ est la racine douzième de 2.",
+      true,
+      "Règle (4) : $\\left(2^{1/12}\\right)^{12}=2^{12/12}=2^1=2$.",
+    ),
+    q(
+      "$2^{1/12}$ est une puissance à exposant irrationnel.",
+      false,
+      "L'exposant $\\frac{1}{12}$ est rationnel : $2^{1/12}=\\sqrt[12]{2}$ existait déjà avant le prolongement aux exposants réels. Le nombre $2^{1/12}$, lui, est irrationnel.",
+    ),
+    q(
+      "$2^{\\sqrt{2}}$ n'a de sens que grâce au prolongement de la puissance aux exposants réels.",
+      true,
+      "L'exposant $\\sqrt{2}$ est irrationnel : aucune racine ni puissance entière ne le définit. C'est la fonction continue $\\exp_2$ qui lui donne un sens.",
+    ),
+    q(
+      "Pour $a>0$, $a^x>0$ pour tout réel $x$.",
+      true,
+      "$a^x=\\left(a^{x/2}\\right)^2\\geq0$, et $a^x\\cdot a^{-x}=1$ empêche $a^x$ d'être nul.",
+    ),
+    q(
+      "Il existe un réel $x$ tel que $5^x=0$.",
+      false,
+      "Une exponentielle ne s'annule jamais : $5^x>0$ pour tout réel $x$.",
+    ),
+    q(
+      "$\\left(1+\\dfrac{1}{x}\\right)^x$ se rapproche de $e$ quand $x\\to+\\infty$.",
+      true,
+      "C'est la définition du nombre $e\\approx2{,}718$ (l'existence de la limite est admise).",
+    ),
+    q(
+      "$\\displaystyle\\lim_{x\\to+\\infty}\\left(1+\\dfrac{1}{x}\\right)^x=1$, puisque $1+\\dfrac{1}{x}\\to1$.",
+      false,
+      "C'est une forme indéterminée « $1^{\\infty}$ » : la base tend vers 1, mais l'exposant devient infini. La limite vaut $e$, pas 1.",
+    ),
+    q(
+      "$\\displaystyle\\lim_{x\\to+\\infty}\\left(1+\\dfrac{3}{x}\\right)^x=e^3$.",
+      true,
+      "C'est la limite $\\left(1+\\dfrac{k}{x}\\right)^x\\to e^k$ avec $k=3$ (on pose $u=\\frac{x}{3}$).",
+    ),
+    q(
+      "$\\displaystyle\\lim_{x\\to+\\infty}\\left(1+\\dfrac{1}{x}\\right)^{2x}=e^{1/2}$.",
+      false,
+      "$\\left(1+\\frac{1}{x}\\right)^{2x}=\\left[\\left(1+\\frac{1}{x}\\right)^x\\right]^2$ tend vers $e^2$, et non $e^{1/2}$.",
+    ),
+    q(
+      "Comme $e$ n'est pas un nombre entier, $e^x$ n'est pas définie pour $x$ irrationnel.",
+      false,
+      "$e\\approx2{,}718>0$ : comme toute base strictement positive, $e^x$ est définie pour tout réel $x$.",
+    ),
+    q(
+      "Le nombre $e$ est un nombre rationnel égal à $2{,}71828$.",
+      false,
+      "$2{,}71828$ n'est qu'une valeur approchée de $e$ : son écriture décimale ne s'arrête jamais (et $e$ est irrationnel).",
+    ),
+    q(
+      "La tangente à la courbe de $e^x$ au point $(0;1)$ a une pente égale à 1.",
+      true,
+      "La pente en $(0;1)$ vaut $\\ln(e)$, et $\\ln(e)=1$ (résultat admis au cours).",
+    ),
+    q(
+      "La tangente à la courbe de $3^x$ au point $(0;1)$ a une pente égale à 3.",
+      false,
+      "Sa pente vaut $\\ln(3)\\approx1{,}10$, le nombre dérivé de $3^x$ en 0 — pas la base elle-même.",
+    ),
+    q(
+      "$\\ln(2)$ est la pente de la tangente à la courbe de $2^x$ au point $(0;1)$.",
+      true,
+      "C'est la définition du cours : $\\ln(a)$ est le nombre dérivé en 0 de $x\\mapsto a^x$.",
+    ),
+    q(
+      "$\\ln(a)<0$ pour $0<a<1$.",
+      true,
+      "Avec $b=\\frac{1}{a}>1$, on a $a^x=b^{-x}$, et la dérivée donne $\\ln(a)=-\\ln(b)<0$.",
+    ),
+    q(
+      "$\\ln(a)$ est positif pour toute base $a>0$.",
+      false,
+      "$\\ln(a)$ est négatif pour $0<a<1$ et nul pour $a=1$ : c'est ce signe qui rend $a^x$ décroissante quand $0<a<1$.",
+    ),
+    q(
+      "Si $a>1$ et $h>0$, alors $a^h>1$.",
+      true,
+      "Une puissance d'exposant positif d'un nombre plus grand que 1 reste plus grande que 1 : c'est le point de départ de la démonstration du signe de $\\ln(a)$.",
+    ),
+    q(
+      "Si $0<a<1$ et $h>0$, alors $a^h>1$.",
+      false,
+      "Pour $0<a<1$, $a^h<1$ dès que $h>0$ : par exemple $0{,}5^2=0{,}25$.",
+    ),
+    q(
+      "$4^x=\\left(2^x\\right)^2$ pour tout réel $x$.",
+      true,
+      "$4^x=\\left(2^2\\right)^x=2^{2x}=\\left(2^x\\right)^2$ (règle (4), deux fois).",
+    ),
+    q(
+      "$4^x=2^{x^2}$ pour tout réel $x$.",
+      false,
+      "$4^x=2^{2x}$, pas $2^{x^2}$ : pour $x=1$, $4^1=4$ alors que $2^{1}=2$.",
+    ),
+    q(
+      "$e^{-x}=\\dfrac{1}{e^x}$ pour tout réel $x$.",
+      true,
+      "$e^x\\cdot e^{-x}=e^0=1$, donc $e^{-x}$ est l'inverse de $e^x$.",
+    ),
+    q(
+      "$e^x\\cdot e^{-x}=0$.",
+      false,
+      "Les exposants s'additionnent : $e^x\\cdot e^{-x}=e^{0}=1$.",
+    ),
+  ],
+
   // ==========================================================================
   // Thème 1 — Calcul de limites (fonctions exponentielles), ref 6gen6
   // ==========================================================================
@@ -134,11 +337,11 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         texte("."),
       ],
     },
-    {
-      enonce: [texte("Un développement limité à l'ordre 1 suffit toujours pour calculer n'importe quelle limite du type "), latex("\\infty-\\infty"), texte(".")],
-      reponse: false,
-      justification: [texte("Certaines formes "), latex("\\infty-\\infty"), texte(" nécessitent un développement à un ordre supérieur pour être tranchées ; l'ordre 1 ne suffit pas toujours.")],
-    },
+    q(
+      "La règle de L'Hôpital appliquée à $\\displaystyle\\lim_{x\\to0}\\frac{e^x+1}{x+1}$ donne la limite $1$.",
+      false,
+      "Ce n'est pas une forme indéterminée : en remplaçant, on obtient directement $\\frac{2}{1}=2$. Dériver hors d'une forme $\\frac{0}{0}$ ou $\\frac{\\infty}{\\infty}$ donne un résultat faux ($\\frac{e^x}{1}\\to1$).",
+    ),
     {
       enonce: [texte("Une fonction exponentielle de base "), latex("a"), texte(" ("), latex("a>0, a\\neq1"), texte(") est toujours strictement positive.")],
       reponse: true,
@@ -170,7 +373,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       justification: [
         texte("Par L'Hôpital, le rapport des dérivées est "),
         latex("\\frac{2/(1+4x^2)}{-4e^{-4x}}\\to\\frac{2}{-4}=-\\frac{1}{2}"),
-        texte(" : c'est l'OPPOSÉ de la valeur annoncée."),
+        texte(" : c'est l'opposé de la valeur annoncée."),
       ],
     },
     {
@@ -218,17 +421,11 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         texte(" : une seconde application est toujours nécessaire."),
       ],
     },
-    {
-      enonce: [latex("\\lim_{x\\to0} \\frac{e^{2x}-1-2x}{3x^2} = \\frac{2}{3}"), texte(".")],
-      reponse: true,
-      justification: [
-        texte("Deux applications de L'Hôpital sont nécessaires ; la seconde donne "),
-        latex("\\frac{4e^{2x}}{6}"),
-        texte(", qui tend vers "),
-        latex("\\frac{4}{6}=\\frac{2}{3}"),
-        texte("."),
-      ],
-    },
+    q(
+      "La règle de L'Hôpital exige que $g'(x)\\neq0$ au voisinage du point étudié (sauf peut-être en ce point).",
+      true,
+      "C'est l'une des conditions du théorème, avec la dérivabilité de $f$ et $g$, la forme indéterminée et l'existence de la limite de $\\frac{f'}{g'}$ : sans elle, le quotient des dérivées n'aurait même pas de sens.",
+    ),
     {
       enonce: [latex("\\lim_{x\\to+\\infty}\\left(1+\\frac{2}{x}\\right)^x = e^2"), texte(".")],
       reponse: true,
@@ -257,15 +454,11 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         texte("."),
       ],
     },
-    {
-      enonce: [latex("\\lim_{x\\to\\frac{\\pi}{2}}\\left(\\frac{1}{\\cos(x)} + \\frac{1}{1-e^{\\frac{\\pi}{2}-x}}\\right) = \\frac{1}{2}"), texte(".")],
-      reponse: true,
-      justification: [
-        texte("Les deux termes divergent, mais leurs parties infinies s'annulent EXACTEMENT à l'ordre 1 : il faut pousser le développement à l'ordre 2, qui laisse le terme fini "),
-        latex("\\frac{1}{2}"),
-        texte("."),
-      ],
-    },
+    q(
+      "Si $\\frac{f'(x)}{g'(x)}$ n'a pas de limite en $a$, alors $\\frac{f(x)}{g(x)}$ n'a pas de limite en $a$ non plus.",
+      false,
+      "La règle de L'Hôpital ne dit alors rien. Par exemple $\\frac{x+\\sin x}{x}=1+\\frac{\\sin x}{x}$ tend vers 1 en $+\\infty$, alors que $\\frac{1+\\cos x}{1}$ n'a pas de limite.",
+    ),
     {
       enonce: [
         texte("La limite "),
@@ -382,7 +575,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       enonce: [latex("\\lim_{x\\to0^-} e^{\\frac{1}{x}} = +\\infty"), texte(".")],
       reponse: false,
       justification: [
-        texte("À GAUCHE de 0, "),
+        texte("À gauche de 0, "),
         latex("\\frac{1}{x}\\to-\\infty"),
         texte(", donc "),
         latex("e^{1/x}\\to0"),
@@ -398,22 +591,22 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
   // ==========================================================================
   domaineDeriveeExponentielles: [
     {
-      enonce: [texte("La dérivée de "), latex("\\text{base}^x"), texte(" est "), latex("\\text{base}^x"), texte(", quelle que soit la base.")],
+      enonce: [texte("La dérivée de "), latex("a^x"), texte(" est "), latex("a^x"), texte(", quelle que soit la base.")],
       reponse: false,
       justification: [
         texte("Ce n'est vrai que pour "),
-        latex("\\text{base}=e"),
+        latex("a=e"),
         texte(". En général, "),
-        latex("(\\text{base}^x)' = \\ln(\\text{base})\\cdot\\text{base}^x"),
+        latex("(a^x)' = \\ln(a)\\cdot a^x"),
         texte(" — un facteur "),
-        latex("\\ln(\\text{base})"),
+        latex("\\ln(a)"),
         texte(" apparaît."),
       ],
     },
     {
       enonce: [texte("La dérivée de "), latex("e^x"), texte(" est "), latex("e^x"), texte(".")],
       reponse: true,
-      justification: [texte("Cas particulier : puisque "), latex("\\ln(e)=1"), texte(", la formule générale "), latex("\\ln(\\text{base})\\cdot\\text{base}^x"), texte(" se réduit à "), latex("e^x"), texte(".")],
+      justification: [texte("Cas particulier : puisque "), latex("\\ln(e)=1"), texte(", la formule générale "), latex("\\ln(a)\\cdot a^x"), texte(" se réduit à "), latex("e^x"), texte(".")],
     },
     {
       enonce: [texte("Pour toute base "), latex("a"), texte(" ("), latex("a>0, a\\neq1"), texte("), "), latex("(a^x)' = \\ln(a)\\cdot a^x"), texte(".")],
@@ -436,7 +629,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       justification: [texte("C'est l'inverse d'une vérité : le domaine se détermine indépendamment de la dérivée, jamais à partir d'elle.")],
     },
     {
-      enonce: [texte("La fonction "), latex("f(x) = \\text{base}^x"), texte(" (pour "), latex("\\text{base}>0, \\text{base}\\neq1"), texte(") est définie sur "), latex("\\mathbb{R}"), texte(" tout entier.")],
+      enonce: [texte("La fonction "), latex("f(x) = a^x"), texte(" (pour "), latex("a>0, a\\neq1"), texte(") est définie sur "), latex("\\mathbb{R}"), texte(" tout entier.")],
       reponse: true,
       justification: [texte("Une exponentielle simple, sans composition avec une racine, une fraction ou une autre restriction, est toujours définie partout.")],
     },
@@ -466,7 +659,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       justification: [texte("Si la fraction de l'exposant a un dénominateur qui peut s'annuler, cela introduit bien une valeur interdite dans le domaine.")],
     },
     {
-      enonce: [texte("Pour dériver "), latex("\\text{base}^{g(x)}"), texte(", on multiplie "), latex("\\text{base}^{g(x)}"), texte(" par "), latex("g'(x)"), texte(" et par "), latex("\\ln(\\text{base})"), texte(".")],
+      enonce: [texte("Pour dériver "), latex("a^{g(x)}"), texte(", on multiplie "), latex("a^{g(x)}"), texte(" par "), latex("g'(x)"), texte(" et par "), latex("\\ln(a)"), texte(".")],
       reponse: true,
       justification: [texte("C'est la règle de la chaîne appliquée à la dérivée générale d'une exponentielle de base quelconque.")],
     },
@@ -488,17 +681,17 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         texte("."),
       ],
     },
+    q(
+      "$\\ln(e)=1$.",
+      true,
+      "On admet que la base $e$ est celle dont la tangente en $(0;1)$ a une pente égale à 1 : $\\ln(e)=1$. C'est pourquoi $(e^x)'=e^x$, sans facteur supplémentaire.",
+    ),
     {
-      enonce: [latex("\\ln(e) = 1"), texte(".")],
-      reponse: true,
-      justification: [texte("C'est la définition même du logarithme népérien : "), latex("\\ln(e)=1"), texte(", ce qui explique pourquoi "), latex("(e^x)'=e^x"), texte(" sans facteur supplémentaire.")],
-    },
-    {
-      enonce: [texte("La dérivée de "), latex("\\text{base}^{g(x)}"), texte(" ne dépend jamais de la base, seulement de "), latex("g(x)"), texte(".")],
+      enonce: [texte("La dérivée de "), latex("a^{g(x)}"), texte(" ne dépend jamais de la base, seulement de "), latex("g(x)"), texte(".")],
       reponse: false,
       justification: [
         texte("La dérivée dépend bien de la base, via le facteur "),
-        latex("\\ln(\\text{base})"),
+        latex("\\ln(a)"),
         texte(" — deux bases différentes donnent deux dérivées différentes pour le même "),
         latex("g(x)"),
         texte("."),
@@ -517,13 +710,11 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: true,
       justification: [latex("\\arccos"), texte(" exige un argument dans "), latex("[-1;1]"), texte(" : cette contrainte peut borner le domaine final même si l'exposant, lui, est défini partout.")],
     },
-    {
-      enonce: [texte("Une expression simplifiée après réduction au même dénominateur reste toujours une fraction unique, comme l'expression de départ.")],
-      reponse: false,
-      justification: [
-        texte("Une expression correctement simplifiée n'est en général plus une simple fraction unique : rester sous cette forme est souvent le signe d'un recopiage sans réelle simplification."),
-      ],
-    },
+    q(
+      "$\\left(e^{2x}\\right)'=e^{2x}$.",
+      false,
+      "Règle de la chaîne avec $u(x)=2x$, $u'(x)=2$ : $\\left(e^{2x}\\right)'=2e^{2x}$. Seule $e^x$ elle-même est égale à sa dérivée.",
+    ),
     {
       enonce: [texte("La règle de dérivation en chaîne s'applique à la composition d'une fonction trigonométrique avec une exponentielle, comme "), latex("\\cos(e^x)"), texte(".")],
       reponse: true,
@@ -561,7 +752,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       justification: [
         texte("C'est la règle de dérivation de "),
         latex("x^n"),
-        texte(" appliquée à tort : ici c'est l'EXPOSANT qui est la variable, et "),
+        texte(" appliquée à tort : ici c'est l'exposant qui est la variable, et "),
         latex("(5^x)'=\\ln(5)\\cdot5^x"),
         texte("."),
       ],
@@ -619,7 +810,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         latex("\\ln(2)\\approx0{,}69"),
         texte(" : "),
         latex("e"),
-        texte(" est la SEULE base dont la tangente en "),
+        texte(" est la seule base dont la tangente en "),
         latex("(0;1)"),
         texte(" a une pente exactement égale à 1."),
       ],
@@ -702,26 +893,26 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     },
     {
       enonce: [
-        latex("\\frac{\\text{base}^x-1}{\\text{base}^x}"),
+        latex("\\frac{a^x-1}{a^x}"),
         texte(" se simplifie en "),
-        latex("1-\\text{base}^{-x}"),
+        latex("1-a^{-x}"),
         texte(", dont la dérivée est "),
-        latex("-\\ln(\\text{base})\\cdot\\text{base}^{-x}"),
+        latex("-\\ln(a)\\cdot a^{-x}"),
         texte("."),
       ],
       reponse: false,
       justification: [
         texte("La simplification est correcte, mais pas le signe : "),
-        latex("\\left(-\\text{base}^{-x}\\right)'=+\\ln(\\text{base})\\cdot\\text{base}^{-x}"),
+        latex("\\left(-a^{-x}\\right)'=+\\ln(a)\\cdot a^{-x}"),
         texte(" — les deux signes moins se compensent."),
       ],
     },
     {
-      enonce: [latex("\\frac{\\text{base}^{g(x)}}{\\text{base}^{h(x)}} = \\text{base}^{g(x)\\cdot h(x)}"), texte(".")],
+      enonce: [latex("\\frac{a^{g(x)}}{a^{h(x)}} = a^{g(x)\\cdot h(x)}"), texte(".")],
       reponse: false,
       justification: [
-        texte("La règle des puissances donne une DIFFÉRENCE d'exposants : "),
-        latex("\\text{base}^{g(x)-h(x)}"),
+        texte("La règle des puissances donne une différence d'exposants : "),
+        latex("a^{g(x)-h(x)}"),
         texte(", jamais un produit."),
       ],
     },
@@ -775,11 +966,11 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: true,
       justification: [texte("Quand la dérivée change de signe, la fonction cesse de croître pour décroître (ou l'inverse) : c'est un extremum.")],
     },
-    {
-      enonce: [texte("Si "), latex("f'"), texte(" garde un signe constant sur tout son domaine, alors "), latex("f"), texte(" est strictement monotone sur ce domaine.")],
-      reponse: true,
-      justification: [texte("Une dérivée de signe constant entraîne que la fonction ne change jamais de sens de variation.")],
-    },
+    q(
+      "Si $f'$ est strictement positive sur un intervalle, alors $f$ est strictement croissante sur cet intervalle.",
+      true,
+      "C'est le lien entre le signe de la dérivée et le sens de variation, valable sur un intervalle. Sur un domaine troué, ce n'est plus vrai : $\\frac{1}{e^{x}-1}$ a une dérivée négative sur $\\mathbb{R}_0$ sans être décroissante sur $\\mathbb{R}_0$.",
+    ),
     {
       enonce: [texte("La dérivée d'une fonction paire est toujours paire elle-même.")],
       reponse: false,
@@ -923,7 +1114,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       enonce: [
         texte("Pour "),
         latex("f(x)=a\\cdot x\\cdot e^x"),
-        texte(", l'extremum de la COURBE DE "),
+        texte(", l'extremum de la courbe de "),
         latex("f'"),
         texte(" elle-même se situe en "),
         latex("x=-2"),
@@ -970,9 +1161,9 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     {
       enonce: [
         texte("Pour "),
-        latex("f(x)=\\frac{\\text{base}^x}{\\text{base}^x+1}"),
+        latex("f(x)=\\frac{a^x}{a^x+1}"),
         texte(", "),
-        latex("f'(x)=\\frac{\\ln(\\text{base})\\cdot\\text{base}^x}{\\left(\\text{base}^x+1\\right)^2}"),
+        latex("f'(x)=\\frac{\\ln(a)\\cdot a^x}{\\left(a^x+1\\right)^2}"),
         texte(", de signe constant sur "),
         latex("\\mathbb{R}"),
         texte("."),
@@ -980,7 +1171,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: true,
       justification: [
         texte("La règle du quotient donne cette expression, dont seul "),
-        latex("\\ln(\\text{base})"),
+        latex("\\ln(a)"),
         texte(" peut être négatif : le signe de "),
         latex("f'"),
         texte(" ne change donc jamais."),
@@ -989,7 +1180,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     {
       enonce: [
         texte("Pour "),
-        latex("f(x)=\\frac{\\text{base}^x}{\\text{base}^x+1}"),
+        latex("f(x)=\\frac{a^x}{a^x+1}"),
         texte(", l'extremum du graphique de "),
         latex("f'"),
         texte(" se décale vers la droite quand la base augmente."),
@@ -1000,17 +1191,17 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         latex("f'"),
         texte(" est en "),
         latex("x=0"),
-        texte(" pour TOUTE base (il correspond à "),
-        latex("\\text{base}^x=1"),
+        texte(" pour toute base (il correspond à "),
+        latex("a^x=1"),
         texte(") — seule sa hauteur change."),
       ],
     },
     {
       enonce: [
         texte("Pour "),
-        latex("f(x)=\\frac{\\text{base}^x}{\\text{base}^x+1}"),
+        latex("f(x)=\\frac{a^x}{a^x+1}"),
         texte(" avec "),
-        latex("0<\\text{base}<1"),
+        latex("0<a<1"),
         texte(", la dérivée "),
         latex("f'"),
         texte(" change de signe en "),
@@ -1020,7 +1211,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: false,
       justification: [
         texte("Son signe est celui de "),
-        latex("\\ln(\\text{base})"),
+        latex("\\ln(a)"),
         texte(", négatif partout dans ce cas : la courbe de "),
         latex("f'"),
         texte(" reste entièrement sous l'axe des abscisses."),
@@ -1079,7 +1270,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       ],
       reponse: false,
       justification: [
-        texte("Le dénominateur est un CARRÉ, donc toujours positif : le signe de "),
+        texte("Le dénominateur est un carré, donc toujours positif : le signe de "),
         latex("f'"),
         texte(" est celui de "),
         latex("-k"),
@@ -1105,7 +1296,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         latex("f''<0"),
         texte(", c'est-à-dire "),
         latex("f'"),
-        texte(" DÉCROISSANTE : c'est en zone convexe que le graphique de "),
+        texte(" décroissante : c'est en zone convexe que le graphique de "),
         latex("f'"),
         texte(" monte."),
       ],
@@ -1121,7 +1312,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: false,
       justification: [
         latex("f'>0"),
-        texte(" renseigne seulement sur la CROISSANCE de "),
+        texte(" renseigne seulement sur la croissance de "),
         latex("f"),
         texte(", jamais sur son signe : "),
         latex("f(x)=e^x-2"),
@@ -1150,9 +1341,9 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       ],
     },
     {
-      enonce: [texte("Si "), latex("f'"), texte(" est une constante NON NULLE, le graphique de "), latex("f"), texte(" est une droite horizontale.")],
+      enonce: [texte("Si "), latex("f'"), texte(" est une constante non nulle, le graphique de "), latex("f"), texte(" est une droite horizontale.")],
       reponse: false,
-      justification: [texte("Une dérivée constante non nulle correspond à une droite de pente non nulle, donc OBLIQUE ; c'est une dérivée NULLE qui donne une droite horizontale.")],
+      justification: [texte("Une dérivée constante non nulle correspond à une droite de pente non nulle, donc oblique ; c'est une dérivée nulle qui donne une droite horizontale.")],
     },
   ],
 
@@ -1161,16 +1352,16 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
   // ==========================================================================
   equationsExponentielles: [
     {
-      enonce: [texte("Pour résoudre "), latex("\\text{base}^u = \\text{base}^v"), texte(", il suffit d'identifier les deux exposants : "), latex("u = v"), texte(".")],
+      enonce: [texte("Pour résoudre "), latex("a^u = a^v"), texte(", il suffit d'identifier les deux exposants : "), latex("u = v"), texte(".")],
       reponse: true,
       justification: [texte("C'est la méthode fondamentale : une exponentielle de base fixée est injective, donc égalité des images équivaut à égalité des exposants.")],
     },
     {
-      enonce: [latex("\\text{base}^x=\\text{base}^y"), texte(" peut être vrai même si "), latex("x \\neq y"), texte(", à condition que la base soit assez grande.")],
+      enonce: [latex("a^x=a^y"), texte(" peut être vrai même si "), latex("x \\neq y"), texte(", à condition que la base soit assez grande.")],
       reponse: false,
       justification: [
         texte("L'injectivité de l'exponentielle ne dépend pas de la taille de la base : "),
-        latex("\\text{base}^x=\\text{base}^y"),
+        latex("a^x=a^y"),
         texte(" entraîne toujours "),
         latex("x=y"),
         texte(", quelle que soit la base ("),
@@ -1179,18 +1370,18 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       ],
     },
     {
-      enonce: [texte("Une équation du type "), latex("c\\cdot\\text{base}^{mx+n} = 0"), texte(", avec "), latex("c \\neq 0"), texte(", n'a aucune solution.")],
+      enonce: [texte("Une équation du type "), latex("c\\cdot a^{mx+n} = 0"), texte(", avec "), latex("c \\neq 0"), texte(", n'a aucune solution.")],
       reponse: true,
-      justification: [latex("\\text{base}^{mx+n}"), texte(" est toujours strictement positif, donc son produit par "), latex("c\\neq0"), texte(" ne peut jamais valoir 0.")],
+      justification: [latex("a^{mx+n}"), texte(" est toujours strictement positif, donc son produit par "), latex("c\\neq0"), texte(" ne peut jamais valoir 0.")],
     },
     {
-      enonce: [latex("\\text{base}^x"), texte(" peut être négatif pour certaines valeurs de "), latex("x"), texte(", si la base est elle-même négative.")],
+      enonce: [latex("a^x"), texte(" peut être négatif pour certaines valeurs de "), latex("x"), texte(", si la base est elle-même négative.")],
       reponse: false,
       justification: [
         texte("Les bases utilisées sont toujours strictement positives ("),
         latex("a>0, a\\neq1"),
         texte(") : "),
-        latex("\\text{base}^x"),
+        latex("a^x"),
         texte(" est donc toujours positif, jamais négatif."),
       ],
     },
@@ -1218,14 +1409,14 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       ],
     },
     {
-      enonce: [texte("Poser "), latex("t = \\text{base}^x"), texte(" est une technique valide pour transformer une équation exponentielle en équation du second degré en "), latex("t"), texte(".")],
+      enonce: [texte("Poser "), latex("t = a^x"), texte(" est une technique valide pour transformer une équation exponentielle en équation du second degré en "), latex("t"), texte(".")],
       reponse: true,
-      justification: [texte("C'est la technique de substitution classique quand l'équation fait apparaître "), latex("\\text{base}^x"), texte(" et son carré.")],
+      justification: [texte("C'est la technique de substitution classique quand l'équation fait apparaître "), latex("a^x"), texte(" et son carré.")],
     },
     {
       enonce: [
         texte("Après avoir résolu une équation du second degré en "),
-        latex("t = \\text{base}^x"),
+        latex("t = a^x"),
         texte(", toute racine "),
         latex("t"),
         texte(" trouvée correspond forcément à une solution "),
@@ -1239,7 +1430,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         texte(" strictement positives correspondent à un "),
         latex("x"),
         texte(" réel, puisque "),
-        latex("\\text{base}^x"),
+        latex("a^x"),
         texte(" est toujours strictement positif : les racines "),
         latex("t\\leq0"),
         texte(" doivent être rejetées."),
@@ -1248,13 +1439,13 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     {
       enonce: [
         texte("Si "),
-        latex("t = \\text{base}^x"),
+        latex("t = a^x"),
         texte(" et "),
         latex("t > 0"),
         texte(", alors il existe toujours un réel "),
         latex("x"),
         texte(" tel que "),
-        latex("\\text{base}^x = t"),
+        latex("a^x = t"),
         texte("."),
       ],
       reponse: true,
@@ -1273,9 +1464,9 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     {
       enonce: [
         texte("Une équation de la forme "),
-        latex("\\text{base}^{ax^2+bx+c} = \\text{base}^d"),
+        latex("a^{mx^2+nx+p} = a^{d}"),
         texte(" se ramène à une équation du second degré classique "),
-        latex("ax^2+bx+(c-d)=0"),
+        latex("mx^2+nx+(p-d)=0"),
         texte("."),
       ],
       reponse: true,
@@ -1288,9 +1479,9 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     },
     {
       enonce: [
-        latex("\\sqrt{\\text{base}^{mx+n} - \\text{base}^p} = 0"),
+        latex("\\sqrt{a^{mx+n} - a^p} = 0"),
         texte(" équivaut à "),
-        latex("\\text{base}^{mx+n} - \\text{base}^p = 0"),
+        latex("a^{mx+n} - a^p = 0"),
         texte(" (le radicande doit être nul)."),
       ],
       reponse: true,
@@ -1304,7 +1495,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     {
       enonce: [
         texte("L'équation "),
-        latex("\\text{base}^{mx+n} = \\text{base}^p"),
+        latex("a^{mx+n} = a^p"),
         texte(" a exactement une solution, quelles que soient les valeurs de "),
         latex("m"),
         texte(", "),
@@ -1331,7 +1522,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         texte("Si "),
         latex("m = 0"),
         texte(" dans "),
-        latex("\\text{base}^{mx+n} = \\text{base}^p"),
+        latex("a^{mx+n} = a^p"),
         texte(", alors l'équation admet toujours une solution unique en "),
         latex("x"),
         texte(", quelle que soit la valeur de "),
@@ -1364,31 +1555,27 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: true,
       justification: [texte("Une contrainte annexe (comme un radicande qui doit rester cohérent) peut invalider une solution obtenue par simple identification.")],
     },
+    q(
+      "$\\sqrt{2^{x}}=2^{\\sqrt{x}}$ pour tout réel $x \\geq 0$.",
+      false,
+      "La racine carrée divise l'exposant par 2 : $\\sqrt{2^{x}}=2^{x/2}$, car $\\left(2^{x/2}\\right)^2=2^{x}$ et $2^{x/2}>0$. Pour $x=1$ : $\\sqrt{2^1}=2^{1/2}\\approx1{,}41$, alors que $2^{\\sqrt{1}}=2$.",
+    ),
     {
-      enonce: [
-        texte("Une équation exponentielle « carré déguisé » (par exemple avec "),
-        latex("\\sqrt{\\text{base}^{(\\ldots)}}"),
-        texte(") est mathématiquement différente d'une équation présentée sous forme directe équivalente."),
-      ],
-      reponse: false,
-      justification: [texte("Ce ne sont que des présentations différentes de la même équation : les solutions restent identiques, seule la mise en forme change.")],
-    },
-    {
-      enonce: [latex("\\text{base}^x = 0"), texte(" possède une solution réelle "), latex("x"), texte(", pour toute base "), latex("a > 0"), texte(" ("), latex("a \\neq 1"), texte(").")],
+      enonce: [latex("a^x = 0"), texte(" possède une solution réelle "), latex("x"), texte(", pour toute base "), latex("a > 0"), texte(" ("), latex("a \\neq 1"), texte(").")],
       reponse: false,
       justification: [
-        latex("\\text{base}^x"),
+        latex("a^x"),
         texte(" est strictement positif pour tout "),
         latex("x"),
         texte(" réel, quelle que soit la base : l'équation "),
-        latex("\\text{base}^x=0"),
+        latex("a^x=0"),
         texte(" n'a jamais de solution."),
       ],
     },
     {
       enonce: [
         texte("Il est possible qu'une équation exponentielle du second degré en "),
-        latex("t = \\text{base}^x"),
+        latex("t = a^x"),
         texte(" ait deux solutions en "),
         latex("t"),
         texte(" mais une seule solution en "),
@@ -1405,7 +1592,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       ],
     },
     {
-      enonce: [texte("Une équation du type "), latex("\\text{base}^{ax^2+bx+c} = \\text{base}^d"), texte(" ne peut jamais avoir deux solutions "), latex("x"), texte(" distinctes.")],
+      enonce: [texte("Une équation du type "), latex("a^{mx^2+nx+p} = a^{d}"), texte(" ne peut jamais avoir deux solutions "), latex("x"), texte(" distinctes.")],
       reponse: false,
       justification: [texte("Si le discriminant de l'équation du second degré obtenue par identification est strictement positif, elle possède bien deux solutions distinctes.")],
     },
@@ -1426,28 +1613,14 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         latex("t=1"),
         texte(" et "),
         latex("t=-\\frac{1}{4}"),
-        texte(" — la seconde est NÉGATIVE."),
+        texte(" — la seconde est négative."),
       ],
     },
-    {
-      enonce: [latex("e^{2x}-3e^x+2=0"), texte(" a pour solutions "), latex("x=0"), texte(" et "), latex("x=\\ln(2)"), texte(".")],
-      reponse: true,
-      justification: [
-        texte("Avec "),
-        latex("t=e^x"),
-        texte(" : "),
-        latex("t^2-3t+2=0"),
-        texte(" donne "),
-        latex("t=1"),
-        texte(" et "),
-        latex("t=2"),
-        texte(", toutes deux strictement positives, donc "),
-        latex("e^x=1"),
-        texte(" et "),
-        latex("e^x=2"),
-        texte("."),
-      ],
-    },
+    q(
+      "$9^x-4\\cdot3^x+3=0$ a pour solutions $x=0$ et $x=1$.",
+      true,
+      "Vérification rapide : $9^0-4\\cdot3^0+3=1-4+3=0$ et $9^1-4\\cdot3^1+3=9-12+3=0$. Avec $t=3^x$ ($9^x=t^2$), $t^2-4t+3=0$ n'a que les racines $t=1$ et $t=3$ : il n'y en a pas d'autre.",
+    ),
     {
       enonce: [latex("5\\cdot2^x+3=0"), texte(" admet une solution négative.")],
       reponse: false,
@@ -1462,7 +1635,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       enonce: [
         texte("La démonstration de "),
         latex("a^x=a^y \\implies x=y"),
-        texte(" passe par la CONTRAPOSÉE : deux réels distincts ont deux images distinctes, car "),
+        texte(" passe par la contraposée : deux réels distincts ont deux images distinctes, car "),
         latex("\\exp_a"),
         texte(" est strictement monotone."),
       ],
@@ -1623,7 +1796,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         latex("3x-1=3"),
         texte(", d'où "),
         latex("x=\\frac{4}{3}"),
-        texte(" : c'est l'EXPOSANT qui vaut 3, pas "),
+        texte(" : c'est l'exposant qui vaut 3, pas "),
         latex("x"),
         texte("."),
       ],
@@ -1635,24 +1808,24 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
   // ==========================================================================
   inequationsExponentielles: [
     {
-      enonce: [texte("Si "), latex("\\text{base} > 1"), texte(", alors "), latex("\\text{base}^u \\geq \\text{base}^v"), texte(" équivaut à "), latex("u \\geq v"), texte(".")],
+      enonce: [texte("Si "), latex("a > 1"), texte(", alors "), latex("a^u \\geq a^v"), texte(" équivaut à "), latex("u \\geq v"), texte(".")],
       reponse: true,
       justification: [texte("Pour une base supérieure à 1, la fonction exponentielle est croissante : l'ordre des exposants est conservé.")],
     },
     {
       enonce: [
         texte("Si "),
-        latex("0 < \\text{base} < 1"),
+        latex("0 < a < 1"),
         texte(", alors "),
-        latex("\\text{base}^u \\geq \\text{base}^v"),
+        latex("a^u \\geq a^v"),
         texte(" équivaut à "),
         latex("u \\geq v"),
         texte(" (comparateur inchangé)."),
       ],
       reponse: false,
       justification: [
-        texte("Pour une base entre 0 et 1, la fonction est décroissante : il faut INVERSER le comparateur, donc "),
-        latex("\\text{base}^u\\geq\\text{base}^v"),
+        texte("Pour une base entre 0 et 1, la fonction est décroissante : il faut inverser le comparateur, donc "),
+        latex("a^u\\geq a^v"),
         texte(" équivaut à "),
         latex("u\\leq v"),
         texte("."),
@@ -1671,7 +1844,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     {
       enonce: [
         texte("Une inéquation du type "),
-        latex("c\\cdot\\text{base}^x \\leq -k"),
+        latex("c\\cdot a^x \\leq -k"),
         texte(" (avec "),
         latex("c > 0"),
         texte(" et "),
@@ -1679,12 +1852,12 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         texte(") n'a aucune solution réelle."),
       ],
       reponse: true,
-      justification: [latex("c\\cdot\\text{base}^x"), texte(" est toujours strictement positif, il ne peut donc jamais être inférieur ou égal à un nombre strictement négatif.")],
+      justification: [latex("c\\cdot a^x"), texte(" est toujours strictement positif, il ne peut donc jamais être inférieur ou égal à un nombre strictement négatif.")],
     },
     {
       enonce: [
         texte("Une inéquation du type "),
-        latex("c\\cdot\\text{base}^x < -k"),
+        latex("c\\cdot a^x < -k"),
         texte(" (avec "),
         latex("c > 0"),
         texte(" et "),
@@ -1695,29 +1868,29 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       ],
       reponse: false,
       justification: [
-        texte("C'est l'inverse : cette inéquation n'est vraie pour AUCUN "),
+        texte("C'est l'inverse : cette inéquation n'est vraie pour aucun "),
         latex("x"),
         texte(", puisque "),
-        latex("c\\cdot\\text{base}^x"),
+        latex("c\\cdot a^x"),
         texte(" est toujours strictement positif, jamais inférieur à un nombre négatif."),
       ],
     },
     {
       enonce: [
         texte("Comparer "),
-        latex("\\text{base}_1^u"),
+        latex("a^u"),
         texte(" à "),
-        latex("\\text{base}_2^u"),
+        latex("b^u"),
         texte(" peut se ramener à comparer "),
-        latex("\\left(\\frac{\\text{base}_1}{\\text{base}_2}\\right)^u"),
+        latex("\\left(\\frac{a}{b}\\right)^u"),
         texte(" à 1."),
       ],
       reponse: true,
       justification: [
         texte("En divisant les deux membres par "),
-        latex("\\text{base}_2^u"),
+        latex("b^u"),
         texte(" (toujours positif), on regroupe les deux exponentielles en une seule, de base "),
-        latex("\\frac{\\text{base}_1}{\\text{base}_2}"),
+        latex("\\frac{a}{b}"),
         texte("."),
       ],
     },
@@ -1729,9 +1902,9 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     {
       enonce: [
         texte("Si le rapport "),
-        latex("\\frac{\\text{base}_1}{\\text{base}_2}"),
+        latex("\\frac{a}{b}"),
         texte(" est inférieur à 1, alors "),
-        latex("\\left(\\frac{\\text{base}_1}{\\text{base}_2}\\right)^u"),
+        latex("\\left(\\frac{a}{b}\\right)^u"),
         texte(" est une fonction croissante de "),
         latex("u"),
         texte("."),
@@ -1739,22 +1912,22 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: false,
       justification: [
         texte("Un rapport inférieur à 1 correspond à une base entre 0 et 1 : la fonction "),
-        latex("\\left(\\frac{\\text{base}_1}{\\text{base}_2}\\right)^u"),
+        latex("\\left(\\frac{a}{b}\\right)^u"),
         texte(" est alors décroissante, pas croissante."),
       ],
     },
     {
-      enonce: [latex("x\\cdot(\\text{base}^x - 1) \\geq 0"), texte(" pour tout réel "), latex("x"), texte(", si "), latex("\\text{base} > 1"), texte(".")],
+      enonce: [latex("x\\cdot(a^x - 1) \\geq 0"), texte(" pour tout réel "), latex("x"), texte(", si "), latex("a > 1"), texte(".")],
       reponse: true,
       justification: [
         texte("Pour "),
         latex("x\\geq0"),
         texte(", "),
-        latex("\\text{base}^x\\geq1"),
+        latex("a^x\\geq1"),
         texte(" donc le produit est positif ; pour "),
         latex("x<0"),
         texte(", "),
-        latex("\\text{base}^x<1"),
+        latex("a^x<1"),
         texte(" donc les deux facteurs sont négatifs et leur produit reste positif : l'inégalité est toujours vraie."),
       ],
     },
@@ -1775,9 +1948,9 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         texte("Certaines inéquations exponentielles sont vraies pour absolument toutes les valeurs de "),
         latex("x"),
         texte(", comme "),
-        latex("x\\cdot(\\text{base}^x-1)\\geq0"),
+        latex("x\\cdot(a^x-1)\\geq0"),
         texte(" pour "),
-        latex("\\text{base}>1"),
+        latex("a>1"),
         texte("."),
       ],
     },
@@ -1829,7 +2002,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: false,
       justification: [
         texte("Les bornes peuvent différer : par exemple "),
-        latex("x\\cdot(\\text{base}^x-1)\\geq0"),
+        latex("x\\cdot(a^x-1)\\geq0"),
         texte(" est vraie sur "),
         latex("\\mathbb{R}"),
         texte(" tout entier, alors que la version stricte ("),
@@ -1869,26 +2042,16 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         latex("8=\\left(\\frac{1}{2}\\right)^{-3}"),
         texte(" et la base "),
         latex("\\frac{1}{2}"),
-        texte(" est inférieure à 1 : le sens s'INVERSE, l'ensemble-solution est "),
+        texte(" est inférieure à 1 : le sens s'inverse, l'ensemble-solution est "),
         latex("x>-3"),
         texte("."),
       ],
     },
-    {
-      enonce: [latex("0{,}315^{x^2}<0{,}315^{2x+3}"), texte(" a pour ensemble-solution "), latex("]-\\infty;-1[\\cup]3;+\\infty["), texte(".")],
-      reponse: true,
-      justification: [
-        texte("Base entre 0 et 1 : le sens s'inverse, "),
-        latex("x^2>2x+3"),
-        texte(", soit "),
-        latex("x^2-2x-3>0"),
-        texte(" — racines "),
-        latex("-1"),
-        texte(" et "),
-        latex("3"),
-        texte(", trinôme positif À L'EXTÉRIEUR des racines."),
-      ],
-    },
+    q(
+      "$0{,}3^{x}\\geq0{,}3^{5}$ équivaut à $x\\leq5$.",
+      true,
+      "La base $0{,}3$ est comprise entre 0 et 1 : la fonction est décroissante et le comparateur s'inverse.",
+    ),
     {
       enonce: [latex("e^{4t-2}<e^{6t-5}"), texte(" équivaut à "), latex("t<\\frac{3}{2}"), texte(".")],
       reponse: false,
@@ -1930,7 +2093,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       ],
       reponse: false,
       justification: [
-        texte("La fonction étant DÉCROISSANTE, "),
+        texte("La fonction étant décroissante, "),
         latex("x\\leq y"),
         texte(" donnerait "),
         latex("a^x\\geq a^y"),
@@ -1958,7 +2121,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         latex("a^x<a^y"),
         texte(" ou "),
         latex("a^x=a^y"),
-        texte(" », le second cas relevant du principe d'équivalence des ÉQUATIONS."),
+        texte(" », le second cas relevant du principe d'équivalence des équations."),
       ],
       reponse: true,
       justification: [texte("C'est exactement ainsi que le cas large se déduit du cas strict, sans aucune nouvelle démonstration.")],
@@ -1967,7 +2130,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       enonce: [texte("Pour "), latex("a>1"), texte(", "), latex("a^x\\geq a^y"), texte(" équivaut à "), latex("x\\leq y"), texte(".")],
       reponse: false,
       justification: [
-        texte("Une base supérieure à 1 CONSERVE le sens : "),
+        texte("Une base supérieure à 1 conserve le sens : "),
         latex("a^x\\geq a^y \\iff x\\geq y"),
         texte(". L'inversion ne concerne que les bases comprises entre 0 et 1."),
       ],
@@ -1977,23 +2140,11 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: true,
       justification: [latex("e\\approx2{,}718>1"), texte(" : la base relève toujours de la colonne « base supérieure à 1 », donc jamais d'inversion.")],
     },
-    {
-      enonce: [latex("3^{x^2}\\geq3^{2x+8}"), texte(" a pour ensemble-solution "), latex("[-2;4]"), texte(".")],
-      reponse: false,
-      justification: [
-        texte("Base supérieure à 1 : "),
-        latex("x^2\\geq2x+8"),
-        texte(", soit "),
-        latex("x^2-2x-8\\geq0"),
-        texte(" (racines "),
-        latex("-2"),
-        texte(" et "),
-        latex("4"),
-        texte(") — le trinôme est positif À L'EXTÉRIEUR : "),
-        latex("]-\\infty;-2]\\cup[4;+\\infty["),
-        texte("."),
-      ],
-    },
+    q(
+      "$3^{x^2}\\geq3^{4}$ équivaut à $x\\geq2$.",
+      false,
+      "La base 3 conserve le sens : $x^2\\geq4$, ce qui donne $x\\leq-2$ ou $x\\geq2$. La solution $x\\leq-2$ est oubliée.",
+    ),
     {
       enonce: [latex("2^{3x-1}<5^{3x-1}"), texte(" équivaut à "), latex("3x-1>0"), texte(".")],
       reponse: true,
@@ -2015,7 +2166,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       justification: [
         texte("Le rapport "),
         latex("\\frac{7}{3}"),
-        texte(" est SUPÉRIEUR à 1 : "),
+        texte(" est supérieur à 1 : "),
         latex("\\left(\\frac{7}{3}\\right)^{x+2}>1"),
         texte(" équivaut à "),
         latex("x+2>0"),
@@ -2049,9 +2200,9 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     {
       enonce: [
         texte("Une inéquation du type "),
-        latex("\\text{base}_1^{g(x)} < \\text{base}_2^{2g(x)}"),
+        latex("a^{g(x)} < b^{2g(x)}"),
         texte(", avec "),
-        latex("\\text{base}_1 < \\text{base}_2^2"),
+        latex("a < b^2"),
         texte(", est vraie pour tout "),
         latex("x"),
         texte(" réel dès que "),
@@ -2060,9 +2211,9 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       ],
       reponse: true,
       justification: [
-        latex("\\text{base}_2^{2g}=\\left(\\text{base}_2^2\\right)^{g}"),
+        latex("b^{2g}=\\left(b^2\\right)^{g}"),
         texte(", donc l'inéquation s'écrit "),
-        latex("\\left(\\frac{\\text{base}_1}{\\text{base}_2^2}\\right)^{g(x)}<1"),
+        latex("\\left(\\frac{a}{b^2}\\right)^{g(x)}<1"),
         texte(" : la base de ce rapport est inférieure à 1, l'inégalité est donc vraie exactement quand "),
         latex("g(x)>0"),
         texte("."),
@@ -2121,17 +2272,11 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: true,
       justification: [texte("Si l'exponentielle s'efface d'un côté (tend vers 0), un terme linéaire additionnel peut alors dessiner une asymptote oblique.")],
     },
-    {
-      enonce: [
-        texte("L'exponentielle l'emporte toujours sur un terme linéaire quand "),
-        latex("x"),
-        texte(" tend vers "),
-        latex("+\\infty"),
-        texte(", empêchant toute asymptote oblique de ce côté."),
-      ],
-      reponse: true,
-      justification: [texte("En "), latex("+\\infty"), texte(", une exponentielle croissante domine toujours un terme linéaire, ce qui exclut une asymptote oblique de ce côté-là.")],
-    },
+    q(
+      "Pour $a>1$, la fonction $f(x)=a^x+mx+p$ n'a pas d'asymptote oblique en $+\\infty$.",
+      true,
+      "En $+\\infty$, l'exponentielle de base $a>1$ l'emporte sur le terme du premier degré : $f(x)-(m'x+p')$ tend vers $+\\infty$ pour toute droite. Attention, une exponentielle qui tend vers 0 ne l'empêche pas : $e^{-x}+x$ a l'asymptote $y=x$ en $+\\infty$.",
+    ),
     {
       enonce: [
         texte("Pour la fonction "),
@@ -2228,7 +2373,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     {
       enonce: [
         texte("Une fonction du type "),
-        latex("\\text{base}^{mx+n} - c\\cdot x"),
+        latex("a^{mx+n} - c\\cdot x"),
         texte(" (avec "),
         latex("c>0"),
         texte(") peut avoir ses deux limites, en "),
@@ -2267,7 +2412,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: false,
       justification: [
         texte("C'est tout à fait possible, comme le montre une fonction du type "),
-        latex("\\text{base}^{mx+n}-c\\cdot x"),
+        latex("a^{mx+n}-c\\cdot x"),
         texte(" avec "),
         latex("c>0"),
         texte("."),
@@ -2320,7 +2465,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         latex("k>0"),
         texte(", la courbe part vers "),
         latex("+\\infty"),
-        texte(" des DEUX côtés de l'asymptote verticale "),
+        texte(" des deux côtés de l'asymptote verticale "),
         latex("x=p"),
         texte("."),
       ],
@@ -2336,21 +2481,14 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         latex("-\\infty"),
         texte(" et "),
         latex("f"),
-        texte(" tend vers la valeur FINIE 0."),
+        texte(" tend vers la valeur finie 0."),
       ],
     },
-    {
-      enonce: [texte("Pour "), latex("f(x)=e^{\\frac{k}{x-p}}"), texte(", le point d'inflexion se situe en "), latex("x=p-\\frac{k}{2}"), texte(".")],
-      reponse: true,
-      justification: [
-        latex("f''"),
-        texte(" a le signe de "),
-        latex("k\\left(k+2(x-p)\\right)"),
-        texte(", qui s'annule en changeant de signe exactement pour "),
-        latex("x=p-\\frac{k}{2}"),
-        texte("."),
-      ],
-    },
+    q(
+      "Pour $f(x)=e^{\\frac{1}{x}}$, la droite $x=0$ est asymptote verticale seulement à droite de 0.",
+      true,
+      "À droite de 0, $\\frac{1}{x}\\to+\\infty$ et $f(x)\\to+\\infty$ ; à gauche, $\\frac{1}{x}\\to-\\infty$ et $f(x)\\to0$, une limite finie.",
+    ),
     {
       enonce: [texte("Pour "), latex("f(x)=e^{\\frac{k}{x-p}}"), texte(", la fonction change de sens de variation d'une branche à l'autre de "), latex("x=p"), texte(".")],
       reponse: false,
@@ -2360,15 +2498,15 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         latex("-k"),
         texte(" (car "),
         latex("(x-p)^2>0"),
-        texte(" toujours) : le sens de variation est le MÊME sur les deux branches."),
+        texte(" toujours) : le sens de variation est le même sur les deux branches."),
       ],
     },
     {
       enonce: [
         texte("Pour "),
-        latex("f(x)=\\text{base}^{mx+n}-c\\cdot x"),
+        latex("f(x)=a^{mx+n}-c\\cdot x"),
         texte(" (avec "),
-        latex("\\text{base}>1"),
+        latex("a>1"),
         texte(", "),
         latex("m>0"),
         texte(", "),
@@ -2384,7 +2522,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         texte("En "),
         latex("-\\infty"),
         texte(", "),
-        latex("\\text{base}^{mx+n}\\to0"),
+        latex("a^{mx+n}\\to0"),
         texte(" : la différence "),
         latex("f(x)-(-c\\cdot x)"),
         texte(" tend vers 0, c'est exactement la définition d'une asymptote oblique."),
@@ -2393,21 +2531,21 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     {
       enonce: [
         texte("Pour "),
-        latex("f(x)=\\text{base}^{mx+n}-c\\cdot x"),
+        latex("f(x)=a^{mx+n}-c\\cdot x"),
         texte(" (avec "),
-        latex("\\text{base}>1"),
+        latex("a>1"),
         texte(", "),
         latex("m>0"),
         texte(", "),
         latex("c>0"),
         texte("), l'unique point où "),
         latex("f'"),
-        texte(" s'annule est un MAXIMUM."),
+        texte(" s'annule est un maximum."),
       ],
       reponse: false,
       justification: [
-        latex("f''(x)=m^2\\ln(\\text{base})^2\\cdot\\text{base}^{mx+n}>0"),
-        texte(" partout : la fonction est convexe, ce point critique est donc un MINIMUM."),
+        latex("f''(x)=m^2\\ln(a)^2\\cdot a^{mx+n}>0"),
+        texte(" partout : la fonction est convexe, ce point critique est donc un minimum."),
       ],
     },
     {
@@ -2470,7 +2608,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       enonce: [texte("Une courbe ne peut jamais franchir son asymptote horizontale.")],
       reponse: false,
       justification: [
-        texte("Une asymptote ne décrit que le comportement À L'INFINI : rien n'interdit à la courbe de la couper à distance finie, du moment qu'elle s'en rapproche au bout du compte."),
+        texte("Une asymptote ne décrit que le comportement À l'infini : rien n'interdit à la courbe de la couper à distance finie, du moment qu'elle s'en rapproche au bout du compte."),
       ],
     },
     {
@@ -2479,7 +2617,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       justification: [
         texte("Encore faut-il que "),
         latex("f'"),
-        texte(" CHANGE de signe : "),
+        texte(" change de signe : "),
         latex("x^3"),
         texte(" a une dérivée nulle en 0 sans y présenter d'extremum (tangente horizontale, mais fonction toujours croissante)."),
       ],
@@ -2566,14 +2704,14 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       ],
     },
     {
-      enonce: [texte("Optimiser une fonction du type "), latex("t^{n-1}\\cdot e^{-at}"), texte(" revient toujours à chercher où cette fonction s'annule.")],
+      enonce: [texte("Optimiser une fonction du type "), latex("t^{n}\\cdot e^{-at}"), texte(" revient toujours à chercher où cette fonction s'annule.")],
       reponse: false,
       justification: [texte("Optimiser signifie chercher un extremum (où la dérivée s'annule), pas chercher où la fonction elle-même s'annule.")],
     },
     {
       enonce: [
         texte("Pour une fonction du type "),
-        latex("t^{n-1}\\cdot e^{-at}"),
+        latex("t^{n}\\cdot e^{-at}"),
         texte(" (avec "),
         latex("a>0"),
         texte("), le maximum se situe en "),
@@ -2586,7 +2724,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       justification: [latex("t=0"), texte(" correspond à un minimum trivial de cette fonction ; le véritable maximum se situe en "), latex("t=\\frac{n}{a}"), texte(".")],
     },
     {
-      enonce: [latex("t = 0"), texte(" est toujours la valeur qui maximise une fonction du type "), latex("t^{n-1}\\cdot e^{-at}"), texte(".")],
+      enonce: [latex("t = 0"), texte(" est toujours la valeur qui maximise une fonction du type "), latex("t^{n}\\cdot e^{-at}"), texte(".")],
       reponse: false,
       justification: [latex("t=0"), texte(" est au contraire un minimum trivial pour ce type de fonction ; le maximum se situe en "), latex("t=\\frac{n}{a}"), texte(".")],
     },
@@ -2631,11 +2769,11 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         texte(". Doubler deux fois multiplie par 4, pas par 3."),
       ],
     },
-    {
-      enonce: [texte("Un résultat arrondi dans un contexte réel doit néanmoins être calculé en interne à partir de la valeur exacte, avant d'être arrondi pour l'affichage.")],
-      reponse: true,
-      justification: [texte("Le calcul se fait toujours sur la valeur exacte ; l'arrondi n'intervient qu'au moment de l'affichage ou de la comparaison finale.")],
-    },
+    q(
+      "Dans un problème, on calcule avec les valeurs non arrondies et on n'arrondit qu'au résultat final.",
+      true,
+      "Arrondir en cours de route accumule les erreurs, surtout dans une puissance comme $1{,}05^{10}$ : on garde les valeurs exactes jusqu'au bout.",
+    ),
     {
       enonce: [
         texte("Une quantité qui diminue de 10 % par an a diminué de 20 % au bout de 2 ans."),
@@ -2654,16 +2792,16 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: true,
       justification: [texte("Le même modèle mathématique peut habiller des histoires très différentes : seul le contexte narratif change, pas les équations.")],
     },
-    {
-      enonce: [texte("Écrire une expression du type "), latex("e^{0-2t}"), texte(" est une notation correctement simplifiée, à conserver telle quelle.")],
-      reponse: false,
-      justification: [texte("Cette expression doit être simplifiée en "), latex("e^{-2t}"), texte(" : le « "), latex("0-"), texte(" » superflu doit être retiré.")],
-    },
-    {
-      enonce: [texte("Une expression du type "), latex("20 + -25\\cdot0{,}8^t"), texte(" est une notation correctement simplifiée.")],
-      reponse: false,
-      justification: [texte("Cette expression doit être simplifiée en "), latex("20 - 25\\cdot0{,}8^t"), texte(" : un « + − » ne doit jamais rester affiché tel quel.")],
-    },
+    q(
+      "Dans $Q(t)=Q_0\\cdot r^t$, la quantité initiale vaut $Q_0\\cdot r$.",
+      false,
+      "La quantité initiale est la valeur en $t=0$ : $Q(0)=Q_0\\cdot r^0=Q_0$.",
+    ),
+    q(
+      "Le modèle $T(t)=20+64\\cdot0{,}5^t$ finit par descendre sous 20.",
+      false,
+      "$64\\cdot0{,}5^t$ reste strictement positif : $T(t)>20$ pour tout $t$. La valeur 20 est une limite, jamais atteinte.",
+    ),
     {
       enonce: [
         texte("Un modèle de propagation qui approche un objectif final (par exemple une rumeur qui se diffuse) peut s'écrire sous la forme "),
@@ -2708,7 +2846,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       enonce: [texte("Une grandeur qui diminue de 20 % par an se modélise par "), latex("Q(t)=Q_0\\cdot0{,}2^t"), texte(".")],
       reponse: false,
       justification: [
-        texte("Diminuer de 20 % revient à MULTIPLIER par "),
+        texte("Diminuer de 20 % revient à multiplier par "),
         latex("1-0{,}20=0{,}8"),
         texte(" : le modèle correct est "),
         latex("Q_0\\cdot0{,}8^t"),
@@ -2720,11 +2858,11 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     {
       enonce: [
         texte(
-          "Dans un tableau de mesures prises à intervalles de temps égaux, c'est la DIFFÉRENCE entre deux valeurs consécutives qui doit être constante pour conclure à un modèle exponentiel.",
+          "Dans un tableau de mesures prises à intervalles de temps égaux, c'est la différence entre deux valeurs consécutives qui doit être constante pour conclure à un modèle exponentiel.",
         ),
       ],
       reponse: false,
-      justification: [texte("C'est le RAPPORT de deux valeurs consécutives qui doit être constant ; une différence constante signale au contraire un modèle linéaire (du premier degré).")],
+      justification: [texte("C'est le rapport de deux valeurs consécutives qui doit être constant ; une différence constante signale au contraire un modèle linéaire (du premier degré).")],
     },
     {
       enonce: [
@@ -2758,7 +2896,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       reponse: true,
       justification: [
         latex("k"),
-        texte(" apparaît au numérateur ET au dénominateur : il se simplifie, et il reste "),
+        texte(" apparaît au numérateur et au dénominateur : il se simplifie, et il reste "),
         latex("\\frac{a^s}{a^r}=a^{s-r}"),
         texte("."),
       ],
@@ -2785,14 +2923,14 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     },
     {
       enonce: [
-        texte("Une fonction dont le rapport "),
+        texte("Une fonction continue et jamais nulle sur ℝ, dont le rapport "),
         latex("\\frac{f(s)}{f(r)}"),
         texte(" ne dépend que de la différence "),
         latex("s-r"),
-        texte(" est nécessairement une exponentielle, un multiple d'exponentielle ou une constante (réciproque admise)."),
+        texte(", est nécessairement une exponentielle, un multiple d'exponentielle ou une constante (réciproque admise)."),
       ],
       reponse: true,
-      justification: [texte("C'est cette réciproque, admise à ce stade, qui autorise à CONCLURE à un modèle exponentiel à partir d'un simple tableau de mesures.")],
+      justification: [texte("C'est cette réciproque, admise à ce stade, qui autorise à conclure à un modèle exponentiel à partir d'un simple tableau de mesures.")],
     },
     {
       enonce: [
@@ -2809,7 +2947,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       ],
       reponse: false,
       justification: [
-        texte("La surface double chaque jour : la moitié de l'étang était atteinte la VEILLE du recouvrement complet, soit au bout de 29 jours (au jour 15, elle n'en couvre que "),
+        texte("La surface double chaque jour : la moitié de l'étang était atteinte la veille du recouvrement complet, soit au bout de 29 jours (au jour 15, elle n'en couvre que "),
         latex("\\frac{1}{2^{15}}"),
         texte(")."),
       ],
@@ -2829,7 +2967,7 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       enonce: [texte("Une croissance de 5 % par mois correspond à une croissance de 60 % par an.")],
       reponse: false,
       justification: [
-        texte("Les facteurs se MULTIPLIENT, les taux ne s'additionnent pas : "),
+        texte("Les facteurs se multiplient, les taux ne s'additionnent pas : "),
         latex("1{,}05^{12}\\approx1{,}796"),
         texte(", soit environ 80 % par an, pas 60 %."),
       ],
@@ -2886,5 +3024,186 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
         texte(" le maximum."),
       ],
     },
+  ],
+
+  // ==========================================================================
+  // Thème ajouté à l'audit — Reconnaître et construire un modèle exponentiel (section 7)
+  // ==========================================================================
+  modeleExponentiel: [
+    q(
+      "Des mesures prises à intervalles de temps égaux relèvent d'un modèle exponentiel si le rapport de deux valeurs consécutives est constant.",
+      true,
+      "Pour $f(t)=b\\cdot a^t$, $\\frac{f(t+d)}{f(t)}=a^d$ ne dépend que de l'écart $d$ : à pas constant, le rapport est constant.",
+    ),
+    q(
+      "Des mesures à intervalles égaux dont les différences consécutives sont constantes relèvent d'un modèle exponentiel.",
+      false,
+      "Une différence constante signale un modèle linéaire (du premier degré) : on ajoute toujours la même quantité. Le modèle exponentiel multiplie par un même facteur.",
+    ),
+    q(
+      "Les valeurs 3 ; 6 ; 12 ; 24, mesurées à intervalles égaux, relèvent d'un modèle exponentiel de facteur 2.",
+      true,
+      "$\\frac{6}{3}=\\frac{12}{6}=\\frac{24}{12}=2$ : le rapport est constant.",
+    ),
+    q(
+      "Les valeurs 5 ; 8 ; 11 ; 14, mesurées à intervalles égaux, relèvent d'un modèle exponentiel.",
+      false,
+      "Les différences valent toutes $+3$, mais les rapports changent ($\\frac{8}{5}=1{,}6$, $\\frac{11}{8}=1{,}375$) : c'est un modèle linéaire.",
+    ),
+    q(
+      "Les valeurs 200 ; 100 ; 50 ; 25, mesurées à intervalles égaux, relèvent d'un modèle exponentiel de facteur $\\frac{1}{2}$.",
+      true,
+      "Chaque valeur est la moitié de la précédente : le rapport vaut toujours $\\frac{1}{2}$, c'est une décroissance exponentielle.",
+    ),
+    q(
+      "Les valeurs 2 ; 4 ; 8 ; 14, mesurées à intervalles égaux, relèvent d'un modèle exponentiel de facteur 2.",
+      false,
+      "$\\frac{4}{2}=\\frac{8}{4}=2$, mais $\\frac{14}{8}=1{,}75$ : le rapport n'est pas constant jusqu'au bout.",
+    ),
+    q(
+      "Pour $f(t)=b\\cdot a^t$, le nombre $b$ est la valeur de $f$ en $t=0$.",
+      true,
+      "$f(0)=b\\cdot a^0=b$ : $b$ est la valeur initiale.",
+    ),
+    q(
+      "Pour $f(t)=b\\cdot a^t$, le nombre $b$ est le facteur par lequel la grandeur est multipliée à chaque unité de temps.",
+      false,
+      "C'est $a$ qui joue ce rôle : $\\frac{f(t+1)}{f(t)}=a$. Le nombre $b$ est la valeur initiale.",
+    ),
+    q(
+      "Une hausse de 4 % par an correspond au facteur annuel $1{,}04$.",
+      true,
+      "Augmenter de 4 %, c'est multiplier par $1+\\frac{4}{100}=1{,}04$.",
+    ),
+    q(
+      "Une baisse de 15 % par an correspond au facteur annuel $0{,}15$.",
+      false,
+      "Baisser de 15 %, c'est multiplier par $1-0{,}15=0{,}85$. Le facteur $0{,}15$ correspondrait à une perte de 85 % par an.",
+    ),
+    q(
+      "Un facteur annuel de $0{,}92$ correspond à une baisse de 8 % par an.",
+      true,
+      "$0{,}92=1-0{,}08$ : on perd 8 % chaque année.",
+    ),
+    q(
+      "Deux hausses successives de 10 % font une hausse totale de 20 %.",
+      false,
+      "Les facteurs se multiplient : $1{,}1\\cdot1{,}1=1{,}21$, soit une hausse de 21 %.",
+    ),
+    q(
+      "Si $f(t)=b\\cdot a^t$ avec $f(0)=40$ et $f(1)=60$, alors $f(2)=90$.",
+      true,
+      "Le facteur vaut $\\frac{60}{40}=1{,}5$, donc $f(2)=60\\cdot1{,}5=90$.",
+    ),
+    q(
+      "Si $f(t)=b\\cdot a^t$ avec $f(0)=40$ et $f(1)=60$, alors $f(2)=80$.",
+      false,
+      "80 suppose une hausse constante de 20 (modèle linéaire). Ici le facteur est $\\frac{60}{40}=1{,}5$, donc $f(2)=90$.",
+    ),
+    q(
+      "Si $f(t)=b\\cdot a^t$ ($a>0$) avec $f(0)=5$ et $f(2)=45$, alors $a=3$.",
+      true,
+      "$b=5$ et $5a^2=45$, donc $a^2=9$ et, comme $a>0$, $a=3$.",
+    ),
+    q(
+      "Si $f(t)=b\\cdot a^t$ ($a>0$) avec $f(0)=5$ et $f(2)=45$, alors $a=9$.",
+      false,
+      "Le rapport $\\frac{45}{5}=9$ porte sur deux unités de temps : c'est $a^2$, donc $a=3$.",
+    ),
+    q(
+      "Pour $f(t)=b\\cdot a^t$, le rapport $\\frac{f(t+3)}{f(t)}$ vaut $a^3$, quel que soit $t$.",
+      true,
+      "$\\frac{b\\cdot a^{t+3}}{b\\cdot a^t}=a^{3}$ : $b$ se simplifie et $t$ disparaît.",
+    ),
+    q(
+      "Pour $f(t)=b\\cdot a^t$, le rapport $\\frac{f(t+3)}{f(t)}$ dépend de la valeur initiale $b$.",
+      false,
+      "$b$ apparaît au numérateur et au dénominateur : il se simplifie, il reste $a^3$.",
+    ),
+    q(
+      "Une quantité qui double toutes les 5 heures se modélise par $Q(t)=Q_0\\cdot2^{t/5}$ ($t$ en heures).",
+      true,
+      "Quand $t$ augmente de 5, l'exposant $\\frac{t}{5}$ augmente de 1 : la quantité est multipliée par 2.",
+    ),
+    q(
+      "Une quantité qui double toutes les 5 heures se modélise par $Q(t)=Q_0\\cdot2^{5t}$ ($t$ en heures).",
+      false,
+      "$2^{5t}$ double cinq fois par heure. Le bon modèle est $Q_0\\cdot2^{t/5}$.",
+    ),
+    q(
+      "Une substance de demi-vie 8 jours se modélise par $Q(t)=Q_0\\cdot\\left(\\frac{1}{2}\\right)^{t/8}$ ($t$ en jours).",
+      true,
+      "Tous les 8 jours, l'exposant augmente de 1 et la quantité est divisée par 2.",
+    ),
+    q(
+      "Après 3 demi-vies, il reste le tiers de la quantité initiale.",
+      false,
+      "Chaque demi-vie divise par 2 : après 3 demi-vies, il reste $\\frac{1}{2^3}=\\frac{1}{8}$ de la quantité.",
+    ),
+    q(
+      "Pour $T(t)=L+C\\cdot q^t$ avec $0<q<1$, $T(t)$ tend vers $L$ quand $t\\to+\\infty$.",
+      true,
+      "$q^t\\to0$, donc $C\\cdot q^t\\to0$ et $T(t)\\to L$ : la droite $y=L$ est asymptote horizontale.",
+    ),
+    q(
+      "Pour $T(t)=L+C\\cdot q^t$ avec $0<q<1$, $T(t)$ tend vers $L+C$ quand $t\\to+\\infty$.",
+      false,
+      "$L+C$ est la valeur initiale $T(0)$. Quand $t\\to+\\infty$, $C\\cdot q^t\\to0$ et $T(t)\\to L$.",
+    ),
+    q(
+      "Pour $T(t)=L+C\\cdot q^t$, la valeur initiale est $T(0)=L+C$.",
+      true,
+      "$T(0)=L+C\\cdot q^0=L+C$.",
+    ),
+    q(
+      "Pour $T(t)=L+C\\cdot q^t$ avec $L\\neq0$, les valeurs mesurées à intervalles égaux ont un rapport constant.",
+      false,
+      "Ce sont les écarts à $L$, $T(t)-L=C\\cdot q^t$, qui ont un rapport constant ; les valeurs elles-mêmes non (sauf si $L=0$).",
+    ),
+    q(
+      "Pour $T(t)=L+C\\cdot q^t$ et trois mesures à intervalles égaux $d$, le rapport des deux écarts successifs vaut $q^d$.",
+      true,
+      "$L$ disparaît dans les différences : $T(t_0+d)-T(t_0)=Cq^{t_0}(q^d-1)$ et $T(t_0+2d)-T(t_0+d)=Cq^{t_0+d}(q^d-1)$, dont le rapport vaut $q^d$.",
+    ),
+    q(
+      "Pour les mesures 84 ; 36 ; 24 aux instants $t=0$, $2$ et $4$, le rapport des écarts vaut $\\frac{24-36}{36-84}=\\frac{1}{4}$.",
+      true,
+      "$\\frac{-12}{-48}=\\frac{1}{4}$ : c'est $q^2$, puisque les mesures sont espacées de 2 unités.",
+    ),
+    q(
+      "Pour un modèle $T(t)=L+C\\cdot q^t$ et les mesures 84 ; 36 ; 24 aux instants $t=0$, $2$ et $4$, on obtient $q=\\frac{1}{4}$.",
+      false,
+      "Le rapport des écarts, $\\frac{1}{4}$, porte sur 2 unités de temps : c'est $q^2$, donc $q=\\frac{1}{2}$.",
+    ),
+    q(
+      "Le modèle $Q(t)=Q_0\\left(1-q^t\\right)$ avec $0<q<1$ et $Q_0>0$ part de 0 et se rapproche de $Q_0$.",
+      true,
+      "$Q(0)=Q_0(1-1)=0$, et $q^t\\to0$ donne $Q(t)\\to Q_0$.",
+    ),
+    q(
+      "Le modèle $Q(t)=Q_0\\left(1-q^t\\right)$ avec $0<q<1$ et $Q_0>0$ finit par dépasser $Q_0$.",
+      false,
+      "$q^t>0$, donc $1-q^t<1$ et $Q(t)<Q_0$ pour tout $t$ : $Q_0$ est un plafond jamais atteint.",
+    ),
+    q(
+      "Une population qui passe de 1000 à 1210 individus en deux ans, à taux annuel constant, croît de 10 % par an.",
+      true,
+      "$1{,}1^2=1{,}21$ : deux hausses de 10 % multiplient par $1{,}21$, et $1000\\cdot1{,}21=1210$.",
+    ),
+    q(
+      "Une population qui passe de 1000 à 1210 individus en deux ans, à taux annuel constant, croît de 10,5 % par an.",
+      false,
+      "Les 21 % ne se partagent pas en deux : on cherche $r$ tel que $r^2=1{,}21$, soit $r=1{,}1$, une hausse de 10 % par an.",
+    ),
+    q(
+      "Un phénomène réel peut s'écarter, à long terme, du modèle exponentiel qui le décrivait bien au début.",
+      true,
+      "C'est le cas de la loi de Moore : le modèle exponentiel ne ralentit jamais, mais la réalité finit par buter sur des limites physiques.",
+    ),
+    q(
+      "Comme la loi de Moore, toute fonction exponentielle croissante finit par ralentir.",
+      false,
+      "Une exponentielle $b\\cdot a^t$ ($a>1$, $b>0$) accélère sans cesse : sa dérivée $b\\ln(a)\\cdot a^t$ grandit. C'est le phénomène réel qui s'écarte du modèle.",
+    ),
   ],
 };

@@ -4659,3 +4659,47 @@ doublon, décimales au centième ; φ dans ]−π ; π] (5gen8, 5gen13) ; libell
 fenêtre 5gen11 [0 ; 2T[ quand T n'a pas π ; étiquettes du cercle au dixième. Lot D : profils 5gen7,
 5gen12, cas particuliers et `groupe_technique` de 5gen10, `forme` de 5gen11 et 5gen13 (détail :
 `feuilles-evaluations.md`, « Textes : écran vs papier »).
+
+## 6e (6h), Chapitre 2 — lots A et F de l'audit (cours, quiz 6gen65)
+
+Lot A (cours) : C1 (2^{1/12} : exposant **rationnel**, exemple 2^{√2}), C2 (« seule base a » et
+non « seule fonction » : lede, § 2, formulaire), C3 (Moore : c'est le phénomène réel qui s'écarte,
+une exponentielle ne ralentit jamais), C4 (figure de saturation et `croissance-saturation-widget`
+à k = 0,1 : (10 ; 0,63)), C5 (x³ contre eˣ, croisements 1,86 et 4,54 en `xTickLabels`), C6
+(exemple 4ˣ − 3·2ˣ + 2 = 0 ; récapitulatif : ln seulement comme touche de calculatrice, § 7), C7
+(monotonie DÉMONTRÉE au § 2, renvois « section 2 » dans les §§ 4–5), C8 (exp′ = exp devient
+« Conséquence — … » : ln e = 1 admis). « base » → a partout (méthodes, tableaux, descriptions) ;
+majuscules → gras ; légendes en KaTeX ; tableau des dérivées en KaTeX ; « lim » du formulaire en
+`\displaystyle\lim_{x \to …}` ; ordre de l'étude (domaine, limites, variation, concavité) dans les
+deux exemples du § 6 ; « et réciproquement » remplacé (f′ paire ⇏ f impaire, contre-exemple x + 1).
+Six démonstrations « Démonstration — … » : aˣ > 0 (§ 1), (1 + k/x)ˣ → eᵏ, signe de ln a (point 1 :
+aʰ > 1 par les rationnels puis la continuité ; ln a ≠ 0 par l'absurde ; 0 < a < 1 par b = 1/a),
+limite fondamentale (aˣ − 1)/x → ln a, dominance xⁿ/aˣ → 0 (minoration aˣ > (ln a)²x²/2 par l'étude
+de g, gendarmes, puis a^x = (a^{x/n})ⁿ) — toutes au § 2, après la dérivée — et parité → dérivée
+(§ 3). **Règle de L'Hôpital** (décision 1) : fin du § 2 (elle utilise les dérivées ; renvoi depuis
+le § 1 et la carte 6gen6), intuition par les tangentes, théorème admis avec ses conditions (0/0 ou
+∞/∞, dérivables au voisinage, g′ ≠ 0, limite du quotient des dérivées qui existe ; aussi à gauche,
+à droite, en ±∞), deux exemples (sin 4x / (e^{2x} − 1) ; deux applications), piège hors forme
+indéterminée ((eˣ + 1)/(x + 1)), condition (2) ((x + sin x)/x), méthode « croissances comparées
+d'abord ». Développement limité : aucune mention. § 3 : tableau de lecture f′ ↔ f, figure
+(x − 1)eˣ / x·eˣ annotée, exemple, piège « signe de f ». § 6 : asymptote oblique (définition,
+exemple 2x − 1 + e^{−x}, figure dont la fenêtre contient toute la droite : `obliqueAsymptotes`
+n'est pas découpé en y et débordait sous le cadre). § 7 : doublements à rebours, modèle
+L + C·qᵗ (rapport des écarts = q^d ; café 84/36/24 → q = 1/2, C = 64, L = 20, figure), Q₀(1 − qᵗ),
+maximum de tⁿe^{−at} (médicament 5t·e^{−0,5t}). Formulaire : 9 groupes dans l'ordre des sections
+(33 formules). `ENONCES_DEMONSTRATION` au format par clé (énoncé « k⁷ = 2 » sans méthode) et
+chapitre ajouté à `CHAPITRES_ENONCES_VERIFIES` ; badge « base 1/2, entre 0 et 1 » (sinon clé
+ambiguë avec « base entre 0 et 1, exposant du second degré »). **Piège** : la `caption` d'un
+`signTable` est en texte BRUT (`$` visible) — Unicode.
+
+Lot F (quiz 6gen65) : Q1–Q3 corrigées (tⁿe^{−at}, « base > 1 », « sur un intervalle ») ; 2
+affirmations « développement limité » et 5 grands calculs remplacés ; L'Hôpital gardé (cohérent
+avec le cours) ; 2 « méta » typographiques remplacées ; « x = ln 2 » remplacé ; ln e = 1 « admis »,
+plus « définition » ; base → a/b ; 0 majuscule ; deux thèmes (`puissancesNombreE` en tête,
+`modeleExponentiel` en fin) : 315 affirmations, 9 × 35, 17 à 20 vraies. Affirmations nouvelles en
+`q("…$…$…", rep, "…")` (helper local `rt`). `nombreExercices` = `nombreQuestions(theme)`, accueil
+calculé ; `QUIZ_THEMES` avec libellés (deux thèmes en § 1 et en § 7). Justification de l'écran de
+correction enveloppée dans un `<span>` (`.triangle-quelconque-aide` est flex : chaque fragment
+KaTeX devenait une colonne — même défaut dans les 8 autres panneaux de quiz de 6e, non touchés).
+Contrôle `check_banque.ts` (KaTeX `strict: 'error'`, notation clavier, majuscules, doublons,
+équilibre, session sans répétition, fragments papier sans `$`) : 0 problème.
