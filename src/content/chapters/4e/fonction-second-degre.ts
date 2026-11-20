@@ -1079,6 +1079,18 @@ export const fonctionSecondDegre: ChapterContent = {
         },
         {
           kind: 'entrainement',
+          title: 'Retrouver l’équation d’une parabole',
+          generatorId: 'gen125',
+          description: [
+            'Un sommet et un point, deux zéros et un point, trois points ou une parabole tracée : ' +
+              'choisis la forme de départ (canonique, factorisée ou développée), calcule a (ou a et b ' +
+              'par un système), puis écris l’équation sous forme développée.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 125. Retrouver l’équation d’une parabole »',
+        },
+        {
+          kind: 'entrainement',
           title: 'Forme canonique et transformations',
           generatorId: 'gen9',
           description: [

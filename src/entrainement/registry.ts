@@ -74,6 +74,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen60: entree(CH_4E_FONCTION_SECOND_DEGRE, () => import('./4e/AppQuizFonctionSecondDegre').then((m) => ({ default: m.AppQuizFonctionSecondDegre }))),
   gen123: entree(CH_4E_FONCTION_SECOND_DEGRE, () => import('./4e/AppLectureParabole').then((m) => ({ default: m.AppLectureParabole }))),
   gen124: entree(CH_4E_FONCTION_SECOND_DEGRE, () => import('./4e/AppDifferencesSecondes').then((m) => ({ default: m.AppDifferencesSecondes }))),
+  gen125: entree(CH_4E_FONCTION_SECOND_DEGRE, () => import('./4e/AppEquationParabolePoints').then((m) => ({ default: m.AppEquationParabolePoints }))),
 
   // --- 4e, chapitre 2 : Équations et inéquations du second degré ---
   gen1: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppMethodeRapide').then((m) => ({ default: m.AppMethodeRapide }))),
