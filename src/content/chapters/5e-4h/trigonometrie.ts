@@ -567,7 +567,7 @@ export const trigonometrie: ChapterContent = {
               text:
                 'Le triangle OAB a deux côtés de longueur $r$ (les rayons OA et OB) et l\'angle ' +
                 '$\\theta$ entre eux ($0 < \\theta \\leq \\pi$). La loi des cosinus, vue en 4e, donne ' +
-                'la corde $c = |AB|$ : $c^2 = r^2 + r^2 - 2 \\cdot r \\cdot r\\cos\\theta = 2r^2(1 - \\cos\\theta)$.',
+                'la corde $c = |AB|$ : $c^2 = r^2 + r^2 - 2 \\cdot r \\cdot r\\cos\\theta$, donc $c^2 = 2r^2(1 - \\cos\\theta)$.',
             },
             {
               kind: 'para',
@@ -580,7 +580,7 @@ export const trigonometrie: ChapterContent = {
               kind: 'para',
               text:
                 'Le segment est ce qui reste du secteur quand on retire le triangle : ' +
-                '$A_{segment} = \\dfrac{1}{2}r^2\\theta - \\dfrac{1}{2}r^2\\sin\\theta = \\dfrac{1}{2}r^2(\\theta - \\sin\\theta)$.',
+                '$A_{segment} = \\dfrac{1}{2}r^2\\theta - \\dfrac{1}{2}r^2\\sin\\theta$, soit $A_{segment} = \\dfrac{1}{2}r^2(\\theta - \\sin\\theta)$.',
             },
           ],
         },
@@ -1086,7 +1086,7 @@ export const trigonometrie: ChapterContent = {
               kind: 'para',
               text:
                 'Période. La fonction sinus reprend les mêmes valeurs tous les $2\\pi$, et pas ' +
-                'avant. Quand x augmente de T, l\'argument $\\omega x + \\varphi$ augmente de ' +
+                'avant. Quand $x$ augmente de $T$, l\'argument $\\omega x + \\varphi$ augmente de ' +
                 '$\\omega T$ (avec $\\omega > 0$). Le motif se répète pour la première fois quand ' +
                 '$\\omega T = 2\\pi$, donc $T = \\dfrac{2\\pi}{\\omega}$.',
             },
@@ -1101,7 +1101,7 @@ export const trigonometrie: ChapterContent = {
               kind: 'para',
               text:
                 'On reconnaît $\\omega(x - \\Phi)$ avec $\\Phi = -\\dfrac{\\varphi}{\\omega}$ : la courbe de ' +
-                '$A\\sin(\\omega x) + b$ est translatée de Φ unités de x (vers la droite si $\\Phi > 0$).',
+                '$A\\sin(\\omega x) + b$ est translatée de Φ unités de $x$ (vers la droite si $\\Phi > 0$).',
             },
             {
               kind: 'para',
@@ -1383,13 +1383,13 @@ export const trigonometrie: ChapterContent = {
               text:
                 'Réunies, les deux familles donnent $\\dfrac{\\pi}{2}$ plus **tous** les multiples ' +
                 'de π : $u = \\dfrac{\\pi}{2} + k\\pi$, $k \\in \\mathbb{Z}$. C\'est une seule famille, ' +
-                'de période π en u, au lieu de $2\\pi$ pour chacune.',
+                'de période π en $u$, au lieu de $2\\pi$ pour chacune.',
             },
             {
               kind: 'para',
               text:
-                'Retour à x : $\\omega x + \\varphi = \\dfrac{\\pi}{2} + k\\pi \\iff x = ' +
-                '\\dfrac{\\pi/2 - \\varphi}{\\omega} + k \\cdot \\dfrac{\\pi}{\\omega}$. Les extremums réunis ' +
+                'Retour à $x$ : on divise tout par ω, $\\omega x + \\varphi = \\dfrac{\\pi}{2} + k\\pi \\iff ' +
+                'x = \\dfrac{\\pi}{2\\omega} - \\dfrac{\\varphi}{\\omega} + k \\cdot \\dfrac{\\pi}{\\omega}$. Les extremums réunis ' +
                 'reviennent tous les $\\dfrac{\\pi}{\\omega}$, la moitié de la période $T = \\dfrac{2\\pi}{\\omega}$.',
             },
           ],
@@ -1548,14 +1548,14 @@ export const trigonometrie: ChapterContent = {
               kind: 'para',
               text:
                 'Soit $c \\in [-1\\,;1]$ et $\\alpha$ un réel tel que $\\sin\\alpha = c$. Sur le cercle ' +
-                'trigonométrique, le point image M de $\\alpha$ a pour ordonnée c.',
+                'trigonométrique, le point image M de $\\alpha$ a pour ordonnée $c$.',
             },
             {
               kind: 'para',
               text:
                 'La droite horizontale $y = c$ coupe le cercle en M et en M\', le symétrique de M ' +
                 'par rapport à l\'axe vertical (en un seul point si $c = \\pm 1$). Aucun autre point ' +
-                'du cercle n\'a pour ordonnée c.',
+                'du cercle n\'a pour ordonnée $c$.',
             },
             {
               kind: 'para',
