@@ -1,14 +1,14 @@
 import { useState } from "react";
 import type { ExercicePolygonesArcsSecteurs } from "../core5e/polygonesArcsSecteurs.types";
 import { diagnostiquerAireCercleEntier, diagnostiquerCirconferenceCercleEntier, type ReponseCercleEntier } from "../moteur5e/verificationPolygonesArcsSecteurs";
-import { consignePhase, latexAideNiveau2, texteAideNiveau1 } from "../ui5e/formatPolygonesArcsSecteurs";
+import { consignePhase } from "../ui5e/formatPolygonesArcsSecteurs";
+import { aidesPolygone, messageCibleCercleEntier } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import { PolygoneCercleSketch } from "./PolygoneCercleSketch";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -32,17 +32,18 @@ interface Props {
 export function EtapeCercleEntier({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [circonference, setCirconference] = useState("");
   const [aire, setAire] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<ReponseCercleEntier>();
   const montrerErreurs = tentativesUtilisees > 0;
-  const circonferenceErronee = montrerErreurs && diagnostiquerCirconferenceCercleEntier(exercice, circonference) !== "correct";
-  const aireErronee = montrerErreurs && diagnostiquerAireCercleEntier(exercice, aire) !== "correct";
+  const circonferenceErronee = (saisie.illisible || montrerErreurs) && diagnostiquerCirconferenceCercleEntier(exercice, circonference) !== "correct";
+  const aireErronee = (saisie.illisible || montrerErreurs) && diagnostiquerAireCercleEntier(exercice, aire) !== "correct";
+  const cible = montrerErreurs && saisie.soumise ? (messageCibleCercleEntier("circonference", saisie.soumise.circonference, exercice) ?? messageCibleCercleEntier("aire", saisie.soumise.aire, exercice)) : null;
   const complet = circonference.trim() !== "" && aire.trim() !== "";
 
   function valider() {
     if (!complet) return;
     const reponse: ReponseCercleEntier = { circonference, aire };
-    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
-    onValider(reponse);
+    // Saisie illisible (un des deux champs) : rien n'est transmis au moteur.
+    saisie.tenter(reponse, estLisible(diagnostiquer?.(reponse)), onValider);
   }
 
   return (
@@ -57,31 +58,22 @@ export function EtapeCercleEntier({ exercice, tentativesUtilisees, tentativesMax
           className={`text-input${circonferenceErronee ? " is-erronee" : ""}`}
           value={circonference}
           onChange={(e) => setCirconference(e.target.value)}
-          placeholder="ex : 7*pi/11"
+          placeholder="ex : 7π/11"
         />
       </div>
       <ApercuExpressionLatex texte={aire} label="Aire =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">Aire =</label>
-        <input type="text" className={`text-input${aireErronee ? " is-erronee" : ""}`} value={aire} onChange={(e) => setAire(e.target.value)} placeholder="ex : 7*pi/11" />
+        <input type="text" className={`text-input${aireErronee ? " is-erronee" : ""}`} value={aire} onChange={(e) => setAire(e.target.value)} placeholder="ex : 7π/11" />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={texteAideNiveau1("cercleEntier")} block />
-          {niveauAide >= 2 && <Katex expression={latexAideNiveau2(exercice, "cercleEntier")} block />}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesPolygone(exercice, "cercleEntier")} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig illisible={saisie.illisible} champ="nombre" tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={cible} />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -2,14 +2,15 @@ import { useState } from "react";
 import type { ExercicePythagoricienne } from "../core5e/equationsTrigonometriques.types";
 import { CONSIGNE_SOLUTIONS_PYTHAGORICIENNE, formatEnonceMixteLatex } from "../ui5e/formatEquationTrigonometrique";
 import { Katex } from "../components/Katex";
-import { CONSIGNE_GENERALE_EQUATION_TRIG, TEXTE_AIDE_SOLUTIONS_NIVEAU1, TEXTE_AIDE_SOLUTIONS_NIVEAU2 } from "../ui5e/formatEquationTrig";
+import { CONSIGNE_GENERALE_EQUATION_TRIG, formatBrancheLatex, relationBranche } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { CercleTrigEquationSketch } from "./CercleTrigEquationSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesSolutions, messageCibleSolutions } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -33,16 +34,16 @@ interface Props {
  * remarquables). */
 export function EtapeSolutionsPythagoricienne({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>([""]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string[]>();
   const montrerErreurs = tentativesUtilisees > 0;
-  const lignesErronee = montrerErreurs && !!diagnostiquer && diagnostiquer(lignes) !== "correct";
+  const lignesErronee = (saisie.illisible || montrerErreurs) && !!diagnostiquer && diagnostiquer(lignes) !== "correct";
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
   const pointsAffiches = niveauAide >= 2 && exercice.solutionsUnion.length > 0 ? [exercice.solutionsUnion[0]] : [];
 
   function valider() {
     if (!complet) return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(lignes));
-    onValider(lignes);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(lignes, estLisible(diagnostiquer?.(lignes)), onValider);
   }
 
   return (
@@ -79,23 +80,20 @@ export function EtapeSolutionsPythagoricienne({ exercice, tentativesUtilisees, t
       <button type="button" className="btn" onClick={() => setLignes((arr) => [...arr, ""])}>
         + Ajouter une solution
       </button>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_SOLUTIONS_NIVEAU1}</p>
-          {niveauAide >= 2 && <p>{TEXTE_AIDE_SOLUTIONS_NIVEAU2}</p>}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesSolutions([exercice.racine1, exercice.racine2].flatMap((r) => r.resolution?.branchesX ?? []).map((br) => `x ${relationBranche(br)} ${formatBrancheLatex(br)}`))} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="solutions"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleSolutions(saisie.soumise, exercice.solutionsUnion) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -28,9 +28,9 @@ export const NIVEAU_AIDE_MAX_EXTREMUMS = 2;
  * réponse attendue étant désormais cette même formule substituée) ; "isolerX" perd l'aide
  * ENTIÈREMENT (0, pas de bouton du tout) ; "solutions" garde le plafond historique (2, le niveau 2
  * y positionne le cercle trigonométrique — voir `EtapeSolutionsExtremum.tsx`). */
-export function niveauAideMaxExtremums(phase: PhaseExtremumsSinusoide): number {
-  if (phase === "poserEquation") return 1;
-  if (phase === "isolerX") return 0;
+export function niveauAideMaxExtremums(_phase: PhaseExtremumsSinusoide): number {
+  // Audit 5e ch. 2, lot B : deux niveaux sur chaque écran (propriété, puis application, jamais la
+  // réponse — `ui5e/aidesTrigonometrie.ts`).
   return NIVEAU_AIDE_MAX_EXTREMUMS;
 }
 

@@ -282,7 +282,7 @@ function etapesReconnaissance(e: T): EtapeCorrection[] {
 // ---------------------------------------------------------------------------------------------
 
 const UTILISE_SOLUTIONS = "On donne à k des valeurs entières successives dans chaque série et on garde les valeurs de [0 ; 2π[ (0 compris, 2π exclu), chacune une seule fois.";
-const UTILISE_ISOLER = `Dans chaque série, on fait passer la constante de l'argument dans l'autre membre, puis on divise tout par le coefficient de x — la constante ET la période ${COURS_EQUATIONS}.`;
+const UTILISE_ISOLER = `Dans chaque série, on fait passer la constante de l'argument dans l'autre membre, puis on divise tout par le coefficient de x — la constante et la période ${COURS_EQUATIONS}.`;
 
 interface BlocSeries {
   label: string;

@@ -49,40 +49,21 @@ export function demarrerSessionModelisationSinusoide(reglages: ReglagesSession5e
 }
 
 function reglagesEtape(etat: EtatSessionModelisationSinusoide): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxModelisation(etat) };
 }
 
-/** Écrans "amplitude"/"decalage" (B1 A=R/b=R+h_sol, B2 A/b, phases PARTAGÉES entre les 2
- * techniques) — aide niveau 2 supprimée pour LES DEUX techniques identiquement (demande explicite
- * dans les 2 sections de `prompt5gen13B1B2.md`), jamais un plafond différent par technique ici. */
-const PHASES_AIDE1_SEULE = new Set<PhaseModelisationSinusoide>(["amplitude", "decalage"]);
-
-/** Écrans SANS AUCUNE aide (0 niveau) quand la technique correspond — `fonctionFinale` pour B1 ET
- * B2 (2 sections du prompt le demandent identiquement) ; "argumentResoudre"/"isolerTResoudre"/
- * "solutionsResoudre" UNIQUEMENT pour B2 (ce sont les écrans 6-8 de sa Phase 2 TOUJOURS "resoudre" —
- * voir `generateurs5e/modelisationSinusoide/index.ts`), jamais pour B3/"donnee" quand ces MÊMES
- * phases partagées apparaissent pour eux (hors périmètre du prompt, comportement inchangé). */
-const PHASES_SANS_AIDE_B1_B2 = new Set<PhaseModelisationSinusoide>(["fonctionFinale"]);
-const PHASES_SANS_AIDE_B2_SEUL = new Set<PhaseModelisationSinusoide>(["argumentResoudre", "isolerTResoudre", "solutionsResoudre"]);
-
-/** Plafond d'aide PAR PHASE/INSTANCE (B.3, `promptcorrectionsround2.md`, étendu par
- * `prompt5gen13B1B2.md`) — remplace l'usage nu de `NIVEAU_AIDE_MAX_MODELISATION` (toujours 2). Sur
- * l'écran "isolerSinInequation", quand `question.casSpecial !== null` (cas |m|>1, boutons "Toujours
- * vraie"/"Toujours fausse"), `EtapeIsolerSinInequation.tsx` bloque explicitement le rendu du niveau 2
- * (aucun texte de repli prévu pour ce cas) — sans ce garde, le bouton "Aide supplémentaire" restait
- * cliquable/pénalisant pour un niveau 2 qui ne s'affiche jamais. Les autres phases gardent le
- * plafond uniforme, SAUF les phases B1/B2 listées ci-dessus (aide réduite ou totalement retirée). */
-export function niveauAideMaxModelisation(exercice: ExerciceModelisationSinusoide, phase: PhaseModelisationSinusoide): number {
-  if (phase === "isolerSinInequation" && exercice.phase2 !== null && "casSpecial" in exercice.phase2 && exercice.phase2.casSpecial !== null) {
-    return 1;
-  }
-  const technique = exercice.phase1.technique;
-  if ((technique === "b1" || technique === "b2") && PHASES_SANS_AIDE_B1_B2.has(phase)) return 0;
-  if (technique === "b2" && PHASES_SANS_AIDE_B2_SEUL.has(phase)) return 0;
-  if (PHASES_AIDE1_SEULE.has(phase)) return 1;
-  if ((technique === "b1" || technique === "b2") && phase === "pulsation") return 1;
-  if (technique === "b2" && phase === "phi") return 1;
+/** Deux niveaux d'aide sur chaque écran (audit 5e ch. 2, lot B : la propriété du cours, puis son
+ * application à l'instance, jamais la réponse — `ui5e/aidesTrigonometrie.ts::aidesModelisation`). */
+export function niveauAideMaxModelisation(_exercice: ExerciceModelisationSinusoide, _phase: PhaseModelisationSinusoide): number {
   return NIVEAU_AIDE_MAX_MODELISATION;
+}
+
+/** Choix fermé (inéquation « toujours vraie / toujours fausse », |m| > 1) : une seule tentative ;
+ * champs : le réglage de la session (3). */
+export function tentativesMaxModelisation(etat: Pick<EtatSessionModelisationSinusoide, "reglages" | "exerciceCourant" | "phase">): number {
+  const q = etat.exerciceCourant.phase2;
+  if (etat.phase === "isolerSinInequation" && q !== null && q.type === "inequation" && q.casSpecial !== null) return 1;
+  return etat.reglages.tentativesMax;
 }
 
 export function activerAideSuivante(etat: EtatSessionModelisationSinusoide): EtatSessionModelisationSinusoide {

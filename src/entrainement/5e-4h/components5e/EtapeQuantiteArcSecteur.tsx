@@ -1,12 +1,12 @@
 import { useState } from "react";
 import type { ExerciceModeDeuxVersTrois, QuantiteArcSecteur } from "../core5e/arcsSecteurs.types";
-import { consigneQuantite, latexAideNiveau2ArcSecteur, quantitesConnuesJusqua, texteAideNiveau1ArcSecteur } from "../ui5e/formatArcsSecteurs";
+import { consigneQuantite, formulesDisponibles, latexAideNiveau2ArcSecteur, quantitesConnuesJusqua, texteAideNiveau1ArcSecteur } from "../ui5e/formatArcsSecteurs";
+import { aidesQuantiteArcSecteur, messageCibleArcSecteur } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 /** Exemples HORS de la plage des réponses possibles (même avec la tolérance) : θ_rad ≥ 10° ≈ 0,17,
@@ -14,10 +14,10 @@ import type { StatutVerification } from "../moteur/statutVerification";
  * « ex : 5*pi/6 ou 2.62 » était parfois la réponse attendue). */
 const PLACEHOLDERS: Record<QuantiteArcSecteur, string> = {
   thetaDeg: "ex : 37,5",
-  thetaRad: "ex : pi/50",
+  thetaRad: "ex : π/50",
   r: "ex : 1,5",
-  l: "ex : pi/50",
-  A: "ex : pi/50",
+  l: "ex : π/50",
+  A: "ex : π/50",
 };
 
 interface Props {
@@ -52,15 +52,16 @@ interface Props {
  */
 export function EtapeQuantiteArcSecteur({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string>();
   const montrerErreurs = tentativesUtilisees > 0;
-  const texteErronee = montrerErreurs && !!diagnostiquer && diagnostiquer(texte) !== "correct";
+  const texteErronee = saisie.illisible || (montrerErreurs && !!diagnostiquer && diagnostiquer(texte) !== "correct");
   const connues = quantitesConnuesJusqua(exercice, phase);
+  const substituee = formulesDisponibles(phase, connues)[0].requiert.every((q) => connues.includes(q));
 
+  /** Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée). */
   function valider() {
     if (texte.trim() === "") return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
-    onValider(texte);
+    saisie.tenter(texte, estLisible(diagnostiquer?.(texte)), onValider);
   }
 
   return (
@@ -68,26 +69,20 @@ export function EtapeQuantiteArcSecteur({ exercice, phase, tentativesUtilisees, 
       <p className="prompt-text">{consigneQuantite(phase)}</p>
       <ApercuExpressionLatex texte={texte} />
       <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder={PLACEHOLDERS[phase]} />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>Formule(s) disponible(s) :</p>
-          {texteAideNiveau1ArcSecteur(phase, connues).map((latex, i) => (
-            <Katex key={i} expression={latex} block />
-          ))}
-          {niveauAide >= 2 && <Katex expression={latexAideNiveau2ArcSecteur(exercice, phase, connues)} block />}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesQuantiteArcSecteur(texteAideNiveau1ArcSecteur(phase, connues), latexAideNiveau2ArcSecteur(exercice, phase, connues), substituee)} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ={phase === "thetaRad" ? "angleRad" : phase === "thetaDeg" ? "angleDeg" : phase === "A" ? "aire" : "longueur"}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleArcSecteur(saisie.soumise, exercice, phase) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

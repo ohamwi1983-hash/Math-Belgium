@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
-import { CONSIGNE_PREFACTEUR, LATEX_AIDE_PREFACTEUR_NIVEAU1, TEXTE_AIDE_PREFACTEUR_NIVEAU1, formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
-import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
+import { CONSIGNE_PREFACTEUR, formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_GENERALE_EQUATION_TRIG, formatArgumentLatex } from "../ui5e/formatEquationTrig";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -9,7 +9,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesPrefacteur, messageCiblePrefacteur } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -32,15 +33,15 @@ interface Props {
  * mise en évidence, champ de texte libre. */
 export function EtapePrefacteurProduit({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string>();
   const montrerErreurs = tentativesUtilisees > 0;
-  const texteErronee = montrerErreurs && !!diagnostiquer && diagnostiquer(texte) !== "correct";
+  const texteErronee = (saisie.illisible || montrerErreurs) && !!diagnostiquer && diagnostiquer(texte) !== "correct";
   const complet = texte.trim() !== "";
 
   function valider() {
     if (!complet) return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
-    onValider(texte);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(texte, estLisible(diagnostiquer?.(texte)), onValider);
   }
 
   return (
@@ -58,23 +59,20 @@ export function EtapePrefacteurProduit({ exercice, tentativesUtilisees, tentativ
       <p className="prompt-text">{CONSIGNE_PREFACTEUR}</p>
       <ApercuExpressionLatex texte={texte} />
       <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : sin(5x)*(sin(5x)-3/7)" />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_PREFACTEUR_NIVEAU1}</p>
-          <Katex expression={LATEX_AIDE_PREFACTEUR_NIVEAU1} block />
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesPrefacteur(`\\${exercice.facteur2.fonction}\\left(${formatArgumentLatex(exercice.facteur2.a, exercice.facteur2.b)}\\right)`, exercice.facteur2.k.latex)} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="equation"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCiblePrefacteur(saisie.soumise) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

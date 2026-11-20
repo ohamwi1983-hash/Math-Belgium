@@ -1,13 +1,13 @@
 import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
-import { consignePhaseFragments, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { consignePhaseFragments, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { FragmentsConsigneSinusoide } from "./FragmentsConsigneSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesModelisation,    messageCibleModelisationLignes } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 type PhaseLignes = "isolerTResoudre" | "solutionsResoudre" | "solutionsExtremum";
@@ -35,16 +35,13 @@ interface Props {
  * "solutionsResoudre", "solutionsExtremum". `App5gen13.tsx` doit le rendre avec `key={phase}`. */
 export function EtapeLignesModelisation({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>([""]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
-  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
-  const [ecritureIllisible, setEcritureIllisible] = useState(false);
+  const saisie = useTentativeLisible<string[]>();
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
-  const apresEchec = tentativesUtilisees > 0;
   /** Les lignes forment UNE seule réponse (l'ensemble des branches/solutions), jamais des champs
    * indépendants — même flag partagé par toute la liste que "pointsErronee" dans
    * `EnsembleReelGuideBuilder.tsx` (A.2). */
-  const lignesErronee = apresEchec && !!diagnostiquer && complet && diagnostiquer(lignes) !== "correct";
+  const lignesErronee = (saisie.illisible || montrerErreurs) && !!diagnostiquer && complet && diagnostiquer(lignes) !== "correct";
 
   function ajouterLigne() {
     setLignes((arr) => [...arr, ""]);
@@ -57,14 +54,8 @@ export function EtapeLignesModelisation({ exercice, phase, tentativesUtilisees, 
   }
   function valider() {
     if (!complet) return;
-    const statut = diagnostiquer ? diagnostiquer(lignes) : null;
-    if (statut === "parse_error") {
-      setEcritureIllisible(true);
-      return;
-    }
-    setEcritureIllisible(false);
-    if (statut !== null) setDernierStatut(statut);
-    onValider(lignes);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(lignes, estLisible(diagnostiquer?.(lignes)), onValider);
   }
 
   const libelleAjout = phase === "isolerTResoudre" ? "+ Ajouter une série" : "+ Ajouter une solution";
@@ -95,28 +86,20 @@ export function EtapeLignesModelisation({ exercice, phase, tentativesUtilisees, 
       <button type="button" className="btn" onClick={ajouterLigne}>
         {libelleAjout}
       </button>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, phase)}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, phase)} block />}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesModelisation(exercice, phase, texteAideNiveau2(exercice, phase))} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {ecritureIllisible && (
-          <p className="alert-error" role="alert">
-            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
-          </p>
-        )}
-        {montrerErreurs && !ecritureIllisible && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ={phase === "isolerTResoudre" ? "solutions" : "solutions"}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleModelisationLignes(exercice, phase, saisie.soumise) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -139,13 +139,6 @@ function formatCoefficientRationnelLatex(a: CoefficientRationnel): string {
   return a.denominateur === 1 ? `${a.numerateur}` : `\\frac{${a.numerateur}}{${a.denominateur}}`;
 }
 
-/** Aide 1 (D.1) — rappel de l'identité selon la fonction, jamais la valeur résolue. */
-export function texteAideArgumentNiveau1(fonction: FonctionTrig): string {
-  if (fonction === "sin") return "Deux angles supplémentaires ont le même sinus.";
-  if (fonction === "cos") return "Deux angles opposés ont le même cosinus.";
-  return "La tangente ne donne qu'une seule famille de solutions par période — pas de second angle à chercher, contrairement à sin et cos.";
-}
-
 /** Aide 2 (D.1) — formule générale selon la fonction, SANS jamais donner la valeur résolue. Fixe
  * par fonction, jamais conditionnée par `aucuneSolution`/`casSpecial` (simplification assumée —
  * voir CLAUDE.md section 5gen10). */
@@ -161,9 +154,6 @@ export function latexAideArgumentNiveau2(fonction: FonctionTrig): string {
   return "\\tan X = a \\iff X = \\arctan a + k\\pi";
 }
 
-export const TEXTE_AIDE_ISOLER_X_NIVEAU1 =
-  "Divise TOUT le membre de droite par a : la constante ET le terme en k — la période est elle aussi divisée par a, jamais seulement la constante.";
-
 /** Aide 2 — formule x=(u-b)/a SUBSTITUÉE (les vraies valeurs de u, a, b) mais PAS calculée/simplifiée
  * — une entrée par branche de `branchesU`. */
 export function formatAideIsolerXNiveau2Latex(exercice: { a: CoefficientRationnel; b: ValeurPiOuDecimale; branchesU: BrancheAngle[] }): string[] {
@@ -171,9 +161,6 @@ export function formatAideIsolerXNiveau2Latex(exercice: { a: CoefficientRationne
   const bLatex = formatValeurLatex(exercice.b);
   return exercice.branchesU.map((u) => `x = \\dfrac{(${formatBrancheLatex(u)}) - (${bLatex})}{${aLatex}}`);
 }
-
-export const TEXTE_AIDE_SOLUTIONS_NIVEAU1 = "Donne à k des valeurs entières successives (…, −1, 0, 1, 2, …) et garde toutes les valeurs de x comprises dans [0 ; 2π[ — pas seulement celles obtenues pour k = −1, 0 et 1.";
-export const TEXTE_AIDE_SOLUTIONS_NIVEAU2 = "Le premier point est déjà placé sur le cercle, à titre d'exemple. Retrouve les autres en faisant varier k.";
 
 /** Cherche p/q (q≤24) tel que v≈(p/q)·π, à tolérance serrée — reconstruction du label texte (pas
  * KaTeX, un `<text>` SVG brut ne peut pas rendre de LaTeX réel) du cercle trigonométrique en régime

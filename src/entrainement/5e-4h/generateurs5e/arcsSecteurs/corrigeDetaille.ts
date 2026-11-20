@@ -215,7 +215,7 @@ function etapesDeuxVersTrois(e: ExerciceModeDeuxVersTrois): EtapeCorrection[] {
       resultat(sq, [f(valeurAvecApprocheLatex(quantite, e))]),
     ];
     if (verif) etapes.push(verification(sq, verif.intro, verif.lignes));
-    if (etapePiege === i) etapes.push(piege(sq, [t("Dans "), f("s=r\\theta"), t(" et "), f("A=\\dfrac{1}{2}r^2\\theta"), t(", l'angle θ est TOUJOURS en radians, jamais en degrés.")]));
+    if (etapePiege === i) etapes.push(piege(sq, [t("Dans "), f("s=r\\theta"), t(" et "), f("A=\\dfrac{1}{2}r^2\\theta"), t(", l'angle θ est toujours en radians, jamais en degrés.")]));
     else if (quantite === "r" && cle(quantite, formule) === "r<-A,thetaRad") etapes.push(piege(sq, [t("Le calcul donne d'abord "), f("r^2"), t(" : ne pas oublier la racine carrée.")]));
     else if (etapePiege === null && quantite === "thetaDeg") etapes.push(piege(sq, [t("Pour revenir aux degrés, on multiplie par "), f("\\dfrac{180}{\\pi}"), t(", pas par "), f("\\dfrac{\\pi}{180}"), t(".")]));
     return etapes;

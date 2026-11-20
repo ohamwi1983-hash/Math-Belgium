@@ -5,7 +5,7 @@ import type { RationnelPi } from "../parametresSinusoide/rationnelPi";
 import { additionnerRationnelPi, inverseRationnelPi, multiplierParEntier, multiplierRationnelPi, negatifRationnelPi, reduireRationnelPi, valeurNumerique } from "../parametresSinusoide/rationnelPi";
 import { formatEquationSubstitueeLatex, formatSolutionsExtremumsLatex, formatTermesEtatActuelExtremums } from "../../ui5e/formatExtremumsSinusoide";
 import { formatCoefficientAmplitudeLatex } from "../../ui5e/formatParametresSinusoide";
-import { valeurTrigVisee } from "./index";
+import { borneFenetreExtremums, fenetreExtremumsTexte, valeurTrigVisee } from "./index";
 import { avecFinale, COURS_EXTREMUMS, finaliserCorrige, kDansIntervalle, rpLatex, rpPar, rpTermeK, somme } from "../../ui5e/corrigeTrigonometrie2";
 
 /**
@@ -122,7 +122,7 @@ function etapesIsoler(e: E): EtapeCorrection[] {
     ];
   }
   return [
-    utilise("b", [texte(`On isole x dans la série : on retranche la constante de l'argument, puis on divise TOUT par le coefficient de x — la constante ET la période ${COURS_EXTREMUMS}.`)]),
+    utilise("b", [texte(`On isole x dans la série : on retranche la constante de l'argument, puis on divise tout par le coefficient de x — la constante et la période ${COURS_EXTREMUMS}.`)]),
     calcul("b", fin),
     resultat("b", [latex(finale)]),
     verification("b", [texte("Pour k = 0, l'argument redonne la valeur de la série en u :")], [ligne(`${somme([tAx0, b.numerateur === 0 ? "" : rpLatex(b)])}=${rpLatex(verifie)}`, "constante de la série de l'étape a")]),
@@ -135,7 +135,9 @@ function etapesSolutions(e: E): EtapeCorrection[] {
   const p = reduireRationnelPi(e.brancheX.periode);
   const cv = valeurNumerique(c);
   const pv = valeurNumerique(p);
-  const ks = kDansIntervalle(cv, pv, 2 * Math.PI, false);
+  const borne = borneFenetreExtremums(e);
+  const fenetre = fenetreExtremumsTexte(e);
+  const ks = kDansIntervalle(cv, pv, valeurNumerique(borne), false);
   const kmin = ks[0]!;
   const kmax = ks[ks.length - 1]!;
   const lignes: LigneCalcul[] = [];
@@ -144,12 +146,12 @@ function etapesSolutions(e: E): EtapeCorrection[] {
     const sub = k === 0 ? rpLatex(c) : somme([c.numerateur === 0 ? "" : rpLatex(c), `${rpPar(p)}\\cdot ${k < 0 ? `(${k})` : k}`]);
     const v = rpLatex(val);
     const chaine = sub === v ? `x=${v}` : `x=${sub}=${v}`;
-    if (k < kmin) lignes.push(ligne(`${chaine}<0`, `k = ${k} : hors de [0 ; 2π[`));
-    else if (k > kmax) lignes.push(ligne(`${chaine}\\geq 2\\pi`, `k = ${k} : hors de [0 ; 2π[`));
+    if (k < kmin) lignes.push(ligne(`${chaine}<0`, `k = ${k} : hors de ${fenetre}`));
+    else if (k > kmax) lignes.push(ligne(`${chaine}\\geq ${rpLatex(borne)}`, `k = ${k} : hors de ${fenetre}`));
     else lignes.push(ligne(chaine, `k = ${k}`));
   }
   return [
-    utilise("c", [texte("On donne à k des valeurs entières successives dans la série de x et on garde les valeurs de [0 ; 2π[ (0 compris, 2π exclu).")]),
+    utilise("c", [texte(`On donne à k des valeurs entières successives dans la série de x et on garde les valeurs de ${fenetre} (0 compris, ${fenetre.slice(4, -1)} exclu).`)]),
     calcul("c", lignes),
     resultat("c", [latex(formatSolutionsExtremumsLatex(e.solutions))]),
   ];

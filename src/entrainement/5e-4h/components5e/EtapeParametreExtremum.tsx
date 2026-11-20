@@ -5,8 +5,11 @@ import {
   PLACEHOLDER_POSER_EQUATION_EXTREMUMS,
   consigneGeneraleExtremums,
   consignePhaseExtremums,
+  donneesMessagesExtremums,
+  formatArgumentExtremumsLatex,
   formatFonctionSourceLatex,
   latexAideNiveau1Extremums,
+  substitutionIsolerXExtremums,
   texteAideNiveau1Extremums,
 } from "../ui5e/formatExtremumsSinusoide";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
@@ -15,7 +18,8 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesIsolerX, aidesPoserEquationExtremums, messageCibleExtremums } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -53,16 +57,16 @@ interface Props {
  */
 export function EtapeParametreExtremum({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string>();
   const montrerErreurs = tentativesUtilisees > 0;
   const apresEchec = tentativesUtilisees > 0;
   const statutActuel = apresEchec && diagnostiquer ? diagnostiquer(texte) : undefined;
-  const texteErronee = statutActuel !== undefined && statutActuel !== "correct";
+  const texteErronee = saisie.illisible || (statutActuel !== undefined && statutActuel !== "correct");
 
   function valider() {
     if (texte.trim() === "") return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
-    onValider(texte);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(texte, estLisible(diagnostiquer?.(texte)), onValider);
   }
 
   return (
@@ -107,23 +111,20 @@ export function EtapeParametreExtremum({ exercice, phase, tentativesUtilisees, t
           </div>
         </>
       )}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1Extremums(exercice)}</p>
-          <Katex expression={latexAideNiveau1Extremums(exercice)} block />
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={phase === "poserEquation" ? aidesPoserEquationExtremums(texteAideNiveau1Extremums(exercice), latexAideNiveau1Extremums(exercice), formatArgumentExtremumsLatex(exercice)) : aidesIsolerX([substitutionIsolerXExtremums(exercice)])} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ={phase === "poserEquation" ? "equation" : "expression"}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleExtremums(saisie.soumise, phase, donneesMessagesExtremums(exercice)) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

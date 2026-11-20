@@ -104,9 +104,10 @@ function reglagesEtape(etat: EtatSessionEquationTrigonometrique): ReglagesEtape 
  * "argument"/"argumentProduit" restent au plafond uniforme (2) pour toute fonction, y compris tan —
  * `texteAideArgumentNiveau2` a désormais un texte réel pour tan (D.1), plus de cas particulier. */
 export function niveauAideMaxEquationTrig(_exercice: ExerciceEquationTrigonometrique, phase: PhaseEquationTrigonometrique): number {
-  if (phase === "racinesPythagoricienne" || phase === "racinesResolution") return 1;
-  if (phase === "isolerX" || phase === "isolerXProduit") return 0;
-  if (phase === "prefacteur" || phase === "separerFacteurs" || phase === "conversionPythagoricienne" || phase === "conversionEgalite") return 1;
+  // Audit 5e ch. 2, lot B : deux niveaux sur chaque écran à champ (la propriété du cours, puis son
+  // application à l'instance, jamais la réponse — `ui5e/aidesTrigonometrie.ts`) ; le choix fermé
+  // « reconnaissance » n'a pas d'aide.
+  if (phase === "reconnaissance") return 0;
   return NIVEAU_AIDE_MAX_EQUATION_TRIG;
 }
 

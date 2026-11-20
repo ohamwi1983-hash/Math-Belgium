@@ -1,16 +1,16 @@
 import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
 import type { ReponseSysteme } from "../moteur5e/sessionModelisationSinusoide";
-import { arrondiPrecis, consignePhaseFragments, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+import { arrondiPrecis, consignePhaseFragments, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { FragmentsConsigneSinusoide } from "./FragmentsConsigneSinusoide";
 
 const virgule = (v: number) => String(v).replace(".", ",").replace("-", "−");
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesModelisation } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerSysteme } from "../moteur5e/verificationModelisationSinusoide";
 
@@ -38,12 +38,9 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
   if (donnees.technique !== "b3") throw new Error("EtapeSysteme : technique hors 'b3'");
   const [equation1, setEquation1] = useState("");
   const [equation2, setEquation2] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
-  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
-  const [ecritureIllisible, setEcritureIllisible] = useState(false);
+  const saisie = useTentativeLisible<ReponseSysteme>();
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = equation1.trim() !== "" && equation2.trim() !== "";
-  const apresEchec = tentativesUtilisees > 0;
   /** equation1/equation2 diagnostiquées INDÉPENDAMMENT (`diagnostiquerSysteme` réutilisée
    * directement par équation, même logique que `diagnostiquerSystemePhase` côté App, qui combine
    * ces 2 mêmes appels — A.2). "parse_error" (pas de "=" dans le champ) compte comme erronée. */
@@ -52,20 +49,14 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
     if (gauche === undefined || droite === undefined) return "parse_error";
     return diagnostiquerSysteme(gauche, droite, t, 1, alpha);
   }
-  const equation1Erronee = apresEchec && statutEquation(equation1, donnees.t1, donnees.alpha1) !== "correct";
-  const equation2Erronee = apresEchec && statutEquation(equation2, donnees.t2, donnees.alpha2) !== "correct";
+  const equation1Erronee = (saisie.illisible || montrerErreurs) && statutEquation(equation1, donnees.t1, donnees.alpha1) !== "correct";
+  const equation2Erronee = (saisie.illisible || montrerErreurs) && statutEquation(equation2, donnees.t2, donnees.alpha2) !== "correct";
 
   function valider() {
     if (!complet) return;
     const reponse = { equation1, equation2 };
-    const statut = diagnostiquer ? diagnostiquer(reponse) : null;
-    if (statut === "parse_error") {
-      setEcritureIllisible(true);
-      return;
-    }
-    setEcritureIllisible(false);
-    if (statut !== null) setDernierStatut(statut);
-    onValider(reponse);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(reponse, estLisible(diagnostiquer?.(reponse)), onValider);
   }
 
   return (
@@ -79,7 +70,7 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
           className={`text-input${equation1Erronee ? " is-erronee" : ""}`}
           value={equation1}
           onChange={(e) => setEquation1(e.target.value)}
-          placeholder="ex : omega*2+phi=asin((1,5-4)/5)"
+          placeholder="ex : 2ω + φ = arcsin((1,5 − 4)/5)"
         />
       </div>
       <ApercuExpressionLatex texte={equation2} />
@@ -90,31 +81,23 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
           className={`text-input${equation2Erronee ? " is-erronee" : ""}`}
           value={equation2}
           onChange={(e) => setEquation2(e.target.value)}
-          placeholder="ex : omega*7+phi=asin((-1-4)/5)"
+          placeholder="ex : 7ω + φ = arcsin((−1 − 4)/5)"
         />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "systeme")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "systeme")} block />}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesModelisation(exercice, "systeme", texteAideNiveau2(exercice, "systeme"))} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {ecritureIllisible && (
-          <p className="alert-error" role="alert">
-            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
-          </p>
-        )}
-        {montrerErreurs && !ecritureIllisible && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="equation"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? null : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -44,10 +44,10 @@ function reglagesEtape(etat: EtatSessionPolygonesArcsSecteurs): ReglagesEtape {
   return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
-/** 2 niveaux d'aide pour "cercleEntier"/"arcElementaire"/"secteurElementaire", 3 pour les écrans
- * multi-pas (spec explicite). */
-export function niveauAideMax(phase: PhasePolygonesArcsSecteurs): number {
-  return phase === "arcMultiPas" || phase === "secteurMultiPas" ? 3 : 2;
+/** 2 niveaux d'aide sur chaque écran (audit 5e ch. 2, lot B : la propriété du cours, puis son
+ * application — la lecture du nombre de côtés couverts, ancien niveau 3, est dans le niveau 2). */
+export function niveauAideMax(_phase: PhasePolygonesArcsSecteurs): number {
+  return 2;
 }
 
 export function activerAideSuivante(etat: EtatSessionPolygonesArcsSecteurs): EtatSessionPolygonesArcsSecteurs {

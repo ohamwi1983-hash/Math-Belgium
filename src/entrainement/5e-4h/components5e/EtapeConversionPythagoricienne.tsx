@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExercicePythagoricienne } from "../core5e/equationsTrigonometriques.types";
-import { TEXTE_AIDE_CONVERSION_NIVEAU1, consigneConversionPythagoricienne, formatEnonceMixteLatex, latexAideConversionNiveau1 } from "../ui5e/formatEquationTrigonometrique";
+import { consigneConversionPythagoricienne, formatEnonceMixteLatex, latexAideConversionNiveau1 } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -8,7 +8,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesConversionPythagoricienne } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -31,15 +32,15 @@ interface Props {
  * fonction trigonométrique), champ de texte libre. */
 export function EtapeConversionPythagoricienne({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string>();
   const montrerErreurs = tentativesUtilisees > 0;
-  const texteErronee = montrerErreurs && !!diagnostiquer && diagnostiquer(texte) !== "correct";
+  const texteErronee = (saisie.illisible || montrerErreurs) && !!diagnostiquer && diagnostiquer(texte) !== "correct";
   const complet = texte.trim() !== "";
 
   function valider() {
     if (!complet) return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
-    onValider(texte);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(texte, estLisible(diagnostiquer?.(texte)), onValider);
   }
 
   return (
@@ -61,23 +62,20 @@ export function EtapeConversionPythagoricienne({ exercice, tentativesUtilisees, 
         onChange={(e) => setTexte(e.target.value)}
         placeholder={`ex : 7*${exercice.fonctionCible}(x)^2-3*${exercice.fonctionCible}(x)+5`}
       />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_CONVERSION_NIVEAU1}</p>
-          <Katex expression={latexAideConversionNiveau1(exercice)} block />
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesConversionPythagoricienne(latexAideConversionNiveau1(exercice), exercice.fonctionCible)} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="equation"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? null : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

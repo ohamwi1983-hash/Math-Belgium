@@ -1,9 +1,11 @@
 import { useState } from "react";
 import type { ExerciceEquationTrig } from "../core5e/equationsTrigonometriques.types";
-import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, formatEquationEnonceLatex } from "../ui5e/formatEquationTrig";
+import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, formatAideIsolerXNiveau2Latex, formatEquationEnonceLatex } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesIsolerX, messageCibleIsolerX } from "../ui5e/aidesTrigonometrie";
+import { BoutonAide } from "./BoutonAide";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -29,11 +31,11 @@ interface Props {
  * nombre de branches déjà confirmées à l'écran 1 (connu avec certitude à ce stade). D.2 : AUCUNE
  * aide sur cet écran (`niveauAideMaxEquationTrig` plafonne cette phase à 0, voir
  * `moteur5e/sessionEquationTrig.ts`) — le bouton et le bloc d'aide sont donc entièrement absents. */
-export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
+export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: Math.max(1, exercice.branchesU.length) }, () => ""));
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string[]>();
   const montrerErreurs = tentativesUtilisees > 0;
-  const lignesErronee = montrerErreurs && !!diagnostiquer && diagnostiquer(lignes) !== "correct";
+  const lignesErronee = (saisie.illisible || montrerErreurs) && !!diagnostiquer && diagnostiquer(lignes) !== "correct";
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
 
   function ajouterLigne() {
@@ -47,8 +49,8 @@ export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentat
   }
   function valider() {
     if (!complet) return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(lignes));
-    onValider(lignes);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(lignes, estLisible(diagnostiquer?.(lignes)), onValider);
   }
 
   return (
@@ -74,7 +76,7 @@ export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentat
               className={`text-input${lignesErronee ? " is-erronee" : ""}`}
               value={ligne}
               onChange={(e) => modifierLigne(i, e.target.value)}
-              placeholder="ex : pi/5 + k*pi/7"
+              placeholder="ex : π/5 + kπ/7"
             />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => retirerLigne(i)}>
@@ -87,16 +89,20 @@ export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentat
       <button type="button" className="btn" onClick={ajouterLigne}>
         + Ajouter une série
       </button>
+      <AidesTrig niveauAide={niveauAide} aides={aidesIsolerX(formatAideIsolerXNiveau2Latex(exercice))} />
       {!validation && (
         <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="solutions"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleIsolerX(saisie.soumise, exercice.branchesX, exercice.a.numerateur / exercice.a.denominateur, exercice.b.decimal) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

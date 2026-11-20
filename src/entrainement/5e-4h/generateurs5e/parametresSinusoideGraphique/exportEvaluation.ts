@@ -130,7 +130,7 @@ function construireEnonceParametresSinusoideGraphique(exercice: ExerciceParametr
 }
 
 const CONSIGNE_GLOBALE =
-  "Lis sur le graphique le décalage vertical b, l'amplitude et la période T, puis détermine la pulsation ω, la fréquence, le décalage horizontal Φ (abscisse x₀ d'un passage de la courbe par sa ligne médiane en montant) et la phase φ (valeurs exactes, ou arrondies au centième).";
+  "Lis sur le graphique le décalage vertical b, l'amplitude et la période T, puis détermine la pulsation ω, la fréquence, le décalage horizontal Φ (abscisse x₀ d'un passage de la courbe par sa ligne médiane en montant) et le déphasage φ (valeurs exactes, ou arrondies au centième).";
 
 function enoncePapierParametresSinusoideGraphique(exercice: ExerciceParametresSinusoideGraphique): EnoncePapier {
   return {

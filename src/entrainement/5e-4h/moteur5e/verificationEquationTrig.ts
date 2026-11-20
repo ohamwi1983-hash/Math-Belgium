@@ -143,7 +143,8 @@ export function verifierIsolerX(exercice: ExerciceEquationTrig, lignes: string[]
  * réutilisée par `diagnostiquerSolutions` (famille "directe") ET directement par les écrans finaux
  * des familles 2/3/4 et l'écran "racines" de la famille 3. */
 export function diagnostiquerEnsembleNumerique(textes: string[], cible: number[]): StatutVerification {
-  if (textes.length !== cible.length) return "not_equivalent";
+  // Lecture AVANT le compte : une valeur illisible est toujours `parse_error` (jamais comptée comme
+  // tentative), même quand le nombre de valeurs est faux.
   const valeurs: number[] = [];
   for (const texte of textes) {
     try {
@@ -154,6 +155,7 @@ export function diagnostiquerEnsembleNumerique(textes: string[], cible: number[]
       return "parse_error";
     }
   }
+  if (valeurs.length !== cible.length) return "not_equivalent";
   const restantes = [...cible];
   for (const v of valeurs) {
     const index = restantes.findIndex((s) => Math.abs(s - v) <= TOLERANCE_EQUATION_TRIG);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExercicePythagoricienne } from "../core5e/equationsTrigonometriques.types";
 import { diagnostiquerUneRacine, type ReponseRacine, type ReponseRacinesPythagoricienne } from "../moteur5e/verificationEquationTrig5gen10";
-import { TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1, consigneRacinesResolution, formatEnonceMixteLatex } from "../ui5e/formatEquationTrigonometrique";
+import { consigneRacinesResolution, formatEnonceMixteLatex } from "../ui5e/formatEquationTrigonometrique";
 import { Katex } from "../components/Katex";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -9,7 +9,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesRacinesResolution, messageCibleRacine } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -45,7 +46,7 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
   const [lignes1, setLignes1] = useState<string[]>([""]);
   const [rejeter2, setRejeter2] = useState(false);
   const [lignes2, setLignes2] = useState<string[]>([""]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<ReponseRacinesPythagoricienne>();
   const montrerErreurs = tentativesUtilisees > 0;
 
   const complet1 = rejeter1 || (lignes1.length > 0 && lignes1.every((l) => l.trim() !== ""));
@@ -53,16 +54,16 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
   const complet = complet1 && complet2;
   const reponseRacine1: ReponseRacine = rejeter1 ? { rejeter: true } : { rejeter: false, lignes: lignes1 };
   const reponseRacine2: ReponseRacine = rejeter2 ? { rejeter: true } : { rejeter: false, lignes: lignes2 };
-  const racine1Erronee = montrerErreurs && !rejeter1 && diagnostiquerUneRacine(exercice.racine1, reponseRacine1) !== "correct";
-  const racine2Erronee = montrerErreurs && !rejeter2 && diagnostiquerUneRacine(exercice.racine2, reponseRacine2) !== "correct";
+  const racine1Erronee = (saisie.illisible || montrerErreurs) && !rejeter1 && diagnostiquerUneRacine(exercice.racine1, reponseRacine1) !== "correct";
+  const racine2Erronee = (saisie.illisible || montrerErreurs) && !rejeter2 && diagnostiquerUneRacine(exercice.racine2, reponseRacine2) !== "correct";
 
   function valider() {
     if (!complet) return;
     const r1: ReponseRacine = rejeter1 ? { rejeter: true } : { rejeter: false, lignes: lignes1 };
     const r2: ReponseRacine = rejeter2 ? { rejeter: true } : { rejeter: false, lignes: lignes2 };
     const reponse: ReponseRacinesPythagoricienne = { racine1: r1, racine2: r2 };
-    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
-    onValider(reponse);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(reponse, estLisible(diagnostiquer?.(reponse)), onValider);
   }
 
   return (
@@ -94,7 +95,7 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
                   className={`text-input${racine1Erronee ? " is-erronee" : ""}`}
                   value={ligne}
                   onChange={(e) => setLignes1((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-                  placeholder="ex : 2*pi/5 + 2*k*pi"
+                  placeholder="ex : 2π/5 + 2kπ"
                 />
                 {lignes1.length > 1 && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes1((arr) => arr.filter((_, j) => j !== i))}>
@@ -127,7 +128,7 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
                   className={`text-input${racine2Erronee ? " is-erronee" : ""}`}
                   value={ligne}
                   onChange={(e) => setLignes2((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-                  placeholder="ex : 2*pi/5 + 2*k*pi"
+                  placeholder="ex : 2π/5 + 2kπ"
                 />
                 {lignes2.length > 1 && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes2((arr) => arr.filter((_, j) => j !== i))}>
@@ -143,22 +144,20 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
         </div>
       )}
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1}</p>
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesRacinesResolution(exercice.fonctionCible)} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="solutions"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? (messageCibleRacine(exercice.fonctionCible, exercice.racine1, saisie.soumise.racine1) ?? messageCibleRacine(exercice.fonctionCible, exercice.racine2, saisie.soumise.racine2)) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

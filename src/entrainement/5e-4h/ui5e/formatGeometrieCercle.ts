@@ -103,15 +103,15 @@ const CONSIGNES: Record<PhaseGeometrieCercle, string> = {
   aireGrandSecteur: "Calcule l'aire A₁ du grand secteur (arrondis à l'unité près).",
   airePetitSecteur: "Calcule l'aire A₂ du petit secteur (arrondis à l'unité près).",
   aireBalayee: "Calcule l'aire balayée A (arrondis à l'unité près).",
-  angleTheta: "Utilise la loi des cosinus sur le triangle isocèle rayon-rayon-corde pour trouver θ, EN RADIANS (arrondis au dixième de radian près).",
+  angleTheta: "Utilise la loi des cosinus sur le triangle isocèle rayon-rayon-corde pour trouver θ en radians (arrondis au dixième de radian près).",
   aireSecteur: "Calcule l'aire du secteur correspondant (arrondis à l'unité près).",
   aireTriangle: "Calcule l'aire du triangle isocèle formé par les 2 rayons et la corde (arrondis à l'unité près).",
   aireSegment: "Calcule l'aire du segment circulaire (arrondis à l'unité près).",
-  angle1: "Loi des cosinus sur le premier cercle (rayon r₁) : trouve θ₁, EN RADIANS (arrondis au dixième de radian près).",
+  angle1: "Loi des cosinus sur le premier cercle (rayon r₁) : trouve θ₁ en radians (arrondis au dixième de radian près).",
   secteur1: "Aire du secteur du premier cercle (arrondis à l'unité près).",
   triangle1: "Aire du triangle isocèle du premier cercle (arrondis à l'unité près).",
   segmentAire1: "Calcule l'aire du segment circulaire du premier cercle (arrondis à l'unité près).",
-  angle2: "Loi des cosinus sur le second cercle (rayon r₂) : trouve θ₂, EN RADIANS (arrondis au dixième de radian près).",
+  angle2: "Loi des cosinus sur le second cercle (rayon r₂) : trouve θ₂ en radians (arrondis au dixième de radian près).",
   secteur2: "Aire du secteur du second cercle (arrondis à l'unité près).",
   triangle2: "Aire du triangle isocèle du second cercle (arrondis à l'unité près).",
   segmentAire2: "Calcule l'aire du segment circulaire du second cercle (arrondis à l'unité près).",
@@ -292,6 +292,8 @@ export function texteAideNiveau2(exercice: ExerciceGeometrieCercle, phase: Phase
           return `A = \\dfrac{1}{2} \\times ${exercice.r}^2 \\times \\theta_{rad}`;
         case "aireTriangle":
           return `A \\approx \\dfrac{1}{2} \\times ${exercice.r}^2 \\times \\sin(${nombreLatex(exercice.thetaRad, 4)})`;
+        case "aireSegment":
+          return `A \\approx ${nombreLatex(exercice.aireSecteur, 2)} - ${nombreLatex(exercice.aireTriangle, 2)}`;
         default:
           return "";
       }
@@ -303,12 +305,16 @@ export function texteAideNiveau2(exercice: ExerciceGeometrieCercle, phase: Phase
           return `A = \\dfrac{1}{2} \\times ${exercice.segment1.r}^2 \\times \\theta_{1,rad}`;
         case "triangle1":
           return `A \\approx \\dfrac{1}{2} \\times ${exercice.segment1.r}^2 \\times \\sin(${nombreLatex(exercice.segment1.thetaRad, 4)})`;
+        case "segmentAire1":
+          return `A \\approx ${nombreLatex(exercice.segment1.aireSecteur, 2)} - ${nombreLatex(exercice.segment1.aireTriangle, 2)}`;
         case "angle2":
           return `\\cos\\theta_2 = \\dfrac{2\\times${exercice.segment2.r}^2 - ${nombreLatex(exercice.c, 2)}^2}{2\\times${exercice.segment2.r}^2}`;
         case "secteur2":
           return `A = \\dfrac{1}{2} \\times ${exercice.segment2.r}^2 \\times \\theta_{2,rad}`;
         case "triangle2":
           return `A \\approx \\dfrac{1}{2} \\times ${exercice.segment2.r}^2 \\times \\sin(${nombreLatex(exercice.segment2.thetaRad, 4)})`;
+        case "segmentAire2":
+          return `A \\approx ${nombreLatex(exercice.segment2.aireSecteur, 2)} - ${nombreLatex(exercice.segment2.aireTriangle, 2)}`;
         case "aireLentille":
           return `${nombreLatex(exercice.segment1.aireSegment, 2)} + ${nombreLatex(exercice.segment2.aireSegment, 2)}`;
         default:

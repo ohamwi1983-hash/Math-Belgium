@@ -1,14 +1,15 @@
 import { useState } from "react";
 import type { ExercicePolygonesArcsSecteurs } from "../core5e/polygonesArcsSecteurs.types";
 import type { PhasePolygonesArcsSecteurs } from "../moteur5e/typesPolygonesArcsSecteurs";
-import { aideNiveau3 as calculerAideNiveau3, consignePhase, latexAideNiveau2, legendeAideNiveau2, surlignagePourPhase, texteAideNiveau1 } from "../ui5e/formatPolygonesArcsSecteurs";
+import { consignePhase, surlignagePourPhase } from "../ui5e/formatPolygonesArcsSecteurs";
+import { aidesPolygone, messageCiblePolygone } from "../ui5e/aidesTrigonometrie";
+import { cibleEcranUnChamp } from "../moteur5e/verificationPolygonesArcsSecteurs";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import { PolygoneCercleSketch } from "./PolygoneCercleSketch";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -37,15 +38,14 @@ interface Props {
  * local (`segmentsEtatActuelPolygone`, retiré ici — doublon visuel). */
 export function EtapeEcranUnChampPolygone({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string>();
   const montrerErreurs = tentativesUtilisees > 0;
-  const texteErronee = montrerErreurs && !!diagnostiquer && diagnostiquer(texte) !== "correct";
-  const aideNiveau3 = calculerAideNiveau3(exercice, phase);
+  const texteErronee = saisie.illisible || (montrerErreurs && !!diagnostiquer && diagnostiquer(texte) !== "correct");
 
+  /** Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée). */
   function valider() {
     if (texte.trim() === "") return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
-    onValider(texte);
+    saisie.tenter(texte, estLisible(diagnostiquer?.(texte)), onValider);
   }
 
   return (
@@ -53,30 +53,21 @@ export function EtapeEcranUnChampPolygone({ exercice, phase, tentativesUtilisees
       <p className="prompt-text">{consignePhase(phase)}</p>
       <PolygoneCercleSketch r={exercice.r} n={exercice.n} surlignage={surlignagePourPhase(exercice, phase)} />
       <ApercuExpressionLatex texte={texte} />
-      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 7*pi/11" />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(phase)} block />
-          {niveauAide >= 2 && <Katex expression={latexAideNiveau2(exercice, phase)} block />}
-          {niveauAide >= 2 && legendeAideNiveau2(phase) !== null && <p>{legendeAideNiveau2(phase)}</p>}
-          {niveauAide >= 3 && aideNiveau3 !== null && (
-            <p>
-              {aideNiveau3.texte} <Katex expression={aideNiveau3.latex} />
-            </p>
-          )}
-        </div>
-      )}
+      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 7π/11" />
+      <AidesTrig niveauAide={niveauAide} aides={aidesPolygone(exercice, phase)} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ={phase === "arcElementaire" || phase === "arcMultiPas" ? "longueur" : "aire"}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCiblePolygone(saisie.soumise, exercice, phase, cibleEcranUnChamp(exercice, phase)) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

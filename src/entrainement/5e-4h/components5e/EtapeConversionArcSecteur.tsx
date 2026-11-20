@@ -1,12 +1,13 @@
 import { useState } from "react";
 import type { ExerciceModeConversion } from "../core5e/arcsSecteurs.types";
-import { TEXTE_AIDE_CONVERSION_NIVEAU1, consigneConversion, labelReponseConversion, latexAideConversionNiveau2, latexEnonceConversion } from "../ui5e/formatArcsSecteurs";
+import { consigneConversion, labelReponseConversion, latexAideConversionNiveau2, latexEnonceConversion } from "../ui5e/formatArcsSecteurs";
+import { aidesConversion, messageCibleConversion } from "../ui5e/aidesTrigonometrie";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -28,14 +29,14 @@ interface Props {
 
 export function EtapeConversionArcSecteur({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<string>();
   const montrerErreurs = tentativesUtilisees > 0;
-  const texteErronee = montrerErreurs && !!diagnostiquer && diagnostiquer(texte) !== "correct";
+  const texteErronee = saisie.illisible || (montrerErreurs && !!diagnostiquer && diagnostiquer(texte) !== "correct");
 
+  /** Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée). */
   function valider() {
     if (texte.trim() === "") return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
-    onValider(texte);
+    saisie.tenter(texte, estLisible(diagnostiquer?.(texte)), onValider);
   }
 
   return (
@@ -47,25 +48,22 @@ export function EtapeConversionArcSecteur({ exercice, tentativesUtilisees, tenta
       <ApercuExpressionLatex texte={texte} label={labelReponseConversion(exercice)} />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">{labelReponseConversion(exercice)}</label>
-        <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder={exercice.direction === "degVersRad" ? "ex : 5*pi" : "ex : 37,5"} />
+        <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder={exercice.direction === "degVersRad" ? "ex : 5π" : "ex : 37,5"} />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={TEXTE_AIDE_CONVERSION_NIVEAU1} block />
-          {niveauAide >= 2 && <Katex expression={latexAideConversionNiveau2(exercice)} block />}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesConversion(latexAideConversionNiveau2(exercice))} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ={exercice.direction === "degVersRad" ? "angleRad" : "angleDeg"}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? messageCibleConversion(saisie.soumise, exercice) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

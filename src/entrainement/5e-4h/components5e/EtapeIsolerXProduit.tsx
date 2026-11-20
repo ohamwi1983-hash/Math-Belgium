@@ -3,10 +3,12 @@ import type { ExerciceProduitFacteurs } from "../core5e/equationsTrigonometrique
 import { diagnostiquerIsolerX, type ReponseDeuxFacteursLignes } from "../moteur5e/verificationEquationTrig5gen10";
 import { CONSIGNE_ISOLER_X_PRODUIT, formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
-import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
+import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, formatAideIsolerXNiveau2Latex } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesIsolerX, messageCibleIsolerX, messageFacteur } from "../ui5e/aidesTrigonometrie";
+import { BoutonAide } from "./BoutonAide";
+import { AidesTrig, RetourSaisieTrig, estLisible, useTentativeLisible } from "./RetourSaisieTrig";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -38,24 +40,24 @@ interface Props {
  * n'en a aucune — bug de softlock trouvé par vérification Playwright de bout en bout : ce cas
  * n'a AUCUNE réponse possible, `diagnostiquerIsolerX` exigeant 0 ligne, jamais 1). D.2 (E.1) :
  * AUCUNE aide sur cet écran (`niveauAideMaxEquationTrig` plafonne cette phase à 0). */
-export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
+export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const facteur1NecessiteLignes = exercice.facteur1.branchesU.length > 0;
   const facteur2NecessiteLignes = exercice.facteur2.branchesU.length > 0;
   const [lignes1, setLignes1] = useState<string[]>(() => Array.from({ length: exercice.facteur1.branchesU.length }, () => ""));
   const [lignes2, setLignes2] = useState<string[]>(() => Array.from({ length: exercice.facteur2.branchesU.length }, () => ""));
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const saisie = useTentativeLisible<ReponseDeuxFacteursLignes>();
   const montrerErreurs = tentativesUtilisees > 0;
   const complet1 = !facteur1NecessiteLignes || (lignes1.length > 0 && lignes1.every((l) => l.trim() !== ""));
   const complet2 = !facteur2NecessiteLignes || (lignes2.length > 0 && lignes2.every((l) => l.trim() !== ""));
   const complet = complet1 && complet2;
-  const facteur1Erronee = montrerErreurs && facteur1NecessiteLignes && diagnostiquerIsolerX(exercice.facteur1, lignes1) !== "correct";
-  const facteur2Erronee = montrerErreurs && facteur2NecessiteLignes && diagnostiquerIsolerX(exercice.facteur2, lignes2) !== "correct";
+  const facteur1Erronee = (saisie.illisible || montrerErreurs) && facteur1NecessiteLignes && diagnostiquerIsolerX(exercice.facteur1, lignes1) !== "correct";
+  const facteur2Erronee = (saisie.illisible || montrerErreurs) && facteur2NecessiteLignes && diagnostiquerIsolerX(exercice.facteur2, lignes2) !== "correct";
 
   function valider() {
     if (!complet) return;
     const reponse: ReponseDeuxFacteursLignes = { facteur1: lignes1, facteur2: lignes2 };
-    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
-    onValider(reponse);
+    // Saisie illisible : rien n'est transmis au moteur (aucune tentative consommée).
+    saisie.tenter(reponse, estLisible(diagnostiquer?.(reponse)), onValider);
   }
 
   return (
@@ -86,7 +88,7 @@ export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesM
                   className={`text-input${facteur1Erronee ? " is-erronee" : ""}`}
                   value={ligne}
                   onChange={(e) => setLignes1((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-                  placeholder="ex : pi/5 + k*pi/7"
+                  placeholder="ex : π/5 + kπ/7"
                 />
                 {lignes1.length > 1 && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes1((arr) => arr.filter((_, j) => j !== i))}>
@@ -118,7 +120,7 @@ export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesM
                   className={`text-input${facteur2Erronee ? " is-erronee" : ""}`}
                   value={ligne}
                   onChange={(e) => setLignes2((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-                  placeholder="ex : pi/5 + k*pi/7"
+                  placeholder="ex : π/5 + kπ/7"
                 />
                 {lignes2.length > 1 && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes2((arr) => arr.filter((_, j) => j !== i))}>
@@ -136,16 +138,20 @@ export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesM
         <p className="prompt-text">Ce facteur n'a aucune solution — rien à isoler.</p>
       )}
 
+      <AidesTrig niveauAide={niveauAide} aides={aidesIsolerX([...formatAideIsolerXNiveau2Latex(exercice.facteur1), ...formatAideIsolerXNiveau2Latex(exercice.facteur2)])} />
       {!validation && (
         <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
+        <RetourSaisieTrig
+          illisible={saisie.illisible}
+          champ="solutions"
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={montrerErreurs && saisie.soumise ? (messageFacteur(1, messageCibleIsolerX(saisie.soumise.facteur1, exercice.facteur1.branchesX, exercice.facteur1.a.numerateur / exercice.facteur1.a.denominateur, exercice.facteur1.b.decimal)) ?? messageFacteur(2, messageCibleIsolerX(saisie.soumise.facteur2, exercice.facteur2.branchesX, exercice.facteur2.a.numerateur / exercice.facteur2.a.denominateur, exercice.facteur2.b.decimal))) : null}
+        />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

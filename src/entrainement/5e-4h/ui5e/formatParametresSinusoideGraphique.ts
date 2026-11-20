@@ -25,7 +25,7 @@ const CONSIGNES: Record<PhaseParametresSinusoideGraphique, string> = {
   pulsation: `Quelle est la pulsation ω de cette fonction ?${PRECISION}`,
   frequence: `Quelle est la fréquence de cette fonction ?${PRECISION}`,
   phi: `Quel est le décalage horizontal Φ de cette fonction, c'est-à-dire l'abscisse x₀ d'un point où la courbe traverse sa ligne médiane en montant ?${PRECISION}`,
-  dephasage: `Quelle est la phase φ de cette fonction ?${PRECISION}`,
+  dephasage: `Quel est le déphasage φ de cette fonction ?${PRECISION}`,
 };
 
 export function consignePhase(phase: PhaseParametresSinusoideGraphique): string {
@@ -63,50 +63,7 @@ export function placeholderPhase(phase: PhaseParametresSinusoideGraphique): stri
   return PLACEHOLDERS[phase];
 }
 
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
-}
-
-const AIDES_NIVEAU1: Record<PhaseParametresSinusoideGraphique, AideAvecLatex> = {
-  decalage: {
-    texte: "Le décalage vertical est la position de la ligne MÉDIANE de la courbe, à mi-chemin entre le maximum et le minimum — attention, ce n'est PAS forcément l'axe des abscisses :",
-    latex: "b = \\dfrac{\\max + \\min}{2}",
-  },
-  amplitude: {
-    texte: "L'amplitude est la distance entre un sommet et la ligne médiane — la MOITIÉ de l'écart entre le maximum et le minimum, jamais l'écart complet :",
-    latex: "\\text{amplitude} = \\dfrac{\\max - \\min}{2}",
-  },
-  periode: {
-    texte: "La période est la distance horizontale entre DEUX MAXIMUMS CONSÉCUTIFS (ou deux minimums consécutifs) — jamais entre un maximum et le minimum voisin, qui ne donne qu'une demi-période.",
-    latex: null,
-  },
-  pulsation: { texte: "La pulsation se déduit de la période :", latex: "\\omega = \\dfrac{2\\pi}{T}" },
-  frequence: { texte: "La fréquence est l'inverse de la période :", latex: "f_{req} = \\dfrac{1}{T}" },
-  phi: {
-    texte: "Le décalage horizontal est l'abscisse x₀ d'un passage de la courbe par la ligne médiane EN MONTANT — jamais un passage en descendant, décalé d'une demi-période.",
-    latex: null,
-  },
-  dephasage: { texte: "La phase se déduit de la pulsation et du passage ascendant x₀ (méthode du cours) :", latex: "\\varphi = -\\omega \\cdot x_0" },
-};
-
-export function aideNiveau1(phase: PhaseParametresSinusoideGraphique): AideAvecLatex {
-  return AIDES_NIVEAU1[phase];
-}
-
-const AIDES_NIVEAU2: Record<PhaseParametresSinusoideGraphique, string> = {
-  decalage: "Repère le sommet le plus haut (maximum) ET le sommet le plus bas (minimum) de la courbe — la médiane est exactement entre les deux.",
-  amplitude: "Repère un sommet de la courbe (maximum ou minimum) et la ligne médiane déjà trouvée à l'écran précédent.",
-  periode: "Repère deux sommets consécutifs de MÊME NATURE (deux maximums, ou deux minimums) sur la courbe.",
-  pulsation: "Reprends la période T déjà trouvée à l'écran précédent.",
-  frequence: "Reprends la période T déjà trouvée.",
-  phi: "Repère le point où la courbe traverse la ligne médiane EN MONTANT, juste après un minimum.",
-  dephasage: "Reprends la pulsation ω et l'abscisse x₀ du passage ascendant déjà trouvées (une autre abscisse x₀ + T donne la même phase, à 2π près).",
-};
-
-export function texteAideNiveau2(phase: PhaseParametresSinusoideGraphique): string {
-  return AIDES_NIVEAU2[phase];
-}
+// Aides (deux niveaux, audit 5e ch. 2, lot B) : `ui5e/aidesTrigonometrie.ts::aidesParametreGraphique`.
 
 // ============================================================================
 // Bloc "état actuel" / récapitulatif final — fragments "label = valeur", TOUJOURS dérivés de

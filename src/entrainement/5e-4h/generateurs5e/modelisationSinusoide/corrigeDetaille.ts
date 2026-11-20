@@ -280,7 +280,7 @@ function lignesIsolerT(U: string, P: string, Pfois: string, c: number, p: number
 
 function etapesIsolerT(e: E, sq: string, series: { U: string; c: number }[], P: string, Pfois: string, p: number, phase: PhaseModelisationSinusoide): EtapeCorrection[] {
   return [
-    utilise(sq, [texte(`Dans chaque série, on remplace u par ωt + φ, on retranche φ, puis on divise TOUT par ω — la constante ET la période ${COURS_MODELISER}.`)]),
+    utilise(sq, [texte(`Dans chaque série, on remplace u par ωt + φ, on retranche φ, puis on divise tout par ω — la constante et la période ${COURS_MODELISER}.`)]),
     ...series.map((s, i) => calcul(sq, lignesIsolerT(s.U, P, Pfois, s.c, p), [], series.length > 1 ? `${i === 0 ? "1ʳᵉ" : "2ᵉ"} série` : "Calcul")),
     resultat(sq, reponse(e, phase)),
     piege(sq, [texte("La période se divise aussi par ω : diviser seulement la constante donne de fausses solutions.")]),
@@ -326,7 +326,7 @@ function etapesPoserExtremum(e: E, sq: string): EtapeCorrection[] {
       ligne("u=\\dfrac{\\pi}{2}+k\\pi", "les deux séries réunies : période π"),
     ]),
     resultat(sq, reponse(e, "poserExtremum")),
-    piege(sq, [texte("Maximums ET minimums : la série a une période π, pas 2π.")]),
+    piege(sq, [texte("Maximums et minimums réunis : la série a une période π, pas 2π.")]),
   ];
 }
 

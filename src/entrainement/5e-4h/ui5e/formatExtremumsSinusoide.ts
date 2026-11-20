@@ -6,11 +6,11 @@
  */
 import { reduireRationnelPi } from "../generateurs5e/parametresSinusoide/rationnelPi";
 import type { ExerciceExtremumsSinusoide, ModeExtremum, RationnelPi } from "../core5e/extremumsSinusoide.types";
-import { valeurTrigVisee } from "../generateurs5e/extremumsSinusoide";
+import { fenetreExtremumsTexte, valeurTrigVisee } from "../generateurs5e/extremumsSinusoide";
 import { formatCoefficientAmplitudeLatex, formatRationnelPiLatex } from "./formatParametresSinusoide";
 
 /** Coefficient de x — omet le "1" littéral (même convention que l'amplitude, déjà établie). */
-function formatCoefficientDeXLatex(a: RationnelPi): string {
+export function formatCoefficientDeXLatex(a: RationnelPi): string {
   const r = reduireRationnelPi(a);
   if (r.degrePi === 0 && r.numerateur === r.denominateur) return "";
   if (r.degrePi === 0 && r.numerateur === -r.denominateur) return "-";
@@ -18,7 +18,7 @@ function formatCoefficientDeXLatex(a: RationnelPi): string {
 }
 
 /** Terme "+bArg"/"-bArg" à l'intérieur de sin/cos(...), jamais affiché si bArg=0. */
-function formatTermeBArgLatex(bArg: RationnelPi): string {
+export function formatTermeBArgLatex(bArg: RationnelPi): string {
   const r = reduireRationnelPi(bArg);
   if (r.numerateur === 0) return "";
   const latex = formatRationnelPiLatex(r);
@@ -35,7 +35,7 @@ function formatTermeDecalageLatex(b: number): string {
  * données (`formatFonctionSourceLatex`) et comme membre gauche de l'équation d'extremum substituée
  * (`formatEquationSubstitueeLatex`, écran 1/2/3, B.1) : la même expression, jamais recalculée deux
  * fois différemment. */
-function formatArgumentLatex(exercice: ExerciceExtremumsSinusoide): string {
+export function formatArgumentExtremumsLatex(exercice: ExerciceExtremumsSinusoide): string {
   const coeffX = formatCoefficientDeXLatex(exercice.a);
   const termeBArg = formatTermeBArgLatex(exercice.bArg);
   // Coefficient qui se termine par une commande LaTeX (ex. « 2\pi ») : une espace, sinon « \pi »+« x »
@@ -51,7 +51,7 @@ function formatArgumentLatex(exercice: ExerciceExtremumsSinusoide): string {
 export function formatFonctionSourceLatex(exercice: ExerciceExtremumsSinusoide): string {
   const coeffA = formatCoefficientAmplitudeLatex(exercice.amplitude);
   const nomFonction = exercice.fonction === "sin" ? "\\sin" : "\\cos";
-  return `${coeffA}${nomFonction}(${formatArgumentLatex(exercice)})${formatTermeDecalageLatex(exercice.decalageVertical)}`;
+  return `${coeffA}${nomFonction}(${formatArgumentExtremumsLatex(exercice)})${formatTermeDecalageLatex(exercice.decalageVertical)}`;
 }
 
 /** L'équation d'extremum COMPLÈTE, argument substitué — "ax+bArg = constante+k·période" — jamais
@@ -72,14 +72,14 @@ function formatTermeKLatex(periode: RationnelPi): string {
 }
 
 /** « constante + k·période », la constante omise si nulle. */
-function formatSerieLatex(branche: { constante: RationnelPi; periode: RationnelPi }): string {
+export function formatSerieLatex(branche: { constante: RationnelPi; periode: RationnelPi }): string {
   const terme = formatTermeKLatex(branche.periode);
   if (reduireRationnelPi(branche.constante).numerateur === 0) return terme;
   return `${formatRationnelPiLatex(branche.constante)} + ${terme}`;
 }
 
 export function formatEquationSubstitueeLatex(exercice: ExerciceExtremumsSinusoide): string {
-  return `${formatArgumentLatex(exercice)} = ${formatSerieLatex(exercice.brancheU)}`;
+  return `${formatArgumentExtremumsLatex(exercice)} = ${formatSerieLatex(exercice.brancheU)}`;
 }
 
 /**
@@ -111,7 +111,7 @@ const OBJET_MODE: Record<ModeExtremum, string> = {
 
 /** Point 40 : l'intervalle final est annoncé dès l'énoncé. */
 export function consigneGeneraleExtremums(exercice: ExerciceExtremumsSinusoide): string {
-  return `Détermine où cette fonction atteint ${OBJET_MODE[exercice.mode]} : d'abord pour tout x réel (k désigne un entier), puis dans [0 ; 2π[.`;
+  return `Détermine où cette fonction atteint ${OBJET_MODE[exercice.mode]} : d'abord pour tout x réel (k désigne un entier), puis dans ${fenetreExtremumsTexte(exercice)}.`;
 }
 
 const OBJET_MODE_COURT: Record<ModeExtremum, string> = {
@@ -126,7 +126,7 @@ export function consignePhaseExtremums(exercice: ExerciceExtremumsSinusoide, pha
 }
 
 export function consigneSolutionsExtremums(exercice: ExerciceExtremumsSinusoide): string {
-  return `Donne toutes les positions ${OBJET_MODE_COURT[exercice.mode]} dans [0 ; 2π[, chaque valeur une seule fois.`;
+  return `Donne toutes les positions ${OBJET_MODE_COURT[exercice.mode]} dans ${fenetreExtremumsTexte(exercice)}, chaque valeur une seule fois.`;
 }
 
 // ============================================================================
@@ -141,11 +141,11 @@ export function consigneSolutionsExtremums(exercice: ExerciceExtremumsSinusoide)
  * seul, la valeur visée (1 ou −1) dépend du SIGNE de l'amplitude. */
 export function texteAideNiveau1Extremums(exercice: ExerciceExtremumsSinusoide): string {
   const f = exercice.fonction;
-  if (exercice.mode === "extremums") return `Les extremums sont atteints quand ${f}(X) vaut 1 OU −1 : ces deux cas se réunissent en une seule série, de période π.`;
+  if (exercice.mode === "extremums") return `Les extremums sont atteints quand ${f}(X) vaut 1 ou −1 : ces deux cas se réunissent en une seule série, de période π :`;
   const vise = valeurTrigVisee(exercice.mode, exercice.amplitude);
   const signe = exercice.amplitude.signe > 0 ? "positive" : "négative";
   const objet = exercice.mode === "maximums" ? "Les maximums" : "Les minimums";
-  return `${objet} sont atteints quand ${f}(X) = ${vise === 1 ? "1" : "−1"} (l'amplitude est ${signe}) : une seule série, de période 2π.`;
+  return `${objet} sont atteints quand ${f}(X) = ${vise === 1 ? "1" : "−1"} (l'amplitude est ${signe}) : une seule série, de période 2π :`;
 }
 
 export function latexAideNiveau1Extremums(exercice: ExerciceExtremumsSinusoide): string {
@@ -156,16 +156,13 @@ export function latexAideNiveau1Extremums(exercice: ExerciceExtremumsSinusoide):
   return vise === 1 ? `${f} X = 1 \\iff X = 2k\\pi` : `${f} X = -1 \\iff X = \\pi + 2k\\pi`;
 }
 
-export const TEXTE_AIDE_SOLUTIONS_NIVEAU1 =
-  "Donne à k des valeurs entières successives (…, −1, 0, 1, 2, …) dans la série de x obtenue à l'écran précédent, et garde les valeurs comprises dans [0 ; 2π[.";
-export const TEXTE_AIDE_SOLUTIONS_NIVEAU2 = "Un premier point est déjà placé sur le cercle, à titre d'exemple — retrouve les autres de la même façon.";
 
 /** Placeholder de l'écran "poserEquation" — équation complète, argument substitué (B.1, jamais la
  * forme abstraite "u=..."). Statique (même convention que l'ancien placeholder unique) : un exemple
  * générique, jamais dérivé de l'exercice tiré. */
-export const PLACEHOLDER_POSER_EQUATION_EXTREMUMS = "ex : 7*x-3=pi/5+k*pi";
+export const PLACEHOLDER_POSER_EQUATION_EXTREMUMS = "ex : 7x − 3 = π/5 + kπ";
 /** Placeholder de l'écran "isolerX" — "n" renommé "k" (B.1). */
-export const PLACEHOLDER_ISOLER_X_EXTREMUMS = "ex : pi/5+k*2*pi/7";
+export const PLACEHOLDER_ISOLER_X_EXTREMUMS = "ex : π/5 + 2kπ/7";
 
 /** Réponse finale révélée, lisible EN x (point 40 : elle n'était montrée que sur un cercle, les x
  * placés comme des angles) — fraction de π, ou fraction simple, quand la valeur en est une. */
@@ -197,4 +194,32 @@ export function formatSolutionsExtremumsLatex(solutions: number[]): string {
     return v.toFixed(2).replace(".", "{,}");
   };
   return `x \\in \\left\\{ ${solutions.map(valeur).join(" \\,;\\, ")} \\right\\}`;
+}
+
+// ============================================================================
+// Aides et messages ciblés (audit 5e ch. 2, lot B) — morceaux d'instance.
+// ============================================================================
+
+/** « x = (série en X − b)/a », substitué mais non simplifié (aide de niveau 2 de « isoler x »). */
+export function substitutionIsolerXExtremums(exercice: ExerciceExtremumsSinusoide): string {
+  const serie = formatSerieLatex(exercice.brancheU);
+  const b = reduireRationnelPi(exercice.bArg);
+  const numerateur = b.numerateur === 0 ? serie : `${serie} - \\left(${formatRationnelPiLatex(b)}\\right)`;
+  const a = reduireRationnelPi(exercice.a);
+  if (a.degrePi === 0 && a.numerateur === a.denominateur) return `x = ${numerateur}`;
+  return `x = \\dfrac{${numerateur}}{${formatRationnelPiLatex(a).replace(/\\dfrac/g, "\\frac")}}`;
+}
+
+/** Valeurs numériques des séries attendues (messages ciblés). */
+export function donneesMessagesExtremums(exercice: ExerciceExtremumsSinusoide): { mode: ModeExtremum; fonction: "sin" | "cos"; amplitudeNegative: boolean; a: number; c: number; p: number; pU: number } {
+  const v = (r: RationnelPi) => (r.numerateur / r.denominateur) * Math.PI ** r.degrePi;
+  return {
+    mode: exercice.mode,
+    fonction: exercice.fonction,
+    amplitudeNegative: exercice.amplitude.signe < 0,
+    a: v(exercice.a),
+    c: v(exercice.brancheX.constante),
+    p: v(exercice.brancheX.periode),
+    pU: v(exercice.brancheX.periode) * v(exercice.a),
+  };
 }
