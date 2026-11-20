@@ -321,7 +321,9 @@ régulier dont les lignes passent par les valeurs remarquables elles-mêmes.
   `groupe_famille_tan`. **Dans un groupe, le niveau et la durée imprimés ne doivent pas trahir le
   verdict** : mesurer par membre (`criteres.ts`) ; constants en gen73 (4, 12 min) et gen81 (4,
   11 min), piège constant en gen19 ; gen17 : seul le cas particulier (déjà visible) descend au
-  niveau 2. Plans réels (`construirePlan`, 30 × 2 séries) : verdict B ≠ A 30/30 par groupe.
+  niveau 2. Même contrôle pour un verdict DANS une variante (`verdictniv.ts`) : gen75 « angle » (nombres
+  constant → 4, 9 min) et gen79 inverse (constants : 5, 12 min). Plans réels (`construirePlan`,
+  30 × 2 séries) : verdict B ≠ A 30/30 par groupe.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 
