@@ -1080,7 +1080,8 @@ function questionsExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, i
       }</section>`;
     }
     const ouverture = ouverturePartieHtml(examen, partie);
-    html += deuxColonnes ? `<div class="partie-colonnes">${ouverture}<div class="deux-colonnes">${questions}</div></div>` : `${ouverture}${questions}`;
+    // Une partie d'UNE seule question reste en pleine largeur (en colonnes, l'autre colonne restait vide).
+    html += deuxColonnes && partie.questions.length > 1 ? `<div class="partie-colonnes">${ouverture}<div class="deux-colonnes">${questions}</div></div>` : `${ouverture}${questions}`;
   }
   return html;
 }
