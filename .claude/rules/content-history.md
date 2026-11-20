@@ -4522,3 +4522,47 @@ Lot G : `roue-hauteur-widget` (§ 5, avant gen79) : θ₀, sens, α, r ∈ [2 ; 
 fenêtre fixe −1 à 34 m (pire cas h + r = 32) ; couleurs par rôle reprises dans le texte et les
 curseurs. Vérifié : 8 réglages × 2 tailles × 2 thèmes, valeurs recoupées à la main, axes
 identiques après chaque réglage, scrollWidth 390, 0 étiquette rognée.
+
+## 5e (4h), Chapitre 2 — lots A, E et F de l'audit (cours, quiz 5gen40, figures)
+
+Lot A (cours) : k → c comme second membre (§ 7 : produit nul, mise en évidence, tableau « Quelle
+méthode ? », carte 5gen10, titre de la vidéo ; titre et whereLabel de la carte intacts) ; 16
+majuscules d'insistance retirées ; « [0 ; 2π[ » au § 6. Notation unique : « déphasage φ » (cartes
+5gen8 / 5gen9, § 5, § 8), Φ = −φ/ω seul décalage horizontal (rappel du § 4, récapitulatif) ;
+fréquence en toutes lettres (`\text{fréquence}`, plus de f_req : f est la fonction). Durée du jour :
+UN modèle sur la page, celui de l'atelier, `12 + 4,5 sin(2π(j − 80)/365,24)` (j = jour de
+l'année) — l'application comptait x depuis le solstice. Rappel arcsin remonté en tête du § 8 (première
+utilisation). Cinq démonstrations « Démonstration — … » (s = rθ et A = ½r²θ ; corde et segment ;
+période et décalage ; extremums réunis tous les π ; solutions de sin x = c par symétrie) ; exemples
+« arc et aire donnés » (r = 2A/s), « k côtés », « maximum en t₀ ≠ 0 », « deux points de la courbe »
+(décision 3 : méthode + exemple + attention arcsin ; A, b donnés, points sur une même montée).
+Formulaire : radians → degrés, θ = s/r, r = 2A/s, r = √(2A/θ), arc / secteur sur k côtés (lettre k
+comme 5gen7), fréquence, φ = −ω·x₀, φ ∈ ]−π ; π], extremums du cosinus, groupe « Modéliser en
+contexte ». **Piège** : la démonstration de sin x = c avait une clé contenant « deux familles de
+solutions », sous-chaîne du badge d'un exemple → `verifier-enonces-evaluation` « clé ambiguë » ;
+label renommé (« … par symétrie »).
+
+Lot F : sept figures en kinds existants, coordonnées calculées (commentées dans le contenu) —
+octogone et secteur sur 3 côtés (`circleDiagram`, sommets en π/8 + kπ/4), essuie-glace et corde
+(A(6 ; 8), B(−6 ; 8)) et lentille (O₁(−8 ; 0), O₂(√28 ; 0)) en `vectorPlane` isotrope, 6 solutions
+sur le cercle (`circleAngles`, étiquettes en `freeLabels` : une étiquette ancrée à droite de 355°
+sortait du cadre), inéquation lue sur la courbe (`shadedRegions`), modèle à deux points. **Piège** :
+arc `y = √(r² − x²)` près de (r ; 0) → dernier segment rectiligne visible ; finir l'arc en
+`curvesOfY`. Contrôle « étiquette SVG hors cadre / chevauchement » : défauts ANCIENS corrigés —
+cercle à 16 angles (« 180° », « 3π/2 », « sin » rognés, « 0° » / « π/2 » sur la flèche :
+`CircleAngles`, mode `mono` seulement, étiquette rapprochée quand |cos| > 0,5 et posée à côté d'un
+point situé sur un axe), « sin u = 1/2 » rogné, « y = c » sur « π−α », « cos(u)=1/2 » sur « u=π/3 »
+(valeur en `freeLabels` près de l'axe), graduations « 0.5 » du § 5. Les trois « chevauchements » qui
+restent (120°/135°…) sont des boîtes de ligne : 5 px, autant qu'entre les deux lignes d'une même
+étiquette (mesuré tspan par tspan), aucun contact de glyphes à l'écran.
+
+Lot E (quiz 5gen40) : banque réécrite en `$…$` (`TexteRiche5e` dans la question, la correction et
+le résumé ; `banquesVraiFaux` sur papier), 245 affirmations, 7 × 35, 18 V / 17 F (17 / 18 pour les
+paramètres) ; c / k, φ / Φ, plus de « bArg » ; notions ajoutées (polygones, Archimède, θ = s/r,
+r = 2A/s, parité, construction, φ = −ω·x₀, tan interdite, t₀ ≠ 0, deux candidats, deux points,
+inéquations, durée du jour). `nombreExercices` = `nombreQuestions(theme)`, accueil et carte du cours
+mis à jour ; catalogue dans l'ordre des sections ; `QUIZ_THEMES` : § 2 rattaché au thème des arcs.
+Contrôle `check_banque5e2.mjs` (dossier de travail) : KaTeX `strict: 'error'`, notation clavier hors
+formule, majuscules, « trig(…) = k », point décimal, doublons, équilibre, session sans répétition,
+fragments papier sans `$` — 0 problème ; parcours Playwright : 35 / 35 énoncés distincts, 0 `$`
+isolé, 0 `.katex-error`.

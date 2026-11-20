@@ -3,22 +3,27 @@ import type { VarianteQuizTrigonometrie5e } from "./core5e/quizTrigonometrie5e.t
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { demarrerSessionQuizTrigonometrie5e, soumettreReponseQuizTrigonometrie5e } from "./moteur5e/sessionQuizTrigonometrie5e";
 import type { EtatSessionQuizTrigonometrie5e, ResultatExerciceQuizTrigonometrie5e } from "./moteur5e/typesQuizTrigonometrie5e";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs5e/quizTrigonometrie5e/index";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition, etendueNombreQuestions, nombreQuestions } from "./generateurs5e/quizTrigonometrie5e/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import { EtapeQuestionQuizTrigonometrie5e } from "./components5e/EtapeQuestionQuizTrigonometrie5e";
 import { ResultatPanelQuizTrigonometrie5e } from "./components5e/ResultatPanelQuizTrigonometrie5e";
 import { ResumeSessionQuizTrigonometrie5e } from "./components5e/ResumeSessionQuizTrigonometrie5e";
 
-/** `nombreExercices: 20` correspond exactement à la taille de la banque par thème (voir
- * `generateurs5e/quizTrigonometrie5e/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 20 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession5e = {
-  nombreExercices: 20,
-  tentativesMax: 1,
-};
+/** `nombreExercices` = taille réelle de la banque du thème choisi (`nombreQuestions`,
+ * `generateurs5e/quizTrigonometrie5e/index.ts`) — jamais une constante fixe : couplé à
+ * `creerGenerateurSansRepetition`, une session parcourt donc toutes les questions du thème sans
+ * jamais en répéter une (convention `.claude/rules/quiz-generators.md`). */
+function reglagesPourTheme(theme: VarianteQuizTrigonometrie5e): ReglagesSession5e {
+  return {
+    nombreExercices: nombreQuestions(theme),
+    tentativesMax: 1,
+  };
+}
+
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizTrigonometrie5e): EtatSessionQuizTrigonometrie5e {
-  return demarrerSessionQuizTrigonometrie5e(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizTrigonometrie5e(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** 5gen40 — "Trigonométrie" (quiz vrai/faux), chapitre 2, réplique mécanique du patron quiz
@@ -50,7 +55,7 @@ export function App5gen40() {
     const theme = varianteId as VarianteQuizTrigonometrie5e;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizTrigonometrie5e(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizTrigonometrie5e(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -81,7 +86,13 @@ export function App5gen40() {
           {!etat ? (
             <div>
               <h2 className="result-title">Choisis un thème</h2>
-              <p className="result-subtitle">7 thèmes, 20 affirmations vrai/faux chacun — révision complète du chapitre.</p>
+              <p className="result-subtitle">
+                {CATALOGUE_VARIANTES.length} thèmes,{" "}
+                {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max
+                  ? `${ETENDUE_QUESTIONS.max} affirmations`
+                  : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max} affirmations`}{" "}
+                vrai/faux chacun — révision complète du chapitre.
+              </p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
                   <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

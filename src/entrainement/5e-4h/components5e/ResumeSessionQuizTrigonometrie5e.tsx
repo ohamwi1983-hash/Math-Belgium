@@ -1,4 +1,5 @@
 import type { ResultatExerciceQuizTrigonometrie5e } from "../moteur5e/typesQuizTrigonometrie5e";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   resultats: ResultatExerciceQuizTrigonometrie5e[];
@@ -37,7 +38,9 @@ export function ResumeSessionQuizTrigonometrie5e({ resultats, onRecommencer, onC
             {resultats.map((resultat, index) => (
               <tr key={index}>
                 <td>{index + 1}</td>
-                <td>{resultat.question.enonce}</td>
+                <td>
+                  <TexteRiche5e texte={resultat.question.enonce} />
+                </td>
                 <td>{libelleVraiFaux(resultat.reponseChoisie)}</td>
                 <td>{resultat.score === 100 ? "✓" : "✗"}</td>
               </tr>
