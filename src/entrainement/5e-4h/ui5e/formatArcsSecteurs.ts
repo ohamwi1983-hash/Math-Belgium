@@ -82,11 +82,11 @@ function nombreLatex(x: number): string {
 }
 
 const CONSIGNES: Record<QuantiteArcSecteur, string> = {
-  thetaDeg: "Calcule la mesure de l'angle θ, en degrés (arrondis au centième près).",
-  thetaRad: "Calcule la mesure de l'angle θ, en radians (arrondis au centième près).",
-  r: "Calcule le rayon r du cercle (arrondis au centième près).",
-  l: "Calcule la longueur s de l'arc (arrondis au centième près).",
-  A: "Calcule l'aire A du secteur (arrondis au centième près).",
+  thetaDeg: "Calcule la mesure de l'angle θ, en degrés (valeur exacte, ou arrondie au centième).",
+  thetaRad: "Calcule la mesure de l'angle θ, en radians (valeur exacte, ou arrondie au centième).",
+  r: "Calcule le rayon r du cercle (valeur exacte, ou arrondie au centième).",
+  l: "Calcule la longueur s de l'arc (valeur exacte, ou arrondie au centième).",
+  A: "Calcule l'aire A du secteur (valeur exacte, ou arrondie au centième).",
 };
 
 export function consigneQuantite(quantite: QuantiteArcSecteur): string {
@@ -185,7 +185,8 @@ export function latexAideNiveau2ArcSecteur(exercice: ExerciceModeDeuxVersTrois, 
 // ============================================================================
 
 export function consigneConversion(exercice: ExerciceModeConversion): string {
-  return exercice.direction === "degVersRad" ? "Convertis cette mesure d'angle en radians (arrondis au centième près)." : "Convertis cette mesure d'angle en degrés (arrondis au centième près).";
+  const precision = exercice.type === "exacte" ? "(valeur exacte, ou arrondie au centième)" : "(arrondis au centième près)";
+  return `Convertis cette mesure d'angle en ${exercice.direction === "degVersRad" ? "radians" : "degrés"} ${precision}.`;
 }
 
 export function labelDepartConversion(exercice: ExerciceModeConversion): string {
