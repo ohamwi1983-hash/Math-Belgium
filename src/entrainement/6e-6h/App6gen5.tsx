@@ -23,11 +23,22 @@ import {
   texteAideNiveau1,
   texteAideNiveau2,
 } from "./ui6e/formatGraphiquesCyclometriques";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeGraphiquesCyclometriques } from "./generateurs6e/graphiquesCyclometriques/corrigeDetaille";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionGraphiquesCyclometriques {
   return demarrerSessionGraphiquesCyclometriques(REGLAGES_DEMO, genererExerciceGraphiquesCyclometriques);
+}
+
+/** Première session : `?code=XXXXXX` (QR code d'une feuille) rouvre l'exercice imprimé — mêmes
+ * fonctions de tirage que l'adaptateur d'export, comme `App6gen14.tsx`. */
+function sessionInitiale(): EtatSessionGraphiquesCyclometriques {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionGraphiquesCyclometriques(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceGraphiquesCyclometriques, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
 }
 
 /** État tenu en attente dès que l'écran unique se termine (bonne réponse, ou tentatives
@@ -47,7 +58,7 @@ interface TransitionEnAttente {
  * notion de phase).
  */
 export function App6gen5() {
-  const [etat, setEtat] = useState<EtatSessionGraphiquesCyclometriques>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionGraphiquesCyclometriques>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   // Hook de debug pour la vérification Playwright (`?dev=1`) — expose l'exercice courant (dont
@@ -120,6 +131,8 @@ export function App6gen5() {
     ? {
         revele: enAttente.revele,
         reponseAttendue,
+        // Corrigé détaillé « comme au tableau » (source unique avec le papier) — écran unique « a ».
+        corrigeDetaille: <CorrigeDetailleEcran etapes={correctionDetailleeGraphiquesCyclometriques(exercice)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

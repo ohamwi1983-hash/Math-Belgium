@@ -43,7 +43,7 @@ function formatSomme(termes: TermeAffiche[]): string {
 function formatAffineLatex(a: number, b: number, variable = "x"): string {
   const termeA: TermeAffiche = { signe: a >= 0 ? 1 : -1, corps: Math.abs(a) === 1 ? variable : `${Math.abs(a)}${variable}` };
   if (b === 0) return formatSomme([termeA]);
-  return formatSomme([termeA, { signe: b >= 0 ? 1 : -1, corps: String(Math.abs(b)) }]);
+  return formatSomme([termeA, { signe: b >= 0 ? 1 : -1, corps: String(Math.abs(b)).replace(".", "{,}") }]);
 }
 
 /** `corps` est toujours ici une arcfonction (`\arcsin(...)`/`\arccos(...)`/`\arctan(...)`) — jamais
@@ -66,7 +66,9 @@ function formatPlusConstante(c: number, corpsSuivant: string): string {
 
 function formatCorpsPlusConstante(corps: string, c: number): string {
   if (c === 0) return corps;
-  return c > 0 ? `${corps} + ${c}` : `${corps} - ${Math.abs(c)}`;
+  // Virgule décimale (famille E : constante au centième), jamais « 1.37 ».
+  const abs = String(Math.abs(c)).replace(".", "{,}");
+  return c > 0 ? `${corps} + ${abs}` : `${corps} - ${abs}`;
 }
 
 // ============================================================================
@@ -307,7 +309,7 @@ export function texteAideNiveau2(exercice: ExerciceGraphiquesCyclometriques): Ai
       const image = [r.c + r.k * base[0], r.c + r.k * base[1]].sort((a, b) => a - b);
       return {
         texte: "Domaine et image de f :",
-        latex: `x \\in \\left[${bornes[0].toFixed(2)}\\,;\\,${bornes[1].toFixed(2)}\\right], \\quad f(x) \\in \\left[${image[0].toFixed(2)}\\,;\\,${image[1].toFixed(2)}\\right]`,
+        latex: `x \\in \\left[${formatNombreAffiche(bornes[0])}\\,;\\,${formatNombreAffiche(bornes[1])}\\right], \\quad f(x) \\in \\left[${formatNombreAffiche(image[0])}\\,;\\,${formatNombreAffiche(image[1])}\\right]`,
       };
     }
     case "B": {
@@ -315,7 +317,7 @@ export function texteAideNiveau2(exercice: ExerciceGraphiquesCyclometriques): Ai
       const signe = Math.sign(r.m);
       const l1 = r.c + r.k * signe * (Math.PI / 2);
       const l2 = r.c - r.k * signe * (Math.PI / 2);
-      return { texte: "Valeurs des deux asymptotes horizontales :", latex: `y \\to ${l1.toFixed(2)} \\text{ et } y \\to ${l2.toFixed(2)}` };
+      return { texte: "Valeurs des deux asymptotes horizontales :", latex: `y \\to ${formatNombreAffiche(l1)} \\text{ et } y \\to ${formatNombreAffiche(l2)}` };
     }
     case "C":
       return { texte: "Valeur au sommet (x=0), sans dire si c'est un minimum ou un maximum :", latex: `f(0) = ${formatExpressionSommetC(exercice.reel)}` };
@@ -323,12 +325,12 @@ export function texteAideNiveau2(exercice: ExerciceGraphiquesCyclometriques): Ai
       const r = exercice.reel;
       const gauche = r.k > 0 ? r.c - Math.PI / 2 : r.c + Math.PI / 2;
       const droite = r.k > 0 ? r.c + Math.PI / 2 : r.c - Math.PI / 2;
-      return { texte: "Valeurs d'approche à gauche et à droite du point exclu :", latex: `x\\to p^-:\\ y\\to ${gauche.toFixed(2)} \\quad x\\to p^+:\\ y\\to ${droite.toFixed(2)}` };
+      return { texte: "Valeurs d'approche à gauche et à droite du point exclu :", latex: `x\\to p^-:\\ y\\to ${formatNombreAffiche(gauche)} \\quad x\\to p^+:\\ y\\to ${formatNombreAffiche(droite)}` };
     }
     case "E": {
       const r = exercice.reel;
       const yInf = evaluerE(r, exercice.domaineInf);
-      return { texte: "Valeur de f à l'une des extrémités du domaine :", latex: `f(${exercice.domaineInf.toFixed(2)}) = ${(yInf ?? 0).toFixed(2)}` };
+      return { texte: "Valeur de f à l'une des extrémités du domaine :", latex: `f(${formatNombreAffiche(exercice.domaineInf)}) \\approx ${formatNombreAffiche(yInf ?? 0)}` };
     }
     case "F":
       return { texte: "Valeur de f à l'extremum :", latex: `f(${exercice.positionExtremum}) = ${exercice.reel.c}` };
@@ -337,7 +339,7 @@ export function texteAideNiveau2(exercice: ExerciceGraphiquesCyclometriques): Ai
 
 function formatExpressionSommetC(r: CandidatC): string {
   const val = evalArcfonction(r.arcfonction, r.b);
-  return val === null ? "\\text{indéfini}" : `${NOM_LATEX[r.arcfonction]}(${r.b}) \\approx ${val.toFixed(2)}`;
+  return val === null ? "\\text{indéfini}" : `${NOM_LATEX[r.arcfonction]}(${r.b}) \\approx ${formatNombreAffiche(val)}`;
 }
 
 // ============================================================================
@@ -347,7 +349,13 @@ function formatExpressionSommetC(r: CandidatC): string {
 // ============================================================================
 
 export function formatNombreAffiche(v: number): string {
-  return Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(2);
+  // Virgule décimale `{,}` et « − » de KaTeX (jamais « 1.57 »).
+  return Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(2).replace(".", "{,}");
+}
+
+/** Vrai si la valeur s'écrit exactement avec deux décimales au plus (sinon on écrit « ≈ »). */
+function estExacteAuCentieme(v: number): boolean {
+  return Math.abs(Math.round(v * 100) / 100 - v) < 1e-9;
 }
 
 export const LIBELLE_PARITE: Record<ParticulariteParite, string> = { paire: "Paire", impaire: "Impaire", aucune: "Aucune parité" };
@@ -367,9 +375,13 @@ export function formatEnsembleReelApproxLatex(ensemble: { forme: string; points:
 }
 
 export function formatOrdonneeLatex(ordonnee: { existe: boolean; valeur: number | null }): string {
-  return ordonnee.existe ? `f(0) = ${formatNombreAffiche(ordonnee.valeur as number)}` : "\\text{n'existe pas}";
+  if (!ordonnee.existe) return "\\text{n'existe pas}";
+  const v = ordonnee.valeur as number;
+  return `f(0) ${estExacteAuCentieme(v) ? "=" : "\\approx"} ${formatNombreAffiche(v)}`;
 }
 
 export function formatExtremumLatex(extremum: { existe: boolean; valeur: number | null }): string {
-  return extremum.existe ? `\\text{valeur } ${formatNombreAffiche(extremum.valeur as number)}` : "\\text{n'existe pas}";
+  if (!extremum.existe) return "\\text{n'existe pas}";
+  const v = extremum.valeur as number;
+  return `\\text{valeur } ${estExacteAuCentieme(v) ? "" : "\\approx "}${formatNombreAffiche(v)}`;
 }

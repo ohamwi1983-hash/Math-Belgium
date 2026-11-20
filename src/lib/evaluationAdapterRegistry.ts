@@ -454,7 +454,7 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen2': versionPapier(adaptateurEvaluationFonctionsCyclometriques) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen3': versionPapier(adaptateurEvaluationEquationsCyclometriques) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen4': versionPapier(adaptateurEvaluationDeriveesCyclometriques) as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen5': adaptateurEvaluationGraphiquesCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen5': versionPapier(adaptateurEvaluationGraphiquesCyclometriques) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen6': versionPapier(adaptateurEvaluationLimitesExponentielles) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen7': versionPapier(adaptateurEvaluationDomaineDeriveeExponentielles) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen8': versionPapier(adaptateurEvaluationGraphiquesDeriveeExponentielles) as unknown as AdaptateurFeuilleExercices<never>,
