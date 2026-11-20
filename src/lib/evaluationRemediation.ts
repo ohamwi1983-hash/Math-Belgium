@@ -1,10 +1,13 @@
 import type { FragmentConsigne, ProfilInstance } from '../entrainement/export/genererFeuilleExercices'
 import { tirerGraine } from '../entrainement/export/codeExercice'
+import { partiesExamen } from '../entrainement/export/examen'
 import { EVALUATION_ADAPTER_REGISTRY } from './evaluationAdapterRegistry'
 import { chargerThemeVraiFaux } from './banquesVraiFaux'
 import { nomGenerateur, type IdGenerateurPilote } from './evaluationPayload'
 import {
   autresCaracteristiques,
+  chapitresExamen,
+  estExamen,
   empreinteSection,
   graineInedite,
   lireHistorique,
@@ -38,7 +41,8 @@ import {
  *
  * Numérotation = celle de la copie de la série A (`itemsDepuisSerie` + `grouperParProcessus`) :
  * items rangés par processus (1, 2, 3, ordre stable), tous les vrai/faux de la série forment une
- * seule question placée au rang du premier.
+ * seule question placée au rang du premier. Examen : ordre des PARTIES (`partiesExamen`, même
+ * fonction que la copie).
  */
 
 const NOM_PROCESSUS: Record<1 | 2 | 3, string> = { 1: 'Connaître', 2: 'Appliquer', 3: 'Transférer' }
@@ -120,6 +124,14 @@ export function questionsRemediables(plan: PlanDocument): QuestionRemediable[] {
     if (!memeSection) vf.titre = 'Vrai ou faux'
     const total = sources.reduce((t, e) => t + e.indices.length, 0)
     vf.detail = `Vrai ou faux · ${total} affirmation${total > 1 ? 's' : ''}`
+  }
+  // Examen : ordre et numérotation des PARTIES de la copie (`partiesExamen`, la même fonction que
+  // les documents) — chapitre(s) de chaque question tirés de ses éléments de la série A.
+  if (estExamen(plan)) {
+    const chapitresDe = (q: Brouillon) => [...new Set(q.indicesElements.map((i) => serie.elements[i].section?.chapitreSlug).filter((c): c is string => !!c))]
+    return partiesExamen(liste, (q) => ({ processus: q.processus, chapitres: chapitresDe(q) }), plan.entete.organisationExamen ?? 'chapitre', chapitresExamen(plan))
+      .flatMap((p) => p.questions)
+      .map(({ element, numero }) => ({ ...element, numero }))
   }
   // Ordre d'impression : processus 1, 2, 3 (tri stable), numérotation continue.
   return ([1, 2, 3] as const).flatMap((p) => liste.filter((q) => q.processus === p)).map((q, i) => ({ ...q, numero: i + 1 }))
@@ -275,6 +287,14 @@ export async function construirePlanRemediation(source: PlanDocument, numeros: n
       mode: 'exercice',
       versionAmenagee,
       afficherDuree: false,
+      // Remédiation d'un examen : une feuille d'exercices ordinaire, sans réglages d'examen.
+      typeDocument: undefined,
+      organisationExamen: undefined,
+      totalExamen: undefined,
+      heureDepart: undefined,
+      dureeExamen: undefined,
+      session: undefined,
+      consignesSupplementaires: undefined,
     },
     lignes: source.lignes,
     chapitresSlugs: chapitresUtiles.length > 0 ? chapitresUtiles : source.chapitresSlugs,

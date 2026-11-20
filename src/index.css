@@ -1415,6 +1415,42 @@ table.feature-table td { white-space: normal; }
 .admin-eval-avertissement { flex-basis: 100%; margin: 4px 0 0; padding: 8px 12px; border-left: 3px solid #b45309; background: color-mix(in srgb, #b45309 9%, transparent); font-size: 0.85rem; color: var(--ink); border-radius: 4px; }
 .admin-eval-lien-bouton { border: none; background: none; padding: 4px 2px; min-height: 32px; font: inherit; font-size: 0.85rem; color: var(--accent, #b4541f); text-decoration: underline; cursor: pointer; }
 .admin-eval-parametres-titre { font-size: 0.85rem; color: var(--ink-soft, #5a6070); }
+/* Choix segmenté compact (Document : Évaluation / Examen ; Parties ; Total) — groupe de type radio. */
+.admin-eval-tf-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ink-faint); font-weight: 700; }
+.admin-eval-segments { display: inline-flex; flex-wrap: nowrap; max-width: 100%; }
+.admin-eval-segment {
+  font: inherit; font-size: 0.85rem; font-weight: 600; padding: 7px 12px; min-height: 36px; cursor: pointer; white-space: nowrap;
+  border: 1px solid var(--line); border-right-width: 0; background: var(--paper); color: var(--ink-soft);
+}
+.admin-eval-segment:first-child { border-radius: 6px 0 0 6px; }
+.admin-eval-segment:last-child { border-radius: 0 6px 6px 0; border-right-width: 1px; }
+.admin-eval-segment[aria-checked='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); position: relative; z-index: 1; }
+/* Réglages de l'examen : bloc sous la barre d'outils, mêmes champs que la barre. */
+.admin-eval-examen {
+  display: flex; flex-direction: column; gap: 12px; min-width: 0; margin: 0;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px 16px;
+}
+.admin-eval-examen legend { font-weight: 700; font-size: 0.9rem; padding: 0 6px; }
+.admin-eval-examen-ligne { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px 16px; }
+.admin-eval-examen-session { flex: 1 1 200px; min-width: 0; }
+.admin-eval-examen-court { flex: 0 1 150px; min-width: 120px; }
+.admin-eval-examen-court input, .admin-eval-examen-session input { width: 100%; }
+.admin-eval-examen textarea {
+  font: inherit; font-size: 0.85rem; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--paper); color: var(--ink); width: 100%; min-width: 0; resize: vertical;
+}
+.admin-eval-aide { font-size: 0.75rem; color: var(--ink-faint); overflow-wrap: anywhere; }
+.admin-eval-aide-erreur { color: #b42318; font-weight: 600; }
+.admin-eval-parties { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.admin-eval-parties li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 0.88rem; }
+.admin-eval-parties li .admin-eval-aide { flex-basis: 100%; }
+.admin-eval-partie-nom { flex: 1 1 200px; min-width: 0; overflow-wrap: anywhere; }
+.admin-eval-partie-total { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.admin-eval-partie-total input {
+  font: inherit; font-size: 0.88rem; width: 5.5em; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--paper); color: var(--ink);
+}
+.admin-eval-parties-total { font-weight: 700; border-bottom: 0 !important; }
 
 .admin-eval-indisponible {
   margin: 0; padding: 12px 16px; background: var(--surface); border: 1px dashed var(--line);
@@ -1584,6 +1620,7 @@ table.feature-table td { white-space: normal; }
    * bannières restent, eux, dans la gouttière normale — seuls les blocs de travail doivent occuper
    * toute la largeur. */
   .admin-eval-toolbar,
+  .admin-eval-examen,
   .admin-eval-processus-bar,
   .admin-eval-table-wrap,
   .admin-eval-bottombar {

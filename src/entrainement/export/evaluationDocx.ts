@@ -3,6 +3,7 @@ import {
   BorderStyle,
   Document,
   Footer,
+  Header,
   ImageRun,
   Packer,
   PageNumber,
@@ -20,17 +21,25 @@ import {
 import { fragmentsVersRunsDocx } from "./fragmentsDocx";
 import {
   dateEnToutesLettres,
+  droiteBandeau,
   dureeEstimeeMinutes,
+  enteteCourantExamen,
   nombreFr,
+  partiesDuDocument,
+  phraseHoraire,
   pointsCriteres,
   pointsParSousQuestion,
   pointsTexte,
   TEXTE_CONSIGNES,
   titreEvaluation,
+  titreExamen,
   titreNettoye,
+  totalPartie,
   type EnteteEvaluation,
+  type ExamenDocument,
   type ItemEvaluation,
 } from "./assemblerEvaluationHtml";
+import { etiquetteQuestion, fragmentsConsigne, lignePartie, NOM_PROCESSUS_EXAMEN, type PartieExamen } from "./examen";
 import type { BlocCorrection, EtapeCorrection, LigneCalcul } from "./genererFeuilleExercices";
 import { decouperLigneCalcul, estLignePiege } from "./corrigeTableau";
 
@@ -204,9 +213,11 @@ function bandeauProcessus(p: 1 | 2 | 3, total: number): Paragraph {
 }
 
 /** Énoncé d'une question : titre et points, en-tête, figures, sous-questions avec leurs points. */
-async function enonceQuestionDocx(item: ItemEvaluation, numero: number): Promise<FileChild[]> {
+async function enonceQuestionDocx(item: ItemEvaluation, numero: number, etiquette?: string): Promise<FileChild[]> {
   const enfants: FileChild[] = [];
-  enfants.push(new Paragraph({ children: [new TextRun({ text: `Question ${numero}`, bold: true }), ptsRun(item.points)], spacing: { before: 200 }, keepNext: true }));
+  // Examen : étiquette du processus / du chapitre en petites capitales grises après le numéro.
+  const tag = etiquette ? [new TextRun({ text: `   ${etiquette.toLocaleUpperCase("fr")}`, size: 15, bold: true, color: GRIS, font: "Arial" })] : [];
+  enfants.push(new Paragraph({ children: [new TextRun({ text: `Question ${numero}`, bold: true }), ...tag, ptsRun(item.points)], spacing: { before: 200 }, keepNext: true }));
   if (item.section.enteteFragments) enfants.push(new Paragraph({ children: await fragmentsVersRunsDocx(item.section.enteteFragments), spacing: { after: 60 } }));
   if (item.section.enteteHtml) enfants.push(...(await htmlVersParagraphes(item.section.enteteHtml)));
   const pts = pointsParSousQuestion(item);
@@ -372,6 +383,154 @@ async function correctionDocx(item: ItemEvaluation): Promise<FileChild[]> {
 }
 
 /* ----------------------------------------------------------------------------------------------
+ * Examen (même contenu que la copie / le corrigé / la grille HTML d'examen)
+ * -------------------------------------------------------------------------------------------- */
+
+const accesItem = (it: ItemEvaluation) => ({ processus: it.processus, chapitres: it.chapitres ?? [] });
+
+/** Bandeau plein « EXAMEN · SESSION DE JUIN 2027 · 08h50 → 09h50 » (fond d'accent, texte blanc). */
+function bandeauExamenDocx(examen: ExamenDocument): Paragraph {
+  const { session, horaire } = droiteBandeau(examen);
+  return new Paragraph({
+    children: [
+      new TextRun({ text: "EXAMEN", bold: true, color: "FFFFFF", size: 18, font: "Arial", characterSpacing: 30 }),
+      new TextRun({ text: `\t${session.toLocaleUpperCase("fr")}`, bold: true, color: "FFFFFF", size: 18, font: "Arial", characterSpacing: 30 }),
+      // Horaire hors capitales : « 08h50 », jamais « 08H50 ».
+      ...(horaire ? [new TextRun({ text: ` · ${horaire}`, bold: true, color: "FFFFFF", size: 18, font: "Arial" })] : []),
+    ],
+    shading: { type: ShadingType.CLEAR, color: "auto", fill: ACCENT },
+    tabStops: [{ type: TabStopType.RIGHT, position: LARGEUR_UTILE - 120 }],
+    indent: { left: 120, right: 120 },
+    spacing: { after: 120 },
+  });
+}
+
+function enteteExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument, suffixe?: string): FileChild[] {
+  return [
+    bandeauExamenDocx(examen),
+    new Paragraph({ children: [new TextRun({ text: `${ECOLE} · Mathématiques ${entete.heuresSemaine}h/sem · ${PROFESSEUR}`, size: 16, color: ACCENT })] }),
+    new Paragraph({ children: [new TextRun({ text: `${titreExamen(entete)}${suffixe ? ` — ${suffixe}` : ""}`, bold: true, size: 32 })], spacing: { before: 60 } }),
+    new Paragraph({
+      children: [new TextRun({ text: `${dateEnToutesLettres(entete.date)} · Série `, size: 18, color: GRIS }), new TextRun({ text: entete.serieLettre, size: 18, color: "1F2937", bold: true })],
+      spacing: { after: 120 },
+    }),
+  ];
+}
+
+function tableauPartiesDocx(parties: PartieExamen<ItemEvaluation>[]): Table {
+  const total = parties.reduce((t, p) => t + totalPartie(p), 0);
+  return new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    rows: [
+      new TableRow({ children: [cellule("Partie", { gras: true }), ...parties.map((p) => cellule(`${p.romain} · ${p.titreCourt}`, { gras: true })), cellule("Total", { gras: true })] }),
+      new TableRow({ children: [cellule("Points"), ...parties.map((p) => cellule(`…… / ${nombreFr(totalPartie(p))}`)), cellule(`…… / ${nombreFr(total)}`, { gras: true })] }),
+    ],
+  });
+}
+
+/** Encadré « Consignes » de l'examen : consignes par défaut, calculatrice, horaire, puis une puce
+ * par consigne supplémentaire (paragraphes au même cadre : Word les fusionne en un encadré). */
+async function consignesExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[]): Promise<Paragraph[]> {
+  const calculatrice = entete.calculatrice ? ` Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}.` : "";
+  const bord = { style: BorderStyle.SINGLE, size: 10, color: ACCENT, space: 4 } as const;
+  const cadre = { border: { top: bord, bottom: bord, left: bord, right: bord }, shading: { type: ShadingType.CLEAR, color: "auto", fill: "F2F7FC" } } as const;
+  const res: Paragraph[] = [
+    new Paragraph({
+      ...cadre,
+      children: [new TextRun({ text: "Consignes", bold: true, color: ACCENT, size: 20 }), new TextRun({ text: ` — ${TEXTE_CONSIGNES}${calculatrice}${phraseHoraire(entete, examen, items)}`, size: 20 })],
+      spacing: { before: 160, after: examen.consignesSupplementaires.length ? 0 : 120 },
+    }),
+  ];
+  for (let i = 0; i < examen.consignesSupplementaires.length; i++) {
+    const derniere = i === examen.consignesSupplementaires.length - 1;
+    res.push(
+      new Paragraph({
+        ...cadre,
+        children: [new TextRun({ text: "•\t", size: 20 }), ...(await fragmentsVersRunsDocx(fragmentsConsigne(examen.consignesSupplementaires[i])))],
+        tabStops: [{ type: TabStopType.LEFT, position: 280 }],
+        indent: { left: 280, hanging: 280 },
+        spacing: { before: 20, after: derniere ? 120 : 0 },
+      }),
+    );
+  }
+  return res;
+}
+
+/** Ouverture d'une partie : filet épais d'accent, « PARTIE I  Titre » et ses points, ligne grise. */
+function ouverturePartieDocx(examen: ExamenDocument, partie: PartieExamen<ItemEvaluation>): Paragraph[] {
+  return [
+    new Paragraph({
+      children: [
+        new TextRun({ text: `PARTIE ${partie.romain}   `, bold: true, color: ACCENT, size: 18, font: "Arial", characterSpacing: 30 }),
+        new TextRun({ text: partie.titre, bold: true, size: 28 }),
+        new TextRun({ text: `\t${pointsTexte(totalPartie(partie))}`, size: 18, color: GRIS }),
+      ],
+      border: { top: { style: BorderStyle.SINGLE, size: 24, color: ACCENT, space: 4 } },
+      tabStops: [{ type: TabStopType.RIGHT, position: LARGEUR_UTILE }],
+      spacing: { before: 320, after: 0 },
+      keepNext: true,
+      keepLines: true,
+    }),
+    new Paragraph({
+      children: [new TextRun({ text: lignePartie(partie, accesItem, examen.organisation, examen.chapitres), size: 17, color: GRIS })],
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: ACCENT, space: 3 } },
+      spacing: { after: 120 },
+      keepNext: true,
+    }),
+  ];
+}
+
+async function questionsExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[], corrige: boolean): Promise<FileChild[]> {
+  const enfants: FileChild[] = [];
+  for (const partie of partiesDuDocument(examen, items)) {
+    enfants.push(...ouverturePartieDocx(examen, partie));
+    let sectionCourante: string | null = null;
+    for (const { element: item, numero } of partie.questions) {
+      if (entete.afficherTitresSection && item.titreSection !== sectionCourante) {
+        sectionCourante = item.titreSection;
+        enfants.push(new Paragraph({ children: [new TextRun({ text: item.titreSection, size: 18, color: GRIS })], spacing: { before: 120 } }));
+      }
+      enfants.push(...(await enonceQuestionDocx(item, numero, etiquetteQuestion(accesItem(item), examen.organisation, examen.chapitres))));
+      if (corrige) enfants.push(...(await correctionDocx(item)));
+    }
+  }
+  return enfants;
+}
+
+/** En-tête courant Word (pages 2 et suivantes : première page sans en-tête, `titlePage`). */
+function enteteCourantDocx(entete: EnteteEvaluation, examen: ExamenDocument): Header {
+  return new Header({
+    children: [
+      new Paragraph({
+        children: [
+          new TextRun({ text: enteteCourantExamen(entete, examen), size: 16, color: GRIS }),
+          new TextRun({ text: "\tSérie ", size: 16, color: GRIS }),
+          new TextRun({ text: entete.serieLettre, size: 16, bold: true }),
+        ],
+        tabStops: [{ type: TabStopType.RIGHT, position: LARGEUR_UTILE }],
+        border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "999999", space: 2 } },
+      }),
+    ],
+  });
+}
+
+async function copieExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[]): Promise<Blob> {
+  const enfants: FileChild[] = [...enteteExamenDocx(entete, examen), new Paragraph({ children: [new TextRun({ text: "Nom : ________________________________    Classe : __________    N° : ____", size: 20 })], spacing: { after: 160 } })];
+  enfants.push(tableauPartiesDocx(partiesDuDocument(examen, items)));
+  if (entete.calculatrice) {
+    enfants.push(new Paragraph({ children: [new TextRun({ text: `Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}`, bold: true, color: entete.calculatrice === "interdite" ? ALERTE : BON })], spacing: { before: 120 } }));
+  }
+  enfants.push(...(await consignesExamenDocx(entete, examen, items)));
+  enfants.push(...(await questionsExamenDocx(entete, examen, items, false)));
+  return documentDocx(enfants, piedDocx(entete.serieLettre), enteteCourantDocx(entete, examen));
+}
+
+async function corrigeExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[]): Promise<Blob> {
+  const enfants: FileChild[] = [...enteteExamenDocx(entete, examen, "Corrigé"), ...(await questionsExamenDocx(entete, examen, items, true))];
+  return documentDocx(enfants, piedDocx(entete.serieLettre, "Corrigé · document du professeur"), enteteCourantDocx(entete, examen));
+}
+
+/* ----------------------------------------------------------------------------------------------
  * Documents
  * -------------------------------------------------------------------------------------------- */
 
@@ -394,15 +553,21 @@ function piedDocx(serieLettre: string, mention?: string): Footer {
   });
 }
 
-function documentDocx(enfants: FileChild[], pied: Footer): Promise<Blob> {
+function documentDocx(enfants: FileChild[], pied: Footer, enteteCourant?: Header): Promise<Blob> {
   const document = new Document({
     styles: { default: { document: { run: { font: "Georgia", size: 22 } } } },
-    sections: [{ properties: { page: { margin: { top: 850, bottom: 850, left: 1000, right: 1000 } } }, footers: { default: pied }, children: enfants }],
+    sections: [
+      enteteCourant
+        ? // Examen : en-tête courant à partir de la page 2 (première page différente), même pied partout.
+          { properties: { titlePage: true, page: { margin: { top: 850, bottom: 850, left: 1000, right: 1000 } } }, headers: { default: enteteCourant, first: new Header({ children: [] }) }, footers: { default: pied, first: pied }, children: enfants }
+        : { properties: { page: { margin: { top: 850, bottom: 850, left: 1000, right: 1000 } } }, footers: { default: pied }, children: enfants },
+    ],
   });
   return Packer.toBlob(document);
 }
 
 export async function genererCopieEvaluationDocx(entete: EnteteEvaluation, items: ItemEvaluation[]): Promise<Blob> {
+  if (entete.examen) return copieExamenDocx(entete, entete.examen, items);
   const enfants: FileChild[] = [...enteteDocx(entete, items), tableauResultats(items)];
   if (entete.calculatrice) {
     enfants.push(new Paragraph({ children: [new TextRun({ text: `Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}`, bold: true, color: entete.calculatrice === "interdite" ? ALERTE : BON })], spacing: { before: 120 } }));
@@ -414,28 +579,48 @@ export async function genererCopieEvaluationDocx(entete: EnteteEvaluation, items
 
 /** Corrigé Word : même contenu que le corrigé HTML (énoncé de chaque question puis son corrigé détaillé). */
 export async function genererCorrigeEvaluationDocx(entete: EnteteEvaluation, items: ItemEvaluation[]): Promise<Blob> {
+  if (entete.examen) return corrigeExamenDocx(entete, entete.examen, items);
   const enfants: FileChild[] = [...enteteDocx(entete, items, "Corrigé").slice(0, 3), ...(await questionsDocx(entete, items, true))];
   return documentDocx(enfants, piedDocx(entete.serieLettre, "Corrigé · document du professeur"));
 }
 
 /** Grille de correction Word : même contenu que la grille HTML (document professeur). */
 export async function genererGrilleEvaluationDocx(entete: EnteteEvaluation, items: ItemEvaluation[]): Promise<Blob> {
+  const examen = entete.examen;
   const totaux = ([1, 2, 3] as const).map((p) => ({ p, t: items.filter((it) => it.processus === p).reduce((s, it) => s + it.points, 0) })).filter((x) => x.t > 0);
   const total = items.reduce((s, it) => s + it.points, 0);
+  const parties = examen ? partiesDuDocument(examen, items) : [];
+  const resume = examen ? parties.map((p) => `${p.romain} ${p.titreCourt} : ${nombreFr(totalPartie(p))}`).join(" · ") : totaux.map((x) => `${NOM_PROCESSUS[x.p]} ${nombreFr(x.t)}`).join(" · ");
   const enfants: FileChild[] = [
-    new Paragraph({ children: [new TextRun({ text: "Document professeur · Série ", size: 16, color: ACCENT }), new TextRun({ text: entete.serieLettre, size: 16, color: ACCENT, bold: true })] }),
-    new Paragraph({ children: [new TextRun({ text: `Grille de correction — ${titreNettoye(entete)}`, bold: true, size: 32 })], spacing: { before: 60 } }),
+    new Paragraph({ children: [new TextRun({ text: `Document professeur · ${examen ? "Examen · " : ""}Série `, size: 16, color: ACCENT }), new TextRun({ text: entete.serieLettre, size: 16, color: ACCENT, bold: true })] }),
+    new Paragraph({ children: [new TextRun({ text: `Grille de correction — ${examen ? titreExamen(entete) : titreNettoye(entete)}`, bold: true, size: 32 })], spacing: { before: 60 } }),
     new Paragraph({
-      children: [new TextRun({ text: `${totaux.map((x) => `${NOM_PROCESSUS[x.p]} ${nombreFr(x.t)}`).join(" · ")} · `, size: 18, color: GRIS }), new TextRun({ text: `Total ${nombreFr(total)}`, size: 18, bold: true })],
+      children: [new TextRun({ text: `${resume} · `, size: 18, color: GRIS }), new TextRun({ text: `Total ${nombreFr(total)}`, size: 18, bold: true })],
       border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: "1B1D22", space: 4 } },
       spacing: { after: 160 },
     }),
   ];
-  let numero = 0;
-  for (const p of [1, 2, 3] as const) {
-    for (const item of items.filter((it) => it.processus === p)) {
-      numero++;
-      const tete: ParagraphChild[] = [new TextRun({ text: `Question ${numero} · ${NOM_PROCESSUS[item.processus]} · ${pointsTexte(item.points)}`, bold: true, size: 19 })];
+  // Évaluation : questions par processus ; examen : partie par partie (ouverture de partie, libellé
+  // processus · chapitre de chaque question).
+  const groupes: { ouverture: Paragraph[]; questions: { item: ItemEvaluation; numero: number; libelle: string }[] }[] = [];
+  if (examen) {
+    for (const partie of parties) {
+      groupes.push({
+        ouverture: ouverturePartieDocx(examen, partie),
+        questions: partie.questions.map(({ element: item, numero }) => {
+          const chapitre = examen.chapitres.filter((c) => (item.chapitres ?? []).includes(c.slug)).map((c) => c.titreCourt);
+          return { item, numero, libelle: [NOM_PROCESSUS_EXAMEN[item.processus], chapitre.length > 2 ? "Plusieurs chapitres" : chapitre.join(" · ")].filter(Boolean).join(" · ") };
+        }),
+      });
+    }
+  } else {
+    let n = 0;
+    for (const p of [1, 2, 3] as const) groupes.push({ ouverture: [], questions: items.filter((it) => it.processus === p).map((item) => ({ item, numero: ++n, libelle: NOM_PROCESSUS[item.processus] })) });
+  }
+  for (const groupe of groupes) {
+    enfants.push(...groupe.ouverture);
+    for (const { item, numero, libelle } of groupe.questions) {
+      const tete: ParagraphChild[] = [new TextRun({ text: `Question ${numero} · ${libelle} · ${pointsTexte(item.points)}`, bold: true, size: 19 })];
       if (item.bareme) tete.push(new TextRun({ text: "    Réponse : ", size: 19 }), ...(await fragmentsVersRunsDocx(item.bareme.reponseFinale, { gras: true })));
       else if (item.notion) tete.push(new TextRun({ text: `    ${item.notion}`, size: 19 }));
       enfants.push(new Paragraph({ children: tete, shading: { type: ShadingType.CLEAR, color: "auto", fill: "EEF3F8" }, spacing: { before: 200, after: 60 }, keepNext: true }));
@@ -489,5 +674,5 @@ export async function genererGrilleEvaluationDocx(entete: EnteteEvaluation, item
       spacing: { before: 280 },
     }),
   );
-  return documentDocx(enfants, piedDocx(entete.serieLettre, "Grille de correction · ne pas distribuer aux élèves"));
+  return documentDocx(enfants, piedDocx(entete.serieLettre, "Grille de correction · ne pas distribuer aux élèves"), examen ? enteteCourantDocx(entete, examen) : undefined);
 }

@@ -4,6 +4,7 @@ import { LIBELLE_PALIER, type Palier } from "./niveauDifficulte";
 import { blocCorrectionHtml, echapperHtml, fragmentsEnteteHtml, fragmentsVersHtml, grillesLisiblesAImpression } from "./genererFeuilleExercicesHtml";
 import { obtenirCssKatexAutonome } from "./katexImage";
 import { qrCodeSvg } from "./qrSvg";
+import { etiquetteQuestion, examenDeSession, fragmentsConsigne, lignePartie, partiesExamen, NOM_PROCESSUS_EXAMEN, type ChapitreExamen, type OrganisationExamen, type PartieExamen, type QuestionOrdonnable } from "./examen";
 
 /**
  * Assembleur HTML des documents imprimables générés depuis Math-Belgium — feuille d'exercices
@@ -59,6 +60,9 @@ export interface ItemEvaluation {
   dureeMinutes?: number;
   /** Code reproductible de l'exercice (QR code de la feuille d'exercices, rappel dans la grille). */
   code?: { code: string; url: string };
+  /** Chapitre(s) d'origine (slugs) : un seul, sauf la question vrai/faux regroupée — parties et
+   * étiquettes de l'examen (`examen.ts`). */
+  chapitres?: string[];
 }
 
 /** École et professeur : fixes (décision prise avec l'utilisateur — aucun champ dans le formulaire). */
@@ -93,6 +97,25 @@ export interface EnteteEvaluation {
    * (copie d'évaluation et énoncé de la feuille d'exercices seulement ; jamais l'aménagée, le
    * corrigé, la grille ni la page « Je vérifie »). Absent = non. */
   deuxColonnes?: boolean;
+  /** Document « Examen » (maquette X3) : présent seulement pour un examen — l'évaluation est rendue
+   * exactement comme avant quand il est absent. Points des items DÉJÀ mis à l'échelle si le total
+   * est fixé (`evaluationLocal.ts::itemsDuDocument`). */
+  examen?: ExamenDocument;
+}
+
+/** Réglages d'un examen, déjà lus et mis en forme (`evaluationLocal.ts::examenDuPlan`). */
+export interface ExamenDocument {
+  organisation: OrganisationExamen;
+  /** Chapitres du plan, dans l'ordre du plan. */
+  chapitres: ChapitreExamen[];
+  /** « Session de juin 2027 ». */
+  session: string;
+  /** « 08h50 → 09h50 » (heure de départ et durée lisibles), sinon `null`. */
+  horaire: string | null;
+  /** « 1 h », « 1 h 30 » (durée lisible), sinon `null`. */
+  duree: string | null;
+  /** Consignes ajoutées après les consignes par défaut (une par ligne non vide, `$…$` en KaTeX). */
+  consignesSupplementaires: string[];
 }
 
 /**
@@ -856,30 +879,33 @@ function questionsEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation
   return deuxColonnes ? `<div class="deux-colonnes">${html}</div>` : html;
 }
 
+/** Bloc d'une question dans la grille de correction (évaluation : `libelle` = processus). */
+function blocGrilleHtml(item: ItemEvaluation, numero: number, libelle: string): string {
+  const reponse = item.bareme ? `Réponse : <b>${fragmentsVersHtml(item.bareme.reponseFinale)}</b>` : item.notion ? echapperHtml(item.notion) : "";
+  const tete = `<div class="q-tete"><span class="sans">Question ${numero} · ${echapperHtml(libelle)} · ${pointsTexte(item.points)}</span><span>${reponse}</span></div>`;
+  if (!item.bareme || item.bareme.criteres.length === 0) {
+    return `<section class="q">${tete}<div class="note">Barème global : ${pointsTexte(item.points)}.</div><div style="padding:3px 10px 0">${correctionHtml(item)}</div></section>`;
+  }
+  const pts = pointsCriteres(item);
+  const criteres = item.bareme.criteres
+    .map((c, i) => `<span>${c.sousQuestion ? `${echapperHtml(c.sousQuestion.replace(/\)$/, ""))}) ` : ""}${c.etape ? `<span class="etape-num">Étape ${c.etape}</span> ` : ""}${fragmentsVersHtml(c.critere)}</span><b>${nombreFr(pts[i])}</b>`)
+    .join("");
+  const erreurs = (item.bareme.erreursFrequentes ?? [])
+    .map((e) => `${fragmentsVersHtml(e.description)}${e.cout ? ` → ${echapperHtml(e.cout)}` : ""}`)
+    .join(" ; ");
+  const acceptees = (item.bareme.reponsesAcceptees ?? []).map((r) => fragmentsVersHtml(r)).join(" ; ");
+  const code = item.code ? ` <span class="pts">code ${echapperHtml(item.code.code)}</span>` : "";
+  return `<section class="q">${tete}<div class="criteres">${criteres}</div>${
+    erreurs ? `<div class="note"><span class="err">Erreurs fréquentes :</span> ${erreurs}</div>` : ""
+  }${acceptees ? `<div class="note"><span class="ok">Accepter :</span> ${acceptees}</div>` : ""}${code ? `<div class="note">${code}</div>` : ""}</section>`;
+}
+
 function grilleHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
   const totaux = totauxParProcessus(items);
   const total = items.reduce((t, it) => t + it.points, 0);
   const resume = `${totaux.map((t) => `${NOM_PROCESSUS[t.processus]} ${nombreFr(t.total)}`).join(" · ")} · <b>Total ${nombreFr(total)}</b>`;
   const blocs = itemsNumerotes(items)
-    .map(({ item, numero }) => {
-      const reponse = item.bareme ? `Réponse : <b>${fragmentsVersHtml(item.bareme.reponseFinale)}</b>` : item.notion ? echapperHtml(item.notion) : "";
-      const tete = `<div class="q-tete"><span class="sans">Question ${numero} · ${NOM_PROCESSUS[item.processus]} · ${pointsTexte(item.points)}</span><span>${reponse}</span></div>`;
-      if (!item.bareme || item.bareme.criteres.length === 0) {
-        return `<section class="q">${tete}<div class="note">Barème global : ${pointsTexte(item.points)}.</div><div style="padding:3px 10px 0">${correctionHtml(item)}</div></section>`;
-      }
-      const pts = pointsCriteres(item);
-      const criteres = item.bareme.criteres
-        .map((c, i) => `<span>${c.sousQuestion ? `${echapperHtml(c.sousQuestion.replace(/\)$/, ""))}) ` : ""}${c.etape ? `<span class="etape-num">Étape ${c.etape}</span> ` : ""}${fragmentsVersHtml(c.critere)}</span><b>${nombreFr(pts[i])}</b>`)
-        .join("");
-      const erreurs = (item.bareme.erreursFrequentes ?? [])
-        .map((e) => `${fragmentsVersHtml(e.description)}${e.cout ? ` → ${echapperHtml(e.cout)}` : ""}`)
-        .join(" ; ");
-      const acceptees = (item.bareme.reponsesAcceptees ?? []).map((r) => fragmentsVersHtml(r)).join(" ; ");
-      const code = item.code ? ` <span class="pts">code ${echapperHtml(item.code.code)}</span>` : "";
-      return `<section class="q">${tete}<div class="criteres">${criteres}</div>${
-        erreurs ? `<div class="note"><span class="err">Erreurs fréquentes :</span> ${erreurs}</div>` : ""
-      }${acceptees ? `<div class="note"><span class="ok">Accepter :</span> ${acceptees}</div>` : ""}${code ? `<div class="note">${code}</div>` : ""}</section>`;
-    })
+    .map(({ item, numero }) => blocGrilleHtml(item, numero, NOM_PROCESSUS[item.processus]))
     .join("");
   return `<div class="grille"><div class="tete-grille"><div><span class="surtitre">Document professeur · Série <strong>${echapperHtml(entete.serieLettre)}</strong></span><h1>Grille de correction — ${echapperHtml(titreNettoye(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${blocs}
 <div class="regle"><span class="sans">RÈGLE</span><span>Une erreur n'est pénalisée qu'une fois : si une valeur fausse est réutilisée correctement dans la suite, la suite rapporte ses points.</span></div>
@@ -890,6 +916,7 @@ function grilleHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
  * « Série · Nom · page n / N », annexes en fin de copie, deux colonnes si demandé ; le corrigé et la
  * grille gardent leur mise en page, avec le pied « Série A · page n / N » (sans « Nom »). */
 export async function genererEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation[], annexes?: AnnexeDocument[]): Promise<{ enonce: Blob; corrige: Blob; grille: Blob }> {
+  if (entete.examen) return genererExamenHtml(entete, entete.examen, items, annexes);
   const cssKatex = await obtenirCssKatexAutonome();
   const css = STYLE_EVALUATION;
   const titre = `${titreEvaluation(entete)} — Série ${entete.serieLettre}`;
@@ -909,6 +936,227 @@ export async function genererEvaluationHtml(entete: EnteteEvaluation, items: Ite
 }
 
 /* ----------------------------------------------------------------------------------------------
+ * Examen (maquette X3 « Sans page de garde », décisions de l'utilisateur)
+ *
+ * Même grammaire que la copie d'évaluation (cartouche, tableau des points, encadré « Consignes ») :
+ * bandeau plein « Examen · session · horaire » au-dessus du cartouche, tableau des points par
+ * PARTIE, ouverture de chaque partie (filet épais d'accent, « Partie I », titre, points, ligne grise
+ * des chapitres / processus couverts et des numéros de questions), étiquette de processus ou de
+ * chapitre sur chaque question, numérotation continue, en-tête courant à partir de la page 2 (boîtes
+ * de marge `@top-*`, absentes de la première page). Le pied de page est celui de l'évaluation.
+ * -------------------------------------------------------------------------------------------- */
+
+const STYLE_EXAMEN = `
+.bande { font-family: Archivo, Arial, sans-serif; font-size: 9pt; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #fff; background: var(--accent); padding: 6px 12px; display: flex; justify-content: space-between; gap: 12px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+/* Horaire et durée hors capitales : « 08h50 », jamais « 08H50 ». */
+.bande .nc { text-transform: none; letter-spacing: 0.04em; }
+.resultats.examen th:first-child, .resultats.examen td.lbl, .resultats.examen td.vide { white-space: nowrap; }
+.partie { margin: 16px 0 8px; border-top: 3px solid var(--accent); border-bottom: 1px solid var(--accent); padding: 6px 0 5px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; column-gap: 12px; row-gap: 1px; break-inside: avoid; page-break-inside: avoid; break-after: avoid; page-break-after: avoid; }
+.partie .no { font-family: Archivo, Arial, sans-serif; font-weight: 700; font-size: 9pt; letter-spacing: 0.14em; color: var(--accent); text-transform: uppercase; white-space: nowrap; }
+.partie h2 { font-size: 15pt; font-weight: 600; line-height: 1.25; min-width: 0; overflow-wrap: anywhere; }
+.partie .chs { grid-column: 1 / -1; font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; color: var(--gris); }
+.question .ligne-titre .ch, .q-am .ch, .grille .q-tete .ch { font-family: Archivo, Arial, sans-serif; font-size: 8pt; font-weight: 600; color: var(--gris); border: 1px solid var(--filet); border-radius: 3px; padding: 0 6px; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+.consignes ul.sup { margin: 3px 0 0; padding-left: 1.3em; }
+.consignes ul.sup li { margin: 1px 0; }
+.grille .partie { margin: 16px 0 4px; }
+.grille .partie h2 { font-size: 12pt; }
+/* Deux colonnes : l'ouverture de partie occupe toute la largeur, ses questions suivent en colonnes. */
+.partie-colonnes > .partie { margin-bottom: 0; }
+`;
+
+/** Polices de la version aménagée pour les éléments propres à l'examen. */
+const STYLE_EXAMEN_AMENAGE = `
+.bande, .partie .no, .partie .chs, .q-am .ch { font-family: 'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif; }
+.bande { font-size: 11pt; margin-bottom: 10px; }
+.partie { margin: 0 0 12px; }
+.partie .no { font-size: 11pt; }
+.partie h2 { font-size: 17pt; }
+.partie .chs { font-size: 11pt; }
+.q-am .ch { font-size: 10pt; }
+`;
+
+/** En-tête courant de l'examen, à partir de la page 2 : « Examen de juin 2027 · Mathématiques 4e »
+ * à gauche, « Série A » à droite (lettre en gras : boîte de coin, comme le pied de page). L'espace
+ * après `\00a0` TERMINE l'échappement CSS : sans elle, « \00a0A » se lisait U+A0A (glyphe gurmukhi). */
+function styleEnteteCourant(gauche: string, serieLettre: string, police: string, taille = "8.5pt"): string {
+  const commun = `font-family: ${police}; font-size: ${taille}; color: #4a4f58; vertical-align: middle;`;
+  const g = gauche.replace(/["\\]/g, "");
+  const serie = serieLettre.replace(/["\\]/g, "");
+  return `@page { @top-left { content: "${g}"; ${commun} text-align: left; }
+  @top-right { content: "Série"; ${commun} text-align: right; }
+  @top-right-corner { content: "\\00a0 ${serie}"; ${commun} font-weight: 700; text-align: left; } }
+@page :first { @top-left { content: none; } @top-right { content: none; } @top-right-corner { content: none; } }`;
+}
+
+const accesExamen = (it: ItemEvaluation): QuestionOrdonnable => ({ processus: it.processus, chapitres: it.chapitres ?? [] });
+
+/** Parties de l'examen (ordre et numérotation de la copie, partagés avec la remédiation). */
+export function partiesDuDocument(examen: ExamenDocument, items: ItemEvaluation[]): PartieExamen<ItemEvaluation>[] {
+  return partiesExamen(items, accesExamen, examen.organisation, examen.chapitres);
+}
+
+export function totalPartie(partie: PartieExamen<ItemEvaluation>): number {
+  return partie.questions.reduce((t, q) => t + q.element.points, 0);
+}
+
+/** « Examen de mathématiques — 4e année ». */
+export function titreExamen(entete: EnteteEvaluation): string {
+  return `Examen de mathématiques — ${entete.niveauNumero}e année`;
+}
+
+/** « Examen de juin 2027 · Mathématiques 4e » (en-tête courant). */
+export function enteteCourantExamen(entete: EnteteEvaluation, examen: ExamenDocument): string {
+  return `${examenDeSession(examen.session)} · Mathématiques ${entete.niveauLabel}`;
+}
+
+/** Droite du bandeau : « Session de juin 2027 · 08h50 → 09h50 » (sans heure : la durée seule). */
+export function droiteBandeau(examen: ExamenDocument): { session: string; horaire: string | null } {
+  return { session: examen.session, horaire: examen.horaire ?? examen.duree };
+}
+
+function bandeHtml(examen: ExamenDocument): string {
+  const { session, horaire } = droiteBandeau(examen);
+  return `<div class="bande"><span>Examen</span><span>${echapperHtml(session)}${horaire ? ` · <span class="nc">${echapperHtml(horaire)}</span>` : ""}</span></div>`;
+}
+
+function cartoucheExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, suffixe?: string): string {
+  return `${bandeHtml(examen)}<div class="cartouche examen">
+  <div class="g"><span class="surtitre">${echapperHtml(ECOLE_NOM)} · Mathématiques ${echapperHtml(entete.heuresSemaine)}h/sem · ${echapperHtml(PROFESSEUR)}</span>
+    <h1>${echapperHtml(titreExamen(entete))}${suffixe ? ` — ${echapperHtml(suffixe)}` : ""}</h1>
+    <span class="meta">${echapperHtml(dateEnToutesLettres(entete.date))} · Série <strong>${echapperHtml(entete.serieLettre)}</strong> · ${echapperHtml(ECOLE_ADRESSE)}</span></div>
+  <div class="d"><span>Nom</span><span class="champ"></span><span>Classe</span><span class="champ"></span><span>N°</span><span class="champ"></span></div>
+</div>`;
+}
+
+function resultatsExamenHtml(entete: EnteteEvaluation, parties: PartieExamen<ItemEvaluation>[]): string {
+  const total = parties.reduce((t, p) => t + totalPartie(p), 0);
+  const tetes = parties.map((p) => `<th>${p.romain} · ${echapperHtml(p.titreCourt)}</th>`).join("");
+  const cases = parties.map((p) => `<td class="vide">…… / ${nombreFr(totalPartie(p))}</td>`).join("");
+  return `<div class="resultats examen"><table><tr><th style="text-align:left">Partie</th>${tetes}<th class="total">Total</th></tr><tr><td class="lbl">Points</td>${cases}<td class="total vide">…… / ${nombreFr(total)}</td></tr></table>${calculatriceHtml(entete.calculatrice)}</div>`;
+}
+
+/** Phrase horaire / durée de l'encadré « Consignes » (copie, aménagée, Word). */
+export function phraseHoraire(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[]): string {
+  if (examen.horaire) return ` Horaire : ${examen.horaire}${examen.duree ? ` (${examen.duree})` : ""}.`;
+  if (examen.duree) return ` Durée : ${examen.duree}.`;
+  return entete.afficherDuree ? ` Durée : ${dureeEstimeeMinutes(items)} minutes.` : "";
+}
+
+function consignesExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[]): string {
+  const calculatrice = entete.calculatrice ? ` Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}.` : "";
+  const sup = examen.consignesSupplementaires.length
+    ? `<ul class="sup">${examen.consignesSupplementaires.map((l) => `<li>${fragmentsVersHtml(fragmentsConsigne(l))}</li>`).join("")}</ul>`
+    : "";
+  return `<div class="consignes"><b class="titre">Consignes</b> — ${echapperHtml(TEXTE_CONSIGNES)}${calculatrice}${echapperHtml(phraseHoraire(entete, examen, items))}${sup}</div>`;
+}
+
+function ouverturePartieHtml(examen: ExamenDocument, partie: PartieExamen<ItemEvaluation>): string {
+  return `<div class="partie"><span class="no">Partie ${partie.romain}</span><h2>${echapperHtml(partie.titre)}</h2><span class="pts">${pointsTexte(totalPartie(partie))}</span><span class="chs">${echapperHtml(lignePartie(partie, accesExamen, examen.organisation, examen.chapitres))}</span></div>`;
+}
+
+function etiquetteHtml(examen: ExamenDocument, item: ItemEvaluation): string {
+  const e = etiquetteQuestion(accesExamen(item), examen.organisation, examen.chapitres);
+  return e ? `<span class="ch">${echapperHtml(e)}</span>` : "";
+}
+
+/** Questions de l'examen, partie par partie. Deux colonnes : chaque partie s'ouvre sur toute la
+ * largeur, puis ses questions en deux colonnes (bloc multicolonne propre à la partie). */
+function questionsExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[], avecCorrection: boolean, deuxColonnes = false): string {
+  const afficherTitres = entete.afficherTitresSection ?? false;
+  let html = "";
+  for (const partie of partiesDuDocument(examen, items)) {
+    let sectionCourante: string | null = null;
+    let questions = "";
+    for (const { element: item, numero } of partie.questions) {
+      let titre = "";
+      if (afficherTitres && item.titreSection !== sectionCourante) {
+        sectionCourante = item.titreSection;
+        titre = `<div class="titre-section">${echapperHtml(item.titreSection)}</div>`;
+      }
+      if (!deuxColonnes) questions += titre;
+      const corps = corpsQuestionHtml(item, pointsParSousQuestion(item));
+      questions += `<section class="question${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 380)}">${deuxColonnes ? titre : ""}<div class="ligne-titre"><span><span class="num">Question ${numero}</span>${etiquetteHtml(examen, item)}</span><span class="pts">${pointsTexte(item.points)}</span></div>${corps}${
+        avecCorrection ? `<div class="correction-bloc">${correctionHtml(item)}</div>` : ""
+      }</section>`;
+    }
+    const ouverture = ouverturePartieHtml(examen, partie);
+    // Une partie d'UNE seule question reste en pleine largeur (en colonnes, l'autre colonne restait vide).
+    html += deuxColonnes && partie.questions.length > 1 ? `<div class="partie-colonnes">${ouverture}<div class="deux-colonnes">${questions}</div></div>` : `${ouverture}${questions}`;
+  }
+  return html;
+}
+
+function grilleExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[]): string {
+  const parties = partiesDuDocument(examen, items);
+  const total = parties.reduce((t, p) => t + totalPartie(p), 0);
+  const resume = `${parties.map((p) => `${p.romain} ${echapperHtml(p.titreCourt)} : ${nombreFr(totalPartie(p))}`).join(" · ")} · <b>Total ${nombreFr(total)}</b>`;
+  const blocs = parties
+    .map((partie) => {
+      const qs = partie.questions
+        .map(({ element: item, numero }) => {
+          // Grille (document professeur) : processus ET chapitre de la question.
+          const chapitre = examen.chapitres.filter((c) => (item.chapitres ?? []).includes(c.slug)).map((c) => c.titreCourt);
+          const libelle = [NOM_PROCESSUS_EXAMEN[item.processus], chapitre.length > 2 ? "Plusieurs chapitres" : chapitre.join(" · ")].filter(Boolean).join(" · ");
+          return blocGrilleHtml(item, numero, libelle);
+        })
+        .join("");
+      return `${ouverturePartieHtml(examen, partie)}${qs}`;
+    })
+    .join("");
+  return `<div class="grille"><div class="tete-grille"><div><span class="surtitre">Document professeur · Examen · Série <strong>${echapperHtml(entete.serieLettre)}</strong></span><h1>Grille de correction — ${echapperHtml(titreExamen(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${blocs}
+<div class="regle"><span class="sans">RÈGLE</span><span>Une erreur n'est pénalisée qu'une fois : si une valeur fausse est réutilisée correctement dans la suite, la suite rapporte ses points.</span></div>
+<div class="pied"><span>${echapperHtml(examenDeSession(examen.session))} · ${echapperHtml(dateEnToutesLettres(entete.date))}</span><span>Ne pas distribuer aux élèves</span></div></div>`;
+}
+
+/** Copie, corrigé et grille d'un EXAMEN (même pied de page que l'évaluation, en-tête courant en plus). */
+async function genererExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[], annexes?: AnnexeDocument[]): Promise<{ enonce: Blob; corrige: Blob; grille: Blob }> {
+  const cssKatex = await obtenirCssKatexAutonome();
+  const css = `${STYLE_EVALUATION}${STYLE_EXAMEN}`;
+  const titre = `${titreExamen(entete)} — ${examen.session} — Série ${entete.serieLettre}`;
+  const deuxColonnes = !!entete.deuxColonnes;
+  const parties = partiesDuDocument(examen, items);
+  const contenuCopie = `${cartoucheExamenHtml(entete, examen)}${resultatsExamenHtml(entete, parties)}${consignesExamenHtml(entete, examen, items)}${questionsExamenHtml(entete, examen, items, false, deuxColonnes)}`;
+  const copie = `${deuxColonnes ? `<div class="page-compacte">${contenuCopie}</div>` : contenuCopie}${annexesHtml(annexes)}`;
+  const corrige = `${cartoucheExamenHtml(entete, examen, "Corrigé")}${questionsExamenHtml(entete, examen, items, true)}`;
+  const grille = grilleExamenHtml(entete, examen, items);
+  const police = "Archivo, Arial, sans-serif";
+  const courant = enteteCourantExamen(entete, examen);
+  const cssCopie = `${stylePied(entete.serieLettre, police)}${styleEnteteCourant(courant, entete.serieLettre, police)}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}`;
+  const cssProfesseur = `${stylePied(entete.serieLettre, police, "8.5pt", false)}${styleEnteteCourant(courant, entete.serieLettre, police)}`;
+  return {
+    enonce: new Blob([documentHtml(titre, copie, css, cssKatex, "standard", cssCopie)], { type: "text/html;charset=utf-8" }),
+    corrige: new Blob([documentHtml(`${titre} — Corrigé`, corrige, css, cssKatex, "standard", cssProfesseur)], { type: "text/html;charset=utf-8" }),
+    grille: new Blob([documentHtml(`${titre} — Grille de correction`, grille, css, cssKatex, "standard", cssProfesseur)], { type: "text/html;charset=utf-8" }),
+  };
+}
+
+/** Version aménagée d'un examen : même énoncé, mise en page aménagée (une question par page), avec
+ * le bandeau, l'horaire, les consignes et l'ouverture de chaque partie sur la page de sa première
+ * question. */
+async function genererExamenAmenage(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[], annexes?: AnnexeDocument[]): Promise<Blob> {
+  const cssKatex = await obtenirCssKatexAutonome();
+  const titre = titreExamen(entete);
+  // Session et horaire : dans le bandeau (pas répétés à droite du titre).
+  const tete = `${bandeHtml(examen)}<div class="tete-am"><div><span class="surtitre" style="color:#1d5b8f;font-weight:700">Version aménagée · Examen</span><h1>${echapperHtml(titre)}</h1></div><span class="droite">Série <strong>${echapperHtml(entete.serieLettre)}</strong><br>Mêmes questions, même barème</span></div>
+<div class="identite-am"><span>Nom <span class="champ"></span></span><span>Classe <span class="champ" style="width:2.5cm"></span></span><span>N° <span class="champ" style="width:1.2cm"></span></span><span>${echapperHtml(dateEnToutesLettres(entete.date))}</span></div>
+${consignesExamenHtml(entete, examen, items)}`;
+  let i = 0;
+  let pages = "";
+  for (const partie of partiesDuDocument(examen, items)) {
+    partie.questions.forEach(({ element: item, numero }, k) => {
+      const corps = corpsQuestionHtml(item, pointsParSousQuestion(item));
+      const question = `<section class="q-am"><h2><span>Question ${numero}${etiquetteHtml(examen, item)}</span><span class="pts">${pointsTexte(item.points)}</span></h2><div class="enonce-am">${corps}</div></section>`;
+      pages += `${i > 0 ? '<div class="saut-page"></div>' : ""}${i === 0 ? tete : ""}${k === 0 ? ouverturePartieHtml(examen, partie) : ""}${question}`;
+      i++;
+    });
+  }
+  const police = "'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif";
+  const css = `${stylePied(entete.serieLettre, police, "10pt")}${styleEnteteCourant(enteteCourantExamen(entete, examen), entete.serieLettre, police, "10pt")}`;
+  const doc = documentHtml(`${titre} — ${examen.session} — Version aménagée`, `${pages}${annexesHtml(annexes)}`, `${STYLE_AMENAGE}${STYLE_EXAMEN}${STYLE_EXAMEN_AMENAGE}`, cssKatex, "amenagee", css);
+  return new Blob([doc], { type: "text/html;charset=utf-8" });
+}
+
+/* ----------------------------------------------------------------------------------------------
  * Version aménagée (feuille d'exercices et évaluation)
  * -------------------------------------------------------------------------------------------- */
 
@@ -925,6 +1173,7 @@ function questionAmenageeHtml(item: ItemEvaluation, numero: number, estExercice:
  * « Économie de papier ». Évaluation : même encadré « Consignes » et même pied de page que la copie ;
  * annexes (formulaire…) en fin de document, dans les deux modes. */
 export async function genererVersionAmenagee(entete: EnteteEvaluation, items: ItemEvaluation[], annexes?: AnnexeDocument[]): Promise<Blob> {
+  if (entete.examen && entete.mode !== "exercice") return genererExamenAmenage(entete, entete.examen, items, annexes);
   const cssKatex = await obtenirCssKatexAutonome();
   const estExercice = entete.mode === "exercice";
   const titre = estExercice ? titreNettoye(entete) : titreEvaluation(entete);

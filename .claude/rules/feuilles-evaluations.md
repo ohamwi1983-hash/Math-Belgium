@@ -447,6 +447,62 @@ Toutes décochées par défaut ; un plan enregistré sans le champ se recharge a
   droit — mention courte pour que le numéro ne passe jamais à la ligne. Pas d'annexe
   formulaire ni de deux colonnes en Word.
 
+## Examen (décisions de l'utilisateur, maquette X3 « Sans page de garde »)
+
+Second type de document d'évaluation, choisi dans la barre d'outils du panneau (« Document :
+Évaluation / Examen », absent en feuille d'exercices). L'évaluation n'a PAS changé : même HTML, même
+Word pour un plan d'évaluation (contrôlé octet par octet, KaTeX inliné neutralisé). Toutes les règles
+de ce fichier valent pour l'examen (série en gras, vrai/faux en une question, aucune place de
+réponse, points à droite, pas de majuscules d'insistance, pied de page, options du document).
+- **Modèle** (`EnTeteEvaluation`, `lib/evaluationPayload.ts`) : `typeDocument: 'examen'`,
+  `organisationExamen: 'chapitre' | 'processus'` (défaut chapitre), `totalExamen: { mode: 'libre' } |
+  { mode: 'fixe', parPartie: Record<clé, number> }`, `heureDepart`, `dureeExamen`, `session`,
+  `consignesSupplementaires` — textes TELS QUE SAISIS, lus à l'impression. Plan sans ces champs =
+  évaluation. Ignorés en mode `exercice` (la remédiation d'un examen les efface : feuille ordinaire).
+- **Module pur** `entrainement/export/examen.ts` (testé seul, esbuild) : `partiesExamen` (parties et
+  numérotation CONTINUE ; partagé par le panneau, les documents, le Word et la remédiation),
+  `mettreAEchelle`, `lireHeure` / `lireDuree` / `lireTotal`, `horaireExamen`, `sessionParDefaut`,
+  `examenDeSession`, `titreCourtChapitre` (table `TITRES_COURTS`, à compléter pour un nouveau chapitre).
+- **Parties** : par chapitre = une partie par chapitre du plan (ordre du plan), questions rangées par
+  processus, étiquette = PROCESSUS ; par processus = I Connaître, II Appliquer, III Transférer (celles
+  qui ont des questions ; numérotation = celle de l'évaluation), étiquette = CHAPITRE (titre court ;
+  au-delà de deux, « Plusieurs chapitres »). Clés : `chapitre:<slug>`, `processus:<n>`, `vraiFaux`.
+  **Choix fait** : par chapitre, le vrai/faux dont les affirmations viennent de PLUSIEURS chapitres
+  forme sa propre partie « Vrai ou faux », placée EN PREMIER (question Connaître) ; d'un seul chapitre,
+  il va dans la partie de ce chapitre.
+- **Mise en page** (`assemblerEvaluationHtml.ts`, `STYLE_EXAMEN`) : bandeau plein `.bande` (accent,
+  blanc, capitales espacées ; horaire `.nc` hors capitales : « 08h50 », jamais « 08H50 ») « Examen » /
+  « Session de juin 2027 · 08h50 → 09h50 » au-dessus du cartouche (« Examen de mathématiques — 4e
+  année », date, Série **A**, Nom/Classe/N°, pas de numéro) ; tableau des points PAR PARTIE
+  (`.resultats.examen`, « I · Titre court », Total) + calculatrice ; « Consignes » (défaut +
+  calculatrice + « Horaire : 08h50 → 09h50 (1 h). » ou « Durée : 1 h. » ; durée estimée seulement
+  sans durée saisie et case cochée ; puis une puce par consigne supplémentaire, texte échappé, `$…$`
+  en KaTeX) ; ouverture `.partie` (filet épais, « Partie I », titre, points, ligne grise couvert —
+  numéros) jamais seule en bas de page (`break-after: avoid`, mesuré `pdftotext -layout`) ; en-tête
+  courant à partir de la page 2 (`styleEnteteCourant`, boîtes `@top-left` / `@top-right` /
+  `@top-right-corner`, vides sur `@page :first`) « Examen de juin 2027 · Mathématiques 4e » / « Série
+  **A** » — piège : `"\00a0A"` est lu U+A0A (gurmukhi), écrire `"\00a0 A"`. Copie, corrigé, grille
+  (libellé « processus · chapitre ») et aménagée (bandeau, consignes, ouverture de partie sur la page
+  de sa première question, une question par page) ; deux colonnes : la partie s'ouvre en pleine
+  largeur puis ses questions dans un bloc multicolonne propre (partie d'une seule question : pleine
+  largeur).
+- **Horaire** : heure « 08h50 », « 8h50 », « 8:50 », « 8 h 50 », « 8h » ; durée « 60 », « 60 min »,
+  « 1h », « 1h30 », « 1 h 30 », « 1:30 », « 1,5 h » ; passage de minuit (« 23h30 → 00h30 ») ; sans
+  heure : la durée seule ; illisible : message sous le champ, rien d'imprimé.
+- **Total fixé** (`evaluationLocal.ts::itemsDuDocument`) : points des questions de la partie mis à
+  l'échelle (proportionnels, demi-points, jamais 0 pt, reste corrigé sur la plus grosse question,
+  somme exacte) ; critères et sous-questions suivent (`pointsCriteres` répartit `item.points`).
+  Total illisible, vide ou impossible (< 0,5 pt par question) : points tels quels, signalé dans le
+  panneau. **Total libre** : le panneau affiche en direct le total par partie et le total général.
+  Badge flottant et barre du bas : total de l'examen. Saisie : texte libre, `normaliserSigneMoins`,
+  jamais de champ numérique (les consignes supplémentaires ne sont PAS normalisées : tirets
+  typographiques gardés).
+- **Word** (`evaluationDocx.ts`) : bandeau (paragraphe ombré), tableau par partie, consignes (puces
+  dans le même cadre), ouvertures de partie, étiquettes, en-tête courant (`titlePage`, première page
+  sans en-tête).
+- **Remédiation** : `questionsRemediables` suit l'ordre des parties pour un examen (même
+  `partiesExamen`) — vérifié identique à la copie A, par chapitre et par processus.
+
 ## Feuille de remédiation en un clic (`lib/evaluationRemediation.ts`, décision C9)
 
 Bouton « Feuille de remédiation » sous chaque évaluation / feuille ENREGISTRÉE (liste

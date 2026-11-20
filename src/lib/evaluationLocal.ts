@@ -4,10 +4,13 @@ import {
   genererEvaluationHtml,
   genererFeuilleExercicesComplete,
   genererVersionAmenagee,
+  partiesDuDocument,
   type AnnexeDocument,
   type EnteteEvaluation as EnteteEvaluationSerie,
+  type ExamenDocument,
   type ItemEvaluation,
 } from '../entrainement/export/assemblerEvaluationHtml'
+import { horaireExamen, lignesConsignes, mettreAEchelle, sessionParDefaut, titreCourtChapitre, type ChapitreExamen } from '../entrainement/export/examen'
 import { annexeFormulaire } from '../entrainement/export/annexesPapier'
 import { niveauEtDuree, type NiveauDifficulte } from '../entrainement/export/niveauDifficulte'
 import { findChapter } from '../content/chaptersIndex'
@@ -549,8 +552,9 @@ function dureeItem(niveaux: (NiveauDifficulte | undefined)[], dureeConstante: nu
   return dureeConstante !== undefined ? dureeConstante * nombre : undefined
 }
 
-function champsCommuns(el: ElementBase): Pick<ItemEvaluation, 'processus' | 'titreSection' | 'notion' | 'sectionCours'> {
+function champsCommuns(el: ElementBase): Pick<ItemEvaluation, 'processus' | 'titreSection' | 'notion' | 'sectionCours' | 'chapitres'> {
   return {
+    chapitres: el.section ? [el.section.chapitreSlug] : [],
     processus: el.processus,
     titreSection: el.titreSection,
     notion: el.section?.titre,
@@ -753,7 +757,9 @@ async function itemVraiFauxRegroupe(elements: ElementVraiFaux[]): Promise<ItemEv
   // plusieurs : la question est simplement « Vrai ou faux ».
   const communs = champsCommuns(sources[0])
   const memeSection = sources.every((el) => el.section && sources[0].section && el.section.titre === sources[0].section.titre && el.chapitreSlug === sources[0].chapitreSlug)
-  const champs = memeSection ? communs : { ...communs, titreSection: 'Vrai ou faux', notion: 'Vrai ou faux', sectionCours: undefined }
+  // Chapitres de TOUTES les affirmations (parties de l'examen : plusieurs chapitres → partie « Vrai ou faux »).
+  const chapitres = [...new Set(sources.map((el) => el.chapitreSlug))]
+  const champs = { ...(memeSection ? communs : { ...communs, titreSection: 'Vrai ou faux', notion: 'Vrai ou faux', sectionCours: undefined }), chapitres }
   const resume = affirmations.map((a, i) => `${prefixe(i)}${vf(a.reponse)}`).join(' · ')
   return {
     ...champs,
@@ -807,8 +813,59 @@ export interface DocumentGenere {
   blob: Blob
 }
 
-function enteteSerie(entete: EnTeteEvaluation, serieLettre: string): EnteteEvaluationSerie {
+/** Le plan est-il un EXAMEN (et pas une feuille d'exercices ni une évaluation) ? */
+export function estExamen(plan: PlanDocument): boolean {
+  return plan.entete.mode !== 'exercice' && plan.entete.typeDocument === 'examen'
+}
+
+/** Chapitres du plan (ordre du plan) avec leurs titres — parties et étiquettes de l'examen. */
+export function chapitresExamen(plan: PlanDocument): ChapitreExamen[] {
+  return plan.chapitresSlugs.map((slug) => {
+    const titre = findChapter(plan.levelSlug, slug)?.title ?? slug
+    return { slug, titre, titreCourt: titreCourtChapitre(slug, titre) }
+  })
+}
+
+/** Réglages d'examen lus et mis en forme pour les documents (`undefined` pour une évaluation). */
+export function examenDuPlan(plan: PlanDocument): ExamenDocument | undefined {
+  if (!estExamen(plan)) return undefined
+  const e = plan.entete
+  const { horaire, duree } = horaireExamen(e.heureDepart, e.dureeExamen)
   return {
+    organisation: e.organisationExamen ?? 'chapitre',
+    chapitres: chapitresExamen(plan),
+    session: e.session?.trim() || sessionParDefaut(e.date),
+    horaire,
+    duree,
+    consignesSupplementaires: lignesConsignes(e.consignesSupplementaires),
+  }
+}
+
+/**
+ * Items d'un document : ceux de la série, et pour un examen à total FIXÉ, les points de chaque
+ * partie mis à l'échelle (`mettreAEchelle` : demi-points, somme exacte, jamais 0 pt). Les points
+ * des critères suivent (`pointsCriteres` répartit `item.points` au prorata des poids du barème) :
+ * copie, corrigé, grille et Word affichent donc tous les points mis à l'échelle. Une partie sans
+ * total, au total illisible ou impossible (moins de 0,5 pt par question) garde ses points.
+ */
+export function itemsDuDocument(plan: PlanDocument, items: ItemEvaluation[]): ItemEvaluation[] {
+  const examen = examenDuPlan(plan)
+  const total = plan.entete.totalExamen
+  if (!examen || !total || total.mode !== 'fixe') return items
+  const nouveaux = new Map<ItemEvaluation, number>()
+  for (const partie of partiesDuDocument(examen, items)) {
+    const voulu = total.parPartie[partie.cle]
+    if (typeof voulu !== 'number' || !(voulu > 0)) continue
+    const points = mettreAEchelle(partie.questions.map((q) => q.element.points), voulu)
+    if (!points) continue
+    partie.questions.forEach((q, i) => nouveaux.set(q.element, points[i]))
+  }
+  return items.map((it) => (nouveaux.has(it) ? { ...it, points: nouveaux.get(it)! } : it))
+}
+
+function enteteSerie(entete: EnTeteEvaluation, serieLettre: string, examen?: ExamenDocument): EnteteEvaluationSerie {
+  return {
+    ...(examen ? { examen } : {}),
     numero: entete.numero,
     date: entete.date,
     titre: entete.titre,
@@ -850,9 +907,10 @@ export function annexesDuDocument(plan: PlanDocument, _items: ItemEvaluation[]):
 export async function genererDocumentsDepuisPlan(plan: PlanDocument): Promise<DocumentGenere[]> {
   const documents: DocumentGenere[] = []
   const exercice = plan.entete.mode === 'exercice'
+  const examen = examenDuPlan(plan)
   for (const serie of plan.series) {
-    const items = await itemsDepuisSerie(serie)
-    const entete = enteteSerie(plan.entete, serie.lettre)
+    const items = itemsDuDocument(plan, await itemsDepuisSerie(serie))
+    const entete = enteteSerie(plan.entete, serie.lettre, examen)
     const annexes = annexesDuDocument(plan, items)
     if (exercice) {
       documents.push({ type: 'feuille', libelle: 'Feuille d’exercices (énoncé, je vérifie, corrigé)', suffixe: 'feuille', blob: await genererFeuilleExercicesComplete(entete, items, annexes) })
@@ -948,7 +1006,7 @@ export async function genererDocxDepuisPlan(plan: PlanDocument, lettre: string, 
   if (!serie) return null
   const docx = await import('../entrainement/export/evaluationDocx')
   const generer = type === 'copie' ? docx.genererCopieEvaluationDocx : type === 'corrige' ? docx.genererCorrigeEvaluationDocx : docx.genererGrilleEvaluationDocx
-  return generer(enteteSerie(plan.entete, lettre), await itemsDepuisSerie(serie))
+  return generer(enteteSerie(plan.entete, lettre, examenDuPlan(plan)), itemsDuDocument(plan, await itemsDepuisSerie(serie)))
 }
 
 /** Copie Word (.docx) d'une série d'évaluation. */
