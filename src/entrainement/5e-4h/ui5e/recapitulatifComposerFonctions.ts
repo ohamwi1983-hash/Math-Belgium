@@ -52,13 +52,13 @@ export function calculerRecapitulatifComposerFonctions(etat: EtatSessionComposer
       entrees.push({ libelle, estLatex: true, valeur: valeurs.join(",\\quad "), valeurs, revele });
     } else if (phase.startsWith("c1") && memeDirection) {
       // Pas de prose en mode math (audit 5e ch. 1, point 27) : le libellé de l'entrée dit déjà ce que c'est.
-      const valeurs = termesAvecPrefixe(`\\text{dom}(${dir.nomInterieure}) =`, formatTermesEnsembleReelLatex(dir.interieure.domaine));
+      const valeurs = termesAvecPrefixe(`\\operatorname{dom}(${dir.nomInterieure}) =`, formatTermesEnsembleReelLatex(dir.interieure.domaine));
       entrees.push({ libelle, estLatex: true, valeur: valeurs.join(" "), valeurs, revele });
     } else if (phase.startsWith("c2") && memeDirection && dir.domaineApresCarre !== null) {
       const valeurs = termesAvecPrefixe("x \\in", formatTermesEnsembleReelLatex(dir.domaineApresCarre));
       entrees.push({ libelle, estLatex: true, valeur: valeurs.join(" "), valeurs, revele });
     } else if (phase.startsWith("domaine")) {
-      const valeurs = termesAvecPrefixe(`\\text{dom}(${nomComposition(estFRondG)}) =`, formatTermesEnsembleReelLatex(dir.domaine));
+      const valeurs = termesAvecPrefixe(`\\operatorname{dom}(${nomComposition(estFRondG)}) =`, formatTermesEnsembleReelLatex(dir.domaine));
       entrees.push({ libelle, estLatex: true, valeur: valeurs.join(" "), valeurs, revele });
     }
   }

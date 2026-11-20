@@ -31,7 +31,15 @@ export const t = texte;
 export const f = latex;
 
 /** Nombre écrit comme à l'écran (fraction irréductible, signe devant). */
-export const nb = (v: number): string => formatValeurLatex(Math.abs(v) < 1e-12 ? 0 : v);
+export function nb(v: number): string {
+  if (Math.abs(v) < 1e-12) return "0";
+  // Valeur rationnelle calculée en flottants (2/3 = 0,6666…67) : relue en fraction exacte d'abord.
+  for (let d = 1; d <= 10000; d++) {
+    const n = Math.round(v * d);
+    if (Math.abs(n / d - v) < 1e-9 * Math.max(1, Math.abs(v))) return qLatex(q(n, d));
+  }
+  return formatValeurLatex(v);
+}
 
 /** Nombre entre parenthèses s'il est négatif (« (−3) »), pour un produit ou une puissance. */
 export function par(v: number): string {
@@ -168,7 +176,7 @@ export function lignesPremierDegre(a: number, b: number, rel: Rel, c = 0): { lig
         : change
           ? jf("on divise par ", { l: nb(a) }, ", un nombre négatif : le sens de l'inégalité change")
           : jf("on divise par ", { l: nb(a) });
-    lignes.push(ligne(`\\iff x${relLatex(relFinal)} ${qLatex(q(Math.round(droite * 1e6), Math.round(a * 1e6)))}`, j));
+    lignes.push(ligne(`\\iff x${relLatex(relFinal)} ${nb(borne)}`, j));
   }
   return { lignes, rel: relFinal, borne };
 }
@@ -195,6 +203,12 @@ function versQ(v: number): Q {
   return q(Math.round(v * 1e6), 1e6);
 }
 
+/** Valeur approchée au centième, virgule `{,}` et « − ». */
+export function approche2(v: number): string {
+  const s = (Math.round(v * 100) / 100).toFixed(2);
+  return s.replace(".", "{,}");
+}
+
 /**
  * Δ calculé ligne à ligne, puis les racines (« x_1 = … », « x_2 = … », x₁ < x₂) ou « racine
  * double », ou « Δ < 0 : aucune racine ». `p` : coefficients croissants [c, b, a].
@@ -214,17 +228,20 @@ export function etudeTrinome(p: Polynome): EtudeTrinome {
   }
   if (delta === 0) {
     const r = -b / (2 * a);
-    out.push(ligne(`x=\\dfrac{${nb(-b)}}{${nb(2 * a)}}=${qLatex(versQ(r))}`, "Δ = 0 : une racine double"));
+    out.push(ligne(b === 0 ? "x_0=0" : `x_0=\\dfrac{${nb(-b)}}{${nb(2 * a)}}=${qLatex(versQ(r))}`, "Δ = 0 : une racine double"));
     return { lignes: out, delta, racines: [r], a };
   }
   const s = Math.sqrt(delta);
-  const racineDelta = Number.isInteger(s) ? `${s}` : `\\sqrt{${delta}}`;
+  const carreParfait = Math.abs(s - Math.round(s)) < 1e-9;
+  const racineDelta = carreParfait ? `${Math.round(s)}` : `\\sqrt{${nb(delta)}}`;
   const moins = (-b - s) / (2 * a);
   const plus = (-b + s) / (2 * a);
   const [r1, signe1, r2, signe2] = moins < plus ? [moins, "-", plus, "+"] : [plus, "+", moins, "-"];
   const ecrit = (sg: string) => `\\dfrac{${nb(-b)}${sg}${racineDelta}}{${nb(2 * a)}}`;
-  out.push(ligne(`x_1=${ecrit(signe1)}=${qLatex(versQ(r1))}`, "Δ > 0 : deux racines"));
-  out.push(ligne(`x_2=${ecrit(signe2)}=${qLatex(versQ(r2))}`));
+  // Racine irrationnelle : valeur approchée au centième (« ≈ »), jamais une fausse fraction.
+  const valeur = (r: number) => (carreParfait ? `=${qLatex(versQ(r))}` : `\\approx ${approche2(r)}`);
+  out.push(ligne(`x_1=${ecrit(signe1)}${valeur(r1)}`, "Δ > 0 : deux racines"));
+  out.push(ligne(`x_2=${ecrit(signe2)}${valeur(r2)}`));
   return { lignes: out, delta, racines: [r1, r2], a };
 }
 
@@ -298,6 +315,96 @@ export function lignesCondition(p: Polynome, pLatex: string, rel: Rel, justifDep
         : ligne(`${pLatex}\\neq 0\\iff x\\notin ${accoladesLatex(etude.racines)}`, etude.racines.length > 1 ? "on exclut les deux racines" : "on exclut la racine")
       : ligne(`${pLatex}${relLatex(rel)} 0\\iff x\\in ${ensLatex(ensemble)}`, justificationSigneTrinome(etude.a, etude.racines.length) + (rel === "≥" && etude.racines.length ? ", racines comprises" : rel === ">" && etude.racines.length ? ", racines exclues" : ""));
   return { lignes: [...etude.lignes, conclusion], ensemble, racines: etude.racines };
+}
+
+/** Polynôme à coefficients rationnels (fractions comme à l'écran) : « -\dfrac{3}{2}x + 4 ». */
+export function polyQLatex(p: number[]): string {
+  const termes: string[] = [];
+  for (let k = p.length - 1; k >= 0; k--) {
+    const c = p[k] ?? 0;
+    if (Math.abs(c) < 1e-12) continue;
+    const v = k === 0 ? "" : k === 1 ? "x" : `x^${k}`;
+    const abs = Math.abs(c);
+    const corps = v === "" ? nb(abs) : Math.abs(abs - 1) < 1e-12 ? v : `${nb(abs)}${v}`;
+    termes.push(termes.length === 0 ? (c < 0 ? `-${corps}` : corps) : c < 0 ? `- ${corps}` : `+ ${corps}`);
+  }
+  return termes.length ? termes.join(" ") : "0";
+}
+
+/**
+ * Ensemble des x qui vérifient un prédicat, à partir de ses points de changement (racines,
+ * valeurs exclues) : chaque zone est testée en son milieu, chaque point pour lui-même (`null` =
+ * non défini, donc exclu). Forme la plus lisible (ℝ, ℝ privé de points, réunion d'intervalles).
+ */
+export function ensembleDepuisPredicat(pred: (x: number) => boolean | null, bornes: number[]): EnsembleReelGuide {
+  const b: number[] = [];
+  for (const v of [...bornes].sort((u, w) => u - w)) if (!b.length || Math.abs(v - b[b.length - 1]!) > 1e-9) b.push(v);
+  const zones: { inf: number | null; sup: number | null; dedans: boolean }[] = [];
+  for (let i = 0; i <= b.length; i++) {
+    const inf = i === 0 ? null : b[i - 1]!;
+    const sup = i === b.length ? null : b[i]!;
+    const milieu = inf === null && sup === null ? 0 : inf === null ? sup! - 1 : sup === null ? inf + 1 : (inf + sup) / 2;
+    zones.push({ inf, sup, dedans: pred(milieu) === true });
+  }
+  const points = b.map((x) => pred(x) === true);
+  const morceaux: MorceauEnsemble[] = [];
+  let courant: MorceauEnsemble | null = null;
+  for (let i = 0; i < zones.length; i++) {
+    const z = zones[i]!;
+    if (z.dedans) {
+      if (!courant) courant = { inf: z.inf, sup: z.sup, infInclus: false, supInclus: false };
+      else {
+        courant.sup = z.sup;
+        courant.supInclus = false;
+      }
+    } else if (courant) {
+      morceaux.push(courant);
+      courant = null;
+    }
+    if (i < b.length) {
+      const x = b[i]!;
+      if (points[i]) {
+        if (courant) {
+          courant.sup = x;
+          courant.supInclus = true;
+        } else courant = { inf: x, sup: x, infInclus: true, supInclus: true };
+        // le point continue-t-il dans la zone suivante ?
+        if (!zones[i + 1]!.dedans) {
+          morceaux.push(courant);
+          courant = null;
+        }
+      } else if (courant) {
+        courant.sup = x;
+        courant.supInclus = false;
+        morceaux.push(courant);
+        courant = null;
+      }
+    }
+  }
+  if (courant) morceaux.push(courant);
+  // Fusion « … x] » + « ]x … » impossible ici (un point est dedans ou dehors) ; forme lisible :
+  if (morceaux.length === 0) return { forme: "intervalles", points: [], morceaux: [] };
+  if (morceaux.length === 1 && morceaux[0]!.inf === null && morceaux[0]!.sup === null) return { forme: "reel", points: [], morceaux: [] };
+  const prive =
+    morceaux[0]!.inf === null &&
+    morceaux[morceaux.length - 1]!.sup === null &&
+    morceaux.every((m) => !m.infInclus && !m.supInclus) &&
+    morceaux.every((m, i) => i === 0 || (m.inf !== null && morceaux[i - 1]!.sup !== null && Math.abs(m.inf - morceaux[i - 1]!.sup!) < 1e-9));
+  if (prive) return { forme: "prive_points", points: morceaux.slice(0, -1).map((m) => m.sup!), morceaux: [] };
+  return { forme: "intervalles", points: [], morceaux };
+}
+
+/** Racines réelles (triées) d'un polynôme de degré ≤ 2. */
+export function racinesReelles(p: number[]): number[] {
+  const d = degre(p);
+  if (d === 0) return [];
+  if (d === 1) return [-(p[0] ?? 0) / p[1]!];
+  const [c, b, a] = [p[0] ?? 0, p[1] ?? 0, p[2]!];
+  const delta = b * b - 4 * a * c;
+  if (delta < -1e-12) return [];
+  if (Math.abs(delta) <= 1e-12) return [-b / (2 * a)];
+  const s = Math.sqrt(delta);
+  return [(-b - s) / (2 * a), (-b + s) / (2 * a)].sort((u, v) => u - v);
 }
 
 /** Fragments « texte formule texte » d'une justification. */
