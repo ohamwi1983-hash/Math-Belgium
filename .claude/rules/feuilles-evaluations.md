@@ -1492,3 +1492,85 @@ réponse, mauvais choix fermé révélé) : scrollWidth 390, 0 erreur console ; 
 aménagée + feuille + Word du corrigé, calculatrice interdite / autorisée, avec et sans regroupement) :
 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error` ; `groupe_erreur` B ≠ A sur 30 plans ;
 `?code=` 36 / 36.
+
+## 4e ch. 7, lot G — gen96–gen99 (nouveaux, notés)
+
+Coquille commune `4e/components/AppTransfertSecondDegre.tsx` réutilisée, avec deux AJOUTS : champ
+`libre` (`ChampLibre` dans `ui/ecransTransfertSecondDegre.ts` : `diagnostiquer(saisie)` → correct /
+faux / piège / parse_error, `aideSaisie`, `apercu`, `affichee` ; branché dans
+`moteur/verificationTransfertSecondDegre.ts` et `components/EtapesTransfertSecondDegre.tsx`) et
+`figureApres` non répétée quand le corrigé RÉVÉLÉ de l'étape porte déjà sa figure (ligne non « piège »).
+Outils du lot `4e/ui/outilsAnalytiqueLotG.ts` : `lireDroite` (toute écriture d'une droite : cartésienne,
+explicite, « x = k », fractions, « − – — » ; comparée par proportionnalité), `lirePoints`
+(« (1 ; 2) ; (3 ; −1) », « aucun »), `champDroite` (pièges par droite, message « bonne direction mais
+décalée » / « passe par le point mais mauvaise direction »), `champPoints`, écritures (`membreDroite`,
+`parametriquesL`, `produitTerme`, `termeProduit`, `valeurSubst`), `figureRepere` (repère SVG sans `id`,
+graduations 1/2/5, points sur les nœuds). Corrigés `4e/generateurs/<gen>/corrigeDetaille.ts`, une lettre
+par écran, partagés appli / papier. Jamais « déterminant » (« critère de colinéarité »), jamais de radian.
+- **gen96** « Projeté orthogonal, symétrique et réflexion » (§ 6, processus 3) : **symétrique**
+  (écrans : perpendiculaire p — champ droite —, H, A′ ; énoncé papier une consigne, regroupable
+  a), b)) ; **réflexion** (contexte billard dm / miroir cm / mur m tiré dans la variante ; écrans A′,
+  (A′B), I, longueur exacte ; énoncé papier = contexte + figure (d, A, B) + DEUX vraies questions,
+  `etapesParQuestion` [[a, b, c], [d]]). Corrigé : blocs titrés (Perpendiculaire, Pied H, Coordonnées
+  de H, Symétrique ; Vecteur directeur, Terme constant c, Équation ; Équations paramétriques,
+  Paramètre de I, Coordonnées de I), vérification milieu / appartenance, AI + IB recalculé morceau par
+  morceau, figure du trajet sous le résultat d. Niveaux : symétrique 3, 10 min ; réflexion 4, 14 min.
+  Cours : méthode « Projeté orthogonal et symétrique d'un point » + astuce « Réflexion : où viser ? ».
+  **Carte placée après gen47** : gen94 (prévu avant elle) n'existait pas dans la branche du lot — à
+  remettre après gen94 à la fusion.
+- **gen97** « Trajectoires et rencontre » (§ 5, processus 3) : variantes = contextes (bateaux km/h,
+  drones m/s, joueurs m/s) ; verdict collision / croisement / parallèles tiré DANS la variante (1/3
+  chacun, jamais cas particulier ni `forme` — `forme` = contexte). Écrans : nature (choix fermé, une
+  tentative), t₁ et t₂, K, verdict (choix fermé), instant ou écart |t₁ − t₂| ; parallèles : nature,
+  verdict (`nombrePuces` = 5 : structure fixe). Critère substitué en membre de gauche (« 4·(−3) −
+  (−3)·4 = −12 + 12 ») — « formule = substitution » sur une rangée dépassait le bloc de calcul à
+  390 px. Niveau et durée CONSTANTS (3, 11 min : `etapesTransformation 4`, une lecture, `sansCharge`).
+  Cours : encadré « Deux mobiles : deux instants » avant la carte.
+- **gen98** « Intersection de deux cercles » (§ 10, processus 2) : **cercle-cercle** (droite par
+  soustraction — champ droite —, solutions de l'équation après substitution — liste, « aucune » —,
+  points communs — liste de points, « aucun ») ; **cercle-parabole** (choix du carré commun à
+  remplacer, options mélangées ; solutions ; points, racine qui rend le carré négatif = piège ciblé).
+  Nombre de points 0 / 1 / 2 tiré à 1/3 (verdict dans la variante). Corrigé : discriminant (B = 0 : carré
+  isolé), blocs Substitution (isolement en introduction) / Développement / Résolution, vérification sur
+  c₂ en valeurs (« 9 + 1 − 36 + 10 + 16 = 0 »), « x₁ = −2 » (jamais « 0 − 2 »). Niveaux : cercle-cercle
+  3, 8 min ; cercle-parabole 4, 8 min (piège : racine à rejeter, dans les données) — constants quel que
+  soit le nombre de points. Cours : astuce « Cercle et parabole : le cas du carré commun ».
+- **gen99** « Détective d'erreurs : géométrie analytique » (révision, processus 3) : modèle gen112 /
+  gen121 / gen127 (copie numérotée à marge rouge, « Quelle ligne ? » à une tentative, ligne fausse
+  précédée de 0 à 3 lignes justes à 25 % chacune — préliminaires du scénario). **Choix : variante =
+  exercice support** (droite par un point et un vecteur directeur, perpendiculaire, pente, cercle
+  développé, parabole, distance point-droite), le TYPE d'erreur (deux par support : normal pris pour
+  directeur / signe de c ; vecteur normal pris pour directeur / composantes échangées sans signe ;
+  pente inversée / signe de p ; signe du centre / r² pris pour r ; p au lieu de p/2 / directrice du côté
+  du foyer ; forme non ramenée / carré négatif) tiré à pile ou face DANS la variante, avant les nombres,
+  avec les mêmes contraintes pour les deux types (aucun nombre ne trahit l'erreur). Pas de
+  `groupe_erreur` : un type n'a de sens que dans son support, et le type (réponse de l'écran 2) n'est
+  jamais choisi par le professeur ; `forme` = support. Écrans : ligne (choix), erreur (quatre
+  descriptions : les deux types du support + deux leurres, mélangées), correction (champ droite ou
+  nombres). La ligne fausse porte son calcul (« A est sur d : …, donc c = … ») : lisible même en tête
+  de copie. Distance : racines EXACTES de rationnels (`racineExacteL`, √(p/q) = √(pq)/q simplifié) —
+  `nombreLatex` écrivait « 4,992302 » et un gabarit « \sqrt{48.40000000000001} ». Niveau et durée
+  constants : 3, 8 min (`sansCharge`).
+
+Regroupement a), b) : gen96 symétrique (« Dans chaque cas, détermine les coordonnées du projeté… »)
+et gen98 (deux consignes : cercles, cercle et parabole) dans `REGROUPEMENTS` ; écartés : gen96
+réflexion (vraies questions), gen97 (contexte narratif propre à l'instance), gen99 (copie d'élève).
+Pilotes `evaluationPayload.ts` : gen96 `distance`, gen97 `intersection`, gen98 `lieux`, gen99
+`revision`. Tout exact (`calcul: "exacte"`), pas de case « cas particulier » (aucun raccourci).
+
+Mesures : moteurs (5 000 tirages par variante pour l'équilibre ; 300 par variante pour les champs :
+la réponse du Résultat du corrigé, convertie en saisie clavier, est acceptée ; « − » lu ; pièges
+reconnus ; « 2x+ », « ((( », « = » illisibles sans tentative ; écrans sans flottant brut ; `?code=`
+200 / 200 par générateur) 0 anomalie — verdicts gen97 33 / 33 / 33 %, gen98 33 / 33 / 33 %, gen99 type
+50 / 50 et ligne fausse 25 % par position dans chaque support ; collecteur (outils `corrige-5e1`
+recopiés, nouveau contrôle « nombre brut » : point décimal, décimal de 4 chiffres ou plus, notation
+scientifique dans tout l'imprimé, `enteteHtml` compris) 2 100 tirages, ≈ 27 800 égalités, 0 fausse ;
+iPhone 13 (39 parcours : illisible, réponse fausse, bonnes réponses, choix raté révélé, trois échecs
+→ corrigé) 0 erreur console, scrollWidth 390 ; corrigé de chaque étape rendu à l'écran (outil
+`defile.cjs`) : blocs de calcul qui défilent horizontalement gen96 1 / 659, gen97 0 / 479, gen98
+11 / 708 (substitution seule ≈ 300 px), gen99 5 / 809 ; plans réels (`construirePlan`, 30 × 3 séries,
+interdite / autorisée) même structure 30 / 30, verdicts différents d'une série à l'autre 30 / 30
+(gen97 interdite 29 / 30), niveau et durée constants par variante ; documents (2 plans : évaluation
+2 séries + aménagée + feuille + aménagée + Word copie / corrigé / grille, interdite ; autorisée en deux
+colonnes) 0 `.katex-error`, 0 débordement à 680, 820 et 1 280 px. Outils du lot (dossier de travail
+`4e7-B`) : `moteur.ts`, `coll/`, `ecranlotG.cjs`, `defile.cjs`, `planG.cjs`, `docsG.cjs`.

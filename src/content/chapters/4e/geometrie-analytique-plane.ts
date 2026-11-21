@@ -1945,7 +1945,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'entrainement',
           title: "Détective d'erreurs : géométrie analytique",
           generatorId: 'gen99',
-          description: ["La copie d'un élève contient une ligne fausse (vecteur normal et directeur confondus, pente inversée, signe du centre, r² pris pour r, p au lieu de p/2…). Trouve-la, explique l'erreur et corrige le résultat."],
+          description: ["La copie d'un élève contient une ligne fausse (vecteur normal et directeur confondus, pente inversée, signe du centre, r² pris pour r, foyer deux fois trop loin du sommet…). Trouve-la, explique l'erreur et corrige le résultat."],
           chantier: '4e',
           whereLabel: "4e → « 99. Détective d'erreurs : géométrie analytique »",
         },
