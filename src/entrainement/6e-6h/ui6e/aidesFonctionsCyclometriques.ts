@@ -15,7 +15,9 @@ export interface AideCycloValeur {
 
 const NOM_LATEX: Record<Arcfonction, string> = { arcsin: "\\arcsin", arccos: "\\arccos", arctan: "\\arctan" };
 const NOM_TRIG_LATEX: Record<Trigfonction, string> = { sin: "\\sin", cos: "\\cos", tan: "\\tan" };
-const NOM_TRIG_FRANCAIS: Record<Trigfonction, string> = { sin: "sinus", cos: "cosinus", tan: "tangente" };
+/** Avec l'article ou le possessif accordé : « la tangente », « sa tangente » (jamais « le tangente »). */
+const LE_TRIG: Record<Trigfonction, string> = { sin: "le sinus", cos: "le cosinus", tan: "la tangente" };
+const SON_TRIG: Record<Trigfonction, string> = { sin: "son sinus", cos: "son cosinus", tan: "sa tangente" };
 const TRIG_DE: Record<Arcfonction, Trigfonction> = { arcsin: "sin", arccos: "cos", arctan: "tan" };
 const DOMAINE_LATEX: Record<Arcfonction, string> = { arcsin: "[-1\\,;1]", arccos: "[-1\\,;1]", arctan: "\\mathbb{R}" };
 export const IMAGE_ARC_LATEX: Record<Arcfonction, string> = {
@@ -25,7 +27,7 @@ export const IMAGE_ARC_LATEX: Record<Arcfonction, string> = {
 };
 
 function definition(arc: Arcfonction): string {
-  return `$${NOM_LATEX[arc]}\\,y$ est l'angle de $${IMAGE_ARC_LATEX[arc]}$ dont le ${NOM_TRIG_FRANCAIS[TRIG_DE[arc]]} vaut $y$ ; il existe pour $y \\in ${DOMAINE_LATEX[arc]}$.`;
+  return `$${NOM_LATEX[arc]}\\,y$ est l'angle de $${IMAGE_ARC_LATEX[arc]}$ dont ${LE_TRIG[TRIG_DE[arc]]} vaut $y$ ; il existe pour $y \\in ${DOMAINE_LATEX[arc]}$.`;
 }
 
 export function aideValeur1(exercice: ExerciceFonctionsCyclometriques): AideCycloValeur {
@@ -33,10 +35,10 @@ export function aideValeur1(exercice: ExerciceFonctionsCyclometriques): AideCycl
     case "directe":
       return { texte: definition(exercice.arcfonction), latex: null };
     case "arcTrig":
-      return { texte: `Calcule d'abord la valeur intermédiaire, le ${NOM_TRIG_FRANCAIS[exercice.trigfonction]} de l'angle donné. Ensuite, ${definition(exercice.arcfonction)}`, latex: null };
+      return { texte: `Calcule d'abord la valeur intermédiaire, ${LE_TRIG[exercice.trigfonction]} de l'angle donné. Ensuite, ${definition(exercice.arcfonction)}`, latex: null };
     case "trigArc":
       return {
-        texte: `${definition(exercice.arcfonction)} Une fois cet angle connu, calcule son ${NOM_TRIG_FRANCAIS[exercice.trigfonction]}${exercice.trigfonction === "tan" ? " (la tangente n'est pas définie en $-\\frac{\\pi}{2}$ ni en $\\frac{\\pi}{2}$)" : ""}.`,
+        texte: `${definition(exercice.arcfonction)} Une fois cet angle connu, calcule ${SON_TRIG[exercice.trigfonction]}${exercice.trigfonction === "tan" ? " (la tangente n'est pas définie en $-\\frac{\\pi}{2}$ ni en $\\frac{\\pi}{2}$)" : ""}.`,
         latex: null,
       };
   }

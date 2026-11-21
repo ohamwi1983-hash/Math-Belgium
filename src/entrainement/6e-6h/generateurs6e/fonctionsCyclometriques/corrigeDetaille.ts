@@ -25,8 +25,9 @@ const TOL = 1e-9;
 
 /** « arcsin y est l'angle de [−π/2 ; π/2] dont le sinus vaut y » (définition, fragments). */
 function definition(arc: Arcfonction): Fragments {
-  const trig = arc === "arcsin" ? "sinus" : arc === "arccos" ? "cosinus" : "tangente";
-  return [latex(`${NOM_ARC[arc]}\\,y`), texte(` est l'angle de `), latex(IMAGE_ARC[arc]), texte(` dont le ${trig} vaut y ; il existe pour `), latex(`y\\in ${DOMAINE_ARC[arc]}`)];
+  // « la tangente » (féminin), « le sinus », « le cosinus ».
+  const trig = arc === "arcsin" ? "le sinus" : arc === "arccos" ? "le cosinus" : "la tangente";
+  return [latex(`${NOM_ARC[arc]}\\,y`), texte(` est l'angle de `), latex(IMAGE_ARC[arc]), texte(` dont ${trig} vaut `), latex("y"), texte(" ; il existe pour "), latex(`y\\in ${DOMAINE_ARC[arc]}`)];
 }
 
 /** Justification d'une valeur remarquable sur le cercle trigonométrique. */
