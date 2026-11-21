@@ -432,9 +432,43 @@ const STYLE_GROUPES = `
 .q-am .ligne-g + .ligne-g { border-top: 1px dotted var(--filet); }
 `;
 
-/** CSS des groupes, seulement si le document en a un. */
+/** Groupes à GRAPHIQUE (une figure par ligne) — ajouté SEULEMENT si le document en contient un (les
+ * documents du premier lot de regroupements restent identiques). Rangées insécables (aucune figure
+ * coupée), deux cellules par rangée (`.paire`) ou une ; la figure se réduit au besoin à sa cellule
+ * (réduction uniforme : les valeurs à lire restent sur les lignes du quadrillage). Deux colonnes :
+ * une cellule par rangée dans la colonne (la figure trop large passe en pleine largeur avec tout le
+ * groupe, `classeLargeur`). */
+const STYLE_GROUPES_FIGURES = `
+.ex.groupe:has(.lignes-fig), .question.groupe:has(.lignes-fig) { break-inside: auto; page-break-inside: auto; }
+.groupe:has(.lignes-fig) .entete { break-inside: avoid; page-break-inside: avoid; }
+.lignes-fig { margin: 4px 0 0; }
+.rang-fig { display: flex; gap: 16px; align-items: flex-start; padding: 5px 0; break-inside: avoid; page-break-inside: avoid; }
+.rang-fig + .rang-fig { border-top: 1px dotted var(--filet); }
+.rang-fig > .cell-fig { flex: 1 1 0; min-width: 0; }
+.rang-fig.paire > .cell-fig { flex: 0 0 calc(50% - 8px); }
+.cell-fig { break-inside: avoid; page-break-inside: avoid; }
+.cell-tete { display: flex; align-items: baseline; gap: 8px; }
+.cell-tete > .lettre-g { flex: none; font-weight: 700; min-width: 1.3em; }
+.cell-tete > .ligne-texte { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.cell-tete > .pts, .cell-tete > .ligne-niveau { flex: none; margin-left: auto; white-space: nowrap; }
+.cell-corps { display: flex; align-items: flex-start; gap: 8px; margin-top: 3px; }
+.cell-corps > .figure-ligne { flex: 0 1 auto; min-width: 0; margin: 0; }
+.cell-corps svg[viewBox]:not(.katex svg):not(.qr) { max-width: 100%; height: auto; }
+.cell-corps > .qr-ligne { flex: none; margin-left: auto; display: flex; flex-direction: column; align-items: center; gap: 1px; width: 58px; font-family: Archivo, Arial, Helvetica, sans-serif; font-size: 7pt; font-weight: 700; letter-spacing: 0.04em; line-height: 1.1; color: var(--encre); }
+.cell-corps > .qr-ligne svg { width: 56px; height: 56px; }
+.deux-colonnes > .groupe.figures-multiples:not(.pleine-largeur):has(.lignes-fig.une-par-ligne) { column-span: none; }
+.deux-colonnes > .groupe:not(.pleine-largeur) .rang-fig.paire { display: block; }
+.deux-colonnes > .groupe:not(.pleine-largeur) .rang-fig.paire > .cell-fig + .cell-fig { border-top: 1px dotted var(--filet); margin-top: 5px; padding-top: 5px; }
+.deux-colonnes .cell-corps > .qr-ligne svg { width: 52px; height: 52px; }
+.q-am .rang-fig { padding: 9px 0; }
+`;
+
+/** CSS des groupes, seulement si le document en a un (et celle des groupes à graphique, seulement
+ * s'il en a un). */
 function styleGroupes(items: ItemEvaluation[]): string {
-  return items.some((it) => it.groupe && it.groupe.length > 0) ? STYLE_GROUPES : "";
+  const groupes = items.filter((it) => it.groupe && it.groupe.length > 0);
+  if (groupes.length === 0) return "";
+  return groupes.some((it) => it.groupe!.some((l) => l.figureHtml)) ? `${STYLE_GROUPES}${STYLE_GROUPES_FIGURES}` : STYLE_GROUPES;
 }
 
 const STYLE_FEUILLE = `
@@ -637,6 +671,7 @@ function plageNiveaux(lignes: LigneGroupe[]): { texte: string; palier?: Palier }
  * écrit dessous). Une ligne ne se coupe jamais ; le groupe peut se couper ENTRE deux lignes (la
  * consigne reste avec la première). */
 function corpsGroupeHtml(item: ItemEvaluation, lignes: LigneGroupe[], avecPoints: boolean, feuille?: { numero: number; qr: boolean }): string {
+  if (lignes.some((l) => l.figureHtml)) return corpsGroupeFiguresHtml(item, lignes, avecPoints, feuille);
   const points = avecPoints ? pointsDesLignes(item) : [];
   const rangs = lignes
     .map((l, i) => {
@@ -654,6 +689,112 @@ function corpsGroupeHtml(item: ItemEvaluation, lignes: LigneGroupe[], avecPoints
   const entete = item.section.enteteFragments ? `<div class="entete">${fragmentsEnteteHtml(item.section.enteteFragments)}</div>` : "";
   const legende = feuille?.qr && lignes.some((l) => l.item.code) ? `<div class="legende-qr">QR code de chaque ligne : refaire en ligne, avec les aides</div>` : "";
   return `${entete}<div class="lignes-groupe">${legende}${rangs}</div>`;
+}
+
+/* ----------------------------------------------------------------------------------------------
+ * Groupes à GRAPHIQUE (une figure par ligne, décision de l'utilisateur : « graphiques côte à côte »)
+ * -------------------------------------------------------------------------------------------- */
+
+/** Largeur au-delà de laquelle deux figures ne tiennent plus côte à côte (px, largeur d'origine,
+ * même mesure que `largeurFigureMax`). Largeur imprimable A4 : 680 px, deux cellules de 332 px
+ * (écart 16 px). Copie, corrigé, aménagée (cadre de 14 px de marge : 318 px par cellule) : la figure
+ * occupe toute sa cellule → 316 px. Feuille d'exercices : le QR code de la ligne (58 px + 8 px)
+ * prend place à droite de la figure → 266 px. Au-delà, une figure par rangée. */
+export const SEUIL_DEUX_FIGURES = 316;
+export const SEUIL_DEUX_FIGURES_QR = 266;
+
+/** Figures d'une ligne de groupe : nombre et plus grande largeur d'origine (px). Comme
+ * `largeurFigureMax` (attribut `width`, sinon `viewBox`), mais une figure à largeur relative
+ * (`width="100%"`, croquis de 5gen12, graphes de 5gen4) est mesurée à sa `viewBox` ; les SVG
+ * internes de KaTeX (largeur en `em`, `preserveAspectRatio="… slice"`) et les QR codes ne comptent pas. */
+export function mesureFiguresLigne(html: string | undefined): { nombre: number; largeur: number } {
+  if (!html) return { nombre: 0, largeur: 0 };
+  let nombre = 0;
+  let largeur = 0;
+  for (const m of html.matchAll(/<svg\b[^>]*>/g)) {
+    const balise = m[0];
+    if (/\swidth="[\d.]+em"/.test(balise) || /preserveAspectRatio="[^"]*slice/.test(balise) || /\sclass="qr"/.test(balise)) continue;
+    nombre++;
+    const w = /\swidth="([\d.]+)(px)?"/.exec(balise);
+    const vb = /viewBox="[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)/.exec(balise);
+    const l = w ? Number(w[1]) : vb ? Number(vb[1]) : 0;
+    if (l > largeur) largeur = l;
+  }
+  return { nombre, largeur };
+}
+
+/** Rangées d'un groupe à graphique (indices des lignes) : DEUX figures par rangée quand chaque ligne
+ * a au plus une figure, toutes assez petites (`seuil`) ; sinon une ligne par rangée. Une ligne dont
+ * la « figure » n'est qu'un bloc de texte (liste de conditions de gen71, transformations de gen72 :
+ * aucune figure SVG) a une largeur inconnue : une par rangée. Partagé par le HTML et le Word. */
+export function rangsDesFigures(lignes: LigneGroupe[], seuil: number): number[][] {
+  const mesures = lignes.map((l) => ({ html: !!l.figureHtml, ...mesureFiguresLigne(l.figureHtml) }));
+  const paires = lignes.length > 1 && mesures.every((m) => !m.html || (m.nombre === 1 && m.largeur > 0 && m.largeur <= seuil));
+  const rangs: number[][] = [];
+  lignes.forEach((_, i) => {
+    if (paires && i % 2 === 1) rangs[rangs.length - 1].push(i);
+    else rangs.push([i]);
+  });
+  return rangs;
+}
+
+/** Suffixe d'identifiants SVG propre à une ligne de groupe : le code `?code=` de l'instance (unique
+ * dans un document), sinon une empreinte de la figure, puis la lettre de la ligne. */
+function suffixeLigne(l: LigneGroupe, i: number, sorte: "e" | "c"): string {
+  const base = l.item.code ? l.item.code.code.replace(/[^A-Za-z0-9_-]/g, "") : empreinte(l.figureHtml ?? "");
+  return `-${sorte}${base}${lettreCle(i)}`;
+}
+
+function empreinte(texte: string): string {
+  let h = 2166136261;
+  for (let i = 0; i < texte.length; i++) h = Math.imul(h ^ texte.charCodeAt(i), 16777619);
+  return (h >>> 0).toString(36);
+}
+
+/** Identifiants SVG (`id`, `url(#…)`, `href="#…"`) rendus uniques par un suffixe : deux figures du
+ * même générateur dans un groupe (identifiant dérivé du contenu, compteur, constante) ne se
+ * marchent jamais dessus, ni l'énoncé et le corrigé de la même ligne. Seuls les identifiants
+ * DÉFINIS dans le fragment sont renommés. */
+export function identifiantsUniques(html: string, suffixe: string): string {
+  const ids = new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
+  if (ids.size === 0) return html;
+  return html
+    .replace(/(\sid=")([^"]+)(")/g, (_t, a: string, id: string, b: string) => `${a}${id}${suffixe}${b}`)
+    .replace(/url\(\s*(['"]?)#([^'")\s]+)\1\s*\)/g, (t, q: string, id: string) => (ids.has(id) ? `url(${q}#${id}${suffixe}${q})` : t))
+    .replace(/((?:xlink:)?href=")#([^"]+)"/g, (t, a: string, id: string) => (ids.has(id) ? `${a}#${id}${suffixe}"` : t));
+}
+
+/** Corps d'un groupe à GRAPHIQUE : la consigne commune une fois, puis une cellule par ligne — en tête
+ * la lettre, la courte donnée éventuelle et, à droite, ses points (copie) ou son niveau (feuille) ;
+ * dessous la figure (identifiants rendus uniques) et, dans la feuille, le QR code de la ligne à droite
+ * de la figure. Deux cellules par rangée quand les figures sont assez petites (`rangsDesFigures`).
+ * Une rangée ne se coupe jamais (aucune figure coupée entre deux pages) ; la consigne reste avec la
+ * première rangée. */
+function corpsGroupeFiguresHtml(item: ItemEvaluation, lignes: LigneGroupe[], avecPoints: boolean, feuille?: { numero: number; qr: boolean }): string {
+  const points = avecPoints ? pointsDesLignes(item) : [];
+  const cellule = (i: number) => {
+    const l = lignes[i];
+    const lettre = lettreCle(i);
+    const texte = l.enonce.length > 0 ? `<span class="ligne-texte">${fragmentsVersHtml(l.enonce)}</span>` : "";
+    const pts = avecPoints ? `<span class="pts">${pointsTexte(points[i])}</span>` : "";
+    const niveau = feuille && l.item.niveau ? `<span class="niveau ligne-niveau" aria-label="niveau ${l.item.niveau} sur 7"><span class="num">${l.item.niveau}</span></span>` : "";
+    const qr =
+      feuille?.qr && l.item.code
+        ? `<span class="qr-ligne">${qrCodeSvg(l.item.code.url, 56, `QR code : refaire l'exercice ${feuille.numero} ${lettre}) en ligne`)}<span class="code">${echapperHtml(l.item.code.code)}</span></span>`
+        : "";
+    const figure = l.figureHtml ? `<div class="figure-ligne">${identifiantsUniques(l.figureHtml, suffixeLigne(l, i, "e"))}</div>` : "";
+    return `<div class="cell-fig"><div class="cell-tete"><span class="lettre-g">${lettre})</span>${texte}${pts}${niveau}</div>${figure || qr ? `<div class="cell-corps">${figure}${qr}</div>` : ""}</div>`;
+  };
+  const disposition = rangsDesFigures(lignes, feuille?.qr ? SEUIL_DEUX_FIGURES_QR : SEUIL_DEUX_FIGURES);
+  // Deux par rangée : une dernière ligne seule garde la largeur d'une demi-rangée (classe `.paire`).
+  const paires = disposition.some((r) => r.length > 1);
+  const rangs = disposition.map((r) => `<div class="rang-fig${paires ? " paire" : ""}">${r.map(cellule).join("")}</div>`).join("");
+  const entete = item.section.enteteFragments ? `<div class="entete">${fragmentsEnteteHtml(item.section.enteteFragments)}</div>` : "";
+  const legende = feuille?.qr && lignes.some((l) => l.item.code) ? `<div class="legende-qr">QR code de chaque ligne : refaire en ligne, avec les aides</div>` : "";
+  // Au plus une figure par ligne : en deux colonnes, le groupe reste DANS la colonne (une cellule par
+  // rangée) même à trois figures ou plus — seule une ligne à plusieurs graphiques (6gen5) prend la largeur.
+  const uneParLigne = lignes.every((l) => mesureFiguresLigne(l.figureHtml).nombre <= 1);
+  return `${entete}<div class="lignes-groupe lignes-fig${uneParLigne ? " une-par-ligne" : ""}">${legende}${rangs}</div>`;
 }
 
 /** Largeur (px) de la plus large figure SVG d'un fragment HTML (attribut `width`, sinon `viewBox`). */
@@ -781,8 +922,13 @@ function correctionHtml(item: ItemEvaluation): string {
   if (item.groupe && item.groupe.length > 0) {
     // Question regroupée : une sous-partie par ligne (« a) » et son énoncé rappelé), puis le corrigé
     // « comme au tableau » de l'instance avec SES étapes (« Étape 1 — … »).
+    // Groupe à graphique : identifiants SVG du corrigé de chaque ligne (figure annotée) rendus uniques.
+    const figures = item.groupe.some((l) => l.figureHtml);
     return item.groupe
-      .map((l, i) => `<div class="corr-ligne"><div class="ligne-corr"><span class="lettre-g">${lettreCle(i)})</span> ${fragmentsVersHtml(l.enonce)}</div>${correctionHtml(l.item)}</div>`)
+      .map((l, i) => {
+        const corrige = figures ? identifiantsUniques(correctionHtml(l.item), suffixeLigne(l, i, "c")) : correctionHtml(l.item);
+        return `<div class="corr-ligne"><div class="ligne-corr"><span class="lettre-g">${lettreCle(i)})</span> ${fragmentsVersHtml(l.enonce)}</div>${corrige}</div>`;
+      })
       .join("");
   }
   if (item.correctionDetaillee && item.correctionDetaillee.length > 0) {

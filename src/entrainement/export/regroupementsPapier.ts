@@ -14,8 +14,11 @@ import type { AdaptateurFeuilleExercices, FragmentConsigne, PrecisionRegroupemen
  * qu'elle est imprimée, la consigne commune est écrite à la forme « chaque » (« Résous chaque
  * équation par la méthode la plus rapide. »), et une précision propre à certaines variantes (« Donne
  * le rayon en valeur exacte. ») est repérée par un groupe nommé `p_<id>`. Un énoncé que le motif ne
- * reconnaît pas, un énoncé à figure (`enteteHtml`) ou à plusieurs questions (vraies questions a) b) c)
- * d'un problème) → `null` : l'instance reste un exercice ordinaire, rendu inchangé.
+ * reconnaît pas ou à plusieurs questions (vraies questions a) b) c) d'un problème) → `null` :
+ * l'instance reste un exercice ordinaire, rendu inchangé. Générateurs à GRAPHIQUE (entrée
+ * `figure: true`) : la figure de l'énoncé papier (`enteteHtml`) devient celle de la ligne
+ * (`figureHtml`, recopiée telle quelle), la ligne de texte peut être vide (gen10 : la courbe est la
+ * seule donnée) ; sans `figure: true`, un énoncé à figure n'est jamais regroupé.
  *
  * Ajouter un générateur : une entrée dans `REGROUPEMENTS` (relire son énoncé papier sur TOUTES ses
  * variantes ; le motif doit reconnaître chacune — sinon elle n'est simplement jamais regroupée).
@@ -39,6 +42,9 @@ export interface SpecRegroupement {
   formes: FormeRegroupement[];
   /** Précisions fusionnables : le groupe nommé `p_<id>` du motif, non vide, active la précision `id`. */
   precisions?: Record<string, { texte: string; pluriel?: string }>;
+  /** Générateur à graphique : l'énoncé papier peut avoir une figure (`enteteHtml`), qui devient la
+   * figure de la ligne ; la ligne de texte peut alors être vide. */
+  figure?: boolean;
 }
 
 /* ----------------------------------------------------------------------------------------------
@@ -47,10 +53,11 @@ export interface SpecRegroupement {
 
 const lisible = (t: string) => t.replace(/[   ]/g, " ").replace(/’/g, "'");
 
-/** Énoncé papier d'une instance, sérialisé — `null` s'il a une figure, plusieurs questions, ou un
- * texte qui contient « $ » (jamais vu : la sérialisation serait ambiguë). */
-export function enoncePapierSerialise(section: SectionExercice): string | null {
-  if (section.enteteHtml) return null;
+/** Énoncé papier d'une instance, sérialisé — `null` s'il a une figure (sauf `avecFigure` : générateur
+ * à graphique, la figure est rendue à part), plusieurs questions, ou un texte qui contient « $ »
+ * (jamais vu : la sérialisation serait ambiguë). */
+export function enoncePapierSerialise(section: SectionExercice, avecFigure = false): string | null {
+  if (section.enteteHtml && !avecFigure) return null;
   if (section.questions.length > 1) return null;
   const morceaux = [section.enteteFragments ?? [], ...section.questions.map((q) => q.consigne)];
   const textes: string[] = [];
@@ -87,16 +94,18 @@ export function minusculeInitiale(t: string): string {
   return t.length === 0 ? t : t[0].toLocaleLowerCase("fr") + t.slice(1);
 }
 
-/** Découpe un énoncé papier sérialisé selon une spécification (fonction pure, testée seule). */
-export function decouperEnonce(spec: SpecRegroupement, enonce: string): RegroupementInstance | null {
+/** Découpe un énoncé papier sérialisé selon une spécification (fonction pure, testée seule).
+ * `figureHtml` : figure de l'énoncé papier (générateur à graphique), recopiée dans la ligne. */
+export function decouperEnonce(spec: SpecRegroupement, enonce: string, figureHtml?: string): RegroupementInstance | null {
   for (const forme of spec.formes) {
     const m = forme.motif.exec(enonce);
     if (!m) continue;
     const g: Groupes = m.groups ?? {};
     const consigne = typeof forme.consigne === "string" ? forme.consigne : forme.consigne(g);
     if (consigne === null) continue;
-    const ligne = forme.ligne ? forme.ligne(g) : g.ligne;
-    if (!ligne) continue;
+    // Générateur à graphique : la ligne de texte peut être vide (la figure est la donnée).
+    const ligne = (forme.ligne ? forme.ligne(g) : g.ligne) ?? (spec.figure ? "" : undefined);
+    if (ligne === undefined || (!ligne && !(spec.figure && figureHtml))) continue;
     const precisions: PrecisionRegroupement[] = [];
     for (const [nom, valeur] of Object.entries(g)) {
       if (!nom.startsWith("p_") || !valeur) continue;
@@ -105,7 +114,12 @@ export function decouperEnonce(spec: SpecRegroupement, enonce: string): Regroupe
       if (!p) continue;
       precisions.push({ id, fragments: fragmentsDepuis(p.texte), ...(p.pluriel ? { pluriel: fragmentsDepuis(p.pluriel) } : {}) });
     }
-    return { consigne: fragmentsDepuis(consigne), ligne: fragmentsDepuis(ligne), ...(precisions.length > 0 ? { precisions } : {}) };
+    return {
+      consigne: fragmentsDepuis(consigne),
+      ligne: fragmentsDepuis(ligne),
+      ...(precisions.length > 0 ? { precisions } : {}),
+      ...(spec.figure && figureHtml ? { figureHtml } : {}),
+    };
   }
   return null;
 }
@@ -119,15 +133,15 @@ export function avecRegroupement<T>(id: string, adaptateur: AdaptateurFeuilleExe
     ...adaptateur,
     regroupement: (instance) => {
       const section = adaptateur.enoncePapier ? adaptateur.enoncePapier(instance).section : adaptateur.construireEnonce(instance);
-      const enonce = enoncePapierSerialise(section);
-      return enonce === null ? null : decouperEnonce(spec, enonce);
+      const enonce = enoncePapierSerialise(section, !!spec.figure);
+      return enonce === null ? null : decouperEnonce(spec, enonce, section.enteteHtml);
     },
   };
 }
 
 /* ----------------------------------------------------------------------------------------------
- * Table des générateurs regroupés (énoncé papier « consigne + données », sans graphique ni vraies
- * questions). `M` = une formule.
+ * Table des générateurs regroupés (énoncé papier « consigne + données », sans vraies questions ;
+ * générateurs à graphique : entrées `fig(…)` en fin de table). `M` = une formule.
  * -------------------------------------------------------------------------------------------- */
 
 const M = String.raw`\$[^$]*\$`;
@@ -144,6 +158,22 @@ function simple(motif: string, consigne: string): SpecRegroupement {
 const dansChaqueCas = (g: Groupes) => (g.q ? `Dans chaque cas, ${minusculeInitiale(g.q)}` : null);
 /** Remplace un démonstratif (« cette équation ») par « chaque … » — `null` s'il est absent. */
 const chaque = (texte: string | undefined, cherche: string, remplace: string) => (texte && texte.includes(cherche) ? texte.replace(cherche, remplace) : null);
+
+/** Générateur à graphique : une figure par ligne (`figure: true`). */
+const fig = (...formes: FormeRegroupement[]): SpecRegroupement => ({ figure: true, formes });
+/** Formule sans le point (ou la virgule `{,}`) final écrit DANS la formule (« $f(x)<0.$ »). */
+const sansPointFinal = (m: string | undefined) => (m ?? "").replace(/(?:\.|\{,\})\$$/, "$");
+/** « Lis sur le graphique » → « Lis sur chaque graphique » (première occurrence de chaque tournure). */
+function surChaque(q: string | undefined): string {
+  let t = q ?? "";
+  for (const [a, b] of [
+    ["sur le graphique", "sur chaque graphique"],
+    ["Par lecture du graphique", "Par lecture de chaque graphique"],
+    ["sur la figure", "sur chaque figure"],
+  ] as const)
+    t = t.replace(a, b);
+  return t;
+}
 
 export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
   /* ---------------------------------- 4e ---------------------------------- */
@@ -609,4 +639,250 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
       },
     ],
   },
+
+  /* ----------- Générateurs à graphique : une figure par ligne (`figure: true`, lot 2) ----------- */
+  /* 4e */
+  gen8: fig({
+    motif: re(String.raw`Le graphique ci-dessous représente une parabole, obtenue en transformant la parabole de référence (?<ref>${M})\. Détermine l'équation de cette parabole sous la forme (?<forme>${M})\.`),
+    consigne: (g) => `Chaque graphique ci-dessous représente une parabole, obtenue en transformant la parabole de référence ${g.ref}. Détermine l'équation de chaque parabole sous la forme ${g.forme}.`,
+    ligne: () => "",
+  }),
+  gen10: fig({
+    motif: re(String.raw`Le graphique ci-dessous représente une fonction f obtenue en transformant l'une des fonctions de référence (?<refs>.+?)\. Détermine l'équation de f, sous sa forme la plus simple\.`),
+    consigne: (g) => `Chaque graphique ci-dessous représente une fonction f obtenue en transformant l'une des fonctions de référence ${g.refs}. Détermine, dans chaque cas, l'équation de f, sous sa forme la plus simple.`,
+    ligne: () => "",
+  }),
+  gen12: fig({
+    // La valeur demandée (« sa valeur en x = 7 ») est propre à l'instance : elle passe dans la ligne.
+    motif: re(String.raw`Le graphique ci-dessous représente une fonction f (?<leg>\(.+?\))\.\n(?<q1>Lis sur le graphique les caractéristiques de f : .+?, sa valeur en )(?<x>${M})(?<q2> \(si elle existe\) .+)`),
+    consigne: (g) => `Chaque graphique ci-dessous représente une fonction f ${g.leg}. ${surChaque(g.q1)}l'abscisse indiquée${g.q2}`,
+    ligne: (g) => `valeur en ${g.x}`,
+  }),
+  gen71: fig(
+    {
+      motif: re(String.raw`Une fonction f est obtenue en transformant une fonction de référence (?<t>\(translations, symétrie, étirement vertical\))\. Elle possède les caractéristiques suivantes\.\n(?<q>Trouve une expression de f et justifie ta démarche\.)`),
+      consigne: (g) => `Dans chaque cas, une fonction f est obtenue en transformant une fonction de référence ${g.t} ; elle possède les caractéristiques indiquées. ${g.q}`,
+      ligne: () => "",
+    },
+    {
+      motif: re(String.raw`Une seule des quatre courbes ci-dessous respecte toutes les conditions suivantes\.\n(?<q>Laquelle \? Justifie .+)`),
+      consigne: (g) => `Dans chaque cas, une seule des quatre courbes respecte toutes les conditions indiquées. ${g.q}`,
+      ligne: () => "",
+    },
+  ),
+  gen72: fig({
+    motif: re(String.raw`On ne connaît de la fonction f que son domaine et son ensemble image\. Son graphique subit successivement les transformations ci-dessous, dans cet ordre ; on note g la fonction obtenue\.\n(?<q>Détermine le domaine et l'ensemble image de g\. .+)`),
+    consigne: (g) => `Dans chaque cas, on ne connaît de la fonction f que son domaine et son ensemble image. Son graphique subit successivement les transformations indiquées, dans cet ordre ; on note g la fonction obtenue. ${g.q}`,
+    ligne: () => "",
+  }),
+  gen117: fig({
+    motif: re(String.raw`On a tracé la parabole (?<P>${M}) d'équation (?<eqP>${M}) \(trait plein\)(?<droite> et la droite (?<d>${M}) d'équation (?<eqd>${M}) \(pointillés\))?\. Résous graphiquement l'inéquation (?<ineq>${M})\.?\n(?<q>.+)`),
+    consigne: (g) =>
+      g.droite
+        ? `On a tracé, dans chaque cas, la parabole ${g.P} d'équation ${g.eqP} (trait plein) et une droite ${g.d} (pointillés). Résous graphiquement chaque inéquation. ${g.q}`
+        : `On a tracé, dans chaque cas, la parabole ${g.P} d'équation ${g.eqP} (trait plein). Résous graphiquement chaque inéquation. ${g.q}`,
+    ligne: (g) => (g.droite && !/g\(x\)/.test(g.eqd ?? "") ? `${sansPointFinal(g.ineq)}, avec ${g.d} : ${g.eqd}` : sansPointFinal(g.ineq)),
+  }),
+  gen122: fig({
+    motif: re(String.raw`Le point (?<M>${M}) est l'image de l'angle (?<t>${M}) \((?<int>${M})\) sur le cercle trigonométrique\. (?<s>Les lignes du quadrillage .+?)\n(?<q>Lis sur la figure .+)`),
+    consigne: (g) => `Sur chaque figure, le point ${g.M} est l'image d'un angle ${g.t} (${g.int}) sur le cercle trigonométrique. ${g.s} ${surChaque(g.q)}`,
+    ligne: () => "",
+  }),
+  gen123: fig({
+    motif: re(String.raw`On a tracé la parabole d'équation (?<eq>${M})\. (?<s>Son sommet, .+?)\n(?<q>Lis sur le graphique .+)`),
+    consigne: (g) => `On a tracé, dans chaque cas, la parabole d'équation ${g.eq}. ${g.s} ${surChaque(g.q)}`,
+    ligne: () => "",
+  }),
+  gen124: fig({
+    motif: re(String.raw`Voici un tableau de valeurs d'une fonction (?<f>${M}) (?<s>\(les valeurs de ${M} vont de 1 en 1\))\.\n(?<q>Calcule les différences premières.+)`),
+    consigne: (g) => `Voici, dans chaque cas, un tableau de valeurs d'une fonction ${g.f} ${g.s}. ${g.q}`,
+    ligne: () => "",
+  }),
+  gen125: (() => {
+    const fin = String.raw` Détermine son équation, sous forme développée\.`;
+    const consigne = "Détermine l'équation de chaque parabole, sous forme développée.";
+    return fig(
+      { motif: re(String.raw`Une parabole a pour sommet (?<S>${M}) et passe par le point (?<P>${M})\.${fin}`), consigne, ligne: (g) => `sommet ${g.S}, passe par le point ${g.P}` },
+      { motif: re(String.raw`Une parabole coupe l'axe des x en (?<a>${M}) et en (?<b>${M}), et passe par le point (?<P>${M})\.${fin}`), consigne, ligne: (g) => `coupe l'axe des x en ${g.a} et en ${g.b}, passe par le point ${g.P}` },
+      { motif: re(String.raw`On a tracé une parabole ; (?<s>le point ${M} marqué est sur un nœud du quadrillage)\.${fin}`), consigne, ligne: (g) => `parabole tracée ; ${g.s}` },
+      { motif: re(String.raw`Une parabole passe par les points (?<pts>.+?)\.${fin}`), consigne, ligne: (g) => `passe par les points ${g.pts}` },
+    );
+  })(),
+  gen128: fig({
+    motif: re(String.raw`Voici quatre équations et leurs quatre paraboles, dans le désordre : (?<liste>.+?)\n(?<q>.+)`),
+    consigne: (g) => `Dans chaque cas, voici quatre équations et leurs quatre paraboles, dans le désordre. ${g.q}`,
+    ligne: (g) => sansPointFinal(g.liste),
+  }),
+  gen23: fig({
+    motif: re(String.raw`On donne les points (?<pts>${M}) ci-dessous\. Construis le vecteur (?<v>${M}) à partir du point de ton choix\.`),
+    consigne: "Construis chaque vecteur à partir du point de ton choix.",
+    ligne: (g) => `${g.v}, avec ${g.pts}`,
+  }),
+  gen27: fig({
+    motif: re(String.raw`On considère la figure ci-dessous \((?<desc>[^)]+)\)\. Réduis l'expression suivante en un seul vecteur, désigné par deux points de la figure : (?<e>${M})\.`),
+    consigne: "Réduis chaque expression en un seul vecteur, désigné par deux points de sa figure.",
+    ligne: (g) => `${g.e} (${g.desc})`,
+  }),
+  gen43: fig(
+    {
+      motif: re(String.raw`Détermine une équation cartésienne de la droite représentée ci-dessous \(sous la forme de ton choix\)\.`),
+      consigne: "Détermine une équation cartésienne de chaque droite représentée ci-dessous (sous la forme de ton choix).",
+      ligne: () => "",
+    },
+    { motif: re(String.raw`Détermine des équations paramétriques de la droite représentée ci-dessous\.`), consigne: "Détermine des équations paramétriques de chaque droite représentée ci-dessous.", ligne: () => "" },
+  ),
+  gen49: fig({
+    motif: re(String.raw`Le graphique ci-dessous représente un cercle ; le point marqué P appartient à ce cercle\. Détermine l'équation cartésienne de ce cercle, sous la forme non développée (?<f>${M})\.`),
+    consigne: (g) => `Chaque graphique ci-dessous représente un cercle ; le point marqué P appartient à ce cercle. Détermine l'équation cartésienne de chaque cercle, sous la forme non développée ${g.f}.`,
+    ligne: () => "",
+  }),
+  gen51: fig({
+    motif: re(String.raw`Le graphique ci-dessous représente une parabole, son foyer F et sa directrice d\. Détermine l'équation de cette parabole sous la forme réduite (?<f>${M}) \(selon son axe\)\.`),
+    consigne: (g) => `Chaque graphique ci-dessous représente une parabole, son foyer F et sa directrice d. Détermine l'équation de chaque parabole sous la forme réduite ${g.f} (selon son axe).`,
+    ligne: () => "",
+  }),
+  gen53: fig({
+    motif: re(String.raw`On donne (?<donnees>le foyer .+? d'une parabole(?: et trois points .+? de ${M})?)\. (?<q>Construis au compas .+)`),
+    consigne: (g) => `Dans chaque cas, on donne ${g.donnees}. ${g.q}`,
+    ligne: () => "",
+  }),
+  gen82: fig(
+    {
+      motif: re(String.raw`Sur la figure \([^)]+\) : (?<l>.+?)\.\n(?<q>Écris .+)`),
+      consigne: (g) => `Dans chaque cas, ${minusculeInitiale(g.q ?? "")}`,
+      ligne: (g) => g.l ?? "",
+    },
+    { motif: re(String.raw`On donne (?<ligne>.+?)\.\n(?<q>.+)`), consigne: dansChaqueCas },
+  ),
+  gen83: fig(
+    {
+      motif: re(String.raw`On donne le point O et les vecteurs (?<uv>${M} et ${M}) ci-dessous\. Trace le vecteur (?<v>${M}) à partir du point O\.`),
+      consigne: (g) => `Dans chaque cas, on donne le point O et les vecteurs ${g.uv}. Trace le vecteur indiqué à partir du point O.`,
+      ligne: (g) => g.v ?? "",
+    },
+    {
+      motif: re(String.raw`On donne les points A, B et C ci-dessous\. Place le point M tel que (?<r>${M})\.`),
+      consigne: "Dans chaque cas, on donne les points A, B et C. Place le point M tel que la relation indiquée soit vraie.",
+      ligne: (g) => g.r ?? "",
+    },
+    {
+      motif: re(String.raw`Donne les composantes des vecteurs (?<uv>${M} et ${M}) tracés ci-dessous \(un carreau = une unité\)\.`),
+      consigne: (g) => `Donne les composantes des vecteurs ${g.uv} tracés sur chaque figure (un carreau = une unité).`,
+      ligne: () => "",
+    },
+  ),
+  /* 5e */
+  "5gen4": fig({
+    motif: re(String.raw`Voici les graphes des fonctions f et g\. Les graphes ci-dessous (?<s>sont complets : .+?\))\. Calcule, si elles existent, les valeurs suivantes : (?<ligne>.+)\.`),
+    consigne: (g) => `Dans chaque cas, voici les graphes de deux fonctions f et g. Les graphes ${g.s}. Calcule, si elles existent, les valeurs indiquées.`,
+  }),
+  "5gen9": fig({
+    motif: re(String.raw`Le graphique ci-dessous représente une fonction sinusoïdale (?<f>${M}), avec (?<c>${M} et ${M})\.\n(?<q>Lis sur le graphique .+)`),
+    consigne: (g) => `Chaque graphique ci-dessous représente une fonction sinusoïdale ${g.f}, avec ${g.c}. ${surChaque(g.q)}`,
+    ligne: () => "",
+  }),
+  "5gen12": fig(
+    {
+      motif: re(String.raw`Détermine l'aire du (?<quoi>secteur balayé|segment circulaire)(?<s>.*?)\. Données : (?<ligne>${M})\. Donne l'aire arrondie à l'unité\.`),
+      consigne: (g) => `Détermine l'aire de chaque ${g.quoi}${g.s}. Donne les aires arrondies à l'unité.`,
+    },
+    {
+      motif: re(String.raw`Deux cercles de rayons r₁ et r₂ se coupent : (?<s>.+?)\. Détermine l'aire de la lentille (?<l>\(.+?\))\. Données : (?<ligne>${M})\. Donne l'aire arrondie à l'unité\.`),
+      consigne: (g) => `Dans chaque cas, deux cercles de rayons r₁ et r₂ se coupent : ${g.s}. Détermine l'aire de la lentille ${g.l}. Donne les aires arrondies à l'unité.`,
+    },
+  ),
+  "5gen22": fig({
+    motif: re(String.raw`Le graphique ci-dessous représente une fonction f (?<leg>\(.+?\))\.\n(?<q>Lis sur le graphique .+)`),
+    consigne: (g) => `Chaque graphique ci-dessous représente une fonction f ${g.leg}. ${surChaque(g.q)}`,
+    ligne: () => "",
+  }),
+  "5gen30": fig({
+    motif: re(String.raw`Le graphique ci-dessous représente une fonction f (?<leg>\(.+?\))\.\n(?<q>Par lecture du graphique : .+)`),
+    consigne: (g) => `Chaque graphique ci-dessous représente une fonction f ${g.leg}. ${surChaque(g.q)}`,
+    ligne: () => "",
+  }),
+  "5gen51": fig({
+    motif: re(String.raw`On donne l'angle (?<t>${M}) \(en radians\)\. Le cercle trigonométrique est quadrillé aux valeurs remarquables\.\nRamène \k<t> dans (?<suite>.+)`),
+    consigne: (g) => String.raw`Pour chaque angle $\theta$ (en radians) — le cercle trigonométrique est quadrillé aux valeurs remarquables —, ramène $\theta$ dans ${g.suite}`,
+    ligne: (g) => g.t ?? "",
+  }),
+  "5gen52": fig({
+    motif: re(String.raw`On donne (?<f>${M}) à représenter sur (?<i>${M})\n(?<q>.+? puis prolonge la courbe sur )\k<i>`),
+    consigne: (g) => `Pour chaque fonction, ${minusculeInitiale(g.q ?? "")}l'intervalle indiqué.`,
+    ligne: (g) => `${sansPointFinal(g.f)} à représenter sur ${sansPointFinal(g.i)}`,
+  }),
+  "5gen53": fig({
+    motif: re(String.raw`Voici quatre expressions et leurs quatre courbes, dans le désordre : (?<liste>.+?)\n(?<q>.+)`),
+    consigne: (g) => `Dans chaque cas, voici quatre expressions et leurs quatre courbes, dans le désordre. ${g.q}`,
+    ligne: (g) => sansPointFinal(g.liste),
+  }),
+  "5gen63": fig({
+    motif: re(String.raw`Les graphes de f et de g ci-dessous sont complets (?<p>\(.+?\))\. À l'aide de la droite (?<d>${M}), détermine (?<v>${M}) s'il existe ; justifie ta réponse\.`),
+    consigne: (g) => `Dans chaque cas, les graphes de f et de g sont complets ${g.p}. À l'aide de la droite ${g.d}, détermine le nombre indiqué s'il existe ; justifie ta réponse.`,
+    ligne: (g) => g.v ?? "",
+  }),
+  /* 6e */
+  "6gen5": fig({
+    motif: re(String.raw`On considère la fonction (?<ligne>${M})\. Indique lequel des graphiques représente f, (?<s>puis justifie .+)`),
+    consigne: (g) => `Pour chaque fonction f, indique lequel des graphiques la représente, ${g.s}`,
+  }),
+  "6gen8": fig(
+    {
+      motif: re(String.raw`On considère la fonction (?<ligne>${M})\. Indique lequel des graphiques A à D représente (?<s>f.\. Justifie à partir de f.\(x\)\.)`),
+      consigne: (g) => `Pour chaque fonction f, indique lequel des graphiques A à D représente ${g.s}`,
+    },
+    {
+      motif: re(String.raw`On considère la fonction (?<ligne>${M})\. (?<s>Calcule f.\(x\), puis indique lequel des graphiques A à D représente f.\. Justifie\.)`),
+      consigne: (g) => `Pour chaque fonction f, ${minusculeInitiale(g.s ?? "")}`,
+    },
+  ),
+  "6gen11": fig({
+    motif: re(String.raw`On considère la fonction (?<ligne>${M})\.\nÉtudie la fonction f : (?<s>.+)`),
+    consigne: (g) => `Étudie chaque fonction f : ${g.s}`,
+  }),
+  "6gen18": fig({
+    motif: re(String.raw`Le graphique est celui de (?<f>${M}), où a et b sont des nombres entiers\. Retrouve a et b à partir du graphique, puis écris l'expression de f\(x\)\. Sur le graphique : (?<ligne>.+)\.`),
+    consigne: (g) => `Chaque graphique est celui d'une fonction ${g.f}, où a et b sont des nombres entiers. Dans chaque cas, retrouve a et b à partir du graphique, puis écris l'expression de f(x).`,
+  }),
+  "6gen20": fig({
+    motif: re(String.raw`On considère la fonction (?<ligne>${M}), dont le graphique est donné \(f\), et quatre graphiques A à D\.\n(?<q>Indique lequel .+)`),
+    consigne: (g) => `Pour chaque fonction f, dont le graphique est donné (f), et ses quatre graphiques A à D : ${minusculeInitiale(g.q ?? "")}`,
+  }),
+  "6gen21": fig({
+    motif: re(String.raw`On considère la fonction suivante : (?<ligne>${M})\nÉtudie la fonction f : (?<s>.+)`),
+    consigne: (g) => `Étudie chaque fonction f : ${g.s}`,
+  }),
+  "6gen77": fig(
+    {
+      motif: re(String.raw`La courbe ci-dessous représente une fonction (?<f>${M}) sur (?<I>${M}) (?<u>\(une case du quadrillage mesure une unité\))\. Sans chercher de primitive, calcule (?<int>${M}) à l'aide d'aires de figures simples\. Donne la valeur exacte\.`),
+      consigne: (g) => `Chaque courbe ci-dessous représente une fonction ${g.f} ${g.u}. Sans chercher de primitive, calcule chaque intégrale à l'aide d'aires de figures simples. Donne les valeurs exactes.`,
+      ligne: (g) => `${g.int} (${g.f} tracée sur ${g.I})`,
+    },
+    {
+      motif: re(String.raw`La courbe ci-dessous représente une fonction (?<f>${M}) sur (?<I>${M}) (?<u>\(une case du quadrillage mesure une unité\))\. Sans chercher de primitive, compare l'intégrale (?<int>${M}) et l'aire de la région comprise entre la courbe de ${M}, l'axe des abscisses et les droites ${M} et ${M}\. (?<s>Calcule ces deux nombres \(valeurs exactes\)\.)`),
+      consigne: (g) => `Chaque courbe ci-dessous représente une fonction ${g.f} ${g.u}. Sans chercher de primitive, compare, dans chaque cas, l'intégrale indiquée et l'aire de la région comprise entre la courbe de ${g.f}, l'axe des abscisses et les droites verticales menées par ses bornes. ${g.s}`,
+      ligne: (g) => `${g.int} (${g.f} tracée sur ${g.I})`,
+    },
+  ),
+  "6gen85": fig(
+    {
+      motif: re(String.raw`Le graphique ci-dessous est celui d'une fonction (?<f>${M}), (?<ou>où .+? sont inconnus)\. Détermine (?<q>.+)`),
+      consigne: (g) => `Chaque graphique ci-dessous est celui d'une fonction ${g.f}, ${g.ou}. Pour chaque graphique, détermine ${g.q}`,
+      ligne: () => "",
+    },
+    {
+      motif: re(String.raw`Les courbes 1 à 4 ci-dessous représentent les fonctions A à D suivantes (?<p>\(asymptotes verticales en pointillés\)) : (?<ligne>.+?)\. (?<q>Associe chaque courbe à son expression, en justifiant\.)`),
+      consigne: (g) => `Dans chaque cas, les courbes 1 à 4 représentent les fonctions A à D indiquées ${g.p}. ${g.q}`,
+    },
+  ),
+  "6gen148": fig({
+    motif: re(String.raw`La courbe ci-dessous représente la fonction (?<f>${M}), (?<ou>où .+? sont des nombres réels) ; la droite en pointillés est son asymptote\. Les points de la courbe d'abscisses (?<abs>.+?) sont sur des nœuds du quadrillage\. (?<q>Donne .+)`),
+    consigne: (g) => `Chaque courbe ci-dessous représente une fonction ${g.f}, ${g.ou} ; la droite en pointillés est son asymptote. Pour chaque courbe, ${minusculeInitiale(g.q ?? "")}`,
+    ligne: (g) => `points de la courbe d'abscisses ${g.abs} sur des nœuds du quadrillage`,
+  }),
+  "6gen158": fig({
+    motif: re(String.raw`La courbe ci-dessous représente (?<f>${M}), (?<ou>où .+? est réel)\. (?<s>Les lignes verticales du quadrillage .+? ; les points marqués sont des nœuds)\. (?<q>Lis .+)`),
+    consigne: (g) => `Chaque courbe ci-dessous représente la fonction f indiquée, ${g.ou}. ${g.s}. Pour chaque courbe, ${minusculeInitiale(g.q ?? "")}`,
+    ligne: (g) => g.f ?? "",
+  }),
 };

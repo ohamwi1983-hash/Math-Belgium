@@ -38,6 +38,9 @@ import {
   type EnteteEvaluation,
   type ExamenDocument,
   type ItemEvaluation,
+  type LigneGroupe,
+  rangsDesFigures,
+  SEUIL_DEUX_FIGURES,
 } from "./assemblerEvaluationHtml";
 import { etiquetteQuestion, fragmentsConsigne, lignePartie, NOM_PROCESSUS_EXAMEN, type PartieExamen } from "./examen";
 import type { BlocCorrection, EtapeCorrection, LigneCalcul } from "./genererFeuilleExercices";
@@ -225,9 +228,15 @@ async function enonceQuestionDocx(item: ItemEvaluation, numero: number, etiquett
   // Examen : étiquette du processus / du chapitre en petites capitales grises après le numéro.
   const tag = etiquette ? [new TextRun({ text: `   ${etiquette.toLocaleUpperCase("fr")}`, size: 15, bold: true, color: GRIS, font: "Arial" })] : [];
   enfants.push(new Paragraph({ children: [new TextRun({ text: `Question ${numero}`, bold: true }), ...tag, ptsRun(item.points)], spacing: { before: 200 }, keepNext: true }));
-  if (item.section.enteteFragments) enfants.push(new Paragraph({ children: await fragmentsVersRunsDocx(item.section.enteteFragments), spacing: { after: 60 } }));
+  // Groupe à graphique : la consigne reste avec la première rangée de figures.
+  const figures = !!item.groupe?.some((l) => l.figureHtml);
+  if (item.section.enteteFragments) enfants.push(new Paragraph({ children: await fragmentsVersRunsDocx(item.section.enteteFragments), spacing: { after: 60 }, keepNext: figures ? true : undefined }));
   if (item.section.enteteHtml) enfants.push(...(await htmlVersParagraphes(item.section.enteteHtml)));
   const pts = pointsParSousQuestion(item);
+  if (figures && item.groupe) {
+    enfants.push(...(await rangsFiguresDocx(item.groupe, pts)));
+    return enfants;
+  }
   const plusieurs = item.section.questions.length > 1;
   for (let q = 0; q < item.section.questions.length; q++) {
     const lettre = LETTRES[q] ?? String(q + 1);
@@ -247,6 +256,47 @@ async function enonceQuestionDocx(item: ItemEvaluation, numero: number, etiquett
     );
     const figure = item.groupe?.[q]?.figureHtml;
     if (figure) enfants.push(...(await htmlVersParagraphes(figure)));
+  }
+  return enfants;
+}
+
+/** Groupe à graphique (une figure par ligne) : mêmes rangées que la copie HTML (`rangsDesFigures`,
+ * seuil de la copie) — deux cellules côte à côte dans un tableau sans bordure dont la rangée ne se
+ * coupe jamais, sinon la ligne (lettre, donnée, points au taquet droit) liée à sa figure. Figures
+ * rasterisées comme celles de l'énoncé (`htmlVersParagraphes`). */
+async function rangsFiguresDocx(lignes: LigneGroupe[], pts: Map<string, number>): Promise<FileChild[]> {
+  const enfants: FileChild[] = [];
+  const enTete = async (i: number, largeur: number, avecFigure: boolean) => {
+    const lettre = LETTRES[i] ?? String(i + 1);
+    const p = pts.get(lettre);
+    return new Paragraph({
+      children: [
+        new TextRun({ text: `${lettre}) `, bold: true }),
+        ...(await fragmentsVersRunsDocx(lignes[i].enonce)),
+        ...(p !== undefined ? [new TextRun({ text: `\t${pointsTexte(p)}`, size: 18, color: GRIS })] : []),
+      ],
+      tabStops: [{ type: TabStopType.RIGHT, position: largeur }],
+      spacing: { before: 60 },
+      keepNext: avecFigure ? true : undefined,
+      keepLines: true,
+    });
+  };
+  for (const rang of rangsDesFigures(lignes, SEUIL_DEUX_FIGURES)) {
+    if (rang.length === 1) {
+      const i = rang[0];
+      const figure = lignes[i].figureHtml;
+      enfants.push(await enTete(i, LARGEUR_UTILE - 240, !!figure));
+      if (figure) enfants.push(...(await htmlVersParagraphes(figure)));
+      continue;
+    }
+    const largeurCellule = Math.floor(LARGEUR_UTILE / 2);
+    const cellules: TableCell[] = [];
+    for (const i of rang) {
+      const figure = lignes[i].figureHtml;
+      const contenu: FileChild[] = [await enTete(i, largeurCellule - 200, !!figure), ...(figure ? await htmlVersParagraphes(figure) : [])];
+      cellules.push(new TableCell({ children: contenu as (Paragraph | Table)[], width: { size: largeurCellule, type: WidthType.DXA }, borders: BORDS_INVISIBLES }));
+    }
+    enfants.push(new Table({ rows: [new TableRow({ children: cellules, cantSplit: true })], columnWidths: rang.map(() => largeurCellule), borders: BORDS_INVISIBLES }));
   }
   return enfants;
 }

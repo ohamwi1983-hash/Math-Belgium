@@ -223,9 +223,11 @@ export interface RegroupementInstance {
    * groupe (deux consignes différentes → deux groupes). */
   consigne: FragmentConsigne[];
   precisions?: PrecisionRegroupement[];
-  /** Les données de l'instance : l'équation, « f(x) = … », « cercle d'équation … »… */
+  /** Les données de l'instance : l'équation, « f(x) = … », « cercle d'équation … »… Vide pour un
+   * générateur à graphique dont la donnée tient tout entière dans la figure (gen10 : la courbe). */
   ligne: FragmentConsigne[];
-  /** Figure propre à la ligne (lot des générateurs à graphique : graphiques côte à côte). */
+  /** Figure propre à la ligne (générateurs à graphique : l'`enteteHtml` de l'énoncé papier, recopié
+   * tel quel) — graphiques côte à côte, deux par rangée quand ils sont assez petits. */
   figureHtml?: string;
 }
 
