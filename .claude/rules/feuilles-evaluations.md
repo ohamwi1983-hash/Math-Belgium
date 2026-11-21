@@ -317,8 +317,9 @@ d'équation … ».
   précisions des lignes, ordre de première apparition), au pluriel si l'entrée en donne un.
 - Version aménagée : même énoncé que la version normale ; le groupe sur une page, lignes bien
   espacées, coupé entre deux lignes seulement s'il ne tient pas.
-- Générateurs à un graphique par exercice : AUSSI à regrouper (graphiques côte à côte) — lot suivant ;
-  le contrat porte déjà `figureHtml` par ligne (rendu HTML et Word en place, non utilisé).
+- Générateurs à un graphique par exercice : AUSSI regroupés (lot 2, validé sur aperçu), « graphiques
+  côte à côte » : consigne une fois, puis a) [graphique] b) [graphique]…, DEUX graphiques par rangée
+  quand ils sont assez petits, sinon un par rangée (section « Rendu des groupes à graphique » plus bas).
 
 **Règles** :
 - On regroupe les instances d'un MÊME générateur, de la même ligne de sélection
@@ -327,8 +328,9 @@ d'équation … ».
   précisions fusionnables) : deux consignes → deux groupes ; une seule instance → exercice ordinaire,
   rendu inchangé. Le groupe prend le rang de sa première instance (comme le vrai/faux) — en série B,
   mélangée par processus, les mêmes lignes forment les mêmes groupes (ordre des lignes variable).
-- Jamais pour un énoncé papier à figure (`enteteHtml`), à vraies questions a) b) c) (plus d'une
-  question papier), ni pour le vrai/faux (déjà regroupé) ou les questions ouvertes.
+- Jamais pour un énoncé papier à vraies questions a) b) c) (plus d'une question papier : il resterait
+  des sous-sous-questions), ni pour le vrai/faux (déjà regroupé) ou les questions ouvertes. Un énoncé
+  à figure (`enteteHtml`) n'est regroupé que si son entrée le déclare (`figure: true`, lot 2).
 - PUREMENT une mise en forme après tirage : le plan garde un élément par instance (graine, variante,
   points, `?code=`) ; anti-doublon, tirage équilibré, cas particuliers, groupes à verdict inchangés.
   Un ancien plan à élément multi-instances (ancien `regroupable`) est remis à plat (`elementsAPlat`).
@@ -369,7 +371,12 @@ champs, APRÈS `versionPapier`) : l'énoncé papier réel (`enoncePapier`, sinon
 sérialisé (formules entre « $ », consigne d'une question unique après « \n ») et découpé par les
 motifs de la table `REGROUPEMENTS` (groupe nommé `ligne`, `p_<id>` pour une précision ; consigne
 écrite en mini-syntaxe, éventuellement construite depuis des groupes). Jamais une seconde source :
-un énoncé que le motif ne reconnaît pas → `null`, l'instance reste ordinaire. Un adaptateur peut
+un énoncé que le motif ne reconnaît pas → `null`, l'instance reste ordinaire. Générateur à graphique :
+entrée `figure: true` (helper `fig(...formes)`) — l'énoncé est sérialisé malgré son `enteteHtml`, qui
+devient le `figureHtml` de la ligne, recopié TEL QUEL (mêmes figures que l'exercice seul, valeurs à
+lire toujours sur les lignes de la grille) ; la ligne de texte peut être vide (`ligne: () => ""`,
+gen10 : la courbe est la seule donnée) ou porter la courte donnée propre (gen12 « valeur en x = 7 »,
+6gen5 « f(x) = … », gen117 l'inéquation). Un adaptateur peut
 aussi écrire son propre `regroupement` (le registre ne le remplace pas). Les champs `regroupable` et
 le chemin regroupé d'avant ont disparu ; les commentaires d'adaptateurs qui en parlent encore
 expliquent une décision historique.
@@ -403,19 +410,96 @@ mois). Classe « rien de commun », non activés : gen31, gen33, gen34 (série d
 6gen32, 6gen76, 6gen86, 6gen90, 6gen155 (contexte propre à l'instance ou consigne qui embarque les
 données), 5gen7 (contexte r, n et consigne de la variante), 6gen39, 6gen42 (énoncés longs, consigne
 dépendante de l'instance), gen20 et gen21 (chaque variante a sa propre tournure « A a pour image A′… »,
-« M est le milieu… » : possible, mais à reformuler à la main), 5gen52 (la réponse est un tracé — lot
-suivant).
+« M est le milieu… » : possible, mais à reformuler à la main), 5gen52 (la réponse est un tracé — activé au
+lot 2).
 
-**Lot suivant** — générateurs à un graphique par exercice (`enteteHtml` ; graphiques côte à côte,
-`figureHtml` par ligne déjà rendu en HTML et en Word) : d'abord ceux dont la question est COURTE et la
-même pour toutes les instances (lecture d'une courbe ou d'un graphe : gen10, gen12, gen69–71, 5gen9,
-5gen22, 5gen53, 6gen5, 6gen8, 6gen148, 6gen158, gen123, gen128) ; les problèmes à scène (triangles
-gen19, gen58, gen73–81 ; ombre, solides, statistique à graphique) restent des exercices seuls —
-contexte et figure propres à chaque instance. Générateurs à vraies questions (gen9, gen35, gen67,
-gen68, 5gen13, 5gen17, 5gen19, 5gen23, 5gen31, 5gen33, 5gen35, 5gen61, 6gen12, 6gen29, 6gen31, 6gen41,
-6gen43–63, 6gen91–94, 6gen146, 6gen151, 6gen153…) : jamais (il resterait des sous-sous-questions).
+**Lot 2 — générateurs à graphique** (une figure par ligne, `figure: true`). Activés (38) — consigne
+identique d'une instance à l'autre, donnée propre = la figure (+ au plus une courte ligne) : 4e gen8,
+gen10, gen12 (« valeur en x = … » dans la ligne), gen23, gen27, gen43, gen49, gen51, gen53, gen71
+(« caractéristiques » : liste HTML ; « courbe » : conditions + 4 courbes ; « déduction » a 3 vraies
+questions → seule), gen72 (domaine, image et liste des transformations en HTML), gen82 (figures ET
+composantes), gen83, gen117 (inéquation dans la ligne ; consigne avec / sans droite), gen122,
+gen123, gen124 (tableau SVG), gen125 (lignes texte et ligne « parabole tracée » mêlées, même consigne),
+gen128 ; 5e 5gen4, 5gen9, 5gen12 (une consigne par type), 5gen22, 5gen30, 5gen51, 5gen52 (sans figure :
+la réponse est un tracé — écarté au lot 1, décidé ici), 5gen53, 5gen63 ; 6e 6gen5, 6gen8 (deux
+consignes), 6gen11, 6gen18, 6gen20, 6gen21, 6gen77 (« calcul » et « aire/intégrale » ; « propriétés »
+a deux données dans la consigne → seule), 6gen85, 6gen148 (abscisses des nœuds dans la ligne),
+6gen158 (forme arcsin/arccos/arctan dans la ligne). Mesuré (`verifReg.cjs`, 6 graines par variante) :
+toutes les variantes visées reconnues, une consigne par (générateur, forme).
+**Écartés, avec raison** : gen69, gen70 (contexte propre à l'instance ET 2–4 vraies questions) ;
+gen28, gen84, gen108, gen110, gen111, gen74, gen19, 5gen59, 6gen95, 6gen154, 6gen159, 6gen147 (vraies
+questions) ; triangles et scènes géométriques gen58, gen73, gen75, gen77, gen79–81 (figure ET données
+nombreuses propres à l'instance) ; solides et espace gen39–41, gen100–107 ; statistique avec contexte
+gen32, gen36, gen38, gen109 ; détectives d'erreurs (copie d'élève longue propre à l'instance) gen91,
+gen112, gen121, gen127, 5gen49, 5gen50, 5gen58, 6gen84, 6gen88, 6gen99, 6gen144, 6gen152 ; problèmes
+en contexte gen29, gen55, gen57, gen86–90, gen119, 5gen5, 5gen32, 5gen48, 5gen56, 5gen57, 6gen30,
+6gen74, 6gen80–83, 6gen89, 6gen96, 6gen97, 6gen150, 6gen156 ; gen85 (définitions des points propres à
+l'instance) ; 5gen25 (un exercice = un jeu de 6 à 10 graphiques, déjà une demi-page) ; 6gen78, 6gen79
+(consigne longue qui embarque les données : intervalle, valeurs demandées, fonctions).
 
-**Vérifié** (documents réels, `construirePlan` → `genererDocumentsDepuisPlan`, 13 plans 4e/5e/6e) :
+**Rendu des groupes à graphique** (`assemblerEvaluationHtml.ts::corpsGroupeFiguresHtml`, CSS
+`STYLE_GROUPES_FIGURES` ajoutée SEULEMENT à un document qui contient un groupe à graphique — documents
+du lot 1 et sans groupe inchangés) : consigne, puis une CELLULE par ligne (`.cell-fig`) — en tête la
+lettre, la courte donnée éventuelle et, à droite, les points (copie, aménagée, examen, corrigé) ou le
+niveau (feuille) ; dessous la figure et, dans la feuille, le QR code de la ligne (`?code=` de
+l'instance) à droite de la figure.
+- **Coupes** : rangées `.rang-fig` insécables (aucune figure coupée entre deux pages) ; DÉBUT
+  insécable `.debut-groupe` = titre (« Exercice 3 », « Question 3 » et ses points, bandeau de processus
+  en deux colonnes ; inséré par `avecTete`, simple concaténation pour tout autre item) + consigne +
+  première rangée. Le groupe (feuille, copie, examen) se coupe ENTRE deux rangées quand il ne tient
+  pas — insécable, deux grands graphiques de gen12 laissaient la page précédente vide ; et
+  l'équilibrage des colonnes ignorait `break-after` (« Exercice 7 » seul en bas de colonne). Aménagée :
+  le groupe commence sa page (`.q-am`), même règle au-delà. En deux colonnes, un début plus haut que
+  ce qui reste de la colonne (sous une question pleine largeur) passe, consigne entière, à la colonne
+  voisine de la même page ; jamais au milieu d'une figure.
+- **Deux par rangée** (`rangsDesFigures`, partagé avec le Word) quand chaque ligne a au plus une
+  figure et que la plus large (même mesure que `largeurFigureMax` ; une figure à `width="100%"` est
+  mesurée à sa `viewBox`, `mesureFiguresLigne`) ne dépasse pas 316 px (copie, corrigé, aménagée :
+  cellule de 318–332 px sur 680) ou 266 px dans la feuille (le QR code prend 66 px) ; une ligne dont la
+  « figure » n'est qu'un bloc de texte (gen71, gen72) ou qui porte plusieurs graphiques (6gen5,
+  5gen53…) → un par rangée ; une dernière ligne seule garde une demi-largeur. La figure se réduit au
+  besoin à sa cellule (réduction uniforme). Le choix se fait par groupe : la série B d'un même plan
+  peut tirer un graphique plus large (gen10 « inverse », 320 px) et passer à un par rangée.
+- **Deux colonnes** : une cellule par rangée dans la colonne, même à trois figures ou plus
+  (`.une-par-ligne` annule le `column-span` de `.figures-multiples`) ; une ligne à plusieurs graphiques
+  (6gen5, 5gen53) ou une figure trop large (`classeLargeur`, seuils 380 / 260 inchangés) fait passer
+  tout le groupe en pleine largeur, comme avant.
+- **Corrigé** : la figure annotée reste dans le corrigé de SA ligne (sous-partie « a) »).
+- **Identifiants SVG** : la figure et le corrigé de chaque ligne ont leurs `id` / `url(#…)` /
+  `href="#…"` suffixés (`identifiantsUniques`, suffixe = `?code=` de l'instance + lettre, « e »
+  énoncé, « c » corrigé) — 6gen148, 6gen158, 6gen85 (identifiant dérivé du contenu), 5gen30, gen51,
+  6gen77 (compteur) ne peuvent jamais se marcher dessus (mesuré : aucun doublon même sans suffixe ;
+  le suffixe le garantit).
+- **Word** : mêmes rangées (seuil de la copie) — deux cellules d'un tableau sans bordure dont la
+  rangée ne se coupe pas, sinon la ligne liée à sa figure (`keepNext`) ; consigne liée à la première
+  rangée ; figures rasterisées comme celles de l'énoncé. Limite héritée (comme l'exercice seul) : un
+  bloc HTML sans SVG (listes de gen71 « caractéristiques », gen72) n'est pas repris en Word.
+
+**Vérifié — lot 2** (documents réels, `construirePlan` → `genererDocumentsDepuisPlan`, scénarios
+`g4e` / `g5e` / `g6e` de `docs.cjs` : groupes à graphique ET groupes du lot 1, vrai/faux) : feuille
+(avec et sans deux colonnes, aménagée), évaluation 2 séries + aménagée + corrigé + grille + Word
+(copie, corrigé, grille), examen par chapitre (total fixé à 20) et par processus (deux colonnes),
+remédiation depuis une évaluation et depuis un examen : numérotation et points identiques copie =
+corrigé = aménagée = grille, `questionsRemediables` = copie A, somme des lignes = points du groupe, une
+carte « Je vérifie » par ligne, QR par ligne tous distincts et parmi les codes du plan, aucun
+identifiant en double ni `url(#…)` sans cible dans chaque document, 0 débordement à 680, 820 et
+1 280 px (un tracé rogné par son SVG — `clip-path`, `overflow: hidden` — ne compte plus : seul le SVG
+compte), 0 `.katex-error`, PDF A4 relus (planches de pages) : aucune figure coupée, aucune consigne
+seule en bas de page, deux figures par rangée quand elles tiennent. Non-régression (code d'avant
+`ed74c46` / d'après, même plan) : plans sans groupe, générateurs à graphique compris (évaluation,
+feuille, examen à total fixé) et plans du lot 1 (4e ch. 2, 5e, 4e mixte en examen deux colonnes,
+anciens `regroupable`) : 72 / 72 documents identiques (HTML et Word) ; seul le plan 6e diffère, par le
+corrigé de 6gen2 corrigé à dessein. **Piège d'outil** : le serveur Vite de contrôle doit servir les
+polices KaTeX (`server.fs.strict: false` quand `node_modules` est un lien hors de la racine) — sinon
+`obtenirCssKatexAutonome` inline une page « 403 » à la place des polices et `\mathbb{R}` s'affiche
+« R » dans les aperçus (cause du « 1 ∈ R » signalé sur 6gen2 : le code écrivait déjà `\mathbb{R}`) ;
+en revanche, pour comparer des Word octet par octet, le chargement des polices rend la taille des
+formules rasterisées variable d'un chargement à l'autre : comparer les Word avec les polices bloquées
+(comportement par défaut). Outils ajoutés (dossier de travail, à recopier) : `figs.cjs` (énoncés papier
+d'un générateur à figure : texte, largeurs et identifiants SVG), `capgroupe.cjs` (capture d'un groupe),
+`mont.sh` (planche des pages d'un PDF).
+
+**Vérifié — lot 1** (documents réels, `construirePlan` → `genererDocumentsDepuisPlan`, 13 plans 4e/5e/6e) :
 feuille (avec et sans deux colonnes, aménagée), évaluation 2 séries + aménagée + corrigé + grille +
 Word (copie, corrigé, grille), examen par chapitre (total fixé à 20 par partie) et par processus (deux
 colonnes), remédiation depuis une évaluation et depuis un examen qui contiennent des groupes :
