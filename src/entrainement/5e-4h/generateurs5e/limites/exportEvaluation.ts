@@ -1,12 +1,12 @@
-import type { ExerciceLimite, ExerciceLimiteFormeIndeterminee, ExerciceLimiteInfini, ExerciceLimiteInfiniePoint, ExerciceLimiteReelle } from "../../core5e/limites.types";
+import type { ExerciceLimite } from "../../core5e/limites.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -15,11 +15,10 @@ import {
   consignePhase,
   formatBlocDonneesLatex,
   formatReponseAttenduePhaseLatex,
-  formatTermesEtatActuelLatex,
-  LIBELLE_FAMILLE_LIMITE,
-  texteAideNiveau1,
 } from "../../ui5e/formatLimites";
 import { ordreComplet, type PhaseLimite } from "../../moteur5e/typesLimites";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeLimite, lettrePhaseLimite } from "./corrigeDetaille";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLimite } from "./index";
 import { LIBELLE_CAS_LIMITES, profilLimite } from "../profilsEvaluationLimites20-21";
 
@@ -32,24 +31,15 @@ import { LIBELLE_CAS_LIMITES, profilLimite } from "../profilsEvaluationLimites20
  * étudier les signes, terme dominant…) sont des étapes d'APPRENTISSAGE : ils passent dans le corrigé
  * (« Étape n — consigne », une étape par phase de `ordreComplet`, mêmes consignes que l'écran).
  *
- * Toutes les valeurs viennent des fonctions de l'écran : `formatReponseAttenduePhaseLatex` (réponses
- * attendues), `formatTermesEtatActuelLatex` (états intermédiaires), `consignePhase` et
- * `texteAideNiveau1` (méthodes) ; seules les valeurs de substitution N(a) et D(a) sont évaluées ici,
- * depuis les coefficients de l'instance.
+ * Corrigé détaillé « comme au tableau » : `./corrigeDetaille.ts` (partagé avec `App5gen20.tsx`, une
+ * lettre par écran de `ordreComplet`) ; réponses attendues de l'écran (`formatReponseAttenduePhaseLatex`)
+ * pour la réponse brève et le barème.
  *
  * `regroupable` : non — le bloc `\lim_{x\to a}` a besoin du mode display, que seul le chemin non
  * regroupé conserve (en-tête formé d'une formule seule).
  */
 
 const LETTRES = "abcdefgh";
-
-/** Phrase RichText de l'écran (`$…$` = LaTeX en ligne) → fragments texte/LaTeX. */
-function fragmentsRiches(source: string): FragmentConsigne[] {
-  return source
-    .split("$")
-    .map((morceau, i) => (i % 2 === 1 ? latex(morceau) : texte(morceau)))
-    .filter((f) => f.valeur !== "");
-}
 
 function etapes(exercice: ExerciceLimite): PhaseLimite[] {
   return ordreComplet(exercice);
@@ -79,16 +69,12 @@ function enoncePapierLimite(exercice: ExerciceLimite): EnoncePapier {
 // Valeurs de substitution.
 // ---------------------------------------------------------------------------------------------
 
-function valeurReelle(e: ExerciceLimiteReelle): { n: number; d: number } {
-  return { n: e.kN * e.a + e.bN, d: e.kD * e.a + e.bD };
-}
-
-/** Dernière réponse attendue : la limite elle-même (`\lim=…`). */
+/** Dernière réponse attendue de l'écran (la valeur de la limite), écrite avec la limite de l'énoncé
+ * pour se lire seule : « \lim_{x\to 2} \dfrac{…}{…}=\dfrac{1}{2} ». */
 function limiteFinaleLatex(exercice: ExerciceLimite): string {
   const ordre = etapes(exercice);
-  const derniere = formatReponseAttenduePhaseLatex(exercice, ordre[ordre.length - 1]);
-  if (exercice.famille === "limiteInfini" && exercice.sousCas === "degresEgaux") return `\\lim=${derniere[0]}`;
-  return derniere[0];
+  const valeur = formatReponseAttenduePhaseLatex(exercice, ordre[ordre.length - 1])[0].replace(/^\\lim=/, "");
+  return `${formatBlocDonneesLatex(exercice)}=${valeur}`;
 }
 
 function reponseBreveLimite(exercice: ExerciceLimite): FragmentConsigne[] {
@@ -97,124 +83,6 @@ function reponseBreveLimite(exercice: ExerciceLimite): FragmentConsigne[] {
     return [latex(gauche), texte(" et "), latex(droite), texte(" : la limite n'existe pas.")];
   }
   return [latex(limiteFinaleLatex(exercice))];
-}
-
-// ---------------------------------------------------------------------------------------------
-// Corrigé détaillé, par famille.
-// ---------------------------------------------------------------------------------------------
-
-function etapesReelle(e: ExerciceLimiteReelle): EtapeCorrection[] {
-  const { n, d } = valeurReelle(e);
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("On remplace x par "), latex(`${e.a}`), texte(" : si le dénominateur ne s'annule pas, la limite est la valeur obtenue.")] },
-    { label: "Calcul", sousQuestion: "a", fragments: [texte("Numérateur : "), latex(`${n}`), texte(" ; dénominateur : "), latex(`${d} \\neq 0`), texte(".")] },
-    { label: "Conclusion", sousQuestion: "a", fragments: [latex(limiteFinaleLatex(e)), texte(" (nombre réel).")] },
-    {
-      label: "Piège",
-      sousQuestion: "a",
-      fragments: [texte("Vérifier d'abord que le dénominateur ne s'annule pas en "), latex(`x = ${e.a}`), texte(" : c'est ce qui autorise la substitution directe.")],
-    },
-  ];
-}
-
-function etapesFormeIndeterminee(e: ExerciceLimiteFormeIndeterminee): EtapeCorrection[] {
-  const [etatSimplifie] = formatTermesEtatActuelLatex(e, "simplifierEvaluer") ?? [];
-  return [
-    { label: "Lecture", sousQuestion: "a", fragments: [texte("En "), latex(`x = ${e.a}`), texte(", le numérateur et le dénominateur valent 0 : forme indéterminée « 0/0 ».")] },
-    { label: "Piège", sousQuestion: "a", fragments: [texte("« 0/0 » n'est pas un résultat : c'est une forme indéterminée, qu'on lève en factorisant puis en simplifiant.")] },
-    { label: "Méthode", sousQuestion: "b", fragments: fragmentsRiches(texteAideNiveau1(e, "factoriser")) },
-    { label: "Calcul", sousQuestion: "b", fragments: formatReponseAttenduePhaseLatex(e, "factoriser").flatMap((t, i) => [...(i ? [texte(" et ")] : []), latex(t)]) },
-    { label: "Calcul", sousQuestion: "c", fragments: [...(etatSimplifie ? [latex(etatSimplifie)] : []), texte(" : on simplifie par "), latex(e.a === 0 ? "x" : `(x${e.a < 0 ? "+" : "-"}${Math.abs(e.a)})`), texte(", puis on remplace x par "), latex(`${e.a}`), texte(".")] },
-    { label: "Conclusion", sousQuestion: "c", fragments: [latex(limiteFinaleLatex(e)), texte(".")] },
-  ];
-}
-
-function etapesInfiniePoint(e: ExerciceLimiteInfiniePoint): EtapeCorrection[] {
-  const n = e.kN * e.a + e.bN;
-  const [gauche, droite] = formatReponseAttenduePhaseLatex(e, "limitesGaucheDroite");
-  const simple = e.sousCas === "racineSimple";
-  return [
-    {
-      label: "Lecture",
-      sousQuestion: "a",
-      fragments: [texte("En "), latex(`x = ${e.a}`), texte(", le numérateur vaut "), latex(`${n} \\neq 0`), texte(" et le dénominateur vaut 0 : "), texte(`${LIBELLE_FAMILLE_LIMITE.limiteInfiniePoint.toLowerCase()}.`)],
-    },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(formatReponseAttenduePhaseLatex(e, "factoriserDenominateur")[0]), texte(simple ? " (deux racines distinctes)." : " (racine double).")] },
-    { label: "Méthode", sousQuestion: "c", fragments: fragmentsRiches(texteAideNiveau1(e, "limitesGaucheDroite")) },
-    { label: "Calcul", sousQuestion: "c", fragments: [latex(gauche), texte(" et "), latex(droite), texte(".")] },
-    {
-      label: "Conclusion",
-      sousQuestion: "d",
-      fragments: simple
-        ? [texte("Les limites à gauche et à droite sont différentes : "), latex(limiteFinaleLatex(e)), texte(" (la limite n'existe pas).")]
-        : [texte("Les deux limites sont égales : "), latex(limiteFinaleLatex(e)), texte(".")],
-    },
-    {
-      label: "Piège",
-      sousQuestion: simple ? "c" : "d",
-      fragments: simple
-        ? [texte("Pour une racine simple, le dénominateur change de signe en "), latex(`x = ${e.a}`), texte(" : il faut étudier les deux côtés, les deux limites diffèrent.")]
-        : [texte("Pour une racine double, le carré garde le même signe des deux côtés : une seule limite, pas « n'existe pas ».")],
-    },
-  ];
-}
-
-function etapesInfini(e: ExerciceLimiteInfini): EtapeCorrection[] {
-  const egaux = e.sousCas === "degresEgaux";
-  const [etatRapport] = formatTermesEtatActuelLatex(e, "simplifierLimiteRef") ?? [];
-  const rapport = formatReponseAttenduePhaseLatex(e, "simplifierLimiteRef")[0];
-  const lignes: EtapeCorrection[] = [
-    { label: "Lecture", sousQuestion: "a", fragments: [texte("Quand x tend vers l'infini, le numérateur et le dénominateur tendent vers l'infini : forme indéterminée « ∞/∞ ».")] },
-    { label: "Méthode", sousQuestion: "b", fragments: fragmentsRiches(texteAideNiveau1(e, "termeDominant")) },
-    { label: "Calcul", sousQuestion: "b", fragments: formatReponseAttenduePhaseLatex(e, "termeDominant").flatMap((t, i) => [...(i ? [texte(" ; ")] : []), latex(t)]) },
-    {
-      label: "Calcul",
-      sousQuestion: "c",
-      fragments: !etatRapport
-        ? [latex(rapport), texte(".")]
-        : egaux
-          ? [latex(`${etatRapport} = ${rapport}`), texte(".")]
-          : [latex(etatRapport), texte(" ; après simplification, il reste "), latex(rapport), texte(".")],
-    },
-  ];
-  if (egaux) {
-    lignes.push({ label: "Conclusion", sousQuestion: "c", fragments: [texte("Même degré : la limite est le rapport des coefficients dominants, "), latex(limiteFinaleLatex(e)), texte(".")] });
-    lignes.push({ label: "Piège", sousQuestion: "b", fragments: [texte("On compare les termes de plus haut degré, pas les termes constants.")] });
-  } else {
-    lignes.push({ label: "Méthode", sousQuestion: "d", fragments: fragmentsRiches(texteAideNiveau1(e, "evaluerLimiteFinale")) });
-    lignes.push({ label: "Conclusion", sousQuestion: "d", fragments: [latex(limiteFinaleLatex(e)), texte(".")] });
-    lignes.push({
-      label: "Piège",
-      sousQuestion: "d",
-      fragments:
-        e.sousCas === "numerateurPlusGrand"
-          ? [texte("Le signe dépend du coefficient ET, pour une puissance impaire de x, du sens : "), latex(e.direction === "plus" ? "x\\to+\\infty" : "x\\to-\\infty"), texte(".")]
-          : [texte("Numérateur de degré plus petit : la limite vaut 0, pas le rapport des coefficients.")],
-    });
-  }
-  return lignes;
-}
-
-/** Lignes dans l'ordre des étapes (une ligne « Piège » se lit sous l'étape qu'elle concerne). */
-function parEtape(lignes: EtapeCorrection[]): EtapeCorrection[] {
-  return lignes.map((l, i) => ({ l, i })).sort((x, y) => (x.l.sousQuestion ?? "a").localeCompare(y.l.sousQuestion ?? "a") || x.i - y.i).map(({ l }) => l);
-}
-
-function correctionDetailleeLimite(exercice: ExerciceLimite): EtapeCorrection[] {
-  return parEtape(lignesCorrigeLimite(exercice));
-}
-
-function lignesCorrigeLimite(exercice: ExerciceLimite): EtapeCorrection[] {
-  switch (exercice.famille) {
-    case "limiteReelle":
-      return etapesReelle(exercice);
-    case "formeIndeterminee":
-      return etapesFormeIndeterminee(exercice);
-    case "limiteInfiniePoint":
-      return etapesInfiniePoint(exercice);
-    case "limiteInfini":
-      return etapesInfini(exercice);
-  }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -256,17 +124,19 @@ function baremeLimite(exercice: ExerciceLimite): BaremeExercice {
   return { reponseFinale: reponseBreveLimite(exercice), criteres, erreursFrequentes: erreurs, reponsesAcceptees: acceptees };
 }
 
-function difficulteLimite(exercice: ExerciceLimite): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "limiteReelle":
-      return 1;
-    case "formeIndeterminee":
-      return 2;
-    case "limiteInfiniePoint":
-      return exercice.sousCas === "racineSimple" ? 3 : 2;
-    case "limiteInfini":
-      return exercice.sousCas === "numerateurPlusGrand" && exercice.degreResultat % 2 === 1 && exercice.direction === "moins" ? 3 : 2;
-  }
+/** Niveau 1–7 (`.claude/rules/feuilles-evaluations.md`, « Niveau de difficulté et durée ») : la
+ * conclusion de la forme k/0 (limites latérales égales ou non) est un écran de pure décision ;
+ * méthode 0 pour la substitution directe (imposée), 1 sinon (reconnaître la forme et choisir la
+ * technique) ; piège dans les DONNÉES : forme k/0 (constant dans les deux sous-cas : le nombre de
+ * limites est le verdict), puissance impaire en −∞ quand la limite est infinie. */
+function criteresDifficulteLimite(exercice: ExerciceLimite): CriteresDifficulte {
+  const lecture = exercice.famille === "limiteInfiniePoint" ? [lettrePhaseLimite(exercice, "conclureLimite")] : [];
+  const piege =
+    exercice.famille === "limiteInfiniePoint" ||
+    (exercice.famille === "limiteInfini" && exercice.sousCas === "numerateurPlusGrand" && exercice.direction === "moins" && exercice.degreResultat % 2 === 1)
+      ? 1
+      : 0;
+  return { ...etapesDuCorrige(correctionDetailleeLimite(exercice), lecture), methode: exercice.famille === "limiteReelle" ? 0 : 1, piege };
 }
 
 /** Ancien corrigé (repli, documents Word) : les étapes du corrigé détaillé, en paragraphes. */
@@ -284,12 +154,11 @@ export const adaptateurEvaluationLimites: AdaptateurFeuilleExercices<ExerciceLim
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id),
   construireEnonce: construireEnonceLimite,
   construireCorrection: construireCorrectionLimite,
-  difficulte: difficulteLimite,
+  criteresDifficulte: criteresDifficulteLimite,
   reponseBreve: reponseBreveLimite,
   correctionDetaillee: correctionDetailleeLimite,
   bareme: baremeLimite,
   enoncePapier: enoncePapierLimite,
-  dureeMinutes: 6,
   profilInstance: profilLimite,
   libelleCasParticulier: LIBELLE_CAS_LIMITES,
 };

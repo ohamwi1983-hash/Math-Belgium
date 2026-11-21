@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { correctionDetailleeEtudeComplete, lettrePhaseEtudeComplete } from "./generateurs5e/etudeComplete/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeComplete } from "./generateurs5e/etudeComplete/index";
@@ -197,6 +200,7 @@ export function App5gen24() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendueEtudeComplete(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEtudeComplete(exercice), lettrePhaseEtudeComplete(exercice, phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
