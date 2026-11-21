@@ -509,6 +509,16 @@ export const limitesAsymptotes: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 20. Limites, reconnaissance et calcul »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Limites avec racines carrées : expression conjuguée',
+          generatorId: '5gen64',
+          chantier: '5e-4h',
+          description: [
+            'Formes ∞ − ∞ (√(x² + bx + c) − x, différence de deux racines), 0/0 ((√(x + 9) − 3)/x) et ∞/∞ en −∞ : reconnais la forme, multiplie par l’expression conjuguée (produit remarquable (A − B)(A + B) = A² − B²) ou mets x² en évidence sous la racine — en −∞, √(x²) = |x| = −x —, simplifie, puis donne la limite exacte.',
+          ],
+          whereLabel: '5e (4h) → « 64. Limites avec racines carrées : expression conjuguée »',
+        },
       ],
     },
     {

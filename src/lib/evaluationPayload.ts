@@ -115,6 +115,7 @@ export type IdGenerateurPilote =
   | '5gen50' | '5gen51' | '5gen52' | '5gen53' | '5gen54' | '5gen55' | '5gen56' | '5gen57'
   | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19' | '5gen44' | '5gen45' | '5gen46' | '5gen47' | '5gen48' | '5gen49'
   | '5gen20' | '5gen21' | '5gen22' | '5gen23' | '5gen24'
+  | '5gen64'
   | '5gen25' | '5gen26' | '5gen27' | '5gen28' | '5gen29' | '5gen30' | '5gen31' | '5gen32' | '5gen33' | '5gen34' | '5gen35'
 
 export interface GeneratorConfig {
@@ -409,6 +410,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'suites', sectionId: 'comparaison-suites', generatorId: '5gen18', label: '' },
   { chapitreSlug: 'suites', sectionId: 'recurrente-affine', generatorId: '5gen19', label: '' },
   { chapitreSlug: 'limites-asymptotes', sectionId: 'limites-calcul', generatorId: '5gen20', label: '' },
+  { chapitreSlug: 'limites-asymptotes', sectionId: 'limites-calcul', generatorId: '5gen64', label: 'Limites avec racines carrées : expression conjuguée (5gen64)', processus: 2 },
   { chapitreSlug: 'limites-asymptotes', sectionId: 'asymptote-oblique', generatorId: '5gen21', label: '' },
   { chapitreSlug: 'limites-asymptotes', sectionId: 'lecture-graphique', generatorId: '5gen22', label: '' },
   { chapitreSlug: 'limites-asymptotes', sectionId: 'limites-contexte', generatorId: '5gen23', label: '', processus: 3 },
