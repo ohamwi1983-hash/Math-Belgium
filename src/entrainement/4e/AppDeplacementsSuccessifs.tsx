@@ -49,6 +49,9 @@ import { EtapeNombre, EtapeTraduction, EtapeVecteur } from "./components/EtapesD
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeDeplacementsSuccessifs } from "./generateurs/deplacementsSuccessifs/corrigeDetaille";
 
 /**
  * gen86 — « Carte au trésor et randonnée : déplacements successifs » (4e, chapitre 6, section
@@ -138,6 +141,7 @@ export function AppDeplacementsSuccessifs() {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDeplacementsSuccessifs(e), lettreEtape(etat.ecran))} />,
         onSuivant: passerEcranSuivant,
       }
     : null;

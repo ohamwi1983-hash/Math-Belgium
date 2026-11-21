@@ -2,37 +2,28 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
   EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeViserCible } from "./corrigeDetaille";
 import type { ExerciceViserCible } from "../../core/viserCible.types";
-import { coefficientK, composanteConnue, conditionInverse, critere, fraction, solutionM, vecteurAC, verdictDirect, verdictInverse } from "../../moteur/modeleViserCible";
+import { critere, solutionM, verdictDirect, verdictInverse } from "../../moteur/modeleViserCible";
 import { ecransDe } from "../../moteur/sessionViserCible";
 import {
   AC,
-  CONTEXTES,
-  FORMULE_CRITERE,
   U,
-  acLatex,
-  colonneLatex,
-  conditionIsoleeLatex,
-  conditionReduiteLatex,
-  conditionSubstitueeLatex,
   consigneEcran,
   critereSubstitueLatex,
   enonceFragments,
   variablesEnLatex,
-  facteurLatex,
-  fractionLatex,
   kLatex,
-  phraseConclusionDirecte,
-  libelleConclusionInverse,
   nombreLatex,
   questionPapier,
-  uResoluLatex,
 } from "../../ui/formatViserCible";
 import { construireFigureViserCible } from "../../ui/figureViserCible";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceViserCible } from "./index";
@@ -50,10 +41,6 @@ function figureEnonce(e: ExerciceViserCible): string {
   return construireFigureViserCible(e, { theme: "papier" });
 }
 
-function figureCorrige(e: ExerciceViserCible): string {
-  return construireFigureViserCible(e, { theme: "papier", corrige: true });
-}
-
 /** Énoncé STRUCTURÉ (une sous-question par écran) : sert aux titres « Étape n — … » du corrigé. */
 function construireEnonce(e: ExerciceViserCible): SectionExercice {
   return {
@@ -64,10 +51,6 @@ function construireEnonce(e: ExerciceViserCible): SectionExercice {
 }
 
 const LETTRES = "abcde";
-
-function majuscule(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
 
 function enoncePapier(e: ExerciceViserCible): EnoncePapier {
   return {
@@ -92,210 +75,18 @@ function reponseBreve(e: ExerciceViserCible): FragmentConsigne[] {
   return [texte("Aucune valeur : "), m, texte(" rend "), latex(U), texte(" colinéaire à "), latex(AC), texte(", mais "), latex(`k = ${kLatex(e)} < 0`), texte(".")];
 }
 
-function etapesCommunes(e: ExerciceViserCible): EtapeCorrection[] {
-  const ac = vecteurAC(e);
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [
-        texte("La trajectoire est la demi-droite d'origine A dirigée par "),
-        latex(U),
-        texte(" : un point M est atteint si, et seulement si, "),
-        latex(`\\vec{AM} = k \\cdot ${U}`),
-        texte(" avec "),
-        latex("k > 0"),
-        texte(". On compare donc à "),
-        latex(U),
-        texte(" le vecteur qui va du départ à la cible."),
-      ],
-    },
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte("Vecteur à comparer : "), latex(AC), texte(" (pas "), latex("\\vec{CA}"), texte(", qui décrit le trajet à l'envers).")] },
-    {
-      label: "Calcul",
-      sousQuestion: "b",
-      fragments: [
-        latex(`${AC}${colonneLatex(`${nombreLatex(e.C.x)} - ${facteurLatex(e.A.x)}`, `${nombreLatex(e.C.y)} - ${facteurLatex(e.A.y)}`)} = ${colonneLatex(nombreLatex(ac.x), nombreLatex(ac.y))}`),
-      ],
-    },
-  ];
-}
-
-const METHODE_CRITERE: FragmentConsigne[] = [
-  texte("Critère du cours : "),
-  latex(U),
-  texte(" et "),
-  latex(AC),
-  texte(" sont colinéaires si, et seulement si, "),
-  latex(`${FORMULE_CRITERE} = 0`),
-  texte("."),
-];
-
-function correctionDirecte(e: ExerciceViserCible): EtapeCorrection[] {
-  const ac = vecteurAC(e);
-  const c = critere(e);
-  const v = verdictDirect(e);
-  const etapes: EtapeCorrection[] = [...etapesCommunes(e), { label: "Méthode", sousQuestion: "c", fragments: METHODE_CRITERE }];
-  if (c !== 0) {
-    etapes.push(
-      { label: "Calcul", sousQuestion: "c", fragments: [latex(`${critereSubstitueLatex(e)} = ${nombreLatex(e.u.x * ac.y)} - ${facteurLatex(e.u.y * ac.x)} = ${nombreLatex(c)}`)] },
-      { label: "Conclusion", sousQuestion: "c", fragments: [texte("Le critère vaut "), latex(`${nombreLatex(c)} \\neq 0`), texte(" : "), latex(U), texte(" et "), latex(AC), texte(" ne sont pas colinéaires.")] },
-    );
-  } else {
-    etapes.push(
-      { label: "Calcul", sousQuestion: "c", fragments: [latex(`${critereSubstitueLatex(e)} = ${nombreLatex(e.u.x * ac.y)} - ${facteurLatex(e.u.y * ac.x)} = 0`), texte(" : colinéaires.")] },
-      {
-        label: "Calcul",
-        sousQuestion: "c",
-        fragments: [
-          texte("Coefficient : "),
-          latex(`x_{AC} = k \\cdot x_u`),
-          texte(" donne "),
-          latex(`k = \\dfrac{${nombreLatex(ac.x)}}{${nombreLatex(e.u.x)}} = ${kLatex(e)}`),
-          texte(" (même résultat avec "),
-          latex(`\\dfrac{${nombreLatex(ac.y)}}{${nombreLatex(e.u.y)}}`),
-          texte(")."),
-        ],
-      },
-      { label: "Conclusion", sousQuestion: "c", fragments: [latex(`${AC} = ${kLatex(e)} \\cdot ${U}`), texte(" avec "), latex(v === "touche" ? "k > 0" : "k < 0"), texte(".")] },
-    );
-  }
-  const raison: FragmentConsigne[] =
-    v === "cote"
-      ? [texte("Le critère n'est pas nul : C n'est pas sur la droite du lancer. ")]
-      : v === "touche"
-        ? [texte("Le critère est nul et "), latex("k > 0"), texte(" : C est devant A, dans le sens de "), latex(U), texte(". ")]
-        : [texte("Le critère est nul, mais "), latex("k < 0"), texte(" : "), latex(AC), texte(" et "), latex(U), texte(" sont de sens contraires. ")];
-  etapes.push({ label: "Conclusion", sousQuestion: "d", fragments: [...raison, texte(majuscule(phraseConclusionDirecte(e, v)))], figureHtml: figureCorrige(e) });
-  etapes.push(piegeDirect(e));
-  return etapes;
-}
-
-function piegeDirect(e: ExerciceViserCible): EtapeCorrection {
-  const v = verdictDirect(e);
-  const ctx = CONTEXTES[e.situation];
-  if (v === "derriere") {
-    return {
-      label: "Piège",
-      sousQuestion: "d",
-      fragments: [
-        texte("Le critère nul ne suffit pas : il dit seulement que C est sur la DROITE du lancer. Le signe de k tranche : ici "),
-        latex(`k = ${kLatex(e)} < 0`),
-        texte(`, ${ctx.mobile} part à l'opposé ${ctx.deCible}.`),
-      ],
-    };
-  }
-  if (v === "cote") {
-    const ac = vecteurAC(e);
-    const devant = ac.x * e.u.x + ac.y * e.u.y > 0;
-    return {
-      label: "Piège",
-      sousQuestion: "c",
-      fragments: devant
-        ? [
-            texte("Sur la figure, C semble presque sur la trajectoire : l'œil ne suffit pas. Le critère vaut "),
-            latex(nombreLatex(critere(e))),
-            texte(", pas 0 : la trajectoire passe à moins d'une unité de C, sans l'atteindre."),
-          ]
-        : [
-            texte("Sur la figure, C semble sur la droite du lancer, derrière A : on croirait à « bonne droite, mauvais sens ». Le critère vaut "),
-            latex(nombreLatex(critere(e))),
-            texte(", pas 0 : C n'est même pas sur cette droite, il en est à moins d'une unité."),
-          ],
-    };
-  }
-  const kCA = fraction(-coefficientK(e)!.num, coefficientK(e)!.den);
-  return {
-    label: "Piège",
-    sousQuestion: "a",
-    fragments: [
-      texte("Comparer "),
-      latex("\\vec{CA}"),
-      texte(" au lieu de "),
-      latex(AC),
-      texte(" donnerait "),
-      latex(`k = ${fractionLatex(kCA)} < 0`),
-      texte(" et ferait conclure à tort au « mauvais sens » : le vecteur part toujours du départ A."),
-    ],
-  };
-}
-
-function correctionInverse(e: ExerciceViserCible): EtapeCorrection[] {
-  const ac = vecteurAC(e);
-  const { alpha, beta } = conditionInverse(e);
-  const m = solutionM(e);
-  const possible = verdictInverse(e) === "possible";
-  const ctx = CONTEXTES[e.situation];
-  const cleK = e.inconnue === "x" ? "y" : "x";
-  const c = composanteConnue(e);
-  const etapes: EtapeCorrection[] = [
-    ...etapesCommunes(e),
-    { label: "Méthode", sousQuestion: "c", fragments: METHODE_CRITERE },
-    { label: "Calcul", sousQuestion: "c", fragments: [latex(conditionSubstitueeLatex(e)), texte(", soit "), latex(conditionReduiteLatex(e)), texte(".")] },
-    {
-      label: "Calcul",
-      sousQuestion: "d",
-      fragments: [latex(conditionIsoleeLatex(e)), texte(", donc "), latex(`m = \\dfrac{${nombreLatex(-beta)}}{${nombreLatex(alpha)}} = ${nombreLatex(m)}`), texte(".")],
-    },
-    { label: "Conclusion", sousQuestion: "d", fragments: [texte("Avec "), latex(`m = ${nombreLatex(m)}`), texte(" : "), latex(uResoluLatex(e)), texte(", colinéaire à "), latex(acLatex(e)), texte(".")] },
-    {
-      label: "Calcul",
-      sousQuestion: "e",
-      fragments: [
-        texte("Sens : "),
-        latex(cleK === "x" ? "x_{AC} = k \\cdot x_u" : "y_{AC} = k \\cdot y_u"),
-        texte(" donne "),
-        latex(`k = \\dfrac{${nombreLatex(cleK === "x" ? ac.x : ac.y)}}{${nombreLatex(c)}} = ${kLatex(e)}`),
-        texte("."),
-      ],
-    },
-  ];
-  if (possible) {
-    etapes.push({
-      label: "Conclusion",
-      sousQuestion: "e",
-      fragments: [latex("k > 0"), texte(" : C est devant A, dans le sens de "), latex(U), texte(". "), ...libelleConclusionInverse(e, "possible"), texte(" Il faut "), latex(`m = ${nombreLatex(m)}`), texte(".")],
-      figureHtml: figureCorrige(e),
-    });
-    etapes.push({
-      label: "Piège",
-      sousQuestion: "e",
-      fragments: [texte("Trouver m ne suffit pas : il faut encore vérifier le sens. Avec une composante imposée de signe contraire, la même équation aurait donné une direction qui part à l'opposé de C.")],
-    });
-  } else {
-    etapes.push({
-      label: "Conclusion",
-      sousQuestion: "e",
-      fragments: [
-        latex("k < 0"),
-        texte(" : avec "),
-        latex(`m = ${nombreLatex(m)}`),
-        texte(`, ${ctx.mobile} part sur la droite (AC), mais à l'opposé ${ctx.deCible}. C'est la seule valeur qui rend `),
-        latex(U),
-        texte(" colinéaire à "),
-        latex(AC),
-        texte(` : aucune valeur de m ne convient (il faudrait que la composante imposée, `),
-        latex(nombreLatex(c)),
-        texte(", change de signe)."),
-      ],
-      figureHtml: figureCorrige(e),
-    });
-    etapes.push({
-      label: "Piège",
-      sousQuestion: "e",
-      fragments: [texte("Répondre "), latex(`m = ${nombreLatex(m)}`), texte(" sans vérifier le sens : "), latex(U), texte(" et "), latex(AC), texte(" sont bien colinéaires, mais de sens contraires.")],
-    });
-  }
-  return etapes;
-}
-
 function correctionDetaillee(e: ExerciceViserCible): EtapeCorrection[] {
-  return (e.sens === "directe" ? correctionDirecte(e) : correctionInverse(e)).map((etape) => ({ ...etape, fragments: variablesEnLatex(etape.fragments) }));
+  return correctionDetailleeViserCible(e);
+}
+
+function criteresDifficulte(e: ExerciceViserCible): CriteresDifficulte {
+  // Le verdict (touchée / à côté / derrière ; m convient ou non) ne doit pas se lire : piège 0, sansCharge (le bloc k n’existe que si les vecteurs sont colinéaires). Méthode 1 : critère de colinéarité PUIS signe de k, à choisir (énoncé papier sans méthode).
+  return { ...etapesDuCorrige(correctionDetailleeViserCible(e)), sansCharge: true, methode: 1, piege: 0, nombres: 0 };
 }
 
 function construireCorrection(e: ExerciceViserCible): BlocCorrection[] {
   return correctionDetaillee(e)
-    .filter((etape) => etape.label === "Conclusion")
+    .filter((etape) => etape.type === "resultat")
     .map((etape) => ({ type: "paragraphe", fragments: [texte(`${etape.sousQuestion}) `), ...etape.fragments] }));
 }
 
@@ -360,10 +151,6 @@ function baremeBrut(e: ExerciceViserCible): BaremeExercice {
   };
 }
 
-function difficulte(e: ExerciceViserCible): 1 | 2 | 3 {
-  return e.sens === "directe" ? 2 : 3;
-}
-
 export const adaptateurEvaluationViserCible: AdaptateurFeuilleExercices<ExerciceViserCible> = {
   profilInstance: profilViserCible,
   titreDocument: "Viser une cible : trajectoires rectilignes — Évaluation",
@@ -373,10 +160,9 @@ export const adaptateurEvaluationViserCible: AdaptateurFeuilleExercices<Exercice
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 7,
 };

@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { Composantes, Point } from "../core/vecteur.types";
 import type { Deplacement, Direction, ExerciceDeplacementsSuccessifs, SituationDeplacements } from "../core/deplacementsSuccessifs.types";
 import {

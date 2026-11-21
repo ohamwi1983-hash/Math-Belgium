@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { ExerciceNatureQuadrilatere, NatureQuadrilatere } from "../core/natureQuadrilatere.types";
 import type { Composantes, Point } from "../core/vecteur.types";
 import {

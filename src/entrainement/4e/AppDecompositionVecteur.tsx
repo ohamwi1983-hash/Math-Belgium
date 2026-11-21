@@ -1,7 +1,7 @@
 import { Fragment, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { FragmentConsigne } from "../export/genererFeuilleExercices";
-import { latex } from "../export/fragmentsDocx";
+import { latex, lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import type { ExerciceComposantes, ExerciceDecompositionVecteur, SystemeOption } from "./core/decompositionVecteur.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDecompositionVecteur } from "./generateurs/decompositionVecteur";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
@@ -50,6 +50,8 @@ import { EtapeChampsDecomposition, EtapeChoixDecomposition, type GroupeChamps, t
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeDecompositionVecteur } from "./generateurs/decompositionVecteur/corrigeDetaille";
 
 /**
  * gen82 — « Décomposer un vecteur selon deux directions » (4e, chapitre 6, section
@@ -153,6 +155,7 @@ export function AppDecompositionVecteur() {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDecompositionVecteur(e), lettreEtape(etat.ecran))} />,
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
       }

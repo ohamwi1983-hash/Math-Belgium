@@ -1,7 +1,7 @@
 import { Fragment, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { FragmentConsigne } from "../export/genererFeuilleExercices";
-import { latex, texte } from "../export/fragmentsDocx";
+import { latex, texte, lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import type { ExerciceViserCible, OptionVecteur, VerdictDirect } from "./core/viserCible.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceViserCible } from "./generateurs/viserCible";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
@@ -54,6 +54,8 @@ import { EtapeChoixViserCible, EtapeComposantesViserCible, EtapeSaisieViserCible
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeViserCible } from "./generateurs/viserCible/corrigeDetaille";
 
 /**
  * gen89 — « Viser une cible : trajectoires rectilignes » (4e, chapitre 6 « Calcul vectoriel »,
@@ -173,6 +175,7 @@ export function AppViserCible() {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeViserCible(e), lettreEtape(etat.ecran))} />,
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
       }

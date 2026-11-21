@@ -2,6 +2,7 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
   EtapeCorrection,
@@ -9,24 +10,17 @@ import type {
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeNatureQuadrilatere } from "./corrigeDetaille";
 import type { ExerciceNatureQuadrilatere } from "../../core/natureQuadrilatere.types";
-import { natureDe, vecAB, vecBC } from "../../moteur/modeleNatureQuadrilatere";
+import { natureDe } from "../../moteur/modeleNatureQuadrilatere";
 import { figureNatureQuadrilatereSvg } from "../../ui/figureNatureQuadrilatere";
 import {
-  calculCritereLatex,
-  calculNormeLatex,
-  calculQuatriemeSommetLatex,
-  calculVecteurLatex,
-  conclusionAngle,
-  conclusionCotes,
-  conclusionParallelogramme,
   consigneGenerale,
   consignesEcrans,
   consignesPapier,
   donneesFragments,
   libelleNature,
-  phraseNature,
-  piegeFragments,
   pointLatex,
 } from "../../ui/formatNatureQuadrilatere";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceNatureQuadrilatere } from "./index";
@@ -91,40 +85,19 @@ function reponseBreve(e: ExerciceNatureQuadrilatere): FragmentConsigne[] {
 }
 
 function correctionDetaillee(e: ExerciceNatureQuadrilatere): EtapeCorrection[] {
-  const etapes: EtapeCorrection[] = [];
-  if (e.variante === "quatrieme") {
-    etapes.push(
-      { label: "Méthode", sousQuestion: "a", fragments: [texte("ABCD est un parallélogramme si et seulement si "), latex("\\vec{AB} = \\vec{DC}"), texte(" : D se trouve à partir de C, en reculant de "), latex("\\vec{AB}"), texte(".")] },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(calculVecteurLatex("AB", e.A, e.B))] },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(calculQuatriemeSommetLatex(e))] },
-      { label: "Conclusion", sousQuestion: "a", fragments: [latex(pointLatex("D", e.D)), texte(" : ABCD est un parallélogramme par construction.")] },
-    );
-  } else {
-    etapes.push(
-      { label: "Méthode", sousQuestion: "a", fragments: [texte("ABCD est un parallélogramme si et seulement si "), latex("\\vec{AB} = \\vec{DC}"), texte(" (même sens de parcours : A vers B, D vers C).")] },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(calculVecteurLatex("AB", e.A, e.B))] },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(calculVecteurLatex("DC", e.D, e.C))] },
-      { label: "Conclusion", sousQuestion: "a", fragments: conclusionParallelogramme(e) },
-    );
-  }
-  etapes.push(
-    { label: "Méthode", sousQuestion: "b", fragments: [texte("Losange : un parallélogramme dont deux côtés consécutifs ont la même longueur. On compare AB et BC.")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(calculVecteurLatex("BC", e.B, e.C))] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(calculNormeLatex("AB", vecAB(e))), texte(" ; "), latex(calculNormeLatex("BC", vecBC(e)))] },
-    { label: "Conclusion", sousQuestion: "b", fragments: conclusionCotes(e) },
-    { label: "Méthode", sousQuestion: "c", fragments: [texte("Rectangle : un parallélogramme qui a un angle droit. On teste l'orthogonalité de "), latex("\\vec{AB}"), texte(" et "), latex("\\vec{BC}"), texte(".")] },
-    { label: "Calcul", sousQuestion: "c", fragments: [latex(calculCritereLatex(e))] },
-    { label: "Conclusion", sousQuestion: "c", fragments: conclusionAngle(e) },
-    { label: "Conclusion", sousQuestion: "d", fragments: [texte(phraseNature(natureDe(e)))], figureHtml: figureNatureQuadrilatereSvg(e, "corrige") },
-  );
-  const piege = piegeFragments(e);
-  etapes.push({ label: "Piège", sousQuestion: piege.sousQuestion, fragments: piege.fragments });
-  return etapes;
+  return correctionDetailleeNatureQuadrilatere(e);
+}
+
+/** Niveau : 4 écrans qui transforment (d combine les trois tests : une décision), méthode imposée
+ * par la consigne d'écran mais choisie sur papier (« justifie par des calculs vectoriels ») → 1 ;
+ * piège 0 (la nature est le verdict : constant, jamais lu dans l'instance). */
+function criteresDifficulte(e: ExerciceNatureQuadrilatere): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeNatureQuadrilatere(e)), sansCharge: true, methode: 1, piege: 0, nombres: 0 };
 }
 
 function construireCorrection(e: ExerciceNatureQuadrilatere): BlocCorrection[] {
   return correctionDetaillee(e)
-    .filter((etape) => etape.label === "Conclusion")
+    .filter((etape) => etape.type === "resultat")
     .map((etape) => ({ type: "paragraphe", fragments: [texte(`${etape.sousQuestion}) `), ...etape.fragments] }));
 }
 
@@ -155,11 +128,6 @@ function bareme(e: ExerciceNatureQuadrilatere): BaremeExercice {
   };
 }
 
-function difficulte(e: ExerciceNatureQuadrilatere): 1 | 2 | 3 {
-  // Selon la variante seulement : jamais selon la nature (elle trahirait le verdict).
-  return e.variante === "quatrieme" ? 3 : 2;
-}
-
 export const adaptateurEvaluationNatureQuadrilatere: AdaptateurFeuilleExercices<ExerciceNatureQuadrilatere> = {
   profilInstance: profilNatureQuadrilatere,
   titreDocument: "Nature d'un quadrilatère — Évaluation",
@@ -169,10 +137,9 @@ export const adaptateurEvaluationNatureQuadrilatere: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };

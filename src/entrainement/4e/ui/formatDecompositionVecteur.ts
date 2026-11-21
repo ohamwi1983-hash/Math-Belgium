@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { ExerciceComposantes, ExerciceDecompositionVecteur, ExerciceGraphique, SystemeOption, Vec2 } from "../core/decompositionVecteur.types";
 import { combinaison, lignesSysteme, nettoyer } from "../moteur/modeleDecompositionVecteur";
 

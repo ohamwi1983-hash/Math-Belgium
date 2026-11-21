@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { Composantes, EcranConstruction, EcranConstruireSomme, ExerciceConstruireSomme, Point } from "../core/construireSomme.types";
 import {
   VEC_AB,

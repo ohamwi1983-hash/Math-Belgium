@@ -2,6 +2,7 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
   EtapeCorrection,
@@ -9,29 +10,20 @@ import type {
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeChantierTerrains } from "./corrigeDetaille";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
-import type { Affine, ExerciceChantierTerrains } from "../../core/chantierTerrains.types";
-import { angleDegres, demiVecteur, equationPiquet, lettreInconnue, point, valeurCritere, valeurInconnue, vecteursUtiles } from "../../moteur/modeleChantierTerrains";
+import type { ExerciceChantierTerrains } from "../../core/chantierTerrains.types";
+import { valeurCritere } from "../../moteur/modeleChantierTerrains";
 import {
   CONSIGNE_GENERALE,
-  EGALITE_ENCLOS,
-  colonneLatex,
   consignePapier,
-  contexte,
-  critereCalculLatex,
   ecrans,
-  equationLatex,
-  formuleCritereLatex,
-  indicePhraseJuste,
   nomCritere,
   nombreLatex,
-  phrasesConclusion,
   pointLatex,
   recitFragments,
-  soustractionLatex,
-  traductionOutil,
   vecLatex,
-  affineLatex,
 } from "../../ui/formatChantierTerrains";
 import { figureChantierSvg } from "../../ui/figureChantierTerrains";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceChantierTerrains } from "./index";
@@ -77,185 +69,18 @@ function reponseBreve(e: ExerciceChantierTerrains): FragmentConsigne[] {
   return [latex(pointLatex(e.cherche!))];
 }
 
-function fragmentsVecteurs(e: ExerciceChantierTerrains): FragmentConsigne[] {
-  const lettre = lettreInconnue(e);
-  const morceaux: FragmentConsigne[] = [texte("Composantes, arrivée moins départ : ")];
-  vecteursUtiles(e).forEach((v, i) => {
-    if (i > 0) morceaux.push(texte(" et "));
-    morceaux.push(latex(`${soustractionLatex(e, v)} = ${colonneLatex(affineLatex(v.x, lettre), affineLatex(v.y, lettre))}`));
-  });
-  morceaux.push(texte("."));
-  return morceaux;
-}
-
-function etapesCritere(e: ExerciceChantierTerrains): EtapeCorrection[] {
-  const [u, v] = vecteursUtiles(e);
-  switch (e.situation) {
-    case "milieu": {
-      const nom = e.cherche!.nom;
-      const am = demiVecteur(e);
-      return [
-        {
-          label: "Calcul",
-          sousQuestion: "c",
-          fragments: [latex(`${vecLatex("A", nom)} = \\frac{1}{2}\\,${vecLatex("A", "B")} = ${colonneLatex(`\\frac{1}{2} \\times ${facteur(u!.x.cst)}`, `\\frac{1}{2} \\times ${facteur(u!.y.cst)}`)} = ${colonneLatex(nombreLatex(am.x), nombreLatex(am.y))}`), texte(".")],
-        },
-      ];
-    }
-    case "enclos": {
-      const c = point(e, "C");
-      return [
-        { label: "Méthode", sousQuestion: "c", fragments: [texte("ABCD est un parallélogramme si et seulement si "), latex(EGALITE_ENCLOS), texte(" (côtés opposés, même sens).")] },
-        { label: "Calcul", sousQuestion: "c", fragments: [texte("Avec "), latex("D(x_D\\,;\\,y_D)"), texte(" : "), latex(`${vecLatex("D", "C")}${colonneLatex(`${nombreLatex(c.x)} - x_D`, `${nombreLatex(c.y)} - y_D`)}`), texte(".")] },
-      ];
-    }
-    case "piquet": {
-      const lettre = lettreInconnue(e)!;
-      return [
-        { label: "Méthode", sousQuestion: "c", fragments: [texte("A, B et P alignés : le critère de colinéarité de "), latex(vecLatex("A", "B")), texte(" et "), latex(vecLatex("A", "P")), texte(" est nul : "), latex(`${formuleCritereLatex(e)} = 0`), texte(".")] },
-        {
-          label: "Calcul",
-          sousQuestion: "c",
-          fragments: [latex(`${facteur(u!.x.cst)} \\times ${terme(v!.y, lettre)} - ${facteur(u!.y.cst)} \\times ${terme(v!.x, lettre)} = 0`), texte(", soit "), latex(equationLatex(e)), texte(".")],
-        },
-      ];
-    }
-    default:
-      return [
-        { label: "Méthode", sousQuestion: "c", fragments: [texte(`${nomCritere(e).charAt(0).toUpperCase()}${nomCritere(e).slice(1)} de `), latex(vecLatex(u!.origine, u!.extremite)), texte(" et "), latex(vecLatex(v!.origine, v!.extremite)), texte(" : "), latex(formuleCritereLatex(e)), texte(".")] },
-        { label: "Calcul", sousQuestion: "c", fragments: [latex(critereCalculLatex(e)), texte(".")] },
-      ];
-  }
-}
-
-function etapesConclusion(e: ExerciceChantierTerrains): EtapeCorrection[] {
-  if (e.verdict !== null) {
-    return [{ label: "Conclusion", sousQuestion: "d", fragments: phrasesConclusion(e)[indicePhraseJuste(e)]! }];
-  }
-  const c = e.cherche!;
-  const a = point(e, "A");
-  if (e.situation === "milieu") {
-    const am = demiVecteur(e);
-    const somme = (x: number, d: number) => `${nombreLatex(x)} ${d < 0 ? "-" : "+"} ${nombreLatex(Math.abs(d))}`;
-    return [
-      { label: "Calcul", sousQuestion: "d", fragments: [latex(`x_${c.nom} = x_A + x_{${vecLatex("A", c.nom)}} = ${somme(a.x, am.x)} = ${nombreLatex(c.x)}`), texte(" et "), latex(`y_${c.nom} = ${somme(a.y, am.y)} = ${nombreLatex(c.y)}`), texte(".")] },
-      { label: "Conclusion", sousQuestion: "d", fragments: [texte(`${contexte(e).sujet.charAt(0).toUpperCase()}${contexte(e).sujet.slice(1)} se trouve en `), latex(pointLatex(c)), texte(".")] },
-    ];
-  }
-  if (e.situation === "enclos") {
-    const pc = point(e, "C");
-    const [ab] = vecteursUtiles(e);
-    return [
-      {
-        label: "Calcul",
-        sousQuestion: "d",
-        fragments: [latex(`${nombreLatex(pc.x)} - x_D = ${nombreLatex(ab!.x.cst)}`), texte(" donc "), latex(`x_D = ${nombreLatex(c.x)}`), texte(" ; "), latex(`${nombreLatex(pc.y)} - y_D = ${nombreLatex(ab!.y.cst)}`), texte(" donc "), latex(`y_D = ${nombreLatex(c.y)}`), texte(".")],
-      },
-      { label: "Conclusion", sousQuestion: "d", fragments: [texte(`${contexte(e).sujet.charAt(0).toUpperCase()}${contexte(e).sujet.slice(1)} : `), latex(pointLatex(c)), texte(".")] },
-    ];
-  }
-  const lettre = lettreInconnue(e)!;
-  const eq = equationPiquet(e);
-  return [
-    { label: "Calcul", sousQuestion: "d", fragments: [latex(`${affineLatex({ coef: eq.coef, cst: 0 }, lettre)} = ${nombreLatex(-eq.cst)}`), texte(" donc "), latex(`${lettre} = \\dfrac{${nombreLatex(-eq.cst)}}{${nombreLatex(eq.coef)}} = ${nombreLatex(valeurInconnue(e))}`), texte(".")] },
-    { label: "Conclusion", sousQuestion: "d", fragments: [texte(`Il faut planter ${contexte(e).sujet} en `), latex(pointLatex(c)), texte(".")] },
-  ];
-}
-
-/** Facteur dans un produit : parenthèses autour d'un négatif. */
-function facteur(n: number): string {
-  return n < 0 ? `(${nombreLatex(n)})` : nombreLatex(n);
-}
-
-/** Composante dans un produit : parenthèses autour d'une expression en lettre ou d'un négatif. */
-function terme(a: Affine, lettre: string): string {
-  return a.coef !== 0 ? `(${affineLatex(a, lettre)})` : facteur(a.cst);
-}
-
-function pgcd(a: number, b: number): number {
-  return b === 0 ? Math.abs(a) : pgcd(b, a % b);
-}
-
-function arrondi1(n: number): string {
-  return (Math.round(n * 10) / 10).toString().replace(".", ",");
-}
-
-function piege(e: ExerciceChantierTerrains): EtapeCorrection {
-  const [u, v] = vecteursUtiles(e);
-  const nu = vecLatex(u!.origine, u!.extremite);
-  switch (e.situation) {
-    case "alignement":
-    case "paralleles": {
-      if (!e.verdict) {
-        const ecart = Math.min(angleDegres({ x: u!.x.cst, y: u!.y.cst }, { x: v!.x.cst, y: v!.y.cst }), 180 - angleDegres({ x: u!.x.cst, y: u!.y.cst }, { x: v!.x.cst, y: v!.y.cst }));
-        return { label: "Piège", sousQuestion: "d", fragments: [texte(`Sur le plan, l'écart ne se voit presque pas (environ ${arrondi1(ecart)}°) : seul le calcul tranche. Un critère de colinéarité non nul, même petit, veut dire « non ».`)] };
-      }
-      const g = pgcd(v!.x.cst, u!.x.cst);
-      const num = Math.abs(v!.x.cst) / g;
-      const den = Math.abs(u!.x.cst) / g;
-      const negatif = v!.x.cst * u!.x.cst < 0;
-      const kLatex = den === 1 ? (num === 1 ? (negatif ? "-" : "") : nombreLatex((negatif ? -1 : 1) * num)) : `${negatif ? "-" : ""}\\frac{${num}}{${den}}`;
-      return {
-        label: "Piège",
-        sousQuestion: "d",
-        fragments: [texte("Colinéaires ne veut pas dire égaux : "), latex(`${vecLatex(v!.origine, v!.extremite)} = ${kLatex}\\,${nu}`), texte(e.situation === "paralleles" ? " — la longueur des deux tronçons ne compte pas, seule la direction compte." : " — les composantes sont proportionnelles, pas identiques.")],
-      };
-    }
-    case "equerre": {
-      const angle = angleDegres({ x: u!.x.cst, y: u!.y.cst }, { x: v!.x.cst, y: v!.y.cst });
-      return {
-        label: "Piège",
-        sousQuestion: "c",
-        fragments: [
-          texte("Pour un angle droit, c'est le produit scalaire "),
-          latex("x_u \\cdot x_v + y_u \\cdot y_v"),
-          texte(" — pas le critère de colinéarité, qui teste la colinéarité."),
-          ...(e.verdict ? [] : [texte(` Ici, l'angle en A mesure environ ${arrondi1(angle)}° : à l'œil, impossible de le distinguer d'un angle droit.`)]),
-        ],
-      };
-    }
-    case "milieu": {
-      const a = point(e, "A");
-      const b = point(e, "B");
-      return {
-        label: "Piège",
-        sousQuestion: "d",
-        fragments: [texte("Ne pas s'arrêter aux composantes de "), latex(vecLatex("A", e.cherche!.nom)), texte(" : ce sont celles d'un déplacement, pas les coordonnées du point. Contrôle par la moyenne : "), latex(`\\frac{${nombreLatex(a.x)} + ${nombreLatex(b.x)}}{2} = ${nombreLatex(e.cherche!.x)}`), texte(".")],
-      };
-    }
-    case "enclos": {
-      const c = point(e, "C");
-      const faux = { nom: "D", x: c.x + u!.x.cst, y: c.y + u!.y.cst };
-      return {
-        label: "Piège",
-        sousQuestion: "c",
-        fragments: [texte("L'ordre des lettres compte : "), latex(`${vecLatex("A", "B")} = ${vecLatex("C", "D")}`), texte(" donnerait "), latex(pointLatex(faux)), texte(", et ABCD serait un quadrilatère croisé.")],
-      };
-    }
-    case "piquet": {
-      const lettre = lettreInconnue(e)!;
-      return {
-        label: "Piège",
-        sousQuestion: "b",
-        fragments: [texte(`Garder la lettre ${lettre} dans la composante de `), latex(vecLatex("A", "P")), texte(" ("), latex(`${lettre === "y" ? "y" : "x"}_{${vecLatex("A", "P")}} = ${affineLatex(lettre === "y" ? v!.y : v!.x, lettre)}`), texte(") : c'est elle qui donne l'équation. Contrôle : avec la valeur trouvée, "), latex(vecLatex("A", "P")), texte(" doit être un multiple de "), latex(nu), texte(".")],
-      };
-    }
-  }
-}
-
 function correctionDetaillee(e: ExerciceChantierTerrains): EtapeCorrection[] {
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: traductionOutil(e) },
-    { label: "Calcul", sousQuestion: "b", fragments: fragmentsVecteurs(e), figureHtml: figureChantierSvg(e, true) },
-    ...etapesCritere(e),
-    ...etapesConclusion(e),
-    piege(e),
-  ];
+  return correctionDetailleeChantierTerrains(e);
+}
+
+function criteresDifficulte(e: ExerciceChantierTerrains): CriteresDifficulte {
+  // Méthode 2 : l’outil vectoriel est caché derrière les mots du chantier (énoncé papier sans méthode). Piège dans les données : piquet (inconnue à garder) et enclos (ordre des sommets) ; jamais le verdict (alignement, équerre, parallèles : piège 0, niveau constant). sansCharge : la longueur ne trahit pas un verdict.
+  return { ...etapesDuCorrige(correctionDetailleeChantierTerrains(e)), sansCharge: true, methode: 2, piege: e.situation === "piquet" || e.situation === "enclos" ? 1 : 0, nombres: 0 };
 }
 
 function construireCorrection(e: ExerciceChantierTerrains): BlocCorrection[] {
   return correctionDetaillee(e)
-    .filter((etape) => etape.label === "Conclusion")
+    .filter((etape) => etape.type === "resultat")
     .map((etape) => ({ type: "paragraphe", fragments: etape.fragments }));
 }
 
@@ -290,15 +115,6 @@ function bareme(e: ExerciceChantierTerrains): BaremeExercice {
   };
 }
 
-const DIFFICULTE: Record<ExerciceChantierTerrains["situation"], 1 | 2 | 3> = {
-  alignement: 2,
-  equerre: 2,
-  paralleles: 2,
-  milieu: 1,
-  enclos: 2,
-  piquet: 3,
-};
-
 export const adaptateurEvaluationChantierTerrains: AdaptateurFeuilleExercices<ExerciceChantierTerrains> = {
   profilInstance: profilChantierTerrains,
   titreDocument: "Chantier et terrains — Évaluation",
@@ -308,10 +124,9 @@ export const adaptateurEvaluationChantierTerrains: AdaptateurFeuilleExercices<Ex
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte: (e) => DIFFICULTE[e.situation],
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 6,
 };
