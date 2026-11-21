@@ -15,6 +15,7 @@ export function CarteSeance({
   seance,
   classe,
   format,
+  avecGrille = false,
   ecole,
   professeur,
   occupe,
@@ -24,6 +25,8 @@ export function CarteSeance({
   seance: Seance
   classe: Classe
   format: FormatHoraire
+  /** L'école de la classe a une grille horaire : « H2 (09h35 → 10h25) ». */
+  avecGrille?: boolean
   ecole: string
   professeur: string
   occupe: boolean
@@ -31,7 +34,7 @@ export function CarteSeance({
   onSupprimer: () => void
 }) {
   const [copie, setCopie] = useState<'ok' | 'echec' | null>(null)
-  const r = resoudreSeance(seance, classe, { format, ecole, lienGenerateur: generatorLink })
+  const r = resoudreSeance(seance, classe, { format, ecole, lienGenerateur: generatorLink, avecGrille })
   const texte = texteSmartschool(r)
   // Nom ASCII : un accent dans l'attribut `download` fait perdre le nom du fichier dans Chromium.
   const nomFiche = `seance-${slugTitre(classe.nom)}-${seance.date_seance}.html`
