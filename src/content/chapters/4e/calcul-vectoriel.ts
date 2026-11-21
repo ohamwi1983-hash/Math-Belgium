@@ -902,6 +902,16 @@ export const calculVectoriel: ChapterContent = {
           result: { tag: 'résultat', text: '$\\vec{AB}\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$' },
         },
         {
+          kind: 'atelier',
+          tag: 'arrivee-moins-depart-widget',
+          label: 'Manipule toi-même : arrivée moins départ',
+          caption:
+            'Déplace A et B sur le quadrillage : les composantes de AB se comptent en carreaux ' +
+            '(horizontalement puis verticalement) et se calculent « arrivée moins départ » : abscisse de B ' +
+            'moins abscisse de A, ordonnée de B moins ordonnée de A. Le bouton « Piège » calcule A − B : on obtient BA, le vecteur opposé. Déplace aussi P : ' +
+            'le même vecteur, tracé ailleurs, garde les mêmes composantes.',
+        },
+        {
           kind: 'application',
           titre: 'Déplacer un personnage à l\'écran',
           illustrations: [
@@ -1242,6 +1252,16 @@ export const calculVectoriel: ChapterContent = {
             'mais on ne se trouve qu\'à $\\sqrt{3^2 + 4^2} = 5$ km du départ **à vol d\'oiseau**. ' +
             'Additionner les longueurs des étapes ne donne jamais la distance en ligne droite : ' +
             'on additionne les vecteurs, puis on calcule la norme du résultat.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'carte-tresor-widget',
+          label: 'Manipule toi-même : la carte au trésor',
+          caption:
+            'Empile des pas avec la rose des vents (N, S, E, O et les diagonales). Le déplacement total ' +
+            'DA est la somme des pas ; compare la distance parcourue (somme des longueurs, √2 par pas en ' +
+            'diagonale) et la distance à vol d\'oiseau, la norme de DA. Le chemin du retour, en pointillés, ' +
+            'est AD = −DA. Le réglage de départ reprend l\'encadré : 7 km parcourus, 5 km à vol d\'oiseau.',
         },
         {
           kind: 'entrainement',
@@ -2163,6 +2183,16 @@ export const calculVectoriel: ChapterContent = {
             'exactement la même norme, tout en pointant dans des directions complètement différentes.',
         },
         {
+          kind: 'atelier',
+          tag: 'longueur-direction-sens-widget',
+          label: 'Manipule toi-même : longueur, direction, sens',
+          caption:
+            'u est fixe ; déplace l\'origine C et l\'extrémité D de v. Les trois propriétés s\'allument en ' +
+            'direct : même longueur (normes comparées), même direction (critère de colinéarité nul), ' +
+            'même sens (seulement si les directions sont les mêmes). La ligne correspondante du tableau ' +
+            'est surlignée. Essaie les raccourcis u, −u, 2u, −2u et « même norme ».',
+        },
+        {
           kind: 'entrainement',
           title: 'Comparaison visuelle de vecteurs sur figure',
           generatorId: 'gen28',
@@ -2399,6 +2429,17 @@ export const calculVectoriel: ChapterContent = {
             'propre dépasse le courant).',
         },
         {
+          kind: 'atelier',
+          tag: 'traversee-riviere-widget',
+          label: 'Manipule toi-même : traverser la rivière',
+          caption:
+            'Règle le courant, la vitesse propre et l\'angle de visée : la vitesse réelle est la somme de ' +
+            'la vitesse propre et du courant. La durée ne dépend que de la composante y ; le point ' +
+            'd\'accostage, de la composante x. Le bouton « Juste en face » vise vers l\'amont (x de la ' +
+            'vitesse propre = −c), ce qui n\'est possible que si la vitesse propre dépasse le courant. Le ' +
+            'réglage de départ reproduit l\'exemple du nageur.',
+        },
+        {
           kind: 'entrainement',
           title: 'Traverser une rivière : vitesses en composantes',
           generatorId: 'gen87',
@@ -2480,6 +2521,15 @@ export const calculVectoriel: ChapterContent = {
               caption: 'bout à bout, elles forment un triangle fermé : la somme est nulle',
             },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'equilibre-forces-widget',
+          label: 'Manipule toi-même : l\'équilibre de trois forces',
+          caption:
+            'Déplace les extrémités de F₁ et F₂ (un carreau = 10 N) : la force d\'équilibre F₃ = −(F₁ + F₂) ' +
+            'se recalcule, avec son intensité et son angle avec l\'horizontale. Bout à bout, les trois forces ' +
+            'forment un triangle fermé. Le bouton « Piège » prend F₃ = F₁ + F₂ : le polygone ne se ferme plus.',
         },
         {
           kind: 'entrainement',
