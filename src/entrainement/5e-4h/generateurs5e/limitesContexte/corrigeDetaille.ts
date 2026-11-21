@@ -2,7 +2,7 @@ import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../ex
 import { calcul, ligne, piege, resultat, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceClubLoisirs, ExerciceEauSalee, ExerciceLimitesContexte, ExercicePopulation, ExercicePrixRevient } from "../../core5e/limitesContexte.types";
 import { ordreComplet, type PhaseLimitesContexte } from "../../moteur5e/typesLimitesContexte";
-import { formatReponseAttendueTexte, formatTermesDonneesLatex, nombreTexte } from "../../ui5e/formatLimitesContexte";
+import { concentrationLatex, valeurClubReelle, formatReponseAttendueTexte, formatTermesDonneesLatex, nombreTexte } from "../../ui5e/formatLimitesContexte";
 import { COURS_CONTEXTE, COURS_LIMITES, decL, egalOuApprox, estExact, finaliser, fracBrute, fracL, lim, nbT, par, pgcd, t, f } from "../../ui5e/corrigeLimites";
 
 /**
@@ -98,7 +98,7 @@ function etapesEauSalee(e: ExerciceEauSalee): EtapeCorrection[] {
   const [V, Q] = formatTermesDonneesLatex(e);
   const rt = r === 1 ? "t" : `${r}t`;
   const crt = cr === 1 ? "t" : `${cr}t`;
-  const Ct = `\\dfrac{${crt}}{${v0}+${rt}}`;
+  const Ct = concentrationLatex(e);
   const L = lim("+\\infty", "t");
   return [
     utilise("a", [t(`La concentration est la quantité ${e.contexte.quantitePhrase} divisée par le volume total, au même instant : `), f("C(t)=\\dfrac{Q(t)}{V(t)}"), t(` ${COURS_CONTEXTE}.`)]),
@@ -145,7 +145,7 @@ function lignesValeurClub(e: ExerciceClubLoisirs, x: number): { lignes: LigneCal
   const valeur = v.n / v.d;
   const arrondi = Math.round(valeur * facteur);
   lignes.push(ligne(`f(${x})\\times ${facteur}=${fracL(v.n, v.d)}\\times ${facteur}`, `1 unité = ${facteur} ${e.contexte.unitePluriel}`));
-  const exact = Number.isInteger(Math.round(valeur * facteur * 1e9) / 1e9);
+  const exact = valeurClubReelle(e, x).exacte;
   lignes.push(ligne(exact ? `=${arrondi}` : `\\approx ${arrondi}`, exact ? undefined : "arrondi à l'unité"));
   return { lignes, valeur, arrondi, exact };
 }
@@ -246,7 +246,7 @@ function etapesPopulation(e: ExercicePopulation): EtapeCorrection[] {
       ligne(egalOuApprox(valeur, 2), exacte ? undefined : "arrondi au centième"),
       ligne(`${decL(valeur, 2)}${valeur > seuil ? ">" : "<"}${decL(seuil, 2)}`, valeur > seuil ? "au-dessus du seuil" : "en dessous du seuil"),
     ]),
-    resultat("c", [f(`f(${x})${exacte ? "=" : "\\approx "}${decL(valeur, 2)}`), t(valeur > seuil ? ` : supérieure au seuil de ${nombreTexte(seuil)} ${unite}.` : ` : inférieure au seuil de ${nombreTexte(seuil)} ${unite}.`)]),
+    resultat("c", [f(`f(${x})${egalOuApprox(valeur, 2)}`), t(valeur > seuil ? ` : supérieure au seuil de ${nombreTexte(seuil)} ${unite}.` : ` : inférieure au seuil de ${nombreTexte(seuil)} ${unite}.`)]),
     piege("c", [t("Comparer la limite b au seuil ne suffit pas : il faut calculer f(x) en l'année demandée.")]),
   ];
 }

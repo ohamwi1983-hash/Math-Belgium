@@ -1,4 +1,9 @@
-import type { ExerciceAsymptoteOblique } from "../../core5e/asymptoteOblique.types";
+import type { ExerciceAsymptoteOblique, ExerciceGen21, ExercicePositionAsymptote } from "../../core5e/asymptoteOblique.types";
+import { estPosition } from "../../core5e/asymptoteOblique.types";
+import { ORDRE_POSITION } from "../../moteur5e/sessionPositionAsymptote";
+import { consignePapierFragments, consignePhaseFragments, dLatex, ecartLatex, enonceFragments, phraseCotes, phraseVerdict, pointLatex, rLatex } from "../../ui5e/formatPositionAsymptote";
+import { correctionDetailleePosition, lettrePhasePosition } from "./corrigePosition";
+import { fragmentsRiches } from "../../ui5e/retoursLimites";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
@@ -14,7 +19,7 @@ import { consignePhase, formatReponseAttenduePhaseLatex, formatTermesDonneesLate
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { correctionDetailleeAsymptoteOblique, lettrePhaseAsymptoteOblique } from "./corrigeDetaille";
 import { ordreComplet, type PhaseAsymptoteOblique } from "../../moteur5e/typesAsymptoteOblique";
-import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceAsymptoteOblique } from "./index";
+import { CATALOGUE_FAMILLES, construireGen21AvecFamilleId, genererExerciceAsymptoteOblique } from "./index";
 import { LIBELLE_CAS_ASYMPTOTE_OBLIQUE, PARAMETRES_ASYMPTOTE_OBLIQUE, profilAsymptoteOblique } from "../profilsEvaluationLimites20-21";
 
 /**
@@ -40,10 +45,9 @@ function fonctionLatex(exercice: ExerciceAsymptoteOblique): string {
   return `f(x) = ${formatTermesDonneesLatex(exercice)[0]}`;
 }
 
-/** Consigne d'étape = celle de l'écran, avec le vrai signe moins et sans formule tapée au clavier. */
+/** Consigne d'étape = celle de l'écran (texte riche : polynômes en KaTeX, plus de texte brut). */
 function consigneEtape(exercice: ExerciceAsymptoteOblique, phase: PhaseAsymptoteOblique): FragmentConsigne[] {
-  if (phase === "ecrireFormeDeveloppee") return [texte("Écris f(x) sous la forme "), latex("Q(x)+\\dfrac{R(x)}{D(x)}"), texte(".")];
-  return [texte(consignePhase(exercice, phase).replace(/-/g, "−"))];
+  return fragmentsRiches(consignePhase(exercice, phase));
 }
 
 function construireEnonceAsymptoteOblique(exercice: ExerciceAsymptoteOblique): SectionExercice {
@@ -111,19 +115,78 @@ function construireCorrectionAsymptoteOblique(exercice: ExerciceAsymptoteOblique
     .map((l) => ({ type: "paragraphe", fragments: l.fragments }));
 }
 
-export const adaptateurEvaluationAsymptoteOblique: AdaptateurFeuilleExercices<ExerciceAsymptoteOblique> = {
+// ============================================================================
+// Famille « position de la courbe par rapport à son asymptote » (lots B–D).
+// ============================================================================
+
+function construireEnoncePosition(e: ExercicePositionAsymptote): SectionExercice {
+  return { enteteFragments: enonceFragments(e), questions: ORDRE_POSITION.map((phase) => ({ consigne: consignePhaseFragments(e, phase) })) };
+}
+
+/** Énoncé papier : la fonction, la droite donnée, UNE consigne globale (aucune sous-question). */
+function enoncePapierPosition(e: ExercicePositionAsymptote): EnoncePapier {
+  return { section: { enteteFragments: enonceFragments(e), questions: [{ consigne: consignePapierFragments(e) }] }, etapesParQuestion: [ORDRE_POSITION.map((p) => lettrePhasePosition(p))] };
+}
+
+function reponseBrevePosition(e: ExercicePositionAsymptote): FragmentConsigne[] {
+  const p = pointLatex(e);
+  return [
+    latex(`${ecartLatex(e)}=\\dfrac{${rLatex(e)}}{${dLatex(e)}}`),
+    texte(" ; "),
+    ...phraseVerdict(e),
+    ...(p ? [texte(" Point de recoupement "), latex(p), texte(".")] : []),
+    texte(" "),
+    ...phraseCotes(e),
+  ];
+}
+
+function baremePosition(e: ExercicePositionAsymptote): BaremeExercice {
+  const c = (sousQuestion: string, texteCritere: string, points: number): CritereBareme => ({ sousQuestion, critere: [texte(texteCritere)], points });
+  return {
+    reponseFinale: reponseBrevePosition(e),
+    criteres: [
+      c("a", "Écart f(x) − (droite) réduit au même dénominateur", 1.5),
+      c("b", "Signe étudié (D(x) > 0, signe du numérateur) et position conclue", 1.5),
+      c("c", "Point de recoupement (ou absence justifiée)", 0.5),
+      c("d", "Côté d'approche en −∞ et en +∞", 0.5),
+    ],
+    erreursFrequentes: [
+      { description: [texte("Oublier de distribuer le signe − sur tout le produit de la droite par D(x)")], cout: "0 pt sur a)" },
+      { description: [texte("Affirmer qu'une asymptote oblique ou horizontale n'est jamais recoupée")], cout: "0 pt sur c)" },
+      { description: [texte("Conclure sur le signe sans justifier que D(x) > 0 (discriminant négatif)")], cout: "−0,5" },
+    ],
+    reponsesAcceptees: [[texte("Numérateur écrit dans un autre ordre ; tableau de signes à la place de la rédaction")]],
+  };
+}
+
+/** Niveau : écart (a), signe et verdict (b), point commun (c) sont des étapes ; le côté d'approche (d)
+ * se LIT sur le signe déjà établi. Méthode 1 (l'énoncé papier ne dit pas d'étudier le signe de
+ * l'écart : c'est la méthode du cours à choisir) ; aucun piège dans les données. Identique pour les
+ * trois verdicts (mesuré : même niveau, même durée). */
+function criteresDifficultePosition(e: ExercicePositionAsymptote): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleePosition(e), [lettrePhasePosition("cotesApproche")]), methode: 1, piege: 0 };
+}
+
+const surGen21 =
+  <R,>(classique: (e: ExerciceAsymptoteOblique) => R, position: (e: ExercicePositionAsymptote) => R) =>
+  (e: ExerciceGen21): R =>
+    estPosition(e) ? position(e) : classique(e);
+
+export const adaptateurEvaluationAsymptoteOblique: AdaptateurFeuilleExercices<ExerciceGen21> = {
   titreDocument: "Asymptote oblique — Évaluation",
   nomFichierBase: "asymptote-oblique",
+  // Tirage libre d'AVANT les lots B–D (un ancien code libre rouvre le même exercice) ; les familles
+  // « position » sont des variantes ajoutées en fin de catalogue.
   genererInstance: genererExerciceAsymptoteOblique,
   catalogueVariantes: CATALOGUE_FAMILLES,
-  genererInstanceAvecVariante: (id) => construireAvecFamilleId(id),
-  construireEnonce: construireEnonceAsymptoteOblique,
-  construireCorrection: construireCorrectionAsymptoteOblique,
-  criteresDifficulte: criteresDifficulteAsymptoteOblique,
-  reponseBreve: reponseBreveAsymptoteOblique,
-  correctionDetaillee: correctionDetailleeAsymptoteOblique,
-  bareme: baremeAsymptoteOblique,
-  enoncePapier: enoncePapierAsymptoteOblique,
+  genererInstanceAvecVariante: (id) => construireGen21AvecFamilleId(id),
+  construireEnonce: surGen21(construireEnonceAsymptoteOblique, construireEnoncePosition),
+  construireCorrection: surGen21(construireCorrectionAsymptoteOblique, (e) => correctionDetailleePosition(e).filter((l) => l.label !== "Piège").map((l) => ({ type: "paragraphe", fragments: l.fragments }) as BlocCorrection)),
+  criteresDifficulte: surGen21(criteresDifficulteAsymptoteOblique, criteresDifficultePosition),
+  reponseBreve: surGen21(reponseBreveAsymptoteOblique, reponseBrevePosition),
+  correctionDetaillee: surGen21(correctionDetailleeAsymptoteOblique, correctionDetailleePosition),
+  bareme: surGen21(baremeAsymptoteOblique, baremePosition),
+  enoncePapier: surGen21(enoncePapierAsymptoteOblique, enoncePapierPosition),
   profilInstance: profilAsymptoteOblique,
   parametresAuChoix: PARAMETRES_ASYMPTOTE_OBLIQUE,
   libelleCasParticulier: LIBELLE_CAS_ASYMPTOTE_OBLIQUE,

@@ -5,7 +5,7 @@
  * Q(x)*D(x)+c — jamais de rejet/régénération, le résultat est par construction toujours un P(x) à
  * coefficients entiers propres.
  */
-import type { ExerciceAsymptoteOblique, VarianteAsymptoteOblique } from "../../core5e/asymptoteOblique.types";
+import type { ExerciceAsymptoteOblique, ExerciceGen21, ExercicePositionAsymptote, VarianteAsymptoteOblique, VerdictPosition } from "../../core5e/asymptoteOblique.types";
 
 function entierAleatoire(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));
@@ -64,12 +64,66 @@ export function genererExerciceAsymptoteOblique(options: OptionsGenerationAsympt
   return { variante, a, b, c, coeffsD, coeffsP };
 }
 
+// ============================================================================
+// Famille « position de la courbe par rapport à son asymptote » (lots B–D).
+// ============================================================================
+
+const VERDICTS_POSITION: VerdictPosition[] = ["dessus", "dessous", "recoupe"];
+
+/** f(x) = P(x)/D(x) avec D(x) = x² + px + q (Δ < 0), d donnée (AO y = ax + b ou AH y = b) et reste
+ * R(x) = rx + s : verdict tiré EN PREMIER, à parts égales ; les nombres ensuite (x₀ entier pour un
+ * recoupement, reste constant non nul sinon). */
+export function genererExercicePositionAsymptote(asymptote: "oblique" | "horizontale"): ExercicePositionAsymptote {
+  const verdict = VERDICTS_POSITION[Math.floor(Math.random() * 3)];
+  const a = asymptote === "oblique" ? entierNonNul(3) : 0;
+  const b = asymptote === "oblique" ? entierAleatoire(-6, 6) : entierNonNul(5);
+  const p = entierAleatoire(-4, 4);
+  const q = Math.ceil((p * p) / 4) + 1 + entierAleatoire(0, 4);
+  const coeffsD = [q, p, 1];
+  let r = 0;
+  let s: number;
+  if (verdict === "recoupe") {
+    r = entierNonNul(3);
+    const x0 = entierAleatoire(-4, 4);
+    s = -r * x0;
+  } else {
+    s = (verdict === "dessus" ? 1 : -1) * entierAleatoire(1, 7);
+  }
+  const coeffsP = multiplierPolynomes([b, a], coeffsD);
+  coeffsP[0] += s;
+  coeffsP[1] += r;
+  while (coeffsP.length > 1 && coeffsP[coeffsP.length - 1] === 0) coeffsP.pop();
+  return { variante: "position", asymptote, a, b, r, s, coeffsD, coeffsP, verdict };
+}
+
+/**
+ * Catalogue : les deux familles « position » sont AJOUTÉES EN FIN (indices 4 et 5) pour que les codes
+ * `?code=` déjà imprimés (indice de variante 0–3) rouvrent toujours le même exercice.
+ */
 export const CATALOGUE_FAMILLES: { id: string; label: string }[] = [
   { id: "divisionEuclidienne-degre1", label: "Via division euclidienne — P2/P1" },
   { id: "divisionEuclidienne-degre2", label: "Via division euclidienne — P3/P2" },
   { id: "viaLimites-degre1", label: "Via les limites — P2/P1" },
   { id: "viaLimites-degre2", label: "Via les limites — P3/P2" },
+  { id: "position-ao", label: "Position de la courbe par rapport à son asymptote oblique" },
+  { id: "position-ah", label: "Position de la courbe par rapport à son asymptote horizontale" },
 ];
+
+/**
+ * Tirage libre de l'APPLI (bouton « Nouvel exercice ») : une fois sur trois la famille « position »,
+ * sinon l'ancien tirage. Le tirage libre de l'adaptateur et des codes (`genererExerciceAsymptoteOblique`)
+ * reste celui d'avant, octet pour octet : un ancien code libre rouvre le même exercice.
+ */
+export function genererExerciceGen21Libre(): ExerciceGen21 {
+  if (Math.random() < 1 / 3) return genererExercicePositionAsymptote(Math.random() < 0.5 ? "oblique" : "horizontale");
+  return genererExerciceAsymptoteOblique();
+}
+
+export function construireGen21AvecFamilleId(id: string): ExerciceGen21 {
+  if (id === "position-ao") return genererExercicePositionAsymptote("oblique");
+  if (id === "position-ah") return genererExercicePositionAsymptote("horizontale");
+  return construireAvecFamilleId(id);
+}
 
 export function construireAvecFamilleId(id: string): ExerciceAsymptoteOblique {
   switch (id) {

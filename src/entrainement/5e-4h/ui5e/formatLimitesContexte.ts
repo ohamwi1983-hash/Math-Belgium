@@ -7,6 +7,37 @@ import type { ExerciceLimitesContexte } from "../core5e/limitesContexte.types";
 import { capitaliser } from "../generateurs5e/limitesContexte/utils";
 import { ordreComplet } from "../moteur5e/typesLimitesContexte";
 import type { PhaseLimitesContexte } from "../moteur5e/typesLimitesContexte";
+import { egalOuApprox } from "./corrigeLimites";
+
+// ============================================================================
+// Écritures partagées par l'écran, les aides, le papier et le corrigé (une seule source).
+// ============================================================================
+
+/** « t », « −t » ou « 15t » : coefficient 1 jamais écrit (« 230+t », pas « 230+1t »). */
+export function monomeTLatex(k: number): string {
+  return k === 1 ? "t" : k === -1 ? "-t" : `${k}t`;
+}
+
+/** C(t) = (c·r)t / (v₀ + rt), coefficients 1 non écrits. */
+export function concentrationLatex(e: { v0: number; r: number; c: number }): string {
+  return `\\dfrac{${monomeTLatex(e.c * e.r)}}{${e.v0}+${monomeTLatex(e.r)}}`;
+}
+
+/** Valeur réelle du club, f(x)·facteur arrondie à l'unité : « = 412 » si elle est exacte, « ≈ 412 »
+ * sinon (même test que le corrigé). */
+export function valeurClubReelle(e: { a: number; b: number; c: number; d: number; facteur: number }, x: number): { arrondi: number; exacte: boolean; relation: string } {
+  const valeur = (e.a * x + e.b - e.c / (x + e.d)) * e.facteur;
+  const arrondi = Math.round(valeur);
+  const exacte = Math.abs(valeur - arrondi) < 1e-9;
+  return { arrondi, exacte, relation: exacte ? "=" : "\\approx " };
+}
+
+/** f(x) de la population au centième : « = 52,5 » si la valeur est exacte, « ≈ 52,47 » sinon. */
+export function valeurPopulationLatex(e: { a: number; b: number; p: number; anneeRef: number; anneeEval: number }): { valeur: number; relationValeur: string } {
+  const x = e.anneeEval - e.anneeRef;
+  const valeur = e.a / (x + e.p) + e.b;
+  return { valeur, relationValeur: egalOuApprox(valeur, 2) };
+}
 
 export function consigneGenerale(): string {
   return "Résous ce problème en t'appuyant sur le contexte donné, étape par étape.";
@@ -55,7 +86,7 @@ export function formatTermesDonneesLatex(exercice: ExerciceLimitesContexte): str
       return [`C_u(x)=${exercice.b}+\\dfrac{${exercice.a}}{x}`];
     case "eauSalee":
       // Coefficient 1 jamais écrit : « 230+t », pas « 230+1t ».
-      return [`V(t)=${exercice.v0}+${exercice.r === 1 ? "" : exercice.r}t`, `Q(t)=${exercice.c * exercice.r === 1 ? "" : exercice.c * exercice.r}t`];
+      return [`V(t)=${exercice.v0}+${monomeTLatex(exercice.r)}`, `Q(t)=${monomeTLatex(exercice.c * exercice.r)}`];
     case "clubLoisirs": {
       const { a, b, c, d } = exercice;
       return [`f(x)=${formatMonomeLatex(a, 1, true)}${formatMonomeLatex(b, 0, false)}-\\dfrac{${c}}{x${d >= 0 ? "+" : "-"}${Math.abs(d)}}`];
@@ -187,7 +218,7 @@ export function labelsChampsLatex(exercice: ExerciceLimitesContexte, phase: Phas
   if (exercice.famille === "eauSalee" && phase === "limiteC") return ["\\lim_{t\\to+\\infty}C(t)="];
   if (exercice.famille === "clubLoisirs") {
     const { facteur, xEval } = exercice;
-    if (phase === "evaluer") return [`f(0)\\times${facteur}=`, `f(${xEval})\\times${facteur}=`];
+    if (phase === "evaluer") return [`f(0)\\times${facteur}${valeurClubReelle(exercice, 0).relation}`, `f(${xEval})\\times${facteur}${valeurClubReelle(exercice, xEval).relation}`];
     if (phase === "inequation") return ["x="];
     if (phase === "asymptoteOblique") return ["y="];
     if (phase === "interpreterPente") return [`a\\times${facteur}=`];
@@ -255,7 +286,7 @@ export function texteAideNiveau2(exercice: ExerciceLimitesContexte, phase: Phase
       if (phase === "construireC")
         return { texte: "Exemple, avec d'autres valeurs :", latex: "\\begin{gathered}V(t)=40+3t,\\ Q(t)=15t\\\\[4pt] \\Rightarrow\\; C(t)=\\dfrac{15t}{40+3t}\\end{gathered}" };
       if (phase === "limiteC")
-        return { texte: "Après division par $t$ (il reste à faire tendre $t$ vers $+\\infty$) :", latex: `C(t)=\\dfrac{${c * r}t}{${v0}+${r}t}=\\dfrac{${c * r}}{\\frac{${v0}}{t}+${r}}` };
+        return { texte: "Après division par $t$ (il reste à faire tendre $t$ vers $+\\infty$) :", latex: `C(t)=${concentrationLatex(exercice)}=\\dfrac{${c * r}}{\\frac{${v0}}{t}+${r}}` };
       return { texte: "Compare les deux volumes, par exemple pour $t=1000$ minutes :", latex: `\\text{initial : }${v0}\\qquad \\text{ajouté : }${r}\\times1000` };
     }
     case "clubLoisirs": {
@@ -305,12 +336,15 @@ function formatEtatLigne(exercice: ExerciceLimitesContexte, phase: PhaseLimitesC
     return null; // "interpreter"/"vaSens" sont des QCM, pas de terme LaTeX synthétique pertinent
   }
   if (exercice.famille === "eauSalee") {
-    if (phase === "construireC") return `C(t)=\\dfrac{${exercice.c * exercice.r}t}{${exercice.v0}+${exercice.r}t}`;
+    if (phase === "construireC") return `C(t)=${concentrationLatex(exercice)}`;
     if (phase === "limiteC") return `\\lim_{t\\to+\\infty}C(t)=${exercice.c}`;
     return null;
   }
   if (exercice.famille === "clubLoisirs") {
-    if (phase === "evaluer") return `f(0)\\times${exercice.facteur}=${Math.round((exercice.b - exercice.c / exercice.d) * exercice.facteur)}`;
+    if (phase === "evaluer") {
+      const v = valeurClubReelle(exercice, 0);
+      return `f(0)\\times${exercice.facteur}${v.relation}${v.arrondi}`;
+    }
     if (phase === "inequation") return `x_{\\text{critique}}\\Rightarrow ${exercice.moisAttendu}\\text{ mois}`;
     if (phase === "asymptoteOblique") return `y=${formatMonomeLatex(exercice.a, 1, true)}${formatMonomeLatex(exercice.b, 0, false)}`;
     return null;
@@ -349,27 +383,27 @@ export function formatReponseAttendueTexte(exercice: ExerciceLimitesContexte, ph
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceLimitesContexte, phase: PhaseLimitesContexte): string[] {
   if (estPhaseQCM(phase)) return [];
   if (exercice.famille === "prixRevient" && phase === "asymptoteHorizontale") return [`\\lim_{x\\to+\\infty}C_u(x)=${exercice.b}`];
-  if (exercice.famille === "eauSalee" && phase === "construireC") return [`C(t)=\\dfrac{${exercice.c * exercice.r}t}{${exercice.v0}+${exercice.r}t}`];
+  if (exercice.famille === "eauSalee" && phase === "construireC") return [`C(t)=${concentrationLatex(exercice)}`];
   if (exercice.famille === "eauSalee" && phase === "limiteC") return [`\\lim_{t\\to+\\infty}C(t)=${exercice.c}`];
   if (exercice.famille === "clubLoisirs") {
-    const { a, b, c, d, facteur, xEval, moisAttendu } = exercice;
+    const { a, b, facteur, xEval, moisAttendu } = exercice;
     if (phase === "evaluer") {
-      const f0 = Math.round((b - c / d) * facteur);
-      const fX = Math.round((a * xEval + b - c / (xEval + d)) * facteur);
-      return [`f(0)\\times${facteur}=${f0}`, `f(${xEval})\\times${facteur}=${fX}`];
+      const v0 = valeurClubReelle(exercice, 0);
+      const vX = valeurClubReelle(exercice, xEval);
+      return [`f(0)\\times${facteur}${v0.relation}${v0.arrondi}`, `f(${xEval})\\times${facteur}${vX.relation}${vX.arrondi}`];
     }
     if (phase === "inequation") return [`${moisAttendu}\\text{ mois}`];
     if (phase === "asymptoteOblique") return [`y=${formatMonomeLatex(a, 1, true)}${formatMonomeLatex(b, 0, false)}`];
     if (phase === "interpreterPente") return [`${a * facteur}\\text{ ${exercice.contexte.unitePluriel}/mois}`];
   }
   if (exercice.famille === "population") {
-    const { a, b, p, anneeRef, anneeEval, seuil } = exercice;
+    const { a, b, anneeRef, anneeEval, seuil } = exercice;
     if (phase === "identification") return [`a=${a}`, `b=${b}`];
     if (phase === "evaluerSeuil") {
       const x = anneeEval - anneeRef;
-      const valeur = a / (x + p) + b;
+      const { valeur, relationValeur } = valeurPopulationLatex(exercice);
       const comparaison = valeur > seuil ? ">" : "<";
-      return [`f(${x})\\approx${nombreLatex(valeur)}`, `${nombreLatex(valeur)}${comparaison}${nombreLatex(seuil)}`];
+      return [`f(${x})${relationValeur}`, `${nombreLatex(valeur)}${comparaison}${nombreLatex(seuil)}`];
     }
   }
   return [];

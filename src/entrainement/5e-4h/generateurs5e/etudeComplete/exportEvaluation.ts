@@ -20,7 +20,7 @@ import {
   formatProprietesConstructionInverseTexte,
   formatReponseAttenduePhaseLatex,
 } from "../../ui5e/formatEtudeComplete";
-import { profilEtudeComplete } from "../profilsEvaluationLimites24";
+import { GROUPES_VERDICT_ETUDE_COMPLETE, profilEtudeComplete } from "../profilsEvaluationLimites24";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeComplete } from "./index";
 
 /**
@@ -257,6 +257,7 @@ export const adaptateurEvaluationEtudeComplete: AdaptateurFeuilleExercices<Exerc
   nomFichierBase: "etude-complete-limites-asymptotes",
   genererInstance: genererExerciceEtudeComplete,
   catalogueVariantes: CATALOGUE_FAMILLES,
+  groupesVerdict: GROUPES_VERDICT_ETUDE_COMPLETE,
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id),
   construireEnonce: construireEnonceEtudeComplete,
   construireCorrection: construireCorrectionEtudeComplete,

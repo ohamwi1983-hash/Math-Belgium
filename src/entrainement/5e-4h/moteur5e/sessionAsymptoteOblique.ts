@@ -8,8 +8,26 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesAsymptoteOblique";
 import type { EtatSessionAsymptoteOblique, PhaseAsymptoteOblique, ResultatExerciceAsymptoteOblique } from "./typesAsymptoteOblique";
-import { diagnostiquerFormeDeveloppee, diagnostiquerNombre, diagnostiquerQuotient } from "./verificationAsymptoteOblique";
+import { diagnostiquerFormeDeveloppee, diagnostiquerQuotient } from "./verificationAsymptoteOblique";
 import { estFormeQuotientPlusReste, retirerMembreGauche } from "./formeSaisieLimites";
+import { diagnostiquerValeurExacte, expressionIllisible, nombreExactRefuse } from "./saisieLimites";
+
+/**
+ * Règles communes (5e ch. 4, lots B–D) : une saisie illisible, une valeur approchée d'un nombre
+ * exact ou une forme à reprendre (f(x) recopiée) est refusée ICI — l'état revient inchangé, aucune
+ * tentative consommée. Les coefficients et le reste sont des entiers : comparés EXACTEMENT.
+ */
+const resteSaisi = (r: string) => r.replace(/^\s*R\s*\(\s*x\s*\)\s*=\s*/, "");
+
+export function saisieDivisionRefusee(e: ExerciceAsymptoteOblique, r: ReponseDiviserEuclidienne): boolean {
+  return expressionIllisible(retirerMembreGauche(r.quotient)) || nombreExactRefuse(resteSaisi(r.reste), e.c);
+}
+
+export function formeDeveloppeeRefusee(e: ExerciceAsymptoteOblique, texte: string): boolean {
+  const saisie = retirerMembreGauche(texte);
+  if (expressionIllisible(saisie)) return true;
+  return diagnostiquerFormeDeveloppee(saisie, e.a, e.b, e.c, e.coeffsD) === "correct" && !estFormeQuotientPlusReste(saisie, e.a, e.b);
+}
 
 const POINTS_DE_BASE = 100;
 
@@ -84,16 +102,18 @@ export interface ReponseDiviserEuclidienne {
 
 export function soumettreReponseDiviserEuclidienne(etat: EtatSessionAsymptoteOblique, reponse: ReponseDiviserEuclidienne): EtatSessionAsymptoteOblique {
   const { a, b, c } = etat.exerciceCourant;
+  if (saisieDivisionRefusee(etat.exerciceCourant, reponse)) return etat;
   return soumettreEcran(
     etat,
     "diviserEuclidienne",
     reponse,
-    (r) => diagnostiquerQuotient(retirerMembreGauche(r.quotient), a, b) === "correct" && diagnostiquerNombre(r.reste.replace(/^\s*R\s*\(\s*x\s*\)\s*=\s*/, ""), c) === "correct",
+    (r) => diagnostiquerQuotient(retirerMembreGauche(r.quotient), a, b) === "correct" && diagnostiquerValeurExacte(resteSaisi(r.reste), c) === "correct",
   );
 }
 
 export function soumettreReponseEcrireFormeDeveloppee(etat: EtatSessionAsymptoteOblique, texte: string): EtatSessionAsymptoteOblique {
   const { a, b, c, coeffsD } = etat.exerciceCourant;
+  if (formeDeveloppeeRefusee(etat.exerciceCourant, texte)) return etat;
   // Forme « quotient + reste/D(x) » exigée : f(x) recopiée en une seule fraction est équivalente mais
   // ne montre pas le travail demandé (audit 5c4a, 5gen21 point 1 ; décision D).
   return soumettreEcran(etat, "ecrireFormeDeveloppee", texte, (t) => {
@@ -108,12 +128,14 @@ export function soumettreReponseEcrireFormeDeveloppee(etat: EtatSessionAsymptote
 
 export function soumettreReponseCalculerCoefficientA(etat: EtatSessionAsymptoteOblique, texte: string): EtatSessionAsymptoteOblique {
   const { a } = etat.exerciceCourant;
-  return soumettreEcran(etat, "calculerCoefficientA", texte, (t) => diagnostiquerNombre(t, a) === "correct");
+  if (nombreExactRefuse(texte, a)) return etat;
+  return soumettreEcran(etat, "calculerCoefficientA", texte, (t) => diagnostiquerValeurExacte(t, a) === "correct");
 }
 
 export function soumettreReponseCalculerCoefficientB(etat: EtatSessionAsymptoteOblique, texte: string): EtatSessionAsymptoteOblique {
   const { b } = etat.exerciceCourant;
-  return soumettreEcran(etat, "calculerCoefficientB", texte, (t) => diagnostiquerNombre(t, b) === "correct");
+  if (nombreExactRefuse(texte, b)) return etat;
+  return soumettreEcran(etat, "calculerCoefficientB", texte, (t) => diagnostiquerValeurExacte(t, b) === "correct");
 }
 
 // ============================================================================
@@ -122,6 +144,7 @@ export function soumettreReponseCalculerCoefficientB(etat: EtatSessionAsymptoteO
 
 export function soumettreReponseConclureEquationAsymptote(etat: EtatSessionAsymptoteOblique, texte: string): EtatSessionAsymptoteOblique {
   const { a, b } = etat.exerciceCourant;
+  if (expressionIllisible(retirerMembreGauche(texte))) return etat;
   // « y = 2x − 3 » accepté : le champ affiche déjà « AO : y = » (décision E).
   return soumettreEcran(etat, "conclureEquationAsymptote", texte, (t) => diagnostiquerQuotient(retirerMembreGauche(t), a, b) === "correct");
 }

@@ -393,7 +393,17 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
   },
   "5gen20": { formes: [{ motif: re(String.raw`(?<ligne>${M})\n(?<q>Détermine cette limite.+)`), consigne: (g) => chaque(g.q, "cette limite", "chaque limite") }] },
   "5gen64": simple(String.raw`Calcule la valeur exacte de la limite suivante : (?<ligne>${M})\.`, "Calcule la valeur exacte de chaque limite."),
-  "5gen21": { formes: [{ motif: re(String.raw`On considère la fonction (?<ligne>${M})\.\n(?<q>.+)`), consigne: (g) => `Pour chaque fonction f : ${minusculeInitiale(g.q ?? "")}` }] },
+  "5gen21": {
+    formes: [
+      { motif: re(String.raw`On considère la fonction (?<ligne>${M})\.\n(?<q>.+)`), consigne: (g) => `Pour chaque fonction f : ${minusculeInitiale(g.q ?? "")}` },
+      // Famille « position » (lots B–D) : la fonction ET la droite asymptote donnée forment la ligne.
+      {
+        motif: re(String.raw`On considère la fonction (?<f>${M}) et la droite (?<d>${M}), asymptote (?<n>oblique|horizontale) de sa courbe\.\n(?<q>Étudie la position .+)`),
+        consigne: (g) => `Pour chaque fonction f et sa droite asymptote d : ${minusculeInitiale(g.q ?? "")}`,
+        ligne: (g) => `${g.f} ; ${g.d} (asymptote ${g.n})`,
+      },
+    ],
+  },
   "5gen24": {
     formes: [
       {

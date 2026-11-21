@@ -276,7 +276,7 @@ export const CATALOGUE_FAMILLES: { id: string; label: string }[] = [
   { id: "1-vaSimple-ao", label: "1 exclusion, AV simple — AO" },
   { id: "1-vaSimple-aucune", label: "1 exclusion, AV simple — aucune asymptote" },
   { id: "1-vaDouble-ahNonNul", label: "1 exclusion, AV double — AH≠0" },
-  { id: "1-vaDouble-ao-special", label: "1 exclusion, AV double — AO + recoupement" },
+  { id: "1-vaDouble-ao-special", label: "1 exclusion — AO + recoupement" },
   { id: "2-vaSimple-vaSimple-ah", label: "2 exclusions, simple+simple — AH" },
   { id: "2-vaSimple-vaSimple-ao", label: "2 exclusions, simple+simple — AO" },
   { id: "2-vaSimple-vaDouble-ahNonNul-special", label: "2 exclusions, simple+double — AH + recoupement" },
@@ -285,6 +285,14 @@ export const CATALOGUE_FAMILLES: { id: string; label: string }[] = [
   { id: "2-pointVide-vaDouble-ao", label: "2 exclusions, point vide + double — AO" },
   { id: "2-pointVide-vaSimple-aucune", label: "2 exclusions, point vide + simple — aucune" },
   { id: "bonus", label: "Bonus — construction inverse" },
+  // Lots B–D : variantes AJOUTÉES EN FIN (les codes `?code=` imprimés gardent leur indice) pour que
+  // chaque structure visible (nombre d'exclusions, comportement à l'infini, recoupement annoncé) ait
+  // au moins deux natures d'exclusion possibles — groupes à verdict de l'évaluation.
+  { id: "1-vaDouble-ahZero", label: "1 exclusion, AV double — AH=0" },
+  { id: "1-vaDouble-ao", label: "1 exclusion, AV double — AO" },
+  { id: "1-vaDouble-aucune", label: "1 exclusion, AV double — aucune asymptote" },
+  { id: "2-vaSimple-vaSimple-aucune", label: "2 exclusions, simple+simple — aucune" },
+  { id: "2-vaSimple-vaSimple-ahNonNul-special", label: "2 exclusions, simple+simple — AH + recoupement" },
 ];
 
 export function construireAvecFamilleId(id: string): ExerciceEtudeComplete {
@@ -317,6 +325,16 @@ export function construireAvecFamilleId(id: string): ExerciceEtudeComplete {
       return genererExerciceEtudeComplete({ nombreExclusions: 2, types: ["pointVide", "vaSimple"], sousCasInfini: "aucune" });
     case "bonus":
       return genererExerciceEtudeCompleteBonus();
+    case "1-vaDouble-ahZero":
+      return genererExerciceEtudeComplete({ nombreExclusions: 1, types: ["vaDouble"], sousCasInfini: "ahZero" });
+    case "1-vaDouble-ao":
+      return genererExerciceEtudeComplete({ nombreExclusions: 1, types: ["vaDouble"], sousCasInfini: "ao", casSpecial: false });
+    case "1-vaDouble-aucune":
+      return genererExerciceEtudeComplete({ nombreExclusions: 1, types: ["vaDouble"], sousCasInfini: "aucune" });
+    case "2-vaSimple-vaSimple-aucune":
+      return genererExerciceEtudeComplete({ nombreExclusions: 2, types: ["vaSimple", "vaSimple"], sousCasInfini: "aucune" });
+    case "2-vaSimple-vaSimple-ahNonNul-special":
+      return genererExerciceEtudeComplete({ nombreExclusions: 2, types: ["vaSimple", "vaSimple"], sousCasInfini: "ahNonNul", casSpecial: true });
     default:
       throw new Error(`construireAvecFamilleId : id inconnu "${id}"`);
   }

@@ -11,7 +11,7 @@ import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 
 /** Signe moins typographique (−, –) → tiret ASCII, espaces retirés. */
 function normaliser(texte: string): string {
-  return texte.replace(/[−–]/g, "-").replace(/\s+/g, "");
+  return texte.replace(/[−–—]/g, "-").replace(/\s+/g, "");
 }
 
 /** Retire les parenthèses extérieures qui englobent TOUTE l'expression (« ((x-1)(x+2)) »). */

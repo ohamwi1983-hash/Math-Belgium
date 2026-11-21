@@ -8,6 +8,9 @@
 import type { ExerciceAsymptoteOblique } from "../core5e/asymptoteOblique.types";
 import { ordreComplet } from "../moteur5e/typesAsymptoteOblique";
 import type { PhaseAsymptoteOblique } from "../moteur5e/typesAsymptoteOblique";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
+import type { AideTrig } from "./aidesTrigonometrie";
+import { egaleA, lireLimite } from "../moteur5e/saisieLimites";
 
 // ============================================================================
 // Seed déterministe (transversal 3, même principe que 5gen20) — dérivé des champs déjà stockés,
@@ -67,31 +70,6 @@ function formatPolynomeLatex(coeffs: number[], seed: number): string {
   let premier = true;
   for (const d of ordre) {
     const frag = formatMonomeLatex(coeffs[d], d, premier);
-    if (frag !== "") {
-      out += frag;
-      premier = false;
-    }
-  }
-  return out === "" ? "0" : out;
-}
-
-/** Version TEXTE BRUT (pas de LaTeX — insérée dans une phrase de consigne en prose), exposants en
- * chiffres unicode ² ³ — même ordre varié (même seed) que la version LaTeX du même polynôme. */
-function formatMonomeTexte(coeff: number, degre: number, premier: boolean): string {
-  if (coeff === 0) return "";
-  const abs = Math.abs(coeff);
-  const signe = coeff < 0 ? "-" : premier ? "" : "+";
-  const exposant = degre === 0 ? "" : degre === 1 ? "x" : degre === 2 ? "x²" : "x³";
-  const coeffAffiche = abs === 1 && degre !== 0 ? "" : `${abs}`;
-  return `${signe}${coeffAffiche}${exposant}`;
-}
-
-function formatPolynomeTexte(coeffs: number[], seed: number): string {
-  const ordre = ordreTermesVarie(coeffs, seed);
-  let out = "";
-  let premier = true;
-  for (const d of ordre) {
-    const frag = formatMonomeTexte(coeffs[d], d, premier);
     if (frag !== "") {
       out += frag;
       premier = false;
@@ -170,85 +148,141 @@ export function formatFormulePhaseLatex(phase: PhaseAsymptoteOblique): string {
   }
 }
 
+/** Consigne d'écran en texte riche (`$…$` = KaTeX) : polynômes de l'énoncé dans leur ordre (titres
+ * d'étape du corrigé compris — plus de « −33−7x²+x³+11x » en texte brut). */
 export function consignePhase(exercice: ExerciceAsymptoteOblique, phase: PhaseAsymptoteOblique): string {
+  const seed = seedExercice(exercice);
+  switch (phase) {
+    case "diviserEuclidienne":
+      return `Effectue la division euclidienne de $${formatPolynomeLatex(exercice.coeffsP, seed)}$ par $${formatPolynomeLatex(exercice.coeffsD, seed + 1)}$. Détermine le quotient $Q(x)$ et le reste $R(x)$.`;
+    case "ecrireFormeDeveloppee":
+      return "Écris $f(x)$ sous la forme $Q(x)+\\dfrac{R(x)}{D(x)}$.";
+    case "calculerCoefficientA":
+      return "Calcule le coefficient $a$.";
+    case "calculerCoefficientB":
+      return "Calcule le coefficient $b$.";
+    case "conclureEquationAsymptote":
+      return "Donne l'équation de l'asymptote oblique.";
+  }
+}
+
+// ============================================================================
+// Aides — niveau 1 : la propriété du cours ; niveau 2 : la propriété posée pour CETTE fonction
+// (jamais la réponse). Format `AideTrig` (phrase puis formules KaTeX), rendu par `AidesTrig`.
+// ============================================================================
+
+const tx = (valeur: string): FragmentConsigne => ({ type: "texte", valeur });
+const lx = (valeur: string): FragmentConsigne => ({ type: "latex", valeur });
+
+function dominant(coeffs: number[]): string {
+  const d = coeffs.length - 1;
+  return formatMonomeLatex(coeffs[d], d, true);
+}
+
+export function aidesAsymptoteOblique(exercice: ExerciceAsymptoteOblique, phase: PhaseAsymptoteOblique): AideTrig[] {
+  const seed = seedExercice(exercice);
+  const P = formatPolynomeLatex(exercice.coeffsP, seed);
+  const D = formatPolynomeLatex(exercice.coeffsD, seed + 1);
+  const ax = formatMonomeLatex(exercice.a, 1, true);
+  switch (phase) {
+    case "diviserEuclidienne":
+      return [
+        {
+          texte: [tx("Division euclidienne : à chaque tour, on divise le terme de plus haut degré du reste par celui de "), lx("D(x)"), tx(", on multiplie "), lx("D(x)"), tx(" par ce terme et on soustrait, jusqu'à un reste de degré inférieur à celui de "), lx("D(x)"), tx(" :")],
+          formules: ["P(x)=Q(x)\\cdot D(x)+R(x)"],
+        },
+        {
+          texte: [tx("Ici, le premier terme du quotient est le quotient des termes de plus haut degré ; le quotient est du premier degré et le reste est une constante :")],
+          formules: [`\\dfrac{${dominant(exercice.coeffsP)}}{${dominant(exercice.coeffsD)}}`],
+        },
+      ];
+    case "ecrireFormeDeveloppee":
+      return [
+        { texte: [tx("De "), lx("P(x)=Q(x)\\cdot D(x)+R(x)"), tx(", on divise chaque membre par "), lx("D(x)"), tx(" :")], formules: ["f(x)=Q(x)+\\dfrac{R(x)}{D(x)}"] },
+        { texte: [tx("Ici, avec le quotient et le reste trouvés à l'étape 1 et le dénominateur de l'énoncé :")], formules: [`f(x)=Q(x)+\\dfrac{R(x)}{${D}}`] },
+      ];
+    case "calculerCoefficientA":
+      return [
+        { texte: [tx("En "), lx("\\pm\\infty"), tx(", un quotient de polynômes a la même limite que le quotient de leurs termes de plus haut degré :")], formules: ["a=\\lim_{x\\to\\pm\\infty}\\dfrac{f(x)}{x}"] },
+        { texte: [tx("Ici, on divise f(x) par x, puis on garde les termes de plus haut degré du numérateur et du dénominateur :")], formules: [`\\dfrac{f(x)}{x}=\\dfrac{${P}}{x(${D})}`] },
+      ];
+    case "calculerCoefficientB":
+      return [
+        { texte: [tx("On réduit "), lx("f(x)-ax"), tx(" au même dénominateur, puis on compare les termes de plus haut degré :")], formules: ["b=\\lim_{x\\to\\pm\\infty}\\left[f(x)-ax\\right]"] },
+        { texte: [tx("Ici, avec le coefficient a trouvé à l'étape 1 :")], formules: [`f(x)-${exercice.a < 0 ? `(${ax})` : ax}=\\dfrac{${P}-${exercice.a < 0 ? `(${ax})` : ax}(${D})}{${D}}`] },
+      ];
+    case "conclureEquationAsymptote":
+      return exercice.variante === "divisionEuclidienne"
+        ? [
+            { texte: [tx("Dans "), lx("f(x)=Q(x)+\\dfrac{R(x)}{D(x)}"), tx(", la fraction tend vers 0 en "), lx("\\pm\\infty"), tx(" : l'asymptote oblique est la droite "), lx("y=Q(x)"), tx(", sans le reste.")] },
+            { texte: [tx("Ici, écris le quotient trouvé à l'étape 1, seul :")], formules: ["\\text{AO : }y=Q(x)"] },
+          ]
+        : [
+            { texte: [tx("Avec "), lx("a=\\lim\\dfrac{f(x)}{x}"), tx(" et "), lx("b=\\lim\\left[f(x)-ax\\right]"), tx(", l'asymptote oblique est la droite "), lx("y=ax+b"), tx(".")] },
+            { texte: [tx("Ici, remplace a et b par les valeurs trouvées aux étapes 1 et 2 :")], formules: ["\\text{AO : }y=ax+b"] },
+          ];
+  }
+}
+
+// ============================================================================
+// Messages ciblés (erreurs du cours), jamais la réponse.
+// ============================================================================
+
+/** Saisie égale à g aux points donnés (hors pôles). */
+function egale(brut: string, g: (x: number) => number): boolean {
+  return egaleA(brut, g);
+}
+
+export function cibleAsymptoteOblique(exercice: ExerciceAsymptoteOblique, phase: PhaseAsymptoteOblique, valeurs: string[]): FragmentConsigne[] | null {
+  const { a, b, c, coeffsD } = exercice;
+  const D = (x: number) => coeffsD.reduce((acc, k, i) => acc + k * x ** i, 0);
   switch (phase) {
     case "diviserEuclidienne": {
-      const seed = seedExercice(exercice);
-      const nTexte = formatPolynomeTexte(exercice.coeffsP, seed);
-      const dTexte = formatPolynomeTexte(exercice.coeffsD, seed + 1);
-      return `Effectue la division euclidienne de ${nTexte} par ${dTexte}. Détermine le quotient Q(x) et le reste R(x).`;
+      const [q, r] = valeurs;
+      const msgs: FragmentConsigne[] = [];
+      if (!egale(q, (x) => a * x + b)) {
+        if (egale(q, (x) => a * x)) msgs.push(tx("Le quotient a encore un terme constant : fais un second tour de division avec le reste obtenu."));
+        else if (egale(q, (x) => a * x - b) || egale(q, (x) => -a * x + b)) msgs.push(tx("Erreur de signe dans le quotient : en soustrayant, change le signe de CHAQUE terme du produit."));
+        else if (egale(q, (x) => a * x + b + c / D(x))) msgs.push(tx("Le quotient est un polynôme : le reste ne s'y ajoute pas."));
+        else msgs.push(tx("Le premier terme du quotient est le quotient des termes de plus haut degré de P et de D."));
+      }
+      const vr = lireLimite(r);
+      if (vr !== null && Math.abs(vr - c) > 1e-9) {
+        if (Math.abs(vr + c) < 1e-9) msgs.push(tx(" Signe du reste : à la dernière soustraction, change le signe de chaque terme."));
+        else msgs.push(tx(" Le reste est ce qui reste à la fin de la division : vérifie avec "), lx("Q(x)\\cdot D(x)+R(x)=P(x)"), tx("."));
+      }
+      return msgs.length > 0 ? msgs : null;
     }
-    case "ecrireFormeDeveloppee":
-      return "Écris f(x) sous la forme de Q(x)+R(x)/D(x).";
-    case "calculerCoefficientA":
-      return "Calcule le coefficient a.";
-    case "calculerCoefficientB":
-      return "Calcule le coefficient b.";
-    case "conclureEquationAsymptote":
-      return "Donne l'équation de l'asymptote oblique AO.";
-  }
-}
-
-// ============================================================================
-// Aides — niveau 1 (exemple/méthode), niveau 2 (résolution complète de l'exemple).
-// ============================================================================
-
-/** Aide fragmentée — phrase en RichText (`$…$` = LaTeX en ligne, rendue par `TexteRiche5e` : jamais
- * de formule tapée au clavier dans le texte), formule display à part. */
-export interface AideFragmentee {
-  texte: string;
-  latex: string | null;
-}
-
-export function texteAideNiveau1(phase: PhaseAsymptoteOblique): AideFragmentee {
-  switch (phase) {
-    case "diviserEuclidienne":
-      return {
-        texte:
-          "Pose la division euclidienne de N(x) par D(x), comme une division de polynômes classique — le quotient Q(x) est toujours de degré 1, le reste R(x) est toujours une constante (son degré reste strictement inférieur à celui de D(x)).",
-        latex: null,
-      };
-    case "ecrireFormeDeveloppee":
-      return {
-        texte: "Directement à partir de la division précédente. Piège : une erreur de signe pendant la division se répercute ici.",
-        latex: "f(x)=Q(x)+\\dfrac{R(x)}{D(x)}",
-      };
-    case "calculerCoefficientA":
-      return {
-        texte: "Exemple avec une autre fonction : pour $g(x)=\\dfrac{3x^2-5x+1}{x-2}$, calcule :",
-        latex: "a=\\lim_{x\\to\\pm\\infty} \\dfrac{g(x)}{x}",
-      };
-    case "calculerCoefficientB":
-      return {
-        texte: "Exemple (suite) : pour la même fonction $g$, avec $a=3$ déjà trouvé, calcule :",
-        latex: "b=\\lim_{x\\to\\pm\\infty} [g(x)-3x]",
-      };
-    case "conclureEquationAsymptote":
-      return {
-        texte: "L'asymptote oblique est le quotient Q(x) SEUL — le reste R(x) disparaît à la limite, ne l'inclus jamais dans l'équation finale.",
-        latex: null,
-      };
-  }
-}
-
-export function texteAideNiveau2(phase: PhaseAsymptoteOblique): AideFragmentee {
-  switch (phase) {
-    case "diviserEuclidienne":
-      return { texte: "Exemple :", latex: "(x^2+5x+2)\\div(x-1) \\;\\Rightarrow\\; Q(x)=x+6, \\quad R(x)=8" };
-    case "ecrireFormeDeveloppee":
-      return { texte: "Exemple :", latex: "Q(x)=x+6,\\ R(x)=8,\\ D(x)=x-1 \\;\\Rightarrow\\; f(x)=x+6+\\dfrac{8}{x-1}" };
-    case "calculerCoefficientA":
-      return {
-        texte: "On divise par $x$, puis la limite est le rapport des coefficients dominants :",
-        latex: "\\dfrac{g(x)}{x}=\\dfrac{3x^2-5x+1}{x^2-2x} \\quad\\text{et}\\quad \\lim_{x\\to\\pm\\infty}\\dfrac{3x^2-5x+1}{x^2-2x}=\\dfrac{3}{1}=3",
-      };
-    case "calculerCoefficientB":
-      return {
-        texte: "On réduit au même dénominateur, puis la limite est le rapport des coefficients dominants :",
-        latex: "g(x)-3x=\\dfrac{3x^2-5x+1-3x(x-2)}{x-2}=\\dfrac{x+1}{x-2} \\quad\\text{et}\\quad \\lim_{x\\to\\pm\\infty}\\dfrac{x+1}{x-2}=1",
-      };
-    case "conclureEquationAsymptote":
-      return { texte: "Exemple : avec le quotient $x+6$ (le reste disparaît à la limite) :", latex: "\\text{AO : }y=x+6" };
+    case "ecrireFormeDeveloppee": {
+      const s = valeurs[0];
+      if (egale(s, (x) => a * x + b + c)) return [tx("Le reste se divise par le dénominateur : "), lx("\\dfrac{R(x)}{D(x)}"), tx(".")];
+      if (egale(s, (x) => a * x + b - c / D(x))) return [tx("Signe du reste : reprends le reste trouvé à l'étape 1 avec son signe.")];
+      if (egale(s, (x) => (a * x + b) / D(x) + c)) return [tx("Le quotient s'écrit seul ; c'est le RESTE qui est divisé par "), lx("D(x)"), tx(".")];
+      return [tx("Utilise le quotient et le reste de l'étape 1 : "), lx("f(x)=Q(x)+\\dfrac{R(x)}{D(x)}"), tx(".")];
+    }
+    case "calculerCoefficientA": {
+      const v = lireLimite(valeurs[0]);
+      if (v === null) return null;
+      if (!Number.isFinite(v)) return [lx("\\dfrac{f(x)}{x}"), tx(" a un numérateur et un dénominateur de même degré : sa limite est un nombre réel.")];
+      if (Math.abs(v - b) < 1e-9 && a !== b) return [tx("C'est l'ordonnée à l'origine : a est le coefficient de x, la limite de "), lx("\\dfrac{f(x)}{x}"), tx(".")];
+      if (Math.abs(v + a) < 1e-9) return [tx("Signe : le quotient des termes de plus haut degré garde le signe de leurs coefficients.")];
+      return [tx("Garde seulement les termes de plus haut degré de "), lx("P(x)"), tx(" et de "), lx("x\\cdot D(x)"), tx(", puis simplifie.")];
+    }
+    case "calculerCoefficientB": {
+      const v = lireLimite(valeurs[0]);
+      if (v === null) return null;
+      if (!Number.isFinite(v)) return [tx("b est la limite de "), lx("f(x)-ax"), tx(", pas celle de f(x) (qui est infinie) : soustrais d'abord ax.")];
+      if (Math.abs(v + b) < 1e-9) return [tx("Signe : le signe − devant ax porte sur tout le produit "), lx("ax\\cdot D(x)"), tx(".")];
+      if (Math.abs(v - c) < 1e-9 && b !== c) return [tx("C'est le reste de la division ; b est la limite du quotient des termes de plus haut degré de "), lx("f(x)-ax"), tx(".")];
+      return [tx("Réduis "), lx("f(x)-ax"), tx(" au même dénominateur : le numérateur est alors de même degré que D(x).")];
+    }
+    case "conclureEquationAsymptote": {
+      const s = valeurs[0];
+      if (egale(s, (x) => a * x + b + c / D(x))) return [tx("L'asymptote est une droite : le reste divisé par D(x) n'en fait pas partie.")];
+      if (egale(s, (x) => b * x + a)) return [tx("a est le coefficient de x et b l'ordonnée à l'origine : "), lx("y=ax+b"), tx(".")];
+      if (egale(s, (x) => a * x)) return [tx("Il manque l'ordonnée à l'origine b.")];
+      return [tx("Reprends les résultats des étapes précédentes : "), lx(exercice.variante === "divisionEuclidienne" ? "y=Q(x)" : "y=ax+b"), tx(".")];
+    }
   }
 }
 
@@ -259,8 +293,9 @@ export function texteAideNiveau2(phase: PhaseAsymptoteOblique): AideFragmentee {
 function formatQuotientResteConfirmesLatex(exo: ExerciceAsymptoteOblique): string[] {
   return [`Q(x)=${formatQuotientLatex(exo.a, exo.b)}`, `R(x)=${exo.c}`];
 }
+/** D(x) dans l'ordre de l'ÉNONCÉ (graine + 1, comme `formatTermesDonneesLatex`). */
 function formatFormeDeveloppeeConfirmeeLatex(exo: ExerciceAsymptoteOblique, seed: number): string {
-  return `=${formatFormeDeveloppeeLatex(exo.a, exo.b, exo.c, exo.coeffsD, seed)}`;
+  return `=${formatFormeDeveloppeeLatex(exo.a, exo.b, exo.c, exo.coeffsD, seed + 1)}`;
 }
 function formatCoefficientAConfirmeLatex(exo: ExerciceAsymptoteOblique): string {
   return `a=${exo.a}`;

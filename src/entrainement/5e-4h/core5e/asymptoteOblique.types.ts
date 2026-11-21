@@ -33,3 +33,41 @@ export interface ExerciceAsymptoteOblique {
 }
 
 export type GenerateurExerciceAsymptoteOblique = () => ExerciceAsymptoteOblique;
+
+/**
+ * Famille « position de la courbe par rapport à son asymptote » (5e ch. 4, lots B–D, validée par
+ * l'utilisateur). La droite d (AO y = ax + b, ou AH y = b avec a = 0) est DONNÉE ; D(x) = x² + px + q
+ * sans racine réelle (Δ < 0, donc D(x) > 0 partout) ; le reste R(x) = rx + s de la division donne
+ * f(x) − (ax + b) = R(x)/D(x), dont le signe est celui de R :
+ * - `dessus` : R = s > 0 (r = 0) — la courbe est au-dessus de d sur ℝ ;
+ * - `dessous` : R = s < 0 (r = 0) — en dessous sur ℝ ;
+ * - `recoupe` : r ≠ 0, R s'annule en x₀ = −s/r (entier) — la courbe recoupe d en (x₀ ; ax₀ + b) et
+ *   passe d'un côté à l'autre.
+ * Le verdict est tiré à parts égales (un tiers chacun) : jamais un cas particulier, jamais dans la
+ * `forme` du profil ; les quatre écrans sont les mêmes pour les trois verdicts.
+ */
+export type VerdictPosition = "dessus" | "dessous" | "recoupe";
+
+export interface ExercicePositionAsymptote {
+  variante: "position";
+  asymptote: "oblique" | "horizontale";
+  /** Pente de d (0 pour une AH). */
+  a: number;
+  /** Ordonnée à l'origine de d (valeur k de l'AH y = k). */
+  b: number;
+  /** Reste R(x) = rx + s (r = 0 : reste constant non nul). */
+  r: number;
+  s: number;
+  /** D(x) = x² + px + q, `coeffsD[i]` = coefficient de xⁱ, Δ < 0. */
+  coeffsD: number[];
+  /** P(x) = (ax + b)·D(x) + R(x), `coeffsP[i]` = coefficient de xⁱ. */
+  coeffsP: number[];
+  verdict: VerdictPosition;
+}
+
+/** Tout exercice de 5gen21 : asymptote oblique (division ou limites) ou position. */
+export type ExerciceGen21 = ExerciceAsymptoteOblique | ExercicePositionAsymptote;
+
+export function estPosition(e: ExerciceGen21): e is ExercicePositionAsymptote {
+  return e.variante === "position";
+}

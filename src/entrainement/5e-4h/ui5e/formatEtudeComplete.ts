@@ -415,7 +415,7 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceEtudeComplete, pha
   const termes: string[] = [];
   for (const p of dejaFaites) {
     if (p === "domaine") {
-      termes.push(`\\text{Domaine : } \\mathbb{R} \\setminus \\{${ex.exclusions.map((e) => e.position).join(",\\ ")}\\}`);
+      termes.push(`\\text{Domaine : } \\mathbb{R} \\setminus \\{${ex.exclusions.map((e) => e.position).join("\\,;\\,")}\\}`);
     } else if (p === "infini") {
       const infini = ex.infini;
       const moins = infini.type === "horizontale" ? `${infini.limite}` : infini.type === "oblique" ? (infini.pente >= 0 ? "-\\infty" : "+\\infty") : infini.signeMoinsInfini === 1 ? "+\\infty" : "-\\infty";
@@ -506,7 +506,7 @@ function formatValeurOuInfiniLatex(v: { fini: true; valeur: number } | { fini: f
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceEtudeCompletePipeline, phase: PhaseEtudeComplete): string[] {
   switch (phase) {
     case "domaine":
-      return [`\\{${exercice.exclusions.map((e) => e.position).join(",\\ ")}\\}`];
+      return [`\\{${exercice.exclusions.map((e) => e.position).join("\\,;\\,")}\\}`];
     case "typeLimite":
       return [exercice.exclusions.map((e) => `x=${e.position} :\\ ${formatFormeExclusionLatex(e.type === "pointVide")}`).join(",\\quad ")];
     case "pointVideSimplification": {

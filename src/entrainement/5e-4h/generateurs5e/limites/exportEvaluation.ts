@@ -20,7 +20,7 @@ import { ordreComplet, type PhaseLimite } from "../../moteur5e/typesLimites";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { correctionDetailleeLimite, lettrePhaseLimite } from "./corrigeDetaille";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLimite } from "./index";
-import { LIBELLE_CAS_LIMITES, profilLimite } from "../profilsEvaluationLimites20-21";
+import { GROUPES_VERDICT_LIMITES, LIBELLE_CAS_LIMITES, profilLimite } from "../profilsEvaluationLimites20-21";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceLimite>` pour 5gen20 (Limites, reconnaissance et
@@ -151,6 +151,7 @@ export const adaptateurEvaluationLimites: AdaptateurFeuilleExercices<ExerciceLim
   nomFichierBase: "limites",
   genererInstance: genererExerciceLimite,
   catalogueVariantes: CATALOGUE_FAMILLES,
+  groupesVerdict: GROUPES_VERDICT_LIMITES,
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id),
   construireEnonce: construireEnonceLimite,
   construireCorrection: construireCorrectionLimite,
