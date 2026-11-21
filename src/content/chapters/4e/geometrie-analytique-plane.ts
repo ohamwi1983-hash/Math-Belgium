@@ -1005,6 +1005,32 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 47. Distance point-droite et droite-droite »',
         },
+        {
+          kind: 'methode',
+          label: 'Projeté orthogonal et symétrique d\'un point',
+          items: [
+            'Le pied H de la perpendiculaire à d passant par A s\'appelle le **projeté orthogonal** de A sur d : on le trouve exactement comme pour la distance (perpendiculaire par A, puis intersection avec d).',
+            'Le **symétrique** A′ de A par rapport à d est le point tel que H soit le milieu de [AA′] : $x_{A\'}=2x_H-x_A$ et $y_{A\'}=2y_H-y_A$.',
+            'Attention au sens : c\'est H qui est au milieu, donc $2x_H-x_A$, et jamais $2x_A-x_H$.',
+          ],
+        },
+        {
+          kind: 'astuce',
+          label: 'Réflexion : où viser ?',
+          text:
+            'Une bille qui rebondit sur une bande, un rayon lumineux sur un miroir, un ballon contre un mur repartent ' +
+            'comme s\'ils venaient du **symétrique** A′ du point de départ A. Pour aller de A à B en touchant d, on vise ' +
+            'donc le point I où la droite (A′B) coupe d. Comme la symétrie conserve les longueurs, le trajet ' +
+            '$AI+IB$ vaut exactement $A\'B$.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Projeté orthogonal, symétrique et réflexion',
+          generatorId: 'gen96',
+          description: ['Construis la perpendiculaire, trouve le projeté H puis le symétrique A′. En contexte (billard, miroir, mur) : où viser pour atteindre B après un rebond ?'],
+          chantier: '4e',
+          whereLabel: '4e → « 96. Projeté orthogonal, symétrique et réflexion »',
+        },
       ],
     },
 

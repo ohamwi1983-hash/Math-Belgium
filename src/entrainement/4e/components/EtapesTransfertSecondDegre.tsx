@@ -36,6 +36,10 @@ export function saisieAffichee(saisie: Saisie, c: Champ): ReactNode {
     return e ? <Katex expression={`${c.type === "ensemble" && c.prefixeApercu ? c.prefixeApercu : "S="}${ensembleLatex(e)}`} /> : "—";
   }
   if (c.type === "nombre" || c.type === "liste") return saisie.trim().replace(/-/g, "−").replace(/(\d)\.(\d)/g, "$1,$2");
+  if (c.type === "libre") {
+    const l = c.affichee?.(saisie);
+    return l ? <Katex expression={l} /> : saisie.trim().replace(/-/g, "−");
+  }
   return saisieEnLatex(normaliserExpression(saisie));
 }
 
@@ -46,10 +50,11 @@ const AIDE_SAISIE: Record<Champ["type"], string> = {
   equation: "Écris une équation complète, avec « = » (par exemple 2x² − 3x + 1 = 0).",
   relation: "Symboles au clavier : < ou >, <= pour ≤, >= pour ≥ (= pour une équation).",
   ensemble: "",
+  libre: "",
 };
 
 function ChampTexte({ champ, valeur, onChange, erronee, fige }: { champ: Champ; valeur: string; onChange: (v: string) => void; erronee: boolean; fige: boolean }) {
-  const avecApercu = champ.type === "expression" || champ.type === "equation" || champ.type === "relation";
+  const avecApercu = champ.type === "expression" || champ.type === "equation" || champ.type === "relation" || (champ.type === "libre" && !!champ.apercu);
   return (
     <div style={{ minWidth: 0 }} data-champ={champ.id}>
       {avecApercu && !fige && <ApercuExpressionLatex texte={normaliserExpression(valeur)} />}
@@ -176,7 +181,8 @@ export function EtapeChampsTransfert({ consigne, champs, tentativesUtilisees, te
   const complet = saisies.every((s) => (typeof s === "string" ? s.trim() !== "" : saisieEnsembleComplete(s)));
   const message = statuts?.find((s) => s.etat !== "correct" && s.message)?.message;
   const fautes = statuts ? statuts.filter((s) => s.etat !== "correct").length : 0;
-  const types = [...new Set(champs.map((c) => c.type))].filter((t) => t !== "ensemble");
+  const types = [...new Set(champs.map((c) => c.type))].filter((t) => t !== "ensemble" && t !== "libre");
+  const aidesLibres = [...new Set(champs.flatMap((c) => (c.type === "libre" ? [c.aideSaisie] : [])))];
 
   return (
     <div>
@@ -197,9 +203,9 @@ export function EtapeChampsTransfert({ consigne, champs, tentativesUtilisees, te
       </div>
       {!validation && (
         <>
-          {types.length > 0 && (
+          {types.length + aidesLibres.length > 0 && (
             <p className="field-hint" style={{ fontSize: "0.9em", color: "var(--color-text-muted)", marginTop: 0 }}>
-              {espacesInsecables(types.map((t) => AIDE_SAISIE[t]).join(" "))}
+              {espacesInsecables([...types.map((t) => AIDE_SAISIE[t]), ...aidesLibres].join(" "))}
             </p>
           )}
           <BlocAides {...aides} />

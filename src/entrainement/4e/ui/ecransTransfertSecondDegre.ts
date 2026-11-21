@@ -88,7 +88,21 @@ export interface ChampEnsemble extends ChampBase {
   pieges: { ensemble: Ensemble; message: string }[];
 }
 
-export type Champ = ChampNombre | ChampListe | ChampExpression | ChampEquation | ChampRelation | ChampEnsemble;
+/** Champ à vérification PROPRE (lot G du 4e ch. 7, gen96–gen99 : équation de droite, liste de points…) :
+ * la fonction `diagnostiquer` lit la saisie brute et rend le statut (une saisie illisible =
+ * `parse_error`, jamais une tentative). Ajout sans effet sur les autres types. */
+export interface ChampLibre extends ChampBase {
+  type: "libre";
+  diagnostiquer: (saisie: string) => { etat: "correct" | "faux" | "piege" | "parse_error"; message?: string };
+  /** Rappel de syntaxe affiché sous les champs. */
+  aideSaisie: string;
+  /** Aperçu KaTeX en direct (équations). */
+  apercu?: boolean;
+  /** Écriture LaTeX de la saisie (fiche de l'écran) ; à défaut, le texte brut. */
+  affichee?: (saisie: string) => string | null;
+}
+
+export type Champ = ChampNombre | ChampListe | ChampExpression | ChampEquation | ChampRelation | ChampEnsemble | ChampLibre;
 
 export type EcranTSD =
   | {
