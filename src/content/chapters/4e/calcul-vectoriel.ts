@@ -2532,15 +2532,16 @@ export const calculVectoriel: ChapterContent = {
       id: 'revision',
       number: 18,
       title: 'Révision — quiz vrai/faux',
-      kicker: '315 affirmations en 9 thèmes',
+      kicker: '420 affirmations en 12 thèmes',
       blocks: [
         { kind: 'video', title: 'Révision : la synthèse du chapitre', youtubeId: 'raOgCbx0OOI' },
         {
           kind: 'para',
           text:
-            'Un quiz vrai/faux qui couvre tout le chapitre : 9 thèmes, un par grande notion du ' +
-            'chapitre (générateurs 20 à 29). Le quiz se trouve tout en bas de la page, dans la ' +
-            'synthèse.',
+            'Un quiz vrai/faux qui couvre tout le chapitre : 12 thèmes de 35 affirmations, un par ' +
+            'grande notion, dans l\'ordre des sections — de la multiplication par un réel aux ' +
+            'vecteurs en contexte (déplacements, rivière, équilibre, chantier). Le quiz se trouve ' +
+            'tout en bas de la page, dans la synthèse.',
         },
         {
           kind: 'entrainement',
@@ -2612,16 +2613,16 @@ export const calculVectoriel: ChapterContent = {
         formulas: [
           { text: '$\\vec{AB} = \\vec{DC}$', condition: 'ABCD est un parallélogramme' },
           { text: '$x_D = x_A + x_C - x_B$, $y_D = y_A + y_C - y_B$', condition: 'quatrième sommet D du parallélogramme ABCD' },
-          { text: '$\\|\\vec{AB}\\| = \\|\\vec{BC}\\|$', condition: 'le parallélogramme ABCD est un losange (deux côtés consécutifs)' },
-          { text: '$x_{AB} \\cdot x_{BC} + y_{AB} \\cdot y_{BC} = 0$', condition: 'le parallélogramme ABCD est un rectangle (angle droit en B)' },
+          { text: '$\\|\\vec{AB}\\| = \\|\\vec{BC}\\|$', condition: 'le parallélogramme ABCD est un losange, deux côtés consécutifs égaux' },
+          { text: '$x_{AB} \\cdot x_{BC} + y_{AB} \\cdot y_{BC} = 0$', condition: 'le parallélogramme ABCD est un rectangle, angle droit en B' },
           { text: 'carré : un parallélogramme à la fois losange et rectangle' },
         ],
       },
       {
         title: 'Colinéarité et orthogonalité',
         formulas: [
-          { text: '$x_u \\cdot y_v - y_u \\cdot x_v = 0$', condition: 'colinéaires (critère de colinéarité nul)' },
-          { text: '$x_u \\cdot x_v + y_u \\cdot y_v = 0$', condition: 'orthogonaux (produit scalaire nul)' },
+          { text: '$x_u \\cdot y_v - y_u \\cdot x_v = 0$', condition: 'colinéaires, critère de colinéarité nul' },
+          { text: '$x_u \\cdot x_v + y_u \\cdot y_v = 0$', condition: 'orthogonaux, produit scalaire nul' },
           { text: 'viser C depuis A dans le sens de $\\vec{u}$ : $\\vec{AC} = k \\cdot \\vec{u}$ avec $k > 0$' },
         ],
       },
@@ -2634,7 +2635,7 @@ export const calculVectoriel: ChapterContent = {
       {
         title: 'Résultante de deux vecteurs',
         formulas: [
-          { text: '$R^2 = F_1^2+F_2^2+2 \\cdot F_1 \\cdot F_2 \\cdot \\cos\\theta$', condition: 'θ entre les deux vecteurs (Al-Kashi)' },
+          { text: '$R^2 = F_1^2+F_2^2+2 \\cdot F_1 \\cdot F_2 \\cdot \\cos\\theta$', condition: 'θ entre les deux vecteurs, Al-Kashi' },
           { text: '$\\dfrac{\\sin(\\text{déviation})}{F_2} = \\dfrac{\\sin\\theta}{R}$' },
           {
             text: '$\\vec{R} = \\begin{pmatrix} F_1 + F_2\\cos\\theta \\\\ F_2\\sin\\theta \\end{pmatrix}$',
@@ -2649,8 +2650,8 @@ export const calculVectoriel: ChapterContent = {
           { text: '$\\begin{pmatrix} a \\\\ 0 \\end{pmatrix}$ vers l\'est, $\\begin{pmatrix} -a \\\\ 0 \\end{pmatrix}$ vers l\'ouest, $\\begin{pmatrix} 0 \\\\ a \\end{pmatrix}$ vers le nord, $\\begin{pmatrix} 0 \\\\ -a \\end{pmatrix}$ vers le sud (a pas)' },
           { text: 'a pas en diagonale vers le nord-ouest → $\\begin{pmatrix} -a \\\\ a \\end{pmatrix}$ (chaque pas : une case vers l\'ouest et une vers le nord)' },
           { text: '$\\|\\vec{DA}\\| = \\|\\vec{u}_1 + \\vec{u}_2 + \\vec{u}_3\\|$', condition: 'distance à vol d\'oiseau après des déplacements successifs' },
-          { text: '$t = \\dfrac{\\text{largeur}}{y_{\\vec{v_R}}}$', condition: 'durée de la traversée d\'une rivière (composante y de la vitesse réelle)' },
-          { text: '$x_{\\vec{v_p}} = -c \\quad y_{\\vec{v_p}} = \\sqrt{\\|\\vec{v_p}\\|^2 - c^2}$', condition: 'arriver juste en face (courant de vitesse c)' },
+          { text: '$t = \\dfrac{\\text{largeur}}{y_{\\vec{v_R}}}$', condition: 'durée de la traversée d\'une rivière, composante y de la vitesse réelle' },
+          { text: '$x_{\\vec{v_p}} = -c \\quad y_{\\vec{v_p}} = \\sqrt{\\|\\vec{v_p}\\|^2 - c^2}$', condition: 'arriver juste en face, courant de vitesse c' },
           { text: '$\\vec{F_3} = -(\\vec{F_1} + \\vec{F_2})$', condition: 'équilibre de trois forces' },
           { text: '$\\tan\\alpha = \\dfrac{|y|}{|x|}$', condition: 'angle α entre une force $\\begin{pmatrix} x \\\\ y \\end{pmatrix}$ et l\'horizontale' },
         ],
@@ -2701,7 +2702,7 @@ export const calculVectoriel: ChapterContent = {
       kind: 'entrainement',
       title: 'Calcul vectoriel — quiz vrai/faux',
       generatorId: 'gen64',
-      description: ['Choisis un thème et teste-toi : 315 affirmations pré-écrites réparties en 9 thèmes (35 par thème), qui reprennent tout le chapitre. Une seule tentative par question, justification toujours révélée.'],
+      description: ['Choisis un thème et teste-toi : 420 affirmations pré-écrites réparties en 12 thèmes (35 par thème), qui reprennent tout le chapitre. Une seule tentative par question, justification toujours révélée.'],
       chantier: '4e',
       whereLabel: '4e → « 64. Calcul vectoriel — quiz vrai/faux »',
     },
