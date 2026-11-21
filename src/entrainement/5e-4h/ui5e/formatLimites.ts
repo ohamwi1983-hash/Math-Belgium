@@ -26,6 +26,9 @@
  */
 import type { ExerciceLimite, ExerciceLimiteFormeIndeterminee, ExerciceLimiteInfini, ExerciceLimiteInfiniePoint, ExerciceLimiteReelle, FractionExacte } from "../core5e/limites.types";
 import type { PhaseLimite } from "../moteur5e/typesLimites";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
+import type { AideTrig } from "./aidesTrigonometrie";
+import { egaleA, lireLimite } from "../moteur5e/saisieLimites";
 
 function commeFormeIndeterminee(exercice: ExerciceLimite): ExerciceLimiteFormeIndeterminee {
   if (exercice.famille !== "formeIndeterminee") throw new Error("commeFormeIndeterminee : famille hors 'formeIndeterminee'");
@@ -346,59 +349,6 @@ export function consignePhase(exercice: ExerciceLimite, phase: PhaseLimite): str
 }
 
 // ============================================================================
-// Aides — niveau 1 (méthode), niveau 2 (exemple sur une AUTRE fonction, jamais la réponse). Écrites
-// en RichText (`$…$` = LaTeX en ligne, rendu par `TexteRiche5e`) : plus aucune formule tapée au
-// clavier dans une phrase (audit 5c4a point 10). Aucune n'est révélatrice de la VRAIE famille sur
-// « reconnaissance » (les 4 catégories sont toujours décrites ensemble).
-// ============================================================================
-
-export function texteAideNiveau1(_exercice: ExerciceLimite, phase: PhaseLimite): string {
-  switch (phase) {
-    case "reconnaissance":
-      return "Remplace x par la valeur visée. Un résultat fini : c'est un nombre réel. Un numérateur non nul sur un dénominateur nul : forme $k/0$, la limite est infinie. Numérateur et dénominateur nuls : forme $0/0$. Quand $x\\to\\pm\\infty$, numérateur et dénominateur deviennent infinis : forme $\\infty/\\infty$, qu'on lève en comparant les degrés.";
-    case "factoriserDenominateur":
-      return "Le dénominateur s'annule pour la valeur vers laquelle tend x : si c'est $a$, alors $(x-a)$ est un de ses facteurs. Trouve l'autre facteur (discriminant, ou somme et produit des racines) ; s'il vaut encore $(x-a)$, la racine est double.";
-    case "limitesGaucheDroite":
-      return "Près de $a$, le numérateur garde son signe. Étudie le signe du dénominateur factorisé juste avant $a$ ($x<a$), puis juste après ($x>a$) : le signe de chaque limite est le produit des deux signes.";
-    case "conclureLimite":
-      return "";
-    case "factoriser":
-      return "Le numérateur et le dénominateur s'annulent tous les deux pour la valeur $a$ vers laquelle tend x : $(x-a)$ est un facteur commun. Écris chacun comme un produit de facteurs du premier degré.";
-    case "simplifierEvaluer":
-      return "Simplifie le facteur commun $(x-a)$, puis remplace x par $a$ dans la fraction qui reste.";
-    case "termeDominant":
-      return "Le terme dominant d'un polynôme est son terme de plus haut degré : c'est lui qui impose le comportement quand x devient très grand.";
-    case "simplifierLimiteRef":
-      return "Simplifie la fraction des deux termes dominants : les puissances de x se simplifient entre elles, il reste le rapport des coefficients, multiplié par la puissance de x qui subsiste.";
-    case "evaluerLimiteFinale":
-      return "Numérateur de degré plus petit : il reste $\\dfrac{k}{x^n}$, qui tend vers 0. Numérateur de degré plus grand : la limite est infinie ; son signe dépend du signe du coefficient et, pour une puissance impaire de x, du sens ($x\\to+\\infty$ ou $x\\to-\\infty$).";
-  }
-}
-
-export function texteAideNiveau2(_exercice: ExerciceLimite, phase: PhaseLimite): string {
-  switch (phase) {
-    case "reconnaissance":
-      return "Exemples : $\\lim_{x\\to 2}\\dfrac{3x+1}{x-5}=-\\dfrac{7}{3}$ est un nombre réel ; $\\lim_{x\\to 2}\\dfrac{1}{(x-2)^2}$ est de la forme $k/0$ ; $\\lim_{x\\to 2}\\dfrac{x^2-4}{x-2}$ est de la forme $0/0$ ; $\\lim_{x\\to+\\infty}\\dfrac{2x+1}{3x-5}$ est de la forme $\\infty/\\infty$.";
-    case "factoriserDenominateur":
-      return "Exemples : $x^2-4x+4=(x-2)^2$ (racine double) ; $x^2-x-6=(x-3)(x+2)$ (deux racines distinctes).";
-    case "limitesGaucheDroite":
-      return "Exemple (autre fonction) : pour $\\lim_{x\\to 1}\\dfrac{5}{(x-1)(x+3)}$, le numérateur vaut $5>0$. Juste avant 1, $(x-1)<0$ et $(x+3)>0$ : le dénominateur est négatif, la limite à gauche vaut $-\\infty$. Juste après 1, il est positif : la limite à droite vaut $+\\infty$.";
-    case "conclureLimite":
-      return "";
-    case "factoriser":
-      return "Exemple : $x^2-5x+6=(x-2)(x-3)$ et $x^2-x-2=(x-2)(x+1)$ ont le facteur commun $(x-2)$.";
-    case "simplifierEvaluer":
-      return "Suite de l'exemple : après simplification, $\\dfrac{x-3}{x+1}$ en $x=2$ donne $\\dfrac{2-3}{2+1}=-\\dfrac{1}{3}$.";
-    case "termeDominant":
-      return "Exemple : dans $3x^3-5x+1$, le terme dominant est $3x^3$ ; dans $-2x^2+7$, c'est $-2x^2$.";
-    case "simplifierLimiteRef":
-      return "Exemples : $\\dfrac{-4x^2}{x^2}=-4$ (même degré) ; $\\dfrac{2x^3}{x^2}=2x$ ; $\\dfrac{3x}{6x^2}=\\dfrac{1}{2x}$.";
-    case "evaluerLimiteFinale":
-      return "Exemples : quand $x\\to-\\infty$, $2x$ tend vers $-\\infty$ mais $2x^2$ tend vers $+\\infty$ ; $\\dfrac{3}{x}$ tend vers 0.";
-  }
-}
-
-// ============================================================================
 // Bloc "état actuel" — dérivé UNIQUEMENT des valeurs déjà CONFIRMÉES (jamais la saisie brute de
 // l'élève). "reconnaissance" n'y contribue JAMAIS. Chaque famille montre l'état le plus RÉCENT
 // (jamais un empilement de tout l'historique — Branche B/D n'affichent que le dernier calcul
@@ -513,4 +463,208 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceLimite, phase:
       return [`\\lim=${formatFractionLatex(exo.ratioCoefficients)}`];
     }
   }
+}
+
+// ============================================================================
+// Lots B–D (règles communes) : aides à deux niveaux — niveau 1 = la propriété du cours, niveau 2 =
+// la propriété posée pour CETTE limite (jamais la réponse) — et messages ciblés sur les erreurs du
+// cours (côté d'approche, signe de 0⁺ / 0⁻, degré, rapport inversé…).
+// ============================================================================
+
+const tF = (valeur: string): FragmentConsigne => ({ type: "texte", valeur });
+const lF = (valeur: string): FragmentConsigne => ({ type: "latex", valeur });
+
+/** N(x) et D(x) tels qu'affichés dans l'énoncé (mêmes ordres de termes). */
+export function numerateurDenominateurLatex(e: ExerciceLimite): { n: string; d: string } {
+  const frac = formatBlocDonneesLatex(e);
+  const i = frac.indexOf("\\dfrac{") + 6;
+  const groupe = (j: number) => {
+    let k = 0;
+    for (let m = j; m < frac.length; m++) {
+      if (frac[m] === "{") k++;
+      else if (frac[m] === "}") {
+        k--;
+        if (k === 0) return { c: frac.slice(j + 1, m), fin: m + 1 };
+      }
+    }
+    return { c: "", fin: frac.length };
+  };
+  const n = groupe(i);
+  const d = groupe(n.fin);
+  return { n: n.c, d: d.c };
+}
+
+const coefDevant = (k: number) => (k === 1 ? "" : k === -1 ? "-" : `${k}`);
+
+function cibleA(e: ExerciceLimite): string {
+  return e.famille === "limiteInfini" ? (e.direction === "plus" ? "+\\infty" : "-\\infty") : `${e.a}`;
+}
+
+export function aidesLimite(e: ExerciceLimite, phase: PhaseLimite): AideTrig[] {
+  const { n, d } = numerateurDenominateurLatex(e);
+  const a = cibleA(e);
+  switch (phase) {
+    case "reconnaissance":
+      return [
+        {
+          texte: [
+            tF("Remplace x par la valeur visée dans le numérateur et dans le dénominateur : un résultat fini donne un nombre réel ; "),
+            lF("\\frac{k}{0}"),
+            tF(" (k ≠ 0) donne une limite infinie ; "),
+            lF("\\frac{0}{0}"),
+            tF(" est une forme indéterminée. En "),
+            lF("\\pm\\infty"),
+            tF(", deux polynômes non constants donnent la forme "),
+            lF("\\frac{\\infty}{\\infty}"),
+            tF("."),
+          ],
+        },
+        e.famille === "limiteInfini"
+          ? { texte: [tF("Ici, x tend vers "), lF(a), tF(" : regarde vers quoi tendent le numérateur et le dénominateur :")], formules: [`\\lim_{x\\to ${a}}\\left(${n}\\right)\\qquad\\lim_{x\\to ${a}}\\left(${d}\\right)`] }
+          : { texte: [tF("Ici, calcule séparément le numérateur et le dénominateur en "), lF(`x=${a}`), tF(" :")], formules: [`N(x)=${n}\\qquad D(x)=${d}`] },
+      ];
+    case "factoriser":
+      return [
+        { texte: [tF("Le numérateur et le dénominateur s'annulent tous les deux en "), lF("x=a"), tF(" : "), lF("(x-a)"), tF(" est un facteur de chacun. L'autre racine se trouve par Δ, ou par le produit des racines "), lF("x_1x_2=\\frac{c}{a}"), tF(".")] },
+        { texte: [tF("Ici, "), lF(formatFacteurLineaireLatex(commeFormeIndeterminee(e).a)), tF(" est un facteur commun ; écris chacun sous la forme :")], formules: ["k\\,(x-x_1)(x-x_2)"] },
+      ];
+    case "simplifierEvaluer":
+      return [
+        { texte: [tF("Pour "), lF("x\\neq a"), tF(", on simplifie le facteur commun "), lF("(x-a)"), tF(", puis on remplace x par a dans la fraction qui reste.")] },
+        { texte: [tF("Ici, après simplification, remplace x par "), lF(a), tF(" dans les facteurs qui restent (coefficients compris) :")], formules: e.famille === "formeIndeterminee" ? [`\\dfrac{${coefDevant(e.kN)}${formatFacteurLineaireLatex(e.p)}}{${coefDevant(e.kD)}${formatFacteurLineaireLatex(e.q)}}`] : [] },
+      ];
+    case "factoriserDenominateur":
+      return [
+        { texte: [tF("Le dénominateur s'annule en "), lF("x=a"), tF(" : "), lF("(x-a)"), tF(" en est un facteur. Trouve l'autre (Δ, ou somme et produit des racines) ; s'il vaut encore "), lF("(x-a)"), tF(", la racine est double.")] },
+        { texte: [tF("Ici, mets d'abord le coefficient de "), lF("x^2"), tF(" en évidence, puis cherche l'autre racine :")], formules: [`D(x)=${d}`] },
+      ];
+    case "limitesGaucheDroite":
+      return [
+        { texte: [tF("Près de a, le numérateur garde son signe. Le facteur "), lF("(x-a)"), tF(" tend vers "), lF("0^-"), tF(" à gauche ("), lF("x<a"), tF(") et vers "), lF("0^+"), tF(" à droite ; un carré "), lF("(x-a)^2"), tF(" tend vers "), lF("0^+"), tF(" des deux côtés. Le signe de la limite est le produit des signes.")] },
+        { texte: [tF("Ici, évalue le numérateur et les autres facteurs en "), lF(`x=${a}`), tF(", puis le signe de chaque facteur juste avant et juste après "), lF(a), tF(" :")], formules: [`N(${a})\\qquad x\\to ${a}^{-}\\qquad x\\to ${a}^{+}`] },
+      ];
+    case "conclureLimite":
+      return [
+        { texte: [tF("La limite en a existe seulement si la limite à gauche et la limite à droite sont égales.")] },
+        { texte: [tF("Ici, compare les deux limites trouvées à l'écran précédent.")] },
+      ];
+    case "termeDominant":
+      return [
+        { texte: [tF("En "), lF("\\pm\\infty"), tF(", un polynôme se comporte comme son terme de plus haut degré (son « terme dominant »), où qu'il soit écrit.")] },
+        { texte: [tF("Ici, les termes ne sont pas forcément rangés : cherche la plus grande puissance de x dans chacun :")], formules: [`N(x)=${n}\\qquad D(x)=${d}`] },
+      ];
+    case "simplifierLimiteRef":
+      return [
+        { texte: [tF("On simplifie le quotient des termes dominants : coefficients divisés, exposants soustraits ("), lF("\\frac{x^m}{x^n}=x^{m-n}"), tF(").")] },
+        e.famille === "limiteInfini"
+          ? { texte: [tF("Ici, simplifie :")], formules: [`\\dfrac{${formatMonomeIsoleLatex(e.coeffsN[e.degN], e.degN)}}{${formatMonomeIsoleLatex(e.coeffsD[e.degD], e.degD)}}`] }
+          : { texte: [] },
+      ];
+    case "evaluerLimiteFinale":
+      return [
+        { texte: [tF("Limites de référence : "), lF("\\frac{k}{x^n}\\to 0"), tF(" ; "), lF("kx^n\\to\\pm\\infty"), tF(", avec le signe de k et, pour n impair, celui de x.")] },
+        e.famille === "limiteInfini"
+          ? { texte: [tF("Ici, x tend vers "), lF(a), tF(" dans l'expression simplifiée :")], formules: [`\\lim_{x\\to ${a}} ${formatRatioMonomeLatex(e.ratioCoefficients, e.degreResultat)}`] }
+          : { texte: [] },
+      ];
+  }
+}
+
+/** Valeur lue (ou ±∞), null si illisible. */
+function lu(brut: string): number | null {
+  return lireLimite(brut);
+}
+
+const proche = (v: number, c: number) => Number.isFinite(v) && Math.abs(v - c) < 1e-9 * Math.max(1, Math.abs(c));
+
+export function cibleLimite(e: ExerciceLimite, phase: PhaseLimite, valeurs: string[]): FragmentConsigne[] | null {
+  switch (phase) {
+    case "reconnaissance": {
+      if (e.famille !== "limiteReelle") return null;
+      const v = lu(valeurs[0] ?? "");
+      if (v === null) return null;
+      const nA = e.kN * e.a + e.bN;
+      const dA = e.kD * e.a + e.bD;
+      if (!Number.isFinite(v)) return [tF("Le dénominateur ne s'annule pas en "), lF(`x=${e.a}`), tF(" : la limite est un nombre réel.")];
+      if (nA !== 0 && proche(v, dA / nA)) return [tF("Fraction inversée : c'est le numérateur divisé par le dénominateur.")];
+      if (proche(v, -nA / dA)) return [tF("Erreur de signe : remplace x par "), lF(`${e.a}`), tF(" entre parenthèses dans chaque terme.")];
+      return [tF("Calcule séparément le numérateur et le dénominateur en "), lF(`x=${e.a}`), tF(", puis leur quotient.")];
+    }
+    case "factoriser":
+    case "factoriserDenominateur":
+      return [tF("Vérifie chaque facteur : il doit s'annuler en une racine du polynôme, et le produit redéveloppé doit redonner le polynôme (coefficient dominant compris).")];
+    case "simplifierEvaluer": {
+      if (e.famille !== "formeIndeterminee") return null;
+      const v = lu(valeurs[0] ?? "");
+      if (v === null) return null;
+      const L = e.limite.num / e.limite.den;
+      if (!Number.isFinite(v)) return [tF("Après simplification du facteur commun, le dénominateur ne s'annule plus : la limite est un nombre réel.")];
+      if (L !== 0 && proche(v, 1 / L)) return [tF("Fraction inversée : numérateur sur dénominateur.")];
+      if (proche(v, e.kN / e.kD)) return [tF("Il reste à remplacer x dans les facteurs qui ne se sont pas simplifiés.")];
+      if (proche(v, (e.a - e.p) / (e.a - e.q))) return [tF("N'oublie pas les coefficients devant les facteurs.")];
+      if (proche(v, -L)) return [tF("Erreur de signe : remplace x par "), lF(`${e.a}`), tF(" entre parenthèses.")];
+      return [tF("Simplifie le facteur commun, puis remplace x par "), lF(`${e.a}`), tF(" dans ce qui reste.")];
+    }
+    case "termeDominant": {
+      if (e.famille !== "limiteInfini") return null;
+      const msgs: FragmentConsigne[] = [];
+      const autreTerme = (brut: string, coeffs: number[], deg: number) =>
+        coeffs.some((c, i) => i !== deg && c !== 0 && egaleA(brut, (x) => c * x ** i));
+      if (autreTerme(valeurs[0] ?? "", e.coeffsN, e.degN) || autreTerme(valeurs[1] ?? "", e.coeffsD, e.degD))
+        return [tF("C'est un terme du polynôme, mais pas celui de plus haut degré : les termes ne sont pas rangés, cherche la plus grande puissance de x.")];
+      if (egaleA(valeurs[0] ?? "", (x) => Math.abs(e.coeffsN[e.degN]) * x ** e.degN) && e.coeffsN[e.degN] < 0) msgs.push(tF("Le terme dominant garde son signe."));
+      return msgs.length ? msgs : [tF("Le terme dominant est le terme de plus haut degré, avec son coefficient et son signe.")];
+    }
+    case "simplifierLimiteRef": {
+      if (e.famille !== "limiteInfini") return null;
+      const s = valeurs[0] ?? "";
+      const r = e.ratioCoefficients.num / e.ratioCoefficients.den;
+      if (egaleA(s, (x) => r * x ** (e.degN + e.degD))) return [tF("Dans un quotient, les exposants se soustraient : "), lF("\\frac{x^m}{x^n}=x^{m-n}"), tF(".")];
+      if (r !== 0 && egaleA(s, (x) => (1 / r) * x ** e.degreResultat)) return [tF("Rapport inversé : coefficient du numérateur divisé par celui du dénominateur.")];
+      if (egaleA(s, (x) => r * x ** -e.degreResultat) && e.degreResultat !== 0) return [tF("Exposant : numérateur moins dénominateur ("), lF(`${e.degN}-${e.degD}`), tF(").")];
+      return [tF("Divise les coefficients et soustrais les exposants.")];
+    }
+    case "evaluerLimiteFinale": {
+      if (e.famille !== "limiteInfini") return null;
+      const v = lu(valeurs[0] ?? "");
+      if (v === null) return null;
+      if (e.natureLimite === "zero") {
+        if (!Number.isFinite(v)) return [tF("Le numérateur est de plus petit degré : il reste "), lF("\\frac{k}{x^n}"), tF(", qui tend vers 0.")];
+        return [tF("Le numérateur est de plus petit degré : "), lF("\\frac{k}{x^n}"), tF(" tend vers 0, quel que soit k.")];
+      }
+      if (!Number.isFinite(v)) return [tF("Degrés égaux : la limite est le rapport des coefficients dominants, un nombre réel.")];
+      return [tF("Degrés égaux : la limite est le rapport des coefficients dominants.")];
+    }
+    default:
+      return null;
+  }
+}
+
+/** Message sous la réponse révélée d'un choix fermé (une seule tentative). */
+export function cibleChoixLimite(e: ExerciceLimite, phase: PhaseLimite, choix: string[]): FragmentConsigne[] | null {
+  if (phase === "reconnaissance") {
+    if (choix[0] === e.famille) return null;
+    if (e.famille === "limiteInfini") return [tF("En "), lF("\\pm\\infty"), tF(", deux polynômes non constants tendent vers l'infini : forme "), lF("\\frac{\\infty}{\\infty}"), tF(".")];
+    const { n, d } = numerateurDenominateurLatex(e);
+    if (e.famille === "formeIndeterminee") return [tF("En "), lF(`x=${e.a}`), tF(", le numérateur ET le dénominateur valent 0 : forme "), lF("\\frac{0}{0}"), tF(" ("), lF(`N(x)=${n}`), tF(").")];
+    if (e.famille === "limiteInfiniePoint") return [tF("En "), lF(`x=${e.a}`), tF(", le dénominateur vaut 0 mais pas le numérateur : forme "), lF("\\frac{k}{0}"), tF(", limite infinie ("), lF(`D(x)=${d}`), tF(").")];
+    return [tF("En "), lF(`x=${e.a}`), tF(", le dénominateur ne s'annule pas : on remplace directement.")];
+  }
+  if (phase === "limitesGaucheDroite" && e.famille === "limiteInfiniePoint") {
+    const [g, dr] = choix.map(Number);
+    if (g === e.signeLimiteDroite && dr === e.signeLimiteGauche && g !== dr) return [tF("Gauche et droite échangées : à gauche de a, "), lF("x-a<0"), tF(" (" ), lF("0^-"), tF(") ; à droite, "), lF("x-a>0"), tF(" ("), lF("0^+"), tF(").")];
+    if (e.sousCas === "racineDouble") return [tF("Un carré "), lF("(x-a)^2"), tF(" est positif des deux côtés : il tend vers "), lF("0^+"), tF(", le signe vient du numérateur et du coefficient.")];
+    return [tF("Le signe de chaque limite est le produit du signe du numérateur en a et de celui du dénominateur juste avant (ou après) a.")];
+  }
+  if (phase === "conclureLimite" && e.famille === "limiteInfiniePoint") {
+    return e.sousCas === "racineSimple"
+      ? [tF("Les deux limites latérales sont différentes : la limite en a n'existe pas.")]
+      : [tF("Les deux limites latérales sont égales : la limite existe et vaut cet infini.")];
+  }
+  if (phase === "evaluerLimiteFinale" && e.famille === "limiteInfini") {
+    return e.direction === "moins" && e.degreResultat % 2 === 1
+      ? [tF("En "), lF("-\\infty"), tF(", une puissance IMPAIRE de x est négative : elle change le signe.")]
+      : [tF("Le signe de la limite est celui du coefficient (et de "), lF("x^n"), tF(" en "), lF("-\\infty"), tF(" pour n impair).")];
+  }
+  return null;
 }

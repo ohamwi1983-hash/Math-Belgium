@@ -14,6 +14,7 @@ import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { ExerciceLimite, FractionExacte } from "../core5e/limites.types";
 import { diagnostiquerValeurArcSecteur } from "./verificationArcsSecteurs";
+import { diagnostiquerValeurExacte } from "./saisieLimites";
 
 export function diagnostiquerNombre(texte: string, cible: number): StatutVerification {
   return diagnostiquerValeurArcSecteur(texte, cible);
@@ -89,5 +90,5 @@ export function verifierReconnaissance(choix: string, exercice: ExerciceLimite, 
   if (exercice.famille !== "limiteReelle") return true;
   if (valeurTexte === undefined) return false;
   const cible = exercice.limite.num / exercice.limite.den;
-  return diagnostiquerNombre(valeurTexte, cible) === "correct";
+  return diagnostiquerValeurExacte(valeurTexte, cible) === "correct";
 }

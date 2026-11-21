@@ -8,6 +8,8 @@ import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLectureGrap
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import {
+  NIVEAU_AIDE_MAX_LECTURE_GRAPHIQUE,
+  activerAideLectureGraphique,
   demarrerSessionLectureGraphiqueLimites,
   soumettreReponseCompleterLimites,
   soumettreReponseNommerAsymptotes,
@@ -186,6 +188,7 @@ export function App5gen22() {
             tentativesMax={tentativesMax}
             cleEcran={cleEcran}
             terminerEtape={terminerEtape}
+            setEtat={setEtat}
             validation={validation}
           />
         </div>
@@ -212,6 +215,7 @@ interface EcranProps {
   tentativesMax: number;
   cleEcran: string;
   terminerEtape: (nouvelEtat: EtatSessionLectureGraphiqueLimites, votreReponse?: ReactNode) => void;
+  setEtat: (etat: EtatSessionLectureGraphiqueLimites) => void;
   validation: ValidationEtapeProps | null;
 }
 
@@ -223,6 +227,7 @@ function EcranCourant({
   tentativesMax,
   cleEcran,
   terminerEtape,
+  setEtat,
   validation,
 }: EcranProps) {
   switch (phase) {
@@ -234,6 +239,9 @@ function EcranCourant({
           exercice={exercice}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
+          niveauAide={etat.niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_LECTURE_GRAPHIQUE}
+          onActiverAide={() => setEtat(activerAideLectureGraphique(etat))}
           onValider={(textes) => terminerEtape(soumettreReponseCompleterLimites(etat, textes), textes.join(" ; "))}
           diagnostiquer={(textes) => textes.map((t, i) => diagnostiquerCibleComportement(t, slots[i].cible))}
           validation={validation}
@@ -249,6 +257,9 @@ function EcranCourant({
           exercice={exercice}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
+          niveauAide={etat.niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_LECTURE_GRAPHIQUE}
+          onActiverAide={() => setEtat(activerAideLectureGraphique(etat))}
           onValider={(reponse) => terminerEtape(soumettreReponseNommerAsymptotes(etat, reponse), texteReponseAsymptotes(reponse))}
           diagnostiquer={(reponse) => diagnostiquerNommerAsymptotes(reponse, slots)}
           validation={validation}

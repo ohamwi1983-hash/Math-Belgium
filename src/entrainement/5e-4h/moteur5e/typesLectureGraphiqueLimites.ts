@@ -131,6 +131,8 @@ export interface ResultatExerciceLectureGraphiqueLimites {
 }
 
 export interface EtatSessionLectureGraphiqueLimites {
+  /** Niveau d'aide ouvert sur l'écran en cours (lots B–D : deux niveaux), remis à 0 à chaque écran. */
+  niveauAide: number;
   reglages: ReglagesSession5e;
   generateur: () => ExerciceLectureGraphiqueLimites;
   exerciceCourant: ExerciceLectureGraphiqueLimites;

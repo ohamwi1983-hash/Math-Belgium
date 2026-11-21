@@ -8,8 +8,9 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesLimites";
 import type { EtatSessionLimite, PhaseLimite, ResultatExerciceLimite } from "./typesLimites";
-import { diagnostiquerFacteurs, diagnostiquerNombre, diagnostiquerRatioDominant, diagnostiquerTermeDominant, verifierReconnaissance, verifierSigne } from "./verificationLimites";
+import { diagnostiquerFacteurs, diagnostiquerRatioDominant, diagnostiquerTermeDominant, verifierReconnaissance, verifierSigne } from "./verificationLimites";
 import { estFormeFactorisee } from "./formeSaisieLimites";
+import { diagnostiquerValeurExacte, expressionsIllisibles, nombreExactRefuse } from "./saisieLimites";
 
 /** Écran "conclureLimite" (famille "limiteInfiniePoint") — 3 options : ±∞ ou "n'existe pas". */
 export type ReponseConclureLimite = 1 | -1 | "nexistepas";
@@ -91,6 +92,32 @@ function soumettreEcran<T>(etat: EtatSessionLimite, phaseAttendue: PhaseLimite, 
 }
 
 // ============================================================================
+// Règles communes (lots B–D) : saisie illisible, valeur approchée d'une valeur exacte, ou forme à
+// reprendre (polynôme recopié au lieu d'être factorisé) refusées ICI — l'état revient inchangé,
+// aucune tentative consommée. Les limites sont des valeurs EXACTES (comparées à 1e-9).
+// ============================================================================
+
+export function saisieLimiteRefusee(etat: EtatSessionLimite, valeurs: string[]): boolean {
+  const e = etat.exerciceCourant;
+  switch (etat.phase) {
+    case "reconnaissance":
+      return e.famille === "limiteReelle" && valeurs[0] !== undefined && nombreExactRefuse(valeurs[0], e.limite.num / e.limite.den);
+    case "simplifierEvaluer":
+      return e.famille === "formeIndeterminee" && nombreExactRefuse(valeurs[0], e.limite.num / e.limite.den);
+    case "evaluerLimiteFinale":
+      return e.famille === "limiteInfini" && nombreExactRefuse(valeurs[0], e.natureLimite === "zero" ? 0 : e.ratioCoefficients.num / e.ratioCoefficients.den);
+    case "factoriser":
+    case "factoriserDenominateur":
+      return expressionsIllisibles(valeurs) || valeurs.some((v) => !estFormeFactorisee(v));
+    case "termeDominant":
+    case "simplifierLimiteRef":
+      return expressionsIllisibles(valeurs);
+    default:
+      return false;
+  }
+}
+
+// ============================================================================
 // Accesseurs narrowed — gardes défensives (jamais atteintes en pratique).
 // ============================================================================
 
@@ -118,6 +145,7 @@ function commeInfini(exercice: ExerciceLimite): ExerciceLimiteInfini {
  * "Nombre réel R", même geste) est alors OBLIGATOIRE et fait partie de la même soumission. */
 export function soumettreReponseReconnaissance(etat: EtatSessionLimite, choix: string, valeurTexte?: string): EtatSessionLimite {
   const exercice = etat.exerciceCourant;
+  if (choix === exercice.famille && valeurTexte !== undefined && saisieLimiteRefusee(etat, [valeurTexte])) return etat;
   return soumettreEcran(
     etat,
     "reconnaissance",
@@ -138,6 +166,7 @@ export interface ReponseFactoriser {
 
 export function soumettreReponseFactoriser(etat: EtatSessionLimite, reponse: ReponseFactoriser): EtatSessionLimite {
   const exo = commeFormeIndeterminee(etat.exerciceCourant);
+  if (saisieLimiteRefusee(etat, [...reponse.numerateur, ...reponse.denominateur])) return etat;
   return soumettreEcran(
     etat,
     "factoriser",
@@ -153,7 +182,8 @@ export function soumettreReponseFactoriser(etat: EtatSessionLimite, reponse: Rep
 export function soumettreReponseSimplifierEvaluer(etat: EtatSessionLimite, texte: string): EtatSessionLimite {
   const exo = commeFormeIndeterminee(etat.exerciceCourant);
   const cible = exo.limite.num / exo.limite.den;
-  return soumettreEcran(etat, "simplifierEvaluer", texte, (t) => diagnostiquerNombre(t, cible) === "correct");
+  if (saisieLimiteRefusee(etat, [texte])) return etat;
+  return soumettreEcran(etat, "simplifierEvaluer", texte, (t) => diagnostiquerValeurExacte(t, cible) === "correct");
 }
 
 // ============================================================================
@@ -167,6 +197,7 @@ export function soumettreReponseSimplifierEvaluer(etat: EtatSessionLimite, texte
 export function soumettreReponseFactoriserDenominateur(etat: EtatSessionLimite, textes: string[]): EtatSessionLimite {
   const exo = commeInfiniePoint(etat.exerciceCourant);
   const autreRacine = exo.sousCas === "racineDouble" ? exo.a : (exo.q as number);
+  if (saisieLimiteRefusee(etat, textes)) return etat;
   return soumettreEcran(etat, "factoriserDenominateur", textes, (t) => diagnostiquerFacteurs(t, exo.a, exo.kD, autreRacine) === "correct" && t.every(estFormeFactorisee));
 }
 
@@ -209,6 +240,7 @@ export interface ReponseTermeDominant {
 
 export function soumettreReponseTermeDominant(etat: EtatSessionLimite, reponse: ReponseTermeDominant): EtatSessionLimite {
   const exo = commeInfini(etat.exerciceCourant);
+  if (saisieLimiteRefusee(etat, [reponse.numerateur, reponse.denominateur])) return etat;
   return soumettreEcran(
     etat,
     "termeDominant",
@@ -219,6 +251,7 @@ export function soumettreReponseTermeDominant(etat: EtatSessionLimite, reponse: 
 
 export function soumettreReponseSimplifierLimiteRef(etat: EtatSessionLimite, texte: string): EtatSessionLimite {
   const exo = commeInfini(etat.exerciceCourant);
+  if (saisieLimiteRefusee(etat, [texte])) return etat;
   return soumettreEcran(etat, "simplifierLimiteRef", texte, (t) => diagnostiquerRatioDominant(t, exo.ratioCoefficients, exo.degreResultat) === "correct");
 }
 
@@ -227,7 +260,8 @@ export function soumettreReponseSimplifierLimiteRef(etat: EtatSessionLimite, tex
 export function soumettreReponseEvaluerLimiteFinaleNumerique(etat: EtatSessionLimite, texte: string): EtatSessionLimite {
   const exo = commeInfini(etat.exerciceCourant);
   const cible = exo.natureLimite === "zero" ? 0 : exo.ratioCoefficients.num / exo.ratioCoefficients.den;
-  return soumettreEcran(etat, "evaluerLimiteFinale", texte, (t) => diagnostiquerNombre(t, cible) === "correct");
+  if (saisieLimiteRefusee(etat, [texte])) return etat;
+  return soumettreEcran(etat, "evaluerLimiteFinale", texte, (t) => diagnostiquerValeurExacte(t, cible) === "correct");
 }
 
 /** "evaluerLimiteFinale" — choix de signe (±∞) quand `natureLimite==="infinie"`. */

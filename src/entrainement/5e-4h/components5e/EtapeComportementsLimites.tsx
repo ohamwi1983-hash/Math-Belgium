@@ -4,9 +4,10 @@ import { listeComportements } from "../moteur5e/typesLectureGraphiqueLimites";
 import { consigneGenerale, consignePhase, labelComportementLatex } from "../ui5e/formatLectureGraphiqueLimites";
 import { Katex } from "../components/Katex";
 import { LectureGraphiqueLimitesGraph } from "./LectureGraphiqueLimitesGraph";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesLectureGraphique, cibleComportements } from "../ui5e/retoursLectureGraphiqueLimites";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -14,6 +15,9 @@ interface Props {
   exercice: ExerciceLectureGraphiqueLimites;
   tentativesUtilisees: number;
   tentativesMax: number;
+  niveauAide: number;
+  niveauAideMax: number;
+  onActiverAide: () => void;
   onValider: (textes: string[]) => void;
   diagnostiquer?: (textes: string[]) => StatutVerification[];
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
@@ -29,7 +33,8 @@ interface Props {
  * Audit 5e ch. 4 : une écriture illisible ne consomme pas de tentative (message de syntaxe propre à
  * cet écran, jamais le message générique qui parle de « * ») ; après une tentative fausse, aucun champ
  * n'est marqué en rouge — un signe ±∞ se gagnerait sinon par élimination, champ par champ. */
-export function EtapeComportementsLimites({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation }: Props) {
+export function EtapeComportementsLimites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation }: Props) {
+  const [soumises, setSoumises] = useState<string[] | null>(null);
   const slots = listeComportements(exercice);
   const [valeurs, setValeurs] = useState<string[]>(() => Array(slots.length).fill(""));
   const [illisibles, setIllisibles] = useState<boolean[] | null>(null);
@@ -49,6 +54,7 @@ export function EtapeComportementsLimites({ exercice, tentativesUtilisees, tenta
       }
     }
     setIllisibles(null);
+    setSoumises(valeurs);
     onValider(valeurs);
   }
 
@@ -66,32 +72,27 @@ export function EtapeComportementsLimites({ exercice, tentativesUtilisees, tenta
             type="text"
             className={`text-input${illisibles?.[i] ? " is-erronee" : ""}`}
             value={valeurs[i]}
-            onChange={(e) => modifier(i, e.target.value)}
+            onChange={(e) => modifier(i, normaliserSigneMoins(e.target.value))}
             placeholder="ex : 7,5 ou −∞"
             disabled={!!validation}
             autoComplete="off"
           />
         </div>
       ))}
-      {!validation && (
-        <>
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-            Valider
-          </button>
-          {illisibles?.some(Boolean) ? (
-            <p className="alert-error" role="alert">
-              Écriture non reconnue : tape un nombre (ex. 7,5), +∞ ou −∞ (ou « +inf », « −inf »).
-            </p>
-          ) : (
-            tentativesUtilisees > 0 && (
-              <p className="alert-error" role="alert">
-                {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-              </p>
-            )
-          )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesLectureGraphique(exercice, "completerLimites")}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={!!illisibles?.some(Boolean)}
+        texteIllisible="Écriture non reconnue : tape un nombre (ex. 7,5), +∞ ou −∞ (ou « +inf », « −inf »). Cette saisie ne compte pas comme une tentative."
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumises && tentativesUtilisees > 0 ? cibleComportements(exercice, soumises) : null}
+        validation={validation}
+      />
     </div>
   );
 }

@@ -5,8 +5,9 @@ import type { DiagnosticNommerAsymptotes } from "../moteur5e/verificationLecture
 import { LIBELLE_TYPE_ASYMPTOTE, consigneGenerale, consignePhase } from "../ui5e/formatLectureGraphiqueLimites";
 import { Katex } from "../components/Katex";
 import { LectureGraphiqueLimitesGraph } from "./LectureGraphiqueLimitesGraph";
-import { formatMessageErreur } from "../ui/messageErreur";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesLectureGraphique, cibleAsymptotesNommees } from "../ui5e/retoursLectureGraphiqueLimites";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EnTeteExercice } from "./EnTeteExercice";
 import "./lectureGraphiqueLimites.css";
@@ -15,6 +16,9 @@ interface Props {
   exercice: ExerciceLectureGraphiqueLimites;
   tentativesUtilisees: number;
   tentativesMax: number;
+  niveauAide: number;
+  niveauAideMax: number;
+  onActiverAide: () => void;
   onValider: (reponse: ReponseNommerAsymptotes) => void;
   diagnostiquer?: (reponse: ReponseNommerAsymptotes) => DiagnosticNommerAsymptotes;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle les lignes,
@@ -38,7 +42,8 @@ const TYPES: TypeAsymptote[] = ["verticale", "horizontale", "oblique"];
  * tentative fausse, aucune ligne n'est marquée (sinon le type se gagnerait par élimination) ; un verdict
  * « aucune / au moins une » faux clôt l'écran (moteur).
  */
-export function EtapeEquationsAsymptotes({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation }: Props) {
+export function EtapeEquationsAsymptotes({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation }: Props) {
+  const [soumise, setSoumise] = useState<ReponseNommerAsymptotes | null>(null);
   const [lignes, setLignes] = useState<LigneAsymptote[]>([]);
   const [aucune, setAucune] = useState(false);
   const [illisibles, setIllisibles] = useState<boolean[] | null>(null);
@@ -54,7 +59,7 @@ export function EtapeEquationsAsymptotes({ exercice, tentativesUtilisees, tentat
     setIllisibles(null);
   }
   function modifier(i: number, texte: string) {
-    setLignes((ls) => ls.map((l, j) => (j === i ? { ...l, texte } : l)));
+    setLignes((ls) => ls.map((l, j) => (j === i ? { ...l, texte: normaliserSigneMoins(texte) } : l)));
     setIllisibles((arr) => (arr ? arr.map((x, j) => (j === i ? false : x)) : arr));
   }
   function valider() {
@@ -68,6 +73,7 @@ export function EtapeEquationsAsymptotes({ exercice, tentativesUtilisees, tentat
       }
     }
     setIllisibles(null);
+    setSoumise(reponse);
     onValider(reponse);
   }
 
@@ -120,25 +126,20 @@ export function EtapeEquationsAsymptotes({ exercice, tentativesUtilisees, tentat
       )}
       {fige && aucune && <p className="prompt-text">Ta réponse : aucune asymptote.</p>}
 
-      {!validation && (
-        <>
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-            Valider
-          </button>
-          {illisibles?.some(Boolean) ? (
-            <p className="alert-error" role="alert">
-              Écriture non reconnue : tape un nombre (ex. 7,5) pour une asymptote verticale ou horizontale, une expression en x (ex. 5x + 12) pour une oblique.
-            </p>
-          ) : (
-            tentativesUtilisees > 0 && (
-              <p className="alert-error" role="alert">
-                {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-              </p>
-            )
-          )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesLectureGraphique(exercice, "nommerAsymptotes")}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={!!illisibles?.some(Boolean)}
+        texteIllisible="Écriture non reconnue : tape un nombre (ex. 7,5) pour une asymptote verticale ou horizontale, une expression en x (ex. 5x + 12) pour une oblique. Cette saisie ne compte pas comme une tentative."
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumise && tentativesUtilisees > 0 ? cibleAsymptotesNommees(exercice, soumise) : null}
+        validation={validation}
+      />
     </div>
   );
 }

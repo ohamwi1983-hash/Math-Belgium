@@ -14,8 +14,16 @@ const POINTS_DE_BASE = 100;
 
 function etatInitial(
   exercice: ExerciceLectureGraphiqueLimites,
-): Pick<EtatSessionLectureGraphiqueLimites, "exerciceCourant" | "phase" | "etapeCourante" | "scoresPartiels" | "revelesPartiels"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), scoresPartiels: {}, revelesPartiels: {} };
+): Pick<EtatSessionLectureGraphiqueLimites, "exerciceCourant" | "phase" | "etapeCourante" | "scoresPartiels" | "revelesPartiels" | "niveauAide"> {
+  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), scoresPartiels: {}, revelesPartiels: {}, niveauAide: 0 };
+}
+
+/** Deux niveaux d'aide par écran (lots B–D). */
+export const NIVEAU_AIDE_MAX_LECTURE_GRAPHIQUE = 2;
+
+export function activerAideLectureGraphique(etat: EtatSessionLectureGraphiqueLimites): EtatSessionLectureGraphiqueLimites {
+  if (etat.terminee || etat.niveauAide >= NIVEAU_AIDE_MAX_LECTURE_GRAPHIQUE) return etat;
+  return { ...etat, niveauAide: etat.niveauAide + 1 };
 }
 
 export function demarrerSessionLectureGraphiqueLimites(reglages: ReglagesSession5e, generateur: () => ExerciceLectureGraphiqueLimites): EtatSessionLectureGraphiqueLimites {
@@ -63,13 +71,15 @@ function soumettreEcran<T>(
   if (phaseSuivante === "termine") {
     return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels, revelesPartiels }, revele);
   }
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), phase: phaseSuivante, scoresPartiels, revelesPartiels, derniereEtapeRevelee: revele };
+  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, scoresPartiels, revelesPartiels, derniereEtapeRevelee: revele };
 }
 
 /** Écran "completerLimites" — un texte par slot de `listeComportements`, dans le MÊME ordre,
  * TOUS corrects requis (même convention que les écrans multi-champs des autres générateurs). */
 export function soumettreReponseCompleterLimites(etat: EtatSessionLectureGraphiqueLimites, textes: string[]): EtatSessionLectureGraphiqueLimites {
   const slots = listeComportements(etat.exerciceCourant);
+  // Règle commune (lots B–D) : une saisie illisible est refusée ici, aucune tentative consommée.
+  if (textes.some((v, i) => slots[i] && diagnostiquerCibleComportement(v, slots[i].cible) === "parse_error")) return etat;
   return soumettreEcran(etat, "completerLimites", textes, (t) => t.length === slots.length && t.every((v, i) => diagnostiquerCibleComportement(v, slots[i].cible) === "correct"));
 }
 
@@ -79,5 +89,6 @@ export function soumettreReponseCompleterLimites(etat: EtatSessionLectureGraphiq
 export function soumettreReponseNommerAsymptotes(etat: EtatSessionLectureGraphiqueLimites, reponse: ReponseNommerAsymptotes): EtatSessionLectureGraphiqueLimites {
   const slots = listeAsymptotes(etat.exerciceCourant);
   const diagnostic = diagnostiquerNommerAsymptotes(reponse, slots);
+  if (diagnostic.illisible) return etat;
   return soumettreEcran(etat, "nommerAsymptotes", reponse, () => diagnostic.correct, diagnostic.verdictAucuneFaux ? 1 : undefined);
 }
