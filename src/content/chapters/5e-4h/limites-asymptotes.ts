@@ -33,7 +33,7 @@ export const limitesAsymptotes: ChapterContent = {
           kind: 'intuition',
           label: 'Tu connais déjà ça',
           text:
-            "Tu as déjà rencontré le **domaine de définition** dans le chapitre précédent : les " +
+            "Tu as déjà rencontré le **domaine de définition** au chapitre 1 (fonctions) : les " +
             "valeurs de x qu'une fonction refuse. Ce chapitre part de là. Que devient f(x) quand " +
             "x s'approche d'une valeur interdite, sans jamais l'atteindre ? Et que devient f(x) " +
             "quand x part très loin, vers $+\\infty$ ou $-\\infty$ ? C'est exactement ce que " +
@@ -115,6 +115,16 @@ export const limitesAsymptotes: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'aussi-pres-que-tu-veux-widget',
+          label: 'Manipule toi-même — aussi près que tu veux',
+          caption:
+            'Choisis une marge autour de L (la bande horizontale, de demi-hauteur ε), aussi petite que tu ' +
+            'veux, puis cherche une bande verticale autour de a (demi-largeur δ) dont tous les points de la ' +
+            'courbe, sauf x = a lui-même, restent dans la marge : c\'est ce que veut dire « aussi près qu\'on ' +
+            'veut ». Essaie ensuite le saut : quand la marge est petite, aucune largeur ne marche.',
+        },
+        {
           kind: 'rappel',
           label: 'Rappel — limite à gauche, limite à droite',
           items: [
@@ -126,6 +136,19 @@ export const limitesAsymptotes: ChapterContent = {
               'limite à gauche et la limite à droite séparément — regarde l\'exemple ci-dessous, ' +
               'et les deux exemples d\'asymptote verticale plus loin.',
           ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi seul le terme dominant compte',
+          text:
+            'Prends $3x^2-5x+1$ et compare la taille de ses trois termes. Pour $x=10$ : $3x^2=300$, ' +
+            '$5x=50$ et $1$ — le terme $3x^2$ pèse déjà 85,5 % du total ($300$ sur $351$). Pour ' +
+            '$x=1\\,000$ : $3\\,000\\,000$ contre $5\\,000$ et $1$, soit 99,83 %. Pour $x=10^6$ : ' +
+            '99,9998 %. Plus x grandit, plus les autres termes deviennent des **miettes** à côté de ' +
+            '$3x^2$. C\'est exactement ce que fait la mise en évidence : ' +
+            '$3x^2-5x+1 = 3x^2\\left(1-\\frac{5}{3x}+\\frac{1}{3x^2}\\right)$, et la parenthèse tend ' +
+            'vers $1$. À l\'infini, un polynôme se comporte comme son terme dominant — et un quotient, ' +
+            'comme le quotient des deux termes dominants.',
         },
         {
           kind: 'rappel',
@@ -152,7 +175,7 @@ export const limitesAsymptotes: ChapterContent = {
               xMax: 30,
               xTicks: [10, 20, 30],
               yTicks: [100, 200],
-              horizontalAsymptotes: [{ y: 200, label: 'v_max = 200 km/h' }],
+              horizontalAsymptotes: [{ y: 200, label: 'v_{max} = 200 km/h' }],
               xAxisLabel: 'temps de chute (s)',
               yAxisLabel: 'vitesse (km/h)',
               caption:
@@ -183,9 +206,18 @@ export const limitesAsymptotes: ChapterContent = {
           text:
             'Face à $\\infty - \\infty$, tu pourrais croire que ça vaut toujours 0 : « l\'infini ' +
             'moins l\'infini, ça s\'annule ». Faux ! Tout dépend de la VITESSE à laquelle chaque ' +
-            'terme grandit. Selon les fonctions, la différence peut tendre vers un nombre fini, ' +
-            'vers l\'infini, ou vers 0 — les trois sont possibles. C\'est pour ça qu\'une forme ' +
-            'indéterminée oblige à un vrai calcul : rien n\'est automatique.',
+            'terme grandit. Selon les fonctions, la différence peut tendre vers un nombre (parfois ' +
+            '0), vers $+\\infty$ ou vers $-\\infty$, ou n\'avoir aucune limite. C\'est pour ça qu\'une ' +
+            'forme indéterminée oblige à un vrai calcul : rien n\'est automatique.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'infini-moins-infini-widget',
+          label: 'Manipule toi-même — ∞ − ∞ ne vaut rien d\'avance',
+          caption:
+            'Choisis un couple de fonctions qui partent toutes les deux vers +∞, puis fais grandir x : ' +
+            'selon le couple, leur différence part vers +∞, se rapproche de 3, de 0, ou part vers −∞. ' +
+            'Le tableau donne aussi les valeurs pour x = 100, 1 000 et 1 000 000.',
         },
         {
           kind: 'methode',
@@ -210,6 +242,7 @@ export const limitesAsymptotes: ChapterContent = {
           headers: ['lim f', 'lim g', 'lim(f+g)'],
           rows: [
             ['m', 'p', { text: 'm+p', tone: 'good' }],
+            ['m', '±∞', { text: '±∞ (même signe)', tone: 'good' }],
             ['+∞', '+∞', { text: '+∞', tone: 'good' }],
             ['−∞', '−∞', { text: '−∞', tone: 'good' }],
             ['+∞', '−∞', { text: 'indét. (∞−∞)', tone: 'bad' }],
@@ -220,9 +253,10 @@ export const limitesAsymptotes: ChapterContent = {
           caption: 'Produit f×g',
           headers: ['lim f', 'lim g', 'lim(f×g)'],
           rows: [
-            ['m≠0', '±∞', { text: '±∞ (signe de m)', tone: 'good' }],
+            ['m≠0', '±∞', { text: '±∞ (règle des signes)', tone: 'good' }],
             ['+∞', '+∞', { text: '+∞', tone: 'good' }],
             ['+∞', '−∞', { text: '−∞', tone: 'good' }],
+            ['−∞', '−∞', { text: '+∞', tone: 'good' }],
             ['0', '±∞', { text: 'indét. (0×∞)', tone: 'bad' }],
           ],
         },
@@ -232,6 +266,7 @@ export const limitesAsymptotes: ChapterContent = {
           headers: ['lim f', 'lim g', 'lim(f/g)'],
           rows: [
             ['m', 'p≠0', { text: '$\\dfrac{m}{p}$', tone: 'good' }],
+            ['m', '±∞', { text: '0', tone: 'good' }],
             ['m≠0', '0', { text: '±∞ (signe à étudier)', tone: 'good' }],
             ['±∞', 'p≠0', { text: '±∞', tone: 'good' }],
             ['0', '0', { text: 'indét. (0/0)', tone: 'bad' }],
@@ -264,6 +299,15 @@ export const limitesAsymptotes: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'terme-dominant-widget',
+          label: 'Manipule toi-même — le terme dominant écrase les autres',
+          caption:
+            'Fais grandir x de 1 à 1 000 000 : les barres montrent le poids de chaque terme de ' +
+            '3x² − 5x + 1 et de x² + 2. Le terme dominant finit par tout peser, et le quotient se ' +
+            'rapproche de 3 ÷ 1 = 3.',
+        },
+        {
           kind: 'exemple',
           badge: 'forme ∞/∞ — mise en évidence du terme dominant',
           formula: '$\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{3x^2-5x+1}{x^2+2}$',
@@ -281,16 +325,104 @@ export const limitesAsymptotes: ChapterContent = {
             xMin: 0,
             xMax: 22,
             xTicks: [4, 20],
-            fixedYRange: { min: 0, max: 4 },
+            fixedYRange: { min: -0.8, max: 4 },
             horizontalAsymptotes: [{ y: 3, label: 'y=3' }],
             points: [
-              { x: 4, y: (3 * 16 - 20 + 1) / (16 + 2), label: 'f(4)≈1,61', tone: 'accent', labelPos: 'below' },
+              { x: 4, y: (3 * 16 - 20 + 1) / (16 + 2), label: 'f(4)≈1,61', tone: 'accent', labelPos: 'right' },
               { x: 20, y: (3 * 400 - 100 + 1) / (400 + 2), label: 'f(20)≈2,74', tone: 'accent', labelPos: 'below' },
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
-            caption: '$f(x)=\\dfrac{3x^2-5x+1}{x^2+2}$ — la courbe se rapproche d\'autant plus de $y=3$ que x augmente. Elle ne la touche plus pour x>−1 : elle la croise une seule fois, en x=−1, hors de la fenêtre.',
+            caption: '$f(x)=\\dfrac{3x^2-5x+1}{x^2+2}$ — la courbe se rapproche d\'autant plus de $y=3$ que x augmente. Elle passe un moment sous l\'axe des x (entre 0,23 et 1,43 environ), puis remonte ; elle croise $y=3$ une seule fois, en $x=-1$, hors de la fenêtre.',
           },
+        },
+        {
+          kind: 'exemple',
+          badge: 'terme dominant — trois autres cas',
+          formula:
+            'Calcule $\\displaystyle\\lim_{x \\to -\\infty} \\dfrac{2x^3-x}{x^2+1}$, puis ' +
+            '$\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{5x+1}{x^2-3}$, puis ' +
+            '$\\displaystyle\\lim_{x \\to +\\infty} (x^3-5x^2)$.',
+          steps: [
+            {
+              tag: 'premier cas — degré plus grand en haut : x³ et x² en évidence',
+              text: '$\\dfrac{2x^3-x}{x^2+1} = \\dfrac{x^3\\left(2-\\frac{1}{x^2}\\right)}{x^2\\left(1+\\frac{1}{x^2}\\right)} = x\\cdot\\dfrac{2-\\frac{1}{x^2}}{1+\\frac{1}{x^2}}$',
+            },
+            {
+              tag: 'passer à la limite — le signe vient de x',
+              text: 'Quand $x \\to -\\infty$, la fraction tend vers $\\dfrac{2}{1}=2>0$ et $x \\to -\\infty$ : le produit tend vers $-\\infty$.',
+            },
+            {
+              tag: 'deuxième cas — degré plus grand en bas : x et x² en évidence',
+              text: '$\\dfrac{5x+1}{x^2-3} = \\dfrac{x\\left(5+\\frac{1}{x}\\right)}{x^2\\left(1-\\frac{3}{x^2}\\right)} = \\dfrac{1}{x}\\cdot\\dfrac{5+\\frac{1}{x}}{1-\\frac{3}{x^2}}$ : $\\dfrac{1}{x} \\to 0$ pendant que la fraction tend vers $5$, donc le produit tend vers $0\\cdot 5=0$.',
+            },
+            {
+              tag: 'troisième cas — ∞−∞ entre deux termes d\'un polynôme',
+              text: '$x^3 \\to +\\infty$ et $-5x^2 \\to -\\infty$ : forme $\\infty-\\infty$. Mets $x^3$ en évidence : $x^3-5x^2 = x^3\\left(1-\\dfrac{5}{x}\\right)$, avec $x^3 \\to +\\infty$ et $1-\\dfrac{5}{x} \\to 1$.',
+            },
+          ],
+          result: {
+            tag: 'conclusion — le terme dominant gagne',
+            text:
+              '$\\displaystyle\\lim_{x \\to -\\infty} \\dfrac{2x^3-x}{x^2+1} = -\\infty$ ; ' +
+              '$\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{5x+1}{x^2-3} = 0$ ; ' +
+              '$\\displaystyle\\lim_{x \\to +\\infty} (x^3-5x^2) = +\\infty$. Le signe de l\'infini se lit ' +
+              'sur le terme dominant (et sur le signe de x quand le degré qui reste est impair).',
+          },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — degrés égaux : la limite vaut le rapport des coefficients dominants',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $f(x)=\\dfrac{ax^2+bx+c}{a\'x^2+b\'x+c\'}$, avec $a\\neq 0$ et $a\'\\neq 0$ (même ' +
+                'degré 2 en haut et en bas). On veut montrer que $\\displaystyle\\lim_{x \\to +\\infty} f(x)' +
+                ' = \\lim_{x \\to -\\infty} f(x) = \\dfrac{a}{a\'}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**1.** Pour $x\\neq 0$, mets $x^2$ en évidence au numérateur : ' +
+                '$ax^2+bx+c = x^2\\left(a+\\dfrac{b}{x}+\\dfrac{c}{x^2}\\right)$. Vérifie en redistribuant : ' +
+                '$x^2\\cdot\\dfrac{b}{x} = bx$ et $x^2\\cdot\\dfrac{c}{x^2} = c$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**2.** De même au dénominateur : ' +
+                '$a\'x^2+b\'x+c\' = x^2\\left(a\'+\\dfrac{b\'}{x}+\\dfrac{c\'}{x^2}\\right)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**3.** Simplifie par $x^2$, qui n\'est pas nul : ' +
+                '$f(x) = \\dfrac{a+\\frac{b}{x}+\\frac{c}{x^2}}{a\'+\\frac{b\'}{x}+\\frac{c\'}{x^2}}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**4.** Passe à la limite, en $+\\infty$ comme en $-\\infty$. Les limites de référence ' +
+                'donnent $\\dfrac{1}{x} \\to 0$ et $\\dfrac{1}{x^2} \\to 0$ ; multipliés par une constante, ' +
+                '$\\dfrac{b}{x}$, $\\dfrac{c}{x^2}$, $\\dfrac{b\'}{x}$ et $\\dfrac{c\'}{x^2}$ tendent donc ' +
+                'tous vers $0$. Le numérateur tend vers $a+0+0=a$, le dénominateur vers $a\'+0+0=a\'$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**5.** Quotient de deux limites finies, avec $a\'\\neq 0$ au dénominateur (tableau du ' +
+                'quotient, première ligne) : $\\displaystyle\\lim_{x \\to \\pm\\infty} f(x) = \\dfrac{a}{a\'}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** Quand les degrés sont égaux, seuls les coefficients dominants comptent : ' +
+                'tous les autres termes, divisés par une puissance de x, s\'éteignent. La même preuve ' +
+                'marche pour n\'importe quel degré $n$, en mettant $x^n$ en évidence. Exemple : ' +
+                '$\\dfrac{3x^2-5x+1}{x^2+2} \\to \\dfrac{3}{1} = 3$.',
+            },
+          ],
         },
         {
           kind: 'exemple',
@@ -329,15 +461,71 @@ export const limitesAsymptotes: ChapterContent = {
         },
         {
           kind: 'exemple',
+          badge: 'forme 0/0 avec une racine — conjuguée au numérateur',
+          formula: '$\\displaystyle\\lim_{x \\to 4} \\dfrac{\\sqrt{x}-2}{x-4}$',
+          steps: [
+            {
+              tag: 'vérifier la forme',
+              text: 'En $x=4$ : numérateur $\\sqrt{4}-2=0$ et dénominateur $4-4=0$ → forme $\\dfrac{0}{0}$. Aucun facteur commun visible : la racine le cache.',
+            },
+            {
+              tag: 'multiplier en haut et en bas par la conjuguée √x + 2',
+              text: '$\\dfrac{\\sqrt{x}-2}{x-4} = \\dfrac{(\\sqrt{x}-2)(\\sqrt{x}+2)}{(x-4)(\\sqrt{x}+2)} = \\dfrac{x-4}{(x-4)(\\sqrt{x}+2)}$, car $(\\sqrt{x}-2)(\\sqrt{x}+2) = (\\sqrt{x})^2-2^2 = x-4$',
+            },
+            { tag: 'simplifier, valable pour x≠4', text: '$\\dfrac{x-4}{(x-4)(\\sqrt{x}+2)} = \\dfrac{1}{\\sqrt{x}+2}$' },
+          ],
+          result: {
+            tag: 'conclusion — limite',
+            text: '$\\displaystyle\\lim_{x \\to 4} \\dfrac{\\sqrt{x}-2}{x-4} = \\dfrac{1}{\\sqrt{4}+2} = \\dfrac{1}{4}$',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'forme ∞−∞ avec une limite non nulle — conjuguée, puis terme dominant',
+          formula: '$\\displaystyle\\lim_{x \\to +\\infty} \\left[\\sqrt{x^2+4x} - x\\right]$',
+          steps: [
+            { tag: 'vérifier la forme', text: '$\\sqrt{x^2+4x} \\to +\\infty$ et $x \\to +\\infty$ → forme $\\infty-\\infty$' },
+            {
+              tag: 'multiplier par l\'expression conjuguée',
+              text: '$\\sqrt{x^2+4x}-x = \\dfrac{\\left(\\sqrt{x^2+4x}-x\\right)\\left(\\sqrt{x^2+4x}+x\\right)}{\\sqrt{x^2+4x}+x} = \\dfrac{x^2+4x-x^2}{\\sqrt{x^2+4x}+x} = \\dfrac{4x}{\\sqrt{x^2+4x}+x}$ — une nouvelle forme $\\dfrac{\\infty}{\\infty}$',
+            },
+            {
+              tag: 'mettre x en évidence, sous la racine aussi (x > 0)',
+              text: '$\\sqrt{x^2+4x} = \\sqrt{x^2\\left(1+\\frac{4}{x}\\right)} = x\\sqrt{1+\\frac{4}{x}}$, donc $\\dfrac{4x}{x\\sqrt{1+\\frac{4}{x}}+x} = \\dfrac{4}{\\sqrt{1+\\frac{4}{x}}+1}$',
+            },
+          ],
+          result: {
+            tag: 'passer à la limite — 4/x tend vers 0',
+            text: '$\\displaystyle\\lim_{x \\to +\\infty} \\left[\\sqrt{x^2+4x}-x\\right] = \\dfrac{4}{\\sqrt{1}+1} = 2$ : cette fois, l\'écart ne s\'éteint pas.',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => Math.sqrt(x * x + 4 * x) - x, tone: 'accent' }],
+            xMin: 0,
+            xMax: 40,
+            xTicks: [20, 40],
+            fixedYRange: { min: 0, max: 2.6 },
+            horizontalAsymptotes: [{ y: 2, label: 'y=2' }],
+            points: [{ x: 10, y: Math.sqrt(140) - 10, label: 'f(10)≈1,83', tone: 'accent', labelPos: 'below' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption:
+              '$f(x)=\\sqrt{x^2+4x}-x$ — l\'écart entre $\\sqrt{x^2+4x}$ et $x$ se rapproche de $2$, ' +
+              'pas de $0$ : la conjuguée seule ne dit pas la limite, il faut finir le calcul',
+          },
+        },
+        {
+          kind: 'exemple',
           badge: 'quand la limite n\'existe pas — limites différentes à gauche et à droite',
           formula: 'Soit $f(x) = x+3$ si $x \\le 2$, et $f(x) = x-3$ si $x>2$. La limite $\\displaystyle\\lim_{x \\to 2} f(x)$ existe-t-elle ?',
           steps: [
             { tag: 'valeur en x=2 — donnée par la première branche (x≤2)', text: '$f(2) = 2+3 = 5$' },
+            { tag: 'limite à gauche — première branche (x<2), quand x→2⁻', text: '$\\displaystyle\\lim_{x \\to 2^-} f(x) = 2+3 = 5$' },
             { tag: 'limite à droite — deuxième branche (x>2), quand x→2⁺', text: '$\\displaystyle\\lim_{x \\to 2^+} f(x) = 2-3 = -1$' },
           ],
           result: {
-            tag: 'conclusion',
-            text: '$f(2)=5$ mais $\\displaystyle\\lim_{x \\to 2^+} f(x)=-1$ : les deux valeurs ne coïncident pas, donc $\\displaystyle\\lim_{x \\to 2} f(x)$ n\'existe pas (la courbe fait un saut en x=2).',
+            tag: 'conclusion — comparer la gauche et la droite',
+            text: 'Limite à gauche $5$, limite à droite $-1$ : $5 \\neq -1$, donc $\\displaystyle\\lim_{x \\to 2} f(x)$ n\'existe pas (la courbe fait un saut en x=2) — même si $f(2)=5$ existe.',
           },
           illustration: {
             kind: 'curvePlot',
@@ -349,14 +537,22 @@ export const limitesAsymptotes: ChapterContent = {
             xMax: 7,
             xTicks: [2],
             points: [
-              { x: 2, y: 5, label: '(2;5)', tone: 'accent', style: 'filled', labelPos: 'above' },
+              { x: 0.5, y: 3.5, label: '', tone: 'good' },
+              { x: 1.2, y: 4.2, label: '', tone: 'good' },
+              { x: 1.6, y: 4.6, label: '', tone: 'good' },
+              { x: 2, y: 5, label: '(2;5)', tone: 'accent', style: 'filled', labelPos: 'left' },
+              { x: 3.5, y: 0.5, label: '', tone: 'bad' },
+              { x: 2.8, y: -0.2, label: '', tone: 'bad' },
+              { x: 2.4, y: -0.6, label: '', tone: 'bad' },
               { x: 2, y: -1, label: '(2;−1)', tone: 'bad', style: 'open', labelPos: 'below' },
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
             caption:
-              '$f(x)=x+3$ si $x\\le 2$, $f(x)=x-3$ si $x>2$ — un saut en x=2 : la limite à droite (point ' +
-              'vide en −1) ne rejoint pas f(2)=5',
+              '$f(x)=x+3$ si $x\\le 2$, $f(x)=x-3$ si $x>2$ — en vert, des points d\'abscisses $0{,}5$ ; $1{,}2$ ; ' +
+              '$1{,}6$ qui s\'approchent de 2 par la gauche : leurs ordonnées montent vers 5. En rouge, des points ' +
+              'd\'abscisses $3{,}5$ ; $2{,}8$ ; $2{,}4$ qui s\'approchent par la droite : leurs ordonnées descendent ' +
+              'vers $-1$ (point vide). Deux cibles différentes : un saut',
           },
         },
         {
@@ -425,6 +621,50 @@ export const limitesAsymptotes: ChapterContent = {
             caption:
               '$f(x)=\\dfrac{2x-5}{x+3}$ : asymptote verticale $x=-3$ ($+\\infty$ à gauche, $-\\infty$ à droite) et ' +
               'asymptote horizontale y=2, car deg(N)=deg(D)',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'racine double au dénominateur — même signe des deux côtés',
+          formula: '$\\displaystyle\\lim_{x \\to 1} \\dfrac{x+2}{(x-1)^2}$, à gauche puis à droite de 1.',
+          steps: [
+            {
+              tag: 'vérifier la forme — dénominateur nul, numérateur non nul',
+              text: 'En $x=1$ : numérateur $1+2=3\\neq 0$ et dénominateur $(1-1)^2=0$ → forme $\\dfrac{3}{0}$, la limite est infinie. Reste son signe.',
+            },
+            {
+              tag: 'signe du dénominateur — un carré',
+              text: 'Pour tout $x\\neq 1$, $(x-1)^2>0$ : le dénominateur tend vers $0^+$ à gauche ET à droite de 1. Un carré ne change jamais de signe.',
+            },
+          ],
+          result: {
+            tag: 'conclusion — le même infini des deux côtés',
+            text:
+              '$\\displaystyle\\lim_{x \\to 1^-} \\dfrac{x+2}{(x-1)^2} = \\dfrac{3}{0^+} = +\\infty$ et ' +
+              '$\\displaystyle\\lim_{x \\to 1^+} \\dfrac{x+2}{(x-1)^2} = \\dfrac{3}{0^+} = +\\infty$, donc ' +
+              '$\\displaystyle\\lim_{x \\to 1} \\dfrac{x+2}{(x-1)^2} = +\\infty$ : asymptote verticale $x=1$, ' +
+              'la courbe monte des deux côtés. Avec $\\dfrac{x+2}{x-1}$ (racine simple), le dénominateur change ' +
+              'de signe en 1 : $-\\infty$ à gauche, $+\\infty$ à droite.',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => (x + 2) / (x - 1), tone: 'faint', xMin: -4, xMax: 0.7 },
+              { fn: (x) => (x + 2) / (x - 1), tone: 'faint', xMin: 1.27, xMax: 6 },
+              { fn: (x) => (x + 2) / ((x - 1) * (x - 1)), tone: 'accent', xMin: -4, xMax: 0.55 },
+              { fn: (x) => (x + 2) / ((x - 1) * (x - 1)), tone: 'accent', xMin: 1.45, xMax: 6 },
+            ],
+            xMin: -4,
+            xMax: 6,
+            xTicks: [1],
+            fixedYRange: { min: -8, max: 12 },
+            verticalAsymptotes: [{ x: 1, label: 'x=1' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption:
+              'En orange, $\\dfrac{x+2}{(x-1)^2}$ : la courbe part vers $+\\infty$ des deux côtés de $x=1$ ' +
+              '(racine double). En gris, $\\dfrac{x+2}{x-1}$ : $-\\infty$ à gauche, $+\\infty$ à droite ' +
+              '(racine simple)',
           },
         },
         {
@@ -676,6 +916,57 @@ export const limitesAsymptotes: ChapterContent = {
             'vers 0 — celui qui rapproche la courbe de la droite.',
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — les deux méthodes donnent la même droite',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Suppose que la division euclidienne a donné $f(x) = ax+b+r(x)$, avec $a\\neq 0$ et un ' +
+                'reste $r(x)$ (le reste divisé par le dénominateur) qui tend vers $0$ quand $x \\to +\\infty$ ' +
+                '— comme $\\dfrac{3}{x-1}$ dans l\'exemple. On veut montrer que la méthode des limites ' +
+                'retrouve exactement les mêmes $a$ et $b$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**1.** Divise chaque terme par $x$ ($x\\neq 0$) : ' +
+                '$\\dfrac{f(x)}{x} = \\dfrac{ax}{x}+\\dfrac{b}{x}+\\dfrac{r(x)}{x} = a+\\dfrac{b}{x}+r(x)\\cdot\\dfrac{1}{x}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**2.** Quand $x \\to +\\infty$ : $\\dfrac{b}{x} \\to 0$ (limite de référence, multipliée ' +
+                'par la constante $b$) et $r(x)\\cdot\\dfrac{1}{x} \\to 0\\cdot 0 = 0$ (produit de deux ' +
+                'limites finies). Donc $\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{f(x)}{x} = a+0+0 = a$ : ' +
+                'la première limite redonne le coefficient $a$ du quotient.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**3.** Retire $ax$ : $f(x)-ax = b+r(x)$. Quand $x \\to +\\infty$, $r(x) \\to 0$, donc ' +
+                '$\\displaystyle\\lim_{x \\to +\\infty} \\big[f(x)-ax\\big] = b+0 = b$ : la seconde limite ' +
+                'redonne la constante $b$ du quotient.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** Les deux méthodes mènent à la même droite $y=ax+b$, et l\'écart ' +
+                '$f(x)-(ax+b) = r(x)$ tend vers $0$ : c\'est exactement la définition d\'une asymptote ' +
+                'oblique. Le raisonnement est identique en $-\\infty$.',
+            },
+          ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'zoom-arriere-asymptote-widget',
+          label: 'Manipule toi-même — prends du recul',
+          caption:
+            'Dézoome (×10 à chaque fois) : de loin, la courbe de (x² − 3x + 5)/(x − 1) devient ' +
+            'impossible à distinguer de la droite y = x − 2, et l\'écart affiché fond. Essaie les deux ' +
+            'autres fonctions : une horizontale, et x³/(x − 1), qu\'aucune droite ne suit.',
+        },
+        {
           kind: 'astuce',
           label: 'Vérifier le degré avant de se lancer',
           text:
@@ -684,14 +975,53 @@ export const limitesAsymptotes: ChapterContent = {
             'divergence aussi rapide.',
         },
         {
+          kind: 'exemple',
+          badge: 'asymptote oblique — dénominateur de degré 2',
+          formula:
+            '$f(x) = \\dfrac{2x^3+x^2-1}{x^2+1}$. Détermine son domaine, son asymptote oblique et le point ' +
+            'où la courbe la recoupe.',
+          steps: [
+            { tag: 'domaine', text: '$x^2+1 \\geq 1 > 0$ pour tout $x$ : domaine $= \\mathbb{R}$, aucune asymptote verticale' },
+            { tag: 'vérifier la condition de degré', text: 'deg(numérateur)=3, deg(dénominateur)=2, soit exactement 1 de plus → asymptote oblique' },
+            {
+              tag: 'division euclidienne de 2x³+x²−1 par x²+1',
+              text: '$2x^3+x^2-1 = (x^2+1)(2x+1) + (-2x-2)$ ; vérification : $(x^2+1)(2x+1) = 2x^3+x^2+2x+1$, et $2x^3+x^2+2x+1-2x-2 = 2x^3+x^2-1$',
+            },
+            { tag: 'réécrire f(x)', text: '$f(x) = 2x+1+\\dfrac{-2x-2}{x^2+1}$ : le reste a un degré plus petit que $x^2+1$, la fraction tend vers $0$ en $\\pm\\infty$' },
+            { tag: 'recoupement — le reste s\'annule', text: '$-2x-2 = 0 \\iff x = -1$, et $f(-1) = \\dfrac{-2+1-1}{2} = -1 = 2\\cdot(-1)+1$' },
+          ],
+          result: {
+            tag: 'conclusion',
+            text:
+              'Asymptote oblique $y = 2x+1$ (en $-\\infty$ et en $+\\infty$), recoupée au point $(-1\\,;-1)$. ' +
+              'La courbe est au-dessus pour $x<-1$ (reste positif), en dessous pour $x>-1$ (reste négatif).',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => (2 * x * x * x + x * x - 1) / (x * x + 1), tone: 'accent' }],
+            xMin: -6,
+            xMax: 6,
+            xTicks: [-1],
+            fixedYRange: { min: -12, max: 14 },
+            obliqueAsymptotes: [{ a: 2, b: 1, label: 'y=2x+1' }],
+            points: [{ x: -1, y: -1, label: '(−1;−1)', tone: 'good', labelPos: 'right' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption:
+              '$f(x)=\\dfrac{2x^3+x^2-1}{x^2+1}$ — aucune asymptote verticale ; la courbe traverse son ' +
+              'asymptote oblique $y=2x+1$ en $(-1\\,;-1)$ puis s\'en rapproche aux deux extrémités',
+          },
+        },
+        {
           kind: 'atelier',
           tag: 'degre-asymptote-widget',
           label: 'Manipule toi-même — les 4 cas du degré en direct',
           caption:
-            'Dénominateur x−1 fixe, choisis le degré du numérateur : bascule entre les 4 cas de ' +
-            'la méthode ci-dessus — horizontale y=0, horizontale par les coefficients dominants, ' +
-            'oblique (le degré 2, réglage par défaut, reproduit exactement l\'exemple résolu), ou ' +
-            'aucune asymptote de cette forme.',
+            'Choisis le dénominateur (x − 1 ou x² + 1), puis le degré du numérateur : le quotient et le ' +
+            'reste de la division euclidienne s\'affichent, et tu passes par les 4 cas de la méthode — ' +
+            'horizontale y = 0, horizontale par les coefficients dominants, oblique, ou aucune asymptote ' +
+            'de cette forme. x − 1 avec le degré 2 reproduit le premier exemple, x² + 1 avec le degré 3 ' +
+            'le second.',
         },
         {
           kind: 'entrainement',
@@ -841,9 +1171,9 @@ export const limitesAsymptotes: ChapterContent = {
           illustration: {
             kind: 'curvePlot',
             curves: [
-              { fn: (x) => 1 / ((x + 1) * (x - 2)), tone: 'accent', xMin: -6, xMax: -1.15 },
-              { fn: (x) => 1 / ((x + 1) * (x - 2)), tone: 'accent', xMin: -0.85, xMax: 1.85 },
-              { fn: (x) => 1 / ((x + 1) * (x - 2)), tone: 'accent', xMin: 2.15, xMax: 7 },
+              { fn: (x) => 1 / ((x + 1) * (x - 2)), tone: 'accent', xMin: -6, xMax: -1.03 },
+              { fn: (x) => 1 / ((x + 1) * (x - 2)), tone: 'accent', xMin: -0.97, xMax: 1.97 },
+              { fn: (x) => 1 / ((x + 1) * (x - 2)), tone: 'accent', xMin: 2.03, xMax: 7 },
             ],
             xMin: -6,
             xMax: 7,
@@ -852,10 +1182,10 @@ export const limitesAsymptotes: ChapterContent = {
             verticalAsymptotes: [{ x: -1, label: 'x=−1' }, { x: 2, label: 'x=2' }],
             horizontalAsymptotes: [{ y: 0, label: 'y=0' }],
             textLabels: [
-              { x: -1.05, y: 5.6, text: '+∞', tone: 'faint', anchor: 'middle' },
-              { x: -0.95, y: -5.6, text: '−∞', tone: 'faint', anchor: 'middle' },
-              { x: 1.9, y: -5.6, text: '−∞', tone: 'faint', anchor: 'middle' },
-              { x: 2.1, y: 5.6, text: '+∞', tone: 'faint', anchor: 'middle' },
+              { x: -1.5, y: 4.6, text: '+∞', tone: 'faint', anchor: 'end' },
+              { x: -0.5, y: -4.8, text: '−∞', tone: 'faint', anchor: 'start' },
+              { x: 1.5, y: -4.8, text: '−∞', tone: 'faint', anchor: 'end' },
+              { x: 2.5, y: 4.6, text: '+∞', tone: 'faint', anchor: 'start' },
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'g(x)',
@@ -902,7 +1232,7 @@ export const limitesAsymptotes: ChapterContent = {
             textLabels: [{ x: 2.6, y: 8, text: '+∞', tone: 'faint', anchor: 'middle' }],
             xAxisLabel: 'x',
             yAxisLabel: 'h(x)',
-            caption: 'à gauche de $x=1$, la courbe arrive sur le point plein $(1\,;2)$ ; à droite, elle part vers $+\\infty$ — la droite $x=1$ (pointillée) reste une asymptote verticale',
+            caption: 'à gauche de $x=1$, la courbe arrive sur le point plein $(1\\,;2)$ ; à droite, elle part vers $+\\infty$ — la droite $x=1$ (pointillée) reste une asymptote verticale',
           },
         },
         {
@@ -937,6 +1267,60 @@ export const limitesAsymptotes: ChapterContent = {
           },
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — une fonction rationnelle a la même limite finie en −∞ et en +∞',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $f(x)=\\dfrac{N(x)}{D(x)}$ une fonction rationnelle telle que ' +
+                '$\\displaystyle\\lim_{x \\to +\\infty} f(x) = L$, avec $L$ un nombre réel. On veut montrer ' +
+                'que $\\displaystyle\\lim_{x \\to -\\infty} f(x) = L$ aussi.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**1.** Si le degré de $N$ dépassait celui de $D$, la limite en $+\\infty$ serait infinie ' +
+                '(comparaison des degrés, section 1). Comme $L$ est fini, $\\deg N \\leq \\deg D$. Note $n$ ' +
+                'le degré de $D$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**2.** Écris $D(x) = q_nx^n+q_{n-1}x^{n-1}+\\ldots+q_0$ avec $q_n\\neq 0$, et ' +
+                '$N(x) = p_nx^n+p_{n-1}x^{n-1}+\\ldots+p_0$, où $p_n$ vaut $0$ si $\\deg N<n$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**3.** Mets $x^n$ en évidence en haut et en bas, puis simplifie par $x^n$ ($x\\neq 0$) : ' +
+                '$f(x) = \\dfrac{p_n+\\frac{p_{n-1}}{x}+\\ldots+\\frac{p_0}{x^n}}{q_n+\\frac{q_{n-1}}{x}+\\ldots+\\frac{q_0}{x^n}}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**4.** Chaque terme $\\dfrac{p_k}{x^{n-k}}$ ou $\\dfrac{q_k}{x^{n-k}}$ (avec $k<n$) est une ' +
+                'constante multipliée par une puissance de $\\dfrac{1}{x}$. Or $\\dfrac{1}{x} \\to 0$ aussi bien ' +
+                'quand $x \\to +\\infty$ que quand $x \\to -\\infty$. Tous ces termes tendent donc vers $0$, des ' +
+                'deux côtés : $f(x) \\to \\dfrac{p_n}{q_n}$ en $+\\infty$ ET en $-\\infty$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**5.** En $+\\infty$, cette limite vaut $L$ (hypothèse) : donc $L = \\dfrac{p_n}{q_n}$, et ' +
+                'la limite en $-\\infty$ est le même nombre $\\dfrac{p_n}{q_n} = L$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** Une fonction rationnelle n\'a jamais deux asymptotes horizontales ' +
+                'différentes : sa limite finie est la même des deux côtés ($0$ si $\\deg N<\\deg D$, le ' +
+                'rapport des coefficients dominants si les degrés sont égaux). La fonction $k$ ci-dessus, ' +
+                'avec sa racine carrée, n\'est pas rationnelle : la preuve ne s\'applique pas à elle.',
+            },
+          ],
+        },
+        {
           kind: 'piege',
           label: 'Les deux côtés d\'une même asymptote verticale n\'ont pas forcément le même signe',
           text:
@@ -944,6 +1328,16 @@ export const limitesAsymptotes: ChapterContent = {
             'verticale — séparément à gauche et à droite ! Supposer que les deux côtés partagent ' +
             'automatiquement le même signe est une erreur fréquente. Il arrive qu\'ils soient ' +
             'identiques (cas d\'une racine double au dénominateur), mais ça ne se devine jamais : ça se LIT.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'cote-asymptote-widget',
+          label: 'Manipule toi-même — de quel côté ça part ?',
+          caption:
+            'Choisis une racine simple (x − 1) ou double ((x − 1)²) au dénominateur et le signe du ' +
+            'numérateur, puis approche-toi de x = 1 par la gauche ou par la droite : les signes du ' +
+            'numérateur, du dénominateur et du quotient s\'affichent en direct. Racine simple : les deux ' +
+            'côtés partent en sens opposés. Racine double : du même côté.',
         },
         {
           kind: 'astuce',
@@ -1012,8 +1406,8 @@ export const limitesAsymptotes: ChapterContent = {
             fixedYRange: { min: 6, max: 56 },
             horizontalAsymptotes: [{ y: 8, label: 'y=8' }],
             points: [
-              { x: 10, y: 32, label: 'Cᵤ(10)≈32€', tone: 'accent', labelPos: 'above' },
-              { x: 100, y: 10.4, label: 'Cᵤ(100)≈10,4€', tone: 'accent', labelPos: 'below' },
+              { x: 10, y: 32, label: 'Cᵤ(10)=32 €', tone: 'accent', labelPos: 'right' },
+              { x: 100, y: 10.4, label: 'Cᵤ(100)=10,4 €', tone: 'accent', labelPos: 'above' },
             ],
             xAxisLabel: 'x (unités)',
             yAxisLabel: 'Cᵤ(x) (€)',
@@ -1033,6 +1427,53 @@ export const limitesAsymptotes: ChapterContent = {
             'Le **sens** aussi (avec $p>0$) : $f(0)-b=\\dfrac{a}{p}$ a le signe de $a$. Si $a>0$, ' +
               '$f$ part au-dessus de $b$ et descend vers $b$ (régression) ; si $a<0$, $f$ part en dessous ' +
               'et monte vers $b$ (croissance). C\'est le signe de $a$, pas une intuition, qui tranche.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — le signe de a décide du sens',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $f(x)=b+\\dfrac{a}{x+p}$, avec $a>0$ et $p>0$. On veut montrer que $f$ est ' +
+                'décroissante sur $[0\\,;+\\infty[$ et que sa courbe ne coupe jamais la droite $y=b$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**1.** Prends deux nombres $x_1$ et $x_2$ avec $0\\leq x_1<x_2$. Ajoute $p$ partout : ' +
+                '$p\\leq x_1+p<x_2+p$. Comme $p>0$, les deux nombres $x_1+p$ et $x_2+p$ sont strictement positifs.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**2.** La fonction inverse est décroissante sur $]0\\,;+\\infty[$ (4e année) : entre deux ' +
+                'nombres positifs, le plus grand a le plus petit inverse. Donc ' +
+                '$\\dfrac{1}{x_1+p} > \\dfrac{1}{x_2+p}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**3.** Multiplie par $a>0$ (le sens ne change pas), puis ajoute $b$ : ' +
+                '$b+\\dfrac{a}{x_1+p} > b+\\dfrac{a}{x_2+p}$, c\'est-à-dire $f(x_1) > f(x_2)$. ' +
+                'Un $x$ plus grand donne une image plus petite : $f$ est décroissante sur $[0\\,;+\\infty[$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**4.** Si la courbe coupait $y=b$, on aurait $f(x)=b$, soit $\\dfrac{a}{x+p}=0$. Une ' +
+                'fraction n\'est nulle que si son numérateur est nul : il faudrait $a=0$, ce qui est faux. ' +
+                'Mieux : $f(x)-b = \\dfrac{a}{x+p} > 0$ pour tout $x\\geq 0$ (quotient de deux positifs), ' +
+                'la courbe reste strictement au-dessus de $y=b$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** Avec $a>0$, $f$ descend vers $b$ sans jamais l\'atteindre : $y=b$ est un ' +
+                'plancher. Avec $a<0$, l\'étape 3 change de sens (multiplier par un négatif) : $f$ est ' +
+                'croissante, toujours en dessous de $y=b$ — un plafond.',
+            },
           ],
         },
         {
@@ -1096,6 +1537,15 @@ export const limitesAsymptotes: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'cuve-eau-salee-widget',
+          label: 'Manipule toi-même — la cuve d\'eau salée',
+          caption:
+            'Change le volume de départ, le débit et la concentration de l\'eau ajoutée : le plafond de ' +
+            'la concentration ne dépend que de la concentration ajoutée. Le volume et le débit ne changent ' +
+            'que la vitesse à laquelle on s\'en approche (le temps pour atteindre 90 % du plafond).',
+        },
+        {
           kind: 'exemple',
           badge: 'club — une asymptote oblique en contexte',
           formula:
@@ -1130,26 +1580,26 @@ export const limitesAsymptotes: ChapterContent = {
             'Une limite calculée mathématiquement peut tomber en dehors du domaine réaliste du ' +
             'problème — une production négative, un temps négatif… Avant d\'interpréter une ' +
             'asymptote en contexte, vérifie toujours qu\'elle correspond à une valeur de x ' +
-            'compatible avec la situation réelle. Ici, x≥1 unité produite : la limite en +∞ ' +
-            'garde tout son sens, la fonction n\'a simplement aucun intérêt pour x<1.',
+            'compatible avec la situation réelle. Dans l\'exemple du coût unitaire, x≥1 unité ' +
+            'produite : la limite en +∞ garde tout son sens, la fonction n\'a simplement aucun intérêt pour x<1.',
         },
         {
           kind: 'astuce',
           label: 'Une asymptote horizontale en contexte = un plancher ou un plafond',
           text:
-            'Que le phénomène descende vers cette valeur (un **plancher**, comme ici) ou monte ' +
-            'vers elle (un **plafond**, ex. une concentration qui se stabilise), la limite donne ' +
+            'Que le phénomène descende vers cette valeur (un **plancher**, comme le coût unitaire) ' +
+            'ou monte vers elle (un **plafond**, comme la concentration de l\'eau salée), la limite donne ' +
             'la valeur théorique à long terme. Dans ces modèles, elle n\'est pas atteinte pour un ' +
             'x fini, aussi grand soit-il : le terme en $1/x$ (ou en $1/(x+p)$) ne s\'annule jamais.',
         },
         {
           kind: 'atelier',
           tag: 'plancher-plafond-widget',
-          label: 'Manipule toi-même — le plancher, jamais atteint',
+          label: 'Manipule toi-même — plancher ou plafond, jamais atteint',
           caption:
-            'Règle le coût fixe F et le coût variable v, puis déplace x : l\'écart au plancher ' +
-            'reste toujours strictement positif, aussi grand que x devienne. Réglages par défaut ' +
-            '(F=240, v=8) reproduisent exactement l\'exemple résolu.',
+            'Mode plancher : règle le coût fixe F et le coût variable v (F = 240, v = 8 : l\'exemple du ' +
+            'coût unitaire). Mode plafond : b + a/(x + p) avec a < 0 (la population qui monte). Déplace x : ' +
+            'l\'écart à l\'asymptote reste toujours strictement positif, aussi grand que x devienne.',
         },
         {
           kind: 'entrainement',
@@ -1198,43 +1648,47 @@ export const limitesAsymptotes: ChapterContent = {
         },
         {
           kind: 'application',
-          titre: 'Prévoir la concentration finale d\'une réaction chimique',
+          titre: 'Prévoir la vitesse maximale d\'une enzyme',
           illustrations: [
             {
               kind: 'curvePlot',
-              curves: [{ fn: (t) => 0.2 + 0.8 * Math.exp(-0.2 * t), tone: 'accent' }],
+              curves: [{ fn: (S) => (10 * S) / (2 + S), tone: 'accent' }],
               xMin: 0,
               xMax: 30,
-              xTicks: [10, 20, 30],
-              yTicks: [0.2, 0.5, 1],
-              horizontalAsymptotes: [{ y: 0.2, label: 'C_eq = 0,2 mol/L' }],
-              xAxisLabel: 'temps (min)',
-              yAxisLabel: 'concentration (mol/L)',
+              xTicks: [2, 10, 20, 30],
+              yTicks: [5, 10],
+              fixedYRange: { min: 0, max: 12 },
+              horizontalAsymptotes: [{ y: 10, label: 'v=v_{max}=10' }],
+              points: [{ x: 2, y: 5, label: 'v(K)=5', tone: 'good', labelPos: 'right' }],
+              xAxisLabel: 'S (mmol/L)',
+              yAxisLabel: 'v (µmol/min)',
               caption:
-                "La concentration d'un réactif, partie de 1 mol/L, décroît et se stabilise vers " +
-                "0,2 mol/L — PAS vers 0 : contrairement à une simple disparition, la réaction " +
-                "atteint ici un équilibre où réactif et produit coexistent. L'asymptote " +
-                'horizontale donne directement cette concentration théorique.',
+                'Modèle de Michaelis–Menten $v(S)=\\dfrac{10S}{2+S}$ ($v_{max}=10$ µmol/min, $K=2$ mmol/L) — ' +
+                'la vitesse monte vers $v_{max}$ sans l\'atteindre ; pour $S=K=2$, elle vaut exactement ' +
+                'la moitié, $5$ µmol/min.',
             },
           ],
           text:
-            "Dans de nombreuses réactions chimiques, la concentration d'un réactif ou d'un " +
-            'produit évolue selon une fonction du temps qui admet une asymptote horizontale : ' +
-            'la réaction ralentit progressivement et la concentration se stabilise vers une ' +
-            'valeur d\'équilibre, sans jamais la dépasser ni l\'atteindre exactement en temps ' +
-            'fini. Faire l\'étude complète d\'une telle fonction — domaine (le temps ne peut ' +
-            'pas être négatif), limites, asymptotes — donne directement aux chimistes la ' +
-            "concentration théorique à l'équilibre, sans devoir attendre un temps infini pour " +
-            "l'observer expérimentalement.",
-          domaines: ['Chimie', 'Cinétique chimique'],
+            'Une **enzyme** accélère une réaction chimique dans une cellule. Plus il y a de substance à ' +
+            'transformer (concentration $S$), plus la réaction va vite… mais pas indéfiniment : l\'enzyme ' +
+            'sature. En 1913, **Leonor Michaelis** et **Maud Menten** proposent le modèle ' +
+            '$v(S)=\\dfrac{v_{max}\\cdot S}{K+S}$ — une vraie fonction rationnelle, dont l\'étude complète ' +
+            'suit la démarche de cette section. Domaine : $S\\geq 0$ (une concentration), la valeur exclue ' +
+            '$S=-K$ est hors du contexte. Degrés égaux : asymptote horizontale $v=v_{max}$, la vitesse ' +
+            'maximale. Division euclidienne : $v(S)=v_{max}-\\dfrac{v_{max}\\cdot K}{K+S}$, de la forme ' +
+            '$b+\\dfrac{a}{x+p}$ avec $a<0$ : la vitesse monte et reste toujours sous $v_{max}$. Et le sens ' +
+            'concret de $K$ : $v(K)=\\dfrac{v_{max}\\cdot K}{2K}=\\dfrac{v_{max}}{2}$, la concentration qui ' +
+            'donne la **demi-vitesse**. Les biochimistes mesurent quelques vitesses, en déduisent ' +
+            '$v_{max}$ et $K$, et comparent ainsi l\'efficacité des enzymes ou des médicaments qui les bloquent.',
+          domaines: ['Biochimie', 'Chimie'],
         },
         {
           kind: 'exemple',
           badge: 'étude complète d\'une fonction rationnelle',
           formula: '$f(x) = \\dfrac{x^2-2x-3}{x-1}$. Mène l\'étude complète de f.',
           steps: [
-            { tag: 'domaine — annuler le dénominateur', text: '$x-1=0 \\iff x=1 \\to$ domaine = ℝ\\{1}' },
-            { tag: 'point vide ou vraie asymptote ? — évaluer le numérateur en x=1', text: 'numérateur(1) = 1−2−3 = −4 ≠ 0 → x=1 est une VRAIE asymptote verticale (pas un point vide)' },
+            { tag: 'domaine — annuler le dénominateur', text: '$x-1=0 \\iff x=1$, donc domaine $= \\mathbb{R}\\setminus\\{1\\}$' },
+            { tag: 'point vide ou vraie asymptote ? — évaluer le numérateur en x=1', text: 'En $x=1$, le numérateur vaut $1^2-2\\cdot 1-3=-4\\neq 0$ → $x=1$ est une VRAIE asymptote verticale (pas un point vide)' },
             { tag: 'comparaison des degrés', text: 'deg(numérateur)=2, deg(dénominateur)=1, soit exactement 1 de plus → asymptote OBLIQUE' },
             {
               tag: 'division euclidienne — x²−2x−3 par x−1',
@@ -1242,8 +1696,12 @@ export const limitesAsymptotes: ChapterContent = {
             },
             { tag: 'asymptote oblique', text: '$y = x-1$' },
             {
-              tag: 'limites en x=1 — signe de chaque côté (x=0,9 puis x=1,1 comme sondes)',
-              text: 'à x=0,9 : numérateur=−3,99, dénominateur=−0,1, f≈39,9 (grand positif) ⟹ $\\displaystyle\\lim_{x \\to 1^-} f(x) = +\\infty$ ; à x=1,1 : numérateur=−3,99, dénominateur=0,1, f≈−39,9 (grand négatif) ⟹ $\\displaystyle\\lim_{x \\to 1^+} f(x) = -\\infty$',
+              tag: 'limites en x=1 — signe du dénominateur de chaque côté (tableau de signes ci-dessous)',
+              text:
+                'Le numérateur tend vers $-4$. Le dénominateur $x-1$ est négatif à gauche de 1 et positif à ' +
+                'droite. Donc $\\displaystyle\\lim_{x \\to 1^-} f(x) = \\dfrac{-4}{0^-} = +\\infty$ et ' +
+                '$\\displaystyle\\lim_{x \\to 1^+} f(x) = \\dfrac{-4}{0^+} = -\\infty$. Vérification : ' +
+                '$f(0{,}9) = \\dfrac{-3{,}99}{-0{,}1} = 39{,}9$ et $f(1{,}1) = \\dfrac{-3{,}99}{0{,}1} = -39{,}9$.',
             },
             {
               tag: 'limites aux bornes infinies — la courbe suit l\'asymptote',
@@ -1253,7 +1711,7 @@ export const limitesAsymptotes: ChapterContent = {
           result: {
             tag: 'synthèse complète',
             text:
-              'Domaine : ℝ\\{1}. Asymptote verticale : x=1 (+∞ à gauche, −∞ à droite). ' +
+              'Domaine : $\\mathbb{R}\\setminus\\{1\\}$. Asymptote verticale : x=1 (+∞ à gauche, −∞ à droite). ' +
               'Asymptote oblique : y=x−1. Limites aux bornes infinies : −∞ en −∞, +∞ en +∞.',
           },
           illustration: {
@@ -1269,12 +1727,121 @@ export const limitesAsymptotes: ChapterContent = {
             verticalAsymptotes: [{ x: 1, label: 'x=1' }],
             obliqueAsymptotes: [{ a: 1, b: -1, label: 'y=x−1' }],
             textLabels: [
-              { x: -2, y: 9, text: '+∞', tone: 'faint', anchor: 'middle' },
-              { x: 1.5, y: -7, text: '−∞', tone: 'faint', anchor: 'middle' },
+              { x: 0.55, y: 8.6, text: '+∞', tone: 'faint', anchor: 'end' },
+              { x: 1.45, y: -7, text: '−∞', tone: 'faint', anchor: 'start' },
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
             caption: '$f(x)=\\dfrac{x^2-2x-3}{x-1}$ — asymptote verticale $x=1$ ($+\\infty$ à gauche, $-\\infty$ à droite) et asymptote oblique $y=x-1$',
+          },
+        },
+        {
+          kind: 'signTable',
+          caption: 'Signe de f(x) = (x² − 2x − 3)/(x − 1) = (x + 1)(x − 3)/(x − 1) — la double barre marque la valeur exclue x = 1',
+          rows: [
+            {
+              label: 'x',
+              cells: [
+                { text: '−∞', tone: 'plain' },
+                { text: '', tone: 'plain' },
+                { text: '−1', tone: 'plain' },
+                { text: '', tone: 'plain' },
+                { text: '1', tone: 'plain' },
+                { text: '', tone: 'plain' },
+                { text: '3', tone: 'plain' },
+                { text: '', tone: 'plain' },
+                { text: '+∞', tone: 'plain' },
+              ],
+            },
+            {
+              label: 'x² − 2x − 3',
+              cells: [
+                { text: '', tone: 'plain' },
+                { text: '+', tone: 'pos' },
+                { text: '0', tone: 'zero' },
+                { text: '−', tone: 'neg' },
+                { text: '−', tone: 'neg' },
+                { text: '−', tone: 'neg' },
+                { text: '0', tone: 'zero' },
+                { text: '+', tone: 'pos' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+            {
+              label: 'x − 1',
+              cells: [
+                { text: '', tone: 'plain' },
+                { text: '−', tone: 'neg' },
+                { text: '−', tone: 'neg' },
+                { text: '−', tone: 'neg' },
+                { text: '0', tone: 'zero' },
+                { text: '+', tone: 'pos' },
+                { text: '+', tone: 'pos' },
+                { text: '+', tone: 'pos' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+            {
+              label: 'quotient',
+              cells: [
+                { text: '', tone: 'plain' },
+                { text: '−', tone: 'neg' },
+                { text: '0', tone: 'zero' },
+                { text: '+', tone: 'pos' },
+                { text: '‖', tone: 'indef' },
+                { text: '−', tone: 'neg' },
+                { text: '0', tone: 'zero' },
+                { text: '+', tone: 'pos' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'étude complète avec un point vide et une asymptote verticale',
+          formula: '$f(x) = \\dfrac{x^2-1}{x^2-3x+2}$. Mène l\'étude complète de f.',
+          steps: [
+            { tag: 'domaine — factoriser le dénominateur', text: '$x^2-3x+2 = (x-1)(x-2)$ s\'annule en $1$ et en $2$ : domaine $= \\mathbb{R}\\setminus\\{1\\,;2\\}$' },
+            {
+              tag: 'en x=1 — le numérateur s\'annule aussi',
+              text: '$1^2-1=0$ : forme $\\dfrac{0}{0}$. $x^2-1=(x-1)(x+1)$, donc pour $x\\neq 1$ : $f(x)=\\dfrac{(x-1)(x+1)}{(x-1)(x-2)}=\\dfrac{x+1}{x-2}$, et $\\displaystyle\\lim_{x \\to 1} f(x) = \\dfrac{2}{-1} = -2$ → **point vide** $(1\\,;-2)$',
+            },
+            {
+              tag: 'en x=2 — le numérateur ne s\'annule pas',
+              text: 'Numérateur $2^2-1=3\\neq 0$ : vraie asymptote verticale. Avec $\\dfrac{x+1}{x-2}$ : $\\displaystyle\\lim_{x \\to 2^-} f(x) = \\dfrac{3}{0^-} = -\\infty$ et $\\displaystyle\\lim_{x \\to 2^+} f(x) = \\dfrac{3}{0^+} = +\\infty$',
+            },
+            { tag: 'comparaison des degrés — degrés égaux', text: 'asymptote horizontale $y=\\dfrac{1}{1}=1$, donc $\\displaystyle\\lim_{x \\to \\pm\\infty} f(x) = 1$' },
+            {
+              tag: 'la courbe recoupe-t-elle y=1 ?',
+              text: '$\\dfrac{x+1}{x-2} = 1+\\dfrac{3}{x-2}$ (division euclidienne) : le reste $3$ ne s\'annule jamais. Autrement dit, $x+1=x-2$ donnerait $1=-2$, impossible : jamais de recoupement',
+            },
+          ],
+          result: {
+            tag: 'synthèse complète',
+            text:
+              'Domaine $\\mathbb{R}\\setminus\\{1\\,;2\\}$. En $x=1$ : point vide $(1\\,;-2)$, pas d\'asymptote. ' +
+              'Asymptote verticale $x=2$ ($-\\infty$ à gauche, $+\\infty$ à droite). Asymptote horizontale ' +
+              '$y=1$ en $\\pm\\infty$, jamais recoupée : la courbe est au-dessus pour $x>2$ et en dessous pour $x<2$.',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => (x + 1) / (x - 2), tone: 'accent', xMin: -6, xMax: 1.6 },
+              { fn: (x) => (x + 1) / (x - 2), tone: 'accent', xMin: 2.4, xMax: 8 },
+            ],
+            xMin: -6,
+            xMax: 8,
+            xTicks: [1, 2],
+            fixedYRange: { min: -6, max: 8 },
+            verticalAsymptotes: [{ x: 2, label: 'x=2' }],
+            horizontalAsymptotes: [{ y: 1, label: 'y=1' }],
+            points: [{ x: 1, y: -2, label: '(1;−2)', tone: 'good', style: 'open', labelPos: 'left' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption:
+              '$f(x)=\\dfrac{x^2-1}{x^2-3x+2}$ — la courbe de $\\dfrac{x+1}{x-2}$ avec un point vide en ' +
+              '$(1\\,;-2)$, une asymptote verticale $x=2$ et une asymptote horizontale $y=1$ jamais traversée',
           },
         },
         {
@@ -1299,7 +1866,7 @@ export const limitesAsymptotes: ChapterContent = {
           result: {
             tag: 'conclusion',
             text:
-              'La courbe recoupe son asymptote $y=1$ au point $(1\,;1)$. Elle est au-dessus pour $x>1$ ' +
+              'La courbe recoupe son asymptote $y=1$ au point $(1\\,;1)$. Elle est au-dessus pour $x>1$ ' +
               '(reste positif), en dessous pour $x<1$ (reste négatif), et s\'en rapproche quand même ' +
               'en $-\\infty$ comme en $+\\infty$.',
           },
@@ -1314,8 +1881,17 @@ export const limitesAsymptotes: ChapterContent = {
             points: [{ x: 1, y: 1, label: '(1;1)', tone: 'good', style: 'filled', labelPos: 'above' }],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
-            caption: '$f(x)=\\dfrac{x^2+x}{x^2+1}$ — la courbe croise son asymptote $y=1$ en $(1\,;1)$, puis s\'en rapproche aux deux extrémités',
+            caption: '$f(x)=\\dfrac{x^2+x}{x^2+1}$ — la courbe croise son asymptote $y=1$ en $(1\\,;1)$, puis s\'en rapproche aux deux extrémités',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'recoupement-widget',
+          label: 'Manipule toi-même — où la courbe recoupe-t-elle son asymptote ?',
+          caption:
+            'Règle p et q dans (x² + px + q)/(x² + 1) : l\'asymptote reste y = 1, et la courbe la recoupe ' +
+            'exactement là où le reste (px + q − 1)/(x² + 1) s\'annule. Avec p = 0, plus aucun recoupement ' +
+            '(sauf si q = 1 : la fonction vaut alors 1 partout).',
         },
         {
           kind: 'exemple',
@@ -1339,22 +1915,43 @@ export const limitesAsymptotes: ChapterContent = {
               '$f(x) = ax+b+\\dfrac{1}{x-r}$ a pour asymptotes $x=r$ et $y=ax+b$ (horizontale si ' +
               '$a=0$). La réponse n\'est pas unique : $3+\\dfrac{5}{x-2}$ convient aussi.',
           },
-          illustration: {
-            kind: 'curvePlot',
-            curves: [
-              { fn: (x) => 3 + 1 / (x - 2), tone: 'accent', xMin: -6, xMax: 1.85 },
-              { fn: (x) => 3 + 1 / (x - 2), tone: 'accent', xMin: 2.15, xMax: 10 },
-            ],
-            xMin: -6,
-            xMax: 10,
-            xTicks: [2],
-            fixedYRange: { min: -4, max: 10 },
-            verticalAsymptotes: [{ x: 2, label: 'x=2' }],
-            horizontalAsymptotes: [{ y: 3, label: 'y=3' }],
-            xAxisLabel: 'x',
-            yAxisLabel: 'f(x)',
-            caption: '$f(x)=3+\\dfrac{1}{x-2}$ — exactement les deux asymptotes demandées, $x=2$ et $y=3$',
-          },
+        },
+        {
+          kind: 'illustrationGroup',
+          items: [
+            {
+              kind: 'curvePlot',
+              curves: [
+                { fn: (x) => 3 + 1 / (x - 2), tone: 'accent', xMin: -6, xMax: 1.9 },
+                { fn: (x) => 3 + 1 / (x - 2), tone: 'accent', xMin: 2.1, xMax: 10 },
+              ],
+              xMin: -6,
+              xMax: 10,
+              xTicks: [2],
+              fixedYRange: { min: -4, max: 10 },
+              verticalAsymptotes: [{ x: 2, label: 'x=2' }],
+              horizontalAsymptotes: [{ y: 3, label: 'y=3' }],
+              xAxisLabel: 'x',
+              yAxisLabel: 'f(x)',
+              caption: '$f(x)=3+\\dfrac{1}{x-2}$ — asymptotes $x=2$ et $y=3$',
+            },
+            {
+              kind: 'curvePlot',
+              curves: [
+                { fn: (x) => 2 * x + 1 + 1 / (x + 1), tone: 'accent', xMin: -5, xMax: -1.1 },
+                { fn: (x) => 2 * x + 1 + 1 / (x + 1), tone: 'accent', xMin: -0.92, xMax: 4 },
+              ],
+              xMin: -5,
+              xMax: 4,
+              xTicks: [-1],
+              fixedYRange: { min: -10, max: 10 },
+              verticalAsymptotes: [{ x: -1, label: 'x=−1' }],
+              obliqueAsymptotes: [{ a: 2, b: 1, label: 'y=2x+1' }],
+              xAxisLabel: 'x',
+              yAxisLabel: 'g(x)',
+              caption: '$g(x)=2x+1+\\dfrac{1}{x+1}$ — asymptotes $x=-1$ et $y=2x+1$',
+            },
+          ],
         },
         {
           kind: 'piege',
@@ -1489,10 +2086,10 @@ export const limitesAsymptotes: ChapterContent = {
       title: 'Quiz vrai ou faux — tout le chapitre',
       generatorId: '5gen42',
       description: [
-        '7 thèmes de 20 affirmations chacun (reconnaissance et calcul, asymptote oblique, ' +
-          'lecture graphique, limites en contexte, étude complète, pièges classiques, ' +
-          'transversal) — choisis un thème, réponds vrai ou faux, la justification est ' +
-          'toujours révélée.',
+        '9 thèmes de 35 affirmations chacun (reconnaissance et calcul, opérations et formes, ' +
+          'gauche, droite et existence, asymptote oblique, lecture graphique, limites en contexte, ' +
+          'étude complète, pièges classiques, transversal) — choisis un thème, réponds vrai ou ' +
+          'faux, la justification est toujours révélée.',
       ],
       chantier: '5e-4h',
       whereLabel: '5e (4h) → « 42. Limites et asymptotes — quiz vrai/faux »',
