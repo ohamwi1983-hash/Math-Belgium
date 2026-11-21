@@ -596,3 +596,45 @@ supprimer, « Ouvrir dans le panneau » = `routeDuPlan` + `?plan=`, messages `ro
   rechargement, renommer — vide refusé, Échap —, dupliquer, supprimer — Échap, confirmer, remédiation
   orpheline —, ouvrir puis retour arrière, import, panne puis Réessayer, tiroir : focus, poignée, « … »,
   Échap, ×, cibles ≥ 44 px) ; `scrollWidth` = largeur, 0 erreur console.
+
+## Page « Administration » refondue (22/11/2026 : proposition B « tableaux » + deux ajouts de C, AUCUN SQL)
+
+Décision de l'utilisateur (maquette `BTableaux`). RIEN n'a disparu (générer avec les mêmes validations,
+codes à transmettre + « Copier le lien d'inscription », révoquer, qui a utilisé quel code, liste des
+professeurs, désactiver / réactiver — jamais soi-même —, liens `/evaluation` et `/exercice`, messages
+`role=status/alert`, chargement). Sans Supabase : `AdminHistorique` INCHANGÉ.
+- `AdminPage` : `PageCompte large sansTete` + `EnTeteCompte` en repli tant qu'il n'y a pas de profil
+  administrateur actif ; `routes/AdminComptes.tsx` dans `MenuEspace` (Administration active).
+- Bandeau sombre (bouclier, « tu ne vois ni les coffres, ni les écoles, ni les carnets… », liens,
+  pastilles : actifs, codes en attente, désactivés et « à accompagner » si > 0). Onglets `role=tablist`
+  (flèches, Début / Fin, tabindex itinérant) ; `?onglet=codes`, sinon Professeurs.
+- Professeurs : recherche nom + e-mail (`normaliserRecherche` : sans accents ni casse, chaque mot), puces
+  Tous / Actifs / Désactivés / À accompagner / Sans connexion depuis 30 jours (non vides + Tous + l'active),
+  tableau (nom, e-mail, « via K7QM-… · note » en petit, état, inscrit le, dernière connexion relative,
+  enregistrements, écoles), ligne choisie = `?prof=<id>` (`replace`). Fiche à droite (téléphone < 760 px :
+  cartes + tiroir `PanneauLateral`) : initiale, via le code (code complet + note ; « premier compte » pour
+  l'admin sans code), dernière connexion détaillée, « n enregistrements · n écoles » + « tu vois des
+  nombres… », Désactiver avec confirmation DANS la fiche (focus Annuler, Échap), Réactiver direct.
+- Ajouts de C, côté client : **par quel code** = `invitations.utilise_par === professeurs.id` ; **à
+  accompagner** = actif, pas toi, `nombre_plans === 0` (pastille, puce, phrase « Inscrite le …, pas encore
+  d'école ni d'enregistrement » / « 1 école renseignée, pas encore d'enregistrement » ; accord d'après la
+  civilité du nom affiché). « Sans connexion depuis 30 jours » : actif, pas toi, jamais connecté ou > 30 j.
+- Codes : puces En attente (défaut) / Utilisés / Expirés / Révoqués / Tous (même priorité d'état
+  qu'avant), tableau (code, note, état + date — « jusqu'au … · encore n jours » —, créé le, utilisé par →
+  lien `?prof=`), « … » (`MenuActions`) sur les codes en attente seulement : Copier le lien (presse-papiers,
+  repli : champ en lecture seule à copier à la main) et Révoquer (confirmation dans la page).
+- « + Inviter » (barre des deux onglets, et l'état vide « Aucun code en attente : + Inviter ») : panneau
+  `PanneauLateral` — note « Pour qui ? », nombre (1–50, `lireEntier`, jamais filtré), expiration 7 j /
+  30 j (défaut) / sans limite / une date (`finDeJournee` ; vide ou passée refusée) — puis codes à
+  transmettre (focus sur la première copie), « Générer d'autres codes » ; l'onglet Codes se recharge et
+  marque les nouveaux (« nouveau »).
+- Logique PURE `lib/compteAdmin.ts` ; styles `components/compte/admin.css` (après `carnet.css` et
+  `profil.css`, sans les modifier ; `page-tool` élargie à 1 320 px pour ce seul écran).
+- Vérifié (Vite de développement + faux client étendu aux cinq RPC admin, navigation interne par
+  `popstate` — recharger l'application à chaque étape donne `ERR_INSUFFICIENT_RESOURCES` —, données
+  fictives : 7 professeurs, 11 codes des 4 états ; 1 280 px et iPhone 13, clair et sombre) : 262
+  vérifications Playwright (puces, recherche avec accents, via, à accompagner, fiche et `?prof=`,
+  désactiver avec Échap puis confirmer puis réactiver, jamais soi-même, onglets au clavier, filtres de
+  codes, lien utilisé par → fiche, copie relue + repli, révoquer avec Échap, générer — validations,
+  arguments RPC, sans limite = null —, état vide, erreur de chargement, non-admin, page historique, cibles
+  ≥ 44 px, tiroir) ; `scrollWidth` = largeur, 0 erreur console.

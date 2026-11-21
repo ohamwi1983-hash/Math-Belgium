@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { SiteHeader } from '../components/SiteHeader'
 import { EvaluationGeneratorPanel } from '../components/admin/EvaluationGeneratorPanel'
-import { PageCompte, PageReservee } from '../components/compte/PageReservee'
+import { EnTeteCompte, PageCompte, PageReservee } from '../components/compte/PageReservee'
+import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { checkAdminPassword, isAdminSessionAuthed, markAdminSessionAuthed } from '../lib/adminAuth'
 import { supabaseConfigure } from '../lib/supabase'
 import { usePageNonIndexee } from '../lib/useDocumentMeta'
@@ -18,7 +19,8 @@ import { AdminComptes } from './AdminComptes'
 export function AdminPage() {
   if (supabaseConfigure()) {
     return (
-      <PageCompte titre="Administration" large>
+      <PageCompte titre="Administration" large sansTete>
+        <TeteDeRepli />
         <PageReservee admin>
           <AdminComptes />
         </PageReservee>
@@ -26,6 +28,14 @@ export function AdminPage() {
     )
   }
   return <AdminHistorique />
+}
+
+/** Titre habituel tant que la page n'est pas prête (chargement, configuration manquante, compte
+ * désactivé, pas administrateur…) : le bandeau d'`AdminComptes`, qui porte le `<h1>`, n'apparaît
+ * qu'avec un profil administrateur actif. */
+function TeteDeRepli() {
+  const compte = useCompte()
+  return estConnecteActif(compte) && compte.profil.est_admin ? null : <EnTeteCompte titre="Administration" />
 }
 
 function AdminHistorique() {
