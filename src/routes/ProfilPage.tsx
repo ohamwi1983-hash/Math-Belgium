@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import '../components/carnet/carnet.css'
 import { MenuActions } from '../components/carnet/MenuActions'
 import { ApercuCartouche, type SurlignageCartouche } from '../components/compte/ApercuCartouche'
+import { BandeauEspace } from '../components/compte/BandeauEspace'
 import { Champ } from '../components/compte/Champ'
 import { MenuEspace } from '../components/compte/MenuEspace'
 import { EnTeteCompte, PageCompte, PageReservee } from '../components/compte/PageReservee'
@@ -188,26 +189,19 @@ function Profil() {
     <div className="profil">
       <MenuEspace>
         <div className="profil-contenu">
-          <section className="profil-bandeau" aria-labelledby={`${id}-titre`}>
-            <span className="profil-initiale" aria-hidden="true">
-              {initiale(profil.nom_affiche)}
-            </span>
-            <div className="profil-bandeau-texte">
-              <p className="profil-bandeau-surtitre">ESPACE PROFESSEUR</p>
-              <h1 id={`${id}-titre`}>Mon profil</h1>
-            </div>
-            {ecoles.length > 0 && (
-              <ul className="profil-bandeau-ecoles" aria-label="Mes écoles">
-                {ecoles.map((e, i) => (
-                  <li key={e.id} className={`profil-bandeau-ecole ${couleur(i)}`}>
-                    <span className="carnet-point" aria-hidden="true" />
-                    {e.nom}
-                    {e.par_defaut && <span className="carnet-sr"> (par défaut)</span>}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+          <BandeauEspace
+            titreId={`${id}-titre`}
+            titre="Mon profil"
+            icone={initiale(profil.nom_affiche)}
+            etiquettePastilles="Mes écoles"
+            pastilles={ecoles.map((e, i) => (
+              <li key={e.id} className={`profil-bandeau-ecole ${couleur(i)}`}>
+                <span className="carnet-point" aria-hidden="true" />
+                {e.nom}
+                {e.par_defaut && <span className="carnet-sr"> (par défaut)</span>}
+              </li>
+            ))}
+          />
 
           {(message || erreur) && (
             <p className={`profil-message ${erreur ? 'compte-erreur-champ' : 'compte-message'}`} role={erreur ? 'alert' : 'status'}>

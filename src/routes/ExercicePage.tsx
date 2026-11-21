@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { EvaluationGeneratorPanel } from '../components/admin/EvaluationGeneratorPanel'
+import { EspaceConception } from '../components/compte/EspaceConception'
 import { AssistantEleve } from '../components/eleve/AssistantEleve'
 import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { usePageNonIndexee } from '../lib/useDocumentMeta'
@@ -8,7 +9,8 @@ import { usePageNonIndexee } from '../lib/useDocumentMeta'
 /** `/exercice` — PUBLIC (décision de l'utilisateur : les élèves s'en servent pour préparer leurs
  * évaluations). Visiteur non connecté (élève) : assistant « Préparer mon évaluation » (feuille
  * d'exercices ou évaluation blanche, `components/eleve/AssistantEleve.tsx`). Professeur connecté
- * (`estConnecteActif`) : panneau des feuilles d'exercices tel quel (école et nom sur les copies, coffre).
+ * (`estConnecteActif`) : panneau des feuilles d'exercices tel quel (école et nom sur les copies, coffre),
+ * dans le cadre « Mon espace » (`EspaceConception` : menu, bandeau sombre, « Voir comme un élève »).
  * Seul `/evaluation` exige une session. */
 export function ExercicePage() {
   const compte = useCompte()
@@ -30,16 +32,12 @@ export function ExercicePage() {
             <AssistantEleve />
           </>
         ) : professeur ? (
-          <>
-            <header className="chapter-head">
-              <p className="eyebrow">Math-Belgium</p>
-              <h1 className="chapter-title">Feuilles d'exercices</h1>
-              <Link className="vue-eleve-lien" to="/exercice?vue=eleve">
-                Voir comme un élève
-              </Link>
-            </header>
-            <EvaluationGeneratorPanel mode="exercice" />
-          </>
+          <EspaceConception
+            type="feuille"
+            titre="Feuilles d'exercices"
+            lienEleve="/exercice?vue=eleve"
+            panneau={(publier) => <EvaluationGeneratorPanel mode="exercice" onResume={publier} />}
+          />
         ) : compte.etat === 'chargement' ? (
           // Session stockée en cours de lecture : ni l'assistant ni le panneau (pas de bascule visible).
           <p className="eleve-aide" role="status">

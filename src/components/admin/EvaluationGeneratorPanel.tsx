@@ -234,13 +234,19 @@ function Stepper({
  * lien « Générer une feuille d'exercices » en bas de chaque page de chapitre) — pré-sélectionne
  * niveau/heures/chapitre d'après l'URL de la page de chapitre et REMPLACE les 3 sélecteurs
  * Niveau/Nombre d'heures/Chapitre par un simple rappel en lecture seule (un élève arrivant depuis
- * un chapitre précis n'a pas à en choisir un autre). */
+ * un chapitre précis n'a pas à en choisir un autre).
+ *
+ * `onResume` (facultatif, pages « Mon espace » du professeur connecté) : reçoit l'école choisie, le
+ * niveau et le nombre de questions imprimées, pour les pastilles du bandeau — lecture seule, le
+ * panneau ne change pas. */
 export function EvaluationGeneratorPanel({
   mode = 'evaluation',
   verrouille,
+  onResume,
 }: {
   mode?: 'evaluation' | 'exercice'
   verrouille?: { levelSlug: string; chapitreSlug: string }
+  onResume?: (r: { ecole: string | null; niveau: string | null; nombre: number; unite: string }) => void
 }) {
   const estExercice = mode === 'exercice'
   const niveauHeuresVerrouille = verrouille ? resoudreNiveauHeures(verrouille.levelSlug) : null
@@ -2002,6 +2008,11 @@ export function EvaluationGeneratorPanel({
   )
 
   const unite = estExercice ? 'exercice' : 'question'
+  const nomEcoleChoisie = ecoleChoisie?.nom ?? null
+  const libelleNiveau = niveauEntry?.label ?? null
+  useEffect(() => {
+    onResume?.({ ecole: nomEcoleChoisie, niveau: libelleNiveau, nombre: nombreImprime, unite })
+  }, [onResume, nomEcoleChoisie, libelleNiveau, nombreImprime, unite])
   const pct = (x: number, total: number) => (total > 0 ? Math.round((x / total) * 100) : 0)
 
   return (

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from 'react'
 import { Link, Navigate, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
-import { PageCompte, PageReservee } from '../components/compte/PageReservee'
+import { BandeauEspace } from '../components/compte/BandeauEspace'
+import { IconeCarnet, MenuEspace } from '../components/compte/MenuEspace'
+import { EnTeteCompte, PageCompte, PageReservee } from '../components/compte/PageReservee'
 import { AgendaPeriode } from '../components/carnet/AgendaPeriode'
 import { Aujourdhui } from '../components/carnet/Aujourdhui'
 import { CarteSeance } from '../components/carnet/CarteSeance'
@@ -8,12 +10,12 @@ import { CarnetContexte, avecGrille, resoudre, type ContexteCarnet } from '../co
 import { FormulaireSeance } from '../components/carnet/FormulaireSeance'
 import { GestionClasses, type SaisieClasse } from '../components/carnet/GestionClasses'
 import { MaSemaine } from '../components/carnet/MaSemaine'
-import { MenuCarnet } from '../components/carnet/MenuCarnet'
 import { MessageHoraireInactif, MonHoraire } from '../components/carnet/MonHoraire'
 import { PageClasse } from '../components/carnet/PageClasse'
 import { PanneauLateral } from '../components/carnet/PanneauLateral'
-import { chapitreParDefaut, copierTexte, lireClasseMemorisee, memoriserClasse } from '../components/carnet/outilsCarnet'
+import { chapitreParDefaut, copierTexte, lireClasseMemorisee, memoriserClasse, texteReperes } from '../components/carnet/outilsCarnet'
 import '../components/carnet/carnet.css'
+import '../components/compte/profil.css'
 import { findChapter } from '../content/chaptersIndex'
 import { dateIso, dateLongue, htmlSmartschool, texteSmartschool, type Classe, type ReglagesCarnet, type SaisieSeance, type Seance } from '../lib/carnet'
 import {
@@ -41,7 +43,9 @@ import { messageErreur } from '../lib/compteValidation'
 const DUREES = [40, 45, 50, 55, 60, 90, 100, 110]
 
 /** `/carnet/*` — carnet de matière vue (phase 2 des comptes), réservé aux professeurs connectés.
- * Un menu (gauche sur ordinateur, barre du bas sur téléphone) mène à : « Aujourd'hui » (accueil,
+ * Bandeau sombre (« ESPACE PROFESSEUR », période et semaine, créneaux à noter, classes) et menu
+ * unique « Mon espace » (`MenuEspace`, où « Carnet de matière vue » se déplie ; gauche sur
+ * ordinateur, barre du bas sur téléphone), qui mène à : « Aujourd'hui » (accueil,
  * `/carnet`), « Ma semaine » (`/carnet/semaine`), une page par classe (`/carnet/classe/:id`), la
  * gestion des classes (`/carnet/classes`), l'agenda d'une période (`/carnet/agenda`, `?classe=`),
  * « Mon horaire » (`/carnet/horaire`) et les réglages (`/carnet/reglages`). « Noter une séance »
@@ -50,12 +54,19 @@ const DUREES = [40, 45, 50, 55, 60, 90, 100, 110]
  * n'est pré-rendue (`scripts/routes.mjs` ne liste que l'accueil et les chapitres). */
 export function CarnetPage() {
   return (
-    <PageCompte titre="Carnet de matière vue" large>
+    <PageCompte titre="Carnet de matière vue" large sansTete>
+      <TeteDeRepli />
       <PageReservee>
         <Carnet />
       </PageReservee>
     </PageCompte>
   )
+}
+
+/** Titre habituel tant que la page n'est pas prête (le bandeau porte le `<h1>`). */
+function TeteDeRepli() {
+  const compte = useCompte()
+  return estConnecteActif(compte) ? null : <EnTeteCompte titre="Carnet de matière vue" />
 }
 
 interface Donnees {
@@ -101,6 +112,7 @@ function Carnet() {
   // Heure courante (créneau en cours, oubliées, heures restantes), rafraîchie chaque minute.
   const [maintenant, setMaintenant] = useState(() => new Date())
   const titrePanneau = useId()
+  const idBandeau = useId()
   useEffect(() => {
     const t = window.setInterval(() => setMaintenant(new Date()), 60_000)
     return () => window.clearInterval(t)
@@ -175,6 +187,44 @@ function Carnet() {
     return creneauxDuJour(d, donnees.horaire.grilles, donnees.horaire.cases).creneaux.filter((c) => c.debut <= m && !seanceDuCreneau(c, seances)).length
   }, [donnees, seances, maintenant])
 
+  /** Menu « Mon espace » (carnet déplié) + bandeau sombre autour de chaque état de la page. */
+  function cadre(contenu: ReactNode) {
+    const classes = donnees?.classes
+    const reperes = texteReperes(dateIso(maintenant))
+    return (
+      <div className="carnet">
+        <MenuEspace carnet={donnees ? { classes: donnees.classes, nombreSeances: (k) => donnees.seances.filter((s) => s.classe_id === k).length, aNoter } : undefined}>
+          <BandeauEspace
+            titreId={`${idBandeau}-titre`}
+            titre="Carnet de matière vue"
+            classe="espace-bandeau-carnet"
+            classeIcone="espace-bandeau-icone"
+            icone={<IconeCarnet mode="bandeau" />}
+            etiquettePastilles="En bref"
+            pastilles={[
+              reperes ? (
+                <li key="reperes" className="profil-bandeau-ecole">
+                  {reperes}
+                </li>
+              ) : null,
+              aNoter > 0 ? (
+                <li key="a-noter" className="profil-bandeau-ecole espace-bandeau-pastille-forte">
+                  {aNoter} à noter<span className="carnet-sr"> aujourd'hui</span>
+                </li>
+              ) : null,
+              classes && classes.length > 0 ? (
+                <li key="classes" className="profil-bandeau-ecole">
+                  {classes.length} classe{classes.length > 1 ? 's' : ''}
+                </li>
+              ) : null,
+            ]}
+          />
+          {contenu}
+        </MenuEspace>
+      </div>
+    )
+  }
+
   async function agir(action: () => Promise<unknown>, succes: string): Promise<boolean> {
     setOccupe(true)
     setErreur(null)
@@ -195,18 +245,18 @@ function Carnet() {
   }
 
   if (!estConnecteActif(compte) || !client || !profil) return null
-  if (absent) return <MessageCarnetInactif />
+  if (absent) return cadre(<MessageCarnetInactif />)
   if (erreurChargement) {
-    return (
+    return cadre(
       <div className="compte-encadre compte-erreur" role="alert">
         <p>{erreurChargement}</p>
         <button type="button" className="compte-bouton-secondaire" onClick={() => void charger()}>
           Réessayer
         </button>
-      </div>
+      </div>,
     )
   }
-  if (!donnees || !contexte) return <p className="compte-chargement">Chargement du carnet…</p>
+  if (!donnees || !contexte) return cadre(<p className="compte-chargement">Chargement du carnet…</p>)
 
   const reglages = donnees.reglages
   const horaire = donnees.horaire
@@ -334,8 +384,8 @@ function Carnet() {
 
   // Sans école : rien n'est possible avant d'en ajouter une dans le profil.
   if (ecoles.length === 0) {
-    return (
-      <div className="compte-sections carnet">
+    return cadre(
+      <div className="compte-sections">
         {messages}
         <div className="compte-encadre" role="status">
           <p>
@@ -344,7 +394,7 @@ function Carnet() {
           </p>
         </div>
         {reglagesSection}
-      </div>
+      </div>,
     )
   }
 
@@ -367,8 +417,8 @@ function Carnet() {
 
   return (
     <CarnetContexte.Provider value={contexte}>
-      <div className="carnet">
-        <MenuCarnet classes={donnees.classes} nombreSeances={(id) => donnees.seances.filter((s) => s.classe_id === id).length} aNoter={aNoter}>
+      {cadre(
+        <>
           {messages}
           <Routes>
             <Route
@@ -494,8 +544,8 @@ function Carnet() {
             <Route path="reglages" element={reglagesSection} />
             <Route path="*" element={<Navigate to="/carnet" replace />} />
           </Routes>
-        </MenuCarnet>
-      </div>
+        </>,
+      )}
 
       {panneau && (panneau.type === 'noter' || panneau.type === 'modifier') && (
         <PanneauLateral titreId={titrePanneau} onFermer={() => setPanneau(null)}>

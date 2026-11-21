@@ -153,7 +153,8 @@ export function Aujourdhui({
   }
 
   const titre = capitale(dateLongue(jourValide).replace(/ \d{4}$/, ''))
-  const reperes = texteReperes(jourValide)
+  // Repères du jour affiché, seulement s'ils diffèrent de ceux du bandeau (aujourd'hui) : jamais doublés.
+  const reperes = texteReperes(jourValide) === texteReperes(aujourdhui) ? '' : texteReperes(jourValide)
   const sProp = propose ? seanceDuCreneau(propose, seances) : null
 
   return (

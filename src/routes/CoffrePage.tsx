@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import '../components/carnet/carnet.css'
 import { MenuActions } from '../components/carnet/MenuActions'
 import { Champ } from '../components/compte/Champ'
+import { BandeauEspace } from '../components/compte/BandeauEspace'
 import { MenuEspace } from '../components/compte/MenuEspace'
 import { EnTeteCompte, PageCompte, PageReservee } from '../components/compte/PageReservee'
 import '../components/compte/profil.css'
@@ -415,28 +416,25 @@ function Coffre() {
     <div className="coffre" ref={racine}>
       <MenuEspace>
         <div className={`coffre-contenu${telephone && choisi ? ' avec-tiroir' : ''}`}>
-          <section className="profil-bandeau coffre-bandeau" aria-labelledby={`${id}-titre`}>
-            <span className="profil-initiale coffre-icone" aria-hidden="true">
-              <IconeCoffre />
-            </span>
-            <div className="profil-bandeau-texte">
-              <p className="profil-bandeau-surtitre">ESPACE PROFESSEUR</p>
-              <h1 id={`${id}-titre`}>Mon coffre</h1>
+          <BandeauEspace
+            titreId={`${id}-titre`}
+            titre="Mon coffre"
+            classe="coffre-bandeau"
+            classeIcone="coffre-icone"
+            icone={<IconeCoffre />}
+            apresTitre={
               <p className="coffre-bandeau-sous-titre">
                 {plans === null ? 'Tes enregistrements suivent ton compte sur tous tes appareils' : `${nombre === 0 ? 'Aucun enregistrement' : pluriel(nombre, 'enregistrement')} · ${nombre > 1 ? 'suivent' : 'suit'} ton compte sur tous tes appareils`}
               </p>
-            </div>
-            {comptesTypes.length > 0 && (
-              <ul className="profil-bandeau-ecoles" aria-label="Enregistrements par type">
-                {comptesTypes.map((c) => (
-                  <li key={c.type} className={`profil-bandeau-ecole ${classeType(c.type)}`}>
-                    <span className="coffre-point" aria-hidden="true" />
-                    {compteType(c.type, c.total)}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+            }
+            etiquettePastilles="Enregistrements par type"
+            pastilles={comptesTypes.map((c) => (
+              <li key={c.type} className={`profil-bandeau-ecole ${classeType(c.type)}`}>
+                <span className="coffre-point" aria-hidden="true" />
+                {compteType(c.type, c.total)}
+              </li>
+            ))}
+          />
 
           {(message || erreur) && (
             <p className={`profil-message ${erreur ? 'compte-erreur-champ' : 'compte-message'}`} role={erreur ? 'alert' : 'status'}>

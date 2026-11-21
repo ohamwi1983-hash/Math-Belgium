@@ -165,7 +165,8 @@ export function MaSemaine({
       </>
     )
 
-  const reperes = texteReperes(lundi)
+  // Repères de la semaine affichée, seulement s'ils diffèrent de ceux du bandeau (aujourd'hui).
+  const reperes = texteReperes(lundi) === texteReperes(aujourdhui) ? '' : texteReperes(lundi)
   const pret = seancesSemaine.length > 0
 
   return (

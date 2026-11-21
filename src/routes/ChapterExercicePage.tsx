@@ -1,6 +1,7 @@
 import { Link, useParams, Navigate, useSearchParams } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { EvaluationGeneratorPanel } from '../components/admin/EvaluationGeneratorPanel'
+import { EspaceConception } from '../components/compte/EspaceConception'
 import { AssistantEleve } from '../components/eleve/AssistantEleve'
 import { LEVELS, findChapter } from '../content/chaptersIndex'
 import { estConnecteActif, useCompte } from '../lib/compteContexte'
@@ -11,7 +12,7 @@ import { usePageNonIndexee } from '../lib/useDocumentMeta'
  * chapitre dont vient le visiteur (lien en bas de `ChapterPage.tsx`). Visiteur non connecté (élève) :
  * assistant « Préparer mon évaluation » sur ce chapitre (`AssistantEleve`, « Changer de chapitre » →
  * `/exercice`). Professeur connecté : panneau des feuilles d'exercices tel quel, pré-verrouillé
- * (`EvaluationGeneratorPanel`, prop `verrouille`). */
+ * (`EvaluationGeneratorPanel`, prop `verrouille`), dans le cadre « Mon espace » (`EspaceConception`). */
 export function ChapterExercicePage() {
   const { levelSlug, chapterSlug } = useParams<{ levelSlug: string; chapterSlug: string }>()
   const chapter = levelSlug && chapterSlug ? findChapter(levelSlug, chapterSlug) : undefined
@@ -43,16 +44,14 @@ export function ChapterExercicePage() {
           </p>
         )}
         {professeur ? (
-          <>
-            <header className="chapter-head">
-              <p className="eyebrow">{chapter.level}</p>
-              <h1 className="chapter-title">Feuille d'exercices — {chapter.title}</h1>
-              <Link className="vue-eleve-lien" to={`/${levelSlug}/${chapterSlug}/exercices?vue=eleve`}>
-                Voir comme un élève
-              </Link>
-            </header>
-            <EvaluationGeneratorPanel mode="exercice" verrouille={{ levelSlug, chapitreSlug: chapterSlug }} />
-          </>
+          <EspaceConception
+            type="feuille"
+            titre={`Feuille d'exercices — ${chapter.title}`}
+            sousTitre={`${level?.label ?? chapter.level} · chapitre ${chapter.chapterNumber}`}
+            sansNiveau
+            lienEleve={`/${levelSlug}/${chapterSlug}/exercices?vue=eleve`}
+            panneau={(publier) => <EvaluationGeneratorPanel mode="exercice" verrouille={{ levelSlug, chapitreSlug: chapterSlug }} onResume={publier} />}
+          />
         ) : !vueEleve && compte.etat === 'chargement' ? (
           <p className="eleve-aide" role="status">
             Chargement…

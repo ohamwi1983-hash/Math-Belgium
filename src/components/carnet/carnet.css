@@ -21,8 +21,8 @@
   clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* En-tête de page plus compact sur le carnet (le menu porte la navigation). */
-.page-tool:has(> .carnet) { padding-top: 28px; }
+/* En-tête de repli (chargement…) plus compact ; une fois prêt, le bandeau sombre porte le titre. */
+.page-tool:has(> .carnet) { padding-top: 24px; }
 .page-tool:has(> .carnet) > .compte-tete { margin-bottom: 18px; }
 .page-tool:has(> .carnet) > .compte-tete .chapter-title { font-size: clamp(1.5rem, 1.2rem + 1vw, 1.9rem); }
 
@@ -92,7 +92,7 @@
   }
   .carnet-feuille .carnet-menu-lien { min-height: 48px; }
   .carnet-bouton { min-height: 44px; }
-  .page-tool:has(> .carnet) { padding-top: 20px; }
+  .page-tool:has(> .carnet) { padding-top: 0; }
 }
 
 /* ---------- vues : en-tête, colonnes ---------- */
