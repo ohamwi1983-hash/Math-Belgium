@@ -14,6 +14,7 @@ import {
   libelleCreneau,
   numerosCreneau,
   plage,
+  premiereHeure,
   texteJournee,
   type CaseHoraire,
   type GrilleHoraire,
@@ -120,7 +121,8 @@ export function MonHoraire({
           initiale={grille ? { ...grille } : GRILLE_EXEMPLE}
           existe={Boolean(grille)}
           occupe={occupe}
-          casesHorsGrille={(g) => casesHorsGrille({ ...g, ecole_id: ecole.id }, horaire.cases).length}
+          casesHorsGrille={(g) => casesHorsGrille({ ...g, ecole_id: ecole.id }, horaire.cases)}
+          heureZeroDisponible={horaire.heureZero}
           onEnregistrer={async (g) => {
             const hors = casesHorsGrille({ ...g, ecole_id: ecole.id }, horaire.cases).map((c) => c.id)
             if (await onEnregistrerGrille(ecole.id, g, Boolean(grille), hors)) setEdition(false)
@@ -131,7 +133,7 @@ export function MonHoraire({
         <div className="carnet-grille-resume">
           <p className="carnet-grille-texte">
             <strong>Grille de {ecole.nom} :</strong> {texteJournee(journee(grille))}
-            {' · '}mercredi : {heuresDuMercredi(grille) === 0 ? 'pas de cours' : `H1 → H${heuresDuMercredi(grille)}`}
+            {' · '}mercredi : {heuresDuMercredi(grille) === 0 ? 'pas de cours' : `H${premiereHeure(grille)} → H${heuresDuMercredi(grille)}`}
           </p>
           <div className="compte-actions">
             <button type="button" className="compte-bouton-secondaire" disabled={occupe} onClick={() => setEdition(true)}>
@@ -213,7 +215,7 @@ function SemaineEcole({
     return j >= 1 && j <= 5 ? j : 1
   })
   const jLundi = journee(grille, 1)
-  const nMercredi = heuresDuMercredi(grille)
+  const numerosMercredi = new Set(journee(grille, 3).heures.map((h) => h.numero))
   const caseDe = (jour: number, heure: number) => cases.find((c) => c.jour === jour && c.heure === heure && c.semaine === null)
 
   if (classes.length === 0) {
@@ -250,6 +252,11 @@ function SemaineEcole({
     <section className="carnet-semaine-bloc" aria-labelledby={`${id}-titre`}>
       <h3 id={`${id}-titre`}>Semaine — {ecole.nom}</h3>
       <p className="compte-aide">Une classe par heure (« — » : pas de cours). Deux heures qui se suivent avec la même classe forment une heure double : une seule séance à noter.</p>
+      {grille.heure_zero && (
+        <p className="compte-aide">
+          H0 : choisis la classe si l'heure zéro est fixe ; laisse « — » si elle est ponctuelle (elle ne sera jamais comptée comme oubliée, et « Nouvelle séance » la propose quand même).
+        </p>
+      )}
       {large ? (
         <table className="carnet-semaine">
           <thead>
@@ -273,7 +280,7 @@ function SemaineEcole({
                   </th>
                   {JOURS_CAPITALE.map((nomJour, i) => {
                     const jour = i + 1
-                    if (jour === 3 && h.numero > nMercredi)
+                    if (jour === 3 && !numerosMercredi.has(h.numero))
                       return (
                         <td key={jour} className="carnet-semaine-sans">
                           <span aria-label={`Mercredi H${h.numero} : pas de cours`}>—</span>

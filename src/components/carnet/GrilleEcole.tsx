@@ -14,6 +14,7 @@ import {
   journee,
   minutes,
   plage,
+  premiereHeure,
   type ErreursGrille,
   type Pause,
   type SaisieGrille,
@@ -33,6 +34,10 @@ function avec(liste: number[], valeur: number): number[] {
  * saisit jamais l'heure des pauses ni la fin des cours : elles se déduisent (règle dans
  * `lib/horaire.ts`). Champs : `type="time"` pour une heure, listes déroulantes pour le reste (jamais
  * de champ numérique, règle CLAUDE.md).
+ *
+ * Heure zéro (0004) : case « Cette école a une heure zéro (H0) », décochée par défaut ; H0 se place
+ * juste avant H1, sans pause, de la durée d'une heure, corrigeable comme les autres. Sans 0004
+ * (`heureZeroDisponible` faux) : case désactivée avec le message d'activation.
  */
 export function GrilleEcole({
   ecoleNom,
@@ -40,6 +45,7 @@ export function GrilleEcole({
   existe,
   occupe,
   casesHorsGrille,
+  heureZeroDisponible = false,
   onEnregistrer,
   onAnnuler,
 }: {
@@ -47,8 +53,10 @@ export function GrilleEcole({
   initiale: SaisieGrille
   existe: boolean
   occupe: boolean
-  /** Nombre de cases de l'horaire qui sortiraient de la grille saisie (calculé par le parent). */
-  casesHorsGrille: (g: SaisieGrille) => number
+  /** Cases de l'horaire qui sortiraient de la grille saisie (calculées par le parent). */
+  casesHorsGrille: (g: SaisieGrille) => { heure: number }[]
+  /** 0004 appliqué : la case « heure zéro » est utilisable. */
+  heureZeroDisponible?: boolean
   onEnregistrer: (g: SaisieGrille) => void
   onAnnuler?: () => void
 }) {
@@ -63,13 +71,14 @@ export function GrilleEcole({
   const nMercredi = heuresDuMercredi(g)
   const jMercredi = useMemo(() => journee(g, 3), [g])
   const midi = g.pauses.find((p) => p.type === 'midi')
+  const h0 = premiereHeure(g)
 
   function changer(partiel: Partial<SaisieGrille>) {
     setG((avant) => {
       const suivant = { ...avant, ...partiel }
       // Raccourcir la journée retire les pauses et corrections devenues impossibles.
       suivant.pauses = suivant.pauses.filter((p) => p.apres < suivant.nombre_heures)
-      suivant.exceptions = suivant.exceptions.filter((x) => x.heure <= suivant.nombre_heures)
+      suivant.exceptions = suivant.exceptions.filter((x) => x.heure <= suivant.nombre_heures && (x.heure >= 1 || suivant.heure_zero === true))
       if (suivant.heures_mercredi !== null && suivant.heures_mercredi > suivant.nombre_heures) suivant.heures_mercredi = suivant.nombre_heures
       return suivant
     })
@@ -96,7 +105,10 @@ export function GrilleEcole({
     setErreurs(err)
     if (Object.keys(err).length > 0) return
     const hors = casesHorsGrille(g)
-    if (hors > 0 && !window.confirm(`${hors} case${hors > 1 ? 's' : ''} de ton horaire sortent de cette grille (heures supprimées) : elles seront retirées. Continuer ?`)) return
+    const horsH0 = hors.filter((c) => c.heure === 0).length
+    const n = hors.length
+    const raison = horsH0 === n ? 'heure zéro retirée' : horsH0 > 0 ? 'heure zéro et heures supprimées' : 'heures supprimées'
+    if (n > 0 && !window.confirm(`${n} case${n > 1 ? 's' : ''} de ton horaire sortent de cette grille (${raison}) : elles seront retirées. Les séances déjà notées sont conservées. Continuer ?`)) return
     onEnregistrer(g)
   }
 
@@ -133,6 +145,28 @@ export function GrilleEcole({
           </select>
           {erreurs.nombre && <p className="compte-erreur-champ">{erreurs.nombre}</p>}
         </div>
+      </div>
+
+      <div className="carnet-heure-zero">
+        <label className="carnet-case">
+          <input
+            type="checkbox"
+            checked={g.heure_zero === true}
+            disabled={!heureZeroDisponible}
+            onChange={(e) => changer({ heure_zero: e.target.checked })}
+            aria-describedby={`${id}-h0-aide`}
+          />
+          <span>Cette école a une heure zéro (H0)</span>
+        </label>
+        {heureZeroDisponible ? (
+          <p id={`${id}-h0-aide`} className="compte-aide">
+            H0 se place juste avant H1, sans pause, et dure comme les autres heures (« Corriger » dans l'aperçu si elle diffère). H1 et la suite gardent leurs numéros et leurs horaires.
+          </p>
+        ) : (
+          <p id={`${id}-h0-aide`} className="compte-aide carnet-h0-inactive" role="note">
+            Heure zéro pas encore activée : colle le fichier <code>supabase/migrations/0004_heure_zero.sql</code> dans l'éditeur SQL de Supabase (SQL Editor → New query → coller → Run), puis recharge cette page.
+          </p>
+        )}
       </div>
 
       <fieldset className="carnet-fieldset">
@@ -192,12 +226,12 @@ export function GrilleEcole({
           aria-invalid={erreurs.mercredi ? true : undefined}
         >
           <option value="">
-            {midi ? `Le matin seulement (H1 → H${Math.min(midi.apres, g.nombre_heures)})` : `Comme les autres jours (${g.nombre_heures} heures)`}
+            {midi ? `Le matin seulement (H${h0} → H${Math.min(midi.apres, g.nombre_heures)})` : `Comme les autres jours (${g.nombre_heures} heures${h0 === 0 ? ' + H0' : ''})`}
           </option>
           <option value="0">Pas de cours</option>
           {Array.from({ length: g.nombre_heures }, (_, i) => i + 1).map((n) => (
             <option key={n} value={String(n)}>
-              {n} heure{n > 1 ? 's' : ''} (H1 → H{n})
+              {n} heure{n > 1 ? 's' : ''} (H{h0} → H{n})
             </option>
           ))}
         </select>
@@ -223,7 +257,7 @@ export function GrilleEcole({
                   <CorrectionHeure
                     idBase={`${id}-corr-${h.numero}`}
                     heure={h.numero}
-                    debut={champHeure(h.debut)}
+                    debut={champHeure(Math.max(0, h.debut))}
                     fin={champHeure(h.fin)}
                     corrigee={h.corrigee}
                     onAppliquer={(d, f) => {
@@ -247,7 +281,7 @@ export function GrilleEcole({
         </ol>
         <p className="carnet-journee-fin">
           Fin des cours : <strong>{heureTexte(j.fin)}</strong>
-          {' · '}Mercredi : {nMercredi === 0 ? 'pas de cours' : `H1 → H${nMercredi}, fin ${heureTexte(jMercredi.fin)}`}
+          {' · '}Mercredi : {nMercredi === 0 ? 'pas de cours' : `H${h0} → H${nMercredi}, fin ${heureTexte(jMercredi.fin)}`}
         </p>
         {(enDirect.exceptions ?? erreurs.exceptions) && <p className="compte-erreur-champ">{enDirect.exceptions ?? erreurs.exceptions}</p>}
       </section>
@@ -290,7 +324,9 @@ function CorrectionHeure({
   const erreur = dm === null || fm === null ? 'Heures illisibles.' : fm <= dm ? 'La fin doit suivre le début.' : null
   return (
     <div className="carnet-correction" role="group" aria-label={`Corriger H${heure}`}>
-      <p className="compte-aide">Pour une école atypique : les heures suivantes repartiront de la fin de H{heure}.</p>
+      <p className="compte-aide">
+        {heure === 0 ? 'H0 garde ces heures : H1 et la suite ne bougent pas (H0 doit finir au plus tard au début de H1).' : `Pour une école atypique : les heures suivantes repartiront de la fin de H${heure}.`}
+      </p>
       <div className="carnet-grille carnet-grille-heures">
         <div className="compte-champ">
           <label htmlFor={`${idBase}-d`}>Début de H{heure}</label>

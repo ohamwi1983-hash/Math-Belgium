@@ -373,6 +373,7 @@ function Carnet() {
                     initiale={formulaire.mode === 'modifier' ? formulaire.seance : null}
                     prerempli={prerempli}
                     horaire={horaireFormulaire}
+                    heureZero={horaire.heureZero}
                     occupe={occupe}
                     onEnregistrer={(s) => void enregistrerSeance(s)}
                     onAnnuler={() => setFormulaire(null)}
@@ -442,7 +443,7 @@ function Carnet() {
                   ecoles={ecoles}
                   classes={donnees.classes}
                   occupe={occupe}
-                  onEnregistrerGrille={(ecoleId, g, existe, hors) => agir(() => enregistrerGrille(client, ecoleId, g, existe, hors), 'Grille horaire enregistrée.')}
+                  onEnregistrerGrille={(ecoleId, g, existe, hors) => agir(() => enregistrerGrille(client, ecoleId, g, existe, hors, horaire.heureZero), 'Grille horaire enregistrée.')}
                   onSupprimerGrille={(ecoleId) => void agir(() => supprimerGrille(client, ecoleId), 'Grille et horaire de cette école retirés.')}
                   onDefinirCase={(existante, saisie) => agir(() => definirCase(client, existante, saisie), 'Horaire enregistré.')}
                 />

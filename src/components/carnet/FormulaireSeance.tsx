@@ -21,9 +21,9 @@ import {
   type SaisieSeance,
   type Seance,
 } from '../../lib/carnet'
-import { champHeure, creneauPropose, creneauxDuJour, libelleCreneau, type CaseHoraire, type Creneau, type GrilleHoraire } from '../../lib/horaire'
+import { champHeure, creneauPropose, creneauxDuJour, creneauxPonctuels, libelleCreneau, type CaseHoraire, type Creneau, type GrilleHoraire } from '../../lib/horaire'
 
-const cleCreneau = (c: Pick<Creneau, 'ecole_id' | 'heureDebut'>) => `${c.ecole_id}|${c.heureDebut}`
+const cleCreneau = (c: Pick<Creneau, 'ecole_id' | 'heureDebut' | 'ponctuel'>) => `${c.ecole_id}|${c.heureDebut}${c.ponctuel ? '|ponctuel' : ''}`
 
 /**
  * Saisie d'une séance : classe, date, horaire (plage « 08h50 → 09h40 » ou numéro d'heure, selon le
@@ -34,6 +34,11 @@ const cleCreneau = (c: Pick<Creneau, 'ecole_id' | 'heureDebut'>) => `${c.ecole_i
  * Avec un horaire (0003 + grille) : liste « Créneau de l'horaire » des créneaux du jour choisi
  * (« H2 (09h35 → 10h25) · 4Ge ») ; en choisir un règle classe, numéro(s) d'heure et plage ensemble
  * (heure double comprise). « Autre horaire » garde la saisie libre d'avant.
+ *
+ * Heure zéro (0004) : une H0 fixe est un créneau comme les autres (« H0–H1 » compris) ; une H0
+ * PONCTUELLE (vide dans l'horaire) est quand même proposée pour la date choisie, « H0 (07h55 →
+ * 08h45) · heure zéro ponctuelle », sans classe imposée : la choisir règle numéro 0 et plage, la classe
+ * reste celle choisie. Sans grille, la liste des numéros propose « heure zéro » si 0004 est appliqué.
  */
 export function FormulaireSeance({
   classes,
@@ -42,6 +47,7 @@ export function FormulaireSeance({
   initiale,
   prerempli,
   horaire = null,
+  heureZero = false,
   occupe,
   onEnregistrer,
   onAnnuler,
@@ -53,19 +59,25 @@ export function FormulaireSeance({
   prerempli: { classeId: string; chapitre: string; date?: string; creneau?: Creneau | null }
   /** Grilles et cases de l'horaire ; `null` sans horaire (0003 absent ou aucune grille). */
   horaire?: { grilles: GrilleHoraire[]; cases: CaseHoraire[] } | null
+  /** 0004 appliqué : le numéro 0 (« heure zéro ») est accepté par la base. */
+  heureZero?: boolean
   occupe: boolean
   onEnregistrer: (s: SaisieSeance) => void
   onAnnuler: () => void
 }) {
   const id = useId()
   const dateDepart = initiale?.date_seance ?? prerempli.creneau?.date ?? prerempli.date ?? dateIso(new Date())
-  const creneauxDe = (d: string) => (horaire && /^\d{4}-\d{2}-\d{2}$/.test(d) ? creneauxDuJour(d, horaire.grilles, horaire.cases).creneaux : [])
+  // Créneaux de l'horaire ce jour-là, plus les heures zéro ponctuelles (sans classe), par heure de début.
+  const creneauxDe = (d: string): Creneau[] =>
+    horaire && /^\d{4}-\d{2}-\d{2}$/.test(d)
+      ? [...creneauxDuJour(d, horaire.grilles, horaire.cases).creneaux, ...creneauxPonctuels(d, horaire.grilles, horaire.cases)].sort((a, b) => a.debut - b.debut || a.heureDebut - b.heureDebut)
+      : []
   // Créneau de départ : celui demandé ; pour une séance existante, celui qui commence à son heure ;
   // sinon le créneau en cours (ou le plus proche) de la classe ce jour-là.
   const creneauDepart = useMemo<Creneau | null>(() => {
     const liste = creneauxDe(dateDepart)
     if (prerempli.creneau && !initiale) return liste.find((c) => cleCreneau(c) === cleCreneau(prerempli.creneau as Creneau)) ?? null
-    if (initiale) return liste.find((c) => c.classe_id === initiale.classe_id && c.heureDebut === initiale.numero_heure) ?? null
+    if (initiale) return liste.find((c) => (c.ponctuel || c.classe_id === initiale.classe_id) && c.heureDebut === initiale.numero_heure) ?? null
     const maintenant = new Date()
     const idem = dateDepart === dateIso(maintenant)
     return creneauPropose(
@@ -74,7 +86,7 @@ export function FormulaireSeance({
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps -- valeur de départ seulement
   }, [])
-  const [classeId, setClasseId] = useState(initiale?.classe_id ?? creneauDepart?.classe_id ?? prerempli.classeId)
+  const [classeId, setClasseId] = useState(initiale?.classe_id ?? (creneauDepart && !creneauDepart.ponctuel ? creneauDepart.classe_id : prerempli.classeId))
   const [date, setDate] = useState(dateDepart)
   const horaireInitial = useMemo(
     () =>
@@ -88,8 +100,8 @@ export function FormulaireSeance({
   )
   const [debut, setDebut] = useState(horaireInitial.heure_debut ? heureChamp(minutesHeure(horaireInitial.heure_debut) ?? 0) : '')
   const [fin, setFin] = useState(horaireInitial.heure_fin ? heureChamp(minutesHeure(horaireInitial.heure_fin) ?? 0) : '')
-  const [numero, setNumero] = useState(horaireInitial.numero_heure ? String(horaireInitial.numero_heure) : '')
-  const [numeroFin, setNumeroFin] = useState(horaireInitial.numero_heure_fin ? String(horaireInitial.numero_heure_fin) : '')
+  const [numero, setNumero] = useState(horaireInitial.numero_heure !== null ? String(horaireInitial.numero_heure) : '')
+  const [numeroFin, setNumeroFin] = useState(horaireInitial.numero_heure_fin !== null ? String(horaireInitial.numero_heure_fin) : '')
   const [creneauCle, setCreneauCle] = useState(creneauDepart ? cleCreneau(creneauDepart) : '')
   const [horaireTouche, setHoraireTouche] = useState(initiale !== null)
   const creneauxDate = useMemo(
@@ -125,7 +137,8 @@ export function FormulaireSeance({
   function appliquerCreneau(c: Creneau | null) {
     setCreneauCle(c ? cleCreneau(c) : '')
     if (!c) return
-    setClasseId(c.classe_id)
+    // H0 ponctuelle : pas de classe imposée, la classe choisie reste.
+    if (!c.ponctuel) setClasseId(c.classe_id)
     setDebut(champHeure(c.debut))
     setFin(champHeure(c.fin))
     setNumero(String(c.heureDebut))
@@ -136,8 +149,14 @@ export function FormulaireSeance({
   function changerDate(nouvelle: string) {
     setDate(nouvelle)
     if (!horaire) return
-    const liste = creneauxDe(nouvelle).filter((c) => c.classe_id === classeId)
     const actuel = creneauxDate.find((c) => cleCreneau(c) === creneauCle)
+    // H0 ponctuelle : la même ce jour-là si elle existe (même école).
+    const ponctuelle = actuel?.ponctuel ? creneauxDe(nouvelle).find((c) => c.ponctuel && c.ecole_id === actuel.ecole_id) : undefined
+    if (ponctuelle) {
+      appliquerCreneau(ponctuelle)
+      return
+    }
+    const liste = creneauxDe(nouvelle).filter((c) => !c.ponctuel && c.classe_id === classeId)
     // Même classe ce jour-là : le créneau qui commence à la même heure, sinon le premier.
     const suivant = liste.find((c) => actuel && c.heureDebut === actuel.heureDebut) ?? liste[0] ?? null
     if (suivant) appliquerCreneau(suivant)
@@ -150,9 +169,10 @@ export function FormulaireSeance({
 
   function changerClasse(nouvelle: string) {
     setClasseId(nouvelle)
-    if (horaire) {
+    const actuelPonctuel = creneauxDate.find((c) => cleCreneau(c) === creneauCle)?.ponctuel === true
+    if (horaire && !actuelPonctuel) {
       const actuel = creneauxDate.find((c) => cleCreneau(c) === creneauCle)
-      const liste = creneauxDate.filter((c) => c.classe_id === nouvelle)
+      const liste = creneauxDate.filter((c) => !c.ponctuel && c.classe_id === nouvelle)
       const suivant = liste.find((c) => actuel && c.heureDebut === actuel.heureDebut) ?? liste[0] ?? null
       if (suivant) appliquerCreneau(suivant)
       else if (creneauCle) {
@@ -163,12 +183,12 @@ export function FormulaireSeance({
       }
     }
     // Avec un créneau de l'horaire pour cette classe, ses heures priment sur l'horaire « par défaut ».
-    const creneauTrouve = horaire !== null && creneauxDate.some((c) => c.classe_id === nouvelle)
+    const creneauTrouve = horaire !== null && (actuelPonctuel || creneauxDate.some((c) => !c.ponctuel && c.classe_id === nouvelle))
     if (!horaireTouche && !initiale && !creneauTrouve) {
       const h = horaireParDefaut(new Date(), reglages.duree_heure, seances.filter((s) => s.classe_id === nouvelle), date)
       setDebut(h.heure_debut ?? '')
       setFin(h.heure_fin ?? '')
-      setNumero(h.numero_heure ? String(h.numero_heure) : '')
+      setNumero(h.numero_heure !== null ? String(h.numero_heure) : '')
     }
     const c = classes.find((x) => x.id === nouvelle)
     if (!chapitreCle && c?.niveau) {
@@ -246,12 +266,13 @@ export function FormulaireSeance({
           <select id={`${id}-creneau`} value={creneauCle} onChange={(e) => appliquerCreneau(creneauxDate.find((c) => cleCreneau(c) === e.target.value) ?? null)}>
             {creneauxDate.map((c) => (
               <option key={cleCreneau(c)} value={cleCreneau(c)}>
-                {libelleCreneau(c)} · {classes.find((k) => k.id === c.classe_id)?.nom ?? 'classe'}
+                {libelleCreneau(c)} · {c.ponctuel ? 'heure zéro ponctuelle' : (classes.find((k) => k.id === c.classe_id)?.nom ?? 'classe')}
               </option>
             ))}
             <option value="">Autre horaire (saisie libre)</option>
           </select>
           {creneauxDate.length === 0 && <p className="compte-aide">Aucun cours de ton horaire ce jour-là (week-end, congé ou jour sans cours) : horaire libre ci-dessous.</p>}
+          {creneauxDate.some((c) => c.ponctuel && cleCreneau(c) === creneauCle) && <p className="compte-aide">Heure zéro ponctuelle : vide dans ton horaire, pour la classe choisie ci-dessus.</p>}
         </div>
       )}
 
@@ -322,6 +343,7 @@ export function FormulaireSeance({
             aria-invalid={erreurs.horaire ? true : undefined}
           >
             <option value="">— non précisée —</option>
+            {(heureZero || numero === '0') && <option value="0">{numeroHeureTexte(0)}</option>}
             {Array.from({ length: NUMERO_HEURE_MAX }, (_, i) => i + 1).map((n) => (
               <option key={n} value={String(n)}>
                 {numeroHeureTexte(n)}
