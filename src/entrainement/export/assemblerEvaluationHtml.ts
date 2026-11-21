@@ -418,6 +418,7 @@ const STYLE_GROUPES = `
 .legende-qr { text-align: right; font-family: Archivo, Arial, Helvetica, sans-serif; font-size: 7pt; color: var(--gris); line-height: 1.2; margin: -2px 0 1px; break-after: avoid; page-break-after: avoid; }
 .figure-ligne { margin-top: 4px; }
 .ligne-corr { margin: 10px 0 3px; font-weight: 600; break-after: avoid; page-break-after: avoid; }
+.corr-ligne .etape-titre { break-after: avoid; page-break-after: avoid; }
 .corr-ligne:first-child .ligne-corr { margin-top: 2px; }
 .corr:has(.corr-ligne) { break-inside: auto; }
 .carte .lettre-carte { text-transform: none; }

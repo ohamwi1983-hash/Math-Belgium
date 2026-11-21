@@ -52,6 +52,7 @@ Chaque `generateurs*/**/exportEvaluation.ts` du chapitre remplit, en plus de
 | `EtapeCorrection.figureHtml` | Figure SVG autonome sous une ligne du corrigé : tout exercice dont la réponse est un GRAPHIQUE (polygone des effectifs cumulés avec lecture de Q₁/Q₂/Q₃, boîte à moustaches attendue, courbes annotées…) la montre dans le corrigé détaillé — sinon elle disparaît, car `correctionDetaillee` remplace l'ancien corrigé. Jamais dans l'énoncé ni la version aménagée. |
 | `bareme` | `reponseFinale`, `criteres` (poids, somme ≈ 4, `sousQuestion` = étape), `erreursFrequentes` (avec `cout`), `reponsesAcceptees`. |
 | `enoncePapier` | `EnoncePapier` : `section` (énoncé + consigne globale ; `questions: []` sauf vraies questions), `etapesParQuestion` (lettres d'étapes couvertes par chaque question papier), `reponseBreve` alignée si celle de l'adaptateur est découpée par étape. |
+| `regroupement` | Regroupement a), b), c) : rempli par le REGISTRE depuis l'énoncé papier (`export/regroupementsPapier.ts`, une entrée dans `REGROUPEMENTS`) — rien à écrire dans l'adaptateur. Voir la section « Regroupement a), b), c) ». |
 
 Toutes les valeurs viennent des MÊMES fonctions que l'écran interactif (`formatReponseAttendue…`,
 `consigneEcran`, aides) — jamais une seconde source recalculée à part.
@@ -294,6 +295,140 @@ régulier dont les lignes passent par les valeurs remarquables elles-mêmes.
 - Questions « démonstration » : énoncés soignés `ENONCES_DEMONSTRATION` (`lib/evaluationPayload.ts`)
   appariés **par clé** à leur bloc d'exemple ; ajouter le chapitre à `CHAPITRES_ENONCES_VERIFIES` pour
   que `scripts/verifier-enonces-evaluation.mjs` fasse échouer le build en cas de dérive.
+
+## Regroupement a), b), c) (décision de l'utilisateur, aperçus validés)
+
+« Pour des économies de place et une certaine cohérence, regroupe dans les feuilles (d'exercices, de
+remédiation, d'évaluation et d'examen) tous les exercices au sein d'un même générateur qui ont la même
+consigne générale, comme pour les vrai ou faux. » Exemples validés : « Exercice 1 — Résous chaque
+équation par la méthode la plus rapide. a) x² + √7x = 0 b) x² − 40 = 0 c) … » ; « Question 1 — Calcule
+et écris chaque résultat sous la forme a + bi. a) … 1 pt b) … 1 pt » ; « Détermine le domaine de
+définition de chaque fonction, en justifiant. a) f(x) = … » (la consigne passe AVANT les données) ;
+« Détermine le centre et le rayon de chaque cercle. Donne les rayons en valeur exacte. a) cercle
+d'équation … ».
+
+**Décisions** :
+- Feuille d'exercices : NIVEAU (cadre numéro) et QR code « Refaire en ligne » PAR LIGNE — chaque ligne
+  rouvre SON exercice (`?code=` de l'instance, inchangé), QR 56 px (52 px en deux colonnes), code écrit
+  dessous ; en tête d'exercice, la plage « niv. 2–4 » (palier seulement s'il est le même pour toutes
+  les lignes) ; petite légende « QR code de chaque ligne : refaire en ligne, avec les aides ».
+- Précision propre à certaines variantes (« Donne le rayon en valeur exacte », « Arrondis au centième
+  les valeurs qui ne sont pas exactes ») : UNE consigne commune, la précision dite une fois (union des
+  précisions des lignes, ordre de première apparition), au pluriel si l'entrée en donne un.
+- Version aménagée : même énoncé que la version normale ; le groupe sur une page, lignes bien
+  espacées, coupé entre deux lignes seulement s'il ne tient pas.
+- Générateurs à un graphique par exercice : AUSSI à regrouper (graphiques côte à côte) — lot suivant ;
+  le contrat porte déjà `figureHtml` par ligne (rendu HTML et Word en place, non utilisé).
+
+**Règles** :
+- On regroupe les instances d'un MÊME générateur, de la même ligne de sélection
+  (`ElementPlan.ligne` = indice de l'item ; toutes ses variantes et copies « id~2 » comprises), du
+  même processus, de la même série. Clé = consigne commune normalisée (texte + formules, sans les
+  précisions fusionnables) : deux consignes → deux groupes ; une seule instance → exercice ordinaire,
+  rendu inchangé. Le groupe prend le rang de sa première instance (comme le vrai/faux) — en série B,
+  mélangée par processus, les mêmes lignes forment les mêmes groupes (ordre des lignes variable).
+- Jamais pour un énoncé papier à figure (`enteteHtml`), à vraies questions a) b) c) (plus d'une
+  question papier), ni pour le vrai/faux (déjà regroupé) ou les questions ouvertes.
+- PUREMENT une mise en forme après tirage : le plan garde un élément par instance (graine, variante,
+  points, `?code=`) ; anti-doublon, tirage équilibré, cas particuliers, groupes à verdict inchangés.
+  Un ancien plan à élément multi-instances (ancien `regroupable`) est remis à plat (`elementsAPlat`).
+- Numérotation APRÈS regroupement, partout : `evaluationLocal.ts::questionsDeSerie` est la SEULE
+  règle — documents (`itemsDepuisSerie`) et remédiation (`questionsRemediables`, indices sur les
+  éléments à plat) l'appellent tous deux ; examen : numérotation continue par parties (même items).
+- Points : chaque ligne garde les points de son instance (colonne de droite, `pointsDesLignes`) ;
+  total du groupe en tête. Barème du groupe (`baremeDuGroupe`) : critères de chaque ligne, avec leurs
+  ÉTAPES, rattachés à la lettre de la ligne et ramenés à ses points (grille « a) Étape 1 … ») ; ligne
+  sans barème → un critère « Réponse correcte et justifiée » ; erreurs fréquentes sans doublon ;
+  réponses acceptées communes dites une fois, sinon précédées de leurs lettres ; réponse finale
+  « a) … · b) … ». Examen à total fixé : mise à l'échelle LIGNE par ligne (0,5 pt au moins chacune ;
+  le panneau compte donc chaque instance pour le contrôle « trop peu de points »). Durée = somme ;
+  niveau = plage des lignes.
+- Corrigé : une sous-partie par ligne (« a) » et ses données rappelées), puis le corrigé « comme au
+  tableau » de l'instance avec SES étapes (« Étape 1 — … »). Chaque ligne est un item complet
+  (`LigneGroupe.item`, passé par `appliquerEnoncePapier`) : `sousQuestion` / `etape` / `etapesCorrige`
+  / renvois « sur l'étape 2 » / niveau et durée de l'instance restent ceux de l'instance — la lettre de
+  ligne est un niveau AU-DESSUS (l'ancien chemin `regroupable`, qui écrasait la lettre d'étape, a
+  disparu).
+- « Je vérifie » : une carte par ligne (« Exercice 3 a) ») ; « Je fais le point » inchangé.
+- Mise en page : lignes `.ligne-g` insécables (lettre | données | points ou niveau + QR), consigne
+  `break-after: avoid` (jamais seule en bas de page) ; deux colonnes : le groupe est un bloc (`display:
+  block`, pas un inline-block) qui ne se coupe qu'entre deux lignes. CSS `STYLE_GROUPES` ajoutée
+  SEULEMENT aux documents qui contiennent un groupe : un document sans groupe reste identique, octet
+  pour octet.
+- Word : consigne, puis une ligne par instance avec ses points au taquet droit (première ligne liée à
+  la consigne), figure de la ligne ; corrigé par ligne ; codes des lignes dans la grille.
+- Remédiation : les exercices d'une question cochée sont repris EN ENTIER, n fois (a, b, c, puis a, b,
+  c…), avec la ligne d'origine « r<n° de question> » : ils forment UN groupe dans la feuille de
+  remédiation (une question d'un seul exercice reprise n fois devient donc « a) … b) … »).
+
+**Contrat** (`export/genererFeuilleExercices.ts`) : `regroupement?(instance) → RegroupementInstance |
+null` = `{ consigne /* forme « chaque », sans les données */, precisions?: { id, fragments, pluriel? }[],
+ligne /* les données de l'instance */, figureHtml? }`. Le registre le remplit pour chaque adaptateur
+avec `export/regroupementsPapier.ts::avecRegroupement(id, adaptateur)` (même enveloppe que les autres
+champs, APRÈS `versionPapier`) : l'énoncé papier réel (`enoncePapier`, sinon `construireEnonce`) est
+sérialisé (formules entre « $ », consigne d'une question unique après « \n ») et découpé par les
+motifs de la table `REGROUPEMENTS` (groupe nommé `ligne`, `p_<id>` pour une précision ; consigne
+écrite en mini-syntaxe, éventuellement construite depuis des groupes). Jamais une seconde source :
+un énoncé que le motif ne reconnaît pas → `null`, l'instance reste ordinaire. Un adaptateur peut
+aussi écrire son propre `regroupement` (le registre ne le remplace pas). Les champs `regroupable` et
+le chemin regroupé d'avant ont disparu ; les commentaires d'adaptateurs qui en parlent encore
+expliquent une décision historique.
+
+**Ajouter un générateur** : une entrée dans `REGROUPEMENTS`, puis relire son énoncé papier sur TOUTES
+ses variantes (outil du chantier `verifReg.cjs`, dossier de travail : taux de reconnaissance par
+variante, une consigne et une ligne par (variante, consigne), énoncés non reconnus) — juger la
+consigne obtenue (forme « chaque », données d'instance toujours dans la ligne : une valeur tirée qui
+reste dans la consigne empêche tout regroupement, ex. la norme visée de gen26 « paramètre » ramenée
+dans la ligne).
+
+**Activés (85 générateurs, table `REGROUPEMENTS`)** — tous ceux de la liste « consigne commune +
+donnée » sauf deux, plus les quatre anciens `regroupable` (gen11, gen18, gen30, 6gen2) et ceux de la
+classe « rien de commun » qui en avaient une en fait. 4e : gen1–7, gen11, gen13–18, gen22, gen24–26,
+gen30, gen42, gen44–48, gen50, gen52, gen76, gen78, gen113–116, gen126. 5e : 5gen1–3, 5gen6 (conversion
+seulement), 5gen8, 5gen10, 5gen11, 5gen16, 5gen20, 5gen21, 5gen24 (pas « bonus »), 5gen26–29 (5gen28 :
+pas « double tangence »), 5gen46, 5gen55, 5gen60, 5gen62. 6e : 6gen1–4, 6gen6, 6gen7, 6gen9, 6gen10,
+6gen13–17, 6gen19, 6gen23–28 (6gen25 : pas « valeur moyenne », 6gen27 : pas D — vraies questions),
+6gen34–38, 6gen40 (A et D ; B et C ont de vraies questions), 6gen87, 6gen93 (pas « application »),
+6gen98, 6gen145, 6gen149 (pas « en zéro »), 6gen157. Mesuré (`verifReg.cjs`, 6 graines par variante) :
+toutes les variantes visées reconnues ; seules les variantes à vraies questions ou à énoncé propre
+restent `null`. Une valeur propre à l'instance va dans la LIGNE quand c'est possible (5gen11
+« dans [0 ; 16[ », 5gen26 « f′(4) », gen26 « norme visée ») ; sinon seules les instances de même
+consigne se regroupent (6gen37 « z⁴ », 6gen157 fin de consigne propre à la variante).
+
+**Écartés et raisons** : gen54 (la question « Quel est le lieu des points qui sont à la fois … et … ? »
+est formulée AUTOUR des deux lieux décrits en mots : la couper changerait la question) ; 5gen18
+(contexte narratif long et propre à chaque instance — deux grandeurs, deux croissances, le n-ième
+mois). Classe « rien de commun », non activés : gen31, gen33, gen34 (série de données ou tableau propre
+à chaque instance : données nombreuses), gen37, 5gen14, 5gen15, 5gen45, 5gen47, 5gen54, 5gen34, 6gen22,
+6gen32, 6gen76, 6gen86, 6gen90, 6gen155 (contexte propre à l'instance ou consigne qui embarque les
+données), 5gen7 (contexte r, n et consigne de la variante), 6gen39, 6gen42 (énoncés longs, consigne
+dépendante de l'instance), gen20 et gen21 (chaque variante a sa propre tournure « A a pour image A′… »,
+« M est le milieu… » : possible, mais à reformuler à la main), 5gen52 (la réponse est un tracé — lot
+suivant).
+
+**Lot suivant** — générateurs à un graphique par exercice (`enteteHtml` ; graphiques côte à côte,
+`figureHtml` par ligne déjà rendu en HTML et en Word) : d'abord ceux dont la question est COURTE et la
+même pour toutes les instances (lecture d'une courbe ou d'un graphe : gen10, gen12, gen69–71, 5gen9,
+5gen22, 5gen53, 6gen5, 6gen8, 6gen148, 6gen158, gen123, gen128) ; les problèmes à scène (triangles
+gen19, gen58, gen73–81 ; ombre, solides, statistique à graphique) restent des exercices seuls —
+contexte et figure propres à chaque instance. Générateurs à vraies questions (gen9, gen35, gen67,
+gen68, 5gen13, 5gen17, 5gen19, 5gen23, 5gen31, 5gen33, 5gen35, 5gen61, 6gen12, 6gen29, 6gen31, 6gen41,
+6gen43–63, 6gen91–94, 6gen146, 6gen151, 6gen153…) : jamais (il resterait des sous-sous-questions).
+
+**Vérifié** (documents réels, `construirePlan` → `genererDocumentsDepuisPlan`, 13 plans 4e/5e/6e) :
+feuille (avec et sans deux colonnes, aménagée), évaluation 2 séries + aménagée + corrigé + grille +
+Word (copie, corrigé, grille), examen par chapitre (total fixé à 20 par partie) et par processus (deux
+colonnes), remédiation depuis une évaluation et depuis un examen qui contiennent des groupes :
+numérotation et points identiques copie = corrigé = aménagée = grille, `questionsRemediables` = copie
+A (numéros et nombre de lignes), somme des lignes = points du groupe, une carte « Je vérifie » par
+ligne, un QR code par ligne, tous distincts et tous parmi les codes du plan (`?code=` de l'instance) ;
+0 débordement à 680 (impression), 820 et 1 280 px, 0 `.katex-error` ; PDF A4 relus (`pdftotext
+-layout`, captures) : aucune ligne coupée, aucune consigne de groupe seule en bas de page.
+Non-régression : un plan sans groupe (une instance par générateur, dont gen30, ancien `regroupable`)
+rendu par le code d'avant et d'après : 24 / 24 documents identiques octet pour octet (évaluation,
+feuille, examen à total fixé ; HTML après neutralisation du CSS KaTeX inliné, Word comparé XML par
+XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `docs.cjs`,
+`controle.cjs`, `nonreg.cjs`.
 
 ## Textes : écran vs papier
 
@@ -589,7 +724,8 @@ codes, aménagée si cochée) intitulée « Remédiation — <titre sans « Éva
   même variante sans contrainte → exercice OMIS. Des variantes n'ont que 1 à 9 énoncés (6gen38 « n3 » :
   1 ; « cos seul » : 4 ; gen57 « produit d'entiers consécutifs » : 3) : plutôt moins d'exercices
   qu'une répétition ; `plan.remediation.incompletes` et le message du panneau le signalent. Question
-  regroupée a)/b)/c) (`regroupable`) : reprise en entier, n fois.
+  regroupée a), b), c) : reprise en entier, n fois, et les exercices d'une question forment UN groupe
+  dans la feuille (section « Regroupement a), b), c) »).
 - **Vrai/faux** : d'autres affirmations des mêmes thèmes, n × le nombre d'origine par thème ; celles de
   l'évaluation (toutes séries) seulement si la banque n'en a pas assez (`piocherIndices`).
 - **Questions ouvertes** (« Formule », démonstration, compréhension) : la même question, une fois —
@@ -846,8 +982,8 @@ Outils du pilote : `collecteur.ts`, `evalLatex.ts` (dossier de travail du chanti
 - Un écran qui couvre plusieurs étapes papier (gen10 : « exercice » = b, c, d) : l'appli filtre
   par une table `LETTRES_PHASE` ; gen13 : `lettrePhaseCaracteristiquesAlgebriques(instance, phase)`
   (séparation/« se débarrasser » → étape intermédiaire, branches, validation). gen11 est
-  `regroupable` : sur papier ses six étapes s'affichent à plat sous la lettre de l'instance (le
-  collecteur compte 6 écrans pour lui).
+  regroupable a), b), c) : dans un groupe, ses six étapes s'affichent comme pour un exercice seul (à plat,
+  sous la lettre de la ligne ; le collecteur compte 6 écrans pour lui).
 - Fonctions intermédiaires (gen11, écrans EH/CH/SOY, TH, EV/CV/SOX) : `f_1`, `f_2`, `f_3` à
   l'écran (consignes, libellés des champs « f₁(x) = », légendes du graphique, réponse attendue,
   fiches des puces) ET dans le corrigé — une seule source, `formatGabaritEtape2Latex`… (noms
