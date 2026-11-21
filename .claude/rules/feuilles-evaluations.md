@@ -1727,6 +1727,14 @@ colinéarité), aucun radian.
   valeurs (liste, « aucune ») ; racine annulant a et b REJETÉE (piège ciblé, contrôle écrit dans le corrigé).
   Degré tiré (1 ou 2 ; « point » toujours 2) puis le NOMBRE de valeurs (verdict : 0/1 au degré 1 — 0 par
   une racine rejetée —, 0/1/2 au degré 2) à parts égales avant la recherche ; `forme` = type + degré.
+  **Motif masqué (décision de l'utilisateur, 21/11/2026)** : au degré 1, « aucune valeur » exigeait a(m) et
+  b(m) affins PROPORTIONNELS (« (m − 2)x + 2(m − 2)y »), forme qu'on ne voyait que pour ce verdict.
+  Désormais : jamais de coefficients proportionnels ; au degré 1, horizontale/verticale = coefficient
+  annulé affin + l'autre TOUJOURS du second degré (rejet ⇔ racine commune), parallèle/perpendiculaire =
+  deux coefficients du second degré dont les termes en m² s'éliminent dans la condition
+  (`famillePremierDegre`). À tout degré, la FORME visible (degrés de a, b, c) est tirée d'une instance
+  libre AVANT le verdict, puis le verdict à parts égales dans cette forme : mesuré sur 15 000 tirages,
+  forme et verdict indépendants (avant : « un coefficient constant » ⇒ presque jamais une seule valeur).
   Niveau CONSTANT (3 étapes `sansCharge`, méthode 0, piège 1 pour toutes les instances : 3, 8 min). Ligne
   « condition posée » longue mise entre accolades (pleine largeur : elle comprimait la colonne « = 0 »,
   2 px de débordement à 680 px avant).
