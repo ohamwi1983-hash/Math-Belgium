@@ -169,4 +169,8 @@ export const adaptateurEvaluationConstruireSomme: AdaptateurFeuilleExercices<Exe
   correctionDetaillee,
   bareme,
   enoncePapier,
+  // Décision de l'utilisateur (4e ch. 6) : la variante « lecture » n'additionne rien — titre propre
+  // sur papier, section du cours « les composantes » à relire ; les autres variantes gardent le titre
+  // de la section du générateur (« Additionner deux vecteurs »).
+  titrePapier: (e) => (e.variante === "lecture" ? { titre: "Composantes d'un vecteur", sectionId: "composantes" } : null),
 };

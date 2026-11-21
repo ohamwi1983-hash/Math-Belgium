@@ -318,6 +318,22 @@ export interface AdaptateurFeuilleExercices<T> {
    * façon). Une seule instance → exercice ordinaire, rendu inchangé. Pipeline :
    * `lib/evaluationLocal.ts::questionsDeSerie` (numérotation) et `itemGroupe` (item regroupé). */
   regroupement?: (instance: T) => RegroupementInstance | null;
+  /** Titre PROPRE à l'instance sur papier, à la place de celui de la section du cours où le
+   * générateur est rangé (décision de l'utilisateur, 4e ch. 6 : la variante « lecture » de gen83 ne
+   * s'imprime plus sous « Additionner deux vecteurs »). `null` / absent = titre de la section, rien
+   * ne change. Voir `TitrePapier` ; appliqué par `lib/evaluationLocal.ts::itemExercice`. */
+  titrePapier?: (instance: T) => TitrePapier | null;
+}
+
+/** Surcharge du titre d'une instance : remplace le titre de section imprimé (`titreSection`), la
+ * notion (corrigé « Question n — … », étiquette de la feuille, grille, Word) et, si `sectionId` est
+ * donné et existe dans le chapitre de l'item, la section du cours à relire (« Je fais le point »).
+ * Un titre différent coupe un regroupement a), b), c) (clé de groupe). */
+export interface TitrePapier {
+  titre: string;
+  /** Identifiant d'une section du MÊME chapitre (`ChapterSection.id`, stable même si la numérotation
+   * change) ; absent ou introuvable : pas de section numérotée, le titre seul. */
+  sectionId?: string;
 }
 
 export interface ProgressionGeneration {

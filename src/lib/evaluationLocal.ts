@@ -1,4 +1,4 @@
-import type { AdaptateurFeuilleExercices, ProfilInstance, BaremeExercice, EnoncePapier, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, PrecisionRegroupement, RegroupementInstance, SectionExercice } from '../entrainement/export/genererFeuilleExercices'
+import type { AdaptateurFeuilleExercices, ProfilInstance, BaremeExercice, EnoncePapier, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, PrecisionRegroupement, RegroupementInstance, SectionExercice, TitrePapier } from '../entrainement/export/genererFeuilleExercices'
 import { texte } from '../entrainement/export/fragmentsDocx'
 import {
   genererEvaluationBlanche,
@@ -15,7 +15,7 @@ import {
 import { horaireExamen, lignesConsignes, mettreAEchelle, sessionParDefaut, titreCourtChapitre, type ChapitreExamen } from '../entrainement/export/examen'
 import { annexeFormulaire } from '../entrainement/export/annexesPapier'
 import { niveauEtDuree, type NiveauDifficulte } from '../entrainement/export/niveauDifficulte'
-import { findChapter } from '../content/chaptersIndex'
+import { findChapter, LEVELS } from '../content/chaptersIndex'
 import { encoderCode, genererAvecCode, tirerGraine } from '../entrainement/export/codeExercice'
 import { ENTRAINEMENT_REGISTRY } from '../entrainement/registry'
 import { EVALUATION_ADAPTER_REGISTRY } from './evaluationAdapterRegistry'
@@ -569,6 +569,24 @@ function champsCommuns(el: ElementBase): Pick<ItemEvaluation, 'processus' | 'tit
   }
 }
 
+/** Titre propre à une instance (`AdaptateurFeuilleExercices.titrePapier`) : remplace le titre de
+ * section, la notion et — si `sectionId` est trouvé dans le chapitre de l'élément — la section du
+ * cours à relire ; sinon la section à relire n'est plus numérotée (le titre seul). */
+function champsTitrePapier(el: ElementBase, t: TitrePapier): Pick<ItemEvaluation, 'titreSection' | 'notion' | 'sectionCours'> {
+  const chapitre = el.section ? LEVELS.flatMap((l) => l.chapters).find((c) => c.slug === el.section!.chapitreSlug) : undefined
+  const section = t.sectionId ? chapitre?.sections.find((s) => s.id === t.sectionId) : undefined
+  return { titreSection: t.titre, notion: t.titre, sectionCours: section ? { numero: section.number, titre: section.title } : undefined }
+}
+
+/** Titre propre de l'instance, `null` si l'adaptateur n'en déclare pas (ou s'il échoue). */
+function titrePapierDe(adaptateur: Adaptateur, instance: never): TitrePapier | null {
+  try {
+    return adaptateur.titrePapier?.(instance) ?? null
+  } catch {
+    return null
+  }
+}
+
 /** Le corrigé et la grille numérotent déjà « Étape n » : un préfixe « Étape n (libellé) — » porté
  * par la consigne elle-même ne doit pas apparaître deux fois (« Étape n (libellé) : » d'un critère
  * devient « libellé : »). */
@@ -659,8 +677,10 @@ function itemExercice(el: Extract<ElementPlan, { type: 'exercice' }>, cache?: Ca
   if (!inst) return null
   const instance = instanceDe(adaptateur, inst, cache)
   const niveau = niveauEtDuree(adaptateur, instance)
+  const titre = titrePapierDe(adaptateur, instance)
   const item: ItemEvaluation = {
     ...champsCommuns(el),
+    ...(titre ? champsTitrePapier(el, titre) : {}),
     nature: 'exercice',
     points: inst.points,
     section: adaptateur.construireEnonce(instance),
@@ -712,9 +732,12 @@ function regroupementDe(el: ElementPlan, cache?: CacheInstances): { cle: string;
   const adaptateur = EVALUATION_ADAPTER_REGISTRY[el.generatorId]
   if (!adaptateur?.regroupement) return null
   try {
-    const reg = adaptateur.regroupement(instanceDe(adaptateur, el.instances[0], cache))
+    const instance = instanceDe(adaptateur, el.instances[0], cache)
+    const reg = adaptateur.regroupement(instance)
     if (!reg) return null
-    return { cle: `${el.ligne ?? ''}|${el.generatorId}|${el.processus}|${normaliserFragments(reg.consigne)}`, reg }
+    // Un titre propre (`titrePapier`) différent coupe le groupe : il s'imprime au-dessus de la question.
+    const titre = titrePapierDe(adaptateur, instance)?.titre ?? ''
+    return { cle: `${el.ligne ?? ''}|${el.generatorId}|${el.processus}|${titre}|${normaliserFragments(reg.consigne)}`, reg }
   } catch {
     return null
   }
