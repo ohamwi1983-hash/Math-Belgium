@@ -13,6 +13,8 @@ paths:
   - "src/components/admin/RepereNiveauDuree.tsx"
   - "src/components/admin/ChampPoints.tsx"
   - "src/lib/pointsAutomatiques.ts"
+  - "src/lib/compositionEleve.ts"
+  - "src/components/eleve/**"
   - "scripts/verifier-enonces-evaluation.mjs"
 ---
 
@@ -989,6 +991,61 @@ réponse, points à droite, pas de majuscules d'insistance, pied de page, option
   sans en-tête).
 - **Remédiation** : `questionsRemediables` suit l'ordre des parties pour un examen (même
   `partiesExamen`) — vérifié identique à la copie A, par chapitre et par processus.
+
+## Parcours élève : assistant « Préparer mon évaluation » et évaluation blanche (décision du 21/11/2026)
+
+Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBlanche ». Pages publiques
+`/exercice` et `/…/exercices`, visiteur NON connecté (qui voit quoi : `.claude/rules/comptes.md`).
+- **Assistant** (`components/eleve/AssistantEleve.tsx`, tutoiement, aucun mot « processus ») : 1. feuille
+  d'exercices / évaluation blanche ; 2. chapitre (`/exercice` : année + chapitre ; page d'un chapitre :
+  verrouillé, « Changer de chapitre » → `/exercice`), notions = sections ayant au moins un générateur
+  du registre (`notionsDuChapitre`), « Tout le chapitre » (exclusif : cocher une notion ne garde
+  qu'elle) ; téléphone : 3 puces + « + n » ; 3. durée 20 / 30 / 50 min, niveau Base / Intermédiaire /
+  Avancé / « Comme une vraie évaluation » (« Interm. », « Réel » au téléphone), « Version aménagée ».
+  Récapitulatif EXACT : le plan est préparé dès qu'un réglage change (clé des réglages : un plan
+  d'anciens réglages n'est jamais affiché ni généré), « 5 questions · ≈ 30 min · 20 points » = questions
+  imprimées après regroupement (`questionsDeSerie`) ; « Générer » rend CE plan puis en prépare un
+  nouveau (nouveau tirage à chaque clic). Téléphone : barre `position: sticky` en bas. Rien n'est
+  enregistré (pas d'historique écrit ; `construirePlan` le lit seulement).
+- **Composition** (`lib/compositionEleve.ts`, jamais un second moteur) : candidats = variantes non
+  retirées (`catalogueVariantesExercice`, mode `evaluation` pour la blanche — groupes à verdict
+  compris) + thèmes vrai/faux (2 min, 1 pt, niveau 2) ; niveau et durée par variante sur 8 tirages
+  (`niveauEtDuree`, contrainte « exercice complet » de l'évaluation pour la blanche), calculés une
+  variante à la fois (la page ne gèle pas), en cache. Palier : variante retenue si ≥ 50 % de ses tirages
+  y tombent ; durée remplie jusqu'à la cible sans la dépasser de plus de 10 % ; variété (notion la moins
+  servie, puis générateur, jamais deux fois la même variante tant qu'une autre convient) ; vrai/faux ≤
+  25 % du temps (Base seulement). « Vraie évaluation » : budgets 15 / 25 / 60 % du temps en Connaître /
+  Transférer / Appliquer (processus absent → Appliquer). Palier trop court (< 85 % de la durée) : un
+  palier voisin complète. Puis LIGNES du panneau (`lignesDeComposition`) → `construireItemsPayload` →
+  `construirePlan`. Retouches du plan figé : un exercice dont le niveau RÉEL sort du palier, ou qui
+  ferait dépasser la durée, reçoit une autre graine de la même variante (40 essais / 120 ms, contrainte
+  respectée, jamais un énoncé déjà dans le document) ; dépassement restant → l'exercice le moins utile
+  est retiré. Un exercice imprimé hors palier → note « des exercices d'un niveau voisin complètent ».
+  Points (blanche) : durée réelle → `pointsDepuisDuree`, vrai/faux 1 pt, puis 20 pts
+  (`mettreAEchelleParGroupes`) ; « vraie évaluation » : 3 / 12 / 5 pts par processus.
+  **Calculatrice** : « autorisée » imprimée (choix : aucun chapitre ne l'interdit dans ses données), le
+  tirage n'est PAS contraint (sinon « autorisée » ne tirerait que des cas à la calculatrice) ; une
+  variante `calculatriceIndispensable` reste donc permise.
+- **Document « Évaluation blanche »** (`EnTeteEvaluation.blanche = { dureeConseillee }`, mode
+  `evaluation`, une série ; `genererDocumentsDepuisPlan` → type `blanche` + aménagée si demandée ; ni
+  corrigé séparé ni grille ; `assemblerEvaluationHtml.ts::genererEvaluationBlanche`) : cartouche
+  « ÉVALUATION BLANCHE · 4e · ENTRAÎNEMENT PERSONNEL », titre = chapitre, « Durée conseillée : 30 min ·
+  20 points indicatifs · sans valeur de note » (durée réelle arrondie aux 5 min), Nom / Début / Fin
+  (choix : pas de professeur — « M. Hamwi » aurait été imprimé chez tous les visiteurs), tableau « Mon
+  score » par processus + encadré calculatrice, consignes de l'élève (phrase QR seulement s'il y a un
+  QR), bandeaux de processus, « Question n » et points à droite, QR « Refaire en ligne avec les aides »
+  par question (par ligne dans un groupe, sans niveau : option `niveau: false` des lignes), puis
+  « Corrigé détaillé » en fin de document (`pageCorrigeFeuilleHtml(…, "Question")`, rendu de la
+  feuille) ; pied « Évaluation blanche — corrigé détaillé en fin de document » · page n / N. Aménagée :
+  même énoncé et mêmes points, une question par page, sans QR, corrigé à la fin. Les autres modes ne
+  changent pas.
+- **Vérifié** (outils `composition.mjs`, `docs.mjs`, `ui.mjs`, dossier de travail
+  `conception-eleve`) : 4e ch. 6, 5e ch. 4, 6e ch. 3 × 20 / 50 min × 4 niveaux × blanche / feuille,
+  50 tirages chacun (2 400 plans) : 0 erreur, 0 plan vide, 0 dépassement de plus de 10 %, total
+  20 pts, « vraie évaluation » 15 / 60 / 25 % exactement ; hors palier 0 sauf 5e ch. 4 Avancé
+  (5gen24, groupes à verdict : la note s'affiche) ; documents réels 0 `.katex-error`, 0 débordement à
+  680 / 820 / 1 280 px ; non-régression (code d'avant / d'après, même plan) : évaluation 2 séries +
+  aménagée, examen, feuille + aménagée de 4 chapitres : 72 / 72 HTML identiques, Word 24 / 24 (XML).
 
 ## Feuille de remédiation en un clic (`lib/evaluationRemediation.ts`, décision C9)
 

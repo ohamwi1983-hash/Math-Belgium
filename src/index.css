@@ -1983,3 +1983,84 @@ table.feature-table td { white-space: normal; }
   .admin-eval-table .admin-eval-points-champ { flex-direction: column; gap: 1px; }
   .admin-eval-table .admin-eval-verrou { width: 30px; height: 22px; }
 }
+
+/* ---------- Parcours élève : assistant « Préparer mon évaluation » (pages publiques /exercice et
+   /{niveau}/{chapitre}/exercices, visiteur non connecté ; maquettes « EleveAssistant » et
+   « EleveTelephone » validées). Jetons du site uniquement : clair et sombre suivent le thème. */
+.eleve { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.eleve-tete { display: flex; gap: 12px 24px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; margin-bottom: 6px; }
+.eleve-surtitre { margin: 0 0 6px; color: var(--accent); }
+h1.eleve-titre { font-family: var(--serif); font-size: clamp(1.6rem, 5vw, 2.25rem); font-weight: 600; line-height: 1.15; margin: 0; }
+.eleve-lien-prof, .eleve-lien-discret { font-size: 0.875rem; color: var(--accent-ink); }
+.eleve-bloc { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--radius); padding: 22px 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.eleve-bloc-tete { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.eleve-bloc-tete-large { justify-content: space-between; flex-wrap: wrap; }
+.eleve-bloc-tete h2 { margin: 0; font-family: var(--serif); font-size: 1.3rem; font-weight: 600; line-height: 1.25; }
+.eleve-num { width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--paper); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; flex: none; }
+.eleve-cartes { display: flex; gap: 12px; flex-wrap: wrap; }
+.eleve-carte { flex: 1 1 260px; min-width: 0; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; font: inherit; color: inherit; }
+.eleve-carte[aria-checked='true'] { border: 2px solid var(--accent); background: var(--accent-soft); padding: 17px; }
+.eleve-carte-titre { font-weight: 600; font-size: 1.06rem; }
+.eleve-carte[aria-checked='true'] .eleve-carte-titre { color: var(--accent-ink); }
+.eleve-carte-texte { font-size: 0.875rem; color: var(--ink-soft); }
+.eleve-choix-chapitre { display: flex; gap: 12px; flex-wrap: wrap; }
+.eleve-champ { display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); min-width: 0; }
+.eleve-champ-large { flex: 1 1 280px; }
+.eleve-champ select { font: inherit; font-size: 1rem; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; min-height: 44px; max-width: 100%; }
+.eleve-aide { margin: 0; font-size: 0.875rem; color: var(--ink-soft); }
+.eleve-puces { display: flex; gap: 8px; flex-wrap: wrap; }
+.eleve-puce { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 9px 15px; font: inherit; font-size: 0.875rem; font-weight: 500; color: var(--ink-soft); cursor: pointer; min-height: 40px; text-align: left; max-width: 100%; }
+.eleve-puce[aria-pressed='true'] { background: var(--good-soft); border-color: var(--good); color: var(--ink); font-weight: 600; }
+.eleve-puce-plus { font-weight: 600; }
+.eleve-reglages { display: flex; gap: 16px 28px; flex-wrap: wrap; }
+.eleve-reglage { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.eleve-etiquette { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+.eleve-segments { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); max-width: 100%; }
+.eleve-segments button { border: 0; background: none; padding: 11px 18px; font: inherit; font-size: 0.95rem; font-weight: 500; color: var(--ink-soft); cursor: pointer; min-height: 44px; }
+.eleve-segments button + button { border-left: 1px solid var(--line-soft); }
+.eleve-segments button[aria-checked='true'] { background: var(--ink); color: var(--paper); }
+.eleve-court { display: none; }
+.eleve-case { display: flex; gap: 10px; align-items: center; font-size: 0.95rem; cursor: pointer; }
+.eleve-case input { width: 20px; height: 20px; flex: none; accent-color: var(--accent); }
+.eleve-note { margin: 0; font-size: 0.875rem; color: var(--attn); }
+.eleve-recap { background: var(--ink); color: var(--paper); border-radius: var(--radius); padding: 20px 24px; display: flex; gap: 14px 18px; align-items: center; justify-content: space-between; flex-wrap: wrap; z-index: 5; }
+.eleve-recap-titre { margin: 0; font-family: var(--serif); font-size: 1.2rem; font-weight: 600; }
+.eleve-recap-detail { margin: 4px 0 0; font-size: 0.95rem; opacity: 0.8; }
+.eleve-generer { background: var(--accent); color: var(--on-accent); border: 0; border-radius: var(--radius); padding: 15px 22px; font: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; min-height: 48px; }
+.eleve-generer:disabled { opacity: 0.6; cursor: progress; }
+.eleve-erreur { margin: 0; color: var(--bad); font-weight: 600; }
+.eleve-resultat { background: var(--surface); border: 2px solid var(--good); border-radius: var(--radius); padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; scroll-margin-top: 16px; }
+.eleve-resultat h2 { margin: 0; font-family: var(--serif); font-size: 1.25rem; font-weight: 600; }
+.eleve-documents { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.eleve-documents li { display: flex; gap: 8px 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 10px 0; border-top: 1px solid var(--line-soft); }
+.eleve-document-nom { font-weight: 600; }
+.eleve-document-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.eleve-document-actions button { font: inherit; font-size: 0.9rem; font-weight: 600; padding: 9px 14px; min-height: 44px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; }
+.eleve-conseil { background: var(--sky-soft); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; color: var(--sky-ink); }
+.eleve-conseil p { margin: 4px 0 0; font-size: 0.875rem; }
+.eleve-conseil .eleve-conseil-titre { margin: 0; font-weight: 600; font-size: 1rem; }
+@media (max-width: 600px) {
+  .eleve { gap: 12px; }
+  .eleve-bloc { padding: 14px; gap: 10px; }
+  .eleve-bloc-tete h2 { font-size: 1.125rem; }
+  .eleve-num { width: 26px; height: 26px; font-size: 0.875rem; }
+  .eleve-carte { flex-basis: 100%; padding: 14px; }
+  .eleve-carte[aria-checked='true'] { padding: 13px; }
+  .eleve-carte-texte { font-size: 0.8125rem; }
+  .eleve-reglage, .eleve-segments { width: 100%; }
+  .eleve-segments { display: flex; flex-wrap: nowrap; }
+  .eleve-segments button { flex: 1 1 0; padding: 11px 4px; min-width: 0; }
+  .eleve-long { display: none; }
+  .eleve-court { display: inline; }
+  /* Barre fixée en bas (maquette téléphone) : récapitulatif et bouton toujours sous le pouce. */
+  .eleve-recap { position: sticky; bottom: 0; margin: 0 calc(-1 * var(--page-gutter, 16px)); border-radius: 0; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)); flex-direction: column; align-items: stretch; gap: 10px; box-shadow: 0 -6px 20px rgba(24, 36, 48, 0.18); }
+  .eleve-recap-titre { display: none; }
+  .eleve-recap-detail { margin: 0; font-size: 0.875rem; }
+  .eleve-recap-fin { display: none; }
+  .eleve-generer { width: 100%; }
+  .eleve-resultat { padding: 16px; }
+}
+@media (prefers-color-scheme: dark) {
+  /* Thème sombre : la barre reste sombre (inverser --ink/--paper la rendait claire). */
+  .eleve-recap { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+}

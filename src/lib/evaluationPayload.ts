@@ -4863,6 +4863,10 @@ export interface EnTeteEvaluation {
    * l'examen. Absent (pas de session, plans enregistrés avant) : valeurs historiques
    * (`entrainement/export/cartouche.ts::CARTOUCHE_DEFAUT`), rendu inchangé. */
   cartouche?: CartoucheEcole
+  /** Parcours ÉLÈVE (`lib/compositionEleve.ts`) — évaluation blanche : UN document (copie aux points
+   * indicatifs, QR code par question, corrigé détaillé à la fin), plus la version aménagée si
+   * demandée ; ni corrigé séparé ni grille. Absent : évaluation / feuille rendue comme avant. */
+  blanche?: { dureeConseillee: number }
 }
 
 /**
