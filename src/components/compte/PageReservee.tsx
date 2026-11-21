@@ -4,20 +4,28 @@ import { SiteHeader } from '../SiteHeader'
 import { useCompte } from '../../lib/compteContexte'
 import { usePageNonIndexee } from '../../lib/useDocumentMeta'
 
-/** Cadre commun des pages de compte : en-tête du site, titre, page non indexée. */
-export function PageCompte({ titre, surtitre = 'Espace professeur', large = false, children }: { titre: string; surtitre?: string; large?: boolean; children: ReactNode }) {
+/** Cadre commun des pages de compte : en-tête du site, titre, page non indexée. `sansTete` : la
+ * page affiche elle-même son titre (`<h1>`, ex. bandeau de « Mon profil » ; `EnTeteCompte` en repli). */
+export function PageCompte({ titre, surtitre = 'Espace professeur', large = false, sansTete = false, children }: { titre: string; surtitre?: string; large?: boolean; sansTete?: boolean; children: ReactNode }) {
   usePageNonIndexee(titre)
   return (
     <>
       <SiteHeader />
       <main className={large ? 'page-tool' : 'page-compte'}>
-        <header className="chapter-head compte-tete">
-          <p className="eyebrow">{surtitre}</p>
-          <h1 className="chapter-title">{titre}</h1>
-        </header>
+        {!sansTete && <EnTeteCompte titre={titre} surtitre={surtitre} />}
         {children}
       </main>
     </>
+  )
+}
+
+/** Titre standard d'une page de compte (surtitre + `<h1>`). */
+export function EnTeteCompte({ titre, surtitre = 'Espace professeur' }: { titre: string; surtitre?: string }) {
+  return (
+    <header className="chapter-head compte-tete">
+      <p className="eyebrow">{surtitre}</p>
+      <h1 className="chapter-title">{titre}</h1>
+    </header>
   )
 }
 
