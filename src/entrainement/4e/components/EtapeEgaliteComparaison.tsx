@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { ExerciceComparaisonVecteurs } from "../core/comparaisonVecteurs.types";
 import { Katex } from "./Katex";
-import { VecteurGraph } from "./VecteurGraph";
-import { aideEgaliteComparaison, vecteursAffichesComparaison, TETE_FLECHE_COMPARAISON } from "../ui/formatComparaisonVecteurs";
+import { FigureComparaison } from "./FigureComparaison";
+import { aideEgaliteComparaison } from "../ui/formatComparaisonVecteurs";
 import { diagnostiquerEgalitePour, egalitesDemandees, lireEgalite } from "../moteur/verificationComparaisonVecteurs";
 import { aidesParNiveau, ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
@@ -50,17 +50,14 @@ export function EtapeEgaliteComparaison({ exercice, tentativesUtilisees, tentati
   const attendues = egalitesDemandees(exercice);
   const [textes, setTextes] = useState<string[]>(() => attendues.map(() => ""));
   const saisie = useTentativeLisible<string[]>();
-  const { points, vecteurs, viewBox } = vecteursAffichesComparaison(
-    exercice,
-    attendues.map((e) => e.label),
-  );
+  const surlignes = useMemo(() => egalitesDemandees(exercice).map((e) => e.label), [exercice]);
   const complet = textes.every((t) => t.trim() !== "");
   const montrerErreurs = saisie.soumise !== null && tentativesUtilisees > 0;
   const plusieurs = attendues.length > 1;
 
   return (
     <div>
-      <VecteurGraph points={points} vecteurs={vecteurs} masquerAxes pasGrille={1} viewBoxFixe={viewBox} teteFleche={TETE_FLECHE_COMPARAISON} />
+      <FigureComparaison exercice={exercice} selection={surlignes} />
       <p className="prompt-text">
         {plusieurs ? "Pour chacun des vecteurs en orange, écris l'égalité qui le relie à " : "Écris l'égalité qui relie le vecteur en orange à "}
         <Katex expression={`\\vec{${exercice.labelReference}}`} />.
