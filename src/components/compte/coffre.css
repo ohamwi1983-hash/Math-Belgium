@@ -1,0 +1,218 @@
+/* ---------- page « Mon coffre » (refonte du 21/11/2026 : proposition B « Liste et fiche détaillée ») ----------
+ * Chargé seulement avec la page (import de `routes/CoffrePage.tsx`, morceau à la demande), APRÈS
+ * `components/carnet/carnet.css` (cadre menu + barre du bas, boutons, menu « … ») et
+ * `components/compte/profil.css` (bandeau sombre, cartes, confirmation) dont il réutilise les classes
+ * sans les modifier. Jetons du site (clair / sombre), rayon 3 px ; la miniature reste blanche (papier).
+ * Couleur par type : feuille d'exercices = --sky, évaluation = --accent, examen = --plan,
+ * remédiation = --good. Processus : 1 = --sky, 2 = --accent, 3 = --plan. Cibles ≥ 44 px sur téléphone. */
+
+.coffre-t-exercice { --t: var(--sky); --t-doux: var(--sky-soft); --t-encre: var(--sky-ink); }
+.coffre-t-evaluation { --t: var(--accent); --t-doux: var(--accent-soft); --t-encre: var(--accent-ink); }
+.coffre-t-examen { --t: var(--plan); --t-doux: var(--plan-soft); --t-encre: var(--plan-ink); }
+.coffre-t-remediation { --t: var(--good); --t-doux: var(--good-soft); --t-encre: color-mix(in srgb, var(--good) 70%, var(--ink)); }
+.coffre-p1 { --p: var(--sky); }
+.coffre-p2 { --p: var(--accent); }
+.coffre-p3 { --p: var(--plan); }
+
+.page-tool:has(> .coffre) { padding-top: 24px; }
+.coffre-contenu { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.coffre-point { display: inline-block; flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--t, var(--p, var(--ink-faint))); }
+.coffre-court { display: none; }
+
+/* ---------- bandeau ---------- */
+.coffre-icone svg { display: block; }
+.coffre-bandeau-sous-titre { margin: 4px 0 0; font-size: 0.82rem; color: var(--profil-sur-sombre-doux); }
+.coffre-bandeau .coffre-point { background: color-mix(in srgb, var(--t) 72%, #ffffff); }
+
+/* ---------- import ---------- */
+.coffre-import {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; padding: 12px 16px; border-radius: var(--radius);
+  background: color-mix(in srgb, var(--attn-soft) 65%, var(--surface)); border: 1px solid color-mix(in srgb, var(--attn) 35%, var(--surface));
+}
+.coffre-import p { flex: 1 1 300px; margin: 0; font-size: 0.9rem; color: var(--ink); }
+
+/* ---------- filtres ---------- */
+.coffre-pastilles { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.coffre-pastille {
+  display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); color: var(--ink); font: 500 0.84rem var(--sans); white-space: nowrap; cursor: pointer;
+}
+.coffre-pastille b { font-weight: 700; }
+.coffre-pastille.niveau { min-width: 44px; justify-content: center; }
+.coffre-pastille:hover { border-color: var(--accent-soft-line); }
+.coffre-pastille[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.coffre-pastille:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.coffre-separateur { align-self: stretch; width: 1px; margin: 4px 4px; background: var(--line); }
+
+/* ---------- liste + fiche ---------- */
+.coffre-grille { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+.coffre-liste, .coffre-fiche { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--radius); min-width: 0; }
+.coffre-liste { flex: 1 1 340px; }
+.coffre-outils { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line-soft); }
+.coffre-recherche {
+  flex: 1 1 160px; min-width: 0; min-height: 40px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); color: var(--ink); font: 400 16px var(--sans);
+}
+.coffre-recherche::placeholder { color: var(--ink-faint); }
+.coffre-recherche:focus-visible, .coffre-ranger select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.coffre-ranger { display: inline-flex; align-items: center; gap: 6px; font: 500 0.84rem var(--sans); color: var(--ink-soft); white-space: nowrap; }
+.coffre-ranger select {
+  min-height: 40px; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); font: 500 0.88rem var(--sans);
+}
+
+.coffre-lignes { list-style: none; margin: 0; padding: 0; }
+.coffre-ligne {
+  display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 12px 16px;
+  border: 0; border-bottom: 1px solid var(--line-soft); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+}
+.coffre-ligne:hover { background: color-mix(in srgb, var(--paper) 70%, var(--surface)); }
+.coffre-ligne.actif { background: color-mix(in srgb, var(--t-doux) 70%, var(--surface)); box-shadow: inset 3px 0 0 var(--t); }
+.coffre-ligne:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.coffre-ligne .coffre-point { width: 11px; height: 11px; }
+.coffre-ligne-texte { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.coffre-ligne-titre { font: 600 0.95rem/1.3 var(--sans); overflow-wrap: anywhere; }
+.coffre-ligne-meta { margin: 0; font-size: 0.82rem; color: var(--ink-soft); overflow-wrap: anywhere; }
+.coffre-date { font: 500 0.7rem var(--mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-soft); white-space: nowrap; }
+.coffre-chevron { display: none; }
+.coffre-liees .coffre-ligne { padding-left: 34px; grid-template-columns: 12px minmax(0, 1fr) auto; background-image: linear-gradient(var(--t), var(--t)); background-size: 2px 100%; background-position: 20px 0; background-repeat: no-repeat; }
+.coffre-liees .coffre-ligne.actif { background-image: none; }
+
+.coffre-groupe-niveau + .coffre-groupe-niveau { border-top: 1px solid var(--line); }
+.coffre-groupe-niveau h3 {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 10px; margin: 0; padding: 14px 16px 4px;
+  font: 600 1.1rem var(--serif); color: var(--ink);
+}
+.coffre-groupe-compte { font: 500 0.78rem var(--sans); color: var(--ink-soft); }
+.coffre-groupe-chapitre h4 { display: flex; align-items: baseline; gap: 8px; margin: 0; padding: 10px 16px 6px; font: 600 0.95rem/1.3 var(--serif); color: var(--ink); border-bottom: 1px solid var(--line-soft); }
+.coffre-groupe-numero { font: 600 1.15rem var(--serif); color: var(--ink-soft); min-width: 1.1em; }
+
+.coffre-aucun { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 20px 16px; }
+.coffre-aucun p { margin: 0; color: var(--ink-soft); }
+
+/* ---------- fiche ---------- */
+.coffre-fiche { flex: 1 1 380px; display: flex; flex-direction: column; }
+.coffre-fiche-tete { display: flex; flex-wrap: wrap; gap: 16px; padding: 18px; border-bottom: 1px solid var(--line-soft); }
+.coffre-fiche-infos { flex: 1 1 180px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.coffre-pastille-type {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--t-doux); color: var(--t-encre);
+  font: 600 0.76rem/1.3 var(--sans); white-space: nowrap;
+}
+.coffre-fiche-titre { margin: 0; font: 600 1.38rem/1.15 var(--serif); color: var(--ink); overflow-wrap: anywhere; }
+.coffre-fiche-titre:focus-visible, .coffre-tiroir-titre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.coffre-etiquettes { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }
+.coffre-etiquettes li { padding: 2px 7px; border-radius: var(--radius); background: var(--paper); color: var(--ink-soft); font: 500 0.78rem var(--sans); }
+.coffre-dates { margin: 0; font-size: 0.82rem; color: var(--ink-soft); }
+.coffre-renommage { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.coffre-renommage .compte-champ input { font-size: 16px; }
+
+.coffre-miniature {
+  flex: none; width: 112px; max-width: 100%; aspect-ratio: 210 / 297; box-sizing: border-box; padding: 9px; overflow: hidden;
+  background: var(--profil-papier); box-shadow: 0 6px 16px rgba(24, 36, 48, 0.16); transform: rotate(-1deg);
+}
+.coffre-miniature-cartouche { border: 1px solid var(--profil-encre-papier); padding: 4px 5px; }
+.coffre-miniature-surtitre { font: 700 4.5px/1.3 Archivo, Arial, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; color: var(--profil-bleu-papier); overflow-wrap: anywhere; }
+.coffre-miniature-titre {
+  margin-top: 2px; font: 600 7.5px/1.15 "Source Serif 4", Georgia, serif; color: var(--profil-encre-papier); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.coffre-miniature-filet { display: block; height: 3px; width: 38%; margin: 7px 0 2px; background: var(--t); }
+.coffre-miniature-bloc + .coffre-miniature-bloc .coffre-miniature-filet { width: 30%; margin-top: 9px; }
+.coffre-miniature-ligne { display: block; height: 4px; margin-top: 5px; background: #e3e8ec; }
+
+.coffre-fiche-bloc { display: flex; flex-direction: column; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); }
+.coffre-fiche-ligne-titre { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.coffre-etiquette-bloc { margin: 0; font: 600 0.72rem var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.coffre-mono { font: 500 0.72rem var(--mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink); }
+.coffre-note { margin: 0; font-size: 0.85rem; color: var(--ink-soft); }
+.coffre-barre { display: flex; gap: 2px; height: 8px; border-radius: 999px; overflow: hidden; }
+.coffre-barre span { flex: 1 1 0; background: var(--p); }
+.coffre-legende { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.coffre-legende li { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--ink-soft); }
+.coffre-legende .coffre-point { background: var(--p); }
+.coffre-questions { list-style: none; margin: 4px 0 0; padding: 0; }
+.coffre-questions li { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line-soft); font-size: 0.9rem; }
+.coffre-questions li:last-child { border-bottom: 0; }
+.coffre-numero {
+  width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--p); color: var(--carnet-sur-couleur); font: 600 0.74rem var(--sans);
+}
+.coffre-q-titre { min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
+.coffre-q-nombre { color: var(--ink-soft); }
+.coffre-q-points { color: var(--ink-soft); white-space: nowrap; }
+
+.coffre-liee { background: color-mix(in srgb, var(--good-soft) 45%, var(--surface)); }
+.coffre-liee-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0; font-size: 0.9rem; color: var(--ink); }
+.coffre-liee-texte { flex: 1 1 200px; min-width: 0; overflow-wrap: anywhere; }
+
+.coffre-fiche-actions { padding: 16px 18px; }
+.coffre-danger { color: var(--bad); }
+.carnet-bouton.coffre-danger:hover:not(:disabled) { color: var(--bad); border-color: var(--bad); }
+.carnet-bouton.coffre-danger-plein, .carnet-bouton.coffre-danger-plein:hover:not(:disabled) { background: var(--bad); border-color: var(--bad); color: var(--carnet-sur-couleur); font-weight: 600; }
+.coffre-confirmation { margin-top: 0; }
+
+.coffre-vide h2 { margin: 0; font: 600 1.25rem var(--serif); color: var(--ink); }
+.coffre-vide p { margin: 0; color: var(--ink-soft); }
+
+/* ---------- téléphone : liste + tiroir ---------- */
+.coffre-tiroir { display: none; }
+
+@media (max-width: 759px) {
+  .page-tool:has(> .coffre) { padding-top: 0; }
+  .coffre-contenu { gap: 10px; }
+  .coffre-contenu.avec-tiroir { padding-bottom: 230px; }
+  .coffre-large { display: none; }
+  .coffre-court { display: inline; }
+  .coffre-bandeau-sous-titre { display: none; }
+  .coffre-icone svg { width: 22px; height: 22px; }
+  .coffre-import { padding: 10px 12px; gap: 8px; }
+  .coffre-import p { flex-basis: 0; flex-grow: 1; min-width: 0; font-size: 0.84rem; }
+  .coffre-import .carnet-bouton { border-color: transparent; background: none; color: var(--accent-ink); font-weight: 700; padding: 8px 6px; }
+
+  .coffre-pastilles {
+    flex-wrap: nowrap; overflow-x: auto; margin: 0 calc(-1 * var(--page-gutter)); padding: 2px var(--page-gutter) 4px; scrollbar-width: none;
+  }
+  .coffre-pastilles::-webkit-scrollbar { display: none; }
+  .coffre-pastille { min-height: 44px; flex: none; }
+
+  .coffre-outils { padding: 10px 12px; }
+  .coffre-recherche, .coffre-ranger select { min-height: 44px; }
+  .coffre-ligne { grid-template-columns: 10px minmax(0, 1fr) auto; gap: 10px; min-height: 60px; padding: 10px 14px; }
+  .coffre-ligne .coffre-point { width: 10px; height: 10px; }
+  .coffre-ligne .coffre-date { display: none; }
+  .coffre-chevron { display: inline; color: var(--ink-faint); font-size: 1.2rem; }
+  .coffre-ligne-meta { font-size: 0.78rem; }
+  .coffre-liees .coffre-ligne { padding-left: 30px; background-position: 18px 0; }
+
+  .coffre-tiroir {
+    display: flex; flex-direction: column; position: fixed; left: 0; right: 0; z-index: 35;
+    bottom: calc(57px + env(safe-area-inset-bottom, 0px)); max-height: calc(100dvh - 57px - 64px);
+    background: var(--surface); border-top: 1px solid var(--line); border-radius: 10px 10px 0 0; box-shadow: 0 -10px 24px rgba(24, 36, 48, 0.16);
+  }
+  .coffre-tiroir-barre { display: flex; align-items: center; gap: 4px; padding: 2px 6px 0 16px; }
+  .coffre-tiroir-poignee {
+    flex: 1 1 auto; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    border: 0; background: none; color: var(--ink-soft); font: 500 0.72rem var(--sans); cursor: pointer; padding: 4px 0 0 44px;
+  }
+  .coffre-tiroir-poignee:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .coffre-tiroir-trait { width: 36px; height: 4px; border-radius: 2px; background: var(--line); }
+  .coffre-tiroir-fermer { border-color: transparent; }
+  .coffre-tiroir-corps { padding: 0 16px 14px; }
+  /* Ouvert seulement : la fiche défile dans le tiroir (réduit, le menu « … » doit pouvoir déborder). */
+  .coffre-tiroir.ouvert .coffre-tiroir-corps { overflow-y: auto; overscroll-behavior: contain; }
+  .coffre-tiroir-resume { display: flex; flex-direction: column; gap: 8px; }
+  .coffre-tiroir-ligne { display: flex; align-items: center; gap: 8px; }
+  .coffre-tiroir-titre { margin: 0; font: 600 1.15rem/1.2 var(--serif); color: var(--ink); overflow-wrap: anywhere; }
+  .coffre-tiroir-actions { display: flex; gap: 8px; align-items: stretch; }
+  .coffre-tiroir-actions > .carnet-bouton { flex: 1 1 auto; min-height: 44px; }
+
+  .coffre-fiche.dans-tiroir { border: 0; }
+  .dans-tiroir .coffre-fiche-tete { padding: 4px 0 14px; gap: 12px; }
+  .dans-tiroir .coffre-miniature { width: 78px; padding: 6px; }
+  .dans-tiroir .coffre-fiche-bloc { padding: 12px 0; }
+  .dans-tiroir .coffre-liee { margin: 0 -16px; padding: 12px 16px; }
+  .dans-tiroir .coffre-fiche-actions { padding: 14px 0 0; }
+  .coffre-fiche-titre { font-size: 1.2rem; }
+  .coffre-fiche-actions .profil-actions .carnet-bouton { flex: 1 1 40%; }
+  .coffre-fiche-actions .profil-actions .carnet-bouton.principal { flex-basis: 100%; }
+  .coffre-liee-ligne .profil-lien-bouton { min-height: 44px; }
+}
