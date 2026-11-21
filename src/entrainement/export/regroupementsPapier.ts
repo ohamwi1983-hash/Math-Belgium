@@ -301,6 +301,17 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     ],
   },
   gen96: { formes: [{ motif: re(String.raw`On donne le point (?<ligne>${M} et la droite ${M})\.\n(?<q>Détermine .+)`), consigne: dansChaqueCas, ligne: (g) => `Point ${g.ligne}` }] },
+  // gen130 : « réduire » et « simplifier » partagent la même consigne ; « démontrer » a la sienne
+  // (les points cités restent hors de la ligne) ; « insérer » (données propres) n'est jamais regroupé.
+  gen130: {
+    formes: [
+      {
+        motif: re(String.raw`Réduis (?<ligne>${M}) à un seul vecteur \(multiplié au besoin par un nombre\) ou au vecteur nul\.`),
+        consigne: "Réduis chaque expression à un seul vecteur (multiplié au besoin par un nombre) ou au vecteur nul.",
+      },
+      { motif: re(String.raw`Démontre que (?<ligne>${M}), quels que soient les points [^.]+\.`), consigne: "Démontre chaque égalité vectorielle, quels que soient les points qui y figurent." },
+    ],
+  },
   gen50: {
     formes: [
       {

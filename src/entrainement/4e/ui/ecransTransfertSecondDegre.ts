@@ -98,6 +98,13 @@ export interface ChampPersonnalise extends ChampBase {
   apercu?: boolean;
   /** Rappel de syntaxe affiché sous les champs. */
   aideSaisie?: string;
+  /** Saisie d'un VECTEUR en colonne (4e ch. 6, lot H, gen129) : deux cases empilées entre
+   * parenthèses, comme les composantes du cours ; la saisie transmise est « x\ny ». Ajout pur. */
+  vecteurColonne?: boolean;
+  /** Aperçu KaTeX propre au champ (gen130 : combinaison de vecteurs nommés) ; `null` = pas d'aperçu. */
+  apercuLatex?: (saisie: string) => string | null;
+  /** Écriture LaTeX de la saisie (fiche de l'écran) ; à défaut, l'écriture d'une expression. */
+  affichee?: (saisie: string) => string | null;
 }
 
 /** Champ à vérification PROPRE (lot G du 4e ch. 7, gen96–gen99 : équation de droite, liste de points…) :
@@ -133,6 +140,19 @@ export type EcranTSD =
       /** Figure SVG autonome affichée avec l'écran (jamais une figure qui trahit la réponse). */
       figure?: string;
       /** Figure montrée seulement une fois l'écran clos. */
+      figureApres?: string;
+    }
+  | {
+      /** Choix MULTIPLE (4e ch. 6, lot H, gen129 : cocher tous les vecteurs directeurs) : cases
+       * carrées, UNE tentative, juste seulement si l'ensemble coché est exactement `bonnes`. */
+      type: "cases";
+      titre: string;
+      consigne: Fragments;
+      options: Fragments[];
+      bonnes: number[];
+      aides: Fragments[];
+      messageFaux: string;
+      figure?: string;
       figureApres?: string;
     }
   | {

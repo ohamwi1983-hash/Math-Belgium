@@ -36,11 +36,76 @@ export function saisieAffichee(saisie: Saisie, c: Champ): ReactNode {
     return e ? <Katex expression={`${c.type === "ensemble" && c.prefixeApercu ? c.prefixeApercu : "S="}${ensembleLatex(e)}`} /> : "—";
   }
   if (c.type === "nombre" || c.type === "liste") return saisie.trim().replace(/-/g, "−").replace(/(\d)\.(\d)/g, "$1,$2");
-  if (c.type === "libre") {
+  if (c.type === "libre" || (c.type === "personnalise" && c.affichee)) {
     const l = c.affichee?.(saisie);
-    return l ? <Katex expression={l} /> : saisie.trim().replace(/-/g, "−");
+    return l ? <Katex expression={l} /> : saisie.trim().replace(/\n/g, " ; ").replace(/-/g, "−");
   }
   return saisieEnLatex(normaliserExpression(saisie));
+}
+
+/** Champ complet : toutes les cases remplies (un vecteur en colonne a deux cases, « x\ny »). */
+function champRempli(s: Saisie, c: Champ): boolean {
+  if (typeof s !== "string") return saisieEnsembleComplete(s);
+  if (c.type === "personnalise" && c.vecteurColonne) {
+    const [x = "", y = ""] = s.split("\n");
+    return x.trim() !== "" && y.trim() !== "";
+  }
+  return s.trim() !== "";
+}
+
+/** Saisie d'un vecteur en colonne (gen129) : deux cases empilées entre parenthèses, comme les
+ * composantes du cours. Jamais de blocage de frappe : seule `normaliserSigneMoins`. */
+function ChampVecteurColonne({ champ, valeur, onChange, erronee, fige }: { champ: Champ; valeur: string; onChange: (v: string) => void; erronee: boolean; fige: boolean }) {
+  const [x = "", y = ""] = valeur.split("\n");
+  // Grande parenthèse étirée à la hauteur des deux cases (SVG sans identifiant).
+  const parenthese = (cote: "g" | "d") => (
+    <svg aria-hidden="true" viewBox="0 0 10 100" preserveAspectRatio="none" style={{ width: 10, alignSelf: "stretch", height: "auto", flex: "none" }}>
+      <path d={cote === "g" ? "M9,2 Q0,50 9,98" : "M1,2 Q10,50 1,98"} fill="none" stroke="currentColor" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+  const caseSaisie = (v: string, maj: (t: string) => void, nom: string) => (
+    <input
+      className={`text-input${erronee ? " is-erronee" : ""}`}
+      style={{ width: "6.5em", minWidth: 0, textAlign: "center" }}
+      aria-label={nom}
+      autoComplete="off"
+      autoCapitalize="off"
+      spellCheck={false}
+      value={v}
+      disabled={fige}
+      onChange={(ev) => maj(normaliserSigneMoins(ev.target.value).replace(/\n/g, ""))}
+    />
+  );
+  return (
+    <div style={{ minWidth: 0 }} data-champ={champ.id}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flexWrap: "wrap" }}>
+        <span className="field-label field-label-minuscule" style={{ margin: 0, maxWidth: "100%" }}>
+          <RenduFragments fragments={champ.libelle} />
+        </span>
+        <span style={{ display: "inline-flex", alignItems: "stretch", gap: 4, padding: "2px 0" }}>
+          {parenthese("g")}
+          <span style={{ display: "grid", gap: 6, padding: "4px 2px" }}>
+            {caseSaisie(x, (t) => onChange(`${t}\n${y}`), "Première composante (x)")}
+            {caseSaisie(y, (t) => onChange(`${x}\n${t}`), "Seconde composante (y)")}
+          </span>
+          {parenthese("d")}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** Aperçu KaTeX fourni par le champ (gen130) : le dernier rendu lisible reste affiché. */
+function ApercuPropre({ latexDe, valeur }: { latexDe: (s: string) => string | null; valeur: string }) {
+  const [dernier, setDernier] = useState<string | null>(null);
+  const courant = valeur.trim() === "" ? null : latexDe(valeur);
+  if (courant !== dernier && (courant !== null || valeur.trim() === "")) setDernier(courant);
+  if (dernier === null) return null;
+  return (
+    <div className={`apercu-expression-latex contenu-conditionnel${courant === null ? " apercu-expression-latex-perime" : ""}`}>
+      <Katex expression={dernier} />
+    </div>
+  );
 }
 
 const AIDE_SAISIE: Record<Champ["type"], string> = {
@@ -55,9 +120,12 @@ const AIDE_SAISIE: Record<Champ["type"], string> = {
 };
 
 function ChampTexte({ champ, valeur, onChange, erronee, fige }: { champ: Champ; valeur: string; onChange: (v: string) => void; erronee: boolean; fige: boolean }) {
-  const avecApercu = champ.type === "expression" || champ.type === "equation" || champ.type === "relation" || (champ.type === "personnalise" && !!champ.apercu) || (champ.type === "libre" && !!champ.apercu);
+  if (champ.type === "personnalise" && champ.vecteurColonne) return <ChampVecteurColonne champ={champ} valeur={valeur} onChange={onChange} erronee={erronee} fige={fige} />;
+  const apercuPropre = champ.type === "personnalise" ? champ.apercuLatex : undefined;
+  const avecApercu = !apercuPropre && (champ.type === "expression" || champ.type === "equation" || champ.type === "relation" || (champ.type === "personnalise" && !!champ.apercu) || (champ.type === "libre" && !!champ.apercu));
   return (
     <div style={{ minWidth: 0 }} data-champ={champ.id}>
+      {apercuPropre && !fige && <ApercuPropre latexDe={apercuPropre} valeur={valeur} />}
       {avecApercu && !fige && <ApercuExpressionLatex texte={normaliserExpression(valeur)} />}
       <label style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flexWrap: "wrap" }}>
         <span className="field-label field-label-minuscule" style={{ margin: 0, maxWidth: "100%" }}>
@@ -179,7 +247,7 @@ interface PropsChamps extends PropsAides {
 export function EtapeChampsTransfert({ consigne, champs, tentativesUtilisees, tentativesMax, statuts, illisible, messageForme, onValider, validation, ...aides }: PropsChamps) {
   const [saisies, setSaisies] = useState<Saisie[]>(() => champs.map(saisieInitiale));
   const fige = !!validation;
-  const complet = saisies.every((s) => (typeof s === "string" ? s.trim() !== "" : saisieEnsembleComplete(s)));
+  const complet = saisies.every((s, i) => champRempli(s, champs[i]!));
   const message = statuts?.find((s) => s.etat !== "correct" && s.message)?.message;
   const fautes = statuts ? statuts.filter((s) => s.etat !== "correct").length : 0;
   const types = [...new Set(champs.map((c) => c.type))].filter((t) => t !== "ensemble" && t !== "personnalise" && t !== "libre");

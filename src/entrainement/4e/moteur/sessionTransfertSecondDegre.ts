@@ -21,7 +21,8 @@ export function demarrer<E>(exercice: E): EtatTransfert<E> {
 }
 
 export function tentativesMax(ecran: EcranTSD): number {
-  return ecran.type === "choix" ? 1 : TENTATIVES_CHAMPS;
+  // Choix fermé (simple ou multiple) : une tentative ; champs : trois.
+  return ecran.type === "champs" ? TENTATIVES_CHAMPS : 1;
 }
 
 export function soumettre<E>(etat: EtatTransfert<E>, ecran: EcranTSD, correct: boolean): { etat: EtatTransfert<E>; clos: boolean; revele: boolean } {

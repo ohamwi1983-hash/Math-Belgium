@@ -5189,3 +5189,18 @@ avant 5gen66 ; § 5 retrouver (ax + b)/(x + d) depuis ses asymptotes et un point
 ax + b + c/(x − p), avant 5gen65. Quatre énoncés soignés ajoutés par clé (`ENONCES_DEMONSTRATION`, build
 strict). Détail : `feuilles-evaluations.md`, entrée « 5e ch. 4 (lots B, C, D) ».
 
+## 4e, Chapitre 6 — Calcul vectoriel, lot H (nouveaux générateurs gen129, gen130)
+
+Deux cartes : **gen129 « Vecteurs directeurs d'une droite »** (§ 15, après l'atelier
+`vecteur-directeur-widget`, avant le rappel « vers le chapitre 7 » ; première carte du § 15, seul
+générateur Connaître du chapitre) et **gen130 « Chasles sans figure : réduire et démontrer une égalité
+vectorielle »** (§ 6, après la carte gen27). Cours du § 6 complété AVANT l'atelier `chasles-defi-widget`
+(le cours ne traitait ni les coefficients, ni la démonstration d'une égalité, ni un point défini par une
+égalité) : astuce « Des coefficients ? Regroupe d'abord » (2AB + 2BC − AC = AC), exemples « démontrer une
+égalité vectorielle » (AB + CD = AD + CB, un seul membre transformé) et « un point défini par une
+égalité » (2MA + MB = 0 ⟹ AM = ⅓AB), énoncés ajoutés par clé dans `ENONCES_DEMONSTRATION`. Le bloc « Pour
+aller plus loin — le milieu par Chasles » n'est pas touché (lot F de l'audit). Registres `registry.ts`,
+`evaluationAdapterRegistry.ts` (`versionPapier`), `evaluationPayload.ts` (gen129 `directeur`, processus 1 ;
+gen130 `chasles`, processus 2 ; libellé de gen27 renseigné), `regroupementsPapier.ts` (gen130). Détail :
+`feuilles-evaluations.md`, entrée « 4e ch. 6, lot H ».
+

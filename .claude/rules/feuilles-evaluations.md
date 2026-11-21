@@ -403,7 +403,8 @@ dans la ligne).
 **Activés (85 générateurs, table `REGROUPEMENTS`)** — tous ceux de la liste « consigne commune +
 donnée » sauf deux, plus les quatre anciens `regroupable` (gen11, gen18, gen30, 6gen2) et ceux de la
 classe « rien de commun » qui en avaient une en fait. 4e : gen1–7, gen11, gen13–18, gen22, gen24–26,
-gen30, gen42, gen44–48, gen50, gen52, gen76, gen78, gen113–116, gen126. 5e : 5gen1–3, 5gen6 (conversion
+gen30, gen42, gen44–48, gen50, gen52, gen76, gen78, gen113–116, gen126, gen130 (réduire / simplifier,
+démontrer ; pas « insérer »). 5e : 5gen1–3, 5gen6 (conversion
 seulement), 5gen8, 5gen10, 5gen11, 5gen16, 5gen20, 5gen21, 5gen24 (pas « bonus »), 5gen26–29 (5gen28 :
 pas « double tangence »), 5gen46, 5gen55, 5gen60, 5gen62. 6e : 6gen1–4, 6gen6, 6gen7, 6gen9, 6gen10,
 6gen13–17, 6gen19, 6gen23–28 (6gen25 : pas « valeur moyenne », 6gen27 : pas D — vraies questions),
@@ -439,7 +440,7 @@ a deux données dans la consigne → seule), 6gen85, 6gen148 (abscisses des nœu
 6gen158 (forme arcsin/arccos/arctan dans la ligne). Mesuré (`verifReg.cjs`, 6 graines par variante) :
 toutes les variantes visées reconnues, une consigne par (générateur, forme).
 **Écartés, avec raison** : gen69, gen70 (contexte propre à l'instance ET 2–4 vraies questions) ;
-gen28, gen84, gen108, gen110, gen111, gen74, gen19, 5gen59, 6gen95, 6gen154, 6gen159, 6gen147 (vraies
+gen28, gen84, gen108, gen110, gen111, gen74, gen19, gen129, 5gen59, 6gen95, 6gen154, 6gen159, 6gen147 (vraies
 questions) ; triangles et scènes géométriques gen58, gen73, gen75, gen77, gen79–81 (figure ET données
 nombreuses propres à l'instance) ; solides et espace gen39–41, gen100–107 ; statistique avec contexte
 gen32, gen36, gen38, gen109 ; détectives d'erreurs (copie d'élève longue propre à l'instance) gen91,
@@ -1854,3 +1855,83 @@ interdite / autorisée) même structure 30 / 30, verdicts différents d'une sér
 2 séries + aménagée + feuille + aménagée + Word copie / corrigé / grille, interdite ; autorisée en deux
 colonnes) 0 `.katex-error`, 0 débordement à 680, 820 et 1 280 px. Outils du lot (dossier de travail
 `4e7-B`) : `moteur.ts`, `coll/`, `ecranlotG.cjs`, `defile.cjs`, `planG.cjs`, `docsG.cjs`.
+
+## 4e ch. 6, lot H — gen129–gen130 (nouveaux, notés)
+
+Coquille `4e/components/AppTransfertSecondDegre.tsx` réutilisée, avec trois AJOUTS sans effet sur les
+autres générateurs : écran `type: "cases"` (`EcranTSD`, choix MULTIPLE à cases carrées — jamais la
+pastille ronde —, juste si l'ensemble coché est exactement `bonnes`, une tentative, « à cocher » sur une
+bonne réponse oubliée ; composant `components/EtapeCasesTransfert.tsx`, `tentativesMax` = 1 pour tout
+écran qui n'est pas « champs ») ; `ChampPersonnalise.vecteurColonne` (deux cases empilées entre grandes
+parenthèses SVG, saisie transmise « x\ny », « Valider » actif quand les deux cases sont remplies),
+`apercuLatex` et `affichee` (aperçu KaTeX et fiche propres au champ) ; message révélé d'un choix fermé
+rendu en KaTeX quand il contient « $…$ ». Corrigés `4e/generateurs/{vecteursDirecteurs,chaslesSansFigure}/corrigeDetaille.ts`,
+une lettre par écran. Jamais « déterminant » (« critère de colinéarité »), aucun radian.
+- **gen129** « Vecteurs directeurs d'une droite » (§ 15, processus 1, Connaître) : variantes
+  `deux-points`, `horizontale-verticale`, `parallele` (d passe par C, parallèle à (EF)). Écrans : a) un
+  vecteur directeur lu sur le quadrillage (`moteur/vecteurColonneSaisi.ts` : tout vecteur non nul
+  colinéaire accepté, fractions et décimaux lus ; pièges composantes échangées, perpendiculaire, une
+  composante de signe changé, coordonnées d'un point recopiées, vecteur nul) ; b) cocher les vecteurs
+  directeurs parmi cinq (2 ou 3 justes tirés à pile ou face AVANT le reste — c'est la réponse, jamais
+  dans `forme` ; l'opposé toujours proposé ; leurres toujours composantes échangées + perpendiculaire,
+  plus un signe changé ; aucun leurre colinéaire : pente jamais ±1) ; c) un vecteur directeur de g :
+  y = mx + p (m entier |m| ≥ 2, ou fraction irréductible de dénominateur 2 à 5, p ≠ 0, p ≠ m ; (1 ; m) et
+  tout multiple acceptés ; pièges (m ; 1), (1 ; p), (1 ; −m)), ou x = k / y = k (variante
+  horizontale-verticale : g perpendiculaire à d). Figure : fenêtre [−6 ; 6]², carreaux de 20 px, points
+  lus sur des nœuds à au moins 2 unités des axes (leur nom ne chevauche aucune graduation), nom du point
+  du côté opposé aux axes, « d » posé à côté de la droite loin des points, des axes et de (EF) (l'étiquette
+  automatique de `figureRepere`, près du bord, chevauchait un point ou une graduation) ; figure du corrigé
+  (coordonnées lues, flèche et ses deux déplacements) en `figureHtml` du résultat a et en `figureApres`.
+  Énoncé papier = figure + phrase + TROIS VRAIES questions (`etapesParQuestion` [[a], [b], [c]]) : jamais
+  regroupé. Corrigé : a) points lus en intro, « arrivée moins départ » ligne à ligne, vérification par
+  les carreaux ; b) une ligne de critère par vecteur proposé (`3\cdot 2-1\cdot 6=0`, « ≠ 0 ») ;
+  c) m, (1 ; m), multiple sans fraction, vérification par deux points de g. Lecture : c. Méthode 0,
+  piège 0 → niveau 1, 7 min, constants (aucune dépendance au nombre de justes). `forme` = variante |
+  type de m (entier / fraction, 50 / 50) ; horizontale-verticale : variante seule.
+- **gen130** « Chasles sans figure : réduire et démontrer une égalité vectorielle » (§ 6, processus 2) :
+  saisie `moteur/expressionChasles.ts` (« AB − CB + 2CD », « 2(AB + BC) », « 2/3AB », « (2/3)AB »,
+  « AB/2 », « 0 », « vec(AB) », « \vec{AB} », « → », minuscules, « − – — » ; un vecteur à une ou trois
+  lettres = illisible ; un point hors de l'exercice = réponse fausse ciblée) ; égalité jugée sur les
+  COEFFICIENTS DE POINTS (XY = Y − X), hypothèse substituée (I milieu : I = ½A + ½B ; M défini par
+  a·MA + b·MB = 0). Statut `forme` (message, aucune tentative) pour une écriture juste mais : non réduite
+  (« réduis jusqu'à un seul vecteur »), un seul terme avec « − » (« −CA = AC »), un « − » restant à l'écran
+  « des + seulement », un vecteur qui ne passe pas par le point à insérer, AM écrit avec M. Variantes :
+  `reduire` (3 ou 4 vecteurs, 1 ou 2 retournés — `forme` ; vecteur nul une fois sur trois, tiré AVANT ;
+  lettres de la chaîne mélangées, jamais déjà dans l'ordre, premier terme positif ; écrans « + seulement »
+  puis le vecteur), `coefficients` (k·XY + k·YZ, l'un éventuellement retourné, + c·XZ éventuellement
+  retourné — `forme` = les deux retournements ; coefficient final r ∈ {−1, 0, 1, 2, 3} \ {k} à parts
+  égales ; écrans « le groupe » puis le résultat), `demontrer` (échange PQ + RS = PS + RQ : première ligne
+  juste = insérer S dans PQ ou Q dans RS, tirée ; différence PQ − RQ = PS − RS ; écran a = choix fermé
+  parmi quatre lignes dont trois FAUSSES, contrôlées par l'algèbre des points, explication par option ;
+  écran b = le vecteur obtenu), `inserer` (milieu : MA + MB = 2MI ; point : AM = b/(a+b)·AB, sept couples
+  (a ; b) dont (1 ; 1)). Énoncé papier = données + UNE consigne (réduire / démontrer / exprimer) ;
+  regroupement a), b) : « Réduis chaque expression à un seul vecteur (multiplié au besoin par un nombre)
+  ou au vecteur nul. » (réduire ET simplifier, même groupe) et « Démontre chaque égalité vectorielle,
+  quels que soient les points qui y figurent. » — 300 / 300 reconnus par variante ; insérer jamais regroupé
+  (données propres). Corrigé : chaque ligne est une égalité vraie pour TOUS points (ou sous l'hypothèse),
+  télescopage de proche en proche « Chasles en B », démontrer : un seul membre transformé + contrôle
+  « mêmes origines, mêmes extrémités », insérer : vérification en plaçant M en A / en reportant AM.
+  Méthode 1 pour démontrer et insérer, 0 sinon ; piège = vecteur retourné dans les données (réduire
+  toujours, simplifier si `forme` ≠ 00) → niveau 2 (simplifier sans retournement : 1), 6 min, constants
+  quel que soit le résultat. Aucun `calcul`, aucun cas particulier, aucun groupe à verdict.
+Pilotes `evaluationPayload.ts` : gen129 `directeur` (processus 1), gen130 `chasles` (processus 2) ;
+libellé de gen27 renseigné (« Réduction d'une somme de vecteurs sur une figure (gen27) »).
+
+Mesures (outils du lot, dossier de travail `4e6-H` : `coll.mts`, `formes.mts`, `reg.mts`,
+`parcours.cjs`, `equilibre.cjs`, `docsH.cjs`, `deborde3.cjs`, `figs.mts`, `page.cjs`) : collecteur
+2 250 tirages (250 libres + 250 par variante) — textes écran / papier / corrigé / barème / aides /
+messages, KaTeX `throwOnError`, ≈ 20 900 relations du corrigé évaluées (vecteurs en colonne et points
+tirés au hasard, hypothèse appliquée ; seules les formules littérales « x_B − x_A » non évaluées) :
+0 fausse, 0 KaTeX invalide, 0 NaN, 0 notation clavier ; réponse de chaque écran (convertie en saisie
+clavier) acceptée, illisibles reconnus ; gen129 3 000 tirages : options bien classées, champs a et c
+(multiples, opposé, fraction, pièges, vecteur nul). Fréquences (5 000 tirages par variante) : gen129
+justes 2 / 3 ≈ 50 / 50 dans chaque variante, type de m 50 / 50 ; gen130 formes de réduire et simplifier
+24–26 % chacune, vecteur nul 33 %, r −1 / 0 / 1 / 2 / 3 : 23 / 24 / 23 / 15 / 15 %. iPhone 13
+(`parcours.cjs`, chaque variante, 2 graines : illisible sans tentative, réponse fausse = tentative 1/3,
+bonne réponse, case ou choix raté révélé, « Nouvel exercice » → champs vides) : 0 erreur console,
+scrollWidth 390. Plans réels `construirePlan` (10 × 3 séries par générateur, interdite / autorisée, deux
+questions par variante) : même multiset (variante, forme, cas) 20 / 20, énoncés tous différents,
+verdicts variés d'une série à l'autre. Documents réels (2 plans : groupés interdite, une question par
+variante autorisée en deux colonnes ; évaluation 2 séries + aménagée + corrigé + grille + feuille +
+aménagée + Word copie / corrigé / grille) : 0 `.katex-error`, 0 débordement à 680, 820 et 1 280 px.
+Page du chapitre 390 / 1 280 px : 0 « $ » ni « ** » visible, 0 erreur.

@@ -657,6 +657,35 @@ export const calculVectoriel: ChapterContent = {
           ],
         },
         {
+          kind: 'astuce',
+          label: 'Des coefficients ? Regroupe d\'abord',
+          text:
+            'Quand deux vecteurs qui se relaient ont le même coefficient, mets-le en évidence avant ' +
+            'de télescoper : $2\\vec{AB}+2\\vec{BC}-\\vec{AC}=2(\\vec{AB}+\\vec{BC})-\\vec{AC}=' +
+            '2\\vec{AC}-\\vec{AC}=\\vec{AC}$.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'démontrer une égalité vectorielle',
+          formula: 'Démontrer que $\\vec{AB}+\\vec{CD}=\\vec{AD}+\\vec{CB}$, quels que soient les points A, B, C et D.',
+          steps: [
+            { tag: 'partir d\'un seul membre et insérer D dans AB', text: '$\\vec{AB}+\\vec{CD}=\\vec{AD}+\\vec{DB}+\\vec{CD}$' },
+            { tag: 'réordonner pour que deux vecteurs se relaient', text: '$=\\vec{AD}+\\vec{CD}+\\vec{DB}$' },
+            { tag: 'télescoper', text: '$=\\vec{AD}+\\vec{CB}$' },
+          ],
+          result: { tag: 'résultat', text: 'on a transformé le membre de gauche jusqu\'à obtenir celui de droite : l\'égalité est vraie pour tous points (on ne part jamais de l\'égalité à démontrer)' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'un point défini par une égalité',
+          formula: 'Le point M vérifie $2\\vec{MA}+\\vec{MB}=\\vec{0}$. Exprimer $\\vec{AM}$ en fonction de $\\vec{AB}$.',
+          steps: [
+            { tag: 'insérer A dans MB', text: '$2\\vec{MA}+\\vec{MA}+\\vec{AB}=\\vec{0}$, donc $3\\vec{MA}+\\vec{AB}=\\vec{0}$' },
+            { tag: 'retourner : MA = −AM', text: '$-3\\vec{AM}+\\vec{AB}=\\vec{0}$, donc $\\vec{AB}=3\\vec{AM}$' },
+          ],
+          result: { tag: 'résultat', text: '$\\vec{AM}=\\dfrac{1}{3}\\vec{AB}$ : M est sur [AB], au tiers en partant de A' },
+        },
+        {
           kind: 'atelier',
           tag: 'chasles-defi-widget',
           label: 'Manipule toi-même : le défi Chasles',
@@ -674,6 +703,16 @@ export const calculVectoriel: ChapterContent = {
           description: ['Réduis une chaîne télescopique de vecteurs sur 4 figures fixes (hexagone, étoile, trapèze, triangle et médianes).'],
           chantier: '4e',
           whereLabel: '4e → « 27. Réduction d\'une somme de vecteurs (Chasles) »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Chasles sans figure : réduire et démontrer une égalité vectorielle',
+          generatorId: 'gen130',
+          description: [
+            'Calcul littéral sur des vecteurs nommés par deux points, sans figure : retourne et réordonne pour réduire, simplifie avec des coefficients, démontre une égalité comme AB + CD = AD + CB, insère un point (milieu, point défini par 2·MA + MB = 0).',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 130. Chasles sans figure »',
         },
       ],
     },
@@ -1791,6 +1830,16 @@ export const calculVectoriel: ChapterContent = {
             'de la même droite d, donc colinéaires. Le vecteur (1 ; m) se lit directement ' +
             'sur l\'équation y = mx + p : quand x augmente de 1, y change de m. Essaie aussi ' +
             'une droite horizontale (m = 0) et une droite verticale (pas de pente).',
+        },
+        {
+          kind: 'entrainement',
+          title: "Vecteurs directeurs d'une droite",
+          generatorId: 'gen129',
+          description: [
+            "Lis un vecteur directeur d'une droite tracée sur un quadrillage (horizontale, verticale ou parallèle à une droite (EF)), reconnais tous les vecteurs directeurs parmi cinq vecteurs, puis lis-en un sur une équation y = mx + p.",
+          ],
+          chantier: '4e',
+          whereLabel: "4e → « 129. Vecteurs directeurs d'une droite »",
         },
         {
           kind: 'rappel',
