@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { RenduFragments } from "../4e/components/RenduFragments";
+import { cibleChoixContexte } from "./ui5e/retoursLimitesContexte";
 import { correctionDetailleeLimitesContexte, lettrePhaseLimitesContexte } from "./generateurs5e/limitesContexte/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
@@ -177,6 +179,15 @@ export function App5gen23() {
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
+        ...(enAttente.revele && cibleChoixContexte(exercice, phase)
+          ? {
+              messageRevele: (
+                <span>
+                  Ce n'était pas la bonne réponse. <RenduFragments fragments={cibleChoixContexte(exercice, phase) ?? []} />
+                </span>
+              ),
+            }
+          : {}),
         reponseAttendue: reponseAttendueLimitesContexte(exercice, phase),
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLimitesContexte(exercice), lettrePhaseLimitesContexte(exercice, phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",

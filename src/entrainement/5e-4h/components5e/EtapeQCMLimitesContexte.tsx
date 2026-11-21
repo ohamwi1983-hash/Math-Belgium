@@ -1,14 +1,12 @@
 import { useState } from "react";
 import type { ExerciceLimitesContexte, OptionInterpretation } from "../core5e/limitesContexte.types";
 import type { PhaseLimitesContexte } from "../moteur5e/typesLimitesContexte";
-import { consignePhaseRiche, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
-import { Katex } from "../components/Katex";
+import { consignePhaseRiche } from "../ui5e/formatLimitesContexte";
 import { TexteRiche5e } from "./TexteRiche5e";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexteLimites } from "../ui5e/retoursLimitesContexte";
 
 interface Props {
   exercice: ExerciceLimitesContexte;
@@ -55,39 +53,19 @@ export function EtapeQCMLimitesContexte({ exercice, phase, options, tentativesUt
       </div>
 
       <CalculatriceScientifique />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>
-            <TexteRiche5e texte={texteAideNiveau1(exercice, phase)} />
-          </p>
-          {niveauAide >= 2 &&
-            (() => {
-              const aide2 = texteAideNiveau2(exercice, phase);
-              return (
-                <>
-                  <p>
-                    <TexteRiche5e texte={aide2.texte} />
-                  </p>
-                  {aide2.latex && <Katex expression={aide2.latex} block />}
-                </>
-              );
-            })()}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => onValider(choix)}>
-          Valider
-        </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, null)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesContexteLimites(exercice, phase)}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={() => choix !== null && onValider(choix)}
+        vide={choix === null}
+        illisible={false}
+        texteIllisible=""
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        validation={validation}
+      />
     </div>
   );
 }

@@ -1,14 +1,14 @@
 import { useState } from "react";
 import type { ExercicePopulation } from "../core5e/limitesContexte.types";
-import { consignePhaseRiche, labelsChampsLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
+import { consignePhaseRiche, labelsChampsLatex } from "../ui5e/formatLimitesContexte";
 import type { ReponseEvaluerSeuil, StatutEvaluerSeuil } from "../moteur5e/verificationLimitesContexte";
 import { Katex } from "../components/Katex";
 import { TexteRiche5e } from "./TexteRiche5e";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexteLimites, cibleContexteLimites, saisieContexteRefusee, texteIllisibleContexte } from "../ui5e/retoursLimitesContexte";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExercicePopulation;
@@ -31,8 +31,8 @@ interface Props {
 export function EtapeEvaluerSeuilPopulation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const [comparaison, setComparaison] = useState<"superieur" | "inferieur" | null>(null);
-  const [dernierStatut, setDernierStatut] = useState<StatutEvaluerSeuil | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0;
+  const [illisible, setIllisible] = useState(false);
+  const [soumise, setSoumise] = useState<string | null>(null);
   const complet = valeur.trim() !== "" && comparaison !== null;
   const apresEchec = tentativesUtilisees > 0;
   const statuts = apresEchec && diagnostiquer && complet ? diagnostiquer({ valeur, comparaison }) : null;
@@ -40,7 +40,13 @@ export function EtapeEvaluerSeuilPopulation({ exercice, tentativesUtilisees, ten
   function valider() {
     if (!complet) return;
     const reponse: ReponseEvaluerSeuil = { valeur, comparaison };
-    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
+    // Règle commune (lots B–D) : valeur illisible → message, aucune tentative (moteur aussi).
+    if (saisieContexteRefusee(exercice, "evaluerSeuil", [valeur])) {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
+    setSoumise(valeur);
     onValider(reponse);
   }
 
@@ -58,7 +64,10 @@ export function EtapeEvaluerSeuilPopulation({ exercice, tentativesUtilisees, ten
           type="text"
           className={`text-input${statuts && statuts.valeur !== "correct" ? " is-erronee" : ""}`}
           value={valeur}
-          onChange={(e) => setValeur(e.target.value)}
+          onChange={(e) => {
+            setValeur(normaliserSigneMoins(e.target.value));
+            setIllisible(false);
+          }}
           placeholder="ex : 87,25"
         />
       </div>
@@ -81,39 +90,20 @@ export function EtapeEvaluerSeuilPopulation({ exercice, tentativesUtilisees, ten
       </div>
 
       <CalculatriceScientifique />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>
-            <TexteRiche5e texte={texteAideNiveau1(exercice, "evaluerSeuil")} />
-          </p>
-          {niveauAide >= 2 &&
-            (() => {
-              const aide2 = texteAideNiveau2(exercice, "evaluerSeuil");
-              return (
-                <>
-                  <p>
-                    <TexteRiche5e texte={aide2.texte} />
-                  </p>
-                  {aide2.latex && <Katex expression={aide2.latex} block />}
-                </>
-              );
-            })()}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut?.valeur)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesContexteLimites(exercice, "evaluerSeuil")}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={illisible}
+        texteIllisible={texteIllisibleContexte("evaluerSeuil", [valeur])}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumise !== null && tentativesUtilisees > 0 ? cibleContexteLimites(exercice, "evaluerSeuil", [soumise]) : null}
+        validation={validation}
+      />
     </div>
   );
 }

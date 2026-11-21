@@ -1,14 +1,14 @@
 import { useState } from "react";
 import type { ExerciceLimitesContexte } from "../core5e/limitesContexte.types";
 import type { PhaseLimitesContexte } from "../moteur5e/typesLimitesContexte";
-import { consignePhaseRiche, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
+import { consignePhaseRiche } from "../ui5e/formatLimitesContexte";
 import { Katex } from "../components/Katex";
 import { TexteRiche5e } from "./TexteRiche5e";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesContexteLimites, cibleContexteLimites, saisieContexteRefusee, texteIllisibleContexte } from "../ui5e/retoursLimitesContexte";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
@@ -55,21 +55,26 @@ export function EtapeChampsLimitesContexte({
   validation,
 }: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => Array(labels.length).fill(""));
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0;
+  const [illisible, setIllisible] = useState(false);
+  const [soumises, setSoumises] = useState<string[] | null>(null);
   const complet = valeurs.every((v) => v.trim() !== "");
   const apresEchec = tentativesUtilisees > 0;
   const statuts = apresEchec && diagnostiquer && complet ? diagnostiquer(valeurs) : null;
 
   function modifier(i: number, valeur: string) {
-    setValeurs((arr) => arr.map((v, j) => (j === i ? valeur : v)));
+    setValeurs((arr) => arr.map((v, j) => (j === i ? normaliserSigneMoins(valeur) : v)));
+    setIllisible(false);
   }
   function valider() {
     if (!complet) return;
-    if (diagnostiquer) {
-      const s = diagnostiquer(valeurs);
-      setDernierStatut(s.find((v) => v !== "correct") ?? "correct");
+    // Règle commune (lots B–D) : illisible ou approchée → message, aucune tentative (le moteur la
+    // refuse aussi).
+    if (saisieContexteRefusee(exercice, phase, valeurs)) {
+      setIllisible(true);
+      return;
     }
+    setIllisible(false);
+    setSoumises(valeurs);
     onValider(valeurs);
   }
 
@@ -93,39 +98,20 @@ export function EtapeChampsLimitesContexte({
         </div>
       ))}
       <CalculatriceScientifique />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>
-            <TexteRiche5e texte={texteAideNiveau1(exercice, phase)} />
-          </p>
-          {niveauAide >= 2 &&
-            (() => {
-              const aide2 = texteAideNiveau2(exercice, phase);
-              return (
-                <>
-                  <p>
-                    <TexteRiche5e texte={aide2.texte} />
-                  </p>
-                  {aide2.latex && <Katex expression={aide2.latex} block />}
-                </>
-              );
-            })()}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesContexteLimites(exercice, phase)}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={illisible}
+        texteIllisible={texteIllisibleContexte(phase, valeurs)}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumises && tentativesUtilisees > 0 ? cibleContexteLimites(exercice, phase, soumises) : null}
+        validation={validation}
+      />
     </div>
   );
 }

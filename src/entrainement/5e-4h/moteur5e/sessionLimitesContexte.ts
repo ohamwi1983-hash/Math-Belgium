@@ -2,6 +2,7 @@
  * Couche B (5e) — moteur de session pour 5gen23 ("Limites et asymptotes en contexte"). N'importe
  * jamais rien de `src/generateurs5e/`.
  */
+import { saisieContexteRefusee } from "./saisieContexteLimites";
 import type { ExerciceLimitesContexte } from "../core5e/limitesContexte.types";
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
@@ -22,6 +23,12 @@ const POINTS_DE_BASE = 100;
 
 /** Convention STANDARD de la plateforme (2 niveaux d'aide sur tout écran), comme 5gen20/5gen21. */
 export const NIVEAU_AIDE_MAX_LIMITES_CONTEXTE = 2;
+
+/** Règle commune (lots B–D) : saisie illisible ou approchée d'une valeur exacte refusée ici (état
+ * inchangé, aucune tentative). */
+function refusee(etat: EtatSessionLimitesContexte, valeurs: string[]): boolean {
+  return saisieContexteRefusee(etat.exerciceCourant, etat.phase, valeurs);
+}
 
 export function niveauAideMaxLimitesContexte(): number {
   return NIVEAU_AIDE_MAX_LIMITES_CONTEXTE;
@@ -89,6 +96,7 @@ function soumettreEcran<T>(
 // ============================================================================
 
 export function soumettreReponseAsymptoteHorizontale(etat: EtatSessionLimitesContexte, texte: string): EtatSessionLimitesContexte {
+  if (refusee(etat, [texte])) return etat;
   if (etat.exerciceCourant.famille !== "prixRevient") throw new Error("soumettreReponseAsymptoteHorizontale : famille inattendue");
   const { b } = etat.exerciceCourant;
   return soumettreEcran(etat, "asymptoteHorizontale", texte, (t) => diagnostiquerNombreExact(t, b) === "correct");
@@ -105,12 +113,14 @@ export function soumettreReponseVASens(etat: EtatSessionLimitesContexte, indexCh
 // ============================================================================
 
 export function soumettreReponseConstruireC(etat: EtatSessionLimitesContexte, texte: string): EtatSessionLimitesContexte {
+  if (refusee(etat, [texte])) return etat;
   if (etat.exerciceCourant.famille !== "eauSalee") throw new Error("soumettreReponseConstruireC : famille inattendue");
   const { v0, r, c } = etat.exerciceCourant;
   return soumettreEcran(etat, "construireC", texte, (t) => diagnostiquerConstructionC(t, v0, r, c) === "correct");
 }
 
 export function soumettreReponseLimiteC(etat: EtatSessionLimitesContexte, texte: string): EtatSessionLimitesContexte {
+  if (refusee(etat, [texte])) return etat;
   if (etat.exerciceCourant.famille !== "eauSalee") throw new Error("soumettreReponseLimiteC : famille inattendue");
   const { c } = etat.exerciceCourant;
   return soumettreEcran(etat, "limiteC", texte, (t) => diagnostiquerNombreExact(t, c) === "correct");
@@ -126,6 +136,7 @@ export interface ReponseEvaluerClub {
 }
 
 export function soumettreReponseEvaluer(etat: EtatSessionLimitesContexte, reponse: ReponseEvaluerClub): EtatSessionLimitesContexte {
+  if (refusee(etat, [reponse.valeurZero, reponse.valeurX])) return etat;
   if (etat.exerciceCourant.famille !== "clubLoisirs") throw new Error("soumettreReponseEvaluer : famille inattendue");
   const { a, b, c, d, facteur, xEval } = etat.exerciceCourant;
   const f0 = (b - c / d) * facteur;
@@ -139,18 +150,21 @@ export function soumettreReponseEvaluer(etat: EtatSessionLimitesContexte, repons
 }
 
 export function soumettreReponseInequation(etat: EtatSessionLimitesContexte, texte: string): EtatSessionLimitesContexte {
+  if (refusee(etat, [texte])) return etat;
   if (etat.exerciceCourant.famille !== "clubLoisirs") throw new Error("soumettreReponseInequation : famille inattendue");
   const { moisAttendu } = etat.exerciceCourant;
   return soumettreEcran(etat, "inequation", texte, (t) => diagnostiquerNombreExact(t, moisAttendu) === "correct");
 }
 
 export function soumettreReponseAsymptoteObliqueClub(etat: EtatSessionLimitesContexte, texte: string): EtatSessionLimitesContexte {
+  if (refusee(etat, [texte])) return etat;
   if (etat.exerciceCourant.famille !== "clubLoisirs") throw new Error("soumettreReponseAsymptoteObliqueClub : famille inattendue");
   const { a, b } = etat.exerciceCourant;
   return soumettreEcran(etat, "asymptoteOblique", texte, (t) => diagnostiquerAsymptoteObliqueClub(t, a, b) === "correct");
 }
 
 export function soumettreReponseInterpreterPente(etat: EtatSessionLimitesContexte, texte: string): EtatSessionLimitesContexte {
+  if (refusee(etat, [texte])) return etat;
   if (etat.exerciceCourant.famille !== "clubLoisirs") throw new Error("soumettreReponseInterpreterPente : famille inattendue");
   const { a, facteur } = etat.exerciceCourant;
   return soumettreEcran(etat, "interpreterPente", texte, (t) => diagnostiquerNombreExact(t, a * facteur) === "correct");
@@ -166,6 +180,7 @@ export interface ReponseIdentificationPopulation {
 }
 
 export function soumettreReponseIdentification(etat: EtatSessionLimitesContexte, reponse: ReponseIdentificationPopulation): EtatSessionLimitesContexte {
+  if (refusee(etat, [reponse.a, reponse.b])) return etat;
   if (etat.exerciceCourant.famille !== "population") throw new Error("soumettreReponseIdentification : famille inattendue");
   const { a, b } = etat.exerciceCourant;
   return soumettreEcran(
@@ -183,6 +198,7 @@ export function soumettreReponseInterpreterPopulation(etat: EtatSessionLimitesCo
 }
 
 export function soumettreReponseEvaluerSeuil(etat: EtatSessionLimitesContexte, reponse: ReponseEvaluerSeuil): EtatSessionLimitesContexte {
+  if (refusee(etat, [reponse.valeur])) return etat;
   if (etat.exerciceCourant.famille !== "population") throw new Error("soumettreReponseEvaluerSeuil : famille inattendue");
   const { a, b, p, anneeRef, anneeEval, seuil } = etat.exerciceCourant;
   const x = anneeEval - anneeRef;
