@@ -55,6 +55,17 @@ export const calculVectoriel: ChapterContent = {
       number: 1,
       title: "Qu'est-ce qu'un vecteur ?",
       kicker: 'direction, sens, longueur — les deux façons de noter un vecteur',
+      partie: 'Sans repère : des flèches et une règle',
+      essentiel: [
+        'Un vecteur porte trois informations : une **direction**, un **sens** et une **longueur** (sa **norme**).',
+        'Deux vecteurs sont **égaux** dès qu\'ils ont la même direction, le même sens et la même longueur, où qu\'ils soient dessinés : $\\vec{AB} = \\vec{CD}$ exactement quand **ABDC** est un parallélogramme.',
+      ],
+      cartes: [
+        { question: 'Quelles sont les trois informations portées par un vecteur ?', reponse: 'Sa direction, son sens et sa longueur (sa norme).' },
+        { question: 'Dans $\\vec{AB}$, comment s\'appellent A et B ?', reponse: 'A est l\'**origine**, B l\'**extrémité**.' },
+        { question: 'Si $\\vec{AB} = \\vec{CD}$, quel quadrilatère est un parallélogramme ?', reponse: '**ABDC** (et non ABCD).' },
+        { question: 'Qu\'est-ce que le vecteur nul ?', reponse: '$\\vec{AA}$, noté $\\vec{0}$ : sa longueur vaut 0, il n\'a ni direction ni sens.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -197,6 +208,17 @@ export const calculVectoriel: ChapterContent = {
       number: 2,
       title: 'Vecteurs opposés',
       kicker: 'même direction, même longueur, sens contraires',
+      titreCourt: 'Vecteurs opposés',
+      partie: 'Sans repère : des flèches et une règle',
+      essentiel: [
+        'Deux vecteurs **opposés** ont la même direction, la même longueur et des sens contraires. L\'opposé de $\\vec{AB}$ est $-\\vec{AB} = \\vec{BA}$.',
+        'Un vecteur suivi de son opposé ramène au point de départ : $\\vec{u} + (-\\vec{u}) = \\vec{0}$.',
+      ],
+      cartes: [
+        { question: 'Que partagent deux vecteurs opposés ?', reponse: 'La direction et la longueur ; leurs sens sont contraires.' },
+        { question: 'Écris l\'opposé de $\\vec{AB}$ de deux façons.', reponse: '$-\\vec{AB}$ ou $\\vec{BA}$.' },
+        { question: 'Que vaut $\\vec{AB} + \\vec{BA}$ ?', reponse: '$\\vec{AA} = \\vec{0}$.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -239,6 +261,18 @@ export const calculVectoriel: ChapterContent = {
       number: 3,
       title: 'Multiplier un vecteur par un réel : colinéarité et alignement',
       kicker: 'k > 1 allonge, 0 < k < 1 raccourcit, k < 0 inverse le sens — colinéaires : même direction',
+      titreCourt: 'Multiplier par un réel',
+      partie: 'Sans repère : des flèches et une règle',
+      essentiel: [
+        'Multiplier un vecteur par k ne change **jamais** sa direction : seules sa longueur et, si k est négatif, son sens changent.',
+        'Deux vecteurs sont **colinéaires** quand ils ont la même direction. A, B et C sont alignés ⟺ $\\vec{AC} = k \\cdot \\vec{AB}$ pour un certain nombre k.',
+      ],
+      cartes: [
+        { question: 'Que devient la direction de $\\vec{u}$ quand on le multiplie par un nombre k ?', reponse: 'Elle ne change jamais.' },
+        { question: 'Quel est l\'effet de $k = -1$ sur $\\vec{AB}$ ?', reponse: 'Sens opposé, même longueur : on obtient le vecteur opposé.' },
+        { question: 'Quand deux vecteurs sont-ils colinéaires ?', reponse: 'Quand ils ont la même direction : portés par des droites parallèles ou par la même droite.' },
+        { question: 'Comment savoir si A, B et C sont alignés ?', reponse: '$\\vec{AB}$ et $\\vec{AC}$ sont colinéaires : $\\vec{AC} = k \\cdot \\vec{AB}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Multiplier un vecteur par un réel, colinéarité, additionner deux vecteurs', youtubeId: '0Z_OAR2MA1E' },
         {
@@ -360,6 +394,18 @@ export const calculVectoriel: ChapterContent = {
       number: 4,
       title: 'Additionner deux vecteurs',
       kicker: 'méthode du triangle (Chasles) ou du parallélogramme',
+      titreCourt: 'Additionner deux vecteurs',
+      partie: 'Sans repère : des flèches et une règle',
+      essentiel: [
+        '**Bout à bout** (méthode du triangle) : place $\\vec{v}$ à la suite de $\\vec{u}$ ; la somme va du point de départ au point d\'arrivée.',
+        '**Même origine** (méthode du parallélogramme) : $\\vec{u} + \\vec{v}$ est la diagonale du parallélogramme construit sur $\\vec{u}$ et $\\vec{v}$.',
+        'L\'ordre ne compte pas : $\\vec{u} + \\vec{v} = \\vec{v} + \\vec{u}$.',
+      ],
+      cartes: [
+        { question: 'Méthode du triangle : comment les deux vecteurs sont-ils placés ?', reponse: 'Bout à bout : l\'origine de $\\vec{v}$ est l\'extrémité de $\\vec{u}$.' },
+        { question: '$\\vec{u}$ et $\\vec{v}$ ont la même origine : que représente $\\vec{u} + \\vec{v}$ ?', reponse: 'La diagonale du parallélogramme construit sur $\\vec{u}$ et $\\vec{v}$, issue de cette origine.' },
+        { question: '$\\vec{u} + \\vec{v}$ et $\\vec{v} + \\vec{u}$ sont-ils égaux ?', reponse: 'Oui : l\'ordre ne compte pas.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -518,6 +564,17 @@ export const calculVectoriel: ChapterContent = {
       number: 5,
       title: 'Soustraire un vecteur',
       kicker: 'retrancher un vecteur, c\'est ajouter son opposé',
+      titreCourt: 'Soustraire un vecteur',
+      partie: 'Sans repère : des flèches et une règle',
+      essentiel: [
+        'Retrancher un vecteur, c\'est ajouter son opposé : $\\vec{u} - \\vec{v} = \\vec{u} + (-\\vec{v})$.',
+        'À partir d\'une même origine, $\\vec{u} - \\vec{v}$ va de l\'extrémité de $\\vec{v}$ à l\'extrémité de $\\vec{u}$ — dans ce sens précis.',
+      ],
+      cartes: [
+        { question: 'Écris $\\vec{u} - \\vec{v}$ comme une somme.', reponse: '$\\vec{u} + (-\\vec{v})$.' },
+        { question: '$\\vec{u}$ et $\\vec{v}$ partent du même point : d\'où part $\\vec{u} - \\vec{v}$, et où arrive-t-il ?', reponse: 'Il part de l\'extrémité de $\\vec{v}$ et arrive à l\'extrémité de $\\vec{u}$.' },
+        { question: 'Comment vérifier que $\\vec{w} = \\vec{u} - \\vec{v}$ ?', reponse: '$\\vec{w} + \\vec{v} = \\vec{u}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Soustraire un vecteur, relation de Chasles, décomposer un vecteur', youtubeId: '5Bb0aZwuzK4' },
         {
@@ -559,6 +616,18 @@ export const calculVectoriel: ChapterContent = {
       number: 6,
       title: 'Réduire une somme de vecteurs : la relation de Chasles',
       kicker: 'AB + BC = AC',
+      titreCourt: 'Relation de Chasles',
+      partie: 'Sans repère : des flèches et une règle',
+      essentiel: [
+        'Une chaîne de vecteurs qui se relaient se réduit au vecteur qui va du tout premier point au tout dernier : $\\vec{AB} + \\vec{BC} = \\vec{AC}$.',
+        'Une chaîne **fermée** se réduit au vecteur nul. Un vecteur écrit « à l\'envers » ? Remplace-le d\'abord par son opposé.',
+      ],
+      cartes: [
+        { question: 'Que vaut $\\vec{AB} + \\vec{BC} + \\vec{CD}$ ?', reponse: '$\\vec{AD}$.' },
+        { question: 'Que vaut la chaîne fermée $\\vec{AB} + \\vec{BC} + \\vec{CA}$ ?', reponse: '$\\vec{0}$.' },
+        { question: '$\\vec{AB} - \\vec{AC}$ vaut-il $\\vec{BC}$ ?', reponse: 'Non : $\\vec{AB} - \\vec{AC} = \\vec{CB}$.' },
+        { question: 'I est le milieu de [AB] : que vaut $\\vec{IA} + \\vec{IB}$ ?', reponse: '$\\vec{0}$ : ces deux vecteurs sont opposés.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -726,6 +795,17 @@ export const calculVectoriel: ChapterContent = {
       number: 7,
       title: 'Décomposer un vecteur selon deux directions',
       kicker: 'méthode du parallélogramme, en sens inverse',
+      titreCourt: 'Décomposer un vecteur',
+      partie: 'Sans repère : des flèches et une règle',
+      essentiel: [
+        'Décomposer $\\vec{u}$ selon deux directions non colinéaires, c\'est l\'écrire $\\vec{u} = a\\vec{v} + b\\vec{w}$ : la méthode du parallélogramme, en sens inverse.',
+        'Trace des **parallèles** aux deux directions, jamais des perpendiculaires ; un coefficient est négatif quand on va à contresens.',
+      ],
+      cartes: [
+        { question: 'Pour décomposer $\\vec{u}$, que trace-t-on par son extrémité ?', reponse: 'Les parallèles aux deux directions imposées.' },
+        { question: 'Quand le coefficient a de $\\vec{u} = a\\vec{v} + b\\vec{w}$ est-il négatif ?', reponse: 'Quand on va à contresens de $\\vec{v}$ ($\\vec{PM}$ et $\\vec{v}$ de sens contraires).' },
+        { question: 'Peut-on décomposer un vecteur selon $\\vec{v}$ et $\\vec{w}$ colinéaires ?', reponse: 'Non : les deux directions n\'en font qu\'une.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -876,6 +956,17 @@ export const calculVectoriel: ChapterContent = {
       number: 8,
       title: 'Caractériser un vecteur dans un repère : les composantes',
       kicker: 'arrivée moins départ : deux nombres suffisent',
+      titreCourt: 'Les composantes',
+      partie: 'Dans un repère : les composantes',
+      essentiel: [
+        'Dans un repère, deux nombres suffisent à décrire un vecteur : ses **composantes**, « arrivée moins départ » : $\\vec{AB}\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$.',
+        'Deux vecteurs sont égaux exactement quand ils ont les mêmes composantes.',
+      ],
+      cartes: [
+        { question: 'Comment calcule-t-on les composantes de $\\vec{AB}$ ?', reponse: 'Arrivée moins départ : $\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$.' },
+        { question: 'A(2 ; −1) et B(5 ; 3) : composantes de $\\vec{AB}$ ?', reponse: '$\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$.' },
+        { question: 'Que donne le calcul « départ moins arrivée » (A − B) ?', reponse: 'Les composantes de $\\vec{BA}$, le vecteur opposé.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Composantes, addition, multiplication par un réel, norme et distance', youtubeId: '7edwkWKGw0Y' },
         {
@@ -954,6 +1045,17 @@ export const calculVectoriel: ChapterContent = {
       number: 9,
       title: 'Additionner deux vecteurs dans un repère',
       kicker: 'on additionne composante par composante',
+      titreCourt: 'Additionner dans un repère',
+      partie: 'Dans un repère : les composantes',
+      essentiel: [
+        'Dans un repère, on additionne ou on soustrait **composante par composante** : $\\vec{u} + \\vec{v} = \\begin{pmatrix} x_u+x_v \\\\ y_u+y_v \\end{pmatrix}$.',
+        'Un vecteur nommé et un vecteur point-à-point se combinent librement : calcule d\'abord leurs composantes.',
+      ],
+      cartes: [
+        { question: 'Composantes de $\\vec{u} + \\vec{v}$ ?', reponse: '$\\begin{pmatrix} x_u+x_v \\\\ y_u+y_v \\end{pmatrix}$.' },
+        { question: '$\\vec{u}\\begin{pmatrix} 2 \\\\ 3 \\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix} -1 \\\\ 4 \\end{pmatrix}$ : composantes de $\\vec{u} + \\vec{v}$ ?', reponse: '$\\begin{pmatrix} 1 \\\\ 7 \\end{pmatrix}$.' },
+        { question: 'Composantes de $\\vec{u} - \\vec{v}$ ?', reponse: '$\\begin{pmatrix} x_u-x_v \\\\ y_u-y_v \\end{pmatrix}$.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -986,6 +1088,17 @@ export const calculVectoriel: ChapterContent = {
       number: 10,
       title: 'Multiplier un vecteur par un réel dans un repère',
       kicker: 'on multiplie chaque composante par k',
+      titreCourt: 'Multiplier dans un repère',
+      partie: 'Dans un repère : les composantes',
+      essentiel: [
+        'Multiplier un vecteur par un réel k, c\'est multiplier **chacune** de ses composantes par k : $k \\cdot \\vec{u} = \\begin{pmatrix} k \\cdot x_u \\\\ k \\cdot y_u \\end{pmatrix}$.',
+        'L\'opposé est le cas $k = -1$ : chaque composante change de signe.',
+      ],
+      cartes: [
+        { question: 'Composantes de $k \\cdot \\vec{u}$ ?', reponse: '$\\begin{pmatrix} k \\cdot x_u \\\\ k \\cdot y_u \\end{pmatrix}$.' },
+        { question: '$\\vec{u}\\begin{pmatrix} x \\\\ y \\end{pmatrix}$ : composantes de $-\\vec{u}$ ?', reponse: '$\\begin{pmatrix} -x \\\\ -y \\end{pmatrix}$.' },
+        { question: 'Que vaut $3 \\cdot \\begin{pmatrix} 2 \\\\ -1 \\end{pmatrix}$ ?', reponse: '$\\begin{pmatrix} 6 \\\\ -3 \\end{pmatrix}$.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -1050,6 +1163,18 @@ export const calculVectoriel: ChapterContent = {
       number: 11,
       title: "Norme d'un vecteur et distance entre deux points",
       kicker: '‖u‖ = √(x² + y²) — Pythagore dans le repère',
+      titreCourt: 'Norme et distance',
+      partie: 'Dans un repère : les composantes',
+      essentiel: [
+        'La **norme** est la longueur d\'un vecteur : $\\|\\vec{u}\\| = \\sqrt{x_u^2 + y_u^2}$ (Pythagore dans le repère). Elle est toujours positive ou nulle.',
+        'La distance AB est la norme de $\\vec{AB}$. Après des déplacements successifs, on additionne les vecteurs puis on calcule la norme : jamais la somme des longueurs.',
+      ],
+      cartes: [
+        { question: 'Norme de $\\vec{u}\\begin{pmatrix} x_u \\\\ y_u \\end{pmatrix}$ ?', reponse: '$\\|\\vec{u}\\| = \\sqrt{x_u^2 + y_u^2}$.' },
+        { question: 'Norme de $\\vec{u}\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$ ?', reponse: '$\\sqrt{3^2 + 4^2} = 5$.' },
+        { question: 'Que vaut $\\|k \\cdot \\vec{u}\\|$ ?', reponse: '$|k| \\cdot \\|\\vec{u}\\|$.' },
+        { question: '3 km vers l\'est puis 4 km vers le nord : à quelle distance du départ, à vol d\'oiseau ?', reponse: '5 km (alors qu\'on a parcouru 7 km).' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -1279,6 +1404,18 @@ export const calculVectoriel: ChapterContent = {
       number: 12,
       title: 'Vecteurs, translation et milieu',
       kicker: 'B = A + u — le milieu est la moyenne des coordonnées',
+      titreCourt: 'Translation et milieu',
+      partie: 'Dans un repère : les composantes',
+      essentiel: [
+        'Translation : B = A + $\\vec{u}$, donc $x_B = x_A + x_u$ et $y_B = y_A + y_u$.',
+        'Le milieu de [AB] a pour coordonnées la **moyenne** des coordonnées de A et de B, jamais leur différence. $\\vec{AM} = k \\cdot \\vec{AB}$ place M sur la droite (AB) ; $k = \\frac{1}{2}$ donne le milieu.',
+      ],
+      cartes: [
+        { question: 'Coordonnées du milieu M de [AB] ?', reponse: '$x_M = \\dfrac{x_A+x_B}{2}$ et $y_M = \\dfrac{y_A+y_B}{2}$.' },
+        { question: 'B est le translaté de A(1 ; 1) par $\\vec{u}\\begin{pmatrix} 4 \\\\ 2 \\end{pmatrix}$ : coordonnées de B ?', reponse: 'B(5 ; 3).' },
+        { question: 'Que donne la différence des coordonnées de A et de B ?', reponse: 'Les composantes de $\\vec{AB}$, pas le milieu.' },
+        { question: 'ABCD est un parallélogramme : que dire de ses diagonales [AC] et [BD] ?', reponse: 'Elles ont le même milieu.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Translation, milieu, colinéarité et alignement par le calcul', youtubeId: '8N9j50tNawQ' },
         {
@@ -1461,6 +1598,18 @@ export const calculVectoriel: ChapterContent = {
       number: 13,
       title: 'Colinéarité de vecteurs et alignement de points',
       kicker: 'colinéaires ⟺ produits en croix égaux',
+      titreCourt: 'Colinéarité et alignement',
+      partie: 'Dans un repère : les composantes',
+      essentiel: [
+        'Critère de colinéarité : $\\vec{u}$ et $\\vec{v}$ sont colinéaires ⟺ $x_u \\cdot y_v - y_u \\cdot x_v = 0$ : les produits en croix sont égaux.',
+        'A, B et C sont alignés ⟺ $\\vec{AB}$ et $\\vec{AC}$ sont colinéaires. Colinéaires **sans point commun** : droites parallèles, pas d\'alignement.',
+      ],
+      cartes: [
+        { question: 'Énonce le critère de colinéarité de $\\vec{u}$ et $\\vec{v}$.', reponse: '$x_u \\cdot y_v - y_u \\cdot x_v = 0$ (produits en croix égaux).' },
+        { question: 'A(0 ; 0), B(2 ; 1) et C(6 ; 3) sont-ils alignés ?', reponse: 'Oui : $2 \\times 3 - 1 \\times 6 = 0$, et $\\vec{AC} = 3\\vec{AB}$.' },
+        { question: 'Le critère de colinéarité vaut 1 : les vecteurs sont-ils colinéaires ?', reponse: 'Non : le critère doit être exactement nul.' },
+        { question: 'Deux vecteurs colinéaires n\'ont aucun point commun : que peut-on conclure ?', reponse: 'Leurs droites sont parallèles ; on ne peut pas conclure à un alignement.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -1646,6 +1795,18 @@ export const calculVectoriel: ChapterContent = {
       number: 14,
       title: 'Orthogonalité et Pythagore généralisé',
       kicker: 'orthogonaux ⟺ produit scalaire nul',
+      titreCourt: 'Orthogonalité',
+      partie: 'Dans un repère : les composantes',
+      essentiel: [
+        '$\\vec{u}$ et $\\vec{v}$ sont **orthogonaux** ⟺ $x_u \\cdot x_v + y_u \\cdot y_v = 0$ : le produit scalaire est nul. ABC est rectangle en A ⟺ $\\vec{AB} \\cdot \\vec{AC} = 0$.',
+        'Nature d\'un quadrilatère : le parallélogramme d\'abord ($\\vec{AB} = \\vec{DC}$), puis deux côtés consécutifs égaux (losange) ou un angle droit (rectangle).',
+      ],
+      cartes: [
+        { question: 'Énonce le critère d\'orthogonalité de $\\vec{u}$ et $\\vec{v}$.', reponse: '$x_u \\cdot x_v + y_u \\cdot y_v = 0$ (produit scalaire nul).' },
+        { question: '$\\vec{AB}\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$ et $\\vec{AC}\\begin{pmatrix} -4 \\\\ 3 \\end{pmatrix}$ : le triangle ABC est-il rectangle en A ?', reponse: 'Oui : $3 \\times (-4) + 4 \\times 3 = 0$.' },
+        { question: 'Un parallélogramme qui a un angle droit est un…', reponse: 'rectangle.' },
+        { question: 'Deux vecteurs non nuls colinéaires peuvent-ils être orthogonaux ?', reponse: 'Non, jamais.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Orthogonalité, Pythagore généralisé et vecteur directeur d\'une droite', youtubeId: 'ihkFhTzx3zI' },
         {
@@ -2021,6 +2182,17 @@ export const calculVectoriel: ChapterContent = {
       number: 15,
       title: "Vecteurs directeurs d'une droite",
       kicker: 'tout vecteur défini par deux points distincts de la droite',
+      titreCourt: 'Vecteurs directeurs',
+      partie: 'Dans un repère : les composantes',
+      essentiel: [
+        'Un **vecteur directeur** de d est un vecteur défini par deux points distincts de d : une droite en a une infinité, tous colinéaires entre eux.',
+        'La droite $y = mx + p$ a pour vecteur directeur $\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$ ; une droite horizontale $\\begin{pmatrix} k \\\\ 0 \\end{pmatrix}$, une droite verticale $\\begin{pmatrix} 0 \\\\ k \\end{pmatrix}$, avec $k \\neq 0$.',
+      ],
+      cartes: [
+        { question: 'Donne un vecteur directeur de la droite $y = 2x - 1$.', reponse: '$\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}$, ou tout multiple non nul.' },
+        { question: 'Combien une droite a-t-elle de vecteurs directeurs ?', reponse: 'Une infinité, tous colinéaires entre eux.' },
+        { question: 'Vecteur directeur d\'une droite verticale ?', reponse: '$\\begin{pmatrix} 0 \\\\ k \\end{pmatrix}$, avec $k \\neq 0$.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -2133,6 +2305,17 @@ export const calculVectoriel: ChapterContent = {
       number: 16,
       title: 'Comparer des vecteurs : longueur, direction, sens',
       kicker: '3 propriétés indépendantes — chacune peut coïncider ou non',
+      titreCourt: 'Comparer des vecteurs',
+      partie: 'Comparer, appliquer, réviser',
+      essentiel: [
+        'Deux vecteurs peuvent partager leur longueur, leur direction et leur sens — ou seulement une partie. L\'égalité exige les trois à la fois.',
+        'Même longueur ne veut **jamais** dire colinéaires.',
+      ],
+      cartes: [
+        { question: 'Qu\'exige l\'égalité de deux vecteurs ?', reponse: 'Même longueur, même direction et même sens.' },
+        { question: 'Que partagent $\\vec{u}$ et $2\\vec{u}$ ?', reponse: 'La direction et le sens, pas la longueur.' },
+        { question: 'Deux vecteurs de même norme sont-ils forcément colinéaires ?', reponse: 'Non : ils peuvent pointer dans des directions complètement différentes.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Comparer des vecteurs et résultante de deux forces', youtubeId: 'x1WjMH6shXc' },
         {
@@ -2208,6 +2391,18 @@ export const calculVectoriel: ChapterContent = {
       number: 17,
       title: 'Applications physiques : la résultante',
       kicker: 'R² = F₁² + F₂² + 2·F₁·F₂·cos θ (Al-Kashi, loi des cosinus, chapitre 5)',
+      titreCourt: 'La résultante (physique)',
+      partie: 'Comparer, appliquer, réviser',
+      essentiel: [
+        'Deux forces ou deux vitesses s\'additionnent comme des vecteurs : leur **résultante** est la diagonale du parallélogramme.',
+        'Sa norme : $R^2 = F_1^2 + F_2^2 + 2 \\cdot F_1 \\cdot F_2 \\cdot \\cos\\theta$, avec $\\theta$ l\'angle entre les deux vecteurs (ou par les composantes). À l\'équilibre, $\\vec{F_3} = -(\\vec{F_1} + \\vec{F_2})$.',
+      ],
+      cartes: [
+        { question: 'Norme de la résultante de deux forces $F_1$ et $F_2$ qui forment un angle $\\theta$ ?', reponse: '$R^2 = F_1^2 + F_2^2 + 2 \\cdot F_1 \\cdot F_2 \\cdot \\cos\\theta$.' },
+        { question: 'Pourquoi un « + » dans cette formule, alors qu\'Al-Kashi a un « − » ?', reponse: 'L\'angle du triangle opposé à R vaut $180° - \\theta$, et $\\cos(180° - \\theta) = -\\cos\\theta$.' },
+        { question: 'Traversée d\'une rivière : par quoi divise-t-on la largeur pour obtenir la durée ?', reponse: 'Par la composante y de la vitesse réelle.' },
+        { question: 'Trois forces en équilibre : que vaut $\\vec{F_3}$ ?', reponse: '$\\vec{F_3} = -(\\vec{F_1} + \\vec{F_2})$, l\'opposée de la résultante des deux autres.' },
+      ],
       blocks: [
         {
           kind: 'intuition',
@@ -2583,6 +2778,15 @@ export const calculVectoriel: ChapterContent = {
       number: 18,
       title: 'Révision — quiz vrai/faux',
       kicker: '420 affirmations en 12 thèmes',
+      titreCourt: 'Révision : vrai ou faux',
+      partie: 'Comparer, appliquer, réviser',
+      essentiel: [
+        'Le quiz vrai/faux reprend tout le chapitre en 12 thèmes, dans l\'ordre des sections : il est dans l\'onglet **Réviser**, avec la fiche du chapitre et le formulaire.',
+      ],
+      cartes: [
+        { question: 'Une copie calcule les composantes de $\\vec{AB}$ par A − B : quelle est l\'erreur ?', reponse: 'Elle obtient $\\vec{BA}$ : c\'est « arrivée moins départ », B − A.' },
+        { question: 'Une copie écrit : ABCD parallélogramme ⟺ $\\vec{AB} = \\vec{CD}$. Quelle est l\'erreur ?', reponse: 'Il faut $\\vec{AB} = \\vec{DC}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Révision : la synthèse du chapitre', youtubeId: 'raOgCbx0OOI' },
         {
