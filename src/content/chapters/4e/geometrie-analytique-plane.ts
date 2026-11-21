@@ -1296,6 +1296,31 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           ],
           result: { tag: 'tangente', text: '$3x + 4y - 32 = 0$ — contrôle : $3 \\cdot 4 + 4 \\cdot 5 - 32 = 0$ ✓' },
         },
+        { kind: 'subheading', text: "Pour aller plus loin — position relative d'une droite et d'un cercle" },
+        {
+          kind: 'methode',
+          label: 'Méthode — comparer la distance au rayon',
+          items: [
+            'Calcule la distance CH du centre C à la droite d, comme à la section 6 : perpendiculaire à d par C, pied H, puis norme de $\\vec{CH}$.',
+            'Compare-la au rayon r. **CH > r** : d est extérieure au cercle (aucun point commun). **CH = r** : d est tangente au cercle en H (un seul point commun). **CH < r** : d est sécante (deux points communs).',
+            'Pour comparer deux racines, compare leurs carrés : $CH^2$ avec $r^2$, jamais $CH^2$ avec r.',
+            'Même idée à l\'envers : le cercle de centre C tangent à une droite d a pour rayon $r = CH$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'droite et cercle : distance et rayon',
+          formula: 'Position relative de la droite $d : x + 2y + 5 = 0$ et du cercle $\\Gamma : x^2+y^2-6x-2y-8=0$.',
+          steps: [
+            { tag: 'centre et rayon', text: '$(x-3)^2+(y-1)^2=18$ : centre C(3 ; 1), rayon $r=\\sqrt{18}=3\\sqrt{2}$' },
+            {
+              tag: 'pied H',
+              text: 'perpendiculaire par C : $\\begin{cases} x = 3+t \\\\ y = 1+2t \\end{cases}$ ; $(3+t)+2(1+2t)+5=0 \\to 5t+10=0 \\to t=-2$ → H(1 ; −3)',
+            },
+            { tag: 'distance', text: '$CH=\\sqrt{(1-3)^2+(-3-1)^2}=\\sqrt{20}=2\\sqrt{5}$' },
+          ],
+          result: { tag: 'comparaison', text: '$CH^2=20>18=r^2$, donc $CH>r$ : d est extérieure à Γ, aucun point commun' },
+        },
         {
           kind: 'atelier',
           tag: 'cercle-equation-widget',
@@ -1369,6 +1394,14 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           description: ["Pars de l'équation développée. Complète le carré et retrouve le centre et le rayon exacts."],
           chantier: '4e',
           whereLabel: "4e → « 50. Centre et rayon d'un cercle »",
+        },
+        {
+          kind: 'entrainement',
+          title: 'Tangente et position relative',
+          generatorId: 'gen92',
+          description: ["Écris la tangente en un point du cercle. Décide si une droite est extérieure, tangente ou sécante à un cercle en comparant la distance du centre au rayon. Ou trouve le cercle de centre donné tangent à une droite."],
+          chantier: '4e',
+          whereLabel: "4e → « 92. Tangente et position relative d'une droite et d'un cercle »",
         },
       ],
     },

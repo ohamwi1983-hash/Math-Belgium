@@ -301,6 +301,17 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     String.raw`Détermine le sommet S, le foyer F, le paramètre p et l'équation de la directrice d de la (?<ligne>parabole d'équation ${M})\.`,
     "Détermine le sommet S, le foyer F, le paramètre p et l'équation de la directrice d de chaque parabole.",
   ),
+  // gen92 : « On donne le cercle Γ ≡ … et son point P(…). » / « la droite d ≡ … et le cercle Γ ≡ … » /
+  // « le point C(…) et la droite d ≡ … », puis la consigne de la variante (une consigne par variante).
+  gen92: {
+    formes: [
+      {
+        motif: re(String.raw`On donne (?:le cercle|la droite|le point) (?<a>${M}) et (?:son point|le cercle|la droite) (?<b>${M})\.\n(?<q>.+)`),
+        consigne: dansChaqueCas,
+        ligne: (g) => `${g.a} et ${g.b}`,
+      },
+    ],
+  },
   gen11: {
     formes: [{ motif: re(String.raw`On considère la fonction (?<ligne>${M})\.\nDétermine la forme canonique de la fonction(?<s>.*)`), consigne: (g) => `Détermine la forme canonique de chaque fonction${g.s}` }],
   },
