@@ -141,7 +141,11 @@ export function FormulaireSeance({
     // Même classe ce jour-là : le créneau qui commence à la même heure, sinon le premier.
     const suivant = liste.find((c) => actuel && c.heureDebut === actuel.heureDebut) ?? liste[0] ?? null
     if (suivant) appliquerCreneau(suivant)
-    else setCreneauCle('')
+    else if (creneauCle) {
+      setCreneauCle('')
+      setNumero('')
+      setNumeroFin('')
+    }
   }
 
   function changerClasse(nouvelle: string) {
@@ -151,9 +155,16 @@ export function FormulaireSeance({
       const liste = creneauxDate.filter((c) => c.classe_id === nouvelle)
       const suivant = liste.find((c) => actuel && c.heureDebut === actuel.heureDebut) ?? liste[0] ?? null
       if (suivant) appliquerCreneau(suivant)
-      else setCreneauCle('')
+      else if (creneauCle) {
+        // Le numéro d'heure du créneau quitté ne vaut pas pour cette classe.
+        setCreneauCle('')
+        setNumero('')
+        setNumeroFin('')
+      }
     }
-    if (!horaireTouche && !initiale) {
+    // Avec un créneau de l'horaire pour cette classe, ses heures priment sur l'horaire « par défaut ».
+    const creneauTrouve = horaire !== null && creneauxDate.some((c) => c.classe_id === nouvelle)
+    if (!horaireTouche && !initiale && !creneauTrouve) {
       const h = horaireParDefaut(new Date(), reglages.duree_heure, seances.filter((s) => s.classe_id === nouvelle), date)
       setDebut(h.heure_debut ?? '')
       setFin(h.heure_fin ?? '')

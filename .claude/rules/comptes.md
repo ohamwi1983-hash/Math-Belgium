@@ -332,7 +332,7 @@ recopier son PDF officiel, source + date, `verifie: true`.
 
 **Vérifications** : Playwright sur un build de test (faux client étendu aux deux tables, option
 `horaireAbsent` qui refuse aussi `numero_heure_fin` — 42703), heure figée (`page.clock`, Europe/Brussels),
-iPhone 13 et 1 280 px, clair et sombre : 352 vérifications (grille et aperçu, correction d'heure,
+iPhone 13 et 1 280 px, clair et sombre : 360 vérifications (grille et aperçu, correction d’heure,
 semaine, Aujourd'hui, séance pré-remplie + autre créneau / autre date, heure double en base,
 Smartschool, oubliées et « Noter », congés, 2030 à confirmer, deux écoles + chevauchement, heures
 restantes, grille raccourcie, chapitre → créneau, 0003 absent) ; 0 erreur console, `scrollWidth` =
