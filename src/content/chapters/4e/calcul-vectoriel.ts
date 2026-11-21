@@ -24,7 +24,7 @@ export const calculVectoriel: ChapterContent = {
           "Imagine qu'on te dise : « le trésor est caché à 10 mètres d'ici. » Tu ne sais " +
           "toujours pas où creuser ! Il manque une **direction** — « 10 mètres vers le " +
           "nord-est », par exemple. Un simple nombre décrit une longueur. Un **vecteur** " +
-          'décrit un déplacement complet : une longueur ET une direction. Voilà exactement ' +
+          'décrit un déplacement complet : une longueur et une direction. Voilà exactement ' +
           'ce que ce chapitre va formaliser.',
       },
       {
@@ -176,10 +176,13 @@ export const calculVectoriel: ChapterContent = {
             'une direction et une longueur, en trois dimensions. Pris d\'enthousiasme, il ' +
             'grave sur-le-champ la formule centrale de sa découverte — ' +
             '$i^2=j^2=k^2=ijk=-1$ — dans la pierre du pont de Broom Bridge. Ces ' +
-            '« quaternions » sont la toute première tentative sérieuse de calculer avec des ' +
-            'grandeurs à la fois dirigées ET mesurables — l\'idée même qui deviendra, une ' +
-            'fois simplifiée quelques décennies plus tard, le vecteur que tu utilises dans ' +
-            'ce chapitre.',
+            '« quaternions » sont l\'une des premières tentatives de calculer, en trois ' +
+            'dimensions, avec des grandeurs à la fois dirigées et mesurables. Dans le plan, ' +
+            'd\'autres l\'avaient déjà fait : le Norvégien Caspar Wessel (1799) et le Suisse ' +
+            'Jean-Robert Argand (1806) avec les nombres complexes, puis l\'Italien Giusto ' +
+            'Bellavitis, dont les « équipollences » (1835) sont déjà des vecteurs du plan. ' +
+            'Simplifiée quelques décennies plus tard, l\'idée de Hamilton deviendra le ' +
+            'vecteur que tu utilises dans ce chapitre.',
           image: {
             src: '/images/historique/hamilton.jpg',
             alt: 'Portrait de William Rowan Hamilton',
@@ -301,9 +304,10 @@ export const calculVectoriel: ChapterContent = {
           kind: 'para',
           text:
             'Deux vecteurs sont **colinéaires** quand ils ont la même direction. Ils sont ' +
-            'portés par des droites parallèles, ou par la même droite. Trois points sont ' +
-            '**alignés** exactement quand deux vecteurs formés à partir de ces points sont ' +
-            'colinéaires. Par convention, le vecteur nul est colinéaire à tous les vecteurs.',
+            'portés par des droites parallèles, ou par la même droite. Trois points A, B et C ' +
+            'sont **alignés** exactement quand $\\vec{AB}$ et $\\vec{AC}$ (deux vecteurs de ' +
+            'même origine A) sont colinéaires. Par convention, le vecteur nul est colinéaire ' +
+            'à tous les vecteurs.',
         },
         {
           kind: 'intuition',
@@ -848,7 +852,7 @@ export const calculVectoriel: ChapterContent = {
             'direction oblique précise. Pour calculer si une poutre va résister, un ' +
             'ingénieur décompose la force exercée par le câble (un vecteur) selon deux ' +
             'directions utiles — horizontale et verticale, ou selon l\'axe de la poutre et ' +
-            'perpendiculairement à lui — EXACTEMENT la méthode de cette section. La ' +
+            'perpendiculairement à lui — exactement la méthode de cette section. La ' +
             'composante verticale indique le poids réellement supporté, la composante ' +
             'horizontale la compression ou la traction exercée sur la structure. Se tromper ' +
             'dans cette décomposition peut littéralement faire s\'effondrer un ouvrage.',
@@ -992,8 +996,9 @@ export const calculVectoriel: ChapterContent = {
           label: 'Rappel — composantes opposées',
           items: [
             'Si $\\vec{u}$ a pour composantes $\\begin{pmatrix} x \\\\ y \\end{pmatrix}$, alors ' +
-              '$-\\vec{u}$ a pour composantes $\\begin{pmatrix} -x \\\\ -y \\end{pmatrix}$. ' +
-              'Chaque composante change juste de signe — rien d\'autre ne bouge.',
+              '$-\\vec{u}$ a pour composantes $\\begin{pmatrix} -x \\\\ -y \\end{pmatrix}$ : ' +
+              '$-\\vec{u} = (-1) \\cdot \\vec{u}$. Chaque composante change juste de signe — rien ' +
+              'd\'autre ne bouge.',
           ],
         },
         {
@@ -1169,13 +1174,24 @@ export const calculVectoriel: ChapterContent = {
           ],
         },
         {
+          kind: 'para',
+          text:
+            'Sur un quadrillage, un **pas en diagonale** va de case en case : une case vers ' +
+            'l\'ouest **et** une case vers le nord pour le nord-ouest. Ses deux composantes ' +
+            'changent donc de 1 à chaque pas : a pas vers le nord-est donnent ' +
+            '$\\begin{pmatrix} a \\\\ a \\end{pmatrix}$, vers le sud-est ' +
+            '$\\begin{pmatrix} a \\\\ -a \\end{pmatrix}$, vers le sud-ouest ' +
+            '$\\begin{pmatrix} -a \\\\ -a \\end{pmatrix}$. Attention : un tel pas mesure ' +
+            '$\\sqrt{1^2 + 1^2} = \\sqrt{2}$ cases, et non 1.',
+        },
+        {
           kind: 'attention',
           label: 'Distance parcourue ou distance à vol d\'oiseau ?',
           text:
             'Après 3 km vers l\'est puis 4 km vers le nord, on a **parcouru** 3 + 4 = 7 km, ' +
             'mais on ne se trouve qu\'à $\\sqrt{3^2 + 4^2} = 5$ km du départ **à vol d\'oiseau**. ' +
             'Additionner les longueurs des étapes ne donne jamais la distance en ligne droite : ' +
-            'on additionne les VECTEURS, puis on calcule la norme du résultat.',
+            'on additionne les vecteurs, puis on calcule la norme du résultat.',
         },
         {
           kind: 'entrainement',
@@ -1224,12 +1240,15 @@ export const calculVectoriel: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
+            'Composantes et points — « arrivée moins départ » : $\\vec{AB} = B - A$, composante par ' +
+              'composante, soit $\\vec{AB}\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$. C\'est la même ' +
+              'relation, lue dans l\'autre sens, que la translation $B = A + \\vec{AB}$.',
             'Translation — B est le translaté de A par $\\vec{u}$ : B = A + $\\vec{u}$. Donc ' +
               '$x_B=x_A+x_u$ et $y_B=y_A+y_u$.',
-            'Milieu — M milieu de [AB] : $x_M=(x_A+x_B)/2$ et $y_M=(y_A+y_B)/2$. De façon ' +
+            'Milieu — M milieu de [AB] : $x_M=\\dfrac{x_A+x_B}{2}$ et $y_M=\\dfrac{y_A+y_B}{2}$. De façon ' +
               'équivalente : $\\vec{AM} = \\vec{MB} = \\frac{1}{2}\\vec{AB}$.',
             'Relation générale — $\\vec{AM} = k \\cdot \\vec{AB}$ place toujours M sur la droite ' +
-              '(AB). k=1/2 redonne le milieu, k=1 redonne B, k=0 redonne A.',
+              '(AB). $k = \\frac{1}{2}$ redonne le milieu, $k = 1$ redonne B, $k = 0$ redonne A.',
           ],
         },
         {
@@ -1238,7 +1257,7 @@ export const calculVectoriel: ChapterContent = {
           formula: 'A(1 ; 1), $\\vec{u} = \\begin{pmatrix} 4 \\\\ 2 \\end{pmatrix}$.',
           steps: [
             { tag: 'translaté B de A par u', text: '$x_B=1+4=5$, $y_B=1+2=3$ → B(5 ; 3)' },
-            { tag: 'milieu M de [AB]', text: '$x_M=(1+5)/2=3$, $y_M=(1+3)/2=2$ → M(3 ; 2)' },
+            { tag: 'milieu M de [AB]', text: '$x_M=\\dfrac{1+5}{2}=3$, $y_M=\\dfrac{1+3}{2}=2$ → M(3 ; 2)' },
           ],
           result: { tag: 'résultat', text: 'B(5 ; 3), M(3 ; 2)' },
         },
@@ -1258,7 +1277,7 @@ export const calculVectoriel: ChapterContent = {
             'Trois façons de placer un point grâce à un vecteur. En mode Milieu, compare le ' +
             'vrai milieu (la moyenne des coordonnées) au piège de la différence. En mode AM ' +
             '= k·AB, fais varier k : M glisse sur la droite (AB) — en A pour k = 0, au ' +
-            'milieu pour k = 1/2, en B pour k = 1, au-delà pour k > 1. En mode Symétrique, ' +
+            'milieu pour k = ½, en B pour k = 1, au-delà pour k > 1. En mode Symétrique, ' +
             'B devient le milieu de [AA′]. Le réglage de départ reproduit l\'exemple ' +
             'ci-dessus.',
         },
@@ -1271,7 +1290,7 @@ export const calculVectoriel: ChapterContent = {
             { tag: 'composantes', text: '$\\vec{AB}\\begin{pmatrix} 4 \\\\ 1 \\end{pmatrix}$ et $\\vec{DC}\\begin{pmatrix} 6-x_D \\\\ 5-y_D \\end{pmatrix}$' },
             { tag: 'égaler', text: '$6 - x_D = 4$ et $5 - y_D = 1$, donc $x_D = 2$ et $y_D = 4$' },
           ],
-          result: { tag: 'résultat', text: 'D(2 ; 4) — contrôle : $\\vec{AD}$ et $\\vec{BC}$ valent tous deux $\\begin{pmatrix} 1 \\\\ 3 \\end{pmatrix}$' },
+          result: { tag: 'résultat', text: 'D(2 ; 4). En général, $x_D = x_A + x_C - x_B$ et $y_D = y_A + y_C - y_B$. Contrôle : $\\vec{AD}$ et $\\vec{BC}$ valent tous deux $\\begin{pmatrix} 1 \\\\ 3 \\end{pmatrix}$' },
         },
         {
           kind: 'atelier',
@@ -1409,7 +1428,7 @@ export const calculVectoriel: ChapterContent = {
           label: "Ne pas confondre avec l'orthogonalité",
           text:
             '$x_u \\cdot y_v - y_u \\cdot x_v = 0$ teste la **colinéarité**. ' +
-            '$x_u \\cdot x_v + y_u \\cdot y_v = 0$ teste l\'**orthogonalité** (section 14). ' +
+            '$x_u x_v + y_u y_v = 0$ teste l\'**orthogonalité** (section 14). ' +
             'Ces deux formules se ressemblent, mais attention : elles testent deux relations très différentes !',
         },
         {
@@ -1921,7 +1940,7 @@ export const calculVectoriel: ChapterContent = {
       id: 'applications',
       number: 17,
       title: 'Applications physiques : la résultante',
-      kicker: 'R² = F₁² + F₂² + 2·F₁·F₂·cos θ (loi des cosinus, chapitre 5)',
+      kicker: 'R² = F₁² + F₂² + 2·F₁·F₂·cos θ (Al-Kashi, loi des cosinus, chapitre 5)',
       blocks: [
         {
           kind: 'intuition',
@@ -1929,15 +1948,15 @@ export const calculVectoriel: ChapterContent = {
           text:
             'Imagine deux personnes qui tirent un traîneau, chacune dans une direction ' +
             "différente. Le traîneau ne part ni vers l'une, ni vers l'autre : il part dans " +
-            'une direction intermédiaire, déterminée par la force ET la direction de ' +
-            'CHACUNE des deux personnes. Cette force et cette direction combinées, c\'est ' +
+            'une direction intermédiaire, déterminée par la force et la direction de ' +
+            'chacune des deux personnes. Cette force et cette direction combinées, c\'est ' +
             'exactement ce que donne $\\vec{v_R} = \\vec{v_1} + \\vec{v_2}$.',
         },
         {
           kind: 'para',
           text:
             'Deux forces ou deux vitesses s\'additionnent comme des vecteurs. Leur ' +
-            '**résultante** se calcule avec la loi des cosinus, vue au chapitre précédent. Le ' +
+            '**résultante** se calcule avec Al-Kashi (loi des cosinus), vu au chapitre précédent. Le ' +
             'triangle formé par les deux vecteurs et leur somme n\'est presque jamais rectangle !',
         },
         {
@@ -2037,7 +2056,7 @@ export const calculVectoriel: ChapterContent = {
           result: {
             tag: 'résultat',
             text:
-              'mêmes valeurs qu\'avec la loi des cosinus. Avantage : si la première composante de R est ' +
+              'mêmes valeurs qu\'avec Al-Kashi. Avantage : si la première composante de R est ' +
               'négative, la résultante penche vers l\'arrière et la déviation est obtuse — le piège ' +
               'ci-dessus se voit d\'un coup d\'œil.',
           },
@@ -2048,7 +2067,7 @@ export const calculVectoriel: ChapterContent = {
           label: 'Manipule toi-même : la règle du parallélogramme',
           caption:
             'Fais varier F₁, F₂ et l\'angle θ : le parallélogramme et la résultante R se ' +
-            'recalculent en direct, par la loi des cosinus et par les composantes. L\'angle ' +
+            'recalculent en direct, par Al-Kashi (loi des cosinus) et par les composantes. L\'angle ' +
             '180° − θ, en violet, explique le « + » de la formule. Le bouton « Déviation ' +
             'obtuse » montre le cas où la calculatrice se trompe d\'angle. Le réglage de ' +
             'départ reproduit le premier exemple de la section.',
@@ -2066,7 +2085,7 @@ export const calculVectoriel: ChapterContent = {
           kind: 'entrainement',
           title: 'Applications physiques (résultante de vecteurs)',
           generatorId: 'gen29',
-          description: ['Calcule la norme, la déviation et la direction cardinale de la résultante de deux vecteurs (avion/vent, forces), via la loi des cosinus.'],
+          description: ['Calcule la norme, la déviation et la direction cardinale de la résultante de deux vecteurs (avion/vent, forces), via Al-Kashi (loi des cosinus).'],
           chantier: '4e',
           whereLabel: '4e → « 29. Applications physiques (résultante de vecteurs) »',
         },
@@ -2201,10 +2220,9 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Un quiz vrai/faux qui couvre tout le chapitre, générateur par générateur. Un ' +
-            'thème par générateur — sauf les deux premiers (relation vectorielle), qui ' +
-            'partagent une seule banque de questions. Ils testent exactement le même contenu mathématique. ' +
-            'Le quiz se trouve tout en bas de la page, dans la synthèse.',
+            'Un quiz vrai/faux qui couvre tout le chapitre : 9 thèmes, un par grande notion du ' +
+            'chapitre (générateurs 20 à 29). Le quiz se trouve tout en bas de la page, dans la ' +
+            'synthèse.',
         },
         {
           kind: 'entrainement',
@@ -2229,9 +2247,10 @@ export const calculVectoriel: ChapterContent = {
       {
         title: 'Vecteur, composantes et norme',
         formulas: [
-          { text: '$\\vec{AB}\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$' },
+          { text: '$\\vec{AB}\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$', condition: 'composantes de $\\vec{AB}$ (« arrivée moins départ »)' },
           { text: '$\\|\\vec{u}\\| = \\sqrt{x_u^2+y_u^2}$' },
           { text: '$AB = \\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}$' },
+          { text: '$\\|k \\cdot \\vec{u}\\| = |k| \\cdot \\|\\vec{u}\\|$' },
         ],
       },
       {
@@ -2244,9 +2263,19 @@ export const calculVectoriel: ChapterContent = {
         ],
       },
       {
+        title: 'Décomposer un vecteur',
+        formulas: [
+          {
+            text: '$x_u = a \\cdot x_v + b \\cdot x_w \\quad y_u = a \\cdot y_v + b \\cdot y_w$',
+            condition: 'système de $\\vec{u} = a\\vec{v} + b\\vec{w}$, avec $\\vec{v}$ et $\\vec{w}$ non colinéaires',
+          },
+        ],
+      },
+      {
         title: 'Relation de Chasles',
         formulas: [
-          { text: '$\\vec{AB} + \\vec{BC} = \\vec{AC}$', condition: 'chaîne fermée → vecteur nul' },
+          { text: '$\\vec{AB} + \\vec{BC} = \\vec{AC}$', condition: 'relation de Chasles' },
+          { text: '$\\vec{AB} + \\vec{BC} + \\vec{CA} = \\vec{0}$', condition: 'chaîne fermée' },
           { text: '$\\vec{AB} - \\vec{AC} = \\vec{CB}$' },
           { text: '$\\vec{AB} = \\vec{CD}$', condition: 'ABDC est un parallélogramme' },
         ],
@@ -2256,8 +2285,18 @@ export const calculVectoriel: ChapterContent = {
         formulas: [
           { text: '$x_B=x_A+x_u$, $y_B=y_A+y_u$', condition: 'translation : B = A + u' },
           { text: '$x_M=\\dfrac{x_A+x_B}{2}$, $y_M=\\dfrac{y_A+y_B}{2}$', condition: 'milieu M de [AB]' },
-          { text: '$\\vec{AM} = k \\cdot \\vec{AB}$', condition: 'k=1/2 → milieu, k=1 → B, k=0 → A' },
+          { text: '$\\vec{AM} = k \\cdot \\vec{AB}$', condition: '$k = \\frac{1}{2}$ → milieu, $k = 1$ → B, $k = 0$ → A' },
           { text: '$x_{A\'}=2x_B-x_A$, $y_{A\'}=2y_B-y_A$', condition: 'A′ symétrique de A par rapport à B' },
+        ],
+      },
+      {
+        title: 'Nature d\'un quadrilatère ABCD',
+        formulas: [
+          { text: '$\\vec{AB} = \\vec{DC}$', condition: 'ABCD est un parallélogramme' },
+          { text: '$x_D = x_A + x_C - x_B$, $y_D = y_A + y_C - y_B$', condition: 'quatrième sommet D du parallélogramme ABCD' },
+          { text: '$\\|\\vec{AB}\\| = \\|\\vec{BC}\\|$', condition: 'le parallélogramme ABCD est un losange (deux côtés consécutifs)' },
+          { text: '$x_{AB} \\cdot x_{BC} + y_{AB} \\cdot y_{BC} = 0$', condition: 'le parallélogramme ABCD est un rectangle (angle droit en B)' },
+          { text: 'carré : un parallélogramme à la fois losange et rectangle' },
         ],
       },
       {
@@ -2265,23 +2304,37 @@ export const calculVectoriel: ChapterContent = {
         formulas: [
           { text: '$x_u \\cdot y_v - y_u \\cdot x_v = 0$', condition: 'colinéaires (critère de colinéarité nul)' },
           { text: '$x_u \\cdot x_v + y_u \\cdot y_v = 0$', condition: 'orthogonaux (produit scalaire nul)' },
+          { text: 'viser C depuis A dans le sens de $\\vec{u}$ : $\\vec{AC} = k \\cdot \\vec{u}$ avec $k > 0$' },
         ],
       },
       {
         title: 'Vecteur directeur',
         formulas: [
-          { text: '$\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$', condition: 'droite d\'équation $y = mx + p$' },
+          { text: '$\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$', condition: 'vecteur directeur de la droite d\'équation $y = mx + p$' },
         ],
       },
       {
         title: 'Résultante de deux vecteurs',
         formulas: [
-          { text: '$R^2 = F_1^2+F_2^2+2 \\cdot F_1 \\cdot F_2 \\cdot \\cos\\theta$', condition: 'θ entre les deux vecteurs' },
+          { text: '$R^2 = F_1^2+F_2^2+2 \\cdot F_1 \\cdot F_2 \\cdot \\cos\\theta$', condition: 'θ entre les deux vecteurs (Al-Kashi)' },
           { text: '$\\dfrac{\\sin(\\text{déviation})}{F_2} = \\dfrac{\\sin\\theta}{R}$' },
           {
             text: '$\\vec{R} = \\begin{pmatrix} F_1 + F_2\\cos\\theta \\\\ F_2\\sin\\theta \\end{pmatrix}$',
             condition: '$\\vec{F_1}$ le long de l\'axe horizontal — méthode par les composantes',
           },
+          { text: 'déviation obtuse si $F_1 + F_2\\cos\\theta < 0$ : elle vaut $180^\\circ - \\alpha_0$ ($\\alpha_0$ donné par la calculatrice)' },
+        ],
+      },
+      {
+        title: 'Vecteurs en contexte',
+        formulas: [
+          { text: '$\\begin{pmatrix} a \\\\ 0 \\end{pmatrix}$ vers l\'est, $\\begin{pmatrix} -a \\\\ 0 \\end{pmatrix}$ vers l\'ouest, $\\begin{pmatrix} 0 \\\\ a \\end{pmatrix}$ vers le nord, $\\begin{pmatrix} 0 \\\\ -a \\end{pmatrix}$ vers le sud (a pas)' },
+          { text: 'a pas en diagonale vers le nord-ouest → $\\begin{pmatrix} -a \\\\ a \\end{pmatrix}$ (chaque pas : une case vers l\'ouest et une vers le nord)' },
+          { text: '$\\|\\vec{DA}\\| = \\|\\vec{u}_1 + \\vec{u}_2 + \\vec{u}_3\\|$', condition: 'distance à vol d\'oiseau après des déplacements successifs' },
+          { text: '$t = \\dfrac{\\text{largeur}}{y_{\\vec{v_R}}}$', condition: 'durée de la traversée d\'une rivière (composante y de la vitesse réelle)' },
+          { text: '$x_{\\vec{v_p}} = -c \\quad y_{\\vec{v_p}} = \\sqrt{\\|\\vec{v_p}\\|^2 - c^2}$', condition: 'arriver juste en face (courant de vitesse c)' },
+          { text: '$\\vec{F_3} = -(\\vec{F_1} + \\vec{F_2})$', condition: 'équilibre de trois forces' },
+          { text: '$\\tan\\alpha = \\dfrac{|y|}{|x|}$', condition: 'angle α entre une force $\\begin{pmatrix} x \\\\ y \\end{pmatrix}$ et l\'horizontale' },
         ],
       },
     ],
@@ -2293,13 +2346,22 @@ export const calculVectoriel: ChapterContent = {
       'Combiner — addition (triangle ou parallélogramme) et multiplication par un scalaire, ' +
         'composante par composante. k>0 conserve le sens, k<0 l\'inverse. Opposé : ' +
         '$-\\vec{u} = (-1) \\cdot \\vec{u}$. Soustraire, c\'est ajouter l\'opposé.',
+      'Décomposer — selon deux directions non colinéaires, $\\vec{u} = a\\vec{v} + b\\vec{w}$ : ' +
+        'parallélogramme sur la figure, système en composantes.',
       'Chasles — une chaîne de vecteurs se réduit du premier point au dernier. Une chaîne fermée se réduit au vecteur nul.',
       'Norme — $\\|\\vec{u}\\|=\\sqrt{x_u^2+y_u^2}$, toujours ≥ 0. Distance entre deux points = norme du vecteur qui les relie.',
       'Points — translation B = A + u. Milieu = moyenne des coordonnées. Relation générale ' +
         '$\\vec{AM} = k \\cdot \\vec{AB}$, toujours sur la droite (AB).',
       'Colinéarité — $x_uy_v-y_ux_v=0$. Orthogonalité — $x_ux_v+y_uy_v=0$. Deux tests à ne jamais confondre !',
+      'Démontrer et classer — sans repère, on exprime tout dans une base de deux vecteurs non ' +
+        'colinéaires et on compare les coefficients. Nature d\'un quadrilatère : parallélogramme ' +
+        'd\'abord ($\\vec{AB} = \\vec{DC}$), puis deux côtés consécutifs égaux (losange) ou un angle ' +
+        'droit (rectangle) ; les deux à la fois, c\'est un carré.',
       'Vecteur directeur — tout vecteur défini par 2 points d\'une droite. Pour une même droite, ils sont tous colinéaires entre eux.',
-      'Résultante — somme vectorielle de deux forces ou vitesses. Sa norme s\'obtient par la loi des cosinus.',
+      'Résultante — somme vectorielle de deux forces ou vitesses. Sa norme s\'obtient par Al-Kashi (loi des cosinus), ou par les composantes.',
+      'Vecteurs en contexte — déplacements successifs : on additionne les vecteurs, la distance à ' +
+        'vol d\'oiseau est la norme de la somme. Rivière : durée = largeur ÷ composante y de la ' +
+        'vitesse réelle. Équilibre : $\\vec{F_3} = -(\\vec{F_1} + \\vec{F_2})$.',
     ],
     checklist: {
       label: 'Avant de rendre ta copie',
@@ -2316,7 +2378,7 @@ export const calculVectoriel: ChapterContent = {
       'Dès le chapitre 7, Géométrie analytique plane, le vecteur directeur sert à écrire les ' +
       'équations d\'une droite, et colinéarité et orthogonalité deviennent des tests de ' +
       'parallélisme et de perpendicularité. Composantes, norme et produit scalaire reviendront ' +
-      'aussi, avec une troisième composante, quand on calculera dans l\'espace.',
+      'aussi plus tard.',
     entrainement: {
       kind: 'entrainement',
       title: 'Calcul vectoriel — quiz vrai/faux',
