@@ -58,6 +58,7 @@ Chaque `generateurs*/**/exportEvaluation.ts` du chapitre remplit, en plus de
 | `bareme` | `reponseFinale`, `criteres` (poids, somme ≈ 4, `sousQuestion` = étape), `erreursFrequentes` (avec `cout`), `reponsesAcceptees`. |
 | `enoncePapier` | `EnoncePapier` : `section` (énoncé + consigne globale ; `questions: []` sauf vraies questions), `etapesParQuestion` (lettres d'étapes couvertes par chaque question papier), `reponseBreve` alignée si celle de l'adaptateur est découpée par étape. |
 | `regroupement` | Regroupement a), b), c) : rempli par le REGISTRE depuis l'énoncé papier (`export/regroupementsPapier.ts`, une entrée dans `REGROUPEMENTS`) — rien à écrire dans l'adaptateur. Voir la section « Regroupement a), b), c) ». |
+| `titrePapier` | Facultatif. `(instance) → { titre, sectionId? } \| null` : titre PROPRE à l'instance à la place de celui de la section du générateur (gen83 « lecture » : « Composantes d'un vecteur », `sectionId: "composantes"`). `evaluationLocal.ts::itemExercice` remplace alors `titreSection` (titre de section de la copie, du corrigé, de la copie et du corrigé Word), `notion` (étiquette de la feuille, « Exercice n — … » du corrigé de la feuille) et `sectionCours` (« Je fais le point » : section retrouvée par son id dans le chapitre de l'élément ; introuvable → le titre seul, sans numéro). Le titre entre dans la clé de regroupement : deux titres différents ne se regroupent pas. `null` / absent : rien ne change (documents identiques). |
 
 Toutes les valeurs viennent des MÊMES fonctions que l'écran interactif (`formatReponseAttendue…`,
 `consigneEcran`, aides) — jamais une seconde source recalculée à part.
@@ -755,6 +756,33 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   nouvelles variantes) ; plans réels 30 × 2 : gen91 `groupe_erreur` B ≠ A 30/30 (même ligne A/B 6/30).
   Codes : 20 générateurs × 60 graines identiques, sauf gen25 et gen26 « paramètre » (tirage refait) et
   gen29 « forces, angle quelconque » (proportion de Sud).
+- **4e ch. 6 (retouches, décisions de l'utilisateur)** : **gen28, étiquettes** — placement en PIXELS
+  réels, à la taille de l'étiquette dessinée (`4e/ui/etiquettesComparaison.ts::placerEtiquettesComparaison`,
+  `ETIQUETTE_ECRAN` / `ETIQUETTE_PAPIER`) : ancrages du milieu vers les extrémités (fractions 0,5 →
+  0,1/0,9), des deux côtés de la normale, écart boîte–trait de 3 à 24 px, puis au-delà des extrémités
+  (prolongement, ±45°) ; admis seulement sans contact avec un trait, une tête, une extrémité, une autre
+  étiquette ni le cadre, centre ≥ 1,2 × sa distance à son vecteur (+ 4 px) de tout autre vecteur ;
+  recherche avec retour arrière (étiquettes les plus contraintes d'abord, budget 20 000), repli glouton
+  par pénalités. Écran : la largeur réelle du graphe (`VecteurGraph.onLargeurGraphe`, ajout pur) est
+  passée au placement (`components/FigureComparaison.tsx`, placement mémorisé : une case cochée ne
+  change que les couleurs). Papier : même placement dans la zone tracée, puis fenêtre resserrée autour
+  des vecteurs et des étiquettes (`figure.ts::fenetreSerree`, jamais plus large que celle du placement :
+  l'échelle ne peut que grandir). Générateur intact : `?code=` = mêmes données. Mesuré (`mesure28.ts`,
+  600 tirages, 200 par variante ; boîte réelle lettre + flèche ; avant → après) : figures avec au moins
+  un défaut papier 84 % → 0 %, écran 322 px (iPhone 13) 86 % → 0 %, 480 px 83 % → 0 % ; étiquettes plus
+  proches d'un autre vecteur que du leur 27 % → 0 % (papier, 322, 480) ; chevauchement d'un vecteur 1,2 %
+  → 0 (papier) et 2,1 % → 0 (322) ; d'une étiquette 0,5–0,8 % → 0 ; distance centre → son vecteur papier
+  moy. 31 px, max 79 → moy. 18, max 26 ; 322 px moy. 26, max 62 → moy. 17, max 21. Limite : écran de 260 px
+  (largeur mini du graphe) 0,8 % des figures gardent une étiquette ambiguë (police fixe de 22 px). Papier :
+  énoncé, aménagée et corrigé ont les mêmes positions (couleurs seules différentes). **gen29** : aides à
+  deux niveaux sur « modélisation » et « interprétation » (`retoursVecteurs4.ts::aidesModelisationPhysique`,
+  `aidesInterpretationPhysique`), affichées par l'écran sans `onPremiereAide` (moteur et puces
+  inchangés). **gen83 « lecture »** : `titrePapier` → « Composantes d'un vecteur », section à relire § 8
+  (contrat dans le tableau « Contrat d'adaptateur »). Vérifié : même plan, code d'avant / d'après
+  (gen28 ×2, gen83 lecture ×2 + somme, titres de section affichés, 2 graines) : seuls les titres
+  changent — copie et corrigé A/B (titre de section), copie et corrigé Word, feuille (étiquette, notion
+  du corrigé, ligne « Je fais le point » § 8) ; aménagées et grilles identiques (elles n'impriment pas
+  de titre) ; 20 HTML × 680 / 820 / 1 280 px : 0 débordement, 0 `.katex-error`.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 
