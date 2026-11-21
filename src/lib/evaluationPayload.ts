@@ -103,7 +103,7 @@ export type IdGenerateurPilote =
   | 'gen126' | 'gen127' | 'gen128'
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38' | 'gen108' | 'gen111' | 'gen109' | 'gen110' | 'gen112'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
-  | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83' | 'gen129'
+  | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83' | 'gen129' | 'gen130'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54' | 'gen92' | 'gen93' | 'gen94' | 'gen95' | 'gen96' | 'gen97' | 'gen98' | 'gen99'
   | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103' | 'gen102' | 'gen105' | 'gen104' | 'gen107' | 'gen106'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
@@ -337,7 +337,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'orthogonalite', generatorId: 'gen84', label: "Nature d'un quadrilatère (gen84)", processus: 2 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'norme', generatorId: 'gen26', label: '' },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'norme', generatorId: 'gen86', label: 'Carte au trésor et randonnée : déplacements successifs (gen86)', processus: 3 },
-  { chapitreSlug: 'calcul-vectoriel', sectionId: 'chasles', generatorId: 'gen27', label: '' },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'chasles', generatorId: 'gen27', label: "Réduction d'une somme de vecteurs sur une figure (gen27)" },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'chasles', generatorId: 'gen130', label: 'Chasles sans figure : réduire et démontrer (gen130)', processus: 2 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'decompositionGeometrique', generatorId: 'gen82', label: 'Décomposer un vecteur selon deux directions (gen82)', processus: 2 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'comparaison', generatorId: 'gen28', label: '' },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', generatorId: 'gen29', label: '', processus: 3 },
@@ -1146,6 +1147,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   'calcul-vectoriel': {
     chasles: [
       { cle: 'chaîne de 3 vecteurs', enonce: "Réduis la somme $\\vec{AB}+\\vec{BC}+\\vec{CD}$ à un seul vecteur, à l'aide de la relation de Chasles." },
+      { cle: 'démontrer une égalité vectorielle', enonce: "Démontre que $\\vec{AB}+\\vec{CD}=\\vec{AD}+\\vec{CB}$, quels que soient les points $A$, $B$, $C$ et $D$." },
+      { cle: 'un point défini par une égalité', enonce: "Le point $M$ vérifie $2\\vec{MA}+\\vec{MB}=\\vec{0}$. Exprime $\\vec{AM}$ en fonction de $\\vec{AB}$." },
       { cle: 'réordonner et retourner', enonce: "Réduis l'expression $\\vec{AB}+\\vec{CD}+\\vec{BC}-\\vec{AD}$ à l'aide de la relation de Chasles." },
       { cle: 'le milieu par Chasles', enonce: "Soit $I$ le milieu de $[AB]$. Démontre que $\\vec{IA}+\\vec{IB}=\\vec{0}$, puis que, pour tout point $M$, $\\vec{MA}+\\vec{MB}=2\\vec{MI}$." },
     ],
