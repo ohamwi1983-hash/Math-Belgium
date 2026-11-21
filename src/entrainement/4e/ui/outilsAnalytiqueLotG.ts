@@ -191,6 +191,11 @@ export function termeProduit(coef: number, v: number, premier = false): string {
   return premier ? val : `+${val}`;
 }
 
+/** x₀ + a·t₀ substitué : « 21-4\cdot 4 », « 4 » (x₀ = 0, a = 1). */
+export function valeurSubst(x0: number, a: number, t0: number): string {
+  return x0 === 0 ? termeProduit(a, t0, true) : `${n(x0)}${termeProduit(a, t0)}`;
+}
+
 /** « 1+2t » (x₀ + a·t), « 2t » si x₀ = 0. */
 export function affineL(x0: number, a: number, param = "t"): string {
   if (x0 === 0) return a === 0 ? "0" : somme([[a, param]]);
@@ -469,7 +474,8 @@ export function figureRepere(spec: SpecFigure): string {
     parts.push(`<polygon points="${fmt(X(0))},${fmt(Y(f.yMax) - 12)} ${fmt(X(0) - 4)},${fmt(Y(f.yMax) - 4)} ${fmt(X(0) + 4)},${fmt(Y(f.yMax) - 4)}" fill="${NOIR}"/>`);
   }
   // Graduations : 1 (et l'origine) — au plus une graduation sur deux si la fenêtre est grande.
-  const pas = Math.max(f.xMax - f.xMin, f.yMax - f.yMin) > 16 ? 2 : 1;
+  const etendue = Math.max(f.xMax - f.xMin, f.yMax - f.yMin);
+  const pas = etendue > 30 ? 5 : etendue > 16 ? 2 : 1;
   const ecr = (v: number) => (v < 0 ? `−${-v}` : `${v}`);
   if (f.yMin <= 0 && f.yMax >= 0) {
     for (let x = Math.ceil(f.xMin / pas) * pas; x <= f.xMax; x += pas) {

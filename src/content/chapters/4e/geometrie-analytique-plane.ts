@@ -852,6 +852,23 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 48. Intersection entre deux droites »',
         },
+        {
+          kind: 'attention',
+          label: 'Deux mobiles : deux instants',
+          text:
+            'Quand chaque droite décrit le mouvement d\'un mobile ($t$ = le temps), on cherche le point commun des ' +
+            '**trajectoires** avec deux paramètres différents, $t_1$ pour le premier et $t_2$ pour le second. Les ' +
+            'mobiles ne se rencontrent (collision) que si, en plus, $t_1=t_2$ : des trajectoires qui se croisent ne ' +
+            'suffisent pas.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Trajectoires et rencontre',
+          generatorId: 'gen97',
+          description: ['Deux bateaux, deux drones ou deux joueurs en ligne droite : leurs trajectoires se coupent-elles ? Y passent-ils au même instant ? Collision, croisement sans rencontre ou trajectoires parallèles.'],
+          chantier: '4e',
+          whereLabel: '4e → « 97. Trajectoires et rencontre »',
+        },
       ],
     },
 
