@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { Coefficients, ExerciceDemontrerVecteurs, IdBase, IdConclusion, OptionBase, PointDefini, Rationnel, VecteurNomme } from "../core/demontrerVecteurs.types";
 import {
   PREMIER_VECTEUR_BASE,

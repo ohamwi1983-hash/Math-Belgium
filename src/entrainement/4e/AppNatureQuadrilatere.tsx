@@ -1,7 +1,7 @@
 import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { FragmentConsigne } from "../export/genererFeuilleExercices";
-import { latex, texte } from "../export/fragmentsDocx";
+import { latex, texte, lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import type { ExerciceNatureQuadrilatere, NatureQuadrilatere } from "./core/natureQuadrilatere.types";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceNatureQuadrilatere } from "./generateurs/natureQuadrilatere";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
@@ -45,6 +45,8 @@ import { EtapeChampsNatureQuadrilatere, EtapeConclusionNatureQuadrilatere, type 
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { correctionDetailleeNatureQuadrilatere } from "./generateurs/natureQuadrilatere/corrigeDetaille";
 
 /**
  * gen84 — « Nature d'un quadrilatère » (4e, chapitre 6 « Calcul vectoriel », section
@@ -247,6 +249,7 @@ export function AppNatureQuadrilatere() {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeNatureQuadrilatere(e), lettreEtape(etat.ecran))} />,
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
       }

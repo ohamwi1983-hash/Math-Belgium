@@ -2,6 +2,7 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
   EtapeCorrection,
@@ -9,49 +10,28 @@ import type {
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeDeplacementsSuccessifs } from "./corrigeDetaille";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDeplacementsSuccessifs } from "../../core/deplacementsSuccessifs.types";
 import {
-  composantes,
-  distanceArrondie,
-  distanceParcourue,
   estDiagonale,
   lettreEcran,
-  nomArrivee,
-  nomCible,
-  simplifierRacine,
-  surUnAxe,
   total,
   vecteurCible,
-  vecteurDistance,
   vecteurRetour,
   vecteursDeplacements,
-  carreNorme,
 } from "../../moteur/modeleDeplacementsSuccessifs";
 import {
-  chaslesLatex,
   colonneLatex,
   consignesEcrans,
-  descriptionGrandPas,
-  differenceColonneLatex,
-  distanceExacteLatex,
-  instructionTexte,
   introFragments,
   listeInstructions,
-  nombreLatex,
-  nomDistance,
-  normeSubstitueeLatex,
-  positionEnMots,
   questionsPapier,
   repereFragments,
   reponseDistanceFragments,
-  sommeColonneLatex,
   suiteFragments,
-  uniteTexte,
-  vecteurCibleLatex,
-  vecteurDistanceLatex,
   vecteurTotalLatex,
-  vecteurU,
 } from "../../ui/formatDeplacementsSuccessifs";
 import { construireFigureDeplacements } from "../../ui/figureDeplacementsSuccessifs";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDeplacementsSuccessifs } from "./index";
@@ -110,158 +90,18 @@ function reponseBreve(e: ExerciceDeplacementsSuccessifs): FragmentConsigne[] {
 // Corrigé détaillé (une lettre par écran)
 // ---------------------------------------------------------------------------------------------
 
-function etapesTraduction(e: ExerciceDeplacementsSuccessifs): EtapeCorrection[] {
-  const l = lettreEcran(e, "traduire");
-  const diag = e.deplacements.some((d) => estDiagonale(d.direction))
-    ? " Un pas en diagonale change les deux composantes d'une case chacune (vers le nord-ouest : une case vers l'ouest et une vers le nord)."
-    : "";
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: l,
-      fragments: [texte("Repère : x vers l'est, y vers le nord. L'est et le nord donnent des composantes positives, l'ouest et le sud des composantes négatives ; le long d'un seul axe, l'autre composante est nulle." + diag)],
-    },
-    ...e.deplacements.map((d, i) => ({
-      label: "Calcul",
-      sousQuestion: l,
-      fragments: [texte(`${i + 1}. ${instructionTexte(e.situation, d)} : `), latex(`${vecteurU(i + 1)} = ${colonneLatex(composantes(d))}`)],
-    })),
-  ];
-}
-
-function etapesTotal(e: ExerciceDeplacementsSuccessifs): EtapeCorrection[] {
-  const l = lettreEcran(e, "total");
-  const A = nomArrivee(e);
-  const lieu = e.question === "repetition" ? "le rocher R" : `le point ${A}`;
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: l,
-      fragments: [texte("Relation de Chasles : les déplacements se mettent bout à bout, le déplacement total est leur somme : "), latex(chaslesLatex(e))],
-      figureHtml: construireFigureDeplacements(e, { theme: "papier", trajet: true, complet: true }),
-    },
-    { label: "Calcul", sousQuestion: l, fragments: [latex(`${vecteurTotalLatex(e)} = ${sommeColonneLatex(e)} = ${colonneLatex(total(e))}`)] },
-    { label: "Conclusion", sousQuestion: l, fragments: [...totalFragments(e), texte(` : ${lieu} se trouve ${positionEnMots(e, total(e))} du départ.`)] },
-  ];
-}
-
-function etapesDistance(e: ExerciceDeplacementsSuccessifs): EtapeCorrection[] {
-  const l = lettreEcran(e, "distance");
-  const v = vecteurDistanceLatex(e);
-  const nom = nomDistance(e);
-  const u = uniteTexte(e.situation);
-  const axe = surUnAxe(e);
-  const etapes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: l,
-      fragments: axe
-        ? [texte("La distance à vol d'oiseau est la norme de "), latex(v), texte(" ; ce vecteur est porté par un axe (une composante nulle) : sa norme est la valeur absolue de l'autre composante.")]
-        : [texte("La distance à vol d'oiseau est la norme du vecteur qui relie les deux points : "), latex(`${nom} = \\|${v}\\| = \\sqrt{x_{${v}}^2 + y_{${v}}^2}`)],
-    },
-  ];
-  const n = carreNorme(vecteurDistance(e));
-  const entiere = simplifierRacine(n).b === 1;
-  const calcul = `${normeSubstitueeLatex(e)} = ${distanceExacteLatex(e)}`;
-  etapes.push({
-    label: "Calcul",
-    sousQuestion: l,
-    fragments: [latex(entiere || e.precision === "exacte" ? calcul : `${calcul} \\approx ${nombreLatex(distanceArrondie(e))}`), texte(` ${u}`)],
-  });
-  etapes.push({ label: "Conclusion", sousQuestion: l, fragments: [...reponseDistanceFragments(e), texte(".")] });
-  return etapes;
-}
-
-function etapesRetour(e: ExerciceDeplacementsSuccessifs): EtapeCorrection[] {
-  const l = lettreEcran(e, "retour");
-  return [
-    { label: "Méthode", sousQuestion: l, fragments: [texte("Revenir au départ, c'est faire le déplacement opposé au déplacement total : "), latex(`\\vec{AD} = -\\vec{DA}`)] },
-    { label: "Conclusion", sousQuestion: l, fragments: [latex(`\\vec{AD} = ${colonneLatex(vecteurRetour(e))}`), texte(`, soit ${positionEnMots(e, vecteurRetour(e))}.`)] },
-  ];
-}
-
-function etapesCible(e: ExerciceDeplacementsSuccessifs): EtapeCorrection[] {
-  const l = lettreEcran(e, "cible");
-  const A = nomArrivee(e);
-  const C = nomCible(e) ?? "C";
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: l,
-      fragments: [texte("Relation de Chasles, en passant par le départ D : "), latex(`\\vec{${A}${C}} = \\vec{${A}D} + \\vec{D${C}} = \\vec{D${C}} - \\vec{D${A}}`), texte(` (coordonnées de ${C} moins celles de ${A}).`)],
-    },
-    { label: "Calcul", sousQuestion: l, fragments: [latex(`${vecteurCibleLatex(e)} = ${differenceColonneLatex(e)} = ${colonneLatex(vecteurCible(e))}`)] },
-    { label: "Conclusion", sousQuestion: l, fragments: [latex(`${vecteurCibleLatex(e)} = ${colonneLatex(vecteurCible(e))}`), texte(`, soit ${positionEnMots(e, vecteurCible(e))}.`)] },
-  ];
-}
-
-function etapesK(e: ExerciceDeplacementsSuccessifs): EtapeCorrection[] {
-  const l = lettreEcran(e, "k");
-  const w = e.pas ?? { x: 1, y: 1 };
-  const rt = vecteurCible(e);
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: l,
-      fragments: [texte(`Le grand pas (${descriptionGrandPas(w)}) se traduit par `), latex(`\\vec{w} = ${colonneLatex(w)}`), texte(". On cherche k entier tel que "), latex("\\vec{RT} = k \\cdot \\vec{w}"), texte(".")],
-    },
-    {
-      label: "Calcul",
-      sousQuestion: l,
-      fragments: [latex(`k = \\dfrac{${nombreLatex(rt.x)}}{${nombreLatex(w.x)}} = ${e.k}`), texte(" ; contrôle : "), latex(`${e.k} \\cdot ${w.y < 0 ? `(${nombreLatex(w.y)})` : nombreLatex(w.y)} = ${nombreLatex(rt.y)}`), texte(", la deuxième composante convient aussi.")],
-    },
-    { label: "Conclusion", sousQuestion: l, fragments: [texte(`Il faut répéter le grand pas ${e.k} fois : `), latex(`\\vec{RT} = ${e.k}\\,\\vec{w}`), texte(".")] },
-  ];
-}
-
-function piege(e: ExerciceDeplacementsSuccessifs): EtapeCorrection {
-  const l = lettreEcran(e, "distance");
-  const u = uniteTexte(e.situation);
-  const parcourue = distanceParcourue(e);
-  const parcourueLatex = Number.isInteger(parcourue) ? nombreLatex(parcourue) : `${nombreLatex(Math.round(parcourue * 10) / 10)}`;
-  const approx = Number.isInteger(parcourue) ? "=" : "\\approx";
-  const nom = nomDistance(e);
-  const distanceFrag = reponseDistanceFragments(e)[0]!;
-  if (e.question === "retour") {
-    const somme = e.deplacements.map((d) => (estDiagonale(d.direction) ? `${d.longueur === 1 ? "" : nombreLatex(d.longueur)}\\sqrt{2}` : nombreLatex(d.longueur))).join(" + ");
-    return {
-      label: "Piège",
-      sousQuestion: l,
-      fragments: [
-        texte("Ne pas confondre avec la distance parcourue en suivant le trajet : "),
-        latex(`${somme} ${approx} ${parcourueLatex}`),
-        texte(` ${u}. À vol d'oiseau, on va en ligne droite : `),
-        distanceFrag,
-        texte(` ${u}.`),
-      ],
-    };
-  }
-  const v = vecteurDistance(e);
-  return {
-    label: "Piège",
-    sousQuestion: l,
-    fragments: [
-      texte("Ne pas additionner les deux composantes (chemin en suivant le quadrillage) : "),
-      latex(`${nombreLatex(Math.abs(v.x))} + ${nombreLatex(Math.abs(v.y))} = ${parcourueLatex}`),
-      texte(` ${u}. À vol d'oiseau, la distance ${nom} est la norme : `),
-      distanceFrag,
-      texte(` ${u}.`),
-    ],
-  };
-}
-
 function correctionDetaillee(e: ExerciceDeplacementsSuccessifs): EtapeCorrection[] {
-  const etapes: EtapeCorrection[] = [...etapesTraduction(e), ...etapesTotal(e)];
-  if (e.question === "retour") etapes.push(...etapesDistance(e), ...etapesRetour(e));
-  else if (e.question === "dernier") etapes.push(...etapesCible(e), ...etapesDistance(e));
-  else etapes.push(...etapesCible(e), ...etapesK(e), ...etapesDistance(e));
-  etapes.push(piege(e));
-  return etapes;
+  return correctionDetailleeDeplacementsSuccessifs(e);
+}
+
+function criteresDifficulte(e: ExerciceDeplacementsSuccessifs): CriteresDifficulte {
+  // Traduction des instructions : lecture. Méthode 1 (modéliser chaque instruction par un vecteur, repère donné) ; piège : un pas en diagonale (deux composantes à la fois). Nombres : détectés (arrondi demandé).
+  return { ...etapesDuCorrige(correctionDetailleeDeplacementsSuccessifs(e), [lettreEcran(e, "traduire")]), methode: 1, piege: e.deplacements.some((d) => estDiagonale(d.direction)) ? 1 : 0 };
 }
 
 function construireCorrection(e: ExerciceDeplacementsSuccessifs): BlocCorrection[] {
   return correctionDetaillee(e)
-    .filter((etape) => etape.label === "Conclusion")
+    .filter((etape) => etape.type === "resultat")
     .map((etape) => ({ type: "paragraphe", fragments: [texte(`${etape.sousQuestion}) `), ...etape.fragments] }));
 }
 
@@ -315,10 +155,6 @@ function bareme(e: ExerciceDeplacementsSuccessifs): BaremeExercice {
   };
 }
 
-function difficulte(e: ExerciceDeplacementsSuccessifs): 1 | 2 | 3 {
-  return e.question === "repetition" ? 3 : 2;
-}
-
 export const adaptateurEvaluationDeplacementsSuccessifs: AdaptateurFeuilleExercices<ExerciceDeplacementsSuccessifs> = {
   profilInstance: profilDeplacementsSuccessifs,
   libelleCasParticulier: LIBELLE_CAS_DEPLACEMENTS_SUCCESSIFS,
@@ -329,10 +165,9 @@ export const adaptateurEvaluationDeplacementsSuccessifs: AdaptateurFeuilleExerci
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };

@@ -2,6 +2,7 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
   EtapeCorrection,
@@ -9,10 +10,11 @@ import type {
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { correctionDetailleeDetectiveVecteurs } from "./corrigeDetaille";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDetectiveVecteurs } from "../../core/detectiveVecteurs.types";
-import { descriptionCorrecte, indiceLigneFausse, resolutionCorrecte, typeErreur, valeursAttendues } from "../../moteur/modeleDetectiveVecteurs";
-import { CONSIGNE_GENERALE, consignesEcrans, constat, descriptionFragments, enonceExercice, lignesCopie, nomErreur, piege, souderPonctuation, valeurFragments } from "../../ui/formatDetectiveVecteurs";
+import { indiceLigneFausse, valeursAttendues } from "../../moteur/modeleDetectiveVecteurs";
+import { CONSIGNE_GENERALE, consignesEcrans, enonceExercice, lignesCopie, nomErreur, valeurFragments } from "../../ui/formatDetectiveVecteurs";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveVecteurs } from "./index";
 import { profilDetectiveVecteurs } from "./profil";
 
@@ -66,19 +68,12 @@ function reponseBreve(e: ExerciceDetectiveVecteurs): FragmentConsigne[] {
 }
 
 function correctionDetaillee(e: ExerciceDetectiveVecteurs): EtapeCorrection[] {
-  const i = indiceLigneFausse(e);
-  const correcte = resolutionCorrecte(e);
-  const etapes: EtapeCorrection[] = [
-    { label: "Contrôle", sousQuestion: "a", fragments: constat(e) },
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte(`La ligne ${i + 1} est fausse.`)] },
-    { label: "Erreur", sousQuestion: "b", fragments: descriptionFragments(descriptionCorrecte(e), e) },
-  ];
-  correcte.slice(i).forEach((ligne, k) => {
-    etapes.push({ label: k === 0 ? "Correction" : "Calcul", sousQuestion: "c", fragments: souderPonctuation([texte(`Ligne ${i + k + 1} : `), ...ligne.fragments]) });
-  });
-  etapes.push({ label: "Conclusion", sousQuestion: "c", fragments: valeurs(e) });
-  etapes.push({ label: "Piège", sousQuestion: "b", fragments: piege(e) });
-  return etapes;
+  return correctionDetailleeDetectiveVecteurs(e);
+}
+
+function criteresDifficulte(_e: ExerciceDetectiveVecteurs): CriteresDifficulte {
+  // Mécanique propre (modèle gen81 / gen99) : trois écrans qui raisonnent, la copie à refaire. Niveau et durée CONSTANTS : le type d’erreur est la réponse de l’écran 2 (piège 0), la longueur de la reprise dépend de la ligne fausse (sansCharge). Méthode 1 : repérer quelle règle du cours est violée.
+  return { etapesTransformation: 3, etapesLecture: 0, sansCharge: true, methode: 1, piege: 0, nombres: 0 };
 }
 
 function construireCorrection(e: ExerciceDetectiveVecteurs): BlocCorrection[] {
@@ -112,11 +107,6 @@ function bareme(e: ExerciceDetectiveVecteurs): BaremeExercice {
   };
 }
 
-function difficulte(e: ExerciceDetectiveVecteurs): 1 | 2 | 3 {
-  const type = typeErreur(e);
-  return type === "chasles" || type === "parallelogramme" ? 3 : 2;
-}
-
 export const adaptateurEvaluationDetectiveVecteurs: AdaptateurFeuilleExercices<ExerciceDetectiveVecteurs> = {
   profilInstance: profilDetectiveVecteurs,
   titreDocument: "Le détective d'erreurs vectoriel — Évaluation",
@@ -126,10 +116,9 @@ export const adaptateurEvaluationDetectiveVecteurs: AdaptateurFeuilleExercices<E
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 7,
 };

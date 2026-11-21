@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { ExerciceEquilibreForces, OptionCondition, Vecteur2 } from "../core/equilibreForces.types";
 import {
   ECRAN_CONDITION,

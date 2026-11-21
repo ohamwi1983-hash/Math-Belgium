@@ -49,6 +49,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import type { FragmentConsigne } from "../export/genererFeuilleExercices";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeDemontrerVecteurs } from "./generateurs/demontrerVecteurs/corrigeDetaille";
 
 /**
  * gen85 — « Démontrer avec des vecteurs » (4e, chapitre 6, section « colinearite », processus 3
@@ -148,6 +151,7 @@ export function AppDemontrerVecteurs() {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDemontrerVecteurs(e), lettreEtape(etat.ecran))} />,
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
       }

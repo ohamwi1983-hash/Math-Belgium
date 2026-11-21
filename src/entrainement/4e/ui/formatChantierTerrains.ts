@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { Affine, ExerciceChantierTerrains, OutilVectoriel, PointPlan, SituationChantier } from "../core/chantierTerrains.types";
 import { OUTIL_ATTENDU, demiVecteur, equationPiquet, lettreInconnue, point, valeurCritere, valeurInconnue, vecteursUtiles, type VecteurUtile } from "../moteur/modeleChantierTerrains";
 

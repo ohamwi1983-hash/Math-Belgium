@@ -30,6 +30,9 @@ import { EtapeCorrectionVecteurs } from "./components/EtapesDetectiveVecteurs";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeDetectiveVecteurs } from "./generateurs/detectiveVecteurs/corrigeDetaille";
 
 /**
  * gen91 — « Le détective d'erreurs vectoriel » (4e, chapitre 6, section « revision », processus 3
@@ -160,6 +163,7 @@ export function AppDetectiveVecteurs() {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveVecteurs(e), lettreEtape(etat.ecran))} />,
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
       }

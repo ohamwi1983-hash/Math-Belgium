@@ -27,6 +27,9 @@ import { EtapeChoixRelation, EtapeConstruction, EtapeLecture } from "./component
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeConstruireSomme } from "./generateurs/construireSomme/corrigeDetaille";
 
 /**
  * gen83 — « Construire une somme, une différence, un point » (4e, chapitre 6 « Calcul vectoriel »,
@@ -125,6 +128,7 @@ export function AppConstruireSomme() {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConstruireSomme(e), lettreEtape(etat.ecran))} />,
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
       }

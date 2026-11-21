@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import { latex, texte } from "../../export/corrigeTableau";
 import type { Composantes, Point } from "../core/vecteur.types";
 import type { ExerciceViserCible, OptionVecteur, SituationViserCible, VerdictDirect, VerdictInverse } from "../core/viserCible.types";
 import { coefficientK, composanteConnue, conditionInverse, critere, solutionM, vecteurAC, verdictDirect, verdictInverse, type Fraction } from "../moteur/modeleViserCible";

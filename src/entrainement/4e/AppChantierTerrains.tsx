@@ -16,6 +16,9 @@ import { EtapeChampsChantier, EtapeChoixChantier } from "./components/EtapesChan
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeChantierTerrains } from "./generateurs/chantierTerrains/corrigeDetaille";
 
 /**
  * gen88 — « Chantier et terrains : alignement, équerre, parallélisme, milieu » (4e, chapitre 6,
@@ -113,6 +116,7 @@ export function AppChantierTerrains() {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeChantierTerrains(e), lettreEtape(etat.ecran))} />,
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
       }

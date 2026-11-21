@@ -27,6 +27,9 @@ import { EtapeSaisieTraverserRiviere } from "./components/EtapesTraverserRiviere
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeTraverserRiviere } from "./generateurs/traverserRiviere/corrigeDetaille";
 
 /**
  * gen87 — « Traverser une rivière : vitesses en composantes » (4e, chapitre 6, section
@@ -110,6 +113,7 @@ export function AppTraverserRiviere() {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTraverserRiviere(e), lettreEtape(etat.ecran))} />,
         onSuivant: passerEcranSuivant,
       }
     : null;
