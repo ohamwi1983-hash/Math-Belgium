@@ -5071,3 +5071,75 @@ les vidéos YouTube signalent parfois « compute-pressure »), scrollWidth = lar
 affines (101 confondus, verdict ⟺ ad + b = cb + d), 56 couples image ∩ domaine confrontés à
 1 201 x échantillonnés ; glisser à la souris ; `test-epingle` 0 échec. Captures :
 `scratchpad/5e1-ateliers/`.
+
+## 5e (4h), Chapitre 4 — passe contenu, démonstrations, ateliers et quiz (rapport de propositions)
+
+Décisions de l'utilisateur : tout le rapport (15 erreurs, 9 contenus, 4 démonstrations, Michaelis–Menten,
+quiz 9 × 35, 7 ateliers + remise à niveau des 3). Le cours des NOUVEAUX générateurs (position courbe /
+asymptote, tableau de limites → esquisse, retrouver f) viendra après leur fusion ; cartes `entrainement`
+des sections et 5gen20–24 intouchées (deux autres chantiers) — seule exception : la description de la
+carte du quiz 5gen42 (récapitulatif), qui annonçait « 7 thèmes de 20 ».
+
+**Erreurs corrigées** : `\,` simple dans une chaîne JS (« (1,;2) », « (1,;1) ») → `\\,` ; « ℝ\{1} » hors
+KaTeX → `$\mathbb{R}\setminus\{1\}$` ; renvoi « chapitre précédent » → « chapitre 1 (fonctions) » ;
+tableaux d'opérations complétés (m + (±∞), (−∞)·(−∞), m/(±∞) = 0, produit « règle des signes ») ;
+exemple du saut : limite à gauche calculée, conclusion « 5 ≠ −1 », points d'approche verts / rouges
+(points sans étiquette) ; g = 1/((x+1)(x−2)) tracée jusqu'à ∓0,03 des asymptotes (elle sort enfin du
+cadre) ; figure ∞/∞ à partir de y = −0,8 (la courbe passe sous l'axe) ; `v_{max}` ; Cᵤ « = » (valeurs
+exactes) ; renvois « ici » de l'attention et de l'astuce du § 4 nommés ; signe en x = 1 de l'étude
+complète par le signe du dénominateur + **tableau de signes** (`signTable`, −1, 1, 3), la sonde en
+vérification ; intuition ∞ − ∞ « un nombre (parfois 0), ±∞ ou aucune limite » ; étiquettes déplacées
+(chevauchements relus sur capture : vraie AV, point vide, g, étude complète, point vide de C5).
+**Piège de figure** : l'étiquette d'une asymptote (`label`) se pose toujours au même endroit ; quand la
+courbe ou l'étiquette d'axe la chevauche, la retirer et écrire un `textLabels` à un endroit libre.
+
+**Contenu** : racine double (x+2)/(x−1)² comparée à (x+2)/(x−1) (§ 1, figure à deux courbes) ; « terme
+dominant — trois autres cas » ; 0/0 avec racine (√x − 2)/(x − 4) = 1/4 ; ∞ − ∞ de limite 2
+(√(x² + 4x) − x, figure) ; intuition « Pourquoi seul le terme dominant compte » (85,5 % / 99,83 % /
+99,9998 % ; 6e intuition, le plafond) ; asymptote oblique à dénominateur de degré 2
+(2x³ + x² − 1)/(x² + 1) = 2x + 1 + (−2x − 2)/(x² + 1), recoupement (−1 ; −1) (§ 2) ; étude complète avec
+point vide (1 ; −2) ET asymptote verticale x = 2, AH y = 1 jamais recoupée (§ 5) ; figure de
+g = 2x + 1 + 1/(x + 1) en `illustrationGroup` avec celle de 3 + 1/(x − 2). **Michaelis–Menten** remplace
+le modèle exponentiel du § 5 : v(S) = v_max·S/(K + S), AH v = v_max, division euclidienne
+v_max − v_max·K/(K + S) (forme b + a/(x + p), a < 0), v(K) = v_max/2 (figure avec le point v(K) = 5).
+
+**Démonstrations** (`exempleLibre` « Démonstration — … », énoncés par clé dans `ENONCES_DEMONSTRATION`,
+chapitre déjà dans `CHAPITRES_ENONCES_VERIFIES`) : degrés égaux ⟹ rapport des coefficients dominants
+(§ 1) ; f = ax + b + r(x), r → 0 ⟹ lim f/x = a et lim (f − ax) = b (§ 2) ; une rationnelle a la même
+limite finie en −∞ et en +∞ (§ 3, justifie « jamais deux AH différentes ») ; b + a/(x + p), a > 0,
+p > 0 : décroissante sur [0 ; +∞[ et jamais égale à b (§ 4, par l'inverse décroissant de 4e, sans
+dérivée). Les nouveaux exemples ont tous leur énoncé (clés « racine double au dénominateur », « terme
+dominant — trois autres cas », « forme 0/0 avec une racine », « forme ∞−∞ avec une limite non nulle »,
+« dénominateur de degré 2 », « un point vide et une asymptote verticale »). **Piège de clé** :
+l'appariement cherche la clé DANS le badge (`includes`) ; un nouveau badge ne doit contenir aucune clé
+existante de sa section (« recoupement », « vraie asymptote verticale »…).
+
+**Quiz 5gen42** : 9 thèmes × 35 = 315 (+15 par thème, `operationsEtFormes` et `gaucheDroiteExistence`
+nouveaux, rattachés au § 1 dans `QUIZ_THEMES`, donc tirés par `banquesVraiFaux`) ; 18 V / 17 F (17 / 18
+pour « gauche, droite ») ; racine double : hypothèse « le numérateur ne s'annule pas en r » sur les deux
+affirmations vraies (contre-exemple (x − 1)/(x − 1)²) ; `nombreQuestions` / `etendueNombreQuestions`,
+accueil calculé (plus de `nombreExercices: 20`). Contrôle : 315 affirmations, KaTeX `strict: 'error'` sur
+630 textes, 0 `$` impair, 0 notation clavier hors `$`, valeurs numériques recalculées.
+
+**Ateliers** (KaTeX dans le Shadow DOM par `katex-shadow.js` ; module partagé du chapitre
+`src/interactive/limites-commun.js` : repère à fenêtre FIXE et axes fléchés, `courbe` coupée aux
+asymptotes et rognée par `clipPath`, `curseur` − / + ≥ 44 px, `choix`, `texGrand` / `texPetit` /
+`texPoly`, `rel` = « = » si la valeur est exacte, « ≈ » sinon) — 7 nouveaux :
+`aussi-pres-que-tu-veux-widget` (§ 1, après Cauchy : bandes ε / δ, point vide et saut, x = a exclu),
+`infini-moins-infini-widget` (§ 1 : (x² ; x), (x + 3 ; x), (√(x² + 1) ; x), (x ; x²), tableau en 10 … 10⁶,
+√(x² + 1) − x calculé par 1/(√(x² + 1) + x)), `terme-dominant-widget` (§ 1, avant ∞/∞ : x = 10^k, barres
+0–100 %, |f − 3| = (5x + 5)/(x² + 2) sans soustraction), `zoom-arriere-asymptote-widget` (§ 2 : Z ×10, le
+zoom est l'effet voulu), `cote-asymptote-widget` (§ 3 : k/(x − 1)ⁿ, sonde h de 1 à 0,001, signes en
+direct), `cuve-eau-salee-widget` (§ 4 : plafond = c, t₉₀ = 9V₀/r), `recoupement-widget` (§ 5 :
+(x² + px + q)/(x² + 1), x = (1 − q)/p, p = 0). Remis à niveau (réécrits en module ES, mêmes balises) :
+`point-vide-ou-asymptote-widget` (limites à gauche / droite N(−3)/0∓, valeur du point vide, asymptote
+oblique y = x − (r₁ + r₂ + 3)), `degre-asymptote-widget` (dénominateur x − 1 ou x² + 1, division
+euclidienne exacte affichée, degrés 0 à 4), `plancher-plafond-widget` (mode plafond b + a/(x + p), a < 0 ;
+une fenêtre par mode). **Piège** : un nombre arrondi par `texGrand` peut donner une mantisse « 10 »
+(999 999·10⁶ écrit « 10·10¹¹ ») — renormaliser après arrondi. Vérifié (Vite `watch: null`, port 5895) :
+page à 390 / 1 280 px, clair / sombre — 0 débordement, 0 `.katex-error`, 0 texte suspect (page ET Shadow
+DOM : `$ ^ \ NaN undefined Infinity`), 0 erreur console du site, 33 figures et 10 ateliers capturés et
+relus ; manipulation Playwright : chaque curseur à ses deux extrémités, chaque bouton, axes identiques
+avant / après (sauf zoom et changement de mode, voulus), 21 valeurs recoupées par un calcul indépendant
+(recoupement x = 1 et 2, t₉₀ = 180 et 1 800, C(40) = 20, N(−3) = 24 et y = x − 7, y = 2x + 1, côtés ±∞,
+ε / δ, f(10⁶) ≈ 2,999995, Cᵤ(100) = 10,4…). Captures et scripts : `scratchpad/5e4/`.
