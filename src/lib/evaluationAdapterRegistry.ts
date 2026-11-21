@@ -118,6 +118,7 @@ import { adaptateurEvaluationEquationParabole } from '../entrainement/4e/generat
 import { adaptateurEvaluationEquationParaboleDeveloppee } from '../entrainement/4e/generateurs/equationParaboleDeveloppee/exportEvaluation'
 import { adaptateurEvaluationConstructionParabole } from '../entrainement/4e/generateurs/constructionParabole/exportEvaluation'
 import { adaptateurEvaluationLieuxGeometriques } from '../entrainement/4e/generateurs/lieuxGeometriques/exportEvaluation'
+import { adaptateurEvaluationDroitesParametre } from '../entrainement/4e/generateurs/droitesParametre/exportEvaluation'
 import { adaptateurEvaluationDroitesRemarquables } from '../entrainement/4e/generateurs/droitesRemarquables/exportEvaluation'
 import { adaptateurEvaluationCercleConditions } from '../entrainement/4e/generateurs/cercleConditions/exportEvaluation'
 import { adaptateurEvaluationDroiteCercle } from '../entrainement/4e/generateurs/droiteCercle/exportEvaluation'
@@ -237,6 +238,7 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen92: versionPapier(adaptateurEvaluationDroiteCercle) as unknown as AdaptateurFeuilleExercices<never>,
   gen93: versionPapier(adaptateurEvaluationCercleConditions) as unknown as AdaptateurFeuilleExercices<never>,
   gen94: versionPapier(adaptateurEvaluationDroitesRemarquables) as unknown as AdaptateurFeuilleExercices<never>,
+  gen95: versionPapier(adaptateurEvaluationDroitesParametre) as unknown as AdaptateurFeuilleExercices<never>,
   gen39: versionPapier(adaptateurEvaluationPositionDroitePlan) as unknown as AdaptateurFeuilleExercices<never>,
   gen40: versionPapier(adaptateurEvaluationSectionPlaneSolide) as unknown as AdaptateurFeuilleExercices<never>,
   gen41: versionPapier(adaptateurEvaluationOmbreSoleil) as unknown as AdaptateurFeuilleExercices<never>,

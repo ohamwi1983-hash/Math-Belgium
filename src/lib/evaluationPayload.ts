@@ -104,7 +104,7 @@ export type IdGenerateurPilote =
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38' | 'gen108' | 'gen111' | 'gen109' | 'gen110' | 'gen112'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83'
-  | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54' | 'gen92' | 'gen93' | 'gen94'
+  | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54' | 'gen92' | 'gen93' | 'gen94' | 'gen95'
   | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103' | 'gen102' | 'gen105' | 'gen104' | 'gen107' | 'gen106'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen63'
@@ -350,7 +350,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen43', label: "Lecture graphique d'une droite (gen43)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen44', label: "Construction graphique d'une droite (gen44)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'caracteristiques', generatorId: 'gen46', label: '' },
-  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'relations', generatorId: 'gen45', label: '' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'relations', generatorId: 'gen45', label: 'Relations entre droites (gen45)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'relations', generatorId: 'gen95', label: "Droites dépendant d'un paramètre (gen95)", processus: 2 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'intersection', generatorId: 'gen48', label: '' },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'distance', generatorId: 'gen47', label: 'Distance point-droite et droite-droite (gen47)' },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'distance', generatorId: 'gen94', label: "Droites remarquables d'un triangle (gen94)", processus: 3 },
@@ -1206,6 +1207,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     relations: [
       { cle: 'perpendiculaire par un point', enonce: "Détermine une équation cartésienne et un vecteur directeur de la droite $d'$ perpendiculaire à $d : x-2y+1=0$ et passant par $C(3\\,;\\,-1)$." },
       { cle: 'parallèle par un point', enonce: "Détermine une équation cartésienne de la droite $d'$ parallèle à $d : 3x-y+2=0$ et passant par $A(1\\,;\\,4)$." },
+      { cle: "droite dépendant d'un paramètre", enonce: "Détermine la ou les valeurs du réel $m$ pour lesquelles la droite $d_m : (m^2-4)x+(m-2)y+3=0$ est horizontale." },
       { cle: 'reconnaître la relation', enonce: "Les droites $d_1 : y = 2x+1$ et $d_2 : x+2y-4=0$ sont-elles parallèles, perpendiculaires, ou ni l'un ni l'autre ? Justifie." },
     ],
     intersection: [

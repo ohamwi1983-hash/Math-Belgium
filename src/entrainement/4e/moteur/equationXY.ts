@@ -104,6 +104,53 @@ export function equationPasseParPoint(saisie: string, x: number, y: number): boo
 }
 
 /* ---------------------------------------------------------------------------------------------
+ * Équation d'inconnue m (gen95)
+ * ------------------------------------------------------------------------------------------- */
+
+const VALEURS_M = [0.37, -1.21, 1.9, -2.6, 3.3, 0.11];
+
+/** Équation en m saisie (« 2m² − 3m − 5 = 0 », « (m−1)·3 − 2m = 0 »…) : juste si gauche − droite est
+ * proportionnel (facteur non nul) au polynôme attendu. Sans « = » : `forme` ; illisible : `parse_error` ;
+ * une autre lettre que m (x, y) : faux avec message. */
+export function verifierEquationM(saisie: string, cible: (m: number) => number, pieges: { f: (m: number) => number; message: string }[], messageSiFaux?: string): StatutSaisieLotG {
+  const s = normaliserExpression(saisie.replace(/^\s*(?:équation|eq)\s*:\s*/i, ""));
+  if (s === "") return { etat: "parse_error" };
+  const membres = s.split("=");
+  const evalue = (expr: string, m: number) => evaluerExpressionGenerale(expr, Number.NaN, { m });
+  if (membres.length !== 2 || membres.some((x) => x.trim() === "")) {
+    if (membres.length === 1) {
+      try {
+        evalue(membres[0]!, 0.5);
+        return { etat: "forme", message: "Écris une équation complète, avec le signe « = » (par exemple $2m^2-3m-5=0$)." };
+      } catch {
+        return { etat: "parse_error" };
+      }
+    }
+    return { etat: "parse_error" };
+  }
+  const valeurs: number[] = [];
+  try {
+    for (const m of VALEURS_M) valeurs.push(evalue(membres[0]!, m) - evalue(membres[1]!, m));
+  } catch {
+    return { etat: "parse_error" };
+  }
+  if (valeurs.some((v) => Number.isNaN(v))) return { etat: "faux", message: "L'équation en m ne doit contenir que l'inconnue m (pas x ni y)." };
+  if (valeurs.every((v) => Math.abs(v) < 1e-9)) return { etat: "faux", message: "Ton égalité est vraie pour toute valeur de m : ce n'est pas la condition cherchée." };
+  const prop = (f: (m: number) => number) => {
+    const t = VALEURS_M.map(f);
+    let j = 0;
+    for (let i = 1; i < t.length; i++) if (Math.abs(t[i]!) > Math.abs(t[j]!)) j = i;
+    if (Math.abs(t[j]!) < 1e-12) return false;
+    const k = valeurs[j]! / t[j]!;
+    return Math.abs(k) > 1e-9 && valeurs.every((v, i) => Math.abs(v - k * t[i]!) <= 1e-7 * Math.max(1, Math.abs(v)));
+  };
+  if (prop(cible)) return { etat: "correct" };
+  const p = pieges.find((x) => prop(x.f));
+  if (p) return { etat: "piege", message: p.message };
+  return { etat: "faux", message: messageSiFaux };
+}
+
+/* ---------------------------------------------------------------------------------------------
  * Valeur exacte
  * ------------------------------------------------------------------------------------------- */
 

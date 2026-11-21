@@ -726,6 +726,36 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 45. Relations entre droites (parallèle/perpendiculaire) »',
         },
+        { kind: 'subheading', text: "Pour aller plus loin — droites qui dépendent d'un paramètre" },
+        {
+          kind: 'methode',
+          label: 'Méthode — une condition, une équation en m, puis un contrôle',
+          items: [
+            'Écris $d_m \\equiv a(m)x+b(m)y+c(m)=0$ : chaque coefficient dépend de m, et $\\begin{pmatrix} -b(m) \\\\ a(m) \\end{pmatrix}$ est un vecteur directeur.',
+            'Traduis la question : **parallèle** à d → critère de colinéarité nul ; **perpendiculaire** → produit scalaire nul ; **passe par P** → les coordonnées de P vérifient l\'équation ; **horizontale** → $a(m)=0$ ; **verticale** → $b(m)=0$.',
+            'Résous l\'équation en m obtenue (premier ou second degré).',
+            'Contrôle chaque solution : si $a(m)$ et $b(m)$ sont tous les deux nuls, l\'équation n\'est plus celle d\'une droite — la valeur est rejetée. Il peut donc y avoir 0, 1 ou 2 valeurs.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'droite dépendant d\'un paramètre',
+          formula: 'Pour quelle(s) valeur(s) de m la droite $d_m \\equiv (m^2-4)x+(m-2)y+3=0$ est-elle horizontale ?',
+          steps: [
+            { tag: 'condition', text: 'horizontale ⟺ coefficient de x nul : $m^2-4=0 \\to m=2$ ou $m=-2$' },
+            { tag: 'contrôle m = 2', text: '$a(2)=0$ et $b(2)=0$ : il reste $3=0$, ce n\'est pas une droite → rejetée' },
+            { tag: 'contrôle m = −2', text: '$a(-2)=0$ et $b(-2)=-4 \\neq 0$ : $d_{-2} \\equiv -4y+3=0$, soit $y=\\dfrac{3}{4}$ ✓' },
+          ],
+          result: { tag: 'résultat', text: 'une seule valeur : $m=-2$' },
+        },
+        {
+          kind: 'entrainement',
+          title: "Droites dépendant d'un paramètre",
+          generatorId: 'gen95',
+          description: ['Une famille de droites dₘ dépend de m : trouve les valeurs de m pour lesquelles dₘ est parallèle ou perpendiculaire à une droite, passe par un point, est horizontale ou verticale. Pense à contrôler que dₘ reste une droite.'],
+          chantier: '4e',
+          whereLabel: "4e → « 95. Droites dépendant d'un paramètre »",
+        },
       ],
     },
 
