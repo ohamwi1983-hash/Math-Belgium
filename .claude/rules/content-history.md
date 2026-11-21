@@ -5143,3 +5143,13 @@ relus ; manipulation Playwright : chaque curseur à ses deux extrémités, chaqu
 avant / après (sauf zoom et changement de mode, voulus), 20 valeurs recoupées par un calcul indépendant
 (recoupement x = 1 et 2, t₉₀ = 180 et 1 800, C(40) = 20, N(−3) = 24 et y = x − 7, y = 2x + 1, côtés ±∞,
 ε / δ, f(10⁶) ≈ 2,999995, Cᵤ(100) = 10,4…). Captures et scripts : `scratchpad/5e4/`.
+## 5e (4h), Chapitre 4 — lot G de l'audit (5gen64–5gen67, nouveaux générateurs)
+
+Quatre cartes ajoutées (descriptions en Unicode, sans `$…$`) sans toucher au reste du cours ni à
+5gen20–24 (chantier parallèle des corrigés) : **5gen64 « Limites avec racines carrées : expression
+conjuguée »** (§ 1, après 5gen20), **5gen66 « Du tableau de limites au graphique »** (§ 3, après
+5gen22), **5gen65 « Retrouver une fonction à partir de ses asymptotes »** (§ 5, après 5gen24) et
+**5gen67 « Détective d'erreurs — limites »** (§ 5, après 5gen65). Registres `registry.ts`,
+`evaluationAdapterRegistry.ts` (`versionPapier`) et `evaluationPayload.ts` (sections limites-calcul
+P2, lecture-graphique P1, etude-complete P2 et P3). Détail des choix, mesures et pièges :
+`feuilles-evaluations.md`, entrée « 5e ch. 4, lot G ».

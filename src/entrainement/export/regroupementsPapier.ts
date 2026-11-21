@@ -392,6 +392,7 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     ],
   },
   "5gen20": { formes: [{ motif: re(String.raw`(?<ligne>${M})\n(?<q>Détermine cette limite.+)`), consigne: (g) => chaque(g.q, "cette limite", "chaque limite") }] },
+  "5gen64": simple(String.raw`Calcule la valeur exacte de la limite suivante : (?<ligne>${M})\.`, "Calcule la valeur exacte de chaque limite."),
   "5gen21": { formes: [{ motif: re(String.raw`On considère la fonction (?<ligne>${M})\.\n(?<q>.+)`), consigne: (g) => `Pour chaque fonction f : ${minusculeInitiale(g.q ?? "")}` }] },
   "5gen24": {
     formes: [
@@ -816,6 +817,18 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     consigne: (g) => `Dans chaque cas, voici quatre expressions et leurs quatre courbes, dans le désordre. ${g.q}`,
     ligne: (g) => sansPointFinal(g.liste),
   }),
+  "5gen65": fig(
+    {
+      motif: re(String.raw`Une fonction f de la forme (?<forme>${M}) admet (?<ligne>l'asymptote verticale d'équation ${M}, l'asymptote (?:horizontale|oblique) d'équation ${M}, et son graphe passe par le point ${M})\. (?<q>Détermine .+)`),
+      consigne: (g) => `Dans chaque cas, une fonction f de la forme ${g.forme} admet les asymptotes indiquées et son graphe passe par le point donné. ${g.q}`,
+      ligne: (g) => (g.ligne ?? "").replace(/^l'asymptote verticale d'équation /, "asymptote verticale ").replace(/, l'asymptote (horizontale|oblique) d'équation /, ", asymptote $1 ").replace(/, et son graphe passe par le point /, ", point "),
+    },
+    {
+    motif: re(String.raw`Le graphique ci-dessous représente une fonction f de la forme (?<forme>${M}) (?<p>\(.+?\))\. (?<q>Détermine f\(x\).+)`),
+    consigne: (g) => `Chaque graphique ci-dessous représente une fonction f de la forme ${g.forme} ${g.p}. Pour chacune, ${minusculeInitiale(g.q ?? "")}`,
+    ligne: () => "",
+    },
+  ),
   "5gen63": fig({
     motif: re(String.raw`Les graphes de f et de g ci-dessous sont complets (?<p>\(.+?\))\. À l'aide de la droite (?<d>${M}), détermine (?<v>${M}) s'il existe ; justifie ta réponse\.`),
     consigne: (g) => `Dans chaque cas, les graphes de f et de g sont complets ${g.p}. À l'aide de la droite ${g.d}, détermine le nombre indiqué s'il existe ; justifie ta réponse.`,

@@ -1446,3 +1446,49 @@ illisible, résultat de la copie) : 0 anomalie ; collecteur (outils de `corrige-
 d'ordre numériques) 2 200 tirages, ≈ 10 200 égalités, 0 fausse ; documents réels `construirePlan`
 (évaluation 2 séries + aménagée + feuille) : 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error` ;
 `groupe_erreur` : verdict B ≠ A 30 / 30 plans ; `?code=` 36 / 36.
+## 5e ch. 4, lot G — 5gen64–5gen67 (nouveaux, notés)
+
+Socle d'écrans du 5e (`AppEcransTrigo` + `DefinitionEcrans`) réutilisé SANS modification (options
+`copie`, `approchee`, `aReprendre`, `piegeChoixRevele`, `raccourcis`, `apercuLatex` déjà là). Modules
+communs du lot : `moteur5e/lectureLimitesLotG.ts` (`lireLimite` : « +∞ », « inf », « ∞ », « +inf »,
+« plus l'infini », « − – — », préfixes « lim = » / « x = » ignorés ; `lireFonctionX` : expression lue
+puis comparée en six points — une racine non définie en 0,37 n'est plus refusée), `ui5e/ecrituresLimitesLotG.ts`
+(`limL` = `\lim\limits_{x\to a^+}`, `cibleL`, `exacteL` (c√r/d simplifié, dénominateur rationnel),
+`polyL`, `moinsDroiteL` : « f(x) − x » mais « f(x) − (−x) », jamais « f(x) − (x) »),
+`ui5e/figureLimitesLotG.ts` (`grapheSvg`, `grilleGraphesSvg` : même échelle, carreaux d'une unité,
+valeurs entières aux nœuds, axes fléchés, asymptotes en pointillés, branches rognées par un `<svg>`
+imbriqué `overflow="hidden"` — AUCUN `id`). Corrigés `generateurs5e/{limitesConjuguee,fonctionAsymptotes,
+tableauLimitesGraphique,detectiveLimites}/corrigeDetaille.ts`, une lettre par écran. **5gen64**
+(expression conjuguée) : variantes diffPlus, deuxRacines (B1 x + a / B2 second degré), zeroEnZero,
+zeroEnA, moinsInfini (E1 x² en évidence et √(x²) = −x, E2 conjuguée en −∞) ; écrans forme (choix
+fermé) → conjuguée + produit réduit (produit encore écrit avec une racine ou non réduit : `aReprendre`,
+sans tentative) → limites partielles → limite exacte (décimale proche : `approchee`). **Piège de mise
+en page** : pour deux racines, « (√A − √B)(√A + √B) / (√A + √B) » et « lim (√(1 + a/x + …) + √(…)) »
+débordaient la colonne du calcul (87 px à 680 px) — la multiplication par la conjuguée est annoncée
+dans l'intro de la chaîne, et la ligne au membre de gauche long est mise entre accolades (pas de « = »
+de niveau 0 → pleine largeur, `decouperLigneCalcul`). **5gen65** (fonction depuis ses asymptotes) :
+(ax + b)/(x + d) ou ax + b + c/(x − p), données algébriques ou graphique (fenêtre [−7 ; 7]², point A
+sur un nœud) ; AV, AH ou AO, inconnue par le point, f(x) (écritures équivalentes par `lireFonctionX`),
+vérification d'une limite latérale. **5gen66** (tableau → graphique) : 4 graphiques complets, la bonne
+lettre en A–D à 25 % chacune ; intrus = erreurs classiques (côté de l'AV, gauche/droite échangés, AH
+à la mauvaise valeur, pente ou ordonnée de l'AO, infinis échangés, AV déplacée), trois types distincts
+par exercice, message ciblé par intrus ; puis équations des asymptotes (deux AH échangées : le message
+« échangées » est testé AVANT « valeur de x » — une ordonnée peut coïncider avec l'abscisse de l'AV ;
+autre droite affine pour l'AO : renvoi à la dernière ligne du tableau). **5gen67** (détective) : huit
+types d'erreur = variantes, `groupe_erreur` ; ligne fausse en position 1–4 à 25 % (`donnees.av`,
+préliminaires justes du scénario) ; copie à marge rouge ; énoncé papier = copie + consigne globale.
+Regroupement a), b), c) : 5gen64 `simple` (« Calcule la valeur exacte de chaque limite. ») et 5gen65
+`fig` (deux formes : algébrique, graphique) reconnus 30 / 30 par variante ; **5gen66 et 5gen67
+écartés** (tableau + quatre graphes, copie d'élève : une consigne commune n'allège rien). Niveaux
+(`niveauEtDuree`, 2 000 tirages par variante, constants dans chaque verdict) : 5gen64 niv. 3 (4 pour
+moinsInfini, piège √(x²) = −x), 10 min ; 5gen65 niv. 3–4 (piège p < 0, `sansCharge`), 12 min ; 5gen66
+niv. 2, 6 min (lectures b, c) ; 5gen67 niv. 3, 8 min (`sansCharge`). Tout exact (`calcul: "exacte"`).
+Mesures : moteurs 42 000 tirages (réponses recalculées numériquement sur f, écritures équivalentes,
+« − – — », ∞/inf, illisible, approchée, copie ≠ bonne réponse) 0 anomalie ; collecteur (outils de
+`corrige-5e1` recopiés ; `\limits` ignoré, lim en ±∞ réessayée à 10⁶, fonctions indicées f_{A}, ligne
+pleine largeur relue sans ses accolades) 3 180 tirages, ≈ 45 200 égalités, 0 fausse ; parcours iPhone 13
+de chaque appli (toutes les variantes : illisible → message sans tentative, erreur ciblée, bonne
+réponse, mauvais choix fermé révélé) : scrollWidth 390, 0 erreur console ; documents réels `construirePlan` (3 plans : évaluation 2 séries +
+aménagée + feuille + Word du corrigé, calculatrice interdite / autorisée, avec et sans regroupement) :
+0 débordement à 680, 820 et 1 280 px, 0 `.katex-error` ; `groupe_erreur` B ≠ A sur 30 plans ;
+`?code=` 36 / 36.

@@ -254,6 +254,10 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '5gen22': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen22').then((m) => ({ default: m.App5gen22 }))),
   '5gen23': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen23').then((m) => ({ default: m.App5gen23 }))),
   '5gen24': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen24').then((m) => ({ default: m.App5gen24 }))),
+  '5gen64': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen64').then((m) => ({ default: m.App5gen64 }))),
+  '5gen65': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen65').then((m) => ({ default: m.App5gen65 }))),
+  '5gen66': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen66').then((m) => ({ default: m.App5gen66 }))),
+  '5gen67': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen67').then((m) => ({ default: m.App5gen67 }))),
   '5gen42': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen42').then((m) => ({ default: m.App5gen42 }))),
 
   // --- 5e, chapitre 5 : Dérivées et applications ---

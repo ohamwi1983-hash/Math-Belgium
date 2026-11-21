@@ -754,6 +754,16 @@ export const limitesAsymptotes: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 20. Limites, reconnaissance et calcul »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Limites avec racines carrées : expression conjuguée',
+          generatorId: '5gen64',
+          chantier: '5e-4h',
+          description: [
+            'Formes ∞ − ∞ (√(x² + bx + c) − x, différence de deux racines), 0/0 ((√(x + 9) − 3)/x) et ∞/∞ en −∞ : reconnais la forme, multiplie par l’expression conjuguée (produit remarquable (A − B)(A + B) = A² − B²) ou mets x² en évidence sous la racine — en −∞, √(x²) = |x| = −x —, simplifie, puis donne la limite exacte.',
+          ],
+          whereLabel: '5e (4h) → « 64. Limites avec racines carrées : expression conjuguée »',
+        },
       ],
     },
     {
@@ -1365,6 +1375,16 @@ export const limitesAsymptotes: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 22. Limites et asymptotes — lecture graphique »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Du tableau de limites au graphique',
+          generatorId: '5gen66',
+          chantier: '5e-4h',
+          description: [
+            'Le chemin inverse de la lecture graphique : un tableau de limites est donné, choisis le seul graphique qui lui correspond parmi quatre — les trois autres portent une erreur classique (côté d’approche d’une asymptote verticale inversé, limites à gauche et à droite échangées, asymptote horizontale confondue avec une valeur atteinte, asymptote oblique mal placée) —, puis écris les équations des asymptotes.',
+          ],
+          whereLabel: '5e (4h) → « 66. Du tableau de limites au graphique »',
         },
       ],
     },
@@ -1990,6 +2010,26 @@ export const limitesAsymptotes: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 24. Étude complète »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Retrouver une fonction à partir de ses asymptotes',
+          generatorId: '5gen65',
+          chantier: '5e-4h',
+          description: [
+            'La forme est donnée — (ax + b)/(x + d) ou ax + b + c/(x − p) — avec ses asymptotes et un point du graphe, ou un graphique complet à lire : traduis chaque asymptote en condition, utilise le point pour trouver la dernière inconnue, écris f(x), puis vérifie l’asymptote verticale par une limite.',
+          ],
+          whereLabel: '5e (4h) → « 65. Retrouver une fonction à partir de ses asymptotes »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Détective d’erreurs : limites',
+          generatorId: '5gen67',
+          chantier: '5e-4h',
+          description: [
+            'La résolution d’un élève contient une seule ligne fausse : « ∞/∞ = 1 », « ∞ − ∞ = 0 », signe de 0⁺ ou 0⁻ faux, simplification interdite, √(x²) = x en −∞, degrés mal comparés, asymptote oblique prise pour une horizontale ou limite latérale oubliée. Trouve la ligne, nomme l’erreur, puis corrige la résolution.',
+          ],
+          whereLabel: '5e (4h) → « 67. Détective d’erreurs : limites »',
         },
       ],
     },
