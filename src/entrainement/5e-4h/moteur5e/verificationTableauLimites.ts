@@ -59,10 +59,16 @@ export function piege(e: E, p: PhaseTableauLimites, valeurs: string[]): Frag[] |
   if (estOblique(s)) {
     const f = lireFonctionX(valeurs[0] ?? "");
     if (f && s.droite.type === "o" && memesValeurs(f, () => (s.droite as { q: number }).q, PTS)) return [tx("C'est une droite horizontale : l'asymptote oblique a une pente, lue sur la dernière ligne du tableau.")];
+    // Autre droite (pente ou ordonnée fausse) : f affine sur les points de contrôle.
+    if (f) {
+      const pente = f(1) - f(0);
+      if (PTS.every((x) => Math.abs(f(x) - (f(0) + pente * x)) < 1e-9)) return [tx("La droite se lit sur la dernière ligne du tableau : c'est l'expression retranchée à f(x), dont l'écart avec f tend vers 0 ; relis son signe et ses coefficients.")];
+    }
     return null;
   }
   const v = valeurs.map(nb);
-  if (v.some((x) => x !== null && s.av.includes(x))) return [tx("Une asymptote horizontale se lit en "), lx("-\\infty"), tx(" et en "), lx("+\\infty"), tx(" : c'est la limite finie de f(x), pas une valeur de x.")];
+  // L'échange exact d'abord : une des deux ordonnées peut coïncider avec l'abscisse de l'AV.
   if (e.variante === "deuxAh" && s.gauche.type === "h" && s.droite.type === "h" && v[0] === s.droite.L && v[1] === s.gauche.L) return [tx("Tu as échangé les deux : la première est la limite en "), lx("-\\infty"), tx(".")];
+  if (v.some((x) => x !== null && s.av.includes(x))) return [tx("Une asymptote horizontale se lit en "), lx("-\\infty"), tx(" et en "), lx("+\\infty"), tx(" : c'est la limite finie de f(x), pas une valeur de x.")];
   return null;
 }

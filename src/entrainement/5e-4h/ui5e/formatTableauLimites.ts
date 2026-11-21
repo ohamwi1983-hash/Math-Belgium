@@ -4,7 +4,7 @@ import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import { fragmentsVersHtml } from "../../export/genererFeuilleExercicesHtml";
 import type { AideEcran, ChampEcran, Frag, OptionEcran, TableauDonnees } from "./ecransTrigo.types";
 import { lx, tx } from "./ecransTrigo.types";
-import { cibleT, polyL } from "./ecrituresLimitesLotG";
+import { cibleT, moinsDroiteL, polyL } from "./ecrituresLimitesLotG";
 import type { SpecGraphe } from "./figureLimitesLotG";
 import { grapheSvg, grilleGraphesSvg } from "./figureLimitesLotG";
 
@@ -54,7 +54,7 @@ function colonnes(s: Situation): string[][] {
 
 function entetes(s: Situation): Frag[][] {
   const base: Frag[][] = [[tx("x tend vers")], [lx("f(x)"), tx(" tend vers")]];
-  if (estOblique(s) && s.droite.type === "o") base.push([lx(`f(x)-(${polyL([s.droite.m, s.droite.q])})`), tx(" tend vers")]);
+  if (estOblique(s) && s.droite.type === "o") base.push([lx(moinsDroiteL(s.droite.m, s.droite.q)), tx(" tend vers")]);
   return base;
 }
 

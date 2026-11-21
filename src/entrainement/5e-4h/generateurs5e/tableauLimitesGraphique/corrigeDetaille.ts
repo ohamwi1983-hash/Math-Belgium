@@ -2,7 +2,7 @@ import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuill
 import { calcul, latex, ligne, piege, resultat, texte, utilise } from "../../../export/corrigeTableau";
 import type { ExerciceTableauLimites, Situation } from "../../core5e/tableauLimitesGraphique";
 import { fonction, LETTRES } from "../../core5e/tableauLimitesGraphique";
-import { limL, MOINS, nombreL, PLUS, pointC, polyL } from "../../ui5e/ecrituresLimitesLotG";
+import { limL, MOINS, moinsDroiteL, nombreL, PLUS, pointC, polyL } from "../../ui5e/ecrituresLimitesLotG";
 import { droiteL, estOblique, figureCorrige, infL, limBoutL, reponse } from "../../ui5e/formatTableauLimites";
 
 /**
@@ -100,7 +100,7 @@ function etapeC(e: E): EtapeCorrection[] {
   const s = e.sit;
   const L: LigneCalcul[] = [];
   if (estOblique(s) && s.droite.type === "o") {
-    L.push(ligne(`${limL(PLUS)}\\left[f(x)-(${polyL([s.droite.m, s.droite.q])})\\right]=0`, "lu dans le tableau (aussi en −∞)"));
+    L.push(ligne(`${limL(PLUS)}\\left[${moinsDroiteL(s.droite.m, s.droite.q)}\\right]=0`, "lu dans le tableau (aussi en −∞)"));
     L.push(ligne(droiteL(s.droite), "asymptote oblique"));
   } else {
     const deux = e.variante === "deuxAh";

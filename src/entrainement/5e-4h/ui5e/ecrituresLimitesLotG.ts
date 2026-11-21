@@ -70,6 +70,12 @@ export function polyL(coefs: number[], v = "x"): string {
   return s === "" ? "0" : s;
 }
 
+/** « f(x) − (mx + q) » sans parenthèses inutiles : « f(x) − x », « f(x) − 2x », mais « f(x) − (−x) ». */
+export function moinsDroiteL(m: number, q: number, f = "f(x)"): string {
+  const d = polyL([m, q]);
+  return q === 0 && m > 0 ? `${f}-${d}` : `${f}-(${d})`;
+}
+
 /** Valeur de polynôme. */
 export function polyV(coefs: number[], x: number): number {
   return coefs.reduce((acc, c) => acc * x + c, 0);

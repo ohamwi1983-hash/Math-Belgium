@@ -14,6 +14,10 @@ import { aD, abL, apresProduitL, apresSimplificationL, conjL, FORMES, modeSimpli
  */
 
 type E = ExerciceConjuguee;
+
+/** Ligne trop large pour la colonne de droite du calcul (membre de gauche long) : entre accolades,
+ * elle n'a plus de « = » de niveau 0 et s'affiche sur toute la largeur (`decouperLigneCalcul`). */
+const pleineLargeur = (l: string): string => `{${l}}`;
 const t = texte;
 const f = latex;
 
@@ -61,6 +65,7 @@ function etapeB(e: E): EtapeCorrection[] {
   const ab = abL(e);
   const conj = conjL(e);
   const P = produitL(e);
+  const deuxRacines = e.sous === "B1" || e.sous === "B2";
   const lignes: LigneCalcul[] = [];
   // Carrés : A² = radicande, B² écrit.
   let a2: string;
@@ -95,6 +100,10 @@ function etapeB(e: E): EtapeCorrection[] {
     lignes.push(ligne(`=\\dfrac{\\left(${A}\\right)^2-${Bsq}}{${den0}\\left(${conj}\\right)}`, [f("(A-B)(A+B)=A^2-B^2")]));
     lignes.push(ligne(`=\\dfrac{${a2}-${b2Paren}}{${den0}\\left(${conj}\\right)}`, "carré d'une racine : le nombre sous la racine"));
     lignes.push(ligne(`=\\dfrac{${P}}{${den0}\\left(${conj}\\right)}`, "on réduit le numérateur"));
+  } else if (deuxRacines) {
+    // Deux racines : le produit (A − B)(A + B) écrit en entier ne tient pas dans la colonne du
+    // calcul ; la multiplication par la conjuguée est annoncée dans l'introduction de la chaîne.
+    lignes.push(ligne(`f(x)=\\dfrac{\\left(${A}\\right)^2-${Bsq}}{${conj}}`, [f("(A-B)(A+B)=A^2-B^2")]));
   } else {
     lignes.push(ligne(`f(x)=\\dfrac{\\left(${ab}\\right)\\left(${conj}\\right)}{${conj}}`, "on multiplie et on divise par la conjuguée (non nulle)"));
     lignes.push(ligne(`=\\dfrac{\\left(${A}\\right)^2-${Bsq}}{${conj}}`, [f("(A-B)(A+B)=A^2-B^2")]));
@@ -103,7 +112,7 @@ function etapeB(e: E): EtapeCorrection[] {
   }
   return [
     utilise("b", [t("Expression conjuguée : celle de "), f("A-B"), t(" est "), f("A+B"), t(" ; leur produit est le produit remarquable "), f("(A-B)(A+B)=A^2-B^2"), t(", qui fait disparaître la racine (cours, § 1).")]),
-    calcul("b", lignes),
+    calcul("b", lignes, deuxRacines ? [t("On multiplie et on divise "), f("f(x)"), t(" par la conjuguée "), f(conj), t(" (non nulle) :")] : []),
     resultat("b", reponse(e, "transformer")),
     piege("b", [t("Multiplier seulement le numérateur par la conjuguée : on multiplie et on divise, sinon la fonction change.")]),
   ];
@@ -134,7 +143,7 @@ function etapeC(e: E): EtapeCorrection[] {
   } else if (m === "direct") {
     usage = [t("Le numérateur est un nombre fixe ; le dénominateur est une somme de deux racines qui tendent vers "), f("+\\infty"), t(" (cours, § 1).")];
     lignes.push(ligne(`f(x)=\\dfrac{${ap.num}}{${ap.den}}`));
-    lignes.push(ligne(`${L}\\left(${as.den}\\right)=+\\infty`, "somme de deux termes qui tendent vers +∞"));
+    lignes.push(ligne(pleineLargeur(`${L}\\left(${as.den}\\right)=+\\infty`), "somme de deux termes qui tendent vers +∞"));
     pg = [t("Conclure trop vite « "), f("\\infty-\\infty=0"), t(" » : ici le résultat est bien 0, mais il faut le démontrer.")];
   } else if (e.sous === "E1") {
     usage = [t("On divise le numérateur et le dénominateur par x (x < 0) ; "), f("\\dfrac{c}{x}"), t(" et "), f("\\dfrac{c}{x^2}"), t(" tendent vers 0 (cours, § 1).")];
@@ -157,7 +166,7 @@ function etapeC(e: E): EtapeCorrection[] {
     lignes.push(ligne(`f(x)=\\dfrac{${as.num}}{${as.den}}`, "on divise numérateur et dénominateur par x"));
     lignes.push(ligne(`${L}\\left(${as.num}\\right)=${n}`, [t("les termes en "), f("\\dfrac{1}{x}"), t(" tendent vers 0")]));
     const s1 = e.sous === "B2" ? "1+1" : neg ? `-${d.p}-${d.p}` : `${d.p}+${d.p}`;
-    lignes.push(ligne(`${L}\\left(${as.den}\\right)=${s1}=${den}`, [t("les termes en "), f("\\dfrac{1}{x}"), t(" et "), f("\\dfrac{1}{x^2}"), t(" tendent vers 0")]));
+    lignes.push(ligne(e.sous === "B2" ? pleineLargeur(`${L}\\left(${as.den}\\right)=${s1}=${den}`) : `${L}\\left(${as.den}\\right)=${s1}=${den}`, [t("les termes en "), f("\\dfrac{1}{x}"), t(" et "), f("\\dfrac{1}{x^2}"), t(" tendent vers 0")]));
     pg = neg
       ? [t("Écrire "), f("\\dfrac{\\sqrt{x^2}}{x}=1"), t(" : pour x < 0, il vaut −1.")]
       : [t("Oublier l'un des deux termes du dénominateur : chacun tend vers "), f(e.sous === "B2" ? "1" : `${d.p}`), t(".")];
