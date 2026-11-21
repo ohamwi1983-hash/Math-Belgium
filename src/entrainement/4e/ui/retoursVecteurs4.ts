@@ -132,3 +132,74 @@ export function messageDeviationPhysique(e: ExerciceApplicationPhysique, valeur:
   }
   return null;
 }
+
+/**
+ * Écran « modélisation » (retouche 4e ch. 6) : le piège réel est de juger la configuration à l'œil
+ * sur le schéma, ou par l'angle du triangle des vecteurs mis bout à bout (180° − θ), au lieu de
+ * l'angle θ de l'énoncé, entre les deux vecteurs placés à la même origine (corrigé, étape a).
+ * Niveau 1 : la règle du cours ; niveau 2 : θ de l'instance et l'angle du triangle à NE PAS
+ * utiliser — la comparaison à 90° reste à faire (même texte pour les deux variantes).
+ */
+export function aidesModelisationPhysique(e: ExerciceApplicationPhysique): Niveaux {
+  const { v1, v2 } = notationVecteursApplicationPhysique(e.contexte);
+  const theta = e.angleEntreVecteurs;
+  return [
+    [
+      texte("La configuration se lit sur l'angle θ entre "),
+      latex(v1),
+      texte(" et "),
+      latex(v2),
+      texte(" placés à la même origine, celui que donne l'énoncé — pas à l'œil sur le schéma. Si "),
+      latex("\\theta = 90^\\circ"),
+      texte(", le parallélogramme des deux vecteurs est un rectangle (théorème de Pythagore, puis tangente) ; sinon, aigu ou obtus, l'angle est quelconque (formule de la résultante, puis loi des sinus)."),
+    ],
+    [
+      texte("Ici, l'énoncé donne "),
+      latex(`\\theta = ${theta}^\\circ`),
+      texte(" entre "),
+      latex(v1),
+      texte(" et "),
+      latex(v2),
+      texte(" : compare cette valeur à "),
+      latex("90^\\circ"),
+      texte(". L'angle du triangle obtenu en mettant les vecteurs bout à bout, "),
+      latex(`180^\\circ - ${theta}^\\circ = ${180 - theta}^\\circ`),
+      texte(", n'est pas celui qui décide."),
+    ],
+  ];
+}
+
+/**
+ * Écran « interprétation » (retouche 4e ch. 6) : pièges réels (corrigé, étape d) — croire la
+ * résultante toujours côté Nord parce que le premier vecteur pointe plein Nord (une déviation
+ * obtuse la fait passer côté Sud, ≈ 30 % des tirages « forces, angle quelconque »), et chercher le
+ * côté Est / Ouest dans le calcul alors qu'il vient de l'énoncé. Niveau 1 : la méthode ; niveau 2 :
+ * le côté donné par l'énoncé et la déviation de l'écran précédent (affichée par le récapitulatif) à
+ * comparer à 90° — jamais la direction elle-même.
+ */
+export function aidesInterpretationPhysique(e: ExerciceApplicationPhysique): Niveaux {
+  const { v1, v2, resultante } = notationVecteursApplicationPhysique(e.contexte);
+  const cote = e.coteDeviation === "est" ? "l'Est" : "l'Ouest";
+  return [
+    [
+      texte("Deux questions séparées. Est ou Ouest : la résultante est déviée du côté du second vecteur "),
+      latex(v2),
+      texte(", lu dans l'énoncé. Nord ou Sud : "),
+      latex(v1),
+      texte(" pointe plein Nord ; compare la déviation (angle entre "),
+      latex(v1),
+      texte(" et "),
+      latex(resultante),
+      texte(") à "),
+      latex("90^\\circ"),
+      texte(" — en dessous, la résultante reste côté Nord ; au-dessus, elle passe côté Sud."),
+    ],
+    [
+      texte(`L'énoncé oriente le second vecteur « en direction de ${cote} ». La déviation trouvée à l'écran précédent vaut environ `),
+      latex(`${Math.round(e.triangle.C)}^\\circ`),
+      texte(" (récapitulatif) : compare-la à "),
+      latex("90^\\circ"),
+      texte(", puis assemble les deux réponses."),
+    ],
+  ];
+}

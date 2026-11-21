@@ -5253,3 +5253,17 @@ scalaire » comme le cours, gen87, gen90, gen91), trois variantes ajoutées en f
 d'un point », gen24 « paramètre au carré », gen26 « nature d'un triangle ») et tirage équilibré (gen91
 ligne fausse tirée + `groupe_erreur`, gen29 Sud ≈ 30 %). Libellés du panneau gen24, 25, 26, 29.
 Détail : `feuilles-evaluations.md`, entrée « 4e ch. 6 (lots B, C, D) ».
+
+## 4e, Chapitre 6 — retouches gen28, gen29, gen83 (décisions de l'utilisateur, 21/11/2026)
+
+gen28 : étiquettes placées en PIXELS réels (`ui/etiquettesComparaison.ts`, partagé écran / papier) —
+près du milieu de leur vecteur, des deux côtés de la normale, écart borné, au-delà des extrémités en
+dernier recours ; jamais sur un trait, une tête, une autre étiquette, hors cadre, ni plus proche d'un
+autre vecteur (retour arrière, budget fixe). Écran : largeur réelle du graphe
+(`VecteurGraph.onLargeurGraphe`, `components/FigureComparaison.tsx`) ; papier : fenêtre resserrée
+autour des vecteurs et des étiquettes. Données et `?code=` inchangés. gen29 : aides à deux niveaux
+sur « modélisation » (θ de l'énoncé, pas l'angle du triangle bout à bout) et « interprétation »
+(Est / Ouest lu dans l'énoncé, Nord / Sud par la déviation comparée à 90°), sans suivi moteur.
+gen83 « lecture » : titre papier « Composantes d'un vecteur » (`titrePapier`). Gen26 « paramètre »
+laissé tel quel (décision). Détail et mesures : `feuilles-evaluations.md`, entrée « 4e ch. 6
+(retouches) ».

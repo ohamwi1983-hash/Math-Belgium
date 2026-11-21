@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { ExerciceComparaisonVecteurs } from "../core/comparaisonVecteurs.types";
 import { Katex } from "./Katex";
-import { VecteurGraph } from "./VecteurGraph";
-import { aideSelectionComparaison, consigneSelection, vecteursAffichesComparaison, TETE_FLECHE_COMPARAISON } from "../ui/formatComparaisonVecteurs";
+import { FigureComparaison } from "./FigureComparaison";
+import { aideSelectionComparaison, consigneSelection } from "../ui/formatComparaisonVecteurs";
 import { aidesParNiveau } from "../ui/retoursVecteurs";
 import { AidesNiveaux } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -27,7 +27,6 @@ interface Props {
 export function EtapeSelectionComparaison({ exercice, onActiverAide, onValider, validation }: Props) {
   const [selection, setSelection] = useState<string[]>([]);
   const consigne = consigneSelection(exercice);
-  const { points, vecteurs, viewBox } = vecteursAffichesComparaison(exercice, selection);
 
   function basculer(label: string) {
     setSelection((s) => (s.includes(label) ? s.filter((l) => l !== label) : [...s, label]));
@@ -35,7 +34,7 @@ export function EtapeSelectionComparaison({ exercice, onActiverAide, onValider, 
 
   return (
     <div>
-      <VecteurGraph points={points} vecteurs={vecteurs} masquerAxes pasGrille={1} viewBoxFixe={viewBox} teteFleche={TETE_FLECHE_COMPARAISON} />
+      <FigureComparaison exercice={exercice} selection={selection} />
       <p className="prompt-text">
         {consigne.avant}
         <Katex expression={consigne.latex} />

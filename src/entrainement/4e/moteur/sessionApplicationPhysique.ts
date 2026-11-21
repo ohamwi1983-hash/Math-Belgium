@@ -11,8 +11,9 @@
  * fausse. Aide progressive (2 niveaux, même principe que
  * "Colinéarité"/"Orthogonalité"/"Distance point-droite") sur l'écran "norme"
  * (`promptgen29modificationscompletes.md`, point 4.3) et, depuis F2 option b, sur l'écran
- * "deviation" (méthode, puis formule substituée + piège de la déviation obtuse) — "modelisation"
- * et "interpretation" restent sans aide.
+ * "deviation" (méthode, puis formule substituée + piège de la déviation obtuse). "modelisation"
+ * et "interpretation" ont aussi leurs aides à deux niveaux (retouche 4e ch. 6,
+ * `ui/retoursVecteurs4.ts`), affichées par l'écran seul : le moteur ne les suit pas.
  */
 import type { GenerateurExerciceApplicationPhysique, VarianteApplicationPhysique } from "../core/applicationPhysique.types";
 import type { ReglagesSession } from "../core/session.types";

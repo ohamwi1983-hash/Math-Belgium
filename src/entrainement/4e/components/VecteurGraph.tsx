@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Line, Mafs, Point as MafsPoint, Polygon, Text, useTransformContext, vec, Vector } from "mafs";
 import "mafs/core.css";
 import { EPAISSEUR_TRAIT_ACCENTUE, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN, formatEtiquetteGrilleTypo } from "../ui/mafsTransformation";
@@ -41,6 +41,10 @@ interface Props {
    * taille fixe en pixels, comportement inchangé). Fournie par gen28 : sa figure au quadrillage
    * serré rendait les têtes Mafs aussi longues qu'un vecteur de 1 à 2 unités (audit 4e ch. 6, G13). */
   teteFleche?: number;
+  /** Largeur réelle du graphe (px) communiquée à l'appelant à chaque changement — absente par
+   * défaut. Fournie par gen28 : le placement de ses étiquettes se calcule à leur taille réelle en
+   * pixels (`ui/etiquettesComparaison.ts`), il a donc besoin de la largeur effectivement tracée. */
+  onLargeurGraphe?: (largeur: number) => void;
 }
 
 /** Tête de flèche proportionnée (unités de la figure) : segment jusqu'à la base, triangle plein. */
@@ -151,9 +155,12 @@ function LabelVecteurFleche({ x, y, label, couleur }: { x: number; y: number; la
  * superposer ses propres éléments Mafs (`MovablePoint`...) sans dupliquer le calcul de viewBox/
  * grille/largeur — voir leurs sections dédiées.
  */
-export function VecteurGraph({ points = [], vecteurs = [], children, onClic, masquerAxes = false, pasGrille, viewBoxFixe, pan = true, teteFleche }: Props) {
+export function VecteurGraph({ points = [], vecteurs = [], children, onClic, masquerAxes = false, pasGrille, viewBoxFixe, pan = true, teteFleche, onLargeurGraphe }: Props) {
   const [wrapperRef, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
   const largeur = Math.min(LARGEUR_MAX, Math.max(LARGEUR_MIN, largeurMesuree || LARGEUR_PAR_DEFAUT));
+  useEffect(() => {
+    if (largeurMesuree) onLargeurGraphe?.(largeur);
+  }, [largeur, largeurMesuree, onLargeurGraphe]);
   const hauteur = largeur / RATIO_GRAPHE;
   const viewBox = viewBoxFixe ?? calculerViewBoxVecteurs(points, vecteurs);
   const [pas, setPas] = useState<{ x: number; y: number } | null>(null);

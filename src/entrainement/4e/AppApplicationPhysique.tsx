@@ -83,7 +83,7 @@ function calculerSegmentsProgression(etat: EtatSessionApplicationPhysique): Etat
     const revele =
       phase === "modelisation" ? etat.modelisationReveleExercice : phase === "norme" ? etat.normeReveleExercice : etat.deviationReveleExercice;
     if (revele) return "revele";
-    // "modelisation" n'a aucun mécanisme d'aide (toujours "correcte", jamais "aide").
+    // "modelisation" : aides affichées par l'écran seul, non suivies (toujours "correcte", jamais "aide").
     const aideUtilisee =
       phase === "norme" ? etat.normeAideUtiliseeExercice : phase === "deviation" ? etat.deviationAideUtiliseeExercice : false;
     return aideUtilisee ? "aide" : "correcte";

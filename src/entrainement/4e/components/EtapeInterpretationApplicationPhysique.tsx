@@ -7,6 +7,8 @@ import { SchemaApplicationPhysique } from "./SchemaApplicationPhysique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesNiveaux } from "./RetourSaisie";
+import { aidesInterpretationPhysique } from "../ui/retoursVecteurs4";
 
 interface Props {
   exercice: ExerciceApplicationPhysique;
@@ -51,6 +53,8 @@ export function EtapeInterpretationApplicationPhysique({ exercice, tentativesUti
       </div>
       {!validation && (
         <>
+        {/* Aides à deux niveaux (retouche 4e ch. 6) : ni pénalité ni suivi dans le moteur. */}
+        <AidesNiveaux aides={aidesInterpretationPhysique(exercice)} />
         <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix)}>
           Valider
         </button>

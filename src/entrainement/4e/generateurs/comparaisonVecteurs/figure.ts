@@ -1,7 +1,9 @@
 import type { ExerciceComparaisonVecteurs } from "../../core/comparaisonVecteurs.types";
 import { TETE_FLECHE_COMPARAISON, vecteursAffichesComparaison } from "../../ui/formatComparaisonVecteurs";
+import { ETIQUETTE_PAPIER, tailleEtiquette } from "../../ui/etiquettesComparaison";
 import { RATIO_GRAPHE } from "../../ui/mafsTransformation";
 import { calculerViewBoxVecteurs } from "../../ui/vecteurGraph";
+import type { PointAffiche, VecteurAffiche, ViewBoxTransformation } from "../../ui/vecteurGraph";
 
 /**
  * Figure papier de gen28 (vecteurs sur quadrillage ; vecteurs retenus en couleur dans le corrigé),
@@ -15,10 +17,11 @@ const COULEUR_GRILLE = "#e9ecef";
 const COULEUR_CADRE = "#d0d7de";
 const COULEUR_VECTEUR_DEFAUT = "#1971c2";
 
-const TAILLE_POLICE_LABEL = 15;
-const LARGEUR_FLECHE_LABEL = 11;
-const TETE_FLECHE_LABEL = 3;
-const ESPACE_FLECHE_LETTRE = 2;
+/** Étiquette dessinée : mêmes valeurs que celles du placement (`ETIQUETTE_PAPIER`). */
+const TAILLE_POLICE_LABEL = ETIQUETTE_PAPIER.police;
+const LARGEUR_FLECHE_LABEL = ETIQUETTE_PAPIER.largeurFleche;
+const TETE_FLECHE_LABEL = ETIQUETTE_PAPIER.demiTete;
+const ESPACE_FLECHE_LETTRE = ETIQUETTE_PAPIER.espaceFleche;
 /** Même ratio empirique que `VecteurGraph.tsx::RATIO_HAUTEUR_MAJUSCULE` — positionne la petite
  * flèche juste au-dessus du sommet de la lettre, jamais une mesure DOM réelle (impossible ici, pas
  * de navigateur). */
@@ -55,7 +58,7 @@ function ligneVecteurSvg(x1: number, y1: number, x2: number, y2: number, couleur
 }
 
 /** Étiquette "flèche au-dessus + lettre" à `(cx,cy)` (position déjà résolue par
- * `calculerPositionsEtiquettesSansChevauchement`, convertie en pixel) — reproduction fidèle, en
+ * `ui/etiquettesComparaison.ts::placerEtiquettesComparaison`, convertie en pixel) — reproduction fidèle, en
  * géométrie SVG inline, de `VecteurGraph.tsx::LabelVecteurFleche` (voir le commentaire de tête pour
  * pourquoi jamais un caractère Unicode). Pas d'indice ici (labels à une seule lettre, comme tous les
  * appels de `vecteursAffichesComparaison`), donc jamais de recentrage de largeur d'indice. */
@@ -76,6 +79,27 @@ function labelVecteurFlecheSvg(cx: number, cy: number, lettre: string, couleur: 
 }
 
 /**
+ * Fenêtre papier resserrée autour des vecteurs ET des boîtes d'étiquettes (marge habituelle de
+ * `calculerViewBoxVecteurs`), comme avant la retouche du placement : la fenêtre du placement (celle
+ * de l'écran) garde de larges marges vides qui rapetissaient la figure imprimée. Jamais plus grande
+ * que la fenêtre du placement : l'échelle ne peut que grandir, donc tous les écarts mesurés au
+ * placement grandissent avec elle (aucun chevauchement nouveau, étiquettes à taille fixe).
+ */
+function fenetreSerree(vecteurs: VecteurAffiche[], placement: ViewBoxTransformation, pxParUnite: number): ViewBoxTransformation {
+  const coins: PointAffiche[] = vecteurs.flatMap((v) => {
+    if (!v.labelPosition || !v.labelFleche) return [];
+    const { largeur, dessus, dessous } = tailleEtiquette(v.labelFleche.base, ETIQUETTE_PAPIER);
+    const p = v.labelPosition;
+    return [
+      { point: { x: p.x - largeur / 2 / pxParUnite, y: p.y + dessus / pxParUnite }, label: "" },
+      { point: { x: p.x + largeur / 2 / pxParUnite, y: p.y - dessous / pxParUnite }, label: "" },
+    ];
+  });
+  const serree = calculerViewBoxVecteurs(coins, vecteurs.map((v) => ({ ...v, labelPosition: undefined })));
+  return serree.x[1] - serree.x[0] < placement.x[1] - placement.x[0] ? serree : placement;
+}
+
+/**
  * `<svg>` autonome de la figure — un vecteur par vecteur de l'exercice, référence en rouge,
  * `labelsSelectionnes` en orange (mêmes couleurs que `vecteursAffichesComparaison`), quadrillage
  * SANS axes ni graduations numériques (voir le commentaire de tête de fichier). `labelsSelectionnes`
@@ -84,14 +108,20 @@ function labelVecteurFlecheSvg(cx: number, cy: number, lettre: string, couleur: 
  * change, jamais deux moteurs de tracé distincts.
  */
 export function construireSvgComparaison(exercice: ExerciceComparaisonVecteurs, labelsSelectionnes: string[]): string {
-  const { vecteurs } = vecteursAffichesComparaison(exercice, labelsSelectionnes);
-  const viewBox = calculerViewBoxVecteurs([], vecteurs);
   const largeur = LARGEUR_SVG;
   const hauteur = Math.round(largeur / RATIO_GRAPHE);
-  const [xMin, xMax] = viewBox.x;
-  const [yMin, yMax] = viewBox.y;
   const zoneX = largeur - 2 * MARGE_SVG;
   const zoneY = hauteur - 2 * MARGE_SVG;
+  // Étiquettes placées dans la zone réellement tracée, à la taille réelle de l'étiquette papier ;
+  // fenêtre = celle du placement (même fenêtre qu'à l'écran), jamais recalculée autour des étiquettes.
+  const { vecteurs, viewBox: fenetrePlacement } = vecteursAffichesComparaison(exercice, labelsSelectionnes, {
+    ...ETIQUETTE_PAPIER,
+    largeurPx: zoneX,
+    hauteurPx: zoneY,
+  });
+  const viewBox = fenetreSerree(vecteurs, fenetrePlacement, zoneX / (fenetrePlacement.x[1] - fenetrePlacement.x[0]));
+  const [xMin, xMax] = viewBox.x;
+  const [yMin, yMax] = viewBox.y;
   const sx = (x: number) => MARGE_SVG + ((x - xMin) / (xMax - xMin)) * zoneX;
   const sy = (y: number) => MARGE_SVG + ((yMax - y) / (yMax - yMin)) * zoneY;
 
