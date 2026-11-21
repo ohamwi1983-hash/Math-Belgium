@@ -12,6 +12,7 @@ paths:
   - "src/components/admin/EvaluationGeneratorPanel.tsx"
   - "src/components/admin/RepereNiveauDuree.tsx"
   - "src/components/admin/ChampPoints.tsx"
+  - "src/components/admin/conception/**"
   - "src/lib/pointsAutomatiques.ts"
   - "scripts/verifier-enonces-evaluation.mjs"
 ---
@@ -131,11 +132,9 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   Sous chaque générateur dont une variante est choisie : rangée « Sous-total : n exercices · ≈ m min
   (· p pts en évaluation) » ; récapitulatif par processus de l'évaluation : « Appliquer : 12 pts
   (60 %) · ≈ 25 min ». Pas de nouvelle colonne (téléphone).
-- **Badge flottant** (`CompteurFlottant`) : « n questions · p points · ≈ m min » (durée = la même
-  « Durée estimée » que l'en-tête, variantes exclues non comptées), en évaluation et en feuille ;
-  « /exercices » caché sous 480 px (≈ 225 px de large sur iPhone 13). Masqué (fondu) dès que la
-  barre du bas (qui redonne le total) est à l'écran ou dépassée : il ne recouvre plus les documents
-  générés ni le formulaire de remédiation.
+- **Compte toujours visible** : l'ancien badge flottant (`CompteurFlottant`) et la barre du bas ont
+  été remplacés par le panneau « Ma feuille / Mon évaluation / Mon examen » de la page de conception
+  (section « Page de conception » plus bas) : mêmes totaux (questions, points, « Durée estimée »).
 - **Affichage** (maquette E) : cadre du NUMÉRO puis cadre du PALIER (« 5 » « Avancé »), noir et blanc
   (`niveauHtml`, `.niveau .num/.pal`) en tête de chaque exercice de la feuille et de sa version
   aménagée ; légende en tête de la feuille « Niveau 1 à 7 : Base 1–2 · Intermédiaire 3–4 · Avancé
@@ -912,7 +911,7 @@ Panneau des évaluations et des examens (pas la feuille d'exercices, qui n'a pas
   (clic → verrouiller la valeur affichée). Téléphone : cadenas sous le champ (la colonne « Points »
   garde sa largeur). Changer les réglages d'une rangée non verrouillée (calculatrice, paramètres)
   change son estimation, donc ses points ; une rangée verrouillée ne bouge jamais.
-- **« Ajuster au total »** (barre du bas) : total saisi en texte libre (`lireTotal` de l'examen,
+- **« Ajuster au total »** (panneau « Mon évaluation ») : total saisi en texte libre (`lireTotal` de l'examen,
   `normaliserSigneMoins`), les unités NON verrouillées sont mises à l'échelle pour que le total vaille
   la saisie (verrouillées comptées telles quelles) : `examen.ts::mettreAEchelleParGroupes` —
   `mettreAEchelle` lui-même quand chaque unité est une question, sinon mêmes règles (proportionnels,
@@ -927,7 +926,7 @@ Panneau des évaluations et des examens (pas la feuille d'exercices, qui n'a pas
   verrouillées → points EXACTEMENT ceux du plan, aucun recalcul ; les lignes sans question restent
   automatiques. Un plan enregistré porte déjà les points effectifs (lignes matérialisées).
 - **Vérifié** (Playwright, 4e ch. 2 et 6e ch. 5, 1 280 px et iPhone 13, outil `panneau.cjs`) : 72 / 72
-  rangées des processus 2 et 3 : points = « ≈ m min » ÷ 2 (de 3,5 à 8) ; badge, barre du bas et
+  rangées des processus 2 et 3 : points = « ≈ m min » ÷ 2 (de 3,5 à 8) ; badge, barre du bas (aujourd'hui : panneau de droite) et
   sous-totaux = somme des points ; saisie « 3,5 » verrouillée et inchangée quand la calculatrice
   change (les rangées non verrouillées suivent) ; « 2,3 » signalé ; « Ajuster au total » 20 et 37
   exacts (verrouillée inchangée), « vingt » et « 0,4 » refusés avec message ; plan enregistré puis
@@ -982,7 +981,7 @@ réponse, points à droite, pas de majuscules d'insistance, pied de page, option
   somme exacte) ; critères et sous-questions suivent (`pointsCriteres` répartit `item.points`).
   Total illisible, vide ou impossible (< 0,5 pt par question) : points tels quels, signalé dans le
   panneau. **Total libre** : le panneau affiche en direct le total par partie et le total général.
-  Badge flottant et barre du bas : total de l'examen. Saisie : texte libre, `normaliserSigneMoins`,
+  Panneau « Mon examen » : total de l'examen. Saisie : texte libre, `normaliserSigneMoins`,
   jamais de champ numérique (les consignes supplémentaires ne sont PAS normalisées : tirets
   typographiques gardés).
 - **Word** (`evaluationDocx.ts`) : bandeau (paragraphe ombré), tableau par partie, consignes (puces
@@ -1935,3 +1934,59 @@ verdicts variés d'une série à l'autre. Documents réels (2 plans : groupés i
 variante autorisée en deux colonnes ; évaluation 2 séries + aménagée + corrigé + grille + feuille +
 aménagée + Word copie / corrigé / grille) : 0 `.katex-error`, 0 débordement à 680, 820 et 1 280 px.
 Page du chapitre 390 / 1 280 px : 0 « $ » ni « ** » visible, 0 erreur.
+## Page de conception — proposition A (décision de l'utilisateur, 21/11/2026)
+
+`EvaluationGeneratorPanel.tsx` (feuille d'exercices, évaluation, examen ; maquettes `Main`,
+`AEvaluation`, `ATelephone` + ajouts `CApercu` et `BAssistant`). État et règles inchangés (mêmes
+`lignes`, même `construirePlan`) ; seul le rendu change. Sous-modules `components/admin/conception/` :
+- **En-tête compact** : niveau / heures / chapitres (sauf page verrouillée), puis Document
+  (Évaluation / Examen), titre, date, N°, vol./sem., **Séries** (compteur −/+, plus de
+  `type="number"`), calculatrice, école (connecté) ; avertissement calculatrice dessous.
+- **Catalogue à gauche** : « Façons de composer » repliables, recherche (sans accents, titre de
+  section, nom de générateur, variantes, code genN), filtre par processus (Tout / 1 / 2 / 3 : plus
+  d'onglets), sections en **accordéon** fermées (pastilles 1/2/3 des processus présents,
+  « n choisis · x pts »). Lignes vides masquées (« Masqué : « Formule » … (aucune question pour ce
+  point) ») ; section sans aucune question : liste « Sans question pour l'instant » sous le chapitre.
+  Générateur : variantes en **puces** (clic = 1 exercice / 0 ; repère « niv. · ≈ min » DANS la puce,
+  calcul paresseux inchangé), puis une rangée par variante choisie et par copie « ~n » : compteur,
+  points + cadenas (`ChampPoints`), paramètres à inclure, cas particulier, « + Même variante, autres
+  réglages », « Retirer cette copie » ; notes calculatrice (« Aller au réglage ») ; sous-total.
+  Questions du processus 1 : compteur, « Voir et choisir » (liste `Choisir`), points.
+- **Panneau de droite** (collant ≥ 960 px ; bouton « Générer » collé en bas du panneau quand il
+  défile) : chiffres (questions imprimées, ≈ min, plage de niveaux tirée du cache des estimations,
+  points), feuille : barre de répartition par processus ; évaluation : jauge durée / 50 min (examen :
+  durée saisie si lisible), barre des points par processus (%, ≈ min), « Ajuster au total » (caché
+  en examen à total fixé : la note reste) ; examen : jauge par partie. **Liste dans l'ordre
+  d'impression** (`conception/ordreImpression.ts`) : éléments factices (graine fixe par générateur)
+  numérotés par `questionsDeSerie` (vrai/faux en une question, regroupements a), b), c)), rangés par
+  processus ou par parties (`partiesExamen`) ; exercices non regroupés d'une même ligne réunis
+  (« Ex. 3–4 ×2 ») ; × remet à zéro les variantes / la ligne concernées. Résumé des options + «
+  Modifier » (mise en page, consignes de l'évaluation, réglages complets de l'examen) ; Générer,
+  **Aperçu**, Enregistrer (coffre / navigateur, actif dès qu'un tirage existe).
+- **Aperçu** (`conception/ApercuDocument.tsx`) : `construirePlan` + `genererDocumentsDepuisPlan`
+  (cartouche du panneau), document dans une fenêtre (iframe 820 px réduite à la largeur), puces
+  pour passer d'un document à l'autre ; rien dans l'historique ; « Autre tirage », « Garder ce
+  tirage » (= documents générés, historique). Indisponible si la génération passe par un lien.
+- **Façons de composer** (`conception/composer.ts`, pur) : remplacent la sélection (bouton
+  « Annuler » rend la précédente) sans rien tirer. Feuille / évaluation / examen équilibré(e) :
+  ≈ 6 exercices (1 Connaître — vrai/faux 3 affirmations, sinon formule —, 4 Appliquer, 1 Transférer,
+  la part d'un processus absent va à Appliquer), une notion après l'autre, chapitres en alternance ;
+  « Sur quelques notions » : notions cochées, 2 exercices + 1 Connaître chacune ; « Préparer
+  l'évaluation » / « Répartition 15 / 60 / 25 % » : durée visée 50 min (examen : durée saisie, sinon
+  50 min par chapitre, 150 au plus) répartie 15 / 60 / 25 % avec les durées estimées. Variantes du
+  panneau seulement (groupes « à verdict » = une rangée), calculatrice interdite : variantes et
+  générateurs `calculatriceIndispensable` exclus, aucun cas particulier coché, jamais de
+  démonstration. Mesuré (23 chapitres × modes × calculatrice, 207 compositions) : 0 défaut, 6
+  exercices imprimés pour chaque « équilibrée », durée « 15/60/25 » de 43 à 67 min (médiane 51).
+- **Téléphone (< 960 px)** : une colonne ; barre fixée en bas « Ma feuille · n exercices ▴ ·
+  ≈ m min · niveaux » + « Générer » ; le panneau s'ouvre en feuille du bas (voile, « Fermer ») ;
+  cibles ≥ 44 px, champs à 16 px.
+- **Vérifié** : non-régression (3 plans — feuille 4e ch. 6, évaluation 5e ch. 4 à 2 séries, examen
+  4e ch. 2 + ch. 4 à total fixé — importés dans l'ancien et le nouveau panneau, « Générer » avec
+  `Math.random` à graine fixe) : export après import = plan importé ; plans et 13 documents
+  identiques ; sélection refaite à la main (puces, compteurs, options) = mêmes lignes, en-tête,
+  séries et graines ; professeur connecté (faux client) : école, coffre, rechargement ; 1 280 px et
+  iPhone 13 (clair / sombre) : scrollWidth = largeur, 0 erreur console du panneau. Outils :
+  dossier de travail `conception-prof/` (`nonreg.cjs`, `uifeuille.cjs`, `facons.cjs`,
+  `captures.cjs`, `connecte.cjs`).
+

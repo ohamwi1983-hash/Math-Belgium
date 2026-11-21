@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import type { CartoucheEcole } from '../../entrainement/export/cartouche'
 import { estConnecteActif, useCompte } from '../../lib/compteContexte'
@@ -12,6 +12,9 @@ import { EVALUATION_ADAPTER_REGISTRY } from '../../lib/evaluationAdapterRegistry
 import { dureeEstimeeVariante, estimationEnCache, type OptionsEstimation } from '../../entrainement/export/niveauDifficulte'
 import { RepereNiveauDuree } from './RepereNiveauDuree'
 import { ChampPoints } from './ChampPoints'
+import { ApercuDocument } from './conception/ApercuDocument'
+import { cleSectionComposer, composer, processusDeLignes, type FaconComposer } from './conception/composer'
+import { ordreImpression, type EntreeImpression, type LigneActive } from './conception/ordreImpression'
 import { pointsDemonstration, pointsDemonstrationMoyens, pointsDepuisDuree } from '../../lib/pointsAutomatiques'
 import {
   codesDuPlan,
@@ -178,33 +181,6 @@ function slugFichier(texte: string): string {
   return texte.replace(/[\\/:*?"<>|]/g, '-').trim()
 }
 
-/** Résumé flottant (position fixe, toujours visible) du nombre total de questions/exercices
- * sélectionnés — et, en mode évaluation, du total de points — et de la durée estimée cumulée (même
- * calcul que « Durée estimée » au-dessus du tableau), pour que l'admin/l'élève garde ce compte sous
- * les yeux en parcourant un long tableau. `masque` : la barre du bas (qui redonne le total) ou ce qui
- * la suit est à l'écran — le badge n'y recouvre plus les documents ni le formulaire de remédiation. */
-function CompteurFlottant({ nombre, points, duree, masque }: { nombre: number; points?: number; duree?: number; masque?: boolean }) {
-  return (
-    <div className="admin-eval-compteur" aria-live="polite" data-masque={masque ? 'oui' : undefined} aria-hidden={masque || undefined}>
-      {/* Un groupe par donnée : l'écart du conteneur (flex `gap`) ne sépare que les groupes. */}
-      <span>
-        <strong>{nombre}</strong> question{nombre > 1 ? 's' : ''}
-        <span className="admin-eval-compteur-long">/exercice{nombre > 1 ? 's' : ''}</span>
-      </span>
-      {points !== undefined && (
-        <span>
-          · <strong>{nombreFrPanneau(points)}</strong> point{points > 1 ? "s" : ""}
-        </span>
-      )}
-      {duree !== undefined && (
-        <span>
-          · ≈ <strong>{duree}</strong> min
-        </span>
-      )}
-    </div>
-  )
-}
-
 /** Compteur +/- partagé par toutes les lignes du tableau (démonstration/compréhension/vrai-faux/
  * exercice) — remplace l'ancien `<input type="number">` brut, plus confortable au doigt. */
 function Stepper({
@@ -212,12 +188,15 @@ function Stepper({
   max,
   min = 0,
   disabled,
+  nom,
   onChange,
 }: {
   valeur: number
   max: number
   min?: number
   disabled?: boolean
+  /** Ce que le compteur compte (noms accessibles « Diminuer — … » / « Augmenter — … »). */
+  nom?: string
   onChange: (prochaineValeur: number) => void
 }) {
   return (
@@ -227,17 +206,19 @@ function Stepper({
         className="admin-eval-stepper-btn"
         disabled={disabled || valeur <= min}
         onClick={() => onChange(Math.max(min, valeur - 1))}
-        aria-label="Diminuer"
+        aria-label={nom ? `Diminuer — ${nom}` : 'Diminuer'}
       >
         −
       </button>
-      <span className="admin-eval-stepper-valeur">{valeur}</span>
+      <span className="admin-eval-stepper-valeur" aria-live="polite">
+        {valeur}
+      </span>
       <button
         type="button"
         className="admin-eval-stepper-btn"
         disabled={disabled || valeur >= max}
         onClick={() => onChange(Math.min(max, valeur + 1))}
-        aria-label="Augmenter"
+        aria-label={nom ? `Augmenter — ${nom}` : 'Augmenter'}
       >
         +
       </button>
@@ -315,9 +296,21 @@ export function EvaluationGeneratorPanel({
   const [remediationNombre, setRemediationNombre] = useState(2)
   const [remediationAmenagee, setRemediationAmenagee] = useState(false)
   const entreeImport = useRef<HTMLInputElement>(null)
-  /** Sélection exclusive (groupe de type radio) : un seul processus affiché à la fois, jamais 2 ou 3
-   * simultanément — voir `.admin-eval-processus-bar`. */
-  const [processusActif, setProcessusActif] = useState<Processus>(1)
+  /** Catalogue : filtre par processus (Tout / 1 / 2 / 3, remplace les anciens onglets), recherche
+   * (notion ou générateur), sections dépliées (accordéon, toutes repliées au départ). */
+  const [filtreProcessus, setFiltreProcessus] = useState<Processus | 'tout'>('tout')
+  const [recherche, setRecherche] = useState('')
+  const [sectionsOuvertes, setSectionsOuvertes] = useState<Set<string>>(() => new Set())
+  /** Panneau de droite : options du document dépliées ; sur téléphone, panneau ouvert (feuille du bas). */
+  const [optionsOuvertes, setOptionsOuvertes] = useState(false)
+  const [panneauMobile, setPanneauMobile] = useState(false)
+  /** « Façons de composer » (proposition B) : bloc déplié, façon choisie, notions cochées, dernier
+   * remplissage (avec la sélection d'avant, pour « Annuler »). */
+  const [faconsOuvertes, setFaconsOuvertes] = useState(true)
+  const [faconActive, setFaconActive] = useState<FaconComposer | 'mesure' | null>(null)
+  const [notionsCochees, setNotionsCochees] = useState<Set<string>>(() => new Set())
+  const [composition, setComposition] = useState<{ texte: string; avant: LigneSelection[] } | null>(null)
+  const champRecherche = useRef<HTMLInputElement>(null)
   /** Lignes « Formule » / « Formule + démonstration » dont la liste de choix est dépliée. */
   const [choixOuverts, setChoixOuverts] = useState<Set<string>>(() => new Set())
   const [erreur, setErreur] = useState<string | null>(null)
@@ -410,10 +403,6 @@ export function EvaluationGeneratorPanel({
     })
     setUrlGeneree(null)
     setGenereLocalementCompte(null)
-  }
-
-  function selectionnerProcessus(processus: Processus) {
-    setProcessusActif(processus)
   }
 
   function mettreAJourLigne(chapitreSlug: string, sectionId: string, type: TypeQuestionEvaluation, cle: string | undefined, patch: Partial<LigneSelection>) {
@@ -845,19 +834,6 @@ export function EvaluationGeneratorPanel({
     window.setTimeout(() => setCalculatriceSurlignee(false), 2600)
   }
 
-  /** Badge flottant masqué dès que la barre du bas (qui redonne le total) est à l'écran ou dépassée :
-   * il ne recouvre plus les documents générés ni le formulaire de remédiation. */
-  const barreDuBas = useRef<HTMLDivElement>(null)
-  const [compteurMasque, setCompteurMasque] = useState(false)
-  const avecTableau = chapitres.length > 0
-  useEffect(() => {
-    const el = barreDuBas.current
-    if (!el || typeof IntersectionObserver === 'undefined') return
-    const obs = new IntersectionObserver(([e]) => setCompteurMasque(e.isIntersecting || e.boundingClientRect.top < 0))
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [avecTableau])
-
   function nomBase(plan: PlanDocument): string {
     return slugFichier(plan.entete.titre)
   }
@@ -880,6 +856,27 @@ export function EvaluationGeneratorPanel({
     for (const doc of docs) declencherTelechargement(doc.blob, nomFichier(plan, doc))
   }
 
+  /** Plan avec le cartouche du panneau (connecté : école choisie, nom du profil ; sinon tel quel). */
+  function avecCartouche(planBrut: PlanDocument, cartoucheForce?: CartoucheEcole): PlanDocument {
+    const cartoucheRendu = cartoucheForce ?? cartouche
+    return cartoucheRendu ? { ...planBrut, entete: { ...planBrut.entete, cartouche: cartoucheRendu } } : planBrut
+  }
+
+  /** Documents d'un plan rendus : ils deviennent les « Documents générés » (et, pour une nouvelle
+   * génération, leurs exercices vont dans l'historique). Partagé par « Générer » et « Garder ce
+   * tirage » de l'aperçu. */
+  function adopterDocuments(plan: PlanDocument, docs: DocumentGenere[], nouveau: boolean) {
+    for (const u of urlsDocuments.current) URL.revokeObjectURL(u)
+    urlsDocuments.current = []
+    setPlanCourant(plan)
+    setDocuments(docs)
+    setGenereLocalementCompte(docs.length)
+    if (nouveau) {
+      enregistrerDansHistorique(plan)
+      setNombreHistorique(lireHistorique().length)
+    }
+  }
+
   async function rendrePlan(planBrut: PlanDocument, nouveau: boolean, cartoucheForce?: CartoucheEcole) {
     // Connecté : le cartouche (école choisie, nom du profil) est celui du panneau, même pour un plan
     // rechargé (mêmes exercices, école du moment). Sans session : plan tel quel.
@@ -890,16 +887,8 @@ export function EvaluationGeneratorPanel({
     setUrlGeneree(null)
     setGenereEnCours(true)
     try {
-      for (const u of urlsDocuments.current) URL.revokeObjectURL(u)
-      urlsDocuments.current = []
       const docs = await genererDocumentsDepuisPlan(plan)
-      setPlanCourant(plan)
-      setDocuments(docs)
-      setGenereLocalementCompte(docs.length)
-      if (nouveau) {
-        enregistrerDansHistorique(plan)
-        setNombreHistorique(lireHistorique().length)
-      }
+      adopterDocuments(plan, docs, nouveau)
     } catch (e) {
       console.error(e)
       setErreur('Erreur pendant la génération — réessaie.')
@@ -1098,7 +1087,7 @@ export function EvaluationGeneratorPanel({
     setHeuresSemaine(HEURES_SEMAINE_DEFAUT[nh.niveau])
     setChapitresSlugs(chapitresCarnet.map((c) => c.slug))
     setLignes(lignesCarnet)
-    setProcessusActif(processusChoisis[0] ?? 1)
+    setFiltreProcessus('tout')
     setUrlGeneree(null)
     setGenereLocalementCompte(null)
     const sections = m.chapitres.reduce((t, c) => t + c.sections.length, 0)
@@ -1184,8 +1173,10 @@ export function EvaluationGeneratorPanel({
     chargerPlan(plan)
   }
 
-  async function genererEvaluation() {
-    if (chapitres.length === 0 || !levelSlug) return
+  /** En-tête, lignes (points effectifs) et items de la sélection — commun à « Générer » et à
+   * « Aperçu » ; `null` si aucune question n'est choisie. */
+  function preparerGeneration(): { levelSlug: string; entete: EnTeteEvaluation; lignesPoints: LigneSelection[]; chapitresPayload: ChapitreAvecSections[]; items: ReturnType<typeof construireItemsPayload> } | null {
+    if (chapitres.length === 0 || !levelSlug) return null
     const titreFinal =
       titre ||
       (estExamen ? `Examen — ${session.trim() || sessionDefaut}` : '') ||
@@ -1238,12 +1229,21 @@ export function EvaluationGeneratorPanel({
     }
     const chapitresPayload: ChapitreAvecSections[] = chapitres.map((c) => ({ chapitreSlug: c.slug, chapterNumber: c.chapterNumber, title: c.title, sections: c.sections, formulaire: c.formulaire }))
     const items = construireItemsPayload(entete, lignesPoints, chapitresPayload)
-    if (items.length === 0) {
+    if (items.length === 0) return null
+    return { levelSlug, entete, lignesPoints, chapitresPayload, items }
+  }
+
+  async function genererEvaluation() {
+    if (chapitres.length === 0 || !levelSlug) return
+    const prep = preparerGeneration()
+    if (!prep) {
       setErreur('Coche au moins une question (nombre > 0) avant de générer.')
       setUrlGeneree(null)
       setGenereLocalementCompte(null)
       return
     }
+    const { entete, lignesPoints, chapitresPayload, items } = prep
+    setPanneauMobile(false)
 
     // Génération 100 % locale (voir `evaluationLocal.ts` pour la portée exacte) : plan figé
     // (graines) puis documents. Une banque vrai/faux manquante fait échouer le plan → repli URL.
@@ -1257,6 +1257,7 @@ export function EvaluationGeneratorPanel({
       }
       if (plan) {
         await rendrePlan(plan, true)
+        requestAnimationFrame(() => blocDocuments.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
         return
       }
     }
@@ -1297,198 +1298,583 @@ export function EvaluationGeneratorPanel({
     </div>
   )
 
-  return (
-    <div className="admin-eval">
-      {bandeauCarnet && (
-        <p className="admin-eval-carnet" role="status">
-          {bandeauCarnet}
-        </p>
-      )}
-      {!verrouille && (
-        <p className="admin-eval-intro">
-          Sont fonctionnels : tous les chapitres de 4e, de 5e (4h) et de 6e (6h). Pour ces trois niveaux, la génération se fait désormais
-          directement ici (aucune redirection), vrai/faux compris — sauf « Fonctions réciproques et cyclométriques » dont la banque vrai/faux reste sur plateforme-maths.
-        </p>
-      )}
+  /* --------------------------------------------------------------------------------------------
+   * Page de conception (proposition A validée le 21/11/2026) : catalogue à gauche (façons de
+   * composer, recherche, filtre par processus, sections en accordéon), « Ma feuille » / « Mon
+   * évaluation » / « Mon examen » à droite, collant (sticky) ; sur téléphone, barre fixée en bas qui
+   * ouvre ce panneau. Toutes les fonctions d'avant restent (variantes, paramètres, cas particulier,
+   * copies, Choisir, points et verrous, Ajuster au total, examen, options, coffre, historique…).
+   * ------------------------------------------------------------------------------------------ */
 
-      {verrouille && (
-        <p className="admin-eval-chapitre-verrouille">
-          {niveauEntry?.label ?? niveau} — Chapitre{' '}
-          {(() => {
-            const c = niveauEntry?.chapters.find((c) => c.slug === verrouille.chapitreSlug)
-            return c ? `${c.chapterNumber}. ${c.title}` : verrouille.chapitreSlug
-          })()}
-        </p>
-      )}
+  const nomPanier = estExercice ? 'Ma feuille' : estExamen ? 'Mon examen' : 'Mon évaluation'
 
-      <div className="admin-eval-toolbar">
-        {!verrouille && (
-          <>
-            <div className="admin-eval-tf">
-              <label htmlFor="eval-niveau">Niveau</label>
-              <select id="eval-niveau" value={niveau} onChange={(e) => changerNiveau(e.target.value as NiveauCode)}>
-                {NIVEAUX.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="admin-eval-tf">
-              <label htmlFor="eval-heures">Heures</label>
-              <select
-                id="eval-heures"
-                value={heures}
-                onChange={(e) => reglerNiveauHeures(niveau, e.target.value)}
-                disabled={HEURES_PAR_NIVEAU[niveau].length === 0}
+  /** Questions disponibles d'une ligne qui n'est pas un exercice (0 = ligne vide, masquée). */
+  function disponiblesLigne(l: LigneSelection): number {
+    const cle = cleSection(l.chapitreSlug, l.sectionId)
+    if (l.type === 'formule') return apercusFormule.get(cle)?.length ?? 0
+    if (l.type === 'demonstration') return apercusDemonstration.get(cle)?.length ?? 0
+    if (l.type === 'comprehension') return apercusComprehension.get(cle) ?? 0
+    if (l.type === 'vraiFaux') return MAX_VRAI_FAUX
+    return MAX_EXERCICE
+  }
+  const ligneUtilisable = (l: LigneSelection) => l.type === 'exercice' || disponiblesLigne(l) > 0
+
+  /** Nom d'une ligne dans le catalogue et dans la liste du panneau. */
+  function nomLigne(l: LigneSelection, section: ChapterContent['sections'][number] | undefined): string {
+    if (l.type === 'exercice') return section ? libelleGenerateurPanneau(section, l.cle ?? '') : (l.cle ?? '')
+    if (l.type === 'vraiFaux') {
+      const theme = themesPourSection(l.chapitreSlug, l.sectionId).find((t) => t.quizTheme === l.cle)
+      return `${LABEL_TYPE.vraiFaux}${theme?.label ? ` — ${theme.label}` : ''}`
+    }
+    return LABEL_TYPE[l.type]
+  }
+  const sectionDe = (l: LigneSelection) => chapitres.find((c) => c.slug === l.chapitreSlug)?.sections.find((s) => s.id === l.sectionId)
+
+  /** Recherche sans accents ni majuscules (« chasles » trouve « Relation de Chasles »). */
+  const normaliser = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  const termes = normaliser(recherche).split(/\s+/).filter(Boolean)
+  const correspond = (texte: string) => termes.every((t) => normaliser(texte).includes(t))
+  function texteLigne(l: LigneSelection): string {
+    const section = sectionDe(l)
+    const variantes = l.type === 'exercice' ? catalogueVariantesExercice(l.cle as IdGenerateurPilote, estExercice ? 'exercice' : 'evaluation', []).map((v) => v.label).join(' ') : ''
+    return `${nomLigne(l, section)} ${variantes} ${l.cle ?? ''}`
+  }
+
+  /* Liste dans l'ordre d'impression (numérotation des documents, regroupements compris). */
+  const cacheInstances = useRef(new Map<string, unknown>())
+  const actives: LigneActive[] = lignes.flatMap((l, index) => {
+    if (nombreLigne(l) === 0) return []
+    const m = materialiser(l)
+    if (l.type === 'exercice') {
+      const variantes = Object.entries(l.parVariante ?? {})
+        .filter(([cle, n]) => n > 0 && !varianteExclue(l.cle ?? '', cle))
+        .map(([cle, nombre]) => ({ cle, nombre, points: m.pointsParVariante?.[cle] ?? m.points }))
+      return [{ ligne: l, index, variantes, nombre: nombreLigne(l), points: m.points }]
+    }
+    if (l.choix?.length) return l.choix.map((id) => ({ ligne: l, index, nombre: 1, points: m.pointsParChoix?.[id] ?? m.points }))
+    return [{ ligne: l, index, nombre: l.nombre, points: m.points }]
+  })
+  const signatureActives = JSON.stringify([actives.map((a) => [a.index, a.ligne.processus, a.variantes, a.nombre, a.points]), estExamen ? organisationExamen : '', chapitresSlugs])
+  const entrees: EntreeImpression[] = useMemo(
+    () => ordreImpression(actives, cacheInstances.current, estExamen ? { organisation: organisationExamen, chapitres: chapitresDuPanneau } : undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `signatureActives` résume la sélection active (clés primitives stables).
+    [signatureActives],
+  )
+  const nombreImprime = entrees.length > 0 ? entrees[entrees.length - 1].dernier : 0
+  const lettre = (i: number) => String.fromCharCode(96 + Math.min(26, Math.max(1, i)))
+
+  function titreEntree(e: EntreeImpression): { titre: string; detail: string | null } {
+    const l = lignes[e.retraits[0].index]
+    const section = sectionDe(l)
+    const detail = e.lettres > 1 ? `a)–${lettre(e.lettres)})` : e.lettres === 1 ? 'a)' : e.repetitions > 1 ? `×${e.repetitions}` : null
+    if (e.nature === 'vraiFaux') return { titre: 'Vrai ou faux', detail }
+    if (e.nature === 'ouverte') return { titre: `${LABEL_TYPE[l.type].replace('Questions ouvertes — ', 'Question de ')}${section ? ` (§ ${section.number})` : ''}`, detail }
+    const nom = (section ? libelleGenerateurPanneau(section, l.cle ?? '') : (l.cle ?? '')).replace(/\s*\((?:\d+)?gen\d+\)$/, '')
+    const catalogue = catalogueVariantesExercice(l.cle as IdGenerateurPilote, estExercice ? 'exercice' : 'evaluation', (e.retraits[0].cles ?? []).map(varianteDeCle))
+    const variantes = [...new Set((e.retraits[0].cles ?? []).map((c) => catalogue.find((v) => v.id === varianteDeCle(c))?.label).filter((x): x is string => !!x && x !== 'Tirage aléatoire'))]
+    const texteVariantes = variantes.join(', ')
+    return { titre: variantes.length === 0 ? nom : texteVariantes.length <= 48 ? `${nom} — ${texteVariantes}` : `${nom} — ${variantes.length} variantes`, detail }
+  }
+
+  /** × d'une entrée : ses exercices (variantes) ou ses questions sont remis à zéro. */
+  function retirerEntree(e: EntreeImpression) {
+    setLignes((prev) =>
+      prev.map((l, i) => {
+        const r = e.retraits.find((x) => x.index === i)
+        if (!r) return l
+        if (l.type === 'exercice') {
+          const parVariante = { ...l.parVariante, ...Object.fromEntries((r.cles ?? Object.keys(l.parVariante ?? {})).map((c) => [c, 0])) }
+          return { ...l, parVariante, nombre: sommeParVariante(parVariante) }
+        }
+        return { ...l, nombre: 0, choix: undefined }
+      }),
+    )
+    setUrlGeneree(null)
+    setGenereLocalementCompte(null)
+  }
+
+  /** Plage de niveaux des exercices choisis (estimations déjà en cache : celles de la durée). */
+  const plageNiveaux = (() => {
+    let min = Infinity
+    let max = -Infinity
+    for (const l of lignes) {
+      if (l.type !== 'exercice' || nombreLigne(l) === 0) continue
+      const adaptateur = EVALUATION_ADAPTER_REGISTRY[l.cle ?? ''] as Adaptateur | undefined
+      if (!adaptateur) continue
+      for (const [cle, n] of Object.entries(l.parVariante ?? {})) {
+        if (n <= 0 || varianteExclue(l.cle ?? '', cle)) continue
+        const options = optionsEstimation(l, cle)
+        const e = estimationEnCache(adaptateur, varianteEstimation(adaptateur, cle), options?.filtre ? options.cleFiltre : undefined)
+        if (e?.niveauMin !== undefined && e.niveauMax !== undefined) {
+          min = Math.min(min, e.niveauMin)
+          max = Math.max(max, e.niveauMax)
+        }
+      }
+    }
+    return min === Infinity ? null : { min, max }
+  })()
+  const textePlage = plageNiveaux ? (plageNiveaux.min === plageNiveaux.max ? `${plageNiveaux.min}` : `${plageNiveaux.min}–${plageNiveaux.max}`) : null
+  const questionsParProcessus = ([1, 2, 3] as const).map((p) => entrees.filter((e) => e.processus === p).reduce((t, e) => t + e.dernier - e.premier + 1, 0))
+  /** Durée de référence de la jauge : la période (50 min) pour une évaluation, la durée saisie pour
+   * un examen (si elle est lisible). */
+  const dureeReference = estExamen ? (lectureDuree.etat === 'ok' ? lectureDuree.valeur : null) : estExercice ? null : 50
+
+  /* Façons de composer : elles REMPLISSENT la sélection (rien n'est tiré ici). */
+  function appliquerFacon(facon: FaconComposer) {
+    const avant = lignes
+    const vierges = lignesInitiales(chapitres)
+    const dureeCible = estExamen ? (lectureDuree.etat === 'ok' ? lectureDuree.valeur : Math.min(150, 50 * Math.max(1, chapitres.length))) : 50
+    const res = composer(facon, {
+      lignes: vierges,
+      mode: estExercice ? 'exercice' : 'evaluation',
+      calculatriceInterdite: calculatrice === 'interdite',
+      disponibles: disponiblesLigne,
+      dureeVariante: (l, varianteId) => {
+        const adaptateur = EVALUATION_ADAPTER_REGISTRY[l.cle ?? ''] as Adaptateur | undefined
+        return adaptateur ? dureeEstimeeVariante(adaptateur, varianteEstimation(adaptateur, varianteId), optionsEstimation(l, varianteId)) : undefined
+      },
+      dureeCible,
+      sections: notionsCochees,
+    })
+    if (res.questions === 0) {
+      setComposition({ texte: 'Rien à proposer avec ces réglages (notions cochées, calculatrice).', avant })
+      return
+    }
+    setLignes(res.lignes)
+    setUrlGeneree(null)
+    setGenereLocalementCompte(null)
+    setSectionsOuvertes(new Set())
+    // Compté comme à l'impression : les affirmations vrai/faux forment UNE question.
+    const nombre = res.lignes.reduce((t, l) => t + (l.type === 'exercice' ? sommeParVariante(l.parVariante ?? {}) : l.type === 'vraiFaux' ? 0 : l.nombre), 0) + (res.lignes.some((l) => l.type === 'vraiFaux' && l.nombre > 0) ? 1 : 0)
+    setComposition({
+      texte: `${nombre} question${nombre > 1 ? 's' : ''} proposée${nombre > 1 ? 's' : ''} sur ${res.notions} notion${res.notions > 1 ? 's' : ''} : la sélection est à droite, modifiable comme tu veux.`,
+      avant,
+    })
+  }
+
+  /* Aperçu : le vrai document, sans rien enregistrer dans l'historique. */
+  const [apercu, setApercu] = useState<{ plan: PlanDocument | null; docs: DocumentGenere[]; enCours: boolean; erreur: string | null } | null>(null)
+  async function lancerApercu() {
+    const prep = preparerGeneration()
+    if (!prep) {
+      setErreur('Coche au moins une question (nombre > 0) avant l’aperçu.')
+      return
+    }
+    if (!peutGenererLocalement(prep.levelSlug, prep.items)) {
+      setErreur('Aperçu indisponible pour cette sélection (génération par lien vers plateforme-maths) : utilise « Générer ».')
+      return
+    }
+    setErreur(null)
+    setPanneauMobile(false)
+    setApercu({ plan: null, docs: [], enCours: true, erreur: null })
+    try {
+      const plan = avecCartouche(await construirePlan(prep.levelSlug, prep.entete, prep.items, prep.lignesPoints, chapitres.map((c) => c.slug)))
+      const docs = await genererDocumentsDepuisPlan(plan)
+      setApercu({ plan, docs, enCours: false, erreur: null })
+    } catch (e) {
+      console.error(e)
+      setApercu({ plan: null, docs: [], enCours: false, erreur: 'Aperçu impossible — réessaie.' })
+    }
+  }
+  const fermerApercu = useCallback(() => setApercu(null), [])
+  function garderApercu() {
+    if (!apercu?.plan) return
+    setErreur(null)
+    setMessage(null)
+    setUrlGeneree(null)
+    adopterDocuments(apercu.plan, apercu.docs, true)
+    setApercu(null)
+    requestAnimationFrame(() => blocDocuments.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
+
+  /** Résumé des options du document (une ligne, « Modifier » ouvre le détail). */
+  const resumeOptions: string[] = [
+    ...(estExercice ? ['corrigé en fin de feuille'] : [`copie, corrigé, grille`]),
+    ...(versionAmenagee ? ['version aménagée'] : []),
+    ...(deuxColonnes ? ['deux colonnes'] : []),
+    ...(joindreFormulaire ? ['formulaire en annexe'] : []),
+    ...(afficherTitresSection ? ['titres de section'] : []),
+    ...(!estExercice && afficherDuree ? ['durée affichée'] : []),
+  ]
+  const lignesConsignes = consignesSupplementaires.split('\n').filter((t) => t.trim()).length
+  const libelleGenerer = genereEnCours
+    ? 'Génération en cours…'
+    : estExercice
+      ? 'Générer la feuille d’exercices'
+      : nombreSeries > 1
+        ? `Générer les ${nombreSeries} séries`
+        : estExamen
+          ? "Générer l'examen"
+          : "Générer l'évaluation"
+
+  const pastille = (p: Processus, petite = false) => (
+    <span className={`conc-pc conc-pc-${p}${petite ? ' conc-pc-petite' : ''}`} title={LABEL_PROCESSUS[p]} aria-hidden="true">
+      {p}
+    </span>
+  )
+
+  /** Rangée d'un générateur : variantes en puces (repère niveau/durée dans chaque puce), puis une
+   * rangée par variante choisie (nombre, points, réglages, copies). */
+  function renduGenerateur(ligne: LigneSelection, chapitreCourant: ChapterContent, section: ChapterContent['sections'][number]) {
+    const catalogue = catalogueVariantesExercice(
+      ligne.cle as IdGenerateurPilote,
+      estExercice ? 'exercice' : 'evaluation',
+      Object.entries(ligne.parVariante ?? {}).filter(([, n]) => n > 0).map(([c]) => varianteDeCle(c)),
+    )
+    const nom = libelleGenerateurPanneau(section, ligne.cle ?? '')
+    // Tirage équilibré : seulement des exercices complets, sauf si le professeur coche « inclure un
+    // cas particulier » (évaluation, générateur doté d'un profil).
+    const libelleCas = estExercice ? null : libelleCasParticulier(ligne.cle as IdGenerateurPilote)
+    const parametres = estExercice ? [] : parametresAuChoix(ligne.cle as IdGenerateurPilote)
+    const adaptateurLigne = EVALUATION_ADAPTER_REGISTRY[ligne.cle ?? ''] as Adaptateur | undefined
+    const toutesExclues = catalogue.length > 0 && catalogue.every((v) => varianteExclue(ligne.cle ?? '', v.id))
+    const exclues = catalogue.filter((v) => varianteExclue(ligne.cle ?? '', v.id))
+    // Variantes choisies et leurs copies (« id~n ») : une rangée chacune, avec SES réglages.
+    const choisies = catalogue.flatMap((variante) => {
+      const copies = Object.keys(ligne.parVariante ?? {})
+        .filter((k) => k !== variante.id && varianteDeCle(k) === variante.id)
+        .sort((x, y) => Number(x.split('~')[1]) - Number(y.split('~')[1]))
+      return [variante.id, ...copies]
+        .map((cle) => ({ cle, variante, copie: cle !== variante.id }))
+        .filter(({ cle, copie }) => !varianteExclue(ligne.cle ?? '', cle) && ((ligne.parVariante?.[cle] ?? 0) > 0 || copie))
+    })
+    const nombreGenerateur = nombreLigne(ligne)
+    return (
+      <div className="conc-gen" key={`ex-${ligne.cle}`}>
+        <div className="conc-gen-tete">
+          {pastille(ligne.processus)}
+          <span className="conc-gen-nom">{nom}</span>
+        </div>
+        {toutesExclues && (
+          <div className="admin-eval-calculatrice-note" role="note">
+            <span>
+              <b>{nom}</b> : toutes ses variantes demandent une calculatrice. Pour l’utiliser, passe la calculatrice à « Autorisée » (en haut) — ce réglage vaut pour toute
+              l’évaluation.
+            </span>
+            <button type="button" className="admin-eval-lien-bouton" onClick={allerAuReglageCalculatrice}>
+              Aller au réglage « Calculatrice »
+            </button>
+          </div>
+        )}
+        <div className="conc-variantes" role="group" aria-label={`Variantes — ${nom}`}>
+          {catalogue.map((variante) => {
+            const exclue = varianteExclue(ligne.cle ?? '', variante.id)
+            const n = exclue ? 0 : (ligne.parVariante?.[variante.id] ?? 0)
+            return (
+              <button
+                key={variante.id}
+                type="button"
+                className="conc-var"
+                aria-pressed={n > 0}
+                disabled={exclue}
+                title={exclue ? 'Demande une calculatrice' : n > 0 ? 'Retirer cette variante' : 'Ajouter un exercice de cette variante'}
+                onClick={() => mettreAJourVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', variante.id, n > 0 ? 0 : 1)}
               >
-                {HEURES_PAR_NIVEAU[niveau].length === 0 ? (
-                  <option value="">— (non applicable)</option>
+                <span className="conc-var-nom">
+                  {variante.label}
+                  {n > 0 && <span className="conc-var-n"> ×{n}</span>}
+                </span>
+                {exclue ? (
+                  <span className="admin-eval-variante-exclue">{toutesExclues ? 'demande une calculatrice' : 'calculatrice'}</span>
                 ) : (
-                  HEURES_PAR_NIVEAU[niveau].map((h) => (
-                    <option key={h} value={h} disabled={resoudreLevelSlug(niveau, h) === null}>
-                      {h}
-                      {resoudreLevelSlug(niveau, h) === null ? ' (bientôt)' : ''}
-                    </option>
-                  ))
+                  adaptateurLigne && (
+                    <RepereNiveauDuree
+                      adaptateur={adaptateurLigne}
+                      varianteId={varianteEstimation(adaptateurLigne, variante.id) ?? ''}
+                      options={optionsEstimation(ligne, variante.id)}
+                      reglages={texteReglagesEstimation(ligne, variante.id)}
+                    />
+                  )
                 )}
-              </select>
-            </div>
-            <div className="admin-eval-tf admin-eval-tf-chapitre">
-              <label id="eval-chapitres-label">Chapitres (plusieurs possibles)</label>
-              {!niveauEntry ? (
-                <p className="admin-eval-indisponible">Aucun chapitre disponible pour l'instant.</p>
-              ) : (
-                <div className="admin-eval-chapitres-chips" role="group" aria-labelledby="eval-chapitres-label">
-                  {niveauEntry.chapters.map((c) => {
-                    const fonctionnel = estChapitreFonctionnel(levelSlug, c.slug)
-                    return (
-                      <button
-                        key={c.slug}
-                        type="button"
-                        className="admin-eval-chapitre-chip"
-                        aria-pressed={chapitresSlugs.includes(c.slug)}
-                        disabled={!fonctionnel}
-                        onClick={() => basculerChapitre(c.slug)}
-                      >
-                        {c.chapterNumber}. {c.title}
-                        {fonctionnel ? '' : ' (bientôt)'}
-                      </button>
-                    )
-                  })}
+              </button>
+            )
+          })}
+        </div>
+        {exclues.length > 0 && !toutesExclues && (
+          <div className="admin-eval-calculatrice-note admin-eval-calculatrice-note-variante" role="note">
+            <span>
+              <b>Demande une calculatrice</b> ({exclues.map((v) => `« ${v.label} »`).join(', ')}) : passe la calculatrice à « Autorisée » (en haut) pour l’utiliser.
+            </span>
+            <button type="button" className="admin-eval-lien-bouton" onClick={allerAuReglageCalculatrice}>
+              Aller au réglage
+            </button>
+          </div>
+        )}
+        {choisies.map(({ cle, variante, copie }) => {
+          const nombreVariante = ligne.parVariante?.[cle] ?? 0
+          const reglages = reglagesVariante(ligne, cle)
+          // Case « cas particulier » seulement si CETTE variante peut en recevoir un (mis en cache).
+          const libelleCasVariante = libelleCas && varianteAdmetCasParticulier(ligne.cle ?? '', variante.id) ? libelleCas : null
+          const aDesReglages = parametres.length > 0 || !!libelleCasVariante
+          const nomVariante = `${variante.label}${copie ? ` (${cle.split('~')[1]})` : ''}`
+          return (
+            <div className="conc-choisie" key={cle}>
+              <div className="conc-choisie-ligne">
+                <span className="conc-choisie-nom">
+                  {nomVariante}
+                  {copie && adaptateurLigne && (
+                    <>
+                      {' '}
+                      <RepereNiveauDuree
+                        adaptateur={adaptateurLigne}
+                        varianteId={varianteEstimation(adaptateurLigne, cle) ?? ''}
+                        options={optionsEstimation(ligne, cle)}
+                        reglages={texteReglagesEstimation(ligne, cle)}
+                      />
+                    </>
+                  )}
+                </span>
+                <span className="conc-reglage-nombre">
+                  <Stepper valeur={nombreVariante} max={MAX_EXERCICE} nom={`exercices « ${nomVariante} »`} onChange={(v) => mettreAJourVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, v)} />
+                  {!estExercice && (
+                    <span className="conc-points">
+                      <ChampPoints
+                        valeur={() => pointsUnite(ligne, cle, nombreVariante > 0)}
+                        verrouille={ligne.modePoints?.[cle] === 'verrouille'}
+                        ajuste={ligne.modePoints?.[cle] === 'ajuste'}
+                        libelle={`Points / question pour la variante « ${variante.label} »`}
+                        onSaisie={(p) => saisirPoints(ligne, cle, p)}
+                        onVerrou={(v) => basculerVerrouPoints(ligne, cle, v)}
+                      />
+                      <span className="conc-points-unite">pts</span>
+                    </span>
+                  )}
+                </span>
+              </div>
+              {aDesReglages && (
+                <div className="admin-eval-cas-contenu conc-reglages">
+                  {parametres.length > 0 && <span className="admin-eval-parametres-titre">Paramètres à inclure :</span>}
+                  {parametres.map((p) => (
+                    <label className="admin-eval-checkbox-field admin-eval-parametre" key={p.id}>
+                      <input
+                        type="checkbox"
+                        checked={!reglages.parametresExclus.includes(p.id)}
+                        onChange={(e) => basculerParametre(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, p.id, e.target.checked)}
+                      />
+                      {p.label}
+                    </label>
+                  ))}
+                  {libelleCasVariante && (
+                    <label className="admin-eval-checkbox-field">
+                      <input type="checkbox" checked={reglages.inclureCasParticulier} onChange={(e) => mettreAJourCasParticulier(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, e.target.checked)} />
+                      {libelleCasVariante}
+                    </label>
+                  )}
+                  <button
+                    type="button"
+                    className="admin-eval-lien-bouton"
+                    onClick={() => dupliquerVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', cle)}
+                    title="Ajoute la même variante avec d'autres réglages (par exemple avec et sans un paramètre)"
+                  >
+                    + Même variante, autres réglages
+                  </button>
+                  {copie && (
+                    <button type="button" className="admin-eval-lien-bouton" onClick={() => retirerVarianteDupliquee(chapitreCourant.slug, section.id, ligne.cle ?? '', cle)}>
+                      Retirer cette copie
+                    </button>
+                  )}
                 </div>
               )}
             </div>
-            <span className="admin-eval-divider" />
-          </>
+          )
+        })}
+        {nombreGenerateur > 0 && (
+          <p className="conc-soustotal">
+            Sous-total : {nombreGenerateur} exercice{nombreGenerateur > 1 ? 's' : ''} · ≈ {Math.max(1, Math.round(dureeLigne(ligne, pointsLigne(ligne))))} min
+            {!estExercice && ` · ${nombreFrPanneau(pointsLigne(ligne))} pt${pointsLigne(ligne) > 1 ? 's' : ''}`}
+          </p>
         )}
+      </div>
+    )
+  }
 
-        {!estExercice && (
-          <div className="admin-eval-tf">
-            <span className="admin-eval-tf-label" id="eval-type-document-label">
-              Document
-            </span>
-            <div className="admin-eval-segments" role="radiogroup" aria-labelledby="eval-type-document-label">
-              {(['evaluation', 'examen'] as const).map((t) => (
-                <button key={t} type="button" role="radio" aria-checked={typeDocument === t} className="admin-eval-segment" onClick={() => setTypeDocument(t)}>
-                  {t === 'evaluation' ? 'Évaluation' : 'Examen'}
-                </button>
+  /** Rangée d'une question du processus 1 (formule, démonstration, compréhension, vrai/faux). */
+  function renduAutre(ligne: LigneSelection, chapitreCourant: ChapterContent, section: ChapterContent['sections'][number]) {
+    const banqueChoix =
+      ligne.type === 'formule' || ligne.type === 'demonstration'
+        ? ((ligne.type === 'formule' ? apercusFormule : apercusDemonstration).get(cleSection(chapitreCourant.slug, section.id)) ?? [])
+        : null
+    const disponibles = disponiblesLigne(ligne)
+    const choix = (ligne.choix ?? []).filter((id) => banqueChoix?.some((q) => q.id === id))
+    const cleChoix = `${chapitreCourant.slug}|${section.id}|${ligne.type}`
+    const choixOuvert = choixOuverts.has(cleChoix)
+    const basculerChoix = (id: string, coche: boolean) => {
+      const suivant = coche ? [...choix, id] : choix.filter((c) => c !== id)
+      // Ordre du cours (pas l'ordre des clics) : la feuille suit l'ordre des sections.
+      const ordonne = (banqueChoix ?? []).map((q) => q.id ?? '').filter((qid) => suivant.includes(qid))
+      mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, { choix: ordonne, nombre: ordonne.length })
+    }
+    const nom = nomLigne(ligne, section)
+    const idChoix = `choix-${cleChoix.replace(/[^a-z0-9]/gi, '-')}`
+    return (
+      <div className="conc-autre" key={`${ligne.type}-${ligne.cle ?? ''}`}>
+        <div className="conc-autre-ligne">
+          {pastille(ligne.processus)}
+          <span className="conc-autre-nom">
+            <span className="conc-gen-nom">{nom}</span>
+            <span className="conc-niv">{ligne.type === 'vraiFaux' ? 'banque du chapitre' : `${disponibles} disponible${disponibles > 1 ? 's' : ''}`}</span>
+            {banqueChoix && banqueChoix.length > 0 && (
+              <button
+                type="button"
+                className="admin-eval-choix-bouton"
+                aria-expanded={choixOuvert}
+                aria-controls={idChoix}
+                onClick={() =>
+                  setChoixOuverts((prev) => {
+                    const n = new Set(prev)
+                    if (n.has(cleChoix)) n.delete(cleChoix)
+                    else n.add(cleChoix)
+                    return n
+                  })
+                }
+              >
+                {choix.length > 0 ? `${choix.length} choisie${choix.length > 1 ? 's' : ''}` : 'Voir et choisir'}
+              </button>
+            )}
+          </span>
+          <span className="conc-reglage-nombre">
+            <Stepper
+              valeur={choix.length > 0 ? choix.length : ligne.nombre}
+              max={disponibles}
+              disabled={choix.length > 0}
+              nom={nom}
+              onChange={(v) => mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, { nombre: v })}
+            />
+            {!estExercice &&
+              (choix.length > 0 ? (
+                <span className="conc-points admin-eval-points-somme" title="Points fixés question par question dans la liste « Choisir »">
+                  {nombreFrPanneau(pointsLigne(ligne))} pt{pointsLigne(ligne) > 1 ? 's' : ''}
+                </span>
+              ) : (
+                <span className="conc-points">
+                  <ChampPoints
+                    valeur={() => pointsUnite(ligne, 'ligne', ligne.nombre > 0)}
+                    verrouille={ligne.modePoints?.ligne === 'verrouille'}
+                    ajuste={ligne.modePoints?.ligne === 'ajuste'}
+                    libelle={`Points / question — ${LABEL_TYPE[ligne.type]}`}
+                    onSaisie={(p) => saisirPoints(ligne, 'ligne', p)}
+                    onVerrou={(v) => basculerVerrouPoints(ligne, 'ligne', v)}
+                  />
+                  <span className="conc-points-unite">pts</span>
+                </span>
               ))}
-            </div>
-          </div>
-        )}
-        {!estExercice && !estExamen && (
-          <div className="admin-eval-tf" style={{ width: '4.5em' }}>
-            <label htmlFor="eval-numero">N°</label>
-            <input id="eval-numero" type="text" value={numero} onChange={(e) => setNumero(e.target.value)} />
-          </div>
-        )}
-        <div className="admin-eval-tf">
-          <label htmlFor="eval-date">Date</label>
-          <input id="eval-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </span>
         </div>
-        <div className="admin-eval-tf" style={{ flex: '1 1 220px', minWidth: '180px' }}>
-          <label htmlFor="eval-titre">{estExamen ? "Nom de l'examen (fichiers)" : `Titre ${estExercice ? "de la feuille d'exercices" : "de l'évaluation"}`}</label>
-          <input
-            id="eval-titre"
-            type="text"
-            placeholder={
-              estExamen
-                ? `Examen — ${session.trim() || sessionDefaut}`
-                : chapitres.length === 1
-                ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres[0].title}`
-                : chapitres.length > 1
-                  ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres.length} chapitres`
-                  : 'Titre'
-            }
-            value={titre}
-            onChange={(e) => setTitre(e.target.value)}
-          />
-        </div>
-        <span className="admin-eval-divider" />
-
-        {connecte && (
-          <div className="admin-eval-tf admin-eval-tf-ecole">
-            {compte.ecoles.length > 1 ? (
-              <>
-                <label htmlFor="eval-ecole">École</label>
-                <select id="eval-ecole" value={ecoleChoisie?.id ?? ''} onChange={(e) => choisirEcole(e.target.value)}>
-                  {compte.ecoles.map((e) => (
-                    <option key={e.id} value={e.id}>
-                      {e.nom}
-                      {e.par_defaut ? ' (par défaut)' : ''}
-                    </option>
-                  ))}
-                </select>
-              </>
-            ) : (
-              <>
-                <span className="admin-eval-tf-label">École</span>
-                {ecoleChoisie ? (
-                  <span className="admin-eval-ecole-unique">{ecoleChoisie.nom}</span>
-                ) : (
-                  <Link className="admin-eval-ecole-unique" to="/profil">
-                    Ajouter mon école
-                  </Link>
+        {banqueChoix && banqueChoix.length > 0 && choixOuvert && (
+          <fieldset className="admin-eval-choix" id={idChoix}>
+            <legend>
+              {ligne.type === 'demonstration' ? 'Démonstrations à donner' : 'Formules à donner'} — les mêmes dans toutes les séries. Aucune cochée : tirage au hasard.
+            </legend>
+            {banqueChoix.map((q) => (
+              <label className="admin-eval-choix-item" key={q.id}>
+                <input type="checkbox" checked={choix.includes(q.id ?? '')} onChange={(e) => basculerChoix(q.id ?? '', e.target.checked)} />
+                <span className="admin-eval-choix-texte">
+                  {ligne.type === 'demonstration' && (
+                    <span className="admin-eval-choix-titre">
+                      <RichText text={q.titre ?? ''} />
+                    </span>
+                  )}
+                  <span className="admin-eval-choix-enonce">
+                    <RichText text={q.apercu ?? ''} />
+                  </span>
+                  {ligne.type === 'demonstration' && (
+                    <span className="admin-eval-choix-longueur">
+                      Corrigé : {q.corrige.length} étape{q.corrige.length > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </span>
+                {!estExercice && choix.includes(q.id ?? '') && (
+                  <span className="admin-eval-choix-points">
+                    <ChampPoints
+                      valeur={() => pointsUnite(ligne, `choix:${q.id ?? ''}`)}
+                      verrouille={ligne.modePoints?.[`choix:${q.id ?? ''}`] === 'verrouille'}
+                      ajuste={ligne.modePoints?.[`choix:${q.id ?? ''}`] === 'ajuste'}
+                      libelle={`Points — ${q.titre ?? 'question'}`}
+                      onSaisie={(p) => saisirPoints(ligne, `choix:${q.id ?? ''}`, p)}
+                      onVerrou={(v) => basculerVerrouPoints(ligne, `choix:${q.id ?? ''}`, v)}
+                    />
+                    pt
+                  </span>
                 )}
-              </>
+              </label>
+            ))}
+          </fieldset>
+        )}
+      </div>
+    )
+  }
+
+  /** Une section du catalogue : en-tête d'accordéon (pastilles des processus qu'elle contient,
+   * « n choisis · x pts »), puis ses rangées visibles ; les lignes vides sont masquées. */
+  function renduSection(chapitreCourant: ChapterContent, section: ChapterContent['sections'][number]) {
+    const lignesSection = lignes.filter((l) => l.chapitreSlug === chapitreCourant.slug && l.sectionId === section.id)
+    const utilisables = lignesSection.filter(ligneUtilisable)
+    if (utilisables.length === 0) return null
+    const titreSection = `${section.number}. ${section.title}`
+    const titreCorrespond = correspond(titreSection)
+    const filtrees = utilisables.filter((l) => (filtreProcessus === 'tout' || l.processus === filtreProcessus) && (titreCorrespond || correspond(texteLigne(l))))
+    if (filtrees.length === 0) return null
+    const masquees = lignesSection.filter((l) => !ligneUtilisable(l) && (filtreProcessus === 'tout' || l.processus === filtreProcessus))
+    const cle = cleSection(chapitreCourant.slug, section.id)
+    const ouverte = termes.length > 0 || sectionsOuvertes.has(cle)
+    const nombre = lignesSection.reduce((t, l) => t + nombreLigne(l), 0)
+    const points = lignesSection.reduce((t, l) => t + (nombreLigne(l) > 0 ? pointsLigne(l) : 0), 0)
+    const processus = processusDeLignes(lignesSection, ligneUtilisable)
+    const idCorps = `section-${cle.replace(/[^a-z0-9]/gi, '-')}`
+    return (
+      <article className="conc-section" key={cle} data-ouverte={ouverte || undefined}>
+        <h4 className="conc-section-h">
+          <button
+            type="button"
+            className="conc-section-tete"
+            aria-expanded={ouverte}
+            aria-controls={idCorps}
+            onClick={() =>
+              setSectionsOuvertes((prev) => {
+                const n = new Set(prev)
+                if (n.has(cle)) n.delete(cle)
+                else n.add(cle)
+                return n
+              })
+            }
+          >
+            <span className="conc-section-titre">{titreSection}</span>
+            <span className="conc-section-meta">
+              <span className="conc-pastilles">
+                {processus.map((p) => (
+                  <Fragment key={p}>{pastille(p, true)}</Fragment>
+                ))}
+                <span className="sr-only">Processus : {processus.map((p) => LABEL_PROCESSUS[p]).join(', ')}.</span>
+              </span>
+              <span className={`conc-section-compte${nombre > 0 ? ' conc-ok' : ''}`}>
+                {nombre > 0 ? `${nombre} choisi${nombre > 1 ? 's' : ''}${estExercice ? '' : ` · ${nombreFrPanneau(points)} pts`}` : '—'}
+              </span>
+              <span className="conc-chevron" aria-hidden="true">
+                ▸
+              </span>
+            </span>
+          </button>
+        </h4>
+        {ouverte && (
+          <div className="conc-section-corps" id={idCorps}>
+            {filtrees.map((l) => (l.type === 'exercice' ? renduGenerateur(l, chapitreCourant, section) : renduAutre(l, chapitreCourant, section)))}
+            {masquees.length > 0 && (
+              <p className="conc-masque">
+                Masqué : {masquees.map((l) => `« ${LABEL_TYPE[l.type]} »`).join(', ')} (aucune question pour ce point).
+              </p>
             )}
           </div>
         )}
-        <div className="admin-eval-tf" style={{ width: '4.5em' }}>
-          <label htmlFor="eval-heures-semaine">Vol./sem</label>
-          <input
-            id="eval-heures-semaine"
-            type="text"
-            value={heuresSemaine}
-            onChange={(e) => setHeuresSemaine(e.target.value)}
-            disabled={estExercice}
-          />
-        </div>
-        {!estExercice && (
-          <>
-            <div className={`admin-eval-tf${calculatriceSurlignee ? ' admin-eval-surligne' : ''}`}>
-              <label htmlFor="eval-calculatrice">Calculatrice</label>
-              <select id="eval-calculatrice" ref={selectCalculatrice} value={calculatrice} onChange={(e) => setCalculatrice(e.target.value as 'interdite' | 'autorisee')}>
-                <option value="interdite">Interdite</option>
-                <option value="autorisee">Autorisée</option>
-              </select>
-            </div>
-            <div className="admin-eval-tf" style={{ width: '4em' }}>
-              <label htmlFor="eval-series">Séries</label>
-              <input
-                id="eval-series"
-                type="number"
-                min={1}
-                max={26}
-                value={nombreSeries}
-                onChange={(e) => setNombreSeries(Math.min(26, Math.max(1, Number(e.target.value) || 1)))}
-              />
-            </div>
-          </>
-        )}
-        <span className="admin-eval-divider" />
+      </article>
+    )
+  }
 
+  /** Options du document (tout ce que la barre d'outils contenait) : mise en page, consignes,
+   * réglages de l'examen. */
+  const blocOptions = (
+    <div className="conc-options" id="conc-options">
+      <fieldset className="conc-groupe">
+        <legend>Mise en page</legend>
         <label className="admin-eval-checkbox-field" htmlFor="eval-titres-section">
           <input id="eval-titres-section" type="checkbox" checked={afficherTitresSection} onChange={(e) => setAfficherTitresSection(e.target.checked)} />
           Afficher les titres de section
@@ -1513,35 +1899,30 @@ export function EvaluationGeneratorPanel({
           <input id="eval-deux-colonnes" type="checkbox" checked={deuxColonnes} onChange={(e) => setDeuxColonnes(e.target.checked)} />
           Économie de papier (deux colonnes)
         </label>
-        {!estExercice && calculatrice === 'interdite' && generateursACalculatrice.length > 0 && (
-          <p className="admin-eval-avertissement" role="note">
-            Calculatrice interdite, mais ces exercices demandent une calculatrice par nature (valeurs décimales) : {generateursACalculatrice.join(' ; ')}.
-          </p>
-        )}
         {!estExercice && (
           <label className="admin-eval-checkbox-field" htmlFor="eval-afficher-duree" title={`Imprime « ≈ ${dureeEstimee} minutes » dans l'en-tête de l'évaluation.`}>
             <input id="eval-afficher-duree" type="checkbox" checked={afficherDuree} onChange={(e) => setAfficherDuree(e.target.checked)} />
             Afficher la durée estimée sur {estExamen ? "l'examen (sans durée saisie)" : "l'évaluation"}
           </label>
         )}
-      </div>
+      </fieldset>
 
       {estExamen && (
         <fieldset className="admin-eval-examen">
           <legend>Réglages de l'examen</legend>
-          <div className="admin-eval-examen-ligne">
-            <div className="admin-eval-tf">
-              <span className="admin-eval-tf-label" id="eval-organisation-label">
-                Parties
-              </span>
-              <div className="admin-eval-segments" role="radiogroup" aria-labelledby="eval-organisation-label">
-                {(['chapitre', 'processus'] as const).map((o) => (
-                  <button key={o} type="button" role="radio" aria-checked={organisationExamen === o} className="admin-eval-segment" onClick={() => setOrganisationExamen(o)}>
-                    {o === 'chapitre' ? 'Par chapitre' : 'Par processus'}
-                  </button>
-                ))}
-              </div>
+          <div className="admin-eval-tf">
+            <span className="admin-eval-tf-label" id="eval-organisation-label">
+              Parties
+            </span>
+            <div className="admin-eval-segments" role="radiogroup" aria-labelledby="eval-organisation-label">
+              {(['chapitre', 'processus'] as const).map((o) => (
+                <button key={o} type="button" role="radio" aria-checked={organisationExamen === o} className="admin-eval-segment" onClick={() => setOrganisationExamen(o)}>
+                  {o === 'chapitre' ? 'Par chapitre' : 'Par processus'}
+                </button>
+              ))}
             </div>
+          </div>
+          <div className="admin-eval-examen-ligne">
             <div className="admin-eval-tf admin-eval-examen-session">
               <label htmlFor="eval-session">Session</label>
               <input id="eval-session" type="text" value={session} placeholder={sessionDefaut} onChange={(e) => setSession(e.target.value)} />
@@ -1574,70 +1955,228 @@ export function EvaluationGeneratorPanel({
               ))}
             </div>
           </div>
-          {partiesPanneau.length === 0 ? (
-            <p className="admin-eval-variante-label">Les parties apparaissent dès qu'une question est choisie dans le tableau.</p>
-          ) : (
-            <ul className="admin-eval-parties">
-              {partiesPanneau.map((p) => (
-                <li key={p.cle}>
-                  <span className="admin-eval-partie-nom">
-                    Partie {p.romain} · {p.titre}
-                  </span>
-                  {modeTotalExamen === 'fixe' ? (
-                    <span className="admin-eval-partie-total">
-                      <input
-                        type="text"
-                        aria-label={`Total voulu pour la partie ${p.romain}`}
-                        value={p.saisie}
-                        placeholder={nombreFrPanneau(p.somme)}
-                        autoComplete="off"
-                        onChange={(e) => {
-                          const v = normaliserSigneMoins(e.target.value)
-                          setTotauxSaisis((prev) => ({ ...prev, [p.cle]: v }))
-                        }}
-                      />{' '}
-                      pts <span className="admin-eval-variante-label">(questions : {nombreFrPanneau(p.somme)} pts)</span>
-                    </span>
-                  ) : (
-                    <span className="admin-eval-partie-total">
-                      <strong>{nombreFrPanneau(p.total)}</strong> pts
-                    </span>
-                  )}
-                  {p.message && (
-                    <span className="admin-eval-aide admin-eval-aide-erreur" role="alert">
-                      {p.message}
-                    </span>
-                  )}
-                </li>
-              ))}
-              <li className="admin-eval-parties-total">
-                <span className="admin-eval-partie-nom">Total de l'examen</span>
-                <span className="admin-eval-partie-total">
-                  <strong>{nombreFrPanneau(totalExamen)}</strong> pts
-                </span>
-              </li>
-            </ul>
-          )}
-          {modeTotalExamen === 'fixe' && partiesPanneau.length > 0 && (
-            <p className="admin-eval-variante-label">
-              Points des questions de chaque partie mis à l'échelle (demi-points, jamais 0 pt, somme exacte) ; barème, grille et corrigé suivent. Champ vide : points tels quels.
-            </p>
-          )}
-
+          {modeTotalExamen === 'fixe' &&
+            (partiesPanneau.length === 0 ? (
+              <p className="admin-eval-variante-label">Les parties apparaissent dès qu'une question est choisie.</p>
+            ) : (
+              <>
+                <ul className="admin-eval-parties">
+                  {partiesPanneau.map((p) => (
+                    <li key={p.cle}>
+                      <span className="admin-eval-partie-nom">
+                        Partie {p.romain} · {p.titre}
+                      </span>
+                      <span className="admin-eval-partie-total">
+                        <input
+                          type="text"
+                          aria-label={`Total voulu pour la partie ${p.romain}`}
+                          value={p.saisie}
+                          placeholder={nombreFrPanneau(p.somme)}
+                          autoComplete="off"
+                          onChange={(e) => {
+                            const v = normaliserSigneMoins(e.target.value)
+                            setTotauxSaisis((prev) => ({ ...prev, [p.cle]: v }))
+                          }}
+                        />{' '}
+                        pts <span className="admin-eval-variante-label">(questions : {nombreFrPanneau(p.somme)} pts)</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="admin-eval-variante-label">
+                  Points des questions de chaque partie mis à l'échelle (demi-points, jamais 0 pt, somme exacte) ; barème, grille et corrigé suivent. Champ vide : points tels quels.
+                </p>
+              </>
+            ))}
           {champConsignesSupplementaires('Commence chaque partie sur une nouvelle feuille.')}
         </fieldset>
       )}
-      {/* Évaluation : même champ, même place (le texte saisi est gardé en passant d'Examen à Évaluation). */}
+      {/* Évaluation : même champ (le texte saisi est gardé en passant d'Examen à Évaluation). */}
       {!estExercice && !estExamen && (
         <fieldset className="admin-eval-examen">
           <legend>Consignes de l'évaluation</legend>
           {champConsignesSupplementaires('Écris au stylo bleu ou noir.')}
         </fieldset>
       )}
-      {!estExercice && nombreSeries > 1 && (
-        <p className="admin-eval-indisponible">
-          {nombreSeries} versions anti-triche (A à {String.fromCharCode(64 + nombreSeries)}) seront générées — mêmes questions, exercices/vrai-faux/questions
-          ouvertes indépendamment randomisés par série quand c'est possible.
+    </div>
+  )
+
+  const unite = estExercice ? 'exercice' : 'question'
+  const pct = (x: number, total: number) => (total > 0 ? Math.round((x / total) * 100) : 0)
+
+  return (
+    <div className={`admin-eval conc${panneauMobile ? ' conc-panier-ouvert' : ''}`}>
+      {bandeauCarnet && (
+        <p className="admin-eval-carnet" role="status">
+          {bandeauCarnet}
+        </p>
+      )}
+
+      {/* ---------- En-tête compact : chapitres, puis le document ---------- */}
+      <section className="conc-entete" aria-label="Document">
+        {verrouille ? (
+          <p className="admin-eval-chapitre-verrouille">
+            {niveauEntry?.label ?? niveau} — Chapitre{' '}
+            {(() => {
+              const c = niveauEntry?.chapters.find((c) => c.slug === verrouille.chapitreSlug)
+              return c ? `${c.chapterNumber}. ${c.title}` : verrouille.chapitreSlug
+            })()}
+          </p>
+        ) : (
+          <div className="conc-entete-chapitres">
+            <div className="admin-eval-tf">
+              <label htmlFor="eval-niveau">Niveau</label>
+              <select id="eval-niveau" value={niveau} onChange={(e) => changerNiveau(e.target.value as NiveauCode)}>
+                {NIVEAUX.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="admin-eval-tf">
+              <label htmlFor="eval-heures">Heures</label>
+              <select id="eval-heures" value={heures} onChange={(e) => reglerNiveauHeures(niveau, e.target.value)} disabled={HEURES_PAR_NIVEAU[niveau].length === 0}>
+                {HEURES_PAR_NIVEAU[niveau].length === 0 ? (
+                  <option value="">— (non applicable)</option>
+                ) : (
+                  HEURES_PAR_NIVEAU[niveau].map((h) => (
+                    <option key={h} value={h} disabled={resoudreLevelSlug(niveau, h) === null}>
+                      {h}
+                      {resoudreLevelSlug(niveau, h) === null ? ' (bientôt)' : ''}
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
+            <div className="admin-eval-tf admin-eval-tf-chapitre">
+              <span className="admin-eval-tf-label" id="eval-chapitres-label">
+                Chapitres (plusieurs possibles)
+              </span>
+              {!niveauEntry ? (
+                <p className="admin-eval-indisponible">Aucun chapitre disponible pour l'instant.</p>
+              ) : (
+                <div className="admin-eval-chapitres-chips" role="group" aria-labelledby="eval-chapitres-label">
+                  {niveauEntry.chapters.map((c) => {
+                    const fonctionnel = estChapitreFonctionnel(levelSlug, c.slug)
+                    return (
+                      <button key={c.slug} type="button" className="admin-eval-chapitre-chip" aria-pressed={chapitresSlugs.includes(c.slug)} disabled={!fonctionnel} onClick={() => basculerChapitre(c.slug)}>
+                        {c.chapterNumber}. {c.title}
+                        {fonctionnel ? '' : ' (bientôt)'}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="conc-entete-champs">
+          {!estExercice && (
+            <div className="admin-eval-tf">
+              <span className="admin-eval-tf-label" id="eval-type-document-label">
+                Document
+              </span>
+              <div className="admin-eval-segments" role="radiogroup" aria-labelledby="eval-type-document-label">
+                {(['evaluation', 'examen'] as const).map((t) => (
+                  <button key={t} type="button" role="radio" aria-checked={typeDocument === t} className="admin-eval-segment" onClick={() => setTypeDocument(t)}>
+                    {t === 'evaluation' ? 'Évaluation' : 'Examen'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="admin-eval-tf conc-champ-titre">
+            <label htmlFor="eval-titre">{estExamen ? "Nom de l'examen (fichiers)" : `Titre ${estExercice ? "de la feuille d'exercices" : "de l'évaluation"}`}</label>
+            <input
+              id="eval-titre"
+              type="text"
+              placeholder={
+                estExamen
+                  ? `Examen — ${session.trim() || sessionDefaut}`
+                  : chapitres.length === 1
+                    ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres[0].title}`
+                    : chapitres.length > 1
+                      ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres.length} chapitres`
+                      : 'Titre'
+              }
+              value={titre}
+              onChange={(e) => setTitre(e.target.value)}
+            />
+          </div>
+          <div className="admin-eval-tf">
+            <label htmlFor="eval-date">Date</label>
+            <input id="eval-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </div>
+          {!estExercice && !estExamen && (
+            <div className="admin-eval-tf conc-champ-court">
+              <label htmlFor="eval-numero">N°</label>
+              <input id="eval-numero" type="text" value={numero} onChange={(e) => setNumero(e.target.value)} />
+            </div>
+          )}
+          {!estExercice && (
+            <>
+              <div className="admin-eval-tf conc-champ-court">
+                <label htmlFor="eval-heures-semaine">Vol./sem.</label>
+                <input id="eval-heures-semaine" type="text" value={heuresSemaine} onChange={(e) => setHeuresSemaine(e.target.value)} />
+              </div>
+              <div className="admin-eval-tf">
+                <span className="admin-eval-tf-label" id="eval-series-label">
+                  Séries
+                </span>
+                <span role="group" aria-labelledby="eval-series-label" className="conc-series">
+                  <Stepper valeur={nombreSeries} min={1} max={26} nom="séries" onChange={setNombreSeries} />
+                </span>
+              </div>
+              <div className={`admin-eval-tf${calculatriceSurlignee ? ' admin-eval-surligne' : ''}`}>
+                <label htmlFor="eval-calculatrice">Calculatrice</label>
+                <select id="eval-calculatrice" ref={selectCalculatrice} value={calculatrice} onChange={(e) => setCalculatrice(e.target.value as 'interdite' | 'autorisee')}>
+                  <option value="interdite">Interdite</option>
+                  <option value="autorisee">Autorisée</option>
+                </select>
+              </div>
+            </>
+          )}
+          {connecte && (
+            <div className="admin-eval-tf admin-eval-tf-ecole">
+              {compte.ecoles.length > 1 ? (
+                <>
+                  <label htmlFor="eval-ecole">École</label>
+                  <select id="eval-ecole" value={ecoleChoisie?.id ?? ''} onChange={(e) => choisirEcole(e.target.value)}>
+                    {compte.ecoles.map((e) => (
+                      <option key={e.id} value={e.id}>
+                        {e.nom}
+                        {e.par_defaut ? ' (par défaut)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              ) : (
+                <>
+                  <span className="admin-eval-tf-label">École</span>
+                  {ecoleChoisie ? (
+                    <span className="admin-eval-ecole-unique">{ecoleChoisie.nom}</span>
+                  ) : (
+                    <Link className="admin-eval-ecole-unique" to="/profil">
+                      Ajouter mon école
+                    </Link>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+        {!estExercice && calculatrice === 'interdite' && generateursACalculatrice.length > 0 && (
+          <p className="admin-eval-avertissement" role="note">
+            Calculatrice interdite, mais ces exercices demandent une calculatrice par nature (valeurs décimales) : {generateursACalculatrice.join(' ; ')}.
+          </p>
+        )}
+      </section>
+      {!verrouille && (
+        <p className="admin-eval-intro">
+          Sont fonctionnels : tous les chapitres de 4e, de 5e (4h) et de 6e (6h). Pour ces trois niveaux, la génération se fait désormais directement ici (aucune redirection), vrai/faux
+          compris — sauf « Fonctions réciproques et cyclométriques » dont la banque vrai/faux reste sur plateforme-maths.
         </p>
       )}
 
@@ -1653,458 +2192,428 @@ export function EvaluationGeneratorPanel({
 
       {chapitres.length > 0 && (
         <>
-          <div className="admin-eval-processus-bar" role="radiogroup" aria-label="Processus">
-            {([1, 2, 3] as const).map((processus) => (
-              <button
-                key={processus}
-                type="button"
-                role="radio"
-                className="admin-eval-processus-btn"
-                aria-checked={processusActif === processus}
-                onClick={() => selectionnerProcessus(processus)}
-              >
-                {processus === 1 ? '①' : processus === 2 ? '②' : '③'} {LABEL_PROCESSUS[processus]}
-              </button>
-            ))}
-          </div>
-
-          <CompteurFlottant nombre={totalNombre} points={estExercice ? undefined : totalAffiche} duree={totalNombre > 0 ? dureeEstimee : undefined} masque={compteurMasque} />
-
-          {totalNombre > 0 && (
-            <div className="admin-eval-repartition" aria-live="polite">
-              {!estExercice &&
-                ([1, 2, 3] as const).map((p) => (
-                  <span key={p} className="admin-eval-repartition-item">
-                    <span className="admin-eval-repartition-barre" style={{ width: `${totalPoints > 0 ? Math.round((pointsParProcessus[p - 1] / totalPoints) * 100) : 0}%` }} />
-                    {LABEL_PROCESSUS[p]} : {pointsParProcessus[p - 1]} pt{pointsParProcessus[p - 1] > 1 ? 's' : ''} ({totalPoints > 0 ? Math.round((pointsParProcessus[p - 1] / totalPoints) * 100) : 0} %)
-                    {dureesParProcessus[p - 1] > 0 && ` · ≈ ${Math.max(1, Math.round(dureesParProcessus[p - 1]))} min`}
+          <div className="conc-grille">
+            {/* ---------- Catalogue ---------- */}
+            <section className="conc-catalogue" aria-label="Catalogue">
+              <div className="conc-facons">
+                <button type="button" className="conc-facons-tete" aria-expanded={faconsOuvertes} aria-controls="conc-facons-corps" onClick={() => setFaconsOuvertes((v) => !v)}>
+                  <span>
+                    <span className="conc-facons-titre">Façons de composer</span>
+                    <span className="conc-facons-sous">Pas le temps de tout choisir ? L’outil remplit {estExercice ? 'la feuille' : estExamen ? "l'examen" : "l'évaluation"}, tu ajustes ensuite.</span>
                   </span>
-                ))}
-              <span className="admin-eval-repartition-item">Durée estimée : ≈ {dureeEstimee} min</span>
-            </div>
-          )}
-
-          {[processusActif].map((processus) => {
-            const lignesProcessus = lignes.filter((l) => l.processus === processus)
-            if (lignesProcessus.length === 0) {
-              return (
-                <p className="admin-eval-indisponible" key={processus}>
-                  Aucun exercice de ce type dans {chapitres.length > 1 ? 'ces chapitres' : 'ce chapitre'} pour l'instant.
-                </p>
-              )
-            }
-            return (
-              <div className="admin-eval-table-wrap" key={processus}>
-                <table className="admin-eval-table">
-                  <thead>
-                    <tr>
-                      <th>
-                        Processus {processus} — {LABEL_PROCESSUS[processus]}
-                      </th>
-                      <th>Disponible</th>
-                      <th className="admin-eval-col-nombre">Nombre</th>
-                      {!estExercice && <th>Points</th>}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {chapitres.map((chapitreCourant) => {
-                      const lignesChapitre = lignes.filter((l) => l.chapitreSlug === chapitreCourant.slug && l.processus === processus)
-                      if (lignesChapitre.length === 0) return null
-                      return (
-                        <Fragment key={chapitreCourant.slug}>
-                          {chapitres.length > 1 && (
-                            <tr className="admin-eval-chapitre-row">
-                              <td colSpan={estExercice ? 3 : 4}>
-                                {chapitreCourant.chapterNumber}. {chapitreCourant.title}
-                              </td>
-                            </tr>
+                  <span className="conc-chevron" aria-hidden="true">
+                    ▸
+                  </span>
+                </button>
+                {faconsOuvertes && (
+                  <div className="conc-facons-corps" id="conc-facons-corps">
+                    <div className="conc-recettes">
+                      {(
+                        [
+                          ['equilibree', estExercice ? 'Feuille équilibrée' : estExamen ? 'Examen équilibré' : 'Évaluation équilibrée', '≈ 6 exercices tirés sur tout le chapitre, des trois processus.'],
+                          ['notions', 'Sur quelques notions', 'Tu coches les notions, l’outil propose les exercices.'],
+                          [
+                            'evaluation',
+                            estExercice ? 'Préparer l’évaluation' : 'Répartition 15 / 60 / 25 %',
+                            estExercice
+                              ? 'Même répartition qu’une évaluation : 15 % / 60 % / 25 % (≈ 50 min).'
+                              : `Connaître, Appliquer, Transférer : 15 / 60 / 25 % de ${estExamen && lectureDuree.etat === 'ok' ? lectureDuree.valeur : estExamen ? Math.min(150, 50 * Math.max(1, chapitres.length)) : 50} min.`,
+                          ],
+                          ['mesure', 'Sur mesure', 'Le catalogue complet, exercice par exercice.'],
+                        ] as const
+                      ).map(([id, titreFacon, texte]) => (
+                        <button
+                          key={id}
+                          type="button"
+                          className="conc-recette"
+                          aria-pressed={faconActive === id}
+                          onClick={() => {
+                            setFaconActive(id)
+                            if (id === 'mesure') {
+                              setComposition(null)
+                              champRecherche.current?.focus()
+                            } else if (id !== 'notions') appliquerFacon(id)
+                          }}
+                        >
+                          <span className="conc-recette-titre">{titreFacon}</span>
+                          <span className="conc-recette-texte">{texte}</span>
+                        </button>
+                      ))}
+                    </div>
+                    {faconActive === 'notions' && (
+                      <div className="conc-notions">
+                        <p className="conc-notions-titre">
+                          Choisis les notions <span>({notionsCochees.size} cochée{notionsCochees.size > 1 ? 's' : ''})</span>
+                        </p>
+                        <div className="conc-notions-grille" role="group" aria-label="Notions">
+                          {chapitres.flatMap((c) =>
+                            c.sections.map((s) => {
+                              const lignesS = lignes.filter((l) => l.chapitreSlug === c.slug && l.sectionId === s.id)
+                              const ps = processusDeLignes(lignesS, ligneUtilisable)
+                              if (ps.length === 0) return null
+                              const cle = cleSectionComposer(c.slug, s.id)
+                              const cochee = notionsCochees.has(cle)
+                              return (
+                                <button
+                                  key={cle}
+                                  type="button"
+                                  className="conc-notion"
+                                  aria-pressed={cochee}
+                                  onClick={() =>
+                                    setNotionsCochees((prev) => {
+                                      const n = new Set(prev)
+                                      if (n.has(cle)) n.delete(cle)
+                                      else n.add(cle)
+                                      return n
+                                    })
+                                  }
+                                >
+                                  <span className="conc-notion-titre">
+                                    {chapitres.length > 1 ? `${c.chapterNumber}.` : ''}
+                                    {s.number}. {s.title}
+                                  </span>
+                                  <span className="conc-pastilles">{ps.map((p) => <Fragment key={p}>{pastille(p, true)}</Fragment>)}</span>
+                                </button>
+                              )
+                            }),
                           )}
-                          {chapitreCourant.sections.map((section) => {
-                            const lignesSection = lignesChapitre.filter((l) => l.sectionId === section.id)
-                            if (lignesSection.length === 0) return null
-                            return (
-                              <Fragment key={chapitreCourant.slug + section.id}>
-                                <tr className="admin-eval-section-row">
-                                  <td colSpan={estExercice ? 3 : 4}>
-                                    {section.number}. {section.title}
-                                  </td>
-                                </tr>
-                                {lignesSection.flatMap((ligne) => {
-                                  if (ligne.type === 'exercice') {
-                                    const catalogue = catalogueVariantesExercice(
-                                      ligne.cle as IdGenerateurPilote,
-                                      estExercice ? 'exercice' : 'evaluation',
-                                      Object.entries(ligne.parVariante ?? {}).filter(([, n]) => n > 0).map(([c]) => varianteDeCle(c)),
-                                    )
-                                    // Tirage équilibré : seulement des exercices complets, sauf si le professeur
-                                    // coche « inclure un cas particulier » (évaluation, générateur doté d'un profil).
-                                    const libelleCas = estExercice ? null : libelleCasParticulier(ligne.cle as IdGenerateurPilote)
-                                    const parametres = estExercice ? [] : parametresAuChoix(ligne.cle as IdGenerateurPilote)
-                                    // Une ligne par variante du catalogue, plus ses copies (« id~n ») ; sous chaque
-                                    // variante choisie, SES réglages (paramètres à inclure, cas particulier).
-                                    const lignesVariantes = catalogue.flatMap((variante) => {
-                                      const copies = Object.keys(ligne.parVariante ?? {})
-                                        .filter((k) => k !== variante.id && varianteDeCle(k) === variante.id)
-                                        .sort((x, y) => Number(x.split('~')[1]) - Number(y.split('~')[1]))
-                                      return [variante.id, ...copies].map((cle) => ({ cle, variante, copie: cle !== variante.id }))
-                                    })
-                                    const adaptateurLigne = EVALUATION_ADAPTER_REGISTRY[ligne.cle ?? ''] as Adaptateur | undefined
-                                    // Calculatrice interdite et TOUTES les variantes l'exigent : dit UNE fois, au
-                                    // niveau du générateur (rangée de tête), au lieu de répéter la note par variante.
-                                    const toutesExclues = catalogue.length > 0 && catalogue.every((v) => varianteExclue(ligne.cle ?? '', v.id))
-                                    const rangeesGenerateur = lignesVariantes.flatMap(({ cle, variante, copie }) => {
-                                      const exclue = varianteExclue(ligne.cle ?? '', cle)
-                                      const nombreVariante = exclue ? 0 : (ligne.parVariante?.[cle] ?? 0)
-                                      const reglages = reglagesVariante(ligne, cle)
-                                      // Case « cas particulier » seulement si CETTE variante peut en recevoir un
-                                      // (calculé seulement quand la sous-rangée s'affiche, puis mis en cache).
-                                      const afficherReglages = !exclue && (nombreVariante > 0 || copie)
-                                      const libelleCasVariante =
-                                        libelleCas && afficherReglages && varianteAdmetCasParticulier(ligne.cle ?? '', variante.id) ? libelleCas : null
-                                      const aDesReglages = parametres.length > 0 || !!libelleCasVariante
-                                      const rangees = [
-                                        <tr className="admin-eval-row" key={(ligne.cle ?? '') + cle}>
-                                          <td>
-                                            {libelleGenerateurPanneau(section, ligne.cle ?? '')} —{' '}
-                                            <span className="admin-eval-variante-label">
-                                              {variante.label}
-                                              {copie ? ` (${cle.split('~')[1]})` : ''}
-                                            </span>
-                                            {!exclue && adaptateurLigne && (
-                                              <>
-                                                {' '}
-                                                <RepereNiveauDuree
-                                                  adaptateur={adaptateurLigne}
-                                                  varianteId={varianteEstimation(adaptateurLigne, cle) ?? ''}
-                                                  options={optionsEstimation(ligne, cle)}
-                                                  reglages={texteReglagesEstimation(ligne, cle)}
-                                                />
-                                              </>
-                                            )}
-                                            {exclue && toutesExclues && <span className="admin-eval-variante-exclue"> — demande une calculatrice</span>}
-                                            {exclue && !toutesExclues && (
-                                              <span className="admin-eval-calculatrice-note admin-eval-calculatrice-note-variante" role="note">
-                                                <span>
-                                                  <b>Demande une calculatrice</b> : passe la calculatrice à « Autorisée » (en haut) pour l’utiliser.
-                                                </span>
-                                                <button type="button" className="admin-eval-lien-bouton" onClick={allerAuReglageCalculatrice}>
-                                                  Aller au réglage
-                                                </button>
-                                              </span>
-                                            )}
-                                          </td>
-                                          <td>—</td>
-                                          <td className="admin-eval-col-nombre">
-                                            <Stepper
-                                              valeur={nombreVariante}
-                                              max={MAX_EXERCICE}
-                                              disabled={exclue}
-                                              onChange={(v) => mettreAJourVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, v)}
-                                            />
-                                          </td>
-                                          {!estExercice && (
-                                            <td>
-                                              <ChampPoints
-                                                valeur={() => pointsUnite(ligne, cle, nombreVariante > 0)}
-                                                verrouille={ligne.modePoints?.[cle] === 'verrouille'}
-                                                ajuste={ligne.modePoints?.[cle] === 'ajuste'}
-                                                disabled={exclue}
-                                                libelle={`Points / question pour la variante « ${variante.label} »`}
-                                                onSaisie={(p) => saisirPoints(ligne, cle, p)}
-                                                onVerrou={(v) => basculerVerrouPoints(ligne, cle, v)}
-                                              />
-                                            </td>
-                                          )}
-                                        </tr>,
-                                      ]
-                                      if (aDesReglages && afficherReglages) {
-                                        rangees.push(
-                                          <tr className="admin-eval-row admin-eval-row-cas" key={(ligne.cle ?? '') + cle + '-reglages'}>
-                                            <td colSpan={4}>
-                                              <div className="admin-eval-cas-contenu">
-                                                {parametres.length > 0 && <span className="admin-eval-parametres-titre">Paramètres à inclure :</span>}
-                                                {parametres.map((p) => (
-                                                  <label className="admin-eval-checkbox-field admin-eval-parametre" key={p.id}>
-                                                    <input
-                                                      type="checkbox"
-                                                      checked={!reglages.parametresExclus.includes(p.id)}
-                                                      onChange={(e) => basculerParametre(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, p.id, e.target.checked)}
-                                                    />
-                                                    {p.label}
-                                                  </label>
-                                                ))}
-                                                {libelleCasVariante && (
-                                                  <label className="admin-eval-checkbox-field">
-                                                    <input
-                                                      type="checkbox"
-                                                      checked={reglages.inclureCasParticulier}
-                                                      onChange={(e) => mettreAJourCasParticulier(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, e.target.checked)}
-                                                    />
-                                                    {libelleCasVariante}
-                                                  </label>
-                                                )}
-                                                <button
-                                                  type="button"
-                                                  className="admin-eval-lien-bouton"
-                                                  onClick={() => dupliquerVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', cle)}
-                                                  title="Ajoute la même variante avec d'autres réglages (par exemple avec et sans un paramètre)"
-                                                >
-                                                  + Même variante, autres réglages
-                                                </button>
-                                                {copie && (
-                                                  <button
-                                                    type="button"
-                                                    className="admin-eval-lien-bouton"
-                                                    onClick={() => retirerVarianteDupliquee(chapitreCourant.slug, section.id, ligne.cle ?? '', cle)}
-                                                  >
-                                                    Retirer cette copie
-                                                  </button>
-                                                )}
-                                              </div>
-                                            </td>
-                                          </tr>,
-                                        )
-                                      }
-                                      return rangees
-                                    })
-                                    const enTete = toutesExclues
-                                      ? [
-                                          <tr className="admin-eval-row admin-eval-row-calculatrice" key={(ligne.cle ?? '') + '-calculatrice'}>
-                                            <td colSpan={4}>
-                                              <div className="admin-eval-calculatrice-note" role="note">
-                                                <span>
-                                                  <b>{libelleGenerateurPanneau(section, ligne.cle ?? '')}</b> : toutes ses variantes demandent une calculatrice.
-                                                  Pour l’utiliser, passe la calculatrice à « Autorisée » (en haut) — ce réglage vaut pour toute l’évaluation.
-                                                </span>
-                                                <button type="button" className="admin-eval-lien-bouton" onClick={allerAuReglageCalculatrice}>
-                                                  Aller au réglage « Calculatrice »
-                                                </button>
-                                              </div>
-                                            </td>
-                                          </tr>,
-                                        ]
-                                      : []
-                                    // Sous-total du générateur (toutes ses variantes choisies) : nombre, durée
-                                    // estimée (même calcul que l'en-tête) et, en évaluation, points.
-                                    const nombreGenerateur = nombreLigne(ligne)
-                                    const sousTotal =
-                                      nombreGenerateur > 0
-                                        ? [
-                                            <tr className="admin-eval-row admin-eval-row-soustotal" key={(ligne.cle ?? '') + '-soustotal'}>
-                                              <td colSpan={estExercice ? 3 : 4}>
-                                                Sous-total : {nombreGenerateur} exercice{nombreGenerateur > 1 ? 's' : ''} · ≈ {Math.max(1, Math.round(dureeLigne(ligne, pointsLigne(ligne))))} min
-                                                {!estExercice && ` · ${pointsLigne(ligne)} pt${pointsLigne(ligne) > 1 ? 's' : ''}`}
-                                              </td>
-                                            </tr>,
-                                          ]
-                                        : []
-                                    return [...enTete, ...rangeesGenerateur, ...sousTotal]
-                                  }
-
-                                  const estBanqueFixe = ligne.type === 'formule' || ligne.type === 'demonstration' || ligne.type === 'comprehension'
-                                  const banqueChoix =
-                                    ligne.type === 'formule' || ligne.type === 'demonstration'
-                                      ? ((ligne.type === 'formule' ? apercusFormule : apercusDemonstration).get(cleSection(chapitreCourant.slug, section.id)) ?? [])
-                                      : null
-                                  const disponibles = banqueChoix
-                                    ? banqueChoix.length
-                                    : estBanqueFixe
-                                      ? apercusComprehension.get(cleSection(chapitreCourant.slug, section.id)) ?? 0
-                                      : MAX_VRAI_FAUX
-                                  const choix = (ligne.choix ?? []).filter((id) => banqueChoix?.some((q) => q.id === id))
-                                  const cleChoix = `${chapitreCourant.slug}|${section.id}|${ligne.type}`
-                                  const choixOuvert = choixOuverts.has(cleChoix)
-                                  const basculerChoix = (id: string, coche: boolean) => {
-                                    const suivant = coche ? [...choix, id] : choix.filter((c) => c !== id)
-                                    // Ordre du cours (pas l'ordre des clics) : la feuille suit l'ordre des sections.
-                                    const ordonne = (banqueChoix ?? []).map((q) => q.id ?? '').filter((qid) => suivant.includes(qid))
-                                    mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, { choix: ordonne, nombre: ordonne.length })
-                                  }
-                                  const indisponible = estBanqueFixe && disponibles === 0
-                                  const theme =
-                                    ligne.type === 'vraiFaux'
-                                      ? themesPourSection(chapitreCourant.slug, section.id).find((t) => t.quizTheme === ligne.cle)
-                                      : undefined
-                                  const rangeeChoix =
-                                    banqueChoix && banqueChoix.length > 0 && choixOuvert ? (
-                                      <tr className="admin-eval-row admin-eval-row-choix" key={ligne.type + '-choix'}>
-                                        <td colSpan={estExercice ? 3 : 4}>
-                                          <fieldset className="admin-eval-choix">
-                                            <legend>
-                                              {ligne.type === 'demonstration' ? 'Démonstrations à donner' : 'Formules à donner'} — les mêmes dans toutes les séries.
-                                              {' '}Aucune cochée : tirage au hasard.
-                                            </legend>
-                                            {banqueChoix.map((q) => (
-                                              <label className="admin-eval-choix-item" key={q.id}>
-                                                <input type="checkbox" checked={choix.includes(q.id ?? '')} onChange={(e) => basculerChoix(q.id ?? '', e.target.checked)} />
-                                                <span className="admin-eval-choix-texte">
-                                                  {ligne.type === 'demonstration' && (
-                                                    <span className="admin-eval-choix-titre">
-                                                      <RichText text={q.titre ?? ''} />
-                                                    </span>
-                                                  )}
-                                                  <span className="admin-eval-choix-enonce">
-                                                    <RichText text={q.apercu ?? ''} />
-                                                  </span>
-                                                  {ligne.type === 'demonstration' && (
-                                                    <span className="admin-eval-choix-longueur">
-                                                      Corrigé : {q.corrige.length} étape{q.corrige.length > 1 ? 's' : ''}
-                                                    </span>
-                                                  )}
-                                                </span>
-                                                {!estExercice && choix.includes(q.id ?? '') && (
-                                                  <span className="admin-eval-choix-points">
-                                                    <ChampPoints
-                                                      valeur={() => pointsUnite(ligne, `choix:${q.id ?? ''}`)}
-                                                      verrouille={ligne.modePoints?.[`choix:${q.id ?? ''}`] === 'verrouille'}
-                                                      ajuste={ligne.modePoints?.[`choix:${q.id ?? ''}`] === 'ajuste'}
-                                                      libelle={`Points — ${q.titre ?? 'question'}`}
-                                                      onSaisie={(p) => saisirPoints(ligne, `choix:${q.id ?? ''}`, p)}
-                                                      onVerrou={(v) => basculerVerrouPoints(ligne, `choix:${q.id ?? ''}`, v)}
-                                                    />
-                                                    pt
-                                                  </span>
-                                                )}
-                                              </label>
-                                            ))}
-                                          </fieldset>
-                                        </td>
-                                      </tr>
-                                    ) : null
-                                  return [
-                                    <tr className="admin-eval-row" key={ligne.type + (ligne.cle ?? '')}>
-                                      <td>
-                                        {LABEL_TYPE[ligne.type]}
-                                        {theme?.label && ` — ${theme.label}`}
-                                        {banqueChoix && banqueChoix.length > 0 && (
-                                          <button
-                                            type="button"
-                                            className="admin-eval-choix-bouton"
-                                            aria-expanded={choixOuvert}
-                                            onClick={() =>
-                                              setChoixOuverts((prev) => {
-                                                const n = new Set(prev)
-                                                if (n.has(cleChoix)) n.delete(cleChoix)
-                                                else n.add(cleChoix)
-                                                return n
-                                              })
-                                            }
-                                          >
-                                            {choix.length > 0 ? `${choix.length} choisie${choix.length > 1 ? 's' : ''}` : 'Choisir'}
-                                          </button>
-                                        )}
-                                        {indisponible &&
-                                          (ligne.type === 'demonstration'
-                                            ? ' — aucune démonstration pour ce point'
-                                            : ligne.type === 'formule'
-                                              ? ' — aucune formule pour ce point'
-                                              : ' — aucune question pour ce point')}
-                                      </td>
-                                      <td>{estBanqueFixe ? disponibles : '—'}</td>
-                                      <td className="admin-eval-col-nombre">
-                                        <Stepper
-                                          valeur={choix.length > 0 ? choix.length : ligne.nombre}
-                                          max={disponibles}
-                                          disabled={indisponible || choix.length > 0}
-                                          onChange={(v) => mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, { nombre: v })}
-                                        />
-                                      </td>
-                                      {!estExercice && choix.length > 0 && (
-                                        <td className="admin-eval-points-somme" title="Points fixés question par question dans la liste « Choisir »">
-                                          {pointsLigne(ligne)} pt{pointsLigne(ligne) > 1 ? 's' : ''}
-                                        </td>
-                                      )}
-                                      {!estExercice && choix.length === 0 && (
-                                        <td>
-                                          <ChampPoints
-                                            valeur={() => pointsUnite(ligne, 'ligne', ligne.nombre > 0)}
-                                            verrouille={ligne.modePoints?.ligne === 'verrouille'}
-                                            ajuste={ligne.modePoints?.ligne === 'ajuste'}
-                                            disabled={indisponible}
-                                            libelle={`Points / question — ${LABEL_TYPE[ligne.type]}`}
-                                            onSaisie={(p) => saisirPoints(ligne, 'ligne', p)}
-                                            onVerrou={(v) => basculerVerrouPoints(ligne, 'ligne', v)}
-                                          />
-                                        </td>
-                                      )}
-                                    </tr>,
-                                    rangeeChoix,
-                                  ]
-                                })}
-                              </Fragment>
-                            )
-                          })}
-                        </Fragment>
-                      )
-                    })}
-                  </tbody>
-                </table>
+                        </div>
+                        <button type="button" className="conc-bouton conc-bouton-principal" disabled={notionsCochees.size === 0} onClick={() => appliquerFacon('notions')}>
+                          Proposer des exercices sur {notionsCochees.size > 1 ? `ces ${notionsCochees.size} notions` : 'cette notion'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {composition && (
+                  <p className="conc-composition" role="status">
+                    <span>{composition.texte}</span>
+                    <button
+                      type="button"
+                      className="admin-eval-lien-bouton"
+                      onClick={() => {
+                        setLignes(composition.avant)
+                        setComposition(null)
+                      }}
+                    >
+                      Annuler
+                    </button>
+                  </p>
+                )}
               </div>
-            )
-          })}
 
-          <div className="admin-eval-bottombar" ref={barreDuBas}>
-            {!estExercice && (
-              <div className="admin-eval-ajuster">
-                <span className="admin-eval-ajuster-ligne">
-                  <label htmlFor="eval-total-voulu">Total voulu</label>
-                  <input
-                    id="eval-total-voulu"
-                    type="text"
-                    autoComplete="off"
-                    className="admin-eval-points-input"
-                    value={totalVoulu}
-                    placeholder="20"
-                    disabled={estExamen && modeTotalExamen === 'fixe'}
-                    aria-describedby="eval-ajuster-aide"
-                    onChange={(e) => {
-                      setTotalVoulu(normaliserSigneMoins(e.target.value))
-                      setMessageAjustement(null)
-                    }}
-                  />
-                  <button type="button" className="admin-eval-lien-bouton admin-eval-ajuster-bouton" onClick={ajusterAuTotal} disabled={estExamen && modeTotalExamen === 'fixe'}>
-                    Ajuster au total
+              <div className="conc-filtres">
+                <label className="sr-only" htmlFor="conc-recherche">
+                  Chercher une notion ou un générateur
+                </label>
+                <input
+                  id="conc-recherche"
+                  ref={champRecherche}
+                  type="search"
+                  className="conc-recherche"
+                  placeholder="Notion ou générateur (ex. Chasles)"
+                  value={recherche}
+                  onChange={(e) => setRecherche(e.target.value)}
+                />
+                <div className="conc-processus" role="group" aria-label="Processus">
+                  {(['tout', 1, 2, 3] as const).map((p) => (
+                    <button key={p} type="button" className="conc-puce" aria-pressed={filtreProcessus === p} onClick={() => setFiltreProcessus(p)}>
+                      {p === 'tout' ? (
+                        'Tout'
+                      ) : (
+                        <>
+                          {pastille(p, true)}
+                          {LABEL_PROCESSUS[p]}
+                        </>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {chapitres.map((chapitreCourant) => {
+                const sectionsRendues = chapitreCourant.sections.map((s) => renduSection(chapitreCourant, s))
+                const vides = chapitreCourant.sections.filter((s) => !lignes.some((l) => l.chapitreSlug === chapitreCourant.slug && l.sectionId === s.id && ligneUtilisable(l)))
+                const aucune = sectionsRendues.every((x) => x === null)
+                return (
+                  <div className="conc-chapitre" key={chapitreCourant.slug}>
+                    {chapitres.length > 1 && (
+                      <h3 className="conc-chapitre-titre">
+                        {chapitreCourant.chapterNumber}. {chapitreCourant.title}
+                      </h3>
+                    )}
+                    {sectionsRendues}
+                    {aucune && <p className="conc-masque">{termes.length > 0 ? 'Aucune notion ni aucun générateur ne correspond à la recherche.' : 'Rien pour ce processus dans ce chapitre pour l’instant.'}</p>}
+                    {vides.length > 0 && termes.length === 0 && (
+                      <p className="conc-masque">Sans question pour l’instant : {vides.map((s) => `${s.number}. ${s.title}`).join(' · ')}.</p>
+                    )}
+                  </div>
+                )
+              })}
+              <p className="conc-masque">Les pastilles disent ce qu’on trouve dans chaque section : 1 Connaître, 2 Appliquer, 3 Transférer.</p>
+            </section>
+
+            {/* ---------- Ma feuille / Mon évaluation / Mon examen ---------- */}
+            <aside className="conc-panier" id="conc-panier" aria-label={nomPanier}>
+              <div className="conc-panier-tete">
+                <h2>{nomPanier}</h2>
+                <button type="button" className="conc-bouton conc-bouton-discret conc-panier-fermer" onClick={() => setPanneauMobile(false)}>
+                  Fermer
+                </button>
+              </div>
+              <div className="conc-chiffres">
+                <div>
+                  <b>{nombreImprime}</b>
+                  <span>
+                    {unite}
+                    {nombreImprime > 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div>
+                  <b>{totalNombre > 0 ? `≈ ${dureeEstimee}` : '—'}</b>
+                  <span>minutes</span>
+                </div>
+                {textePlage && (
+                  <div>
+                    <b>{textePlage}</b>
+                    <span>niveaux</span>
+                  </div>
+                )}
+                {!estExercice && (
+                  <div>
+                    <b>{nombreFrPanneau(totalAffiche)}</b>
+                    <span>points</span>
+                  </div>
+                )}
+              </div>
+
+              {estExercice ? (
+                nombreImprime > 0 && (
+                  <div className="conc-jauge-bloc">
+                    <div className="conc-barre" aria-hidden="true">
+                      {([1, 2, 3] as const).map((p) => questionsParProcessus[p - 1] > 0 && <span key={p} className={`conc-barre-p${p}`} style={{ flex: questionsParProcessus[p - 1] }} />)}
+                    </div>
+                    <p className="conc-legende">
+                      {([1, 2, 3] as const).map((p) => (
+                        <span key={p} className={`conc-legende-p${p}`}>
+                          ● {LABEL_PROCESSUS[p]} {questionsParProcessus[p - 1]}
+                        </span>
+                      ))}
+                    </p>
+                  </div>
+                )
+              ) : (
+                <>
+                  {totalNombre > 0 && (
+                    <div className="conc-jauge-bloc">
+                      <p className="conc-jauge-titre">
+                        <span>Durée estimée</span>
+                        <b>
+                          ≈ {dureeEstimee}
+                          {dureeReference ? ` / ${dureeReference}` : ''} min
+                        </b>
+                      </p>
+                      {dureeReference && (
+                        <div className="conc-jauge" aria-hidden="true">
+                          <span className={dureeEstimee > dureeReference ? 'conc-jauge-trop' : ''} style={{ width: `${Math.min(100, pct(dureeEstimee, dureeReference))}%` }} />
+                        </div>
+                      )}
+                      {dureeReference && (
+                        <p className="conc-legende">{estExamen ? 'Durée de l’examen saisie dans les options.' : 'Une période de 50 minutes.'}</p>
+                      )}
+                    </div>
+                  )}
+                  {totalNombre > 0 && (
+                    <div className="conc-jauge-bloc">
+                      <p className="conc-jauge-titre">
+                        <span>{estExamen && modeTotalExamen === 'fixe' && totalExamen !== totalPoints ? 'Points des questions (avant mise à l’échelle)' : 'Points par processus'}</span>
+                        <b>{nombreFrPanneau(totalPoints)} pts</b>
+                      </p>
+                      <div className="conc-barre" aria-hidden="true">
+                        {([1, 2, 3] as const).map((p) => pointsParProcessus[p - 1] > 0 && <span key={p} className={`conc-barre-p${p}`} style={{ flex: pointsParProcessus[p - 1] }} />)}
+                      </div>
+                      <p className="conc-legende">
+                        {([1, 2, 3] as const).map((p) => (
+                          <span key={p} className={`conc-legende-p${p}`}>
+                            ● {LABEL_PROCESSUS[p]} : {nombreFrPanneau(pointsParProcessus[p - 1])} pt{pointsParProcessus[p - 1] > 1 ? 's' : ''} ({pct(pointsParProcessus[p - 1], totalPoints)} %)
+                            {dureesParProcessus[p - 1] > 0 && ` · ≈ ${Math.max(1, Math.round(dureesParProcessus[p - 1]))} min`}
+                          </span>
+                        ))}
+                      </p>
+                    </div>
+                  )}
+                  <div className="admin-eval-ajuster conc-ajuster">
+                    {!(estExamen && modeTotalExamen === 'fixe') && (
+                      <span className="admin-eval-ajuster-ligne">
+                        <label htmlFor="eval-total-voulu">Total voulu</label>
+                        <input
+                          id="eval-total-voulu"
+                          type="text"
+                          autoComplete="off"
+                          className="admin-eval-points-input"
+                          value={totalVoulu}
+                          placeholder="20"
+                          disabled={estExamen && modeTotalExamen === 'fixe'}
+                          aria-describedby="eval-ajuster-aide"
+                          onChange={(e) => {
+                            setTotalVoulu(normaliserSigneMoins(e.target.value))
+                            setMessageAjustement(null)
+                          }}
+                        />
+                        <button type="button" className="conc-bouton" onClick={ajusterAuTotal} disabled={estExamen && modeTotalExamen === 'fixe'}>
+                          Ajuster au total{lireTotal(normaliserSigneMoins(totalVoulu)).etat === 'ok' ? ` (${totalVoulu} pts)` : ''}
+                        </button>
+                      </span>
+                    )}
+                    <span id="eval-ajuster-aide" className={`admin-eval-aide${messageAjustement?.erreur ? ' admin-eval-aide-erreur' : ''}`} role={messageAjustement?.erreur ? 'alert' : 'status'}>
+                      {estExamen && modeTotalExamen === 'fixe'
+                        ? 'Total fixé par partie : les points sont déjà mis à l’échelle partie par partie à l’impression.'
+                        : (messageAjustement?.texte ?? 'Questions non verrouillées mises à l’échelle (demi-points) ; cadenas fermé = points gardés.')}
+                    </span>
+                  </div>
+                  {estExamen && partiesPanneau.length > 0 && (
+                    <div className="conc-jauge-bloc">
+                      <p className="conc-jauge-titre">
+                        <span>Parties ({organisationExamen === 'chapitre' ? 'par chapitre' : 'par processus'})</span>
+                        <b>{nombreFrPanneau(totalExamen)} pts</b>
+                      </p>
+                      <ul className="conc-parties">
+                        {partiesPanneau.map((p) => (
+                          <li key={p.cle}>
+                            <span className="conc-partie-nom">
+                              Partie {p.romain} · {p.titre}
+                            </span>
+                            <b>
+                              {nombreFrPanneau(p.total)} pts{p.valeurFixee !== null && p.total !== p.somme ? <span className="conc-partie-somme"> (questions : {nombreFrPanneau(p.somme)})</span> : null}
+                            </b>
+                            <span className="conc-jauge" aria-hidden="true">
+                              <span style={{ width: `${pct(p.total, totalExamen)}%` }} />
+                            </span>
+                            {p.message && (
+                              <span className="admin-eval-aide admin-eval-aide-erreur" role="alert">
+                                {p.message}
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {entrees.length === 0 ? (
+                <p className="conc-vide">Rien pour l’instant : choisis une façon de composer, ou des exercices dans le catalogue.</p>
+              ) : (
+                <ol className="conc-liste" aria-label="Questions, dans l’ordre d’impression">
+                  {entrees.map((e) => {
+                    const { titre: t, detail } = titreEntree(e)
+                    const numero = estExercice ? `Ex. ${e.premier}${e.dernier > e.premier ? `–${e.dernier}` : ''}` : `Q${e.premier}${e.dernier > e.premier ? `–${e.dernier}` : ''}`
+                    return (
+                      <Fragment key={e.cle}>
+                        {e.partie && (
+                          <li className="conc-liste-partie" aria-hidden="true">
+                            Partie {e.partie.romain} · {e.partie.titre}
+                          </li>
+                        )}
+                        <li className="conc-liste-item">
+                          {pastille(e.processus)}
+                          <span className="conc-liste-texte">
+                            <b>{numero}</b> · {t}
+                            {detail && <span className="conc-niv">{detail}</span>}
+                          </span>
+                          {!estExercice && <span className="conc-liste-points">{nombreFrPanneau(e.points)}</span>}
+                          <button type="button" className="conc-retirer" aria-label={`Retirer ${estExercice ? "l'exercice" : 'la question'} ${e.premier} (${t})`} title="Retirer" onClick={() => retirerEntree(e)}>
+                            ×
+                          </button>
+                        </li>
+                      </Fragment>
+                    )
+                  })}
+                </ol>
+              )}
+
+              <div className="conc-options-resume">
+                <p>
+                  <b>{estExercice ? 'Options' : 'Documents'} :</b> {resumeOptions.join(' · ')}
+                  {!estExercice && lignesConsignes > 0 && (
+                    <>
+                      <br />
+                      <b>Consignes en plus :</b> {lignesConsignes} ligne{lignesConsignes > 1 ? 's' : ''}
+                    </>
+                  )}
+                  {estExamen && (
+                    <>
+                      <br />
+                      <b>Examen :</b> parties {organisationExamen === 'chapitre' ? 'par chapitre' : 'par processus'} · total {modeTotalExamen === 'fixe' ? 'fixé par partie' : 'libre'}
+                      {apercuHoraire.horaire ? ` · ${apercuHoraire.horaire}` : apercuHoraire.duree ? ` · ${apercuHoraire.duree}` : ''}
+                    </>
+                  )}
+                </p>
+                <button type="button" className="conc-lien" aria-expanded={optionsOuvertes} aria-controls="conc-options" onClick={() => setOptionsOuvertes((v) => !v)}>
+                  {optionsOuvertes ? 'Fermer les options' : 'Modifier'}
+                </button>
+              </div>
+              {optionsOuvertes && blocOptions}
+
+              {!estExercice && nombreSeries > 1 && (
+                <p className="conc-note">
+                  {nombreSeries} versions anti-triche (A à {String.fromCharCode(64 + nombreSeries)}) — mêmes questions, exercices, vrai/faux et questions ouvertes indépendamment randomisés par série
+                  quand c'est possible.
+                </p>
+              )}
+              <div className="conc-actions">
+                <button type="button" className="conc-bouton conc-bouton-principal conc-generer" onClick={genererEvaluation} disabled={genereEnCours}>
+                  {libelleGenerer}
+                </button>
+                <span className="conc-actions-secondaires">
+                  <button type="button" className="conc-bouton" onClick={() => void lancerApercu()} disabled={genereEnCours || totalNombre === 0}>
+                    Aperçu
+                  </button>
+                  <button
+                    type="button"
+                    className="conc-bouton"
+                    onClick={enregistrerPlanCourant}
+                    disabled={!planCourant}
+                    title={planCourant ? 'Enregistre le dernier tirage (mêmes exercices au rechargement)' : 'Génère la feuille (ou garde un aperçu) d’abord : on enregistre un tirage précis.'}
+                  >
+                    {connecte ? 'Enregistrer dans le coffre' : 'Enregistrer dans ce navigateur'}
                   </button>
                 </span>
-                <span
-                  id="eval-ajuster-aide"
-                  className={`admin-eval-aide${messageAjustement?.erreur ? ' admin-eval-aide-erreur' : ''}`}
-                  role={messageAjustement?.erreur ? 'alert' : 'status'}
-                >
-                  {estExamen && modeTotalExamen === 'fixe'
-                    ? 'Total fixé par partie : les points sont déjà mis à l’échelle partie par partie à l’impression.'
-                    : (messageAjustement?.texte ?? 'Questions non verrouillées mises à l’échelle (demi-points) ; cadenas fermé = points gardés.')}
-                </span>
+                {erreur && <p className="admin-gate-error">{erreur}</p>}
+                {urlGeneree && (
+                  <p className="admin-eval-lien">
+                    Ouvert dans un nouvel onglet.{' '}
+                    <a href={urlGeneree} target="_blank" rel="noopener noreferrer">
+                      Rouvrir le lien
+                    </a>
+                    .
+                  </p>
+                )}
+                {message && <p className="admin-eval-lien">{message}</p>}
               </div>
-            )}
-            {!estExercice && (
-              <p className="admin-eval-total">
-                {estExamen ? "Total de l'examen" : 'Total'} : {nombreFrPanneau(totalAffiche)} point{totalAffiche > 1 ? 's' : ''}
-              </p>
-            )}
-            <button type="button" className="admin-gate-submit" onClick={genererEvaluation} disabled={genereEnCours}>
-              {genereEnCours
-                ? 'Génération en cours…'
-                : estExercice
-                  ? 'Générer la feuille d’exercices'
-                  : nombreSeries > 1
-                    ? `Générer les ${nombreSeries} séries`
-                    : estExamen
-                      ? "Générer l'examen"
-                      : "Générer l'évaluation"}
+            </aside>
+          </div>
+
+          {/* Téléphone : barre fixée en bas, qui ouvre le panneau. */}
+          <div className="conc-barre-mobile">
+            <button type="button" className="conc-barre-ouvrir" aria-expanded={panneauMobile} aria-controls="conc-panier" onClick={() => setPanneauMobile((v) => !v)}>
+              <span className="conc-barre-titre">
+                {nomPanier} · {nombreImprime} {unite}
+                {nombreImprime > 1 ? 's' : ''} <span aria-hidden="true">{panneauMobile ? '▾' : '▴'}</span>
+              </span>
+              <span className="conc-barre-detail">
+                {totalNombre > 0 ? `≈ ${dureeEstimee} min` : 'rien de choisi'}
+                {textePlage ? ` · niveaux ${textePlage.replace('–', ' à ')}` : ''}
+                {!estExercice && totalNombre > 0 ? ` · ${nombreFrPanneau(totalAffiche)} pts` : ''}
+              </span>
+            </button>
+            <button type="button" className="conc-bouton conc-bouton-principal" onClick={genererEvaluation} disabled={genereEnCours}>
+              {genereEnCours ? '…' : 'Générer'}
             </button>
           </div>
-          {erreur && <p className="admin-gate-error">{erreur}</p>}
-          {urlGeneree && (
-            <p className="admin-eval-lien">
-              Ouvert dans un nouvel onglet.{' '}
-              <a href={urlGeneree} target="_blank" rel="noopener noreferrer">
-                Rouvrir le lien
-              </a>
-              .
-            </p>
-          )}
-          {message && <p className="admin-eval-lien">{message}</p>}
+          {panneauMobile && <div className="conc-voile" onClick={() => setPanneauMobile(false)} aria-hidden="true" />}
+
           {planCourant && documents.length > 0 && genereLocalementCompte !== null && (
             <div className="admin-eval-documents" ref={blocDocuments}>
               <h3>{planCourant.remediation ? planCourant.entete.titre : 'Documents générés'}</h3>
@@ -2156,141 +2665,150 @@ export function EvaluationGeneratorPanel({
               )}
             </div>
           )}
-
-          <details className="admin-eval-enregistrees">
-            <summary>
-              Enregistrements, import et historique ({listeEnregistrements.length} enregistrement{listeEnregistrements.length > 1 ? 's' : ''}
-              {connecte ? ' dans ton coffre' : ''})
-            </summary>
-            {connecte && locauxAImporter.length > 0 && (
-              <p className="admin-eval-documents-pied">
-                <button type="button" onClick={() => void importerLocaux()}>
-                  Importer dans mon coffre les {locauxAImporter.length} enregistrement{locauxAImporter.length > 1 ? 's' : ''} de ce navigateur
-                </button>
-              </p>
-            )}
-            {listeEnregistrements.length > 0 ? (
-              <ul>
-                {listeEnregistrements.map((e) => (
-                  <li key={e.id} className={remediationId === e.id ? 'admin-eval-enregistree-ouverte' : undefined}>
-                    <span>
-                      {e.nom}{' '}
-                      <span className="admin-eval-variante-label">
-                        — {new Date(e.enregistreLe).toLocaleDateString('fr-BE')}
-                        {e.plan.remediation ? ' · remédiation' : e.plan.series.length > 1 ? ` · séries ${e.plan.series.map((s) => s.lettre).join(', ')}` : ''}
-                      </span>
-                    </span>
-                    <span className="admin-eval-documents-actions">
-                      <button type="button" onClick={() => chargerPlan(e.plan)}>
-                        Recharger (mêmes exercices)
-                      </button>
-                      {!e.plan.remediation && (
-                        <button
-                          type="button"
-                          className={remediationId === e.id ? 'admin-eval-bouton-actif' : undefined}
-                          aria-expanded={remediationId === e.id}
-                          onClick={() => ouvrirRemediation(e)}
-                        >
-                          Feuille de remédiation
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!connecte || window.confirm(`Supprimer « ${e.nom} » de ton coffre ?`)) void supprimerEnregistrement(e.id)
-                        }}
-                      >
-                        Supprimer
-                      </button>
-                    </span>
-                    {remediationId === e.id && (
-                      <div className="admin-eval-remediation">
-                        <h4>Feuille de remédiation — {titreRemediation(e)}</h4>
-                        <p className="admin-eval-variante-label">
-                          Coche les questions à retravailler (numéros de la copie de la série A) : chaque exercice revient avec d'autres nombres, même type et mêmes réglages ; le corrigé est en fin de feuille et un QR code renvoie au générateur avec les aides.
-                        </p>
-                        <fieldset className="admin-eval-choix">
-                          <legend>Questions de l'évaluation</legend>
-                          {questionsRemediables(e.plan).map((q) => (
-                            <label className="admin-eval-choix-item" key={q.numero}>
-                              <input
-                                type="checkbox"
-                                checked={remediationCochees.has(q.numero)}
-                                onChange={(ev) => {
-                                  const suivant = new Set(remediationCochees)
-                                  if (ev.target.checked) suivant.add(q.numero)
-                                  else suivant.delete(q.numero)
-                                  setRemediationCochees(suivant)
-                                }}
-                              />
-                              <span className="admin-eval-choix-texte">
-                                <span className="admin-eval-choix-titre">
-                                  Question {q.numero} — <RichText text={q.titre} /> ({q.nomProcessus})
-                                </span>
-                                <span className="admin-eval-choix-enonce">
-                                  <RichText text={q.detail} />
-                                </span>
-                                {q.memeQuestion && <span className="admin-eval-choix-longueur">Même question reprise une fois (pas d'autre tirage possible)</span>}
-                              </span>
-                            </label>
-                          ))}
-                        </fieldset>
-                        <div className="admin-eval-remediation-options">
-                          <span className="admin-eval-remediation-nombre">
-                            Exercices par question
-                            <Stepper valeur={remediationNombre} min={1} max={6} onChange={setRemediationNombre} />
-                          </span>
-                          <label>
-                            <input type="checkbox" checked={remediationAmenagee} onChange={(ev) => setRemediationAmenagee(ev.target.checked)} /> Version aménagée en plus
-                          </label>
-                        </div>
-                        <button type="button" className="admin-gate-submit" disabled={genereEnCours || remediationCochees.size === 0} onClick={() => void creerRemediation(e)}>
-                          {genereEnCours ? 'Création en cours…' : 'Créer la feuille'}
-                        </button>
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="admin-eval-variante-label">{connecte ? (coffre === null ? 'Chargement du coffre…' : 'Aucun enregistrement dans ton coffre.') : 'Aucun enregistrement dans ce navigateur.'}</p>
-            )}
-            <p className="admin-eval-documents-pied">
-              <button type="button" onClick={() => entreeImport.current?.click()}>
-                Importer une configuration (JSON)
-              </button>
-              <input
-                ref={entreeImport}
-                type="file"
-                accept="application/json,.json"
-                hidden
-                onChange={(e) => {
-                  const f = e.target.files?.[0]
-                  if (f) void importerPlanJson(f)
-                  e.target.value = ''
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  effacerHistorique()
-                  setNombreHistorique(0)
-                }}
-              >
-                Effacer l'historique ({nombreHistorique} exercice{nombreHistorique > 1 ? 's' : ''} déjà tiré{nombreHistorique > 1 ? 's' : ''})
-              </button>
-            </p>
-            <p className="admin-eval-variante-label">
-              L'historique évite de redonner un exercice déjà imprimé depuis ce navigateur : un tirage identique est automatiquement retiré.
-              {connecte && (
-                <>
-                  {' '}
-                  Gérer le coffre (renommer, dupliquer) : <Link to="/coffre">mon coffre</Link>.
-                </>
-              )}
-            </p>
-          </details>
         </>
+      )}
+
+      {/* Enregistrements, import et historique (avec la feuille de remédiation). */}
+      <details className="admin-eval-enregistrees">
+        <summary>
+          Enregistrements, import et historique ({listeEnregistrements.length} enregistrement{listeEnregistrements.length > 1 ? 's' : ''}
+          {connecte ? ' dans ton coffre' : ''})
+        </summary>
+        {connecte && locauxAImporter.length > 0 && (
+          <p className="admin-eval-documents-pied">
+            <button type="button" onClick={() => void importerLocaux()}>
+              Importer dans mon coffre les {locauxAImporter.length} enregistrement{locauxAImporter.length > 1 ? 's' : ''} de ce navigateur
+            </button>
+          </p>
+        )}
+        {listeEnregistrements.length > 0 ? (
+          <ul>
+            {listeEnregistrements.map((e) => (
+              <li key={e.id} className={remediationId === e.id ? 'admin-eval-enregistree-ouverte' : undefined}>
+                <span>
+                  {e.nom}{' '}
+                  <span className="admin-eval-variante-label">
+                    — {new Date(e.enregistreLe).toLocaleDateString('fr-BE')}
+                    {e.plan.remediation ? ' · remédiation' : e.plan.series.length > 1 ? ` · séries ${e.plan.series.map((s) => s.lettre).join(', ')}` : ''}
+                  </span>
+                </span>
+                <span className="admin-eval-documents-actions">
+                  <button type="button" onClick={() => chargerPlan(e.plan)}>
+                    Recharger (mêmes exercices)
+                  </button>
+                  {!e.plan.remediation && (
+                    <button type="button" className={remediationId === e.id ? 'admin-eval-bouton-actif' : undefined} aria-expanded={remediationId === e.id} onClick={() => ouvrirRemediation(e)}>
+                      Feuille de remédiation
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!connecte || window.confirm(`Supprimer « ${e.nom} » de ton coffre ?`)) void supprimerEnregistrement(e.id)
+                    }}
+                  >
+                    Supprimer
+                  </button>
+                </span>
+                {remediationId === e.id && (
+                  <div className="admin-eval-remediation">
+                    <h4>Feuille de remédiation — {titreRemediation(e)}</h4>
+                    <p className="admin-eval-variante-label">
+                      Coche les questions à retravailler (numéros de la copie de la série A) : chaque exercice revient avec d'autres nombres, même type et mêmes réglages ; le corrigé est en fin
+                      de feuille et un QR code renvoie au générateur avec les aides.
+                    </p>
+                    <fieldset className="admin-eval-choix">
+                      <legend>Questions de l'évaluation</legend>
+                      {questionsRemediables(e.plan).map((q) => (
+                        <label className="admin-eval-choix-item" key={q.numero}>
+                          <input
+                            type="checkbox"
+                            checked={remediationCochees.has(q.numero)}
+                            onChange={(ev) => {
+                              const suivant = new Set(remediationCochees)
+                              if (ev.target.checked) suivant.add(q.numero)
+                              else suivant.delete(q.numero)
+                              setRemediationCochees(suivant)
+                            }}
+                          />
+                          <span className="admin-eval-choix-texte">
+                            <span className="admin-eval-choix-titre">
+                              Question {q.numero} — <RichText text={q.titre} /> ({q.nomProcessus})
+                            </span>
+                            <span className="admin-eval-choix-enonce">
+                              <RichText text={q.detail} />
+                            </span>
+                            {q.memeQuestion && <span className="admin-eval-choix-longueur">Même question reprise une fois (pas d'autre tirage possible)</span>}
+                          </span>
+                        </label>
+                      ))}
+                    </fieldset>
+                    <div className="admin-eval-remediation-options">
+                      <span className="admin-eval-remediation-nombre">
+                        Exercices par question
+                        <Stepper valeur={remediationNombre} min={1} max={6} nom="exercices par question" onChange={setRemediationNombre} />
+                      </span>
+                      <label>
+                        <input type="checkbox" checked={remediationAmenagee} onChange={(ev) => setRemediationAmenagee(ev.target.checked)} /> Version aménagée en plus
+                      </label>
+                    </div>
+                    <button type="button" className="admin-gate-submit" disabled={genereEnCours || remediationCochees.size === 0} onClick={() => void creerRemediation(e)}>
+                      {genereEnCours ? 'Création en cours…' : 'Créer la feuille'}
+                    </button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="admin-eval-variante-label">{connecte ? (coffre === null ? 'Chargement du coffre…' : 'Aucun enregistrement dans ton coffre.') : 'Aucun enregistrement dans ce navigateur.'}</p>
+        )}
+        <p className="admin-eval-documents-pied">
+          <button type="button" onClick={() => entreeImport.current?.click()}>
+            Importer une configuration (JSON)
+          </button>
+          <input
+            ref={entreeImport}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0]
+              if (f) void importerPlanJson(f)
+              e.target.value = ''
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              effacerHistorique()
+              setNombreHistorique(0)
+            }}
+          >
+            Effacer l'historique ({nombreHistorique} exercice{nombreHistorique > 1 ? 's' : ''} déjà tiré{nombreHistorique > 1 ? 's' : ''})
+          </button>
+        </p>
+        <p className="admin-eval-variante-label">
+          L'historique évite de redonner un exercice déjà imprimé depuis ce navigateur : un tirage identique est automatiquement retiré.
+          {connecte && (
+            <>
+              {' '}
+              Gérer le coffre (renommer, dupliquer) : <Link to="/coffre">mon coffre</Link>.
+            </>
+          )}
+        </p>
+      </details>
+
+      {apercu && (
+        <ApercuDocument
+          titre={titre || (estExercice ? "Feuille d'exercices" : estExamen ? 'Examen' : 'Évaluation')}
+          documents={apercu.docs}
+          enCours={apercu.enCours}
+          erreur={apercu.erreur}
+          onFermer={fermerApercu}
+          onAutreTirage={() => void lancerApercu()}
+          onGarder={garderApercu}
+        />
       )}
     </div>
   )
