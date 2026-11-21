@@ -1,7 +1,7 @@
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ComposantesLin, ExerciceOrthogonalite, ExerciceOrthogonaliteTriangle, ExerciceOrthogonaliteTriangleParametre, Reduction, Sommet } from "../../core/orthogonalite.types";
-import { formuleSubstitueeParametreLatex, formuleSubstitueeSommetTriangleParametreLatex } from "../../ui/formatOrthogonalite";
+import { facteursParametre, formuleSubstitueeParametreLatex, formuleSubstitueeSommetTriangleParametreLatex } from "../../ui/formatOrthogonalite";
 import { lignesDelta, rac } from "../../ui/corrigeSecondDegre1";
 import {
   COURS_ORTHOGONALITE,
@@ -93,14 +93,17 @@ function etapesTest(e: Extract<ExerciceOrthogonalite, { variante: "test" }>): Et
 function etapesParametre(e: Extract<ExerciceOrthogonalite, { variante: "parametre" }>): EtapeCorrection[] {
   const zero: Lin = { coefX: 0, constante: 0 };
   const cst = (t: number): Lin => ({ ...zero, constante: t });
-  const { lignes, reduit } = lignesCritereLin(formuleSubstitueeParametreLatex(e), [cst(e.v1.x), { coefX: 1, constante: 0 }], [cst(e.v1.y), cst(e.v2Connu)], "+", [texte("critère d'orthogonalité de "), latex(vec(e.v1Nom)), texte(" et "), latex(vec(e.v2Nom))]);
+  // Facteurs dans l'ordre d'écriture de l'écran (u puis v ; x en première ou seconde composante).
+  const { u, v } = facteursParametre(e);
+  const lin = (t: number | null): Lin => (t === null ? { coefX: 1, constante: 0 } : cst(t));
+  const { lignes, reduit } = lignesCritereLin(formuleSubstitueeParametreLatex(e), [lin(u[0]), lin(v[0])], [lin(u[1]), lin(v[1])], "+", [texte("critère d'orthogonalité de "), latex(vec("u")), texte(" et "), latex(vec("v"))]);
   const eq = `${polyLatex(reduit)}=0`;
-  const v2 = { x: e.solutionX, y: e.v2Connu };
+  const v2 = e.xEnSeconde ? { x: e.v2Connu, y: e.solutionX } : { x: e.solutionX, y: e.v2Connu };
   return [
     utilise("a", CRITERE),
     calcul("a", [...lignes, ligne(eq, "le critère doit être nul")]),
     resultat("a", [latex(eq)]),
-    piege("a", [texte("Le produit des premières composantes contient x : il reste un terme en x, le second produit est un nombre.")]),
+    piege("a", [texte(`Le produit des ${e.xEnSeconde ? "secondes" : "premières"} composantes contient x : il reste un terme en x, l'autre produit est un nombre.`)]),
     utilise("b", [texte("Équation du premier degré : on isole x (on retire le terme constant, puis on divise par le coefficient de x).")]),
     calcul("b", lignesPremierDegreNul(e.coefX, e.coefConst)),
     resultat("b", [latex(`x=${q(e.solutionX)}`)]),

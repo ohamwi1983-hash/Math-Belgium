@@ -2,13 +2,15 @@ import { useState } from "react";
 import type { ExerciceColinearPoints } from "../core/colinearite.types";
 import { evaluerConstructionVecteurs } from "../moteur/verificationColinearite";
 import type { ReponseConstructionVecteurs } from "../moteur/verificationColinearite";
-import { NIVEAU_AIDE_MAX_CONSTRUCTION_VECTEURS } from "../moteur/sessionColinearite";
-import { PLACEHOLDER_COMPOSANTE, consigneGlobaleColinearite, formatFormuleComposantesLatex, formatTermesEnoncePointsLatex } from "../ui/formatColinearite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { PLACEHOLDER_COMPOSANTE, consigneGlobaleColinearite, formatTermesEnoncePointsLatex } from "../ui/formatColinearite";
+import { lireNombreSaisi } from "../ui/lireNombre";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesConstructionColinearite, messageConstructionColinearite } from "../ui/retoursVecteurs2";
 import { Katex } from "./Katex";
+import { PiedVecteurs } from "./PiedVecteurs";
+import { useTentativeLisible } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -16,7 +18,6 @@ interface Props {
   exercice: ExerciceColinearPoints;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseConstructionVecteurs) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
@@ -42,7 +43,7 @@ interface Props {
  * (`formatTermesEnoncePointsLatex`, un fragment KaTeX par point) — jamais un unique `\quad`-joined,
  * qui ne retourne jamais à la ligne sur mobile étroit.
  */
-export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
@@ -50,17 +51,15 @@ export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtili
 
   const complet = [abX, abY, acX, acY].every((v) => v.trim() !== "");
 
+  // Règles communes (audit 4e ch. 6, lot B) : lecture tolérante (virgule, fraction), saisie
+  // illisible jamais transmise ; seuls les champs de la dernière réponse jugée sont marqués.
+  const lus = [abX, abY, acX, acY].map(lireNombreSaisi);
   function construireReponse(): ReponseConstructionVecteurs {
-    return {
-      abX: Number(abX.replace(",", ".")),
-      abY: Number(abY.replace(",", ".")),
-      acX: Number(acX.replace(",", ".")),
-      acY: Number(acY.replace(",", ".")),
-    };
+    return { abX: lus[0] ?? Number.NaN, abY: lus[1] ?? Number.NaN, acX: lus[2] ?? Number.NaN, acY: lus[3] ?? Number.NaN };
   }
-
-  const apresEchec = tentativesUtilisees > 0;
-  const evaluation = apresEchec ? evaluerConstructionVecteurs(exercice, construireReponse()) : null;
+  const saisie = useTentativeLisible<ReponseConstructionVecteurs>();
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
+  const evaluation = jugee !== null ? evaluerConstructionVecteurs(exercice, jugee) : null;
   const abXErronee = evaluation !== null && evaluation.abX !== "correct";
   const abYErronee = evaluation !== null && evaluation.abY !== "correct";
   const acXErronee = evaluation !== null && evaluation.acX !== "correct";
@@ -140,28 +139,20 @@ export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtili
         </div>
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <Katex expression={formatFormuleComposantesLatex(exercice.labelA, exercice.labelB)} block />
-        </div>
-      )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONSTRUCTION_VECTEURS} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(
-              tentativesUtilisees,
-              tentativesMax,
-              evaluation && Object.values(evaluation).includes("parse_error") ? "parse_error" : undefined,
-            )}
-          </p>
-        )}
-        </>
+        <PiedVecteurs
+          aides={aidesConstructionColinearite(exercice)}
+          onPremiereAide={onActiverAide}
+          complet={complet}
+          saisie={saisie}
+          reponse={construireReponse}
+          lisible={() => lus.every((v) => v !== null)}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_VECTEURS.composante}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => messageConstructionColinearite(exercice, r)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

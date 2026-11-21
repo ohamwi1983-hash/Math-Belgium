@@ -1,7 +1,7 @@
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
-import type { ExerciceIsocele, ExerciceNormeDistance, ExerciceParametreNorme, ExercicePythagore } from "../../core/normeDistance.types";
-import { formatEquationReduiteParametreNormeLatex } from "../../ui/formatNormeDistance";
+import type { ExerciceNatureTriangle, ExerciceNormeDistance, ExerciceParametreNorme, ExercicePythagore, ExerciceTriangleCotes } from "../../core/normeDistance.types";
+import { cibleParametreNormeLatex, formatEquationReduiteParametreNormeLatex, libelleNatureCotes } from "../../ui/formatNormeDistance";
 import {
   COURS_NORME,
   COURS_ORTHOGONALITE,
@@ -34,7 +34,7 @@ const PIEGE_CARRE: Fragments = [texte("Le carré d'une composante négative est 
 
 const norme = (nom: string) => `\\|${vec(nom)}\\|`;
 
-function etapesComposantesTriangle(e: ExerciceIsocele | ExercicePythagore): EtapeCorrection[] {
+function etapesComposantesTriangle(e: ExerciceTriangleCotes | ExercicePythagore): EtapeCorrection[] {
   const { labelA: A, labelB: B, labelC: C } = e;
   return [
     utilise("a", [texte("Les côtés du triangle sont portés par "), latex(vec(`${A}${B}`)), texte(", "), latex(vec(`${A}${C}`)), texte(" et "), latex(vec(`${B}${C}`)), texte(" ; composantes : extrémité − origine.")]),
@@ -44,7 +44,7 @@ function etapesComposantesTriangle(e: ExerciceIsocele | ExercicePythagore): Etap
   ];
 }
 
-function etapesLongueursTriangle(e: ExerciceIsocele | ExercicePythagore): EtapeCorrection[] {
+function etapesLongueursTriangle(e: ExerciceTriangleCotes | ExercicePythagore): EtapeCorrection[] {
   const { labelA: A, labelB: B, labelC: C } = e;
   return [
     utilise("b", [texte("La longueur d'un côté est la norme du vecteur qui le porte : "), latex("\\|\\vec{u}\\|=\\sqrt{x_u^2+y_u^2}"), texte(` ${COURS_NORME}.`)]),
@@ -56,7 +56,41 @@ function etapesLongueursTriangle(e: ExerciceIsocele | ExercicePythagore): EtapeC
   ];
 }
 
-function etapesIsocele(e: ExerciceIsocele): EtapeCorrection[] {
+/** Variante « nature d'un triangle » (lot C) : mêmes écrans a, b que « isocèle », puis l'égalité de
+ * longueurs ET la réciproque de Pythagore — rectangle isocèle quand les deux tests passent. */
+function etapesNature(e: ExerciceNatureTriangle): EtapeCorrection[] {
+  const { labelA: A, labelB: B, labelC: C, carreAB, carreAC, carreBC, nature, sommetDroit } = e;
+  const cotes = [
+    { n: `${A}${B}`, c: carreAB },
+    { n: `${A}${C}`, c: carreAC },
+    { n: `${B}${C}`, c: carreBC },
+  ];
+  const grand = cotes.reduce((m, x) => (x.c > m.c ? x : m));
+  const autres = cotes.filter((x) => x !== grand);
+  const somme = autres[0]!.c + autres[1]!.c;
+  const isocele = nature === "isocele" || nature === "rectangleIsocele";
+  const egaux = isocele ? (carreAB === carreAC ? [`${A}${B}`, `${A}${C}`] : carreAB === carreBC ? [`${A}${B}`, `${B}${C}`] : [`${A}${C}`, `${B}${C}`]) : null;
+  const nomSommet = sommetDroit === "A" ? A : sommetDroit === "B" ? B : sommetDroit === "C" ? C : null;
+  const conclusion = `Le triangle ${A}${B}${C} est ${libelleNatureCotes(nature).toLowerCase()}`;
+  const precisions = [egaux ? `deux côtés de même longueur ([${egaux[0]}] et [${egaux[1]}])` : null, nomSommet ? `un angle droit en ${nomSommet}` : null].filter(Boolean);
+  return [
+    ...etapesComposantesTriangle(e),
+    ...etapesLongueursTriangle(e),
+    utilise("c", [
+      texte("Isocèle : deux côtés de même longueur. Rectangle : réciproque du théorème de Pythagore — le carré du plus grand côté est égal à la somme des carrés des deux autres. Les deux à la fois : rectangle isocèle ; aucun des deux : quelconque "),
+      texte(`${COURS_NORME}.`),
+    ]),
+    calcul("c", [
+      ligne(`${norme(`${A}${B}`)}^2=${q(carreAB)},\\ ${norme(`${A}${C}`)}^2=${q(carreAC)},\\ ${norme(`${B}${C}`)}^2=${q(carreBC)}`, isocele ? "deux carrés égaux : deux côtés de même longueur" : "trois carrés différents"),
+      ligne(`${norme(autres[0]!.n)}^2+${norme(autres[1]!.n)}^2=${q(autres[0]!.c)}+${q(autres[1]!.c)}=${q(somme)}`, "les deux plus petits côtés"),
+      ligne(`${q(somme)}${somme === grand.c ? "=" : "\\neq "}${q(grand.c)}=${norme(grand.n)}^2`, somme === grand.c ? "égalité de Pythagore vérifiée" : "égalité de Pythagore non vérifiée"),
+    ]),
+    resultat("c", [texte(precisions.length ? `${conclusion} : ${precisions.join(" et ")}.` : `${conclusion} : trois longueurs différentes et pas d'angle droit.`)]),
+    piege("c", [texte("Un triangle peut être à la fois isocèle et rectangle : on fait les deux tests, sans s'arrêter au premier qui réussit.")]),
+  ];
+}
+
+function etapesIsocele(e: Extract<ExerciceTriangleCotes, { variante: "isocele" }>): EtapeCorrection[] {
   const { labelA: A, labelB: B, labelC: C, carreAB, carreAC, carreBC, classification } = e;
   const cmp = (n1: string, c1: number, n2_: string, c2: number) => ligne(`${norme(n1)}${c1 === c2 ? "=" : "\\neq "}${norme(n2_)}`, c1 === c2 ? "même longueur" : "longueurs différentes");
   const sommet = classification === "isoceleA" ? A : classification === "isoceleB" ? B : classification === "isoceleC" ? C : null;
@@ -93,7 +127,7 @@ function etapesParametre(e: ExerciceParametreNorme): EtapeCorrection[] {
     ligne(`\\|\\vec{v}\\|^2=${binome(p)}^2+${binome(r)}^2`, "norme au carré : somme des carrés des composantes"),
     ligne(`=${developpe}`, [latex("(x-a)^2=x^2-2ax+a^2")]),
     ligne(`=${polyLatex(somme)}`, "on réduit"),
-    ligne(`${polyLatex(somme)}=${q(N)}`, [texte("car "), latex(`\\|\\vec{v}\\|^2=\\left(${racineL(N)}\\right)^2=${q(N)}`)]),
+    ligne(`${polyLatex(somme)}=${q(N)}`, [texte("car "), latex(`\\|\\vec{v}\\|^2=\\left(${cibleParametreNormeLatex(N)}\\right)^2=${q(N)}`)]),
     ligne(equation, `on soustrait ${nT(N)} aux deux membres`),
   ]);
   const qpB = qp(b);
@@ -116,12 +150,12 @@ function etapesParametre(e: ExerciceParametreNorme): EtapeCorrection[] {
   const verif: EtapeCorrection[] = solutions.length
     ? [
         verification("b", [texte("Pour "), latex(`x=${q(solutions[0])}`), texte(", "), latex(`\\vec{v}=${col({ x: solutions[0] - p, y: solutions[0] - r })}`), texte(" : ")], [
-          ligne(`${carre(solutions[0] - p)}+${carre(solutions[0] - r)}=${q(N)}`, [texte("somme des carrés des composantes : on retrouve "), latex(`\\left(${racineL(N)}\\right)^2`)]),
+          ligne(`${carre(solutions[0] - p)}+${carre(solutions[0] - r)}=${q(N)}`, [texte("somme des carrés des composantes : on retrouve "), latex(`\\left(${cibleParametreNormeLatex(N)}\\right)^2`)]),
         ]),
       ]
     : [];
   return [
-    utilise("a", [texte("Une norme est positive : "), latex(`\\|\\vec{v}\\|=${racineL(N)}`), texte(" équivaut à "), latex(`\\|\\vec{v}\\|^2=${q(N)}`), texte(` ; on développe chaque carré ${COURS_NORME}.`)]),
+    utilise("a", [texte("Une norme est positive : "), latex(`\\|\\vec{v}\\|=${cibleParametreNormeLatex(N)}`), texte(" équivaut à "), latex(`\\|\\vec{v}\\|^2=${q(N)}`), texte(` ; on développe chaque carré ${COURS_NORME}.`)]),
     calcul("a", lignesA),
     resultat("a", [latex(equation)]),
     piege("a", [texte("Le carré d'un binôme a trois termes : "), latex("(x-a)^2=x^2-2ax+a^2"), texte(" ; oublier le double produit fausse toute la suite.")]),
@@ -183,5 +217,6 @@ export function correctionDetailleeNormeDistance(e: ExerciceNormeDistance): Etap
   }
   if (e.variante === "isocele") return finaliserCorrigeVecteurs(etapesIsocele(e));
   if (e.variante === "parametre") return finaliserCorrigeVecteurs(etapesParametre(e));
+  if (e.variante === "natureTriangle") return finaliserCorrigeVecteurs(etapesNature(e));
   return finaliserCorrigeVecteurs(etapesPythagore(e));
 }

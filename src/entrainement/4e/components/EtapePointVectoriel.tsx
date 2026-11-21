@@ -9,9 +9,10 @@ import {
   formatTermesDonneesConnuesLatex,
   valeursGraphePointVectoriel,
 } from "../ui/formatPointVectoriel";
-import { diagnostiquerCoordonnees, diagnostiquerX, diagnostiquerY } from "../moteur/verificationPointVectoriel";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { diagnostiquerX, diagnostiquerY } from "../moteur/verificationPointVectoriel";
+import { lireNombreSaisi } from "../ui/lireNombre";
+import { ILLISIBLE_VECTEURS, aidesPointVectoriel, messagePointVectoriel } from "../ui/retoursVecteurs";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
@@ -31,22 +32,26 @@ interface Props {
  * Unique écran de l'exercice : bloc énoncé fixe (points/vecteurs connus, en texte et sur le
  * graphe — jamais le point cherché, voir `valeursGraphePointVectoriel`), consigne, puis les 2
  * champs numériques (x,y) soumis ensemble en un seul essai.
+ *
+ * Règles communes (audit 4e ch. 6, lot B) : une saisie illisible n'est jamais transmise au moteur
+ * (aucune tentative), message ciblé sur l'erreur trahie par la réponse fausse, aides à deux
+ * niveaux (`ui/retoursVecteurs.ts`).
  */
-export function EtapePointVectoriel({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapePointVectoriel({ exercice, tentativesUtilisees, tentativesMax, onValider, validation }: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
+  const saisie = useTentativeLisible<{ x: number; y: number }>();
 
-  // Entier, décimal (point ou virgule) ou fraction p/q (« 1/2 ») ; NaN si illisible → parse_error.
-  const x = parserNombreOuFraction(texteX) ?? Number.NaN;
-  const y = parserNombreOuFraction(texteY) ?? Number.NaN;
+  const lx = lireNombreSaisi(texteX);
+  const ly = lireNombreSaisi(texteY);
   const complet = texteX.trim() !== "" && texteY.trim() !== "";
-  const statut = complet && tentativesUtilisees > 0 ? diagnostiquerCoordonnees(exercice, x, y) : undefined;
   const { points, vecteurs } = valeursGraphePointVectoriel(exercice);
   const consigne = consignePointVectoriel(exercice);
 
-  const apresEchec = tentativesUtilisees > 0;
-  const xErronee = apresEchec && diagnostiquerX(exercice, x) !== "correct";
-  const yErronee = apresEchec && diagnostiquerY(exercice, y) !== "correct";
+  // Champ fautif marqué seulement sur la dernière réponse réellement jugée.
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
+  const xErronee = jugee !== null && diagnostiquerX(exercice, jugee.x) !== "correct";
+  const yErronee = jugee !== null && diagnostiquerY(exercice, jugee.y) !== "correct";
 
   return (
     <div>
@@ -71,6 +76,7 @@ export function EtapePointVectoriel({ exercice, tentativesUtilisees, tentativesM
             id="point-vectoriel-x"
             className={`text-input${xErronee ? " is-erronee" : ""}`}
             value={texteX}
+            disabled={!!validation}
             onChange={(e) => setTexteX(normaliserSigneMoins(e.target.value))}
           />
         </div>
@@ -82,22 +88,30 @@ export function EtapePointVectoriel({ exercice, tentativesUtilisees, tentativesM
             id="point-vectoriel-y"
             className={`text-input${yErronee ? " is-erronee" : ""}`}
             value={texteY}
+            disabled={!!validation}
             onChange={(e) => setTexteY(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>
-      {statut === "parse_error" && <p className="alert-error">{formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")}</p>}
 
       {!validation && (
         <>
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ x, y })}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && statut !== "parse_error" && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+          <AidesNiveaux aides={aidesPointVectoriel(exercice)} />
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={!complet}
+            onClick={() => saisie.tenter({ x: lx ?? Number.NaN, y: ly ?? Number.NaN }, lx !== null && ly !== null, onValider)}
+          >
+            Valider
+          </button>
+          <MessageRetour
+            illisible={saisie.illisible}
+            texteIllisible={ILLISIBLE_VECTEURS.coordonnee}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cible={saisie.soumise !== null ? messagePointVectoriel(exercice, saisie.soumise) : null}
+          />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

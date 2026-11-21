@@ -21,10 +21,14 @@ export function duree(e: ExerciceTraverserRiviere): number {
   return e.largeur / vitesseReelle(e).y;
 }
 
-/** Abscisse du point d'accostage A(x_A ; L) (m) : x(v_R) · t. */
+/** Abscisse du point d'accostage A(x_A ; L) (m) : x(v_R) · t. Arrondi au millionième seulement
+ * (bruit des flottants) : l'ancien arrondi au dixième passait AVANT `estExacte`, qui voyait donc
+ * toujours un décimal court et faisait écrire « = » à l'écran (audit 4e ch. 6, lot C). Avec une
+ * durée entière (`choisirDuree`) et x(v_R) au dixième, x_A reste un dixième exact : instances
+ * inchangées. */
 export function abscisseAccostage(e: ExerciceTraverserRiviere): number {
   if (e.variante === "enFace") return 0;
-  return arrondi(vitesseReelle(e).x * duree(e), 10);
+  return arrondi(vitesseReelle(e).x * duree(e), 1e6);
 }
 
 /** Vitesse réelle ‖v_R‖ (m/s). */

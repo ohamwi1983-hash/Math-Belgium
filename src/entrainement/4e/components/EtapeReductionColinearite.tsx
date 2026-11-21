@@ -1,20 +1,21 @@
 import { useState } from "react";
-import type { ExerciceColinearParametre } from "../core/colinearite.types";
+import type { ExerciceColinearParametre, ExerciceColinearParametreCarre, ExerciceColinearPointsParametre } from "../core/colinearite.types";
 import { diagnostiquerReductionAvecX } from "../moteur/verificationColinearite";
-import { NIVEAU_AIDE_MAX_REDUCTION } from "../moteur/sessionColinearite";
-import { CONSIGNE_REDUCTION_AVEC_X, LATEX_FORMULE_COLINEARITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_EQUATION_REDUITE, RAPPEL_VECTORIEL_COLINEARITE_APRES, RAPPEL_VECTORIEL_COLINEARITE_AVANT, RAPPEL_VECTORIEL_COLINEARITE_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_FIN, consigneGlobaleColinearite, formatEnonceLatex, formuleSubstitueeReductionLatex } from "../ui/formatColinearite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { CONSIGNE_REDUCTION_AVEC_X, PLACEHOLDER_EQUATION_REDUITE, consigneGlobaleColinearite, formatEnonceLatex, formatTermesEnoncePointsParametreLatex } from "../ui/formatColinearite";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesReductionColinearite, messageReductionColinearite, reductionColineariteLisible } from "../ui/retoursVecteurs2";
 import { Katex } from "./Katex";
+import { PiedVecteurs } from "./PiedVecteurs";
+import { useTentativeLisible } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
-  exercice: ExerciceColinearParametre;
+  exercice: ExerciceColinearParametre | ExerciceColinearParametreCarre | ExerciceColinearPointsParametre;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
@@ -24,34 +25,35 @@ interface Props {
 }
 
 /**
- * Écran "reduction" — V2-écran1 (variante "parametre") UNIQUEMENT. Depuis
- * `promptcorrectionsgenerateur24lot3.md`, point 2 : réécrit pour rejoindre exactement le patron déjà
- * en place pour "reductionAvecX" (V4, `EtapeReductionAvecXColinearite.tsx`) — consigne globale
- * persistante, bloc énoncé fixe (déjà présent via l'`equation-box`), aide nettoyée (formulation
- * vectorielle u/v seule, jamais la version générique (a;b)/(c;d) redondante), et surtout un seul
- * champ de saisie libre "Équation" attendant l'équation réduite complète, vérifiée symboliquement
- * (`diagnostiquerReductionAvecX`, réutilisée telle quelle — cette variante garantit désormais elle
- * aussi `typeSolution="unique"`, voir `generateurs/colinearite/index.ts`) — remplace les 2 anciens
- * champs séparés (coefficient de x / terme constant).
- *
- * Pas de bloc "État actuel" ici : "reduction" est toujours la première étape de cette variante, rien
- * n'a encore été confirmé (contrairement à "reductionAvecX", qui suit "constructionAvecX").
+ * Écran « relation réduite » de gen24 (« paramètre », « paramètre au carré », « alignement avec
+ * x ») : un seul champ libre, l'équation réduite complète (toute équation proportionnelle acceptée,
+ * `diagnostiquerFormeCanonique`). Règles communes (audit 4e ch. 6, lot B) : équation illisible sans
+ * tentative, message ciblé (orthogonalité confondue, somme au lieu de différence), aides à deux
+ * niveaux (critère, puis critère substitué).
  */
-export function EtapeReductionColinearite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeReductionColinearite({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
-
+  const saisie = useTentativeLisible<string>();
   const complet = texte.trim() !== "";
-  const statut = complet && tentativesUtilisees > 0 ? diagnostiquerReductionAvecX(exercice, texte) : undefined;
-  const consigneGlobale = consigneGlobaleColinearite(exercice);
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
+  const erronee = jugee !== null && diagnostiquerReductionAvecX(exercice, jugee) !== "correct";
 
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGlobale}
+        consigneGenerale={consigneGlobaleColinearite(exercice)}
         blocDonnees={
-          <div className="equation-box">
-            <Katex expression={formatEnonceLatex(exercice)} />
-          </div>
+          exercice.variante === "pointsParametre" ? (
+            <div className="equation-box equation-box-termes">
+              {formatTermesEnoncePointsParametreLatex(exercice).map((t, i) => (
+                <Katex key={i} expression={t} />
+              ))}
+            </div>
+          ) : (
+            <div className="equation-box">
+              <Katex expression={formatEnonceLatex(exercice)} />
+            </div>
+          )
         }
       />
       <p className="prompt-text">{CONSIGNE_REDUCTION_AVEC_X}</p>
@@ -60,41 +62,30 @@ export function EtapeReductionColinearite({ exercice, tentativesUtilisees, tenta
         <label className="field-label" htmlFor="colinearite-reduction-equation">
           Équation =
         </label>
-        <input disabled={!!validation}
+        <input
+          disabled={!!validation}
           id="colinearite-reduction-equation"
-          className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
+          className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_EQUATION_REDUITE}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            {RAPPEL_VECTORIEL_COLINEARITE_AVANT} <Katex expression={LATEX_VEC_U} /> {RAPPEL_VECTORIEL_COLINEARITE_ENTRE} <Katex expression={LATEX_VEC_V} />{" "}
-            {RAPPEL_VECTORIEL_COLINEARITE_APRES} <Katex expression={LATEX_FORMULE_COLINEARITE_VECTORIELLE} /> {RAPPEL_VECTORIEL_COLINEARITE_FIN}
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              Formule substituée : <Katex expression={formuleSubstitueeReductionLatex(exercice)} />
-            </p>
-          )}
-        </div>
-      )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_REDUCTION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedVecteurs
+          aides={aidesReductionColinearite(exercice)}
+          onPremiereAide={onActiverAide}
+          complet={complet}
+          saisie={saisie}
+          reponse={() => texte}
+          lisible={() => reductionColineariteLisible(exercice, texte)}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_VECTEURS.equationX}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(t) => messageReductionColinearite(exercice, t)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

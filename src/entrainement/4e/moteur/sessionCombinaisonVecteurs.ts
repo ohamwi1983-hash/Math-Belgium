@@ -10,7 +10,7 @@
  * "composantes" (`activerAideSuivante`), chacun un cran de plus que le précédent, jamais
  * accessible au-delà de son maximum ni hors de la phase à laquelle il appartient.
  */
-import type { GenerateurExerciceCombinaisonVecteurs } from "../core/combinaisonVecteurs.types";
+import type { ExerciceCombinaisonVecteurs, GenerateurExerciceCombinaisonVecteurs } from "../core/combinaisonVecteurs.types";
 import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
@@ -25,12 +25,13 @@ export function demarrerSessionCombinaisonVecteurs(
   reglages: ReglagesSession,
   generateur: GenerateurExerciceCombinaisonVecteurs,
 ): EtatSessionCombinaisonVecteurs {
+  const exerciceCourant = generateur();
   return {
     reglages,
     generateur,
     indexExercice: 0,
-    exerciceCourant: generateur(),
-    phase: "simplification",
+    exerciceCourant,
+    phase: phaseInitiale(exerciceCourant),
     etapeCourante: demarrerEtapeTentatives(),
     niveauAideSimplification: 0,
     niveauAideComposantes: 0,
@@ -39,6 +40,12 @@ export function demarrerSessionCombinaisonVecteurs(
     resultats: [],
     terminee: false,
   };
+}
+
+/** Variante « sans parenthèses » (lot C, audit 4e ch. 6, G6) : l'expression est déjà réduite —
+ * l'écran « réduction » n'était qu'une copie ; l'exercice commence aux composantes. */
+export function phaseInitiale(exercice: ExerciceCombinaisonVecteurs): "simplification" | "composantes" {
+  return exercice.variante === "plate" ? "composantes" : "simplification";
 }
 
 function reglagesEtape(etat: EtatSessionCombinaisonVecteurs): ReglagesEtape {
@@ -77,12 +84,13 @@ function cloturerExerciceOuSuivant(
     return { ...etat, resultats, indexExercice, terminee: true };
   }
 
+  const exerciceCourant = etat.generateur();
   return {
     ...etat,
     resultats,
     indexExercice,
-    exerciceCourant: etat.generateur(),
-    phase: "simplification",
+    exerciceCourant,
+    phase: phaseInitiale(exerciceCourant),
     etapeCourante: demarrerEtapeTentatives(),
     niveauAideSimplification: 0,
     niveauAideComposantes: 0,

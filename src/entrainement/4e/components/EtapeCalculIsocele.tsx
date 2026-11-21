@@ -1,21 +1,23 @@
 import { useState } from "react";
-import type { ExerciceIsocele } from "../core/normeDistance.types";
+import type { ExerciceTriangleCotes } from "../core/normeDistance.types";
 import { evaluerCalculIsocele } from "../moteur/verificationNormeDistance";
 import type { ReponseCalculIsocele } from "../moteur/verificationNormeDistance";
-import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { CONSIGNE_GENERALE_ISOCELE, PLACEHOLDER_LONGUEUR, formatAideNormeABNiveau1Latex, formatAideNormeABNiveau2Latex, formatLabelNormeLatex, formatTermesDonneesIsoceleLatex } from "../ui/formatNormeDistance";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { CONSIGNE_GENERALE_ISOCELE, PLACEHOLDER_LONGUEUR, formatLabelNormeLatex, formatTermesDonneesIsoceleLatex } from "../ui/formatNormeDistance";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesCalculTriangleCotes, lireValeurExacte, messageCalculTriangleCotes } from "../ui/retoursVecteurs3";
+import { lireExpressionNorme } from "../moteur/verificationNormeDistance";
+import { PiedVecteurs } from "./PiedVecteurs";
+import { useTentativeLisible } from "./RetourSaisie";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  exercice: ExerciceIsocele;
+  exercice: ExerciceTriangleCotes;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseCalculIsocele) => void;
   validation?: ValidationEtapeProps | null;
@@ -28,19 +30,24 @@ interface Props {
  * ($\|\vec{AB}\|=$, remplace l'ancien "AB="). Aide à 2 niveaux, limitée à $\vec{AB}$ —
  * `promptgen26refontecomplete.md`, Partie D.
  */
-export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [ab, setAb] = useState("");
   const [ac, setAc] = useState("");
   const [bc, setBc] = useState("");
   const complet = ab.trim() !== "" && ac.trim() !== "" && bc.trim() !== "";
-  const max = NIVEAU_AIDE_MAX.calculIsocele;
 
   function construireReponse(): ReponseCalculIsocele {
     return { ab, ac, bc };
   }
 
-  const apresEchec = tentativesUtilisees > 0;
-  const evaluation = apresEchec ? evaluerCalculIsocele(exercice, construireReponse()) : null;
+  // Règles communes (audit 4e ch. 6, lot B) : valeur illisible OU décimale approchée refusée sans
+  // tentative (on demande la valeur exacte) ; seuls les champs de la dernière réponse jugée sont marqués.
+  const cibles = [exercice.longueurAB, exercice.longueurAC, exercice.longueurBC];
+  const lectures = [ab, ac, bc].map((t, i) => lireValeurExacte(t, cibles[i]));
+  const approchee = lectures.some((l) => l.approchee);
+  const saisie = useTentativeLisible<ReponseCalculIsocele>();
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
+  const evaluation = jugee === null ? null : evaluerCalculIsocele(exercice, jugee);
 
   return (
     <div>
@@ -54,7 +61,7 @@ export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMa
           </div>
         }
       />
-      <p className="prompt-text">Calcule la longueur des 3 côtés du triangle.</p>
+      <p className="prompt-text">Calcule la longueur des 3 côtés du triangle (valeurs exactes, simplifiées).</p>
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="norme-distance-isocele-ab">
@@ -65,7 +72,7 @@ export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMa
           className={`text-input${evaluation !== null && evaluation.ab !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_LONGUEUR}
           value={ab}
-          onChange={(e) => setAb(e.target.value)}
+          onChange={(e) => setAb(normaliserSigneMoins(e.target.value))}
         />
       </div>
       <div className="field field-inline">
@@ -77,7 +84,7 @@ export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMa
           className={`text-input${evaluation !== null && evaluation.ac !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_LONGUEUR}
           value={ac}
-          onChange={(e) => setAc(e.target.value)}
+          onChange={(e) => setAc(normaliserSigneMoins(e.target.value))}
         />
       </div>
       <div className="field field-inline">
@@ -89,38 +96,24 @@ export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMa
           className={`text-input${evaluation !== null && evaluation.bc !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_LONGUEUR}
           value={bc}
-          onChange={(e) => setBc(e.target.value)}
+          onChange={(e) => setBc(normaliserSigneMoins(e.target.value))}
         />
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            Rappel (uniquement pour <Katex expression={`\\vec{${exercice.labelA}${exercice.labelB}}`} />) :{" "}
-            <Katex expression={formatAideNormeABNiveau1Latex(exercice.labelA, exercice.labelB)} />
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              Formule substituée : <Katex expression={formatAideNormeABNiveau2Latex(exercice.labelA, exercice.labelB, exercice.vecteurAB)} />
-            </p>
-          )}
-        </div>
-      )}
       {!validation && (
-        <>
-          {max > 0 && (
-            <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-          )}
-
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-            Valider
-          </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-            </p>
-          )}
-        </>
+        <PiedVecteurs
+          aides={aidesCalculTriangleCotes(exercice)}
+          onPremiereAide={onActiverAide}
+          complet={complet}
+          saisie={saisie}
+          reponse={construireReponse}
+          lisible={() => lectures.every((l) => l.valeur !== null && !l.approchee)}
+          onValider={onValider}
+          texteIllisible={approchee ? ILLISIBLE_VECTEURS.normeApprochee : ILLISIBLE_VECTEURS.norme}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => messageCalculTriangleCotes(exercice, [r.ab, r.ac, r.bc].map((t) => lireExpressionNorme(t) ?? Number.NaN))}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

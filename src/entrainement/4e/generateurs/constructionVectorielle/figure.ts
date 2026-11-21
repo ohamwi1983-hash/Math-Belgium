@@ -43,6 +43,12 @@ function construireEchelle(viewBox: ViewBoxTransformation): Echelle {
   };
 }
 
+/** Graduation lisible : vrai signe moins « − » (audit 4e ch. 6, G5 : « -2 » au tiret dans 98,8 % des
+ * figures), corps 10 au lieu de 8. */
+function graduation(v: number): string {
+  return formatNombreGraphique(v).replace(/^-/, "−");
+}
+
 /** Grille "nombre rond" (`calculerPasGrille`, même fonction que l'écran) + axes x=0/y=0 — géométrie
  * en attributs SVG inline, même patron que `triangleLies/exportEvaluation.ts::construireCroquisHtml`
  * (document HTML d'évaluation autonome, sans dépendance à `App.css`). */
@@ -59,14 +65,14 @@ function construireGrilleEtAxesHtml(viewBox: ViewBoxTransformation, echelle: Ech
     const px = echelle.sx(v);
     lignes.push(`<line x1="${px.toFixed(1)}" y1="${MARGE_PX}" x2="${px.toFixed(1)}" y2="${HAUTEUR_SVG - MARGE_PX}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
     if (Math.abs(v) > 1e-9) {
-      labels.push(`<text x="${px.toFixed(1)}" y="${(echelle.sy(0) + 11).toFixed(1)}" font-size="8" text-anchor="middle" fill="${COULEUR_AXE}">${formatNombreGraphique(v)}</text>`);
+      labels.push(`<text x="${px.toFixed(1)}" y="${(echelle.sy(0) + 12).toFixed(1)}" font-size="10" text-anchor="middle" fill="${COULEUR_AXE}">${graduation(v)}</text>`);
     }
   }
   for (let v = Math.ceil(yMin / pasY) * pasY; v <= yMax + 1e-9; v += pasY) {
     const py = echelle.sy(v);
     lignes.push(`<line x1="${MARGE_PX}" y1="${py.toFixed(1)}" x2="${LARGEUR_SVG - MARGE_PX}" y2="${py.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
     if (Math.abs(v) > 1e-9) {
-      labels.push(`<text x="${(echelle.sx(0) - 4).toFixed(1)}" y="${(py + 3).toFixed(1)}" font-size="8" text-anchor="end" fill="${COULEUR_AXE}">${formatNombreGraphique(v)}</text>`);
+      labels.push(`<text x="${(echelle.sx(0) - 4).toFixed(1)}" y="${(py + 3.5).toFixed(1)}" font-size="10" text-anchor="end" fill="${COULEUR_AXE}">${graduation(v)}</text>`);
     }
   }
 

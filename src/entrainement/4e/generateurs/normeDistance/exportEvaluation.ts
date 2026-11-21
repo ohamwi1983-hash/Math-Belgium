@@ -2,6 +2,7 @@ import type {
   ClassificationTriangleIsocele,
   ExerciceDistance,
   ExerciceIsocele,
+  ExerciceNatureTriangle,
   ExerciceNormeDistance,
   ExerciceNormeVecteur,
   ExerciceParametreNorme,
@@ -34,6 +35,7 @@ import {
   formatTermesEnonceParametreLatex,
   formatVecteurLatex,
   formuleSubstitueeNormeLatex,
+  libelleNatureCotes,
   segmentsConsigneParametre,
   segmentsConsigneVecteur,
 } from "../../ui/formatNormeDistance";
@@ -351,7 +353,7 @@ function construireEnoncePythagore(exercice: ExercicePythagore): SectionExercice
         ],
       },
       {
-        consigne: [texte("Calcule la longueur des 3 côtés du triangle (forme exacte ou décimale arrondie au centième).")],
+        consigne: [texte("Calcule la longueur des 3 côtés du triangle (valeurs exactes, simplifiées).")],
       },
       { consigne: [texte(CONSIGNE_GENERALE_PYTHAGORE)] },
     ],
@@ -395,11 +397,21 @@ function construireCorrectionPythagore(exercice: ExercicePythagore): BlocCorrect
 // Dispatch et adaptateur
 // ============================================================================
 
+const QUESTION_NATURE = "Quelle est la nature du triangle : quelconque, isocèle, rectangle ou rectangle isocèle ?";
+
+/** Variante « nature d'un triangle » (lot C) : mêmes écrans vecteurs et longueurs que « isocèle »,
+ * puis la nature (une question par écran). */
+function construireEnonceNature(exercice: ExerciceNatureTriangle): SectionExercice {
+  const base = construireEnonceIsocele({ ...exercice, variante: "isocele" });
+  return { ...base, questions: [base.questions[0], base.questions[1], { consigne: [texte(QUESTION_NATURE)] }] };
+}
+
 function construireEnonceNormeDistance(instance: ExerciceNormeDistance): SectionExercice {
   if (instance.variante === "vecteur") return construireEnonceVecteur(instance);
   if (instance.variante === "distance") return construireEnonceDistance(instance);
   if (instance.variante === "isocele") return construireEnonceIsocele(instance);
   if (instance.variante === "parametre") return construireEnonceParametre(instance);
+  if (instance.variante === "natureTriangle") return construireEnonceNature(instance);
   return construireEnoncePythagore(instance);
 }
 
@@ -408,6 +420,7 @@ function construireCorrectionNormeDistance(instance: ExerciceNormeDistance): Blo
   if (instance.variante === "distance") return construireCorrectionDistance(instance);
   if (instance.variante === "isocele") return construireCorrectionIsocele(instance);
   if (instance.variante === "parametre") return construireCorrectionParametre(instance);
+  if (instance.variante === "natureTriangle") return [{ type: "paragraphe", fragments: [texte(`Le triangle ${instance.labelA}${instance.labelB}${instance.labelC} est ${libelleNatureCotes(instance.nature).toLowerCase()}.`)] }];
   return construireCorrectionPythagore(instance);
 }
 
@@ -431,6 +444,9 @@ function enoncePapier(instance: ExerciceNormeDistance): EnoncePapier {
   }
   if (instance.variante === "isocele") {
     return { section: { enteteFragments: [texte("On donne les points "), latex(formatEnonceIsoceleLatex(instance)), texte(`. Le triangle ${instance.labelA}${instance.labelB}${instance.labelC} est-il isocèle (et en quel sommet) ou scalène ? Justifie par des calculs de longueurs.`)], questions: [] } };
+  }
+  if (instance.variante === "natureTriangle") {
+    return { section: { enteteFragments: [texte("On donne les points "), latex(formatEnonceIsoceleLatex(instance)), texte(`. Le triangle ${instance.labelA}${instance.labelB}${instance.labelC} est-il quelconque, isocèle, rectangle ou rectangle isocèle ? Justifie par des calculs de longueurs.`)], questions: [] } };
   }
   if (instance.variante === "parametre") {
     return {
@@ -462,6 +478,7 @@ function reponseBreve(instance: ExerciceNormeDistance): FragmentConsigne[] {
   if (instance.variante === "distance") return [latex(`${instance.labelA}${instance.labelB} = ${formatLongueurIrreductibleLatex(instance.distanceCarree)}`)];
   if (instance.variante === "isocele") return libelleClassificationIsocele(instance.classification, instance.labelA, instance.labelB, instance.labelC, instance.carreAB, instance.carreAC, instance.carreBC);
   if (instance.variante === "parametre") return instance.solutions.length === 0 ? [texte("Aucune valeur de x ne convient.")] : [latex(formatSolutionsAttenduesTexte(instance).replace(" ou ", " \\text{ ou } "))];
+  if (instance.variante === "natureTriangle") return [texte(`Triangle ${libelleNatureCotes(instance.nature).toLowerCase()}`), ...(instance.sommetDroit ? [texte(` (angle droit en ${nomSommet(instance, instance.sommetDroit)})`)] : []), texte(".")];
   return [texte(conclusionPythagore(instance))];
 }
 
@@ -513,6 +530,18 @@ function bareme(instance: ExerciceNormeDistance): BaremeExercice {
       erreursFrequentes: [{ description: [texte("Double produit oublié en développant un carré")], cout: "−1,5" }, { description: [texte("Norme cible non élevée au carré")], cout: "−1" }],
     };
   }
+  if (instance.variante === "natureTriangle") {
+    return {
+      reponseFinale: reponseBreve(instance),
+      criteres: [
+        { sousQuestion: "a", critere: [texte("Composantes des trois vecteurs côtés")], points: 1 },
+        { sousQuestion: "b", critere: [texte("Les trois longueurs (ou leurs carrés)")], points: 1 },
+        { sousQuestion: "c", critere: [texte("Test d'égalité des longueurs ET test de Pythagore, nature justifiée")], points: 2 },
+      ],
+      erreursFrequentes: [carre, { description: [texte("Un seul des deux tests mené (« isocèle » ou « rectangle » au lieu de « rectangle isocèle »)")], cout: "−1" }],
+      reponsesAcceptees: [[texte("Angle droit montré par le produit scalaire des deux côtés issus du sommet, s'il est correctement mené")]],
+    };
+  }
   return {
     reponseFinale: reponseBreve(instance),
     criteres: [
@@ -530,7 +559,9 @@ function bareme(instance: ExerciceNormeDistance): BaremeExercice {
  * « termes proches » ; méthode 1 pour les triangles et le paramètre (choisir / construire la
  * relation), 0 sinon ; aucun piège dans les données (Δ < 0, scalène, non rectangle sont des verdicts). */
 function criteresDifficulte(instance: ExerciceNormeDistance): CriteresDifficulte {
-  const triangle = instance.variante === "isocele" || instance.variante === "pythagore";
+  // « nature d'un triangle » : la nature est un verdict (4 × 25 %) ; les écrans et leurs charges sont
+  // les mêmes pour toutes les natures (niveau et durée constants, lot D).
+  const triangle = instance.variante === "isocele" || instance.variante === "pythagore" || instance.variante === "natureTriangle";
   const base = etapesDuCorrige(correctionDetailleeNormeDistance(instance), instance.variante === "isocele" ? ["c"] : []);
   const methode = triangle || instance.variante === "parametre" ? 1 : 0;
   return { ...base, lettresSansCharge: [...(base.lettresSansCharge ?? []), ...(triangle ? ["b"] : [])], methode, piege: 0, nombres: 0 };

@@ -1,102 +1,54 @@
-import { useState } from "react";
 import type { ExerciceOrthogonaliteParametre } from "../core/orthogonalite.types";
 import { diagnostiquerReductionParametre } from "../moteur/verificationOrthogonalite";
-import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import { CONSIGNE_REDUCTION_PARAMETRE_ORTHOGONALITE, LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_EQUATION_REDUITE, RAPPEL_VECTORIEL_ORTHOGONALITE_APRES, RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT, RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE, RAPPEL_VECTORIEL_ORTHOGONALITE_FIN, consigneGlobaleOrthogonalite, formatEnonceLatex, formuleSubstitueeParametreLatex } from "../ui/formatOrthogonalite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { CONSIGNE_REDUCTION_PARAMETRE_ORTHOGONALITE, PLACEHOLDER_EQUATION_REDUITE, consigneGlobaleOrthogonalite, formatEnonceLatex } from "../ui/formatOrthogonalite";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesReductionParametreOrthogonalite, messageReductionParametreOrthogonalite } from "../ui/retoursVecteurs3";
 import { Katex } from "./Katex";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import { EcranChampVecteurs } from "./EcranChampVecteurs";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteParametre;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
+   * champ, remplace "Valider" par le bloc `ValidationEcran`. */
   validation?: ValidationEtapeProps | null;
 }
 
-/**
- * Écran "réduction" — variante 2, écran 1. Depuis `promptcorrectionsgenerateur25lot3.md`, point 1
- * (transposition du lot3 du générateur 24) : réécrit pour rejoindre exactement le patron déjà en
- * place pour "réduction du sommet [X]" (V4, `EtapeReductionSommetOrthogonalite.tsx`) — consigne
- * globale persistante, bloc énoncé fixe (déjà présent via l'`equation-box`), aide nettoyée
- * (formulation vectorielle u/v seule, jamais la version générique (a;b)/(c;d) redondante), et un
- * seul champ de saisie libre "Équation" attendant l'équation réduite complète, vérifiée
- * symboliquement (`diagnostiquerReductionParametre`) — remplace les 2 anciens champs séparés
- * (coefficient de x / terme constant).
- *
- * Pas de bloc "État actuel" ici : "réduction" est toujours la première étape de cette variante.
- */
-export function EtapeReductionParametreOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
-  const [texte, setTexte] = useState("");
-  const max = NIVEAU_AIDE_MAX.reductionParametre;
-
-  const complet = texte.trim() !== "";
-  const statut = complet && tentativesUtilisees > 0 ? diagnostiquerReductionParametre(exercice, texte) : undefined;
-  const consigneGlobale = consigneGlobaleOrthogonalite(exercice);
-
+/** Écran 1 de la variante « paramètre » : la relation d'orthogonalité réduite (équation en x, un
+ * seul champ libre, toute équation proportionnelle acceptée). Règles communes (audit 4e ch. 6,
+ * lot B) : illisible sans tentative, message ciblé (produits en croix), aides à deux niveaux. */
+export function EtapeReductionParametreOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   return (
-    <div>
-      <EnTeteExercice
-        consigneGenerale={consigneGlobale}
-        blocDonnees={
-          <div className="equation-box">
-            <Katex expression={formatEnonceLatex(exercice)} />
-          </div>
-        }
-      />
-      <p className="prompt-text">{CONSIGNE_REDUCTION_PARAMETRE_ORTHOGONALITE}</p>
-
-      <div className="field field-inline">
-        <label className="field-label" htmlFor="orthogonalite-reductionparametre-equation">
-          Équation =
-        </label>
-        <input disabled={!!validation}
-          id="orthogonalite-reductionparametre-equation"
-          className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
-          placeholder={PLACEHOLDER_EQUATION_REDUITE}
-          value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+    <EcranChampVecteurs<string>
+      enTete={
+        <EnTeteExercice
+          consigneGenerale={consigneGlobaleOrthogonalite(exercice)}
+          blocDonnees={
+            <div className="equation-box">
+              <Katex expression={formatEnonceLatex(exercice)} />
+            </div>
+          }
         />
-      </div>
-
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            {RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT} <Katex expression={LATEX_VEC_U} /> {RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE}{" "}
-            <Katex expression={LATEX_VEC_V} /> {RAPPEL_VECTORIEL_ORTHOGONALITE_APRES} <Katex expression={LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE} />{" "}
-            {RAPPEL_VECTORIEL_ORTHOGONALITE_FIN}
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              Formule substituée : <Katex expression={formuleSubstitueeParametreLatex(exercice)} />
-            </p>
-          )}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
+      }
+      consigne={CONSIGNE_REDUCTION_PARAMETRE_ORTHOGONALITE}
+      id="orthogonalite-reduction-equation"
+      label="Équation ="
+      placeholder={PLACEHOLDER_EQUATION_REDUITE}
+      lire={(t) => (diagnostiquerReductionParametre(exercice, t) === "parse_error" ? null : t)}
+      estFausse={(t) => diagnostiquerReductionParametre(exercice, t) !== "correct"}
+      aides={aidesReductionParametreOrthogonalite(exercice)}
+      onPremiereAide={onActiverAide}
+      cible={(t) => messageReductionParametreOrthogonalite(exercice, t)}
+      texteIllisible={ILLISIBLE_VECTEURS.equationX}
+      tentativesUtilisees={tentativesUtilisees}
+      tentativesMax={tentativesMax}
+      onValider={onValider}
+      validation={validation}
+    />
   );
 }

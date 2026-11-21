@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
-import { correctionDetailleeComparaisonVecteurs } from "./generateurs/comparaisonVecteurs/corrigeDetaille";
+import { correctionDetailleeComparaisonVecteurs, egalitesLatex } from "./generateurs/comparaisonVecteurs/corrigeDetaille";
 import type { ReactNode } from "react";
 import type { ExerciceComparaisonVecteurs, ProprieteComparaison } from "./core/comparaisonVecteurs.types";
 import type { ReglagesSession } from "./core/session.types";
@@ -43,21 +43,11 @@ function sessionInitiale(): EtatSessionComparaisonVecteurs {
   return demarrerSessionComparaisonVecteurs(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceComparaisonVecteurs, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
 }
 
-/** Coefficient jamais explicite s'il vaut `1`/`-1` — même convention que le reste de la
- * plateforme (ex. `formatRelationVectorielle.ts::formatCoefficientTraduction`). */
-function formatCoefficientLatex(coef: number): string {
-  if (coef === 1) return "";
-  if (coef === -1) return "-";
-  return String(coef);
-}
 
 function formatVecteursAttendusLatex(labels: string[]): string {
   return labels.map((label) => `\\vec{${label}}`).join(", ");
 }
 
-function formatEgaliteAttendueLatex(exercice: ExerciceComparaisonVecteurs): string {
-  return `\\vec{${exercice.cibleEgalite}} = ${formatCoefficientLatex(exercice.coefficientEgalite)}\\vec{${exercice.labelReference}}`;
-}
 
 const LIBELLES_PROPRIETE: Record<ProprieteComparaison, string> = {
   longueur: "même longueur",
@@ -68,7 +58,7 @@ const LIBELLES_PROPRIETE: Record<ProprieteComparaison, string> = {
 /** Titre d'un écran (fiche de consultation et ligne du récapitulatif). */
 function titreEcran(exercice: ExerciceComparaisonVecteurs, phase: PhaseComparaisonVecteurs): string {
   // Texte brut (pas de KaTeX dans un libellé) : « le vecteur rouge » plutôt qu'une lettre sans flèche.
-  return phase === "selection" ? `Vecteurs de ${LIBELLES_PROPRIETE[exercice.propriete]} que le vecteur rouge` : "Égalité";
+  return phase === "selection" ? `Vecteurs de ${LIBELLES_PROPRIETE[exercice.propriete]} que le vecteur rouge` : "Égalités";
 }
 
 /** Récapitulatif « Ce qu'on sait déjà » — seule l'étape « sélection » précède une autre étape. */
@@ -122,7 +112,7 @@ export function AppComparaisonVecteurs() {
     etat.phase === "selection" ? (
       <Katex expression={formatVecteursAttendusLatex(exercice.labelsCorrects)} />
     ) : (
-      <Katex expression={formatEgaliteAttendueLatex(exercice)} />
+      <Katex expression={egalitesLatex(exercice)} />
     );
 
   function terminerEtape(nouvelEtat: EtatSessionComparaisonVecteurs, votreReponse: ReactNode) {
@@ -187,9 +177,6 @@ export function AppComparaisonVecteurs() {
           <EtapeSelectionComparaison
             key={`${numeroExercice}-${etat.phase}`}
             exercice={etat.exerciceCourant}
-            tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-            tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(labels) =>
               terminerEtape(
@@ -205,9 +192,8 @@ export function AppComparaisonVecteurs() {
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => terminerEtape(soumettreReponseEgalite(etat, texte), texte)}
+            onValider={(textes) => terminerEtape(soumettreReponseEgalite(etat, textes), textes.join(" ; "))}
             validation={validation}
           />
         )}

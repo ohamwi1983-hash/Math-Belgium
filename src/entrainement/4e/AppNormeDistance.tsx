@@ -17,12 +17,20 @@ import {
   soumettreReponseReductionParametreNorme,
   soumettreReponseResolutionParametreNorme,
   soumettreReponseTestPythagore,
+  soumettreChoixResolutionParametreNorme,
+  soumettreReponseConclusionNature,
 } from "./moteur/sessionNormeDistance";
+import { EtapeConclusionNature } from "./components/EtapeConclusionNature";
+import { EtapeValeursAvecChoix, type ReponseValeursAvecChoix } from "./components/EtapeValeursAvecChoix";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+import { RenduFragments } from "./components/RenduFragments";
+import { aidesResolutionParametreNorme, messageChoixParametreNorme, messageValeursParametreNorme } from "./ui/retoursVecteurs3";
+import { formatTermesEnonceParametreLatex, libelleNatureCotes, segmentsConsigneParametre } from "./ui/formatNormeDistance";
 import { SEQUENCES } from "./moteur/typesNormeDistance";
 import type { EtatSessionNormeDistance, PhaseNormeDistance, ResultatExerciceNormeDistance } from "./moteur/typesNormeDistance";
 import type { ExerciceNormeDistance } from "./core/normeDistance.types";
 import type { Composantes } from "./core/vecteur.types";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceNormeDistance } from "./generateurs/normeDistance";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceNormeDistance, genererExerciceNormeDistanceLibre } from "./generateurs/normeDistance";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { VarianteNormeDistance } from "./core/normeDistance.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -34,7 +42,6 @@ import { EtapeConstructionIsocele } from "./components/EtapeConstructionIsocele"
 import { EtapeCalculIsocele } from "./components/EtapeCalculIsocele";
 import { EtapeConclusionIsocele } from "./components/EtapeConclusionIsocele";
 import { EtapeReductionParametreNorme } from "./components/EtapeReductionParametreNorme";
-import { EtapeResolutionParametreNorme } from "./components/EtapeResolutionParametreNorme";
 import { EtapeConstructionPythagore } from "./components/EtapeConstructionPythagore";
 import { EtapeCalculPythagore } from "./components/EtapeCalculPythagore";
 import { EtapeTestPythagore } from "./components/EtapeTestPythagore";
@@ -63,7 +70,8 @@ const REGLAGES_DEMO: ReglagesSession = {
 };
 
 function nouvelleSession(): EtatSessionNormeDistance {
-  return demarrerSessionNormeDistance(REGLAGES_DEMO, genererExerciceNormeDistance);
+  // Tirage libre de l'appli : « nature d'un triangle » compris ; les codes gardent l'ancien tirage.
+  return demarrerSessionNormeDistance(REGLAGES_DEMO, genererExerciceNormeDistanceLibre);
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
@@ -124,6 +132,8 @@ function reveleDepuisResultat(resultat: ResultatExerciceNormeDistance, phase: Ph
       return resultat.calculPythagoreRevele;
     case "testPythagore":
       return resultat.testPythagoreRevele;
+    case "conclusionNature":
+      return resultat.conclusionNatureRevele;
   }
 }
 
@@ -141,6 +151,7 @@ const TITRES_ECRANS: Record<PhaseNormeDistance, string> = {
   constructionPythagore: "Vecteurs construits",
   calculPythagore: "Longueurs calculées",
   testPythagore: "Sommet de l'angle droit",
+  conclusionNature: "Nature du triangle",
 };
 
 function vecteursTriangleLatex(labels: { labelA: string; labelB: string; labelC: string }, ab: Composantes, ac: Composantes, bc: Composantes): string {
@@ -185,10 +196,10 @@ function construireReponseAttendue(exercice: ExerciceNormeDistance, phase: Phase
   if (phase === "calculDistance" && exercice.variante === "distance") {
     return <Katex expression={`${exercice.labelA}${exercice.labelB} = ${formatLongueurIrreductibleLatex(exercice.distanceCarree)}`} />;
   }
-  if (phase === "constructionIsocele" && exercice.variante === "isocele") {
+  if (phase === "constructionIsocele" && (exercice.variante === "isocele" || exercice.variante === "natureTriangle")) {
     return <Katex expression={vecteursTriangleLatex(exercice, exercice.vecteurAB, exercice.vecteurAC, exercice.vecteurBC)} />;
   }
-  if (phase === "calculIsocele" && exercice.variante === "isocele") {
+  if (phase === "calculIsocele" && (exercice.variante === "isocele" || exercice.variante === "natureTriangle")) {
     return (
       <Katex
         expression={longueursTriangleLatex(
@@ -226,6 +237,9 @@ function construireReponseAttendue(exercice: ExerciceNormeDistance, phase: Phase
   }
   if (phase === "testPythagore" && exercice.variante === "pythagore") {
     return <>{libelleSommetPythagore(sommetAttenduPythagore(exercice), exercice)}</>;
+  }
+  if (phase === "conclusionNature" && exercice.variante === "natureTriangle") {
+    return <>{libelleNatureCotes(exercice.nature)}</>;
   }
   return null;
 }
@@ -324,7 +338,6 @@ export function AppNormeDistance() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(texte) => terminerEtape(soumettreReponseNormeVecteur(etat, texte), saisieBrute(texte))}
             validation={validation}
@@ -335,7 +348,6 @@ export function AppNormeDistance() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) =>
               terminerEtape(
@@ -351,18 +363,16 @@ export function AppNormeDistance() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(texte) => terminerEtape(soumettreReponseCalculDistance(etat, texte), saisieBrute(texte))}
             validation={validation}
           />
-        ) : phase === "constructionIsocele" && exercice.variante === "isocele" ? (
+        ) : phase === "constructionIsocele" && (exercice.variante === "isocele" || exercice.variante === "natureTriangle") ? (
           <EtapeConstructionIsocele
             key={`${numeroExercice}-${phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) =>
               terminerEtape(
@@ -374,13 +384,12 @@ export function AppNormeDistance() {
             }
             validation={validation}
           />
-        ) : phase === "calculIsocele" && exercice.variante === "isocele" ? (
+        ) : phase === "calculIsocele" && (exercice.variante === "isocele" || exercice.variante === "natureTriangle") ? (
           <EtapeCalculIsocele
             key={`${numeroExercice}-${phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) =>
               terminerEtape(soumettreReponseCalculIsocele(etat, reponse), <LongueursSaisies labels={exercice} saisies={reponse} />)
@@ -393,7 +402,6 @@ export function AppNormeDistance() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={1}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseConclusionIsocele(etat, reponse), libelleClassification(reponse, exercice))}
             validation={validation}
@@ -404,20 +412,44 @@ export function AppNormeDistance() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(texte) => terminerEtape(soumettreReponseReductionParametreNorme(etat, texte), saisieBrute(texte))}
             validation={validation}
           />
         ) : phase === "resolutionParametreNorme" && exercice.variante === "parametre" ? (
-          <EtapeResolutionParametreNorme
+          <EtapeValeursAvecChoix
             key={`${numeroExercice}-${phase}`}
-            exercice={exercice}
+            enTete={
+              <EnTeteExercice
+                consigneGenerale={<RenduFragments fragments={segmentsConsigneParametre(exercice)} />}
+                blocDonnees={
+                  <div className="equation-box equation-box-termes">
+                    {formatTermesEnonceParametreLatex(exercice).map((terme, i) => (
+                      <Katex key={i} expression={terme} />
+                    ))}
+                  </div>
+                }
+              />
+            }
+            question="Résous cette équation."
+            libelleAucune="Aucune solution"
+            libelleAuMoins="Au moins une solution"
+            placeholder="ex : 2,5"
+            choixFige={etat.choixValeurs}
+            attenduAucune={exercice.solutions.length === 0}
+            messageChoixFaux={messageChoixParametreNorme(exercice)}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
-            onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(valeurs) => terminerEtape(soumettreReponseResolutionParametreNorme(etat, valeurs), formatValeursX(valeurs))}
+            aides={aidesResolutionParametreNorme(exercice)}
+            onPremiereAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(r: ReponseValeursAvecChoix) => {
+              // Choix (jugé une fois) puis, s'il est juste et dit « au moins une », les valeurs dans
+              // la foulée ; ensuite, les valeurs seules (audit 4e ch. 6, lot B, G3).
+              let suivant = etat.choixValeurs === null ? soumettreChoixResolutionParametreNorme(etat, r.aucune) : etat;
+              if (!r.aucune && suivant.phase === "resolutionParametreNorme" && !suivant.terminee && (etat.choixValeurs !== null || suivant.choixValeurs?.correct)) suivant = soumettreReponseResolutionParametreNorme(suivant, r.valeurs);
+              terminerEtape(suivant, r.aucune ? "Aucune solution" : formatValeursX(r.valeurs));
+            }}
+            cible={(v) => messageValeursParametreNorme(exercice, v)}
             validation={validation}
           />
         ) : phase === "constructionPythagore" && exercice.variante === "pythagore" ? (
@@ -426,7 +458,6 @@ export function AppNormeDistance() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) =>
               terminerEtape(
@@ -444,7 +475,6 @@ export function AppNormeDistance() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) =>
               terminerEtape(soumettreReponseCalculPythagore(etat, reponse), <LongueursSaisies labels={exercice} saisies={reponse} />)
@@ -457,9 +487,18 @@ export function AppNormeDistance() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={1}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseTestPythagore(etat, reponse), libelleSommetPythagore(reponse, exercice))}
+            validation={validation}
+          />
+        ) : phase === "conclusionNature" && exercice.variante === "natureTriangle" ? (
+          <EtapeConclusionNature
+            key={`${numeroExercice}-${phase}`}
+            exercice={exercice}
+            tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+            tentativesMax={1}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(nature) => terminerEtape(soumettreReponseConclusionNature(etat, nature), libelleNatureCotes(nature))}
             validation={validation}
           />
         ) : null}

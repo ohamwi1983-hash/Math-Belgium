@@ -13,7 +13,9 @@ import type {
   ClassificationTriangleIsocele,
   ExerciceDistance,
   ExerciceIsocele,
+  ExerciceNatureTriangle,
   ExerciceNormeDistance,
+  NatureTriangleCotes,
   ExerciceNormeVecteur,
   ExerciceParametreNorme,
   ExercicePythagore,
@@ -214,6 +216,18 @@ function construireIsocele(): ExerciceIsocele {
  * - `"zero"` : `1 ≤ N < (p-r)²/2` ⟹ aucune racine réelle.
  * `N` (= `cibleCarree`) est affiché en `m√k` irréductible, entier quand c'est un carré parfait.
  */
+/**
+ * Motif masqué (lot D de l'audit 4e ch. 6, G8 ; précédent gen95) : « une solution » exige
+ * N = (p − r)²/2, donc une cible m√2 — 100 % des « une solution » avaient une cible en k√2, et
+ * l'élève qui voyait « √2 » devinait le verdict. Désormais :
+ * - la cible est TOUJOURS écrite √N, non simplifiée (`cibleParametreNormeLatex`) : aucune forme
+ *   visible (entier, k√2, k√r) ne distingue plus les verdicts ;
+ * - p − r est pair et non nul pour TOUS les verdicts (avant : impair ⇒ jamais « une solution ») ;
+ * - « aucune solution » prend une fois sur deux une cible N = 2m² (m < |p − r|/2), pour que
+ *   « N double d'un carré » ne trahisse pas non plus « une solution ».
+ * Le verdict reste tiré d'abord, à parts égales (1/3 chacun). Mesure : voir
+ * `.claude/rules/feuilles-evaluations.md` (4e ch. 6, lots B, C, D).
+ */
 function construireParametreNorme(): ExerciceParametreNorme {
   const typeSolution: TypeSolutionNormeDistance = (["deux", "une", "zero"] as const)[randomInt(0, 2)];
 
@@ -222,33 +236,40 @@ function construireParametreNorme(): ExerciceParametreNorme {
   let cibleCarree: number;
   let solutions: number[];
 
+  // p − r pair, non nul : |p − r| = 2a, a ∈ {1, 2, 3, 4} (≥ 2 pour « aucune », qui a besoin d'une
+  // cible entière N < 2a²).
+  const tirerEcart = (aMin: number) => {
+    for (;;) {
+      const pp = randomInt(-4, 4);
+      const rr = randomInt(-4, 4);
+      if (pp !== rr && (pp - rr) % 2 === 0 && Math.abs(pp - rr) >= 2 * aMin) return [pp, rr] as const;
+    }
+  };
+
   if (typeSolution === "deux") {
-    do {
-      p = randomInt(-4, 4);
-      r = randomInt(-4, 4);
-    } while (p === r);
+    [p, r] = tirerEcart(1);
     const ecart = p - r;
-    let d: number;
-    do {
-      d = randomInt(1, 7);
-    } while ((d - ecart) % 2 !== 0);
+    // d de même parité que p − r (pair), d'où x = (p + r ± d)/2 entiers.
+    const d = 2 * randomInt(1, 3);
     cibleCarree = (ecart * ecart + d * d) / 2;
     solutions = [(p + r - d) / 2, (p + r + d) / 2];
   } else if (typeSolution === "une") {
-    do {
-      p = randomInt(-4, 4);
-      r = randomInt(-4, 4);
-    } while (p === r || (p - r) % 2 !== 0);
+    [p, r] = tirerEcart(1);
     cibleCarree = ((p - r) * (p - r)) / 2;
     solutions = [(p + r) / 2];
   } else {
-    // |p-r| ≥ 2 garantit (p-r)²/2 > 1, donc au moins un N entier possible.
-    do {
-      p = randomInt(-4, 4);
-      r = randomInt(-4, 4);
-    } while (Math.abs(p - r) < 2);
-    const borne = Math.ceil(((p - r) * (p - r)) / 2) - 1;
-    cibleCarree = randomInt(1, borne);
+    [p, r] = tirerEcart(2);
+    const a = Math.abs(p - r) / 2;
+    const borne = 2 * a * a - 1;
+    if (Math.random() < 0.5) {
+      // N = 2m², m < a : même allure de cible que « une solution ».
+      const m = randomInt(1, a - 1);
+      cibleCarree = 2 * m * m;
+    } else {
+      do {
+        cibleCarree = randomInt(1, borne);
+      } while (Number.isInteger(Math.sqrt(cibleCarree / 2)));
+    }
     solutions = [];
   }
 
@@ -354,12 +375,103 @@ function construirePythagore(): ExercicePythagore {
 
 // ============================================================================
 
+// ============================================================================
+// Variante 6 — nature d'un triangle : quelconque, isocèle, rectangle, rectangle isocèle
+// ============================================================================
+
+/** Perpendiculaire primitive de w (composantes divisées par leur PGCD). */
+function perpendiculairePrimitive(w: Composantes): Composantes {
+  const pgcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : pgcd(b, a % b));
+  const g = pgcd(w.x, w.y) || 1;
+  return { x: -w.y / g, y: w.x / g };
+}
+
+/**
+ * Lot C de l'audit 4e ch. 6 : la nature (verdict) est tirée d'abord, à parts égales, puis deux
+ * côtés issus d'un même sommet : rectangle isocèle = w2 = ±rot90(w1) ; rectangle = w2
+ * perpendiculaire de longueur différente ; isocèle = même norme, non perpendiculaires ;
+ * quelconque = trois longueurs différentes, aucun angle droit. Sommets répartis au hasard sur A, B,
+ * C (même permutation que « isocèle »).
+ */
+function construireNatureTriangle(): ExerciceNatureTriangle {
+  const nature: NatureTriangleCotes = (["quelconque", "isocele", "rectangle", "rectangleIsocele"] as const)[randomInt(0, 3)];
+  for (;;) {
+    const w1 = vecteurNonNul();
+    let w2: Composantes;
+    if (nature === "rectangleIsocele") {
+      w2 = Math.random() < 0.5 ? { x: -w1.y, y: w1.x } : { x: w1.y, y: -w1.x };
+    } else if (nature === "rectangle") {
+      const base = perpendiculairePrimitive(w1);
+      const k = randomInt(1, 4) * (Math.random() < 0.5 ? 1 : -1);
+      w2 = multiplier(k, base);
+      if (Math.abs(w2.x) > BORNE_COMPOSANTE || Math.abs(w2.y) > BORNE_COMPOSANTE || normeCarree(w2) === normeCarree(w1)) continue;
+    } else if (nature === "isocele") {
+      const candidats = vecteursMemeNormeNonColineaires(w1).filter((c) => produitPourOrthogonalite(w1, c) !== 0);
+      if (candidats.length === 0) continue;
+      w2 = candidats[randomInt(0, candidats.length - 1)];
+    } else {
+      w2 = vecteurNonNul();
+    }
+    if (!assezOuvert(w1, w2)) continue;
+    const w3 = soustraire(w2, w1);
+    const carres = [normeCarree(w1), normeCarree(w2), normeCarree(w3)];
+    const isocele = new Set(carres).size < 3;
+    const [c1, c2, c3] = carres;
+    const rectangle = c1 + c2 === c3 || c1 + c3 === c2 || c2 + c3 === c1;
+    const obtenue: NatureTriangleCotes = rectangle ? (isocele ? "rectangleIsocele" : "rectangle") : isocele ? "isocele" : "quelconque";
+    if (obtenue !== nature) continue;
+
+    const apex: Point = { x: randomInt(-3, 3), y: randomInt(-3, 3) };
+    const gauche = additionner(apex, w1);
+    const droite = additionner(apex, w2);
+    const permutations: [Point, Point, Point][] = [
+      [apex, gauche, droite],
+      [apex, droite, gauche],
+      [gauche, apex, droite],
+      [gauche, droite, apex],
+      [droite, apex, gauche],
+      [droite, gauche, apex],
+    ];
+    const [pointA, pointB, pointC] = permutations[randomInt(0, permutations.length - 1)];
+    const vecteurAB = soustraire(pointB, pointA);
+    const vecteurAC = soustraire(pointC, pointA);
+    const vecteurBC = soustraire(pointC, pointB);
+    const carreAB = normeCarree(vecteurAB);
+    const carreAC = normeCarree(vecteurAC);
+    const carreBC = normeCarree(vecteurBC);
+    const sommetDroit: "A" | "B" | "C" | null = carreBC === carreAB + carreAC ? "A" : carreAC === carreAB + carreBC ? "B" : carreAB === carreAC + carreBC ? "C" : null;
+    return {
+      variante: "natureTriangle",
+      pointA,
+      labelA: "A",
+      pointB,
+      labelB: "B",
+      pointC,
+      labelC: "C",
+      vecteurAB,
+      vecteurAC,
+      vecteurBC,
+      carreAB,
+      carreAC,
+      carreBC,
+      longueurAB: Math.sqrt(carreAB),
+      longueurAC: Math.sqrt(carreAC),
+      longueurBC: Math.sqrt(carreBC),
+      classification: classifierTriangleIsocele(carreAB, carreAC, carreBC),
+      nature,
+      sommetDroit,
+    };
+  }
+}
+
 export const CATALOGUE_VARIANTES: { id: VarianteNormeDistance; label: string }[] = [
   { id: "vecteur", label: "Norme d'un vecteur donné" },
   { id: "distance", label: "Distance entre deux points" },
   { id: "isocele", label: "Triangle isocèle/scalène" },
   { id: "parametre", label: "Déterminer x pour une norme cible" },
   { id: "pythagore", label: "Pythagore, méthode alternative" },
+  // Ajoutée EN FIN de catalogue (lot C, audit 4e ch. 6) : indices — donc `?code=` imprimés — inchangés.
+  { id: "natureTriangle", label: "Nature d'un triangle : isocèle, rectangle, rectangle isocèle" },
 ];
 
 export function construireAvecVarianteId(varianteId: VarianteNormeDistance): ExerciceNormeDistance {
@@ -367,10 +479,19 @@ export function construireAvecVarianteId(varianteId: VarianteNormeDistance): Exe
   if (varianteId === "distance") return construireDistance();
   if (varianteId === "isocele") return construireIsocele();
   if (varianteId === "parametre") return construireParametreNorme();
+  if (varianteId === "natureTriangle") return construireNatureTriangle();
   return construirePythagore();
 }
 
+/** Tirage libre des CODES et de l'adaptateur : les cinq variantes d'origine, comme avant l'ajout de
+ * « nature d'un triangle » — un `?code=` libre déjà imprimé garde sa variante. */
 export function genererExerciceNormeDistance(): ExerciceNormeDistance {
+  const varianteId = CATALOGUE_VARIANTES[randomInt(0, 4)].id;
+  return construireAvecVarianteId(varianteId);
+}
+
+/** Tirage libre de l'appli : les six variantes. */
+export function genererExerciceNormeDistanceLibre(): ExerciceNormeDistance {
   const varianteId = CATALOGUE_VARIANTES[randomInt(0, CATALOGUE_VARIANTES.length - 1)].id;
   return construireAvecVarianteId(varianteId);
 }

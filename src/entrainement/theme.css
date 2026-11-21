@@ -1622,6 +1622,17 @@
   background: var(--color-error);
 }
 
+/* Sélection MULTIPLE (plusieurs cases à la fois, ex. gen28) : cases carrées cochées, jamais la
+ * pastille ronde d'un choix unique (audit 4e ch. 6, G13). */
+.entrainement .options-multiples .btn::before {
+  border-radius: 3px;
+}
+
+.entrainement .options-multiples .btn.toggle-active::before {
+  box-shadow: none;
+  background: var(--color-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.4 2.4 4.6-5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 11px no-repeat;
+}
+
 /* Sélecteur de variante — replié par défaut derrière `.selecteur-variante-toggle` (voir le
  * commentaire des 3 composants `SelecteurVarianteDev`), un vrai combobox soigné à l'identique du
  * reste de l'UI (`.card`/`.text-input`/`.btn-primary`) une fois déplié, jamais le cadre pointillé

@@ -189,8 +189,7 @@ export function AppRelationVectorielle() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            aideActivee={etat.aideUtilisee}
-            onActiverAide={() => setEtat(activerAide(etat))}
+            onActiverAide={() => setEtat((e) => (e.terminee ? e : activerAide(e)))}
             onValider={(x, y) => terminerEtape(soumettreReponseCoordonnees(etat, x, y))}
             validation={validation}
           />
@@ -200,8 +199,7 @@ export function AppRelationVectorielle() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            aideActivee={etat.aideUtilisee}
-            onActiverAide={() => setEtat(activerAide(etat))}
+            onActiverAide={() => setEtat((e) => (e.terminee ? e : activerAide(e)))}
             onValider={(texte) => terminerEtape(soumettreReponseTraduction(etat, texte), texte)}
             validation={validation}
           />
@@ -212,8 +210,7 @@ export function AppRelationVectorielle() {
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             recapitulatif={recapitulatif}
-            aideActivee={etat.aideUtilisee}
-            onActiverAide={() => setEtat(activerAide(etat))}
+            onActiverAide={() => setEtat((e) => (e.terminee ? e : activerAide(e)))}
             onValider={(x, y) => terminerEtape(soumettreReponseCoordonnees(etat, x, y))}
             validation={validation}
           />

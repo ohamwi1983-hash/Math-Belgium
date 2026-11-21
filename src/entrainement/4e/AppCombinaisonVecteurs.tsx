@@ -4,7 +4,7 @@ import { lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleeCombinaisonVecteurs } from "./generateurs/combinaisonVecteurs/corrigeDetaille";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
-import { activerAideSuivante, demarrerSessionCombinaisonVecteurs, soumettreReponseComposantes, soumettreReponseSimplification } from "./moteur/sessionCombinaisonVecteurs";
+import { activerAideSuivante, demarrerSessionCombinaisonVecteurs, phaseInitiale, soumettreReponseComposantes, soumettreReponseSimplification } from "./moteur/sessionCombinaisonVecteurs";
 import type { EtatSessionCombinaisonVecteurs, PhaseCombinaisonVecteurs } from "./moteur/typesCombinaisonVecteurs";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCombinaisonVecteurs } from "./generateurs/combinaisonVecteurs";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
@@ -53,7 +53,9 @@ const ORDRE_PHASES: PhaseCombinaisonVecteurs[] = ["simplification", "composantes
  * l'exercice n'est pas terminé elle est forcément "courante" (dernière phase active), et une fois
  * terminé un nouvel exercice démarre (l'état entier est remis à zéro). */
 function calculerSegmentsProgression(etat: EtatSessionCombinaisonVecteurs): EtatPuceProgression[] {
-  return ORDRE_PHASES.map((phase) => {
+  // « Sans parenthèses » : un seul écran (composantes), voir `phaseInitiale`.
+  const phases = phaseInitiale(etat.exerciceCourant) === "composantes" ? ORDRE_PHASES.filter((p) => p === "composantes") : ORDRE_PHASES;
+  return phases.map((phase) => {
     if (phase === etat.phase) return "courante";
     const score = phase === "simplification" ? etat.scoreSimplificationExercice : null;
     if (score === null) return "a-venir";
@@ -152,7 +154,7 @@ export function AppCombinaisonVecteurs() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCombinaisonVecteurs(exercice), etat.phase === "simplification" ? "a" : "b")} />,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCombinaisonVecteurs(exercice), etat.phase === "simplification" || phaseInitiale(exercice) === "composantes" ? "a" : "b")} />,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "simplification" ? (
           <Katex expression={formatEquationReduiteLatex(exercice)} />
         ) : (
@@ -191,7 +193,6 @@ export function AppCombinaisonVecteurs() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideSimplification}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(texte) => terminerEtape(soumettreReponseSimplification(etat, texte), texte)}
             validation={validation}
@@ -202,7 +203,6 @@ export function AppCombinaisonVecteurs() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideComposantes}
             recapitulatif={recapitulatif}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseComposantes(etat, reponse))}

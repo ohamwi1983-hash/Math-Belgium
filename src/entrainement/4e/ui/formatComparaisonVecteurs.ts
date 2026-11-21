@@ -25,8 +25,12 @@ export function consigneSelection(exercice: ExerciceComparaisonVecteurs): { avan
 const FRACTION_LARGEUR_ETIQUETTE = 0.1;
 const FRACTION_HAUTEUR_ETIQUETTE = 0.15;
 const FRACTION_DECALAGE_ETIQUETTE = 0.06;
-/** Rayon de la tête de flèche (taille fixe en pixels chez Mafs), même fraction. */
-const FRACTION_RAYON_TETE = 0.06;
+/** Tête de flèche des vecteurs de la figure (écran et papier), en unités du quadrillage (audit
+ * 4e ch. 6, G13 : environ 0,35 unité, au lieu d'une tête Mafs de taille fixe aussi longue qu'un
+ * vecteur de 1 à 2 unités). */
+export const TETE_FLECHE_COMPARAISON = 0.35;
+/** Rayon de la tête de flèche, même fraction (marge des étiquettes autour de la pointe). */
+const FRACTION_RAYON_TETE = 0.04;
 /** Positions essayées le long du vecteur (fraction de sa longueur), de part et d'autre. */
 const FRACTIONS_LE_LONG = [0.5, 0.35, 0.65, 0.2, 0.8];
 

@@ -1,87 +1,57 @@
-import { useState } from "react";
 import type { ExerciceOrthogonaliteParametre } from "../core/orthogonalite.types";
 import { diagnostiquerResolutionParametre } from "../moteur/verificationOrthogonalite";
 import { PLACEHOLDER_SOLUTION_X, consigneGlobaleOrthogonalite, formatEnonceLatex, formatEquationReduiteParametreLatex } from "../ui/formatOrthogonalite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { lireNombreSaisi } from "../ui/lireNombre";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesResolutionPremierDegre, messageResolutionPremierDegre } from "../ui/retoursVecteurs3";
 import { Katex } from "./Katex";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import { EcranChampVecteurs } from "./EcranChampVecteurs";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceOrthogonaliteParametre;
   tentativesUtilisees: number;
   tentativesMax: number;
+  onActiverAide: () => void;
   onValider: (valeur: number) => void;
-  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
 }
 
-/**
- * Écran "résolution" — variante 2, écran 2 (dernière phase). Depuis
- * `promptcorrectionsgenerateur25lot3.md`, point 1 : cette variante garantit toujours exactement une
- * solution (voir `core/orthogonalite.types.ts` — `solutionX` jamais `null`), donc l'aide générique
- * de résolution (méthode d'isolement de x) est retirée — **aucun bouton "Aide"**
- * (`NIVEAU_AIDE_MAX.resolutionParametre = 0` — même convention que "resolution"/"resolutionAvecX" du
- * générateur 24 : un écran à `max=0` n'affiche jamais de bouton, jamais un bouton perpétuellement
- * désactivé).
- *
- * `promptgen25modificationscompletes.md` : bloc de données redondant (composantes de $\vec u$/
- * $\vec v$, `formatEnonceLatex`) ajouté au-dessus — le bloc violet existant (équation réduite
- * validée à l'écran précédent) devient conceptuellement le bloc "état actuel", aucun changement
- * structurel de son propre rendu.
- */
-export function EtapeResolutionParametreOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
-  const [texte, setTexte] = useState("");
-  const valeur = Number(texte.replace(",", "."));
-  const complet = texte.trim() !== "";
-  const statut = complet && tentativesUtilisees > 0 ? diagnostiquerResolutionParametre(exercice, valeur) : undefined;
-  const consigneGlobale = consigneGlobaleOrthogonalite(exercice);
-
+/** Écran 2 de la variante « paramètre » : résoudre l'équation réduite (champ `x =`). Règles
+ * communes (audit 4e ch. 6, lot B) — aides à deux niveaux (il n'y en avait aucune). */
+export function EtapeResolutionParametreOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   return (
-    <div>
-      <EnTeteExercice
-        consigneGenerale={consigneGlobale}
-        blocDonnees={
-          <div className="equation-box">
-            <Katex expression={formatEnonceLatex(exercice)} />
-          </div>
-        }
-      />
-      <div className="equation-box">
-        <Katex expression={formatEquationReduiteParametreLatex(exercice)} />
-      </div>
-      <p className="prompt-text">Résous cette équation.</p>
-
-      <div className="field field-inline">
-        <label className="field-label" htmlFor="orthogonalite-resolution-x">
-          x =
-        </label>
-        <input disabled={!!validation}
-          id="orthogonalite-resolution-x"
-          className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
-          placeholder={PLACEHOLDER_SOLUTION_X}
-          value={texte}
-          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
-        />
-      </div>
-
-      {!validation && (
+    <EcranChampVecteurs<number>
+      enTete={
         <>
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+          <EnTeteExercice
+            consigneGenerale={consigneGlobaleOrthogonalite(exercice)}
+            blocDonnees={
+              <div className="equation-box">
+                <Katex expression={formatEnonceLatex(exercice)} />
+              </div>
+            }
+          />
+          <div className="equation-box">
+            <Katex expression={formatEquationReduiteParametreLatex(exercice)} />
+          </div>
         </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
+      }
+      consigne="Résous cette équation."
+      id="orthogonalite-resolution-x"
+      label="x ="
+      placeholder={PLACEHOLDER_SOLUTION_X}
+      lire={lireNombreSaisi}
+      estFausse={(v) => diagnostiquerResolutionParametre(exercice, v) !== "correct"}
+      aides={aidesResolutionPremierDegre(exercice.coefX, exercice.coefConst)}
+      onPremiereAide={onActiverAide}
+      cible={(v) => messageResolutionPremierDegre(exercice.coefX, exercice.coefConst, exercice.solutionX, v)}
+      texteIllisible={ILLISIBLE_VECTEURS.valeurX}
+      tentativesUtilisees={tentativesUtilisees}
+      tentativesMax={tentativesMax}
+      onValider={onValider}
+      validation={validation}
+    />
   );
 }

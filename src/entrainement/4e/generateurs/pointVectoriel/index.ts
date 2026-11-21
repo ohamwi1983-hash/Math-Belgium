@@ -129,6 +129,19 @@ function construireRelationCombinaison(): ExerciceRelationCombinaison {
   };
 }
 
+/** Symétrique de A par rapport à I (variante « symetrique », ajoutée en fin de catalogue) : A et I
+ * distincts, A′ = 2I − A gardé dans [−8 ; 8] (lisible sur le graphe et calculable de tête). */
+function construireSymetrique(): ExercicePointVectoriel {
+  for (;;) {
+    const pointA = pointAleatoire(-6, 6);
+    const centre = pointAleatoire(-4, 4);
+    if (pointA.x === centre.x && pointA.y === centre.y) continue;
+    const reponse = { x: 2 * centre.x - pointA.x, y: 2 * centre.y - pointA.y };
+    if (Math.abs(reponse.x) > 8 || Math.abs(reponse.y) > 8) continue;
+    return { variante: "symetrique", pointA, labelA: "A", centre, labelCentre: "I", pointCherche: "A'", reponse };
+  }
+}
+
 function construireRelationGenerale(): ExercicePointVectoriel {
   return Math.random() < 0.5 ? construireRelationPointAPoint() : construireRelationCombinaison();
 }
@@ -137,6 +150,9 @@ export const CATALOGUE_VARIANTES: { id: VariantePointVectoriel; label: string }[
   { id: "translation", label: "Image par une translation" },
   { id: "milieu", label: "Milieu d'un segment" },
   { id: "relationGenerale", label: "Relation vectorielle générale" },
+  // Ajoutée EN FIN de catalogue (lot C, audit 4e ch. 6) : l'indice des trois premières — donc leurs
+  // `?code=` déjà imprimés — ne change pas.
+  { id: "symetrique", label: "Symétrique d'un point" },
 ];
 
 /** Convention CLAUDE.md ("Catalogue de variantes") — force la variante demandée ; pour
@@ -146,10 +162,20 @@ export const CATALOGUE_VARIANTES: { id: VariantePointVectoriel; label: string }[
 export function construireAvecVarianteId(varianteId: VariantePointVectoriel): ExercicePointVectoriel {
   if (varianteId === "translation") return construireTranslation();
   if (varianteId === "milieu") return construireMilieu();
+  if (varianteId === "symetrique") return construireSymetrique();
   return construireRelationGenerale();
 }
 
+/** Tirage libre des CODES et de l'adaptateur (feuille d'exercices) : les trois variantes d'origine,
+ * exactement comme avant l'ajout du symétrique — un `?code=` libre déjà imprimé rouvre le même
+ * exercice (même précédent que 5gen21 « position »). */
 export const genererExercicePointVectoriel: GenerateurExercicePointVectoriel = () => {
+  const varianteId = CATALOGUE_VARIANTES[randomInt(0, 2)].id;
+  return construireAvecVarianteId(varianteId);
+};
+
+/** Tirage libre de l'appli (« Nouvel exercice ») : les quatre variantes, symétrique compris. */
+export const genererExercicePointVectorielLibre: GenerateurExercicePointVectoriel = () => {
   const varianteId = CATALOGUE_VARIANTES[randomInt(0, CATALOGUE_VARIANTES.length - 1)].id;
   return construireAvecVarianteId(varianteId);
 };

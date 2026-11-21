@@ -109,24 +109,31 @@ function construireEnonceCombinaisonVecteurs(instance: ExerciceCombinaisonVecteu
   }
   enteteFragments.push(texte(". On considère la combinaison "), latex(formatExpressionLatex(instance)), texte("."));
 
+  // Une question par écran (corrigé, collecteur) : « sans parenthèses » n'a que les composantes ;
+  // « convertis BA » seulement quand des points sont donnés (lot C, audit 4e ch. 6, G6).
+  const composantes = { consigne: [texte("Calcule les composantes de "), latex(formatResultatLatex(instance)), texte(".")] };
+  if (instance.variante === "plate") return { enteteFragments, questions: [composantes] };
   return {
     enteteFragments,
     questions: [
       {
-        consigne: [
-          texte("Réduis cette expression au maximum (distribue les coefficients externes, convertis "),
-          latex("\\vec{BA}"),
-          texte(" en "),
-          latex("-\\vec{AB}"),
-          texte(" si nécessaire, puis regroupe les vecteurs identiques)."),
-        ],
+        consigne: instance.points
+          ? [
+              texte("Réduis cette expression au maximum (distribue les coefficients externes, convertis "),
+              latex("\\vec{BA}"),
+              texte(" en "),
+              latex("-\\vec{AB}"),
+              texte(", puis regroupe les vecteurs identiques)."),
+            ]
+          : [texte("Réduis cette expression au maximum (distribue les coefficients externes, puis regroupe les vecteurs identiques).")],
       },
-      { consigne: [texte("Calcule les composantes de "), latex(formatResultatLatex(instance)), texte(".")] },
+      composantes,
     ],
   };
 }
 
 function construireCorrectionCombinaisonVecteurs(instance: ExerciceCombinaisonVecteurs): BlocCorrection[] {
+  if (instance.variante === "plate") return [fragmentsGroupeComposantes(instance)];
   return [fragmentsGroupeReduction(instance), fragmentsGroupeComposantes(instance)];
 }
 
@@ -157,6 +164,22 @@ function reponseBreve(instance: ExerciceCombinaisonVecteurs): FragmentConsigne[]
 }
 
 function bareme(instance: ExerciceCombinaisonVecteurs): BaremeExercice {
+  if (instance.variante === "plate") {
+    // Un seul écran (composantes, lettre « a ») : rien à réduire.
+    return {
+      reponseFinale: reponseBreve(instance),
+      criteres: [
+        { sousQuestion: "a", critere: [texte("Substitution des composantes de chaque vecteur")], points: 1 },
+        { sousQuestion: "a", critere: [texte("Première composante : "), latex(nombreFrLatex(instance.reponse.x))], points: 1.5 },
+        { sousQuestion: "a", critere: [texte("Seconde composante : "), latex(nombreFrLatex(instance.reponse.y))], points: 1.5 },
+      ],
+      erreursFrequentes: [
+        { description: [texte("Coefficient négatif appliqué à une seule composante")], cout: "−1,5" },
+        { description: [texte("Erreur de calcul sur une seule composante")], cout: "−1" },
+      ],
+      reponsesAcceptees: [[texte("Composantes écrites en colonne ou sous la forme d'un couple")]],
+    };
+  }
   return {
     reponseFinale: reponseBreve(instance),
     criteres: [

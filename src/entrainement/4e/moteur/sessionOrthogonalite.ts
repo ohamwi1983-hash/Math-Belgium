@@ -21,15 +21,18 @@ import {
   verifierConclusionTriangle,
   verifierConstructionAvecXTriangle,
   verifierConstructionTriangle,
-  verifierIdentificationResolution,
+  diagnostiquerCritereTest,
+  diagnostiquerResolutionTriangleParametre,
+  verifierConclusionTest,
+  verifierSommetTriangleParametre,
   verifierReductionParametre,
   verifierReductionSommet,
   verifierResolutionParametre,
-  verifierTest,
+
   verifierTestSommetTriangle,
 } from "./verificationOrthogonalite";
 import { NIVEAU_AIDE_MAX, SEQUENCES } from "./typesOrthogonalite";
-import type { EtatSessionOrthogonalite, PhaseOrthogonalite, ResultatExerciceOrthogonalite, ScoreEcran } from "./typesOrthogonalite";
+import type { ChoixFigeOrthogonalite, EtatSessionOrthogonalite, PhaseOrthogonalite, ResultatExerciceOrthogonalite, ScoreEcran } from "./typesOrthogonalite";
 
 const POINTS_DE_BASE = 100;
 
@@ -45,13 +48,14 @@ function phaseSuivante(exercice: ExerciceOrthogonalite, phaseActuelle: PhaseOrth
 
 function etatInitial(
   exercice: ExerciceOrthogonalite,
-): Pick<EtatSessionOrthogonalite, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresAccumules"> {
+): Pick<EtatSessionOrthogonalite, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresAccumules" | "choixFige"> {
   return {
     exerciceCourant: exercice,
     phase: phaseInitiale(exercice),
     etapeCourante: demarrerEtapeTentatives(),
     niveauAide: 0,
     scoresAccumules: {},
+    choixFige: null,
   };
 }
 
@@ -182,6 +186,9 @@ function soumettrePhase<R>(
   verifier: (reponse: R) => boolean,
   /** Choix fermé gagnable par élimination : une seule tentative (au lieu du réglage de session). */
   tentativesMax?: number,
+  /** Choix fermé du même écran, jugé une fois (`soumettreAvecChoix`) : gardé tant que l'écran dure,
+   * et l'écran est révélé s'il était faux. */
+  choixFige: ChoixFigeOrthogonalite | null = null,
 ): EtatSessionOrthogonalite {
   if (etat.terminee || etat.phase !== phaseAttendue) {
     throw new Error(`soumettrePhase(${phaseAttendue}) : la session n'est pas à cette étape`);
@@ -195,13 +202,14 @@ function soumettrePhase<R>(
   });
 
   if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
+    return { ...etat, etapeCourante, choixFige };
   }
 
-  const score = etapeCourante.score as number;
+  const choixFaux = choixFige !== null && !choixFige.correct;
+  const score = choixFaux ? 0 : (etapeCourante.score as number);
   const scoresAccumules: Partial<Record<PhaseOrthogonalite, ScoreEcran>> = {
     ...etat.scoresAccumules,
-    [phaseAttendue]: { score, revele: etapeCourante.revelee, niveauAide: etat.niveauAide },
+    [phaseAttendue]: { score, revele: etapeCourante.revelee || choixFaux, niveauAide: etat.niveauAide },
   };
 
   const suivante = phaseSuivante(etat.exerciceCourant, phaseAttendue);
@@ -209,7 +217,14 @@ function soumettrePhase<R>(
     return cloturerExerciceOuSuivant(etat, construireResultat(etat.exerciceCourant, scoresAccumules));
   }
 
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), phase: suivante, niveauAide: 0, scoresAccumules };
+  return { ...etat, etapeCourante: demarrerEtapeTentatives(), phase: suivante, niveauAide: 0, scoresAccumules, choixFige: null };
+}
+
+/** Écran à choix fermé + champ (audit 4e ch. 6, lot B, G3) : le choix est jugé à la PREMIÈRE
+ * validation puis figé ; seules les tentatives du champ comptent ensuite. */
+function soumettreAvecChoix<R>(etat: EtatSessionOrthogonalite, phase: PhaseOrthogonalite, reponse: R, choixCorrect: (r: R) => boolean, verifierChamp: (r: R) => boolean): EtatSessionOrthogonalite {
+  const choixFige = etat.choixFige ?? { correct: choixCorrect(reponse) };
+  return soumettrePhase(etat, phase, reponse, verifierChamp, undefined, choixFige);
 }
 
 // ============================================================================
@@ -219,7 +234,7 @@ function soumettrePhase<R>(
 export function soumettreReponseTest(etat: EtatSessionOrthogonalite, reponse: ReponseTest): EtatSessionOrthogonalite {
   const exercice = etat.exerciceCourant;
   if (exercice.variante !== "test") throw new Error("soumettreReponseTest : réservé à la variante 'test'");
-  return soumettrePhase(etat, "test", reponse, (r) => verifierTest(exercice, r));
+  return soumettreAvecChoix(etat, "test", reponse, (r) => verifierConclusionTest(exercice, r.conclusion), (r) => diagnostiquerCritereTest(exercice, r.critere) === "correct");
 }
 
 /** Depuis `promptcorrectionsgenerateur25lot3.md`, point 1 : un seul champ de saisie libre pour
@@ -290,5 +305,11 @@ export function soumettreReponseIdentificationResolution(
 ): EtatSessionOrthogonalite {
   const exercice = etat.exerciceCourant;
   if (exercice.variante !== "triangleParametre") throw new Error("soumettreReponseIdentificationResolution : réservé à la variante 'triangleParametre'");
-  return soumettrePhase(etat, "identificationResolution", reponse, (r) => verifierIdentificationResolution(exercice, r));
+  return soumettreAvecChoix(
+    etat,
+    "identificationResolution",
+    reponse,
+    (r) => r.estRectangle && r.sommet !== null && verifierSommetTriangleParametre(exercice, r.sommet),
+    (r) => diagnostiquerResolutionTriangleParametre(exercice, r.x) === "correct",
+  );
 }

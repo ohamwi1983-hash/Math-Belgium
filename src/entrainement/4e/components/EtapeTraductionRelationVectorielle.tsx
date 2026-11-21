@@ -2,17 +2,18 @@ import { useState } from "react";
 import type { ExerciceRelationGeneraleRV } from "../core/relationVectorielle.types";
 import { diagnostiquerTraduction } from "../moteur/verificationRelationVectorielle";
 import { consigneRelationVectorielle, formatTermesDonneesConnuesLatex, placeholderTraduction } from "../ui/formatRelationVectorielle";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { ILLISIBLE_VECTEURS, aidesTraductionRV, messageTraductionRV } from "../ui/retoursVecteurs";
 import { AideRelationVectorielle } from "./AideRelationVectorielle";
+import { MessageRetour, useTentativeLisible } from "./RetourSaisie";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceRelationGeneraleRV;
   tentativesUtilisees: number;
   tentativesMax: number;
-  aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
@@ -22,27 +23,17 @@ interface Props {
 }
 
 /**
- * Écran 1 de la variante `relationGenerale` (forme `pointAPoint` OU `milieu`, même écran pour les
- * deux — voir `core/relationVectorielle.types.ts`) — traduire la relation vectorielle donnée en
- * équation de coordonnées (`F-B=k(E-B)`), champ libre, jamais de bloquage numérique (lettres,
- * signes et parenthèses tous légitimes ici, contrairement aux champs strictement numériques du
- * reste de l'exercice). Vérification symbolique, statut à 3 valeurs — voir
- * `verificationRelationVectorielle.ts` pour le détail du parseur.
+ * Écran 1 de la variante `relationGenerale` (forme `pointAPoint` OU `milieu`) — traduire la relation
+ * vectorielle en égalité entre différences de points (`F-B=k(E-B)`), champ libre jamais bloqué.
+ * Vérification symbolique (`verificationRelationVectorielle.ts`). Une écriture que le parseur ne
+ * lit pas (`parse_error`) n'est jamais transmise au moteur (audit 4e ch. 6, lot B).
  */
-export function EtapeTraductionRelationVectorielle({
-  exercice,
-  tentativesUtilisees,
-  tentativesMax,
-  aideActivee,
-  onActiverAide,
-  onValider,
-  validation,
-}: Props) {
+export function EtapeTraductionRelationVectorielle({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
-
+  const saisie = useTentativeLisible<string>();
   const complet = texte.trim() !== "";
-  const statut = complet && tentativesUtilisees > 0 ? diagnostiquerTraduction(exercice, texte) : undefined;
   const consigne = consigneRelationVectorielle(exercice);
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
 
   return (
     <div>
@@ -63,25 +54,27 @@ export function EtapeTraductionRelationVectorielle({
         </label>
         <input
           id="relation-vectorielle-traduction"
-          className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
+          className={`text-input${jugee !== null ? " is-erronee" : ""}`}
           placeholder={placeholderTraduction()}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          disabled={!!validation}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 
-      <AideRelationVectorielle exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
-
       {!validation && (
         <>
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+          <AideRelationVectorielle exercice={exercice} aides={aidesTraductionRV(exercice)} onPremiereAide={onActiverAide} />
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(texte, diagnostiquerTraduction(exercice, texte) !== "parse_error", onValider)}>
+            Valider
+          </button>
+          <MessageRetour
+            illisible={saisie.illisible}
+            texteIllisible={ILLISIBLE_VECTEURS.traduction}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cible={saisie.soumise !== null ? messageTraductionRV(exercice, saisie.soumise) : null}
+          />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

@@ -40,27 +40,9 @@ function formatVecteurColonneLatex(v: { x: number; y: number }): string {
   return `\\begin{pmatrix} ${formatNombre(v.x)} \\\\ ${formatNombre(v.y)} \\end{pmatrix}`;
 }
 
-/**
- * Coefficient d'une relation générale (`\pm3, \pm2, \pm1, \pm1/2, \pm1/3`, ou `0.5` pour "milieu"),
- * jamais explicite s'il vaut `1`/`-1` (convention déjà en place côté `formatPointVectoriel.ts`).
- * **Piège rencontré et corrigé** : un premier essai réutilisait `formatNombre` (arrondi à 2
- * décimales) — `1/3` s'y affichait `"0.33"`, une valeur ARRONDIE, pas la valeur exacte `1/3` (le
- * test d'intégration, en reconstruisant une réponse "correcte" à partir de ce texte, révélait la
- * régression : `diagnostiquerTraduction`, comparé à l'exacte fraction `1/3` avec une tolérance de
- * `1e-9`, rejetait `"0.33"`). Corrigé en réutilisant `formatFractionIrreductible`
- * (`ui/formatFraction.ts`, déjà utilisée ailleurs dans le projet pour la même raison) — jamais un
- * décimal bruité, notation identique à celle attendue dans le champ de saisie ("1/3", pas
- * `\frac{1}{3}`), pour que la valeur révélée reste directement comparable à ce que l'élève a tapé.
- */
-function formatCoefficientTraduction(coef: number): string {
-  if (coef === 1) return "";
-  if (coef === -1) return "-";
-  return formatFractionIrreductible(coef);
-}
-
 /** Coefficient de l'énoncé en LaTeX, fraction exacte en `\\tfrac` (`-\\tfrac{1}{3}`), jamais la
- * barre en ligne « -1/3 » (audit chapitre 6) ; implicite pour ±1. La forme à TAPER reste « 1/3 »
- * (`formatCoefficientTraduction`). */
+ * barre en ligne « -1/3 » (audit chapitre 6) ; implicite pour ±1 — aussi pour la traduction révélée
+ * (`formatTraductionAttendueLatex`) ; l’élève, lui, peut taper « 1/3 ». */
 function formatCoefficientConsigneLatex(coef: number): string {
   if (coef === 1) return "";
   if (coef === -1) return "-";
@@ -114,13 +96,11 @@ export function formatDonneesConnuesLatex(exercice: ExerciceRelationVectorielle)
  * étroit, KaTeX rendant en `white-space: nowrap` en interne, `promptmodificationsgenerateurs20et21.md`
  * A.4). Un seul élément pour `translation` (rien à séparer), 2 pour `relationGenerale`. */
 export function formatTermesDonneesConnuesLatex(exercice: ExerciceRelationVectorielle): string[] {
+  const pt = (l: string, p: { x: number; y: number }) => `${l}(${formatNombre(p.x)}\\,;\\,${formatNombre(p.y)})`;
   if (exercice.variante === "translation") {
-    return [`${exercice.labelPoint}(${formatNombre(exercice.point.x)} ; ${formatNombre(exercice.point.y)})`];
+    return [pt(exercice.labelPoint, exercice.point)];
   }
-  return [
-    `${exercice.labelOrigine}(${formatNombre(exercice.pointOrigine.x)} ; ${formatNombre(exercice.pointOrigine.y)})`,
-    `${exercice.labelConnu}(${formatNombre(exercice.pointConnu.x)} ; ${formatNombre(exercice.pointConnu.y)})`,
-  ];
+  return [pt(exercice.labelOrigine, exercice.pointOrigine), pt(exercice.labelConnu, exercice.pointConnu)];
 }
 
 /**
@@ -180,7 +160,9 @@ export function formeTraductionLatex(exercice: ExerciceRelationGeneraleRV): stri
  * récapitulatif (`recapitulatifRelationVectorielle.ts`) et par la révélation du panneau de résultat
  * après échec (`ResultatPanelRelationVectorielle.tsx`), jamais recalculée indépendamment deux fois. */
 export function formatTraductionAttendueLatex(exercice: ExerciceRelationGeneraleRV): string {
-  const coefTexte = formatCoefficientTraduction(exercice.coefficient);
+  // Fraction en KaTeX (`\tfrac{1}{2}`), jamais « 1/2 » écrit au clavier (point ouvert du corrigé,
+  // décisions 4e ch. 6) : la réponse révélée et le récapitulatif s'affichent, ils ne se recopient pas.
+  const coefTexte = formatCoefficientConsigneLatex(exercice.coefficient);
   return `${exercice.pointCherche}-${exercice.labelOrigine}=${coefTexte}(${exercice.labelConnu}-${exercice.labelOrigine})`;
 }
 

@@ -71,7 +71,7 @@ export function intensiteAttendueLatex(e: ExerciceEquilibreForces): string {
 }
 
 export function angleLatex(e: ExerciceEquilibreForces): string {
-  return `\\alpha \\approx ${dixieme(angleF3(e))}°`;
+  return `\\alpha \\approx ${dixieme(angleF3(e))}^\\circ`;
 }
 
 /** Sens de F₃ lisible : « vers la droite et vers le haut », « vers le bas »… */
@@ -266,7 +266,7 @@ export function aidesEcran(e: ExerciceEquilibreForces, ecran: number): FragmentC
       ];
     case ECRAN_F3:
       return [
-        [texte("La force d'équilibre est l'OPPOSÉE de la résultante : chaque composante change de signe :"), latex(`${V3} = -(${SOMME12})`)],
+        [texte("La force d'équilibre est l'opposée de la résultante : chaque composante change de signe :"), latex(`${V3} = -(${SOMME12})`)],
         [texte("Avec la résultante obtenue à l'étape précédente :"), latex(`${V3}${colonneTexte(`-(${nb(r.x)})`, `-(${nb(r.y)})`)}`)],
       ];
     case ECRAN_INTENSITE: {
@@ -293,7 +293,7 @@ export function aidesEcran(e: ExerciceEquilibreForces, ecran: number): FragmentC
 export function messageComposantes(e: ExerciceEquilibreForces, statut: StatutComposantes): string | null {
   switch (statut) {
     case "soustraction":
-      return "Tu as soustrait les deux forces : la résultante est leur SOMME.";
+      return "Tu as soustrait les deux forces : la résultante est leur somme.";
     case "oppose":
       return "Tu as déjà changé les signes : ici on demande la résultante elle-même, pas son opposé.";
     case "oubli_signe":
@@ -331,7 +331,7 @@ export function messageAngle(statut: StatutAngle): string | null {
     case "tangente":
       return "C'est la valeur de la tangente : il reste à trouver l'angle (touche arc tangente).";
     case "obtus":
-      return "On demande l'angle AIGU entre la direction de la force et l'axe x.";
+      return "On demande l'angle aigu entre la direction de la force et l'axe x.";
     default:
       return null;
   }

@@ -91,7 +91,7 @@ export function formatVecteursLibresLatex(exercice: ExerciceCombinaisonVecteurs)
 export function formatPointsLatex(exercice: ExerciceCombinaisonVecteurs): string | null {
   if (!exercice.points) return null;
   const { A, B } = exercice.points;
-  return `A(${formatNombre(A.x)} ; ${formatNombre(A.y)}) \\quad B(${formatNombre(B.x)} ; ${formatNombre(B.y)})`;
+  return `A(${formatNombre(A.x)}\\,;\\,${formatNombre(A.y)}) \\quad B(${formatNombre(B.x)}\\,;\\,${formatNombre(B.y)})`;
 }
 
 /** "Bloc fitter" (`promptmodificationsgenerateur22.md`) — un fragment KaTeX par vecteur libre,
@@ -108,7 +108,7 @@ export function formatTermesVecteursLibresLatex(exercice: ExerciceCombinaisonVec
 export function formatTermesPointsLatex(exercice: ExerciceCombinaisonVecteurs): string[] | null {
   if (!exercice.points) return null;
   const { A, B } = exercice.points;
-  return [`A(${formatNombre(A.x)} ; ${formatNombre(A.y)})`, `B(${formatNombre(B.x)} ; ${formatNombre(B.y)})`];
+  return [`A(${formatNombre(A.x)}\\,;\\,${formatNombre(A.y)})`, `B(${formatNombre(B.x)}\\,;\\,${formatNombre(B.y)})`];
 }
 
 /** Bloc de données complet (vecteurs libres + points le cas échéant) en un seul tableau de
@@ -266,21 +266,24 @@ function basesUtilisees(exercice: ExerciceCombinaisonVecteurs): { id: string; co
     .map((id) => ({ id, coefficient: exercice.coefficientsReduits[id], composantes: composantesDeId(exercice, id) }));
 }
 
-/** Coefficient TOUJOURS explicite (jamais omis pour une magnitude 1) — convention distincte de
+/** Coefficient explicite sauf pour une magnitude 1 (lot C, audit 4e ch. 6) — convention proche de
  * `formatTermeVecteurSigne` : ici on affiche une substitution numérique littérale, pas un
  * coefficient devant un symbole vectoriel. Jamais de parenthèses autour de `valeurLatex` — une
  * matrice colonne porte déjà ses propres délimiteurs visuels, des parenthèses supplémentaires
- * seraient redondantes (contrairement à un couple `(x ; y)`, qui en avait besoin). */
+ * seraient redondantes (contrairement à un couple `(x ; y)`, qui en avait besoin). L'écran
+ * affichait « 1(…) » (point ouvert du corrigé, décisions 4e ch. 6). */
 function formatTermeMatriceSigne(coefficient: number, valeurLatex: string, estPremier: boolean): string {
   const signe = coefficient < 0 ? "-" : estPremier ? "" : "+";
-  return `${signe}${formatNombre(Math.abs(coefficient))}${valeurLatex}`;
+  const abs = Math.abs(coefficient);
+  return `${signe}${abs === 1 ? "" : formatNombre(abs)}${valeurLatex}`;
 }
 
-/** Coefficient TOUJOURS explicite, valeur scalaire entre parenthèses classiques — utilisée par
- * `formatSommeAxesLatex` uniquement (une composante isolée n'est jamais habillée en matrice). */
-function formatTermeScalaireSigne(coefficient: number, valeurTexte: string, estPremier: boolean): string {
+/** « 3\cdot(−2) », « −(−2) » : produit coefficient × composante, composante négative entre parenthèses. */
+function formatTermeScalaireSigne(coefficient: number, valeur: number, estPremier: boolean): string {
   const signe = coefficient < 0 ? "-" : estPremier ? "" : "+";
-  return `${signe}${formatNombre(Math.abs(coefficient))}(${valeurTexte})`;
+  const abs = Math.abs(coefficient);
+  const val = valeur < 0 ? `(${formatNombre(valeur)})` : formatNombre(valeur);
+  return abs === 1 ? `${signe}${val}` : `${signe}${formatNombre(abs)}\\cdot ${val}`;
 }
 
 /** Aide 1 (écran 2) — substitution des composantes réelles (notation matricielle), terme à terme,
@@ -297,7 +300,7 @@ export function formatSubstitutionLatex(exercice: ExerciceCombinaisonVecteurs): 
  * jamais un `x =`/`y =` nu. */
 export function formatSommeAxesLatex(exercice: ExerciceCombinaisonVecteurs): { x: string; y: string } {
   const bases = basesUtilisees(exercice);
-  const ligne = (axe: "x" | "y") => bases.map((b, i) => formatTermeScalaireSigne(b.coefficient, formatNombre(b.composantes[axe]), i === 0)).join("");
+  const ligne = (axe: "x" | "y") => bases.map((b, i) => formatTermeScalaireSigne(b.coefficient, b.composantes[axe], i === 0)).join("");
   return { x: `${formatLabelXLatex(exercice)} ${ligne("x")}`, y: `${formatLabelYLatex(exercice)} ${ligne("y")}` };
 }
 

@@ -298,7 +298,7 @@ function enoncePapier(instance: ExerciceOrthogonalite): EnoncePapier {
     return { section: { enteteFragments: [texte("On donne les vecteurs "), donnees, texte(". Les vecteurs "), latex(`\\vec{${instance.v1Nom}}`), texte(" et "), latex(`\\vec{${instance.v2Nom}}`), texte(" sont-ils orthogonaux ? Justifie par un calcul.")], questions: [] } };
   }
   if (instance.variante === "parametre") {
-    return { section: { enteteFragments: [texte("On donne les vecteurs "), donnees, texte(". Détermine la valeur du réel "), latex("x"), texte(" pour laquelle "), latex(`\\vec{${instance.v1Nom}}`), texte(" et "), latex(`\\vec{${instance.v2Nom}}`), texte(" sont orthogonaux.")], questions: [] } };
+    return { section: { enteteFragments: [texte("On donne les vecteurs "), donnees, texte(". Détermine la valeur du réel "), latex("x"), texte(" pour laquelle "), latex("\\vec{u}"), texte(" et "), latex("\\vec{v}"), texte(" sont orthogonaux.")], questions: [] } };
   }
   const { labelA, labelB, labelC } = instance;
   if (instance.variante === "triangle") {

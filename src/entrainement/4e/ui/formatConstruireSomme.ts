@@ -1,3 +1,4 @@
+import { CONSIGNE_CONSTRUCTION_PAPIER } from "./formatConstructionVectorielle";
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import { latex, texte } from "../../export/corrigeTableau";
 import type { Composantes, EcranConstruction, EcranConstruireSomme, ExerciceConstruireSomme, Point } from "../core/construireSomme.types";
@@ -82,9 +83,9 @@ export function enonceGlobalPapier(e: ExerciceConstruireSomme): FragmentConsigne
     case "somme":
     case "difference":
     case "combinaison":
-      return [texte("On donne le point O et les vecteurs "), latex(VEC_U), texte(" et "), latex(VEC_V), texte(" ci-dessous. Trace le vecteur "), latex(vecteurDemandeLatex(e)), texte(" à partir du point O.")];
+      return [texte("On donne le point O et les vecteurs "), latex(VEC_U), texte(" et "), latex(VEC_V), texte(" ci-dessous. Trace le vecteur "), latex(vecteurDemandeLatex(e)), texte(` à partir du point O. ${CONSIGNE_CONSTRUCTION_PAPIER}`)];
     case "point":
-      return [texte("On donne les points A, B et C ci-dessous. Place le point M tel que "), latex(relationLatex(e)), texte(".")];
+      return [texte("On donne les points A, B et C ci-dessous. Place le point M tel que "), latex(relationLatex(e)), texte(`. ${CONSIGNE_CONSTRUCTION_PAPIER}`)];
     case "lecture":
       return [texte("Donne les composantes des vecteurs "), latex(VEC_U), texte(" et "), latex(VEC_V), texte(" tracés ci-dessous (un carreau = une unité).")];
   }

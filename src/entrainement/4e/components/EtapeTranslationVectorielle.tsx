@@ -1,20 +1,20 @@
 import { useState } from "react";
 import type { ExerciceTranslationRV } from "../core/relationVectorielle.types";
-import { diagnostiquerCoordonnees, diagnostiquerX, diagnostiquerY } from "../moteur/verificationRelationVectorielle";
+import { diagnostiquerX, diagnostiquerY } from "../moteur/verificationRelationVectorielle";
 import { consigneRelationVectorielle, formatLabelXLatex, formatLabelYLatex, formatTermesDonneesConnuesLatex } from "../ui/formatRelationVectorielle";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { lireNombreSaisi } from "../ui/lireNombre";
+import { ILLISIBLE_VECTEURS, aidesCoordonneesRV, messageCoordonneesRV } from "../ui/retoursVecteurs";
 import { AideRelationVectorielle } from "./AideRelationVectorielle";
+import { DeuxChampsVecteurs } from "./DeuxChampsVecteurs";
+import { MessageRetour, useTentativeLisible } from "./RetourSaisie";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceTranslationRV;
   tentativesUtilisees: number;
   tentativesMax: number;
-  aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (x: number, y: number) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
@@ -25,25 +25,17 @@ interface Props {
 
 /**
  * Écran unique de la variante `translation` — seule phase, `"coordonnees"`, jamais de traduction
- * symbolique (déplacement direct, rien à traduire). 2 champs numériques SÉPARÉS (jamais un champ
- * couple unique) — objectif explicite de la spec : isoler une éventuelle erreur de signe sur une
- * seule coordonnée. Marquage rouge EN DIRECT du seul champ fautif après un échec (`diagnostiquerX`/
- * `diagnostiquerY`, disparaît dès correction — même principe que `classeCurseur`/
- * `celluleEstErronee` ailleurs dans le projet).
+ * symbolique. 2 champs SÉPARÉS : le seul champ fautif est marqué après un échec. Règles communes
+ * (audit 4e ch. 6, lot B) : saisie illisible sans tentative, message ciblé, aides à deux niveaux.
  */
-export function EtapeTranslationVectorielle({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation}: Props) {
+export function EtapeTranslationVectorielle({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
-
+  const saisie = useTentativeLisible<{ x: number; y: number }>();
+  const lx = lireNombreSaisi(texteX);
+  const ly = lireNombreSaisi(texteY);
   const complet = texteX.trim() !== "" && texteY.trim() !== "";
-  const x = (parserNombreOuFraction(texteX) ?? Number.NaN);
-  const y = (parserNombreOuFraction(texteY) ?? Number.NaN);
-  const statut = complet ? diagnostiquerCoordonnees(exercice, x, y) : undefined;
-
-  const apresEchec = tentativesUtilisees > 0;
-  const xErronee = apresEchec && diagnostiquerX(exercice, x) !== "correct";
-  const yErronee = apresEchec && diagnostiquerY(exercice, y) !== "correct";
-
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
   const consigne = consigneRelationVectorielle(exercice);
 
   return (
@@ -59,45 +51,32 @@ export function EtapeTranslationVectorielle({ exercice, tentativesUtilisees, ten
         ))}
       </div>
 
-      <div className="field-row">
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule" htmlFor="relation-vectorielle-translation-x">
-            <Katex expression={formatLabelXLatex(exercice)} />
-          </label>
-          <input
-            id="relation-vectorielle-translation-x"
-            className={`text-input${xErronee ? " is-erronee" : ""}`}
-            placeholder="ex : 2,5"
-            value={texteX}
-            onChange={(e) => setTexteX(normaliserSigneMoins(e.target.value))}
-          />
-        </div>
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule" htmlFor="relation-vectorielle-translation-y">
-            <Katex expression={formatLabelYLatex(exercice)} />
-          </label>
-          <input
-            id="relation-vectorielle-translation-y"
-            className={`text-input${yErronee ? " is-erronee" : ""}`}
-            placeholder="ex : −1,5"
-            value={texteY}
-            onChange={(e) => setTexteY(normaliserSigneMoins(e.target.value))}
-          />
-        </div>
-      </div>
-
-      <AideRelationVectorielle exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
+      <DeuxChampsVecteurs
+        id="relation-vectorielle-translation"
+        labelX={formatLabelXLatex(exercice)}
+        labelY={formatLabelYLatex(exercice)}
+        texteX={texteX}
+        texteY={texteY}
+        onX={setTexteX}
+        onY={setTexteY}
+        erreurX={jugee !== null && diagnostiquerX(exercice, jugee.x) !== "correct"}
+        erreurY={jugee !== null && diagnostiquerY(exercice, jugee.y) !== "correct"}
+        desactive={!!validation}
+      />
 
       {!validation && (
         <>
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(x, y)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+          <AideRelationVectorielle exercice={exercice} aides={aidesCoordonneesRV(exercice)} onPremiereAide={onActiverAide} />
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter({ x: lx ?? Number.NaN, y: ly ?? Number.NaN }, lx !== null && ly !== null, (r) => onValider(r.x, r.y))}>
+            Valider
+          </button>
+          <MessageRetour
+            illisible={saisie.illisible}
+            texteIllisible={ILLISIBLE_VECTEURS.coordonnee}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cible={saisie.soumise !== null ? messageCoordonneesRV(exercice, saisie.soumise) : null}
+          />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

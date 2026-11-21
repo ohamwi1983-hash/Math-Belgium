@@ -12,8 +12,8 @@ import {
   formatTermesDonneesConnuesConstructionLatex,
   traceInitialConstruction,
 } from "../ui/formatConstructionVectorielle";
-import { diagnostiquerConstruction } from "../moteur/verificationConstructionVectorielle";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { aidesConstructionVectorielle, messageConstructionVectorielle } from "../ui/retoursVecteurs2";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
@@ -65,7 +65,13 @@ export function EtapeConstructionVectorielle({ exercice, tentativesUtilisees, te
 
   const departPoint: Point = { x: depart[0], y: depart[1] };
   const arriveePoint: Point = { x: arrivee[0], y: arrivee[1] };
-  const statut = tentativesUtilisees > 0 ? diagnostiquerConstruction(exercice, departPoint, arriveePoint) : undefined;
+  // Règles communes (audit 4e ch. 6, lot B) : un tracé vide (les deux points confondus) ou le tracé
+  // initial laissé tel quel (jamais la bonne réponse, `traceInitialConstruction`) n'est pas une
+  // réponse — jamais transmis au moteur, aucune tentative ; message ciblé sur un tracé faux.
+  const saisie = useTentativeLisible<{ depart: Point; arrivee: Point }>();
+  const initial = traceInitialConstruction(exercice);
+  const inchange = departPoint.x === initial.depart.x && departPoint.y === initial.depart.y && arriveePoint.x === initial.arrivee.x && arriveePoint.y === initial.arrivee.y;
+  const vide = inchange || (departPoint.x === arriveePoint.x && departPoint.y === arriveePoint.y);
   const consigne = consigneConstructionVectorielle(exercice);
   const revele = validation?.revele === true;
 
@@ -116,18 +122,19 @@ export function EtapeConstructionVectorielle({ exercice, tentativesUtilisees, te
         </p>
       )}
 
-      {statut === "parse_error" && <p className="alert-error">{formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")}</p>}
-
       {!validation && (
         <>
-        <button type="button" className="btn btn-primary" onClick={() => onValider({ depart: departPoint, arrivee: arriveePoint })}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && statut !== "parse_error" && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+          <AidesNiveaux aides={aidesConstructionVectorielle(exercice)} />
+          <button type="button" className="btn btn-primary" onClick={() => saisie.tenter({ depart: departPoint, arrivee: arriveePoint }, !vide, onValider)}>
+            Valider
+          </button>
+          <MessageRetour
+            illisible={saisie.illisible}
+            texteIllisible="Tu n'as pas encore tracé de vecteur : déplace ses deux extrémités (points orange) sur des nœuds différents. Cela ne compte pas comme une tentative."
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cible={saisie.soumise !== null ? messageConstructionVectorielle(exercice, { x: saisie.soumise.arrivee.x - saisie.soumise.depart.x, y: saisie.soumise.arrivee.y - saisie.soumise.depart.y }) : null}
+          />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

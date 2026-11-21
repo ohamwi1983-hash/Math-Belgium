@@ -5,7 +5,7 @@ import { nombreFrLatex } from "../../ui/nombreFr";
 import { LIBELLE_CAS_CONSTRUCTION, profilConstructionVectorielle } from "../profilsEvaluation4eCh6";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatNombreGraphique } from "../../../export/svgGraph";
-import { consigneConstructionVectorielle, formatTermesDonneesConnuesConstructionLatex } from "../../ui/formatConstructionVectorielle";
+import { CONSIGNE_CONSTRUCTION_PAPIER, consigneConstructionVectorielle, formatTermesDonneesConnuesConstructionLatex } from "../../ui/formatConstructionVectorielle";
 import { genererExerciceConstructionVectorielle } from "./index";
 import { correctionDetailleeConstructionVectorielle } from "./corrigeDetaille";
 import { construireSvgConstructionVectorielle, formatCoefficientTexte } from "./figure";
@@ -152,7 +152,7 @@ function enoncePapier(exercice: ExerciceConstructionVectorielle): EnoncePapier {
         latex(formatTermesDonneesConnuesConstructionLatex(exercice).join(" \\quad ")),
         texte(" ci-dessous. Construis le vecteur "),
         latex(vecteurDemandeLatex(exercice)),
-        texte(" à partir du point de ton choix."),
+        texte(` à partir du point de ton choix. ${CONSIGNE_CONSTRUCTION_PAPIER}`),
       ],
       enteteHtml: construireSvgConstructionVectorielle(exercice, false),
       questions: [],

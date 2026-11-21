@@ -1,19 +1,18 @@
 import { useState } from "react";
 import type { ExerciceIsocele } from "../core/normeDistance.types";
 import type { ReponseClassificationIsocele } from "../moteur/verificationNormeDistance";
-import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { CONSIGNE_GENERALE_ISOCELE, OPTIONS_NATURE_TRIANGLE, SOMMETS_ISOCELE, TEXTE_AIDE_ISOCELE_SCALENE, composerClassificationIsocele, formatTermesDonneesIsoceleLatex, type NatureTriangle } from "../ui/formatNormeDistance";
+import { CONSIGNE_GENERALE_ISOCELE, OPTIONS_NATURE_TRIANGLE, SOMMETS_ISOCELE, composerClassificationIsocele, formatTermesDonneesIsoceleLatex, type NatureTriangle } from "../ui/formatNormeDistance";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux } from "./RetourSaisie";
+import { aidesConclusionIsocele } from "../ui/retoursVecteurs3";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceIsocele;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseClassificationIsocele) => void;
   validation?: ValidationEtapeProps | null;
@@ -27,10 +26,9 @@ interface Props {
  * "Isocèle", le sommet (A/B/C) — l'option "Équilatéral" a été retirée entièrement (piège
  * volontairement abandonné). Aide à 1 niveau : définition des 2 natures.
  */
-export function EtapeConclusionIsocele({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeConclusionIsocele({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [nature, setNature] = useState<NatureTriangle | null>(null);
   const [sommet, setSommet] = useState<"A" | "B" | "C" | null>(null);
-  const max = NIVEAU_AIDE_MAX.conclusionIsocele;
 
   function choisirNature(n: NatureTriangle) {
     setNature(n);
@@ -75,16 +73,10 @@ export function EtapeConclusionIsocele({ exercice, tentativesUtilisees, tentativ
         </>
       )}
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_ISOCELE_SCALENE}</p>
-        </div>
-      )}
       {!validation && (
         <>
-          {max > 0 && (
-            <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-          )}
+          {/* Choix fermé : une tentative (moteur) ; aides à deux niveaux (audit 4e ch. 6, lot B). */}
+          <AidesNiveaux aides={aidesConclusionIsocele(exercice)} onPremiereAide={onActiverAide} />
 
           <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => reponse !== null && onValider(reponse)}>
             Valider

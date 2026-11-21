@@ -13,28 +13,24 @@
  * **Aide PROGRESSIVE par écran** (même principe exact que "Triangle quelconque"/"Calcul de
  * composantes de combinaisons linéaires") — 1 ou 2 niveaux selon l'écran (`NIVEAU_AIDE_MAX_XXX`).
  */
-import type { ExerciceColinearPoints, ExerciceColinearVecteurs, ExerciceColinearite, GenerateurExerciceColinearite } from "../core/colinearite.types";
+import type { ExerciceColinearParametreCarre, ExerciceColinearPoints, ExerciceColinearVecteurs, ExerciceColinearite, GenerateurExerciceColinearite } from "../core/colinearite.types";
 import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
-import { verifierConstructionAvecX, verifierConstructionVecteurs, verifierReductionAvecX, verifierResolutionAvecX, verifierTest } from "./verificationColinearite";
+import { conclusionAttendue, diagnostiquerCritereTest, verifierConstructionAvecX, verifierConstructionVecteurs, verifierReductionAvecX, verifierResolutionAvecX, verifierValeursCarre } from "./verificationColinearite";
 import type { ReponseConstructionAvecX, ReponseConstructionVecteurs, ReponseTest } from "./verificationColinearite";
 import type { EtatSessionColinearite, PhaseColinearite, ResultatExerciceColinearite } from "./typesColinearite";
 
 const POINTS_DE_BASE = 100;
+// Aides à deux niveaux sur tous les écrans (audit 4e ch. 6, lot B) ; le moteur ne garde que le
+// drapeau « aide ouverte » (niveau 1, pour la puce de progression), le niveau 2 est local à l'écran.
 export const NIVEAU_AIDE_MAX_TEST = 2;
-export const NIVEAU_AIDE_MAX_CONSTRUCTION_VECTEURS = 1;
-export const NIVEAU_AIDE_MAX_CONSTRUCTION_AVEC_X = 1;
-/** `promptcorrectionsgenerateur24lot3.md`, point 2 — "reduction" (V2) est désormais alignée sur
- * "reductionAvecX" (V4) : 2 niveaux (formule vectorielle générique + substituée). "resolution" (V2)
- * est de même alignée sur "resolutionAvecX" (V4) : AUCUNE aide (`max=0` — retire l'aide générique de
- * résolution, sans valeur ajoutée pour un simple champ `x=`, même convention que le générateur 26
- * "Norme d'un vecteur et distance entre 2 points" : un écran à `max=0` n'affiche aucun bouton "Aide"
- * côté composant, jamais un bouton perpétuellement désactivé). */
+export const NIVEAU_AIDE_MAX_CONSTRUCTION_VECTEURS = 2;
+export const NIVEAU_AIDE_MAX_CONSTRUCTION_AVEC_X = 2;
 export const NIVEAU_AIDE_MAX_REDUCTION = 2;
-export const NIVEAU_AIDE_MAX_RESOLUTION = 0;
+export const NIVEAU_AIDE_MAX_RESOLUTION = 2;
 export const NIVEAU_AIDE_MAX_REDUCTION_AVEC_X = 2;
-export const NIVEAU_AIDE_MAX_RESOLUTION_AVEC_X = 0;
+export const NIVEAU_AIDE_MAX_RESOLUTION_AVEC_X = 2;
 
 function estExerciceTest(exercice: ExerciceColinearite): exercice is ExerciceColinearVecteurs | ExerciceColinearPoints {
   return exercice.variante === "vecteurs" || exercice.variante === "points";
@@ -43,7 +39,7 @@ function estExerciceTest(exercice: ExerciceColinearite): exercice is ExerciceCol
 function phaseInitiale(exercice: ExerciceColinearite): PhaseColinearite {
   if (exercice.variante === "vecteurs") return "test";
   if (exercice.variante === "points") return "constructionVecteurs";
-  if (exercice.variante === "parametre") return "reduction";
+  if (exercice.variante === "parametre" || exercice.variante === "parametreCarre") return "reduction";
   return "constructionAvecX"; // pointsParametre → constructionAvecX → reductionAvecX → resolutionAvecX
 }
 
@@ -60,6 +56,8 @@ function etatInitial(exercice: ExerciceColinearite): Pick<
   | "constructionRevele"
   | "scoreReductionExercice"
   | "reductionRevele"
+  | "conclusionTest"
+  | "choixValeurs"
 > {
   return {
     exerciceCourant: exercice,
@@ -73,6 +71,8 @@ function etatInitial(exercice: ExerciceColinearite): Pick<
     constructionRevele: false,
     scoreReductionExercice: null,
     reductionRevele: false,
+    conclusionTest: null,
+    choixValeurs: null,
   };
 }
 
@@ -122,9 +122,9 @@ export function activerAideSuivante(etat: EtatSessionColinearite): EtatSessionCo
     if (etat.niveauAideReduction >= NIVEAU_AIDE_MAX_REDUCTION_AVEC_X) throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
     return { ...etat, niveauAideReduction: etat.niveauAideReduction + 1 };
   }
-  // "resolution" (V2) et "resolutionAvecX" (V4) n'ont plus aucune aide (`NIVEAU_AIDE_MAX_RESOLUTION`
-  // = `NIVEAU_AIDE_MAX_RESOLUTION_AVEC_X` = 0 depuis `promptcorrectionsgenerateur24lot3.md`, point 2).
-  throw new Error("activerAideSuivante : aucune aide sur cet écran");
+  // Résolutions (V2, V4, « paramètre au carré ») : aides à deux niveaux depuis le lot B.
+  if (etat.niveauAideResolution >= NIVEAU_AIDE_MAX_RESOLUTION) throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
+  return { ...etat, niveauAideResolution: etat.niveauAideResolution + 1 };
 }
 
 function cloturerExerciceOuSuivant(etat: EtatSessionColinearite, resultat: ResultatExerciceColinearite): EtatSessionColinearite {
@@ -207,7 +207,7 @@ export function soumettreReponseConstructionAvecX(etat: EtatSessionColinearite, 
  * réutilisée telle quelle — cette variante garantit désormais elle aussi `typeSolution="unique"`,
  * voir `generateurs/colinearite/index.ts`). */
 export function soumettreReponseReduction(etat: EtatSessionColinearite, texte: string): EtatSessionColinearite {
-  if (etat.terminee || etat.phase !== "reduction" || etat.exerciceCourant.variante !== "parametre") {
+  if (etat.terminee || etat.phase !== "reduction" || (etat.exerciceCourant.variante !== "parametre" && etat.exerciceCourant.variante !== "parametreCarre")) {
     throw new Error("soumettreReponseReduction : la session n'est pas à l'étape reduction");
   }
   const exercice = etat.exerciceCourant;
@@ -227,10 +227,57 @@ export function soumettreReponseReduction(etat: EtatSessionColinearite, texte: s
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
-    phase: "resolution",
+    phase: exercice.variante === "parametreCarre" ? "resolutionCarre" : "resolution",
     scoreReductionExercice: score,
     reductionRevele: etapeCourante.revelee,
   };
+}
+
+function cloturerResolutionCarre(etat: EtatSessionColinearite, score: number, revele: boolean): EtatSessionColinearite {
+  return cloturerExerciceOuSuivant(etat, {
+    variante: "parametreCarre",
+    scoreConstruction: null,
+    constructionRevele: false,
+    niveauAideConstruction: 0,
+    scoreReduction: etat.scoreReductionExercice,
+    reductionRevele: etat.reductionRevele,
+    niveauAideReduction: etat.niveauAideReduction,
+    scoreResolution: score,
+    resolutionRevele: revele,
+    niveauAideResolution: etat.niveauAideResolution,
+    scoreTest: null,
+    testRevele: false,
+    niveauAideTest: 0,
+  });
+}
+
+/** « Paramètre au carré », écran « résolution », partie 1 : le choix « aucune valeur / au moins
+ * une » est jugé UNE fois (choix fermé, audit 4e ch. 6, G3). Aucune solution : l'écran se clôt
+ * (réussi ou révélé). Des solutions : le choix est figé (révélé s'il était faux) et les valeurs se
+ * saisissent ensuite avec les tentatives habituelles. */
+export function soumettreChoixResolutionCarre(etat: EtatSessionColinearite, aucune: boolean): EtatSessionColinearite {
+  if (etat.terminee || etat.phase !== "resolutionCarre" || etat.exerciceCourant.variante !== "parametreCarre" || etat.choixValeurs !== null) {
+    throw new Error("soumettreChoixResolutionCarre : la session n'est pas au choix de l'écran resolutionCarre");
+  }
+  const exercice: ExerciceColinearParametreCarre = etat.exerciceCourant;
+  const correct = aucune === (exercice.solutions.length === 0);
+  if (exercice.solutions.length === 0) return cloturerResolutionCarre(etat, correct ? POINTS_DE_BASE : 0, !correct);
+  return { ...etat, choixValeurs: { choisi: aucune, correct } };
+}
+
+/** Partie 2 : les valeurs de x (tentatives du réglage). Écran révélé si le choix était faux. */
+export function soumettreReponseResolutionCarre(etat: EtatSessionColinearite, valeurs: number[]): EtatSessionColinearite {
+  if (etat.terminee || etat.phase !== "resolutionCarre" || etat.exerciceCourant.variante !== "parametreCarre" || etat.choixValeurs === null) {
+    throw new Error("soumettreReponseResolutionCarre : la session n'est pas aux valeurs de l'écran resolutionCarre");
+  }
+  const exercice: ExerciceColinearParametreCarre = etat.exerciceCourant;
+  const etapeCourante = soumettreEtapeTentatives<number[]>(etat.etapeCourante, valeurs, {
+    ...reglagesEtape(etat),
+    verifier: (v) => verifierValeursCarre(exercice, v),
+    revelerReponse: () => {},
+  });
+  if (!etapeCourante.terminee) return { ...etat, etapeCourante };
+  return cloturerResolutionCarre(etat, etapeCourante.score as number, etapeCourante.revelee || !etat.choixValeurs.correct);
 }
 
 /** Écran "resolution" (V2 SEULE, "parametre", dernière phase) — clôture toujours l'exercice. Depuis
@@ -340,21 +387,31 @@ export function soumettreReponseResolutionAvecX(etat: EtatSessionColinearite, va
   });
 }
 
-/** Écran "test" (V1 seul écran, V3-écran2, dernière phase) — clôture toujours l'exercice. */
+/** Écran "test" (V1 seul écran, V3-écran2, dernière phase) — clôture toujours l'exercice.
+ * Choix fermé + champ sur le même écran (audit 4e ch. 6, lot B, G3) : la conclusion (colinéaires ?
+ * alignés ?) est jugée à la PREMIÈRE validation, puis figée (révélée si elle était fausse) ; seul le
+ * critère garde ses tentatives. Écran révélé si la conclusion était fausse. */
 export function soumettreReponseTest(etat: EtatSessionColinearite, reponse: ReponseTest): EtatSessionColinearite {
   if (etat.terminee || etat.phase !== "test" || !estExerciceTest(etat.exerciceCourant)) {
     throw new Error("soumettreReponseTest : la session n'est pas à l'étape test");
   }
   const exercice = etat.exerciceCourant;
+  const attendue = conclusionAttendue(exercice);
+  const conclusionTest =
+    etat.conclusionTest ??
+    {
+      choisi: { colinearite: reponse.conclusionColinearite, alignement: reponse.conclusionAlignement },
+      correct: reponse.conclusionColinearite === attendue && (exercice.variante !== "points" || reponse.conclusionAlignement === attendue),
+    };
 
   const etapeCourante = soumettreEtapeTentatives<ReponseTest>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
-    verifier: (r) => verifierTest(exercice, r),
+    verifier: (r) => diagnostiquerCritereTest(exercice, r.critere) === "correct",
     revelerReponse: () => {},
   });
 
   if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
+    return { ...etat, etapeCourante, conclusionTest };
   }
 
   const score = etapeCourante.score as number;
@@ -370,8 +427,8 @@ export function soumettreReponseTest(etat: EtatSessionColinearite, reponse: Repo
     scoreResolution: null,
     resolutionRevele: false,
     niveauAideResolution: 0,
-    scoreTest: score,
-    testRevele: etapeCourante.revelee,
+    scoreTest: conclusionTest.correct ? score : 0,
+    testRevele: etapeCourante.revelee || !conclusionTest.correct,
     niveauAideTest: etat.niveauAideTest,
   });
 }

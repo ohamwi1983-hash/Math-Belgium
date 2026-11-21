@@ -1,13 +1,11 @@
-import { useState } from "react";
 import type { ExerciceOrthogonaliteTriangleParametre, Sommet } from "../core/orthogonalite.types";
 import { diagnostiquerReductionSommet } from "../moteur/verificationOrthogonalite";
-import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import { LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE, LATEX_PIEGE_B_EQUATION, LATEX_PIEGE_B_SEUL, LATEX_PIEGE_C_EQUATION_1, LATEX_PIEGE_C_EQUATION_2, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_EQUATION_REDUITE, RAPPEL_VECTORIEL_ORTHOGONALITE_APRES, RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT, RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE, RAPPEL_VECTORIEL_ORTHOGONALITE_FIN, TEXTE_AIDE_PIEGE_B_APRES, TEXTE_AIDE_PIEGE_B_AVANT, TEXTE_AIDE_PIEGE_B_ENTRE, TEXTE_AIDE_PIEGE_C_APRES, TEXTE_AIDE_PIEGE_C_AVANT, TEXTE_AIDE_PIEGE_C_ENTRE, consigneGlobaleOrthogonalite, formatTermesEnonceTriangleParametreLatex, formuleSubstitueeSommetTriangleParametreLatex } from "../ui/formatOrthogonalite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { PLACEHOLDER_EQUATION_REDUITE, consigneGlobaleOrthogonalite, formatTermesEnonceTriangleParametreLatex } from "../ui/formatOrthogonalite";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesReductionSommet, messageReductionSommet } from "../ui/retoursVecteurs3";
 import { Katex } from "./Katex";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import { EcranChampVecteurs } from "./EcranChampVecteurs";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -15,123 +13,50 @@ interface Props {
   sommet: Sommet;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
+   * champ, remplace "Valider" par le bloc `ValidationEcran`. */
   validation?: ValidationEtapeProps | null;
 }
-
-const PHASE_PAR_SOMMET = { A: "reductionSommetA", B: "reductionSommetB", C: "reductionSommetC" } as const;
 
 function labelSommet(exercice: ExerciceOrthogonaliteTriangleParametre, sommet: Sommet): string {
   return sommet === "A" ? exercice.labelA : sommet === "B" ? exercice.labelB : exercice.labelC;
 }
 
-/** `promptcorrectionsgenerateur25lot3.md`, point 2 — même correctif que `EtapeTestSommetOrthogonalite.tsx`
- * (rendu correct du piège de conversion de signe, prose + fragments Katex courts). */
-function Piege({ sommet }: { sommet: Sommet }) {
-  if (sommet === "B") {
-    return (
-      <p>
-        {TEXTE_AIDE_PIEGE_B_AVANT} <Katex expression={LATEX_PIEGE_B_EQUATION} />
-        {TEXTE_AIDE_PIEGE_B_ENTRE} <Katex expression={LATEX_PIEGE_B_SEUL} /> {TEXTE_AIDE_PIEGE_B_APRES}
-      </p>
-    );
-  }
-  if (sommet === "C") {
-    return (
-      <p>
-        {TEXTE_AIDE_PIEGE_C_AVANT} <Katex expression={LATEX_PIEGE_C_EQUATION_1} /> {TEXTE_AIDE_PIEGE_C_ENTRE} <Katex expression={LATEX_PIEGE_C_EQUATION_2} />{" "}
-        {TEXTE_AIDE_PIEGE_C_APRES}
-      </p>
-    );
-  }
-  return null;
-}
-
-/**
- * Écran "réduction du sommet [X]" — variante 4, écrans 2 à 4 : UN SEUL champ de saisie libre
- * attendant l'équation réduite complète (`... = 0`), quel que soit son degré réel (linéaire pour le
- * sommet fixe, quadratique pour les 2 sommets mobiles — voir `core/orthogonalite.types.ts` pour la
- * justification géométrique complète) — `promptcorrectionsgenerateur25complet.md`, points 5-6.
- *
- * Aide progressive à 2 niveaux reformulée en notation vectorielle générique (point 7, même
- * formulation que l'écran "test du sommet" de la variante 3) — conserve le rappel du piège
- * BA⃗=-AB⃗/CA⃗=-AC⃗ et CB⃗=-BC⃗ pour B/C, déjà prévu à la création.
- *
- * `promptgen25modificationscompletes.md` : consigne globale ET bloc de données redondant (points
- * A/B/C, "bloc fitter" via `formatTermesEnonceTriangleParametreLatex`) ajoutés.
- *
- * Ancien bloc "état actuel" (vecteurs concernés par ce test, `etatActuelReductionSommet`) retiré —
- * son contenu alimente maintenant le récapitulatif "Ce qu'on sait déjà"
- * (`ui/recapitulatifOrthogonalite.ts`), affiché en haut de `AppOrthogonalite.tsx`.
- */
-export function EtapeReductionSommetOrthogonalite({ exercice, sommet, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
-  const [texte, setTexte] = useState("");
-  const max = NIVEAU_AIDE_MAX[PHASE_PAR_SOMMET[sommet]];
-  const complet = texte.trim() !== "";
-  const statut = complet && tentativesUtilisees > 0 ? diagnostiquerReductionSommet(exercice, sommet, texte) : undefined;
-  const consigneGlobale = consigneGlobaleOrthogonalite(exercice);
-
+/** Écran « réduction » d'un sommet (variante « triangle avec x ») : le produit scalaire des deux
+ * côtés issus du sommet, réduit à une équation (un seul champ, quel que soit le degré). Règles
+ * communes (audit 4e ch. 6, lot B) : illisible sans tentative, message ciblé (produits en croix,
+ * côté non retourné), aides à deux niveaux (le rappel « BA = −AB » est dans le niveau 1). */
+export function EtapeReductionSommetOrthogonalite({ exercice, sommet, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   return (
-    <div>
-      <EnTeteExercice
-        consigneGenerale={consigneGlobale}
-        blocDonnees={
-          <div className="equation-box equation-box-termes">
-            {formatTermesEnonceTriangleParametreLatex(exercice).map((t, i) => (
-              <Katex key={i} expression={t} />
-            ))}
-          </div>
-        }
-      />
-      <p className="prompt-text">Réduis le critère d'orthogonalité du sommet {labelSommet(exercice, sommet)} à une équation.</p>
-
-      <div className="field field-inline">
-        <label className="field-label" htmlFor={`orthogonalite-reductionsommet-${sommet}-equation`}>
-          Équation =
-        </label>
-        <input disabled={!!validation}
-          id={`orthogonalite-reductionsommet-${sommet}-equation`}
-          className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
-          placeholder={PLACEHOLDER_EQUATION_REDUITE}
-          value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+    <EcranChampVecteurs<string>
+      enTete={
+        <EnTeteExercice
+          consigneGenerale={consigneGlobaleOrthogonalite(exercice)}
+          blocDonnees={
+            <div className="equation-box equation-box-termes">
+              {formatTermesEnonceTriangleParametreLatex(exercice).map((t, i) => (
+                <Katex key={i} expression={t} />
+              ))}
+            </div>
+          }
         />
-      </div>
-
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <Piege sommet={sommet} />
-          <p>
-            {RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT} <Katex expression={LATEX_VEC_U} /> {RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE} <Katex expression={LATEX_VEC_V} />{" "}
-            {RAPPEL_VECTORIEL_ORTHOGONALITE_APRES} <Katex expression={LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE} /> {RAPPEL_VECTORIEL_ORTHOGONALITE_FIN}
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              Formule substituée : <Katex expression={formuleSubstitueeSommetTriangleParametreLatex(exercice, sommet)} />
-            </p>
-          )}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
+      }
+      consigne={`Réduis le produit scalaire du sommet ${labelSommet(exercice, sommet)} à une équation.`}
+      id={`orthogonalite-reductionsommet-${sommet}-equation`}
+      label="Équation ="
+      placeholder={PLACEHOLDER_EQUATION_REDUITE}
+      lire={(t) => (diagnostiquerReductionSommet(exercice, sommet, t) === "parse_error" ? null : t)}
+      estFausse={(t) => diagnostiquerReductionSommet(exercice, sommet, t) !== "correct"}
+      aides={aidesReductionSommet(exercice, sommet)}
+      onPremiereAide={onActiverAide}
+      cible={(t) => messageReductionSommet(exercice, sommet, t)}
+      texteIllisible={ILLISIBLE_VECTEURS.equationX}
+      tentativesUtilisees={tentativesUtilisees}
+      tentativesMax={tentativesMax}
+      onValider={onValider}
+      validation={validation}
+    />
   );
 }

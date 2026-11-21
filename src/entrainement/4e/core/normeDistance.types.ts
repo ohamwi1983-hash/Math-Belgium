@@ -19,7 +19,7 @@
  */
 import type { Composantes, Point } from "./vecteur.types";
 
-export type VarianteNormeDistance = "vecteur" | "distance" | "isocele" | "parametre" | "pythagore";
+export type VarianteNormeDistance = "vecteur" | "distance" | "isocele" | "parametre" | "pythagore" | "natureTriangle";
 
 /** Variante 1 — norme d'un vecteur donné (1 seul écran). */
 export interface ExerciceNormeVecteur {
@@ -137,6 +137,23 @@ export interface ExercicePythagore {
   sommetRectangle: "A" | "B" | "C" | null;
 }
 
-export type ExerciceNormeDistance = ExerciceNormeVecteur | ExerciceDistance | ExerciceIsocele | ExerciceParametreNorme | ExercicePythagore;
+/** Nature d'un triangle par les longueurs (lot C de l'audit 4e ch. 6 ; variante ajoutée EN FIN de
+ * catalogue) : quelconque, isocèle, rectangle ou rectangle isocèle — exemple du § 11 du cours,
+ * jamais entraîné (la variante « isocèle » classait isocèle / scalène, Pythagore à part). Mêmes
+ * données que « isocèle » (trois points, trois vecteurs, trois longueurs) ; la nature est un
+ * VERDICT tiré à parts égales. */
+export type NatureTriangleCotes = "quelconque" | "isocele" | "rectangle" | "rectangleIsocele";
+
+export interface ExerciceNatureTriangle extends Omit<ExerciceIsocele, "variante"> {
+  variante: "natureTriangle";
+  nature: NatureTriangleCotes;
+  /** Sommet de l'angle droit (null si le triangle n'est pas rectangle). */
+  sommetDroit: "A" | "B" | "C" | null;
+}
+
+/** Données communes aux écrans « vecteurs » et « longueurs » des triangles (isocèle, nature). */
+export type ExerciceTriangleCotes = ExerciceIsocele | ExerciceNatureTriangle;
+
+export type ExerciceNormeDistance = ExerciceNormeVecteur | ExerciceDistance | ExerciceIsocele | ExerciceParametreNorme | ExercicePythagore | ExerciceNatureTriangle;
 
 export type GenerateurExerciceNormeDistance = () => ExerciceNormeDistance;

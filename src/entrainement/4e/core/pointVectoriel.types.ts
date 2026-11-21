@@ -11,7 +11,7 @@
  */
 import type { Composantes, Point } from "./vecteur.types";
 
-export type VariantePointVectoriel = "translation" | "milieu" | "relationGenerale";
+export type VariantePointVectoriel = "translation" | "milieu" | "relationGenerale" | "symetrique";
 
 export interface ExerciceTranslation {
   variante: "translation";
@@ -59,6 +59,19 @@ export interface ExerciceRelationCombinaison {
   reponse: Point;
 }
 
-export type ExercicePointVectoriel = ExerciceTranslation | ExerciceMilieu | ExerciceRelationPointAPoint | ExerciceRelationCombinaison;
+/** Symétrique d'un point A par rapport à un point I (lot C de l'audit 4e ch. 6, variante ajoutée EN FIN
+ * de catalogue : les `?code=` déjà imprimés gardent leur variante) : I est le milieu de [AA′], donc
+ * A′ = 2I − A (formule du cours, § 12). */
+export interface ExerciceSymetrique {
+  variante: "symetrique";
+  pointA: Point;
+  labelA: string; // "A"
+  centre: Point;
+  labelCentre: string; // "I"
+  pointCherche: string; // "A'"
+  reponse: Point;
+}
+
+export type ExercicePointVectoriel = ExerciceTranslation | ExerciceMilieu | ExerciceRelationPointAPoint | ExerciceRelationCombinaison | ExerciceSymetrique;
 
 export type GenerateurExercicePointVectoriel = () => ExercicePointVectoriel;

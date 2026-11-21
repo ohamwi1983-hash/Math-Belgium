@@ -9,7 +9,7 @@
  * chaque `soumettreReponseXxx` exporté n'est qu'un thin wrapper typé par écran — même patron exact
  * que `sessionOrthogonalite.ts` (générateur 25).
  */
-import type { ExerciceNormeDistance, GenerateurExerciceNormeDistance } from "../core/normeDistance.types";
+import type { ExerciceNormeDistance, GenerateurExerciceNormeDistance, NatureTriangleCotes } from "../core/normeDistance.types";
 import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
@@ -50,13 +50,14 @@ function phaseSuivante(exercice: ExerciceNormeDistance, phaseActuelle: PhaseNorm
 
 function etatInitial(
   exercice: ExerciceNormeDistance,
-): Pick<EtatSessionNormeDistance, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresAccumules"> {
+): Pick<EtatSessionNormeDistance, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresAccumules" | "choixValeurs"> {
   return {
     exerciceCourant: exercice,
     phase: phaseInitiale(exercice),
     etapeCourante: demarrerEtapeTentatives(),
     niveauAide: 0,
     scoresAccumules: {},
+    choixValeurs: null,
   };
 }
 
@@ -115,6 +116,7 @@ function construireResultat(
   const constructionPythagore = champ(scoresAccumules, "constructionPythagore");
   const calculPythagore = champ(scoresAccumules, "calculPythagore");
   const testPythagore = champ(scoresAccumules, "testPythagore");
+  const conclusionNature = champ(scoresAccumules, "conclusionNature");
 
   return {
     variante: exercice.variante,
@@ -151,6 +153,9 @@ function construireResultat(
     scoreTestPythagore: testPythagore.score,
     testPythagoreRevele: testPythagore.revele,
     niveauAideTestPythagore: testPythagore.niveauAide,
+    scoreConclusionNature: conclusionNature.score,
+    conclusionNatureRevele: conclusionNature.revele,
+    niveauAideConclusionNature: conclusionNature.niveauAide,
   };
 }
 
@@ -180,6 +185,8 @@ function soumettrePhase<R>(
   verifier: (reponse: R) => boolean,
   /** Choix fermé gagnable par élimination : une seule tentative (au lieu du réglage de session). */
   tentativesMax?: number,
+  /** L'écran est révélé quoi qu'il arrive (choix fermé figé et faux, `choixValeurs`). */
+  revelerQuandMeme = false,
 ): EtatSessionNormeDistance {
   if (etat.terminee || etat.phase !== phaseAttendue) {
     throw new Error(`soumettrePhase(${phaseAttendue}) : la session n'est pas à cette étape`);
@@ -196,10 +203,10 @@ function soumettrePhase<R>(
     return { ...etat, etapeCourante };
   }
 
-  const score = etapeCourante.score as number;
+  const score = revelerQuandMeme ? 0 : (etapeCourante.score as number);
   const scoresAccumules: Partial<Record<PhaseNormeDistance, ScoreEcran>> = {
     ...etat.scoresAccumules,
-    [phaseAttendue]: { score, revele: etapeCourante.revelee, niveauAide: etat.niveauAide },
+    [phaseAttendue]: { score, revele: etapeCourante.revelee || revelerQuandMeme, niveauAide: etat.niveauAide },
   };
 
   const suivante = phaseSuivante(etat.exerciceCourant, phaseAttendue);
@@ -207,7 +214,7 @@ function soumettrePhase<R>(
     return cloturerExerciceOuSuivant(etat, construireResultat(etat.exerciceCourant, scoresAccumules));
   }
 
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), phase: suivante, niveauAide: 0, scoresAccumules };
+  return { ...etat, etapeCourante: demarrerEtapeTentatives(), phase: suivante, niveauAide: 0, scoresAccumules, choixValeurs: null };
 }
 
 // ============================================================================
@@ -234,13 +241,13 @@ export function soumettreReponseCalculDistance(etat: EtatSessionNormeDistance, t
 
 export function soumettreReponseConstructionIsocele(etat: EtatSessionNormeDistance, reponse: ReponseConstructionIsocele): EtatSessionNormeDistance {
   const exercice = etat.exerciceCourant;
-  if (exercice.variante !== "isocele") throw new Error("soumettreReponseConstructionIsocele : réservé à la variante 'isocele'");
+  if (exercice.variante !== "isocele" && exercice.variante !== "natureTriangle") throw new Error("soumettreReponseConstructionIsocele : réservé aux variantes 'isocele' et 'natureTriangle'");
   return soumettrePhase(etat, "constructionIsocele", reponse, (r) => verifierConstructionIsocele(exercice, r));
 }
 
 export function soumettreReponseCalculIsocele(etat: EtatSessionNormeDistance, reponse: ReponseCalculIsocele): EtatSessionNormeDistance {
   const exercice = etat.exerciceCourant;
-  if (exercice.variante !== "isocele") throw new Error("soumettreReponseCalculIsocele : réservé à la variante 'isocele'");
+  if (exercice.variante !== "isocele" && exercice.variante !== "natureTriangle") throw new Error("soumettreReponseCalculIsocele : réservé aux variantes 'isocele' et 'natureTriangle'");
   return soumettrePhase(etat, "calculIsocele", reponse, (r) => verifierCalculIsocele(exercice, r));
 }
 
@@ -256,10 +263,32 @@ export function soumettreReponseReductionParametreNorme(etat: EtatSessionNormeDi
   return soumettrePhase(etat, "reductionParametreNorme", texte, (t) => verifierReductionParametreNorme(exercice, t));
 }
 
+/** Écran « résolution » de « paramètre », partie 1 (audit 4e ch. 6, lot B, G3) : « aucune solution /
+ * au moins une » jugé UNE fois. Aucune solution : l'écran se clôt (réussi ou révélé, une tentative).
+ * Des solutions : le choix est figé (révélé s'il était faux), les valeurs se saisissent ensuite. */
+export function soumettreChoixResolutionParametreNorme(etat: EtatSessionNormeDistance, aucune: boolean): EtatSessionNormeDistance {
+  const exercice = etat.exerciceCourant;
+  if (exercice.variante !== "parametre" || etat.choixValeurs !== null) throw new Error("soumettreChoixResolutionParametreNorme : pas au choix de l'écran de résolution");
+  const correct = aucune === (exercice.solutions.length === 0);
+  if (exercice.solutions.length === 0) return soumettrePhase(etat, "resolutionParametreNorme", aucune, () => correct, 1);
+  return { ...etat, choixValeurs: { choisi: aucune, correct } };
+}
+
+/** Partie 2 : les valeurs de x (tentatives du réglage) ; écran révélé si le choix était faux. */
 export function soumettreReponseResolutionParametreNorme(etat: EtatSessionNormeDistance, valeurs: number[]): EtatSessionNormeDistance {
   const exercice = etat.exerciceCourant;
   if (exercice.variante !== "parametre") throw new Error("soumettreReponseResolutionParametreNorme : réservé à la variante 'parametre'");
-  return soumettrePhase(etat, "resolutionParametreNorme", valeurs, (v) => verifierResolutionParametreNorme(exercice, v));
+  const choixFaux = etat.choixValeurs !== null && !etat.choixValeurs.correct;
+  const suivant = soumettrePhase(etat, "resolutionParametreNorme", valeurs, (v) => verifierResolutionParametreNorme(exercice, v), undefined, choixFaux);
+  return suivant.phase === "resolutionParametreNorme" && !suivant.terminee ? { ...suivant, choixValeurs: etat.choixValeurs } : suivant;
+}
+
+/** Variante « nature d'un triangle » : quelconque, isocèle, rectangle, rectangle isocèle — choix
+ * fermé, une tentative. */
+export function soumettreReponseConclusionNature(etat: EtatSessionNormeDistance, nature: NatureTriangleCotes): EtatSessionNormeDistance {
+  const exercice = etat.exerciceCourant;
+  if (exercice.variante !== "natureTriangle") throw new Error("soumettreReponseConclusionNature : réservé à la variante 'natureTriangle'");
+  return soumettrePhase(etat, "conclusionNature", nature, (n) => n === exercice.nature, 1);
 }
 
 export function soumettreReponseConstructionPythagore(etat: EtatSessionNormeDistance, reponse: ReponseConstructionPythagore): EtatSessionNormeDistance {

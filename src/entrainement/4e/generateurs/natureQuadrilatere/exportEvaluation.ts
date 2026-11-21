@@ -120,7 +120,7 @@ function bareme(e: ExerciceNatureQuadrilatere): BaremeExercice {
         points: 1.5,
       },
       { sousQuestion: "b", critere: [texte("Normes de deux côtés consécutifs exactes et comparées")], points: 1 },
-      { sousQuestion: "c", critere: [texte("Critère d'orthogonalité de "), latex("\\vec{AB}"), texte(" et "), latex("\\vec{BC}"), texte(" juste")], points: 1 },
+      { sousQuestion: "c", critere: [texte("Produit scalaire de "), latex("\\vec{AB}"), texte(" et "), latex("\\vec{BC}"), texte(" juste")], points: 1 },
       { sousQuestion: "d", critere: [texte("Nature exacte, déduite des trois tests dans le bon ordre")], points: 0.5 },
     ],
     erreursFrequentes: erreurs,

@@ -1,19 +1,18 @@
 import { useState } from "react";
 import type { ExercicePythagore } from "../core/normeDistance.types";
 import type { ReponseTestPythagore } from "../moteur/verificationNormeDistance";
-import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { CONSIGNE_GENERALE_PYTHAGORE, TEXTE_AIDE_TEST_PYTHAGORE_NIVEAU1, formatRelationsPythagoreNiveau1Latex, formatRelationsPythagoreNiveau2Latex, formatTermesDonneesPythagoreLatex, libelleRectangleEn } from "../ui/formatNormeDistance";
+import { CONSIGNE_GENERALE_PYTHAGORE, formatTermesDonneesPythagoreLatex, libelleRectangleEn } from "../ui/formatNormeDistance";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux } from "./RetourSaisie";
+import { aidesTestPythagore } from "../ui/retoursVecteurs3";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExercicePythagore;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseTestPythagore) => void;
   validation?: ValidationEtapeProps | null;
@@ -30,10 +29,9 @@ const SOMMETS: ("A" | "B" | "C")[] = ["A", "B", "C"];
  * 2 niveaux : la relation de Pythagore
  * pour chaque sommet (niveau 1), puis substituée avec un "?" à la place du signe "=" (niveau 2).
  */
-export function EtapeTestPythagore({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeTestPythagore({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [choix, setChoix] = useState<"A" | "B" | "C" | null>(null);
   const complet = choix !== null;
-  const max = NIVEAU_AIDE_MAX.testPythagore;
 
   return (
     <div>
@@ -57,23 +55,10 @@ export function EtapeTestPythagore({ exercice, tentativesUtilisees, tentativesMa
         ))}
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_TEST_PYTHAGORE_NIVEAU1}</p>
-          <Katex expression={formatRelationsPythagoreNiveau1Latex(exercice)} block />
-          {niveauAide >= 2 && (
-            <>
-              <p>Substituées :</p>
-              <Katex expression={formatRelationsPythagoreNiveau2Latex(exercice)} block />
-            </>
-          )}
-        </div>
-      )}
       {!validation && (
         <>
-          {max > 0 && (
-            <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-          )}
+          {/* Choix fermé : une tentative (moteur) ; aides à deux niveaux (audit 4e ch. 6, lot B). */}
+          <AidesNiveaux aides={aidesTestPythagore(exercice)} onPremiereAide={onActiverAide} />
 
           <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider(choix)}>
             Valider

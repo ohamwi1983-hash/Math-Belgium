@@ -108,7 +108,6 @@ export function AppReductionVectorielle() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(texte) => terminerEtape(soumettreReponseReduction(etat, texte))}
             validation={validation}

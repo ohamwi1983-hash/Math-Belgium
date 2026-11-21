@@ -67,28 +67,34 @@ function construireTest(): ExerciceOrthogonaliteTest {
  * `b`/`c` non nuls) pour garantir `x` entier — cible choisie avant construction, jamais tirée puis
  * vérifiée après coup. */
 function construireParametre(): ExerciceOrthogonaliteParametre {
-  let b = 0;
-  while (b === 0) b = randomInt(-5, 5);
-  let c = 0;
-  while (c === 0) c = randomInt(-5, 5);
-
-  const produitBC = b * c;
-  const listeDiviseurs = diviseurs(produitBC);
-  const d = listeDiviseurs[randomInt(0, listeDiviseurs.length - 1)];
-  const signe = Math.random() < 0.5 ? 1 : -1;
-  const a = signe * d;
-  const solutionX = -produitBC / a;
-
-  return {
-    variante: "parametre",
-    v1: { x: a, y: b },
-    v1Nom: "u",
-    v2Connu: c,
-    v2Nom: "v",
-    coefX: a,
-    coefConst: b * c,
-    solutionX,
-  };
+  // Lot C de l'audit 4e ch. 6 (G11 : x toujours en première composante de v, 645 énoncés distincts
+  // sur 2 000) : x en première OU seconde composante, dans u OU dans v, plages élargies à ±6.
+  // Le coefficient m qui multiplie x est un diviseur signé de p·c (x entier) ; |x| ≤ 12.
+  for (;;) {
+    let p = 0;
+    while (p === 0) p = randomInt(-6, 6);
+    let c = 0;
+    while (c === 0) c = randomInt(-6, 6);
+    const produit = p * c;
+    const listeDiviseurs = diviseurs(produit);
+    const m = listeDiviseurs[randomInt(0, listeDiviseurs.length - 1)] * (Math.random() < 0.5 ? 1 : -1);
+    const solutionX = -produit / m;
+    if (Math.abs(solutionX) > 12) continue;
+    const xEnSeconde = Math.random() < 0.5;
+    const xDansU = Math.random() < 0.5;
+    return {
+      variante: "parametre",
+      // Vecteur numérique (m multiplie x : même rang que x dans l'autre vecteur).
+      v1: xEnSeconde ? { x: p, y: m } : { x: m, y: p },
+      v1Nom: xDansU ? "v" : "u",
+      v2Connu: c,
+      v2Nom: xDansU ? "u" : "v",
+      xEnSeconde,
+      coefX: m,
+      coefConst: produit,
+      solutionX,
+    };
+  }
 }
 
 // ============================================================================

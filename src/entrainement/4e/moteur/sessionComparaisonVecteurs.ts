@@ -9,11 +9,13 @@ import type { GenerateurExerciceComparaisonVecteurs } from "../core/comparaisonV
 import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
-import { verifierEgalite, verifierSelection } from "./verificationComparaisonVecteurs";
+import { verifierEgalites, verifierSelection } from "./verificationComparaisonVecteurs";
 import { NIVEAU_AIDE_MAX_COMPARAISON } from "./typesComparaisonVecteurs";
 import type { EtatSessionComparaisonVecteurs, ResultatExerciceComparaisonVecteurs } from "./typesComparaisonVecteurs";
 
 const POINTS_DE_BASE = 100;
+/** Sélection = choix fermé : une seule tentative. */
+export const TENTATIVES_SELECTION = 1;
 
 export function demarrerSessionComparaisonVecteurs(
   reglages: ReglagesSession,
@@ -84,8 +86,10 @@ export function soumettreReponseSelection(etat: EtatSessionComparaisonVecteurs, 
     throw new Error("soumettreReponseSelection : la session n'est pas à l'étape sélection");
   }
 
+  // Choix fermé (sélection sur la figure) : UNE tentative (audit 4e ch. 6, lot B, G3).
   const etapeCourante = soumettreEtapeTentatives<string[]>(etat.etapeCourante, labels, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_SELECTION,
     verifier: (r) => verifierSelection(etat.exerciceCourant, r),
     revelerReponse: () => {},
   });
@@ -105,15 +109,16 @@ export function soumettreReponseSelection(etat: EtatSessionComparaisonVecteurs, 
   };
 }
 
-/** Dernière phase, clôture l'exercice. */
-export function soumettreReponseEgalite(etat: EtatSessionComparaisonVecteurs, texte: string): EtatSessionComparaisonVecteurs {
+/** Dernière phase, clôture l'exercice : une égalité par vecteur parallèle trouvé
+ * (`egalitesDemandees`), jugées ensemble (3 tentatives). */
+export function soumettreReponseEgalite(etat: EtatSessionComparaisonVecteurs, textes: string[]): EtatSessionComparaisonVecteurs {
   if (etat.terminee || etat.phase !== "egalite") {
     throw new Error("soumettreReponseEgalite : la session n'est pas à l'étape égalité");
   }
 
-  const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, texte, {
+  const etapeCourante = soumettreEtapeTentatives<string[]>(etat.etapeCourante, textes, {
     ...reglagesEtape(etat),
-    verifier: (r) => verifierEgalite(etat.exerciceCourant, r),
+    verifier: (r) => verifierEgalites(etat.exerciceCourant, r),
     revelerReponse: () => {},
   });
 

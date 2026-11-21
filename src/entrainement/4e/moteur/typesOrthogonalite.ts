@@ -45,21 +45,30 @@ export const SEQUENCES: Record<VarianteOrthogonalite, PhaseOrthogonalite[]> = {
  * seule aide qu'il portait — le rappel "contradiction" — est retirée avec le reste de l'aide) — un
  * écran à `max=0` n'affiche aucun bouton "Aide" côté composant, jamais un bouton perpétuellement
  * désactivé. */
+// Lot B de l'audit 4e ch. 6 : aides à deux niveaux sur tous les écrans (le moteur ne garde que le
+// drapeau « aide ouverte », le niveau 2 est local à l'écran).
 export const NIVEAU_AIDE_MAX: Record<PhaseOrthogonalite, number> = {
   test: 2,
   reductionParametre: 2,
-  resolutionParametre: 0,
-  constructionTriangle: 1,
+  resolutionParametre: 2,
+  constructionTriangle: 2,
   testSommetA: 2,
   testSommetB: 2,
   testSommetC: 2,
-  conclusionTriangle: 1,
-  constructionAvecX: 1,
+  conclusionTriangle: 2,
+  constructionAvecX: 2,
   reductionSommetA: 2,
   reductionSommetB: 2,
   reductionSommetC: 2,
-  identificationResolution: 0,
+  identificationResolution: 2,
 };
+
+/** Choix fermé jugé UNE fois puis figé (audit 4e ch. 6, lot B, G3) — conclusion de l'écran « test »
+ * (orthogonaux ?), « rectangle ? en quel sommet ? » de l'écran « identification » ; le champ du même
+ * écran garde ses tentatives. `correct` faux : la bonne réponse est révélée. */
+export interface ChoixFigeOrthogonalite {
+  correct: boolean;
+}
 
 export interface ResultatExerciceOrthogonalite {
   variante: VarianteOrthogonalite;
@@ -123,6 +132,8 @@ export interface EtatSessionOrthogonalite {
   /** Écrans déjà clos de CET exercice, accumulés jusqu'à la clôture complète (qui construit le
    * `ResultatExerciceOrthogonalite` final via `construireResultat`, `sessionOrthogonalite.ts`). */
   scoresAccumules: Partial<Record<PhaseOrthogonalite, ScoreEcran>>;
+  /** Choix fermé de l'écran courant déjà jugé (null : pas encore, ou écran sans choix). */
+  choixFige: ChoixFigeOrthogonalite | null;
   resultats: ResultatExerciceOrthogonalite[];
   terminee: boolean;
 }

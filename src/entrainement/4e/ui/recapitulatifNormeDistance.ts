@@ -24,7 +24,7 @@ function valeurPourPhase(exercice: ExerciceNormeDistance, phase: PhaseNormeDista
       return { libelle: "Vecteur construit", estLatex: true, valeur: formatVecteurLatex(`${exercice.labelA}${exercice.labelB}`, exercice.vecteurAB) };
     }
     case "constructionIsocele": {
-      if (exercice.variante !== "isocele") throw new Error("recapitulatifNormeDistance : exercice inattendu (constructionIsocele)");
+      if (exercice.variante !== "isocele" && exercice.variante !== "natureTriangle") throw new Error("recapitulatifNormeDistance : exercice inattendu (constructionIsocele)");
       return {
         libelle: "Vecteurs construits",
         estLatex: true,
@@ -32,7 +32,7 @@ function valeurPourPhase(exercice: ExerciceNormeDistance, phase: PhaseNormeDista
       };
     }
     case "calculIsocele": {
-      if (exercice.variante !== "isocele") throw new Error("recapitulatifNormeDistance : exercice inattendu (calculIsocele)");
+      if (exercice.variante !== "isocele" && exercice.variante !== "natureTriangle") throw new Error("recapitulatifNormeDistance : exercice inattendu (calculIsocele)");
       return { libelle: "Longueurs calculées", estLatex: true, valeur: formatEtatActuelLongueursIsoceleLatex(exercice) };
     }
     case "reductionParametreNorme": {

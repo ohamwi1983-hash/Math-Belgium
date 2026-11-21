@@ -763,8 +763,10 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     ligne: (g) => sansPointFinal(g.liste),
   }),
   gen23: fig({
-    motif: re(String.raw`On donne les points (?<pts>${M}) ci-dessous\. Construis le vecteur (?<v>${M}) à partir du point de ton choix\.`),
-    consigne: "Construis chaque vecteur à partir du point de ton choix.",
+    // Exception « réponse graphique » (décision 2, audit 4e ch. 6) : la construction se trace sur la
+    // figure de l'énoncé, jointe à la feuille.
+    motif: re(String.raw`On donne les points (?<pts>${M}) ci-dessous\. Construis le vecteur (?<v>${M}) à partir du point de ton choix\. Trace ta construction sur la figure de l'énoncé, que tu joins à ta feuille\.`),
+    consigne: "Construis chaque vecteur à partir du point de ton choix. Trace chaque construction sur sa figure, que tu joins à ta feuille.",
     ligne: (g) => `${g.v}, avec ${g.pts}`,
   }),
   gen27: fig({
@@ -807,13 +809,13 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
   ),
   gen83: fig(
     {
-      motif: re(String.raw`On donne le point O et les vecteurs (?<uv>${M} et ${M}) ci-dessous\. Trace le vecteur (?<v>${M}) à partir du point O\.`),
-      consigne: (g) => `Dans chaque cas, on donne le point O et les vecteurs ${g.uv}. Trace le vecteur indiqué à partir du point O.`,
+      motif: re(String.raw`On donne le point O et les vecteurs (?<uv>${M} et ${M}) ci-dessous\. Trace le vecteur (?<v>${M}) à partir du point O\. Trace ta construction sur la figure de l'énoncé, que tu joins à ta feuille\.`),
+      consigne: (g) => `Dans chaque cas, on donne le point O et les vecteurs ${g.uv}. Trace le vecteur indiqué à partir du point O, sur la figure de l'énoncé, que tu joins à ta feuille.`,
       ligne: (g) => g.v ?? "",
     },
     {
-      motif: re(String.raw`On donne les points A, B et C ci-dessous\. Place le point M tel que (?<r>${M})\.`),
-      consigne: "Dans chaque cas, on donne les points A, B et C. Place le point M tel que la relation indiquée soit vraie.",
+      motif: re(String.raw`On donne les points A, B et C ci-dessous\. Place le point M tel que (?<r>${M})\. Trace ta construction sur la figure de l'énoncé, que tu joins à ta feuille\.`),
+      consigne: "Dans chaque cas, on donne les points A, B et C. Place le point M tel que la relation indiquée soit vraie, sur la figure de l'énoncé, que tu joins à ta feuille.",
       ligne: (g) => g.r ?? "",
     },
     {

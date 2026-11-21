@@ -11,6 +11,7 @@
 import type {
   ComposantesLin,
   ExerciceColinearParametre,
+  ExerciceColinearParametreCarre,
   ExerciceColinearPoints,
   ExerciceColinearPointsParametre,
   ExerciceColinearVecteurs,
@@ -21,7 +22,7 @@ import type {
 import type { Composantes } from "../core/vecteur.types";
 
 type ExerciceTest = ExerciceColinearVecteurs | ExerciceColinearPoints;
-type ExerciceAvecX = ExerciceColinearParametre | ExerciceColinearPointsParametre;
+type ExerciceAvecX = ExerciceColinearParametre | ExerciceColinearPointsParametre | ExerciceColinearParametreCarre;
 
 function formatNombre(valeur: number): string {
   // Virgule décimale (`{,}` : pas d'espace parasite en KaTeX) — seules les saisies de l'élève,
@@ -52,12 +53,13 @@ function formatFacteurLatex(expr: LinExpr): string {
   return expr.coefX !== 0 || expr.constante < 0 ? `(${rendu})` : rendu;
 }
 
+// Coordonnées « (1\,;\,−4) » (audit 4e ch. 6, G5 : « ; » se rendait collé en KaTeX).
 export function formatComposantesLinLatex(v: ComposantesLin): string {
-  return `(${formatLinExpr(v.x)} ; ${formatLinExpr(v.y)})`;
+  return `(${formatLinExpr(v.x)}\\,;\\,${formatLinExpr(v.y)})`;
 }
 
 export function formatComposantesLatex(v: Composantes): string {
-  return `(${formatNombre(v.x)} ; ${formatNombre(v.y)})`;
+  return `(${formatNombre(v.x)}\\,;\\,${formatNombre(v.y)})`;
 }
 
 /** `promptgen24modificationscompletes.md` — "bloc fitter" (un fragment KaTeX par point, jamais un
@@ -89,7 +91,7 @@ export function formatEnonceLatex(exercice: ExerciceColinearite): string {
   if (exercice.variante === "vecteurs") {
     return `\\vec{${exercice.v1Nom}}${formatComposantesMatriceLatex(exercice.v1)} \\quad \\vec{${exercice.v2Nom}}${formatComposantesMatriceLatex(exercice.v2)}`;
   }
-  if (exercice.variante === "parametre") {
+  if (exercice.variante === "parametre" || exercice.variante === "parametreCarre") {
     return `\\vec{${exercice.v1Nom}}${formatComposantesLinMatriceLatex(exercice.v1)} \\quad \\vec{${exercice.v2Nom}}${formatComposantesLinMatriceLatex(exercice.v2)}`;
   }
   if (exercice.variante === "points") {
@@ -110,7 +112,7 @@ export function formuleSubstitueeTestLatex(exercice: ExerciceTest): string {
 }
 
 export function formuleSubstitueeReductionLatex(exercice: ExerciceAvecX): string {
-  if (exercice.variante === "parametre") return formuleSubstitueeLatex(exercice.v1, exercice.v2);
+  if (exercice.variante === "parametre" || exercice.variante === "parametreCarre") return formuleSubstitueeLatex(exercice.v1, exercice.v2);
   return formuleSubstitueeLatex(exercice.vecteurAB, exercice.vecteurAC);
 }
 
@@ -119,6 +121,7 @@ const LIBELLES_VARIANTE: Record<VarianteColinearite, string> = {
   parametre: "Déterminer x pour la colinéarité",
   points: "Alignement de trois points",
   pointsParametre: "Alignement avec x",
+  parametreCarre: "Déterminer x : paramètre au carré",
 };
 
 export function libelleVarianteColinearite(variante: VarianteColinearite): string {
@@ -142,12 +145,21 @@ export const QUESTION_COLINEARITE_VECTEURS_APRES = "sont-ils colinéaires ?";
 
 /** Question d'alignement des 3 points — variante "points" uniquement, remplace l'ancienne
  * question générique "Que peux-tu conclure ?". */
-export const QUESTION_ALIGNEMENT_POINTS = "Les points A, B et C sont-ils alignés ?";
+/** Noms des points de l'instance (point ouvert du corrigé, décisions 4e ch. 6 : « ABC » en dur). */
+export function questionAlignementPoints(e: { labelA: string; labelB: string; labelC: string }): string {
+  return `Les points ${e.labelA}, ${e.labelB} et ${e.labelC} sont-ils alignés ?`;
+}
 
 /** Équation réduite `αx + β = 0` déjà confirmée à l'écran "réduction" — rappel persistant sur
  * l'écran "résolution" qui suit (jamais recalculée différemment, toujours dérivée des mêmes
  * `coefX`/`coefConst` que la vérification). */
 export function formatEquationReduiteLatex(exercice: ExerciceAvecX): string {
+  if (exercice.variante === "parametreCarre") {
+    const x2 = exercice.coefX2 === 1 ? "x^2" : exercice.coefX2 === -1 ? "-x^2" : `${formatNombre(exercice.coefX2)}x^2`;
+    const lin = formatLinExpr({ coefX: exercice.coefX, constante: exercice.coefConst });
+    const suite = exercice.coefX === 0 && exercice.coefConst === 0 ? "" : lin.startsWith("-") ? lin : `+${lin}`;
+    return `${x2}${suite} = 0`;
+  }
   return `${formatLinExpr({ coefX: exercice.coefX, constante: exercice.coefConst })} = 0`;
 }
 
@@ -162,9 +174,11 @@ export function formatEquationReduiteLatex(exercice: ExerciceAvecX): string {
  * n'avait encore reçu aucune des corrections déjà appliquées à "pointsParametre" (V4). */
 export function consigneGlobaleColinearite(exercice: ExerciceColinearite): string | null {
   if (exercice.variante === "vecteurs") return "Vérifie si ces deux vecteurs sont colinéaires.";
-  if (exercice.variante === "points") return "Vérifie si les points A, B et C sont alignés.";
-  if (exercice.variante === "parametre") return "Que doit valoir x pour que ces 2 vecteurs soient colinéaires ?";
-  return "Quelle valeur doit avoir x pour que les points A, B et C soient alignés ?";
+  if (exercice.variante === "points") return `Vérifie si les points ${exercice.labelA}, ${exercice.labelB} et ${exercice.labelC} sont alignés.`;
+  if (exercice.variante === "parametre") return "Que doit valoir x pour que ces deux vecteurs soient colinéaires ?";
+  // Second degré : 0, 1 ou 2 valeurs — la consigne ne présuppose pas le nombre (comme gen26).
+  if (exercice.variante === "parametreCarre") return "Détermine la ou les valeurs de x, s'il en existe, pour que ces deux vecteurs soient colinéaires.";
+  return `Quelle valeur doit avoir x pour que les points ${exercice.labelA}, ${exercice.labelB} et ${exercice.labelC} soient alignés ?`;
 }
 
 // ============================================================================

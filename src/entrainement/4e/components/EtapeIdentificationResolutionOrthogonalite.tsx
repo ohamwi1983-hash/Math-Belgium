@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ExerciceOrthogonaliteTriangleParametre, Sommet } from "../core/orthogonalite.types";
 import type { ReponseIdentificationResolution } from "../moteur/verificationOrthogonalite";
 import { diagnostiquerResolutionTriangleParametre } from "../moteur/verificationOrthogonalite";
+import type { ChoixFigeOrthogonalite } from "../moteur/typesOrthogonalite";
 import {
   LIBELLES_OUI_NON,
   PLACEHOLDER_SOLUTION_X,
@@ -11,8 +12,13 @@ import {
   formatReductionLatex,
   formatTermesEnonceTriangleParametreLatex,
 } from "../ui/formatOrthogonalite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { lireNombreSaisi } from "../ui/lireNombre";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesIdentification, messageChoixIdentification, messageIdentification } from "../ui/retoursVecteurs3";
 import { Katex } from "./Katex";
+import { RenduFragments } from "./RenduFragments";
+import { PiedVecteurs } from "./PiedVecteurs";
+import { useTentativeLisible } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EnTeteExercice } from "./EnTeteExercice";
@@ -22,6 +28,9 @@ interface Props {
   exercice: ExerciceOrthogonaliteTriangleParametre;
   tentativesUtilisees: number;
   tentativesMax: number;
+  /** « Rectangle ? en quel sommet ? » jugé à la première validation, puis figé. */
+  choixFige: ChoixFigeOrthogonalite | null;
+  onActiverAide: () => void;
   onValider: (reponse: ReponseIdentificationResolution) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -36,41 +45,28 @@ function labelSommet(exercice: ExerciceOrthogonaliteTriangleParametre, sommet: S
 }
 
 /**
- * Écran "identification et résolution" — variante 4, écran 5 (dernier). Restructuré par
- * `promptcorrectionsgenerateur25lot3.md`, point 3, puis par `promptcorrectionsgenerateur25lot4.md`,
- * section 2 :
- * - consigne globale + bloc des points (point f, tous deux manquaient jusque-là) ;
- * - les 3 équations réduites sont désormais affichées avec leur label AU-DESSUS de l'équation
- *   (point a), jamais sur la même ligne ;
- * - consigne de résolution reformulée en "Résous la seule équation résolvable." (point b) — un seul
- *   champ numérique `x =` (point c), sans qu'aucune sélection catégorielle ne soit exigée au
- *   préalable pour identifier l'équation ;
- * - une fois x résolu, la conclusion se pose désormais en 2 questions liées, EXACTEMENT comme
- *   `EtapeConclusionTriangleOrthogonalite` (V3) : "Ce triangle est-il rectangle ?" (Oui/Non), puis
- *   — uniquement si "Oui" — "Il est rectangle en :" (A/B/C). Cette variante garantit toujours
- *   exactement un sommet résoluble (la réponse attendue à la question 1 est donc toujours "Oui"),
- *   mais l'interface pose la question NORMALEMENT — jamais pré-remplie ni masquée, pour ne donner
- *   aucun indice supplémentaire à l'élève ;
- * - **aucune aide sur cet écran** (point e, aide entièrement retirée — `NIVEAU_AIDE_MAX.identificationResolution
- *   = 0`, même convention "max=0 → pas de bouton" que "resolutionParametre").
- *
- * La réponse soumise devient `{estRectangle, sommet, x}` (`ReponseIdentificationResolution`) — voir
- * `verificationOrthogonalite.ts` pour la vérification des 2 champs liés.
- *
- * `promptgen25modificationscompletes.md` : bloc des points passé en "bloc fitter"
- * (`formatTermesEnonceTriangleParametreLatex`) — le bloc des 3 équations réduites reste inchangé
- * (déjà un `<div>` par sommet, aucun risque de coupure).
+ * Dernier écran de « triangle avec x » : résoudre la seule équation résoluble (champ x) et dire en
+ * quel sommet le triangle est rectangle (choix fermé). Audit 4e ch. 6, lot B (G3) : le choix est
+ * jugé UNE fois puis figé (révélé s'il était faux) ; seul x garde ses tentatives. Illisible sans
+ * tentative, aides à deux niveaux (il n'y en avait aucune).
  */
-export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
-  const [estRectangle, setEstRectangle] = useState<boolean | null>(null);
-  const [sommet, setSommet] = useState<Sommet | null>(null);
+export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, choixFige, onActiverAide, onValider, validation }: Props) {
+  const [estRectangleChoisi, setEstRectangle] = useState<boolean | null>(null);
+  const [sommetChoisi, setSommet] = useState<Sommet | null>(null);
+  const [premier, setPremier] = useState<{ estRectangle: boolean; sommet: Sommet | null } | null>(null);
   const [texteX, setTexteX] = useState("");
-  const valeurX = Number(texteX.replace(",", "."));
-  const complet = texteX.trim() !== "" && (estRectangle === false || (estRectangle === true && sommet !== null));
-  const statut = texteX.trim() !== "" && tentativesUtilisees > 0 ? diagnostiquerResolutionTriangleParametre(exercice, valeurX) : undefined;
-  const consigneGlobale = consigneGlobaleOrthogonalite(exercice);
+  const saisie = useTentativeLisible<ReponseIdentificationResolution>();
+  const lu = lireNombreSaisi(texteX);
 
-  const reductions: Record<Sommet, ReturnType<typeof formatReductionLatex>> = {
+  const fige = choixFige !== null;
+  const estRectangle = fige ? (choixFige.correct ? (premier?.estRectangle ?? true) : true) : estRectangleChoisi;
+  const sommet = fige ? (choixFige.correct ? (premier?.sommet ?? null) : exercice.sommetResoluble) : sommetChoisi;
+  const complet = texteX.trim() !== "" && (estRectangle === false || (estRectangle === true && sommet !== null));
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
+  const erronee = jugee !== null && diagnostiquerResolutionTriangleParametre(exercice, jugee.x) !== "correct";
+  const bloque = !!validation || fige;
+
+  const reductions: Record<Sommet, string> = {
     A: formatReductionLatex(exercice.reductionA),
     B: formatReductionLatex(exercice.reductionB),
     C: formatReductionLatex(exercice.reductionC),
@@ -79,7 +75,7 @@ export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentative
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGlobale}
+        consigneGenerale={consigneGlobaleOrthogonalite(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-termes">
             {formatTermesEnonceTriangleParametreLatex(exercice).map((t, i) => (
@@ -91,20 +87,21 @@ export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentative
       <div className="equation-box">
         {SOMMETS.map((s) => (
           <div key={s}>
-            <p>Sommet {s} :</p>
+            <p>Sommet {labelSommet(exercice, s)} :</p>
             <Katex expression={reductions[s]} />
           </div>
         ))}
       </div>
-      <p className="prompt-text prompt-text--question-multiple">Résous la seule équation résolvable.</p>
+      <p className="prompt-text prompt-text--question-multiple">Résous la seule équation qui a une solution.</p>
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="orthogonalite-identification-x">
           x =
         </label>
-        <input disabled={!!validation}
+        <input
+          disabled={!!validation}
           id="orthogonalite-identification-x"
-          className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
+          className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_SOLUTION_X}
           value={texteX}
           onChange={(e) => setTexteX(normaliserSigneMoins(e.target.value))}
@@ -113,14 +110,11 @@ export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentative
 
       <p className="prompt-text prompt-text--question-multiple">{QUESTION_TRIANGLE_RECTANGLE}</p>
       <div className="options-grid-compact">
-        <button disabled={!!validation}
-          type="button"
-          className={estRectangle === true ? "btn toggle-active" : "btn"}
-          onClick={() => setEstRectangle(true)}
-        >
+        <button disabled={bloque} type="button" className={estRectangle === true ? "btn toggle-active" : "btn"} onClick={() => setEstRectangle(true)}>
           {LIBELLES_OUI_NON.positif}
         </button>
-        <button disabled={!!validation}
+        <button
+          disabled={bloque}
           type="button"
           className={estRectangle === false ? "btn toggle-active" : "btn"}
           onClick={() => {
@@ -137,30 +131,38 @@ export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentative
           <p className="prompt-text prompt-text--question-multiple contenu-conditionnel">{QUESTION_SOMMET_RECTANGLE}</p>
           <div className="options-grid-compact">
             {SOMMETS.map((s) => (
-              <button disabled={!!validation} key={s} type="button" className={sommet === s ? "btn toggle-active" : "btn"} onClick={() => setSommet(s)}>
+              <button disabled={bloque} key={s} type="button" className={sommet === s ? "btn toggle-active" : "btn"} onClick={() => setSommet(s)}>
                 {labelSommet(exercice, s)}
               </button>
             ))}
           </div>
         </>
       )}
+      {fige && !choixFige.correct && !validation && (
+        <p className="alert-error" role="status">
+          <span>
+            <RenduFragments fragments={messageChoixIdentification(exercice)} />
+          </span>
+        </p>
+      )}
 
       {!validation && (
-        <>
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={!complet}
-          onClick={() => complet && onValider({ estRectangle: estRectangle as boolean, sommet, x: valeurX })}
-        >
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedVecteurs
+          aides={aidesIdentification(exercice)}
+          onPremiereAide={onActiverAide}
+          complet={complet}
+          saisie={saisie}
+          reponse={() => ({ estRectangle: estRectangle as boolean, sommet, x: lu ?? Number.NaN })}
+          lisible={() => lu !== null}
+          onValider={(r) => {
+            if (!fige) setPremier({ estRectangle: r.estRectangle, sommet: r.sommet });
+            onValider(r);
+          }}
+          texteIllisible={ILLISIBLE_VECTEURS.valeurX}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => messageIdentification(exercice, r.x)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>
