@@ -43,7 +43,9 @@ cherchant le chapitre correspondant dans `chaptersIndex.ts`.
 - `/` — page d'accueil (`routes/HomePage.tsx`), une section par niveau (`LEVELS` dans
   `content/chaptersIndex.ts`) listant ses chapitres.
 - `/{levelSlug}/{chapterSlug}` — page d'un chapitre (`routes/ChapterRoute.tsx`), résolue via
-  `findChapter()`.
+  `findChapter()`. Parcours « une étape par écran » sur cette seule route : vue choisie par le
+  fragment (`#sectionId` = étape, `#reviser`, `#entrainer`, rien = carte), voir
+  `.claude/rules/chapter-components.md`.
 - Comptes professeurs (`.claude/rules/comptes.md`) : `/connexion`, `/inscription`, `/mot-de-passe`,
   `/profil`, `/coffre`, `/carnet` (carnet de matière vue), `/admin` ; le panneau des évaluations/examens (`/evaluation`) exige une
   session. Cours, générateurs et feuilles d'exercices (`/exercice`, `/{levelSlug}/{chapterSlug}/exercices`)
