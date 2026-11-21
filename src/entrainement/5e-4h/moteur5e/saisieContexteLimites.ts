@@ -23,6 +23,8 @@ export function saisieContexteRefusee(e: ExerciceLimitesContexte, phase: PhaseLi
     case "identification":
       return e.famille === "population" && (nombreExactRefuse(v[0], e.a) || nombreExactRefuse(v[1], e.b));
     case "construireC":
+      // Expression en t : lue comme une expression en x (même substitution que la vérification).
+      return expressionIllisible(v[0].replace(/(?<![a-zA-Z])t(?![a-zA-Z])/g, "x"));
     case "asymptoteOblique":
       return expressionIllisible(v[0]);
     case "evaluer":

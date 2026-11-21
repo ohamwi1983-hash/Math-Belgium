@@ -38,7 +38,7 @@ const REGEX_INFINI = /^([+-]?)(inf|infini|infty|\\infty|oo)$/;
  * → « - », symbole « ∞ » → « inf », espaces retirés (audit 5e ch. 4, point 4 : « −∞ », « +∞ », « ∞ »
  * étaient refusés). */
 function normaliserInfini(texte: string): string {
-  return texte.trim().toLowerCase().replace(/\s+/g, "").replace(/[\u2212\u2013]/g, "-").replace(/∞/g, "inf");
+  return texte.trim().toLowerCase().replace(/\s+/g, "").replace(/[\u2212\u2013\u2014]/g, "-").replace(/∞/g, "inf");
 }
 
 /** Champ libre générique acceptant soit une valeur numérique (entier, décimal, fraction — via
