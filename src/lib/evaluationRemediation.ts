@@ -7,6 +7,8 @@ import { nomGenerateur, type IdGenerateurPilote } from './evaluationPayload'
 import {
   autresCaracteristiques,
   chapitresExamen,
+  elementsAPlat,
+  questionsDeSerie,
   estExamen,
   empreinteSection,
   graineInedite,
@@ -32,7 +34,8 @@ import {
  *   même profil de tirage que la question d'origine (cas particulier, paramètres absents, type de
  *   question `forme`, calculatrice de l'évaluation) — avec de NOUVELLES graines : jamais un énoncé
  *   de l'évaluation (toutes séries), jamais deux fois le même énoncé dans la feuille. Une question
- *   regroupée a)/b)/c) (adaptateur `regroupable`) revient en entier, `exercicesParQuestion` fois.
+ *   regroupée a), b), c) (`AdaptateurFeuilleExercices.regroupement`) revient en entier, `exercicesParQuestion`
+ *   fois ; les exercices d'une même question forment, dans la feuille, UN groupe a), b), c) (même consigne).
  * - Vrai/faux coché (UNE question par série, `itemVraiFauxRegroupe`) : d'autres affirmations des
  *   mêmes thèmes, autant de fois plus qu'à l'évaluation — celles de l'évaluation seulement si la
  *   banque n'en a pas assez.
@@ -88,37 +91,39 @@ function detailExercice(el: Extract<ElementPlan, { type: 'exercice' }>): string 
     return p !== null && autresCaracteristiques(p, (adaptateur.parametresAuChoix ?? []).map((x) => x.id)) !== null
   }))
     morceaux.push('cas particulier')
-  if (el.instances.length > 1) morceaux.push(`${el.instances.length} calculs a), b)…`)
+  if (el.instances.length > 1) morceaux.push(`${el.instances.length} exercices regroupés a), b)…`)
   return morceaux.join(' · ')
 }
 
-/** Questions de l'évaluation, dans l'ordre et avec la numérotation de la copie de la série A. */
+/** Questions de l'évaluation, dans l'ordre et avec la numérotation de la copie de la série A —
+ * MÊME règle que les documents (`questionsDeSerie` : vrai/faux en une question au rang du premier,
+ * exercices regroupés a), b), c) au rang du premier), puis rangement par processus / parties. Les
+ * indices désignent les éléments « à plat » de la série A (`elementsAPlat`). */
 export function questionsRemediables(plan: PlanDocument): QuestionRemediable[] {
   const serie = plan.series[0]
   if (!serie) return []
+  const elements = elementsAPlat(serie)
   type Brouillon = Omit<QuestionRemediable, 'numero'>
   const liste: Brouillon[] = []
-  let vraiFaux: Brouillon | null = null
-  serie.elements.forEach((el, indice) => {
+  let vf: Brouillon | null = null
+  for (const q of questionsDeSerie(elements)) {
+    const el = elements[q.indices[0]]
     const base = { processus: el.processus, nomProcessus: NOM_PROCESSUS[el.processus], titre: el.section?.titre ?? el.titreSection }
     if (el.type === 'exercice') {
-      if (!EVALUATION_ADAPTER_REGISTRY[el.generatorId]) return
-      liste.push({ ...base, nature: 'exercice', detail: detailExercice(el), memeQuestion: false, indicesElements: [indice] })
+      if (!EVALUATION_ADAPTER_REGISTRY[el.generatorId]) continue
+      const membres = q.indices.map((i) => elements[i]).filter((e): e is Extract<ElementPlan, { type: 'exercice' }> => e.type === 'exercice')
+      liste.push({ ...base, nature: 'exercice', detail: detailExercice({ ...el, instances: membres.flatMap((m) => m.instances) }), memeQuestion: false, indicesElements: q.indices })
     } else if (el.type === 'ouverte') {
       const detail = el.question.titre ?? fragmentsEnRichText(el.question.enonce)
-      liste.push({ ...base, nature: 'ouverte', detail, memeQuestion: true, indicesElements: [indice] })
+      liste.push({ ...base, nature: 'ouverte', detail, memeQuestion: true, indicesElements: q.indices })
     } else {
       // Tous les vrai/faux de la série : UNE question, au rang du premier (`itemVraiFauxRegroupe`).
-      if (!vraiFaux) {
-        vraiFaux = { ...base, nature: 'vraiFaux', detail: '', memeQuestion: false, indicesElements: [] }
-        liste.push(vraiFaux)
-      }
-      vraiFaux.indicesElements.push(indice)
+      vf = { ...base, nature: 'vraiFaux', detail: '', memeQuestion: false, indicesElements: q.indices }
+      liste.push(vf)
     }
-  })
-  const vf = vraiFaux as Brouillon | null
+  }
   if (vf) {
-    const sources = vf.indicesElements.map((i) => serie.elements[i]).filter((e): e is Extract<ElementPlan, { type: 'vraiFaux' }> => e.type === 'vraiFaux')
+    const sources = vf.indicesElements.map((i) => elements[i]).filter((e): e is Extract<ElementPlan, { type: 'vraiFaux' }> => e.type === 'vraiFaux')
     const premier = sources[0]
     const memeSection = sources.every((e) => e.section && premier.section && e.section.titre === premier.section.titre && e.chapitreSlug === premier.chapitreSlug)
     if (!memeSection) vf.titre = 'Vrai ou faux'
@@ -128,7 +133,7 @@ export function questionsRemediables(plan: PlanDocument): QuestionRemediable[] {
   // Examen : ordre et numérotation des PARTIES de la copie (`partiesExamen`, la même fonction que
   // les documents) — chapitre(s) de chaque question tirés de ses éléments de la série A.
   if (estExamen(plan)) {
-    const chapitresDe = (q: Brouillon) => [...new Set(q.indicesElements.map((i) => serie.elements[i].section?.chapitreSlug).filter((c): c is string => !!c))]
+    const chapitresDe = (q: Brouillon) => [...new Set(q.indicesElements.map((i) => elements[i].section?.chapitreSlug).filter((c): c is string => !!c))]
     return partiesExamen(liste, (q) => ({ processus: q.processus, chapitres: chapitresDe(q) }), plan.entete.organisationExamen ?? 'chapitre', chapitresExamen(plan))
       .flatMap((p) => p.questions)
       .map(({ element, numero }) => ({ ...element, numero }))
@@ -241,20 +246,28 @@ export async function construirePlanRemediation(source: PlanDocument, numeros: n
   const elements: ElementPlan[] = []
   /** Questions dont la variante n'avait plus assez d'énoncés inédits (exercices omis). */
   const incomplete = new Set<number>()
+  const aPlat = elementsAPlat(serieA)
   for (const q of choisies) {
-    for (const indice of q.indicesElements) {
-      const el = serieA.elements[indice]
-      if (el.type === 'exercice') {
+    // Exercices de la question (une instance chacun) : repris n fois EN ENTIER (a, b, c, puis a, b,
+    // c…), tous avec la même ligne d'origine « r<n° de question> » — ils forment donc UN groupe
+    // a), b), c) dans la feuille de remédiation quand le générateur se regroupe (même consigne).
+    const exercices = q.indicesElements.map((i) => aPlat[i]).filter((e): e is Extract<ElementPlan, { type: 'exercice' }> => e.type === 'exercice')
+    for (let k = 0; k < n; k++) {
+      for (const el of exercices) {
         const adaptateur = EVALUATION_ADAPTER_REGISTRY[el.generatorId] as Adaptateur | undefined
         if (!adaptateur) continue
-        for (let k = 0; k < n; k++) {
-          const instances = el.instances.flatMap((inst) => {
-            const graine = graineRemediation(el.generatorId, adaptateur, inst.varianteId, contrainteDepuisOrigine(adaptateur, inst, calculatrice), vues, interdites)
-            return graine === null ? [] : [{ ...inst, graine }]
-          })
-          if (instances.length > 0) elements.push({ ...el, instances })
-          if (instances.length < el.instances.length) incomplete.add(q.numero)
-        }
+        const instances = el.instances.flatMap((inst) => {
+          const graine = graineRemediation(el.generatorId, adaptateur, inst.varianteId, contrainteDepuisOrigine(adaptateur, inst, calculatrice), vues, interdites)
+          return graine === null ? [] : [{ ...inst, graine }]
+        })
+        if (instances.length > 0) elements.push({ ...el, instances, ligne: `r${q.numero}` })
+        if (instances.length < el.instances.length) incomplete.add(q.numero)
+      }
+    }
+    for (const indice of q.indicesElements) {
+      const el = aPlat[indice]
+      if (el.type === 'exercice') {
+        continue
       } else if (el.type === 'vraiFaux') {
         const banque = await chargerThemeVraiFaux(el.chapitreSlug, el.theme)
         if (!banque) throw new Error(`Banque vrai/faux locale introuvable : ${el.chapitreSlug} / ${el.theme}`)

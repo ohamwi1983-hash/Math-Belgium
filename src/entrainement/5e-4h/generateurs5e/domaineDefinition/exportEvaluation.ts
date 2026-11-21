@@ -167,5 +167,4 @@ export const adaptateurEvaluationDomaineDefinition: AdaptateurFeuilleExercices<E
   enoncePapier: enoncePapierDomaineDefinition,
   profilInstance: profilDomaineDefinition,
   libelleCasParticulier: LIBELLE_CAS_DOMAINE_DEFINITION,
-  regroupable: false,
 };

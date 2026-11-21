@@ -26,7 +26,7 @@ import { correctionDetailleeQuelAngle } from "./corrigeDetaille";
  * feuille imprimée, l'élève écrit directement les valeurs trouvées (ou "aucune solution" s'il croit
  * qu'il n'y en a pas) en réponse à la même consigne, jamais un choix structurel séparé à reproduire.
  *
- * `regroupable: true` — remplit exactement les 3 conditions de `AdaptateurFeuilleExercices.regroupable`
+ * Regroupable a), b), c) (`export/regroupementsPapier.ts` ; ancien `regroupable: true`) — remplit les 3 conditions d'origine
  * (voir `export/genererFeuilleExercices.ts`) : (1) toujours UNE seule question par instance ; (2) une
  * consigne GÉNÉRIQUE, constante quelle que soit la variante ou les valeurs tirées (`CONSIGNE_GENERALE`
  * ci-dessous, jamais interpolée) — l'équation à résoudre, elle-même dépendante de l'instance, reste
@@ -82,7 +82,7 @@ function construireCorrectionQuelAngle(exercice: ExerciceQuelAngle): BlocCorrect
 // --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
 // Un seul écran : l'énoncé imprimé est l'équation suivie de la consigne de l'écran (le choix « pas de
 // solution / au moins une solution » de l'écran n'a pas d'équivalent papier : l'élève écrit les
-// solutions, ou qu'il n'y en a pas). `regroupable` reste vrai : l'énoncé papier est identique à la
+// solutions, ou qu'il n'y en a pas). le regroupement a), b), c) reste possible : l'énoncé papier est identique à la
 // consigne d'écran, le regroupement de plusieurs équations sous une consigne ne perd donc rien.
 
 function enoncePapier(exercice: ExerciceQuelAngle): EnoncePapier {
@@ -181,5 +181,4 @@ export const adaptateurEvaluationQuelAngle: AdaptateurFeuilleExercices<ExerciceQ
   enoncePapier,
   profilInstance: profilQuelAngle,
   libelleCasParticulier: LIBELLE_CAS_QUEL_ANGLE,
-  regroupable: true,
 };

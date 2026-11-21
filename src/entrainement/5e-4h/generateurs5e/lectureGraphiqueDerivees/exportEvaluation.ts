@@ -368,5 +368,4 @@ export const adaptateurEvaluationLectureGraphiqueDerivees: AdaptateurFeuilleExer
   dureeMinutes: 12,
   profilInstance: profilLectureGraphiqueDerivees,
   // Graphique (`enteteHtml`) : pas de regroupement.
-  regroupable: false,
 };

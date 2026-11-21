@@ -111,5 +111,4 @@ export const adaptateurEvaluationDecompositionFonction: AdaptateurFeuilleExercic
   bareme: baremeDecompositionFonction,
   enoncePapier: enoncePapierDecompositionFonction,
   profilInstance: profilDecompositionFonction,
-  regroupable: false,
 };

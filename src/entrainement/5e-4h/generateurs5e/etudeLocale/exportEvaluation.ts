@@ -271,5 +271,4 @@ export const adaptateurEvaluationEtudeLocale: AdaptateurFeuilleExercices<Exercic
   dureeMinutes: 12,
   profilInstance: profilEtudeLocale,
   calculatriceIndispensable: ["polynomiale-irrationnelle-base", "polynomiale-irrationnelle-avance"],
-  regroupable: false,
 };

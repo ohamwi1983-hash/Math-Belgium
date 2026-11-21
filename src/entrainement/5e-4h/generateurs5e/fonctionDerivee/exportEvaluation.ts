@@ -230,5 +230,4 @@ export const adaptateurEvaluationFonctionDerivee: AdaptateurFeuilleExercices<Exe
   enoncePapier: enoncePapierFonctionDerivee,
   dureeMinutes: 5,
   profilInstance: profilFonctionDerivee,
-  regroupable: false,
 };

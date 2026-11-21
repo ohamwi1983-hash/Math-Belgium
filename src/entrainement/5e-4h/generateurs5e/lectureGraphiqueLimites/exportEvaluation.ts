@@ -386,7 +386,5 @@ export const adaptateurEvaluationLectureGraphiqueLimites: AdaptateurFeuilleExerc
   // (`export/genererFeuilleExercices.ts`) — ET la consigne texte varie déjà avec l'instance (nombre de
   // blancs à compléter, 2 à 9 selon le tirage — jamais une consigne générique constante), ET il y a
   // plusieurs questions par instance (une par blanc) : les 3 conditions d'exclusion du mécanisme sont
-  // réunies, `regroupable` reste donc à sa valeur par défaut `false`/absent — laissé explicite ici pour
-  // documenter la décision plutôt que de l'omettre silencieusement.
-  regroupable: false,
+  // réunies : jamais de regroupement a), b), c) (aucune entrée dans `export/regroupementsPapier.ts`).
 };

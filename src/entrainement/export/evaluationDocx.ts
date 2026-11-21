@@ -240,8 +240,13 @@ async function enonceQuestionDocx(item: ItemEvaluation, numero: number, etiquett
         tabStops: [{ type: TabStopType.RIGHT, position: LARGEUR_UTILE - (plusieurs ? 240 : 0) }],
         spacing: { before: 60 },
         indent: plusieurs ? { left: 240 } : undefined,
+        // Question regroupée : une ligne ne se sépare pas de la consigne quand c'est la première.
+        keepNext: item.groupe && q === 0 ? true : undefined,
+        keepLines: item.groupe ? true : undefined,
       }),
     );
+    const figure = item.groupe?.[q]?.figureHtml;
+    if (figure) enfants.push(...(await htmlVersParagraphes(figure)));
   }
   return enfants;
 }
@@ -362,6 +367,22 @@ async function blocCorrectionDocx(bloc: BlocCorrection): Promise<FileChild[]> {
 
 async function correctionDocx(item: ItemEvaluation): Promise<FileChild[]> {
   const enfants: FileChild[] = [new Paragraph({ children: [new TextRun({ text: "Corrigé", bold: true, color: COULEUR_CORRIGE, size: 18 })], spacing: { before: 80 }, keepNext: true })];
+  if (item.groupe && item.groupe.length > 0) {
+    // Question regroupée : une sous-partie par ligne (« a) » et son énoncé), puis le corrigé de
+    // l'instance avec SES étapes — comme le corrigé HTML.
+    for (let i = 0; i < item.groupe.length; i++) {
+      const ligne = item.groupe[i];
+      enfants.push(
+        new Paragraph({
+          children: [new TextRun({ text: `${LETTRES[i] ?? i + 1}) `, bold: true }), ...(await fragmentsVersRunsDocx(ligne.enonce))],
+          spacing: { before: 140 },
+          keepNext: true,
+        }),
+      );
+      enfants.push(...(await correctionDocx(ligne.item)).slice(1));
+    }
+    return enfants;
+  }
   const lignes = item.correctionDetaillee ?? [];
   if (lignes.length === 0) {
     for (const bloc of item.correction) enfants.push(...(await blocCorrectionDocx(bloc)));
@@ -671,6 +692,8 @@ export async function genererGrilleEvaluationDocx(entete: EnteteEvaluation, item
         enfants.push(new Paragraph({ children: runs, spacing: { before: 40 } }));
       }
       if (item.code) enfants.push(new Paragraph({ children: [new TextRun({ text: `code ${item.code.code}`, size: 16, color: GRIS })], spacing: { before: 40 } }));
+      const codesLignes = (item.groupe ?? []).map((l, i) => (l.item.code ? `${LETTRES[i] ?? i + 1}) ${l.item.code.code}` : "")).filter(Boolean);
+      if (!item.code && codesLignes.length > 0) enfants.push(new Paragraph({ children: [new TextRun({ text: `codes ${codesLignes.join(" · ")}`, size: 16, color: GRIS })], spacing: { before: 40 } }));
     }
   }
   const bord = { style: BorderStyle.SINGLE, size: 4, color: "B9BEC7", space: 4 } as const;

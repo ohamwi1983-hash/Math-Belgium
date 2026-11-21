@@ -639,8 +639,9 @@ export function EvaluationGeneratorPanel({
         vraiFaux.points += pointsLigne(l)
         continue
       }
-      const regroupe = l.type === 'exercice' && !!EVALUATION_ADAPTER_REGISTRY[l.cle ?? '']?.regroupable
-      elements.push({ processus: l.processus, chapitres: [l.chapitreSlug], points: pointsLigne(l), questions: regroupe ? 1 : nombreLigne(l) })
+      // Exercices regroupés a), b), c) : le total fixé se répartit LIGNE par ligne (0,5 pt au moins
+      // chacune, `itemsDuDocument`) — chaque instance compte donc ici, regroupée ou non.
+      elements.push({ processus: l.processus, chapitres: [l.chapitreSlug], points: pointsLigne(l), questions: nombreLigne(l) })
     }
     return partiesExamen(elements, (e) => e, organisationExamen, chapitresDuPanneau).map((p) => {
       const somme = p.questions.reduce((t, q) => t + q.element.points, 0)

@@ -1,4 +1,4 @@
-import type { AdaptateurFeuilleExercices, ProfilInstance, BaremeExercice, EnoncePapier, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, QuestionExercice, SectionExercice } from '../entrainement/export/genererFeuilleExercices'
+import type { AdaptateurFeuilleExercices, ProfilInstance, BaremeExercice, EnoncePapier, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, PrecisionRegroupement, RegroupementInstance, SectionExercice } from '../entrainement/export/genererFeuilleExercices'
 import { texte } from '../entrainement/export/fragmentsDocx'
 import {
   genererEvaluationHtml,
@@ -9,6 +9,7 @@ import {
   type EnteteEvaluation as EnteteEvaluationSerie,
   type ExamenDocument,
   type ItemEvaluation,
+  type LigneGroupe,
 } from '../entrainement/export/assemblerEvaluationHtml'
 import { horaireExamen, lignesConsignes, mettreAEchelle, sessionParDefaut, titreCourtChapitre, type ChapitreExamen } from '../entrainement/export/examen'
 import { annexeFormulaire } from '../entrainement/export/annexesPapier'
@@ -87,7 +88,10 @@ export interface InstancePlan {
 }
 
 export type ElementPlan =
-  | (ElementBase & { type: 'exercice'; generatorId: string; instances: InstancePlan[] })
+  /** `ligne` : ligne de sélection d'origine (indice de l'item du panneau ; remédiation : « r<n° de
+   * question> ») — les exercices regroupés a), b), c) viennent toujours de la même ligne. Absent
+   * (plans d'avant) : regroupement par générateur et processus. */
+  | (ElementBase & { type: 'exercice'; generatorId: string; instances: InstancePlan[]; ligne?: number | string })
   | (ElementBase & { type: 'ouverte'; points: number; question: QuestionOuverte })
   | (ElementBase & { type: 'vraiFaux'; pointsParAffirmation: number; chapitreSlug: string; theme: string; indices: number[] })
 
@@ -464,8 +468,9 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
           }
         }
         if (instances.length === 0) continue
-        if (adaptateur.regroupable && instances.length > 1) elements.push({ ...base, type: 'exercice', generatorId, instances })
-        else for (const instance of instances) elements.push({ ...base, type: 'exercice', generatorId, instances: [instance] })
+        // Un élément par instance : le regroupement a), b), c) se fait à l'impression
+        // (`questionsDeSerie`), d'après la ligne d'origine.
+        for (const instance of instances) elements.push({ ...base, type: 'exercice', generatorId, instances: [instance], ligne: indexItem })
       } else if (item.vraiFaux) {
         const chapitreSlug = item.section?.chapitreSlug
         const banque = chapitreSlug ? await chargerThemeVraiFaux(chapitreSlug, item.vraiFaux.theme) : null
@@ -633,76 +638,201 @@ function appliquerEnoncePapier(item: ItemEvaluation, papier: EnoncePapier): Item
   }
 }
 
-function itemExercice(el: Extract<ElementPlan, { type: 'exercice' }>): ItemEvaluation | null {
+/** Instance tirée d'un élément (une instance), mise en cache le temps d'une série : la clé de
+ * regroupement et l'item la tirent tous deux. */
+type CacheInstances = Map<string, unknown>
+function instanceDe(adaptateur: Adaptateur, inst: InstancePlan, cache?: CacheInstances): never {
+  const cle = `${inst.varianteId}|${inst.graine}`
+  if (cache?.has(cle)) return cache.get(cle) as never
+  const instance = tirerInstance(adaptateur, inst.varianteId, inst.graine)
+  cache?.set(cle, instance)
+  return instance
+}
+
+/** Item d'UN exercice (une instance) : énoncé papier, corrigé, barème, niveau, code. */
+function itemExercice(el: Extract<ElementPlan, { type: 'exercice' }>, cache?: CacheInstances): ItemEvaluation | null {
   const adaptateur = EVALUATION_ADAPTER_REGISTRY[el.generatorId]
   if (!adaptateur) return null
-  const tirees = el.instances.map((inst) => ({ inst, instance: tirerInstance(adaptateur, inst.varianteId, inst.graine) }))
-  const communs = champsCommuns(el)
-
-  if (tirees.length === 1) {
-    const { inst, instance } = tirees[0]
-    const niveau = niveauEtDuree(adaptateur, instance)
-    const item: ItemEvaluation = {
-      ...communs,
-      nature: 'exercice',
-      points: inst.points,
-      section: adaptateur.construireEnonce(instance),
-      correction: adaptateur.construireCorrection(instance),
-      ...niveauItem([niveau]),
-      reponseBreve: adaptateur.reponseBreve?.(instance),
-      correctionDetaillee: adaptateur.correctionDetaillee?.(instance),
-      bareme: adaptateur.bareme?.(instance),
-      dureeMinutes: dureeItem([niveau], adaptateur.dureeMinutes, 1),
-      code: codeInstance(el.generatorId, adaptateur, inst.varianteId, inst.graine),
-    }
-    return adaptateur.enoncePapier ? appliquerEnoncePapier(item, adaptateur.enoncePapier(instance)) : item
-  }
-
-  // Regroupement (adaptateur `regroupable`) : une seule question, une ligne a)/b)/c) par instance.
-  const consigneGroupee = adaptateur.construireEnonce(tirees[0].instance).questions[0]?.consigne ?? []
-  const section: SectionExercice = {
-    enteteFragments: consigneGroupee,
-    questions: tirees.map(({ instance }): QuestionExercice => ({ consigne: adaptateur.construireEnonce(instance).enteteFragments ?? [] })),
-    disposeEnTableau: true,
-  }
-  const correction = tirees.flatMap(({ instance }, i) => prefixerLettreBlocs(adaptateur.construireCorrection(instance), LETTRES[i] ?? String(i + 1)))
-  const points = tirees.reduce((t, { inst }) => t + inst.points, 0)
-  const reponses = adaptateur.reponseBreve ? tirees.map(({ instance }) => adaptateur.reponseBreve!(instance)) : undefined
-  const correctionDetaillee = adaptateur.correctionDetaillee
-    ? tirees.flatMap(({ instance }, i) => adaptateur.correctionDetaillee!(instance).map((e): EtapeCorrection => ({ ...e, sousQuestion: LETTRES[i] })))
-    : undefined
-  let bareme: BaremeExercice | undefined
-  if (adaptateur.bareme) {
-    const baremes = tirees.map(({ instance }) => adaptateur.bareme!(instance))
-    const criteres: CritereBareme[] = baremes.flatMap((b, i) => {
-      const somme = b.criteres.reduce((t, c) => t + c.points, 0) || 1
-      // Poids ramenés aux points de l'instance, pour que chaque ligne a)/b) pèse ce qu'elle vaut.
-      return b.criteres.map((c) => ({ ...c, sousQuestion: LETTRES[i], points: (c.points / somme) * tirees[i].inst.points }))
-    })
-    bareme = {
-      reponseFinale: joindreAvecLettres(baremes.map((b) => b.reponseFinale)),
-      criteres,
-      erreursFrequentes: baremes[0].erreursFrequentes,
-      reponsesAcceptees: baremes.flatMap((b) => b.reponsesAcceptees ?? []),
-    }
-  }
-  const premier = tirees[0]
-  const niveaux = tirees.map(({ instance }) => niveauEtDuree(adaptateur, instance))
-  return {
-    ...communs,
+  const inst = el.instances[0]
+  if (!inst) return null
+  const instance = instanceDe(adaptateur, inst, cache)
+  const niveau = niveauEtDuree(adaptateur, instance)
+  const item: ItemEvaluation = {
+    ...champsCommuns(el),
     nature: 'exercice',
-    points,
-    section,
-    correction,
-    ...niveauItem(niveaux),
-    reponseBreve: reponses ? joindreAvecLettres(reponses) : undefined,
-    correctionDetaillee,
-    bareme,
-    dureeMinutes: dureeItem(niveaux, adaptateur.dureeMinutes, tirees.length),
-    code: codeInstance(el.generatorId, adaptateur, premier.inst.varianteId, premier.inst.graine),
+    points: inst.points,
+    section: adaptateur.construireEnonce(instance),
+    correction: adaptateur.construireCorrection(instance),
+    ...niveauItem([niveau]),
+    reponseBreve: adaptateur.reponseBreve?.(instance),
+    correctionDetaillee: adaptateur.correctionDetaillee?.(instance),
+    bareme: adaptateur.bareme?.(instance),
+    dureeMinutes: dureeItem([niveau], adaptateur.dureeMinutes, 1),
+    code: codeInstance(el.generatorId, adaptateur, inst.varianteId, inst.graine),
+  }
+  return adaptateur.enoncePapier ? appliquerEnoncePapier(item, adaptateur.enoncePapier(instance)) : item
+}
+
+/* ----------------------------------------------------------------------------------------------
+ * Regroupement a), b), c) (décision de l'utilisateur, `AdaptateurFeuilleExercices.regroupement`)
+ *
+ * Purement une MISE EN FORME après tirage : le plan garde un élément par instance (graine, variante,
+ * points, `?code=` inchangés) ; à l'impression, les instances d'un même générateur, de la même ligne
+ * de sélection (`ElementPlan.ligne`), du même processus, qui ont la même consigne générale forment
+ * UNE question, placée au rang de la première (comme le vrai/faux). Une seule instance → exercice
+ * ordinaire, rendu exactement comme avant. `questionsDeSerie` est la SEULE règle de numérotation :
+ * documents (`itemsDepuisSerie`) et remédiation (`questionsRemediables`) l'appellent tous deux.
+ * -------------------------------------------------------------------------------------------- */
+
+/** Une question imprimée d'une série : indices des éléments qu'elle couvre (un exercice, une question
+ * ouverte, TOUS les vrai/faux, ou un groupe a), b), c)). */
+export interface QuestionSerie {
+  nature: 'exercice' | 'ouverte' | 'vraiFaux'
+  indices: number[]
+  /** Regroupement a), b), c) de plusieurs exercices. */
+  regroupe: boolean
+}
+
+/** Éléments « à plat » : un ancien plan peut porter plusieurs instances dans un élément (ancien
+ * `regroupable`) — chacune redevient un élément, regroupé ensuite par la règle commune. */
+export function elementsAPlat(serie: PlanSerie): ElementPlan[] {
+  return serie.elements.flatMap((el) => (el.type === 'exercice' && el.instances.length > 1 ? el.instances.map((inst) => ({ ...el, instances: [inst] })) : [el]))
+}
+
+function normaliserFragments(fr: FragmentConsigne[]): string {
+  return JSON.stringify(fr.map((f) => (f.type === 'texte' ? { t: f.valeur.replace(/\s+/g, ' ').trim() } : { l: f.valeur.replace(/\s+/g, '') })))
+}
+
+/** Ligne de regroupement d'un élément (consigne commune, données…) et sa clé de groupe, ou `null`
+ * (générateur sans `regroupement`, énoncé non reconnu, instance non reproductible). */
+function regroupementDe(el: ElementPlan, cache?: CacheInstances): { cle: string; reg: RegroupementInstance } | null {
+  if (el.type !== 'exercice' || el.instances.length !== 1) return null
+  const adaptateur = EVALUATION_ADAPTER_REGISTRY[el.generatorId]
+  if (!adaptateur?.regroupement) return null
+  try {
+    const reg = adaptateur.regroupement(instanceDe(adaptateur, el.instances[0], cache))
+    if (!reg) return null
+    return { cle: `${el.ligne ?? ''}|${el.generatorId}|${el.processus}|${normaliserFragments(reg.consigne)}`, reg }
+  } catch {
+    return null
   }
 }
 
+/** Questions d'une série, dans l'ordre de la série (avant le rangement par processus), avec les
+ * regroupements : tous les vrai/faux = UNE question au rang du premier ; les exercices de même clé
+ * de regroupement = UNE question au rang du premier. */
+export function questionsDeSerie(elements: ElementPlan[], cache?: CacheInstances): QuestionSerie[] {
+  const questions: QuestionSerie[] = []
+  let vraiFaux: QuestionSerie | null = null
+  const parCle = new Map<string, QuestionSerie>()
+  elements.forEach((el, i) => {
+    if (el.type === 'vraiFaux') {
+      if (!vraiFaux) questions.push((vraiFaux = { nature: 'vraiFaux', indices: [], regroupe: false }))
+      vraiFaux.indices.push(i)
+      return
+    }
+    if (el.type === 'ouverte') {
+      questions.push({ nature: 'ouverte', indices: [i], regroupe: false })
+      return
+    }
+    const r = regroupementDe(el, cache)
+    const existante = r ? parCle.get(r.cle) : undefined
+    if (existante) {
+      existante.indices.push(i)
+      existante.regroupe = true
+      return
+    }
+    const q: QuestionSerie = { nature: 'exercice', indices: [i], regroupe: false }
+    if (r) parCle.set(r.cle, q)
+    questions.push(q)
+  })
+  return questions
+}
+
+/** Précisions des lignes réunies (ordre de première apparition), au pluriel quand il est fourni. */
+function consigneDuGroupe(regs: RegroupementInstance[]): FragmentConsigne[] {
+  const vues = new Map<string, PrecisionRegroupement>()
+  for (const r of regs) for (const p of r.precisions ?? []) if (!vues.has(p.id)) vues.set(p.id, p)
+  return [...regs[0].consigne, ...[...vues.values()].flatMap((p) => [texte(' '), ...(p.pluriel ?? p.fragments)])]
+}
+
+const CRITERE_PAR_DEFAUT = 'Réponse correcte et justifiée'
+
+/** Barème du groupe : les critères de chaque ligne (étapes comprises), rattachés à la lettre de la
+ * ligne, leurs poids ramenés aux points de la ligne — `pointsCriteres` redonne alors exactement les
+ * points de chaque ligne (colonne de droite de la copie, grille). */
+function baremeDuGroupe(lignes: LigneGroupe[]): BaremeExercice {
+  const lettre = (i: number) => LETTRES[i] ?? String(i + 1)
+  const criteres: CritereBareme[] = lignes.flatMap((l, i) => {
+    const propres = l.item.bareme?.criteres ?? []
+    const somme = propres.reduce((t, c) => t + Math.max(0, c.points), 0)
+    if (propres.length === 0 || somme <= 0) return [{ sousQuestion: lettre(i), critere: [texte(CRITERE_PAR_DEFAUT)], points: l.item.points }]
+    return propres.map((c) => ({ ...c, sousQuestion: lettre(i), points: (Math.max(0, c.points) / somme) * l.item.points }))
+  })
+  const erreurs = new Map<string, NonNullable<BaremeExercice['erreursFrequentes']>[number]>()
+  for (const l of lignes) for (const e of l.item.bareme?.erreursFrequentes ?? []) erreurs.set(JSON.stringify(e), e)
+  return {
+    reponseFinale: joindreAvecLettres(lignes.map((l) => l.item.bareme?.reponseFinale ?? l.item.reponseBreve ?? [])),
+    criteres,
+    erreursFrequentes: erreurs.size > 0 ? [...erreurs.values()] : undefined,
+    reponsesAcceptees: reponsesAccepteesDuGroupe(lignes),
+  }
+}
+
+/** Réponses acceptées du groupe : une écriture commune à toutes les lignes est dite une fois ;
+ * propre à certaines lignes, elle est précédée de leurs lettres (« b) », « a), c) »). */
+function reponsesAccepteesDuGroupe(lignes: LigneGroupe[]): FragmentConsigne[][] | undefined {
+  const parTexte = new Map<string, { r: FragmentConsigne[]; lignes: number[] }>()
+  lignes.forEach((l, i) => {
+    for (const r of l.item.bareme?.reponsesAcceptees ?? []) {
+      const cle = normaliserFragments(r)
+      const e = parTexte.get(cle) ?? { r, lignes: [] }
+      if (!e.lignes.includes(i)) e.lignes.push(i)
+      parTexte.set(cle, e)
+    }
+  })
+  if (parTexte.size === 0) return undefined
+  return [...parTexte.values()].map(({ r, lignes: ls }) => (ls.length === lignes.length ? r : [texte(`${ls.map((i) => `${LETTRES[i] ?? i + 1})`).join(', ')} `), ...r]))
+}
+
+/** Item d'un groupe a), b), c) à partir de ses lignes (items d'une instance, déjà en énoncé papier).
+ * Aussi appelé après une mise à l'échelle des points (examen à total fixé) : chaque ligne garde SES
+ * points, le total du groupe est leur somme. */
+export function assemblerGroupe(base: ItemEvaluation, consigne: FragmentConsigne[], lignes: LigneGroupe[]): ItemEvaluation {
+  const plusHaut = lignes.reduce<ItemEvaluation | undefined>((m, l) => (l.item.niveau !== undefined && (m?.niveau === undefined || l.item.niveau > m.niveau) ? l.item : m), undefined)
+  const durees = lignes.map((l) => l.item.dureeMinutes)
+  const breves = lignes.map((l) => l.item.reponseBreve)
+  return {
+    processus: base.processus,
+    titreSection: base.titreSection,
+    notion: base.notion,
+    sectionCours: base.sectionCours,
+    chapitres: base.chapitres,
+    nature: 'exercice',
+    points: lignes.reduce((t, l) => t + l.item.points, 0),
+    section: { enteteFragments: consigne, questions: lignes.map((l) => ({ consigne: l.enonce })), disposeEnTableau: true },
+    correction: lignes.flatMap((l, i) => prefixerLettreBlocs(l.item.correction, LETTRES[i] ?? String(i + 1))),
+    niveau: plusHaut?.niveau,
+    palier: plusHaut?.palier,
+    reponseBreve: breves.every((b): b is FragmentConsigne[] => !!b && b.length > 0) ? joindreAvecLettres(breves) : undefined,
+    bareme: baremeDuGroupe(lignes),
+    dureeMinutes: durees.every((d): d is number => d !== undefined) ? durees.reduce((t, d) => t + d, 0) : undefined,
+    groupe: lignes,
+  }
+}
+
+/** Item d'une question regroupée : une ligne par instance (données, item complet de l'instance). */
+function itemGroupe(elements: Extract<ElementPlan, { type: 'exercice' }>[], cache: CacheInstances): ItemEvaluation | null {
+  const membres = elements.flatMap((el) => {
+    const r = regroupementDe(el, cache)
+    const item = itemExercice(el, cache)
+    return r && item ? [{ reg: r.reg, item }] : []
+  })
+  if (membres.length === 0) return null
+  if (membres.length === 1) return membres[0].item
+  const lignes: LigneGroupe[] = membres.map(({ reg, item }) => ({ enonce: reg.ligne, ...(reg.figureHtml ? { figureHtml: reg.figureHtml } : {}), item }))
+  return assemblerGroupe(membres[0].item, consigneDuGroupe(membres.map((m) => m.reg)), lignes)
+}
 const RE_ETIQUETTE = /^\s*([^:]{1,32}?)\s:\s/
 
 function itemOuverte(el: Extract<ElementPlan, { type: 'ouverte' }>): ItemEvaluation {
@@ -781,21 +911,29 @@ async function itemVraiFauxRegroupe(elements: ElementVraiFaux[]): Promise<ItemEv
   }
 }
 
+/** Items d'une série, dans l'ordre de la série : une question par `questionsDeSerie` (vrai/faux
+ * regroupés au rang du premier, exercices regroupés a), b), c) au rang du premier). */
 export async function itemsDepuisSerie(serie: PlanSerie): Promise<ItemEvaluation[]> {
-  const items: (ItemEvaluation | 'vraiFaux')[] = []
-  const vraiFaux: ElementVraiFaux[] = []
-  for (const el of serie.elements) {
-    if (el.type === 'vraiFaux') {
-      // La question regroupée prend la place du PREMIER vrai/faux de la série.
-      if (vraiFaux.length === 0) items.push('vraiFaux')
-      vraiFaux.push(el)
+  const elements = elementsAPlat(serie)
+  const cache: CacheInstances = new Map()
+  const items: ItemEvaluation[] = []
+  for (const q of questionsDeSerie(elements, cache)) {
+    if (q.nature === 'vraiFaux') {
+      const regroupe = await itemVraiFauxRegroupe(q.indices.map((i) => elements[i] as ElementVraiFaux))
+      if (regroupe) items.push(regroupe)
       continue
     }
-    const item = el.type === 'exercice' ? itemExercice(el) : itemOuverte(el)
+    const premier = elements[q.indices[0]]
+    const item = q.regroupe
+      ? itemGroupe(q.indices.map((i) => elements[i] as Extract<ElementPlan, { type: 'exercice' }>), cache)
+      : premier.type === 'exercice'
+        ? itemExercice(premier, cache)
+        : premier.type === 'ouverte'
+          ? itemOuverte(premier)
+          : null
     if (item) items.push(item)
   }
-  const regroupe = vraiFaux.length > 0 ? await itemVraiFauxRegroupe(vraiFaux) : null
-  return items.flatMap((it) => (it === 'vraiFaux' ? (regroupe ? [regroupe] : []) : [it]))
+  return items
 }
 
 /* ----------------------------------------------------------------------------------------------
@@ -852,15 +990,29 @@ export function itemsDuDocument(plan: PlanDocument, items: ItemEvaluation[]): It
   const examen = examenDuPlan(plan)
   const total = plan.entete.totalExamen
   if (!examen || !total || total.mode !== 'fixe') return items
-  const nouveaux = new Map<ItemEvaluation, number>()
+  // Une question regroupée a), b), c) compte LIGNE par ligne (chaque ligne garde au moins 0,5 pt et
+  // ses points propres ; le total du groupe est leur somme).
+  const unites = (it: ItemEvaluation) => (it.groupe ? it.groupe.map((l) => l.item.points) : [it.points])
+  const nouveaux = new Map<ItemEvaluation, number[]>()
   for (const partie of partiesDuDocument(examen, items)) {
     const voulu = total.parPartie[partie.cle]
     if (typeof voulu !== 'number' || !(voulu > 0)) continue
-    const points = mettreAEchelle(partie.questions.map((q) => q.element.points), voulu)
+    const points = mettreAEchelle(partie.questions.flatMap((q) => unites(q.element)), voulu)
     if (!points) continue
-    partie.questions.forEach((q, i) => nouveaux.set(q.element, points[i]))
+    let k = 0
+    for (const q of partie.questions) {
+      const n = unites(q.element).length
+      nouveaux.set(q.element, points.slice(k, k + n))
+      k += n
+    }
   }
-  return items.map((it) => (nouveaux.has(it) ? { ...it, points: nouveaux.get(it)! } : it))
+  return items.map((it) => {
+    const pts = nouveaux.get(it)
+    if (!pts) return it
+    if (!it.groupe) return { ...it, points: pts[0] }
+    const lignes = it.groupe.map((l, i) => ({ ...l, item: { ...l.item, points: pts[i] } }))
+    return assemblerGroupe(it, it.section.enteteFragments ?? [], lignes)
+  })
 }
 
 function enteteSerie(entete: EnTeteEvaluation, serieLettre: string, examen?: ExamenDocument): EnteteEvaluationSerie {

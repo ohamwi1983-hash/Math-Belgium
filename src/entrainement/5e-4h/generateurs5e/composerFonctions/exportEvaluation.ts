@@ -155,5 +155,4 @@ export const adaptateurEvaluationComposerFonctions: AdaptateurFeuilleExercices<E
   enoncePapier: enoncePapierComposerFonctions,
   profilInstance: profilComposerFonctions,
   libelleCasParticulier: LIBELLE_CAS_COMPOSER_FONCTIONS,
-  regroupable: false,
 };

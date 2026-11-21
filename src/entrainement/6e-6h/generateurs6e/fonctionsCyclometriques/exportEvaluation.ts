@@ -12,7 +12,7 @@ import { GROUPES_VERDICT_FONCTIONS_CYCLOMETRIQUES, profilFonctionsCyclometriques
  * cyclométriques : existence et calcul) — feuille d'exercices et évaluation.
  *
  * Un seul écran (existence + valeur exacte) : une seule question, consigne générique
- * (`CONSIGNE_GENERALE`, celle de l'écran) — `regroupable` (plusieurs expressions sous une même
+ * (`CONSIGNE_GENERALE`, celle de l'écran) — regroupable a), b), c) (`export/regroupementsPapier.ts` : plusieurs expressions sous une même
  * question a) b) c)). Corrigé détaillé partagé avec l'appli (`corrigeDetaille.ts`).
  */
 
@@ -79,6 +79,5 @@ export const adaptateurEvaluationFonctionsCyclometriques: AdaptateurFeuilleExerc
   bareme,
   enoncePapier,
   // Une seule question par instance, consigne GÉNÉRIQUE (`CONSIGNE_GENERALE`, constante) — voir
-  // `AdaptateurFeuilleExercices.regroupable`.
-  regroupable: true,
+  // `AdaptateurFeuilleExercices.regroupement` (rempli par le registre, `export/regroupementsPapier.ts`).
 };

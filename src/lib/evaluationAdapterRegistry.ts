@@ -1,4 +1,5 @@
 import type { AdaptateurFeuilleExercices } from '../entrainement/export/genererFeuilleExercices'
+import { avecRegroupement } from '../entrainement/export/regroupementsPapier'
 
 /**
  * Registre des adaptateurs `AdaptateurFeuilleExercices<T>` déjà portés dans Math-Belgium (voir
@@ -578,9 +579,13 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
 }
 
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas
- * à savoir quel chantier a produit quel générateur. */
-export const EVALUATION_ADAPTER_REGISTRY: Record<string, AdaptateurFeuilleExercices<never>> = {
-  ...EVALUATION_ADAPTER_REGISTRY_4E,
-  ...EVALUATION_ADAPTER_REGISTRY_5E,
-  ...EVALUATION_ADAPTER_REGISTRY_6E,
-}
+ * à savoir quel chantier a produit quel générateur. Chaque adaptateur reçoit ici son
+ * `regroupement` a), b), c) (`export/regroupementsPapier.ts`, découpe de son énoncé papier — déjà
+ * passé par `versionPapier`). */
+export const EVALUATION_ADAPTER_REGISTRY: Record<string, AdaptateurFeuilleExercices<never>> = Object.fromEntries(
+  Object.entries({
+    ...EVALUATION_ADAPTER_REGISTRY_4E,
+    ...EVALUATION_ADAPTER_REGISTRY_5E,
+    ...EVALUATION_ADAPTER_REGISTRY_6E,
+  }).map(([id, adaptateur]) => [id, avecRegroupement(id, adaptateur)]),
+)

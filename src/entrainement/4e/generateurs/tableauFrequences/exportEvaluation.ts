@@ -31,8 +31,8 @@ import { profilTableauFrequences } from "../profilsEvaluationStatistique";
  * valeurs tirées : ni la liste brute ni le contexte n'apparaissent dans la consigne elle-même, qui
  * reste dans `enteteFragments`).
  *
- * `regroupable: true` : conséquence directe de ce qui précède (voir la doc de
- * `AdaptateurFeuilleExercices.regroupable` dans `genererFeuilleExercices.ts`) — une seule question
+ * Regroupable a), b), c) (`export/regroupementsPapier.ts` ; ancien `regroupable: true`) : conséquence
+ * directe de ce qui précède (voir `AdaptateurFeuilleExercices.regroupement`) — une seule question
  * par instance, consigne générique et identique pour toutes les instances par construction, aucun
  * `enteteHtml` (le contexte + la liste brute suffisent en texte pur, comme à l'écran — voir
  * `EnonceTableauFrequences.tsx`). `/admin` de Math-Belgium peut donc regrouper plusieurs séries
@@ -157,7 +157,6 @@ const adaptateurEvaluationTableauFrequencesBrut: AdaptateurFeuilleExercices<Exer
   correctionDetaillee: correctionDetailleeTableauFrequences,
   bareme: baremeTableauFrequences,
   enoncePapier: enoncePapierTableauFrequences,
-  regroupable: true,
 };
 
 /** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */

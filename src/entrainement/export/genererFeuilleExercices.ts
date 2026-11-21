@@ -53,11 +53,9 @@ export interface SectionExercice {
    * qui ne connaissent que `enteteFragments`. */
   enteteHtml?: string;
   questions: QuestionExercice[];
-  /** `true` : rend `questions` sous forme de tableau à 2 colonnes (lettre | contenu), bordures
-   * invisibles, plutôt que des paragraphes `a) …`/`b) …` empilés — utilisé pour le regroupement de
-   * plusieurs instances d'un même générateur sous UNE question (voir `AdaptateurFeuilleExercices.regroupable`
-   * et `AppEvaluation6e.tsx::construireItemsExercice`). Ignoré par les pipelines Word/PDF (HTML
-   * uniquement, `assemblerEvaluationHtml.ts`). */
+  /** `true` : `questions` sont les LIGNES d'un regroupement a), b), c)
+   * (`AdaptateurFeuilleExercices.regroupement`) — rendues en lignes alignées (lettre | données |
+   * points dans la colonne de droite) sous la consigne commune (`enteteFragments`). */
   disposeEnTableau?: boolean;
 }
 
@@ -210,6 +208,27 @@ export interface EnoncePapier {
   reponseBreve?: FragmentConsigne[];
 }
 
+/** Précision qui ne vaut que pour certaines instances (« Donne le rayon en valeur exacte. ») : dite UNE
+ * fois en tête du groupe (union des précisions des lignes, ordre de première apparition), au pluriel
+ * quand il est fourni (« Donne les rayons en valeur exacte. »). */
+export interface PrecisionRegroupement {
+  id: string;
+  fragments: FragmentConsigne[];
+  pluriel?: FragmentConsigne[];
+}
+
+/** Une instance vue comme une LIGNE d'un regroupement a), b), c) (`AdaptateurFeuilleExercices.regroupement`). */
+export interface RegroupementInstance {
+  /** Consigne commune, forme « chaque », sans les données ni les précisions fusionnables — clé du
+   * groupe (deux consignes différentes → deux groupes). */
+  consigne: FragmentConsigne[];
+  precisions?: PrecisionRegroupement[];
+  /** Les données de l'instance : l'équation, « f(x) = … », « cercle d'équation … »… */
+  ligne: FragmentConsigne[];
+  /** Figure propre à la ligne (lot des générateurs à graphique : graphiques côte à côte). */
+  figureHtml?: string;
+}
+
 export interface AdaptateurFeuilleExercices<T> {
   titreDocument: string;
   /** Utilisé pour composer le nom du fichier téléchargé (voir telechargerBlob.ts), sans extension. */
@@ -239,8 +258,7 @@ export interface AdaptateurFeuilleExercices<T> {
   /** Barème détaillé (grille de correction de l'évaluation, points par sous-question). */
   bareme?: (instance: T) => BaremeExercice;
   /** Énoncé papier sans les étapes d'apprentissage (voir `EnoncePapier`) ; à défaut, les
-   * sous-questions de `construireEnonce` sont imprimées telles quelles. Ignoré quand plusieurs
-   * instances sont regroupées sous une question (`regroupable`). */
+   * sous-questions de `construireEnonce` sont imprimées telles quelles. */
   enoncePapier?: (instance: T) => EnoncePapier;
   /** Durée indicative CONSTANTE d'une instance, en minutes — seulement pour un chapitre pas encore
    * noté : avec `criteresDifficulte`, la durée est calculée par exercice. */
@@ -277,18 +295,19 @@ export interface AdaptateurFeuilleExercices<T> {
    * `SelecteurVarianteDev` du générateur gardent les variantes séparées. Un verdict n'est jamais mis
    * dans `ProfilInstance.forme`. Voir `export/groupesVerdict.ts`. */
   groupesVerdict?: GroupeVerdict[];
-  /** `true` ssi ce générateur produit TOUJOURS une seule question par instance, avec une consigne
-   * GÉNÉRIQUE (indépendante des valeurs tirées, ex. une constante `CONSIGNE_GENERALE`) — permet à
-   * `/admin` de Math-Belgium de regrouper plusieurs instances demandées sous UNE question imprimée
-   * plutôt qu'une par instance : `construireEnonce(instance).enteteFragments` de chaque instance
-   * devient une ligne a)/b)/c) d'un tableau à bordures invisibles (`SectionExercice.disposeEnTableau`),
-   * la consigne (`questions[0].consigne`, identique pour toutes les instances par construction)
-   * n'étant alors affichée qu'UNE SEULE FOIS — voir `AppEvaluation6e.tsx::construireItemsExercice`.
-   * Absent/`false` = comportement historique (une question complète par instance). Ne JAMAIS activer
-   * pour un générateur dont la consigne dépend de l'instance (ex. mentionne une valeur tirée) ou qui
-   * a plusieurs questions par instance, ou qui utilise `enteteHtml` (graphique) — aucun de ces 3 cas
-   * n'est représentable par ce mécanisme. */
-  regroupable?: boolean;
+  /** Regroupement a), b), c) sur papier (décision de l'utilisateur : « pour des économies de place et
+   * une certaine cohérence ») : les instances d'un MÊME générateur, de la même ligne de sélection, qui
+   * ont la même consigne générale forment UNE question — « Résous chaque équation par la méthode la
+   * plus rapide. a) … b) … c) … » — dans la feuille d'exercices, la remédiation, l'évaluation et
+   * l'examen (copie, aménagée, corrigé, grille, Word, « Je vérifie »). Rend la consigne commune (forme
+   * « chaque », SANS les données), les précisions qui ne valent que pour certaines instances et la
+   * LIGNE propre à l'instance (ses données) ; `null` = instance jamais regroupée (énoncé inattendu).
+   * Toujours tiré de l'énoncé PAPIER réel, jamais d'une seconde source : le registre le remplit avec
+   * `export/regroupementsPapier.ts::avecRegroupement` (découpe de l'énoncé papier selon la table
+   * `REGROUPEMENTS`). Jamais pour un énoncé à vraies questions a) b) c) (le pipeline l'écarte de toute
+   * façon). Une seule instance → exercice ordinaire, rendu inchangé. Pipeline :
+   * `lib/evaluationLocal.ts::questionsDeSerie` (numérotation) et `itemGroupe` (item regroupé). */
+  regroupement?: (instance: T) => RegroupementInstance | null;
 }
 
 export interface ProgressionGeneration {

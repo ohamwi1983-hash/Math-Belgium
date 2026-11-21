@@ -147,5 +147,4 @@ export const adaptateurEvaluationComposeeGraphique: AdaptateurFeuilleExercices<E
   bareme: baremeComposeeGraphique,
   enoncePapier: enoncePapierComposeeGraphique,
   profilInstance: profilComposeeGraphique,
-  regroupable: false,
 };

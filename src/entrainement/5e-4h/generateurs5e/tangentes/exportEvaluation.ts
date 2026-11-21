@@ -267,6 +267,5 @@ export const adaptateurEvaluationTangentes: AdaptateurFeuilleExercices<ExerciceT
   dureeMinutes: 7,
   profilInstance: profilTangente,
   libelleCasParticulier: LIBELLE_CAS_TANGENTES,
-  // Consigne propre à la variante (abscisse interpolée) : pas de regroupement.
-  regroupable: false,
+  // Regroupement a), b), c) : l'abscisse va dans la ligne (`export/regroupementsPapier.ts`, 5gen28).
 };

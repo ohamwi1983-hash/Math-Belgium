@@ -305,5 +305,4 @@ export const adaptateurEvaluationAssociation: AdaptateurFeuilleExercices<Exercic
   enoncePapier: enoncePapierAssociation,
   dureeMinutes: 6,
   profilInstance: profilAssociation,
-  regroupable: false,
 };

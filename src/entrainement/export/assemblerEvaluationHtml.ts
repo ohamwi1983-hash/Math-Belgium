@@ -64,6 +64,29 @@ export interface ItemEvaluation {
   /** Chapitre(s) d'origine (slugs) : un seul, sauf la question vrai/faux regroupée — parties et
    * étiquettes de l'examen (`examen.ts`). */
   chapitres?: string[];
+  /** Question REGROUPÉE a), b), c) (`AdaptateurFeuilleExercices.regroupement`) : une ligne par
+   * instance, chacune avec son item complet (points, niveau, code `?code=`, réponse brève, corrigé
+   * « comme au tableau » avec ses propres étapes, barème). `section` porte alors la consigne commune
+   * (`enteteFragments`) et une question par ligne ; `bareme` réunit les critères des lignes, rattachés
+   * à la lettre de leur ligne (`pointsParSousQuestion` redonne les points de chaque ligne). */
+  groupe?: LigneGroupe[];
+}
+
+/** Une ligne d'une question regroupée a), b), c). */
+export interface LigneGroupe {
+  /** Les données de l'instance (« x² − 40 = 0 », « f(x) = … », « cercle d'équation … »). */
+  enonce: FragmentConsigne[];
+  /** Figure propre à la ligne (lot des générateurs à graphique). */
+  figureHtml?: string;
+  /** Item complet de l'instance (énoncé papier, corrigé, barème, niveau, code…). */
+  item: ItemEvaluation;
+}
+
+/** Points de chaque ligne d'une question regroupée, tels que la copie et la grille les impriment
+ * (répartition du barème du groupe, `pointsParSousQuestion`). */
+export function pointsDesLignes(item: ItemEvaluation): number[] {
+  const parLettre = pointsParSousQuestion(item);
+  return (item.groupe ?? []).map((l, i) => parLettre.get(LETTRES[i] ?? String(i + 1)) ?? l.item.points);
 }
 
 /** École, adresse et professeur du cartouche : profil du professeur connecté et école choisie dans
@@ -375,6 +398,44 @@ const STYLE_DEUX_COLONNES = `
 .deux-colonnes .qr-bloc svg { width: 52px; height: 52px; }
 `;
 
+/** Questions regroupées a), b), c) — ajouté au document SEULEMENT s'il en contient (un document sans
+ * groupe reste identique, octet pour octet, à ce qu'il était avant le regroupement). Une ligne par
+ * exercice : lettre, données, puis à droite ses points (copie) ou son niveau et son QR code
+ * (feuille). Une ligne ne se coupe jamais ; le groupe peut se couper entre deux lignes, la consigne
+ * reste avec la première. */
+const STYLE_GROUPES = `
+.groupe .entete, .groupe .ex-tete { break-after: avoid; page-break-after: avoid; }
+.lignes-groupe { margin: 3px 0 0; }
+.ligne-g { display: flex; align-items: baseline; gap: 10px; padding: 3px 0; break-inside: avoid; page-break-inside: avoid; }
+.ligne-g > .lettre-g { flex: none; font-weight: 700; min-width: 1.3em; }
+.ligne-g > .ligne-texte { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.ligne-g > .pts { flex: none; white-space: nowrap; min-width: 3.2em; text-align: right; }
+.ligne-g > .ligne-niveau, .ligne-g > .qr-ligne { flex: none; align-self: center; }
+.ligne-g > .qr-ligne { display: flex; flex-direction: column; align-items: center; gap: 1px; width: 1.9cm; font-family: Archivo, Arial, Helvetica, sans-serif; font-size: 7pt; font-weight: 700; letter-spacing: 0.04em; line-height: 1.1; color: var(--encre); }
+.ligne-g > .qr-ligne svg { width: 56px; height: 56px; }
+.ex.groupe .ligne-g { align-items: center; padding: 4px 0; }
+.ex.groupe .ligne-g + .ligne-g { border-top: 1px dotted var(--filet); }
+.legende-qr { text-align: right; font-family: Archivo, Arial, Helvetica, sans-serif; font-size: 7pt; color: var(--gris); line-height: 1.2; margin: -2px 0 1px; break-after: avoid; page-break-after: avoid; }
+.figure-ligne { margin-top: 4px; }
+.ligne-corr { margin: 10px 0 3px; font-weight: 600; break-after: avoid; page-break-after: avoid; }
+.corr-ligne:first-child .ligne-corr { margin-top: 2px; }
+.corr:has(.corr-ligne) { break-inside: auto; }
+.carte .lettre-carte { text-transform: none; }
+/* Deux colonnes : un bloc qui peut se couper ENTRE deux lignes quand il est plus haut que la colonne
+   (un inline-block ne se coupe jamais). */
+.deux-colonnes > .groupe { display: block; }
+.deux-colonnes .ligne-g > .qr-ligne { width: 1.6cm; font-size: 6.5pt; }
+.deux-colonnes .ligne-g > .qr-ligne svg { width: 52px; height: 52px; }
+/* Version aménagée : lignes bien espacées. */
+.q-am .ligne-g { padding: 9px 0; }
+.q-am .ligne-g + .ligne-g { border-top: 1px dotted var(--filet); }
+`;
+
+/** CSS des groupes, seulement si le document en a un. */
+function styleGroupes(items: ItemEvaluation[]): string {
+  return items.some((it) => it.groupe && it.groupe.length > 0) ? STYLE_GROUPES : "";
+}
+
 const STYLE_FEUILLE = `
 .tete { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 10px; border-bottom: 2px solid var(--encre); }
 .tete h1 { font-size: 22pt; font-weight: 600; line-height: 1.15; }
@@ -525,7 +586,8 @@ function lettreCle(q: number): string {
 
 /** Corps d'une question : en-tête (formules dans la phrase), contenu HTML (graphiques), puis
  * sous-questions a)/b)… avec, en évaluation, leurs points. Jamais de zone de réponse. */
-function corpsQuestionHtml(item: ItemEvaluation, pointsSousQ?: Map<string, number>): string {
+function corpsQuestionHtml(item: ItemEvaluation, pointsSousQ?: Map<string, number>, feuille?: { numero: number; qr: boolean }): string {
+  if (item.groupe && item.groupe.length > 0) return corpsGroupeHtml(item, item.groupe, !!pointsSousQ, feuille);
   let html = "";
   if (item.section.enteteFragments) html += `<div class="entete">${fragmentsEnteteHtml(item.section.enteteFragments)}</div>`;
   if (item.section.enteteHtml) html += item.section.enteteHtml;
@@ -556,12 +618,50 @@ function corpsQuestionHtml(item: ItemEvaluation, pointsSousQ?: Map<string, numbe
   return html;
 }
 
+/** Plage de niveaux d'une question regroupée (« 2–4 ») et son palier s'il est le même pour toutes
+ * les lignes. */
+function plageNiveaux(lignes: LigneGroupe[]): { texte: string; palier?: Palier } | null {
+  const avec = lignes.filter((l) => l.item.niveau !== undefined);
+  if (avec.length === 0) return null;
+  const n = avec.map((l) => l.item.niveau!);
+  const min = Math.min(...n);
+  const max = Math.max(...n);
+  const paliers = new Set(avec.map((l) => l.item.palier));
+  return { texte: min === max ? String(min) : `${min}–${max}`, palier: paliers.size === 1 ? avec[0].item.palier : undefined };
+}
+
+/** Corps d'une question REGROUPÉE a), b), c) : la consigne commune une fois, puis une ligne par
+ * instance — lettre, données (et figure), et à droite : ses points (évaluation) ou, dans la feuille
+ * d'exercices, son niveau et son QR code « Refaire en ligne » (chaque ligne rouvre SON exercice, code
+ * écrit dessous). Une ligne ne se coupe jamais ; le groupe peut se couper ENTRE deux lignes (la
+ * consigne reste avec la première). */
+function corpsGroupeHtml(item: ItemEvaluation, lignes: LigneGroupe[], avecPoints: boolean, feuille?: { numero: number; qr: boolean }): string {
+  const points = avecPoints ? pointsDesLignes(item) : [];
+  const rangs = lignes
+    .map((l, i) => {
+      const lettre = lettreCle(i);
+      const figure = l.figureHtml ? `<div class="figure-ligne">${l.figureHtml}</div>` : "";
+      const pts = avecPoints ? `<span class="pts">${pointsTexte(points[i])}</span>` : "";
+      const niveau = feuille && l.item.niveau ? `<span class="niveau ligne-niveau" aria-label="niveau ${l.item.niveau} sur 7"><span class="num">${l.item.niveau}</span></span>` : "";
+      const qr =
+        feuille?.qr && l.item.code
+          ? `<span class="qr-ligne">${qrCodeSvg(l.item.code.url, 56, `QR code : refaire l'exercice ${feuille.numero} ${lettre}) en ligne`)}<span class="code">${echapperHtml(l.item.code.code)}</span></span>`
+          : "";
+      return `<div class="ligne-g"><span class="lettre-g">${lettre})</span><div class="ligne-texte">${fragmentsVersHtml(l.enonce)}${figure}</div>${pts}${niveau}${qr}</div>`;
+    })
+    .join("");
+  const entete = item.section.enteteFragments ? `<div class="entete">${fragmentsEnteteHtml(item.section.enteteFragments)}</div>` : "";
+  const legende = feuille?.qr && lignes.some((l) => l.item.code) ? `<div class="legende-qr">QR code de chaque ligne : refaire en ligne, avec les aides</div>` : "";
+  return `${entete}<div class="lignes-groupe">${legende}${rangs}</div>`;
+}
+
 /** Largeur (px) de la plus large figure SVG d'un fragment HTML (attribut `width`, sinon `viewBox`). */
 /** Balises ouvrantes des FIGURES SVG d'un fragment HTML — sans les SVG internes de KaTeX (racines,
  * flèches, accolades : largeur en `em` ou en `%`), qui ne sont pas des figures (une question à trois
  * racines carrées passait pour une question « à trois figures »). */
 function balisesFigures(corpsHtml: string): string[] {
-  return [...corpsHtml.matchAll(/<svg\b[^>]*>/g)].map((m) => m[0]).filter((balise) => !/\swidth="[\d.]+(em|%)"/.test(balise));
+  // Les QR codes « Refaire en ligne » des lignes d'un groupe (`class="qr"`) ne sont pas des figures.
+  return [...corpsHtml.matchAll(/<svg\b[^>]*>/g)].map((m) => m[0]).filter((balise) => !/\swidth="[\d.]+(em|%)"/.test(balise) && !/\sclass="qr"/.test(balise));
 }
 
 function largeurFigureMax(corpsHtml: string): number {
@@ -677,6 +777,13 @@ function etapesCorrigeParEtapeHtml(item: ItemEvaluation, lignes: EtapeCorrection
 }
 
 function correctionHtml(item: ItemEvaluation): string {
+  if (item.groupe && item.groupe.length > 0) {
+    // Question regroupée : une sous-partie par ligne (« a) » et son énoncé rappelé), puis le corrigé
+    // « comme au tableau » de l'instance avec SES étapes (« Étape 1 — … »).
+    return item.groupe
+      .map((l, i) => `<div class="corr-ligne"><div class="ligne-corr"><span class="lettre-g">${lettreCle(i)})</span> ${fragmentsVersHtml(l.enonce)}</div>${correctionHtml(l.item)}</div>`)
+      .join("");
+  }
   if (item.correctionDetaillee && item.correctionDetaillee.length > 0) {
     return item.etapesCorrige && item.correctionDetaillee.some((e) => e.etape !== undefined)
       ? etapesCorrigeParEtapeHtml(item, item.correctionDetaillee)
@@ -687,6 +794,13 @@ function correctionHtml(item: ItemEvaluation): string {
 
 /** Badge « numéro + palier » (« 5 » « Avancé ») — rien si l'exercice n'a pas de niveau. */
 function niveauHtml(item: ItemEvaluation): string {
+  if (item.groupe && item.groupe.length > 0) {
+    // Groupe : plage « niv. 2–4 », palier seulement s'il est le même pour toutes les lignes.
+    const plage = plageNiveaux(item.groupe);
+    if (!plage) return "";
+    const palier = plage.palier ? LIBELLE_PALIER[plage.palier] : "";
+    return `<span class="niveau" aria-label="niveaux ${plage.texte} sur 7${palier ? `, ${palier}` : ""}"><span class="num">${plage.texte.includes("–") ? `niv. ${plage.texte}` : plage.texte}</span>${palier ? `<span class="pal">${palier}</span>` : ""}</span>`;
+  }
   if (!item.niveau || !item.palier) return "";
   const palier = LIBELLE_PALIER[item.palier];
   return `<span class="niveau" aria-label="niveau ${item.niveau} sur 7, ${palier}"><span class="num">${item.niveau}</span><span class="pal">${palier}</span></span>`;
@@ -739,6 +853,15 @@ function enteteFeuilleHtml(entete: EnteteEvaluation, sousTitre: string): string 
 
 function exerciceFeuilleHtml(item: ItemEvaluation, numero: number, deuxColonnes = false): string {
   const tag = [item.notion, NOM_PROCESSUS[item.processus]].filter(Boolean).join(" · ");
+  if (item.groupe && item.groupe.length > 0) {
+    // Question regroupée : plage de niveaux en tête, niveau et QR code PAR LIGNE (pas de QR global).
+    const corps = corpsQuestionHtml(item, undefined, { numero, qr: true });
+    const sansQr = corpsQuestionHtml(item);
+    return `<section class="ex groupe${classeFigures(sansQr)}${classeLargeur(sansQr, deuxColonnes, 260)}">
+  <div class="ex-tete"><h3>Exercice ${numero}</h3>${niveauHtml(item)}${tag ? `<span class="tag">${echapperHtml(tag)}</span>` : ""}</div>
+  <div class="ex-texte">${corps}</div>
+</section>`;
+  }
   const qr = item.code
     ? `<div class="qr-bloc">${qrCodeSvg(item.code.url, 66, `QR code : refaire l'exercice ${numero} en ligne`)}<span>Refaire en ligne<br>avec les aides</span><span class="code">code ${echapperHtml(item.code.code)}</span></div>`
     : "";
@@ -766,8 +889,10 @@ function reponseBreveLongue(item: ItemEvaluation): boolean {
 }
 
 function pageJeVerifieHtml(entete: EnteteEvaluation, numerotes: { item: ItemEvaluation; numero: number }[]): string {
+  // Une carte par exercice ; une question regroupée : une carte par LIGNE (« Exercice 3 a) »).
+  const carte = (item: ItemEvaluation, titre: string) => `<div class="carte${reponseBreveLongue(item) ? " large" : ""}"><span class="num">${titre}</span>${reponseBreveHtml(item)}</div>`;
   const cartes = numerotes
-    .map(({ item, numero }) => `<div class="carte${reponseBreveLongue(item) ? " large" : ""}"><span class="num">Exercice ${numero}</span>${reponseBreveHtml(item)}</div>`)
+    .map(({ item, numero }) => (item.groupe && item.groupe.length > 0 ? item.groupe.map((l, i) => carte(l.item, `Exercice ${numero} <span class="lettre-carte">${lettreCle(i)})</span>`)).join("") : carte(item, `Exercice ${numero}`)))
     .join("");
 
   // Une ligne par section du cours présente dans la feuille, dans l'ordre du cours.
@@ -826,7 +951,7 @@ ${deuxColonnes ? `<div class="deux-colonnes">${exercices}</div>` : exercices}`;
 ${pageJeVerifieHtml(entete, numerotes)}
 <div class="saut-page"></div>
 ${pageCorrigeFeuilleHtml(numerotes)}`;
-  const css = `${stylePied(null, "Archivo, Arial, sans-serif", "8.5pt", true, professeurFeuille(entete))}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}`;
+  const css = `${stylePied(null, "Archivo, Arial, sans-serif", "8.5pt", true, professeurFeuille(entete))}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}${styleGroupes(items)}`;
   const doc = documentHtml(`${titreNettoye(entete)} — Feuille d'exercices`, corps, STYLE_FEUILLE, cssKatex, "standard", css);
   return new Blob([doc], { type: "text/html;charset=utf-8" });
 }
@@ -893,7 +1018,7 @@ function questionsEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation
       if (!deuxColonnes) questions += titre;
       const pts = pointsParSousQuestion(item);
       const corps = corpsQuestionHtml(item, pts);
-      questions += `<section class="question${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 380)}">${deuxColonnes ? `${premiere ? bandeau : ""}${titre}` : ""}<div class="ligne-titre"><span class="num">Question ${numero}</span><span class="pts">${pointsTexte(item.points)}</span></div>${corps}${
+      questions += `<section class="question${item.groupe ? " groupe" : ""}${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 380)}">${deuxColonnes ? `${premiere ? bandeau : ""}${titre}` : ""}<div class="ligne-titre"><span class="num">Question ${numero}</span><span class="pts">${pointsTexte(item.points)}</span></div>${corps}${
         avecCorrection ? `<div class="correction-bloc">${correctionHtml(item)}</div>` : ""
       }</section>`;
       premiere = false;
@@ -918,7 +1043,8 @@ function blocGrilleHtml(item: ItemEvaluation, numero: number, libelle: string): 
     .map((e) => `${fragmentsVersHtml(e.description)}${e.cout ? ` → ${echapperHtml(e.cout)}` : ""}`)
     .join(" ; ");
   const acceptees = (item.bareme.reponsesAcceptees ?? []).map((r) => fragmentsVersHtml(r)).join(" ; ");
-  const code = item.code ? ` <span class="pts">code ${echapperHtml(item.code.code)}</span>` : "";
+  const codesLignes = (item.groupe ?? []).map((l, i) => (l.item.code ? `${lettreCle(i)}) ${echapperHtml(l.item.code.code)}` : "")).filter(Boolean);
+  const code = item.code ? ` <span class="pts">code ${echapperHtml(item.code.code)}</span>` : codesLignes.length > 0 ? ` <span class="pts">codes ${codesLignes.join(" · ")}</span>` : "";
   return `<section class="q">${tete}<div class="criteres">${criteres}</div>${
     erreurs ? `<div class="note"><span class="err">Erreurs fréquentes :</span> ${erreurs}</div>` : ""
   }${acceptees ? `<div class="note"><span class="ok">Accepter :</span> ${acceptees}</div>` : ""}${code ? `<div class="note">${code}</div>` : ""}</section>`;
@@ -949,9 +1075,9 @@ export async function genererEvaluationHtml(entete: EnteteEvaluation, items: Ite
   const copie = enveloppeEvaluation(`${deuxColonnes ? `<div class="page-compacte">${contenuCopie}</div>` : contenuCopie}${annexesHtml(annexes)}`);
   const corrige = enveloppeEvaluation(`${cartoucheEvaluationHtml(entete, items, "Corrigé")}${questionsEvaluationHtml(entete, items, true)}`);
   const grille = grilleHtml(entete, items);
-  const cssCopie = `${stylePied(entete.serieLettre, "Archivo, Arial, sans-serif")}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}`;
+  const cssCopie = `${stylePied(entete.serieLettre, "Archivo, Arial, sans-serif")}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}${styleGroupes(items)}`;
   // Corrigé et grille : documents du professeur — « Série A » (sans « Nom ») et « page n / N ».
-  const cssProfesseur = stylePied(entete.serieLettre, "Archivo, Arial, sans-serif", "8.5pt", false);
+  const cssProfesseur = `${stylePied(entete.serieLettre, "Archivo, Arial, sans-serif", "8.5pt", false)}${styleGroupes(items)}`;
   return {
     enonce: new Blob([documentHtml(titre, copie, css, cssKatex, "standard", cssCopie)], { type: "text/html;charset=utf-8" }),
     corrige: new Blob([documentHtml(`${titre} — Corrigé`, corrige, css, cssKatex, "standard", cssProfesseur)], { type: "text/html;charset=utf-8" }),
@@ -1099,7 +1225,7 @@ function questionsExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, i
       }
       if (!deuxColonnes) questions += titre;
       const corps = corpsQuestionHtml(item, pointsParSousQuestion(item));
-      questions += `<section class="question${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 380)}">${deuxColonnes ? titre : ""}<div class="ligne-titre"><span><span class="num">Question ${numero}</span>${etiquetteHtml(examen, item)}</span><span class="pts">${pointsTexte(item.points)}</span></div>${corps}${
+      questions += `<section class="question${item.groupe ? " groupe" : ""}${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 380)}">${deuxColonnes ? titre : ""}<div class="ligne-titre"><span><span class="num">Question ${numero}</span>${etiquetteHtml(examen, item)}</span><span class="pts">${pointsTexte(item.points)}</span></div>${corps}${
         avecCorrection ? `<div class="correction-bloc">${correctionHtml(item)}</div>` : ""
       }</section>`;
     }
@@ -1145,8 +1271,8 @@ async function genererExamenHtml(entete: EnteteEvaluation, examen: ExamenDocumen
   const grille = grilleExamenHtml(entete, examen, items);
   const police = "Archivo, Arial, sans-serif";
   const courant = enteteCourantExamen(entete, examen);
-  const cssCopie = `${stylePied(entete.serieLettre, police)}${styleEnteteCourant(courant, entete.serieLettre, police)}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}`;
-  const cssProfesseur = `${stylePied(entete.serieLettre, police, "8.5pt", false)}${styleEnteteCourant(courant, entete.serieLettre, police)}`;
+  const cssCopie = `${stylePied(entete.serieLettre, police)}${styleEnteteCourant(courant, entete.serieLettre, police)}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}${styleGroupes(items)}`;
+  const cssProfesseur = `${stylePied(entete.serieLettre, police, "8.5pt", false)}${styleEnteteCourant(courant, entete.serieLettre, police)}${styleGroupes(items)}`;
   return {
     enonce: new Blob([documentHtml(titre, copie, css, cssKatex, "standard", cssCopie)], { type: "text/html;charset=utf-8" }),
     corrige: new Blob([documentHtml(`${titre} — Corrigé`, corrige, css, cssKatex, "standard", cssProfesseur)], { type: "text/html;charset=utf-8" }),
@@ -1169,13 +1295,13 @@ ${consignesExamenHtml(entete, examen, items)}`;
   for (const partie of partiesDuDocument(examen, items)) {
     partie.questions.forEach(({ element: item, numero }, k) => {
       const corps = corpsQuestionHtml(item, pointsParSousQuestion(item));
-      const question = `<section class="q-am"><h2><span>Question ${numero}${etiquetteHtml(examen, item)}</span><span class="pts">${pointsTexte(item.points)}</span></h2><div class="enonce-am">${corps}</div></section>`;
+      const question = `<section class="q-am${item.groupe ? " groupe" : ""}"><h2><span>Question ${numero}${etiquetteHtml(examen, item)}</span><span class="pts">${pointsTexte(item.points)}</span></h2><div class="enonce-am">${corps}</div></section>`;
       pages += `${i > 0 ? '<div class="saut-page"></div>' : ""}${i === 0 ? tete : ""}${k === 0 ? ouverturePartieHtml(examen, partie) : ""}${question}`;
       i++;
     });
   }
   const police = "'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif";
-  const css = `${stylePied(entete.serieLettre, police, "10pt")}${styleEnteteCourant(enteteCourantExamen(entete, examen), entete.serieLettre, police, "10pt")}`;
+  const css = `${stylePied(entete.serieLettre, police, "10pt")}${styleEnteteCourant(enteteCourantExamen(entete, examen), entete.serieLettre, police, "10pt")}${styleGroupes(items)}`;
   const doc = documentHtml(`${titre} — ${examen.session} — Version aménagée`, `${pages}${annexesHtml(annexes)}`, `${STYLE_AMENAGE}${STYLE_EXAMEN}${STYLE_EXAMEN_AMENAGE}`, cssKatex, "amenagee", css);
   return new Blob([doc], { type: "text/html;charset=utf-8" });
 }
@@ -1189,8 +1315,9 @@ ${consignesExamenHtml(entete, examen, items)}`;
  * l'utilisateur : l'aménagement porte sur la mise en page, pas sur le contenu). */
 function questionAmenageeHtml(item: ItemEvaluation, numero: number, estExercice: boolean): string {
   const titre = estExercice ? `Exercice ${numero} ${niveauHtml(item)}` : `Question ${numero}`;
-  const corps = corpsQuestionHtml(item, estExercice ? undefined : pointsParSousQuestion(item));
-  return `<section class="q-am"><h2><span>${titre}</span>${estExercice ? "" : `<span class="pts">${pointsTexte(item.points)}</span>`}</h2><div class="enonce-am">${corps}</div></section>`;
+  // Feuille aménagée, question regroupée : niveau de chaque ligne (pas de QR code dans l'aménagée).
+  const corps = corpsQuestionHtml(item, estExercice ? undefined : pointsParSousQuestion(item), estExercice ? { numero, qr: false } : undefined);
+  return `<section class="q-am${item.groupe ? " groupe" : ""}"><h2><span>${titre}</span>${estExercice ? "" : `<span class="pts">${pointsTexte(item.points)}</span>`}</h2><div class="enonce-am">${corps}</div></section>`;
 }
 
 /** Version aménagée : JAMAIS en deux colonnes (décision de l'utilisateur), même avec la case
@@ -1209,6 +1336,6 @@ ${estExercice ? "" : consignesHtml(entete, items)}`;
     .map(({ item, numero }, i) => `${i > 0 ? '<div class="saut-page"></div>' : ""}${i === 0 ? tete : ""}${questionAmenageeHtml(item, numero, estExercice)}`)
     .join("");
   const police = "'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif";
-  const doc = documentHtml(`${titre} — Version aménagée`, `${pages}${annexesHtml(annexes)}`, STYLE_AMENAGE, cssKatex, "amenagee", stylePied(estExercice ? null : entete.serieLettre, police, "10pt", true, estExercice ? professeurFeuille(entete) : ""));
+  const doc = documentHtml(`${titre} — Version aménagée`, `${pages}${annexesHtml(annexes)}`, STYLE_AMENAGE, cssKatex, "amenagee", stylePied(estExercice ? null : entete.serieLettre, police, "10pt", true, estExercice ? professeurFeuille(entete) : "") + styleGroupes(items));
   return new Blob([doc], { type: "text/html;charset=utf-8" });
 }

@@ -34,7 +34,7 @@ import { profilFormeCanonique, PARAMETRES_FORME_CANONIQUE } from "../profilsEval
  * étirement vertical et une compression horizontale donnent la même courbe).
  *
  * Une seule question par instance et consigne GÉNÉRIQUE (aucune valeur tirée), sans `enteteHtml` :
- * `regroupable: true` (plusieurs fonctions sous une même question a) b) c) en évaluation).
+ * regroupable a), b), c) (`export/regroupementsPapier.ts` : plusieurs fonctions sous une même question a) b) c) en évaluation).
  *
  * Toutes les valeurs viennent des fonctions de l'écran : `cibleFinale`/`formatCibleLatex`
  * (réponse attendue), `formatFormeDepartLatex` (énoncé), `formatGabaritLatex` (décomposition en
@@ -162,5 +162,4 @@ export const adaptateurEvaluationFormeCanoniqueFonctionsReference: AdaptateurFeu
   correctionDetaillee: correctionDetailleeFormeCanoniqueFonctionsReference,
   bareme: baremeFormeCanoniqueFonctionsReference,
   enoncePapier: enoncePapierFormeCanoniqueFonctionsReference,
-  regroupable: true,
 };
