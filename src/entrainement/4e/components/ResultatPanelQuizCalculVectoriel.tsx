@@ -1,7 +1,6 @@
 import type { ResultatExerciceQuizCalculVectoriel } from "../moteur/typesQuizCalculVectoriel";
 import { LigneRecap, statutRecap } from "./LigneRecap";
-import { RenduFragments } from "./RenduFragments";
-import { fragmentsTexteVectoriel } from "../ui/formatQuizCalculVectoriel";
+import { TexteRiche } from "./TexteRiche";
 
 interface Props {
   resultat: ResultatExerciceQuizCalculVectoriel;
@@ -30,7 +29,7 @@ export function ResultatPanelQuizCalculVectoriel({ resultat, labelBouton, onCont
     <div>
       <h2 className="result-title">{correct ? "Bonne réponse !" : "Mauvaise réponse"}</h2>
       <p className="result-subtitle">
-        <RenduFragments fragments={fragmentsTexteVectoriel(resultat.question.enonce)} />
+        <TexteRiche texte={resultat.question.enonce} />
       </p>
       <p className="prompt-text">
         Ta réponse : {libelleVraiFaux(resultat.reponseChoisie)} — Réponse correcte : {libelleVraiFaux(resultat.question.reponse)}
@@ -40,7 +39,7 @@ export function ResultatPanelQuizCalculVectoriel({ resultat, labelBouton, onCont
       </LigneRecap>
       <div className="triangle-quelconque-aide">
         <p>
-          <RenduFragments fragments={fragmentsTexteVectoriel(resultat.question.justification)} />
+          <TexteRiche texte={resultat.question.justification} />
         </p>
       </div>
       <button type="button" className="btn btn-primary" onClick={onContinuer}>

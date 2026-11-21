@@ -8,19 +8,23 @@ import type { ExerciceQuizCalculVectoriel, GenerateurExerciceQuizCalculVectoriel
 import { randomInt } from "./aleatoire";
 import { BANQUE_QUIZ_CALCUL_VECTORIEL } from "./banque";
 
+/** Thèmes dans l'ordre des sections du cours. */
 export const CATALOGUE_VARIANTES: { id: VarianteQuizCalculVectoriel; label: string }[] = [
-  { id: "relationVectorielle", label: "Point à partir d'une relation vectorielle — translation, milieu, relation générale" },
-  { id: "combinaisonLineaire", label: "Calcul de composantes d'une combinaison linéaire de vecteurs" },
-  { id: "constructionGraphique", label: "Construction graphique de vecteurs — multiplier un vecteur par un scalaire" },
-  { id: "colinearite", label: "Colinéarité de vecteurs et alignement de points" },
-  { id: "orthogonalite", label: "Orthogonalité de vecteurs et théorème de Pythagore généralisé" },
+  { id: "constructionGraphique", label: "Multiplier un vecteur par un réel — construction graphique" },
+  { id: "chasles", label: "Réduire une somme de vecteurs — relation de Chasles" },
+  { id: "decomposerDemontrer", label: "Décomposer un vecteur et démontrer sans repère" },
+  { id: "combinaisonLineaire", label: "Composantes d'une combinaison de vecteurs" },
   { id: "normeDistance", label: "Norme d'un vecteur et distance entre deux points" },
-  { id: "chasles", label: "Réduction d'une somme de vecteurs — relation de Chasles" },
-  { id: "comparaisonVisuelle", label: "Comparaison de vecteurs — longueur, direction et sens" },
-  { id: "applicationsPhysiques", label: "Applications physiques — résultante de deux vecteurs" },
+  { id: "relationVectorielle", label: "Points et vecteurs — translation, milieu, relation générale" },
+  { id: "colinearite", label: "Colinéarité de vecteurs et alignement de points" },
+  { id: "orthogonalite", label: "Orthogonalité de vecteurs et Pythagore généralisé" },
+  { id: "quadrilateresConstructions", label: "Quadrilatères et constructions" },
+  { id: "comparaisonVisuelle", label: "Comparer des vecteurs — longueur, direction et sens" },
+  { id: "applicationsPhysiques", label: "Résultante de deux vecteurs" },
+  { id: "vecteursContexte", label: "Vecteurs en contexte — déplacements, rivière, équilibre, chantier" },
 ];
 
-/** Taille réelle de la banque d'un thème (35 aujourd'hui pour chacun des 9 thèmes) — jamais une
+/** Taille réelle de la banque d'un thème (35 aujourd'hui pour chacun des 12 thèmes) — jamais une
  * constante fixe : `AppQuizCalculVectoriel.tsx` l'utilise pour fixer `nombreExercices`, seule façon
  * pour `creerGenerateurSansRepetition` de garder sa garantie « jamais de répétition dans une
  * session » si un thème venait à perdre ou gagner des affirmations (`.claude/rules/quiz-generators.md`). */

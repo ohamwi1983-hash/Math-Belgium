@@ -5204,3 +5204,41 @@ aller plus loin — le milieu par Chasles » n'est pas touché (lot F de l'audit
 gen130 `chasles`, processus 2 ; libellé de gen27 renseigné), `regroupementsPapier.ts` (gen130). Détail :
 `feuilles-evaluations.md`, entrée « 4e ch. 6, lot H ».
 
+
+## 4e, Chapitre 6 — Calcul vectoriel, lots A, E, F et G de l'audit (cours, quiz gen64, démonstrations, ateliers)
+
+Lot A (cours) : § 18 sans « un thème par générateur » ; questions « Formule » relues avec
+`deriveQuestionsFormules` (outil `formules.ts` du dossier de travail) — chaîne fermée séparée
+(AB + BC + CA = 0), milieu rattaché au § 12 (la méthode écrit maintenant `\dfrac{x_A+x_B}{2}`, plus
+« (x_A+x_B)/2 » : la PREMIÈRE section qui contient la formule telle quelle gagne), produit scalaire au
+§ 14 (le piège du § 13 l'écrit `x_u x_v + y_u y_v`, sans `\cdot`, pour ne plus capter la formule),
+opposé au § 10, vecteur directeur « de la droite y = mx + p » ; conditions du formulaire sans
+parenthèses (elles sont imprimées entre parenthèses). Alignement : AB et AC, deux vecteurs de même
+origine ; Hamilton : une des premières tentatives EN TROIS DIMENSIONS (Wessel, Argand, Bellavitis
+avant lui dans le plan) ; majuscules d'insistance ; renvoi final « plus tard » ; convention du pas en
+diagonale (une case dans chaque direction, √2) ; § 12 « AB = B − A » ; « Al-Kashi (loi des cosinus) »
+partout (aussi `resultante-vecteurs-widget`). Formulaire complété (‖k·u‖, décomposition, quadrilatères
+et quatrième sommet, viser, déviation obtuse, directions, traversée, équilibre) : 36 questions
+« Formule », chacune dans la section qui l'enseigne. Récapitulatif : 3 puces.
+
+Lot F : D6 relabellisé « Démonstration — le milieu par Chasles » ; D7 (coordonnées du milieu, § 12),
+D8 (‖k·u‖, § 11), D9 ((1 ; m) dirige y = mx + p, § 15), D10 (jamais colinéaires et orthogonaux, § 14),
+D11 (parallélogramme ⟺ diagonales de même milieu, § 12), énoncés par clé sans méthode. Figures :
+pas en diagonale, traversée de la rivière (vitesses × 10), équilibre (forces au point + triangle
+fermé, `illustrationGroup`), quatre natures de quadrilatère (`illustrationGroup` de 4, quadrillage) ;
+domaines au rapport 320/300.
+
+Lot E (quiz gen64) : banque réécrite en `$…$` (`TexteRiche` à l'écran, `banquesVraiFaux` sur papier ;
+`ui/formatQuizCalculVectoriel.ts` supprimé), 420 affirmations, 12 × 35, 18 V / 17 F ; thèmes
+`decomposerDemontrer`, `quadrilateresConstructions`, `vecteursContexte` ; catalogue dans l'ordre des
+sections ; `QUIZ_THEMES` : libellés pour § 14 et § 17 (deux thèmes chacun), § 7 pour la décomposition.
+Contrôle `check_banque.mjs` (KaTeX, notation clavier, majuscules, doublons, équilibre ; seule alerte :
+« m/s ») ; parcours Playwright des 12 thèmes : 35 / 35 énoncés distincts, 0 `.katex-error`.
+
+Lot G : cinq ateliers — `arrivee-moins-depart-widget` (§ 8, piège A − B = BA, même vecteur depuis P),
+`carte-tresor-widget` (§ 11, rose des vents, parcourue n + m√2 contre ‖DA‖, retour), 
+`longueur-direction-sens-widget` (§ 16, trois voyants + ligne du tableau en liste : un tableau à quatre
+colonnes débordait à 308 px), `traversee-riviere-widget` (§ 17, curseurs c, v, θ ; « juste en face »
+impossible si v ≤ c), `equilibre-forces-widget` (§ 17, F₃ = −(F₁ + F₂), triangle fermé, piège
+F₃ = F₁ + F₂). Fenêtres fixes, flèches d'axes, figure seule dans `.graphe-zone` (épinglage : 13 ok,
+0 ko). Valeurs recoupées (script `ateliers.cjs` : 15 contrôles × 2 tailles × 2 thèmes, 60 / 60).

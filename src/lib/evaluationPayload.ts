@@ -569,11 +569,14 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'multiplicationReperes', quizTheme: 'combinaisonLineaire', label: '', quizChapitre: 6 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'multiplicationGeometrique', quizTheme: 'constructionGraphique', label: '', quizChapitre: 6 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'colinearite', quizTheme: 'colinearite', label: '', quizChapitre: 6 },
-  { chapitreSlug: 'calcul-vectoriel', sectionId: 'orthogonalite', quizTheme: 'orthogonalite', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'orthogonalite', quizTheme: 'orthogonalite', label: 'Orthogonalité et Pythagore généralisé', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'orthogonalite', quizTheme: 'quadrilateresConstructions', label: 'Quadrilatères et constructions', quizChapitre: 6 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'norme', quizTheme: 'normeDistance', label: '', quizChapitre: 6 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'chasles', quizTheme: 'chasles', label: '', quizChapitre: 6 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'comparaison', quizTheme: 'comparaisonVisuelle', label: '', quizChapitre: 6 },
-  { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', quizTheme: 'applicationsPhysiques', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', quizTheme: 'applicationsPhysiques', label: 'Résultante de deux vecteurs', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', quizTheme: 'vecteursContexte', label: 'Vecteurs en contexte', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'decompositionGeometrique', quizTheme: 'decomposerDemontrer', label: '', quizChapitre: 6 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'reperer', quizTheme: 'equationDroite', label: '', quizChapitre: 7 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', quizTheme: 'lectureGraphiqueDroite', label: 'Lecture graphique', quizChapitre: 7 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', quizTheme: 'constructionDroite', label: 'Construction graphique', quizChapitre: 7 },
@@ -1164,6 +1167,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     norme: [
       { cle: 'Pythagore', enonce: "Démontre que, pour deux points $A(x_A\\,;\\,y_A)$ et $B(x_B\\,;\\,y_B)$, $\\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}$." },
+      { cle: 'la norme de k·u', enonce: "Démontre que, pour tout vecteur $\\vec{u}$ et tout réel $k$, $\\|k\\cdot\\vec{u}\\| = |k|\\cdot\\|\\vec{u}\\|$." },
       { cle: 'distance entre deux points', enonce: "Calcule la distance entre les points $A(1\\,;\\,1)$ et $B(4\\,;\\,5)$." },
       { cle: 'distance avec un paramètre', enonce: "On donne les points $A(1\\,;\\,2)$ et $B(x\\,;\\,6)$. Détermine les valeurs de $x$ pour lesquelles $AB = 5$." },
       { cle: "nature d'un triangle", enonce: "On donne les points $A(1\\,;\\,1)$, $B(4\\,;\\,2)$ et $C(0\\,;\\,4)$. Détermine la nature du triangle $ABC$ en calculant les longueurs de ses côtés." },
@@ -1172,6 +1176,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'translation puis milieu', enonce: "On donne le point $A(1\\,;\\,1)$ et le vecteur $\\vec{u}\\begin{pmatrix}4\\\\2\\end{pmatrix}$. Détermine les coordonnées du point $B$, image de $A$ par la translation de vecteur $\\vec{u}$, puis celles du milieu $M$ de $[AB]$." },
       { cle: "quatrième sommet d'un parallélogramme", enonce: "On donne les points $A(1\\,;\\,1)$, $B(5\\,;\\,2)$ et $C(6\\,;\\,5)$. Détermine les coordonnées du point $D$ tel que $ABCD$ soit un parallélogramme." },
       { cle: "symétrique d'un point", enonce: "On donne les points $A(1\\,;\\,2)$ et $B(4\\,;\\,3)$. Détermine les coordonnées du point $A'$, symétrique de $A$ par rapport à $B$." },
+      { cle: 'les coordonnées du milieu', enonce: "On donne les points $A(x_A\\,;\\,y_A)$ et $B(x_B\\,;\\,y_B)$. À partir de l'égalité $\\vec{AM}=\\dfrac{1}{2}\\vec{AB}$, qui caractérise le milieu $M$ de $[AB]$, démontre que $x_M=\\dfrac{x_A+x_B}{2}$ et $y_M=\\dfrac{y_A+y_B}{2}$." },
+      { cle: 'parallélogramme et diagonales de même milieu', enonce: "Dans un repère, on donne quatre points $A$, $B$, $C$ et $D$. Démontre que $\\vec{AB}=\\vec{DC}$ si et seulement si les segments $[AC]$ et $[BD]$ ont le même milieu : $ABCD$ est un parallélogramme si et seulement si ses diagonales ont le même milieu." },
       { cle: 'relation générale AM', enonce: "On donne les points $A(1\\,;\\,1)$ et $B(7\\,;\\,4)$. Détermine les coordonnées du point $M$ tel que $\\vec{AM}=\\dfrac{2}{3}\\vec{AB}$." },
     ],
     colinearite: [
@@ -1188,6 +1194,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'triangle donné par ses sommets', enonce: "On donne les points $A(1\\,;\\,1)$, $B(4\\,;\\,2)$ et $C(0\\,;\\,4)$. Le triangle $ABC$ est-il rectangle en $A$ ? Justifie à l'aide des composantes." },
       { cle: 'orthogonalité avec un paramètre', enonce: "Détermine la valeur de $x$ pour laquelle les vecteurs $\\vec{u}\\begin{pmatrix}x\\\\3\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}4\\\\-2\\end{pmatrix}$ sont orthogonaux." },
       { cle: "nature d'un quadrilatère", enonce: "On donne les points $A(1\\,;\\,0)$, $B(5\\,;\\,2)$, $C(4\\,;\\,4)$ et $D(0\\,;\\,2)$. Détermine la nature du quadrilatère $ABCD$ (parallélogramme, losange, rectangle ou carré). Justifie par des calculs vectoriels." },
+      { cle: 'jamais colinéaires et orthogonaux', enonce: "Démontre que deux vecteurs non nuls ne peuvent pas être à la fois colinéaires et orthogonaux." },
     ],
     applications: [
       { cle: 'deux forces', enonce: "Deux forces de normes $F_1 = 50$ N et $F_2 = 30$ N s'appliquent au même point et forment entre elles un angle de 60°. Calcule la norme de leur résultante, puis l'angle qu'elle forme avec la force $\\vec{F_1}$ (au dixième de degré)." },
@@ -1198,6 +1205,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     directeur: [
       { cle: "vecteur directeur à partir de l'équation", enonce: "Donne un vecteur directeur de la droite $d$ d'équation $y = 2x - 1$, puis deux autres vecteurs directeurs de $d$." },
+      { cle: 'pourquoi (1 ; m) dirige', enonce: "Démontre que le vecteur $\\begin{pmatrix}1\\\\m\\end{pmatrix}$ est un vecteur directeur de la droite $d$ d'équation $y = mx + p$." },
     ],
   },
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc

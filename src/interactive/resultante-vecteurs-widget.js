@@ -5,7 +5,7 @@
    * <resultante-vecteurs-widget> — atelier interactif : F₁, F₂ (en N)
    * et θ, l'angle entre les deux forces — règle du parallélogramme en
    * direct, avec :
-   *  - la loi des cosinus et l'explication du signe « + » : dans le
+   *  - Al-Kashi (loi des cosinus) et l'explication du signe « + » : dans le
    *    triangle formé par F₁ et le côté opposé du parallélogramme,
    *    l'angle opposé à R vaut 180° − θ, et cos(180° − θ) = −cos θ ;
    *  - la méthode par les composantes (F₁ sur l'axe horizontal) ;
@@ -279,7 +279,7 @@
     // ---------- lecture ----------
     var sF1 = brut(f1, 0), sF2 = brut(f2, 0), sTh = brut(th, 0);
     var html = "";
-    html += '<div class="bloc"><h4>Loi des cosinus</h4>R² = ' + sF1 + '² + ' + sF2 + '² + 2 × ' + sF1 + ' × ' + sF2 + ' × cos ' + sTh + '° ' +
+    html += '<div class="bloc"><h4>Al-Kashi (loi des cosinus)</h4>R² = ' + sF1 + '² + ' + sF2 + '² + 2 × ' + sF1 + ' × ' + sF2 + ' × cos ' + sTh + '° ' +
       eqv(r2, 2) + '<br><span class="res">R ' + eqv(r, 2) + ' N</span></div>';
     html += '<div class="bloc signe"><h4>Pourquoi « + » et pas « − » ?</h4>Dans le triangle formé par <span class=vec>F₁</span> et le côté opposé du parallélogramme, l\'angle opposé à <span class=vec>R</span> vaut 180° − θ = ' +
       brut(180 - th, 0) + '°. Al-Kashi donne R² = F₁² + F₂² − 2·F₁·F₂·cos(180° − θ), et comme cos(180° − θ) = −cos θ, le « − » devient « + ».</div>';

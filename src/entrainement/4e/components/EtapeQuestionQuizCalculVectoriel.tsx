@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { QuestionVraiFaux } from "../core/quizCalculVectoriel.types";
-import { RenduFragments } from "./RenduFragments";
-import { fragmentsTexteVectoriel } from "../ui/formatQuizCalculVectoriel";
+import { TexteRiche } from "./TexteRiche";
 
 interface Props {
   question: QuestionVraiFaux;
@@ -17,7 +16,7 @@ export function EtapeQuestionQuizCalculVectoriel({ question, onValider }: Props)
   return (
     <div>
       <p className="prompt-text">
-        <RenduFragments fragments={fragmentsTexteVectoriel(question.enonce)} />
+        <TexteRiche texte={question.enonce} />
       </p>
 
       <div className="options-grid-compact">
