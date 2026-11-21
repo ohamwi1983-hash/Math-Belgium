@@ -5071,3 +5071,13 @@ les vidéos YouTube signalent parfois « compute-pressure »), scrollWidth = lar
 affines (101 confondus, verdict ⟺ ad + b = cb + d), 56 couples image ∩ domaine confrontés à
 1 201 x échantillonnés ; glisser à la souris ; `test-epingle` 0 échec. Captures :
 `scratchpad/5e1-ateliers/`.
+## 5e (4h), Chapitre 4 — lot G de l'audit (5gen64–5gen67, nouveaux générateurs)
+
+Quatre cartes ajoutées (descriptions en Unicode, sans `$…$`) sans toucher au reste du cours ni à
+5gen20–24 (chantier parallèle des corrigés) : **5gen64 « Limites avec racines carrées : expression
+conjuguée »** (§ 1, après 5gen20), **5gen66 « Du tableau de limites au graphique »** (§ 3, après
+5gen22), **5gen65 « Retrouver une fonction à partir de ses asymptotes »** (§ 5, après 5gen24) et
+**5gen67 « Détective d'erreurs — limites »** (§ 5, après 5gen65). Registres `registry.ts`,
+`evaluationAdapterRegistry.ts` (`versionPapier`) et `evaluationPayload.ts` (sections limites-calcul
+P2, lecture-graphique P1, etude-complete P2 et P3). Détail des choix, mesures et pièges :
+`feuilles-evaluations.md`, entrée « 5e ch. 4, lot G ».
