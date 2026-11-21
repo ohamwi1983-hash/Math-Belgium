@@ -3,6 +3,10 @@
  * d'écran).
  */
 import { useEffect, useState } from 'react'
+import { findChapter, LEVELS } from '../../content/chaptersIndex'
+import { ajouterJours, CALENDRIER_FWB, estJourDeClasse } from '../../lib/calendrierFwb'
+import { dateLongue, jourSemaine, lignesPartiesVues, structureChapitre, texteBrut, type Classe, type Seance } from '../../lib/carnet'
+import { lundiDe } from '../../lib/carnetAgenda'
 
 /** Vrai si l'écran est assez large pour le tableau de la semaine (sinon : un jour à la fois). */
 export function useEcranLarge(requete = '(min-width: 720px)'): boolean {
@@ -121,4 +125,112 @@ export function memoriserClasse(id: string): void {
   } catch {
     // stockage indisponible : simple confort perdu
   }
+}
+
+/* ------------------------------------------------------------ repères et résumés (refonte) */
+
+export function capitale(t: string): string {
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
+
+/** Séances de la plus récente à la plus ancienne (même jour : la dernière créée d'abord). */
+export function trierRecentes<S extends Pick<Seance, 'date_seance' | 'cree_le'>>(seances: S[]): S[] {
+  return [...seances].sort((a, b) => (a.date_seance < b.date_seance ? 1 : a.date_seance > b.date_seance ? -1 : a.cree_le < b.cree_le ? 1 : -1))
+}
+
+/** Chapitre proposé pour une nouvelle séance d'une classe : celui de sa dernière séance (chapitre
+ * « en cours »), sinon le premier de son niveau. */
+export function chapitreParDefaut(classeId: string | undefined, classes: Classe[], seances: Seance[]): string {
+  const enCours = classeId ? chapitreEnCours(classeId, seances) : ''
+  if (enCours) return enCours
+  const k = classes.find((c) => c.id === classeId)
+  const premier = k?.niveau ? LEVELS.find((l) => l.slug === k.niveau)?.chapters[0] : undefined
+  return premier && k?.niveau ? `${k.niveau}/${premier.slug}` : ''
+}
+
+/** Chapitre « en cours » d'une classe (celui de sa dernière séance), ou `''`. */
+export function chapitreEnCours(classeId: string, seances: Seance[]): string {
+  const derniere = trierRecentes(seances.filter((s) => s.classe_id === classeId))[0]
+  return derniere && findChapter(derniere.niveau, derniere.chapitre) ? `${derniere.niveau}/${derniere.chapitre}` : ''
+}
+
+/** Minutes → « 08h45 ». */
+export function heureCourte(m: number): string {
+  return `${String(Math.floor(m / 60)).padStart(2, '0')}h${String(m % 60).padStart(2, '0')}`
+}
+
+/** « 20/11 ». */
+export function jourMois(iso: string): string {
+  return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`
+}
+
+const JOURS_ABREGES = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.']
+const MOIS_ABREGES = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.']
+
+/** « Ven. 20 nov. » */
+export function dateAbregee(iso: string): string {
+  const j = Number(iso.slice(8, 10))
+  return `${JOURS_ABREGES[jourSemaine(iso)] ?? ''} ${j === 1 ? '1er' : j} ${MOIS_ABREGES[Number(iso.slice(5, 7)) - 1] ?? ''}`
+}
+
+/** Période (entre deux vacances de plusieurs jours) et numéro de semaine de cours depuis la rentrée
+ * FWB, pour l'en-tête « Période 2 · semaine 11 ». `null` hors d'une année connue du calendrier ;
+ * `semaine` nulle si la semaine n'a aucun jour de classe (vacances). */
+export function reperesScolaires(iso: string): { periode: number; semaine: number | null } | null {
+  const annee = CALENDRIER_FWB.find((a) => iso >= a.debut && iso <= a.fin)
+  if (!annee) return null
+  const periode = 1 + annee.conges.filter((c) => c.au > c.du && c.au < iso).length
+  const cible = lundiDe(iso)
+  let semaine = 0
+  let classeCetteSemaine = false
+  for (let lundi = lundiDe(annee.debut); lundi <= cible; lundi = ajouterJours(lundi, 7)) {
+    let classe = false
+    for (let i = 0; i < 5; i++) if (estJourDeClasse(ajouterJours(lundi, i))) classe = true
+    if (classe) semaine++
+    if (lundi === cible) classeCetteSemaine = classe
+  }
+  return { periode, semaine: classeCetteSemaine ? semaine : null }
+}
+
+export function texteReperes(iso: string): string {
+  const r = reperesScolaires(iso)
+  if (!r) return ''
+  return r.semaine === null ? `Période ${r.periode}` : `Période ${r.periode} · semaine ${r.semaine}`
+}
+
+/** Résumé court d'une séance : titre du chapitre, sections vues (« 6. Relation de Chasles »), et
+ * numéros (« § 6, 7 »). */
+export function resumeSeance(s: Pick<Seance, 'niveau' | 'chapitre' | 'parties'>): { chapitre: string; sections: string[]; numeros: string } {
+  const ch = findChapter(s.niveau, s.chapitre)
+  if (!ch) return { chapitre: `Chapitre retiré du site (${s.chapitre})`, sections: [], numeros: '' }
+  const lignes = lignesPartiesVues(s.parties, structureChapitre(ch))
+  return {
+    chapitre: texteBrut(ch.title),
+    sections: lignes.map((l) => `${l.numero}. ${l.titreSection}`),
+    numeros: lignes.length > 0 ? `§ ${lignes.map((l) => l.numero).join(', ')}` : '',
+  }
+}
+
+/** « Limites et asymptotes, § 3 Asymptotes » : la dernière séance de la classe AVANT ce créneau
+ * (dernière section vue), pour « dernière fois : … ». */
+export function derniereFois(seances: Seance[], classeId: string, date: string, numeroHeure: number | null = null): string | null {
+  const avant = seances.filter(
+    (s) => s.classe_id === classeId && (s.date_seance < date || (s.date_seance === date && numeroHeure !== null && s.numero_heure !== null && s.numero_heure < numeroHeure)),
+  )
+  const s = trierRecentes(avant)[0]
+  if (!s) return null
+  const ch = findChapter(s.niveau, s.chapitre)
+  if (!ch) return null
+  const lignes = lignesPartiesVues(s.parties, structureChapitre(ch))
+  const derniere = lignes[lignes.length - 1]
+  return derniere ? `${texteBrut(ch.title)}, § ${derniere.numero} ${derniere.titreSection}` : texteBrut(ch.title)
+}
+
+/** « Semaine du 16 au 20 novembre » / « … du 30 novembre au 4 décembre ». */
+export function titreSemaine(lundi: string): string {
+  const vendredi = ajouterJours(lundi, 4)
+  const debut = dateLongue(lundi, false).replace(/ \d{4}$/, '')
+  const fin = dateLongue(vendredi, false).replace(/ \d{4}$/, '')
+  const memeMois = lundi.slice(5, 7) === vendredi.slice(5, 7)
+  return `Semaine du ${memeMois ? debut.split(' ')[0] : debut} au ${fin}`
 }

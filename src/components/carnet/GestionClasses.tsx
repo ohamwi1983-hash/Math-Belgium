@@ -4,7 +4,7 @@ import { erreurNomClasse, libelleNiveau, type Classe } from '../../lib/carnet'
 import { ecoleParDefaut, type Ecole } from '../../lib/compteValidation'
 import { Champ } from '../compte/Champ'
 
-type SaisieClasse = { nom: string; ecole_id: string; niveau: string | null }
+export type SaisieClasse = { nom: string; ecole_id: string; niveau: string | null }
 
 /** Ajouter / renommer / supprimer les classes ; chacune rattachée à une école du profil. */
 export function GestionClasses({
@@ -65,15 +65,16 @@ export function GestionClasses({
           )}
         </ul>
       )}
-      <div className="compte-sous-form">
-        <h4>Ajouter une classe</h4>
+      <div className="compte-sous-form" id="ajouter">
+        <h3>Ajouter une classe</h3>
         <FormClasse initiale={null} ecoles={ecoles} occupe={occupe} libelle="Ajouter la classe" onEnvoyer={async (s) => void (await onAjouter(s))} />
       </div>
     </div>
   )
 }
 
-function FormClasse({
+/** Formulaire d'une classe (nom, école, niveau) : ajout, ou modification depuis la page de la classe. */
+export function FormClasse({
   initiale,
   ecoles,
   occupe,

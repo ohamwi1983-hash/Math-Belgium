@@ -15,7 +15,7 @@ function dateParDefaut(seances: Seance[]): string {
 
 /** « Créer une évaluation sur la matière vue depuis le … » : ouvre `/evaluation` avec les
  * générateurs des sections cochées depuis cette date déjà sélectionnés (`?matiere=`). */
-export function EvaluationMatiere({ classe, seances }: { classe: Classe; seances: Seance[] }) {
+export function EvaluationMatiere({ classe, seances, sansTitre = false }: { classe: Classe; seances: Seance[]; sansTitre?: boolean }) {
   const id = useId()
   const navigate = useNavigate()
   const [depuis, setDepuis] = useState(() => dateParDefaut(seances))
@@ -35,10 +35,12 @@ export function EvaluationMatiere({ classe, seances }: { classe: Classe; seances
   })
 
   return (
-    <section className="compte-encadre carnet-evaluation" aria-labelledby={`${id}-titre`}>
-      <h3 id={`${id}-titre`} className="compte-titre-encadre">
-        Évaluation sur la matière vue
-      </h3>
+    <section className="compte-encadre carnet-evaluation" aria-labelledby={sansTitre ? undefined : `${id}-titre`} aria-label={sansTitre ? `Évaluation sur la matière vue en ${classe.nom}` : undefined}>
+      {!sansTitre && (
+        <h3 id={`${id}-titre`} className="compte-titre-encadre">
+          Évaluation sur la matière vue
+        </h3>
+      )}
       <div className="compte-champ carnet-champ-court">
         <label htmlFor={`${id}-depuis`}>Matière vue depuis le</label>
         <input id={`${id}-depuis`} type="date" value={depuis} onChange={(e) => setDepuis(e.target.value)} />
