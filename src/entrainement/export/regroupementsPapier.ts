@@ -36,6 +36,9 @@ export interface FormeRegroupement {
   consigne: string | ((g: Groupes) => string | null);
   /** Ligne (mini-syntaxe) ; défaut : le groupe `ligne`. */
   ligne?: (g: Groupes) => string;
+  /** Générateur à graphique : consigne et ligne quand toutes les lignes du groupe ont la même figure
+   * (imprimée une seule fois, sous la consigne). */
+  figureCommune?: { consigne: (g: Groupes) => string; ligne: (g: Groupes) => string };
 }
 
 export interface SpecRegroupement {
@@ -119,6 +122,9 @@ export function decouperEnonce(spec: SpecRegroupement, enonce: string, figureHtm
       ligne: fragmentsDepuis(ligne),
       ...(precisions.length > 0 ? { precisions } : {}),
       ...(spec.figure && figureHtml ? { figureHtml } : {}),
+      ...(spec.figure && figureHtml && forme.figureCommune
+        ? { figureCommune: { consigne: fragmentsDepuis(forme.figureCommune.consigne(g)), ligne: fragmentsDepuis(forme.figureCommune.ligne(g)) } }
+        : {}),
     };
   }
   return null;
@@ -765,6 +771,8 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     motif: re(String.raw`On considère la figure ci-dessous \((?<desc>[^)]+)\)\. Réduis l'expression suivante en un seul vecteur, désigné par deux points de la figure : (?<e>${M})\.`),
     consigne: "Réduis chaque expression en un seul vecteur, désigné par deux points de sa figure.",
     ligne: (g) => `${g.e} (${g.desc})`,
+    // Même figure pour toutes les lignes (même hexagone…) : une seule figure, décrite une fois.
+    figureCommune: { consigne: (g) => `On considère la figure ci-dessous (${g.desc}). Réduis chaque expression en un seul vecteur, désigné par deux points de la figure.`, ligne: (g) => g.e ?? "" },
   }),
   gen43: fig(
     {

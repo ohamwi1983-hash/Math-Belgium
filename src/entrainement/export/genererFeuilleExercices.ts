@@ -233,6 +233,10 @@ export interface RegroupementInstance {
   /** Figure propre à la ligne (générateurs à graphique : l'`enteteHtml` de l'énoncé papier, recopié
    * tel quel) — graphiques côte à côte, deux par rangée quand ils sont assez petits. */
   figureHtml?: string;
+  /** Écriture quand TOUTES les lignes du groupe ont la même figure (gen27 : même hexagone) : la
+   * figure est alors imprimée une seule fois sous la consigne, et la consigne / la ligne ne
+   * décrivent plus la figure à chaque ligne. À défaut, `consigne` et `ligne` servent telles quelles. */
+  figureCommune?: { consigne: FragmentConsigne[]; ligne: FragmentConsigne[] };
 }
 
 export interface AdaptateurFeuilleExercices<T> {

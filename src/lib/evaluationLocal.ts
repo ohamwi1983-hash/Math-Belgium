@@ -799,7 +799,7 @@ function reponsesAccepteesDuGroupe(lignes: LigneGroupe[]): FragmentConsigne[][] 
 /** Item d'un groupe a), b), c) à partir de ses lignes (items d'une instance, déjà en énoncé papier).
  * Aussi appelé après une mise à l'échelle des points (examen à total fixé) : chaque ligne garde SES
  * points, le total du groupe est leur somme. */
-export function assemblerGroupe(base: ItemEvaluation, consigne: FragmentConsigne[], lignes: LigneGroupe[]): ItemEvaluation {
+export function assemblerGroupe(base: ItemEvaluation, consigne: FragmentConsigne[], lignes: LigneGroupe[], figureCommune?: string): ItemEvaluation {
   const plusHaut = lignes.reduce<ItemEvaluation | undefined>((m, l) => (l.item.niveau !== undefined && (m?.niveau === undefined || l.item.niveau > m.niveau) ? l.item : m), undefined)
   const durees = lignes.map((l) => l.item.dureeMinutes)
   const breves = lignes.map((l) => l.item.reponseBreve)
@@ -811,7 +811,7 @@ export function assemblerGroupe(base: ItemEvaluation, consigne: FragmentConsigne
     chapitres: base.chapitres,
     nature: 'exercice',
     points: lignes.reduce((t, l) => t + l.item.points, 0),
-    section: { enteteFragments: consigne, questions: lignes.map((l) => ({ consigne: l.enonce })), disposeEnTableau: true },
+    section: { enteteFragments: consigne, ...(figureCommune ? { enteteHtml: figureCommune } : {}), questions: lignes.map((l) => ({ consigne: l.enonce })), disposeEnTableau: true },
     correction: lignes.flatMap((l, i) => prefixerLettreBlocs(l.item.correction, LETTRES[i] ?? String(i + 1))),
     niveau: plusHaut?.niveau,
     palier: plusHaut?.palier,
@@ -831,8 +831,22 @@ function itemGroupe(elements: Extract<ElementPlan, { type: 'exercice' }>[], cach
   })
   if (membres.length === 0) return null
   if (membres.length === 1) return membres[0].item
+  // Même figure pour toutes les lignes (gen27 : le même hexagone) : imprimée une seule fois, sous la
+  // consigne, au lieu d'être répétée à chaque ligne.
+  const figures = membres.map((m) => m.reg.figureHtml)
+  const commune = figures.every((f): f is string => !!f && empreinteFigure(f) === empreinteFigure(figures[0]!)) ? figures[0] : undefined
+  if (commune) {
+    const lignes: LigneGroupe[] = membres.map(({ reg, item }) => ({ enonce: reg.figureCommune?.ligne ?? reg.ligne, item }))
+    const regs = membres.map((m) => (m.reg.figureCommune ? { ...m.reg, consigne: m.reg.figureCommune.consigne } : m.reg))
+    return assemblerGroupe(membres[0].item, consigneDuGroupe(regs), lignes, commune)
+  }
   const lignes: LigneGroupe[] = membres.map(({ reg, item }) => ({ enonce: reg.ligne, ...(reg.figureHtml ? { figureHtml: reg.figureHtml } : {}), item }))
   return assemblerGroupe(membres[0].item, consigneDuGroupe(membres.map((m) => m.reg)), lignes)
+}
+
+/** Figure comparée sans ses identifiants internes (dégradés, marqueurs : uniques par instance). */
+function empreinteFigure(html: string): string {
+  return html.replace(/\s(?:id|href|xlink:href)="[^"]*"/g, '').replace(/url\(#[^)]*\)/g, 'url()').replace(/\s+/g, ' ')
 }
 const RE_ETIQUETTE = /^\s*([^:]{1,32}?)\s:\s/
 
@@ -1012,7 +1026,7 @@ export function itemsDuDocument(plan: PlanDocument, items: ItemEvaluation[]): It
     if (!pts) return it
     if (!it.groupe) return { ...it, points: pts[0] }
     const lignes = it.groupe.map((l, i) => ({ ...l, item: { ...l.item, points: pts[i] } }))
-    return assemblerGroupe(it, it.section.enteteFragments ?? [], lignes)
+    return assemblerGroupe(it, it.section.enteteFragments ?? [], lignes, it.section.enteteHtml)
   })
 }
 

@@ -422,6 +422,7 @@ const STYLE_GROUPES = `
 .ex.groupe .ligne-g + .ligne-g { border-top: 1px dotted var(--filet); }
 .legende-qr { text-align: right; font-family: Archivo, Arial, Helvetica, sans-serif; font-size: 7pt; color: var(--gris); line-height: 1.2; margin: -2px 0 1px; break-after: avoid; page-break-after: avoid; }
 .figure-ligne { margin-top: 4px; }
+.figure-commune { margin: 4px 0 6px; break-inside: avoid; page-break-inside: avoid; }
 .ligne-corr { margin: 10px 0 3px; font-weight: 600; break-after: avoid; page-break-after: avoid; }
 .corr-ligne .etape-titre { break-after: avoid; page-break-after: avoid; }
 .corr-ligne:first-child .ligne-corr { margin-top: 2px; }
@@ -694,8 +695,10 @@ function corpsGroupeHtml(item: ItemEvaluation, lignes: LigneGroupe[], avecPoints
     })
     .join("");
   const entete = item.section.enteteFragments ? `<div class="entete">${fragmentsEnteteHtml(item.section.enteteFragments)}</div>` : "";
+  // Figure commune à toutes les lignes (gen27 : le même hexagone) : une seule fois, sous la consigne.
+  const figureCommune = item.section.enteteHtml ? `<div class="figure-commune">${item.section.enteteHtml}</div>` : "";
   const legende = feuille?.qr && lignes.some((l) => l.item.code) ? `<div class="legende-qr">QR code de chaque ligne : refaire en ligne, avec les aides</div>` : "";
-  return `${entete}<div class="lignes-groupe">${legende}${rangs}</div>`;
+  return `${entete}${figureCommune}<div class="lignes-groupe">${legende}${rangs}</div>`;
 }
 
 /* ----------------------------------------------------------------------------------------------
@@ -962,7 +965,7 @@ function correctionHtml(item: ItemEvaluation): string {
     // Question regroupée : une sous-partie par ligne (« a) » et son énoncé rappelé), puis le corrigé
     // « comme au tableau » de l'instance avec SES étapes (« Étape 1 — … »).
     // Groupe à graphique : identifiants SVG du corrigé de chaque ligne (figure annotée) rendus uniques.
-    const figures = item.groupe.some((l) => l.figureHtml);
+    const figures = item.groupe.some((l) => l.figureHtml) || !!item.section.enteteHtml;
     return item.groupe
       .map((l, i) => {
         const corrige = figures ? identifiantsUniques(correctionHtml(l.item), suffixeLigne(l, i, "c")) : correctionHtml(l.item);

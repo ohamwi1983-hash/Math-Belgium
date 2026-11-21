@@ -322,6 +322,16 @@ d'équation … ».
 - Générateurs à un graphique par exercice : AUSSI regroupés (lot 2, validé sur aperçu), « graphiques
   côte à côte » : consigne une fois, puis a) [graphique] b) [graphique]…, DEUX graphiques par rangée
   quand ils sont assez petits, sinon un par rangée (section « Rendu des groupes à graphique » plus bas).
+- **Figure commune (décision de l'utilisateur, 21/11/2026 : « la figure est exactement la même,
+  pourquoi tu la reprends 4 fois ? »)** : quand TOUTES les lignes d'un groupe ont la même figure
+  (comparée sans ses identifiants internes, `evaluationLocal.ts::empreinteFigure`), elle est imprimée
+  UNE fois sous la consigne (`section.enteteHtml` du groupe, `.figure-commune` ; Word : déjà rendu
+  par `enonceQuestionDocx`), et les lignes deviennent de simples lignes de texte (points, niveau, QR
+  par ligne inchangés). L'entrée peut fournir `figureCommune: { consigne, ligne }` pour décrire la
+  figure une seule fois — gen27 : « On considère la figure ci-dessous (un hexagone régulier et son
+  centre). Réduis chaque expression en un seul vecteur, désigné par deux points de la figure. » puis
+  a) l'expression seule. Figures différentes (hexagone + étoile…) : rendu « graphiques côte à côte »
+  inchangé. Corrigé : identifiants SVG des figures annotées toujours rendus uniques par ligne.
 
 **Règles** :
 - On regroupe les instances d'un MÊME générateur, de la même ligne de sélection
