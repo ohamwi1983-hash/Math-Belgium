@@ -194,6 +194,56 @@ export function mettreAEchelle(points: number[], total: number): number[] | null
   return res.map((u) => u / 2);
 }
 
+/**
+ * `mettreAEchelle` quand chaque valeur vaut pour PLUSIEURS questions (panneau : « Ajuster au total »
+ * — une variante de 3 exercices à 2 pts chacun, un vrai/faux de 4 affirmations à 1 pt) : renvoie les
+ * points PAR QUESTION de chaque groupe, avec Σ nombres[k] × res[k] = total EXACTEMENT, mêmes règles
+ * (proportionnels, demi-points, jamais 0 pt). Tous les groupes d'une question : `mettreAEchelle`
+ * lui-même. Sinon, le reste (en demi-points) est corrigé par les plus petits pas possibles, en
+ * commençant par les plus gros groupes ; `null` si le total est impossible (moins de 0,5 pt par
+ * question, total non multiple de 0,5, ou reste qu'aucune combinaison des nombres de questions
+ * n'absorbe — ex. deux groupes de 2 questions et un total impair de demi-points).
+ */
+export function mettreAEchelleParGroupes(points: number[], nombres: number[], total: number): number[] | null {
+  const n = points.length;
+  if (n === 0) return [];
+  if (nombres.every((q) => q === 1)) return mettreAEchelle(points, total);
+  const unites = Math.round(total * 2);
+  const questions = nombres.reduce((s, q) => s + q, 0);
+  if (!Number.isFinite(total) || Math.abs(unites - total * 2) > 1e-9 || unites < questions || nombres.some((q) => !(q >= 1))) return null;
+  const somme = points.reduce((s, p, k) => s + Math.max(0, p) * nombres[k], 0);
+  const poids = somme > 0 ? points.map((p) => Math.max(0, p)) : points.map(() => 1);
+  const sommePoids = somme > 0 ? somme : questions;
+  const bruts = poids.map((p) => (p / sommePoids) * unites);
+  const res = bruts.map((b) => Math.max(1, Math.round(b + 1e-9)));
+  let reste = unites - res.reduce((s, r, k) => s + r * nombres[k], 0);
+  if (reste === 0) return res.map((u) => u / 2);
+  // Plus petite correction : on cherche des pas d_k (|d_k| ≤ 3, res_k + d_k ≥ 1) tels que
+  // Σ nombres[k]·d_k = reste, en minimisant Σ |d_k| (programmation dynamique sur le reste).
+  const ordre = res.map((_, k) => k).sort((a, b) => bruts[b] - bruts[a] || a - b);
+  type Etat = { cout: number; pas: Map<number, number> };
+  let etats = new Map<number, Etat>([[0, { cout: 0, pas: new Map() }]]);
+  for (const k of ordre) {
+    const suivants = new Map<number, Etat>(etats);
+    for (const [r, e] of etats) {
+      for (let d = -3; d <= 3; d++) {
+        if (d === 0 || res[k] + d < 1) continue;
+        const r2 = r + d * nombres[k];
+        if (Math.abs(r2) > Math.abs(reste) + 3 * Math.max(...nombres)) continue;
+        const cout = e.cout + Math.abs(d);
+        const actuel = suivants.get(r2);
+        if (!actuel || cout < actuel.cout) suivants.set(r2, { cout, pas: new Map([...e.pas, [k, d]]) });
+      }
+    }
+    etats = suivants;
+  }
+  const solution = etats.get(reste);
+  if (!solution) return null;
+  for (const [k, d] of solution.pas) res[k] += d;
+  reste = unites - res.reduce((s, r, k) => s + r * nombres[k], 0);
+  return reste === 0 && res.every((r) => r >= 1) ? res.map((u) => u / 2) : null;
+}
+
 /* ----------------------------------------------------------------------------------------------
  * Saisies libres du panneau (jamais de blocage de frappe : lues, jamais filtrées)
  * -------------------------------------------------------------------------------------------- */

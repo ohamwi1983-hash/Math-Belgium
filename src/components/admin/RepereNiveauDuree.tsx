@@ -42,6 +42,31 @@ function enFile(tache: Tache) {
   planifier()
 }
 
+/** Abonnés prévenus quand une estimation vient d'être calculée (points pré-remplis d'une rangée pas
+ * encore choisie, `ChampPoints` : sa valeur automatique dépend de la même estimation). */
+const abonnes = new Set<() => void>()
+let notificationPrevue = false
+function notifierEstimation() {
+  if (notificationPrevue) return
+  notificationPrevue = true
+  window.setTimeout(() => {
+    notificationPrevue = false
+    for (const f of [...abonnes]) f()
+  }, 0)
+}
+
+/** Re-rend le composant appelant à chaque nouvelle estimation en cache (regroupées par tâche). */
+export function useEstimationsCalculees(): void {
+  const [, rafraichir] = useState(0)
+  useEffect(() => {
+    const f = () => rafraichir((n) => n + 1)
+    abonnes.add(f)
+    return () => {
+      abonnes.delete(f)
+    }
+  }, [])
+}
+
 function texteNiveau(e: EstimationVariante): string | null {
   if (e.niveauMin === undefined || e.niveauMax === undefined) return null
   return e.niveauMin === e.niveauMax ? `${e.niveauMin}` : `${e.niveauMin}–${e.niveauMax}`
@@ -111,6 +136,7 @@ export function RepereNiveauDuree<T>({
         if (!actif) return
         estimationVariante(adaptateur, varianteId, optionsRef.current)
         rafraichir((n) => n + 1)
+        notifierEstimation()
       })
     }
     if (typeof IntersectionObserver === 'undefined') {

@@ -9,8 +9,10 @@ import type { ChapterContent } from '../../content/types'
 import { declencherTelechargement } from '../../entrainement/export/telechargerBlob'
 import { RichText } from '../Math'
 import { EVALUATION_ADAPTER_REGISTRY } from '../../lib/evaluationAdapterRegistry'
-import { dureeEstimeeVariante, type OptionsEstimation } from '../../entrainement/export/niveauDifficulte'
+import { dureeEstimeeVariante, estimationEnCache, type OptionsEstimation } from '../../entrainement/export/niveauDifficulte'
 import { RepereNiveauDuree } from './RepereNiveauDuree'
+import { ChampPoints } from './ChampPoints'
+import { pointsDemonstration, pointsDemonstrationMoyens, pointsDepuisDuree } from '../../lib/pointsAutomatiques'
 import {
   codesDuPlan,
   construirePlan,
@@ -42,6 +44,7 @@ import {
   lireHeure,
   lireTotal,
   mettreAEchelle,
+  mettreAEchelleParGroupes,
   partiesExamen,
   sessionParDefaut,
   titreCourtChapitre,
@@ -476,6 +479,8 @@ export function EvaluationGeneratorPanel({
         parVariante,
         nombre: sommeParVariante(parVariante),
         pointsParVariante: { ...l.pointsParVariante, [nouvelle]: l.pointsParVariante?.[cle] ?? l.points },
+        // Même état de points que la variante copiée (automatique, verrouillé ou ajusté).
+        ...(l.modePoints?.[cle] ? { modePoints: { ...l.modePoints, [nouvelle]: l.modePoints[cle] } } : {}),
         parametresExclusParVariante: { ...l.parametresExclusParVariante, [nouvelle]: reglages.parametresExclus },
         casParticulierParVariante: { ...l.casParticulierParVariante, [nouvelle]: false },
       }
@@ -492,24 +497,11 @@ export function EvaluationGeneratorPanel({
         parVariante,
         nombre: sommeParVariante(parVariante),
         pointsParVariante: sans(l.pointsParVariante),
+        ...(l.modePoints ? { modePoints: sans(l.modePoints) } : {}),
         parametresExclusParVariante: sans(l.parametresExclusParVariante),
         casParticulierParVariante: sans(l.casParticulierParVariante),
       }
     })
-  }
-
-  /** Met à jour le barème d'UNE famille/variante précise, pour UN générateur précis (ligne
-   * `type==='exercice'`, `cle===generatorId`) — chaque variante peut valoir un nombre de points
-   * différent, voir `LigneSelection.pointsParVariante`. */
-  function mettreAJourPointsVariante(chapitreSlug: string, sectionId: string, generatorId: string, varianteId: string, points: number) {
-    setLignes((prev) =>
-      prev.map((l) => {
-        if (l.chapitreSlug !== chapitreSlug || l.sectionId !== sectionId || l.type !== 'exercice' || l.cle !== generatorId) return l
-        return { ...l, pointsParVariante: { ...l.pointsParVariante, [varianteId]: points } }
-      }),
-    )
-    setUrlGeneree(null)
-    setGenereLocalementCompte(null)
   }
 
   /** Décision de l'utilisateur : en évaluation « calculatrice interdite », une variante qui exige
@@ -527,7 +519,9 @@ export function EvaluationGeneratorPanel({
   /** Points totaux d'une ligne — pour `type==='exercice'`, somme par variante (`pointsParVariante`,
    * replié sur `points` tant qu'une variante n'a pas encore son propre barème édité) ; pour les
    * autres types, simple produit `points × nombre` (pas de notion de variante). */
-  function pointsLigne(ligne: LigneSelection): number {
+  function pointsLigne(ligneSaisie: LigneSelection): number {
+    // Points EFFECTIFS (automatiques, verrouillés ou ajustés) : badge, totaux, parties de l'examen.
+    const ligne = materialiser(ligneSaisie)
     if (ligne.type === 'exercice') {
       return Object.entries(ligne.parVariante ?? {}).filter(([cle]) => !varianteExclue(ligne.cle ?? '', cle)).reduce(
         (total, [varianteId, nombre]) => total + (ligne.pointsParVariante?.[varianteId] ?? ligne.points) * nombre,
@@ -577,6 +571,172 @@ export function EvaluationGeneratorPanel({
     if (!optionsEstimation(ligne, cle)) return 'Tirages libres de la variante (générateur sans tirage équilibré).'
     const reglages = reglagesVariante(ligne, cle)
     return `Évaluation : exercices complets${reglages.parametresExclus.length > 0 ? ', paramètres décochés absents' : ''}, calculatrice ${calculatrice === 'interdite' ? 'interdite' : 'autorisée'}${reglages.inclureCasParticulier ? ' ; le cas particulier coché n’est pas compté à part' : ''}.`
+  }
+
+  /* --------------------------------------------------------------------------------------------
+   * Points pré-remplis (`lib/pointsAutomatiques.ts`, décision de l'utilisateur). Une UNITÉ de points
+   * = une variante (clé de `parVariante`), « ligne » (`points`) ou « choix:<id> » (`pointsParChoix`).
+   * Sans `modePoints[unité]`, ses points sont AUTOMATIQUES (durée estimée ÷ 2 pour un exercice — même
+   * estimation et même cache que le repère « ≈ m min » —, 1 pt par affirmation, longueur d'une
+   * démonstration…) ; tant que la durée n'est pas calculée, la valeur enregistrée reste affichée.
+   * « verrouille » (saisie à la main, plan rechargé) et « ajuste » (« Ajuster au total ») : la valeur
+   * enregistrée, jamais écrasée par la règle automatique.
+   * ------------------------------------------------------------------------------------------ */
+
+  function pointsStockes(ligne: LigneSelection, unite: string): number {
+    if (unite === 'ligne') return ligne.points
+    if (unite.startsWith('choix:')) return ligne.pointsParChoix?.[unite.slice(6)] ?? ligne.points
+    return ligne.pointsParVariante?.[unite] ?? ligne.points
+  }
+
+  /** Points automatiques d'une unité (`undefined` : pas encore connus — durée pas calculée). `calculer`
+   * : faute d'estimation en cache, la calculer (rangée choisie, comme la durée de l'en-tête) ; sinon
+   * lire le cache seulement (rangée pas encore choisie : calcul paresseux du repère). */
+  function pointsAutomatiques(ligne: LigneSelection, unite: string, calculer: boolean): number | undefined {
+    if (ligne.type === 'exercice') {
+      const adaptateur = EVALUATION_ADAPTER_REGISTRY[ligne.cle ?? ''] as Adaptateur | undefined
+      if (!adaptateur || unite === 'ligne' || unite.startsWith('choix:')) return undefined
+      const varianteId = varianteEstimation(adaptateur, unite)
+      const options = optionsEstimation(ligne, unite)
+      let duree: number | undefined
+      if (!adaptateur.criteresDifficulte) duree = adaptateur.dureeMinutes
+      else if (calculer) duree = dureeEstimeeVariante(adaptateur, varianteId, options)
+      else duree = estimationEnCache(adaptateur, varianteId, options?.filtre ? options.cleFiltre : undefined)?.dureeMinutes
+      return duree === undefined ? undefined : pointsDepuisDuree(duree)
+    }
+    if (ligne.type === 'vraiFaux' || ligne.type === 'formule') return 1
+    if (ligne.type === 'comprehension') return POINTS_DEFAUT.comprehension
+    const banque = apercusDemonstration.get(cleSection(ligne.chapitreSlug, ligne.sectionId)) ?? []
+    if (unite.startsWith('choix:')) {
+      const q = banque.find((x) => x.id === unite.slice(6))
+      return q ? pointsDemonstration(q.corrige.length) : undefined
+    }
+    return pointsDemonstrationMoyens(banque.map((q) => q.corrige.length))
+  }
+
+  /** Points EFFECTIFS d'une unité : enregistrés si verrouillés / ajustés, sinon automatiques. */
+  function pointsUnite(ligne: LigneSelection, unite: string, calculer = true): number {
+    if (ligne.modePoints?.[unite]) return pointsStockes(ligne, unite)
+    return pointsAutomatiques(ligne, unite, calculer) ?? pointsStockes(ligne, unite)
+  }
+
+  /** La ligne avec ses points EFFECTIFS écrits dans `points` / `pointsParVariante` / `pointsParChoix`
+   * (payload, plan enregistré, totaux), sans `modePoints` (propre au panneau). */
+  function materialiser(ligne: LigneSelection): LigneSelection {
+    const { modePoints: _modes, ...reste } = ligne
+    void _modes
+    if (ligne.type === 'exercice') {
+      const cles = Object.keys(ligne.parVariante ?? {})
+      if (cles.length === 0) return reste
+      return { ...reste, pointsParVariante: { ...ligne.pointsParVariante, ...Object.fromEntries(cles.map((c) => [c, pointsUnite(ligne, c, (ligne.parVariante?.[c] ?? 0) > 0)])) } }
+    }
+    const res: LigneSelection = { ...reste, points: pointsUnite(ligne, 'ligne', ligne.nombre > 0) }
+    if (ligne.choix?.length) res.pointsParChoix = { ...ligne.pointsParChoix, ...Object.fromEntries(ligne.choix.map((id) => [id, pointsUnite(ligne, `choix:${id}`)])) }
+    return res
+  }
+
+  /** Identité d'une ligne (chapitre, section, type, clé). */
+  const memeIdentite = (a: LigneSelection, b: LigneSelection) => a.chapitreSlug === b.chapitreSlug && a.sectionId === b.sectionId && a.type === b.type && (a.cle ?? '') === (b.cle ?? '')
+
+  /** Points saisis à la main : gardés et VERROUILLÉS (jamais écrasés par la règle ni l'ajustement). */
+  function saisirPoints(cible: LigneSelection, unite: string, points: number) {
+    setLignes((prev) =>
+      prev.map((l) => {
+        if (!memeIdentite(l, cible)) return l
+        const modePoints = { ...l.modePoints, [unite]: 'verrouille' as const }
+        if (unite === 'ligne') return { ...l, points, modePoints }
+        if (unite.startsWith('choix:')) return { ...l, pointsParChoix: { ...l.pointsParChoix, [unite.slice(6)]: points }, modePoints }
+        return { ...l, pointsParVariante: { ...l.pointsParVariante, [unite]: points }, modePoints }
+      }),
+    )
+    setUrlGeneree(null)
+    setGenereLocalementCompte(null)
+  }
+
+  /** Cadenas : verrouiller la valeur affichée, ou déverrouiller (la règle automatique reprend). */
+  function basculerVerrouPoints(cible: LigneSelection, unite: string, verrouiller: boolean) {
+    if (verrouiller) {
+      saisirPoints(cible, unite, pointsUnite(cible, unite))
+      return
+    }
+    setLignes((prev) =>
+      prev.map((l) => {
+        if (!memeIdentite(l, cible) || !l.modePoints) return l
+        const modePoints = { ...l.modePoints }
+        delete modePoints[unite]
+        return { ...l, modePoints }
+      }),
+    )
+    setUrlGeneree(null)
+    setGenereLocalementCompte(null)
+  }
+
+  /** Unités de points des questions choisies (variantes exclues non comptées), avec leur nombre de
+   * questions et leurs points effectifs — « Ajuster au total ». */
+  function unitesDePoints(): { ligne: LigneSelection; unite: string; nombre: number; points: number; verrouille: boolean }[] {
+    const res: { ligne: LigneSelection; unite: string; nombre: number; points: number; verrouille: boolean }[] = []
+    for (const l of lignes) {
+      if (nombreLigne(l) === 0) continue
+      const ajouter = (unite: string, nombre: number) => res.push({ ligne: l, unite, nombre, points: pointsUnite(l, unite), verrouille: l.modePoints?.[unite] === 'verrouille' })
+      if (l.type === 'exercice') {
+        for (const [cle, n] of Object.entries(l.parVariante ?? {})) if (n > 0 && !varianteExclue(l.cle ?? '', cle)) ajouter(cle, n)
+      } else if (l.choix?.length) {
+        for (const id of l.choix) ajouter(`choix:${id}`, 1)
+      } else ajouter('ligne', l.nombre)
+    }
+    return res
+  }
+
+  const [totalVoulu, setTotalVoulu] = useState('')
+  const [messageAjustement, setMessageAjustement] = useState<{ texte: string; erreur: boolean } | null>(null)
+
+  /** « Ajuster au total » : les questions NON verrouillées sont mises à l'échelle proportionnellement
+   * (demi-points, jamais 0 pt, somme exacte — `mettreAEchelleParGroupes`, généralisation de
+   * `mettreAEchelle` de l'examen) pour que le total des points vaille le total saisi. */
+  function ajusterAuTotal() {
+    const lecture = lireTotal(normaliserSigneMoins(totalVoulu))
+    if (lecture.etat !== 'ok') {
+      setMessageAjustement({ texte: lecture.etat === 'vide' ? 'Écris le total voulu, par exemple 20 ou 40.' : lecture.message, erreur: true })
+      return
+    }
+    const unites = unitesDePoints()
+    const libres = unites.filter((u) => !u.verrouille)
+    const fixe = unites.filter((u) => u.verrouille).reduce((t, u) => t + u.points * u.nombre, 0)
+    if (libres.length === 0) {
+      setMessageAjustement({ texte: unites.length === 0 ? 'Choisis d’abord des questions.' : 'Toutes les questions sont verrouillées : déverrouille-en (cadenas) pour les ajuster.', erreur: true })
+      return
+    }
+    const cible = lecture.valeur - fixe
+    const questionsLibres = libres.reduce((t, u) => t + u.nombre, 0)
+    const res = cible >= questionsLibres * 0.5 ? mettreAEchelleParGroupes(libres.map((u) => u.points), libres.map((u) => u.nombre), cible) : null
+    if (!res) {
+      const minimum = fixe + questionsLibres * 0.5
+      setMessageAjustement({
+        texte:
+          cible < questionsLibres * 0.5
+            ? `Total trop petit : ${nombreFrPanneau(minimum)} pts au moins (${questionsLibres} question${questionsLibres > 1 ? 's' : ''} non verrouillée${questionsLibres > 1 ? 's' : ''} à 0,5 pt${fixe > 0 ? `, plus ${nombreFrPanneau(fixe)} pts verrouillés` : ''}).`
+            : `Somme exacte impossible avec ces nombres de questions (une même variante ou un même vrai/faux vaut le même nombre de points pour chacune de ses questions) : essaie ${nombreFrPanneau(lecture.valeur + 0.5)} ou ${nombreFrPanneau(lecture.valeur - 0.5)}.`,
+        erreur: true,
+      })
+      return
+    }
+    setLignes((prev) =>
+      prev.map((l) => {
+        const siennes = libres.map((u, k) => ({ u, p: res[k] })).filter(({ u }) => memeIdentite(u.ligne, l))
+        if (siennes.length === 0) return l
+        let n: LigneSelection = { ...l, modePoints: { ...l.modePoints } }
+        for (const { u, p } of siennes) {
+          n.modePoints![u.unite] = 'ajuste'
+          if (u.unite === 'ligne') n = { ...n, points: p }
+          else if (u.unite.startsWith('choix:')) n = { ...n, pointsParChoix: { ...n.pointsParChoix, [u.unite.slice(6)]: p } }
+          else n = { ...n, pointsParVariante: { ...n.pointsParVariante, [u.unite]: p } }
+        }
+        return n
+      }),
+    )
+    setUrlGeneree(null)
+    setGenereLocalementCompte(null)
+    setMessageAjustement({ texte: `Points ajustés : total ${nombreFrPanneau(lecture.valeur)} pts${fixe > 0 ? ` (dont ${nombreFrPanneau(fixe)} pts verrouillés, inchangés)` : ''}.`, erreur: false })
   }
 
   /** Durée indicative d'une ligne, en minutes — exercice : durée par exercice de la grille commune,
@@ -828,7 +988,20 @@ export function EvaluationGeneratorPanel({
     const memeLigne = (a: LigneSelection, b: LigneSelection) =>
       a.chapitreSlug === b.chapitreSlug && a.sectionId === b.sectionId && a.type === b.type && (a.cle ?? '') === (b.cle ?? '')
     const base = lignesInitiales(chapitresPlan)
-    setLignes([...base.map((b) => plan.lignes.find((l) => memeLigne(l, b)) ?? b), ...plan.lignes.filter((l) => !base.some((b) => memeLigne(l, b)))])
+    // Points du plan gardés EXACTEMENT : toutes ses questions sont verrouillées (aucun recalcul par la
+    // règle automatique) ; les lignes sans question du plan restent automatiques.
+    const verrouillee = (l: LigneSelection): LigneSelection => {
+      const unites =
+        l.type === 'exercice'
+          ? Object.entries(l.parVariante ?? {}).filter(([, n]) => n > 0).map(([c]) => c)
+          : l.choix?.length
+            ? l.choix.map((id) => `choix:${id}`)
+            : l.nombre > 0
+              ? ['ligne']
+              : []
+      return unites.length ? { ...l, modePoints: Object.fromEntries(unites.map((u) => [u, 'verrouille' as const])) } : { ...l, modePoints: undefined }
+    }
+    setLignes([...base.map((b) => plan.lignes.find((l) => memeLigne(l, b)) ?? b), ...plan.lignes.filter((l) => !base.some((b) => memeLigne(l, b)))].map(verrouillee))
     setTitre(plan.entete.titre)
     setDate(plan.entete.date)
     if (plan.entete.numero !== undefined) setNumero(plan.entete.numero)
@@ -1020,6 +1193,9 @@ export function EvaluationGeneratorPanel({
         ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres[0].title}`
         : `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres.length} chapitres`)
     const niveauLabel = niveauEntry?.label ?? niveau
+    // Points EFFECTIFS écrits dans les lignes (automatiques, verrouillés ou ajustés) ; feuille
+    // d'exercices : sans points, lignes telles quelles (sans l'état propre au panneau).
+    const lignesPoints = estExercice ? lignes.map(({ modePoints: _m, ...l }) => (void _m, l)) : lignes.map(materialiser)
     const entete: EnTeteEvaluation = {
       numero: estExercice ? undefined : numero,
       date,
@@ -1061,7 +1237,7 @@ export function EvaluationGeneratorPanel({
           : {}),
     }
     const chapitresPayload: ChapitreAvecSections[] = chapitres.map((c) => ({ chapitreSlug: c.slug, chapterNumber: c.chapterNumber, title: c.title, sections: c.sections, formulaire: c.formulaire }))
-    const items = construireItemsPayload(entete, lignes, chapitresPayload)
+    const items = construireItemsPayload(entete, lignesPoints, chapitresPayload)
     if (items.length === 0) {
       setErreur('Coche au moins une question (nombre > 0) avant de générer.')
       setUrlGeneree(null)
@@ -1075,7 +1251,7 @@ export function EvaluationGeneratorPanel({
       setGenereLocalementCompte(null)
       let plan: PlanDocument | null = null
       try {
-        plan = await construirePlan(levelSlug, entete, items, lignes, chapitres.map((c) => c.slug))
+        plan = await construirePlan(levelSlug, entete, items, lignesPoints, chapitres.map((c) => c.slug))
       } catch (e) {
         console.warn('Génération locale impossible, repli sur plateforme-maths :', e)
       }
@@ -1085,7 +1261,7 @@ export function EvaluationGeneratorPanel({
       }
     }
 
-    const url = buildEvaluationUrl(levelSlug, entete, lignes, chapitresPayload)
+    const url = buildEvaluationUrl(levelSlug, entete, lignesPoints, chapitresPayload)
     if (!url) {
       setErreur('Coche au moins une question (nombre > 0) avant de générer.')
       setUrlGeneree(null)
@@ -1628,15 +1804,14 @@ export function EvaluationGeneratorPanel({
                                           </td>
                                           {!estExercice && (
                                             <td>
-                                              <input
-                                                type="number"
-                                                min={1}
-                                                className="admin-eval-points-input"
-                                                value={ligne.pointsParVariante?.[cle] ?? ligne.points}
-                                                onChange={(e) =>
-                                                  mettreAJourPointsVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, Number(e.target.value) || 1)
-                                                }
-                                                title={`Points / question pour la variante « ${variante.label} »`}
+                                              <ChampPoints
+                                                valeur={() => pointsUnite(ligne, cle, nombreVariante > 0)}
+                                                verrouille={ligne.modePoints?.[cle] === 'verrouille'}
+                                                ajuste={ligne.modePoints?.[cle] === 'ajuste'}
+                                                disabled={exclue}
+                                                libelle={`Points / question pour la variante « ${variante.label} »`}
+                                                onSaisie={(p) => saisirPoints(ligne, cle, p)}
+                                                onVerrou={(v) => basculerVerrouPoints(ligne, cle, v)}
                                               />
                                             </td>
                                           )}
@@ -1779,18 +1954,13 @@ export function EvaluationGeneratorPanel({
                                                 </span>
                                                 {!estExercice && choix.includes(q.id ?? '') && (
                                                   <span className="admin-eval-choix-points">
-                                                    <input
-                                                      type="number"
-                                                      min={0.5}
-                                                      step={0.5}
-                                                      className="admin-eval-points-input"
-                                                      aria-label={`Points — ${q.titre ?? 'question'}`}
-                                                      value={ligne.pointsParChoix?.[q.id ?? ''] ?? ligne.points}
-                                                      onChange={(e) =>
-                                                        mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, {
-                                                          pointsParChoix: { ...ligne.pointsParChoix, [q.id ?? '']: Number(e.target.value) || 0.5 },
-                                                        })
-                                                      }
+                                                    <ChampPoints
+                                                      valeur={() => pointsUnite(ligne, `choix:${q.id ?? ''}`)}
+                                                      verrouille={ligne.modePoints?.[`choix:${q.id ?? ''}`] === 'verrouille'}
+                                                      ajuste={ligne.modePoints?.[`choix:${q.id ?? ''}`] === 'ajuste'}
+                                                      libelle={`Points — ${q.titre ?? 'question'}`}
+                                                      onSaisie={(p) => saisirPoints(ligne, `choix:${q.id ?? ''}`, p)}
+                                                      onVerrou={(v) => basculerVerrouPoints(ligne, `choix:${q.id ?? ''}`, v)}
                                                     />
                                                     pt
                                                   </span>
@@ -1846,17 +2016,14 @@ export function EvaluationGeneratorPanel({
                                       )}
                                       {!estExercice && choix.length === 0 && (
                                         <td>
-                                          <input
-                                            type="number"
-                                            min={1}
-                                            className="admin-eval-points-input"
-                                            value={ligne.points}
+                                          <ChampPoints
+                                            valeur={() => pointsUnite(ligne, 'ligne', ligne.nombre > 0)}
+                                            verrouille={ligne.modePoints?.ligne === 'verrouille'}
+                                            ajuste={ligne.modePoints?.ligne === 'ajuste'}
                                             disabled={indisponible}
-                                            onChange={(e) =>
-                                              mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, {
-                                                points: Number(e.target.value) || 1,
-                                              })
-                                            }
+                                            libelle={`Points / question — ${LABEL_TYPE[ligne.type]}`}
+                                            onSaisie={(p) => saisirPoints(ligne, 'ligne', p)}
+                                            onVerrou={(v) => basculerVerrouPoints(ligne, 'ligne', v)}
                                           />
                                         </td>
                                       )}
@@ -1877,6 +2044,39 @@ export function EvaluationGeneratorPanel({
           })}
 
           <div className="admin-eval-bottombar" ref={barreDuBas}>
+            {!estExercice && (
+              <div className="admin-eval-ajuster">
+                <span className="admin-eval-ajuster-ligne">
+                  <label htmlFor="eval-total-voulu">Total voulu</label>
+                  <input
+                    id="eval-total-voulu"
+                    type="text"
+                    autoComplete="off"
+                    className="admin-eval-points-input"
+                    value={totalVoulu}
+                    placeholder="20"
+                    disabled={estExamen && modeTotalExamen === 'fixe'}
+                    aria-describedby="eval-ajuster-aide"
+                    onChange={(e) => {
+                      setTotalVoulu(normaliserSigneMoins(e.target.value))
+                      setMessageAjustement(null)
+                    }}
+                  />
+                  <button type="button" className="admin-eval-lien-bouton admin-eval-ajuster-bouton" onClick={ajusterAuTotal} disabled={estExamen && modeTotalExamen === 'fixe'}>
+                    Ajuster au total
+                  </button>
+                </span>
+                <span
+                  id="eval-ajuster-aide"
+                  className={`admin-eval-aide${messageAjustement?.erreur ? ' admin-eval-aide-erreur' : ''}`}
+                  role={messageAjustement?.erreur ? 'alert' : 'status'}
+                >
+                  {estExamen && modeTotalExamen === 'fixe'
+                    ? 'Total fixé par partie : les points sont déjà mis à l’échelle partie par partie à l’impression.'
+                    : (messageAjustement?.texte ?? 'Questions non verrouillées mises à l’échelle (demi-points) ; cadenas fermé = points gardés.')}
+                </span>
+              </div>
+            )}
             {!estExercice && (
               <p className="admin-eval-total">
                 {estExamen ? "Total de l'examen" : 'Total'} : {nombreFrPanneau(totalAffiche)} point{totalAffiche > 1 ? 's' : ''}

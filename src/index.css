@@ -1962,3 +1962,24 @@ table.feature-table td { white-space: normal; }
 @media (max-width: 520px) {
   .carnet-agenda-actions .compte-bouton, .carnet-agenda-actions .compte-bouton-secondaire { flex: 1 1 100%; }
 }
+
+/* Points pré-remplis : champ texte + cadenas (verrouillé = saisi à la main, jamais écrasé). */
+.admin-eval-points-champ { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+.admin-eval-points-illisible { border-color: #b42318; box-shadow: 0 0 0 1px #b42318 inset; }
+.admin-eval-verrou {
+  display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0;
+  border: 1px solid transparent; border-radius: 5px; background: none; color: var(--ink-faint); cursor: pointer; opacity: 0.55;
+}
+.admin-eval-verrou:hover:not(:disabled) { opacity: 1; border-color: var(--line); }
+.admin-eval-verrou-ferme { color: var(--accent); opacity: 1; }
+.admin-eval-verrou:disabled { cursor: not-allowed; opacity: 0.25; }
+/* « Ajuster au total » (barre du bas). */
+.admin-eval-ajuster { display: flex; flex-direction: column; gap: 3px; margin-right: auto; min-width: 0; max-width: 100%; }
+.admin-eval-ajuster-ligne { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 0.85rem; }
+.admin-eval-ajuster-ligne .admin-eval-points-input { width: 4.2em; }
+.admin-eval-ajuster-bouton { font-weight: 700; }
+/* Téléphone : cadenas SOUS le champ (la colonne « Points » garde sa largeur d'avant). */
+@media (max-width: 640px) {
+  .admin-eval-table .admin-eval-points-champ { flex-direction: column; gap: 1px; }
+  .admin-eval-table .admin-eval-verrou { width: 30px; height: 22px; }
+}
