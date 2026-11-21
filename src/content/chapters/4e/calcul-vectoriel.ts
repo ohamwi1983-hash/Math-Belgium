@@ -642,7 +642,7 @@ export const calculVectoriel: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Pour aller plus loin — le milieu par Chasles',
+          label: 'Démonstration — le milieu par Chasles',
           blocks: [
             {
               kind: 'para',
@@ -1104,6 +1104,27 @@ export const calculVectoriel: ChapterContent = {
           ],
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la norme de k·u',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Prends $\\vec{u}\\begin{pmatrix} x \\\\ y \\end{pmatrix}$ et un réel k. Le vecteur ' +
+                '$k \\cdot \\vec{u}$ a pour composantes $\\begin{pmatrix} kx \\\\ ky \\end{pmatrix}$ (section 10). ' +
+                'Sa norme vaut donc $\\sqrt{(kx)^2 + (ky)^2} = \\sqrt{k^2x^2 + k^2y^2} = \\sqrt{k^2(x^2 + y^2)}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'La racine d\'un produit de nombres positifs est le produit des racines : ' +
+                '$\\sqrt{k^2(x^2 + y^2)} = \\sqrt{k^2} \\cdot \\sqrt{x^2 + y^2}$. Or $\\sqrt{k^2} = |k|$, et non k : ' +
+                'si k = −3, $\\sqrt{(-3)^2} = \\sqrt{9} = 3$. D\'où $\\|k \\cdot \\vec{u}\\| = |k| \\cdot \\|\\vec{u}\\|$ : ' +
+                'multiplier par −3 ou par 3 donne la même longueur, seul le sens change.',
+            },
+          ],
+        },
+        {
           kind: 'exemple',
           badge: 'distance entre deux points',
           formula: 'A(1 ; 1), B(4 ; 5).',
@@ -1185,6 +1206,35 @@ export const calculVectoriel: ChapterContent = {
             '$\\sqrt{1^2 + 1^2} = \\sqrt{2}$ cases, et non 1.',
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            // domaine 6 × 5,625 : rapport 320/300, cases carrées (un pas en diagonale à 45°)
+            xMin: -4.5,
+            xMax: 1.5,
+            yMin: -1,
+            yMax: 4.625,
+            showAxes: false,
+            grid: true,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: -1, y: 0 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: -1, y: 0 }, to: { x: -1, y: 1 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: -1, y: 1 }, tone: 'accent' },
+              { from: { x: -1, y: 1 }, to: { x: -2, y: 2 }, tone: 'accent' },
+              { from: { x: -2, y: 2 }, to: { x: -3, y: 3 }, tone: 'accent' },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'D', tone: 'ink', labelPos: 'right' },
+              { x: -3, y: 3, label: 'A', tone: 'ink', labelPos: 'left' },
+              { x: -0.5, y: -0.35, label: '−1', tone: 'ink', node: false },
+              { x: -1.35, y: 0.5, label: '+1', tone: 'ink', node: false },
+            ],
+            caption:
+              '3 pas en diagonale vers le nord-ouest : chaque pas change x de −1 et y de +1, donc ' +
+              '$\\vec{DA}\\begin{pmatrix} -3 \\\\ 3 \\end{pmatrix}$. Un pas mesure $\\sqrt{2}$ cases.',
+          },
+        },
+        {
           kind: 'attention',
           label: 'Distance parcourue ou distance à vol d\'oiseau ?',
           text:
@@ -1262,6 +1312,26 @@ export const calculVectoriel: ChapterContent = {
           result: { tag: 'résultat', text: 'B(5 ; 3), M(3 ; 2)' },
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — les coordonnées du milieu',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'M est le milieu de [AB] exactement quand $\\vec{AM} = \\dfrac{1}{2}\\vec{AB}$. Écris cette égalité ' +
+                'composante par composante, avec « arrivée moins départ » : ' +
+                '$x_M - x_A = \\dfrac{1}{2}(x_B - x_A)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Isole $x_M$ : $x_M = x_A + \\dfrac{1}{2}x_B - \\dfrac{1}{2}x_A = \\dfrac{1}{2}x_A + \\dfrac{1}{2}x_B = ' +
+                '\\dfrac{x_A + x_B}{2}$. Le même calcul sur la seconde composante donne ' +
+                '$y_M = \\dfrac{y_A + y_B}{2}$ : les coordonnées du milieu sont bien les moyennes des coordonnées de A et de B.',
+            },
+          ],
+        },
+        {
           kind: 'piege',
           label: 'Milieu ≠ différence de coordonnées',
           text:
@@ -1291,6 +1361,31 @@ export const calculVectoriel: ChapterContent = {
             { tag: 'égaler', text: '$6 - x_D = 4$ et $5 - y_D = 1$, donc $x_D = 2$ et $y_D = 4$' },
           ],
           result: { tag: 'résultat', text: 'D(2 ; 4). En général, $x_D = x_A + x_C - x_B$ et $y_D = y_A + y_C - y_B$. Contrôle : $\\vec{AD}$ et $\\vec{BC}$ valent tous deux $\\begin{pmatrix} 1 \\\\ 3 \\end{pmatrix}$' },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — parallélogramme et diagonales de même milieu',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'ABCD est un parallélogramme ⟺ $\\vec{AB} = \\vec{DC}$ (section 1). En composantes : ' +
+                '$x_B - x_A = x_C - x_D$ et $y_B - y_A = y_C - y_D$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Fais passer $x_A$ et $x_D$ de l\'autre côté : $x_B + x_D = x_A + x_C$. Divise par 2 : ' +
+                '$\\dfrac{x_A + x_C}{2} = \\dfrac{x_B + x_D}{2}$. De même, $\\dfrac{y_A + y_C}{2} = \\dfrac{y_B + y_D}{2}$. ' +
+                'Chaque étape se lit dans les deux sens (on ajoute, on retranche, on multiplie ou on divise par 2).',
+            },
+            {
+              kind: 'para',
+              text:
+                'Ces deux égalités disent exactement que le milieu de [AC] et le milieu de [BD] ont les mêmes ' +
+                'coordonnées. Donc ABCD est un parallélogramme ⟺ ses diagonales [AC] et [BD] ont le même milieu.',
+            },
+          ],
         },
         {
           kind: 'atelier',
@@ -1709,6 +1804,32 @@ export const calculVectoriel: ChapterContent = {
           result: { tag: 'résultat', text: '$x = 1{,}5$' },
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — jamais colinéaires et orthogonaux à la fois',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Prends deux vecteurs non nuls $\\vec{u}\\begin{pmatrix} x \\\\ y \\end{pmatrix}$ et $\\vec{v}$, et ' +
+                'suppose qu\'ils sont colinéaires : $\\vec{v} = k \\cdot \\vec{u}$, soit ' +
+                '$\\vec{v}\\begin{pmatrix} kx \\\\ ky \\end{pmatrix}$. Comme $\\vec{v}$ n\'est pas nul, $k \\neq 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Calcule leur produit scalaire : $x \\cdot kx + y \\cdot ky = k(x^2 + y^2) = k \\cdot \\|\\vec{u}\\|^2$. ' +
+                'Or $k \\neq 0$, et $\\|\\vec{u}\\|^2 > 0$ car $\\vec{u}$ n\'est pas nul : le produit scalaire n\'est ' +
+                'donc jamais nul.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Deux vecteurs non nuls colinéaires ne sont donc jamais orthogonaux : pour eux, les deux tests ' +
+                'ne peuvent pas être vérifiés en même temps.',
+            },
+          ],
+        },
+        {
           kind: 'entrainement',
           title: 'Orthogonalité et Pythagore généralisé',
           generatorId: 'gen25',
@@ -1735,6 +1856,101 @@ export const calculVectoriel: ChapterContent = {
             'Rectangle ? — un parallélogramme est un rectangle ⟺ il a un angle droit : ' +
               '$x_{AB} \\cdot x_{BC} + y_{AB} \\cdot y_{BC} = 0$.',
             'Carré — un parallélogramme à la fois losange et rectangle : les deux tests sont vérifiés.',
+          ],
+        },
+        {
+          kind: 'illustrationGroup',
+          items: [
+            {
+              kind: 'vectorPlane',
+              xMin: -0.6,
+              xMax: 4.6,
+              yMin: -0.6,
+              yMax: 4.275,
+              showAxes: false,
+              grid: true,
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 3, y: 0 }, tone: 'accent', arrow: false },
+                { from: { x: 3, y: 0 }, to: { x: 4, y: 2 }, tone: 'accent', arrow: false },
+                { from: { x: 4, y: 2 }, to: { x: 1, y: 2 }, tone: 'accent', arrow: false },
+                { from: { x: 1, y: 2 }, to: { x: 0, y: 0 }, tone: 'accent', arrow: false },
+              ],
+              points: [
+                { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'left' },
+                { x: 3, y: 0, label: 'B', tone: 'ink', labelPos: 'right' },
+                { x: 4, y: 2, label: 'C', tone: 'ink', labelPos: 'right' },
+                { x: 1, y: 2, label: 'D', tone: 'ink', labelPos: 'left' },
+              ],
+              caption: 'parallélogramme : $\\vec{AB} = \\vec{DC}$',
+            },
+            {
+              kind: 'vectorPlane',
+              xMin: -0.6,
+              xMax: 4.6,
+              yMin: -0.6,
+              yMax: 4.275,
+              showAxes: false,
+              grid: true,
+              vectors: [
+                { from: { x: 1, y: 0 }, to: { x: 3, y: 1 }, tone: 'accent', arrow: false },
+                { from: { x: 3, y: 1 }, to: { x: 4, y: 3 }, tone: 'accent', arrow: false },
+                { from: { x: 4, y: 3 }, to: { x: 2, y: 2 }, tone: 'accent', arrow: false },
+                { from: { x: 2, y: 2 }, to: { x: 1, y: 0 }, tone: 'accent', arrow: false },
+              ],
+              points: [
+                { x: 1, y: 0, label: 'A', tone: 'ink', labelPos: 'left' },
+                { x: 3, y: 1, label: 'B', tone: 'ink', labelPos: 'right' },
+                { x: 4, y: 3, label: 'C', tone: 'ink', labelPos: 'right' },
+                { x: 2, y: 2, label: 'D', tone: 'ink', labelPos: 'left' },
+              ],
+              caption: 'losange : en plus, $AB = BC$',
+            },
+            {
+              kind: 'vectorPlane',
+              xMin: -0.6,
+              xMax: 4.6,
+              yMin: -0.6,
+              yMax: 4.275,
+              showAxes: false,
+              grid: true,
+              vectors: [
+                { from: { x: 0, y: 1 }, to: { x: 4, y: 1 }, tone: 'accent', arrow: false },
+                { from: { x: 4, y: 1 }, to: { x: 4, y: 3 }, tone: 'accent', arrow: false },
+                { from: { x: 4, y: 3 }, to: { x: 0, y: 3 }, tone: 'accent', arrow: false },
+                { from: { x: 0, y: 3 }, to: { x: 0, y: 1 }, tone: 'accent', arrow: false },
+              ],
+              points: [
+                { x: 0, y: 1, label: 'A', tone: 'ink', labelPos: 'left' },
+                { x: 4, y: 1, label: 'B', tone: 'ink', labelPos: 'right' },
+                { x: 4, y: 3, label: 'C', tone: 'ink', labelPos: 'right' },
+                { x: 0, y: 3, label: 'D', tone: 'ink', labelPos: 'left' },
+              ],
+              rightAngleMarkers: [{ vertex: { x: 4, y: 1 }, arm1: { x: 0, y: 1 }, arm2: { x: 4, y: 3 } }],
+              caption: 'rectangle : en plus, un angle droit',
+            },
+            {
+              kind: 'vectorPlane',
+              xMin: -0.6,
+              xMax: 4.6,
+              yMin: -0.6,
+              yMax: 4.275,
+              showAxes: false,
+              grid: true,
+              vectors: [
+                { from: { x: 1, y: 0 }, to: { x: 3, y: 1 }, tone: 'accent', arrow: false },
+                { from: { x: 3, y: 1 }, to: { x: 2, y: 3 }, tone: 'accent', arrow: false },
+                { from: { x: 2, y: 3 }, to: { x: 0, y: 2 }, tone: 'accent', arrow: false },
+                { from: { x: 0, y: 2 }, to: { x: 1, y: 0 }, tone: 'accent', arrow: false },
+              ],
+              points: [
+                { x: 1, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
+                { x: 3, y: 1, label: 'B', tone: 'ink', labelPos: 'right' },
+                { x: 2, y: 3, label: 'C', tone: 'ink', labelPos: 'above' },
+                { x: 0, y: 2, label: 'D', tone: 'ink', labelPos: 'left' },
+              ],
+              rightAngleMarkers: [{ vertex: { x: 3, y: 1 }, arm1: { x: 1, y: 0 }, arm2: { x: 2, y: 3 } }],
+              caption: 'carré : losange et rectangle',
+            },
           ],
         },
         {
@@ -1839,6 +2055,27 @@ export const calculVectoriel: ChapterContent = {
             { tag: 'vecteur AB', text: '$\\vec{AB}\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}$, c\'est bien $\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$ avec m = 2' },
           ],
           result: { tag: 'résultat', text: '$\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}$ — et tout multiple non nul, comme $\\begin{pmatrix} 2 \\\\ 4 \\end{pmatrix}$ ou $\\begin{pmatrix} -1 \\\\ -2 \\end{pmatrix}$' },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — pourquoi (1 ; m) dirige la droite y = mx + p',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Les points A(0 ; p) et B(1 ; m + p) sont sur la droite d : en x = 0, $y = m \\cdot 0 + p = p$ ; ' +
+                'en x = 1, $y = m \\cdot 1 + p = m + p$. Ils sont distincts, donc $\\vec{AB}$ est un vecteur ' +
+                'directeur de d : $\\vec{AB}\\begin{pmatrix} 1 - 0 \\\\ (m + p) - p \\end{pmatrix} = ' +
+                '\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Plus généralement, deux points de d d\'abscisses $x_1 \\neq x_2$ donnent le vecteur ' +
+                '$\\begin{pmatrix} x_2 - x_1 \\\\ m(x_2 - x_1) \\end{pmatrix} = (x_2 - x_1) \\cdot \\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$ : ' +
+                'tous les vecteurs directeurs de d sont des multiples de $\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$.',
+            },
+          ],
         },
         {
           kind: 'atelier',
@@ -2114,6 +2351,42 @@ export const calculVectoriel: ChapterContent = {
           result: { tag: 'résultat', text: 'il accoste 30 m en aval du point juste en face, après 50 s.' },
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            // largeur 40 m ; vitesses dessinées × 10 (0,8 m/s → 8 unités) ; domaine 53 × 50 (rapport 320/300)
+            xMin: -8,
+            xMax: 45,
+            yMin: -5,
+            yMax: 45,
+            showAxes: false,
+            vectors: [
+              { from: { x: -8, y: 0 }, to: { x: 45, y: 0 }, tone: 'faint', arrow: false },
+              { from: { x: -8, y: 40 }, to: { x: 45, y: 40 }, tone: 'faint', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 0, y: 40 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 30, y: 40 }, tone: 'accent', dashed: true, arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 0, y: 8 }, tone: 'good' },
+              { from: { x: 0, y: 0 }, to: { x: 6, y: 0 }, tone: 'attn' },
+              { from: { x: 0, y: 8 }, to: { x: 6, y: 8 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: 6, y: 0 }, to: { x: 6, y: 8 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 6, y: 8 }, tone: 'accent' },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'départ', tone: 'ink', labelPos: 'below' },
+              { x: 0, y: 40, label: 'en face', tone: 'ink', labelPos: 'above' },
+              { x: 30, y: 40, label: 'accostage', tone: 'accent', labelPos: 'above' },
+              { x: 15, y: 40, label: '30 m', tone: 'accent', node: false, labelPos: 'below' },
+              { x: -0.5, y: 5, vectorLabel: [{ text: 'v', vector: true }, { text: 'ₚ' }], tone: 'good', node: false, labelPos: 'left' },
+              { x: 9, y: 2, vectorLabel: [{ text: 'v', vector: true }, { text: 'c' }], tone: 'attn', node: false, labelPos: 'right' },
+              { x: 7, y: 8.5, vectorLabel: [{ text: 'v', vector: true }, { text: 'R' }], tone: 'accent', node: false, labelPos: 'right' },
+              { x: 44, y: 20, label: '40 m', tone: 'ink', node: false, labelPos: 'left' },
+            ],
+            caption:
+              'vitesses dessinées 10 fois plus grandes : $\\vec{v_R} = \\vec{v_p} + \\vec{v_c}$ donne la direction ' +
+              'de la trajectoire réelle (en pointillés). Le nageur traverse en 50 s et accoste 30 m en aval.',
+          },
+        },
+        {
           kind: 'piege',
           label: 'Piège — le courant ne change pas la durée',
           text:
@@ -2162,6 +2435,51 @@ export const calculVectoriel: ChapterContent = {
             tag: 'résultat',
             text: 'le second câble tire vers la droite et vers le haut, avec une force d\'environ 106,3 N, à 41,2° de l\'horizontale.',
           },
+        },
+        {
+          kind: 'illustrationGroup',
+          items: [
+            {
+              kind: 'vectorPlane',
+              // forces en N : F₁(0 ; −150), F₂(−80 ; 80), F₃(80 ; 70) ; domaine 300 × 281 (rapport 320/300)
+              xMin: -150,
+              xMax: 150,
+              yMin: -171,
+              yMax: 110,
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 0, y: -150 }, tone: 'bad' },
+                { from: { x: 0, y: 0 }, to: { x: -80, y: 80 }, tone: 'good' },
+                { from: { x: 0, y: 0 }, to: { x: 80, y: 70 }, tone: 'accent' },
+              ],
+              points: [
+                { x: 0, y: 0, label: 'L', tone: 'ink', labelPos: 'right' },
+                { x: 4, y: -110, vectorLabel: [{ text: 'F', vector: true }, { text: '₁' }], tone: 'bad', node: false, labelPos: 'right' },
+                { x: -70, y: 60, vectorLabel: [{ text: 'F', vector: true }, { text: '₂' }], tone: 'good', node: false, labelPos: 'left' },
+                { x: 70, y: 52, vectorLabel: [{ text: 'F', vector: true }, { text: '₃' }], tone: 'accent', node: false, labelPos: 'right' },
+              ],
+              caption: 'les trois forces appliquées au lustre L',
+            },
+            {
+              kind: 'vectorPlane',
+              // triangle des forces : 0 → F₁ → (0 ; −150) → F₂ → (−80 ; −70) → F₃ → 0 ; domaine 170 × 160
+              xMin: -120,
+              xMax: 50,
+              yMin: -165,
+              yMax: -5,
+              showAxes: false,
+              vectors: [
+                { from: { x: 0, y: -10 }, to: { x: 0, y: -160 }, tone: 'bad' },
+                { from: { x: 0, y: -160 }, to: { x: -80, y: -80 }, tone: 'good' },
+                { from: { x: -80, y: -80 }, to: { x: 0, y: -10 }, tone: 'accent' },
+              ],
+              points: [
+                { x: 4, y: -85, vectorLabel: [{ text: 'F', vector: true }, { text: '₁' }], tone: 'bad', node: false, labelPos: 'right' },
+                { x: -44, y: -126, vectorLabel: [{ text: 'F', vector: true }, { text: '₂' }], tone: 'good', node: false, labelPos: 'left' },
+                { x: -44, y: -40, vectorLabel: [{ text: 'F', vector: true }, { text: '₃' }], tone: 'accent', node: false, labelPos: 'left' },
+              ],
+              caption: 'bout à bout, elles forment un triangle fermé : la somme est nulle',
+            },
+          ],
         },
         {
           kind: 'entrainement',
