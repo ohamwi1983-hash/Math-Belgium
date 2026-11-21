@@ -73,7 +73,7 @@ export function correctionDetailleeDroitesParametre(e: E): EtapeCorrection[] {
     resultat("a", [texte(`dₘ ${NOMS[e.variante]} ⟺ `), ...(e.variante === "parallele" ? [texte("critère de colinéarité de "), latex("\\vec{u}_m"), texte(" et "), latex("\\vec{v}"), texte(" nul.")] : e.variante === "perpendiculaire" ? [latex("\\vec{u}_m\\cdot\\vec{v}=0"), texte(".")] : e.variante === "point" ? [texte("les coordonnées de P vérifient l'équation de dₘ.")] : [texte(`le coefficient de ${e.variante === "horizontale" ? "x" : "y"} est nul (et l'autre ne l'est pas).`)])]),
     piege("a", [texte(e.variante === "parallele" || e.variante === "perpendiculaire" ? "Ne pas confondre les deux critères : colinéarité nulle pour des parallèles, produit scalaire nul pour des perpendiculaires." : e.variante === "point" ? "On remplace x par l'abscisse de P et y par son ordonnée, pas l'inverse." : "Horizontale : coefficient de x nul ; verticale : coefficient de y nul — pas l'inverse.")]),
     utilise("b", [texte("On écrit la condition avec les coefficients de dₘ, qui dépendent de m, puis on développe et on réduit.")]),
-    calcul("b", [ligne(conditionPosee(e), e.variante === "parallele" ? "α·β′ − β·α′ = 0" : e.variante === "perpendiculaire" ? "α·α′ + β·β′ = 0" : e.variante === "point" ? "on remplace x et y" : "condition sur le coefficient"), ligne(equationLatex(e), "on développe et on réduit")]),
+    calcul("b", [ligne(pleineLargeur(conditionPosee(e)), e.variante === "parallele" ? "α·β′ − β·α′ = 0" : e.variante === "perpendiculaire" ? "α·α′ + β·β′ = 0" : e.variante === "point" ? "on remplace x et y" : "condition sur le coefficient"), ligne(equationLatex(e), "on développe et on réduit")]),
     resultat("b", [latex(equationLatex(e))]),
     piege("b", [texte("Attention aux signes en développant : chaque coefficient est un polynôme en m, à mettre entre parenthèses.")]),
     utilise("c", [texte(e.degre === 1 ? "Équation du premier degré en m ; puis, pour chaque solution, dₘ doit rester une droite : a(m) et b(m) ne peuvent pas être nuls ensemble." : "Équation du second degré en m : discriminant, puis formule ; pour chaque solution, dₘ doit rester une droite : a(m) et b(m) ne peuvent pas être nuls ensemble.")]),
@@ -85,6 +85,13 @@ export function correctionDetailleeDroitesParametre(e: E): EtapeCorrection[] {
       : []),
     piege("c", [texte("Une solution de l'équation n'est retenue que si dₘ est encore une droite : il faut toujours contrôler les deux coefficients.")]),
   ];
+}
+
+/** Ligne au membre de gauche long : entre accolades (aucun « = » de niveau 0), elle prend toute la
+ * largeur du calcul au lieu de comprimer la colonne « = 0 » (≈ 230 px à 680 px). */
+function pleineLargeur(l: string): string {
+  const visible = l.replace(/\\[a-zA-Z]+/g, "").replace(/[{}\s]/g, "").length;
+  return visible > 30 ? `{${l}}` : l;
 }
 
 /** Valeur de Q en m = v, substituée : « 2·(−1)² − 3·(−1) − 5 ». */

@@ -2380,6 +2380,20 @@ paths:
   n'avait aucun atelier ; 7 créés — `droite-formes-widget` (§ 1), `pente-angle-widget` (§ 3),
   `relations-droites-widget` (§ 4, défi), `distance-droite-widget` (§ 6), `cercle-equation-widget`
   (§ 8), `parabole-foyer-widget` (§ 9), `droite-cercle-widget` (§ 10).
+  **Lot G (nouveaux générateurs, gen92–gen95)** : cartes gen95 « Droites dépendant d'un paramètre » en § 4
+  (après gen45), gen94 « Droites remarquables d'un triangle » en § 6 (après gen47), gen92 « Tangente et
+  position relative » et gen93 « Déterminer un cercle par des conditions » en § 8 (après gen50) ; chaque
+  carte précédée d'un court bloc de cours (« Pour aller plus loin — … ») : § 4 méthode « condition,
+  équation en m, contrôle » + exemple (m² − 4)x + (m − 2)y + 3 = 0 horizontale (m = 2 rejetée) ; § 6
+  paragraphe, tableau des droites remarquables (passe par / vecteur / point de concours), exemple
+  hauteurs et orthocentre, astuce aire = BC · AH / 2 ; § 8 méthode « comparer la distance au rayon » +
+  exemple, méthode « trouver d'abord le centre Ω » + exemple trois points (médiatrices). Énoncés par clé
+  ajoutés (`droite dépendant d'un paramètre`, `hauteurs et orthocentre`, `droite et cercle : distance et
+  rayon`, `cercle passant par trois points`). Registres (`registry.ts`, `evaluationAdapterRegistry.ts`
+  avec `versionPapier`, `evaluationPayload.ts`, processus 2 / 3 / 3 / 2 ; libellés donnés à gen45 et
+  gen47 sur la page de conception). Formulaire inchangé (choix : les règles ajoutées sont des méthodes,
+  pas des formules à compléter). Descriptions de carte en Unicode (dₘ). Détail papier :
+  `.claude/rules/feuilles-evaluations.md`, « 4e ch. 7, lot G — gen92–gen95 ».
 
 - **4e, Chapitre 8 — Géométrie dans l'espace** (`geometrie-dans-espace`) : audit puis enrichissement
   validé par l'utilisateur (toutes les recommandations). Corrections : « la perspective centrale ne
