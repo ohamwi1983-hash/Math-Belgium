@@ -373,6 +373,8 @@ export function diagnostiquerChamp(saisie: Saisie, c: Champ): StatutChamp {
       return diagRelation(saisie, c);
     case "personnalise":
       return c.verifier(saisie);
+    case "libre":
+      return c.diagnostiquer(saisie);
   }
 }
 

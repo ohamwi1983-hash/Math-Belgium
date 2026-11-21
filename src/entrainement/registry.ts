@@ -183,6 +183,10 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen93: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppCercleConditions').then((m) => ({ default: m.AppCercleConditions }))),
   gen94: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppDroitesRemarquables').then((m) => ({ default: m.AppDroitesRemarquables }))),
   gen95: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppDroitesParametre').then((m) => ({ default: m.AppDroitesParametre }))),
+  gen96: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppProjeteSymetrique').then((m) => ({ default: m.AppProjeteSymetrique }))),
+  gen97: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppTrajectoiresRencontre').then((m) => ({ default: m.AppTrajectoiresRencontre }))),
+  gen98: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppIntersectionCercles').then((m) => ({ default: m.AppIntersectionCercles }))),
+  gen99: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppDetectiveAnalytique').then((m) => ({ default: m.AppDetectiveAnalytique }))),
 
   // --- 4e, chapitre 8 : Géométrie dans l'espace ---
   gen39: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppPositionDroitePlan').then((m) => ({ default: m.AppPositionDroitePlan }))),

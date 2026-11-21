@@ -2394,6 +2394,15 @@ paths:
   gen47 sur la page de conception). Formulaire inchangé (choix : les règles ajoutées sont des méthodes,
   pas des formules à compléter). Descriptions de carte en Unicode (dₘ). Détail papier :
   `.claude/rules/feuilles-evaluations.md`, « 4e ch. 7, lot G — gen92–gen95 ».
+  **Lot G (nouveaux générateurs gen96–gen99)** : cartes gen96 « Projeté orthogonal, symétrique et
+  réflexion » en § 6 (après gen47 : gen94, prévu avant elle, n'existait pas encore dans la branche du lot
+  — à déplacer après gen94 à la fusion) avec une méthode « Projeté orthogonal et symétrique d'un point »
+  et une astuce « Réflexion : où viser ? », gen97 « Trajectoires et rencontre » en § 5 (après gen48,
+  encadré « Deux mobiles : deux instants »), gen98 « Intersection de deux cercles » en § 10 (après gen54,
+  astuce « Cercle et parabole : le cas du carré commun »), gen99 « Détective d'erreurs : géométrie
+  analytique » en révision (avant le quiz) ; registres (`registry.ts`, `evaluationAdapterRegistry.ts` avec
+  `versionPapier`, `evaluationPayload.ts`, processus 3 / 3 / 2 / 3), regroupement gen96 / gen98. Détail :
+  `.claude/rules/feuilles-evaluations.md`, « 4e ch. 7, lot G — gen96–gen99 ».
 
 - **4e, Chapitre 8 — Géométrie dans l'espace** (`geometrie-dans-espace`) : audit puis enrichissement
   validé par l'utilisateur (toutes les recommandations). Corrections : « la perspective centrale ne

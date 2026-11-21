@@ -882,6 +882,23 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 48. Intersection entre deux droites »',
         },
+        {
+          kind: 'attention',
+          label: 'Deux mobiles : deux instants',
+          text:
+            'Quand chaque droite décrit le mouvement d\'un mobile ($t$ = le temps), on cherche le point commun des ' +
+            '**trajectoires** avec deux paramètres différents, $t_1$ pour le premier et $t_2$ pour le second. Les ' +
+            'mobiles ne se rencontrent (collision) que si, en plus, $t_1=t_2$ : des trajectoires qui se croisent ne ' +
+            'suffisent pas.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Trajectoires et rencontre',
+          generatorId: 'gen97',
+          description: ['Deux bateaux, deux drones ou deux joueurs en ligne droite : leurs trajectoires se coupent-elles ? Y passent-ils au même instant ? Collision, croisement sans rencontre ou trajectoires parallèles.'],
+          chantier: '4e',
+          whereLabel: '4e → « 97. Trajectoires et rencontre »',
+        },
       ],
     },
 
@@ -1076,6 +1093,32 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           description: ["Écris les équations des médiatrices, des hauteurs ou des médianes d'un triangle et trouve leur point de concours. Ou calcule son aire avec une base et la distance du sommet opposé à la droite de ce côté."],
           chantier: '4e',
           whereLabel: "4e → « 94. Droites remarquables d'un triangle »",
+        },
+        {
+          kind: 'methode',
+          label: 'Projeté orthogonal et symétrique d\'un point',
+          items: [
+            'Le pied H de la perpendiculaire à d passant par A s\'appelle le **projeté orthogonal** de A sur d : on le trouve exactement comme pour la distance (perpendiculaire par A, puis intersection avec d).',
+            'Le **symétrique** A′ de A par rapport à d est le point tel que H soit le milieu de [AA′] : $x_{A\'}=2x_H-x_A$ et $y_{A\'}=2y_H-y_A$.',
+            'Attention au sens : c\'est H qui est au milieu, donc $2x_H-x_A$, et jamais $2x_A-x_H$.',
+          ],
+        },
+        {
+          kind: 'astuce',
+          label: 'Réflexion : où viser ?',
+          text:
+            'Une bille qui rebondit sur une bande, un rayon lumineux sur un miroir, un ballon contre un mur repartent ' +
+            'comme s\'ils venaient du **symétrique** A′ du point de départ A. Pour aller de A à B en touchant d, on vise ' +
+            'donc le point I où la droite (A′B) coupe d. Comme la symétrie conserve les longueurs, le trajet ' +
+            '$AI+IB$ vaut exactement $A\'B$.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Projeté orthogonal, symétrique et réflexion',
+          generatorId: 'gen96',
+          description: ['Construis la perpendiculaire, trouve le projeté H puis le symétrique A′. En contexte (billard, miroir, mur) : où viser pour atteindre B après un rebond ?'],
+          chantier: '4e',
+          whereLabel: '4e → « 96. Projeté orthogonal, symétrique et réflexion »',
         },
       ],
     },
@@ -1999,6 +2042,23 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 54. Lieux géométriques »',
         },
+        {
+          kind: 'astuce',
+          label: 'Cercle et parabole : le cas du carré commun',
+          text:
+            'Quand le cercle est centré sur l\'axe de la parabole, par exemple $(x-1)^2+(y-3)^2=10$ et ' +
+            '$(x-1)^2=2(y+1)$, le carré $(x-1)^2$ apparaît dans les deux équations : on le remplace par $2(y+1)$ ' +
+            'dans celle du cercle, et il reste une équation du **second degré** en y. Attention : une solution en y ' +
+            'qui rend $(x-1)^2$ négatif ne donne aucun point, on la rejette.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Intersection de deux cercles',
+          generatorId: 'gen98',
+          description: ['Deux cercles : soustrais leurs équations pour obtenir une droite, puis substitue. Un cercle et une parabole : remplace le carré commun, et rejette les solutions qui ne donnent aucun point. 0, 1 ou 2 points communs.'],
+          chantier: '4e',
+          whereLabel: '4e → « 98. Intersection de deux cercles »',
+        },
       ],
     },
 
@@ -2015,6 +2075,14 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'générateur, sans fusion : contrairement au chapitre sur les vecteurs, chaque ' +
             "générateur d'ici teste une compétence vraiment distincte. Le quiz se trouve tout en " +
             'bas de la page, dans la synthèse.',
+        },
+        {
+          kind: 'entrainement',
+          title: "Détective d'erreurs : géométrie analytique",
+          generatorId: 'gen99',
+          description: ["La copie d'un élève contient une ligne fausse (vecteur normal et directeur confondus, pente inversée, signe du centre, r² pris pour r, foyer deux fois trop loin du sommet…). Trouve-la, explique l'erreur et corrige le résultat."],
+          chantier: '4e',
+          whereLabel: "4e → « 99. Détective d'erreurs : géométrie analytique »",
         },
       ],
     },

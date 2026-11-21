@@ -122,6 +122,10 @@ import { adaptateurEvaluationDroitesParametre } from '../entrainement/4e/generat
 import { adaptateurEvaluationDroitesRemarquables } from '../entrainement/4e/generateurs/droitesRemarquables/exportEvaluation'
 import { adaptateurEvaluationCercleConditions } from '../entrainement/4e/generateurs/cercleConditions/exportEvaluation'
 import { adaptateurEvaluationDroiteCercle } from '../entrainement/4e/generateurs/droiteCercle/exportEvaluation'
+import { adaptateurEvaluationProjeteSymetrique } from '../entrainement/4e/generateurs/projeteSymetrique/exportEvaluation'
+import { adaptateurEvaluationTrajectoires } from '../entrainement/4e/generateurs/trajectoiresRencontre/exportEvaluation'
+import { adaptateurEvaluationIntersectionCercles } from '../entrainement/4e/generateurs/intersectionCercles/exportEvaluation'
+import { adaptateurEvaluationDetectiveAnalytique } from '../entrainement/4e/generateurs/detectiveAnalytique/exportEvaluation'
 import { adaptateurEvaluationPositionDroitePlan } from '../entrainement/4e/generateurs/positionDroitePlan/exportEvaluation'
 import { adaptateurEvaluationSectionPlaneSolide } from '../entrainement/4e/generateurs/sectionPlaneSolide/exportEvaluation'
 import { adaptateurEvaluationOmbreSoleil } from '../entrainement/4e/generateurs/ombreSoleil/exportEvaluation'
@@ -239,6 +243,10 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen93: versionPapier(adaptateurEvaluationCercleConditions) as unknown as AdaptateurFeuilleExercices<never>,
   gen94: versionPapier(adaptateurEvaluationDroitesRemarquables) as unknown as AdaptateurFeuilleExercices<never>,
   gen95: versionPapier(adaptateurEvaluationDroitesParametre) as unknown as AdaptateurFeuilleExercices<never>,
+  gen96: versionPapier(adaptateurEvaluationProjeteSymetrique) as unknown as AdaptateurFeuilleExercices<never>,
+  gen97: versionPapier(adaptateurEvaluationTrajectoires) as unknown as AdaptateurFeuilleExercices<never>,
+  gen98: versionPapier(adaptateurEvaluationIntersectionCercles) as unknown as AdaptateurFeuilleExercices<never>,
+  gen99: versionPapier(adaptateurEvaluationDetectiveAnalytique) as unknown as AdaptateurFeuilleExercices<never>,
   gen39: versionPapier(adaptateurEvaluationPositionDroitePlan) as unknown as AdaptateurFeuilleExercices<never>,
   gen40: versionPapier(adaptateurEvaluationSectionPlaneSolide) as unknown as AdaptateurFeuilleExercices<never>,
   gen41: versionPapier(adaptateurEvaluationOmbreSoleil) as unknown as AdaptateurFeuilleExercices<never>,
