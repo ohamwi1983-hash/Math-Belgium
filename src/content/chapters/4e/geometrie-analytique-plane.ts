@@ -1941,6 +1941,14 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             "générateur d'ici teste une compétence vraiment distincte. Le quiz se trouve tout en " +
             'bas de la page, dans la synthèse.',
         },
+        {
+          kind: 'entrainement',
+          title: "Détective d'erreurs : géométrie analytique",
+          generatorId: 'gen99',
+          description: ["La copie d'un élève contient une ligne fausse (vecteur normal et directeur confondus, pente inversée, signe du centre, r² pris pour r, p au lieu de p/2…). Trouve-la, explique l'erreur et corrige le résultat."],
+          chantier: '4e',
+          whereLabel: "4e → « 99. Détective d'erreurs : géométrie analytique »",
+        },
       ],
     },
   ],
