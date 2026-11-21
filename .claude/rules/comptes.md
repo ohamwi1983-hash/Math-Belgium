@@ -20,7 +20,8 @@ l'utilisateur, après mise en service : ses élèves préparent leurs évaluatio
 d'exercices) ; seuls le panneau des évaluations / examens (`/evaluation`), le coffre, le profil et
 l'administration sont derrière la connexion.
 Aucune donnée d'élève. Phase 2 (faite, section « Phase 2 » en fin de fichier) : carnet de matière vue (`/carnet`),
-puis son horaire de la semaine (`0003_horaire.sql`, sous-section « Horaire de la semaine »).
+puis son horaire de la semaine (`0003_horaire.sql`, sous-section « Horaire de la semaine ») et l'heure
+zéro (`0004_heure_zero.sql`, même sous-section).
 Plus tard (pas fait) : partage entre collègues.
 
 ## Décisions de l'utilisateur
@@ -341,3 +342,65 @@ largeur. Le parcours Playwright de la phase 2 repasse aussi (carnet sans horaire
 **Mise en service** : SQL Editor → New query → coller TOUT `0003_horaire.sql` → Run → « Success. No
 rows returned » ; recharger `/carnet` → « Mon horaire ». À vérifier contre le vrai projet : grille,
 cases, séance « H1–H2 » (colonne `numero_heure_fin`).
+
+**Heure zéro (H0, `supabase/migrations/0004_heure_zero.sql`)** — décisions de l'utilisateur : certaines
+écoles (dont la sienne) ont, exceptionnellement, une heure AVANT H1. Case « Cette école a une heure zéro
+(H0) » dans la grille, décochée par défaut ; H0 JUSTE AVANT H1, SANS pause, MÊME durée que les autres
+heures (grille de l'utilisateur : H0 07h55 → 08h45), corrigeable avec « Corriger » ; mercredi aussi.
+H1 … Hn GARDENT numéros et horaires : rien ne bouge dans les cases ni dans les séances existantes. Deux
+usages : H0 FIXE (ligne H0 en haut de la semaine, une classe ; comptée dans Aujourd'hui, Séances à noter,
+Heures restantes) et H0 PONCTUELLE (« — » dans l'horaire : jamais d'oubli ni d'heure restante, mais le
+formulaire de séance propose « H0 (07h55 → 08h45) · heure zéro ponctuelle » pour la date choisie, sans
+classe imposée). Format « H0 (07h55 → 08h45) » / « H0–H1 (07h55 → 09h35) » partout (carnet, Smartschool,
+fiche A4) ; sans grille, réglage numéro : « heure zéro », « heure zéro et 1re heure », « heure zéro à
+2e heure » (jamais « 0e heure »).
+
+- **Schéma 0004** (idempotent, à coller APRÈS 0001–0003 ; « Success. No rows returned ») :
+  `horaires_ecoles.heure_zero boolean not null default false` ; contraintes ÉLARGIES sous LEURS noms
+  (remplacées seulement si elles ont encore l'ancienne définition, repérée par `pg_get_constraintdef`,
+  donc relançable et sans réécriture de données) : `horaire_cases_heure_check` 0–15,
+  `seances_numero_heure_check` 0–15 (noms donnés par Postgres aux CHECK de colonne de 0003 / 0002),
+  `seances_numero_heure_fin_valide` 1–15 et > `numero_heure` (« H0–H1 »),
+  `horaires_ecoles_exceptions_valides` → `exceptions_horaire_valides(j, n, heure_zero)` (heure 0 permise
+  SEULEMENT si `heure_zero`, ≤ 16 corrections) ; nouvelle `horaires_ecoles_heure_zero_tient`
+  (`heure_zero_tient(debut, duree, exceptions)` : H0 non corrigée = début de H1 — corrigé ou non — moins
+  la durée ≥ 00h00, jamais la veille ; corrigée, ses « HH:MM » sont forcément dans la journée).
+  `journee_horaire_tient` inchangée (H0 est avant H1, la fin ne bouge pas). Relancer 0003 après 0004 ne
+  rétrécit rien (ses contraintes sont créées « si absentes »). RLS, droits, FK et cascades inchangés ;
+  nouvelles fonctions : `revoke … from public, anon`, `grant execute … to authenticated`. Une case H0
+  d'une école sans heure zéro n'est pas refusée par la base (comme une case au-delà du nombre
+  d'heures) : le site la retire et l'ignore.
+- **Calcul** (`lib/horaire.ts`) : `journee` ajoute `{ numero: 0 }` EN TÊTE (`heures[0]`) si `heure_zero`
+  et au moins une heure ce jour-là ; NE PLUS indexer `heures[numero - 1]` : `heureDe(j, numero)`,
+  `premiereHeure(g)` (0 ou 1). `erreursGrille` : correction de H0 sans heure zéro, H0 la veille, H0 qui
+  finit après le début de H1. Heure double : règle existante (`heureFin === heure - 1`, pas de pause
+  « après 0 ») → « H0–H1 », « H0–H2 ». `creneauxPonctuels(date, grilles, cases)` : H0 des écoles à heure
+  zéro sans case H0 ce jour-là (`classe_id` vide, `ponctuel: true`), jamais dans `creneauxDuJour`.
+  `casesHorsGrille` : cases H0 sans heure zéro (ou mercredi sans cours) en plus des heures supprimées.
+  PIÈGE : le numéro 0 est FAUX en JavaScript — tout test `if (s.numero_heure)` devient `!== null`
+  (`seanceDuCreneau`, `horaireTexte`, `horaireParDefaut`, `ligneSeance`, formulaire).
+- **0004 pas appliqué** : `carnetDonnees.ts::lireGrilles` lit avec `heure_zero`, et sur 42703 / PGRST204
+  mentionnant `heure_zero` relit SANS la colonne → `DonneesHoraire.heureZero` faux ; `ligneGrille` n'écrit
+  alors ni la colonne ni une correction de H0, les cases H0 sont ignorées ; la case de la grille est
+  désactivée avec « Heure zéro pas encore activée : colle le fichier 0004_heure_zero.sql… » ; la liste
+  des numéros ne propose « heure zéro » que si 0004 est appliqué. Tout le reste comme avant.
+- **Interface** : `GrilleEcole` (case + aide, H0 dans l'aperçu et « Corriger H0 » — « H1 et la suite ne
+  bougent pas », mercredi « H0 → H4 ») ; décocher H0 avec des cases H0 → confirmation « … (heure zéro
+  retirée) … Les séances déjà notées sont conservées » puis suppression de ces cases (comme raccourcir la
+  grille) ; `MonHoraire` (ligne H0, mercredi d'après `journee(g, 3)`, aide fixe / ponctuelle) ;
+  `FormulaireSeance` (H0 ponctuelle : la choisir garde la classe ; changer de classe la garde ; changer de
+  date reprend la H0 ponctuelle de la même école ce jour-là, sinon la règle des créneaux de la classe).
+- **Vérifications** : Postgres 16 local (faux schéma `auth`, 0001–0003 + données, 0004 exécuté trois
+  fois — instantané des lignes identique —, 0003 relancé après 0004, 0004 encore) : 81 vérifications
+  (H0 / H0–H1 / H0–H2 acceptées, -1 / 16 / fin ≤ début refusés, correction de H0 sans heure zéro ou
+  décocher en la gardant refusés, H0 la veille refusée, 16 corrections, RLS croisé, `anon`, désactivé,
+  cascades, suppression de compte) + les 90 de 0003 repassent avec 0004. Logique : 82 vérifications
+  esbuild + node (journée de l'utilisateur avec H0, correction, mercredi, H0–H1, ponctuelle sans oubli,
+  heures restantes, formats) ; les suites horaire (116) et carnet (85) repassent. Playwright (faux client
+  étendu : option `heureZeroAbsent`, contrôles 0…15 et fin > début) iPhone 13 et 1 280 px, clair et
+  sombre : 274 vérifications (case cochée / décochée avec case H0, aperçu, correction, ligne H0, Aujourd'hui
+  H0–H1 en cours, séance H0–H1 + Smartschool, H0 ponctuelle, heures restantes, « heure zéro » en numéro,
+  0004 absent) ; 0 erreur console, `scrollWidth` = largeur ; le parcours de 0003 (360) repasse.
+- **Mise en service** : SQL Editor → New query → coller TOUT `0004_heure_zero.sql` → Run → « Success. No
+  rows returned » ; recharger `/carnet` → Mon horaire → Modifier la grille → cocher « Cette école a une
+  heure zéro (H0) » → Enregistrer. À vérifier contre le vrai projet : case H0, séance « H0–H1 ».
