@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { correctionDetailleeAsymptoteOblique, lettrePhaseAsymptoteOblique } from "./generateurs5e/asymptoteOblique/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceAsymptoteOblique } from "./generateurs5e/asymptoteOblique";
@@ -150,6 +153,7 @@ export function App5gen21() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendueAsymptoteOblique(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAsymptoteOblique(exercice), lettrePhaseAsymptoteOblique(exercice, phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

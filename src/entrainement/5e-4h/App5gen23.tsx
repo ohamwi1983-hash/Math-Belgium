@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { correctionDetailleeLimitesContexte, lettrePhaseLimitesContexte } from "./generateurs5e/limitesContexte/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLimitesContexte } from "./generateurs5e/limitesContexte";
@@ -175,6 +178,7 @@ export function App5gen23() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendueLimitesContexte(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLimitesContexte(exercice), lettrePhaseLimitesContexte(exercice, phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

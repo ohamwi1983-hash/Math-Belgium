@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { correctionDetailleeLimite, lettrePhaseLimite } from "./generateurs5e/limites/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLimite } from "./generateurs5e/limites";
@@ -187,6 +190,7 @@ export function App5gen20() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendueLimite(exercice, phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLimite(exercice), lettrePhaseLimite(exercice, phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

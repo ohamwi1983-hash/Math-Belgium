@@ -4,13 +4,15 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { consignePhase, formatFormulePhaseLatex, formatReponseAttenduePhaseLatex, formatTermesDonneesLatex, texteAideNiveau1 } from "../../ui5e/formatAsymptoteOblique";
+import { consignePhase, formatReponseAttenduePhaseLatex, formatTermesDonneesLatex } from "../../ui5e/formatAsymptoteOblique";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeAsymptoteOblique, lettrePhaseAsymptoteOblique } from "./corrigeDetaille";
 import { ordreComplet, type PhaseAsymptoteOblique } from "../../moteur5e/typesAsymptoteOblique";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceAsymptoteOblique } from "./index";
 import { LIBELLE_CAS_ASYMPTOTE_OBLIQUE, PARAMETRES_ASYMPTOTE_OBLIQUE, profilAsymptoteOblique } from "../profilsEvaluationLimites20-21";
@@ -25,21 +27,14 @@ import { LIBELLE_CAS_ASYMPTOTE_OBLIQUE, PARAMETRES_ASYMPTOTE_OBLIQUE, profilAsym
  * forme développée / conclusion, ou a / b / conclusion) passent dans le corrigé (« Étape n —
  * consigne », phases de `ordreComplet`, mêmes consignes que l'écran).
  *
- * Valeurs : `formatReponseAttenduePhaseLatex` (réponses attendues de l'écran), `formatFormulePhaseLatex`
- * et `texteAideNiveau1` (méthodes) — jamais recalculées ici.
+ * Corrigé détaillé « comme au tableau » : `./corrigeDetaille.ts` (partagé avec `App5gen21.tsx`) ;
+ * réponses attendues de l'écran (`formatReponseAttenduePhaseLatex`) pour la réponse brève et le barème.
  *
  * `regroupable` : non — l'énoncé papier porte une consigne propre à la variante, et le chemin
  * regroupé du pipeline n'utilise pas `enoncePapier` (il prendrait la première étape comme consigne).
  */
 
 const LETTRES = "abcdefgh";
-
-function fragmentsRiches(source: string): FragmentConsigne[] {
-  return source
-    .split("$")
-    .map((morceau, i) => (i % 2 === 1 ? latex(morceau) : texte(morceau)))
-    .filter((f) => f.valeur !== "");
-}
 
 function fonctionLatex(exercice: ExerciceAsymptoteOblique): string {
   return `f(x) = ${formatTermesDonneesLatex(exercice)[0]}`;
@@ -83,52 +78,6 @@ function reponseBreveAsymptoteOblique(exercice: ExerciceAsymptoteOblique): Fragm
   return [latex(equationLatex(exercice))];
 }
 
-function methode(phase: PhaseAsymptoteOblique): FragmentConsigne[] {
-  const aide = texteAideNiveau1(phase);
-  return [...fragmentsRiches(aide.texte), ...(aide.latex ? [texte(" "), latex(aide.latex)] : [])];
-}
-
-function correctionDetailleeAsymptoteOblique(exercice: ExerciceAsymptoteOblique): EtapeCorrection[] {
-  const division = exercice.variante === "divisionEuclidienne";
-  const conclusion: EtapeCorrection[] = [
-    {
-      label: "Conclusion",
-      sousQuestion: "c",
-      fragments: division
-        ? [texte("Quand x tend vers ±∞, le reste divisé par le dénominateur tend vers 0 : la courbe se rapproche de la droite "), latex(equationLatex(exercice)), texte(".")]
-        : [texte("Avec a et b trouvés, l'asymptote oblique est la droite "), latex(equationLatex(exercice)), texte(".")],
-    },
-    {
-      label: "Piège",
-      sousQuestion: division ? "c" : "b",
-      fragments: division
-        ? [texte("L'asymptote est le quotient seul : le reste disparaît à la limite, il ne figure jamais dans l'équation.")]
-        : [texte("b se calcule avec "), latex("f(x)-ax"), texte(", pas avec f(x) seule : sinon la limite est infinie.")],
-    },
-  ];
-  if (exercice.variante === "divisionEuclidienne") {
-    const [quotient, reste] = formatReponseAttenduePhaseLatex(exercice, "diviserEuclidienne");
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: methode("diviserEuclidienne") },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(quotient), texte(" et "), latex(reste), texte(".")] },
-      { label: "Calcul", sousQuestion: "b", fragments: [latex(`f(x)${formatReponseAttenduePhaseLatex(exercice, "ecrireFormeDeveloppee")[0]}`), texte(".")] },
-      ...conclusion,
-    ];
-  }
-  return parEtape([
-    { label: "Méthode", sousQuestion: "a", fragments: [latex(formatFormulePhaseLatex("calculerCoefficientA")), texte(" : rapport des coefficients dominants du numérateur et de x fois le dénominateur.")] },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(formatReponseAttenduePhaseLatex(exercice, "calculerCoefficientA")[0]), texte(".")] },
-    { label: "Méthode", sousQuestion: "b", fragments: [latex(formatFormulePhaseLatex("calculerCoefficientB")), texte(" : on réduit au même dénominateur, puis on compare les termes dominants.")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(formatReponseAttenduePhaseLatex(exercice, "calculerCoefficientB")[0]), texte(".")] },
-    ...conclusion,
-  ]);
-}
-
-/** Lignes dans l'ordre des étapes (une ligne « Piège » se lit sous l'étape qu'elle concerne). */
-function parEtape(lignes: EtapeCorrection[]): EtapeCorrection[] {
-  return lignes.map((l, i) => ({ l, i })).sort((x, y) => (x.l.sousQuestion ?? "a").localeCompare(y.l.sousQuestion ?? "a") || x.i - y.i).map(({ l }) => l);
-}
-
 function baremeAsymptoteOblique(exercice: ExerciceAsymptoteOblique): BaremeExercice {
   const c = (sousQuestion: string, texteCritere: string, points: number): CritereBareme => ({ sousQuestion, critere: [texte(texteCritere)], points });
   const criteres =
@@ -148,8 +97,11 @@ function baremeAsymptoteOblique(exercice: ExerciceAsymptoteOblique): BaremeExerc
   };
 }
 
-function difficulteAsymptoteOblique(exercice: ExerciceAsymptoteOblique): 1 | 2 | 3 {
-  return exercice.coeffsD.length - 1 === 2 ? 3 : 2;
+/** Niveau 1–7 : la conclusion (le quotient, ou y = ax + b avec a et b trouvés) est un écran de
+ * lecture ; la technique est imposée par la variante (méthode 0) ; aucun piège dans les données (le
+ * reste à écarter est la méthode). */
+function criteresDifficulteAsymptoteOblique(exercice: ExerciceAsymptoteOblique): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeAsymptoteOblique(exercice), [lettrePhaseAsymptoteOblique(exercice, "conclureEquationAsymptote")]), methode: 0, piege: 0 };
 }
 
 /** Ancien corrigé (repli, documents Word) : les étapes du corrigé détaillé, en paragraphes. */
@@ -167,12 +119,11 @@ export const adaptateurEvaluationAsymptoteOblique: AdaptateurFeuilleExercices<Ex
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id),
   construireEnonce: construireEnonceAsymptoteOblique,
   construireCorrection: construireCorrectionAsymptoteOblique,
-  difficulte: difficulteAsymptoteOblique,
+  criteresDifficulte: criteresDifficulteAsymptoteOblique,
   reponseBreve: reponseBreveAsymptoteOblique,
   correctionDetaillee: correctionDetailleeAsymptoteOblique,
   bareme: baremeAsymptoteOblique,
   enoncePapier: enoncePapierAsymptoteOblique,
-  dureeMinutes: 8,
   profilInstance: profilAsymptoteOblique,
   parametresAuChoix: PARAMETRES_ASYMPTOTE_OBLIQUE,
   libelleCasParticulier: LIBELLE_CAS_ASYMPTOTE_OBLIQUE,

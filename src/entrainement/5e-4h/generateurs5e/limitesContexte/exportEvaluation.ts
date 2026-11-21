@@ -4,9 +4,9 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -19,9 +19,10 @@ import {
   labelsChampsLatex,
   nombreTexte,
   texteAideNiveau1,
-  texteAideNiveau2,
 } from "../../ui5e/formatLimitesContexte";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLimitesContexte } from "./index";
+import { consigneEtapeLimitesContexte, correctionDetailleeLimitesContexte } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { profilLimitesContexte, FAMILLES_CALCULATRICE_LIMITES_CONTEXTE } from "../profilsEvaluationLimites22-23";
 
 /**
@@ -112,14 +113,6 @@ const ORDRE_ECRANS: Record<ExerciceLimitesContexte["famille"], PhaseLimitesConte
   population: ["identification", "interpreter", "evaluerSeuil"],
 };
 
-/** Texte riche de l'écran (`$…$` = formule) → fragments texte / LaTeX du document. */
-function richeVersFragments(riche: string): FragmentConsigne[] {
-  return riche
-    .split("$")
-    .map((morceau, i) => (i % 2 === 1 ? latex(morceau) : texte(morceau)))
-    .filter((f) => !(f.type === "texte" && f.valeur === ""));
-}
-
 function enonceDonnees(exercice: ExerciceLimitesContexte): FragmentConsigne[] {
   const [formule1, formule2] = formatTermesDonneesLatex(exercice);
   return formule2
@@ -178,97 +171,14 @@ function sectionPapierLimitesContexte(exercice: ExerciceLimitesContexte): Sectio
   return { enteteFragments: enonceDonnees(exercice), questions: questionsPapier(exercice).map((q) => ({ consigne: q.consigne })) };
 }
 
+/** Étapes (titres « Étape n — consigne » du corrigé) : un écran par étape, consignes rédigées pour le
+ * papier (`consigneEtapeLimitesContexte`) — les vraies questions papier restent dans `enoncePapier`. */
 function construireEnonceLimitesContexte(exercice: ExerciceLimitesContexte): SectionExercice {
-  return sectionPapierLimitesContexte(exercice);
+  return { enteteFragments: enonceDonnees(exercice), questions: ORDRE_ECRANS[exercice.famille].map((phase) => ({ consigne: consigneEtapeLimitesContexte(exercice, phase) })) };
 }
 
 function enoncePapierLimitesContexte(exercice: ExerciceLimitesContexte): EnoncePapier {
   return { section: sectionPapierLimitesContexte(exercice), etapesParQuestion: questionsPapier(exercice).map((q) => q.etapes) };
-}
-
-function lettreEtape(exercice: ExerciceLimitesContexte, phase: PhaseLimitesContexte): LettreEtape {
-  return (["a", "b", "c", "d"] as const)[ORDRE_ECRANS[exercice.famille].indexOf(phase)];
-}
-
-function methode(exercice: ExerciceLimitesContexte, phase: PhaseLimitesContexte): EtapeCorrection {
-  return { label: "Méthode", sousQuestion: lettreEtape(exercice, phase), fragments: richeVersFragments(texteAideNiveau1(exercice, phase)) };
-}
-
-function calculAide2(exercice: ExerciceLimitesContexte, phase: PhaseLimitesContexte, suite = ""): EtapeCorrection | null {
-  const aide = texteAideNiveau2(exercice, phase);
-  return aide.latex ? { label: "Calcul", sousQuestion: lettreEtape(exercice, phase), fragments: [latex(`${aide.latex}${suite}`)] } : null;
-}
-
-function conclusionLatex(exercice: ExerciceLimitesContexte, phase: PhaseLimitesContexte, apres?: string): EtapeCorrection {
-  const valeurs = formatReponseAttenduePhaseLatex(exercice, phase);
-  return {
-    label: "Conclusion",
-    sousQuestion: lettreEtape(exercice, phase),
-    fragments: [...valeurs.flatMap((v, i) => [...(i === 0 ? [] : [texte(" ; ")]), latex(v)]), ...(apres ? [texte(apres)] : [])],
-  };
-}
-
-function conclusionTexte(exercice: ExerciceLimitesContexte, phase: PhaseLimitesContexte): EtapeCorrection {
-  return { label: "Conclusion", sousQuestion: lettreEtape(exercice, phase), fragments: [texte(formatReponseAttendueTexte(exercice, phase) ?? "")] };
-}
-
-function correctionDetailleeLimitesContexte(exercice: ExerciceLimitesContexte): EtapeCorrection[] {
-  const etapes: (EtapeCorrection | null)[] = [];
-  switch (exercice.famille) {
-    case "prixRevient": {
-      const { b } = exercice;
-      etapes.push(methode(exercice, "asymptoteHorizontale"), calculAide2(exercice, "asymptoteHorizontale", `=${b}+0`));
-      etapes.push(conclusionLatex(exercice, "asymptoteHorizontale", ` : la droite y = ${b} est asymptote horizontale.`));
-      etapes.push(methode(exercice, "interpreter"), conclusionTexte(exercice, "interpreter"));
-      etapes.push({ label: "Piège", sousQuestion: "b", fragments: [texte("Pour "), latex("x>0"), texte(", le terme "), latex(`\\dfrac{${exercice.a}}{x}`), texte(` est positif : le coût unitaire reste au-dessus de ${b} € et s'en rapproche, sans descendre en dessous.`)] });
-      etapes.push(methode(exercice, "vaSens"), conclusionTexte(exercice, "vaSens"));
-      break;
-    }
-    case "eauSalee": {
-      etapes.push(methode(exercice, "construireC"), conclusionLatex(exercice, "construireC"));
-      etapes.push({ label: "Piège", sousQuestion: "a", fragments: [texte("On divise par le volume TOTAL V(t), et non par le seul volume ajouté.")] });
-      etapes.push(methode(exercice, "limiteC"), calculAide2(exercice, "limiteC"), conclusionLatex(exercice, "limiteC"));
-      etapes.push(methode(exercice, "interpreter"), conclusionTexte(exercice, "interpreter"));
-      break;
-    }
-    case "clubLoisirs": {
-      const { a, facteur, moisAttendu, contexte } = exercice;
-      etapes.push(methode(exercice, "evaluer"), calculAide2(exercice, "evaluer"), conclusionLatex(exercice, "evaluer", ` (${contexte.unitePluriel} réels).`));
-      etapes.push(methode(exercice, "inequation"), calculAide2(exercice, "inequation"));
-      etapes.push({ label: "Conclusion", sousQuestion: "b", fragments: [latex(`x=${moisAttendu}`), texte(` : le seuil est atteint pour la première fois après ${moisAttendu} mois.`)] });
-      etapes.push({ label: "Piège", sousQuestion: "b", fragments: [texte("On prend le premier nombre entier de mois pour lequel le seuil est atteint (la solution arrondie vers le haut), pas l'entier le plus proche.")] });
-      etapes.push(methode(exercice, "asymptoteOblique"), conclusionLatex(exercice, "asymptoteOblique"));
-      etapes.push(methode(exercice, "interpreterPente"));
-      etapes.push({ label: "Conclusion", sousQuestion: "d", fragments: [latex(`${a}\\times${facteur}=${a * facteur}`), texte(` : à long terme, environ ${a * facteur} ${contexte.unitePluriel} de plus chaque mois.`)] });
-      break;
-    }
-    case "population": {
-      const { a, b, p, anneeRef, anneeEval } = exercice;
-      const constante = a + b * p;
-      const signeC = constante < 0 ? "-" : "+";
-      const signeP = p < 0 ? "-" : "+";
-      etapes.push(methode(exercice, "identification"));
-      etapes.push({
-        label: "Calcul",
-        sousQuestion: "a",
-        fragments: [
-          latex(
-            `\\dfrac{${b}x${signeC}${Math.abs(constante)}}{x${signeP}${Math.abs(p)}}=\\dfrac{${b}(x${signeP}${Math.abs(p)})${a < 0 ? "-" : "+"}${Math.abs(a)}}{x${signeP}${Math.abs(p)}}=${b}+\\dfrac{${a}}{x${signeP}${Math.abs(p)}}`,
-          ),
-        ],
-      });
-      etapes.push(conclusionLatex(exercice, "identification", ` : ${exercice.contexte.grandeurArticle} tend vers ${b} ${exercice.contexte.unitePourValeur}.`));
-      etapes.push(methode(exercice, "interpreter"));
-      etapes.push({ label: "Calcul", sousQuestion: "b", fragments: [latex(`f(0)-b=\\dfrac{a}{p}=\\dfrac{${a}}{${p}}${a / p > 0 ? ">0" : "<0"}`), texte(a / p > 0 ? " : la valeur de départ est au-dessus de la limite." : " : la valeur de départ est en dessous de la limite.")] });
-      etapes.push(conclusionTexte(exercice, "interpreter"));
-      etapes.push({ label: "Piège", sousQuestion: "b", fragments: [texte("Le signe de a ne se lit pas seul : c'est l'écart "), latex("f(0)-b=\\dfrac{a}{p}"), texte(" qui dit si la grandeur descend ou monte vers b.")] });
-      etapes.push(methode(exercice, "evaluerSeuil"));
-      etapes.push({ label: "Calcul", sousQuestion: "c", fragments: [latex(`x=${anneeEval}-${anneeRef}=${anneeEval - anneeRef}`)] });
-      etapes.push(conclusionLatex(exercice, "evaluerSeuil"));
-      break;
-    }
-  }
-  return etapes.filter((e): e is EtapeCorrection => e !== null);
 }
 
 function reponseBreveLimitesContexte(exercice: ExerciceLimitesContexte): FragmentConsigne[] {
@@ -321,10 +231,22 @@ function baremeLimitesContexte(exercice: ExerciceLimitesContexte): BaremeExercic
   return { reponseFinale: reponseBreveLimitesContexte(exercice), criteres, erreursFrequentes: erreurs, reponsesAcceptees: acceptees };
 }
 
-function difficulteLimitesContexte(exercice: ExerciceLimitesContexte): 1 | 2 | 3 {
-  if (exercice.famille === "clubLoisirs") return 3;
-  if (exercice.famille === "prixRevient") return 1;
-  return 2;
+/** Niveau 1–7 : les interprétations (écrans à choix) sont des écrans de pure décision — prix de
+ * revient b et c, eau salée c, population b — comme la conversion de la pente (club d) ; méthode :
+ * 0 pour la limite directe du prix de revient, 1 sinon (construire C = Q/V, poser l'équation,
+ * division euclidienne ; modèle donné : au plus 1) ; piège dans les DONNÉES : asymptote x = 0 hors du
+ * domaine réel (prix de revient, constant), racine négative à rejeter et entier suivant (club) —
+ * jamais le verdict croissance / régression ni la comparaison au seuil (population). Nombres :
+ * profil `calcul` (club, population non exacte). */
+function criteresDifficulteLimitesContexte(exercice: ExerciceLimitesContexte): CriteresDifficulte {
+  const lecture: Record<ExerciceLimitesContexte["famille"], string[]> = { prixRevient: ["b", "c"], eauSalee: ["c"], clubLoisirs: ["d"], population: ["b"] };
+  return {
+    ...etapesDuCorrige(correctionDetailleeLimitesContexte(exercice), lecture[exercice.famille]),
+    methode: exercice.famille === "prixRevient" ? 0 : 1,
+    piege: exercice.famille === "prixRevient" || exercice.famille === "clubLoisirs" ? 1 : 0,
+    // Nombres lus sur le profil (calculatrice), pas sur le « ≈ » que l'écran écrit même devant une valeur exacte.
+    nombres: profilLimitesContexte(exercice).calcul === "calculatrice" ? 1 : 0,
+  };
 }
 
 function construireCorrectionLimitesContexte(exercice: ExerciceLimitesContexte): BlocCorrection[] {
@@ -396,12 +318,11 @@ export const adaptateurEvaluationLimitesContexte: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id),
   construireEnonce: construireEnonceLimitesContexte,
   construireCorrection: construireCorrectionLimitesContexte,
-  difficulte: difficulteLimitesContexte,
+  criteresDifficulte: criteresDifficulteLimitesContexte,
   reponseBreve: reponseBreveLimitesContexte,
   correctionDetaillee: correctionDetailleeLimitesContexte,
   bareme: baremeLimitesContexte,
   enoncePapier: enoncePapierLimitesContexte,
-  dureeMinutes: 12,
   profilInstance: profilLimitesContexte,
   // PAS regroupable — 2 questions par instance (jamais une seule), consigne dépendante des valeurs
   // tirées (b, seuil, facteur, contexte narratif...) : voir le commentaire de tête.

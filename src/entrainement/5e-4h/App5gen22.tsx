@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { correctionDetailleeLectureGraphiqueLimites, lettrePhaseLectureGraphique } from "./generateurs5e/lectureGraphiqueLimites/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLectureGraphiqueLimites } from "./generateurs5e/lectureGraphiqueLimites";
@@ -145,6 +148,7 @@ export function App5gen22() {
             </span>
           ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLectureGraphiqueLimites(exercice), lettrePhaseLectureGraphique(phase))} />,
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.closTot
           ? listeAsymptotes(exercice).length > 0
