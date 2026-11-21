@@ -440,8 +440,10 @@ const STYLE_GROUPES = `
  * groupe, `classeLargeur`). */
 const STYLE_GROUPES_FIGURES = `
 .ex.groupe:has(.lignes-fig), .question.groupe:has(.lignes-fig) { break-inside: auto; page-break-inside: auto; }
-.groupe:has(.lignes-fig) .entete { break-inside: avoid; page-break-inside: avoid; }
+.debut-groupe, .debut-groupe > .entete { break-inside: avoid; page-break-inside: avoid; }
 .lignes-fig { margin: 4px 0 0; }
+.lignes-fig.suite { margin: 0; }
+.lignes-fig.suite > .rang-fig:first-child { border-top: 1px dotted var(--filet); }
 .rang-fig { display: flex; gap: 16px; align-items: flex-start; padding: 5px 0; break-inside: avoid; page-break-inside: avoid; }
 .rang-fig + .rang-fig { border-top: 1px dotted var(--filet); }
 .rang-fig > .cell-fig { flex: 1 1 0; min-width: 0; }
@@ -788,13 +790,29 @@ function corpsGroupeFiguresHtml(item: ItemEvaluation, lignes: LigneGroupe[], ave
   const disposition = rangsDesFigures(lignes, feuille?.qr ? SEUIL_DEUX_FIGURES_QR : SEUIL_DEUX_FIGURES);
   // Deux par rangée : une dernière ligne seule garde la largeur d'une demi-rangée (classe `.paire`).
   const paires = disposition.some((r) => r.length > 1);
-  const rangs = disposition.map((r) => `<div class="rang-fig${paires ? " paire" : ""}">${r.map(cellule).join("")}</div>`).join("");
+  const rangs = disposition.map((r) => `<div class="rang-fig${paires ? " paire" : ""}">${r.map(cellule).join("")}</div>`);
   const entete = item.section.enteteFragments ? `<div class="entete">${fragmentsEnteteHtml(item.section.enteteFragments)}</div>` : "";
   const legende = feuille?.qr && lignes.some((l) => l.item.code) ? `<div class="legende-qr">QR code de chaque ligne : refaire en ligne, avec les aides</div>` : "";
   // Au plus une figure par ligne : en deux colonnes, le groupe reste DANS la colonne (une cellule par
   // rangée) même à trois figures ou plus — seule une ligne à plusieurs graphiques (6gen5) prend la largeur.
   const uneParLigne = lignes.every((l) => mesureFiguresLigne(l.figureHtml).nombre <= 1);
-  return `${entete}<div class="lignes-groupe lignes-fig${uneParLigne ? " une-par-ligne" : ""}">${legende}${rangs}</div>`;
+  const classe = `lignes-groupe lignes-fig${uneParLigne ? " une-par-ligne" : ""}`;
+  // Début insécable : (titre, inséré par `avecTete`) + consigne + première rangée — jamais un titre ni
+  // une consigne seuls en bas de page ou de colonne (l'équilibrage des colonnes ignorait `break-after`).
+  const suite = rangs.length > 1 ? `<div class="${classe} suite">${rangs.slice(1).join("")}</div>` : "";
+  return `<div class="debut-groupe">${entete}<div class="${classe}">${legende}${rangs[0] ?? ""}</div></div>${suite}`;
+}
+
+const DEBUT_GROUPE = `<div class="debut-groupe">`;
+
+/** Titre d'une question (« Exercice 3 », « Question 3 » et ses points, bandeau de processus…) suivi de
+ * son corps : pour un groupe à graphique, le titre entre dans le début insécable du groupe ; sinon,
+ * simple concaténation (rendu inchangé). */
+function avecTete(tete: string, corps: string): string {
+  const i = corps.indexOf(DEBUT_GROUPE);
+  if (i < 0) return `${tete}${corps}`;
+  const j = i + DEBUT_GROUPE.length;
+  return `${corps.slice(0, j)}${tete}${corps.slice(j)}`;
 }
 
 /** Largeur (px) de la plus large figure SVG d'un fragment HTML (attribut `width`, sinon `viewBox`). */
@@ -1004,8 +1022,11 @@ function exerciceFeuilleHtml(item: ItemEvaluation, numero: number, deuxColonnes 
     // Question regroupée : plage de niveaux en tête, niveau et QR code PAR LIGNE (pas de QR global).
     const corps = corpsQuestionHtml(item, undefined, { numero, qr: true });
     const sansQr = corpsQuestionHtml(item);
+    const tete = `<div class="ex-tete"><h3>Exercice ${numero}</h3>${niveauHtml(item)}${tag ? `<span class="tag">${echapperHtml(tag)}</span>` : ""}</div>`;
+    // Groupe à graphique : le titre entre dans le début insécable du groupe (`avecTete`).
+    if (corps.includes(DEBUT_GROUPE)) return `<section class="ex groupe${classeFigures(sansQr)}${classeLargeur(sansQr, deuxColonnes, 260)}">\n  <div class="ex-texte">${avecTete(tete, corps)}</div>\n</section>`;
     return `<section class="ex groupe${classeFigures(sansQr)}${classeLargeur(sansQr, deuxColonnes, 260)}">
-  <div class="ex-tete"><h3>Exercice ${numero}</h3>${niveauHtml(item)}${tag ? `<span class="tag">${echapperHtml(tag)}</span>` : ""}</div>
+  ${tete}
   <div class="ex-texte">${corps}</div>
 </section>`;
   }
@@ -1165,7 +1186,7 @@ function questionsEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation
       if (!deuxColonnes) questions += titre;
       const pts = pointsParSousQuestion(item);
       const corps = corpsQuestionHtml(item, pts);
-      questions += `<section class="question${item.groupe ? " groupe" : ""}${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 380)}">${deuxColonnes ? `${premiere ? bandeau : ""}${titre}` : ""}<div class="ligne-titre"><span class="num">Question ${numero}</span><span class="pts">${pointsTexte(item.points)}</span></div>${corps}${
+      questions += `<section class="question${item.groupe ? " groupe" : ""}${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 380)}">${avecTete(`${deuxColonnes ? `${premiere ? bandeau : ""}${titre}` : ""}<div class="ligne-titre"><span class="num">Question ${numero}</span><span class="pts">${pointsTexte(item.points)}</span></div>`, corps)}${
         avecCorrection ? `<div class="correction-bloc">${correctionHtml(item)}</div>` : ""
       }</section>`;
       premiere = false;
@@ -1372,7 +1393,7 @@ function questionsExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, i
       }
       if (!deuxColonnes) questions += titre;
       const corps = corpsQuestionHtml(item, pointsParSousQuestion(item));
-      questions += `<section class="question${item.groupe ? " groupe" : ""}${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 380)}">${deuxColonnes ? titre : ""}<div class="ligne-titre"><span><span class="num">Question ${numero}</span>${etiquetteHtml(examen, item)}</span><span class="pts">${pointsTexte(item.points)}</span></div>${corps}${
+      questions += `<section class="question${item.groupe ? " groupe" : ""}${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 380)}">${avecTete(`${deuxColonnes ? titre : ""}<div class="ligne-titre"><span><span class="num">Question ${numero}</span>${etiquetteHtml(examen, item)}</span><span class="pts">${pointsTexte(item.points)}</span></div>`, corps)}${
         avecCorrection ? `<div class="correction-bloc">${correctionHtml(item)}</div>` : ""
       }</section>`;
     }
