@@ -1160,7 +1160,11 @@ formule y passe en fragments `[texte("car "), latex("i^{3}=-i")]`).
   gauche / suite / justification, `.calcul` insécable entre deux pages, KaTeX en ligne qui passe à
   la ligne dans sa cellule — mesuré : 0 formule coupée à 680, 820 et 1280 px), résultat
   `.resultat .cadre` ; Word `evaluationDocx.ts::calculDocx` (tableau sans bordure, rangées
-  insécables, résultat dans un paragraphe encadré) ; écran `components/CorrigeDetailleEcran.tsx`.
+  insécables, résultat dans un paragraphe encadré) ; écran `components/CorrigeDetailleEcran.tsx`
+  (bloc de calcul plus large que l'écran : police du bloc réduite juste assez pour tenir, jamais
+  sous 85 %, recalculée au changement de largeur — `useAjusterLargeur` ; au-delà, défilement
+  horizontal. Mesuré iPhone 13 : gen96, gen98, gen99 0 bloc qui défile, contre 1 / 659, 11 / 708,
+  5 / 809 avant).
 - **Même source pour le papier et l'écran** : le corrigé de chaque générateur vit dans
   `generateurs*/<générateur>/corrigeDetaille.ts` (jamais dans `exportEvaluation.ts`, qui importe
   `docx`), importé par l'adaptateur ET par l'appli. L'appli passe
@@ -1830,7 +1834,8 @@ scientifique dans tout l'imprimé, `enteteHtml` compris) 2 100 tirages, ≈ 27 8
 iPhone 13 (39 parcours : illisible, réponse fausse, bonnes réponses, choix raté révélé, trois échecs
 → corrigé) 0 erreur console, scrollWidth 390 ; corrigé de chaque étape rendu à l'écran (outil
 `defile.cjs`) : blocs de calcul qui défilent horizontalement gen96 1 / 659, gen97 0 / 479, gen98
-11 / 708 (substitution seule ≈ 300 px), gen99 5 / 809 ; plans réels (`construirePlan`, 30 × 3 séries,
+11 / 708 (substitution seule ≈ 300 px), gen99 5 / 809 — tous ramenés à 0 par la réduction de police
+de `CorrigeDetailleEcran` (décision de l'utilisateur : supprimer ce défilement) ; plans réels (`construirePlan`, 30 × 3 séries,
 interdite / autorisée) même structure 30 / 30, verdicts différents d'une série à l'autre 30 / 30
 (gen97 interdite 29 / 30), niveau et durée constants par variante ; documents (2 plans : évaluation
 2 séries + aménagée + feuille + aménagée + Word copie / corrigé / grille, interdite ; autorisée en deux

@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useLayoutEffect, useRef } from "react";
 import { InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import { normaliserLogDecimal } from "../../lib/notationLog";
@@ -13,8 +13,8 @@ import { decouperLigneCalcul, estLignePiege } from "../export/corrigeTableau";
  * seconde source recalculée à part. Partagé par tous les niveaux.
  *
  * Mise en page étroite (téléphone) : étiquette au-dessus de son contenu ; chaîne de calcul alignée
- * sur « = » dans un bloc qui défile horizontalement s'il le faut (la page ne déborde jamais), la
- * justification passe sous sa ligne.
+ * sur « = » ; un bloc trop large est d'abord resserré (police réduite jusqu'à 85 %), puis défile
+ * horizontalement s'il le faut encore (la page ne déborde jamais) ; la justification passe sous sa ligne.
  */
 
 function Formule({ latex }: { latex: string }) {
@@ -33,9 +33,47 @@ function Fragments({ fragments }: { fragments: FragmentConsigne[] }) {
   );
 }
 
+/** Réduction maximale de la taille d'un bloc de calcul trop large (au-delà, il défile). */
+const ECHELLE_MIN = 0.85;
+
+/**
+ * Bloc de calcul plus large que la place disponible (téléphone, membre de gauche long) : la taille
+ * de police du bloc est réduite juste assez pour qu'il tienne, sans descendre sous `ECHELLE_MIN` ;
+ * au-delà, le défilement horizontal reste le recours. Recalculé quand la largeur change.
+ */
+function useAjusterLargeur() {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ajuster = () => {
+      el.style.fontSize = "";
+      const dispo = el.clientWidth;
+      const besoin = el.scrollWidth;
+      if (dispo > 0 && besoin > dispo + 1) {
+        const echelle = Math.max(ECHELLE_MIN, Math.floor((dispo / besoin) * 1000) / 1000);
+        el.style.fontSize = `${echelle * 100}%`;
+      }
+    };
+    ajuster();
+    if (typeof ResizeObserver === "undefined") return;
+    let largeur = el.clientWidth;
+    const obs = new ResizeObserver(() => {
+      if (el.clientWidth !== largeur) {
+        largeur = el.clientWidth;
+        ajuster();
+      }
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  });
+  return ref;
+}
+
 function Calcul({ lignes }: { lignes: LigneCalcul[] }) {
+  const ref = useAjusterLargeur();
   return (
-    <div className="corrige-ecran-calcul-defile">
+    <div className="corrige-ecran-calcul-defile" ref={ref}>
       <div className="corrige-ecran-calcul">
         {lignes.map((l, i) => {
           const { gauche, droite } = decouperLigneCalcul(l.latex);
