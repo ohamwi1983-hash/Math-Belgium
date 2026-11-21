@@ -104,7 +104,7 @@ export type IdGenerateurPilote =
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38' | 'gen108' | 'gen111' | 'gen109' | 'gen110' | 'gen112'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83'
-  | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54' | 'gen96' | 'gen97'
+  | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54' | 'gen96' | 'gen97' | 'gen98'
   | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103' | 'gen102' | 'gen105' | 'gen104' | 'gen107' | 'gen106'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen63'
@@ -360,7 +360,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen51', label: "Équation d'une parabole depuis son graphe (gen51)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen52', label: "Sommet, foyer, paramètre et directrice depuis l'équation développée (gen52)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen53', label: "Construction graphique d'une parabole (gen53)" },
-  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lieux', generatorId: 'gen54', label: '', processus: 3 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lieux', generatorId: 'gen54', label: 'Lieux géométriques (gen54)', processus: 3 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lieux', generatorId: 'gen98', label: 'Intersection de deux cercles (gen98)', processus: 2 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'deux-droites', generatorId: 'gen100', label: 'Positions de deux droites et plan déterminé (gen100)', processus: 2 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'position', generatorId: 'gen39', label: '' },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'trois-plans', generatorId: 'gen101', label: 'Positions de deux plans et de trois plans (gen101)', processus: 2 },

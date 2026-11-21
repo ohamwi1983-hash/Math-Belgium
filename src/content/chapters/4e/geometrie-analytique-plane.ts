@@ -1907,6 +1907,23 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 54. Lieux géométriques »',
         },
+        {
+          kind: 'astuce',
+          label: 'Cercle et parabole : le cas du carré commun',
+          text:
+            'Quand le cercle est centré sur l\'axe de la parabole, par exemple $(x-1)^2+(y-3)^2=10$ et ' +
+            '$(x-1)^2=2(y+1)$, le carré $(x-1)^2$ apparaît dans les deux équations : on le remplace par $2(y+1)$ ' +
+            'dans celle du cercle, et il reste une équation du **second degré** en y. Attention : une solution en y ' +
+            'qui rend $(x-1)^2$ négatif ne donne aucun point, on la rejette.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Intersection de deux cercles',
+          generatorId: 'gen98',
+          description: ['Deux cercles : soustrais leurs équations pour obtenir une droite, puis substitue. Un cercle et une parabole : remplace le carré commun, et rejette les solutions qui ne donnent aucun point. 0, 1 ou 2 points communs.'],
+          chantier: '4e',
+          whereLabel: '4e → « 98. Intersection de deux cercles »',
+        },
       ],
     },
 

@@ -288,6 +288,12 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
   },
   gen47: { formes: [{ motif: re(String.raw`On donne :\s*(?<ligne>${M})\n(?<q>.+)`), consigne: dansChaqueCas }] },
   gen48: { formes: [{ motif: re(String.raw`On donne les droites :\s*(?<ligne>${M})\n(?<q>.+)`), consigne: dansChaqueCas }] },
+  gen98: {
+    formes: [
+      { motif: re(String.raw`On donne les cercles (?<ligne>${M} et ${M})\.\n(?<q>Détermine .+)`), consigne: dansChaqueCas },
+      { motif: re(String.raw`On donne le cercle (?<ligne>${M} et la parabole ${M})\.\n(?<q>Détermine .+)`), consigne: dansChaqueCas, ligne: (g) => `Cercle ${g.ligne}` },
+    ],
+  },
   gen96: { formes: [{ motif: re(String.raw`On donne le point (?<ligne>${M} et la droite ${M})\.\n(?<q>Détermine .+)`), consigne: dansChaqueCas, ligne: (g) => `Point ${g.ligne}` }] },
   gen50: {
     formes: [

@@ -185,6 +185,7 @@ export function produitTerme(coef: number, inner: string, premier = false): stri
 
 /** Terme « a·v » substitué dans une somme : « 2\cdot 3 », « -(-1) », « +3\cdot(-2) », « -5 ». */
 export function termeProduit(coef: number, v: number, premier = false): string {
+  if (coef === 0) return premier ? "0" : "";
   const c = Math.abs(coef);
   const val = c === 1 ? (premier && coef > 0 ? n(v) : nbp(v)) : `${n(c)}\\cdot ${nbp(v)}`;
   if (coef < 0) return `-${val}`;
