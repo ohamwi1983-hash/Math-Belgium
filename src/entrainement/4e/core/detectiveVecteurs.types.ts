@@ -91,6 +91,10 @@ export interface ExerciceDetectiveVecteurs {
   /** Les 4 descriptions de l'écran 2, dans l'ordre d'affichage (tiré à la génération : le QR code
    * rouvre le même ordre). */
   options: IdDescriptionVecteurs[];
+  /** Nombre de lignes justes AVANT la ligne fausse (0 à 3, tiré uniformément en DERNIER : audit
+   * 4e ch. 6, lot C, décision 1 — la ligne fausse n'est plus fixée par la variante). Absent : copie
+   * canonique (ligne fausse à sa place d'origine). Voir `modeleDetectiveVecteurs.ts::structure`. */
+  av?: number;
 }
 
 /** Valeur portée par une ligne (ce que l'écran 3 demande de corriger). */

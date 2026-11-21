@@ -63,9 +63,14 @@ export function support(e: { scenario: IdScenarioVecteurs }): SupportVecteurs {
   return SCENARIOS[e.scenario].support;
 }
 
-/** Indice (0 = ligne 1) de la ligne fausse. */
-export function indiceLigneFausse(e: { scenario: IdScenarioVecteurs }): number {
-  return SCENARIOS[e.scenario].ligne;
+/** Indice (0 = ligne 1) de la ligne fausse dans la copie réellement affichée. */
+export function indiceLigneFausse(e: ExerciceDetectiveVecteurs): number {
+  return structure(e, true).fausse;
+}
+
+/** Nombre de lignes de la copie réellement affichée. */
+export function nombreLignesCopie(e: ExerciceDetectiveVecteurs): number {
+  return structure(e, true).lignes.length;
 }
 
 /** Description juste de l'erreur (écran 2). */
@@ -485,7 +490,7 @@ function lignesMilieu(e: ExerciceDetectiveVecteurs, fautive: boolean): LigneCopi
 // API
 // ---------------------------------------------------------------------------------------------
 
-function lignes(e: ExerciceDetectiveVecteurs, fautive: boolean): LigneCopie[] {
+function lignesCanoniques(e: ExerciceDetectiveVecteurs, fautive: boolean): LigneCopie[] {
   switch (support(e)) {
     case "relation":
       return lignesRelation(e, fautive);
@@ -504,14 +509,150 @@ function lignes(e: ExerciceDetectiveVecteurs, fautive: boolean): LigneCopie[] {
   }
 }
 
-/** La copie de l'élève fictif (une ligne fausse, la suite cohérente avec elle). */
-export function copieEleve(e: ExerciceDetectiveVecteurs): LigneCopie[] {
-  return lignes(e, true);
+// ---------------------------------------------------------------------------------------------
+// Position de la ligne fausse (audit 4e ch. 6, lot C, décision 1) : 0 à 3 lignes justes avant
+// ---------------------------------------------------------------------------------------------
+
+/** Identité d'une ligne de la copie affichée : indice de la ligne canonique, ou ligne préliminaire
+ * juste (données, méthode, inconnue, plan) qui n'existe pas dans la copie canonique. */
+export type IdLigneCopie = number | "donnees" | "methode" | "inconnue" | "plan";
+
+type VecteurInline = "AB" | "AC";
+
+interface EntreeAvant {
+  id: IdLigneCopie;
+  ligne: LigneCopie;
+  /** Ligne nécessaire à la suite : non placée avant la ligne fausse, elle vient juste APRÈS. */
+  utile: boolean;
+  /** Vecteur dont la ligne fausse a besoin : absent avant elle, ses composantes sont écrites dans
+   * la ligne fausse elle-même (« Avec \vec{AB} = (…), … »). */
+  inline?: VecteurInline;
 }
 
-/** La résolution sans erreur (même nombre de lignes). */
+function ligneSimple(fragments: FragmentConsigne[]): LigneCopie {
+  return { fragments, valeur: null, formule: null };
+}
+
+function ligneDonnees(e: ExerciceDetectiveVecteurs): LigneCopie {
+  const noms: ("A" | "B" | "C" | "D")[] = support(e) === "chasles" ? ["A", "B", "C", "D"] : ["A", "B", "C"];
+  const f: FragmentConsigne[] = [t("Données : ")];
+  noms.forEach((nom, i) => {
+    if (i > 0) f.push(t(i === noms.length - 1 ? " et " : ", "));
+    const P = e.donnees[nom] as Point;
+    f.push(l(pointLatex(nom, P.x, P.y)));
+  });
+  f.push(t("."));
+  return ligneSimple(f);
+}
+
+const LIGNE_INCONNUE_D = ligneSimple([t("On cherche les coordonnées du point "), l("D(x_D\\,;\\,y_D)"), t(".")]);
+
+/** Lignes justes qui peuvent précéder la ligne fausse, dans l'ordre d'écriture (au moins 3 par
+ * scénario : la ligne fausse est précédée de `av` d'entre elles, les premières). */
+function entreesAvant(e: ExerciceDetectiveVecteurs, c: LigneCopie[]): EntreeAvant[] {
+  const donnees: EntreeAvant = { id: "donnees", ligne: ligneDonnees(e), utile: false };
+  const canon = (id: number, utile = true, inline?: VecteurInline): EntreeAvant => ({ id, ligne: c[id]!, utile, inline });
+  switch (e.scenario) {
+    case "S1":
+    case "S2": {
+      const k = e.donnees.k!;
+      const methode: EntreeAvant = {
+        id: "methode",
+        ligne: ligneSimple([t("On calcule "), l(`\\vec{AM} = ${relationLatex(k)}`), t(", puis M est l'image de A par la translation de vecteur "), l("\\vec{AM}"), t(".")]),
+        utile: false,
+      };
+      return e.scenario === "S1" ? [donnees, methode, canon(1), canon(2)] : [donnees, methode, canon(0)];
+    }
+    case "S3":
+      return [donnees, canon(0), canon(2)];
+    case "P1":
+      return [donnees, { id: "inconnue", ligne: LIGNE_INCONNUE_D, utile: false }, canon(1)];
+    case "P2":
+      return [donnees, { id: "inconnue", ligne: LIGNE_INCONNUE_D, utile: false }, canon(0)];
+    case "C1": {
+      const expr = expressionChasles(e.sousVariante);
+      return [
+        donnees,
+        { id: "methode", ligne: ligneSimple([l(`\\vec{DM} = ${expr}`), t(" : M est l'image de D par la translation de ce vecteur.")]), utile: false },
+        { id: "plan", ligne: ligneSimple([t("On réduit d'abord "), l(expr), t(" en un seul vecteur avec la relation de Chasles.")]), utile: false },
+      ];
+    }
+    case "N1":
+      return [canon(2), canon(3), canon(0, false, "AB")];
+    case "N2":
+      return [canon(0), canon(1), canon(2, false, "AC")];
+    case "K1":
+      return [
+        { id: "methode", ligne: ligneSimple([t("A, B et C sont alignés si et seulement si "), l("\\vec{AB}"), t(" et "), l("\\vec{AC}"), t(" sont colinéaires.")]), utile: false },
+        canon(0, false, "AB"),
+        canon(1, false, "AC"),
+      ];
+    case "O1":
+      return [
+        { id: "methode", ligne: ligneSimple([t("ABC est rectangle en A si et seulement si "), l("\\vec{AB}"), t(" et "), l("\\vec{AC}"), t(" sont orthogonaux.")]), utile: false },
+        canon(0, false, "AB"),
+        canon(1, false, "AC"),
+      ];
+  }
+}
+
+/** Ligne fausse (ou sa version juste) précédée des composantes des vecteurs non calculés avant elle. */
+function avecVecteursInline(e: ExerciceDetectiveVecteurs, ligne: LigneCopie, vecteurs: VecteurInline[]): LigneCopie {
+  const { A, B, C } = e.donnees;
+  const ecrire = (nom: VecteurInline) => {
+    const E = nom === "AB" ? B : C;
+    return l(`\\vec{${nom}} = ${colonne(nb(E.x - A.x), nb(E.y - A.y))}`);
+  };
+  const prefixe: FragmentConsigne[] = [t("Avec "), ecrire(vecteurs[0]!)];
+  if (vecteurs[1]) prefixe.push(t(" et "), ecrire(vecteurs[1]));
+  prefixe.push(t(", "));
+  const [premier, ...reste] = ligne.fragments;
+  const suite = premier && premier.type === "texte" ? [t(premier.valeur.charAt(0).toLowerCase() + premier.valeur.slice(1)), ...reste] : ligne.fragments;
+  return { ...ligne, fragments: [...prefixe, ...suite] };
+}
+
+export interface StructureCopie {
+  lignes: LigneCopie[];
+  ids: IdLigneCopie[];
+  fausse: number;
+  /** Vecteurs dont les composantes sont écrites dans la ligne fausse elle-même. */
+  inline: VecteurInline[];
+}
+
+/**
+ * Copie affichée : les `av` premières lignes justes de `entreesAvant` (0 à 3), la ligne fausse, les
+ * lignes utiles qui n'ont pas été placées avant (dans leur ordre), puis la suite canonique. Mêmes
+ * lignes, même ordre pour la copie et pour la résolution correcte (`fautive` faux).
+ */
+export function structure(e: ExerciceDetectiveVecteurs, fautive: boolean): StructureCopie {
+  const c = lignesCanoniques(e, fautive);
+  const f = SCENARIOS[e.scenario].ligne;
+  if (e.av === undefined) return { lignes: c, ids: c.map((_, i) => i), fausse: f, inline: [] };
+  const pool = entreesAvant(e, c);
+  const kk = Math.min(e.av, pool.length);
+  const avant = pool.slice(0, kk);
+  const apres = pool.slice(kk).filter((p) => p.utile);
+  const presents = new Set(avant.map((p) => p.id));
+  const inline = pool.filter((p) => p.inline && !presents.has(p.id)).map((p) => p.inline!);
+  const ligneF = inline.length ? avecVecteursInline(e, c[f]!, inline) : c[f]!;
+  const dansPool = new Set(pool.map((p) => p.id));
+  const suite = c.map((ligne, i) => ({ ligne, i })).filter(({ i }) => i > f && !dansPool.has(i));
+  return {
+    lignes: [...avant.map((p) => p.ligne), ligneF, ...apres.map((p) => p.ligne), ...suite.map((s) => s.ligne)],
+    ids: [...avant.map((p) => p.id), f, ...apres.map((p) => p.id), ...suite.map((s) => s.i)],
+    fausse: kk,
+    inline,
+  };
+}
+
+/** La copie de l'élève fictif (une ligne fausse, la suite cohérente avec elle). */
+export function copieEleve(e: ExerciceDetectiveVecteurs): LigneCopie[] {
+  return structure(e, true).lignes;
+}
+
+/** La résolution sans erreur (mêmes lignes, même ordre). */
 export function resolutionCorrecte(e: ExerciceDetectiveVecteurs): LigneCopie[] {
-  return lignes(e, false);
+  return structure(e, false).lignes;
 }
 
 /**

@@ -5189,3 +5189,14 @@ avant 5gen66 ; § 5 retrouver (ax + b)/(x + d) depuis ses asymptotes et un point
 ax + b + c/(x − p), avant 5gen65. Quatre énoncés soignés ajoutés par clé (`ENONCES_DEMONSTRATION`, build
 strict). Détail : `feuilles-evaluations.md`, entrée « 5e ch. 4 (lots B, C, D) ».
 
+
+## 4e, Chapitre 6 — lots B, C, D de l'audit (gen20–29, points ouverts gen84, 87, 90, 91)
+
+Aucun changement du cours (chapitre `calcul-vectoriel.ts` intact). Générateurs : règles communes des
+anciens gen20–29 (illisible sans tentative, choix fermés à une tentative, aides à deux niveaux,
+messages ciblés), défauts propres (gen22 « sans parenthèses », gen26 cible √N et « la ou les
+valeurs », gen25 x en 1ʳᵉ ou 2ᵉ composante, gen28 figure et écran « égalité », gen84 « produit
+scalaire », gen87, gen90, gen91), trois variantes ajoutées en fin de catalogue (gen20 « symétrique
+d'un point », gen24 « paramètre au carré », gen26 « nature d'un triangle ») et tirage équilibré (gen91
+ligne fausse tirée + `groupe_erreur`, gen29 Sud ≈ 30 %). Libellés du panneau gen24, 25, 26, 29.
+Détail : `feuilles-evaluations.md`, entrée « 4e ch. 6 (lots B, C, D) ».

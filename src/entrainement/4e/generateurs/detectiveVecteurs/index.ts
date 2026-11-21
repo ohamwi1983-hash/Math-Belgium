@@ -14,9 +14,10 @@ import { SCENARIOS, SCENARIOS_PAR_TYPE, SOUS_VARIANTES, copieEleve, descriptionC
  * `Math.random` : `genererAvecCode` (`export/codeExercice.ts`) le remplace par une graine, et le QR
  * code d'une feuille rouvre ainsi le MÊME exercice (données, sous-variante, ordre des descriptions).
  *
- * Variante = type d'erreur ; dans une variante, le scénario (support + ligne fausse) puis la
+ * Variante = type d'erreur ; dans une variante, le scénario (support + étape fausse) puis la
  * sous-variante sont tirés uniformément (chaque forme sort avec une probabilité d'au moins 25 % :
- * séries équilibrées faciles à reproduire, `profil.ts`).
+ * séries équilibrées faciles à reproduire, `profil.ts`), enfin le nombre de lignes justes avant
+ * la ligne fausse (0 à 3, `av`).
  *
  * Garanties (vérifiées par tirages massifs) :
  * - coordonnées entières (milieu : demi-entiers), composantes non nulles là où l'erreur doit se voir ;
@@ -181,7 +182,7 @@ export function instanceValide(e: ExerciceDetectiveVecteurs): boolean {
   if (s === "chasles") {
     const P = [d.A, d.B, d.C, d.D!];
     for (let a = 0; a < 4; a++) for (let b = a + 1; b < 4; b++) if (P[a]!.x === P[b]!.x && P[a]!.y === P[b]!.y) return false;
-    const vc = copie[0]!.valeur!;
+    const vc = copie[i]!.valeur!;
     if (vc.genre !== "vecteur" || vc.x === 0 || vc.y === 0) return false;
   }
   if (s === "isocele") {
@@ -223,7 +224,12 @@ export function genererDetectiveVecteurs(scenario: IdScenarioVecteurs): Exercice
     const sousVariante = sousVariantePour(scenario);
     const e: ExerciceDetectiveVecteurs = { scenario, donnees: tirerDonnees(scenario, sousVariante), sousVariante, options: [] };
     if (!instanceValide(e)) continue;
-    return { ...e, options: melanger([descriptionCorrecte(e), ...leurres(scenario, sousVariante)]) };
+    const options = melanger([descriptionCorrecte(e), ...leurres(scenario, sousVariante)]);
+    // Position de la ligne fausse tirée EN DERNIER (audit 4e ch. 6, lot C, décision 1) : 0 à 3
+    // lignes justes avant elle, 25 % chacune. Tirage ajouté après tous les autres : un `?code=`
+    // déjà imprimé rouvre les mêmes données, la même erreur et les mêmes réponses ; seule la mise en
+    // page de la copie (lignes justes avant la ligne fausse) peut différer.
+    return { ...e, options, av: Math.floor(Math.random() * 4) };
   }
 }
 

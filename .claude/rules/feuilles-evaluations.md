@@ -719,6 +719,40 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   820 et 1 280 px, 0 `.katex-error`. iPhone 13 (clair / sombre, 5gen20–24 et `?code=` de la famille
   position, parcours complet de la nouvelle famille) : scrollWidth 390, 0 erreur console, 0
   `.katex-error` ; page du chapitre 390 / 1 280 px, clair / sombre : idem, aucun « $ » ni « ** » visible.
+- **4e ch. 6 (lots B, C, D ; gen20–29, points ouverts gen84, 87, 90, 91)** : règles communes dans
+  `4e/ui/retoursVecteurs{,2,3,4}.ts` (illisible PAR NATURE de champ — coordonnée, composante,
+  combinaison, critère, équation, valeurs, norme exacte / approchée, vecteur de la figure, égalité,
+  angle —, aides à deux niveaux KaTeX, messages ciblés : A − B, milieu par différence, k sur la mauvaise
+  origine, BA non retourné, colinéarité / orthogonalité confondues, racine oubliée, carré négatif,
+  sommet faux, Chasles inversé, « + » / « − » de la formule de la résultante, calculatrice « pas en
+  mode degrés » — jamais « radian ») ; écrans génériques `EcranChampVecteurs`, `PiedVecteurs`,
+  `DeuxChampsVecteurs`, `EtapeValeursAvecChoix` (choix « aucune / au moins une » jugé UNE fois et
+  figé, valeurs à 3 tentatives ; après un choix faux, les valeurs restent à donner), `EtapeConclusionNature`.
+  Choix fermés à 1 tentative : conclusions gen24 / gen25 (figées dans le moteur, `ChoixFige`),
+  identification gen25, sélection gen28 (cases CARRÉES `.options-multiples`). gen23 : tracé vide OU
+  tracé initial laissé tel quel = aucune tentative. **Défauts** : gen22 « sans parenthèses » démarre à
+  l'écran des composantes, coefficient 1 implicite ; gen26 cible toujours √N non simplifiée, « la ou les
+  valeurs », p − r pair pour tous les verdicts ; gen25 x en 1ʳᵉ ou 2ᵉ composante, de u ou de v ; gen28
+  écran « égalité » = une égalité PAR vecteur parallèle trouvé (`egalitesDemandees`, comme le corrigé),
+  têtes de flèche 0,35 unité (`VecteurGraph.teteFleche`, figure papier proportionnée), flèche d'étiquette
+  centrée ; gen84 « produit scalaire » ; gen87 x_A non arrondi avant `estExacte` ; gen90 `^\circ` ;
+  `souderPonctuation` : virgule de ponctuation `,` (plus `{,}`) ; minuscules d'insistance gen84, gen90.
+  **Nouvelles variantes EN FIN de catalogue** (codes 0–n inchangés ; les adaptateurs gardent l'ancien
+  tirage libre, l'appli tire la nouvelle variante via `…Libre`) : gen20 « symétrique d'un point », gen24
+  « paramètre au carré » (0 / 1 / 2 solutions au tiers, Δ, niveau 2, 6 min dans les trois verdicts),
+  gen26 « nature d'un triangle » (quelconque / isocèle / rectangle / rectangle isocèle à 25 %, niveau 3,
+  8 min). Constructions papier (gen23, gen82 graphique, gen83) : « Trace ta construction sur la figure
+  de l'énoncé, que tu joins à ta feuille ». **Tirage (lot D)** : gen91 ligne fausse précédée de 0 à 3
+  lignes justes (`av`, tiré EN DERNIER : un code imprimé rouvre les mêmes données et réponses, seule la
+  mise en page de la copie change ; lignes préliminaires « Données », méthode, inconnue, ou vecteurs
+  écrits dans la ligne fausse — `modeleDetectiveVecteurs.ts::structure`), ligne retirée de `forme`,
+  `groupe_erreur` (6 variantes) ; gen29 « forces, angle quelconque » : Sud ≈ 30 % (0,295). Mesuré :
+  gen91 L1–L4 ≈ 25 % chacune dans chaque variante ; gen26 « paramètre » 15 000 tirages : un tiers par
+  verdict, mais « une solution » ⟺ N = 2m² (mathématique : Δ = 0) — P(une | N = 2m²) ≈ 65 % ; niveau et
+  durée constants par variante pour tous les verdicts (gen24–26, gen82 « possible », gen88, gen89, gen91,
+  nouvelles variantes) ; plans réels 30 × 2 : gen91 `groupe_erreur` B ≠ A 30/30 (même ligne A/B 6/30).
+  Codes : 20 générateurs × 60 graines identiques, sauf gen25 et gen26 « paramètre » (tirage refait) et
+  gen29 « forces, angle quelconque » (proportion de Sud).
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 

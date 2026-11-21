@@ -1,7 +1,7 @@
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, decouperLigneCalcul, latex, ligne, piege, resultat, texte, utilise } from "../../../export/corrigeTableau";
 import type { ExerciceDetectiveVecteurs, Point, ValeurLigne } from "../../core/detectiveVecteurs.types";
-import { copieEleve, descriptionCorrecte, expressionChasles, indiceLigneFausse, relationLatex, resolutionCorrecte, support, typeErreur, valeursAttendues } from "../../moteur/modeleDetectiveVecteurs";
+import { copieEleve, descriptionCorrecte, expressionChasles, indiceLigneFausse, relationLatex, resolutionCorrecte, structure, support, typeErreur, valeursAttendues } from "../../moteur/modeleDetectiveVecteurs";
 import { constat, descriptionFragments, piege as piegeEcran, valeurFragments } from "../../ui/formatDetectiveVecteurs";
 import {
   COURS_CHASLES,
@@ -40,8 +40,21 @@ function vec(P: Point, Q: Point) {
   return moins(Q, P);
 }
 
-/** Lignes « comme au tableau » de la ligne d'indice j de la résolution CORRECTE (vide : ligne de rappel). */
+/** Lignes « comme au tableau » de la ligne d'indice j de la copie AFFICHÉE (résolution correcte ;
+ * vide : ligne de rappel ou ligne préliminaire). La ligne fausse dont un vecteur est écrit dans la
+ * ligne elle-même (« Avec \vec{AB} = … ») commence par le calcul de ses composantes. */
 function lignesTableau(e: E, j: number): LigneCalcul[] {
+  const s = structure(e, false);
+  const id = s.ids[j];
+  if (typeof id !== "number") return [];
+  const lignes = tableauCanonique(e, id);
+  if (j !== s.fausse || s.inline.length === 0) return lignes;
+  const { A, B, C } = e.donnees;
+  return [...s.inline.flatMap((nom) => lignesComposantes(nom, A, nom === "AB" ? B : C)), ...lignes];
+}
+
+/** Lignes « comme au tableau » de la ligne CANONIQUE d'indice j (copie d'origine). */
+function tableauCanonique(e: E, j: number): LigneCalcul[] {
   const { A, B, C } = e.donnees;
   const ab = vec(A, B);
   const ac = vec(A, C);
