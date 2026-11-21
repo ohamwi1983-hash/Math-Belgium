@@ -25,7 +25,7 @@ export function ProgressionClasse({ classe, seances, autres }: { classe: Classe;
   }
 
   if (chapitres.length === 0) {
-    return <p className="compte-vide">Aucune séance pour l'instant, et pas de niveau choisi pour cette classe : indique son niveau (Gérer mes classes) pour voir tous ses chapitres.</p>
+    return <p className="compte-vide">Aucune séance pour l'instant, et pas de niveau choisi pour cette classe : indique son niveau (« Modifier la classe ») pour voir tous ses chapitres.</p>
   }
 
   return (

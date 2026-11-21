@@ -39,7 +39,8 @@ function App() {
           <Route path="/mot-de-passe" element={<MotDePassePage />} />
           <Route path="/profil" element={<ProfilPage />} />
           <Route path="/coffre" element={<CoffrePage />} />
-          <Route path="/carnet" element={<CarnetPage />} />
+          {/* `/carnet/*` : sous-pages du carnet (Aujourd’hui, semaine, classe, agenda…), jamais pré-rendues. */}
+          <Route path="/carnet/*" element={<CarnetPage />} />
           {/* Un seul générateur rapatrié depuis plateforme-maths = une entrée dans
            * `ENTRAINEMENT_REGISTRY` (voir `src/entrainement/registry.ts`), jamais une nouvelle route
            * ici — `EntrainementPage` charge le bon composant à la demande (`React.lazy`), lu depuis

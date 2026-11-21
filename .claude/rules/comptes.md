@@ -216,7 +216,8 @@ chapitre (`generateursChapitre`, ids `6gen13`, `gen7`…).
 - Réglage du format d'horaire et de la durée d'une heure : `carnet_reglages` (mémorisé dans le compte).
 
 **Routes et liens** : `/carnet` (réservée, `noindex`, non pré-rendue, lien « Carnet de matière vue »
-dans `MenuCompte`). `?chapitre=<niveau>/<chapitre>` ouvre une nouvelle séance sur ce chapitre (classe
+dans `MenuCompte`) et ses sous-pages `/carnet/*` (voir « Interface refondue » ci-dessous).
+`?chapitre=<niveau>/<chapitre>` ouvre le panneau « Noter une séance » sur ce chapitre (classe
 du même niveau choisie). Bouton « Carnet » dans `OutilsChapitre` seulement si `useCompte().etat ===
 'connecte'` et profil actif — `useCompte()` SANS `demarrer` : un visiteur sans session stockée ne
 télécharge ni supabase-js ni le code du carnet (vérifié par Playwright).
@@ -313,7 +314,8 @@ tombe hors détente). Année absente → `etatJour` « inconnu » (jour de semai
 classe possible) et l'interface affiche « Calendrier FWB 2029-2030 à confirmer ». Ajouter une année :
 recopier son PDF officiel, source + date, `verifie: true`.
 
-**Interface** (`CarnetPage` + `components/carnet/`) :
+**Interface** (`CarnetPage` + `components/carnet/` ; emplacements d'AVANT la refonte du 21/11/2026, le
+contenu de chaque bloc est conservé — voir « Interface refondue ») :
 - « Mon horaire » (après « Mes classes », visible dès qu'il y a une classe ; ouvert d'office tant que
   l'horaire est vide) : `MonHoraire` → onglets d'école (plusieurs écoles), alerte de chevauchement,
   `GrilleEcole` (création pré-remplie avec la grille d'exemple de l'utilisateur ; début `type="time"`,
@@ -458,3 +460,51 @@ d'une période à une autre ». Tout se calcule à partir des séances existante
   et liens, toutes les classes en tableau et par classe, période vide, dates inversées, repli de copie,
   `page.pdf` A4 + `pdftotext -layout` : « page n / N » et nom du professeur sur chaque page, aucune
   séance coupée, aucun titre de semaine orphelin) ; 0 erreur console, `scrollWidth` = largeur.
+
+### Interface refondue (21/11/2026 : menu + « Aujourd'hui » + « Ma semaine » + page par classe, AUCUNE migration)
+
+Décision de l'utilisateur (maquettes A + B + C) : la longue page unique est remplacée par un menu et des
+vues ; RIEN n'a disparu (classes, écoles, horaire et grille avec H0, réglages, agenda, évaluation,
+progression, fiches, séances à rattraper, messages, cas sans école / sans classe / horaire vide).
+- Routes (`App.tsx` : `/carnet/*`, garde `PageReservee` inchangée, `PageCompte large`, jamais pré-rendues) :
+  `/carnet` Aujourd'hui · `/carnet/semaine` · `/carnet/classe/:id` (mémorisée comme classe active) ·
+  `/carnet/classes` (`GestionClasses`, « Ajouter une classe ») · `/carnet/agenda` (`?classe=` présélectionne)
+  · `/carnet/horaire` (`MonHoraire`) · `/carnet/reglages` ; adresse inconnue → `/carnet`.
+- `MenuCarnet` : colonne de gauche ≥ 760 px (`NavLink`, `aria-current`, « n à noter » = créneaux du jour
+  passés / en cours sans séance, nombre de séances par classe) ; téléphone : barre fixe en bas
+  (Aujourd'hui · Semaine · Classes · Plus, feuilles au-dessus, Échap / clic à côté). Classe CSS
+  `.carnet-barre-bas` (`.carnet-barre` = barre de progression d'`index.css`, ne pas réutiliser).
+- `Aujourdhui` : heures du jour (`journeeCarnet.ts::lignesDuJour` : H0 → Hn, heures doubles, libres
+  regroupées, récréation / midi ; plusieurs écoles le même jour → créneaux seuls), créneau proposé
+  encadré, notée → « ✓ Noté » + `ActionsSeance`, sinon « Noter la séance » (+ « dernière fois : … ») ;
+  carte « Maintenant » sur téléphone ; colonne : À rattraper (jours précédents, date mémorisée, 12 puis
+  « Afficher les n »), Où en sont mes classes, raccourcis. En-tête « Période n · semaine n »
+  (`outilsCarnet::reperesScolaires` : vacances de plusieurs jours passées + semaines ayant un jour de
+  classe FWB). Séances du jour hors horaire listées dessous ; horaire vide / 0003 absent → invitation.
+- `MaSemaine` : `journeeCarnet.ts::grilleSemaine` (rangées = heures des écoles actives + pauses de
+  l'école par défaut ; `rowSpan` des heures doubles, heures sans cours regroupées, congé FWB = colonne
+  grisée) ; case notée → panneau de la séance, « Noter » → panneau pré-rempli ; téléphone : un jour à la
+  fois ; « Imprimer la semaine » = `agendaPeriodeHtml` du lundi au vendredi (toutes classes, sans
+  remarques) ; `Planification` (heures restantes) dessous, ancre `#heures-restantes`.
+- `PageClasse` : en-tête (niveau, h/semaine = cases de l'horaire, école, séances, « Modifier la classe »
+  → `FormClasse` + suppression), fil par semaine (2 semaines en entier, puis lignes compactes, 4 semaines
+  puis « Voir les semaines précédentes »), progression à droite (chapitre en cours, ✓ / ▸ / ○ avec dates,
+  « Comparer avec » une classe du même niveau, autres chapitres, `ProgressionClasse` complète repliée),
+  `EvaluationMatiere` (`#evaluation`).
+- Panneau commun `PanneauLateral` (portail, `role="dialog"` + `aria-modal`, focus piégé, Échap, focus
+  rendu, clic sur le voile SANS effet) : `FormulaireSeance` (résumé classe · date · créneau + « changer »,
+  chapitre en cours proposé — suit la classe tant qu'il n'a pas été choisi, sauf `?chapitre=` —, « vu le /
+  commencé le », aperçu Smartschool en direct, Annuler / Enregistrer / « Enregistrer et copier » : la copie
+  est lancée AVANT l'enregistrement, repli texte à copier si refusée) ; séance ouverte = `CarteSeance`.
+- Une action principale par séance (`CarteSeance.tsx::ActionsSeance` : Copier pour Smartschool) + menu
+  « … » (`MenuActions` : `role="menu"`, flèches, Échap) : fiche, télécharger, modifier, supprimer.
+  `contexteCarnet.ts::resoudre` = mêmes options qu'avant → textes / fiches IDENTIQUES.
+- Styles : `components/carnet/carnet.css` (importé par `CarnetPage`, morceau à la demande), couleurs de
+  classe `.carnet-c0…c5` (rang dans la liste), jetons clair / sombre.
+- **Vérifications** (Vite de développement + faux client, heure figée vendredi 20/11/2026 11h50,
+  données fictives : 1 école à H0, 3 classes, 17 cases, 25 séances) : 216 vérifications Playwright
+  (1 280 px et iPhone 13) dont non-régression contre l'interface d'avant — 25 textes Smartschool,
+  25 fiches, 4 agendas (texte + HTML) identiques octet pour octet —, panneau (pré-remplissage, focus
+  piégé, Échap, enregistrer et copier = aperçu, modifier, supprimer), semaine (heure double, mercredi,
+  Armistice, Toussaint), classe, barre du bas, `?chapitre=`, cas vides ; 82 captures (clair + sombre),
+  `scrollWidth` = largeur, 0 erreur console.

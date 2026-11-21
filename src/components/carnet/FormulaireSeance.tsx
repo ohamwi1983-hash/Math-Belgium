@@ -1,14 +1,15 @@
-import { useId, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react'
 import { RichText } from '../Math'
 import { findChapter, LEVELS } from '../../content/chaptersIndex'
 import {
   NUMERO_HEURE_MAX,
-  dateCourte,
   dateIso,
+  dateLongue,
   erreursSeance,
   generateursChapitre,
   heureChamp,
   horaireParDefaut,
+  horaireTexte,
   minutesHeure,
   normaliserParties,
   numeroHeureTexte,
@@ -22,14 +23,20 @@ import {
   type Seance,
 } from '../../lib/carnet'
 import { champHeure, creneauPropose, creneauxDuJour, creneauxPonctuels, libelleCreneau, type CaseHoraire, type Creneau, type GrilleHoraire } from '../../lib/horaire'
+import { chapitreEnCours, chapitreParDefaut, jourMois } from './outilsCarnet'
 
 const cleCreneau = (c: Pick<Creneau, 'ecole_id' | 'heureDebut' | 'ponctuel'>) => `${c.ecole_id}|${c.heureDebut}${c.ponctuel ? '|ponctuel' : ''}`
 
 /**
- * Saisie d'une séance : classe, date, horaire (plage « 08h50 → 09h40 » ou numéro d'heure, selon le
- * réglage), chapitre puis sections / sous-parties cochées (une case de section coche toutes ses
- * sous-parties), générateurs utilisés, devoir, remarque. Aucun champ numérique libre (règle
- * CLAUDE.md) : date et heures en `type="date"` / `type="time"`, numéro d'heure en liste.
+ * « Noter une séance » / « Modifier la séance » : contenu du panneau latéral commun (`PanneauLateral`).
+ * En tête, le résumé « 5B · vendredi 20 novembre · H2 (09h35 → 10h25) · changer » : classe, date et
+ * créneau pré-remplis (depuis le créneau cliqué), modifiables en dépliant « changer ». Puis chapitre
+ * (celui en cours de la classe proposé), sections / sous-parties cochées avec « vu le … » (une case de
+ * section coche toutes ses sous-parties), exercices faits, devoir, remarque privée, aperçu du texte
+ * Smartschool en direct, et Annuler / Enregistrer / Enregistrer et copier pour Smartschool.
+ *
+ * Aucun champ numérique libre (règle CLAUDE.md) : date et heures en `type="date"` / `type="time"`,
+ * numéro d'heure en liste.
  *
  * Avec un horaire (0003 + grille) : liste « Créneau de l'horaire » des créneaux du jour choisi
  * (« H2 (09h35 → 10h25) · 4Ge ») ; en choisir un règle classe, numéro(s) d'heure et plage ensemble
@@ -49,6 +56,9 @@ export function FormulaireSeance({
   horaire = null,
   heureZero = false,
   occupe,
+  titreId,
+  apercu,
+  avecGrille,
   onEnregistrer,
   onAnnuler,
 }: {
@@ -56,16 +66,26 @@ export function FormulaireSeance({
   seances: Seance[]
   reglages: ReglagesCarnet
   initiale: Seance | null
-  prerempli: { classeId: string; chapitre: string; date?: string; creneau?: Creneau | null }
+  /** `chapitreChoisi` : chapitre demandé explicitement (bouton « Carnet » d'un chapitre) — il ne suit
+   * pas un changement de classe. */
+  prerempli: { classeId: string; chapitre: string; date?: string; creneau?: Creneau | null; chapitreChoisi?: boolean }
   /** Grilles et cases de l'horaire ; `null` sans horaire (0003 absent ou aucune grille). */
   horaire?: { grilles: GrilleHoraire[]; cases: CaseHoraire[] } | null
   /** 0004 appliqué : le numéro 0 (« heure zéro ») est accepté par la base. */
   heureZero?: boolean
   occupe: boolean
-  onEnregistrer: (s: SaisieSeance) => void
+  /** Id du titre (`aria-labelledby` du panneau). */
+  titreId: string
+  /** Texte Smartschool de la saisie (même calcul que la copie d'une séance enregistrée). */
+  apercu: (s: SaisieSeance) => string
+  /** L'école de cette classe a une grille horaire (format « H2 (09h35 → 10h25) »). */
+  avecGrille: (classeId: string) => boolean
+  /** `copier` : « Enregistrer et copier pour Smartschool ». */
+  onEnregistrer: (s: SaisieSeance, copier: boolean) => void
   onAnnuler: () => void
 }) {
   const id = useId()
+  const formulaire = useRef<HTMLFormElement>(null)
   const dateDepart = initiale?.date_seance ?? prerempli.creneau?.date ?? prerempli.date ?? dateIso(new Date())
   // Créneaux de l'horaire ce jour-là, plus les heures zéro ponctuelles (sans classe), par heure de début.
   const creneauxDe = (d: string): Creneau[] =>
@@ -110,6 +130,10 @@ export function FormulaireSeance({
     [date, horaire],
   )
   const [chapitreCle, setChapitreCle] = useState(initiale ? `${initiale.niveau}/${initiale.chapitre}` : prerempli.chapitre)
+  const [chapitreTouche, setChapitreTouche] = useState(initiale !== null || prerempli.chapitreChoisi === true)
+  // Classe / date / créneau repliés derrière « changer » (dépliés d'office sans classe).
+  const [changer, setChanger] = useState(!classeId)
+  const [erreursAFocaliser, setErreursAFocaliser] = useState(0)
   const [niveau, chapitreSlug] = chapitreCle.split('/')
   const chapitre = niveau && chapitreSlug ? findChapter(niveau, chapitreSlug) : undefined
   const structure = useMemo(() => (chapitre ? structureChapitre(chapitre) : []), [chapitre])
@@ -190,15 +214,16 @@ export function FormulaireSeance({
       setFin(h.heure_fin ?? '')
       setNumero(h.numero_heure !== null ? String(h.numero_heure) : '')
     }
-    const c = classes.find((x) => x.id === nouvelle)
-    if (!chapitreCle && c?.niveau) {
-      const premier = LEVELS.find((l) => l.slug === c.niveau)?.chapters[0]
-      if (premier) changerChapitre(`${c.niveau}/${premier.slug}`)
+    // Chapitre pas encore choisi à la main et rien de coché : celui en cours de la nouvelle classe.
+    if (!chapitreTouche && coches.size === 0 && gens.size === 0) {
+      const propose = chapitreParDefaut(nouvelle, classes, seances)
+      if (propose && propose !== chapitreCle) changerChapitre(propose, false)
     }
   }
 
-  function changerChapitre(cle: string) {
+  function changerChapitre(cle: string, touche = true) {
     setChapitreCle(cle)
+    setChapitreTouche(touche)
     setCoches(new Set())
     setGens(new Set())
   }
@@ -211,9 +236,8 @@ export function FormulaireSeance({
     })
   }
 
-  function envoyer(e: FormEvent) {
-    e.preventDefault()
-    const saisie: SaisieSeance = {
+  function saisieCourante(): SaisieSeance {
+    return {
       classe_id: classeId,
       date_seance: date,
       heure_debut: debut || null,
@@ -227,247 +251,310 @@ export function FormulaireSeance({
       devoir,
       remarque,
     }
+  }
+
+  function envoyer(copier: boolean) {
+    const saisie = saisieCourante()
     const err = erreursSeance(saisie)
     setErreurs(err)
-    if (Object.keys(err).length === 0) onEnregistrer(saisie)
+    if (Object.keys(err).length === 0) {
+      onEnregistrer(saisie, copier)
+      return
+    }
+    // Classe, date ou horaire en erreur : déplier « changer » pour les montrer.
+    if (err.classe || err.date || err.horaire) setChanger(true)
+    setErreursAFocaliser((n) => n + 1)
   }
+
+  // Après une tentative refusée : focus sur le premier champ en erreur.
+  useEffect(() => {
+    if (erreursAFocaliser === 0) return
+    formulaire.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
+  }, [erreursAFocaliser])
 
   const niveauxOrdonnes = classe?.niveau ? [...LEVELS.filter((l) => l.slug === classe.niveau), ...LEVELS.filter((l) => l.slug !== classe.niveau)] : LEVELS
   const nbCochees = normaliserParties(coches, structure).length
   const nbGens = gens.size
+  const enCours = classeId ? chapitreEnCours(classeId, seances.filter((s) => s.id !== initiale?.id)) : ''
+  const saisie = saisieCourante()
+  const horaireResume = horaireTexte(
+    { heure_debut: saisie.heure_debut, heure_fin: saisie.heure_fin, numero_heure: saisie.numero_heure, numero_heure_fin: saisie.numero_heure_fin },
+    reglages.format_horaire,
+    classeId ? avecGrille(classeId) : false,
+  )
+  const dateValide = /^\d{4}-\d{2}-\d{2}$/.test(date)
+  const texteApercu = classe && chapitre && dateValide ? apercu(saisie) : null
 
   return (
-    <form className="carnet-form" onSubmit={envoyer} noValidate aria-labelledby={`${id}-titre`}>
-      <h3 id={`${id}-titre`}>{initiale ? `Modifier la séance du ${dateCourte(initiale.date_seance)}` : 'Nouvelle séance'}</h3>
-
-      <div className="carnet-grille">
-        <div className="compte-champ">
-          <label htmlFor={`${id}-classe`}>Classe</label>
-          <select id={`${id}-classe`} value={classeId} onChange={(e) => changerClasse(e.target.value)} aria-invalid={erreurs.classe ? true : undefined}>
-            <option value="">— choisir —</option>
-            {classes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nom}
-              </option>
-            ))}
-          </select>
-          {erreurs.classe && <p className="compte-erreur-champ">{erreurs.classe}</p>}
+    <form ref={formulaire} className="carnet-form-panneau" onSubmit={(e: FormEvent) => (e.preventDefault(), envoyer(false))} noValidate aria-labelledby={titreId}>
+      <div className="carnet-panneau-tete">
+        <div className="carnet-panneau-titres">
+          <h2 id={titreId}>{initiale ? 'Modifier la séance' : 'Noter une séance'}</h2>
+          <p className="carnet-panneau-resume">
+            <strong>{classe?.nom ?? 'Classe à choisir'}</strong>
+            {dateValide && <> · {dateLongue(date, true).replace(/ \d{4}$/, '')}</>}
+            {horaireResume && <> · {horaireResume}</>}
+            {' · '}
+            <button type="button" className="compte-bouton-lien carnet-lien-changer" aria-expanded={changer} aria-controls={`${id}-quand`} onClick={() => setChanger(!changer)}>
+              {changer ? 'masquer' : 'changer'}
+              <span className="carnet-sr"> la classe, la date ou l’heure</span>
+            </button>
+          </p>
         </div>
-        <div className="compte-champ">
-          <label htmlFor={`${id}-date`}>Date</label>
-          <input id={`${id}-date`} type="date" value={date} onChange={(e) => changerDate(e.target.value)} aria-invalid={erreurs.date ? true : undefined} />
-          {erreurs.date && <p className="compte-erreur-champ">{erreurs.date}</p>}
-        </div>
+        <button type="button" className="carnet-bouton carnet-fermer" aria-label="Fermer" onClick={onAnnuler}>
+          <span aria-hidden="true">×</span>
+        </button>
       </div>
 
-      {horaire && (
-        <div className="compte-champ">
-          <label htmlFor={`${id}-creneau`}>Créneau de l'horaire</label>
-          <select id={`${id}-creneau`} value={creneauCle} onChange={(e) => appliquerCreneau(creneauxDate.find((c) => cleCreneau(c) === e.target.value) ?? null)}>
-            {creneauxDate.map((c) => (
-              <option key={cleCreneau(c)} value={cleCreneau(c)}>
-                {libelleCreneau(c)} · {c.ponctuel ? 'heure zéro ponctuelle' : (classes.find((k) => k.id === c.classe_id)?.nom ?? 'classe')}
-              </option>
-            ))}
-            <option value="">Autre horaire (saisie libre)</option>
-          </select>
-          {creneauxDate.length === 0 && <p className="compte-aide">Aucun cours de ton horaire ce jour-là (week-end, congé ou jour sans cours) : horaire libre ci-dessous.</p>}
-          {creneauxDate.some((c) => c.ponctuel && cleCreneau(c) === creneauCle) && <p className="compte-aide">Heure zéro ponctuelle : vide dans ton horaire, pour la classe choisie ci-dessus.</p>}
-        </div>
-      )}
-
-      {horaire && creneauCle ? null : plage ? (
-        <fieldset className="carnet-fieldset">
-          <legend>Horaire</legend>
-          <div className="carnet-grille carnet-grille-heures">
+      <div className="carnet-panneau-corps">
+        <div id={`${id}-quand`} className="carnet-panneau-quand" hidden={!changer}>
+          <div className="carnet-grille">
             <div className="compte-champ">
-              <label htmlFor={`${id}-debut`}>Début</label>
-              <input
-                id={`${id}-debut`}
-                type="time"
-                value={debut}
-                onChange={(e) => {
-                  setHoraireTouche(true)
-                  if (horaire) {
-                    setNumero('')
-                    setNumeroFin('')
-                  }
-                  const ancien = minutesHeure(debut)
-                  const nouveau = minutesHeure(e.target.value)
-                  const finM = minutesHeure(fin)
-                  // La fin suit le début (même durée) tant qu'elle n'a pas été changée à la main.
-                  if (nouveau !== null && (finM === null || (ancien !== null && finM - ancien === reglages.duree_heure))) setFin(heureChamp(Math.min(nouveau + reglages.duree_heure, 1439)))
-                  setDebut(e.target.value)
-                }}
-                aria-invalid={erreurs.horaire ? true : undefined}
-              />
+              <label htmlFor={`${id}-classe`}>Classe</label>
+              <select id={`${id}-classe`} value={classeId} onChange={(e) => changerClasse(e.target.value)} aria-invalid={erreurs.classe ? true : undefined}>
+                <option value="">— choisir —</option>
+                {classes.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nom}
+                  </option>
+                ))}
+              </select>
+              {erreurs.classe && <p className="compte-erreur-champ">{erreurs.classe}</p>}
             </div>
-            <span className="carnet-fleche" aria-hidden="true">
-              →
-            </span>
             <div className="compte-champ">
-              <label htmlFor={`${id}-fin`}>Fin</label>
-              <input
-                id={`${id}-fin`}
-                type="time"
-                value={fin}
-                onChange={(e) => {
-                  setHoraireTouche(true)
-                  if (horaire) {
-                    setNumero('')
-                    setNumeroFin('')
-                  }
-                  setFin(e.target.value)
-                }}
-                aria-invalid={erreurs.horaire ? true : undefined}
-              />
+              <label htmlFor={`${id}-date`}>Date</label>
+              <input id={`${id}-date`} type="date" value={date} onChange={(e) => changerDate(e.target.value)} aria-invalid={erreurs.date ? true : undefined} />
+              {erreurs.date && <p className="compte-erreur-champ">{erreurs.date}</p>}
             </div>
           </div>
-          {erreurs.horaire && <p className="compte-erreur-champ">{erreurs.horaire}</p>}
-        </fieldset>
-      ) : (
+
+          {horaire && (
+            <div className="compte-champ">
+              <label htmlFor={`${id}-creneau`}>Créneau de l'horaire</label>
+              <select id={`${id}-creneau`} value={creneauCle} onChange={(e) => appliquerCreneau(creneauxDate.find((c) => cleCreneau(c) === e.target.value) ?? null)}>
+                {creneauxDate.map((c) => (
+                  <option key={cleCreneau(c)} value={cleCreneau(c)}>
+                    {libelleCreneau(c)} · {c.ponctuel ? 'heure zéro ponctuelle' : (classes.find((k) => k.id === c.classe_id)?.nom ?? 'classe')}
+                  </option>
+                ))}
+                <option value="">Autre horaire (saisie libre)</option>
+              </select>
+              {creneauxDate.length === 0 && <p className="compte-aide">Aucun cours de ton horaire ce jour-là (week-end, congé ou jour sans cours) : horaire libre ci-dessous.</p>}
+              {creneauxDate.some((c) => c.ponctuel && cleCreneau(c) === creneauCle) && <p className="compte-aide">Heure zéro ponctuelle : vide dans ton horaire, pour la classe choisie ci-dessus.</p>}
+            </div>
+          )}
+
+          {horaire && creneauCle ? null : plage ? (
+            <fieldset className="carnet-fieldset">
+              <legend>Horaire</legend>
+              <div className="carnet-grille carnet-grille-heures">
+                <div className="compte-champ">
+                  <label htmlFor={`${id}-debut`}>Début</label>
+                  <input
+                    id={`${id}-debut`}
+                    type="time"
+                    value={debut}
+                    onChange={(e) => {
+                      setHoraireTouche(true)
+                      if (horaire) {
+                        setNumero('')
+                        setNumeroFin('')
+                      }
+                      const ancien = minutesHeure(debut)
+                      const nouveau = minutesHeure(e.target.value)
+                      const finM = minutesHeure(fin)
+                      // La fin suit le début (même durée) tant qu'elle n'a pas été changée à la main.
+                      if (nouveau !== null && (finM === null || (ancien !== null && finM - ancien === reglages.duree_heure))) setFin(heureChamp(Math.min(nouveau + reglages.duree_heure, 1439)))
+                      setDebut(e.target.value)
+                    }}
+                    aria-invalid={erreurs.horaire ? true : undefined}
+                  />
+                </div>
+                <span className="carnet-fleche" aria-hidden="true">
+                  →
+                </span>
+                <div className="compte-champ">
+                  <label htmlFor={`${id}-fin`}>Fin</label>
+                  <input
+                    id={`${id}-fin`}
+                    type="time"
+                    value={fin}
+                    onChange={(e) => {
+                      setHoraireTouche(true)
+                      if (horaire) {
+                        setNumero('')
+                        setNumeroFin('')
+                      }
+                      setFin(e.target.value)
+                    }}
+                    aria-invalid={erreurs.horaire ? true : undefined}
+                  />
+                </div>
+              </div>
+              {erreurs.horaire && <p className="compte-erreur-champ">{erreurs.horaire}</p>}
+            </fieldset>
+          ) : (
+            <div className="compte-champ">
+              <label htmlFor={`${id}-numero`}>Heure de cours</label>
+              <select
+                id={`${id}-numero`}
+                value={numero}
+                onChange={(e) => {
+                  setHoraireTouche(true)
+                  setNumero(e.target.value)
+                  setNumeroFin('')
+                  if (horaire) {
+                    setDebut('')
+                    setFin('')
+                  }
+                }}
+                aria-invalid={erreurs.horaire ? true : undefined}
+              >
+                <option value="">— non précisée —</option>
+                {(heureZero || numero === '0') && <option value="0">{numeroHeureTexte(0)}</option>}
+                {Array.from({ length: NUMERO_HEURE_MAX }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={String(n)}>
+                    {numeroHeureTexte(n)}
+                  </option>
+                ))}
+              </select>
+              {erreurs.horaire && <p className="compte-erreur-champ">{erreurs.horaire}</p>}
+            </div>
+          )}
+        </div>
+
         <div className="compte-champ">
-          <label htmlFor={`${id}-numero`}>Heure de cours</label>
-          <select
-            id={`${id}-numero`}
-            value={numero}
-            onChange={(e) => {
-              setHoraireTouche(true)
-              setNumero(e.target.value)
-              setNumeroFin('')
-              if (horaire) {
-                setDebut('')
-                setFin('')
-              }
-            }}
-            aria-invalid={erreurs.horaire ? true : undefined}
-          >
-            <option value="">— non précisée —</option>
-            {(heureZero || numero === '0') && <option value="0">{numeroHeureTexte(0)}</option>}
-            {Array.from({ length: NUMERO_HEURE_MAX }, (_, i) => i + 1).map((n) => (
-              <option key={n} value={String(n)}>
-                {numeroHeureTexte(n)}
-              </option>
+          <label htmlFor={`${id}-chapitre`} className="carnet-etiquette">
+            Chapitre
+          </label>
+          <select id={`${id}-chapitre`} data-autofocus value={chapitreCle} onChange={(e) => changerChapitre(e.target.value)} aria-invalid={erreurs.chapitre ? true : undefined}>
+            <option value="">— choisir —</option>
+            {niveauxOrdonnes.map((l) => (
+              <optgroup key={l.slug} label={l.label}>
+                {l.chapters.map((c) => (
+                  <option key={c.slug} value={`${l.slug}/${c.slug}`}>
+                    {c.chapterNumber}. {c.title}
+                    {enCours === `${l.slug}/${c.slug}` ? ' (en cours)' : ''}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
-          {erreurs.horaire && <p className="compte-erreur-champ">{erreurs.horaire}</p>}
+          {erreurs.chapitre && <p className="compte-erreur-champ">{erreurs.chapitre}</p>}
         </div>
-      )}
 
-      <div className="compte-champ">
-        <label htmlFor={`${id}-chapitre`}>Chapitre</label>
-        <select id={`${id}-chapitre`} value={chapitreCle} onChange={(e) => changerChapitre(e.target.value)} aria-invalid={erreurs.chapitre ? true : undefined}>
-          <option value="">— choisir —</option>
-          {niveauxOrdonnes.map((l) => (
-            <optgroup key={l.slug} label={l.label}>
-              {l.chapters.map((c) => (
-                <option key={c.slug} value={`${l.slug}/${c.slug}`}>
-                  {c.chapterNumber}. {c.title}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
-        {erreurs.chapitre && <p className="compte-erreur-champ">{erreurs.chapitre}</p>}
-      </div>
-
-      {chapitre && (
-        <fieldset className="carnet-fieldset carnet-parties">
-          <legend>
-            Vu en classe <span className="compte-compte">({nbCochees} cochée{nbCochees > 1 ? 's' : ''})</span>
-          </legend>
-          <p className="compte-aide">Coche une section entière, ou seulement les sous-parties vues.</p>
-          {structure.map((section) => {
-            const unites = unitesSection(section)
-            const n = unites.filter((u) => coches.has(u)).length
-            const toutes = n === unites.length
-            const vuSection = section.sousParties.length === 0 ? dejaVu.get(section.id) : undefined
-            return (
-              <div className="carnet-section" key={section.id}>
-                <label className="carnet-case carnet-case-section">
-                  <input
-                    type="checkbox"
-                    checked={toutes}
-                    ref={(el) => {
-                      if (el) el.indeterminate = n > 0 && !toutes
-                    }}
-                    onChange={() => basculer(unites, !toutes)}
-                  />
-                  <span>
-                    {section.numero}. <RichText text={section.titre} />
-                    {vuSection && <span className="carnet-deja-vu"> · déjà vu le {dateCourte(vuSection)}</span>}
-                  </span>
-                </label>
-                {section.sousParties.length > 0 && (
-                  <div className="carnet-sous-parties">
-                    {section.sousParties.map((p) => (
-                      <label className="carnet-case" key={p.id}>
-                        <input type="checkbox" checked={coches.has(p.id)} onChange={(e) => basculer([p.id], e.target.checked)} />
-                        <span>
-                          <RichText text={p.titre} />
-                          {dejaVu.has(p.id) && <span className="carnet-deja-vu"> · déjà vu le {dateCourte(dejaVu.get(p.id) as string)}</span>}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </fieldset>
-      )}
-
-      {chapitre && generateurs.length > 0 && (
-        <details className="carnet-details" open={nbGens > 0}>
-          <summary>
-            Exercices et générateurs utilisés <span className="compte-compte">({nbGens})</span>
-          </summary>
-          <div className="carnet-sous-parties carnet-generateurs">
-            {generateurs.map((g) => {
-              const section = structure.find((s) => s.id === g.sectionId)
+        {chapitre && (
+          <fieldset className="carnet-fieldset carnet-parties">
+            <legend className="carnet-etiquette">
+              Ce qui a été vu <span className="compte-compte">({nbCochees} cochée{nbCochees > 1 ? 's' : ''})</span>
+            </legend>
+            <p className="compte-aide">Coche une section entière, ou seulement les sous-parties vues.</p>
+            {structure.map((section) => {
+              const unites = unitesSection(section)
+              const n = unites.filter((u) => coches.has(u)).length
+              const toutes = n === unites.length
+              const dates = unites.map((u) => dejaVu.get(u)).filter((d): d is string => d !== undefined).sort()
+              const vue = dates.length === unites.length
+              const etat = vue ? `vu le ${jourMois(dates[dates.length - 1])}` : dates.length > 0 ? `commencé le ${jourMois(dates[0])}` : null
               return (
-                <label className="carnet-case" key={g.id}>
-                  <input
-                    type="checkbox"
-                    checked={gens.has(g.id)}
-                    onChange={(e) =>
-                      setGens((avant) => {
-                        const s = new Set(avant)
-                        if (e.target.checked) s.add(g.id)
-                        else s.delete(g.id)
-                        return s
-                      })
-                    }
-                  />
-                  <span>
-                    {section ? `${section.numero}. ` : 'Synthèse · '}
-                    <RichText text={g.titre} />
-                  </span>
-                </label>
+                <div className={`carnet-section${vue ? ' vue' : dates.length > 0 ? ' commencee' : ''}`} key={section.id}>
+                  <label className="carnet-case carnet-case-section">
+                    <input
+                      type="checkbox"
+                      checked={toutes}
+                      ref={(el) => {
+                        if (el) el.indeterminate = n > 0 && !toutes
+                      }}
+                      onChange={() => basculer(unites, !toutes)}
+                    />
+                    <span className="carnet-case-texte">
+                      {section.numero}. <RichText text={section.titre} />
+                    </span>
+                    {etat && <span className="carnet-vu-le">{etat}</span>}
+                  </label>
+                  {section.sousParties.length > 0 && (
+                    <div className="carnet-sous-parties">
+                      {section.sousParties.map((p) => (
+                        <label className="carnet-case" key={p.id}>
+                          <input type="checkbox" checked={coches.has(p.id)} onChange={(e) => basculer([p.id], e.target.checked)} />
+                          <span className="carnet-case-texte">
+                            <RichText text={p.titre} />
+                          </span>
+                          {dejaVu.has(p.id) && <span className="carnet-vu-le">vu le {jourMois(dejaVu.get(p.id) as string)}</span>}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )
             })}
-          </div>
-        </details>
-      )}
+          </fieldset>
+        )}
 
-      <div className="compte-champ">
-        <label htmlFor={`${id}-devoir`}>Devoir</label>
-        <textarea id={`${id}-devoir`} rows={2} value={devoir} onChange={(e) => setDevoir(e.target.value)} aria-invalid={erreurs.devoir ? true : undefined} />
-        {erreurs.devoir && <p className="compte-erreur-champ">{erreurs.devoir}</p>}
-      </div>
-      <div className="compte-champ">
-        <label htmlFor={`${id}-remarque`}>Remarque (pour toi seulement)</label>
-        <textarea id={`${id}-remarque`} rows={2} value={remarque} onChange={(e) => setRemarque(e.target.value)} aria-invalid={erreurs.remarque ? true : undefined} />
-        <p className="compte-aide">Jamais copiée vers Smartschool. Aucune donnée d'élève.</p>
-        {erreurs.remarque && <p className="compte-erreur-champ">{erreurs.remarque}</p>}
+        {chapitre && generateurs.length > 0 && (
+          <details className="carnet-details" open={nbGens > 0}>
+            <summary>
+              Exercices faits en classe <span className="compte-compte">({nbGens} coché{nbGens > 1 ? 's' : ''})</span>
+            </summary>
+            <div className="carnet-sous-parties carnet-generateurs">
+              {generateurs.map((g) => {
+                const section = structure.find((s) => s.id === g.sectionId)
+                return (
+                  <label className="carnet-case" key={g.id}>
+                    <input
+                      type="checkbox"
+                      checked={gens.has(g.id)}
+                      onChange={(e) =>
+                        setGens((avant) => {
+                          const s = new Set(avant)
+                          if (e.target.checked) s.add(g.id)
+                          else s.delete(g.id)
+                          return s
+                        })
+                      }
+                    />
+                    <span>
+                      {section ? `${section.numero}. ` : 'Synthèse · '}
+                      <RichText text={g.titre} />
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+          </details>
+        )}
+
+        <div className="compte-champ">
+          <label htmlFor={`${id}-devoir`} className="carnet-etiquette">
+            Devoir
+          </label>
+          <textarea id={`${id}-devoir`} rows={2} value={devoir} onChange={(e) => setDevoir(e.target.value)} aria-invalid={erreurs.devoir ? true : undefined} />
+          {erreurs.devoir && <p className="compte-erreur-champ">{erreurs.devoir}</p>}
+        </div>
+        <div className="compte-champ">
+          <label htmlFor={`${id}-remarque`} className="carnet-etiquette">
+            Remarque (pour toi seulement)
+          </label>
+          <textarea id={`${id}-remarque`} rows={2} value={remarque} onChange={(e) => setRemarque(e.target.value)} aria-invalid={erreurs.remarque ? true : undefined} placeholder="Ex. : revoir ce point mardi" />
+          <p className="compte-aide">Jamais copiée vers Smartschool. Aucune donnée d'élève.</p>
+          {erreurs.remarque && <p className="compte-erreur-champ">{erreurs.remarque}</p>}
+        </div>
+
+        <section className="carnet-apercu-smartschool" aria-labelledby={`${id}-apercu`}>
+          <h3 id={`${id}-apercu`}>Aperçu pour Smartschool</h3>
+          {texteApercu ? <p className="carnet-apercu-texte">{texteApercu}</p> : <p className="compte-aide">Choisis la classe, la date et le chapitre pour voir le texte.</p>}
+        </section>
       </div>
 
-      <div className="compte-actions">
-        <button type="submit" className="compte-bouton" disabled={occupe}>
-          {initiale ? 'Enregistrer les modifications' : 'Enregistrer la séance'}
-        </button>
-        <button type="button" className="compte-bouton-secondaire" onClick={onAnnuler}>
+      <div className="carnet-panneau-pied">
+        <button type="button" className="carnet-bouton" onClick={onAnnuler}>
           Annuler
+        </button>
+        <button type="submit" className="carnet-bouton" disabled={occupe}>
+          Enregistrer
+        </button>
+        <button type="button" className="carnet-bouton principal" disabled={occupe} onClick={() => envoyer(true)}>
+          Enregistrer et copier pour Smartschool
         </button>
       </div>
     </form>

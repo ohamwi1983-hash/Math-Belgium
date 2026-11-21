@@ -221,7 +221,7 @@ function SemaineEcole({
   if (classes.length === 0) {
     return (
       <p className="compte-encadre" role="status">
-        Ajoute d'abord une classe rattachée à <strong>{ecole.nom}</strong> (« Gérer mes classes ») pour remplir l'horaire de la semaine.
+        Ajoute d'abord une classe rattachée à <strong>{ecole.nom}</strong> (« Mes classes » → « Ajouter une classe ») pour remplir l'horaire de la semaine.
       </p>
     )
   }
@@ -254,7 +254,7 @@ function SemaineEcole({
       <p className="compte-aide">Une classe par heure (« — » : pas de cours). Deux heures qui se suivent avec la même classe forment une heure double : une seule séance à noter.</p>
       {grille.heure_zero && (
         <p className="compte-aide">
-          H0 : choisis la classe si l'heure zéro est fixe ; laisse « — » si elle est ponctuelle (elle ne sera jamais comptée comme oubliée, et « Nouvelle séance » la propose quand même).
+          H0 : choisis la classe si l'heure zéro est fixe ; laisse « — » si elle est ponctuelle (elle ne sera jamais comptée comme oubliée, et « Noter une séance » la propose quand même).
         </p>
       )}
       {large ? (

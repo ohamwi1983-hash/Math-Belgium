@@ -1,40 +1,22 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { generatorLink } from '../../lib/generatorLink'
-import { dateLongue, htmlSmartschool, resoudreSeance, slugTitre, texteSmartschool, type Classe, type FormatHoraire, type Seance } from '../../lib/carnet'
+import { dateCourte, htmlSmartschool, slugTitre, texteSmartschool, type Classe, type Seance } from '../../lib/carnet'
 import { ficheSeanceHtml } from '../../lib/carnetFiche'
-import { copierTexte, ouvrirFiche, telechargerFiche } from './outilsCarnet'
+import { couleurClasse, resoudre, useCarnet } from './contexteCarnet'
+import { MenuActions } from './MenuActions'
+import { capitale, copierTexte, dateAbregee, ouvrirFiche, telechargerFiche } from './outilsCarnet'
 
-function capitale(t: string): string {
-  return t.charAt(0).toUpperCase() + t.slice(1)
-}
-
-/** Une séance de la liste : résumé, puis « Copier pour Smartschool », fiche imprimable,
- * modifier, supprimer. */
-export function CarteSeance({
-  seance,
-  classe,
-  format,
-  avecGrille = false,
-  ecole,
-  professeur,
-  occupe,
-  onModifier,
-  onSupprimer,
-}: {
-  seance: Seance
-  classe: Classe
-  format: FormatHoraire
-  /** L'école de la classe a une grille horaire : « H2 (09h35 → 10h25) ». */
-  avecGrille?: boolean
-  ecole: string
-  professeur: string
-  occupe: boolean
-  onModifier: () => void
-  onSupprimer: () => void
-}) {
+/**
+ * Actions d'une séance notée : UNE action principale, « Copier pour Smartschool » (texte + HTML
+ * riche, repli texte à copier à la main), et le menu « … » (fiche à imprimer / PDF, télécharger la
+ * fiche, modifier, supprimer). `menuSeul` : la copie passe aussi dans le menu (ligne compacte).
+ */
+export function ActionsSeance({ seance, menuSeul = false, avecOuvrir = false }: { seance: Seance; menuSeul?: boolean; avecOuvrir?: boolean }) {
+  const ctx = useCarnet()
   const [copie, setCopie] = useState<'ok' | 'echec' | null>(null)
-  const r = resoudreSeance(seance, classe, { format, ecole, lienGenerateur: generatorLink, avecGrille })
+  const classe = ctx.classes.find((c) => c.id === seance.classe_id)
+  if (!classe) return null
+  const r = resoudre(ctx, seance, classe)
   const texte = texteSmartschool(r)
   // Nom ASCII : un accent dans l'attribut `download` fait perdre le nom du fichier dans Chromium.
   const nomFiche = `seance-${slugTitre(classe.nom)}-${seance.date_seance}.html`
@@ -45,28 +27,101 @@ export function CarteSeance({
     if (ok) window.setTimeout(() => setCopie((c) => (c === 'ok' ? null : c)), 4000)
   }
 
+  const actions = [
+    ...(menuSeul ? [{ texte: 'Copier pour Smartschool', onChoisir: () => void copier() }] : []),
+    ...(avecOuvrir ? [{ texte: 'Ouvrir la séance', onChoisir: () => ctx.voir(seance) }] : []),
+    { texte: 'Fiche (imprimer, PDF)', onChoisir: () => ouvrirFiche(ficheSeanceHtml({ ...r, professeur: ctx.professeur })) },
+    { texte: 'Télécharger la fiche', onChoisir: () => telechargerFiche(ficheSeanceHtml({ ...r, professeur: ctx.professeur }), nomFiche) },
+    { texte: 'Modifier', onChoisir: () => ctx.modifier(seance), desactive: ctx.occupe },
+    { texte: 'Supprimer', onChoisir: () => ctx.supprimer(seance), danger: true, desactive: ctx.occupe },
+  ]
+
   return (
-    <li className="carnet-seance">
-      <div className="carnet-seance-tete">
-        <h4>
-          {capitale(dateLongue(seance.date_seance))}
-          {r.horaire && <span className="carnet-horaire"> · {r.horaire}</span>}
-        </h4>
-        {r.chapitre ? (
-          <p className="carnet-seance-chapitre">
-            <Link to={`/${seance.niveau}/${seance.chapitre}`}>
-              Ch. {r.chapitre.numero} — {r.chapitre.titre}
-            </Link>
-          </p>
-        ) : (
-          <p className="carnet-seance-chapitre">Chapitre retiré du site ({seance.chapitre})</p>
+    <div className="carnet-actions-seance">
+      <div className="carnet-actions-ligne">
+        {!menuSeul && (
+          <button type="button" className="carnet-bouton" onClick={() => void copier()}>
+            Copier pour Smartschool
+          </button>
         )}
+        <MenuActions libelle={`Autres actions — séance de ${classe.nom} du ${dateCourte(seance.date_seance)} : fiche, modifier, supprimer`} actions={actions} />
       </div>
+      {copie === 'ok' && (
+        <p className="compte-message carnet-copie" role="status">
+          Copié : colle-le dans Smartschool (journal de classe ou message).
+        </p>
+      )}
+      {copie === 'echec' && (
+        <div className="carnet-copie" role="status">
+          <p className="compte-aide">Copie automatique impossible sur cet appareil : sélectionne le texte ci-dessous et copie-le.</p>
+          <textarea className="carnet-texte-copie" readOnly rows={8} value={texte} onFocus={(e) => e.currentTarget.select()} aria-label="Texte pour Smartschool" />
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Pastille de couleur d'une classe (« 4Ge »). */
+export function PastilleClasse({ classe, petite = false }: { classe: Pick<Classe, 'id' | 'nom'> | undefined; petite?: boolean }) {
+  const { classes } = useCarnet()
+  return <span className={`carnet-pastille carnet-c${classe ? couleurClasse(classes, classe.id) : 5}${petite ? ' petite' : ''}`}>{classe?.nom ?? 'Classe supprimée'}</span>
+}
+
+/**
+ * Une séance du fil d'une classe (ou ouverte dans le panneau) : date et horaire, chapitre (lien vers
+ * le cours), sections vues (liens vers leurs ancres), exercices, devoir, remarque privée, puis les
+ * actions. `compacte` : une ligne (semaines plus anciennes), copie dans le menu « … ».
+ */
+export function CarteSeance({ seance, compacte = false, titreId }: { seance: Seance; compacte?: boolean; titreId?: string }) {
+  const ctx = useCarnet()
+  const classe = ctx.classes.find((c) => c.id === seance.classe_id)
+  if (!classe) return null
+  const r = resoudre(ctx, seance, classe)
+  const lienSection = (url: string) => `/${seance.niveau}/${seance.chapitre}#${url.split('#')[1]}`
+
+  if (compacte) {
+    return (
+      <article className="carnet-seance compacte" aria-label={`Séance du ${dateCourte(seance.date_seance)}`}>
+        <p className="carnet-seance-ligne">
+          <span className="carnet-date">{dateAbregee(seance.date_seance)}</span>
+          {r.horaire && <span className="carnet-horaire"> · {r.horaire}</span>}
+          {' · '}
+          {r.chapitre ? r.chapitre.titre : `Chapitre retiré du site (${seance.chapitre})`}
+          {r.parties.map((p) => (
+            <Link key={p.url + p.texte} className="carnet-sec" to={lienSection(p.url)}>
+              {p.texte}
+            </Link>
+          ))}
+        </p>
+        <ActionsSeance seance={seance} menuSeul />
+      </article>
+    )
+  }
+
+  return (
+    <article className="carnet-seance" aria-labelledby={titreId}>
+      <div className="carnet-seance-tete">
+        <h3 className="carnet-date" id={titreId}>
+          {capitale(dateAbregee(seance.date_seance))}
+          {r.horaire && <span className="carnet-horaire"> · {r.horaire}</span>}
+        </h3>
+      </div>
+      {r.chapitre ? (
+        <p className="carnet-seance-chapitre">
+          <Link to={`/${seance.niveau}/${seance.chapitre}`}>
+            Ch. {r.chapitre.numero} — {r.chapitre.titre}
+          </Link>
+        </p>
+      ) : (
+        <p className="carnet-seance-chapitre">Chapitre retiré du site ({seance.chapitre})</p>
+      )}
       {r.parties.length > 0 ? (
-        <ul className="carnet-seance-parties">
+        <ul className="carnet-secs" aria-label="Vu en classe">
           {r.parties.map((p) => (
             <li key={p.url + p.texte}>
-              <Link to={`/${seance.niveau}/${seance.chapitre}#${p.url.split('#')[1]}`}>{p.texte}</Link>
+              <Link className="carnet-sec" to={lienSection(p.url)}>
+                {p.texte}
+              </Link>
             </li>
           ))}
         </ul>
@@ -85,37 +140,10 @@ export function CarteSeance({
       )}
       {r.remarque && (
         <p className="carnet-seance-detail carnet-texte-libre carnet-remarque">
-          <strong>Remarque :</strong> {r.remarque}
+          <strong>Remarque (pour toi seulement) :</strong> {r.remarque}
         </p>
       )}
-      <div className="compte-actions carnet-seance-actions">
-        <button type="button" className="compte-bouton" onClick={() => void copier()}>
-          Copier pour Smartschool
-        </button>
-        <button type="button" className="compte-bouton-secondaire" onClick={() => ouvrirFiche(ficheSeanceHtml({ ...r, professeur }))}>
-          Fiche (imprimer, PDF)
-        </button>
-        <button type="button" className="compte-bouton-secondaire" onClick={() => telechargerFiche(ficheSeanceHtml({ ...r, professeur }), nomFiche)}>
-          Télécharger la fiche
-        </button>
-        <button type="button" className="compte-bouton-secondaire" disabled={occupe} onClick={onModifier}>
-          Modifier
-        </button>
-        <button type="button" className="compte-bouton-secondaire compte-danger" disabled={occupe} onClick={onSupprimer}>
-          Supprimer
-        </button>
-      </div>
-      {copie === 'ok' && (
-        <p className="compte-message carnet-copie" role="status">
-          Copié : colle-le dans Smartschool (journal de classe ou message).
-        </p>
-      )}
-      {copie === 'echec' && (
-        <div className="carnet-copie" role="status">
-          <p className="compte-aide">Copie automatique impossible sur cet appareil : sélectionne le texte ci-dessous et copie-le.</p>
-          <textarea className="carnet-texte-copie" readOnly rows={8} value={texte} onFocus={(e) => e.currentTarget.select()} aria-label="Texte pour Smartschool" />
-        </div>
-      )}
-    </li>
+      <ActionsSeance seance={seance} />
+    </article>
   )
 }
