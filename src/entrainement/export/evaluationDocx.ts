@@ -202,16 +202,41 @@ function enteteDocx(entete: EnteteEvaluation, items: ItemEvaluation[], suffixe?:
 }
 
 /** Encadré « Consignes » (même texte que la copie HTML). */
-function consignesDocx(entete: EnteteEvaluation, items: ItemEvaluation[]): Paragraph {
+async function consignesDocx(entete: EnteteEvaluation, items: ItemEvaluation[]): Promise<Paragraph[]> {
   const calculatrice = entete.calculatrice ? ` Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}.` : "";
   const duree = entete.afficherDuree ? ` Durée : ${dureeEstimeeMinutes(items)} minutes.` : "";
   const bord = { style: BorderStyle.SINGLE, size: 10, color: ACCENT, space: 4 } as const;
-  return new Paragraph({
-    children: [new TextRun({ text: "Consignes", bold: true, color: ACCENT, size: 20 }), new TextRun({ text: ` — ${TEXTE_CONSIGNES}${calculatrice}${duree}`, size: 20 })],
-    border: { top: bord, bottom: bord, left: bord, right: bord },
-    shading: { type: ShadingType.CLEAR, color: "auto", fill: "F2F7FC" },
-    spacing: { before: 160, after: 120 },
-  });
+  const sup = entete.consignesSupplementaires ?? [];
+  return [
+    new Paragraph({
+      children: [new TextRun({ text: "Consignes", bold: true, color: ACCENT, size: 20 }), new TextRun({ text: ` — ${TEXTE_CONSIGNES}${calculatrice}${duree}`, size: 20 })],
+      border: { top: bord, bottom: bord, left: bord, right: bord },
+      shading: { type: ShadingType.CLEAR, color: "auto", fill: "F2F7FC" },
+      spacing: { before: 160, after: sup.length ? 0 : 120 },
+    }),
+    ...(await pucesConsignesDocx(sup)),
+  ];
+}
+
+/** Puces des consignes supplémentaires, dans le même cadre que l'encadré « Consignes » (paragraphes
+ * au même cadre : Word les fusionne) — examen ET évaluation. */
+async function pucesConsignesDocx(lignes: string[]): Promise<Paragraph[]> {
+  const bord = { style: BorderStyle.SINGLE, size: 10, color: ACCENT, space: 4 } as const;
+  const cadre = { border: { top: bord, bottom: bord, left: bord, right: bord }, shading: { type: ShadingType.CLEAR, color: "auto", fill: "F2F7FC" } } as const;
+  const res: Paragraph[] = [];
+  for (let i = 0; i < lignes.length; i++) {
+    const derniere = i === lignes.length - 1;
+    res.push(
+      new Paragraph({
+        ...cadre,
+        children: [new TextRun({ text: "•\t", size: 20 }), ...(await fragmentsVersRunsDocx(fragmentsConsigne(lignes[i])))],
+        tabStops: [{ type: TabStopType.LEFT, position: 280 }],
+        indent: { left: 280, hanging: 280 },
+        spacing: { before: 20, after: derniere ? 120 : 0 },
+      }),
+    );
+  }
+  return res;
 }
 
 /** Bandeau d'un processus (« Processus 2 — Appliquer (8 pts) »). */
@@ -521,18 +546,7 @@ async function consignesExamenDocx(entete: EnteteEvaluation, examen: ExamenDocum
       spacing: { before: 160, after: examen.consignesSupplementaires.length ? 0 : 120 },
     }),
   ];
-  for (let i = 0; i < examen.consignesSupplementaires.length; i++) {
-    const derniere = i === examen.consignesSupplementaires.length - 1;
-    res.push(
-      new Paragraph({
-        ...cadre,
-        children: [new TextRun({ text: "•\t", size: 20 }), ...(await fragmentsVersRunsDocx(fragmentsConsigne(examen.consignesSupplementaires[i])))],
-        tabStops: [{ type: TabStopType.LEFT, position: 280 }],
-        indent: { left: 280, hanging: 280 },
-        spacing: { before: 20, after: derniere ? 120 : 0 },
-      }),
-    );
-  }
+  res.push(...(await pucesConsignesDocx(examen.consignesSupplementaires)));
   return res;
 }
 
@@ -652,7 +666,7 @@ export async function genererCopieEvaluationDocx(entete: EnteteEvaluation, items
   if (entete.calculatrice) {
     enfants.push(new Paragraph({ children: [new TextRun({ text: `Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}`, bold: true, color: entete.calculatrice === "interdite" ? ALERTE : BON })], spacing: { before: 120 } }));
   }
-  enfants.push(consignesDocx(entete, items));
+  enfants.push(...(await consignesDocx(entete, items)));
   enfants.push(...(await questionsDocx(entete, items, false)));
   return documentDocx(enfants, piedDocx(entete.serieLettre));
 }

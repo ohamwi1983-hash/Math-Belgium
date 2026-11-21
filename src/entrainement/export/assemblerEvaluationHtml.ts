@@ -136,6 +136,10 @@ export interface EnteteEvaluation {
    * exactement comme avant quand il est absent. Points des items DÉJÀ mis à l'échelle si le total
    * est fixé (`evaluationLocal.ts::itemsDuDocument`). */
   examen?: ExamenDocument;
+  /** Consignes supplémentaires d'une ÉVALUATION (une par ligne non vide, `$…$` en KaTeX), en puces
+   * dans l'encadré « Consignes » de la copie et de l'aménagée. Absent ou vide : copie identique à
+   * avant. L'examen garde les siennes dans `examen.consignesSupplementaires`. */
+  consignesSupplementaires?: string[];
 }
 
 /** Réglages d'un examen, déjà lus et mis en forme (`evaluationLocal.ts::examenDuPlan`). */
@@ -851,7 +855,23 @@ function classeLargeur(corpsHtml: string, deuxColonnes: boolean, seuil: number):
 function consignesHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
   const calculatrice = entete.calculatrice ? ` Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}.` : "";
   const duree = entete.afficherDuree ? ` Durée : ${dureeEstimeeMinutes(items)} minutes.` : "";
-  return `<div class="consignes"><b class="titre">Consignes</b> — ${echapperHtml(TEXTE_CONSIGNES)}${calculatrice}${duree}</div>`;
+  return `<div class="consignes"><b class="titre">Consignes</b> — ${echapperHtml(TEXTE_CONSIGNES)}${calculatrice}${duree}${consignesSupplementairesHtml(entete.consignesSupplementaires ?? [])}</div>`;
+}
+
+/** Une puce par consigne supplémentaire (texte échappé, `$…$` en KaTeX) — examen ET évaluation. */
+function consignesSupplementairesHtml(lignes: string[]): string {
+  return lignes.length ? `<ul class="sup">${lignes.map((l) => `<li>${fragmentsVersHtml(fragmentsConsigne(l))}</li>`).join("")}</ul>` : "";
+}
+
+/** CSS des puces de consignes supplémentaires d'une ÉVALUATION (l'examen les a dans `STYLE_EXAMEN`),
+ * ajoutée SEULEMENT quand il y en a : une copie sans consigne supplémentaire reste identique. */
+const STYLE_CONSIGNES_SUP = `
+.consignes ul.sup { margin: 3px 0 0; padding-left: 1.3em; }
+.consignes ul.sup li { margin: 1px 0; }
+`;
+
+function styleConsignesSup(entete: EnteteEvaluation): string {
+  return !entete.examen && entete.consignesSupplementaires?.length ? STYLE_CONSIGNES_SUP : "";
 }
 
 /** Texte de l'encadré « Consignes » (repris tel quel par la copie Word). */
@@ -1382,7 +1402,7 @@ export async function genererEvaluationHtml(entete: EnteteEvaluation, items: Ite
   const copie = enveloppeEvaluation(`${deuxColonnes ? `<div class="page-compacte">${contenuCopie}</div>` : contenuCopie}${annexesHtml(annexes)}`);
   const corrige = enveloppeEvaluation(`${cartoucheEvaluationHtml(entete, items, "Corrigé")}${questionsEvaluationHtml(entete, items, true)}`);
   const grille = grilleHtml(entete, items);
-  const cssCopie = `${stylePied(entete.serieLettre, "Archivo, Arial, sans-serif")}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}${styleGroupes(items)}`;
+  const cssCopie = `${stylePied(entete.serieLettre, "Archivo, Arial, sans-serif")}${deuxColonnes ? STYLE_DEUX_COLONNES : ""}${styleGroupes(items)}${styleConsignesSup(entete)}`;
   // Corrigé et grille : documents du professeur — « Série A » (sans « Nom ») et « page n / N ».
   const cssProfesseur = `${stylePied(entete.serieLettre, "Archivo, Arial, sans-serif", "8.5pt", false)}${styleGroupes(items)}`;
   return {
@@ -1501,9 +1521,7 @@ export function phraseHoraire(entete: EnteteEvaluation, examen: ExamenDocument, 
 
 function consignesExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[]): string {
   const calculatrice = entete.calculatrice ? ` Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}.` : "";
-  const sup = examen.consignesSupplementaires.length
-    ? `<ul class="sup">${examen.consignesSupplementaires.map((l) => `<li>${fragmentsVersHtml(fragmentsConsigne(l))}</li>`).join("")}</ul>`
-    : "";
+  const sup = consignesSupplementairesHtml(examen.consignesSupplementaires);
   return `<div class="consignes"><b class="titre">Consignes</b> — ${echapperHtml(TEXTE_CONSIGNES)}${calculatrice}${echapperHtml(phraseHoraire(entete, examen, items))}${sup}</div>`;
 }
 
@@ -1647,6 +1665,6 @@ ${estExercice ? "" : consignesHtml(entete, items)}`;
     .map(({ item, numero }, i) => `${i > 0 ? '<div class="saut-page"></div>' : ""}${i === 0 ? tete : ""}${questionAmenageeHtml(item, numero, estExercice)}`)
     .join("");
   const police = "'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif";
-  const doc = documentHtml(`${titre} — Version aménagée`, `${pages}${annexesHtml(annexes)}`, STYLE_AMENAGE, cssKatex, "amenagee", stylePied(estExercice ? null : entete.serieLettre, police, "10pt", true, estExercice ? professeurFeuille(entete) : "") + styleGroupes(items));
+  const doc = documentHtml(`${titre} — Version aménagée`, `${pages}${annexesHtml(annexes)}`, STYLE_AMENAGE, cssKatex, "amenagee", stylePied(estExercice ? null : entete.serieLettre, police, "10pt", true, estExercice ? professeurFeuille(entete) : "") + styleGroupes(items) + (estExercice ? "" : styleConsignesSup(entete)));
   return new Blob([doc], { type: "text/html;charset=utf-8" });
 }

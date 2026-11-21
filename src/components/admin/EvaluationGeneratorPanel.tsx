@@ -1055,7 +1055,10 @@ export function EvaluationGeneratorPanel({
             session: session.trim() || undefined,
             consignesSupplementaires: consignesSupplementaires.trim() ? consignesSupplementaires : undefined,
           }
-        : {}),
+        : // Évaluation : consignes supplémentaires seulement si saisies (sinon en-tête identique à avant).
+          !estExercice && consignesSupplementaires.trim()
+          ? { consignesSupplementaires }
+          : {}),
     }
     const chapitresPayload: ChapitreAvecSections[] = chapitres.map((c) => ({ chapitreSlug: c.slug, chapterNumber: c.chapterNumber, title: c.title, sections: c.sections, formulaire: c.formulaire }))
     const items = construireItemsPayload(entete, lignes, chapitresPayload)
@@ -1102,6 +1105,21 @@ export function EvaluationGeneratorPanel({
     setUrlGeneree(url)
     window.open(url, '_blank', 'noopener')
   }
+
+  /** « Consignes supplémentaires » (une par ligne, textes tels que saisis — tirets typographiques
+   * gardés, `$…$` en KaTeX) : examen ET évaluation, jamais en feuille d'exercices. */
+  const champConsignesSupplementaires = (exemple: string) => (
+    <div className="admin-eval-tf">
+      <label htmlFor="eval-consignes">Consignes supplémentaires (une par ligne)</label>
+      <textarea
+        id="eval-consignes"
+        rows={3}
+        value={consignesSupplementaires}
+        placeholder={`${exemple}\nFormules en $…$ : $\\sqrt{2}$`}
+        onChange={(e) => setConsignesSupplementaires(e.target.value)}
+      />
+    </div>
+  )
 
   return (
     <div className="admin-eval">
@@ -1430,16 +1448,14 @@ export function EvaluationGeneratorPanel({
             </p>
           )}
 
-          <div className="admin-eval-tf">
-            <label htmlFor="eval-consignes">Consignes supplémentaires (une par ligne)</label>
-            <textarea
-              id="eval-consignes"
-              rows={3}
-              value={consignesSupplementaires}
-              placeholder={'Commence chaque partie sur une nouvelle feuille.\nFormules en $…$ : $\\sqrt{2}$'}
-              onChange={(e) => setConsignesSupplementaires(e.target.value)}
-            />
-          </div>
+          {champConsignesSupplementaires('Commence chaque partie sur une nouvelle feuille.')}
+        </fieldset>
+      )}
+      {/* Évaluation : même champ, même place (le texte saisi est gardé en passant d'Examen à Évaluation). */}
+      {!estExercice && !estExamen && (
+        <fieldset className="admin-eval-examen">
+          <legend>Consignes de l'évaluation</legend>
+          {champConsignesSupplementaires('Écris au stylo bleu ou noir.')}
         </fieldset>
       )}
       {!estExercice && nombreSeries > 1 && (
