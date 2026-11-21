@@ -5267,3 +5267,22 @@ sur « modélisation » (θ de l'énoncé, pas l'angle du triangle bout à bout)
 gen83 « lecture » : titre papier « Composantes d'un vecteur » (`titrePapier`). Gen26 « paramètre »
 laissé tel quel (décision). Détail et mesures : `feuilles-evaluations.md`, entrée « 4e ch. 6
 (retouches) ».
+
+## 4e, chapitres 1–5, 7, 8 — champs du parcours (décision de l'utilisateur, 21/11/2026)
+
+`titreCourt`, `partie`, `essentiel`, `cartes` remplis pour les 7 autres chapitres de 4e sur le modèle
+du pilote `calcul-vectoriel.ts` (blocs du cours inchangés). Parties : ch. 1 « La parabole : la lire,
+la transformer » 1–2 / « S'en servir, puis réviser » 3–4 ; ch. 2 « Résoudre, puis étudier un signe »
+1–3 / « Quand x est au dénominateur » 4–6 / « En contexte, puis réviser » 7–8 ; ch. 3 « Lire et
+étudier une fonction » 1–2 / « Transformer, puis réviser » 3–4 ; ch. 4 « Organiser et représenter les
+données » 1–2 / « Moyenne, médiane, quartiles » 3–5 / « Mesurer la dispersion » 6–7 / « Comparer,
+puis réviser » 8–9 ; ch. 5 « Le cercle trigonométrique » 1–5 / « Les triangles quelconques » 6–8 ;
+ch. 7 « Écrire, lire et tracer une droite » 1–3 / « Deux droites : position et distance » 4–6 / « Lieux
+géométriques : cercle et parabole » 7–11 ; ch. 8 « Dessiner l'espace, positionner droites et plans »
+1–7 / « Constructions sur un solide » 8–9 / « Perspective centrale et ombres » 10–13. 57 sections, 57
+essentiels (141 phrases), 195 cartes ; révisions : essentiel = le quiz, cartes « détective » tirées des
+erreurs que la section liste (aucune au ch. 5, sans liste). Piège trouvé au rendu iPhone 13 : une
+formule longue d'un seul tenant (formule unifiée des 8 paramètres, égalité à deux membres) déborde de
+l'encadré et de la fiche — la couper en deux `$…$` (« g(u), avec u = … »). Vérifié : KaTeX strict sur
+tous les champs (0 erreur), étapes / fiche / 195 cartes retournées sans débordement, 0 erreur console,
+texte `pdftotext` des 7 PDF A4 identique avant / après.

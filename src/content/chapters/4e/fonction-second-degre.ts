@@ -1632,7 +1632,7 @@ export const fonctionSecondDegre: ChapterContent = {
         'Le quiz vrai/faux reprend tout le chapitre en 10 thèmes de 35 affirmations, dans l\'ordre des 3 parties : un seul essai par question, la justification est toujours donnée.',
       ],
       cartes: [
-        { question: 'Une copie écrit $2[(x-2)^2 - 4] + 3 = 2(x-2)^2 - 4 + 3$. Quelle est l\'erreur ?', reponse: 'Le $-4$ doit être multiplié par a : $2(x-2)^2 - 8 + 3 = 2(x-2)^2 - 5$.' },
+        { question: 'Une copie transforme $2[(x-2)^2 - 4] + 3$ en $2(x-2)^2 - 4 + 3$. Quelle est l\'erreur ?', reponse: 'Le $-4$ doit être multiplié par a : $2(x-2)^2 - 8 + 3 = 2(x-2)^2 - 5$.' },
         { question: 'Sommet $S(2\\,;\\,-5)$, $a > 0$ : une copie donne $\\operatorname{im} f = [2\\,;\\,{+\\infty}[$. Quelle est l\'erreur ?', reponse: 'Elle a pris l\'abscisse du sommet : l\'image est $[-5\\,;\\,{+\\infty}[$.' },
       ],
       blocks: [

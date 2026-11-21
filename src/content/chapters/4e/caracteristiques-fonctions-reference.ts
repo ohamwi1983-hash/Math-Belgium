@@ -870,7 +870,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       titreCourt: 'Transformer une fonction',
       partie: 'Transformer, puis réviser',
       essentiel: [
-        'Formule unifiée : $f(x) = SOX \\cdot \\dfrac{EV}{CV} \\cdot g\\left(SOY \\cdot \\dfrac{CH}{EH} \\cdot (x-TH)\\right) + TV$ ; TH est toujours soustrait, TV toujours ajouté.',
+        'Formule unifiée : $f(x) = SOX \\cdot \\dfrac{EV}{CV} \\cdot g(u) + TV$, avec $u = SOY \\cdot \\dfrac{CH}{EH} \\cdot (x-TH)$ ; TH est toujours soustrait, TV toujours ajouté.',
         '$f(2x)$ **comprime** la courbe horizontalement, de facteur $\\dfrac{1}{2}$ ; le point caractéristique est toujours en $x = TH$.',
         'Une transformation horizontale agit sur le domaine, une verticale sur l\'ensemble image ; une symétrie échange les bornes, et chaque crochet suit sa borne.',
       ],
