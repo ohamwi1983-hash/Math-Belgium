@@ -102,12 +102,16 @@ export function agendaPeriodeHtml(a: Agenda, options: OptionsSortieAgenda & { pr
     const contenu: string[] = []
     contenu.push(
       r.chapitre
-        ? `<p class="chapitre">${lienOuTexte(r.chapitre.url, `Ch. ${r.chapitre.numero} — ${r.chapitre.titre}`)}${plusieurs ? ` <span class="niveau">(${e(r.chapitre.niveau)})</span>` : ''}</p>`
+        ? `<p class="chapitre">${lienOuTexte(r.chapitre.url, `Ch. ${r.chapitre.numero} — ${r.chapitre.titre}`)}${plusieurs ? ` <span class="niveau">· ${e(r.chapitre.niveau)}</span>` : ''}</p>`
         : `<p class="chapitre">Chapitre retiré du site (${e(s.seance.chapitre)})</p>`,
     )
     contenu.push(r.parties.length > 0 ? `<ul>${r.parties.map((p) => `<li>${lienOuTexte(p.url, p.texte)}${url(p.url)}</li>`).join('')}</ul>` : '<p class="vide">Aucune partie cochée.</p>')
     if (r.generateurs.length > 0)
-      contenu.push(`<p class="detail"><strong>Exercices :</strong> ${r.generateurs.map((g) => `${lienOuTexte(g.url, g.titre)}${url(g.url)}`).join(options.liens ? '' : ' · ')}</p>`)
+      contenu.push(
+        options.liens
+          ? `<p class="detail"><strong>Exercices :</strong></p><ul class="exercices">${r.generateurs.map((g) => `<li>${lienOuTexte(g.url, g.titre)}${url(g.url)}</li>`).join('')}</ul>`
+          : `<p class="detail"><strong>Exercices :</strong> ${r.generateurs.map((g) => e(g.titre)).join(' · ')}</p>`,
+      )
     if (r.devoir) contenu.push(`<p class="detail"><strong>Devoir :</strong> ${texteLibre(r.devoir)}</p>`)
     if (options.remarques && r.remarque) contenu.push(`<p class="detail remarque"><strong>Remarque :</strong> ${texteLibre(r.remarque)}</p>`)
     return `<div class="seance${avecClasse ? ' avec-classe' : ''}">
@@ -163,7 +167,7 @@ export function agendaPeriodeHtml(a: Agenda, options: OptionsSortieAgenda & { pr
   html { background: #fff; color: #1d2433; }
   body { font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; font-size: 10.5pt; line-height: 1.4; width: 21cm; max-width: 100%; margin: 0 auto; padding: 1.4cm 1.6cm; }
   @media print { body { width: auto; padding: 0; } .pied-ecran { display: none; } * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
-  a { color: inherit; }
+  a { color: inherit; text-decoration: none; }
   header { border-bottom: 2px solid #1d2433; padding-bottom: 0.3cm; margin-bottom: 0.35cm; }
   .surtitre { font-size: 9pt; color: #4a5468; margin: 0 0 0.1cm; }
   h1 { font-size: 16pt; margin: 0; line-height: 1.2; }
@@ -186,7 +190,7 @@ export function agendaPeriodeHtml(a: Agenda, options: OptionsSortieAgenda & { pr
   ul { margin: 0.04cm 0 0; padding-left: 0.5cm; }
   li { margin: 0 0 0.03cm; overflow-wrap: anywhere; }
   .lien { display: block; font-size: 7.5pt; color: #4a5468; overflow-wrap: anywhere; }
-  .detail .lien { display: inline; margin: 0 0.25cm 0 0.12cm; }
+  .exercices { font-size: 10pt; }
   p { margin: 0; overflow-wrap: anywhere; }
   .detail { margin-top: 0.04cm; font-size: 10pt; }
   .remarque { color: #4a5468; }

@@ -340,11 +340,10 @@ export function horaireTexte(s: Pick<Seance, 'heure_debut' | 'heure_fin' | 'nume
 }
 
 /** Nombre d'heures de cours d'une séance (agenda, synthèse) : heure double « H1–H2 » = 2 (numéros) ;
- * sans numéro de fin, une plage plus longue qu'une heure compte d'après `dureeHeure` (arrondi, au
- * moins 1) ; sinon 1. */
+ * sans numéro de fin (saisie libre, ou 0003 pas appliqué), une plage plus longue qu'une heure compte
+ * d'après `dureeHeure` (arrondi, au moins 1 : 08h45 → 10h25 avec des heures de 50 min = 2) ; sinon 1. */
 export function heuresSeance(s: Pick<Seance, 'heure_debut' | 'heure_fin' | 'numero_heure' | 'numero_heure_fin'>, dureeHeure: number): number {
   if (aNumero(s.numero_heure) && aNumero(s.numero_heure_fin) && s.numero_heure_fin > s.numero_heure) return s.numero_heure_fin - s.numero_heure + 1
-  if (aNumero(s.numero_heure)) return 1
   const d = minutesHeure(s.heure_debut)
   const f = minutesHeure(s.heure_fin)
   if (d !== null && f !== null && f > d && dureeHeure > 0) return Math.max(1, Math.round((f - d) / dureeHeure))

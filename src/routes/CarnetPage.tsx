@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { PageCompte, PageReservee } from '../components/compte/PageReservee'
+import { AgendaPeriode } from '../components/carnet/AgendaPeriode'
 import { Aujourdhui } from '../components/carnet/Aujourdhui'
 import { CarteSeance } from '../components/carnet/CarteSeance'
 import { EvaluationMatiere } from '../components/carnet/EvaluationMatiere'
@@ -274,7 +275,7 @@ function Carnet() {
   return (
     <div className="compte-sections carnet">
       <p className="compte-intro">
-        Note ce qui a été vu dans chaque classe : sections et sous-parties du cours, exercices, devoir. Copie le résumé pour Smartschool, imprime une fiche, suis la progression et crée une
+        Note ce qui a été vu dans chaque classe : sections et sous-parties du cours, exercices, devoir. Copie le résumé pour Smartschool, imprime une fiche ou l'agenda complet d'une période, suis la progression et crée une
         évaluation sur la matière vue. Aucune donnée d'élève n'est enregistrée.
       </p>
       {(message || erreur) && (
@@ -420,6 +421,18 @@ function Carnet() {
               {seancesClasse.length > 0 && <EvaluationMatiere key={classe.id} classe={classe} seances={seancesClasse} />}
             </section>
           )}
+
+          <AgendaPeriode
+            classes={donnees.classes}
+            seances={donnees.seances}
+            ecoles={ecoles}
+            grilles={horaire.actif ? horaire.grilles : []}
+            format={reglages.format_horaire}
+            dureeHeure={reglages.duree_heure}
+            professeur={profil.nom_affiche}
+            classeActive={classe?.id ?? null}
+            maintenant={maintenant}
+          />
         </>
       )}
 
