@@ -312,6 +312,8 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
       },
     ],
   },
+  // gen93 : « On donne les points A(…), B(…) [et C(…) | et la droite d ≡ …]. » + consigne de la variante.
+  gen93: { formes: [{ motif: re(String.raw`On donne les points (?<ligne>.+)\.\n(?<q>Détermine une équation du cercle .+)`), consigne: dansChaqueCas }] },
   gen11: {
     formes: [{ motif: re(String.raw`On considère la fonction (?<ligne>${M})\.\nDétermine la forme canonique de la fonction(?<s>.*)`), consigne: (g) => `Détermine la forme canonique de chaque fonction${g.s}` }],
   },

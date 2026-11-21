@@ -1321,6 +1321,28 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           ],
           result: { tag: 'comparaison', text: '$CH^2=20>18=r^2$, donc $CH>r$ : d est extérieure à Γ, aucun point commun' },
         },
+        { kind: 'subheading', text: 'Pour aller plus loin — déterminer un cercle par des conditions' },
+        {
+          kind: 'methode',
+          label: 'Méthode — trouver d\'abord le centre Ω, puis le rayon',
+          items: [
+            '**Diamètre [AB]** : Ω est le milieu de [AB] et $r=\\dfrac{AB}{2}=\\Omega A$.',
+            '**Trois points A, B, C** : Ω est à égale distance des trois points, donc sur la médiatrice de [AB] et sur celle de [BC] (section 7). Ω est l\'intersection de ces deux médiatrices.',
+            '**Deux points A, B et un centre sur une droite d** : Ω est l\'intersection de d et de la médiatrice de [AB].',
+            'La médiatrice de [AB] passe par le milieu M de [AB] et a pour vecteur normal $\\vec{AB}$ : $a(x-x_M)+b(y-y_M)=0$. Le rayon vaut ensuite $r=\\Omega A$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'cercle passant par trois points',
+          formula: 'Équation du cercle qui passe par A(4 ; 5), B(−2 ; 5) et C(6 ; 1).',
+          steps: [
+            { tag: 'médiatrice de [AB]', text: 'milieu (1 ; 5), vecteur normal $\\vec{AB}\\begin{pmatrix} -6 \\\\ 0 \\end{pmatrix}$ : $-6(x-1)=0$, soit $x=1$' },
+            { tag: 'médiatrice de [AC]', text: 'milieu (5 ; 3), vecteur normal $\\vec{AC}\\begin{pmatrix} 2 \\\\ -4 \\end{pmatrix}$ : $2(x-5)-4(y-3)=0 \\to x-2y+1=0$' },
+            { tag: 'centre Ω', text: '$x=1 \\to 1-2y+1=0 \\to y=1$ : Ω(1 ; 1)' },
+          ],
+          result: { tag: 'cercle', text: '$r=\\Omega A=\\sqrt{3^2+4^2}=5$ → $(x-1)^2+(y-1)^2=25$' },
+        },
         {
           kind: 'atelier',
           tag: 'cercle-equation-widget',
@@ -1402,6 +1424,14 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           description: ["Écris la tangente en un point du cercle. Décide si une droite est extérieure, tangente ou sécante à un cercle en comparant la distance du centre au rayon. Ou trouve le cercle de centre donné tangent à une droite."],
           chantier: '4e',
           whereLabel: "4e → « 92. Tangente et position relative d'une droite et d'un cercle »",
+        },
+        {
+          kind: 'entrainement',
+          title: 'Déterminer un cercle par des conditions',
+          generatorId: 'gen93',
+          description: ['Trouve l\'équation d\'un cercle à partir de son diamètre, de trois de ses points (médiatrices), ou de deux de ses points et d\'une droite qui porte son centre.'],
+          chantier: '4e',
+          whereLabel: '4e → « 93. Déterminer un cercle par des conditions »',
         },
       ],
     },

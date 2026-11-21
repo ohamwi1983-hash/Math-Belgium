@@ -227,14 +227,14 @@ export function lignesIntersection(d1: Droite, d2: Droite, sol: Pt, nom = "I"): 
       const A = dj.a + dj.b * m;
       const B = dj.b * p + dj.c;
       if (dj.b !== 0) {
-        const sub = `${somme([[dj.a, "x"]])}${coefSuite(dj.b)}(${expr})${plusQ(dj.c)}`;
+        const sub = m === 0 ? `${somme([[dj.a, "x"]])}${dj.b < 0 ? "-" : "+"}${Math.abs(dj.b) === 1 ? qp(p) : `${q(Math.abs(dj.b))}\\cdot ${qp(p)}`}${plusQ(dj.c)}` : `${somme([[dj.a, "x"]])}${coefSuite(dj.b)}(${expr})${plusQ(dj.c)}`;
         L.push(ligne(`${dj.a === 0 ? `${coefTete(dj.b)}(${expr})${plusQ(dj.c)}` : sub}=0`, `on remplace y dans (${choix.eq === 1 ? 2 : 1})`));
         L.push(ligne(`${somme([[A, "x"], [B, ""]])}=0`, "on développe et on réduit"));
       } else {
         L.push(ligne(`${somme([[A, "x"], [B, ""]])}=0`, `(${choix.eq === 1 ? 2 : 1}) ne contient pas y`));
       }
       L.push(ligne(`x_${indice}=${q(sol.x)}`));
-      L.push(ligne(`y_${indice}=${substX(m, p, sol.x)}=${q(sol.y)}`, "on remplace x"));
+      L.push(ligne(m === 0 || sol.x === 0 ? `y_${indice}=${q(sol.y)}` : `y_${indice}=${substX(m, p, sol.x)}=${q(sol.y)}`, "on remplace x"));
     } else {
       const m = -di.b / di.a;
       const p = -di.c / di.a;
@@ -246,14 +246,14 @@ export function lignesIntersection(d1: Droite, d2: Droite, sol: Pt, nom = "I"): 
       const A = dj.b + dj.a * m;
       const B = dj.a * p + dj.c;
       if (dj.a !== 0) {
-        const sub = `${coefTete(dj.a)}(${expr})${dj.b === 0 ? "" : dj.b > 0 ? `+${mono1(dj.b, "y")}` : `-${mono1(-dj.b, "y")}`}${plusQ(dj.c)}`;
+        const sub = `${m === 0 ? `${dj.a === 1 ? "" : dj.a === -1 ? "-" : `${q(dj.a)}\\cdot `}${qp(p)}` : `${coefTete(dj.a)}(${expr})`}${dj.b === 0 ? "" : dj.b > 0 ? `+${mono1(dj.b, "y")}` : `-${mono1(-dj.b, "y")}`}${plusQ(dj.c)}`;
         L.push(ligne(`${sub}=0`, `on remplace x dans (${choix.eq === 1 ? 2 : 1})`));
         L.push(ligne(`${somme([[A, "y"], [B, ""]])}=0`, "on développe et on réduit"));
       } else {
         L.push(ligne(`${somme([[A, "y"], [B, ""]])}=0`, `(${choix.eq === 1 ? 2 : 1}) ne contient pas x`));
       }
       L.push(ligne(`y_${indice}=${q(sol.y)}`));
-      L.push(ligne(`x_${indice}=${substX(m, p, sol.y)}=${q(sol.x)}`, "on remplace y"));
+      L.push(ligne(m === 0 || sol.y === 0 ? `x_${indice}=${q(sol.x)}` : `x_${indice}=${substX(m, p, sol.y)}=${q(sol.x)}`, "on remplace y"));
     }
     return dedoublonner(L);
   }
@@ -291,12 +291,29 @@ function substX(m: number, p: number, v: number): string {
 
 /** Les deux équations numérotées d'un système, en lignes (affichage). */
 export function lignesSysteme(d1: Droite, d2: Droite, j1: string, j2: string): LigneCalcul[] {
-  return [ligne(`(1)\\;\\;${droiteLatex(d1)}`, j1), ligne(`(2)\\;\\;${droiteLatex(d2)}`, j2)];
+  return [ligne(`\\text{(1)}\\;\\;${droiteLatex(d1)}`, j1), ligne(`\\text{(2)}\\;\\;${droiteLatex(d2)}`, j2)];
 }
 
 /** « r=\sqrt{n}=… » */
 export function rayonLatex(r2: number): string {
   return `r=${racineDetaillee(r2)}`;
+}
+
+/** Équation du cercle de centre c et de rayon √r2 : substitution, rayon élevé au carré. */
+export function lignesEquationCercle(c: Pt, r2: number): LigneCalcul[] {
+  const r = Math.sqrt(r2);
+  const membre = `${carreLatex(c.x, "x")}+${carreLatex(c.y, "y")}`;
+  return dedoublonner([
+    ligne(`${membre}=${Number.isInteger(r) ? `${q(r)}^2` : `\\left(${racine(r2)}\\right)^2`}`, `centre (${nb(c.x)} ; ${nb(c.y)}), rayon r`),
+    ligne(`${membre}=${q(r2)}`, "on élève le rayon au carré"),
+  ]);
+}
+
+/** Vérification « le point P est sur le cercle » : (x_P − x₀)² + (y_P − y₀)² = r². */
+export function lignesPointSurCercle(c: Pt, r2: number, p: Pt, nomPoint: string): LigneCalcul[] {
+  const carre = (v: number, c0: number) => (c0 === 0 ? (v < 0 ? `(${q(v)})^2` : `${q(v)}^2`) : `(${q(v)}${c0 < 0 ? `+${q(-c0)}` : `-${q(c0)}`})^2`);
+  const val = (p.x - c.x) ** 2 + (p.y - c.y) ** 2;
+  return [ligne(`${carre(p.x, c.x)}+${carre(p.y, c.y)}=${q(val)}`, Math.abs(val - r2) < 1e-9 ? `${nomPoint} vérifie l'équation : il est sur le cercle` : `${nomPoint} ne vérifie pas l'équation`)];
 }
 
 export { racine };
