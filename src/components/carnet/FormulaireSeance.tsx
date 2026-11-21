@@ -21,12 +21,19 @@ import {
   type SaisieSeance,
   type Seance,
 } from '../../lib/carnet'
+import { champHeure, creneauPropose, creneauxDuJour, libelleCreneau, type CaseHoraire, type Creneau, type GrilleHoraire } from '../../lib/horaire'
+
+const cleCreneau = (c: Pick<Creneau, 'ecole_id' | 'heureDebut'>) => `${c.ecole_id}|${c.heureDebut}`
 
 /**
  * Saisie d'une séance : classe, date, horaire (plage « 08h50 → 09h40 » ou numéro d'heure, selon le
  * réglage), chapitre puis sections / sous-parties cochées (une case de section coche toutes ses
  * sous-parties), générateurs utilisés, devoir, remarque. Aucun champ numérique libre (règle
  * CLAUDE.md) : date et heures en `type="date"` / `type="time"`, numéro d'heure en liste.
+ *
+ * Avec un horaire (0003 + grille) : liste « Créneau de l'horaire » des créneaux du jour choisi
+ * (« H2 (09h35 → 10h25) · 4Ge ») ; en choisir un règle classe, numéro(s) d'heure et plage ensemble
+ * (heure double comprise). « Autre horaire » garde la saisie libre d'avant.
  */
 export function FormulaireSeance({
   classes,
@@ -34,6 +41,7 @@ export function FormulaireSeance({
   reglages,
   initiale,
   prerempli,
+  horaire = null,
   occupe,
   onEnregistrer,
   onAnnuler,
@@ -42,26 +50,53 @@ export function FormulaireSeance({
   seances: Seance[]
   reglages: ReglagesCarnet
   initiale: Seance | null
-  prerempli: { classeId: string; chapitre: string }
+  prerempli: { classeId: string; chapitre: string; date?: string; creneau?: Creneau | null }
+  /** Grilles et cases de l'horaire ; `null` sans horaire (0003 absent ou aucune grille). */
+  horaire?: { grilles: GrilleHoraire[]; cases: CaseHoraire[] } | null
   occupe: boolean
   onEnregistrer: (s: SaisieSeance) => void
   onAnnuler: () => void
 }) {
   const id = useId()
-  const [classeId, setClasseId] = useState(initiale?.classe_id ?? prerempli.classeId)
-  const [date, setDate] = useState(initiale?.date_seance ?? dateIso(new Date()))
+  const dateDepart = initiale?.date_seance ?? prerempli.creneau?.date ?? prerempli.date ?? dateIso(new Date())
+  const creneauxDe = (d: string) => (horaire && /^\d{4}-\d{2}-\d{2}$/.test(d) ? creneauxDuJour(d, horaire.grilles, horaire.cases).creneaux : [])
+  // Créneau de départ : celui demandé ; pour une séance existante, celui qui commence à son heure ;
+  // sinon le créneau en cours (ou le plus proche) de la classe ce jour-là.
+  const creneauDepart = useMemo<Creneau | null>(() => {
+    const liste = creneauxDe(dateDepart)
+    if (prerempli.creneau && !initiale) return liste.find((c) => cleCreneau(c) === cleCreneau(prerempli.creneau as Creneau)) ?? null
+    if (initiale) return liste.find((c) => c.classe_id === initiale.classe_id && c.heureDebut === initiale.numero_heure) ?? null
+    const maintenant = new Date()
+    const idem = dateDepart === dateIso(maintenant)
+    return creneauPropose(
+      liste.filter((c) => c.classe_id === prerempli.classeId),
+      idem ? maintenant.getHours() * 60 + maintenant.getMinutes() : 0,
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- valeur de départ seulement
+  }, [])
+  const [classeId, setClasseId] = useState(initiale?.classe_id ?? creneauDepart?.classe_id ?? prerempli.classeId)
+  const [date, setDate] = useState(dateDepart)
   const horaireInitial = useMemo(
     () =>
       initiale
-        ? { heure_debut: initiale.heure_debut, heure_fin: initiale.heure_fin, numero_heure: initiale.numero_heure }
-        : horaireParDefaut(new Date(), reglages.duree_heure, seances.filter((s) => s.classe_id === prerempli.classeId)),
+        ? { heure_debut: initiale.heure_debut, heure_fin: initiale.heure_fin, numero_heure: initiale.numero_heure, numero_heure_fin: initiale.numero_heure_fin ?? null }
+        : creneauDepart
+          ? { heure_debut: champHeure(creneauDepart.debut), heure_fin: champHeure(creneauDepart.fin), numero_heure: creneauDepart.heureDebut, numero_heure_fin: creneauDepart.heureFin > creneauDepart.heureDebut ? creneauDepart.heureFin : null }
+          : { ...horaireParDefaut(new Date(), reglages.duree_heure, seances.filter((s) => s.classe_id === prerempli.classeId), dateDepart), numero_heure_fin: null },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- valeur de départ seulement
     [],
   )
   const [debut, setDebut] = useState(horaireInitial.heure_debut ? heureChamp(minutesHeure(horaireInitial.heure_debut) ?? 0) : '')
   const [fin, setFin] = useState(horaireInitial.heure_fin ? heureChamp(minutesHeure(horaireInitial.heure_fin) ?? 0) : '')
   const [numero, setNumero] = useState(horaireInitial.numero_heure ? String(horaireInitial.numero_heure) : '')
+  const [numeroFin, setNumeroFin] = useState(horaireInitial.numero_heure_fin ? String(horaireInitial.numero_heure_fin) : '')
+  const [creneauCle, setCreneauCle] = useState(creneauDepart ? cleCreneau(creneauDepart) : '')
   const [horaireTouche, setHoraireTouche] = useState(initiale !== null)
+  const creneauxDate = useMemo(
+    () => creneauxDe(date),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `horaire` change avec les données
+    [date, horaire],
+  )
   const [chapitreCle, setChapitreCle] = useState(initiale ? `${initiale.niveau}/${initiale.chapitre}` : prerempli.chapitre)
   const [niveau, chapitreSlug] = chapitreCle.split('/')
   const chapitre = niveau && chapitreSlug ? findChapter(niveau, chapitreSlug) : undefined
@@ -87,9 +122,49 @@ export function FormulaireSeance({
     return m
   }, [seances, classeId, initiale?.id, chapitre, structure])
 
+  function appliquerCreneau(c: Creneau | null) {
+    setCreneauCle(c ? cleCreneau(c) : '')
+    if (!c) return
+    setClasseId(c.classe_id)
+    setDebut(champHeure(c.debut))
+    setFin(champHeure(c.fin))
+    setNumero(String(c.heureDebut))
+    setNumeroFin(c.heureFin > c.heureDebut ? String(c.heureFin) : '')
+    setHoraireTouche(true)
+  }
+
+  function changerDate(nouvelle: string) {
+    setDate(nouvelle)
+    if (!horaire) return
+    const liste = creneauxDe(nouvelle).filter((c) => c.classe_id === classeId)
+    const actuel = creneauxDate.find((c) => cleCreneau(c) === creneauCle)
+    // Même classe ce jour-là : le créneau qui commence à la même heure, sinon le premier.
+    const suivant = liste.find((c) => actuel && c.heureDebut === actuel.heureDebut) ?? liste[0] ?? null
+    if (suivant) appliquerCreneau(suivant)
+    else if (creneauCle) {
+      setCreneauCle('')
+      setNumero('')
+      setNumeroFin('')
+    }
+  }
+
   function changerClasse(nouvelle: string) {
     setClasseId(nouvelle)
-    if (!horaireTouche && !initiale) {
+    if (horaire) {
+      const actuel = creneauxDate.find((c) => cleCreneau(c) === creneauCle)
+      const liste = creneauxDate.filter((c) => c.classe_id === nouvelle)
+      const suivant = liste.find((c) => actuel && c.heureDebut === actuel.heureDebut) ?? liste[0] ?? null
+      if (suivant) appliquerCreneau(suivant)
+      else if (creneauCle) {
+        // Le numéro d'heure du créneau quitté ne vaut pas pour cette classe.
+        setCreneauCle('')
+        setNumero('')
+        setNumeroFin('')
+      }
+    }
+    // Avec un créneau de l'horaire pour cette classe, ses heures priment sur l'horaire « par défaut ».
+    const creneauTrouve = horaire !== null && creneauxDate.some((c) => c.classe_id === nouvelle)
+    if (!horaireTouche && !initiale && !creneauTrouve) {
       const h = horaireParDefaut(new Date(), reglages.duree_heure, seances.filter((s) => s.classe_id === nouvelle), date)
       setDebut(h.heure_debut ?? '')
       setFin(h.heure_fin ?? '')
@@ -124,6 +199,7 @@ export function FormulaireSeance({
       heure_debut: debut || null,
       heure_fin: debut ? fin || null : null,
       numero_heure: numero ? Number(numero) : null,
+      numero_heure_fin: numero && numeroFin ? Number(numeroFin) : null,
       niveau: chapitre?.levelSlug ?? '',
       chapitre: chapitre?.slug ?? '',
       parties: normaliserParties(coches, structure),
@@ -159,12 +235,27 @@ export function FormulaireSeance({
         </div>
         <div className="compte-champ">
           <label htmlFor={`${id}-date`}>Date</label>
-          <input id={`${id}-date`} type="date" value={date} onChange={(e) => setDate(e.target.value)} aria-invalid={erreurs.date ? true : undefined} />
+          <input id={`${id}-date`} type="date" value={date} onChange={(e) => changerDate(e.target.value)} aria-invalid={erreurs.date ? true : undefined} />
           {erreurs.date && <p className="compte-erreur-champ">{erreurs.date}</p>}
         </div>
       </div>
 
-      {plage ? (
+      {horaire && (
+        <div className="compte-champ">
+          <label htmlFor={`${id}-creneau`}>Créneau de l'horaire</label>
+          <select id={`${id}-creneau`} value={creneauCle} onChange={(e) => appliquerCreneau(creneauxDate.find((c) => cleCreneau(c) === e.target.value) ?? null)}>
+            {creneauxDate.map((c) => (
+              <option key={cleCreneau(c)} value={cleCreneau(c)}>
+                {libelleCreneau(c)} · {classes.find((k) => k.id === c.classe_id)?.nom ?? 'classe'}
+              </option>
+            ))}
+            <option value="">Autre horaire (saisie libre)</option>
+          </select>
+          {creneauxDate.length === 0 && <p className="compte-aide">Aucun cours de ton horaire ce jour-là (week-end, congé ou jour sans cours) : horaire libre ci-dessous.</p>}
+        </div>
+      )}
+
+      {horaire && creneauCle ? null : plage ? (
         <fieldset className="carnet-fieldset">
           <legend>Horaire</legend>
           <div className="carnet-grille carnet-grille-heures">
@@ -176,6 +267,10 @@ export function FormulaireSeance({
                 value={debut}
                 onChange={(e) => {
                   setHoraireTouche(true)
+                  if (horaire) {
+                    setNumero('')
+                    setNumeroFin('')
+                  }
                   const ancien = minutesHeure(debut)
                   const nouveau = minutesHeure(e.target.value)
                   const finM = minutesHeure(fin)
@@ -197,6 +292,10 @@ export function FormulaireSeance({
                 value={fin}
                 onChange={(e) => {
                   setHoraireTouche(true)
+                  if (horaire) {
+                    setNumero('')
+                    setNumeroFin('')
+                  }
                   setFin(e.target.value)
                 }}
                 aria-invalid={erreurs.horaire ? true : undefined}
@@ -214,6 +313,11 @@ export function FormulaireSeance({
             onChange={(e) => {
               setHoraireTouche(true)
               setNumero(e.target.value)
+              setNumeroFin('')
+              if (horaire) {
+                setDebut('')
+                setFin('')
+              }
             }}
             aria-invalid={erreurs.horaire ? true : undefined}
           >

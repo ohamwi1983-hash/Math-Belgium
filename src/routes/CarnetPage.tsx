@@ -1,17 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { PageCompte, PageReservee } from '../components/compte/PageReservee'
+import { Aujourdhui } from '../components/carnet/Aujourdhui'
 import { CarteSeance } from '../components/carnet/CarteSeance'
 import { EvaluationMatiere } from '../components/carnet/EvaluationMatiere'
 import { FormulaireSeance } from '../components/carnet/FormulaireSeance'
 import { GestionClasses } from '../components/carnet/GestionClasses'
+import { MessageHoraireInactif, MonHoraire } from '../components/carnet/MonHoraire'
+import { Planification } from '../components/carnet/Planification'
 import { ProgressionClasse } from '../components/carnet/ProgressionClasse'
 import { lireClasseMemorisee, memoriserClasse } from '../components/carnet/outilsCarnet'
 import { findChapter, LEVELS } from '../content/chaptersIndex'
-import { type Classe, type ReglagesCarnet, type SaisieSeance, type Seance } from '../lib/carnet'
+import { dateIso, type Classe, type ReglagesCarnet, type SaisieSeance, type Seance } from '../lib/carnet'
 import {
   ajouterClasse,
   ajouterSeance,
+  chargerHoraire,
+  definirCase,
+  enregistrerGrille,
   enregistrerReglages,
   ErreurCarnet,
   lireReglages,
@@ -20,16 +26,21 @@ import {
   modifierClasse,
   modifierSeance,
   supprimerClasse,
+  supprimerGrille,
   supprimerSeance,
+  type DonneesHoraire,
 } from '../lib/carnetDonnees'
+import { creneauPropose, creneauxDuJour, type Creneau } from '../lib/horaire'
 import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { messageErreur } from '../lib/compteValidation'
 
 const DUREES = [40, 45, 50, 55, 60, 90, 100, 110]
 
 /** `/carnet` — carnet de matière vue (phase 2 des comptes) : classes, séances, progression,
- * évaluation sur la matière vue. `?chapitre=<niveau>/<chapitre>` (bouton « Noter dans le carnet »
- * d'une page de cours) ouvre une nouvelle séance sur ce chapitre. */
+ * évaluation sur la matière vue ; avec 0003, horaire de la semaine (vue « Aujourd'hui », séances
+ * oubliées, heures restantes, séance pré-remplie sur le créneau en cours ou le plus proche).
+ * `?chapitre=<niveau>/<chapitre>` (bouton « Carnet » d'une page de cours) ouvre une nouvelle séance
+ * sur ce chapitre. */
 export function CarnetPage() {
   return (
     <PageCompte titre="Carnet de matière vue">
@@ -45,9 +56,10 @@ interface Donnees {
   seances: Seance[]
   reglages: ReglagesCarnet
   reglagesExiste: boolean
+  horaire: DonneesHoraire
 }
 
-type Formulaire = { mode: 'nouveau'; chapitre: string } | { mode: 'modifier'; seance: Seance }
+type Formulaire = { mode: 'nouveau'; chapitre: string; creneau?: Creneau | null } | { mode: 'modifier'; seance: Seance }
 
 function MessageCarnetInactif() {
   return (
@@ -77,12 +89,27 @@ function Carnet() {
   const [erreur, setErreur] = useState<string | null>(null)
   const [occupe, setOccupe] = useState(false)
   const zoneFormulaire = useRef<HTMLDivElement>(null)
+  // Heure courante (créneau en cours, oubliées, heures restantes), rafraîchie chaque minute.
+  const [maintenant, setMaintenant] = useState(() => new Date())
+  // « Mon horaire » ouvert d'office tant que l'horaire n'est pas rempli (fixé au premier chargement).
+  const [horaireOuvert, setHoraireOuvert] = useState(false)
+  const horaireOuvertFixe = useRef(false)
+  useEffect(() => {
+    const t = window.setInterval(() => setMaintenant(new Date()), 60_000)
+    return () => window.clearInterval(t)
+  }, [])
 
   const charger = useCallback(async () => {
     if (!client) return
     try {
-      const [classes, seances, r] = await Promise.all([listerClasses(client), listerSeances(client), lireReglages(client)])
-      setDonnees({ classes, seances, reglages: r.reglages, reglagesExiste: r.existe })
+      // L'horaire (0003) d'abord : il dit si `seances.numero_heure_fin` existe.
+      const [classes, r, horaire] = await Promise.all([listerClasses(client), lireReglages(client), chargerHoraire(client)])
+      const seances = await listerSeances(client, horaire.actif)
+      setDonnees({ classes, seances, reglages: r.reglages, reglagesExiste: r.existe, horaire })
+      if (!horaireOuvertFixe.current) {
+        horaireOuvertFixe.current = true
+        setHoraireOuvert(horaire.actif && !horaire.grilles.some((g) => horaire.cases.some((c) => c.ecole_id === g.ecole_id)))
+      }
       setAbsent(false)
       setErreurChargement(null)
     } catch (ex) {
@@ -113,6 +140,18 @@ function Carnet() {
     suivant.delete('chapitre')
     setParams(suivant, { replace: true })
     if (!niveau || !slug || !findChapter(niveau, slug) || donnees.classes.length === 0) return
+    // Avec un horaire : le créneau en cours (ou le plus proche) d'aujourd'hui, de préférence d'une
+    // classe du niveau du chapitre.
+    const h = donnees.horaire
+    const maintenantCourant = new Date()
+    const creneaux = h.actif ? creneauxDuJour(dateIso(maintenantCourant), h.grilles, h.cases).creneaux : []
+    const niveauDe = (classeIdCreneau: string) => donnees.classes.find((c) => c.id === classeIdCreneau)?.niveau
+    const creneau = creneauPropose(creneaux, maintenantCourant.getHours() * 60 + maintenantCourant.getMinutes(), (c) => niveauDe(c.classe_id) === niveau)
+    if (creneau) {
+      setClasseId(creneau.classe_id)
+      setFormulaire({ mode: 'nouveau', chapitre: `${niveau}/${slug}`, creneau })
+      return
+    }
     const memeNiveau = donnees.classes.filter((c) => c.niveau === niveau)
     if (memeNiveau.length > 0 && !memeNiveau.some((c) => c.id === classeId)) setClasseId(memeNiveau[0].id)
     setFormulaire({ mode: 'nouveau', chapitre: `${niveau}/${slug}` })
@@ -149,6 +188,10 @@ function Carnet() {
 
   const { profil, ecoles } = compte
   const reglages = donnees.reglages
+  const horaire = donnees.horaire
+  // Horaire utilisable par le formulaire : 0003 appliqué et au moins une grille.
+  const horaireFormulaire = horaire.actif && horaire.grilles.length > 0 ? { grilles: horaire.grilles, cases: horaire.cases } : null
+  const horaireRempli = horaire.actif && horaire.grilles.some((g) => horaire.cases.some((c) => c.ecole_id === g.ecole_id))
 
   async function agir(action: () => Promise<unknown>, succes: string): Promise<boolean> {
     setOccupe(true)
@@ -177,7 +220,11 @@ function Carnet() {
   async function enregistrerSeance(s: SaisieSeance) {
     const f = formulaire
     if (!f || !client) return
-    const ok = await agir(() => (f.mode === 'modifier' ? modifierSeance(client, f.seance.id, s) : ajouterSeance(client, s)), f.mode === 'modifier' ? 'Séance modifiée.' : 'Séance enregistrée.')
+    const actif = donnees?.horaire.actif ?? false
+    const ok = await agir(
+      () => (f.mode === 'modifier' ? modifierSeance(client, f.seance.id, s, actif) : ajouterSeance(client, s, actif)),
+      f.mode === 'modifier' ? 'Séance modifiée.' : 'Séance enregistrée.',
+    )
     if (ok) {
       setFormulaire(null)
       if (s.classe_id !== classeId) choisirClasse(s.classe_id)
@@ -192,14 +239,36 @@ function Carnet() {
     await agir(() => enregistrerReglages(client, r, existe, profil.id), 'Réglage enregistré.')
   }
 
-  const prerempli = formulaire?.mode === 'nouveau' ? { classeId: classe?.id ?? '', chapitre: formulaire.chapitre } : { classeId: classe?.id ?? '', chapitre: '' }
+  const prerempli =
+    formulaire?.mode === 'nouveau'
+      ? { classeId: formulaire.creneau?.classe_id ?? classe?.id ?? '', chapitre: formulaire.chapitre, creneau: formulaire.creneau ?? null }
+      : { classeId: classe?.id ?? '', chapitre: '' }
   const ecoleClasse = classe ? (ecoles.find((e) => e.id === classe.ecole_id)?.nom ?? '') : ''
+  const classeAvecGrille = classe ? horaire.grilles.some((g) => g.ecole_id === classe.ecole_id) : false
 
-  function chapitreParDefaut(): string {
-    const derniere = seancesClasse[0]
+  /** Chapitre proposé pour une nouvelle séance d'une classe : celui de sa dernière séance, sinon le
+   * premier de son niveau. */
+  function chapitreParDefaut(id: string | undefined = classe?.id): string {
+    const k = donnees?.classes.find((c) => c.id === id)
+    const derniere = donnees?.seances.filter((s) => s.classe_id === id).sort((a, b) => (a.date_seance < b.date_seance ? 1 : a.date_seance > b.date_seance ? -1 : a.cree_le < b.cree_le ? 1 : -1))[0]
     if (derniere && findChapter(derniere.niveau, derniere.chapitre)) return `${derniere.niveau}/${derniere.chapitre}`
-    const premier = classe?.niveau ? LEVELS.find((l) => l.slug === classe.niveau)?.chapters[0] : undefined
-    return premier && classe?.niveau ? `${classe.niveau}/${premier.slug}` : ''
+    const premier = k?.niveau ? LEVELS.find((l) => l.slug === k.niveau)?.chapters[0] : undefined
+    return premier && k?.niveau ? `${k.niveau}/${premier.slug}` : ''
+  }
+
+  /** « Noter la séance » d'un créneau (vue Aujourd'hui, oubliées). */
+  function noterCreneau(c: Creneau) {
+    setClasseId(c.classe_id)
+    memoriserClasse(c.classe_id)
+    setVue('seances')
+    setFormulaire({ mode: 'nouveau', chapitre: chapitreParDefaut(c.classe_id), creneau: c })
+  }
+
+  function voirSeance(s: Seance) {
+    setClasseId(s.classe_id)
+    memoriserClasse(s.classe_id)
+    setVue('seances')
+    setFormulaire({ mode: 'modifier', seance: s })
   }
 
   return (
@@ -237,6 +306,18 @@ function Carnet() {
         </section>
       ) : (
         <>
+          {horaireRempli && (
+            <Aujourdhui
+              grilles={horaire.grilles}
+              cases={horaire.cases}
+              seances={donnees.seances}
+              classes={donnees.classes}
+              ecoles={ecoles}
+              maintenant={maintenant}
+              onNoter={noterCreneau}
+              onVoir={voirSeance}
+            />
+          )}
           <section className="compte-section" aria-labelledby="carnet-classes">
             <h2 id="carnet-classes">Mes classes</h2>
             <div className="carnet-onglets-classes" role="tablist" aria-label="Classe">
@@ -281,12 +362,17 @@ function Carnet() {
               <div ref={zoneFormulaire}>
                 {formulaire && (
                   <FormulaireSeance
-                    key={formulaire.mode === 'modifier' ? formulaire.seance.id : `nouveau-${formulaire.chapitre}-${classe.id}`}
+                    key={
+                      formulaire.mode === 'modifier'
+                        ? formulaire.seance.id
+                        : `nouveau-${formulaire.chapitre}-${classe.id}-${formulaire.creneau ? `${formulaire.creneau.date}-${formulaire.creneau.ecole_id}-${formulaire.creneau.heureDebut}` : ''}`
+                    }
                     classes={donnees.classes}
                     seances={donnees.seances}
                     reglages={reglages}
                     initiale={formulaire.mode === 'modifier' ? formulaire.seance : null}
                     prerempli={prerempli}
+                    horaire={horaireFormulaire}
                     occupe={occupe}
                     onEnregistrer={(s) => void enregistrerSeance(s)}
                     onAnnuler={() => setFormulaire(null)}
@@ -314,6 +400,7 @@ function Carnet() {
                         seance={s}
                         classe={classe}
                         format={reglages.format_horaire}
+                        avecGrille={classeAvecGrille}
                         ecole={ecoleClasse}
                         professeur={profil.nom_affiche}
                         occupe={occupe}
@@ -334,6 +421,38 @@ function Carnet() {
           )}
         </>
       )}
+
+      {ecoles.length > 0 && donnees.classes.length > 0 && (
+        <section className="compte-section" aria-labelledby="carnet-horaire">
+          <h2 id="carnet-horaire">Mon horaire</h2>
+          {!horaire.actif ? (
+            <MessageHoraireInactif />
+          ) : (
+            <details className="carnet-details carnet-horaire-details" open={horaireOuvert} onToggle={(e) => setHoraireOuvert(e.currentTarget.open)}>
+              <summary>{horaireRempli ? "Grille de l'école et horaire de la semaine" : 'Remplir mon horaire'}</summary>
+              {!horaireRempli && (
+                <p className="compte-intro">
+                  Remplis ton horaire de la semaine : le carnet te proposera alors la séance du créneau en cours, te rappellera les séances oubliées et comptera les heures restantes
+                  avec chaque classe (congés de la Fédération Wallonie-Bruxelles exclus).
+                </p>
+              )}
+              {client && (
+                <MonHoraire
+                  horaire={horaire}
+                  ecoles={ecoles}
+                  classes={donnees.classes}
+                  occupe={occupe}
+                  onEnregistrerGrille={(ecoleId, g, existe, hors) => agir(() => enregistrerGrille(client, ecoleId, g, existe, hors), 'Grille horaire enregistrée.')}
+                  onSupprimerGrille={(ecoleId) => void agir(() => supprimerGrille(client, ecoleId), 'Grille et horaire de cette école retirés.')}
+                  onDefinirCase={(existante, saisie) => agir(() => definirCase(client, existante, saisie), 'Horaire enregistré.')}
+                />
+              )}
+            </details>
+          )}
+        </section>
+      )}
+
+      {horaireRempli && <Planification grilles={horaire.grilles} cases={horaire.cases} classes={donnees.classes} maintenant={maintenant} />}
 
       <section className="compte-section" aria-labelledby="carnet-reglages">
         <h2 id="carnet-reglages">Réglages</h2>
@@ -359,7 +478,10 @@ function Carnet() {
               </select>
             </div>
           )}
-          <p className="compte-aide">Mémorisé dans ton compte. Les séances déjà notées gardent leurs deux écritures quand elles les ont.</p>
+          <p className="compte-aide">
+            Mémorisé dans ton compte. Les séances déjà notées gardent leurs deux écritures quand elles les ont. Avec une grille horaire, les séances notées depuis l'horaire
+            affichent le numéro et la plage ensemble : « H2 (09h35 → 10h25) ».
+          </p>
         </fieldset>
       </section>
     </div>

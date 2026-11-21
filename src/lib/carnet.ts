@@ -47,6 +47,8 @@ export interface Seance {
   heure_debut: string | null
   heure_fin: string | null
   numero_heure: number | null
+  /** Dernière heure d'une heure double (« H1–H2 » : 1 et 2) ; absente si 0003 n'est pas appliqué. */
+  numero_heure_fin?: number | null
   niveau: string
   chapitre: string
   parties: string[]
@@ -58,7 +60,7 @@ export interface Seance {
 }
 
 /** Ce que le formulaire envoie (sans id ni dates techniques). */
-export type SaisieSeance = Pick<Seance, 'classe_id' | 'date_seance' | 'heure_debut' | 'heure_fin' | 'numero_heure' | 'niveau' | 'chapitre' | 'parties' | 'generateurs' | 'devoir' | 'remarque'>
+export type SaisieSeance = Pick<Seance, 'classe_id' | 'date_seance' | 'heure_debut' | 'heure_fin' | 'numero_heure' | 'numero_heure_fin' | 'niveau' | 'chapitre' | 'parties' | 'generateurs' | 'devoir' | 'remarque'>
 
 /* ------------------------------------------------------------------------------- textes */
 
@@ -302,9 +304,10 @@ export function heureChamp(minutes: number): string {
   return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
 }
 
-/** « 1re heure », « 3e heure ». */
-export function numeroHeureTexte(n: number): string {
-  return `${n}${n === 1 ? 're' : 'e'} heure`
+/** « 1re heure », « 3e heure » ; avec `fin` (heure double) : « 1re–2e heures ». */
+export function numeroHeureTexte(n: number, fin?: number | null): string {
+  const ordinal = (k: number) => `${k}${k === 1 ? 're' : 'e'}`
+  return fin && fin > n ? `${ordinal(n)}–${ordinal(fin)} heures` : `${ordinal(n)} heure`
 }
 
 /** Plage « 08h50 → 09h40 » (même typographie que l'examen), « 08h50 » sans fin, `null` sans début. */
@@ -315,10 +318,16 @@ export function plageTexte(debut: string | null, fin: string | null): string | n
   return f === null ? heureTexte(d) : `${heureTexte(d)} → ${heureTexte(f)}`
 }
 
-/** Horaire d'une séance selon le format préféré ; l'autre écriture sert de repli. */
-export function horaireTexte(s: Pick<Seance, 'heure_debut' | 'heure_fin' | 'numero_heure'>, format: FormatHoraire): string | null {
+/** Horaire d'une séance selon le format préféré ; l'autre écriture sert de repli. `avecGrille`
+ * (l'école de la classe a une grille horaire, 0003) : numéro ET plage ensemble, « H2 (09h35 → 10h25) »,
+ * « H1–H2 (08h45 → 10h25) », dès que la séance a les deux. */
+export function horaireTexte(s: Pick<Seance, 'heure_debut' | 'heure_fin' | 'numero_heure' | 'numero_heure_fin'>, format: FormatHoraire, avecGrille = false): string | null {
   const plage = plageTexte(s.heure_debut, s.heure_fin)
-  const numero = s.numero_heure ? numeroHeureTexte(s.numero_heure) : null
+  if (avecGrille && s.numero_heure && plage) {
+    const fin = s.numero_heure_fin && s.numero_heure_fin > s.numero_heure ? s.numero_heure_fin : null
+    return `${fin ? `H${s.numero_heure}–H${fin}` : `H${s.numero_heure}`} (${plage})`
+  }
+  const numero = s.numero_heure ? numeroHeureTexte(s.numero_heure, s.numero_heure_fin) : null
   return format === 'numero' ? (numero ?? plage) : (plage ?? numero)
 }
 
@@ -370,6 +379,8 @@ export function erreursSeance(s: SaisieSeance): ErreursSeance {
   else if (fin !== null && debut === null) e.horaire = 'Indique aussi l’heure de début.'
   else if (fin !== null && debut !== null && fin <= debut) e.horaire = 'L’heure de fin doit suivre l’heure de début.'
   if (s.numero_heure !== null && (s.numero_heure < 1 || s.numero_heure > NUMERO_HEURE_MAX)) e.horaire = `Numéro d’heure : de 1 à ${NUMERO_HEURE_MAX}.`
+  const nFin = s.numero_heure_fin ?? null
+  if (nFin !== null && (s.numero_heure === null || nFin <= s.numero_heure || nFin > NUMERO_HEURE_MAX)) e.horaire = 'Heure double : la dernière heure doit suivre la première.'
   if (!s.niveau || !s.chapitre) e.chapitre = 'Choisis le chapitre.'
   if (s.devoir.length > DEVOIR_MAX) e.devoir = `Devoir trop long : ${DEVOIR_MAX} caractères maximum.`
   if (s.remarque.length > REMARQUE_MAX) e.remarque = `Remarque trop longue : ${REMARQUE_MAX} caractères maximum.`
@@ -395,7 +406,7 @@ export interface SeanceResolue {
 export function resoudreSeance(
   seance: Seance,
   classe: Pick<Classe, 'nom'>,
-  options: { format: FormatHoraire; ecole?: string; lienGenerateur?: (chantier: string, id: string) => string },
+  options: { format: FormatHoraire; ecole?: string; lienGenerateur?: (chantier: string, id: string) => string; avecGrille?: boolean },
 ): SeanceResolue {
   const chapitre = findChapter(seance.niveau, seance.chapitre)
   const base = `${SITE_URL}/${seance.niveau}/${seance.chapitre}`
@@ -408,7 +419,7 @@ export function resoudreSeance(
     : seance.generateurs.map((id) => ({ titre: id, url: '' }))
   return {
     date: seance.date_seance,
-    horaire: horaireTexte(seance, options.format),
+    horaire: horaireTexte(seance, options.format, options.avecGrille ?? false),
     classe: classe.nom.trim(),
     ecole: options.ecole?.trim() ?? '',
     chapitre: chapitre ? { numero: chapitre.chapterNumber, titre: texteBrut(chapitre.title), niveau: chapitre.level, url: base } : null,

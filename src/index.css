@@ -1863,3 +1863,85 @@ table.feature-table td { white-space: normal; }
 .lecture-entete.avec-carnet .lecture-outils { margin-left: auto; }
 /* Bandeau du panneau des évaluations ouvert depuis le carnet (`?matiere=`). */
 .admin-eval-carnet { margin: 0 0 16px; padding: 12px 14px; border: 1px solid var(--accent-soft-line); border-radius: var(--radius); background: var(--accent-soft); color: var(--accent-ink); font-size: 0.95rem; }
+
+/* ---------- horaire de la semaine du carnet (0003) ----------
+ * Grille d'école + aperçu calculé, tableau jours × heures (écran large) ou un jour à la fois
+ * (téléphone), vue « Aujourd'hui », oubliées, heures restantes. Mêmes jetons clair / sombre. */
+.carnet-champ-moyen { max-width: 340px; }
+.carnet-champ-date { max-width: 220px; }
+.carnet-champ-date input[type="date"] {
+  font: inherit; font-size: 16px; padding: 10px 12px; min-height: 46px; width: 100%; max-width: 100%;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+}
+.carnet-champ-date input[type="date"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.carnet-pauses { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.carnet-pause { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 8px 10px; align-items: end; padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
+.carnet-pause-retirer { min-height: 46px; }
+@media (max-width: 480px) {
+  .carnet-pause { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.carnet-apercu-journee { padding: 12px 14px; border-radius: var(--radius); background: var(--surface-2); border: 1px solid var(--line); }
+.carnet-apercu-journee h4 { margin: 0 0 6px; font-size: 1rem; }
+.carnet-journee { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.carnet-journee-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; min-height: 40px; border-top: 1px solid var(--line); }
+.carnet-journee > li:first-child > .carnet-journee-ligne:first-child { border-top: 0; }
+.carnet-journee-num { font-weight: 700; min-width: 3.2em; }
+.carnet-journee-plage { font-family: var(--mono); font-size: 0.9rem; }
+.carnet-journee-corriger { margin-left: auto; min-height: 40px; }
+.carnet-journee-pause { color: var(--ink-soft); font-style: italic; background: var(--accent-soft); margin: 0 -14px; padding: 0 14px; }
+.carnet-journee-pause .carnet-journee-num { font-weight: 600; min-width: 5.5em; }
+.carnet-journee-ligne.corrigee .carnet-journee-plage { color: var(--accent-ink); font-weight: 700; }
+.carnet-journee-fin { margin: 8px 0 0; font-size: 0.92rem; }
+.carnet-correction { margin: 4px 0 10px; padding: 10px 12px; border: 1px dashed var(--accent-soft-line); border-radius: var(--radius); background: var(--surface); display: flex; flex-direction: column; gap: 8px; }
+.carnet-correction input[type="time"] {
+  font: inherit; font-size: 16px; padding: 10px 12px; min-height: 46px; width: 100%;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+}
+.carnet-mon-horaire { display: flex; flex-direction: column; gap: 16px; }
+.carnet-horaire-details[open] > summary { margin-bottom: 8px; }
+.carnet-conflits ul { margin: 6px 0 0; padding-left: 20px; }
+.carnet-grille-resume { display: flex; flex-direction: column; gap: 10px; }
+.carnet-grille-texte { margin: 0; font-size: 0.92rem; overflow-wrap: anywhere; }
+.carnet-semaine-bloc h3 { font-size: 1.1rem; margin: 0 0 4px; }
+.carnet-semaine-bloc .compte-aide { margin-bottom: 10px; }
+.carnet-semaine { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.9rem; }
+.carnet-semaine th, .carnet-semaine td { border: 1px solid var(--line); padding: 4px; text-align: center; vertical-align: middle; }
+.carnet-semaine thead th { background: var(--surface-2); font-weight: 700; padding: 8px 4px; }
+.carnet-semaine thead th:first-child { width: 92px; }
+.carnet-semaine tbody th { text-align: left; font-weight: 700; padding: 4px 6px; background: var(--surface-2); }
+.carnet-semaine-plage { display: block; font-family: var(--mono); font-size: 0.72rem; font-weight: 400; color: var(--ink-soft); white-space: normal; }
+.carnet-jour-ligne .carnet-semaine-plage { display: inline; font-size: 0.85rem; }
+.carnet-semaine-pause td { background: var(--accent-soft); color: var(--accent-ink); font-size: 0.8rem; font-style: italic; padding: 2px 4px; }
+.carnet-semaine-sans { color: var(--ink-faint); background: var(--surface-2); }
+.carnet-case-horaire {
+  font: inherit; font-size: 16px; width: 100%; min-height: 44px; padding: 6px 4px; text-overflow: ellipsis;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink-faint);
+}
+.carnet-case-horaire.remplie { color: var(--accent-ink); background: var(--accent-soft); border-color: var(--accent-soft-line); font-weight: 700; }
+.carnet-case-horaire:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.carnet-case-horaire:disabled { opacity: 0.7; }
+.carnet-jour-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.carnet-jour-ligne { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 10px; }
+.carnet-jour-pause { font-size: 0.85rem; font-style: italic; color: var(--accent-ink); background: var(--accent-soft); border-radius: var(--radius); padding: 4px 10px; }
+.carnet-semaine-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.92rem; }
+.carnet-semaine-liste li { overflow-wrap: anywhere; }
+.carnet-jour-choix { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 16px; margin-bottom: 12px; }
+.carnet-date-jour { margin: 0; flex: 1 1 100%; font-size: 1.05rem; font-weight: 700; }
+.carnet-a-confirmer { padding: 8px 12px; border: 1px dashed var(--accent-soft-line); border-radius: var(--radius); margin-bottom: 10px; }
+.carnet-creneaux { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.carnet-creneau {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px;
+  padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.carnet-creneau.propose { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
+.carnet-creneau.note { background: var(--good-soft); border-color: var(--good); }
+.carnet-creneau-texte { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; min-width: 0; flex: 1 1 220px; }
+.carnet-creneau-horaire { font-family: var(--mono); font-size: 0.88rem; color: var(--ink-soft); white-space: nowrap; }
+.carnet-creneau-date { flex-basis: 100%; font-size: 0.85rem; color: var(--ink-faint); }
+.carnet-creneau-classe { font-size: 1.02rem; }
+.carnet-creneau-note { color: var(--good); border-color: var(--good); }
+.carnet-oubliees { padding-top: 12px; border-top: 1px dashed var(--line); }
+.carnet-oubliees h3 { margin: 0 0 6px; }
+.carnet-oubliees-compte { margin: 0 0 10px; font-weight: 700; color: var(--accent-ink); }
+.carnet-creneaux-oublies .carnet-creneau { padding: 8px 12px; }
+.carnet-restantes { margin: 12px 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }

@@ -1,6 +1,43 @@
 /**
- * Petits outils d'interface du carnet (presse-papiers, fiche, mémoire de la classe active).
+ * Petits outils d'interface du carnet (presse-papiers, fiche, mémoire de la classe active, largeur
+ * d'écran).
  */
+import { useEffect, useState } from 'react'
+
+/** Vrai si l'écran est assez large pour le tableau de la semaine (sinon : un jour à la fois). */
+export function useEcranLarge(requete = '(min-width: 720px)'): boolean {
+  const [large, setLarge] = useState(() => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia(requete).matches)
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return
+    const m = window.matchMedia(requete)
+    const suivre = () => setLarge(m.matches)
+    suivre()
+    m.addEventListener('change', suivre)
+    return () => m.removeEventListener('change', suivre)
+  }, [requete])
+  return large
+}
+
+const CLE_OUBLIEES = 'math-belgium-carnet-oubliees-depuis'
+
+/** Date de départ choisie pour le rappel des oubliées (par appareil) ; `null` = par défaut. */
+export function lireDepuisOubliees(): string | null {
+  try {
+    const v = localStorage.getItem(CLE_OUBLIEES)
+    return v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null
+  } catch {
+    return null
+  }
+}
+
+export function memoriserDepuisOubliees(v: string | null): void {
+  try {
+    if (v) localStorage.setItem(CLE_OUBLIEES, v)
+    else localStorage.removeItem(CLE_OUBLIEES)
+  } catch {
+    // stockage indisponible : simple confort perdu
+  }
+}
 /** Copie `texte` (et `html` quand le navigateur sait coller du texte riche). Faux si aucune méthode
  * n'a marché : l'appelant affiche alors le texte à copier à la main. */
 export async function copierTexte(texte: string, html?: string): Promise<boolean> {
