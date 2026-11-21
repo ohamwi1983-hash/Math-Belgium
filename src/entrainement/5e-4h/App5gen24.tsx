@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { RenduFragments } from "../4e/components/RenduFragments";
+import { cibleTypeLimite } from "./ui5e/retoursEtudeComplete";
 import { correctionDetailleeEtudeComplete, lettrePhaseEtudeComplete } from "./generateurs5e/etudeComplete/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
@@ -199,6 +201,15 @@ export function App5gen24() {
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
+        ...(enAttente.revele && phase === "typeLimite"
+          ? {
+              messageRevele: (
+                <span>
+                  Ce n'était pas la bonne réponse (une seule tentative sur un choix fermé). <RenduFragments fragments={cibleTypeLimite(exercice) ?? []} />
+                </span>
+              ),
+            }
+          : {}),
         reponseAttendue: reponseAttendueEtudeComplete(exercice, phase),
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEtudeComplete(exercice), lettrePhaseEtudeComplete(exercice, phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",

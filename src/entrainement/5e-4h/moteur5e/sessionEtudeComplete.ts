@@ -3,6 +3,7 @@
  * `src/generateurs5e/`. Refonte `prompt5gen24refontecomplete.md` — voir `typesEtudeComplete.ts` pour
  * le détail du nouveau pipeline à 8 écrans.
  */
+import { refusSaisieEtude } from "./saisieEtudeComplete";
 import type { ComportementInfiniEtude, Exclusion, ExerciceEtudeComplete } from "../core5e/etudeComplete.types";
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
@@ -103,6 +104,7 @@ function exclusionPointVide(etat: EtatSessionEtudeComplete): Exclusion {
 // ============================================================================
 
 export function soumettreReponseDomaine(etat: EtatSessionEtudeComplete, textes: string[]): EtatSessionEtudeComplete {
+  if (refusSaisieEtude(etat.exerciceCourant, etat.phase, textes)) return etat;
   const cibles = exerciceEtude(etat).exclusions.map((e) => e.position);
   return soumettreEcran(etat, "domaine", textes, (t) => diagnostiquerEnsembleNombres(t, cibles) === "correct");
 }
@@ -121,6 +123,7 @@ export function soumettreReponseTypeLimite(etat: EtatSessionEtudeComplete, choix
 // ============================================================================
 
 export function soumettreReponsePointVideSimplification(etat: EtatSessionEtudeComplete, texte: string): EtatSessionEtudeComplete {
+  if (refusSaisieEtude(etat.exerciceCourant, etat.phase, [texte])) return etat;
   const ex = exerciceEtude(etat);
   const coeffsM = ex.coeffsM as number[];
   const coeffsDVraie = ex.coeffsDVraie as number[];
@@ -129,6 +132,7 @@ export function soumettreReponsePointVideSimplification(etat: EtatSessionEtudeCo
 }
 
 export function soumettreReponsePointVideLimite(etat: EtatSessionEtudeComplete, texte: string): EtatSessionEtudeComplete {
+  if (refusSaisieEtude(etat.exerciceCourant, etat.phase, [texte])) return etat;
   const cible = exclusionPointVide(etat).valeurPointVide as number;
   return soumettreEcran(etat, "pointVideLimite", texte, (t) => diagnostiquerNombre(t, cible) === "correct");
 }
@@ -153,6 +157,7 @@ function exclusionDeLimitesGD(etat: EtatSessionEtudeComplete, phase: "limitesGD1
 }
 
 export function soumettreReponseLimitesGD(etat: EtatSessionEtudeComplete, phase: "limitesGD1" | "limitesGD2", reponse: ReponseLimitesGD): EtatSessionEtudeComplete {
+  if (refusSaisieEtude(etat.exerciceCourant, phase, [reponse.gauche, reponse.droite])) return etat;
   const excl = exclusionDeLimitesGD(etat, phase);
   const cibleGauche: CibleValeurOuInfini = { fini: false, signe: excl.signeGauche as 1 | -1 };
   const cibleDroite: CibleValeurOuInfini = { fini: false, signe: excl.signeDroit as 1 | -1 };
@@ -171,6 +176,7 @@ export function soumettreReponseLimitesGD(etat: EtatSessionEtudeComplete, phase:
 export type ReponseAV = { aucuneAV: true } | { aucuneAV: false; textes: string[] };
 
 export function soumettreReponseAV(etat: EtatSessionEtudeComplete, reponse: ReponseAV): EtatSessionEtudeComplete {
+  if (refusSaisieEtude(etat.exerciceCourant, etat.phase, reponse.aucuneAV ? [] : reponse.textes)) return etat;
   const cibles = exerciceEtude(etat)
     .exclusions.filter((e) => e.type !== "pointVide")
     .map((e) => e.position);
@@ -200,6 +206,7 @@ function cibleInfini(infini: ComportementInfiniEtude, borne: "moins" | "plus"): 
 }
 
 export function soumettreReponseInfini(etat: EtatSessionEtudeComplete, reponse: ReponseInfini): EtatSessionEtudeComplete {
+  if (refusSaisieEtude(etat.exerciceCourant, etat.phase, [reponse.moins, reponse.plus])) return etat;
   const infini = exerciceEtude(etat).infini;
   const cibleMoins = cibleInfini(infini, "moins");
   const ciblePlus = cibleInfini(infini, "plus");
@@ -227,6 +234,7 @@ function cibleCoefDirecteur(infini: ComportementInfiniEtude, phase: "moins" | "p
 }
 
 export function soumettreReponseCoefDirecteur(etat: EtatSessionEtudeComplete, reponse: ReponseCoefDirecteur): EtatSessionEtudeComplete {
+  if (refusSaisieEtude(etat.exerciceCourant, etat.phase, [reponse.moins, reponse.plus])) return etat;
   const infini = exerciceEtude(etat).infini;
   const cibleMoins = cibleCoefDirecteur(infini, "moins");
   const ciblePlus = cibleCoefDirecteur(infini, "plus");
@@ -255,6 +263,7 @@ function cibleCoefB(infini: ComportementInfiniEtude): CibleValeurOuInfini {
 }
 
 export function soumettreReponseCoefB(etat: EtatSessionEtudeComplete, reponse: ReponseCoefB): EtatSessionEtudeComplete {
+  if (refusSaisieEtude(etat.exerciceCourant, etat.phase, [reponse.moins, reponse.plus])) return etat;
   const infini = exerciceEtude(etat).infini;
   const cible = cibleCoefB(infini);
   return soumettreEcran(etat, "coefB", reponse, (r) => diagnostiquerValeurOuInfini(r.moins, cible) === "correct" && diagnostiquerValeurOuInfini(r.plus, cible) === "correct");
@@ -282,6 +291,7 @@ function blocAsymptoteCorrect(bloc: ReponseBlocAsymptote, infini: ComportementIn
 }
 
 export function soumettreReponseAsymptoteInfini(etat: EtatSessionEtudeComplete, reponse: ReponseAsymptoteInfini): EtatSessionEtudeComplete {
+  if (refusSaisieEtude(etat.exerciceCourant, etat.phase, [reponse.moins, reponse.plus].map((b) => (b.aucune ? "" : b.type === "horizontale" ? b.valeur : b.equation)))) return etat;
   const infini = exerciceEtude(etat).infini;
   return soumettreEcran(etat, "asymptoteInfini", reponse, (r) => blocAsymptoteCorrect(r.moins, infini) && blocAsymptoteCorrect(r.plus, infini));
 }
@@ -291,6 +301,7 @@ export function soumettreReponseAsymptoteInfini(etat: EtatSessionEtudeComplete, 
 // ============================================================================
 
 export function soumettreReponseCasSpecial(etat: EtatSessionEtudeComplete, reponse: ReponseCasSpecial): EtatSessionEtudeComplete {
+  if (refusSaisieEtude(etat.exerciceCourant, etat.phase, [reponse.x, reponse.y])) return etat;
   const ex = exerciceEtude(etat);
   const cas = ex.casSpecial;
   if (!cas) throw new Error("soumettreReponseCasSpecial : cet exercice n'a pas de cas spécial");
@@ -305,6 +316,7 @@ export function soumettreReponseCasSpecial(etat: EtatSessionEtudeComplete, repon
 // ============================================================================
 
 export function soumettreReponseConstructionInverse(etat: EtatSessionEtudeComplete, texte: string): EtatSessionEtudeComplete {
+  if (refusSaisieEtude(etat.exerciceCourant, etat.phase, [texte])) return etat;
   const ex = etat.exerciceCourant;
   if (ex.mode !== "constructionInverse") throw new Error("soumettreReponseConstructionInverse : mode inattendu");
   const proprietes = ex.proprietes;

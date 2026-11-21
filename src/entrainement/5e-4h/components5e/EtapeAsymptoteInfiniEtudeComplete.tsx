@@ -1,13 +1,12 @@
 import { useState } from "react";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesEtude, cibleEtude, refusSaisieEtude } from "../ui5e/retoursEtudeComplete";
 import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.types";
-import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatEtudeComplete";
+import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase } from "../ui5e/formatEtudeComplete";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { TexteRiche5e } from "./TexteRiche5e";
 import type { ReponseAsymptoteInfini, ReponseBlocAsymptote } from "../moteur5e/sessionEtudeComplete";
 
 interface Props {
@@ -92,6 +91,8 @@ function BlocDirection({
 /** Écran "asymptoteInfini" — 2 blocs indépendants "vers −∞"/"vers +∞", TOUJOURS vérifiés contre la
  * même cible (voir `moteur5e/sessionEtudeComplete.ts`). */
 export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+  const [refusAffiche, setRefusAffiche] = useState<string | null>(null);
+  const [saisieSoumise, setSaisieSoumise] = useState<string[] | null>(null);
   const [moins, setMoins] = useState<EtatBloc>({ choix: null, valeur: "" });
   const [plus, setPlus] = useState<EtatBloc>({ choix: null, valeur: "" });
   const montrerErreurs = tentativesUtilisees > 0;
@@ -102,6 +103,11 @@ export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisee
   const correction = montrerErreurs && diagnostiquer && complet ? diagnostiquer({ moins: reponseMoins, plus: reponsePlus }) : null;
 
   function valider() {
+    if (!complet) return;
+    const refus = refusSaisieEtude(exercice, "asymptoteInfini", [reponseMoins, reponsePlus].map((b) => (!b || b.aucune ? "" : b.type === "horizontale" ? b.valeur : b.equation)));
+    setRefusAffiche(refus);
+    if (refus) return;
+    setSaisieSoumise([reponseMoins, reponsePlus].map((b) => (!b || b.aucune ? "" : b.type === "horizontale" ? b.valeur : b.equation)));
     if (!reponseMoins || !reponsePlus) return;
     onValider({ moins: reponseMoins, plus: reponsePlus });
   }
@@ -116,26 +122,20 @@ export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisee
       <BlocDirection titre="Vers −∞" etat={moins} setEtat={setMoins} erronee={correction !== null && !correction.moins} />
       <BlocDirection titre="Vers +∞" etat={plus} setEtat={setPlus} erronee={correction !== null && !correction.plus} />
       <CalculatriceScientifique />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "asymptoteInfini")} /></p>
-          {niveauAide >= 2 && <p><TexteRiche5e texte={texteAideNiveau2(exercice, "asymptoteInfini")} /></p>}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesEtude(exercice, "asymptoteInfini")}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={refusAffiche !== null}
+        texteIllisible={refusAffiche ?? ""}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={saisieSoumise && tentativesUtilisees > 0 ? cibleEtude(exercice, "asymptoteInfini", saisieSoumise) : null}
+        validation={validation}
+      />
     </div>
   );
 }

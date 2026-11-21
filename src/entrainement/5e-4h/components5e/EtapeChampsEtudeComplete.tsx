@@ -1,18 +1,16 @@
 import { useState } from "react";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesEtude, cibleEtude, refusSaisieEtude } from "../ui5e/retoursEtudeComplete";
 import type { ExerciceEtudeComplete } from "../core5e/etudeComplete.types";
 import type { PhaseEtudeComplete } from "../moteur5e/typesEtudeComplete";
-import { CONSIGNE_GENERALE_CONSTRUCTION_INVERSE, CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, formatProprietesConstructionInverseTexte, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatEtudeComplete";
+import { CONSIGNE_GENERALE_CONSTRUCTION_INVERSE, CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, formatProprietesConstructionInverseTexte } from "../ui5e/formatEtudeComplete";
 import { Katex } from "../components/Katex";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.types";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceEtudeComplete;
@@ -45,9 +43,11 @@ interface Props {
  * Calculatrice TOUJOURS présente (contextes réalistes, arithmétique non triviale), sauf sur l'écran
  * "domaine"/"classification" (purement symbolique, gérés par `EtapeListeNombresEtudeComplete`). */
 export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders, labelsLatex, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, prevalider, validation}: Props) {
+  const [refusAffiche, setRefusAffiche] = useState<string | null>(null);
+  const [saisieSoumise, setSaisieSoumise] = useState<string[] | null>(null);
   const [valeurs, setValeurs] = useState<string[]>(labels.map(() => ""));
   const [messagePrevalidation, setMessagePrevalidation] = useState<string | null>(null);
-  const [dernierStatuts, setDernierStatuts] = useState<StatutVerification[] | null>(null);
+  const [, setDernierStatuts] = useState<StatutVerification[] | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = valeurs.every((v) => v.trim() !== "");
   const correction = montrerErreurs && diagnostiquer && complet ? diagnostiquer(valeurs) : null;
@@ -58,16 +58,19 @@ export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders
   }
   function valider() {
     if (!complet) return;
+    const refus = refusSaisieEtude(exercice, phase, valeurs);
+    setRefusAffiche(refus);
+    if (refus) return;
     const message = prevalider ? prevalider(valeurs) : null;
     setMessagePrevalidation(message);
     if (message) return;
+    setSaisieSoumise(valeurs);
     if (diagnostiquer) setDernierStatuts(diagnostiquer(valeurs));
     onValider(valeurs);
   }
 
   const estBonus = exercice.mode === "constructionInverse";
   const pipeline = estBonus ? null : (exercice as ExerciceEtudeCompletePipeline);
-  const pireStatut = correction?.find((s) => s !== "correct") ?? null;
 
   return (
     <div>
@@ -105,31 +108,21 @@ export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders
         </div>
       ))}
       <CalculatriceScientifique />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={texteAideNiveau1(exercice, phase)} /></p>
-          {niveauAide >= 2 && <p><TexteRiche5e texte={texteAideNiveau2(exercice, phase)} /></p>}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {messagePrevalidation && (
-          <p className="alert-error" role="alert">
-            {messagePrevalidation}
-          </p>
-        )}
-        {montrerErreurs && !messagePrevalidation && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, pireStatut ?? dernierStatuts?.find((s) => s !== "correct") ?? "not_equivalent")}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesEtude(exercice, phase)}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={refusAffiche !== null}
+        messageSansTentative={messagePrevalidation}
+        texteIllisible={refusAffiche ?? ""}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={saisieSoumise && tentativesUtilisees > 0 ? cibleEtude(exercice, phase, saisieSoumise) : null}
+        validation={validation}
+      />
     </div>
   );
 }

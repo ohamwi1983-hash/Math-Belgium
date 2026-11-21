@@ -1,15 +1,13 @@
 import { useState } from "react";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesEtude, cibleEtude, refusSaisieEtude } from "../ui5e/retoursEtudeComplete";
 import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.types";
-import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatEtudeComplete";
+import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase } from "../ui5e/formatEtudeComplete";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { ReponseAV } from "../moteur5e/sessionEtudeComplete";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
@@ -30,9 +28,11 @@ interface Props {
  * patron que `EtapeCEDomaineDefinition.tsx`) puis, si "Au moins une AV", liste add-as-needed des
  * équations (une valeur numérique par ligne, jamais les points vides — simplifiés). */
 export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+  const [refusAffiche, setRefusAffiche] = useState<string | null>(null);
+  const [saisieSoumise, setSaisieSoumise] = useState<string[] | null>(null);
   const [auMoinsUneAV, setAuMoinsUneAV] = useState<boolean | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const [, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const afficheFormulaire = auMoinsUneAV === true;
   const complet = auMoinsUneAV === false || (auMoinsUneAV === true && valeurs.length > 0 && valeurs.every((v) => v.trim() !== ""));
@@ -51,6 +51,10 @@ export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentatives
   }
   function valider() {
     if (!complet) return;
+    const refus = refusSaisieEtude(exercice, "av", (auMoinsUneAV === false ? [] : valeurs));
+    setRefusAffiche(refus);
+    if (refus) return;
+    setSaisieSoumise((auMoinsUneAV === false ? [] : valeurs));
     if (diagnostiquer) setDernierStatut(diagnostiquer(auMoinsUneAV === false ? [] : valeurs));
     onValider(reponseActuelle());
   }
@@ -96,26 +100,20 @@ export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentatives
           </button>
         </div>
       )}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "av")} /></p>
-          {niveauAide >= 2 && <p><TexteRiche5e texte={texteAideNiveau2(exercice, "av")} /></p>}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesEtude(exercice, "av")}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={refusAffiche !== null}
+        texteIllisible={refusAffiche ?? ""}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={saisieSoumise && tentativesUtilisees > 0 ? cibleEtude(exercice, "av", saisieSoumise) : null}
+        validation={validation}
+      />
     </div>
   );
 }

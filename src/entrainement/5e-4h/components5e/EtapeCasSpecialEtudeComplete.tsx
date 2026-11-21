@@ -1,14 +1,13 @@
 import { useState } from "react";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { TexteRiche5e } from "./TexteRiche5e";
+import { aidesEtude, cibleEtude, refusSaisieEtude } from "../ui5e/retoursEtudeComplete";
 import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.types";
-import { CONSIGNE_GENERALE_ETUDE_COMPLETE, texteAideNiveau1, texteAideNiveau2, consigneCasSpecialTexte } from "../ui5e/formatEtudeComplete";
+import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consigneCasSpecialTexte } from "../ui5e/formatEtudeComplete";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { TexteRiche5e } from "./TexteRiche5e";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { ReponseCasSpecial } from "../moteur5e/verificationEtudeComplete";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -36,15 +35,20 @@ interface Props {
  * jamais empilés verticalement comme le rendait `EtapeChampsEtudeComplete` générique.
  */
 export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+  const [refusAffiche, setRefusAffiche] = useState<string | null>(null);
+  const [saisieSoumise, setSaisieSoumise] = useState<string[] | null>(null);
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = texteX.trim() !== "" && texteY.trim() !== "";
   const correction = montrerErreurs && diagnostiquer && complet ? diagnostiquer({ x: texteX, y: texteY }) : null;
-  const pireStatut: StatutVerification | null = correction ? (correction.x !== "correct" ? correction.x : correction.y !== "correct" ? correction.y : null) : null;
 
   function valider() {
     if (!complet) return;
+    const refus = refusSaisieEtude(exercice, "casSpecial", [texteX, texteY]);
+    setRefusAffiche(refus);
+    if (refus) return;
+    setSaisieSoumise([texteX, texteY]);
     onValider({ x: texteX, y: texteY });
   }
 
@@ -86,26 +90,20 @@ export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, te
         </div>
       </div>
       <CalculatriceScientifique />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "casSpecial")} /></p>
-          {niveauAide >= 2 && <p><TexteRiche5e texte={texteAideNiveau2(exercice, "casSpecial")} /></p>}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, pireStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesEtude(exercice, "casSpecial")}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={refusAffiche !== null}
+        texteIllisible={refusAffiche ?? ""}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={saisieSoumise && tentativesUtilisees > 0 ? cibleEtude(exercice, "casSpecial", saisieSoumise) : null}
+        validation={validation}
+      />
     </div>
   );
 }

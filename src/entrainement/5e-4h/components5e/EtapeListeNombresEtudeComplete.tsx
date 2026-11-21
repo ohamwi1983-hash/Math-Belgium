@@ -1,14 +1,12 @@
 import { useState } from "react";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { aidesEtude, cibleEtude, refusSaisieEtude } from "../ui5e/retoursEtudeComplete";
 import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.types";
-import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatEtudeComplete";
+import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase } from "../ui5e/formatEtudeComplete";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
@@ -30,8 +28,10 @@ interface Props {
  * depuis la refonte `prompt5gen24refontecomplete.md` (l'ancien écran "classification" est remplacé
  * par `EtapeAVEtudeComplete.tsx`, avec son propre gate "Pas de AV"/"Au moins une AV"). */
 export function EtapeListeNombresEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+  const [refusAffiche, setRefusAffiche] = useState<string | null>(null);
+  const [saisieSoumise, setSaisieSoumise] = useState<string[] | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const [, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = valeurs.length > 0 && valeurs.every((v) => v.trim() !== "");
 
@@ -46,6 +46,10 @@ export function EtapeListeNombresEtudeComplete({ exercice, tentativesUtilisees, 
   }
   function valider() {
     if (!complet) return;
+    const refus = refusSaisieEtude(exercice, "domaine", valeurs);
+    setRefusAffiche(refus);
+    if (refus) return;
+    setSaisieSoumise(valeurs);
     if (diagnostiquer) setDernierStatut(diagnostiquer(valeurs));
     onValider(valeurs);
   }
@@ -73,26 +77,20 @@ export function EtapeListeNombresEtudeComplete({ exercice, tentativesUtilisees, 
       <button type="button" className="btn" onClick={ajouter}>
         + Ajouter une valeur exclue
       </button>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "domaine")} /></p>
-          {niveauAide >= 2 && <p><TexteRiche5e texte={texteAideNiveau2(exercice, "domaine")} /></p>}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesEtude(exercice, "domaine")}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={refusAffiche !== null}
+        texteIllisible={refusAffiche ?? ""}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={saisieSoumise && tentativesUtilisees > 0 ? cibleEtude(exercice, "domaine", saisieSoumise) : null}
+        validation={validation}
+      />
     </div>
   );
 }
