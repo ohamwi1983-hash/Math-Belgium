@@ -2,6 +2,7 @@
 paths:
   - "src/lib/supabase.ts"
   - "src/lib/compte*"
+  - "src/lib/coffre*"
   - "src/components/compte/**"
   - "src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation,Carnet,Exercice,ChapterExercice}*"
   - "src/lib/carnet*"
@@ -551,3 +552,47 @@ mot de passe, coffre et déconnexion — dans le menu —, suppression du compte
   grille seule / vide / 0003 absent, frappe du nom et de l'adresse → aperçu surligné, nom vide refusé,
   par défaut, suppression avec Échap puis cascade, ajout, menu « Plus », lien `?ecole=`, déconnexion,
   cibles ≥ 44 px sur téléphone) ; `scrollWidth` = largeur, 0 erreur console.
+
+## Page « Mon coffre » refondue (21/11/2026 : proposition B « Liste et fiche détaillée », AUCUNE migration)
+
+Décision de l'utilisateur (maquettes `BListe` / `Telephone` + « Ranger par : récents / chapitre » repris de
+C). RIEN n'a disparu (chargement, erreur — avec « Réessayer » —, coffre vide avec liens `/exercice` et
+`/evaluation`, import des enregistrements du navigateur, renommer avec `erreurTitrePlan`, dupliquer,
+supprimer, « Ouvrir dans le panneau » = `routeDuPlan` + `?plan=`, messages `role=status/alert`).
+- `routes/CoffrePage.tsx` : `PageCompte large sansTete` + `MenuEspace` (Mon coffre actif), bandeau sombre
+  (classes `profil-bandeau…` de `profil.css`, sous-titre « n enregistrements · suivent ton compte… »,
+  pastilles par type), bandeau d'import, pastilles de type (comptes après filtres niveau + recherche) et de
+  niveau (niveaux présents, seulement s'il y en a ≥ 2), recherche, « Ranger par » (`localStorage`
+  `math-belgium-coffre-ranger`, commodité), liste (boutons, `aria-current`) et fiche (`aria-labelledby`).
+  Sélection dans `?id=` (`replace` : un retour arrière depuis le panneau rouvre la même fiche ; « Ouvrir »
+  pose `?id=` avant de naviguer) ; ordinateur : le plus récent par défaut ; liste et fiche empilées (écran
+  étroit) : la fiche est amenée à l'écran. Suppression confirmée DANS la fiche (focus sur Annuler, Échap),
+  plus de `window.confirm`. Téléphone (< 760 px) : pas de fiche par défaut ; un choix ouvre un tiroir fixe
+  au-dessus de la barre « Mon espace » (réduit : type, date, titre, résumé, « Ouvrir dans le panneau » +
+  « … » `MenuActions` — Voir le contenu, Renommer, Dupliquer, Supprimer… ; poignée = fiche complète ;
+  × ou Échap ferme et rend le focus à la ligne).
+- `lib/coffreResume.ts` (PUR) : AUCUN générateur relancé, tout vient du `PlanDocument` stocké et de
+  `chaptersIndex.ts`. Questions = série A rangée par processus comme la copie, tous les vrai/faux = une
+  question, exercices d'une même ligne (`ElementPlan.ligne` + générateur + processus) = une question
+  (approximation : l'impression regroupe aussi selon la consigne de chaque instance, ce qui demande le
+  générateur) ; titre = carte « S'entraîner » du générateur (`titreGenerateur`), question ouverte =
+  « Démonstration / Formule / Compréhension — section ». Points stockés ; examen « total fixé » : total
+  imprimé (clés de `partiesExamen`) + note de mise à l'échelle ; feuille / remédiation : pas de points ni de
+  calculatrice. **Pas de durée** (elle demande `niveauEtDuree` sur chaque instance retirée). Recherche
+  (`normaliserRecherche` : sans accents ni casse, ponctuation = espace) sur titre, type, niveau, « ch n »,
+  titres complet et court (`titreCourtChapitre`) ; un nombre seul est un mot entier (« ch 1 » ≠ « ch 10 »).
+  Lien remédiation → évaluation : `contenu.remediation.titreSource` = titre du coffre ou titre du
+  document sans préfixe (renommer l'évaluation dans le coffre ne casse pas le lien) ; plusieurs : même
+  niveau, puis la plus récente créée avant ; aucune → « (pas dans ton coffre) ». « Par chapitre » : niveau
+  → chapitre (ordre et titres réels) → plus récent d'abord, « Plusieurs chapitres » en fin de niveau,
+  remédiation SOUS son évaluation si celle-ci est affichée.
+- Styles `components/compte/coffre.css` (après `carnet.css` et `profil.css`, sans les modifier) : type =
+  `--sky` / `--accent` / `--plan` / `--good` (`.coffre-t-*`), processus 1/2/3 = `--sky` / `--accent` /
+  `--plan` ; miniature papier blanche (cartouche école · professeur de `cartoucheDepuisCompte`).
+- Vérifié (Vite de développement + faux client étendu à `plans` — titre vide / type inconnu refusés,
+  panne de lecture —, données fictives : 0, 1 et 9 enregistrements des 4 types et 3 niveaux, remédiation
+  liée, examen sur 4 chapitres à total fixé, 3 enregistrements locaux ; 1 280 / 1 024 / 800 px et iPhone 13,
+  clair et sombre) : 185 vérifications Playwright (filtres, recherche sans accents, rangement, `?id=` et
+  rechargement, renommer — vide refusé, Échap —, dupliquer, supprimer — Échap, confirmer, remédiation
+  orpheline —, ouvrir puis retour arrière, import, panne puis Réessayer, tiroir : focus, poignée, « … »,
+  Échap, ×, cibles ≥ 44 px) ; `scrollWidth` = largeur, 0 erreur console.
