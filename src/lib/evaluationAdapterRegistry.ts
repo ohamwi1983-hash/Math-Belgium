@@ -291,6 +291,7 @@ import { adaptateurEvaluationEtudeComplete } from '../entrainement/5e-4h/generat
 import { adaptateurEvaluationLimitesConjuguee } from '../entrainement/5e-4h/generateurs5e/limitesConjuguee/exportEvaluation'
 import { adaptateurEvaluationFonctionAsymptotes } from '../entrainement/5e-4h/generateurs5e/fonctionAsymptotes/exportEvaluation'
 import { adaptateurEvaluationTableauLimites } from '../entrainement/5e-4h/generateurs5e/tableauLimitesGraphique/exportEvaluation'
+import { adaptateurEvaluationDetectiveLimites } from '../entrainement/5e-4h/generateurs5e/detectiveLimites/exportEvaluation'
 import { adaptateurEvaluationAssociation } from '../entrainement/5e-4h/generateurs5e/association/exportEvaluation'
 import { adaptateurEvaluationDefinitionDerivee } from '../entrainement/5e-4h/generateurs5e/definitionDerivee/exportEvaluation'
 import { adaptateurEvaluationFonctionDerivee } from '../entrainement/5e-4h/generateurs5e/fonctionDerivee/exportEvaluation'
@@ -351,6 +352,7 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen64': versionPapier(adaptateurEvaluationLimitesConjuguee) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen65': versionPapier(adaptateurEvaluationFonctionAsymptotes) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen66': versionPapier(adaptateurEvaluationTableauLimites) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen67': versionPapier(adaptateurEvaluationDetectiveLimites) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen25': versionPapier(adaptateurEvaluationAssociation) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen26': versionPapier(adaptateurEvaluationDefinitionDerivee) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen27': versionPapier(adaptateurEvaluationFonctionDerivee) as unknown as AdaptateurFeuilleExercices<never>,

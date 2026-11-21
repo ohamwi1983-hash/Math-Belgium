@@ -1416,6 +1416,16 @@ export const limitesAsymptotes: ChapterContent = {
           ],
           whereLabel: '5e (4h) → « 65. Retrouver une fonction à partir de ses asymptotes »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Détective d’erreurs : limites',
+          generatorId: '5gen67',
+          chantier: '5e-4h',
+          description: [
+            'La résolution d’un élève contient une seule ligne fausse : « ∞/∞ = 1 », « ∞ − ∞ = 0 », signe de 0⁺ ou 0⁻ faux, simplification interdite, √(x²) = x en −∞, degrés mal comparés, asymptote oblique prise pour une horizontale ou limite latérale oubliée. Trouve la ligne, nomme l’erreur, puis corrige la résolution.',
+          ],
+          whereLabel: '5e (4h) → « 67. Détective d’erreurs : limites »',
+        },
       ],
     },
   ],
