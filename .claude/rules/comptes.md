@@ -5,6 +5,8 @@ paths:
   - "src/components/compte/**"
   - "src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation,Carnet}*"
   - "src/lib/carnet*"
+  - "src/lib/horaire.ts"
+  - "src/lib/calendrierFwb.ts"
   - "src/components/carnet/**"
   - "supabase/**"
   - ".env*"
@@ -17,7 +19,8 @@ Seul backend du site : **Supabase** (Postgres + Auth + Row Level Security), proj
 l'utilisateur, après mise en service : ses élèves préparent leurs évaluations avec les feuilles
 d'exercices) ; seuls le panneau des évaluations / examens (`/evaluation`), le coffre, le profil et
 l'administration sont derrière la connexion.
-Aucune donnée d'élève. Phase 2 (faite, section « Phase 2 » en fin de fichier) : carnet de matière vue (`/carnet`).
+Aucune donnée d'élève. Phase 2 (faite, section « Phase 2 » en fin de fichier) : carnet de matière vue (`/carnet`),
+puis son horaire de la semaine (`0003_horaire.sql`, sous-section « Horaire de la semaine »).
 Plus tard (pas fait) : partage entre collègues.
 
 ## Décisions de l'utilisateur
@@ -239,3 +242,102 @@ recharger `/carnet` (Supabase peut mettre quelques secondes à voir les nouvelle
 contre le vrai projet : création de classe / séance, refus d'une école d'un autre (impossible depuis le
 site, à tester au besoin dans l'éditeur SQL avec deux comptes).
 
+### Horaire de la semaine (`supabase/migrations/0003_horaire.sql`, dans `/carnet`)
+
+Décisions de l'utilisateur : grille horaire PAR ÉCOLE (une seule source), heures des pauses et fin des
+cours CALCULÉES (jamais saisies), mercredi = heures du matin par défaut (réglable), heures doubles =
+UNE séance, congés = calendrier officiel FWB, semaine A / B PLUS TARD (non faite, schéma prêt).
+
+**Schéma 0003** (idempotent, à coller APRÈS 0001 et 0002 ; « Success. No rows returned ») :
+
+| Table | Colonnes | Contraintes |
+| --- | --- | --- |
+| `horaires_ecoles` | clé `(ecole_id, proprietaire)`, `debut` (time 06:00–20:00, défaut 08:45), `duree_heure` (20–240, défaut 50), `nombre_heures` (1–15, défaut 7), `pauses` jsonb (défaut récréation 20 min après H2 + midi 60 min après H4), `heures_mercredi` (NULL = heures avant midi, 0–nombre), `exceptions` jsonb, dates | `pauses_horaire_valides` (≤ 6 objets `{apres 1…n−1, duree 5–180, type recreation/midi/autre}`, exactement ces clés, une par position, ≤ 1 midi) ; `exceptions_horaire_valides` (≤ 15 `{heure 1…n, debut "HH:MM", fin "HH:MM"}`, fin > début, une par heure) ; `journee_horaire_tient` (fin calculée ≤ 23h59) ; FK COMPOSÉE `(ecole_id, proprietaire) → ecoles` on delete cascade |
+| `horaire_cases` | `proprietaire`, `ecole_id`, `jour` (1 = lundi … 5), `heure` (1–15), `classe_id`, `semaine` (NULL ; 'A'/'B' prévu plus tard), dates | unique `(proprietaire, ecole_id, jour, heure, coalesce(semaine,'*'))` ; FK `(ecole_id, proprietaire) → ecoles` et FK `(classe_id, ecole_id, proprietaire) → classes (id, ecole_id, proprietaire)` (contrainte ajoutée `classes_id_ecole_proprietaire_uniq`) : une case ne vise qu'une école à soi ET une classe à soi DE CETTE ÉCOLE ; cascades |
+| `seances` | + `numero_heure_fin` (NULL ; 2–15, > `numero_heure`, exige `numero_heure`) | anciennes séances intactes |
+
+Clé `(ecole_id, proprietaire)` et non `ecole_id` seule : viser l'école d'un autre donne 23503, sans
+révéler (23505) qu'elle a une grille. Déclencheur `classes_change_ecole_horaire` (SECURITY INVOKER) :
+une classe qui change d'école quitte l'horaire de l'ancienne (sinon la FK composée bloquerait la
+modification). RLS des deux tables comme 0002 (`proprietaire = auth.uid() and est_actif()`, `anon`
+sans droit). `supprimer_mon_compte()` inchangé : tout part en cascade. Vérifié sur Postgres 16 local
+(faux schéma `auth`, 0001 + 0002 + données, puis 0003 exécuté TROIS fois sans perte) : 90 vérifications
+(lecture / écriture croisées, rattachement à l'école / la classe d'un autre — 23503 —, classe d'une
+autre école du même professeur — 23503 —, propriétaire changé — 42501 —, doublons — 23505 —, toutes
+les limites — 23514 —, désactivation, `anon`, cascades école / classe / changement d'école,
+suppression de compte). Semaine A / B plus tard : 0004 non destructive (référence de la semaine A dans
+`carnet_reglages`, règle « une case NULL exclut A et B au même endroit ») + site.
+
+**0003 pas appliqué** : `carnetDonnees.ts::chargerHoraire` renvoie `actif: false` (table absente), les
+séances sont lues / écrites SANS `numero_heure_fin` (`listerSeances(c, horaire)`, `ligneSeance`), la
+section « Mon horaire » affiche « Horaire pas encore activé : colle le fichier 0003_horaire.sql… » ;
+tout le reste du carnet marche comme avant.
+
+**Règles de calcul** (`lib/horaire.ts`, PUR, 116 vérifications esbuild + node dont l'exemple de
+l'utilisateur au détail près : 08h45, 09h35, récréation 10h25 → 10h45, 10h45, 11h35, midi 12h25 →
+13h25, 13h25, 14h15, 15h05, fin 15h55 ; écoles à 3 heures avant la récréation, 2 / 4 l'après-midi,
+45 et 55 min) :
+- `journee(g, jour)` : H1 au début des cours ; chaque heure dure `duree_heure` ; la suivante commence
+  à la fin de la précédente + la pause placée « après » elle. Heure corrigée à la main (`exceptions`) :
+  garde ses heures, les suivantes repartent de SA fin (chevauchement refusé par `erreursGrille`).
+  Mercredi : `heuresDuMercredi` = réglage, sinon `apres` du midi, sinon toutes.
+- Heures doubles (`creneauxSemaine`) : numéros consécutifs, même école, même classe → un créneau
+  « H1–H2 (08h45 → 10h25) », `nbHeures` 2 — à travers une récréation ou une pause « autre », JAMAIS à
+  travers le midi (matin et après-midi = deux séances). Une séance enregistrée depuis un créneau porte
+  `numero_heure`, `numero_heure_fin`, `heure_debut`, `heure_fin`.
+- `creneauxDuJour(date)` : rien les week-ends / congés / vacances FWB ; `creneauPropose` = créneau en
+  cours, sinon le plus proche (égalité → celui qui vient de finir), préférence possible (classes du
+  niveau du chapitre).
+- `seanceDuCreneau` : même classe, même date, numéros qui se recouvrent (sinon plages ; une séance
+  sans horaire couvre tous les créneaux de sa classe ce jour-là).
+- `creneauxOublies` : de `depuis` (défaut `depuisParDefaut` = 14 derniers jours de classe, aujourd'hui
+  compris) à maintenant ; congés exclus ; une case ne compte qu'à partir de son `cree_le` (remplir
+  l'horaire aujourd'hui ne crée pas d'oubli rétroactif).
+- `heuresRestantes` : de maintenant (créneaux pas encore commencés) au jour choisi inclus, congés
+  exclus ; heure double = 2 heures, 1 séance ; `aConfirmer` si une année au calendrier inconnu.
+- `chevauchements` : heures de deux écoles qui se recouvrent le même jour.
+- Format : `carnet.ts::horaireTexte(s, format, avecGrille)` → « H2 (09h35 → 10h25) » / « H1–H2 (…) »
+  quand l'école de la classe a une grille et que la séance a numéro + plage ; sinon réglage plage /
+  numéro d'avant (« 1re–2e heures » pour une heure double). Smartschool et la fiche A4 suivent
+  (`resoudreSeance(…, { avecGrille })`).
+
+**Calendrier FWB** (`lib/calendrierFwb.ts`, données en code, une entrée par année scolaire, source et
+date de consultation en commentaire) : 2025-2026, 2026-2027, 2027-2028 et 2028-2029 recopiés des PDF
+officiels d'enseignement.be (page https://www.enseignement.be/calendrier-scolaire, PDF
+`…/menu_courtoisie/calendrier_scolaire/2024_Cal_Obli_2526.pdf`, `2026_Cal_Obli_2627.pdf`,
+`2026_Cal_Obli_2728.pdf`, `2026_Cal_Obli_2829.pdf`, consultés le 21/11/2026 ; 2026-2027 recoupé avec la
+circulaire 9753 du 24/06/2026). Jours de congé = ceux surlignés sur les PDF (mardi gras compris quand il
+tombe hors détente). Année absente → `etatJour` « inconnu » (jour de semaine compté comme jour de
+classe possible) et l'interface affiche « Calendrier FWB 2029-2030 à confirmer ». Ajouter une année :
+recopier son PDF officiel, source + date, `verifie: true`.
+
+**Interface** (`CarnetPage` + `components/carnet/`) :
+- « Mon horaire » (après « Mes classes », visible dès qu'il y a une classe ; ouvert d'office tant que
+  l'horaire est vide) : `MonHoraire` → onglets d'école (plusieurs écoles), alerte de chevauchement,
+  `GrilleEcole` (création pré-remplie avec la grille d'exemple de l'utilisateur ; début `type="time"`,
+  durées / nombres / positions en listes, aperçu « Journée calculée » en direct, « Corriger » une heure,
+  « Fin des cours », mercredi), puis « Semaine — École » : tableau jours × heures dès 720 px
+  (`useEcranLarge`), un jour à la fois sur téléphone ; chaque case = liste des classes DE CETTE ÉCOLE
+  ou « — » (enregistrée aussitôt). Raccourcir la grille retire (après confirmation) les cases hors
+  grille. « Ma semaine complète » résume toutes les écoles.
+- « Aujourd'hui » (en tête dès que l'horaire a une case) : créneaux du jour (« en cours » / « le plus
+  proche »), « Noter la séance » ou « Séance notée ✓ » (ouvre la séance), autre jour au choix,
+  congé / week-end / « calendrier à confirmer » ; « Séances à noter » (oubliées, depuis une date
+  mémorisée par appareil, défaut 14 jours de classe, 12 visibles puis « Afficher les n »).
+- « Heures restantes » : « 14 heures avec 4Ge d'ici le 18 décembre 2026 (9 séances) », date par défaut
+  = dernier jour de classe avant le prochain congé FWB (`prochainConge`).
+- `FormulaireSeance` : liste « Créneau de l'horaire » des créneaux du jour choisi (règle classe,
+  numéros, plage ; changer de date ou de classe suit) + « Autre horaire (saisie libre) ». Nouvelle
+  séance, « Noter », oubliée, bouton « Carnet » d'un chapitre (`?chapitre=`) : créneau pré-rempli.
+
+**Vérifications** : Playwright sur un build de test (faux client étendu aux deux tables, option
+`horaireAbsent` qui refuse aussi `numero_heure_fin` — 42703), heure figée (`page.clock`, Europe/Brussels),
+iPhone 13 et 1 280 px, clair et sombre : 352 vérifications (grille et aperçu, correction d'heure,
+semaine, Aujourd'hui, séance pré-remplie + autre créneau / autre date, heure double en base,
+Smartschool, oubliées et « Noter », congés, 2030 à confirmer, deux écoles + chevauchement, heures
+restantes, grille raccourcie, chapitre → créneau, 0003 absent) ; 0 erreur console, `scrollWidth` =
+largeur. Le parcours Playwright de la phase 2 repasse aussi (carnet sans horaire).
+
+**Mise en service** : SQL Editor → New query → coller TOUT `0003_horaire.sql` → Run → « Success. No
+rows returned » ; recharger `/carnet` → « Mon horaire ». À vérifier contre le vrai projet : grille,
+cases, séance « H1–H2 » (colonne `numero_heure_fin`).
