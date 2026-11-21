@@ -25,6 +25,18 @@ export const geometrieDansEspace: ChapterContent = {
       number: 1,
       title: 'Perspective cavalière — dessiner un solide en 3D',
       kicker: 'x à l\'horizontale, z à la verticale, y en profondeur à 45° et réduit de moitié',
+      titreCourt: 'Perspective cavalière',
+      partie: 'Dessiner l\'espace, positionner droites et plans',
+      essentiel: [
+        'Perspective cavalière : l\'axe x reste horizontal et l\'axe z vertical, en vraie grandeur ; l\'axe y (la profondeur) se trace à 45° et réduit de moitié.',
+        'La face avant se dessine en vraie grandeur, les fuyantes sont parallèles et de même longueur ; les faces qui contiennent la profondeur deviennent des parallélogrammes, et les arêtes cachées se tracent en pointillés.',
+      ],
+      cartes: [
+        { question: 'Comment dessine-t-on une profondeur de 4 cm ?', reponse: 'Par une fuyante à 45°, de 2 cm : la moitié de la profondeur réelle.' },
+        { question: 'Quelles faces d\'un pavé gardent leur vraie forme sur le dessin ?', reponse: 'Seules les faces avant et arrière.' },
+        { question: 'Comment trace-t-on une arête cachée ?', reponse: 'En pointillés.' },
+        { question: 'Une longueur en profondeur se lit-elle directement sur le dessin ?', reponse: 'Non : elle paraît deux fois plus courte qu\'en réalité.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Perspective cavalière — dessiner un solide en 3D', youtubeId: 'hMaTBZeqAiA' },
         {
@@ -207,6 +219,17 @@ export const geometrieDansEspace: ChapterContent = {
       number: 2,
       title: 'Déterminer un plan',
       kicker: "4 façons équivalentes de fixer un plan, sans jamais en donner l'équation",
+      titreCourt: 'Déterminer un plan',
+      partie: 'Dessiner l\'espace, positionner droites et plans',
+      essentiel: [
+        'Un plan est déterminé par trois points **non alignés**, une droite et un point **hors** de cette droite, deux droites **sécantes**, ou deux droites **parallèles** distinctes.',
+        'Trois points alignés ne fixent aucun plan : une infinité de plans passent par la droite qui les porte. Deux droites gauches n\'ont aucun plan commun.',
+      ],
+      cartes: [
+        { question: 'Quelles sont les 4 façons de déterminer un plan ?', reponse: 'Trois points non alignés ; une droite et un point hors d\'elle ; deux droites sécantes ; deux droites parallèles distinctes.' },
+        { question: 'Trois points alignés déterminent-ils un plan ?', reponse: 'Non : une infinité de plans passent par la droite qui les porte.' },
+        { question: 'Comment désigne-t-on le plus souvent un plan ?', reponse: 'Par trois de ses points : « le plan (ABC) ».' },
+      ],
       blocks: [
         { kind: 'video', title: 'Déterminer un plan et positions de deux droites', youtubeId: 'azPMOAl2FD4' },
         {
@@ -306,6 +329,19 @@ export const geometrieDansEspace: ChapterContent = {
       number: 3,
       title: 'Positions de deux droites : sécantes, parallèles ou gauches',
       kicker: 'une troisième possibilité, impossible dans le plan : les droites gauches',
+      titreCourt: 'Positions de deux droites',
+      partie: 'Dessiner l\'espace, positionner droites et plans',
+      essentiel: [
+        'Deux droites distinctes de l\'espace sont soit **coplanaires** (parallèles ou sécantes), soit **gauches** : aucun plan ne les contient toutes les deux.',
+        'Deux droites parallèles sont toujours coplanaires. Deux droites qui se croisent sur le dessin ne sont pas forcément sécantes.',
+        'Pour prouver que deux droites sont gauches : montrer qu\'elles ne sont ni sécantes, ni parallèles — souvent, l\'une perce un plan qui contient l\'autre en un point qui n\'est pas sur l\'autre.',
+      ],
+      cartes: [
+        { question: 'Que veut dire « deux droites gauches » ?', reponse: 'Aucun plan ne les contient toutes les deux : elles ne sont ni sécantes, ni parallèles.' },
+        { question: 'Deux droites parallèles peuvent-elles ne pas être coplanaires ?', reponse: 'Non : deux droites parallèles sont toujours coplanaires.' },
+        { question: 'Dans le cube ABCDEFGH, quelle est la position de (AB) et (CG) ?', reponse: 'Gauches : (CG) perce la base (ABC) au seul point C, qui n\'est pas sur (AB), et elles ne sont pas parallèles.' },
+        { question: 'Deux droites se croisent sur le dessin : sont-elles sécantes ?', reponse: 'Pas forcément : en perspective, des droites gauches semblent souvent se couper.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -458,6 +494,18 @@ export const geometrieDansEspace: ChapterContent = {
       number: 4,
       title: "Position d'une droite par rapport à un plan",
       kicker: 'incluse, parallèle ou sécante — 3 questions, toujours dans le même ordre',
+      titreCourt: 'Droite et plan',
+      partie: 'Dessiner l\'espace, positionner droites et plans',
+      essentiel: [
+        'Trois questions, dans cet ordre : les 2 points de la droite sont-ils dans le plan (**incluse**) ? Sinon, la droite est-elle parallèle à une droite du plan (**parallèle**) ? Sinon, elle est **sécante**.',
+        'Le plan est toujours infini : le point d\'intersection peut tomber sur un sommet, à l\'intérieur d\'une arête ou en dehors du solide dessiné.',
+      ],
+      cartes: [
+        { question: 'Quelles sont les trois positions possibles d\'une droite par rapport à un plan ?', reponse: 'Incluse, parallèle ou sécante.' },
+        { question: 'Dans le cube ABCDEFGH, position de (AB) par rapport au plan (EFGH) ?', reponse: 'Parallèle : (AB) est parallèle à (EF), une droite du plan.' },
+        { question: 'Dans le même cube, position de (AG) par rapport au plan (EFGH) ?', reponse: 'Sécante, au sommet G.' },
+        { question: 'Le point d\'intersection doit-il tomber sur le solide dessiné ?', reponse: 'Non : le plan est infini, le point peut tomber en dehors du solide.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Position d\'une droite par rapport à un plan et positions de deux plans', youtubeId: 'FFn-DPGPEZE' },
         {
@@ -595,6 +643,17 @@ export const geometrieDansEspace: ChapterContent = {
       number: 5,
       title: 'Positions de deux plans',
       kicker: 'parallèles, ou sécants suivant une droite — jamais un point isolé',
+      titreCourt: 'Positions de deux plans',
+      partie: 'Dessiner l\'espace, positionner droites et plans',
+      essentiel: [
+        'Deux plans distincts sont **parallèles** (aucun point commun) ou **sécants** : leur intersection est alors toujours une droite entière, jamais un point isolé.',
+        'Si un plan coupe deux plans parallèles, les deux droites d\'intersection sont parallèles ; et toute droite qui coupe l\'un de deux plans parallèles coupe l\'autre.',
+      ],
+      cartes: [
+        { question: 'Deux plans sécants peuvent-ils n\'avoir qu\'un seul point commun ?', reponse: 'Non : leur intersection est toujours une droite entière.' },
+        { question: 'Le plan (ACGE) coupe les faces opposées (ABCD) et (EFGH) du cube : que dire de (AC) et (EG) ?', reponse: 'Elles sont parallèles.' },
+        { question: 'I milieu de [AE], J milieu de [BF] : position des plans (ABJ) et (EFI) ?', reponse: 'Confondus : c\'est le plan de la face ABFE.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -718,6 +777,17 @@ export const geometrieDansEspace: ChapterContent = {
       number: 6,
       title: 'Positions de trois plans',
       kicker: 'droites d\'intersection sécantes en un point, parallèles, ou confondues',
+      titreCourt: 'Trois plans',
+      partie: 'Dessiner l\'espace, positionner droites et plans',
+      essentiel: [
+        'Trois plans sécants deux à deux : leurs droites d\'intersection sont **sécantes en un même point**, **parallèles**, ou **confondues** — jamais quelconques.',
+        'Méthode : la droite d\'intersection d de deux des plans, puis la position de d par rapport au troisième — elle le perce (un seul point commun), y est incluse (une droite commune) ou lui est parallèle (aucun point commun).',
+      ],
+      cartes: [
+        { question: 'Quels sont les trois cas pour trois plans sécants deux à deux ?', reponse: 'Droites d\'intersection sécantes en un point (le coin d\'une pièce), parallèles (le Toblerone) ou confondues (les pages d\'un livre).' },
+        { question: 'Deux des trois plans sont parallèles : combien de points communs aux trois ?', reponse: 'Aucun.' },
+        { question: 'Les plans (ABC), (ABF) et (DCF) du cube ont-ils un point commun ?', reponse: 'Non : (AB) est parallèle à (DCF) sans y être incluse.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Trois plans, critères de parallélisme et point de percée', youtubeId: 'k6hI1gqH1Eo' },
         {
@@ -834,6 +904,18 @@ export const geometrieDansEspace: ChapterContent = {
       number: 7,
       title: "Critères de parallélisme dans l'espace",
       kicker: '3 critères à connaître, chacun ramène à une comparaison de directions',
+      titreCourt: 'Critères de parallélisme',
+      partie: 'Dessiner l\'espace, positionner droites et plans',
+      essentiel: [
+        'Une droite est parallèle à un plan si elle est parallèle à **une droite de ce plan** ; deux plans sont parallèles si deux droites **sécantes** du premier sont parallèles à deux droites du second.',
+        'Par un point, il ne passe qu\'une seule parallèle à une droite donnée. Prouver un parallélisme, c\'est toujours le prouver entre deux **droites**, dans une figure plane (parallélogramme, droite des milieux).',
+      ],
+      cartes: [
+        { question: 'Quand une droite est-elle parallèle à un plan ?', reponse: 'Quand elle est parallèle à une droite de ce plan.' },
+        { question: 'Quand deux plans sont-ils parallèles ?', reponse: 'Quand deux droites sécantes du premier sont parallèles à deux droites du second.' },
+        { question: 'Tétraèdre ABCD, I et J milieux de [DA] et [DB] : pourquoi (IJ) est-elle parallèle au plan (ABC) ?', reponse: 'Par la droite des milieux, (IJ) est parallèle à (AB), une droite du plan (ABC).' },
+        { question: 'Deux droites sans point commun sont-elles forcément parallèles ?', reponse: 'Non : elles peuvent être gauches.' },
+      ],
       blocks: [
         {
           kind: 'methode',
@@ -922,6 +1004,18 @@ export const geometrieDansEspace: ChapterContent = {
       number: 8,
       title: 'Point de percée et intersection de deux plans',
       kicker: 'un plan auxiliaire pour ramener un problème 3D à une intersection 2D',
+      titreCourt: 'Point de percée',
+      partie: 'Constructions sur un solide',
+      essentiel: [
+        'Point de percée de d dans α : un plan auxiliaire π qui contient d et coupe α, la droite b commune à π et α, puis l\'intersection de d et b, coplanaires dans π.',
+        'Intersection de deux plans sécants : deux points distincts communs aux deux plans, ou un point commun et la direction de la droite.',
+      ],
+      cartes: [
+        { question: 'Quelles conditions doit remplir le plan auxiliaire π ?', reponse: 'Il contient la droite d et il est sécant au plan α.' },
+        { question: 'À quoi le plan auxiliaire ramène-t-il le problème ?', reponse: 'À l\'intersection de deux droites coplanaires : d et la droite b commune à π et α.' },
+        { question: 'Que faut-il pour trouver la droite d\'intersection de deux plans ?', reponse: 'Deux points distincts communs aux deux plans.' },
+        { question: 'Quelle est l\'intersection des plans (ACGE) et (BDHF) du cube ?', reponse: 'La droite (OO′), qui joint le centre O de ABCD et le centre O′ de EFGH.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -1047,6 +1141,19 @@ export const geometrieDansEspace: ChapterContent = {
       number: 9,
       title: "Section plane d'un solide",
       kicker: 'chaque face traversée fournit exactement 2 sommets de la section',
+      titreCourt: 'Section plane',
+      partie: 'Constructions sur un solide',
+      essentiel: [
+        'Un plan transversal coupe un solide convexe suivant **un unique polygone fermé** ; chaque face traversée apporte exactement **deux** sommets de la section.',
+        'Deux coups, répétés jusqu\'à fermeture : un **segment direct** dès qu\'une face a ses 2 points connus ; sinon un **point auxiliaire**, au croisement de deux droites d\'une même face, l\'une dans le plan de coupe, l\'autre dans le plan de la face visée.',
+        'Un seul point connu sur une face ne suffit jamais pour tracer son côté de section.',
+      ],
+      cartes: [
+        { question: 'Combien de sommets de la section chaque face traversée apporte-t-elle ?', reponse: 'Exactement deux.' },
+        { question: 'Une face n\'a qu\'un seul point de section connu : peut-on tracer son côté ?', reponse: 'Non : il faut les deux points de la même face avant de les relier.' },
+        { question: 'Comment construit-on un point auxiliaire ?', reponse: 'On croise deux droites d\'une même face : l\'une dans le plan de coupe, l\'autre dans le plan de la face visée.' },
+        { question: 'Sur un parallélépipède, que dire des côtés de section sur deux faces opposées ?', reponse: 'Ils sont parallèles : un plan coupe deux plans parallèles suivant deux droites parallèles.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Section plane d\'un solide', youtubeId: 'Px1zuBUYsw0' },
         {
@@ -1288,6 +1395,16 @@ export const geometrieDansEspace: ChapterContent = {
       number: 10,
       title: 'La fenêtre de Dürer : le dispositif de la perspective centrale',
       kicker: 'vision monoculaire à travers une vitre quadrillée — un cadre popularisé par Dürer',
+      titreCourt: 'La fenêtre de Dürer',
+      partie: 'Perspective centrale et ombres',
+      essentiel: [
+        'La fenêtre de Dürer : le peintre regarde la scène d\'un seul œil (vision **monoculaire**) à travers une vitre quadrillée, puis reporte où les lignes de vision coupent le quadrillage.',
+        'Un objet proche et petit et un objet éloigné et grand qui traversent la vitre au même endroit ont la même taille apparente.',
+      ],
+      cartes: [
+        { question: 'Pourquoi le peintre ferme-t-il un œil ?', reponse: 'Pour que toute la scène se projette de façon cohérente sur une seule vitre plane : sa vision est monoculaire.' },
+        { question: 'Que veut dire le mot « perspective » ?', reponse: 'Il vient du latin **perspectiva** : « voir au travers ».' },
+      ],
       blocks: [
         { kind: 'video', title: 'Perspective centrale (fenêtre de Dürer, point de fuite) et ombre au soleil', youtubeId: '-hIwnCIyjFU' },
         {
@@ -1398,6 +1515,18 @@ export const geometrieDansEspace: ChapterContent = {
       number: 11,
       title: 'Point de fuite et construction en perspective centrale',
       kicker: 'toutes les parallèles d\'un plan horizontal convergent vers un point, sur la ligne d\'horizon',
+      titreCourt: 'Point de fuite',
+      partie: 'Perspective centrale et ombres',
+      essentiel: [
+        'Des droites horizontales parallèles qui s\'éloignent (les **fuyantes**) semblent se couper en un même **point de fuite**, sur la ligne d\'horizon, à la hauteur de l\'œil ; chaque direction a son propre point de fuite.',
+        'Les droites parallèles à la vitre (verticales, horizontales de face) restent parallèles sur le dessin.',
+        'Le milieu d\'un segment fuyant se trouve avec les diagonales de la face qui le contient, jamais au milieu de sa longueur dessinée.',
+      ],
+      cartes: [
+        { question: 'Où se trouve la ligne d\'horizon d\'une image ?', reponse: 'À la hauteur de l\'œil du peintre (ou de l\'objectif de l\'appareil photo).' },
+        { question: 'Quelles droites gardent leur parallélisme en perspective centrale ?', reponse: 'Celles qui sont parallèles à la vitre : les verticales et les horizontales de face.' },
+        { question: 'Comment trouver le vrai milieu d\'un segment fuyant ?', reponse: 'Par l\'intersection des diagonales de la face qui le contient.' },
+      ],
       blocks: [
         {
           kind: 'intuition',
@@ -1630,6 +1759,19 @@ export const geometrieDansEspace: ChapterContent = {
       number: 12,
       title: 'Ombre au soleil — projection parallèle',
       kicker: 'la direction n\'est jamais donnée en nombres — seulement par un exemple déjà résolu',
+      titreCourt: 'Ombre au soleil',
+      partie: 'Perspective centrale et ombres',
+      essentiel: [
+        'Au soleil, les rayons sont parallèles : la direction se lit sur un exemple déjà résolu, puis on mène par chaque point la parallèle à cette direction, jusqu\'au sol ou au premier obstacle.',
+        'Le sens compte : une direction de sens opposé projette l\'ombre du mauvais côté, et la verticale n\'est pas la direction du soleil.',
+        'Sous une lampe, les rayons partent tous de la lampe (projection centrale) : les ombres de poteaux verticaux se rejoignent au pied L₀ de la lampe.',
+      ],
+      cartes: [
+        { question: 'Comment connaît-on la direction du soleil ?', reponse: 'Par un exemple déjà résolu : un point et son ombre déjà connue.' },
+        { question: 'Au soleil, que dire des ombres de deux piquets verticaux ?', reponse: 'Elles sont parallèles.' },
+        { question: 'Sous une lampe, où se rejoignent les ombres de deux poteaux ?', reponse: 'Au pied L₀ de la lampe, juste sous elle.' },
+        { question: 'Un rayon rencontre un obstacle avant le sol : où se forme l\'ombre ?', reponse: 'Sur le premier obstacle rencontré.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -1897,6 +2039,15 @@ export const geometrieDansEspace: ChapterContent = {
       number: 13,
       title: 'Révision — quiz vrai/faux',
       kicker: '245 affirmations en 7 thèmes',
+      titreCourt: 'Révision : vrai ou faux',
+      partie: 'Perspective centrale et ombres',
+      essentiel: [
+        'Le quiz vrai/faux reprend tout le chapitre en 7 thèmes, dans l\'ordre des sections ; le détective d\'erreurs traque la ligne fausse d\'une copie.',
+      ],
+      cartes: [
+        { question: 'Une copie conclut que deux droites sont sécantes parce que leurs traits se croisent sur le dessin. Quelle est l\'erreur ?', reponse: 'Un croisement des traits n\'est pas un point commun : des droites gauches semblent souvent se couper en perspective.' },
+        { question: 'Une copie dessine une profondeur de 4 cm par une fuyante de 4 cm. Quelle est l\'erreur ?', reponse: 'La fuyante n\'est pas réduite : elle doit mesurer 2 cm, à 45°.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Synthèse du chapitre', youtubeId: 'y9OlAV4pqK4' },
         {
