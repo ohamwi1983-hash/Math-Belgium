@@ -1,4 +1,5 @@
-import type { BaremeExercice, BlocCorrection, EtapeCorrection, FragmentConsigne, LigneCalcul, SectionExercice } from "./genererFeuilleExercices";
+import type { BaremeExercice, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, LigneCalcul, SectionExercice } from "./genererFeuilleExercices";
+import { blocsDeColonnes, colonnesReponses, largeurColonneTableau, largeurFragments, largeurLibelleBloc, largeurLibelleTableau, segmentsDuGroupe, type TableauGroupe } from "./grilleCorrection";
 import { decouperLigneCalcul, estLignePiege } from "./corrigeTableau";
 import { LIBELLE_PALIER, type Palier } from "./niveauDifficulte";
 import { blocCorrectionHtml, echapperHtml, fragmentsEnteteHtml, fragmentsVersHtml, grillesLisiblesAImpression } from "./genererFeuilleExercicesHtml";
@@ -1196,6 +1197,147 @@ function questionsEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation
   return deuxColonnes ? `<div class="deux-colonnes">${html}</div>` : html;
 }
 
+/* ----------------------------------------------------------------------------------------------
+ * Grille de correction (document professeur). Décision de l'utilisateur, plus rapide à utiliser :
+ * A. page « Réponses » en tête (toutes les réponses finales, numérotées comme la copie, avec leurs
+ *    points) ; B. question regroupée a), b), c) aux critères identiques → tableau critère × ligne
+ *    (`grilleCorrection.ts::segmentsDuGroupe`) ; C. erreurs fréquentes et réponses acceptées en liste,
+ *    une par ligne, le coût aligné à droite. CSS `STYLE_GRILLE` ajoutée à la SEULE grille : copie,
+ *    corrigé, aménagée et feuille restent identiques.
+ * -------------------------------------------------------------------------------------------- */
+
+/** Largeur utile d'une question de la grille à l'impression (680 px moins les marges du bloc). */
+const LARGEUR_GRILLE = 660;
+
+const STYLE_GRILLE = `
+.grille .rep-page { break-after: page; page-break-after: always; }
+.grille .rep-titre { font-size: 13pt; font-weight: 600; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 6px 0 6px; padding-bottom: 3px; border-bottom: 1.5px solid var(--accent); }
+.grille .rep-partie { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-family: Archivo, Arial, sans-serif; font-size: 9pt; font-weight: 700; color: var(--accent); margin: 10px 0 2px; break-after: avoid; page-break-after: avoid; }
+.grille .rep-bloc { column-gap: 8mm; column-rule: 1px solid var(--filet); font-size: 10.5pt; }
+.grille .rep-c2 { column-count: 2; }
+.grille .rep-c3 { column-count: 3; }
+.grille .rep-q { break-inside: avoid; page-break-inside: avoid; padding: 3px 0; border-bottom: 1px dotted var(--filet); }
+.grille .rep-l { display: grid; grid-template-columns: 1.7em minmax(0, 1fr) auto; column-gap: 6px; align-items: baseline; }
+.grille .rep-n { font-family: Archivo, Arial, sans-serif; font-size: 9.5pt; }
+.grille .rep-lettre { text-align: right; font-weight: 600; }
+.grille .rep-v { min-width: 0; overflow-wrap: anywhere; }
+.grille .rep-p { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 700; white-space: nowrap; }
+.grille .rep-tete .rep-p { color: var(--gris); }
+.grille .tab-g { width: 100%; table-layout: fixed; margin: 4px 0 0; font-size: 10pt; break-inside: avoid; page-break-inside: avoid; }
+.grille .tab-g + .tab-g { margin-top: 6px; }
+.grille .tab-g th, .grille .tab-g td { border: 1px solid var(--filet); padding: 2px 6px; vertical-align: top; text-align: left; }
+.grille .tab-g th { font-family: Archivo, Arial, sans-serif; font-size: 9pt; font-weight: 700; text-align: center; background: var(--fond-doux); }
+.grille .tab-g th.lib { background: none; border-top-color: transparent; border-left-color: transparent; }
+.grille .tab-g .cel { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.grille .tab-g .cel .v { min-width: 0; overflow-wrap: anywhere; }
+.grille .tab-g .cel b { flex: none; white-space: nowrap; }
+.grille .tab-g tr.tot td { font-family: Archivo, Arial, sans-serif; font-size: 9pt; font-weight: 700; background: var(--fond-doux); }
+.grille .lst { margin: 4px 10px 0; font-size: 10pt; color: var(--gris); }
+.grille .lst-t { font-weight: 700; }
+.grille .lst-t.err { color: var(--alerte); }
+.grille .lst-t.ok { color: var(--bon); }
+.grille .lst-l { display: flex; align-items: baseline; gap: 14px; padding: 1px 0 1px 10px; border-bottom: 1px dotted #d5d9df; }
+.grille .lst-l:last-child { border-bottom: 0; }
+.grille .lst-d { flex: 1; min-width: 0; }
+.grille .lst-c { flex: 0 1 auto; max-width: 42%; text-align: right; font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 600; color: var(--encre); }
+`;
+
+/** Ligne de la page « Réponses » : lettre (a), b)… ou rien), réponse finale, points. */
+export interface LigneReponse {
+  lettre: string | null;
+  fragments: FragmentConsigne[];
+  points: number;
+}
+
+/** Réponses finales d'une question, ligne par ligne — même source que l'en-tête de la question dans
+ * la grille (`bareme.reponseFinale`, sinon la réponse brève) : vrai/faux une ligne par affirmation,
+ * question regroupée une ligne par a), b), c). Question ouverte (formule, démonstration) : le corrigé
+ * s'il est court, sinon un renvoi au détail de la question. */
+export function reponsesDeLaQuestion(item: ItemEvaluation, numero: number): LigneReponse[] {
+  if (item.groupe && item.groupe.length > 0) {
+    const pts = pointsDesLignes(item);
+    return item.groupe.map((l, i) => ({ lettre: lettreCle(i), fragments: l.item.bareme?.reponseFinale ?? l.item.reponseBreve ?? [], points: pts[i] }));
+  }
+  if (item.nature === "vraiFaux" && item.correctionDetaillee && item.correctionDetaillee.length > 1) {
+    const pts = pointsParSousQuestion(item);
+    return item.correctionDetaillee.map((e, i) => {
+      const lettre = e.sousQuestion ?? lettreCle(i);
+      return { lettre, fragments: [{ type: "texte", valeur: e.label }], points: pts.get(lettre) ?? 0 };
+    });
+  }
+  const finale = item.bareme?.reponseFinale ?? item.reponseBreve;
+  if (finale && finale.length > 0) return [{ lettre: null, fragments: finale, points: item.points }];
+  const paragraphes = item.correction.flatMap((b) => (b.type === "paragraphe" ? [b.fragments] : []));
+  const joints = paragraphes.flatMap((p, i) => (i === 0 ? p : [{ type: "texte" as const, valeur: " — " }, ...p]));
+  const court = paragraphes.length > 0 && paragraphes.length === item.correction.length && largeurFragments(joints) <= 560;
+  return [{ lettre: null, fragments: court ? joints : [{ type: "texte", valeur: `Voir le détail de la question ${numero}.` }], points: item.points }];
+}
+
+function reponsesQuestionHtml(item: ItemEvaluation, numero: number): string {
+  const lignes = reponsesDeLaQuestion(item, numero);
+  if (lignes.length === 1 && lignes[0].lettre === null) {
+    return `<div class="rep-q"><div class="rep-l"><b class="rep-n">${numero}</b><span class="rep-v">${fragmentsVersHtml(lignes[0].fragments)}</span><span class="rep-p">${nombreFr(lignes[0].points)}</span></div></div>`;
+  }
+  const total = lignes.reduce((t, l) => t + l.points, 0);
+  return `<div class="rep-q"><div class="rep-l rep-tete"><b class="rep-n">${numero}</b><span class="rep-v"></span><span class="rep-p">${nombreFr(total)}</span></div>${lignes
+    .map((l) => `<div class="rep-l"><span class="rep-lettre">${l.lettre ? `${echapperHtml(l.lettre)})` : ""}</span><span class="rep-v">${fragmentsVersHtml(l.fragments)}</span><span class="rep-p">${nombreFr(l.points)}</span></div>`)
+    .join("")}</div>`;
+}
+
+/** Bloc de réponses (une partie d'examen, ou toute l'évaluation) en 1, 2 ou 3 colonnes selon la
+ * plus longue réponse. */
+function blocReponsesHtml(questions: { item: ItemEvaluation; numero: number }[]): string {
+  const largeur = Math.max(0, ...questions.flatMap(({ item, numero }) => reponsesDeLaQuestion(item, numero).map((l) => largeurFragments(l.fragments))));
+  const n = colonnesReponses(largeur);
+  return `<div class="rep-bloc rep-c${n}">${questions.map(({ item, numero }) => reponsesQuestionHtml(item, numero)).join("")}</div>`;
+}
+
+/** Page « Réponses — Série A » en tête de la grille ; examen : un bloc par partie. */
+function pageReponsesHtml(serieLettre: string, sections: { titre?: string; points?: number; questions: { item: ItemEvaluation; numero: number }[] }[]): string {
+  const corps = sections
+    .map((s) => `${s.titre ? `<div class="rep-partie"><span>${echapperHtml(s.titre)}</span>${s.points !== undefined ? `<span class="pts">${pointsTexte(s.points)}</span>` : ""}</div>` : ""}${blocReponsesHtml(s.questions)}`)
+    .join("");
+  return `<section class="rep-page"><h2 class="rep-titre"><span>Réponses — Série <strong>${echapperHtml(serieLettre)}</strong></span><span class="pts">points à droite</span></h2>${corps}</section>`;
+}
+
+function critereGrilleHtml(c: CritereBareme, points: number): string {
+  return `<span>${c.sousQuestion ? `${echapperHtml(c.sousQuestion.replace(/\)$/, ""))}) ` : ""}${c.etape ? `<span class="etape-num">Étape ${c.etape}</span> ` : ""}${fragmentsVersHtml(c.critere)}</span><b>${nombreFr(points)}</b>`;
+}
+
+/** Tableau d'un groupe (B) : une rangée par critère commun, une colonne par ligne a), b), c)…, coupé
+ * en blocs de colonnes au-delà de la largeur imprimable (680 px). */
+function tableauGroupeHtml(t: TableauGroupe): string {
+  const libelle = largeurLibelleTableau(t);
+  const largeurs = t.colonnes.map((_, j) => largeurColonneTableau(t, j));
+  return blocsDeColonnes(largeurs, LARGEUR_GRILLE - libelle)
+    .map((bloc) => {
+      const libelleBloc = largeurLibelleBloc(t, bloc.map((j) => largeurs[j]), LARGEUR_GRILLE);
+      const tete = `<tr><th class="lib"></th>${bloc.map((j) => `<th>${lettreCle(t.colonnes[j])})</th>`).join("")}</tr>`;
+      const rangees = t.rangees
+        .map(
+          (r) =>
+            `<tr><td class="lib">${r.etape ? `<span class="etape-num">Étape ${r.etape}</span> — ` : ""}${fragmentsVersHtml(r.libelle)}</td>${bloc
+              .map((j) => {
+                const c = r.cellules[j];
+                return `<td><div class="cel">${c.valeur ? `<span class="v">${fragmentsVersHtml(c.valeur)}</span>` : "<span></span>"}<b>${nombreFr(c.points)}</b></div></td>`;
+              })
+              .join("")}</tr>`,
+        )
+        .join("");
+      const totaux = `<tr class="tot"><td class="lib">Total</td>${bloc.map((j) => `<td><div class="cel"><span></span><b>${nombreFr(t.totaux[j])}</b></div></td>`).join("")}</tr>`;
+      return `<table class="tab-g"><colgroup><col style="width:${libelleBloc}px">${bloc.map(() => "<col>").join("")}</colgroup><thead>${tete}</thead><tbody>${rangees}${totaux}</tbody></table>`;
+    })
+    .join("");
+}
+
+/** Liste (C) : une entrée par ligne, le coût éventuel aligné à droite. */
+function listeGrilleHtml(classe: "err" | "ok", titre: string, entrees: { texte: string; cout?: string }[]): string {
+  if (entrees.length === 0) return "";
+  return `<div class="lst"><div class="lst-t ${classe}">${titre}</div>${entrees
+    .map((e) => `<div class="lst-l"><span class="lst-d">${e.texte}</span>${e.cout ? `<span class="lst-c">${echapperHtml(e.cout)}</span>` : ""}</div>`)
+    .join("")}</div>`;
+}
+
 /** Bloc d'une question dans la grille de correction (évaluation : `libelle` = processus). */
 function blocGrilleHtml(item: ItemEvaluation, numero: number, libelle: string): string {
   const reponse = item.bareme ? `Réponse : <b>${fragmentsVersHtml(item.bareme.reponseFinale)}</b>` : item.notion ? echapperHtml(item.notion) : "";
@@ -1203,29 +1345,26 @@ function blocGrilleHtml(item: ItemEvaluation, numero: number, libelle: string): 
   if (!item.bareme || item.bareme.criteres.length === 0) {
     return `<section class="q">${tete}<div class="note">Barème global : ${pointsTexte(item.points)}.</div><div style="padding:3px 10px 0">${correctionHtml(item)}</div></section>`;
   }
+  const bareme = item.bareme;
   const pts = pointsCriteres(item);
-  const criteres = item.bareme.criteres
-    .map((c, i) => `<span>${c.sousQuestion ? `${echapperHtml(c.sousQuestion.replace(/\)$/, ""))}) ` : ""}${c.etape ? `<span class="etape-num">Étape ${c.etape}</span> ` : ""}${fragmentsVersHtml(c.critere)}</span><b>${nombreFr(pts[i])}</b>`)
-    .join("");
-  const erreurs = (item.bareme.erreursFrequentes ?? [])
-    .map((e) => `${fragmentsVersHtml(e.description)}${e.cout ? ` → ${echapperHtml(e.cout)}` : ""}`)
-    .join(" ; ");
-  const acceptees = (item.bareme.reponsesAcceptees ?? []).map((r) => fragmentsVersHtml(r)).join(" ; ");
+  const liste = (indices: number[]) => `<div class="criteres">${indices.map((i) => critereGrilleHtml(bareme.criteres[i], pts[i])).join("")}</div>`;
+  const segments = item.groupe && item.groupe.length > 1 ? segmentsDuGroupe(bareme.criteres, pts, item.groupe.length) : null;
+  const criteres = segments ? segments.map((s) => (s.type === "tableau" ? tableauGroupeHtml(s.tableau) : liste(s.indices))).join("") : liste(bareme.criteres.map((_, i) => i));
+  const erreurs = listeGrilleHtml("err", "Erreurs fréquentes", (bareme.erreursFrequentes ?? []).map((e) => ({ texte: fragmentsVersHtml(e.description), cout: e.cout })));
+  const acceptees = listeGrilleHtml("ok", "Accepter", (bareme.reponsesAcceptees ?? []).map((r) => ({ texte: fragmentsVersHtml(r) })));
   const codesLignes = (item.groupe ?? []).map((l, i) => (l.item.code ? `${lettreCle(i)}) ${echapperHtml(l.item.code.code)}` : "")).filter(Boolean);
   const code = item.code ? ` <span class="pts">code ${echapperHtml(item.code.code)}</span>` : codesLignes.length > 0 ? ` <span class="pts">codes ${codesLignes.join(" · ")}</span>` : "";
-  return `<section class="q">${tete}<div class="criteres">${criteres}</div>${
-    erreurs ? `<div class="note"><span class="err">Erreurs fréquentes :</span> ${erreurs}</div>` : ""
-  }${acceptees ? `<div class="note"><span class="ok">Accepter :</span> ${acceptees}</div>` : ""}${code ? `<div class="note">${code}</div>` : ""}</section>`;
+  return `<section class="q">${tete}${criteres}${erreurs}${acceptees}${code ? `<div class="note">${code}</div>` : ""}</section>`;
 }
 
 function grilleHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
   const totaux = totauxParProcessus(items);
   const total = items.reduce((t, it) => t + it.points, 0);
   const resume = `${totaux.map((t) => `${NOM_PROCESSUS[t.processus]} ${nombreFr(t.total)}`).join(" · ")} · <b>Total ${nombreFr(total)}</b>`;
-  const blocs = itemsNumerotes(items)
-    .map(({ item, numero }) => blocGrilleHtml(item, numero, NOM_PROCESSUS[item.processus]))
-    .join("");
-  return `<div class="grille"><div class="tete-grille"><div><span class="surtitre">Document professeur · Série <strong>${echapperHtml(entete.serieLettre)}</strong></span><h1>Grille de correction — ${echapperHtml(titreNettoye(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${blocs}
+  const numerotes = itemsNumerotes(items);
+  const blocs = numerotes.map(({ item, numero }) => blocGrilleHtml(item, numero, NOM_PROCESSUS[item.processus])).join("");
+  const reponses = pageReponsesHtml(entete.serieLettre, [{ questions: numerotes }]);
+  return `<div class="grille"><div class="tete-grille"><div><span class="surtitre">Document professeur · Série <strong>${echapperHtml(entete.serieLettre)}</strong></span><h1>Grille de correction — ${echapperHtml(titreNettoye(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${reponses}${blocs}
 <div class="regle"><span class="sans">RÈGLE</span><span>Une erreur n'est pénalisée qu'une fois : si une valeur fausse est réutilisée correctement dans la suite, la suite rapporte ses points.</span></div>
 <div class="pied"><span>${echapperHtml(titreEvaluation(entete))} · ${echapperHtml(dateEnToutesLettres(entete.date))}</span><span>Ne pas distribuer aux élèves</span></div></div>`;
 }
@@ -1249,7 +1388,7 @@ export async function genererEvaluationHtml(entete: EnteteEvaluation, items: Ite
   return {
     enonce: new Blob([documentHtml(titre, copie, css, cssKatex, "standard", cssCopie)], { type: "text/html;charset=utf-8" }),
     corrige: new Blob([documentHtml(`${titre} — Corrigé`, corrige, css, cssKatex, "standard", cssProfesseur)], { type: "text/html;charset=utf-8" }),
-    grille: new Blob([documentHtml(`${titre} — Grille de correction`, grille, css, cssKatex, "standard", cssProfesseur)], { type: "text/html;charset=utf-8" }),
+    grille: new Blob([documentHtml(`${titre} — Grille de correction`, grille, css, cssKatex, "standard", `${cssProfesseur}${STYLE_GRILLE}`)], { type: "text/html;charset=utf-8" }),
   };
 }
 
@@ -1421,7 +1560,11 @@ function grilleExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, item
       return `${ouverturePartieHtml(examen, partie)}${qs}`;
     })
     .join("");
-  return `<div class="grille"><div class="tete-grille"><div><span class="surtitre">Document professeur · Examen · Série <strong>${echapperHtml(entete.serieLettre)}</strong></span><h1>Grille de correction — ${echapperHtml(titreExamen(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${blocs}
+  const reponses = pageReponsesHtml(
+    entete.serieLettre,
+    parties.map((p) => ({ titre: `Partie ${p.romain} · ${p.titre}`, points: totalPartie(p), questions: p.questions.map(({ element, numero }) => ({ item: element, numero })) })),
+  );
+  return `<div class="grille"><div class="tete-grille"><div><span class="surtitre">Document professeur · Examen · Série <strong>${echapperHtml(entete.serieLettre)}</strong></span><h1>Grille de correction — ${echapperHtml(titreExamen(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${reponses}${blocs}
 <div class="regle"><span class="sans">RÈGLE</span><span>Une erreur n'est pénalisée qu'une fois : si une valeur fausse est réutilisée correctement dans la suite, la suite rapporte ses points.</span></div>
 <div class="pied"><span>${echapperHtml(examenDeSession(examen.session))} · ${echapperHtml(dateEnToutesLettres(entete.date))}</span><span>Ne pas distribuer aux élèves</span></div></div>`;
 }
@@ -1444,7 +1587,7 @@ async function genererExamenHtml(entete: EnteteEvaluation, examen: ExamenDocumen
   return {
     enonce: new Blob([documentHtml(titre, copie, css, cssKatex, "standard", cssCopie)], { type: "text/html;charset=utf-8" }),
     corrige: new Blob([documentHtml(`${titre} — Corrigé`, corrige, css, cssKatex, "standard", cssProfesseur)], { type: "text/html;charset=utf-8" }),
-    grille: new Blob([documentHtml(`${titre} — Grille de correction`, grille, css, cssKatex, "standard", cssProfesseur)], { type: "text/html;charset=utf-8" }),
+    grille: new Blob([documentHtml(`${titre} — Grille de correction`, grille, css, cssKatex, "standard", `${cssProfesseur}${STYLE_GRILLE}`)], { type: "text/html;charset=utf-8" }),
   };
 }
 

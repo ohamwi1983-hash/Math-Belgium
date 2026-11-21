@@ -30,6 +30,7 @@ import {
   pointsCriteres,
   pointsParSousQuestion,
   pointsTexte,
+  reponsesDeLaQuestion,
   TEXTE_CONSIGNES,
   titreEvaluation,
   titreExamen,
@@ -43,7 +44,8 @@ import {
   SEUIL_DEUX_FIGURES,
 } from "./assemblerEvaluationHtml";
 import { etiquetteQuestion, fragmentsConsigne, lignePartie, NOM_PROCESSUS_EXAMEN, type PartieExamen } from "./examen";
-import type { BlocCorrection, EtapeCorrection, LigneCalcul } from "./genererFeuilleExercices";
+import type { BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, LigneCalcul } from "./genererFeuilleExercices";
+import { blocsDeColonnes, colonnesReponses, largeurColonneTableau, largeurFragments, largeurLibelleBloc, largeurLibelleTableau, segmentsDuGroupe, type TableauGroupe } from "./grilleCorrection";
 import { decouperLigneCalcul, estLignePiege } from "./corrigeTableau";
 import { cartoucheEffectif, morceauxSurtitre } from "./cartouche";
 
@@ -662,6 +664,147 @@ export async function genererCorrigeEvaluationDocx(entete: EnteteEvaluation, ite
   return documentDocx(enfants, piedDocx(entete.serieLettre, "Corrigé · document du professeur"));
 }
 
+/* ----------------------------------------------------------------------------------------------
+ * Grille Word plus rapide à utiliser (mêmes règles que la grille HTML, `grilleCorrection.ts`) :
+ * A. page « Réponses », B. tableau critère × ligne d'un groupe a), b), c), C. listes une par ligne.
+ * -------------------------------------------------------------------------------------------- */
+
+/** Largeur imprimable de la grille HTML (px) ↔ largeur utile Word (twips). */
+const PX_GRILLE = 660;
+const TWIPS_PAR_PX = LARGEUR_UTILE / PX_GRILLE;
+const BORDS_VIDES = BORDS_INVISIBLES;
+const FILET = { style: BorderStyle.SINGLE, size: 4, color: "B9BEC7" } as const;
+
+async function ligneReponseDocx(lettre: string | null, numero: number | null, fragments: FragmentConsigne[], points: number, largeur: number, gris = false): Promise<Paragraph> {
+  const tete: ParagraphChild[] = numero !== null ? [new TextRun({ text: `${numero}`, bold: true, size: 19 })] : lettre ? [new TextRun({ text: `${lettre})`, bold: true, size: 19 })] : [];
+  return new Paragraph({
+    children: [...tete, new TextRun({ text: "\t", size: 19 }), ...(await fragmentsVersRunsDocx(fragments)), new TextRun({ text: `\t${nombreFr(points)}`, bold: true, size: 17, color: gris ? GRIS : undefined })],
+    tabStops: [
+      { type: TabStopType.LEFT, position: 400 },
+      { type: TabStopType.RIGHT, position: Math.max(800, largeur - 160) },
+    ],
+    indent: { left: 400, hanging: 400 },
+    spacing: { before: 0, after: 20 },
+  });
+}
+
+/** A : « Réponses — Série A », questions réparties en 1 à 3 colonnes (une cellule de tableau sans
+ * bordure par colonne, remplie de haut en bas comme les colonnes de la grille HTML). */
+async function pageReponsesDocx(serieLettre: string, sections: { titre?: string; points?: number; questions: { item: ItemEvaluation; numero: number }[] }[]): Promise<FileChild[]> {
+  const res: FileChild[] = [
+    new Paragraph({
+      children: [new TextRun({ text: "Réponses — Série ", bold: true, size: 26 }), new TextRun({ text: serieLettre, bold: true, size: 26 }), new TextRun({ text: "\tpoints à droite", size: 16, color: GRIS })],
+      tabStops: [{ type: TabStopType.RIGHT, position: LARGEUR_UTILE }],
+      border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: ACCENT, space: 2 } },
+      spacing: { before: 120, after: 100 },
+    }),
+  ];
+  for (const s of sections) {
+    if (s.questions.length === 0) continue;
+    if (s.titre) {
+      res.push(
+        new Paragraph({
+          children: [new TextRun({ text: s.titre, bold: true, color: ACCENT, size: 18 }), ...(s.points !== undefined ? [new TextRun({ text: `\t${pointsTexte(s.points)}`, size: 16, color: GRIS })] : [])],
+          tabStops: [{ type: TabStopType.RIGHT, position: LARGEUR_UTILE }],
+          spacing: { before: 140, after: 40 },
+          keepNext: true,
+        }),
+      );
+    }
+    const blocs = s.questions.map(({ item, numero }) => ({ numero, lignes: reponsesDeLaQuestion(item, numero) }));
+    const n = colonnesReponses(Math.max(0, ...blocs.flatMap((b) => b.lignes.map((l) => largeurFragments(l.fragments)))));
+    const largeur = Math.floor(LARGEUR_UTILE / n);
+    // Répartition équilibrée en nombre de lignes, de haut en bas puis colonne suivante.
+    const poids = blocs.map((b) => (b.lignes.length === 1 && b.lignes[0].lettre === null ? 1 : b.lignes.length + 1));
+    const totalPoids = poids.reduce((t, p) => t + p, 0);
+    const colonnes: (typeof blocs)[] = Array.from({ length: n }, () => []);
+    let cumul = 0;
+    blocs.forEach((b, i) => {
+      const k = Math.min(n - 1, Math.floor((cumul / totalPoids) * n + 1e-9));
+      colonnes[k].push(b);
+      cumul += poids[i];
+    });
+    const cellules: TableCell[] = [];
+    for (const col of colonnes) {
+      const paragraphes: Paragraph[] = [];
+      for (const b of col) {
+        if (b.lignes.length === 1 && b.lignes[0].lettre === null) paragraphes.push(await ligneReponseDocx(null, b.numero, b.lignes[0].fragments, b.lignes[0].points, largeur));
+        else {
+          paragraphes.push(await ligneReponseDocx(null, b.numero, [], b.lignes.reduce((t, l) => t + l.points, 0), largeur, true));
+          for (const l of b.lignes) paragraphes.push(await ligneReponseDocx(l.lettre, null, l.fragments, l.points, largeur));
+        }
+        paragraphes.push(new Paragraph({ children: [], border: { bottom: { style: BorderStyle.DOTTED, size: 4, color: "B9BEC7", space: 1 } }, spacing: { before: 0, after: 40 } }));
+      }
+      cellules.push(new TableCell({ children: paragraphes.length ? paragraphes : [new Paragraph({ children: [] })], width: { size: largeur, type: WidthType.DXA }, borders: { top: SANS_BORD, bottom: SANS_BORD, left: SANS_BORD, right: SANS_BORD } }));
+    }
+    res.push(new Table({ width: { size: LARGEUR_UTILE, type: WidthType.DXA }, columnWidths: colonnes.map(() => largeur), borders: BORDS_VIDES, rows: [new TableRow({ children: cellules })] }));
+  }
+  return res;
+}
+
+/** Critères en liste (affichage historique : « a) Étape 1 critère … points »). */
+async function listeCriteresDocx(criteres: CritereBareme[], pts: number[], indices: number[]): Promise<Table> {
+  const lignes: TableRow[] = [];
+  for (const i of indices) {
+    const c = criteres[i];
+    const prefixe = `${c.sousQuestion ? `${c.sousQuestion.replace(/\)$/, "")}) ` : ""}${c.etape ? `Étape ${c.etape} ` : ""}`;
+    lignes.push(
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [...(prefixe ? [new TextRun({ text: prefixe, bold: true, color: ACCENT, size: 18 })] : []), ...(await fragmentsVersRunsDocx(c.critere))] })], width: { size: 85, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: nombreFr(pts[i]), bold: true })], alignment: AlignmentType.RIGHT })], width: { size: 15, type: WidthType.PERCENTAGE } }),
+        ],
+      }),
+    );
+  }
+  return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, columnWidths: [Math.round(LARGEUR_UTILE * 0.85), Math.round(LARGEUR_UTILE * 0.15)], rows: lignes });
+}
+
+/** B : tableau d'un groupe, coupé en blocs de colonnes comme la grille HTML. */
+async function tableauGroupeDocx(t: TableauGroupe): Promise<FileChild[]> {
+  const largeurs = t.colonnes.map((_, j) => largeurColonneTableau(t, j));
+  const res: FileChild[] = [];
+  for (const bloc of blocsDeColonnes(largeurs, PX_GRILLE - largeurLibelleTableau(t))) {
+    const libelle = Math.round(largeurLibelleBloc(t, bloc.map((j) => largeurs[j]), PX_GRILLE) * TWIPS_PAR_PX);
+    const largeurCol = Math.floor((LARGEUR_UTILE - libelle) / bloc.length);
+    const cel = (enfants: ParagraphChild[], largeur: number, options?: { fond?: string; centre?: boolean }) =>
+      new TableCell({
+        children: [new Paragraph({ children: enfants, alignment: options?.centre ? AlignmentType.CENTER : undefined, tabStops: [{ type: TabStopType.RIGHT, position: Math.max(400, largeur - 200) }] })],
+        width: { size: largeur, type: WidthType.DXA },
+        shading: options?.fond ? { type: ShadingType.CLEAR, color: "auto", fill: options.fond } : undefined,
+      });
+    const rangees: TableRow[] = [new TableRow({ tableHeader: true, cantSplit: true, children: [cel([], libelle), ...bloc.map((j) => cel([new TextRun({ text: `${LETTRES[t.colonnes[j]] ?? t.colonnes[j] + 1})`, bold: true, size: 18 })], largeurCol, { fond: "EEF3F8", centre: true }))] })];
+    for (const r of t.rangees) {
+      const lib: ParagraphChild[] = [...(r.etape ? [new TextRun({ text: `Étape ${r.etape} — `, bold: true, color: ACCENT, size: 17 })] : []), ...(await fragmentsVersRunsDocx(r.libelle))];
+      const cellules: TableCell[] = [cel(lib, libelle)];
+      for (const j of bloc) {
+        const c = r.cellules[j];
+        cellules.push(cel([...(c.valeur ? await fragmentsVersRunsDocx(c.valeur) : []), new TextRun({ text: `\t${nombreFr(c.points)}`, bold: true })], largeurCol));
+      }
+      rangees.push(new TableRow({ cantSplit: true, children: cellules }));
+    }
+    rangees.push(new TableRow({ cantSplit: true, children: [cel([new TextRun({ text: "Total", bold: true, size: 18 })], libelle, { fond: "EEF3F8" }), ...bloc.map((j) => cel([new TextRun({ text: `\t${nombreFr(t.totaux[j])}`, bold: true })], largeurCol, { fond: "EEF3F8" }))] }));
+    res.push(new Table({ width: { size: LARGEUR_UTILE, type: WidthType.DXA }, columnWidths: [libelle, ...bloc.map(() => largeurCol)], borders: { top: FILET, bottom: FILET, left: FILET, right: FILET, insideHorizontal: FILET, insideVertical: FILET }, rows: rangees }));
+    res.push(new Paragraph({ children: [], spacing: { before: 0, after: 40 } }));
+  }
+  return res;
+}
+
+/** C : titre (« Erreurs fréquentes », « Accepter ») puis une ligne par entrée, le coût à droite. */
+async function listeGrilleDocx(titre: string, couleur: string, entrees: { fragments: FragmentConsigne[]; cout?: string }[]): Promise<FileChild[]> {
+  const rangees: TableRow[] = [];
+  const avecCout = entrees.some((e) => e.cout);
+  for (const e of entrees) {
+    const desc = new TableCell({ children: [new Paragraph({ children: await fragmentsVersRunsDocx(e.fragments), indent: { left: 200 } })], width: { size: avecCout ? 68 : 100, type: WidthType.PERCENTAGE }, borders: { top: SANS_BORD, left: SANS_BORD, right: SANS_BORD, bottom: { style: BorderStyle.DOTTED, size: 4, color: "D5D9DF" } } });
+    const cout = new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: e.cout ?? "", bold: true, size: 17 })], alignment: AlignmentType.RIGHT })], width: { size: 32, type: WidthType.PERCENTAGE }, borders: { top: SANS_BORD, left: SANS_BORD, right: SANS_BORD, bottom: { style: BorderStyle.DOTTED, size: 4, color: "D5D9DF" } } });
+    rangees.push(new TableRow({ cantSplit: true, children: avecCout ? [desc, cout] : [desc] }));
+  }
+  return [
+    new Paragraph({ children: [new TextRun({ text: titre, bold: true, color: couleur, size: 20 })], spacing: { before: 60 }, keepNext: true }),
+    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, columnWidths: avecCout ? [Math.round(LARGEUR_UTILE * 0.68), Math.round(LARGEUR_UTILE * 0.32)] : [LARGEUR_UTILE], borders: BORDS_VIDES, rows: rangees }),
+  ];
+}
+
 /** Grille de correction Word : même contenu que la grille HTML (document professeur). */
 export async function genererGrilleEvaluationDocx(entete: EnteteEvaluation, items: ItemEvaluation[]): Promise<Blob> {
   const examen = entete.examen;
@@ -695,6 +838,9 @@ export async function genererGrilleEvaluationDocx(entete: EnteteEvaluation, item
     let n = 0;
     for (const p of [1, 2, 3] as const) groupes.push({ ouverture: [], questions: items.filter((it) => it.processus === p).map((item) => ({ item, numero: ++n, libelle: NOM_PROCESSUS[item.processus] })) });
   }
+  // A : page « Réponses — Série A » (examen : un bloc par partie), puis le détail sur une page neuve.
+  enfants.push(...(await pageReponsesDocx(entete.serieLettre, examen ? parties.map((p, k) => ({ titre: `Partie ${p.romain} · ${p.titre}`, points: totalPartie(p), questions: groupes[k].questions })) : [{ questions: groupes.flatMap((g) => g.questions) }])));
+  enfants.push(new Paragraph({ children: [], pageBreakBefore: true, spacing: { before: 0, after: 0 } }));
   for (const groupe of groupes) {
     enfants.push(...groupe.ouverture);
     for (const { item, numero, libelle } of groupe.questions) {
@@ -708,39 +854,18 @@ export async function genererGrilleEvaluationDocx(entete: EnteteEvaluation, item
         continue;
       }
       const pts = pointsCriteres(item);
-      const lignes: TableRow[] = [];
-      for (let i = 0; i < item.bareme.criteres.length; i++) {
-        const c = item.bareme.criteres[i];
-        const prefixe = `${c.sousQuestion ? `${c.sousQuestion.replace(/\)$/, "")}) ` : ""}${c.etape ? `Étape ${c.etape} ` : ""}`;
-        lignes.push(
-          new TableRow({
-            children: [
-              new TableCell({ children: [new Paragraph({ children: [...(prefixe ? [new TextRun({ text: prefixe, bold: true, color: ACCENT, size: 18 })] : []), ...(await fragmentsVersRunsDocx(c.critere))] })], width: { size: 85, type: WidthType.PERCENTAGE } }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: nombreFr(pts[i]), bold: true })], alignment: AlignmentType.RIGHT })], width: { size: 15, type: WidthType.PERCENTAGE } }),
-            ],
-          }),
-        );
+      const bareme = item.bareme;
+      // B : question regroupée aux critères identiques → tableau critère × ligne (sinon liste).
+      const segments = item.groupe && item.groupe.length > 1 ? segmentsDuGroupe(bareme.criteres, pts, item.groupe.length) : null;
+      for (const segment of segments ?? [{ type: "liste" as const, indices: bareme.criteres.map((_, i) => i) }]) {
+        if (segment.type === "tableau") enfants.push(...(await tableauGroupeDocx(segment.tableau)));
+        else enfants.push(await listeCriteresDocx(bareme.criteres, pts, segment.indices));
       }
-      enfants.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, columnWidths: [Math.round(LARGEUR_UTILE * 0.85), Math.round(LARGEUR_UTILE * 0.15)], rows: lignes }));
-      const erreurs = item.bareme.erreursFrequentes ?? [];
-      if (erreurs.length > 0) {
-        const runs: ParagraphChild[] = [new TextRun({ text: "Erreurs fréquentes : ", bold: true, color: ALERTE, size: 20 })];
-        for (let i = 0; i < erreurs.length; i++) {
-          if (i > 0) runs.push(new TextRun({ text: " ; ", size: 20 }));
-          runs.push(...(await fragmentsVersRunsDocx(erreurs[i].description)));
-          if (erreurs[i].cout) runs.push(new TextRun({ text: ` → ${erreurs[i].cout}`, size: 20 }));
-        }
-        enfants.push(new Paragraph({ children: runs, spacing: { before: 60 } }));
-      }
-      const acceptees = item.bareme.reponsesAcceptees ?? [];
-      if (acceptees.length > 0) {
-        const runs: ParagraphChild[] = [new TextRun({ text: "Accepter : ", bold: true, color: BON, size: 20 })];
-        for (let i = 0; i < acceptees.length; i++) {
-          if (i > 0) runs.push(new TextRun({ text: " ; ", size: 20 }));
-          runs.push(...(await fragmentsVersRunsDocx(acceptees[i])));
-        }
-        enfants.push(new Paragraph({ children: runs, spacing: { before: 40 } }));
-      }
+      // C : erreurs fréquentes et réponses acceptées en liste, une par ligne, coût aligné à droite.
+      const erreurs = bareme.erreursFrequentes ?? [];
+      if (erreurs.length > 0) enfants.push(...(await listeGrilleDocx("Erreurs fréquentes", ALERTE, erreurs.map((e) => ({ fragments: e.description, cout: e.cout })))));
+      const acceptees = bareme.reponsesAcceptees ?? [];
+      if (acceptees.length > 0) enfants.push(...(await listeGrilleDocx("Accepter", BON, acceptees.map((r) => ({ fragments: r })))));
       if (item.code) enfants.push(new Paragraph({ children: [new TextRun({ text: `code ${item.code.code}`, size: 16, color: GRIS })], spacing: { before: 40 } }));
       const codesLignes = (item.groupe ?? []).map((l, i) => (l.item.code ? `${LETTRES[i] ?? i + 1}) ${l.item.code.code}` : "")).filter(Boolean);
       if (!item.code && codesLignes.length > 0) enfants.push(new Paragraph({ children: [new TextRun({ text: `codes ${codesLignes.join(" · ")}`, size: 16, color: GRIS })], spacing: { before: 40 } }));
