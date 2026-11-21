@@ -8,6 +8,8 @@
  */
 export type VarianteQuizLimites5e =
   | "reconnaissanceEtCalcul"
+  | "operationsEtFormes"
+  | "gaucheDroiteExistence"
   | "asymptoteOblique"
   | "lectureGraphique"
   | "limitesEnContexte"

@@ -13,6 +13,8 @@ import { BANQUE_QUIZ_LIMITES_5E } from "./banque";
 
 export const CATALOGUE_VARIANTES: { id: VarianteQuizLimites5e; label: string }[] = [
   { id: "reconnaissanceEtCalcul", label: "Limites, reconnaissance et calcul" },
+  { id: "operationsEtFormes", label: "Opérations sur les limites et formes indéterminées" },
+  { id: "gaucheDroiteExistence", label: "Gauche, droite et existence d'une limite" },
   { id: "asymptoteOblique", label: "Asymptote oblique" },
   { id: "lectureGraphique", label: "Limites et asymptotes — lecture graphique" },
   { id: "limitesEnContexte", label: "Limites et asymptotes en contexte" },
@@ -20,6 +22,17 @@ export const CATALOGUE_VARIANTES: { id: VarianteQuizLimites5e; label: string }[]
   { id: "piegesClassiques", label: "Pièges classiques" },
   { id: "transversal", label: "Synthèse transversale du chapitre" },
 ];
+
+/** Taille RÉELLE de la banque d'un thème (`.claude/rules/quiz-generators.md`, piège du nombre fixe). */
+export function nombreQuestions(varianteId: VarianteQuizLimites5e): number {
+  return BANQUE_QUIZ_LIMITES_5E[varianteId].length;
+}
+
+/** Bornes min/max des tailles de thèmes, pour un texte d'accueil toujours exact. */
+export function etendueNombreQuestions(): { min: number; max: number } {
+  const tailles = CATALOGUE_VARIANTES.map((v) => nombreQuestions(v.id));
+  return { min: Math.min(...tailles), max: Math.max(...tailles) };
+}
 
 function tirerQuestion(varianteId: VarianteQuizLimites5e): QuestionVraiFaux5e {
   const banque = BANQUE_QUIZ_LIMITES_5E[varianteId];
@@ -52,9 +65,9 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (20) : sans
- * cette précaution, le tirage indépendant habituel (`genererExerciceQuizLimites5e`) pourrait
- * répéter une question avant d'avoir couvert les 19 autres. État interne (file mélangée, ré-mélangée
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème (`nombreQuestions`) :
+ * sans cette précaution, le tirage indépendant habituel (`genererExerciceQuizLimites5e`) pourrait
+ * répéter une question avant d'avoir couvert les autres. État interne (file mélangée, ré-mélangée
  * à chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de cette fonction
  * — voir `App5gen42.tsx`, qui en crée une par session démarrée.
  */

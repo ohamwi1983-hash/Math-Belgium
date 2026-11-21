@@ -1,0 +1,1 @@
+import './recoupement-widget.js'

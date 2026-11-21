@@ -3,22 +3,23 @@ import type { VarianteQuizLimites5e } from "./core5e/quizLimites5e.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { demarrerSessionQuizLimites5e, soumettreReponseQuizLimites5e } from "./moteur5e/sessionQuizLimites5e";
 import type { EtatSessionQuizLimites5e, ResultatExerciceQuizLimites5e } from "./moteur5e/typesQuizLimites5e";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs5e/quizLimites5e/index";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition, etendueNombreQuestions, nombreQuestions } from "./generateurs5e/quizLimites5e/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import { EtapeQuestionQuizLimites5e } from "./components5e/EtapeQuestionQuizLimites5e";
 import { ResultatPanelQuizLimites5e } from "./components5e/ResultatPanelQuizLimites5e";
 import { ResumeSessionQuizLimites5e } from "./components5e/ResumeSessionQuizLimites5e";
 
-/** `nombreExercices: 20` correspond exactement à la taille de la banque par thème (voir
- * `generateurs5e/quizLimites5e/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 20 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession5e = {
-  nombreExercices: 20,
-  tentativesMax: 1,
-};
+/** `nombreExercices` = taille RÉELLE de la banque du thème (`.claude/rules/quiz-generators.md`,
+ * piège du nombre fixe) : couplé à `creerGenerateurSansRepetition`, une session parcourt toutes les
+ * affirmations du thème choisi sans jamais en répéter une, même si la banque change de taille. */
+function reglagesPour(theme: VarianteQuizLimites5e): ReglagesSession5e {
+  return { nombreExercices: nombreQuestions(theme), tentativesMax: 1 };
+}
+
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizLimites5e): EtatSessionQuizLimites5e {
-  return demarrerSessionQuizLimites5e(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizLimites5e(reglagesPour(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** 5gen42 — "Limites et asymptotes" (quiz vrai/faux), chapitre 4, réplique mécanique du patron quiz
@@ -51,7 +52,7 @@ export function App5gen42() {
     const theme = varianteId as VarianteQuizLimites5e;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizLimites5e(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizLimites5e(reglagesPour(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -82,7 +83,13 @@ export function App5gen42() {
           {!etat ? (
             <div>
               <h2 className="result-title">Choisis un thème</h2>
-              <p className="result-subtitle">7 thèmes, 20 affirmations vrai/faux chacun — révision complète du chapitre.</p>
+              <p className="result-subtitle">
+                {CATALOGUE_VARIANTES.length} thèmes,{" "}
+                {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max
+                  ? `${ETENDUE_QUESTIONS.max} affirmations`
+                  : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max} affirmations`}{" "}
+                vrai/faux chacun — révision complète du chapitre.
+              </p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
                   <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>
