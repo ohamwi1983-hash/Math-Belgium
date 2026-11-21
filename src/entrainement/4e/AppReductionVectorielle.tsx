@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeReductionVectorielle } from "./generateurs/reductionVectorielle/corrigeDetaille";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAideSuivante, demarrerSessionReductionVectorielle, soumettreReponseReduction } from "./moteur/sessionReductionVectorielle";
 import type { EtatSessionReductionVectorielle } from "./moteur/typesReductionVectorielle";
@@ -82,6 +85,7 @@ export function AppReductionVectorielle() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: <Katex expression={`\\vec{${exercice.pointDepart}${exercice.pointArrivee}}`} />,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeReductionVectorielle(exercice), "a")} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

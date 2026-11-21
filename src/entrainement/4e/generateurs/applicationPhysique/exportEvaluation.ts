@@ -1,5 +1,5 @@
 import type { ExerciceApplicationPhysique } from "../../core/applicationPhysique.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { profilApplicationPhysique } from "../profilsEvaluation4eCh6";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
@@ -19,6 +19,8 @@ import {
 import type { LabelGrapheVecteur } from "../../ui/formatApplicationPhysique";
 import { nombreFrLatex } from "../../ui/nombreFr";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceApplicationPhysique } from "./index";
+import { correctionDetailleeApplicationPhysique } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { resultantePencheEnArriere } from "../../moteur/verificationApplicationPhysique";
 
 /**
@@ -411,42 +413,6 @@ function reponseBreve(instance: ExerciceApplicationPhysique): FragmentConsigne[]
   ];
 }
 
-function sansLettre(bloc: BlocCorrection): FragmentConsigne[] {
-  return bloc.type === "paragraphe" ? bloc.fragments.slice(1) : [];
-}
-
-function correctionDetaillee(instance: ExerciceApplicationPhysique): EtapeCorrection[] {
-  const estDroit = instance.variante === "angleDroit";
-  const { v1, v2 } = notationVecteursApplicationPhysique(instance.contexte);
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: estDroit
-        ? [texte("L'angle entre "), latex(v1), texte(" et "), latex(v2), texte(" est droit : le parallélogramme construit sur les deux vecteurs est un rectangle, la résultante (sa diagonale) se calcule par Pythagore.")]
-        : [texte(`L'angle entre `), latex(v1), texte(" et "), latex(v2), texte(` vaut ${instance.angleEntreVecteurs}° : la résultante, diagonale du parallélogramme, se calcule par la loi des cosinus.`)],
-    },
-    { label: "Calcul", sousQuestion: "b", fragments: sansLettre(correctionNorme(instance)) },
-    { label: "Calcul", sousQuestion: "c", fragments: sansLettre(correctionDeviation(instance)) },
-    {
-      label: "Conclusion",
-      sousQuestion: "d",
-      fragments: [
-        texte(
-          `La résultante dévie vers ${instance.coteDeviation === "est" ? "l'Est" : "l'Ouest"} par rapport au premier vecteur (donnée de l'énoncé). L'angle de déviation vaut environ ${formatValeurApplicationPhysique(instance.triangle.C)}°, ${instance.triangle.C < 90 ? "moins" : "plus"} de 90° : la résultante est du côté ${instance.triangle.C < 90 ? "Nord" : "Sud"}. Direction : ${instance.directionCorrecte}.`,
-        ),
-      ],
-    },
-    {
-      label: "Piège",
-      sousQuestion: estDroit ? "c" : "b",
-      fragments: estDroit
-        ? [texte("La déviation se calcule depuis le premier vecteur : "), latex("\\tan = \\dfrac{\\text{côté opposé}}{\\text{côté adjacent}}"), texte(", avec le second vecteur au numérateur — pas l'inverse.")]
-        : [texte("Dans la formule de la résultante, θ est l'angle ENTRE les deux vecteurs issus de la même origine : le terme vaut "), latex("+2\\|\\vec{v_1}\\|\\|\\vec{v_2}\\|\\cos\\theta"), texte(" (signe +), contrairement à la loi des cosinus écrite avec l'angle du triangle.")],
-    },
-  ];
-}
-
 function bareme(instance: ExerciceApplicationPhysique): BaremeExercice {
   const { normeResultante } = notationVecteursApplicationPhysique(instance.contexte);
   return {
@@ -461,15 +427,18 @@ function bareme(instance: ExerciceApplicationPhysique): BaremeExercice {
       instance.variante === "angleDroit"
         ? { description: [texte("Rapport de la tangente inversé (premier vecteur au numérateur)")], cout: "−1" }
         : { description: [texte("Signe « − » devant le terme en cosinus (angle du triangle confondu avec l'angle entre les vecteurs)")], cout: "−1" },
-      { description: [texte("Calculatrice en radians")], cout: "−1" },
+      { description: [texte("Calculatrice qui n'est pas en mode degrés")], cout: "−1" },
     ],
     reponsesAcceptees: [[texte("Déviation à 1° près (selon l'arrondi de la norme utilisé)")]],
   };
 }
 
-/** ★★ angle droit (Pythagore, tangente) ; ★★★ angle quelconque (loi des cosinus, loi des sinus). */
-function difficulte(instance: ExerciceApplicationPhysique): 1 | 2 | 3 {
-  return instance.variante === "angleDroit" ? 2 : 3;
+/** Niveau : configuration (angle θ lu) et direction (côté lu sur la déviation) = écrans de lecture ;
+ * méthode 1 (choisir Pythagore et la tangente, ou la formule de la résultante et la loi des sinus) ;
+ * piège CONSTANT 0 : une déviation obtuse donne la réponse « Sud » de l'écran d, le niveau ne doit pas la trahir ; nombres 1
+ * (calculatrice, valeurs approchées). */
+function criteresDifficulte(instance: ExerciceApplicationPhysique): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeApplicationPhysique(instance), ["a", "d"]), methode: 1, piege: 0, nombres: 1 };
 }
 
 export const adaptateurEvaluationApplicationPhysique: AdaptateurFeuilleExercices<ExerciceApplicationPhysique> = {
@@ -480,12 +449,11 @@ export const adaptateurEvaluationApplicationPhysique: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceApplicationPhysique,
   construireCorrection: construireCorrectionApplicationPhysique,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeApplicationPhysique,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
   profilInstance: profilApplicationPhysique,
   calculatriceIndispensable: true,
   // 4 questions par instance, `enteteHtml` (croquis SVG des vecteurs) : 2 raisons indépendantes déjà

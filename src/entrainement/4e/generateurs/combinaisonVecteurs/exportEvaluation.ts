@@ -1,5 +1,5 @@
 import type { ExerciceCombinaisonVecteurs } from "../../core/combinaisonVecteurs.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, SectionExercice } from "../../../export/genererFeuilleExercices";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { nombreFrLatex } from "../../ui/nombreFr";
 import { LIBELLE_CAS_COMBINAISON, profilCombinaisonVecteurs } from "../profilsEvaluation4eCh6";
@@ -17,6 +17,8 @@ import {
   formatVecteursLibresLatex,
 } from "../../ui/formatCombinaisonVecteurs";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCombinaisonVecteurs } from "./index";
+import { correctionDetailleeCombinaisonVecteurs } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceCombinaisonVecteurs>` pour gen22 (Calcul de
@@ -154,42 +156,6 @@ function reponseBreve(instance: ExerciceCombinaisonVecteurs): FragmentConsigne[]
   return [latex(formatReponseColonneLatex(instance))];
 }
 
-function correctionDetaillee(instance: ExerciceCombinaisonVecteurs): EtapeCorrection[] {
-  const axes = formatSommeAxesLatex(instance);
-  const lignes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: instance.points
-        ? [
-            texte("On distribue les coefficients externes, on remplace "),
-            latex("\\vec{BA}"),
-            texte(" par "),
-            latex("-\\vec{AB}"),
-            texte(", puis on regroupe les vecteurs identiques."),
-          ]
-        : [texte("On distribue les coefficients externes, puis on regroupe les vecteurs identiques.")],
-    },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(formatDistribueLatex(instance))] },
-  ];
-  if (instance.points) lignes.push({ label: "Calcul", sousQuestion: "a", fragments: [latex(formatConvertiLatex(instance))] });
-  lignes.push(
-    { label: "Réduction", sousQuestion: "a", fragments: [latex(formatEquationReduiteLatex(instance))] },
-    { label: "Substitution", sousQuestion: "b", fragments: [latex(formatSubstitutionLatex(instance))] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(`${axes.x} = ${nombreFrLatex(instance.reponse.x)}`)] },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(`${axes.y} = ${nombreFrLatex(instance.reponse.y)}`)] },
-    { label: "Conclusion", sousQuestion: "b", fragments: reponseBreve(instance) },
-    {
-      label: "Piège",
-      sousQuestion: "a",
-      fragments: instance.points
-        ? [latex("\\vec{BA} = -\\vec{AB}"), texte(" : oublier ce changement de signe fausse le regroupement des termes en "), latex("\\vec{AB}"), texte(".")]
-        : [texte("Le coefficient devant une parenthèse multiplie TOUS ses termes, et un signe « − » devant un groupe change le signe de chacun d'eux.")],
-    },
-  );
-  return lignes;
-}
-
 function bareme(instance: ExerciceCombinaisonVecteurs): BaremeExercice {
   return {
     reponseFinale: reponseBreve(instance),
@@ -209,10 +175,10 @@ function bareme(instance: ExerciceCombinaisonVecteurs): BaremeExercice {
   };
 }
 
-/** ★ sans parenthèses ; ★★ parenthèses ou vecteur répété ; ★★★ avec la paire de points AB/BA. */
-function difficulte(instance: ExerciceCombinaisonVecteurs): 1 | 2 | 3 {
-  if (instance.variante === "plate") return 1;
-  return instance.points ? 3 : 2;
+/** Niveau : deux écrans (réduction, composantes) ; méthode imposée (0) ; piège dans les données :
+ * \vec{BA} à retourner (variantes avec points). */
+function criteresDifficulte(instance: ExerciceCombinaisonVecteurs): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeCombinaisonVecteurs(instance)), methode: 0, piege: instance.points ? 1 : 0, nombres: 0 };
 }
 
 export const adaptateurEvaluationCombinaisonVecteurs: AdaptateurFeuilleExercices<ExerciceCombinaisonVecteurs> = {
@@ -223,12 +189,11 @@ export const adaptateurEvaluationCombinaisonVecteurs: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceCombinaisonVecteurs,
   construireCorrection: construireCorrectionCombinaisonVecteurs,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeCombinaisonVecteurs,
   bareme,
   enoncePapier,
-  dureeMinutes: 5,
   profilInstance: profilCombinaisonVecteurs,
   libelleCasParticulier: LIBELLE_CAS_COMBINAISON,
   // Toujours 2 questions substantielles par instance (réduction symbolique, puis calcul numérique),

@@ -8,8 +8,7 @@ import type {
   ExercicePythagore,
   VarianteNormeDistance,
 } from "../../core/normeDistance.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { nombreFrLatex } from "../../ui/nombreFr";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { LIBELLE_CAS_NORME_ENTIERE, profilNormeDistance } from "../profilsEvaluation4eCh6";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
@@ -39,6 +38,8 @@ import {
   segmentsConsigneVecteur,
 } from "../../ui/formatNormeDistance";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceNormeDistance } from "./index";
+import { correctionDetailleeNormeDistance } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceNormeDistance>` pour gen26 (Norme d'un vecteur et
@@ -464,115 +465,6 @@ function reponseBreve(instance: ExerciceNormeDistance): FragmentConsigne[] {
   return [texte(conclusionPythagore(instance))];
 }
 
-const METHODE_NORME: FragmentConsigne[] = [texte("La norme d'un vecteur est la racine carrée de la somme des carrés de ses composantes : "), latex("\\|\\vec{v}\\| = \\sqrt{x^2+y^2}"), texte(".")];
-const PIEGE_CARRE: FragmentConsigne[] = [texte("Le carré d'une composante négative est positif : on écrit "), latex("(-3)^2 = 9"), texte(", jamais "), latex("-3^2"), texte(".")];
-
-function vecteursTriangle(e: ExerciceIsocele | ExercicePythagore): EtapeCorrection {
-  return {
-    label: "Calcul",
-    sousQuestion: "a",
-    fragments: [latex(formatEtatActuelVecteursTriangleLatex(e.labelA, e.labelB, e.labelC, e.vecteurAB, e.vecteurAC, e.vecteurBC))],
-  };
-}
-
-function longueursTriangle(e: ExerciceIsocele | ExercicePythagore): EtapeCorrection {
-  const { labelA: a, labelB: b, labelC: c } = e;
-  return {
-    label: "Calcul",
-    sousQuestion: "b",
-    fragments: [
-      latex(
-        `\\begin{gathered} \\|\\vec{${a}${b}}\\| = ${formuleSubstitueeNormeLatex(e.vecteurAB)} = ${formatLongueurIrreductibleLatex(e.carreAB)} \\\\ \\|\\vec{${a}${c}}\\| = ${formuleSubstitueeNormeLatex(e.vecteurAC)} = ${formatLongueurIrreductibleLatex(e.carreAC)} \\\\ \\|\\vec{${b}${c}}\\| = ${formuleSubstitueeNormeLatex(e.vecteurBC)} = ${formatLongueurIrreductibleLatex(e.carreBC)} \\end{gathered}`,
-      ),
-    ],
-  };
-}
-
-function correctionDetaillee(instance: ExerciceNormeDistance): EtapeCorrection[] {
-  if (instance.variante === "vecteur") {
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: METHODE_NORME },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(`\\|\\vec{${instance.vNom}}\\| = ${formuleSubstitueeNormeLatex(instance.v)} = \\sqrt{${instance.normeCarree}}`)] },
-      { label: "Conclusion", sousQuestion: "a", fragments: reponseBreve(instance) },
-      { label: "Piège", sousQuestion: "a", fragments: PIEGE_CARRE },
-    ];
-  }
-  if (instance.variante === "distance") {
-    const { labelA, pointA, labelB, pointB, vecteurAB, distanceCarree } = instance;
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: [texte(`La distance ${labelA}${labelB} est la norme du vecteur `), latex(`\\vec{${labelA}${labelB}}`), texte(", dont les composantes sont « extrémité moins origine ».")] },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(formatAideVecteurABNiveau2Latex(labelA, pointA, labelB, pointB)), texte(", donc "), latex(formatVecteurLatex(`${labelA}${labelB}`, vecteurAB))] },
-      { label: "Calcul", sousQuestion: "b", fragments: [latex(`${formatAideNormeABNiveau2Latex(labelA, labelB, vecteurAB)} = \\sqrt{${distanceCarree}}`)] },
-      { label: "Conclusion", sousQuestion: "b", fragments: reponseBreve(instance) },
-      { label: "Piège", sousQuestion: "a", fragments: [texte("Soustraire une coordonnée négative revient à ajouter sa valeur absolue : "), latex("2-(-3) = 5"), texte(".")] },
-    ];
-  }
-  if (instance.variante === "isocele") {
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: [texte("On calcule les longueurs des trois côtés (normes des vecteurs côtés) et on les compare : deux côtés égaux donnent un triangle isocèle.")] },
-      vecteursTriangle(instance),
-      longueursTriangle(instance),
-      { label: "Conclusion", sousQuestion: "c", fragments: reponseBreve(instance) },
-      { label: "Piège", sousQuestion: "c", fragments: [texte("Le sommet principal d'un triangle isocèle est le sommet COMMUN aux deux côtés égaux, pas le troisième sommet.")] },
-    ];
-  }
-  if (instance.variante === "parametre") {
-    const { p, r, cibleCarree, a, b, c, discriminant, solutions } = instance;
-    const resolution: FragmentConsigne[] =
-      solutions.length === 0
-        ? [texte("Le discriminant est négatif : l'équation n'a aucune solution réelle.")]
-        : solutions.length === 1
-          ? [texte("Le discriminant est nul : une seule solution, "), latex(`x = \\dfrac{${-b}}{${2 * a}} = ${nombreFrLatex(solutions[0])}`), texte(".")]
-          : [texte("Le discriminant est positif : deux solutions, "), latex(`x = \\dfrac{${-b} \\pm \\sqrt{${discriminant}}}{${2 * a}}`), texte(", soit "), latex(formatSolutionsAttenduesTexte(instance).replace(" ou ", " \\text{ ou } ")), texte(".")];
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: [texte("On élève les deux membres au carré (une norme est positive), on développe, puis on résout l'équation du second degré obtenue.")] },
-      { label: "Relation", sousQuestion: "a", fragments: [latex(formatAideNormeSubstitueeParametreLatex(instance)), texte(", donc "), latex(`${p === 0 ? "x^2" : `(${formatBinomeX(p)})^2`}+${r === 0 ? "x^2" : `(${formatBinomeX(r)})^2`} = ${cibleCarree}`)] },
-      { label: "Réduction", sousQuestion: "a", fragments: [latex(formatEquationReduiteParametreNormeLatex(instance))] },
-      { label: "Calcul", sousQuestion: "b", fragments: [latex(`\\Delta = ${formatTermeCarre(b)}^2-4\\cdot ${a}\\cdot ${formatTermeCarre(c)} = ${nombreFrLatex(discriminant)}`)] },
-      { label: "Conclusion", sousQuestion: "b", fragments: resolution },
-      { label: "Piège", sousQuestion: "a", fragments: [texte("Le carré d'un binôme a trois termes : "), latex("(x-p)^2 = x^2-2px+p^2"), texte(" ; oublier le double produit fausse toute la suite.")] },
-    ];
-  }
-  const { labelA: A, labelB: B, labelC: C, carreAB, carreAC, carreBC, sommetRectangle } = instance;
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("On calcule les longueurs des côtés, puis on teste la réciproque du théorème de Pythagore : le carré du plus grand côté est-il la somme des carrés des deux autres ?")] },
-    vecteursTriangle(instance),
-    longueursTriangle(instance),
-    {
-      label: "Test",
-      sousQuestion: "c",
-      fragments: [
-        latex(`${A}${B}^2 = ${carreAB}`),
-        texte(", "),
-        latex(`${A}${C}^2 = ${carreAC}`),
-        texte(", "),
-        latex(`${B}${C}^2 = ${carreBC}`),
-        texte(" : "),
-        latex(
-          sommetRectangle === "A"
-            ? `${carreBC} = ${carreAB}+${carreAC}`
-            : sommetRectangle === "B"
-              ? `${carreAC} = ${carreAB}+${carreBC}`
-              : sommetRectangle === "C"
-                ? `${carreAB} = ${carreAC}+${carreBC}`
-                : `\\text{aucun carré n'est la somme des deux autres}`,
-        ),
-      ],
-    },
-    { label: "Conclusion", sousQuestion: "c", fragments: [texte(conclusionPythagore(instance))] },
-    { label: "Piège", sousQuestion: "c", fragments: [texte("On compare les CARRÉS des longueurs (entiers), pas les longueurs elles-mêmes ; et on teste le plus grand côté comme hypoténuse.")] },
-  ];
-}
-
-/** « x−3 », « x+2 » (binôme du vecteur à paramètre, même écriture que l'énoncé). */
-function formatBinomeX(valeur: number): string {
-  return valeur > 0 ? `x-${valeur}` : `x+${-valeur}`;
-}
-
-function formatTermeCarre(valeur: number): string {
-  return valeur < 0 ? `(${nombreFrLatex(valeur)})` : nombreFrLatex(valeur);
-}
-
 function bareme(instance: ExerciceNormeDistance): BaremeExercice {
   const carre = { description: [texte("Carré d'une composante négative compté négatif")], cout: "−1" };
   if (instance.variante === "vecteur") {
@@ -633,10 +525,15 @@ function bareme(instance: ExerciceNormeDistance): BaremeExercice {
   };
 }
 
-/** ★ norme d'un vecteur ; ★★ distance, nature, Pythagore ; ★★★ paramètre (équation du second degré). */
-function difficulte(instance: ExerciceNormeDistance): 1 | 2 | 3 {
-  if (instance.variante === "vecteur") return 1;
-  return instance.variante === "parametre" ? 3 : 2;
+/** Niveau : une lettre par écran ; nature du triangle isocèle (longueurs lues et comparées) = écran
+ * de lecture ; les trois longueurs d'un triangle (même calcul répété) = étape SANS charge, comme les
+ * « termes proches » ; méthode 1 pour les triangles et le paramètre (choisir / construire la
+ * relation), 0 sinon ; aucun piège dans les données (Δ < 0, scalène, non rectangle sont des verdicts). */
+function criteresDifficulte(instance: ExerciceNormeDistance): CriteresDifficulte {
+  const triangle = instance.variante === "isocele" || instance.variante === "pythagore";
+  const base = etapesDuCorrige(correctionDetailleeNormeDistance(instance), instance.variante === "isocele" ? ["c"] : []);
+  const methode = triangle || instance.variante === "parametre" ? 1 : 0;
+  return { ...base, lettresSansCharge: [...(base.lettresSansCharge ?? []), ...(triangle ? ["b"] : [])], methode, piege: 0, nombres: 0 };
 }
 
 export const adaptateurEvaluationNormeDistance: AdaptateurFeuilleExercices<ExerciceNormeDistance> = {
@@ -647,12 +544,11 @@ export const adaptateurEvaluationNormeDistance: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteNormeDistance),
   construireEnonce: construireEnonceNormeDistance,
   construireCorrection: construireCorrectionNormeDistance,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeNormeDistance,
   bareme,
   enoncePapier,
-  dureeMinutes: 5,
   profilInstance: profilNormeDistance,
   libelleCasParticulier: LIBELLE_CAS_NORME_ENTIERE,
 };

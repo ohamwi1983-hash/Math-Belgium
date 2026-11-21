@@ -6,7 +6,7 @@ import type {
   ExerciceOrthogonaliteTriangleParametre,
   Sommet,
 } from "../../core/orthogonalite.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { nombreFrLatex } from "../../ui/nombreFr";
 import { profilOrthogonalite } from "../profilsEvaluation4eCh6";
 import { latex, texte } from "../../../export/fragmentsDocx";
@@ -14,8 +14,6 @@ import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
   formatComposantesLatex,
   formatComposantesLinLatex,
-  formatComposantesLinMatriceLatex,
-  formatComposantesMatriceLatex,
   formatEnonceLatex,
   formatEquationReduiteParametreLatex,
   formatReductionLatex,
@@ -26,6 +24,8 @@ import {
   libelleRectangleEn,
 } from "../../ui/formatOrthogonalite";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOrthogonalite } from "./index";
+import { correctionDetailleeOrthogonalite } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceOrthogonalite>` pour gen25 (Orthogonalité et
@@ -163,9 +163,7 @@ function construireEnonceTriangle(instance: ExerciceOrthogonaliteTriangle): Sect
       {
         consigne: [texte("Calcule les composantes des vecteurs "), latex(`\\vec{${labelA}${labelB}}`), texte(", "), latex(`\\vec{${labelA}${labelC}}`), texte(" et "), latex(`\\vec{${labelB}${labelC}}`), texte(".")],
       },
-      {
-        consigne: [texte("Calcule le critère d'orthogonalité en "), latex(labelA), texte(", en "), latex(labelB), texte(", puis en "), latex(labelC), texte(".")],
-      },
+      ...[labelA, labelB, labelC].map((s) => ({ consigne: [texte(`Ce triangle est-il rectangle en ${s} ? Calcule le critère d'orthogonalité correspondant.`)] })),
       {
         consigne: [texte("Ce triangle est-il rectangle ? Si oui, précise en quel sommet.")],
       },
@@ -225,9 +223,7 @@ function construireEnonceTriangleParametre(instance: ExerciceOrthogonaliteTriang
           texte("."),
         ],
       },
-      {
-        consigne: [texte("Réduis le critère d'orthogonalité en "), latex(labelA), texte(", en "), latex(labelB), texte(", puis en "), latex(labelC), texte(" à une équation.")],
-      },
+      ...[labelA, labelB, labelC].map((s) => ({ consigne: [texte(`Réduis le critère d'orthogonalité du sommet ${s} à une équation.`)] })),
       {
         consigne: [texte("Résous la seule équation résolvable, puis conclus : ce triangle est-il rectangle ? Si oui, en quel sommet ?")],
       },
@@ -296,12 +292,6 @@ function construireCorrectionOrthogonalite(instance: ExerciceOrthogonalite): Blo
 // corrigé. Orthogonaux ou non / rectangle ou non (et en quel sommet) est un VERDICT : jamais un cas
 // particulier du tirage.
 
-const METHODE_ORTHO: FragmentConsigne[] = [
-  texte("Deux vecteurs sont orthogonaux si et seulement si "),
-  latex("x_{\\vec u}\\cdot x_{\\vec v} + y_{\\vec u}\\cdot y_{\\vec v} = 0"),
-  texte("."),
-];
-
 function enoncePapier(instance: ExerciceOrthogonalite): EnoncePapier {
   const donnees = latex(formatEnonceLatex(instance));
   if (instance.variante === "test") {
@@ -326,87 +316,6 @@ function reponseBreve(instance: ExerciceOrthogonalite): FragmentConsigne[] {
   if (instance.variante === "parametre") return [latex(`x = ${nombreFrLatex(instance.solutionX)}`)];
   if (instance.variante === "triangle") return [texte(conclusionTriangle(instance))];
   return [latex(`x = ${nombreFrLatex(instance.solutionX)}`), texte(` ; triangle rectangle en ${labelSommet(instance, instance.sommetFixe)}.`)];
-}
-
-function composantesTroisVecteurs(instance: ExerciceOrthogonaliteTriangle | ExerciceOrthogonaliteTriangleParametre): FragmentConsigne[] {
-  const { labelA, labelB, labelC } = instance;
-  const f = (cle: "vecteurAB" | "vecteurAC" | "vecteurBC") =>
-    instance.variante === "triangle" ? formatComposantesMatriceLatex(instance[cle]) : formatComposantesLinMatriceLatex(instance[cle]);
-  return [
-    latex(`\\vec{${labelA}${labelB}} = ${f("vecteurAB")}`),
-    texte(", "),
-    latex(`\\vec{${labelA}${labelC}} = ${f("vecteurAC")}`),
-    texte(" et "),
-    latex(`\\vec{${labelB}${labelC}} = ${f("vecteurBC")}`),
-  ];
-}
-
-function correctionDetaillee(instance: ExerciceOrthogonalite): EtapeCorrection[] {
-  if (instance.variante === "test") {
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: METHODE_ORTHO },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(`${formuleSubstitueeTestLatex(instance)} = ${nombreFrLatex(instance.critere)}`)] },
-      { label: "Conclusion", sousQuestion: "a", fragments: [texte(instance.orthogonaux ? "Le critère est nul : les vecteurs sont orthogonaux." : "Le critère n'est pas nul : les vecteurs ne sont pas orthogonaux.")] },
-      { label: "Piège", sousQuestion: "a", fragments: [texte("On multiplie les composantes de même rang (première avec première, seconde avec seconde) et on ADDITIONNE les deux produits.")] },
-    ];
-  }
-  if (instance.variante === "parametre") {
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: METHODE_ORTHO },
-      { label: "Relation", sousQuestion: "a", fragments: [latex(`${formuleSubstitueeParametreLatex(instance)} = 0`), texte(", soit "), latex(formatEquationReduiteParametreLatex(instance))] },
-      { label: "Résolution", sousQuestion: "b", fragments: [latex(`x = ${nombreFrLatex(instance.solutionX)}`)] },
-      { label: "Piège", sousQuestion: "b", fragments: [texte("En isolant x, le terme constant change de signe en passant dans l'autre membre ; on divise ensuite par le coefficient de x, avec son signe.")] },
-    ];
-  }
-  const { labelA, labelB, labelC } = instance;
-  if (instance.variante === "triangle") {
-    const { critereA, critereB, critereC } = instance;
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: [texte("Le triangle est rectangle en un sommet si les deux côtés issus de ce sommet sont orthogonaux : on teste les trois sommets.")] },
-      { label: "Calcul", sousQuestion: "a", fragments: composantesTroisVecteurs(instance) },
-      { label: "Calcul", sousQuestion: "b", fragments: [texte(`En ${labelA} : `), latex(`${formuleSubstitueeSommetTriangleLatex(instance, "A")} = ${nombreFrLatex(critereA)}`)] },
-      { label: "Calcul", sousQuestion: "b", fragments: [texte(`En ${labelB} : `), latex(`${formuleSubstitueeSommetTriangleLatex(instance, "B")} = ${nombreFrLatex(critereB)}`)] },
-      { label: "Calcul", sousQuestion: "b", fragments: [texte(`En ${labelC} : `), latex(`${formuleSubstitueeSommetTriangleLatex(instance, "C")} = ${nombreFrLatex(critereC)}`)] },
-      {
-        label: "Conclusion",
-        sousQuestion: "c",
-        fragments: [
-          texte(
-            instance.sommetRectangle === null
-              ? "Aucun des trois critères n'est nul : le triangle n'est pas rectangle."
-              : `Le critère en ${labelSommet(instance, instance.sommetRectangle)} est nul : le triangle est rectangle en ${labelSommet(instance, instance.sommetRectangle)}.`,
-          ),
-        ],
-      },
-      { label: "Piège", sousQuestion: "b", fragments: [texte("Au sommet testé, les deux vecteurs doivent PARTIR de ce sommet (en B : BA et BC, pas AB et BC) ; sinon le signe d'un produit change.")] },
-    ];
-  }
-  const { sommetFixe, reductionA, reductionB, reductionC, solutionX } = instance;
-  const reductions: Record<Sommet, string> = { A: formatReductionLatex(reductionA), B: formatReductionLatex(reductionB), C: formatReductionLatex(reductionC) };
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("Le triangle est rectangle en un sommet si les deux côtés issus de ce sommet sont orthogonaux : on écrit la condition en chacun des trois sommets.")] },
-    { label: "Calcul", sousQuestion: "a", fragments: composantesTroisVecteurs(instance) },
-    ...(["A", "B", "C"] as Sommet[]).map(
-      (som): EtapeCorrection => ({
-        label: "Calcul",
-        sousQuestion: "b",
-        fragments: [texte(`En ${labelSommet(instance, som)} : `), latex(`${formuleSubstitueeSommetTriangleParametreLatex(instance, som)} = 0`), texte(", soit "), latex(reductions[som])],
-      }),
-    ),
-    {
-      label: "Résolution",
-      sousQuestion: "c",
-      fragments: [
-        texte(`Seule l'équation du sommet ${labelSommet(instance, sommetFixe)} est du premier degré ; les deux autres, du second degré, n'ont aucune solution réelle. `),
-        latex(reductions[sommetFixe]),
-        texte(" donne "),
-        latex(`x = ${nombreFrLatex(solutionX)}`),
-        texte("."),
-      ],
-    },
-    { label: "Conclusion", sousQuestion: "c", fragments: [texte(`Pour cette valeur, le triangle est rectangle en ${labelSommet(instance, sommetFixe)}.`)] },
-    { label: "Piège", sousQuestion: "b", fragments: [texte("Les composantes contiennent x : développer complètement chaque produit avant de réduire, sans oublier le terme en x² qui apparaît quand deux composantes en x se multiplient.")] },
-  ];
 }
 
 function bareme(instance: ExerciceOrthogonalite): BaremeExercice {
@@ -437,9 +346,11 @@ function bareme(instance: ExerciceOrthogonalite): BaremeExercice {
     return {
       reponseFinale: reponseBreve(instance),
       criteres: [
-        { sousQuestion: "a", critere: [texte("Composantes des trois vecteurs côtés")], points: 1 },
-        { sousQuestion: "b", critere: [texte("Les trois critères calculés (vecteurs issus du sommet testé)")], points: 2 },
-        { sousQuestion: "c", critere: [texte("Conclusion : "), ...reponseBreve(instance)], points: 1 },
+        { sousQuestion: "a", critere: [texte("Composantes des trois vecteurs côtés")], points: 1.5 },
+        { sousQuestion: "b", critere: [texte(`Critère en ${instance.labelA} (vecteurs issus de ${instance.labelA})`)], points: 0.5 },
+        { sousQuestion: "c", critere: [texte(`Critère en ${instance.labelB} (vecteurs issus de ${instance.labelB})`)], points: 0.5 },
+        { sousQuestion: "d", critere: [texte(`Critère en ${instance.labelC} (vecteurs issus de ${instance.labelC})`)], points: 0.5 },
+        { sousQuestion: "e", critere: [texte("Conclusion : "), ...reponseBreve(instance)], points: 1 },
       ],
       erreursFrequentes: [
         { description: [texte("Vecteurs non issus du sommet testé (signe d'un produit faux)")], cout: "−1" },
@@ -452,9 +363,11 @@ function bareme(instance: ExerciceOrthogonalite): BaremeExercice {
     reponseFinale: reponseBreve(instance),
     criteres: [
       { sousQuestion: "a", critere: [texte("Composantes des trois vecteurs côtés (en fonction de x)")], points: 1 },
-      { sousQuestion: "b", critere: [texte("Conditions d'orthogonalité réduites aux trois sommets")], points: 1.5 },
-      { sousQuestion: "c", critere: [texte("Solution : "), latex(`x = ${nombreFrLatex(instance.solutionX)}`)], points: 1 },
-      { sousQuestion: "c", critere: [texte(`Sommet de l'angle droit : ${labelSommet(instance, instance.sommetFixe)}`)], points: 0.5 },
+      { sousQuestion: "b", critere: [texte(`Condition réduite en ${instance.labelA}`)], points: 0.5 },
+      { sousQuestion: "c", critere: [texte(`Condition réduite en ${instance.labelB}`)], points: 0.5 },
+      { sousQuestion: "d", critere: [texte(`Condition réduite en ${instance.labelC}`)], points: 0.5 },
+      { sousQuestion: "e", critere: [texte("Solution : "), latex(`x = ${nombreFrLatex(instance.solutionX)}`)], points: 1 },
+      { sousQuestion: "e", critere: [texte(`Sommet de l'angle droit : ${labelSommet(instance, instance.sommetFixe)}`)], points: 0.5 },
     ],
     erreursFrequentes: [
       { description: [texte("Terme en x² oublié en développant")], cout: "−1" },
@@ -463,10 +376,19 @@ function bareme(instance: ExerciceOrthogonalite): BaremeExercice {
   };
 }
 
-/** ★ test de deux vecteurs ; ★★ paramètre ou triangle ; ★★★ triangle avec paramètre. */
-function difficulte(instance: ExerciceOrthogonalite): 1 | 2 | 3 {
-  if (instance.variante === "test") return 1;
-  return instance.variante === "triangleParametre" ? 3 : 2;
+/** Niveau : une lettre par écran ; « conclusion » du triangle (critères lus et comparés à 0) =
+ * écran de lecture ; méthode 1 pour les triangles (choisir le critère en chaque sommet), 0 sinon ;
+ * piège dans les données : triangle avec x (deux équations du second degré à écarter, Δ < 0). */
+function criteresDifficulte(instance: ExerciceOrthogonalite): CriteresDifficulte {
+  const lecture = instance.variante === "triangle" ? ["e"] : [];
+  const methode = instance.variante === "triangle" || instance.variante === "triangleParametre" ? 1 : 0;
+  const base = etapesDuCorrige(correctionDetailleeOrthogonalite(instance), lecture);
+  // Triangle avec x : les trois réductions (b, c, d) sont le même calcul répété, et l'étape e (deux
+  // discriminants + une équation du premier degré) aussi — étapes SANS charge,
+  // comme les « termes proches » ; sinon leur longueur (qui dépend du sommet de l'angle droit, donc
+  // de la réponse) ferait varier le niveau.
+  const sansCharge = instance.variante === "triangleParametre" ? ["b", "c", "d", "e"] : [];
+  return { ...base, lettresSansCharge: [...(base.lettresSansCharge ?? []), ...sansCharge], methode, piege: instance.variante === "triangleParametre" ? 1 : 0, nombres: 0 };
 }
 
 export const adaptateurEvaluationOrthogonalite: AdaptateurFeuilleExercices<ExerciceOrthogonalite> = {
@@ -477,12 +399,11 @@ export const adaptateurEvaluationOrthogonalite: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceOrthogonalite,
   construireCorrection: construireCorrectionOrthogonalite,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeOrthogonalite,
   bareme,
   enoncePapier,
-  dureeMinutes: 5,
   profilInstance: profilOrthogonalite,
   // PAS regroupable : 1 à 3 questions selon la variante, jamais uniformément 1 seule — voir le
   // commentaire de tête.

@@ -5,7 +5,7 @@ import type {
   ExerciceColinearVecteurs,
   ExerciceColinearite,
 } from "../../core/colinearite.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { nombreFrLatex } from "../../ui/nombreFr";
 import { profilColinearite } from "../profilsEvaluation4eCh6";
 import { latex, texte } from "../../../export/fragmentsDocx";
@@ -15,14 +15,14 @@ import {
   CONSIGNE_REDUCTION_AVEC_X,
   formatComposantesLatex,
   formatComposantesLinLatex,
-  formatComposantesLinMatriceLatex,
-  formatComposantesMatriceLatex,
   formatEnonceLatex,
   formatEquationReduiteLatex,
   formuleSubstitueeReductionLatex,
   formuleSubstitueeTestLatex,
 } from "../../ui/formatColinearite";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceColinearite } from "./index";
+import { correctionDetailleeColinearite } from "./corrigeDetaille";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceColinearite>` pour gen24 (Colinéarité et
@@ -329,53 +329,6 @@ function reponseBreve(instance: ExerciceColinearite): FragmentConsigne[] {
   return [latex(`x = ${nombreFrLatex(instance.solutionX as number)}`)];
 }
 
-const METHODE_CRITERE: FragmentConsigne[] = [
-  texte("Deux vecteurs sont colinéaires si et seulement si "),
-  latex("x_{\\vec u}\\cdot y_{\\vec v} - y_{\\vec u}\\cdot x_{\\vec v} = 0"),
-  texte("."),
-];
-
-function correctionDetaillee(instance: ExerciceColinearite): EtapeCorrection[] {
-  if (instance.variante === "vecteurs") {
-    const c = critereReel(instance);
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: METHODE_CRITERE },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(`${formuleSubstitueeTestLatex(instance)} = ${nombreFrLatex(c)}`)] },
-      { label: "Conclusion", sousQuestion: "a", fragments: [texte(`Le critère ${c === 0 ? "est nul" : "n'est pas nul"} : ${verdict(instance)}`)] },
-      { label: "Piège", sousQuestion: "a", fragments: [texte("Respecter l'ordre des produits en croix et mettre chaque composante négative entre parenthèses : une seule erreur de signe change le verdict.")] },
-    ];
-  }
-  if (instance.variante === "points") {
-    const { labelA, labelB, labelC, vecteurAB, vecteurAC } = instance;
-    const c = critereReel(instance);
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: [texte(`${labelA}, ${labelB} et ${labelC} sont alignés si et seulement si les vecteurs `), latex(`\\vec{${labelA}${labelB}}`), texte(" et "), latex(`\\vec{${labelA}${labelC}}`), texte(", de même origine, sont colinéaires.")] },
-      { label: "Calcul", sousQuestion: "a", fragments: [latex(`\\vec{${labelA}${labelB}} = ${formatComposantesMatriceLatex(vecteurAB)}`), texte(" et "), latex(`\\vec{${labelA}${labelC}} = ${formatComposantesMatriceLatex(vecteurAC)}`)] },
-      { label: "Calcul", sousQuestion: "b", fragments: [latex(`${formuleSubstitueeTestLatex(instance)} = ${nombreFrLatex(c)}`)] },
-      { label: "Conclusion", sousQuestion: "b", fragments: [texte(`Le critère ${c === 0 ? "est nul : les vecteurs sont colinéaires" : "n'est pas nul : les vecteurs ne sont pas colinéaires"}. ${verdict(instance)}`)] },
-      { label: "Piège", sousQuestion: "a", fragments: [texte("Les deux vecteurs doivent avoir la même origine : la colinéarité de deux vecteurs sans point commun ne prouve pas l'alignement (droites parallèles).")] },
-    ];
-  }
-  if (instance.variante === "parametre") {
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: METHODE_CRITERE },
-      { label: "Relation", sousQuestion: "a", fragments: [latex(`${formuleSubstitueeReductionLatex(instance)} = 0`)] },
-      { label: "Réduction", sousQuestion: "a", fragments: [latex(formatEquationReduiteLatex(instance))] },
-      { label: "Résolution", sousQuestion: "b", fragments: [latex(`x = ${nombreFrLatex(instance.solutionX as number)}`)] },
-      { label: "Piège", sousQuestion: "a", fragments: [texte("Développer chaque produit avant de réduire, et distribuer le signe « − » sur tout le second produit.")] },
-    ];
-  }
-  const { labelA, labelB, labelC, vecteurAB, vecteurAC } = instance;
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte(`${labelA}, ${labelB} et ${labelC} sont alignés si et seulement si `), latex(`\\vec{${labelA}${labelB}}`), texte(" et "), latex(`\\vec{${labelA}${labelC}}`), texte(" sont colinéaires.")] },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(`\\vec{${labelA}${labelB}} = ${formatComposantesLinMatriceLatex(vecteurAB)}`), texte(" et "), latex(`\\vec{${labelA}${labelC}} = ${formatComposantesLinMatriceLatex(vecteurAC)}`)] },
-    { label: "Relation", sousQuestion: "b", fragments: [latex(`${formuleSubstitueeReductionLatex(instance)} = 0`)] },
-    { label: "Réduction", sousQuestion: "b", fragments: [latex(formatEquationReduiteLatex(instance))] },
-    { label: "Résolution", sousQuestion: "c", fragments: [latex(`x = ${nombreFrLatex(instance.solutionX as number)}`)] },
-    { label: "Piège", sousQuestion: "a", fragments: [texte("Une composante qui contient x se calcule comme les autres (extrémité moins origine) : garder x dans l'expression, sans le remplacer par une valeur.")] },
-  ];
-}
-
 function bareme(instance: ExerciceColinearite): BaremeExercice {
   const erreurSigne = { description: [texte("Erreur de signe dans les produits en croix")], cout: "−1" };
   if (instance.variante === "vecteurs") {
@@ -427,10 +380,11 @@ function bareme(instance: ExerciceColinearite): BaremeExercice {
   };
 }
 
-/** ★ deux vecteurs ; ★★ trois points ou paramètre ; ★★★ trois points avec paramètre. */
-function difficulte(instance: ExerciceColinearite): 1 | 2 | 3 {
-  if (instance.variante === "vecteurs") return 1;
-  return instance.variante === "pointsParametre" ? 3 : 2;
+/** Niveau : une lettre par écran ; méthode 1 quand l'élève doit choisir deux vecteurs de même
+ * origine (alignement), 0 sinon ; aucun piège dans les données (le verdict est la question). */
+function criteresDifficulte(instance: ExerciceColinearite): CriteresDifficulte {
+  const methode = instance.variante === "points" || instance.variante === "pointsParametre" ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeColinearite(instance)), methode, piege: 0, nombres: 0 };
 }
 
 export const adaptateurEvaluationColinearite: AdaptateurFeuilleExercices<ExerciceColinearite> = {
@@ -441,11 +395,10 @@ export const adaptateurEvaluationColinearite: AdaptateurFeuilleExercices<Exercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceColinearite,
   construireCorrection: construireCorrectionColinearite,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeColinearite,
   bareme,
   enoncePapier,
-  dureeMinutes: 4,
   profilInstance: profilColinearite,
 };

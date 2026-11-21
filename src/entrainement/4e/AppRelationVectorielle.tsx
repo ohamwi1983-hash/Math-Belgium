@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeRelationVectorielle } from "./generateurs/relationVectorielle/corrigeDetaille";
 import type { ReactNode } from "react";
 import type { ExerciceRelationGeneraleRV } from "./core/relationVectorielle.types";
 import type { ReglagesSession } from "./core/session.types";
@@ -156,6 +159,7 @@ export function AppRelationVectorielle() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeRelationVectorielle(exercice), etat.phase === "traduction" || exercice.variante === "translation" ? "a" : "b")} />,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "traduction" ? (
           <Katex expression={formatTraductionAttendueLatex(exercice as ExerciceRelationGeneraleRV)} />
         ) : (
