@@ -58,6 +58,13 @@ function valeurParabole(k: number, r: number, uS: number): string {
   return k === 1 ? inner : k === -1 ? `-(${inner})` : `${q(k)}(${inner})`;
 }
 
+/** Somme de valeurs écrite terme à terme (« 9+1-36+10+16 »), termes nuls omis. */
+function sommeValeurs(vs: number[]): string {
+  const nz = vs.filter((v) => v !== 0);
+  if (nz.length === 0) return "0";
+  return nz.map((v, i) => (i === 0 ? n(v) : plusTerme(v))).join("");
+}
+
 /** Première racine non nulle (une vérification avec 0 ne prouve rien de lisible). */
 function racineAVerifier(racines: number[]): number | undefined {
   return racines.find((r) => r !== 0);
@@ -91,22 +98,27 @@ function correctionCercles(e: E): EtapeCorrection[] {
     [E1 * s.m, s.u],
     [E1 * s.p, ""],
   ]);
-  const lignesB: LigneCalcul[] = [
-    ligne(`${s.v}=${vx}`, `on isole ${s.v} dans l'équation de d`),
+  // Trois blocs (substitution, développement, résolution) : chacun a sa propre grille, ce qui
+  // évite qu'un long membre de gauche et un long membre de droite s'additionnent sur un téléphone.
+  const introSubst: Fr = [t("On isole "), l(s.v), t(" dans l'équation de d : "), l(`${s.v}=${vx}`), t(".")];
+  const lignesSubst: LigneCalcul[] = [
     ligne(`${s.u}^2+(${vx})^2${plusTerme(D1u, s.u)}${E1 === 0 ? "" : produitTerme(E1, vx)}${plusTerme(d1.F)}=0`, [t("on remplace "), l(s.v), t(" dans "), l("c_1")]),
   ];
+  const lignesB: LigneCalcul[] = [];
   if (s.m !== 0) lignesB.push(ligne(`(${vx})^2=${carreDev}`, "on développe le carré"));
   if (E1 !== 0 && s.m !== 0) lignesB.push(ligne(`${produitTerme(E1, vx, true)}=${prodDev}`, "on distribue"));
   lignesB.push(ligne(`${somme([[A, `${s.u}^2`], [B, s.u], [C, ""]])}=0`, "on réduit"));
   if (s.g !== 1) lignesB.push(ligne(`${somme([[A2, `${s.u}^2`], [B2, s.u], [C2, ""]])}=0`, `on divise par ${nombreTexte(s.g)}`));
-  lignesB.push(...lignesDiscriminant(A2, B2, C2, s.u));
+  const lignesRes = lignesDiscriminant(A2, B2, C2, s.u);
   const sortie: EtapeCorrection[] = [
     utilise("a", [t("Un point commun vérifie les deux équations, donc aussi leur différence : en soustrayant membre à membre, "), l("x^2"), t(" et "), l("y^2"), t(" disparaissent et il reste l'équation d'une droite qui contient les points communs "), t(COURS), t(".")]),
     calcul("a", lignesA),
     resultat("a", [l(`d\\equiv ${equationL(e.radicale!)}`)]),
     piege("a", [t("On soustrait chaque terme, constante comprise : "), l("F_1-F_2"), t(" et non "), l("F_1+F_2"), t(".")]),
     utilise("b", [t("On isole la coordonnée de coefficient ±1 dans l'équation de d, puis on remplace dans l'équation de "), l("c_1"), t(" : on obtient une équation du second degré, résolue par le discriminant.")]),
-    calcul("b", lignesB),
+    calcul("b", lignesSubst, introSubst, "Substitution"),
+    calcul("b", lignesB, [], "Développement"),
+    calcul("b", lignesRes, [], "Résolution"),
     resultat("b", reponseRacines(e)),
   ];
   { const r0 = racineAVerifier(s.racines); if (r0 !== undefined) sortie.push(verificationRacine(A2, B2, C2, s.u, r0, "b")); }
@@ -120,7 +132,7 @@ function correctionCercles(e: E): EtapeCorrection[] {
   sortie.push(utilise("c", [t("Chaque solution donne un point commun : son autre coordonnée se calcule avec l'équation de la droite d.")]), calcul("c", lignesC), { ...resultat("c", reponsePoints(e)), figureHtml: figureCorrige(e) });
   if (e.points.length > 0) {
     const P = e.points[0]!;
-    sortie.push(verification("c", [t("Le point "), l(`(${n(P.x)}\\,;${n(P.y)})`), t(" est aussi sur "), l("c_2"), t(" :")], [ligne(`${nbp(P.x)}^2+${nbp(P.y)}^2${termeProduit(d2.D, P.x)}${termeProduit(d2.E, P.y)}${plusTerme(d2.F)}=0`, "il vérifie l'équation de c₂")]));
+    sortie.push(verification("c", [t("Le point "), l(`(${n(P.x)}\\,;${n(P.y)})`), t(" est aussi sur "), l("c_2"), t(" :")], [ligne(`${sommeValeurs([P.x * P.x, P.y * P.y, d2.D * P.x, d2.E * P.y, d2.F])}=0`, [t("on remplace "), l("x"), t(" par "), l(n(P.x)), t(" et "), l("y"), t(" par "), l(n(P.y)), t(" dans l'équation de "), l("c_2")])]));
   }
   sortie.push(piege("c", [t("Un point a deux coordonnées : il faut calculer l'autre coordonnée pour chaque solution.")]));
   return sortie;
@@ -150,7 +162,10 @@ function correctionParabole(e: E): EtapeCorrection[] {
     else if (c === 0) lignesC.push(ligne(`${s.v}=${n(s.vS)}`, just("carré nul : un seul point, le sommet")));
     else {
       const rc = Math.sqrt(c);
-      lignesC.push(ligne(`${s.v}_1=${n(s.vS)}-${n(rc)}`, direct ? just(`les deux racines de ${nombreTexte(c)}`) : [t("on prend les deux racines de "), l(n(c))]), ligne(`=${n(s.vS - rc)}`), ligne(`${s.v}_2=${n(s.vS)}+${n(rc)}`), ligne(`=${n(s.vS + rc)}`));
+      const justR = direct ? just(`les deux racines de ${nombreTexte(c)}`) : [t("on prend les deux racines de "), l(n(c))];
+      // Sommet sur l'axe (v_S = 0) : « x₁ = −2 », jamais « x₁ = 0 − 2 ».
+      if (s.vS === 0) lignesC.push(ligne(`${s.v}_1=${n(-rc)}`, justR), ligne(`${s.v}_2=${n(rc)}`));
+      else lignesC.push(ligne(`${s.v}_1=${n(s.vS)}-${n(rc)}`, justR), ligne(`=${n(s.vS - rc)}`), ligne(`${s.v}_2=${n(s.vS)}+${n(rc)}`), ligne(`=${n(s.vS + rc)}`));
     }
   });
   const sortie: EtapeCorrection[] = [
@@ -159,7 +174,8 @@ function correctionParabole(e: E): EtapeCorrection[] {
     resultat("a", [t("On remplace "), l(carreV), t(" par "), l(second), t(" dans l'équation du cercle.")]),
     piege("a", [t(`Isoler ${u} dans l'équation de la parabole mènerait à une équation de degré 4 : c'est le carré commun qu'on remplace.`)]),
     utilise("b", [t("On développe, on réduit, puis on résout l'équation du second degré par le discriminant.")]),
-    calcul("b", lignesB),
+    calcul("b", lignesB.slice(0, 3), [], "Développement"),
+    calcul("b", lignesB.slice(3), [], "Résolution"),
     resultat("b", reponseRacines(e)),
   ];
   { const r0 = racineAVerifier(s.racines); if (r0 !== undefined) sortie.push(verificationRacine(1, s.B, s.C, u, r0, "b")); }

@@ -154,7 +154,8 @@ function correctionSymetrique(e: E): EtapeCorrection[] {
     verificationSur("A", e.A, p, "p", "a"),
     piege("a", [t("Le vecteur "), l(colonne("-b", "a")), t(" est un vecteur DIRECTEUR de d : le prendre pour p donnerait la parallèle à d passant par A, pas la perpendiculaire.")]),
     utilise("b", utilisePied),
-    calcul("b", lignesPied(e)),
+    calcul("b", lignesPied(e).slice(0, 3), [], "Pied H"),
+    calcul("b", lignesPied(e).slice(3), [], "Coordonnées de H"),
     resultat("b", reponseH(e)),
     verificationSur("H", e.H, e.d, "d", "b"),
     piege("b", [t("On remplace dans l'équation de d, pas dans celle de p : H est le point de p qui est aussi sur d.")]),
@@ -182,32 +183,38 @@ function correctionReflexion(e: E): EtapeCorrection[] {
     ligne(`=${colonne(v.x, v.y)}`),
   ];
   if (g > 1) lignesDroite.push(ligne(`\\vec{w}=${colonne(w.x, w.y)}`, `on divise par ${g} : même direction`));
-  lignesDroite.push(...lignesCartesienne("(A'B)", e.B!, w, "B"));
   const u = unite(e);
   return [
     utilise("a", [t("Trois temps : la perpendiculaire à d par A (vecteur directeur "), l(colonne("a", "b")), t(") "), t(COURS_REL), t(", son pied H sur d "), t(COURS_DIST), t(", puis A′ tel que H soit le milieu de [AA′].")]),
     calcul("a", lignesPerpendiculaire(e), [], "Perpendiculaire"),
-    calcul("a", lignesPied(e), [], "Pied H"),
+    calcul("a", lignesPied(e).slice(0, 3), [], "Pied H"),
+    calcul("a", lignesPied(e).slice(3), [], "Coordonnées de H"),
     calcul("a", lignesSymetrique(e), [], "Symétrique"),
     resultat("a", reponseAp(e)),
     verificationMilieu(e, "a"),
     piege("a", [l("x_{A'}=2x_H-x_A"), t(", pas "), l("2x_A-x_H"), t(" : c'est H, le milieu de [AA′].")]),
     utilise("b", [t("Une droite passant par deux points a pour vecteur directeur le vecteur qui les relie "), t("(cours, § 1)"), t(".")]),
-    calcul("b", lignesDroite),
+    calcul("b", lignesDroite, [], "Vecteur directeur"),
+    // La forme « (A′B) ≡ ax + by + c = 0 » en introduction, puis deux grilles (c, équation) : sur un
+    // téléphone, le long membre de gauche de la substitution et la longue équation ne s'additionnent plus.
+    calcul("b", lignesCartesienne("(A'B)", e.B!, w, "B").slice(1, 4), [t("Avec "), l(`a=${n(w.y)}`), t(" et "), l(`b=${n(-w.x)}`), t(" (vecteur directeur "), l(colonne("-b", "a")), t(") : "), l(lignesCartesienne("(A'B)", e.B!, w, "B")[0]!.latex), t(".")], "Terme constant c"),
+    calcul("b", lignesCartesienne("(A'B)", e.B!, w, "B").slice(4), [], "Équation"),
     resultat("b", reponseApB(e)),
     verificationSur("A'", e.Ap, apb, "(A'B)", "b"),
     piege("b", [t("La droite (AB) ne convient pas : le trajet réfléchi est aligné avec A′, pas avec A.")]),
     utilise("c", [t("I est sur (A′B) et sur d : on remplace x et y des équations paramétriques de (A′B) dans l'équation de d "), t(COURS_INT), t(".")]),
+    calcul("c", [ligne(`(A'B)\\equiv ${parametriquesL(e.Ap, w)}`, [t("passe par A′, vecteur directeur "), l(g > 1 ? "\\vec{w}" : "\\vec{A'B}")])], [], "Équations paramétriques"),
     calcul("c", [
-      ligne(`(A'B)\\equiv ${parametriquesL(e.Ap, w)}`, [t("passe par A′, vecteur directeur "), l(g > 1 ? "\\vec{w}" : "\\vec{A'B}")]),
       ligne(substitutionImpact(e), "on remplace x et y dans l'équation de d"),
       ligne(`${s === 1 ? "" : s === -1 ? "-" : n(s)}t${plusTerme(cst)}=0`, "on distribue et on réduit"),
       ligne(`t=${q(ti)}`, "on isole t"),
+    ], [], "Paramètre de I"),
+    calcul("c", [
       ligne(`x_I=${n(e.Ap.x)}${plusFoisQ(w.x, ti)}`, "on remplace t"),
       ligne(`=${n(e.I!.x)}`),
       ligne(`y_I=${n(e.Ap.y)}${plusFoisQ(w.y, ti)}`),
       ligne(`=${n(e.I!.y)}`),
-    ]),
+    ], [], "Coordonnées de I"),
     resultat("c", reponseI(e)),
     verificationSur("I", e.I!, apb, "(A'B)", "c"),
     piege("c", [t("Le point d'impact n'est pas le projeté H de A : en visant H, le trajet repartirait vers A′ du côté de A, pas vers B.")]),
@@ -219,14 +226,14 @@ function correctionReflexion(e: E): EtapeCorrection[] {
       ligne(`=\\sqrt{${n(L2)}}`),
       ...(Number.isInteger(L) || n(L) === `\\sqrt{${L2}}` ? (Number.isInteger(L) ? [ligne(`=${n(L)}`)] : []) : [ligne(`=${n(L)}`, "on simplifie la racine")]),
     ]),
-    resultat("d", reponseLongueur(e)),
+    { ...resultat("d", reponseLongueur(e)), figureHtml: figureCorrige(e) },
     verification("d", [t("En calculant les deux morceaux :")], [
       ligne(`AI=\\sqrt{${nbp(e.I!.x - e.A.x)}^2+${nbp(e.I!.y - e.A.y)}^2}=${n(AI)}`),
       ligne(`IB=\\sqrt{${nbp(e.B!.x - e.I!.x)}^2+${nbp(e.B!.y - e.I!.y)}^2}=${n(IB)}`),
       ligne(`AI+IB=${n(AI)}+${n(IB)}`),
       ligne(`=${n(L)}`, `en ${u}`),
     ]),
-    { ...piege("d", [t("La longueur AB en ligne droite ne convient pas : le trajet passe par I.")]), figureHtml: figureCorrige(e) },
+    piege("d", [t("La longueur AB en ligne droite ne convient pas : le trajet passe par I.")]),
   ];
 }
 

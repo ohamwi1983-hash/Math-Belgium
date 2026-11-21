@@ -131,6 +131,8 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
     (window as unknown as Record<string, unknown>)[props.idDebug] = { exercice: e, ecran };
   }
 
+  // Corrigé de l'étape ; quand il est révélé et porte déjà sa figure, `figureApres` n'est pas répétée.
+  const corrigeEtape = lignesDeLEtape(props.correction(e), lettreEtape(ecran));
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -138,7 +140,7 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(props.correction(e), lettreEtape(ecran))} />,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={corrigeEtape} />,
       }
     : null;
 
@@ -211,7 +213,7 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
           <EnTeteExercice consigneGenerale={props.consigneGenerale(e)} blocDonnees={props.blocDonnees(e)} />
           {def.figure && <Figure svg={def.figure} />}
           <Fragment key={`${generation}-${ecran}`}>{ecranCourant()}</Fragment>
-          {enAttente && def.figureApres && <Figure svg={def.figureApres} />}
+          {enAttente && def.figureApres && !(enAttente.revele && corrigeEtape.some((x) => x.figureHtml && x.type !== "piege")) && <Figure svg={def.figureApres} />}
         </div>
       </main>
 

@@ -18,24 +18,29 @@ type E = ExerciceTrajectoires;
 const COURS_INT = "(cours, § 5)";
 const COURS_REL = "(cours, § 4)";
 
+/** « a·b − c·d = p₁ − p₂ » puis « = valeur » ; la ligne intermédiaire seulement si elle apporte quelque chose. */
+function lignesProduitsCroix(gauche: string, p1: number, p2: number, just: Fr, fin: string): LigneCalcul[] {
+  if (p1 === 0 || p2 === 0) return [ligne(`${gauche}=${n(p1 - p2)}`, [...just, t(` ; ${fin}`)])];
+  return [ligne(`${gauche}=${n(p1)}${plusTerme(-p2)}`, just), ligne(`=${n(p1 - p2)}`, fin)];
+}
+
 function lignesCritere(e: E): LigneCalcul[] {
   const { v1, v2 } = e;
   return [
     ligne(`\\vec{v_1}=${colonne(v1.x, v1.y)}`, "coefficients de t du mobile 1"),
     ligne(`\\vec{v_2}=${colonne(v2.x, v2.y)}`, "coefficients de t du mobile 2"),
-    ligne(`x_{v_1}\\cdot y_{v_2}-y_{v_1}\\cdot x_{v_2}=${n(v1.x)}\\cdot ${nbp(v2.y)}-${nbp(v1.y)}\\cdot ${nbp(v2.x)}`, "critère de colinéarité"),
-    ligne(`=${n(critere(e))}`, critere(e) === 0 ? "nul : vecteurs colinéaires" : "non nul : vecteurs non colinéaires"),
+    // Substitution en membre de gauche (la formule est dans « Ce qu'on utilise ») : sur un téléphone,
+    // « formule = substitution » sur une seule rangée dépassait la largeur du bloc.
+    ...lignesProduitsCroix(`${n(v1.x)}\\cdot ${nbp(v2.y)}-${nbp(v1.y)}\\cdot ${nbp(v2.x)}`, v1.x * v2.y, v1.y * v2.x, [t("critère de colinéarité "), l("x_{v_1}\\cdot y_{v_2}-y_{v_1}\\cdot x_{v_2}")], critere(e) === 0 ? "nul : vecteurs colinéaires" : "non nul : vecteurs non colinéaires"),
   ];
 }
 
 function lignesDeparts(e: E): LigneCalcul[] {
   const dx = e.P2.x - e.P1.x;
   const dy = e.P2.y - e.P1.y;
-  const val = e.v1.x * dy - e.v1.y * dx;
   return [
     ligne(`\\vec{M_1M_2}=${colonne(dx, dy)}`, "du départ du mobile 1 au départ du mobile 2 (t = 0)"),
-    ligne(`x_{v_1}\\cdot ${nbp(dy)}-y_{v_1}\\cdot ${nbp(dx)}=${n(e.v1.x)}\\cdot ${nbp(dy)}-${nbp(e.v1.y)}\\cdot ${nbp(dx)}`, "critère avec le vecteur directeur 1"),
-    ligne(`=${n(val)}`, "non nul : le départ du mobile 2 n'est pas sur la trajectoire 1"),
+    ...lignesProduitsCroix(`${n(e.v1.x)}\\cdot ${nbp(dy)}-${nbp(e.v1.y)}\\cdot ${nbp(dx)}`, e.v1.x * dy, e.v1.y * dx, [t("critère avec "), l("\\vec{v_1}"), t(" et "), l("\\vec{M_1M_2}")], "non nul : le départ du mobile 2 n'est pas sur la trajectoire 1"),
   ];
 }
 
@@ -66,7 +71,7 @@ function lignesSysteme(e: E): LigneCalcul[] {
 export function correctionDetailleeTrajectoires(e: E): EtapeCorrection[] {
   const c = ctx(e);
   const sortie: EtapeCorrection[] = [
-    utilise("a", [t("Chaque trajectoire est une droite dont un vecteur directeur est formé par les coefficients de "), l("t"), t(". Deux droites sont sécantes si leurs vecteurs directeurs ne sont pas colinéaires : "), l("x_1\\cdot y_2-y_1\\cdot x_2\\neq 0"), t(" "), t(COURS_INT), t(".")]),
+    utilise("a", [t("Chaque trajectoire est une droite dont un vecteur directeur est formé par les coefficients de "), l("t"), t(". Deux droites sont sécantes si leurs vecteurs directeurs ne sont pas colinéaires : "), l("x_{v_1}\\cdot y_{v_2}-y_{v_1}\\cdot x_{v_2}\\neq 0"), t(" "), t(COURS_INT), t(".")]),
     calcul("a", e.verdict === "paralleles" ? [...lignesCritere(e), ...lignesDeparts(e)] : lignesCritere(e)),
     resultat("a", reponseNature(e)),
     piege("a", e.verdict === "paralleles" ? [t("Des vecteurs colinéaires ne suffisent pas pour conclure « confondues » : on vérifie si un point de l'une est sur l'autre.")] : [t("Les coefficients de "), l("t"), t(" forment le vecteur directeur ; les termes constants donnent le point de départ (à "), l("t=0"), t(").")]),

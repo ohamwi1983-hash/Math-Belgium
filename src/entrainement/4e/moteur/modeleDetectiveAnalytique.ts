@@ -37,6 +37,9 @@ export interface ScenarioDetective {
   constat: Fr;
   regle: Fr;
   corrigeC: LigneCalcul[];
+  /** Découpage facultatif de `corrigeC` en blocs titrés (une grille par bloc : sur un téléphone, un
+   * long membre de gauche et un long membre de droite ne s'additionnent plus). */
+  blocsC?: { titre: string; lignes: LigneCalcul[] }[];
   verification?: { texte: Fr; lignes: LigneCalcul[] };
   piege: Fr;
   /** Aide de niveau 2 de l'écran 3 (jamais la réponse). */
@@ -124,9 +127,9 @@ export const NOM_ERREUR: Record<TypeErreurAnalytique, string> = {
   ordonneeOrigine: "erreur de signe en isolant p",
   signeCentre: "signe des coordonnées du centre",
   rCarre: "r² pris pour le rayon",
-  pAuLieuDemi: "foyer à p du sommet au lieu de p/2",
+  pAuLieuDemi: "foyer à la distance p du sommet au lieu de la moitié de p",
   signeDirectrice: "directrice du même côté que le foyer",
-  formeNonRamenee: "équation mal mise sous la forme ax + by + c = 0",
+  formeNonRamenee: "termes passés dans le membre de gauche sans changer de signe",
   carreNegatif: "carré d'un nombre négatif compté négatif",
 };
 
@@ -161,8 +164,7 @@ function scenarioDroite(e: E): ScenarioDetective {
   const cCopie = e.type === "signeC" ? s : -sCopie;
   const lignes: Fr[] = [
     [l(`d\\equiv ${somme([[A, "x"], [B, "y"]])}+c=0`), t(" car un vecteur directeur est "), l(colonne("-b", "a"))],
-    [t("A est sur d : "), l(egaliteC(A, xA, B, yA))],
-    [t("donc "), l(`c=${n(cCopie)}`)],
+    [t("A est sur d : "), l(egaliteC(A, xA, B, yA)), t(", donc "), l(`c=${n(cCopie)}`)],
     [l(`d\\equiv ${eqL(A, B, cCopie)}`)],
   ];
   const correcte = normaliser({ a: be, b: -al, c: -s });
@@ -179,7 +181,7 @@ function scenarioDroite(e: E): ScenarioDetective {
     recit: [t("Un élève cherche une équation cartésienne de la droite d passant par "), l(pointL("A", { x: xA, y: yA })), t(" et de vecteur directeur "), l(vecL("u", { x: al, y: be })), t(". Voici sa copie :")],
     demande: "Donne une équation cartésienne correcte de d.",
     lignes,
-    ligneFausse: e.type === "normalDirecteur" ? 0 : 2,
+    ligneFausse: e.type === "normalDirecteur" ? 0 : 1,
     preliminaires: [
       [t("Données : "), l(pointL("A", { x: xA, y: yA })), t(" et "), l(vecL("u", { x: al, y: be })), t(".")],
       [t("On cherche une équation de la forme "), l("ax+by+c=0"), t(".")],
@@ -216,7 +218,7 @@ function scenarioPerpendiculaire(e: E): ScenarioDetective {
   const cc = -(A * xP + B * yP);
   const lignes: Fr[] = [
     [t("Vecteur directeur de d : "), l(`\\vec{u}${colonne(u.x, u.y)}`)],
-    [t("Vecteur directeur de p, perpendiculaire à "), l("\\vec{u}"), t(" : "), l(`\\vec{v}${colonne(v.x, v.y)}`)],
+    [t("Vecteur directeur de p, perpendiculaire à "), l(`\\vec{u}${colonne(u.x, u.y)}`), t(" : "), l(`\\vec{v}${colonne(v.x, v.y)}`)],
     [l(`p\\equiv ${somme([[A, "x"], [B, "y"]])}+c=0`), t(" et P est sur p : "), l(egaliteC(A, xP, B, yP)), t(", donc "), l(`c=${n(cc)}`)],
     [l(`p\\equiv ${eqL(A, B, cc)}`)],
   ];
@@ -275,8 +277,7 @@ function scenarioPente(e: E): ScenarioDetective {
   const expl = (mm: number, pp: number) => `y=${somme([[mm, "x"], [pp, ""]])}`;
   const lignes: Fr[] = [
     [l(`m=${fracCopie}=${q(M)}`)],
-    [t("A est sur la droite : "), l(`${n(yA)}=${q(M)}\\cdot ${nbp(xA)}+p`)],
-    [t("donc "), l(`p=${q(P)}`)],
+    [t("A est sur la droite : "), l(`${n(yA)}=${q(M)}\\cdot ${nbp(xA)}+p`), t(", donc "), l(`p=${q(P)}`)],
     [l(expl(M, P))],
   ];
   const correcte = normaliser({ a: m, b: -1, c: p });
@@ -284,7 +285,7 @@ function scenarioPente(e: E): ScenarioDetective {
     recit: [t("Un élève cherche l'équation explicite de la droite (AB), avec "), l(pointL("A", { x: xA, y: yA })), t(" et "), l(pointL("B", { x: xB, y: yB })), t(". Voici sa copie :")],
     demande: "Donne l'équation explicite correcte de (AB).",
     lignes,
-    ligneFausse: e.type === "penteInversee" ? 0 : 2,
+    ligneFausse: e.type === "penteInversee" ? 0 : 1,
     preliminaires: [
       [t("Données : "), l(pointL("A", { x: xA, y: yA })), t(" et "), l(pointL("B", { x: xB, y: yB })), t(".")],
       [t("On cherche l'équation explicite "), l("y=mx+p"), t(" de la droite (AB).")],
@@ -439,6 +440,32 @@ function scenarioParabole(e: E): ScenarioDetective {
   };
 }
 
+/** Racine carrée EXACTE d'un rationnel positif : √(p/q) = √(pq)/q simplifiée (« \\dfrac{18\\sqrt{13}}{13} »).
+ * `nombreLatex` ne reconnaît pas toutes ces formes et écrivait alors un décimal (« 4,992302 »). */
+function racineExacteL(N: number): string {
+  let den = 1;
+  while (den < 5000 && Math.abs(N * den - Math.round(N * den)) > 1e-7) den++;
+  let num = Math.round(N * den);
+  const g0 = pgcdEntiers(num, den);
+  num /= g0;
+  den /= g0;
+  let P = num * den;
+  let a = 1;
+  for (let k = 2; k * k <= P; k++) while (P % (k * k) === 0) { P /= k * k; a *= k; }
+  const g = pgcdEntiers(a, den);
+  const c = a / g;
+  const dd = den / g;
+  const corps = P === 1 ? String(c) : `${c === 1 ? "" : c}\\sqrt{${P}}`;
+  return dd === 1 ? corps : `\\dfrac{${corps}}{${dd}}`;
+}
+
+function pgcdEntiers(x: number, y: number): number {
+  x = Math.abs(x);
+  y = Math.abs(y);
+  while (y) [x, y] = [y, x % y];
+  return x || 1;
+}
+
 function scenarioDistance(e: E): ScenarioDetective {
   const { al, be, ga, xH, yH, k } = e.d as Record<string, number>;
   // d : al·x = be·y + ga, soit al·x − be·y − ga = 0 ; C = H + k·(al ; −be).
@@ -456,7 +483,6 @@ function scenarioDistance(e: E): ScenarioDetective {
   const dx = H.x - C.x;
   const dy = H.y - C.y;
   const N2 = dx * dx + dy * dy;
-  const dist = Math.sqrt(N2);
   // carré négatif : la composante négative (la plus petite en valeur absolue) comptée négative.
   const neg = dx < 0 ? dx : dy;
   const pos = dx < 0 ? dy : dx;
@@ -466,18 +492,40 @@ function scenarioDistance(e: E): ScenarioDetective {
     [be, "y"],
     [ga, ""],
   ])}`;
-  const racine = (N: number) => (n(Math.sqrt(N)) === `\\sqrt{${N}}` ? `\\sqrt{${N}}` : `\\sqrt{${N}}=${n(Math.sqrt(N))}`);
+  // N rationnel (H peut avoir des coordonnées fractionnaires) : écrit en fraction exacte, jamais le flottant brut.
+  const racine = (N: number) => (racineExacteL(N) === `\\sqrt{${q(N)}}` ? `\\sqrt{${q(N)}}` : `\\sqrt{${q(N)}}=${racineExacteL(N)}`);
+  const base = (v: number) => (Number.isInteger(v) ? nbp(v) : `\\left(${n(v)}\\right)`);
   const subst = `${produitTerme(A, affineL(C.x, A), true)}${produitTerme(B, affineL(C.y, B))}${plusTerme(Cc)}=0`;
-  const normeCopie = e.type === "carreNegatif" ? `CH=\\sqrt{${nbp(dx)}^2+${nbp(dy)}^2}=\\sqrt{${n(pos * pos)}-${n(neg * neg)}}=${racine(N2Copie)}` : `CH=\\sqrt{${nbp(dx)}^2+${nbp(dy)}^2}=${racine(N2)}`;
+  const normeCopie = e.type === "carreNegatif" ? `CH=\\sqrt{${base(dx)}^2+${base(dy)}^2}=\\sqrt{${n(pos * pos)}-${n(neg * neg)}}=${racine(N2Copie)}` : `CH=\\sqrt{${base(dx)}^2+${base(dy)}^2}=${racine(N2)}`;
   const lignes: Fr[] = [
-    [t("On écrit d sous la forme ax + by + c = 0 : "), l(`d\\equiv ${eqL(A, B, Cc)}`)],
+    [t("On écrit d sous la forme "), l("ax+by+c=0"), t(" : "), l(`d\\equiv ${eqL(A, B, Cc)}`)],
     [t("Perpendiculaire par C, de vecteur directeur "), l(colonne(A, B)), t(" : "), l(parametriquesL(C, { x: A, y: B }))],
     [t("Dans d : "), l(subst), t(", donc "), l(`t=${q(T)}`), t(" et "), l(`H${coordL(H)}`)],
     [l(normeCopie)],
-    [t("La distance de C à d vaut "), l(n(distCopie)), t(".")],
+    [t("La distance de C à d vaut "), l(racineExacteL(N2Copie)), t(".")],
   ];
   const sCorr = a * a + b * b;
   const cst = a * C.x + b * C.y + c;
+  const blocsDistance: { titre: string; lignes: LigneCalcul[] }[] = [
+    { titre: "Perpendiculaire", lignes: [
+      ligne(`d\\equiv ${eqL(a, b, c)}`, [t("forme "), l("ax+by+c=0")]),
+      ligne(`p\\equiv ${parametriquesL(C, { x: a, y: b })}`, "perpendiculaire par C, vecteur normal de d"),
+    ] },
+    { titre: "Pied H", lignes: [
+      ligne(`${produitTerme(a, affineL(C.x, a), true)}${produitTerme(b, affineL(C.y, b))}${plusTerme(c)}=0`, "dans l'équation de d"),
+      ligne(`${sCorr === 1 ? "" : n(sCorr)}t${plusTerme(cst)}=0`, "on réduit"),
+      ligne(`t=${q(-k)}`, "on isole t"),
+    ] },
+    { titre: "Coordonnées de H", lignes: [
+      ligne(`x_H=${valeurSubst(C.x, a, -k)}=${n(xH)}`),
+      ligne(`y_H=${valeurSubst(C.y, b, -k)}=${n(yH)}`),
+    ] },
+    { titre: "Distance", lignes: [
+      ligne(`CH=\\sqrt{${nbp(xH - C.x)}^2+${nbp(yH - C.y)}^2}`, [t("norme de "), l("\\vec{CH}")]),
+      ligne(`=\\sqrt{${n((xH - C.x) ** 2 + (yH - C.y) ** 2)}}`),
+      ...(n(Math.sqrt((xH - C.x) ** 2 + (yH - C.y) ** 2)) === `\\sqrt{${(xH - C.x) ** 2 + (yH - C.y) ** 2}}` ? [] : [ligne(`=${n(Math.sqrt((xH - C.x) ** 2 + (yH - C.y) ** 2))}`)]),
+    ] },
+  ];
   return {
     recit: [t("Un élève cherche la distance du point "), l(pointL("C", C)), t(" à la droite "), l(dTexte), t(". Voici sa copie :")],
     demande: "Donne la distance correcte de C à d (valeur exacte).",
@@ -490,26 +538,16 @@ function scenarioDistance(e: E): ScenarioDetective {
     ],
     valeur: { genre: "nombres", champs: [{ id: "dist", libelle: "\\text{distance}=", cible: Math.sqrt(a * a * k * k + b * b * k * k), copie: distCopie }] },
     reponse: [t("La distance de C à d vaut "), l(n(Math.abs(k) * Math.sqrt(sCorr))), t(".")],
-    resultatCopie: [l(n(distCopie))],
+    resultatCopie: [l(racineExacteL(N2Copie))],
     corrigeA: forme
       ? [ligne(`${mono(al, "x")}=${somme([[be, "y"], [ga, ""]])}`, "équation donnée"), ligne(eqL(a, b, c), [t("on fait passer les termes à gauche, ils changent de signe ; et non "), l(eqL(al, be, ga)), t(" comme dans la copie")])]
-      : [ligne(`${nbp(neg)}^2=${n(neg * neg)}`, "un carré n'est jamais négatif"), ligne(`CH=\\sqrt{${n(pos * pos)}+${n(neg * neg)}}`), ligne(`=${n(dist)}`, [t("et non "), l(n(distCopie)), t(" comme dans la copie")])],
+      : [ligne(`${nbp(neg)}^2=${n(neg * neg)}`, "un carré n'est jamais négatif"), ligne(`CH=\\sqrt{${n(pos * pos)}+${n(neg * neg)}}`), ligne(`=${racineExacteL(N2)}`, [t("et non "), l(racineExacteL(N2Copie)), t(" comme dans la copie")])],
     constat: forme ? [t("La droite utilisée par la copie n'est pas d : les signes de b et de c sont faux.")] : [t("La norme de la copie est fausse : un carré y est compté négatif.")],
     regle: forme
       ? [t("Un terme qui change de membre change de signe : "), l("\\alpha x=\\beta y+\\gamma"), t(" s'écrit "), l("\\alpha x-\\beta y-\\gamma=0"), t(" (cours, § 1).")]
       : [t("Le carré d'un nombre négatif est positif : "), l(`${nbp(neg)}^2=${n(neg * neg)}`), t(". La norme de "), l(colonne("x", "y")), t(" est "), l("\\sqrt{x^2+y^2}"), t(" (cours, § 6).")],
-    corrigeC: [
-      ligne(`d\\equiv ${eqL(a, b, c)}`, "forme ax + by + c = 0"),
-      ligne(`p\\equiv ${parametriquesL(C, { x: a, y: b })}`, "perpendiculaire par C, vecteur normal de d"),
-      ligne(`${produitTerme(a, affineL(C.x, a), true)}${produitTerme(b, affineL(C.y, b))}${plusTerme(c)}=0`, "dans l'équation de d"),
-      ligne(`${sCorr === 1 ? "" : n(sCorr)}t${plusTerme(cst)}=0`, "on réduit"),
-      ligne(`t=${q(-k)}`, "on isole t"),
-      ligne(`x_H=${valeurSubst(C.x, a, -k)}=${n(xH)}`),
-      ligne(`y_H=${valeurSubst(C.y, b, -k)}=${n(yH)}`),
-      ligne(`CH=\\sqrt{${nbp(xH - C.x)}^2+${nbp(yH - C.y)}^2}`, [t("norme de "), l("\\vec{CH}")]),
-      ligne(`=\\sqrt{${n((xH - C.x) ** 2 + (yH - C.y) ** 2)}}`),
-      ...(n(Math.sqrt((xH - C.x) ** 2 + (yH - C.y) ** 2)) === `\\sqrt{${(xH - C.x) ** 2 + (yH - C.y) ** 2}}` ? [] : [ligne(`=${n(Math.sqrt((xH - C.x) ** 2 + (yH - C.y) ** 2))}`)]),
-    ],
+    corrigeC: blocsDistance.flatMap((x) => x.lignes),
+    blocsC: blocsDistance,
     verification: { texte: [t("Le pied H est bien sur d :")], lignes: [ligne(`${termeProduit(a, xH, true)}${termeProduit(b, yH)}${plusTerme(c)}=0`, "H vérifie l'équation de d")] },
     piege: forme ? [t("Avant de lire a, b et c, on met l'équation sous la forme "), l("ax+by+c=0"), t(" : tout dans le membre de gauche.")] : [t("Dans une norme, les deux carrés sont positifs : on les additionne.")],
     aideCorrection: [t("Ici : "), l(`d\\equiv ${eqL(a, b, c)}`), t(" ; la perpendiculaire par C a pour vecteur directeur "), l(colonne(a, b)), t(".")],

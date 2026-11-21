@@ -33,7 +33,7 @@ export function correctionDetailleeDetectiveAnalytique(e: E): EtapeCorrection[] 
     resultat("b", descriptionFragments(e.type)),
     piege("b", s.piege),
     utilise("c", [t("On reprend la copie sans l'erreur : les lignes qui suivent la ligne fausse changent aussi.")]),
-    calcul("c", s.corrigeC),
+    ...(s.blocsC ? s.blocsC.map((b) => calcul("c", b.lignes, [], b.titre)) : [calcul("c", s.corrigeC)]),
     resultat("c", s.reponse),
   ];
   if (s.verification) sortie.push(verification("c", s.verification.texte, s.verification.lignes));

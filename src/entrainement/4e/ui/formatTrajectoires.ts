@@ -62,7 +62,7 @@ export function enonceFragments(e: E): Fr {
 export function questionPapier(e: E): Fr {
   const c = ctx(e);
   return [
-    t(`${c.mobiles.charAt(0).toUpperCase()}${c.mobiles.slice(1)} risquent-ils de ${c.collision} ? Justifie. S'il y a collision, donne l'instant et le lieu ; si leurs trajectoires se croisent sans qu'ils se rencontrent, donne le point de croisement et l'écart de temps entre leurs deux passages.`),
+    t(`${c.mobiles.charAt(0).toUpperCase()}${c.mobiles.slice(1)} risquent-ils ${/^[aeiouéè]/.test(c.collision) ? "d'" : "de "}${c.collision} ? Justifie. S'il y a collision, donne l'instant et le lieu ; si leurs trajectoires se croisent sans qu'ils se rencontrent, donne le point de croisement et l'écart de temps entre leurs deux passages.`),
   ];
 }
 
