@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeConstructionVectorielle } from "./generateurs/constructionVectorielle/corrigeDetaille";
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionConstructionVectorielle, soumettreReponseConstruction } from "./moteur/sessionConstructionVectorielle";
 import type { EtatSessionConstructionVectorielle } from "./moteur/typesConstructionVectorielle";
@@ -79,6 +82,7 @@ export function AppConstructionVectorielle() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConstructionVectorielle(exercice), "a")} />,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : (
           <Katex expression={`${formatVecteurLatex(exercice)} = ${formatVecteurColonneLatex(exercice.cibleComposantes)}`} />
         ),

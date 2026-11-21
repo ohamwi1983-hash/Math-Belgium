@@ -1,4 +1,7 @@
 import { useState, type ReactNode } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeOrthogonalite } from "./generateurs/orthogonalite/corrigeDetaille";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -336,6 +339,7 @@ export function AppOrthogonalite() {
     ? {
         revele: enAttente.revele,
         reponseAttendue,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOrthogonalite(exercice), lettreEtape(SEQUENCES[exercice.variante].indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

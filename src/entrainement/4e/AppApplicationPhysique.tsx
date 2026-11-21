@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeApplicationPhysique } from "./generateurs/applicationPhysique/corrigeDetaille";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -182,6 +185,7 @@ export function AppApplicationPhysique() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeApplicationPhysique(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec
           ? undefined
           : etat.phase === "modelisation"

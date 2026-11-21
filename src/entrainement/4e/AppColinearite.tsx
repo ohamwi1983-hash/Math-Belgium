@@ -1,4 +1,7 @@
 import { useState, type ReactNode } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeColinearite } from "./generateurs/colinearite/corrigeDetaille";
 import type { ExerciceColinearite } from "./core/colinearite.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -287,6 +290,7 @@ export function AppColinearite() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : construireReponseAttendue(etat, exercice),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeColinearite(exercice), lettreEtape(sequence.indexOf(etat.phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

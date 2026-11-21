@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeCombinaisonVecteurs } from "./generateurs/combinaisonVecteurs/corrigeDetaille";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAideSuivante, demarrerSessionCombinaisonVecteurs, soumettreReponseComposantes, soumettreReponseSimplification } from "./moteur/sessionCombinaisonVecteurs";
@@ -149,6 +152,7 @@ export function AppCombinaisonVecteurs() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCombinaisonVecteurs(exercice), etat.phase === "simplification" ? "a" : "b")} />,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "simplification" ? (
           <Katex expression={formatEquationReduiteLatex(exercice)} />
         ) : (

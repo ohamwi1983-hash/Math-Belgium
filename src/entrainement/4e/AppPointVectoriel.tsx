@@ -10,6 +10,9 @@ import { EtapePointVectoriel } from "./components/EtapePointVectoriel";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { Katex } from "./components/Katex";
 import { formatNombreLatex } from "./ui/formatPointVectoriel";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleePointVectoriel } from "./generateurs/pointVectoriel/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Détermine les coordonnées de ce point à partir de la relation vectorielle.";
 
@@ -83,6 +86,7 @@ export function AppPointVectoriel() {
             expression={`${exercice.pointCherche}(${formatNombreLatex(exercice.reponse.x)} \\,;\\, ${formatNombreLatex(exercice.reponse.y)})`}
           />
         ),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePointVectoriel(exercice), "a")} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

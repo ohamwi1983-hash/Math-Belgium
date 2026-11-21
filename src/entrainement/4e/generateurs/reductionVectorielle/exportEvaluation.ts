@@ -1,12 +1,13 @@
-import type { ExerciceReductionVectorielle, TermeReduction } from "../../core/reductionVectorielle.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { ExerciceReductionVectorielle } from "../../core/reductionVectorielle.types";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { PARAMETRES_REDUCTION, profilReductionVectorielle } from "../profilsEvaluation4eCh6";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
-import { calculerGeometrieFigureReduction } from "../../ui/figureReductionSketch";
 import { formatExpressionLatex, libelleFigure } from "../../ui/formatReductionVectorielle";
-import { FIGURES } from "./figures";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceReductionVectorielle } from "./index";
+import { correctionDetailleeReductionVectorielle, detecterAnnulations, formatTermeLatex, formatTermesArbitraires, reconstituerChemin } from "./corrigeDetaille";
+import { construireFigureReductionHtml } from "./figureHtml";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceReductionVectorielle>` pour gen27 (Réduction d'une
@@ -69,114 +70,11 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceReduction
  * une simple paire de lettres, jamais un calcul à dérouler sur plusieurs lignes.
  */
 
-const LARGEUR_SVG = 260;
-const COULEUR_ARETE = "#e6e6f0";
-const COULEUR_POINT = "#1b1c2b";
-
-/** Reproduit `ui/formatReductionVectorielle.ts::formatTerme` (privée, non réexportée) — voir le
- * commentaire de tête pour pourquoi ce petit doublon est nécessaire ici (sous-ensembles/réordonnancements
- * de termes, jamais `instance.termes` tel quel). */
-function formatTermeLatex(terme: TermeReduction, estSuite: boolean): string {
-  const { coefficient, origine, arrivee } = terme;
-  const signe = coefficient < 0 ? "-" : estSuite ? "+" : "";
-  const abs = Math.abs(coefficient);
-  const coefTexte = abs === 1 ? "" : String(abs);
-  return `${signe}${coefTexte}\\vec{${origine}${arrivee}}`;
-}
-
-function formatTermesArbitraires(termes: TermeReduction[]): string {
-  return termes.map((t, i) => formatTermeLatex(t, i > 0)).join("");
-}
-
-/**
- * Repère les paires de termes qui s'annulent exactement : deux termes de même coefficient `k`, dont
- * les points origine/arrivée sont échangés (`k·\vec{RS}+k·\vec{SR}=\vec 0`, corollaire de Chasles —
- * vrai algébriquement quels que soient `R`/`S`/`k`, voir le commentaire de tête). Glouton : chaque
- * terme n'est apparié qu'une seule fois, dans l'ordre du tableau.
- */
-function detecterAnnulations(termes: TermeReduction[]): { annulations: [TermeReduction, TermeReduction][]; restants: TermeReduction[] } {
-  const utilises = new Set<number>();
-  const annulations: [TermeReduction, TermeReduction][] = [];
-
-  for (let i = 0; i < termes.length; i++) {
-    if (utilises.has(i)) continue;
-    for (let j = i + 1; j < termes.length; j++) {
-      if (utilises.has(j)) continue;
-      const a = termes[i];
-      const b = termes[j];
-      if (a.origine === b.arrivee && a.arrivee === b.origine && a.coefficient === b.coefficient) {
-        annulations.push([a, b]);
-        utilises.add(i);
-        utilises.add(j);
-        break;
-      }
-    }
-  }
-
-  return { annulations, restants: termes.filter((_, i) => !utilises.has(i)) };
-}
-
-/**
- * Réordonne `restants` en une chaîne continue `depart → … → arrivee`, un terme = une arête (chaque
- * terme restant a nécessairement un coefficient ±1 dans les 4 figures actuelles — voir le commentaire
- * de tête) : le signe -1 signifie une arête réelle inversée par rapport à `origine`/`arrivee` (même
- * convention que `construireChaineTelescopique`, `index.ts`). Retourne `null` (garde défensive, jamais
- * rencontrée par le smoke test) si la reconstruction échoue — coefficient restant ≠ ±1, ou aucune marche
- * continue de `depart` à `arrivee`.
- */
-function reconstituerChemin(restants: TermeReduction[], depart: string, arrivee: string): TermeReduction[] | null {
-  if (restants.length === 0 || restants.some((t) => Math.abs(t.coefficient) !== 1)) return null;
-
-  const aretes = restants.map((t) => (t.coefficient === 1 ? { origine: t.origine, arrivee: t.arrivee } : { origine: t.arrivee, arrivee: t.origine }));
-  const disponibles = new Set(aretes.map((_, i) => i));
-  const chemin: { origine: string; arrivee: string }[] = [];
-  let courant = depart;
-
-  while (courant !== arrivee) {
-    const idx = [...disponibles].find((i) => aretes[i].origine === courant);
-    if (idx === undefined) return null;
-    chemin.push(aretes[idx]);
-    disponibles.delete(idx);
-    courant = aretes[idx].arrivee;
-  }
-
-  if (disponibles.size > 0) return null; // arêtes en trop, non reliées à la chaîne — ne devrait jamais arriver.
-
-  return chemin.map((e) => ({ origine: e.origine, arrivee: e.arrivee, coefficient: 1 }));
-}
-
-/** Croquis SVG autonome (attributs inline, aucune dépendance à `App.css`) — mêmes couleurs que
- * `FigureReductionSketch.tsx`, voir le commentaire de tête pour la justification de cette
- * réimplémentation plutôt qu'un rendu direct du composant React. */
-function construireFigureHtml(instance: ExerciceReductionVectorielle): string {
-  const geom = calculerGeometrieFigureReduction(instance.points, FIGURES[instance.figure].aretes);
-  const [xMin, yMin, largeur, hauteur] = geom.viewBox.split(" ").map(Number);
-  const hauteurSvg = Math.round((LARGEUR_SVG / largeur) * hauteur);
-
-  const lignes = geom.aretes
-    .map(
-      (a) =>
-        `<line x1="${a.x1.toFixed(2)}" y1="${a.y1.toFixed(2)}" x2="${a.x2.toFixed(2)}" y2="${a.y2.toFixed(2)}" stroke="${COULEUR_ARETE}" stroke-width="${(geom.rayonPoint * 0.3).toFixed(3)}"/>`,
-    )
-    .join("");
-  const points = geom.points.map((p) => `<circle cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r="${geom.rayonPoint.toFixed(3)}" fill="${COULEUR_POINT}"/>`).join("");
-  const labels = geom.points
-    .map(
-      (p) =>
-        `<text x="${(p.x + geom.rayonPoint * 1.8).toFixed(2)}" y="${(p.y - geom.rayonPoint * 1.8).toFixed(2)}" font-size="${(geom.rayonPoint * 3.2).toFixed(2)}" font-weight="700" fill="${COULEUR_POINT}">${p.nom}</text>`,
-    )
-    .join("");
-
-  return `<svg width="${LARGEUR_SVG}" height="${hauteurSvg}" viewBox="${geom.viewBox}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Figure de référence" style="display:block;margin:8px auto 14px;border:1px solid ${COULEUR_ARETE};border-radius:8px;background:#ffffff;">
-<rect x="${xMin}" y="${yMin}" width="${largeur}" height="${hauteur}" fill="#ffffff"/>
-${lignes}${points}${labels}
-</svg>`;
-}
 
 function construireEnonceReductionVectorielle(instance: ExerciceReductionVectorielle): SectionExercice {
   return {
     enteteFragments: [texte(`${libelleFigure(instance)}. Réduis l'expression suivante en un seul vecteur : `), latex(formatExpressionLatex(instance)), texte(".")],
-    enteteHtml: construireFigureHtml(instance),
+    enteteHtml: construireFigureReductionHtml(instance),
     questions: [
       {
         consigne: [
@@ -267,7 +165,7 @@ function enoncePapier(instance: ExerciceReductionVectorielle): EnoncePapier {
   return {
     section: {
       enteteFragments: [texte(`On considère la figure ci-dessous (${FIGURE_PAPIER[instance.figure]}). Réduis l'expression suivante en un seul vecteur, désigné par deux points de la figure : `), latex(formatExpressionLatex(instance)), texte(".")],
-      enteteHtml: construireFigureHtml(instance),
+      enteteHtml: construireFigureReductionHtml(instance),
       questions: [],
     },
   };
@@ -275,32 +173,6 @@ function enoncePapier(instance: ExerciceReductionVectorielle): EnoncePapier {
 
 function reponseBreve(instance: ExerciceReductionVectorielle): FragmentConsigne[] {
   return [latex(`\\vec{${instance.pointDepart}${instance.pointArrivee}}`)];
-}
-
-function correctionDetaillee(instance: ExerciceReductionVectorielle): EtapeCorrection[] {
-  const { termes, pointDepart, pointArrivee } = instance;
-  const { annulations, restants } = detecterAnnulations(termes);
-  const chemin = reconstituerChemin(restants, pointDepart, pointArrivee);
-  const lignes: EtapeCorrection[] = [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("On élimine les termes opposés, on écrit chaque vecteur précédé d'un « − » dans l'autre sens ("), latex("-\\vec{RS} = \\vec{SR}"), texte("), puis on enchaîne les vecteurs bout à bout (relation de Chasles).")] },
-  ];
-  for (const [a, b] of annulations) {
-    lignes.push({ label: "Annulation", sousQuestion: "a", fragments: [latex(`${formatTermeLatex(a, false)} ${formatTermeLatex(b, true)} = \\vec 0`)] });
-  }
-  if (chemin) {
-    lignes.push({ label: "Chasles", sousQuestion: "a", fragments: [latex(`${formatTermesArbitraires(chemin)} = \\vec{${pointDepart}${pointArrivee}}`)] });
-  }
-  lignes.push(
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte("Vecteur réduit : "), latex(`\\vec{${pointDepart}${pointArrivee}}`), texte(" (ou toute autre paire de points de la figure qui représente ce même vecteur).")] },
-    {
-      label: "Piège",
-      sousQuestion: "a",
-      fragments: annulations.length > 0
-        ? [texte("Deux termes ne s'annulent que s'ils sont opposés avec le MÊME coefficient : "), latex("2\\vec{RS}+2\\vec{SR} = \\vec 0"), texte(", mais "), latex("2\\vec{RS}+\\vec{SR} = \\vec{RS}"), texte(".")]
-        : [texte("Un terme précédé d'un « − » se réécrit dans l'autre sens avant d'être enchaîné : "), latex("-\\vec{BA} = \\vec{AB}"), texte(".")],
-    },
-  );
-  return lignes;
 }
 
 function bareme(instance: ExerciceReductionVectorielle): BaremeExercice {
@@ -329,9 +201,11 @@ function bareme(instance: ExerciceReductionVectorielle): BaremeExercice {
   };
 }
 
-/** ★ chaîne de 2 vecteurs sans paire opposée ; ★★ sinon. */
-function difficulte(instance: ExerciceReductionVectorielle): 1 | 2 | 3 {
-  return detecterAnnulations(instance.termes).annulations.length === 0 && instance.termes.length <= 2 ? 1 : 2;
+/** Niveau : un écran ; méthode imposée (Chasles, 0) ; piège dans les données : un vecteur précédé de
+ * « − » à retourner, ou une paire de termes opposés à annuler. */
+function criteresDifficulte(instance: ExerciceReductionVectorielle): CriteresDifficulte {
+  const piege = instance.termes.some((t) => t.coefficient < 0) || detecterAnnulations(instance.termes).annulations.length > 0 ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeReductionVectorielle(instance)), methode: 0, piege, nombres: 0 };
 }
 
 export const adaptateurEvaluationReductionVectorielle: AdaptateurFeuilleExercices<ExerciceReductionVectorielle> = {
@@ -342,12 +216,11 @@ export const adaptateurEvaluationReductionVectorielle: AdaptateurFeuilleExercice
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceReductionVectorielle,
   construireCorrection: construireCorrectionReductionVectorielle,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeReductionVectorielle,
   bareme,
   enoncePapier,
-  dureeMinutes: 3,
   profilInstance: profilReductionVectorielle,
   parametresAuChoix: PARAMETRES_REDUCTION,
   // PAS regroupable — `enteteHtml` (croquis) présent, disqualifie à lui seul : voir le commentaire de

@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeComparaisonVecteurs } from "./generateurs/comparaisonVecteurs/corrigeDetaille";
 import type { ReactNode } from "react";
 import type { ExerciceComparaisonVecteurs, ProprieteComparaison } from "./core/comparaisonVecteurs.types";
 import type { ReglagesSession } from "./core/session.types";
@@ -160,6 +163,7 @@ export function AppComparaisonVecteurs() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttendue,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComparaisonVecteurs(exercice), etat.phase === "selection" ? "a" : "b")} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
