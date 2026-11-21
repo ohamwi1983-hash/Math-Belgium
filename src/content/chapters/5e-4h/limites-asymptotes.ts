@@ -1396,6 +1396,16 @@ export const limitesAsymptotes: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 24. Étude complète »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Retrouver une fonction à partir de ses asymptotes',
+          generatorId: '5gen65',
+          chantier: '5e-4h',
+          description: [
+            'La forme est donnée — (ax + b)/(x + d) ou ax + b + c/(x − p) — avec ses asymptotes et un point du graphe, ou un graphique complet à lire : traduis chaque asymptote en condition, utilise le point pour trouver la dernière inconnue, écris f(x), puis vérifie l’asymptote verticale par une limite.',
+          ],
+          whereLabel: '5e (4h) → « 65. Retrouver une fonction à partir de ses asymptotes »',
+        },
       ],
     },
   ],
