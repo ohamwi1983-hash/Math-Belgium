@@ -2218,7 +2218,11 @@ h1.eleve-titre { font-family: var(--serif); font-size: clamp(1.6rem, 5vw, 2.25re
   .btn-compris { flex: 0 0 auto; padding-left: 12px; padding-right: 12px; color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, var(--surface)); }
   .btn-compris.fait { background: var(--good); border-color: var(--good); color: var(--surface); }
   .etape-nav .nav-suiv { flex: 1 1 0; min-width: 0; padding-left: 12px; padding-right: 12px; }
-  .nav-texte { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .etape-nav .nav-suiv .nav-long { display: block; min-width: 0; overflow: hidden; white-space: nowrap; }
+  .etape-nav .nav-suiv .nav-court { display: none; }
+  /* « n. titre » qui ne tient pas en entier (mesuré par NavEtape) : seulement « n › », jamais un mot coupé. */
+  .etape-nav .nav-compacte .nav-long { display: none; }
+  .etape-nav .nav-compacte .nav-court { display: inline; }
 
   /* --- Réviser --- */
   .parcours-reviser { font-family: var(--sans); }

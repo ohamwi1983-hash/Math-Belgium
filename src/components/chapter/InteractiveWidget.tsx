@@ -202,7 +202,7 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
  * jamais capturé par l'export HTML (A4) (voir `.no-export` sur le conteneur appelant : un Shadow
  * DOM n'est de toute façon pas repris par un `cloneNode`/`outerHTML` classique).
  */
-export function InteractiveWidget({ tag, figuresTactiles }: { tag: InteractiveWidgetTag; figuresTactiles?: boolean }) {
+export function InteractiveWidget({ tag, figuresTactiles, panneau }: { tag: InteractiveWidgetTag; figuresTactiles?: boolean; panneau?: boolean }) {
   const hostRef = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
 
@@ -222,13 +222,13 @@ export function InteractiveWidget({ tag, figuresTactiles }: { tag: InteractiveWi
     if (!ready || !host) return
     const el = document.createElement(tag)
     host.replaceChildren(el)
-    const retirerEpingle = epinglerFigure(el)
+    const retirerEpingle = epinglerFigure(el, !!panneau)
     const retirerTactile = figuresTactiles ? figuresSansDefilement(el) : undefined
     return () => {
       retirerEpingle()
       retirerTactile?.()
     }
-  }, [ready, tag, figuresTactiles])
+  }, [ready, tag, figuresTactiles, panneau])
 
   return <div ref={hostRef} className="widget-host" />
 }
@@ -268,20 +268,36 @@ function figuresSansDefilement(el: HTMLElement): () => void {
  * Garde le dessin d'un atelier à l'écran pendant qu'on manipule ses réglages (retour utilisateur :
  * dans la plupart des ateliers, curseurs et boutons sont trop loin du graphe — en les manipulant, on
  * ne voit plus le dessin). Plutôt que de remanier ~120 widgets un par un, la plus grande figure SVG
- * du Shadow DOM est rendue `position: sticky` :
- * - `top` : elle reste collée en haut de l'écran quand on descend vers des réglages placés EN
- *   DESSOUS (sous l'en-tête collant mobile, ~40 px) ;
- * - `bottom` : elle remonte se coller en bas de l'écran quand les réglages sont AU-DESSUS d'elle.
- * L'élément épinglé est le plus grand ancêtre de la figure qui ne contient encore aucun contrôle
- * (input/button/select) : son parent contient les réglages, c'est donc lui qui borne l'épinglage
- * (le dessin ne sort jamais de son atelier). Une figure plus haute que 55 % de l'écran (deux
- * panneaux empilés sur téléphone) est réduite d'autant ; rien n'est épinglé au-delà de 90 %, ni si
- * l'atelier entier tient déjà à l'écran. Un
+ * du Shadow DOM est rendue `position: sticky`. L'élément épinglé est le plus grand ancêtre de la
+ * figure qui ne contient encore aucun contrôle (input/button/select) : son parent contient les
+ * réglages, c'est donc lui qui borne l'épinglage (le dessin ne sort jamais de son atelier). Un
  * `MutationObserver` ré-applique le réglage quand un widget reconstruit son DOM.
+ *
+ * Dans la page (`panneau` faux) :
+ * - `top` : la figure reste collée en haut de l'écran quand on descend vers des réglages placés EN
+ *   DESSOUS (sous l'en-tête collant mobile, ~50 px) ;
+ * - `bottom` : elle remonte se coller en bas de l'écran quand les réglages sont AU-DESSUS d'elle.
+ *
+ * Dans le panneau plein écran (`panneau`, voir `PanneauModal`) — retour utilisateur : la figure
+ * couvrait une ligne de réglages ou une consigne de l'atelier. Le collage en BAS remontait la figure
+ * par-dessus ce qui la précède dès l'ouverture (consigne, curseurs placés au-dessus d'elle), sans
+ * rien qui signale qu'il y a quelque chose dessous. D'où, dans le panneau :
+ * - rien n'est épinglé si l'atelier entier tient sous l'en-tête du panneau (rien ne peut alors
+ *   passer sous la figure) ;
+ * - sinon, collage en HAUT seulement, juste sous l'en-tête du panneau : à l'ouverture la figure est
+ *   à sa place, rien n'est couvert ; en descendant, les réglages défilent SOUS la figure et chacun
+ *   arrive entièrement visible sous elle avant de passer dessous.
+ *
+ * Une figure plus haute que 55 % de la zone visible (deux panneaux empilés sur téléphone) est
+ * réduite : par `zoom`, ou, si la figure est fluide (`svg` à `width: 100%`, que `zoom` ne réduit
+ * pas : l'élément réduit dispose d'autant plus de largeur), en bornant sa largeur. Rien n'est
+ * épinglé au-delà de 90 % de la zone visible.
  */
 const ATTR = 'data-figure-epinglee'
+const STYLES_POSES = ['position', 'top', 'bottom', 'z-index', 'background-color', 'zoom', 'max-width', 'margin-left', 'margin-right']
+const STYLES_TAILLE = ['zoom', 'max-width', 'margin-left', 'margin-right']
 
-function epinglerFigure(el: HTMLElement): () => void {
+function epinglerFigure(el: HTMLElement, panneau: boolean): () => void {
   let raf = 0
   let observer: MutationObserver | null = null
   let attente = 0
@@ -302,7 +318,7 @@ function epinglerFigure(el: HTMLElement): () => void {
     sr.querySelectorAll(`[${ATTR}]`).forEach((n) => {
       const h = n as HTMLElement
       h.removeAttribute(ATTR)
-      for (const p of ['position', 'top', 'bottom', 'z-index', 'background-color', 'zoom']) h.style.removeProperty(p)
+      for (const p of STYLES_POSES) h.style.removeProperty(p)
     })
   }
 
@@ -311,7 +327,9 @@ function epinglerFigure(el: HTMLElement): () => void {
     const sr = el.shadowRoot
     if (!sr) return
     // Mesurer à la taille naturelle : on retire une éventuelle réduction posée au passage précédent.
-    sr.querySelectorAll(`[${ATTR}]`).forEach((n) => (n as HTMLElement).style.removeProperty('zoom'))
+    sr.querySelectorAll(`[${ATTR}]`).forEach((n) => {
+      for (const p of STYLES_TAILLE) (n as HTMLElement).style.removeProperty(p)
+    })
     const svgs = [...sr.querySelectorAll('svg')].filter((s) => {
       const r = s.getBoundingClientRect()
       return r.width > 120 && r.height > 80
@@ -330,30 +348,54 @@ function epinglerFigure(el: HTMLElement): () => void {
     }
     const hFig = cible.getBoundingClientRect().height
     const hAtelier = el.getBoundingClientRect().height
-    const hEcran = window.innerHeight
+    // Zone où la figure reste visible : l'écran (dans la page), ou la partie du panneau plein écran
+    // située sous son en-tête collant (le panneau est le conteneur qui défile).
+    const boite = panneau ? el.closest('dialog') : null
+    const haut = boite
+      ? (boite.querySelector<HTMLElement>('.panneau-entete')?.offsetHeight ?? 0)
+      : window.matchMedia('(max-width: 759.98px)').matches
+        ? 50
+        : 12
+    const hZone = boite ? boite.clientHeight - haut : window.innerHeight
     const deja = sr.querySelector(`[${ATTR}]`)
     if (cible === sr.firstElementChild && !sr.firstElementChild?.nextElementSibling) {
       if (deja) nettoyer(sr)
       return
     }
-    if (hFig > 0.9 * hEcran || hAtelier < 0.9 * hEcran) {
+    // Panneau : figure et réglages tiennent ensemble sous l'en-tête (16 px : marge du panneau).
+    const tient = boite ? hAtelier <= hZone - 16 : hAtelier < 0.9 * hZone
+    if (hFig > 0.9 * hZone || tient) {
       if (deja) nettoyer(sr)
       return
     }
     if (deja && deja !== cible) nettoyer(sr)
     const h = cible as HTMLElement
-    const haut = window.matchMedia('(max-width: 759.98px)').matches ? 50 : 12
     h.setAttribute(ATTR, '')
     h.style.position = 'sticky'
-    h.style.top = `${haut}px`
-    h.style.bottom = '8px'
     h.style.zIndex = '3'
     h.style.backgroundColor = fondOpaque(h.parentElement ?? el)
     if (getComputedStyle(h).display === 'inline') h.style.display = 'block'
     // Figure double (deux panneaux empilés sur téléphone) : on la réduit pour qu'elle laisse au
-    // moins 45 % de l'écran aux réglages. `zoom` (et non `transform`) réduit aussi la place occupée.
-    const plafond = 0.55 * hEcran
-    if (hFig > plafond) h.style.setProperty('zoom', (plafond / hFig).toFixed(3))
+    // moins 45 % de la zone aux réglages. `zoom` (et non `transform`) réduit aussi la place occupée.
+    const plafond = 0.55 * hZone
+    let echelle = 1
+    if (hFig > plafond) {
+      echelle = plafond / hFig
+      h.style.setProperty('zoom', echelle.toFixed(3))
+      if (h.getBoundingClientRect().height > plafond * 1.05) {
+        // Figure fluide : `zoom` ne la réduit pas, on borne sa largeur (la hauteur suit).
+        h.style.removeProperty('zoom')
+        echelle = 1
+        h.style.maxWidth = `${Math.floor((h.getBoundingClientRect().width * plafond) / hFig)}px`
+        h.style.marginLeft = 'auto'
+        h.style.marginRight = 'auto'
+      }
+    }
+    // `zoom` s'applique aussi aux décalages de l'élément : 50px sous zoom 0,7 ne font que 35px à
+    // l'écran (la figure passerait sous l'en-tête) — on compense.
+    h.style.top = `${(haut / echelle).toFixed(1)}px`
+    if (panneau) h.style.removeProperty('bottom')
+    else h.style.bottom = `${(8 / echelle).toFixed(1)}px`
   }
 
   const planifier = () => {

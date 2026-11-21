@@ -2794,8 +2794,8 @@ export const calculVectoriel: ChapterContent = {
           text:
             'Un quiz vrai/faux qui couvre tout le chapitre : 12 thèmes de 35 affirmations, un par ' +
             'grande notion, dans l\'ordre des sections — de la multiplication par un réel aux ' +
-            'vecteurs en contexte (déplacements, rivière, équilibre, chantier). Le quiz se trouve ' +
-            'tout en bas de la page, dans la synthèse.',
+            'vecteurs en contexte (déplacements, rivière, équilibre, chantier). Le quiz se fait en ' +
+            'ligne : sur la page du chapitre, onglet **Réviser**.',
         },
         {
           kind: 'entrainement',

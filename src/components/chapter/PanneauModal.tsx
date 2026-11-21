@@ -71,7 +71,7 @@ export function PanneauModal({ panneau, fermer }: { panneau: Panneau | null; fer
           <div className="panneau-corps">
             {panneau.type === 'atelier' ? (
               <>
-                <InteractiveWidget tag={panneau.bloc.tag} figuresTactiles />
+                <InteractiveWidget tag={panneau.bloc.tag} figuresTactiles panneau />
                 {panneau.bloc.caption && (
                   <p className="panneau-legende">
                     <RichText text={panneau.bloc.caption} />

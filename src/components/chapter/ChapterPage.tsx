@@ -243,43 +243,114 @@ function EtapeSection({
         {section.essentiel && section.essentiel.length > 0 && <Essentiel phrases={section.essentiel} />}
         <ContenuEtape blocks={section.blocks} actif={actif} colonneDroite={colonneDroite && actif} ouvrirPanneau={ouvrirPanneau} />
       </div>
-      {actif && (
-        <nav className="etape-nav no-export" aria-label="Étapes">
-          {precedente ? (
-            <LienVue cible={precedente.id} aller={aller} className="btn-parcours nav-prec" aria-label={`Étape précédente : ${precedente.number}. ${titreCourt(precedente)}`}>
-              <span aria-hidden="true">‹</span>
-              <span className="nav-court" aria-hidden="true">
-                {precedente.number}
-              </span>
-              <span className="nav-long" aria-hidden="true">
-                {precedente.number}. {titreCourt(precedente)}
-              </span>
-            </LienVue>
-          ) : (
-            <LienVue cible={null} aller={aller} className="btn-parcours nav-prec">
-              <span aria-hidden="true">‹</span> Carte
-            </LienVue>
-          )}
-          <button type="button" className={`btn-parcours btn-compris${lue ? ' fait' : ''}`} aria-pressed={lue} onClick={() => marquer(section.id, !lue)}>
-            <Icone nom="coche" taille={17} />
-            J’ai compris
-          </button>
-          {suivante ? (
-            <LienVue cible={suivante.id} aller={aller} className="btn-parcours btn-plein nav-suiv" aria-label={`Étape suivante : ${suivante.number}. ${titreCourt(suivante)}`}>
-              <span className="nav-texte" aria-hidden="true">
-                {suivante.number}. {titreCourt(suivante)}
-              </span>
-              <span aria-hidden="true">›</span>
-            </LienVue>
-          ) : (
-            <LienVue cible="reviser" aller={aller} className="btn-parcours btn-plein nav-suiv">
-              <span className="nav-texte">Réviser le chapitre</span>
-              <span aria-hidden="true">›</span>
-            </LienVue>
-          )}
-        </nav>
-      )}
+      {actif && <NavEtape section={section} precedente={precedente} suivante={suivante} lue={lue} marquer={marquer} aller={aller} />}
     </section>
+  )
+}
+
+/**
+ * Barre « ‹ n−1 · J'ai compris · n+1. titre › » (fixée en bas sur téléphone, sous l'étape sur
+ * ordinateur). Un titre de bouton ne doit jamais être coupé au milieu d'un mot (« 5. Soustraire u… ») :
+ * quand « n. titre » ne tient pas en entier dans la place du bouton, il n'affiche que « n › »
+ * (classe `nav-compacte`) ; le titre complet reste dans `aria-label` et dans l'info-bulle `title`.
+ * Mesuré après chaque changement de largeur de la barre (rotation, fenêtre redimensionnée) et une
+ * fois les polices chargées : on rétablit le titre, on mesure, on replie si besoin (avant
+ * l'affichage, pas de clignotement).
+ */
+function NavEtape({
+  section,
+  precedente,
+  suivante,
+  lue,
+  marquer,
+  aller,
+}: {
+  section: ChapterSection
+  precedente?: ChapterSection
+  suivante?: ChapterSection
+  lue: boolean
+  marquer: (id: string, lue: boolean) => void
+  aller: Aller
+}) {
+  const ref = useRef<HTMLElement>(null)
+  useLayoutEffect(() => {
+    const nav = ref.current
+    if (!nav) return
+    const ajuster = () => {
+      for (const lien of nav.querySelectorAll<HTMLElement>('.nav-prec, .nav-suiv')) {
+        lien.classList.remove('nav-compacte')
+        const titre = lien.querySelector<HTMLElement>('.nav-long')
+        if (!titre || !lien.querySelector('.nav-court') || getComputedStyle(titre).display === 'none') continue
+        const plage = document.createRange()
+        plage.selectNodeContents(titre)
+        if (titre.scrollWidth > titre.clientWidth || plage.getBoundingClientRect().width > titre.getBoundingClientRect().width + 0.5) {
+          lien.classList.add('nav-compacte')
+        }
+      }
+    }
+    ajuster()
+    let largeur = nav.clientWidth
+    const observateur = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => {
+          if (nav.clientWidth === largeur) return
+          largeur = nav.clientWidth
+          ajuster()
+        })
+      : null
+    observateur?.observe(nav)
+    let actif = true
+    document.fonts?.ready.then(() => actif && ajuster())
+    return () => {
+      actif = false
+      observateur?.disconnect()
+    }
+  }, [section.id, precedente, suivante])
+
+  const titrePrec = precedente && `${precedente.number}. ${titreCourt(precedente)}`
+  const titreSuiv = suivante && `${suivante.number}. ${titreCourt(suivante)}`
+  return (
+    <nav ref={ref} className="etape-nav no-export" aria-label="Étapes">
+      {precedente ? (
+        <LienVue cible={precedente.id} aller={aller} className="btn-parcours nav-prec" aria-label={`Étape précédente : ${titrePrec}`} title={titrePrec}>
+          <span aria-hidden="true">‹</span>
+          <span className="nav-court" aria-hidden="true">
+            {precedente.number}
+          </span>
+          <span className="nav-long" aria-hidden="true">
+            {titrePrec}
+          </span>
+        </LienVue>
+      ) : (
+        <LienVue cible={null} aller={aller} className="btn-parcours nav-prec">
+          <span aria-hidden="true">‹</span> Carte
+        </LienVue>
+      )}
+      <button type="button" className={`btn-parcours btn-compris${lue ? ' fait' : ''}`} aria-pressed={lue} onClick={() => marquer(section.id, !lue)}>
+        <Icone nom="coche" taille={17} />
+        J’ai compris
+      </button>
+      {suivante ? (
+        <LienVue cible={suivante.id} aller={aller} className="btn-parcours btn-plein nav-suiv" aria-label={`Étape suivante : ${titreSuiv}`} title={titreSuiv}>
+          <span className="nav-long" aria-hidden="true">
+            {titreSuiv}
+          </span>
+          <span className="nav-court" aria-hidden="true">
+            {suivante.number}
+          </span>
+          <span aria-hidden="true">›</span>
+        </LienVue>
+      ) : (
+        <LienVue cible="reviser" aller={aller} className="btn-parcours btn-plein nav-suiv" aria-label="Réviser le chapitre" title="Réviser le chapitre">
+          <span className="nav-long" aria-hidden="true">
+            Réviser le chapitre
+          </span>
+          <span className="nav-court" aria-hidden="true">
+            Réviser
+          </span>
+          <span aria-hidden="true">›</span>
+        </LienVue>
+      )}
+    </nav>
   )
 }
 

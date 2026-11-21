@@ -67,10 +67,19 @@ Composants :
   **À toi**. ≥ 1200 px : Manipuler, Vidéo et À toi passent dans la colonne de droite (`ColonneDroite`).
   `historique`, `application`, `video`, `atelier`, `entrainement` (tous `no-export`) ne sont plus
   rendus dans le fil. `Essentiel` : encadré orange (champ `essentiel`).
+- `NavEtape` (`ChapterPage.tsx`) — barre « ‹ n−1 · J'ai compris · n+1. titre › ». Jamais de titre
+  coupé au milieu d'un mot (retour utilisateur : « 5. Soustraire u… » sur iPhone) : chaque lien porte
+  `.nav-long` (« n. titre ») et `.nav-court` (« n ») ; si `.nav-long` ne tient pas en entier, classe
+  `nav-compacte` → seulement « n › » (« Réviser › » pour la dernière étape). Mesure en
+  `useLayoutEffect` (rétablir, mesurer `scrollWidth`/`Range`, replier), relancée par un
+  `ResizeObserver` (largeur de la barre) et `document.fonts.ready`. Titre complet dans `aria-label` et
+  `title`. Téléphone : le précédent reste « ‹ n » ; ordinateur : même règle pour les deux liens.
 - `PanneauModal.tsx` — atelier ou vidéo dans un `<dialog>` natif (`showModal` : focus piégé, Échap,
   retour du focus) : plein écran sur téléphone, grand panneau (≤ 1100 px) sur ordinateur ; page
   verrouillée (`html.panneau-ouvert`), widget monté à l'ouverture, figures sans défilement tactile
-  (`InteractiveWidget figuresTactiles`).
+  (`InteractiveWidget figuresTactiles`), épinglage de la figure propre au panneau
+  (`InteractiveWidget panneau` : jamais par-dessus un réglage ou une consigne, voir
+  `interactive-widgets.md`).
 - `ReviserVue.tsx` — « Teste-toi » (champ `cartes`, « à revoir » remises en fin de paquet), « La fiche
   du chapitre » (une ligne par `essentiel`), liens vers synthèse / formulaire / quiz / impression
   (rendus ensuite par `ChapterPage`, visibles dans l'onglet Réviser).

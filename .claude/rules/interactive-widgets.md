@@ -70,5 +70,20 @@ contrôle amené à l'écran → figure entièrement visible et ne recouvrant pa
 un panneau `<dialog>` (`PanneauModal`, plein écran sur téléphone) ouvert depuis une carte
 « Manipuler ». `InteractiveWidget figuresTactiles` y ajoute `svg { touch-action: none }` dans le
 Shadow DOM (feuille adoptée) : le doigt qui déplace une flèche ne fait pas défiler le panneau ; le
-panneau défile en glissant ailleurs. L'épinglage de la figure (`top: 50px` sur téléphone) tombe sous
-l'en-tête du panneau (50 px).
+panneau défile en glissant ailleurs.
+
+**Épinglage dans le panneau (`InteractiveWidget panneau`)** — retour utilisateur : la figure épinglée
+couvrait une ligne de réglages ou une consigne. Cause : le collage en BAS (`bottom: 8px`) remontait la
+figure, dès l'ouverture, par-dessus ce qui la précède (consigne, boutons, curseurs au-dessus d'elle).
+Dans le panneau : rien n'est épinglé si l'atelier entier tient sous l'en-tête (hauteur du `<dialog>`
+moins `.panneau-entete`) ; sinon collage en HAUT seulement, `top` = hauteur de l'en-tête du panneau
+(aussi sur ordinateur, où l'ancien `12px` passait sous l'en-tête) : les réglages défilent sous la
+figure et arrivent entièrement visibles sous elle. Deux bugs corrigés au passage : `zoom` réduit aussi
+`top`/`bottom` (50px sous zoom 0,7 = 35px à l'écran, sous l'en-tête) → décalages divisés par le
+zoom ; une figure fluide (`svg` à `width: 100%`) ne rapetisse pas avec `zoom` → largeur bornée à la
+place. Aucun widget modifié. Mesure : `scratchpad/chapitre-retouches/ateliers.cjs` (chaque atelier de
+chaque chapitre ouvert dans le panneau, défilement balayé par pas de 8 px : contrôles
+`input/button/select/label/textarea` et textes vs rectangle de la figure — couverts à l'ouverture,
+couverts à l'arrivée en descendant, jamais visibles en entier) sur les 191 ateliers : avant, 5
+ateliers fautifs à chaque taille (10 et 8 éléments couverts à l'ouverture) ; après, 0 / 0 / 0 à
+375×667 et 390×664.
