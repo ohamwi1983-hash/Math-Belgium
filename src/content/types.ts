@@ -1281,6 +1281,20 @@ export interface ChapterSection {
   title: string
   kicker?: string
   blocks: Block[]
+  /** Titre court (carte du chapitre, boutons « étape suivante », fiche de révision) — texte BRUT,
+   * jamais de `$…$`. Absent : `title` est utilisé tel quel. */
+  titreCourt?: string
+  /** Partie du chapitre sur la carte (ex. « Sans repère : des flèches et une règle ») — texte BRUT.
+   * Les sections CONSÉCUTIVES de même `partie` forment un groupe ; aucune section n'en a : une seule
+   * liste. */
+  partie?: string
+  /** « L'essentiel » de l'étape : 1 à 3 phrases courtes (RichText), encadré orange en tête d'étape et
+   * ligne de la fiche du chapitre (onglet Réviser). Absent : pas d'encadré (rien n'est déduit du
+   * texte). Jamais imprimé ni exporté (le chapitre imprimé reste celui d'avant). */
+  essentiel?: string[]
+  /** Cartes « Teste-toi » de l'onglet Réviser (question → réponse courte, RichText), 2 à 4 par
+   * section. Aucune carte dans le chapitre : le bloc « Teste-toi » n'apparaît pas. */
+  cartes?: { question: string; reponse: string }[]
 }
 
 export interface ChapterContent {
