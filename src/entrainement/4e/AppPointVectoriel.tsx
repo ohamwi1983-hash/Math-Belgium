@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionPointVectoriel, soumettreReponseCoordonnees } from "./moteur/sessionPointVectoriel";
 import type { EtatSessionPointVectoriel } from "./moteur/typesPointVectoriel";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePointVectoriel } from "./generateurs/pointVectoriel";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePointVectoriel, genererExercicePointVectorielLibre } from "./generateurs/pointVectoriel";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { VariantePointVectoriel } from "./core/pointVectoriel.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -24,7 +24,8 @@ const REGLAGES_DEMO: ReglagesSession = {
 };
 
 function nouvelleSession(): EtatSessionPointVectoriel {
-  return demarrerSessionPointVectoriel(REGLAGES_DEMO, genererExercicePointVectoriel);
+  // Tirage libre de l'appli : symétrique compris ; les codes gardent l'ancien tirage (voir l'index).
+  return demarrerSessionPointVectoriel(REGLAGES_DEMO, genererExercicePointVectorielLibre);
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la

@@ -43,7 +43,7 @@ export function calculerRecapitulatifColinearite(etat: EtatSessionColinearite): 
     }
   }
 
-  if (etat.scoreReductionExercice !== null && (exercice.variante === "parametre" || exercice.variante === "pointsParametre")) {
+  if (etat.scoreReductionExercice !== null && (exercice.variante === "parametre" || exercice.variante === "pointsParametre" || exercice.variante === "parametreCarre")) {
     entrees.push({
       libelle: "Équation réduite",
       estLatex: true,

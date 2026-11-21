@@ -1,28 +1,22 @@
 import type { ExerciceRelationVectorielle } from "../core/relationVectorielle.types";
 import { valeursGrapheAide } from "../ui/formatRelationVectorielle";
+import type { Niveaux } from "../ui/retoursVecteurs";
 import { VecteurGraph } from "./VecteurGraph";
-import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux } from "./RetourSaisie";
 
 interface Props {
   exercice: ExerciceRelationVectorielle;
-  aideActivee: boolean;
-  onActiverAide: () => void;
+  aides: Niveaux;
+  /** Drapeau d'aide du moteur (`activerAide`), levé à la première ouverture. */
+  onPremiereAide: () => void;
 }
 
 /**
- * Aide UNIQUE (`sessionRelationVectorielle.ts`) — même patron bouton+révélation
- * que le reste du projet (ex. `AideQuelAngle.tsx`) : le graphe révélé précède le bouton, qui reste
- * toujours affiché (désactivé + relabellisé "Aide utilisée" une fois activé). Contrairement au
- * générateur homonyme en position 21, le graphe n'est JAMAIS affiché par défaut ici — seulement
- * après activation, conformément à la spec de cette version guidée.
+ * Aides de gen21 (audit 4e ch. 6, lot B) : deux niveaux en KaTeX (`ui/retoursVecteurs.ts`), et au
+ * niveau 2 le graphe d'aide d'avant (points connus et vecteur tracé, jamais le point cherché) — il
+ * n'est jamais affiché par défaut dans cette version guidée.
  */
-export function AideRelationVectorielle({ exercice, aideActivee, onActiverAide }: Props) {
+export function AideRelationVectorielle({ exercice, aides, onPremiereAide }: Props) {
   const { points, vecteurs } = valeursGrapheAide(exercice);
-
-  return (
-    <div>
-      {aideActivee && <VecteurGraph points={points} vecteurs={vecteurs} />}
-      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-    </div>
-  );
+  return <AidesNiveaux aides={aides} figure={(n) => (n >= 2 ? <VecteurGraph points={points} vecteurs={vecteurs} /> : null)} onPremiereAide={onPremiereAide} />;
 }

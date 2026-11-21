@@ -1,5 +1,5 @@
 import type { ExerciceComparaisonVecteurs } from "../../core/comparaisonVecteurs.types";
-import { vecteursAffichesComparaison } from "../../ui/formatComparaisonVecteurs";
+import { TETE_FLECHE_COMPARAISON, vecteursAffichesComparaison } from "../../ui/formatComparaisonVecteurs";
 import { RATIO_GRAPHE } from "../../ui/mafsTransformation";
 import { calculerViewBoxVecteurs } from "../../ui/vecteurGraph";
 
@@ -16,7 +16,7 @@ const COULEUR_CADRE = "#d0d7de";
 const COULEUR_VECTEUR_DEFAUT = "#1971c2";
 
 const TAILLE_POLICE_LABEL = 15;
-const LARGEUR_FLECHE_LABEL = 9;
+const LARGEUR_FLECHE_LABEL = 11;
 const TETE_FLECHE_LABEL = 3;
 const ESPACE_FLECHE_LETTRE = 2;
 /** Même ratio empirique que `VecteurGraph.tsx::RATIO_HAUTEUR_MAJUSCULE` — positionne la petite
@@ -24,7 +24,6 @@ const ESPACE_FLECHE_LETTRE = 2;
  * de navigateur). */
 const RATIO_HAUTEUR_MAJUSCULE = 0.72;
 
-const TETE_FLECHE_VECTEUR = 6;
 
 function echapperTexteSvg(valeur: string): string {
   return valeur.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -32,8 +31,10 @@ function echapperTexteSvg(valeur: string): string {
 
 /** Segment + tête de flèche triangulaire pleine pour UN vecteur tracé, de `(x1,y1)` (origine, déjà
  * en coordonnées pixel) à `(x2,y2)` (extrémité) — le trait s'arrête légèrement avant `(x2,y2)` pour
- * que la tête de flèche ne recouvre pas la pointe exacte, même principe visuel qu'un `Vector` Mafs. */
-function ligneVecteurSvg(x1: number, y1: number, x2: number, y2: number, couleur: string): string {
+ * que la tête de flèche ne recouvre pas la pointe exacte, même principe visuel qu'un `Vector` Mafs.
+ * `tete` : longueur de la tête en pixels (`TETE_FLECHE_COMPARAISON` unité × échelle, audit 4e ch. 6,
+ * G13 — la tête fixe de 9,6 px valait presque une unité du quadrillage). */
+function ligneVecteurSvg(x1: number, y1: number, x2: number, y2: number, couleur: string, tete: number): string {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const longueur = Math.hypot(dx, dy) || 1;
@@ -41,10 +42,11 @@ function ligneVecteurSvg(x1: number, y1: number, x2: number, y2: number, couleur
   const uy = dy / longueur;
   const perpX = -uy;
   const perpY = ux;
-  const baseX = x2 - ux * TETE_FLECHE_VECTEUR * 1.6;
-  const baseY = y2 - uy * TETE_FLECHE_VECTEUR * 1.6;
-  const p1 = `${(baseX + perpX * TETE_FLECHE_VECTEUR * 0.55).toFixed(1)},${(baseY + perpY * TETE_FLECHE_VECTEUR * 0.55).toFixed(1)}`;
-  const p2 = `${(baseX - perpX * TETE_FLECHE_VECTEUR * 0.55).toFixed(1)},${(baseY - perpY * TETE_FLECHE_VECTEUR * 0.55).toFixed(1)}`;
+  const l = Math.min(tete, longueur * 0.45);
+  const baseX = x2 - ux * l;
+  const baseY = y2 - uy * l;
+  const p1 = `${(baseX + perpX * l * 0.5).toFixed(1)},${(baseY + perpY * l * 0.5).toFixed(1)}`;
+  const p2 = `${(baseX - perpX * l * 0.5).toFixed(1)},${(baseY - perpY * l * 0.5).toFixed(1)}`;
   const p3 = `${x2.toFixed(1)},${y2.toFixed(1)}`;
   return (
     `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${baseX.toFixed(1)}" y2="${baseY.toFixed(1)}" stroke="${couleur}" stroke-width="2.2"/>` +
@@ -58,13 +60,18 @@ function ligneVecteurSvg(x1: number, y1: number, x2: number, y2: number, couleur
  * pourquoi jamais un caractère Unicode). Pas d'indice ici (labels à une seule lettre, comme tous les
  * appels de `vecteursAffichesComparaison`), donc jamais de recentrage de largeur d'indice. */
 function labelVecteurFlecheSvg(cx: number, cy: number, lettre: string, couleur: string): string {
+  // Lettre posée sur sa ligne de base en `cy` (comme à l'écran : le placement des étiquettes
+  // suppose un texte qui MONTE depuis son ancrage — l'ancien `dominant-baseline="middle"` le
+  // descendait d'une demi-lettre et détachait la flèche) ; flèche entière (trait + pointe) centrée
+  // sur la lettre, juste au-dessus (audit 4e ch. 6, G13).
   const yFleche = cy - TAILLE_POLICE_LABEL * RATIO_HAUTEUR_MAJUSCULE - ESPACE_FLECHE_LETTRE;
   const xDebut = cx - LARGEUR_FLECHE_LABEL / 2;
   const xFin = cx + LARGEUR_FLECHE_LABEL / 2;
+  const xBase = xFin - TETE_FLECHE_LABEL * 1.4;
   return (
-    `<line x1="${xDebut.toFixed(1)}" y1="${yFleche.toFixed(1)}" x2="${xFin.toFixed(1)}" y2="${yFleche.toFixed(1)}" stroke="${couleur}" stroke-width="1.3"/>` +
-    `<polygon points="${(xFin + TETE_FLECHE_LABEL).toFixed(1)},${yFleche.toFixed(1)} ${(xFin - TETE_FLECHE_LABEL * 0.4).toFixed(1)},${(yFleche - TETE_FLECHE_LABEL).toFixed(1)} ${(xFin - TETE_FLECHE_LABEL * 0.4).toFixed(1)},${(yFleche + TETE_FLECHE_LABEL).toFixed(1)}" fill="${couleur}"/>` +
-    `<text x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" font-size="${TAILLE_POLICE_LABEL}" text-anchor="middle" dominant-baseline="middle" fill="${couleur}">${echapperTexteSvg(lettre)}</text>`
+    `<line x1="${xDebut.toFixed(1)}" y1="${yFleche.toFixed(1)}" x2="${(xBase + 0.5).toFixed(1)}" y2="${yFleche.toFixed(1)}" stroke="${couleur}" stroke-width="1.3"/>` +
+    `<polygon points="${xFin.toFixed(1)},${yFleche.toFixed(1)} ${xBase.toFixed(1)},${(yFleche - TETE_FLECHE_LABEL).toFixed(1)} ${xBase.toFixed(1)},${(yFleche + TETE_FLECHE_LABEL).toFixed(1)}" fill="${couleur}"/>` +
+    `<text x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" font-size="${TAILLE_POLICE_LABEL}" text-anchor="middle" fill="${couleur}">${echapperTexteSvg(lettre)}</text>`
   );
 }
 
@@ -111,7 +118,7 @@ export function construireSvgComparaison(exercice: ExerciceComparaisonVecteurs, 
       const y2 = sy(v.origine.y + v.vecteur.y);
       const centre = v.labelPosition ?? { x: v.origine.x + v.vecteur.x / 2, y: v.origine.y + v.vecteur.y / 2 };
       const labelHtml = v.labelFleche ? labelVecteurFlecheSvg(sx(centre.x), sy(centre.y), v.labelFleche.base, couleur) : "";
-      return `${ligneVecteurSvg(x1, y1, x2, y2, couleur)}${labelHtml}`;
+      return `${ligneVecteurSvg(x1, y1, x2, y2, couleur, TETE_FLECHE_COMPARAISON * (zoneX / (xMax - xMin)))}${labelHtml}`;
     })
     .join("");
 

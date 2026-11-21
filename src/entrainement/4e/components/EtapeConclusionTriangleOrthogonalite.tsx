@@ -1,19 +1,18 @@
 import { useState } from "react";
 import type { ExerciceOrthogonaliteTriangle, Sommet } from "../core/orthogonalite.types";
 import type { ReponseConclusionTriangle } from "../moteur/verificationOrthogonalite";
-import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import { LIBELLES_OUI_NON, QUESTION_SOMMET_RECTANGLE, QUESTION_TRIANGLE_RECTANGLE, TEXTE_AIDE_CONCLUSION_TRIANGLE, consigneGlobaleOrthogonalite, formatTermesEnonceTriangleLatex } from "../ui/formatOrthogonalite";
+import { LIBELLES_OUI_NON, QUESTION_SOMMET_RECTANGLE, QUESTION_TRIANGLE_RECTANGLE, consigneGlobaleOrthogonalite, formatTermesEnonceTriangleLatex } from "../ui/formatOrthogonalite";
+import { aidesConclusionTriangle } from "../ui/retoursVecteurs3";
 import { Katex } from "./Katex";
+import { AidesNiveaux } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangle;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseConclusionTriangle) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
@@ -47,10 +46,9 @@ function labelSommet(exercice: ExerciceOrthogonaliteTriangle, sommet: Sommet): s
  * les entrées `testSommetA/B/C` du récapitulatif "Ce qu'on sait déjà"
  * (`ui/recapitulatifOrthogonalite.ts`), affiché en haut de `AppOrthogonalite.tsx`.
  */
-export function EtapeConclusionTriangleOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConclusionTriangleOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [estRectangle, setEstRectangle] = useState<boolean | null>(null);
   const [sommet, setSommet] = useState<Sommet | null>(null);
-  const max = NIVEAU_AIDE_MAX.conclusionTriangle;
   const complet = estRectangle === false || (estRectangle === true && sommet !== null);
   const consigneGlobale = consigneGlobaleOrthogonalite(exercice);
 
@@ -101,14 +99,10 @@ export function EtapeConclusionTriangleOrthogonalite({ exercice, tentativesUtili
         </>
       )}
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_CONCLUSION_TRIANGLE}</p>
-        </div>
-      )}
       {!validation && (
         <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+        {/* Choix fermé : une seule tentative (moteur) ; aides à deux niveaux (audit 4e ch. 6, lot B). */}
+        <AidesNiveaux aides={aidesConclusionTriangle(exercice)} onPremiereAide={onActiverAide} />
 
         <button
           type="button"

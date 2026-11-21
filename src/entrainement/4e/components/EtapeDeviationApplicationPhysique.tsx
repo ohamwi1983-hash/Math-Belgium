@@ -1,23 +1,19 @@
 import { useState } from "react";
 import type { ExerciceApplicationPhysique } from "../core/applicationPhysique.types";
 import {
-  formatAideDeviationNiveau2Latex,
   formatEnonceApplicationPhysique,
-  segmentsAideDeviationNiveau1,
-  segmentsAideDeviationSens,
   segmentsConsigneDeviation,
 } from "../ui/formatApplicationPhysique";
 import { diagnostiquerDeviation } from "../moteur/verificationApplicationPhysique";
-import { NIVEAU_AIDE_MAX_DEVIATION } from "../moteur/sessionApplicationPhysique";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
-import { Katex } from "./Katex";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { RenduFragments } from "./RenduFragments";
 import { SchemaApplicationPhysique } from "./SchemaApplicationPhysique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { aidesDeviationPhysique, messageDeviationPhysique, lireNombrePhysique } from "../ui/retoursVecteurs4";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -25,7 +21,6 @@ interface Props {
   exercice: ExerciceApplicationPhysique;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   recapitulatif: EntreeRecapitulatif[];
   onActiverAide: () => void;
   onValider: (valeur: number) => void;
@@ -43,7 +38,6 @@ export function EtapeDeviationApplicationPhysique({
   exercice,
   tentativesUtilisees,
   tentativesMax,
-  niveauAide,
   recapitulatif,
   onActiverAide,
   onValider,
@@ -51,12 +45,11 @@ export function EtapeDeviationApplicationPhysique({
 }: Props) {
   const [texte, setTexte] = useState("");
 
+  const saisie = useTentativeLisible<number>();
   const complet = texte.trim() !== "";
-  const valeur = Number(texte.replace(",", "."));
-  const apresEchec = tentativesUtilisees > 0;
-  const statut = complet ? diagnostiquerDeviation(exercice, valeur) : undefined;
-  const erronee = apresEchec && statut !== "correct";
-  const aideSens = segmentsAideDeviationSens(exercice);
+  const valeur = lireNombrePhysique(texte, true);
+  const statut = saisie.soumise !== null ? diagnostiquerDeviation(exercice, saisie.soumise) : undefined;
+  const erronee = tentativesUtilisees > 0 && statut !== undefined && statut !== "correct";
 
   return (
     <div>
@@ -84,37 +77,19 @@ export function EtapeDeviationApplicationPhysique({
         </div>
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            <RenduFragments fragments={segmentsAideDeviationNiveau1(exercice)} />
-          </p>
-          {niveauAide >= 2 && (
-            <>
-              <p>
-                <Katex expression={formatAideDeviationNiveau2Latex(exercice)} />
-              </p>
-              {aideSens && (
-                <p>
-                  <RenduFragments fragments={aideSens} />
-                </p>
-              )}
-            </>
-          )}
-        </div>
-      )}
       {!validation && (
         <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_DEVIATION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+          <AidesNiveaux aides={aidesDeviationPhysique(exercice)} onPremiereAide={onActiverAide} />
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(valeur ?? NaN, valeur !== null, onValider)}>
+            Valider
+          </button>
+          <MessageRetour
+            illisible={saisie.illisible}
+            texteIllisible={ILLISIBLE_VECTEURS.angle}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cible={saisie.soumise !== null ? messageDeviationPhysique(exercice, saisie.soumise) : null}
+          />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

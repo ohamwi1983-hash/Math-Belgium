@@ -1,95 +1,57 @@
-import { useState } from "react";
 import type { ExerciceDistance } from "../core/normeDistance.types";
-import { diagnostiquerCalculDistance } from "../moteur/verificationNormeDistance";
-import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { CONSIGNE_GENERALE_DISTANCE, FORMULE_GENERALE_DISTANCE_LATEX, PLACEHOLDER_NORME, formatTermesDonneesDistanceLatex, formuleSubstitueeNormeLatex } from "../ui/formatNormeDistance";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { diagnostiquerCalculDistance, lireExpressionNorme } from "../moteur/verificationNormeDistance";
+import { CONSIGNE_GENERALE_DISTANCE, PLACEHOLDER_NORME, formatTermesDonneesDistanceLatex } from "../ui/formatNormeDistance";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesCalculDistance, lireValeurExacte, messageNorme } from "../ui/retoursVecteurs3";
 import { Katex } from "./Katex";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import { EcranChampVecteurs } from "./EcranChampVecteurs";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDistance;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
   validation?: ValidationEtapeProps | null;
 }
 
-/**
- * Écran "calcul" — variante 2, écran 2 (dernier) : consigne générale + bloc de données redondant
- * (AB⃗, déjà confirmé à l'écran précédent et listé dans le récapitulatif "Ce qu'on sait déjà") +
- * un champ de texte libre pour `dist(A,B)` (label reformulé, fraction/irrationnel irréductible
- * acceptés — `promptgen26refontecomplete.md`, Partie F). Aide à 2 niveaux, texte seul.
- */
-export function EtapeCalculDistance({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
-  const [texte, setTexte] = useState("");
-  const max = NIVEAU_AIDE_MAX.calculDistance;
-  const complet = texte.trim() !== "";
-  const apresEchec = tentativesUtilisees > 0;
-  const statut = apresEchec ? diagnostiquerCalculDistance(exercice, texte) : undefined;
-  const erronee = apresEchec && statut !== "correct";
-
+/** Variante « distance », écran 2 : la distance exacte (norme de AB). Règles communes (audit 4e
+ * ch. 6, lot B) : illisible ou approchée sans tentative, message ciblé, aides à deux niveaux. */
+export function EtapeCalculDistance({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   return (
-    <div>
-      <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE_DISTANCE}
-        blocDonnees={
-          <div className="equation-box equation-box-termes">
-            {formatTermesDonneesDistanceLatex(exercice).map((t, i) => (
-              <Katex key={i} expression={t} />
-            ))}
-          </div>
-        }
-      />
-      <p className="prompt-text">Calcule la distance entre ces deux points.</p>
-
-      <div className="field field-inline">
-        <label className="field-label" htmlFor="norme-distance-calcul">
-          dist(A,B) =
-        </label>
-        <input disabled={!!validation}
-          id="norme-distance-calcul"
-          className={`text-input${erronee ? " is-erronee" : ""}`}
-          placeholder={PLACEHOLDER_NORME}
-          value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+    <EcranChampVecteurs<string>
+      enTete={
+        <EnTeteExercice
+          consigneGenerale={CONSIGNE_GENERALE_DISTANCE}
+          blocDonnees={
+            <div className="equation-box equation-box-termes">
+              {formatTermesDonneesDistanceLatex(exercice).map((t, i) => (
+                <Katex key={i} expression={t} />
+              ))}
+            </div>
+          }
         />
-      </div>
-
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            Rappel : <Katex expression={FORMULE_GENERALE_DISTANCE_LATEX} />
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              Formule substituée : <Katex expression={formuleSubstitueeNormeLatex(exercice.vecteurAB)} />
-            </p>
-          )}
-        </div>
-      )}
-      {!validation && (
-        <>
-          {max > 0 && (
-            <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-          )}
-
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-            Valider
-          </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-            </p>
-          )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
+      }
+      consigne="Calcule la distance entre ces deux points (valeur exacte, simplifiée)."
+      id="norme-distance-calcul"
+      label=""
+      labelLatex={`${exercice.labelA}${exercice.labelB} =`}
+      placeholder={PLACEHOLDER_NORME}
+      lire={(t) => {
+        const l = lireValeurExacte(t, exercice.distance);
+        return l.valeur === null || l.approchee ? null : t;
+      }}
+      estFausse={(t) => diagnostiquerCalculDistance(exercice, t) !== "correct"}
+      aides={aidesCalculDistance(exercice)}
+      onPremiereAide={onActiverAide}
+      cible={(t) => messageNorme(exercice.vecteurAB, lireExpressionNorme(t) ?? Number.NaN)}
+      texteIllisible={(t) => (lireValeurExacte(t, exercice.distance).approchee ? ILLISIBLE_VECTEURS.normeApprochee : ILLISIBLE_VECTEURS.norme)}
+      tentativesUtilisees={tentativesUtilisees}
+      tentativesMax={tentativesMax}
+      onValider={onValider}
+      validation={validation}
+    />
   );
 }

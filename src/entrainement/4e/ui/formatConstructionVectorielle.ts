@@ -16,6 +16,11 @@ function formatNombre(valeur: number): string {
  * (voir sa section dédiée, CLAUDE.md) : jamais de `$...$` littéral passé à KaTeX, une prose brute
  * autour d'un court fragment mathématique.
  */
+/** Exception « réponse graphique » (décision 2 de l'utilisateur, audit 4e ch. 6) : les constructions
+ * demandées sur papier (gen23, gen82 « justifie par une construction », gen83) se tracent sur la
+ * figure de l'énoncé — aucune place de réponse n'est ajoutée, la consigne le dit. */
+export const CONSIGNE_CONSTRUCTION_PAPIER = "Trace ta construction sur la figure de l'énoncé, que tu joins à ta feuille.";
+
 export interface ConsigneConstruction {
   avant: string;
   latex: string;
@@ -43,8 +48,8 @@ export function formatDonneesConnuesConstructionLatex(exercice: ExerciceConstruc
  * (`promptblocfittertousgenerateurs.md`) — un fragment KaTeX par point. */
 export function formatTermesDonneesConnuesConstructionLatex(exercice: ExerciceConstructionVectorielle): string[] {
   return [
-    `${exercice.labelA}(${formatNombre(exercice.pointA.x)} ; ${formatNombre(exercice.pointA.y)})`,
-    `${exercice.labelB}(${formatNombre(exercice.pointB.x)} ; ${formatNombre(exercice.pointB.y)})`,
+    `${exercice.labelA}(${formatNombre(exercice.pointA.x)}\\,;\\,${formatNombre(exercice.pointA.y)})`,
+    `${exercice.labelB}(${formatNombre(exercice.pointB.x)}\\,;\\,${formatNombre(exercice.pointB.y)})`,
   ];
 }
 

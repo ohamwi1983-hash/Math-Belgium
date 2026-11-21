@@ -1,5 +1,6 @@
 import type {
   ExerciceColinearParametre,
+  ExerciceColinearParametreCarre,
   ExerciceColinearPoints,
   ExerciceColinearPointsParametre,
   ExerciceColinearVecteurs,
@@ -277,10 +278,28 @@ function construireCorrectionPointsParametre(exercice: ExerciceColinearPointsPar
 // Dispatch — un seul point d'entrée par le contrat `AdaptateurFeuilleExercices`.
 // ============================================================================
 
+/** « Paramètre au carré » (lot C) : deux écrans, relation réduite (second degré) puis valeurs. */
+function construireEnonceParametreCarre(instance: ExerciceColinearParametreCarre): SectionExercice {
+  return {
+    enteteFragments: [texte("On donne les vecteurs "), latex(formatEnonceLatex(instance)), texte(".")],
+    questions: [
+      { consigne: [texte(CONSIGNE_REDUCTION_AVEC_X)] },
+      { consigne: [texte("Résous cette équation : donne la ou les valeurs de "), latex("x"), texte(", s'il en existe.")] },
+    ],
+  };
+}
+
+function valeursCarreLatex(instance: ExerciceColinearParametreCarre): string | null {
+  const s = instance.solutions.map((v) => nombreFrLatex(v));
+  if (s.length === 0) return null;
+  return s.length === 1 ? `x = ${s[0]}` : `x = ${s[0]} \\text{ ou } x = ${s[1]}`;
+}
+
 function construireEnonceColinearite(instance: ExerciceColinearite): SectionExercice {
   if (instance.variante === "vecteurs") return construireEnonceVecteurs(instance);
   if (instance.variante === "points") return construireEnoncePoints(instance);
   if (instance.variante === "parametre") return construireEnonceParametre(instance);
+  if (instance.variante === "parametreCarre") return construireEnonceParametreCarre(instance);
   return construireEnoncePointsParametre(instance);
 }
 
@@ -288,6 +307,13 @@ function construireCorrectionColinearite(instance: ExerciceColinearite): BlocCor
   if (instance.variante === "vecteurs") return construireCorrectionVecteurs(instance);
   if (instance.variante === "points") return construireCorrectionPoints(instance);
   if (instance.variante === "parametre") return construireCorrectionParametre(instance);
+  if (instance.variante === "parametreCarre") {
+    const v = valeursCarreLatex(instance);
+    return [
+      { type: "paragraphe", fragments: [texte("a) "), latex(`${formuleSubstitueeReductionLatex(instance)} = 0`), texte(" soit "), latex(formatEquationReduiteLatex(instance)), texte(".")] },
+      { type: "paragraphe", fragments: v ? [texte("b) "), latex(v), texte(".")] : [texte("b) Aucune valeur de x (Δ < 0).")] },
+    ];
+  }
   return construireCorrectionPointsParametre(instance);
 }
 
@@ -309,6 +335,10 @@ function enoncePapier(instance: ExerciceColinearite): EnoncePapier {
   if (instance.variante === "parametre") {
     return { section: { enteteFragments: [texte("On donne les vecteurs "), donnees, texte(". Détermine la valeur du réel "), latex("x"), texte(" pour laquelle "), ...nomsVecteurs(instance), texte(" sont colinéaires.")], questions: [] } };
   }
+  if (instance.variante === "parametreCarre") {
+    // 0, 1 ou 2 valeurs : la consigne ne présuppose jamais le nombre (verdict).
+    return { section: { enteteFragments: [texte("On donne les vecteurs "), donnees, texte(". Détermine la ou les valeurs du réel "), latex("x"), texte(", s'il en existe, pour lesquelles "), ...nomsVecteurs(instance), texte(" sont colinéaires.")], questions: [] } };
+  }
   const { labelA, labelB, labelC } = instance;
   if (instance.variante === "points") {
     return { section: { enteteFragments: [texte("On donne les points "), donnees, texte(`. Les points ${labelA}, ${labelB} et ${labelC} sont-ils alignés ? Justifie par un calcul.`)], questions: [] } };
@@ -325,6 +355,10 @@ function verdict(instance: ExerciceColinearVecteurs | ExerciceColinearPoints): s
 function reponseBreve(instance: ExerciceColinearite): FragmentConsigne[] {
   if (instance.variante === "vecteurs" || instance.variante === "points") {
     return [texte("Critère : "), latex(nombreFrLatex(critereReel(instance))), texte(` ; ${verdict(instance)}`)];
+  }
+  if (instance.variante === "parametreCarre") {
+    const v = valeursCarreLatex(instance);
+    return v ? [latex(v)] : [texte("Aucune valeur de x (Δ < 0)")];
   }
   return [latex(`x = ${nombreFrLatex(instance.solutionX as number)}`)];
 }
@@ -367,6 +401,20 @@ function bareme(instance: ExerciceColinearite): BaremeExercice {
       reponsesAcceptees: [[texte("Vérification de la valeur trouvée par le critère (facultative)")]],
     };
   }
+  if (instance.variante === "parametreCarre") {
+    const v = valeursCarreLatex(instance);
+    return {
+      reponseFinale: reponseBreve(instance),
+      criteres: [
+        { sousQuestion: "a", critere: [texte("Relation de colinéarité écrite avec x et développée")], points: 1 },
+        { sousQuestion: "a", critere: [texte("Équation réduite : "), latex(formatEquationReduiteLatex(instance))], points: 1 },
+        { sousQuestion: "b", critere: [texte("Discriminant et nombre de valeurs")], points: 1 },
+        { sousQuestion: "b", critere: v ? [texte("Valeurs : "), latex(v)] : [texte("Conclusion : aucune valeur de x")], points: 1 },
+      ],
+      erreursFrequentes: [erreurSigne, { description: [texte("Une seule valeur donnée alors que Δ > 0")], cout: "−0,5" }, { description: [texte("Δ < 0 interprété comme une valeur de x")], cout: "−1" }],
+      reponsesAcceptees: [[texte("Factorisation directe ou produit nul à la place du discriminant, si elle est juste")]],
+    };
+  }
   return {
     reponseFinale: reponseBreve(instance),
     criteres: [
@@ -384,6 +432,11 @@ function bareme(instance: ExerciceColinearite): BaremeExercice {
  * origine (alignement), 0 sinon ; aucun piège dans les données (le verdict est la question). */
 function criteresDifficulte(instance: ExerciceColinearite): CriteresDifficulte {
   const methode = instance.variante === "points" || instance.variante === "pointsParametre" ? 1 : 0;
+  if (instance.variante === "parametreCarre") {
+    // Verdict (0, 1 ou 2 valeurs) tiré dans la variante : niveau et durée constants (lot D) — les
+    // deux étapes comptent sans charge (les lignes de x₁, x₂ ou leur absence ne trahissent rien).
+    return { ...etapesDuCorrige(correctionDetailleeColinearite(instance)), sansCharge: true, methode: 0, piege: 1, nombres: 0 };
+  }
   return { ...etapesDuCorrige(correctionDetailleeColinearite(instance)), methode, piege: 0, nombres: 0 };
 }
 

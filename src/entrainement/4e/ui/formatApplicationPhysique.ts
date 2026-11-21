@@ -525,7 +525,7 @@ export function formatAideNormeNiveau2Latex(exercice: ExerciceApplicationPhysiqu
   if (exercice.variante === "angleDroit") {
     return `\\|${resultante}\\|^2 = ${exercice.v1}^2 + ${exercice.v2}^2`;
   }
-  return `\\|${resultante}\\|^2 = ${exercice.v1}^2 + ${exercice.v2}^2 + 2\\cdot ${exercice.v1}\\cdot ${exercice.v2}\\cdot\\cos(${exercice.angleEntreVecteurs}°)`;
+  return `\\|${resultante}\\|^2 = ${exercice.v1}^2 + ${exercice.v2}^2 + 2\\cdot ${exercice.v1}\\cdot ${exercice.v2}\\cdot\\cos(${exercice.angleEntreVecteurs}^\\circ)`;
 }
 
 /**
@@ -564,7 +564,7 @@ export function formatAideDeviationNiveau2Latex(exercice: ExerciceApplicationPhy
     return `\\tan(\\text{déviation}) = \\dfrac{${exercice.v2}}{${exercice.v1}}`;
   }
   const norme = nombreFrLatex(Math.round(exercice.triangle.a * 100) / 100);
-  return `\\sin(\\text{déviation}) = \\dfrac{${exercice.v2}\\cdot\\sin(${exercice.angleEntreVecteurs}°)}{${norme}}`;
+  return `\\sin(\\text{déviation}) = \\dfrac{${exercice.v2}\\cdot\\sin(${exercice.angleEntreVecteurs}^\\circ)}{${norme}}`;
 }
 
 /**
@@ -580,7 +580,7 @@ export function segmentsAideDeviationSens(exercice: ExerciceApplicationPhysique)
   const { v1, v2 } = notationVecteursApplicationPhysique(exercice.contexte);
   return [
     texte("Attention, la calculatrice (arcsin) donne toujours un angle aigu. Calcule "),
-    latex(`\\|${v1}\\| + \\|${v2}\\|\\cos\\theta = ${exercice.v1} + ${exercice.v2}\\cdot\\cos(${exercice.angleEntreVecteurs}°)`),
+    latex(`\\|${v1}\\| + \\|${v2}\\|\\cos\\theta = ${exercice.v1} + ${exercice.v2}\\cdot\\cos(${exercice.angleEntreVecteurs}^\\circ)`),
     texte(" : s'il est négatif, la résultante penche vers l'arrière et la déviation vaut 180° moins l'angle de la calculatrice ; sinon, c'est l'angle de la calculatrice."),
   ];
 }

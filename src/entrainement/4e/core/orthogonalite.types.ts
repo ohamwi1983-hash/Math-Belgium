@@ -65,6 +65,9 @@ export interface ExerciceOrthogonaliteParametre {
   v1: Composantes;
   v1Nom: string;
   v2Connu: number;
+  /** Lot C de l'audit 4e ch. 6 (G11) : x dans la SECONDE composante du vecteur qui le contient
+   * (absent ou faux : la première, comme avant). */
+  xEnSeconde?: boolean;
   v2Nom: string;
   coefX: number;
   coefConst: number;

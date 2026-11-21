@@ -1,18 +1,23 @@
 import { useState } from "react";
-import type { ExerciceColinearParametre } from "../core/colinearite.types";
+import type { ExerciceColinearParametre, ExerciceColinearPointsParametre } from "../core/colinearite.types";
 import { diagnostiquerResolutionAvecX } from "../moteur/verificationColinearite";
-import { PLACEHOLDER_SOLUTION_X, consigneGlobaleColinearite, formatEnonceLatex, formatEquationReduiteLatex } from "../ui/formatColinearite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { PLACEHOLDER_SOLUTION_X, consigneGlobaleColinearite, formatEquationReduiteLatex } from "../ui/formatColinearite";
+import { lireNombreSaisi } from "../ui/lireNombre";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesResolutionColinearite, messageResolutionColinearite } from "../ui/retoursVecteurs2";
 import { Katex } from "./Katex";
+import { PiedVecteurs } from "./PiedVecteurs";
+import { useTentativeLisible } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
-  exercice: ExerciceColinearParametre;
+  exercice: ExerciceColinearParametre | ExerciceColinearPointsParametre;
   tentativesUtilisees: number;
   tentativesMax: number;
+  onActiverAide: () => void;
   onValider: (valeur: number) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -21,52 +26,39 @@ interface Props {
 }
 
 /**
- * Écran "resolution" — V2-écran2 (variante "parametre"), dernière phase. Depuis
- * `promptcorrectionsgenerateur24lot3.md`, point 2 : réécrit pour rejoindre exactement le patron déjà
- * en place pour "resolutionAvecX" (V4, `EtapeResolutionAvecXColinearite.tsx`) — cette variante
- * garantit désormais toujours exactement une solution (voir `generateurs/colinearite/index.ts`), un
- * simple champ numérique `x =` remplace l'ancienne interface à 3 états (Aucune/Une/Une infinité de
- * solutions).
- *
- * **Aucun bouton "Aide"** (`NIVEAU_AIDE_MAX_RESOLUTION = 0` — retire l'aide générique de résolution,
- * sans valeur ajoutée pour un simple champ `x=`, même convention que "resolutionAvecX").
- *
- * `promptgen24modificationscompletes.md` : bloc de données redondant (composantes de $\vec u$/
- * $\vec v$, `formatEnonceLatex`) ajouté au-dessus — le bloc violet existant (équation réduite
- * validée à l'écran précédent) devient conceptuellement le bloc "état actuel", aucun changement
- * structurel de son propre rendu (structure miroir de `EtapeResolutionParametreOrthogonalite.tsx`,
- * générateur 25).
+ * Écran « résolution » (premier degré) de gen24, variantes « paramètre » et « alignement avec x » :
+ * rappel de l'équation réduite confirmée, champ `x =`. Règles communes (audit 4e ch. 6, lot B) :
+ * nombre illisible sans tentative, message ciblé (signe du terme constant, division inversée),
+ * aides à deux niveaux (il n'y en avait aucune).
  */
-export function EtapeResolutionColinearite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeResolutionColinearite({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
-
-  const valeur = Number(texte.replace(",", "."));
+  const saisie = useTentativeLisible<number>();
+  const lu = lireNombreSaisi(texte);
   const complet = texte.trim() !== "";
-  const statut = complet && tentativesUtilisees > 0 ? diagnostiquerResolutionAvecX(exercice, valeur) : undefined;
-  const consigneGlobale = consigneGlobaleColinearite(exercice);
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
+  const erronee = jugee !== null && diagnostiquerResolutionAvecX(exercice, jugee) !== "correct";
 
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGlobale}
+        consigneGenerale={consigneGlobaleColinearite(exercice)}
         blocDonnees={
           <div className="equation-box">
-            <Katex expression={formatEnonceLatex(exercice)} />
+            <Katex expression={formatEquationReduiteLatex(exercice)} />
           </div>
         }
       />
-      <div className="equation-box">
-        <Katex expression={formatEquationReduiteLatex(exercice)} />
-      </div>
       <p className="prompt-text">Résous cette équation.</p>
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="colinearite-resolution-x">
           x =
         </label>
-        <input disabled={!!validation}
+        <input
+          disabled={!!validation}
           id="colinearite-resolution-x"
-          className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
+          className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_SOLUTION_X}
           value={texte}
           onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
@@ -74,16 +66,19 @@ export function EtapeResolutionColinearite({ exercice, tentativesUtilisees, tent
       </div>
 
       {!validation && (
-        <>
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedVecteurs
+          aides={aidesResolutionColinearite(exercice)}
+          onPremiereAide={onActiverAide}
+          complet={complet}
+          saisie={saisie}
+          reponse={() => lu ?? Number.NaN}
+          lisible={() => lu !== null}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_VECTEURS.valeurX}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(v) => messageResolutionColinearite(exercice, v)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

@@ -230,7 +230,6 @@ export function AppApplicationPhysique() {
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideNorme}
             recapitulatif={calculerRecapitulatifApplicationPhysique(etat)}
             onActiverAide={() => setEtat(activerAideNorme(etat))}
             onValider={(valeur) => terminerEtape(soumettreReponseNorme(etat, valeur), `${nombreFr(valeur)} ${exercice.unite}`)}
@@ -242,7 +241,6 @@ export function AppApplicationPhysique() {
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideDeviation}
             recapitulatif={calculerRecapitulatifApplicationPhysique(etat)}
             onActiverAide={() => setEtat(activerAideDeviation(etat))}
             onValider={(valeur) => terminerEtape(soumettreReponseDeviation(etat, valeur), `${nombreFr(valeur)}°`)}

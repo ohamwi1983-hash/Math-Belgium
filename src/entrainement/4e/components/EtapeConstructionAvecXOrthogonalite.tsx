@@ -2,20 +2,22 @@ import { useState } from "react";
 import type { ExerciceOrthogonaliteTriangleParametre } from "../core/orthogonalite.types";
 import { evaluerConstructionAvecXTriangle } from "../moteur/verificationOrthogonalite";
 import type { ReponseConstructionAvecXTriangle } from "../moteur/verificationOrthogonalite";
-import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import { PLACEHOLDER_COMPOSANTE_SYMBOLIQUE, consigneGlobaleOrthogonalite, formatFormuleComposantesLatex, formatTermesEnonceTriangleParametreLatex } from "../ui/formatOrthogonalite";
+import { PLACEHOLDER_COMPOSANTE_SYMBOLIQUE, consigneGlobaleOrthogonalite, formatTermesEnonceTriangleParametreLatex } from "../ui/formatOrthogonalite";
 import { Katex } from "./Katex";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesConstructionTriangle, constructionTriangleXLisible, messageConstructionTriangleX } from "../ui/retoursVecteurs3";
+import { PiedVecteurs } from "./PiedVecteurs";
+import { useTentativeLisible } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangleParametre;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
+
   onActiverAide: () => void;
   onValider: (reponse: ReponseConstructionAvecXTriangle) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
@@ -56,7 +58,7 @@ function ChampSymbolique({
         className={`text-input${erronee ? " is-erronee" : ""}`}
         placeholder={PLACEHOLDER_COMPOSANTE_SYMBOLIQUE}
         value={valeur}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(normaliserSigneMoins(e.target.value))}
       />
     </div>
   );
@@ -81,14 +83,13 @@ function ChampSymbolique({
  * (`formatTermesEnonceTriangleParametreLatex`) pour ne jamais couper/déborder un point symbolique
  * potentiellement long (ex. "C(3x-15;x-6)") sur mobile.
  */
-export function EtapeConstructionAvecXOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConstructionAvecXOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
   const [acY, setAcY] = useState("");
   const [bcX, setBcX] = useState("");
   const [bcY, setBcY] = useState("");
-  const max = NIVEAU_AIDE_MAX.constructionAvecX;
 
   const complet = [abX, abY, acX, acY, bcX, bcY].every((v) => v.trim() !== "");
 
@@ -96,8 +97,10 @@ export function EtapeConstructionAvecXOrthogonalite({ exercice, tentativesUtilis
     return { abX, abY, acX, acY, bcX, bcY };
   }
 
-  const apresEchec = tentativesUtilisees > 0;
-  const evaluation = apresEchec ? evaluerConstructionAvecXTriangle(exercice, construireReponse()) : null;
+  // Règles communes (audit 4e ch. 6, lot B) : saisie illisible jamais transmise au moteur.
+  const saisie = useTentativeLisible<ReponseConstructionAvecXTriangle>();
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
+  const evaluation = jugee !== null ? evaluerConstructionAvecXTriangle(exercice, jugee) : null;
 
   const consigneGlobale = consigneGlobaleOrthogonalite(exercice);
 
@@ -169,28 +172,20 @@ export function EtapeConstructionAvecXOrthogonalite({ exercice, tentativesUtilis
         </div>
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <Katex expression={formatFormuleComposantesLatex(exercice.labelA, exercice.labelB)} block />
-        </div>
-      )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(
-              tentativesUtilisees,
-              tentativesMax,
-              evaluation && Object.values(evaluation).includes("parse_error") ? "parse_error" : undefined,
-            )}
-          </p>
-        )}
-        </>
+        <PiedVecteurs
+          aides={aidesConstructionTriangle(exercice)}
+          onPremiereAide={onActiverAide}
+          complet={complet}
+          saisie={saisie}
+          reponse={construireReponse}
+          lisible={() => constructionTriangleXLisible({ ...construireReponse() })}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_VECTEURS.composanteX}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => messageConstructionTriangleX(exercice, r)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

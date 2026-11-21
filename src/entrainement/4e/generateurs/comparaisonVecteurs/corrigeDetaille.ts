@@ -3,6 +3,7 @@ import { calcul, latex, ligne, piege, resultat, texte, utilise } from "../../../
 import type { ExerciceComparaisonVecteurs, VecteurFigureCompare } from "../../core/comparaisonVecteurs.types";
 import { COURS_COLINEARITE, COURS_COMPARER, COURS_NORME, carre, coefVec, col, finaliserCorrigeVecteurs, fois, nT, q, vec, type Fragments } from "../../ui/corrigeVecteurs1";
 import { construireSvgComparaison } from "./figure";
+import { egalitesDemandees } from "../../moteur/verificationComparaisonVecteurs";
 
 /**
  * Corrigé détaillé « comme au tableau » de gen28 « Comparaison visuelle de vecteurs sur figure » —
@@ -24,10 +25,8 @@ function coefficient(v: VecteurFigureCompare, ref: VecteurFigureCompare): number
   return ref.composantes.x !== 0 ? v.composantes.x / ref.composantes.x : v.composantes.y / ref.composantes.y;
 }
 
-export function egalitesAttendues(e: ExerciceComparaisonVecteurs): { label: string; k: number }[] {
-  const ref = e.vecteurs.find((v) => v.label === e.labelReference)!;
-  return e.vecteurs.filter((v) => e.labelsCorrects.includes(v.label) && v.indexBase === ref.indexBase).map((v) => ({ label: v.label, k: v.coefficientBase }));
-}
+/** Mêmes égalités que l'écran « égalité » (une source : le moteur). */
+export const egalitesAttendues = egalitesDemandees;
 
 export function egalitesLatex(e: ExerciceComparaisonVecteurs): string {
   const k = (c: number) => (c === 1 ? "" : c === -1 ? "-" : String(c));

@@ -2,20 +2,21 @@ import { useState } from "react";
 import type { ExerciceColinearPointsParametre } from "../core/colinearite.types";
 import { evaluerConstructionAvecX } from "../moteur/verificationColinearite";
 import type { ReponseConstructionAvecX } from "../moteur/verificationColinearite";
-import { NIVEAU_AIDE_MAX_CONSTRUCTION_AVEC_X } from "../moteur/sessionColinearite";
-import { PLACEHOLDER_COMPOSANTE_SYMBOLIQUE, consigneGlobaleColinearite, formatFormuleComposantesLatex, formatTermesEnoncePointsParametreLatex } from "../ui/formatColinearite";
+import { PLACEHOLDER_COMPOSANTE_SYMBOLIQUE, consigneGlobaleColinearite, formatTermesEnoncePointsParametreLatex } from "../ui/formatColinearite";
 import { Katex } from "./Katex";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesConstructionColinearite, constructionAvecXLisible, messageConstructionAvecX } from "../ui/retoursVecteurs2";
+import { PiedVecteurs } from "./PiedVecteurs";
+import { useTentativeLisible } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceColinearPointsParametre;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseConstructionAvecX) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
@@ -56,7 +57,7 @@ function ChampSymbolique({
         className={`text-input${erronee ? " is-erronee" : ""}`}
         placeholder={PLACEHOLDER_COMPOSANTE_SYMBOLIQUE}
         value={valeur}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(normaliserSigneMoins(e.target.value))}
       />
     </div>
   );
@@ -80,7 +81,7 @@ function ChampSymbolique({
  * `promptgen24modificationscompletes.md` : bloc de données (points A/B/C) passé en "bloc fitter"
  * (`formatTermesEnoncePointsParametreLatex`, un fragment KaTeX par point).
  */
-export function EtapeConstructionAvecXColinearite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConstructionAvecXColinearite({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
@@ -92,8 +93,10 @@ export function EtapeConstructionAvecXColinearite({ exercice, tentativesUtilisee
     return { abX, abY, acX, acY };
   }
 
-  const apresEchec = tentativesUtilisees > 0;
-  const evaluation = apresEchec ? evaluerConstructionAvecX(exercice, construireReponse()) : null;
+  // Règles communes (audit 4e ch. 6, lot B) : saisie illisible jamais transmise au moteur.
+  const saisie = useTentativeLisible<ReponseConstructionAvecX>();
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
+  const evaluation = jugee !== null ? evaluerConstructionAvecX(exercice, jugee) : null;
 
   const consigneGlobale = consigneGlobaleColinearite(exercice);
 
@@ -149,28 +152,20 @@ export function EtapeConstructionAvecXColinearite({ exercice, tentativesUtilisee
         </div>
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <Katex expression={formatFormuleComposantesLatex(exercice.labelA, exercice.labelB)} block />
-        </div>
-      )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONSTRUCTION_AVEC_X} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(
-              tentativesUtilisees,
-              tentativesMax,
-              evaluation && Object.values(evaluation).includes("parse_error") ? "parse_error" : undefined,
-            )}
-          </p>
-        )}
-        </>
+        <PiedVecteurs
+          aides={aidesConstructionColinearite(exercice)}
+          onPremiereAide={onActiverAide}
+          complet={complet}
+          saisie={saisie}
+          reponse={construireReponse}
+          lisible={() => constructionAvecXLisible(construireReponse())}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_VECTEURS.composanteX}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => messageConstructionAvecX(exercice, r)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

@@ -14,7 +14,15 @@ import type { EtatEtapeTentatives } from "./etapeTentatives";
  * - `parametre`        : reduction → resolution
  * - `pointsParametre`  : constructionAvecX → reductionAvecX → resolutionAvecX
  */
-export type PhaseColinearite = "test" | "constructionVecteurs" | "constructionAvecX" | "reduction" | "resolution" | "reductionAvecX" | "resolutionAvecX";
+export type PhaseColinearite = "test" | "constructionVecteurs" | "constructionAvecX" | "reduction" | "resolution" | "reductionAvecX" | "resolutionAvecX" | "resolutionCarre";
+
+/** Choix fermé jugé UNE fois puis figé (audit 4e ch. 6, lot B, G3) : la conclusion de l'écran
+ * « test » (colinéaires ? alignés ?), ou « aucune valeur / au moins une » de « paramètre au carré ».
+ * `correct` faux : la bonne réponse est révélée, le champ garde ses tentatives. */
+export interface ChoixFige<T> {
+  choisi: T;
+  correct: boolean;
+}
 
 export interface ResultatExerciceColinearite {
   variante: VarianteColinearite;
@@ -53,6 +61,10 @@ export interface EtatSessionColinearite {
   constructionRevele: boolean;
   scoreReductionExercice: number | null;
   reductionRevele: boolean;
+  /** Écran « test » : conclusion(s) jugée(s) à la première validation, puis figée(s). */
+  conclusionTest: ChoixFige<{ colinearite: boolean; alignement: boolean | null }> | null;
+  /** Écran « résolution » de « paramètre au carré » : « aucune valeur » (vrai) / « au moins une ». */
+  choixValeurs: ChoixFige<boolean> | null;
   resultats: ResultatExerciceColinearite[];
   terminee: boolean;
 }

@@ -14,9 +14,15 @@ import {
   soumettreReponseResolution,
   soumettreReponseResolutionAvecX,
   soumettreReponseTest,
+  soumettreChoixResolutionCarre,
+  soumettreReponseResolutionCarre,
 } from "./moteur/sessionColinearite";
+import { EtapeValeursAvecChoix, type ReponseValeursAvecChoix } from "./components/EtapeValeursAvecChoix";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+import { aidesResolutionCarre, messageChoixCarre, messageValeursCarre } from "./ui/retoursVecteurs2";
+import { consigneGlobaleColinearite, formatEnonceLatex } from "./ui/formatColinearite";
 import type { EtatSessionColinearite, PhaseColinearite } from "./moteur/typesColinearite";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceColinearite } from "./generateurs/colinearite";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceColinearite, genererExerciceColineariteLibre } from "./generateurs/colinearite";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { VarianteColinearite } from "./core/colinearite.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -46,7 +52,8 @@ const REGLAGES_DEMO: ReglagesSession = {
 };
 
 function nouvelleSession(): EtatSessionColinearite {
-  return demarrerSessionColinearite(REGLAGES_DEMO, genererExerciceColinearite);
+  // Tirage libre de l'appli : « paramètre au carré » compris ; les codes gardent l'ancien tirage.
+  return demarrerSessionColinearite(REGLAGES_DEMO, genererExerciceColineariteLibre);
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
@@ -89,6 +96,11 @@ function revelationConstruction(exercice: ExerciceColinearite) {
 
 /** Révélation de la résolution (V2/V4 dernier écran) — les 3 cas (unique/identité/contradiction). */
 function revelationResolution(exercice: ExerciceColinearite) {
+  if (exercice.variante === "parametreCarre") {
+    const s = exercice.solutions.map((v) => String(v).replace(".", "{,}").replace("-", "-"));
+    if (s.length === 0) return <span>Aucune valeur de x ne convient (Δ &lt; 0).</span>;
+    return <Katex expression={s.length === 1 ? `x = ${s[0]}` : `x = ${s[0]} \\text{ ou } x = ${s[1]}`} />;
+  }
   if (exercice.variante !== "parametre" && exercice.variante !== "pointsParametre") return null;
   if (exercice.typeSolution === "unique") return <Katex expression={`x = ${String(exercice.solutionX).replace(".", "{,}")}`} />;
   if (exercice.typeSolution === "identite") return <span>Tout x convient (une infinité de solutions).</span>;
@@ -136,6 +148,10 @@ function construireReponseAttendue(etat: EtatSessionColinearite, exercice: Exerc
     if (etat.phase === "reduction") return <Katex expression={formatEquationReduiteLatex(exercice)} />;
     if (etat.phase === "resolution") return revelationResolution(exercice);
   }
+  if (exercice.variante === "parametreCarre") {
+    if (etat.phase === "reduction") return <Katex expression={formatEquationReduiteLatex(exercice)} />;
+    if (etat.phase === "resolutionCarre") return revelationResolution(exercice);
+  }
   if (exercice.variante === "pointsParametre") {
     if (etat.phase === "constructionAvecX") return revelationConstruction(exercice);
     if (etat.phase === "reductionAvecX") return <Katex expression={formatEquationReduiteLatex(exercice)} />;
@@ -152,6 +168,7 @@ const TITRES_ECRANS: Record<PhaseColinearite, string> = {
   reductionAvecX: "Équation réduite",
   resolution: "Valeur de x",
   resolutionAvecX: "Valeur de x",
+  resolutionCarre: "Valeurs de x",
   test: "Test de colinéarité",
 };
 
@@ -207,6 +224,8 @@ function sequencePourExercice(exercice: ExerciceColinearite): PhaseColinearite[]
       return ["reduction", "resolution"];
     case "pointsParametre":
       return ["constructionAvecX", "reductionAvecX", "resolutionAvecX"];
+    case "parametreCarre":
+      return ["reduction", "resolutionCarre"];
   }
 }
 
@@ -315,7 +334,6 @@ export function AppColinearite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideConstruction}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseConstructionVecteurs(etat, reponse), saisieConstructionVecteurs(exercice, reponse))}
             validation={validation}
@@ -326,18 +344,16 @@ export function AppColinearite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideConstruction}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseConstructionAvecX(etat, reponse), saisieConstructionAvecX(exercice, reponse))}
             validation={validation}
           />
-        ) : etat.phase === "reduction" && exercice.variante === "parametre" ? (
+        ) : etat.phase === "reduction" && (exercice.variante === "parametre" || exercice.variante === "parametreCarre") ? (
           <EtapeReductionColinearite
             key={`${numeroExercice}-${etat.phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideReduction}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(texte) => terminerEtape(soumettreReponseReduction(etat, texte), saisieBrute(texte))}
             validation={validation}
@@ -348,7 +364,43 @@ export function AppColinearite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(valeur) => terminerEtape(soumettreReponseResolution(etat, valeur), <Katex expression={`x = ${formatSaisieNombre(valeur)}`} />)}
+            validation={validation}
+          />
+        ) : etat.phase === "resolutionCarre" && exercice.variante === "parametreCarre" ? (
+          <EtapeValeursAvecChoix
+            key={`${numeroExercice}-${etat.phase}`}
+            enTete={
+              <EnTeteExercice
+                consigneGenerale={consigneGlobaleColinearite(exercice)}
+                blocDonnees={
+                  <div className="equation-box">
+                    <Katex expression={formatEnonceLatex(exercice)} />
+                  </div>
+                }
+              />
+            }
+            question="Résous cette équation : combien de valeurs de x conviennent, et lesquelles ?"
+            libelleAucune="Aucune valeur"
+            libelleAuMoins="Au moins une valeur"
+            placeholder="ex : −3"
+            choixFige={etat.choixValeurs}
+            attenduAucune={exercice.solutions.length === 0}
+            messageChoixFaux={messageChoixCarre(exercice)}
+            tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+            tentativesMax={etat.reglages.tentativesMax}
+            aides={aidesResolutionCarre(exercice)}
+            onPremiereAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(r: ReponseValeursAvecChoix) => {
+              // Premier envoi : le choix (jugé une fois) puis, s'il est juste et dit « au moins une »,
+              // les valeurs dans la foulée ; ensuite, les valeurs seules.
+              let suivant = etat.choixValeurs === null ? soumettreChoixResolutionCarre(etat, r.aucune) : etat;
+              if (!r.aucune && suivant.phase === "resolutionCarre" && !suivant.terminee && (etat.choixValeurs !== null || suivant.choixValeurs?.correct)) suivant = soumettreReponseResolutionCarre(suivant, r.valeurs);
+              const valeursTexte = r.aucune ? "Aucune valeur" : r.valeurs.map(formatSaisieNombre).join(" ; ");
+              terminerEtape(suivant, r.aucune ? valeursTexte : <Katex expression={`x = ${valeursTexte.replace(/ ; /g, " \\text{ ou } x = ")}`} />);
+            }}
+            cible={(v) => messageValeursCarre(exercice, v)}
             validation={validation}
           />
         ) : etat.phase === "reductionAvecX" && exercice.variante === "pointsParametre" ? (
@@ -357,7 +409,6 @@ export function AppColinearite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideReduction}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(texte) => terminerEtape(soumettreReponseReductionAvecX(etat, texte), saisieBrute(texte))}
             validation={validation}
@@ -368,6 +419,7 @@ export function AppColinearite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(valeur) => terminerEtape(soumettreReponseResolutionAvecX(etat, valeur), <Katex expression={`x = ${formatSaisieNombre(valeur)}`} />)}
             validation={validation}
           />
@@ -377,7 +429,7 @@ export function AppColinearite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideTest}
+            conclusionFigee={etat.conclusionTest}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseTest(etat, reponse), saisieTest(reponse))}
             validation={validation}

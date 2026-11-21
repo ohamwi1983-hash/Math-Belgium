@@ -5,7 +5,7 @@ import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveVe
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { NOMBRE_ECRANS, activerAide, demarrer, ecranSuivant, soumettre, tentativesMaxEcran, type EtatDetectiveVecteurs } from "./moteur/sessionDetectiveVecteurs";
 import { diagnostiquerCorrection, verdictFaux, verifierDescription, verifierLigne, type SaisieCorrection, type StatutChamp } from "./moteur/verificationDetectiveVecteurs";
-import { SCENARIOS, colonne, descriptionCorrecte, indiceLigneFausse, valeursAttendues } from "./moteur/modeleDetectiveVecteurs";
+import { colonne, descriptionCorrecte, indiceLigneFausse, nombreLignesCopie, valeursAttendues } from "./moteur/modeleDetectiveVecteurs";
 import { expressionLibreVersLatex } from "./ui/formatExpressionLatex";
 import {
   CONSIGNE_GENERALE,
@@ -178,7 +178,7 @@ export function AppDetectiveVecteurs() {
         <EtapeLigneFausse
           {...communs}
           consigne={consigne}
-          nombreLignes={SCENARIOS[e.scenario].nombreLignes}
+          nombreLignes={nombreLignesCopie(e)}
           attendue={indiceLigneFausse(e)}
           onValider={(i) => conclure(verifierLigne(e, i), <p style={{ margin: 0 }}>{`Ligne ${i + 1}`}</p>)}
         />

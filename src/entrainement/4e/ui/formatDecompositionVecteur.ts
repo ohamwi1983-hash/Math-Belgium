@@ -1,3 +1,4 @@
+import { CONSIGNE_CONSTRUCTION_PAPIER } from "./formatConstructionVectorielle";
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import { latex, texte } from "../../export/corrigeTableau";
 import type { ExerciceComposantes, ExerciceDecompositionVecteur, ExerciceGraphique, SystemeOption, Vec2 } from "../core/decompositionVecteur.types";
@@ -102,7 +103,7 @@ export function enonceFragments(e: ExerciceDecompositionVecteur): FragmentConsig
 /** Questions imprimées (énoncé papier) : la consigne globale, sans les étapes d'apprentissage. */
 export function questionPapier(e: ExerciceDecompositionVecteur): FragmentConsigne[] {
   if (e.type === "graphique") {
-    return [texte("Écris "), latex(U), texte(" sous la forme "), latex(`a${V} + b${W}`), texte(", où a et b sont des réels. Justifie par une construction.")];
+    return [texte("Écris "), latex(U), texte(" sous la forme "), latex(`a${V} + b${W}`), texte(`, où a et b sont des réels. Justifie par une construction. ${CONSIGNE_CONSTRUCTION_PAPIER}`)];
   }
   if (e.famille === "composantes") {
     return [texte("Détermine les réels a et b tels que "), latex(`${U} = a${V} + b${W}`), texte(", puis vérifie ta réponse.")];

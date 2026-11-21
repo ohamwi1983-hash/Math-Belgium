@@ -25,7 +25,7 @@
  * logique de vérification booléenne, jamais le statut à 3 valeurs (aucune saisie libre pour lui,
  * jamais de risque de `parse_error`) — voir `verifierConclusion` ci-dessous.
  */
-import type { ExerciceColinearParametre, ExerciceColinearPoints, ExerciceColinearPointsParametre, ExerciceColinearVecteurs, LinExpr } from "../core/colinearite.types";
+import type { ExerciceColinearParametre, ExerciceColinearParametreCarre, ExerciceColinearPoints, ExerciceColinearPointsParametre, ExerciceColinearVecteurs, LinExpr } from "../core/colinearite.types";
 import { diagnostiquerFormeCanonique, evaluerExpression } from "./expressionAlgebrique";
 import type { StatutVerification } from "./statutVerification";
 
@@ -203,11 +203,24 @@ export function verifierConstructionAvecX(exercice: ExerciceColinearPointsParame
  * `enonce.a===0` de `coefficientsProportionnels` retombe toujours sur une comparaison de rapport
  * bien définie.
  */
-export function diagnostiquerReductionAvecX(exercice: ExerciceAvecX, texte: string): StatutVerification {
-  return diagnostiquerFormeCanonique(normaliserSigneMoins(texte), { a: 0, b: exercice.coefX, c: exercice.coefConst });
+/** Relation réduite (premier degré ; second degré pour « paramètre au carré ») : toute équation
+ * proportionnelle est acceptée (`diagnostiquerFormeCanonique`). */
+export function diagnostiquerReductionAvecX(exercice: ExerciceAvecX | ExerciceColinearParametreCarre, texte: string): StatutVerification {
+  const a = exercice.variante === "parametreCarre" ? exercice.coefX2 : 0;
+  return diagnostiquerFormeCanonique(normaliserSigneMoins(texte), { a, b: exercice.coefX, c: exercice.coefConst });
 }
 
-export function verifierReductionAvecX(exercice: ExerciceAvecX, texte: string): boolean {
+/** « Paramètre au carré » : l'ensemble des valeurs saisies est celui des solutions (ordre libre,
+ * doublon d'une solution double accepté). */
+export function verifierValeursCarre(exercice: ExerciceColinearParametreCarre, valeurs: number[]): boolean {
+  const attendues = exercice.solutions;
+  if (valeurs.length === 0) return attendues.length === 0;
+  const tous = valeurs.every((v) => attendues.some((s) => Math.abs(v - s) <= TOLERANCE));
+  const couvre = attendues.every((s) => valeurs.some((v) => Math.abs(v - s) <= TOLERANCE));
+  return tous && couvre;
+}
+
+export function verifierReductionAvecX(exercice: ExerciceAvecX | ExerciceColinearParametreCarre, texte: string): boolean {
   return diagnostiquerReductionAvecX(exercice, texte) === "correct";
 }
 

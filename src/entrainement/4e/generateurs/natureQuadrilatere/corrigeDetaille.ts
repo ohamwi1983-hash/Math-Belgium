@@ -62,7 +62,7 @@ function etapesCotes(e: E): EtapeCorrection[] {
   const egal = cotesConsecutifsEgaux(e);
   return [
     utilise("b", [
-      texte("Un losange est un parallélogramme dont deux côtés CONSÉCUTIFS (AB et BC, issus de B) ont la même longueur ; norme d'un vecteur : "),
+      texte("Un losange est un parallélogramme dont deux côtés consécutifs (AB et BC, issus de B) ont la même longueur ; norme d'un vecteur : "),
       latex("\\|\\vec{u}\\|=\\sqrt{x_u^2+y_u^2}"),
       texte(` ${COURS_NORME}.`),
     ]),

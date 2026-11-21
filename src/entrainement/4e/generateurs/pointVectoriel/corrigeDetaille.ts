@@ -20,6 +20,7 @@ import {
   plus,
   pointL,
   q,
+  qp,
   sub,
   termeVecSuite,
   vec,
@@ -53,6 +54,33 @@ export function correctionDetailleePointVectoriel(e: ExercicePointVectoriel): Et
         ligne(`${vec(`${P}${b}`)}=${colonne(moins(B.x, M.x), moins(B.y, M.y))}=${col(sub(B, M))}`, "mêmes composantes"),
       ]),
       piege(l, [texte("On divise la somme des coordonnées par 2, pas leur différence : la différence donnerait les composantes du vecteur, pas le milieu.")]),
+    ]);
+  }
+  if (e.variante === "symetrique") {
+    const { pointA: A, centre: I, labelA: a, labelCentre: c } = e;
+    const S = e.reponse;
+    return finaliserCorrigeVecteurs([
+      utilise(l, [
+        texte(`${P} est le symétrique de ${a} par rapport à ${c} : ${c} est le milieu de [${a}${P}] ${COURS_TRANSLATION_MILIEU}, donc `),
+        latex(`x_${indice(c)}=\\dfrac{x_${a}+x_${indice(P)}}{2}`),
+        texte(", c'est-à-dire "),
+        latex(`x_${indice(P)}=2x_${indice(c)}-x_${a}`),
+        texte(" (de même pour les ordonnées)."),
+      ]),
+      calcul(l, [
+        ligne(`x_${indice(P)}=2\\cdot ${qp(I.x)}-${qp(A.x)}`, `${c} milieu de [${a}${P}]`),
+        ligne(`=${q(2 * I.x)}-${qp(A.x)}`),
+        ligne(`=${q(S.x)}`),
+        ligne(`y_${indice(P)}=2\\cdot ${qp(I.y)}-${qp(A.y)}`, "même calcul pour les ordonnées"),
+        ligne(`=${q(2 * I.y)}-${qp(A.y)}`),
+        ligne(`=${q(S.y)}`),
+      ]),
+      resultat(l, [latex(pointL(P, S))]),
+      verification(l, [texte(`Le milieu de [${a}${P}] est bien ${c} : `)], [
+        ligne(`\\dfrac{x_${a}+x_${indice(P)}}{2}=\\dfrac{${plus(A.x, S.x)}}{2}=${q((A.x + S.x) / 2)}`, "moyenne des abscisses"),
+        ligne(`\\dfrac{y_${a}+y_${indice(P)}}{2}=\\dfrac{${plus(A.y, S.y)}}{2}=${q((A.y + S.y) / 2)}`, "moyenne des ordonnées"),
+      ]),
+      piege(l, [texte(`${c} est au milieu, ${P} est de l'autre côté : la moyenne des coordonnées de ${a} et ${c} donnerait le milieu de [${a}${c}], pas ${P}.`)]),
     ]);
   }
   if (e.forme === "pointAPoint") return finaliserCorrigeVecteurs(etapesMultiplePoint(l, e));

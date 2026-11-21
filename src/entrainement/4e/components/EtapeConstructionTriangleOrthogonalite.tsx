@@ -2,13 +2,15 @@ import { useState } from "react";
 import type { ExerciceOrthogonaliteTriangle } from "../core/orthogonalite.types";
 import { evaluerConstructionTriangle } from "../moteur/verificationOrthogonalite";
 import type { ReponseConstructionTriangle } from "../moteur/verificationOrthogonalite";
-import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import { PLACEHOLDER_COMPOSANTE, consigneGlobaleOrthogonalite, formatFormuleComposantesLatex, formatTermesEnonceTriangleLatex } from "../ui/formatOrthogonalite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { PLACEHOLDER_COMPOSANTE, consigneGlobaleOrthogonalite, formatTermesEnonceTriangleLatex } from "../ui/formatOrthogonalite";
+import { lireNombreSaisi } from "../ui/lireNombre";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesConstructionTriangle, messageConstructionTriangle } from "../ui/retoursVecteurs3";
 import { Katex } from "./Katex";
+import { PiedVecteurs } from "./PiedVecteurs";
+import { useTentativeLisible } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -16,7 +18,6 @@ interface Props {
   exercice: ExerciceOrthogonaliteTriangle;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseConstructionTriangle) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
@@ -40,30 +41,25 @@ interface Props {
  * l'aide ne montre plus que la formule de AB⃗ (jamais AC⃗/BC⃗) ; point 5, marquage rouge en direct de
  * chaque champ fautif après un échec.
  */
-export function EtapeConstructionTriangleOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConstructionTriangleOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
   const [acY, setAcY] = useState("");
   const [bcX, setBcX] = useState("");
   const [bcY, setBcY] = useState("");
-  const max = NIVEAU_AIDE_MAX.constructionTriangle;
 
   const complet = [abX, abY, acX, acY, bcX, bcY].every((v) => v.trim() !== "");
 
+  // Règles communes (audit 4e ch. 6, lot B) : lecture tolérante, saisie illisible jamais transmise.
+  const lus = [abX, abY, acX, acY, bcX, bcY].map(lireNombreSaisi);
   function construireReponse(): ReponseConstructionTriangle {
-    return {
-      abX: Number(abX.replace(",", ".")),
-      abY: Number(abY.replace(",", ".")),
-      acX: Number(acX.replace(",", ".")),
-      acY: Number(acY.replace(",", ".")),
-      bcX: Number(bcX.replace(",", ".")),
-      bcY: Number(bcY.replace(",", ".")),
-    };
+    const n = (i: number) => lus[i] ?? Number.NaN;
+    return { abX: n(0), abY: n(1), acX: n(2), acY: n(3), bcX: n(4), bcY: n(5) };
   }
-
-  const apresEchec = tentativesUtilisees > 0;
-  const evaluation = apresEchec ? evaluerConstructionTriangle(exercice, construireReponse()) : null;
+  const saisie = useTentativeLisible<ReponseConstructionTriangle>();
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
+  const evaluation = jugee !== null ? evaluerConstructionTriangle(exercice, jugee) : null;
 
   function champ(id: string, label: string, valeur: string, onChange: (v: string) => void, erronee: boolean) {
     return (
@@ -116,28 +112,20 @@ export function EtapeConstructionTriangleOrthogonalite({ exercice, tentativesUti
         </div>
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <Katex expression={formatFormuleComposantesLatex(exercice.labelA, exercice.labelB)} block />
-        </div>
-      )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(
-              tentativesUtilisees,
-              tentativesMax,
-              evaluation && Object.values(evaluation).includes("parse_error") ? "parse_error" : undefined,
-            )}
-          </p>
-        )}
-        </>
+        <PiedVecteurs
+          aides={aidesConstructionTriangle(exercice)}
+          onPremiereAide={onActiverAide}
+          complet={complet}
+          saisie={saisie}
+          reponse={construireReponse}
+          lisible={() => lus.every((v) => v !== null)}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_VECTEURS.composante}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => messageConstructionTriangle(exercice, r)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

@@ -26,8 +26,9 @@ function formatNombre(valeur: number): string {
   return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "").replace(".", "{,}");
 }
 
+// Coordonnées « (1\,;\,−4) » (audit 4e ch. 6, G5 : « ; » se rendait collé en KaTeX).
 export function formatComposantesLatex(v: Composantes): string {
-  return `(${formatNombre(v.x)} ; ${formatNombre(v.y)})`;
+  return `(${formatNombre(v.x)}\\,;\\,${formatNombre(v.y)})`;
 }
 
 /** `coefX·x + constante` — coefficient 1/-1 jamais explicite, terme constant omis s'il est nul,
@@ -44,7 +45,7 @@ export function formatLinExpr(expr: LinExpr): string {
 }
 
 export function formatComposantesLinLatex(v: ComposantesLin): string {
-  return `(${formatLinExpr(v.x)} ; ${formatLinExpr(v.y)})`;
+  return `(${formatLinExpr(v.x)}\\,;\\,${formatLinExpr(v.y)})`;
 }
 
 /** Parenthèse un facteur composé (dépend de `x`) ou négatif — jamais une simple constante
@@ -71,7 +72,10 @@ export function formatEnonceLatex(exercice: ExerciceOrthogonalite): string {
     return `\\vec{${exercice.v1Nom}}${formatComposantesMatriceLatex(exercice.v1)} \\quad \\vec{${exercice.v2Nom}}${formatComposantesMatriceLatex(exercice.v2)}`;
   }
   if (exercice.variante === "parametre") {
-    return `\\vec{${exercice.v1Nom}}${formatComposantesMatriceLatex(exercice.v1)} \\quad \\vec{${exercice.v2Nom}}\\begin{pmatrix} x \\\\ ${formatNombre(exercice.v2Connu)} \\end{pmatrix}`;
+    // u toujours écrit en premier, quel que soit le vecteur qui contient x (lot C, G11).
+    const num = `\\vec{${exercice.v1Nom}}${formatComposantesMatriceLatex(exercice.v1)}`;
+    const avecX = `\\vec{${exercice.v2Nom}}${vecteurAvecXParametreLatex(exercice)}`;
+    return exercice.v1Nom === "u" ? `${num} \\quad ${avecX}` : `${avecX} \\quad ${num}`;
   }
   if (exercice.variante === "triangle") {
     return `${exercice.labelA}${formatComposantesLatex(exercice.pointA)} \\quad ${exercice.labelB}${formatComposantesLatex(exercice.pointB)} \\quad ${exercice.labelC}${formatComposantesLatex(exercice.pointC)}`;
@@ -126,8 +130,23 @@ export function formuleSubstitueeTestLatex(exercice: ExerciceOrthogonaliteTest):
   return formuleSubstitueeLatex(exercice.v1, exercice.v2);
 }
 
+/** Vecteur qui contient x, en colonne : x en première ou en seconde composante (lot C, G11). */
+export function vecteurAvecXParametreLatex(exercice: ExerciceOrthogonaliteParametre): string {
+  const c = formatNombre(exercice.v2Connu);
+  return exercice.xEnSeconde ? `\\begin{pmatrix} ${c} \\\\ x \\end{pmatrix}` : `\\begin{pmatrix} x \\\\ ${c} \\end{pmatrix}`;
+}
+
+/** Composantes des deux vecteurs dans l'ordre d'écriture (u, puis v) — `null` : la composante x. */
+export function facteursParametre(exercice: ExerciceOrthogonaliteParametre): { u: [number | null, number | null]; v: [number | null, number | null] } {
+  const num: [number | null, number | null] = [exercice.v1.x, exercice.v1.y];
+  const avecX: [number | null, number | null] = exercice.xEnSeconde ? [exercice.v2Connu, null] : [null, exercice.v2Connu];
+  return exercice.v1Nom === "u" ? { u: num, v: avecX } : { u: avecX, v: num };
+}
+
 export function formuleSubstitueeParametreLatex(exercice: ExerciceOrthogonaliteParametre): string {
-  return `${formatFacteurNum(exercice.v1.x)}\\cdot x + ${formatFacteurNum(exercice.v1.y)}\\cdot ${formatFacteurNum(exercice.v2Connu)}`;
+  const { u, v } = facteursParametre(exercice);
+  const f = (t: number | null) => (t === null ? "x" : formatFacteurNum(t));
+  return `${f(u[0])}\\cdot ${f(v[0])} + ${f(u[1])}\\cdot ${f(v[1])}`;
 }
 
 function vecteurNumSommet(exercice: ExerciceOrthogonaliteTriangle, cote: "AB" | "AC" | "BC"): Composantes {
@@ -226,9 +245,11 @@ export function libelleRectangleEn(sommet: Sommet, exercice: { labelA: string; l
  * corrections déjà appliquées à "triangleParametre" (V4). */
 export function consigneGlobaleOrthogonalite(exercice: ExerciceOrthogonalite): string | null {
   if (exercice.variante === "test") return "Vérifie si ces deux vecteurs sont orthogonaux.";
-  if (exercice.variante === "parametre") return "Que doit valoir x pour que ces 2 vecteurs soient orthogonaux ?";
-  if (exercice.variante === "triangle") return "Vérifie si le triangle ABC est rectangle.";
-  return "Le triangle ABC est-il rectangle ? Si oui, en quel sommet ?";
+  if (exercice.variante === "parametre") return "Que doit valoir x pour que ces deux vecteurs soient orthogonaux ?";
+  // Noms des points de l'instance (point ouvert du corrigé, décisions 4e ch. 6 : « ABC » en dur).
+  const t = `${exercice.labelA}${exercice.labelB}${exercice.labelC}`;
+  if (exercice.variante === "triangle") return `Vérifie si le triangle ${t} est rectangle.`;
+  return `Le triangle ${t} est-il rectangle ? Si oui, en quel sommet ?`;
 }
 
 // ============================================================================

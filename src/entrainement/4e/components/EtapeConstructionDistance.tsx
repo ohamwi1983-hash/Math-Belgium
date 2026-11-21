@@ -2,44 +2,37 @@ import { useState } from "react";
 import type { ExerciceDistance } from "../core/normeDistance.types";
 import { evaluerConstructionDistance } from "../moteur/verificationNormeDistance";
 import type { ReponseConstructionDistance } from "../moteur/verificationNormeDistance";
-import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { CONSIGNE_GENERALE_DISTANCE, PLACEHOLDER_COMPOSANTE, formatAideVecteurABNiveau1Latex, formatAideVecteurABNiveau2Latex, formatTermesDonneesDistanceLatex } from "../ui/formatNormeDistance";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { CONSIGNE_GENERALE_DISTANCE, formatTermesDonneesDistanceLatex } from "../ui/formatNormeDistance";
+import { lireNombreSaisi } from "../ui/lireNombre";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesConstructionDistance, messageConstructionDistance } from "../ui/retoursVecteurs3";
 import { Katex } from "./Katex";
+import { DeuxChampsVecteurs } from "./DeuxChampsVecteurs";
+import { PiedVecteurs } from "./PiedVecteurs";
+import { useTentativeLisible } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceDistance;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseConstructionDistance) => void;
   validation?: ValidationEtapeProps | null;
 }
 
-/**
- * Écran "construction" — variante 2, écran 1 : consigne générale + bloc de données redondant (sans
- * débordement mobile, `.equation-box-termes`) + 2 champs numériques (composantes de AB⃗), soumis en
- * une seule tentative. Aide à 2 niveaux (formule générale non substituée, puis substituée) —
- * `promptgen26refontecomplete.md`, Partie F : graphe supprimé (chevauchement de labels).
- */
-export function EtapeConstructionDistance({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+/** Variante « distance », écran 1 : les composantes de AB. Règles communes (audit 4e ch. 6, lot B) :
+ * illisible sans tentative, message ciblé (A − B), aides à deux niveaux. */
+export function EtapeConstructionDistance({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
-  const max = NIVEAU_AIDE_MAX.constructionDistance;
-  const complet = texteX.trim() !== "" && texteY.trim() !== "";
-
-  function construireReponse(): ReponseConstructionDistance {
-    return { x: Number(texteX.replace(",", ".")), y: Number(texteY.replace(",", ".")) };
-  }
-
-  const apresEchec = tentativesUtilisees > 0;
-  const evaluation = apresEchec ? evaluerConstructionDistance(exercice, construireReponse()) : null;
+  const saisie = useTentativeLisible<ReponseConstructionDistance>();
+  const lx = lireNombreSaisi(texteX);
+  const ly = lireNombreSaisi(texteY);
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
+  const evaluation = jugee !== null ? evaluerConstructionDistance(exercice, jugee) : null;
 
   return (
     <div>
@@ -56,61 +49,32 @@ export function EtapeConstructionDistance({ exercice, tentativesUtilisees, tenta
       <p className="prompt-text">
         Calcule les composantes de <Katex expression={`\\vec{${exercice.labelA}${exercice.labelB}}`} />.
       </p>
-
-      <div className="field-row">
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule" htmlFor="norme-distance-construction-x">
-            <Katex expression={`x_{${exercice.labelA}${exercice.labelB}} =`} />
-          </label>
-          <input disabled={!!validation}
-            id="norme-distance-construction-x"
-            className={`text-input${evaluation !== null && evaluation.x !== "correct" ? " is-erronee" : ""}`}
-            placeholder={PLACEHOLDER_COMPOSANTE}
-            value={texteX}
-            onChange={(e) => setTexteX(normaliserSigneMoins(e.target.value))}
-          />
-        </div>
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule" htmlFor="norme-distance-construction-y">
-            <Katex expression={`y_{${exercice.labelA}${exercice.labelB}} =`} />
-          </label>
-          <input disabled={!!validation}
-            id="norme-distance-construction-y"
-            className={`text-input${evaluation !== null && evaluation.y !== "correct" ? " is-erronee" : ""}`}
-            placeholder={PLACEHOLDER_COMPOSANTE}
-            value={texteY}
-            onChange={(e) => setTexteY(normaliserSigneMoins(e.target.value))}
-          />
-        </div>
-      </div>
-
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            Rappel : <Katex expression={formatAideVecteurABNiveau1Latex(exercice.labelA, exercice.labelB)} />
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              Formule substituée : <Katex expression={formatAideVecteurABNiveau2Latex(exercice.labelA, exercice.pointA, exercice.labelB, exercice.pointB)} />
-            </p>
-          )}
-        </div>
-      )}
+      <DeuxChampsVecteurs
+        id="norme-distance-construction"
+        labelX={`x_{${exercice.labelA}${exercice.labelB}} =`}
+        labelY={`y_{${exercice.labelA}${exercice.labelB}} =`}
+        texteX={texteX}
+        texteY={texteY}
+        onX={setTexteX}
+        onY={setTexteY}
+        erreurX={evaluation !== null && evaluation.x !== "correct"}
+        erreurY={evaluation !== null && evaluation.y !== "correct"}
+        desactive={!!validation}
+      />
       {!validation && (
-        <>
-          {max > 0 && (
-            <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-          )}
-
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-            Valider
-          </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-            </p>
-          )}
-        </>
+        <PiedVecteurs
+          aides={aidesConstructionDistance(exercice)}
+          onPremiereAide={onActiverAide}
+          complet={texteX.trim() !== "" && texteY.trim() !== ""}
+          saisie={saisie}
+          reponse={() => ({ x: lx ?? Number.NaN, y: ly ?? Number.NaN })}
+          lisible={() => lx !== null && ly !== null}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_VECTEURS.composante}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => messageConstructionDistance(exercice, r)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

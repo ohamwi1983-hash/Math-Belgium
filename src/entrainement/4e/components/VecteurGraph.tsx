@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Line, Mafs, Point as MafsPoint, Text, useTransformContext, vec, Vector } from "mafs";
+import { Line, Mafs, Point as MafsPoint, Polygon, Text, useTransformContext, vec, Vector } from "mafs";
 import "mafs/core.css";
-import { EPAISSEUR_TRAIT_ACCENTUE, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN } from "../ui/mafsTransformation";
+import { EPAISSEUR_TRAIT_ACCENTUE, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN, formatEtiquetteGrilleTypo } from "../ui/mafsTransformation";
 import { calculerViewBoxVecteurs } from "../ui/vecteurGraph";
 import type { LabelVecteurAvecFleche, PointAffiche, VecteurAffiche, ViewBoxTransformation } from "../ui/vecteurGraph";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
@@ -37,6 +37,33 @@ interface Props {
   /** Déplacement du fond au glisser — `true` par défaut (comportement inchangé) ; `false` pour gen23,
    * où un glisser manqué sur une poignée déplaçait toute la figure (point 26). */
   pan?: boolean;
+  /** Longueur de la tête de flèche des vecteurs, en UNITÉS de la figure (absente : tête Mafs de
+   * taille fixe en pixels, comportement inchangé). Fournie par gen28 : sa figure au quadrillage
+   * serré rendait les têtes Mafs aussi longues qu'un vecteur de 1 à 2 unités (audit 4e ch. 6, G13). */
+  teteFleche?: number;
+}
+
+/** Tête de flèche proportionnée (unités de la figure) : segment jusqu'à la base, triangle plein. */
+function VecteurTeteProportionnee({ tail, tip, couleur, tete }: { tail: [number, number]; tip: [number, number]; couleur: string; tete: number }) {
+  const dx = tip[0] - tail[0];
+  const dy = tip[1] - tail[1];
+  const longueur = Math.hypot(dx, dy) || 1;
+  const ux = dx / longueur;
+  const uy = dy / longueur;
+  const l = Math.min(tete, longueur * 0.45);
+  const base: [number, number] = [tip[0] - ux * l, tip[1] - uy * l];
+  const demi = l * 0.5;
+  return (
+    <>
+      <Line.Segment point1={tail} point2={base} color={couleur} weight={EPAISSEUR_TRAIT_ACCENTUE} />
+      <Polygon
+        points={[tip, [base[0] - uy * demi, base[1] + ux * demi], [base[0] + uy * demi, base[1] - ux * demi]]}
+        color={couleur}
+        fillOpacity={1}
+        weight={1}
+      />
+    </>
+  );
 }
 
 const COULEUR_POINT_DEFAUT = "#495057";
@@ -88,17 +115,22 @@ function LabelVecteurFleche({ x, y, label, couleur }: { x: number; y: number; la
   const largeurIndiceEstimee = aUnIndice ? TAILLE_POLICE_INDICE * RATIO_LARGEUR_GLYPHE : 0;
   const xCentreLettreBase = cx - largeurIndiceEstimee / 2;
   const yFleche = cy - TAILLE_POLICE_BASE * RATIO_HAUTEUR_MAJUSCULE - ESPACE_FLECHE_LETTRE_PX;
+  // Flèche ENTIÈRE (trait + pointe) centrée sur la lettre (audit 4e ch. 6, G13 : la pointe
+  // dépassait à droite du trait centré, la flèche paraissait à côté de la lettre).
   const xDebutFleche = xCentreLettreBase - LARGEUR_FLECHE_PX / 2;
   const xPointeFleche = xCentreLettreBase + LARGEUR_FLECHE_PX / 2;
+  const xBaseTete = xPointeFleche - TAILLE_TETE_FLECHE_PX * 1.4;
 
   return (
     <g style={{ fill: couleur, stroke: couleur }}>
-      <line x1={xDebutFleche} y1={yFleche} x2={xPointeFleche} y2={yFleche} strokeWidth={1.5} />
+      <line x1={xDebutFleche} y1={yFleche} x2={xBaseTete + 1} y2={yFleche} strokeWidth={1.5} />
       <polygon
-        points={`${xPointeFleche + TAILLE_TETE_FLECHE_PX},${yFleche} ${xPointeFleche - TAILLE_TETE_FLECHE_PX * 0.4},${yFleche - TAILLE_TETE_FLECHE_PX} ${xPointeFleche - TAILLE_TETE_FLECHE_PX * 0.4},${yFleche + TAILLE_TETE_FLECHE_PX}`}
+        points={`${xPointeFleche},${yFleche} ${xBaseTete},${yFleche - TAILLE_TETE_FLECHE_PX} ${xBaseTete},${yFleche + TAILLE_TETE_FLECHE_PX}`}
         stroke="none"
       />
-      <text x={cx} y={cy} fontSize={TAILLE_POLICE_BASE} textAnchor="middle" dominantBaseline="alphabetic" className="mafs-shadow" stroke="none">
+      {/* `textAnchor` aussi en style : le centrage de la lettre sous sa flèche ne dépend d'aucune
+       * règle CSS `text-anchor` héritée (une règle CSS l'emporte sur l'attribut de présentation). */}
+      <text x={cx} y={cy} fontSize={TAILLE_POLICE_BASE} textAnchor="middle" style={{ textAnchor: "middle" }} dominantBaseline="alphabetic" className="mafs-shadow" stroke="none">
         <tspan>{label.base}</tspan>
         {aUnIndice && (
           <tspan dy={TAILLE_POLICE_BASE * 0.32} fontSize={TAILLE_POLICE_INDICE}>
@@ -119,7 +151,7 @@ function LabelVecteurFleche({ x, y, label, couleur }: { x: number; y: number; la
  * superposer ses propres éléments Mafs (`MovablePoint`...) sans dupliquer le calcul de viewBox/
  * grille/largeur — voir leurs sections dédiées.
  */
-export function VecteurGraph({ points = [], vecteurs = [], children, onClic, masquerAxes = false, pasGrille, viewBoxFixe, pan = true }: Props) {
+export function VecteurGraph({ points = [], vecteurs = [], children, onClic, masquerAxes = false, pasGrille, viewBoxFixe, pan = true, teteFleche }: Props) {
   const [wrapperRef, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
   const largeur = Math.min(LARGEUR_MAX, Math.max(LARGEUR_MIN, largeurMesuree || LARGEUR_PAR_DEFAUT));
   const hauteur = largeur / RATIO_GRAPHE;
@@ -136,7 +168,7 @@ export function VecteurGraph({ points = [], vecteurs = [], children, onClic, mas
         zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}
         onClick={onClic ? (p) => onClic({ x: p[0], y: p[1] }) : undefined}
       >
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} masquerAxes={masquerAxes} pasFixe={pasGrille} />
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} masquerAxes={masquerAxes} pasFixe={pasGrille} formatEtiquette={formatEtiquetteGrilleTypo} />
         {vecteurs.map((v, i) => {
           const couleur = v.couleur ?? COULEUR_VECTEUR_DEFAUT;
           const tip: [number, number] = [v.origine.x + v.vecteur.x, v.origine.y + v.vecteur.y];
@@ -146,6 +178,8 @@ export function VecteurGraph({ points = [], vecteurs = [], children, onClic, mas
             <g key={`vecteur-${i}`}>
               {v.sansFleche ? (
                 <Line.Segment point1={[v.origine.x, v.origine.y]} point2={tip} color={couleur} weight={EPAISSEUR_TRAIT_ACCENTUE} />
+              ) : teteFleche ? (
+                <VecteurTeteProportionnee tail={[v.origine.x, v.origine.y]} tip={tip} couleur={couleur} tete={teteFleche} />
               ) : (
                 <Vector tail={[v.origine.x, v.origine.y]} tip={tip} color={couleur} weight={EPAISSEUR_TRAIT_ACCENTUE} />
               )}

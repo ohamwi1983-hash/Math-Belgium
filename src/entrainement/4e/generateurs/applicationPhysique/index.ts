@@ -116,9 +116,11 @@ function exerciceExploitable(exercice: ExerciceApplicationPhysique): boolean {
 /** Part visée d'exercices « forces, angle quelconque » dont la résultante penche vers l'arrière
  * (déviation > 90°, F2 option b — piège du cours, section « Applications physiques ») : le tirage
  * uniforme n'en produisait que ~0,7 %, presque jamais vus. Avec cette probabilité de remplacement,
- * la part atteint ~17,5 % (0,007 + 0,993 × 0,17). Avion/hélicoptère et angle droit inchangés : le
- * piège y est géométriquement impossible (vent faible devant la vitesse propre, cos 90° = 0). */
-const PROBABILITE_PIEGE_DEVIATION_OBTUSE = 0.17;
+ * la part atteint ~30 % (0,007 + 0,993 × 0,295 ; audit 4e ch. 6, lot D : la direction Nord/Sud est
+ * un verdict de l'écran « interprétation », 17,5 % la rendait trop prévisible). Avion/hélicoptère
+ * et angle droit inchangés : le piège y est géométriquement impossible (vent faible devant la
+ * vitesse propre, cos 90° = 0). */
+const PROBABILITE_PIEGE_DEVIATION_OBTUSE = 0.295;
 
 /** Même tirage et mêmes filtres que d'habitude (`exerciceExploitable`), restreint aux exercices
  * dont la résultante penche vers l'arrière — en pratique θ = 135° ou 150° avec F₂ grande devant F₁. */

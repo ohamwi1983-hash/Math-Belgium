@@ -8,11 +8,12 @@ import { SCENARIOS } from "../../moteur/modeleDetectiveVecteurs";
  * la même étape, dans toutes les séries.
  *
  * - La VARIANTE fixe le type d'erreur.
- * - `forme` = type d'erreur + exercice support + ligne fausse (+ sous-variante du défaut quand il y
- *   en a deux, ex. « norme|isocele|L4|carre ») : la même erreur, dans le même exercice, à la même
- *   étape de la copie ; seuls les nombres changent d'une série à l'autre. Dans une variante, chaque
- *   forme sort avec une probabilité d'au moins 25 % (scénarios et sous-variantes équiprobables,
- *   `index.ts`) : 20 000 essais suffisent largement.
+ * - `forme` = type d'erreur + exercice support (+ sous-variante du défaut quand il y en a deux, ex.
+ *   « norme|isocele|carre ») : la même erreur, dans le même exercice ; seuls les nombres et la
+ *   POSITION de la ligne fausse (0 à 3 lignes justes avant elle, tirée) changent d'une série à
+ *   l'autre — la ligne n'est plus dans `forme` (audit 4e ch. 6, lot D : la série B reproduisait la
+ *   même ligne, réponse de l'écran 1). Le type d'erreur (réponse de l'écran 2) : groupe à verdict
+ *   `groupe_erreur` du panneau (`exportEvaluation.ts`).
  * - Le VERDICT d'une question à décider (isocèle, alignés, rectangle) n'entre PAS dans `forme` :
  *   il reste tiré à pile ou face dans chaque série, et la copie l'inverse ou non selon les nombres.
  * - Aucun cas particulier : chaque copie demande la même démarche (trouver, nommer, corriger).
@@ -20,7 +21,7 @@ import { SCENARIOS } from "../../moteur/modeleDetectiveVecteurs";
  */
 export function formeDetectiveVecteurs(e: ExerciceDetectiveVecteurs): string {
   const s = SCENARIOS[e.scenario];
-  return [s.type, s.support, `L${s.ligne + 1}`, ...(e.sousVariante ? [e.sousVariante] : [])].join("|");
+  return [s.type, s.support, ...(e.sousVariante ? [e.sousVariante] : [])].join("|");
 }
 
 export function profilDetectiveVecteurs(e: ExerciceDetectiveVecteurs): ProfilInstance {

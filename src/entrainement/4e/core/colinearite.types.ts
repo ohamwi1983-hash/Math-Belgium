@@ -12,7 +12,7 @@
  */
 import type { Composantes, Point } from "./vecteur.types";
 
-export type VarianteColinearite = "vecteurs" | "parametre" | "points" | "pointsParametre";
+export type VarianteColinearite = "vecteurs" | "parametre" | "points" | "pointsParametre" | "parametreCarre";
 
 export interface LinExpr {
   coefX: number;
@@ -93,6 +93,24 @@ export interface ExerciceColinearPointsParametre {
   solutionX: number | null;
 }
 
-export type ExerciceColinearite = ExerciceColinearVecteurs | ExerciceColinearParametre | ExerciceColinearPoints | ExerciceColinearPointsParametre;
+/** « Paramètre au carré » (lot C de l'audit 4e ch. 6, décision 3 ; variante ajoutée EN FIN de
+ * catalogue) : x dans les deux vecteurs, le critère de colinéarité est du second degré —
+ * `coefX2·x² + coefX·x + coefConst = 0` — avec 0, 1 ou 2 solutions tirées à parts égales (un
+ * verdict, jamais un cas particulier). Exemple du cours : u(2 ; x), v(x ; 8), x² = 16. */
+export interface ExerciceColinearParametreCarre {
+  variante: "parametreCarre";
+  v1: ComposantesLin;
+  v1Nom: string;
+  v2: ComposantesLin;
+  v2Nom: string;
+  coefX2: number;
+  coefX: number;
+  coefConst: number;
+  typeSolution: "zero" | "une" | "deux";
+  /** Solutions réelles, dans l'ordre croissant (0, 1 ou 2 valeurs entières). */
+  solutions: number[];
+}
+
+export type ExerciceColinearite = ExerciceColinearVecteurs | ExerciceColinearParametre | ExerciceColinearPoints | ExerciceColinearPointsParametre | ExerciceColinearParametreCarre;
 
 export type GenerateurExerciceColinearite = () => ExerciceColinearite;

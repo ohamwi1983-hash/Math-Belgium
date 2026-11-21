@@ -26,7 +26,8 @@ export type PhaseNormeDistance =
   | "resolutionParametreNorme"
   | "constructionPythagore"
   | "calculPythagore"
-  | "testPythagore";
+  | "testPythagore"
+  | "conclusionNature";
 
 export const SEQUENCES: Record<VarianteNormeDistance, PhaseNormeDistance[]> = {
   vecteur: ["normeVecteur"],
@@ -34,6 +35,8 @@ export const SEQUENCES: Record<VarianteNormeDistance, PhaseNormeDistance[]> = {
   isocele: ["constructionIsocele", "calculIsocele", "conclusionIsocele"],
   parametre: ["reductionParametreNorme", "resolutionParametreNorme"],
   pythagore: ["constructionPythagore", "calculPythagore", "testPythagore"],
+  // Lot C (audit 4e ch. 6) : mêmes écrans « vecteurs » et « longueurs » que « isocèle », puis la nature.
+  natureTriangle: ["constructionIsocele", "calculIsocele", "conclusionNature"],
 };
 
 /**
@@ -49,12 +52,13 @@ export const NIVEAU_AIDE_MAX: Record<PhaseNormeDistance, number> = {
   calculDistance: 2,
   constructionIsocele: 2,
   calculIsocele: 2,
-  conclusionIsocele: 1,
+  conclusionIsocele: 2,
   reductionParametreNorme: 2,
   resolutionParametreNorme: 2,
   constructionPythagore: 2,
   calculPythagore: 2,
   testPythagore: 2,
+  conclusionNature: 2,
 };
 
 export interface ResultatExerciceNormeDistance {
@@ -92,6 +96,9 @@ export interface ResultatExerciceNormeDistance {
   scoreTestPythagore: number | null;
   testPythagoreRevele: boolean;
   niveauAideTestPythagore: number;
+  scoreConclusionNature: number | null;
+  conclusionNatureRevele: boolean;
+  niveauAideConclusionNature: number;
 }
 
 export interface ScoreEcran {
@@ -112,6 +119,9 @@ export interface EtatSessionNormeDistance {
   niveauAide: number;
   /** Écrans déjà clos de CET exercice, accumulés jusqu'à la clôture complète. */
   scoresAccumules: Partial<Record<PhaseNormeDistance, ScoreEcran>>;
+  /** Écran « résolution » de « paramètre » : « aucune solution » (vrai) / « au moins une », jugé UNE
+   * fois puis figé (audit 4e ch. 6, lot B, G3) ; les valeurs gardent leurs tentatives. */
+  choixValeurs: { choisi: boolean; correct: boolean } | null;
   resultats: ResultatExerciceNormeDistance[];
   terminee: boolean;
 }

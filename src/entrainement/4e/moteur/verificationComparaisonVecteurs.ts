@@ -64,29 +64,57 @@ function parserMembre(texte: string): Record<string, number> | null {
   return position === texte.length ? coefficients : null;
 }
 
-/** Étape "égalité" — toute égalité équivalente à `cible = k·référence` est acceptée, quel que soit
- * le sens d'écriture (`c = 2h`, `2h = c`, `h = c/2`, `c - 2h = 0`, `c = 2·h`, `C = −2H`…) : on
- * ramène tout dans un membre (`α·cible + β·référence = 0`) et on vérifie `−β/α = k`. Un autre
- * vecteur de la figure dans l'égalité, ou la cible absente, donne `not_equivalent`. */
-export function diagnostiquerEgalite(exercice: ExerciceComparaisonVecteurs, texte: string): StatutVerification {
+/** Vecteurs dont l'écran « égalité » demande l'égalité avec la référence : TOUS les vecteurs trouvés
+ * à l'écran « sélection » qui sont parallèles à la référence (même vecteur de base), avec leur
+ * coefficient — comme l'étape b du corrigé et la question b) du papier (audit 4e ch. 6, lot C :
+ * l'écran n'en demandait qu'un). */
+export function egalitesDemandees(exercice: ExerciceComparaisonVecteurs): { label: string; k: number }[] {
+  const ref = exercice.vecteurs.find((v) => v.label === exercice.labelReference)!;
+  return exercice.vecteurs
+    .filter((v) => exercice.labelsCorrects.includes(v.label) && v.indexBase === ref.indexBase)
+    .map((v) => ({ label: v.label, k: v.coefficientBase }));
+}
+
+/** Coefficients d'une égalité saisie, tout ramené dans le membre de gauche — `null` si illisible. */
+export function lireEgalite(texte: string): Record<string, number> | null {
   const parties = normaliserEgalite(texte).split("=");
-  if (parties.length !== 2) return "parse_error";
+  if (parties.length !== 2) return null;
   const gauche = parserMembre(parties[0]);
   const droite = parserMembre(parties[1]);
-  if (gauche === null || droite === null) return "parse_error";
-
-  const cible = exercice.cibleEgalite.toLowerCase();
-  const reference = exercice.labelReference.toLowerCase();
+  if (gauche === null || droite === null) return null;
   const total: Record<string, number> = { ...gauche };
   for (const [nom, valeur] of Object.entries(droite)) total[nom] = (total[nom] ?? 0) - valeur;
+  return total;
+}
 
-  const alpha = total[cible] ?? 0;
-  const beta = total[reference] ?? 0;
-  const autres = Object.entries(total).some(([nom, valeur]) => nom !== cible && nom !== reference && Math.abs(valeur) > TOLERANCE);
+/** Une égalité reliant `cible` à `reference` avec le coefficient `k` attendu — toute écriture
+ * équivalente est acceptée, quel que soit le sens d'écriture (`c = 2h`, `2h = c`, `h = c/2`,
+ * `c - 2h = 0`, `c = 2·h`, `C = −2H`…) : on ramène tout dans un membre (`α·cible + β·référence = 0`)
+ * et on vérifie `−β/α = k`. Un autre vecteur de la figure dans l'égalité, ou la cible absente, donne
+ * `not_equivalent`. */
+export function diagnostiquerEgalitePour(cible: string, reference: string, k: number, texte: string): StatutVerification {
+  const total = lireEgalite(texte);
+  if (total === null) return "parse_error";
+  const c = cible.toLowerCase();
+  const r = reference.toLowerCase();
+  const alpha = total[c] ?? 0;
+  const beta = total[r] ?? 0;
+  const autres = Object.entries(total).some(([nom, valeur]) => nom !== c && nom !== r && Math.abs(valeur) > TOLERANCE);
   if (autres || Math.abs(alpha) < TOLERANCE) return "not_equivalent";
-  return Math.abs(-beta / alpha - exercice.coefficientEgalite) < TOLERANCE ? "correct" : "not_equivalent";
+  return Math.abs(-beta / alpha - k) < TOLERANCE ? "correct" : "not_equivalent";
+}
+
+/** Égalité du seul vecteur `cibleEgalite` (contrat d'origine, gardé pour les tests). */
+export function diagnostiquerEgalite(exercice: ExerciceComparaisonVecteurs, texte: string): StatutVerification {
+  return diagnostiquerEgalitePour(exercice.cibleEgalite, exercice.labelReference, exercice.coefficientEgalite, texte);
 }
 
 export function verifierEgalite(exercice: ExerciceComparaisonVecteurs, texte: string): boolean {
   return diagnostiquerEgalite(exercice, texte) === "correct";
+}
+
+/** Écran « égalité » : une égalité par vecteur de `egalitesDemandees`, dans le même ordre. */
+export function verifierEgalites(exercice: ExerciceComparaisonVecteurs, textes: string[]): boolean {
+  const attendues = egalitesDemandees(exercice);
+  return attendues.length === textes.length && attendues.every((e, i) => diagnostiquerEgalitePour(e.label, exercice.labelReference, e.k, textes[i]) === "correct");
 }

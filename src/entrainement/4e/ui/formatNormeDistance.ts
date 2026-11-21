@@ -7,7 +7,7 @@
  * `‖(a;b)‖=√(a²+b²)`, `AB=‖AB⃗‖=√((xB-xA)²+(yB-yA)²)` — construite en passant d'abord par `AB⃗`
  * (chevauchement volontaire avec le générateur 20, comme "Colinéarité"/"Orthogonalité").
  */
-import type { ExerciceDistance, ExerciceIsocele, ExerciceNormeVecteur, ExerciceParametreNorme, ExercicePythagore, VarianteNormeDistance } from "../core/normeDistance.types";
+import type { ExerciceDistance, ExerciceTriangleCotes, ExerciceNormeVecteur, ExerciceParametreNorme, ExercicePythagore, VarianteNormeDistance } from "../core/normeDistance.types";
 import type { Composantes, Point } from "../core/vecteur.types";
 import type { ReponseClassificationIsocele } from "../moteur/verificationNormeDistance";
 
@@ -31,7 +31,14 @@ function formatNombre(valeur: number): string {
  * norme de vecteur / distance entre points, les deux notations doivent donc rester visuellement
  * distinctes partout où elles apparaissent (correction transversale). */
 export function formatComposantesLatex(v: Composantes): string {
-  return `(${formatNombre(v.x)} ; ${formatNombre(v.y)})`;
+  // « (1\,;\,−4) » (audit 4e ch. 6, G5 : « ; » se rendait collé en KaTeX).
+  return `(${formatNombre(v.x)}\\,;\\,${formatNombre(v.y)})`;
+}
+
+/** Norme visée de la variante « paramètre », TOUJOURS écrite √N non simplifiée (lot D de l'audit
+ * 4e ch. 6, G8) : la forme simplifiée m√2 trahissait « une seule solution ». */
+export function cibleParametreNormeLatex(cibleCarree: number): string {
+  return `\\sqrt{${cibleCarree}}`;
 }
 
 /** Réservée aux VECTEURS — notation matricielle colonne (2×1), jamais la même notation en ligne
@@ -193,11 +200,11 @@ export function formatEnonceTroisPointsLatex(labelA: string, pointA: Point, labe
   return `${formatPointLatex(labelA, pointA)} \\quad ${formatPointLatex(labelB, pointB)} \\quad ${formatPointLatex(labelC, pointC)}`;
 }
 
-export function formatEnonceIsoceleLatex(exercice: ExerciceIsocele): string {
+export function formatEnonceIsoceleLatex(exercice: ExerciceTriangleCotes): string {
   return formatEnonceTroisPointsLatex(exercice.labelA, exercice.pointA, exercice.labelB, exercice.pointB, exercice.labelC, exercice.pointC);
 }
 
-export function formatTermesDonneesIsoceleLatex(exercice: ExerciceIsocele): string[] {
+export function formatTermesDonneesIsoceleLatex(exercice: ExerciceTriangleCotes): string[] {
   return formatTermesTroisPointsLatex(exercice.labelA, exercice.pointA, exercice.labelB, exercice.pointB, exercice.labelC, exercice.pointC);
 }
 
@@ -210,7 +217,7 @@ export function formatEtatActuelVecteursTriangleLatex(labelA: string, labelB: st
 
 /** Bloc "état actuel" de l'écran 3 (`conclusionIsocele`) — les 3 normes confirmées à l'écran 2, en
  * `m√k` irréductible (entières ou radicales, voir `core/normeDistance.types.ts`), jamais de décimal. */
-export function formatEtatActuelLongueursIsoceleLatex(exercice: ExerciceIsocele): string {
+export function formatEtatActuelLongueursIsoceleLatex(exercice: ExerciceTriangleCotes): string {
   return `\\begin{gathered} \\|\\vec{${exercice.labelA}${exercice.labelB}}\\| = ${formatLongueurIrreductibleLatex(exercice.carreAB)} \\\\ \\|\\vec{${exercice.labelA}${exercice.labelC}}\\| = ${formatLongueurIrreductibleLatex(exercice.carreAC)} \\\\ \\|\\vec{${exercice.labelB}${exercice.labelC}}\\| = ${formatLongueurIrreductibleLatex(exercice.carreBC)} \\end{gathered}`;
 }
 
@@ -245,11 +252,12 @@ export const TEXTE_AIDE_ISOCELE_SCALENE =
  * de l'instance. */
 export function segmentsConsigneParametre(exercice: ExerciceParametreNorme): FragmentConsigne[] {
   return [
-    texte("Quelle valeur doit avoir x pour que le vecteur "),
+    // « La ou les valeurs, s'il en existe » (lot C, G7) : 0 ou 2 solutions dans deux tirages sur trois.
+    texte("Détermine la ou les valeurs de x, s'il en existe, pour que le vecteur "),
     latex("\\vec{v}"),
     texte(" soit de longueur "),
-    latex(formatLongueurIrreductibleLatex(exercice.cibleCarree)),
-    texte(" ?"),
+    latex(cibleParametreNormeLatex(exercice.cibleCarree)),
+    texte("."),
   ];
 }
 
@@ -263,7 +271,7 @@ export function formatEnonceParametreLatex(exercice: ExerciceParametreNorme): st
 export function formatTermesEnonceParametreLatex(exercice: ExerciceParametreNorme): string[] {
   return [
     `\\vec{v}\\begin{pmatrix} ${formatBinome(exercice.p)} \\\\ ${formatBinome(exercice.r)} \\end{pmatrix}`,
-    `\\|\\vec{v}\\| = ${formatLongueurIrreductibleLatex(exercice.cibleCarree)}`,
+    `\\|\\vec{v}\\| = ${cibleParametreNormeLatex(exercice.cibleCarree)}`,
   ];
 }
 
@@ -277,7 +285,7 @@ export function formatAideNormeSubstitueeParametreLatex(exercice: ExerciceParame
   // autour d'un "x" seul, qui donnerait "(x)²" superflu (audit transversal,
   // `promptauditparenthesessuperflues.md`).
   const carreBinome = (valeur: number) => (valeur === 0 ? `${formatBinome(valeur)}^2` : `(${formatBinome(valeur)})^2`);
-  return `\\|\\vec{v}\\| = \\sqrt{${carreBinome(exercice.p)}+${carreBinome(exercice.r)}} = ${formatLongueurIrreductibleLatex(exercice.cibleCarree)}`;
+  return `\\|\\vec{v}\\| = \\sqrt{${carreBinome(exercice.p)}+${carreBinome(exercice.r)}} = ${cibleParametreNormeLatex(exercice.cibleCarree)}`;
 }
 
 export function formatEquationReduiteParametreNormeLatex(exercice: ExerciceParametreNorme): string {
@@ -356,7 +364,20 @@ const LIBELLES_VARIANTE: Record<VarianteNormeDistance, string> = {
   isocele: "Triangle isocèle/scalène",
   parametre: "Déterminer x pour une norme cible",
   pythagore: "Pythagore, méthode alternative",
+  natureTriangle: "Nature d'un triangle : isocèle, rectangle, rectangle isocèle",
 };
+
+/** Choix de l'écran « nature » (variante « nature d'un triangle », lot C de l'audit 4e ch. 6). */
+export const OPTIONS_NATURE_COTES: { valeur: "quelconque" | "isocele" | "rectangle" | "rectangleIsocele"; libelle: string }[] = [
+  { valeur: "quelconque", libelle: "Quelconque" },
+  { valeur: "isocele", libelle: "Isocèle" },
+  { valeur: "rectangle", libelle: "Rectangle" },
+  { valeur: "rectangleIsocele", libelle: "Rectangle isocèle" },
+];
+
+export function libelleNatureCotes(nature: "quelconque" | "isocele" | "rectangle" | "rectangleIsocele"): string {
+  return OPTIONS_NATURE_COTES.find((o) => o.valeur === nature)!.libelle;
+}
 
 export function libelleVarianteNormeDistance(variante: VarianteNormeDistance): string {
   return LIBELLES_VARIANTE[variante];

@@ -1,14 +1,18 @@
 import { useState } from "react";
 import type { ExerciceColinearPoints, ExerciceColinearVecteurs } from "../core/colinearite.types";
-import { diagnostiquerCritereTest } from "../moteur/verificationColinearite";
+import { conclusionAttendue, diagnostiquerCritereTest } from "../moteur/verificationColinearite";
 import type { ReponseTest } from "../moteur/verificationColinearite";
-import { NIVEAU_AIDE_MAX_TEST } from "../moteur/sessionColinearite";
-import { LATEX_FORMULE_COLINEARITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, LIBELLES_OUI_NON, PLACEHOLDER_CRITERE, QUESTION_ALIGNEMENT_POINTS, QUESTION_COLINEARITE_VECTEURS_APRES, QUESTION_COLINEARITE_VECTEURS_AVANT, QUESTION_COLINEARITE_VECTEURS_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_APRES, RAPPEL_VECTORIEL_COLINEARITE_AVANT, RAPPEL_VECTORIEL_COLINEARITE_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_FIN, consigneGlobaleColinearite, formatEnonceLatex, formatTermesEnoncePointsLatex, formuleSubstitueeTestLatex } from "../ui/formatColinearite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import type { ChoixFige } from "../moteur/typesColinearite";
+import { LATEX_VEC_U, LATEX_VEC_V, LIBELLES_OUI_NON, PLACEHOLDER_CRITERE, QUESTION_COLINEARITE_VECTEURS_APRES, QUESTION_COLINEARITE_VECTEURS_AVANT, QUESTION_COLINEARITE_VECTEURS_ENTRE, consigneGlobaleColinearite, formatEnonceLatex, formatTermesEnoncePointsLatex, questionAlignementPoints } from "../ui/formatColinearite";
+import { lireNombreSaisi } from "../ui/lireNombre";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesTestColinearite, messageConclusionColinearite, messageCritereColinearite } from "../ui/retoursVecteurs2";
 import { Katex } from "./Katex";
+import { RenduFragments } from "./RenduFragments";
+import { PiedVecteurs } from "./PiedVecteurs";
+import { useTentativeLisible } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -16,7 +20,8 @@ interface Props {
   exercice: ExerciceColinearVecteurs | ExerciceColinearPoints;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
+  /** Conclusion(s) jugée(s) à la première validation, puis figée(s) (`sessionColinearite`). */
+  conclusionFigee: ChoixFige<{ colinearite: boolean; alignement: boolean | null }> | null;
   onActiverAide: () => void;
   onValider: (reponse: ReponseTest) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
@@ -26,38 +31,43 @@ interface Props {
 }
 
 /**
- * Écran "test" — V1 (seul écran, variante "vecteurs") et V3-écran2 (variante "points", après
- * construction des vecteurs AB/AC — `promptcorrectionsgenerateur24complet.md`, points 14-17) : un
- * champ numérique (le critère de colinéarité) ET un ou deux champ(s) catégoriel(s), soumis ensemble
- * en une seule tentative — le champ numérique est exigé en plus de la conclusion pour empêcher de
- * deviner sans calculer.
- *
- * "points" : consigne globale + bloc "État actuel" (AB/AC, notation matricielle) + SECOND champ
- * catégoriel ("colinéaires ?" en plus de "alignés ?"). Les deux variantes partagent désormais la
- * MÊME aide vectorielle générique (u/v, jamais liée aux vrais noms de l'exercice) —
- * `promptcorrectionsgenerateur24lot2.md`, point 6 (consigne globale manquante sur V1) et point 7
- * (retrait de l'ancienne aide générique (a;b)/(c;d) de V1, qui coexistait à tort avec la version u/v
- * déjà utilisée par V3). Marquage rouge en direct du champ critère après un échec (point 5).
- *
- * `promptgen24modificationscompletes.md` : bloc de données de "points" passé en "bloc fitter"
- * (`formatTermesEnoncePointsLatex`, un fragment par point A/B/C) — "vecteurs" garde
- * `formatEnonceLatex` (2 vecteurs seulement, aucun risque de coupure).
- *
- * Ancien bloc "état actuel" de "points" (`etatActuelTestPoints`, les vecteurs AB/AC confirmés à
- * l'écran précédent) retiré — son contenu alimente maintenant le récapitulatif "Ce qu'on sait
- * déjà" (`ui/recapitulatifColinearite.ts`), affiché en haut de `AppColinearite.tsx`.
+ * Écran « test » (variante « vecteurs », seul écran ; variante « points », écran 2) : le critère de
+ * colinéarité (champ) puis la conclusion (choix fermé). Audit 4e ch. 6, lot B (G3) : la conclusion
+ * est jugée UNE fois, à la première validation, puis figée — révélée si elle était fausse ; le
+ * critère garde ses tentatives. Saisie illisible sans tentative, message ciblé (produit scalaire
+ * calculé, somme au lieu de différence), aides à deux niveaux.
  */
-export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentativesMax, conclusionFigee, onActiverAide, onValider, validation }: Props) {
   const [texteCritere, setTexteCritere] = useState("");
   const [conclusionAlignement, setConclusionAlignement] = useState<boolean | null>(null);
   const [conclusionColinearite, setConclusionColinearite] = useState<boolean | null>(null);
+  const saisie = useTentativeLisible<ReponseTest>();
 
   const estPoints = exercice.variante === "points";
-  const critere = Number(texteCritere.replace(",", "."));
-  const complet = texteCritere.trim() !== "" && conclusionAlignement !== null && (!estPoints || conclusionColinearite !== null);
-  const statut = texteCritere.trim() !== "" && tentativesUtilisees > 0 ? diagnostiquerCritereTest(exercice, critere) : undefined;
-  const critereErronee = tentativesUtilisees > 0 && statut !== undefined && statut !== "correct";
+  const critereLu = lireNombreSaisi(texteCritere);
+  const attendue = conclusionAttendue(exercice);
+  // Conclusions affichées : la bonne réponse une fois figée et fausse, sinon le choix de l'élève.
+  const figee = conclusionFigee !== null;
+  const affColin = figee ? (conclusionFigee.correct ? conclusionFigee.choisi.colinearite : attendue) : conclusionColinearite;
+  const affAlign = figee ? (conclusionFigee.correct ? (estPoints ? conclusionFigee.choisi.alignement : conclusionFigee.choisi.colinearite) : attendue) : conclusionAlignement;
+  const complet = texteCritere.trim() !== "" && affAlign !== null && (!estPoints || affColin !== null);
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
+  const critereErronee = jugee !== null && diagnostiquerCritereTest(exercice, jugee.critere) !== "correct";
   const consigneGlobale = consigneGlobaleColinearite(exercice);
+  const choixBloque = !!validation || figee;
+
+  function boutons(valeur: boolean | null, choisir: (v: boolean) => void) {
+    return (
+      <div className="options-grid-compact">
+        <button disabled={choixBloque} type="button" className={valeur === true ? "btn toggle-active" : "btn"} onClick={() => choisir(true)}>
+          {LIBELLES_OUI_NON.positif}
+        </button>
+        <button disabled={choixBloque} type="button" className={valeur === false ? "btn toggle-active" : "btn"} onClick={() => choisir(false)}>
+          {LIBELLES_OUI_NON.negatif}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -83,7 +93,8 @@ export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentatives
         <label className="field-label" htmlFor="colinearite-test-critere">
           Critère =
         </label>
-        <input disabled={!!validation}
+        <input
+          disabled={!!validation}
           id="colinearite-test-critere"
           className={`text-input${critereErronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_CRITERE}
@@ -97,75 +108,46 @@ export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentatives
           {/* Variante "points" : les vecteurs réellement construits, AB⃗ et AC⃗ — jamais u⃗/v⃗, absents de l'énoncé. */}
           <p className="prompt-text prompt-text--question-multiple">
             {QUESTION_COLINEARITE_VECTEURS_AVANT} <Katex expression={`\\vec{${exercice.labelA}${exercice.labelB}}`} /> {QUESTION_COLINEARITE_VECTEURS_ENTRE}{" "}
-            <Katex expression={`\\vec{${exercice.labelA}${exercice.labelC}}`} />{" "}
-            {QUESTION_COLINEARITE_VECTEURS_APRES}
+            <Katex expression={`\\vec{${exercice.labelA}${exercice.labelC}}`} /> {QUESTION_COLINEARITE_VECTEURS_APRES}
           </p>
-          <div className="options-grid-compact">
-            <button disabled={!!validation} type="button" className={conclusionColinearite === true ? "btn toggle-active" : "btn"} onClick={() => setConclusionColinearite(true)}>
-              {LIBELLES_OUI_NON.positif}
-            </button>
-            <button disabled={!!validation} type="button" className={conclusionColinearite === false ? "btn toggle-active" : "btn"} onClick={() => setConclusionColinearite(false)}>
-              {LIBELLES_OUI_NON.negatif}
-            </button>
-          </div>
+          {boutons(affColin, setConclusionColinearite)}
         </>
       )}
 
-      {estPoints ? (
-        <p className="prompt-text prompt-text--question-multiple">{QUESTION_ALIGNEMENT_POINTS}</p>
+      {estPoints && exercice.variante === "points" ? (
+        <p className="prompt-text prompt-text--question-multiple">{questionAlignementPoints(exercice)}</p>
       ) : (
         <p className="prompt-text">
-          {QUESTION_COLINEARITE_VECTEURS_AVANT} <Katex expression={LATEX_VEC_U} /> {QUESTION_COLINEARITE_VECTEURS_ENTRE} <Katex expression={LATEX_VEC_V} />{" "}
-          {QUESTION_COLINEARITE_VECTEURS_APRES}
+          {QUESTION_COLINEARITE_VECTEURS_AVANT} <Katex expression={LATEX_VEC_U} /> {QUESTION_COLINEARITE_VECTEURS_ENTRE} <Katex expression={LATEX_VEC_V} /> {QUESTION_COLINEARITE_VECTEURS_APRES}
         </p>
       )}
-      <div className="options-grid-compact">
-        <button disabled={!!validation} type="button" className={conclusionAlignement === true ? "btn toggle-active" : "btn"} onClick={() => setConclusionAlignement(true)}>
-          {LIBELLES_OUI_NON.positif}
-        </button>
-        <button disabled={!!validation} type="button" className={conclusionAlignement === false ? "btn toggle-active" : "btn"} onClick={() => setConclusionAlignement(false)}>
-          {LIBELLES_OUI_NON.negatif}
-        </button>
-      </div>
-
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            {RAPPEL_VECTORIEL_COLINEARITE_AVANT} <Katex expression={LATEX_VEC_U} /> {RAPPEL_VECTORIEL_COLINEARITE_ENTRE} <Katex expression={LATEX_VEC_V} />{" "}
-            {RAPPEL_VECTORIEL_COLINEARITE_APRES} <Katex expression={LATEX_FORMULE_COLINEARITE_VECTORIELLE} /> {RAPPEL_VECTORIEL_COLINEARITE_FIN}
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              Formule substituée : <Katex expression={formuleSubstitueeTestLatex(exercice)} />
-            </p>
-          )}
-        </div>
+      {boutons(affAlign, setConclusionAlignement)}
+      {figee && !conclusionFigee.correct && !validation && (
+        <p className="alert-error" role="status">
+          <span>
+            <RenduFragments fragments={messageConclusionColinearite(exercice)} />
+          </span>
+        </p>
       )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_TEST} onActiverAide={onActiverAide} />
 
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={!complet}
-          onClick={() =>
-            complet &&
-            onValider({
-              critere,
-              conclusionColinearite: estPoints ? (conclusionColinearite as boolean) : (conclusionAlignement as boolean),
-              conclusionAlignement: estPoints ? conclusionAlignement : null,
-            })
-          }
-        >
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+      {!validation && (
+        <PiedVecteurs
+          aides={aidesTestColinearite(exercice)}
+          onPremiereAide={onActiverAide}
+          complet={complet}
+          saisie={saisie}
+          reponse={() => ({
+            critere: critereLu ?? Number.NaN,
+            conclusionColinearite: estPoints ? (affColin as boolean) : (affAlign as boolean),
+            conclusionAlignement: estPoints ? affAlign : null,
+          })}
+          lisible={() => critereLu !== null}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_VECTEURS.critere}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => messageCritereColinearite(exercice, r.critere)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

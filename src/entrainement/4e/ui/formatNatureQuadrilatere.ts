@@ -145,7 +145,7 @@ export function consignesEcrans(e: ExerciceNatureQuadrilatere): FragmentConsigne
       latex(normeLatex("BC")),
       texte("."),
     ],
-    [texte("Calcule le critère d'orthogonalité des vecteurs "), latex(vecLatex("AB")), texte(" et "), latex(vecLatex("BC")), texte(".")],
+    [texte("Calcule le produit scalaire des vecteurs "), latex(vecLatex("AB")), texte(" et "), latex(vecLatex("BC")), texte(".")],
     [texte(conclusion)],
   ];
 }
@@ -192,9 +192,9 @@ export function messageVerdict(e: ExerciceNatureQuadrilatere, choix: NatureQuadr
   }
   if (choix === "quelconque") return "AB et DC sont égaux : ABCD est au moins un parallélogramme.";
   if (attendu === "carre") return "Deux côtés consécutifs égaux ET un angle droit : c'est un carré, la réponse la plus précise.";
-  if (choix === "carre") return attendu === "losange" ? "Un losange n'est pas forcément un carré : il lui faut aussi un angle droit, et le critère ne vaut pas 0." : "Un rectangle n'est un carré que si deux côtés consécutifs ont la même longueur : ce n'est pas le cas ici.";
+  if (choix === "carre") return attendu === "losange" ? "Un losange n'est pas forcément un carré : il lui faut aussi un angle droit, et le produit scalaire ne vaut pas 0." : "Un rectangle n'est un carré que si deux côtés consécutifs ont la même longueur : ce n'est pas le cas ici.";
   if (attendu === "losange") return "Les côtés consécutifs AB et BC ont la même longueur : c'est un losange.";
-  if (attendu === "rectangle") return "Le critère d'orthogonalité de AB et BC vaut 0 : il y a un angle droit en B, c'est un rectangle.";
+  if (attendu === "rectangle") return "Le produit scalaire de AB et BC vaut 0 : il y a un angle droit en B, c'est un rectangle.";
   return "Ni côtés consécutifs égaux, ni angle droit : c'est un parallélogramme, sans plus.";
 }
 
@@ -266,7 +266,7 @@ export function aidesEcran(e: ExerciceNatureQuadrilatere, ecran: number): Fragme
     case 1:
       return [
         [
-          texte("Un parallélogramme est un losange quand deux côtés CONSÉCUTIFS (qui partent du même sommet) ont la même longueur. La norme d'un vecteur se calcule ainsi : "),
+          texte("Un parallélogramme est un losange quand deux côtés consécutifs (qui partent du même sommet) ont la même longueur. La norme d'un vecteur se calcule ainsi : "),
           latex("\\|\\vec{u}\\| = \\sqrt{x_u^2 + y_u^2}"),
         ],
         [
@@ -280,7 +280,7 @@ export function aidesEcran(e: ExerciceNatureQuadrilatere, ecran: number): Fragme
     case 2:
       return [
         [
-          texte("Un parallélogramme est un rectangle quand il a un angle droit, par exemple en B. Deux vecteurs sont orthogonaux si, et seulement si, ce critère vaut 0 : "),
+          texte("Un parallélogramme est un rectangle quand il a un angle droit, par exemple en B. Deux vecteurs sont orthogonaux si, et seulement si, leur produit scalaire vaut 0 : "),
           latex("x_u \\cdot x_v + y_u \\cdot y_v"),
         ],
         [texte("Avec les composantes de "), latex(vecLatex("AB")), texte(" et de "), latex(vecLatex("BC")), texte(" : "), latex(critereSubstitueLatex(ab, vecBC(e)))],
@@ -294,7 +294,7 @@ export function aidesEcran(e: ExerciceNatureQuadrilatere, ecran: number): Fragme
         ],
         [
           texte(
-            "Procède dans l'ordre. D'abord : AB et DC sont-ils égaux ? Sinon, ABCD n'est pas un parallélogramme, et les deux autres résultats ne prouvent rien. Si oui, regarde les longueurs de AB et BC, puis le critère.",
+            "Procède dans l'ordre. D'abord : AB et DC sont-ils égaux ? Sinon, ABCD n'est pas un parallélogramme, et les deux autres résultats ne prouvent rien. Si oui, regarde les longueurs de AB et BC, puis le produit scalaire.",
           ),
         ],
       ];
@@ -349,7 +349,7 @@ export function conclusionAngle(e: ExerciceNatureQuadrilatere): FragmentConsigne
   const droit = angleDroitEnB(e);
   const base: FragmentConsigne[] = droit
     ? [latex(`${vecLatex("AB")} \\perp ${vecLatex("BC")}`), texte(" : angle droit en B")]
-    : [texte("Le critère n'est pas nul : pas d'angle droit en B")];
+    : [texte("Le produit scalaire n'est pas nul : pas d'angle droit en B")];
   if (!estParallelogramme(e)) return [...base, texte(droit ? " — mais ABCD n'étant pas un parallélogramme, ce n'est pas un rectangle." : ".")];
   return [...base, texte(droit ? " : le parallélogramme ABCD est un rectangle." : " : ce n'est pas un rectangle.")];
 }
@@ -372,7 +372,7 @@ export function piegeFragments(e: ExerciceNatureQuadrilatere): { sousQuestion: s
     };
   }
   if (n === "quelconque") {
-    if (angleDroitEnB(e)) return { sousQuestion: "d", fragments: [texte("Le critère est nul (angle droit en B), mais ABCD n'est pas un parallélogramme : conclure « rectangle » sans avoir montré le parallélogramme est faux.")] };
+    if (angleDroitEnB(e)) return { sousQuestion: "d", fragments: [texte("Le produit scalaire est nul (angle droit en B), mais ABCD n'est pas un parallélogramme : conclure « rectangle » sans avoir montré le parallélogramme est faux.")] };
     if (cotesConsecutifsEgaux(e)) return { sousQuestion: "d", fragments: [texte("AB et BC ont la même longueur, mais ABCD n'est pas un parallélogramme : ce n'est pas un losange.")] };
     const cd = vecCD(e);
     return {
@@ -392,13 +392,13 @@ export function piegeFragments(e: ExerciceNatureQuadrilatere): { sousQuestion: s
     case "parallelogramme":
       return {
         sousQuestion: "b",
-        fragments: [texte("Pour le losange, comparer deux côtés OPPOSÉS (AB et DC) ne prouve rien : ils ont toujours la même longueur dans un parallélogramme. Il faut deux côtés consécutifs, AB et BC.")],
+        fragments: [texte("Pour le losange, comparer deux côtés opposés (AB et DC) ne prouve rien : ils ont toujours la même longueur dans un parallélogramme. Il faut deux côtés consécutifs, AB et BC.")],
       };
     case "losange":
-      return { sousQuestion: "d", fragments: [texte("Un losange n'est pas forcément un carré : ici le critère vaut "), latex(nombreLatex(critereABBC(e))), texte(", il n'y a pas d'angle droit.")] };
+      return { sousQuestion: "d", fragments: [texte("Un losange n'est pas forcément un carré : ici le produit scalaire vaut "), latex(nombreLatex(critereABBC(e))), texte(", il n'y a pas d'angle droit.")] };
     case "rectangle":
       return { sousQuestion: "d", fragments: [texte("Un rectangle n'est un carré que si deux côtés consécutifs ont la même longueur : ici "), latex(`${normeLatex("AB")} \\neq ${normeLatex("BC")}`), texte(".")] };
     default:
-      return { sousQuestion: "d", fragments: [texte("Un carré est à la fois un losange et un rectangle : il faut les DEUX tests (côtés consécutifs égaux et angle droit), après avoir montré le parallélogramme.")] };
+      return { sousQuestion: "d", fragments: [texte("Un carré est à la fois un losange et un rectangle : il faut les deux tests (côtés consécutifs égaux et angle droit), après avoir montré le parallélogramme.")] };
   }
 }

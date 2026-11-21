@@ -1,22 +1,19 @@
 import { useState } from "react";
 import type { ExerciceApplicationPhysique } from "../core/applicationPhysique.types";
 import {
-  formatAideNormeNiveau2Latex,
   formatEnonceApplicationPhysique,
-  segmentsAideNormeNiveau1,
   segmentsConsigneNorme,
 } from "../ui/formatApplicationPhysique";
 import { diagnostiquerNorme } from "../moteur/verificationApplicationPhysique";
-import { NIVEAU_AIDE_MAX_NORME } from "../moteur/sessionApplicationPhysique";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
-import { Katex } from "./Katex";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { RenduFragments } from "./RenduFragments";
 import { SchemaApplicationPhysique } from "./SchemaApplicationPhysique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { aidesNormePhysique, messageNormePhysique, lireNombrePhysique } from "../ui/retoursVecteurs4";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -24,7 +21,6 @@ interface Props {
   exercice: ExerciceApplicationPhysique;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   recapitulatif: EntreeRecapitulatif[];
   onActiverAide: () => void;
   onValider: (valeur: number) => void;
@@ -44,7 +40,6 @@ export function EtapeNormeApplicationPhysique({
   exercice,
   tentativesUtilisees,
   tentativesMax,
-  niveauAide,
   recapitulatif,
   onActiverAide,
   onValider,
@@ -52,11 +47,11 @@ export function EtapeNormeApplicationPhysique({
 }: Props) {
   const [texte, setTexte] = useState("");
 
+  const saisie = useTentativeLisible<number>();
   const complet = texte.trim() !== "";
-  const valeur = Number(texte.replace(",", "."));
-  const apresEchec = tentativesUtilisees > 0;
-  const statut = complet ? diagnostiquerNorme(exercice, valeur) : undefined;
-  const erronee = apresEchec && statut !== "correct";
+  const valeur = lireNombrePhysique(texte, false);
+  const statut = saisie.soumise !== null ? diagnostiquerNorme(exercice, saisie.soumise) : undefined;
+  const erronee = tentativesUtilisees > 0 && statut !== undefined && statut !== "correct";
 
   return (
     <div>
@@ -84,30 +79,19 @@ export function EtapeNormeApplicationPhysique({
         </div>
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            <RenduFragments fragments={segmentsAideNormeNiveau1(exercice)} />
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              <Katex expression={formatAideNormeNiveau2Latex(exercice)} />
-            </p>
-          )}
-        </div>
-      )}
       {!validation && (
         <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_NORME} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+          <AidesNiveaux aides={aidesNormePhysique(exercice)} onPremiereAide={onActiverAide} />
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(valeur ?? NaN, valeur !== null, onValider)}>
+            Valider
+          </button>
+          <MessageRetour
+            illisible={saisie.illisible}
+            texteIllisible={ILLISIBLE_VECTEURS.norme29}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cible={saisie.soumise !== null ? messageNormePhysique(exercice, saisie.soumise) : null}
+          />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

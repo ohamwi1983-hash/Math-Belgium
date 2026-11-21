@@ -13,7 +13,7 @@
  * valeurs (aucune saisie libre pour eux) — même principe que "Colinéarité"/"Orthogonalité"
  * (générateurs 24/25).
  */
-import type { ClassificationTriangleIsocele, ExerciceDistance, ExerciceIsocele, ExerciceNormeVecteur, ExerciceParametreNorme, ExercicePythagore } from "../core/normeDistance.types";
+import type { ClassificationTriangleIsocele, ExerciceDistance, ExerciceIsocele, ExerciceTriangleCotes, ExerciceNormeVecteur, ExerciceParametreNorme, ExercicePythagore } from "../core/normeDistance.types";
 import { evaluerExpressionGenerale } from "./expressionGenerale";
 import type { StatutVerification } from "./statutVerification";
 
@@ -39,6 +39,23 @@ function remplacerRacineUnicode(texte: string): string {
 /** Champ de texte libre acceptant entier/fraction/racine/décimal — même patron que
  * `verificationDistanceDroite.ts::diagnostiquerDistance`, réutilisé sur tous les écrans de ce
  * générateur au format de réponse élargi (`promptgen26refontecomplete.md`, Partie B/D/F/G). */
+/** Valeur d'une saisie exacte (« 3√5 », « rac(29) », « sqrt(29) », « 5 ») ; `null` si illisible. */
+export function lireExpressionNorme(texte: string): number | null {
+  if (texte.trim() === "") return null;
+  try {
+    const v = evaluerExpressionGenerale(remplacerRacineUnicode(texte.replace(/[—]/g, "-")), 0);
+    return Number.isFinite(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Saisie décimale proche d'une valeur exacte irrationnelle (« 5,39 » pour √29) : refusée SANS
+ * tentative (audit 4e ch. 6, lot B — on demande la valeur exacte). */
+export function estApprochee(texte: string, valeur: number, cible: number): boolean {
+  return /[.,]\d/.test(texte) && !/[√r]/i.test(texte) && Math.abs(valeur - cible) > TOLERANCE && Math.abs(valeur - cible) <= Math.max(0.051, Math.abs(cible) * 0.01);
+}
+
 function diagnostiquerExpressionNumerique(texte: string, cible: number): StatutVerification {
   let valeur: number;
   try {
@@ -104,7 +121,7 @@ export interface ReponseConstructionIsocele {
 }
 
 export function evaluerConstructionIsocele(
-  exercice: ExerciceIsocele,
+  exercice: ExerciceTriangleCotes,
   reponse: ReponseConstructionIsocele,
 ): Record<keyof ReponseConstructionIsocele, StatutVerification> {
   return {
@@ -117,7 +134,7 @@ export function evaluerConstructionIsocele(
   };
 }
 
-export function verifierConstructionIsocele(exercice: ExerciceIsocele, reponse: ReponseConstructionIsocele): boolean {
+export function verifierConstructionIsocele(exercice: ExerciceTriangleCotes, reponse: ReponseConstructionIsocele): boolean {
   const e = evaluerConstructionIsocele(exercice, reponse);
   return Object.values(e).every((s) => s === "correct");
 }
@@ -130,7 +147,7 @@ export interface ReponseCalculIsocele {
   bc: string;
 }
 
-export function evaluerCalculIsocele(exercice: ExerciceIsocele, reponse: ReponseCalculIsocele): { ab: StatutVerification; ac: StatutVerification; bc: StatutVerification } {
+export function evaluerCalculIsocele(exercice: ExerciceTriangleCotes, reponse: ReponseCalculIsocele): { ab: StatutVerification; ac: StatutVerification; bc: StatutVerification } {
   return {
     ab: diagnostiquerExpressionNumerique(reponse.ab, exercice.longueurAB),
     ac: diagnostiquerExpressionNumerique(reponse.ac, exercice.longueurAC),
@@ -138,7 +155,7 @@ export function evaluerCalculIsocele(exercice: ExerciceIsocele, reponse: Reponse
   };
 }
 
-export function verifierCalculIsocele(exercice: ExerciceIsocele, reponse: ReponseCalculIsocele): boolean {
+export function verifierCalculIsocele(exercice: ExerciceTriangleCotes, reponse: ReponseCalculIsocele): boolean {
   const e = evaluerCalculIsocele(exercice, reponse);
   return e.ab === "correct" && e.ac === "correct" && e.bc === "correct";
 }

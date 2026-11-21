@@ -8,6 +8,7 @@ const LIBELLES_VARIANTE: Record<VariantePointVectoriel, string> = {
   translation: "Image par une translation",
   milieu: "Milieu d'un segment",
   relationGenerale: "Relation vectorielle générale",
+  symetrique: "Symétrique d'un point",
 };
 
 export function libelleVariantePointVectoriel(variante: VariantePointVectoriel): string {
@@ -48,6 +49,11 @@ export function formatFacteurLatex(coef: number): string {
 
 const formatNombre = formatNombreLatex;
 
+/** Point en LaTeX, `A(1\,;\,-4)` (audit 4e ch. 6, G5 : « A(1 ; -4) » se rendait collé « A(1;−4) »). */
+export function pointLatex(label: string, p: { x: number; y: number }): string {
+  return `${label}(${formatNombre(p.x)}\\,;\\,${formatNombre(p.y)})`;
+}
+
 /** Notation matricielle colonne (2×1) — jamais la notation en ligne d'un point (correction
  * transversale : un vecteur ne doit jamais être visuellement indiscernable d'un point). */
 function formatVecteurColonneLatex(v: { x: number; y: number }): string {
@@ -81,6 +87,13 @@ export function consignePointVectoriel(exercice: ExercicePointVectoriel): Consig
   if (exercice.variante === "milieu") {
     return {
       avant: `${exercice.pointCherche} est le milieu du segment [${exercice.labelA}${exercice.labelB}]. Détermine les coordonnées de ${exercice.pointCherche}.`,
+      latex: null,
+      apres: "",
+    };
+  }
+  if (exercice.variante === "symetrique") {
+    return {
+      avant: `${exercice.pointCherche} est le symétrique de ${exercice.labelA} par rapport au point ${exercice.labelCentre}. Détermine les coordonnées de ${exercice.pointCherche}.`,
       latex: null,
       apres: "",
     };
@@ -119,22 +132,19 @@ export function formatDonneesConnuesLatex(exercice: ExercicePointVectoriel): str
  * `combinaisonVecteurs` (le point de départ, puis chacun des 2 vecteurs u/v). */
 export function formatTermesDonneesConnuesLatex(exercice: ExercicePointVectoriel): string[] {
   if (exercice.variante === "translation") {
-    return [`${exercice.labelPoint}(${formatNombre(exercice.point.x)} ; ${formatNombre(exercice.point.y)})`];
+    return [pointLatex(exercice.labelPoint, exercice.point)];
   }
   if (exercice.variante === "milieu") {
-    return [
-      `${exercice.labelA}(${formatNombre(exercice.pointA.x)} ; ${formatNombre(exercice.pointA.y)})`,
-      `${exercice.labelB}(${formatNombre(exercice.pointB.x)} ; ${formatNombre(exercice.pointB.y)})`,
-    ];
+    return [pointLatex(exercice.labelA, exercice.pointA), pointLatex(exercice.labelB, exercice.pointB)];
+  }
+  if (exercice.variante === "symetrique") {
+    return [pointLatex(exercice.labelA, exercice.pointA), pointLatex(exercice.labelCentre, exercice.centre)];
   }
   if (exercice.forme === "pointAPoint") {
-    return [
-      `${exercice.labelOrigine}(${formatNombre(exercice.pointOrigine.x)} ; ${formatNombre(exercice.pointOrigine.y)})`,
-      `${exercice.labelConnu}(${formatNombre(exercice.pointConnu.x)} ; ${formatNombre(exercice.pointConnu.y)})`,
-    ];
+    return [pointLatex(exercice.labelOrigine, exercice.pointOrigine), pointLatex(exercice.labelConnu, exercice.pointConnu)];
   }
   return [
-    `${exercice.labelDepart}(${formatNombre(exercice.pointDepart.x)} ; ${formatNombre(exercice.pointDepart.y)})`,
+    pointLatex(exercice.labelDepart, exercice.pointDepart),
     `\\vec{${exercice.labelU}}${formatVecteurColonneLatex(exercice.vecteurU)}`,
     `\\vec{${exercice.labelV}}${formatVecteurColonneLatex(exercice.vecteurV)}`,
   ];
@@ -199,6 +209,18 @@ export function valeursGraphePointVectoriel(exercice: ExercicePointVectoriel): {
     points[0] = { ...points[0], labelPosition: positionEtiquettePoint(exercice.pointA, { x: -versB.x, y: -versB.y }, viewBox) };
     points[1] = { ...points[1], labelPosition: positionEtiquettePoint(exercice.pointB, versB, viewBox) };
     return { points, vecteurs };
+  }
+  if (exercice.variante === "symetrique") {
+    // A et I seulement : aucun segment vers A′ (il donnerait la direction, donc la réponse).
+    const points: PointAffiche[] = [
+      { point: exercice.pointA, label: exercice.labelA },
+      { point: exercice.centre, label: exercice.labelCentre },
+    ];
+    const versI = { x: exercice.centre.x - exercice.pointA.x, y: exercice.centre.y - exercice.pointA.y };
+    const viewBox = calculerViewBoxVecteurs(points, []);
+    points[0] = { ...points[0], labelPosition: positionEtiquettePoint(exercice.pointA, { x: -versI.x, y: -versI.y }, viewBox) };
+    points[1] = { ...points[1], labelPosition: positionEtiquettePoint(exercice.centre, versI, viewBox) };
+    return { points, vecteurs: [] };
   }
   if (exercice.forme === "pointAPoint") {
     const vecteurBE = { x: exercice.pointConnu.x - exercice.pointOrigine.x, y: exercice.pointConnu.y - exercice.pointOrigine.y };

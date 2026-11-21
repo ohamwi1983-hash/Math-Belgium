@@ -1,7 +1,7 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import type { ExerciceDetectiveVecteurs, IdDescriptionVecteurs, Point, TypeErreurVecteurs, ValeurLigne } from "../core/detectiveVecteurs.types";
 import {
-  SCENARIOS,
+  nombreLignesCopie,
   colonne,
   copieEleve,
   descriptionCorrecte,
@@ -44,7 +44,10 @@ export function souderPonctuation(fragments: FragmentConsigne[]): FragmentConsig
     const precedent = resultat[resultat.length - 1];
     const m = f.type === "texte" ? /^([.,])(.*)$/s.exec(f.valeur) : null;
     if (m && precedent?.type === "latex") {
-      resultat[resultat.length - 1] = { type: "latex", valeur: `${precedent.valeur}${m[1] === "," ? "{,}" : "."}` };
+      // Virgule de PONCTUATION (`,` de LaTeX, classe « ponctuation »), jamais `{,}` : c'est la
+      // notation de la virgule décimale, et « 1{,} » se lisait comme un nombre décimal inachevé
+      // (audit 4e ch. 6, lot C).
+      resultat[resultat.length - 1] = { type: "latex", valeur: `${precedent.valeur}${m[1]}` };
       if (m[2]) resultat.push({ type: "texte", valeur: m[2] });
     } else {
       resultat.push(f);
@@ -275,7 +278,7 @@ export function nomErreur(e: ExerciceDetectiveVecteurs): string {
 
 function aidesLigne(e: ExerciceDetectiveVecteurs): FragmentConsigne[][] {
   const i = indiceLigneFausse(e);
-  const n = SCENARIOS[e.scenario].nombreLignes;
+  const n = nombreLignesCopie(e);
   const [p, q] = i % 2 === 0 ? (i + 1 < n ? [i, i + 1] : [i - 1, i]) : [i - 1, i];
   return [
     [t("Refais la résolution à partir des données, ligne par ligne, en comparant chaque formule à celle du cours : la première ligne qui ne redonne pas le même résultat est la ligne fausse.")],
@@ -328,7 +331,7 @@ function aideSuite(e: ExerciceDetectiveVecteurs): FragmentConsigne[] {
     case "parallelogramme":
       return [t("Reprends ensuite les équations avec cette valeur :"), l("x_C - x_D = x_{\\vec{AB}}")];
     case "milieu":
-      return [t("Reprends ensuite la dernière ligne avec ce milieu :"), l("x_D = 2x_M - x_B")];
+      return [t("Reprends ensuite le calcul de D avec ce milieu :"), l("x_D = 2x_M - x_B")];
   }
 }
 

@@ -5242,3 +5242,14 @@ colonnes débordait à 308 px), `traversee-riviere-widget` (§ 17, curseurs c, v
 impossible si v ≤ c), `equilibre-forces-widget` (§ 17, F₃ = −(F₁ + F₂), triangle fermé, piège
 F₃ = F₁ + F₂). Fenêtres fixes, flèches d'axes, figure seule dans `.graphe-zone` (épinglage : 13 ok,
 0 ko). Valeurs recoupées (script `ateliers.cjs` : 15 contrôles × 2 tailles × 2 thèmes, 60 / 60).
+
+## 4e, Chapitre 6 — lots B, C, D de l'audit (gen20–29, points ouverts gen84, 87, 90, 91)
+
+Aucun changement du cours (chapitre `calcul-vectoriel.ts` intact). Générateurs : règles communes des
+anciens gen20–29 (illisible sans tentative, choix fermés à une tentative, aides à deux niveaux,
+messages ciblés), défauts propres (gen22 « sans parenthèses », gen26 cible √N et « la ou les
+valeurs », gen25 x en 1ʳᵉ ou 2ᵉ composante, gen28 figure et écran « égalité », gen84 « critère
+d'orthogonalité », gen87, gen90, gen91), trois variantes ajoutées en fin de catalogue (gen20 « symétrique
+d'un point », gen24 « paramètre au carré », gen26 « nature d'un triangle ») et tirage équilibré (gen91
+ligne fausse tirée + `groupe_erreur`, gen29 Sud ≈ 30 %). Libellés du panneau gen24, 25, 26, 29.
+Détail : `feuilles-evaluations.md`, entrée « 4e ch. 6 (lots B, C, D) ».

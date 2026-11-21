@@ -1,6 +1,6 @@
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
-import type { ComposantesLin, ExerciceColinearite, ExerciceColinearParametre, ExerciceColinearPoints, ExerciceColinearPointsParametre, ExerciceColinearVecteurs } from "../../core/colinearite.types";
+import type { ComposantesLin, ExerciceColinearite, ExerciceColinearParametre, ExerciceColinearParametreCarre, ExerciceColinearPoints, ExerciceColinearPointsParametre, ExerciceColinearVecteurs } from "../../core/colinearite.types";
 import { formuleSubstitueeReductionLatex } from "../../ui/formatColinearite";
 import {
   COURS_COLINEARITE,
@@ -14,6 +14,7 @@ import {
   linLatex,
   polyLatex,
   q,
+  qp,
   vec,
   type Fragments,
   type V,
@@ -91,6 +92,45 @@ function etapesResolution(l: string, coefX: number, coefConst: number, solution:
   ];
 }
 
+/** « Paramètre au carré » : critère du second degré, discriminant, 0, 1 ou 2 valeurs, vérification. */
+function etapesResolutionCarre(l: string, e: ExerciceColinearParametreCarre): EtapeCorrection[] {
+  const { coefX2: a, coefX: b, coefConst: c, solutions } = e;
+  const D = b * b - 4 * a * c;
+  const lignes: LigneCalcul[] = [
+    ligne(`\\Delta=${qp(b)}^2-4\\cdot ${qp(a)}\\cdot ${qp(c)}`, [texte("on remplace "), latex(`a=${q(a)}`), texte(", "), latex(`b=${q(b)}`), texte(", "), latex(`c=${q(c)}`)]),
+    ligne(`=${q(b * b)}${-4 * a * c >= 0 ? "+" : "-"}${q(Math.abs(4 * a * c))}`),
+    ligne(`=${q(D)}`, D > 0 ? "Δ > 0 : deux valeurs" : D === 0 ? "Δ = 0 : une seule valeur" : "Δ < 0 : aucune valeur réelle"),
+  ];
+  let res: Fragments;
+  if (D > 0) {
+    const s = Math.round(Math.sqrt(D));
+    lignes.push(ligne(`\\sqrt{\\Delta}=${q(s)}`, `car ${q(D)} = ${q(s)}²`));
+    for (const [nomX, signe] of [["x_1", "-"], ["x_2", "+"]] as const) {
+      const x = (-b + (signe === "-" ? -s : s)) / (2 * a);
+      lignes.push(ligne(`${nomX}=\\dfrac{${q(-b)}${signe}${q(s)}}{2\\cdot ${qp(a)}}`, [texte("formule, signe "), latex(signe)]), ligne(`=${q(x)}`));
+    }
+    res = [latex(`x=${q(solutions[0])}`), texte(" ou "), latex(`x=${q(solutions[1])}`)];
+  } else if (D === 0) {
+    lignes.push(ligne(`x=\\dfrac{${q(-b)}}{2\\cdot ${qp(a)}}`, [texte("valeur double "), latex("x=\\dfrac{-b}{2a}")]), ligne(`=${q(-b / (2 * a))}`));
+    res = [latex(`x=${q(solutions[0])}`), texte(" (une seule valeur)")];
+  } else {
+    res = [texte("Aucune valeur de x ne rend ces vecteurs colinéaires : l'équation n'a pas de solution réelle.")];
+  }
+  const etapes: EtapeCorrection[] = [
+    utilise(l, [texte("Équation du second degré : discriminant "), latex("\\Delta=b^2-4ac"), texte(" ; si Δ > 0 deux solutions "), latex("\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}"), texte(", si Δ = 0 une seule, si Δ < 0 aucune (chapitre 2).")]),
+    calcul(l, lignes),
+    resultat(l, res),
+  ];
+  if (solutions.length > 0) {
+    const x0 = solutions[0];
+    const uX = enX(e.v1, x0);
+    const vX = enX(e.v2, x0);
+    etapes.push(verification(l, [texte("Pour "), latex(`x=${q(x0)}`), texte(", "), latex(`${vec(e.v1Nom)}=${col(uX)}`), texte(" et "), latex(`${vec(e.v2Nom)}=${col(vX)}`), texte(" : ")], lignesCritereColinearite(uX, vX, "le critère est bien nul")));
+  }
+  etapes.push(piege(l, [texte("Le critère est du second degré : il peut y avoir deux valeurs, une seule ou aucune — on ne s'arrête pas à la première trouvée, et Δ < 0 signifie qu'aucun x ne convient.")]));
+  return etapes;
+}
+
 function etapesConstruction(l: string, e: ExerciceColinearPoints | ExerciceColinearPointsParametre): EtapeCorrection[] {
   const { labelA: a, labelB: b, labelC: c } = e;
   let lignes: LigneCalcul[];
@@ -132,6 +172,9 @@ export function correctionDetailleeColinearite(e: ExerciceColinearite): EtapeCor
       ...etapesReduction("a", formuleSubstitueeReductionLatex(p), p.v1, p.v2, p.v1Nom, p.v2Nom),
       ...etapesResolution("b", p.coefX, p.coefConst, p.solutionX as number, p.v1, p.v2, p.v1Nom, p.v2Nom),
     ]);
+  }
+  if (e.variante === "parametreCarre") {
+    return finaliserCorrigeVecteurs([...etapesReduction("a", formuleSubstitueeReductionLatex(e), e.v1, e.v2, e.v1Nom, e.v2Nom), ...etapesResolutionCarre("b", e)]);
   }
   const { labelA: a, labelB: b, labelC: c } = e;
   return finaliserCorrigeVecteurs([

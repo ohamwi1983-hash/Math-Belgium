@@ -12,6 +12,7 @@
 import type {
   ComposantesLin,
   ExerciceColinearParametre,
+  ExerciceColinearParametreCarre,
   ExerciceColinearPoints,
   ExerciceColinearPointsParametre,
   ExerciceColinearVecteurs,
@@ -143,21 +144,76 @@ function construirePointsParametre(): ExerciceColinearPointsParametre {
   };
 }
 
+/**
+ * « Paramètre au carré » (décision 3, audit 4e ch. 6) : u(x + p ; a), v(b ; x + r) — ou la disposition
+ * miroir u(a ; x + p), v(x + r ; b) — d'où le critère ±[(x + p)(x + r) − ab], de discriminant
+ * (p − r)² + 4ab. Le VERDICT (0, 1 ou 2 valeurs) est tiré d'abord, à parts égales ; puis p, r, a, b
+ * sont tirés jusqu'à l'obtenir. Motif masqué (précédent gen95) : ab < 0 et p ≠ r pour TOUS les
+ * verdicts — sinon « ab > 0 » trahissait deux solutions et « p = r » aucune ((x + p)² = ab < 0).
+ * Deux solutions : Δ carré parfait, racines entières (même parité automatique).
+ */
+function construireParametreCarre(): ExerciceColinearParametreCarre {
+  const typeSolution = (["zero", "une", "deux"] as const)[randomInt(0, 2)];
+  for (;;) {
+    const p = randomInt(-5, 5);
+    const r = randomInt(-5, 5);
+    if (p === r) continue;
+    const a = randomInt(1, 6) * (Math.random() < 0.5 ? -1 : 1);
+    const b = -Math.sign(a) * randomInt(1, 6);
+    const delta = (p - r) * (p - r) + 4 * a * b;
+    const racine = Math.round(Math.sqrt(Math.max(0, delta)));
+    const verdict = delta < 0 ? "zero" : delta === 0 ? "une" : racine * racine === delta ? "deux" : null;
+    if (verdict !== typeSolution) continue;
+    const solutions = delta < 0 ? [] : delta === 0 ? [-(p + r) / 2] : [(-(p + r) - racine) / 2, (-(p + r) + racine) / 2];
+    if (solutions.some((s) => Math.abs(s) > 9)) continue;
+    const miroir = Math.random() < 0.5;
+    const xp = { coefX: 1, constante: p };
+    const xr = { coefX: 1, constante: r };
+    const ca = { coefX: 0, constante: a };
+    const cb = { coefX: 0, constante: b };
+    // Critère x_u·y_v − y_u·x_v : (x+p)(x+r) − ab, ou ab − (x+p)(x+r) en miroir.
+    const s = miroir ? -1 : 1;
+    return {
+      variante: "parametreCarre",
+      v1: miroir ? { x: ca, y: xp } : { x: xp, y: ca },
+      v1Nom: "u",
+      v2: miroir ? { x: xr, y: cb } : { x: cb, y: xr },
+      v2Nom: "v",
+      coefX2: s,
+      coefX: normaliserZero(s * (p + r)),
+      coefConst: normaliserZero(s * (p * r - a * b)),
+      typeSolution,
+      solutions: solutions.map(normaliserZero),
+    };
+  }
+}
+
 export const CATALOGUE_VARIANTES: { id: VarianteColinearite; label: string }[] = [
   { id: "vecteurs", label: "Colinéarité de deux vecteurs" },
   { id: "parametre", label: "Déterminer x pour la colinéarité" },
   { id: "points", label: "Alignement de trois points" },
   { id: "pointsParametre", label: "Alignement avec x" },
+  // Ajoutée EN FIN de catalogue (lot C, audit 4e ch. 6) : indices — donc `?code=` imprimés — inchangés.
+  { id: "parametreCarre", label: "Déterminer x : paramètre au carré" },
 ];
 
 export function construireAvecVarianteId(varianteId: VarianteColinearite): ExerciceColinearite {
   if (varianteId === "vecteurs") return construireVecteurs();
   if (varianteId === "parametre") return construireParametre();
   if (varianteId === "points") return construirePoints();
+  if (varianteId === "parametreCarre") return construireParametreCarre();
   return construirePointsParametre();
 }
 
+/** Tirage libre des CODES et de l'adaptateur : les quatre variantes d'origine, comme avant l'ajout
+ * de « paramètre au carré » — un `?code=` libre déjà imprimé rouvre le même exercice. */
 export function genererExerciceColinearite(): ExerciceColinearite {
+  const varianteId = CATALOGUE_VARIANTES[randomInt(0, 3)].id;
+  return construireAvecVarianteId(varianteId);
+}
+
+/** Tirage libre de l'appli : les cinq variantes. */
+export function genererExerciceColineariteLibre(): ExerciceColinearite {
   const varianteId = CATALOGUE_VARIANTES[randomInt(0, CATALOGUE_VARIANTES.length - 1)].id;
   return construireAvecVarianteId(varianteId);
 }

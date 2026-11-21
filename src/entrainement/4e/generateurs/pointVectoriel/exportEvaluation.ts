@@ -67,7 +67,7 @@ import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 const formatNombre = formatNombreLatex;
 
 function formatPointLatex(label: string, point: { x: number; y: number }): string {
-  return `${label}(${formatNombre(point.x)} \\text{ ; } ${formatNombre(point.y)})`;
+  return `${label}(${formatNombre(point.x)}\\,;\\,${formatNombre(point.y)})`;
 }
 
 /** « a + b » avec b négatif entre parenthèses : « 3 + (−2) ». */
@@ -165,9 +165,27 @@ function correctionRelationCombinaison(
   ];
 }
 
+/** Correction de la variante "symetrique" : I milieu de [AA′], donc A′ = 2I − A. */
+function correctionSymetrique(instance: Extract<ExercicePointVectoriel, { variante: "symetrique" }>): BlocCorrection[] {
+  const { pointA, labelA, centre, labelCentre, pointCherche, reponse } = instance;
+  return [
+    {
+      type: "paragraphe",
+      fragments: [
+        texte(`${labelCentre} est le milieu de [${labelA}${pointCherche}], donc `),
+        latex(
+          `${pointCherche} = (2 \\times ${formatTermeLatex(centre.x)} - ${formatTermeLatex(pointA.x)}\\,;\\,2 \\times ${formatTermeLatex(centre.y)} - ${formatTermeLatex(pointA.y)}) = ${formatPointLatex(pointCherche, reponse)}`,
+        ),
+        texte("."),
+      ],
+    },
+  ];
+}
+
 function construireCorrectionPointVectoriel(instance: ExercicePointVectoriel): BlocCorrection[] {
   if (instance.variante === "translation") return correctionTranslation(instance);
   if (instance.variante === "milieu") return correctionMilieu(instance);
+  if (instance.variante === "symetrique") return correctionSymetrique(instance);
   if (instance.forme === "pointAPoint") return correctionRelationPointAPoint(instance);
   return correctionRelationCombinaison(instance);
 }
@@ -203,6 +221,7 @@ function bareme(instance: ExercicePointVectoriel): BaremeExercice {
     milieu: "Formule du milieu (moyenne des coordonnées)",
     pointAPoint: "Composantes du vecteur connu, puis relation point de départ + multiple du vecteur",
     combinaisonVecteurs: "Relation point de départ + combinaison des vecteurs, composante par composante",
+    symetrique: "Le centre est le milieu de [AA′] : coordonnées de A′ = 2 × centre − A",
   };
   const cle = instance.variante === "relationGenerale" ? instance.forme : instance.variante;
   return {
@@ -215,7 +234,9 @@ function bareme(instance: ExercicePointVectoriel): BaremeExercice {
     erreursFrequentes: [
       instance.variante === "milieu"
         ? { description: [texte("Différence des coordonnées au lieu de leur somme")], cout: "0 pt aux coordonnées" }
-        : { description: [texte("Erreur de signe sur une composante négative (parenthèses oubliées)")], cout: "−1,5" },
+        : instance.variante === "symetrique"
+          ? { description: [texte(`Moyenne des coordonnées de ${instance.labelA} et ${instance.labelCentre} (milieu de [${instance.labelA}${instance.labelCentre}] au lieu du symétrique)`)], cout: "0 pt aux coordonnées" }
+          : { description: [texte("Erreur de signe sur une composante négative (parenthèses oubliées)")], cout: "−1,5" },
       { description: [texte("Coordonnées inversées (abscisse et ordonnée échangées)")], cout: "−1" },
     ],
     reponsesAcceptees: [[texte("Coordonnées écrites en colonne ou sous la forme d'un couple")]],
@@ -223,10 +244,11 @@ function bareme(instance: ExercicePointVectoriel): BaremeExercice {
 }
 
 /** Niveau (règle « Noter un nouveau chapitre ») : un écran ; méthode imposée par la relation de
- * l'énoncé (0) ; piège dans les données : un coefficient négatif dans une relation générale. */
+ * l'énoncé (0) — sauf le symétrique (1 : l'élève doit voir que le centre est le milieu de [AA′]) ;
+ * piège dans les données : un coefficient négatif dans une relation générale. */
 function criteresDifficulte(instance: ExercicePointVectoriel): CriteresDifficulte {
   const piege = instance.variante === "relationGenerale" && (instance.forme === "pointAPoint" ? instance.coefficient < 0 : instance.coefU < 0 || instance.coefV < 0) ? 1 : 0;
-  return { ...etapesDuCorrige(correctionDetailleePointVectoriel(instance)), methode: 0, piege, nombres: 0 };
+  return { ...etapesDuCorrige(correctionDetailleePointVectoriel(instance)), methode: instance.variante === "symetrique" ? 1 : 0, piege, nombres: 0 };
 }
 
 export const adaptateurEvaluationPointVectoriel: AdaptateurFeuilleExercices<ExercicePointVectoriel> = {

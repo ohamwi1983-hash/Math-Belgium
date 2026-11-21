@@ -1,19 +1,18 @@
 import { useState } from "react";
 import type { ExerciceCombinaisonVecteurs } from "../core/combinaisonVecteurs.types";
-import { diagnostiquerSimplification } from "../moteur/verificationCombinaisonVecteurs";
-import { NIVEAU_AIDE_MAX_SIMPLIFICATION } from "../moteur/sessionCombinaisonVecteurs";
-import { formatConvertiLatex, formatDistribueLatex, formatResultatLatex, formatTermesExpressionLatex, idsConcernesRegroupementLatex, placeholderReduction, vecteursPresentsLatex } from "../ui/formatCombinaisonVecteurs";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { formatResultatLatex, formatTermesExpressionLatex, placeholderReduction, vecteursPresentsLatex } from "../ui/formatCombinaisonVecteurs";
+import { ILLISIBLE_VECTEURS } from "../ui/retoursVecteurs";
+import { aidesReductionCombinaison, messageReductionCombinaison, reductionLisible } from "../ui/retoursVecteurs2";
 import { Katex } from "./Katex";
+import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceCombinaisonVecteurs;
   tentativesUtilisees: number;
   tentativesMax: number;
-  niveauAide: number;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
@@ -23,34 +22,20 @@ interface Props {
 }
 
 /**
- * Écran 1 — un champ de saisie libre UNIQUE (`promptcorrectionsgenerateur21notationinterface.md`,
- * correction 4 — remplace l'interface "add-as-needed" d'une réécriture précédente) : l'élève écrit
- * directement l'expression réduite complète en une seule fois (ex. `-3u+3v+12AB`), jamais un champ
- * numérique par vecteur. Toujours la première étape, jamais de récapitulatif ici.
+ * Écran 1 (variantes à parenthèses, vecteur répété, paire AB/BA) — un champ de saisie libre UNIQUE :
+ * l'élève écrit directement l'expression réduite complète (ex. `-3u+3v+12AB`). La consigne liste les
+ * vecteurs réellement présents dans l'expression (`vecteursPresentsLatex`).
  *
- * Consigne dynamique (correction 3) : liste uniquement les vecteurs RÉELLEMENT présents dans
- * l'expression brute de l'énoncé (`vecteursPresentsLatex`), jamais `baseCanonique` tout entier — un
- * vecteur candidat peut ne jamais apparaître dans cet exercice précis.
- *
- * 3 niveaux d'aide progressive, texte uniquement (aucun croquis — un vecteur libre n'a pas de
- * position, un rendu graphique suggérerait à tort qu'il en a une) : distribution des coefficients
- * externes, puis identification des vecteurs concernés par un regroupement/une conversion, puis la
- * conversion `\vec{BA}\to-\vec{AB}` elle-même — jamais le coefficient final avant le niveau 3, et
- * même alors pas encore regroupé (l'addition reste à faire).
- *
- * Le bloc de données (vecteurs libres + points) est affiché une seule fois dans l'en-tête de
- * l'exercice (`EnTeteExercice`, blocDonnees), jamais ici. L'énoncé (l'expression à réduire) reste
- * propre à cet écran, en "bloc fitter" (`formatTermesExpressionLatex`, un fragment KaTeX par
- * vecteur/point/groupe) — jamais un unique bloc `\quad`-joined qui ne retourne jamais à la ligne sur
- * mobile étroit.
+ * Aides (audit 4e ch. 6, lots B et C — G6) : deux niveaux, la règle puis UN terme distribué, jamais
+ * l'expression distribuée entière (dans la variante « parenthèses », elle EST la réponse à l'ordre
+ * près). La variante « sans parenthèses » n'a plus cet écran (`phaseInitiale`).
  */
-export function EtapeSimplificationCombinaisonVecteurs({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeSimplificationCombinaisonVecteurs({ exercice, tentativesUtilisees, tentativesMax, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
-
+  const saisie = useTentativeLisible<string>();
   const complet = texte.trim() !== "";
-  const statut = complet && tentativesUtilisees > 0 ? diagnostiquerSimplification(exercice, texte) : undefined;
   const vecteursConsigne = vecteursPresentsLatex(exercice);
-  const idsAides = niveauAide >= 2 ? idsConcernesRegroupementLatex(exercice) : [];
+  const jugee = tentativesUtilisees > 0 && !saisie.illisible ? saisie.soumise : null;
 
   return (
     <div>
@@ -76,48 +61,27 @@ export function EtapeSimplificationCombinaisonVecteurs({ exercice, tentativesUti
         </label>
         <input
           id="combinaison-simplification"
-          className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
+          className={`text-input${jugee !== null ? " is-erronee" : ""}`}
           placeholder={placeholderReduction(exercice)}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          disabled={!!validation}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>
-            <Katex expression={formatDistribueLatex(exercice)} />
-          </p>
-          {niveauAide >= 2 && (
-            <p>
-              On regroupe les vecteurs :{" "}
-              {idsAides.map((latex, i) => (
-                <span key={latex}>
-                  {i > 0 && " et "}
-                  <Katex expression={latex} />
-                </span>
-              ))}
-            </p>
-          )}
-          {niveauAide >= 3 && (
-            <p>
-              <Katex expression={formatConvertiLatex(exercice)} />
-            </p>
-          )}
-        </div>
-      )}
       {!validation && (
         <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SIMPLIFICATION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
+          <AidesNiveaux aides={aidesReductionCombinaison(exercice)} onPremiereAide={onActiverAide} />
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => saisie.tenter(texte, reductionLisible(exercice, texte), onValider)}>
+            Valider
+          </button>
+          <MessageRetour
+            illisible={saisie.illisible}
+            texteIllisible={ILLISIBLE_VECTEURS.combinaison}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cible={saisie.soumise !== null ? messageReductionCombinaison(exercice, saisie.soumise) : null}
+          />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

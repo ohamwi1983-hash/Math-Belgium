@@ -53,7 +53,11 @@ export function correctionDetailleeCombinaisonVecteurs(e: ExerciceCombinaisonVec
 
   const bases = e.baseCanonique.filter((id) => e.coefficientsReduits[id] !== 0).map((id) => ({ id, c: e.coefficientsReduits[id], v: composantesDe(e, id) }));
   const avecAB = !!e.points && bases.some((b) => b.id === "AB");
-  const etapes: EtapeCorrection[] = [
+  // « Sans parenthèses » : expression déjà réduite, un seul écran (composantes, lettre « a ») —
+  // lot C de l'audit 4e ch. 6 (G6), même séquence que l'appli (`phaseInitiale`).
+  const reduction = e.variante !== "plate";
+  const lc = reduction ? "b" : "a";
+  const etapesReduction: EtapeCorrection[] = [
     utilise("a", [
       texte(`Un coefficient devant une parenthèse multiplie chacun de ses termes ; `),
       ...(e.points ? [latex("\\vec{BA}=-\\vec{AB}"), texte(` : vecteurs opposés ${COURS_OPPOSES} ; `)] : []),
@@ -67,19 +71,22 @@ export function correctionDetailleeCombinaisonVecteurs(e: ExerciceCombinaisonVec
         ? [latex("\\vec{BA}=-\\vec{AB}"), texte(" : oublier ce changement de signe fausse le regroupement des termes en "), latex("\\vec{AB}"), texte(".")]
         : [texte("Le coefficient devant une parenthèse multiplie tous ses termes, et un signe « − » devant un groupe change le signe de chacun d'eux.")],
     ),
-    utilise("b", [
+  ];
+  const etapes: EtapeCorrection[] = [
+    ...(reduction ? etapesReduction : []),
+    utilise(lc, [
       texte(`En repère, k fois un vecteur multiplie chaque composante par k ${COURS_MULTIPLICATION_REPERE}, et une somme se calcule composante par composante ${COURS_ADDITION_REPERE}`),
       ...(avecAB ? [texte(" ; "), latex("\\vec{AB}"), texte(" a pour composantes extrémité − origine.")] : [texte(".")]),
     ]),
   ];
-  if (avecAB) etapes.push(calcul("b", lignesComposantes("AB", e.points!.A, e.points!.B), [], "Composantes de AB"));
+  if (avecAB) etapes.push(calcul(lc, lignesComposantes("AB", e.points!.A, e.points!.B), [], "Composantes de AB"));
   etapes.push(
-    calcul("b", [ligne(`${t}=${reduit}`, "expression réduite (étape 1)"), ...lignesAxe(e, "x", bases), ...lignesAxe(e, "y", bases)], [], "Composantes"),
-    resultat("b", [latex(formatReponseColonneLatex(e).replace(/\s+/g, ""))]),
-    verification("b", [texte("Ligne par ligne, le résultat est la combinaison des colonnes : ")], [
+    calcul(lc, [ligne(`${t}=${reduit}`, reduction ? "expression réduite (étape 1)" : "expression de l'énoncé, déjà réduite"), ...lignesAxe(e, "x", bases), ...lignesAxe(e, "y", bases)], [], "Composantes"),
+    resultat(lc, [latex(formatReponseColonneLatex(e).replace(/\s+/g, ""))]),
+    verification(lc, [texte("Ligne par ligne, le résultat est la combinaison des colonnes : ")], [
       ligne(`${t}=${bases.map((b, i) => `${i === 0 ? (b.c < 0 ? "-" : "") : b.c < 0 ? "-" : "+"}${Math.abs(b.c) === 1 ? "" : q(Math.abs(b.c))}${col(b.v)}`).join("")}=${col(e.reponse)}`, "même vecteur"),
     ]),
-    piege("b", [texte("Un coefficient négatif s'applique aux deux composantes : une composante négative multipliée par un coefficient négatif donne un nombre positif.")]),
+    piege(lc, [texte("Un coefficient négatif s'applique aux deux composantes : une composante négative multipliée par un coefficient négatif donne un nombre positif.")]),
   );
   return finaliserCorrigeVecteurs(etapes);
 }

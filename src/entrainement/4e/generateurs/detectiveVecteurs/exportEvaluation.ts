@@ -107,8 +107,15 @@ function bareme(e: ExerciceDetectiveVecteurs): BaremeExercice {
   };
 }
 
+/** Groupe à verdict (audit 4e ch. 6, lot D, décision 1 — comme gen81) : le type d'erreur est la
+ * réponse de l'écran 2 — panneau d'évaluation seulement, feuille et sélecteurs intacts. */
+const GROUPES_VERDICT = [
+  { id: "groupe_erreur", label: "Type d'erreur à reconnaître (au hasard parmi les six)", variantes: ["sens", "chasles", "norme", "colinearite", "orthogonalite", "parallelogramme"] },
+];
+
 export const adaptateurEvaluationDetectiveVecteurs: AdaptateurFeuilleExercices<ExerciceDetectiveVecteurs> = {
   profilInstance: profilDetectiveVecteurs,
+  groupesVerdict: GROUPES_VERDICT,
   titreDocument: "Le détective d'erreurs vectoriel — Évaluation",
   nomFichierBase: "detective-erreurs-vecteurs",
   genererInstance: genererExerciceDetectiveVecteurs,

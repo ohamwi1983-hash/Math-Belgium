@@ -30,7 +30,7 @@ export const LIBELLE_CAS_ORIGINE = "Inclure un cas particulier (image de l'origi
  * à 50 % dans la variante « relation générale »). */
 export function profilPointVectoriel(e: ExercicePointVectoriel): ProfilInstance {
   if (e.variante === "translation") return { casParticulier: e.labelPoint === "O" ? "image-origine" : null };
-  if (e.variante === "milieu") return { casParticulier: null };
+  if (e.variante === "milieu" || e.variante === "symetrique") return { casParticulier: null };
   return { casParticulier: null, forme: e.forme };
 }
 

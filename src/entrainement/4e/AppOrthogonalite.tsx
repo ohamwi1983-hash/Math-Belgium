@@ -62,6 +62,8 @@ const REGLAGES_DEMO: ReglagesSession = {
   affichageExplication: true,
 };
 
+// Nouveau tirage de « paramètre » (lot C : x en première ou seconde composante, dans u ou v) :
+// les codes de cette variante imprimés avant rouvrent un autre exercice de la même variante.
 function nouvelleSession(): EtatSessionOrthogonalite {
   return demarrerSessionOrthogonalite(REGLAGES_DEMO, genererExerciceOrthogonalite);
 }
@@ -364,7 +366,7 @@ export function AppOrthogonalite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
+            choixFige={etat.choixFige}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseTest(etat, reponse), saisieTest(reponse))}
             validation={validation}
@@ -375,7 +377,6 @@ export function AppOrthogonalite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseReductionParametre(etat, reponse), saisieBrute(reponse))}
             validation={validation}
@@ -386,6 +387,7 @@ export function AppOrthogonalite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(valeur) => terminerEtape(soumettreReponseResolutionParametre(etat, valeur), <Katex expression={`x = ${formatSaisieNombre(valeur)}`} />)}
             validation={validation}
           />
@@ -395,7 +397,6 @@ export function AppOrthogonalite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseConstructionTriangle(etat, reponse), saisieConstructionTriangle(exercice, reponse))}
             validation={validation}
@@ -407,7 +408,6 @@ export function AppOrthogonalite() {
             sommet="A"
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(valeur) => terminerEtape(soumettreReponseTestSommet(etat, "A", valeur), formatSaisieNombreTexte(valeur))}
             validation={validation}
@@ -419,7 +419,6 @@ export function AppOrthogonalite() {
             sommet="B"
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(valeur) => terminerEtape(soumettreReponseTestSommet(etat, "B", valeur), formatSaisieNombreTexte(valeur))}
             validation={validation}
@@ -431,7 +430,6 @@ export function AppOrthogonalite() {
             sommet="C"
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(valeur) => terminerEtape(soumettreReponseTestSommet(etat, "C", valeur), formatSaisieNombreTexte(valeur))}
             validation={validation}
@@ -442,7 +440,6 @@ export function AppOrthogonalite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={1}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseConclusionTriangle(etat, reponse), saisieConclusion(exercice, reponse))}
             validation={validation}
@@ -453,7 +450,6 @@ export function AppOrthogonalite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseConstructionAvecXTriangle(etat, reponse), saisieConstructionAvecX(exercice, reponse))}
             validation={validation}
@@ -465,7 +461,6 @@ export function AppOrthogonalite() {
             sommet="A"
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseReductionSommet(etat, "A", reponse), saisieBrute(reponse))}
             validation={validation}
@@ -477,7 +472,6 @@ export function AppOrthogonalite() {
             sommet="B"
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseReductionSommet(etat, "B", reponse), saisieBrute(reponse))}
             validation={validation}
@@ -489,7 +483,6 @@ export function AppOrthogonalite() {
             sommet="C"
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseReductionSommet(etat, "C", reponse), saisieBrute(reponse))}
             validation={validation}
@@ -500,6 +493,8 @@ export function AppOrthogonalite() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
+            choixFige={etat.choixFige}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseIdentificationResolution(etat, reponse), saisieIdentification(exercice, reponse))}
             validation={validation}
           />
