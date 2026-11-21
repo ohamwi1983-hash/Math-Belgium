@@ -1793,6 +1793,16 @@ export const calculVectoriel: ChapterContent = {
             'une droite horizontale (m = 0) et une droite verticale (pas de pente).',
         },
         {
+          kind: 'entrainement',
+          title: "Vecteurs directeurs d'une droite",
+          generatorId: 'gen129',
+          description: [
+            "Lis un vecteur directeur d'une droite tracée sur un quadrillage (horizontale, verticale ou parallèle à une droite (EF)), reconnais tous les vecteurs directeurs parmi cinq vecteurs, puis lis-en un sur une équation y = mx + p.",
+          ],
+          chantier: '4e',
+          whereLabel: "4e → « 129. Vecteurs directeurs d'une droite »",
+        },
+        {
           kind: 'rappel',
           label: 'Rappel — vers le chapitre 7',
           items: [

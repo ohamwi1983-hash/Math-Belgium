@@ -17,6 +17,8 @@ import { EnTeteExercice } from "./EnTeteExercice";
 import { RenduFragments } from "./RenduFragments";
 import { EtapeChoixTransformation } from "./EtapesTransformationDonnees";
 import { EtapeChampsTransfert, saisieAffichee } from "./EtapesTransfertSecondDegre";
+import { EtapeCasesTransfert } from "./EtapeCasesTransfert";
+import { messageFragments } from "../ui/formatTransformationDonnees";
 
 /**
  * Coquille commune des nouveaux générateurs du chapitre 2 de 4e (gen115, gen116, gen118, gen119,
@@ -55,6 +57,7 @@ interface TransitionEnAttente {
 
 function reponseAttendue(def: EcranTSD): ReactNode {
   if (def.type === "choix") return <RenduFragments fragments={def.options[def.bonne]!} />;
+  if (def.type === "cases") return <RenduFragments fragments={def.bonnes.flatMap((b, i) => [...(i > 0 ? [{ type: "texte" as const, valeur: " ; " }] : []), ...def.options[b]!])} />;
   return <RenduFragments fragments={def.reponse} />;
 }
 
@@ -109,7 +112,8 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
     setEnAttente({
       revele: resultat.revele,
       reponseAttendue: attendue,
-      messageRevele: def.type === "choix" ? ((optionChoisie !== undefined ? (def.explications?.[optionChoisie] ?? def.messagesOptions?.[optionChoisie]) : undefined) ?? def.messageFaux) : undefined,
+      messageRevele:
+        def.type === "choix" ? ((optionChoisie !== undefined ? (def.explications?.[optionChoisie] ?? def.messagesOptions?.[optionChoisie]) : undefined) ?? def.messageFaux) : def.type === "cases" ? def.messageFaux : undefined,
       derniere: ecran >= tous.length - 1,
     });
   }
@@ -139,7 +143,14 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        messageRevele: enAttente.messageRevele,
+        // Message qui contient des formules « $…$ » (gen130) : rendu en KaTeX ; texte brut inchangé.
+        messageRevele: enAttente.messageRevele?.includes("$") ? (
+          <span>
+            <RenduFragments fragments={messageFragments(enAttente.messageRevele)} />
+          </span>
+        ) : (
+          enAttente.messageRevele
+        ),
         corrigeDetaille: <CorrigeDetailleEcran etapes={corrigeEtape} />,
       }
     : null;
@@ -157,6 +168,19 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
   function ecranCourant(): ReactNode {
     if (def.type === "choix") {
       return <EtapeChoixTransformation {...communs} options={def.options} bonne={def.bonne} onValider={(i) => conclure(i === def.bonne, <RenduFragments fragments={def.options[i]!} />, i)} />;
+    }
+    if (def.type === "cases") {
+      return (
+        <EtapeCasesTransfert
+          {...communs}
+          options={def.options}
+          bonnes={def.bonnes}
+          onValider={(coches) => {
+            const juste = coches.length === def.bonnes.length && coches.every((c) => def.bonnes.includes(c));
+            conclure(juste, <RenduFragments fragments={coches.flatMap((c, i) => [...(i > 0 ? [{ type: "texte" as const, valeur: " ; " }] : []), ...def.options[c]!])} />);
+          }}
+        />
+      );
     }
     return (
       <EtapeChampsTransfert
