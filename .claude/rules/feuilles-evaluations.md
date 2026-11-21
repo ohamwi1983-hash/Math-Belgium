@@ -11,6 +11,8 @@ paths:
   - "src/lib/banquesVraiFaux.ts"
   - "src/components/admin/EvaluationGeneratorPanel.tsx"
   - "src/components/admin/RepereNiveauDuree.tsx"
+  - "src/components/admin/ChampPoints.tsx"
+  - "src/lib/pointsAutomatiques.ts"
   - "scripts/verifier-enonces-evaluation.mjs"
 ---
 
@@ -683,6 +685,20 @@ Décisions de l'utilisateur (maquettes validées, lots A1–A4) :
   résultats) : « Réponds sur une feuille à part… ne rapporte pas tous les points. » + calculatrice
   autorisée/interdite + « Durée : n minutes. » seulement si `afficherDuree`. Jamais sur la feuille
   d'exercices. Même texte dans la copie Word (`TEXTE_CONSIGNES`).
+  **Consignes supplémentaires de l'évaluation** (demande de l'utilisateur, comme l'examen) : le champ
+  « Consignes supplémentaires (une par ligne) » du panneau s'affiche aussi pour le document
+  « Évaluation » (bloc « Consignes de l'évaluation », même place que les réglages de l'examen ;
+  absent en feuille d'exercices ; même état React : le texte est gardé en passant d'Examen à
+  Évaluation). Plan : `EnTeteEvaluation.consignesSupplementaires` (texte tel que saisi, tirets
+  typographiques gardés), écrit SEULEMENT s'il n'est pas vide ; `enteteSerie` le passe aux documents
+  en lignes (`EnteteEvaluation.consignesSupplementaires`, ni en feuille ni en examen — l'examen garde
+  `examen.consignesSupplementaires`). Rendu : une puce par ligne après les consignes par défaut,
+  `$…$` en KaTeX, dans la copie et l'aménagée (`consignesSupplementairesHtml`, partagée avec
+  l'examen ; CSS `STYLE_CONSIGNES_SUP` ajoutée SEULEMENT quand il y en a) et la copie Word
+  (`pucesConsignesDocx`, partagée avec l'examen : paragraphes au même cadre) ; corrigé et grille :
+  rien. Sans consigne : copie, aménagée et Word identiques à avant (vérifié octet par octet ; seul
+  le compteur global `docPr id` des images Word avance pour les documents générés APRÈS une copie
+  qui a une formule de plus dans la même page — contenu identique).
 - **Liste de données affichée** (« Données : \text{…},\ \text{…} », 6gen44/46/48) : une formule
   display ne se coupe jamais et sortait à 30 % de sa largeur ; une formule affichée de niveau 0
   découpable à ses « ,\ » / « ;\ » et longue (> 45 caractères visibles) est rendue en formules EN
@@ -731,6 +747,110 @@ Toutes décochées par défaut ; un plan enregistré sans le champ se recharge a
   de correction · ne pas distribuer aux élèves », « page n / N » (champs PAGE / NUMPAGES) au taquet
   droit — mention courte pour que le numéro ne passe jamais à la ligne. Pas d'annexe
   formulaire ni de deux colonnes en Word.
+
+## Grille de correction plus rapide (décision de l'utilisateur)
+
+Grille HTML ET Word, évaluation ET examen ; jamais sur la copie ni le corrigé. Logique pure partagée
+`export/grilleCorrection.ts` (testable seule) ; CSS `STYLE_GRILLE` ajoutée à la SEULE grille (le CSS
+commun ne change pas : copie, corrigé, aménagée, feuille identiques octet pour octet). Le reste de la
+grille ne change pas (en-tête et résumé par processus, « Réponse : … » de chaque question, règle « une
+erreur n'est pénalisée qu'une fois », codes, pied « Série A · page n / N », couleurs).
+- **A. Page « Réponses — Série A »** juste sous l'en-tête de la grille, puis saut de page avant le
+  détail (`.rep-page`, Word : paragraphe `pageBreakBefore`). Une entrée par question, numérotée comme
+  la copie (mêmes items, `itemsNumerotes` / parties de l'examen), points à droite :
+  `reponsesDeLaQuestion` — même source que l'en-tête de la question (`bareme.reponseFinale`, sinon
+  `reponseBreve`) ; vrai/faux regroupé : une ligne par affirmation (« a) Vrai 1 ») ; question
+  regroupée : une ligne par a), b), c) avec la réponse et les points de SA ligne ; question ouverte
+  (formule, démonstration) : le corrigé s'il est court (≤ 560 px estimés), sinon « Voir le détail de
+  la question n ». Colonnes (`colonnesReponses`, plus longue réponse estimée par `largeurFragments`) :
+  3 si ≤ 140 px, 2 si ≤ 255 px, sinon 1 ; colonnes CSS équilibrées, une question jamais coupée. Word :
+  une cellule de tableau sans bordure par colonne, remplie de haut en bas. Examen : un bloc par partie
+  (« Partie I · titre », points de la partie).
+- **B. Question regroupée en tableau** (`segmentsDuGroupe`) : les critères du groupe (rattachés à la
+  lettre de leur ligne par `baremeDuGroupe`) sont séparés en libellé générique + valeur
+  (`separerCritere` : premier « : » d'un fragment de TEXTE, jamais dans une formule — « Factorisation
+  correcte : x(x + 4√3) = 0 » → « Factorisation correcte » | « x(x + 4√3) = 0 » ; critère réduit à une
+  formule → libellé « Résultat » ; sans « : » → libellé entier, pas de valeur). Signature d'une ligne
+  = suite (étape, libellé). Lignes de même signature (au moins deux) → UN tableau : une rangée par
+  critère (« Étape 2 — Factorisation correcte »), une colonne par ligne a), b)…, dans chaque case la
+  valeur propre à la ligne et ses points (`pointsCriteres` du groupe, inchangé), rangée « Total » par
+  colonne (= points de la ligne) ; une valeur identique dans toutes les colonnes reste dans le
+  libellé. Signatures différentes (variantes différentes, valeurs dans le libellé sans « : », ex.
+  gen50 « Division par 4… ») : un tableau par signature, une ligne seule dans sa signature garde la
+  liste d'avant (« e) Étape 1 … ») — chaque critère est dans exactement un segment, rien n'est perdu.
+  Largeur : colonnes estimées (`largeurColonneTableau`, valeur + 46 px) ; au-delà de 660 px moins le
+  libellé, coupe en blocs de colonnes équilibrés (`blocsDeColonnes`, libellé répété ; 5 colonnes →
+  3 + 2), libellé élargi jusqu'à sa largeur naturelle quand il reste de la place
+  (`largeurLibelleBloc`) ; Word : mêmes blocs, rangées insécables, en-tête répété.
+- **C. Listes** : « Erreurs fréquentes » puis une erreur par ligne, son coût (« −0,5 », « 0 pt sur
+  l'étape 3 », « moitié des points sur l'étape 3 ») aligné à droite (au plus 42 % de la largeur, plus
+  de flèche « → ») ; « Accepter » : une réponse acceptée par ligne. Word : tableau sans bordure à
+  deux colonnes (68 % / 32 %).
+- **Vérifié** (documents réels, `construirePlan` → `genererDocumentsDepuisPlan`, scénarios `docs.cjs`
+  4e ch. 2, 5e ch. 1/2/3, 6e ch. 5/3/1, 4e mixte, plan sans groupe ; évaluation 2 séries, examen par
+  chapitre à total fixé et par processus en deux colonnes, Word de la grille ; outils du chantier
+  `verif.cjs`, `debord.cjs`, `nonreg.cjs`, dossier de travail) : numérotation Réponses = copie =
+  détail, points des lignes = points de la copie, réponses = « Réponse : … » de chaque question,
+  colonnes des tableaux : somme des cases = total = points de la ligne, nombre de critères = grille
+  d'avant (16 grilles, 0 défaut) ; 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error` ; PDF A4 et
+  Word (LibreOffice) relus. Non-régression (même plan, code d'avant / d'après) : copie, corrigé,
+  aménagée, feuille et Word copie / corrigé identiques (8 / 11 documents par évaluation ou examen,
+  seules les grilles changent ; feuille 2 / 2).
+
+## Points pré-remplis du panneau (décision de l'utilisateur)
+
+Panneau des évaluations et des examens (pas la feuille d'exercices, qui n'a pas de points). Règle
+(`lib/pointsAutomatiques.ts`, pur) :
+- **exercice** : points par exercice = durée estimée de SA variante arrondie à la minute — la valeur
+  du repère « ≈ m min » de la rangée (`estimationVariante` / `dureeEstimeeVariante`, même cache, mêmes
+  réglages de rangée : calculatrice, paramètres décochés) — ÷ 2, demi-point, bornée entre 1 et 8
+  (`pointsDepuisDuree` ; « ≈ 7 min » → 3,5 ; ≥ 16 min → 8). Générateur pas encore noté : même règle
+  sur sa durée provisoire (`dureeMinutes`). Calcul paresseux respecté : une rangée choisie calcule sa
+  durée tout de suite (comme la durée de l'en-tête), une rangée pas encore choisie garde sa valeur
+  enregistrée (4) jusqu'à ce que son repère soit calculé, puis affiche la valeur automatique
+  (`useEstimationsCalculees` : le champ se re-rend à chaque estimation mise en cache, sans re-rendre
+  tout le panneau) ;
+- **vrai/faux** 1 pt par affirmation, **formule** 1 pt, **compréhension** 2 pts (valeur d'avant) ;
+- **démonstration** (choix fait) : ≈ 1 pt pour 2 étapes du corrigé (`q.corrige.length`, le nombre
+  affiché dans la liste « Choisir »), demi-point, borné 2–6 (4 étapes → 2 ; 9 → 4,5 ; 15 → 6) ; ligne
+  sans choix (tirée une seule fois pour toutes les séries) : moyenne des démonstrations que la section
+  peut tirer.
+- **Unités et état** : une unité = une variante (clé de `parVariante`, copies « ~n » comprises), la
+  ligne (`points`) ou une question choisie (`choix:<id>`, `pointsParChoix`). `LigneSelection.modePoints`
+  (panneau seulement) : absent = automatique ; « verrouille » = saisi à la main ou plan rechargé ;
+  « ajuste » = posé par « Ajuster au total ». Points EFFECTIFS (`pointsUnite`, `materialiser`) :
+  utilisés par les totaux, le badge flottant, les parties de l'examen, et écrits dans les lignes
+  envoyées à `construireItemsPayload` / `construirePlan` / `buildEvaluationUrl` (sans `modePoints`).
+- **Verrou** (`ChampPoints`) : saisie en TEXTE libre lue avec tolérance (`lirePoints` : « 2 »,
+  « 2,5 », « 2.5 pts », demi-points ; jamais `type="number"` ni filtre de frappe — les anciens champs
+  numériques de points ont été remplacés) ; une valeur lisible est gardée et VERROUILLÉE, une saisie
+  illisible est signalée (`aria-invalid`) sans rien écraser, le champ reprend la valeur en sortie.
+  Cadenas : fermé = verrouillé (clic → la règle automatique reprend), ouvert = automatique / ajusté
+  (clic → verrouiller la valeur affichée). Téléphone : cadenas sous le champ (la colonne « Points »
+  garde sa largeur). Changer les réglages d'une rangée non verrouillée (calculatrice, paramètres)
+  change son estimation, donc ses points ; une rangée verrouillée ne bouge jamais.
+- **« Ajuster au total »** (barre du bas) : total saisi en texte libre (`lireTotal` de l'examen,
+  `normaliserSigneMoins`), les unités NON verrouillées sont mises à l'échelle pour que le total vaille
+  la saisie (verrouillées comptées telles quelles) : `examen.ts::mettreAEchelleParGroupes` —
+  `mettreAEchelle` lui-même quand chaque unité est une question, sinon mêmes règles (proportionnels,
+  demi-points, jamais 0) avec le reste absorbé par les plus petits pas sur les unités de n questions
+  (une variante de 3 exercices change le total par pas de 1,5) ; `null` → message (« total trop
+  petit : n pts au moins », « somme exacte impossible avec ces nombres de questions : essaie … ») ;
+  illisible → message de `lireTotal`. Testé seul (20 000 tirages : somme exacte, ≥ 0,5, demi-points ;
+  identique à `mettreAEchelle` quand toutes les unités valent une question). Examen « total fixé par
+  partie » : bouton désactivé avec une note (les points sont déjà mis à l'échelle partie par partie
+  à l'impression, `itemsDuDocument`) — les deux mécanismes ne se contredisent jamais.
+- **Plan rechargé** (`chargerPlan`, import JSON, « Recharger ») : toutes ses questions sont
+  verrouillées → points EXACTEMENT ceux du plan, aucun recalcul ; les lignes sans question restent
+  automatiques. Un plan enregistré porte déjà les points effectifs (lignes matérialisées).
+- **Vérifié** (Playwright, 4e ch. 2 et 6e ch. 5, 1 280 px et iPhone 13, outil `panneau.cjs`) : 72 / 72
+  rangées des processus 2 et 3 : points = « ≈ m min » ÷ 2 (de 3,5 à 8) ; badge, barre du bas et
+  sous-totaux = somme des points ; saisie « 3,5 » verrouillée et inchangée quand la calculatrice
+  change (les rangées non verrouillées suivent) ; « 2,3 » signalé ; « Ajuster au total » 20 et 37
+  exacts (verrouillée inchangée), « vingt » et « 0,4 » refusés avec message ; plan enregistré puis
+  rechargé après changement de réglages : mêmes points, tous verrouillés ; démonstrations 2 à 4,5 pts
+  selon leur longueur ; scrollWidth 390 sur iPhone 13 (tableau : même largeur qu'avant) ; 0 erreur
+  console.
 
 ## Examen (décisions de l'utilisateur, maquette X3 « Sans page de garde »)
 
