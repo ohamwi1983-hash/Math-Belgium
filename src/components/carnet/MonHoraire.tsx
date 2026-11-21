@@ -1,4 +1,5 @@
 import { useId, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import type { Classe } from '../../lib/carnet'
 import type { DonneesHoraire } from '../../lib/carnetDonnees'
 import { ecoleParDefaut, type Ecole } from '../../lib/compteValidation'
@@ -64,7 +65,13 @@ export function MonHoraire({
   onSupprimerGrille: (ecoleId: string) => void
   onDefinirCase: (existante: CaseHoraire | undefined, saisie: SaisieCase) => Promise<boolean>
 }) {
-  const [ecoleId, setEcoleId] = useState<string>(() => ecoleParDefaut(ecoles)?.id ?? ecoles[0]?.id ?? '')
+  // `?ecole=<id>` (lien « Horaire » d'une école de la page Mon profil) : onglet de cette école ;
+  // sinon l'école par défaut, comme avant.
+  const [params] = useSearchParams()
+  const [ecoleId, setEcoleId] = useState<string>(() => {
+    const demandee = params.get('ecole')
+    return (demandee && ecoles.some((e) => e.id === demandee) ? demandee : null) ?? ecoleParDefaut(ecoles)?.id ?? ecoles[0]?.id ?? ''
+  })
   const [edition, setEdition] = useState(false)
   const ecole = ecoles.find((e) => e.id === ecoleId) ?? ecoles[0]
   const grille = horaire.grilles.find((g) => g.ecole_id === ecole?.id)
