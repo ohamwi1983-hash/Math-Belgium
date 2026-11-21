@@ -114,7 +114,7 @@ Partage plus tard : table `partages (plan_id, destinataire, droit)` + politique 
   discret « Je suis professeur : me connecter » (`/connexion?retour=<page>`, masqué si `indisponible`) ;
   session stockée en cours de lecture (`chargement`) → « Chargement… » (aucune bascule visible).
   L'assistant n'enregistre rien (ni coffre, ni navigateur, ni historique). `/evaluation` reste réservée.
-  **« Voir comme un élève »** (décision de l'utilisateur) : lien sous le titre du panneau professeur ;
+  **« Voir comme un élève »** (décision de l'utilisateur) : lien dans le bandeau du panneau professeur ;
   `?vue=eleve` montre l'assistant au professeur connecté, avec un bandeau « Revenir à ma page ».
   Aucune n'est pré-rendue (`scripts/routes.mjs` ne liste que l'accueil et les chapitres) ;
   toutes `noindex`. Vérifié (Playwright, faux client) : sans compte → assistant sur les deux pages,
@@ -481,9 +481,10 @@ progression, fiches, séances à rattraper, messages, cas sans école / sans cla
   `/carnet` Aujourd'hui · `/carnet/semaine` · `/carnet/classe/:id` (mémorisée comme classe active) ·
   `/carnet/classes` (`GestionClasses`, « Ajouter une classe ») · `/carnet/agenda` (`?classe=` présélectionne)
   · `/carnet/horaire` (`MonHoraire`) · `/carnet/reglages` ; adresse inconnue → `/carnet`.
-- `MenuCarnet` : colonne de gauche ≥ 760 px (`NavLink`, `aria-current`, « n à noter » = créneaux du jour
-  passés / en cours sans séance, nombre de séances par classe) ; téléphone : barre fixe en bas
-  (Aujourd'hui · Semaine · Classes · Plus, feuilles au-dessus, Échap / clic à côté). Classe CSS
+- Menu : `MenuCarnet` a disparu le 22/11/2026, repris dans `MenuEspace` (voir « Harmonisation « Mon
+  espace » » en fin de fichier) — « n à noter » = créneaux du jour passés / en cours sans séance, nombre
+  de séances par classe ; téléphone : barre fixe en bas (Aujourd'hui · Semaine · Classes · Plus,
+  feuilles au-dessus, Échap / clic à côté). Classe CSS
   `.carnet-barre-bas` (`.carnet-barre` = barre de progression d'`index.css`, ne pas réutiliser).
 - `Aujourdhui` : heures du jour (`journeeCarnet.ts::lignesDuJour` : H0 → Hn, heures doubles, libres
   regroupées, récréation / midi ; plusieurs écoles le même jour → créneaux seuls), créneau proposé
@@ -530,8 +531,8 @@ mot de passe, coffre et déconnexion — dans le menu —, suppression du compte
 - `components/compte/MenuEspace.tsx` : menu « Mon espace » (Mon profil · Carnet · Feuilles · Évaluations
   et examens · Mon coffre | Administration si admin · Se déconnecter) ; téléphone : barre du bas
   (Carnet · Feuilles · Coffre · Profil · Plus). Réutilise les CLASSES CSS du menu du carnet
-  (`carnet.css`, importé par `ProfilPage`) et `MenuActions` (« … ») sans les modifier — les deux menus
-  sont à unifier plus tard.
+  (`carnet.css`, importé par `ProfilPage`) et `MenuActions` (« … ») sans les modifier — menu unique
+  depuis l'harmonisation (fin de fichier).
 - Cartes « Sur les copies » (pastille « ✓ enregistré » / « non enregistré », Enregistrer / Annuler),
   « Mes écoles » (couleur = rang, `.carnet-c0…c5` ; par défaut encadrée ; « Mettre par défaut » ; état
   de l'horaire du carnet LU par `import()` de `carnetDonnees.ts::chargerHoraire` : « ✓ Horaire H0–H7 »,
@@ -638,3 +639,46 @@ professeurs, désactiver / réactiver — jamais soi-même —, liens `/evaluati
   codes, lien utilisé par → fiche, copie relue + repli, révoquer avec Échap, générer — validations,
   arguments RPC, sans limite = null —, état vide, erreur de chargement, non-admin, page historique, cibles
   ≥ 44 px, tiroir) ; `scrollWidth` = largeur, 0 erreur console.
+
+## Harmonisation « Mon espace » (22/11/2026 : bandeau sombre + menu unique, AUCUN SQL)
+
+Décision de l'utilisateur : le carnet et les pages de conception (professeur connecté) prennent le bandeau
+sombre et le menu `MenuEspace` du profil, du coffre et de l'administration ; contenu et fonctionnement
+des pages inchangés.
+- `components/compte/BandeauEspace.tsx` : bandeau commun (classes `profil-bandeau…` de `profil.css` ;
+  pastille ronde, « ESPACE PROFESSEUR », `<h1>`, `apresTitre`, `pastilles` = `<li>`, `fin`). Profil et
+  coffre l'utilisent (DOM identique, captures avant / après identiques au pixel près hors chevron du
+  menu) ; l'administration garde `admin-bandeau` (jetons `--admin-*`).
+- `MenuEspace` = menu UNIQUE : « Carnet de matière vue » se déplie (bouton `aria-expanded`, chevron) en
+  Aujourd'hui (« n à noter ») · Ma semaine · Mes classes (couleur + nombre de séances, + Ajouter une
+  classe) · Agenda d'une période · Mon horaire · Réglages ; déplié d'office dans `/carnet/*` (prop
+  `carnet` : classes, séances, à noter), replié ailleurs (déplié à la main : « Mes classes » au lieu de la
+  liste). Défilement en haut / vers l'ancre au changement de sous-page du carnet (repris de `MenuCarnet`).
+  Téléphone : UNE barre — dans le carnet Aujourd'hui · Semaine · Classes · Plus (Plus = Agenda, Mon
+  horaire, Réglages, puis Mon profil, Mon coffre, Feuilles, Évaluations, Administration si admin, Se
+  déconnecter : les trois vues du quotidien en classe à un geste), ailleurs Carnet · Feuilles · Coffre ·
+  Profil · Plus (inchangée).
+- Carnet (`CarnetPage`) : `PageCompte sansTete` + `EnTeteCompte` en repli ; bandeau « Carnet de matière
+  vue » (titre fixe : les vues gardent leur propre titre — date, semaine, classe) avec pastilles
+  « Période n · semaine n » (`texteReperes` d'aujourd'hui), « n à noter » (accent) et « n classes »,
+  visibles aussi sur téléphone. Le surtitre de repères d'`Aujourdhui` / `MaSemaine` ne s'affiche plus
+  que s'il DIFFÈRE de celui du bandeau (autre semaine) : jamais doublé. Tous les états (chargement,
+  0002 absent, erreur, sans école) sont dans le même cadre.
+- Conception (`components/compte/EspaceConception.tsx`, professeur connecté SEULEMENT : `/exercice`,
+  `/…/exercices`, `/evaluation`) : `MenuEspace compact` (colonne d'icônes de 760 à 1 359 px — libellés
+  visuellement masqués mais lus, `title`, cibles 48 px —, menu complet dès 1 360 px, `page-tool` élargie
+  à 1 440 px : le panneau garde au moins la largeur d'avant), bandeau (icône feuille / évaluation,
+  titre — « Feuille d'exercices — Calcul vectoriel » + « 4e · chapitre 6 » sur une page de chapitre —,
+  pastilles école choisie · niveau (sauf page de chapitre) · « n exercices choisis », lien « Voir comme
+  un élève », même `?vue=eleve`). Pastilles : prop `onResume` du panneau (lecture seule, effet) vers un
+  petit magasin (`useSyncExternalStore`) : seul le bandeau se re-rend. Téléphone : la barre « Ma feuille
+  · Générer » du panneau est remontée AU-DESSUS de la barre du menu (`.espace-conception
+  .conc-barre-mobile`), jamais superposée. Visiteur, élève, « vue élève » et `/admin` historique :
+  inchangés (aucun bandeau ni menu).
+- Vérifié (Vite de développement + faux client, données fictives du carnet, du coffre et de l'admin,
+  heure figée au 20/11/2026 11h50 ; 1 440 / 1 280 / 1 024 / 800 px et iPhone 13, clair et sombre) :
+  450 vérifications Playwright (menu déplié / replié au clavier, `aria-current`, classes et compteurs,
+  sous-pages, panneau Noter, barre du bas et feuille « Plus », menu d'icônes, pastille = compte du
+  panneau, Aperçu, mode examen, vue élève aller-retour, visiteur sans bandeau, `scrollWidth` = largeur,
+  0 erreur console hors document blob de l'Aperçu — `ERR_INVALID_URL`, antérieur) ; le parcours du carnet
+  refondu (216, dont 25 textes Smartschool, 25 fiches, 4 agendas identiques à la référence) repasse.
