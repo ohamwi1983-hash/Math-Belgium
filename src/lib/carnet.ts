@@ -339,6 +339,18 @@ export function horaireTexte(s: Pick<Seance, 'heure_debut' | 'heure_fin' | 'nume
   return format === 'numero' ? (numero ?? plage) : (plage ?? numero)
 }
 
+/** Nombre d'heures de cours d'une séance (agenda, synthèse) : heure double « H1–H2 » = 2 (numéros) ;
+ * sans numéro de fin, une plage plus longue qu'une heure compte d'après `dureeHeure` (arrondi, au
+ * moins 1) ; sinon 1. */
+export function heuresSeance(s: Pick<Seance, 'heure_debut' | 'heure_fin' | 'numero_heure' | 'numero_heure_fin'>, dureeHeure: number): number {
+  if (aNumero(s.numero_heure) && aNumero(s.numero_heure_fin) && s.numero_heure_fin > s.numero_heure) return s.numero_heure_fin - s.numero_heure + 1
+  if (aNumero(s.numero_heure)) return 1
+  const d = minutesHeure(s.heure_debut)
+  const f = minutesHeure(s.heure_fin)
+  if (d !== null && f !== null && f > d && dureeHeure > 0) return Math.max(1, Math.round((f - d) / dureeHeure))
+  return 1
+}
+
 /** Horaire proposé pour une nouvelle séance : celui de la dernière séance de la classe le même jour
  * de la semaine s'il existe ; sinon l'heure actuelle arrondie aux 5 minutes (plage de `duree`). */
 export function horaireParDefaut(
@@ -447,23 +459,32 @@ export function enteteSeance(r: SeanceResolue): string {
   return [capitale(dateLongue(r.date)), r.horaire, r.classe].filter(Boolean).join(' · ')
 }
 
+/** Options de sortie (agenda d'une période) : `liens` faux retire les adresses, `remarque` vrai ajoute
+ * la remarque libre. Par défaut (une séance) : liens, et JAMAIS la remarque. */
+export interface OptionsTexteSeance {
+  liens?: boolean
+  remarque?: boolean
+}
+
 /** Texte brut à coller dans Smartschool (journal de classe, message) : date, horaire, classe,
  * chapitre, parties vues avec le lien de leur section, générateurs utilisés, devoir. La remarque
- * libre est une note du professeur : jamais copiée. */
-export function texteSmartschool(r: SeanceResolue): string {
+ * libre est une note du professeur : jamais copiée (sauf demande explicite, `remarque: true`). */
+export function texteSmartschool(r: SeanceResolue, options: OptionsTexteSeance = {}): string {
+  const liens = options.liens ?? true
   const lignes: string[] = [enteteSeance(r)]
   if (r.chapitre) lignes.push(`Chapitre ${r.chapitre.numero} — ${r.chapitre.titre}`)
   if (r.parties.length > 0) {
     lignes.push('', 'Vu en classe :')
-    for (const p of r.parties) lignes.push(`• ${p.texte}`, `  ${p.url}`)
-  } else if (r.chapitre) {
+    for (const p of r.parties) lignes.push(`• ${p.texte}`, ...(liens ? [`  ${p.url}`] : []))
+  } else if (r.chapitre && liens) {
     lignes.push(r.chapitre.url)
   }
   if (r.generateurs.length > 0) {
     lignes.push('', 'Pour s’entraîner :')
-    for (const g of r.generateurs) lignes.push(`• ${g.titre}`, ...(g.url ? [`  ${g.url}`] : []))
+    for (const g of r.generateurs) lignes.push(`• ${g.titre}`, ...(g.url && liens ? [`  ${g.url}`] : []))
   }
   if (r.devoir) lignes.push('', `Devoir : ${r.devoir}`)
+  if (options.remarque && r.remarque) lignes.push('', `Remarque : ${r.remarque}`)
   return lignes.join('\n')
 }
 
@@ -472,21 +493,24 @@ export function echapperHtml(t: string): string {
 }
 
 /** Même contenu en HTML simple (liens cliquables quand l'éditeur de Smartschool accepte le collage riche). */
-export function htmlSmartschool(r: SeanceResolue): string {
+export function htmlSmartschool(r: SeanceResolue, options: OptionsTexteSeance = {}): string {
+  const liens = options.liens ?? true
+  const lien = (url: string, texte: string) => (liens && url ? `<a href="${echapperHtml(url)}">${echapperHtml(texte)}</a>` : echapperHtml(texte))
   const h: string[] = [`<p><strong>${echapperHtml(enteteSeance(r))}</strong>`]
-  if (r.chapitre) h.push(`<br>Chapitre ${r.chapitre.numero} — <a href="${echapperHtml(r.chapitre.url)}">${echapperHtml(r.chapitre.titre)}</a>`)
+  if (r.chapitre) h.push(`<br>Chapitre ${r.chapitre.numero} — ${lien(r.chapitre.url, r.chapitre.titre)}`)
   h.push('</p>')
   if (r.parties.length > 0) {
     h.push('<p>Vu en classe :</p><ul>')
-    for (const p of r.parties) h.push(`<li><a href="${echapperHtml(p.url)}">${echapperHtml(p.texte)}</a></li>`)
+    for (const p of r.parties) h.push(`<li>${lien(p.url, p.texte)}</li>`)
     h.push('</ul>')
   }
   if (r.generateurs.length > 0) {
     h.push('<p>Pour s’entraîner :</p><ul>')
-    for (const g of r.generateurs) h.push(g.url ? `<li><a href="${echapperHtml(g.url)}">${echapperHtml(g.titre)}</a></li>` : `<li>${echapperHtml(g.titre)}</li>`)
+    for (const g of r.generateurs) h.push(`<li>${lien(g.url, g.titre)}</li>`)
     h.push('</ul>')
   }
   if (r.devoir) h.push(`<p><strong>Devoir :</strong> ${echapperHtml(r.devoir).replace(/\n/g, '<br>')}</p>`)
+  if (options.remarque && r.remarque) h.push(`<p><strong>Remarque :</strong> ${echapperHtml(r.remarque).replace(/\n/g, '<br>')}</p>`)
   return h.join('')
 }
 
