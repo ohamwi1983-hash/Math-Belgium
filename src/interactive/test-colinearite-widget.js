@@ -5,13 +5,13 @@
    * <test-colinearite-widget> — atelier interactif : A(0;0) et B(2;1)
    * fixes, C déplaçable (curseurs x_C, y_C), sélecteur colinéarité/
    * orthogonalité — matérialise en direct le piège de la section : les
-   * deux formules (déterminant pour la colinéarité, produit scalaire
+   * deux formules (critère de colinéarité, produit scalaire
    * pour l'orthogonalité) se ressemblent mais testent deux relations
    * très différentes, appliquées ici aux mêmes vecteurs AB, AC. En
    * colinéarité, k tel que AC = k·AB est affiché (fraction exacte) ; en
    * orthogonalité, marqueur d'angle droit et vérification Pythagore.
    * Réglage par défaut (C=(6;3), mode colinéarité) reproduit exactement
-   * l'exemple résolu : déterminant nul, A/B/C alignés. Web Component
+   * l'exemple résolu : critère de colinéarité nul, A/B/C alignés. Web Component
    * (Shadow DOM).
    * ================================================================ */
 
@@ -263,7 +263,7 @@
     var detNul = Math.abs(determinant) < EPS, psNul = Math.abs(produitScalaire) < EPS;
     var ligneVecteurs = "<span class=vec>u</span> = <span class=vec>AB</span>(" + nb(abx) + " ; " + nb(aby) + ") et <span class=vec>v</span> = <span class=vec>AC</span>(" + nb(acx) + " ; " + nb(acy) + ")";
     var ligneColinearite =
-      "Déterminant : xᵤ·yᵥ − yᵤ·xᵥ = " + nb(abx) + " × " + nbPar(acy) + " − " + nb(aby) + " × " + nbPar(acx) +
+      "Critère de colinéarité : xᵤ·yᵥ − yᵤ·xᵥ = " + nb(abx) + " × " + nbPar(acy) + " − " + nb(aby) + " × " + nbPar(acx) +
       " = " + nb(determinant) + (detNul ? " → colinéaires : A, B, C alignés" : " ≠ 0 → pas colinéaires");
     var ligneOrtho =
       "Produit scalaire : xᵤ·xᵥ + yᵤ·yᵥ = " + nb(abx) + " × " + nbPar(acx) + " + " + nb(aby) + " × " + nbPar(acy) +

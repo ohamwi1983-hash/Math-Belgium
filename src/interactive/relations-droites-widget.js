@@ -5,7 +5,7 @@
    * <relations-droites-widget> — atelier interactif (4e, ch. 7, § 4 et § 5) :
    * deux droites d₁ et d₂ données par leur équation implicite
    * ax + by + c = 0 (coefficients entiers de −6 à 6, a = b = 0 refusé).
-   * Pour chacune, un vecteur directeur (−b ; a) ; puis le déterminant et le
+   * Pour chacune, un vecteur directeur (−b ; a) ; puis le critère de colinéarité et le
    * produit scalaire des deux directeurs, et le verdict : perpendiculaires,
    * parallèles distinctes, confondues (équations proportionnelles) ou
    * sécantes quelconques. Pour des sécantes, le point d'intersection exact
@@ -422,13 +422,13 @@
       var d1 = droites[0], d2 = droites[1];
       var h = '<div class="carte-titre">Vecteurs directeurs (−b ; a)</div>';
       h += '<div>' + vecHtml("u₁") + ' = ' + vecteurTxt(-d1.b, d1.a) + ' pour d₁, ' + vecHtml("u₂") + ' = ' + vecteurTxt(-d2.b, d2.a) + ' pour d₂</div>';
-      h += '<div>Déterminant : ' + par(r.u1[0]) + ' · ' + par(r.u2[1]) + ' − ' + par(r.u1[1]) + ' · ' + par(r.u2[0]) + ' = ' + moins(r.det) + '</div>';
+      h += '<div>Critère de colinéarité : ' + par(r.u1[0]) + ' · ' + par(r.u2[1]) + ' − ' + par(r.u1[1]) + ' · ' + par(r.u2[0]) + ' = ' + moins(r.det) + '</div>';
       h += '<div>Produit scalaire : ' + par(r.u1[0]) + ' · ' + par(r.u2[0]) + ' + ' + par(r.u1[1]) + ' · ' + par(r.u2[1]) + ' = ' + moins(r.scal) + '</div>';
       var v = "";
-      if (r.type === "conf") v = "Déterminant nul et équations proportionnelles : les droites sont confondues (une infinité de points communs).";
-      else if (r.type === "paral") v = "Déterminant nul, mais équations non proportionnelles : parallèles distinctes, aucun point commun.";
-      else if (r.type === "perp") v = "Déterminant non nul et produit scalaire nul : sécantes et perpendiculaires.";
-      else v = "Déterminant non nul et produit scalaire non nul : sécantes, mais pas perpendiculaires.";
+      if (r.type === "conf") v = "Critère de colinéarité nul et équations proportionnelles : les droites sont confondues (une infinité de points communs).";
+      else if (r.type === "paral") v = "Critère de colinéarité nul, mais équations non proportionnelles : parallèles distinctes, aucun point commun.";
+      else if (r.type === "perp") v = "Critère de colinéarité non nul et produit scalaire nul : sécantes et perpendiculaires.";
+      else v = "Critère de colinéarité non nul et produit scalaire non nul : sécantes, mais pas perpendiculaires.";
       h += '<div class="verdict v-ok">' + v + '</div>';
       if (r.type === "conf") {
         var k = d1.a !== 0 ? frac(d2.a, d1.a) : frac(d2.b, d1.b);

@@ -334,7 +334,7 @@
       if (!R.possible) {
         var raison = (v.x === 0 && v.y === 0) || (w.x === 0 && w.y === 0)
           ? 'Un des deux vecteurs est nul : il n\'a pas de direction.'
-          : vecHtml("v") + ' et ' + vecHtml("w") + ' sont colinéaires : ils ont la même direction (déterminant ' +
+          : vecHtml("v") + ' et ' + vecHtml("w") + ' sont colinéaires : ils ont la même direction (critère de colinéarité : ' +
             moins(v.x) + ' × ' + moins(w.y) + ' − ' + moins(v.y) + ' × ' + moins(w.x) + ' = 0).';
         h += '<div class="carte alerte">Décomposition impossible. ' + raison +
           ' Il faut deux directions différentes pour décomposer ' + vecHtml("u") + '.</div>';
