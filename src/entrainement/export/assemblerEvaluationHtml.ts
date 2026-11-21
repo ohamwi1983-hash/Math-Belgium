@@ -140,6 +140,11 @@ export interface EnteteEvaluation {
    * dans l'encadré « Consignes » de la copie et de l'aménagée. Absent ou vide : copie identique à
    * avant. L'examen garde les siennes dans `examen.consignesSupplementaires`. */
   consignesSupplementaires?: string[];
+  /** ÉVALUATION BLANCHE (parcours élève, `lib/compositionEleve.ts`) : présentation d'une évaluation
+   * (durée et points INDICATIFS, « sans valeur de note »), QR code par question, corrigé détaillé À LA
+   * FIN du même document ; ni corrigé séparé, ni grille, ni série. Absent : évaluation rendue
+   * exactement comme avant. `dureeConseillee` : durée imprimée (min). */
+  blanche?: { dureeConseillee: number };
 }
 
 /** Réglages d'un examen, déjà lus et mis en forme (`evaluationLocal.ts::examenDuPlan`). */
@@ -629,7 +634,7 @@ function lettreCle(q: number): string {
 
 /** Corps d'une question : en-tête (formules dans la phrase), contenu HTML (graphiques), puis
  * sous-questions a)/b)… avec, en évaluation, leurs points. Jamais de zone de réponse. */
-function corpsQuestionHtml(item: ItemEvaluation, pointsSousQ?: Map<string, number>, feuille?: { numero: number; qr: boolean }): string {
+function corpsQuestionHtml(item: ItemEvaluation, pointsSousQ?: Map<string, number>, feuille?: OptionsLignes): string {
   if (item.groupe && item.groupe.length > 0) return corpsGroupeHtml(item, item.groupe, !!pointsSousQ, feuille);
   let html = "";
   if (item.section.enteteFragments) html += `<div class="entete">${fragmentsEnteteHtml(item.section.enteteFragments)}</div>`;
@@ -661,6 +666,15 @@ function corpsQuestionHtml(item: ItemEvaluation, pointsSousQ?: Map<string, numbe
   return html;
 }
 
+/** Options des lignes d'une question regroupée : `numero` (libellé du QR code), QR code par ligne,
+ * niveau par ligne (absent = affiché, comme dans la feuille d'exercices ; l'évaluation blanche le
+ * masque). */
+interface OptionsLignes {
+  numero: number;
+  qr: boolean;
+  niveau?: boolean;
+}
+
 /** Plage de niveaux d'une question regroupée (« 2–4 ») et son palier s'il est le même pour toutes
  * les lignes. */
 function plageNiveaux(lignes: LigneGroupe[]): { texte: string; palier?: Palier } | null {
@@ -678,7 +692,7 @@ function plageNiveaux(lignes: LigneGroupe[]): { texte: string; palier?: Palier }
  * d'exercices, son niveau et son QR code « Refaire en ligne » (chaque ligne rouvre SON exercice, code
  * écrit dessous). Une ligne ne se coupe jamais ; le groupe peut se couper ENTRE deux lignes (la
  * consigne reste avec la première). */
-function corpsGroupeHtml(item: ItemEvaluation, lignes: LigneGroupe[], avecPoints: boolean, feuille?: { numero: number; qr: boolean }): string {
+function corpsGroupeHtml(item: ItemEvaluation, lignes: LigneGroupe[], avecPoints: boolean, feuille?: OptionsLignes): string {
   if (lignes.some((l) => l.figureHtml)) return corpsGroupeFiguresHtml(item, lignes, avecPoints, feuille);
   const points = avecPoints ? pointsDesLignes(item) : [];
   const rangs = lignes
@@ -686,7 +700,7 @@ function corpsGroupeHtml(item: ItemEvaluation, lignes: LigneGroupe[], avecPoints
       const lettre = lettreCle(i);
       const figure = l.figureHtml ? `<div class="figure-ligne">${l.figureHtml}</div>` : "";
       const pts = avecPoints ? `<span class="pts">${pointsTexte(points[i])}</span>` : "";
-      const niveau = feuille && l.item.niveau ? `<span class="niveau ligne-niveau" aria-label="niveau ${l.item.niveau} sur 7"><span class="num">${l.item.niveau}</span></span>` : "";
+      const niveau = feuille && feuille.niveau !== false && l.item.niveau ? `<span class="niveau ligne-niveau" aria-label="niveau ${l.item.niveau} sur 7"><span class="num">${l.item.niveau}</span></span>` : "";
       const qr =
         feuille?.qr && l.item.code
           ? `<span class="qr-ligne">${qrCodeSvg(l.item.code.url, 56, `QR code : refaire l'exercice ${feuille.numero} ${lettre}) en ligne`)}<span class="code">${echapperHtml(l.item.code.code)}</span></span>`
@@ -780,14 +794,14 @@ export function identifiantsUniques(html: string, suffixe: string): string {
  * de la figure. Deux cellules par rangée quand les figures sont assez petites (`rangsDesFigures`).
  * Une rangée ne se coupe jamais (aucune figure coupée entre deux pages) ; la consigne reste avec la
  * première rangée. */
-function corpsGroupeFiguresHtml(item: ItemEvaluation, lignes: LigneGroupe[], avecPoints: boolean, feuille?: { numero: number; qr: boolean }): string {
+function corpsGroupeFiguresHtml(item: ItemEvaluation, lignes: LigneGroupe[], avecPoints: boolean, feuille?: OptionsLignes): string {
   const points = avecPoints ? pointsDesLignes(item) : [];
   const cellule = (i: number) => {
     const l = lignes[i];
     const lettre = lettreCle(i);
     const texte = l.enonce.length > 0 ? `<span class="ligne-texte">${fragmentsVersHtml(l.enonce)}</span>` : "";
     const pts = avecPoints ? `<span class="pts">${pointsTexte(points[i])}</span>` : "";
-    const niveau = feuille && l.item.niveau ? `<span class="niveau ligne-niveau" aria-label="niveau ${l.item.niveau} sur 7"><span class="num">${l.item.niveau}</span></span>` : "";
+    const niveau = feuille && feuille.niveau !== false && l.item.niveau ? `<span class="niveau ligne-niveau" aria-label="niveau ${l.item.niveau} sur 7"><span class="num">${l.item.niveau}</span></span>` : "";
     const qr =
       feuille?.qr && l.item.code
         ? `<span class="qr-ligne">${qrCodeSvg(l.item.code.url, 56, `QR code : refaire l'exercice ${feuille.numero} ${lettre}) en ligne`)}<span class="code">${echapperHtml(l.item.code.code)}</span></span>`
@@ -1119,9 +1133,9 @@ function pageJeVerifieHtml(entete: EnteteEvaluation, numerotes: { item: ItemEval
 ${enLigne}`;
 }
 
-function pageCorrigeFeuilleHtml(numerotes: { item: ItemEvaluation; numero: number }[]): string {
+function pageCorrigeFeuilleHtml(numerotes: { item: ItemEvaluation; numero: number }[], libelle = "Exercice"): string {
   const blocs = numerotes
-    .map(({ item, numero }) => `<section class="corr"><h3>Exercice ${numero}${item.notion ? ` <span class="notion">— ${echapperHtml(item.notion)}</span>` : ""}</h3>${correctionHtml(item)}</section>`)
+    .map(({ item, numero }) => `<section class="corr"><h3>${libelle} ${numero}${item.notion ? ` <span class="notion">— ${echapperHtml(item.notion)}</span>` : ""}</h3>${correctionHtml(item)}</section>`)
     .join("");
   return `<h2 class="page-titre">Corrigé détaillé</h2>${blocs}`;
 }
@@ -1416,6 +1430,143 @@ export async function genererEvaluationHtml(entete: EnteteEvaluation, items: Ite
 }
 
 /* ----------------------------------------------------------------------------------------------
+ * Évaluation blanche (parcours élève, maquette « EvaluationBlanche » validée le 21/11/2026)
+ *
+ * Présentation d'une évaluation — cartouche, tableau « Mon score » par processus, encadré
+ * calculatrice, consignes, bandeaux de processus, questions numérotées avec leurs points — mais pour
+ * l'élève seul : durée et points INDICATIFS, « sans valeur de note », QR code « refaire en ligne »
+ * par question (par LIGNE dans une question regroupée), et le corrigé détaillé « comme au tableau »
+ * À LA FIN du même document (rendu de la feuille d'exercices). Une seule série ; ni corrigé séparé, ni
+ * grille, ni école, ni professeur, ni consignes du professeur. Les autres documents ne changent pas.
+ * -------------------------------------------------------------------------------------------- */
+
+const PIED_BLANCHE = "Évaluation blanche — corrigé détaillé en fin de document";
+const CONSIGNES_BLANCHE = "Fais-la sans ton cours, chronomètre lancé. Le <b>corrigé détaillé</b> est à la fin du document : ne le regarde qu'après.";
+const CONSIGNE_QR_BLANCHE = " Le QR code de chaque question te permet de la refaire en ligne, avec les aides.";
+
+const STYLE_BLANCHE = `
+.surtitre .nc { text-transform: none; letter-spacing: 0.04em; }
+.question .q-corps { display: flex; gap: 16px; align-items: flex-start; }
+.question .q-texte { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.qr-bloc { width: 2.3cm; flex: none; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; font-family: Archivo, Arial, sans-serif; font-size: 7pt; color: var(--gris); line-height: 1.2; }
+.qr-bloc .code { font-weight: 700; color: var(--encre); letter-spacing: 0.05em; }
+h2.page-titre { font-size: 18pt; font-weight: 600; padding-bottom: 8px; border-bottom: 2px solid var(--encre); margin-bottom: 12px; }
+.corr { margin: 14px 0 0; break-inside: avoid; page-break-inside: avoid; }
+.corr:has(.etape-titre) { break-inside: auto; page-break-inside: auto; }
+.corr h3 { font-family: Archivo, Arial, sans-serif; font-size: 12pt; font-weight: 700; margin-bottom: 4px; break-after: avoid; page-break-after: avoid; }
+.corr h3 .notion { font-weight: 500; color: var(--gris); }
+.reponse-ancienne { color: inherit; }
+.figure-corrige-bloc { margin: 6px 0 2px; break-inside: avoid; page-break-inside: avoid; }
+.figure-corrige-bloc svg { display: block; width: 100%; max-width: 14cm; height: auto; }
+.etapes > *, .piege, .etape-titre { break-inside: avoid; page-break-inside: avoid; }
+.etape-titre { break-after: avoid; page-break-after: avoid; }
+`;
+
+/** Version aménagée : corrigé de fin de document et ligne « Durée conseillée ». */
+const STYLE_BLANCHE_AMENAGE = `
+.corr h3 { font-family: 'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif; font-size: 14pt; }
+.meta-am { font-size: 11pt; color: var(--gris); margin: -6px 0 10px; }
+`;
+
+function totalPoints(items: ItemEvaluation[]): number {
+  return items.reduce((t, it) => t + it.points, 0);
+}
+
+/** « Durée conseillée : 30 min · 20 points indicatifs · sans valeur de note ». */
+function metaBlanche(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
+  const total = totalPoints(items);
+  const duree = entete.blanche?.dureeConseillee ?? dureeEstimeeMinutes(items);
+  return `Durée conseillée : ${duree} min · ${nombreFr(total)} ${total >= 2 ? "points" : "point"} indicatifs · sans valeur de note`;
+}
+
+function titreBlanche(entete: EnteteEvaluation): string {
+  return entete.titreChapitre || entete.titre.replace(/^\s*Évaluation blanche\s*[—–-]\s*/i, "").trim() || entete.titre;
+}
+
+function cartoucheBlancheHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
+  return `<div class="cartouche blanche">
+  <div class="g"><span class="surtitre">Évaluation blanche · <span class="nc">${echapperHtml(entete.niveauLabel)}</span> · Entraînement personnel</span>
+    <h1>${echapperHtml(titreBlanche(entete))}</h1>
+    <span class="meta">${echapperHtml(metaBlanche(entete, items))}</span></div>
+  <div class="d"><span>Nom</span><span class="champ"></span><span>Début</span><span class="champ"></span><span>Fin</span><span class="champ"></span></div>
+</div>`;
+}
+
+function resultatsBlancheHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
+  const totaux = totauxParProcessus(items);
+  const tetes = totaux.map((t) => `<th>${NOM_PROCESSUS[t.processus]}</th>`).join("");
+  const cases = totaux.map((t) => `<td class="vide">…… / ${nombreFr(t.total)}</td>`).join("");
+  return `<div class="resultats"><table><tr><th style="text-align:left">Processus</th>${tetes}<th class="total">Total</th></tr><tr><td class="lbl">Mon score</td>${cases}<td class="total vide">…… / ${nombreFr(totalPoints(items))}</td></tr></table>${calculatriceHtml(entete.calculatrice)}</div>`;
+}
+
+function aDesQrCodes(items: ItemEvaluation[]): boolean {
+  return items.some((it) => it.code || it.groupe?.some((l) => l.item.code));
+}
+
+function consignesBlancheHtml(items: ItemEvaluation[], avecQr: boolean): string {
+  return `<div class="consignes"><b class="titre">Consignes</b> — ${CONSIGNES_BLANCHE}${avecQr && aDesQrCodes(items) ? CONSIGNE_QR_BLANCHE : ""}</div>`;
+}
+
+/** Questions de l'évaluation blanche : comme la copie (bandeaux de processus, « Question n », points
+ * à droite), avec le QR code « refaire en ligne » de la question (à droite de l'énoncé) ou de chaque
+ * ligne d'une question regroupée (niveaux non affichés : présentation d'une évaluation). */
+function questionsBlancheHtml(items: ItemEvaluation[]): string {
+  let html = "";
+  for (const groupe of grouperParProcessus(items)) {
+    const totalP = groupe.items.reduce((t, x) => t + x.item.points, 0);
+    html += `<div class="bloc-processus"><h2>Processus ${groupe.processus} — ${NOM_PROCESSUS[groupe.processus]}</h2><span class="pts">${pointsTexte(totalP)}</span></div>`;
+    for (const { item, numero } of groupe.items) {
+      const pts = pointsParSousQuestion(item);
+      const tete = `<div class="ligne-titre"><span class="num">Question ${numero}</span><span class="pts">${pointsTexte(item.points)}</span></div>`;
+      const sansQr = corpsQuestionHtml(item, pts);
+      if (item.groupe && item.groupe.length > 0) {
+        const corps = corpsQuestionHtml(item, pts, { numero, qr: true, niveau: false });
+        html += `<section class="question groupe${classeFigures(sansQr)}">${avecTete(tete, corps)}</section>`;
+        continue;
+      }
+      const qr = item.code
+        ? `<div class="qr-bloc">${qrCodeSvg(item.code.url, 62, `QR code : refaire la question ${numero} en ligne`)}<span>Refaire en ligne<br>avec les aides</span><span class="code">code ${echapperHtml(item.code.code)}</span></div>`
+        : "";
+      html += `<section class="question${classeFigures(sansQr)}">${tete}${qr ? `<div class="q-corps"><div class="q-texte">${sansQr}</div>${qr}</div>` : sansQr}</section>`;
+    }
+  }
+  return html;
+}
+
+/** Évaluation blanche : UN document (copie, annexes éventuelles, puis corrigé détaillé en fin de
+ * document). */
+export async function genererEvaluationBlanche(entete: EnteteEvaluation, items: ItemEvaluation[], annexes?: AnnexeDocument[]): Promise<Blob> {
+  const cssKatex = await obtenirCssKatexAutonome();
+  const numerotes = itemsNumerotes(items);
+  const corps = `${cartoucheBlancheHtml(entete, items)}${resultatsBlancheHtml(entete, items)}${consignesBlancheHtml(items, true)}${questionsBlancheHtml(items)}${annexesHtml(annexes)}
+<div class="saut-page"></div>
+${pageCorrigeFeuilleHtml(numerotes, "Question")}`;
+  const css = `${stylePied(null, "Archivo, Arial, sans-serif", "8.5pt", true, PIED_BLANCHE)}${styleGroupes(items)}`;
+  const doc = documentHtml(`Évaluation blanche — ${titreBlanche(entete)}`, corps, `${STYLE_EVALUATION}${STYLE_BLANCHE}`, cssKatex, "standard", css);
+  return new Blob([doc], { type: "text/html;charset=utf-8" });
+}
+
+/** Version aménagée de l'évaluation blanche : même énoncé, mêmes points, une question par page (pas
+ * de QR code, comme la feuille aménagée), puis le corrigé détaillé à la fin. */
+async function genererBlancheAmenagee(entete: EnteteEvaluation, items: ItemEvaluation[], annexes?: AnnexeDocument[]): Promise<Blob> {
+  const cssKatex = await obtenirCssKatexAutonome();
+  const titre = titreBlanche(entete);
+  const tete = `<div class="tete-am"><div><span class="surtitre" style="color:#1d5b8f;font-weight:700">Version aménagée · Évaluation blanche · <span class="nc">${echapperHtml(entete.niveauLabel)}</span></span><h1>${echapperHtml(titre)}</h1></div><span class="droite">Mêmes questions,<br>mêmes points indicatifs</span></div>
+<p class="meta-am">${echapperHtml(metaBlanche(entete, items))}</p>
+<div class="identite-am"><span>Nom <span class="champ"></span></span><span>Début <span class="champ" style="width:2.5cm"></span></span><span>Fin <span class="champ" style="width:2.5cm"></span></span></div>
+${consignesBlancheHtml(items, false)}`;
+  const numerotes = itemsNumerotes(items);
+  const pages = numerotes.map(({ item, numero }, i) => `${i > 0 ? '<div class="saut-page"></div>' : ""}${i === 0 ? tete : ""}${questionAmenageeHtml(item, numero, false)}`).join("");
+  const corps = `${pages}${annexesHtml(annexes)}
+<div class="saut-page"></div>
+${pageCorrigeFeuilleHtml(numerotes, "Question")}`;
+  const police = "'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif";
+  const css = `${stylePied(null, police, "10pt", true, PIED_BLANCHE)}${styleGroupes(items)}`;
+  const doc = documentHtml(`Évaluation blanche — ${titre} — Version aménagée`, corps, `${STYLE_AMENAGE}${STYLE_BLANCHE}${STYLE_BLANCHE_AMENAGE}`, cssKatex, "amenagee", css);
+  return new Blob([doc], { type: "text/html;charset=utf-8" });
+}
+
+/* ----------------------------------------------------------------------------------------------
  * Examen (maquette X3 « Sans page de garde », décisions de l'utilisateur)
  *
  * Même grammaire que la copie d'évaluation (cartouche, tableau des points, encadré « Consignes ») :
@@ -1657,6 +1808,7 @@ function questionAmenageeHtml(item: ItemEvaluation, numero: number, estExercice:
  * annexes (formulaire…) en fin de document, dans les deux modes. */
 export async function genererVersionAmenagee(entete: EnteteEvaluation, items: ItemEvaluation[], annexes?: AnnexeDocument[]): Promise<Blob> {
   if (entete.examen && entete.mode !== "exercice") return genererExamenAmenage(entete, entete.examen, items, annexes);
+  if (entete.blanche && entete.mode !== "exercice") return genererBlancheAmenagee(entete, items, annexes);
   const cssKatex = await obtenirCssKatexAutonome();
   const estExercice = entete.mode === "exercice";
   const titre = estExercice ? titreNettoye(entete) : titreEvaluation(entete);

@@ -12,14 +12,14 @@ export function ExerciseGeneratorSection({ chapter }: { chapter: ChapterContent 
   return (
     <div className="export-section no-export">
       <h2>S'entraîner sur ce chapitre</h2>
-      <p>Génère une feuille d'exercices sur ce chapitre (énoncé + corrigé, aléatoire à chaque génération).</p>
+      <p>Prépare ton évaluation : une feuille d'exercices ou une évaluation blanche sur ce chapitre (corrigé détaillé, nouveaux exercices à chaque génération).</p>
       <div className="export-buttons">
         <Link className="export-btn" to={`/${chapter.levelSlug}/${chapter.slug}/exercices`}>
           <span className="export-icon" aria-hidden="true">
             📝
           </span>
-          <span className="export-label">Générer une feuille d'exercices</span>
-          <span className="export-sub">avec corrigé</span>
+          <span className="export-label">Préparer mon évaluation</span>
+          <span className="export-sub">feuille d'exercices ou évaluation blanche</span>
         </Link>
       </div>
     </div>

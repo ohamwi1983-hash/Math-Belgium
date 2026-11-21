@@ -1,6 +1,7 @@
 import type { AdaptateurFeuilleExercices, ProfilInstance, BaremeExercice, EnoncePapier, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, PrecisionRegroupement, RegroupementInstance, SectionExercice } from '../entrainement/export/genererFeuilleExercices'
 import { texte } from '../entrainement/export/fragmentsDocx'
 import {
+  genererEvaluationBlanche,
   genererEvaluationHtml,
   genererFeuilleExercicesComplete,
   genererVersionAmenagee,
@@ -955,7 +956,7 @@ export async function itemsDepuisSerie(serie: PlanSerie): Promise<ItemEvaluation
  * Documents
  * -------------------------------------------------------------------------------------------- */
 
-export type TypeDocument = 'feuille' | 'enonce' | 'corrige' | 'grille' | 'amenagee'
+export type TypeDocument = 'feuille' | 'enonce' | 'corrige' | 'grille' | 'amenagee' | 'blanche'
 
 export interface DocumentGenere {
   type: TypeDocument
@@ -1048,6 +1049,8 @@ function enteteSerie(entete: EnTeteEvaluation, serieLettre: string, examen?: Exa
     titreChapitre: entete.titreChapitre,
     urlChapitre: entete.urlChapitre,
     deuxColonnes: entete.deuxColonnes,
+    // Évaluation blanche (parcours élève) seulement : absent sinon, en-tête identique à avant.
+    ...(entete.blanche && entete.mode !== 'exercice' && !examen ? { blanche: entete.blanche } : {}),
     // Comptes professeurs : absent (pas de session / plan d'avant) = cartouche historique.
     ...(entete.cartouche ? { cartouche: entete.cartouche } : {}),
     // Évaluation (ni feuille d'exercices, ni examen — qui les porte dans `examen`) : consignes
@@ -1089,6 +1092,13 @@ export async function genererDocumentsDepuisPlan(plan: PlanDocument): Promise<Do
     if (exercice) {
       documents.push({ type: 'feuille', libelle: 'Feuille d’exercices (énoncé, je vérifie, corrigé)', suffixe: 'feuille', blob: await genererFeuilleExercicesComplete(entete, items, annexes) })
       if (plan.entete.versionAmenagee) documents.push({ type: 'amenagee', libelle: 'Version aménagée', suffixe: 'amenagee', blob: await genererVersionAmenagee(entete, items, annexes) })
+      continue
+    }
+    if (entete.blanche) {
+      // Évaluation blanche (parcours élève) : UN document (corrigé détaillé à la fin), plus
+      // l'aménagée si demandée ; ni corrigé séparé ni grille.
+      documents.push({ type: 'blanche', libelle: 'Évaluation blanche (corrigé détaillé à la fin)', suffixe: 'evaluation-blanche', blob: await genererEvaluationBlanche(entete, items, annexes) })
+      if (plan.entete.versionAmenagee) documents.push({ type: 'amenagee', libelle: 'Version aménagée', suffixe: 'evaluation-blanche-amenagee', blob: await genererVersionAmenagee(entete, items, annexes) })
       continue
     }
     const { enonce, corrige, grille } = await genererEvaluationHtml(entete, items, annexes)

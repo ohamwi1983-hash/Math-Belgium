@@ -3,7 +3,7 @@ paths:
   - "src/lib/supabase.ts"
   - "src/lib/compte*"
   - "src/components/compte/**"
-  - "src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation,Carnet}*"
+  - "src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation,Carnet,Exercice,ChapterExercice}*"
   - "src/lib/carnet*"
   - "src/lib/horaire.ts"
   - "src/lib/calendrierFwb.ts"
@@ -105,9 +105,17 @@ Partage plus tard : table `partages (plan_id, destinataire, droit)` + politique 
 - Routes : `/connexion` (`?oubli=1` : lien de réinitialisation → `/mot-de-passe`), `/inscription`
   (`?code=` pré-rempli), `/mot-de-passe`, `/profil`, `/coffre`, `/evaluation` (panneau évaluations /
   examens pour tous les professeurs), `/admin` (`AdminComptes`). `/exercice` et `/…/exercices` sont
-  PUBLIQUES (pas de `PageReservee`) : sans session, cartouche par défaut et enregistrements dans le
-  navigateur ; connecté, école/nom et coffre comme sur `/evaluation`. Aucune n'est pré-rendue (`scripts/routes.mjs` ne liste que l'accueil et les chapitres) ;
-  toutes `noindex`.
+  PUBLIQUES (pas de `PageReservee`). **Qui voit quoi** (décision de l'utilisateur, 21/11/2026) :
+  professeur connecté (`estConnecteActif(useCompte())`, `useCompte()` SANS `demarrer`) → panneau des
+  feuilles d'exercices tel quel (école/nom, coffre) ; visiteur non connecté (élève, ou Supabase non
+  configuré) → assistant « Préparer mon évaluation » (`components/eleve/AssistantEleve.tsx`, feuille
+  d'exercices ou évaluation blanche, voir `.claude/rules/feuilles-evaluations.md`) avec un lien
+  discret « Je suis professeur : me connecter » (`/connexion?retour=<page>`, masqué si `indisponible`) ;
+  session stockée en cours de lecture (`chargement`) → « Chargement… » (aucune bascule visible).
+  L'assistant n'enregistre rien (ni coffre, ni navigateur, ni historique). `/evaluation` reste réservée.
+  Aucune n'est pré-rendue (`scripts/routes.mjs` ne liste que l'accueil et les chapitres) ;
+  toutes `noindex`. Vérifié (Playwright, faux client) : sans compte → assistant sur les deux pages,
+  compte simulé → panneau, `/evaluation` sans compte → `/connexion?retour=%2Fevaluation`.
 - Panneau (`EvaluationGeneratorPanel`) : connecté → `cartouche` (école choisie + `nom_affiche`) dans
   `EnTeteEvaluation` et appliqué à tout rendu (`rendrePlan`, même un plan rechargé ; changer d'école
   re-rend les documents avec les mêmes graines) ; enregistrer / lister / supprimer via le coffre ;
