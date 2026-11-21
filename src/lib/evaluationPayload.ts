@@ -1331,6 +1331,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   // ouverte ne porte pas de figure) : leurs énoncés DÉCRIVENT la courbe en mots et font traduire
   // ces observations en limites et en équations d'asymptotes.
   'limites-calcul': [
+    { cle: 'racine en −∞', enonce: "Calcule $\\displaystyle\\lim_{x \\to -\\infty} \\dfrac{\\sqrt{x^2+1}}{x}$, puis compare avec la limite en $+\\infty$." },
     { cle: 'forme 0/0 — factorisation', enonce: "Calcule $\\displaystyle\\lim_{x \\to 2} \\dfrac{x^2-5x+6}{x-2}$ : vérifie d'abord la forme obtenue en remplaçant $x$ par 2, puis lève l'indétermination." },
     { cle: 'forme ∞/∞ — mise en évidence du terme dominant', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{3x^2-5x+1}{x^2+2}$ en mettant en évidence le terme dominant au numérateur et au dénominateur." },
     { cle: 'forme ∞−∞ — expression conjuguée', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\left(\\sqrt{x^2+1} - x\\right)$ à l'aide de l'expression conjuguée." },
@@ -1344,11 +1345,13 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'forme ∞−∞ avec une limite non nulle', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\left(\\sqrt{x^2+4x} - x\\right)$." },
   ],
   'asymptote-oblique': [
+    { cle: 'au-dessus, en dessous, recoupement', enonce: "Soit $f(x) = \\dfrac{x^3+3x^2+9x+1}{x^2+2x+5}$, dont la droite $d : y = x+1$ est l'asymptote oblique. Étudie la position de la courbe de $f$ par rapport à $d$ : signe de $f(x)-(x+1)$, point de recoupement éventuel, et côté par lequel la courbe s'approche de $d$ en $-\\infty$ et en $+\\infty$." },
     { cle: 'asymptote oblique — deux méthodes', enonce: "Soit $f(x) = \\dfrac{x^2-3x+5}{x-1}$. Détermine l'équation de son asymptote oblique par la division euclidienne, puis vérifie-la par le calcul des limites $a = \\displaystyle\\lim_{x \\to +\\infty} \\dfrac{f(x)}{x}$ et $b = \\displaystyle\\lim_{x \\to +\\infty} \\left(f(x) - ax\\right)$." },
     { cle: 'Démonstration — les deux méthodes', enonce: "Soit $f(x) = ax+b+r(x)$, avec $a \\neq 0$ et $\\displaystyle\\lim_{x \\to +\\infty} r(x) = 0$. Démontre que $\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{f(x)}{x} = a$ et que $\\displaystyle\\lim_{x \\to +\\infty} \\left(f(x)-ax\\right) = b$." },
     { cle: 'dénominateur de degré 2', enonce: "Soit $f(x) = \\dfrac{2x^3+x^2-1}{x^2+1}$. Détermine son domaine, l'équation de son asymptote oblique, le point où la courbe la recoupe et la position de la courbe par rapport à cette asymptote." },
   ],
   'lecture-graphique': [
+    { cle: 'esquisser un graphique depuis ses limites', enonce: "Une fonction $f$ définie sur $\\mathbb{R}\\setminus\\{1\\}$ vérifie $\\displaystyle\\lim_{x \\to -\\infty} f(x) = 2$, $\\displaystyle\\lim_{x \\to 1^-} f(x) = +\\infty$, $\\displaystyle\\lim_{x \\to 1^+} f(x) = -\\infty$ et $\\displaystyle\\lim_{x \\to +\\infty} f(x) = 2$. Donne les équations des asymptotes et décris l'allure du graphique de part et d'autre de $x = 1$." },
     { cle: 'lecture directe sur un graphique', enonce: "Sur le graphique d'une fonction $f$, on observe : juste à gauche de $x = 2$, la courbe plonge vers le bas ; juste à droite, elle s'envole vers le haut ; aux deux extrémités, elle s'aplatit sur la droite d'équation $y = 1$. Traduis ces observations par des limites, puis donne les équations des asymptotes." },
     { cle: 'lecture directe — plusieurs asymptotes verticales', enonce: "Sur le graphique d'une fonction $g$, on observe : en $x = -1$, la courbe s'envole vers le haut à gauche et plonge vers le bas à droite ; en $x = 2$, elle plonge vers le bas à gauche et s'envole vers le haut à droite ; aux deux extrémités, elle s'aplatit sur l'axe des abscisses. Écris toutes les limites correspondantes et les équations des asymptotes." },
     { cle: "une limite finie d'un seul côté", enonce: "Sur le graphique d'une fonction $h$, on observe : à gauche de $x = 1$, la courbe arrive sur le point plein $(1\\,;2)$ ; à droite de $x = 1$, elle s'envole vers le haut ; vers la droite, elle s'aplatit sur la droite $y = 3$ ; vers la gauche, elle plonge sans fin. Écris les limites en $1^-$, en $1^+$, en $-\\infty$ et en $+\\infty$, puis donne les asymptotes en justifiant pourquoi $x = 1$ en est une." },
@@ -1363,6 +1366,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'Démonstration — le signe de a', enonce: "Soit $f(x) = b + \\dfrac{a}{x+p}$, avec $a > 0$ et $p > 0$. Démontre que $f$ est décroissante sur $[0\\,;+\\infty[$ et que sa courbe ne coupe jamais la droite d'équation $y = b$." },
   ],
   'etude-complete': [
+    { cle: 'deux asymptotes et un point', enonce: "Une fonction $f(x) = \\dfrac{ax+b}{x+d}$ a pour asymptotes $x = 2$ et $y = 3$, et sa courbe passe par $A(0\\,;1)$. Détermine $a$, $b$ et $d$, puis vérifie l'asymptote verticale par une limite." },
     { cle: "étude complète d'une fonction rationnelle", enonce: "Soit $f(x) = \\dfrac{x^2-2x-3}{x-1}$. Mène l'étude complète de $f$ : domaine, nature de la valeur exclue (asymptote verticale ou point vide), limites à gauche et à droite, asymptote horizontale ou oblique." },
     { cle: 'un point vide et une asymptote verticale', enonce: "Soit $f(x) = \\dfrac{x^2-1}{x^2-3x+2}$. Mène l'étude complète de $f$ : domaine, nature de chaque valeur exclue (asymptote verticale ou point vide), limites à gauche et à droite, asymptote horizontale ou oblique, et recoupement éventuel de cette asymptote." },
     { cle: 'recoupement', enonce: "Soit $f(x) = \\dfrac{x^2+x}{x^2+1}$. Détermine son asymptote horizontale, puis le point où la courbe la recoupe, et la position de la courbe par rapport à cette asymptote." },

@@ -755,6 +755,18 @@ export const limitesAsymptotes: ChapterContent = {
           whereLabel: '5e (4h) → « 20. Limites, reconnaissance et calcul »',
         },
         {
+          kind: 'exemple',
+          badge: 'racine en −∞ — √(x²) = |x| = −x',
+          formula: 'Calcule $\\lim\\limits_{x\\to-\\infty}\\dfrac{\\sqrt{x^2+1}}{x}$.',
+          steps: [
+            { tag: 'forme', text: 'Numérateur $\\to+\\infty$, dénominateur $\\to-\\infty$ : forme $\\dfrac{\\infty}{\\infty}$.' },
+            { tag: 'mettre x² en évidence sous la racine', text: '$\\sqrt{x^2+1}=\\sqrt{x^2\\left(1+\\dfrac{1}{x^2}\\right)}=\\sqrt{x^2}\\,\\sqrt{1+\\dfrac{1}{x^2}}$' },
+            { tag: 'en −∞, x < 0', text: '$\\sqrt{x^2}=|x|=-x$ (et non $x$, qui est négatif)' },
+            { tag: 'simplifier', text: '$\\dfrac{\\sqrt{x^2+1}}{x}=\\dfrac{-x\\sqrt{1+\\frac{1}{x^2}}}{x}=-\\sqrt{1+\\dfrac{1}{x^2}}$' },
+          ],
+          result: { tag: 'conclusion', text: '$\\lim\\limits_{x\\to-\\infty}\\dfrac{\\sqrt{x^2+1}}{x}=-\\sqrt{1+0}=-1$ (en $+\\infty$, la même limite vaut $1$ : il faut lire $-\\infty$ et $+\\infty$ séparément).' },
+        },
+        {
           kind: 'entrainement',
           title: 'Limites avec racines carrées : expression conjuguée',
           generatorId: '5gen64',
@@ -1040,12 +1052,68 @@ export const limitesAsymptotes: ChapterContent = {
             'le second.',
         },
         {
+          kind: 'methode',
+          label: 'Méthode — position de la courbe par rapport à son asymptote',
+          items: [
+            'Écris l\'écart $f(x)-(ax+b)$ (ou $f(x)-k$ pour une asymptote horizontale $y=k$) sous la forme d\'**une seule fraction** $\\dfrac{R(x)}{D(x)}$ : c\'est le reste de la division euclidienne divisé par le dénominateur.',
+            'Étudie le **signe** de cette fraction (tableau de signes). Positif : la courbe est **au-dessus** de l\'asymptote ; négatif : **en dessous** ; nul : la courbe **recoupe** son asymptote.',
+            'Les points de recoupement sont les solutions de $R(x)=0$ (le dénominateur ne s\'annule pas) ; leur ordonnée se lit sur l\'asymptote.',
+            'Le signe de l\'écart pour $x$ très grand (puis très négatif) dit de quel côté la courbe s\'approche de son asymptote en $+\\infty$ (puis en $-\\infty$).',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — au-dessus, en dessous, recoupement',
+          blocks: [
+            { kind: 'para', text: 'Soit $f(x)=\\dfrac{x^3+3x^2+9x+1}{x^2+2x+5}$, dont la droite $d : y=x+1$ est l\'asymptote oblique. Étudie la position de la courbe de $f$ par rapport à $d$.' },
+            { kind: 'para', text: '**Écart réduit au même dénominateur.** $(x+1)(x^2+2x+5)=x^3+3x^2+7x+5$, donc $f(x)-(x+1)=\\dfrac{x^3+3x^2+9x+1-(x^3+3x^2+7x+5)}{x^2+2x+5}=\\dfrac{2x-4}{x^2+2x+5}$.' },
+            { kind: 'para', text: '**Signe.** $\\Delta=2^2-4\\cdot 5=-16<0$ : le dénominateur n\'a pas de racine, il est toujours positif. Le signe de l\'écart est celui de $2x-4$, qui s\'annule en $x=2$.' },
+            {
+              kind: 'signTable',
+              caption: 'Signe de f(x) − (x + 1) et position de la courbe par rapport à d',
+              rows: [
+                { label: 'x', cells: [{ text: '−∞', tone: 'plain' }, { text: '', tone: 'plain' }, { text: '2', tone: 'zero' }, { text: '', tone: 'plain' }, { text: '+∞', tone: 'plain' }] },
+                { label: '2x − 4', cells: [{ text: '', tone: 'plain' }, { text: '−', tone: 'neg' }, { text: '0', tone: 'zero' }, { text: '+', tone: 'pos' }, { text: '', tone: 'plain' }] },
+                { label: 'x² + 2x + 5', cells: [{ text: '', tone: 'plain' }, { text: '+', tone: 'pos' }, { text: '', tone: 'plain' }, { text: '+', tone: 'pos' }, { text: '', tone: 'plain' }] },
+                { label: 'f(x) − (x + 1)', cells: [{ text: '', tone: 'plain' }, { text: '−', tone: 'neg' }, { text: '0', tone: 'zero' }, { text: '+', tone: 'pos' }, { text: '', tone: 'plain' }] },
+                { label: 'courbe / d', cells: [{ text: '', tone: 'plain' }, { text: 'en dessous', tone: 'plain' }, { text: 'point commun', tone: 'zero' }, { text: 'au-dessus', tone: 'plain' }, { text: '', tone: 'plain' }] },
+              ],
+            },
+            { kind: 'para', text: '**Recoupement.** $2x-4=0\\iff x=2$, et $y=2+1=3$ : la courbe recoupe $d$ au point $(2\\,;3)$ (vérification : $f(2)=\\dfrac{39}{13}=3$).' },
+            { kind: 'para', text: '**Côtés d\'approche.** Pour $x$ très grand, $2x-4>0$ : en $+\\infty$, la courbe s\'approche de $d$ par au-dessus ; pour $x$ très négatif, $2x-4<0$ : en $-\\infty$, par en dessous.' },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'curvePlot',
+                curves: [{ fn: (x) => (x * x * x + 3 * x * x + 9 * x + 1) / (x * x + 2 * x + 5), tone: 'accent' }],
+                xMin: -7,
+                xMax: 7,
+                xTicks: [2],
+                fixedYRange: { min: -7, max: 9 },
+                obliqueAsymptotes: [{ a: 1, b: 1, label: 'y=x+1' }],
+                points: [{ x: 2, y: 3, label: '', tone: 'good' }],
+                textLabels: [{ x: 2.3, y: 1.6, text: '(2;3)', tone: 'good', anchor: 'start' }],
+                xAxisLabel: 'x',
+                yAxisLabel: 'f(x)',
+                caption: 'La courbe est en dessous de $y=x+1$ pour $x<2$, la recoupe en $(2\\,;3)$, puis reste au-dessus',
+              },
+            },
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Reste constant, dénominateur sans racine',
+          text: 'Si le reste est une constante non nulle $c$ et que le dénominateur ne s\'annule jamais, l\'écart $\\dfrac{c}{D(x)}$ garde le signe de $c$ : la courbe reste du même côté de son asymptote sur tout $\\mathbb{R}$ (au-dessus si $c>0$, en dessous si $c<0$) et ne la recoupe jamais.',
+        },
+        {
           kind: 'entrainement',
           title: 'Asymptote oblique',
           generatorId: '5gen21',
           description: [
             'Détermine l\'équation y = ax + b d\'une asymptote oblique, par division euclidienne ou par la ' +
-              'méthode des limites (a = lim f(x)/x, b = lim (f(x) − ax)) — pour un dénominateur de degré 1 ou 2.',
+              'méthode des limites (a = lim f(x)/x, b = lim (f(x) − ax)) — pour un dénominateur de degré 1 ou 2 ; ' +
+              'ou étudie la position de la courbe par rapport à son asymptote (signe de f(x) − (ax + b), ' +
+              'point de recoupement, côté d\'approche en −∞ et en +∞).',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 21. Asymptote oblique »',
@@ -1375,6 +1443,44 @@ export const limitesAsymptotes: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 22. Limites et asymptotes — lecture graphique »',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — d\'un tableau de limites à une esquisse du graphique',
+          items: [
+            'Trace d\'abord les **asymptotes** en pointillés : une asymptote verticale $x=a$ pour chaque limite infinie en $a$ ; une asymptote horizontale $y=b$ pour chaque limite finie $b$ en $-\\infty$ ou en $+\\infty$ ; l\'asymptote oblique si le tableau la donne.',
+            'Pour chaque ligne du tableau, dessine un **bout de branche** au bon endroit : juste à gauche ($x\\to a^-$) ou juste à droite ($x\\to a^+$) de la verticale, vers le haut ($+\\infty$) ou vers le bas ($-\\infty$) ; tout à gauche ou tout à droite le long de l\'horizontale.',
+            'Relie les bouts de branche de chaque intervalle du domaine **sans jamais traverser une asymptote verticale**, puis relis chaque ligne du tableau sur ton dessin.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — esquisser un graphique depuis ses limites',
+          blocks: [
+            { kind: 'para', text: 'Une fonction $f$ définie sur $\\mathbb{R}\\setminus\\{1\\}$ vérifie : $\\lim\\limits_{x\\to-\\infty}f(x)=2$, $\\lim\\limits_{x\\to 1^-}f(x)=+\\infty$, $\\lim\\limits_{x\\to 1^+}f(x)=-\\infty$ et $\\lim\\limits_{x\\to+\\infty}f(x)=2$. Esquisse son graphique.' },
+            { kind: 'para', text: '**Asymptotes.** Les limites infinies en $1$ donnent l\'asymptote verticale $x=1$ ; la limite $2$ en $-\\infty$ et en $+\\infty$ donne UNE asymptote horizontale $y=2$.' },
+            { kind: 'para', text: '**Bouts de branche.** À gauche de $x=1$, la courbe monte le long de la verticale ; à droite, elle descend le long de la verticale. Tout à gauche et tout à droite, elle longe $y=2$.' },
+            { kind: 'para', text: '**Liaison.** Sur $]-\\infty\\,;1[$, la courbe part de $y=2$ et monte vers $+\\infty$ ; sur $]1\\,;+\\infty[$, elle remonte de $-\\infty$ vers $y=2$. Une fonction qui convient : $f(x)=2+\\dfrac{1}{1-x}$.' },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'curvePlot',
+                curves: [
+                  { fn: (x) => 2 + 1 / (1 - x), tone: 'accent', xMax: 0.93 },
+                  { fn: (x) => 2 + 1 / (1 - x), tone: 'accent', xMin: 1.07 },
+                ],
+                xMin: -6,
+                xMax: 7,
+                xTicks: [1],
+                fixedYRange: { min: -6, max: 10 },
+                verticalAsymptotes: [{ x: 1, label: 'x=1' }],
+                horizontalAsymptotes: [{ y: 2, label: 'y=2' }],
+                xAxisLabel: 'x',
+                yAxisLabel: 'f(x)',
+                caption: 'Esquisse : asymptotes $x=1$ et $y=2$, branche montante à gauche de $x=1$, descendante à droite',
+              },
+            },
+          ],
         },
         {
           kind: 'entrainement',
@@ -2010,6 +2116,48 @@ export const limitesAsymptotes: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 24. Étude complète »',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — retrouver une fonction à partir de ses asymptotes et d\'un point',
+          items: [
+            'Pour $f(x)=\\dfrac{ax+b}{x+d}$ : l\'asymptote verticale $x=-d$ donne $d$ (le dénominateur s\'y annule) ; l\'asymptote horizontale $y=a$ donne $a$ (rapport des coefficients dominants).',
+            'Pour $f(x)=ax+b+\\dfrac{c}{x-p}$ : l\'asymptote oblique $y=ax+b$ donne $a$ et $b$ ; l\'asymptote verticale $x=p$ donne $p$.',
+            'La dernière inconnue se trouve avec le **point** du graphe : remplace $x$ et $f(x)$ par ses coordonnées et résous l\'équation du premier degré obtenue.',
+            'Vérifie : la limite en la valeur exclue doit être infinie (numérateur non nul) et la fonction doit passer par le point.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — deux asymptotes et un point',
+          blocks: [
+            { kind: 'para', text: 'Une fonction $f(x)=\\dfrac{ax+b}{x+d}$ a pour asymptotes $x=2$ et $y=3$, et sa courbe passe par $A(0\\,;1)$. Retrouve $f(x)$.' },
+            { kind: 'para', text: '**Asymptote verticale.** Le dénominateur s\'annule en $x=2$ : $2+d=0$, donc $d=-2$.' },
+            { kind: 'para', text: '**Asymptote horizontale.** En $\\pm\\infty$, $f(x)\\to\\dfrac{a}{1}=a$ : donc $a=3$.' },
+            { kind: 'para', text: '**Point.** $f(0)=\\dfrac{b}{-2}=1$, donc $b=-2$ et $f(x)=\\dfrac{3x-2}{x-2}$.' },
+            { kind: 'para', text: '**Vérification.** En $x=2$, le numérateur vaut $3\\cdot 2-2=4\\neq 0$ : $\\lim\\limits_{x\\to 2^+}f(x)=+\\infty$, l\'asymptote verticale est bien $x=2$ ; et $f(0)=\\dfrac{-2}{-2}=1$.' },
+            { kind: 'para', text: '**Avec une asymptote oblique.** Si $f(x)=ax+b+\\dfrac{c}{x-p}$ a pour asymptotes $y=2x-1$ et $x=1$ et passe par $(2\\,;6)$ : $a=2$, $b=-1$, $p=1$, puis $2\\cdot 2-1+\\dfrac{c}{1}=6$, donc $c=3$ et $f(x)=2x-1+\\dfrac{3}{x-1}$.' },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'curvePlot',
+                curves: [
+                  { fn: (x) => (3 * x - 2) / (x - 2), tone: 'accent', xMax: 1.85 },
+                  { fn: (x) => (3 * x - 2) / (x - 2), tone: 'accent', xMin: 2.15 },
+                ],
+                xMin: -6,
+                xMax: 8,
+                xTicks: [2],
+                fixedYRange: { min: -6, max: 12 },
+                verticalAsymptotes: [{ x: 2, label: 'x=2' }],
+                horizontalAsymptotes: [{ y: 3, label: 'y=3' }],
+                points: [{ x: 0, y: 1, label: 'A', tone: 'good' }],
+                xAxisLabel: 'x',
+                yAxisLabel: 'f(x)',
+                caption: '$f(x)=\\dfrac{3x-2}{x-2}$ : asymptotes $x=2$ et $y=3$, courbe passant par $A(0\\,;1)$',
+              },
+            },
+          ],
         },
         {
           kind: 'entrainement',
