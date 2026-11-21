@@ -17,7 +17,8 @@ import {
 import { construirePlan, elementsAPlat, empreinteSection, questionsDeSerie, respecteContrainte, tirerInstance, type Adaptateur, type ContrainteTirage, type ElementPlan, type PlanDocument } from './evaluationLocal'
 import { chapitreAUneBanqueVraiFauxLocale, chargerThemeVraiFaux } from './banquesVraiFaux'
 import { pointsDepuisDuree } from './pointsAutomatiques'
-import { niveauEtDuree } from '../entrainement/export/niveauDifficulte'
+import { CATEGORIES_NIVEAU, LIBELLE_CATEGORIE, categorieDuNiveau, niveauEtDuree, rangCategorie, type CategorieNiveau } from '../entrainement/export/niveauDifficulte'
+import { REPARTITION_PROCESSUS } from './repartitionProcessus'
 import { mettreAEchelle, mettreAEchelleParGroupes } from '../entrainement/export/examen'
 import { tirerGraine } from '../entrainement/export/codeExercice'
 
@@ -25,13 +26,15 @@ import { tirerGraine } from '../entrainement/export/codeExercice'
  * Parcours ÉLÈVE — composition automatique d'une feuille d'exercices ou d'une ÉVALUATION BLANCHE
  * (assistant « Préparer mon évaluation », `components/eleve/AssistantEleve.tsx`).
  *
- * L'élève choisit des notions (sections du chapitre qui ont au moins un générateur), une durée
- * (20 / 30 / 50 min) et un niveau (Base 1–2, Intermédiaire 3–4, Avancé 5–7, ou « comme une vraie
- * évaluation » : 15 % / 60 % / 25 % des points en Connaître / Appliquer / Transférer, niveaux
- * mélangés). Ce module en fait une SÉLECTION du panneau (`LigneSelection[]`, une ligne par
+ * L'élève choisit des notions (sections du chapitre qui ont au moins un générateur), les compétences
+ * annoncées (Connaître / Appliquer / Transférer, une à trois), une durée (20 / 30 / 50 min) et un ou
+ * plusieurs niveaux (catégories de `niveauDifficulte.ts` : très facile 1, facile 2, moyen 3, difficile
+ * 4, très difficile 5–7 ; par défaut tous, niveaux mélangés). Le temps (et les points de l'évaluation
+ * blanche) est réparti comme une vraie évaluation (`REPARTITION_PROCESSUS`), recalculé sur les seules
+ * compétences cochées ; jamais une compétence non cochée. Ce module en fait une SÉLECTION du panneau (`LigneSelection[]`, une ligne par
  * générateur, `parVariante`) puis passe par le pipeline EXISTANT — `construireItemsPayload` →
  * `construirePlan` → `genererDocumentsDepuisPlan` — jamais un second moteur. Seules retouches du
- * plan figé : les graines d'un exercice dont le niveau réel sort du palier demandé (ou qui ferait
+ * plan figé : les graines d'un exercice dont le niveau réel sort des niveaux demandés (ou qui ferait
  * dépasser la durée) sont retirées (mêmes fonctions : `tirerInstance`, `niveauEtDuree`,
  * `respecteContrainte`), et les points indicatifs sont posés (durée → `pointsDepuisDuree`, total
  * ramené à 20 par `mettreAEchelle`).
@@ -41,25 +44,26 @@ import { tirerGraine } from '../entrainement/export/codeExercice'
  */
 
 export type TypeEleve = 'feuille' | 'blanche'
-export type NiveauEleve = 'base' | 'intermediaire' | 'avance' | 'reel'
 
 export const DUREES_ELEVE = [20, 30, 50] as const
 export const TOTAL_POINTS_BLANCHE = 20
 /** Dépassement toléré de la durée visée (décision : jamais plus de ~10 %). */
 export const TOLERANCE_DEPASSEMENT = 0.1
-/** Répartition des points « comme une vraie évaluation » (Connaître / Appliquer / Transférer). */
-export const REPARTITION_REELLE: Record<Processus, number> = { 1: 0.15, 2: 0.6, 3: 0.25 }
+/** Compétences proposées à l'élève (les processus, sans le mot). */
+export const COMPETENCES_ELEVE: readonly { id: Processus; libelle: string }[] = [
+  { id: 1, libelle: 'Connaître' },
+  { id: 2, libelle: 'Appliquer' },
+  { id: 3, libelle: 'Transférer' },
+]
+export const LIBELLE_COMPETENCE: Record<Processus, string> = { 1: 'Connaître', 2: 'Appliquer', 3: 'Transférer' }
 
-const PLAGES: Record<Exclude<NiveauEleve, 'reel'>, [number, number]> = { base: [1, 2], intermediaire: [3, 4], avance: [5, 7] }
-/** Paliers voisins, pris seulement si le palier demandé ne suffit pas à remplir la durée. */
-const VOISINS: Record<Exclude<NiveauEleve, 'reel'>, Exclude<NiveauEleve, 'reel'>[]> = { base: ['intermediaire'], intermediaire: ['base', 'avance'], avance: ['intermediaire'] }
-/** Vrai/faux : 2 min et 1 pt par affirmation (`itemVraiFauxRegroupe`), niveau 2 (Base). */
+/** Durée remplie en dessous de laquelle des niveaux voisins complètent (part de la durée visée). */
+const SEUIL_ELARGIR = 0.85
+/** Vrai/faux : 2 min et 1 pt par affirmation (`itemVraiFauxRegroupe`), niveau 2 (facile). */
 const DUREE_VRAI_FAUX = 2
 const NIVEAU_VRAI_FAUX = 2
 /** Durée par défaut d'un exercice d'un générateur sans durée (ni critères ni constante). */
 const DUREE_PAR_DEFAUT = 5
-/** Part maximale du temps en vrai/faux hors « vraie évaluation » (niveau Base seulement). */
-const PART_MAX_VRAI_FAUX = 0.25
 
 export interface ReglagesEleve {
   levelSlug: string
@@ -67,9 +71,17 @@ export interface ReglagesEleve {
   /** Sections retenues (ids) — toutes les notions si vide. */
   sections: string[]
   duree: number
-  niveau: NiveauEleve
+  /** Niveaux cochés (au moins un) ; les cinq = niveaux mélangés, générateurs sans niveau compris. */
+  niveaux: CategorieNiveau[]
+  /** Compétences cochées (au moins une) : jamais un exercice d'une autre compétence. */
+  competences: Processus[]
   type: TypeEleve
   amenagee: boolean
+}
+
+/** Les cinq niveaux cochés : niveaux mélangés (l'ancienne « vraie évaluation »). */
+export function tousLesNiveaux(niveaux: readonly CategorieNiveau[]): boolean {
+  return CATEGORIES_NIVEAU.every((c) => niveaux.includes(c))
 }
 
 export interface NotionEleve {
@@ -247,25 +259,37 @@ export interface Composition {
   unites: UniteComposee[]
   /** Somme des durées ESTIMÉES (min). */
   dureeEstimee: number
-  /** Le palier demandé ne suffisait pas : des exercices d'un palier voisin complètent. */
+  /** Les niveaux cochés ne suffisaient pas : des exercices d'un niveau voisin complètent. */
   elargi: boolean
+  /** Niveaux admis à l'impression : les cochés, plus les voisins réellement utilisés. */
+  niveauxAdmis: CategorieNiveau[]
 }
 
-function plageDe(niveau: Exclude<NiveauEleve, 'reel'>): [number, number] {
-  return PLAGES[niveau]
-}
-
-/** Part des tirages d'estimation dans la plage (générateur sans niveau : 0, sauf « vraie évaluation »). */
-function adequation(c: Candidat, niveau: Exclude<NiveauEleve, 'reel'>): number {
+/** Part des tirages d'estimation d'un candidat dont la catégorie est dans `categories` (générateur
+ * sans niveau : 0). */
+export function partDansCategories(c: Candidat, categories: ReadonlySet<CategorieNiveau>): number {
   if (c.niveaux.length === 0) return 0
-  const [a, b] = plageDe(niveau)
-  return c.niveaux.filter((n) => n >= a && n <= b).length / c.niveaux.length
+  return c.niveaux.filter((n) => categories.has(categorieDuNiveau(n))).length / c.niveaux.length
+}
+
+/** Un candidat est retenu pour les niveaux cochés si au moins la moitié de ses tirages d'estimation y
+ * tombent ; un générateur sans niveau seulement quand les cinq niveaux sont cochés. */
+export function candidatAuxNiveaux(c: Candidat, categories: ReadonlySet<CategorieNiveau>, tous: boolean): boolean {
+  return c.niveaux.length === 0 ? tous : partDansCategories(c, categories) >= 0.5
+}
+
+/** Distance (en pas de l'échelle) d'une catégorie aux catégories cochées. */
+function distanceCategorie(c: CategorieNiveau, cochees: ReadonlySet<CategorieNiveau>): number {
+  const r = rangCategorie(c)
+  return Math.min(...[...cochees].map((k) => Math.abs(rangCategorie(k) - r)))
 }
 
 interface EtatComposition {
   unites: Map<string, UniteComposee>
   parSection: Map<string, number>
   parGenerateur: Map<string, number>
+  /** Durée estimée déjà prise par compétence. */
+  parProcessus: Map<Processus, number>
   duree: number
   dureeVraiFaux: number
 }
@@ -282,12 +306,13 @@ function ajouter(etat: EtatComposition, c: Candidat): void {
   const g = c.sorte === 'exercice' ? c.generatorId : `vf:${c.theme}`
   etat.parGenerateur.set(g, (etat.parGenerateur.get(g) ?? 0) + 1)
   etat.duree += c.duree
+  etat.parProcessus.set(c.processus, (etat.parProcessus.get(c.processus) ?? 0) + c.duree)
   if (c.sorte === 'vraiFaux') etat.dureeVraiFaux += c.duree
 }
 
 interface Bassin {
   candidats: Candidat[]
-  /** Priorité (0 = palier demandé, 1 = palier voisin). */
+  /** Priorité (0 = niveaux cochés, d = niveaux voisins à d pas de l'échelle). */
   rang: Map<string, number>
 }
 
@@ -327,63 +352,152 @@ function remplir(etat: EtatComposition, bassin: Bassin, budget: number, plafond:
   }
 }
 
-/** Bassin du palier demandé (vrai/faux : niveau 2, donc seulement au niveau Base) et, à part, celui
- * des paliers voisins — pris seulement si le palier demandé ne remplit pas la durée. */
-function bassinsPourNiveau(candidats: Candidat[], niveau: NiveauEleve): { bassin: Bassin; voisins: Bassin } {
-  if (niveau === 'reel') return { bassin: { candidats, rang: new Map() }, voisins: { candidats: [], rang: new Map() } }
-  const rang = new Map<string, number>()
-  const retenus = candidats.filter((c) => adequation(c, niveau) >= 0.5)
-  retenus.forEach((c) => rang.set(c.cle, 0))
-  const voisins = candidats.filter((c) => !rang.has(c.cle) && VOISINS[niveau].some((v) => adequation(c, v) >= 0.5))
-  return { bassin: { candidats: retenus, rang }, voisins: { candidats: voisins, rang: new Map(voisins.map((c) => [c.cle, 1])) } }
+/**
+ * Temps visé par compétence : la répartition d'une vraie évaluation (`REPARTITION_PROCESSUS`)
+ * recalculée sur les compétences COCHÉES (une seule → 100 %). Une compétence cochée sans exercice
+ * disponible (`presentes`) cède son temps : Connaître ou Transférer à Appliquer (sinon à l'autre
+ * cochée), Appliquer à parts égales aux autres cochées — même règle qu'avant pour les trois cochées.
+ * `bruts` : avant cette cession.
+ */
+export function budgetsParCompetence(cible: number, competences: readonly Processus[], presentes: readonly Processus[]): { budgets: Record<Processus, number>; bruts: Record<Processus, number> } {
+  const cochees = ([1, 2, 3] as const).filter((p) => competences.includes(p))
+  const somme = cochees.reduce((t, p) => t + REPARTITION_PROCESSUS[p], 0)
+  const bruts: Record<Processus, number> = { 1: 0, 2: 0, 3: 0 }
+  for (const p of cochees) bruts[p] = cible * (REPARTITION_PROCESSUS[p] / somme)
+  const budgets: Record<Processus, number> = { ...bruts }
+  const presents = presentes.filter((p) => cochees.includes(p))
+  for (const p of [1, 3] as const) {
+    if (cochees.includes(p) && !presents.includes(p)) {
+      const receveur = presents.includes(2) ? 2 : presents.find((q) => q !== p)
+      if (receveur) budgets[receveur] += budgets[p]
+      budgets[p] = 0
+    }
+  }
+  if (cochees.includes(2) && !presents.includes(2)) {
+    const autres = presents.filter((q) => q !== 2)
+    autres.forEach((q) => (budgets[q] += budgets[2] / autres.length))
+    budgets[2] = 0
+  }
+  return { budgets, bruts }
 }
 
 /** Compose une sélection (aléatoire à chaque appel) pour les réglages. */
 export function composer(candidatsChapitre: Candidat[], reglages: ReglagesEleve, aleatoire: () => number = Math.random): Composition {
   const sections = new Set(reglages.sections)
-  const candidats = sections.size > 0 ? candidatsChapitre.filter((c) => sections.has(c.sectionId)) : candidatsChapitre
+  const competences = new Set(reglages.competences)
+  // Jamais une compétence non cochée, même pour remplir la durée.
+  const candidats = candidatsChapitre.filter((c) => (sections.size === 0 || sections.has(c.sectionId)) && competences.has(c.processus))
+  const cochees = new Set(reglages.niveaux)
+  const tous = tousLesNiveaux(reglages.niveaux)
+  const admis = candidats.filter((c) => candidatAuxNiveaux(c, cochees, tous))
   const cible = reglages.duree
   const plafond = cible * (1 + TOLERANCE_DEPASSEMENT)
-  const etat: EtatComposition = { unites: new Map(), parSection: new Map(), parGenerateur: new Map(), duree: 0, dureeVraiFaux: 0 }
-  const { bassin, voisins } = bassinsPourNiveau(candidats, reglages.niveau)
-  let elargi = false
+  const etat: EtatComposition = { unites: new Map(), parSection: new Map(), parGenerateur: new Map(), parProcessus: new Map(), duree: 0, dureeVraiFaux: 0 }
+  const bassin: Bassin = { candidats: admis, rang: new Map() }
+  const parProcessus = (b: Bassin, p: Processus): Bassin => ({ candidats: b.candidats.filter((c) => c.processus === p), rang: b.rang })
 
-  if (reglages.niveau === 'reel') {
-    // Budgets par processus (15 / 60 / 25 %) ; un processus sans candidat cède son temps à Appliquer
-    // (ou, faute d'Appliquer, aux autres).
-    const parProcessus = (p: Processus): Bassin => ({ candidats: bassin.candidats.filter((c) => c.processus === p), rang: bassin.rang })
-    const budgets: Record<Processus, number> = { 1: cible * REPARTITION_REELLE[1], 2: cible * REPARTITION_REELLE[2], 3: cible * REPARTITION_REELLE[3] }
-    const presents = ([1, 2, 3] as const).filter((p) => parProcessus(p).candidats.length > 0)
-    for (const p of [1, 3] as const) {
-      if (!presents.includes(p)) {
-        const receveur = presents.includes(2) ? 2 : presents.find((q) => q !== p)
-        if (receveur) budgets[receveur] += budgets[p]
-        budgets[p] = 0
+  // Budgets par compétence ; une compétence cochée sans exercice aux niveaux cochés cède son temps.
+  const presentes = ([1, 2, 3] as const).filter((p) => admis.some((c) => c.processus === p))
+  const { budgets, bruts } = budgetsParCompetence(cible, reglages.competences, presentes)
+  // Transférer d'abord (questions longues), puis Connaître, puis Appliquer jusqu'à la durée visée.
+  if (budgets[3] > 0) remplir(etat, parProcessus(bassin, 3), budgets[3], etat.duree + budgets[3] + cible * TOLERANCE_DEPASSEMENT, Infinity, aleatoire)
+  if (budgets[1] > 0) remplir(etat, parProcessus(bassin, 1), budgets[1], etat.duree + budgets[1] + 1, budgets[1] + 1, aleatoire)
+  if (budgets[2] > 0) remplir(etat, parProcessus(bassin, 2), cible - etat.duree, plafond, Infinity, aleatoire)
+  // Reste du temps (bassin trop court) : n'importe quelle compétence cochée.
+  remplir(etat, bassin, cible - etat.duree, plafond, budgets[1] + 1, aleatoire)
+
+  // Niveaux cochés trop courts pour la durée : les niveaux voisins complètent, le plus proche
+  // d'abord, toujours dans les compétences cochées (l'élève en est averti).
+  let elargi = false
+  const voisinsUtilises = new Set<CategorieNiveau>()
+  if (!tous) {
+    const vus = new Set(admis.map((c) => c.cle))
+    const etendus = new Set(cochees)
+    const parts = presentes.length > 0 ? budgets : bruts
+    for (let d = 1; d < CATEGORIES_NIVEAU.length && etat.duree < cible * SEUIL_ELARGIR; d++) {
+      const nouvelles = CATEGORIES_NIVEAU.filter((c) => !etendus.has(c) && distanceCategorie(c, cochees) === d)
+      if (nouvelles.length === 0) continue
+      nouvelles.forEach((c) => etendus.add(c))
+      const voisins = candidats.filter((c) => !vus.has(c.cle) && c.niveaux.length > 0 && partDansCategories(c, etendus) >= 0.5)
+      voisins.forEach((c) => vus.add(c.cle))
+      if (voisins.length === 0) continue
+      const avant = etat.duree
+      const bv: Bassin = { candidats: voisins, rang: new Map(voisins.map((c) => [c.cle, d])) }
+      // D'abord les compétences en retard sur leur part, puis n'importe laquelle des cochées.
+      for (const p of [3, 1, 2] as const) {
+        const manque = parts[p] - (etat.parProcessus.get(p) ?? 0)
+        if (manque >= 1.5) remplir(etat, parProcessus(bv, p), manque, plafond, parts[1] + 1, aleatoire)
       }
-    }
-    if (!presents.includes(2)) {
-      const autres = presents.filter((q) => q !== 2)
-      autres.forEach((q) => (budgets[q] += budgets[2] / autres.length))
-      budgets[2] = 0
-    }
-    // Transférer d'abord (questions longues), puis Connaître, puis Appliquer jusqu'à la durée visée.
-    if (budgets[3] > 0) remplir(etat, parProcessus(3), budgets[3], etat.duree + budgets[3] + cible * TOLERANCE_DEPASSEMENT, Infinity, aleatoire)
-    if (budgets[1] > 0) remplir(etat, parProcessus(1), budgets[1], etat.duree + budgets[1] + 1, budgets[1] + 1, aleatoire)
-    if (budgets[2] > 0) remplir(etat, parProcessus(2), cible - etat.duree, plafond, Infinity, aleatoire)
-    // Reste du temps (bassin trop court) : n'importe quel processus.
-    remplir(etat, bassin, cible - etat.duree, plafond, budgets[1] + 1, aleatoire)
-  } else {
-    remplir(etat, bassin, cible, plafond, cible * PART_MAX_VRAI_FAUX, aleatoire)
-    // Palier demandé trop court pour la durée (peu de variantes, ou trop longues pour se combiner) :
-    // un palier voisin complète, et l'élève en est averti.
-    if (etat.duree < cible * 0.85 && voisins.candidats.length > 0) {
-      const avant = etat.unites.size
-      remplir(etat, voisins, cible - etat.duree, plafond, cible * PART_MAX_VRAI_FAUX, aleatoire)
-      elargi = etat.unites.size > avant
+      remplir(etat, bv, cible - etat.duree, plafond, parts[1] + 1, aleatoire)
+      if (etat.duree > avant) {
+        elargi = true
+        nouvelles.forEach((c) => voisinsUtilises.add(c))
+      }
     }
   }
 
-  return { unites: [...etat.unites.values()], dureeEstimee: etat.duree, elargi }
+  return { unites: [...etat.unites.values()], dureeEstimee: etat.duree, elargi, niveauxAdmis: [...CATEGORIES_NIVEAU.filter((c) => cochees.has(c) || voisinsUtilises.has(c))] }
+}
+
+/* ----------------------------------------------------------------------------------------------
+ * Disponibilité EN DIRECT (assistant) : calculée sur les candidats déjà préparés
+ * -------------------------------------------------------------------------------------------- */
+
+export interface DisponibiliteCompetence {
+  /** Exercices (variantes et thèmes) de cette compétence dans les notions retenues. */
+  total: number
+  /** Niveaux où elle a au moins un exercice (majorité de ses tirages d'estimation à ce niveau). */
+  categories: CategorieNiveau[]
+  /** Au moins un exercice retenu aux niveaux cochés (même règle que `composer`). */
+  auxNiveauxCoches: boolean
+}
+
+export interface DisponibiliteEleve {
+  /** Niveau proposé : au moins un exercice des compétences cochées, dans les notions retenues. */
+  niveaux: Record<CategorieNiveau, boolean>
+  parCompetence: Record<Processus, DisponibiliteCompetence>
+}
+
+/** Ce que les candidats permettent pour ces notions, compétences et niveaux cochés : niveaux à griser
+ * (aucun exercice des compétences cochées) et compétences sans exercice aux niveaux cochés. Même
+ * règle d'appartenance que `composer` (au moins la moitié des tirages d'estimation) : un niveau
+ * proposé, coché seul, donne au moins un exercice retenu. */
+export function disponibilite(candidatsChapitre: Candidat[], reglages: Pick<ReglagesEleve, 'sections' | 'competences' | 'niveaux'>): DisponibiliteEleve {
+  const sections = new Set(reglages.sections)
+  const dansNotions = candidatsChapitre.filter((c) => sections.size === 0 || sections.has(c.sectionId))
+  const cochees = new Set(reglages.niveaux)
+  const tous = tousLesNiveaux(reglages.niveaux)
+  const parCompetence = {} as Record<Processus, DisponibiliteCompetence>
+  for (const p of [1, 2, 3] as const) {
+    const liste = dansNotions.filter((c) => c.processus === p)
+    parCompetence[p] = {
+      total: liste.length,
+      categories: CATEGORIES_NIVEAU.filter((k) => liste.some((c) => partDansCategories(c, new Set([k])) >= 0.5)),
+      auxNiveauxCoches: liste.some((c) => candidatAuxNiveaux(c, cochees, tous)),
+    }
+  }
+  const niveaux = {} as Record<CategorieNiveau, boolean>
+  for (const k of CATEGORIES_NIVEAU) niveaux[k] = reglages.competences.some((p) => parCompetence[p]?.categories.includes(k))
+  return { niveaux, parCompetence }
+}
+
+/** Liste lisible de niveaux : « moyen », « très facile et facile », « facile à difficile » (au moins
+ * trois niveaux qui se suivent), « tous les niveaux ». */
+export function texteCategories(categories: readonly CategorieNiveau[]): string {
+  const rangs = [...new Set(categories)].map(rangCategorie).sort((a, b) => a - b)
+  if (rangs.length === 0) return ''
+  if (rangs.length === CATEGORIES_NIVEAU.length) return 'tous les niveaux'
+  const mot = (r: number) => LIBELLE_CATEGORIE[CATEGORIES_NIVEAU[r - 1]]
+  if (rangs.length >= 3 && rangs[rangs.length - 1] - rangs[0] === rangs.length - 1) return `${mot(rangs[0])} à ${mot(rangs[rangs.length - 1])}`
+  const mots = rangs.map(mot)
+  return mots.length === 1 ? mots[0] : `${mots.slice(0, -1).join(', ')} et ${mots[mots.length - 1]}`
+}
+
+/** « seulement en très facile et facile », « seulement de facile à difficile », « à tous les niveaux ». */
+export function texteSeulement(categories: readonly CategorieNiveau[]): string {
+  const t = texteCategories(categories)
+  if (t === 'tous les niveaux') return 'à tous les niveaux'
+  return / à /.test(t) ? `seulement de ${t}` : `seulement en ${t}`
 }
 
 /** Sélection du panneau correspondant à une composition : une ligne par générateur (variantes dans
@@ -422,6 +536,11 @@ export interface ResumeEleve {
   pointsParProcessus?: Partial<Record<Processus, number>>
   /** Niveaux des exercices tirés (contrôle). */
   niveaux: number[]
+  /** Niveaux (catégories) et compétences réellement imprimés, vrai/faux compris (niveau 2). */
+  categories: CategorieNiveau[]
+  competences: Processus[]
+  /** Niveaux imprimés hors des niveaux cochés (niveaux voisins qui complètent). */
+  categoriesHorsChoix: CategorieNiveau[]
   elargi: boolean
 }
 
@@ -461,20 +580,21 @@ export function enteteEleve(reglages: ReglagesEleve, chapter: ChapterContent): E
   }
 }
 
-function niveauAdmis(niveau: number | null, reglages: ReglagesEleve, elargi: boolean): boolean {
-  if (reglages.niveau === 'reel' || niveau === null) return true
-  const [a, b] = plageDe(reglages.niveau)
-  if (niveau >= a && niveau <= b) return true
-  if (!elargi) return false
-  return VOISINS[reglages.niveau].some((v) => niveau >= plageDe(v)[0] && niveau <= plageDe(v)[1])
+/** Niveau réel admis à l'impression : un niveau coché, ou un niveau voisin réellement utilisé par la
+ * composition ; tout niveau quand les cinq sont cochés (ou générateur sans niveau). */
+function niveauAdmis(niveau: number | null, reglages: ReglagesEleve, composition: Composition): boolean {
+  if (niveau === null || tousLesNiveaux(reglages.niveaux)) return true
+  const c = categorieDuNiveau(niveau)
+  if (reglages.niveaux.includes(c)) return true
+  return composition.elargi && composition.niveauxAdmis.includes(c)
 }
 
-function niveauDansPalier(niveau: number | null, reglages: ReglagesEleve): boolean {
-  return niveauAdmis(niveau, reglages, false)
+function niveauCoche(niveau: number, reglages: ReglagesEleve): boolean {
+  return tousLesNiveaux(reglages.niveaux) || reglages.niveaux.includes(categorieDuNiveau(niveau))
 }
 
 /**
- * Retouche les graines du plan : un exercice dont le niveau RÉEL sort du palier demandé, ou dont la
+ * Retouche les graines du plan : un exercice dont le niveau RÉEL sort des niveaux admis, ou dont la
  * durée ferait dépasser la durée visée de plus de 10 %, est retiré (autre graine de la MÊME variante,
  * contrainte de l'évaluation respectée, jamais un énoncé déjà dans le document) ; s'il dépasse encore,
  * les exercices les moins utiles à la durée sont retirés (au moins un exercice gardé).
@@ -505,7 +625,7 @@ function retoucher(plan: PlanDocument, reglages: ReglagesEleve, composition: Com
     const m = mesures.get(el)!
     const resteEstime = exercices.slice(k + 1).reduce((t, e) => t + (estimations.get(`${e.generatorId}|${e.instances[0].varianteId}`) ?? mesures.get(e)!.duree), 0)
     const budget = plafond - cumul - resteEstime
-    const bon = (x: { niveau: number | null; duree: number }) => niveauAdmis(x.niveau, reglages, composition.elargi) && x.duree <= Math.max(budget, 0) + 1e-9
+    const bon = (x: { niveau: number | null; duree: number }) => niveauAdmis(x.niveau, reglages, composition) && x.duree <= Math.max(budget, 0) + 1e-9
     if (!bon(m)) {
       const contrainte = contrainteEleve(adaptateur, reglages.type)
       const fin = Date.now() + BUDGET_RETOUCHE_MS
@@ -538,9 +658,9 @@ function retoucher(plan: PlanDocument, reglages: ReglagesEleve, composition: Com
           break
         }
         // Repli : niveau admis et durée la plus courte.
-        if (niveauAdmis(mesure.niveau, reglages, composition.elargi) && (!meilleur || mesure.duree < meilleur.mesure.duree)) meilleur = { graine, mesure, empreinte }
+        if (niveauAdmis(mesure.niveau, reglages, composition) && (!meilleur || mesure.duree < meilleur.mesure.duree)) meilleur = { graine, mesure, empreinte }
       }
-      const garderAncienne = !meilleur || (niveauAdmis(m.niveau, reglages, composition.elargi) && m.duree <= meilleur.mesure.duree)
+      const garderAncienne = !meilleur || (niveauAdmis(m.niveau, reglages, composition) && m.duree <= meilleur.mesure.duree)
       if (meilleur && !garderAncienne) {
         if (ancienne) empreintes.delete(ancienne)
         empreintes.add(meilleur.empreinte)
@@ -570,8 +690,9 @@ function retoucher(plan: PlanDocument, reglages: ReglagesEleve, composition: Com
 }
 
 /** Points indicatifs : durée de chaque exercice → `pointsDepuisDuree`, 1 pt par affirmation, puis
- * total ramené à 20 — « vraie évaluation » : 15 / 60 / 25 % du total par processus (3 / 12 / 5 pts). */
-function poserPoints(plan: PlanDocument, reglages: ReglagesEleve, mesures: Map<ElementExercice, { niveau: number | null; duree: number }>): void {
+ * total ramené à 20, réparti entre les compétences imprimées comme une vraie évaluation
+ * (`REPARTITION_PROCESSUS`, recalculée sur ces compétences ; une seule → les 20 pts). */
+function poserPoints(plan: PlanDocument, mesures: Map<ElementExercice, { niveau: number | null; duree: number }>): void {
   const elements = plan.series[0].elements
   const bruts = elements.map((e) => (e.type === 'exercice' ? pointsDepuisDuree(mesures.get(e)?.duree ?? DUREE_PAR_DEFAUT) : e.type === 'vraiFaux' ? 1 : e.points))
   const nombres = elements.map((e) => (e.type === 'vraiFaux' ? Math.max(1, e.indices.length) : 1))
@@ -585,19 +706,17 @@ function poserPoints(plan: PlanDocument, reglages: ReglagesEleve, mesures: Map<E
   }
   const echelle = (indices: number[], total: number) => mettreAEchelleParGroupes(indices.map((i) => bruts[i]), indices.map((i) => nombres[i]), total)
   const tous = elements.map((_, i) => i)
-  if (reglages.niveau === 'reel') {
-    const presents = ([1, 2, 3] as const).filter((p) => elements.some((e) => e.processus === p))
-    const parts = presents.map((p) => REPARTITION_REELLE[p])
-    const totaux = mettreAEchelle(parts, TOTAL_POINTS_BLANCHE)
-    if (totaux) {
-      const resultats = presents.map((p, k) => {
-        const indices = tous.filter((i) => elements[i].processus === p)
-        return { indices, points: echelle(indices, totaux[k]) }
-      })
-      if (resultats.every((r) => r.points)) {
-        resultats.forEach((r) => appliquer(r.indices, r.points!))
-        return
-      }
+  const presents = ([1, 2, 3] as const).filter((p) => elements.some((e) => e.processus === p))
+  const parts = presents.map((p) => REPARTITION_PROCESSUS[p])
+  const totaux = mettreAEchelle(parts, TOTAL_POINTS_BLANCHE)
+  if (totaux) {
+    const resultats = presents.map((p, k) => {
+      const indices = tous.filter((i) => elements[i].processus === p)
+      return { indices, points: echelle(indices, totaux[k]) }
+    })
+    if (resultats.every((r) => r.points)) {
+      resultats.forEach((r) => appliquer(r.indices, r.points!))
+      return
     }
   }
   const points = echelle(tous, TOTAL_POINTS_BLANCHE)
@@ -624,7 +743,7 @@ export async function construirePlanEleve(reglages: ReglagesEleve, chapter: Chap
   let pointsParProcessus: Partial<Record<Processus, number>> | undefined
   let points: number | undefined
   if (blanche) {
-    poserPoints(plan, reglages, mesures)
+    poserPoints(plan, mesures)
     pointsParProcessus = {}
     for (const e of plan.series[0].elements) {
       const p = e.type === 'exercice' ? e.instances.reduce((t, i) => t + i.points, 0) : e.type === 'vraiFaux' ? e.pointsParAffirmation * e.indices.length : e.points
@@ -643,7 +762,11 @@ export async function construirePlanEleve(reglages: ReglagesEleve, chapter: Chap
   }
   const niveaux = [...mesures.values()].flatMap((m) => (m.niveau === null ? [] : [m.niveau]))
   const questions = questionsDeSerie(elementsAPlat(plan.series[0])).length
-  // Averti dès qu'un exercice imprimé sort du palier demandé (palier voisin ajouté, ou variante dont
-  // aucun tirage du palier n'a été trouvé dans le budget de la retouche).
-  return { plan, resume: { questions, duree, dureeConseillee, points, pointsParProcessus, niveaux, elargi: niveaux.some((n) => !niveauDansPalier(n, reglages)) } }
+  const imprimes = [...niveaux, ...(elements.some((e) => e.type === 'vraiFaux') ? [NIVEAU_VRAI_FAUX] : [])]
+  const categories = CATEGORIES_NIVEAU.filter((c) => imprimes.some((n) => categorieDuNiveau(n) === c))
+  const competences = ([1, 2, 3] as const).filter((p) => elements.some((e) => e.processus === p))
+  // Averti dès qu'un exercice imprimé sort des niveaux cochés (niveau voisin ajouté, ou variante dont
+  // aucun tirage aux niveaux cochés n'a été trouvé dans le budget de la retouche).
+  const categoriesHorsChoix = CATEGORIES_NIVEAU.filter((c) => imprimes.some((n) => categorieDuNiveau(n) === c && !niveauCoche(n, reglages)))
+  return { plan, resume: { questions, duree, dureeConseillee, points, pointsParProcessus, niveaux, categories, competences, categoriesHorsChoix, elargi: categoriesHorsChoix.length > 0 } }
 }

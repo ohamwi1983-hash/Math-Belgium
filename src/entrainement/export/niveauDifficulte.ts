@@ -3,7 +3,7 @@ import { decouperLigneCalcul, lignesDepuisChaine } from "./corrigeTableau";
 import { membreAuHasard } from "./groupesVerdict";
 
 /**
- * Niveau de difficulté 1–7 (affiché « numéro + palier ») et durée PAR EXERCICE — décision de
+ * Niveau de difficulté 1–7 (affiché « numéro · catégorie », ex. « 4 · difficile ») et durée PAR EXERCICE — décision de
  * l'utilisateur, remplace les étoiles ★/★★/★★★ (voir `.claude/rules/feuilles-evaluations.md`,
  * section « Niveau de difficulté et durée »).
  *
@@ -16,16 +16,37 @@ import { membreAuHasard } from "./groupesVerdict";
  * - Méthode (0/1/2), Piège (0/1) : jugés par l'adaptateur (`criteresDifficulte`).
  * - Nombres (0/1) : calculatrice, valeur approchée, ln/e/π non remarquables → 1 ; donné par
  *   l'adaptateur, ou détecté sur le corrigé (`nombresDuCorrige`).
- * Niveau = score + 1 (1 à 7). Paliers : Base 1–2, Intermédiaire 3–4, Avancé 5–7.
+ * Niveau = score + 1 (1 à 7). Catégories (décision du 22/11/2026, calées sur la distribution réelle des
+ * exercices — niveaux 6 et 7 presque inexistants) : 1 très facile, 2 facile, 3 moyen, 4 difficile,
+ * 5 à 7 très difficile (`categorieDuNiveau`, SEULE source du mot affiché partout).
  * Durée (min) = 2 + 2 × étapes équivalentes + 1 × écran de lecture + 1 si Nombres + 2 si Méthode = 2.
  *
  * Adaptateur sans `criteresDifficulte` (chapitres pas encore notés) : conversion PROVISOIRE de ses
- * étoiles (★ → 2, ★★ → 3, ★★★ → 5, palier conservé) et durée = sa constante `dureeMinutes`.
+ * étoiles (★ → 2, ★★ → 3, ★★★ → 5) et durée = sa constante `dureeMinutes`.
  */
 
-export type Palier = "base" | "intermediaire" | "avance";
+/** Catégorie affichée d'un niveau 1–7 (cinq pas, du plus facile au plus difficile). */
+export type CategorieNiveau = "tres-facile" | "facile" | "moyen" | "difficile" | "tres-difficile";
 
-export const LIBELLE_PALIER: Record<Palier, string> = { base: "Base", intermediaire: "Intermédiaire", avance: "Avancé" };
+/** Les cinq catégories, dans l'ordre de difficulté (indice 0 → 4 : pas de l'échelle de couleurs). */
+export const CATEGORIES_NIVEAU: readonly CategorieNiveau[] = ["tres-facile", "facile", "moyen", "difficile", "tres-difficile"];
+
+export const LIBELLE_CATEGORIE: Record<CategorieNiveau, string> = {
+  "tres-facile": "très facile",
+  facile: "facile",
+  moyen: "moyen",
+  difficile: "difficile",
+  "tres-difficile": "très difficile",
+};
+
+/** Niveaux 1–7 de chaque catégorie (« 5 à 7 » pour très difficile). */
+export const PLAGE_CATEGORIE: Record<CategorieNiveau, readonly [number, number]> = {
+  "tres-facile": [1, 1],
+  facile: [2, 2],
+  moyen: [3, 3],
+  difficile: [4, 4],
+  "tres-difficile": [5, 7],
+};
 
 /** Charge d'une étape longue : une étape dont le calcul détaillé dépasse `SEUILS_CHARGE[0]` lignes
  * compte pour 2 étapes, au-delà de `SEUILS_CHARGE[1]` pour 3 (calibrage : voir les règles). */
@@ -45,7 +66,7 @@ export interface CriteresCalcules {
 
 export interface NiveauDifficulte {
   niveau: number;
-  palier: Palier;
+  categorie: CategorieNiveau;
   score: number;
   /** Absent pour une conversion provisoire d'étoiles. */
   criteres?: CriteresCalcules;
@@ -55,8 +76,37 @@ export interface NiveauDifficulte {
   provisoire: boolean;
 }
 
-export function palierDuNiveau(niveau: number): Palier {
-  return niveau <= 2 ? "base" : niveau <= 4 ? "intermediaire" : "avance";
+/** Catégorie d'un niveau 1–7 : 1 très facile, 2 facile, 3 moyen, 4 difficile, 5–7 très difficile. Le
+ * calcul du niveau (`niveauEtDuree`) n'en dépend pas : seule la catégorie AFFICHÉE en découle. */
+export function categorieDuNiveau(niveau: number): CategorieNiveau {
+  return niveau <= 1 ? "tres-facile" : niveau === 2 ? "facile" : niveau === 3 ? "moyen" : niveau === 4 ? "difficile" : "tres-difficile";
+}
+
+/** Rang 1–5 de la catégorie (pas de l'échelle de couleurs graduée). */
+export function rangCategorie(categorie: CategorieNiveau): number {
+  return CATEGORIES_NIVEAU.indexOf(categorie) + 1;
+}
+
+/** Libellé « numéro · mot » d'un niveau : « 4 · difficile », « 6 · très difficile ». */
+export function libelleNiveau(niveau: number): string {
+  return `${niveau} · ${LIBELLE_CATEGORIE[categorieDuNiveau(niveau)]}`;
+}
+
+/** Libellé d'une plage de niveaux : « 3 · moyen » (une valeur), « 2–4 · facile à difficile », « 5–6 ·
+ * très difficile » (même catégorie). */
+export function libellePlageNiveaux(min: number, max: number): string {
+  if (min === max) return libelleNiveau(min);
+  const a = LIBELLE_CATEGORIE[categorieDuNiveau(min)];
+  const b = LIBELLE_CATEGORIE[categorieDuNiveau(max)];
+  return `${min}–${max} · ${a === b ? a : `${a} à ${b}`}`;
+}
+
+/** Morceaux de la légende de l'échelle : « 1 » « très facile », …, « 5 à 7 » « très difficile ». */
+export function morceauxLegende(): { categorie: CategorieNiveau; niveaux: string; mot: string }[] {
+  return CATEGORIES_NIVEAU.map((c) => {
+    const [a, b] = PLAGE_CATEGORIE[c];
+    return { categorie: c, niveaux: a === b ? String(a) : `${a} à ${b}`, mot: LIBELLE_CATEGORIE[c] };
+  });
 }
 
 export function scoreEtapes(etapesEquivalentes: number): 0 | 1 | 2 {
@@ -199,10 +249,10 @@ export function niveauDepuisCriteres(c: CriteresDifficulte, lignes: Map<string, 
   const score = criteres.etapes + criteres.methode + criteres.piege + criteres.nombres;
   const niveau = score + 1;
   const dureeMinutes = 2 + 2 * etapesEquivalentes + c.etapesLecture + nombres + (c.methode === 2 ? 2 : 0);
-  return { niveau, palier: palierDuNiveau(niveau), score, criteres, dureeMinutes };
+  return { niveau, categorie: categorieDuNiveau(niveau), score, criteres, dureeMinutes };
 }
 
-/** Niveau, palier, critères et durée de l'instance tirée — `undefined` si l'adaptateur n'a ni
+/** Niveau, catégorie, critères et durée de l'instance tirée — `undefined` si l'adaptateur n'a ni
  * critères ni étoiles (rien n'est alors affiché). */
 export function niveauEtDuree<T>(adaptateur: AdaptateurFeuilleExercices<T>, instance: T): NiveauDifficulte | undefined {
   if (adaptateur.criteresDifficulte) {
@@ -213,9 +263,9 @@ export function niveauEtDuree<T>(adaptateur: AdaptateurFeuilleExercices<T>, inst
   }
   const etoiles = adaptateur.difficulte?.(instance);
   if (!etoiles) return undefined;
-  // Conversion PROVISOIRE (chapitre pas encore noté) : le palier des étoiles est conservé.
+  // Conversion PROVISOIRE (chapitre pas encore noté).
   const niveau = CONVERSION_ETOILES[etoiles];
-  return { niveau, palier: palierDuNiveau(niveau), score: niveau - 1, dureeMinutes: adaptateur.dureeMinutes, provisoire: true };
+  return { niveau, categorie: categorieDuNiveau(niveau), score: niveau - 1, dureeMinutes: adaptateur.dureeMinutes, provisoire: true };
 }
 
 /** Durée d'une instance : celle de la grille si l'adaptateur est noté, sinon sa constante. */

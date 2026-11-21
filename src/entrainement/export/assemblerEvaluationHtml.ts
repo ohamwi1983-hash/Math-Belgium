@@ -1,7 +1,7 @@
 import type { BaremeExercice, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, LigneCalcul, SectionExercice } from "./genererFeuilleExercices";
 import { blocsDeColonnes, colonnesReponses, largeurColonneTableau, largeurFragments, largeurLibelleBloc, largeurLibelleTableau, segmentsDuGroupe, type TableauGroupe } from "./grilleCorrection";
 import { decouperLigneCalcul, estLignePiege } from "./corrigeTableau";
-import { LIBELLE_PALIER, type Palier } from "./niveauDifficulte";
+import { LIBELLE_CATEGORIE, categorieDuNiveau, morceauxLegende, rangCategorie, type CategorieNiveau } from "./niveauDifficulte";
 import { blocCorrectionHtml, echapperHtml, fragmentsEnteteHtml, fragmentsVersHtml, grillesLisiblesAImpression } from "./genererFeuilleExercicesHtml";
 import { obtenirCssKatexAutonome } from "./katexImage";
 import { qrCodeSvg } from "./qrSvg";
@@ -47,10 +47,10 @@ export interface ItemEvaluation {
   notion?: string;
   /** Section du cours à relire (page « Je fais le point »). */
   sectionCours?: { numero: number; titre: string };
-  /** Niveau de difficulté 1–7 et son palier (grille commune, `niveauDifficulte.ts`), affichés
-   * « numéro + palier » en tête de l'exercice (feuille d'exercices et sa version aménagée). */
+  /** Niveau de difficulté 1–7 et sa catégorie (grille commune, `niveauDifficulte.ts`), affichés
+   * « numéro · catégorie » en tête de l'exercice (feuille d'exercices et sa version aménagée). */
   niveau?: number;
-  palier?: Palier;
+  categorie?: CategorieNiveau;
   reponseBreve?: FragmentConsigne[];
   correctionDetaillee?: EtapeCorrection[];
   bareme?: BaremeExercice;
@@ -406,6 +406,10 @@ const STYLE_DEUX_COLONNES = `
    légende, il imposait sa hauteur à chaque exercice court. */
 .deux-colonnes .qr-bloc { width: 1.9cm; font-size: 6.5pt; line-height: 1.15; gap: 1px; }
 .deux-colonnes .qr-bloc svg { width: 52px; height: 52px; }
+/* Ligne d'un groupe a), b), c) en colonne étroite : le numéro seul (case teintée, mot dans l'aria-label
+   et dans la plage « niv. 1–2 · très facile à facile » en tête) — « · très facile » mangeait la place
+   des données et les faisait passer sur trois lignes. */
+.deux-colonnes .ligne-niveau .mot { display: none; }
 `;
 
 /** Questions regroupées a), b), c) — ajouté au document SEULEMENT s'il en contient (un document sans
@@ -493,11 +497,18 @@ const STYLE_FEUILLE = `
 .identite .valeur { color: var(--encre); }
 .legende { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 4px; font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; color: var(--gris); }
 .legende .droite { margin-left: auto; }
-/* Niveau de difficulté « numéro + palier » (maquette E validée) : deux petits cadres, lisibles en
-   noir et blanc — aucune couleur indispensable. */
-.niveau { display: inline-flex; align-items: center; gap: 4px; font-family: Archivo, Arial, sans-serif; font-size: 8pt; font-weight: 700; color: var(--encre); line-height: 1.35; white-space: nowrap; vertical-align: middle; }
+/* Niveau de difficulté « numéro · mot » (« 4 · difficile ») : le MOT porte l'information (lisible en
+   noir et blanc) ; la case du numéro est teintée sur une échelle graduée à 5 pas (très facile → très
+   difficile), du plus clair au plus foncé — un simple appoint, qui reste ordonné en niveaux de gris. */
+.niveau { display: inline-flex; align-items: center; gap: 1px; font-family: Archivo, Arial, sans-serif; font-size: 8pt; font-weight: 700; color: var(--encre); line-height: 1.35; white-space: nowrap; vertical-align: middle; }
 .niveau .num { border: 1.4px solid var(--encre); border-radius: 3px; padding: 0 5px; }
-.niveau .pal { border: 1.2px solid var(--encre); border-radius: 4px; padding: 0 7px; font-weight: 600; }
+.niveau .mot { font-weight: 600; }
+.niveau .num { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.niveau.niv-c1 .num { background: #e7f3ea; color: #1b1d22; }
+.niveau.niv-c2 .num { background: #efe0a0; color: #1b1d22; }
+.niveau.niv-c3 .num { background: #eab06a; color: #1b1d22; }
+.niveau.niv-c4 .num { background: #b55a2e; color: #fff; border-color: #b55a2e; }
+.niveau.niv-c5 .num { background: #8f2d2b; color: #fff; border-color: #8f2d2b; }
 .ex { margin: 14px 0 0; break-inside: avoid; page-break-inside: avoid; }
 .ex-tete { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
 .ex-tete h3 { font-family: Archivo, Arial, sans-serif; font-size: 12pt; font-weight: 700; }
@@ -593,9 +604,15 @@ body { font-family: 'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif; font-s
 .tete-am .droite { font-size: 11pt; color: var(--gris); text-align: right; }
 .q-am { break-inside: avoid; }
 .q-am h2 { font-size: 16pt; display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-.niveau { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; font-size: 11pt; font-weight: 700; color: var(--encre); line-height: 1.35; white-space: nowrap; vertical-align: middle; }
+.niveau { display: inline-flex; align-items: center; gap: 2px; margin-left: 8px; font-size: 11pt; font-weight: 700; color: var(--encre); line-height: 1.35; white-space: nowrap; vertical-align: middle; }
 .niveau .num { border: 1.6px solid var(--encre); border-radius: 3px; padding: 0 6px; }
-.niveau .pal { border: 1.4px solid var(--encre); border-radius: 4px; padding: 0 8px; }
+.niveau .mot { font-weight: 600; }
+.niveau .num { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.niveau.niv-c1 .num { background: #e7f3ea; color: #1b1d22; }
+.niveau.niv-c2 .num { background: #efe0a0; color: #1b1d22; }
+.niveau.niv-c3 .num { background: #eab06a; color: #1b1d22; }
+.niveau.niv-c4 .num { background: #b55a2e; color: #fff; border-color: #b55a2e; }
+.niveau.niv-c5 .num { background: #8f2d2b; color: #fff; border-color: #8f2d2b; }
 .enonce-am { padding: 10px 14px; background: var(--fond-doux); border-radius: 8px; margin-bottom: 12px; }
 .enonce-am .entete + p, .enonce-am p { margin: 0.5em 0; }
 .identite-am { display: flex; flex-wrap: wrap; gap: 6px 24px; font-size: 11pt; color: var(--gris); margin-bottom: 10px; }
@@ -675,16 +692,20 @@ interface OptionsLignes {
   niveau?: boolean;
 }
 
-/** Plage de niveaux d'une question regroupée (« 2–4 ») et son palier s'il est le même pour toutes
- * les lignes. */
-function plageNiveaux(lignes: LigneGroupe[]): { texte: string; palier?: Palier } | null {
+/** Plage de niveaux d'une question regroupée (« 2–4 ») et ses catégories extrêmes. */
+function plageNiveaux(lignes: LigneGroupe[]): { min: number; max: number } | null {
   const avec = lignes.filter((l) => l.item.niveau !== undefined);
   if (avec.length === 0) return null;
   const n = avec.map((l) => l.item.niveau!);
-  const min = Math.min(...n);
-  const max = Math.max(...n);
-  const paliers = new Set(avec.map((l) => l.item.palier));
-  return { texte: min === max ? String(min) : `${min}–${max}`, palier: paliers.size === 1 ? avec[0].item.palier : undefined };
+  return { min: Math.min(...n), max: Math.max(...n) };
+}
+
+/** Badge « numéro · mot » d'un niveau 1–7 (« 4 · difficile ») : case du numéro teintée par catégorie
+ * (`niv-c1` … `niv-c5`), mot en clair. `seul` : sans le mot (jamais utilisé sur papier aujourd'hui). */
+function badgeNiveau(niveau: number, classe = ""): string {
+  const c = categorieDuNiveau(niveau);
+  const mot = LIBELLE_CATEGORIE[c];
+  return `<span class="niveau niv-c${rangCategorie(c)}${classe ? ` ${classe}` : ""}" aria-label="niveau ${niveau} sur 7 : ${mot}"><span class="num">${niveau}</span><span class="mot">&nbsp;· ${mot}</span></span>`;
 }
 
 /** Corps d'une question REGROUPÉE a), b), c) : la consigne commune une fois, puis une ligne par
@@ -700,7 +721,7 @@ function corpsGroupeHtml(item: ItemEvaluation, lignes: LigneGroupe[], avecPoints
       const lettre = lettreCle(i);
       const figure = l.figureHtml ? `<div class="figure-ligne">${l.figureHtml}</div>` : "";
       const pts = avecPoints ? `<span class="pts">${pointsTexte(points[i])}</span>` : "";
-      const niveau = feuille && feuille.niveau !== false && l.item.niveau ? `<span class="niveau ligne-niveau" aria-label="niveau ${l.item.niveau} sur 7"><span class="num">${l.item.niveau}</span></span>` : "";
+      const niveau = feuille && feuille.niveau !== false && l.item.niveau ? badgeNiveau(l.item.niveau, "ligne-niveau") : "";
       const qr =
         feuille?.qr && l.item.code
           ? `<span class="qr-ligne">${qrCodeSvg(l.item.code.url, 56, `QR code : refaire l'exercice ${feuille.numero} ${lettre}) en ligne`)}<span class="code">${echapperHtml(l.item.code.code)}</span></span>`
@@ -801,7 +822,7 @@ function corpsGroupeFiguresHtml(item: ItemEvaluation, lignes: LigneGroupe[], ave
     const lettre = lettreCle(i);
     const texte = l.enonce.length > 0 ? `<span class="ligne-texte">${fragmentsVersHtml(l.enonce)}</span>` : "";
     const pts = avecPoints ? `<span class="pts">${pointsTexte(points[i])}</span>` : "";
-    const niveau = feuille && feuille.niveau !== false && l.item.niveau ? `<span class="niveau ligne-niveau" aria-label="niveau ${l.item.niveau} sur 7"><span class="num">${l.item.niveau}</span></span>` : "";
+    const niveau = feuille && feuille.niveau !== false && l.item.niveau ? badgeNiveau(l.item.niveau, "ligne-niveau") : "";
     const qr =
       feuille?.qr && l.item.code
         ? `<span class="qr-ligne">${qrCodeSvg(l.item.code.url, 56, `QR code : refaire l'exercice ${feuille.numero} ${lettre}) en ligne`)}<span class="code">${echapperHtml(l.item.code.code)}</span></span>`
@@ -995,22 +1016,28 @@ function correctionHtml(item: ItemEvaluation): string {
   return `<div class="reponse-ancienne">${item.correction.map(blocCorrectionHtml).join("")}</div>`;
 }
 
-/** Badge « numéro + palier » (« 5 » « Avancé ») — rien si l'exercice n'a pas de niveau. */
+/** Badge « numéro · mot » (« 4 · difficile ») — rien si l'exercice n'a pas de niveau. Groupe : plage
+ * « niv. 2–4 · facile à difficile » (une seule catégorie : « niv. 5–6 · très difficile » ; un seul
+ * niveau : le badge ordinaire), case teintée par la catégorie du plus haut niveau. */
 function niveauHtml(item: ItemEvaluation): string {
   if (item.groupe && item.groupe.length > 0) {
-    // Groupe : plage « niv. 2–4 », palier seulement s'il est le même pour toutes les lignes.
     const plage = plageNiveaux(item.groupe);
     if (!plage) return "";
-    const palier = plage.palier ? LIBELLE_PALIER[plage.palier] : "";
-    return `<span class="niveau" aria-label="niveaux ${plage.texte} sur 7${palier ? `, ${palier}` : ""}"><span class="num">${plage.texte.includes("–") ? `niv. ${plage.texte}` : plage.texte}</span>${palier ? `<span class="pal">${palier}</span>` : ""}</span>`;
+    if (plage.min === plage.max) return badgeNiveau(plage.min);
+    const a = LIBELLE_CATEGORIE[categorieDuNiveau(plage.min)];
+    const b = LIBELLE_CATEGORIE[categorieDuNiveau(plage.max)];
+    const mots = a === b ? a : `${a} à ${b}`;
+    return `<span class="niveau niv-c${rangCategorie(categorieDuNiveau(plage.max))}" aria-label="niveaux ${plage.min} à ${plage.max} sur 7 : ${mots}"><span class="num">niv. ${plage.min}–${plage.max}</span><span class="mot">&nbsp;· ${mots}</span></span>`;
   }
-  if (!item.niveau || !item.palier) return "";
-  const palier = LIBELLE_PALIER[item.palier];
-  return `<span class="niveau" aria-label="niveau ${item.niveau} sur 7, ${palier}"><span class="num">${item.niveau}</span><span class="pal">${palier}</span></span>`;
+  if (!item.niveau) return "";
+  return badgeNiveau(item.niveau);
 }
 
-/** Légende de la feuille d'exercices : l'échelle et ce qui fait monter le niveau. */
-const LEGENDE_NIVEAUX = `<span>Niveau 1 à 7 : <span class="niveau"><span class="pal">Base</span></span> 1–2 · <span class="niveau"><span class="pal">Intermédiaire</span></span> 3–4 · <span class="niveau"><span class="pal">Avancé</span></span> 5–7. Il monte avec le nombre d'étapes, le choix de la méthode, un piège dans les données et les nombres (calculatrice, valeurs approchées).</span>`;
+/** Légende de la feuille d'exercices : l'échelle (« Niveau : 1 très facile · 2 facile · 3 moyen ·
+ * 4 difficile · 5 à 7 très difficile », numéros dans leur case teintée) et ce qui fait monter le niveau. */
+const LEGENDE_NIVEAUX = `<span class="legende-niveaux">Niveau : ${morceauxLegende()
+  .map((m) => `<span class="niveau niv-c${rangCategorie(m.categorie)}"><span class="num">${m.niveaux}</span><span class="mot">&nbsp;${m.mot}</span></span>`)
+  .join(" · ")}. Il monte avec le nombre d'étapes, le choix de la méthode, un piège dans les données et les nombres (calculatrice, valeurs approchées).</span>`;
 
 function calculatriceHtml(calculatrice: "interdite" | "autorisee" | undefined): string {
   if (!calculatrice) return "";

@@ -542,14 +542,14 @@ function joindreAvecLettres(listes: FragmentConsigne[][]): FragmentConsigne[] {
   return listes.flatMap((fr, i) => [texte(`${i > 0 ? ' · ' : ''}${LETTRES[i] ?? i + 1}) `), ...fr])
 }
 
-/** Niveau (1–7) et palier affichés pour un exercice — grille commune (`niveauDifficulte.ts`), ou
+/** Niveau (1–7) et catégorie affichés pour un exercice — grille commune (`niveauDifficulte.ts`), ou
  * conversion provisoire des étoiles d'un chapitre pas encore noté. Plusieurs instances regroupées :
  * le plus haut niveau. */
-function niveauItem(niveaux: (NiveauDifficulte | undefined)[]): Pick<ItemEvaluation, 'niveau' | 'palier'> {
+function niveauItem(niveaux: (NiveauDifficulte | undefined)[]): Pick<ItemEvaluation, 'niveau' | 'categorie'> {
   const n = niveaux.filter((v): v is NiveauDifficulte => v !== undefined)
   if (n.length === 0) return {}
   const max = n.reduce((a, b) => (b.niveau > a.niveau ? b : a))
-  return { niveau: max.niveau, palier: max.palier }
+  return { niveau: max.niveau, categorie: max.categorie }
 }
 
 /** Durée d'un item = somme des durées par exercice (indéfinie si l'adaptateur n'en donne aucune). */
@@ -838,7 +838,7 @@ export function assemblerGroupe(base: ItemEvaluation, consigne: FragmentConsigne
     section: { enteteFragments: consigne, ...(figureCommune ? { enteteHtml: figureCommune } : {}), questions: lignes.map((l) => ({ consigne: l.enonce })), disposeEnTableau: true },
     correction: lignes.flatMap((l, i) => prefixerLettreBlocs(l.item.correction, LETTRES[i] ?? String(i + 1))),
     niveau: plusHaut?.niveau,
-    palier: plusHaut?.palier,
+    categorie: plusHaut?.categorie,
     reponseBreve: breves.every((b): b is FragmentConsigne[] => !!b && b.length > 0) ? joindreAvecLettres(breves) : undefined,
     bareme: baremeDuGroupe(lignes),
     dureeMinutes: durees.every((d): d is number => d !== undefined) ? durees.reduce((t, d) => t + d, 0) : undefined,
@@ -936,9 +936,9 @@ async function itemVraiFauxRegroupe(elements: ElementVraiFaux[]): Promise<ItemEv
     points: affirmations.reduce((t, a) => t + a.points, 0),
     section: { enteteFragments: [texte(seule ? 'Vrai ou faux ? Justifie ta réponse.' : CONSIGNE_VRAI_FAUX)], questions: affirmations.map((a) => ({ consigne: a.enonce })) },
     correction: affirmations.map((a, i) => ({ type: 'paragraphe', fragments: [texte(`${prefixe(i)}${vf(a.reponse)} — `), ...a.justification] })),
-    // Vrai/faux : pas encore noté par la grille — ancien « ★ » converti (niveau 2, Base), provisoire.
+    // Vrai/faux : pas encore noté par la grille — ancien « ★ » converti (niveau 2, facile), provisoire.
     niveau: 2,
-    palier: 'base',
+    categorie: 'facile',
     reponseBreve: [texte(resume)],
     correctionDetaillee: affirmations.map((a, i) => ({ label: vf(a.reponse), sousQuestion: seule ? undefined : lettre(i), fragments: a.justification })),
     bareme: {

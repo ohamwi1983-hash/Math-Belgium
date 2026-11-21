@@ -69,11 +69,34 @@
   --serif: "Fraunces", "Iowan Old Style", "Georgia", serif;
   --sans: "Work Sans", "Segoe UI", system-ui, sans-serif;
   --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+  /* Échelle des niveaux de difficulté (1 très facile · 2 facile · 3 moyen · 4 difficile · 5–7 très
+     difficile) : 5 pas gradués du plus clair au plus foncé, fond + encre (`niv-c1` … `niv-c5`). Le MOT
+     porte l'information ; la couleur n'est qu'un appoint. Mêmes teintes sur papier (assemblerEvaluationHtml). */
+  --niv1-fond: #e7f3ea;
+  --niv1-encre: #1b1d22;
+  --niv2-fond: #efe0a0;
+  --niv2-encre: #1b1d22;
+  --niv3-fond: #eab06a;
+  --niv3-encre: #1b1d22;
+  --niv4-fond: #b55a2e;
+  --niv4-encre: #ffffff;
+  --niv5-fond: #8f2d2b;
+  --niv5-encre: #ffffff;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
+    --niv1-fond: #1f3527;
+    --niv1-encre: #cfe9d7;
+    --niv2-fond: #4a4120;
+    --niv2-encre: #f3e2a2;
+    --niv3-fond: #6e4a1f;
+    --niv3-encre: #ffdcae;
+    --niv4-fond: #a04f28;
+    --niv4-encre: #ffffff;
+    --niv5-fond: #c0423c;
+    --niv5-encre: #ffffff;
     --paper: #10161d;
     --surface: #161f27;
     --surface-2: #1b252e;
@@ -1456,18 +1479,21 @@ table.feature-table td { white-space: normal; }
 .admin-eval-variante-exclue { color: var(--ink-faint); font-size: 0.78rem; font-style: italic; }
 
 /* Repère « niv. 2–3 · ≈ 7 min » d'une rangée de variante (`RepereNiveauDuree.tsx`) : discret, insécable,
- * numéros colorés par palier (Base / Intermédiaire / Avancé), le mot du palier quand toute la plage
- * est dans un même palier et que la place le permet ; « * » = niveau provisoire (étoiles converties). */
+ * numéros sur une pastille teintée par catégorie (échelle graduée `--nivN-*`), le mot de la catégorie
+ * (« · difficile ») quand toute la plage est dans une même catégorie et que la place le permet ;
+ * « * » = niveau provisoire (étoiles converties). */
 .admin-eval-repere {
   display: inline-block; white-space: nowrap; margin-left: 2px; padding: 0 7px; vertical-align: 1px;
   border: 1px solid var(--line-soft); border-radius: 999px; background: var(--paper);
   font-family: var(--mono); font-size: 0.7rem; line-height: 1.55; color: var(--ink-soft); cursor: help;
 }
 .admin-eval-repere[data-etat='attente'] { color: var(--ink-faint); opacity: 0.6; cursor: default; }
-.admin-eval-repere-n { font-weight: 700; }
-.admin-eval-repere-n.palier-base { color: var(--good); }
-.admin-eval-repere-n.palier-intermediaire { color: var(--attn); }
-.admin-eval-repere-n.palier-avance { color: var(--bad); }
+.admin-eval-repere-n { font-weight: 700; display: inline-block; min-width: 1.35em; padding: 0 3px; border-radius: 4px; text-align: center; line-height: 1.35; }
+.niv-c1 { background: var(--niv1-fond); color: var(--niv1-encre); }
+.niv-c2 { background: var(--niv2-fond); color: var(--niv2-encre); }
+.niv-c3 { background: var(--niv3-fond); color: var(--niv3-encre); }
+.niv-c4 { background: var(--niv4-fond); color: var(--niv4-encre); }
+.niv-c5 { background: var(--niv5-fond); color: var(--niv5-encre); }
 .admin-eval-repere-provisoire { color: var(--ink-faint); }
 .admin-eval-repere-palier { font-family: var(--sans); }
 /* Variante exclue faute de calculatrice : la raison ET la solution, avec un bouton vers le réglage. */
@@ -2232,7 +2258,22 @@ h1.eleve-titre { font-family: var(--serif); font-size: clamp(1.6rem, 5vw, 2.25re
 .eleve-segments button { border: 0; background: none; padding: 11px 18px; font: inherit; font-size: 0.95rem; font-weight: 500; color: var(--ink-soft); cursor: pointer; min-height: 44px; }
 .eleve-segments button + button { border-left: 1px solid var(--line-soft); }
 .eleve-segments button[aria-checked='true'] { background: var(--ink); color: var(--paper); }
-.eleve-court { display: none; }
+/* Cases à cocher (compétences, niveaux) : puces ≥ 44 px, case carrée avec ✓ (l'état ne repose jamais
+ * sur la seule couleur) ; une option sans exercice est grisée (bordure pointillée) avec sa raison. */
+.eleve-etiquette-ligne { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.eleve-lien-bouton { border: 0; background: none; padding: 0; font: inherit; font-size: 0.875rem; color: var(--accent-ink); text-decoration: underline; cursor: pointer; min-height: 32px; }
+.eleve-coches { display: flex; gap: 8px; flex-wrap: wrap; }
+.eleve-coche { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 14px 8px 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); font: inherit; font-size: 0.95rem; font-weight: 500; color: var(--ink-soft); cursor: pointer; text-align: left; max-width: 100%; }
+.eleve-coche[aria-pressed='true'] { background: var(--good-soft); border-color: var(--good); color: var(--ink); font-weight: 600; }
+.eleve-coche[aria-disabled='true'] { border-style: dashed; color: var(--ink-faint); background: transparent; cursor: not-allowed; }
+.eleve-coche[aria-disabled='true'] .eleve-niv-num { opacity: 0.45; }
+.eleve-coche-case { flex: none; width: 20px; height: 20px; border: 2px solid var(--ink-faint); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; line-height: 1; color: var(--paper); }
+.eleve-coche[aria-pressed='true'] .eleve-coche-case { background: var(--good); border-color: var(--good); }
+.eleve-coche-raison { font-size: 0.75rem; font-weight: 400; color: var(--ink-faint); }
+.eleve-niv-num { flex: none; min-width: 1.6em; padding: 1px 5px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(27, 29, 34, 0.18); font-family: var(--mono); font-size: 0.8rem; font-weight: 700; text-align: center; line-height: 1.4; }
+.eleve-dispo { display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; border-left: 3px solid var(--line); background: var(--surface-2); border-radius: 4px; }
+.eleve-dispo p { margin: 0; font-size: 0.85rem; color: var(--ink-soft); }
+.eleve-recap-contenu { margin: 2px 0 0; font-size: 0.875rem; opacity: 0.8; }
 .eleve-case { display: flex; gap: 10px; align-items: center; font-size: 0.95rem; cursor: pointer; }
 .eleve-case input { width: 20px; height: 20px; flex: none; accent-color: var(--accent); }
 .eleve-note { margin: 0; font-size: 0.875rem; color: var(--attn); }
@@ -2263,12 +2304,12 @@ h1.eleve-titre { font-family: var(--serif); font-size: clamp(1.6rem, 5vw, 2.25re
   .eleve-reglage, .eleve-segments { width: 100%; }
   .eleve-segments { display: flex; flex-wrap: nowrap; }
   .eleve-segments button { flex: 1 1 0; padding: 11px 4px; min-width: 0; }
-  .eleve-long { display: none; }
-  .eleve-court { display: inline; }
+  .eleve-coche { flex: 1 1 calc(50% - 4px); }
   /* Barre fixée en bas (maquette téléphone) : récapitulatif et bouton toujours sous le pouce. */
   .eleve-recap { position: sticky; bottom: 0; margin: 0 calc(-1 * var(--page-gutter, 16px)); border-radius: 0; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)); flex-direction: column; align-items: stretch; gap: 10px; box-shadow: 0 -6px 20px rgba(24, 36, 48, 0.18); }
   .eleve-recap-titre { display: none; }
   .eleve-recap-detail { margin: 0; font-size: 0.875rem; }
+  .eleve-recap-contenu { margin: 0; font-size: 0.8125rem; }
   .eleve-recap-fin { display: none; }
   .eleve-generer { width: 100%; }
   .eleve-resultat { padding: 16px; }

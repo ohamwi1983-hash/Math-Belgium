@@ -4336,7 +4336,7 @@ paths:
   proportionnelle acceptée) + ses solutions ; d) rejet (choix fermé) ; e) réponse à la question,
   avec l'unité (x lui-même en `directe`, grandeur déduite — prix, vitesse au retour, durée de l'autre
   robinet — en `deduite`). Profil : `forme` = « variante:directe|deduite » tirée avant les nombres
-  (50/50), aucun cas particulier, pas de `calcul`. Niveau 6 (Avancé), ≈ 16 min. Libellé de conception
+  (50/50), aucun cas particulier, pas de `calcul`. Niveau 6 (très difficile), ≈ 16 min. Libellé de conception
   « Problèmes avec une fraction (gen119) ». **Socle commun des nouveaux générateurs du ch. 2**
   (gen115, gen116, gen118, gen119, gen120) : écrans en DONNÉES (`ui/ecransTransfertSecondDegre.ts` :
   choix, ou champs typés nombre / liste / expression / équation à un facteur près / relation jugée
