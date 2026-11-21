@@ -6,7 +6,7 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import type { ExercicePositionAsymptote, VerdictPosition } from "../core5e/asymptoteOblique.types";
 import { cotesAttendus, pointRecoupementAttendu, type Cote, type PhasePositionAsymptote, type ReponseCotes, type ReponsePointRecoupement } from "../moteur5e/sessionPositionAsymptote";
-import { egalAuPolynome, egaleA, lireLimite } from "../moteur5e/saisieLimites";
+import { egalAuPolynome, egaleA, lireLimite, valeurExpression } from "../moteur5e/saisieLimites";
 import type { AideTrig } from "./aidesTrigonometrie";
 import { mulP, polyFacteur, polyLatex, subP } from "./corrigeLimites";
 
@@ -180,6 +180,10 @@ export function cibleNumerateur(e: ExercicePositionAsymptote, brut: string): Fra
   if (egalAuPolynome(brut, subP(e.coeffsP, QD.map((c) => -c)))) return [t("Le signe − porte sur tout le produit "), l(e.a === 0 ? `${e.b < 0 ? `(${e.b})` : e.b}\\cdot D(x)` : "(ax+b)\\cdot D(x)"), t(" : change le signe de chacun de ses termes.")];
   if (egalAuPolynome(brut, e.coeffsP)) return [t("C'est le numérateur de f : il faut encore lui soustraire le produit de la droite par "), l("D(x)"), t(".")];
   if (egaleA(brut, (x) => valeurPoly(R, x) / valeurPoly(e.coeffsD, x))) return [t("On demande seulement le numérateur "), l("R(x)"), t(" : le dénominateur reste "), l("D(x)"), t(".")];
+  const v0 = valeurExpression(brut, 0);
+  const v1 = valeurExpression(brut, 1);
+  if (v0 !== null && v1 !== null && egaleA(brut, (x) => v0 + (v1 - v0) * x))
+    return [t("Ton numérateur est bien de degré au plus 1 ; revois la soustraction terme à terme : le terme en x et la constante de "), l("P(x)"), t(" moins ceux du produit.")];
   return [t("Les termes de plus haut degré doivent s'annuler : "), l("R(x)"), t(" est de degré au plus 1. Revois le développement du produit par "), l("D(x)"), t(".")];
 }
 

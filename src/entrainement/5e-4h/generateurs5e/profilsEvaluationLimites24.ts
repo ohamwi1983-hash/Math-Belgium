@@ -30,14 +30,14 @@ export function formeEtudeComplete(e: ExerciceEtudeComplete): string {
 
 /** Groupes à verdict : une rangée par structure visible, la nature des valeurs exclues tirée au hasard. */
 export const GROUPES_VERDICT_ETUDE_COMPLETE = [
-  { id: "groupe_1_ah_nulle", label: "1 exclusion — AH y = 0 (nature de l'asymptote verticale tirée au hasard)", variantes: ["1-vaSimple-ahZero", "1-vaDouble-ahZero"] },
-  { id: "groupe_1_ah", label: "1 exclusion — AH non nulle (nature de l'asymptote verticale tirée au hasard)", variantes: ["1-vaSimple-ahNonNul", "1-vaDouble-ahNonNul"] },
-  { id: "groupe_1_ao", label: "1 exclusion — AO (nature de l'asymptote verticale tirée au hasard)", variantes: ["1-vaSimple-ao", "1-vaDouble-ao"] },
-  { id: "groupe_1_aucune", label: "1 exclusion — aucune asymptote à l'infini (nature de l'asymptote verticale tirée au hasard)", variantes: ["1-vaSimple-aucune", "1-vaDouble-aucune"] },
-  { id: "groupe_2_ah", label: "2 exclusions — AH (nature des valeurs exclues tirée au hasard)", variantes: ["2-vaSimple-vaSimple-ah", "2-pointVide-vaSimple-ahNonNul"] },
-  { id: "groupe_2_ao", label: "2 exclusions — AO (nature des valeurs exclues tirée au hasard)", variantes: ["2-vaSimple-vaSimple-ao", "2-vaDouble-vaDouble-ao", "2-pointVide-vaDouble-ao"] },
-  { id: "groupe_2_aucune", label: "2 exclusions — aucune asymptote à l'infini (nature des valeurs exclues tirée au hasard)", variantes: ["2-pointVide-vaSimple-aucune", "2-vaSimple-vaSimple-aucune"] },
-  { id: "groupe_2_ah_recoupement", label: "2 exclusions — AH + recoupement (nature des valeurs exclues tirée au hasard)", variantes: ["2-vaSimple-vaDouble-ahNonNul-special", "2-vaSimple-vaSimple-ahNonNul-special"] },
+  { id: "groupe_1_ah_nulle", label: "1 exclusion — AH y = 0 (nature de l'asymptote verticale tirée au hasard)", formeCommune: true, variantes: ["1-vaSimple-ahZero", "1-vaDouble-ahZero"] },
+  { id: "groupe_1_ah", label: "1 exclusion — AH non nulle (nature de l'asymptote verticale tirée au hasard)", formeCommune: true, variantes: ["1-vaSimple-ahNonNul", "1-vaDouble-ahNonNul"] },
+  { id: "groupe_1_ao", label: "1 exclusion — AO (nature de l'asymptote verticale tirée au hasard)", formeCommune: true, variantes: ["1-vaSimple-ao", "1-vaDouble-ao"] },
+  { id: "groupe_1_aucune", label: "1 exclusion — aucune asymptote à l'infini (nature de l'asymptote verticale tirée au hasard)", formeCommune: true, variantes: ["1-vaSimple-aucune", "1-vaDouble-aucune"] },
+  { id: "groupe_2_ah", label: "2 exclusions — AH (nature des valeurs exclues tirée au hasard)", formeCommune: true, variantes: ["2-vaSimple-vaSimple-ah", "2-pointVide-vaSimple-ahNonNul"] },
+  { id: "groupe_2_ao", label: "2 exclusions — AO (nature des valeurs exclues tirée au hasard)", formeCommune: true, variantes: ["2-vaSimple-vaSimple-ao", "2-vaDouble-vaDouble-ao", "2-pointVide-vaDouble-ao"] },
+  { id: "groupe_2_aucune", label: "2 exclusions — aucune asymptote à l'infini (nature des valeurs exclues tirée au hasard)", formeCommune: true, variantes: ["2-pointVide-vaSimple-aucune", "2-vaSimple-vaSimple-aucune"] },
+  { id: "groupe_2_ah_recoupement", label: "2 exclusions — AH + recoupement (nature des valeurs exclues tirée au hasard)", formeCommune: true, variantes: ["2-vaSimple-vaDouble-ahNonNul-special", "2-vaSimple-vaSimple-ahNonNul-special"] },
 ];
 
 export function profilEtudeComplete(e: ExerciceEtudeComplete): ProfilInstance {

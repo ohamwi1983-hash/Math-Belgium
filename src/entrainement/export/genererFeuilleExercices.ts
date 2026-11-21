@@ -81,6 +81,10 @@ export interface GroupeVerdict {
   id: string;
   label: string;
   variantes: string[];
+  /** Les membres partagent la même `forme` de profil (structure visible : 5gen24) : la série B
+   * reproduit alors la forme de la série A même quand le verdict tiré change de variante. Absent :
+   * la forme, propre à la variante, n'est imposée qu'à la même variante (comportement d'avant). */
+  formeCommune?: boolean;
 }
 
 /** Une ligne d'une chaîne de calcul « comme au tableau » (`EtapeCorrection.calcul`) : UNE

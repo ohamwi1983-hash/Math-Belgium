@@ -27,7 +27,9 @@ import {
   demarrerSessionPositionAsymptote,
   NIVEAU_AIDE_MAX_POSITION,
   ORDRE_POSITION,
+  cotesAttendus,
   pointIllisible,
+  pointRecoupementAttendu,
   soumettreCotes,
   soumettreNumerateurEcart,
   soumettrePointRecoupement,
@@ -66,6 +68,7 @@ import {
   labelNumerateur,
   optionVerdictFragments,
   reponseAttenduePosition,
+  rLatex,
 } from "./ui5e/formatPositionAsymptote";
 import { MESSAGES_ILLISIBLE_LIMITES, fragmentsRiches } from "./ui5e/retoursLimites";
 import { expressionIllisible, nombreExactRefuse, nombreIllisible } from "./moteur5e/saisieLimites";
@@ -113,9 +116,24 @@ function sessionInitiale(): Session {
   return sessionPour(genererAvecCode<ExerciceGen21>(code, CATALOGUE_FAMILLES, () => genererExerciceAsymptoteOblique(), (id) => construireGen21AvecFamilleId(id)));
 }
 
-/** Fragments → LaTeX d'une ligne (récapitulatif). */
-function fragmentsVersLatex(fr: FragmentConsigne[]): string {
-  return fr.map((f) => (f.type === "latex" ? f.valeur : `\\text{${f.valeur.replace(/[{}\\]/g, "")}}`)).join("");
+/** Récapitulatif de la famille « position » : valeurs COURTES, une formule par morceau (le panneau
+ * passe à la ligne entre deux morceaux — une phrase entière dans un seul \text{} sortait du cadre
+ * à 390 px). */
+function recapPosition(e: ExercicePositionAsymptote, p: PhasePositionAsymptote): string[] {
+  const pt = pointRecoupementAttendu(e);
+  const cote = (c: Cote) => (c === "dessus" ? "\\text{au-dessus}" : "\\text{en dessous}");
+  switch (p) {
+    case "numerateurEcart":
+      return [`R(x)=${rLatex(e)}`];
+    case "verdictPosition":
+      return e.verdict === "recoupe" ? ["\\text{recoupe } d"] : [e.verdict === "dessus" ? "\\text{au-dessus de } d" : "\\text{en dessous de } d"];
+    case "pointRecoupement":
+      return [pt ? `(${pt.x}\\,;\\,${pt.y})` : "\\text{aucun point commun}"];
+    case "cotesApproche": {
+      const c = cotesAttendus(e);
+      return [`-\\infty :\\ ${cote(c.moinsInfini)}`, `+\\infty :\\ ${cote(c.plusInfini)}`];
+    }
+  }
 }
 
 function phaseDe(s: Session): string {
@@ -142,7 +160,8 @@ function recapitulatif(s: Session): EntreeRecapitulatif[] {
   return ORDRE_POSITION.filter((p) => s.etat.scoresPartiels[p] !== undefined).map((p) => ({
     libelle: LIBELLE_PHASE_POSITION[p],
     estLatex: true,
-    valeur: fragmentsVersLatex(reponseAttenduePosition(s.etat.exerciceCourant, p)),
+    valeur: "",
+    valeurs: recapPosition(s.etat.exerciceCourant, p),
     revele: s.etat.revelesPartiels[p] ?? false,
   }));
 }

@@ -428,15 +428,16 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
           Array.from({ length: e.nombre }, () => {
             const groupe = groupeVerdict(adaptateur as Adaptateur, e.varianteId)
             const varianteId = groupe ? verdictSuivant(`${indexItem}:${groupe.id}`, groupe.variantes) : e.varianteId
-            return { varianteId, points: e.points, indexEntree, exclus: exclusDe(e) }
+            return { varianteId, points: e.points, indexEntree, exclus: exclusDe(e), formeCommune: !!groupe?.formeCommune }
           }),
         )
         let instances: InstancePlan[]
         if (equilibre && structureA && structureA.length === questions.length) {
-          instances = questions.map(({ varianteId, points, exclus }, k) => {
+          instances = questions.map(({ varianteId, points, exclus, formeCommune }, k) => {
             // Groupe « à verdict » : la variante peut différer de la série A — on garde alors le cas
-            // particulier (oui / non) mais pas la forme, propre à la variante.
-            const meme = structureA[k].varianteId === varianteId
+            // particulier (oui / non) mais pas la forme, propre à la variante (sauf groupe à
+            // `formeCommune` : structure visible partagée par tous les membres, 5gen24).
+            const meme = structureA[k].varianteId === varianteId || formeCommune
             const cas = meme ? (structureA[k].cas ?? 'complet') : structureA[k].cas ? 'particulier' : 'complet'
             return { varianteId, points, graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe(cas, exclus, meme ? structureA[k].forme : undefined), false, vuesSerie).graine }
           })
