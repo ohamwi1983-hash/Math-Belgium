@@ -5153,3 +5153,16 @@ conjuguée »** (§ 1, après 5gen20), **5gen66 « Du tableau de limites au grap
 `evaluationAdapterRegistry.ts` (`versionPapier`) et `evaluationPayload.ts` (sections limites-calcul
 P2, lecture-graphique P1, etude-complete P2 et P3). Détail des choix, mesures et pièges :
 `feuilles-evaluations.md`, entrée « 5e ch. 4, lot G ».
+
+## 5e (4h), Chapitre 4 — lots B, C, D (règles communes 5gen20–24, famille « position » de 5gen21)
+
+Cours complété, calqué sur les corrigés des générateurs, chaque fois méthode + exemple résolu placés
+avant la carte correspondante : § 1 « racine en −∞ — √(x²) = |x| = −x » (avant 5gen64 ; les trois
+exemples d'expression conjuguée existants suffisaient pour le reste) ; § 2 position de la courbe par
+rapport à son asymptote (écart réduit, Δ < 0, `signTable`, recoupement (2 ; 3), côtés d'approche,
+`curvePlot` + Attention « reste constant ») avant 5gen21, dont la carte cite la nouvelle famille ; § 3
+d'un tableau de limites à une esquisse (asymptotes, bouts de branche, liaison ; f(x) = 2 + 1/(1 − x))
+avant 5gen66 ; § 5 retrouver (ax + b)/(x + d) depuis ses asymptotes et un point, et le cas
+ax + b + c/(x − p), avant 5gen65. Quatre énoncés soignés ajoutés par clé (`ENONCES_DEMONSTRATION`, build
+strict). Détail : `feuilles-evaluations.md`, entrée « 5e ch. 4 (lots B, C, D) ».
+

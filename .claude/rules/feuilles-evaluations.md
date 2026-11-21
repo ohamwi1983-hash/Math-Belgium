@@ -635,6 +635,78 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   documents réels 26 (2 séries + aménagée + feuille, cas coché ou non) : même structure B = A, 0
   débordement à 680 / 1 280 px. Durées 5gen3 : libre 8–34 min (moy. 17), combinaisons retirées
   jusqu'à 38.
+- **5e ch. 4 (lots B, C, D, 5gen20–24)** : écrans génériques du chapitre
+  `5e-4h/components5e/EcranSaisieLimites.tsx` (`EcranSaisieLimites` : champs, `normaliserSigneMoins`,
+  aperçu KaTeX, `controleSansTentative` ; `EcranChoixLimites` : options KaTeX, une tentative) au-dessus
+  de `PiedEcranFonctions` du 5e ch. 1 ; lecture `moteur5e/saisieLimites.ts` (`lireLimite` du lot G :
+  « − – — », ±∞ / inf LISIBLES dans un champ numérique — un infini tapé pour une limite finie est une
+  réponse fausse ciblée, jamais illisible —, `nombreExactRefuse` = illisible OU décimale approchée,
+  `diagnostiquerValeurExacte` à 1e-9 : la tolérance 0,01 laissait passer 1,86 pour 13/7). **Refus dans
+  le moteur** (état inchangé) : 5gen20 `saisieLimiteRefusee` (forme non factorisée comprise), 5gen21
+  `saisieDivisionRefusee` / `formeDeveloppeeRefusee`, 5gen22 (illisible), 5gen23
+  `moteur5e/saisieContexteLimites.ts` (expression en t lue comme en x), 5gen24
+  `moteur5e/saisieEtudeComplete.ts::refusSaisieEtude` (message rendu, partagé avec l'écran) ; « — »
+  ajouté aux normalisations de `formeSaisieLimites` et `verificationEtudeComplete`. Aides à deux niveaux
+  (`AideTrig`) : niveau 2 posé pour l'instance — les anciens « exemple avec une autre fonction » de
+  5gen20, 5gen21, 5gen23 (4 écrans) et 5gen24 (12 écrans) sont remplacés ; 5gen22 gagne deux niveaux
+  (`niveauAide` dans son moteur). Textes : `formatLimites::aidesLimite/cibleLimite/cibleChoixLimite`,
+  `formatAsymptoteOblique::aidesAsymptoteOblique/cibleAsymptoteOblique`,
+  `ui5e/retours{LectureGraphiqueLimites,LimitesContexte,EtudeComplete}.ts`, messages d'illisible
+  `ui5e/retoursLimites.ts`. Messages ciblés : fraction inversée, terme non dominant (termes non
+  rangés), exposants additionnés, côtés gauche / droite échangés, carré positif des deux côtés,
+  puissance impaire en −∞, abscisse de l'AV donnée pour la limite, AV / AH confondues, pente ou
+  ordonnée de l'oblique, reste gardé dans l'asymptote, a et b échangés, b calculé sur f au lieu de
+  f − ax, coût fixe, division par le volume ajouté, facteur oublié, mois non arrondi par excès, point
+  vide compté comme AV ; message sous la réponse révélée de chaque choix fermé (une tentative). Composants
+  5gen20 (8) et 5gen21 (2) supprimés : leurs écrans passent par les écrans génériques.
+  **Défauts d'écran** (une seule source écran = aides = papier = corrigé) : 5gen23 `valeurClubReelle`
+  (« ≈ » si arrondi, aussi dans le libellé du champ), `valeurPopulationLatex` (« = » si exact),
+  `monomeTLatex` / `concentrationLatex` (plus de « 1t ») ; 5gen21 forme développée avec la graine + 1
+  de l'énoncé, consignes en texte riche (titres d'étape en KaTeX) ; 5gen24 domaine `\{1\,;\,3\}`.
+  **Tirage** : 5gen20 `groupe_infinie_point` (racine simple / double = la limite existe ou non), `forme`
+  « limiteInfiniePoint » ; 5gen24 : la nature de chaque valeur exclue (point vide, AV simple / double)
+  est le verdict de l'élève → retirée de la `forme` (= nombre d'exclusions | AH nulle, AH, AO, aucune |
+  recoupement annoncé), huit groupes par structure visible, cinq variantes AJOUTÉES EN FIN de catalogue
+  (`1-vaDouble-ahZero`, `1-vaDouble-ao`, `1-vaDouble-aucune`, `2-vaSimple-vaSimple-aucune`,
+  `2-vaSimple-vaSimple-ahNonNul-special`) ; `1-vaDouble-ao-special` reste seule, renommée « 1 exclusion —
+  AO + recoupement » (un recoupement exige un dénominateur réduit de degré ≥ 2). **Contrat** :
+  `GroupeVerdict.formeCommune` (opt-in, 5gen24) — `construirePlan` impose la forme de la série A même
+  quand le verdict change de variante (un recoupement tiré au hasard dans un membre changeait la
+  structure) ; autres groupes inchangés. Niveaux : constants en 5gen20 (4, 9 min) ; en 5gen24 ils
+  suivent les écrans (point vide + 1 écran, AV double + piège : 3–5, 12–24 min) — la copie
+  d'évaluation n'imprime ni l'un ni l'autre (même choix que 5gen10). 5gen21 rejugé sur le papier :
+  technique imposée (méthode 0), aucune donnée piège, deux étapes sans charge + une lecture → niveau 1,
+  7 min, justifié.
+  **Famille « position » de 5gen21** (`position-ao`, `position-ah`, indices 4 et 5 : codes 0–3
+  inchangés ; tirage libre de l'adaptateur et des codes = ancien `genererExerciceAsymptoteOblique`,
+  l'appli tire la nouvelle famille une fois sur trois via `genererExerciceGen21Libre`) : D(x) sans
+  racine (Δ < 0), droite DONNÉE, reste R(x) = rx + s ; verdict au-dessus / en dessous / recoupe tiré au
+  tiers AVANT les nombres (x₀ entier), jamais dans la `forme` (« position-oblique / horizontale »),
+  paramètres a ≠ ±1, b ≠ 0 `parametresNonApplicables`. Quatre écrans pour tous les verdicts (moteur
+  `sessionPositionAsymptote.ts`) : numérateur R(x) (champ), verdict (choix fermé), point de recoupement
+  (x₀, y₀ ou « Aucun point commun »), côtés en −∞ / +∞ (choix fermés) ; niveau 3, 9 min dans les trois
+  verdicts (lecture d, méthode 1 : le papier ne dit pas d'étudier le signe). Corrigé
+  `asymptoteOblique/corrigePosition.ts` (écart au même dénominateur, Δ < 0 ⇒ D > 0, signe de R,
+  tableau de signes HTML en `figureHtml`, x₀ et y₀ lus sur la droite, vérification f(x₀), limites de R
+  en ±∞). Énoncé papier : f, la droite, une consigne SANS donnée tirée ; regroupement : seconde forme
+  de l'entrée `5gen21` (ligne « f ; d (asymptote oblique) »). Appli : une session par famille
+  (`App5gen21.tsx`, union `Session`), récapitulatif en morceaux courts.
+  **Mesures** : moteurs 2 000 tirages par variante (5gen20–24, nouvelle famille comprise : réponses
+  recalculées depuis les données — P = QD + R, f(x₀) = droite(x₀), signe de R, mois par balayage,
+  domaine par racines de D, types par N(r), limites latérales par le signe de f en r ± 10⁻⁵ —,
+  écritures équivalentes, « − – — », illisible et approchée sans tentative, réponse fausse = une
+  tentative, choix fermé faux = clos) : 0 anomalie ; verdicts de « position » 1 978 / 2 017 / 2 005 sur
+  6 000 ; `?code=` : 300 graines × (libre + 4 variantes) identiques. Collecteur (outils de
+  `corrige-5e4` recopiés, `env.ts` : R, Q, x₀, y₀ de la famille position) : 2 520 tirages, ≈ 37 600
+  relations, 0 fausse. Plans réels (30 × 2 séries) : verdict B ≠ A 30 / 30 pour `groupe_infinie_point`
+  et les groupes 5gen24 testés (1 AH, 1 AO, 2 AO, 2 aucune, 2 AH + recoupement), forme B = A 30 / 30 sauf
+  `groupe_1_ah` 27 / 30 (un recoupement tiré par l'AV double en série A ne se reproduit pas avec une AV
+  simple : repli du moteur) ; famille position : B ≠ A 19 / 30 (verdict tiré dans la variante, ≈ 2/3
+  attendu), niveau et durée constants. Documents réels (2 graines × avec / sans regroupement × 2 plans :
+  évaluation 2 séries + aménagée + corrigé + grille + feuille + Word du corrigé) : 0 débordement à 680,
+  820 et 1 280 px, 0 `.katex-error`. iPhone 13 (clair / sombre, 5gen20–24 et `?code=` de la famille
+  position, parcours complet de la nouvelle famille) : scrollWidth 390, 0 erreur console, 0
+  `.katex-error` ; page du chapitre 390 / 1 280 px, clair / sombre : idem, aucun « $ » ni « ** » visible.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 
