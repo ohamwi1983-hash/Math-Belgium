@@ -181,6 +181,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen65: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppQuizGeometrieAnalytique').then((m) => ({ default: m.AppQuizGeometrieAnalytique }))),
   gen92: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppDroiteCercle').then((m) => ({ default: m.AppDroiteCercle }))),
   gen93: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppCercleConditions').then((m) => ({ default: m.AppCercleConditions }))),
+  gen94: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppDroitesRemarquables').then((m) => ({ default: m.AppDroitesRemarquables }))),
 
   // --- 4e, chapitre 8 : Géométrie dans l'espace ---
   gen39: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppPositionDroitePlan').then((m) => ({ default: m.AppPositionDroitePlan }))),

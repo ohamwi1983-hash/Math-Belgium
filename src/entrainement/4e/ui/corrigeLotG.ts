@@ -210,6 +210,24 @@ export function lignesDistance(d: Droite, c: Pt, h: Pt, nomCentre = "C"): LigneC
 export function lignesIntersection(d1: Droite, d2: Droite, sol: Pt, nom = "I"): LigneCalcul[] {
   const L: LigneCalcul[] = [];
   const indice = nom.length > 1 ? `{${nom}}` : nom;
+  // Une équation sans x : y se lit directement, puis on remplace.
+  if (d1.a === 0 || d2.a === 0) {
+    const [dy, ny, dx, nx] = d1.a === 0 ? [d1, 1, d2, 2] : [d2, 2, d1, 1];
+    L.push(ligne(`${somme([[dy.b, "y"], [dy.c, ""]])}=0`, `(${ny}) ne contient pas x`));
+    L.push(ligne(`y_${indice}=${q(sol.y)}`));
+    L.push(ligne(`${coefTete(dx.a)}x=${q(-dx.c - dx.b * sol.y)}`, `on remplace y dans (${nx})`));
+    L.push(ligne(`x_${indice}=${q(sol.x)}`));
+    return dedoublonner(L);
+  }
+  // Une équation sans y : x se lit directement.
+  if (d1.b === 0 || d2.b === 0) {
+    const [dx, nx, dy0, ny] = d1.b === 0 ? [d1, 1, d2, 2] : [d2, 2, d1, 1];
+    L.push(ligne(`${somme([[dx.a, "x"], [dx.c, ""]])}=0`, `(${nx}) ne contient pas y`));
+    L.push(ligne(`x_${indice}=${q(sol.x)}`));
+    L.push(ligne(`${coefTete(dy0.b)}y=${q(-dy0.c - dy0.a * sol.x)}`, `on remplace x dans (${ny})`));
+    L.push(ligne(`y_${indice}=${q(sol.y)}`));
+    return dedoublonner(L);
+  }
   // Inconnue isolable : coefficient ±1.
   const choix: { eq: 1 | 2; v: "x" | "y" } | null =
     Math.abs(d1.b) === 1 ? { eq: 1, v: "y" } : Math.abs(d2.b) === 1 ? { eq: 2, v: "y" } : Math.abs(d1.a) === 1 ? { eq: 1, v: "x" } : Math.abs(d2.a) === 1 ? { eq: 2, v: "x" } : null;
@@ -255,15 +273,6 @@ export function lignesIntersection(d1: Droite, d2: Droite, sol: Pt, nom = "I"): 
       L.push(ligne(`y_${indice}=${q(sol.y)}`));
       L.push(ligne(m === 0 || sol.y === 0 ? `x_${indice}=${q(sol.x)}` : `x_${indice}=${substX(m, p, sol.y)}=${q(sol.x)}`, "on remplace y"));
     }
-    return dedoublonner(L);
-  }
-  // Une équation sans y : x se lit directement.
-  if (d1.b === 0 || d2.b === 0) {
-    const [dx, nx, dy0, ny] = d1.b === 0 ? [d1, 1, d2, 2] : [d2, 2, d1, 1];
-    L.push(ligne(`${somme([[dx.a, "x"], [dx.c, ""]])}=0`, `(${nx}) ne contient pas y`));
-    L.push(ligne(`x_${indice}=${q(sol.x)}`));
-    L.push(ligne(`${coefTete(dy0.b)}y=${q(-dy0.c - dy0.a * sol.x)}`, `on remplace x dans (${ny})`));
-    L.push(ligne(`y_${indice}=${q(sol.y)}`));
     return dedoublonner(L);
   }
   // Combinaison : b2·(1) − b1·(2) élimine y.

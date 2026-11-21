@@ -1005,6 +1005,48 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 47. Distance point-droite et droite-droite »',
         },
+        { kind: 'subheading', text: "Pour aller plus loin — droites remarquables d'un triangle" },
+        {
+          kind: 'para',
+          text:
+            'Les droites remarquables d\'un triangle ABC se construisent avec les outils des sections 4 à 6 : un point ' +
+            'de passage, puis un vecteur directeur ou un vecteur normal. Deux d\'entre elles suffisent : leur ' +
+            'intersection (section 5) donne le point de concours.',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Droite', 'Elle passe par', 'Son vecteur', 'Point de concours'],
+          rows: [
+            ['médiatrice de [BC]', 'le milieu M de [BC]', 'normal : $\\vec{BC}$', 'O, centre du cercle circonscrit'],
+            ['hauteur issue de A', 'le sommet A', 'normal : $\\vec{BC}$', 'H, orthocentre'],
+            ['médiane issue de A', 'A et le milieu M de [BC]', 'directeur : $\\vec{AM}$', 'G, centre de gravité : $\\left(\\dfrac{x_A+x_B+x_C}{3}\\,;\\dfrac{y_A+y_B+y_C}{3}\\right)$'],
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'hauteurs et orthocentre',
+          formula: 'Triangle A(0 ; 0), B(6 ; 0), C(2 ; 4) : hauteurs issues de A et de B, puis orthocentre H.',
+          steps: [
+            { tag: 'hauteur issue de A', text: 'vecteur normal $\\vec{BC}\\begin{pmatrix} -4 \\\\ 4 \\end{pmatrix}$, par A : $-4x+4y=0 \\to x-y=0$' },
+            { tag: 'hauteur issue de B', text: 'vecteur normal $\\vec{CA}\\begin{pmatrix} -2 \\\\ -4 \\end{pmatrix}$, par B : $-2(x-6)-4y=0 \\to x+2y-6=0$' },
+            { tag: 'intersection', text: '$x=y \\to 3y-6=0 \\to y=2$, puis $x=2$' },
+          ],
+          result: { tag: 'orthocentre', text: 'H(2 ; 2) — contrôle par la troisième hauteur : $\\vec{CH}\\cdot\\vec{AB}=0 \\cdot 6+(-2) \\cdot 0=0$ ✓' },
+        },
+        {
+          kind: 'astuce',
+          text:
+            "Aire d'un triangle en repère : prends un côté, par exemple [BC], comme base. La hauteur est la distance de A " +
+            'à la droite (BC) : perpendiculaire par A, pied H, puis AH. Alors $\\mathcal{A}=\\dfrac{BC\\cdot AH}{2}$.',
+        },
+        {
+          kind: 'entrainement',
+          title: "Droites remarquables d'un triangle",
+          generatorId: 'gen94',
+          description: ["Écris les équations des médiatrices, des hauteurs ou des médianes d'un triangle et trouve leur point de concours. Ou calcule son aire avec une base et la distance du sommet opposé à la droite de ce côté."],
+          chantier: '4e',
+          whereLabel: "4e → « 94. Droites remarquables d'un triangle »",
+        },
       ],
     },
 

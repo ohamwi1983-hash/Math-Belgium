@@ -104,7 +104,7 @@ export type IdGenerateurPilote =
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38' | 'gen108' | 'gen111' | 'gen109' | 'gen110' | 'gen112'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83'
-  | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54' | 'gen92' | 'gen93'
+  | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54' | 'gen92' | 'gen93' | 'gen94'
   | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103' | 'gen102' | 'gen105' | 'gen104' | 'gen107' | 'gen106'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen63'
@@ -352,7 +352,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'caracteristiques', generatorId: 'gen46', label: '' },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'relations', generatorId: 'gen45', label: '' },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'intersection', generatorId: 'gen48', label: '' },
-  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'distance', generatorId: 'gen47', label: '' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'distance', generatorId: 'gen47', label: 'Distance point-droite et droite-droite (gen47)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'distance', generatorId: 'gen94', label: "Droites remarquables d'un triangle (gen94)", processus: 3 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen49', label: "Équation d'un cercle depuis son graphe (gen49)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen50', label: "Centre et rayon d'un cercle depuis l'équation développée (gen50)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen92', label: "Tangente et position relative d'une droite et d'un cercle (gen92)", processus: 2 },
@@ -1214,6 +1215,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     distance: [
       { cle: 'distance point-droite', enonce: "Calcule la distance du point $C(-7\\,;\\,7)$ à la droite $d : 4x-3y-1=0$ sans formule toute faite : construis la perpendiculaire à $d$ passant par $C$, détermine son pied $H$, puis calcule $\\|\\vec{CH}\\|$." },
+      { cle: 'hauteurs et orthocentre', enonce: "Dans le triangle de sommets $A(0\\,;\\,0)$, $B(6\\,;\\,0)$ et $C(2\\,;\\,4)$, détermine une équation des hauteurs issues de $A$ et de $B$, puis les coordonnées de l'orthocentre $H$." },
       { cle: 'distance entre deux droites parallèles', enonce: "Calcule la distance entre les droites parallèles $d_1 : y = 2x+1$ et $d_2 : y = 2x-4$, sans formule toute faite." },
     ],
     cercle: [
