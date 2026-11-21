@@ -18,6 +18,13 @@
  * même jour, forment UN créneau (« H1–H2 (08h45 → 10h25) ») et une seule séance, même si une
  * récréation (ou une autre pause courte) les sépare — mais PAS à travers la pause de midi (matin
  * et après-midi restent deux séances). Une heure double compte pour 2 heures de cours, 1 séance.
+ *
+ * Heure zéro (H0, `0004_heure_zero.sql`, colonne `heure_zero`) : une heure JUSTE AVANT H1, sans
+ * pause, de la durée d'une heure (corrigeable à la main : `exceptions`, heure 0). H1 … Hn gardent
+ * leurs numéros et leurs horaires. Une H0 corrigée ne déplace rien (elle doit finir au plus tard au
+ * début de H1) ; elle existe aussi le mercredi (sauf « pas de cours »). H0 fixe = une case de
+ * l'horaire (heure 0) comme les autres, heure double « H0–H1 » comprise ; H0 ponctuelle = vide dans
+ * l'horaire : jamais d'oubli, mais proposée dans le formulaire de séance (`creneauxPonctuels`).
  */
 import { heureTexte } from '../entrainement/export/examen'
 import { ajouterJours, estJourDeClasse, etatJour, jourIso, type EtatJour } from './calendrierFwb'
@@ -52,6 +59,8 @@ export interface ExceptionHeure {
 
 export interface GrilleHoraire {
   ecole_id: string
+  /** Heure zéro (H0) avant H1 (0004) ; faux si 0004 n'est pas appliqué. */
+  heure_zero: boolean
   /** `HH:MM` ou `HH:MM:SS` (colonne `time`). */
   debut: string
   duree_heure: number
@@ -88,6 +97,7 @@ export const GRILLE_EXEMPLE: SaisieGrille = {
   ],
   heures_mercredi: null,
   exceptions: [],
+  heure_zero: false,
 }
 
 /* ------------------------------------------------------------------------------- outils */
@@ -171,7 +181,27 @@ export function journee(g: SaisieGrille, jour = 1): Journee {
       t += pause.duree
     }
   }
+  // H0 : juste avant H1 (son début corrigé compris), sans pause, de la durée d'une heure ; corrigée
+  // à la main, elle garde ses heures et ne déplace rien.
+  if (g.heure_zero === true && heures.length > 0) {
+    const ex = g.exceptions.find((e) => e.heure === 0)
+    const exDebut = ex ? minutes(ex.debut) : null
+    const exFin = ex ? minutes(ex.fin) : null
+    const debut = exDebut ?? heures[0].debut - g.duree_heure
+    const fin = exFin !== null && exFin > debut ? exFin : debut + g.duree_heure
+    heures.unshift({ numero: 0, debut, fin, corrigee: exDebut !== null || exFin !== null })
+  }
   return { heures, pauses, fin: heures.length > 0 ? heures[heures.length - 1].fin : (minutes(g.debut) ?? 0) }
+}
+
+/** Première heure de la journée d'une grille : 0 avec une heure zéro, sinon 1. */
+export function premiereHeure(g: Pick<GrilleHoraire, 'heure_zero'>): number {
+  return g.heure_zero === true ? 0 : 1
+}
+
+/** L'heure de numéro `numero` d'une journée calculée (H0 comprise), ou `undefined`. */
+export function heureDe(j: Journee, numero: number): HeureCalculee | undefined {
+  return j.heures.find((h) => h.numero === numero)
 }
 
 /** Aperçu d'une ligne : « H1 08h45 → 09h35 · H2 09h35 → 10h25 · Récréation 10h25 → 10h45 · … ». */
@@ -207,13 +237,14 @@ export function erreursGrille(g: SaisieGrille): ErreursGrille {
   else if (g.pauses.some((p) => p.duree < DUREE_PAUSE_MIN || p.duree > DUREE_PAUSE_MAX)) e.pauses = `Durée d’une pause : de ${DUREE_PAUSE_MIN} à ${DUREE_PAUSE_MAX} min.`
   else if (g.pauses.filter((p) => p.type === 'midi').length > 1) e.pauses = 'Une seule pause de midi.'
   if (g.heures_mercredi !== null && (g.heures_mercredi < 0 || g.heures_mercredi > g.nombre_heures)) e.mercredi = `Mercredi : de 0 à ${g.nombre_heures} heures.`
-  if (g.exceptions.length > HEURES_MAX || new Set(g.exceptions.map((x) => x.heure)).size !== g.exceptions.length) e.exceptions = 'Corrections d’heures en double.'
+  const h0 = premiereHeure(g)
+  if (g.exceptions.length > HEURES_MAX + 1 - h0 || new Set(g.exceptions.map((x) => x.heure)).size !== g.exceptions.length) e.exceptions = 'Corrections d’heures en double.'
   else {
     for (const x of g.exceptions) {
       const a = minutes(x.debut)
       const b = minutes(x.fin)
-      if (x.heure < 1 || x.heure > g.nombre_heures) {
-        e.exceptions = `Correction de H${x.heure} : cette heure n’existe plus (H1 … H${g.nombre_heures}).`
+      if (x.heure < h0 || x.heure > g.nombre_heures) {
+        e.exceptions = x.heure === 0 ? 'Correction de H0 : coche « Cette école a une heure zéro » ou retire la correction.' : `Correction de H${x.heure} : cette heure n’existe plus (H${h0} … H${g.nombre_heures}).`
         break
       }
       if (a === null || b === null) {
@@ -228,7 +259,11 @@ export function erreursGrille(g: SaisieGrille): ErreursGrille {
   }
   if (!e.debut && !e.duree && !e.nombre && !e.pauses && !e.exceptions) {
     const j = journee(g)
-    for (let i = 1; i < j.heures.length; i++) {
+    const zero = heureDe(j, 0)
+    const un = heureDe(j, 1)
+    if (zero && un && zero.debut < 0) e.exceptions = `H0 commencerait la veille (avant 00h00) : corrige H0 à la main ou retarde H1.`
+    else if (zero && un && zero.fin > un.debut) e.exceptions = `H0 doit finir au plus tard au début de H1 (${heureTexte(un.debut)}).`
+    for (let i = zero ? 2 : 1; !e.exceptions && i < j.heures.length; i++) {
       const avant = j.heures[i - 1]
       const pause = j.pauses.find((p) => p.apres === avant.numero)
       if (j.heures[i].debut < (pause ? pause.fin : avant.fin)) {
@@ -255,6 +290,8 @@ export interface Creneau {
   fin: number
   /** Heures de cours couvertes (2 pour une heure double). */
   nbHeures: number
+  /** H0 ponctuelle (`creneauxPonctuels`) : vide dans l'horaire, sans classe imposée (`classe_id` vide). */
+  ponctuel?: boolean
 }
 
 /** « H2 (09h35 → 10h25) », « H1–H2 (08h45 → 10h25) ». */
@@ -277,11 +314,11 @@ export function creneauxSemaine(jour: number, grilles: GrilleHoraire[], cases: C
   for (const g of grilles) {
     const j = journee(g, jour)
     const duJour = cases
-      .filter((c) => c.ecole_id === g.ecole_id && c.jour === jour && c.semaine === null && c.heure <= j.heures.length)
+      .filter((c) => c.ecole_id === g.ecole_id && c.jour === jour && c.semaine === null && heureDe(j, c.heure) !== undefined)
       .filter((c) => !options.dateLimite || !c.cree_le || c.cree_le.slice(0, 10) <= options.dateLimite)
       .sort((a, b) => a.heure - b.heure)
     for (const c of duJour) {
-      const h = j.heures[c.heure - 1]
+      const h = heureDe(j, c.heure) as HeureCalculee
       const precedent = resultat[resultat.length - 1]
       const pauseEntre = j.pauses.find((p) => p.apres === c.heure - 1)
       if (
@@ -316,6 +353,25 @@ export function creneauxDuJour(date: string, grilles: GrilleHoraire[], cases: Ca
   if (etat.type !== 'classe' && etat.type !== 'inconnu') return { etat, creneaux: [] }
   const creneaux = creneauxSemaine(jourIso(date), grilles, cases, { dateLimite: options.dateLimite ? date : undefined }).map((c) => ({ ...c, date }))
   return { etat, creneaux }
+}
+
+/** Heures zéro PONCTUELLES d'une date : la H0 de chaque école qui en a une, quand aucune case de
+ * l'horaire ne l'occupe ce jour-là (sinon c'est une H0 fixe, déjà dans `creneauxDuJour`). Sans classe
+ * imposée (`classe_id` vide, `ponctuel`). Proposées seulement dans le formulaire de séance : jamais
+ * d'oubli, jamais dans les heures restantes. Rien les week-ends, congés et vacances. */
+export function creneauxPonctuels(date: string, grilles: GrilleHoraire[], cases: CaseHoraire[]): Creneau[] {
+  const etat = etatJour(date)
+  if (etat.type !== 'classe' && etat.type !== 'inconnu') return []
+  const jour = jourIso(date)
+  if (jour < 1 || jour > 5) return []
+  const resultat: Creneau[] = []
+  for (const g of grilles) {
+    if (g.heure_zero !== true) continue
+    const h = heureDe(journee(g, jour), 0)
+    if (!h || cases.some((c) => c.ecole_id === g.ecole_id && c.jour === jour && c.heure === 0 && c.semaine === null)) continue
+    resultat.push({ ecole_id: g.ecole_id, classe_id: '', date, jour, heureDebut: 0, heureFin: 0, debut: h.debut, fin: h.fin, nbHeures: 1, ponctuel: true })
+  }
+  return resultat.sort((a, b) => a.debut - b.debut)
 }
 
 /** Créneau proposé à l'ouverture du carnet : celui en cours, sinon le plus proche dans le temps
@@ -355,7 +411,7 @@ export interface SeanceHoraire {
 export function seanceDuCreneau<S extends SeanceHoraire>(c: Creneau, seances: S[]): S | null {
   for (const s of seances) {
     if (s.classe_id !== c.classe_id || s.date_seance !== c.date) continue
-    if (s.numero_heure) {
+    if (s.numero_heure !== null && s.numero_heure !== undefined) {
       const fin = s.numero_heure_fin ?? s.numero_heure
       if (s.numero_heure <= c.heureFin && fin >= c.heureDebut) return s
       continue
@@ -467,9 +523,14 @@ export function chevauchements(grilles: GrilleHoraire[], cases: CaseHoraire[]): 
   return liste
 }
 
-/** Cases au-delà du nombre d'heures d'une grille (à retirer quand on raccourcit la journée). */
-export function casesHorsGrille(g: Pick<GrilleHoraire, 'ecole_id' | 'nombre_heures' | 'pauses' | 'heures_mercredi'>, cases: CaseHoraire[]): CaseHoraire[] {
-  return cases.filter((c) => c.ecole_id === g.ecole_id && c.heure > (c.jour === 3 ? heuresDuMercredi(g) : g.nombre_heures))
+/** Cases hors de la grille : au-delà du nombre d'heures (on raccourcit la journée), ou en H0 sans
+ * heure zéro (on la décoche) ou un mercredi sans cours. */
+export function casesHorsGrille(g: Pick<GrilleHoraire, 'ecole_id' | 'nombre_heures' | 'pauses' | 'heures_mercredi' | 'heure_zero'>, cases: CaseHoraire[]): CaseHoraire[] {
+  return cases.filter((c) => {
+    if (c.ecole_id !== g.ecole_id) return false
+    const n = c.jour === 3 ? heuresDuMercredi(g) : g.nombre_heures
+    return c.heure > n || c.heure < premiereHeure(g) || (c.heure === 0 && n === 0)
+  })
 }
 
 /** Normalise une grille lue en base (colonnes `time` « 08:45:00 », jsonb éventuellement absent). */
@@ -480,5 +541,6 @@ export function nettoyerGrille(g: GrilleHoraire): GrilleHoraire {
     pauses: Array.isArray(g.pauses) ? g.pauses : [],
     exceptions: Array.isArray(g.exceptions) ? g.exceptions.map((x) => ({ ...x, debut: champHeure(minutes(x.debut) ?? 0), fin: champHeure(minutes(x.fin) ?? 0) })) : [],
     heures_mercredi: g.heures_mercredi ?? null,
+    heure_zero: g.heure_zero === true,
   }
 }

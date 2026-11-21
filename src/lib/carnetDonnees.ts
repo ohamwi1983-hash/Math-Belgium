@@ -12,6 +12,10 @@
  * `seances.numero_heure_fin`) : FACULTATIF. `chargerHoraire` renvoie `actif: false` si 0003 n'est pas
  * appliqué, et les séances sont alors lues / écrites sans `numero_heure_fin` — le carnet marche
  * comme avant.
+ *
+ * Heure zéro (`0004_heure_zero.sql`, colonne `horaires_ecoles.heure_zero`, numéro 0 accepté) :
+ * FACULTATIVE aussi. Sans 0004, `chargerHoraire` renvoie `heureZero: false` (grilles relues sans la
+ * colonne) et le site n'écrit jamais ni la colonne ni le numéro 0.
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { messageErreur } from './compteValidation'
@@ -52,6 +56,8 @@ const COLONNES_SEANCE = 'id, classe_id, date_seance, heure_debut, heure_fin, num
 /** Avec 0003 : la dernière heure d'une heure double en plus. */
 const COLONNES_SEANCE_HORAIRE: string = `${COLONNES_SEANCE}, numero_heure_fin`
 const COLONNES_GRILLE = 'ecole_id, debut, duree_heure, nombre_heures, pauses, heures_mercredi, exceptions'
+/** Avec 0004 : l'heure zéro en plus. */
+const COLONNES_GRILLE_H0: string = `${COLONNES_GRILLE}, heure_zero`
 const COLONNES_CASE = 'id, ecole_id, jour, heure, classe_id, semaine, cree_le'
 
 /* ------------------------------------------------------------------------------- classes */
@@ -87,7 +93,7 @@ export async function listerSeances(c: SupabaseClient, horaire = false): Promise
 }
 
 function ligneSeance(s: SaisieSeance, horaire: boolean): Record<string, unknown> {
-  const heureDouble = horaire ? { numero_heure_fin: s.numero_heure && s.numero_heure_fin && s.numero_heure_fin > s.numero_heure ? s.numero_heure_fin : null } : {}
+  const heureDouble = horaire ? { numero_heure_fin: s.numero_heure !== null && s.numero_heure_fin !== null && s.numero_heure_fin !== undefined && s.numero_heure_fin > s.numero_heure ? s.numero_heure_fin : null } : {}
   return {
     ...heureDouble,
     classe_id: s.classe_id,
@@ -134,44 +140,66 @@ export async function enregistrerReglages(c: SupabaseClient, reglages: ReglagesC
 export interface DonneesHoraire {
   /** Faux : 0003 pas encore appliqué (« Horaire pas encore activé »). */
   actif: boolean
+  /** Faux : 0004 pas encore appliqué (case « heure zéro » désactivée, aucun numéro 0 écrit). */
+  heureZero: boolean
   grilles: GrilleHoraire[]
   cases: CaseHoraire[]
+}
+
+/** Colonne `heure_zero` inconnue : 0004 pas appliqué (Postgres 42703 en lecture, PGRST204 en écriture). */
+function colonneHeureZeroAbsente(erreur: unknown): boolean {
+  const e = (erreur ?? {}) as { code?: string; message?: string }
+  return /heure_zero/i.test(String(e.message ?? '')) && (e.code === '42703' || e.code === 'PGRST204' || /does not exist|schema cache|could not find/i.test(String(e.message ?? '')))
+}
+
+/** Grilles avec l'heure zéro si 0004 est appliqué, sinon sans (`heureZero: false`). */
+async function lireGrilles(c: SupabaseClient): Promise<{ grilles: GrilleHoraire[]; heureZero: boolean }> {
+  const avec = await c.from('horaires_ecoles').select(COLONNES_GRILLE_H0).order('ecole_id', { ascending: true })
+  if (avec.error && colonneHeureZeroAbsente(avec.error)) {
+    const sans = await c.from('horaires_ecoles').select(COLONNES_GRILLE).order('ecole_id', { ascending: true })
+    return { grilles: ((verifier(sans) ?? []) as unknown as GrilleHoraire[]).map((g) => nettoyerGrille({ ...g, heure_zero: false })), heureZero: false }
+  }
+  return { grilles: ((verifier(avec) ?? []) as unknown as GrilleHoraire[]).map(nettoyerGrille), heureZero: true }
 }
 
 /** Grilles et cases du professeur ; `actif: false` (sans erreur) si les tables n'existent pas. */
 export async function chargerHoraire(c: SupabaseClient): Promise<DonneesHoraire> {
   try {
-    const [grilles, cases] = await Promise.all([
-      c.from('horaires_ecoles').select(COLONNES_GRILLE).order('ecole_id', { ascending: true }),
-      c.from('horaire_cases').select(COLONNES_CASE).order('heure', { ascending: true }),
-    ])
+    const [g, cases] = await Promise.all([lireGrilles(c), c.from('horaire_cases').select(COLONNES_CASE).order('heure', { ascending: true })])
     return {
       actif: true,
-      grilles: ((verifier(grilles) ?? []) as GrilleHoraire[]).map(nettoyerGrille),
-      cases: ((verifier(cases) ?? []) as CaseHoraire[]).map((x) => ({ ...x, semaine: x.semaine ?? null })),
+      heureZero: g.heureZero,
+      grilles: g.grilles,
+      // Sans 0004, une case H0 ne peut pas exister ; par prudence elle est ignorée.
+      cases: ((verifier(cases) ?? []) as CaseHoraire[]).map((x) => ({ ...x, semaine: x.semaine ?? null })).filter((x) => g.heureZero || x.heure >= 1),
     }
   } catch (ex) {
-    if (ex instanceof ErreurCarnet && ex.tableAbsente) return { actif: false, grilles: [], cases: [] }
+    if (ex instanceof ErreurCarnet && ex.tableAbsente) return { actif: false, heureZero: false, grilles: [], cases: [] }
     throw ex
   }
 }
 
-function ligneGrille(g: SaisieGrille) {
+/** Ligne écrite en base. Sans 0004 (`heureZero` faux) : ni la colonne `heure_zero` ni une
+ * correction de H0. */
+function ligneGrille(g: SaisieGrille, heureZero: boolean) {
+  const h0 = heureZero && g.heure_zero === true
   return {
+    ...(heureZero ? { heure_zero: h0 } : {}),
     debut: g.debut,
     duree_heure: g.duree_heure,
     nombre_heures: g.nombre_heures,
     pauses: g.pauses.map((p) => ({ apres: p.apres, duree: p.duree, type: p.type })),
     heures_mercredi: g.heures_mercredi,
-    exceptions: g.exceptions.map((x) => ({ heure: x.heure, debut: x.debut, fin: x.fin })),
+    exceptions: g.exceptions.filter((x) => h0 || x.heure >= 1).map((x) => ({ heure: x.heure, debut: x.debut, fin: x.fin })),
   }
 }
 
-/** Crée ou remplace la grille d'une école ; retire d'abord les cases devenues hors grille. */
-export async function enregistrerGrille(c: SupabaseClient, ecoleId: string, g: SaisieGrille, existe: boolean, casesARetirer: string[] = []): Promise<void> {
+/** Crée ou remplace la grille d'une école ; retire d'abord les cases devenues hors grille (H0
+ * décochée comprise). `heureZero` : 0004 appliqué. */
+export async function enregistrerGrille(c: SupabaseClient, ecoleId: string, g: SaisieGrille, existe: boolean, casesARetirer: string[] = [], heureZero = false): Promise<void> {
   for (const id of casesARetirer) verifier(await c.from('horaire_cases').delete().eq('id', id))
-  if (existe) verifier(await c.from('horaires_ecoles').update(ligneGrille(g)).eq('ecole_id', ecoleId))
-  else verifier(await c.from('horaires_ecoles').insert({ ecole_id: ecoleId, ...ligneGrille(g) }))
+  if (existe) verifier(await c.from('horaires_ecoles').update(ligneGrille(g, heureZero)).eq('ecole_id', ecoleId))
+  else verifier(await c.from('horaires_ecoles').insert({ ecole_id: ecoleId, ...ligneGrille(g, heureZero) }))
 }
 
 /** Retire la grille d'une école ET son horaire de la semaine. */

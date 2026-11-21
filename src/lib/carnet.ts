@@ -304,10 +304,18 @@ export function heureChamp(minutes: number): string {
   return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
 }
 
-/** « 1re heure », « 3e heure » ; avec `fin` (heure double) : « 1re–2e heures ». */
+/** « 1re heure », « 3e heure » ; avec `fin` (heure double) : « 1re–2e heures ». Heure zéro (0004) :
+ * « heure zéro » (jamais « 0e heure »), « heure zéro et 1re heure », « heure zéro à 2e heure ». */
 export function numeroHeureTexte(n: number, fin?: number | null): string {
   const ordinal = (k: number) => `${k}${k === 1 ? 're' : 'e'}`
-  return fin && fin > n ? `${ordinal(n)}–${ordinal(fin)} heures` : `${ordinal(n)} heure`
+  const double = fin !== null && fin !== undefined && fin > n
+  if (n === 0) return double ? `heure zéro ${fin === 1 ? 'et' : 'à'} ${ordinal(fin)} heure` : 'heure zéro'
+  return double ? `${ordinal(n)}–${ordinal(fin)} heures` : `${ordinal(n)} heure`
+}
+
+/** Le numéro d'heure est-il renseigné ? (0 = heure zéro, renseigné). */
+function aNumero(n: number | null | undefined): n is number {
+  return n !== null && n !== undefined
 }
 
 /** Plage « 08h50 → 09h40 » (même typographie que l'examen), « 08h50 » sans fin, `null` sans début. */
@@ -323,11 +331,11 @@ export function plageTexte(debut: string | null, fin: string | null): string | n
  * « H1–H2 (08h45 → 10h25) », dès que la séance a les deux. */
 export function horaireTexte(s: Pick<Seance, 'heure_debut' | 'heure_fin' | 'numero_heure' | 'numero_heure_fin'>, format: FormatHoraire, avecGrille = false): string | null {
   const plage = plageTexte(s.heure_debut, s.heure_fin)
-  if (avecGrille && s.numero_heure && plage) {
-    const fin = s.numero_heure_fin && s.numero_heure_fin > s.numero_heure ? s.numero_heure_fin : null
-    return `${fin ? `H${s.numero_heure}–H${fin}` : `H${s.numero_heure}`} (${plage})`
+  if (avecGrille && aNumero(s.numero_heure) && plage) {
+    const fin = aNumero(s.numero_heure_fin) && s.numero_heure_fin > s.numero_heure ? s.numero_heure_fin : null
+    return `${fin !== null ? `H${s.numero_heure}–H${fin}` : `H${s.numero_heure}`} (${plage})`
   }
-  const numero = s.numero_heure ? numeroHeureTexte(s.numero_heure, s.numero_heure_fin) : null
+  const numero = aNumero(s.numero_heure) ? numeroHeureTexte(s.numero_heure, s.numero_heure_fin) : null
   return format === 'numero' ? (numero ?? plage) : (plage ?? numero)
 }
 
@@ -341,7 +349,7 @@ export function horaireParDefaut(
 ): { heure_debut: string | null; heure_fin: string | null; numero_heure: number | null } {
   const jour = jourSemaine(date)
   const meme = [...seancesClasse]
-    .filter((s) => jourSemaine(s.date_seance) === jour && (s.heure_debut || s.numero_heure))
+    .filter((s) => jourSemaine(s.date_seance) === jour && (s.heure_debut || aNumero(s.numero_heure)))
     .sort((a, b) => (a.date_seance < b.date_seance ? 1 : -1))[0]
   if (meme) return { heure_debut: meme.heure_debut ? heureChamp(minutesHeure(meme.heure_debut) ?? 0) : null, heure_fin: meme.heure_fin ? heureChamp(minutesHeure(meme.heure_fin) ?? 0) : null, numero_heure: meme.numero_heure }
   const debut = Math.round((maintenant.getHours() * 60 + maintenant.getMinutes()) / 5) * 5
@@ -378,7 +386,7 @@ export function erreursSeance(s: SaisieSeance): ErreursSeance {
   else if (s.heure_fin && fin === null) e.horaire = 'Heure de fin illisible : écris par exemple 09:40.'
   else if (fin !== null && debut === null) e.horaire = 'Indique aussi l’heure de début.'
   else if (fin !== null && debut !== null && fin <= debut) e.horaire = 'L’heure de fin doit suivre l’heure de début.'
-  if (s.numero_heure !== null && (s.numero_heure < 1 || s.numero_heure > NUMERO_HEURE_MAX)) e.horaire = `Numéro d’heure : de 1 à ${NUMERO_HEURE_MAX}.`
+  if (s.numero_heure !== null && (s.numero_heure < 0 || s.numero_heure > NUMERO_HEURE_MAX)) e.horaire = `Numéro d’heure : de 0 (heure zéro) à ${NUMERO_HEURE_MAX}.`
   const nFin = s.numero_heure_fin ?? null
   if (nFin !== null && (s.numero_heure === null || nFin <= s.numero_heure || nFin > NUMERO_HEURE_MAX)) e.horaire = 'Heure double : la dernière heure doit suivre la première.'
   if (!s.niveau || !s.chapitre) e.chapitre = 'Choisis le chapitre.'
