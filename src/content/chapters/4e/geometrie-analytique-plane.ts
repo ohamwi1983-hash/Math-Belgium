@@ -726,6 +726,36 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 45. Relations entre droites (parallèle/perpendiculaire) »',
         },
+        { kind: 'subheading', text: "Pour aller plus loin — droites qui dépendent d'un paramètre" },
+        {
+          kind: 'methode',
+          label: 'Méthode — une condition, une équation en m, puis un contrôle',
+          items: [
+            'Écris $d_m \\equiv a(m)x+b(m)y+c(m)=0$ : chaque coefficient dépend de m, et $\\begin{pmatrix} -b(m) \\\\ a(m) \\end{pmatrix}$ est un vecteur directeur.',
+            'Traduis la question : **parallèle** à d → critère de colinéarité nul ; **perpendiculaire** → produit scalaire nul ; **passe par P** → les coordonnées de P vérifient l\'équation ; **horizontale** → $a(m)=0$ ; **verticale** → $b(m)=0$.',
+            'Résous l\'équation en m obtenue (premier ou second degré).',
+            'Contrôle chaque solution : si $a(m)$ et $b(m)$ sont tous les deux nuls, l\'équation n\'est plus celle d\'une droite — la valeur est rejetée. Il peut donc y avoir 0, 1 ou 2 valeurs.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'droite dépendant d\'un paramètre',
+          formula: 'Pour quelle(s) valeur(s) de m la droite $d_m \\equiv (m^2-4)x+(m-2)y+3=0$ est-elle horizontale ?',
+          steps: [
+            { tag: 'condition', text: 'horizontale ⟺ coefficient de x nul : $m^2-4=0 \\to m=2$ ou $m=-2$' },
+            { tag: 'contrôle m = 2', text: '$a(2)=0$ et $b(2)=0$ : il reste $3=0$, ce n\'est pas une droite → rejetée' },
+            { tag: 'contrôle m = −2', text: '$a(-2)=0$ et $b(-2)=-4 \\neq 0$ : $d_{-2} \\equiv -4y+3=0$, soit $y=\\dfrac{3}{4}$ ✓' },
+          ],
+          result: { tag: 'résultat', text: 'une seule valeur : $m=-2$' },
+        },
+        {
+          kind: 'entrainement',
+          title: "Droites dépendant d'un paramètre",
+          generatorId: 'gen95',
+          description: ['Une famille de droites dₘ dépend de m : trouve les valeurs de m pour lesquelles dₘ est parallèle ou perpendiculaire à une droite, passe par un point, est horizontale ou verticale. Pense à contrôler que dₘ reste une droite.'],
+          chantier: '4e',
+          whereLabel: "4e → « 95. Droites dépendant d'un paramètre »",
+        },
       ],
     },
 
@@ -1004,6 +1034,48 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           description: ['Exercice de synthèse : construis la perpendiculaire, trouve le pied, mesure la distance. Sans jamais utiliser de formule directe.'],
           chantier: '4e',
           whereLabel: '4e → « 47. Distance point-droite et droite-droite »',
+        },
+        { kind: 'subheading', text: "Pour aller plus loin — droites remarquables d'un triangle" },
+        {
+          kind: 'para',
+          text:
+            'Les droites remarquables d\'un triangle ABC se construisent avec les outils des sections 4 à 6 : un point ' +
+            'de passage, puis un vecteur directeur ou un vecteur normal. Deux d\'entre elles suffisent : leur ' +
+            'intersection (section 5) donne le point de concours.',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Droite', 'Elle passe par', 'Son vecteur', 'Point de concours'],
+          rows: [
+            ['médiatrice de [BC]', 'le milieu M de [BC]', 'normal : $\\vec{BC}$', 'O, centre du cercle circonscrit'],
+            ['hauteur issue de A', 'le sommet A', 'normal : $\\vec{BC}$', 'H, orthocentre'],
+            ['médiane issue de A', 'A et le milieu M de [BC]', 'directeur : $\\vec{AM}$', 'G, centre de gravité : $\\left(\\dfrac{x_A+x_B+x_C}{3}\\,;\\dfrac{y_A+y_B+y_C}{3}\\right)$'],
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'hauteurs et orthocentre',
+          formula: 'Triangle A(0 ; 0), B(6 ; 0), C(2 ; 4) : hauteurs issues de A et de B, puis orthocentre H.',
+          steps: [
+            { tag: 'hauteur issue de A', text: 'vecteur normal $\\vec{BC}\\begin{pmatrix} -4 \\\\ 4 \\end{pmatrix}$, par A : $-4x+4y=0 \\to x-y=0$' },
+            { tag: 'hauteur issue de B', text: 'vecteur normal $\\vec{CA}\\begin{pmatrix} -2 \\\\ -4 \\end{pmatrix}$, par B : $-2(x-6)-4y=0 \\to x+2y-6=0$' },
+            { tag: 'intersection', text: '$x=y \\to 3y-6=0 \\to y=2$, puis $x=2$' },
+          ],
+          result: { tag: 'orthocentre', text: 'H(2 ; 2) — contrôle par la troisième hauteur : $\\vec{CH}\\cdot\\vec{AB}=0 \\cdot 6+(-2) \\cdot 0=0$ ✓' },
+        },
+        {
+          kind: 'astuce',
+          text:
+            "Aire d'un triangle en repère : prends un côté, par exemple [BC], comme base. La hauteur est la distance de A " +
+            'à la droite (BC) : perpendiculaire par A, pied H, puis AH. Alors $\\mathcal{A}=\\dfrac{BC\\cdot AH}{2}$.',
+        },
+        {
+          kind: 'entrainement',
+          title: "Droites remarquables d'un triangle",
+          generatorId: 'gen94',
+          description: ["Écris les équations des médiatrices, des hauteurs ou des médianes d'un triangle et trouve leur point de concours. Ou calcule son aire avec une base et la distance du sommet opposé à la droite de ce côté."],
+          chantier: '4e',
+          whereLabel: "4e → « 94. Droites remarquables d'un triangle »",
         },
       ],
     },
@@ -1296,6 +1368,53 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           ],
           result: { tag: 'tangente', text: '$3x + 4y - 32 = 0$ — contrôle : $3 \\cdot 4 + 4 \\cdot 5 - 32 = 0$ ✓' },
         },
+        { kind: 'subheading', text: "Pour aller plus loin — position relative d'une droite et d'un cercle" },
+        {
+          kind: 'methode',
+          label: 'Méthode — comparer la distance au rayon',
+          items: [
+            'Calcule la distance CH du centre C à la droite d, comme à la section 6 : perpendiculaire à d par C, pied H, puis norme de $\\vec{CH}$.',
+            'Compare-la au rayon r. **CH > r** : d est extérieure au cercle (aucun point commun). **CH = r** : d est tangente au cercle en H (un seul point commun). **CH < r** : d est sécante (deux points communs).',
+            'Pour comparer deux racines, compare leurs carrés : $CH^2$ avec $r^2$, jamais $CH^2$ avec r.',
+            'Même idée à l\'envers : le cercle de centre C tangent à une droite d a pour rayon $r = CH$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'droite et cercle : distance et rayon',
+          formula: 'Position relative de la droite $d : x + 2y + 5 = 0$ et du cercle $\\Gamma : x^2+y^2-6x-2y-8=0$.',
+          steps: [
+            { tag: 'centre et rayon', text: '$(x-3)^2+(y-1)^2=18$ : centre C(3 ; 1), rayon $r=\\sqrt{18}=3\\sqrt{2}$' },
+            {
+              tag: 'pied H',
+              text: 'perpendiculaire par C : $\\begin{cases} x = 3+t \\\\ y = 1+2t \\end{cases}$ ; $(3+t)+2(1+2t)+5=0 \\to 5t+10=0 \\to t=-2$ → H(1 ; −3)',
+            },
+            { tag: 'distance', text: '$CH=\\sqrt{(1-3)^2+(-3-1)^2}=\\sqrt{20}=2\\sqrt{5}$' },
+          ],
+          result: { tag: 'comparaison', text: '$CH^2=20>18=r^2$, donc $CH>r$ : d est extérieure à Γ, aucun point commun' },
+        },
+        { kind: 'subheading', text: 'Pour aller plus loin — déterminer un cercle par des conditions' },
+        {
+          kind: 'methode',
+          label: 'Méthode — trouver d\'abord le centre Ω, puis le rayon',
+          items: [
+            '**Diamètre [AB]** : Ω est le milieu de [AB] et $r=\\dfrac{AB}{2}=\\Omega A$.',
+            '**Trois points A, B, C** : Ω est à égale distance des trois points, donc sur la médiatrice de [AB] et sur celle de [BC] (section 7). Ω est l\'intersection de ces deux médiatrices.',
+            '**Deux points A, B et un centre sur une droite d** : Ω est l\'intersection de d et de la médiatrice de [AB].',
+            'La médiatrice de [AB] passe par le milieu M de [AB] et a pour vecteur normal $\\vec{AB}$ : $a(x-x_M)+b(y-y_M)=0$. Le rayon vaut ensuite $r=\\Omega A$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'cercle passant par trois points',
+          formula: 'Équation du cercle qui passe par A(4 ; 5), B(−2 ; 5) et C(6 ; 1).',
+          steps: [
+            { tag: 'médiatrice de [AB]', text: 'milieu (1 ; 5), vecteur normal $\\vec{AB}\\begin{pmatrix} -6 \\\\ 0 \\end{pmatrix}$ : $-6(x-1)=0$, soit $x=1$' },
+            { tag: 'médiatrice de [AC]', text: 'milieu (5 ; 3), vecteur normal $\\vec{AC}\\begin{pmatrix} 2 \\\\ -4 \\end{pmatrix}$ : $2(x-5)-4(y-3)=0 \\to x-2y+1=0$' },
+            { tag: 'centre Ω', text: '$x=1 \\to 1-2y+1=0 \\to y=1$ : Ω(1 ; 1)' },
+          ],
+          result: { tag: 'cercle', text: '$r=\\Omega A=\\sqrt{3^2+4^2}=5$ → $(x-1)^2+(y-1)^2=25$' },
+        },
         {
           kind: 'atelier',
           tag: 'cercle-equation-widget',
@@ -1369,6 +1488,22 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           description: ["Pars de l'équation développée. Complète le carré et retrouve le centre et le rayon exacts."],
           chantier: '4e',
           whereLabel: "4e → « 50. Centre et rayon d'un cercle »",
+        },
+        {
+          kind: 'entrainement',
+          title: 'Tangente et position relative',
+          generatorId: 'gen92',
+          description: ["Écris la tangente en un point du cercle. Décide si une droite est extérieure, tangente ou sécante à un cercle en comparant la distance du centre au rayon. Ou trouve le cercle de centre donné tangent à une droite."],
+          chantier: '4e',
+          whereLabel: "4e → « 92. Tangente et position relative d'une droite et d'un cercle »",
+        },
+        {
+          kind: 'entrainement',
+          title: 'Déterminer un cercle par des conditions',
+          generatorId: 'gen93',
+          description: ['Trouve l\'équation d\'un cercle à partir de son diamètre, de trois de ses points (médiatrices), ou de deux de ses points et d\'une droite qui porte son centre.'],
+          chantier: '4e',
+          whereLabel: '4e → « 93. Déterminer un cercle par des conditions »',
         },
       ],
     },

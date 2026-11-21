@@ -88,7 +88,19 @@ export interface ChampEnsemble extends ChampBase {
   pieges: { ensemble: Ensemble; message: string }[];
 }
 
-export type Champ = ChampNombre | ChampListe | ChampExpression | ChampEquation | ChampRelation | ChampEnsemble;
+/** Champ texte dont la LECTURE et le JUGEMENT sont fournis par le générateur (4e ch. 7, lot G,
+ * gen92–gen95 : équations de droite ou de cercle en x et y, valeur exacte d'une longueur). Mêmes
+ * statuts que les autres champs (`parse_error` et `forme` : aucune tentative comptée). */
+export interface ChampPersonnalise extends ChampBase {
+  type: "personnalise";
+  verifier: (saisie: string) => { etat: "correct" | "faux" | "piege" | "parse_error" | "forme"; message?: string };
+  /** Aperçu KaTeX de la saisie au-dessus du champ (équations). */
+  apercu?: boolean;
+  /** Rappel de syntaxe affiché sous les champs. */
+  aideSaisie?: string;
+}
+
+export type Champ = ChampNombre | ChampListe | ChampExpression | ChampEquation | ChampRelation | ChampEnsemble | ChampPersonnalise;
 
 export type EcranTSD =
   | {

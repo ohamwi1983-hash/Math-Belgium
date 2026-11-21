@@ -104,7 +104,7 @@ export type IdGenerateurPilote =
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38' | 'gen108' | 'gen111' | 'gen109' | 'gen110' | 'gen112'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83'
-  | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
+  | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54' | 'gen92' | 'gen93' | 'gen94' | 'gen95'
   | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103' | 'gen102' | 'gen105' | 'gen104' | 'gen107' | 'gen106'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen63'
@@ -350,11 +350,15 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen43', label: "Lecture graphique d'une droite (gen43)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen44', label: "Construction graphique d'une droite (gen44)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'caracteristiques', generatorId: 'gen46', label: '' },
-  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'relations', generatorId: 'gen45', label: '' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'relations', generatorId: 'gen45', label: 'Relations entre droites (gen45)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'relations', generatorId: 'gen95', label: "Droites dépendant d'un paramètre (gen95)", processus: 2 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'intersection', generatorId: 'gen48', label: '' },
-  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'distance', generatorId: 'gen47', label: '' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'distance', generatorId: 'gen47', label: 'Distance point-droite et droite-droite (gen47)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'distance', generatorId: 'gen94', label: "Droites remarquables d'un triangle (gen94)", processus: 3 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen49', label: "Équation d'un cercle depuis son graphe (gen49)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen50', label: "Centre et rayon d'un cercle depuis l'équation développée (gen50)" },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen92', label: "Tangente et position relative d'une droite et d'un cercle (gen92)", processus: 2 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen93', label: "Déterminer un cercle par des conditions (gen93)", processus: 3 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen51', label: "Équation d'une parabole depuis son graphe (gen51)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen52', label: "Sommet, foyer, paramètre et directrice depuis l'équation développée (gen52)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen53', label: "Construction graphique d'une parabole (gen53)" },
@@ -1203,6 +1207,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     relations: [
       { cle: 'perpendiculaire par un point', enonce: "Détermine une équation cartésienne et un vecteur directeur de la droite $d'$ perpendiculaire à $d : x-2y+1=0$ et passant par $C(3\\,;\\,-1)$." },
       { cle: 'parallèle par un point', enonce: "Détermine une équation cartésienne de la droite $d'$ parallèle à $d : 3x-y+2=0$ et passant par $A(1\\,;\\,4)$." },
+      { cle: "droite dépendant d'un paramètre", enonce: "Détermine la ou les valeurs du réel $m$ pour lesquelles la droite $d_m : (m^2-4)x+(m-2)y+3=0$ est horizontale." },
       { cle: 'reconnaître la relation', enonce: "Les droites $d_1 : y = 2x+1$ et $d_2 : x+2y-4=0$ sont-elles parallèles, perpendiculaires, ou ni l'un ni l'autre ? Justifie." },
     ],
     intersection: [
@@ -1212,6 +1217,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     distance: [
       { cle: 'distance point-droite', enonce: "Calcule la distance du point $C(-7\\,;\\,7)$ à la droite $d : 4x-3y-1=0$ sans formule toute faite : construis la perpendiculaire à $d$ passant par $C$, détermine son pied $H$, puis calcule $\\|\\vec{CH}\\|$." },
+      { cle: 'hauteurs et orthocentre', enonce: "Dans le triangle de sommets $A(0\\,;\\,0)$, $B(6\\,;\\,0)$ et $C(2\\,;\\,4)$, détermine une équation des hauteurs issues de $A$ et de $B$, puis les coordonnées de l'orthocentre $H$." },
       { cle: 'distance entre deux droites parallèles', enonce: "Calcule la distance entre les droites parallèles $d_1 : y = 2x+1$ et $d_2 : y = 2x-4$, sans formule toute faite." },
     ],
     cercle: [
@@ -1219,6 +1225,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'compléter le carré', enonce: "Montre que l'équation $2x^2+2y^2-8x+12y-24=0$ est celle d'un cercle, puis détermine son centre et son rayon." },
       { cle: 'un second membre négatif', enonce: "L'équation $x^2+y^2-2x+4y+10=0$ est-elle celle d'un cercle ? Justifie en complétant les carrés." },
       { cle: 'tangente en un point du cercle', enonce: "Écris une équation de la tangente au cercle $(x-1)^2+(y-1)^2=25$ en son point $P(4\\,;\\,5)$." },
+      { cle: 'cercle passant par trois points', enonce: "Détermine une équation du cercle qui passe par les points $A(4\\,;\\,5)$, $B(-2\\,;\\,5)$ et $C(6\\,;\\,1)$." },
+      { cle: 'droite et cercle : distance et rayon', enonce: "Détermine la position relative de la droite $d : x+2y+5=0$ et du cercle $\\Gamma : x^2+y^2-6x-2y-8=0$ en comparant la distance du centre de $\\Gamma$ à $d$ avec le rayon." },
     ],
     parabole: [
       "Démontre qu'une parabole de foyer $F\\left(0\\,;\\,\\dfrac{p}{2}\\right)$ et de directrice $y=-\\dfrac{p}{2}$ (avec $p>0$) a pour équation $x^2=2py$, en traduisant l'équidistance d'un point $P(x\\,;\\,y)$ au foyer et à la directrice.",

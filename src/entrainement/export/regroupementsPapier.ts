@@ -301,6 +301,31 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     String.raw`Détermine le sommet S, le foyer F, le paramètre p et l'équation de la directrice d de la (?<ligne>parabole d'équation ${M})\.`,
     "Détermine le sommet S, le foyer F, le paramètre p et l'équation de la directrice d de chaque parabole.",
   ),
+  // gen92 : « On donne le cercle Γ ≡ … et son point P(…). » / « la droite d ≡ … et le cercle Γ ≡ … » /
+  // « le point C(…) et la droite d ≡ … », puis la consigne de la variante (une consigne par variante).
+  gen92: {
+    formes: [
+      {
+        motif: re(String.raw`On donne (?:le cercle|la droite|le point) (?<a>${M}) et (?:son point|le cercle|la droite) (?<b>${M})\.\n(?<q>.+)`),
+        consigne: dansChaqueCas,
+        ligne: (g) => `${g.a} et ${g.b}`,
+      },
+    ],
+  },
+  // gen93 : « On donne les points A(…), B(…) [et C(…) | et la droite d ≡ …]. » + consigne de la variante.
+  gen93: { formes: [{ motif: re(String.raw`On donne les points (?<ligne>.+)\.\n(?<q>Détermine une équation du cercle .+)`), consigne: dansChaqueCas }] },
+  // gen94 : « On donne le triangle ABC de sommets A(…), B(…) et C(…). » + consigne de la variante.
+  gen94: { formes: [{ motif: re(String.raw`On donne le triangle ABC de sommets (?<ligne>.+)\.\n(?<q>.+)`), consigne: dansChaqueCas }] },
+  // gen95 : « On considère la famille de droites dₘ ≡ … (m réel) [et la droite d ≡ … | et le point P(…)]. »
+  gen95: {
+    formes: [
+      {
+        motif: re(String.raw`On considère la famille de droites (?<f>${M}) \(m réel\)(?: et (?<x>la droite ${M}|le point ${M}))?\.\n(?<q>Détermine la ou les valeurs de m .+)`),
+        consigne: dansChaqueCas,
+        ligne: (g) => (g.x ? `${g.f} et ${g.x}` : `${g.f}`),
+      },
+    ],
+  },
   gen11: {
     formes: [{ motif: re(String.raw`On considère la fonction (?<ligne>${M})\.\nDétermine la forme canonique de la fonction(?<s>.*)`), consigne: (g) => `Détermine la forme canonique de chaque fonction${g.s}` }],
   },

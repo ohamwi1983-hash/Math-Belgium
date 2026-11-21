@@ -1684,3 +1684,66 @@ réponse, mauvais choix fermé révélé) : scrollWidth 390, 0 erreur console ; 
 aménagée + feuille + Word du corrigé, calculatrice interdite / autorisée, avec et sans regroupement) :
 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error` ; `groupe_erreur` B ≠ A sur 30 plans ;
 `?code=` 36 / 36.
+
+## 4e ch. 7, lot G — gen92–gen95 (nouveaux, notés)
+
+Coquille `components/AppTransfertSecondDegre.tsx` réutilisée ; seule extension (ajout pur, sans effet sur
+gen115–gen128) : champ `type: "personnalise"` (`ui/ecransTransfertSecondDegre.ts::ChampPersonnalise` —
+`verifier(saisie)` fourni par le générateur, `apercu`, `aideSaisie` ; un `case` dans `diagnostiquerChamp`,
+une entrée dans `AIDE_SAISIE`). Socle du lot : `moteur/equationXY.ts` (équation en x et y — droite ou
+cercle, toute forme : cartésienne, explicite, non développée, développée, multipliée — jugée en huit points :
+« gauche − droite » proportionnel à l'attendu ; préfixe « d : », « d ≡ » ignoré ; sans « = » → `forme`,
+illisible → `parse_error`, aucune tentative ; `verifierEquationM` pour une équation en m ;
+`verifierValeurExacte` : décimale proche d'une racine → `forme`, « valeur exacte »), `ui/geometrieLotG.ts`
+(droites réduites, `pointLatex`, `colonne`, `cercleLatex` / `cercleDeveloppeLatex`, champs `champsPoint`,
+`champDroite`, `champCercle`, `champExact`), `ui/corrigeLotG.ts` (briques « comme au tableau » :
+`lignesDroiteNormale` a(x − x_P) + b(y − y_P) = 0 distribuée / réduite / simplifiée, `lignesMilieu`,
+`lignesVecteur`, `lignesNorme`, `lignesCentreRayon`, `lignesPied` — perpendiculaire paramétrique, t, H,
+raccourci droite verticale / horizontale —, `lignesDistance`, `lignesIntersection` — équation sans x ou sans
+y lue directement, substitution sur un coefficient ±1, sinon combinaison —, `lignesSysteme` (étiquettes
+`\text{(1)}` : « (2) x − 3 » était relu 2·(x − 3) par le collecteur), `lignesEquationCercle`,
+`lignesPointSurDroite`, `lignesPointSurCercle`), `ui/figureLotG.ts` (repère carré, quadrillage d'une
+unité, aucun `id`). Corrigés `4e/generateurs/{droiteCercle,cercleConditions,droitesRemarquables,droitesParametre}/corrigeDetaille.ts`,
+une lettre par écran ; figure annotée en `figureHtml` du résultat final (papier) et en `figureApres` (écran,
+une seule fois : l'appli retire `figureHtml` du corrigé d'écran). Jamais « déterminant » (critère de
+colinéarité), aucun radian.
+- **gen92** (§ 8, processus 2) : `tangente-point` (C lu, CP, CP vecteur normal — choix fermé à options
+  mélangées —, tangente ; pièges CP directeur, droite par C), `position-relative` (centre et rayon par
+  complétion des carrés, pied H, CH, verdict extérieure / tangente / sécante — tiré AVANT les nombres, à
+  parts égales, C = H + k·n à rebours, r² à au plus CH²/2 de CH² ; comparaison des carrés), `cercle-tangent`
+  (H, r = CH, équation ; pièges r au lieu de r², signes). Cas particulier `parallele-axe` (droite ou rayon
+  parallèle à un axe, ≈ 17 %). Niveau 2 constant par variante (8 / 10 / 8 min).
+- **gen93** (§ 8, processus 3) : `diametre` (milieu, r = AB/2, équation), `trois-points` (médiatrices de [AB]
+  et [BC], centre, rayon, équation), `centre-sur-droite` (médiatrice, d ∩ médiatrice…). Centre Ω entier,
+  r² somme de deux carrés, points entiers ; médiatrice parallèle à un axe bridée (≈ 25 %). Méthode 0 / 1 →
+  niveaux 2 / 3, 8 / 12 / 10 min. Vérifications : ΩB = ΩA, points donnés dans l'équation.
+- **gen94** (§ 6, processus 3) : médiatrices + O (O équidistant, OA² = OB² = OC²), hauteurs + H (H = A + B +
+  C − 2O entier, triangle non rectangle ; vérification CH · AB = 0), médianes + G (sommes multiples de 3 ;
+  vecteur 2·AM sans fraction ; contrôle par la moyenne), aire (BC, (BC), pied H, AH, aire = BC · AH / 2 —
+  produit de racines entier par construction). Côtés fixés ([AB], [BC] ; issues de A et de B) pour que la
+  consigne reste commune. Niveau 3 (méthode 1), 8 à 12 min.
+- **gen95** (§ 4, processus 2) : dₘ ≡ a(m)x + b(m)y + c(m) = 0, questions parallèle (A·v − B·u), perpendiculaire
+  (A·u + B·v), point, horizontale (a = 0), verticale (b = 0) ; écrans condition (choix fermé), équation en m,
+  valeurs (liste, « aucune ») ; racine annulant a et b REJETÉE (piège ciblé, contrôle écrit dans le corrigé).
+  Degré tiré (1 ou 2 ; « point » toujours 2) puis le NOMBRE de valeurs (verdict : 0/1 au degré 1 — 0 par
+  une racine rejetée —, 0/1/2 au degré 2) à parts égales avant la recherche ; `forme` = type + degré.
+  Niveau CONSTANT (3 étapes `sansCharge`, méthode 0, piège 1 pour toutes les instances : 3, 8 min). Ligne
+  « condition posée » longue mise entre accolades (pleine largeur : elle comprimait la colonne « = 0 »,
+  2 px de débordement à 680 px avant).
+Profils : `forme` = variante (gen92, gen93, gen94) ; aucun groupe à verdict (aucun nom de variante ne
+donne la réponse) ; pas de `calcul` (tout exact). Regroupement a), b), c) activé pour les quatre
+(`regroupementsPapier.ts`, « Dans chaque cas, … » ; ligne = les données) : 300 / 300 reconnus par variante,
+une consigne par variante. Page de conception : libellés de gen45 et gen47 renseignés.
+Mesures : moteurs (saisies justes autrement écrites, « − », illisible, sans « = », valeur approchée,
+pièges, faux ; contrôles géométriques — H sur d, CH ⟂ d, points sur le cercle, point de concours sur les
+droites, aire = ½|det| recalculée, valeurs de m recalculées par balayage) gen92 6 000 tirages / 142 849
+saisies, gen93 6 000 / 149 729, gen94 4 000 / 91 311, gen95 5 000 / 49 117 : 0 anomalie ; `?code=`
+100 / 100 par générateur ; collecteur (outils de `corrige-4e5-m2` recopiés, candidats = points des droites
+et cercles de l'instance, t, m aux racines ; Δ < 0 : lignes en m non testables) 3 800 tirages, 57 531
+relations, 0 fausse, 0 KaTeX invalide ; parcours iPhone 13 (chaque variante, illisible → sans tentative,
+faux → « tentative 1/3 », trois échecs → réponse et corrigé révélés, choix fermé raté, « Nouvel exercice »
+→ champs vides) : scrollWidth 390, 0 erreur console ; plans réels `construirePlan` (16 × 3 séries,
+interdite / autorisée, cas particulier coché ou non) : même multiset (variante, forme, cas) 16 / 16,
+énoncés tous différents, verdict B ≠ A gen95 16 / 16, gen92 9 / 16 (une seule question à verdict par
+plan, issue tirée à chaque série) ; documents réels (évaluation 2 séries + aménagée + grille + feuille +
+Word du corrigé, avec regroupement) : 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error`.

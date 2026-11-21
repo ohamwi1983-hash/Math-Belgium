@@ -46,10 +46,11 @@ const AIDE_SAISIE: Record<Champ["type"], string> = {
   equation: "Écris une équation complète, avec « = » (par exemple 2x² − 3x + 1 = 0).",
   relation: "Symboles au clavier : < ou >, <= pour ≤, >= pour ≥ (= pour une équation).",
   ensemble: "",
+  personnalise: "",
 };
 
 function ChampTexte({ champ, valeur, onChange, erronee, fige }: { champ: Champ; valeur: string; onChange: (v: string) => void; erronee: boolean; fige: boolean }) {
-  const avecApercu = champ.type === "expression" || champ.type === "equation" || champ.type === "relation";
+  const avecApercu = champ.type === "expression" || champ.type === "equation" || champ.type === "relation" || (champ.type === "personnalise" && !!champ.apercu);
   return (
     <div style={{ minWidth: 0 }} data-champ={champ.id}>
       {avecApercu && !fige && <ApercuExpressionLatex texte={normaliserExpression(valeur)} />}
@@ -176,7 +177,8 @@ export function EtapeChampsTransfert({ consigne, champs, tentativesUtilisees, te
   const complet = saisies.every((s) => (typeof s === "string" ? s.trim() !== "" : saisieEnsembleComplete(s)));
   const message = statuts?.find((s) => s.etat !== "correct" && s.message)?.message;
   const fautes = statuts ? statuts.filter((s) => s.etat !== "correct").length : 0;
-  const types = [...new Set(champs.map((c) => c.type))].filter((t) => t !== "ensemble");
+  const types = [...new Set(champs.map((c) => c.type))].filter((t) => t !== "ensemble" && t !== "personnalise");
+  const aidesPersonnalisees = [...new Set(champs.map((c) => (c.type === "personnalise" ? (c.aideSaisie ?? "") : "")).filter((t) => t !== ""))];
 
   return (
     <div>
@@ -197,9 +199,9 @@ export function EtapeChampsTransfert({ consigne, champs, tentativesUtilisees, te
       </div>
       {!validation && (
         <>
-          {types.length > 0 && (
+          {types.length + aidesPersonnalisees.length > 0 && (
             <p className="field-hint" style={{ fontSize: "0.9em", color: "var(--color-text-muted)", marginTop: 0 }}>
-              {espacesInsecables(types.map((t) => AIDE_SAISIE[t]).join(" "))}
+              {espacesInsecables([...types.map((t) => AIDE_SAISIE[t]), ...aidesPersonnalisees].join(" "))}
             </p>
           )}
           <BlocAides {...aides} />
