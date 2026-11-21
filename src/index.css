@@ -402,132 +402,7 @@ h1.chapter-title {
   color: var(--ink-soft);
   max-width: 62ch;
 }
-.toc {
-  margin-top: 32px;
-  padding: 18px 20px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-}
-.toc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.toc p.toc-label {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin: 0 0 10px;
-}
-.toc ol { margin: 0; padding: 0 0 0 1.3em; }
-.toc li { margin: 3px 0; color: var(--ink-soft); }
-.toc a { color: var(--ink); text-decoration: none; }
-.toc a:hover { color: var(--accent-ink); }
-
-/* ---------- aides de navigation mobile (chapitre long) ----------
-   Barre de progression + en-tête de section collant + sommaire flottant + bouton "remonter en
-   haut", voir `LectureAids.tsx`. Comparées et validées avec l'utilisateur via un artefact
-   interactif avant implémentation ("Je prends toutes les options. C'est parfait."). z-index élevé
-   (au-dessus de tout le reste du gabarit, dont les callouts/illustrations qui n'en ont pas) mais
-   sous celui d'un éventuel futur modal plus prioritaire. */
-.lecture-progress {
-  position: fixed;
-  top: env(safe-area-inset-top, 0px);
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--line-soft);
-  z-index: 60;
-}
-.lecture-progress-fill { height: 100%; background: var(--accent); }
-
-.lecture-sticky-head {
-  position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 3px);
-  left: 0;
-  right: 0;
-  z-index: 59;
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
-  padding: 9px 20px;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  color: var(--ink-soft);
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  transform: translateY(-100%);
-  transition: transform 0.18s ease;
-}
-.lecture-sticky-head.visible { transform: translateY(0); }
-.lecture-sticky-head .num { color: var(--accent); font-weight: 600; }
-
-.lecture-fab-top,
-.lecture-fab-toc {
-  position: fixed;
-  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-  z-index: 58;
-  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-  border: none;
-}
-.lecture-fab-top {
-  right: 18px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  color: var(--ink-soft);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.18s ease;
-}
-.lecture-fab-top.visible { opacity: 1; pointer-events: auto; }
-.lecture-fab-top svg { width: 16px; height: 16px; }
-
-.lecture-fab-toc {
-  left: 18px;
-  padding: 11px 17px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: var(--on-accent);
-  font-family: var(--sans);
-  font-weight: 600;
-  font-size: 13.5px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.lecture-fab-toc:hover { background: var(--accent-ink); }
-
-.lecture-sheet {
-  position: fixed;
-  inset: 0;
-  z-index: 70;
-  background: rgba(10, 14, 18, 0.45);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-}
-.lecture-sheet.open { opacity: 1; pointer-events: auto; }
-.lecture-sheet-body {
-  width: 100%;
-  max-width: 560px;
-  max-height: 76vh;
-  overflow-y: auto;
-  background: var(--surface);
-  border-radius: 16px 16px 0 0;
-  padding: 18px 18px calc(22px + env(safe-area-inset-bottom, 0px));
-  transform: translateY(12px);
-  transition: transform 0.18s ease;
-}
-.lecture-sheet.open .lecture-sheet-body { transform: translateY(0); }
+/* ---------- outils du chapitre (« Feuilles », « Carnet », « Imprimer », voir `OutilsChapitre.tsx`) ---------- */
 .lecture-sheet-title {
   font-family: var(--mono);
   font-size: 11.5px;
@@ -550,8 +425,6 @@ h1.chapter-title {
 .lecture-outil svg { width: 19px; height: 19px; }
 .lecture-outil:hover, .lecture-outil.actif { background: var(--accent-soft); color: var(--accent-ink); }
 .lecture-outil:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.lecture-sheet .lecture-outil { width: 64px; font-size: 11.5px; padding: 6px 0 5px; }
-.lecture-sheet .lecture-outil svg { width: 21px; height: 21px; }
 .lecture-menu-impression {
   position: absolute; top: calc(100% + 6px); right: 0; z-index: 30; min-width: 170px;
   display: flex; flex-direction: column; padding: 4px;
@@ -562,199 +435,6 @@ h1.chapter-title {
   font-family: var(--sans); font-size: 14px; color: var(--ink); cursor: pointer;
 }
 .lecture-menu-impression button:hover, .lecture-menu-impression button:focus-visible { background: var(--accent-soft); color: var(--accent-ink); outline: none; }
-.lecture-sheet-tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--surface-2);
-  border: 1px solid var(--line-soft);
-  border-radius: 999px;
-  padding: 4px;
-  margin: 0 0 14px;
-}
-.lecture-sheet-tab {
-  flex: 1 1 0;
-  border: none;
-  border-radius: 999px;
-  padding: 8px 0;
-  background: none;
-  color: var(--ink-soft);
-  font-family: var(--sans);
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-}
-.lecture-sheet-tab.active { background: var(--accent); color: var(--on-accent); }
-.lecture-sheet-item {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  width: 100%;
-  text-align: left;
-  border: none;
-  background: none;
-  cursor: pointer;
-  padding: 11px 6px;
-  border-radius: var(--radius);
-  color: var(--ink);
-  font-family: var(--sans);
-  font-size: 0.98rem;
-}
-.lecture-sheet-item:hover { background: var(--surface-2); }
-.lecture-sheet-item.current { color: var(--accent-ink); font-weight: 600; }
-.lecture-sheet-item .n {
-  font-family: var(--serif);
-  color: var(--accent);
-  width: 1.6em;
-  flex: none;
-}
-a.lecture-sheet-item { text-decoration: none; }
-.lecture-sheet-item-exercice { align-items: center; }
-.lecture-sheet-exercice-id {
-  flex: none;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  color: var(--accent-ink);
-  background: var(--surface-2);
-  border: 1px solid var(--accent-soft-line);
-  padding: 3px 7px;
-  border-radius: 2px;
-  white-space: nowrap;
-}
-.lecture-sheet-item-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.lecture-sheet-item-section {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--ink-faint);
-}
-.lecture-sheet-item-exercice .arrow { flex: none; margin-left: auto; font-family: var(--mono); color: var(--ink-faint); }
-.lecture-sheet-item-video { align-items: center; }
-.lecture-sheet-video-icon {
-  flex: none;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--surface-2);
-  border: 1px solid var(--line-soft);
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.lecture-sheet-item-atelier { align-items: center; }
-/* Violet (--plan), pas l'accent orange des exercices/vidéos : un atelier est un widget LIBRE (pas
-   de correction ni de score, voir .claude/rules/interactive-widgets.md), teinte déjà réutilisée
-   sur ce principe par le callout "intuition" — distinguer visuellement "manipuler" de "s'exercer"
-   dans le tiroir, sans inventer une nouvelle couleur hors palette. */
-.lecture-sheet-atelier-icon {
-  flex: none;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--plan-soft);
-  border: 1px solid var(--plan);
-  color: var(--plan);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.lecture-sheet-close {
-  display: block;
-  margin: 14px auto 0;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--ink-faint);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-/* ---------- sommaire permanent (tablette/PC) ----------
-   `.chapter-sidebar` (rendue par `LectureAids`, voir ce fichier) reprend les mêmes onglets/listes
-   que le tiroir mobile ci-dessus (`rendreListeOnglet`, même source de données), mais à poste fixe
-   à côté du texte plutôt que caché derrière le bouton flottant « Sections » — un tiroir qui glisse
-   depuis le bas de l'écran est un réflexe mobile, qui ne correspond à aucune habitude sur grand
-   écran. Masquée par défaut (mobile, où le tiroir reste adapté) ; devient un flex sibling de
-   `.chapter-main` au-delà du seuil ci-dessous, qui bascule aussi `.chapter-layout` en vrai layout
-   à deux colonnes et retire le tiroir/bouton/en-tête collant devenus redondants. Comparée et
-   validée avec l'utilisateur via un artefact avant implémentation. */
-.chapter-sidebar { display: none; }
-
-@media (min-width: 760px) {
-  /* Grille, pas flex : `position: sticky` sur un enfant de conteneur flex a un lourd historique de
-     bugs multi-navigateurs (le sticky "décroche" au scroll dans certaines combinaisons flex +
-     overflow/max-height sur l'enfant, exactement notre cas) — une grille à colonnes fixes est la
-     manière robuste, documentée, d'obtenir une colonne collante à côté du contenu, sans dépendre
-     du calcul de hauteur des items flex. */
-  .chapter-layout {
-    display: grid;
-    grid-template-columns: 240px minmax(0, 760px);
-    gap: 28px;
-    max-width: 1040px;
-    margin: 0 auto;
-    padding: 0 24px;
-  }
-  .chapter-layout .page.chapter-main {
-    max-width: none;
-    margin: 0;
-    padding: 56px 0 96px;
-    min-width: 0;
-  }
-  .chapter-sidebar {
-    display: flex;
-    flex-direction: column;
-    width: 240px;
-    margin-top: 56px;
-    position: sticky;
-    top: 24px;
-    align-self: start;
-    max-height: calc(100vh - 48px);
-    overflow-y: auto;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 16px 18px;
-  }
-  .chapter-sidebar .lecture-sheet-title { margin: 0 0 12px; }
-  .chapter-sidebar .lecture-entete .lecture-sheet-title { margin: 0 0 4px; }
-  .chapter-sidebar .lecture-sheet-tabs { margin: 0 0 10px; }
-  /* 4 onglets (avec "Ateliers") ne tiennent plus sur une seule ligne dans ce sommaire, large de
-     240px seulement — "Exercices" à lui seul y occupe près de 70px, contre ~202px de largeur utile
-     pour les 4 pastilles. Repliées en grille 2×2 plutôt que rétrécies (taille de police illisible)
-     ou tronquées. Seul le sommaire desktop est concerné : le tiroir mobile (`.lecture-sheet`, bien
-     plus large) garde sa ligne unique, `.lecture-sheet-tabs-wrap` n'étant posée que si 4 onglets ou
-     plus (voir `LectureAids.tsx`) et scopée ici à `.chapter-sidebar`. */
-  .chapter-sidebar .lecture-sheet-tabs-wrap { flex-wrap: wrap; }
-  .chapter-sidebar .lecture-sheet-tabs-wrap .lecture-sheet-tab { flex: 1 1 42%; }
-  .lecture-sidebar-list { display: flex; flex-direction: column; }
-  .lecture-sidebar-item {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    width: 100%;
-    text-align: left;
-    border: none;
-    background: none;
-    cursor: pointer;
-    text-decoration: none;
-    padding: 7px 6px;
-    border-radius: var(--radius);
-    color: var(--ink-soft);
-    font-family: var(--sans);
-    font-size: 0.85rem;
-  }
-  .lecture-sidebar-item:hover { background: var(--surface-2); }
-  .lecture-sidebar-item.current { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
-  .lecture-sidebar-item .n { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-faint); width: 1.4em; flex: none; }
-  .lecture-sidebar-item.current .n { color: var(--accent-ink); }
-
-  /* Devenus redondants avec le sommaire permanent ci-dessus : le tiroir/bouton déclencheur (réflexe
-     mobile) et l'en-tête collant (la section courante est déjà visible dans la liste du sommaire). */
-  .lecture-fab-toc,
-  .lecture-sheet,
-  .lecture-sticky-head {
-    display: none;
-  }
-}
 
 /* ---------- sections ---------- */
 .chapter-section { margin-top: 68px; }
@@ -2276,4 +1956,398 @@ h1.eleve-titre { font-family: var(--serif); font-size: clamp(1.6rem, 5vw, 2.25re
 @media (prefers-color-scheme: dark) {
   /* Thème sombre : la barre reste sombre (inverser --ink/--paper la rendait claire). */
   .eleve-recap { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+}
+
+/* ---------- parcours du chapitre : une étape par écran (`ChapterPage`) ----------
+   Maquettes validées par l'utilisateur (22/11/2026) : carte du chapitre, une étape par écran,
+   exemple pas à pas, atelier plein écran, onglet Réviser, ordinateur à trois colonnes.
+   TOUT ce bloc est limité à l'ÉCRAN (`@media screen`) et à `.chapter-layout.parcours`, ancêtre
+   situé hors de `.page` : l'impression (Ctrl+P, menu « Imprimer », version aménagée) et l'export
+   HTML (qui ne clone que `.page`) gardent exactement le chapitre d'avant, d'un seul bloc.
+   La vue courante (`data-vue` : carte | etape | reviser | entrainer) ne fait que MASQUER le reste
+   du chapitre, toujours présent dans le DOM (pré-rendu : texte de toutes les sections). */
+@media screen {
+  .chapter-layout.parcours {
+    /* Police de LECTURE (corps, encadrés, légendes, tiroirs) : Andika, déjà servie par le site et
+       utilisée à l'impression. Un seul jeton à changer. Titres : Fraunces (`--serif`) ; interface
+       (onglets, boutons, pastilles) : Work Sans (`--sans`). */
+    --lecture: "Andika", "Work Sans", "Segoe UI", system-ui, sans-serif;
+    /* Fond orange clair (essentiel, définition, méthode, rappel), dérivé des jetons existants. */
+    --orange-clair: color-mix(in srgb, var(--accent-soft) 55%, var(--surface));
+    background: var(--surface);
+    min-height: 100vh;
+  }
+  /* Fond UNI : plus de quadrillé derrière la lecture. */
+  body:has(.chapter-layout.parcours) { background: var(--paper); }
+
+  /* --- ce que chaque vue montre --- */
+  .parcours .page > :is(.parcours-tete, .onglets-page, .intro-section, .parcours-carte, .parcours-reviser,
+    .synthese, .formulaire, .formulaire-actions, .export-section, .parcours-entrainer),
+  .parcours .page > .chapter-section:not(.etape-active) { display: none; }
+  .parcours[data-vue="carte"] .page > :is(.parcours-tete, .intro-section, .parcours-carte) { display: block; }
+  .parcours:not([data-vue="etape"]) .page > .onglets-page { display: flex; }
+  .parcours[data-vue="reviser"] .page > :is(.parcours-reviser, .synthese, .formulaire, .export-section) { display: block; }
+  .parcours[data-vue="reviser"] .page > .formulaire-actions { display: flex; }
+  .parcours[data-vue="entrainer"] .page > .parcours-entrainer { display: block; }
+  .parcours[data-vue="etape"] .page > .chapter-head { display: none; }
+  .parcours:is([data-vue="reviser"], [data-vue="entrainer"]) .chapter-lede { display: none; }
+  /* Exemples : rendus à leur place pour l'impression, relus à l'écran dans un tiroir. */
+  .parcours .en-tiroir { display: none; }
+
+  /* --- colonne de lecture (téléphone d'abord) --- */
+  .parcours .page.chapter-main {
+    max-width: 760px;
+    padding: 22px 16px 56px;
+    font-family: var(--lecture);
+    font-size: 17px;
+    line-height: 1.6;
+  }
+  .parcours .chapter-head { margin-bottom: 18px; }
+  .parcours .chapter-head .eyebrow { font-size: 11.5px; margin-bottom: 6px; }
+  .parcours h1.chapter-title { font-size: clamp(1.9rem, 7vw, 2.5rem); margin-bottom: 10px; }
+  .parcours .chapter-lede { font-family: var(--lecture); font-size: 1.02rem; margin: 0; }
+  .parcours h3.sub-title { font-family: var(--serif); font-size: 1.22rem; font-weight: 600; margin: 30px 0 10px; }
+  .parcours figure { margin: 20px 0; }
+  .parcours figcaption { font-family: var(--lecture); font-size: 15px; line-height: 1.5; color: var(--ink-soft); text-align: left; }
+  .parcours .diagram-frame { border-color: var(--line-soft); }
+  /* Une formule ne se casse plus en fin de ligne (« = » seul, « N » seul) : trop large, elle
+     défile horizontalement dans son propre conteneur (`.math-inline`, déjà `overflow-x: auto`). */
+  .parcours .math-inline .katex { white-space: nowrap; }
+  .parcours .math-inline { max-width: 100%; padding-bottom: 2px; }
+  .parcours [tabindex="-1"]:focus { outline: none; }
+  .parcours :is(button, a, [role="tab"]):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* --- quatre rôles d'encadrés seulement --- */
+  .parcours .callout { border: 1px solid var(--line-soft); border-left: 3px solid var(--line); padding: 14px 16px; margin: 20px 0; }
+  .parcours .callout-label, .parcours .etiquette {
+    font-family: var(--sans); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 7px; margin: 0 0 8px;
+  }
+  /* orange : définition, méthode, rappel (et l'essentiel) */
+  .parcours :is(.callout-definition, .callout-methode, .callout-rappel) {
+    background: var(--orange-clair); border-color: var(--accent-soft-line); border-left-color: var(--accent);
+  }
+  .parcours :is(.callout-definition, .callout-methode, .callout-rappel) .callout-label { color: var(--accent-ink); }
+  /* rouge : attention, piège */
+  .parcours :is(.callout-attention, .callout-piege) {
+    background: var(--bad-soft); border-color: color-mix(in srgb, var(--bad) 30%, var(--surface)); border-left-color: var(--bad);
+  }
+  .parcours :is(.callout-attention, .callout-piege) .callout-label { color: var(--bad); }
+  /* neutre clair : astuce, intuition */
+  .parcours :is(.callout-astuce, .callout-intuition) { background: var(--surface-2); border-color: var(--line-soft); border-left-color: var(--line); }
+  .parcours :is(.callout-astuce, .callout-intuition) .callout-label { color: var(--ink-soft); }
+  /* bleu : exemple */
+  .parcours .callout-exemple { background: var(--sky-soft); border-color: color-mix(in srgb, var(--sky) 30%, var(--surface)); border-left-color: var(--sky); }
+  .parcours .callout-exemple .callout-label { color: var(--sky-ink); }
+
+  .parcours .essentiel {
+    background: var(--orange-clair); border: 1px solid var(--accent-soft-line); border-radius: var(--radius);
+    padding: 14px 16px; margin: 0 0 22px;
+  }
+  .parcours .essentiel .etiquette { color: var(--accent-ink); }
+  .parcours .essentiel p { margin: 0 0 0.5em; }
+  .parcours .essentiel p:last-child { margin-bottom: 0; }
+
+  /* --- carte du chapitre --- */
+  .parcours-tete { margin: 0 0 14px; }
+  .parcours-progression { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; font: 600 14px/1 var(--sans); color: var(--good); }
+  .parcours-progression .barre, .etape-entete .barre { flex: 1; height: 8px; background: var(--line-soft); border-radius: 4px; overflow: hidden; }
+  .parcours-progression .barre span, .etape-entete .barre span { display: block; height: 100%; background: var(--good); border-radius: inherit; }
+  .parcours-compte { white-space: nowrap; }
+  .btn-reprendre {
+    display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 16px;
+    background: var(--accent); color: var(--on-accent); border-radius: var(--radius);
+    font: 600 16px/1.3 var(--sans); text-align: center; text-decoration: none;
+  }
+  .btn-reprendre:hover { background: var(--accent-ink); color: var(--surface); }
+
+  .onglets-chapitre { display: flex; gap: 6px; margin: 0 0 18px; }
+  .onglet {
+    flex: 1 1 0; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-height: 44px; padding: 8px 8px; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--surface); color: var(--ink); font: 500 15px/1.1 var(--sans); white-space: nowrap; cursor: pointer;
+  }
+  .onglet svg { flex: none; }
+  .onglet:hover { border-color: var(--ink-soft); }
+  .onglet.actif { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+
+  .parcours .intro-section { margin: 0 0 14px; padding: 0; border: 0; }
+  .parcours .intro-section:not(.intro-ouverte) > :not(.intro-bascule),
+  .parcours .intro-section > h2.section-title { display: none; }
+  .intro-bascule {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px;
+    padding: 10px 14px; border: 1px solid var(--line-soft); border-radius: var(--radius); background: var(--surface-2);
+    color: var(--ink); text-align: left; cursor: pointer; font-family: var(--sans);
+  }
+  .intro-bascule > span:first-child { display: flex; flex-direction: column; }
+  .intro-avant { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+  .intro-nom { font-size: 16px; font-weight: 600; }
+  .intro-ouverte .intro-bascule { margin-bottom: 8px; }
+
+  .liste-partie { font: 600 12.5px/1.3 var(--sans); letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-soft); margin: 18px 0 4px; }
+  .liste-groupe:first-child .liste-partie { margin-top: 4px; }
+  .liste-etapes ol { list-style: none; margin: 0; padding: 0; }
+  .etape-lien {
+    display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 6px 10px; margin: 2px 0;
+    border: 1px solid transparent; border-radius: var(--radius);
+    color: var(--ink); text-decoration: none; font: 500 16.5px/1.3 var(--sans);
+  }
+  .etape-lien:hover { background: var(--surface-2); }
+  .etape-lien.en-cours { background: var(--orange-clair); border-color: var(--accent-soft-line); font-weight: 600; }
+  .pastille {
+    flex: none; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--line);
+    display: inline-flex; align-items: center; justify-content: center; font: 600 13px/1 var(--sans); color: var(--ink-soft);
+  }
+  .etape-lien.lue .pastille { background: var(--good); border-color: var(--good); color: var(--surface); }
+  .etape-lien.en-cours:not(.lue) .pastille { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .etape-nom { flex: 1; min-width: 0; }
+  .etape-duree { flex: none; font: 400 14px/1 var(--sans); color: var(--ink-faint); }
+  .carte-outils { margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+
+  /* --- une étape --- */
+  .parcours-cote { display: none; }
+  .etape-entete {
+    position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 12px;
+    padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--line-soft);
+  }
+  .etape-carte {
+    flex: none; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--line); border-radius: var(--radius); color: var(--ink);
+  }
+  .etape-entete-texte { flex: 1; min-width: 0; }
+  .etape-entete-texte p {
+    margin: 0; font: 500 11.5px/1.3 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .etape-entete .barre { height: 4px; margin-top: 6px; }
+  .etape-entete .barre span { background: var(--accent); }
+
+  /* Fragment changé hors de React Router (adresse modifiée à la main) : l'ancre native du navigateur
+     amène la section en haut de l'écran — sous l'en-tête collant de l'étape, pas derrière. */
+  .parcours .chapter-section { margin-top: 0; padding-top: 0; border-top: 0; scroll-margin-top: 72px; }
+  .parcours .section-head { margin-bottom: 6px; }
+  .parcours .section-num { display: none; }
+  .parcours h2.section-title { font-size: 1.75rem; line-height: 1.15; }
+  .etape-meta { margin: 0 0 14px; font: 400 14px/1.4 var(--sans); color: var(--ink-soft); }
+  .etape-meta-num { display: none; }
+  .parcours .section-kicker { margin: 0 0 14px; font-size: 12px; }
+
+  .etape-annexes { display: flex; flex-direction: column; gap: 14px; margin: 24px 0; }
+  .tiroirs { border: 1px solid var(--line-soft); border-radius: var(--radius); background: var(--surface); }
+  .tiroirs > * + * { border-top: 1px solid var(--line-soft); }
+  .tiroir-bouton {
+    width: 100%; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 12px 14px;
+    background: none; border: 0; color: var(--ink); text-align: left; cursor: pointer; font: 600 16px/1.35 var(--sans);
+  }
+  .tiroir-bouton:hover { background: var(--surface-2); }
+  .tiroir-icone { flex: none; display: inline-flex; }
+  .tiroir-exemple .tiroir-icone { color: var(--sky); }
+  .tiroir-vraie-vie .tiroir-icone { color: var(--accent); }
+  .tiroir-histoire .tiroir-icone { color: var(--histoire); }
+  .tiroir-video .tiroir-icone, .tiroir-inactif .tiroir-icone { color: var(--bad); }
+  .tiroir-titre { flex: 1; min-width: 0; }
+  .tiroir-sous { font-weight: 500; color: var(--ink-soft); }
+  .tiroir-signe { flex: none; font: 400 22px/1 var(--sans); color: var(--ink-soft); }
+  .tiroir-corps { padding: 2px 14px 16px; }
+  .tiroir-corps > p:last-child { margin-bottom: 0; }
+  .tiroir-exemple.ouvert { background: color-mix(in srgb, var(--sky-soft) 60%, var(--surface)); }
+  .tiroir-vignette { float: right; width: 84px; height: auto; margin: 4px 0 8px 14px; border-radius: var(--radius); border: 1px solid var(--line-soft); }
+  .tiroir-domaines { font: 500 13px/1.4 var(--sans); color: var(--ink-soft); clear: both; }
+  .tiroir-inactif { display: flex; align-items: center; gap: 12px; margin: 0; padding: 12px 14px; font: 500 15px/1.35 var(--sans); color: var(--ink-soft); }
+  .tiroir-corps .video-embed { margin: 4px 0 0; }
+
+  .pas-a-pas { border-left: 3px solid var(--sky); padding: 2px 0 2px 14px; }
+  .pas-enonce { margin: 0 0 12px; }
+  .pas-liste { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .pas-liste li { display: flex; gap: 12px; align-items: flex-start; }
+  .pas-liste li > div { min-width: 0; flex: 1; }
+  .pas-num {
+    flex: none; width: 26px; height: 26px; margin-top: 1px; border-radius: 50%; background: var(--sky); color: var(--on-sky);
+    font: 700 13px/26px var(--sans); text-align: center;
+  }
+  .pas-tag { display: block; font: 600 12.5px/1.3 var(--sans); color: var(--sky-ink); margin-bottom: 2px; }
+  .pas-a-pas .exemple-result { margin: 0 0 12px; }
+  .pas-boutons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+
+  .btn-parcours {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 14px;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    font: 500 15px/1.2 var(--sans); text-decoration: none; cursor: pointer;
+  }
+  .btn-parcours:hover { border-color: var(--ink-soft); }
+  .btn-parcours.btn-plein { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .btn-parcours.btn-plein:hover { background: var(--accent-ink); border-color: var(--accent-ink); color: var(--surface); }
+  .btn-parcours.btn-discret { border-color: transparent; background: none; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+  .carte-manipuler {
+    background: var(--ink); color: var(--surface); border-radius: var(--radius); padding: 16px;
+    display: flex; flex-direction: column; gap: 10px; font-family: var(--sans);
+  }
+  .carte-manipuler .etiquette { color: var(--accent-soft-line); margin: 0; }
+  .carte-titre { margin: 0; font: 600 17px/1.3 var(--sans); }
+  .carte-legende {
+    margin: 0; font-family: var(--lecture); font-size: 15px; line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .carte-atoi {
+    background: var(--plan-soft); border: 1px solid color-mix(in srgb, var(--plan) 30%, var(--surface)); border-left: 3px solid var(--plan);
+    border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; font-family: var(--sans);
+  }
+  .carte-atoi .etiquette { color: var(--plan-ink); margin: 0; }
+  .carte-atoi-id { margin-left: auto; font: 500 12px/1 var(--mono); letter-spacing: 0; text-transform: none; }
+  .carte-desc { margin: 0; font-family: var(--lecture); font-size: 15px; line-height: 1.5; color: var(--ink-soft); }
+  .btn-parcours.btn-atoi { background: var(--plan); border-color: var(--plan); color: var(--surface); font-weight: 600; margin-top: 4px; }
+  .btn-parcours.btn-atoi:hover { background: var(--plan-ink); border-color: var(--plan-ink); }
+  .carte-video { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--radius); padding: 14px 16px; font-family: var(--sans); }
+  .carte-video .etiquette { color: var(--bad); }
+  .carte-video-bouton {
+    width: 100%; min-height: 44px; padding: 8px 0; border: 0; background: none; text-align: left; cursor: pointer;
+    font: 500 15px/1.35 var(--sans); color: var(--ink); text-decoration: underline; text-underline-offset: 3px;
+  }
+  .carte-video-attente { margin: 0; font-size: 14.5px; color: var(--ink-soft); }
+
+  /* Barre du bas (téléphone) : ‹ n−1 · J'ai compris · n+1. titre › */
+  .etape-nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; gap: 6px;
+    padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: var(--surface); border-top: 1px solid var(--line-soft); font-family: var(--sans);
+  }
+  .parcours[data-vue="etape"] .page.chapter-main { padding-bottom: 104px; }
+  .etape-nav .nav-prec { flex: none; }
+  .etape-nav .nav-long { display: none; }
+  .btn-compris { flex: 0 0 auto; padding-left: 12px; padding-right: 12px; color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, var(--surface)); }
+  .btn-compris.fait { background: var(--good); border-color: var(--good); color: var(--surface); }
+  .etape-nav .nav-suiv { flex: 1 1 0; min-width: 0; padding-left: 12px; padding-right: 12px; }
+  .nav-texte { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+  /* --- Réviser --- */
+  .parcours-reviser { font-family: var(--sans); }
+  .parcours[data-vue="reviser"] .page > .parcours-reviser { display: flex; flex-direction: column; gap: 26px; }
+  .teste-toi { background: var(--ink); color: var(--surface); border-radius: var(--radius); padding: 16px 16px 14px; }
+  .teste-toi-tete { display: flex; gap: 6px; margin: 0 0 4px; font: 500 11.5px/1.4 var(--mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--accent-soft-line); }
+  .teste-toi-etape { margin: 0 0 8px; font-size: 13px; opacity: 0.8; }
+  .teste-toi-question { margin: 0 0 14px; font: 600 1.35rem/1.25 var(--serif); }
+  .teste-toi-reponse {
+    margin: 0 0 14px; padding: 10px 12px; border-left: 3px solid var(--accent-soft-line);
+    background: color-mix(in srgb, var(--surface) 10%, transparent); font-family: var(--lecture); font-size: 17px; line-height: 1.55;
+  }
+  .teste-toi > .btn-parcours, .teste-toi-boutons .btn-parcours { width: 100%; }
+  .teste-toi-boutons { display: flex; flex-wrap: wrap; gap: 8px; }
+  .teste-toi-boutons .btn-parcours { flex: 1 1 140px; }
+  .teste-toi .btn-parcours:not(.btn-plein):not(.btn-su) { background: transparent; color: var(--surface); border-color: color-mix(in srgb, var(--surface) 45%, transparent); }
+  .btn-parcours.btn-su { background: var(--good); border-color: var(--good); color: var(--surface); font-weight: 600; }
+  .teste-toi-fin p { margin: 0 0 12px; }
+  .teste-toi-avancement { height: 4px; margin-top: 14px; border-radius: 2px; overflow: hidden; background: color-mix(in srgb, var(--surface) 22%, transparent); }
+  .teste-toi-avancement span { display: block; height: 100%; background: var(--accent-soft-line); }
+
+  .fiche-chapitre h2 { font: 600 1.3rem/1.2 var(--serif); margin: 0 0 6px; }
+  .fiche-chapitre ol { list-style: none; margin: 0; padding: 0; }
+  .fiche-chapitre li { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line-soft); }
+  .fiche-num { flex: none; width: 34px; min-height: 30px; font: 600 1.25rem/1.2 var(--serif); color: var(--accent); text-decoration: none; }
+  .fiche-num:hover { text-decoration: underline; }
+  .fiche-titre { margin: 0 0 2px; font: 600 16px/1.3 var(--sans); }
+  .fiche-texte { margin: 0; font-family: var(--lecture); font-size: 15.5px; line-height: 1.5; color: var(--ink-soft); }
+  .reviser-liens { display: flex; flex-wrap: wrap; gap: 8px; }
+  .reviser-liens button {
+    min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface);
+    color: var(--accent-ink); font: 500 14.5px/1.2 var(--sans); cursor: pointer;
+  }
+  .parcours[data-vue="reviser"] .synthese { margin-top: 28px; padding: 20px 18px; }
+  .parcours .synthese li { color: var(--ink); }
+
+  /* --- S'entraîner --- */
+  .parcours-entrainer .export-section { margin-top: 0; }
+  .entrainer-etapes { margin-top: 28px; font-family: var(--sans); }
+  .entrainer-etapes h2 { font: 600 1.3rem/1.2 var(--serif); margin: 0 0 4px; }
+  .entrainer-groupe { display: flex; flex-direction: column; gap: 8px; margin: 18px 0; }
+  .entrainer-etape { margin: 0; font: 600 15px/1.3 var(--sans); }
+  .entrainer-etape a { color: var(--ink); }
+
+  /* --- panneau plein écran (atelier, vidéo) --- */
+  html.panneau-ouvert, html.panneau-ouvert body { overflow: hidden; }
+  .panneau-modal {
+    position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+    background: var(--surface); color: var(--ink); overflow-y: auto; overscroll-behavior: contain;
+  }
+  .panneau-modal::backdrop { background: rgb(10 14 18 / 0.55); }
+  .panneau-entete {
+    position: sticky; top: 0; z-index: 5; height: 50px; display: flex; align-items: center; gap: 10px;
+    padding: 0 6px 0 14px; background: var(--surface); border-bottom: 1px solid var(--line-soft);
+  }
+  .panneau-type { flex: none; display: inline-flex; color: var(--plan); }
+  .panneau-video .panneau-type { color: var(--bad); }
+  .panneau-entete h2 { flex: 1; min-width: 0; font: 600 16px/1.2 var(--sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .panneau-fermer {
+    flex: none; min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--surface); color: var(--ink); font: 600 15px/1 var(--sans); cursor: pointer;
+  }
+  .panneau-corps { padding: 14px 12px 28px; }
+  .panneau-legende { max-width: 760px; margin: 18px auto 0; font-family: var(--lecture); font-size: 16px; line-height: 1.55; text-align: left; }
+  .panneau-corps .widget-host { max-width: 760px; }
+  .panneau-corps .widget-host:has(cercle-trigo-widget) { max-width: none; }
+  .panneau-corps .video-embed { margin: 0; }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  .tiroir-bouton, .etape-lien, .onglet, .btn-parcours { transition: background-color 0.15s ease, border-color 0.15s ease; }
+}
+
+/* Tablette et ordinateur : la carte, Réviser et S'entraîner dans une colonne centrée ; une étape
+   avec la carte des étapes à gauche (et, en grand, la colonne de droite). */
+@media screen and (min-width: 760px) {
+  .chapter-layout.parcours { background: var(--paper); }
+  .parcours .page.chapter-main {
+    margin: 28px auto 48px; padding: 40px 48px 48px; background: var(--surface);
+    border: 1px solid var(--line-soft); border-radius: 4px;
+  }
+  .parcours[data-vue="etape"] {
+    display: grid; grid-template-columns: 232px minmax(0, 760px); justify-content: center; gap: 28px;
+    align-items: start; padding: 24px;
+  }
+  .parcours[data-vue="etape"] .page.chapter-main { margin: 0; padding: 32px 40px 36px; }
+  .etape-entete { display: none; }
+  .etape-meta { font: 500 12px/1.4 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; }
+  .etape-meta-num { display: inline; }
+  .parcours h2.section-title { font-size: 2.1rem; }
+  .parcours .page.chapter-main { font-size: 17.5px; }
+
+  .parcours-cote {
+    position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; padding: 8px 4px 16px 0;
+    display: flex; flex-direction: column; gap: 12px; font-family: var(--sans);
+  }
+  .cote-titre { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--ink); }
+  .cote-titre .eyebrow { margin: 0; font-size: 11px; }
+  .cote-nom { font: 600 1.35rem/1.15 var(--serif); }
+  .parcours-cote .onglets-chapitre { margin: 0; flex-direction: column; gap: 4px; }
+  .parcours-cote .onglet { justify-content: flex-start; border-radius: var(--radius); padding: 8px 12px; flex: none; }
+  .parcours-cote .parcours-progression { margin: 4px 0 0; font-size: 13px; }
+  .parcours-cote .parcours-progression .barre { height: 5px; }
+  .liste-cote .etape-lien { min-height: 44px; gap: 10px; padding: 4px 8px; font-size: 14.5px; font-weight: 500; margin: 0; }
+  .liste-cote .pastille { width: 22px; height: 22px; font-size: 11.5px; border-width: 1px; }
+  .liste-cote .etape-lien.en-cours { background: var(--ink); border-color: var(--ink); color: var(--surface); font-weight: 600; }
+  .liste-cote .etape-lien.en-cours:not(.lue) .pastille { background: var(--surface); border-color: var(--surface); color: var(--ink); }
+  .liste-cote .liste-partie { font-size: 11px; margin: 12px 0 2px; }
+
+  .etape-nav {
+    position: static; z-index: auto; justify-content: space-between; flex-wrap: wrap; margin-top: 28px;
+    padding: 20px 0 0; background: none;
+  }
+  .parcours[data-vue="etape"] .page.chapter-main { padding-bottom: 36px; }
+  .etape-nav .nav-court { display: none; }
+  .etape-nav .nav-long { display: inline; }
+  .btn-compris { flex: none; }
+  .etape-nav .nav-suiv { flex: 0 1 auto; max-width: 48%; }
+  .etape-nav .nav-prec { max-width: 40%; }
+  .etape-nav .nav-prec .nav-long { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .panneau-modal {
+    inset: 0; margin: auto; width: min(1100px, 94vw); height: auto; max-height: 92vh;
+    border: 1px solid var(--line); border-radius: 6px;
+  }
+  .panneau-video { width: min(900px, 94vw); }
+  .panneau-corps { padding: 18px 24px 28px; }
+}
+@media screen and (min-width: 1200px) {
+  .parcours[data-vue="etape"] { grid-template-columns: 232px minmax(0, 760px) 256px; }
+  .parcours-droite { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 14px; max-height: calc(100vh - 32px); overflow-y: auto; }
 }

@@ -10,8 +10,12 @@ import { FeatureTable } from './FeatureTable'
 import { OperationChain } from './OperationChain'
 import { InteractiveWidget } from './InteractiveWidget'
 
-/** Renders one content block. Sections/intros are just ordered arrays of these. */
-export function BlockRenderer({ block }: { block: Block }) {
+/** Renders one content block. Sections/intros are just ordered arrays of these.
+ *
+ * `enTiroir` (exemples seulement) : l'exemple est rendu à sa place pour l'impression, l'export et
+ * le pré-rendu, mais masqué à l'écran du parcours, où il est relu pas à pas dans un tiroir en fin
+ * d'étape (voir `ContenuEtape`). */
+export function BlockRenderer({ block, enTiroir }: { block: Block; enTiroir?: boolean }) {
   switch (block.kind) {
     case 'para':
       return (
@@ -54,10 +58,10 @@ export function BlockRenderer({ block }: { block: Block }) {
     case 'application':
       return <Application block={block} />
     case 'exemple':
-      return <ExempleResolu block={block} />
+      return <ExempleResolu block={block} className={enTiroir ? 'en-tiroir' : undefined} />
     case 'exempleLibre':
       return (
-        <div className="callout callout-exemple">
+        <div className={`callout callout-exemple${enTiroir ? ' en-tiroir' : ''}`}>
           <p className="callout-label">{block.label ?? 'Exemple résolu'}</p>
           <BlockList blocks={block.blocks} />
         </div>

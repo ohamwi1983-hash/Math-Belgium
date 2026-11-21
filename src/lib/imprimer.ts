@@ -25,7 +25,15 @@ const POLICES_IMPRESSION = [
 async function chargerPolicesImpression(): Promise<void> {
   if (!('fonts' in document)) return
   try {
-    await Promise.all(POLICES_IMPRESSION.map((p) => document.fonts.load(p, 'Aa1')))
+    // Polices KaTeX aussi : la page de chapitre n'affiche qu'une vue à la fois (carte, une étape…),
+    // le reste du chapitre est masqué à l'écran — ses formules n'ont donc pas forcément encore
+    // déclenché le chargement de toutes les polices KaTeX (italiques, tailles, AMS…), alors que
+    // l'impression montre tout le chapitre d'un coup.
+    const katex: Promise<unknown>[] = []
+    document.fonts.forEach((f) => {
+      if (f.family.replace(/["']/g, '').startsWith('KaTeX') && f.status === 'unloaded') katex.push(f.load().catch(() => undefined))
+    })
+    await Promise.all([...POLICES_IMPRESSION.map((p) => document.fonts.load(p, 'Aa1')), ...katex])
   } catch {
     // Police indisponible (hors ligne…) : l'impression part quand même avec la police de secours.
   }

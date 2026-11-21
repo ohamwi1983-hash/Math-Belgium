@@ -202,7 +202,7 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
  * jamais capturé par l'export HTML (A4) (voir `.no-export` sur le conteneur appelant : un Shadow
  * DOM n'est de toute façon pas repris par un `cloneNode`/`outerHTML` classique).
  */
-export function InteractiveWidget({ tag }: { tag: InteractiveWidgetTag }) {
+export function InteractiveWidget({ tag, figuresTactiles }: { tag: InteractiveWidgetTag; figuresTactiles?: boolean }) {
   const hostRef = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
 
@@ -222,10 +222,46 @@ export function InteractiveWidget({ tag }: { tag: InteractiveWidgetTag }) {
     if (!ready || !host) return
     const el = document.createElement(tag)
     host.replaceChildren(el)
-    return epinglerFigure(el)
-  }, [ready, tag])
+    const retirerEpingle = epinglerFigure(el)
+    const retirerTactile = figuresTactiles ? figuresSansDefilement(el) : undefined
+    return () => {
+      retirerEpingle()
+      retirerTactile?.()
+    }
+  }, [ready, tag, figuresTactiles])
 
   return <div ref={hostRef} className="widget-host" />
+}
+
+/**
+ * Atelier ouvert en plein écran (panneau du parcours de chapitre, voir `PanneauModal`) : sur
+ * téléphone, le doigt qui déplace une flèche ou un point d'une figure ne doit pas faire défiler le
+ * panneau. `touch-action: none` est posé sur les figures SVG DANS le Shadow DOM du widget (feuille
+ * adoptée, qui survit à un widget qui réécrit son `innerHTML`) — aucun fichier de widget modifié.
+ * Le panneau défile toujours en glissant ailleurs (réglages, marges).
+ */
+function figuresSansDefilement(el: HTMLElement): () => void {
+  let essais = 0
+  let minuterie = 0
+  const appliquer = () => {
+    const sr = el.shadowRoot
+    if (!sr) {
+      if (essais++ < 20) minuterie = window.setTimeout(appliquer, 50)
+      return
+    }
+    const regle = 'svg { touch-action: none; }'
+    if ('adoptedStyleSheets' in sr && typeof CSSStyleSheet !== 'undefined' && 'replaceSync' in CSSStyleSheet.prototype) {
+      const feuille = new CSSStyleSheet()
+      feuille.replaceSync(regle)
+      sr.adoptedStyleSheets = [...sr.adoptedStyleSheets, feuille]
+    } else {
+      const style = document.createElement('style')
+      style.textContent = regle
+      sr.appendChild(style)
+    }
+  }
+  appliquer()
+  return () => window.clearTimeout(minuterie)
 }
 
 /**

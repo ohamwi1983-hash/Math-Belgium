@@ -13,10 +13,10 @@ import { Illustration } from '../illustrations/Illustration'
  * $\operatorname{dom}(f\circ g) = \varnothing$ dans « Fonctions composées »), qui a bien un
  * contenu et doit continuer à s'afficher. C'est donc l'absence de contenu, et non ce drapeau, qui
  * supprime le cadre. */
-export function ExempleResolu({ block }: { block: Extract<Block, { kind: 'exemple' }> }) {
+export function ExempleResolu({ block, className }: { block: Extract<Block, { kind: 'exemple' }>; className?: string }) {
   const aUnResultat = block.result.tag.trim() !== '' || block.result.text.trim() !== ''
   return (
-    <div className="exemple">
+    <div className={className ? `exemple ${className}` : 'exemple'}>
       <div className="exemple-head">
         Exemple résolu
         {block.badge && <span className="badge">{block.badge}</span>}

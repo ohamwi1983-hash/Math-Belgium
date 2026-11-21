@@ -15,8 +15,8 @@ import '../entrainement/theme.css'
  * Le fil d'Ariane renvoie déjà au chapitre, mais pas forcément à LA section qui a amené l'élève
  * ici (un chapitre peut référencer le même générateur depuis plusieurs sections, ou être long) —
  * `trouverSectionGenerateur` retrouve cette section précise via `chaptersIndex.ts`, en lisant les
- * mêmes données que `ChapterPage`/`LectureAids`, jamais une liste entretenue à part. Le lien
- * pointe vers `#sectionId` : voir l'effet de `LectureAids` qui rouvre/scrolle vers cette section
+ * mêmes données que `ChapterPage`, jamais une liste entretenue à part. Le lien
+ * pointe vers `#sectionId` : `ChapterPage` ouvre directement cette étape du parcours
  * à l'arrivée sur la page du chapitre. */
 export function EntrainementPage() {
   const { chantier, generatorId } = useParams<{ chantier: string; generatorId: string }>()

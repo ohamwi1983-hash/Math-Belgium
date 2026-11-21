@@ -65,3 +65,10 @@ NOUVEL atelier** : garder la figure principale dans une `<svg>` et ne PAS mettre
 l'intérieur du conteneur direct de la figure (sinon seule la `<svg>` elle-même est épinglée, bornée
 par ce petit conteneur, donc sans effet). Vérification : `scratchpad/test-epingle.cjs` (chaque
 contrôle amené à l'écran → figure entièrement visible et ne recouvrant pas le contrôle).
+
+**Ateliers du parcours de chapitre** : un atelier n'est plus monté dans le fil de la page mais dans
+un panneau `<dialog>` (`PanneauModal`, plein écran sur téléphone) ouvert depuis une carte
+« Manipuler ». `InteractiveWidget figuresTactiles` y ajoute `svg { touch-action: none }` dans le
+Shadow DOM (feuille adoptée) : le doigt qui déplace une flèche ne fait pas défiler le panneau ; le
+panneau défile en glissant ailleurs. L'épinglage de la figure (`top: 50px` sur téléphone) tombe sous
+l'en-tête du panneau (50 px).
