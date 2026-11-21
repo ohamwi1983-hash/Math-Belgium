@@ -5140,6 +5140,6 @@ une fenêtre par mode). **Piège** : un nombre arrondi par `texGrand` peut donne
 page à 390 / 1 280 px, clair / sombre — 0 débordement, 0 `.katex-error`, 0 texte suspect (page ET Shadow
 DOM : `$ ^ \ NaN undefined Infinity`), 0 erreur console du site, 33 figures et 10 ateliers capturés et
 relus ; manipulation Playwright : chaque curseur à ses deux extrémités, chaque bouton, axes identiques
-avant / après (sauf zoom et changement de mode, voulus), 21 valeurs recoupées par un calcul indépendant
+avant / après (sauf zoom et changement de mode, voulus), 20 valeurs recoupées par un calcul indépendant
 (recoupement x = 1 et 2, t₉₀ = 180 et 1 800, C(40) = 20, N(−3) = 24 et y = x − 7, y = 2x + 1, côtés ±∞,
 ε / δ, f(10⁶) ≈ 2,999995, Cᵤ(100) = 10,4…). Captures et scripts : `scratchpad/5e4/`.

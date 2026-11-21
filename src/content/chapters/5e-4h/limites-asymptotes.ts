@@ -1006,10 +1006,11 @@ export const limitesAsymptotes: ChapterContent = {
             curves: [{ fn: (x) => (2 * x * x * x + x * x - 1) / (x * x + 1), tone: 'accent' }],
             xMin: -6,
             xMax: 6,
-            xTicks: [-1],
+            xTicks: [],
             fixedYRange: { min: -12, max: 14 },
             obliqueAsymptotes: [{ a: 2, b: 1, label: 'y=2x+1' }],
-            points: [{ x: -1, y: -1, label: '(−1;−1)', tone: 'good', labelPos: 'left' }],
+            points: [{ x: -1, y: -1, label: '', tone: 'good' }],
+            textLabels: [{ x: -0.7, y: -4.6, text: '(−1;−1)', tone: 'good', anchor: 'start' }],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
             caption:
