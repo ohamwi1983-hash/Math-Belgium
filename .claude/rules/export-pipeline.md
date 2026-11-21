@@ -65,4 +65,6 @@ Décisions de l'utilisateur (choix fait sur de vraies impressions A4 comparées)
   latin, importées dans `main.tsx`) — jamais Google Fonts : `buildHtml.ts` ne peut recopier et inliner
   que des `@font-face` de même origine. `imprimer.ts` les charge avant `window.print()` (et les
   précharge en tâche de fond à l'ouverture d'un chapitre) : sinon la première impression sortirait
-  dans la police de secours.
+  dans la police de secours. Il charge aussi TOUTES les polices KaTeX : la page de chapitre n'affiche
+  qu'une vue à la fois (parcours, voir `chapter-components.md`), les formules masquées n'ont donc pas
+  déclenché leur chargement — sans ça, 4 chapitres sortaient avec des formules mal composées.

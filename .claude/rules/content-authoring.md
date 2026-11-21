@@ -58,6 +58,33 @@ ci-dessous.
 (`recap.table`, même forme que `featureTable`) sans liste à puces — cas rencontré dès qu'un
 chapitre récapitule plusieurs fonctions/objets comparables plutôt qu'une liste de principes.
 
+## Champs facultatifs du parcours (`ChapterSection`) — page « une étape par écran »
+
+La page de chapitre est un parcours (carte → une étape par écran → Réviser, voir
+`.claude/rules/chapter-components.md`). Quatre champs FACULTATIFS par section l'enrichissent ; un
+chapitre sans eux fonctionne tel quel (une seule liste d'étapes, pas d'encadré « L'essentiel », pas de
+cartes « Teste-toi »). Aucun n'est imprimé ni exporté : le chapitre imprimé ne change pas.
+
+- `titreCourt?: string` — texte BRUT (pas de `$…$`) : carte du chapitre, boutons « étape suivante »,
+  « tu as vu : … », fiche de révision. Court (2 à 4 mots : « Relation de Chasles »). Absent : `title`.
+- `partie?: string` — texte BRUT : les sections CONSÉCUTIVES de même `partie` sont groupées sous ce
+  titre sur la carte (ex. 4e ch. 6 : « Sans repère : des flèches et une règle » 1–7, « Dans un
+  repère : les composantes » 8–15, « Comparer, appliquer, réviser » 16–18).
+- `essentiel?: string[]` — RichText, 1 à 3 phrases courtes : ce qu'un élève doit retenir de l'étape.
+  Encadré orange en tête d'étape ET ligne de « La fiche du chapitre » (onglet Réviser). Reprendre le
+  cours mot pour mot (relire la section avant d'écrire), jamais une notion absente de la section ;
+  rien n'est déduit automatiquement du texte.
+- `cartes?: { question: string; reponse: string }[]` — RichText, 2 à 4 par section : questions de
+  restitution ou de reconnaissance, réponse courte (une formule, une phrase). Elles forment le paquet
+  « Teste-toi » de l'onglet Réviser (« Je savais » / « À revoir », mémorisé dans le navigateur).
+  Aucune carte dans le chapitre : le bloc n'apparaît pas.
+
+Mêmes règles que partout : KaTeX `$…$`, « − », virgule décimale, `**gras**` jamais autour de `$…$`,
+pas de « déterminant » ni de radian en 4e. Pilote : `4e/calcul-vectoriel.ts`.
+
+Durée affichée d'une étape : CALCULÉE (mots / 180 par minute + 1 min par atelier, arrondie,
+`dureeEtape` dans `src/lib/parcoursChapitre.ts`), jamais saisie.
+
 ## `ChapterContent.formulaire` — formulaire de fin de chapitre
 
 Champ optionnel, sibling de `recap`, rendu après lui par `Formulaire`
