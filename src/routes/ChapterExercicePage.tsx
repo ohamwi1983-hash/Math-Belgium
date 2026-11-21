@@ -1,4 +1,4 @@
-import { useParams, Navigate } from 'react-router-dom'
+import { Link, useParams, Navigate, useSearchParams } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { EvaluationGeneratorPanel } from '../components/admin/EvaluationGeneratorPanel'
 import { AssistantEleve } from '../components/eleve/AssistantEleve'
@@ -16,7 +16,11 @@ export function ChapterExercicePage() {
   const { levelSlug, chapterSlug } = useParams<{ levelSlug: string; chapterSlug: string }>()
   const chapter = levelSlug && chapterSlug ? findChapter(levelSlug, chapterSlug) : undefined
   const compte = useCompte()
-  const professeur = estConnecteActif(compte)
+  const connecte = estConnecteActif(compte)
+  // « Voir comme un élève » (décision de l'utilisateur) : `?vue=eleve` montre l'assistant au professeur.
+  const [params] = useSearchParams()
+  const vueEleve = connecte && params.get('vue') === 'eleve'
+  const professeur = connecte && !vueEleve
   usePageNonIndexee(chapter ? `${professeur ? "Feuille d'exercices" : 'Préparer mon évaluation'} — ${chapter.title}` : "Feuille d'exercices")
 
   if (!chapter || !levelSlug || !chapterSlug) return <Navigate to="/" replace />
@@ -33,15 +37,23 @@ export function ChapterExercicePage() {
         ]}
       />
       <div className="page-tool">
+        {vueEleve && (
+          <p className="vue-eleve-bandeau" role="status">
+            Tu vois cette page comme un élève. <Link to={`/${levelSlug}/${chapterSlug}/exercices`}>Revenir à ma page</Link>
+          </p>
+        )}
         {professeur ? (
           <>
             <header className="chapter-head">
               <p className="eyebrow">{chapter.level}</p>
               <h1 className="chapter-title">Feuille d'exercices — {chapter.title}</h1>
+              <Link className="vue-eleve-lien" to={`/${levelSlug}/${chapterSlug}/exercices?vue=eleve`}>
+                Voir comme un élève
+              </Link>
             </header>
             <EvaluationGeneratorPanel mode="exercice" verrouille={{ levelSlug, chapitreSlug: chapterSlug }} />
           </>
-        ) : compte.etat === 'chargement' ? (
+        ) : !vueEleve && compte.etat === 'chargement' ? (
           <p className="eleve-aide" role="status">
             Chargement…
           </p>

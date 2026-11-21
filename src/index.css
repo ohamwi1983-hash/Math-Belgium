@@ -2217,6 +2217,10 @@ h1.eleve-titre { font-family: var(--serif); font-size: clamp(1.6rem, 5vw, 2.25re
 .eleve-champ-large { flex: 1 1 280px; }
 .eleve-champ select { font: inherit; font-size: 1rem; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; min-height: 44px; max-width: 100%; }
 .eleve-aide { margin: 0; font-size: 0.875rem; color: var(--ink-soft); }
+/* « Voir comme un élève » : lien discret sous le titre du professeur, bandeau en vue élève. */
+.vue-eleve-lien { display: inline-block; margin-top: 0.5rem; font-size: 0.875rem; color: var(--accent); }
+.vue-eleve-bandeau { margin: 0 0 1rem; padding: 0.6rem 0.9rem; border: 1px solid var(--sky); border-radius: var(--radius); background: var(--sky-soft); color: var(--sky-ink); font-size: 0.9rem; }
+.vue-eleve-bandeau a { color: inherit; font-weight: 600; }
 .eleve-puces { display: flex; gap: 8px; flex-wrap: wrap; }
 .eleve-puce { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 9px 15px; font: inherit; font-size: 0.875rem; font-weight: 500; color: var(--ink-soft); cursor: pointer; min-height: 40px; text-align: left; max-width: 100%; }
 .eleve-puce[aria-pressed='true'] { background: var(--good-soft); border-color: var(--good); color: var(--ink); font-weight: 600; }

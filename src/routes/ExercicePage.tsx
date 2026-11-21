@@ -1,3 +1,4 @@
+import { Link, useSearchParams } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { EvaluationGeneratorPanel } from '../components/admin/EvaluationGeneratorPanel'
 import { AssistantEleve } from '../components/eleve/AssistantEleve'
@@ -12,16 +13,30 @@ import { usePageNonIndexee } from '../lib/useDocumentMeta'
 export function ExercicePage() {
   const compte = useCompte()
   const professeur = estConnecteActif(compte)
-  usePageNonIndexee(professeur ? "Feuilles d'exercices" : 'Préparer mon évaluation')
+  // « Voir comme un élève » (décision de l'utilisateur) : le professeur connecté voit l'assistant
+  // des élèves avec `?vue=eleve`, sans se déconnecter.
+  const [params] = useSearchParams()
+  const vueEleve = professeur && params.get('vue') === 'eleve'
+  usePageNonIndexee(professeur && !vueEleve ? "Feuilles d'exercices" : 'Préparer mon évaluation')
   return (
     <>
       <SiteHeader />
       <div className="page-tool">
-        {professeur ? (
+        {vueEleve ? (
+          <>
+            <p className="vue-eleve-bandeau" role="status">
+              Tu vois cette page comme un élève. <Link to="/exercice">Revenir à ma page</Link>
+            </p>
+            <AssistantEleve />
+          </>
+        ) : professeur ? (
           <>
             <header className="chapter-head">
               <p className="eyebrow">Math-Belgium</p>
               <h1 className="chapter-title">Feuilles d'exercices</h1>
+              <Link className="vue-eleve-lien" to="/exercice?vue=eleve">
+                Voir comme un élève
+              </Link>
             </header>
             <EvaluationGeneratorPanel mode="exercice" />
           </>

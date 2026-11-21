@@ -113,6 +113,8 @@ Partage plus tard : table `partages (plan_id, destinataire, droit)` + politique 
   discret « Je suis professeur : me connecter » (`/connexion?retour=<page>`, masqué si `indisponible`) ;
   session stockée en cours de lecture (`chargement`) → « Chargement… » (aucune bascule visible).
   L'assistant n'enregistre rien (ni coffre, ni navigateur, ni historique). `/evaluation` reste réservée.
+  **« Voir comme un élève »** (décision de l'utilisateur) : lien sous le titre du panneau professeur ;
+  `?vue=eleve` montre l'assistant au professeur connecté, avec un bandeau « Revenir à ma page ».
   Aucune n'est pré-rendue (`scripts/routes.mjs` ne liste que l'accueil et les chapitres) ;
   toutes `noindex`. Vérifié (Playwright, faux client) : sans compte → assistant sur les deux pages,
   compte simulé → panneau, `/evaluation` sans compte → `/connexion?retour=%2Fevaluation`.
