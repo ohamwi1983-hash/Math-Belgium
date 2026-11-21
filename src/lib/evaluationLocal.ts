@@ -1036,6 +1036,11 @@ function enteteSerie(entete: EnTeteEvaluation, serieLettre: string, examen?: Exa
     deuxColonnes: entete.deuxColonnes,
     // Comptes professeurs : absent (pas de session / plan d'avant) = cartouche historique.
     ...(entete.cartouche ? { cartouche: entete.cartouche } : {}),
+    // Évaluation (ni feuille d'exercices, ni examen — qui les porte dans `examen`) : consignes
+    // supplémentaires seulement s'il y en a, sinon en-tête identique à avant.
+    ...(!examen && entete.mode !== 'exercice' && lignesConsignes(entete.consignesSupplementaires).length > 0
+      ? { consignesSupplementaires: lignesConsignes(entete.consignesSupplementaires) }
+      : {}),
   }
 }
 

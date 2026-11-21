@@ -4675,6 +4675,12 @@ export interface LigneSelection {
    * clé que `parVariante`), pour que deux variantes d'un même générateur puissent valoir un nombre
    * de points différent sur la feuille d'évaluation. Absent (ou vide) pour les autres types. */
   pointsParVariante?: Record<string, number>
+  /** Panneau seulement (points pré-remplis, `lib/pointsAutomatiques.ts`) : état des points de chaque
+   * UNITÉ de la ligne — clé de variante (`parVariante`), « ligne » (`points`) ou « choix:<id> »
+   * (`pointsParChoix`). Absent = automatique (règle de durée, de longueur…) ; « verrouille » = saisi à
+   * la main ou plan rechargé, jamais écrasé ; « ajuste » = mis à l'échelle par « Ajuster au total »
+   * (gardé tant qu'on ne réajuste pas). Sans effet sur les documents (seuls les points comptent). */
+  modePoints?: Record<string, 'verrouille' | 'ajuste'>
 }
 
 /** Id réel de variante d'une clé de `parVariante` (« carre~2 » → « carre ») : une variante
