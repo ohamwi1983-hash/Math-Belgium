@@ -21,7 +21,8 @@ d'exercices) ; seuls le panneau des évaluations / examens (`/evaluation`), le c
 l'administration sont derrière la connexion.
 Aucune donnée d'élève. Phase 2 (faite, section « Phase 2 » en fin de fichier) : carnet de matière vue (`/carnet`),
 puis son horaire de la semaine (`0003_horaire.sql`, sous-section « Horaire de la semaine ») et l'heure
-zéro (`0004_heure_zero.sql`, même sous-section).
+zéro (`0004_heure_zero.sql`, même sous-section), puis l'agenda d'une période (sous-section « Agenda d'une
+période », sans migration).
 Plus tard (pas fait) : partage entre collègues.
 
 ## Décisions de l'utilisateur
@@ -404,3 +405,56 @@ fiche A4) ; sans grille, réglage numéro : « heure zéro », « heure zéro et
 - **Mise en service** : SQL Editor → New query → coller TOUT `0004_heure_zero.sql` → Run → « Success. No
   rows returned » ; recharger `/carnet` → Mon horaire → Modifier la grille → cocher « Cette école a une
   heure zéro (H0) » → Enregistrer. À vérifier contre le vrai projet : case H0, séance « H0–H1 ».
+
+### Agenda d'une période (dans `/carnet`, AUCUNE migration)
+
+Demande de l'utilisateur : télécharger / imprimer pas seulement la séance, mais « l'agenda complet allant
+d'une période à une autre ». Tout se calcule à partir des séances existantes : marche avec ou sans
+0003 / 0004 (sans grille : format d'horaire du réglage, comme les cartes de séance). Choix par défaut
+(ajustables par l'utilisateur) :
+- Bloc « Agenda d'une période » (`components/carnet/AgendaPeriode.tsx`), après la classe active, avant
+  « Mon horaire » : classe (suit la classe active tant qu'on n'en a pas choisi une ici) ou « Toutes mes
+  classes » ; Du / Au en `type="date"` ; raccourcis « Cette semaine » (lundi → vendredi), « Ce mois-ci »
+  (1er → dernier jour), « Depuis la rentrée » (rentrée FWB → aujourd'hui), « Du dernier congé à
+  aujourd'hui » (premier jour de classe après les dernières vacances de plusieurs jours finies, été
+  compris → aujourd'hui ; PÉRIODE PAR DÉFAUT) ; cases « Inclure les liens » (cochée), « Inclure mes
+  remarques » (DÉCOCHÉE : note privée, comme Smartschool ; vaut pour les trois sorties), et pour
+  toutes les classes « Une section par classe » (décochée : un tableau chronologique unique avec une
+  colonne Classe). Résumé en direct (« 5 séances · 7 heures de cours · 1 chapitre · 4 sections pour
+  5e B du … ») ; période vide → « Aucune séance notée pour … : rien à imprimer », boutons désactivés ;
+  dates inversées → erreur. Pas de limite de durée.
+- Sorties : **Imprimer l'agenda** (`ouvrirFiche` : lien `target=_blank` vers une URL blob `#imprimer`,
+  jamais `window.open`), **Télécharger (HTML A4)** (nom ASCII `agenda-5e-b-2026-09-01-au-2026-12-18.html`,
+  `agenda-toutes-classes-…`), **Copier pour Smartschool** (texte + HTML riche, repli texte à copier à la
+  main).
+- `lib/carnetAgenda.ts` (PUR, 103 vérifications esbuild + node) : `periodeRaccourci`, `rentreeDe`,
+  `debutDepuisDernierConge`, `congesDeLaPeriode` (congés FWB + vacances d'été entre deux années,
+  réduits à leurs jours de semaine dans la période ; un congé tombé un week-end n'est pas cité),
+  `construireAgenda` (bornes INCLUSES, ordre date → heure → classe ; `groupes` : un seul, ou un par
+  classe), `blocsParSemaine` (« Semaine du 15 septembre », année ajoutée si la période couvre deux
+  années civiles ; un congé est annoncé UNE fois, dans la première semaine qu'il touche ; semaine
+  entièrement en congé sans séance → seulement la ligne du congé ; semaine de classe sans séance →
+  « Aucune séance notée cette semaine. », sauf si elle commence après aujourd'hui), `syntheseAgenda`
+  (séances, heures via `carnet.ts::heuresSeance` — « H1–H2 » = 2 ; sans numéro de fin, plage ÷ durée
+  d'une heure arrondie, ≥ 1 —, chapitres et sections distincts, détail par classe),
+  `texteSmartschoolAgenda` / `htmlSmartschoolAgenda` (chaque séance = `texteSmartschool(r, { liens,
+  remarque })`, même format que la copie d'une séance ; options par défaut : liens, sans remarque),
+  `nomFichierAgenda`, `periodeTexte` (« du lundi 1er septembre au vendredi 18 décembre 2026 »).
+- `lib/carnetFiche.ts::agendaPeriodeHtml` : même style que la fiche d'une séance ; en-tête (école(s),
+  professeur, « Agenda — 5e B » / « Agenda — toutes les classes », période en toutes lettres, classes) ;
+  lignes en grille (Date · horaire | [Classe] | Matière vue : chapitre, parties, exercices, devoir,
+  remarque si cochée ; « 2 heures » sous l'horaire d'une heure double) ; chaque séance `break-inside:
+  avoid`, titre de semaine collé à sa première ligne (`.tete-semaine`) ; « une section par classe » :
+  saut de page entre classes + synthèse par classe ; synthèse globale à la fin ; pied de page `@page`
+  « professeur · titre » à gauche, « page n / N » à droite (boîtes de marge : Chromium / Edge ; ignoré
+  ailleurs, jamais bloquant). Aucune figure, aucune ressource externe (une année entière ≈ 200 Ko).
+- `texteSmartschool` / `htmlSmartschool` ont gagné des options `{ liens, remarque }` ; sans option :
+  sortie d'une séance IDENTIQUE à avant (remarque jamais copiée).
+- **Vérifications** : logique 103 (bornes, raccourcis, congés 2026-2027 et été, semaines, futur, heures
+  doubles, synthèse, textes, remarques exclues par défaut, documents) ; suites carnet (85), horaire (116),
+  heure zéro (82) repassent. Playwright (build de test, faux client, heure figée au samedi 21/11/2026,
+  iPhone 13 et 1 280 px, clair et sombre, + 0003 absent) : 215 vérifications (défauts, raccourcis,
+  imprimer → onglet blob `#imprimer`, téléchargements et noms, presse-papiers relu avec / sans remarques
+  et liens, toutes les classes en tableau et par classe, période vide, dates inversées, repli de copie,
+  `page.pdf` A4 + `pdftotext -layout` : « page n / N » et nom du professeur sur chaque page, aucune
+  séance coupée, aucun titre de semaine orphelin) ; 0 erreur console, `scrollWidth` = largeur.

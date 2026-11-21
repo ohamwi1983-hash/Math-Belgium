@@ -1945,3 +1945,20 @@ table.feature-table td { white-space: normal; }
 .carnet-oubliees-compte { margin: 0 0 10px; font-weight: 700; color: var(--accent-ink); }
 .carnet-creneaux-oublies .carnet-creneau { padding: 8px 12px; }
 .carnet-restantes { margin: 12px 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+
+/* ---------- agenda d'une période du carnet (`AgendaPeriode`) ---------- */
+.carnet-agenda { display: flex; flex-direction: column; gap: 12px; }
+.carnet .carnet-agenda h2 { margin-bottom: 0; }
+.carnet-agenda-champs { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; }
+.carnet-agenda-champs .carnet-champ-moyen { flex: 1 1 220px; min-width: 0; }
+.carnet-agenda-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; flex: 1 1 300px; max-width: 460px; min-width: 0; }
+.carnet-agenda-dates .carnet-champ-date { max-width: none; min-width: 0; }
+.carnet-agenda-raccourcis { display: flex; flex-wrap: wrap; gap: 8px; }
+.carnet-agenda-raccourcis .carnet-puce[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.carnet-agenda-options { gap: 0; }
+.carnet-agenda-resume { margin: 0; padding: 10px 12px; border-radius: var(--radius); background: var(--surface-2); border: 1px solid var(--line); overflow-wrap: anywhere; }
+.carnet-agenda-note { color: var(--ink-soft); }
+.carnet-agenda .carnet-copie { margin: 0; }
+@media (max-width: 520px) {
+  .carnet-agenda-actions .compte-bouton, .carnet-agenda-actions .compte-bouton-secondaire { flex: 1 1 100%; }
+}
