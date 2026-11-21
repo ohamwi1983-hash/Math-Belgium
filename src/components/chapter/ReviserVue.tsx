@@ -29,7 +29,10 @@ export function ReviserVue({ chapter, aller }: { chapter: ChapterContent; aller:
     [chapter],
   )
   const fiche = chapter.sections.filter((s) => s.essentiel && s.essentiel.length > 0)
-  const defiler = (selecteur: string) => document.querySelector(selecteur)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const defiler = (selecteur: string) => {
+    const doux = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    document.querySelector(selecteur)?.scrollIntoView({ behavior: doux ? 'smooth' : 'auto', block: 'start' })
+  }
   const liens = [
     { label: 'Ce qu’il faut retenir', sel: '.synthese' },
     ...(chapter.formulaire ? [{ label: 'Formulaire', sel: '.formulaire' }] : []),

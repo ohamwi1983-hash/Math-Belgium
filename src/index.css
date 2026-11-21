@@ -2122,7 +2122,9 @@ h1.eleve-titre { font-family: var(--serif); font-size: clamp(1.6rem, 5vw, 2.25re
   .etape-entete .barre { height: 4px; margin-top: 6px; }
   .etape-entete .barre span { background: var(--accent); }
 
-  .parcours .chapter-section { margin-top: 0; padding-top: 0; border-top: 0; }
+  /* Fragment changé hors de React Router (adresse modifiée à la main) : l'ancre native du navigateur
+     amène la section en haut de l'écran — sous l'en-tête collant de l'étape, pas derrière. */
+  .parcours .chapter-section { margin-top: 0; padding-top: 0; border-top: 0; scroll-margin-top: 72px; }
   .parcours .section-head { margin-bottom: 6px; }
   .parcours .section-num { display: none; }
   .parcours h2.section-title { font-size: 1.75rem; line-height: 1.15; }
