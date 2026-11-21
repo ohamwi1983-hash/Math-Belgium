@@ -975,6 +975,16 @@ export const limitesAsymptotes: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 22. Limites et asymptotes — lecture graphique »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Du tableau de limites au graphique',
+          generatorId: '5gen66',
+          chantier: '5e-4h',
+          description: [
+            'Le chemin inverse de la lecture graphique : un tableau de limites est donné, choisis le seul graphique qui lui correspond parmi quatre — les trois autres portent une erreur classique (côté d’approche d’une asymptote verticale inversé, limites à gauche et à droite échangées, asymptote horizontale confondue avec une valeur atteinte, asymptote oblique mal placée) —, puis écris les équations des asymptotes.',
+          ],
+          whereLabel: '5e (4h) → « 66. Du tableau de limites au graphique »',
+        },
       ],
     },
     {
