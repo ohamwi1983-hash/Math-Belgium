@@ -98,7 +98,7 @@ Partage plus tard : table `partages (plan_id, destinataire, droit)` + politique 
   états `indisponible` / `inactif` / `chargement` / `anonyme` / `connecte`. Jamais d'appel Supabase dans le
   rappel `onAuthStateChange` (verrou de supabase-js) : `setTimeout`. Après `signIn`, attendre
   `etat === 'connecte'` avant de naviguer (sinon la garde voit encore `anonyme`).
-- `components/compte/PageReservee.tsx` : `PageCompte` (cadre + `usePageNonIndexee`), `PageReservee`
+- `components/compte/PageReservee.tsx` : `PageCompte` (cadre + `usePageNonIndexee` ; `sansTete` : la page porte son `<h1>`), `EnTeteCompte`, `PageReservee`
   (garde : sans session → `/connexion?retour=…`, désactivé → message, `admin`), `MessageIndisponible`.
   `Champ.tsx` : label, aide, erreur reliée (`aria-describedby`, `aria-invalid`), « Afficher » le mot de
   passe ; jamais de filtre de frappe ni de champ numérique (règle CLAUDE.md). `MenuCompte.tsx` : en-tête.
@@ -518,3 +518,36 @@ progression, fiches, séances à rattraper, messages, cas sans école / sans cla
   piégé, Échap, enregistrer et copier = aperçu, modifier, supprimer), semaine (heure double, mercredi,
   Armistice, Toussaint), classe, barre du bas, `?chapitre=`, cas vides ; 82 captures (clair + sombre),
   `scrollWidth` = largeur, 0 erreur console.
+
+## Page « Mon profil » refondue (21/11/2026 : proposition A, style du carnet, AUCUNE migration)
+
+Décision de l'utilisateur (maquettes `AStyleCarnet` / `AStyleTelephone`). RIEN n'a disparu (nom affiché
+et sa validation, écoles : ajouter / modifier / supprimer / par défaut, état vide, messages, e-mail,
+mot de passe, coffre et déconnexion — dans le menu —, suppression du compte, chargement / indisponible).
+- `PageCompte large sansTete` : le `<h1>` est dans le bandeau sombre (initiale, « ESPACE PROFESSEUR »,
+  pastilles des écoles) ; `EnTeteCompte` en repli tant que le profil n'est pas prêt.
+- `components/compte/MenuEspace.tsx` : menu « Mon espace » (Mon profil · Carnet · Feuilles · Évaluations
+  et examens · Mon coffre | Administration si admin · Se déconnecter) ; téléphone : barre du bas
+  (Carnet · Feuilles · Coffre · Profil · Plus). Réutilise les CLASSES CSS du menu du carnet
+  (`carnet.css`, importé par `ProfilPage`) et `MenuActions` (« … ») sans les modifier — les deux menus
+  sont à unifier plus tard.
+- Cartes « Sur les copies » (pastille « ✓ enregistré » / « non enregistré », Enregistrer / Annuler),
+  « Mes écoles » (couleur = rang, `.carnet-c0…c5` ; par défaut encadrée ; « Mettre par défaut » ; état
+  de l'horaire du carnet LU par `import()` de `carnetDonnees.ts::chargerHoraire` : « ✓ Horaire H0–H7 »,
+  « Grille H1–H7 · semaine à remplir », « Horaire à remplir », rien si 0003 absent ; lien
+  `/carnet/horaire?ecole=<id>` — `MonHoraire` ouvre l'onglet de cette école, sinon l'école par défaut
+  comme avant ; « … » Modifier / Supprimer avec confirmation DANS la page — focus sur Annuler, Échap —,
+  qui dit que classes, séances et horaire de l'école partent aussi (cascade) ; « + Ajouter une école »
+  ouvre le formulaire, ouvert d'office sans école), « Mon compte » (suppression : confirmation intégrée
+  au lieu de `window.confirm`, même RPC).
+- `components/compte/ApercuCartouche.tsx` (« Ce qui s'imprime ») : `cartoucheDepuisCompte` →
+  `cartoucheEffectif`, mêmes morceaux que `morceauxSurtitre`, adresse en ligne méta, pied de page de la
+  feuille ; nom SAISI (non enregistré), école par défaut ou ses valeurs en cours de modification (ou la
+  future première école) ; ce qui diffère de l'enregistré ou a le focus est surligné (`<mark>`). Colonne
+  de droite collante ; contenu étroit (`@container` < 758 px) : en tête, compact.
+- Styles `components/compte/profil.css` (jetons, bandeau / panneau sombres dans les deux thèmes).
+- Vérifié (Vite de développement + faux client avec `definir_ecole_par_defaut`, données fictives, 1 280 px
+  et iPhone 13, clair et sombre) : 172 vérifications Playwright (0 / 1 / 2 écoles, horaire rempli /
+  grille seule / vide / 0003 absent, frappe du nom et de l'adresse → aperçu surligné, nom vide refusé,
+  par défaut, suppression avec Échap puis cascade, ajout, menu « Plus », lien `?ecole=`, déconnexion,
+  cibles ≥ 44 px sur téléphone) ; `scrollWidth` = largeur, 0 erreur console.
