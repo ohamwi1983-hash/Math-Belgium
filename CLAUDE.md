@@ -40,8 +40,17 @@ cherchant le chapitre correspondant dans `chaptersIndex.ts`.
 
 ## Structure de navigation
 
-- `/` — page d'accueil (`routes/HomePage.tsx`), une section par niveau (`LEVELS` dans
-  `content/chaptersIndex.ts`) listant ses chapitres.
+- `/` — page d'accueil « Mon année d'abord » (`routes/HomePage.tsx`, maquettes A du 22/11/2026) :
+  onglets d'année (`LEVELS`), choix mémorisé dans le navigateur (`lib/anneeAccueil.ts`, clé
+  `accueil:annee` ; première visite sans choix ni historique : cartes « Tu es en… »), bandeau
+  « Reprendre » (dernière étape ouverte DE CETTE ANNÉE, clé `parcours:derniere-etape`), « Préparer mon
+  interro » (`/{niveau}/{chapitre}/exercices` du chapitre en cours, sinon `/exercice`), chapitres de
+  l'année avec leur progression (celle des pages de chapitre, jamais envoyée). Les trois années restent
+  dans le DOM (23 liens dans la page pré-rendue) : ce qui est montré dépend de `<html
+  data-annee-accueil>`, posé avant le JS par le script en ligne d'`index.html` (même logique que
+  `anneeDeDepart`, à garder en accord). Recherche dans l'en-tête (`components/RechercheSite.tsx`, toutes
+  les pages à `SiteHeader`) : titres de chapitres, d'étapes (`title`, `titreCourt`, `kicker`) et
+  sous-titres, index léger `lib/rechercheIndex.ts` chargé à la demande au premier focus.
 - `/{levelSlug}/{chapterSlug}` — page d'un chapitre (`routes/ChapterRoute.tsx`), résolue via
   `findChapter()`. Parcours « une étape par écran » sur cette seule route : vue choisie par le
   fragment (`#sectionId` = étape, `#reviser`, `#entrainer`, rien = carte), voir

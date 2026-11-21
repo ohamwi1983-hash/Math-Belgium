@@ -67,6 +67,23 @@
         }, 10000)
       })()
     </script>
+    <!-- Accueil « Mon année d'abord » : année de l'élève posée sur <html> AVANT le JS (même logique que
+         src/lib/anneeAccueil.ts::anneeDeDepart — année choisie, sinon celle de la dernière étape
+         ouverte), pour que la page pré-rendue n'affiche pas les cartes « Tu es en… » à un élève qui a
+         déjà choisi. Rien d'envoyé : lecture du localStorage de ce navigateur seulement. -->
+    <script>
+      (function () {
+        try {
+          var a = localStorage.getItem('accueil:annee')
+          if (!a) {
+            var d = JSON.parse(localStorage.getItem('parcours:derniere-etape') || 'null')
+            var q = -1
+            if (d && typeof d === 'object') for (var k in d) if (d[k] && typeof d[k].quand === 'number' && d[k].quand > q) { q = d[k].quand; a = k }
+          }
+          if (a) document.documentElement.setAttribute('data-annee-accueil', a)
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

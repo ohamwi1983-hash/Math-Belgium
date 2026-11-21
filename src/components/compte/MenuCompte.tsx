@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useCompte } from '../../lib/compteContexte'
 
 /**
- * Lien « Se connecter » / menu « Mon compte » discret, à droite de l'en-tête du site. Rien du tout
+ * Lien « Je suis professeur » (connexion) / menu « Mon compte » discret, à droite de l'en-tête du site. Rien du tout
  * quand Supabase n'est pas configuré (pages publiques inchangées). Ne charge pas supabase-js : sur
  * une page de cours, le menu s'affiche d'après la présence d'une session stockée.
  */
@@ -36,7 +36,7 @@ export function MenuCompte() {
     const retour = location.pathname === '/' ? '' : `?retour=${encodeURIComponent(location.pathname)}`
     return (
       <Link className="menu-compte-lien" to={`/connexion${retour}`}>
-        Se connecter
+        Je suis professeur
       </Link>
     )
   }

@@ -1,39 +1,11 @@
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
-import { HomeChapterIcon, type HomeIconKind } from '../components/HomeChapterIcon'
-import { LEVELS } from '../content/chaptersIndex'
+import { LEVELS, type LevelEntry } from '../content/chaptersIndex'
+import type { ChapterContent } from '../content/types'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
-
-/** Icône par chapitre (voir `HomeChapterIcon.tsx`) — une valeur par `slug`, jamais une icône
- * générique partagée par catégorie (piège déjà rencontré et corrigé : une première version
- * réutilisait la même courbe pour 10 chapitres à la fois). Vit ici plutôt que dans
- * `ChapterContent` (`content/types.ts`) : c'est une métadonnée de LISTE (page d'accueil), pas une
- * propriété du contenu du chapitre lui-même. */
-const CHAPTER_ICON: Record<string, HomeIconKind> = {
-  'fonction-second-degre': 'parabola',
-  'equations-inequations-second-degre': 'parabolaRoots',
-  'caracteristiques-fonctions-reference': 'curveFamily',
-  'statistique-descriptive': 'bars',
-  'cercle-trigonometrique-triangles': 'circleAngle',
-  'calcul-vectoriel': 'vector',
-  'geometrie-analytique-plane': 'axesPoint',
-  'geometrie-dans-espace': 'cube',
-  'fonctions-composees': 'curve',
-  trigonometrie: 'sineWave',
-  suites: 'sequence',
-  'limites-asymptotes': 'curveAsymptote',
-  'derivees-applications': 'curveTangent',
-  'fonctions-reciproques-cyclometriques': 'curveMirror',
-  'fonctions-exponentielles': 'expCurve',
-  'fonctions-logarithmes': 'logCurve',
-  'primitives-integrales': 'curveArea',
-  'nombres-complexes': 'complexPlane',
-  probabilites: 'tree',
-  'analyse-combinatoire': 'gridSelect',
-  'variables-aleatoires': 'bump',
-  'lieux-geometriques': 'circleLocus',
-  coniques: 'ellipse',
-}
+import { lireDernieresEtapes, lireParcours, titreCourt, type DerniereEtape, type EtatParcours } from '../lib/parcoursChapitre'
+import { ATTRIBUT_ANNEE, anneeDeDepart, ecrireAnneeChoisie } from '../lib/anneeAccueil'
 
 /** Teinte par niveau — réutilise les jetons déjà dédiés au codage couleur des diagrammes
  * (`--accent`/`--sky`/`--plan`, voir `index.css`), jamais une couleur inventée pour l'occasion. */
@@ -41,6 +13,181 @@ const LEVEL_TONE = ['accent', 'sky', 'plan'] as const
 
 const BASE_URL = 'https://math-belgium.vercel.app'
 
+const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? 's' : ''}`
+
+/**
+ * Ce que l'accueil montre selon l'année, en CSS seulement (règles générées depuis `LEVELS`, donc
+ * présentes dans la page pré-rendue) : sans année (`<html>` sans `data-annee-accueil`), les cartes
+ * « Tu es en… » ; avec une année, ses onglets, son titre et SES chapitres. Les trois années restent
+ * dans le DOM (liens des 23 chapitres dans le HTML pré-rendu, pour les moteurs de recherche).
+ */
+const REGLES_ANNEES = [
+  `html:not([${ATTRIBUT_ANNEE}]) .accueil-avec-annee{display:none}`,
+  `html[${ATTRIBUT_ANNEE}] .annees-choix{display:none}`,
+  ...LEVELS.map((l) => `html:not([${ATTRIBUT_ANNEE}="${l.slug}"]) [data-annee-bloc="${l.slug}"]{display:none}`),
+  // Avant le chargement du JS (attribut posé par `index.html`) : l'onglet de l'année déjà marqué.
+  ...LEVELS.map((l) => `html[${ATTRIBUT_ANNEE}="${l.slug}"] .onglet-annee[data-niveau="${l.slug}"]{background:var(--ink);color:var(--surface)}`),
+].join('\n')
+
+interface EtatChapitre {
+  chapter: ChapterContent
+  etat: EtatParcours
+  total: number
+  lues: number
+  termine: boolean
+  commence: boolean
+  courant: boolean
+}
+
+interface Reprise {
+  chapter: ChapterContent
+  numero: number
+  titre: string
+  href: string
+  lues: number
+  total: number
+}
+
+/** Progression de chaque chapitre (lue dans le navigateur) et étape à reprendre de chaque année. */
+function lireProgression(): { chapitres: Record<string, EtatChapitre[]>; reprises: Record<string, Reprise | null> } {
+  const dernieres = lireDernieresEtapes()
+  const chapitres: Record<string, EtatChapitre[]> = {}
+  const reprises: Record<string, Reprise | null> = {}
+  for (const level of LEVELS) {
+    const d: DerniereEtape | undefined = dernieres[level.slug]
+    reprises[level.slug] = null
+    chapitres[level.slug] = level.chapters.map((chapter) => {
+      const etat = lireParcours(chapter)
+      const total = chapter.sections.length
+      const lues = etat.lues.length
+      const section = d && d.chapitre === chapter.slug ? chapter.sections.find((s) => s.id === d.section) : undefined
+      if (section) {
+        reprises[level.slug] = {
+          chapter,
+          numero: section.number,
+          titre: titreCourt(section),
+          href: `/${level.slug}/${chapter.slug}#${encodeURIComponent(section.id)}`,
+          lues,
+          total,
+        }
+      }
+      return { chapter, etat, total, lues, termine: total > 0 && lues === total, commence: lues > 0 || etat.derniere !== null, courant: !!section }
+    })
+  }
+  return { chapitres, reprises }
+}
+
+function Barre({ valeur, total, ton }: { valeur: number; total: number; ton?: 'courant' }) {
+  return (
+    <span className={`accueil-barre${ton ? ` ${ton}` : ''}`} aria-hidden="true">
+      <span style={{ width: `${total ? (100 * valeur) / total : 0}%` }} />
+    </span>
+  )
+}
+
+const Coche = () => (
+  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12l5 5 9-10" />
+  </svg>
+)
+
+/** Bandeau sombre « Reprendre » : dernière étape ouverte de l'année. */
+function BandeauReprendre({ reprise }: { reprise: Reprise }) {
+  return (
+    <Link className="accueil-reprendre" to={reprise.href}>
+      <span className="reprendre-corps">
+        <span className="reprendre-sur">Reprendre</span>
+        <span className="reprendre-chapitre">{reprise.chapter.title}</span>
+        <span className="reprendre-etape">
+          Étape {reprise.numero} · {reprise.titre}
+        </span>
+        <span className="reprendre-progression">
+          <Barre valeur={reprise.lues} total={reprise.total} ton="courant" />
+          <span>
+            {reprise.lues} / {reprise.total}
+            <span className="sr-only"> étapes comprises</span>
+          </span>
+        </span>
+      </span>
+      <span className="reprendre-bouton" aria-hidden="true">
+        Continuer ›
+      </span>
+    </Link>
+  )
+}
+
+/** « Préparer mon interro » : l'assistant élève, sur le chapitre en cours s'il y en a un
+ * (`/{niveau}/{chapitre}/exercices`, page verrouillée sur ce chapitre), sinon `/exercice`. */
+function CartePreparer({ reprise }: { reprise: Reprise | null }) {
+  const href = reprise ? `/${reprise.chapter.levelSlug}/${reprise.chapter.slug}/exercices` : '/exercice'
+  return (
+    <Link className="accueil-preparer" to={href}>
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 11l2 2 4-4" />
+        <rect x="4" y="3" width="16" height="18" rx="2" />
+      </svg>
+      <span className="preparer-corps">
+        <span className="preparer-titre">Préparer mon interro</span>
+        <span className="preparer-desc">
+          {reprise ? <>Feuille d'exercices ou évaluation blanche sur « {reprise.chapter.title} ».</> : <>Feuille d'exercices ou évaluation blanche, sur le chapitre et les notions annoncés.</>}
+        </span>
+      </span>
+      <span className="accueil-chevron" aria-hidden="true">
+        ›
+      </span>
+    </Link>
+  )
+}
+
+function ListeChapitres({ level, etats }: { level: LevelEntry; etats: EtatChapitre[] }) {
+  return (
+    <ul className="accueil-chapitres">
+      {etats.map(({ chapter, total, lues, termine, commence, courant }) => (
+        <li key={chapter.slug}>
+          <Link className={`accueil-chapitre${courant ? ' courant' : ''}${termine ? ' termine' : ''}`} to={`/${level.slug}/${chapter.slug}`}>
+            <span className="chapitre-pastille" aria-hidden="true">
+              {termine ? <Coche /> : chapter.chapterNumber}
+            </span>
+            <span className="chapitre-corps">
+              <span className="chapitre-tete">
+                <span className="chapitre-num">Chapitre {chapter.chapterNumber}</span>
+                {(termine || commence) && <span className={`chapitre-pill${termine ? ' termine' : ''}`}>{termine ? 'terminé' : 'en cours'}</span>}
+              </span>
+              <span className="chapitre-titre">{chapter.title}</span>
+              <span className="chapitre-etat">
+                {commence && <Barre valeur={lues} total={total} ton={courant && !termine ? 'courant' : undefined} />}
+                <span className="chapitre-compte">
+                  {termine ? (
+                    <>
+                      <span className="compte-telephone">chapitre terminé</span>
+                      <span className="compte-ordi">
+                        {total} / {total} étapes
+                      </span>
+                    </>
+                  ) : commence ? (
+                    `${lues} / ${total} étapes`
+                  ) : (
+                    pluriel(total, 'étape')
+                  )}
+                </span>
+              </span>
+            </span>
+            <span className="accueil-chevron" aria-hidden="true">
+              ›
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/**
+ * Page d'accueil « Mon année d'abord » (maquettes A, décision de l'utilisateur du 22/11/2026) :
+ * l'élève choisit son année une fois (mémorisée dans son navigateur), puis voit « Reprendre »
+ * (dernière étape ouverte de cette année), « Préparer mon interro » et SES chapitres avec leur
+ * progression — celle des pages de chapitre (`lib/parcoursChapitre.ts`), jamais envoyée.
+ */
 export function HomePage() {
   useDocumentMeta({
     title: 'Chapitres de maths — FWB',
@@ -59,55 +206,117 @@ export function HomePage() {
     },
   })
 
+  const [annee, setAnnee] = useState<string | null>(anneeDeDepart)
+  const { chapitres, reprises } = useMemo(lireProgression, [])
+  const onglets = useRef<(HTMLButtonElement | null)[]>([])
+  const ongletAFocaliser = useRef<number>(-1)
+
+  // L'année décide en CSS de ce qui est montré (voir `REGLES_ANNEES`) ; l'onglet choisi au clavier
+  // (ou depuis une carte « Tu es en… ») reçoit le focus une fois visible.
+  useLayoutEffect(() => {
+    const racine = document.documentElement
+    if (annee) racine.setAttribute(ATTRIBUT_ANNEE, annee)
+    else racine.removeAttribute(ATTRIBUT_ANNEE)
+    if (ongletAFocaliser.current >= 0) {
+      onglets.current[ongletAFocaliser.current]?.focus()
+      ongletAFocaliser.current = -1
+    }
+  }, [annee])
+
+  function choisir(slug: string, focus?: boolean) {
+    if (focus) ongletAFocaliser.current = LEVELS.findIndex((l) => l.slug === slug)
+    setAnnee(slug)
+    ecrireAnneeChoisie(slug)
+  }
+
+  function clavierOnglets(e: React.KeyboardEvent, i: number) {
+    const n = LEVELS.length
+    const cible = e.key === 'ArrowRight' ? (i + 1) % n : e.key === 'ArrowLeft' ? (i - 1 + n) % n : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : -1
+    if (cible < 0) return
+    e.preventDefault()
+    choisir(LEVELS[cible].slug, true)
+  }
+
   return (
     <>
       <SiteHeader />
-      <div className="page page-wide">
-        <header className="home-hero">
-          <div className="home-hero-text">
-            <p className="eyebrow">Fédération Wallonie-Bruxelles · Mathématiques</p>
-            <h1 className="chapter-title">Chaque chapitre, en un coup d'œil</h1>
-            <p className="home-lede">
-              Vingt-trois chapitres narratifs, classés par année — chacun renvoie vers ses exercices
-              interactifs auto-corrigés.
-            </p>
-          </div>
-          <svg viewBox="0 0 160 110" width="160" height="110" fill="none" aria-hidden="true" className="home-hero-svg">
-            <path d="M12 94V12M12 94H148" className="home-hero-axis" strokeWidth="2" strokeLinecap="round" />
-            <path d="M18 80C40 80 48 24 82 24C104 24 112 46 148 46" className="home-hero-curve" strokeWidth="3.5" strokeLinecap="round" />
-          </svg>
-        </header>
-
-        {LEVELS.map((level, i) => {
-          const tone = LEVEL_TONE[i] ?? 'accent'
-          return (
-            <section className="home-level" key={level.slug} style={{ '--level-c': `var(--${tone})`, '--level-c-ink': `var(--${tone}-ink)` } as React.CSSProperties}>
-              <div className="home-level-head">
-                <h2 className="home-level-number">{level.label.replace(/\s*\(.*\)/, '')}</h2>
-                <span className="home-level-count">
-                  {level.chapters.length} chapitre{level.chapters.length > 1 ? 's' : ''}
+      <style>{REGLES_ANNEES}</style>
+      <main className="accueil">
+        <div className="accueil-tete">
+          <div>
+            <p className="accueil-sur">Mathématiques · FWB</p>
+            <h1 className="accueil-titre">
+              Mes maths
+              {LEVELS.map((l) => (
+                <span key={l.slug} data-annee-bloc={l.slug}>
+                  {' '}
+                  de {l.label}
                 </span>
-              </div>
+              ))}
+            </h1>
+          </div>
+          <div className="annees-onglets accueil-avec-annee" role="tablist" aria-label="Mon année">
+            {LEVELS.map((l, i) => (
+              <button
+                key={l.slug}
+                ref={(el) => {
+                  onglets.current[i] = el
+                }}
+                type="button"
+                role="tab"
+                id={`onglet-annee-${l.slug}`}
+                className="onglet-annee"
+                data-niveau={l.slug}
+                aria-selected={annee === l.slug}
+                aria-controls={`annee-${l.slug}`}
+                tabIndex={annee === l.slug || (!annee && i === 0) ? 0 : -1}
+                onClick={() => choisir(l.slug)}
+                onKeyDown={(e) => clavierOnglets(e, i)}
+              >
+                {l.label}
+                <span className="onglet-compte"> · {pluriel(l.chapters.length, 'chapitre')}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
-              {level.chapters.length === 0 ? (
-                <p className="empty-note">Aucun chapitre publié pour l'instant.</p>
-              ) : (
-                <div className="home-chapter-grid">
-                  {level.chapters.map((chapter) => (
-                    <Link className="home-chapter-card" to={`/${level.slug}/${chapter.slug}`} key={chapter.slug}>
-                      <HomeChapterIcon kind={CHAPTER_ICON[chapter.slug] ?? 'curve'} className="home-chapter-icon" />
-                      <span>
-                        <span className="home-chapter-num">{String(chapter.chapterNumber).padStart(2, '0')}</span>
-                        <span className="home-chapter-title">{chapter.title}</span>
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </section>
+        <section className="annees-choix" aria-labelledby="titre-choix-annee">
+          <h2 id="titre-choix-annee">Tu es en…</h2>
+          <p className="choix-aide">Choisis ton année : tu verras tes chapitres et où tu en es. Tu pourras en changer quand tu veux.</p>
+          <div className="choix-cartes">
+            {LEVELS.map((l, i) => (
+              <button
+                key={l.slug}
+                type="button"
+                className="choix-carte"
+                style={{ '--annee-c': `var(--${LEVEL_TONE[i] ?? 'accent'})` } as React.CSSProperties}
+                onClick={() => choisir(l.slug, true)}
+              >
+                <span className="choix-nom">{l.label}</span>
+                <span className="choix-compte">{pluriel(l.chapters.length, 'chapitre')}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {LEVELS.map((l) => {
+          const reprise = reprises[l.slug]
+          return (
+            <div key={l.slug} className="accueil-annee" id={`annee-${l.slug}`} role="tabpanel" aria-labelledby={`onglet-annee-${l.slug}`} data-annee-bloc={l.slug}>
+              <div className="accueil-actions">
+                {reprise && <BandeauReprendre reprise={reprise} />}
+                <CartePreparer reprise={reprise} />
+              </div>
+              <h2 className="accueil-liste-titre">
+                Les {pluriel(l.chapters.length, 'chapitre')} de {l.label}
+              </h2>
+              {l.chapters.length === 0 ? <p className="empty-note">Aucun chapitre publié pour l'instant.</p> : <ListeChapitres level={l} etats={chapitres[l.slug]} />}
+            </div>
           )
         })}
-      </div>
+
+        <p className="accueil-appareil accueil-avec-annee">Ta progression reste sur cet appareil : rien n'est envoyé.</p>
+      </main>
     </>
   )
 }
