@@ -1131,6 +1131,17 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'deux-mobiles-widget',
+          label: 'Manipule toi-même : deux mobiles',
+          caption:
+            'Fais avancer le temps t : les deux mobiles parcourent leurs trajectoires. L\'atelier ' +
+            'trouve la croix K des trajectoires avec deux paramètres différents, t₁ et t₂ : collision ' +
+            'si t₁ = t₂, sinon les mobiles passent en K à des instants différents. Essaie les ' +
+            'scénarios « collision » et « trajectoires parallèles ». Le réglage de départ reproduit ' +
+            'la figure ci-dessus.',
+        },
+        {
           kind: 'entrainement',
           title: 'Trajectoires et rencontre',
           generatorId: 'gen97',
@@ -1366,6 +1377,16 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'droites-remarquables-widget',
+          label: 'Manipule toi-même : droites remarquables',
+          caption:
+            'Déplace A, B et C et choisis les médiatrices, les hauteurs ou les médianes : chaque ' +
+            'droite est tracée avec son équation cartésienne, et le point de concours O, H ou G est ' +
+            'calculé en valeur exacte. Vérifie qu\'il est aussi sur la troisième droite. Le réglage ' +
+            'de départ reproduit l\'exemple ci-dessus (orthocentre H(2 ; 2)).',
+        },
+        {
           kind: 'astuce',
           text:
             "Aire d'un triangle en repère : prends un côté, par exemple [BC], comme base. La hauteur est la distance de A " +
@@ -1483,6 +1504,16 @@ export const geometrieAnalytiquePlane: ChapterContent = {
               '$AI + IB = A\'B = \\sqrt{50} \\approx 7{,}07$, alors qu\'en passant par J(2 ; 0) : ' +
               '$AJ + JB = \\sqrt{10} + \\sqrt{20} \\approx 7{,}63$, plus long',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'reflexion-viser-widget',
+          label: 'Manipule toi-même : réflexion, où viser ?',
+          caption:
+            'Déplace A, B et la droite d (fixée par D et E) : l\'atelier construit le projeté H de A, ' +
+            'le symétrique A′, puis le point visé I, où (A′B) coupe d. Le trajet AI + IB vaut A′B. ' +
+            'Fais glisser J le long de d : le trajet AJ + JB est toujours plus long, sauf quand J ' +
+            'arrive en I. Le réglage de départ reproduit la figure ci-dessus.',
         },
         {
           kind: 'entrainement',
@@ -1661,6 +1692,16 @@ export const geometrieAnalytiquePlane: ChapterContent = {
                 'perpendiculaire à (AB) qui passe par le milieu de [AB] : la médiatrice de [AB].',
             },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'lieu-trace-widget',
+          label: 'Manipule toi-même : le lieu se dessine',
+          caption:
+            'Choisis une règle, puis déplace le point M : chaque position laisse une trace verte si ' +
+            'la règle est vérifiée, rouge sinon. Les traces vertes dessinent peu à peu le lieu. ' +
+            '« Révéler le lieu » trace la médiatrice, les deux parallèles, la parallèle médiane, la ' +
+            'parabole ou le cercle, avec son équation.',
         },
       ],
     },
@@ -2716,6 +2757,17 @@ export const geometrieAnalytiquePlane: ChapterContent = {
                 '$r_2^2 - r_1^2 = 0$ : aucune droite.',
             },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'deux-cercles-widget',
+          label: 'Manipule toi-même : deux cercles',
+          caption:
+            'Déplace les centres et règle les rayons : l\'atelier écrit les deux équations ' +
+            'développées et les soustrait. Les carrés disparaissent, il reste une droite, ' +
+            'perpendiculaire à la droite des centres ; les points communs, 0, 1 ou 2, sont ceux de ' +
+            'cette droite et du premier cercle. Place les deux centres au même endroit : plus de ' +
+            'droite. Le réglage de départ reproduit l\'exemple du GPS.',
         },
         {
           kind: 'entrainement',
