@@ -144,9 +144,20 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             ['Deux points A, B', '$\\vec{AB} = \\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$'],
             ['Un point et un vecteur', 'le vecteur donné, tel quel'],
             ['Un point et un angle avec Ox', '$(\\cos\\theta ; \\sin\\theta)$, ramené à des coordonnées exactes pour un angle remarquable'],
-            ['Un point et un angle α avec Oy', '$(\\sin\\alpha ; \\cos\\alpha)$ — même principe, l\'angle avec Ox valant alors 90° − α'],
+            ['Un point et un angle α avec Oy', '$(\\sin\\alpha ; \\cos\\alpha)$ — même principe, l\'angle avec Ox valant alors 90° − α (α se mesure depuis le demi-axe positif de Oy, voir section 3)'],
             ['Un point et une pente m', '$\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$'],
           ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'point et angle de 30° avec Oy',
+          formula: 'La droite d passe par A(2 ; −1) et forme un angle de 30° avec Oy. Trouve un vecteur directeur à coordonnées exactes, puis une équation de d.',
+          steps: [
+            { tag: 'vecteur (sin α ; cos α)', text: '$\\alpha = 30^{\\circ}$ : $\\begin{pmatrix} \\sin 30^{\\circ} \\\\ \\cos 30^{\\circ} \\end{pmatrix} = \\begin{pmatrix} \\frac{1}{2} \\\\ \\frac{\\sqrt{3}}{2} \\end{pmatrix}$' },
+            { tag: 'sans fraction', text: 'on multiplie par 2 : $\\vec{u} = \\begin{pmatrix} 1 \\\\ \\sqrt{3} \\end{pmatrix}$, donc la pente vaut $m = \\sqrt{3}$ — l\'angle avec Ox vaut bien $90^{\\circ} - 30^{\\circ} = 60^{\\circ}$, et $\\tan 60^{\\circ} = \\sqrt{3}$' },
+            { tag: 'équation', text: '$y + 1 = \\sqrt{3}\\,(x - 2)$, soit $y = \\sqrt{3}\\,x - 2\\sqrt{3} - 1$' },
+          ],
+          result: { tag: 'implicite', text: '$\\sqrt{3}\\,x - y - 2\\sqrt{3} - 1 = 0$' },
         },
         { kind: 'subheading', text: '4 façons d\'écrire la même droite' },
         {
@@ -156,16 +167,31 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'de 4 façons différentes. Chacune est utile dans un contexte différent.',
         },
         {
-          kind: 'rappel',
-          label: "D'où vient la forme paramétrique ? — l'équation vectorielle",
-          items: [
-            'Un point M(x ; y) appartient à la droite (A, $\\vec{u}$) exactement quand $\\vec{AM}$ ' +
-              'et $\\vec{u}$ sont colinéaires. Autrement dit : il existe un nombre t tel que ' +
-              '$\\vec{AM} = t \\cdot \\vec{u}$. C\'est l\'**équation vectorielle** de la droite. ' +
-              "Écris-la composante par composante : $\\begin{pmatrix} x-x_0 \\\\ y-y_0 " +
-              '\\end{pmatrix} = t \\cdot \\begin{pmatrix} a \\\\ b \\end{pmatrix}$. Tu retrouves ' +
-              'exactement le système paramétrique $\\begin{cases} x = x_0+t \\cdot a \\\\ y = ' +
-              'y_0+t \\cdot b \\end{cases}$.',
+          kind: 'exempleLibre',
+          label: 'Démonstration — la forme paramétrique, depuis l\'équation vectorielle',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit d la droite qui passe par $A(x_0\\,;\\,y_0)$ et de vecteur directeur ' +
+                '$\\vec{u}\\begin{pmatrix} a \\\\ b \\end{pmatrix}$, non nul. Un point $M(x\\,;\\,y)$ est sur d ' +
+                'exactement quand $\\vec{AM}$ et $\\vec{u}$ sont colinéaires, c\'est-à-dire quand il existe un ' +
+                'réel t tel que $\\vec{AM} = t \\cdot \\vec{u}$ : c\'est l\'**équation vectorielle** de la droite.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Composante par composante : $\\begin{pmatrix} x-x_0 \\\\ y-y_0 \\end{pmatrix} = ' +
+                '\\begin{pmatrix} t \\cdot a \\\\ t \\cdot b \\end{pmatrix}$, donc $x - x_0 = t \\cdot a$ et ' +
+                '$y - y_0 = t \\cdot b$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'On isole x et y : $\\begin{cases} x = x_0+t \\cdot a \\\\ y = y_0+t \\cdot b \\end{cases}$, avec ' +
+                'le même paramètre t dans les deux équations. Chaque valeur de t donne un point de d, et ' +
+                'chaque point de d est obtenu pour une valeur de t.',
+            },
           ],
         },
         {
@@ -188,6 +214,39 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             '**Paramétrique** — $\\begin{cases} x = x_0+t \\cdot \\alpha \\\\ y = y_0+t \\cdot ' +
               '\\beta \\end{cases}$. Une équation par variable, avec le même paramètre t dans les ' +
               'deux. **Toujours possible**, même pour une verticale ou une horizontale.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — pourquoi (−b ; a) dirige la droite ax + by + c = 0',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $d : ax + by + c = 0$, avec a et b non tous deux nuls (sinon ce n\'est pas une droite). ' +
+                'Prends deux points distincts de d, $M_1(x_1\\,;\\,y_1)$ et $M_2(x_2\\,;\\,y_2)$ : ' +
+                '$ax_1 + by_1 + c = 0$ et $ax_2 + by_2 + c = 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'On soustrait ces deux égalités : c disparaît, et il reste $a(x_2-x_1) + b(y_2-y_1) = 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Compare le vecteur directeur $\\vec{M_1M_2}\\begin{pmatrix} x_2-x_1 \\\\ y_2-y_1 \\end{pmatrix}$ ' +
+                'au vecteur $\\begin{pmatrix} -b \\\\ a \\end{pmatrix}$ par le critère de colinéarité : ' +
+                '$(x_2-x_1) \\cdot a - (y_2-y_1) \\cdot (-b) = a(x_2-x_1) + b(y_2-y_1) = 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Les deux vecteurs sont donc colinéaires, et $\\begin{pmatrix} -b \\\\ a \\end{pmatrix}$ n\'est pas ' +
+                'nul : c\'est un vecteur directeur de d. Au passage, l\'égalité de l\'étape 2 dit aussi que ' +
+                '$\\vec{M_1M_2}$ est orthogonal à $\\begin{pmatrix} a \\\\ b \\end{pmatrix}$ : c\'est pour cela qu\'on ' +
+                'appelle ce vecteur le vecteur **normal** de d.',
+            },
           ],
         },
         {
@@ -754,6 +813,34 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           result: { tag: 'd′', text: '$3x - y + 1 = 0$ — deux parallèles ne diffèrent que par c' },
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — deux droites parallèles ne diffèrent que par c',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $d : ax + by + c = 0$, avec a et b non tous deux nuls, et $d\' : a\'x + b\'y + c\' = 0$ une ' +
+                'droite parallèle à d. Leurs vecteurs directeurs $\\begin{pmatrix} -b \\\\ a \\end{pmatrix}$ et ' +
+                '$\\begin{pmatrix} -b\' \\\\ a\' \\end{pmatrix}$ sont colinéaires et non nuls : il existe un réel ' +
+                '$k \\neq 0$ tel que $a\' = k \\cdot a$ et $b\' = k \\cdot b$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'L\'équation de d′ s\'écrit donc $k \\cdot a\\,x + k \\cdot b\\,y + c\' = 0$. On la divise par ' +
+                '$k \\neq 0$ : $ax + by + \\dfrac{c\'}{k} = 0$. Les coefficients de x et de y sont ceux de d : ' +
+                'seul le terme constant change.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Réciproquement, une droite d\'équation $ax + by + c\'\' = 0$ admet le même vecteur directeur ' +
+                '$\\begin{pmatrix} -b \\\\ a \\end{pmatrix}$ que d : elle est parallèle à d, et même confondue ' +
+                'avec d si $c\'\' = c$.',
+            },
+          ],
+        },
+        {
           kind: 'exemple',
           badge: 'reconnaître la relation',
           formula: 'd₁ : y = 2x + 1 et d₂ : x + 2y − 4 = 0 — parallèles, perpendiculaires, ou ni l\'un ni l\'autre ?',
@@ -785,18 +872,39 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             "— ce sont juste des multiples négatifs l'un de l'autre. N'importe lequel des deux " +
             'convient pour construire une perpendiculaire.',
         },
-        { kind: 'subheading', text: "Démonstration — d'où vient m·m′ = −1 ?" },
         {
-          kind: 'para',
-          text:
-            'Si $\\vec{u}\\begin{pmatrix} \\alpha \\\\ \\beta \\end{pmatrix}$ et $\\vec{v}$ sont ' +
-            'perpendiculaires, tu peux toujours écrire $\\vec{v} = \\begin{pmatrix} -k \\cdot \\beta ' +
-            '\\\\ k \\cdot \\alpha \\end{pmatrix}$ pour un certain $k \\neq 0$ (le produit scalaire ' +
-            '$\\alpha \\cdot (-k\\beta) + \\beta \\cdot (k\\alpha) = 0$ est toujours vrai, quel que ' +
-            'soit k). Si aucune des deux droites n\'est verticale ni horizontale ($\\alpha \\neq 0$ et ' +
-            '$\\beta \\neq 0$), les pentes valent $m = \\frac{\\beta}{\\alpha}$ et ' +
-            "$m' = \\frac{k\\alpha}{-k\\beta} = -\\frac{\\alpha}{\\beta}$. Leur produit vaut " +
-            "$m \\cdot m' = \\frac{\\beta}{\\alpha} \\cdot \\left(-\\frac{\\alpha}{\\beta}\\right) = -1$.",
+          kind: 'exempleLibre',
+          label: "Démonstration — d'où vient m·m′ = −1 ?",
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soient deux droites perpendiculaires, dont aucune n\'est verticale, de vecteurs directeurs ' +
+                '$\\vec{u}\\begin{pmatrix} \\alpha \\\\ \\beta \\end{pmatrix}$ et ' +
+                '$\\vec{v}\\begin{pmatrix} \\alpha\' \\\\ \\beta\' \\end{pmatrix}$. Aucune n\'est verticale, donc ' +
+                '$\\alpha \\neq 0$ et $\\alpha\' \\neq 0$, et leurs pentes valent $m = \\dfrac{\\beta}{\\alpha}$ et ' +
+                '$m\' = \\dfrac{\\beta\'}{\\alpha\'}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Les droites sont perpendiculaires, donc le produit scalaire de leurs vecteurs directeurs est ' +
+                'nul : $\\alpha \\cdot \\alpha\' + \\beta \\cdot \\beta\' = 0$, c\'est-à-dire ' +
+                '$\\beta \\cdot \\beta\' = -\\alpha \\cdot \\alpha\'$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'On en déduit $m \\cdot m\' = \\dfrac{\\beta \\cdot \\beta\'}{\\alpha \\cdot \\alpha\'} = ' +
+                '\\dfrac{-\\alpha \\cdot \\alpha\'}{\\alpha \\cdot \\alpha\'} = -1$, puisque $\\alpha \\cdot \\alpha\' \\neq 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'L\'hypothèse « aucune n\'est verticale » est indispensable : la perpendiculaire à une horizontale ' +
+                'est verticale, et sa pente n\'existe pas (voir ci-dessous).',
+            },
+          ],
         },
         {
           kind: 'attention',
@@ -992,6 +1100,35 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             '**trajectoires** avec deux paramètres différents, $t_1$ pour le premier et $t_2$ pour le second. Les ' +
             'mobiles ne se rencontrent (collision) que si, en plus, $t_1=t_2$ : des trajectoires qui se croisent ne ' +
             'suffisent pas.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.5,
+            xMax: 9.5,
+            yMin: -1,
+            yMax: 8.375,
+            grid: true,
+            vectors: [
+              { from: { x: -0.4, y: 0.3 }, to: { x: 9.4, y: 5.2 }, tone: 'accent', arrow: false },
+              { from: { x: 9, y: -1 }, to: { x: -0.375, y: 8.375 }, tone: 'good', arrow: false },
+            ],
+            points: [
+              { x: 1, y: 1, label: 'M₁', tone: 'accent', labelPos: 'above' },
+              { x: 3, y: 2, label: 't = 1', tone: 'accent', labelPos: 'below' },
+              { x: 7, y: 4, label: 't = 3', tone: 'accent', labelPos: 'below' },
+              { x: 8, y: 0, tone: 'good' },
+              { x: 7.6, y: -0.55, label: 'M₂', tone: 'good', node: false, labelPos: 'left' },
+              { x: 7, y: 1, label: 't = 1', tone: 'good', labelPos: 'right' },
+              { x: 6, y: 2, label: 't = 2', tone: 'good', labelPos: 'right' },
+              { x: 5, y: 3, label: 'K', tone: 'ink', labelPos: 'above' },
+            ],
+            caption:
+              'M₁ : $\\begin{cases} x = 1+2t \\\\ y = 1+t \\end{cases}$ et M₂ : $\\begin{cases} x = 8-t \\\\ y = t \\end{cases}$ ' +
+              '— points marqués à t = 0, 1, 2, 3 ; les trajectoires se coupent en K(5 ; 3), mais M₁ y passe à $t_1 = 2$ et M₂ à $t_2 = 3$ : ' +
+              'croisement sans collision',
+          },
         },
         {
           kind: 'entrainement',
@@ -1196,6 +1333,39 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           result: { tag: 'orthocentre', text: 'H(2 ; 2) — contrôle par la troisième hauteur : $\\vec{CH}\\cdot\\vec{AB}=0 \\cdot 6+(-2) \\cdot 0=0$ ✓' },
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.8,
+            xMax: 6.8,
+            yMin: -0.8,
+            yMax: 6.325,
+            grid: true,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 6, y: 0 }, tone: 'ink', arrow: false },
+              { from: { x: 6, y: 0 }, to: { x: 2, y: 4 }, tone: 'ink', arrow: false },
+              { from: { x: 2, y: 4 }, to: { x: 0, y: 0 }, tone: 'ink', arrow: false },
+              { from: { x: -0.6, y: -0.6 }, to: { x: 4.2, y: 4.2 }, tone: 'good', dashed: true, arrow: false },
+              { from: { x: 6.6, y: -0.3 }, to: { x: 0.4, y: 2.8 }, tone: 'good', dashed: true, arrow: false },
+              { from: { x: 2, y: -0.6 }, to: { x: 2, y: 5 }, tone: 'good', dashed: true, arrow: false },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'left' },
+              { x: 6, y: 0, label: 'B', tone: 'ink', labelPos: 'below' },
+              { x: 2, y: 4, label: 'C', tone: 'ink', labelPos: 'left' },
+              { x: 2, y: 2, label: 'H(2 ; 2)', tone: 'accent', labelPos: 'right' },
+            ],
+            rightAngleMarkers: [
+              { vertex: { x: 3, y: 3 }, arm1: { x: 6, y: 0 }, arm2: { x: 0, y: 0 }, size: 9 },
+              { vertex: { x: 1.2, y: 2.4 }, arm1: { x: 0, y: 0 }, arm2: { x: 6, y: 0 }, size: 9 },
+              { vertex: { x: 2, y: 0 }, arm1: { x: 6, y: 0 }, arm2: { x: 2, y: 4 }, size: 9 },
+            ],
+            caption:
+              'les trois hauteurs du triangle de l\'exemple (pointillés verts) : $x - y = 0$, $x + 2y - 6 = 0$ et ' +
+              '$x = 2$ — elles se coupent toutes en l\'orthocentre H(2 ; 2)',
+          },
+        },
+        {
           kind: 'astuce',
           text:
             "Aire d'un triangle en repère : prends un côté, par exemple [BC], comme base. La hauteur est la distance de A " +
@@ -1219,6 +1389,63 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           ],
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -2.5,
+            xMax: 4.5,
+            yMin: -2,
+            yMax: 4.5625,
+            grid: true,
+            vectors: [
+              { from: { x: -2.5, y: 4.5 }, to: { x: 4, y: -2 }, tone: 'accent', arrow: false },
+              { from: { x: 3, y: 3 }, to: { x: 1, y: 1 }, tone: 'good', tick: true, arrow: false },
+              { from: { x: 1, y: 1 }, to: { x: -1, y: -1 }, tone: 'good', tick: true, arrow: false },
+            ],
+            points: [
+              { x: 3, y: 3, label: 'A(3 ; 3)', tone: 'ink', labelPos: 'right' },
+              { x: 1, y: 1, label: 'H(1 ; 1)', tone: 'accent', labelPos: 'right' },
+              { x: -1, y: -1, label: 'A′(−1 ; −1)', tone: 'good', labelPos: 'right' },
+              { x: -1.9, y: 3.3, label: 'd', tone: 'accent', node: false },
+            ],
+            rightAngleMarkers: [{ vertex: { x: 1, y: 1 }, arm1: { x: 3, y: 3 }, arm2: { x: 3, y: -1 } }],
+            caption:
+              'd : $x + y - 2 = 0$ — H est le projeté orthogonal de A sur d, et le milieu de [AA′] : ' +
+              '$x_{A\'} = 2 \\cdot 1 - 3 = -1$, $y_{A\'} = 2 \\cdot 1 - 3 = -1$',
+          },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — les coordonnées du symétrique',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $H(x_H\\,;\\,y_H)$ le projeté orthogonal de $A(x_A\\,;\\,y_A)$ sur d. Par définition, le ' +
+                'symétrique $A\'(x_{A\'}\\,;\\,y_{A\'})$ de A par rapport à d est le point tel que H soit le milieu ' +
+                'de [AA′].',
+            },
+            {
+              kind: 'para',
+              text:
+                'Les coordonnées du milieu donnent $x_H = \\dfrac{x_A + x_{A\'}}{2}$ et ' +
+                '$y_H = \\dfrac{y_A + y_{A\'}}{2}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'On multiplie par 2 : $2x_H = x_A + x_{A\'}$, puis on isole $x_{A\'}$ : $x_{A\'} = 2x_H - x_A$. ' +
+                'De même, $2y_H = y_A + y_{A\'}$ donne $y_{A\'} = 2y_H - y_A$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Contrôle avec les vecteurs : H est le milieu de [AA′], donc $\\vec{AH} = \\vec{HA\'}$, soit ' +
+                '$x_H - x_A = x_{A\'} - x_H$ : on retrouve $x_{A\'} = 2x_H - x_A$.',
+            },
+          ],
+        },
+        {
           kind: 'astuce',
           label: 'Réflexion : où viser ?',
           text:
@@ -1226,6 +1453,36 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'comme s\'ils venaient du **symétrique** A′ du point de départ A. Pour aller de A à B en touchant d, on vise ' +
             'donc le point I où la droite (A′B) coupe d. Comme la symétrie conserve les longueurs, le trajet ' +
             '$AI+IB$ vaut exactement $A\'B$.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -1.2,
+            xMax: 7.3,
+            yMin: -3.8,
+            yMax: 4.17,
+            vectors: [
+              { from: { x: 1, y: 3 }, to: { x: 4, y: 0 }, tone: 'good', arrow: false },
+              { from: { x: 4, y: 0 }, to: { x: 6, y: 2 }, tone: 'good' },
+              { from: { x: 1, y: -3 }, to: { x: 4, y: 0 }, tone: 'faint', dashed: true },
+              { from: { x: 1, y: 3 }, to: { x: 1, y: -3 }, tone: 'faint', dashed: true },
+              { from: { x: 1, y: 3 }, to: { x: 2, y: 0 }, tone: 'bad', dashed: true },
+              { from: { x: 2, y: 0 }, to: { x: 6, y: 2 }, tone: 'bad', dashed: true },
+            ],
+            points: [
+              { x: 1, y: 3, label: 'A(1 ; 3)', tone: 'ink', labelPos: 'above' },
+              { x: 6, y: 2, label: 'B(6 ; 2)', tone: 'ink', labelPos: 'above' },
+              { x: 1, y: -3, label: 'A′(1 ; −3)', tone: 'ink', labelPos: 'right' },
+              { x: 4, y: 0, tone: 'good' },
+              { x: 4.15, y: -0.55, label: 'I(4 ; 0)', tone: 'good', node: false, labelPos: 'right' },
+              { x: 2, y: 0, label: 'J', tone: 'bad', labelPos: 'below' },
+            ],
+            caption:
+              'le mur d est l\'axe Ox : A′ est le symétrique de A, et I le point où (A′B) coupe d. ' +
+              '$AI + IB = A\'B = \\sqrt{50} \\approx 7{,}07$, alors qu\'en passant par J(2 ; 0) : ' +
+              '$AJ + JB = \\sqrt{10} + \\sqrt{20} \\approx 7{,}64$, plus long',
+          },
         },
         {
           kind: 'entrainement',
@@ -1371,6 +1628,40 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             caption: 'tous les points de la droite orange sont à la même distance de A et de B — et eux seuls',
           },
         },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la médiatrice, en coordonnées',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soient $A(x_A\\,;\\,y_A)$ et $B(x_B\\,;\\,y_B)$ deux points distincts, et $M(x\\,;\\,y)$. Les ' +
+                'distances sont positives, donc $MA = MB \\iff MA^2 = MB^2$, c\'est-à-dire ' +
+                '$(x-x_A)^2+(y-y_A)^2 = (x-x_B)^2+(y-y_B)^2$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'On développe : $x^2 - 2x_Ax + x_A^2 + y^2 - 2y_Ay + y_A^2 = x^2 - 2x_Bx + x_B^2 + y^2 - 2y_By + y_B^2$. ' +
+                'Les termes $x^2$ et $y^2$ s\'éliminent, et il reste ' +
+                '$2(x_B-x_A)\\,x + 2(y_B-y_A)\\,y + x_A^2+y_A^2-x_B^2-y_B^2 = 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'A et B sont distincts, donc $x_B-x_A$ et $y_B-y_A$ ne sont pas tous deux nuls : c\'est ' +
+                'l\'équation d\'une **droite**. Son vecteur normal est ' +
+                '$\\begin{pmatrix} 2(x_B-x_A) \\\\ 2(y_B-y_A) \\end{pmatrix} = 2\\vec{AB}$ : elle est ' +
+                'perpendiculaire à (AB).',
+            },
+            {
+              kind: 'para',
+              text:
+                'Le milieu I de [AB] vérifie $IA = IB$ : il est sur cette droite. Le lieu est donc la droite ' +
+                'perpendiculaire à (AB) qui passe par le milieu de [AB] : la médiatrice de [AB].',
+            },
+          ],
+        },
       ],
     },
 
@@ -1411,14 +1702,32 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'que ça, juste en langage algébrique.',
         },
         {
-          kind: 'rappel',
-          label: "D'où vient l'équation (x−x₀)² + (y−y₀)² = r² ?",
-          items: [
-            'Un point P(x ; y) appartient au cercle exactement quand sa distance au centre ' +
-              '$C(x_0 ; y_0)$ vaut r : $\\sqrt{(x-x_0)^2+(y-y_0)^2} = r$. Élève les deux membres ' +
-              "au carré. Une distance est déjà positive, donc aucune solution n'est perdue. Tu " +
-              'obtiens directement $(x-x_0)^2+(y-y_0)^2=r^2$.',
-            '**Cas particulier** — cercle centré à l\'origine : $x^2+y^2=r^2$.',
+          kind: 'exempleLibre',
+          label: 'Démonstration — l\'équation du cercle, par Pythagore',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit le cercle de centre $C(x_0\\,;\\,y_0)$ et de rayon $r > 0$. Un point $P(x\\,;\\,y)$ ' +
+                'appartient au cercle exactement quand $CP = r$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Le vecteur $\\vec{CP}\\begin{pmatrix} x - x_0 \\\\ y - y_0 \\end{pmatrix}$ a pour norme, par ' +
+                'Pythagore, $CP = \\sqrt{(x-x_0)^2+(y-y_0)^2}$. La condition s\'écrit donc ' +
+                '$\\sqrt{(x-x_0)^2+(y-y_0)^2} = r$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Les deux membres sont positifs : on peut les élever au carré sans perdre ni ajouter de ' +
+                'solution. On obtient $(x-x_0)^2+(y-y_0)^2=r^2$.',
+            },
+            {
+              kind: 'para',
+              text: 'Cas particulier : le cercle centré à l\'origine a pour équation $x^2+y^2=r^2$.',
+            },
           ],
         },
         {
@@ -1543,6 +1852,37 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         },
         { kind: 'subheading', text: 'Pour aller plus loin — la tangente en un point du cercle' },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la tangente est perpendiculaire au rayon',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit un cercle de centre C et de rayon r, P un point de ce cercle, et t la droite qui passe ' +
+                'par P, perpendiculaire à (CP). Montrons que t n\'a que le point P en commun avec le cercle : ' +
+                'c\'est la tangente en P.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Soit M un point de t, différent de P. La droite (PM) est t, perpendiculaire à (CP) : le ' +
+                'triangle CPM est rectangle en P. Par Pythagore, $CM^2 = CP^2 + PM^2 = r^2 + PM^2$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Comme $M \\neq P$, $PM^2 > 0$, donc $CM^2 > r^2$ et $CM > r$ : M est à l\'extérieur du cercle. ' +
+                'Le seul point commun de t et du cercle est P.',
+            },
+            {
+              kind: 'para',
+              text:
+                'En coordonnées : la tangente en P a pour vecteur normal $\\vec{CP}$. Un point M est sur elle ' +
+                'exactement quand $\\vec{CP} \\cdot \\vec{PM} = 0$, l\'équation du formulaire.',
+            },
+          ],
+        },
+        {
           kind: 'exemple',
           badge: 'tangente en un point du cercle',
           formula: 'Écris l\'équation de la tangente au cercle $(x-1)^2+(y-1)^2=25$ au point P(4 ; 5).',
@@ -1598,6 +1938,34 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             { tag: 'centre Ω', text: '$x=1 \\to 1-2y+1=0 \\to y=1$ : Ω(1 ; 1)' },
           ],
           result: { tag: 'cercle', text: '$r=\\Omega A=\\sqrt{3^2+4^2}=5$ → $(x-1)^2+(y-1)^2=25$' },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -4.8,
+            xMax: 6.7,
+            yMin: -4.6,
+            yMax: 6.18,
+            grid: true,
+            circle: { cx: 1, cy: 1, r: 5, tone: 'accent' },
+            vectors: [
+              { from: { x: 4, y: 5 }, to: { x: -2, y: 5 }, tone: 'faint', arrow: false },
+              { from: { x: 4, y: 5 }, to: { x: 6, y: 1 }, tone: 'faint', arrow: false },
+              { from: { x: 1, y: -4.6 }, to: { x: 1, y: 6.18 }, tone: 'good', dashed: true, arrow: false },
+              { from: { x: -4.8, y: -1.9 }, to: { x: 6.7, y: 3.85 }, tone: 'good', dashed: true, arrow: false },
+            ],
+            points: [
+              { x: 4, y: 5, label: 'A', tone: 'ink', labelPos: 'above' },
+              { x: -2, y: 5, label: 'B', tone: 'ink', labelPos: 'above' },
+              { x: 6, y: 1, label: 'C', tone: 'ink', labelPos: 'right' },
+              { x: 1, y: 1, tone: 'accent' },
+              { x: 1.25, y: 0.35, label: 'Ω(1 ; 1)', tone: 'accent', node: false, labelPos: 'right' },
+            ],
+            caption:
+              'médiatrices de [AB], $x = 1$, et de [AC], $x - 2y + 1 = 0$, en pointillés : elles se coupent ' +
+              'au centre Ω(1 ; 1), à la distance 5 des trois points',
+          },
         },
         {
           kind: 'atelier',
@@ -1791,20 +2159,36 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             ['horizontal (directrice verticale)', '$(y-y_S)^2=2p(x-x_S)$', '$2(x_F-x_S)$', '$x=x_S-p/2$'],
           ],
         },
-        { kind: 'subheading', text: 'Démonstration — cas le plus simple (sommet à l\'origine, axe vertical)' },
         {
-          kind: 'para',
-          text:
-            'Prends le foyer $F(0 ; p/2)$ et la directrice $d : y=-p/2$. Un point P(x ; y) est ' +
-            'sur la parabole exactement quand $\\text{dist}(P,F) = \\text{dist}(P,d)$ :',
-        },
-        {
-          kind: 'exemple',
-          steps: [
-            { tag: 'équidistance', text: '$\\sqrt{x^2+(y-p/2)^2} = |y+p/2|$' },
-            { tag: 'élever au carré', text: 'les deux membres sont positifs : $x^2+y^2-py+p^2/4 = y^2+py+p^2/4$' },
+          kind: 'exempleLibre',
+          label: 'Démonstration — l\'équation x² = 2py, sommet à l\'origine',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Prends le foyer $F\\left(0\\,;\\,\\dfrac{p}{2}\\right)$ et la directrice $d : y = -\\dfrac{p}{2}$, ' +
+                'avec $p \\neq 0$ : le sommet est l\'origine, à mi-chemin entre F et d. Un point $P(x\\,;\\,y)$ est ' +
+                'sur la parabole exactement quand $\\text{dist}(P,F) = \\text{dist}(P,d)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'D\'un côté, $\\text{dist}(P,F) = \\sqrt{x^2 + \\left(y - \\dfrac{p}{2}\\right)^2}$. De l\'autre, la ' +
+                'distance de P à l\'horizontale $y = -\\dfrac{p}{2}$ est un écart d\'ordonnées : ' +
+                '$\\text{dist}(P,d) = \\left|y + \\dfrac{p}{2}\\right|$ — avec une valeur absolue, car p est signé.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Les deux membres de $\\sqrt{x^2 + \\left(y - \\dfrac{p}{2}\\right)^2} = \\left|y + \\dfrac{p}{2}\\right|$ ' +
+                'sont positifs : on peut les élever au carré sans perdre ni ajouter de solution. On obtient ' +
+                '$x^2 + y^2 - py + \\dfrac{p^2}{4} = y^2 + py + \\dfrac{p^2}{4}$.',
+            },
+            {
+              kind: 'para',
+              text: 'Les termes $y^2$ et $\\dfrac{p^2}{4}$ s\'éliminent : il reste $x^2 - py = py$, soit $x^2 = 2py$.',
+            },
           ],
-          result: { tag: 'après simplification', text: '$x^2=2py$' },
         },
         {
           kind: 'para',
@@ -1814,15 +2198,36 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             "tableau ci-dessus. L'axe horizontal s'obtient en échangeant les rôles de x et y.",
         },
         {
-          kind: 'rappel',
-          label: 'Lien avec le chapitre 1 — la parabole y = ax²',
-          items: [
-            'La courbe de $y = ax^2$ est exactement une parabole d\'axe vertical et de sommet O : ' +
-              '$x^2 = \\frac{1}{a}\\,y$, donc $2p = \\frac{1}{a}$, soit $p = \\frac{1}{2a}$, et son ' +
-              'foyer est $F\\left(0 ; \\frac{1}{4a}\\right)$.',
-            'Pour $y = \\frac{x^2}{4}$ (la figure du début de section), $a = \\frac{1}{4}$ donne ' +
-              '$p = 2$ et $F(0 ; 1)$ : c\'est bien le foyer dessiné. Et si $a < 0$, p est négatif : ' +
-              'la parabole s\'ouvre vers le bas, comme au chapitre 1.',
+          kind: 'exempleLibre',
+          label: 'Démonstration — le foyer de la parabole y = ax², lien avec le chapitre 1',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $a \\neq 0$. L\'équation $y = ax^2$ s\'écrit $x^2 = \\dfrac{1}{a}\\,y$ : c\'est la forme ' +
+                '$x^2 = 2py$ d\'une parabole d\'axe vertical et de sommet O, avec $2p = \\dfrac{1}{a}$, soit ' +
+                '$p = \\dfrac{1}{2a}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Son foyer est $F\\left(0\\,;\\,\\dfrac{p}{2}\\right)$, et $\\dfrac{p}{2} = \\dfrac{1}{4a}$ : ' +
+                '$F\\left(0\\,;\\,\\dfrac{1}{4a}\\right)$. Sa directrice a pour équation $y = -\\dfrac{1}{4a}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Contrôle par la définition : pour $P(x\\,;\\,ax^2)$, $PF^2 = x^2 + \\left(ax^2 - \\dfrac{1}{4a}\\right)^2 ' +
+                '= a^2x^4 + \\dfrac{x^2}{2} + \\dfrac{1}{16a^2} = \\left(ax^2 + \\dfrac{1}{4a}\\right)^2$, le carré de ' +
+                'la distance de P à la directrice.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Pour $y = \\dfrac{x^2}{4}$ (la figure du début de section), $a = \\dfrac{1}{4}$ donne $p = 2$ et ' +
+                '$F(0\\,;\\,1)$ : c\'est bien le foyer dessiné. Et si $a < 0$, p est négatif : la parabole ' +
+                's\'ouvre vers le bas, comme au chapitre 1.',
+            },
           ],
         },
         {
@@ -2182,6 +2587,42 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           result: { tag: 'résultat', text: 'un seul point, (2 ; 1) : la droite est tangente à la parabole' },
         },
         {
+          kind: 'exemple',
+          badge: 'droite parallèle à l\'axe d\'une parabole',
+          formula: 'Parabole $x^2 = 4y$ et droite $x = 2$.',
+          steps: [
+            { tag: 'remplacer x', text: '$2^2 = 4y \\to 4 = 4y$ : une équation du **premier** degré en y' },
+            { tag: 'une seule solution', text: '$y = 1$ : un seul point commun, (2 ; 1)' },
+          ],
+          result: {
+            tag: 'résultat',
+            text: 'un seul point, mais la droite $x = 2$, parallèle à l\'axe de la parabole, la traverse : ce n\'est pas une tangente. La tangente en (2 ; 1) est $y = x - 1$, l\'exemple précédent',
+          },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -3,
+            xMax: 5,
+            yMin: -1.5,
+            yMax: 6,
+            curves: [{ fn: (x: number) => (x * x) / 4, tone: 'accent', xMin: -3, xMax: 4.8 }],
+            vectors: [
+              { from: { x: 2, y: -1.5 }, to: { x: 2, y: 6 }, tone: 'good', arrow: false },
+              { from: { x: -0.5, y: -1.5 }, to: { x: 5, y: 4 }, tone: 'faint', dashed: true, arrow: false },
+            ],
+            points: [
+              { x: 2, y: 1, label: '(2 ; 1)', tone: 'ink', labelPos: 'left' },
+              { x: 2.15, y: 5.5, label: 'x = 2', tone: 'good', node: false, labelPos: 'right' },
+              { x: 3.2, y: 1.1, label: 'y = x − 1', tone: 'ink', node: false, labelPos: 'right' },
+            ],
+            caption:
+              'parabole $x^2 = 4y$ : la droite $x = 2$ (verte) la coupe en un seul point en la traversant ; ' +
+              'la tangente $y = x - 1$ (pointillés) la touche au même point sans la traverser',
+          },
+        },
+        {
           kind: 'piege',
           label: 'Piège — un seul point ne veut pas toujours dire « tangente »',
           text:
@@ -2213,6 +2654,68 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             { tag: 'revenir à un cercle', text: '$16 + y^2 = 25 \\to y = 3$ ou $y = -3$' },
           ],
           result: { tag: 'résultat', text: '(4 ; 3) et (4 ; −3). Le 3e satellite tranche : seul (4 ; 3) est à √26 ≈ 5,1 de (3 ; 8)' },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -6,
+            xMax: 14,
+            yMin: -9.4,
+            yMax: 9.35,
+            circles: [
+              { cx: 0, cy: 0, r: 5, tone: 'accent' },
+              { cx: 8, cy: 0, r: 5, tone: 'good' },
+            ],
+            vectors: [{ from: { x: 4, y: -9.4 }, to: { x: 4, y: 9.35 }, tone: 'ink', dashed: true, arrow: false }],
+            points: [
+              { x: 0, y: 0, label: 'C₁', tone: 'accent', labelPos: 'below' },
+              { x: 8, y: 0, label: 'C₂', tone: 'good', labelPos: 'below' },
+              { x: 4, y: 3, label: '(4 ; 3)', tone: 'ink', labelPos: 'right' },
+              { x: 4, y: -3, label: '(4 ; −3)', tone: 'ink', labelPos: 'right' },
+              { x: 4.3, y: 8.3, label: 'x = 4', tone: 'ink', node: false, labelPos: 'right' },
+            ],
+            caption:
+              'soustraire $x^2+y^2=25$ et $(x-8)^2+y^2=25$ donne la droite $x = 4$ (pointillés), perpendiculaire ' +
+              'à la droite des centres : elle passe par les deux points communs',
+          },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la soustraction de deux équations de cercles donne une droite',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soient deux cercles de centres distincts $C_1(a_1\\,;\\,b_1)$ et $C_2(a_2\\,;\\,b_2)$, de rayons ' +
+                '$r_1$ et $r_2$. Développées, leurs équations s\'écrivent ' +
+                '$x^2 + y^2 - 2a_1x - 2b_1y + a_1^2 + b_1^2 - r_1^2 = 0$ et ' +
+                '$x^2 + y^2 - 2a_2x - 2b_2y + a_2^2 + b_2^2 - r_2^2 = 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'On soustrait la seconde de la première : $x^2$ et $y^2$ disparaissent, et il reste ' +
+                '$2(a_2 - a_1)\\,x + 2(b_2 - b_1)\\,y + k = 0$, où ' +
+                '$k = a_1^2 + b_1^2 - r_1^2 - a_2^2 - b_2^2 + r_2^2$ est un nombre.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Les centres sont distincts, donc $a_2 - a_1$ et $b_2 - b_1$ ne sont pas tous deux nuls : c\'est ' +
+                'l\'équation d\'une droite. Son vecteur normal ' +
+                '$\\begin{pmatrix} 2(a_2-a_1) \\\\ 2(b_2-b_1) \\end{pmatrix} = 2\\vec{C_1C_2}$ montre qu\'elle est ' +
+                'perpendiculaire à la droite des centres $(C_1C_2)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Un point vérifie les deux équations exactement quand il vérifie la première et leur ' +
+                'différence : les points communs aux deux cercles sont les points de cette droite qui sont sur ' +
+                'le premier cercle. Si les centres étaient confondus, la soustraction ne laisserait que ' +
+                '$r_2^2 - r_1^2 = 0$ : aucune droite.',
+            },
+          ],
         },
         {
           kind: 'entrainement',

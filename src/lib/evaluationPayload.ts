@@ -1210,11 +1210,14 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'pourquoi (1 ; m) dirige', enonce: "Démontre que le vecteur $\\begin{pmatrix}1\\\\m\\end{pmatrix}$ est un vecteur directeur de la droite $d$ d'équation $y = mx + p$." },
     ],
   },
-  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
-  // d'exemple du cours (`src/content/chapters/4e/geometrie-analytique-plane.ts`). Le premier exemple
-  // de § parabole n'a ni badge ni label : apparié par position (entrée texte simple au rang 0).
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge ou le
+  // label du bloc d'exemple du cours (`src/content/chapters/4e/geometrie-analytique-plane.ts`).
+  // Démonstrations D1–D11 (lot F de l'audit) : énoncés sans méthode.
   'geometrie-analytique-plane': {
     reperer: [
+      { cle: 'la forme paramétrique, depuis', enonce: "La droite $d$ passe par $A(x_0\\,;\\,y_0)$ et admet $\\vec{u}\\begin{pmatrix}a\\\\b\\end{pmatrix}$, non nul, comme vecteur directeur. Démontre que $d$ admet la représentation paramétrique $\\begin{cases} x = x_0+t \\cdot a \\\\ y = y_0+t \\cdot b \\end{cases}$, avec $t \\in \\mathbb{R}$." },
+      { cle: 'point et angle de 30° avec Oy', enonce: "La droite $d$ passe par $A(2\\,;\\,-1)$ et forme un angle de $30^\\circ$ avec l'axe $Oy$. Détermine un vecteur directeur de $d$ à coordonnées exactes, puis une équation de $d$." },
+      { cle: 'pourquoi (−b ; a) dirige', enonce: "Soit $d$ la droite d'équation $ax + by + c = 0$, avec $a$ et $b$ non tous deux nuls. Démontre que le vecteur $\\begin{pmatrix}-b\\\\a\\end{pmatrix}$ est un vecteur directeur de $d$." },
       { cle: '4 formes', enonce: "La droite $d$ passe par $A(1\\,;\\,1)$ et admet $\\vec{u}\\begin{pmatrix}2\\\\1\\end{pmatrix}$ comme vecteur directeur. Écris-en une équation paramétrique, une équation cartésienne, l'équation explicite en $y$ et l'équation explicite en $x$." },
     ],
     caracteristiques: [
@@ -1225,6 +1228,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     relations: [
       { cle: 'perpendiculaire par un point', enonce: "Détermine une équation cartésienne et un vecteur directeur de la droite $d'$ perpendiculaire à $d : x-2y+1=0$ et passant par $C(3\\,;\\,-1)$." },
       { cle: 'parallèle par un point', enonce: "Détermine une équation cartésienne de la droite $d'$ parallèle à $d : 3x-y+2=0$ et passant par $A(1\\,;\\,4)$." },
+      { cle: 'ne diffèrent que par c', enonce: "Soit $d$ la droite d'équation $ax + by + c = 0$. Démontre que toute droite parallèle à $d$ admet une équation de la forme $ax + by + c' = 0$, puis que toute droite d'équation $ax + by + c' = 0$ est parallèle à $d$." },
+      { cle: "d'où vient m·m′", enonce: "Deux droites perpendiculaires, dont aucune n'est verticale, ont pour pentes $m$ et $m'$. Démontre que $m \\cdot m' = -1$." },
       { cle: "droite dépendant d'un paramètre", enonce: "Détermine la ou les valeurs du réel $m$ pour lesquelles la droite $d_m : (m^2-4)x+(m-2)y+3=0$ est horizontale." },
       { cle: 'reconnaître la relation', enonce: "Les droites $d_1 : y = 2x+1$ et $d_2 : x+2y-4=0$ sont-elles parallèles, perpendiculaires, ou ni l'un ni l'autre ? Justifie." },
     ],
@@ -1235,10 +1240,13 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     distance: [
       { cle: 'distance point-droite', enonce: "Calcule la distance du point $C(-7\\,;\\,7)$ à la droite $d : 4x-3y-1=0$ sans formule toute faite : construis la perpendiculaire à $d$ passant par $C$, détermine son pied $H$, puis calcule $\\|\\vec{CH}\\|$." },
+      { cle: 'les coordonnées du symétrique', enonce: "Soit $H(x_H\\,;\\,y_H)$ le projeté orthogonal du point $A(x_A\\,;\\,y_A)$ sur une droite $d$. Démontre que le symétrique $A'$ de $A$ par rapport à $d$ a pour coordonnées $(2x_H - x_A\\,;\\,2y_H - y_A)$." },
       { cle: 'hauteurs et orthocentre', enonce: "Dans le triangle de sommets $A(0\\,;\\,0)$, $B(6\\,;\\,0)$ et $C(2\\,;\\,4)$, détermine une équation des hauteurs issues de $A$ et de $B$, puis les coordonnées de l'orthocentre $H$." },
       { cle: 'distance entre deux droites parallèles', enonce: "Calcule la distance entre les droites parallèles $d_1 : y = 2x+1$ et $d_2 : y = 2x-4$, sans formule toute faite." },
     ],
     cercle: [
+      { cle: "l'équation du cercle, par Pythagore", enonce: "Démontre que le cercle de centre $C(x_0\\,;\\,y_0)$ et de rayon $r$ a pour équation $(x-x_0)^2+(y-y_0)^2=r^2$." },
+      { cle: 'la tangente est perpendiculaire au rayon', enonce: "Soit un cercle de centre $C$ et $P$ un point de ce cercle. Démontre que la droite qui passe par $P$, perpendiculaire à $(CP)$, n'a aucun autre point commun avec le cercle." },
       { cle: 'rayon indirect', enonce: "Écris l'équation du cercle de centre $C(1\\,;\\,1)$ passant par le point $P(4\\,;\\,5)$." },
       { cle: 'compléter le carré', enonce: "Montre que l'équation $2x^2+2y^2-8x+12y-24=0$ est celle d'un cercle, puis détermine son centre et son rayon." },
       { cle: 'un second membre négatif', enonce: "L'équation $x^2+y^2-2x+4y+10=0$ est-elle celle d'un cercle ? Justifie en complétant les carrés." },
@@ -1247,7 +1255,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'droite et cercle : distance et rayon', enonce: "Détermine la position relative de la droite $d : x+2y+5=0$ et du cercle $\\Gamma : x^2+y^2-6x-2y-8=0$ en comparant la distance du centre de $\\Gamma$ à $d$ avec le rayon." },
     ],
     parabole: [
-      "Démontre qu'une parabole de foyer $F\\left(0\\,;\\,\\dfrac{p}{2}\\right)$ et de directrice $y=-\\dfrac{p}{2}$ (avec $p>0$) a pour équation $x^2=2py$, en traduisant l'équidistance d'un point $P(x\\,;\\,y)$ au foyer et à la directrice.",
+      { cle: "l'équation x² = 2py", enonce: "Démontre que la parabole de foyer $F\\left(0\\,;\\,\\dfrac{p}{2}\\right)$ et de directrice $y=-\\dfrac{p}{2}$, avec $p \\neq 0$, a pour équation $x^2=2py$." },
+      { cle: 'le foyer de la parabole y = ax²', enonce: "Soit $a \\neq 0$. Démontre que la parabole d'équation $y = ax^2$ a pour foyer $F\\left(0\\,;\\,\\dfrac{1}{4a}\\right)$ et pour directrice la droite $y = -\\dfrac{1}{4a}$." },
       { cle: 'axe vertical', enonce: "Une parabole d'axe vertical a pour sommet $S(1\\,;\\,-1)$ et pour foyer $F(1\\,;\\,1)$. Détermine son paramètre $p$, son équation et l'équation de sa directrice." },
       { cle: 'équation développée', enonce: "Pour la parabole d'équation $y^2-6y-4x+5=0$, détermine son sommet, son paramètre $p$, son foyer et l'équation de sa directrice." },
       { cle: 'p négatif', enonce: "Une parabole d'axe vertical a pour sommet $S(2\\,;\\,1)$ et pour foyer $F(2\\,;\\,-1)$. Détermine son paramètre $p$, son équation et l'équation de sa directrice." },
@@ -1257,9 +1266,12 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'droite et parabole tangentes', enonce: "Détermine les points communs à la parabole $x^2 = 4y$ et à la droite $y = x-1$. Que peut-on dire de la droite ?" },
       { cle: 'à partir de deux phrases', enonce: "Détermine les points communs au lieu des points équidistants de $A(0\\,;\\,0)$ et $B(4\\,;\\,0)$, et au lieu des points situés à une distance $\\sqrt{13}$ de l'origine." },
       { cle: 'deux cercles', enonce: "Détermine les points d'intersection des cercles $x^2+y^2=25$ et $(x-8)^2+y^2=25$." },
+      { cle: "droite parallèle à l'axe d'une parabole", enonce: "Détermine les points communs à la parabole $x^2 = 4y$ et à la droite $x = 2$. La droite est-elle tangente à la parabole ?" },
+      { cle: 'la soustraction de deux équations', enonce: "Deux cercles $\\Gamma_1$ et $\\Gamma_2$ ont des centres distincts $C_1$ et $C_2$. Démontre que la différence de leurs équations développées est l'équation d'une droite perpendiculaire à $(C_1C_2)$, et que leurs points communs sont les points de cette droite qui appartiennent à $\\Gamma_1$." },
     ],
     'notion-lieu': [
       { cle: 'la médiatrice comme lieu', enonce: "Détermine une équation du lieu des points $M(x\\,;\\,y)$ équidistants de $A(1\\,;\\,2)$ et $B(5\\,;\\,4)$, puis reconnais ce lieu." },
+      { cle: 'la médiatrice, en coordonnées', enonce: "Soient $A$ et $B$ deux points distincts. Démontre que l'ensemble des points $M$ tels que $MA = MB$ est une droite, perpendiculaire à $(AB)$ et passant par le milieu de $[AB]$." },
     ],
   },
   'trigonometrie': {
