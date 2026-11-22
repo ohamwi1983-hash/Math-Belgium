@@ -73,6 +73,7 @@ export const HEURES_SEMAINE_DEFAUT: Record<NiveauCode, string> = { '4e': '5', '5
 export { LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, CHAPITRE_FONCTIONNEL_SLUG, estChapitreFonctionnel, type ChapitreFonctionnel } from './chapitresFonctionnels'
 import { LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, type ChapitreFonctionnel } from './chapitresFonctionnels'
 import { catalogueAvecGroupes, variantesDe } from '../entrainement/export/groupesVerdict'
+import { QUESTIONS_FORMULES } from './questionsFormules'
 
 const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
   [LEVELSLUG_FONCTIONNEL_6E]: EVALUATION_BASE_URL_6E_6H,
@@ -752,8 +753,9 @@ export interface FragmentTexte {
 export interface QuestionOuverte {
   enonce: FragmentTexte[]
   corrige: FragmentTexte[][]
-  /** Identifiant stable dans sa section (« Formule » : le texte de la formule ; « Formule +
-   * démonstration » : le titre du bloc) — sert au choix explicite des questions par le professeur
+  /** Identifiant stable dans sa section (« Formule » : `id` de la banque `lib/questionsFormules/`,
+   * le texte de l'ancienne formule quand la question la reprend ; « Formule + démonstration » : le
+   * titre du bloc) — sert au choix explicite des questions par le professeur
    * (`LigneSelection.choix`). Jamais envoyé dans le payload. */
   id?: string
   /** Titre lisible pour le sélecteur du panneau (RichText), et énoncé source (RichText). */
@@ -1938,159 +1940,62 @@ export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSe
 }
 
 // ============================================================================
-// Type « Formule » : les formules du FORMULAIRE de fin de chapitre (décision de l'utilisateur),
-// chacune rattachée à la section qui en parle le plus.
+// Type « Formule » : banque ÉCRITE À LA MAIN, chapitre par chapitre (`lib/questionsFormules/`,
+// décision de l'utilisateur du 22/11/2026). Elle remplace la fabrication automatique depuis le
+// formulaire de fin de chapitre (membre de droite masqué, condition seule…), qui donnait des énoncés
+// sans objet. Chaque question est rattachée à la section où la formule est enseignée.
 // ============================================================================
 
-const JETONS_IGNORES = new Set([
-  'dfrac', 'frac', 'tfrac', 'left', 'right', 'cdot', 'times', 'quad', 'qquad', 'text', 'mathrm', 'displaystyle',
-  'big', 'Big', 'le', 'ge', 'leq', 'geq', 'et', 'ou', 'si', 'pour', 'la', 'les', 'de', 'du', 'des', 'un', 'une',
-  'avec', 'sur', 'en', 'au', 'aux', 'est',
-])
-
-/** Jetons significatifs d'un texte LaTeX/RichText : commandes (sin, Delta…), mots, nombres. */
-function jetonsFormule(texte: string): string[] {
-  return (texte.match(/\\[A-Za-z]+|[A-Za-zÀ-ÿ]+|\d+/g) ?? [])
-    .map((j) => j.replace(/^\\/, ''))
-    .filter((j) => !JETONS_IGNORES.has(j))
+/** Chapitre tel que le reçoivent les appelants : `ChapterContent` (`slug`) ou `ChapitreAvecSections`
+ * (`chapitreSlug`). `sections` / `formulaire` restent dans le type pour ne rien changer aux appels. */
+export interface ChapitreQuestionsFormules {
+  slug?: string
+  chapitreSlug?: string
+  sections: ChapterSection[]
+  formulaire?: FormulaireData
 }
 
-interface FormuleRattachee {
-  sectionId: string
-  question: QuestionOuverte
+/** Questions « Formule » d'une section (`[]` si la banque n'en a pas). `id` = identifiant stable
+ * (`LigneSelection.choix`), `titre` / `apercu` = énoncé (liste « Choisir » du panneau). */
+export function deriveQuestionsFormules(chapitre: ChapitreQuestionsFormules, sectionId: string): QuestionOuverte[] {
+  const slug = chapitre.slug ?? chapitre.chapitreSlug ?? ''
+  return (QUESTIONS_FORMULES[slug]?.[sectionId] ?? []).map((q) => ({
+    enonce: parseRichText(q.enonce),
+    corrige: (Array.isArray(q.corrige) ? q.corrige : [q.corrige]).map(parseRichText),
+    id: normaliserCle(q.id),
+    titre: q.enonce,
+    apercu: q.enonce,
+  }))
 }
 
-/** « $s = r\theta$ » → « $s = \ldots$ » : on donne le membre de gauche, l'élève écrit le reste.
- * `null` dès qu'un morceau n'a pas de « = » (rien à masquer proprement : l'énoncé retombe alors sur
- * le titre du groupe du formulaire). */
-/** Position du premier « = » au NIVEAU 0 (hors (), [], {}) : « P(X=k) = … » coupe au second « = »,
- * pas dans l'argument (audit 6e ch. 6, décision L). « \left( » / « \right) » comptent comme des
- * parenthèses ordinaires ; « \{ » / « \} » aussi. −1 s'il n'y en a pas. */
-function premierEgalNiveauZero(maths: string): number {
-  let profondeur = 0
-  for (let i = 0; i < maths.length; i++) {
-    const c = maths[i]
-    if (c === '(' || c === '[' || c === '{') profondeur++
-    else if (c === ')' || c === ']' || c === '}') profondeur = Math.max(0, profondeur - 1)
-    else if (c === '=' && profondeur === 0) return i
-  }
-  return -1
-}
-
-function masquerMembresDeDroite(texte: string): string | null {
-  let toutMasque = true
-  const resultat = texte.replace(/\$([^$]+)\$/g, (_tout: string, maths: string) => {
-    const morceaux = maths.split(/\\qquad|\\quad/)
-    const masques = morceaux.map((m) => {
-      const i = premierEgalNiveauZero(m)
-      if (i < 0) {
-        toutMasque = false
-        return m
-      }
-      return `${m.slice(0, i).trim()} = \\ldots`
-    })
-    return `$${masques.join(' \\qquad ')}$`
-  })
-  return toutMasque && resultat.includes('$') ? resultat : null
-}
-
-/** Règle sans « = » (« racine carrée : $ax+b \\ge 0$ », « $\\Delta<0$ → aucune racine réelle ») :
- * on garde ce qui précède le premier séparateur HORS formule (« : », « → », « ⟺ », « ⟹ ») et on
- * masque la suite. `null` s'il n'y a aucun séparateur. */
-function masquerApresSeparateur(texte: string): string | null {
-  const morceaux = texte.split(/(\$[^$]+\$)/)
-  let vu = ''
-  for (const m of morceaux) {
-    if (m.startsWith('$')) {
-      vu += m
-      continue
-    }
-    const r = /\s(:|→|⟺|⟹)\s/.exec(m)
-    if (r && (vu + m.slice(0, r.index)).trim()) return `${vu}${m.slice(0, r.index + r[0].length)}…`
-    vu += m
-  }
-  return null
-}
-
-/** Mots d'un titre réduits à leurs 5 premières lettres (« Polygones » ≈ « Polygone »). */
-function radicaux(texte: string): Set<string> {
-  return new Set((texte.toLowerCase().match(/[a-zà-ÿ]{4,}/g) ?? []).map((m) => m.slice(0, 5)))
-}
-
-/** Toutes les chaînes d'une section (texte, formules, légendes…), mises bout à bout. */
-function chainesSection(valeur: unknown, acc: string[] = []): string[] {
-  if (typeof valeur === 'string') acc.push(valeur)
-  else if (Array.isArray(valeur)) valeur.forEach((v) => chainesSection(v, acc))
-  else if (valeur && typeof valeur === 'object') Object.values(valeur).forEach((v) => chainesSection(v, acc))
-  return acc
-}
-
-/** Forme comparable d'un LaTeX : sans espaces ni habillage (\\dfrac ≡ \\frac, \\left/\\right retirés). */
-function latexComparable(texte: string): string {
-  return texte.replace(/\\[dt]frac/g, '\\frac').replace(/\\left|\\right|\\,|\\;|\\!/g, '').replace(/\s+/g, '')
-}
-
-const CACHE_FORMULES = new WeakMap<object, FormuleRattachee[]>()
-
-/** Rattache chaque formule du formulaire à la section dont le texte partage le plus de jetons
- * « rares » avec elle (poids = 1 / nombre de sections qui contiennent le jeton). */
-function formulesRattachees(chapitre: { sections: ChapterSection[]; formulaire?: FormulaireData }): FormuleRattachee[] {
-  const deja = CACHE_FORMULES.get(chapitre)
-  if (deja) return deja
-  const ensembles = chapitre.sections.map((sec) => new Set(jetonsFormule(JSON.stringify(sec.blocks))))
-  const titres = chapitre.sections.map((sec) => radicaux(sec.title))
-  const textesComparables = chapitre.sections.map((sec) => latexComparable(chainesSection(sec.blocks).join(' ')))
-  // Les sections « Révision — vrai ou faux » reprennent tout le chapitre : jamais candidates.
-  const estRevision = chapitre.sections.map((sec) => /^révision/i.test(sec.title) || sec.id === 'revision')
-  const resultat: FormuleRattachee[] = []
-  for (const groupe of chapitre.formulaire?.groups ?? []) {
-    for (const formule of groupe.formulas) {
-      const jetons = [...new Set(jetonsFormule(formule.text))]
-      const motsGroupe = radicaux(groupe.title)
-      let meilleur = 0
-      let meilleurScore = -1
-      ensembles.forEach((ens, i) => {
-        if (estRevision[i] && !estRevision.every(Boolean)) return
-        let score = 0
-        for (const j of jetons) {
-          if (!ens.has(j)) continue
-          score += 1 / ensembles.filter((e) => e.has(j)).length
-        }
-        // Le titre du groupe du formulaire (« Polygone régulier… ») départage les sections voisines.
-        for (const m of motsGroupe) if (titres[i].has(m)) score += 0.4
-        if (score > meilleurScore) {
-          meilleurScore = score
-          meilleur = i
-        }
-      })
-      const masque = masquerMembresDeDroite(formule.text)
-      const regle = masque ? null : masquerApresSeparateur(formule.text)
-      const precision = formule.condition ? ` (${formule.condition})` : ''
-      let enonce: string
-      // Priorité : la PREMIÈRE section où la formule (son premier morceau mathématique, assez long
-      // pour être distinctif) apparaît telle quelle — en général là où elle est introduite.
-      const premierMorceau = latexComparable((/\$([^$]+)\$/.exec(formule.text)?.[1] ?? '').split(/\\qquad|\\quad/)[0])
-      if (premierMorceau.length >= 6 && premierMorceau.includes('=')) {
-        const ou = textesComparables.findIndex((t) => t.includes(premierMorceau))
-        if (ou >= 0 && !estRevision[ou]) meilleur = ou
-      }
-      if (masque) enonce = `Complète la formule${precision} : ${masque}`
-      else if (regle) enonce = `Complète (${groupe.title}) : ${regle}`
-      else if (formule.condition) enonce = `Écris la formule : ${formule.condition}.`
-      else continue // simple énoncé de propriété, rien à faire compléter : pas une question « Formule ».
-      const corrige = [parseRichText(formule.condition ? `${formule.text} — ${formule.condition}` : formule.text)]
-      resultat.push({
-        sectionId: chapitre.sections[meilleur]?.id ?? '',
-        question: { enonce: parseRichText(enonce), corrige, id: normaliserCle(formule.text), titre: formule.text, apercu: enonce },
-      })
+/** Plan rechargé dont la ligne « Formule » (ou « Formule + démonstration ») porte un CHOIX explicite
+ * d'ids qui n'existent plus dans la banque — les questions « Formule » automatiques ont été
+ * remplacées par une banque écrite à la main (22/11/2026) ; une question qui reprend une ancienne
+ * formule a gardé son id, les autres non. Les ids introuvables sont retirés (avec leurs points) ;
+ * s'il n'en reste aucun, la ligne repasse au tirage au hasard du même nombre de questions, aux points
+ * de la première question choisie. `perdus` = nombre d'ids retirés (0 : ligne inchangée). */
+export function nettoyerChoixIntrouvables(ligne: LigneSelection, chapitre: ChapitreQuestionsFormules): { ligne: LigneSelection; perdus: number } {
+  if ((ligne.type !== 'formule' && ligne.type !== 'demonstration') || !ligne.choix?.length) return { ligne, perdus: 0 }
+  const section = chapitre.sections.find((s) => s.id === ligne.sectionId)
+  if (!section) return { ligne, perdus: 0 }
+  const banque = ligne.type === 'formule' ? deriveQuestionsFormules(chapitre, section.id) : deriveQuestionsOuvertes(ligne.chapitreSlug, section)
+  const ids = new Set(banque.map((q) => q.id))
+  const gardes = ligne.choix.filter((id) => ids.has(id))
+  const perdus = ligne.choix.length - gardes.length
+  if (perdus === 0) return { ligne, perdus: 0 }
+  const garder = <T,>(r: Record<string, T> | undefined, cle: (id: string) => string) =>
+    r ? Object.fromEntries(gardes.filter((id) => r[cle(id)] !== undefined).map((id) => [cle(id), r[cle(id)]])) : undefined
+  if (gardes.length > 0) {
+    return {
+      ligne: { ...ligne, choix: gardes, nombre: gardes.length, pointsParChoix: garder(ligne.pointsParChoix, (id) => id), modePoints: garder(ligne.modePoints, (id) => `choix:${id}`) },
+      perdus,
     }
   }
-  CACHE_FORMULES.set(chapitre, resultat)
-  return resultat
-}
-
-export function deriveQuestionsFormules(chapitre: { sections: ChapterSection[]; formulaire?: FormulaireData }, sectionId: string): QuestionOuverte[] {
-  return formulesRattachees(chapitre).filter((f) => f.sectionId === sectionId).map((f) => f.question)
+  const premiers = ligne.choix.map((id) => ligne.pointsParChoix?.[id]).find((p) => p !== undefined)
+  return {
+    ligne: { ...ligne, choix: undefined, pointsParChoix: undefined, modePoints: undefined, nombre: Math.min(ligne.choix.length, banque.length), points: premiers ?? ligne.points },
+    perdus,
+  }
 }
 
 /**
@@ -4898,7 +4803,8 @@ export interface ChapitreAvecSections {
   chapterNumber: number
   title: string
   sections: ChapterSection[]
-  /** Source des questions « Formule » (voir `deriveQuestionsFormules`). */
+  /** Formulaire de fin de chapitre (annexe des documents). Les questions « Formule » viennent de la
+   * banque écrite à la main (`deriveQuestionsFormules`), plus de ce champ. */
   formulaire?: FormulaireData
 }
 
@@ -4963,10 +4869,15 @@ export function construireItemsPayload(entete: EnTeteEvaluation, lignes: LigneSe
           : ligne.type === 'demonstration'
             ? deriveQuestionsOuvertes(ligne.chapitreSlug, section)
             : deriveQuestionsComprehension(ligne.chapitreSlug, section.id)
-      const choisies = ligne.type !== 'comprehension' && ligne.choix?.length ? banque.filter((q) => q.id && ligne.choix!.includes(q.id)) : null
+      const trouvees = ligne.type !== 'comprehension' && ligne.choix?.length ? banque.filter((q) => q.id && ligne.choix!.includes(q.id)) : null
+      // Choix dont AUCUN id n'existe plus (plan enregistré avant une réécriture de la banque, voir
+      // `nettoyerChoixIntrouvables`) : tirage au hasard du même nombre de questions plutôt qu'une
+      // ligne qui disparaîtrait sans prévenir.
+      const choisies = trouvees && trouvees.length > 0 ? trouvees : null
+      const nombreTire = trouvees && trouvees.length === 0 ? ligne.choix!.length : ligne.nombre
       const ouvertesParSerie = choisies
         ? Array.from({ length: nombreSeries }, () => choisies.map((q) => pourPayload({ ...q, points: ligne.pointsParChoix?.[q.id ?? ''] ?? ligne.points })))
-        : construireOuvertesParSerie(banque, ligne.nombre, nombreSeries, ligne.type !== 'comprehension')
+        : construireOuvertesParSerie(banque, nombreTire, nombreSeries, ligne.type !== 'comprehension')
       if (ouvertesParSerie[0].length > 0) items.push({ processus: ligne.processus, titreSection, points: ligne.points, ouvertesParSerie, section: sectionRef })
     }
   }

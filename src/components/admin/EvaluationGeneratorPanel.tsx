@@ -85,6 +85,7 @@ import {
   estChapitreFonctionnel,
   generateursPourSection,
   libelleGenerateurPanneau,
+  nettoyerChoixIntrouvables,
   resoudreLevelSlug,
   resoudreNiveauHeures,
   sommeParVariante,
@@ -302,6 +303,8 @@ export function EvaluationGeneratorPanel({
   const [enregistrees, setEnregistrees] = useState<PlanEnregistre[]>(() => lirePlansEnregistres())
   const [nombreHistorique, setNombreHistorique] = useState(() => lireHistorique().length)
   const [message, setMessage] = useState<string | null>(null)
+  /** Plan rechargé dont des questions choisies n'existent plus (`nettoyerChoixIntrouvables`). */
+  const [avisPlan, setAvisPlan] = useState<string | null>(null)
   const urlsDocuments = useRef<string[]>([])
   const blocDocuments = useRef<HTMLDivElement>(null)
   /** Feuille de remédiation (`evaluationRemediation.ts`) : enregistrement dont le formulaire est
@@ -914,6 +917,7 @@ export function EvaluationGeneratorPanel({
     setErreur(null)
     setMessage(null)
     setUrlGeneree(null)
+    if (nouveau) setAvisPlan(null)
     setGenereEnCours(true)
     try {
       const docs = await genererDocumentsDepuisPlan(plan)
@@ -1019,7 +1023,27 @@ export function EvaluationGeneratorPanel({
               : []
       return unites.length ? { ...l, modePoints: Object.fromEntries(unites.map((u) => [u, 'verrouille' as const])) } : { ...l, modePoints: undefined }
     }
-    setLignes([...base.map((b) => plan.lignes.find((l) => memeLigne(l, b)) ?? b), ...plan.lignes.filter((l) => !base.some((b) => memeLigne(l, b)))].map(verrouillee))
+    // Questions choisies qui n'existent plus (banque « Formule » réécrite à la main) : retirées de la
+    // sélection, la ligne repasse au tirage si plus rien n'est choisi. Les documents rechargés, eux,
+    // gardent les énoncés enregistrés dans le plan.
+    let perdus = 0
+    let touchees = 0
+    let auHasard = 0
+    const lignesPlan = plan.lignes.map((l) => {
+      const chapitre = chapitresPlan.find((c) => c.slug === l.chapitreSlug)
+      if (!chapitre) return l
+      const r = nettoyerChoixIntrouvables(l, chapitre)
+      perdus += r.perdus
+      if (r.perdus > 0) touchees++
+      if (r.perdus > 0 && !r.ligne.choix?.length) auHasard++
+      return r.ligne
+    })
+    setAvisPlan(
+      perdus > 0
+        ? `${perdus} question${perdus > 1 ? 's' : ''} choisie${perdus > 1 ? 's' : ''} dans ce plan n'existe${perdus > 1 ? 'nt' : ''} plus (questions « Formule » réécrites) : les documents rechargés gardent l'ancien énoncé ; dans la sélection, ${auHasard === 0 ? 'seules les questions encore disponibles restent cochées' : auHasard === touchees ? (auHasard > 1 ? 'les lignes concernées reviennent au tirage au hasard' : 'la ligne concernée revient au tirage au hasard') : `les questions encore disponibles restent cochées et ${auHasard} ligne${auHasard > 1 ? 's reviennent' : ' revient'} au tirage au hasard`}. Vérifie la liste « Voir et choisir » avant de générer à nouveau.`
+        : null,
+    )
+    setLignes([...base.map((b) => lignesPlan.find((l) => memeLigne(l, b)) ?? b), ...lignesPlan.filter((l) => !base.some((b) => memeLigne(l, b)))].map(verrouillee))
     setTitre(plan.entete.titre)
     setDate(plan.entete.date)
     if (plan.entete.numero !== undefined) setNumero(plan.entete.numero)
@@ -2696,6 +2720,11 @@ export function EvaluationGeneratorPanel({
                   </p>
                 )}
                 {message && <p className="admin-eval-lien">{message}</p>}
+                {avisPlan && (
+                  <p className="admin-eval-lien" role="status">
+                    {avisPlan}
+                  </p>
+                )}
               </div>
             </aside>
           </div>
