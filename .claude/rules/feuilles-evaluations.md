@@ -2161,7 +2161,15 @@ Page du chapitre 390 / 1 280 px : 0 « $ » ni « ** » visible, 0 erreur.
   aux seules autres cochées présentes, au prorata (parts égales → à parts égales), jamais à une non
   cochée ; aucune présente → rien n'est composé (« Rien à proposer pour Transférer avec ces
   réglages… ») ; `ResultatComposition.cedees` = cochées sans question, dites dans le message
-  (« Transférer : aucun exercice dans ces chapitres — son temps va à Connaître et Appliquer. »). Variantes du
+  (« Transférer : aucun exercice dans ces chapitres — son temps va à Connaître et Appliquer. »).
+  **Respect des parts** (correction du 22/11/2026, examen ET évaluation / feuille) : un ajout n'est
+  admis que s'il ne dépasse le budget du processus ni de plus de la moitié de sa durée NI de plus de
+  `DEPASSEMENT_MAX` = 4 min, la PREMIÈRE question comprise ; si la question tirée pour une notion ne
+  tient pas, une autre de la même notion qui tient est prise (aucun tirage de plus) ; si aucune ne
+  tient, la plus courte du processus (un processus voulu est toujours présent). Avant, la première
+  question était toujours admise et le dépassement allait jusqu'à la moitié de sa durée : gen35
+  « classes » (28 min) remplissait un Appliquer de 15 min, 5gen31 (25 min) passait un budget de 40 min
+  à 52. Équilibrée et « Sur quelques notions » inchangées. Variantes du
   panneau seulement (groupes « à verdict » = une rangée), calculatrice interdite : variantes et
   générateurs `calculatriceIndispensable` exclus, aucun cas particulier coché, jamais de
   démonstration. Mesuré (23 chapitres × modes × calculatrice, 207 compositions) : 0 défaut, 6
@@ -2217,8 +2225,15 @@ mesurée avec l'ancienne répartition ; 25 / 50 / 25 : de 42 à 59 min, médiane
   (23 chapitres × feuille / évaluation × calculatrice × 7 combinaisons × 3 graines, parts égales et
   828 ajustées) : 0 question d'une compétence non cochée, 0 composition vide, `cedees` toujours juste,
   parts effectives exactement égales, temps par compétence de −5 à +13 min de la part égale (médiane
-  1–2) ; examen = code d'avant à graine égale 2 484 / 2 484 (trois façons, répartition absente,
-  25 / 50 / 25, 30 / 45 / 25, 0 / 50 / 50, `cession` absente ou « examen ») ; cession d'une
+  1–2 ; après la correction « respect des parts » : de −6 à +4 min) ; examen : écart cible / obtenu
+  par processus (`examen-ecarts.mjs`, 23 chapitres × calculatrice × 10 répartitions — 25/50/25,
+  20/60/20, 30/45/25, 10/80/10, 35/30/35, 40/40/20, 0/50/50, 50/50/0, 0/100/0, 100/0/0 — × 3 graines,
+  1 380 compositions, 3 144 mesures ; cible = part APRÈS cession) : code d'avant moy. |écart| 2,0 min,
+  de −6 à +13,3 min, 95,2 % à 5 min près ; après correction moy. 1,8 min, de −5,5 à +7 min, 99,5 % à
+  5 min près, 100 % à 8 min ; les +7 restants = un Transférer de 5 min dont l'exercice le plus court
+  dure 12 min (incompressible). 0 processus à 0 % choisi, cession toujours d'abord à Appliquer ;
+  compositions identiques au code d'avant quand le choix d'avant tient (848 / 1 380 ; équilibrée et
+  notions : toutes) ; cession d'une
   compétence retirée des lignes : 88 / 88 (temps aux autres cochées seulement) ; assistant élève
   (5 chapitres × 2 types) : 420 compositions + 100 plans, 0 compétence non cochée, temps à ±9 min de
   la part égale (médiane 0), blanche 20 / 10-10 / 7-6,5-6,5 pts, une compétence = composition d'avant

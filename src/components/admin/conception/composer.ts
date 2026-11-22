@@ -240,15 +240,22 @@ function evaluation(ctx: ContexteComposition, alea: () => number): { sel: Select
     if (budget <= 0 || liste.length === 0) continue
     const ordre = sectionsReparties(liste, alea)
     let duree = 0
+    // Un ajout est admis s'il ne dépasse pas le budget de plus de la moitié de sa durée NI de plus de
+    // `DEPASSEMENT_MAX` minutes — la PREMIÈRE question du processus comprise. Avant : la première était
+    // toujours admise et le dépassement allait jusqu'à la moitié de la durée (un exercice de 28 min
+    // remplissait un budget de 15 min, un de 25 min passait 40 min à 52).
+    const admis = (x: Unite) => duree + dureeUnite(x) <= budget + Math.min(dureeUnite(x) / 2, DEPASSEMENT_MAX)
     for (let tour = 0; tour < 8 && duree < budget; tour++) {
       let progres = false
       for (const s of ordre) {
         const ici = melanger(liste.filter((u) => u.cleSection === s), alea)
-        const u = ici.find((x) => sel.nombreDe(x) === 0) ?? ici[0]
+        const premier = ici.find((x) => sel.nombreDe(x) === 0) ?? ici[0]
+        // Choix d'avant s'il tient ; sinon une autre question de la notion qui tient (pas encore prise
+        // d'abord). Aucun tirage de plus : composition identique quand le choix d'avant tient.
+        const u = premier && !admis(premier) ? (ici.find((x) => sel.nombreDe(x) === 0 && admis(x)) ?? ici.find(admis) ?? premier) : premier
         if (!u) continue
         const d = dureeUnite(u)
-        // On s'arrête quand l'ajout dépasserait le budget de plus de la moitié de sa durée.
-        if (duree > 0 && duree + d > budget + d / 2) continue
+        if (!admis(u)) continue
         // Vrai/faux : deux affirmations d'un coup (une seule question imprimée).
         const n = u.type === 'vraiFaux' ? 2 : 1
         if (sel.ajouter(u, n)) {
@@ -259,9 +266,19 @@ function evaluation(ctx: ContexteComposition, alea: () => number): { sel: Select
       }
       if (!progres) break
     }
+    // Aucune question ne tient dans le budget (toutes plus longues que deux fois la part) : la plus
+    // courte, pour que le processus voulu soit présent.
+    if (duree === 0) {
+      const plusCourte = [...liste].sort((a, b) => dureeUnite(a) - dureeUnite(b))[0]
+      if (plusCourte) sel.ajouter(plusCourte, plusCourte.type === 'vraiFaux' ? 2 : 1)
+    }
   }
   return { sel, cedees }
 }
+
+/** Dépassement maximal (minutes) du budget d'un processus par un ajout de « Préparer l'évaluation /
+ * l'examen » (en plus de la règle « moitié de sa durée »). */
+export const DEPASSEMENT_MAX = 4
 
 /**
  * Part d'un processus sans question possible : Connaître ou Transférer → Appliquer (règle d'avant,
