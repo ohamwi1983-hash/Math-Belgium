@@ -11,7 +11,7 @@
  *   particulier) ; sinon (61 %) il faut le chercher sur une arête/diagonale ou un autre sommet. La
  *   position relative (incluse/parallèle/sécante) est un VERDICT : jamais un cas particulier.
  * - gen40 — 3 points sur 3 arêtes ; la section a k = 4, 5 ou 6 côtés et demande toujours k − 3 points
- *   auxiliaires (≥ 1 : aucun raccourci). Parallélépipède 17/50/33 %, cube 14/48/38 %, prisme 69/31/0 %,
+ *   auxiliaires (≥ 1) ; la variante « triangle » (k = 3, aucun point auxiliaire) est le cas particulier. Parallélépipède 17/50/33 %, cube 14/48/38 %, prisme 69/31/0 %,
  *   tétraèdre 100 % k = 4. Le nombre de côtés fixe la longueur de la construction → `forme`, pour que
  *   toutes les séries aient la même charge de travail.
  * - gen41 — obstacle : l'ombre s'arrête au sol (30 %) ou sur un obstacle (70 %) : c'est la réponse
@@ -38,6 +38,13 @@ export const CAS_PERCEE_SUR_LA_DROITE = "percee-sur-la-droite";
 
 export const PARAMETRES_POSITION_DROITE_PLAN = [{ id: SANS_MILIEU_GEN39, label: "Droite passant par un milieu d'arête (I, J)" }];
 
+/** Groupe « à verdict » (audit 4e ch. 8, lot D, G4) : le nom de chaque variante de gen39 EST la
+ * position cherchée — dans le panneau d'ÉVALUATION seulement, une rangée tire la variante réelle de
+ * chaque question au hasard, équilibrée et différente d'une série à l'autre. Codes inchangés. */
+export const GROUPES_VERDICT_POSITION_DROITE_PLAN = [
+  { id: "groupe_position", label: "Position d'une droite et d'un plan (incluse, parallèle ou sécante, tirée au hasard)", variantes: ["incluse", "parallele", "secante"] },
+];
+
 export const LIBELLE_CAS_POSITION_DROITE_PLAN = "Inclure un cas direct : droite sécante qui perce le plan en l'un de ses deux points nommés";
 
 /** L'un des deux points qui définissent la droite est-il dans le plan ? (sécante → percée immédiate) */
@@ -55,8 +62,15 @@ export function profilPositionDroitePlan(e: ExercicePositionDroitePlan): ProfilI
 
 // --- gen40 ---------------------------------------------------------------------------------------
 
+/** Section triangulaire (variante « triangle », audit 4e ch. 8, lot D) : trois côtés tracés
+ * directement, aucun point auxiliaire — un RACCOURCI, donc un cas particulier (jamais un verdict à
+ * décider : le triangle se voit dès que P, Q, R entourent un sommet). */
+export const CAS_SECTION_TRIANGLE = "triangle";
+
+export const LIBELLE_CAS_SECTION_PLANE_SOLIDE = "Inclure un cas direct : section triangulaire (P, Q, R autour d'un sommet, aucun point auxiliaire)";
+
 export function profilSectionPlaneSolide(e: ExerciceSectionPlaneSolide): ProfilInstance {
-  return { casParticulier: null, forme: `${e.points.length}-cotes` };
+  return { casParticulier: e.points.length === 3 ? CAS_SECTION_TRIANGLE : null, forme: `${e.points.length}-cotes` };
 }
 
 // --- gen41 ---------------------------------------------------------------------------------------

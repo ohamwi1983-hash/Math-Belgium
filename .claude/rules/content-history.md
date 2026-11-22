@@ -5394,6 +5394,18 @@ parallèle à α sans témoin tracée par deux points nommés (corrigé). Page d
 clair et sombre, 14 vues, 12 ateliers ouverts dans leur panneau) : scrollWidth = largeur, 0
 `.katex-error`, 0 `$`/astérisque isolé, 0 « déterminant »/radian, 0 erreur console.
 
+## 4e, Chapitre 8 — lots B, C, D du second audit (gen39–41, points ouverts gen101, gen103, gen107)
+
+Cours intact (seule la variante « triangle » de gen40 s'ajoute ; l'exemple « section triangulaire » du
+§ 9 existait déjà). Choix fermés de gen39 (position, justification « parallèle » / « sécante » : 1
+tentative), gen40 (faces) et gen41 (rayons, points) jugés rouge ✗ / vert ✓ avec un message propre au
+choix ; gen39 : aides à deux niveaux sur la justification, plus de leurre vrai (segment dont la percée
+est une extrémité), « parallèle à (AC), une droite du plan » partout ; gen40 : variante « triangle » en
+fin de catalogue, noms « ABCDEFGH », « ABCDEF (bases ABC et DEF) » ; gen41 : obstacles nommés K, L, M
+sur la figure dès qu'il y en a deux, étiquettes des pieds du corrigé dégagées ; gen101 : parallélismes
+toujours prouvables ; gen103 minuscules, gen107 aide 2. Tirage : `groupe_position` (gen39), cas
+particulier « triangle » (gen40). Détail : `feuilles-evaluations.md`, entrée « 4e ch. 8 (lots B, C, D) ».
+
 ## 4e, chapitres 1–5, 7, 8 — champs du parcours (décision de l'utilisateur, 21/11/2026)
 
 `titreCourt`, `partie`, `essentiel`, `cartes` remplis pour les 7 autres chapitres de 4e sur le modèle

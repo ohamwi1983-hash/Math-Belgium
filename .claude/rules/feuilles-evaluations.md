@@ -839,6 +839,57 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   groupes gen54 B ≠ A 30 / 30, gen50 26 / 30 ; figures (300 tirages gen47, 300 gen132) : graduation
   touchée 9 % → 0 (gen47), 90 % → 0 (gen132 « escalier ») ; `?code=` : seuls gen42 / gen46 « angle »
   (et les tirages libres qui y tombent) et tout gen54 changent.
+- **4e ch. 8 (lots B, C, D ; gen39–41, points ouverts gen101, gen103, gen107)** : choix fermés jugés
+  rouge ✗ / vert ✓ (`4e/ui/choixFige.ts`) et figés, message propre au choix dans `messageRevele` (plus
+  « Tentatives épuisées ») — gen39 position et justification « parallèle » / « sécante » (1 tentative,
+  `tentativesMaxEcran`), sélection « incluse » à 3 tentatives (cases carrées, message « point en trop /
+  il manque des points », écran clos : points du plan ✓ même oubliés, choisis à tort ✗) ; gen40 faces
+  (« segment » et « face » du point auxiliaire ; l'écran « droites », ≈ 2 paires sur 300, garde 3) ;
+  gen41 rayons et points (`ChoixCandidatsOmbre.messageFaux`, message par `ErreurPointOmbre`, sens ou
+  inclinaison du rayon). Textes `ui/formatPositionDroitePlan.ts` (`messageClassificationFausse`,
+  `messageJustificationFausse` : droites sécantes / gauches, point sur la droite mais pas dans le plan…,
+  `texteAideJustificationNiveau2` posée pour l'instance — nombre de points du plan, figure plane des
+  milieux, face qui contient la droite —, `cibleSelectionIncluse`), `formatSectionPlaneSolide.ts`
+  (`messageFaceSegmentFausse`, `messageFaceAuxiliaireFausse` : face non traversée, un seul point connu,
+  I hors du plan de la face), `formatOmbreSoleil.ts` (`messageDirectionFausse`, `messagePointFaux`).
+  gen103 : minuscules d'insistance (aides, défaut « sécantes », piège) ; gen107 aide 2 « cavalière » :
+  longueur à la règle (diagonale d'un carreau ≈ 1,4 cm). **Défauts** : gen39 leurres vrais retirés
+  (segment FERMÉ qui contient la percée : `v39b` 732 → 0 sur 4 000), « parallèle à (AC), une droite du
+  plan (FAC) » (consigne, brève, corrigé, barème), libellés « arête [AB] » ; G7 (« lettre commune dans
+  un cas parallèle ») impossible — une lettre commune est un point commun — et le nom du plan à sommet
+  de percée ne faisait passer la stratégie « lettres » que de 43,0 à 42,5 % : non retenu. gen40 variante
+  `triangle` EN FIN de catalogue (P, Q, R sur les trois arêtes d'un sommet, t ∈ [0,25 ; 0,75], solide
+  tiré parmi les quatre ; deux écrans « segment » puis le troisième côté automatique), tirée une fois sur
+  six par l'appli (`genererExerciceSectionPlaneSolideLibre`), tirage libre de l'adaptateur et des codes
+  inchangé ; barème propre (côtés directs, aucun point auxiliaire), niveau 1 · 7 min (cas particulier
+  visible) ; noms des gabarits « Cube ABCDEFGH », « Parallélépipède rectangle ABCDEFGH », « Prisme droit
+  ABCDEF (bases ABC et DEF) » (seul gen40 imprime ces libellés). gen41 : obstacles nommés K, L, M (ordre
+  le long de la trace) dès qu'il y en a deux, étiquette sans disque (`rayon: 0`) placée en pixels par
+  `meilleurDecalageEtiquette` (coins du dessus, 80 décalages, dégagement des traits, points, aperçus et
+  étiquettes, plus près de son obstacle) ; énoncé « Des obstacles, nommés K, L… », consigne « lequel ? »
+  seulement à plusieurs obstacles (« sur la caisse » sinon), corrigé et brève « la caisse K » ; figure
+  papier : `decalageLabel` et `rayon` lus ; pieds du corrigé (A₀, S₀, G₀…) posés par la même fonction.
+  gen101 : parallélismes du tirage tous prouvables dans une figure plane (`parallelismeJustifiable` de
+  `corrigeEspace1.ts`), deux droites sécantes en un point NOMMÉ exigées (deux plans), affirmation vraie
+  « … parallèle au plan (R) » seulement avec un témoin prouvable et « (P) et (Q) sont parallèles »
+  seulement si le critère se prouve avec des droites nommées (trois plans) ; témoin du corrigé choisi
+  prouvable. Libellés pilotes gen39 / gen40 remplis. **Tirage (lot D)** : gen39 `groupe_position`
+  (incluse, parallèle, sécante ; panneau d'évaluation seulement), gen39 n'a aucune `forme` ; gen40
+  `casParticulier: 'triangle'` (`LIBELLE_CAS_SECTION_PLANE_SOLIDE`), `forme` `k-cotes` inchangée — la case
+  ne s'affiche que sous la rangée « triangle » (les rangées des gabarits ne tirent jamais de triangle :
+  codes gardés) ; verdicts de gen100 / gen101 / gen103 / gen107 hors de la `forme` (vérifié). Mesuré :
+  collecteurs `corrige-4e8-m1/m2` (recopiés) 4 380 tirages, ≈ 51 000 relations / lignes, 0 fausse, 0
+  « même direction », 0 critère incomplet (gen101 seul : 2 100 tirages, 0 / 0 ; avant 5 / 224) ; textes
+  d'écran 51 900 (4 500 gen39, 600 triangles, 1 500 scènes gen41) : 0 NaN / notation clavier /
+  « déterminant » / radian, une seule proposition vraie par sécante ; niveau et durée constants dans
+  chaque verdict (gen39 2 · 6, gen40 3 · 9 et triangle 1 · 7, gen100, gen101, gen103) ; étiquettes K, L,
+  M : 614, 0 à moins de 6 px d'un trait ou d'un point ; pieds : 18 / 1 209 à moins de 6 px (position
+  d'avant : 1 195) ; plans réels 30 × 2 : `groupe_position` B ≠ A 30 / 30 (1 et 2 questions), triangle
+  en dernière question 30 / 30 dans chaque série, verdicts B ≠ A gen100 19, gen101 19, gen103 20, gen107
+  27 / 30 ; `?code=` (60 graines × variante, code d'avant / d'après) : identiques sauf gen39 « sécante »
+  (53 / 60 : liste des leurres) et libre (57 / 60), gen101 « deux plans » (59 / 60, tirage bridé) ; gen103
+  et gen107 « cavalière » : mêmes exercices, textes changés ; documents réels (2 plans, 2 séries +
+  aménagée + corrigé + grille + feuille + Word) : 0 débordement à 680 / 820 / 1 280 px, 0 `.katex-error`.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 
