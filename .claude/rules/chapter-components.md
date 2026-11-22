@@ -85,7 +85,10 @@ Composants :
   (rendus ensuite par `ChapterPage`, visibles dans l'onglet Réviser).
 - `src/lib/parcoursChapitre.ts` — progression et cartes en `localStorage` (clés
   `parcours:{niveau}/{slug}`, `cartes:{niveau}/{slug}`, try/catch partout, rien envoyé au serveur),
-  `dureeEtape`, `titreCourt`.
+  `dureeEtape`, `titreCourt`. Clé GLOBALE `parcours:derniere-etape` (`{ "4e": { chapitre, section,
+  quand }, … }`, une entrée par année) écrite par `ouvrir` à chaque étape ouverte, en plus de la clé du
+  chapitre (inchangée) : lue par l'accueil (`lireDernieresEtapes`, bandeau « Reprendre ») et par le
+  script en ligne d'`index.html`. `lireParcours(chapter)` est exporté (progression sans abonnement).
 
 Lecture (écran seulement) : corps, encadrés, légendes, tiroirs en Andika via le jeton `--lecture`
 (sur `.chapter-layout.parcours`), titres en Fraunces, interface en Work Sans ; 17 px, interligne

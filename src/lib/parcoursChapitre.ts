@@ -39,7 +39,36 @@ function ecrireJson(cle: string, valeur: unknown): void {
 const cleParcours = (c: ChapterContent) => `parcours:${c.levelSlug}/${c.slug}`
 const cleCartes = (c: ChapterContent) => `cartes:${c.levelSlug}/${c.slug}`
 
-function lireParcours(c: ChapterContent): EtatParcours {
+/** Clé GLOBALE « dernière étape ouverte », une entrée par année (bandeau « Reprendre » de la page
+ * d'accueil) : `{ "4e": { chapitre, section, quand }, … }`. Écrite à chaque ouverture d'étape, à côté
+ * de la clé du chapitre (inchangée). */
+const CLE_DERNIERE_ETAPE = 'parcours:derniere-etape'
+
+export interface DerniereEtape {
+  chapitre: string
+  section: string
+  /** `Date.now()` de l'ouverture. */
+  quand: number
+}
+
+/** Dernière étape ouverte par année (`levelSlug`), entrées malformées ignorées. */
+export function lireDernieresEtapes(): Record<string, DerniereEtape> {
+  const v = lireJson(CLE_DERNIERE_ETAPE)
+  const res: Record<string, DerniereEtape> = {}
+  if (v && typeof v === 'object' && !Array.isArray(v)) {
+    for (const [niveau, e] of Object.entries(v as Record<string, Partial<DerniereEtape> | null>)) {
+      if (e && typeof e.chapitre === 'string' && typeof e.section === 'string' && typeof e.quand === 'number') res[niveau] = { chapitre: e.chapitre, section: e.section, quand: e.quand }
+    }
+  }
+  return res
+}
+
+function noterDerniereEtape(c: ChapterContent, section: string): void {
+  ecrireJson(CLE_DERNIERE_ETAPE, { ...lireDernieresEtapes(), [c.levelSlug]: { chapitre: c.slug, section, quand: Date.now() } })
+}
+
+/** Progression d'un chapitre lue sans s'abonner (page d'accueil). */
+export function lireParcours(c: ChapterContent): EtatParcours {
   const v = lireJson(cleParcours(c)) as Partial<EtatParcours> | null
   const ids = new Set(c.sections.map((s) => s.id))
   return {
@@ -67,7 +96,13 @@ export function useParcours(chapter: ChapterContent) {
     [chapter],
   )
 
-  const ouvrir = useCallback((id: string) => modifier((e) => (e.derniere === id ? e : { ...e, derniere: id })), [modifier])
+  const ouvrir = useCallback(
+    (id: string) => {
+      noterDerniereEtape(chapter, id)
+      modifier((e) => (e.derniere === id ? e : { ...e, derniere: id }))
+    },
+    [chapter, modifier],
+  )
   const marquer = useCallback(
     (id: string, lue: boolean) =>
       modifier((e) => {

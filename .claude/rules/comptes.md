@@ -102,7 +102,7 @@ Partage plus tard : table `partages (plan_id, destinataire, droit)` + politique 
 - `components/compte/PageReservee.tsx` : `PageCompte` (cadre + `usePageNonIndexee` ; `sansTete` : la page porte son `<h1>`), `EnTeteCompte`, `PageReservee`
   (garde : sans session → `/connexion?retour=…`, désactivé → message, `admin`), `MessageIndisponible`.
   `Champ.tsx` : label, aide, erreur reliée (`aria-describedby`, `aria-invalid`), « Afficher » le mot de
-  passe ; jamais de filtre de frappe ni de champ numérique (règle CLAUDE.md). `MenuCompte.tsx` : en-tête.
+  passe ; jamais de filtre de frappe ni de champ numérique (règle CLAUDE.md). `MenuCompte.tsx` : en-tête (visiteur : « Je suis professeur » → `/connexion?retour=…` ; connecté : « Mon compte »).
 - Routes : `/connexion` (`?oubli=1` : lien de réinitialisation → `/mot-de-passe`), `/inscription`
   (`?code=` pré-rempli), `/mot-de-passe`, `/profil`, `/coffre`, `/evaluation` (panneau évaluations /
   examens pour tous les professeurs), `/admin` (`AdminComptes`). `/exercice` et `/…/exercices` sont
