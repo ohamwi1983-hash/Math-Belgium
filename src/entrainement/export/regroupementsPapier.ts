@@ -301,6 +301,17 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     ],
   },
   gen96: { formes: [{ motif: re(String.raw`On donne le point (?<ligne>${M} et la droite ${M})\.\n(?<q>Détermine .+)`), consigne: dansChaqueCas, ligne: (g) => `Point ${g.ligne}` }] },
+  // gen131 : « On considère le lieu des points M(x ; y) <description>. » + une consigne commune à toutes
+  // les variantes ; la description du lieu est la ligne.
+  gen131: {
+    formes: [
+      {
+        motif: re(String.raw`On considère le lieu des points \$M\(x\\,;\\,y\)\$ (?<ligne>.+)\.\nReconnais ce lieu et détermine son équation \(ou ses équations\)\.`),
+        consigne: "Reconnais chacun des lieux de points $M(x\\,;\\,y)$ ci-dessous et détermine son équation (ou ses équations).",
+        ligne: (g) => `Points ${g.ligne}`,
+      },
+    ],
+  },
   // gen130 : « réduire » et « simplifier » partagent la même consigne ; « démontrer » a la sienne
   // (les points cités restent hors de la ligne) ; « insérer » (données propres) n'est jamais regroupé.
   gen130: {
