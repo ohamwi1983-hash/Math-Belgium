@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeDistanceDroite } from "./generateurs/distanceDroite/corrigeDetaille";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDistanceDroite } from "./generateurs/distanceDroite";
@@ -188,6 +191,7 @@ export function AppDistanceDroite() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: construireReponseAttendue(etat, exercice, etat.phase, enAttente.etatSuivant.point),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDistanceDroite(exercice, enAttente.etatSuivant.point ?? etat.point), lettreEtape(sequencePourExercice(exercice).indexOf(etat.phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

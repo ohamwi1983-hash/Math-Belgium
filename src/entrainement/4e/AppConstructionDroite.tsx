@@ -1,4 +1,7 @@
 import { useState, type ReactNode } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeConstructionDroite } from "./generateurs/constructionDroite/corrigeDetaille";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceConstructionDroite } from "./generateurs/constructionDroite";
 import type { VarianteConstructionDroite } from "./core/constructionDroite.types";
@@ -145,6 +148,7 @@ export function AppConstructionDroite() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: construireReponseAttendue(exercice, etat.phase, etat.cible1, etat.cible2),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConstructionDroite(exercice, etat.cible1 && etat.cible2 ? [etat.cible1, etat.cible2] : undefined), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
