@@ -75,6 +75,19 @@ export const statistiqueDescriptive: ChapterContent = {
       number: 1,
       title: 'Organiser des données brutes : le tableau de fréquences',
       kicker: 'liste brute → valeur, effectif, fréquence, cumulés',
+      titreCourt: 'Tableau de fréquences',
+      partie: 'Organiser et représenter les données',
+      essentiel: [
+        'Tableau de fréquences : les valeurs distinctes rangées par ordre croissant, leur effectif $n_i$, leur fréquence $f_i = \\dfrac{n_i}{n}$, puis les effectifs et fréquences **cumulés** ; la dernière ligne cumulée vaut n et 100 %.',
+        'Une série discrète se représente par un diagramme en bâtons, aux bâtons séparés. Dans un diagramme circulaire, l\'angle d\'un secteur vaut $\\alpha_i = f_i \\times 360^{\\circ}$.',
+        'Avant de croire un graphique, lis ses axes et ses nombres : axe tronqué, graduations irrégulières, pictogrammes agrandis dans les deux sens, parts qui ne totalisent pas 100 %.',
+      ],
+      cartes: [
+        { question: 'Comment calcule-t-on la fréquence d\'une valeur ?', reponse: '$f_i = \\dfrac{n_i}{n}$ : son effectif divisé par l\'effectif total, souvent en %.' },
+        { question: 'Que doit valoir la dernière ligne des effectifs cumulés ?', reponse: 'L\'effectif total n (et 100 % pour la fréquence cumulée).' },
+        { question: 'Une fréquence de 30 % : quel angle dans un diagramme circulaire ?', reponse: '$0{,}30 \\times 360^{\\circ} = 108^{\\circ}$.' },
+        { question: 'Un pictogramme 2 fois plus haut et 2 fois plus large : quel est le piège ?', reponse: 'Son aire est 4 fois plus grande : l\'œil voit « ×4 » pour une valeur seulement doublée.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Organiser des données brutes : le tableau de fréquences', youtubeId: 'LnLwqGZ1POU' },
         {
@@ -293,6 +306,19 @@ export const statistiqueDescriptive: ChapterContent = {
       number: 2,
       title: 'Regrouper en classes : l\'histogramme',
       kicker: 'caractère continu → classes d\'amplitude constante → histogramme',
+      titreCourt: 'Classes et histogramme',
+      partie: 'Organiser et représenter les données',
+      essentiel: [
+        'Un caractère continu se regroupe en **classes** ; l\'amplitude d\'une classe vaut borne supérieure − borne inférieure. L\'histogramme a des barres **accolées**, de hauteur égale à l\'effectif quand les classes ont la même amplitude.',
+        'Une classe $[a\\,;\\,b[$ contient a mais **pas** b : une donnée sur une frontière va dans la classe suivante — sauf dans la dernière classe, qui inclut sa borne supérieure.',
+        'Amplitude : l\'étendue divisée par le nombre de classes (en pratique 5 à 8), arrondie vers le haut à une valeur ronde.',
+      ],
+      cartes: [
+        { question: 'Avec les classes $[2\\,;\\,4[$ et $[4\\,;\\,6[$, où va la donnée 4 ?', reponse: 'Dans $[4\\,;\\,6[$ : une donnée sur une frontière va dans la classe suivante.' },
+        { question: 'Quelle classe fait exception à la règle des frontières ?', reponse: 'La toute dernière : elle inclut aussi sa borne supérieure.' },
+        { question: 'Étendue 7,5 et 4 classes : quelle amplitude choisir ?', reponse: '$\\dfrac{7{,}5}{4} = 1{,}875$, arrondi vers le haut à 2.' },
+        { question: 'Bâtons séparés ou barres accolées : quand utilise-t-on chacun ?', reponse: 'Des bâtons séparés pour une série discrète ; des barres accolées (histogramme) pour des classes qui se suivent.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Regrouper en classes : l\'histogramme', youtubeId: 'oftzQYXj6tA' },
         {
@@ -462,6 +488,19 @@ export const statistiqueDescriptive: ChapterContent = {
       number: 3,
       title: 'La moyenne pondérée',
       kicker: 'x̄ = Σ(xᵢ·nᵢ) / Σnᵢ',
+      titreCourt: 'Moyenne pondérée',
+      partie: 'Moyenne, médiane, quartiles',
+      essentiel: [
+        'Moyenne pondérée : $\\bar{x} = \\dfrac{\\Sigma(x_i \\cdot n_i)}{\\Sigma n_i}$ — chaque valeur multipliée par son effectif, la somme divisée par l\'effectif total. Jamais la moyenne des valeurs distinctes seules.',
+        'En classes, chaque classe $[a\\,;\\,b[$ est représentée par son **centre** $\\dfrac{a+b}{2}$ : la moyenne obtenue est une approximation.',
+        'Une donnée manque ? Écris la formule avec toutes les données, l\'inconnue comprise, égale-la à la moyenne connue et résous l\'équation.',
+      ],
+      cartes: [
+        { question: 'Quel est le centre de la classe $[4\\,;\\,8[$ ?', reponse: '$\\dfrac{4+8}{2} = 6$.' },
+        { question: 'Valeurs 2, 6, 9, 12 d\'effectifs 5, 8, 4, 3 : quelle est la moyenne ?', reponse: '$\\bar{x} = \\dfrac{10+48+36+36}{20} = \\dfrac{130}{20} = 6{,}5$.' },
+        { question: 'Notes 12, 9 et 14 : quelle quatrième note pour une moyenne de 12 ?', reponse: '$\\dfrac{35 + x}{4} = 12$, donc $x = 13$.' },
+        { question: '24 élèves de moyenne 14 et 16 élèves de moyenne 9 : quelle moyenne pour les 40 ?', reponse: '$\\dfrac{24 \\times 14 + 16 \\times 9}{40} = 12$, et non 11,5.' },
+      ],
       blocks: [
         { kind: 'video', title: 'La moyenne pondérée', youtubeId: 'LxeW4gzXW-w' },
         {
@@ -640,6 +679,19 @@ export const statistiqueDescriptive: ChapterContent = {
       number: 4,
       title: 'Médiane, quartiles et mode',
       kicker: 'les paramètres de position — le rang, pas la valeur',
+      titreCourt: 'Médiane, quartiles, mode',
+      partie: 'Moyenne, médiane, quartiles',
+      essentiel: [
+        'Règle du seuil : sur les effectifs cumulés, le seuil vaut $\\dfrac{n}{2}$ pour la médiane, $\\dfrac{n}{4}$ pour Q1 et $\\dfrac{3n}{4}$ pour Q3 ; le paramètre est la **première valeur** dont l\'effectif cumulé dépasse **strictement** ce seuil.',
+        'En classes, on interpole dans la classe du seuil : $\\text{valeur} = L + \\dfrac{\\text{seuil} - CF_{avant}}{n_{classe}} \\cdot \\text{amplitude}$.',
+        'Le **mode** est la valeur (ou la classe) de plus grand effectif. La médiane est insensible aux valeurs extrêmes, la moyenne très sensible.',
+      ],
+      cartes: [
+        { question: 'n = 20 : quel est le seuil de Q1 ?', reponse: '$\\dfrac{n}{4} = 5$ : Q1 est la première valeur dont l\'effectif cumulé dépasse strictement 5.' },
+        { question: 'L\'effectif cumulé d\'une valeur vaut exactement le seuil : est-ce le paramètre cherché ?', reponse: 'Non, pas encore : on prend la valeur suivante.' },
+        { question: 'Le seuil 10 tombe dans $[4\\,;\\,8[$ (cumulés de 5 à 13) : que vaut la médiane ?', reponse: '$4 + \\dfrac{10-5}{8} \\cdot 4 = 6{,}5$.' },
+        { question: 'Une valeur énorme s\'ajoute à la série : quel indicateur bouge à peine ?', reponse: 'La médiane : elle est insensible aux valeurs extrêmes, contrairement à la moyenne.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Médiane, quartiles et mode (1/2) : la règle du seuil', youtubeId: 'OTT30Ux-Z8k' },
         { kind: 'video', title: 'Médiane, quartiles et mode (2/2) : classes, mode, quelle valeur centrale ?', youtubeId: 'SOaot7PbsMo' },
@@ -953,6 +1005,18 @@ export const statistiqueDescriptive: ChapterContent = {
       number: 5,
       title: 'La boîte à moustaches',
       kicker: 'min, Q1, médiane, Q3, max — un résumé visuel en 5 nombres',
+      titreCourt: 'Boîte à moustaches',
+      partie: 'Moyenne, médiane, quartiles',
+      essentiel: [
+        'La boîte à moustaches résume une série en cinq nombres : minimum, Q1, médiane, Q3, maximum. La boîte couvre $[Q_1\\,;\\,Q_3]$, la moitié centrale de la série.',
+        'Ses quatre parties contiennent chacune environ 25 % des valeurs, quelle que soit leur longueur. L\'**écart interquartile** $Q_3 - Q_1$ est la largeur de la boîte.',
+        'Pour comparer deux boîtes : la médiane la plus grande est le trait le plus à droite ; la série la plus dispersée a la boîte la plus large.',
+      ],
+      cartes: [
+        { question: 'Quels sont les cinq nombres d\'une boîte à moustaches ?', reponse: 'Le minimum, Q1, la médiane, Q3 et le maximum.' },
+        { question: 'Q1 = 6 et Q3 = 9 : que vaut l\'écart interquartile ?', reponse: '$Q_3 - Q_1 = 9 - 6 = 3$.' },
+        { question: 'Quelle part des valeurs contient une moustache très longue ?', reponse: 'Environ 25 %, comme chaque partie : longue veut dire que ses valeurs sont étalées.' },
+      ],
       blocks: [
         { kind: 'video', title: 'La boîte à moustaches', youtubeId: 'CMzCmWA9YTg' },
         {
@@ -1094,6 +1158,19 @@ export const statistiqueDescriptive: ChapterContent = {
       number: 6,
       title: 'Étendue, variance et écart-type',
       kicker: 'à quel point les valeurs s\'écartent-elles de la moyenne ?',
+      titreCourt: 'Variance et écart-type',
+      partie: 'Mesurer la dispersion',
+      essentiel: [
+        'Étendue : max − min. Variance : $V = \\dfrac{\\Sigma(x_i-\\bar{x})^2 \\cdot n_i}{n}$, la moyenne des carrés des écarts à $\\bar{x}$ ; écart-type : $\\sqrt{V}$, dans la même unité que les données.',
+        'Sur cette plateforme, on divise toujours par n (σx sur la calculatrice), et l\'écart-type se calcule à partir de la variance arrondie à 2 décimales.',
+        'Si $y = ax + b$ : $\\bar{y} = a\\,\\bar{x} + b$, $V_y = a^2\\,V_x$ et $\\sigma_y = |a|\\,\\sigma_x$ ; le nombre b ajouté ne change aucune dispersion.',
+      ],
+      cartes: [
+        { question: 'Pourquoi interpréter l\'écart-type plutôt que la variance ?', reponse: 'L\'écart-type est dans la même unité que les données ; la variance est en unité au carré.' },
+        { question: 'La variance vaut 10,95 : que vaut l\'écart-type ?', reponse: '$\\sqrt{10{,}95} \\approx 3{,}31$.' },
+        { question: 'Une prime de 50 € pour chaque employé : que devient l\'écart-type des salaires ?', reponse: 'Il ne change pas : un nombre ajouté à toutes les valeurs ne change jamais la dispersion.' },
+        { question: '$y = 1{,}8\\,x + 32$ et $V_x = 16$ : que vaut $V_y$ ?', reponse: '$1{,}8^2 \\times 16 = 51{,}84$ ; le $+32$ n\'intervient pas.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étendue, variance et écart-type', youtubeId: 'C7z8U5OC_QI' },
         {
@@ -1367,6 +1444,18 @@ export const statistiqueDescriptive: ChapterContent = {
       number: 7,
       title: 'L\'inégalité de Bienaymé-Tchebychev',
       kicker: 'au moins (1 − 1/k²) × 100 % des valeurs dans [x̄ − kσ ; x̄ + kσ]',
+      titreCourt: 'Inégalité de Bienaymé-Tchebychev',
+      partie: 'Mesurer la dispersion',
+      essentiel: [
+        'Pour **n\'importe quelle série** et tout $k > 1$, au moins $\\left(1 - \\dfrac{1}{k^2}\\right) \\times 100\\,\\%$ des valeurs se trouvent dans $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$.',
+        'C\'est une garantie minimale, souvent dépassée : on arrondit dans le sens qui la conserve — un pourcentage vers le bas, un nombre d\'individus vers le haut.',
+      ],
+      cartes: [
+        { question: 'k = 2 : quelle proportion minimale des valeurs dans $[\\bar{x}-2\\sigma\\,;\\,\\bar{x}+2\\sigma]$ ?', reponse: '$1 - \\dfrac{1}{4} = \\dfrac{3}{4}$ : au moins 75 % des valeurs.' },
+        { question: '$\\bar{x} = 12$ et $\\sigma = 2$ : quel k correspond à l\'intervalle $[8\\,;\\,16]$ ?', reponse: '$k = 2$, car $8 = 12 - 2 \\cdot 2$ et $16 = 12 + 2 \\cdot 2$.' },
+        { question: 'Quel k garantit au moins 95 % des valeurs ?', reponse: '$1 - \\dfrac{1}{k^2} = 0{,}95$, donc $k^2 = 20$ et $k = \\sqrt{20}$.' },
+        { question: 'On trouve « au moins 18,75 élèves » : comment arrondir ?', reponse: 'Vers le haut : au moins 19 élèves.' },
+      ],
       blocks: [
         { kind: 'video', title: 'L\'inégalité de Bienaymé-Tchebychev', youtubeId: '7aV5FgCHztI' },
         {
@@ -1527,6 +1616,17 @@ export const statistiqueDescriptive: ChapterContent = {
       number: 8,
       title: 'Comparer deux séries statistiques',
       kicker: 'même centre ? même dispersion ? lire un seuil sur une courbe cumulée',
+      titreCourt: 'Comparer deux séries',
+      partie: 'Comparer, puis réviser',
+      essentiel: [
+        'Comparer deux séries : le **centrage** (les médianes), la **dispersion** (les écarts-types : la plus petite valeur, la série la plus homogène), un **seuil** lu sur la courbe cumulée, puis une phrase d\'interprétation.',
+        'Le pourcentage de valeurs entre a et b se lit en deux fois : cumulé(b) − cumulé(a).',
+      ],
+      cartes: [
+        { question: 'De deux séries, laquelle est la plus homogène ?', reponse: 'Celle qui a le plus petit écart-type.' },
+        { question: 'Comment lire le pourcentage de valeurs entre a et b sur une courbe cumulée ?', reponse: 'On lit le cumulé en b et le cumulé en a, puis on soustrait : cumulé(b) − cumulé(a).' },
+        { question: 'Groupe A : médiane 12, écart interquartile 4 ; groupe B : médiane 10, écart interquartile 6. Conclusion ?', reponse: 'A réussit mieux (médiane plus grande) et de façon plus homogène (boîte plus étroite).' },
+      ],
       blocks: [
         { kind: 'video', title: 'Comparer deux séries statistiques', youtubeId: 'ojdBYg8_mbY' },
         {
@@ -1722,6 +1822,15 @@ export const statistiqueDescriptive: ChapterContent = {
       number: 9,
       title: 'Révision — synthèse et vrai/faux',
       kicker: 'tout le chapitre sur un seul jeu de données, puis 350 affirmations en 10 thèmes',
+      titreCourt: 'Révision et synthèse',
+      partie: 'Comparer, puis réviser',
+      essentiel: [
+        'Trois façons de réviser : un exercice de synthèse sur un seul jeu de données, un détective d\'erreurs dans la copie d\'un élève, et le quiz vrai/faux en 10 thèmes.',
+      ],
+      cartes: [
+        { question: 'Une copie cherche la médiane sur la série brute, sans la ranger. Quelle est l\'erreur ?', reponse: 'La médiane se cherche par le rang : il faut d\'abord ranger les valeurs par ordre croissant.' },
+        { question: 'Une copie donne un écart-type de 10,95 pour une variance de 10,95. Quelle est l\'erreur ?', reponse: 'La racine est oubliée : $\\sigma = \\sqrt{10{,}95} \\approx 3{,}31$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Révision : la synthèse du chapitre', youtubeId: 'AN_L26bmYLg' },
         {

@@ -68,6 +68,19 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       number: 1,
       title: 'Le cercle trigonométrique : placer et lire un angle',
       kicker: "trouve le quadrant, le signe, et l'angle du premier quadrant",
+      titreCourt: 'Placer un angle',
+      partie: 'Le cercle trigonométrique',
+      essentiel: [
+        'Le quadrant de θ donne les signes : quadrant I, sin, cos et tan positifs ; II, seul sin est positif ; III, seule tan est positive ; IV, seul cos est positif. $\\tan\\theta = \\dfrac{\\sin\\theta}{\\cos\\theta}$, sauf en 90° et 270°.',
+        'Angle du premier quadrant : θ (I), 180° − θ (II), θ − 180° (III), 360° − θ (IV), après avoir ramené l\'angle dans [0° ; 360°[ par des tours de 360°.',
+        '0°, 90°, 180° et 270° n\'appartiennent à aucun quadrant : on donne directement leur valeur exacte.',
+      ],
+      cartes: [
+        { question: 'Dans quel quadrant tombe 240°, et quels sont les signes ?', reponse: 'Quadrant III : sin et cos négatifs, tan positive.' },
+        { question: 'Quel est l\'angle du premier quadrant de 150° ?', reponse: '180° − 150° = 30°.' },
+        { question: 'Ramène −120° dans [0° ; 360°[.', reponse: '−120° + 360° = 240°.' },
+        { question: 'Pourquoi tan 90° n\'existe-t-elle pas ?', reponse: '$\\cos 90^{\\circ} = 0$ : le quotient $\\dfrac{\\sin\\theta}{\\cos\\theta}$ n\'est pas défini.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Placer et lire un angle : quadrants, signes, angle du premier quadrant, tangente', youtubeId: '15kSJpPlfhs' },
         {
@@ -266,6 +279,18 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       number: 2,
       title: 'L\'identité fondamentale : retrouver sin ou cos',
       kicker: 'cos²θ + sin²θ = 1, un Pythagore caché',
+      titreCourt: 'Identité fondamentale',
+      partie: 'Le cercle trigonométrique',
+      essentiel: [
+        'Pour tout angle θ : $\\cos^2\\theta + \\sin^2\\theta = 1$, c\'est Pythagore dans le cercle de rayon 1.',
+        'Connaissant sin θ : $\\cos\\theta = \\pm\\sqrt{1-\\sin^2\\theta}$. Deux valeurs sont possibles, le quadrant tranche le signe ; puis $\\tan\\theta = \\dfrac{\\sin\\theta}{\\cos\\theta}$.',
+      ],
+      cartes: [
+        { question: 'Que veut dire $\\cos^2\\theta$ ?', reponse: '$(\\cos\\theta)^2$, et non $\\cos(\\theta^2)$.' },
+        { question: '$\\sin\\theta = \\dfrac{3}{5}$ et θ dans le quadrant II : que vaut cos θ ?', reponse: '$\\cos^2\\theta = \\dfrac{16}{25}$ et cos est négatif en II : $\\cos\\theta = -\\dfrac{4}{5}$.' },
+        { question: 'Quel est le piège de l\'écriture $\\cos\\theta = \\sqrt{1-\\sin^2\\theta}$ ?', reponse: 'Elle oublie le ± : le signe se tranche avec le quadrant.' },
+        { question: 'Quelle relation permet de partir de tan θ ?', reponse: '$1 + \\tan^2\\theta = \\dfrac{1}{\\cos^2\\theta}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Identité fondamentale cos²θ + sin²θ = 1 — retrouver sin ou cos', youtubeId: 'OvQSK4L46dE' },
         {
@@ -427,6 +452,19 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       number: 3,
       title: 'Les valeurs remarquables',
       kicker: 'les 5 valeurs à connaître par cœur, puis comment les étendre par symétrie',
+      titreCourt: 'Valeurs remarquables',
+      partie: 'Le cercle trigonométrique',
+      essentiel: [
+        '$\\sin 30^{\\circ} = \\dfrac{1}{2}$, $\\sin 45^{\\circ} = \\dfrac{\\sqrt{2}}{2}$, $\\sin 60^{\\circ} = \\dfrac{\\sqrt{3}}{2}$ ; les cosinus sont les mêmes valeurs, dans l\'ordre inverse ; $\\tan 30^{\\circ} = \\dfrac{\\sqrt{3}}{3}$, $\\tan 45^{\\circ} = 1$, $\\tan 60^{\\circ} = \\sqrt{3}$.',
+        'On les retrouve avec deux triangles : rectangle isocèle de côtés 1 (45°), moitié d\'un triangle équilatéral de côté 2 (30° et 60°).',
+        'Hors du premier quadrant : la valeur de l\'angle du premier quadrant, avec le signe du quadrant de départ.',
+      ],
+      cartes: [
+        { question: 'Que vaut $\\cos 30^{\\circ}$ ?', reponse: '$\\dfrac{\\sqrt{3}}{2}$.' },
+        { question: 'Que vaut $\\tan 60^{\\circ}$ ?', reponse: '$\\sqrt{3}$.' },
+        { question: 'Donne la valeur exacte de $\\cos 210^{\\circ}$.', reponse: '$-\\dfrac{\\sqrt{3}}{2}$ : quadrant III, angle du premier quadrant 30°, cos négatif.' },
+        { question: 'Donne la valeur exacte de $\\sin 315^{\\circ}$.', reponse: '$-\\dfrac{\\sqrt{2}}{2}$ : quadrant IV, angle du premier quadrant 45°, sin négatif.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Valeurs remarquables de sin, cos, tan — 0°, 30°, 45°, 60°, 90° et leur extension', youtubeId: 'dQbD98E-ooQ' },
         {
@@ -615,6 +653,19 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       number: 4,
       title: 'Les angles associés',
       kicker: '4 symétries autour de θ, pour ne jamais recalculer une valeur',
+      titreCourt: 'Angles associés',
+      partie: 'Le cercle trigonométrique',
+      essentiel: [
+        'Supplémentaire : $\\sin(180^{\\circ}-\\theta) = \\sin\\theta$ et $\\cos(180^{\\circ}-\\theta) = -\\cos\\theta$ ; anti-supplémentaire : $\\sin(180^{\\circ}+\\theta) = -\\sin\\theta$ et $\\cos(180^{\\circ}+\\theta) = -\\cos\\theta$.',
+        'Opposé : $\\sin(-\\theta) = -\\sin\\theta$ et $\\cos(-\\theta) = \\cos\\theta$ (360° − θ suit les mêmes règles) ; complémentaire : sinus et cosinus s\'échangent, $\\sin(90^{\\circ}-\\theta) = \\cos\\theta$.',
+        'Pour reconnaître la famille : le signe devant θ, puis 90° ou 180°, puis 180° − θ ou 180° + θ.',
+      ],
+      cartes: [
+        { question: 'Que vaut $\\cos(180^{\\circ}-\\theta)$ ?', reponse: '$-\\cos\\theta$.' },
+        { question: 'Dans quelle famille sinus et cosinus s\'échangent-ils ?', reponse: 'La famille complémentaire : $\\sin(90^{\\circ}-\\theta) = \\cos\\theta$ et $\\cos(90^{\\circ}-\\theta) = \\sin\\theta$.' },
+        { question: '$\\sin 35^{\\circ} \\approx 0{,}574$ : que vaut $\\sin 145^{\\circ}$ ?', reponse: '$145^{\\circ} = 180^{\\circ} - 35^{\\circ}$, donc $\\sin 145^{\\circ} = \\sin 35^{\\circ} \\approx 0{,}574$.' },
+        { question: 'Quelle symétrie du cercle donne l\'angle $180^{\\circ}+\\theta$ ?', reponse: 'La symétrie de centre O : $(x\\,;\\,y)$ devient $(-x\\,;\\,-y)$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Angles associés — 90°−θ, 180°−θ, 180°+θ, −θ', youtubeId: '0UBfwtqxi6k' },
         {
@@ -827,6 +878,19 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       number: 5,
       title: 'Résoudre une équation trigonométrique',
       kicker: 'sin α = k / cos α = k / tan α = k, sur [0° ; 360°[',
+      titreCourt: 'Équations trigonométriques',
+      partie: 'Le cercle trigonométrique',
+      essentiel: [
+        'Sur [0° ; 360°[ : l\'angle de référence $\\alpha_0$, puis la seconde solution par symétrie. Si $k > 0$, $\\sin\\alpha = k$ donne $\\alpha_0$ et $180^{\\circ} - \\alpha_0$, $\\cos\\alpha = k$ donne $\\alpha_0$ et $360^{\\circ} - \\alpha_0$ ; $\\tan\\alpha = k$ a deux solutions espacées de 180°.',
+        'Pour k = 1 ou k = −1, sin α = k et cos α = k n\'ont qu\'une solution. La calculatrice, en mode **degrés**, ne donne qu\'un angle : la seconde solution se trouve par symétrie.',
+        'Une équation à transformer ($\\sin^2\\alpha = k$, produit nul…) se ramène à des équations de base ; ne jamais diviser par $\\sin\\alpha$.',
+      ],
+      cartes: [
+        { question: 'Résous $\\sin\\alpha = \\dfrac{1}{2}$ sur [0° ; 360°[.', reponse: 'α = 30° ou α = 150°.' },
+        { question: 'Résous $\\cos\\alpha = -\\dfrac{1}{2}$ sur [0° ; 360°[.', reponse: 'α = 120° ou α = 240°.' },
+        { question: 'Combien de solutions a $\\tan\\alpha = k$ sur [0° ; 360°[ ?', reponse: 'Toujours exactement deux, espacées de 180°.' },
+        { question: 'Pourquoi ne jamais diviser les deux membres par $\\sin\\alpha$ ?', reponse: 'On perdrait les solutions de $\\sin\\alpha = 0$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Équations trigonométriques sin α = k, cos α = k, tan α = k sur [0° ; 360°[', youtubeId: 'B5XVyZQS2i8' },
         {
@@ -1186,6 +1250,19 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       number: 6,
       title: 'Le triangle quelconque : lois des sinus et des cosinus',
       kicker: 'a/sin Â = b/sin B̂ = c/sin Ĉ — et a² = b² + c² − 2bc·cos Â',
+      titreCourt: 'Triangle quelconque',
+      partie: 'Les triangles quelconques',
+      essentiel: [
+        'Loi des sinus : $\\dfrac{a}{\\sin \\hat{A}} = \\dfrac{b}{\\sin \\hat{B}} = \\dfrac{c}{\\sin \\hat{C}}$, pour 2 angles et 1 côté (AAS) ou 2 côtés et un angle non compris (SSA, le cas ambigu : 0, 1 ou 2 triangles).',
+        'Loi des cosinus (Al-Kashi) : $a^2 = b^2 + c^2 - 2bc\\cos \\hat{A}$, pour 2 côtés et l\'angle compris (SAS) ou les 3 côtés (SSS) ; elle distingue un angle aigu d\'un angle obtus.',
+        'Aire : $\\dfrac{1}{2}ab\\sin \\hat{C}$ — deux côtés et l\'angle compris suffisent.',
+      ],
+      cartes: [
+        { question: 'Quelle loi pour 2 côtés et l\'angle compris ?', reponse: 'Al-Kashi : $a^2 = b^2 + c^2 - 2bc\\cos \\hat{A}$.' },
+        { question: 'Pourquoi le cas SSA est-il ambigu ?', reponse: '$\\hat{B}$ et $180^{\\circ} - \\hat{B}$ ont le même sinus : il faut tester les deux candidats.' },
+        { question: 'Pourquoi chercher le plus grand angle par Al-Kashi, pas par la loi des sinus ?', reponse: 'C\'est le seul angle qui peut être obtus, et $\\sin^{-1}$ ne renvoie jamais un angle obtus.' },
+        { question: 'Aire d\'un triangle avec b = 8, c = 6 et $\\hat{A} = 60^{\\circ}$ ?', reponse: '$\\dfrac{1}{2} \\cdot 8 \\cdot 6 \\cdot \\sin 60^{\\circ} = 12\\sqrt{3} \\approx 20{,}78$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Triangle quelconque — lois des sinus et des cosinus (1/2) : énoncés, cas ambigu, démonstration des sinus', youtubeId: 'G66-HKd81Zs' },
         { kind: 'video', title: 'Triangle quelconque — lois des sinus et des cosinus (2/2) : démonstrations, piège d\'Al-Kashi, exemple SAS', youtubeId: '8pkdfnzQPD4' },
@@ -1982,6 +2059,19 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       number: 7,
       title: 'Triangles liés : la triangulation',
       kicker: 'résous un triangle « pont » pour transférer un élément vers le triangle « cible »',
+      titreCourt: 'Triangles liés',
+      partie: 'Les triangles quelconques',
+      essentiel: [
+        'Triangulation : on résout d\'abord un triangle **pont**, entièrement résoluble avec les données, puis on transfère un côté ou un angle vers le triangle **cible**, qui contient la grandeur cherchée.',
+        'Résultante de deux forces qui font l\'angle θ : l\'angle intérieur du triangle vaut $180^{\\circ} - \\theta$, donc $F_R^2 = F_1^2 + F_2^2 - 2F_1F_2\\cos(180^{\\circ} - \\theta)$.',
+        'Avant d\'appliquer une loi, traduis chaque angle de l\'énoncé (cap, élévation, dépression) en **angle intérieur** du triangle.',
+      ],
+      cartes: [
+        { question: 'Quels sont les deux triangles d\'une triangulation ?', reponse: 'Le triangle pont, résoluble avec les données, et le triangle cible, qui contient la grandeur cherchée.' },
+        { question: 'Deux forces font l\'angle θ : quel angle mettre dans Al-Kashi pour la résultante ?', reponse: '$180^{\\circ} - \\theta$ ; avec θ, on obtient l\'autre diagonale du parallélogramme.' },
+        { question: 'Un sommet est vu sous l\'élévation α depuis A (loin), puis β depuis B (près) : quel angle au sommet ?', reponse: '$\\beta - \\alpha$.' },
+        { question: 'Cap 40° de A à B, puis cap 120° de B à C : quel angle intérieur en B ?', reponse: 'L\'écart des caps vaut 80°, donc l\'angle en B vaut 180° − 80° = 100°.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Triangulation — mesurer une hauteur inaccessible avec deux triangles liés', youtubeId: 'fGwjUxVHL5s' },
         {
@@ -2408,6 +2498,11 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       number: 8,
       title: 'Révision — quiz vrai/faux',
       kicker: '350 affirmations en 10 thèmes, tout le chapitre',
+      titreCourt: 'Révision : vrai ou faux',
+      partie: 'Les triangles quelconques',
+      essentiel: [
+        'Le quiz vrai/faux reprend tout le chapitre en 10 thèmes, dans l\'ordre des sections : un seul essai par question, la justification est toujours révélée.',
+      ],
       blocks: [
         { kind: 'video', title: 'Cercle trigonométrique et triangles quelconques — synthèse et points à vérifier', youtubeId: 'YjmwkQmAxsc' },
         {

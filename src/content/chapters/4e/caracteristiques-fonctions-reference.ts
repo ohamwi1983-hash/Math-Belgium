@@ -296,6 +296,19 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       number: 1,
       title: 'Lire les caractéristiques sur un graphique',
       kicker: 'domaine, zéros, variations, ordonnée à l\'origine, valeur en un point, asymptotes',
+      titreCourt: 'Lire un graphique',
+      partie: 'Lire et étudier une fonction',
+      essentiel: [
+        'Une courbe se lit toujours dans le même ordre : domaine, ensemble image, zéros, variations, ordonnée à l\'origine, valeur en un point, asymptotes.',
+        'Un rond vide : la valeur est exclue du domaine ; un rond plein : f(a) existe et se lit à cet endroit.',
+        'Pour résoudre $f(x) = k$, trace la droite $y = k$ : les solutions sont les **antécédents** de k, abscisses des points d\'intersection ; $f(x) > k$ là où la courbe est au-dessus de la droite.',
+      ],
+      cartes: [
+        { question: 'Qu\'est-ce qu\'un zéro de f ?', reponse: 'Un réel dont l\'image vaut 0 : l\'abscisse d\'un point d\'intersection de la courbe avec l\'axe Ox.' },
+        { question: 'Combien d\'images peut avoir un réel a ? Combien d\'antécédents un réel k ?', reponse: 'a a au plus une image ; k peut avoir 0, 1 ou plusieurs antécédents.' },
+        { question: 'Que signifie un rond vide en $x = a$ sur une courbe ?', reponse: 'La valeur a est exclue du domaine : f(a) n\'existe pas.' },
+        { question: 'Comment lire les solutions de $f(x) > g(x)$ sur un graphique ?', reponse: 'Ce sont les x où la courbe de f est au-dessus de celle de g.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Lire les caractéristiques sur un graphique', youtubeId: 'Xrng-oSlUAo' },
         {
@@ -654,6 +667,19 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       number: 2,
       title: 'Étudier algébriquement une fonction de référence',
       kicker: 'f(x) = [famille](ax + b) + k — CE, domaine, isolement, zéros, condition de validité',
+      titreCourt: 'Étude algébrique',
+      partie: 'Lire et étudier une fonction',
+      essentiel: [
+        'On part de $f(x) = [\\text{famille}](ax+b) + k$ : poser la condition d\'existence, en déduire le domaine, puis isoler la famille pour trouver les zéros.',
+        'Carrée et valeur absolue se séparent en **deux** équations : $|P(x)| = K$ donne $P(x) = K$ ou $P(x) = -K$.',
+        'Quand le membre de droite contient x, ajoute la **condition de validité** et confronte-lui chaque candidate : élever au carré peut faire apparaître des solutions étrangères.',
+      ],
+      cartes: [
+        { question: 'Quel est le domaine de $f(x) = \\sqrt{2x-4} - \\dfrac{1}{2}$ ?', reponse: '$2x - 4 \\geq 0 \\iff x \\geq 2$ : $[2\\,;\\,+\\infty[$.' },
+        { question: 'Combien de solutions a l\'équation $\\dfrac{1}{ax+b} = 0$ ?', reponse: 'Aucune : $\\dfrac{1}{u}$ ne vaut jamais 0.' },
+        { question: 'Quels sont les zéros de $f(x) = |2x-3| - 5$ ?', reponse: '$2x - 3 = 5$ ou $2x - 3 = -5$ : $x = 4$ et $x = -1$.' },
+        { question: '$\\sqrt{x+2} = x$ : quelle condition de validité, et quelle solution ?', reponse: '$x \\geq 0$ : des candidates 2 et −1, seule $x = 2$ est gardée.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étudier algébriquement une fonction de référence', youtubeId: '0CERKsS8qiA' },
         {
@@ -841,6 +867,19 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       number: 3,
       title: 'Transformer une fonction de référence',
       kicker: 'une seule formule pour les 8 transformations, généralisée aux 6 familles',
+      titreCourt: 'Transformer une fonction',
+      partie: 'Transformer, puis réviser',
+      essentiel: [
+        'Formule unifiée : $f(x) = SOX \\cdot \\dfrac{EV}{CV} \\cdot g(u) + TV$, avec $u = SOY \\cdot \\dfrac{CH}{EH} \\cdot (x-TH)$ ; TH est toujours soustrait, TV toujours ajouté.',
+        '$f(2x)$ **comprime** la courbe horizontalement, de facteur $\\dfrac{1}{2}$ ; le point caractéristique est toujours en $x = TH$.',
+        'Une transformation horizontale agit sur le domaine, une verticale sur l\'ensemble image ; une symétrie échange les bornes, et chaque crochet suit sa borne.',
+      ],
+      cartes: [
+        { question: 'Quelles sont les asymptotes de $f(x) = \\dfrac{1}{x-3} + 2$ ?', reponse: 'Verticale $x = 3$ (TH), horizontale $y = 2$ (TV).' },
+        { question: 'Que vaut TH dans $f(x) = (x+3)^3$ ?', reponse: '$TH = -3$ : une translation de 3 vers la gauche.' },
+        { question: 'Quel est l\'effet de $f(2x)$ sur la courbe de f ?', reponse: 'Une compression horizontale de facteur $\\dfrac{1}{2}$ — pas un étirement.' },
+        { question: 'Après une SOX, que devient l\'ensemble image $[-2\\,;\\,+\\infty[$ ?', reponse: '$]-\\infty\\,;\\,2]$ : les bornes changent de signe et s\'échangent.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Transformer une fonction de référence (1/2) : la formule unifiée et les 8 paramètres', youtubeId: 'jTuYvEEo8I8' },
         { kind: 'video', title: 'Transformer une fonction de référence (2/2) : exemples, pièges et forme canonique', youtubeId: 'OuKRjDttAXs' },
@@ -1320,6 +1359,15 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       number: 4,
       title: 'Révision — vrai ou faux',
       kicker: '243 affirmations, 7 thèmes, tout le chapitre en révision transversale',
+      titreCourt: 'Révision : vrai ou faux',
+      partie: 'Transformer, puis réviser',
+      essentiel: [
+        'Le quiz vrai/faux reprend tout le chapitre en 7 thèmes, de la lecture graphique aux transformations : un seul essai par question, la justification est toujours révélée.',
+      ],
+      cartes: [
+        { question: 'La fonction inverse est-elle décroissante sur $\\mathbb{R} \\setminus \\{0\\}$ ?', reponse: 'Non : elle est décroissante sur chaque branche séparément, jamais globalement.' },
+        { question: 'Quel est le domaine de la racine carrée ? Et celui de l\'inverse ?', reponse: '$[0\\,;\\,+\\infty[$ pour la racine carrée, $\\mathbb{R} \\setminus \\{0\\}$ pour l\'inverse.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Révision vrai ou faux et synthèse du chapitre', youtubeId: '2ox8on-dIaY' },
         {

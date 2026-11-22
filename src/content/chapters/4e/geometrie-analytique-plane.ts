@@ -20,6 +20,19 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       number: 1,
       title: 'Décrire une droite : point et vecteur directeur',
       kicker: "5 façons de donner une droite → un point + un vecteur directeur → 4 façons de l'écrire",
+      titreCourt: 'Point et vecteur directeur',
+      partie: 'Écrire, lire et tracer une droite',
+      essentiel: [
+        'Une droite est déterminée par **un point** et **un vecteur directeur** $\\vec{u}$ non nul : deux points A et B donnent $\\vec{AB}$, une pente m donne $\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$.',
+        'Quatre écritures : implicite $ax + by + c = 0$ (vecteur directeur $\\begin{pmatrix} -b \\\\ a \\end{pmatrix}$), explicite $y = mx + p$, explicite $x = ny + q$, paramétrique (une équation par variable, le même paramètre t).',
+        'Une verticale n\'a pas de forme $y = mx + p$, une horizontale pas de forme $x = ny + q$ ; l\'implicite et la paramétrique existent toujours.',
+      ],
+      cartes: [
+        { question: 'Donne un vecteur directeur de la droite $ax + by + c = 0$.', reponse: '$\\begin{pmatrix} -b \\\\ a \\end{pmatrix}$, ou n\'importe quel multiple non nul.' },
+        { question: 'Quel vecteur directeur pour une droite de pente m ?', reponse: '$\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$.' },
+        { question: 'Quelles écritures existent toujours, même pour une droite verticale ?', reponse: 'L\'implicite et la paramétrique.' },
+        { question: 'Écris la paramétrique de la droite par A(1 ; 1), de vecteur directeur $\\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$.', reponse: '$\\begin{cases} x = 1+2t \\\\ y = 1+t \\end{cases}$' },
+      ],
       blocks: [
         { kind: 'video', title: 'Décrire une droite : point, vecteur directeur et 4 formes d\'équation', youtubeId: 'OkLInSNqf-Q' },
         {
@@ -278,6 +291,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       number: 2,
       title: 'Lire une droite sur un graphe, la tracer depuis son équation',
       kicker: 'deux compétences réciproques, sur le même quadrillage',
+      titreCourt: 'Lire et tracer',
+      partie: 'Écrire, lire et tracer une droite',
+      essentiel: [
+        'Lire une droite : deux points à coordonnées entières, puis le vecteur directeur qui les relie, réduit à sa forme **primitive** (composantes divisées par leur PGCD).',
+        'Sur $y = mx + p$ : p se lit où la droite coupe Oy, et m en « escalier » — on avance de 1, on monte de m.',
+        'Tracer : deux points suffisent, souvent les intersections avec les axes ; en paramétrique, t = 0 puis t = 1.',
+      ],
+      cartes: [
+        { question: 'Quelle est la forme primitive de $\\begin{pmatrix} 4 \\\\ 2 \\end{pmatrix}$ ?', reponse: '$\\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$ : on divise par le PGCD, 2.' },
+        { question: 'Comment lire la pente m sur un graphe ?', reponse: 'On avance de 1 vers la droite et on compte de combien la droite monte (m > 0) ou descend (m < 0).' },
+        { question: 'Quels deux points pour tracer une droite donnée en paramétrique ?', reponse: 't = 0 donne le point de départ, t = 1 le point translaté du vecteur directeur.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Lire, tracer une droite ; pente, angle et ordonnée à l\'origine', youtubeId: 'XhlMFkJ5XG4' },
         {
@@ -425,6 +450,19 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       number: 3,
       title: "Pente, angle avec les axes, ordonnée à l'origine",
       kicker: 'm = tan θ — trois façons de décrire la même inclinaison',
+      titreCourt: 'Pente et angle',
+      partie: 'Écrire, lire et tracer une droite',
+      essentiel: [
+        'Pente $m = \\dfrac{\\Delta y}{\\Delta x} = \\tan\\theta$, où θ est l\'angle avec Ox, dans $[0^{\\circ};180^{\\circ}[$ : une pente négative donne un angle **obtus**, jamais un angle négatif.',
+        'Angle avec Oy : $90^{\\circ} - \\theta_{Ox}$, ramené dans $[0^{\\circ};180^{\\circ}[$. L\'ordonnée à l\'origine p est la valeur de y en x = 0.',
+        'Depuis $ax + by + c = 0$ : $m = -\\dfrac{a}{b}$ et $p = -\\dfrac{c}{b}$ ; une verticale n\'a ni pente ni ordonnée à l\'origine.',
+      ],
+      cartes: [
+        { question: '$m = \\sqrt{3}$ : quel angle avec Ox ?', reponse: '$\\tan\\theta = \\sqrt{3}$, donc θ = 60° (et 30° avec Oy).' },
+        { question: 'La calculatrice donne $\\tan^{-1}(-1) = -45^{\\circ}$ : quel est l\'angle avec Ox ?', reponse: 'On ajoute 180° : θ = 135°, un angle obtus.' },
+        { question: 'Pente et ordonnée à l\'origine de $2x + 2y - 3 = 0$ ?', reponse: '$y = -x + \\dfrac{3}{2}$ : $m = -1$ et $p = \\dfrac{3}{2}$.' },
+        { question: 'Quelle droite n\'a pas de pente ?', reponse: 'Une verticale : son angle avec Ox vaut 90°, mais la pente n\'existe pas.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -540,6 +578,19 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       number: 4,
       title: 'Droites parallèles et perpendiculaires',
       kicker: 'critère de colinéarité nul ↔ parallèles — produit scalaire nul ↔ perpendiculaires',
+      titreCourt: 'Parallèles, perpendiculaires',
+      partie: 'Deux droites : position et distance',
+      essentiel: [
+        '**Parallèles** ⟺ critère de colinéarité nul : $\\alpha \\cdot \\beta\' - \\beta \\cdot \\alpha\' = 0$ ; en pentes, $m = m\'$.',
+        '**Perpendiculaires** ⟺ produit scalaire nul : $\\alpha \\cdot \\alpha\' + \\beta \\cdot \\beta\' = 0$ ; en pentes, $m \\cdot m\' = -1$ si les deux pentes existent.',
+        '$\\begin{pmatrix} a \\\\ b \\end{pmatrix}$ tourné de 90° donne $\\begin{pmatrix} -b \\\\ a \\end{pmatrix}$ ; deux parallèles $ax + by + c = 0$ ne diffèrent que par c.',
+      ],
+      cartes: [
+        { question: 'Quel critère dit que deux droites sont parallèles ?', reponse: 'Le critère de colinéarité de leurs vecteurs directeurs est nul : $\\alpha \\cdot \\beta\' - \\beta \\cdot \\alpha\' = 0$.' },
+        { question: '$m_1 = 2$ et $m_2 = -\\dfrac{1}{2}$ : quelle relation entre les droites ?', reponse: 'Perpendiculaires : $m_1 \\cdot m_2 = -1$.' },
+        { question: 'Parallèle à $3x - y + 2 = 0$ passant par A(1 ; 4) ?', reponse: '$3x - y + c = 0$ avec $3 - 4 + c = 0$ : $3x - y + 1 = 0$.' },
+        { question: 'Une horizontale et une verticale : pourquoi $m \\cdot m\' = -1$ ne marche-t-il pas ?', reponse: 'La verticale n\'a pas de pente ; le produit scalaire, lui, marche toujours.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Droites parallèles, perpendiculaires et intersection de deux droites', youtubeId: 'E0Uvj1gvBi0' },
         {
@@ -764,6 +815,19 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       number: 5,
       title: 'Intersection de deux droites',
       kicker: 'sécantes (1 point) — parallèles distinctes (0 point) — confondues (une infinité)',
+      titreCourt: 'Intersection de deux droites',
+      partie: 'Deux droites : position et distance',
+      essentiel: [
+        'Compare d\'abord les vecteurs directeurs : non colinéaires → droites **sécantes**, un seul point commun ; colinéaires → **confondues** si un point de l\'une est sur l\'autre, sinon **parallèles distinctes**.',
+        'Pour des sécantes, on résout le système des deux équations, par substitution ou par combinaison linéaire.',
+        'Deux mobiles ne se rencontrent que s\'ils passent au point commun au même instant : $t_1 = t_2$.',
+      ],
+      cartes: [
+        { question: 'Vecteurs directeurs colinéaires : quelles positions sont possibles ?', reponse: 'Confondues (une infinité de points communs) ou parallèles distinctes (aucun).' },
+        { question: '$2x - 4y + 2 = 0$ et $x - 2y + 1 = 0$ : quelle position ?', reponse: 'Confondues : la première équation est le double de la seconde.' },
+        { question: 'Point commun de $\\begin{cases} x = 1+2t \\\\ y = 3-t \\end{cases}$ et de $x + y - 6 = 0$ ?', reponse: '$(1+2t) + (3-t) - 6 = 0$ donne $t = 2$ : le point (5 ; 1).' },
+        { question: 'Deux trajectoires se coupent : les mobiles se rencontrent-ils forcément ?', reponse: 'Non : il faut en plus le même instant, $t_1 = t_2$.' },
+      ],
       blocks: [
         { kind: 'para', text: "Il y a trois issues possibles. Distingue-les **avant** de te lancer dans un calcul inutile." },
         {
@@ -907,6 +971,19 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       number: 6,
       title: 'Distance point-droite et droite-droite',
       kicker: 'construire la perpendiculaire, trouver le pied, mesurer — sans formule toute faite',
+      titreCourt: 'Distance point-droite',
+      partie: 'Deux droites : position et distance',
+      essentiel: [
+        'Distance d\'un point à une droite, sans formule : la perpendiculaire par le point, son intersection avec la droite (le pied H), puis la norme du vecteur qui relie le point à H.',
+        'Entre deux parallèles : un point quelconque de l\'une, puis la même méthode vers l\'autre. Raccourcis : $|x_P - k|$ pour une verticale $x = k$, $|y_P - k|$ pour une horizontale $y = k$.',
+        'Le symétrique A′ de A par rapport à d : H est le milieu de [AA′], donc $x_{A\'} = 2x_H - x_A$ et $y_{A\'} = 2y_H - y_A$.',
+      ],
+      cartes: [
+        { question: 'Quelles sont les trois étapes de la distance d\'un point C à une droite d ?', reponse: 'La perpendiculaire à d par C, le pied H (intersection avec d), puis $\\|\\vec{CH}\\|$.' },
+        { question: 'Distance d\'un point P à la droite verticale $x = k$ ?', reponse: '$|x_P - k|$, un simple écart d\'abscisses.' },
+        { question: 'Comment obtenir le symétrique A′ de A par rapport à d ?', reponse: 'Projeté orthogonal H, puis $x_{A\'} = 2x_H - x_A$ et $y_{A\'} = 2y_H - y_A$.' },
+        { question: 'Coordonnées du centre de gravité G du triangle ABC ?', reponse: '$G\\left(\\dfrac{x_A+x_B+x_C}{3}\\,;\\,\\dfrac{y_A+y_B+y_C}{3}\\right)$' },
+      ],
       blocks: [
         { kind: 'video', title: 'Distance point-droite, droite-droite et notion de lieu géométrique', youtubeId: 'mkdqsJBJKNU' },
         {
@@ -1128,6 +1205,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       number: 7,
       title: "Qu'est-ce qu'un lieu géométrique ?",
       kicker: 'propriété caractéristique — tous les points qui la partagent, et eux seuls',
+      titreCourt: 'Lieu géométrique',
+      partie: 'Lieux géométriques : cercle et parabole',
+      essentiel: [
+        'Un **lieu géométrique** est l\'ensemble de tous les points qui partagent une propriété — et qui sont les seuls à la partager.',
+        'Équidistants de deux parallèles : la parallèle à mi-chemin ; à une distance donnée d\'une droite : la **réunion** de deux parallèles, une de chaque côté.',
+        'Équidistants de A et B : on traduit $MA = MB$ par $MA^2 = MB^2$, ce qui donne la médiatrice de [AB].',
+      ],
+      cartes: [
+        { question: 'Quel est le lieu des points situés à la distance r d\'une droite d ?', reponse: 'La réunion de deux droites parallèles à d, une de chaque côté.' },
+        { question: 'Quel est le lieu des points équidistants de deux droites parallèles ?', reponse: 'La parallèle située exactement à mi-chemin.' },
+        { question: 'Comment traduire « M est équidistant de A et de B » en équation ?', reponse: '$MA^2 = MB^2$ : on obtient la médiatrice de [AB].' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -1252,6 +1341,19 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       number: 8,
       title: 'Le cercle',
       kicker: "(x−x₀)² + (y−y₀)² = r² — depuis un graphe, ou depuis l'équation développée",
+      titreCourt: 'Le cercle',
+      partie: 'Lieux géométriques : cercle et parabole',
+      essentiel: [
+        'Cercle de centre $(x_0 ; y_0)$ et de rayon r : $(x-x_0)^2+(y-y_0)^2=r^2$ — c\'est Pythagore.',
+        'Depuis $x^2 + y^2 + Dx + Ey + F = 0$ (même coefficient devant x² et y²), on complète les carrés : un second membre positif est r², nul donne un seul point, négatif aucun point.',
+        'La tangente en P est perpendiculaire au rayon [CP]. Une droite est extérieure, tangente ou sécante selon que CH > r, CH = r ou CH < r.',
+      ],
+      cartes: [
+        { question: 'Centre et rayon de $(x-2)^2+(y+3)^2=25$ ?', reponse: 'Centre (2 ; −3), rayon 5.' },
+        { question: 'Centre C(1 ; 1) et point P(4 ; 5) du cercle : quelle équation ?', reponse: '$r = \\sqrt{3^2+4^2} = 5$ : $(x-1)^2+(y-1)^2=25$.' },
+        { question: 'Après avoir complété les carrés, le second membre vaut −5. Conclusion ?', reponse: 'Aucun point : une somme de carrés n\'est jamais négative, ce n\'est pas un cercle.' },
+        { question: 'Quand une droite est-elle tangente à un cercle ?', reponse: 'Quand la distance CH du centre à la droite est égale au rayon.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Le cercle : équation, centre et rayon', youtubeId: 'tSgRL4q19Go' },
         {
@@ -1556,6 +1658,19 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       number: 9,
       title: 'La parabole : foyer, directrice et équation',
       kicker: 'équidistance d\'un point (foyer) et d\'une droite (directrice)',
+      titreCourt: 'La parabole',
+      partie: 'Lieux géométriques : cercle et parabole',
+      essentiel: [
+        'Une parabole est l\'ensemble des points P à égale distance du **foyer** F et de la **directrice** d ; le sommet S est à mi-chemin entre F et d.',
+        'Axe vertical : $(x-x_S)^2=2p(y-y_S)$, avec $p = 2(y_F-y_S)$ **signé** et la directrice $y = y_S - \\dfrac{p}{2}$ ; pour un axe horizontal, x et y échangent leurs rôles.',
+        'Construction : le cercle de centre F et de rayon r coupe la parallèle à d située à la distance r en des points de la parabole.',
+      ],
+      cartes: [
+        { question: 'Quelle propriété vérifie tout point P de la parabole ?', reponse: 'PF = distance(P, d) : P est à égale distance du foyer et de la directrice.' },
+        { question: 'Sommet S(1 ; −1) et foyer F(1 ; 1) : quels p et quelle équation ?', reponse: '$p = 2(1-(-1)) = 4$ : $(x-1)^2 = 8(y+1)$.' },
+        { question: 'Axe vertical et p négatif : que se passe-t-il ?', reponse: 'Le foyer est sous le sommet : la parabole s\'ouvre vers le bas.' },
+        { question: 'Sommet et p de $(y-3)^2 = 4(x+1)$ ?', reponse: 'S(−1 ; 3) et $2p = 4$, donc $p = 2$ (axe horizontal).' },
+      ],
       blocks: [
         { kind: 'video', title: 'La parabole : foyer, directrice, équation et construction au compas', youtubeId: 'C8pnTijgKro' },
         { kind: 'video', title: 'Construction d\'une parabole au compas et à l\'équerre', youtubeId: 'mmRHcf1ttrY' },
@@ -1877,6 +1992,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       number: 10,
       title: 'Lieux géométriques : intersection de deux courbes',
       kicker: 'traduire, écrire l\'équation, résoudre le système',
+      titreCourt: 'Intersection de deux lieux',
+      partie: 'Lieux géométriques : cercle et parabole',
+      essentiel: [
+        'Méthode : identifier chaque lieu, écrire son équation, résoudre le système par substitution, puis dénombrer les solutions.',
+        'Avec une droite et un cercle (ou une parabole), on obtient une équation du second degré au plus : 0, 1 ou 2 points communs ; une racine double veut dire que la droite est tangente.',
+      ],
+      cartes: [
+        { question: '« Les points dont l\'ordonnée est le triple de l\'abscisse » : quel lieu ?', reponse: 'La droite $y = 3x$.' },
+        { question: 'Points communs de $y = x$ et de $(x-1)^2+y^2=5$ ?', reponse: '$x^2 - x - 2 = 0$ : (2 ; 2) et (−1 ; −1).' },
+        { question: 'Droite et parabole : la substitution donne $(x-2)^2 = 0$. Conclusion ?', reponse: 'Un seul point commun : la droite est tangente à la parabole.' },
+        { question: 'Comment trouver les points communs de deux cercles ?', reponse: 'On soustrait leurs équations : les carrés disparaissent, il reste une droite ; puis on substitue.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Lieux géométriques, intersection de deux courbes, révision du chapitre', youtubeId: 'WZbxEM82VOo' },
         {
@@ -2067,6 +2194,15 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       number: 11,
       title: 'Révision — quiz vrai/faux',
       kicker: '455 affirmations en 13 thèmes',
+      titreCourt: 'Révision : vrai ou faux',
+      partie: 'Lieux géométriques : cercle et parabole',
+      essentiel: [
+        'Le quiz vrai/faux couvre les 13 générateurs du chapitre, un thème par générateur ; le détective d\'erreurs traque la ligne fausse d\'une copie.',
+      ],
+      cartes: [
+        { question: 'Une copie lit un rayon de 25 dans $(x-1)^2+(y-1)^2=25$. Quelle est l\'erreur ?', reponse: '25 est r² : le rayon vaut 5.' },
+        { question: 'Une copie lit le centre (−2 ; 3) dans $(x-2)^2+(y+3)^2=25$. Quelle est l\'erreur ?', reponse: 'Le signe : le centre est (2 ; −3).' },
+      ],
       blocks: [
         {
           kind: 'para',

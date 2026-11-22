@@ -127,6 +127,19 @@ export const fonctionSecondDegre: ChapterContent = {
       number: 1,
       title: 'Étudier une parabole',
       kicker: "lire les propriétés d'une parabole sur son équation",
+      titreCourt: 'Étudier une parabole',
+      partie: 'La parabole : la lire, la transformer',
+      essentiel: [
+        'Le signe de a donne l\'allure : si $a > 0$, la parabole est ouverte vers le haut et a un **minimum** ; si $a < 0$, elle est ouverte vers le bas et a un **maximum**. c est l\'ordonnée à l\'origine : $f(0) = c$.',
+        'Le sommet : $x_S = -\\dfrac{b}{2a}$ et $y_S = f(x_S)$ ; l\'axe de symétrie est la droite $x = x_S$. Le domaine est toujours ℝ ; l\'image vaut $[y_S\\,;\\,{+\\infty}[$ si $a > 0$ et $]{-\\infty}\\,;\\,y_S]$ si $a < 0$.',
+        'Tableau de signes : à l\'extérieur des zéros, f(x) a le signe de a ; entre les zéros, le signe opposé.',
+      ],
+      cartes: [
+        { question: 'Que t\'apprend le signe de a ?', reponse: 'L\'ouverture : vers le haut si $a > 0$ (un minimum), vers le bas si $a < 0$ (un maximum).' },
+        { question: 'Comment calcule-t-on le sommet de $f(x) = ax^2 + bx + c$ ?', reponse: '$x_S = -\\dfrac{b}{2a}$, puis $y_S = f(x_S)$.' },
+        { question: 'Quelle est l\'image de $f(x) = 3(x+1)^2 - 3$ ?', reponse: '$[-3\\,;\\,{+\\infty}[$ : $a = 3 > 0$, le sommet $S(-1\\,;\\,-3)$ est un minimum.' },
+        { question: 'Quel est le signe de $f(x) = (x-1)(x-4)$ entre 1 et 4 ?', reponse: 'Négatif : entre les zéros, f(x) a le signe opposé à a, et ici $a = 1 > 0$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étudier une parabole (1/2) : allure, sommet et axe de symétrie', youtubeId: 'B4ht8n3qdV4' },
         { kind: 'video', title: 'Étudier une parabole (2/2) : domaine, image, zéros, signes et variations', youtubeId: 'LLeP6JrBbqA' },
@@ -791,6 +804,19 @@ export const fonctionSecondDegre: ChapterContent = {
       number: 2,
       title: 'Transformer une parabole',
       kicker: "de y = x² à n'importe quelle parabole, sans tableau de valeurs",
+      titreCourt: 'Transformer une parabole',
+      partie: 'La parabole : la lire, la transformer',
+      essentiel: [
+        'Toute parabole vient de $y = x^2$ : $y = (x-p)^2$ la translate de p à l\'horizontale (attention au signe : $(x-3)^2$ va vers la **droite**), $y = x^2 + q$ de q à la verticale ; a l\'étire si $|a| > 1$, la comprime si $0 < |a| < 1$, la retourne si $a < 0$.',
+        'La **forme canonique** $f(x) = a(x-x_S)^2+y_S$ affiche le sommet $S(x_S\\,;\\,y_S)$ ; on l\'obtient en complétant le carré, après avoir mis a en évidence si $a \\neq 1$.',
+        'Développée : on lit le point $(0\\,;\\,c)$ ; canonique : le sommet ; factorisée $a(x-x_1)(x-x_2)$ : les zéros.',
+      ],
+      cartes: [
+        { question: 'Dans quel sens $y = (x-3)^2$ déplace-t-il la courbe de $y = x^2$ ?', reponse: 'De 3 unités vers la droite : le signe dans la parenthèse est l\'opposé du sens du déplacement.' },
+        { question: 'Quel est le sommet de $f(x) = 3(x+2)^2 - 1$ ?', reponse: '$S(-2\\,;\\,-1)$, car $x + 2 = x - (-2)$.' },
+        { question: 'Écris $f(x) = x^2 - 6x + 5$ sous forme canonique.', reponse: '$f(x) = (x-3)^2 - 4$, de sommet $S(3\\,;\\,-4)$.' },
+        { question: 'Une parabole a pour zéros −1 et 3 : quelle forme poser pour retrouver son équation ?', reponse: 'La forme factorisée $f(x) = a(x+1)(x-3)$ ; un point de la courbe donne a.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Transformer une parabole : translations, étirement, forme canonique', youtubeId: 'RyQDXGNNJO8' },
         {
@@ -1369,6 +1395,17 @@ export const fonctionSecondDegre: ChapterContent = {
       number: 3,
       title: 'Utiliser la fonction du second degré',
       kicker: 'modéliser une situation concrète, trouver un optimum',
+      titreCourt: 'Modéliser et optimiser',
+      partie: 'S\'en servir, puis réviser',
+      essentiel: [
+        'Modéliser, toujours en 3 étapes : choisir la variable x, exprimer la grandeur à étudier avec cette seule variable, définir le **domaine de validité**.',
+        'L\'optimum est au sommet si son abscisse appartient au domaine de validité ; sinon, il est à une des **bornes** du domaine.',
+      ],
+      cartes: [
+        { question: 'Quelles sont les 3 étapes pour modéliser une situation ?', reponse: 'Choisir la variable x, exprimer la grandeur avec x, définir le domaine de validité.' },
+        { question: 'Le sommet tombe hors du domaine de validité : où est l\'optimum réel ?', reponse: 'À une des bornes du domaine, jamais au sommet théorique.' },
+        { question: 'Pour quelle largeur x l\'aire $A(x) = -2x^2 + 40x$ est-elle maximale, sur $]0\\,;\\,20[$ ?', reponse: '$x = -\\dfrac{40}{2 \\cdot (-2)} = 10$, dans le domaine : $A(10) = 200$ m².' },
+      ],
       blocks: [
         { kind: 'video', title: 'Utiliser la fonction : modéliser, optimiser, résoudre en contexte', youtubeId: 'qXbyPY-Y1A0' },
         {
@@ -1589,6 +1626,15 @@ export const fonctionSecondDegre: ChapterContent = {
       number: 4,
       title: 'Révision — vrai ou faux',
       kicker: '350 affirmations, 10 thèmes, tout le chapitre en révision transversale',
+      titreCourt: 'Révision : vrai ou faux',
+      partie: 'S\'en servir, puis réviser',
+      essentiel: [
+        'Le quiz vrai/faux reprend tout le chapitre en 10 thèmes de 35 affirmations, dans l\'ordre des 3 parties : un seul essai par question, la justification est toujours donnée.',
+      ],
+      cartes: [
+        { question: 'Une copie transforme $2[(x-2)^2 - 4] + 3$ en $2(x-2)^2 - 4 + 3$. Quelle est l\'erreur ?', reponse: 'Le $-4$ doit être multiplié par a : $2(x-2)^2 - 8 + 3 = 2(x-2)^2 - 5$.' },
+        { question: 'Sommet $S(2\\,;\\,-5)$, $a > 0$ : une copie donne $\\operatorname{im} f = [2\\,;\\,{+\\infty}[$. Quelle est l\'erreur ?', reponse: 'Elle a pris l\'abscisse du sommet : l\'image est $[-5\\,;\\,{+\\infty}[$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Révision : la synthèse du chapitre en 2 minutes', youtubeId: 'vpgVztac-9g' },
         {

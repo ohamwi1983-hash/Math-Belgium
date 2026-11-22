@@ -52,6 +52,19 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       number: 1,
       title: 'Résoudre une équation du second degré',
       kicker: '3 raccourcis, 1 cas sans solution visible, 1 cas caché, et le discriminant en dernier recours',
+      titreCourt: 'Résoudre une équation',
+      partie: 'Résoudre, puis étudier un signe',
+      essentiel: [
+        'Essaie d\'abord les raccourcis : $c = 0$ → mettre x en évidence ; $b = 0$ → différence de deux carrés (aucune solution si a et c sont de même signe) ; un carré parfait → une racine double ; la même expression des deux côtés → la mettre en évidence (le cas caché).',
+        'Cas général : $\\Delta = b^2 - 4ac$. Si $\\Delta > 0$, deux solutions $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$ ; si $\\Delta = 0$, une racine double ; si $\\Delta < 0$, aucune solution réelle.',
+        'Viète : $x_1 + x_2 = -\\dfrac{b}{a}$ et $x_1 \\cdot x_2 = \\dfrac{c}{a}$. Si $\\Delta \\geq 0$, $ax^2+bx+c = a(x-x_1)(x-x_2)$ ; si $a + b + c = 0$, 1 est une racine évidente.',
+      ],
+      cartes: [
+        { question: 'Quel raccourci pour résoudre $2x^2 - 6x = 0$ ?', reponse: '$c = 0$ : on met x en évidence, $2x(x-3) = 0$, donc $x = 0$ ou $x = 3$.' },
+        { question: 'Quelles sont les solutions de $ax^2 + bx + c = 0$ quand $\\Delta > 0$ ?', reponse: '$x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$, avec $\\Delta = b^2 - 4ac$.' },
+        { question: 'Résous $3x^2 - 5x + 2 = 0$ sans calculer le discriminant.', reponse: '$3 - 5 + 2 = 0$, donc $x_1 = 1$ ; le produit donne $x_2 = \\dfrac{c}{a} = \\dfrac{2}{3}$.' },
+        { question: 'Écris une équation de solutions 2 et 5 sous la forme $x^2 - Sx + P = 0$.', reponse: '$S = 7$ et $P = 10$ : $x^2 - 7x + 10 = 0$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Résoudre une équation du second degré (1/3) : les raccourcis avant le discriminant', youtubeId: '6WDdAWpUZW8' },
         { kind: 'video', title: 'Résoudre une équation du second degré (2/3) : le discriminant', youtubeId: 'Vv3ZyYvgF5A' },
@@ -844,6 +857,19 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       number: 2,
       title: "Étudier le signe d'un trinôme",
       kicker: 'un tableau de signes en 3 étapes, toujours dans le même ordre',
+      titreCourt: 'Signe d\'un trinôme',
+      partie: 'Résoudre, puis étudier un signe',
+      essentiel: [
+        'Trois étapes, toujours dans le même ordre : calculer les racines, regarder le signe de a (c\'est le signe du trinôme **à l\'extérieur** des racines), trouver l\'intervalle-solution selon le symbole.',
+        'Si $\\Delta < 0$, le trinôme a toujours le signe de a ; si $\\Delta = 0$, le signe de a partout, et il est nul en la racine double ; si $\\Delta > 0$, le signe opposé à a entre les racines.',
+        'Crochet ouvert vers l\'intérieur : borne exclue ; vers l\'extérieur : borne incluse. $-\\infty$ et $+\\infty$ ne sont jamais inclus.',
+      ],
+      cartes: [
+        { question: 'Quel est le signe de $ax^2 + bx + c$ entre ses deux racines ?', reponse: 'Le signe opposé à celui de a.' },
+        { question: 'Résous $x^2 - x - 6 \\geq 0$.', reponse: 'Racines −2 et 3, $a > 0$ : $S = ]-\\infty;-2] \\cup [3;+\\infty[$.' },
+        { question: 'Résous $x^2 + x + 1 < 0$.', reponse: '$\\Delta = -3 < 0$ et $a > 0$ : le trinôme est toujours positif, donc $S = \\varnothing$.' },
+        { question: 'Dans $]-2;3]$, quelles bornes sont incluses ?', reponse: 'Seulement 3 : −2 est exclu (crochet ouvert vers l\'intérieur).' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étudier le signe d\'un trinôme', youtubeId: 'gZ82w5l4vWQ' },
         {
@@ -1306,6 +1332,17 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       number: 3,
       title: 'Signe d\'un produit de plusieurs facteurs',
       kicker: 'le même principe, appliqué à 2 ou 3 facteurs à la fois',
+      titreCourt: 'Signe d\'un produit',
+      partie: 'Résoudre, puis étudier un signe',
+      essentiel: [
+        'Chaque facteur a sa ligne dans le tableau, et le produit se lit colonne par colonne : un nombre **impair** de facteurs négatifs donne un produit négatif, sinon il est positif.',
+        'Un facteur quadratique **irréductible** ($\\Delta < 0$) ne s\'annule jamais : sa ligne garde partout le signe de son propre a, sans colonne en plus.',
+      ],
+      cartes: [
+        { question: 'Dans une colonne, trois facteurs sont négatifs : quel est le signe du produit ?', reponse: 'Négatif : le nombre de facteurs négatifs est impair.' },
+        { question: 'Quelles colonnes le facteur $x^2 + 2x + 5$ ajoute-t-il au tableau ?', reponse: 'Aucune : $\\Delta = -16 < 0$, il ne s\'annule jamais et reste positif.' },
+        { question: 'Résous $(x-1) \\cdot x \\cdot (x-3) > 0$.', reponse: '$S = ]0;1[ \\cup ]3;+\\infty[$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Signe d\'un produit de plusieurs facteurs', youtubeId: '2jApAPJkfRw' },
         {
@@ -1535,6 +1572,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       number: 4,
       title: 'Simplifier une fraction rationnelle',
       kicker: 'tout factoriser d\'abord, éliminer ensuite ce qui est identique',
+      titreCourt: 'Simplifier une fraction',
+      partie: 'Quand x est au dénominateur',
+      essentiel: [
+        'On factorise d\'abord tout, le numérateur **et** le dénominateur, puis on enlève un facteur identique des deux côtés — jamais des termes au hasard.',
+        'La condition d\'existence se pose sur le dénominateur **avant** de simplifier : un facteur enlevé reste interdit.',
+        'Deux facteurs opposés ne se simplifient pas en 1 : $\\dfrac{3-x}{x-3} = -1$.',
+      ],
+      cartes: [
+        { question: 'Quand pose-t-on la CE d\'une fraction rationnelle ?', reponse: 'Sur le dénominateur, avant de simplifier.' },
+        { question: 'Simplifie $\\dfrac{x^2-4}{x+2}$.', reponse: '$x - 2$, pour $x \\neq -2$ : la CE reste écrite à côté.' },
+        { question: 'Que vaut $\\dfrac{3-x}{x-3}$ ?', reponse: '$-1$, car $3 - x = -(x-3)$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Simplifier une fraction rationnelle', youtubeId: '0Sp2z_qx-S8' },
         {
@@ -1654,6 +1703,17 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       number: 5,
       title: 'L\'inconnue au dénominateur',
       kicker: 'résoudre, puis toujours écarter les racines étrangères',
+      titreCourt: 'L\'inconnue au dénominateur',
+      partie: 'Quand x est au dénominateur',
+      essentiel: [
+        'Toujours le même chemin : poser la CE (chaque dénominateur ≠ 0), multiplier les deux membres par le dénominateur commun, résoudre, puis vérifier **chaque** solution avec la CE.',
+        'Une solution qui viole la CE est une **racine étrangère** : on la rejette.',
+      ],
+      cartes: [
+        { question: 'Qu\'est-ce qu\'une racine étrangère ?', reponse: 'Une solution de l\'équation obtenue qui ne respecte pas la CE de départ : on la rejette.' },
+        { question: 'Pourquoi préférer le dénominateur commun au produit en croix ?', reponse: 'Le produit en croix multiplie par un dénominateur de trop et fait monter le degré.' },
+        { question: 'Résous $\\dfrac{1}{x-2} + \\dfrac{1}{x+2} = \\dfrac{4}{x^2-4}$.', reponse: 'On trouve $x = 2$, interdit par la CE : $S = \\varnothing$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'L\'inconnue au dénominateur', youtubeId: '-9pfuHh_OLI' },
         {
@@ -1767,6 +1827,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       number: 6,
       title: 'Inéquations rationnelles',
       kicker: 'une grille de quotient, avec une valeur « non définie » à part entière',
+      titreCourt: 'Inéquations rationnelles',
+      partie: 'Quand x est au dénominateur',
+      essentiel: [
+        'Méthode : poser la CE, tout passer à gauche, réduire au même dénominateur et factoriser, puis un tableau de signes avec une colonne ∄ pour chaque valeur de CE.',
+        'Une valeur qui annule le dénominateur n\'est **jamais** solution, même avec ≤ ou ≥ : son crochet reste ouvert.',
+        'Jamais de produit en croix dans une inéquation : le signe du dénominateur dépend de x.',
+      ],
+      cartes: [
+        { question: 'Résous $\\dfrac{x-2}{x+1} \\geq 0$. La valeur −1 est-elle solution ?', reponse: '$S = ]-\\infty;-1[ \\cup [2;+\\infty[$ : −1 est exclu, le quotient n\'y existe pas.' },
+        { question: 'Pourquoi ne multiplie-t-on jamais en croix dans une inéquation ?', reponse: 'Le sens ne se conserve que si le dénominateur est positif, et son signe dépend de x.' },
+        { question: 'Résous $\\dfrac{x+3}{(x-1)^2} > 0$.', reponse: 'Le quotient a le signe de $x + 3$ : $S = ]-3;1[ \\cup ]1;+\\infty[$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Inéquations rationnelles', youtubeId: 'nMZsTQUZQKE' },
         {
@@ -1952,6 +2024,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       number: 7,
       title: 'Équations et inéquations en contexte',
       kicker: 'poser, résoudre, confronter chaque solution au domaine de validité',
+      titreCourt: 'Équations en contexte',
+      partie: 'En contexte, puis réviser',
+      essentiel: [
+        'Un seuil **atteint exactement** se traduit par $f(x) = k$ ; un seuil **dépassé**, par $f(x) > k$ ou $f(x) < k$.',
+        'Chaque solution est confrontée au domaine de validité : une racine correcte en calcul mais impossible dans la réalité (un temps négatif, une longueur trop grande…) est rejetée.',
+      ],
+      cartes: [
+        { question: '$h(t) = -5(t-5)(t+1)$, avec $t \\geq 0$ : quand le ballon touche-t-il le sol ?', reponse: 'En $t = 5$ s ; $t = -1$ est rejeté, un temps négatif n\'existe pas.' },
+        { question: 'Comment traduire « l\'aire $A(x) = x(20-x)$ vaut au moins 96 m² » ?', reponse: 'Par l\'inéquation $x(20-x) \\geq 96$ ; ici $x \\in [8;12]$.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -2102,6 +2184,15 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       number: 8,
       title: 'Révision — vrai ou faux',
       kicker: '360 affirmations, 11 thèmes, de Viète aux inéquations rationnelles',
+      titreCourt: 'Révision : vrai ou faux',
+      partie: 'En contexte, puis réviser',
+      essentiel: [
+        'Le quiz vrai/faux reprend tout le chapitre en 11 thèmes, de la résolution sans discriminant aux équations en contexte : un seul essai par question, la justification est toujours donnée.',
+      ],
+      cartes: [
+        { question: 'Pour $x^2 - 3x - 4 = 0$, une copie écrit $\\Delta = -3^2 + 16$. Quelle est l\'erreur ?', reponse: 'Il faut $(-3)^2 = 9$ : $\\Delta = 9 + 16 = 25$.' },
+        { question: 'Une copie résout $x^2 < 4x$ en divisant par x et trouve $x < 4$. Quelle est l\'erreur ?', reponse: 'x peut être négatif ou nul : $x(x-4) < 0$ donne $S = ]0;4[$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Révision : présentation du quiz et synthèse du chapitre', youtubeId: 'Z7YvxgvtaIM' },
         {
