@@ -13,7 +13,7 @@ import { dureeEstimeeVariante, estimationEnCache, type OptionsEstimation } from 
 import { RepereNiveauDuree } from './RepereNiveauDuree'
 import { ChampPoints } from './ChampPoints'
 import { ApercuDocument } from './conception/ApercuDocument'
-import { cleSectionComposer, composer, processusDeLignes, type FaconComposer } from './conception/composer'
+import { cleSectionComposer, composer, processusComposables, processusDeLignes, type ContexteComposition, type FaconComposer } from './conception/composer'
 import { ordreImpression, type EntreeImpression, type LigneActive } from './conception/ordreImpression'
 import { pointsDemonstration, pointsDemonstrationMoyens, pointsDepuisDuree } from '../../lib/pointsAutomatiques'
 import {
@@ -40,8 +40,16 @@ import {
 } from '../../lib/evaluationLocal'
 import { construirePlanRemediation, questionsRemediables, titreSansPrefixe } from '../../lib/evaluationRemediation'
 import { normaliserSigneMoins } from '../../lib/normaliserSaisie'
-import { fractionsRepartition, texteRepartition } from '../../lib/repartitionProcessus'
+import { fractionsRepartition, texteCompetences, texteRepartition } from '../../lib/repartitionProcessus'
 import { noteCarteRepartition, ReglageRepartition, useRepartitionProfesseur } from './conception/ReglageRepartition'
+import {
+  fractionsCompetences,
+  noteCarteCompetences,
+  REGLAGE_COMPETENCES_DEFAUT,
+  ReglageCompetences,
+  texteReglageCompetences,
+  type ReglageCompetencesDocument,
+} from './conception/ReglageCompetences'
 import { decoderMatiere } from '../../lib/carnetMatiere'
 import {
   horaireExamen,
@@ -318,8 +326,13 @@ export function EvaluationGeneratorPanel({
   const [faconActive, setFaconActive] = useState<FaconComposer | 'mesure' | null>(null)
   const [notionsCochees, setNotionsCochees] = useState<Set<string>>(() => new Set())
   const [composition, setComposition] = useState<{ texte: string; avant: LigneSelection[] } | null>(null)
-  /** Réglage de la répartition de « Préparer l'évaluation » (carte « Modifier ») ouvert. */
+  /** Réglage de la carte « Préparer l'évaluation / l'examen » ouvert : compétences du document
+   * (évaluation, feuille) ou répartition d'examen mémorisée (examen). */
   const [reglageRepartitionOuvert, setReglageRepartitionOuvert] = useState(false)
+  /** Évaluation / feuille : compétences cochées et parts du DOCUMENT (jamais mémorisées). */
+  const [reglageCompetences, setReglageCompetences] = useState<ReglageCompetencesDocument>(REGLAGE_COMPETENCES_DEFAUT)
+  // Évaluation ↔ examen : le réglage ouvert n'est plus le même (compétences / répartition d'examen).
+  useEffect(() => setReglageRepartitionOuvert(false), [estExamen])
   const boutonModifierRepartition = useRef<HTMLButtonElement>(null)
   const champRecherche = useRef<HTMLInputElement>(null)
   /** Lignes « Formule » / « Formule + démonstration » dont la liste de choix est dépliée. */
@@ -344,8 +357,9 @@ export function EvaluationGeneratorPanel({
   const cartouche: CartoucheEcole | undefined = connecte ? cartoucheDepuisCompte(compte.profil, ecoleChoisie) : undefined
   const [coffre, setCoffre] = useState<PlanCoffre[] | null>(null)
   const [params, setParams] = useSearchParams()
-  /** Répartition Connaître / Appliquer / Transférer de « Préparer l'évaluation » : celle du profil
-   * (0005), sinon 25 / 50 / 25 ; réglable pour la session dans tous les cas. */
+  /** Répartition d'EXAMEN Connaître / Appliquer / Transférer de « Préparer l'examen » : celle du
+   * profil (0005), sinon 25 / 50 / 25 ; réglable pour la session dans tous les cas. Les évaluations et
+   * feuilles n'en ont pas (`reglageCompetences`, parts égales). */
   const repartitionProf = useRepartitionProfesseur(compte)
   const repartition = repartitionProf.valeur
 
@@ -1436,12 +1450,9 @@ export function EvaluationGeneratorPanel({
 
   /* Façons de composer : elles REMPLISSENT la sélection (rien n'est tiré ici). */
   const dureeCibleComposer = estExamen ? (lectureDuree.etat === 'ok' ? lectureDuree.valeur : Math.min(150, 50 * Math.max(1, chapitres.length))) : 50
-  function appliquerFacon(facon: FaconComposer) {
-    const avant = lignes
-    const vierges = lignesInitiales(chapitres)
-    const dureeCible = dureeCibleComposer
-    const res = composer(facon, {
-      lignes: vierges,
+  function contexteComposer(): ContexteComposition {
+    return {
+      lignes: lignesInitiales(chapitres),
       mode: estExercice ? 'exercice' : 'evaluation',
       calculatriceInterdite: calculatrice === 'interdite',
       disponibles: disponiblesLigne,
@@ -1449,12 +1460,25 @@ export function EvaluationGeneratorPanel({
         const adaptateur = EVALUATION_ADAPTER_REGISTRY[l.cle ?? ''] as Adaptateur | undefined
         return adaptateur ? dureeEstimeeVariante(adaptateur, varianteEstimation(adaptateur, varianteId), optionsEstimation(l, varianteId)) : undefined
       },
-      dureeCible,
-      repartition: fractionsRepartition(repartition),
+      dureeCible: dureeCibleComposer,
+      // Examen : répartition d'examen du professeur ; évaluation / feuille : compétences cochées, parts
+      // égales (ou ajustées pour ce document), jamais une compétence non cochée.
+      repartition: estExamen ? fractionsRepartition(repartition) : fractionsCompetences(reglageCompetences),
+      cession: estExamen ? 'examen' : 'cochees',
       sections: notionsCochees,
-    })
+    }
+  }
+  function appliquerFacon(facon: FaconComposer) {
+    const avant = lignes
+    const res = composer(facon, contexteComposer())
     if (res.questions === 0) {
-      setComposition({ texte: 'Rien à proposer avec ces réglages (notions cochées, calculatrice).', avant })
+      setComposition({
+        texte:
+          facon === 'evaluation' && !estExamen
+            ? `Rien à proposer pour ${texteCompetences(reglageCompetences.cochees)} avec ces réglages (chapitres, calculatrice).`
+            : 'Rien à proposer avec ces réglages (notions cochées, calculatrice).',
+        avant,
+      })
       return
     }
     setLignes(res.lignes)
@@ -1464,7 +1488,11 @@ export function EvaluationGeneratorPanel({
     // Compté comme à l'impression : les affirmations vrai/faux forment UNE question.
     const nombre = res.lignes.reduce((t, l) => t + (l.type === 'exercice' ? sommeParVariante(l.parVariante ?? {}) : l.type === 'vraiFaux' ? 0 : l.nombre), 0) + (res.lignes.some((l) => l.type === 'vraiFaux' && l.nombre > 0) ? 1 : 0)
     setComposition({
-      texte: `${nombre} question${nombre > 1 ? 's' : ''} proposée${nombre > 1 ? 's' : ''} sur ${res.notions} notion${res.notions > 1 ? 's' : ''} : la sélection est à droite, modifiable comme tu veux.`,
+      texte: `${nombre} question${nombre > 1 ? 's' : ''} proposée${nombre > 1 ? 's' : ''} sur ${res.notions} notion${res.notions > 1 ? 's' : ''} : la sélection est à droite, modifiable comme tu veux.${
+        res.cedees.length > 0
+          ? ` ${texteCompetences(res.cedees)} : aucun exercice dans ces chapitres — ${res.cedees.length > 1 ? 'leur' : 'son'} temps va à ${texteCompetences(reglageCompetences.cochees.filter((p) => !res.cedees.includes(p)))}.`
+          : ''
+      }`,
       avant,
     })
   }
@@ -2236,10 +2264,10 @@ export function EvaluationGeneratorPanel({
                           ['notions', 'Sur quelques notions', 'Tu coches les notions, l’outil propose les exercices.'],
                           [
                             'evaluation',
-                            estExercice ? 'Préparer l’évaluation' : `Répartition ${texteRepartition(true, repartition)}`,
-                            estExercice
-                              ? `Ta répartition : ${texteRepartition(false, repartition)} (≈\u00a050\u00a0min), comme pour une évaluation.`
-                              : `Connaître, Appliquer, Transférer : ${texteRepartition(false, repartition)} de ${dureeCibleComposer}\u00a0min.`,
+                            estExamen ? 'Préparer l’examen' : 'Préparer l’évaluation',
+                            estExamen
+                              ? `Ta répartition d’examen : ${texteRepartition(false, repartition)} de ${dureeCibleComposer}\u00a0min.`
+                              : `Tu choisis les compétences ; le temps est partagé entre elles (≈\u00a0${dureeCibleComposer}\u00a0min).`,
                           ],
                           ['mesure', 'Sur mesure', 'Le catalogue complet, exercice par exercice.'],
                         ] as const
@@ -2263,7 +2291,7 @@ export function EvaluationGeneratorPanel({
                           </button>
                         )
                         if (id !== 'evaluation') return carte
-                        const note = noteCarteRepartition(repartitionProf)
+                        const note = estExamen ? noteCarteRepartition(repartitionProf) : noteCarteCompetences(reglageCompetences)
                         return (
                           <div key={id} className="conc-recette-groupe">
                             {carte}
@@ -2272,12 +2300,12 @@ export function EvaluationGeneratorPanel({
                               ref={boutonModifierRepartition}
                               className="conc-recette-modifier"
                               aria-expanded={reglageRepartitionOuvert}
-                              aria-controls="conc-rep"
-                              aria-label={`Modifier la répartition (${texteRepartition(false, repartition)})`}
+                              aria-controls={estExamen ? 'conc-rep' : 'conc-comp'}
+                              aria-label={estExamen ? `Modifier ta répartition d’examen (${texteRepartition(false, repartition)})` : `Choisir les compétences (${texteReglageCompetences(reglageCompetences)})`}
                               onClick={() => setReglageRepartitionOuvert((v) => !v)}
                             >
                               <span>
-                                <span aria-hidden="true">⚙</span> Modifier
+                                <span aria-hidden="true">⚙</span> {estExamen ? 'Modifier' : 'Compétences'}
                               </span>
                               {note ? <span className="conc-recette-note">{note}</span> : null}
                             </button>
@@ -2285,7 +2313,24 @@ export function EvaluationGeneratorPanel({
                         )
                       })}
                     </div>
-                    {reglageRepartitionOuvert && (
+                    {reglageRepartitionOuvert && !estExamen && (
+                      <ReglageCompetences
+                        reglage={reglageCompetences}
+                        onChange={setReglageCompetences}
+                        feuille={estExercice}
+                        dureeCible={dureeCibleComposer}
+                        presentes={processusComposables(contexteComposer())}
+                        onPreparer={() => {
+                          setFaconActive('evaluation')
+                          appliquerFacon('evaluation')
+                        }}
+                        onFermer={() => {
+                          setReglageRepartitionOuvert(false)
+                          boutonModifierRepartition.current?.focus()
+                        }}
+                      />
+                    )}
+                    {reglageRepartitionOuvert && estExamen && (
                       <ReglageRepartition
                         rp={repartitionProf}
                         connecte={connecte}

@@ -25,8 +25,9 @@ l'administration sont derrière la connexion.
 Aucune donnée d'élève. Phase 2 (faite, section « Phase 2 » en fin de fichier) : carnet de matière vue (`/carnet`),
 puis son horaire de la semaine (`0003_horaire.sql`, sous-section « Horaire de la semaine ») et l'heure
 zéro (`0004_heure_zero.sql`, même sous-section), puis l'agenda d'une période (sous-section « Agenda d'une
-période », sans migration). Répartition Connaître / Appliquer / Transférer de « Préparer l'évaluation »
-mémorisée dans le profil : `0005_repartition.sql` (section « Répartition mémorisée » en fin de fichier).
+période », sans migration). Répartition d'EXAMEN Connaître / Appliquer / Transférer (« Préparer
+l'examen ») mémorisée dans le profil : `0005_repartition.sql` (section « Répartition mémorisée » en fin
+de fichier).
 Plus tard (pas fait) : partage entre collègues.
 
 ## Décisions de l'utilisateur
@@ -688,11 +689,15 @@ des pages inchangés.
 
 ## Répartition mémorisée (22/11/2026 : `supabase/migrations/0005_repartition.sql`)
 
-Décision de l'utilisateur : la répartition Connaître / Appliquer / Transférer de « Préparer l'évaluation »
-(page de conception du professeur : feuilles d'exercices, évaluations, examens) est RÉGLABLE, et la
+Décision de l'utilisateur : la répartition Connaître / Appliquer / Transférer est RÉGLABLE et la
 valeur du professeur est mémorisée dans son profil. Défaut 25 / 50 / 25 (`REPARTITION_PROCESSUS`).
-L'assistant élève (visiteurs) garde la constante, inchangé. Logique de composition et interface :
-`.claude/rules/feuilles-evaluations.md` (« Façons de composer »).
+**Sens de 0005 depuis la décision du 22/11/2026** : `profils.repartition` est la répartition d'EXAMEN
+du professeur — elle ne vaut QUE pour « Préparer l'examen » (mode examen du panneau), seul endroit où
+le réglage mémorisé et « Enregistrer comme ma répartition d'examen » apparaissent. Évaluations et
+feuilles d'exercices (« hyper flexible ») : compétences cochées, temps à parts égales, ajustable pour
+le document seulement, jamais mémorisé ; assistant élève (visiteurs) : parts égales entre les
+compétences cochées. Aucun changement SQL (colonne, contrainte, droits identiques). Logique de
+composition et interface : `.claude/rules/feuilles-evaluations.md` (« Façons de composer »).
 
 **Schéma 0005** (idempotent, ne dépend que de 0001 ; « Success. No rows returned », 0005 exécutée trois
 fois sur des données réelles sans rien changer) :
@@ -727,7 +732,9 @@ fois sur des données réelles sans rien changer) :
 - `components/admin/conception/ReglageRepartition.tsx` : `useRepartitionProfesseur(compte)` (état
   `memo` : `sans-compte` / `chargement` / `active` / `absente` / `erreur` ; valeur de session gardée en
   mémoire du module : elle survit au passage `/exercice` ↔ `/evaluation`, pas à un rechargement ; une
-  valeur réglée avant la fin de la lecture n'est pas écrasée) et `ReglageRepartition` (panneau).
+  valeur réglée avant la fin de la lecture n'est pas écrasée) et `ReglageRepartition` (panneau « Ta
+  répartition d'examen », affiché seulement en mode examen ; la lecture du profil se fait quand même
+  au chargement du panneau, sans effet hors examen).
 - **0005 pas appliquée** : réglage et composition marchent pour la session ; le panneau affiche
   « Mémorisation pas encore activée : colle le fichier 0005_repartition.sql dans l'éditeur SQL de
   Supabase (SQL Editor → coller tout le fichier → Run). En attendant, ce réglage vaut pour cette
@@ -753,10 +760,14 @@ fois sur des données réelles sans rien changer) :
   (carte et nom accessible, réglage, total 100 à chaque clic, bornes, retour au défaut, enregistrement
   en base, Échap + focus rendu, rechargement → valeur relue, composition qui suit la répartition — 0 %
   jamais choisi —, `/evaluation` avec la valeur du profil puis examen, 0005 absente, sans compte,
-  cibles ≥ 44 px, aucun champ numérique, `scrollWidth` = largeur, 0 erreur console).
+  cibles ≥ 44 px, aucun champ numérique, `scrollWidth` = largeur, 0 erreur console). Depuis la
+  décision « examen seulement » (dossier de travail `repartition-examen/ui.mjs`, 174 vérifications) :
+  feuille et évaluation n'affichent ni la répartition mémorisée ni « Enregistrer » et ne modifient
+  jamais le profil ; examen : répartition du profil (20 / 60 / 20) affichée, réglée (20 / 50 / 30),
+  enregistrée en base, relue après rechargement.
 
 **Mise en service** : SQL Editor → New query → coller TOUT `0005_repartition.sql` → Run → « Success. No
-rows returned » ; recharger une page de conception → « Préparer l'évaluation » → Modifier → régler →
-« Enregistrer comme ma répartition ». À vérifier contre le vrai projet : enregistrement puis
+rows returned » ; recharger `/evaluation` → Document : Examen → « Préparer l'examen » → Modifier →
+régler → « Enregistrer comme ma répartition d'examen ». À vérifier contre le vrai projet : enregistrement puis
 rechargement (valeur relue), message « Répartition refusée » impossible depuis le site (les boutons ne
 produisent que des valeurs valides).

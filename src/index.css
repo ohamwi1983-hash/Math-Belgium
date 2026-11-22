@@ -1784,6 +1784,12 @@ table.feature-table td { white-space: normal; }
 .conc-rep-etat .conc-rep-ok { color: var(--good); font-weight: 600; }
 .conc-rep-etat .conc-rep-alerte { color: var(--accent-ink); font-weight: 500; }
 .conc-rep-etat code { font: 600 0.82rem var(--mono); overflow-wrap: anywhere; }
+/* Compétences d'une évaluation / feuille (« ⚙ Compétences ») : case à cocher dans chaque rangée. */
+.conc-comp-coche { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-weight: 600; flex: 1 1 auto; min-width: 0; cursor: pointer; }
+.conc-comp-coche input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--accent); cursor: pointer; }
+.conc-comp-off .conc-rep-libelle, .conc-comp-off .conc-rep-valeur { color: var(--ink-soft); }
+.conc-comp-off .conc-pc { opacity: 0.45; }
+.conc-comp-cede { margin: 0; font-size: 0.86rem; color: var(--accent-ink); font-weight: 500; }
 @media (max-width: 640px) {
   .conc-rep { padding: 12px; }
   .conc-rep-actions .conc-bouton { flex: 1 1 100%; }

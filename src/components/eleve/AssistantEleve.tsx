@@ -280,7 +280,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
         : 'Préparation…'
   /** Niveaux et compétences réellement obtenus (récapitulatif exact). */
   const recapContenu = resume
-    ? `${resume.categories.length === 1 ? 'Niveau' : 'Niveaux'} : ${texteCategories(resume.categories) || '—'} · ${listeCompetences(resume.competences)}`
+    ? `${resume.categories.length === 1 ? 'Niveau' : 'Niveaux'} : ${texteCategories(resume.categories) || '—'} · ${listeCompetences(resume.competences)}${resume.competences.length > 1 ? ', temps partagé à parts égales' : ''}`
     : null
   const tousNiveauxCoches = niveaux.length === CATEGORIES_NIVEAU.length
   const niveauxGrises = dispo ? CATEGORIES_NIVEAU.filter((c) => !dispo.niveaux[c]) : []
@@ -387,7 +387,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
           <span className="eleve-etiquette" id="eleve-competences">
             Compétences
           </span>
-          <p className="eleve-aide">Coche ce que ton professeur a annoncé pour l'interrogation. Le temps est réparti entre les compétences cochées comme dans une vraie évaluation.</p>
+          <p className="eleve-aide">Coche ce que ton professeur a annoncé pour l'interrogation. Le temps est partagé à parts égales entre les compétences cochées.</p>
           <div className="eleve-coches" role="group" aria-labelledby="eleve-competences">
             {COMPETENCES_ELEVE.map(({ id, libelle }) => {
               const vide = !!dispo && dispo.parCompetence[id].total === 0
@@ -452,7 +452,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             )}
           </div>
           <p className="eleve-aide" id="eleve-niveau-aide">
-            Tous cochés : les niveaux sont mélangés, comme dans une vraie évaluation.
+            Tous cochés : les niveaux sont mélangés.
           </p>
           <div className="eleve-coches" role="group" aria-labelledby="eleve-niveau" aria-describedby="eleve-niveau-aide">
             {CATEGORIES_NIVEAU.map((c) => {

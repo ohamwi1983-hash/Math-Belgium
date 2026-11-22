@@ -18,7 +18,7 @@ import { construirePlan, elementsAPlat, empreinteSection, questionsDeSerie, resp
 import { chapitreAUneBanqueVraiFauxLocale, chargerThemeVraiFaux } from './banquesVraiFaux'
 import { pointsDepuisDuree } from './pointsAutomatiques'
 import { CATEGORIES_NIVEAU, LIBELLE_CATEGORIE, categorieDuNiveau, niveauEtDuree, rangCategorie, type CategorieNiveau } from '../entrainement/export/niveauDifficulte'
-import { REPARTITION_PROCESSUS } from './repartitionProcessus'
+import { partageEgal } from './repartitionProcessus'
 import { mettreAEchelle, mettreAEchelleParGroupes } from '../entrainement/export/examen'
 import { tirerGraine } from '../entrainement/export/codeExercice'
 
@@ -30,8 +30,9 @@ import { tirerGraine } from '../entrainement/export/codeExercice'
  * annoncées (Connaître / Appliquer / Transférer, une à trois), une durée (20 / 30 / 50 min) et un ou
  * plusieurs niveaux (catégories de `niveauDifficulte.ts` : très facile 1, facile 2, moyen 3, difficile
  * 4, très difficile 5–7 ; par défaut tous, niveaux mélangés). Le temps (et les points de l'évaluation
- * blanche) est réparti comme une vraie évaluation (`REPARTITION_PROCESSUS`), recalculé sur les seules
- * compétences cochées ; jamais une compétence non cochée. Ce module en fait une SÉLECTION du panneau (`LigneSelection[]`, une ligne par
+ * blanche) est partagé à parts égales entre les compétences cochées (`partageEgal`, décision de
+ * l'utilisateur du 22/11/2026 : la répartition 25 / 50 / 25 ne vaut que pour l'examen) ; jamais une
+ * compétence non cochée. Ce module en fait une SÉLECTION du panneau (`LigneSelection[]`, une ligne par
  * générateur, `parVariante`) puis passe par le pipeline EXISTANT — `construireItemsPayload` →
  * `construirePlan` → `genererDocumentsDepuisPlan` — jamais un second moteur. Seules retouches du
  * plan figé : les graines d'un exercice dont le niveau réel sort des niveaux demandés (ou qui ferait
@@ -353,30 +354,20 @@ function remplir(etat: EtatComposition, bassin: Bassin, budget: number, plafond:
 }
 
 /**
- * Temps visé par compétence : la répartition d'une vraie évaluation (`REPARTITION_PROCESSUS`)
- * recalculée sur les compétences COCHÉES (une seule → 100 %). Une compétence cochée sans exercice
- * disponible (`presentes`) cède son temps : Connaître ou Transférer à Appliquer (sinon à l'autre
- * cochée), Appliquer à parts égales aux autres cochées — même règle qu'avant pour les trois cochées.
- * `bruts` : avant cette cession.
+ * Temps visé par compétence : parts ÉGALES entre les compétences COCHÉES (`partageEgal` ; une seule →
+ * 100 %). Une compétence cochée sans exercice disponible (`presentes`) cède son temps aux autres
+ * cochées présentes, à parts égales. Aucune cochée présente → rien. `bruts` : avant cette cession.
  */
 export function budgetsParCompetence(cible: number, competences: readonly Processus[], presentes: readonly Processus[]): { budgets: Record<Processus, number>; bruts: Record<Processus, number> } {
   const cochees = ([1, 2, 3] as const).filter((p) => competences.includes(p))
-  const somme = cochees.reduce((t, p) => t + REPARTITION_PROCESSUS[p], 0)
+  const egal = partageEgal(cochees)
   const bruts: Record<Processus, number> = { 1: 0, 2: 0, 3: 0 }
-  for (const p of cochees) bruts[p] = cible * (REPARTITION_PROCESSUS[p] / somme)
-  const budgets: Record<Processus, number> = { ...bruts }
-  const presents = presentes.filter((p) => cochees.includes(p))
-  for (const p of [1, 3] as const) {
-    if (cochees.includes(p) && !presents.includes(p)) {
-      const receveur = presents.includes(2) ? 2 : presents.find((q) => q !== p)
-      if (receveur) budgets[receveur] += budgets[p]
-      budgets[p] = 0
-    }
-  }
-  if (cochees.includes(2) && !presents.includes(2)) {
-    const autres = presents.filter((q) => q !== 2)
-    autres.forEach((q) => (budgets[q] += budgets[2] / autres.length))
-    budgets[2] = 0
+  for (const p of cochees) bruts[p] = cible * egal[p]
+  const presents = cochees.filter((p) => presentes.includes(p))
+  const budgets: Record<Processus, number> = { 1: 0, 2: 0, 3: 0 }
+  if (presents.length > 0) {
+    const part = partageEgal(presents)
+    for (const p of presents) budgets[p] = cochees.length === 0 ? 0 : cible * part[p]
   }
   return { budgets, bruts }
 }
@@ -690,8 +681,8 @@ function retoucher(plan: PlanDocument, reglages: ReglagesEleve, composition: Com
 }
 
 /** Points indicatifs : durée de chaque exercice → `pointsDepuisDuree`, 1 pt par affirmation, puis
- * total ramené à 20, réparti entre les compétences imprimées comme une vraie évaluation
- * (`REPARTITION_PROCESSUS`, recalculée sur ces compétences ; une seule → les 20 pts). */
+ * total ramené à 20, partagé à parts égales entre les compétences imprimées (comme le temps ; une
+ * seule → les 20 pts). */
 function poserPoints(plan: PlanDocument, mesures: Map<ElementExercice, { niveau: number | null; duree: number }>): void {
   const elements = plan.series[0].elements
   const bruts = elements.map((e) => (e.type === 'exercice' ? pointsDepuisDuree(mesures.get(e)?.duree ?? DUREE_PAR_DEFAUT) : e.type === 'vraiFaux' ? 1 : e.points))
@@ -707,7 +698,8 @@ function poserPoints(plan: PlanDocument, mesures: Map<ElementExercice, { niveau:
   const echelle = (indices: number[], total: number) => mettreAEchelleParGroupes(indices.map((i) => bruts[i]), indices.map((i) => nombres[i]), total)
   const tous = elements.map((_, i) => i)
   const presents = ([1, 2, 3] as const).filter((p) => elements.some((e) => e.processus === p))
-  const parts = presents.map((p) => REPARTITION_PROCESSUS[p])
+  const egal = partageEgal(presents)
+  const parts = presents.map((p) => egal[p])
   const totaux = mettreAEchelle(parts, TOTAL_POINTS_BLANCHE)
   if (totaux) {
     const resultats = presents.map((p, k) => {
