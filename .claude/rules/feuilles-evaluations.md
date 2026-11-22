@@ -1080,9 +1080,9 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   du registre (`notionsDuChapitre`), « Tout le chapitre » (exclusif : cocher une notion ne garde
   qu'elle) ; téléphone : 3 puces + « + n » ; puis **Compétences** cochables Connaître / Appliquer /
   Transférer (une à trois, les trois par défaut ; aide « Coche ce que ton professeur a annoncé pour
-  l'interrogation. » + « Le temps est partagé à parts égales entre les compétences cochées. » pour la
-  feuille seulement — jamais de pourcentages pour la feuille ; évaluation blanche : parts et
-  démonstrations annoncées, voir plus bas) ; 3. durée 20 / 30 / 50 min, **Niveaux** cochables
+  l'interrogation. » pour la blanche ; feuille : voir « Feuille d'exercices de l'élève » plus bas —
+  jamais de pourcentages pour la feuille ; évaluation blanche : parts et démonstrations annoncées,
+  voir plus bas) ; 3. durée 20 / 30 / 50 min (blanche seulement), **Niveaux** cochables
   (cinq cases « 1 très facile » … « 5–7 très difficile », numéro dans sa case teintée ; un ou
   plusieurs, TOUS par défaut = niveaux mélangés, l'ancien « Réel » ; « Tout cocher » quand il en
   manque), « Version aménagée ». Cases ≥ 44 px, case carrée avec ✓ (l'état ne repose pas sur la seule
@@ -1114,9 +1114,10 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   tirages y tombent (`candidatAuxNiveaux` ; générateur sans niveau : seulement avec les cinq cochés) —
   la même règle décide la disponibilité, donc un niveau proposé, coché seul, donne au moins un
   exercice. **Proportions** (décision de l'utilisateur, 22/11/2026 : la répartition 25 / 50 / 25 ne
-  vaut que pour l'EXAMEN) : FEUILLE d'exercices de l'élève : temps partagé à PARTS ÉGALES entre les
-  compétences cochées (`repartitionProcessus.ts::partageEgal`, appelé par `budgetsParCompetence` ; une
-  seule → 100 %) ; évaluation blanche : parts au hasard ou réglées (puce suivante) ; jamais le réglage
+  vaut que pour l'EXAMEN) : ancien chemin « durée » de la feuille (plus utilisé par l'assistant depuis
+  le nombre d'exercices, puce « Feuille d'exercices de l'élève ») : temps partagé à PARTS ÉGALES entre
+  les compétences cochées (`repartitionProcessus.ts::partageEgal`, appelé par `budgetsParCompetence` ;
+  une seule → 100 %) ; évaluation blanche : parts au hasard ou réglées (puce suivante) ; jamais le réglage
   du professeur ; une compétence cochée sans
   exercice aux niveaux cochés cède son temps aux autres cochées présentes, à parts égales (aucune
   présente → rien). Récapitulatif : « · Appliquer et Transférer, temps partagé à parts égales » dès
@@ -1185,6 +1186,35 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   = parts des points, 0 compétence cochée absente ; démonstrations 1 228 tirées, 0 hors des cochées,
   aucune sans case cochée ; Playwright (build de production, iPhone 13 et 1 280 px) 96 vérifications,
   documents HTML + PDF, 0 erreur console, `scrollWidth` = largeur.
+- **Feuille d'exercices de l'élève : un NOMBRE d'exercices, ni durée ni points** (décision de
+  l'utilisateur, 22/11/2026 : « pas de limite de temps ou de longueur […] rien à voir avec une
+  évaluation » ; nombre : « les deux »). Plus de réglage « Durée », de « ≈ n min », de points ni de
+  parts par compétence pour la feuille (la blanche ne change pas). Bloc 3 « Quels niveaux, et combien
+  d'exercices ? » : niveaux, puis « Combien d'exercices ? » (`Compteur` − / +, 1 à 30, 10 par défaut,
+  cibles 44 px, aucun champ numérique). `ReglagesEleve.exercices` (`ExercicesFeuille`, absent = ancien
+  chemin « durée », gardé et inchangé) → `composerFeuille` : types = `typesFeuille` (notions,
+  compétences cochées, niveaux cochés par la règle des 50 % ; AUCUN niveau voisin, aucune démonstration
+  — la feuille n'en tirait pas) ; **global** : un exercice à la fois, compétence la moins servie, puis
+  notion la moins servie dans elle, puis type le moins servi (jamais deux fois le même type tant
+  qu'un autre de cette notion et compétence est libre — l'équilibre passe avant), puis générateur,
+  égalités au hasard ; au plus `MAX_PAR_TYPE` = 5 par type (vrai/faux : au plus la banque ; une
+  affirmation = un exercice) ; moins que demandé → « Seulement n exercices disponibles avec ces
+  choix » et « n exercices sur N demandés » ; **« Choisir exercice par exercice »** : la liste des
+  types (`typesFeuille`, par notion, compétence et « niv. 2–4 · facile à difficile » en petit),
+  pré-remplie avec la feuille préparée, compteur 0 à `capaciteType` par type, total, « Revenir au
+  nombre global » ; rien de mémorisé (changer de chapitre revient au global). Retouche du plan : le
+  niveau réel seulement (aucune durée visée, aucun exercice retiré). Récapitulatif « 10 exercices »
+  (`ResumeEleve.exercices` = instances + affirmations, avant regroupement ; note « les exercices de
+  même consigne sont regroupés sous un même numéro » quand il y en a). Document : celui d'avant
+  (aucune durée ni aucun point n'y était imprimé). **Vérifié — 22/11** (dossier de travail
+  `feuille-eleve` : `tests.mjs`, `ui.mjs`) : 23 chapitres × 3 choix de notions × 7 combinaisons × 3
+  choix de niveaux × 1, 5, 10, 30 = 5 796 compositions : nombre = min(demandé, disponibles), 0 hors
+  choix, 0 déséquilibre, 0 répétition évitable, reproductible ; 2 898 « à la carte » exactes ;
+  276 plans réels (deux passes) : nombres par variante / thème identiques, 0 puis 4 instances hors
+  des niveaux cochés sur ≈ 3 400 (retouche sans autre tirage ; note « Un exercice tiré est de niveau… »
+  affichée chaque fois) ; documents feuille + aménagée sans durée ni points ; blanche (hasard, réglée, sans parts) et ancien
+  chemin feuille identiques à la branche de départ (4 × 644 compositions) ; Playwright iPhone 13 et
+  1 280 px 86 vérifications, 0 erreur console, `scrollWidth` = largeur.
 - **Document « Évaluation blanche »** (`EnTeteEvaluation.blanche = { dureeConseillee }`, mode
   `evaluation`, une série ; `genererDocumentsDepuisPlan` → type `blanche` + aménagée si demandée ; ni
   corrigé séparé ni grille ; `assemblerEvaluationHtml.ts::genererEvaluationBlanche`) : cartouche

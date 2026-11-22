@@ -7,14 +7,21 @@ import { estChapitreFonctionnel } from '../../lib/chapitresFonctionnels'
 import { genererDocumentsDepuisPlan, type DocumentGenere } from '../../lib/evaluationLocal'
 import { declencherTelechargement } from '../../entrainement/export/telechargerBlob'
 import type { Processus } from '../../lib/evaluationPayload'
-import { CATEGORIES_NIVEAU, LIBELLE_CATEGORIE, PLAGE_CATEGORIE, rangCategorie, type CategorieNiveau } from '../../entrainement/export/niveauDifficulte'
+import { CATEGORIES_NIVEAU, LIBELLE_CATEGORIE, PLAGE_CATEGORIE, categorieDuNiveau, libellePlageNiveaux, rangCategorie, type CategorieNiveau } from '../../entrainement/export/niveauDifficulte'
 import { tirerGraine } from '../../entrainement/export/codeExercice'
 import { PART_MAX_HASARD, PART_MIN_HASARD, texteParts, type RepartitionPourcents } from '../../lib/repartitionProcessus'
 import { ReglageCompetences } from '../admin/conception/ReglageCompetences'
 import { RichText } from '../Math'
 import {
   COMPETENCES_ELEVE,
+  NOMBRE_FEUILLE_DEFAUT,
+  NOMBRE_FEUILLE_MAX,
+  NOMBRE_FEUILLE_MIN,
+  capaciteType,
   demonstrationsDuChapitre,
+  typesFeuille,
+  type Composition,
+  type ExercicesFeuille,
   texteRepartitionBlanche,
   type PartsEleve,
   DUREES_ELEVE,
@@ -46,7 +53,10 @@ import {
  * l'élève (« Je règle les parts » : `ReglageCompetences` du professeur, non mémorisé) ; parts obtenues
  * affichées dans le récapitulatif et le document. Démonstrations annoncées : l'élève coche celles que
  * son professeur a demandé de retenir (aucune par défaut), seules celles-là peuvent être tirées.
- * Aucune donnée d'élève : rien n'est enregistré.
+ * Feuille d'exercices (décision de l'utilisateur, 22/11/2026 : « rien à voir avec une évaluation ») :
+ * ni durée ni points — un nombre d'exercices global (− / +, 1 à 30, 10 par défaut), réparti à parts
+ * égales, ou « Choisir exercice par exercice » (compteur par type, 0 à 5 ; « Revenir au nombre
+ * global »). Aucune donnée d'élève : rien n'est enregistré.
  */
 
 /** Numéros 1–7 d'une catégorie, tels qu'imprimés sur les feuilles (« 5–7 » pour très difficile). */
@@ -75,6 +85,38 @@ function useEtroit(): boolean {
     return () => mq.removeEventListener('change', suivre)
   }, [])
   return etroit
+}
+
+/** Compteur − / + (cibles ≥ 44 px) : jamais de champ numérique (règle « champs de saisie libre »). */
+function Compteur({ valeur, min, max, nom, onChange }: { valeur: number; min: number; max: number; nom: string; onChange: (v: number) => void }) {
+  return (
+    <span className="eleve-compteur">
+      <button type="button" aria-label={`Un de moins — ${nom}`} disabled={valeur <= min} onClick={() => onChange(Math.max(min, valeur - 1))}>
+        −
+      </button>
+      <span className="eleve-compteur-valeur" aria-live="polite">
+        {valeur}
+      </span>
+      <button type="button" aria-label={`Un de plus — ${nom}`} disabled={valeur >= max} onClick={() => onChange(Math.min(max, valeur + 1))}>
+        +
+      </button>
+    </span>
+  )
+}
+
+/** Niveaux d'un type d'exercice aux niveaux cochés (« 2–4 · facile à difficile »), d'après ses tirages
+ * d'estimation ; rien pour un générateur sans niveau. */
+function niveauxDuType(c: Candidat, niveaux: readonly CategorieNiveau[]): string | null {
+  const tous = niveaux.length === CATEGORIES_NIVEAU.length
+  const retenus = c.niveaux.filter((n) => tous || niveaux.includes(categorieDuNiveau(n)))
+  const liste = retenus.length > 0 ? retenus : c.niveaux
+  if (liste.length === 0) return null
+  return libellePlageNiveaux(Math.min(...liste), Math.max(...liste))
+}
+
+/** Nom d'un type d'exercice (texte simple, pour les noms accessibles des compteurs). */
+function nomType(c: Candidat): string {
+  return `${c.titre ?? 'Exercice'}${c.variante ? ` — ${c.variante}` : ''}`.replace(/\$/g, '')
 }
 
 function nomFichier(chapitre: ChapterContent, type: TypeEleve, doc: DocumentGenere): string {
@@ -117,12 +159,17 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const [graineParts, setGraineParts] = useState(() => tirerGraine())
   /** Démonstrations annoncées par le professeur (clés `cleDemonstration`) : aucune par défaut. */
   const [demosCochees, setDemosCochees] = useState<Set<string>>(() => new Set())
+  /** FEUILLE d'exercices (décision de l'utilisateur, 22/11/2026) : ni durée ni points — un nombre
+   * d'exercices global (10 par défaut), ou choisi exercice par exercice. Rien n'est mémorisé. */
+  const [nombreExercices, setNombreExercices] = useState(NOMBRE_FEUILLE_DEFAUT)
+  const [modeNombre, setModeNombre] = useState<'global' | 'carte'>('global')
+  const [parType, setParType] = useState<Record<string, number>>({})
 
   const [candidats, setCandidats] = useState<Candidat[] | null>(null)
   const [progression, setProgression] = useState<{ fait: number; total: number } | null>(null)
   /** Plan préparé, avec la clé des réglages pour lesquels il a été tiré : un plan d'anciens réglages
    * (changement pas encore recalculé) n'est jamais affiché ni généré. */
-  const [prepareBrut, setPrepare] = useState<(PlanEleve & { cle: string }) | null>(null)
+  const [prepareBrut, setPrepare] = useState<(PlanEleve & { cle: string; composition: Composition }) | null>(null)
   const [enPreparation, setEnPreparation] = useState(false)
   const [tirage, setTirage] = useState(0)
   const [genereEnCours, setGenereEnCours] = useState(false)
@@ -139,18 +186,39 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const niveaux = useMemo(() => CATEGORIES_NIVEAU.filter((c) => niveauxCoches.has(c)), [niveauxCoches])
   const competences = useMemo(() => ([1, 2, 3] as Processus[]).filter((p) => competencesCochees.has(p)), [competencesCochees])
   // Disponibilité EN DIRECT, sur les candidats déjà préparés (niveaux des tirages d'estimation).
-  const dispo = useMemo(() => (candidats ? disponibilite(candidats, { sections, competences, niveaux, demonstrations: demosRetenues }) : null), [candidats, sections, competences, niveaux, demosRetenues])
+  const dispo = useMemo(
+    () => (candidats ? disponibilite(candidats, { sections, competences, niveaux, demonstrations: demosRetenues }) : null),
+    [candidats, sections, competences, niveaux, demosRetenues],
+  )
   /** Niveaux cochés ET proposés : au moins un, sinon rien n'est composé. */
   const niveauxUtiles = dispo ? niveaux.filter((c) => dispo.niveaux[c]) : niveaux
   const competencesUtiles = dispo ? competences.filter((p) => dispo.parCompetence[p].total > 0) : competences
   // Seules des démonstrations cochées (sans niveau) : les niveaux ne comptent pas.
   const seulementDemos = !!dispo && competencesUtiles.length > 0 && competencesUtiles.every((p) => dispo.parCompetence[p].demonstrationsSeules) && demosRetenues.length > 0
-  const reglagesValides = (niveauxUtiles.length > 0 || seulementDemos) && competencesUtiles.length > 0
+  // Feuille : types d'exercices proposés pour ces choix (liste « exercice par exercice »), et nombre.
+  const typesDispo = useMemo(
+    () => (!blancheChoisie && candidats && chapitre ? typesFeuille(candidats, { sections, competences, niveaux }, chapitre) : []),
+    [blancheChoisie, candidats, chapitre, sections, competences, niveaux],
+  )
+  /** Compteurs des seuls types encore proposés (un type qui disparaît avec les choix ne compte plus). */
+  const parTypeRetenu = useMemo(() => {
+    const r: Record<string, number> = {}
+    for (const c of typesDispo) if (parType[c.cle]) r[c.cle] = Math.min(capaciteType(c), parType[c.cle])
+    return r
+  }, [typesDispo, parType])
+  const totalCarte = Object.values(parTypeRetenu).reduce((t, n) => t + n, 0)
+  const exercices: ExercicesFeuille | undefined = blancheChoisie ? undefined : modeNombre === 'global' ? { mode: 'global', nombre: nombreExercices } : { mode: 'carte', parType: parTypeRetenu }
+  const carteVide = exercices?.mode === 'carte' && totalCarte === 0
+  const reglagesValides = (niveauxUtiles.length > 0 || seulementDemos) && competencesUtiles.length > 0 && !carteVide
   const cleCompetencesUtiles = competencesUtiles.join(',')
   // Cocher / décocher une compétence remet les parts réglées à égalité (comme le réglage du professeur).
   useEffect(() => setPartsManuelles(null), [cleCompetencesUtiles])
-  const parts: PartsEleve | undefined = blancheChoisie ? (modeParts === 'hasard' ? { mode: 'hasard', graine: graineParts } : { mode: 'reglee', pourcents: partsManuelles, graine: graineParts }) : undefined
-  const cleReglages = JSON.stringify([levelSlug, chapitreSlug, sections, duree, niveaux, competences, type, amenagee, tirage, parts ?? null, demosRetenues])
+  const parts: PartsEleve | undefined = blancheChoisie
+    ? modeParts === 'hasard'
+      ? { mode: 'hasard', graine: graineParts }
+      : { mode: 'reglee', pourcents: partsManuelles, graine: graineParts }
+    : undefined
+  const cleReglages = JSON.stringify([levelSlug, chapitreSlug, sections, duree, niveaux, competences, type, amenagee, tirage, parts ?? null, demosRetenues, exercices ?? null])
   const prepare = prepareBrut && prepareBrut.cle === cleReglages ? prepareBrut : null
 
   // Candidats du chapitre (niveaux et durées estimés), calculés une variante à la fois.
@@ -185,14 +253,25 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
     }
     let annule = false
     setEnPreparation(true)
-    const reglages: ReglagesEleve = { levelSlug, chapitreSlug: chapitre.slug, sections, duree, niveaux, competences, type, amenagee, ...(parts ? { parts, demonstrations: demosRetenues } : {}) }
-    const cle = JSON.stringify([levelSlug, chapitre.slug, sections, duree, niveaux, competences, type, amenagee, tirage, parts ?? null, demosRetenues])
+    const reglages: ReglagesEleve = {
+      levelSlug,
+      chapitreSlug: chapitre.slug,
+      sections,
+      duree,
+      niveaux,
+      competences,
+      type,
+      amenagee,
+      ...(parts ? { parts, demonstrations: demosRetenues } : {}),
+      ...(exercices ? { exercices } : {}),
+    }
+    const cle = JSON.stringify([levelSlug, chapitre.slug, sections, duree, niveaux, competences, type, amenagee, tirage, parts ?? null, demosRetenues, exercices ?? null])
     const minuterie = window.setTimeout(() => {
       const composition = composer(candidats, reglages)
       construirePlanEleve(reglages, chapitre, composition)
         .then((p) => {
           if (!annule) {
-            setPrepare({ ...p, cle })
+            setPrepare({ ...p, cle, composition })
             setErreur(null)
           }
         })
@@ -201,7 +280,11 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
           if (!(e instanceof Error && /vide/i.test(e.message))) console.error(e)
           if (!annule) {
             setPrepare(null)
-            setErreur(sections.length > 0 ? 'Aucun exercice ne convient à ces réglages : ajoute une notion, un niveau ou une compétence.' : 'Aucun exercice ne convient à ces réglages : ajoute un niveau ou une compétence.')
+            setErreur(
+              sections.length > 0
+                ? 'Aucun exercice ne convient à ces réglages : ajoute une notion, un niveau ou une compétence.'
+                : 'Aucun exercice ne convient à ces réglages : ajoute un niveau ou une compétence.',
+            )
           }
         })
         .finally(() => {
@@ -214,7 +297,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
     }
     // `parts` est recréé à chaque rendu : sa forme sérialisée (`cleParts`) suffit comme dépendance.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chapitre, candidats, levelSlug, sections, duree, niveaux, competences, type, amenagee, tirage, reglagesValides, JSON.stringify(parts ?? null), demosRetenues])
+  }, [chapitre, candidats, levelSlug, sections, duree, niveaux, competences, type, amenagee, tirage, reglagesValides, JSON.stringify(parts ?? null), demosRetenues, JSON.stringify(exercices ?? null)])
 
   useEffect(() => () => urls.current.forEach((u) => URL.revokeObjectURL(u)), [])
 
@@ -223,12 +306,27 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
     setChapitreSlug(chapitresDisponibles(slug)[0]?.slug ?? '')
     setChoisies(null)
     setResultat(null)
+    revenirAuNombreGlobal()
   }
 
   function changerChapitre(slug: string) {
     setChapitreSlug(slug)
     setChoisies(null)
     setResultat(null)
+    revenirAuNombreGlobal()
+  }
+
+  /** « Choisir exercice par exercice » : la liste part de la feuille préparée (même répartition). */
+  function choisirParType() {
+    const depart: Record<string, number> = {}
+    if (prepare && modeNombre === 'global') for (const u of prepare.composition.unites) depart[u.candidat.cle] = u.nombre
+    setParType(depart)
+    setModeNombre('carte')
+  }
+
+  function revenirAuNombreGlobal() {
+    setModeNombre('global')
+    setParType({})
   }
 
   function basculerNotion(id: string) {
@@ -320,28 +418,39 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const recap = resume
     ? blanche
       ? `${resume.questions} question${resume.questions > 1 ? 's' : ''} · ≈ ${resume.dureeConseillee} min · ${resume.points ?? 20} points`
-      : `${resume.questions} exercice${resume.questions > 1 ? 's' : ''} · ≈ ${resume.dureeConseillee} min`
+      : // Feuille : le nombre d'exercices seulement (ni durée ni points).
+        `${resume.exercices} exercice${resume.exercices > 1 ? 's' : ''}${resume.demandes !== undefined && resume.exercices < resume.demandes ? ` sur ${resume.demandes} demandés` : ''}`
     : progression && !candidats
       ? `Préparation des exercices… ${Math.round((100 * progression.fait) / Math.max(1, progression.total))} %`
-      : candidats && !reglagesValides
-        ? 'Rien à composer avec ces réglages'
-        : 'Préparation…'
+      : candidats && carteVide
+        ? 'Choisis au moins un exercice dans la liste'
+        : candidats && !reglagesValides
+          ? 'Rien à composer avec ces réglages'
+          : 'Préparation…'
   /** Niveaux et compétences réellement obtenus (récapitulatif exact). */
   const recapContenu = resume
-    ? `${resume.categories.length === 1 ? 'Niveau' : 'Niveaux'} : ${texteCategories(resume.categories) || '—'} · ${listeCompetences(resume.competences)}${resume.competences.length > 1 && !resume.parts ? ', temps partagé à parts égales' : ''}`
+    ? `${resume.categories.length === 1 ? 'Niveau' : 'Niveaux'} : ${texteCategories(resume.categories) || '—'} · ${listeCompetences(resume.competences)}${blanche && resume.competences.length > 1 && !resume.parts ? ', temps partagé à parts égales' : ''}`
     : null
+  /** Feuille au nombre global : moins de types que demandé (dit simplement). */
+  const manqueExercices = !blanche && modeNombre === 'global' && resume?.disponibles !== undefined && resume.disponibles < nombreExercices ? resume.disponibles : null
+  /** Feuille : des exercices de même consigne sont regroupés sous un même numéro. */
+  const regroupes = !blanche && !!resume && resume.questions < resume.exercices
+  /** Liste « exercice par exercice », groupée par point du chapitre. */
+  const groupesTypes = notions.map((n) => ({ notion: n, types: typesDispo.filter((c) => c.sectionId === n.sectionId) })).filter((g) => g.types.length > 0)
   /** Évaluation blanche : parts obtenues (celles des points), et leur origine (même texte que le
    * document, `texteRepartitionBlanche` ; téléphone : l'avertissement final est masqué dans la barre
    * collante, il est écrit juste au-dessus, sous « Parts du temps et des points »). */
   const plusieursParts = !!resume?.parts && Object.values(resume.parts).filter((v) => v > 0).length > 1
-  const recapParts = resume?.parts ? (plusieursParts ? `${texteParts(resume.parts)} — ${resume.partsHasard ? 'tirées au hasard' : 'réglées par toi'}` : texteRepartitionBlanche(resume.parts, !!resume.partsHasard)) : null
+  const recapParts = resume?.parts
+    ? plusieursParts
+      ? `${texteParts(resume.parts)} — ${resume.partsHasard ? 'tirées au hasard' : 'réglées par toi'}`
+      : texteRepartitionBlanche(resume.parts, !!resume.partsHasard)
+    : null
   const tousNiveauxCoches = niveaux.length === CATEGORIES_NIVEAU.length
   const niveauxGrises = dispo ? CATEGORIES_NIVEAU.filter((c) => !dispo.niveaux[c]) : []
   /** Pourquoi des niveaux sont grisés : ce que chaque compétence cochée offre vraiment. */
   const raisonsNiveaux =
-    dispo && niveauxGrises.length > 0
-      ? competences.filter((p) => dispo.parCompetence[p].total > 0).map((p) => `${LIBELLE_COMPETENCE[p]} : ${texteSeulement(dispo.parCompetence[p].categories)}`)
-      : []
+    dispo && niveauxGrises.length > 0 ? competences.filter((p) => dispo.parCompetence[p].total > 0).map((p) => `${LIBELLE_COMPETENCE[p]} : ${texteSeulement(dispo.parCompetence[p].categories)}`) : []
   /** Compétences cochées sans exercice aux niveaux cochés : signalées, leur temps va aux autres. */
   const competencesSansNiveau = dispo ? competences.filter((p) => dispo.parCompetence[p].total > 0 && !dispo.parCompetence[p].auxNiveauxCoches) : []
   const connaitreCochee = competencesCochees.has(1) && !!dispo && dispo.parCompetence[1].total > 0
@@ -372,7 +481,9 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
         <div className="eleve-cartes" role="radiogroup" aria-labelledby="eleve-q1">
           <button type="button" role="radio" aria-checked={type === 'feuille'} className="eleve-carte" onClick={() => setType('feuille')}>
             <span className="eleve-carte-titre">Une feuille d'exercices</span>
-            <span className="eleve-carte-texte">T'entraîner notion par notion, à ton rythme. Corrigé à la fin, QR code pour refaire en ligne avec les aides.</span>
+            <span className="eleve-carte-texte">
+              Tu choisis les points du chapitre, les compétences et le nombre d'exercices. Ni durée ni points : corrigé à la fin, QR code pour refaire en ligne avec les aides.
+            </span>
           </button>
           <button type="button" role="radio" aria-checked={type === 'blanche'} className="eleve-carte" onClick={() => setType('blanche')}>
             <span className="eleve-carte-titre">Une évaluation blanche</span>
@@ -387,7 +498,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             <span className="eleve-num" aria-hidden="true">
               2
             </span>
-            <h2 id="eleve-q2">Sur quoi porte ton évaluation ?</h2>
+            <h2 id="eleve-q2">{blanche ? 'Sur quoi porte ton évaluation ?' : 'Sur quoi veux-tu t’entraîner ?'}</h2>
           </div>
           {verrouille && (
             <Link className="eleve-lien-discret" to="/exercice">
@@ -419,7 +530,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             </label>
           </div>
         )}
-        <p className="eleve-aide">Coche ce que ton professeur a annoncé. Pas sûr ? Prends tout le chapitre.</p>
+        <p className="eleve-aide">{blanche ? 'Coche ce que ton professeur a annoncé. Pas sûr ? Prends tout le chapitre.' : 'Choisis les points du chapitre qui t’intéressent, ou tout le chapitre.'}</p>
         <div className="eleve-puces" role="group" aria-label="Notions">
           <button type="button" className="eleve-puce" aria-pressed={toutLeChapitre} onClick={() => setChoisies(null)}>
             Tout le chapitre
@@ -446,7 +557,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
           <p className="eleve-aide">
             {blanche
               ? "Coche ce que ton professeur a annoncé pour l'interrogation."
-              : "Coche ce que ton professeur a annoncé pour l'interrogation. Le temps est partagé à parts égales entre les compétences cochées."}
+              : 'Coche celles que tu veux travailler (une, deux ou trois) : les exercices sont répartis à parts égales entre elles.'}
           </p>
           <div className="eleve-coches" role="group" aria-labelledby="eleve-competences">
             {COMPETENCES_ELEVE.map(({ id, libelle }) => {
@@ -508,7 +619,8 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             </div>
             {modeParts === 'hasard' ? (
               <p className="eleve-aide">
-                Chaque tirage partage le temps et les points autrement entre les compétences cochées (de {PART_MIN_HASARD}&nbsp;% à {PART_MAX_HASARD}&nbsp;% chacune) : ta vraie interro peut être répartie autrement.
+                Chaque tirage partage le temps et les points autrement entre les compétences cochées (de {PART_MIN_HASARD}&nbsp;% à {PART_MAX_HASARD}&nbsp;% chacune) : ta vraie interro peut être
+                répartie autrement.
               </p>
             ) : (
               <ReglageCompetences
@@ -535,22 +647,24 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
           <span className="eleve-num" aria-hidden="true">
             3
           </span>
-          <h2 id="eleve-q3">Combien de temps, et quels niveaux ?</h2>
+          <h2 id="eleve-q3">{blanche ? 'Combien de temps, et quels niveaux ?' : 'Quels niveaux, et combien d’exercices ?'}</h2>
         </div>
-        <div className="eleve-reglages">
-          <div className="eleve-reglage">
-            <span className="eleve-etiquette" id="eleve-duree">
-              Durée
-            </span>
-            <div className="eleve-segments" role="radiogroup" aria-labelledby="eleve-duree">
-              {DUREES_ELEVE.map((d) => (
-                <button key={d} type="button" role="radio" aria-checked={duree === d} onClick={() => setDuree(d)}>
-                  {d} min
-                </button>
-              ))}
+        {blanche && (
+          <div className="eleve-reglages">
+            <div className="eleve-reglage">
+              <span className="eleve-etiquette" id="eleve-duree">
+                Durée
+              </span>
+              <div className="eleve-segments" role="radiogroup" aria-labelledby="eleve-duree">
+                {DUREES_ELEVE.map((d) => (
+                  <button key={d} type="button" role="radio" aria-checked={duree === d} onClick={() => setDuree(d)}>
+                    {d} min
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
         <div className="eleve-reglage">
           <div className="eleve-etiquette-ligne">
             <span className="eleve-etiquette" id="eleve-niveau">
@@ -596,29 +710,112 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
           )}
           {(raisonsNiveaux.length > 0 || competencesSansNiveau.length > 0) && (
             <div className="eleve-dispo" id="eleve-niveau-raisons">
-              {raisonsNiveaux.length > 0 && (
-                <p>
-                  Grisé : aucun exercice à ce niveau dans ces notions. {raisonsNiveaux.join(' · ')}.
-                </p>
-              )}
+              {raisonsNiveaux.length > 0 && <p>Grisé : aucun exercice à ce niveau dans ces notions. {raisonsNiveaux.join(' · ')}.</p>}
               {competencesSansNiveau.map((p) =>
                 dispo!.parCompetence[p].demonstrationsSeules ? (
-                  <p key={p}>{LIBELLE_COMPETENCE[p]} : seulement des démonstrations ici — coche celles qui sont annoncées, sinon son temps va aux autres compétences cochées.</p>
+                  <p key={p}>
+                    {LIBELLE_COMPETENCE[p]} : seulement des démonstrations ici — coche celles qui sont annoncées, sinon {blanche ? 'son temps va' : 'ses exercices vont'} aux autres compétences
+                    cochées.
+                  </p>
                 ) : (
                   <p key={p}>
-                    {LIBELLE_COMPETENCE[p]} : aucun exercice aux niveaux cochés ({texteSeulement(dispo!.parCompetence[p].categories)}) — son temps va aux autres compétences cochées.
+                    {LIBELLE_COMPETENCE[p]} : aucun exercice aux niveaux cochés ({texteSeulement(dispo!.parCompetence[p].categories)}) — {blanche ? 'son temps va' : 'ses exercices vont'} aux autres
+                    compétences cochées.
                   </p>
                 ),
               )}
             </div>
           )}
         </div>
+        {!blanche && (
+          <div className="eleve-reglage eleve-nombre">
+            {modeNombre === 'global' ? (
+              <>
+                <span className="eleve-etiquette" id="eleve-nombre">
+                  Combien d'exercices ?
+                </span>
+                <div className="eleve-nombre-ligne" role="group" aria-labelledby="eleve-nombre">
+                  <Compteur valeur={nombreExercices} min={NOMBRE_FEUILLE_MIN} max={NOMBRE_FEUILLE_MAX} nom="nombre d'exercices" onChange={setNombreExercices} />
+                  <button type="button" className="eleve-bouton-secondaire" onClick={choisirParType} disabled={!candidats}>
+                    Choisir exercice par exercice
+                  </button>
+                </div>
+                {manqueExercices !== null && (
+                  <p className="eleve-note" role="status">
+                    Seulement {manqueExercices} exercice{manqueExercices > 1 ? 's' : ''} disponible{manqueExercices > 1 ? 's' : ''} avec ces choix.
+                  </p>
+                )}
+                <p className="eleve-aide">Les exercices sont répartis le plus également possible entre les points du chapitre et les compétences cochés.</p>
+              </>
+            ) : (
+              <>
+                <span className="eleve-etiquette" id="eleve-nombre">
+                  Exercice par exercice
+                </span>
+                <p className="eleve-aide">Règle le nombre de chaque type d'exercice (de 0 à 5). Rien n'est mémorisé.</p>
+                {groupesTypes.length === 0 ? (
+                  <p className="eleve-note">Aucun exercice avec ces choix : ajoute une notion, un niveau ou une compétence.</p>
+                ) : (
+                  <div className="eleve-types">
+                    {groupesTypes.map(({ notion, types }) => {
+                      const choisis = types.reduce((t, c) => t + (parTypeRetenu[c.cle] ?? 0), 0)
+                      return (
+                        <div key={notion.sectionId} className="eleve-types-notion" role="group" aria-labelledby={`eleve-types-${notion.sectionId}`}>
+                          <p className="eleve-types-titre" id={`eleve-types-${notion.sectionId}`}>
+                            {notion.titre}
+                            {choisis > 0 && <span className="eleve-types-choisis"> · {choisis} choisi{choisis > 1 ? 's' : ''}</span>}
+                          </p>
+                          <ul>
+                            {types.map((c) => {
+                              const niv = niveauxDuType(c, niveaux)
+                              return (
+                                <li key={c.cle} className="eleve-type">
+                                  <span className="eleve-type-nom">
+                                    <span>
+                                      <RichText text={c.titre ?? 'Exercice'} />
+                                      {c.variante && (
+                                        <>
+                                          {' — '}
+                                          <RichText text={c.variante} />
+                                        </>
+                                      )}
+                                    </span>
+                                    <span className="eleve-type-meta">
+                                      {LIBELLE_COMPETENCE[c.processus]}
+                                      {niv ? ` · niv. ${niv}` : ''}
+                                    </span>
+                                  </span>
+                                  <Compteur valeur={parTypeRetenu[c.cle] ?? 0} min={0} max={capaciteType(c)} nom={nomType(c)} onChange={(v) => setParType((avant) => ({ ...avant, [c.cle]: v }))} />
+                                </li>
+                              )
+                            })}
+                          </ul>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+                <div className="eleve-types-pied">
+                  <span className="eleve-types-total" aria-live="polite">
+                    Total : {totalCarte} exercice{totalCarte > 1 ? 's' : ''}
+                  </span>
+                  <button type="button" className="eleve-bouton-secondaire" onClick={revenirAuNombreGlobal}>
+                    Revenir au nombre global
+                  </button>
+                </div>
+              </>
+            )}
+            {regroupes && <p className="eleve-aide">Sur la feuille, les exercices qui ont la même consigne sont regroupés sous un même numéro (a, b, c…).</p>}
+          </div>
+        )}
         <label className="eleve-case">
           <input type="checkbox" checked={amenagee} onChange={(e) => setAmenagee(e.target.checked)} /> Version aménagée (plus grande, plus aérée)
         </label>
         {resume?.elargi && (
           <p className="eleve-note">
-            Peu d'exercices aux niveaux cochés dans ces notions : des exercices de niveau {texteCategories(resume.categoriesHorsChoix)} complètent.
+            {blanche
+              ? `Peu d'exercices aux niveaux cochés dans ces notions : des exercices de niveau ${texteCategories(resume.categoriesHorsChoix)} complètent.`
+              : `Un exercice tiré est de niveau ${texteCategories(resume.categoriesHorsChoix)} : son type n'a pas donné d'autre tirage aux niveaux cochés.`}
           </p>
         )}
       </section>
@@ -662,12 +859,14 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
           <p className="eleve-aide">
             {resultat.type === 'blanche'
               ? `${resultat.plan.resume.questions} questions · ≈ ${resultat.plan.resume.dureeConseillee} min · ${resultat.plan.resume.points ?? 20} points indicatifs. Imprime-la, ou ouvre-la et enregistre-la en PDF.`
-              : `${resultat.plan.resume.questions} exercices · ≈ ${resultat.plan.resume.dureeConseillee} min. Imprime-la, ou ouvre-la et enregistre-la en PDF.`}
+              : `${resultat.plan.resume.exercices} exercice${resultat.plan.resume.exercices > 1 ? 's' : ''}. Imprime-la, ou ouvre-la et enregistre-la en PDF.`}
           </p>
           <ul className="eleve-documents">
             {resultat.documents.map((doc) => (
               <li key={doc.suffixe}>
-                <span className="eleve-document-nom">{doc.type === 'amenagee' ? 'Version aménagée' : resultat.type === 'blanche' ? 'Évaluation blanche + corrigé détaillé' : "Feuille d'exercices + corrigé détaillé"}</span>
+                <span className="eleve-document-nom">
+                  {doc.type === 'amenagee' ? 'Version aménagée' : resultat.type === 'blanche' ? 'Évaluation blanche + corrigé détaillé' : "Feuille d'exercices + corrigé détaillé"}
+                </span>
                 <span className="eleve-document-actions">
                   <button type="button" onClick={() => ouvrir(doc, false)}>
                     Ouvrir
