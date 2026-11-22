@@ -2716,48 +2716,58 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
 
   recap: {
     items: [
-      '**Cercle trigonométrique** — M(θ) = (cos θ ; sin θ), rayon 1. Le quadrant donne le ' +
-        'signe de sin, cos et tan. L\'angle du premier quadrant vaut θ, 180° − θ, θ − 180° ou ' +
-        '360° − θ, selon le quadrant.',
-      '**Identité fondamentale** — $\\cos^2\\theta + \\sin^2\\theta = 1$. Toujours avec un ± à trancher ' +
-        'grâce au quadrant. À partir de tan θ : $1 + \\tan^2\\theta = \\dfrac{1}{\\cos^2\\theta}$.',
-      '**Valeurs remarquables** — 0°, 30°, 45°, 60°, 90°, à connaître exactement. Tu les ' +
-        'étends à tout angle via l\'angle du premier quadrant, puis le signe du quadrant.',
-      '**Angles associés** — 4 familles (90° − θ, 180° − θ, 180° + θ, −θ), et 90° + θ en ' +
-        'enchaînant deux familles. Chacune a sa propre règle de signe sur sin, cos et tan.',
-      '**Équations trigonométriques** — en général 2 solutions sur [0° ; 360°[. Seulement 1 ' +
-        'pour sin ou cos en k = ±1, aucune si |k| > 1. Toujours 2 pour tan.',
-      '**Équations à transformer et mouvements circulaires** — isole sin α (ou cos α), ' +
-        'pense aux deux racines de $\\sin^2\\alpha = k$, et annule un facteur à la fois dans un produit. ' +
-        'Un point qui tourne est à la hauteur $h + r\\sin\\theta$, avec $\\theta = \\theta_0 \\pm \\alpha$ selon le sens.',
-      '**Triangle quelconque** — loi des sinus $\\dfrac{a}{\\sin\\hat A}=\\dfrac{b}{\\sin\\hat B}=\\dfrac{c}{\\sin\\hat C}$ ' +
-        'pour AAS et SSA (cas ambigu : tester B̂ et 180° − B̂). Loi des cosinus ' +
-        '$a^2=b^2+c^2-2bc\\cos\\hat A$ pour SAS et SSS.',
+      '**Cercle trigonométrique** — $M(\\theta) = (\\cos\\theta\\,;\\sin\\theta)$, rayon 1. Le quadrant ' +
+        'donne le signe de $\\sin$, $\\cos$ et $\\tan$. L\'angle du premier quadrant vaut $\\theta$, ' +
+        '$180^\\circ - \\theta$, $\\theta - 180^\\circ$ ou $360^\\circ - \\theta$, selon le quadrant.',
+      '**Identité fondamentale** — $\\cos^2\\theta + \\sin^2\\theta = 1$. Toujours avec un $\\pm$ à ' +
+        'trancher grâce au quadrant. À partir de $\\tan\\theta$ : $1 + \\tan^2\\theta = ' +
+        '\\dfrac{1}{\\cos^2\\theta}$.',
+      '**Valeurs remarquables** — $0^\\circ$, $30^\\circ$, $45^\\circ$, $60^\\circ$, $90^\\circ$, à ' +
+        'connaître exactement. Tu les étends à tout angle via l\'angle du premier quadrant, puis le ' +
+        'signe du quadrant.',
+      '**Angles associés** — 4 familles ($90^\\circ - \\theta$, $180^\\circ - \\theta$, $180^\\circ + ' +
+        '\\theta$, $-\\theta$), et $90^\\circ + \\theta$ en enchaînant deux familles. Chacune a sa propre ' +
+        'règle de signe sur $\\sin$, $\\cos$ et $\\tan$.',
+      '**Équations trigonométriques** — en général 2 solutions sur $[0^\\circ\\,;360^\\circ[$. ' +
+        'Seulement 1 pour $\\sin$ ou $\\cos$ en $k = \\pm 1$, aucune si $|k| > 1$. Toujours 2 pour ' +
+        '$\\tan$.',
+      '**Équations à transformer et mouvements circulaires** — isole $\\sin\\alpha$ (ou ' +
+        '$\\cos\\alpha$), pense aux deux racines de $\\sin^2\\alpha = k$, et annule un facteur à la fois ' +
+        'dans un produit. Un point qui tourne est à la hauteur $h + r\\sin\\theta$, avec $\\theta = ' +
+        '\\theta_0 \\pm \\alpha$ selon le sens.',
+      '**Triangle quelconque** — loi des sinus $\\dfrac{a}{\\sin\\hat A}=\\dfrac{b}{\\sin\\hat ' +
+        'B}=\\dfrac{c}{\\sin\\hat C}$ pour AAS et SSA (cas ambigu : tester $\\hat B$ et $180^\\circ - \\hat ' +
+        'B$). Loi des cosinus $a^2=b^2+c^2-2bc\\cos\\hat A$ pour SAS et SSS.',
       '**Aire** — $\\dfrac12\\,ab\\sin\\hat C$ avec deux côtés et l\'angle compris, Héron avec les trois ' +
-        'côtés. Un angle retrouvé à partir de l\'aire a deux amplitudes possibles, Ĉ et 180° − Ĉ. ' +
-        'Un quadrilatère se découpe en deux triangles par une diagonale.',
+        'côtés. Un angle retrouvé à partir de l\'aire a deux amplitudes possibles, $\\hat C$ et ' +
+        '$180^\\circ - \\hat C$. Un quadrilatère se découpe en deux triangles par une diagonale.',
       '**Triangulation** — résous d\'abord le triangle pont. Transfère un côté ou un angle ' +
         'vers le triangle cible, celui qui contient la grandeur demandée. Résous-le par la loi ' +
         'des sinus, par Al-Kashi, ou par la trigonométrie du triangle rectangle.',
       '**Forces et angles du texte** — la résultante est la diagonale du parallélogramme : dans ' +
-        'Al-Kashi, l\'angle vaut 180° − θ. Un cap se mesure depuis le nord, une élévation depuis ' +
-        'l\'horizontale : traduis-les toujours en angles intérieurs du triangle.',
+        'Al-Kashi, l\'angle vaut $180^\\circ - \\theta$. Un cap se mesure depuis le nord, une élévation ' +
+        'depuis l\'horizontale : traduis-les toujours en angles intérieurs du triangle.',
     ],
     checklist: {
       items: [
-        'Ai-je bien réduit tout angle donné dans [0° ; 360°[ avant de chercher son quadrant ?',
-        'Ai-je gardé le ± en isolant cos θ ou sin θ ? Ai-je tranché le signe grâce au quadrant — jamais par réflexe ?',
+        'Ai-je bien réduit tout angle donné dans $[0^\\circ\\,;360^\\circ[$ avant de chercher son quadrant ?',
+        'Ai-je gardé le $\\pm$ en isolant $\\cos\\theta$ ou $\\sin\\theta$ ? Ai-je tranché le signe ' +
+          'grâce au quadrant — jamais par réflexe ?',
         'Après une loi des cosinus, ai-je réutilisé Al-Kashi (pas la loi des sinus) pour l\'angle restant ?',
-        'Ma tangente a-t-elle bien exactement 2 solutions sur [0° ; 360°[, quelle que soit la valeur de k ?',
-        'Ma calculatrice est-elle en mode degrés ? Ai-je cherché moi-même la seconde solution que sin⁻¹ ou cos⁻¹ ne donne pas ?',
-        'Dans le cas SSA, ai-je testé le second candidat 180° − B̂ (il faut Â + B̂ < 180°) ?',
-        'Pour une résultante, ai-je mis 180° − θ (et pas θ) dans Al-Kashi ? Ai-je traduit chaque cap ou élévation en angle intérieur du triangle ?',
+        'Ma tangente a-t-elle bien exactement 2 solutions sur $[0^\\circ\\,;360^\\circ[$, quelle que ' +
+          'soit la valeur de $k$ ?',
+        'Ma calculatrice est-elle en mode degrés ? Ai-je cherché moi-même la seconde solution que ' +
+          '$\\sin^{-1}$ ou $\\cos^{-1}$ ne donne pas ?',
+        'Dans le cas SSA, ai-je testé le second candidat $180^\\circ - \\hat B$ (il faut $\\hat A + ' +
+          '\\hat B < 180^\\circ$) ?',
+        'Pour une résultante, ai-je mis $180^\\circ - \\theta$ (et pas $\\theta$) dans Al-Kashi ? ' +
+          'Ai-je traduit chaque cap ou élévation en angle intérieur du triangle ?',
       ],
     },
     forward:
       'En 5e, le chapitre Trigonométrie reprend ce cercle en radians, en fait des fonctions ' +
-      '(sinusoïdes) et résout les équations sur ℝ tout entier, plus seulement sur [0° ; 360°[. ' +
-      'La loi des sinus, Al-Kashi et le réflexe « quadrant → signe » restent, eux, des outils ' +
-      'de base en géométrie comme en physique (forces, vecteurs, ondes).',
+      '(sinusoïdes) et résout les équations sur $\\mathbb{R}$ tout entier, plus seulement sur ' +
+      '$[0^\\circ\\,;360^\\circ[$. La loi des sinus, Al-Kashi et le réflexe « quadrant → signe » ' +
+      'restent, eux, des outils de base en géométrie comme en physique (forces, vecteurs, ondes).',
   },
 }

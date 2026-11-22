@@ -2149,9 +2149,9 @@ export const geometrieDansEspace: ChapterContent = {
 
   recap: {
     items: [
-      'Perspective cavalière — x et z restent à l\'échelle réelle. y part en diagonale à 45°, ' +
-        'réduit de moitié. On ne lit jamais une longueur en profondeur à la règle sur le dessin. ' +
-        'La perspective centrale (point de fuite) est plus réaliste, mais elle ne conserve le ' +
+      'Perspective cavalière — $x$ et $z$ restent à l\'échelle réelle. $y$ part en diagonale à ' +
+        '$45^\\circ$, réduit de moitié. On ne lit jamais une longueur en profondeur à la règle sur le ' +
+        'dessin. La perspective centrale (point de fuite) est plus réaliste, mais elle ne conserve le ' +
         'parallélisme que des droites parallèles à la vitre — plus lourde à main levée.',
       'Déterminer un plan — 4 façons équivalentes : 3 points non alignés, ou une droite + un ' +
         'point extérieur, ou 2 droites sécantes, ou 2 droites parallèles distinctes. Jamais une ' +

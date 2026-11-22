@@ -2915,16 +2915,19 @@ export const calculVectoriel: ChapterContent = {
 
   recap: {
     items: [
-      'Vecteur — direction, sens, longueur. $\\vec{AB} = \\vec{CD}$ ⟺ ABDC est un parallélogramme. Composantes $\\vec{AB} = \\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$, toujours indépendantes du point où tu le dessines.',
+      'Vecteur — direction, sens, longueur. $\\vec{AB} = \\vec{CD} \\iff ABDC$ est un parallélogramme. ' +
+        'Composantes $\\vec{AB} = \\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$, toujours ' +
+        'indépendantes du point où tu le dessines.',
       'Combiner — addition (triangle ou parallélogramme) et multiplication par un scalaire, ' +
-        'composante par composante. k>0 conserve le sens, k<0 l\'inverse. Opposé : ' +
-        '$-\\vec{u} = (-1) \\cdot \\vec{u}$. Soustraire, c\'est ajouter l\'opposé.',
+        'composante par composante. $k>0$ conserve le sens, $k<0$ l\'inverse. Opposé : $-\\vec{u} = ' +
+        '(-1) \\cdot \\vec{u}$. Soustraire, c\'est ajouter l\'opposé.',
       'Décomposer — selon deux directions non colinéaires, $\\vec{u} = a\\vec{v} + b\\vec{w}$ : ' +
         'parallélogramme sur la figure, système en composantes.',
       'Chasles — une chaîne de vecteurs se réduit du premier point au dernier. Une chaîne fermée se réduit au vecteur nul.',
-      'Norme — $\\|\\vec{u}\\|=\\sqrt{x_u^2+y_u^2}$, toujours ≥ 0. Distance entre deux points = norme du vecteur qui les relie.',
-      'Points — translation B = A + u. Milieu = moyenne des coordonnées. Relation générale ' +
-        '$\\vec{AM} = k \\cdot \\vec{AB}$, toujours sur la droite (AB).',
+      'Norme — $\\|\\vec{u}\\|=\\sqrt{x_u^2+y_u^2}$, toujours $\\geq 0$. Distance entre deux points = ' +
+        'norme du vecteur qui les relie.',
+      'Points — translation $B = A + \\vec{u}$. Milieu = moyenne des coordonnées. Relation générale ' +
+        '$\\vec{AM} = k \\cdot \\vec{AB}$, toujours sur la droite $(AB)$.',
       'Colinéarité — $x_uy_v-y_ux_v=0$. Orthogonalité — $x_ux_v+y_uy_v=0$. Deux tests à ne jamais confondre !',
       'Démontrer et classer — sans repère, on exprime tout dans une base de deux vecteurs non ' +
         'colinéaires et on compare les coefficients. Nature d\'un quadrilatère : parallélogramme ' +
@@ -2933,8 +2936,9 @@ export const calculVectoriel: ChapterContent = {
       'Vecteur directeur — tout vecteur défini par 2 points d\'une droite. Pour une même droite, ils sont tous colinéaires entre eux.',
       'Résultante — somme vectorielle de deux forces ou vitesses. Sa norme s\'obtient par Al-Kashi (loi des cosinus), ou par les composantes.',
       'Vecteurs en contexte — déplacements successifs : on additionne les vecteurs, la distance à ' +
-        'vol d\'oiseau est la norme de la somme. Rivière : durée = largeur ÷ composante y de la ' +
-        'vitesse réelle. Équilibre : $\\vec{F_3} = -(\\vec{F_1} + \\vec{F_2})$.',
+        'vol d\'oiseau est la norme de la somme. Rivière : $\\text{durée} = ' +
+        '\\dfrac{\\text{largeur}}{\\text{composante } y \\text{ de la vitesse réelle}}$. Équilibre : ' +
+        '$\\vec{F_3} = -(\\vec{F_1} + \\vec{F_2})$.',
     ],
     checklist: {
       label: 'Avant de rendre ta copie',
@@ -2944,7 +2948,8 @@ export const calculVectoriel: ChapterContent = {
         'Ai-je bien calculé le milieu comme une moyenne, jamais comme une différence de coordonnées ?',
         'Ai-je utilisé la bonne formule — critère de colinéarité pour la colinéarité, produit scalaire pour l\'orthogonalité ?',
         'Ai-je bien écrit $\\vec{AB} - \\vec{AC} = \\vec{CB}$, et non $\\vec{BC}$ ?',
-        'Dans la formule de la résultante, ai-je bien mis « + 2F₁F₂·cos θ » (θ = angle entre les deux vecteurs) ?',
+        'Dans la formule de la résultante, ai-je bien mis « $+\\,2F_1F_2\\cos\\theta$ » ($\\theta$ = ' +
+          'angle entre les deux vecteurs) ?',
       ],
     },
     forward:

@@ -2293,30 +2293,33 @@ export const geometrieAnalytiquePlane: ChapterContent = {
   recap: {
     items: [
       'Droite — un point + un vecteur directeur, c\'est la seule vérité géométrique. 4 formes ' +
-        'équivalentes (implicite, explicite en y, explicite en x, paramétrique) ; les deux ' +
-        'formes explicites sont parfois impossibles (verticale/horizontale).',
-      'Pente et angle — $m=\\tan\\theta$, $\\theta \\in [0°;180°[$. Angle avec Oy = 90° − angle ' +
-        'avec Ox, ramené dans $[0°;180°[$. La pente peut être négative (droite qui descend), mais un ' +
-        'angle ne l\'est jamais : une pente négative donne un angle avec Ox obtus.',
+        'équivalentes (implicite, explicite en $y$, explicite en $x$, paramétrique) ; les deux formes ' +
+        'explicites sont parfois impossibles (verticale/horizontale).',
+      'Pente et angle — $m=\\tan\\theta$, $\\theta \\in [0^\\circ\\,;180^\\circ[$. $\\text{Angle avec } Oy ' +
+        '= 90^\\circ - \\text{angle avec } Ox$, ramené dans $[0^\\circ\\,;180^\\circ[$. La pente peut être ' +
+        'négative (droite qui descend), mais un angle ne l\'est jamais : une pente négative donne un ' +
+        'angle avec $Ox$ obtus.',
       'Parallèles / perpendiculaires — critère de colinéarité nul ↔ colinéaires ; produit scalaire nul ↔ ' +
         'orthogonaux. En pentes : $m=m\'$ ou $m \\cdot m\'=-1$.',
       "Intersection — compare d'abord les vecteurs directeurs (sécantes ou colinéaires), avant tout calcul de système.",
       'Distance — jamais de formule directe : perpendiculaire, intersection, puis norme du vecteur obtenu.',
-      'Cercle — $(x-x_0)^2+(y-y_0)^2=r^2$. En développée, le coefficient de x² et de y² doit ' +
+      'Cercle — $(x-x_0)^2+(y-y_0)^2=r^2$. En développée, le coefficient de $x^2$ et de $y^2$ doit ' +
         'être **identique**, puis tu complètes le carré pour retrouver centre et rayon.',
-      'Parabole — PF = distance(P, directrice). p est **signé**, le sommet est à mi-chemin entre ' +
-        'foyer et directrice, et il y a 2 orientations symétriques.',
+      'Parabole — $PF = \\text{distance}(P, \\text{directrice})$. $p$ est **signé**, le sommet est à ' +
+        'mi-chemin entre foyer et directrice, et il y a 2 orientations symétriques.',
       'Lieux géométriques — traduis la phrase en équation, résous le système par substitution (au plus du second degré quand l\'un des deux lieux est une droite), dénombre 0, 1 ou 2 solutions.',
     ],
     checklist: {
       label: 'Avant de rendre ta copie',
       items: [
         "Ai-je bien vérifié qu'une droite verticale ou horizontale n'admet pas les deux formes explicites ?",
-        'Le p de ma parabole est-il bien signé — jamais une distance donnée en positif par défaut ?',
-        'Le coefficient de x² et de y² de mon cercle sont-ils bien identiques avant que je complète le carré ?',
-        'Ai-je diagnostiqué le cas (sécantes / parallèles / confondues, 0/1/2 points) avant de me lancer dans un calcul ?',
+        'Le $p$ de ma parabole est-il bien signé — jamais une distance donnée en positif par défaut ?',
+        'Le coefficient de $x^2$ et de $y^2$ de mon cercle sont-ils bien identiques avant que je ' +
+          'complète le carré ?',
+        'Ai-je diagnostiqué le cas (sécantes / parallèles / confondues, 0, 1 ou 2 points) avant de ' +
+          'me lancer dans un calcul ?',
         'Après avoir complété le carré, mon second membre est-il bien positif (sinon, ce n\'est pas un cercle) ?',
-        'Ai-je évité « m · m′ = −1 » quand l\'une des deux droites est verticale ou horizontale ?',
+        'Ai-je évité « $m \\cdot m\' = -1$ » quand l\'une des deux droites est verticale ou horizontale ?',
       ],
     },
     forward:

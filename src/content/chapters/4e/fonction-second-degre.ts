@@ -1768,34 +1768,34 @@ export const fonctionSecondDegre: ChapterContent = {
 
   recap: {
     items: [
-      '**Coefficient a** — son signe donne le sens d\'ouverture (minimum ou maximum). Sa valeur ' +
-        'absolue donne l\'allure (resserrée ou aplatie). b et c n\'y changent rien.',
-      '**Lire et reconnaître** — sur un graphique : a par l\'ouverture, $c = f(0)$, b par la ' +
-        'position de l\'axe et le signe de a. Dans un tableau de valeurs (x de 1 en 1) : ' +
+      '**Coefficient** $\\boldsymbol{a}$ — son signe donne le sens d\'ouverture (minimum ou maximum). ' +
+        'Sa valeur absolue donne l\'allure (resserrée ou aplatie). $b$ et $c$ n\'y changent rien.',
+      '**Lire et reconnaître** — sur un graphique : $a$ par l\'ouverture, $c = f(0)$, $b$ par la ' +
+        'position de l\'axe et le signe de $a$. Dans un tableau de valeurs ($x$ de 1 en 1) : ' +
         'différences secondes constantes, égales à $2a$.',
       '**Sommet et axe** — $S(x_S\\,;\\,y_S)$ est le point extrémal, $x=x_S$ son axe de ' +
         'symétrie. $x_S = -\\dfrac{b}{2a}$, $y_S = f(x_S)$. Deux points de même hauteur suffisent aussi ' +
         'à le retrouver par leur milieu.',
       '**Domaine et image** — $\\operatorname{dom} f = \\mathbb{R}$, toujours. ' +
         '$\\operatorname{im} f = [y_S\\,;\\,{+\\infty}[$ si $a>0$, $]{-\\infty}\\,;\\,y_S]$ si $a<0$.',
-      '**Zéros et signe** — 0, 1 ou 2 racines réelles. Entre les racines : signe opposé à a. À ' +
-        'l\'extérieur : signe de a.',
-      '**Transformations** — $y = a(x-p)^2+q$ : translation horizontale p (vers la droite si ' +
-        '$p > 0$), verticale q ; $|a| > 1$ étire, $0 < |a| < 1$ comprime, $a < 0$ retourne la courbe.',
-      '**Forme canonique** — $f(x)=a(x-x_S)^2+y_S$. On l\'obtient en complétant le carré. Si ' +
-        '$a \\neq 1$, on met a en évidence avant.',
-      '**Trois écritures** — développée (lit c), canonique (lit le sommet), factorisée (lit les ' +
-        'zéros). Pour retrouver une équation : sommet + un point, ou zéros + un point, donnent a.',
+      '**Zéros et signe** — 0, 1 ou 2 racines réelles. Entre les racines : signe opposé à $a$. À ' +
+        'l\'extérieur : signe de $a$.',
+      '**Transformations** — $y = a(x-p)^2+q$ : translation horizontale $p$ (vers la droite si $p > ' +
+        '0$), verticale $q$ ; $|a| > 1$ étire, $0 < |a| < 1$ comprime, $a < 0$ retourne la courbe.',
+      '**Forme canonique** — $f(x)=a(x-x_S)^2+y_S$. On l\'obtient en complétant le carré. Si $a \\neq ' +
+        '1$, on met $a$ en évidence avant.',
+      '**Trois écritures** — développée (lit $c$), canonique (lit le sommet), factorisée (lit les ' +
+        'zéros). Pour retrouver une équation : sommet + un point, ou zéros + un point, donnent $a$.',
       '**En contexte** — modélise (variable → grandeur → domaine de validité). Puis vérifie si ' +
         'le sommet théorique tombe dans ce domaine, avant de conclure à un optimum réel.',
     ],
     checklist: {
       items: [
         "Ai-je développé l'expression, avant de dire que c'est bien une fonction du second degré ?",
-        'Ai-je vérifié le signe de a, avant de parler de minimum ou de maximum ?',
-        'Pour lire le signe de b sur un graphique, ai-je tenu compte du signe de a ?',
-        'Dans $a(x+2)^2-1$, ai-je bien lu $x_S = -2$, et non 2 ?',
-        'En complétant le carré, ai-je bien redistribué a sur le terme sorti de la parenthèse ?',
+        'Ai-je vérifié le signe de $a$, avant de parler de minimum ou de maximum ?',
+        'Pour lire le signe de $b$ sur un graphique, ai-je tenu compte du signe de $a$ ?',
+        'Dans $a(x+2)^2-1$, ai-je bien lu $x_S = -2$, et non $2$ ?',
+        'En complétant le carré, ai-je bien redistribué $a$ sur le terme sorti de la parenthèse ?',
         'En contexte, ai-je vérifié que le sommet (ou la borne retenue) est dans le domaine de ' +
           'validité réel — pas seulement dans le domaine mathématique ?',
       ],

@@ -2321,19 +2321,19 @@ export const equationsInequationsSecondDegre: ChapterContent = {
 
   recap: {
     items: [
-      '**Résoudre** — essaie d\'abord les 3 raccourcis (c = 0 ; b = 0 avec a et c de signes ' +
-        'opposés ; carré parfait), repère le cas sans solution visible (b = 0, a et c de même ' +
-        'signe) et le cas caché (une même expression des deux côtés). Si $a+b+c=0$ ou ' +
-        '$a-b+c=0$, la racine évidente est une méthode possible — le discriminant reste juste ' +
-        'aussi. Le discriminant, c\'est pour le cas général — jamais par défaut !',
-      '**Discriminant** — $\\Delta = b^2-4ac$, $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$. ' +
-        'Viète : $S = x_1+x_2 = -b/a$, $P = x_1 \\cdot x_2 = c/a$.',
-      '**Écrire une équation à partir des racines** — $a(x-x_1)(x-x_2)=0$ ($a \\neq 0$). Ou, à ' +
-        'un facteur a près : $x^2 - Sx + P = 0$.',
-      '**Signe d\'un trinôme** — racines → signe de a → intervalle. Toujours avec des crochets ' +
+      '**Résoudre** — essaie d\'abord les 3 raccourcis ($c = 0$ ; $b = 0$ avec $a$ et $c$ de signes ' +
+        'opposés ; carré parfait), repère le cas sans solution visible ($b = 0$, $a$ et $c$ de même ' +
+        'signe) et le cas caché (une même expression des deux côtés). Si $a+b+c=0$ ou $a-b+c=0$, la ' +
+        'racine évidente est une méthode possible — le discriminant reste juste aussi. Le ' +
+        'discriminant, c\'est pour le cas général — jamais par défaut !',
+      '**Discriminant** — $\\Delta = b^2-4ac$, $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$. Viète : $S = ' +
+        'x_1+x_2 = -\\dfrac{b}{a}$, $P = x_1 \\cdot x_2 = \\dfrac{c}{a}$.',
+      '**Écrire une équation à partir des racines** — $a(x-x_1)(x-x_2)=0$ ($a \\neq 0$). Ou, à un ' +
+        'facteur $a$ près : $x^2 - Sx + P = 0$.',
+      '**Signe d\'un trinôme** — racines → signe de $a$ → intervalle. Toujours avec des crochets ' +
         'inversés, jamais des parenthèses.',
       '**Produit de facteurs** — une ligne par facteur. Nombre impair de facteurs négatifs → ' +
-        'produit négatif. Un facteur irréductible (Δ<0) garde toujours le même signe — pas de ' +
+        'produit négatif. Un facteur irréductible ($\\Delta<0$) garde toujours le même signe — pas de ' +
         'racine à ajouter.',
       '**Fractions rationnelles** — simplifie seulement après avoir tout factorisé. La CE se ' +
         'pose sur le dénominateur avant de simplifier, jamais après.',
@@ -2346,11 +2346,12 @@ export const equationsInequationsSecondDegre: ChapterContent = {
     checklist: {
       items: [
         'Ai-je cherché une méthode plus rapide que le discriminant ?',
-        'Ai-je bien mis −b, et pas b, dans la formule du discriminant ?',
+        'Ai-je bien mis $-b$, et pas $b$, dans la formule du discriminant ?',
         'Ai-je posé la CE sur chaque dénominateur, avant de simplifier ou de multiplier en croix ?',
         'Ai-je vérifié chaque solution trouvée avec la CE ?',
         'Dans une inéquation rationnelle, ai-je tout passé à gauche au lieu de multiplier en croix ?',
-        'Pour Δ < 0 ou Δ = 0, ai-je écrit S = ℝ, ∅, ℝ \\ {r} ou {r}, selon le symbole ?',
+        'Pour $\\Delta < 0$ ou $\\Delta = 0$, ai-je écrit $S = \\mathbb{R}$, $\\varnothing$, ' +
+          '$\\mathbb{R} \\setminus \\{r\\}$ ou $\\{r\\}$, selon le symbole ?',
         'En contexte, ai-je rejeté les solutions hors du domaine de validité (temps négatif, longueur trop grande…) ?',
       ],
     },

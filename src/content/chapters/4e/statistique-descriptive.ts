@@ -1964,35 +1964,38 @@ export const statistiqueDescriptive: ChapterContent = {
 
   recap: {
     items: [
-      '**Vocabulaire** — population, individu, caractère (discret ou continu), effectif nᵢ, ' +
-        'effectif total n, fréquence fᵢ = nᵢ/n.',
-      '**Regroupement** — tableau de fréquences pour une liste discrète. Convention [inf;sup[ ' +
-        'pour un caractère continu (sauf la dernière classe, fermée des deux côtés). Classes de ' +
-        'même amplitude pour construire un histogramme ; ailleurs, les amplitudes peuvent ' +
-        'différer.',
-      '**Moyenne** — $\\bar{x} = \\Sigma(x_i \\cdot n_i)/\\Sigma n_i$, jamais la moyenne des ' +
+      '**Vocabulaire** — population, individu, caractère (discret ou continu), effectif $n_i$, ' +
+        'effectif total $n$, fréquence $f_i = \\dfrac{n_i}{n}$.',
+      '**Regroupement** — tableau de fréquences pour une liste discrète. Convention ' +
+        '$[\\text{inf}\\,;\\text{sup}[$ pour un caractère continu (sauf la dernière classe, fermée des ' +
+        'deux côtés). Classes de même amplitude pour construire un histogramme ; ailleurs, les ' +
+        'amplitudes peuvent différer.',
+      '**Moyenne** — $\\bar{x} = \\dfrac{\\sum x_i \\cdot n_i}{\\sum n_i}$, jamais la moyenne des ' +
         'valeurs distinctes seules.',
-      '**Position** — médiane/Q1/Q3 = première valeur dont l\'effectif cumulé dépasse ' +
-        '**strictement** le seuil (n/2, n/4, 3n/4). Interpolation linéaire pour des classes.',
-      '**Boîte à moustaches** — 5 nombres : min, Q1, médiane, Q3, max. Écart interquartile = ' +
-        'Q3 − Q1, la largeur de la boîte. Chaque partie contient environ 25 % des valeurs ; une ' +
+      '**Position** — médiane / $Q_1$ / $Q_3$ = première valeur dont l\'effectif cumulé dépasse ' +
+        '**strictement** le seuil ($\\dfrac{n}{2}$, $\\dfrac{n}{4}$, $\\dfrac{3n}{4}$). Interpolation ' +
+        'linéaire pour des classes.',
+      '**Boîte à moustaches** — 5 nombres : min, $Q_1$, médiane, $Q_3$, max. Écart interquartile $= ' +
+        'Q_3 - Q_1$, la largeur de la boîte. Chaque partie contient environ 25 % des valeurs ; une ' +
         'médiane décentrée signale une série asymétrique.',
-      '**Dispersion** — étendue = max−min. Variance = $\\Sigma(x_i-\\bar{x})^2 \\cdot n_i/n$, ' +
-        'division par n. Écart-type = √variance, calculé depuis la variance déjà arrondie.',
-      '**Bienaymé-Tchebychev** — au moins (1−1/k²)×100% des valeurs dans ' +
-        '$[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$, pour k>1 (k=2 → au moins 75%).',
+      '**Dispersion** — étendue $= \\max - \\min$. Variance $= \\dfrac{\\sum (x_i-\\bar{x})^2 \\cdot ' +
+        'n_i}{n}$, division par $n$. Écart-type $= \\sqrt{\\text{variance}}$, calculé depuis la ' +
+        'variance déjà arrondie.',
+      '**Bienaymé-Tchebychev** — au moins $\\left(1-\\dfrac{1}{k^2}\\right) \\times 100\\,\\%$ des ' +
+        'valeurs dans $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$, pour $k>1$ ($k=2$ → au moins ' +
+        '$75\\,\\%$).',
       '**Comparer deux séries** — centrage (les médianes), dispersion (écart-type ou écart ' +
         'interquartile), lecture d\'un seuil sur les courbes cumulées, puis une phrase de conclusion.',
     ],
     checklist: {
       items: [
-        'Ma colonne d\'effectifs cumulés se termine-t-elle bien par n ? Et ma fréquence ' +
-          'cumulée par 100 % ?',
+        'Ma colonne d\'effectifs cumulés se termine-t-elle bien par $n$ ? Et ma fréquence cumulée ' +
+          'par 100 % ?',
         'Ai-je bien pris la première valeur dont le cumulé dépasse strictement le seuil, ' +
           'jamais celle qui l\'atteint tout juste ?',
-        'Ai-je divisé la somme des carrés d\'écarts par n, pas par n−1 ?',
+        'Ai-je divisé la somme des carrés d\'écarts par $n$, pas par $n-1$ ?',
         'Ai-je calculé l\'écart-type à partir de la variance déjà arrondie ?',
-        'Sur ma calculatrice, ai-je lu σx (division par n), et pas sx ?',
+        'Sur ma calculatrice, ai-je lu $\\sigma_x$ (division par $n$), et pas $s_x$ ?',
       ],
     },
     forward:

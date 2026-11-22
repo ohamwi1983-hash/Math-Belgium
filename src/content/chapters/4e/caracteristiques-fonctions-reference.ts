@@ -1475,21 +1475,23 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
 
   recap: {
     items: [
-      '**6 familles** — carrée (x²), cube (x³), racine carrée (√x, domaine [0;+∞[), racine ' +
-        'cubique (∛x), inverse (1/x, domaine privé de 0), valeur absolue (|x|).',
+      '**6 familles** — carrée ($x^2$), cube ($x^3$), racine carrée ($\\sqrt{x}$, domaine ' +
+        '$[0\\,;+\\infty[$), racine cubique ($\\sqrt[3]{x}$), inverse ($\\dfrac{1}{x}$, domaine privé de ' +
+        '0), valeur absolue ($|x|$).',
       '**Lecture graphique** — toujours dans l\'ordre domaine → ensemble image → zéros → ' +
         'variations → ordonnée à l\'origine → valeur en un point → asymptotes. Distingue bien ' +
         'trou, point plein et point redéfini.',
-      '**Image et antécédent** — l\'image de a se lit à la verticale de a ; les antécédents ' +
-        'de k à la hauteur k. Résoudre $f(x) = k$ ou $f(x) > k$, c\'est comparer la courbe à la ' +
+      '**Image et antécédent** — l\'image de $a$ se lit à la verticale de $a$ ; les antécédents de ' +
+        '$k$ à la hauteur $k$. Résoudre $f(x) = k$ ou $f(x) > k$, c\'est comparer la courbe à la ' +
         'droite $y = k$ (ou à une autre courbe).',
-      '**Étude algébrique** — CE selon la famille (aucune, ≠0 pour l\'inverse, ≥0 ou ≤0 selon ' +
-        'le signe de a pour la racine carrée), puis isole pour trouver les zéros. Carrée et ' +
-        'valeur absolue se séparent toujours en deux équations. Si le membre de droite contient ' +
-        'x : condition de validité, puis validation de chaque candidate.',
-      '**Formule unifiée** — $f(x) = SOX \\cdot (EV/CV) \\cdot g(SOY \\cdot (CH/EH) \\cdot ' +
-        '(x-TH)) + TV$. TH est toujours soustrait, TV toujours ajouté. Le point caractéristique ' +
-        'reste toujours en x = TH. $g(kx)$ comprime horizontalement si $k > 1$ (facteur 1/k).',
+      '**Étude algébrique** — CE selon la famille (aucune, $\\neq 0$ pour l\'inverse, $\\geq 0$ ou ' +
+        '$\\leq 0$ selon le signe de $a$ pour la racine carrée), puis isole pour trouver les zéros. ' +
+        'Carrée et valeur absolue se séparent toujours en deux équations. Si le membre de droite ' +
+        'contient $x$ : condition de validité, puis validation de chaque candidate.',
+      '**Formule unifiée** — $f(x) = \\text{SOX} \\cdot (\\text{EV/CV}) \\cdot g\\big(\\text{SOY} \\cdot ' +
+        '(\\text{CH/EH}) \\cdot (x-\\text{TH})\\big) + \\text{TV}$. TH est toujours soustrait, TV toujours ' +
+        'ajouté. Le point caractéristique reste toujours en $x = \\text{TH}$. $g(kx)$ comprime ' +
+        'horizontalement si $k > 1$ (facteur $\\dfrac{1}{k}$).',
       '**Parité et redondance** — SOY est invisible pour une famille paire. SOX et SOY sont ' +
         'interchangeables pour une famille impaire. Seule la racine carrée donne à SOY un rôle ' +
         'vraiment indépendant.',
@@ -1497,9 +1499,10 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
     checklist: {
       items: [
         'Ai-je bien identifié la famille avant de chercher la forme canonique ?',
-        'Ai-je vérifié le signe de a avant de conclure sur le sens de l\'inégalité de la CE (racine carrée) ?',
+        'Ai-je vérifié le signe de $a$ avant de conclure sur le sens de l\'inégalité de la CE ' +
+          '(racine carrée) ?',
         'Ai-je séparé en deux équations pour la carrée/valeur absolue, plutôt qu\'une seule ?',
-        'Si le membre de droite contient x, ai-je confronté chaque candidate à la condition de validité ?',
+        'Si le membre de droite contient $x$, ai-je confronté chaque candidate à la condition de validité ?',
         'Ai-je lu le domaine en premier, avant les variations, sur une courbe composite ?',
       ],
     },
