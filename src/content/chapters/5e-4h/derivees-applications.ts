@@ -114,8 +114,8 @@ export const deriveesApplications: ChapterContent = {
           caption:
             'Fais tendre h vers 0, par la droite puis par la gauche : la sécante (AB) ' +
             'pivote autour de A et le taux d\'accroissement se stabilise. Le tableau garde ' +
-            'les taux des valeurs repères ; coche la tangente pour voir la limite f\'(a). ' +
-            'Essaie aussi x³, 1/x et √x.',
+            'les taux des valeurs repères ; coche la tangente pour voir la limite $f\'(a)$. ' +
+            'Essaie aussi $x^3$, $\\dfrac{1}{x}$ et $\\sqrt{x}$.',
         },
         {
           kind: 'methode',
@@ -187,7 +187,7 @@ export const deriveesApplications: ChapterContent = {
           description: [
             'Calcule f(a) et f(a+h), simplifie le taux d\'accroissement, puis passe à la limite ' +
               'pour obtenir f\'(a) — sur des fonctions affines, quadratiques et rationnelles ' +
-              '(k/x, k/x², (mx+p)/(x−q)).',
+              '(k⁄x, k⁄x², (mx + p) / (x − q)).',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 26. Calculer f\'(a) par la définition »',
@@ -500,7 +500,7 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — 1/x et √x, retrouvées à partir de la définition (section 1)',
+          label: 'Démonstration — 1⁄x et √x, retrouvées à partir de la définition (section 1)',
           blocks: [
             {
               kind: 'para',
@@ -602,7 +602,7 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'attention',
-          label: '(uv)\' ≠ u\'·v\', et (u/v)\' ≠ u\'/v\'',
+          label: '(uv)\' ≠ u\'·v\', et (u⁄v)\' ≠ u\'⁄v\'',
           text:
             'L\'erreur la plus fréquente de ce chapitre : dériver un produit ou un quotient en ' +
             'dérivant chaque facteur SÉPARÉMENT, puis en les recombinant naïvement. Seules la ' +
@@ -616,7 +616,7 @@ export const deriveesApplications: ChapterContent = {
           steps: [
             { tag: 'identifier u et v', text: '$u(x)=x^2+1$, $u\'(x)=2x$ ; $v(x)=x-2$, $v\'(x)=1$' },
             {
-              tag: 'appliquer (u/v)\'=(u\'v−uv\')/v², ordre du numérateur respecté',
+              tag: 'appliquer (u⁄v)\'=(u\'v−uv\') / v², ordre du numérateur respecté',
               text: '$f\'(x) = \\dfrac{2x(x-2) - (x^2+1)(1)}{(x-2)^2} = \\dfrac{2x^2-4x-x^2-1}{(x-2)^2}$',
             },
           ],
@@ -1490,7 +1490,7 @@ export const deriveesApplications: ChapterContent = {
               tag: '2. asymptote verticale — x=1 (numérateur en x=1 : 1−2+5=4≠0, vraie asymptote)',
               text: '$\\displaystyle\\lim_{x \\to 1^-} f(x) = -\\infty$ ; $\\displaystyle\\lim_{x \\to 1^+} f(x) = +\\infty$',
             },
-            { tag: 'asymptote oblique — le terme 4/(x−1) tend vers 0 à l\'infini', text: '$y = x - 1$' },
+            { tag: 'asymptote oblique — le terme 4 / (x−1) tend vers 0 à l\'infini', text: '$y = x - 1$' },
             { tag: '3. dériver', text: '$f\'(x) = 1 - \\dfrac{4}{(x-1)^2}$' },
             { tag: 'zéros de f\' — résoudre f\'(x)=0', text: '$1 = \\dfrac{4}{(x-1)^2} \\iff (x-1)^2 = 4 \\iff x-1 = \\pm 2 \\iff x = -1$ ou $x = 3$' },
             {
@@ -1774,9 +1774,9 @@ export const deriveesApplications: ChapterContent = {
           tag: 'canette-optimale-widget',
           label: 'Manipule toi-même : la canette optimale',
           caption:
-            'Pour 330 cm³, fais varier le rayon : l\'aire de métal est minimale quand h = ' +
-            '2r. Coche « fond et couvercle épais » : l\'optimum passe à h = 4r, plus proche ' +
-            'd\'une vraie canette (h/r ≈ 3,5). Un modèle plus réaliste change la réponse.',
+            'Pour 330 cm³, fais varier le rayon : l\'aire de métal est minimale quand ' +
+            '$h = 2r$. Coche « fond et couvercle épais » : l\'optimum passe à $h = 4r$, plus proche ' +
+            'd\'une vraie canette ($\\dfrac{h}{r} \\approx 3{,}5$). Un modèle plus réaliste change la réponse.',
         },
         {
           kind: 'entrainement',
@@ -1908,8 +1908,8 @@ export const deriveesApplications: ChapterContent = {
           label: 'Manipule toi-même : Rm = Cm au bénéfice maximal',
           caption:
             'Fais glisser x pour voir Rm et Cm se croiser au bénéfice maximal. Change le ' +
-            'prix de départ a : l\'optimum x* = (a − 10)/4 se déplace. Change le coût fixe c ' +
-            ': la courbe de B descend, mais x* ne bouge pas.',
+            'prix de départ a : l\'optimum $x^* = \\dfrac{a - 10}{4}$ se déplace. Change le coût fixe c ' +
+            ': la courbe de B descend, mais $x^*$ ne bouge pas.',
         },
         { kind: 'subheading', text: 'Coût moyen minimal — et la dichotomie pour l\'approcher' },
         {

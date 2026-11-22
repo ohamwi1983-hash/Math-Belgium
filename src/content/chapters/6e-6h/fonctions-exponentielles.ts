@@ -319,10 +319,10 @@ export const fonctionsExponentielles: ChapterContent = {
           title: 'Puissances à exposant réel sans calculatrice',
           generatorId: '6gen146',
           description: [
-            'Applique les règles (1) à (4) à des exposants irrationnels : 2^√3 · 2^(1−√3), ' +
-              '(5^√2)^√2, 4^√2 · 2^(3−2√2)… écrits comme une seule puissance, puis leur valeur exacte. ' +
-              'Compare 3^√2 et 3^1,4 sans calculatrice (et attention aux bases entre 0 et 1), et ' +
-              'réécris (1/2)^(−x), 0,5ˣ · 8ˣ ou 9ˣ/3^(x+1) comme une puissance de 2 ou de 3.',
+            'Applique les règles (1) à (4) à des exposants irrationnels : 2 exposant √3 · 2 exposant (1 − √3), ' +
+              '(5 exposant √2) exposant √2, 4 exposant √2 · 2 exposant (3 − 2√2)… écrits comme une seule puissance, puis leur valeur exacte. ' +
+              'Compare 3 exposant √2 et 3 exposant 1,4 sans calculatrice (et attention aux bases entre 0 et 1), et ' +
+              'réécris (1⁄2)⁻ˣ, 0,5ˣ · 8ˣ ou 9ˣ⁄3ˣ⁺¹ comme une puissance de 2 ou de 3.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 146. Puissances à exposant réel sans calculatrice »',
@@ -523,7 +523,7 @@ export const fonctionsExponentielles: ChapterContent = {
               text: '$x^2 \\cdot e^{-x} = \\dfrac{x^2}{e^x}$',
             },
             {
-              tag: 'les deux limites, forme indéterminée ∞/∞',
+              tag: 'les deux limites, forme indéterminée ∞⁄∞',
               text: '$\\displaystyle\\lim_{x \\to +\\infty} x^2 = +\\infty \\quad$ et $\\quad \\displaystyle\\lim_{x \\to +\\infty} e^x = +\\infty$',
             },
           ],
@@ -564,8 +564,8 @@ export const fonctionsExponentielles: ChapterContent = {
           title: 'Limites de référence et croissances comparées',
           generatorId: '6gen145',
           description: [
-            'Reconnais la forme (0/0, ∞/∞, 0·∞, ∞ − ∞… ou pas indéterminée du tout), choisis la ' +
-              'limite de référence qui conclut — (eᵘ − 1)/u → 1, (aˣ − 1)/x → ln a, xⁿ/aˣ → 0 en +∞, ' +
+            'Reconnais la forme (0⁄0, ∞⁄∞, 0·∞, ∞ − ∞… ou pas indéterminée du tout), choisis la ' +
+              'limite de référence qui conclut — (eᵘ − 1) / u → 1, (aˣ − 1) / x → ln a, xⁿ⁄aˣ → 0 en +∞, ' +
               'xⁿ·aˣ → 0 en −∞ — puis donne la valeur exacte de la limite.',
           ],
           chantier: '6e-6h',
@@ -931,7 +931,7 @@ export const fonctionsExponentielles: ChapterContent = {
         {
           kind: 'atelier',
           tag: 'vers-e-widget',
-          label: 'Manipule toi-même — vers e : (1 + 1/n)ⁿ et les intérêts composés',
+          label: 'Manipule toi-même — vers e : (1 + 1⁄n)ⁿ et les intérêts composés',
           caption:
             "Premier mode : fais grandir n jusqu'à un milliard avec le curseur logarithmique et regarde les " +
             'chiffres de e apparaître un à un. Second mode : 1 000 € placés un an à 100 %, intérêts versés ' +
@@ -939,7 +939,7 @@ export const fonctionsExponentielles: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — la limite de (1 + k/x)ˣ',
+          label: 'Démonstration — la limite de (1 + k⁄x)ˣ',
           blocks: [
             {
               kind: 'para',
@@ -1236,7 +1236,7 @@ export const fonctionsExponentielles: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'forme 0/0 — règle de L’Hôpital',
+          badge: 'forme 0⁄0 — règle de L’Hôpital',
           formula: '$\\displaystyle\\lim_{x \\to 0} \\dfrac{\\sin(4x)}{e^{2x} - 1}$',
           steps: [
             {
@@ -1833,10 +1833,10 @@ export const fonctionsExponentielles: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'base 1/2, entre 0 et 1',
+          badge: 'base 1⁄2, entre 0 et 1',
           formula: '$(1/2)^x < (1/2)^{-3} = 8$',
           steps: [],
-          result: { tag: 'base 1/2 < 1 : on inverse le comparateur', text: '$x > -3$' },
+          result: { tag: 'base 1⁄2 < 1 : on inverse le comparateur', text: '$x > -3$' },
         },
         {
           kind: 'definition',
@@ -2276,11 +2276,11 @@ export const fonctionsExponentielles: ChapterContent = {
               cells: [
                 { text: '−∞', tone: 'zero' },
                 { text: '', tone: 'plain' },
-                { text: '−√2/2', tone: 'zero' },
+                { text: '−√2⁄2', tone: 'zero' },
                 { text: '', tone: 'plain' },
                 { text: '0', tone: 'zero' },
                 { text: '', tone: 'plain' },
-                { text: '√2/2', tone: 'zero' },
+                { text: '√2⁄2', tone: 'zero' },
                 { text: '', tone: 'plain' },
                 { text: '+∞', tone: 'zero' },
               ],
@@ -2930,7 +2930,7 @@ export const fonctionsExponentielles: ChapterContent = {
           generatorId: '6gen144',
           description: [
             "La résolution d'un élève contient une seule ligne fausse : trouve-la, nomme l'erreur " +
-              '(facteur ln a oublié, signe de e^(−kx) perdu, sens non inversé pour une base entre 0 et 1, ' +
+              '(facteur ln a oublié, signe de e⁻ᵏˣ perdu, sens non inversé pour une base entre 0 et 1, ' +
               'racine négative gardée après t = aˣ, règles des puissances, dominance renversée, ' +
               'r = 1 + p pour une baisse, différence prise pour un rapport) et corrige le résultat.',
           ],

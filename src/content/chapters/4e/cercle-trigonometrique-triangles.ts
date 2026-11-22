@@ -360,7 +360,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'sin θ = 3/5, θ ∈ ]90° ; 180°[',
+          badge: 'sin θ = 3⁄5, θ ∈ ]90° ; 180°[',
           steps: [
             { tag: 'quadrant de θ', text: ']90° ; 180°[ → quadrant II → cos négatif' },
             { tag: 'isoler cos²θ', text: '$\\cos^2\\theta = 1 - \\left(\\dfrac{3}{5}\\right)^2 = 1 - \\dfrac{9}{25} = \\dfrac{16}{25}$' },
@@ -378,11 +378,11 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             '+ sin²θ = 1 donne toujours deux candidats ±, et seul le quadrant permet de ' +
             'garder le bon. Le triangle rectangle OPM, d\'hypoténuse 1, montre d\'où vient la ' +
             'formule. Les boutons donnent des valeurs exactes, et le réglage de départ ' +
-            'reproduit le premier exemple (sin θ = 3/5, quadrant II).',
+            'reproduit le premier exemple ($\\sin\\theta = \\dfrac{3}{5}$, quadrant II).',
         },
         {
           kind: 'exemple',
-          badge: 'cos θ = −1/3, θ ∈ ]180° ; 270°[',
+          badge: 'cos θ = −1⁄3, θ ∈ ]180° ; 270°[',
           steps: [
             { tag: 'quadrant de θ', text: ']180° ; 270°[ → quadrant III → sin négatif' },
             { tag: 'isoler sin²θ', text: '$\\sin^2\\theta = 1 - \\left(-\\dfrac{1}{3}\\right)^2 = 1 - \\dfrac{1}{9} = \\dfrac{8}{9}$' },
@@ -958,7 +958,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'cos α = −1/2',
+          badge: 'cos α = −1⁄2',
           steps: [
             { tag: 'angle de référence', text: '$\\cos\\alpha_0 = \\dfrac{1}{2}$, donc α₀ = 60°' },
             { tag: 'k négatif → famille 180°∓α₀', text: 'solutions : 180° − 60° = 120° et 180° + 60° = 240°' },
@@ -990,12 +990,12 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'remarquables) : l\'atelier trouve l\'angle de référence α₀, puis la symétrie qui ' +
             'donne les deux solutions. Fais glisser k vers ±1 : pour sin et cos, les deux ' +
             'solutions fusionnent, puis disparaissent au-delà. Pour tan, il y en a toujours ' +
-            'exactement deux. Le réglage de départ (cos α = −1/2) reproduit l\'exemple ' +
+            'exactement deux. Le réglage de départ ($\\cos\\alpha = -\\dfrac{1}{2}$) reproduit l\'exemple ' +
             'ci-dessus.',
         },
         {
           kind: 'exemple',
-          badge: 'sin α = −√2/2',
+          badge: 'sin α = −√2⁄2',
           steps: [
             { tag: 'angle de référence', text: '$\\sin\\alpha_0 = \\dfrac{\\sqrt{2}}{2}$, donc α₀ = 45°' },
             { tag: 'k négatif → quadrants III et IV', text: 'solutions : 180° + 45° = 225° et 360° − 45° = 315°' },
@@ -1136,7 +1136,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           steps: [
             { tag: 'produit nul', text: '$\\sin\\alpha = 0$ ou $2\\cos\\alpha - 1 = 0$, c\'est-à-dire $\\cos\\alpha = \\dfrac{1}{2}$' },
             { tag: 'sin α = 0', text: 'solutions sur l\'axe horizontal : 0° et 180°' },
-            { tag: 'cos α = 1/2', text: 'angle de référence 60°, cos positif dans les quadrants I et IV : 60° et 360° − 60° = 300°' },
+            { tag: 'cos α = 1⁄2', text: 'angle de référence 60°, cos positif dans les quadrants I et IV : 60° et 360° − 60° = 300°' },
           ],
           result: { tag: 'résultat', text: 'S = {0° ; 60° ; 180° ; 300°}' },
         },
@@ -1249,7 +1249,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       id: 'triangle',
       number: 6,
       title: 'Le triangle quelconque : lois des sinus et des cosinus',
-      kicker: 'a/sin Â = b/sin B̂ = c/sin Ĉ — et a² = b² + c² − 2bc·cos Â',
+      kicker: 'a / sin Â = b / sin B̂ = c / sin Ĉ — et a² = b² + c² − 2bc·cos Â',
       titreCourt: 'Triangle quelconque',
       partie: 'Les triangles quelconques',
       essentiel: [
@@ -1673,11 +1673,11 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           tag: 'triangle-deformable-widget',
           label: 'Manipule toi-même : un triangle qui se déforme',
           caption:
-            'Fais glisser les sommets du triangle. Les trois rapports a / sin Â, b / sin B̂ ' +
-            'et c / sin Ĉ restent toujours égaux, et égaux au diamètre du cercle ' +
-            'circonscrit. Al-Kashi apparaît comme un Pythagore corrigé : le terme −2bc·cos ' +
-            'Â est négatif si Â est aigu, nul si Â est droit, positif si Â est obtus. Le ' +
-            'réglage de départ est le triangle de l\'exemple SSS (a = 7, b = 5, c = 8).',
+            'Fais glisser les sommets du triangle. Les trois rapports $\\dfrac{a}{\\sin\\hat{A}}$, $\\dfrac{b}{\\sin\\hat{B}}$ ' +
+            'et $\\dfrac{c}{\\sin\\hat{C}}$ restent toujours égaux, et égaux au diamètre du cercle ' +
+            'circonscrit. Al-Kashi apparaît comme un Pythagore corrigé : le terme ' +
+            '$-2bc\\cos\\hat{A}$ est négatif si Â est aigu, nul si Â est droit, positif si Â est obtus. Le ' +
+            'réglage de départ est le triangle de l\'exemple SSS ($a = 7$, $b = 5$, $c = 8$).',
         },
         {
           kind: 'piege',

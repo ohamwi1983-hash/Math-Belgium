@@ -76,7 +76,7 @@ export const nombresComplexes: ChapterContent = {
             examplePoints: [
               { dx: 0, dy: 10, label: '1 ; 2 ; 3', anchor: 'start' },
               { dx: -40, dy: 6, label: '−3', anchor: 'end' },
-              { dx: 62, dy: 24, label: '1/2', anchor: 'start' },
+              { dx: 62, dy: 24, label: '1⁄2', anchor: 'start' },
               { dx: -95, dy: -50, label: '√2', anchor: 'end' },
               { dx: 128, dy: 68, label: 'i', anchor: 'start' },
             ],
@@ -935,7 +935,7 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'featureTable',
           caption: 'Valeurs exactes du cosinus et du sinus des angles remarquables',
-          headers: ['θ', '0', 'π/6', 'π/4', 'π/3', 'π/2'],
+          headers: ['θ', '0', 'π⁄6', 'π⁄4', 'π⁄3', 'π⁄2'],
           rows: [
             ['$\\cos\\theta$', '$1$', '$\\dfrac{\\sqrt{3}}{2}$', '$\\dfrac{\\sqrt{2}}{2}$', '$\\dfrac{1}{2}$', '$0$'],
             ['$\\sin\\theta$', '$0$', '$\\dfrac{1}{2}$', '$\\dfrac{\\sqrt{2}}{2}$', '$\\dfrac{\\sqrt{3}}{2}$', '$1$'],
@@ -1063,7 +1063,7 @@ export const nombresComplexes: ChapterContent = {
           caption:
             'Fais glisser r₁, θ₁, r₂, θ₂, puis bascule entre produit et quotient. Le ' +
             'réglage de départ (r₁ = 2, θ₁ = 60°, r₂ = 3, θ₂ = 30°) reproduit exactement ' +
-            'l\'exemple ci-dessus : z₁z₂ a pour module 6 et pour argument π/2. Le mode « × i ' +
+            'l\'exemple ci-dessus : $z_1z_2$ a pour module 6 et pour argument $\\dfrac{\\pi}{2}$. Le mode « × i ' +
             'répété » montre le quart de tour et le cycle 1, i, −1, −i.',
         },
         {
@@ -1092,7 +1092,7 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'cos(π/12) et sin(π/12) par deux écritures',
+          badge: 'cos(π⁄12) et sin(π⁄12) par deux écritures',
           formula: 'Calcule les valeurs exactes de $\\cos\\dfrac{\\pi}{12}$ et $\\sin\\dfrac{\\pi}{12}$ à l\'aide de $z=\\dfrac{1+i}{\\sqrt{3}+i}$.',
           steps: [
             {
@@ -1208,7 +1208,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'entrainement',
           title: 'Valeurs exactes par deux écritures d\'un même complexe',
           generatorId: '6gen94',
-          description: ['Écris z = (1 + i)/(√3 + i), ou un produit du même genre, sous forme algébrique puis sous forme trigonométrique (modules et arguments des facteurs), et identifie les deux écritures pour obtenir cos(π/12), sin(5π/12)… en valeurs exactes.'],
+          description: ['Écris z = (1 + i) / (√3 + i), ou un produit du même genre, sous forme algébrique puis sous forme trigonométrique (modules et arguments des facteurs), et identifie les deux écritures pour obtenir cos(π⁄12), sin(5π⁄12)… en valeurs exactes.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 94. Valeurs exactes par deux écritures d\'un même complexe »',
         },
@@ -1563,7 +1563,7 @@ export const nombresComplexes: ChapterContent = {
       id: 'racinesniemes',
       number: 6,
       title: 'Racines n-ièmes d\'un nombre complexe',
-      kicker: 'zₖ = ⁿ√r · exp(i(θ + 2kπ)/n) — polygone régulier',
+      kicker: 'zₖ = ⁿ√r · exp(i(θ + 2kπ) / n) — polygone régulier',
       titreCourt: 'Racines n-ièmes',
       partie: 'Module, argument, puissances',
       essentiel: [
@@ -1735,7 +1735,7 @@ export const nombresComplexes: ChapterContent = {
           title: 'Polygones réguliers et racines n-ièmes',
           generatorId: '6gen97',
           description: [
-            'Calcule les affixes exactes des sommets d\'un polygone régulier de centre C par une rotation, son côté 2r·sin(π/n), son périmètre et son aire, puis justifie que la somme des racines n-ièmes de l\'unité est nulle.',
+            'Calcule les affixes exactes des sommets d\'un polygone régulier de centre C par une rotation, son côté 2r·sin(π⁄n), son périmètre et son aire, puis justifie que la somme des racines n-ièmes de l\'unité est nulle.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 97. Polygones réguliers et racines n-ièmes »',
@@ -1904,7 +1904,7 @@ export const nombresComplexes: ChapterContent = {
           caption:
             'Fais glisser |a|, arg(a), Re(b), Im(b). Le réglage de départ (|a| = 1, arg(a) ' +
             '= 90°, b = 0) reproduit le cas z′ = iz de l\'astuce ci-dessus : rotation de ' +
-            'centre O et d\'angle π/2. Fais glisser M pour voir son image M′, le centre Ω, ' +
+            'centre $O$ et d\'angle $\\dfrac{\\pi}{2}$. Fais glisser M pour voir son image M′, le centre Ω, ' +
             'l\'angle et le rapport ; le mode « Composer » montre que l\'ordre compte quand ' +
             'les centres diffèrent.',
         },
@@ -2157,9 +2157,9 @@ export const nombresComplexes: ChapterContent = {
           tag: 'triangle-rapport-affixes-widget',
           label: 'Manipule toi-même : le triangle et son rapport d\'affixes',
           caption:
-            'Fais glisser A, B et C : le quotient q = (zC − zA)/(zB − zA) s\'affiche comme ' +
-            'un point. q réel : points alignés ; q imaginaire pur : rectangle en A ; |q| = ' +
-            '1 : isocèle en A ; q = i ou −i : isocèle rectangle ; q = e^(iπ/3) ou e^(−iπ/3) ' +
+            'Fais glisser A, B et C : le quotient $q = \\dfrac{z_C - z_A}{z_B - z_A}$ s\'affiche comme ' +
+            'un point. $q$ réel : points alignés ; $q$ imaginaire pur : rectangle en A ; ' +
+            '$|q| = 1$ : isocèle en A ; $q = i$ ou $-i$ : isocèle rectangle ; $q = e^{i\\pi/3}$ ou $e^{-i\\pi/3}$ ' +
             ': équilatéral. Les aimants t\'aident à atteindre ces cas exacts.',
         },
         {
@@ -2201,7 +2201,7 @@ export const nombresComplexes: ChapterContent = {
               { from: { x: 0, y: 0 }, to: { x: 2 * Math.cos(PI / 3), y: 2 * Math.sin(PI / 3) }, tone: 'good', tick: true },
               { from: { x: 2, y: 0 }, to: { x: 2 * Math.cos(PI / 3), y: 2 * Math.sin(PI / 3) }, tone: 'bad', tick: true },
             ],
-            angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 60, radiusPx: 24, label: 'π/3', tone: 'accent' }],
+            angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 60, radiusPx: 24, label: 'π⁄3', tone: 'accent' }],
             caption: '$OBF$ est équilatéral pour tout $B\\ne O$, avec $F=B\\cdot e^{i\\pi/3}$.',
           },
         },
@@ -2369,7 +2369,7 @@ export const nombresComplexes: ChapterContent = {
         { kind: 'subheading', text: 'Une transformation qui conserve le cercle unité' },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — pour |a|≠1, si |z|=1 alors |z′|=1 avec z′ = (z−a)/(1−āz)',
+          label: 'Démonstration — pour |a|≠1, si |z|=1 alors |z′|=1 avec z′ = (z − a) / (1 − āz)',
           blocks: [
             { kind: 'para', text: 'Hypothèse : $|z|=1$, c\'est-à-dire $z\\cdot\\bar{z}=1$ — définition du module au carré (section 1), appliquée à $|z|=1$' },
             { kind: 'para', text: '$z\\cdot\\bar{z}=1 \\implies \\bar{z} = 1/z$ — divise les deux membres par $z$ (non nul, car $|z|=1$)' },
@@ -2552,7 +2552,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'entrainement',
           title: 'Détective d\'erreurs : nombres complexes',
           generatorId: '6gen99',
-          description: ['La résolution d\'un élève contient une seule ligne fausse : trouve-la, nomme l\'erreur (argument sans correction de quadrant, i² = 1, conjugué oublié, rⁿ oublié dans Moivre, pas de 2π au lieu de 2π/n, |z + w| = |z| + |w|…) et corrige le résultat. Forme trigonométrique, quotient, puissance, Moivre, racines n-ièmes, module d\'une somme, et la célèbre « démonstration » de 1 = −1 (√(ab) = √a·√b appliquée à des négatifs).'],
+          description: ['La résolution d\'un élève contient une seule ligne fausse : trouve-la, nomme l\'erreur (argument sans correction de quadrant, i² = 1, conjugué oublié, rⁿ oublié dans Moivre, pas de 2π au lieu de 2π⁄n, |z + w| = |z| + |w|…) et corrige le résultat. Forme trigonométrique, quotient, puissance, Moivre, racines n-ièmes, module d\'une somme, et la célèbre « démonstration » de 1 = −1 (√(ab) = √a·√b appliquée à des négatifs).'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 99. Détective d\'erreurs : nombres complexes »',
         },

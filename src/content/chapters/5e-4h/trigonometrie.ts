@@ -165,8 +165,8 @@ export const trigonometrie: ChapterContent = {
           caption:
             'Fais varier le nombre de côtés n, ou passe en mode doublement pour refaire la ' +
             'démarche d\'Archimède : 6, 12, 24, 48 puis 96 côtés. Les périmètres inscrit ' +
-            'n·sin(π/n) et circonscrit n·tan(π/n) encadrent π de plus en plus près ; à 96 ' +
-            'côtés, Archimède obtenait 3 + 10/71 < π < 3 + 1/7.',
+            '$n\\sin\\left(\\frac{\\pi}{n}\\right)$ et circonscrit $n\\tan\\left(\\frac{\\pi}{n}\\right)$ encadrent $\\pi$ de plus en plus près ; à 96 ' +
+            'côtés, Archimède obtenait $3 + \\dfrac{10}{71} < \\pi < 3 + \\dfrac{1}{7}$.',
         },
         {
           kind: 'entrainement',
@@ -280,11 +280,11 @@ export const trigonometrie: ChapterContent = {
               tag: 'relier A et s — A = ½r²θ = ½r·(rθ) = ½r·s',
               text: '$A = \\dfrac{1}{2}r \\cdot s \\iff r = \\dfrac{2A}{s} = \\dfrac{2 \\times 40}{10} = 8$ cm',
             },
-            { tag: 'angle en radians — θ = s/r', text: '$\\theta = \\dfrac{10}{8} = 1{,}25$ rad' },
+            { tag: 'angle en radians — θ = s⁄r', text: '$\\theta = \\dfrac{10}{8} = 1{,}25$ rad' },
             { tag: 'vérification avec A = ½r²θ', text: '$A = \\dfrac{1}{2} \\times 8^2 \\times 1{,}25 = 40$ cm²' },
           ],
           result: {
-            tag: 'angle en degrés — × 180/π',
+            tag: 'angle en degrés — × 180⁄π',
             text: '$\\theta = 1{,}25 \\times \\dfrac{180}{\\pi} \\approx 71{,}62°$',
           },
         },
@@ -302,8 +302,8 @@ export const trigonometrie: ChapterContent = {
           kind: 'astuce',
           label: 'Astuce — les angles remarquables par cœur',
           items: [
-            '30° = π/6 · 45° = π/4 · 60° = π/3',
-            '90° = π/2 · 180° = π · 360° = 2π',
+            '$30^\\circ = \\dfrac{\\pi}{6}$ · $45^\\circ = \\dfrac{\\pi}{4}$ · $60^\\circ = \\dfrac{\\pi}{3}$',
+            '$90^\\circ = \\dfrac{\\pi}{2}$ · $180^\\circ = \\pi$ · $360^\\circ = 2\\pi$',
           ],
           text: 'Apprends ces six correspondances degré/radian par cœur : elles reviennent dans presque tous les exercices.',
         },
@@ -365,7 +365,7 @@ export const trigonometrie: ChapterContent = {
             'Un hexagone régulier ABCDEF est inscrit dans un cercle de centre O et de rayon ' +
             '$r = 4$ cm. Calcule l\'aire de la région comprise entre le côté [AB] et l\'arc AB.',
           steps: [
-            { tag: 'angle au centre d\'un côté — θ = 2π/n avec n = 6', text: '$\\theta = \\dfrac{2\\pi}{6} = \\dfrac{\\pi}{3}$' },
+            { tag: 'angle au centre d\'un côté — θ = 2π⁄n avec n = 6', text: '$\\theta = \\dfrac{2\\pi}{6} = \\dfrac{\\pi}{3}$' },
             {
               tag: 'aire du secteur OAB — A = ½r²θ',
               text: '$A_{secteur} = \\frac{1}{2} \\times 4^2 \\times \\dfrac{\\pi}{3} = \\dfrac{8\\pi}{3} \\approx 8{,}38$ cm²',
@@ -413,7 +413,7 @@ export const trigonometrie: ChapterContent = {
             'longueur de l\'arc et l\'aire du secteur qui couvrent trois côtés consécutifs du polygone.',
           steps: [
             {
-              tag: 'angle au centre — k côtés sur n : θ = k · 2π/n',
+              tag: 'angle au centre — k côtés sur n : θ = k · 2π⁄n',
               text: '$\\theta = 3 \\times \\dfrac{2\\pi}{8} = \\dfrac{3\\pi}{4}$',
             },
             {
@@ -458,7 +458,7 @@ export const trigonometrie: ChapterContent = {
           tag: 'secteur-segment-widget',
           label: 'Manipule toi-même — secteur, triangle et segment en direct',
           caption:
-            'En mode polygone, n fixe l\'angle au centre θ = 2π/n et la vérification par ' +
+            'En mode polygone, $n$ fixe l\'angle au centre $\\theta = \\dfrac{2\\pi}{n}$ et la vérification par ' +
             'l\'astuce ci-dessus (n × segment = cercle − polygone) s\'affiche ; en mode angle ' +
             'libre, règle θ toi-même. Les aires du secteur, du triangle et du segment se ' +
             'mettent à jour, et la corde est calculée par la loi des cosinus : AB² = r² + ' +
@@ -785,8 +785,8 @@ export const trigonometrie: ChapterContent = {
           caption:
             'Lentille : fais varier les rayons et la distance des centres ; la lentille ' +
             'commune est la somme de deux segments circulaires de même corde c, chacun ' +
-            'calculé avec θ = arccos(1 − c²/(2r²)) puis ½r²(θ − sin θ). Essuie-glace : la ' +
-            'surface balayée est la différence de deux secteurs de même angle, ½θ(R² − r²).',
+            'calculé avec $\\theta = \\arccos\\left(1 - \\dfrac{c^2}{2r^2}\\right)$ puis $\\dfrac{1}{2}r^2(\\theta - \\sin\\theta)$. Essuie-glace : la ' +
+            'surface balayée est la différence de deux secteurs de même angle, $\\dfrac{1}{2}\\theta(R^2 - r^2)$.',
         },
         {
           kind: 'application',
@@ -936,21 +936,21 @@ export const trigonometrie: ChapterContent = {
             ],
             points: [
               { angle: 0, label: '0°', sublabel: '0', tone: 'ink' },
-              { angle: PI / 6, label: '30°', sublabel: 'π/6', tone: 'sky' },
-              { angle: PI / 4, label: '45°', sublabel: 'π/4', tone: 'plan' },
-              { angle: PI / 3, label: '60°', sublabel: 'π/3', tone: 'rose' },
-              { angle: PI / 2, label: '90°', sublabel: 'π/2', tone: 'good' },
-              { angle: 2 * (PI / 3), label: '120°', sublabel: '2π/3', tone: 'rose' },
-              { angle: 3 * (PI / 4), label: '135°', sublabel: '3π/4', tone: 'plan' },
-              { angle: 5 * (PI / 6), label: '150°', sublabel: '5π/6', tone: 'sky' },
+              { angle: PI / 6, label: '30°', sublabel: 'π⁄6', tone: 'sky' },
+              { angle: PI / 4, label: '45°', sublabel: 'π⁄4', tone: 'plan' },
+              { angle: PI / 3, label: '60°', sublabel: 'π⁄3', tone: 'rose' },
+              { angle: PI / 2, label: '90°', sublabel: 'π⁄2', tone: 'good' },
+              { angle: 2 * (PI / 3), label: '120°', sublabel: '2π⁄3', tone: 'rose' },
+              { angle: 3 * (PI / 4), label: '135°', sublabel: '3π⁄4', tone: 'plan' },
+              { angle: 5 * (PI / 6), label: '150°', sublabel: '5π⁄6', tone: 'sky' },
               { angle: PI, label: '180°', sublabel: 'π', tone: 'bad' },
-              { angle: 7 * (PI / 6), label: '210°', sublabel: '7π/6', tone: 'sky' },
-              { angle: 5 * (PI / 4), label: '225°', sublabel: '5π/4', tone: 'plan' },
-              { angle: 4 * (PI / 3), label: '240°', sublabel: '4π/3', tone: 'rose' },
-              { angle: 3 * (PI / 2), label: '270°', sublabel: '3π/2', tone: 'accent' },
-              { angle: 5 * (PI / 3), label: '300°', sublabel: '5π/3', tone: 'rose' },
-              { angle: 7 * (PI / 4), label: '315°', sublabel: '7π/4', tone: 'plan' },
-              { angle: 11 * (PI / 6), label: '330°', sublabel: '11π/6', tone: 'sky' },
+              { angle: 7 * (PI / 6), label: '210°', sublabel: '7π⁄6', tone: 'sky' },
+              { angle: 5 * (PI / 4), label: '225°', sublabel: '5π⁄4', tone: 'plan' },
+              { angle: 4 * (PI / 3), label: '240°', sublabel: '4π⁄3', tone: 'rose' },
+              { angle: 3 * (PI / 2), label: '270°', sublabel: '3π⁄2', tone: 'accent' },
+              { angle: 5 * (PI / 3), label: '300°', sublabel: '5π⁄3', tone: 'rose' },
+              { angle: 7 * (PI / 4), label: '315°', sublabel: '7π⁄4', tone: 'plan' },
+              { angle: 11 * (PI / 6), label: '330°', sublabel: '11π⁄6', tone: 'sky' },
             ],
             caption:
               'les angles particuliers des quatre quadrants, placés sur le cercle trigonométrique ' +
@@ -963,10 +963,10 @@ export const trigonometrie: ChapterContent = {
           kind: 'featureTable',
           headers: ['angle', '0°', '30°', '45°', '60°', '90°', '180°', '270°', '360°'],
           rows: [
-            ['en radians', '0', 'π/6', 'π/4', 'π/3', 'π/2', 'π', '3π/2', '2π'],
-            ['cos', '1', '√3/2', '√2/2', '1/2', '0', '−1', '0', '1'],
-            ['sin', '0', '1/2', '√2/2', '√3/2', '1', '0', '−1', '0'],
-            ['tan', '0', '√3/3', '1', '√3', 'non définie', '0', 'non définie', '0'],
+            ['en radians', '$0$', '$\\dfrac{\\pi}{6}$', '$\\dfrac{\\pi}{4}$', '$\\dfrac{\\pi}{3}$', '$\\dfrac{\\pi}{2}$', '$\\pi$', '$\\dfrac{3\\pi}{2}$', '$2\\pi$'],
+            ['cos', '$1$', '$\\dfrac{\\sqrt{3}}{2}$', '$\\dfrac{\\sqrt{2}}{2}$', '$\\dfrac{1}{2}$', '$0$', '$-1$', '$0$', '$1$'],
+            ['sin', '$0$', '$\\dfrac{1}{2}$', '$\\dfrac{\\sqrt{2}}{2}$', '$\\dfrac{\\sqrt{3}}{2}$', '$1$', '$0$', '$-1$', '$0$'],
+            ['tan', '$0$', '$\\dfrac{\\sqrt{3}}{3}$', '$1$', '$\\sqrt{3}$', 'non définie', '$0$', 'non définie', '$0$'],
           ],
         },
         {
@@ -974,7 +974,7 @@ export const trigonometrie: ChapterContent = {
           title: 'Angles en radians sur le cercle',
           generatorId: '5gen51',
           description: [
-            'Un angle en radians (17π/6, −5π/4, 7π/2…) : ramène-le dans [0 ; 2π[, place son point ' +
+            'Un angle en radians (17π⁄6, −5π⁄4, 7π⁄2…) : ramène-le dans [0 ; 2π[, place son point ' +
               'image dans le bon quadrant, puis lis les valeurs exactes de cos et sin sur le cercle ' +
               'quadrillé et calcule tan (ou dis pourquoi elle n\'existe pas).',
           ],
@@ -1008,9 +1008,9 @@ export const trigonometrie: ChapterContent = {
           caption: 'Caractéristiques des fonctions de référence (x en radians)',
           headers: ['fonction', 'domaine', 'image (ensemble des valeurs)', 'période', 'parité'],
           rows: [
-            ['sin x', 'ℝ', '[−1 ; 1]', '2π', 'impaire'],
-            ['cos x', 'ℝ', '[−1 ; 1]', '2π', 'paire'],
-            ['tan x', 'ℝ \\ {π/2 + kπ, k∈ℤ}', 'ℝ', 'π', 'impaire'],
+            ['$\\sin x$', '$\\mathbb{R}$', '$[-1\\,;1]$', '$2\\pi$', 'impaire'],
+            ['$\\cos x$', '$\\mathbb{R}$', '$[-1\\,;1]$', '$2\\pi$', 'paire'],
+            ['$\\tan x$', '$\\mathbb{R} \\setminus \\left\\{\\dfrac{\\pi}{2} + k\\pi,\\ k\\in\\mathbb{Z}\\right\\}$', '$\\mathbb{R}$', '$\\pi$', 'impaire'],
           ],
         },
         {
@@ -1030,12 +1030,12 @@ export const trigonometrie: ChapterContent = {
             xTicks: [-2 * PI, -3 * (PI / 2), -PI, -PI / 2, PI / 2, PI, 3 * (PI / 2), 2 * PI],
             xTickLabels: {
               [-2 * PI]: '−2π',
-              [-3 * (PI / 2)]: '−3π/2',
+              [-3 * (PI / 2)]: '−3π⁄2',
               [-PI]: '−π',
-              [-PI / 2]: '−π/2',
-              [PI / 2]: 'π/2',
+              [-PI / 2]: '−π⁄2',
+              [PI / 2]: 'π⁄2',
               [PI]: 'π',
-              [3 * (PI / 2)]: '3π/2',
+              [3 * (PI / 2)]: '3π⁄2',
               [2 * PI]: '2π',
             },
             fixedYRange: { min: -1.5, max: 1.5 },
@@ -1058,12 +1058,12 @@ export const trigonometrie: ChapterContent = {
             xTicks: [-2 * PI, -3 * (PI / 2), -PI, -PI / 2, PI / 2, PI, 3 * (PI / 2), 2 * PI],
             xTickLabels: {
               [-2 * PI]: '−2π',
-              [-3 * (PI / 2)]: '−3π/2',
+              [-3 * (PI / 2)]: '−3π⁄2',
               [-PI]: '−π',
-              [-PI / 2]: '−π/2',
-              [PI / 2]: 'π/2',
+              [-PI / 2]: '−π⁄2',
+              [PI / 2]: 'π⁄2',
               [PI]: 'π',
-              [3 * (PI / 2)]: '3π/2',
+              [3 * (PI / 2)]: '3π⁄2',
               [2 * PI]: '2π',
             },
             fixedYRange: { min: -1.5, max: 1.5 },
@@ -1089,7 +1089,7 @@ export const trigonometrie: ChapterContent = {
             fixedYRange: { min: -10, max: 10 },
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'y = tan x — impaire ; asymptotes verticales en x=π/2+kπ (là où cos x = 0), période π',
+            caption: '$y = \\tan x$ — impaire ; asymptotes verticales en $x=\\dfrac{\\pi}{2}+k\\pi$ (là où $\\cos x = 0$), période $\\pi$',
           },
         },
         {
@@ -1098,8 +1098,8 @@ export const trigonometrie: ChapterContent = {
           label: 'Manipule toi-même — le cercle trigonométrique relié au graphique',
           caption:
             'Fais tourner x : le point parcourt le cercle et la courbe de sin, cos ou tan ' +
-            'se trace en même temps. L\'aimant accroche les angles remarquables (π/6, π/4, ' +
-            'π/3…) et affiche alors les valeurs exactes, comme √3/2 ou √2/2.',
+            'se trace en même temps. L\'aimant accroche les angles remarquables ($\\dfrac{\\pi}{6}$, ' +
+            '$\\dfrac{\\pi}{4}$, $\\dfrac{\\pi}{3}$…) et affiche alors les valeurs exactes, comme $\\dfrac{\\sqrt{3}}{2}$ ou $\\dfrac{\\sqrt{2}}{2}$.',
         },
         {
           kind: 'intuition',
@@ -1222,8 +1222,8 @@ export const trigonometrie: ChapterContent = {
             'C\'est le problème direct : tu choisis les paramètres, la courbe suit, avec ses ' +
             'encadrés Maximum/Minimum. Fais bouger un seul curseur à la fois pour voir ' +
             'l\'effet propre à chaque paramètre. La flèche violette montre le décalage ' +
-            'horizontal réel Φ = −φ/ω, depuis l\'origine jusqu\'au début du motif décalé : ' +
-            'avec ω ≠ 1, φ et Φ ne sont pas égaux.',
+            'horizontal réel $\\Phi = -\\dfrac{\\varphi}{\\omega}$, depuis l\'origine jusqu\'au début du motif décalé : ' +
+            'avec $\\omega \\neq 1$, $\\varphi$ et $\\Phi$ ne sont pas égaux.',
         },
         { kind: 'subheading', text: 'Construction pas à pas du graphique' },
         {
@@ -1247,7 +1247,7 @@ export const trigonometrie: ChapterContent = {
           steps: [
             { tag: 'A, b, T, Φ', text: '$A=3,\\ b=1,\\ \\omega=2 \\implies T=\\pi,\\ \\varphi=\\pi/4 \\implies \\Phi=-\\pi/8$' },
             {
-              tag: 'une période, en 4 parties égales à partir de Φ = −π/8',
+              tag: 'une période, en 4 parties égales à partir de Φ = −π⁄8',
               text: '$[-\\pi/8\\,;\\,7\\pi/8]$ divisé en 4 : $-\\pi/8,\\ \\pi/8,\\ 3\\pi/8,\\ 5\\pi/8,\\ 7\\pi/8$',
             },
           ],
@@ -1261,7 +1261,7 @@ export const trigonometrie: ChapterContent = {
             xMin: -PI,
             xMax: PI,
             xTicks: [-PI / 8, PI / 8, 3 * (PI / 8), 5 * (PI / 8), 7 * (PI / 8)],
-            xTickLabels: { [-PI / 8]: '−π/8', [PI / 8]: 'π/8', [3 * (PI / 8)]: '3π/8', [5 * (PI / 8)]: '5π/8', [7 * (PI / 8)]: '7π/8' },
+            xTickLabels: { [-PI / 8]: '−π⁄8', [PI / 8]: 'π⁄8', [3 * (PI / 8)]: '3π⁄8', [5 * (PI / 8)]: '5π⁄8', [7 * (PI / 8)]: '7π⁄8' },
             horizontalAsymptotes: [{ y: 1, label: 'y = 1 (ligne moyenne)' }],
             points: [
               { x: -PI / 8, y: 1, label: '', tone: 'good' },
@@ -1532,22 +1532,22 @@ export const trigonometrie: ChapterContent = {
           badge: 'maximums, minimums, puis extremums réunis',
           formula: '$f(x) = 2\\sin(3x + \\dfrac{\\pi}{6}) - 1$. Détermine séparément les maximums, les minimums, puis tous les extremums réunis.',
           steps: [
-            { tag: 'maximums — sin(u) = 1, u = 3x+π/6', text: '$x = \\pi/9 + (2\\pi/3)k$ (période 2π/3)' },
-            { tag: 'minimums — sin(u) = −1', text: '$x = -2\\pi/9 + (2\\pi/3)k$ (période 2π/3)' },
+            { tag: 'maximums — sin(u) = 1, u = 3x+π⁄6', text: '$x = \\pi/9 + (2\\pi/3)k$ (période $\\dfrac{2\\pi}{3}$)' },
+            { tag: 'minimums — sin(u) = −1', text: '$x = -2\\pi/9 + (2\\pi/3)k$ (période $\\dfrac{2\\pi}{3}$)' },
             { tag: 'valeurs des extremums — b ± |A| avec A = 2, b = −1', text: 'maximum $= -1 + 2 = 1$ ; minimum $= -1 - 2 = -3$' },
             {
               tag: 'extremums dans [0 ; 2π[ — k = 0, 1, 2',
               text: 'maximums en $\\dfrac{\\pi}{9},\\ \\dfrac{7\\pi}{9},\\ \\dfrac{13\\pi}{9}$ ; minimums en $\\dfrac{4\\pi}{9},\\ \\dfrac{10\\pi}{9},\\ \\dfrac{16\\pi}{9}$ — 6 extremums en tout',
             },
           ],
-          result: { tag: 'extremums réunis — |sin(u)|=1, u = π/2+kπ', text: '$x = \\pi/9 + (\\pi/3)k$, $k\\in\\mathbb{Z}$' },
+          result: { tag: 'extremums réunis — |sin(u)|=1, u = π⁄2+kπ', text: '$x = \\pi/9 + (\\pi/3)k$, $k\\in\\mathbb{Z}$' },
           illustration: {
             kind: 'curvePlot',
             curves: [{ fn: (x) => 2 * Math.sin(3 * x + PI / 6) - 1, tone: 'accent' }],
             xMin: -1,
             xMax: 3,
             xTicks: [PI / 9, (4 * PI) / 9, (7 * PI) / 9],
-            xTickLabels: { [PI / 9]: 'π/9', [(4 * PI) / 9]: '4π/9', [(7 * PI) / 9]: '7π/9' },
+            xTickLabels: { [PI / 9]: 'π⁄9', [(4 * PI) / 9]: '4π⁄9', [(7 * PI) / 9]: '7π⁄9' },
             yTicks: [-3, -1, 1],
             yTickLabels: { [-3]: '−3', [-1]: '−1', [1]: '1' },
             fixedYRange: { min: -3.6, max: 1.8 },
@@ -1559,15 +1559,15 @@ export const trigonometrie: ChapterContent = {
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'maximums et minimums alternent tous les π/3 — c\'est la période effective des extremums réunis',
+            caption: 'maximums et minimums alternent tous les $\\dfrac{\\pi}{3}$ — c\'est la période effective des extremums réunis',
           },
         },
         {
           kind: 'astuce',
           text:
             'Relis toujours la question ! « Donne les maximums » (une seule famille, ' +
-            'période 2π/ω) n\'appelle pas la même formule que « donne tous les extremums » ' +
-            '(les deux familles réunies, période π/ω). En cas de doute, calcule les deux ' +
+            'période $\\dfrac{2\\pi}{\\omega}$) n\'appelle pas la même formule que « donne tous les extremums » ' +
+            '(les deux familles réunies, période $\\dfrac{\\pi}{\\omega}$). En cas de doute, calcule les deux ' +
             'familles séparément — c\'est plus long, mais toujours juste. Ne les réunis ' +
             'qu\'à la toute fin, si la question le demande explicitement.',
         },
@@ -1777,12 +1777,12 @@ export const trigonometrie: ChapterContent = {
           badge: 'deux familles de solutions',
           formula: 'Résous $2\\cos(3x - \\dfrac{\\pi}{4}) = 1$ dans ℝ, puis donne les solutions de $[0\\,;2\\pi[$.',
           steps: [
-            { tag: 'isoler cos(u), avec u = 3x − π/4', text: '$\\cos(u) = \\dfrac{1}{2}$' },
-            { tag: 'cercle trigonométrique — cos(u)=1/2 : deux familles', text: '$u = \\pi/3 + 2k\\pi$ ou $u = -\\pi/3 + 2k\\pi$' },
-            { tag: 'remplacer u par 3x−π/4, isoler x — diviser tout par 3', text: '$3x-\\pi/4 = \\pi/3+2k\\pi \\implies x = 7\\pi/36 + (2\\pi/3)k$' },
+            { tag: 'isoler cos(u), avec u = 3x − π⁄4', text: '$\\cos(u) = \\dfrac{1}{2}$' },
+            { tag: 'cercle trigonométrique — cos(u)=1⁄2 : deux familles', text: '$u = \\pi/3 + 2k\\pi$ ou $u = -\\pi/3 + 2k\\pi$' },
+            { tag: 'remplacer u par 3x−π⁄4, isoler x — diviser tout par 3', text: '$3x-\\pi/4 = \\pi/3+2k\\pi \\implies x = 7\\pi/36 + (2\\pi/3)k$' },
             { tag: 'deux familles de solutions dans ℝ', text: '$x = \\dfrac{7\\pi}{36} + \\dfrac{2k\\pi}{3}$ ou $x = -\\dfrac{\\pi}{36} + \\dfrac{2k\\pi}{3}$, $k\\in\\mathbb{Z}$' },
             {
-              tag: 'garder celles de [0 ; 2π[ — la période 2π/3 tient 3 fois dans un tour',
+              tag: 'garder celles de [0 ; 2π[ — la période 2π⁄3 tient 3 fois dans un tour',
               text: 'première famille ($k = 0, 1, 2$) : $\\dfrac{7\\pi}{36},\\ \\dfrac{31\\pi}{36},\\ \\dfrac{55\\pi}{36}$ ; seconde famille ($k = 1, 2, 3$) : $\\dfrac{23\\pi}{36},\\ \\dfrac{47\\pi}{36},\\ \\dfrac{71\\pi}{36}$',
             },
           ],
@@ -1793,15 +1793,15 @@ export const trigonometrie: ChapterContent = {
           illustration: {
             kind: 'circleAngles',
             points: [
-              { angle: PI / 3, label: 'u=π/3', tone: 'accent' },
-              { angle: -PI / 3, label: 'u=−π/3', tone: 'accent' },
+              { angle: PI / 3, label: 'u=π⁄3', tone: 'accent' },
+              { angle: -PI / 3, label: 'u=−π⁄3', tone: 'accent' },
             ],
             connectPoints: true,
             // « cos(u)=1/2 » au-dessus du cercle chevauchait « u=π/3 » : la valeur 1/2 est écrite
             // sous l'axe horizontal, au pied de la droite verticale.
             verticalLine: { x: 0.5, label: '' },
-            freeLabels: [{ x: 0.66, y: -0.15, text: '1/2', tone: 'accent' }],
-            caption: 'les deux points du cercle où l\'abscisse (cosinus) vaut 1/2 — symétriques par rapport à l\'axe horizontal',
+            freeLabels: [{ x: 0.66, y: -0.15, text: '1⁄2', tone: 'accent' }],
+            caption: 'les deux points du cercle où l\'abscisse (cosinus) vaut $\\dfrac{1}{2}$ — symétriques par rapport à l\'axe horizontal',
           },
         },
         {
@@ -1821,12 +1821,12 @@ export const trigonometrie: ChapterContent = {
               { angle: (71 * PI) / 36, label: '', tone: 'good' },
             ],
             freeLabels: [
-              { x: 1.08, y: 0.8, text: '7π/36', tone: 'accent' },
-              { x: -1.2, y: 0.62, text: '31π/36', tone: 'accent' },
-              { x: 0.32, y: -1.22, text: '55π/36', tone: 'accent' },
-              { x: -0.62, y: 1.12, text: '23π/36', tone: 'good' },
-              { x: -0.84, y: -1.08, text: '47π/36', tone: 'good' },
-              { x: 1.22, y: -0.31, text: '71π/36', tone: 'good' },
+              { x: 1.08, y: 0.8, text: '7π⁄36', tone: 'accent' },
+              { x: -1.2, y: 0.62, text: '31π⁄36', tone: 'accent' },
+              { x: 0.32, y: -1.22, text: '55π⁄36', tone: 'accent' },
+              { x: -0.62, y: 1.12, text: '23π⁄36', tone: 'good' },
+              { x: -0.84, y: -1.08, text: '47π⁄36', tone: 'good' },
+              { x: 1.22, y: -0.31, text: '71π⁄36', tone: 'good' },
             ],
             caption:
               'les 6 solutions en x dans $[0\\,;2\\pi[$ : en orange la famille ' +
@@ -1848,8 +1848,8 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Diviser **seulement** le terme constant par a, en oubliant le « +2kπ » : ça ' +
-            'donne une famille de solutions avec la mauvaise période (2π au lieu de 2π/a) ' +
+            'Diviser **seulement** le terme constant par a, en oubliant le « $+\\,2k\\pi$ » : ça ' +
+            'donne une famille de solutions avec la mauvaise période ($2\\pi$ au lieu de $\\dfrac{2\\pi}{a}$) ' +
             '! Toute l\'équation en u — terme constant **et** terme périodique — passe par la ' +
             'même division.',
         },
@@ -1866,7 +1866,7 @@ export const trigonometrie: ChapterContent = {
           badge: 'tangente — une seule famille',
           formula: 'Résous $\\tan\\left(2x - \\dfrac{\\pi}{3}\\right) = 1$ dans $[0\\,;2\\pi[$.',
           steps: [
-            { tag: 'u = 2x − π/3 : tan(u) = 1, une seule famille (période π)', text: '$u = \\dfrac{\\pi}{4} + k\\pi$' },
+            { tag: 'u = 2x − π⁄3 : tan(u) = 1, une seule famille (période π)', text: '$u = \\dfrac{\\pi}{4} + k\\pi$' },
             { tag: 'revenir à x — diviser tout par 2', text: '$2x = \\dfrac{\\pi}{4} + \\dfrac{\\pi}{3} + k\\pi = \\dfrac{7\\pi}{12} + k\\pi \\implies x = \\dfrac{7\\pi}{24} + \\dfrac{k\\pi}{2}$' },
             { tag: 'garder celles de [0 ; 2π[ — k = 0, 1, 2, 3', text: '$\\dfrac{7\\pi}{24},\\ \\dfrac{19\\pi}{24},\\ \\dfrac{31\\pi}{24},\\ \\dfrac{43\\pi}{24}$ (pour $k = 4$ : $\\dfrac{55\\pi}{24} > 2\\pi$)' },
             { tag: 'valeurs interdites', text: 'aucune de ces valeurs ne donne $u = \\dfrac{\\pi}{2} + k\\pi$ (on a toujours $u = \\dfrac{\\pi}{4} + k\\pi$) : toutes sont acceptées' },
@@ -1940,7 +1940,7 @@ export const trigonometrie: ChapterContent = {
           steps: [
             { tag: 'remplacer sin²(x) par 1 − cos²(x)', text: '$2\\left(1 - \\cos^2(x)\\right) - \\cos(x) + 1 = 0 \\iff 2\\cos^2(x) + \\cos(x) - 3 = 0$' },
             { tag: 'poser t = cos(x)', text: '$2t^2 + t - 3 = 0$, $\\Delta = 1 + 24 = 25$, $t = \\dfrac{-1 \\pm 5}{4}$ : $t = 1$ ou $t = -\\dfrac{3}{2}$' },
-            { tag: 'rejeter t = −3/2 (hors de [−1 ; 1])', text: 'il reste $\\cos(x) = 1$' },
+            { tag: 'rejeter t = −3⁄2 (hors de [−1 ; 1])', text: 'il reste $\\cos(x) = 1$' },
             { tag: 'résoudre cos(x) = 1', text: '$x = 0 + 2k\\pi$, donc $x = 0$ dans $[0\\,;2\\pi[$' },
           ],
           result: { tag: 'résultat', text: '$S = \\{0\\}$' },
@@ -2005,7 +2005,7 @@ export const trigonometrie: ChapterContent = {
             { tag: 'seconde famille', text: '$2x = -\\left(\\dfrac{\\pi}{2} - x\\right) + 2k\\pi \\iff x = -\\dfrac{\\pi}{2} + 2k\\pi$' },
             { tag: 'garder les valeurs de [0 ; 2π[', text: 'première famille : $\\dfrac{\\pi}{6}$, $\\dfrac{5\\pi}{6}$, $\\dfrac{3\\pi}{2}$ ; seconde famille : $\\dfrac{3\\pi}{2}$' },
           ],
-          result: { tag: 'résultat (3π/2 n\'est compté qu\'une fois)', text: '$S = \\left\\{\\dfrac{\\pi}{6}\\,;\\dfrac{5\\pi}{6}\\,;\\dfrac{3\\pi}{2}\\right\\}$' },
+          result: { tag: 'résultat (3π⁄2 n\'est compté qu\'une fois)', text: '$S = \\left\\{\\dfrac{\\pi}{6}\\,;\\dfrac{5\\pi}{6}\\,;\\dfrac{3\\pi}{2}\\right\\}$' },
         },
         {
           kind: 'piege',
@@ -2084,9 +2084,9 @@ export const trigonometrie: ChapterContent = {
           kind: 'methode',
           label: 'Méthode — construire le modèle pas à pas',
           items: [
-            'A = (valeur max − valeur min) / 2.',
-            'b = (valeur max + valeur min) / 2.',
-            'T = durée d\'un cycle complet (donnée par l\'énoncé) ⟹ ω = 2π/T.',
+            '$A = \\dfrac{\\text{valeur max} - \\text{valeur min}}{2}$.',
+            '$b = \\dfrac{\\text{valeur max} + \\text{valeur min}}{2}$.',
+            '$T$ = durée d\'un cycle complet (donnée par l\'énoncé) ⟹ $\\omega = \\dfrac{2\\pi}{T}$.',
             'φ : injecte la condition initiale (une valeur connue à un instant connu) dans ' +
               '$A\\sin(\\omega t+\\varphi)+b$. Résous en φ, en choisissant la solution la ' +
               'plus simple parmi l\'infinité de solutions possibles.',
@@ -2187,7 +2187,7 @@ export const trigonometrie: ChapterContent = {
             { tag: 'A et b, à partir des extrêmes', text: '$A = \\dfrac{14 - (-2)}{2} = 8$ ; $b = \\dfrac{14 + (-2)}{2} = 6$' },
             { tag: 'pulsation, avec T = 12', text: '$\\omega = \\dfrac{2\\pi}{12} = \\dfrac{\\pi}{6}$' },
             {
-              tag: 'maximum en t₀ = 7 : l\'argument vaut π/2 (−π/2 pour un minimum)',
+              tag: 'maximum en t₀ = 7 : l\'argument vaut π⁄2 (−π⁄2 pour un minimum)',
               text: '$\\dfrac{\\pi}{6} \\cdot 7 + \\varphi = \\dfrac{\\pi}{2} \\iff \\varphi = \\dfrac{\\pi}{2} - \\dfrac{7\\pi}{6} = -\\dfrac{2\\pi}{3}$, déjà dans $]-\\pi\\,;\\pi]$',
             },
             {
@@ -2232,8 +2232,8 @@ export const trigonometrie: ChapterContent = {
             xAxisLabel: 't (min)',
             yAxisLabel: 'hauteur (m)',
             caption:
-              'les deux candidats passent par 24,5 m à t = 0 (point orange) : en vert φ = π/6 (la nacelle monte, ' +
-              'retenu), en gris φ = 5π/6 (elle descendrait, rejeté)',
+              'les deux candidats passent par 24,5 m à $t = 0$ (point orange) : en vert $\\varphi = \\dfrac{\\pi}{6}$ (la nacelle monte, ' +
+              'retenu), en gris $\\varphi = \\dfrac{5\\pi}{6}$ (elle descendrait, rejeté)',
           },
         },
         {
@@ -2307,7 +2307,7 @@ export const trigonometrie: ChapterContent = {
             },
           ],
           result: {
-            tag: 'modèle — période T = 2π/ω = 24 h',
+            tag: 'modèle — période T = 2π⁄ω = 24 h',
             text: '$f(t) = 4\\sin\\left(\\dfrac{\\pi}{12}t - \\dfrac{\\pi}{12}\\right) + 10$',
           },
           // f(1) = 10 (argument 0), f(3) = 4 sin(π/6) + 10 = 12, maximum 14 en t = 7 (argument π/2),
@@ -2409,8 +2409,8 @@ export const trigonometrie: ChapterContent = {
           label: 'Manipule toi-même : la durée du jour selon la latitude',
           caption:
             'Fais varier la latitude : la durée du jour au fil de l\'année est calculée avec ' +
-            'la formule astronomique cos H₀ = −tan(latitude)·tan(δ), et comparée au même ' +
-            'modèle que ci-dessus, 12 + A sin(2π(j − 80)/365,24), où j est le numéro du jour ' +
+            'la formule astronomique $\\cos H_0 = -\\tan(\\text{latitude})\\cdot\\tan(\\delta)$, et comparée au même ' +
+            'modèle que ci-dessus, $12 + A\\sin\\left(\\dfrac{2\\pi(j - 80)}{365{,}24}\\right)$, où $j$ est le numéro du jour ' +
             'dans l\'année. Partout, b ≈ 12 h ; c\'est l\'amplitude A qui ' +
             'grandit avec la latitude, jusqu\'au jour et à la nuit polaires au-delà de ' +
             '66,5°.',
@@ -2452,25 +2452,25 @@ export const trigonometrie: ChapterContent = {
             'au moins 24,5 m du sol ? On résout $15\\sin\\left(\\dfrac{\\pi}{4}t - ' +
             '\\dfrac{\\pi}{2}\\right) + 17 \\geq 24{,}5$ pour $t \\in [0\\,;8]$.',
           steps: [
-            { tag: 'isoler le sinus, avec u = πt/4 − π/2', text: '$\\sin(u) \\geq \\dfrac{24{,}5 - 17}{15} = \\dfrac{1}{2}$' },
+            { tag: 'isoler le sinus, avec u = πt⁄4 − π⁄2', text: '$\\sin(u) \\geq \\dfrac{24{,}5 - 17}{15} = \\dfrac{1}{2}$' },
             { tag: 'lire l\'arc du haut sur le cercle', text: '$u \\in \\left[\\dfrac{\\pi}{6}\\,;\\dfrac{5\\pi}{6}\\right] + 2k\\pi$' },
-            { tag: 'revenir à t : t = (u + π/2) · 4/π', text: '$u = \\dfrac{\\pi}{6} \\implies t = \\dfrac{8}{3}$ ; $u = \\dfrac{5\\pi}{6} \\implies t = \\dfrac{16}{3}$' },
+            { tag: 'revenir à t : t = (u + π⁄2) · 4⁄π', text: '$u = \\dfrac{\\pi}{6} \\implies t = \\dfrac{8}{3}$ ; $u = \\dfrac{5\\pi}{6} \\implies t = \\dfrac{16}{3}$' },
             { tag: 'garder ce qui tombe dans [0 ; 8]', text: 'avec $k = 0$ : $\\left[\\dfrac{8}{3}\\,;\\dfrac{16}{3}\\right]$ ; avec $k = \\pm 1$, on ajoute $\\pm 8$ min : hors de la fenêtre' },
           ],
           result: { tag: 'résultat — de 2 min 40 s à 5 min 20 s', text: '$t \\in \\left[\\dfrac{8}{3}\\,;\\dfrac{16}{3}\\right]$' },
           illustration: {
             kind: 'circleAngles',
             points: [
-              { angle: PI / 6, label: 'u=π/6', tone: 'accent' },
-              { angle: (5 * PI) / 6, label: 'u=5π/6', tone: 'accent' },
+              { angle: PI / 6, label: 'u=π⁄6', tone: 'accent' },
+              { angle: (5 * PI) / 6, label: 'u=5π⁄6', tone: 'accent' },
             ],
             connectPoints: true,
             // « sin u = 1/2 », à gauche du cercle, sortait du cadre : la valeur 1/2 est écrite
             // près de l'axe vertical, au-dessus de la droite.
             horizontalLine: { y: 0.5, label: '' },
-            freeLabels: [{ x: -0.17, y: 0.58, text: '1/2', tone: 'accent' }],
+            freeLabels: [{ x: -0.17, y: 0.58, text: '1⁄2', tone: 'accent' }],
             angleArcs: [{ from: PI / 6, to: (5 * PI) / 6, tone: 'good', radiusPx: 100 }],
-            caption: 'sin(u) ≥ 1/2 : tout l\'arc du haut, entre u = π/6 et u = 5π/6 (en vert)',
+            caption: '$\\sin(u) \\geq \\dfrac{1}{2}$ : tout l\'arc du haut, entre $u = \\dfrac{\\pi}{6}$ et $u = \\dfrac{5\\pi}{6}$ (en vert)',
           },
         },
         {
@@ -2485,7 +2485,7 @@ export const trigonometrie: ChapterContent = {
             xMin: 0,
             xMax: 8,
             xTicks: [8 / 3, 4, 16 / 3, 8],
-            xTickLabels: { [8 / 3]: '8/3', [4]: '4', [16 / 3]: '16/3', [8]: '8' },
+            xTickLabels: { [8 / 3]: '8⁄3', [4]: '4', [16 / 3]: '16⁄3', [8]: '8' },
             yTicks: [2, 17, 24.5, 32],
             yTickLabels: { [2]: '2', [17]: '17', [24.5]: '24,5', [32]: '32' },
             fixedYRange: { min: 0, max: 36 },
@@ -2508,10 +2508,10 @@ export const trigonometrie: ChapterContent = {
           tag: 'seuil-grande-roue-widget',
           label: 'Manipule toi-même : au-dessus du seuil sur la grande roue',
           caption:
-            'Règle le seuil y₀ : l\'arc de la roue où la nacelle est au-dessus (ou ' +
+            'Règle le seuil $y_0$ : l\'arc de la roue où la nacelle est au-dessus (ou ' +
             'au-dessous) du seuil s\'allume, et les intervalles de temps correspondants se ' +
-            'colorent sur la courbe h(t) = 15 sin(πt/4 − π/2) + 17, sur deux tours. Le ' +
-            'réglage de départ (y₀ = 24,5 m) reproduit l\'exemple : de 2 min 40 s à 5 min 20 ' +
+            'colorent sur la courbe $h(t) = 15\\sin\\left(\\dfrac{\\pi t}{4} - \\dfrac{\\pi}{2}\\right) + 17$, sur deux tours. Le ' +
+            'réglage de départ ($y_0 = 24{,}5$ m) reproduit l\'exemple : de 2 min 40 s à 5 min 20 ' +
             's, soit un tiers du tour.',
         },
         {
@@ -2537,8 +2537,8 @@ export const trigonometrie: ChapterContent = {
           label: 'Manipule toi-même — construis le modèle pas à pas',
           caption:
             'Règle le rayon, la hauteur du centre, la période, puis la hauteur de départ h₀ ' +
-            'et le sens de la nacelle. φ n\'est jamais réglé directement : sin φ = (h₀ − ' +
-            'b)/A donne deux candidats, φ₁ = arcsin m et φ₂ = π − arcsin m, et c\'est le ' +
+            'et le sens de la nacelle. $\\varphi$ n\'est jamais réglé directement : $\\sin\\varphi = \\dfrac{h_0 - b}{A}$ ' +
+            'donne deux candidats, $\\varphi_1 = \\arcsin m$ et $\\varphi_2 = \\pi - \\arcsin m$, et c\'est le ' +
             'sens (montée ou descente) qui tranche. Le réglage de départ reproduit ' +
             'l\'exemple de la grande roue.',
         },
@@ -2588,7 +2588,7 @@ export const trigonometrie: ChapterContent = {
             'La copie d\'un élève — aire d\'un secteur, maximum d\'une sinusoïde, équation ' +
               'sin(2x) = c ou cos(2x) = c, produit nul avec une tangente — contient une erreur : ' +
               'trouve la ligne fausse, nomme l\'erreur (π perdu, ½ oublié, degrés au lieu de ' +
-              'radians, T = π/ω, φ pris pour Φ, seconde famille oubliée, 2kπ non divisé, valeur ' +
+              'radians, T = π⁄ω, φ pris pour Φ, seconde famille oubliée, 2kπ non divisé, valeur ' +
               'interdite de la tangente…), puis donne le bon résultat.',
           ],
           chantier: '5e-4h',

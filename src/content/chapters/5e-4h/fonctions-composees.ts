@@ -275,7 +275,7 @@ export const fonctionsComposees: ChapterContent = {
             },
             {
               kind: 'signTable',
-              caption: 'Signe de (x−1)/(x+2) — la double barre marque la valeur interdite x = −2',
+              caption: 'Signe de (x − 1) / (x + 2) — la double barre marque la valeur interdite x = −2',
               rows: [
                 {
                   label: 'x',
@@ -405,7 +405,7 @@ export const fonctionsComposees: ChapterContent = {
           caption:
             'Choisis une famille et règle les coefficients : chaque condition d\'existence ' +
             's\'affiche en bande sur sa propre droite graduée, puis leur intersection donne ' +
-            'dom f. Pour √(N/D), le tableau de signes se construit en direct. Déplace x : ' +
+            '$\\operatorname{dom} f$. Pour $\\sqrt{\\dfrac{N}{D}}$, le tableau de signes se construit en direct. Déplace x : ' +
             'f(x) est calculé, ou l\'atelier dit pourquoi c\'est impossible (dénominateur ' +
             'nul, racine d\'un négatif).',
         },
@@ -571,9 +571,9 @@ export const fonctionsComposees: ChapterContent = {
           tag: 'constructeur-composees-widget',
           label: 'Manipule toi-même : le constructeur de composées',
           caption:
-            'Ajoute des briques (ax + b, x², x³, √x, ∛x, 1/x, |x|) : la formule h(x) et son ' +
+            'Ajoute des briques ($ax + b$, $x^2$, $x^3$, $\\sqrt{x}$, $\\sqrt[3]{x}$, $\\dfrac{1}{x}$, $|x|$) : la formule h(x) et son ' +
             'graphe se construisent étage par étage. Échange deux étages avec ↑ ↓ : ' +
-            'l\'ancienne courbe reste en pointillé, et l\'on voit que f∘g ≠ g∘f. En mode ' +
+            'l\'ancienne courbe reste en pointillé, et l\'on voit que $f\\circ g \\neq g\\circ f$. En mode ' +
             'Défi, reconstitue la chaîne qui donne l\'écriture proposée.',
         },
         { kind: 'subheading', text: 'Décomposer : remonter d’une écriture composée vers ses étages' },
@@ -1212,8 +1212,8 @@ export const fonctionsComposees: ChapterContent = {
           label: 'Manipule toi-même : le bidon optimal',
           caption:
             'Choisis la contenance, puis fais varier le rayon r : le bidon s\'élargit et ' +
-            's\'aplatit, sa hauteur h(r) = V/(πr²) s\'adapte, et le point suit l\'aire totale ' +
-            'A(r) = 2πr² + 2V/r. Le minimum est atteint en r = ∛(V/(2π)) : la hauteur y ' +
+            's\'aplatit, sa hauteur $h(r) = \\dfrac{V}{\\pi r^2}$ s\'adapte, et le point suit l\'aire totale ' +
+            '$A(r) = 2\\pi r^2 + \\dfrac{2V}{r}$. Le minimum est atteint en $r = \\sqrt[3]{\\dfrac{V}{2\\pi}}$ : la hauteur y ' +
             'égale le diamètre.',
         },
         {
@@ -1403,9 +1403,9 @@ export const fonctionsComposees: ChapterContent = {
           tag: 'seuil-rentabilite-widget',
           label: 'Manipule toi-même : le seuil de rentabilité',
           caption:
-            'Règle le coût fixe, le coût variable par objet et le prix de vente : CT(x), ' +
-            'CA(x) et le bénéfice B(x) = CA(x) − CT(x) se tracent, et le seuil de ' +
-            'rentabilité est marqué. En dessous, le coût unitaire c(x) = CT(x)/x, un ' +
+            'Règle le coût fixe, le coût variable par objet et le prix de vente : $CT(x)$, ' +
+            '$CA(x)$ et le bénéfice $B(x) = CA(x) - CT(x)$ se tracent, et le seuil de ' +
+            'rentabilité est marqué. En dessous, le coût unitaire $c(x) = \\dfrac{CT(x)}{x}$, un ' +
             'quotient et non une composition, décroît vers le coût variable et croise le ' +
             'prix exactement au seuil.',
         },

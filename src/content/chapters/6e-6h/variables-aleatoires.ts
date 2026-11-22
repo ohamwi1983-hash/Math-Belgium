@@ -1197,13 +1197,13 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'featureTable',
-          headers: ['k', 'Facteur λ/i', 'P(X=k)', 'P(X≤k)'],
+          headers: ['k', 'Facteur λ⁄i', 'P(X=k)', 'P(X≤k)'],
           rows: [
             ['0', '—', '0,018316', '0,018316'],
-            ['1', '4/1', '0,073263', '0,091579'],
-            ['2', '4/2', '0,146525', '0,238104'],
-            ['3', '4/3', '0,195367', '0,433471'],
-            ['4', '4/4', '0,195367', '0,628838'],
+            ['1', '$\\dfrac{4}{1}$', '0,073263', '0,091579'],
+            ['2', '$\\dfrac{4}{2}$', '0,146525', '0,238104'],
+            ['3', '$\\dfrac{4}{3}$', '0,195367', '0,433471'],
+            ['4', '$\\dfrac{4}{4}$', '0,195367', '0,628838'],
           ],
         },
         {
@@ -1250,7 +1250,7 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'attention',
           label: "λ n'est jamais le taux de base recopié tel quel",
-          text: '$\\lambda$ doit toujours être ajusté à l\'échelle exacte de la question posée : multiplicatif pour un contexte temporel (taux par minute × nombre de minutes), proportionnel pour un contexte effectif (taux « pour N » × effectif cible/N). Recopier le taux de base sans ajustement, c\'est LE piège le plus fréquent de cette famille !',
+          text: '$\\lambda$ doit toujours être ajusté à l\'échelle exacte de la question posée : multiplicatif pour un contexte temporel (taux par minute × nombre de minutes), proportionnel pour un contexte effectif (taux « pour $N$ » $\\times\\, \\dfrac{\\text{effectif cible}}{N}$). Recopier le taux de base sans ajustement, c\'est LE piège le plus fréquent de cette famille !',
         },
         {
           kind: 'exempleLibre',

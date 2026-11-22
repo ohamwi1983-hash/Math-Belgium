@@ -72,12 +72,12 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         caption: 'Les 6 familles',
         headers: ['Famille', 'Formule', 'Domaine', 'Allure'],
         rows: [
-          ['Carrée', 'x²', 'ℝ', 'parabole, sommet à l\'origine, paire'],
-          ['Cube', 'x³', 'ℝ', 'point d\'inflexion à l\'origine, toujours croissante, impaire'],
-          ['Racine carrée', '√x', '[0 ; +∞[', 'part de l\'origine, croissante, concave'],
-          ['Racine cubique', '∛x', 'ℝ', 'tangente verticale à l\'origine, toujours croissante, impaire'],
-          ['Inverse', '1/x', 'ℝ \\ {0}', 'hyperbole à 2 branches, impaire'],
-          ['Valeur absolue', '|x|', 'ℝ', '« V », sommet à l\'origine, paire'],
+          ['Carrée', '$x^2$', 'ℝ', 'parabole, sommet à l\'origine, paire'],
+          ['Cube', '$x^3$', 'ℝ', 'point d\'inflexion à l\'origine, toujours croissante, impaire'],
+          ['Racine carrée', '$\\sqrt{x}$', '[0 ; +∞[', 'part de l\'origine, croissante, concave'],
+          ['Racine cubique', '$\\sqrt[3]{x}$', 'ℝ', 'tangente verticale à l\'origine, toujours croissante, impaire'],
+          ['Inverse', '$\\dfrac{1}{x}$', 'ℝ \\ {0}', 'hyperbole à 2 branches, impaire'],
+          ['Valeur absolue', '$|x|$', 'ℝ', '« V », sommet à l\'origine, paire'],
         ],
       },
       {
@@ -108,7 +108,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           ],
           xAxisLabel: 'x',
           yAxisLabel: 'y',
-          caption: 'y = x² — sommet S, paire (symétrie d\'axe Oy)',
+          caption: '$y = x^2$ — sommet S, paire (symétrie d\'axe Oy)',
         },
       },
       {
@@ -128,7 +128,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           ],
           xAxisLabel: 'x',
           yAxisLabel: 'y',
-          caption: 'y = x³ — point d\'inflexion, impaire (symétrie centrale)',
+          caption: '$y = x^3$ — point d\'inflexion, impaire (symétrie centrale)',
         },
       },
       {
@@ -148,7 +148,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           ],
           xAxisLabel: 'x',
           yAxisLabel: 'y',
-          caption: 'y = √x — départ en (0;0), domaine [0;+∞[',
+          caption: '$y = \\sqrt{x}$ — départ en $(0\\,;0)$, domaine $[0\\,;+\\infty[$',
         },
       },
       {
@@ -168,7 +168,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           ],
           xAxisLabel: 'x',
           yAxisLabel: 'y',
-          caption: 'y = ∛x — point d\'inflexion, tangente verticale, impaire',
+          caption: '$y = \\sqrt[3]{x}$ — point d\'inflexion, tangente verticale, impaire',
         },
       },
       {
@@ -203,7 +203,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           ],
           xAxisLabel: 'x',
           yAxisLabel: 'y',
-          caption: 'y = 1/x — asymptotes AV/AH, impaire (symétrie centrale)',
+          caption: '$y = \\dfrac{1}{x}$ — asymptotes AV/AH, impaire (symétrie centrale)',
         },
       },
       {
@@ -223,7 +223,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           ],
           xAxisLabel: 'x',
           yAxisLabel: 'y',
-          caption: 'y = |x| — sommet S, paire (symétrie d\'axe Oy)',
+          caption: '$y = |x|$ — sommet S, paire (symétrie d\'axe Oy)',
         },
       },
       {
@@ -729,7 +729,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             ['Carrée / Valeur absolue', '0', '1', '2'],
             ['Racine carrée', '0', '1', '1'],
             ['Cube / Racine cubique', '1', '1', '1'],
-            ['Inverse', '1', '0 (1/u ne vaut jamais 0)', '1'],
+            ['Inverse', '1', '0 ($\\dfrac{1}{u}$ ne vaut jamais 0)', '1'],
           ],
         },
         {
@@ -921,8 +921,8 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             ['f(x) + k', 'translation verticale (TV = k)'],
             ['f(−x)', 'symétrie d\'axe Oy (SOY)'],
             ['−f(x)', 'symétrie d\'axe Ox (SOX)'],
-            ['f(k·x)', 'compression (|k|>1) ou étirement (0<|k|<1) horizontal, facteur 1/k'],
-            ['k·f(x)', 'compression (0<|k|<1) ou étirement (|k|>1) vertical, facteur k'],
+            ['f(k·x)', 'compression ($|k|>1$) ou étirement ($0<|k|<1$) horizontal, facteur $\\dfrac{1}{k}$'],
+            ['k·f(x)', 'compression ($0<|k|<1$) ou étirement ($|k|>1$) vertical, facteur $k$'],
           ],
         },
         {
@@ -1154,12 +1154,12 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           caption: 'Forme de départ par famille',
           headers: ['Famille', 'Forme de départ'],
           rows: [
-            ['Carrée', 'ax² + bx + c'],
-            ['Cube', '(a + bx)³'],
-            ['Racine carrée', '√(ax + b)'],
-            ['Racine cubique', '∛(ax + b)'],
-            ['Inverse', '(ax + b)/(cx + d)'],
-            ['Valeur absolue', '|ax + b|'],
+            ['Carrée', '$ax^2 + bx + c$'],
+            ['Cube', '$(a + bx)^3$'],
+            ['Racine carrée', '$\\sqrt{ax + b}$'],
+            ['Racine cubique', '$\\sqrt[3]{ax + b}$'],
+            ['Inverse', '$\\dfrac{ax + b}{cx + d}$'],
+            ['Valeur absolue', '$|ax + b|$'],
           ],
         },
         {

@@ -87,7 +87,7 @@ export const coniques: ChapterContent = {
         },
         {
           kind: 'piege',
-          label: 'La borne r ≥ p/2 n\'est pas décorative',
+          label: 'La borne r ≥ p⁄2 n\'est pas décorative',
           text:
             'Pour $r < p/2$, le cercle et la parallèle ne se coupent **pas du tout** ! Aucun point de la parabole n\'est jamais plus proche de $F$ que $p/2$. Pour $r = p/2$ pile, il n\'y a qu\'**un seul** point (le sommet). Pour $r > p/2$, il y en a exactement **deux**, symétriques par rapport à l\'axe focal.',
         },
@@ -180,7 +180,7 @@ export const coniques: ChapterContent = {
               curvesOfY: [{ fn: (y) => (y * y) / 4, tone: 'accent' }],
               vectors: [{ from: { x: -1, y: -2.25 }, to: { x: -1, y: 2.25 }, tone: 'ink', dashed: true }],
               points: [{ x: 1, y: 0, label: 'F', tone: 'good', labelPos: 'below' }],
-              caption: 'F(p/2;0), d ≡ x=−p/2 → y² = 2px',
+              caption: '$F\\left(\\frac{p}{2};0\\right)$, $d \\equiv x=-\\frac{p}{2}$ → $y^2 = 2px$',
             },
             {
               kind: 'vectorPlane',
@@ -188,7 +188,7 @@ export const coniques: ChapterContent = {
               curvesOfY: [{ fn: (y) => -(y * y) / 4, tone: 'accent' }],
               vectors: [{ from: { x: 1, y: -2.25 }, to: { x: 1, y: 2.25 }, tone: 'ink', dashed: true }],
               points: [{ x: -1, y: 0, label: 'F', tone: 'good', labelPos: 'below' }],
-              caption: 'F(−p/2;0), d ≡ x=p/2 → y² = −2px',
+              caption: '$F\\left(-\\frac{p}{2};0\\right)$, $d \\equiv x=\\frac{p}{2}$ → $y^2 = -2px$',
             },
           ],
         },
@@ -201,7 +201,7 @@ export const coniques: ChapterContent = {
               curves: [{ fn: (x) => (x * x) / 4, tone: 'accent' }],
               vectors: [{ from: { x: -2.4, y: -1 }, to: { x: 2.4, y: -1 }, tone: 'ink', dashed: true }],
               points: [{ x: 0, y: 1, label: 'F', tone: 'good', labelPos: 'right' }],
-              caption: 'F(0;p/2), d ≡ y=−p/2 → x² = 2py',
+              caption: '$F\\left(0;\\frac{p}{2}\\right)$, $d \\equiv y=-\\frac{p}{2}$ → $x^2 = 2py$',
             },
             {
               kind: 'vectorPlane',
@@ -209,7 +209,7 @@ export const coniques: ChapterContent = {
               curves: [{ fn: (x) => -(x * x) / 4, tone: 'accent' }],
               vectors: [{ from: { x: -2.4, y: 1 }, to: { x: 2.4, y: 1 }, tone: 'ink', dashed: true }],
               points: [{ x: 0, y: -1, label: 'F', tone: 'good', labelPos: 'right' }],
-              caption: 'F(0;−p/2), d ≡ y=p/2 → x² = −2py',
+              caption: '$F\\left(0;-\\frac{p}{2}\\right)$, $d \\equiv y=\\frac{p}{2}$ → $x^2 = -2py$',
             },
           ],
         },
@@ -344,7 +344,7 @@ export const coniques: ChapterContent = {
                 { x: -3, y: 0, label: "F'", tone: 'good', labelPos: 'below' },
                 { x: 3, y: 3.2, label: 'P', tone: 'ink', labelPos: 'right' },
               ],
-              caption: "Ellipse x²/25+y²/16=1 : a=5, b=4, c=3. Foyers F(3;0) et F′(−3;0), sommets (±5;0) et (0;±4). Pour tout point P : |PF|+|PF′| = 2a = 10.",
+              caption: "Ellipse $\\dfrac{x^2}{25}+\\dfrac{y^2}{16}=1$ : $a=5$, $b=4$, $c=3$. Foyers $F(3;0)$ et $F\'(-3;0)$, sommets $(\\pm5;0)$ et $(0;\\pm4)$. Pour tout point $P$ : $|PF|+|PF\'| = 2a = 10$.",
             },
             {
               kind: 'vectorPlane',
@@ -360,7 +360,7 @@ export const coniques: ChapterContent = {
                 { x: 3, y: 3.2, label: '', tone: 'ink', node: true },
               ],
               caption:
-                "Toute ellipse est un cercle « aplati » : le graphique de f(x)=(b/a)√(a²−x²) s'obtient en multipliant par b/a l'ordonnée de chaque point du cercle g(x)=√(a²−x²).",
+                "Toute ellipse est un cercle « aplati » : le graphique de $f(x)=\\dfrac{b}{a}\\sqrt{a^2-x^2}$ s'obtient en multipliant par $\\dfrac{b}{a}$ l'ordonnée de chaque point du cercle $g(x)=\\sqrt{a^2-x^2}$.",
             },
           ],
         },
@@ -480,7 +480,7 @@ export const coniques: ChapterContent = {
               { x: -3, y: 0, label: "S'", tone: 'ink', labelPos: 'above' },
             ],
             caption:
-              "Hyperbole x²/9−y²/16=1 : a=3, b=4, c=5. Sommets (±3;0), foyers (±5;0), asymptotes y=±(4/3)x. Le rectangle en pointillé (±a;±b) donne les asymptotes par ses diagonales.",
+              "Hyperbole $\\dfrac{x^2}{9}-\\dfrac{y^2}{16}=1$ : $a=3$, $b=4$, $c=5$. Sommets $(\\pm3;0)$, foyers $(\\pm5;0)$, asymptotes $y=\\pm\\dfrac{4}{3}x$. Le rectangle en pointillé $(\\pm a;\\pm b)$ donne les asymptotes par ses diagonales.",
           },
         },
         {
@@ -794,7 +794,7 @@ export const coniques: ChapterContent = {
               { x: -2.5, y: 1.5, label: "S'", tone: 'accent', labelPos: 'right' },
             ],
             caption:
-              "La conique 16x²−36y²+80x+252y−197=0 dans le repère donné R₁ : hyperbole de centre O′(−5/2;7/2), sommets S(−5/2;11/2) et S′(−5/2;3/2). Les axes translatés x′ et y′ sont en pointillé.",
+              "La conique $16x^2-36y^2+80x+252y-197=0$ dans le repère donné $R_1$ : hyperbole de centre $O\'\\left(-\\frac{5}{2};\\frac{7}{2}\\right)$, sommets $S\\left(-\\frac{5}{2};\\frac{11}{2}\\right)$ et $S\'\\left(-\\frac{5}{2};\\frac{3}{2}\\right)$. Les axes translatés $x\'$ et $y\'$ sont en pointillé.",
           },
         },
         {
@@ -859,7 +859,7 @@ export const coniques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: "Exemple résolu — ellipse x²/25+y²/16=1, point P tel que |PF| = 2·|PF′|",
+          label: "Exemple résolu — ellipse x²⁄25 + y²⁄16 = 1, point P tel que |PF| = 2·|PF′|",
           blocks: [
             {
               kind: 'para',
@@ -884,7 +884,7 @@ export const coniques: ChapterContent = {
             {
               kind: 'para',
               text:
-                "**Recoupement par la formule de Héron** (côtés 20/3, 10/3 et 6, demi-périmètre $s=8$) : $\\text{aire} = \\sqrt{8\\cdot\\dfrac{4}{3}\\cdot\\dfrac{14}{3}\\cdot 2} = \\sqrt{\\dfrac{896}{9}} = \\dfrac{8\\sqrt{14}}{3}$ ✓ — résultat identique.",
+                "**Recoupement par la formule de Héron** (côtés $\\dfrac{20}{3}$, $\\dfrac{10}{3}$ et 6, demi-périmètre $s=8$) : $\\text{aire} = \\sqrt{8\\cdot\\dfrac{4}{3}\\cdot\\dfrac{14}{3}\\cdot 2} = \\sqrt{\\dfrac{896}{9}} = \\dfrac{8\\sqrt{14}}{3}$ ✓ — résultat identique.",
             },
           ],
         },
@@ -909,7 +909,7 @@ export const coniques: ChapterContent = {
               { x: -2.778, y: 3.326, label: 'P', tone: 'ink', labelPos: 'above' },
             ],
             caption:
-              "Triangle FPF′ sur l'ellipse x²/25+y²/16=1, pour |PF|=2|PF′| : |PF′|=10/3, |PF|=20/3, |FF′|=6, aire = 8√14/3 ≈ 9,98.",
+              "Triangle $FPF'$ sur l'ellipse $\\dfrac{x^2}{25}+\\dfrac{y^2}{16}=1$, pour $|PF|=2|PF'|$ : $|PF'|=\\dfrac{10}{3}$, $|PF|=\\dfrac{20}{3}$, $|FF'|=6$, aire $= \\dfrac{8\\sqrt{14}}{3} \\approx 9{,}98$.",
           },
         },
         {
@@ -969,7 +969,7 @@ export const coniques: ChapterContent = {
               { x: 0, y: 1, label: 'B', tone: 'ink', labelPos: 'above' },
             ],
             caption:
-              "Ellipse x²/2+y²=1 (a=√2, b=1, c=1) : depuis le sommet B(0;1) de l'axe non focal, l'angle FBF′ est droit. |BF|=|BF′|=a=√2, |FF′|=2. Excentricité e=√2/2.",
+              "Ellipse $\\dfrac{x^2}{2}+y^2=1$ ($a=\\sqrt{2}$, $b=1$, $c=1$) : depuis le sommet $B(0;1)$ de l'axe non focal, l'angle $FBF'$ est droit. $|BF|=|BF'|=a=\\sqrt{2}$, $|FF'|=2$. Excentricité $e=\\dfrac{\\sqrt{2}}{2}$.",
           },
         },
         {
@@ -1041,7 +1041,7 @@ export const coniques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: "Exemple résolu — droite par A(−4;0) et B(0;−3), conique de foyer F(3;−2), directrice d′ ≡ x=−1/5, excentricité e=5/3",
+          label: "Exemple résolu — droite par A(−4;0) et B(0;−3), conique de foyer F(3;−2), directrice d′ ≡ x=−1⁄5, excentricité e=5⁄3",
           blocks: [
             {
               kind: 'para',
@@ -1097,7 +1097,7 @@ export const coniques: ChapterContent = {
               { x: -5.98, y: 1.48, label: 'Q', tone: 'ink', labelPos: 'left' },
             ],
             caption:
-              'La droite d ≡ y=−(3/4)x−3 coupe l\'hyperbole 16x²−9y²+64x−36y−116=0 en 2 points, P sur la branche droite et Q sur la branche gauche.',
+              'La droite $d \\equiv y=-\\dfrac{3}{4}x-3$ coupe l\'hyperbole $16x^2-9y^2+64x-36y-116=0$ en 2 points, $P$ sur la branche droite et $Q$ sur la branche gauche.',
           },
         },
         {
@@ -1169,7 +1169,7 @@ export const coniques: ChapterContent = {
             { tag: 'branche supérieure', text: '$\\text{on considère } y_P>0 : \\; y_P = \\dfrac{b}{a}\\sqrt{a^2-x_P^2}$' },
             { tag: 'la fonction dont P est un point', text: '$f(x) = \\dfrac{b}{a}\\sqrt{a^2-x^2}, \\; x_P \\in \\,]-a;a[$' },
           ],
-          result: { tag: 'dérivée, puis a√(a²−xP²) = a²yP/b', text: "$f'(x_P) = -\\dfrac{bx_P}{a\\sqrt{a^2-x_P^2}} = -\\dfrac{b^2x_P}{a^2y_P}$" },
+          result: { tag: 'dérivée, puis a√(a²−xP²) = a²yP⁄b', text: "$f'(x_P) = -\\dfrac{bx_P}{a\\sqrt{a^2-x_P^2}} = -\\dfrac{b^2x_P}{a^2y_P}$" },
         },
         {
           kind: 'para',
@@ -1186,7 +1186,7 @@ export const coniques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — tangente à x²/25+y²/16=1 au point P(3 ; 16/5)',
+          label: 'Exemple résolu — tangente à x²⁄25 + y²⁄16 = 1 au point P(3 ; 16⁄5)',
           blocks: [
             {
               kind: 'para',
@@ -1227,7 +1227,7 @@ export const coniques: ChapterContent = {
             vectors: [{ from: { x: -6.5, y: 5 - 0.6 * -6.5 }, to: { x: 6.5, y: 5 - 0.6 * 6.5 }, tone: 'attn', arrow: false }],
             points: [{ x: 3, y: 3.2, label: 'P', tone: 'ink', labelPos: 'right' }],
             caption:
-              "Tangente à l'ellipse x²/25+y²/16=1 au point P(3;3,2) : droite 3x+5y=25, de pente −3/5. Elle touche l'ellipse en P et ne la recoupe nulle part.",
+              "Tangente à l'ellipse $\\dfrac{x^2}{25}+\\dfrac{y^2}{16}=1$ au point $P(3;3{,}2)$ : droite $3x+5y=25$, de pente $-\\dfrac{3}{5}$. Elle touche l'ellipse en $P$ et ne la recoupe nulle part.",
           },
         },
         {

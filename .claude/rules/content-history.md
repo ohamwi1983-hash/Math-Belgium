@@ -5326,3 +5326,14 @@ Notation clavier repérée ailleurs dans le cours (pas corrigée) : fractions «
 cellules et textes (« (x−2)/(x+1) », « √3/2 », « 0/0, ∞/∞ », « 3 + 10/71 < π »), « ^ » dans des
 étiquettes de figure (6e ch. 3 « y=2^x », 6e ch. 2 « 2^√3 » en description, 6e ch. 5 « e^(iπ/3) » en
 légende), « x* = (a − 10)/4 » (5e ch. 5, légende d'atelier), « Rm = Cm = 30 € » hors `$…$` (5e ch. 5).
+
+## Notation clavier hors synthèses — les 23 chapitres (décision de l'utilisateur, 22/11/2026)
+
+Corrigée dans tout le cours (463 chaînes, 21 chapitres ; 223 RichText → KaTeX, 240 brutes → Unicode : fraction
+`⁄` U+2044 pour un quotient simple « 3⁄5 », « π⁄2 », barre entre espaces fines insécables U+202F pour un quotient
+composé « (x − 2) / (x + 1) », exposants Unicode « 2ˣ », « e⁻ᵏˣ » ; seule exception, la description de 6gen146 :
+« 2 exposant √3 », aucun exposant Unicode pour √) — tableaux entiers passés en KaTeX quand une cellule l'était.
+Restent, voulues : « ou » entre mots/sigles (vrai/faux, EV/CV…, f′/f″, sin/cos), numéros de parties de vidéo
+« (1/2) », unités (g/L, rad/s, tr/min…), notes « 13/20 », sources. Badges/labels modifiés ⇒ clés de
+`ENONCES_DEMONSTRATION` (`evaluationPayload.ts`) mises à jour (24) : le build échoue sinon. Vérifié : KaTeX strict
+(0 erreur nouvelle), 0 `$` en champ brut, 148 étapes iPhone 13 sans débordement, 0 `.katex-error`, PDF de 3 chapitres.

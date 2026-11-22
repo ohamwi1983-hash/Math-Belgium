@@ -27,7 +27,7 @@ export const limitesAsymptotes: ChapterContent = {
       partie: 'Calculer limites et asymptotes',
       essentiel: [
         '$\\lim\\limits_{x \\to a} f(x) = L$ : f(x) se rapproche d\'autant plus de L que x se rapproche de a. Si la limite à gauche et la limite à droite diffèrent, la limite en a n\'existe pas.',
-        'Trois formes indéterminées : 0/0, on factorise et on simplifie ; ∞/∞, on met en évidence le terme de plus haut degré ; ∞−∞, terme dominant ou expression conjuguée s\'il y a des racines.',
+        'Trois formes indéterminées : $\\dfrac{0}{0}$, on factorise et on simplifie ; $\\dfrac{\\infty}{\\infty}$, on met en évidence le terme de plus haut degré ; $\\infty-\\infty$, terme dominant ou expression conjuguée s\'il y a des racines.',
         'Forme $\\dfrac{k}{0}$ avec $k \\neq 0$ : la limite est infinie, son signe se lit à gauche et à droite. En $-\\infty$, $\\sqrt{x^2} = |x| = -x$.',
       ],
       cartes: [
@@ -39,8 +39,8 @@ export const limitesAsymptotes: ChapterContent = {
       blocks: [
         { kind: 'video', title: 'Introduction : que devient f(x) ?', youtubeId: 'Ox4FLOO-Fus' },
         { kind: 'video', title: 'Notion de limite : bornes du domaine, limite à gauche/à droite, limites de référence', youtubeId: 'GXuoF1-6fLU' },
-        { kind: 'video', title: 'Formes indéterminées et opérations sur les limites : 0/0, ∞/∞, ∞−∞', youtubeId: 'BdqbQlLk19I' },
-        { kind: 'video', title: 'Calculer des limites : ∞/∞, ∞−∞ et limite qui n\'existe pas', youtubeId: 'n3lIgfR4_GQ' },
+        { kind: 'video', title: 'Formes indéterminées et opérations sur les limites : 0⁄0, ∞⁄∞, ∞ − ∞', youtubeId: 'BdqbQlLk19I' },
+        { kind: 'video', title: 'Calculer des limites : ∞⁄∞, ∞ − ∞ et limite qui n\'existe pas', youtubeId: 'n3lIgfR4_GQ' },
         { kind: 'video', title: 'Point vide ou asymptote verticale ? Tester le numérateur avant de conclure', youtubeId: 'h6Ft2QTFVk4' },
         {
           kind: 'intuition',
@@ -236,8 +236,8 @@ export const limitesAsymptotes: ChapterContent = {
           kind: 'methode',
           label: 'Méthode — 3 formes indéterminées, 3 techniques',
           items: [
-            '**0/0** — factorise numérateur et dénominateur par leur facteur commun, puis simplifie.',
-            '**∞/∞** — mets en évidence (factorise) le terme de plus haut degré, au numérateur ET au dénominateur.',
+            '$\\boldsymbol{\\dfrac{0}{0}}$ — factorise numérateur et dénominateur par leur facteur commun, puis simplifie.',
+            '$\\boldsymbol{\\dfrac{\\infty}{\\infty}}$ — mets en évidence (factorise) le terme de plus haut degré, au numérateur ET au dénominateur.',
             '**∞−∞** — mets en évidence le terme dominant pour des polynômes, ou multiplie par ' +
               'l\'expression conjuguée s\'il y a des racines.',
           ],
@@ -276,19 +276,19 @@ export const limitesAsymptotes: ChapterContent = {
         {
           kind: 'featureTable',
           caption: 'Quotient f ÷ g',
-          headers: ['lim f', 'lim g', 'lim(f/g)'],
+          headers: ['lim f', 'lim g', 'lim (f⁄g)'],
           rows: [
             ['m', 'p≠0', { text: '$\\dfrac{m}{p}$', tone: 'good' }],
             ['m', '±∞', { text: '0', tone: 'good' }],
             ['m≠0', '0', { text: '±∞ (signe à étudier)', tone: 'good' }],
             ['±∞', 'p≠0', { text: '±∞', tone: 'good' }],
-            ['0', '0', { text: 'indét. (0/0)', tone: 'bad' }],
-            ['±∞', '±∞', { text: 'indét. (∞/∞)', tone: 'bad' }],
+            ['0', '0', { text: 'indét. ($\\frac{0}{0}$)', tone: 'bad' }],
+            ['±∞', '±∞', { text: 'indét. ($\\frac{\\infty}{\\infty}$)', tone: 'bad' }],
           ],
         },
         {
           kind: 'exemple',
-          badge: 'forme 0/0 — factorisation',
+          badge: 'forme 0⁄0 — factorisation',
           formula: '$\\displaystyle\\lim_{x \\to 2} \\dfrac{x^2-5x+6}{x-2}$',
           steps: [
             { tag: 'vérifier la forme', text: 'En $x=2$ : numérateur $2^2-5\\cdot 2+6=0$ et dénominateur $2-2=0$ → forme $\\dfrac{0}{0}$, il faut factoriser' },
@@ -322,16 +322,16 @@ export const limitesAsymptotes: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'forme ∞/∞ — mise en évidence du terme dominant',
+          badge: 'forme ∞⁄∞ — mise en évidence du terme dominant',
           formula: '$\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{3x^2-5x+1}{x^2+2}$',
           steps: [
-            { tag: 'vérifier la forme', text: 'numérateur→+∞ et dénominateur→+∞ : les deux partent vers l\'infini → forme ∞/∞' },
+            { tag: 'vérifier la forme', text: 'numérateur $\\to +\\infty$ et dénominateur $\\to +\\infty$ : les deux partent vers l\'infini → forme $\\dfrac{\\infty}{\\infty}$' },
             {
               tag: 'mettre x² en évidence au numérateur ET au dénominateur',
               text: '$\\dfrac{3x^2-5x+1}{x^2+2} = \\dfrac{x^2(3-5/x+1/x^2)}{x^2(1+2/x^2)} = \\dfrac{3-5/x+1/x^2}{1+2/x^2}$',
             },
           ],
-          result: { tag: 'passer à la limite — chaque terme en 1/x, 1/x² tend vers 0', text: '$\\displaystyle\\lim_{x \\to +\\infty} = \\dfrac{3}{1} = 3$' },
+          result: { tag: 'passer à la limite — chaque terme en 1⁄x, 1⁄x² tend vers 0', text: '$\\displaystyle\\lim_{x \\to +\\infty} = \\dfrac{3}{1} = 3$' },
           illustration: {
             kind: 'curvePlot',
             curves: [{ fn: (x) => (3 * x * x - 5 * x + 1) / (x * x + 2), tone: 'accent' }],
@@ -474,7 +474,7 @@ export const limitesAsymptotes: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'forme 0/0 avec une racine — conjuguée au numérateur',
+          badge: 'forme 0⁄0 avec une racine — conjuguée au numérateur',
           formula: '$\\displaystyle\\lim_{x \\to 4} \\dfrac{\\sqrt{x}-2}{x-4}$',
           steps: [
             {
@@ -508,7 +508,7 @@ export const limitesAsymptotes: ChapterContent = {
             },
           ],
           result: {
-            tag: 'passer à la limite — 4/x tend vers 0',
+            tag: 'passer à la limite — 4⁄x tend vers 0',
             text: '$\\displaystyle\\lim_{x \\to +\\infty} \\left[\\sqrt{x^2+4x}-x\\right] = \\dfrac{4}{\\sqrt{1}+1} = 2$ : cette fois, l\'écart ne s\'éteint pas.',
           },
           illustration: {
@@ -732,7 +732,7 @@ export const limitesAsymptotes: ChapterContent = {
           text:
             'Remplace d\'abord x par la valeur cible — ou observe la tendance, si la cible est ' +
             '±∞. Tu sais tout de suite si tu es dans une forme **déterminée** (calcul direct ' +
-            'possible) ou **indéterminée** (0/0, ∞/∞, ∞−∞, qui demandent une transformation). ' +
+            'possible) ou **indéterminée** ($\\dfrac{0}{0}$, $\\dfrac{\\infty}{\\infty}$, $\\infty-\\infty$, qui demandent une transformation). ' +
             'Sauter ce diagnostic fait perdre du temps sur des formes qui n\'en avaient pas besoin.',
         },
         {
@@ -760,8 +760,8 @@ export const limitesAsymptotes: ChapterContent = {
           title: 'Limites, reconnaissance et calcul',
           generatorId: '5gen20',
           description: [
-            'Reconnais la nature d\'une limite (finie, forme k/0 donc infinie, ou forme ' +
-              'indéterminée 0/0 ou ∞/∞), puis calcule-la : factorisation, terme dominant mis en ' +
+            'Reconnais la nature d\'une limite (finie, forme k⁄0 donc infinie, ou forme ' +
+              'indéterminée 0⁄0 ou ∞⁄∞), puis calcule-la : factorisation, terme dominant mis en ' +
               'évidence, ou étude de signe, selon le cas.',
           ],
           chantier: '5e-4h',
@@ -785,7 +785,7 @@ export const limitesAsymptotes: ChapterContent = {
           generatorId: '5gen64',
           chantier: '5e-4h',
           description: [
-            'Formes ∞ − ∞ (√(x² + bx + c) − x, différence de deux racines), 0/0 ((√(x + 9) − 3)/x) et ∞/∞ en −∞ : reconnais la forme, multiplie par l’expression conjuguée (produit remarquable (A − B)(A + B) = A² − B²) ou mets x² en évidence sous la racine — en −∞, √(x²) = |x| = −x —, simplifie, puis donne la limite exacte.',
+            'Formes ∞ − ∞ (√(x² + bx + c) − x, différence de deux racines), 0⁄0 ((√(x + 9) − 3) / x) et ∞⁄∞ en −∞ : reconnais la forme, multiplie par l’expression conjuguée (produit remarquable (A − B)(A + B) = A² − B²) ou mets x² en évidence sous la racine — en −∞, √(x²) = |x| = −x —, simplifie, puis donne la limite exacte.',
           ],
           whereLabel: '5e (4h) → « 64. Limites avec racines carrées : expression conjuguée »',
         },
@@ -796,7 +796,7 @@ export const limitesAsymptotes: ChapterContent = {
       number: 2,
       title: 'Asymptote oblique',
       kicker:
-        'définir une asymptote (AV/AH/AO, cas général) ; y = ax + b, avec a = lim f(x)/x et ' +
+        'définir une asymptote (AV/AH/AO, cas général) ; y = ax + b, avec a = lim f(x) / x et ' +
         'b = lim (f(x) − ax) — lien avec le degré de N et D',
       titreCourt: 'Asymptote oblique',
       partie: 'Calculer limites et asymptotes',
@@ -938,7 +938,7 @@ export const limitesAsymptotes: ChapterContent = {
             { tag: 'vérifier la condition de degré', text: 'deg(numérateur)=2, deg(dénominateur)=1, soit exactement 1 de plus → asymptote oblique garantie' },
             { tag: 'méthode 1 — division euclidienne de x²−3x+5 par x−1', text: '$x^2-3x+5 = (x-1)(x-2) + 3$' },
             { tag: 'réécrire f(x)', text: '$f(x) = x-2 + \\dfrac{3}{x-1}$' },
-            { tag: 'méthode 2 — vérification par les limites : a = lim f(x)/x', text: '$a = \\displaystyle\\lim_{x \\to +\\infty} \\dfrac{x^2-3x+5}{x^2-x} = 1$ (rapport des coefficients dominants $x^2/x^2$)' },
+            { tag: 'méthode 2 — vérification par les limites : a = lim f(x) / x', text: '$a = \\displaystyle\\lim_{x \\to +\\infty} \\dfrac{x^2-3x+5}{x^2-x} = 1$ (rapport des coefficients dominants $x^2/x^2$)' },
             { tag: 'b = lim (f(x) − x)', text: '$b = \\displaystyle\\lim_{x \\to +\\infty} \\dfrac{-2x+5}{x-1} = -2$ (rapport des coefficients dominants $-2x/x$)' },
           ],
           result: { tag: 'asymptote oblique — le quotient SEUL, jamais le reste', text: '$y = x-2$' },
@@ -1015,9 +1015,9 @@ export const limitesAsymptotes: ChapterContent = {
           tag: 'zoom-arriere-asymptote-widget',
           label: 'Manipule toi-même — prends du recul',
           caption:
-            'Dézoome (×10 à chaque fois) : de loin, la courbe de (x² − 3x + 5)/(x − 1) devient ' +
-            'impossible à distinguer de la droite y = x − 2, et l\'écart affiché fond. Essaie les deux ' +
-            'autres fonctions : une horizontale, et x³/(x − 1), qu\'aucune droite ne suit.',
+            'Dézoome (×10 à chaque fois) : de loin, la courbe de $\\dfrac{x^2 - 3x + 5}{x - 1}$ devient ' +
+            'impossible à distinguer de la droite $y = x - 2$, et l\'écart affiché fond. Essaie les deux ' +
+            'autres fonctions : une horizontale, et $\\dfrac{x^3}{x - 1}$, qu\'aucune droite ne suit.',
         },
         {
           kind: 'astuce',
@@ -1137,7 +1137,7 @@ export const limitesAsymptotes: ChapterContent = {
           generatorId: '5gen21',
           description: [
             'Détermine l\'équation y = ax + b d\'une asymptote oblique, par division euclidienne ou par la ' +
-              'méthode des limites (a = lim f(x)/x, b = lim (f(x) − ax)) — pour un dénominateur de degré 1 ou 2 ; ' +
+              'méthode des limites (a = lim f(x) / x, b = lim (f(x) − ax)) — pour un dénominateur de degré 1 ou 2 ; ' +
               'ou étudie la position de la courbe par rapport à son asymptote (signe de f(x) − (ax + b), ' +
               'point de recoupement, côté d\'approche en −∞ et en +∞).',
           ],
@@ -1573,7 +1573,7 @@ export const limitesAsymptotes: ChapterContent = {
               tag: 'quelques valeurs, pour observer la tendance',
               text: '$C_u(100) = 8+2{,}4 = 10{,}4$ € ; $C_u(1000) = 8+0{,}24 = 8{,}24$ € ; $C_u(10\\,000) = 8+0{,}024 = 8{,}024$ €',
             },
-            { tag: 'limite en +∞ — le terme 240/x tend vers 0', text: '$\\displaystyle\\lim_{x \\to +\\infty} C_u(x) = 8 + 0 = 8$' },
+            { tag: 'limite en +∞ — le terme 240⁄x tend vers 0', text: '$\\displaystyle\\lim_{x \\to +\\infty} C_u(x) = 8 + 0 = 8$' },
           ],
           result: {
             tag: 'interprétation',
@@ -1603,7 +1603,7 @@ export const limitesAsymptotes: ChapterContent = {
         },
         {
           kind: 'methode',
-          label: 'Méthode — écrire f(x) = b + a/(x+p) par division euclidienne',
+          label: 'Méthode — écrire f(x) = b + a / (x + p) par division euclidienne',
           items: [
             'Une fonction de la forme $f(x)=\\dfrac{bx+q}{x+p}$ se réécrit en divisant $bx+q$ par ' +
               '$x+p$ : le quotient est $b$, le reste est $a=q-bp$. Donc $f(x)=b+\\dfrac{a}{x+p}$.',
@@ -1737,7 +1737,7 @@ export const limitesAsymptotes: ChapterContent = {
             'Un club compte $N(x)=2x+15-\\dfrac{8}{x+2}$ centaines d\'abonnés, $x$ mois après son ' +
             'ouverture. Comment évolue le nombre d\'abonnés à long terme ?',
           steps: [
-            { tag: 'le terme en 8/(x+2) tend vers 0', text: '$\\displaystyle\\lim_{x \\to +\\infty} \\left[N(x)-(2x+15)\\right] = \\lim_{x \\to +\\infty} -\\dfrac{8}{x+2} = 0$' },
+            { tag: 'le terme en 8 / (x+2) tend vers 0', text: '$\\displaystyle\\lim_{x \\to +\\infty} \\left[N(x)-(2x+15)\\right] = \\lim_{x \\to +\\infty} -\\dfrac{8}{x+2} = 0$' },
             { tag: 'asymptote oblique', text: '$y = 2x+15$ — la courbe reste juste en dessous, car $-\\dfrac{8}{x+2} < 0$' },
             { tag: 'une valeur — après 12 mois', text: '$N(12) = 24+15-\\dfrac{8}{14} \\approx 38{,}43$, soit environ 3 843 abonnés' },
           ],
@@ -1782,8 +1782,8 @@ export const limitesAsymptotes: ChapterContent = {
           tag: 'plancher-plafond-widget',
           label: 'Manipule toi-même — plancher ou plafond, jamais atteint',
           caption:
-            'Mode plancher : règle le coût fixe F et le coût variable v (F = 240, v = 8 : l\'exemple du ' +
-            'coût unitaire). Mode plafond : b + a/(x + p) avec a < 0 (la population qui monte). Déplace x : ' +
+            'Mode plancher : règle le coût fixe F et le coût variable $v$ ($F = 240$, $v = 8$ : l\'exemple du ' +
+            'coût unitaire). Mode plafond : $b + \\dfrac{a}{x + p}$ avec $a < 0$ (la population qui monte). Déplace x : ' +
             'l\'écart à l\'asymptote reste toujours strictement positif, aussi grand que x devienne.',
         },
         {
@@ -1793,7 +1793,7 @@ export const limitesAsymptotes: ChapterContent = {
           description: [
             'Traduis une situation concrète — coût de production, concentration d\'eau salée, ' +
               'club à abonnement, population — en limite ou en asymptote (horizontale ou oblique), ' +
-              'écris la fonction sous la forme b + a/(x + p) par division euclidienne, puis ' +
+              'écris la fonction sous la forme b + a / (x + p) par division euclidienne, puis ' +
               'interprète le résultat dans le contexte.',
           ],
           chantier: '5e-4h',
@@ -1935,7 +1935,7 @@ export const limitesAsymptotes: ChapterContent = {
         },
         {
           kind: 'signTable',
-          caption: 'Signe de f(x) = (x² − 2x − 3)/(x − 1) = (x + 1)(x − 3)/(x − 1) — la double barre marque la valeur exclue x = 1',
+          caption: 'Signe de f(x) = (x² − 2x − 3) / (x − 1) = (x + 1)(x − 3) / (x − 1) — la double barre marque la valeur exclue x = 1',
           rows: [
             {
               label: 'x',
@@ -2088,9 +2088,9 @@ export const limitesAsymptotes: ChapterContent = {
           tag: 'recoupement-widget',
           label: 'Manipule toi-même — où la courbe recoupe-t-elle son asymptote ?',
           caption:
-            'Règle p et q dans (x² + px + q)/(x² + 1) : l\'asymptote reste y = 1, et la courbe la recoupe ' +
-            'exactement là où le reste (px + q − 1)/(x² + 1) s\'annule. Avec p = 0, plus aucun recoupement ' +
-            '(sauf si q = 1 : la fonction vaut alors 1 partout).',
+            'Règle $p$ et $q$ dans $\\dfrac{x^2 + px + q}{x^2 + 1}$ : l\'asymptote reste $y = 1$, et la courbe la recoupe ' +
+            'exactement là où le reste $\\dfrac{px + q - 1}{x^2 + 1}$ s\'annule. Avec $p = 0$, plus aucun recoupement ' +
+            '(sauf si $q = 1$ : la fonction vaut alors 1 partout).',
         },
         {
           kind: 'exemple',
@@ -2230,7 +2230,7 @@ export const limitesAsymptotes: ChapterContent = {
           generatorId: '5gen65',
           chantier: '5e-4h',
           description: [
-            'La forme est donnée — (ax + b)/(x + d) ou ax + b + c/(x − p) — avec ses asymptotes et un point du graphe, ou un graphique complet à lire : traduis chaque asymptote en condition, utilise le point pour trouver la dernière inconnue, écris f(x), puis vérifie l’asymptote verticale par une limite.',
+            'La forme est donnée — (ax + b) / (x + d) ou ax + b + c / (x − p) — avec ses asymptotes et un point du graphe, ou un graphique complet à lire : traduis chaque asymptote en condition, utilise le point pour trouver la dernière inconnue, écris f(x), puis vérifie l’asymptote verticale par une limite.',
           ],
           whereLabel: '5e (4h) → « 65. Retrouver une fonction à partir de ses asymptotes »',
         },
@@ -2240,7 +2240,7 @@ export const limitesAsymptotes: ChapterContent = {
           generatorId: '5gen67',
           chantier: '5e-4h',
           description: [
-            'La résolution d’un élève contient une seule ligne fausse : « ∞/∞ = 1 », « ∞ − ∞ = 0 », signe de 0⁺ ou 0⁻ faux, simplification interdite, √(x²) = x en −∞, degrés mal comparés, asymptote oblique prise pour une horizontale ou limite latérale oubliée. Trouve la ligne, nomme l’erreur, puis corrige la résolution.',
+            'La résolution d’un élève contient une seule ligne fausse : « ∞⁄∞ = 1 », « ∞ − ∞ = 0 », signe de 0⁺ ou 0⁻ faux, simplification interdite, √(x²) = x en −∞, degrés mal comparés, asymptote oblique prise pour une horizontale ou limite latérale oubliée. Trouve la ligne, nomme l’erreur, puis corrige la résolution.',
           ],
           whereLabel: '5e (4h) → « 67. Détective d’erreurs : limites »',
         },
@@ -2261,8 +2261,8 @@ export const limitesAsymptotes: ChapterContent = {
       {
         title: 'Formes indéterminées',
         formulas: [
-          { text: '0/0 — factoriser le facteur commun, puis simplifier' },
-          { text: '∞/∞ — mettre en évidence le terme de plus haut degré, au numérateur et au dénominateur' },
+          { text: '$\\dfrac{0}{0}$ — factoriser le facteur commun, puis simplifier' },
+          { text: '$\\dfrac{\\infty}{\\infty}$ — mettre en évidence le terme de plus haut degré, au numérateur et au dénominateur' },
           { text: '∞−∞ — terme dominant (polynômes) ou expression conjuguée (racines)' },
         ],
       },
@@ -2291,7 +2291,7 @@ export const limitesAsymptotes: ChapterContent = {
         ],
       },
       {
-        title: 'Degré ↔ asymptote (N/D rationnelle)',
+        title: 'Degré ↔ asymptote (N⁄D rationnelle)',
         formulas: [
           { text: 'deg(N) < deg(D)', condition: '$y=0$' },
           { text: 'deg(N) = deg(D)', condition: 'AH, $b$ = rapport des coefficients dominants' },

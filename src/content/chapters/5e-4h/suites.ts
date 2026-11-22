@@ -1060,11 +1060,11 @@ export const suites: ChapterContent = {
           formula: 'Calcule $\\lim_{n\\to+\\infty} u_n$ pour $u_n = \\dfrac{3n-1}{2n+5}$.',
           steps: [
             { tag: 'diviser numérateur ET dénominateur par n (plus haute puissance au dénominateur)', text: '$u_n = \\dfrac{3-\\frac{1}{n}}{2+\\frac{5}{n}}$' },
-            { tag: 'quand n→+∞, 1/n→0 et 5/n→0', text: '$u_n \\to \\dfrac{3-0}{2+0} = \\dfrac{3}{2}$' },
+            { tag: 'quand n→+∞, 1⁄n→0 et 5⁄n→0', text: '$u_n \\to \\dfrac{3-0}{2+0} = \\dfrac{3}{2}$' },
           ],
           result: {
             tag: 'résultat',
-            text: '$\\lim_{n\\to+\\infty} u_n = \\dfrac{3}{2} = 1{,}5$ — même degré (1) au numérateur et au dénominateur : la limite est le rapport des coefficients dominants, 3/2.',
+            text: '$\\lim_{n\\to+\\infty} u_n = \\dfrac{3}{2} = 1{,}5$ — même degré (1) au numérateur et au dénominateur : la limite est le rapport des coefficients dominants, $\\dfrac{3}{2}$.',
           },
         },
         {
@@ -1073,7 +1073,7 @@ export const suites: ChapterContent = {
             'Diviser par n\'importe quelle puissance de n (la même au numérateur et au ' +
             'dénominateur) ne change jamais la valeur de l\'expression. Mais diviser par la ' +
             '**bonne** puissance (celle du dénominateur) fait apparaître directement des termes ' +
-            'en 1/n, qui s\'annulent à la limite — sans calcul supplémentaire.',
+            'en $\\dfrac{1}{n}$, qui s\'annulent à la limite — sans calcul supplémentaire.',
         },
         {
           kind: 'application',
@@ -1123,7 +1123,7 @@ export const suites: ChapterContent = {
           generatorId: '5gen16',
           description: [
             'Classe la limite d\'une suite arithmétique, géométrique (avec les pièges q=−1 et ' +
-              'q<−1), ou d\'une suite quelconque uₙ = P(n)/Q(n) en comparant les degrés du ' +
+              'q<−1), ou d\'une suite quelconque uₙ = P(n) / Q(n) en comparant les degrés du ' +
               'numérateur et du dénominateur.',
           ],
           chantier: '5e-4h',
@@ -1230,7 +1230,7 @@ export const suites: ChapterContent = {
             'nouveau carré. Calcule la somme des aires de tous les carrés.',
           steps: [
             { tag: "l'aire est divisée par 2 à chaque étape", text: 'Les 4 triangles des coins, repliés vers le centre, recouvrent exactement le carré inscrit : il occupe la moitié du carré précédent.' },
-            { tag: 'suite géométrique — u1 = 16, q = 1/2', text: '$u_n = 16\\times\\left(\\dfrac{1}{2}\\right)^{n-1}$ (en cm²), et $|q| = \\dfrac{1}{2} < 1$' },
+            { tag: 'suite géométrique — u1 = 16, q = 1⁄2', text: '$u_n = 16\\times\\left(\\dfrac{1}{2}\\right)^{n-1}$ (en cm²), et $|q| = \\dfrac{1}{2} < 1$' },
             { tag: 'somme infinie', text: '$S_\\infty = \\dfrac{16}{1-\\frac{1}{2}} = \\dfrac{16}{\\frac{1}{2}} = 32$' },
           ],
           result: {
@@ -1410,9 +1410,9 @@ export const suites: ChapterContent = {
           generatorId: '5gen49',
           description: [
             'La copie d\'un élève — somme de termes d\'une suite arithmétique ou géométrique, ' +
-              'évolution en pourcentage, somme infinie ou limite de P(n)/Q(n) — contient une ' +
+              'évolution en pourcentage, somme infinie ou limite de P(n) / Q(n) — contient une ' +
               'erreur : trouve la ligne fausse, nomme l\'erreur (n au lieu de n − 1, terme oublié ' +
-              'dans le compte, q = t/100, |q| ≥ 1, raison inversée…), puis donne le bon résultat.',
+              'dans le compte, q = t⁄100, |q| ≥ 1, raison inversée…), puis donne le bon résultat.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 49. Détective d\'erreurs : suites »',
@@ -1619,7 +1619,7 @@ export const suites: ChapterContent = {
         { question: 'Pourquoi la suite des écarts $v_n = u_n - L$ est-elle géométrique ?', reponse: 'Avec $b = L - aL$ : $v_{n+1} = a\\times u_n + b - L = a\\times v_n$.' },
       ],
       blocks: [
-        { kind: 'video', title: 'Suite récurrente affine uₙ₊₁ = a·uₙ + b et régime permanent L = b/(1−a)', youtubeId: '7ATLT1PpzIE' },
+        { kind: 'video', title: 'Suite récurrente affine uₙ₊₁ = a·uₙ + b et régime permanent L = b / (1 − a)', youtubeId: '7ATLT1PpzIE' },
         {
           kind: 'para',
           text:
@@ -1658,7 +1658,7 @@ export const suites: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — pourquoi L = b/(1−a)',
+          label: 'Démonstration — pourquoi L = b / (1 − a)',
           blocks: [
             {
               kind: 'para',
@@ -1920,7 +1920,7 @@ export const suites: ChapterContent = {
         ],
       },
       {
-        title: 'Suite quelconque P(n)/Q(n)',
+        title: 'Suite quelconque P(n) / Q(n)',
         formulas: [
           { text: 'degré(P) < degré(Q) $\\Rightarrow \\lim u_n = 0$' },
           { text: 'degré(P) = degré(Q) → limite = rapport des coefficients dominants' },

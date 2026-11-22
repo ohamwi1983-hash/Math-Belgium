@@ -220,7 +220,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             xTicks: [],
             fixedYRange: { min: -2.5, max: 3.2 },
             textLabels: [
-              { x: 0.55, y: 2.95, text: 'y=2^x', tone: 'good', anchor: 'start' },
+              { x: 0.55, y: 2.95, text: 'y = 2ˣ', tone: 'good', anchor: 'start' },
               { x: 2.55, y: 2.15, text: 'y=x', tone: 'faint', anchor: 'start' },
               { x: 2.35, y: 0.3, text: 'y=log₂x', tone: 'accent', anchor: 'start' },
             ],
@@ -250,7 +250,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             xTicks: [],
             fixedYRange: { min: -2.5, max: 3.2 },
             textLabels: [
-              { x: -2.4, y: 2.55, text: 'y=0,5^x', tone: 'good', anchor: 'start' },
+              { x: -2.4, y: 2.55, text: 'y = 0,5ˣ', tone: 'good', anchor: 'start' },
               { x: 2.55, y: 2.15, text: 'y=x', tone: 'faint', anchor: 'start' },
               { x: 0.7, y: -1.95, text: 'y=log₀,₅x', tone: 'accent', anchor: 'start' },
             ],
@@ -271,10 +271,10 @@ export const fonctionsLogarithmes: ChapterContent = {
           tag: 'log-exp-miroir-widget',
           label: 'Manipule toi-même — le miroir expₐ / logₐ',
           caption:
-            'Fais glisser r : le point (r ; aʳ) sur expₐ a toujours son symétrique (aʳ ; r) ' +
-            'sur logₐ. Coche « Afficher les tangentes » : elles sont symétriques elles ' +
-            'aussi, et leurs pentes sont inverses (m et 1/m). Appuie sur « a = e » : la ' +
-            'pente de ln en x vaut exactement 1/x — c\'est (ln x)′ = 1/x, démontré à la ' +
+            'Fais glisser $r$ : le point $(r\\,;a^r)$ sur $\\exp_a$ a toujours son symétrique $(a^r\\,;r)$ ' +
+            'sur $\\log_a$. Coche « Afficher les tangentes » : elles sont symétriques elles ' +
+            'aussi, et leurs pentes sont inverses ($m$ et $\\dfrac{1}{m}$). Appuie sur « a = e » : la ' +
+            'pente de $\\ln$ en $x$ vaut exactement $\\dfrac{1}{x}$ — c\'est $(\\ln x)\' = \\dfrac{1}{x}$, démontré à la ' +
             'section 4.',
         },
         { kind: 'subheading', text: 'Propriétés algébriques' },
@@ -555,8 +555,8 @@ export const fonctionsLogarithmes: ChapterContent = {
             xTicks: [],
             fixedYRange: { min: -0.5, max: 3.6 },
             textLabels: [
-              { x: -1.95, y: 3.2, text: 'g(x)=3^x', tone: 'good', anchor: 'start' },
-              { x: -1.95, y: 2.5, text: 'f(x)=2^x', tone: 'accent', anchor: 'start' },
+              { x: -1.95, y: 3.2, text: 'g(x) = 3ˣ', tone: 'good', anchor: 'start' },
+              { x: -1.95, y: 2.5, text: 'f(x) = 2ˣ', tone: 'accent', anchor: 'start' },
             ],
             points: [
               { x: 1, y: 3, label: '(1;3)', tone: 'good', labelPos: 'left' },
@@ -674,7 +674,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               'Quatre fonctions logarithmes (bases 2, e, 10 et 0,5) sur les mêmes axes. Elles ' +
               'passent toutes par (1;0) et sont toutes multiples les unes des autres : leurs ' +
               'ordonnées sont, en chaque x, proportionnelles entre elles. Un coefficient négatif ' +
-              '(cas de log₀,₅, dont le coefficient vaut 1/ln(0,5) < 0) retourne simplement la ' +
+              '(cas de $\\log_{0{,}5}$, dont le coefficient vaut $\\dfrac{1}{\\ln(0{,}5)} < 0$) retourne simplement la ' +
               'courbe autour de l\'axe des abscisses.',
           },
         },
@@ -1773,7 +1773,7 @@ export const fonctionsLogarithmes: ChapterContent = {
       id: 'derivee',
       number: 4,
       title: 'Domaine, dérivée et dérivation logarithmique',
-      kicker: "(ln x)' = 1/x, dérivation logarithmique, exposant variable",
+      kicker: "(ln x)' = 1⁄x, dérivation logarithmique, exposant variable",
       titreCourt: 'Dérivée du logarithme',
       partie: 'Dérivée, limites, paramètres',
       essentiel: [
@@ -1801,7 +1801,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration de ln\'(x) = 1/x',
+          label: 'Démonstration de ln\'(x) = 1⁄x',
           blocks: [
             {
               kind: 'para',
@@ -1865,14 +1865,14 @@ export const fonctionsLogarithmes: ChapterContent = {
             fixedYRange: { min: -2.8, max: 3.6 },
             textLabels: [
               { x: 5.9, y: 2.35, text: 'ln x', tone: 'accent', anchor: 'start' },
-              { x: 5.9, y: 0.55, text: "ln'x=1/x", tone: 'good', anchor: 'start' },
+              { x: 5.9, y: 0.55, text: "ln'x = 1⁄x", tone: 'good', anchor: 'start' },
               { x: 1.6, y: 2.9, text: "ln'(x) > 0 partout", tone: 'good', anchor: 'start' },
             ],
             points: [{ x: 1, y: 1, label: '', tone: 'good' }],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
             caption:
-              'ln et sa dérivée 1/x. La dérivée reste strictement positive sur tout ]0;+∞[ : ln ' +
+              '$\\ln$ et sa dérivée $\\dfrac{1}{x}$. La dérivée reste strictement positive sur tout $]0\\,;+\\infty[$ : $\\ln$ ' +
               'est donc strictement croissante partout, y compris là où elle est négative. Et ' +
               'cette dérivée est elle-même décroissante (elle tend vers 0) : la croissance de ln ' +
               'ralentit sans jamais s\'arrêter — c\'est ce que signifie « concavité tournée vers ' +
@@ -1886,7 +1886,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration de logₐ\'(x) = 1/(x·ln(a))',
+          label: 'Démonstration de logₐ\'(x) = 1 / (x·ln(a))',
           blocks: [
             {
               kind: 'para',
@@ -1990,7 +1990,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             'près de $x = -2$ et de $x = 2$.',
           steps: [
             { tag: 'domaine — l\'argument doit être non nul', text: '$x^2 - 4 \\neq 0 \\iff x \\neq \\pm2$ : $\\text{dom} f = \\mathbb{R} \\setminus \\{-2;2\\}$' },
-            { tag: 'dérivée — (ln|u|)′ = u′/u', text: '$f\'(x) = \\dfrac{2x}{x^2-4}$' },
+            { tag: 'dérivée — (ln|u|)′ = u′⁄u', text: '$f\'(x) = \\dfrac{2x}{x^2-4}$' },
             { tag: 'près de ±2', text: '$\\left|x^2-4\\right| \\to 0^+$, donc $f(x) \\to -\\infty$ : asymptotes verticales $x = -2$ et $x = 2$' },
           ],
           result: { tag: 'résultat', text: '$f\'(x) = \\dfrac{2x}{x^2-4}$ sur $\\mathbb{R} \\setminus \\{-2;2\\}$, deux asymptotes verticales' },
@@ -2093,9 +2093,9 @@ export const fonctionsLogarithmes: ChapterContent = {
               xAxisLabel: 't (années)',
               yAxisLabel: 'ln(f(t))',
               caption:
-                'La MÊME croissance, mais en traçant ln(f(t)) : une droite, dont la pente ' +
+                'La MÊME croissance, mais en traçant $\\ln(f(t))$ : une droite, dont la pente ' +
                 '(0,05) EST directement le taux de croissance relatif — plus besoin de ' +
-                "calculer f'(t)/f(t), il suffit de lire la pente sur ce graphique.",
+                "calculer $\\dfrac{f'(t)}{f(t)}$, il suffit de lire la pente sur ce graphique.",
             },
           ],
           text:
@@ -2385,7 +2385,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               xTicks: [0, 3, 6, 9],
               fixedYRange: { min: 0, max: 32 },
               points: [{ x: 9, y: 29.9, label: '10⁹ données → ≈30 comparaisons', tone: 'good', labelPos: 'left' }],
-              xAxisLabel: 'n = 10^k',
+              xAxisLabel: 'n = 10ᵏ',
               yAxisLabel: 'comparaisons (log₂n)',
               caption:
                 'Chaque facteur 10 de plus sur la taille des données (k+1) ne coûte que ' +
@@ -2528,7 +2528,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           formula: 'Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{(\\ln x)^2}{x}$.',
           steps: [
             { tag: 'faire apparaître une croissance comparée connue', text: '$\\dfrac{(\\ln x)^2}{x} = \\left(\\dfrac{\\ln(x)}{\\sqrt{x}}\\right)^2$' },
-            { tag: 'croissance comparée (k = 1/2)', text: '$\\dfrac{\\ln(x)}{x^{1/2}} \\to 0$' },
+            { tag: 'croissance comparée (k = 1⁄2)', text: '$\\dfrac{\\ln(x)}{x^{1/2}} \\to 0$' },
           ],
           result: { tag: 'résultat', text: '$\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{(\\ln x)^2}{x} = 0^2 = 0$' },
         },
@@ -2649,7 +2649,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           generatorId: '6gen17',
           description: [
             'Calcule des limites de fonctions logarithmiques : croissance comparée ' +
-              '(exponentielle > puissance > logarithme), limite de référence ln(1+u)/u → 1, ' +
+              '(exponentielle > puissance > logarithme), limite de référence ln(1 + u) / u → 1, ' +
               'limites déterminées déguisées en formes indéterminées, et limites de puissances ' +
               'dont la base et l\'exposant varient (formes « 1 exposant l\'infini », 0⁰ et ∞⁰).',
           ],
@@ -2723,10 +2723,10 @@ export const fonctionsLogarithmes: ChapterContent = {
           tag: 'parametres-graphiques-widget',
           label: 'Manipule toi-même — a, b et le piège du point en x = e',
           caption:
-            'En mode Libre, fais varier a et b : le point (1 ; a) et la tangente de pente b ' +
-            'suivent ; coche « Révéler le point en x = e » pour voir que f(e) = a + b. En ' +
-            'mode Défi, recouvre la courbe en pointillés à partir de deux points pris en x ' +
-            '= e, e² ou 1/e, avec ln(e) = 1, ln(e²) = 2 et ln(1/e) = −1.',
+            'En mode Libre, fais varier $a$ et $b$ : le point $(1\\,;a)$ et la tangente de pente $b$ ' +
+            'suivent ; coche « Révéler le point en x = e » pour voir que $f(e) = a + b$. En ' +
+            'mode Défi, recouvre la courbe en pointillés à partir de deux points pris en ' +
+            '$x = e$, $e^2$ ou $\\dfrac{1}{e}$, avec $\\ln(e) = 1$, $\\ln(e^2) = 2$ et $\\ln\\left(\\dfrac{1}{e}\\right) = -1$.',
         },
         {
           kind: 'exempleLibre',
@@ -3077,7 +3077,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'lire f′ pour ln(x) − x/2',
+          badge: 'lire f′ pour ln(x) − x⁄2',
           formula:
             'Pour $f(x) = \\ln(x) - \\dfrac{x}{2}$ ($x > 0$), étudie le signe et les variations de $f\'$, ' +
             'et déduis-en l\'allure du graphique de f.',
@@ -3152,7 +3152,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         { question: '$D(v) = 5v - 2v\\ln(v)$ : où le débit est-il maximal ?', reponse: '$D\'(v) = 3 - 2\\ln(v)$ s\'annule en $v = e^{3/2} \\approx 4{,}48$.' },
       ],
       blocks: [
-        { kind: 'video', title: 'Étudier une fonction : f(x) = ln(x)/x', youtubeId: 'uZjWAZVXFTA' },
+        { kind: 'video', title: 'Étudier une fonction : f(x) = ln(x) / x', youtubeId: 'uZjWAZVXFTA' },
         {
           kind: 'para',
           text:
@@ -3208,7 +3208,7 @@ export const fonctionsLogarithmes: ChapterContent = {
                   cells: [
                     { text: '−∞', tone: 'plain' },
                     { text: '↗', tone: 'plain' },
-                    { text: 'max (1/e)', tone: 'zero' },
+                    { text: 'max (1⁄e)', tone: 'zero' },
                     { text: '↘', tone: 'plain' },
                     { text: '0', tone: 'plain' },
                   ],
@@ -3237,12 +3237,12 @@ export const fonctionsLogarithmes: ChapterContent = {
             verticalAsymptotes: [{ x: 0, label: 'asymptote x=0' }],
             horizontalAsymptotes: [{ y: 0, label: 'asymptote y=0' }],
             points: [
-              { x: E, y: 1 / E, label: 'max (e;1/e)', tone: 'accent', labelPos: 'above' },
+              { x: E, y: 1 / E, label: 'max (e ; 1⁄e)', tone: 'accent', labelPos: 'above' },
               { x: Math.exp(1.5), y: 1.5 / Math.exp(1.5), label: 'inflexion', tone: 'good', labelPos: 'right' },
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'f(x) = ln(x)/x : maximum en (e;1/e), point d\'inflexion en $x = e^{3/2} \\approx 4{,}48$, asymptote verticale x=0, asymptote horizontale y=0 en +∞',
+            caption: '$f(x) = \\dfrac{\\ln(x)}{x}$ : maximum en $\\left(e\\,;\\dfrac{1}{e}\\right)$, point d\'inflexion en $x = e^{3/2} \\approx 4{,}48$, asymptote verticale $x=0$, asymptote horizontale $y=0$ en $+\\infty$',
           },
         },
         {
@@ -3275,7 +3275,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           formula: 'Étudie les variations de $f(x) = \\ln\\left|x^2 - 4\\right|$ (dérivée calculée à la section 4).',
           steps: [
             { tag: 'domaine, parité, asymptotes', text: '$\\mathbb{R}\\setminus\\{-2;2\\}$ ; f est paire ; asymptotes verticales $x = \\pm2$ ($f \\to -\\infty$), et $f \\to +\\infty$ en $\\pm\\infty$' },
-            { tag: 'signe de f′(x) = 2x/(x² − 4)', text: '$f\' < 0$ sur $]-\\infty;-2[$ et $]0;2[$, $f\' > 0$ sur $]-2;0[$ et $]2;+\\infty[$' },
+            { tag: 'signe de f′(x) = 2x / (x² − 4)', text: '$f\' < 0$ sur $]-\\infty;-2[$ et $]0;2[$, $f\' > 0$ sur $]-2;0[$ et $]2;+\\infty[$' },
             { tag: 'zéros — |x² − 4| = 1', text: '$x^2 = 5$ ou $x^2 = 3$ : $x = \\pm\\sqrt{5}$ ou $x = \\pm\\sqrt{3}$' },
           ],
           result: {
@@ -3318,8 +3318,8 @@ export const fonctionsLogarithmes: ChapterContent = {
           generatorId: '6gen21',
           description: [
             'Mène une étude complète en 6 écrans (domaine, limites, asymptotes, variation, ' +
-              'extremum, concavité) sur cinq familles logarithmiques — k(ln x + c)/x, ' +
-              '(bx)ᵃˣ + c, ln|trinôme|, ln(trinôme toujours positif), m(ln x + c/x) — puis ' +
+              'extremum, concavité) sur cinq familles logarithmiques — k(ln x + c) / x, ' +
+              '(bx)ᵃˣ + c, ln|trinôme|, ln(trinôme toujours positif), m(ln x + c⁄x) — puis ' +
               'choisis le bon graphique, en une seule tentative.',
           ],
           chantier: '6e-6h',
@@ -3333,7 +3333,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             'Optimise une grandeur en contexte en 5 écrans — domaine dans la situation, dérivée, ' +
               'valeur exacte qui l\'annule (fraction ou eᵏ), maximum ou minimum par le signe de la ' +
               'dérivée (une seule tentative), puis l\'optimum dans les unités de l\'énoncé — sur cinq ' +
-              'modèles : rendement d\'un engrais, bénéfice, bénéfice moyen ln(x)/x, coût moyen x·ln(x), ' +
+              'modèles : rendement d\'un engrais, bénéfice, bénéfice moyen ln(x) / x, coût moyen x·ln(x), ' +
               'débit d\'une route.',
           ],
           chantier: '6e-6h',
@@ -3454,7 +3454,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             'Un os ne contient plus que 30 % du carbone 14 qu\'il contenait à la mort de l\'animal. La ' +
             'demi-vie du carbone 14 vaut 5 730 ans. Quel est l\'âge de l\'os ?',
           steps: [
-            { tag: 'constante de désintégration — T = ln(2)/λ', text: '$\\lambda = \\dfrac{\\ln(2)}{5730}$' },
+            { tag: 'constante de désintégration — T = ln(2) / λ', text: '$\\lambda = \\dfrac{\\ln(2)}{5730}$' },
             { tag: 'il reste 30 %', text: '$e^{-\\lambda t} = 0{,}3 \\iff -\\lambda t = \\ln(0{,}3) \\iff t = \\dfrac{\\ln(1/0{,}3)}{\\lambda} = 5730\\times\\dfrac{\\ln(10/3)}{\\ln(2)}$' },
           ],
           result: { tag: 'résultat', text: '$t \\approx 9\\,950$ ans.' },
@@ -3517,8 +3517,8 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 'La croissance la plus rapide (point d\'inflexion) se produit exactement en ' +
-                'y = k/2, à l\'instant $t = \\ln(a)/r$. Avec k=10, a=9, r=1 : inflexion en ' +
-                't = ln(9) ≈ 2,20, y=5 ; asymptote horizontale y=10 en +∞ (capacité limite).',
+                '$y = \\dfrac{k}{2}$, à l\'instant $t = \\ln(a)/r$. Avec $k=10$, $a=9$, $r=1$ : inflexion en ' +
+                '$t = \\ln(9) \\approx 2{,}20$, $y=5$ ; asymptote horizontale $y=10$ en $+\\infty$ (capacité limite).',
             },
           ],
         },

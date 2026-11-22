@@ -1096,9 +1096,9 @@ export const fonctionSecondDegre: ChapterContent = {
           tag: 'completer-le-carre-widget',
           label: 'Manipule toi-même — pourquoi « compléter le carré » ?',
           caption:
-            'La méthode porte bien son nom : x² + bx se dessine comme un carré et deux rectangles, et ' +
-            'il manque un petit carré (b/2)² pour obtenir un grand carré de côté x + b/2. C\'est ' +
-            'exactement le « + 9 − 9 » de l\'exemple ci-dessus (b = 6, (6/2)² = 9).',
+            'La méthode porte bien son nom : $x^2 + bx$ se dessine comme un carré et deux rectangles, et ' +
+            'il manque un petit carré $\\left(\\dfrac{b}{2}\\right)^2$ pour obtenir un grand carré de côté $x + \\dfrac{b}{2}$. C\'est ' +
+            'exactement le « $+\\,9 - 9$ » de l\'exemple ci-dessus ($b = 6$, $\\left(\\dfrac{6}{2}\\right)^2 = 9$).',
         },
         {
           kind: 'para',
@@ -1383,7 +1383,7 @@ export const fonctionSecondDegre: ChapterContent = {
           description: [
             'Quatre équations, quatre paraboles dans le désordre : retrouve laquelle va avec ' +
               'laquelle en lisant le sommet, le sens, les zéros ou l\'ordonnée à l\'origine. Les ' +
-              'pièges : le signe dans la parenthèse, a et −a, a et 1/a, les signes des zéros.',
+              'pièges : le signe dans la parenthèse, a et −a, a et 1⁄a, les signes des zéros.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 128. Associer paraboles et équations »',

@@ -537,7 +537,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             { tag: 'angle avec Ox', text: '$\\tan\\theta = -1$ ; la calculatrice donne $\\tan^{-1}(-1) = -45°$, hors de $[0°;180°[$ : on ajoute 180°, $\\theta = 135°$ (obtus)' },
             { tag: 'angle avec Oy', text: '90° − 135° = −45°, négatif : on ajoute 180°, soit 135°' },
           ],
-          result: { tag: 'résultat', text: 'm = −1, angle avec Ox 135°, angle avec Oy 135°, p = 3/2' },
+          result: { tag: 'résultat', text: '$m = -1$, angle avec $Ox$ $135^\\circ$, angle avec $Oy$ $135^\\circ$, $p = \\dfrac{3}{2}$' },
         },
         {
           kind: 'exemple',
@@ -899,7 +899,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
               { from: { x: 1.8, y: 1.4 }, to: { x: 1.8, y: 0 }, tone: 'faint', dashed: true },
               { from: { x: 1.8, y: 1.4 }, to: { x: 0, y: 1.4 }, tone: 'faint', dashed: true },
             ],
-            points: [{ x: 1.8, y: 1.4, label: '(9/5 ; 7/5)', tone: 'ink', labelPos: 'right' }],
+            points: [{ x: 1.8, y: 1.4, label: '(9⁄5 ; 7⁄5)', tone: 'ink', labelPos: 'right' }],
             caption: 'd₁ ∩ d₂ — le point trouvé par le calcul, replacé sur le graphe',
           },
         },

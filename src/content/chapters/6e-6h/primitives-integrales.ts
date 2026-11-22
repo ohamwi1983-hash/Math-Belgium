@@ -105,7 +105,7 @@ export const primitivesIntegrales: ChapterContent = {
           caption:
             'Choisis f et fais glisser C : la courbe se déplace verticalement, mais la ' +
             'tangente au point marqué garde toujours la même pente, celle donnée par f. ' +
-            'Avec f(x) = 1/x, chaque branche de ln|x| a sa propre constante (C₁ et C₂) : ℝ₀ ' +
+            'Avec $f(x) = \\dfrac{1}{x}$, chaque branche de $\\ln|x|$ a sa propre constante ($C_1$ et $C_2$) : $\\mathbb{R}_0$ ' +
             'n\'est pas un intervalle. Coche « Afficher f » pour voir f en pointillés.',
         },
         {
@@ -149,27 +149,27 @@ export const primitivesIntegrales: ChapterContent = {
           caption: 'Primitives usuelles',
           headers: ['f(x)', 'Primitive F(x)', 'Condition'],
           rows: [
-            ['xⁿ', 'xⁿ⁺¹/(n+1) + C', 'n ≠ −1'],
-            ['1/x', 'ln|x| + C', 'x ≠ 0'],
-            ['eˣ', 'eˣ + C', '—'],
-            ['eᵏˣ', '(1/k)eᵏˣ + C', 'k ≠ 0'],
-            ['aˣ', 'aˣ/ln(a) + C', 'a > 0, a ≠ 1'],
-            ['cos(x)', 'sin(x) + C', '—'],
-            ['sin(x)', '−cos(x) + C', '—'],
-            ['1/(1+x²)', 'arctan(x) + C', '—'],
-            ['1/√(1−x²)', 'arcsin(x) + C', 'x ∈ ]−1;1['],
-            ['1/x²', '−1/x + C', 'x ≠ 0'],
-            ['√x', '(2/3)·x√x + C', 'x ≥ 0'],
-            ['1/cos²(x)', 'tan(x) + C', 'cos(x) ≠ 0'],
+            ['$x^n$', '$\\dfrac{x^{n+1}}{n+1} + C$', '$n \\neq -1$'],
+            ['$\\dfrac{1}{x}$', '$\\ln|x| + C$', '$x \\neq 0$'],
+            ['$e^x$', '$e^x + C$', '—'],
+            ['$e^{kx}$', '$\\dfrac{1}{k}e^{kx} + C$', '$k \\neq 0$'],
+            ['$a^x$', '$\\dfrac{a^x}{\\ln(a)} + C$', '$a > 0$, $a \\neq 1$'],
+            ['$\\cos(x)$', '$\\sin(x) + C$', '—'],
+            ['$\\sin(x)$', '$-\\cos(x) + C$', '—'],
+            ['$\\dfrac{1}{1+x^2}$', '$\\arctan(x) + C$', '—'],
+            ['$\\dfrac{1}{\\sqrt{1-x^2}}$', '$\\arcsin(x) + C$', '$x \\in \\mathopen{]}-1\\,;1\\mathclose{[}$'],
+            ['$\\dfrac{1}{x^2}$', '$-\\dfrac{1}{x} + C$', '$x \\neq 0$'],
+            ['$\\sqrt{x}$', '$\\dfrac{2}{3}x\\sqrt{x} + C$', '$x \\geq 0$'],
+            ['$\\dfrac{1}{\\cos^2(x)}$', '$\\tan(x) + C$', '$\\cos(x) \\neq 0$'],
           ],
         },
         {
           kind: 'piege',
           text:
-            'La formule $x^n \\to \\dfrac{x^{n+1}}{n+1}$ est **explicitement exclue** pour n = ' +
-            '−1 : tu diviserais par 0 ! La primitive de 1/x n\'est jamais une puissance de x, ' +
-            'c\'est ln|x|. Piège classique : oublier la valeur absolue — ln(x) seul n\'est ' +
-            'défini que pour x > 0, alors que 1/x l\'est aussi pour x < 0. Et comme ℝ₀ n\'est pas ' +
+            'La formule $x^n \\to \\dfrac{x^{n+1}}{n+1}$ est **explicitement exclue** pour ' +
+            '$n = -1$ : tu diviserais par 0 ! La primitive de $\\dfrac{1}{x}$ n\'est jamais une puissance de $x$, ' +
+            'c\'est $\\ln|x|$. Piège classique : oublier la valeur absolue — $\\ln(x)$ seul n\'est ' +
+            'défini que pour $x > 0$, alors que $\\dfrac{1}{x}$ l\'est aussi pour $x < 0$. Et comme $\\mathbb{R}_0$ n\'est pas ' +
             'un intervalle, la constante peut être différente sur $]-\\infty;0[$ et sur $]0;+\\infty[$ ' +
             '(section 2).',
         },
@@ -201,7 +201,7 @@ export const primitivesIntegrales: ChapterContent = {
           steps: [
             { tag: 'a = 3', text: '$\\int \\cos(3x)dx = \\dfrac{1}{3}\\sin(3x) + C$' },
             { tag: 'a = 2', text: '$\\int e^{2x+1}dx = \\dfrac{1}{2}e^{2x+1} + C$' },
-            { tag: 'a = 2, et une primitive de u⁵ est u⁶/6', text: '$\\int (2x+1)^5dx = \\dfrac{1}{2}\\cdot\\dfrac{(2x+1)^6}{6} + C = \\dfrac{(2x+1)^6}{12} + C$' },
+            { tag: 'a = 2, et une primitive de u⁵ est u⁶⁄6', text: '$\\int (2x+1)^5dx = \\dfrac{1}{2}\\cdot\\dfrac{(2x+1)^6}{6} + C = \\dfrac{(2x+1)^6}{12} + C$' },
           ],
           result: { tag: 'vérifier en dérivant', text: '$\\left(\\dfrac{(2x+1)^6}{12}\\right)\' = \\dfrac{6\\cdot2\\,(2x+1)^5}{12} = (2x+1)^5$' },
         },
@@ -233,11 +233,11 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'piege',
           text:
             '$\\int x \\cdot e^{x^2} dx \\neq e^{x^2}+C$ : l\'intégrande ne porte que x, pas ' +
-            '$2x=u\'(x)$ — il manque le facteur 1/2 ! La bonne primitive est $\\dfrac{1}{2}e^{x^2}+C$.',
+            '$2x=u\'(x)$ — il manque le facteur $\\dfrac{1}{2}$ ! La bonne primitive est $\\dfrac{1}{2}e^{x^2}+C$.',
         },
         {
           kind: 'exemple',
-          badge: 'forme u′/u',
+          badge: 'forme u′⁄u',
           formula: 'Calcule $\\int \\dfrac{2x}{x^2+1}dx$ et $\\int \\tan(x)dx$.',
           steps: [
             { tag: 'u = x² + 1, u′ = 2x — et u > 0', text: '$\\int \\dfrac{2x}{x^2+1}dx = \\ln\\left(x^2+1\\right) + C$' },
@@ -340,7 +340,7 @@ export const primitivesIntegrales: ChapterContent = {
             'Dans ∫ f·g′ dx = f·g − ∫ f′·g dx, tout se joue dans le choix du facteur à ' +
             'dériver. Choisis-le : l\'intégrale restante devient plus simple, ou plus ' +
             'compliquée. Tu n\'as qu\'un essai, puis la primitive complète est révélée. ' +
-            'Retiens le réflexe : on dérive la partie qui se simplifie (x → 1, ln x → 1/x).',
+            'Retiens le réflexe : on dérive la partie qui se simplifie ($x \\to 1$, $\\ln x \\to \\dfrac{1}{x}$).',
         },
         {
           kind: 'exempleLibre',
@@ -529,8 +529,8 @@ export const primitivesIntegrales: ChapterContent = {
             {
               kind: 'para',
               text:
-                'f(x) = 1/x (pour x > 0), F(1) = 2. Primitive générale : F(x) = ln(x)+C. Comme ' +
-                'ln(1) = 0, la condition donne directement C = 2.',
+                '$f(x) = \\dfrac{1}{x}$ (pour $x > 0$), $F(1) = 2$. Primitive générale : $F(x) = \\ln(x)+C$. Comme ' +
+                '$\\ln(1) = 0$, la condition donne directement $C = 2$.',
             },
             { kind: 'para', text: 'F(x) = ln(x) + 2' },
           ],
@@ -585,7 +585,7 @@ export const primitivesIntegrales: ChapterContent = {
           caption:
             'Choisis f puis place le point (x₀ ; y₀) : la constante se calcule en direct ' +
             'par C = y₀ − F(x₀), et seule la primitive qui passe par ce point s\'allume. ' +
-            'Avec 1/x, un point ne fixe que la branche où il se trouve : l\'autre reste ' +
+            'Avec $\\dfrac{1}{x}$, un point ne fixe que la branche où il se trouve : l\'autre reste ' +
             'libre. Les réglages par défaut (f = 2x, point (1 ; 4)) reproduisent ' +
             'l\'illustration ci-dessus (C = 3).',
         },
@@ -694,8 +694,8 @@ export const primitivesIntegrales: ChapterContent = {
           label: 'Comment définit-on l\'intégrale, avant même de connaître une primitive ?',
           items: [
             'Prends f continue et positive sur [a;b]. Partage cet intervalle en n ' +
-              'sous-intervalles de longueur constante Δx=(b−a)/n. Sur chacun, note mᵢ la plus ' +
-              'petite valeur prise par f, et Mᵢ la plus grande.',
+              'sous-intervalles de longueur constante $\\Delta x=\\dfrac{b-a}{n}$. Sur chacun, note $m_i$ la plus ' +
+              'petite valeur prise par $f$, et $M_i$ la plus grande.',
           ],
         },
         {
@@ -1014,8 +1014,8 @@ export const primitivesIntegrales: ChapterContent = {
             {
               kind: 'para',
               text:
-                'La valeur exacte (théorème fondamental, une primitive de x² est x³/3) vaut ' +
-                '64/3 ≈ 21,33 : l\'approximation par trapèzes (22) surestime légèrement, car la ' +
+                'La valeur exacte (théorème fondamental, une primitive de $x^2$ est $\\dfrac{x^3}{3}$) vaut ' +
+                '$\\dfrac{64}{3} \\approx 21{,}33$ : l\'approximation par trapèzes (22) surestime légèrement, car la ' +
                 'parabole est **convexe (tournée vers le haut)** — chaque trapèze passe donc au-dessus de la courbe.',
             },
           ],
@@ -1028,7 +1028,7 @@ export const primitivesIntegrales: ChapterContent = {
             'Choisis une fonction et une méthode, puis fais grandir n : l\'encadrement ' +
             'minorant ≤ I ≤ majorant se resserre autour de la valeur exacte, et l\'erreur ' +
             'fond. Compare le point milieu et les trapèzes : à n égal, lequel est le plus ' +
-            'précis ? x², n = 4, trapèzes reproduit l\'exemple résolu (22 contre 64/3).',
+            'précis ? $x^2$, $n = 4$, trapèzes reproduit l\'exemple résolu (22 contre $\\dfrac{64}{3}$).',
         },
         { kind: 'subheading', text: 'Valeur moyenne d\'une fonction sur un intervalle' },
         {
@@ -1080,8 +1080,8 @@ export const primitivesIntegrales: ChapterContent = {
             {
               kind: 'para',
               text:
-                'f(x) = x sur [0;4] : l\'intégrale vaut [x²/2]₀⁴ = 8, donc la valeur moyenne ' +
-                'vaut 8/(4−0) = 2.',
+                '$f(x) = x$ sur $[0\\,;4]$ : l\'intégrale vaut $\\left[\\dfrac{x^2}{2}\\right]_0^4 = 8$, donc la valeur moyenne ' +
+                'vaut $\\dfrac{8}{4-0} = 2$.',
             },
           ],
         },
@@ -1503,7 +1503,7 @@ export const primitivesIntegrales: ChapterContent = {
               kind: 'para',
               text:
                 'Substitution $x=r\\sin(\\theta)$, $dx=r\\cos(\\theta)d\\theta$, et les bornes changent ' +
-                '(section 3) : θ: 0→π/2 — ' +
+                '(section 3) : $\\theta : 0 \\to \\dfrac{\\pi}{2}$ — ' +
                 'élimine la racine : $\\sqrt{r^2-r^2\\sin^2(\\theta)} = r\\cos(\\theta)$',
             },
             {
@@ -1685,9 +1685,9 @@ export const primitivesIntegrales: ChapterContent = {
           caption:
             'Fais tourner la région autour de l\'axe des abscisses : chaque tranche ' +
             'verticale devient un disque de rayon f(x), ou une rondelle quand la région est ' +
-            'bordée par deux courbes. Déplace x pour voir l\'aire de la tranche, π·f(x)² ou ' +
-            'π(f² − g²) : le volume est la somme de toutes ces tranches. Les préréglages ' +
-            'retrouvent le cône (πr²h/3) et la boule (4/3·πr³).',
+            'bordée par deux courbes. Déplace $x$ pour voir l\'aire de la tranche, $\\pi f(x)^2$ ou ' +
+            '$\\pi(f^2 - g^2)$ : le volume est la somme de toutes ces tranches. Les préréglages ' +
+            'retrouvent le cône ($\\dfrac{\\pi r^2 h}{3}$) et la boule ($\\dfrac{4}{3}\\pi r^3$).',
         },
         {
           kind: 'historique',
@@ -2395,7 +2395,7 @@ export const primitivesIntegrales: ChapterContent = {
             textLabels: [
               { x: 0.62, y: 0.8, text: 'y = x', tone: 'faint', anchor: 'end' },
               { x: 0.86, y: 0.5, text: 'L(x) = x²', tone: 'accent', anchor: 'start' },
-              { x: 0.52, y: 0.4, text: 'aire 1/6', tone: 'ink', anchor: 'middle' },
+              { x: 0.52, y: 0.4, text: 'aire 1⁄6', tone: 'ink', anchor: 'middle' },
             ],
             xAxisLabel: 'part de la population',
             yAxisLabel: 'part des revenus',

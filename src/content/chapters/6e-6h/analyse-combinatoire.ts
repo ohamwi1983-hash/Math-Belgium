@@ -1295,8 +1295,8 @@ export const analyseCombinatoire: ChapterContent = {
               scale: 'log',
               logMin: 3,
               bars: [
-                { label: 'foudre (1 an)', value: 15300, valueLabel: '1/15 300', tone: 'faint' },
-                { label: 'loto (1 grille)', value: 8145060, valueLabel: '1/8 145 060', tone: 'accent' },
+                { label: 'foudre (1 an)', value: 15300, valueLabel: '1⁄15 300', tone: 'faint' },
+                { label: 'loto (1 grille)', value: 8145060, valueLabel: '1⁄8 145 060', tone: 'accent' },
               ],
               xAxisLabel: 'événement',
               yAxisLabel: '« 1 chance sur... »',
@@ -1529,33 +1529,33 @@ export const analyseCombinatoire: ChapterContent = {
               {
                 label: 'R–R–B',
                 steps: [
-                  { label: 'R', prob: '5/10', tone: 'accent' },
-                  { label: 'R', prob: '4/9', tone: 'accent' },
-                  { label: 'B', prob: '5/8', tone: 'good' },
+                  { label: 'R', prob: '5⁄10', tone: 'accent' },
+                  { label: 'R', prob: '4⁄9', tone: 'accent' },
+                  { label: 'B', prob: '5⁄8', tone: 'good' },
                 ],
-                resultLabel: '= 5/36',
+                resultLabel: '= 5⁄36',
               },
               {
                 label: 'R–B–R',
                 steps: [
-                  { label: 'R', prob: '5/10', tone: 'accent' },
-                  { label: 'B', prob: '5/9', tone: 'good' },
-                  { label: 'R', prob: '4/8', tone: 'accent' },
+                  { label: 'R', prob: '5⁄10', tone: 'accent' },
+                  { label: 'B', prob: '5⁄9', tone: 'good' },
+                  { label: 'R', prob: '4⁄8', tone: 'accent' },
                 ],
-                resultLabel: '= 5/36',
+                resultLabel: '= 5⁄36',
               },
               {
                 label: 'B–R–R',
                 steps: [
-                  { label: 'B', prob: '5/10', tone: 'good' },
-                  { label: 'R', prob: '5/9', tone: 'accent' },
-                  { label: 'R', prob: '4/8', tone: 'accent' },
+                  { label: 'B', prob: '5⁄10', tone: 'good' },
+                  { label: 'R', prob: '5⁄9', tone: 'accent' },
+                  { label: 'R', prob: '4⁄8', tone: 'accent' },
                 ],
-                resultLabel: '= 5/36',
+                resultLabel: '= 5⁄36',
               },
             ],
             bracketLabel: ['3 séquences', 'équiprobables'],
-            footer: 'composition « 2 rouges, 1 bleue », ordre libre : 3 × 5/36 = 5/12',
+            footer: 'composition « 2 rouges, 1 bleue », ordre libre : 3 × 5⁄36 = 5⁄12',
             caption:
               'Urne à 5 rouges / 5 bleues, 3 tirages sans remise : les 3 séquences menant à ' +
               '« 2 rouges, 1 bleue » ont chacune la même probabilité $\\frac{5}{36}$ ; leur somme ' +

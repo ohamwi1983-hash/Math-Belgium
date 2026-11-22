@@ -386,7 +386,7 @@ export const lieuxGeometriques: ChapterContent = {
               { x: 0, y: 4, label: 'C', tone: 'ink', labelPos: 'left' },
               { x: 4 / 3, y: 4, label: 'I', tone: 'accent', labelPos: 'below' },
             ],
-            caption: "triangle ABC avec la bissectrice issue de B coupant [AC] en I, tel que AI/IC=AB/BC",
+            caption: "triangle $ABC$ avec la bissectrice issue de $B$ coupant $[AC]$ en $I$, tel que $\\dfrac{AI}{IC}=\\dfrac{AB}{BC}$",
           },
         },
         {
@@ -545,7 +545,7 @@ export const lieuxGeometriques: ChapterContent = {
       id: 'cercles',
       number: 2,
       title: 'Cercles',
-      kicker: 'x²+y²+Dx+Ey+F=0 ↔ centre (−D/2;−E/2), rayon — 3 points, 2 points+rayon, inscrit, tangentes',
+      kicker: 'x² + y² + Dx + Ey + F = 0 ↔ centre (−D⁄2 ; −E⁄2), rayon — 3 points, 2 points+rayon, inscrit, tangentes',
       blocks: [
         { kind: 'video', title: 'Cercles : équation, 3 points, 2 points et rayon, inscrit, tangentes', youtubeId: 'jt_aOsw6y4k' },
         {
@@ -809,7 +809,7 @@ export const lieuxGeometriques: ChapterContent = {
               { x: 1, y: 4 / 3, label: 'G (gravité)', tone: 'good', labelPos: 'above' },
             ],
             caption:
-              "l'incentre I(1;1) (moyenne pondérée par les côtés opposés) et le centre de gravité G(1;4/3) (moyenne simple) sont deux points distincts",
+              "l'incentre $I(1;1)$ (moyenne pondérée par les côtés opposés) et le centre de gravité $G\\left(1;\\dfrac{4}{3}\\right)$ (moyenne simple) sont deux points distincts",
           },
         },
         { kind: 'subheading', text: "Tangentes à un cercle depuis un point extérieur" },

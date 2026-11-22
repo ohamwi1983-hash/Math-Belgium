@@ -514,7 +514,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             'À gauche, la chaîne d\'opérations de f, lue de haut en bas ; à droite, la ' +
             'chaîne réciproque, qui défait chaque opération dans l\'ordre inverse, lue de ' +
             'bas en haut. Fais varier x : sur chaque ligne, les deux colonnes affichent la ' +
-            'même valeur, et le retour rend le x de départ. Avec 5/(x − 1), essaie x = 1.',
+            'même valeur, et le retour rend le $x$ de départ. Avec $\\dfrac{5}{x - 1}$, essaie $x = 1$.',
         },
         {
           kind: 'methode',
@@ -932,7 +932,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               xMin: -PI / 2 - 0.15,
               xMax: PI / 2 + 0.15,
               xTicks: [-PI / 2, PI / 2],
-              xTickLabels: { [-PI / 2]: '-π/2', [PI / 2]: 'π/2' },
+              xTickLabels: { [-PI / 2]: '−π⁄2', [PI / 2]: 'π⁄2' },
               fixedYRange: { min: -1.2, max: 1.2 },
               points: [{ x: 0.8727, y: 0.766, label: '', tone: 'accent' }],
               textLabels: [{ x: -PI / 2 + 0.1, y: -1.05, text: 'direct : θ → position', tone: 'accent', anchor: 'start' }],
@@ -1008,7 +1008,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           description: [
             'Sans expression de f⁻¹ (x³ + x, eˣ + x, x + sin x…) : trouve x₀ = f⁻¹(y₀) par une valeur ' +
               "évidente, calcule f′(x₀), décide si le théorème s'applique (f′(x₀) ≠ 0) et conclus " +
-              "(f⁻¹)′(y₀) = 1/f′(x₀) — ou une tangente verticale.",
+              "(f⁻¹)′(y₀) = 1 / f′(x₀) — ou une tangente verticale.",
           ],
           chantier: '6e-6h',
           whereLabel: "6e (6h) → « 155. Dérivée d'une réciproque en un point »",
@@ -1065,11 +1065,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             xMin: -2 * PI,
             xMax: 2 * PI,
             xTicks: [-PI / 2, PI / 2],
-            xTickLabels: { [-PI / 2]: '-π/2', [PI / 2]: 'π/2' },
+            xTickLabels: { [-PI / 2]: '−π⁄2', [PI / 2]: 'π⁄2' },
             fixedYRange: { min: -1.3, max: 1.3 },
             xAxisLabel: '',
             yAxisLabel: '',
-            caption: 'sin restreint à [−π/2 ; π/2] (en accent) : bijective de cet intervalle vers [−1 ; 1].',
+            caption: '$\\sin$ restreint à $\\left[-\\dfrac{\\pi}{2}\\,;\\dfrac{\\pi}{2}\\right]$ (en accent) : bijective de cet intervalle vers $[-1\\,;1]$.',
           },
         },
         {
@@ -1102,12 +1102,12 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             xMin: -3 * PI,
             xMax: 3 * PI,
             xTicks: [-PI / 2, PI / 2],
-            xTickLabels: { [-PI / 2]: '-π/2', [PI / 2]: 'π/2' },
+            xTickLabels: { [-PI / 2]: '−π⁄2', [PI / 2]: 'π⁄2' },
             verticalAsymptotes: [{ x: -PI / 2 }, { x: PI / 2 }],
             fixedYRange: { min: -4, max: 4 },
             xAxisLabel: '',
             yAxisLabel: '',
-            caption: 'tan restreint à ]−π/2 ; π/2[ (en accent) : bijective de cet intervalle vers ℝ tout entier.',
+            caption: '$\\tan$ restreint à $\\left]-\\dfrac{\\pi}{2}\\,;\\dfrac{\\pi}{2}\\right[$ (en accent) : bijective de cet intervalle vers $\\mathbb{R}$ tout entier.',
           },
         },
         {
@@ -1167,7 +1167,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             xMin: -2.23,
             xMax: 2.23,
             xTicks: [-PI / 2, -1, 1, PI / 2],
-            xTickLabels: { [-PI / 2]: '-π/2', [-1]: '-1', 1: '1', [PI / 2]: 'π/2' },
+            xTickLabels: { [-PI / 2]: '−π⁄2', [-1]: '−1', 1: '1', [PI / 2]: 'π⁄2' },
             points: [
               { x: PI / 2, y: 1, label: '', tone: 'accent' },
               { x: 1, y: PI / 2, label: '', tone: 'good' },
@@ -1232,10 +1232,10 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'intuition',
           label: 'Tu connais déjà ce cercle',
           text:
-            'Ce cercle trigonométrique, tu le manipules depuis la 4e/5e : sin(π/6) = 1/2, ' +
-            "cos(π/3) = 1/2, etc. Une arcfonction ne fait rien de neuf — elle pose juste la " +
-            'même question à l\'envers. Tu savais lire sin(π/6) = 1/2 ; tu sais donc déjà, sans ' +
-            'aucun calcul supplémentaire, qu\'arcsin(1/2) = π/6.',
+            'Ce cercle trigonométrique, tu le manipules depuis la 4e/5e : $\\sin\\left(\\dfrac{\\pi}{6}\\right) = \\dfrac{1}{2}$, ' +
+            "$\\cos\\left(\\dfrac{\\pi}{3}\\right) = \\dfrac{1}{2}$, etc. Une arcfonction ne fait rien de neuf — elle pose juste la " +
+            'même question à l\'envers. Tu savais lire $\\sin\\left(\\dfrac{\\pi}{6}\\right) = \\dfrac{1}{2}$ ; tu sais donc déjà, sans ' +
+            'aucun calcul supplémentaire, qu\'$\\arcsin\\left(\\dfrac{1}{2}\\right) = \\dfrac{\\pi}{6}$.',
         },
         { kind: 'subheading', text: 'Caractérisation, limites et graphes' },
         {
@@ -1302,8 +1302,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             xMax: 10,
             xTicks: [-8, -4, 4, 8],
             horizontalAsymptotes: [
-              { y: PI / 2, label: 'AH ≡ y = π/2' },
-              { y: -PI / 2, label: 'AH ≡ y = −π/2' },
+              { y: PI / 2, label: 'AH ≡ y = π⁄2' },
+              { y: -PI / 2, label: 'AH ≡ y = −π⁄2' },
             ],
             fixedYRange: { min: -2.1, max: 2.1 },
             xAxisLabel: 'x',
@@ -1316,7 +1316,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           text:
             'arcsin($x$) n\'est **pas** « un » angle dont le sinus vaut $x$ parmi tous les ' +
             'possibles (il y en a une infinité par périodicité) ! C\'est **l\'unique** angle de ' +
-            '[−π/2 ; π/2] dont le sinus vaut $x$. Même logique pour arccos et arctan, chacune ' +
+            '$\\left[-\\dfrac{\\pi}{2}\\,;\\dfrac{\\pi}{2}\\right]$ dont le sinus vaut $x$. Même logique pour arccos et arctan, chacune ' +
             'avec sa propre image.',
         },
         { kind: 'subheading', text: 'Parité et sens de variation' },
@@ -1518,7 +1518,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — arcsin(sin θ) = θ exactement quand θ ∈ [−π/2 ; π/2]',
+          label: 'Démonstration — arcsin(sin θ) = θ exactement quand θ ∈ [−π⁄2 ; π⁄2]',
           blocks: [
             {
               kind: 'para',
@@ -1592,8 +1592,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               illustration: {
                 kind: 'circleAngles',
                 points: [
-                  { angle: (5 * PI) / 6, label: '5π/6', tone: 'bad' },
-                  { angle: PI / 6, label: 'π/6', tone: 'good' },
+                  { angle: (5 * PI) / 6, label: '5π⁄6', tone: 'bad' },
+                  { angle: PI / 6, label: 'π⁄6', tone: 'good' },
                 ],
                 connectPoints: true,
                 angleArcs: [
@@ -1670,7 +1670,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — cos(arctan x) = 1/√(1 + x²)',
+          label: 'Démonstration — cos(arctan x) = 1 / √(1 + x²)',
           blocks: [
             {
               kind: 'para',
@@ -1912,7 +1912,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         { kind: 'para', text: '$\\arcsin(u) + \\arccos(u) = \\pi/2 \\quad \\forall u \\in [-1;1]$' },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — arcsin(u) + arccos(u) = π/2',
+          label: 'Démonstration — arcsin(u) + arccos(u) = π⁄2',
           blocks: [
             {
               kind: 'para',
@@ -2170,11 +2170,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
                 max: 0.36,
                 segments: [{ from: 0, to: 0.25 }],
                 points: [
-                  { value: -0.2, closed: true, label: '−1/5', tone: 'bad', sublabel: 'rejeté' },
-                  { value: 0.2, closed: true, label: '1/5', tone: 'good', sublabel: 'accepté' },
+                  { value: -0.2, closed: true, label: '−1⁄5', tone: 'bad', sublabel: 'rejeté' },
+                  { value: 0.2, closed: true, label: '1⁄5', tone: 'good', sublabel: 'accepté' },
                 ],
                 extraTicks: [{ value: 0, label: '0' }],
-                axisLabel: 'CE et compatibilité : x ∈ [0 ; 1/4]',
+                axisLabel: 'CE et compatibilité : x ∈ [0 ; 1⁄4]',
                 caption:
                   'La CE est $\\left[-\\dfrac{1}{4} ; \\dfrac{1}{4}\\right]$ ; la compatibilité des ' +
                   "images ne garde que sa moitié positive (trait vert). $x = -\\dfrac{1}{5}$ est " +
@@ -2609,7 +2609,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — arctan(x) + arctan(1/x) = π/2 pour x > 0',
+          label: 'Démonstration — arctan(x) + arctan(1⁄x) = π⁄2 pour x > 0',
           blocks: [
             {
               kind: 'para',
@@ -2826,7 +2826,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             xMax: 4,
             xTicks: [-3, -2, -1, 1, 2, 3],
             yTicks: [-PI / 2, PI / 2, PI],
-            yTickLabels: { [-PI / 2]: '−π/2', [PI / 2]: 'π/2', [PI]: 'π' },
+            yTickLabels: { [-PI / 2]: '−π⁄2', [PI / 2]: 'π⁄2', [PI]: 'π' },
             grid: true,
             fixedYRange: { min: -2.1, max: 3.7 },
             points: [
@@ -2879,7 +2879,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — lire f(x) = π/2 + 2·arcsin(x − 1)',
+          label: 'Exemple résolu — lire f(x) = π⁄2 + 2·arcsin(x − 1)',
           blocks: [
             {
               kind: 'para',
@@ -2916,13 +2916,13 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
                 xMax: 2.8,
                 xTicks: [1, 2],
                 yTicks: [-PI / 2, PI / 2, PI, (3 * PI) / 2],
-                yTickLabels: { [-PI / 2]: '−π/2', [PI / 2]: 'π/2', [PI]: 'π', [(3 * PI) / 2]: '3π/2' },
+                yTickLabels: { [-PI / 2]: '−π⁄2', [PI / 2]: 'π⁄2', [PI]: 'π', [(3 * PI) / 2]: '3π⁄2' },
                 grid: true,
                 fixedYRange: { min: -2.3, max: 5.4 },
                 points: [
-                  { x: 0, y: -PI / 2, label: '(0 ; −π/2)', tone: 'accent', labelPos: 'right' },
+                  { x: 0, y: -PI / 2, label: '(0 ; −π⁄2)', tone: 'accent', labelPos: 'right' },
                   { x: 1, y: PI / 2, label: '', tone: 'good' },
-                  { x: 2, y: (3 * PI) / 2, label: '(2 ; 3π/2)', tone: 'accent', labelPos: 'left' },
+                  { x: 2, y: (3 * PI) / 2, label: '(2 ; 3π⁄2)', tone: 'accent', labelPos: 'left' },
                 ],
                 xAxisLabel: 'x',
                 yAxisLabel: 'y',
@@ -2936,7 +2936,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — lire g(x) = π/2 − 2·arctan(x + 1)',
+          label: 'Exemple résolu — lire g(x) = π⁄2 − 2·arctan(x + 1)',
           blocks: [
             {
               kind: 'para',
@@ -2970,7 +2970,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
                 xMax: 5,
                 xTicks: [-6, -5, -4, -3, -2, -1, 1, 2, 3, 4],
                 yTicks: [-PI / 2, PI / 2, PI, (3 * PI) / 2],
-                yTickLabels: { [-PI / 2]: '−π/2', [PI / 2]: 'π/2', [PI]: 'π', [(3 * PI) / 2]: '3π/2' },
+                yTickLabels: { [-PI / 2]: '−π⁄2', [PI / 2]: 'π⁄2', [PI]: 'π', [(3 * PI) / 2]: '3π⁄2' },
                 grid: true,
                 horizontalAsymptotes: [{ y: -PI / 2 }, { y: (3 * PI) / 2 }],
                 fixedYRange: { min: -2.4, max: 5.6 },
@@ -3026,9 +3026,9 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           generatorId: '6gen152',
           description: [
             "La résolution d'un élève contient une seule ligne fausse : trouve-la, nomme l'erreur " +
-              '(f⁻¹ prise pour 1/f, arcsin(sin θ) = θ hors de l\'image, signe oublié devant la dérivée de ' +
+              '(f⁻¹ prise pour 1⁄f, arcsin(sin θ) = θ hors de l\'image, signe oublié devant la dérivée de ' +
               "arccos, u′ oublié, (kx)² écrit kx², candidat hors condition d'existence, sens de " +
-              "l'inégalité non inversé, ±π/2 atteints par arctan, injectivité sur une réunion d'intervalles) " +
+              "l'inégalité non inversé, ±π⁄2 atteints par arctan, injectivité sur une réunion d'intervalles) " +
               'et corrige le résultat.',
           ],
           chantier: '6e-6h',
@@ -3039,7 +3039,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           title: 'Lire une transformée c + k·arc(mx + n)',
           generatorId: '6gen158',
           description: [
-            'Sur une grille aux multiples de π/4 : lis le domaine et l\'image d\'une transformée d\'arcsin, ' +
+            'Sur une grille aux multiples de π⁄4 : lis le domaine et l\'image d\'une transformée d\'arcsin, ' +
               'arccos ou arctan, puis retrouve m, n, k, c et l\'expression.',
           ],
           chantier: '6e-6h',
@@ -3094,7 +3094,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — étude de g(x) = arctan(x) − x/2',
+          label: 'Exemple résolu — étude de g(x) = arctan(x) − x⁄2',
           blocks: [
             {
               kind: 'para',
@@ -3130,7 +3130,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'signTable',
-          caption: 'Tableau de variations de g(x) = arctan(x) − x/2 sur [0 ; +∞[ (g impaire : le reste par symétrie)',
+          caption: 'Tableau de variations de g(x) = arctan(x) − x⁄2 sur [0 ; +∞[ (g impaire : le reste par symétrie)',
           rows: [
             {
               label: 'x',

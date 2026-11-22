@@ -64,8 +64,8 @@ export const probabilites: ChapterContent = {
             '$P(A)$ mesure la chance que $A$ se réalise : $0 \\leq P(A) \\leq 1$, ' +
               '$P(\\Omega)=1$ (certitude), $P(\\emptyset)=0$ (impossibilité), ' +
               '$P(\\bar{A})=1-P(A)$ (contraire). En situation d\'**équiprobabilité** (tous les ' +
-              'résultats également probables), c\'est simple : $P(A)$ = (nombre de cas ' +
-              'favorables) / (nombre de cas possibles).',
+              'résultats également probables), c\'est simple : ' +
+              '$P(A) = \\dfrac{\\text{nombre de cas favorables}}{\\text{nombre de cas possibles}}$.',
           ],
         },
         {
@@ -154,7 +154,7 @@ export const probabilites: ChapterContent = {
           kind: 'astuce',
           label: 'Les deux méthodes doivent converger',
           text:
-            'Pour une pièce ou un dé bien équilibrés, la probabilité théorique (1/2, 1/6, …) et ' +
+            'Pour une pièce ou un dé bien équilibrés, la probabilité théorique ($\\dfrac{1}{2}$, $\\dfrac{1}{6}$, …) et ' +
             'la probabilité expérimentale (mesurée en répétant l\'expérience) convergent vers ' +
             'la même valeur. C\'est même comme ça qu\'on détecte un dé ou une pièce truqués : ' +
             'la fréquence observée ne se stabilise **pas** autour de la valeur théorique attendue.',
@@ -262,7 +262,7 @@ export const probabilites: ChapterContent = {
             'vient aussi souvent d\'une **prévision d\'ensemble** : le modèle météo est lancé ' +
             'une cinquantaine de fois, avec des conditions de départ très légèrement ' +
             'différentes ; si 35 des 50 simulations donnent de la pluie, on annonce ' +
-            '35/50 = 70 %. C\'est encore une fréquence, mais calculée sur des simulations.',
+            '$\\dfrac{35}{50} = 70\\,\\%$. C\'est encore une fréquence, mais calculée sur des simulations.',
           domaines: ['Météorologie', 'Statistique'],
         },
         { kind: 'subheading', text: 'Représenter A∪B et A∩B' },
@@ -335,8 +335,8 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Additionner $P(A)+P(B)$ **sans** retirer $P(A \\cap B)$ donne 33/40 ici — **faux** ! Les 6 ' +
-            'personnes de l\'intersection sont comptées deux fois. La bonne valeur reste 27/40.',
+            'Additionner $P(A)+P(B)$ **sans** retirer $P(A \\cap B)$ donne $\\dfrac{33}{40}$ ici — **faux** ! Les 6 ' +
+            'personnes de l\'intersection sont comptées deux fois. La bonne valeur reste $\\dfrac{27}{40}$.',
         },
         { kind: 'subheading', text: 'Tableau à double entrée et complémentaire' },
         {
@@ -366,8 +366,8 @@ export const probabilites: ChapterContent = {
           kind: 'piege',
           text:
             'La case « ni $A$ ni $B$ » vaut $1-P(A \\cup B)$, **jamais** $1-P(A)-P(B)$ — cette ' +
-            'dernière formule oublie que $A$ et $B$ se chevauchent ! Ici : 1−27/40=13/40, pas ' +
-            '1−18/40−15/40=7/40.',
+            'dernière formule oublie que $A$ et $B$ se chevauchent ! Ici : $1-\\dfrac{27}{40}=\\dfrac{13}{40}$, pas ' +
+            '$1-\\dfrac{18}{40}-\\dfrac{15}{40}=\\dfrac{7}{40}$.',
         },
         {
           kind: 'atelier',
@@ -393,7 +393,7 @@ export const probabilites: ChapterContent = {
           items: [
             'La probabilité de $A$ **sachant** $B$ (tu sais déjà que $B$ est réalisé) se note ' +
               '$P(A|B)$ : $P(A|B) = \\dfrac{P(A \\cap B)}{P(B)}$.',
-            'Avec l\'exemple : $P(A|B)$ = 6/15 = 0,4, alors que $P(B|A)$ = 6/18 = 1/3. Le ' +
+            'Avec l\'exemple : $P(A|B) = \\dfrac{6}{15} = 0{,}4$, alors que $P(B|A) = \\dfrac{6}{18} = \\dfrac{1}{3}$. Le ' +
               'numérateur est le même — mais pas le dénominateur !',
           ],
         },
@@ -455,8 +455,8 @@ export const probabilites: ChapterContent = {
           kind: 'exemple',
           badge: 'jeu de 52 cartes : cœur et figure',
           formula:
-            '$A$ = « tirer un cœur » ($P(A)$=13/52), $B$ = « tirer une figure » ($P(B)$=12/52). ' +
-            'Il y a exactement 3 figures de cœur, donc $P(A \\cap B)$=3/52.',
+            '$A$ = « tirer un cœur » ($P(A)=\\dfrac{13}{52}$), $B$ = « tirer une figure » ($P(B)=\\dfrac{12}{52}$). ' +
+            'Il y a exactement 3 figures de cœur, donc $P(A \\cap B)=\\dfrac{3}{52}$.',
           steps: [{ tag: 'test d\'indépendance', text: '$P(A) \\times P(B) = \\frac{13}{52} \\times \\frac{12}{52} = \\frac{3}{52} = P(A \\cap B)$' }],
           result: { tag: 'résultat', text: '$A$ et $B$ **sont** indépendants — un résultat que seul le calcul confirme, jamais l\'intuition.' },
         },
@@ -541,14 +541,14 @@ export const probabilites: ChapterContent = {
           illustration: {
             kind: 'weightedTree',
             firstLevel: [
-              { label: 'R', prob: '5/8' },
-              { label: 'B', prob: '3/8' },
+              { label: 'R', prob: '5⁄8' },
+              { label: 'B', prob: '3⁄8' },
             ],
             secondLevel: [
-              { fromFirst: 0, label: 'R', prob: '4/7', pathProb: '20/56' },
-              { fromFirst: 0, label: 'B', prob: '3/7', pathProb: '15/56' },
-              { fromFirst: 1, label: 'R', prob: '5/7', pathProb: '15/56' },
-              { fromFirst: 1, label: 'B', prob: '2/7', pathProb: '6/56' },
+              { fromFirst: 0, label: 'R', prob: '4⁄7', pathProb: '20⁄56' },
+              { fromFirst: 0, label: 'B', prob: '3⁄7', pathProb: '15⁄56' },
+              { fromFirst: 1, label: 'R', prob: '5⁄7', pathProb: '15⁄56' },
+              { fromFirst: 1, label: 'B', prob: '2⁄7', pathProb: '6⁄56' },
             ],
             caption:
               'Urne à 5 boules rouges, 3 bleues (8 au total), 2 tirages successifs **sans** remise : la composition change après le 1er tirage.',
@@ -623,9 +623,9 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Utiliser la même probabilité 5/8 au second tirage **sans** remise, comme si de rien ' +
+            'Utiliser la même probabilité $\\dfrac{5}{8}$ au second tirage **sans** remise, comme si de rien ' +
             'n\'était, c\'est l\'erreur la plus fréquente de cette section ! La bonne valeur, ' +
-            '4/7, se lit directement sur la 2e branche de l\'arbre.',
+            '$\\dfrac{4}{7}$, se lit directement sur la 2e branche de l\'arbre.',
         },
         {
           kind: 'methode',
@@ -642,7 +642,7 @@ export const probabilites: ChapterContent = {
           label: 'Vérifier que les chemins couvrent tout',
           text:
             'La somme des probabilités de **tous** les chemins d\'un arbre vaut toujours 1 (ici, ' +
-            'sans remise : 20/56+15/56+15/56+6/56=1). Un excellent moyen de repérer une erreur ' +
+            'sans remise : $\\dfrac{20}{56}+\\dfrac{15}{56}+\\dfrac{15}{56}+\\dfrac{6}{56}=1$). Un excellent moyen de repérer une erreur ' +
             'de calcul avant de répondre !',
         },
         {
@@ -671,16 +671,16 @@ export const probabilites: ChapterContent = {
             {
               kind: 'weightedTree',
               firstLevel: [
-                { label: 'D', prob: '2/20' },
-                { label: 'B', prob: '18/20' },
+                { label: 'D', prob: '2⁄20' },
+                { label: 'B', prob: '18⁄20' },
               ],
               secondLevel: [
-                { fromFirst: 0, label: 'D', prob: '1/19', pathProb: '2/380' },
-                { fromFirst: 0, label: 'B', prob: '18/19', pathProb: '36/380' },
-                { fromFirst: 1, label: 'D', prob: '2/19', pathProb: '36/380' },
-                { fromFirst: 1, label: 'B', prob: '17/19', pathProb: '306/380', highlight: true },
+                { fromFirst: 0, label: 'D', prob: '1⁄19', pathProb: '2⁄380' },
+                { fromFirst: 0, label: 'B', prob: '18⁄19', pathProb: '36⁄380' },
+                { fromFirst: 1, label: 'D', prob: '2⁄19', pathProb: '36⁄380' },
+                { fromFirst: 1, label: 'B', prob: '17⁄19', pathProb: '306⁄380', highlight: true },
               ],
-              caption: 'Lot de 20 pièces (2 défectueuses D, 18 bonnes B) : échantillon de 2 pièces **sans** remise. Le chemin BB (en évidence) donne P(0 défectueuse)=306/380 ≈ 80,5 %.',
+              caption: 'Lot de 20 pièces (2 défectueuses D, 18 bonnes B) : échantillon de 2 pièces **sans** remise. Le chemin BB (en évidence) donne $P(\\text{0 défectueuse})=\\dfrac{306}{380} \\approx 80{,}5\\,\\%$.',
             },
             {
               kind: 'complementBar',
@@ -748,7 +748,7 @@ export const probabilites: ChapterContent = {
             tag: 'résultat',
             text:
               'Sur les 36 couples équiprobables, exactement 4 donnent une somme de 5 : (1;4), ' +
-              '(2;3), (3;2), (4;1). D\'où $P$(somme=5) = 4/36 = 1/9.',
+              '(2;3), (3;2), (4;1). D\'où $P(\\text{somme}=5) = \\dfrac{4}{36} = \\dfrac{1}{9}$.',
           },
         },
         {
@@ -805,7 +805,7 @@ export const probabilites: ChapterContent = {
             'Le nombre de façons de ranger $n$ objets distincts (une **permutation**) vaut ' +
               '$n! = n \\times (n-1) \\times \\ldots \\times 1$. Un dérangement, c\'est une ' +
               'permutation où **aucun** objet ne reste à sa place initiale ; leur nombre se note ' +
-              '$D(n)$ — et $D(n) \\neq n!$ (par exemple $D(4)$=9, très différent de 4!=24).',
+              '$D(n)$ — et $D(n) \\neq n!$ (par exemple $D(4)=9$, très différent de $4!=24$).',
           ],
         },
         {
@@ -828,8 +828,8 @@ export const probabilites: ChapterContent = {
           badge: '4 lettres, 4 enveloppes : dérangements',
           formula: '',
           steps: [
-            { tag: 'total', text: '4!=24 répartitions possibles au total' },
-            { tag: 'tout correct', text: 'une seule est **entièrement** correcte, donc $P$(tout correct)=1/24' },
+            { tag: 'total', text: '$4!=24$ répartitions possibles au total' },
+            { tag: 'tout correct', text: 'une seule est **entièrement** correcte, donc $P(\\text{tout correct})=\\dfrac{1}{24}$' },
             { tag: 'aucune correcte', text: '$P = D(4)/4! = 9/24 = 3/8$' },
             {
               tag: 'exactement 2 correctes',
@@ -887,7 +887,7 @@ export const probabilites: ChapterContent = {
             'Mélange n lettres dans leurs enveloppes, puis simule 1 000 répartitions : la ' +
             'fréquence observée de chaque nombre de lettres bien placées rejoint la ' +
             'probabilité exacte. Fais grandir n : la probabilité qu\'aucune lettre ne soit ' +
-            'bien placée se stabilise presque aussitôt près de 1/e ≈ 0,368. Pour n = 4, ' +
+            'bien placée se stabilise presque aussitôt près de $\\dfrac{1}{e} \\approx 0{,}368$. Pour $n = 4$, ' +
             'affiche les 9 dérangements.',
         },
         {
@@ -1053,7 +1053,7 @@ export const probabilites: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'naturalFrequencies',
-            headline: 'P(malade|T⁺) = 90/270 = 1/3',
+            headline: 'P(malade|T⁺) = 90⁄270 = 1⁄3',
             columns: [
               {
                 title: 'malades',
@@ -1088,8 +1088,8 @@ export const probabilites: ChapterContent = {
             ],
             caption:
               'Sur 1000 personnes : 100 malades dont 90 $T^+$, et 900 non malades dont 180 $T^+$ ' +
-              '— au total 270 $T^+$, dont seulement 90 sont réellement malades : 90/270=1/3, à ne ' +
-              'pas confondre avec 90/100=0,9.',
+              '— au total 270 $T^+$, dont seulement 90 sont réellement malades : $\\dfrac{90}{270}=\\dfrac{1}{3}$, à ne ' +
+              'pas confondre avec $\\dfrac{90}{100}=0{,}9$.',
           },
         },
         { kind: 'subheading', text: 'Le vocabulaire des tests, et le cas d\'une maladie rare' },
@@ -1284,7 +1284,7 @@ export const probabilites: ChapterContent = {
                   footLabel: '105 avec « gratuit »',
                 },
               ],
-              caption: 'Sur 1000 messages (100 spams), P(gratuit|spam)=60 % mais P(spam|gratuit)=60/(60+45)≈57 % — recombiner par le mot plutôt que par le statut retourne le conditionnement, exactement le calcul que fait le filtre.',
+              caption: 'Sur 1000 messages (100 spams), $P(\\text{gratuit}\\mid\\text{spam})=60\\,\\%$ mais $P(\\text{spam}\\mid\\text{gratuit})=\\dfrac{60}{60+45}\\approx 57\\,\\%$ — recombiner par le mot plutôt que par le statut retourne le conditionnement, exactement le calcul que fait le filtre.',
             },
             {
               kind: 'categoricalBarChart',
@@ -1737,12 +1737,12 @@ export const probabilites: ChapterContent = {
           illustration: {
             kind: 'weightedTree',
             firstLevel: [
-              { label: 'voiture', prob: '1/3' },
-              { label: 'chèvre', prob: '2/3' },
+              { label: 'voiture', prob: '1⁄3' },
+              { label: 'chèvre', prob: '2⁄3' },
             ],
             secondLevel: [
-              { fromFirst: 0, label: 'perdu', prob: '1', pathProb: '1/3' },
-              { fromFirst: 1, label: 'gagné', prob: '1', pathProb: '2/3', highlight: true },
+              { fromFirst: 0, label: 'perdu', prob: '1', pathProb: '1⁄3' },
+              { fromFirst: 1, label: 'gagné', prob: '1', pathProb: '2⁄3', highlight: true },
             ],
             caption:
               'Stratégie « changer » : 1er niveau, ce que cache la porte choisie au départ ; 2e niveau, ' +

@@ -95,7 +95,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             ['raccourci 1 — c = 0 : pas de terme constant', 'tu mets x en évidence'],
             ['raccourci 2 — b = 0, et a et c de signes opposés', 'différence de deux carrés'],
             ['raccourci 3 — un carré parfait se reconnaît (b² = 4ac), ex. x² − 6x + 9', 'tu l\'écris (x − 3)² = 0 : une racine double'],
-            ['sans solution visible — b = 0, et a et c de même signe', 'aucune solution : x² = −c/a est négatif'],
+            ['sans solution visible — b = 0, et a et c de même signe', 'aucune solution : $x^2 = -\\dfrac{c}{a}$ est négatif'],
             ['cas général — aucune des conditions ci-dessus', 'le discriminant'],
           ],
         },
@@ -122,7 +122,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         },
         {
           kind: 'attention',
-          label: 'Attention — quand −c/a n\'est pas un carré',
+          label: 'Attention — quand −c⁄a n\'est pas un carré',
           text:
             'La différence de deux carrés marche toujours, même si les nombres ne « tombent pas ' +
             'juste » : isole $x^2$. $2x^2 - 5 = 0 \\iff x^2 = \\dfrac{5}{2} \\iff x = \\pm\\sqrt{\\dfrac{5}{2}} = ' +
@@ -357,7 +357,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'Fais varier a, b et c : Δ se recalcule en direct et la parabole change de ' +
             'couleur selon son signe. Quand il y a des racines, regarde S et P (relations ' +
             'de Viète), la forme factorisée a(x − x₁)(x − x₂), et le sommet, toujours à ' +
-            'mi-chemin des deux racines (xₛ = S/2).',
+            'mi-chemin des deux racines ($x_s = \\dfrac{S}{2}$).',
         },
         {
           kind: 'historique',
@@ -391,10 +391,10 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           tag: 'completer-le-carre-widget',
           label: 'Manipule toi-même — compléter un vrai carré',
           caption:
-            'Al-Khwārizmī résolvait x² + bx = c avec un vrai dessin : un carré x², deux ' +
-            'rectangles de largeur b/2, et un coin vide. Appuie sur « Compléter le carré » ' +
-            ': en ajoutant le petit carré (b/2)² des deux côtés, on obtient un grand carré ' +
-            'de côté x + b/2, dont on lit la longueur. C\'est exactement l\'étape « compléter ' +
+            'Al-Khwārizmī résolvait $x^2 + bx = c$ avec un vrai dessin : un carré $x^2$, deux ' +
+            'rectangles de largeur $\\dfrac{b}{2}$, et un coin vide. Appuie sur « Compléter le carré » ' +
+            ': en ajoutant le petit carré $\\left(\\dfrac{b}{2}\\right)^2$ des deux côtés, on obtient un grand carré ' +
+            'de côté $x + \\dfrac{b}{2}$, dont on lit la longueur. C\'est exactement l\'étape « compléter ' +
             'le carré » de la démonstration du discriminant.',
         },
         { kind: 'subheading', text: 'Le cas caché — mettre une expression entière en évidence' },
@@ -603,7 +603,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'Fais glisser les deux racines : la parabole a(x − x₁)(x − x₂) se redessine, ' +
             'avec S = x₁ + x₂, P = x₁·x₂ et l\'équation x² − Sx + P = 0. Sans calculer les ' +
             'racines, le signe de P et de S dit déjà si elles sont de même signe ou non. ' +
-            'Quand a + b + c = 0, x = 1 est une racine évidente, et l\'autre vaut c/a.',
+            'Quand $a + b + c = 0$, $x = 1$ est une racine évidente, et l\'autre vaut $\\dfrac{c}{a}$.',
         },
         { kind: 'subheading', text: 'Factoriser un trinôme grâce à ses racines' },
         {
@@ -844,8 +844,8 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           title: 'Signe des racines sans les calculer',
           generatorId: 'gen114',
           description: [
-            'Sans résoudre l\'équation, décide du signe de ses racines : le produit P = c/a, puis Δ si ' +
-              'P > 0, puis la somme S = −b/a. Variante : une racine évidente, puis l\'autre par le produit.',
+            'Sans résoudre l\'équation, décide du signe de ses racines : le produit P = c⁄a, puis Δ si ' +
+              'P > 0, puis la somme S = −b⁄a. Variante : une racine évidente, puis l\'autre par le produit.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 114. Signe des racines sans les calculer »',
@@ -1857,7 +1857,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             { kind: 'para', text: 'CE : $x \\neq -1$.' },
             {
               kind: 'signTable',
-              caption: 'Signe de (x−2)/(x+1)',
+              caption: 'Signe de (x − 2) / (x + 1)',
               rows: [
                 {
                   label: 'x',
@@ -1983,8 +1983,8 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           tag: 'signe-produit-widget',
           label: 'Manipule toi-même — pourquoi pas de produit en croix ?',
           caption:
-            'Choisis le mode « Piège : produit en croix » : pour x/(x − 1) ≤ 2, la méthode ' +
-            'fausse (multiplier par x − 1) donne [2 ; +∞[, la bonne ]−∞ ; 1[ ∪ [2 ; +∞[. La ' +
+            'Choisis le mode « Piège : produit en croix » : pour $\\dfrac{x}{x-1} \\le 2$, la méthode ' +
+            'fausse (multiplier par $x - 1$) donne $[2\\,;+\\infty[$, la bonne $\\mathopen{]}-\\infty\\,;1\\mathclose{[}\\,\\cup\\,[2\\,;+\\infty[$. La ' +
             'bande colorée montre où le dénominateur est négatif : là, le sens de ' +
             'l\'inégalité aurait dû s\'inverser.',
         },

@@ -356,7 +356,7 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'para',
           text:
             'Sur l\'exemple ci-dessous : min = 0,5 et max = 8, donc étendue = 7,5. Avec seulement ' +
-            '20 données, 4 classes suffisent : 7,5/4 = 1,875, arrondi à **2**. On démarre à 0 : ' +
+            '20 données, 4 classes suffisent : $\\dfrac{7{,}5}{4} = 1{,}875$, arrondi à **2**. On démarre à 0 : ' +
             '[0 ; 2[, [2 ; 4[, [4 ; 6[, [6 ; 8].',
         },
         {
@@ -409,10 +409,10 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Dans l\'entraînement de cette section, l\'effectif total vaut toujours n = 10, 20 ou ' +
+            'Dans l\'entraînement de cette section, l\'effectif total vaut toujours $n = 10$, 20 ou ' +
             '25 : chaque fréquence y tombe sur un **pourcentage entier**, un bon moyen de te ' +
-            'relire. Ce n\'est pas une règle générale ! Avec n = 16 (possible dans le tableau de ' +
-            'fréquences de la section 1), une seule donnée vaut 1/16 = 6,25 % : une fréquence à ' +
+            'relire. Ce n\'est pas une règle générale ! Avec $n = 16$ (possible dans le tableau de ' +
+            'fréquences de la section 1), une seule donnée vaut $\\dfrac{1}{16} = 6{,}25\\,\\%$ : une fréquence à ' +
             'virgule y est parfaitement exacte.',
         },
         {
@@ -718,7 +718,7 @@ export const statistiqueDescriptive: ChapterContent = {
           label: 'La règle du seuil',
           items: [
             'Sur le tableau des effectifs cumulés, chaque paramètre correspond à un **seuil** : ' +
-              'n/2 pour la médiane, n/4 pour Q1, 3n/4 pour Q3. Le paramètre cherché, c\'est la ' +
+              '$\\dfrac{n}{2}$ pour la médiane, $\\dfrac{n}{4}$ pour $Q_1$, $\\dfrac{3n}{4}$ pour $Q_3$. Le paramètre cherché, c\'est la ' +
               '**première valeur** dont l\'effectif cumulé dépasse **strictement** ce seuil.',
           ],
         },
@@ -728,7 +728,7 @@ export const statistiqueDescriptive: ChapterContent = {
           text:
             'C\'est l\'erreur la plus fréquente ! Si l\'effectif cumulé est **exactement** égal ' +
             'au seuil, ce n\'est **pas encore** la bonne valeur. Il faut prendre la ' +
-            '**suivante**. Preuve sur l\'exemple ci-dessous, avec Q1 : le seuil vaut n/4 = 5, ' +
+            '**suivante**. Preuve sur l\'exemple ci-dessous, avec $Q_1$ : le seuil vaut $\\dfrac{n}{4} = 5$, ' +
             'et l\'effectif cumulé de x=2 vaut **exactement** 5 — égal au seuil, donc pas encore. ' +
             'Le premier cumulé strictement supérieur à 5 est 13, à x=6 : Q1 = 6. Jamais x=2, ' +
             'même si tu es tenté de t\'arrêter dès que le cumulé « atteint » le seuil.',
@@ -747,9 +747,9 @@ export const statistiqueDescriptive: ChapterContent = {
                 ['12', '3', '20'],
               ],
             },
-            { kind: 'para', text: 'Médiane — seuil n/2 = 10 : premier cumulé > 10 est 13 (à x=6) → médiane = 6.' },
-            { kind: 'para', text: 'Q1 — seuil n/4 = 5 : premier cumulé > 5 est 13 (à x=6) → Q1 = 6. 5 n\'est pas strictement supérieur à 5, donc on passe à la ligne suivante.' },
-            { kind: 'para', text: 'Q3 — seuil 3n/4 = 15 : premier cumulé > 15 est 17 (à x=9) → Q3 = 9.' },
+            { kind: 'para', text: 'Médiane — seuil $\\dfrac{n}{2} = 10$ : premier cumulé $> 10$ est 13 (à $x=6$) → médiane $= 6$.' },
+            { kind: 'para', text: '$Q_1$ — seuil $\\dfrac{n}{4} = 5$ : premier cumulé $> 5$ est 13 (à $x=6$) → $Q_1 = 6$. 5 n\'est pas strictement supérieur à 5, donc on passe à la ligne suivante.' },
+            { kind: 'para', text: '$Q_3$ — seuil $\\dfrac{3n}{4} = 15$ : premier cumulé $> 15$ est 17 (à $x=9$) → $Q_3 = 9$.' },
             { kind: 'para', text: 'Résultat : min=2, Q1=6, médiane=6, Q3=9, max=12, mode=6 (effectif 8, le plus grand).' },
           ],
         },
@@ -846,7 +846,7 @@ export const statistiqueDescriptive: ChapterContent = {
               '**juste avant** cette classe.',
             'Sur les mêmes effectifs regroupés en classes [0;4[/[4;8[/[8;12[/[12;16[ : le ' +
               'seuil médiane = 10 tombe dans [4;8[ (cumulés 5→13). Donc médiane = ' +
-              '4 + ((10−5)/8)×4 = 6,5.',
+              '$4 + \\dfrac{10-5}{8}\\times 4 = 6{,}5$.',
           ],
         },
         {
@@ -945,7 +945,7 @@ export const statistiqueDescriptive: ChapterContent = {
               caption:
                 '8 matchs d\'un basketteur, dont un exceptionnel à 50 points. La moyenne ' +
                 '(22,75) est tirée vers le haut par ce seul match ; la médiane (20 — règle du ' +
-                'seuil : n/2 = 4, et la 5e valeur dans l\'ordre croissant est 20) reste proche du ' +
+                'seuil : $\\dfrac{n}{2} = 4$, et la 5e valeur dans l\'ordre croissant est 20) reste proche du ' +
                 'niveau typique des 7 autres matchs.',
             },
           ],
@@ -1443,7 +1443,7 @@ export const statistiqueDescriptive: ChapterContent = {
       id: 'tchebychev',
       number: 7,
       title: 'L\'inégalité de Bienaymé-Tchebychev',
-      kicker: 'au moins (1 − 1/k²) × 100 % des valeurs dans [x̄ − kσ ; x̄ + kσ]',
+      kicker: 'au moins (1 − 1⁄k²) × 100 % des valeurs dans [x̄ − kσ ; x̄ + kσ]',
       titreCourt: 'Inégalité de Bienaymé-Tchebychev',
       partie: 'Mesurer la dispersion',
       essentiel: [
@@ -1484,7 +1484,7 @@ export const statistiqueDescriptive: ChapterContent = {
             rangeAnnotations: [{ from: 0.5, to: 3.5, label: 'au moins 75 % des valeurs (k=2)' }],
             axisLabel: 'x',
             axisLabelAtEnd: true,
-            caption: 'zone centrale [x̄−kσ ; x̄+kσ] — pour k=2, elle contient au moins 1−1/4 = 75 % des valeurs',
+            caption: 'zone centrale $[\\bar{x}-k\\sigma\\,;\\bar{x}+k\\sigma]$ — pour $k=2$, elle contient au moins $1-\\dfrac{1}{4} = 75\\,\\%$ des valeurs',
           },
         },
         {
@@ -1499,8 +1499,8 @@ export const statistiqueDescriptive: ChapterContent = {
           label: 'Manipule toi-même — une garantie minimale',
           caption:
             'Choisis la forme de la série et fais varier k : le pourcentage réel de valeurs ' +
-            'dans [x̄ − kσ ; x̄ + kσ] ne descend jamais sous le minimum garanti (1 − 1/k²) ' +
-            '× 100 %, quelle que soit la forme — et il le dépasse souvent largement.',
+            'dans $[\\bar{x} - k\\sigma\\,;\\bar{x} + k\\sigma]$ ne descend jamais sous le minimum garanti ' +
+            '$\\left(1 - \\dfrac{1}{k^2}\\right) \\times 100\\,\\%$, quelle que soit la forme — et il le dépasse souvent largement.',
         },
         {
           kind: 'astuce',
