@@ -2,6 +2,7 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
   EtapeCorrection,
@@ -9,12 +10,13 @@ import type {
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeDetectiveEspace } from "./corrigeDetaille";
 import { fragmentsVersHtml } from "../../../export/genererFeuilleExercicesHtml";
 import type { ExerciceDetectiveEspace } from "../../core/detectiveEspace.types";
-import { CONSIGNE_GENERALE, consignesEcrans, correctionCorrecte, descriptionCorrecte, dessinPaveSvg, figureSolideSvg } from "../../ui/formatDetectiveEspace";
+import { CONSIGNE_GENERALE, consignesEcrans, correctionCorrecte, dessinPaveSvg, figureSolideSvg } from "../../ui/formatDetectiveEspace";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDetectiveEspace } from "./index";
 import { profilDetectiveEspace } from "./profil";
-import { retirerDebut } from "./commun";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen107 « Détective d'erreurs : géométrie dans
@@ -41,11 +43,6 @@ function copieHtml(e: ExerciceDetectiveEspace): string {
 
 function figureEnonce(e: ExerciceDetectiveEspace): string {
   return e.figure.type === "solide" ? figureSolideSvg(e.figure, "papier") : dessinPaveSvg(e.figure.dessin, "papier");
-}
-
-function figureCorrige(e: ExerciceDetectiveEspace): string {
-  if (e.figure.type === "cavaliere") return dessinPaveSvg(e.corrige.dessin!, "papier");
-  return figureSolideSvg(e.figure, "papier", { corrige: e.corrige });
 }
 
 function enteteHtml(e: ExerciceDetectiveEspace): string {
@@ -76,21 +73,7 @@ function reponseBreve(e: ExerciceDetectiveEspace): FragmentConsigne[] {
 }
 
 function correctionDetaillee(e: ExerciceDetectiveEspace): EtapeCorrection[] {
-  const n = e.ligneFausse + 1;
-  const etapes: EtapeCorrection[] = e.controles.map((c) => ({ label: "Contrôle", sousQuestion: "a", fragments: c }));
-  etapes.push({ label: "Conclusion", sousQuestion: "a", fragments: [texte(`La ligne ${n} est fausse.`)] });
-  etapes.push({ label: "Erreur", sousQuestion: "b", fragments: retirerDebut(descriptionCorrecte(e)) });
-  const enMinuscule = (f: FragmentConsigne[]): FragmentConsigne[] =>
-    f.map((x, j) => (j === 0 && x.type === "texte" && /^[A-ZÉ][a-zé]/.test(x.valeur) ? { ...x, valeur: x.valeur[0]!.toLowerCase() + x.valeur.slice(1) } : x));
-  if (e.theme === "cavaliere") {
-    etapes.push({ label: "Correction", sousQuestion: "c", fragments: [texte(`Ligne ${n} corrigée : `), ...enMinuscule(e.ligneCorrigee)] });
-    etapes.push({ label: "Conclusion", sousQuestion: "c", fragments: [texte("Le dessin juste : fuyantes à 45°, vers la droite et vers le haut, réduites de moitié ; arêtes [AD], [CD] et [DH] en pointillés.")], figureHtml: figureCorrige(e) });
-  } else {
-    etapes.push({ label: "Correction", sousQuestion: "c", fragments: [texte(`Ligne ${n} corrigée : `), ...enMinuscule(e.ligneCorrigee)], figureHtml: e.suite ? undefined : figureCorrige(e) });
-    if (e.suite) etapes.push({ label: "Suite", sousQuestion: "c", fragments: e.suite, figureHtml: figureCorrige(e) });
-  }
-  etapes.push({ label: "Piège", sousQuestion: "b", fragments: e.piege });
-  return etapes;
+  return correctionDetailleeDetectiveEspace(e);
 }
 
 function construireCorrection(e: ExerciceDetectiveEspace): BlocCorrection[] {
@@ -117,9 +100,12 @@ function bareme(e: ExerciceDetectiveEspace): BaremeExercice {
   };
 }
 
-/** Difficulté selon le thème (jamais selon le type d'erreur ni la ligne, qui sont les verdicts). */
-function difficulte(e: ExerciceDetectiveEspace): 1 | 2 | 3 {
-  return e.theme === "parallelisme" || e.theme === "section" ? 3 : 2;
+/** Niveau (grille commune) : trois étapes qui raisonnent (ligne fausse, erreur, correction), sans
+ * charge (la longueur des contrôles dépend de la ligne fausse et du type d'erreur, qui sont les
+ * verdicts : le niveau ne doit pas les trahir) ; méthode 1 (trouver la propriété du cours en jeu),
+ * aucun piège ni nombre. Constant pour toutes les instances : niveau 3, 8 min. */
+function criteresDifficulte(e: ExerciceDetectiveEspace): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: 0, nombres: 0, sansCharge: true };
 }
 
 export const adaptateurEvaluationDetectiveEspace: AdaptateurFeuilleExercices<ExerciceDetectiveEspace> = {
@@ -131,10 +117,9 @@ export const adaptateurEvaluationDetectiveEspace: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 7,
 };

@@ -1,4 +1,5 @@
-import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
+import type { FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
+import { ligne } from "../../../export/corrigeTableau";
 import type { ExerciceDetectiveEspace, TypeErreurEspace } from "../../core/detectiveEspace.types";
 import type { Point3D, Solide3D } from "../../core/geometrieEspace.types";
 import { pixel } from "../deuxDroitesPlan";
@@ -101,6 +102,13 @@ export function genererSection(type: TypeErreurEspace, ligneFausse: number): Exe
   }
 }
 
+/** Clé d'une ligne « (XY)\\parallel (ZW) » indépendante de l'ordre des lettres et des droites. */
+function cleParallele(latex: string): string {
+  const m = /^\(([A-Z]{2})\)\\parallel \(([A-Z]{2})\)$/.exec(latex);
+  if (!m) return latex;
+  return [m[1]!, m[2]!].map((d) => [...d].sort().join("")).sort().join("|");
+}
+
 function construire(
   type: keyof typeof GENRE_DU_TYPE,
   ligneFausse: number,
@@ -135,17 +143,46 @@ function construire(
   let questionCorrection = "";
   let suiteSection = "";
   const corrigeDroites: [Point3D, Point3D][] = [];
+  // Corrigé « comme au tableau » (aucun aléa ici) : contrôle de chaque remarque, remarque corrigée.
+  const tabCtrl: LigneCalcul[][] = [];
+  let tabCorr: LigneCalcul[] = [];
+  const juste = " ; la copie est juste";
+  const fausse = " ; la copie est fausse";
+  /** Côté de la section sur la face F(j) : (PQ), (QR), (RS) ou (PS). */
+  const coteSurFace = (j: number) => dr(NOMS[j % 4]!, NOMS[(j + 1) % 4]!);
 
-  for (let ligne = 0; ligne < 3; ligne++) {
-    const genre = genres[ligne]!;
-    const faux = ligne === ligneFausse;
-    const n = ligne + 1;
+  /** Faces opposées F(i) ∥ F(i + 2) : le côté sur F(i + 2) est parallèle au côté sur F(i). */
+  const lignesParallele = (i: number, fin: string): LigneCalcul[] => [
+    ligne(`(${F(i)})\\parallel (${F(i + 2)})`, "faces opposées du parallélépipède"),
+    ligne(`${coteSurFace(i)}\\subset (${F(i)})`, `côté de la section sur la face ${F(i)}`),
+    ligne(`${coteSurFace(i + 2)}\\parallel ${coteSurFace(i)}`, `deux plans parallèles coupés par le plan de coupe : côtés parallèles${fin}`),
+  ];
+  /** Point auxiliaire : un côté et une arête d'une MÊME face, non parallèles. */
+  const lignesAux = (xy: [string, string], fin: string): LigneCalcul[] => {
+    const [A, B] = [NOMS[coteAux]!, NOMS[coteAux + 1]!];
+    return [
+      ligne(`${A},\\,${B}\\in (${F(coteAux)})`, `${dr(A, B)} est dans la face ${F(coteAux)}`),
+      ligne(`${dr(xy[0], xy[1])}\\subset (${F(coteAux)})`, "arête de la même face"),
+      ligne(`${dr(A, B)}\\nparallel ${dr(xy[0], xy[1])}`, `deux droites d'une même face, non parallèles : elles se coupent${fin}`),
+    ];
+  };
+
+  for (let numLigne = 0; numLigne < 3; numLigne++) {
+    const genre = genres[numLigne]!;
+    const faux = numLigne === ligneFausse;
+    const n = numLigne + 1;
     if (genre === "direct") {
       if (!faux) {
         const i = Math.random() < 0.5 ? 0 : 1; // [PQ] sur F01 ou [QR] sur F12
         const [X, Y] = Math.random() < 0.5 ? [NOMS[i]!, NOMS[i + 1]!] : [NOMS[i + 1]!, NOMS[i]!];
         lignes.push(t(`La face ${F(i)} contient deux points déjà connus, ${X} et ${Y} : ${sg(X, Y)} est un côté de la section.`));
         controles.push(t(`Ligne ${n} : ${NOMS[i]} est sur ${arete(i)} et ${NOMS[i + 1]} sur ${arete(i + 1)}, deux arêtes de la face ${F(i)} : ${sg(X, Y)} est bien un côté de la section. C'est juste.`));
+        tabCtrl.push([
+          ligne(`${NOMS[i]}\\in ${arete(i)}`, "donnée de l'énoncé"),
+          ligne(`${NOMS[i + 1]}\\in ${arete(i + 1)}`, "donnée de l'énoncé"),
+          ligne(`${NOMS[i]},\\,${NOMS[i + 1]}\\in (${F(i)})`, `deux arêtes de la face ${F(i)}`),
+          ligne(`${sg(X, Y)}\\subset (${F(i)})`, `deux points de la face : côté de la section${juste}`),
+        ]);
       } else {
         // R et P (arêtes e2 et e0, opposées) : la face citée n'en contient qu'un.
         const surR = Math.random() < 0.5;
@@ -155,6 +192,10 @@ function construire(
         const [X, Y] = Math.random() < 0.5 ? ["R", "P"] : ["P", "R"];
         lignes.push(t(`La face ${face} contient deux points déjà connus, ${X} et ${Y} : ${sg(X, Y)} est un côté de la section.`));
         controles.push(t(`Ligne ${n} : ${absent} est sur ${arete(surR ? 0 : 2)}, qui n'est pas une arête de la face ${face} : P et R ne sont sur aucune face commune, et ${sg(X, Y)} traverserait l'intérieur du solide. La copie est fausse.`));
+        tabCtrl.push([
+          ligne(`${connu}\\in (${face})`, `${connu} est sur une arête de la face`),
+          ligne(`${absent}\\notin (${face})`, `${absent} est sur ${arete(surR ? 0 : 2)}, hors de cette face : ${sg(X, Y)} traverserait le solide${fausse}`),
+        ]);
         // Construction correcte sur cette face : par le point connu, parallèle au côté de la face opposée.
         const coteDroite = surR ? dr("P", "Q") : dr("Q", "R");
         const opposee = surR ? F(0) : F(1);
@@ -170,6 +211,11 @@ function construire(
           t(`La face ${face} n'a qu'un point connu, ${connu} : elle n'apporte donc qu'un seul sommet à la section.`),
           t(`La face ${face} n'a qu'un point connu, ${connu} : son côté est porté par la parallèle à ${dr(bout[0], bout[1])} menée par ${connu}.`),
         ]);
+        tabCorr = [
+          ligne(`(${face})\\parallel (${opposee})`, "faces opposées du parallélépipède"),
+          ligne(`${coteDroite}\\subset (${opposee})`, `côté de la section sur la face ${opposee}`),
+          ligne(`${coteSurFace(surR ? 2 : 3)}\\parallel ${coteDroite}`, "deux plans parallèles coupés par le plan de coupe : côtés parallèles"),
+        ];
         suiteSection = `Les faces ${face} et ${opposee} sont parallèles : le côté de la section sur ${face} est parallèle à son côté sur ${opposee}, ${coteDroite.replace("(", "[").replace(")", "]")}. `;
         questionCorrection = `Que fallait-il écrire à la ligne ${n} ? Choisis la remarque corrigée.`;
         piege = "Piège central du cours : on ne trace un côté de la section que sur une face qui a déjà SES DEUX points connus. Deux points situés sur deux arêtes opposées ne sont sur aucune face commune : le segment qui les joint traverse le solide.";
@@ -185,11 +231,19 @@ function construire(
       if (!faux) {
         lignes.push(t(`Les faces ${Fa} et ${Fb} sont parallèles : sur la face ${Fb}, le côté de la section est parallèle à ${bon}.`));
         controles.push(t(`Ligne ${n} : les faces ${Fa} et ${Fb} sont opposées, donc parallèles ; le plan de coupe les traverse suivant deux droites parallèles, et son côté sur ${Fa} est ${bon}. C'est juste.`));
+        tabCtrl.push(lignesParallele(i, `${juste}`));
       } else {
         lignes.push(t(`Les faces ${Fa} et ${Fb} sont parallèles : sur la face ${Fb}, le côté de la section est parallèle à ${mauvais}.`));
         // Le mauvais côté est sur la face voisine F(1) (si i = 0) ou F(0) (si i = 1).
         const voisine = i === 0 ? F(1) : F(0);
         controles.push(t(`Ligne ${n} : les faces ${Fa} et ${Fb} sont bien parallèles, mais le côté de la section sur ${Fa} est ${bon} ; ${mauvais} est sur la face ${voisine}, qui n'est pas parallèle à ${Fb}. La copie est fausse.`));
+        const horsFa = i === 0 ? "R" : "P";
+        tabCtrl.push([
+          ligne(`(${Fa})\\parallel (${Fb})`, "faces opposées du parallélépipède"),
+          ligne(`${horsFa}\\notin (${Fa})`, `${mauvais} n'est pas sur la face ${Fa}, mais sur ${voisine}`),
+          ligne(`${coteSurFace(i + 2)}\\nparallel ${i === 0 ? coteSurFace(1) : coteSurFace(0)}`, `le côté sur ${Fb} n'est pas parallèle à ${mauvais}${fausse}`),
+        ]);
+        tabCorr = lignesParallele(i, "");
         const bout = areteBout(i + 2, Math.random() < 0.5 ? 0 : 1);
         descriptions = descriptionsVariees(t(`${mauvais} n'est pas sur la face ${Fa} : il fallait mener la parallèle à ${bon}.`), [
           t(`Les faces ${Fa} et ${Fb} ne sont pas parallèles : elles ont une arête commune.`),
@@ -228,9 +282,16 @@ function construire(
       if (!faux) {
         lignes.push(t(phrase(xy, Fc)));
         controles.push(t(`Ligne ${n} : ${dr(xy[0], xy[1])} est une arête de la face ${Fc}, qui contient aussi ${cote} ; ces deux droites ne sont pas parallèles, elles se coupent en un point de ${cote} (donc du plan de coupe) et de ${dr(xy[0], xy[1])} (donc du plan de la face ${faceBout}). C'est juste.`));
+        tabCtrl.push(lignesAux(xy, juste));
       } else {
         lignes.push(t(phrase(fauxXY, Fc)));
         controles.push(t(`Ligne ${n} : ${dr(fauxXY[0], fauxXY[1])} n'est pas une arête de la face ${Fc} : ${cote} et ${dr(fauxXY[0], fauxXY[1])} ne sont pas dans un même plan, leurs traits ne se croisent que sur le dessin. La copie est fausse.`));
+        const horsFc = fauxXY.find((l) => !Fc.includes(l)) ?? fauxXY[0];
+        tabCtrl.push([
+          ligne(`${A},\\,${B}\\in (${Fc})`, `${cote} est dans la face ${Fc}`),
+          ligne(`${horsFc}\\notin (${Fc})`, `${dr(fauxXY[0], fauxXY[1])} n'est pas dans cette face : ses traits ne croisent ${cote} que sur le dessin${fausse}`),
+        ]);
+        tabCorr = lignesAux(xy, "");
         const autreFaux = autresBout.find((a) => a !== fauxXY)!;
         descriptions = descriptionsVariees(t(`${dr(fauxXY[0], fauxXY[1])} n'est pas dans la face ${Fc} : ces deux droites ne se coupent que sur le dessin.`), [
           t(`${cote} et ${dr(fauxXY[0], fauxXY[1])} sont parallèles : elles ne peuvent pas avoir de point commun.`),
@@ -284,5 +345,9 @@ function construire(
     ],
     figure: { type: "solide", solide, points, plans: [], dessins: null },
     corrige: { droites: corrigeDroites, plans: [["P", "Q", "R"]], sections: true, points: [{ nom: "S", position: pts[3]! }], dessin: null },
+    tableau: {
+      controles: tabCtrl,
+      correction: [...tabCorr, ...[ligne("(PQ)\\parallel (RS)", "faces opposées coupées par le plan de coupe"), ligne("(QR)\\parallel (PS)", "de même : la section PQRS est un parallélogramme")].filter((l) => !tabCorr.some((x) => cleParallele(x.latex) === cleParallele(l.latex)))],
+    },
   };
 }

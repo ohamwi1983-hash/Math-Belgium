@@ -30,6 +30,9 @@ import { EtapeDeuxChoix } from "./components/EtapesDemontrerParallelisme";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeDemontrerParallelisme } from "./generateurs/demontrerParallelisme/corrigeDetaille";
 
 /**
  * gen103 — « Démontrer un parallélisme » (4e, chapitre 8 « Géométrie dans l'espace », section
@@ -129,6 +132,8 @@ export function AppDemontrerParallelisme() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
+        // Corrigé détaillé de l'étape (même source que le papier) ; la figure finale est déjà à l'écran.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDemontrerParallelisme(e, paires), lettreEtape(ecran)).map((x) => ({ ...x, figureHtml: undefined }))} />,
       }
     : null;
 

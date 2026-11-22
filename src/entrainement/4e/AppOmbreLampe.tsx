@@ -25,6 +25,9 @@ import { Solide3DSketch } from "./components/Solide3DSketch";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeOmbreLampe } from "./generateurs/ombreLampe/corrigeDetaille";
 
 /**
  * gen106 — « Ombre à la lampe : projection centrale » (4e, chapitre 8 « Géométrie dans l'espace »,
@@ -90,7 +93,14 @@ export function AppOmbreLampe() {
   }
 
   const validation: ValidationEtapeProps | null = enAttente
-    ? { revele: enAttente.revele, labelSuivant: ecran === 1 ? "Voir la construction" : "Écran suivant", onSuivant: passerEcranSuivant, messageRevele: enAttente.messageRevele }
+    ? {
+        revele: enAttente.revele,
+        labelSuivant: ecran === 1 ? "Voir la construction" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+        messageRevele: enAttente.messageRevele,
+        // Corrigé détaillé de l'étape (même source que le papier) ; la construction complète suit à l'écran.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOmbreLampe(exercice, ""), lettreEtape(ecran))} />,
+      }
     : null;
 
   const solide = solidePourAffichage(e);

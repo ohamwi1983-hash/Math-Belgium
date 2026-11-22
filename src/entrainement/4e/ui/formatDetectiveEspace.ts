@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { texte } from "../../export/fragmentsDocx";
+import { texte } from "../../export/corrigeTableau";
 import type { CorrigeFigureEspace, DessinPave, ExerciceDetectiveEspace, FigureSolideEspace } from "../core/detectiveEspace.types";
 import type { CadreDessin, PointDessin } from "../core/perspectiveCavaliere.types";
 import { COULEURS_CAVALIERE, figureCavaliereSvg, type ModeFigure, type PointFigure, type SegmentFigure } from "./figureCavaliere";

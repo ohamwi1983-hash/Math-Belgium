@@ -3,6 +3,7 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
   EtapeCorrection,
@@ -10,9 +11,11 @@ import type {
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleePointFuite } from "./corrigeDetaille";
 import type { ExercicePointFuite, VariantePointFuite } from "../../core/pointFuite.types";
-import { figurePointFuiteSvg, sceneComplete, type LigneFigureFuite } from "../../ui/figurePointFuite";
-import { CONSIGNE_AFFIRMATIONS, explicationsAffirmations, indexAffirmationVraie, reponseAffirmations, reponseConstruction, texteAffirmation } from "../../ui/formatPointFuite";
+import { figurePointFuiteSvg, sceneComplete } from "../../ui/figurePointFuite";
+import { CONSIGNE_AFFIRMATIONS, indexAffirmationVraie, reponseConstruction, texteAffirmation } from "../../ui/formatPointFuite";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExercicePointFuite } from "./index";
 import { profilPointFuite } from "./profil";
 
@@ -36,14 +39,6 @@ function echapper(t: string): string {
 
 function figureDepart(e: ExercicePointFuite): string {
   return figurePointFuiteSvg({ mode: "papier", horizon: e.horizon, scene: e.base, sceneEtiquettes: sceneComplete(e, 2) });
-}
-
-function figureFinale(e: ExercicePointFuite): string {
-  const lignes: LigneFigureFuite[] = e.etapes
-    .flatMap((et) => et.supports)
-    .filter((s) => s.nature === "horizontale" || s.nature === "verticale")
-    .map((s) => ({ a: s.a, b: s.b, ton: "correction" as const }));
-  return figurePointFuiteSvg({ mode: "papier", horizon: e.horizon, scene: sceneComplete(e, 2), lignes });
 }
 
 function enteteHtml(e: ExercicePointFuite): string {
@@ -85,19 +80,8 @@ const PIEGES: Record<VariantePointFuite, string> = {
   panneaux: "Dessiner le second panneau de la même taille que le premier, comme en perspective cavalière : en perspective centrale, il est plus petit, ses coins sont sur les fuyantes.",
 };
 
-const METHODE =
-  "Sur le dessin, des droites horizontales parallèles qui s'éloignent de la vitre (les fuyantes) convergent vers un même point de fuite, sur la ligne d'horizon ; les droites parallèles à la vitre (verticales, horizontales de face) restent parallèles. Chaque point se construit à l'intersection de deux droites.";
-
 function correctionDetaillee(e: ExercicePointFuite): EtapeCorrection[] {
-  const [a, b] = e.etapes;
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte(METHODE)] },
-    { label: "Construction", sousQuestion: "a", fragments: [texte(a.justification)] },
-    { label: "Construction", sousQuestion: "b", fragments: [texte(b.justification)], figureHtml: figureFinale(e) },
-    { label: "Piège", sousQuestion: "b", fragments: [texte(PIEGES[e.variante])] },
-    { label: "Conclusion", sousQuestion: "c", fragments: [texte(reponseAffirmations(e))] },
-    ...explicationsAffirmations(e).map((l) => ({ label: "Justification", sousQuestion: "c", fragments: [texte(l)] })),
-  ];
+  return correctionDetailleePointFuite(e);
 }
 
 function construireCorrection(e: ExercicePointFuite): BlocCorrection[] {
@@ -123,8 +107,12 @@ function bareme(e: ExercicePointFuite): BaremeExercice {
   };
 }
 
-function difficulte(e: ExercicePointFuite): 1 | 2 | 3 {
-  return e.variante === "carrelage" || e.variante === "poteaux" ? 3 : 2;
+/** Niveau (grille commune) : trois étapes qui raisonnent (deux constructions, l'affirmation vraie) ;
+ * méthode 1 quand la construction demande une idée du cours non dite par la consigne (diagonale du
+ * carrelage, milieu du poteau), 0 sinon (fuyantes et droites parallèles à la vitre) ; aucun piège dans
+ * les données, aucun nombre. Constant dans chaque variante (l'affirmation vraie n'y change rien). */
+function criteresDifficulte(e: ExercicePointFuite): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: e.variante === "carrelage" || e.variante === "poteaux" ? 1 : 0, piege: 0, nombres: 0 };
 }
 
 export const adaptateurEvaluationPointFuite: AdaptateurFeuilleExercices<ExercicePointFuite> = {
@@ -136,10 +124,9 @@ export const adaptateurEvaluationPointFuite: AdaptateurFeuilleExercices<Exercice
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };

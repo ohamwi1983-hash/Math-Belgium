@@ -1,4 +1,4 @@
-import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
+import type { FragmentConsigne, LigneCalcul } from "../../export/genererFeuilleExercices";
 import type { PlanSolide3D, Point3D, Solide3D } from "./geometrieEspace.types";
 import type { MilieuNomme } from "./positionsPlans.types";
 
@@ -99,6 +99,15 @@ export interface CorrigeFigureEspace {
   dessin: DessinPave | null;
 }
 
+/** Corrigé « comme au tableau » (`generateurs/detectiveEspace/corrigeDetaille.ts`) : rédigé au tirage,
+ * avec les mêmes données que la copie, SANS aléa (un code `?code=` rouvre le même exercice). */
+export interface TableauDetectiveEspace {
+  /** Contrôle de chaque ligne de la copie : les propriétés appliquées, une par ligne (∈, ⊂, ∥, ∩…). */
+  controles: LigneCalcul[][];
+  /** La ligne fausse refaite juste (et, s'il le faut, la suite reprise). */
+  correction: LigneCalcul[];
+}
+
 export interface ExerciceDetectiveEspace {
   theme: ThemeDetectiveEspace;
   type: TypeErreurEspace;
@@ -125,4 +134,5 @@ export interface ExerciceDetectiveEspace {
   aides: FragmentConsigne[][][];
   figure: FigureDetectiveEspace;
   corrige: CorrigeFigureEspace;
+  tableau: TableauDetectiveEspace;
 }

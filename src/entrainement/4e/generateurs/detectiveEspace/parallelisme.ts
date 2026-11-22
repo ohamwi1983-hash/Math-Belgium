@@ -1,4 +1,6 @@
-import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
+import type { FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
+import { ligne } from "../../../export/corrigeTableau";
+import { lignesRaison } from "../demontrerParallelisme/corrigeDetaille";
 import type { ExerciceDetectiveEspace, TypeErreurEspace } from "../../core/detectiveEspace.types";
 import type { OptionDemonstration, RaisonParallele } from "../../core/demontrerParallelisme.types";
 import type { NomSolide3D, PlanSolide3D, Point3D } from "../../core/geometrieEspace.types";
@@ -168,6 +170,25 @@ function construire(
     return n ? ` (en ${n.nom})` : "";
   };
 
+  // Corrigé « comme au tableau » (sans aléa) : chaque ligne de la copie contrôlée, propriété par propriété.
+  const nomInter = (a: [Point3D, Point3D], b: [Point3D, Point3D]) => {
+    const i = intersectionDroites(a[0], a[1], b[0], b[1]);
+    return i ? nommes.find((x) => Math.hypot(x.position.x - i.x, x.position.y - i.y, x.position.z - i.z) < 1e-6)?.nom ?? null : null;
+  };
+  const lignesSecantes = (La: string, Lb: string, a: [Point3D, Point3D], b: [Point3D, Point3D], fin: string): LigneCalcul[] => {
+    const x = nomInter(a, b);
+    return [
+      ligne(`${La}\\subset ${P}`, `deux points de ${La} dans le plan ${P}`),
+      ligne(`${Lb}\\subset ${P}`, `deux points de ${Lb} dans le plan ${P}`),
+      x ? ligne(`${La}\\cap ${Lb}=\\{${x}\\}`, `sécantes en ${x}${fin}`) : ligne(`${La}\\nparallel ${Lb}`, `même plan, non parallèles : sécantes${fin}`),
+    ];
+  };
+  const lignesTemoin = (r: RaisonParallele, fin: string): LigneCalcul[] => [...lignesRaison(r), ligne(`${libelle(r.droite2)}\\subset ${Q}`, `droite du plan ${Q}${fin}`)];
+  const ligneCritere = ligne(`${P}\\parallel ${Q}`, "critère plan ∥ plan : valable seulement si les lignes 1 à 3 sont justes");
+  const JUSTE = " ; la copie est juste";
+  let tabCtrl: LigneCalcul[][];
+  let tabCorr: LigneCalcul[];
+
   let lignes: string[];
   let controles: FragmentConsigne[][];
   let descriptions;
@@ -190,6 +211,13 @@ function construire(
       t(`Ligne 3 : ${sansPoint(texteRaison(rf))}, et ${Mf} est bien dans le plan ${Q}. C'est juste, mais ce parallélisme ne donne pas de nouvelle direction.`),
       controleL4,
     ];
+    tabCtrl = [
+      [ligne(`${L1}\\subset ${P}`, `deux points de ${L1} dans le plan ${P}`), ligne(`${Lf}\\subset ${P}`, `deux points de ${Lf} dans le plan ${P}`), ligne(`${L1}\\parallel ${Lf}`, "parallèles, pas sécantes : la copie est fausse")],
+      lignesTemoin(r1, JUSTE),
+      lignesTemoin(rf, " ; juste, mais même direction que la ligne 2"),
+      [ligneCritere],
+    ];
+    tabCorr = [...lignesSecantes(L1, L2, pos2(o1.l), pos2(o2.l), ""), ...lignesTemoin(r2, " (nouvelle ligne 3)")];
     descriptions = descriptionsVariees(t(`${L1} et ${Lf} sont parallèles : elles ne donnent qu'une direction du plan ${P}.`), [
       t(`${Lf} n'est pas une droite du plan ${P} : la ligne 1 ne peut pas l'utiliser.`),
       t(`${L1} et ${Lf} sont sécantes, mais leur point commun n'est pas un sommet.`),
@@ -225,6 +253,12 @@ function construire(
       t(`Ligne 3 : ${sansPoint(texteRaison(r2))}, et ${M2} est bien dans le plan ${Q}. C'est juste.`),
       controleL4,
     ];
+    tabCtrl = [
+      lignesSecantes(Lh, L2, pos2(hors!.l), pos2(o2.l), JUSTE),
+      [...lignesRaison(rh), ligne(`${ph}\\notin ${Q}`, `${Mh} n'est pas une droite du plan ${Q} : la copie est fausse`)],
+      lignesTemoin(r2, JUSTE),
+      [ligneCritere],
+    ];
     descriptions = descriptionsVariees(t(`${Mh} n'est pas une droite du plan ${Q} : ce parallélisme ne concerne pas ${Q}.`), [
       t(`${Lh} et ${Mh} ne sont pas parallèles : la raison citée est fausse.`),
       t(`La raison citée ne suffit pas à prouver que ${Lh} est parallèle à ${Mh}.`),
@@ -243,6 +277,7 @@ function construire(
     const rj = raison(choisir(justes.length > 0 ? justes : [o1]));
     questionCorrection = `Quelle droite du plan ${Q}, parallèle à ${Lh}, fallait-il utiliser à la ligne 2 ?`;
     ligneCorrigee = ligneParallele(texteRaison(rj), libelle(rj.droite2));
+    tabCorr = lignesTemoin(rj, "");
     corrections = propositions(t(libelle(bonne.noms)), leurres.slice(0, 3).map((l) => t(libelle(l.noms))));
     piege = "Chaque droite témoin doit appartenir au plan visé : une droite parallèle à (ℓ) mais située hors du plan (Q) ne dit rien de (Q). Vérifie que ses deux points sont dans (Q).";
     nomErreur = `droite témoin ${Mh} hors du plan ${Q}`;
@@ -270,6 +305,13 @@ function construire(
       t(`Ligne 3 : ${L2} ∥ ${M2} est vrai, mais la raison donnée ne le prouve pas. ${copie.defaut} La copie est fausse.`),
       controleL4,
     ];
+    tabCtrl = [
+      lignesSecantes(L1, L2, pos2(o1.l), pos2(o2.l), JUSTE),
+      lignesTemoin(r1, JUSTE),
+      [ligne(`${L2}\\parallel ${M2}`, "vrai, mais la raison citée ne le prouve pas : la copie est fausse")],
+      [ligneCritere],
+    ];
+    tabCorr = lignesTemoin(r2, "");
     descriptions = descriptionsVariees(t(copie.defaut), [
       t(`${M2} n'est pas une droite du plan ${Q} : ce parallélisme ne relie donc pas les deux plans.`),
       t(`${L1} et ${L2} ne sont pas sécantes : elles sont parallèles, la ligne 1 est donc fausse.`),
@@ -322,5 +364,6 @@ function construire(
     ],
     figure: { type: "solide", solide, points: listeMilieux, plans: [nomP, nomQ], dessins: null },
     corrige: { droites: corrigeDroites, plans: [nomP, nomQ], sections: true, points: [], dessin: null },
+    tableau: { controles: tabCtrl, correction: tabCorr },
   };
 }

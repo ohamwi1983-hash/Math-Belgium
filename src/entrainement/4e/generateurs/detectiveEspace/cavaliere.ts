@@ -1,5 +1,5 @@
-import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
+import type { FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
+import { latex, ligne, texte } from "../../../export/corrigeTableau";
 import type { DessinPave, ExerciceDetectiveEspace, OptionDetective, TypeErreurEspace } from "../../core/detectiveEspace.types";
 import { choisir, entier, melanger, descriptionsVariees, t } from "./commun";
 
@@ -73,6 +73,31 @@ export function genererCavaliere(type: TypeErreurEspace): ExerciceDetectiveEspac
       ? t("Ligne 4 : le sommet caché est D (arrière, en bas, à gauche) ; ses trois arêtes [AD], [CD] et [DH] sont en pointillés. C'est juste.")
       : t(`Ligne 4 : avec des fuyantes vers la droite et vers le haut, le sommet caché est D (arrière, en bas, à gauche), pas ${copie.cache} ; ce sont [AD], [CD] et [DH] qui vont en pointillés. La copie est fausse.`),
   ];
+
+  // Corrigé « comme au tableau » (aucun aléa) : chaque règle de la perspective cavalière, une par ligne.
+  const JUSTE = " ; la copie est juste";
+  const FAUX = " : la copie est fausse";
+  const FACES_SOMMET: Record<DessinPave["cache"], [string, string, string]> = { D: ["AD", "CD", "DH"], C: ["BC", "CD", "CG"], H: ["DH", "EH", "GH"], B: ["AB", "BC", "BF"] };
+  const FACES_ARETE: Record<string, [string, string]> = {
+    AD: ["ABCD", "ADHE"], CD: ["ABCD", "DCGH"], DH: ["ADHE", "DCGH"], BC: ["ABCD", "BCGF"], CG: ["BCGF", "DCGH"], EH: ["ADHE", "EFGH"], GH: ["DCGH", "EFGH"], AB: ["ABCD", "ABFE"], BF: ["ABFE", "BCGF"],
+  };
+  const VUES = new Set(["ABFE", "EFGH", "BCGF"]);
+  const lignesAngle = (fin: string): LigneCalcul[] => [ligne("\\text{angle des fuyantes}=45^\\circ", `convention du cours, vers la droite et vers le haut${fin}`)];
+  const lignesReduction = (fin: string): LigneCalcul[] => [ligne(`\\text{fuyante dessinée}=${profondeur}\\times 0{,}5`, "profondeur réelle réduite de moitié"), ligne(`=${nombreLatex(q)}\\text{ cm}`, fin.trim() ? fin.replace(/^ ; /, "") : undefined)];
+  const lignesCachees = (sommet: DessinPave["cache"], fin: string): LigneCalcul[] =>
+    FACES_SOMMET[sommet].map((a, k) => {
+      const [f1, f2] = FACES_ARETE[a]!;
+      const vue = [f1, f2].find((f) => VUES.has(f));
+      const j = vue ? `la face ${vue} est vue : arête vue` : "deux faces cachées : arête cachée";
+      return ligne(`[${a}]=${f1}\\cap ${f2}`, k === 2 ? `${j}${fin}` : j);
+    });
+  const tabCtrl: LigneCalcul[][] = [
+    [ligne(`AB=${largeur}\\text{ cm}`, "face avant en vraie grandeur"), ligne(`AE=${hauteur}\\text{ cm}`, `face avant en vraie grandeur${JUSTE}`)],
+    copie.angle === 45 ? lignesAngle(JUSTE) : [...lignesAngle(""), ligne(`${copie.angle}^\\circ\\neq 45^\\circ`, `angle des fuyantes du dessin${FAUX}`)],
+    copie.coefficient === 0.5 ? lignesReduction(JUSTE) : [...lignesReduction(""), ligne(`${nombreLatex(profondeur)}\\text{ cm}\\neq ${nombreLatex(q)}\\text{ cm}`, `fuyantes du dessin non réduites${FAUX}`)],
+    copie.cache === "D" ? lignesCachees("D", JUSTE) : lignesCachees(copie.cache, ` ; ${copie.cache} n'est pas caché, la copie est fausse`),
+  ];
+  const tabCorr: LigneCalcul[] = typeC === "angle" ? lignesAngle("") : typeC === "reduction" ? lignesReduction("") : lignesCachees("D", " : D est le sommet caché");
 
   let descriptions: OptionDetective[];
   let ligneCorrigee: FragmentConsigne[];
@@ -158,5 +183,6 @@ export function genererCavaliere(type: TypeErreurEspace): ExerciceDetectiveEspac
     ],
     figure: { type: "cavaliere", dessin: copie },
     corrige: { droites: [], plans: [], sections: false, points: [], dessin: juste },
+    tableau: { controles: tabCtrl, correction: tabCorr },
   };
 }

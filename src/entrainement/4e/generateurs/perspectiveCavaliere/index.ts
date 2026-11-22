@@ -72,7 +72,7 @@ function centroide(points: Point3D[]): Point3D {
 }
 
 /** Face vue par l'observateur (normale extérieure, orientée par le centre du solide). */
-function faceVue(sommets: Record<string, Point3D>, face: string[]): boolean {
+export function faceVue(sommets: Record<string, Point3D>, face: string[]): boolean {
   const [p0, p1, p2] = face.map((n) => sommets[n]!) as [Point3D, Point3D, Point3D];
   let normale = produitVectoriel3D(soustraire3D(p1, p0), soustraire3D(p2, p0));
   const versExterieur = soustraire3D(centroide(face.map((n) => sommets[n]!)), centroide(Object.values(sommets)));

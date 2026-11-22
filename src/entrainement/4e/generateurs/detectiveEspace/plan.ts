@@ -1,4 +1,5 @@
-import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
+import type { FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
+import { ligne as lc } from "../../../export/corrigeTableau";
 import type { DessinLigne, ExerciceDetectiveEspace, TypeErreurEspace } from "../../core/detectiveEspace.types";
 import type { NomSolide3D, Point3D, Solide3D } from "../../core/geometrieEspace.types";
 import type { MilieuNomme } from "../../core/positionsPlans.types";
@@ -235,6 +236,36 @@ function construire(type: keyof typeof GENRE_DU_TYPE, ligneFausse: number, solid
     return t(`Ligne ${i + 1} : ${phrase}${fin}`);
   });
 
+  /** Corrigé « comme au tableau » (sans aléa) : la condition du cours testée sur la figure. */
+  const lignesPreuve = (x: ItemPlan): LigneCalcul[] => {
+    const m = x.points.map(nomDe);
+    if (x.genre === "troisPoints") {
+      return x.determine
+        ? [lc(`${m[2]}\\notin ${dr(m[0]!, m[1]!)}`, "trois points non alignés : un seul plan")]
+        : [lc(`${m[2]}\\in ${dr(m[0]!, m[1]!)}`, "trois points alignés : une infinité de plans les contiennent")];
+    }
+    if (x.genre === "droitePoint") {
+      return x.determine
+        ? [lc(`${m[2]}\\notin ${dr(m[0]!, m[1]!)}`, "point extérieur à la droite : un seul plan")]
+        : [lc(`${m[2]}\\in ${dr(m[0]!, m[1]!)}`, "point de la droite : une infinité de plans")];
+    }
+    const [d1, d2] = [dr(m[0]!, m[1]!), dr(m[2]!, m[3]!)];
+    if (!x.determine) {
+      const q = pl(nomListe(temoinGauches(m)));
+      return [lc(`${d1}\\subset ${q}`, `deux points de ${d1} dans le plan ${q}`), lc(`${m[2]}\\in ${q}`, "un point de l'autre droite y est"), lc(`${m[3]}\\notin ${q}`, "pas l'autre : droites gauches, aucun plan commun")];
+    }
+    const plan = pl(m.slice(0, 3));
+    return [
+      lc(`${m[3]}\\in ${plan}`, `les deux droites sont dans le plan ${plan}`),
+      x.paire!.position === "secantes" ? lc(`${d1}\\nparallel ${d2}`, "sécantes : un seul plan") : lc(`${d1}\\parallel ${d2}`, "parallèles distinctes : un seul plan"),
+    ];
+  };
+  const tableauControles = items.map((x, i) => {
+    const l = lignesPreuve(x);
+    const der = l[l.length - 1]!;
+    return [...l.slice(0, -1), { ...der, justification: `${der.justification}${i === ligneFausse ? " ; la copie dit « un seul plan » : faux" : " ; la copie est juste"}` }];
+  });
+
   const it = items[ligneFausse]!;
   const n = it.points.map(nomDe);
   const ligne = ligneFausse + 1;
@@ -349,5 +380,6 @@ function construire(type: keyof typeof GENRE_DU_TYPE, ligneFausse: number, solid
     ],
     figure: { type: "solide", solide, points: definis, plans: [], dessins },
     corrige: { droites: dessinCorrige, plans: planCorrige ? [planCorrige as [string, string, string]] : [], sections: false, points: [], dessin: null },
+    tableau: { controles: tableauControles, correction: lignesPreuve(it) },
   };
 }

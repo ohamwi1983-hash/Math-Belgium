@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
-import { texte } from "../../../export/fragmentsDocx";
+import { texte } from "../../../export/corrigeTableau";
 import type { OptionDetective } from "../../core/detectiveEspace.types";
 import type { Point3D, Solide3D } from "../../core/geometrieEspace.types";
 import { normalePlan, normeCarree3D, EPSILON_3D, pointAppartientAuPlan, points3Colineaires } from "../solide3D/geometrieEspace";

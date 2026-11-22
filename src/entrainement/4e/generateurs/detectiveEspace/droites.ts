@@ -1,4 +1,5 @@
-import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
+import type { FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
+import { ligne } from "../../../export/corrigeTableau";
 import type { ExerciceDetectiveEspace, TypeErreurEspace } from "../../core/detectiveEspace.types";
 import type { PositionDeuxDroites } from "../../core/deuxDroitesPlan.types";
 import type { Point3D, Solide3D } from "../../core/geometrieEspace.types";
@@ -195,6 +196,31 @@ function construire(type: keyof typeof AFFICHE, ligneFausse: number, solide: Sol
   };
 
   const preuves = items.map(preuve);
+
+  /** Corrigé « comme au tableau » (sans aléa) : la preuve de la position, une propriété par ligne. */
+  const lignesPreuve = (it: Item, pr: Preuve): LigneCalcul[] => {
+    const { P, Q, R, S, d1, d2 } = texteDroites(it);
+    const plan = nomPlan(pr.plan);
+    if (pr.temoin) {
+      const { dc, r, s: s2 } = pr.temoin;
+      return [ligne(`${dc}\\subset ${plan}`, `deux points de ${dc} dans le plan ${plan}`), ligne(`${r}\\in ${plan}`, "un point de l'autre droite y est"), ligne(`${s2}\\notin ${plan}`, "pas l'autre : aucun plan ne contient les deux droites, elles sont gauches")];
+    }
+    const quatre = [...new Set([P, Q, R, S])];
+    const lignes = [ligne(`${quatre.join(",\\,")}\\in ${plan}`, `les deux droites sont dans le plan ${plan}`)];
+    if (it.paire.position === "paralleles") lignes.push(ligne(`${d1}\\parallel ${d2}`, "même plan, aucun point commun : parallèles"));
+    else {
+      const inter = it.paire.lieu?.type === "nomme" && it.paire.inter ? nommes.find((n) => Math.hypot(n.position.x - it.paire.inter!.x, n.position.y - it.paire.inter!.y, n.position.z - it.paire.inter!.z) < 1e-6) : undefined;
+      lignes.push(inter ? ligne(`${d1}\\cap ${d2}=\\{${inter.nom}\\}`, `même plan, sécantes en ${inter.nom}`) : ligne(`${d1}\\nparallel ${d2}`, "même plan, non parallèles : sécantes"));
+    }
+    return lignes;
+  };
+  const avecVerdict = (lignes: LigneCalcul[], i: number): LigneCalcul[] => {
+    const der = lignes[lignes.length - 1]!;
+    const verdict = i === ligneFausse ? ` ; la copie dit « ${MOTS[mots[i]!]} » : faux` : " ; la copie est juste";
+    return [...lignes.slice(0, -1), { ...der, justification: `${der.justification}${verdict}` }];
+  };
+  const tableauControles = items.map((it, i) => avecVerdict(lignesPreuve(it, preuves[i]!), i));
+  const tableauCorrection = lignesPreuve(items[ligneFausse]!, preuves[ligneFausse]!);
   const controles: FragmentConsigne[][] = items.map((_, i) => {
     const juste = i !== ligneFausse;
     return t(`Ligne ${i + 1} : ${preuves[i]!.phrase} ${juste ? "C'est juste." : `La copie dit « ${MOTS[mots[i]!]} » : c'est faux.`}`);
@@ -323,5 +349,6 @@ function construire(type: keyof typeof AFFICHE, ligneFausse: number, solide: Sol
       points: [],
       dessin: null,
     },
+    tableau: { controles: tableauControles, correction: tableauCorrection },
   };
 }

@@ -26,6 +26,9 @@ import { ConstructionPointFuite, type TraceFuite } from "./components/Constructi
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { ValidationEcran, type ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleePointFuite } from "./generateurs/pointFuite/corrigeDetaille";
 
 /**
  * gen105 — « Perspective centrale : point de fuite » (4e, chapitre 8 « Géométrie dans l'espace »,
@@ -153,6 +156,8 @@ export function AppPointDeFuite() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: etape ? "Tentatives épuisées — la construction attendue est dessinée sur la figure." : "Ce n'était pas l'affirmation vraie (une seule tentative sur un choix fermé).",
+        // Corrigé détaillé de l'étape (même source que le papier) ; la construction est déjà sur la figure.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePointFuite(e), lettreEtape(ecran)).map((x) => ({ ...x, figureHtml: undefined }))} />,
       }
     : null;
 

@@ -3,6 +3,7 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
   EtapeCorrection,
@@ -10,20 +11,18 @@ import type {
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { texte } from "../../../export/fragmentsDocx";
-import type { ExerciceDemontrerParallelisme, ExerciceDeuxPlansParalleles, ExerciceDroitePlanParallele } from "../../core/demontrerParallelisme.types";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeDemontrerParallelisme } from "./corrigeDetaille";
+import type { ExerciceDemontrerParallelisme } from "../../core/demontrerParallelisme.types";
 import { figurePositionsPlansSvg } from "../../ui/figurePositionsPlans";
 import {
-  conclusionCritere,
-  conclusionJustification,
   consigneGlobale,
   elementsFigure,
   enonce,
-  legendeFigure,
   libelle,
   libelleCandidat,
   nomP,
   phraseSecantes,
-  raisonDansPlan,
 } from "../../ui/formatDemontrerParallelisme";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDemontrerParallelisme, texteRaison } from "./index";
 import { profilDemontrerParallelisme } from "./profil";
@@ -47,10 +46,6 @@ function echapper(t: string): string {
 
 function enteteHtml(e: ExerciceDemontrerParallelisme): string {
   return `<p class="paragraphe">${echapper(enonce(e))}</p>${figurePositionsPlansSvg(e, { mode: "papier", ...elementsFigure(e, null, false) })}`;
-}
-
-function temoinsAttendus(e: ExerciceDemontrerParallelisme): number | [number, number] {
-  return e.variante === "droite-plan" ? e.temoin : e.paireAttendue;
 }
 
 /** Consignes des étapes (titres « Étape n — … » du corrigé), rédigées pour le papier. */
@@ -97,67 +92,8 @@ function reponseBreve(e: ExerciceDemontrerParallelisme): FragmentConsigne[] {
   ];
 }
 
-function figureFinale(e: ExerciceDemontrerParallelisme): string {
-  return figurePositionsPlansSvg(e, { mode: "papier", ...elementsFigure(e, temoinsAttendus(e), true) });
-}
-
-function correctionDroitePlan(e: ExerciceDroitePlanParallele): EtapeCorrection[] {
-  const W = e.raison.droite2;
-  const hors = e.candidats.find((_, i) => e.defautsCandidats[i]?.includes("bien parallèle"));
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte(conclusionCritere(e))] },
-    { label: "Droite témoin", sousQuestion: "b", fragments: [texte(`${libelle(W)} est une droite du plan ${nomP(e)} : ${raisonDansPlan(e, W, 0)}.`)] },
-    { label: "Justification", sousQuestion: "c", fragments: [texte(texteRaison(e.raison))] },
-    {
-      label: "Conclusion",
-      sousQuestion: "c",
-      fragments: [texte(`${conclusionJustification(e, 1)} ${legendeFigure(e, e.temoin, true)}`)],
-      figureHtml: figureFinale(e),
-    },
-    {
-      label: "Piège",
-      sousQuestion: "b",
-      fragments: [
-        texte(
-          hors
-            ? `${libelle(hors)} est aussi parallèle à ${libelle(e.droite)}, mais elle n'est pas dans le plan ${nomP(e)} : elle ne prouve rien. La droite témoin doit être une droite DU plan.`
-            : `La droite témoin doit être une droite DU plan et être parallèle à ${libelle(e.droite)} : une droite du plan qui la croise seulement sur le dessin ne convient pas.`,
-        ),
-      ],
-    },
-  ];
-}
-
-function correctionDeuxPlans(e: ExerciceDeuxPlansParalleles): EtapeCorrection[] {
-  const [a, b] = e.paireAttendue;
-  const ca = e.candidats[a]!;
-  const cb = e.candidats[b]!;
-  const dansQ = `${libelle(ca.droite)} et ${libelle(cb.droite)} sont des droites du plan ${nomP(e, 1)}`;
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte(conclusionCritere(e))] },
-    {
-      label: "Droites témoins",
-      sousQuestion: "b",
-      fragments: [texte(`${libelleCandidat(ca)} et ${libelleCandidat(cb)} ; ${phraseSecantes(e, a, b)}, et ${dansQ}.`)],
-    },
-    { label: "Justification", sousQuestion: "c", fragments: [texte(texteRaison(ca.raison!))] },
-    { label: "Justification", sousQuestion: "d", fragments: [texte(texteRaison(cb.raison!))] },
-    {
-      label: "Conclusion",
-      sousQuestion: "d",
-      fragments: [texte(`${conclusionJustification(e, 2)} ${legendeFigure(e, e.paireAttendue, true)}`)],
-      figureHtml: figureFinale(e),
-    },
-    {
-      label: "Piège",
-      sousQuestion: "b",
-      fragments: [texte(`Une seule droite, ou deux droites parallèles entre elles, ne suffisent pas : il faut deux droites SÉCANTES du plan ${nomP(e, 0)}, chacune parallèle à une droite du plan ${nomP(e, 1)}.`)],
-    },
-  ];
-}
-
 function correctionDetaillee(e: ExerciceDemontrerParallelisme): EtapeCorrection[] {
-  return e.variante === "droite-plan" ? correctionDroitePlan(e) : correctionDeuxPlans(e);
+  return correctionDetailleeDemontrerParallelisme(e);
 }
 
 function construireCorrection(e: ExerciceDemontrerParallelisme): BlocCorrection[] {
@@ -199,8 +135,12 @@ function bareme(e: ExerciceDemontrerParallelisme): BaremeExercice {
   };
 }
 
-function difficulte(e: ExerciceDemontrerParallelisme): 1 | 2 | 3 {
-  return e.variante === "droite-plan" ? 2 : 3;
+/** Niveau (grille commune) : une étape par écran (critère, témoin(s), justification(s)) ; méthode 1
+ * (l'énoncé papier dit QUOI démontrer, l'élève choisit le critère et la figure plane) ; aucun piège
+ * dans les données. Constant dans chaque variante : 3 étapes (droite ∥ plan, 8 min) ou 4 (deux plans,
+ * 10 min). */
+function criteresDifficulte(e: ExerciceDemontrerParallelisme): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: 0 };
 }
 
 export const adaptateurEvaluationDemontrerParallelisme: AdaptateurFeuilleExercices<ExerciceDemontrerParallelisme> = {
@@ -212,10 +152,9 @@ export const adaptateurEvaluationDemontrerParallelisme: AdaptateurFeuilleExercic
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 7,
 };

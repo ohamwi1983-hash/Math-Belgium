@@ -3,6 +3,7 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
   EtapeCorrection,
@@ -10,19 +11,16 @@ import type {
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleePerspectiveCavaliere } from "./corrigeDetaille";
 import type { ExercicePerspectiveCavaliere } from "../../core/perspectiveCavaliere.types";
-import { origineMesure } from "../../moteur/verificationPerspectiveCavaliere";
 import {
   aretesCacheesTexte,
   consigneEtapePapier,
   consigneGlobale,
   enonce,
-  figurePapierCorrige,
   figurePapierEnonce,
-  longueurFuyante,
   nombre,
-  raisonAretes,
-  segment,
 } from "../../ui/formatCavaliere";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExercicePerspectiveCavaliere } from "./index";
 import { profilPerspectiveCavaliere } from "./profil";
@@ -64,55 +62,13 @@ function enoncePapier(e: ExercicePerspectiveCavaliere): EnoncePapier {
   };
 }
 
-function decalage(e: ExercicePerspectiveCavaliere): string {
-  return (Math.round(e.fuyante.x * 100) / 100).toString().replace(".", ",");
-}
-
 function reponseBreve(e: ExercicePerspectiveCavaliere): FragmentConsigne[] {
   const hauteur = e.variante === "pyramide" ? ` ; S à la verticale du centre de la base, OS = ${nombre(e.hauteur)} cm` : "";
   return [texte(`Fuyantes à 45°, de ${nombre(e.profondeur / 2)} cm sur le dessin${hauteur} ; arêtes cachées en pointillés : ${aretesCacheesTexte(e)}.`)];
 }
 
-function etapeAutresSommets(e: ExercicePerspectiveCavaliere): string {
-  const o = origineMesure(e, e.premier).nom;
-  if (e.variante === "pyramide") {
-    const c = e.completes[0]!;
-    return `${c} se place de la même façon, au bout de la fuyante issue de ${origineMesure(e, c).nom}. La perspective cavalière conserve les milieux : le centre O de la base est le point de rencontre des diagonales [AC] et [BD] du parallélogramme ABCD dessiné. La hauteur est verticale, donc en vraie grandeur : S est à la verticale de O, avec OS = ${nombre(e.hauteur)} cm.`;
-  }
-  const suivants = e.suivants.map((n) => `${n} au bout de la fuyante issue de ${origineMesure(e, n).nom}`).join(", ");
-  return `Toutes les fuyantes sont parallèles et ont la même longueur sur le dessin que ${segment(o, e.premier)} : on place ${suivants}. La face arrière, reliée par ces fuyantes, est superposable à la face avant.`;
-}
-
 function correctionDetaillee(e: ExercicePerspectiveCavaliere): EtapeCorrection[] {
-  const o = origineMesure(e, e.premier).nom;
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [texte("En perspective cavalière, la face avant reste en vraie grandeur. Une arête en profondeur (fuyante) se dessine à 45° de l'horizontale, vers la droite et vers le haut, et réduite de moitié.")],
-    },
-    {
-      label: "Calcul",
-      sousQuestion: "a",
-      fragments: [
-        texte(
-          `Profondeur réelle : ${nombre(e.profondeur)} cm, donc sur le dessin ${segment(o, e.premier)} mesure ${longueurFuyante(e)}. On la trace à l'équerre (45°) et on mesure cette longueur à la règle, le long de la fuyante : ${e.premier} ne tombe pas sur un nœud du quadrillage (environ ${decalage(e)} cm vers la droite et ${decalage(e)} cm vers le haut depuis ${o}).`,
-        ),
-      ],
-    },
-    { label: e.variante === "pyramide" ? "Sommet S" : "Construction", sousQuestion: "b", fragments: [texte(etapeAutresSommets(e))] },
-    {
-      label: "Conclusion",
-      sousQuestion: "c",
-      fragments: [texte(`Une arête est cachée quand toutes les faces qui la bordent sont cachées. ${raisonAretes(e)}`)],
-      figureHtml: figurePapierCorrige(e),
-    },
-    {
-      label: "Piège",
-      sousQuestion: "c",
-      fragments: [texte("Compter « un carreau en diagonale » par centimètre ne réduit pas de moitié (la diagonale d'un carreau mesure environ 1,4 cm) ; une fuyante non réduite étire le solide vers l'arrière ; une arête cachée se trace en pointillés, jamais en trait plein.")],
-    },
-  ];
+  return correctionDetailleePerspectiveCavaliere(e);
 }
 
 function construireCorrection(e: ExercicePerspectiveCavaliere): BlocCorrection[] {
@@ -141,8 +97,15 @@ function bareme(e: ExercicePerspectiveCavaliere): BaremeExercice {
   };
 }
 
-function difficulte(e: ExercicePerspectiveCavaliere): 1 | 2 | 3 {
-  return e.variante === "pyramide" ? 3 : 2;
+/** Niveau (grille commune) : a) première fuyante (calcul de la longueur dessinée) et c) arêtes
+ * cachées (décision) transforment ; b) répète la même construction pour le pavé et le prisme (écran
+ * de lecture), construit O et S pour la pyramide. Méthode 0 (convention imposée par la consigne) ;
+ * piège 1 pour le prisme et la pyramide (face de gauche vue ou non : une ou trois arêtes cachées), le
+ * même dans les deux cas ; nombres 0 (la longueur se mesure exactement, le décalage ≈ n'est qu'un
+ * contrôle). Constant dans chaque variante. */
+function criteresDifficulte(e: ExercicePerspectiveCavaliere): CriteresDifficulte {
+  const lecture = e.variante === "pyramide" ? [] : ["b"];
+  return { ...etapesDuCorrige(correctionDetaillee(e), lecture), methode: 0, piege: e.variante === "pave" ? 0 : 1, nombres: 0 };
 }
 
 export const adaptateurEvaluationPerspectiveCavaliere: AdaptateurFeuilleExercices<ExercicePerspectiveCavaliere> = {
@@ -154,10 +117,9 @@ export const adaptateurEvaluationPerspectiveCavaliere: AdaptateurFeuilleExercice
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
   correctionDetaillee,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };

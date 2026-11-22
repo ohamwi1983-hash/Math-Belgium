@@ -27,6 +27,9 @@ import { EtapeAretes, EtapePlacement } from "./components/EtapesPerspectiveCaval
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleePerspectiveCavaliere } from "./generateurs/perspectiveCavaliere/corrigeDetaille";
 
 /**
  * gen104 — « Dessiner en perspective cavalière » (4e, chapitre 8 « Géométrie dans l'espace », section
@@ -160,6 +163,8 @@ export function AppPerspectiveCavaliere() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: ecran === 2 ? "Ce n'était pas le bon classement des arêtes." : undefined,
+        // Corrigé détaillé de l'étape (même source que le papier) ; le dessin corrigé est déjà à l'écran.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePerspectiveCavaliere(e), lettreEtape(ecran)).map((x) => ({ ...x, figureHtml: undefined }))} />,
       }
     : null;
 

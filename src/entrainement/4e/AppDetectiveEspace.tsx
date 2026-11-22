@@ -14,6 +14,9 @@ import { EtapeChoixDessin, FigureDetectiveEspace } from "./components/EtapesDete
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeDetectiveEspace } from "./generateurs/detectiveEspace/corrigeDetaille";
 
 /**
  * gen107 — « Détective d'erreurs : géométrie dans l'espace » (4e, chapitre 8, section « revision »,
@@ -123,6 +126,8 @@ export function AppDetectiveEspace() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
+        // Corrigé détaillé de l'étape (même source que le papier), figure corrigée comprise.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveEspace(e), lettreEtape(ecran))} />,
       }
     : null;
 
