@@ -2255,6 +2255,45 @@ verdicts variés d'une série à l'autre. Documents réels (2 plans : groupés i
 variante autorisée en deux colonnes ; évaluation 2 séries + aménagée + corrigé + grille + feuille +
 aménagée + Word copie / corrigé / grille) : 0 `.katex-error`, 0 débordement à 680, 820 et 1 280 px.
 Page du chapitre 390 / 1 280 px : 0 « $ » ni « ** » visible, 0 erreur.
+
+## 4e ch. 7, lot H — gen131–gen132 (nouveaux, notés)
+
+Coquille `4e/components/AppTransfertSecondDegre.tsx` réutilisée telle quelle (aucun ajout). Corrigés
+`4e/generateurs/{traduireLieu,lireDroite}/corrigeDetaille.ts`, une lettre par écran, partagés appli / papier.
+Jamais « déterminant » (« critère de colinéarité »), aucun radian.
+- **gen131** « Traduire un lieu géométrique en équation » (§ 7, processus 2) : `mediatrice` (a) traduction
+  MA = MB → MA² = MB², choix fermé parmi quatre équations — sans carré, coordonnées mélangées, signes —,
+  b) équation de la droite (`champDroite` du lot G : toute forme), c) nature (médiatrice / (AB) / cercle de
+  diamètre / perpendiculaire en A) ; `distance-droite` (nature, puis pour une droite de vecteur normal 3-4-5 :
+  B = A ± (r/5)·n — `champPoints`, r = 10 ou 15 —, puis les DEUX équations dans un champ « éq ; éq »
+  (`champDeuxDroites` : « ; », « et », « ou » ; une seule droite juste = piège « il en manque une »,
+  terme constant décalé de r = piège) ; droite horizontale / verticale = cas particulier `parallele-axe`, deux
+  écrans, |y − k| = r) ; `deux-paralleles` (nature, parallèle médiane ; d₂ écrite multipliée par k ∈ {2, −1, 3}
+  une fois sur deux : piège « moyenne sans ramener ») ; `parabole` (nature, S et p signé, équation du cours ;
+  la traduction directe MF² = dist² développée est acceptée) ; `cercle` (nature, équation). Énoncé papier =
+  « On considère le lieu des points M(x ; y) <description>. » + « Reconnais ce lieu et détermine son
+  équation (ou ses équations). » ; regroupement a), b) (`REGROUPEMENTS.gen131`, ligne = « Points … », une
+  consigne pour toutes les variantes, 300 / 300 reconnus par variante). Profil : `forme` = variante
+  (+ `memes` / `multipliee`, + axe et signe de p pour la parabole) ; cas particulier `parallele-axe`. Niveaux :
+  cercle 1 (6 min), distance axe 1 (6), parallèles 1 / 2 (6), médiatrice 3 (8), distance oblique 3 (8), parabole
+  3 / 4 (8, piège p < 0). Figure du lieu sous le dernier résultat (repère d'au plus ≈ 300 px).
+- **gen132** « Lire une droite : associer droites et équations » (§ 1–3, processus 1) : a)–d) quatre droites
+  (base, pente opposée, p opposé, composantes échangées ; variante `axe` : base, un leurre, y = p et x = p),
+  quatre formes (implicite, explicite en y, explicite en x, paramétrique), jamais une forme impossible,
+  choix fermé à une tentative avec explication (« L'équation B est celle de … ») ; e) m et p lus en escalier
+  (pièges −m, Δx/Δy, p opposé, abscisse à l'origine) ; f) écriture impossible pour g verticale / horizontale
+  (pile ou face, verdict hors `forme`). Énoncé papier = quatre équations, six figures, TROIS vraies questions
+  (`etapesParQuestion` [[a–d], [e], [f]]) ; jamais regroupé. Lectures a–f, piège 1 → niveau 2, 8 min constants.
+
+Mesures (outils du dossier de travail `gen-4e7-H` : `moteur.ts`, `coll/`, `parcours.cjs`, `equilibre.cjs`,
+`docsH.cjs`, `deborde3.cjs`, `reg.ts`, `figs.cjs`, `page.cjs`) : moteurs 2 000 tirages par variante
+(réponses recalculées géométriquement, 113 937 saisies — juste autrement écrite, « − », illisible, sans « = »,
+pièges, faux) 0 anomalie ; `?code=` 100 / 100 ; collecteur 2 500 tirages, ≈ 28 500 égalités, 0 fausse,
+0 KaTeX invalide ; iPhone 13 (chaque variante, 2 graines) scrollWidth 390, 0 erreur console ; plans réels
+24 × 3 séries : même structure 24 / 24, énoncés tous différents ; documents (2 plans) 0 `.katex-error`,
+0 débordement à 680 / 820 / 1 280 px sauf la ligne « codes a) … j) » d'une grille à 10 lignes d'un même groupe
+(limite commune, voir rapport).
+
 ## Page de conception — proposition A (décision de l'utilisateur, 21/11/2026)
 
 `EvaluationGeneratorPanel.tsx` (feuille d'exercices, évaluation, examen ; maquettes `Main`,

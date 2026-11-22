@@ -2404,6 +2404,11 @@ paths:
   `versionPapier`, `evaluationPayload.ts`, processus 3 / 3 / 2 / 3), regroupement gen96 / gen98. Détail :
   `.claude/rules/feuilles-evaluations.md`, « 4e ch. 7, lot G — gen96–gen99 ».
 
+  - Lot H (22/11/2026) : § 7 — sous-titre « Traduire les autres lieux en équation », méthode (distance r d'une
+    droite par un point et le vecteur normal ramené à la norme r, parallèle médiane par c moyen après avoir
+    ramené les coefficients, parabole et cercle comme lieux), exemple « à une distance donnée d'une droite »
+    (d ≡ 3x + 4y − 12 = 0, r = 10 → 3x + 4y − 62 = 0 et 3x + 4y + 38 = 0 ; énoncé par clé dans
+    `ENONCES_DEMONSTRATION`), piège « décaler le terme constant de r », carte gen131. § 2 : carte gen132 après gen44.
 - **4e, Chapitre 8 — Géométrie dans l'espace** (`geometrie-dans-espace`) : audit puis enrichissement
   validé par l'utilisateur (toutes les recommandations). Corrections : « la perspective centrale ne
   conserve jamais le parallélisme » (4 passages : § 1, § 11, formulaire, récap) → seules les fuyantes
