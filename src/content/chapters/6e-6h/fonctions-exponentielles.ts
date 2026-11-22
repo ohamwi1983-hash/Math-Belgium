@@ -3052,18 +3052,18 @@ export const fonctionsExponentielles: ChapterContent = {
 
   recap: {
     table: {
-      headers: ['Base', 'limite en −∞', 'limite en +∞', 'Dérivée'],
+      headers: ['Base', 'limite en $-\\infty$', 'limite en $+\\infty$', 'Dérivée'],
       rows: [
-        ['a > 1', '0', '+∞', 'ln(a)·aˣ'],
-        ['0 < a < 1', '+∞', '0', 'ln(a)·aˣ'],
-        ['a = e', '0', '+∞', 'eˣ (dérivée = fonction)'],
+        ['$a > 1$', '$0$', '$+\\infty$', '$\\ln(a)\\cdot a^x$'],
+        ['$0 < a < 1$', '$+\\infty$', '$0$', '$\\ln(a)\\cdot a^x$'],
+        ['$a = e$', '$0$', '$+\\infty$', '$e^x$ (dérivée = fonction)'],
       ],
     },
     forward:
-      "À retenir : l'exponentielle domine toujours tout polynôme en +∞. Côté " +
-      'équations/inéquations, tu raisonnes par identification de bases ou par substitution — ' +
-      "jamais par logarithme, pas encore à ce stade. Le seul usage de ln dans ce chapitre est " +
-      "la touche de la calculatrice, pour trouver un instant précis dans un problème (section 7).",
+      'À retenir : l\'exponentielle domine toujours tout polynôme en $+\\infty$. Côté ' +
+      'équations/inéquations, tu raisonnes par identification de bases ou par substitution — jamais ' +
+      'par logarithme, pas encore à ce stade. Le seul usage de $\\ln$ dans ce chapitre est la touche ' +
+      'de la calculatrice, pour trouver un instant précis dans un problème (section 7).',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai/faux : réviser tout le chapitre',

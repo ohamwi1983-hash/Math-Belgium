@@ -2545,31 +2545,33 @@ export const primitivesIntegrales: ChapterContent = {
     table: {
       headers: ['Notion', 'Formule / méthode'],
       rows: [
-        ['Primitive générale', 'F(x) + C, C ∈ ℝ'],
-        ['Condition initiale', 'résoudre F(x₀) + C = y₀ en C'],
-        ['Théorème fondamental', '∫ₐᵇf(x)dx = F(b)−F(a)'],
-        ['Valeur moyenne', '(1/(b−a))∫ₐᵇf(x)dx'],
+        ['Primitive générale', '$F(x) + C$, $C \\in \\mathbb{R}$'],
+        ['Condition initiale', 'résoudre $F(x_0) + C = y_0$ en $C$'],
+        ['Théorème fondamental', '$\\int_a^b f(x)\\,dx = F(b)-F(a)$'],
+        ['Valeur moyenne', '$\\dfrac{1}{b-a}\\int_a^b f(x)\\,dx$'],
         ['Aire (une courbe)', 'découper aux racines, sommer les valeurs absolues'],
-        ['Aire (deux courbes)', '∫ₐᵇ(f(x)−g(x))dx, f ≥ g'],
-        ['Volume — disques', 'π∫ₐᵇ[f(x)]²dx'],
-        ['Volume — rondelles', 'π∫ₐᵇ([f(x)]²−[g(x)]²)dx'],
-        ['Longueur d\'arc', '∫ₐᵇ√(1+[f\'(x)]²)dx'],
-        ['Cinématique', 'a → v → x, une constante distincte à chaque étape'],
-        ['Déplacement / distance', '∫v(t)dt / ∫|v(t)|dt'],
+        ['Aire (deux courbes)', '$\\int_a^b \\big(f(x)-g(x)\\big)\\,dx$, $f \\geq g$'],
+        ['Volume — disques', '$\\pi\\int_a^b [f(x)]^2\\,dx$'],
+        ['Volume — rondelles', '$\\pi\\int_a^b \\big([f(x)]^2-[g(x)]^2\\big)\\,dx$'],
+        ['Longueur d\'arc', '$\\int_a^b \\sqrt{1+[f\'(x)]^2}\\,dx$'],
+        ['Cinématique', '$a \\to v \\to x$, une constante distincte à chaque étape'],
+        ['Déplacement / distance', '$\\int v(t)\\,dt$ / $\\int |v(t)|\\,dt$'],
       ],
     },
     checklist: {
       label: 'Astuce — avant de rendre ta copie',
       items: [
-        'Ai-je écrit + C pour une primitive générale, et vérifié ma primitive en la dérivant ?',
-        'Pour f(ax + b), ai-je divisé par a ? Pour une substitution dans une intégrale définie, ai-je changé les bornes ?',
+        'Ai-je écrit $+\\,C$ pour une primitive générale, et vérifié ma primitive en la dérivant ?',
+        'Pour $f(ax + b)$, ai-je divisé par $a$ ? Pour une substitution dans une intégrale définie, ' +
+          'ai-je changé les bornes ?',
         'Pour une aire, ai-je découpé aux racines (ou aux intersections) et sommé des valeurs absolues ?',
-        'Pour un volume par rondelles, ai-je soustrait les carrés ([f]² − [g]²) et non élevé la différence au carré ?',
-        'En cinématique, ai-je distingué déplacement (∫v) et distance parcourue (∫|v|) ?',
+        'Pour un volume par rondelles, ai-je soustrait les carrés ($[f]^2 - [g]^2$) et non élevé la ' +
+          'différence au carré ?',
+        'En cinématique, ai-je distingué déplacement ($\\int v$) et distance parcourue ($\\int |v|$) ?',
       ],
     },
     forward:
-      'Un seul théorème — $\\int_a^b f(x)dx = F(b)-F(a)$, démontré grâce à la fonction aire — porte ' +
+      'Un seul théorème — $\\int_a^b f(x)\\,dx = F(b)-F(a)$, démontré grâce à la fonction aire — porte ' +
       'toutes les applications de ce chapitre : aires, volumes, longueurs, valeur moyenne, ' +
       'cinématique. Tu le retrouveras au chapitre 8 : une probabilité y devient une aire sous une ' +
       'courbe de densité.',

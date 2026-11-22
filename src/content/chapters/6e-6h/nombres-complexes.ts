@@ -2636,11 +2636,12 @@ export const nombresComplexes: ChapterContent = {
   recap: {
     items: [
       '**Définition** — $i^2=-1$, $z=a+bi$, conjugué $\\bar{z}=a-bi$.',
-      '**Puissances de i** — cycle de période 4 : $1, i, -1, -i$.',
+      '**Puissances de** $\\boldsymbol{i}$ — cycle de période 4 : $1, i, -1, -i$.',
       '**Affixe** — $M(a;b) \\leftrightarrow z=a+bi$ ; $AB=|z_B-z_A|$.',
       '**Racine carrée** — système $x^2-y^2=a$, $2xy=b$, $x^2+y^2=|z|$ — toujours 2 racines opposées.',
-      '**Δ<0** — $z = (-b\\pm i\\sqrt{|\\Delta|})/2a$, 2 solutions conjuguées.',
-      '**Module, argument** — $|z|=\\sqrt{a^2+b^2}$, $z=re^{i\\theta}$ ; produit → modules ×, arguments +.',
+      '$\\boldsymbol{\\Delta<0}$ — $z = \\dfrac{-b\\pm i\\sqrt{|\\Delta|}}{2a}$, 2 solutions conjuguées.',
+      '**Module, argument** — $|z|=\\sqrt{a^2+b^2}$, $z=re^{i\\theta}$ ; produit → modules $\\times$, ' +
+        'arguments $+$.',
       '**Moivre** — $(\\cos\\theta+i\\sin\\theta)^n = \\cos(n\\theta)+i\\sin(n\\theta)$ ; en sens inverse, Euler linéarise : $\\cos^2x=\\dfrac{1+\\cos(2x)}{2}$.',
       '**Racines n-ièmes** — $z_k = r^{1/n}e^{i(\\theta+2k\\pi)/n}$, $k=0,\\ldots,n-1$ — polygone régulier.',
       '**Transformations** — $z\'=az+b$ : rotation $|a|=1$, homothétie $a$ réel, similitude sinon.',

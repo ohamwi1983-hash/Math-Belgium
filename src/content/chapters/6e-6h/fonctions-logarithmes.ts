@@ -3756,29 +3756,32 @@ export const fonctionsLogarithmes: ChapterContent = {
     table: {
       headers: ['Propriété', 'Énoncé'],
       rows: [
-        ['Domaine', ']0;+∞['],
-        ['Valeurs particulières', 'ln(1)=0, ln(e)=1'],
-        ['Somme / différence', 'ln(ab)=ln(a)+ln(b)'],
-        ['Dérivée', '1/x (et (ln|x|)′ = 1/x pour x ≠ 0)'],
-        ['Limite en 0⁺', '−∞'],
-        ['Limite en +∞', '+∞ (très lente)'],
+        ['Domaine', '$]0\\,;+\\infty[$'],
+        ['Valeurs particulières', '$\\ln(1)=0$, $\\ln(e)=1$'],
+        ['Somme / différence', '$\\ln(ab)=\\ln(a)+\\ln(b)$'],
+        ['Dérivée', '$\\dfrac{1}{x}$ (et $(\\ln|x|)\' = \\dfrac{1}{x}$ pour $x \\neq 0$)'],
+        ['Limite en $0^+$', '$-\\infty$'],
+        ['Limite en $+\\infty$', '$+\\infty$ (très lente)'],
       ],
     },
     checklist: {
       label: 'Astuce — avant de rendre ta copie',
       items: [
         'Ai-je déterminé le domaine (CE) AVANT de résoudre, et confronté chaque solution à la CE de l\'équation de départ ?',
-        'Après avoir regroupé ou séparé des logarithmes, ai-je vérifié que le domaine n\'a pas changé (ln(x²) = 2 ln|x|, pas 2 ln x) ?',
-        'Pour une inéquation, ai-je tenu compte de la base (sens inversé si 0 < a < 1) — et inversé le sens en divisant par ln(a) < 0 ?',
-        'Ai-je évité ln(x + y) = ln(x) + ln(y) ? La propriété porte sur un produit, jamais sur une somme.',
+        'Après avoir regroupé ou séparé des logarithmes, ai-je vérifié que le domaine n\'a pas ' +
+          'changé ($\\ln(x^2) = 2\\ln|x|$, pas $2\\ln x$) ?',
+        'Pour une inéquation, ai-je tenu compte de la base (sens inversé si $0 < a < 1$) — et ' +
+          'inversé le sens en divisant par $\\ln(a) < 0$ ?',
+        'Ai-je évité $\\ln(x + y) = \\ln(x) + \\ln(y)$ ? La propriété porte sur un produit, jamais sur ' +
+          'une somme.',
         'Pour une étude de fonction : domaine, limites et asymptotes, dérivée et variations, concavité — dans cet ordre ?',
       ],
     },
     forward:
-      'ln et exp se défont mutuellement, et ln est dominée par toute puissance de x en +∞. Au ' +
-      'chapitre 4, la dérivée $(\\ln|x|)\' = \\dfrac{1}{x}$ se lira à l\'envers : une primitive de ' +
-      '$\\dfrac{1}{x}$ est $\\ln|x|$ — le logarithme reviendra dans toutes les intégrales de la forme ' +
-      '$\\dfrac{u\'}{u}$.',
+      '$\\ln$ et $\\exp$ se défont mutuellement, et $\\ln$ est dominée par toute puissance de $x$ en ' +
+      '$+\\infty$. Au chapitre 4, la dérivée $(\\ln|x|)\' = \\dfrac{1}{x}$ se lira à l\'envers : une ' +
+      'primitive de $\\dfrac{1}{x}$ est $\\ln|x|$ — le logarithme reviendra dans toutes les intégrales ' +
+      'de la forme $\\dfrac{u\'}{u}$.',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai/faux : réviser tout le chapitre',

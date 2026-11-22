@@ -3418,14 +3418,15 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
     table: {
       headers: ['Fonction', 'Domaine → image ; dérivée'],
       rows: [
-        ['arcsin($u$)', "$[-1 ; 1] \\to \\left[-\\frac{\\pi}{2} ; \\frac{\\pi}{2}\\right]$ ; $\\dfrac{u'}{\\sqrt{1-u^2}}$"],
-        ['arccos($u$)', "$[-1 ; 1] \\to [0 ; \\pi]$ ; $-\\dfrac{u'}{\\sqrt{1-u^2}}$"],
-        ['arctan($u$)', "$\\mathbb{R} \\to \\left]-\\frac{\\pi}{2} ; \\frac{\\pi}{2}\\right[$ ; $\\dfrac{u'}{1+u^2}$"],
+        ['$\\arcsin(u)$', '$[-1\\,;1] \\to \\left[-\\dfrac{\\pi}{2}\\,;\\dfrac{\\pi}{2}\\right]$ ; $\\dfrac{u\'}{\\sqrt{1-u^2}}$'],
+        ['$\\arccos(u)$', '$[-1\\,;1] \\to [0\\,;\\pi]$ ; $-\\dfrac{u\'}{\\sqrt{1-u^2}}$'],
+        ['$\\arctan(u)$', '$\\mathbb{R} \\to \\left]-\\dfrac{\\pi}{2}\\,;\\dfrac{\\pi}{2}\\right[$ ; $\\dfrac{u\'}{1+u^2}$'],
       ],
     },
     forward:
-      'À connaître aussi : $\\arcsin(u) + \\arccos(u) = \\pi/2$ pour tout $u \\in [-1;1]$, et ' +
-      '$\\arcsin(\\sin\\theta) = \\theta$ **seulement** si $\\theta \\in [-\\pi/2 ; \\pi/2]$.',
+      'À connaître aussi : $\\arcsin(u) + \\arccos(u) = \\dfrac{\\pi}{2}$ pour tout $u \\in [-1\\,;1]$, et ' +
+      '$\\arcsin(\\sin\\theta) = \\theta$ **seulement** si $\\theta \\in ' +
+      '\\left[-\\dfrac{\\pi}{2}\\,;\\dfrac{\\pi}{2}\\right]$.',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai/faux : réviser tout le chapitre',
