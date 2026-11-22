@@ -35,6 +35,19 @@ export const trigonometrie: ChapterContent = {
       number: 1,
       title: 'Arcs et secteurs',
       kicker: "radian, longueur d'arc s = rθ, aire de secteur A = ½r²θ",
+      titreCourt: 'Arcs et secteurs',
+      partie: 'Arcs, secteurs et aires',
+      essentiel: [
+        'Archimède encadre π entre deux polygones réguliers à n côtés : $n\\sin\\alpha \\leq \\pi \\leq n\\tan\\alpha$, avec $\\alpha = 180°/n$.',
+        '1 radian intercepte un arc de longueur égale au rayon ; 360° correspondent à $2\\pi$ radians. $\\text{angle}_{rad} = \\text{angle}_{deg} \\times \\dfrac{\\pi}{180}$.',
+        'Longueur d\'arc $s = r\\theta$, aire de secteur $A = \\frac{1}{2}r^2\\theta$ : θ toujours en **radians**.',
+      ],
+      cartes: [
+        { question: 'Convertis 60° en radians.', reponse: '$60 \\times \\dfrac{\\pi}{180} = \\dfrac{\\pi}{3}$ rad.' },
+        { question: 'Secteur de rayon 6 cm et d\'angle $\\dfrac{\\pi}{3}$ : longueur d\'arc et aire ?', reponse: '$s = 6 \\times \\dfrac{\\pi}{3} = 2\\pi$ cm et $A = \\frac{1}{2} \\times 6^2 \\times \\dfrac{\\pi}{3} = 6\\pi$ cm².' },
+        { question: 'Pourquoi $s = r\\theta$ n\'accepte-t-elle que des radians ?', reponse: 'Le secteur est la fraction $\\dfrac{\\theta}{2\\pi}$ du disque ; en degrés, on obtiendrait $s = \\dfrac{\\pi r \\theta}{180}$.' },
+        { question: 'Combien de radians valent 45° ? Et 90° ?', reponse: '$\\dfrac{\\pi}{4}$ et $\\dfrac{\\pi}{2}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Arcs et secteurs (1/3) : encadrer π avec Archimède', youtubeId: 'PDFxI__g9nI' },
         { kind: 'video', title: 'Arcs et secteurs (2/3) : le radian, longueur d\'arc et aire d\'un secteur', youtubeId: 't1kbJB41t6I' },
@@ -313,6 +326,18 @@ export const trigonometrie: ChapterContent = {
       number: 2,
       title: 'Polygones, arcs et secteurs',
       kicker: "figures composées — additionner ou soustraire des aires élémentaires",
+      titreCourt: 'Figures composées',
+      partie: 'Arcs, secteurs et aires',
+      essentiel: [
+        'Une figure composée se découpe en triangles et en secteurs dont on connaît l\'aire ; on **additionne** ou on **soustrait** ces aires élémentaires.',
+        'Un polygone régulier à n côtés inscrit dans un cercle donne n triangles isocèles d\'angle au centre $\\theta = \\dfrac{2\\pi}{n}$. Compte les côtés couverts par le secteur : sur trois côtés, son angle vaut $3 \\times \\dfrac{2\\pi}{n}$.',
+        'Contrôle : l\'aire du cercle moins l\'aire du polygone vaut n fois l\'aire d\'un segment.',
+      ],
+      cartes: [
+        { question: 'Angle au centre d\'un côté d\'un hexagone régulier inscrit ?', reponse: '$\\dfrac{2\\pi}{6} = \\dfrac{\\pi}{3}$.' },
+        { question: 'Octogone régulier inscrit : angle du secteur qui couvre 3 côtés ?', reponse: '$3 \\times \\dfrac{2\\pi}{8} = \\dfrac{3\\pi}{4}$, et non $\\dfrac{2\\pi}{8}$.' },
+        { question: 'Hexagone inscrit, r = 4 cm : aire du segment entre [AB] et l\'arc AB ?', reponse: 'Secteur moins triangle équilatéral : $\\dfrac{8\\pi}{3} - 4\\sqrt{3} \\approx 1{,}45$ cm².' },
+      ],
       blocks: [
         { kind: 'video', title: 'Polygones, arcs et secteurs : figures composées', youtubeId: 'h-q_G5tDJ-0' },
         {
@@ -497,6 +522,19 @@ export const trigonometrie: ChapterContent = {
       number: 3,
       title: 'Problèmes de géométrie du cercle',
       kicker: 'secteurs, segments circulaires, et la loi des cosinus',
+      titreCourt: 'Segments circulaires',
+      partie: 'Arcs, secteurs et aires',
+      essentiel: [
+        'Segment circulaire = secteur − triangle : $A_{segment} = \\frac{1}{2}r^2(\\theta - \\sin\\theta)$, θ en radians.',
+        'Loi des cosinus dans le triangle isocèle : $c^2 = 2r^2(1-\\cos\\theta)$. À l\'envers, $\\cos\\theta = 1 - \\dfrac{c^2}{2r^2}$ donne l\'angle au centre à partir de la corde.',
+        'Essuie-glace : différence de deux secteurs de même angle. Lentille : deux segments de même corde, chacun avec **son propre** rayon et **son propre** angle.',
+      ],
+      cartes: [
+        { question: 'Aire du triangle OAB d\'un secteur de rayon r et d\'angle θ ?', reponse: '$\\frac{1}{2}r^2\\sin\\theta$, sans hauteur ni base.' },
+        { question: 'Rayon 10 cm, corde 12 cm : que vaut cos θ ?', reponse: '$1 - \\dfrac{12^2}{2 \\times 10^2} = 0{,}28$, donc $\\theta \\approx 1{,}2870$ rad.' },
+        { question: 'Essuie-glace de 120°, balai entre 10 cm et 50 cm du pivot : aire balayée ?', reponse: '$\\dfrac{2500\\pi}{3} - \\dfrac{100\\pi}{3} = 800\\pi \\approx 2513{,}27$ cm².' },
+        { question: 'Une lentille commune à deux disques : combien de segments ?', reponse: 'Deux, un par cercle, chacun avec son propre rayon et son propre angle au centre ; la corde est commune.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Problèmes de géométrie du cercle : segments circulaires et loi des cosinus', youtubeId: 'neGbIoX6UqI' },
         {
@@ -830,6 +868,19 @@ export const trigonometrie: ChapterContent = {
       number: 4,
       title: "Paramètres d'une fonction sinusoïdale",
       kicker: 'f(x) = A sin(ωx+φ) + b — le sens de chaque lettre',
+      titreCourt: 'Paramètres d\'une sinusoïde',
+      partie: 'Les fonctions sinusoïdales',
+      essentiel: [
+        'Le point image de x sur le cercle trigonométrique a pour abscisse cos x et pour ordonnée sin x. sin et cos : image [−1 ; 1], période 2π ; tan : période π, non définie en $\\dfrac{\\pi}{2} + k\\pi$.',
+        '$f(x) = A\\sin(\\omega x + \\varphi) + b$ : $A = \\dfrac{max - min}{2}$, $b = \\dfrac{max + min}{2}$, $T = \\dfrac{2\\pi}{\\omega}$.',
+        'Le déphasage φ n\'est pas le décalage horizontal $\\Phi = -\\dfrac{\\varphi}{\\omega}$. Pour tracer : une période à partir de Φ, en 4 : b, max, b, min, b (si $A > 0$).',
+      ],
+      cartes: [
+        { question: '$f(x) = 3\\sin(2x - \\dfrac{\\pi}{3}) + 1$ : période et décalage horizontal ?', reponse: '$T = \\dfrac{2\\pi}{2} = \\pi$ et $\\Phi = -\\dfrac{\\varphi}{\\omega} = \\dfrac{\\pi}{6}$.' },
+        { question: '$\\omega = 3$ : tous les combien la courbe se répète-t-elle ?', reponse: 'Tous les $\\dfrac{2\\pi}{3}$, pas tous les 3.' },
+        { question: 'Maximum 4, minimum −2 : que valent A et b ?', reponse: '$A = \\dfrac{4-(-2)}{2} = 3$ et $b = \\dfrac{4+(-2)}{2} = 1$.' },
+        { question: 'cos est-elle paire ou impaire ? Et sin ?', reponse: 'cos est paire : $\\cos(-x) = \\cos x$ ; sin est impaire : $\\sin(-x) = -\\sin x$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Arcs et secteurs (3/3) : le cercle trigonométrique', youtubeId: '_1kh3SXWfwM' },
         { kind: 'video', title: 'Paramètres d\'une sinusoïde (1/2) : sinus, cosinus, tangente', youtubeId: 'fr8hM_dcfEA' },
@@ -1255,6 +1306,18 @@ export const trigonometrie: ChapterContent = {
       number: 5,
       title: "Paramètres d'une fonction sinusoïdale — lecture graphique",
       kicker: 'retrouver A, ω, φ, b sans aucune formule de départ',
+      titreCourt: 'Lecture graphique',
+      partie: 'Les fonctions sinusoïdales',
+      essentiel: [
+        'Sur le graphique : A et b par le maximum et le minimum, T entre deux maximums consécutifs, puis $\\omega = \\dfrac{2\\pi}{T}$.',
+        'φ par la traversée montante $x_0$ de la ligne moyenne : $\\varphi = -\\omega \\cdot x_0$ ; ou par le maximum : $\\varphi = \\dfrac{\\pi}{2} - \\omega x_{max}$. Ramène φ dans $]-\\pi\\,;\\pi]$, puis vérifie $f(x_{max})$.',
+        'La lecture à la traversée montante suppose $A > 0$ : vérifie le sens de variation juste après le point choisi.',
+      ],
+      cartes: [
+        { question: 'Deux maximums consécutifs en x = 1,5 et x = 5,5 : T et ω ?', reponse: '$T = 4$ et $\\omega = \\dfrac{2\\pi}{4} = \\dfrac{\\pi}{2}$.' },
+        { question: '$\\omega = \\dfrac{\\pi}{2}$ et un maximum en $x = 1{,}5$ : que vaut φ ?', reponse: '$\\varphi = \\dfrac{\\pi}{2} - \\dfrac{3\\pi}{4} = -\\dfrac{\\pi}{4}$.' },
+        { question: 'Pourquoi mesurer T entre deux maximums plutôt qu\'entre deux traversées ?', reponse: 'Un maximum est un point isolé et net, plus facile à pointer qu\'une traversée de la ligne moyenne.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Lire A, ω, φ et b sur le graphique d\'une sinusoïde', youtubeId: '2Qf_W3tzZMI' },
         {
@@ -1374,6 +1437,19 @@ export const trigonometrie: ChapterContent = {
       number: 6,
       title: "Extremums d'une fonction sinusoïdale",
       kicker: 'sin(u)=±1 réunis — attention à la période effective',
+      titreCourt: 'Extremums d\'une sinusoïde',
+      partie: 'Les fonctions sinusoïdales',
+      essentiel: [
+        'Avec $A > 0$ : maximum $b + A$ quand $\\sin u = 1$, minimum $b - A$ quand $\\sin u = -1$. Dans tous les cas : maximum $= b + |A|$, minimum $= b - |A|$.',
+        'Maximums seuls : une famille, de période $\\dfrac{2\\pi}{\\omega}$. Extremums réunis : $u = \\dfrac{\\pi}{2} + k\\pi$, période effective $\\dfrac{\\pi}{\\omega}$.',
+        'Relis la question : « les maximums » et « tous les extremums » n\'appellent pas la même formule.',
+      ],
+      cartes: [
+        { question: '$f(x) = 2\\sin(3x + \\dfrac{\\pi}{6}) - 1$ : maximum et minimum ?', reponse: 'Maximum $-1 + 2 = 1$, minimum $-1 - 2 = -3$.' },
+        { question: 'Même fonction : où sont tous les extremums réunis ?', reponse: '$x = \\dfrac{\\pi}{9} + \\dfrac{k\\pi}{3}$, $k \\in \\mathbb{Z}$.' },
+        { question: '$g(x) = -2\\sin x + 1$ : où est atteint le maximum ?', reponse: 'Là où $\\sin x = -1$ : en $x = -\\dfrac{\\pi}{2} + 2k\\pi$, et il vaut 3.' },
+        { question: 'Pourquoi la période des extremums réunis est-elle divisée par deux ?', reponse: 'Un maximum et un minimum se produisent à chaque tour : on en croise un tous les π en u.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Extremums d\'une fonction sinusoïdale : sin(u) = ±1 réunis', youtubeId: '7kx_Zy6QCpE' },
         {
@@ -1525,6 +1601,19 @@ export const trigonometrie: ChapterContent = {
       number: 7,
       title: 'Équations trigonométriques',
       kicker: 'trig(ax+b) = c, produit nul, second degré en sin ou cos, égalité de deux expressions',
+      titreCourt: 'Équations trigonométriques',
+      partie: 'Équations et modélisation',
+      essentiel: [
+        '$\\sin x = c$ : $x = \\alpha + 2k\\pi$ ou $x = (\\pi - \\alpha) + 2k\\pi$ ; $\\cos x = c$ : $x = \\alpha + 2k\\pi$ ou $x = -\\alpha + 2k\\pi$ ; $\\tan x = c$ : $x = \\alpha + k\\pi$, une seule famille.',
+        'trig(ax+b) = c : pose $u = ax + b$, résous au cercle, puis divise **tout** par a, terme de période compris. Si $|c| > 1$, sin et cos n\'ont aucune solution.',
+        'Produit nul : chaque facteur nul, puis la réunion — jamais de division par un facteur. Second degré : pose $t = \\cos x$ (ou $\\sin x$) et rejette toute racine hors de $[-1\\,;1]$.',
+      ],
+      cartes: [
+        { question: 'Résous $\\sin(x)\\cdot\\left(2\\cos(x)-1\\right) = 0$ dans $[0\\,;2\\pi[$.', reponse: '$S = \\left\\{0\\,;\\dfrac{\\pi}{3}\\,;\\pi\\,;\\dfrac{5\\pi}{3}\\right\\}$.' },
+        { question: '$2\\cos(3x - \\dfrac{\\pi}{4}) = 1$ : quelle période pour chaque famille en x ?', reponse: '$\\dfrac{2\\pi}{3}$ : le $2k\\pi$ se divise aussi par 3.' },
+        { question: 'Avec $t = \\cos x$, on trouve $t = 1$ ou $t = -\\dfrac{3}{2}$ : que garder ?', reponse: 'Seulement $t = 1$, car $-\\dfrac{3}{2}$ est hors de $[-1\\,;1]$ : il reste $\\cos x = 1$.' },
+        { question: 'Comment résoudre $\\tan(A) = -\\tan(B)$ ?', reponse: 'On écrit $-\\tan(B) = \\tan(-B)$, d\'où $A = -B + k\\pi$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Équations trigonométriques trig(ax + b) = c', youtubeId: 'mOwnAw5DlCY' },
         {
@@ -1967,6 +2056,19 @@ export const trigonometrie: ChapterContent = {
       number: 8,
       title: 'Modéliser une fonction sinusoïdale en contexte',
       kicker: 'construire A, b, T (donc ω), puis φ à partir d\'une condition initiale — puis résoudre f(t) ≥ y₀',
+      titreCourt: 'Modéliser en contexte',
+      partie: 'Équations et modélisation',
+      essentiel: [
+        'Toujours dans cet ordre : $A = \\dfrac{max - min}{2}$, $b = \\dfrac{max + min}{2}$, $\\omega = \\dfrac{2\\pi}{T}$, puis φ par la condition initiale.',
+        'Départ hors d\'un extremum : $\\sin\\varphi = m$ a deux candidats, $\\arcsin(m)$ et $\\pi - \\arcsin(m)$ ; le sens de variation au départ tranche. Vérifie le modèle sur une deuxième donnée.',
+        'Inéquation : $\\sin(u) \\geq m$ donne l\'arc du haut, $u \\in [\\arcsin(m)\\,;\\pi - \\arcsin(m)] + 2k\\pi$ ; on revient à t par $t = \\dfrac{u - \\varphi}{\\omega}$.',
+      ],
+      cartes: [
+        { question: 'Grande roue : rayon 15 m, centre à 17 m, un tour en 8 min. A, b et ω ?', reponse: '$A = 15$, $b = 17$ et $\\omega = \\dfrac{2\\pi}{8} = \\dfrac{\\pi}{4}$.' },
+        { question: 'Même roue, départ au point le plus bas : quel φ ?', reponse: '$15\\sin(\\varphi) + 17 = 2$, donc $\\sin(\\varphi) = -1$ et $\\varphi = -\\dfrac{\\pi}{2}$.' },
+        { question: '$\\sin\\varphi = \\dfrac{1}{2}$ et la nacelle monte : $\\dfrac{\\pi}{6}$ ou $\\dfrac{5\\pi}{6}$ ?', reponse: '$\\dfrac{\\pi}{6}$ : la nacelle monte si $\\cos\\varphi > 0$, or $\\cos\\dfrac{5\\pi}{6} < 0$.' },
+        { question: 'Pour $\\sin(u) \\leq m$, quel arc garder ?', reponse: 'L\'arc du bas : $u \\in [\\pi - \\arcsin(m)\\,;2\\pi + \\arcsin(m)] + 2k\\pi$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Modéliser une situation périodique par une sinusoïde (grande roue)', youtubeId: 'fw20BqIfKCU' },
         {
