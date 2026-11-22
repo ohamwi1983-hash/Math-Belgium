@@ -2369,30 +2369,35 @@ export const deriveesApplications: ChapterContent = {
 
   recap: {
     items: [
-      '**Définition de f\'(a)** — la limite du taux d\'accroissement $\\dfrac{f(a+h)-f(a)}{h}$ quand ' +
-        'h→0 (chapitre précédent). C\'est la pente de la tangente en a.',
-      '**Tangente** — $y=f(a)+f\'(a)(x-a)$. Horizontale ⟺ $f\'(a)=0$. Localement, elle ne touche ' +
-        'la courbe qu\'au point de contact, mais elle peut la recouper plus loin — et une même ' +
-        'droite peut être tangente en deux points. Près de a, elle approche f : $f(a+h) \\approx f(a)+f\'(a)\\,h$.',
+      '**Définition de** $\\boldsymbol{f\'(a)}$ — la limite du taux d\'accroissement ' +
+        '$\\dfrac{f(a+h)-f(a)}{h}$ quand $h \\to 0$ (chapitre précédent). C\'est la pente de la tangente ' +
+        'en $a$.',
+      '**Tangente** — $y=f(a)+f\'(a)(x-a)$. Horizontale ⟺ $f\'(a)=0$. Localement, elle ne touche la ' +
+        'courbe qu\'au point de contact, mais elle peut la recouper plus loin — et une même droite ' +
+        'peut être tangente en deux points. Près de $a$, elle approche $f$ : $f(a+h) \\approx ' +
+        'f(a)+f\'(a)\\,h$.',
       '**Fonction dérivée** — règles de la somme, du produit ($u\'v+uv\'$), du quotient ' +
-        '($\\frac{u\'v-uv\'}{v^2}$) et de la chaîne ($u\'(x) \\cdot g\'(u(x))$). Jamais ' +
-        '$(uv)\'=u\'v\'$ ni $\\left(\\frac{u}{v}\\right)\'=\\frac{u\'}{v\'}$ !',
-      '**Signe de f\'/f\'\'** — f\'>0 ⟹ croissante, f\'<0 ⟹ décroissante, f\'=0 ET change de ' +
-        'signe ⟹ extremum local. f\'\'>0 ⟹ convexe (∪), f\'\'<0 ⟹ concave (∩), f\'\' change de ' +
-        'signe ⟹ point d\'inflexion. Point anguleux ou tangente verticale : f\'(a) n\'existe pas.',
-      '**Étude locale** — le tableau de signes de f\' (avec les colonnes ∄ des valeurs exclues) ' +
-        'donne les variations et les extremums, en valeurs exactes. Un point critique ' +
-        '(f\'(a)=0) n\'est un extremum QUE si f\' change réellement de signe.',
-      '**Étude complète** — domaine → limites et asymptotes (chapitre précédent) → f\' et ' +
-        'variations → f\'\' et concavité → coordonnées des points remarquables → graphique.',
+        '($\\dfrac{u\'v-uv\'}{v^2}$) et de la chaîne ($u\'(x) \\cdot g\'(u(x))$). Jamais $(uv)\'=u\'v\'$ ni ' +
+        '$\\left(\\dfrac{u}{v}\\right)\'=\\dfrac{u\'}{v\'}$ !',
+      '**Signe de** $\\boldsymbol{f\'}$ / $\\boldsymbol{f\'\'}$ — $f\'>0 \\Rightarrow$ croissante, $f\'<0 ' +
+        '\\Rightarrow$ décroissante, $f\'=0$ ET change de signe $\\Rightarrow$ extremum local. $f\'\'>0 ' +
+        '\\Rightarrow$ convexe ($\\cup$), $f\'\'<0 \\Rightarrow$ concave ($\\cap$), $f\'\'$ change de signe ' +
+        '$\\Rightarrow$ point d\'inflexion. Point anguleux ou tangente verticale : $f\'(a)$ n\'existe ' +
+        'pas.',
+      '**Étude locale** — le tableau de signes de $f\'$ (avec les colonnes $\\nexists$ des valeurs ' +
+        'exclues) donne les variations et les extremums, en valeurs exactes. Un point critique ' +
+        '($f\'(a)=0$) n\'est un extremum QUE si $f\'$ change réellement de signe.',
+      '**Étude complète** — domaine → limites et asymptotes (chapitre précédent) → $f\'$ et ' +
+        'variations → $f\'\'$ et concavité → coordonnées des points remarquables → graphique.',
       '**Applications en contexte** — optimisation géométrique (dérivée nulle, nature par le ' +
-        'tableau de signes), coût marginal $C\'(q)$ et écart en %, bénéfice maximal ⟺ Rm=Cm, coût ' +
-        'moyen minimal ⟺ Cm = $C_M$ (dichotomie si besoin). Extrema BORNÉS : compare aussi aux ' +
-        'bornes de l\'intervalle. Vitesse $v=s\'$, accélération $a=v\'=s\'\'$, 1 m/s = 3,6 km/h.',
+        'tableau de signes), coût marginal $C\'(q)$ et écart en %, bénéfice maximal ⟺ $\\text{Rm} = ' +
+        '\\text{Cm}$, coût moyen minimal ⟺ $\\text{Cm} = C_M$ (dichotomie si besoin). Extrema BORNÉS : ' +
+        'compare aussi aux bornes de l\'intervalle. Vitesse $v=s\'$, accélération $a=v\'=s\'\'$, $1\\ ' +
+        '\\text{m/s} = 3{,}6\\ \\text{km/h}$.',
     ],
     checklist: {
       items: [
-        'Ai-je vérifié que f\' change bien de signe avant d\'appeler un point critique un extremum ?',
+        'Ai-je vérifié que $f\'$ change bien de signe avant d\'appeler un point critique un extremum ?',
         'Pour un produit ou un quotient : ai-je utilisé la formule complète, jamais le produit/quotient des dérivées ?',
         'Sur un intervalle FERMÉ : ai-je comparé les extremums locaux AUX valeurs des deux bornes ?',
         'Ma tangente vérifie-t-elle les deux conditions (passe par le point, ET a la bonne pente) ?',

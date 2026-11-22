@@ -2699,54 +2699,62 @@ export const trigonometrie: ChapterContent = {
 
   recap: {
     items: [
-      '**Radian** — $\\text{angle}_{rad} = \\text{angle}_{deg} \\times \\pi/180$. Les ' +
-        'formules $s=r\\theta$ et $A=\\frac{1}{2}r^2\\theta$ n\'utilisent que des radians ; ' +
-        'à l\'envers, $\\theta = s/r$ et $r = 2A/s$.',
-      '**Figures composées** — décompose en triangles et secteurs élémentaires. Additionne ' +
-        'ou soustrais selon la figure. L\'angle d\'un polygone régulier vaut $2\\pi/n$ par côté, ' +
-        'mais un secteur peut en couvrir plusieurs : $k$ côtés donnent $k \\cdot 2\\pi/n$.',
+      '**Radian** — $\\text{angle}_{\\text{rad}} = \\text{angle}_{\\text{deg}} \\times ' +
+        '\\dfrac{\\pi}{180}$. Les formules $s=r\\theta$ et $A=\\dfrac{1}{2}r^2\\theta$ n\'utilisent que des ' +
+        'radians ; à l\'envers, $\\theta = \\dfrac{s}{r}$ et $r = \\dfrac{2A}{s}$.',
+      '**Figures composées** — décompose en triangles et secteurs élémentaires. Additionne ou ' +
+        'soustrais selon la figure. L\'angle d\'un polygone régulier vaut $\\dfrac{2\\pi}{n}$ par côté, ' +
+        'mais un secteur peut en couvrir plusieurs : $k$ côtés donnent $k \\cdot \\dfrac{2\\pi}{n}$.',
       '**Géométrie du cercle** — aire d\'un segment = aire du secteur − aire du triangle ' +
-        '($\\frac{1}{2}r^2\\sin\\theta$). Loi des cosinus pour une corde : $c^2 = 2r^2(1-\\cos\\theta)$, ' +
+        '($\\dfrac{1}{2}r^2\\sin\\theta$). Loi des cosinus pour une corde : $c^2 = 2r^2(1-\\cos\\theta)$, ' +
         'et « à l\'envers » pour retrouver l\'angle. Essuie-glace : différence de deux secteurs ; ' +
         'lentille : somme de deux segments.',
-      '**Paramètres d\'une sinusoïde** — $A=(max-min)/2$, $b=(max+min)/2$, $T=2\\pi/\\omega$ ' +
-        '(jamais l\'inverse), fréquence $= 1/T$. Le déphasage φ, combiné à ω, décale la courbe ' +
-        'horizontalement de $\\Phi = -\\varphi/\\omega$ — jamais de φ lui-même.',
-      '**Lecture graphique** — max/min pour trouver A et b. Distance entre deux maximums ' +
-        'pour T. Traversée montante de la ligne moyenne pour φ (en vérifiant le sens de variation), ' +
-        'contrôlée par le maximum : $\\varphi = \\pi/2 - \\omega x_{max}$.',
+      '**Paramètres d\'une sinusoïde** — $A=\\dfrac{\\max-\\min}{2}$, $b=\\dfrac{\\max+\\min}{2}$, ' +
+        '$T=\\dfrac{2\\pi}{\\omega}$ (jamais l\'inverse), fréquence $= \\dfrac{1}{T}$. Le déphasage ' +
+        '$\\varphi$, combiné à $\\omega$, décale la courbe horizontalement de $\\Phi = ' +
+        '-\\dfrac{\\varphi}{\\omega}$ — jamais de $\\varphi$ lui-même.',
+      '**Lecture graphique** — max/min pour trouver $A$ et $b$. Distance entre deux maximums pour ' +
+        '$T$. Traversée montante de la ligne moyenne pour $\\varphi$ (en vérifiant le sens de ' +
+        'variation), contrôlée par le maximum : $\\varphi = \\dfrac{\\pi}{2} - \\omega x_{\\max}$.',
       '**Extremums** — $\\sin(u)=1$ seul (période $2\\pi$, maximums) ≠ $\\sin(u)=\\pm 1$ réunis ' +
-        '(période π, tous les extremums). Ne confonds jamais les deux formules. Valeurs : $b \\pm |A|$ ; si ' +
-        '$A < 0$, le maximum correspond à $\\sin(u) = -1$.',
+        '(période $\\pi$, tous les extremums). Ne confonds jamais les deux formules. Valeurs : $b \\pm ' +
+        '|A|$ ; si $A < 0$, le maximum correspond à $\\sin(u) = -1$.',
       '**Équations** $\\text{trig}(ax+b)=c$ — isole l\'argument, résous au cercle trigonométrique, ' +
-        'divise tout (constante et période) par a, puis liste les solutions de la fenêtre ' +
-        'demandée. $|c|>1$ pour sin/cos ⟹ aucune solution.',
-      '**Autres équations** — produit nul : réunion des solutions de chaque facteur. Second ' +
-        'degré en sin/cos : $\\sin^2+\\cos^2=1$, poser $t$, rejeter $|t|>1$. Égalité de deux ' +
-        'expressions : convertir ($\\sin\\theta=\\cos(\\pi/2-\\theta)$), puis égaler les ' +
-        'arguments. Avec une tangente, rejeter les valeurs où elle n\'existe pas.',
-      '**Modéliser en contexte** — A et b à partir des extrêmes. T (donc ω) à partir de la ' +
-        'durée d\'un cycle. φ en dernier, à partir d\'une condition initiale précise ; hors ' +
-        'd\'un extremum, deux candidats, et le sens de variation tranche. À partir de deux ' +
-        'points sur une même montée : $\\omega t_i + \\varphi = \\arcsin\\left(\\frac{f_i - b}{A}\\right)$, ' +
-        'un système qu\'on résout en soustrayant les deux équations. Une ' +
-        'inéquation $f(t)\\geq y_0$ se lit comme un arc du cercle, puis se ramène à $t$.',
+        'divise tout (constante et période) par $a$, puis liste les solutions de la fenêtre demandée. ' +
+        '$|c|>1$ pour $\\sin$/$\\cos$ ⟹ aucune solution.',
+      '**Autres équations** — produit nul : réunion des solutions de chaque facteur. Second degré ' +
+        'en $\\sin$/$\\cos$ : $\\sin^2+\\cos^2=1$, poser $t$, rejeter $|t|>1$. Égalité de deux ' +
+        'expressions : convertir ($\\sin\\theta=\\cos\\left(\\dfrac{\\pi}{2}-\\theta\\right)$), puis égaler ' +
+        'les arguments. Avec une tangente, rejeter les valeurs où elle n\'existe pas.',
+      '**Modéliser en contexte** — $A$ et $b$ à partir des extrêmes. $T$ (donc $\\omega$) à partir ' +
+        'de la durée d\'un cycle. $\\varphi$ en dernier, à partir d\'une condition initiale précise ; ' +
+        'hors d\'un extremum, deux candidats, et le sens de variation tranche. À partir de deux points ' +
+        'sur une même montée : $\\omega t_i + \\varphi = \\arcsin\\left(\\dfrac{f_i - b}{A}\\right)$, un ' +
+        'système qu\'on résout en soustrayant les deux équations. Une inéquation $f(t)\\geq y_0$ se lit ' +
+        'comme un arc du cercle, puis se ramène à $t$.',
     ],
     checklist: {
       label: 'Astuce — avant de rendre ta copie',
       items: [
-        'Ai-je bien converti tout angle en degrés vers les radians avant d\'utiliser $s=r\\theta$ ou $A=\\frac{1}{2}r^2\\theta$ ?',
-        'Pour une sinusoïde : ai-je distingué la pulsation ω de la période T ($T=2\\pi/\\omega$, jamais l\'inverse) ? Et le déphasage φ du décalage horizontal Φ ?',
-        'Pour une équation $\\text{trig}(ax+b)=c$ : ai-je divisé par a le terme constant et le terme périodique en $2k\\pi$ ?',
-        'Pour une équation en $t = \\cos x$ ou $t = \\sin x$, ai-je rejeté les racines hors de [−1 ; 1] ? Avec une tangente, ai-je écarté les valeurs où elle n\'existe pas ?',
-        'Pour des extremums : la question porte-t-elle sur les maximums seuls, les minimums seuls, ou tous les extremums réunis — et ai-je pris la bonne période ($2\\pi/\\omega$ ou $\\pi/\\omega$) ?',
+        'Ai-je bien converti tout angle en degrés vers les radians avant d\'utiliser $s=r\\theta$ ou ' +
+          '$A=\\dfrac{1}{2}r^2\\theta$ ?',
+        'Pour une sinusoïde : ai-je distingué la pulsation $\\omega$ de la période $T$ ' +
+          '($T=\\dfrac{2\\pi}{\\omega}$, jamais l\'inverse) ? Et le déphasage $\\varphi$ du décalage ' +
+          'horizontal $\\Phi$ ?',
+        'Pour une équation $\\text{trig}(ax+b)=c$ : ai-je divisé par $a$ le terme constant et le ' +
+          'terme périodique en $2k\\pi$ ?',
+        'Pour une équation en $t = \\cos x$ ou $t = \\sin x$, ai-je rejeté les racines hors de ' +
+          '$[-1\\,;1]$ ? Avec une tangente, ai-je écarté les valeurs où elle n\'existe pas ?',
+        'Pour des extremums : la question porte-t-elle sur les maximums seuls, les minimums seuls, ' +
+          'ou tous les extremums réunis — et ai-je pris la bonne période ($\\dfrac{2\\pi}{\\omega}$ ou ' +
+          '$\\dfrac{\\pi}{\\omega}$) ?',
       ],
     },
     forward:
-      'En 6e, tu retrouveras arcsin, arccos et arctan — déjà utilisés ici comme touches de ' +
-      'calculatrice — étudiés comme de vraies fonctions (les fonctions cyclométriques), ainsi ' +
-      'que les dérivées de sinus et de cosinus, qui expliquent pourquoi une sinusoïde change ' +
-      'de sens exactement à ses extremums.',
+      'En 6e, tu retrouveras $\\arcsin$, $\\arccos$ et $\\arctan$ — déjà utilisés ici comme touches de ' +
+      'calculatrice — étudiés comme de vraies fonctions (les fonctions cyclométriques), ainsi que les ' +
+      'dérivées de sinus et de cosinus, qui expliquent pourquoi une sinusoïde change de sens ' +
+      'exactement à ses extremums.',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai ou faux — tout le chapitre',

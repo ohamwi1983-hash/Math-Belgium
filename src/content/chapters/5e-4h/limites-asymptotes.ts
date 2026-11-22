@@ -2304,25 +2304,26 @@ export const limitesAsymptotes: ChapterContent = {
 
   recap: {
     items: [
-      '**Limites et formes indéterminées** — 0/0 se lève par factorisation et simplification ' +
-        '(peut révéler un point vide, invisible sur le graphique). ∞/∞ et ∞−∞ avec des ' +
-        'polynômes : mets en évidence le terme de plus haut degré. ∞−∞ avec des racines : ' +
-        'multiplie par l\'expression conjuguée. Diagnostique toujours la forme AVANT de choisir ' +
-        'la technique — le tableau des opérations (somme/produit/quotient) donne le résultat ' +
-        'direct dans les cas déterminés. f(a) définie ne garantit pas que ' +
-        '$\\displaystyle\\lim_{x \\to a} f(x)$ existe : c\'est le cas d\'un saut.',
-      '**Asymptote oblique** — $y=ax+b$, avec $a=\\lim f(x)/x$ puis $b=\\lim\\,[f(x)-ax]$. C\'est équivalent ' +
-        'à la division euclidienne N=D×(ax+b)+reste : le reste ne fait JAMAIS partie de ' +
-        'l\'équation de l\'asymptote. Horizontale dès que deg(N)≤deg(D) (y=0 si strictement ' +
-        'inférieur) ; oblique non horizontale seulement si deg(N)=deg(D)+1, exactement.',
-      '**Lecture graphique** — asymptote verticale : la courbe part vers ±∞ d\'au moins un côté ' +
-        '(les signes peuvent différer ; de l\'autre côté, une limite finie est possible). ' +
-        'Asymptote horizontale : droite plate rejointe aux extrémités, parfois différente en −∞ ' +
-        'et en +∞. Asymptote oblique : droite penchée rejointe aux extrémités.',
-      '**Limites en contexte** — le comportement à long terme d\'un phénomène réel se traduit ' +
-        'par une limite en +∞. Une asymptote horizontale, c\'est un plafond ou un plancher ' +
-        'théorique. Écrire $f(x)=b+\\dfrac{a}{x+p}$ (avec $p>0$) par division euclidienne donne à ' +
-        'la fois la valeur à long terme b et le sens : croissance si $a<0$, régression si $a>0$.',
+      '**Limites et formes indéterminées** — $\\dfrac{0}{0}$ se lève par factorisation et ' +
+        'simplification (peut révéler un point vide, invisible sur le graphique). ' +
+        '$\\dfrac{\\infty}{\\infty}$ et $\\infty-\\infty$ avec des polynômes : mets en évidence le terme ' +
+        'de plus haut degré. $\\infty-\\infty$ avec des racines : multiplie par l\'expression conjuguée. ' +
+        'Diagnostique toujours la forme AVANT de choisir la technique — le tableau des opérations ' +
+        '(somme/produit/quotient) donne le résultat direct dans les cas déterminés. $f(a)$ définie ne ' +
+        'garantit pas que $\\lim\\limits_{x \\to a} f(x)$ existe : c\'est le cas d\'un saut.',
+      '**Asymptote oblique** — $y=ax+b$, avec $a=\\lim \\dfrac{f(x)}{x}$ puis $b=\\lim\\,[f(x)-ax]$. ' +
+        'C\'est équivalent à la division euclidienne $N=D\\times(ax+b)+\\text{reste}$ : le reste ne fait ' +
+        'JAMAIS partie de l\'équation de l\'asymptote. Horizontale dès que $\\deg(N)\\leq\\deg(D)$ ($y=0$ ' +
+        'si strictement inférieur) ; oblique non horizontale seulement si $\\deg(N)=\\deg(D)+1$, ' +
+        'exactement.',
+      '**Lecture graphique** — asymptote verticale : la courbe part vers $\\pm\\infty$ d\'au moins un ' +
+        'côté (les signes peuvent différer ; de l\'autre côté, une limite finie est possible). ' +
+        'Asymptote horizontale : droite plate rejointe aux extrémités, parfois différente en ' +
+        '$-\\infty$ et en $+\\infty$. Asymptote oblique : droite penchée rejointe aux extrémités.',
+      '**Limites en contexte** — le comportement à long terme d\'un phénomène réel se traduit par ' +
+        'une limite en $+\\infty$. Une asymptote horizontale, c\'est un plafond ou un plancher ' +
+        'théorique. Écrire $f(x)=b+\\dfrac{a}{x+p}$ (avec $p>0$) par division euclidienne donne à la ' +
+        'fois la valeur à long terme $b$ et le sens : croissance si $a<0$, régression si $a>0$.',
       '**Étude complète** — domaine → point vide ou vraie asymptote verticale (test du ' +
         'numérateur) → comparaison des degrés pour l\'horizontale/l\'oblique → limites à chaque ' +
         'borne → synthèse. Vérifie toujours le numérateur avant de conclure à une vraie ' +
@@ -2333,7 +2334,8 @@ export const limitesAsymptotes: ChapterContent = {
     checklist: {
       items: [
         'Ai-je bien identifié la forme (déterminée ou indéterminée, et laquelle) avant de me lancer dans le calcul ?',
-        'Pour une asymptote oblique : ai-je bien vérifié deg(N)=deg(D)+1, et exclu le reste de l\'équation finale ?',
+        'Pour une asymptote oblique : ai-je bien vérifié $\\deg(N)=\\deg(D)+1$, et exclu le reste de ' +
+          'l\'équation finale ?',
         'Pour une lecture graphique : ai-je vérifié séparément le signe de CHAQUE côté d\'une asymptote verticale ?',
         'Pour une asymptote verticale : ai-je bien vérifié que le numérateur ne s\'annule PAS au même point (sinon c\'est un point vide, pas une asymptote) ?',
       ],

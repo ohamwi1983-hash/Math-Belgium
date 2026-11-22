@@ -1493,18 +1493,25 @@ export const fonctionsComposees: ChapterContent = {
   recap: {
     items: [
       '**Domaine de définition** — repérer dénominateurs et racines paires, poser une condition par risque (racine au dénominateur : stricte ; diviser par un négatif : le sens change), combiner par intersection.',
-      '**Composer** — (f∘g)(x) = f(g(x)) : g agit en premier, f en second (comme les chaussettes avant les chaussures) ; l’ordre compte, mais pas la place des parenthèses : (f∘g)∘h = f∘(g∘h).',
+      '**Composer** — $(f\\circ g)(x) = f(g(x))$ : $g$ agit en premier, $f$ en second (comme les ' +
+        'chaussettes avant les chaussures) ; l’ordre compte, mais pas la place des parenthèses : ' +
+        '$(f\\circ g)\\circ h = f\\circ (g\\circ h)$.',
       '**Décomposer** — repérer la toute dernière opération effectuée, l’éplucher, recommencer.',
-      '**Domaine d’une composée** — x ∈ dom g, ET g(x) ∈ dom f (là où l’image de g rencontre dom f) ; jamais lu sur la formule simplifiée ; l’intersection peut être bornée, voire vide.',
+      '**Domaine d’une composée** — $x \\in \\operatorname{dom} g$, ET $g(x) \\in \\operatorname{dom} ' +
+        'f$ (là où l’image de $g$ rencontre $\\operatorname{dom} f$) ; jamais lu sur la formule ' +
+        'simplifiée ; l’intersection peut être bornée, voire vide.',
       '**Lecture graphique** — deux lectures successives, la sortie de la première devient l’entrée de la seconde ; hors du domaine : n’existe pas, hors du dessin : pas lisible.',
-      '**En contexte** — isoler une grandeur en fonction d’une autre avant de la réinjecter ailleurs ; un coût unitaire C(x)/x est un quotient, pas une composition ; le domaine physique restreint souvent le domaine mathématique.',
+      '**En contexte** — isoler une grandeur en fonction d’une autre avant de la réinjecter ' +
+        'ailleurs ; un coût unitaire $\\dfrac{C(x)}{x}$ est un quotient, pas une composition ; le ' +
+        'domaine physique restreint souvent le domaine mathématique.',
     ],
     checklist: {
       label: 'Astuce — avant de rendre ta copie',
       items: [
         'Ai-je repéré les 2 opérations à surveiller (dénominateur, racine paire) — sans poser de condition pour une racine impaire ou une valeur absolue ?',
         'Ai-je bien combiné mes conditions par **intersection**, jamais par union ?',
-        'Pour une composée : ai-je vérifié les **deux** domaines — x ∈ dom g, ET g(x) ∈ dom f ?',
+        'Pour une composée : ai-je vérifié les **deux** domaines — $x \\in \\operatorname{dom} g$, ET ' +
+          '$g(x) \\in \\operatorname{dom} f$ ?',
         'Pour une lecture graphique : ai-je confirmé que l’image lue existe bien, avant de répondre une valeur ?',
       ],
     },

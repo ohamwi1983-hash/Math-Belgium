@@ -1940,39 +1940,45 @@ export const suites: ChapterContent = {
 
   recap: {
     items: [
-      '**Suite arithmétique** — $u_n = u_1 + (n-1)r$. Croissante si $r>0$, décroissante si ' +
-        '$r<0$. Somme $S_n = n(u_1+u_n)/2$ (de $u_p$ à $u_n$ : $n-p+1$ termes). Inconnue x ou rang n : relie deux termes par ' +
-        '$u_n = u_p + (n-p)r$, puis résous l\'équation du premier degré.',
-      '**Suite géométrique** — $u_n = u_1\\times q^{n-1}$ ; une évolution de t % donne $q = 1 \\pm t/100$. Somme $S_n = u_1(1-q^n)/(1-q)$. ' +
-        'Retrouver q depuis $q^k=a$ ? Vérifie la parité de k (0, 1 ou 2 solutions). Rang n : ' +
-        'réduis à la même base. Somme infinie $S_\\infty = u_1/(1-q)$, seulement si $|q|<1$.',
-      '**Convergence** — arithmétique : $\\pm\\infty$ selon le signe de r (jamais ' +
-        'convergente, sauf r=0). Géométrique : 0 si $|q|<1$, $u_1$ si $q=1$, $\\pm\\infty$ si $q>1$, ' +
-        'pas de limite si $q\\leq-1$. Suite $P(n)/Q(n)$ : compare les degrés de P et Q.',
+      '**Suite arithmétique** — $u_n = u_1 + (n-1)r$. Croissante si $r>0$, décroissante si $r<0$. ' +
+        'Somme $S_n = \\dfrac{n(u_1+u_n)}{2}$ (de $u_p$ à $u_n$ : $n-p+1$ termes). Inconnue $x$ ou ' +
+        'rang $n$ : relie deux termes par $u_n = u_p + (n-p)r$, puis résous l\'équation du premier ' +
+        'degré.',
+      '**Suite géométrique** — $u_n = u_1\\times q^{n-1}$ ; une évolution de $t\\,\\%$ donne $q = 1 ' +
+        '\\pm \\dfrac{t}{100}$. Somme $S_n = u_1\\,\\dfrac{1-q^n}{1-q}$. Retrouver $q$ depuis $q^k=a$ ? ' +
+        'Vérifie la parité de $k$ (0, 1 ou 2 solutions). Rang $n$ : réduis à la même base. Somme ' +
+        'infinie $S_\\infty = \\dfrac{u_1}{1-q}$, seulement si $|q|<1$.',
+      '**Convergence** — arithmétique : $\\pm\\infty$ selon le signe de $r$ (jamais convergente, sauf ' +
+        '$r=0$). Géométrique : $0$ si $|q|<1$, $u_1$ si $q=1$, $\\pm\\infty$ si $q>1$, pas de limite si ' +
+        '$q\\leq-1$. Suite $\\dfrac{P(n)}{Q(n)}$ : compare les degrés de $P$ et $Q$.',
       '**Problèmes classiques** — reconnais d\'abord la nature de la suite (raison additive ' +
         'ou multiplicative), avant de choisir la formule.',
       '**Comparaison de deux suites** — balayage numérique jusqu\'au rang de bascule, en ' +
         'vérifiant que la condition est bien fausse au rang précédent. Traduis toujours le ' +
         'rang trouvé dans l\'unité du contexte.',
-      '**Suite récurrente affine** — $u_{n+1}=a\\times u_n+b$. Régime permanent $L=b/(1-a)$, ' +
-        'seulement si $|a|<1$. Sinon, la suite diverge et L n\'est pas une limite (sauf si $u_1 = L$ : ' +
-        'la suite est alors constante). Formule explicite : $u_n = L + (u_1-L)\\times a^{n-1}$.',
+      '**Suite récurrente affine** — $u_{n+1}=a\\times u_n+b$. Régime permanent $L=\\dfrac{b}{1-a}$, ' +
+        'seulement si $|a|<1$. Sinon, la suite diverge et $L$ n\'est pas une limite (sauf si $u_1 = L$ ' +
+        ': la suite est alors constante). Formule explicite : $u_n = L + (u_1-L)\\times a^{n-1}$.',
     ],
     checklist: {
       label: 'Astuce — avant de rendre ta copie',
       items: [
-        'Ai-je bien utilisé (n−1), et non n, dans la formule générale — aussi bien pour une suite arithmétique que géométrique ?',
+        'Ai-je bien utilisé $(n-1)$, et non $n$, dans la formule générale — aussi bien pour une ' +
+          'suite arithmétique que géométrique ?',
         'Pour une raison géométrique retrouvée par une racine d\'exposant pair : ai-je considéré les deux solutions possibles, ou vérifié qu\'aucune n\'existe ?',
-        'Pour une somme de uₚ à uₙ : ai-je compté n − p + 1 termes, et non n − p ?',
-        'Pour un pourcentage : ai-je traduit +t % en q = 1 + t/100 (et −t % en q = 1 − t/100), et multiplié les coefficients successifs au lieu d\'additionner les pourcentages ?',
-        'Pour une limite géométrique : ai-je bien distingué q=−1 (bornée, oscille, pas de limite) de q<−1 (oscille, |uₙ| grandit sans borne, pas de limite non plus) ?',
-        'Pour un régime permanent : ai-je vérifié |a|<1 avant de calculer L, et pas seulement après ?',
+        'Pour une somme de $u_p$ à $u_n$ : ai-je compté $n - p + 1$ termes, et non $n - p$ ?',
+        'Pour un pourcentage : ai-je traduit $+t\\,\\%$ en $q = 1 + \\dfrac{t}{100}$ (et $-t\\,\\%$ en ' +
+          '$q = 1 - \\dfrac{t}{100}$), et multiplié les coefficients successifs au lieu d\'additionner ' +
+          'les pourcentages ?',
+        'Pour une limite géométrique : ai-je bien distingué $q=-1$ (bornée, oscille, pas de limite) ' +
+          'de $q<-1$ (oscille, $|u_n|$ grandit sans borne, pas de limite non plus) ?',
+        'Pour un régime permanent : ai-je vérifié $|a|<1$ avant de calculer $L$, et pas seulement après ?',
       ],
     },
     forward:
-      'Le prochain chapitre relie les suites aux limites de fonctions. La notion de ' +
-      'convergence vue ici, pour un indice entier n qui tend vers l\'infini, se généralise à ' +
-      'une variable réelle x — qui tend vers l\'infini, ou vers une valeur précise.',
+      'Le prochain chapitre relie les suites aux limites de fonctions. La notion de convergence vue ' +
+      'ici, pour un indice entier $n$ qui tend vers l\'infini, se généralise à une variable réelle $x$ ' +
+      '— qui tend vers l\'infini, ou vers une valeur précise.',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai ou faux — tout le chapitre',
