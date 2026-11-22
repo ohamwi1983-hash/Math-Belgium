@@ -1,3 +1,6 @@
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeDeuxDroitesPlan } from "./generateurs/deuxDroitesPlan/corrigeDetaille";
 import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceDeuxDroitesPlan, ExercicePlanDetermine } from "./core/deuxDroitesPlan.types";
@@ -133,6 +136,7 @@ export function AppPositionsDeuxDroites() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDeuxDroitesPlan(e), lettreEtape(ecran))} />,
       }
     : null;
 

@@ -1,5 +1,5 @@
 import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
-import { texte } from "../../export/fragmentsDocx";
+import { texte } from "../../export/corrigeTableau";
 import type {
   DeuxDroitesJustifiees,
   DroiteNommee,

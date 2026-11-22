@@ -5,26 +5,23 @@ import type {
   CritereBareme,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
+  CriteresDifficulte,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleePercee } from "./corrigeDetaille";
 import type { ExercicePercee } from "../../core/perceePlanAuxiliaire.types";
 import { figurePerceeSvg } from "../../ui/figurePercee";
 import {
   consigneGlobale,
-  elementsFinaux,
   enonce,
-  faceDuPlan,
-  legendeFinale,
   nomB,
   nomDroite,
   nomPlan,
   perceeDansSolide,
   phraseNomsConstruits,
-  phrasePositionPercee,
-  raisonCandidat,
 } from "../../ui/formatPercee";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExercicePercee } from "./index";
 import { LIBELLE_CAS_PARTICULIER_PERCEE, profilPercee } from "./profil";
@@ -85,42 +82,6 @@ function reponseBreve(e: ExercicePercee): FragmentConsigne[] {
   return [texte(`Plan auxiliaire π = ${nomPlan(o.nom)} ; b = ${nomB(e, s, paire)}${noms ? ` (${noms.replace(/^On nomme /, "").replace(/\.$/, "")})` : ""} ; P est le point de rencontre de ${nomDroite(e)} et ${nomB(e, s, paire)}, ${perceeDansSolide(e) ? "sur le solide" : "hors du solide"}.`)];
 }
 
-function correctionDetaillee(e: ExercicePercee): EtapeCorrection[] {
-  const { o, s, paire } = reference(e);
-  const [a, b] = e.droite;
-  const face = faceDuPlan(e, o.nom);
-  const B = nomB(e, s, paire);
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [texte("On choisit un plan auxiliaire π qui contient d. Il coupe α suivant une droite b ; le point de percée est l'intersection de d et b, deux droites du plan π.")],
-    },
-    {
-      label: "Plan auxiliaire",
-      sousQuestion: "a",
-      fragments: [texte(`Le plan π = ${nomPlan(o.nom)}${face ? ` (${face})` : ""} contient ${a} et ${b}, donc la droite d. Tout plan qui contient d convient : il coupe α, puisqu'il contient le point où d perce α.`)],
-    },
-    ...paire.map((i) => ({ label: "Point commun", sousQuestion: "b", fragments: [texte(raisonCandidat(e, o, s.candidats[i]!))] })),
-    {
-      label: "Conclusion",
-      sousQuestion: "b",
-      fragments: [texte(`${phraseNomsConstruits(s, paire)} La droite b, commune à π et α, est ${B}.`.trim())],
-    },
-    {
-      label: "Construction",
-      sousQuestion: "c",
-      fragments: [texte(`Les droites d = ${nomDroite(e)} et b = ${B} sont toutes deux dans le plan π : elles se coupent en un point P. P est sur b, donc dans α : c'est le point de percée de d dans α. ${phrasePositionPercee(e)} ${legendeFinale()}`)],
-      figureHtml: figurePerceeSvg(e, { mode: "papier", etiquetteD: true, ...elementsFinaux(e, o, paire) }),
-    },
-    {
-      label: "Piège",
-      sousQuestion: "c",
-      fragments: [texte("Le point où d semble croiser une arête ou un côté de α sur le dessin n'est pas le point de percée : d et cette droite sont souvent gauches. Seule l'intersection de d avec b, deux droites d'un même plan, est sûre.")],
-    },
-  ];
-}
-
 function construireCorrection(e: ExercicePercee): BlocCorrection[] {
   return [{ type: "paragraphe", fragments: reponseBreve(e) }];
 }
@@ -144,8 +105,11 @@ function bareme(e: ExercicePercee): BaremeExercice {
   };
 }
 
-function difficulte(e: ExercicePercee): 1 | 2 | 3 {
-  return e.directe ? 2 : 3;
+/** Trois écrans de raisonnement (plan auxiliaire, droite b, point de percée), sans charge (le
+ * nombre de points construits dépend du plan choisi), méthode 1 (le plan auxiliaire est à choisir),
+ * aucun piège dans les données, aucun nombre. */
+function criteresDifficulte(e: ExercicePercee): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleePercee(e)), sansCharge: true, methode: 1, piege: 0, nombres: 0 };
 }
 
 export const adaptateurEvaluationPercee: AdaptateurFeuilleExercices<ExercicePercee> = {
@@ -158,10 +122,9 @@ export const adaptateurEvaluationPercee: AdaptateurFeuilleExercices<ExercicePerc
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: (e) => correctionDetailleePercee(e),
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
 };

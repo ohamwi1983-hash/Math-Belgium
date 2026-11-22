@@ -1,6 +1,8 @@
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeDeuxDroitesPlan } from "./corrigeDetaille";
 import { texte } from "../../../export/fragmentsDocx";
-import type { ExerciceDeuxDroites, ExerciceDeuxDroitesPlan, ExercicePlanDetermine } from "../../core/deuxDroitesPlan.types";
+import type { ExerciceDeuxDroites, ExerciceDeuxDroitesPlan } from "../../core/deuxDroitesPlan.types";
 import { figureDeuxDroitesPlanSvg } from "../../ui/figureDeuxDroitesPlan";
 import {
   LIBELLES_POSITION,
@@ -8,18 +10,10 @@ import {
   droiteContenue,
   droitePercante,
   droiteTexte,
-  droitesDuPlan,
   ecrans,
   lieuTexte,
   listeEt,
-  phrasePosition,
-  piegePlan,
-  piegePositions,
   planTexte,
-  reponseJustification,
-  reponseNomPlan,
-  reponsePlanCommun,
-  reponseVerdictPlan,
   texteRaison,
 } from "../../ui/formatDeuxDroitesPlan";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDeuxDroitesPlan } from "./index";
@@ -93,62 +87,12 @@ function reponseBreve(e: ExerciceDeuxDroitesPlan): FragmentConsigne[] {
 // Corrigé détaillé
 // ---------------------------------------------------------------------------------------------
 
-function lecturePlanCommun(e: ExerciceDeuxDroites): string {
-  const quatre = [...e.d1, ...e.d2];
-  if (e.planCommun) return `Le plan ${planTexte(e.planCommun)} contient les quatre points ${listeEt(quatre)} : il contient donc les deux droites.`;
-  const j = e.justification;
-  if (j.type !== "gauches") return "";
-  const percante = droitePercante(e);
-  const autre = percante.find((n) => n !== j.point)!;
-  return `Un plan qui contiendrait les deux droites contiendrait ${droiteTexte(droiteContenue(e))} et le point ${j.point} : ce serait le plan ${planTexte(j.plan)}. Or ${autre} n'est pas dans ce plan. Aucun plan ne contient donc les deux droites.`;
-}
-
-function conclusionPosition(e: ExerciceDeuxDroites): string {
-  if (e.position === "gauches") return `Aucun plan ne les contient toutes les deux. ${phrasePosition(e)}`;
-  if (e.position === "paralleles") return `Dans le plan ${planTexte(e.planCommun!)}, elles ont la même direction et aucun point commun. ${phrasePosition(e)}`;
-  return `Dans le plan ${planTexte(e.planCommun!)}, elles n'ont pas la même direction : elles se coupent. ${phrasePosition(e)}`;
-}
-
-function correctionPositions(e: ExerciceDeuxDroites): EtapeCorrection[] {
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("Deux droites sont dans un même plan si un plan contient leurs quatre points : un plan contient une droite dès qu'il contient deux de ses points.")] },
-    { label: "Lecture", sousQuestion: "a", fragments: [texte(lecturePlanCommun(e))] },
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte(reponsePlanCommun(e))] },
-    { label: "Conclusion", sousQuestion: "b", fragments: [texte(conclusionPosition(e))] },
-    { label: "Justification", sousQuestion: "c", fragments: [texte(reponseJustification(e))], figureHtml: figureDeuxDroitesPlanSvg(e, { corrige: true, largeurMax: 360 }) },
-    { label: "Piège", sousQuestion: e.position === "gauches" ? "b" : "c", fragments: [texte(piegePositions(e))] },
-  ];
-}
-
-function methodePlan(e: ExercicePlanDetermine): string {
-  if (e.type === "troisPoints") return "Trois points déterminent un seul plan s'ils ne sont pas alignés. Trois points alignés en déterminent une infinité (tous les plans qui contiennent leur droite).";
-  if (e.type === "droitePoint") return "Une droite et un point déterminent un seul plan si le point n'est pas sur la droite ; sinon, une infinité de plans les contiennent.";
-  return "Deux droites sécantes ou parallèles déterminent un seul plan ; deux droites gauches n'en déterminent aucun.";
-}
-
-function correctionPlan(e: ExercicePlanDetermine): EtapeCorrection[] {
-  const droites = droitesDuPlan(e);
-  const etapes: EtapeCorrection[] = [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte(methodePlan(e))] },
-    ...(droites ? [{ label: "Preuve", sousQuestion: "a", fragments: [texte(reponseJustification(droites))] }] : []),
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte(reponseVerdictPlan(e))] },
-  ];
-  if (e.determine) {
-    etapes.push({
-      label: "Nom du plan",
-      sousQuestion: "b",
-      fragments: [texte(`${reponseNomPlan(e)} Les lettres peuvent être écrites dans n'importe quel ordre.`)],
-      figureHtml: figureDeuxDroitesPlanSvg(e, { corrige: true, largeurMax: 360 }),
-    });
-  } else {
-    etapes.push({ label: "Raison", sousQuestion: "b", fragments: [texte(texteRaison(e, "vraie"))] });
-  }
-  etapes.push({ label: "Piège", sousQuestion: e.determine ? "a" : "b", fragments: [texte(piegePlan(e))] });
-  return etapes;
-}
-
-function correctionDetaillee(e: ExerciceDeuxDroitesPlan): EtapeCorrection[] {
-  return e.variante === "positions" ? correctionPositions(e) : correctionPlan(e);
+/** Niveau CONSTANT dans un verdict (position des droites, plan déterminé ou non) : famille
+ * « positions » — a) plan commun et c) justification raisonnés, b) position = conséquence directe de
+ * a) (lecture) ; famille « plan » — deux écrans. Sans charge (le nombre de lignes dépend du verdict),
+ * méthode 1 (choisir la propriété du cours), aucun piège dans les données, aucun nombre. */
+function criteresDifficulte(e: ExerciceDeuxDroitesPlan): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeDeuxDroitesPlan(e), e.variante === "positions" ? ["b"] : []), sansCharge: true, methode: 1, piege: 0, nombres: 0 };
 }
 
 function construireCorrection(e: ExerciceDeuxDroitesPlan): BlocCorrection[] {
@@ -200,10 +144,9 @@ export const adaptateurEvaluationDeuxDroitesPlan: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte: (e) => (e.variante === "positions" || e.type === "deuxDroites" ? 2 : 1),
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeDeuxDroitesPlan,
   bareme,
   enoncePapier,
-  dureeMinutes: 5,
 };
