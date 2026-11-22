@@ -864,6 +864,31 @@ Décisions de l'utilisateur (maquettes validées, lots A1–A4) :
   découpable à ses « ,\ » / « ;\ » et longue (> 45 caractères visibles) est rendue en formules EN
   LIGNE séparées par leurs virgules (`formuleAfficheeHtml`, `genererFeuilleExercicesHtml.ts`).
 
+## Couleurs des compétences (décision de l'utilisateur, 22/11/2026)
+
+1 Connaître = **vert sarcelle** (le plus clair), 2 Appliquer = **bleu franc** (clarté moyenne),
+3 Transférer = **rouge bordeaux** (le plus foncé) — avant : `--sky` / `--accent` / `--plan`, Connaître et
+Transférer se confondaient. Teinte ET clarté différentes (≈ 13 à 15 points de L* d'écart, lisibles en
+niveaux de gris, en deutéranopie et en protanopie) ; le numéro reste dans la pastille, le nom de la
+compétence est toujours écrit.
+- **Site** : jetons dédiés `--proc1…3` (pastille, barre, point), `--on-procN` (texte posé dessus),
+  `--procN-ink` (texte sur la page ou sur `--procN-soft`) dans `index.css`, clair et sombre ; JAMAIS
+  `--sky`, `--accent`, `--plan`, `--good`, `--bad` pour une compétence (ils gardent leurs autres usages).
+  Clair : `#0c828a` / `#1d52a8` / `#67152e`, encres `#05585e` / `#133f87` / `#60132a`, blanc dessus
+  (4,6 / 7,4 / 12,2:1). Sombre : `#7be0df` / `#77a9f3` / `#c1628b`, encres `#98e4e3` / `#a7c9fc` /
+  `#e6afc4`, texte `#10161d` dessus (11,8 / 7,6 / 4,7:1). Usages : `.conc-pc-N`, `.conc-rep-seg-N`,
+  `.conc-barre-pN`, `.conc-legende-pN` (panneau, réglages Compétences / Répartition d'examen, assistant
+  élève qui réutilise `ReglageCompetences`), `.coffre-pN` (fiche du coffre). Le texte posé sur une
+  pastille ou un segment vient de `--on-procN` (l'assistant élève, hors `.conc`, n'avait pas de couleur
+  de texte : l'ancien `--conc-on-pc` a disparu).
+- **Documents** : seule source `export/couleursProcessus.ts` (valeurs CLAIRES du site, `trait` / `encre`,
+  `CSS_VARIABLES_PROCESSUS` pour le HTML, `couleurProcessusDocx` pour le Word). Couleur seule, textes et
+  mises en page inchangés : bandeau « Processus n — … » (filet + titre ; copie, corrigé, blanche), en-têtes
+  du tableau « Points » / « Mon score », étiquette « notion · compétence » de la feuille, résumé et
+  « Question n · compétence » de la grille, examen par processus (ouverture de partie, en-têtes du
+  tableau des parties), examen par chapitre (étiquette de compétence des questions). Le reste de la
+  charte papier (`--accent` #1d5b8f : surtitres, consignes, étapes du corrigé) ne change pas.
+
 ## Options du document (cases du panneau, `EnTeteEvaluation`)
 
 Toutes décochées par défaut ; un plan enregistré sans le champ se recharge avec « non ».

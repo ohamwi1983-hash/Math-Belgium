@@ -4,15 +4,16 @@
  * `components/compte/profil.css` (bandeau sombre, cartes, confirmation) dont il réutilise les classes
  * sans les modifier. Jetons du site (clair / sombre), rayon 3 px ; la miniature reste blanche (papier).
  * Couleur par type : feuille d'exercices = --sky, évaluation = --accent, examen = --plan,
- * remédiation = --good. Processus : 1 = --sky, 2 = --accent, 3 = --plan. Cibles ≥ 44 px sur téléphone. */
+ * remédiation = --good. Processus : 1 = --proc1 (vert sarcelle), 2 = --proc2 (bleu franc), 3 = --proc3 (rouge
+ * bordeaux), texte posé dessus --on-procN. Cibles ≥ 44 px sur téléphone. */
 
 .coffre-t-exercice { --t: var(--sky); --t-doux: var(--sky-soft); --t-encre: var(--sky-ink); }
 .coffre-t-evaluation { --t: var(--accent); --t-doux: var(--accent-soft); --t-encre: var(--accent-ink); }
 .coffre-t-examen { --t: var(--plan); --t-doux: var(--plan-soft); --t-encre: var(--plan-ink); }
 .coffre-t-remediation { --t: var(--good); --t-doux: var(--good-soft); --t-encre: color-mix(in srgb, var(--good) 70%, var(--ink)); }
-.coffre-p1 { --p: var(--sky); }
-.coffre-p2 { --p: var(--accent); }
-.coffre-p3 { --p: var(--plan); }
+.coffre-p1 { --p: var(--proc1); --p-sur: var(--on-proc1); }
+.coffre-p2 { --p: var(--proc2); --p-sur: var(--on-proc2); }
+.coffre-p3 { --p: var(--proc3); --p-sur: var(--on-proc3); }
 
 .page-tool:has(> .coffre) { padding-top: 24px; }
 .coffre-contenu { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
@@ -134,7 +135,7 @@
 .coffre-questions li:last-child { border-bottom: 0; }
 .coffre-numero {
   width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-  background: var(--p); color: var(--carnet-sur-couleur); font: 600 0.74rem var(--sans);
+  background: var(--p); color: var(--p-sur, var(--carnet-sur-couleur)); font: 600 0.74rem var(--sans);
 }
 .coffre-q-titre { min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
 .coffre-q-nombre { color: var(--ink-soft); }
