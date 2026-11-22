@@ -19,6 +19,19 @@ export const primitivesIntegrales: ChapterContent = {
       number: 1,
       title: 'Calcul de primitives',
       kicker: 'F\'=f ; primitive générale F(x)+C ; substitution ; intégration par parties',
+      titreCourt: 'Calcul de primitives',
+      partie: 'Les primitives',
+      essentiel: [
+        'F est une primitive de f sur I si $F\'(x) = f(x)$ ; toutes les primitives de f s\'écrivent alors $F(x) + C$ : $\\int f(x)dx = F(x)+C$.',
+        '$\\int x^n dx = \\dfrac{x^{n+1}}{n+1} + C$ si $n \\neq -1$, et $\\int \\dfrac{1}{x}dx = \\ln|x| + C$. Une primitive de $f(ax+b)$ est $\\dfrac{1}{a}F(ax+b)$.',
+        'Substitution : reconnaître $u\'(x) \\cdot f(u(x))$, de primitive $F(u(x)) + C$. Par parties : $\\int f \\cdot g\' \\, dx = f \\cdot g - \\int f\' \\cdot g \\, dx$, en dérivant la partie qui se simplifie.',
+      ],
+      cartes: [
+        { question: 'Quelle est la primitive de $\\dfrac{1}{x}$ ?', reponse: '$\\ln|x| + C$ : la formule des puissances exclut $n = -1$.' },
+        { question: 'Calcule $\\int \\cos(3x)dx$.', reponse: '$\\dfrac{1}{3}\\sin(3x) + C$.' },
+        { question: 'Calcule $\\int x \\cdot e^{x^2} dx$.', reponse: '$\\dfrac{1}{2}e^{x^2} + C$ : il manque le facteur 2 de $u\'(x) = 2x$.' },
+        { question: 'Calcule $\\int x \\cdot e^x dx$.', reponse: 'Par parties, avec $f(x) = x$ et $g\'(x) = e^x$ : $(x-1)e^x + C$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Calcul de primitives (1/2) : famille et tableau', youtubeId: '_g-hpY4PFSk' },
         { kind: 'video', title: 'Calcul de primitives (2/2) : substitution et intégration par parties', youtubeId: 'L2k06qFYtc8' },
@@ -436,6 +449,18 @@ export const primitivesIntegrales: ChapterContent = {
       number: 2,
       title: 'Quelle primitive ? (condition initiale)',
       kicker: 'isoler une primitive particulière depuis F(x₀)=y₀',
+      titreCourt: 'Condition initiale',
+      partie: 'Les primitives',
+      essentiel: [
+        'Une condition initiale $F(x_0) = y_0$ isole une seule primitive : on pose $F(x_0) + C = y_0$, puis on résout cette équation du premier degré en C.',
+        'C reste symbolique jusqu\'à la condition initiale, jamais fixé provisoirement à 0. Contrôle : dérive (tu retrouves f), puis remplace x par $x_0$ (tu retrouves $y_0$).',
+      ],
+      cartes: [
+        { question: 'Primitive de $f(x) = 2x$ telle que $F(0) = 5$ ?', reponse: '$F(x) = x^2 + 5$.' },
+        { question: 'Primitive de $3x^2 - 4x + 1$ telle que $F(2) = 3$ ?', reponse: '$F(2) = 2 + C = 3$, donc $F(x) = x^3 - 2x^2 + x + 1$.' },
+        { question: 'Primitive de $\\cos(x)$ telle que $F(\\pi) = 1$ ?', reponse: '$F(x) = \\sin(x) + 1$.' },
+        { question: 'Vitesse $v(t) = 6t$ et position $x(0) = 10$ : que vaut x(t) ?', reponse: '$x(t) = 3t^2 + 10$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Quelle primitive ? Condition initiale', youtubeId: '8XP9SUOn69c' },
         {
@@ -639,6 +664,19 @@ export const primitivesIntegrales: ChapterContent = {
       number: 3,
       title: 'Intégrales définies, paramètre et valeur moyenne',
       kicker: 'théorème fondamental, propriétés, méthode des trapèzes, valeur moyenne',
+      titreCourt: 'Intégrale définie',
+      partie: 'Intégrale définie et aires',
+      essentiel: [
+        'Théorème fondamental : $\\int_a^b f(x)dx = [F(x)]_a^b = F(b) - F(a)$, quelle que soit la primitive F. La fonction aire $A(x) = \\int_a^x f(t)dt$ est la primitive de f qui s\'annule en a.',
+        'L\'intégrale est une somme **signée** : les aires sous l\'axe comptent négativement. Échanger les bornes change le signe : $\\int_b^a f(x)dx = -\\int_a^b f(x)dx$.',
+        'Valeur moyenne de f sur [a;b] : $\\dfrac{1}{b-a}\\int_a^b f(x)dx$, toujours atteinte par f. Si $m \\le f(x) \\le M$ : $m(b-a) \\le \\int_a^b f(x)dx \\le M(b-a)$.',
+      ],
+      cartes: [
+        { question: 'f(x) = x sur [0;4] : intégrale et valeur moyenne ?', reponse: '$\\int_0^4 x\\,dx = 8$ et la valeur moyenne vaut $\\dfrac{8}{4} = 2$.' },
+        { question: 'Calcule $\\int_{-2}^{2}\\left(x^3 - 5x\\right)dx$.', reponse: '0, sans calcul : la fonction est impaire.' },
+        { question: 'f vaut 2 sur [0;3] et −1 sur [3;5] : intégrale et aire ?', reponse: '$\\int_0^5 f(x)dx = 6 - 2 = 4$, mais l\'aire vaut $6 + 2 = 8$ u.a.' },
+        { question: 'Approche $\\int_0^4 x^2 dx$ par 4 trapèzes.', reponse: '$\\dfrac{1}{2}[0+16+2(1+4+9)] = 22$, pour une valeur exacte de $\\dfrac{64}{3}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Intégrales définies (1/2) : de l\'aire à l\'intégrale, théorème fondamental', youtubeId: 'VcBrwzQ86wc' },
         { kind: 'video', title: 'Intégrales définies (2/2) : propriétés, trapèzes, valeur moyenne', youtubeId: 'PTTczZuLjOw' },
@@ -1161,6 +1199,19 @@ export const primitivesIntegrales: ChapterContent = {
       number: 4,
       title: 'Calcul d\'aires par intégrale',
       kicker: 'découper aux racines, sommer les valeurs absolues ; aire entre deux courbes',
+      titreCourt: 'Calcul d\'aires',
+      partie: 'Intégrale définie et aires',
+      essentiel: [
+        'Une aire est toujours positive. Si f change de signe, découpe aux racines de f et additionne les valeurs absolues des intégrales partielles.',
+        'Aire entre deux courbes, si $f(x) \\ge g(x)$ sur [a;b] : $\\int_a^b (f(x)-g(x))dx$ ; si elles se croisent, découpe à leurs points d\'intersection.',
+        'Quand la courbe qui borde la région par le haut change, découpe aussi au point de bascule.',
+      ],
+      cartes: [
+        { question: '$\\int_0^{2\\pi}\\sin(x)dx$, et l\'aire entre sin et l\'axe sur $[0;2\\pi]$ ?', reponse: 'L\'intégrale vaut 0, mais l\'aire vaut $2 + 2 = 4$.' },
+        { question: 'Aire entre $y = x^2$ et $y = 4$ ?', reponse: '$\\int_{-2}^{2}(4-x^2)dx = \\dfrac{32}{3}$.' },
+        { question: 'Aire entre les courbes de $x^3$ et de $x$ ?', reponse: '$\\dfrac{1}{4} + \\dfrac{1}{4} = \\dfrac{1}{2}$, alors que $\\int_{-1}^{1}\\left(x^3 - x\\right)dx = 0$.' },
+        { question: 'Aire sous la courbe de ln entre $x = 1$ et $x = e$ ?', reponse: '$[x\\ln(x) - x]_1^e = 1$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Calcul d\'aires par intégrale', youtubeId: '0LDrwlZLcoY' },
         {
@@ -1538,6 +1589,19 @@ export const primitivesIntegrales: ChapterContent = {
       number: 5,
       title: 'Volumes de révolution',
       kicker: 'méthode des disques (une courbe) et des rondelles (deux courbes)',
+      titreCourt: 'Volumes de révolution',
+      partie: 'Volumes, longueurs, problèmes',
+      essentiel: [
+        'Méthode des disques : $V = \\pi \\int_a^b [f(x)]^2 dx$ — chaque tranche est un disque de rayon f(x).',
+        'Méthode des rondelles, avec $f(x) \\ge g(x) \\ge 0$ : $V = \\pi \\int_a^b ([f(x)]^2 - [g(x)]^2) dx$ ; on soustrait les **carrés**, on n\'élève jamais la différence au carré.',
+        'Contenance d\'un objet : méthode des disques avec le profil **intérieur** ; $1$ L $= 1\\,000$ cm³.',
+      ],
+      cartes: [
+        { question: 'Rotation de $f(x) = x$ sur [0;3] : quel volume ?', reponse: '$\\pi\\int_0^3 x^2 dx = 9\\pi$ : un cône de rayon 3 et de hauteur 3.' },
+        { question: 'Volume d\'une boule de rayon r par les disques ?', reponse: '$\\pi\\int_{-r}^{r}\\left(r^2 - x^2\\right)dx = \\dfrac{4}{3}\\pi r^3$.' },
+        { question: 'Rotation de la région entre $y = 3$ et $y = x$ sur [0;3] ?', reponse: '$\\pi\\int_0^3 (9-x^2)dx = 18\\pi$.' },
+        { question: 'Rotation de $f(x) = \\sqrt{x}$ sur [0;4] : quel volume ?', reponse: '$\\pi\\int_0^4 x\\,dx = 8\\pi$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Volumes de révolution (1/2) : disques et cône', youtubeId: '-zG5OaZNCXQ' },
         { kind: 'video', title: 'Volumes de révolution (2/2) : rondelles et tronc de cône', youtubeId: '6KvZkBicCXQ' },
@@ -1849,6 +1913,18 @@ export const primitivesIntegrales: ChapterContent = {
       number: 6,
       title: 'Longueur d\'un arc de courbe',
       kicker: 'L = ∫√(1+[f\'(x)]²)dx',
+      titreCourt: 'Longueur d\'un arc',
+      partie: 'Volumes, longueurs, problèmes',
+      essentiel: [
+        'Longueur de l\'arc de y = f(x) entre a et b : $L = \\int_a^b \\sqrt{1+[f\'(x)]^2} \\, dx$, par Pythagore sur chaque petit segment.',
+        'Le « 1+ » et la racine sont toujours là. Repère un carré parfait sous la racine ; sinon, approche L numériquement.',
+      ],
+      cartes: [
+        { question: 'f(x) = ch(x) sur [0;a] : quelle longueur ?', reponse: '$1+\\text{sh}^2(x) = \\text{ch}^2(x)$, donc $L = \\text{sh}(a)$.' },
+        { question: '$f(x) = \\dfrac{2}{3}x^{3/2}$ sur [0;3] : quelle longueur ?', reponse: '$\\int_0^3 \\sqrt{1+x} \\, dx = \\dfrac{14}{3}$.' },
+        { question: 'D\'où vient la formule de la longueur d\'un arc ?', reponse: '$ds = \\sqrt{dx^2+dy^2} = \\sqrt{1+[f\'(x)]^2} \\, dx$, puis on somme sur [a;b].' },
+        { question: 'Le signe de f′(x) compte-t-il dans la formule ?', reponse: 'Non : f′(x) est élevé au carré.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Longueur d\'un arc de courbe', youtubeId: 'xFPokTBlOU8' },
         {
@@ -2058,6 +2134,19 @@ export const primitivesIntegrales: ChapterContent = {
       number: 7,
       title: 'Intégrales et primitives : problèmes',
       kicker: 'cinématique (a→v→x), économie, trapèzes, volumes par soustraction',
+      titreCourt: 'Problèmes en contexte',
+      partie: 'Volumes, longueurs, problèmes',
+      essentiel: [
+        'Cinématique : v est une primitive de a, x une primitive de v ; chaque intégration a sa **propre** constante, fixée par sa propre condition initiale.',
+        'Déplacement : $\\int_a^b v(t)dt$ ; distance parcourue : $\\int_a^b |v(t)|dt$, en découpant là où v s\'annule.',
+        'Accumuler : $Q(T) = Q(0) + \\int_0^T r(t)\\,dt$, avec le taux net (entrée moins sortie). Coefficient de Gini : $G = 2\\int_0^1 (x - L(x))\\,dx$.',
+      ],
+      cartes: [
+        { question: '$a(t) = 2$, $v(0) = 3$ et $x(0) = 0$ : que vaut x(t) ?', reponse: '$v(t) = 2t + 3$, puis $x(t) = t^2 + 3t$.' },
+        { question: '$v(t) = (t-1)(t-3)$ sur [0;3] : déplacement et distance ?', reponse: 'Déplacement 0 ; distance $\\dfrac{4}{3} + \\dfrac{4}{3} = \\dfrac{8}{3}$ m.' },
+        { question: 'Débit $d(t) = 12 - 0{,}1t$ en m³/h : quel volume en 10 h ?', reponse: '$\\left[12t - 0{,}05t^2\\right]_0^{10} = 115$ m³.' },
+        { question: 'Courbe de Lorenz $L(x) = x^2$ : coefficient de Gini ?', reponse: '$G = 2\\int_0^1 (x - x^2)\\,dx = \\dfrac{1}{3}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Intégrales et primitives : problèmes', youtubeId: 'piBkKOuDwWs' },
         {
