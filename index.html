@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#b65c1f" />
+    <!-- Barre du navigateur = fond de l'en-tête du site (bannière claire du 22/11/2026) : blanc en thème
+         clair, --surface du thème sombre (#161f27) en sombre. Plus d'orange. -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#161f27" media="(prefers-color-scheme: dark)" />
     <meta name="google-site-verification" content="YN8YFvxUIagFQ8FKYtpZpWRSUVLtqeWLVjt2VCA-HPA" />
     <!-- Installabilité PWA sur iOS/iPadOS : Safari n'utilise ni le manifest Web App ni son champ
          `display` pour décider du mode plein écran — ces 3 balises `apple-*` sont indispensables en

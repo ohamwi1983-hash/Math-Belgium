@@ -105,8 +105,8 @@ Partage plus tard : table `partages (plan_id, destinataire, droit)` + politique 
   `etat === 'connecte'` avant de naviguer (sinon la garde voit encore `anonyme`).
 - `components/compte/PageReservee.tsx` : `PageCompte` (cadre + `usePageNonIndexee` ; `sansTete` : la page porte son `<h1>`), `EnTeteCompte`, `PageReservee`
   (garde : sans session → `/connexion?retour=…`, désactivé → message, `admin`), `MessageIndisponible`.
-  `Champ.tsx` : label, aide, erreur reliée (`aria-describedby`, `aria-invalid`), « Afficher » le mot de
-  passe ; jamais de filtre de frappe ni de champ numérique (règle CLAUDE.md). `MenuCompte.tsx` : en-tête (visiteur : « Je suis professeur » → `/connexion?retour=…` ; connecté : « Mon compte »).
+  `Champ.tsx` : label, aide, erreur reliée (`aria-describedby`, `aria-invalid`), œil « Afficher le mot de
+  passe » dans le champ ; jamais de filtre de frappe ni de champ numérique (règle CLAUDE.md). `MenuCompte.tsx` : en-tête (visiteur : « Professeur » → `/connexion?retour=…` ; connecté : pastille « Mon compte » — voir « Bannière et pages d'accès » en fin de fichier).
 - Routes : `/connexion` (`?oubli=1` : lien de réinitialisation → `/mot-de-passe`), `/inscription`
   (`?code=` pré-rempli), `/mot-de-passe`, `/profil`, `/coffre`, `/evaluation` (panneau évaluations /
   examens pour tous les professeurs), `/admin` (`AdminComptes`). `/exercice` et `/…/exercices` sont
@@ -649,7 +649,7 @@ professeurs, désactiver / réactiver — jamais soi-même —, liens `/evaluati
 Décision de l'utilisateur : le carnet et les pages de conception (professeur connecté) prennent le bandeau
 sombre et le menu `MenuEspace` du profil, du coffre et de l'administration ; contenu et fonctionnement
 des pages inchangés.
-- `components/compte/BandeauEspace.tsx` : bandeau commun (classes `profil-bandeau…` de `profil.css` ;
+- `components/compte/BandeauEspace.tsx` : bandeau commun (classes `profil-bandeau…`, depuis le 22/11/2026 dans `bandeau-espace.css` ;
   pastille ronde, « ESPACE PROFESSEUR », `<h1>`, `apresTitre`, `pastilles` = `<li>`, `fin`). Profil et
   coffre l'utilisent (DOM identique, captures avant / après identiques au pixel près hors chevron du
   menu) ; l'administration garde `admin-bandeau` (jetons `--admin-*`).
@@ -771,3 +771,50 @@ rows returned » ; recharger `/evaluation` → Document : Examen → « Prépare
 régler → « Enregistrer comme ma répartition d'examen ». À vérifier contre le vrai projet : enregistrement puis
 rechargement (valeur relue), message « Répartition refusée » impossible depuis le site (les boutons ne
 produisent que des valeurs valides).
+
+## Bannière, menu « Mon compte » et pages d'accès (22/11/2026 : maquettes « A », AUCUN SQL)
+
+Décision de l'utilisateur (« J'accepte tes recommandations ») : bannière A (claire), menu A (liste groupée),
+pages de compte telles que dessinées ; bannière B (sombre) et menu en tuiles NON retenus. Champs, libellés,
+aides, erreurs, validations et flux Supabase (code d'invitation, lien par e-mail, `?retour=`, `?oubli=1`,
+garde des pages réservées) inchangés.
+- `SiteHeader` : logo (carré marine arrondi, courbe orange, `aria-hidden`) + « Chapitres de maths »
+  (Fraunces, sans retour à la ligne dès 360 px) ; téléphone : loupe = bouton bordé de 44 px ; ordinateur
+  (≥ 900 px) : champ de recherche à droite, à côté du compte (`RechercheSite` inchangé) ; fil d'Ariane
+  toujours SOUS la ligne. `theme-color` : `#ffffff` en clair, `#161f27` (= `--surface` sombre) en sombre
+  (`media`), manifeste PWA `#ffffff` : plus d'orange.
+- `MenuCompte` : visiteur → bouton bordé « Professeur » (icône personne, 44 px ; absent de `/connexion`,
+  `/inscription`, `/mot-de-passe`) ; connecté → pastille ronde (initiale du `nom_affiche` sans la civilité :
+  « M. Essai » → E) + ▾, `aria-label="Mon compte"`, `aria-expanded`, `aria-controls`. Menu `nav` : en-tête
+  (initiale, nom, « Espace professeur »), Préparer (Feuilles d'exercices, Évaluations et examens) · Mes outils
+  (Mon coffre, Carnet de matière vue) · Mon compte (Mon profil, Administration + badge « admin », admin
+  seulement) — mêmes six liens, même ordre ; « Tu es ici » + fond orange pâle + `aria-current="page"`
+  (`"true"` sur une sous-page du carnet) ; « Se déconnecter » à part, en rouge. Lignes ≥ 48 px. Téléphone
+  (< 760 px) : tiroir par le bas + voile (voile, Échap, lien, glisser vers le bas ; page bloquée dessous) ;
+  ordinateur : liste de 300 px ancrée à droite (clic à côté, Échap, Tab hors du menu). Focus sur le premier
+  lien à l'ouverture, rendu au bouton (Échap, voile) ; `prefers-reduced-motion` : aucune animation. En-tête
+  passé à `z-index: 90` tant que le menu est ouvert (au-dessus des barres fixes des pages).
+- Icônes au trait communes : `components/compte/IconesEspace.tsx` (sorties de `MenuEspace`, qui les
+  réexporte ; sans dépendance, car `MenuCompte` est dans le paquet principal), mode `compte` = 20 px.
+- Pages d'accès : `components/compte/PageAcces.tsx` (+ `acces.css`, chargé avec ces pages) — bandeau
+  `BandeauEspace` (icône clé / enveloppe / personne), carte blanche, champs 52 px, bouton principal orange
+  plein pleine largeur, liens secondaires sous un filet, fond uni ; phrase « Tu es élève ? Pas besoin de
+  compte… Retour aux chapitres » sur connexion et inscription ; ordinateur (≥ 860 px) : bandeau (+ « Prépare
+  tes feuilles, évaluations et examens… ») et phrase élève à gauche, carte à droite. `MessageAcces` :
+  pastille verte (« E-mail envoyé », « Presque fini ! », « Mot de passe modifié. ») ou rouge (« Ce lien ne
+  fonctionne plus » + message d'avant). Inscription : la phrase d'introduction est devenue le sous-titre du
+  bandeau (« Réservée aux professeurs, avec un code d'invitation donné par l'administrateur du site. »).
+  `PageCompte` / `EnTeteCompte` restent pour les autres pages.
+- Règles du bandeau sorties de `profil.css` vers `components/compte/bandeau-espace.css` (importé par
+  `BandeauEspace.tsx`), à l'identique : les pages d'accès n'importent pas `profil.css` (qui doit rester
+  APRÈS `carnet.css` : le charger plus tôt depuis `/connexion` inverserait l'ordre au passage vers `/profil`).
+- Vérifié (dossier de travail `banniere/` : `verifier.mjs`, `captures.mjs`, `faux-supabase.js` étendu à
+  `signInWithPassword` / `resetPasswordForEmail` / `updateUser` / `signUp` / `signOut` + options `anonyme`,
+  `recuperation`) : visiteur sur le build de PRODUCTION, professeur et flux simulés sur un build
+  `NODE_ENV=development vite build --mode test` + faux client ; iPhone 13, 360 px, 1 000 et 1 280 px, clair
+  et sombre — 726 vérifications (une ligne dès 360 px, 44 / 48 / 52 px, `?retour=`, œil dans le champ, menu
+  admin / non admin, « Tu es ici », Échap, voile, clic à côté, Tab, glisser, déconnexion, connexion →
+  `?retour=`, lien envoyé, inscription, nouveau mot de passe, `MenuEspace` intact, `scrollWidth` =
+  largeur), 0 erreur console ; sous l'en-tête, captures de `/profil` et `/coffre` identiques au pixel près
+  avant / après (bandeau déplacé sans changement). Captures avant / après dans `banniere/captures/`.
+  `npm run build` : 24 pages pré-rendues, accueil avec ses 23 liens de chapitres.

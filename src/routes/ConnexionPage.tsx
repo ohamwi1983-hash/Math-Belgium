@@ -1,14 +1,17 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Champ } from '../components/compte/Champ'
-import { MessageChargement, MessageIndisponible, PageCompte } from '../components/compte/PageReservee'
+import { IconeCle, IconeEnveloppe } from '../components/compte/IconesEspace'
+import { MessageAcces, PageAcces } from '../components/compte/PageAcces'
+import { MessageChargement, MessageIndisponible } from '../components/compte/PageReservee'
 import { useCompte } from '../lib/compteContexte'
 import { connecter, envoyerLienReinitialisation } from '../lib/compteDonnees'
 import { erreurEmail, messageErreur, retourSur } from '../lib/compteValidation'
 
 /** `/connexion` — e-mail + mot de passe ; « Mot de passe oublié ? » (`?oubli=1`) envoie le lien
  * de réinitialisation (flux Supabase, retour sur `/mot-de-passe`). `?retour=` : page demandée
- * avant la redirection (chemin du site seulement). */
+ * avant la redirection (chemin du site seulement). Cadre `PageAcces` (bandeau « ESPACE PROFESSEUR »,
+ * carte ; phrase « Tu es élève ? » sur la connexion seulement). */
 export function ConnexionPage() {
   const compte = useCompte({ demarrer: true })
   const navigate = useNavigate()
@@ -68,24 +71,22 @@ export function ConnexionPage() {
   }
 
   return (
-    <PageCompte titre={oubli ? 'Mot de passe oublié' : 'Connexion'}>
+    <PageAcces titre={oubli ? 'Mot de passe oublié' : 'Connexion'} icone={oubli ? <IconeEnveloppe /> : <IconeCle />} eleve={!oubli}>
       {compte.etat === 'indisponible' ? (
         <MessageIndisponible />
       ) : compte.etat === 'inactif' || (compte.etat === 'chargement' && !envoi) ? (
         <MessageChargement />
       ) : oubli ? (
         lienEnvoye ? (
-          <div className="compte-encadre compte-succes" role="status">
+          <MessageAcces ton="succes" titre="E-mail envoyé" role="status">
             <p>
               Si un compte existe pour <strong>{lienEnvoye}</strong>, un e-mail vient d'être envoyé avec un lien pour choisir un nouveau mot de passe. Regarde aussi dans les
               courriers indésirables.
             </p>
-            <p>
-              <button type="button" className="compte-bouton-lien" onClick={() => basculerOubli(false)}>
-                Retour à la connexion
-              </button>
-            </p>
-          </div>
+            <button type="button" className="compte-bouton-lien" onClick={() => basculerOubli(false)}>
+              <span aria-hidden="true">←</span> Retour à la connexion
+            </button>
+          </MessageAcces>
         ) : (
           <form className="compte-form" onSubmit={envoyerLien} noValidate>
             <p className="compte-intro">Indique l'adresse e-mail de ton compte : tu recevras un lien pour choisir un nouveau mot de passe.</p>
@@ -100,7 +101,7 @@ export function ConnexionPage() {
             </button>
             <p className="compte-liens">
               <button type="button" className="compte-bouton-lien" onClick={() => basculerOubli(false)}>
-                Retour à la connexion
+                <span aria-hidden="true">←</span> Retour à la connexion
               </button>
             </p>
           </form>
@@ -127,6 +128,6 @@ export function ConnexionPage() {
           </p>
         </form>
       )}
-    </PageCompte>
+    </PageAcces>
   )
 }

@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Champ } from '../components/compte/Champ'
-import { MessageChargement, MessageIndisponible, PageCompte } from '../components/compte/PageReservee'
+import { IconeCle } from '../components/compte/IconesEspace'
+import { MessageAcces, PageAcces } from '../components/compte/PageAcces'
+import { MessageChargement, MessageIndisponible } from '../components/compte/PageReservee'
 import { useCompte } from '../lib/compteContexte'
 import { changerMotDePasse } from '../lib/compteDonnees'
 import { erreurConfirmation, erreurMotDePasse, messageErreur, MOT_DE_PASSE_MIN } from '../lib/compteValidation'
@@ -16,7 +18,7 @@ function erreurDuLien(): string | null {
 /**
  * `/mot-de-passe` — choix d'un nouveau mot de passe : après le lien « mot de passe oublié » (la
  * session de récupération est ouverte par supabase-js à partir des jetons de l'URL), ou depuis le
- * profil d'un professeur connecté.
+ * profil d'un professeur connecté. Cadre `PageAcces` (bandeau « ESPACE PROFESSEUR », carte).
  */
 export function MotDePassePage() {
   const compte = useCompte({ demarrer: true })
@@ -48,21 +50,16 @@ export function MotDePassePage() {
   else if (compte.etat === 'inactif' || compte.etat === 'chargement') contenu = <MessageChargement />
   else if (compte.etat === 'anonyme')
     contenu = (
-      <div className="compte-encadre compte-erreur" role="alert">
+      <MessageAcces ton="erreur" titre="Ce lien ne fonctionne plus" role="alert">
         <p>{erreurLien ?? 'Lien invalide ou expiré : pour choisir un nouveau mot de passe, demande un nouveau lien.'}</p>
-        <p>
-          <Link to="/connexion?oubli=1">Recevoir un nouveau lien</Link>
-        </p>
-      </div>
+        <Link to="/connexion?oubli=1">Recevoir un nouveau lien</Link>
+      </MessageAcces>
     )
   else if (fait)
     contenu = (
-      <div className="compte-encadre compte-succes" role="status">
-        <p>Mot de passe modifié.</p>
-        <p>
-          <Link to="/profil">Aller à mon profil</Link>
-        </p>
-      </div>
+      <MessageAcces ton="succes" titre="Mot de passe modifié." role="status">
+        <Link to="/profil">Aller à mon profil</Link>
+      </MessageAcces>
     )
   else
     contenu = (
@@ -94,5 +91,9 @@ export function MotDePassePage() {
       </form>
     )
 
-  return <PageCompte titre="Nouveau mot de passe">{contenu}</PageCompte>
+  return (
+    <PageAcces titre="Nouveau mot de passe" icone={<IconeCle />}>
+      {contenu}
+    </PageAcces>
+  )
 }

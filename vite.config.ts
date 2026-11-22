@@ -14,7 +14,7 @@ export default defineConfig({
         short_name: 'Maths FWB',
         description: 'Chapitres de cours de mathématiques interactifs pour la FWB (4e, 5e, 6e).',
         lang: 'fr',
-        theme_color: '#b65c1f',
+        theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
