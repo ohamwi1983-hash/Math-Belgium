@@ -12,7 +12,7 @@ import { InvitationHoraire } from './Aujourdhui'
 import { grilleSemaine, type CelluleSemaine, type JourSemaine, type RangeeSemaine } from './journeeCarnet'
 import { capitale, dateAbregee, heureCourte, ouvrirFiche, resumeSeance, texteReperes, titreSemaine, trierRecentes, useEcranLarge } from './outilsCarnet'
 import { Planification } from './Planification'
-import { avertissementsInterro, dateCourteJour, evenementsEntre, interrosDuCreneau, motifCourt, predicatSuppression, texteAvertissement, titreEvenement, type Evenement } from '../../lib/agendaEvenements'
+import { avertissementsInterro, dateCourteJour, evenementsEntre, interrosDuCreneau, motifCourt, predicatSuppression, quiTexte, texteAvertissement, titreEvenement, type Evenement } from '../../lib/agendaEvenements'
 import { CarteRemise, IconeType, PuceType } from './AgendaUi'
 import { TableauHeuresRestantes, titreChapitre } from './HeuresEffectives'
 
@@ -455,15 +455,7 @@ export function MaSemaine({
 /** « Journée pédagogique — lun. 7/12 · toutes les classes », « Interrogation — mer. 9/12 · 5e B · Suites ». */
 function LigneEvenementSemaine({ e }: { e: Evenement }) {
   const ctx = useCarnet()
-  const noms =
-    e.type === 'interrogation'
-      ? (ctx.classes.find((c) => c.id === e.classe_id)?.nom ?? '')
-      : e.toutes_classes
-        ? 'toutes les classes'
-        : e.classes
-            .map((cid) => ctx.classes.find((c) => c.id === cid)?.nom ?? '')
-            .filter(Boolean)
-            .join(', ')
+  const noms = quiTexte(e, ctx.classes)
   const quoi = e.type === 'interrogation' ? (e.chapitre ? titreChapitre(e.chapitre) : '') : e.intitule.trim()
   return (
     <li>

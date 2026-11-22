@@ -8,6 +8,7 @@ import {
   INTITULE_MAX,
   LIBELLE_TYPE,
   resumeSuppressions,
+  titreEvenement,
   TYPES_EVENEMENT,
   type ContexteAgenda,
   type ErreursEvenement,
@@ -26,7 +27,9 @@ const nomHeure = (n: number) => (n === 0 ? 'heure zéro (H0)' : `${n}${n === 1 ?
  * date limite » du 22/11/2026), dans le panneau latéral commun (`PanneauLateral`). Type en puces ;
  * sortie, voyage, journée pédagogique… : intitulé, du / au, « Journée entière » ou « Certaines
  * heures » (de la n-ième à la m-ième heure de l'horaire de l'école), classes « Toutes » / « Certaines »
- * (pastilles), « J'accompagne », résumé « Heures supprimées : … ». Interrogation : classe, date, heure
+ * (pastilles), « J'accompagne », résumé « Heures supprimées : … ». Absence du professeur : ni
+ * « Toutes » / « Certaines » ni « J'accompagne » (toujours toutes ses classes de l'école), intitulé
+ * facultatif (« Formation », « Maladie »). Interrogation : classe, date, heure
  * facultative (créneaux de la classe ce jour-là), chapitre facultatif, avertissements de la date
  * limite du bulletin. Supprimer : confirmation DANS le panneau (jamais `confirm()`).
  *
@@ -102,6 +105,7 @@ export function FormulaireEvenement({
   }, [confirmer])
 
   const interro = s.type === 'interrogation'
+  const absence = s.type === 'absence_professeur'
   const maj = (p: Partial<SaisieEvenement>) => {
     setS((x) => ({ ...x, ...p }))
     setErreurs({})
@@ -117,6 +121,9 @@ export function FormulaireEvenement({
       const cid = s.classe_id ?? s.classes[0] ?? classesEcole[0]?.id ?? classes[0]?.id ?? null
       const k = classes.find((c) => c.id === cid)
       maj({ type: t, classe_id: cid, ecole_id: k?.ecole_id ?? s.ecole_id, au: s.du, journee_entiere: true, heure_debut: null, heure_fin: null })
+    } else if (t === 'absence_professeur') {
+      // Toujours toutes les classes de l'école, jamais « J'accompagne » (choix masqués).
+      maj({ type: t, toutes_classes: true, accompagne: false, classes: [], ...(s.type === 'interrogation' ? { journee_entiere: true, heure_debut: null, heure_fin: null } : {}) })
     } else maj({ type: t, ...(s.type === 'interrogation' ? { toutes_classes: s.classe_id === null, classes: s.classe_id ? [s.classe_id] : [], journee_entiere: true, heure_debut: null, heure_fin: null } : {}) })
   }
 
@@ -268,12 +275,12 @@ export function FormulaireEvenement({
             ) : (
               <>
                 <div className="compte-champ">
-                  <label htmlFor={`${id}-intitule`}>Intitulé</label>
+                  <label htmlFor={`${id}-intitule`}>{absence ? 'Intitulé (facultatif)' : 'Intitulé'}</label>
                   <input
                     id={`${id}-intitule`}
                     type="text"
                     value={s.intitule}
-                    placeholder={LIBELLE_TYPE[s.type]}
+                    placeholder={absence ? 'Ex. : Formation, Maladie' : LIBELLE_TYPE[s.type]}
                     aria-invalid={erreurs.intitule ? true : undefined}
                     aria-describedby={erreurs.intitule ? `${id}-intitule-e` : undefined}
                     onChange={(e) => maj({ intitule: e.target.value })}
@@ -363,6 +370,12 @@ export function FormulaireEvenement({
                 )}
                 {erreurs.heures && <p className="compte-erreur-champ">{erreurs.heures}</p>}
 
+                {absence ? (
+                  <p className="compte-aide agenda-absence-note">
+                    <strong>Toutes tes classes{ecoles.length > 1 ? ' de cette école' : ''}</strong> : tes heures de cours pendant {s.journee_entiere ? 'ces journées' : 'ces heures'} sont supprimées.
+                  </p>
+                ) : (
+                <>
                 <fieldset className="agenda-groupe">
                   <legend className="agenda-etiquette">Classes concernées</legend>
                   <div className="agenda-segments">
@@ -405,6 +418,8 @@ export function FormulaireEvenement({
                     <span className="compte-aide">Tes cours avec les autres classes pendant {s.journee_entiere ? 'ces journées' : 'ces heures'} sont aussi supprimés.</span>
                   </span>
                 </label>
+                </>
+                )}
 
                 {grilles.length > 0 && (
                   <p className="agenda-resume" role="status">
@@ -425,7 +440,7 @@ export function FormulaireEvenement({
             {confirmer && initiale && (
               <div className="agenda-confirmation" role="alertdialog" aria-labelledby={`${id}-conf`} onKeyDown={clavierConfirmation}>
                 <p id={`${id}-conf`}>
-                  <strong>Supprimer « {initiale.intitule.trim() || LIBELLE_TYPE[initiale.type]} » ?</strong>{' '}
+                  <strong>Supprimer « {titreEvenement(initiale)} » ?</strong>{' '}
                   {initiale.type === 'interrogation' ? 'L’interro disparaît de l’agenda.' : 'Les heures supprimées reviennent dans ton horaire.'}
                 </p>
                 <div className="agenda-confirmation-actions">

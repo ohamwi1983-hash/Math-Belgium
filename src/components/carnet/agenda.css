@@ -2,7 +2,7 @@
  * Chargé avec la page du carnet (import de `routes/CarnetPage.tsx`, après `carnet.css`). Maquettes du
  * 22/11/2026 ; mêmes jetons que le carnet (clair / sombre), rayon 3 px ; cibles ≥ 44 px sur téléphone.
  * Couleur par type d'événement : sortie = --plan, voyage = --sky, interrogation = --good,
- * session d'examens = --attn, journée pédagogique / conseil de classe / autre = neutre. */
+ * session d'examens = --attn, absence du professeur = --bad, journée pédagogique / conseil de classe / autre = neutre. */
 
 :root { --agenda-sombre: #182430; --agenda-sur-sombre: #ffffff; --agenda-sur-sombre-doux: #a3b2bd; --agenda-sur-sombre-accent: #e6c8a4; }
 @media (prefers-color-scheme: dark) {
@@ -14,6 +14,7 @@
 .agenda-t-voyage { --t: var(--sky); --t-doux: var(--sky-soft); --t-encre: var(--sky-ink); }
 .agenda-t-interrogation { --t: var(--good); --t-doux: var(--good-soft); --t-encre: var(--good); }
 .agenda-t-session_examens { --t: var(--attn); --t-doux: var(--attn-soft); --t-encre: var(--attn); }
+.agenda-t-absence_professeur { --t: var(--bad); --t-doux: var(--bad-soft); --t-encre: var(--bad); }
 .agenda-t-journee_pedagogique, .agenda-t-conseil_classe, .agenda-t-autre { --t: var(--ink-soft); --t-doux: var(--surface-2); --t-encre: var(--ink); }
 .agenda-t-journee_pedagogique, .agenda-t-conseil_classe, .agenda-t-autre { --t-doux: color-mix(in srgb, var(--line) 45%, var(--surface)); }
 

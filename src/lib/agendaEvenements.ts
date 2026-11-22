@@ -3,15 +3,17 @@
  * supabase-js, testée seule (esbuild + node). Voir `.claude/rules/comptes.md`, sous-section
  * « Événements et bulletin ».
  *
- * Événements : sortie, voyage scolaire, journée pédagogique, conseil de classe, session d'examens,
- * interrogation, autre. Un événement est rattaché à une école ; il concerne toutes les classes de
+ * Événements : sortie, voyage scolaire, journée pédagogique, conseil de classe, absence du professeur,
+ * session d'examens, interrogation, autre. Un événement est rattaché à une école ; il concerne toutes les classes de
  * cette école ou certaines ; il dure du … au …, toute la journée ou de la n-ième à la m-ième heure
  * (numéros de l'horaire de l'école). Pendant l'événement, les classes concernées n'ont pas cours :
  * leurs heures sont SUPPRIMÉES (rien à noter, pas d'oubli, pas comptées dans les heures effectives).
  * « J'accompagne » : les heures du professeur avec ses AUTRES classes pendant l'événement le sont
  * aussi (même école : par numéro d'heure ; autre école : par recouvrement des horaires ; journée
  * entière : toute la journée). Une INTERROGATION ne supprime rien (c'est une heure de cours) : une
- * classe, une date, heure et chapitre facultatifs.
+ * classe, une date, heure et chapitre facultatifs. Une ABSENCE DU PROFESSEUR concerne toujours TOUTES
+ * ses classes de l'école de l'événement (`toutes_classes` vrai, jamais « J'accompagne ») : leurs heures
+ * sont supprimées ; une absence d'une journée entière ne compte pas comme jour de classe.
  *
  * Périodes du bulletin : par école et par année scolaire, la date de remise des points de chaque
  * période. Jours de classe = jours ouvrables hors congés FWB (`calendrierFwb.ts`) et hors événements
@@ -24,16 +26,17 @@ import { creneauxDuJour, creneauxSemaine, journee, type CaseHoraire, type Crenea
 
 /* ------------------------------------------------------------------------------- types */
 
-export type TypeEvenement = 'sortie' | 'voyage' | 'journee_pedagogique' | 'conseil_classe' | 'session_examens' | 'interrogation' | 'autre'
+export type TypeEvenement = 'sortie' | 'voyage' | 'journee_pedagogique' | 'conseil_classe' | 'absence_professeur' | 'session_examens' | 'interrogation' | 'autre'
 
 /** Ordre des puces du formulaire. */
-export const TYPES_EVENEMENT: TypeEvenement[] = ['sortie', 'voyage', 'journee_pedagogique', 'conseil_classe', 'session_examens', 'interrogation', 'autre']
+export const TYPES_EVENEMENT: TypeEvenement[] = ['sortie', 'voyage', 'journee_pedagogique', 'conseil_classe', 'absence_professeur', 'session_examens', 'interrogation', 'autre']
 
 export const LIBELLE_TYPE: Record<TypeEvenement, string> = {
   sortie: 'Sortie',
   voyage: 'Voyage scolaire',
   journee_pedagogique: 'Journée pédagogique',
   conseil_classe: 'Conseil de classe',
+  absence_professeur: 'Absence du professeur',
   session_examens: 'Session d’examens',
   interrogation: 'Interrogation',
   autre: 'Autre',
@@ -143,14 +146,39 @@ export function heuresTexte(e: Pick<Evenement, 'journee_entiere' | 'heure_debut'
   return `${e.heure_debut === 0 ? 'heure zéro' : ordinal(e.heure_debut)} à ${ordinal(e.heure_fin)} heure`
 }
 
+/** Minuscule initiale, sauf sigle (« Formation » → « formation », « IFC » reste « IFC »). */
+function minusculeInitiale(t: string): string {
+  return t.length > 1 && t.charAt(1) !== t.charAt(1).toLowerCase() ? t : t.charAt(0).toLowerCase() + t.slice(1)
+}
+
+/** Absence du professeur : l'intitulé facultatif (« Formation ») en précision, jamais à la place du
+ * type — « Absence du professeur (formation) ». */
+function precisionAbsence(e: Pick<Evenement, 'type' | 'intitule'>): string {
+  const t = e.intitule.trim()
+  return !t || t.toLowerCase() === LIBELLE_TYPE.absence_professeur.toLowerCase() ? '' : ` (${minusculeInitiale(t)})`
+}
+
 export function titreEvenement(e: Pick<Evenement, 'type' | 'intitule'>): string {
+  if (e.type === 'absence_professeur') return `${LIBELLE_TYPE.absence_professeur}${precisionAbsence(e)}`
   return e.intitule.trim() || LIBELLE_TYPE[e.type]
 }
 
-/** « théâtre « Antigone » » : l'intitulé en minuscule initiale, pour « Pas cours — … ». */
+/** « théâtre « Antigone » », « absence du professeur (formation) » : minuscule initiale, pour
+ * « Pas cours — … ». */
 export function motifCourt(e: Pick<Evenement, 'type' | 'intitule'>): string {
   const t = titreEvenement(e)
   return t.charAt(0).toLowerCase() + t.slice(1)
+}
+
+/** Qui est concerné, en toutes lettres : « 5e B », « toutes les classes », « toutes tes classes »
+ * (absence du professeur ; « … de l'école » s'il a des classes dans une autre école). */
+export function quiTexte(e: Evenement, classes: ClasseAgenda[]): string {
+  const noms = (ids: string[]) => ids.map((id) => classes.find((c) => c.id === id)?.nom ?? '?').join(', ')
+  if (e.type === 'interrogation') return noms(classesConcernees(e, classes))
+  if (e.type === 'absence_professeur') return classes.some((c) => c.ecole_id !== e.ecole_id) ? 'toutes tes classes de l’école' : 'toutes tes classes'
+  if (e.toutes_classes) return 'toutes les classes'
+  const concernees = classesConcernees(e, classes)
+  return concernees.length > 0 ? noms(concernees) : 'aucune classe'
 }
 
 /** « du jeu. 3/12 au ven. 4/12 », « jeu. 3/12 ». */
@@ -330,8 +358,7 @@ export function texteBandeau(e: Evenement, date: string, ctx: ContexteAgenda, ti
     const ch = e.chapitre ? ` · ${titreChapitre ? titreChapitre(e.chapitre) : e.chapitre}` : ''
     return { titre: `Interrogation — ${noms(classesConcernees(e, ctx.classes))}${ch}`, suite: heures ? ` (${heures}).` : '.' }
   }
-  const concernees = classesConcernees(e, ctx.classes)
-  const qui = e.toutes_classes ? 'toutes les classes' : concernees.length > 0 ? noms(concernees) : 'aucune classe'
+  const qui = quiTexte(e, ctx.classes)
   let suite = heures ? ` (${heures}).` : e.du !== e.au ? ` (${datesTexte(e)}).` : ''
   if (e.accompagne) {
     const autres = [...new Set(journeeAgenda(date, { ...ctx, evenements: [e] }).supprimes.filter((s) => s.accompagne).map((s) => s.classe_id))]
@@ -361,14 +388,27 @@ export function joursDeClasse(apres: string, jusqua: string, ecoleId: string, ev
   return { jours, sansCours }
 }
 
-/** « (la journée pédagogique ne compte pas) », « (2 journées sans cours ne comptent pas) ». */
+/** Nom du type avec son article, pour « (… ne compte pas) ». */
+const TYPE_AVEC_ARTICLE: Record<TypeEvenement, string> = {
+  sortie: 'la sortie',
+  voyage: 'le voyage scolaire',
+  journee_pedagogique: 'la journée pédagogique',
+  conseil_classe: 'le conseil de classe',
+  absence_professeur: 'ton absence',
+  session_examens: 'la session d’examens',
+  interrogation: 'l’interrogation',
+  autre: 'l’événement',
+}
+
+/** « (la journée pédagogique ne compte pas) », « (ton absence ne compte pas) », « (2 journées sans
+ * cours ne comptent pas) ». */
 export function texteSansCours(s: JoursDeClasse['sansCours']): string {
   if (s.length === 0) return ''
   if (s.length === 1) {
     const e = s[0].evenement
     const t = e.intitule.trim()
-    const generique = !t || t.toLowerCase() === LIBELLE_TYPE[e.type].toLowerCase()
-    return `(${generique ? `la ${LIBELLE_TYPE[e.type].toLowerCase()}` : `« ${t} »`} ne compte pas)`
+    const generique = e.type === 'absence_professeur' || !t || t.toLowerCase() === LIBELLE_TYPE[e.type].toLowerCase()
+    return `(${generique ? TYPE_AVEC_ARTICLE[e.type] : `« ${t} »`} ne compte pas)`
   }
   return `(${s.length} journées sans cours ne comptent pas)`
 }
@@ -625,14 +665,17 @@ export function erreursEvenement(s: SaisieEvenement): ErreursEvenement {
   if (!s.ecole_id) e.ecole = 'Choisis l’école.'
   if (s.type === 'interrogation') {
     if (!s.classe_id) e.classes = 'Choisis la classe.'
-  } else if (!s.toutes_classes && s.classes.length === 0) e.classes = 'Choisis au moins une classe (ou « Toutes »).'
+  } else if (s.type !== 'absence_professeur' && !s.toutes_classes && s.classes.length === 0) e.classes = 'Choisis au moins une classe (ou « Toutes »).'
   return e
 }
 
-/** Saisie normalisée avant l'écriture (cohérente avec les contraintes de la base). */
+/** Saisie normalisée avant l'écriture (cohérente avec les contraintes de la base). Absence du
+ * professeur : toutes ses classes de l'école, jamais « J'accompagne ». */
 export function normaliserSaisie(s: SaisieEvenement): SaisieEvenement {
   const interro = s.type === 'interrogation'
+  const absence = s.type === 'absence_professeur'
   const heures = !s.journee_entiere && s.heure_debut !== null && s.heure_fin !== null
+  const toutes = interro ? false : absence ? true : s.toutes_classes
   return {
     ...s,
     intitule: s.intitule.trim(),
@@ -640,10 +683,10 @@ export function normaliserSaisie(s: SaisieEvenement): SaisieEvenement {
     journee_entiere: !heures,
     heure_debut: heures ? s.heure_debut : null,
     heure_fin: heures ? s.heure_fin : null,
-    toutes_classes: interro ? false : s.toutes_classes,
-    accompagne: interro ? false : s.accompagne,
+    toutes_classes: toutes,
+    accompagne: interro || absence ? false : s.accompagne,
     classe_id: interro ? s.classe_id : null,
     chapitre: interro ? s.chapitre || null : null,
-    classes: interro || s.toutes_classes ? [] : [...new Set(s.classes)],
+    classes: interro || toutes ? [] : [...new Set(s.classes)],
   }
 }

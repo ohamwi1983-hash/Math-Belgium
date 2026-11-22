@@ -56,6 +56,15 @@ export function IconeType({ type, taille = 16 }: { type: TypeEvenement | 'remise
           <path d="M16 14.2c2.9.4 5 2.8 5 5.8" />
         </svg>
       )
+    case 'absence_professeur':
+      // Personne barrée.
+      return (
+        <svg {...p}>
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M5.5 20.5c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5" />
+          <path d="M3.5 3.5l17 17" />
+        </svg>
+      )
     case 'session_examens':
       return (
         <svg {...p}>

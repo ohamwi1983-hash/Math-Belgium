@@ -530,20 +530,36 @@ progression, fiches, séances à rattraper, messages, cas sans école / sans cla
 ### Événements et bulletin (`supabase/migrations/0006_agenda.sql`, dans `/carnet`, maquettes du 22/11/2026)
 
 Décisions de l'utilisateur : événements (sortie, voyage scolaire, journée pédagogique, conseil de classe,
-session d'examens, interrogation, autre) pour TOUTES les classes d'une école ou CERTAINES ; pendant un
+absence du professeur, session d'examens, interrogation, autre) pour TOUTES les classes d'une école ou CERTAINES ; pendant un
 événement les classes concernées n'ont pas cours (heures SUPPRIMÉES) ; « J'accompagne » supprime aussi les
 heures du professeur avec ses AUTRES classes pendant l'événement ; une INTERROGATION (une classe, une date,
-heure et chapitre facultatifs) ne supprime rien. Pas de semaines A / B (`semaine` reste NULL). Périodes du
+heure et chapitre facultatifs) ne supprime rien. ABSENCE DU PROFESSEUR (ajoutée le 22/11/2026, « prévois
+parmi les événements l'absence du professeur aussi ») : concerne TOUTES ses classes de l'école de
+l'événement (`toutes_classes = true`, `accompagne = false`, ni Toutes / Certaines ni « J'accompagne » dans
+le formulaire), journée entière ou certaines heures, du / au, intitulé facultatif (« Formation »,
+« Maladie »). Pas de semaines A / B (`semaine` reste NULL). Périodes du
 bulletin par école ET par année scolaire (date de remise des points de P1 … Pn), seuil d'avertissement en
 jours de classe (défaut 3, 0–15). AUCUNE donnée d'élève.
 
 **Schéma 0006** (idempotent, à coller APRÈS 0005 ; « Success. No rows returned » ; vérifié sur Postgres 16
 local, 0001 → 0005 + données puis 0006 exécuté CINQ fois et 0002 → 0005 relancés après lui, données
-identiques — 135 vérifications, outils `agenda-evenements/test_sql.py` du dossier de travail) :
+identiques — 135 vérifications, outils `agenda-evenements/test_sql.py` du dossier de travail).
+**Recolle 0006 si tu l'avais déjà collé** avant l'ajout de l'absence du professeur : la liste des types est
+la contrainte `evenements_type_check` (nom que Postgres avait donné au CHECK de colonne de la première
+version), retirée et reposée à CHAQUE exécution par un seul `alter table … drop constraint if exists …, add
+constraint …` juste après le `create table if not exists` (la colonne `type` n'a plus de CHECK en ligne) ;
+idem pour `evenements_absence_professeur` (`type <> 'absence_professeur' or (toutes_classes and not
+accompagne)`). Vérifié (`agenda-absence/test_absence_sql.py`, 108 vérifications) : ancien 0006 + événements
+de tous les anciens types puis nouveau 0006 ×5 (données, RLS, politiques, droits, déclencheurs identiques ;
+seules ces deux contraintes changent), nouveau 0006 seul ×3, 0002 → 0005 relancés après, absence acceptée
+(journée, heures, deux jours), « certaines » / « J'accompagne » / `classe_id` / liaison refusés (23514), RLS
+croisé, `anon`, suppression de compte ; les 135 vérifications d'origine repassent. La contrainte qui
+imposerait des classes à « certaines » n'existe pas (événement sans classe restante ignoré par le site) :
+rien à changer puisque l'absence est toujours « toutes ».
 
 | Table | Colonnes | Contraintes |
 | --- | --- | --- |
-| `evenements` | `proprietaire`, `ecole_id`, `type` (7 valeurs), `intitule` (≤ 120, vide = nom du type), `du`, `au`, `journee_entiere`, `heure_debut` / `heure_fin` (0–15 : H0 permise comme 0004), `toutes_classes`, `accompagne`, `classe_id` + `chapitre` (« niveau/slug ») de l'interro, dates | `au >= du`, ≤ 366 jours, années 2000–2100 ; journée entière ⟺ heures NULL, sinon fin ≥ début ; interro ⟺ `classe_id` + une date + pas « toutes » + pas « J'accompagne » (sinon `classe_id` et `chapitre` NULL) ; FK `(ecole_id, proprietaire) → ecoles` et `(classe_id, ecole_id, proprietaire) → classes` (cascade, ON UPDATE CASCADE : l'interro suit sa classe qui change d'école) |
+| `evenements` | `proprietaire`, `ecole_id`, `type` (8 valeurs, `evenements_type_check`), `intitule` (≤ 120, vide = nom du type), `du`, `au`, `journee_entiere`, `heure_debut` / `heure_fin` (0–15 : H0 permise comme 0004), `toutes_classes`, `accompagne`, `classe_id` + `chapitre` (« niveau/slug ») de l'interro, dates | `au >= du`, ≤ 366 jours, années 2000–2100 ; journée entière ⟺ heures NULL, sinon fin ≥ début ; interro ⟺ `classe_id` + une date + pas « toutes » + pas « J'accompagne » (sinon `classe_id` et `chapitre` NULL) ; absence ⟹ « toutes » et pas « J'accompagne » ; FK `(ecole_id, proprietaire) → ecoles` et `(classe_id, ecole_id, proprietaire) → classes` (cascade, ON UPDATE CASCADE : l'interro suit sa classe qui change d'école) |
 | `evenements_classes` | `evenement_id`, `classe_id`, `ecole_id`, `proprietaire` | clé `(evenement_id, classe_id, proprietaire)` ; FK `(evenement_id, ecole_id, proprietaire) → evenements` et `(classe_id, ecole_id, proprietaire) → classes` (cascades) : un événement à soi, une classe à soi DE LA MÊME ÉCOLE |
 | `periodes_bulletin` | `proprietaire`, `ecole_id`, `annee_scolaire` (« 2026-2027 », années consécutives), `numero` (1–8), `remise` (1er août → 31 juillet de l'année) | uniques `(proprietaire, ecole_id, annee_scolaire, numero)` et `(proprietaire, ecole_id, remise)` ; FK école (cascade) |
 | `carnet_reglages` | + `seuil_avertissement` (défaut 3) | `carnet_reglages_seuil_valide` 0–15 |
@@ -581,8 +597,17 @@ même école et dans une autre, toutes / certaines, période sans date suivante,
   événement regroupées) + événements du jour ; `journeeCarnet.ts::lignesDuJour` / `grilleSemaine` reçoivent
   l'agenda en option (ligne / cellule `supprime`).
 - Jours de classe (`joursDeClasse(apres, jusqua, ecole)`) : APRÈS `apres`, jusqu'à `jusqua` INCLUS, jours
-  ouvrables hors congés FWB et hors événements « journée entière + toutes les classes » de l'école
-  (`texteSansCours` : « (la journée pédagogique ne compte pas) »).
+  ouvrables hors congés FWB et hors événements « journée entière + toutes les classes » de l'école — une
+  absence du professeur d'une journée entière en est un, une absence de certaines heures non
+  (`texteSansCours` : « (la journée pédagogique ne compte pas) », « (ton absence ne compte pas) », article
+  par type : « le voyage scolaire », « le conseil de classe »…).
+- Absence du professeur (`titreEvenement` / `motifCourt`) : « Absence du professeur (formation) » —
+  l'intitulé en précision, jamais à la place du type, minuscule initiale sauf sigle ; « Pas cours — absence
+  du professeur (formation) » sur les heures barrées (puce courte « Absence » dans Aujourd'hui), ligne
+  « Absence du professeur (formation) − n h » du compteur ; `quiTexte` : « toutes tes classes » (« … de
+  l'école » s'il a des classes ailleurs). Tests : `agenda-absence/absence.test.ts` (45 vérifications, dont
+  jeu. 10 → ven. 11/12 de la 1re à la 3e heure : 4e A · 2 h — 5e B · 2 h, l'autre école intacte, compteur,
+  heures restantes, à rattraper, jours de classe).
 - Période d'une date : première remise ≥ date (même année scolaire) ; après la dernière → `numero + 1`,
   remise `null` (« date de remise pas encore fixée dans tes réglages »).
 - Avertissements (`avertissementsInterro`) : « apres » si la date est STRICTEMENT après la remise de la
@@ -602,7 +627,10 @@ même école et dans une autre, toutes / certaines, période sans date suivante,
 **Interface** (`components/carnet/` + `agenda.css`, importé par `CarnetPage` après `carnet.css`) :
 - `ContexteCarnet` gagne `agenda`, `ctxAgenda` (horaire + événements + classes, `null` sans 0003 ou 0006),
   `nouvelEvenement(prerempli)`, `ouvrirEvenement(e)` ; panneau `{ type: 'evenement' }` dans `CarnetPage`.
-- `FormulaireEvenement` (dans `PanneauLateral`) : type en puces (radios), intitulé, école (si plusieurs),
+- `FormulaireEvenement` (dans `PanneauLateral`) : type en puces (radios ; « Absence du professeur » après
+  « Conseil de classe », icône personne barrée, teinte `--bad`), intitulé (« Intitulé (facultatif) » pour
+  l'absence, qui remplace Toutes / Certaines et « J'accompagne » par « Toutes tes classes : tes heures de
+  cours pendant … sont supprimées »), école (si plusieurs),
   du / au, « Journée entière » / « Certaines heures » (de la / à la : numéros de la grille de l'école,
   « heure zéro (H0) »), « Toutes » / « Certaines » (pastilles = cases), « J'accompagne », résumé « Heures
   supprimées : 5e B · 3e h — 6e C · 4e h (tu accompagnes). Rien n'est noté… » ; Interrogation : classe, date,
@@ -648,6 +676,10 @@ numérique, `scrollWidth` = largeur, 0 erreur console).
 
 **Mise en service** : SQL Editor → New query → coller TOUT `0006_agenda.sql` → Run → « Success. No rows
 returned » ; recharger `/carnet` → Réglages → « Périodes du bulletin » (dates de remise) → « + Événement ».
+Déjà collé avant l'ajout de l'absence du professeur : recoller TOUT `0006_agenda.sql` (même résultat, rien
+n'est perdu) — sinon l'enregistrement d'une absence est refusé : `ErreurCarnet` reconnaît
+`evenements_type_check` (23514) et affiche « Type d'événement inconnu du serveur : recolle tout le fichier
+…0006_agenda.sql… ».
 À vérifier contre le vrai projet : création d'un événement « certaines classes » (liaison), interro,
 périodes et seuil.
 

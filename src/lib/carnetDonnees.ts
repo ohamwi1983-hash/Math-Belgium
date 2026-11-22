@@ -36,6 +36,8 @@ export class ErreurCarnet extends Error {
     if (absente) message = 'Carnet pas encore activé.'
     else if (code === '23505' && /periodes_bulletin/i.test(String(b.message ?? ''))) message = 'Une autre période a déjà ce numéro ou cette date (autre onglet ?) : recharge la page.'
     else if (code === '23505' && /evenements/i.test(String(b.message ?? ''))) message = 'Cette classe est déjà dans l’événement : recharge la page.'
+    // Ancienne version de 0006 (sans « absence_professeur ») encore en place dans la base.
+    else if (code === '23514' && /evenements_type_check/i.test(String(b.message ?? ''))) message = 'Type d’événement inconnu du serveur : recolle tout le fichier supabase/migrations/0006_agenda.sql dans l’éditeur SQL de Supabase (SQL Editor → New query → coller → Run), puis réessaie.'
     else if (code === '23514' && /evenement|periodes_bulletin|seuil/i.test(String(b.message ?? ''))) message = 'Événement ou période refusé par le serveur (dates, heures ou classes incohérentes) : vérifie le formulaire.'
     else if (code === '23505' && /horaire/i.test(String(b.message ?? ''))) message = 'Cette case de l’horaire est déjà remplie (autre onglet ?) : recharge la page.'
     else if (code === '23505') message = 'Une classe porte déjà ce nom dans cette école.'

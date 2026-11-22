@@ -183,7 +183,8 @@ export function Aujourdhui({
         </div>
         <div className="carnet-heure-actions">
           <button type="button" className="agenda-puce-bouton" onClick={() => ctx.ouvrirEvenement(x.evenement)} aria-label={`${motif}. Modifier l’événement`}>
-            <PuceType type={x.evenement.type} />
+            {/* « Absence » seul : le motif dit déjà « absence du professeur », la ligne reste lisible sur téléphone. */}
+            <PuceType type={x.evenement.type} libelle={x.evenement.type === 'absence_professeur' ? 'Absence' : undefined} />
           </button>
         </div>
       </li>

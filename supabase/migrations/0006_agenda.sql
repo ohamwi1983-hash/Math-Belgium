@@ -9,18 +9,23 @@
 -- fonctions `create or replace`, politiques et déclencheurs supprimés puis recréés). Aucune clé
 -- secrète, aucun jeton, aucun mot de passe : rien à remplacer.
 --
+-- DÉJÀ COLLÉ L'ANCIENNE VERSION (sans « Absence du professeur ») ? Recolle simplement TOUT ce
+-- fichier : il met la base à jour (nouvelle liste des types, contrainte de l'absence) sans rien
+-- perdre. Pas encore collé : colle-le une fois, comme d'habitude.
+--
 -- Résultat attendu : « Success. No rows returned ». Recharger /carnet : le bouton « + Événement »,
 -- l'onglet Réglages (périodes du bulletin) et les compteurs d'heures effectives apparaissent (Supabase
 -- peut mettre quelques secondes à voir les nouvelles tables). Tant que ce fichier n'est pas exécuté,
 -- le carnet marche comme avant et ces écrans affichent « Agenda pas encore activé ».
 --
 -- Contenu (AUCUNE donnée d'élève) :
---   evenements          sortie, voyage scolaire, journée pédagogique, conseil de classe, session
---              d'examens, interrogation, autre — d'une école DU professeur, du … au …, journée
---              entière ou de la n-ième à la m-ième heure (numéros de l'horaire de l'école), toutes
---              les classes de l'école ou certaines, « J'accompagne ». Interrogation : UNE classe
---              (colonne `classe_id`), UNE date, heure et chapitre facultatifs ; elle ne supprime
---              aucune heure (c'est une heure de cours).
+--   evenements          sortie, voyage scolaire, journée pédagogique, conseil de classe, absence du
+--              professeur, session d'examens, interrogation, autre — d'une école DU professeur, du …
+--              au …, journée entière ou de la n-ième à la m-ième heure (numéros de l'horaire de
+--              l'école), toutes les classes de l'école ou certaines, « J'accompagne ». Absence du
+--              professeur : toujours TOUTES ses classes de l'école, jamais « J'accompagne ».
+--              Interrogation : UNE classe (colonne `classe_id`), UNE date, heure et chapitre
+--              facultatifs ; elle ne supprime aucune heure (c'est une heure de cours).
 --   evenements_classes  les classes « certaines » d'un événement (table de liaison).
 --   periodes_bulletin   par école ET par année scolaire : la date de remise des points de chaque
 --              période (P1 … Pn).
@@ -50,7 +55,8 @@ create table if not exists public.evenements (
   id              uuid primary key default gen_random_uuid(),
   proprietaire    uuid not null default auth.uid() references public.profils (id) on delete cascade,
   ecole_id        uuid not null,
-  type            text not null check (type in ('sortie', 'voyage', 'journee_pedagogique', 'conseil_classe', 'session_examens', 'interrogation', 'autre')),
+  -- Liste des types : contrainte `evenements_type_check`, (re)posée juste après la table.
+  type            text not null,
   -- Vide : le site affiche le nom du type (« Journée pédagogique »).
   intitule        text not null default '' check (char_length(intitule) <= 120),
   du              date not null,
@@ -94,6 +100,18 @@ create table if not exists public.evenements (
   constraint evenements_classe_de_l_ecole foreign key (classe_id, ecole_id, proprietaire)
     references public.classes (id, ecole_id, proprietaire) on delete cascade on update cascade
 );
+-- Liste des types (re)posée à CHAQUE exécution, sous le nom que Postgres avait donné au CHECK de
+-- colonne de la première version de ce fichier (`evenements_type_check`) : une base où l'ancienne
+-- version a été collée reçoit la nouvelle liste (« absence_professeur » ajouté), une base neuve la
+-- reçoit ici. Un seul `alter table` : retrait et ajout ensemble, ou rien.
+alter table public.evenements
+  drop constraint if exists evenements_type_check,
+  add constraint evenements_type_check check (type in ('sortie', 'voyage', 'journee_pedagogique', 'conseil_classe', 'absence_professeur', 'session_examens', 'interrogation', 'autre'));
+-- Absence du professeur : toujours toutes ses classes de l'école (donc aucune liaison, refusée par
+-- `evenements_classes_coherence`), jamais « J'accompagne ».
+alter table public.evenements
+  drop constraint if exists evenements_absence_professeur,
+  add constraint evenements_absence_professeur check (type <> 'absence_professeur' or (toutes_classes and not accompagne));
 comment on table public.evenements is 'Agenda du carnet : événements d''une école d''un professeur (sorties, journées pédagogiques, interrogations…). Aucune donnée d''élève.';
 create index if not exists evenements_proprietaire_idx on public.evenements (proprietaire, du);
 create index if not exists evenements_ecole_idx on public.evenements (ecole_id, proprietaire);
