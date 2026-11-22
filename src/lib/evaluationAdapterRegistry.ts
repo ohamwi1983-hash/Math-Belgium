@@ -128,6 +128,8 @@ import { adaptateurEvaluationIntersectionCercles } from '../entrainement/4e/gene
 import { adaptateurEvaluationVecteursDirecteurs } from '../entrainement/4e/generateurs/vecteursDirecteurs/exportEvaluation'
 import { adaptateurEvaluationChasles } from '../entrainement/4e/generateurs/chaslesSansFigure/exportEvaluation'
 import { adaptateurEvaluationDetectiveAnalytique } from '../entrainement/4e/generateurs/detectiveAnalytique/exportEvaluation'
+import { adaptateurEvaluationTraduireLieu } from '../entrainement/4e/generateurs/traduireLieu/exportEvaluation'
+import { adaptateurEvaluationLireDroite } from '../entrainement/4e/generateurs/lireDroite/exportEvaluation'
 import { adaptateurEvaluationPositionDroitePlan } from '../entrainement/4e/generateurs/positionDroitePlan/exportEvaluation'
 import { adaptateurEvaluationSectionPlaneSolide } from '../entrainement/4e/generateurs/sectionPlaneSolide/exportEvaluation'
 import { adaptateurEvaluationOmbreSoleil } from '../entrainement/4e/generateurs/ombreSoleil/exportEvaluation'
@@ -251,6 +253,8 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen97: versionPapier(adaptateurEvaluationTrajectoires) as unknown as AdaptateurFeuilleExercices<never>,
   gen98: versionPapier(adaptateurEvaluationIntersectionCercles) as unknown as AdaptateurFeuilleExercices<never>,
   gen99: versionPapier(adaptateurEvaluationDetectiveAnalytique) as unknown as AdaptateurFeuilleExercices<never>,
+  gen131: versionPapier(adaptateurEvaluationTraduireLieu) as unknown as AdaptateurFeuilleExercices<never>,
+  gen132: versionPapier(adaptateurEvaluationLireDroite) as unknown as AdaptateurFeuilleExercices<never>,
   gen39: versionPapier(adaptateurEvaluationPositionDroitePlan) as unknown as AdaptateurFeuilleExercices<never>,
   gen40: versionPapier(adaptateurEvaluationSectionPlaneSolide) as unknown as AdaptateurFeuilleExercices<never>,
   gen41: versionPapier(adaptateurEvaluationOmbreSoleil) as unknown as AdaptateurFeuilleExercices<never>,

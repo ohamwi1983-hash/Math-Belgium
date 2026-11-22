@@ -442,6 +442,16 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 44. Construction graphique — tracer une droite »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lire une droite : associer droites et équations',
+          generatorId: 'gen132',
+          description: [
+            "Quatre droites, quatre équations sous des formes différentes : associe-les. Puis lis une pente et une ordonnée à l'origine en escalier, et repère l'écriture impossible pour une droite verticale ou horizontale.",
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 132. Lire une droite : associer droites et équations »',
+        },
       ],
     },
 
@@ -1332,6 +1342,46 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             rightAngleMarkers: [{ vertex: { x: 3, y: 3 }, arm1: { x: 5, y: 4 }, arm2: { x: 2.5, y: 4 } }],
             caption: 'tous les points de la droite orange sont à la même distance de A et de B — et eux seuls',
           },
+        },
+        { kind: 'subheading', text: 'Traduire les autres lieux en équation' },
+        {
+          kind: 'methode',
+          label: 'Méthode — de la phrase à l\'équation',
+          items: [
+            '**À la distance r d\'une droite d** — deux parallèles à d, de même vecteur normal $\\vec{n}$. Pars d\'un point A de d et avance de r le long de $\\vec{n}$, dans un sens puis dans l\'autre : $B = A + \\dfrac{r}{\\|\\vec{n}\\|}\\,\\vec{n}$ et $B\' = A - \\dfrac{r}{\\|\\vec{n}\\|}\\,\\vec{n}$. Chaque parallèle passe par l\'un de ces points. Pour une horizontale $y = k$ : simplement $y = k + r$ et $y = k - r$.',
+            '**Équidistant de deux parallèles** — écris d\'abord les deux équations avec les **mêmes** coefficients de x et de y, $ax + by + c_1 = 0$ et $ax + by + c_2 = 0$ ; la parallèle médiane est $ax + by + \\dfrac{c_1 + c_2}{2} = 0$.',
+            '**Équidistant d\'un point F et d\'une droite d** — la parabole de foyer F et de directrice d (section 9) : sommet à mi-chemin, p signé, puis $(x - x_S)^2 = 2p(y - y_S)$.',
+            '**À la distance r d\'un point C** — le cercle de centre C et de rayon r (section 8), d\'équation $(x - x_C)^2 + (y - y_C)^2 = r^2$',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'à une distance donnée d\'une droite',
+          formula: 'Trouve les équations du lieu des points situés à la distance 10 de la droite $d \\equiv 3x + 4y - 12 = 0$.',
+          steps: [
+            { tag: 'un point et le vecteur normal', text: '$A(4\\,;\\,0)$ est sur d ; $\\vec{n}\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$, $\\|\\vec{n}\\| = \\sqrt{9 + 16} = 5$, donc $\\dfrac{10}{5}\\,\\vec{n} = \\begin{pmatrix} 6 \\\\ 8 \\end{pmatrix}$' },
+            { tag: 'deux points du lieu', text: '$B = A + \\begin{pmatrix} 6 \\\\ 8 \\end{pmatrix} = (10\\,;\\,8)$ et $B\' = A - \\begin{pmatrix} 6 \\\\ 8 \\end{pmatrix} = (-2\\,;\\,-8)$' },
+            { tag: 'les deux parallèles', text: '$3(x - 10) + 4(y - 8) = 0$, soit $3x + 4y - 62 = 0$ ; $3(x + 2) + 4(y + 8) = 0$, soit $3x + 4y + 38 = 0$' },
+          ],
+          result: { tag: 'résultat', text: 'la réunion des droites $3x + 4y - 62 = 0$ et $3x + 4y + 38 = 0$ — d est à mi-chemin : $\\dfrac{-62 + 38}{2} = -12$' },
+        },
+        {
+          kind: 'piege',
+          label: 'Piège — décaler le terme constant de r',
+          text:
+            'Pour $d \\equiv 3x + 4y - 12 = 0$ et $r = 10$, les droites $3x + 4y - 22 = 0$ et $3x + 4y - 2 = 0$ (terme constant décalé de 10) ne sont **pas** à la ' +
+            'distance 10 de d : elles n\'en sont qu\'à 2. Le terme constant s\'écarte de $r \\cdot \\|\\vec{n}\\|$ : ' +
+            'passe toujours par les points B et B′.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Traduire un lieu géométrique en équation',
+          generatorId: 'gen131',
+          description: [
+            'Médiatrice, deux parallèles, parallèle médiane, parabole ou cercle : reconnais le lieu décrit par une phrase, puis construis son équation.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 131. Traduire un lieu géométrique en équation »',
         },
       ],
     },
