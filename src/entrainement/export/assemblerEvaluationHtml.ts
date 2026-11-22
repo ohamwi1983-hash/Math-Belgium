@@ -143,8 +143,9 @@ export interface EnteteEvaluation {
   /** ÉVALUATION BLANCHE (parcours élève, `lib/compositionEleve.ts`) : présentation d'une évaluation
    * (durée et points INDICATIFS, « sans valeur de note »), QR code par question, corrigé détaillé À LA
    * FIN du même document ; ni corrigé séparé, ni grille, ni série. Absent : évaluation rendue
-   * exactement comme avant. `dureeConseillee` : durée imprimée (min). */
-  blanche?: { dureeConseillee: number };
+   * exactement comme avant. `dureeConseillee` : durée imprimée (min) ; `repartition` : parts entre
+   * les compétences (texte prêt, `compositionEleve.ts::texteRepartitionBlanche`), sous la durée. */
+  blanche?: { dureeConseillee: number; repartition?: string };
 }
 
 /** Réglages d'un examen, déjà lus et mis en forme (`evaluationLocal.ts::examenDuPlan`). */
@@ -1473,6 +1474,7 @@ const CONSIGNE_QR_BLANCHE = " Le QR code de chaque question te permet de la refa
 
 const STYLE_BLANCHE = `
 .surtitre .nc { text-transform: none; letter-spacing: 0.04em; }
+.meta.parts, .meta-am.parts { color: var(--encre); }
 .question .q-corps { display: flex; gap: 16px; align-items: flex-start; }
 .question .q-texte { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .qr-bloc { width: 2.3cm; flex: none; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; font-family: Archivo, Arial, sans-serif; font-size: 7pt; color: var(--gris); line-height: 1.2; }
@@ -1506,6 +1508,13 @@ function metaBlanche(entete: EnteteEvaluation, items: ItemEvaluation[]): string 
   return `Durée conseillée : ${duree} min · ${nombreFr(total)} ${total >= 2 ? "points" : "point"} indicatifs · sans valeur de note`;
 }
 
+/** « Parts : Connaître 20 % · Appliquer 65 % · Transférer 15 % — tirées au hasard : … » (absent :
+ * rien, document identique à avant). */
+function repartitionBlancheHtml(entete: EnteteEvaluation, classe: string, balise: "span" | "p" = "span"): string {
+  const r = entete.blanche?.repartition;
+  return r ? `<${balise} class="${classe}">Parts : ${echapperHtml(r)}.</${balise}>` : "";
+}
+
 function titreBlanche(entete: EnteteEvaluation): string {
   return entete.titreChapitre || entete.titre.replace(/^\s*Évaluation blanche\s*[—–-]\s*/i, "").trim() || entete.titre;
 }
@@ -1514,7 +1523,7 @@ function cartoucheBlancheHtml(entete: EnteteEvaluation, items: ItemEvaluation[])
   return `<div class="cartouche blanche">
   <div class="g"><span class="surtitre">Évaluation blanche · <span class="nc">${echapperHtml(entete.niveauLabel)}</span> · Entraînement personnel</span>
     <h1>${echapperHtml(titreBlanche(entete))}</h1>
-    <span class="meta">${echapperHtml(metaBlanche(entete, items))}</span></div>
+    <span class="meta">${echapperHtml(metaBlanche(entete, items))}</span>${repartitionBlancheHtml(entete, "meta parts")}</div>
   <div class="d"><span>Nom</span><span class="champ"></span><span>Début</span><span class="champ"></span><span>Fin</span><span class="champ"></span></div>
 </div>`;
 }
@@ -1579,7 +1588,7 @@ async function genererBlancheAmenagee(entete: EnteteEvaluation, items: ItemEvalu
   const cssKatex = await obtenirCssKatexAutonome();
   const titre = titreBlanche(entete);
   const tete = `<div class="tete-am"><div><span class="surtitre" style="color:#1d5b8f;font-weight:700">Version aménagée · Évaluation blanche · <span class="nc">${echapperHtml(entete.niveauLabel)}</span></span><h1>${echapperHtml(titre)}</h1></div><span class="droite">Mêmes questions,<br>mêmes points indicatifs</span></div>
-<p class="meta-am">${echapperHtml(metaBlanche(entete, items))}</p>
+<p class="meta-am">${echapperHtml(metaBlanche(entete, items))}</p>${repartitionBlancheHtml(entete, "meta-am parts", "p")}
 <div class="identite-am"><span>Nom <span class="champ"></span></span><span>Début <span class="champ" style="width:2.5cm"></span></span><span>Fin <span class="champ" style="width:2.5cm"></span></span></div>
 ${consignesBlancheHtml(items, false)}`;
   const numerotes = itemsNumerotes(items);

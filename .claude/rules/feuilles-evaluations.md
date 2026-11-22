@@ -1080,8 +1080,9 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   du registre (`notionsDuChapitre`), « Tout le chapitre » (exclusif : cocher une notion ne garde
   qu'elle) ; téléphone : 3 puces + « + n » ; puis **Compétences** cochables Connaître / Appliquer /
   Transférer (une à trois, les trois par défaut ; aide « Coche ce que ton professeur a annoncé pour
-  l'interrogation. Le temps est partagé à parts égales entre les compétences cochées. » — jamais de
-  pourcentages à l'écran) ; 3. durée 20 / 30 / 50 min, **Niveaux** cochables
+  l'interrogation. » + « Le temps est partagé à parts égales entre les compétences cochées. » pour la
+  feuille seulement — jamais de pourcentages pour la feuille ; évaluation blanche : parts et
+  démonstrations annoncées, voir plus bas) ; 3. durée 20 / 30 / 50 min, **Niveaux** cochables
   (cinq cases « 1 très facile » … « 5–7 très difficile », numéro dans sa case teintée ; un ou
   plusieurs, TOUS par défaut = niveaux mélangés, l'ancien « Réel » ; « Tout cocher » quand il en
   manque), « Version aménagée ». Cases ≥ 44 px, case carrée avec ✓ (l'état ne repose pas sur la seule
@@ -1113,9 +1114,10 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   tirages y tombent (`candidatAuxNiveaux` ; générateur sans niveau : seulement avec les cinq cochés) —
   la même règle décide la disponibilité, donc un niveau proposé, coché seul, donne au moins un
   exercice. **Proportions** (décision de l'utilisateur, 22/11/2026 : la répartition 25 / 50 / 25 ne
-  vaut que pour l'EXAMEN) : temps partagé à PARTS ÉGALES entre les compétences cochées
-  (`repartitionProcessus.ts::partageEgal`, appelé par `budgetsParCompetence` ; une seule → 100 %), pour
-  la feuille comme pour la blanche ; jamais le réglage du professeur ; une compétence cochée sans
+  vaut que pour l'EXAMEN) : FEUILLE d'exercices de l'élève : temps partagé à PARTS ÉGALES entre les
+  compétences cochées (`repartitionProcessus.ts::partageEgal`, appelé par `budgetsParCompetence` ; une
+  seule → 100 %) ; évaluation blanche : parts au hasard ou réglées (puce suivante) ; jamais le réglage
+  du professeur ; une compétence cochée sans
   exercice aux niveaux cochés cède son temps aux autres cochées présentes, à parts égales (aucune
   présente → rien). Récapitulatif : « · Appliquer et Transférer, temps partagé à parts égales » dès
   que deux compétences au moins sont imprimées. Phrase des niveaux : « Tous cochés : les niveaux sont
@@ -1140,6 +1142,49 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   **Calculatrice** : « autorisée » imprimée (choix : aucun chapitre ne l'interdit dans ses données), le
   tirage n'est PAS contraint (sinon « autorisée » ne tirerait que des cas à la calculatrice) ; une
   variante `calculatriceIndispensable` reste donc permise.
+- **Évaluation blanche : parts au hasard, réglables ; démonstrations annoncées** (décision de
+  l'utilisateur, 22/11/2026, choix c : « je ne respecte pas les proportions […] je ne peux faire croire
+  aux élèves que mon évaluation sera équilibrée comme dans leur simulation » ; « s'il y a des
+  démonstrations à retenir, je leur dis lesquelles »). `ReglagesEleve.parts` (absent = feuille, code
+  d'avant inchangé : non-régression 483 / 483 compositions feuille et 483 blanche sans parts).
+  **Loi** (`repartitionProcessus.ts::tirerPartsHasard`) : parts multiples de 5 %, chacune de 15 à 70 %,
+  somme 100, UNIFORME parmi les répartitions possibles (2 cochées : 9, 3 : 78 ; une part ≥ 50 % dans
+  58 % des tirages à trois) ; une seule → 100 % ; tirée parmi les cochées QUI ONT des exercices
+  (`partsVisees`) ; fonction de la seule graine (mulberry32, `aleatoireDepuisGraine`) : mêmes cochées +
+  même graine → mêmes parts, et la composition est tirée avec la même graine (mêmes candidats → même
+  composition). Nouvelle graine à chaque « Générer » et « Autre tirage » (bouton du récapitulatif) ;
+  elle n'est pas un code de document (le plan dépend aussi de l'historique et des budgets de temps).
+  **Réglage** : segments « Au hasard » (défaut) / « Je règle les parts » → `ReglageCompetences` du
+  professeur avec la prop `eleve` (sans cases : les compétences sont cochées dans l'assistant, pas de
+  « Préparer », « Revenir au hasard », Échap) : 33 / 34 / 33, − / + de 5, 5 % au moins, non mémorisé,
+  remis à égalité quand une compétence change. **Composition** (`composerParParts`) : budgets = parts ×
+  durée ; Transférer, Connaître (une démonstration annoncée d'abord si elle tient), Appliquer ; un ajout
+  n'entre que s'il ne dépasse sa part ni de plus de la moitié de sa durée ni de plus de
+  `DEPASSEMENT_MAX` (4 min, règle de « Préparer l'évaluation » du professeur) ; temps réservé pour la
+  question la plus courte des compétences pas encore servies ; aucune question qui tienne → la plus
+  courte si elle tient dans la durée (+ 10 %) ; jamais de temps donné à une autre compétence ; niveaux
+  voisins pour les compétences en retard seulement. **Points** : 20 pts partagés selon les parts
+  ramenées aux compétences imprimées (`partsAuProrata` → `mettreAEchelle`), dans une compétence selon
+  la durée comme avant ; total impossible en demi-points à cause de vrai/faux à n affirmations → chaque
+  affirmation devient son élément (même thème : toujours UNE question imprimée), nouvel essai.
+  **Affichage** = parts des points (`ResumeEleve.parts`, `pourcentsEntiers`) : récapitulatif « Connaître
+  20 % · Appliquer 65 % · Transférer 15 % — tirées au hasard : ta vraie interro peut être répartie
+  autrement » (« réglées par toi » ; téléphone : avertissement final masqué dans la barre collante, il est
+  écrit sous les segments) ; document et aménagée : « Parts : … » sous la durée
+  (`EnTeteEvaluation.blanche.repartition`, `texteRepartitionBlanche`). **Démonstrations** : liste
+  « Démonstrations annoncées » (titres des blocs « Démonstration — … », `demonstrationsDuChapitre`, notions
+  retenues ou tout le chapitre) quand Connaître est cochée ; AUCUNE cochée par défaut (choix : l'élève
+  coche ce que le professeur a annoncé ; tout cocher aurait tiré des démonstrations jamais annoncées) ;
+  seules les cochées sont candidates (`CandidatDemonstration`, 1 fois au plus, jamais deux au même
+  énoncé, durée = 2 × `pointsDemonstration`, sans niveau), ligne `demonstration` à `choix` explicite.
+  **Vérifié — 22/11** (dossier de travail `blanche-eleve` : `tests.mjs`, `ui.mjs`) : loi 1 543 contrôles
+  purs ; 23 chapitres × 7 combinaisons × 20 graines = 3 220 compositions : 0 part hors loi, 0 compétence
+  non cochée, 0 non reproductible, 0 dépassement (total ≤ + 10 %, part ≤ + 4 min hors 28 « plus courte
+  forcée »), écart temps − part de −10 à +9 min (moy. |écart| 1,35), durée remplie ≥ 85 % dans 3 099 / 3 140,
+  80 vides = combinaisons sans aucune question ; 471 plans : points = parts, total 20, parts affichées
+  = parts des points, 0 compétence cochée absente ; démonstrations 1 228 tirées, 0 hors des cochées,
+  aucune sans case cochée ; Playwright (build de production, iPhone 13 et 1 280 px) 96 vérifications,
+  documents HTML + PDF, 0 erreur console, `scrollWidth` = largeur.
 - **Document « Évaluation blanche »** (`EnTeteEvaluation.blanche = { dureeConseillee }`, mode
   `evaluation`, une série ; `genererDocumentsDepuisPlan` → type `blanche` + aménagée si demandée ; ni
   corrigé séparé ni grille ; `assemblerEvaluationHtml.ts::genererEvaluationBlanche`) : cartouche

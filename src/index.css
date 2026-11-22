@@ -2073,6 +2073,18 @@ h1.eleve-titre { font-family: var(--serif); font-size: clamp(1.6rem, 5vw, 2.25re
 .eleve-recap-contenu { margin: 2px 0 0; font-size: 0.875rem; opacity: 0.8; }
 .eleve-case { display: flex; gap: 10px; align-items: center; font-size: 0.95rem; cursor: pointer; }
 .eleve-case input { width: 20px; height: 20px; flex: none; accent-color: var(--accent); }
+/* Évaluation blanche : démonstrations annoncées, parts au hasard / réglées (décision du 22/11/2026). */
+fieldset.eleve-demos { border: 0; margin: 0; padding: 0; }
+.eleve-demos legend { padding: 0; margin-bottom: 8px; }
+.eleve-demos-liste { display: flex; flex-direction: column; gap: 2px; }
+.eleve-demo { min-height: 44px; align-items: center; overflow-wrap: anywhere; }
+.eleve-demo > span { min-width: 0; }
+.eleve-parts .conc-rep { margin-top: 2px; }
+.eleve-parts > .eleve-segments { align-self: flex-start; }
+.conc-comp-sans-case { cursor: default; }
+.eleve-recap-parts { opacity: 1; }
+.eleve-recap-tirage { font: inherit; font-size: 0.8125rem; font-weight: 600; color: inherit; background: transparent; border: 1px solid currentColor; border-radius: 999px; padding: 4px 12px; min-height: 32px; margin-left: 4px; cursor: pointer; vertical-align: middle; }
+.eleve-recap-tirage:disabled { opacity: 0.6; cursor: progress; }
 .eleve-note { margin: 0; font-size: 0.875rem; color: var(--attn); }
 .eleve-recap { background: var(--ink); color: var(--paper); border-radius: var(--radius); padding: 20px 24px; display: flex; gap: 14px 18px; align-items: center; justify-content: space-between; flex-wrap: wrap; z-index: 5; }
 .eleve-recap-titre { margin: 0; font-family: var(--serif); font-size: 1.2rem; font-weight: 600; }
@@ -2107,6 +2119,8 @@ h1.eleve-titre { font-family: var(--serif); font-size: clamp(1.6rem, 5vw, 2.25re
   .eleve-recap-titre { display: none; }
   .eleve-recap-detail { margin: 0; font-size: 0.875rem; }
   .eleve-recap-contenu { margin: 0; font-size: 0.8125rem; }
+  .eleve-recap-avertissement { display: none; }
+  .eleve-recap-tirage { min-height: 44px; margin: 0 0 0 6px; padding: 4px 14px; }
   .eleve-recap-fin { display: none; }
   .eleve-generer { width: 100%; }
   .eleve-resultat { padding: 16px; }

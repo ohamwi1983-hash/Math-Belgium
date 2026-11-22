@@ -23,6 +23,8 @@ import {
  * partagé à parts ÉGALES entre elles (`partageEgal`) ; il peut ajuster avec − / + (total 100 %, une
  * non cochée = 0 %, `ajusterParts`). Réglage du DOCUMENT seulement (état du panneau) : jamais
  * mémorisé, jamais « Enregistrer ». Cocher / décocher remet les parts égales.
+ * Réutilisé par l'assistant élève (évaluation blanche, « Je règle les parts », prop `eleve`) : sans
+ * case à cocher (les compétences sont cochées dans l'assistant) ni bouton « Préparer ».
  */
 
 export interface ReglageCompetencesDocument {
@@ -65,6 +67,7 @@ export function ReglageCompetences({
   presentes,
   onPreparer,
   onFermer,
+  eleve,
 }: {
   reglage: ReglageCompetencesDocument
   onChange: (r: ReglageCompetencesDocument) => void
@@ -74,8 +77,12 @@ export function ReglageCompetences({
   dureeCible: number
   /** Compétences ayant au moins une question composable dans les chapitres. */
   presentes: readonly Processus[]
-  onPreparer: () => void
+  /** Absent : pas de bouton « Préparer » (assistant élève : le plan se prépare tout seul). */
+  onPreparer?: () => void
   onFermer: () => void
+  /** Assistant élève (évaluation blanche, « Je règle les parts ») : les compétences sont cochées plus
+   * haut dans l'assistant (pas de case ici), textes propres. Absent : rendu du professeur inchangé. */
+  eleve?: { titre: string; aide: string; etat: string; fermer: string }
 }) {
   const titre = useRef<HTMLParagraphElement>(null)
   const [rappel, setRappel] = useState(false)
@@ -106,10 +113,12 @@ export function ReglageCompetences({
   return (
     <div className="conc-rep conc-comp" id="conc-comp" role="group" aria-labelledby="conc-comp-titre" onKeyDown={surTouche}>
       <p className="conc-rep-titre" id="conc-comp-titre" ref={titre} tabIndex={-1}>
-        Compétences de {doc}
+        {eleve ? eleve.titre : `Compétences de ${doc}`}
       </p>
       <p className="conc-rep-aide">
-        Coche une, deux ou trois compétences. Le temps{feuille ? '' : ' (et donc les points)'} est partagé à parts égales entre elles ; tu peux l’ajuster avec − / +. Une compétence non cochée n’est jamais choisie.
+        {eleve
+          ? eleve.aide
+          : `Coche une, deux ou trois compétences. Le temps${feuille ? '' : ' (et donc les points)'} est partagé à parts égales entre elles ; tu peux l’ajuster avec − / +. Une compétence non cochée n’est jamais choisie.`}
       </p>
       <div className="conc-rep-barre" aria-hidden="true">
         {CLES_REPARTITION.map((c) =>
@@ -129,16 +138,28 @@ export function ReglageCompetences({
           const absente = on && !presentes.includes(p)
           return (
             <li key={c} className={`conc-rep-ligne${on ? '' : ' conc-comp-off'}`}>
-              <label className="conc-comp-coche">
-                <input type="checkbox" checked={on} onChange={() => basculer(p)} />
-                <span className={`conc-pc conc-pc-${p}`} aria-hidden="true">
-                  {p}
+              {eleve ? (
+                <span className="conc-comp-coche conc-comp-sans-case">
+                  <span className={`conc-pc conc-pc-${p}`} aria-hidden="true">
+                    {p}
+                  </span>
+                  <span className="conc-rep-libelle">
+                    {LIBELLE_CLE[c]}
+                    <span className="conc-rep-min">{!on ? 'non cochée' : absente ? 'aucun exercice ici' : `≈ ${Math.round(dureeCible * fractions[p])} min`}</span>
+                  </span>
                 </span>
-                <span className="conc-rep-libelle">
-                  {LIBELLE_CLE[c]}
-                  <span className="conc-rep-min">{!on ? 'non cochée' : absente ? 'aucun exercice ici' : `≈ ${Math.round(dureeCible * fractions[p])} min`}</span>
-                </span>
-              </label>
+              ) : (
+                <label className="conc-comp-coche">
+                  <input type="checkbox" checked={on} onChange={() => basculer(p)} />
+                  <span className={`conc-pc conc-pc-${p}`} aria-hidden="true">
+                    {p}
+                  </span>
+                  <span className="conc-rep-libelle">
+                    {LIBELLE_CLE[c]}
+                    <span className="conc-rep-min">{!on ? 'non cochée' : absente ? 'aucun exercice ici' : `≈ ${Math.round(dureeCible * fractions[p])} min`}</span>
+                  </span>
+                </label>
+              )}
               <span className="conc-rep-reglage">
                 <button type="button" className="conc-rep-btn" disabled={!moins} aria-label={`Diminuer ${LIBELLE_CLE[c]} de ${PAS_REPARTITION} %`} onClick={() => moins && onChange({ ...reglage, parts: moins })}>
                   −
@@ -157,23 +178,25 @@ export function ReglageCompetences({
       </p>
       {absentes.length > 0 && (
         <p className="conc-rep-alerte conc-comp-cede">
-          {texteCompetences(absentes)} : aucun exercice dans ces chapitres{feuille ? '' : ' (avec ces réglages)'}
+          {texteCompetences(absentes)} : aucun exercice {eleve ? 'avec ces notions et ces niveaux' : `dans ces chapitres${feuille ? '' : ' (avec ces réglages)'}`}
           {receveuses.length > 0 ? ` — ${absentes.length > 1 ? 'leur' : 'son'} temps va à ${texteCompetences(receveuses)}.` : ' : rien à proposer avec ces compétences.'}
         </p>
       )}
       <div className="conc-rep-actions">
-        <button type="button" className="conc-bouton conc-bouton-principal" onClick={onPreparer}>
-          Préparer avec {reglage.cochees.length === 1 ? texteCompetences(reglage.cochees) : 'ces compétences'}
-        </button>
+        {onPreparer && (
+          <button type="button" className="conc-bouton conc-bouton-principal" onClick={onPreparer}>
+            Préparer avec {reglage.cochees.length === 1 ? texteCompetences(reglage.cochees) : 'ces compétences'}
+          </button>
+        )}
         <button type="button" className="conc-bouton" disabled={!reglage.parts} onClick={() => onChange({ ...reglage, parts: null })}>
           Parts égales
         </button>
         <button type="button" className="conc-bouton conc-bouton-discret" onClick={onFermer}>
-          Fermer
+          {eleve ? eleve.fermer : 'Fermer'}
         </button>
       </div>
       <div className="conc-rep-etat" role="status">
-        {rappel ? <p className="conc-rep-alerte">Garde au moins une compétence.</p> : <p>Réglage de {doc} seulement : il n’est pas mémorisé.</p>}
+        {rappel ? <p className="conc-rep-alerte">Garde au moins une compétence.</p> : <p>{eleve ? eleve.etat : `Réglage de ${doc} seulement : il n’est pas mémorisé.`}</p>}
       </div>
     </div>
   )

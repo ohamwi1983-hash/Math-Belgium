@@ -8,8 +8,15 @@ import { genererDocumentsDepuisPlan, type DocumentGenere } from '../../lib/evalu
 import { declencherTelechargement } from '../../entrainement/export/telechargerBlob'
 import type { Processus } from '../../lib/evaluationPayload'
 import { CATEGORIES_NIVEAU, LIBELLE_CATEGORIE, PLAGE_CATEGORIE, rangCategorie, type CategorieNiveau } from '../../entrainement/export/niveauDifficulte'
+import { tirerGraine } from '../../entrainement/export/codeExercice'
+import { PART_MAX_HASARD, PART_MIN_HASARD, texteParts, type RepartitionPourcents } from '../../lib/repartitionProcessus'
+import { ReglageCompetences } from '../admin/conception/ReglageCompetences'
+import { RichText } from '../Math'
 import {
   COMPETENCES_ELEVE,
+  demonstrationsDuChapitre,
+  texteRepartitionBlanche,
+  type PartsEleve,
   DUREES_ELEVE,
   LIBELLE_COMPETENCE,
   composer,
@@ -34,6 +41,11 @@ import {
  * ces notions et compétences est grisé avec sa raison) ; puis un récapitulatif EXACT (le plan est
  * préparé à l'avance : questions imprimées, durée, points, niveaux et compétences réellement obtenus)
  * et le bouton de génération. Chaque clic produit un nouveau tirage.
+ * Évaluation blanche (décision de l'utilisateur, 22/11/2026, choix c) : parts du temps et des points
+ * entre les compétences cochées tirées AU HASARD à chaque préparation (« Autre tirage »), ou réglées par
+ * l'élève (« Je règle les parts » : `ReglageCompetences` du professeur, non mémorisé) ; parts obtenues
+ * affichées dans le récapitulatif et le document. Démonstrations annoncées : l'élève coche celles que
+ * son professeur a demandé de retenir (aucune par défaut), seules celles-là peuvent être tirées.
  * Aucune donnée d'élève : rien n'est enregistré.
  */
 
@@ -98,6 +110,13 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   /** Petit rappel quand l'élève essaie de tout décocher. */
   const [rappelMinimum, setRappelMinimum] = useState<'niveau' | 'competence' | null>(null)
   const [amenagee, setAmenagee] = useState(false)
+  /** Évaluation blanche (décision de l'utilisateur, 22/11/2026, choix c) : parts tirées au hasard à
+   * chaque préparation (graine), ou réglées par l'élève — jamais mémorisé. */
+  const [modeParts, setModeParts] = useState<'hasard' | 'reglee'>('hasard')
+  const [partsManuelles, setPartsManuelles] = useState<RepartitionPourcents | null>(null)
+  const [graineParts, setGraineParts] = useState(() => tirerGraine())
+  /** Démonstrations annoncées par le professeur (clés `cleDemonstration`) : aucune par défaut. */
+  const [demosCochees, setDemosCochees] = useState<Set<string>>(() => new Set())
 
   const [candidats, setCandidats] = useState<Candidat[] | null>(null)
   const [progression, setProgression] = useState<{ fait: number; total: number } | null>(null)
@@ -113,15 +132,25 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const blocResultat = useRef<HTMLDivElement>(null)
 
   const sections = useMemo(() => (choisies ? [...choisies] : []), [choisies])
+  const blancheChoisie = type === 'blanche'
+  /** Démonstrations du chapitre dans les notions retenues (tout le chapitre : toutes). */
+  const demonstrations = useMemo(() => (chapitre ? demonstrationsDuChapitre(chapitre).filter((d) => !choisies || choisies.has(d.sectionId)) : []), [chapitre, choisies])
+  const demosRetenues = useMemo(() => (blancheChoisie ? demonstrations.filter((d) => demosCochees.has(d.cle)).map((d) => d.cle) : []), [blancheChoisie, demonstrations, demosCochees])
   const niveaux = useMemo(() => CATEGORIES_NIVEAU.filter((c) => niveauxCoches.has(c)), [niveauxCoches])
   const competences = useMemo(() => ([1, 2, 3] as Processus[]).filter((p) => competencesCochees.has(p)), [competencesCochees])
   // Disponibilité EN DIRECT, sur les candidats déjà préparés (niveaux des tirages d'estimation).
-  const dispo = useMemo(() => (candidats ? disponibilite(candidats, { sections, competences, niveaux }) : null), [candidats, sections, competences, niveaux])
+  const dispo = useMemo(() => (candidats ? disponibilite(candidats, { sections, competences, niveaux, demonstrations: demosRetenues }) : null), [candidats, sections, competences, niveaux, demosRetenues])
   /** Niveaux cochés ET proposés : au moins un, sinon rien n'est composé. */
   const niveauxUtiles = dispo ? niveaux.filter((c) => dispo.niveaux[c]) : niveaux
   const competencesUtiles = dispo ? competences.filter((p) => dispo.parCompetence[p].total > 0) : competences
-  const reglagesValides = niveauxUtiles.length > 0 && competencesUtiles.length > 0
-  const cleReglages = JSON.stringify([levelSlug, chapitreSlug, sections, duree, niveaux, competences, type, amenagee, tirage])
+  // Seules des démonstrations cochées (sans niveau) : les niveaux ne comptent pas.
+  const seulementDemos = !!dispo && competencesUtiles.length > 0 && competencesUtiles.every((p) => dispo.parCompetence[p].demonstrationsSeules) && demosRetenues.length > 0
+  const reglagesValides = (niveauxUtiles.length > 0 || seulementDemos) && competencesUtiles.length > 0
+  const cleCompetencesUtiles = competencesUtiles.join(',')
+  // Cocher / décocher une compétence remet les parts réglées à égalité (comme le réglage du professeur).
+  useEffect(() => setPartsManuelles(null), [cleCompetencesUtiles])
+  const parts: PartsEleve | undefined = blancheChoisie ? (modeParts === 'hasard' ? { mode: 'hasard', graine: graineParts } : { mode: 'reglee', pourcents: partsManuelles, graine: graineParts }) : undefined
+  const cleReglages = JSON.stringify([levelSlug, chapitreSlug, sections, duree, niveaux, competences, type, amenagee, tirage, parts ?? null, demosRetenues])
   const prepare = prepareBrut && prepareBrut.cle === cleReglages ? prepareBrut : null
 
   // Candidats du chapitre (niveaux et durées estimés), calculés une variante à la fois.
@@ -156,13 +185,14 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
     }
     let annule = false
     setEnPreparation(true)
-    const reglages: ReglagesEleve = { levelSlug, chapitreSlug: chapitre.slug, sections, duree, niveaux, competences, type, amenagee }
+    const reglages: ReglagesEleve = { levelSlug, chapitreSlug: chapitre.slug, sections, duree, niveaux, competences, type, amenagee, ...(parts ? { parts, demonstrations: demosRetenues } : {}) }
+    const cle = JSON.stringify([levelSlug, chapitre.slug, sections, duree, niveaux, competences, type, amenagee, tirage, parts ?? null, demosRetenues])
     const minuterie = window.setTimeout(() => {
       const composition = composer(candidats, reglages)
       construirePlanEleve(reglages, chapitre, composition)
         .then((p) => {
           if (!annule) {
-            setPrepare({ ...p, cle: JSON.stringify([levelSlug, chapitre.slug, sections, duree, niveaux, competences, type, amenagee, tirage]) })
+            setPrepare({ ...p, cle })
             setErreur(null)
           }
         })
@@ -182,7 +212,9 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
       annule = true
       window.clearTimeout(minuterie)
     }
-  }, [chapitre, candidats, levelSlug, sections, duree, niveaux, competences, type, amenagee, tirage, reglagesValides])
+    // `parts` est recréé à chaque rendu : sa forme sérialisée (`cleParts`) suffit comme dépendance.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chapitre, candidats, levelSlug, sections, duree, niveaux, competences, type, amenagee, tirage, reglagesValides, JSON.stringify(parts ?? null), demosRetenues])
 
   useEffect(() => () => urls.current.forEach((u) => URL.revokeObjectURL(u)), [])
 
@@ -237,6 +269,20 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
     setCompetencesCochees(suivantes)
   }
 
+  function basculerDemonstration(cle: string) {
+    setDemosCochees((actuelles) => {
+      const suivantes = new Set(actuelles)
+      if (suivantes.has(cle)) suivantes.delete(cle)
+      else suivantes.add(cle)
+      return suivantes
+    })
+  }
+
+  function autreTirage() {
+    setGraineParts(tirerGraine())
+    setTirage((t) => t + 1)
+  }
+
   async function generer() {
     if (!prepare || !chapitre) return
     setGenereEnCours(true)
@@ -247,6 +293,8 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
       urls.current = []
       setResultat({ plan: prepare, documents, type, chapitre })
       setTirage((t) => t + 1)
+      // Nouvelles parts au hasard à chaque génération.
+      setGraineParts(tirerGraine())
       window.setTimeout(() => blocResultat.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
     } catch (e) {
       console.error(e)
@@ -280,8 +328,13 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
         : 'Préparation…'
   /** Niveaux et compétences réellement obtenus (récapitulatif exact). */
   const recapContenu = resume
-    ? `${resume.categories.length === 1 ? 'Niveau' : 'Niveaux'} : ${texteCategories(resume.categories) || '—'} · ${listeCompetences(resume.competences)}${resume.competences.length > 1 ? ', temps partagé à parts égales' : ''}`
+    ? `${resume.categories.length === 1 ? 'Niveau' : 'Niveaux'} : ${texteCategories(resume.categories) || '—'} · ${listeCompetences(resume.competences)}${resume.competences.length > 1 && !resume.parts ? ', temps partagé à parts égales' : ''}`
     : null
+  /** Évaluation blanche : parts obtenues (celles des points), et leur origine (même texte que le
+   * document, `texteRepartitionBlanche` ; téléphone : l'avertissement final est masqué dans la barre
+   * collante, il est écrit juste au-dessus, sous « Parts du temps et des points »). */
+  const plusieursParts = !!resume?.parts && Object.values(resume.parts).filter((v) => v > 0).length > 1
+  const recapParts = resume?.parts ? (plusieursParts ? `${texteParts(resume.parts)} — ${resume.partsHasard ? 'tirées au hasard' : 'réglées par toi'}` : texteRepartitionBlanche(resume.parts, !!resume.partsHasard)) : null
   const tousNiveauxCoches = niveaux.length === CATEGORIES_NIVEAU.length
   const niveauxGrises = dispo ? CATEGORIES_NIVEAU.filter((c) => !dispo.niveaux[c]) : []
   /** Pourquoi des niveaux sont grisés : ce que chaque compétence cochée offre vraiment. */
@@ -291,6 +344,9 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
       : []
   /** Compétences cochées sans exercice aux niveaux cochés : signalées, leur temps va aux autres. */
   const competencesSansNiveau = dispo ? competences.filter((p) => dispo.parCompetence[p].total > 0 && !dispo.parCompetence[p].auxNiveauxCoches) : []
+  const connaitreCochee = competencesCochees.has(1) && !!dispo && dispo.parCompetence[1].total > 0
+  const montrerDemos = blanche && connaitreCochee && demonstrations.length > 0
+  const montrerParts = blanche && competencesUtiles.length > 1
 
   return (
     <div className="eleve">
@@ -387,7 +443,11 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
           <span className="eleve-etiquette" id="eleve-competences">
             Compétences
           </span>
-          <p className="eleve-aide">Coche ce que ton professeur a annoncé pour l'interrogation. Le temps est partagé à parts égales entre les compétences cochées.</p>
+          <p className="eleve-aide">
+            {blanche
+              ? "Coche ce que ton professeur a annoncé pour l'interrogation."
+              : "Coche ce que ton professeur a annoncé pour l'interrogation. Le temps est partagé à parts égales entre les compétences cochées."}
+          </p>
           <div className="eleve-coches" role="group" aria-labelledby="eleve-competences">
             {COMPETENCES_ELEVE.map(({ id, libelle }) => {
               const vide = !!dispo && dispo.parCompetence[id].total === 0
@@ -417,6 +477,57 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             </p>
           )}
         </div>
+        {montrerDemos && (
+          <fieldset className="eleve-reglage eleve-demos">
+            <legend className="eleve-etiquette">Démonstrations annoncées</legend>
+            <p className="eleve-aide">Coche celles que ton professeur a demandé de retenir pour l'interro. Aucune cochée : pas de démonstration dans ton évaluation blanche.</p>
+            <div className="eleve-demos-liste">
+              {demonstrations.map((d) => (
+                <label key={d.cle} className="eleve-case eleve-demo">
+                  <input type="checkbox" checked={demosCochees.has(d.cle)} onChange={() => basculerDemonstration(d.cle)} />
+                  <span>
+                    <RichText text={d.titre} />
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
+        {montrerParts && (
+          <div className="eleve-reglage eleve-parts">
+            <span className="eleve-etiquette" id="eleve-parts">
+              Parts du temps et des points
+            </span>
+            <div className="eleve-segments" role="radiogroup" aria-labelledby="eleve-parts">
+              <button type="button" role="radio" aria-checked={modeParts === 'hasard'} onClick={() => setModeParts('hasard')}>
+                Au hasard
+              </button>
+              <button type="button" role="radio" aria-checked={modeParts === 'reglee'} onClick={() => setModeParts('reglee')}>
+                Je règle les parts
+              </button>
+            </div>
+            {modeParts === 'hasard' ? (
+              <p className="eleve-aide">
+                Chaque tirage partage le temps et les points autrement entre les compétences cochées (de {PART_MIN_HASARD}&nbsp;% à {PART_MAX_HASARD}&nbsp;% chacune) : ta vraie interro peut être répartie autrement.
+              </p>
+            ) : (
+              <ReglageCompetences
+                reglage={{ cochees: competencesUtiles, parts: partsManuelles }}
+                onChange={(r) => setPartsManuelles(r.parts)}
+                feuille={false}
+                dureeCible={duree}
+                presentes={dispo ? competencesUtiles.filter((p) => dispo.parCompetence[p].auxNiveauxCoches) : competencesUtiles}
+                onFermer={() => setModeParts('hasard')}
+                eleve={{
+                  titre: 'Parts de ton évaluation blanche',
+                  aide: 'Règle avec − / + la part de chaque compétence cochée (5 % au moins). Le temps et les points suivent ces parts.',
+                  etat: 'Réglage non mémorisé : il disparaît si tu recharges la page.',
+                  fermer: 'Revenir au hasard',
+                }}
+              />
+            )}
+          </div>
+        )}
       </section>
 
       <section className="eleve-bloc" aria-labelledby="eleve-q3">
@@ -490,11 +601,15 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
                   Grisé : aucun exercice à ce niveau dans ces notions. {raisonsNiveaux.join(' · ')}.
                 </p>
               )}
-              {competencesSansNiveau.map((p) => (
-                <p key={p}>
-                  {LIBELLE_COMPETENCE[p]} : aucun exercice aux niveaux cochés ({texteSeulement(dispo!.parCompetence[p].categories)}) — son temps va aux autres compétences cochées.
-                </p>
-              ))}
+              {competencesSansNiveau.map((p) =>
+                dispo!.parCompetence[p].demonstrationsSeules ? (
+                  <p key={p}>{LIBELLE_COMPETENCE[p]} : seulement des démonstrations ici — coche celles qui sont annoncées, sinon son temps va aux autres compétences cochées.</p>
+                ) : (
+                  <p key={p}>
+                    {LIBELLE_COMPETENCE[p]} : aucun exercice aux niveaux cochés ({texteSeulement(dispo!.parCompetence[p].categories)}) — son temps va aux autres compétences cochées.
+                  </p>
+                ),
+              )}
             </div>
           )}
         </div>
@@ -516,6 +631,20 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             {resume && <span className="eleve-recap-fin"> · corrigé détaillé à la fin</span>}
           </p>
           {recapContenu && <p className="eleve-recap-contenu">{recapContenu}</p>}
+          {recapParts && (
+            <p className="eleve-recap-contenu eleve-recap-parts">
+              {recapParts}
+              {plusieursParts && <span className="eleve-recap-avertissement"> : ta vraie interro peut être répartie autrement</span>}
+              {resume?.partsHasard && plusieursParts && (
+                <>
+                  {' '}
+                  <button type="button" className="eleve-recap-tirage" onClick={autreTirage} disabled={enPreparation}>
+                    Autre tirage
+                  </button>
+                </>
+              )}
+            </p>
+          )}
         </div>
         <button type="button" className="eleve-generer" onClick={() => void generer()} disabled={!prepare || genereEnCours || enPreparation}>
           {genereEnCours ? 'Génération…' : blanche ? 'Générer mon évaluation blanche' : 'Générer ma feuille d’exercices'}

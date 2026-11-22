@@ -4877,8 +4877,10 @@ export interface EnTeteEvaluation {
   cartouche?: CartoucheEcole
   /** Parcours ÉLÈVE (`lib/compositionEleve.ts`) — évaluation blanche : UN document (copie aux points
    * indicatifs, QR code par question, corrigé détaillé à la fin), plus la version aménagée si
-   * demandée ; ni corrigé séparé ni grille. Absent : évaluation / feuille rendue comme avant. */
-  blanche?: { dureeConseillee: number }
+   * demandée ; ni corrigé séparé ni grille. Absent : évaluation / feuille rendue comme avant.
+   * `repartition` : parts du document entre les compétences (« Connaître 20 % · … — tirées au hasard :
+   * ta vraie interro peut être répartie autrement »), imprimées sous la durée ; absent : rien. */
+  blanche?: { dureeConseillee: number; repartition?: string }
 }
 
 /**
