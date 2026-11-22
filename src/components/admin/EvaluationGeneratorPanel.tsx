@@ -40,6 +40,7 @@ import {
 } from '../../lib/evaluationLocal'
 import { construirePlanRemediation, questionsRemediables, titreSansPrefixe } from '../../lib/evaluationRemediation'
 import { normaliserSigneMoins } from '../../lib/normaliserSaisie'
+import { texteRepartition } from '../../lib/repartitionProcessus'
 import { decoderMatiere } from '../../lib/carnetMatiere'
 import {
   horaireExamen,
@@ -2225,10 +2226,10 @@ export function EvaluationGeneratorPanel({
                           ['notions', 'Sur quelques notions', 'Tu coches les notions, l’outil propose les exercices.'],
                           [
                             'evaluation',
-                            estExercice ? 'Préparer l’évaluation' : 'Répartition 15 / 60 / 25 %',
+                            estExercice ? 'Préparer l’évaluation' : `Répartition ${texteRepartition(true)}`,
                             estExercice
-                              ? 'Même répartition qu’une évaluation : 15 % / 60 % / 25 % (≈ 50 min).'
-                              : `Connaître, Appliquer, Transférer : 15 / 60 / 25 % de ${estExamen && lectureDuree.etat === 'ok' ? lectureDuree.valeur : estExamen ? Math.min(150, 50 * Math.max(1, chapitres.length)) : 50} min.`,
+                              ? `Même répartition qu’une évaluation : ${texteRepartition()} (≈ 50 min).`
+                              : `Connaître, Appliquer, Transférer : ${texteRepartition(true)} de ${estExamen && lectureDuree.etat === 'ok' ? lectureDuree.valeur : estExamen ? Math.min(150, 50 * Math.max(1, chapitres.length)) : 50} min.`,
                           ],
                           ['mesure', 'Sur mesure', 'Le catalogue complet, exercice par exercice.'],
                         ] as const

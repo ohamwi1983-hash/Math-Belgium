@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  LIBELLE_PALIER,
+  LIBELLE_CATEGORIE,
+  categorieDuNiveau,
   estimationEnCache,
   estimationVariante,
-  palierDuNiveau,
+  rangCategorie,
   type EstimationVariante,
   type OptionsEstimation,
 } from '../../entrainement/export/niveauDifficulte'
@@ -80,12 +81,12 @@ function texteDuree(minutes: number): string {
 function infobulle(e: EstimationVariante, reglages: string): string {
   const morceaux: string[] = []
   if (e.niveauMin !== undefined && e.niveauMax !== undefined) {
-    const pMin = LIBELLE_PALIER[palierDuNiveau(e.niveauMin)]
-    const pMax = LIBELLE_PALIER[palierDuNiveau(e.niveauMax)]
+    const pMin = LIBELLE_CATEGORIE[categorieDuNiveau(e.niveauMin)]
+    const pMax = LIBELLE_CATEGORIE[categorieDuNiveau(e.niveauMax)]
     morceaux.push(
       e.niveauMin === e.niveauMax
-        ? `Niveau ${e.niveauMin} (${pMin})`
-        : `Niveau ${e.niveauMin} à ${e.niveauMax} (${pMin === pMax ? pMin : `${pMin} à ${pMax}`})`,
+        ? `Niveau ${e.niveauMin} · ${pMin}`
+        : `Niveaux ${e.niveauMin} à ${e.niveauMax} · ${pMin === pMax ? pMin : `${pMin} à ${pMax}`}`,
     )
   }
   if (e.dureeMinutes !== undefined) morceaux.push(`${texteDuree(e.dureeMinutes)} par exercice`)
@@ -170,8 +171,8 @@ export function RepereNiveauDuree<T>({
   }
   if (enCache === undefined) return null
   const niveau = texteNiveau(enCache)
-  const palierMin = enCache.niveauMin !== undefined ? palierDuNiveau(enCache.niveauMin) : null
-  const palierMax = enCache.niveauMax !== undefined ? palierDuNiveau(enCache.niveauMax) : null
+  const categorieMin = enCache.niveauMin !== undefined ? categorieDuNiveau(enCache.niveauMin) : null
+  const categorieMax = enCache.niveauMax !== undefined ? categorieDuNiveau(enCache.niveauMax) : null
   const titre = infobulle(enCache, reglages)
   return (
     <span ref={ref} className="admin-eval-repere" data-etat="pret" title={titre}>
@@ -179,15 +180,15 @@ export function RepereNiveauDuree<T>({
         <>
           niv.{' '}
           {enCache.niveauMin === enCache.niveauMax ? (
-            <b className={`admin-eval-repere-n palier-${palierMin}`}>{enCache.niveauMin}</b>
+            <b className={`admin-eval-repere-n niv-c${rangCategorie(categorieMin!)}`}>{enCache.niveauMin}</b>
           ) : (
             <>
-              <b className={`admin-eval-repere-n palier-${palierMin}`}>{enCache.niveauMin}</b>–
-              <b className={`admin-eval-repere-n palier-${palierMax}`}>{enCache.niveauMax}</b>
+              <b className={`admin-eval-repere-n niv-c${rangCategorie(categorieMin!)}`}>{enCache.niveauMin}</b>–
+              <b className={`admin-eval-repere-n niv-c${rangCategorie(categorieMax!)}`}>{enCache.niveauMax}</b>
             </>
           )}
           {enCache.provisoire && <span className="admin-eval-repere-provisoire">*</span>}
-          {palierMin && palierMin === palierMax && <span className="admin-eval-repere-palier"> {LIBELLE_PALIER[palierMin]}</span>}
+          {categorieMin && categorieMin === categorieMax && <span className="admin-eval-repere-palier"> · {LIBELLE_CATEGORIE[categorieMin]}</span>}
         </>
       )}
       {niveau !== null && enCache.dureeMinutes !== undefined && ' · '}

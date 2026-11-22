@@ -105,7 +105,7 @@ function bareme(e: ExerciceResoudreTriangle): BaremeExercice {
  * donnerait l'angle aigu) ; nombres : calculatrice. */
 /** Groupe à verdict (audit 4e ch. 5, lot D) : la configuration est la réponse de l'écran 1 — le
  * niveau et la durée imprimés ne doivent pas la trahir (SSS : 14 min, angle obtus calculé : niveau 5).
- * Niveau ET durée CONSTANTS, comme gen74 : 4 · Intermédiaire, 12 min (trois calculs, une lecture,
+ * Niveau ET durée CONSTANTS, comme gen74 : 4 · difficile, 12 min (trois calculs, une lecture,
  * méthode à choisir, calculatrice). */
 function criteresDifficulte(e: ExerciceResoudreTriangle): CriteresDifficulte {
   void e;

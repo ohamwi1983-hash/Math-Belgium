@@ -6,14 +6,20 @@ import { useCompte } from '../../lib/compteContexte'
 import { estChapitreFonctionnel } from '../../lib/chapitresFonctionnels'
 import { genererDocumentsDepuisPlan, type DocumentGenere } from '../../lib/evaluationLocal'
 import { declencherTelechargement } from '../../entrainement/export/telechargerBlob'
+import type { Processus } from '../../lib/evaluationPayload'
+import { CATEGORIES_NIVEAU, LIBELLE_CATEGORIE, PLAGE_CATEGORIE, rangCategorie, type CategorieNiveau } from '../../entrainement/export/niveauDifficulte'
 import {
+  COMPETENCES_ELEVE,
   DUREES_ELEVE,
+  LIBELLE_COMPETENCE,
   composer,
   construirePlanEleve,
+  disponibilite,
   notionsDuChapitre,
   preparerCandidats,
+  texteCategories,
+  texteSeulement,
   type Candidat,
-  type NiveauEleve,
   type PlanEleve,
   type ReglagesEleve,
   type TypeEleve,
@@ -23,20 +29,24 @@ import {
  * Assistant « Préparer mon évaluation » — parcours ÉLÈVE des pages publiques `/exercice` et
  * `/{niveau}/{chapitre}/exercices` (visiteur non connecté ; un professeur connecté voit le panneau
  * professeur). Trois blocs (maquettes validées « EleveAssistant » / « EleveTelephone ») : que veux-tu
- * faire (feuille d'exercices ou évaluation blanche), sur quoi (chapitre, notions), combien de temps et
- * quel niveau ; puis un récapitulatif EXACT (le plan est préparé à l'avance : nombre de questions
- * imprimées, durée, points) et le bouton de génération. Chaque clic produit un nouveau tirage.
+ * faire (feuille d'exercices ou évaluation blanche), sur quoi (chapitre, notions, compétences annoncées),
+ * combien de temps et quels niveaux (cases à cocher, tous par défaut ; un niveau sans exercice pour
+ * ces notions et compétences est grisé avec sa raison) ; puis un récapitulatif EXACT (le plan est
+ * préparé à l'avance : questions imprimées, durée, points, niveaux et compétences réellement obtenus)
+ * et le bouton de génération. Chaque clic produit un nouveau tirage.
  * Aucune donnée d'élève : rien n'est enregistré.
  */
 
-const NIVEAUX: { id: NiveauEleve; court: string; long: string }[] = [
-  { id: 'base', court: 'Base', long: 'Base' },
-  { id: 'intermediaire', court: 'Interm.', long: 'Intermédiaire' },
-  { id: 'avance', court: 'Avancé', long: 'Avancé' },
-  { id: 'reel', court: 'Réel', long: 'Comme une vraie évaluation' },
-]
+/** Numéros 1–7 d'une catégorie, tels qu'imprimés sur les feuilles (« 5–7 » pour très difficile). */
+function numerosCategorie(c: CategorieNiveau): string {
+  const [a, b] = PLAGE_CATEGORIE[c]
+  return a === b ? String(a) : `${a}–${b}`
+}
 
-const LIBELLE_PALIER: Record<Exclude<NiveauEleve, 'reel'>, string> = { base: 'Base', intermediaire: 'Intermédiaire', avance: 'Avancé' }
+function listeCompetences(ps: readonly Processus[]): string {
+  const mots = ps.map((p) => LIBELLE_COMPETENCE[p])
+  return mots.length <= 1 ? (mots[0] ?? '') : `${mots.slice(0, -1).join(', ')} et ${mots[mots.length - 1]}`
+}
 
 /** Chapitres proposés d'un niveau : câblés, avec au moins une notion à générateur. */
 function chapitresDisponibles(levelSlug: string): ChapterContent[] {
@@ -65,8 +75,14 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const location = useLocation()
   const etroit = useEtroit()
 
-  const [levelSlug, setLevelSlug] = useState(verrouille?.levelSlug ?? LEVELS[0].slug)
-  const [chapitreSlug, setChapitreSlug] = useState(verrouille?.chapitreSlug ?? chapitresDisponibles(LEVELS[0].slug)[0]?.slug ?? '')
+  // `/exercice?niveau=5e-4h` : année présélectionnée (lien de la page d'accueil) ; valeur inconnue, ou
+  // année sans chapitre proposé, ignorée (première année).
+  const [anneeInitiale] = useState(() => {
+    const demandee = new URLSearchParams(location.search).get('niveau')
+    return demandee && LEVELS.some((l) => l.slug === demandee) && chapitresDisponibles(demandee).length > 0 ? demandee : LEVELS[0].slug
+  })
+  const [levelSlug, setLevelSlug] = useState(verrouille?.levelSlug ?? anneeInitiale)
+  const [chapitreSlug, setChapitreSlug] = useState(verrouille?.chapitreSlug ?? chapitresDisponibles(anneeInitiale)[0]?.slug ?? '')
   const chapitre = findChapter(levelSlug, chapitreSlug)
   const notions = useMemo(() => (chapitre ? notionsDuChapitre(chapitre) : []), [chapitre])
 
@@ -75,7 +91,12 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const [choisies, setChoisies] = useState<Set<string> | null>(null)
   const [notionsDepliees, setNotionsDepliees] = useState(false)
   const [duree, setDuree] = useState<number>(30)
-  const [niveau, setNiveau] = useState<NiveauEleve>('reel')
+  /** Niveaux cochés (intention de l'élève) : tous par défaut, niveaux mélangés. */
+  const [niveauxCoches, setNiveauxCoches] = useState<Set<CategorieNiveau>>(() => new Set(CATEGORIES_NIVEAU))
+  /** Compétences cochées : les trois par défaut. */
+  const [competencesCochees, setCompetencesCochees] = useState<Set<Processus>>(() => new Set([1, 2, 3] as Processus[]))
+  /** Petit rappel quand l'élève essaie de tout décocher. */
+  const [rappelMinimum, setRappelMinimum] = useState<'niveau' | 'competence' | null>(null)
   const [amenagee, setAmenagee] = useState(false)
 
   const [candidats, setCandidats] = useState<Candidat[] | null>(null)
@@ -92,7 +113,15 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const blocResultat = useRef<HTMLDivElement>(null)
 
   const sections = useMemo(() => (choisies ? [...choisies] : []), [choisies])
-  const cleReglages = JSON.stringify([levelSlug, chapitreSlug, sections, duree, niveau, type, amenagee, tirage])
+  const niveaux = useMemo(() => CATEGORIES_NIVEAU.filter((c) => niveauxCoches.has(c)), [niveauxCoches])
+  const competences = useMemo(() => ([1, 2, 3] as Processus[]).filter((p) => competencesCochees.has(p)), [competencesCochees])
+  // Disponibilité EN DIRECT, sur les candidats déjà préparés (niveaux des tirages d'estimation).
+  const dispo = useMemo(() => (candidats ? disponibilite(candidats, { sections, competences, niveaux }) : null), [candidats, sections, competences, niveaux])
+  /** Niveaux cochés ET proposés : au moins un, sinon rien n'est composé. */
+  const niveauxUtiles = dispo ? niveaux.filter((c) => dispo.niveaux[c]) : niveaux
+  const competencesUtiles = dispo ? competences.filter((p) => dispo.parCompetence[p].total > 0) : competences
+  const reglagesValides = niveauxUtiles.length > 0 && competencesUtiles.length > 0
+  const cleReglages = JSON.stringify([levelSlug, chapitreSlug, sections, duree, niveaux, competences, type, amenagee, tirage])
   const prepare = prepareBrut && prepareBrut.cle === cleReglages ? prepareBrut : null
 
   // Candidats du chapitre (niveaux et durées estimés), calculés une variante à la fois.
@@ -120,23 +149,29 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   // génération (`tirage`).
   useEffect(() => {
     if (!chapitre || !candidats) return
+    if (!reglagesValides) {
+      setPrepare(null)
+      setEnPreparation(false)
+      return
+    }
     let annule = false
     setEnPreparation(true)
-    const reglages: ReglagesEleve = { levelSlug, chapitreSlug: chapitre.slug, sections, duree, niveau, type, amenagee }
+    const reglages: ReglagesEleve = { levelSlug, chapitreSlug: chapitre.slug, sections, duree, niveaux, competences, type, amenagee }
     const minuterie = window.setTimeout(() => {
       const composition = composer(candidats, reglages)
       construirePlanEleve(reglages, chapitre, composition)
         .then((p) => {
           if (!annule) {
-            setPrepare({ ...p, cle: JSON.stringify([levelSlug, chapitre.slug, sections, duree, niveau, type, amenagee, tirage]) })
+            setPrepare({ ...p, cle: JSON.stringify([levelSlug, chapitre.slug, sections, duree, niveaux, competences, type, amenagee, tirage]) })
             setErreur(null)
           }
         })
         .catch((e) => {
-          console.error(e)
+          // Composition vide : rien ne convient (dit à l'élève, pas une erreur de la page).
+          if (!(e instanceof Error && /vide/i.test(e.message))) console.error(e)
           if (!annule) {
             setPrepare(null)
-            setErreur(sections.length > 0 ? 'Aucun exercice ne convient à ces réglages : ajoute une notion ou change de niveau.' : 'Aucun exercice ne convient à ces réglages.')
+            setErreur(sections.length > 0 ? 'Aucun exercice ne convient à ces réglages : ajoute une notion, un niveau ou une compétence.' : 'Aucun exercice ne convient à ces réglages : ajoute un niveau ou une compétence.')
           }
         })
         .finally(() => {
@@ -147,7 +182,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
       annule = true
       window.clearTimeout(minuterie)
     }
-  }, [chapitre, candidats, levelSlug, sections, duree, niveau, type, amenagee, tirage])
+  }, [chapitre, candidats, levelSlug, sections, duree, niveaux, competences, type, amenagee, tirage, reglagesValides])
 
   useEffect(() => () => urls.current.forEach((u) => URL.revokeObjectURL(u)), [])
 
@@ -173,6 +208,33 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
       else suivantes.add(id)
       return suivantes.size === 0 || suivantes.size === notions.length ? null : suivantes
     })
+  }
+
+  function basculerNiveau(c: CategorieNiveau) {
+    if (dispo && !dispo.niveaux[c]) return
+    const suivants = new Set(niveauxCoches)
+    if (suivants.has(c)) suivants.delete(c)
+    else suivants.add(c)
+    // Au moins un niveau coché ET proposé.
+    if (!CATEGORIES_NIVEAU.some((k) => suivants.has(k) && (!dispo || dispo.niveaux[k]))) {
+      setRappelMinimum('niveau')
+      return
+    }
+    setRappelMinimum(null)
+    setNiveauxCoches(suivants)
+  }
+
+  function basculerCompetence(p: Processus) {
+    if (dispo && dispo.parCompetence[p].total === 0) return
+    const suivantes = new Set(competencesCochees)
+    if (suivantes.has(p)) suivantes.delete(p)
+    else suivantes.add(p)
+    if (![...suivantes].some((q) => !dispo || dispo.parCompetence[q].total > 0)) {
+      setRappelMinimum('competence')
+      return
+    }
+    setRappelMinimum(null)
+    setCompetencesCochees(suivantes)
   }
 
   async function generer() {
@@ -213,7 +275,22 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
       : `${resume.questions} exercice${resume.questions > 1 ? 's' : ''} · ≈ ${resume.dureeConseillee} min`
     : progression && !candidats
       ? `Préparation des exercices… ${Math.round((100 * progression.fait) / Math.max(1, progression.total))} %`
-      : 'Préparation…'
+      : candidats && !reglagesValides
+        ? 'Rien à composer avec ces réglages'
+        : 'Préparation…'
+  /** Niveaux et compétences réellement obtenus (récapitulatif exact). */
+  const recapContenu = resume
+    ? `${resume.categories.length === 1 ? 'Niveau' : 'Niveaux'} : ${texteCategories(resume.categories) || '—'} · ${listeCompetences(resume.competences)}`
+    : null
+  const tousNiveauxCoches = niveaux.length === CATEGORIES_NIVEAU.length
+  const niveauxGrises = dispo ? CATEGORIES_NIVEAU.filter((c) => !dispo.niveaux[c]) : []
+  /** Pourquoi des niveaux sont grisés : ce que chaque compétence cochée offre vraiment. */
+  const raisonsNiveaux =
+    dispo && niveauxGrises.length > 0
+      ? competences.filter((p) => dispo.parCompetence[p].total > 0).map((p) => `${LIBELLE_COMPETENCE[p]} : ${texteSeulement(dispo.parCompetence[p].categories)}`)
+      : []
+  /** Compétences cochées sans exercice aux niveaux cochés : signalées, leur temps va aux autres. */
+  const competencesSansNiveau = dispo ? competences.filter((p) => dispo.parCompetence[p].total > 0 && !dispo.parCompetence[p].auxNiveauxCoches) : []
 
   return (
     <div className="eleve">
@@ -306,6 +383,40 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             </button>
           )}
         </div>
+        <div className="eleve-reglage">
+          <span className="eleve-etiquette" id="eleve-competences">
+            Compétences
+          </span>
+          <p className="eleve-aide">Coche ce que ton professeur a annoncé pour l'interrogation. Le temps est réparti entre les compétences cochées comme dans une vraie évaluation.</p>
+          <div className="eleve-coches" role="group" aria-labelledby="eleve-competences">
+            {COMPETENCES_ELEVE.map(({ id, libelle }) => {
+              const vide = !!dispo && dispo.parCompetence[id].total === 0
+              const on = competencesCochees.has(id) && !vide
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  className="eleve-coche"
+                  aria-pressed={on}
+                  aria-disabled={vide || undefined}
+                  title={vide ? `Aucun exercice « ${libelle} » dans ces notions` : undefined}
+                  onClick={() => basculerCompetence(id)}
+                >
+                  <span className="eleve-coche-case" aria-hidden="true">
+                    {on ? '✓' : ''}
+                  </span>
+                  <span>{libelle}</span>
+                  {vide && <span className="eleve-coche-raison">aucun exercice ici</span>}
+                </button>
+              )
+            })}
+          </div>
+          {rappelMinimum === 'competence' && (
+            <p className="eleve-note" role="status">
+              Garde au moins une compétence.
+            </p>
+          )}
+        </div>
       </section>
 
       <section className="eleve-bloc" aria-labelledby="eleve-q3">
@@ -313,7 +424,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
           <span className="eleve-num" aria-hidden="true">
             3
           </span>
-          <h2 id="eleve-q3">Combien de temps, et quel niveau ?</h2>
+          <h2 id="eleve-q3">Combien de temps, et quels niveaux ?</h2>
         </div>
         <div className="eleve-reglages">
           <div className="eleve-reglage">
@@ -328,27 +439,72 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
               ))}
             </div>
           </div>
-          <div className="eleve-reglage">
+        </div>
+        <div className="eleve-reglage">
+          <div className="eleve-etiquette-ligne">
             <span className="eleve-etiquette" id="eleve-niveau">
-              Niveau
+              Niveaux
             </span>
-            <div className="eleve-segments" role="radiogroup" aria-labelledby="eleve-niveau">
-              {NIVEAUX.map((n) => (
-                <button key={n.id} type="button" role="radio" aria-checked={niveau === n.id} onClick={() => setNiveau(n.id)} aria-label={n.long}>
-                  <span className="eleve-long">{n.long}</span>
-                  <span className="eleve-court" aria-hidden="true">
-                    {n.court}
+            {!tousNiveauxCoches && (
+              <button type="button" className="eleve-lien-bouton" onClick={() => setNiveauxCoches(new Set(CATEGORIES_NIVEAU))}>
+                Tout cocher
+              </button>
+            )}
+          </div>
+          <p className="eleve-aide" id="eleve-niveau-aide">
+            Tous cochés : les niveaux sont mélangés, comme dans une vraie évaluation.
+          </p>
+          <div className="eleve-coches" role="group" aria-labelledby="eleve-niveau" aria-describedby="eleve-niveau-aide">
+            {CATEGORIES_NIVEAU.map((c) => {
+              const grise = !!dispo && !dispo.niveaux[c]
+              const on = niveauxCoches.has(c) && !grise
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  className="eleve-coche eleve-coche-niveau"
+                  aria-pressed={on}
+                  aria-disabled={grise || undefined}
+                  aria-describedby={grise ? 'eleve-niveau-raisons' : undefined}
+                  title={grise ? `Aucun exercice ${LIBELLE_CATEGORIE[c]} pour ${listeCompetences(competences)} dans ces notions` : undefined}
+                  onClick={() => basculerNiveau(c)}
+                >
+                  <span className="eleve-coche-case" aria-hidden="true">
+                    {on ? '✓' : ''}
                   </span>
+                  <span className={`eleve-niv-num niv-c${rangCategorie(c)}`}>{numerosCategorie(c)}</span>
+                  <span>{LIBELLE_CATEGORIE[c]}</span>
                 </button>
+              )
+            })}
+          </div>
+          {rappelMinimum === 'niveau' && (
+            <p className="eleve-note" role="status">
+              Garde au moins un niveau.
+            </p>
+          )}
+          {(raisonsNiveaux.length > 0 || competencesSansNiveau.length > 0) && (
+            <div className="eleve-dispo" id="eleve-niveau-raisons">
+              {raisonsNiveaux.length > 0 && (
+                <p>
+                  Grisé : aucun exercice à ce niveau dans ces notions. {raisonsNiveaux.join(' · ')}.
+                </p>
+              )}
+              {competencesSansNiveau.map((p) => (
+                <p key={p}>
+                  {LIBELLE_COMPETENCE[p]} : aucun exercice aux niveaux cochés ({texteSeulement(dispo!.parCompetence[p].categories)}) — son temps va aux autres compétences cochées.
+                </p>
               ))}
             </div>
-          </div>
+          )}
         </div>
         <label className="eleve-case">
           <input type="checkbox" checked={amenagee} onChange={(e) => setAmenagee(e.target.checked)} /> Version aménagée (plus grande, plus aérée)
         </label>
-        {resume?.elargi && niveau !== 'reel' && (
-          <p className="eleve-note">Peu d'exercices de niveau {LIBELLE_PALIER[niveau]} dans ces notions : des exercices d'un niveau voisin complètent.</p>
+        {resume?.elargi && (
+          <p className="eleve-note">
+            Peu d'exercices aux niveaux cochés dans ces notions : des exercices de niveau {texteCategories(resume.categoriesHorsChoix)} complètent.
+          </p>
         )}
       </section>
 
@@ -359,6 +515,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             {recap}
             {resume && <span className="eleve-recap-fin"> · corrigé détaillé à la fin</span>}
           </p>
+          {recapContenu && <p className="eleve-recap-contenu">{recapContenu}</p>}
         </div>
         <button type="button" className="eleve-generer" onClick={() => void generer()} disabled={!prepare || genereEnCours || enPreparation}>
           {genereEnCours ? 'Génération…' : blanche ? 'Générer mon évaluation blanche' : 'Générer ma feuille d’exercices'}

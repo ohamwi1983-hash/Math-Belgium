@@ -7,6 +7,7 @@ import {
   type LigneSelection,
   type Processus,
 } from '../../../lib/evaluationPayload'
+import { REPARTITION_PROCESSUS } from '../../../lib/repartitionProcessus'
 
 /**
  * « Façons de composer » de la page de conception (proposition B, décision de l'utilisateur du
@@ -201,13 +202,13 @@ function notions(ctx: ContexteComposition, alea: () => number): Selection {
   return sel
 }
 
-/** Préparer l'évaluation : durée visée répartie 15 % / 60 % / 25 % entre les processus (les points
+/** Préparer l'évaluation : durée visée répartie entre les processus selon `REPARTITION_PROCESSUS` (les points
  * automatiques suivent la durée, donc les points aussi) ; la part d'un processus absent passe à
  * Appliquer. */
 function evaluation(ctx: ContexteComposition, alea: () => number): Selection {
   const sel = new Selection(ctx)
   const tout = unites(ctx)
-  const parts: Record<Processus, number> = { 1: 0.15, 2: 0.6, 3: 0.25 }
+  const parts: Record<Processus, number> = { ...REPARTITION_PROCESSUS }
   const candidats = (p: Processus) => tout.filter((u) => u.processus === p)
   for (const p of [1, 3] as const) {
     if (candidats(p).length === 0) {

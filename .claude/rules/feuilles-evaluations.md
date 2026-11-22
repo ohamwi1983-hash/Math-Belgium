@@ -71,14 +71,20 @@ les étapes 1 et 2 » (ou en lettre de question papier).
 ## Niveau de difficulté et durée (décision de l'utilisateur)
 
 Les étoiles ★/★★/★★★ (posées au jugement) sont remplacées par un **NIVEAU 1–7** calculé par une grille
-commune, affiché « numéro + palier », et la durée constante par générateur par une **durée PAR
+commune, affiché « numéro · catégorie » (« 4 · difficile »), et la durée constante par générateur par une **durée PAR
 EXERCICE** calculée avec les mêmes critères. Module commun `export/niveauDifficulte.ts`
-(`niveauEtDuree(adaptateur, instance) → { niveau, palier, score, criteres, dureeMinutes, provisoire }`,
+(`niveauEtDuree(adaptateur, instance) → { niveau, categorie, score, criteres, dureeMinutes, provisoire }`,
 testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
 (`genererFeuilleExercices.ts`).
 
-- **Score par exercice** (instance tirée), niveau = score + 1 (1 à 7 ; le 7 est gardé). **Paliers** :
-  Base 1–2, Intermédiaire 3–4, Avancé 5–7 (`palierDuNiveau`).
+- **Score par exercice** (instance tirée), niveau = score + 1 (1 à 7 ; le 7 est gardé). **Catégories**
+  (décision du 22/11/2026, calées sur la distribution mesurée — niveaux 6 et 7 presque inexistants :
+  variantes d'exercices, tous chapitres, Appliquer 1:81 2:217 3:315 4:159 5:108 6:7 7:0, Transférer
+  1:3 2:17 3:150 4:128 5:154 6:25 7:1, Connaître 1:14 2:18 + vrai/faux au niveau 2) : **1 très facile,
+  2 facile, 3 moyen, 4 difficile, 5 à 7 très difficile** — `categorieDuNiveau`, SEULE fonction utilisée
+  partout (avec `LIBELLE_CATEGORIE`, `libelleNiveau` « 4 · difficile », `libellePlageNiveaux`,
+  `morceauxLegende`, `rangCategorie` 1–5 pour la couleur). Le calcul du niveau ne dépend pas de la
+  catégorie. Plus aucun « Base / Intermédiaire / Avancé / Réel » comme libellé de niveau.
 - **Étapes (0/1/2)** : étapes « qui transforment » (calcul, raisonnement) — une lettre `sousQuestion`
   du corrigé détaillé = un écran (`etapesDuCorrige(corrigé, lettresDeLecture)`, corrigé sans lettre →
   1 étape). Les écrans de **pure lecture** (lire une valeur, un point, une caractéristique sur un
@@ -122,9 +128,10 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   seulement les instances que le moteur peut tirer pour la rangée (`respecteContrainte` : exercice
   complet, paramètres décochés absents, calculatrice interdite / autorisée ; recherche bornée à
   4 000 essais / 80 ms, sinon tirages libres et l'infobulle le dit) ; un cas particulier coché (une
-  seule question) n'est pas compté à part (dit dans l'infobulle). Numéros colorés par palier
-  (Base / Intermédiaire / Avancé, `--good` / `--attn` / `--bad`), mot du palier quand toute la
-  plage est dans un palier et la largeur > 640 px. Générateur pas encore noté : niveau converti
+  seule question) n'est pas compté à part (dit dans l'infobulle « Niveaux 2 à 4 · facile à
+  difficile, ≈ 7 min… »). Numéros sur une pastille teintée par catégorie (`niv-c1` … `niv-c5`,
+  jetons `--niv1-fond` / `--niv1-encre` … `--niv5-*` de `index.css`, clair ET sombre), « · difficile »
+  quand toute la plage est dans une catégorie et la largeur > 640 px. Générateur pas encore noté : niveau converti
   avec « * » (« niv. 3* »), infobulle « Provisoire : … étoiles converties, durée = constante » ;
   sans étoiles : durée seule. **Calcul paresseux** : rien n'est tiré à l'ouverture ; une rangée
   calcule seulement quand elle approche de l'écran (IntersectionObserver, marge 200 px), une variante
@@ -138,14 +145,21 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
 - **Compte toujours visible** : l'ancien badge flottant (`CompteurFlottant`) et la barre du bas ont
   été remplacés par le panneau « Ma feuille / Mon évaluation / Mon examen » de la page de conception
   (section « Page de conception » plus bas) : mêmes totaux (questions, points, « Durée estimée »).
-- **Affichage** (maquette E) : cadre du NUMÉRO puis cadre du PALIER (« 5 » « Avancé »), noir et blanc
-  (`niveauHtml`, `.niveau .num/.pal`) en tête de chaque exercice de la feuille et de sa version
-  aménagée ; légende en tête de la feuille « Niveau 1 à 7 : Base 1–2 · Intermédiaire 3–4 · Avancé
-  5–7. Il monte avec… ». Rien sur la copie d'évaluation ni en Word (les étoiles n'y étaient pas).
+- **Affichage** : badge « numéro · mot » (« 4 · difficile », `badgeNiveau` / `niveauHtml`, `.niveau
+  .num/.mot`) en tête de chaque exercice de la feuille et de sa version aménagée, et sur chaque ligne
+  d'un groupe a), b), c) (en deux colonnes, la ligne n'imprime que la case du numéro : « · très
+  facile » faisait passer les données sur trois lignes ; le mot reste dans l'`aria-label` et dans la
+  plage en tête) ; groupe : « niv. 2–4 · facile à difficile » en tête. Le MOT porte
+  l'information (lisible en noir et blanc) ; la case du numéro est teintée sur une échelle graduée à
+  5 pas, du plus clair au plus foncé (`niv-c1` … `niv-c5`, `print-color-adjust: exact`), qui reste
+  ordonnée en niveaux de gris. Légende en tête de la feuille « Niveau : 1 très facile · 2 facile ·
+  3 moyen · 4 difficile · 5 à 7 très difficile. Il monte avec… » (numéros dans leurs cases teintées).
+  Rien sur la copie d'évaluation, son corrigé, sa grille, l'examen ni en Word (les étoiles n'y
+  étaient pas) : ces documents n'impriment pas de niveau.
 - **Chapitres notés** : 6e ch. 5, 6e ch. 4, 4e ch. 3, 6e ch. 3, 5e ch. 3, 4e ch. 4, 4e ch. 2, 4e ch. 5, 5e ch. 2, 6e ch. 2 (6gen6–12), 4e ch. 1 (gen7–9, gen55), 6e ch. 1 (6gen1–5), 5e ch. 1 (5gen1–5), 5e ch. 4 (5gen20–24), 4e ch. 6 (gen20–29, gen82–91) (ni `difficulte` ni
   `dureeMinutes` : `criteresDifficulte` seul). **Conversion PROVISOIRE** pour les autres adaptateurs
-  (non encore notés) : leurs étoiles → niveau ★ 2, ★★ 3, ★★★ 5 (palier conservé), durée = leur
-  constante `dureeMinutes` ; sans étoiles → rien d'affiché. Vrai/faux : niveau 2 (Base), provisoire.
+  (non encore notés) : leurs étoiles → niveau ★ 2, ★★ 3, ★★★ 5, durée = leur
+  constante `dureeMinutes` ; sans étoiles → rien d'affiché. Vrai/faux : niveau 2 (facile), provisoire.
 - **Noter un nouveau chapitre** : pour chaque adaptateur, juger méthode et piège par variante (sur
   l'énoncé PAPIER), repérer les écrans de pure lecture, écrire
   `criteresDifficulte(e) = { ...etapesDuCorrige(correction(e), lecture), methode, piege }` (même
@@ -314,8 +328,8 @@ d'équation … ».
 **Décisions** :
 - Feuille d'exercices : NIVEAU (cadre numéro) et QR code « Refaire en ligne » PAR LIGNE — chaque ligne
   rouvre SON exercice (`?code=` de l'instance, inchangé), QR 56 px (52 px en deux colonnes), code écrit
-  dessous ; en tête d'exercice, la plage « niv. 2–4 » (palier seulement s'il est le même pour toutes
-  les lignes) ; petite légende « QR code de chaque ligne : refaire en ligne, avec les aides ».
+  dessous ; en tête d'exercice, la plage « niv. 2–4 · facile à difficile » ; petite légende « QR code
+  de chaque ligne : refaire en ligne, avec les aides ».
 - Précision propre à certaines variantes (« Donne le rayon en valeur exacte », « Arrondis au centième
   les valeurs qui ne sont pas exactes ») : UNE consigne commune, la précision dite une fois (union des
   précisions des lignes, ordre de première apparition), au pluriel si l'entrée en donne un.
@@ -1054,37 +1068,71 @@ réponse, points à droite, pas de majuscules d'insistance, pied de page, option
 - **Remédiation** : `questionsRemediables` suit l'ordre des parties pour un examen (même
   `partiesExamen`) — vérifié identique à la copie A, par chapitre et par processus.
 
-## Parcours élève : assistant « Préparer mon évaluation » et évaluation blanche (décision du 21/11/2026)
+## Parcours élève : assistant « Préparer mon évaluation » et évaluation blanche (décisions du 21 et du 22/11/2026)
 
 Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBlanche ». Pages publiques
 `/exercice` et `/…/exercices`, visiteur NON connecté (qui voit quoi : `.claude/rules/comptes.md`).
 - **Assistant** (`components/eleve/AssistantEleve.tsx`, tutoiement, aucun mot « processus ») : 1. feuille
-  d'exercices / évaluation blanche ; 2. chapitre (`/exercice` : année + chapitre ; page d'un chapitre :
+  d'exercices / évaluation blanche ; 2. chapitre (`/exercice` : année + chapitre — `/exercice?niveau=<levelSlug>`
+  (`4e`, `5e-4h`, `6e-6h`) présélectionne l'année, lien de la page d'accueil ; valeur inconnue ou année sans
+  chapitre proposé ignorée → première année ; page d'un chapitre :
   verrouillé, « Changer de chapitre » → `/exercice`), notions = sections ayant au moins un générateur
   du registre (`notionsDuChapitre`), « Tout le chapitre » (exclusif : cocher une notion ne garde
-  qu'elle) ; téléphone : 3 puces + « + n » ; 3. durée 20 / 30 / 50 min, niveau Base / Intermédiaire /
-  Avancé / « Comme une vraie évaluation » (« Interm. », « Réel » au téléphone), « Version aménagée ».
+  qu'elle) ; téléphone : 3 puces + « + n » ; puis **Compétences** cochables Connaître / Appliquer /
+  Transférer (une à trois, les trois par défaut ; aide « Coche ce que ton professeur a annoncé pour
+  l'interrogation. Le temps est réparti entre les compétences cochées comme dans une vraie
+  évaluation. » — jamais les pourcentages à l'écran) ; 3. durée 20 / 30 / 50 min, **Niveaux** cochables
+  (cinq cases « 1 très facile » … « 5–7 très difficile », numéro dans sa case teintée ; un ou
+  plusieurs, TOUS par défaut = niveaux mélangés, l'ancien « Réel » ; « Tout cocher » quand il en
+  manque), « Version aménagée ». Cases ≥ 44 px, case carrée avec ✓ (l'état ne repose pas sur la seule
+  couleur), téléphone : deux par rangée. La dernière case cochée (niveau proposé, compétence ayant des
+  exercices) ne se décoche pas (« Garde au moins un niveau / une compétence »).
+  **Disponibilité EN DIRECT** (`compositionEleve.ts::disponibilite`, sur les candidats déjà préparés —
+  niveaux des tirages d'estimation, pas de nouveau moteur) : un niveau sans aucun exercice des
+  compétences cochées dans ces notions est grisé (`aria-disabled`, bordure pointillée, non cochable,
+  infobulle) et la raison est écrite sous les cases : « Grisé : aucun exercice à ce niveau dans ces
+  notions. Connaître : seulement en très facile et facile · … » (`texteSeulement`) ; une compétence
+  cochée sans exercice aux niveaux cochés est signalée (« Transférer : aucun exercice aux niveaux
+  cochés (seulement de moyen à très difficile) — son temps va aux autres compétences cochées. ») ; une
+  compétence sans aucun exercice dans les notions est grisée (« aucun exercice ici »). Un niveau grisé
+  qui était coché reste coché dans l'état (il revient si une notion le rend disponible) mais ne compte
+  pas : rien n'est composé si aucun niveau coché n'est proposé. Jamais de substitution silencieuse.
   Récapitulatif EXACT : le plan est préparé dès qu'un réglage change (clé des réglages : un plan
   d'anciens réglages n'est jamais affiché ni généré), « 5 questions · ≈ 30 min · 20 points » = questions
-  imprimées après regroupement (`questionsDeSerie`) ; « Générer » rend CE plan puis en prépare un
-  nouveau (nouveau tirage à chaque clic). Téléphone : barre `position: sticky` en bas. Rien n'est
-  enregistré (pas d'historique écrit ; `construirePlan` le lit seulement).
+  imprimées après regroupement (`questionsDeSerie`), puis « Niveaux : facile à difficile · Appliquer et
+  Transférer » = niveaux (catégories) et compétences RÉELLEMENT imprimés (`ResumeEleve.categories`,
+  `competences`, vrai/faux compté au niveau 2) ; « Générer » rend CE plan puis en prépare un nouveau
+  (nouveau tirage à chaque clic). Téléphone : barre `position: sticky` en bas. Rien n'est enregistré
+  (pas d'historique écrit ; `construirePlan` le lit seulement).
 - **Composition** (`lib/compositionEleve.ts`, jamais un second moteur) : candidats = variantes non
   retirées (`catalogueVariantesExercice`, mode `evaluation` pour la blanche — groupes à verdict
   compris) + thèmes vrai/faux (2 min, 1 pt, niveau 2) ; niveau et durée par variante sur 8 tirages
   (`niveauEtDuree`, contrainte « exercice complet » de l'évaluation pour la blanche), calculés une
-  variante à la fois (la page ne gèle pas), en cache. Palier : variante retenue si ≥ 50 % de ses tirages
-  y tombent ; durée remplie jusqu'à la cible sans la dépasser de plus de 10 % ; variété (notion la moins
-  servie, puis générateur, jamais deux fois la même variante tant qu'une autre convient) ; vrai/faux ≤
-  25 % du temps (Base seulement). « Vraie évaluation » : budgets 15 / 25 / 60 % du temps en Connaître /
-  Transférer / Appliquer (processus absent → Appliquer). Palier trop court (< 85 % de la durée) : un
-  palier voisin complète. Puis LIGNES du panneau (`lignesDeComposition`) → `construireItemsPayload` →
-  `construirePlan`. Retouches du plan figé : un exercice dont le niveau RÉEL sort du palier, ou qui
-  ferait dépasser la durée, reçoit une autre graine de la même variante (40 essais / 120 ms, contrainte
-  respectée, jamais un énoncé déjà dans le document) ; dépassement restant → l'exercice le moins utile
-  est retiré. Un exercice imprimé hors palier → note « des exercices d'un niveau voisin complètent ».
-  Points (blanche) : durée réelle → `pointsDepuisDuree`, vrai/faux 1 pt, puis 20 pts
-  (`mettreAEchelleParGroupes`) ; « vraie évaluation » : 3 / 12 / 5 pts par processus.
+  variante à la fois (la page ne gèle pas), en cache. **Jamais une compétence non cochée**, même pour
+  remplir la durée (filtre AVANT tout). Un candidat est retenu aux niveaux cochés si ≥ 50 % de ses
+  tirages y tombent (`candidatAuxNiveaux` ; générateur sans niveau : seulement avec les cinq cochés) —
+  la même règle décide la disponibilité, donc un niveau proposé, coché seul, donne au moins un
+  exercice. **Proportions** : `REPARTITION_PROCESSUS` (`lib/repartitionProcessus.ts`, répartition de
+  l'utilisateur, SEULE source — aussi « Préparer l'évaluation » du panneau et le texte de sa carte)
+  recalculée sur les compétences cochées (`budgetsParCompetence` ; une seule → 100 %), pour la feuille
+  comme pour la blanche ; une compétence cochée sans exercice aux niveaux cochés cède son temps
+  (Connaître ou Transférer → Appliquer, sinon l'autre cochée ; Appliquer → à parts égales). Remplissage :
+  Transférer d'abord, puis Connaître (vrai/faux plafonnés à son budget), puis Appliquer jusqu'à la
+  durée, puis n'importe quelle compétence cochée ; durée remplie jusqu'à la cible sans la dépasser de
+  plus de 10 % ; variété (notion la moins servie, puis générateur, jamais deux fois la même variante
+  tant qu'une autre convient). **Niveaux voisins** : durée remplie < 85 % → les niveaux à 1 pas de
+  l'échelle complètent, puis à 2 pas…, toujours dans les compétences cochées (compétences en retard
+  sur leur part d'abord) ; `Composition.niveauxAdmis` = cochés + voisins réellement utilisés. Puis
+  LIGNES du panneau (`lignesDeComposition`) → `construireItemsPayload` → `construirePlan`. Retouches du
+  plan figé : un exercice dont le niveau RÉEL sort des niveaux admis, ou qui ferait dépasser la durée,
+  reçoit une autre graine de la même variante (40 essais / 120 ms, contrainte respectée, jamais un
+  énoncé déjà dans le document) ; dépassement restant → l'exercice le moins utile est retiré. Un
+  exercice imprimé hors des niveaux cochés → note « Peu d'exercices aux niveaux cochés dans ces
+  notions : des exercices de niveau moyen complètent. » (`categoriesHorsChoix`). Points (blanche) :
+  durée réelle → `pointsDepuisDuree`, vrai/faux 1 pt, puis 20 pts répartis entre les compétences
+  imprimées selon `REPARTITION_PROCESSUS` recalculée sur elles (`mettreAEchelle` puis
+  `mettreAEchelleParGroupes`). Les cinq niveaux et les trois compétences cochés = exactement l'ancien
+  « Réel » (même composition et même plan à graine égale, vérifié).
   **Calculatrice** : « autorisée » imprimée (choix : aucun chapitre ne l'interdit dans ses données), le
   tirage n'est PAS contraint (sinon « autorisée » ne tirerait que des cas à la calculatrice) ; une
   variante `calculatriceIndispensable` reste donc permise.
@@ -1096,18 +1144,23 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   (choix : pas de professeur — « M. Hamwi » aurait été imprimé chez tous les visiteurs), tableau « Mon
   score » par processus + encadré calculatrice, consignes de l'élève (phrase QR seulement s'il y a un
   QR), bandeaux de processus, « Question n » et points à droite, QR « Refaire en ligne avec les aides »
-  par question (par ligne dans un groupe, sans niveau : option `niveau: false` des lignes), puis
+  par question (par ligne dans un groupe, sans niveau — présentation d'une évaluation : option
+  `niveau: false` des lignes ; la feuille d'exercices, elle, imprime « 4 · difficile »), puis
   « Corrigé détaillé » en fin de document (`pageCorrigeFeuilleHtml(…, "Question")`, rendu de la
   feuille) ; pied « Évaluation blanche — corrigé détaillé en fin de document » · page n / N. Aménagée :
   même énoncé et mêmes points, une question par page, sans QR, corrigé à la fin. Les autres modes ne
   changent pas.
-- **Vérifié** (outils `composition.mjs`, `docs.mjs`, `ui.mjs`, dossier de travail
-  `conception-eleve`) : 4e ch. 6, 5e ch. 4, 6e ch. 3 × 20 / 50 min × 4 niveaux × blanche / feuille,
-  50 tirages chacun (2 400 plans) : 0 erreur, 0 plan vide, 0 dépassement de plus de 10 %, total
-  20 pts, « vraie évaluation » 15 / 60 / 25 % exactement ; hors palier 0 sauf 5e ch. 4 Avancé
-  (5gen24, groupes à verdict : la note s'affiche) ; documents réels 0 `.katex-error`, 0 débordement à
-  680 / 820 / 1 280 px ; non-régression (code d'avant / d'après, même plan) : évaluation 2 séries +
-  aménagée, examen, feuille + aménagée de 4 chapitres : 72 / 72 HTML identiques, Word 24 / 24 (XML).
+- **Vérifié — 21/11** (outils `composition.mjs`, `docs.mjs`, `ui.mjs`, dossier de travail
+  `conception-eleve`) : 2 400 plans (3 chapitres × 2 durées × 4 anciens niveaux × 2 types) : 0 erreur,
+  0 plan vide, 0 dépassement de plus de 10 %, total 20 pts ; documents réels 0 `.katex-error`, 0
+  débordement ; non-régression 72 / 72 HTML, Word 24 / 24.
+- **Vérifié — 22/11, niveaux et compétences** (outils `tests.mjs`, `ui.mjs`, `docs.mjs`, dossier de
+  travail `niveaux-refonte`) : proportions des 7 combinaisons de compétences et cessions exactes ;
+  5 chapitres × 2 types × 25 plans aux réglages aléatoires (compétences, niveaux, durée) : 0 exercice
+  d'une compétence non cochée (niveaux voisins compris), 0 dépassement, 0 erreur, blanche 20 pts et
+  points par compétence à 1 pt au plus de la part recalculée ; disponibilité : 350 contrôles (chaque
+  niveau seul × 7 combinaisons × 10 cas), 0 incohérence avec le moteur ; défaut ≡ ancien « Réel »
+  (copie du code d'avant, même répartition) : 120 / 120 compositions et plans identiques à graine égale.
 
 ## Feuille de remédiation en un clic (`lib/evaluationRemediation.ts`, décision C9)
 
@@ -1245,7 +1298,7 @@ Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feui
 - 4e ch. 5, moitié 1 (gen14–18, gen76, gen78, gen79 ; notés, `criteresDifficulte`) : briques `4e/ui/corrigeCercleTrigo.ts` (`COURS_*` § 1–5, angles en degrés `deg` (plus de radians en 4e), réduction ligne à ligne « −480° + 2 × 360° = −480° + 720° », « = 240° » puis l'encadrement `0^\circ\leq 240^\circ<360^\circ`, `ligneQuadrant`, `lignesAnglePremierQuadrant` (+ retour comme vérification), signes une ligne par fonction, valeurs sur un axe `\cos 180^\circ=-1` « abscisse de M », `lignesValeurAssociee` « sin 300° = −sin 60° », « = −√3/2 », `lignesCandidats` (α₁, α₂, confondus sur un axe), `avecFinale` : la forme de l'écran en dernière ligne sauf si elle y est déjà) ; une lettre par ÉCRAN (`ecransDe` pour gen76/gen78, phases de l'appli ailleurs) ; écrans de lecture : gen14 b (quadrant) et d (signes) — sur un axe b et c —, gen15 a si l'angle est déjà dans [0° ; 360°[ et b sur un axe, gen76 « quadrant et signe » de chaque terme, gen79 a (départ et sens). Valeurs approchées depuis les valeurs NON arrondies : « α₂ = 180° − α₀ ≈ 162,5° » (gen78, `calculSolutionsLatex` qui substituait α₀ arrondi retiré), θ₀ = sin⁻¹|k| (gen79), « y non arrondi » ; gen17 : nombres = 0 (valeurs approchées DONNÉES, recopiées avec un signe) ; gen79 : méthode 2 (aucun modèle dans l'énoncé papier). Pièges de niveau : jamais la racine négative d'un carré ni le facteur nu d'un produit (gen78 : c'est la méthode). Collecteur `corrige-4e5-m1` : `^\circ` → × π/180, `\sin^{-1}`, `:`, `\pm` (comparaison en valeur absolue), « ≈ » toléré à la demi-unité du dernier chiffre écrit, équations en α / θ testées aux solutions EXACTES, équation sans solution détectée par balayage (non testable) ; 2 830 tirages (200 libres + 30 par variante), ≈ 26 900 égalités, 0 fausse. Corrigé à la source : intervalle `[0° ; 360°[` de gen18 écrit avec « ; » (la virgule se lisait comme une virgule décimale) ; `formatRotationsContexte`, `formatValeurExacte`, `formatEquationsTransformer` importent `texte`/`latex` de `corrigeTableau` (plus de `docx` dans les applis).
 
 - 4e ch. 5, gen122 « Lire sur le cercle trigonométrique » (nouveau, Connaître ; noté) : corrigé `generateurs/lectureCercle/corrigeDetaille.ts` (partagé avec l'appli) — a) `\cos\theta=…`, `\sin\theta=…` « abscisse de M : graduation …, à gauche de l'axe vertical », vérification `\cos^2\theta+\sin^2\theta=\dfrac{3}{4}+\dfrac{1}{4}=1` ; b) `|\cos\theta|`, `\alpha`, les deux candidats de même cosinus (justification), `\sin\theta` qui tranche, formule du quadrant ligne à ligne (axes : candidats puis choix, sans α), vérification `\cos 120^\circ=…` ; c) `x_T=1`, `y_T=…` « graduation …, (OM) prolongée au-delà de O », `\tan\theta=y_T`, vérification par le quotient `\dfrac{\frac{…}{…}}{…}` — ou `\cos\theta=0` + verdict « n'est pas définie » ; figure (OM) + T en `figureHtml` (enveloppée à 8 cm). Lectures : a et c (`criteresDifficulte` = `etapesDuCorrige(…, ["a","c"])`, méthode 0, piège = M hors du quadrant I ou tan non définie) → niveaux 1–2, 6 min. Figure papier = figure de l'écran : quadrillage aux valeurs REMARQUABLES (lignes x, y = 0, ±1/2, ±√2/2, ±√3/2, ±1 dans [−1 ; 1]², graduées sur les demi-axes positifs seulement : le signe se lit au quadrant) et tangente x = 1 graduée en ±√3/3, ±1, ±√3 — √2/2 ≈ 0,71 et √3/2 ≈ 0,87 ne tombent sur aucune grille régulière. Collecteur (outils de `corrige-4e5-m1` recopiés dans le dossier `gen122`, variables θ, α, x_T, y_T) : 600 tirages, 12 620 égalités, 0 fausse.
-- 4e ch. 5, moitié 2 — les triangles (gen19, gen58, gen73, gen74, gen75, gen77, gen80, gen81 ; notés, `criteresDifficulte`) : briques `4e/ui/corrigeTriangles.ts` (`COURS_*` § 3–7 ; loi des sinus isolée ligne à ligne pour un côté / pour un sinus, touche sin⁻¹ puis supplémentaire « (cours, § 4) », Al-Kashi pour un côté — substituée, carrés et produit calculés, carré, racine — et pour un angle — isolée en cos (ajout/retrait, division : une opération par ligne), fraction simplifiée, touche cos⁻¹ —, aire ½ · p · q · sin X, somme des angles). **Valeur en mémoire** (`Val` : `donnee`/`angleDonne` exactes, `coteMemoire`/`angleMemoire` écrites au centième / au dixième AVEC leurs zéros, « 125{,}0° ») : toute substitution d'une valeur arrondie est un « ≈ », le résultat qui la suit aussi (`relSubst`, `relApres`, `apres`) — jamais « 135 · sin 53,1° = 108 ». Une lettre par ÉCRAN (gen58 : pont, angles OU soustraction, cible, interprétation — l'écran « interprétation » manquait aux étapes papier : ajouté à `construireEnonce`). Figures dans le corrigé : parallélogramme résolu (gen80 a), arc de compas (gen74 d), deux configurations (gen75 « angle » c, `figureSvgPapier(e, true)`), figure résolue (gen77 e). Vérifications : Héron (gen19 b), aire retrouvée (gen75 « côté »), Al-Kashi après la loi des sinus (gen80 cap, gen75 Héron), contrôle de gen73 par Al-Kashi, inégalité triangulaire (gen80). gen81 (détective) sur le modèle de gen112 : la ligne refaite et « ≠ copie », constat chiffré (radians : la même fonction en rad et en degrés), blocs « Ligne k » — la copie recopie les valeurs ARRONDIES d'une ligne à l'autre et la valeur attendue de l'écran en dépend : le corrigé suit cette règle, avec « ≈ » devant toute valeur recopiée arrondie (même un entier issu d'un « ≈ » précédent). **Niveaux** — lectures : gen73 a (configuration), gen74 d (nombre de triangles), gen77 a et e, gen58 interprétation ; méthode 0 (gen74, gen75 sauf quadrilatère), 1 (gen19, gen73, gen81, gen75 quadrilatère), 2 (gen58, gen77, gen80) ; piège dans les données : gen19 Al-Kashi avec angle compris obtus, gen73 angle obtus à calculer en SAS/SSS, gen75 « angle » (un sinus, deux amplitudes) et quadrilatère à angle B obtus, gen77 « deux positions ». gen74 : niveau ET durée CONSTANTS (3 · Intermédiaire, 12 min, `sansCharge`) — 0, 1 ou 2 triangles est le verdict ; gen81 : piège constant 0 (le type d'erreur est la réponse de l'écran 2). Mesuré (200 tirages libres + 30 par variante) : gen19 niv. 3–4, 7 min ; gen58 4–5, 10–14 min (moy. 12,6) ; gen73 4–5, 12–14 (12,4) ; gen74 3, 12 ; gen75 1–5, 6–9 (7,5) ; gen77 5–6, 13–15 (13,3) ; gen80 5, 11–13 (12,5) ; gen81 4, 9–11 (10,1). Écritures corrigées à la source (écran = aides = papier = corrigé) : gen75 `egalOuEnviron` (« sin Ĉ = 0,875 », plus « ≈ » pour une valeur exacte) ; gen80 degrés `^\circ` (plus « ° » brut en mode math) et « ≈ » dans les aides qui substituent une valeur arrondie ; gen81 copie, aides et constats en `^\circ`, `membresLatex` / `relationResultat` (« a ≈ √52,42 », « 180° − sin⁻¹(0,8660) ≈ 120° », jamais « = ») ; formats d'écran de ces huit générateurs sans `docx` (`texte`/`latex` de `corrigeTableau`). Collecteur `corrige-4e5-m2` : degrés (`^\circ` → radians), `\hat{X}`, `\widehat{XYZ}`, noms de segments, `\sin^{-1}`, unités N/kN/km/h/nœuds ; « ≈ » toléré à la demi-unité du dernier chiffre écrit, PROPAGÉE à travers une substitution de valeurs arrondies — 2 800 tirages, ≈ 50 000 relations évaluées, 0 fausse.
+- 4e ch. 5, moitié 2 — les triangles (gen19, gen58, gen73, gen74, gen75, gen77, gen80, gen81 ; notés, `criteresDifficulte`) : briques `4e/ui/corrigeTriangles.ts` (`COURS_*` § 3–7 ; loi des sinus isolée ligne à ligne pour un côté / pour un sinus, touche sin⁻¹ puis supplémentaire « (cours, § 4) », Al-Kashi pour un côté — substituée, carrés et produit calculés, carré, racine — et pour un angle — isolée en cos (ajout/retrait, division : une opération par ligne), fraction simplifiée, touche cos⁻¹ —, aire ½ · p · q · sin X, somme des angles). **Valeur en mémoire** (`Val` : `donnee`/`angleDonne` exactes, `coteMemoire`/`angleMemoire` écrites au centième / au dixième AVEC leurs zéros, « 125{,}0° ») : toute substitution d'une valeur arrondie est un « ≈ », le résultat qui la suit aussi (`relSubst`, `relApres`, `apres`) — jamais « 135 · sin 53,1° = 108 ». Une lettre par ÉCRAN (gen58 : pont, angles OU soustraction, cible, interprétation — l'écran « interprétation » manquait aux étapes papier : ajouté à `construireEnonce`). Figures dans le corrigé : parallélogramme résolu (gen80 a), arc de compas (gen74 d), deux configurations (gen75 « angle » c, `figureSvgPapier(e, true)`), figure résolue (gen77 e). Vérifications : Héron (gen19 b), aire retrouvée (gen75 « côté »), Al-Kashi après la loi des sinus (gen80 cap, gen75 Héron), contrôle de gen73 par Al-Kashi, inégalité triangulaire (gen80). gen81 (détective) sur le modèle de gen112 : la ligne refaite et « ≠ copie », constat chiffré (radians : la même fonction en rad et en degrés), blocs « Ligne k » — la copie recopie les valeurs ARRONDIES d'une ligne à l'autre et la valeur attendue de l'écran en dépend : le corrigé suit cette règle, avec « ≈ » devant toute valeur recopiée arrondie (même un entier issu d'un « ≈ » précédent). **Niveaux** — lectures : gen73 a (configuration), gen74 d (nombre de triangles), gen77 a et e, gen58 interprétation ; méthode 0 (gen74, gen75 sauf quadrilatère), 1 (gen19, gen73, gen81, gen75 quadrilatère), 2 (gen58, gen77, gen80) ; piège dans les données : gen19 Al-Kashi avec angle compris obtus, gen73 angle obtus à calculer en SAS/SSS, gen75 « angle » (un sinus, deux amplitudes) et quadrilatère à angle B obtus, gen77 « deux positions ». gen74 : niveau ET durée CONSTANTS (3 · moyen, 12 min, `sansCharge`) — 0, 1 ou 2 triangles est le verdict ; gen81 : piège constant 0 (le type d'erreur est la réponse de l'écran 2). Mesuré (200 tirages libres + 30 par variante) : gen19 niv. 3–4, 7 min ; gen58 4–5, 10–14 min (moy. 12,6) ; gen73 4–5, 12–14 (12,4) ; gen74 3, 12 ; gen75 1–5, 6–9 (7,5) ; gen77 5–6, 13–15 (13,3) ; gen80 5, 11–13 (12,5) ; gen81 4, 9–11 (10,1). Écritures corrigées à la source (écran = aides = papier = corrigé) : gen75 `egalOuEnviron` (« sin Ĉ = 0,875 », plus « ≈ » pour une valeur exacte) ; gen80 degrés `^\circ` (plus « ° » brut en mode math) et « ≈ » dans les aides qui substituent une valeur arrondie ; gen81 copie, aides et constats en `^\circ`, `membresLatex` / `relationResultat` (« a ≈ √52,42 », « 180° − sin⁻¹(0,8660) ≈ 120° », jamais « = ») ; formats d'écran de ces huit générateurs sans `docx` (`texte`/`latex` de `corrigeTableau`). Collecteur `corrige-4e5-m2` : degrés (`^\circ` → radians), `\hat{X}`, `\widehat{XYZ}`, noms de segments, `\sin^{-1}`, unités N/kN/km/h/nœuds ; « ≈ » toléré à la demi-unité du dernier chiffre écrit, PROPAGÉE à travers une substitution de valeurs arrondies — 2 800 tirages, ≈ 50 000 relations évaluées, 0 fausse.
 - 5e ch. 2, moitié 1 (5gen6 arcs et secteurs, 5gen7 polygones, 5gen12 géométrie du cercle, 5gen8 paramètres d'une sinusoïde ; notés, `criteresDifficulte`) : brique `5e-4h/ui5e/corrigeTrigonometrie1.ts` (`COURS_*` § 1–4 avec espace insécable, rationnels `Q`, multiples de π exacts `piQ`/`piBrut` — la forme non réduite sur sa ligne puis « on simplifie par 15 » —, `lignesDegresVersRadians` « 75 × π/180 = 75π/180 = 5π/12 », `lignesRadiansVersDegres` « 5π/12 × 180/π = 5 × 180/12 = 5 × 15 = 75 » (nombre de degrés SANS ° dans la chaîne, ° au résultat), `lignesProduitPi`, `lignesQuotientPiParEntier`, `lignesQuotientPiParPi` (× inverse, π simplifié), `lignesAireSecteurExacte`, `lignesDifferencePi`, `RP` / `lignesFinRP` pour A, ω, φ, Φ, b, `approche` (arrondi avec ses zéros), `sansDoublons` qui retire aussi « =Y » après « X=Y ») ; une lettre par ÉCRAN (5gen6 `quantitesManquantes`, première ligne = substitution de l'aide de niveau 2 `formulesDisponibles(…)[0]`, r depuis A et θ par r² puis √ ; 5gen7 `sequencePolygone` ; 5gen12 `phasesDuScenario` ; 5gen8 `ORDRE_PHASES_SINUSOIDE`). 5gen12 : secteur balayé en valeurs EXACTES (θ multiple de π, A₁ − A₂ au même dénominateur, vérification ½(r₁² − r₂²)θ) ; segment et lentille : cos θ en fraction réduite, `\theta=\arccos\left(…\right)`, aires « = 72θ ≈ … » et « = 72(θ − sin θ) ≈ … » avec θ NON arrondi, lentille = somme des segments à 4 décimales ; croquis de l'énoncé en `figureHtml` de la première étape. Vérifications : retour aux degrés / radians, s ou A recalculé avec r trouvé, k × élémentaire (5gen7), ωT = 2π, −ωΦ = φ. **Lectures** (5gen8 seul) : A, ω, b, et φ en forme développée ou Φ en forme pré-factorisée (`lettresLectureSinusoide`). **Niveaux** : 5gen6 méthode 1 (2 → 3) / 0 (conversion), nombres 1 seulement pour la conversion décimale ; 5gen7 méthode 0, nombres 0 (valeurs en π acceptées sur papier) ; 5gen12 méthode 1 (secteur balayé, segment) / 2 (lentille), nombres 1 ; 5gen8 méthode 0, piège = A < 0 ou parenthèse « x + k » en forme pré-factorisée ; aucun piège ailleurs (convertir θ en radians est la méthode). Mesuré (200 tirages libres + 30 par variante) : 5gen6 2 → 3 niv. 3, 8 min, conversion niv. 1–2, 4–5 min (libre : moy. 7,2) ; 5gen7 niv. 2, 8 / 10 / 10 / 12 min selon les écrans « k côtés » ; 5gen8 niv. 2–3, 12 min ; 5gen12 secteur balayé et segment niv. 4, 11 min, lentille niv. 6, 23 min (9 écrans). Écritures corrigées à la source (écran = aides = papier = corrigé) : 5gen6 aide de niveau 2 « 75 × π/180 » (plus « 75° × π/180 »), fractions intérieures en `\frac` (plus deux `\dfrac` empilés, aussi 5gen8), conversion décimale « θ ≈ 2,15 » dans la réponse brève (plus « = »), consignes « valeur exacte, ou arrondie au centième » ; 5gen12 aides de niveau 1 en texte + KaTeX (plus « θ=acos(...) », « A=½r²θ » au clavier), « ≈ » dans les aides qui substituent une valeur arrondie (θ à 4 décimales), réponse attendue « θ ≈ 1,6961 ≈ 1,7 » (plus « 1,7 (1,6961) », deux nombres juxtaposés lus comme un produit). Collecteur `corrige-5e2-m1` (variables θ, r, s, A, θ₁, θ₂, A₁, A₂, ω, T, f_req, φ, Φ, b, x = 0,7 ; `\arccos` ajouté ; tolérance des « ≈ » additionnée sur une somme de valeurs arrondies) : 1 130 tirages, ≈ 24 000 égalités, 0 fausse.
 
 - 6e ch. 2, moitié 1 (6gen6 limites, 6gen7 domaine et dérivée, 6gen8 graphique de la dérivée, 6gen9 équations ; notés, `criteresDifficulte` ; contrat papier complet — `enoncePapier`, `reponseBreve`, `bareme` —, `versionPapier` dans le registre) : brique `6e-6h/ui6e/corrigeExponentielles1.ts` (`COURS_*` § 1–4, `lim`, réexporte `finaliserCorrige`, nombres et termes de `corrigeLogarithmes1/2`) ; une lettre par ÉCRAN (`sequence…` = `phaseInitiale` → `phaseApres` du moteur) ; construireEnonce = une question par écran (titres « Étape n — … »), énoncé papier = l'expression + la consigne globale. 6gen6 : exposant / base (règle a > 1, 0 < a < 1, « on pose t = … »), terme dominant, « +∞ − ∞ » et « ∞·0 » levées par mise en évidence et croissances comparées, L'Hôpital écran par écran (forme 0/0 substituée, f′ et g′ par la règle de la chaîne avec u pour f et v pour g, « (cours, § 1) »), K : forme persistante vérifiée puis dérivées secondes, L : changement de variable puis pivot, N : loi des puissances ; G (retirée par un lot suivant) : corrigé minimal. Limites finies EXACTES partagées écran / corrigé / récapitulatif (`formatLimiteFinaleLatex` : « −\dfrac{2}{3}\ln(3) ≈ −0,7324 », 4 chiffres significatifs depuis la valeur non arrondie). 6gen7 : domaine résolu ligne à ligne (racine, dénominateur, arccos : « e^{x²−k} ≤ 1 = e⁰ »), chaîne u, u′, formule, substitution, forme finale (`deriveeFinaleLatex`), produit / quotient assemblés puis simplifiés (mise en évidence, simplification par k). 6gen8 : dérivée (quotient, 1/u) puis caractéristiques de f′ testées une par ligne, figure des candidats (bon mis en évidence) en `figureHtml`. 6gen9 : valeur réécrite en puissance de la même base, exposants égaux, premier / second degré (x₁ < x₂ quel que soit le signe de a), racine d'une puissance (contradiction écrite « n₁ ≠ 2n₂ », jamais une égalité fausse), t = bˣ (racine t ≤ 0 rejetée nommée), positivité ; AUCUN logarithme (décision de l'utilisateur) : t non puissance de la base → « x ≈ … » à la calculatrice. L'appli affiche le « Résultat » de l'étape comme réponse attendue (plus de flottant brut, plus de « vérifiée par équivalence numérique »). **Lectures** : 6gen7 domaine = ℝ (a) ; 6gen8 sélection après la dérivée (B, D : b). **Niveaux** : méthode 1 sauf 6gen6 A (0) et G (2), 6gen7 (0, E : 1), 6gen9 (0, C : 1) ; pièges dans les données : 6gen6 base < 1 ou x → 0⁻ sous une puissance impaire (A), « +∞ − ∞ » d'apparence −∞ (B), K, L, N, G ; 6gen7 racine cachée (C e), arccos (F) ; 6gen8 base < 1 (B), x = 0 exclu (D) ; 6gen9 racine t ≤ 0 (C) — « aucune solution » n'est pas un piège ; nombres : ln(a) ou e^{km} (6gen6 H–L), facteur ln(a), a ≠ e (6gen7), x non exact (6gen9 C). Mesuré (200 tirages libres + 30 par variante) : 6gen6 niv. 1–6, moy. 9,2 min (A 6, H–J 11, K 15) ; 6gen7 niv. 1–3, 5–9 min (moy. 6,9) ; 6gen8 niv. 2–3, 4–5 min ; 6gen9 niv. 1–5, 4–9 min (C 8,4–8,8). Écritures corrigées à la source (écran = aides = papier = corrigé) : 6gen6 base décimale « 0{,}5 » (plus « 0.5 »), « \sin(x−3) » au lieu de « \sin((x−3)) », « −x² » au lieu de « −1x² » (K), « −\frac{3}{x} » au lieu de « \frac{−3}{x} » (L, N), consignes de L sans « x/(−3) » ni « 1x », « (x)² » retiré (J), « \ln^{2}(a) » ; 6gen7 « x² − 9 » au lieu de « x² − 3² », aides du domaine (B) avec les données, facteur simple sans parenthèses ; 6gen8 base fractionnaire « \left(\dfrac{1}{4}\right)^{x} » et « \ln\left(\dfrac{1}{4}\right) » (l'exposant semblait porter sur le seul dénominateur), aide sans notation clavier ; 6gen9 « x ≈ 1{,}465 » (plus « x = 1.465 »), second membre en fraction au-delà de 3 décimales (plus « 0,001953125 », « 5,12e-7 »), consigne « t = 3ˣ » (plus « t = base^x »), consigne de l'écran 2 de A sans « CORRECT(E) ». `REECRITURES` : « Sélectionne le graphique qui représente la dérivée f'(x). ». Collecteur `corrige-6e2-m1` (outils de `corrige-6e3-m1`, limites infinies contrôlées en deux points de plus en plus lointains — signe et croissance —, « 0⁺ / 0⁻ » par le signe, f, g, u, v, w, N, D de l'instance, équations testées en leurs solutions) : 1 670 tirages, ≈ 15 300 égalités, 0 fausse.
@@ -2091,12 +2144,15 @@ Page du chapitre 390 / 1 280 px : 0 « $ » ni « ** » visible, 0 erreur.
   ≈ 6 exercices (1 Connaître — vrai/faux 3 affirmations, sinon formule —, 4 Appliquer, 1 Transférer,
   la part d'un processus absent va à Appliquer), une notion après l'autre, chapitres en alternance ;
   « Sur quelques notions » : notions cochées, 2 exercices + 1 Connaître chacune ; « Préparer
-  l'évaluation » / « Répartition 15 / 60 / 25 % » : durée visée 50 min (examen : durée saisie, sinon
-  50 min par chapitre, 150 au plus) répartie 15 / 60 / 25 % avec les durées estimées. Variantes du
+  l'évaluation » / « Répartition … % » : durée visée 50 min (examen : durée saisie, sinon
+  50 min par chapitre, 150 au plus) répartie selon `REPARTITION_PROCESSUS` (`lib/repartitionProcessus.ts`,
+  répartition de l'utilisateur, seule source ; le titre et le texte de la carte la lisent :
+  `texteRepartition`) avec les durées estimées. Variantes du
   panneau seulement (groupes « à verdict » = une rangée), calculatrice interdite : variantes et
   générateurs `calculatriceIndispensable` exclus, aucun cas particulier coché, jamais de
   démonstration. Mesuré (23 chapitres × modes × calculatrice, 207 compositions) : 0 défaut, 6
-  exercices imprimés pour chaque « équilibrée », durée « 15/60/25 » de 43 à 67 min (médiane 51).
+  exercices imprimés pour chaque « équilibrée », durée « Préparer l'évaluation » de 43 à 67 min (médiane 51,
+mesurée avec l'ancienne répartition).
 - **Téléphone (< 960 px)** : une colonne ; barre fixée en bas « Ma feuille · n exercices ▴ ·
   ≈ m min · niveaux » + « Générer » ; le panneau s'ouvre en feuille du bas (voile, « Fermer ») ;
   cibles ≥ 44 px, champs à 16 px.

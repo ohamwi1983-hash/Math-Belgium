@@ -111,7 +111,7 @@ function bareme(e: ExerciceDetectiveErreurs): BaremeExercice {
  * d'erreur est la réponse de l'écran 2 (un piège « angle obtus » ou « cas ambigu » le trahirait
  * sur la feuille), comme gen112 ; aucun écran de lecture ; calculatrice. */
 /** Groupe à verdict (audit 4e ch. 5, lot D) : le type d'erreur ne doit pas se lire dans la durée
- * imprimée (9 ou 11 min selon le type) — niveau ET durée CONSTANTS : 4 · Intermédiaire, 11 min. */
+ * imprimée (9 ou 11 min selon le type) — niveau ET durée CONSTANTS : 4 · difficile, 11 min. */
 function criteresDifficulte(e: ExerciceDetectiveErreurs): CriteresDifficulte {
   void e;
   return { etapesTransformation: 4, etapesLecture: 0, sansCharge: true, methode: 1, piege: 0, nombres: 1 };
