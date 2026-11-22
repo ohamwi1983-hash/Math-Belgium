@@ -20,6 +20,19 @@ export const suites: ChapterContent = {
       number: 1,
       title: 'Suites numériques et suites arithmétiques',
       kicker: 'notation uₙ, raison r, formule générale, inconnue x ou rang n, somme',
+      titreCourt: 'Suites arithmétiques',
+      partie: 'Deux familles de suites',
+      essentiel: [
+        'Une suite est arithmétique si l\'on passe d\'un terme au suivant en ajoutant toujours la même raison r : $u_n = u_1 + (n-1)r$, avec le facteur $(n-1)$, jamais n.',
+        'Entre deux termes quelconques : $u_n = u_p + (n-p)r$. Somme des n premiers termes : $S_n = \\dfrac{n(u_1+u_n)}{2}$.',
+        'De $u_p$ à $u_n$, il y a $n - p + 1$ termes. Un rang cherché doit être un entier naturel non nul.',
+      ],
+      cartes: [
+        { question: '$u_1 = 7$ et $u_6 = 22$ : que vaut la raison ?', reponse: '$22 = 7 + 5r$, donc $r = 3$.' },
+        { question: 'Somme des 20 premiers termes, avec $u_1 = 4$ et $r = 3$ ?', reponse: '$u_{20} = 61$, donc $S_{20} = \\dfrac{20\\times(4+61)}{2} = 650$.' },
+        { question: 'Combien de termes de $u_5$ à $u_{20}$ ?', reponse: '$20 - 5 + 1 = 16$ termes, pas 15.' },
+        { question: 'Comment montrer que $u_n = n^2$ n\'est pas arithmétique ?', reponse: 'Un contre-exemple suffit : $4 - 1 = 3 \\neq 9 - 4 = 5$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Qu\'est-ce qu\'une suite numérique ? Terme, rang, formule explicite et récurrence', youtubeId: 'VL39ShU_-Yw' },
         { kind: 'video', title: 'Suites arithmétiques : raison, formule uₙ = u₁ + (n−1)r et somme des termes', youtubeId: 'aWb7XAIoPVI' },
@@ -360,6 +373,19 @@ export const suites: ChapterContent = {
       number: 2,
       title: 'Suites géométriques',
       kicker: 'raison multiplicative q, formule générale, moyenne et somme',
+      titreCourt: 'Suites géométriques',
+      partie: 'Deux familles de suites',
+      essentiel: [
+        'Une suite est géométrique si l\'on multiplie toujours par la même raison q, non nulle : $u_n = u_1 \\times q^{n-1}$ et $u_n = u_p \\times q^{\\,n-p}$.',
+        'Somme des n premiers termes ($q \\neq 1$) : $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$. De $u_p$ à $u_n$ : premier terme $u_p$ et $N = n - p + 1$ termes.',
+        'Une hausse de t % donne $q = 1 + \\dfrac{t}{100}$, une baisse $q = 1 - \\dfrac{t}{100}$ : des pourcentages successifs se multiplient. Avec un exposant pair, $q^k = a$ a deux solutions opposées si $a > 0$.',
+      ],
+      cartes: [
+        { question: '+10 % puis −10 % : le prix revient-il à sa valeur de départ ?', reponse: 'Non : $1{,}10 \\times 0{,}90 = 0{,}99$, il a baissé de 1 %.' },
+        { question: '$u_1 = 3$ et $q = 2$ : somme des 8 premiers termes ?', reponse: '$S_8 = 3 \\times \\dfrac{1-2^8}{1-2} = 3 \\times 255 = 765$.' },
+        { question: '$u_1 = 3$ et $q = 2$ : à quel rang la suite vaut-elle 384 ?', reponse: '$2^{n-1} = 128 = 2^7$, donc $n = 8$.' },
+        { question: 'a, b, c sont trois termes consécutifs d\'une suite géométrique : quelle relation ?', reponse: '$b^2 = a \\times c$, et aucun terme n\'est nul.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Suites géométriques : raison q, formule uₙ = u₁·qⁿ⁻¹ et somme des termes', youtubeId: 'XWAtOBtrBRk' },
         {
@@ -816,6 +842,19 @@ export const suites: ChapterContent = {
       number: 3,
       title: 'Convergence et divergence des suites',
       kicker: "limite à l'infini, arithmétique, géométrique, et le cas d'une suite quelconque",
+      titreCourt: 'Convergence et divergence',
+      partie: 'Limites et problèmes classiques',
+      essentiel: [
+        'Si $\\lim_{n\\to+\\infty} u_n$ est un réel a, la suite **converge** vers a ; si la limite est infinie ou n\'existe pas, elle est **divergente**.',
+        'Géométrique : $|q| < 1$ donne $\\lim u_n = 0$ ; $q = -1$ oscille, sans limite et sans tendre vers l\'infini. Somme infinie : $S_\\infty = \\dfrac{u_1}{1-q}$, seulement si $-1 < q < 1$.',
+        '$u_n = \\dfrac{P(n)}{Q(n)}$ : divise par la plus haute puissance de n du dénominateur ; à degrés égaux, la limite est le rapport des coefficients dominants.',
+      ],
+      cartes: [
+        { question: 'Suite géométrique de raison $q = -1$ : quelle limite ?', reponse: 'Aucune : elle oscille entre $u_1$ et $-u_1$, sans tendre vers l\'infini.' },
+        { question: 'Somme infinie de $6 + 2 + \\dfrac{2}{3} + \\ldots$ ?', reponse: '$q = \\dfrac{1}{3}$, donc $S_\\infty = \\dfrac{6}{1-\\frac{1}{3}} = 9$.' },
+        { question: '$\\lim_{n\\to+\\infty} \\dfrac{3n-1}{2n+5}$ ?', reponse: '$\\dfrac{3}{2}$ : même degré, rapport des coefficients dominants.' },
+        { question: 'Pourquoi $0{,}999\\ldots = 1$ ?', reponse: 'C\'est une somme infinie avec $u_1 = 0{,}9$ et $q = 0{,}1$ : $S_\\infty = \\dfrac{0{,}9}{1 - 0{,}1} = 1$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Convergence et divergence des suites : limites, q = −1 et comparaison des degrés', youtubeId: '52jNqfKWQ_8' },
         {
@@ -1110,6 +1149,19 @@ export const suites: ChapterContent = {
       number: 4,
       title: 'Problèmes classiques sur les suites',
       kicker: 'des énigmes historiques qui se résolvent avec les mêmes outils',
+      titreCourt: 'Problèmes classiques',
+      partie: 'Limites et problèmes classiques',
+      essentiel: [
+        'Face à un problème habillé, repère ce qui varie d\'une étape à l\'autre : une addition donne une suite arithmétique, une multiplication une suite géométrique.',
+        'Une suite géométrique de raison supérieure à 1 finit toujours par dépasser une suite arithmétique : l\'échiquier donne $S_{64} = 2^{64} - 1$ grains.',
+        'Modéliser : $u_1$ est la valeur de l\'année de rang 1, puis on compte les années sans oublier le « + 1 ».',
+      ],
+      cartes: [
+        { question: 'Carrés emboîtés : 16 cm² au départ, chaque carré vaut la moitié du précédent. Aire totale ?', reponse: '$S_\\infty = \\dfrac{16}{1-\\frac{1}{2}} = 32$ cm².' },
+        { question: 'Combien de grains de blé sur la case n de l\'échiquier ?', reponse: '$u_n = 1\\times2^{n-1}$.' },
+        { question: 'Quelle est la règle de la suite de Fibonacci ?', reponse: 'Chaque terme est la somme des deux précédents ; le rapport de deux termes successifs converge vers le nombre d\'or.' },
+        { question: 'Si 2025 a le rang 1, quel rang pour l\'année 2031 ?', reponse: '$2031 - 2025 + 1 = 7$, et non 6.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Problèmes classiques sur les suites : l\'échiquier, Fibonacci, Rhind…', youtubeId: 'UvIBl9xznRk' },
         {
@@ -1372,6 +1424,17 @@ export const suites: ChapterContent = {
       number: 5,
       title: 'Comparaison numérique de deux suites',
       kicker: 'balayage numérique, tableau, rang de bascule',
+      titreCourt: 'Rang de bascule',
+      partie: 'Comparer et prévoir le long terme',
+      essentiel: [
+        'Balayage numérique : calcule les deux suites terme après terme et repère le **premier** rang où la condition devient vraie.',
+        'Vérifie qu\'elle était fausse au rang précédent, puis traduis le rang dans l\'unité du contexte : une année, un nombre de mois.',
+      ],
+      cartes: [
+        { question: 'Le rang 13 vérifie $B_n > A_n$ : est-ce forcément le rang de bascule ?', reponse: 'Seulement si la condition est fausse au rang 12 ; sinon, le vrai premier rang est plus petit.' },
+        { question: 'Le rang 1 correspond à 2020 et la bascule a lieu au rang 13 : quelle année ?', reponse: '$2020 + 13 - 1 = 2032$.' },
+        { question: 'Une suite arithmétique contre une géométrique de raison $q > 1$ : laquelle finit devant ?', reponse: 'La géométrique : une fois la bascule passée, elle n\'est plus jamais rattrapée.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Comparer deux suites : balayage numérique et rang de bascule', youtubeId: '058xsl_oNsE' },
         {
@@ -1542,6 +1605,19 @@ export const suites: ChapterContent = {
       number: 6,
       title: 'Suite récurrente affine et régime permanent',
       kicker: 'uₙ₊₁ = a·uₙ + b — ni arithmétique, ni géométrique',
+      titreCourt: 'Récurrente affine',
+      partie: 'Comparer et prévoir le long terme',
+      essentiel: [
+        'Suite récurrente affine : $u_{n+1} = a\\times u_n + b$, avec $a \\neq 1$ et $b \\neq 0$.',
+        'Si $|a| < 1$, elle converge vers le régime permanent $L = \\dfrac{b}{1-a}$, point fixe de la récurrence. Si $|a| \\geq 1$, il n\'existe pas : vérifie toujours $|a| < 1$ d\'abord.',
+        'La suite des écarts $v_n = u_n - L$ est géométrique de raison a : $u_n = L + (u_1 - L)\\times a^{n-1}$.',
+      ],
+      cartes: [
+        { question: '$u_{n+1} = 0{,}7\\times u_n + 3$ : régime permanent ?', reponse: '$|a| = 0{,}7 < 1$, donc $L = \\dfrac{3}{1-0{,}7} = 10$.' },
+        { question: 'Même suite, avec $u_1 = 1$ : formule explicite ?', reponse: '$u_n = 10 - 9\\times0{,}7^{n-1}$.' },
+        { question: '$u_{n+1} = 1{,}005\\times u_n - 300$ : le point fixe $60\\,000$ est-il une limite ?', reponse: 'Non : $|a| \\geq 1$, la suite diverge si $u_1 \\neq L$ ; L n\'est qu\'un **seuil**.' },
+        { question: 'Pourquoi la suite des écarts $v_n = u_n - L$ est-elle géométrique ?', reponse: 'Avec $b = L - aL$ : $v_{n+1} = a\\times u_n + b - L = a\\times v_n$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Suite récurrente affine uₙ₊₁ = a·uₙ + b et régime permanent L = b/(1−a)', youtubeId: '7ATLT1PpzIE' },
         {
