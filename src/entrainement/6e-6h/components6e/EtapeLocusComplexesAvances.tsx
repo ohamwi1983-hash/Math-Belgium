@@ -1,3 +1,4 @@
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -141,12 +142,12 @@ export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, cons
           <div className="field">
             <ApercuExpressionLatex texte={point1} label="Point 1 (a+bi) =" />
             <label className="field-label field-label-minuscule">Point 1 de la droite (a+bi) =</label>
-            <input type="text" className={classeChamp} value={point1} placeholder="ex : 1/2+3i" disabled={gele} onChange={(e) => modifier(setPoint1)(e.target.value)} />
+            <input type="text" className={classeChamp} value={point1} placeholder="ex : 1/2+3i" disabled={gele} onChange={(e) => modifier(setPoint1)(normaliserSigneMoins(e.target.value))} />
           </div>
           <div className="field">
             <ApercuExpressionLatex texte={point2} label="Point 2 (a+bi) =" />
             <label className="field-label field-label-minuscule">Point 2 de la droite (a+bi) =</label>
-            <input type="text" className={classeChamp} value={point2} placeholder="ex : 5−i/3" disabled={gele} onChange={(e) => modifier(setPoint2)(e.target.value)} />
+            <input type="text" className={classeChamp} value={point2} placeholder="ex : 5−i/3" disabled={gele} onChange={(e) => modifier(setPoint2)(normaliserSigneMoins(e.target.value))} />
           </div>
         </div>
       )}
@@ -156,12 +157,12 @@ export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, cons
           <div className="field">
             <ApercuExpressionLatex texte={centre} label="Centre (a+bi) =" />
             <label className="field-label field-label-minuscule">Centre (a+bi) =</label>
-            <input type="text" className={classeChamp} value={centre} placeholder="ex : 2/3−i" disabled={gele} onChange={(e) => modifier(setCentre)(e.target.value)} />
+            <input type="text" className={classeChamp} value={centre} placeholder="ex : 2/3−i" disabled={gele} onChange={(e) => modifier(setCentre)(normaliserSigneMoins(e.target.value))} />
           </div>
           <div className="field">
             <ApercuExpressionLatex texte={rayon} label="Rayon =" />
             <label className="field-label field-label-minuscule">Rayon =</label>
-            <input type="text" className={classeChamp} value={rayon} placeholder="ex : 2,5" disabled={gele} onChange={(e) => modifier(setRayon)(e.target.value)} />
+            <input type="text" className={classeChamp} value={rayon} placeholder="ex : 2,5" disabled={gele} onChange={(e) => modifier(setRayon)(normaliserSigneMoins(e.target.value))} />
           </div>
         </div>
       )}
@@ -171,14 +172,14 @@ export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, cons
           <div className="field">
             <ApercuExpressionLatex texte={origine} label="Origine (a+bi) =" />
             <label className="field-label field-label-minuscule">Origine commune (a+bi) =</label>
-            <input type="text" className={classeChamp} value={origine} placeholder="ex : 2/3+i" disabled={gele} onChange={(e) => modifier(setOrigine)(e.target.value)} />
+            <input type="text" className={classeChamp} value={origine} placeholder="ex : 2/3+i" disabled={gele} onChange={(e) => modifier(setOrigine)(normaliserSigneMoins(e.target.value))} />
           </div>
           <label className="field-label field-label-minuscule">Angle(s) de direction (radians) =</label>
           {angles.map((a, i) => (
             <div key={i}>
               <ApercuExpressionLatex texte={a} />
               <div className="field-row">
-                <input type="text" style={{ flex: "1 1 auto" }} aria-label={`Angle ${i + 1}`} className={classeChamp} value={a} placeholder="ex : 3pi/5" disabled={gele} onChange={(e) => modifierAngle(i, e.target.value)} />
+                <input type="text" style={{ flex: "1 1 auto" }} aria-label={`Angle ${i + 1}`} className={classeChamp} value={a} placeholder="ex : 3pi/5" disabled={gele} onChange={(e) => modifierAngle(i, normaliserSigneMoins(e.target.value))} />
                 {angles.length > 1 && !gele && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label={`Retirer l'angle ${i + 1}`} onClick={() => retirerAngle(i)}>
                     ×
@@ -200,7 +201,7 @@ export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, cons
           <div className="field">
             <ApercuExpressionLatex texte={poleTexte} />
             <label className="field-label field-label-minuscule">Point exclu du lieu (a+bi) =</label>
-            <input type="text" className={classeChamp} value={poleTexte} placeholder="ex : 1/2−i" disabled={gele} onChange={(e) => modifier(setPoleTexte)(e.target.value)} />
+            <input type="text" className={classeChamp} value={poleTexte} placeholder="ex : 1/2−i" disabled={gele} onChange={(e) => modifier(setPoleTexte)(normaliserSigneMoins(e.target.value))} />
           </div>
         </div>
       )}

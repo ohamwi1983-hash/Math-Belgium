@@ -1,3 +1,4 @@
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { useState } from "react";
 import type { ExerciceSuiteGeometrique } from "../core5e/suitesGeometriques.types";
 import type { PhaseSuiteGeometrique } from "../moteur5e/typesSuiteGeometrique";
@@ -70,7 +71,7 @@ export function EtapeChampSimpleSuiteGeometrique({ exercice, phase, tentativesUt
           type="text"
           className={`text-input${texteErronee ? " is-erronee" : ""}`}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
           placeholder={placeholder}
         />
       </div>

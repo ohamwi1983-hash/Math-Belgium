@@ -1,3 +1,4 @@
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -97,7 +98,7 @@ export function EtapeChampsComplexesAvances({ consigneGenerale, blocDonnees, con
           <label className="field-label field-label-minuscule" htmlFor={`champ-6gen42-${i}`}>
             {champ.label}
           </label>
-          <input id={`champ-6gen42-${i}`} type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} disabled={Boolean(validation)} onChange={(e) => changer(i, e.target.value)} />
+          <input id={`champ-6gen42-${i}`} type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} disabled={Boolean(validation)} onChange={(e) => changer(i, normaliserSigneMoins(e.target.value))} />
         </div>
       ))}
       {niveauAide >= 1 && (

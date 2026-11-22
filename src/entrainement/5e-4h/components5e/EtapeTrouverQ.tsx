@@ -1,3 +1,4 @@
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { useState } from "react";
 import type { ExerciceSuiteGeometrique } from "../core5e/suitesGeometriques.types";
 import { consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2, noteAideNiveau1 } from "../ui5e/formatSuiteGeometrique";
@@ -79,7 +80,7 @@ export function EtapeTrouverQ({ exercice, tentativesUtilisees, tentativesMax, ni
             <label className="field-label field-label-minuscule">
               <Katex expression={valeurs.length > 1 ? `q_{${i + 1}} =` : "q ="} />
             </label>
-            <input type="text" className={`text-input${champErronee ? " is-erronee" : ""}`} value={v} onChange={(e) => modifier(i, e.target.value)} />
+            <input type="text" className={`text-input${champErronee ? " is-erronee" : ""}`} value={v} onChange={(e) => modifier(i, normaliserSigneMoins(e.target.value))} />
             {valeurs.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => retirer(i)}>
                 ×

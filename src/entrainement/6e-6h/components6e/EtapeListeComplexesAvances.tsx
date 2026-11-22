@@ -1,3 +1,4 @@
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { useState } from "react";
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
@@ -90,7 +91,7 @@ export function EtapeListeComplexesAvances({ consigneGenerale, blocDonnees, cons
       </p>
       {lignes.map((ligne, i) => (
         <div key={i} className="field-row">
-          <input type="text" style={{ flex: "1 1 auto" }} aria-label={`Valeur ${i + 1}`} className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne} placeholder={placeholder} disabled={Boolean(validation)} onChange={(e) => modifierLigne(i, e.target.value)} />
+          <input type="text" style={{ flex: "1 1 auto" }} aria-label={`Valeur ${i + 1}`} className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne} placeholder={placeholder} disabled={Boolean(validation)} onChange={(e) => modifierLigne(i, normaliserSigneMoins(e.target.value))} />
           {lignes.length > 1 && (
             <button type="button" className="btn liste-morceaux-retirer" aria-label={`Retirer la ligne ${i + 1}`} onClick={() => retirerLigne(i)}>
               ×

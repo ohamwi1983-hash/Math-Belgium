@@ -1,3 +1,4 @@
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { useState } from "react";
 import type { ExerciceSuiteGeometrique } from "../core5e/suitesGeometriques.types";
 import type { PhaseSuiteGeometrique } from "../moteur5e/typesSuiteGeometrique";
@@ -76,7 +77,7 @@ export function EtapeSommeInfinie({ exercice, phase, tentativesUtilisees, tentat
           <label className="field-label field-label-minuscule">
             <Katex expression="S_\infty =" />
           </label>
-          <input type="text" className={`text-input${valeurErronee ? " is-erronee" : ""}`} value={valeur} onChange={(e) => setValeur(e.target.value)} />
+          <input type="text" className={`text-input${valeurErronee ? " is-erronee" : ""}`} value={valeur} onChange={(e) => setValeur(normaliserSigneMoins(e.target.value))} />
         </div>
       )}
 

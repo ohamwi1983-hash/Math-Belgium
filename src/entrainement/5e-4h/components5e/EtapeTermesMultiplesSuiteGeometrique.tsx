@@ -1,3 +1,4 @@
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { useState } from "react";
 import type { ExercicePrincipalSuiteGeometrique, ExerciceSuiteGeometrique } from "../core5e/suitesGeometriques.types";
 import type { PhaseSuiteGeometrique } from "../moteur5e/typesSuiteGeometrique";
@@ -98,7 +99,7 @@ export function EtapeTermesMultiplesSuiteGeometrique({
         return (
           <div key={i} className="field field-inline">
             <label className="field-label field-label-minuscule">{enLatex ? <Katex expression={label} /> : label}</label>
-            <input type="text" className={`text-input${champErronee ? " is-erronee" : ""}`} value={valeurs[i]} onChange={(e) => modifier(i, e.target.value)} />
+            <input type="text" className={`text-input${champErronee ? " is-erronee" : ""}`} value={valeurs[i]} onChange={(e) => modifier(i, normaliserSigneMoins(e.target.value))} />
           </div>
         );
       })}

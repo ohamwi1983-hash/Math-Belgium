@@ -1,3 +1,4 @@
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { useState } from "react";
 import type { ExerciceSuiteGeometrique } from "../core5e/suitesGeometriques.types";
 import type { PhaseSuiteGeometrique } from "../moteur5e/typesSuiteGeometrique";
@@ -88,7 +89,7 @@ export function EtapePoserEquationGeometrique({ exercice, phase, tentativesUtili
           className={`text-input${equationErronee ? " is-erronee" : ""}`}
           value={texte}
           onChange={(e) => {
-            setTexte(e.target.value);
+            setTexte(normaliserSigneMoins(e.target.value));
             setSolutionDirecte(false);
           }}
           placeholder={placeholder}
