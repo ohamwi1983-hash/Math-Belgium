@@ -141,6 +141,8 @@ import { adaptateurEvaluationPointFuite } from '../entrainement/4e/generateurs/p
 import { adaptateurEvaluationPerspectiveCavaliere } from '../entrainement/4e/generateurs/perspectiveCavaliere/exportEvaluation'
 import { adaptateurEvaluationDetectiveEspace } from '../entrainement/4e/generateurs/detectiveEspace/exportEvaluation'
 import { adaptateurEvaluationOmbreLampe } from '../entrainement/4e/generateurs/ombreLampe/exportEvaluation'
+import { adaptateurEvaluationLectureSolide } from '../entrainement/4e/generateurs/lectureSolide/exportEvaluation'
+import { adaptateurEvaluationIntersectionParallele } from '../entrainement/4e/generateurs/intersectionParallele/exportEvaluation'
 
 export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExercices<never>> = {
   gen1: versionPapier(adaptateurEvaluationSecondDegre) as unknown as AdaptateurFeuilleExercices<never>,
@@ -266,6 +268,8 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen104: versionPapier(adaptateurEvaluationPerspectiveCavaliere) as unknown as AdaptateurFeuilleExercices<never>,
   gen107: versionPapier(adaptateurEvaluationDetectiveEspace) as unknown as AdaptateurFeuilleExercices<never>,
   gen106: versionPapier(adaptateurEvaluationOmbreLampe) as unknown as AdaptateurFeuilleExercices<never>,
+  gen133: versionPapier(adaptateurEvaluationLectureSolide) as unknown as AdaptateurFeuilleExercices<never>,
+  gen134: versionPapier(adaptateurEvaluationIntersectionParallele) as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 import { adaptateurEvaluationDomaineDefinition } from '../entrainement/5e-4h/generateurs5e/domaineDefinition/exportEvaluation'

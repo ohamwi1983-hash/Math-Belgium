@@ -4312,6 +4312,15 @@ paths:
   `core/ombreLampe.types.ts`, `ui/formatOmbreLampe.ts`, `generateurs/ombreLampe/` (geometrieLampe,
   index, profil, exportEvaluation).
 
+- **4e, Chapitre 8 — lot H : gen133 « Lire un solide en perspective : vocabulaire et positions »
+  et gen134 « Intersection de deux plans par parallélisme »** (audit du 4e ch. 8, décisions du
+  22/11/2026). Cartes « S'entraîner » seulement, aucun bloc de cours : gen133 en § 1 (après gen104) et
+  en § 2 (variante « Points d'un plan » — le § 2 n'avait aucune carte) ; gen134 en § 5 (première carte
+  de la section) et en § 8 après gen102 (variante « un point et une direction », qui s'appuie sur le
+  théorème du toit ajouté au § 8 par le lot A). Descriptions en texte brut. Registres : `registry.ts`,
+  `evaluationAdapterRegistry.ts` (`versionPapier`), `evaluationPayload.ts` (processus 1 / 2, sections
+  `cavaliere` / `deux-plans`). Détail : `.claude/rules/feuilles-evaluations.md`, « 4e ch. 8, lot H ».
+
 - **Corrections d'écran validées par l'utilisateur (6e ch. 4 et 4e ch. 3)** : 6gen81 « section —
   fonction donnée » — tirage refait tant que la profondeur c = a·(W/2)² n'a pas une écriture décimale
   exacte d'au plus 4 décimales (`decimalCourt`, aussi pour la flèche du mur) : W = 10,5 et a = 0,3

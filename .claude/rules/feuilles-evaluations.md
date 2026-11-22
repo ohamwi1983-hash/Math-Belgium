@@ -2338,6 +2338,84 @@ pièges, faux) 0 anomalie ; `?code=` 100 / 100 ; collecteur 2 500 tirages, ≈ 2
 0 débordement à 680 / 820 / 1 280 px sauf la ligne « codes a) … j) » d'une grille à 10 lignes d'un même groupe
 (limite commune, voir rapport).
 
+## 4e ch. 8, lot H — gen133–gen134 (nouveaux, notés)
+
+Coquille NOUVELLE `4e/components/AppEspaceLotH.tsx` (aucune autre appli ne change) : figure du solide
+TOUJOURS visible hors de l'énoncé repliable (`EnTeteExercice` replie son `blocDonnees` dès le premier écran
+clos), `FigureCliquable` de gen102 réutilisée (cadre 400 × 320), quatre sortes d'écrans — `choix` (une
+tentative, jugé ✗ / ✓ par `ui/choixFige.ts`, explication du choix faux en `messageRevele`), `cases` (choix
+multiple, une tentative, case cochée à tort ✗, bonne case ✓ même oubliée), `lignes` (un verdict par ligne
+parmi les mêmes étiquettes, une tentative pour l'ensemble, chaque ligne jugée ; toucher une ligne la met
+en couleur sur la figure), `toucher` (point numéroté touché sur la figure ou son bouton, TROIS tentatives,
+message ciblé et point essayé en rouge à chaque essai faux, numéros retirés une fois l'écran clos).
+Figures `4e/ui/figureEspaceLotH.ts` (même cavalière, même visibilité des arêtes et mêmes couleurs que
+gen101/gen102 ; `toutesAretesPleines` ; arêtes surlignées avec texte ; droites prolongées, parties cachées
+en pointillé ; aucun identifiant SVG). Corrigés `4e/generateurs/{lectureSolide,intersectionParallele}/corrigeDetaille.ts`,
+une lettre par écran, partagés appli / papier. Aucun calcul chiffré (sauf doubler une fuyante), jamais
+« déterminant », aucun radian.
+- **gen133** « Lire un solide en perspective : vocabulaire et positions » (§ 1–4, processus 1) : solides
+  à dimensions entières DESSINÉS À L'ÉCHELLE (cube, pavé ABCDEFGH ; prisme droit COUCHÉ ABC-DEF, triangles
+  avant / arrière ; tétraèdre « coin de cube » ABCD, face avant ABC, fuyante [AD]). `dessin` : a) une ligne
+  par face, « vraie grandeur » / « parallélogramme » (tétraèdre : « triangle déformé ») ; b) arêtes cachées
+  à cocher — l'énoncé (écran ET papier) trace TOUTES les arêtes en trait plein, les pointillés n'arrivent
+  qu'une fois b) clos et dans le corrigé ; c) « dessiné à l'échelle 1 : [AD] mesure 1,5 cm sur ce dessin »,
+  quatre options (double, lue directement, moitié, « on ne peut pas la connaître ») ; une fuyante 2 fois
+  sur 3, sinon une arête horizontale / verticale de face (avant OU arrière) — tiré AVANT tout le reste,
+  jamais dans `forme`. `appartenance` : 2 ou 3 milieux d'arêtes nommés I, J, K ; trois plans (une face, un
+  plan diagonal — ou par un milieu si le solide n'en a pas —, un plan par un milieu), 1 à 3 autres points
+  à cocher, chacun JUSTIFIÉ de proche en proche (milieu d'une arête du plan, point d'une droite du plan,
+  parallèle à une arête ou côté d'un parallélogramme de points nommés ; un plan qui demanderait la droite
+  des milieux est écarté). `positions` : quatre paires (cube, pavé, prisme ; jamais le tétraèdre), chaque
+  position au moins une fois (position doublée tirée AVANT la boucle de rejet), toujours au moins une paire
+  gauche qui se croise sur le dessin, parallèles le plus souvent dans deux faces différentes ; raison =
+  plan commun / arête témoin / parallélogramme / « aucun plan ne contient les quatre points ». Énoncé papier
+  = figure + VRAIES questions (`etapesParQuestion` [[a], [b], [c]] ; positions : consigne commune et une paire
+  par question a–d, corrigé à une lettre par paire, l'appli les montre toutes sous son écran unique avec un
+  seul « Ce qu'on utilise »). Jamais regroupé. `titrePapier` par variante (§ 1 « Perspective cavalière »,
+  § 2 « Déterminer un plan », § 3 « Positions de deux droites »). Profil : `forme` = variante | solide ;
+  aucun cas particulier, pas de `calcul`. Niveaux (lectures, méthode 0) : dessin 2 (5 min, piège face
+  arrière / fuyante toujours présent), appartenance 1 (5 min), positions 2 (6 min, croisement toujours
+  présent) — constants.
+- **gen134** « Intersection de deux plans par parallélisme » (§ 5 et § 8, processus 2) : cube (arête 4)
+  ou pavé (4 ou 6) ; faces étudiées F0 / F1 = dessous / dessus, avant / arrière ou gauche / droite (axe au
+  tiers). `faces-paralleles` : P, Q à l'intérieur de deux arêtes de F0, |PQ| ≥ 2 et oblique, triangle PQR
+  d'aire dessinée ≥ 3 unités², R sur une arête de F1 jamais au-dessus de P ou Q ; écrans : a) le point connu
+  (R ; leurres P, Q « pas dans la face », un sommet de F1 « pas dans le plan »), b) la droite (parallèle à
+  (PQ) par R — propriété 1 ; leurres (RQ) ou (RP) « traverse le solide », parallèle à une arête par R,
+  parallèle à (PQ) par un sommet), c) S touché sur la figure. `point-direction` (théorème du toit, § 8,
+  ajouté par le lot A) : traces des deux plans dans F0 entre sommets et MILIEUX d'arêtes (deux milieux au
+  plus : « I est le milieu de [EH], J celui de [FG] »), K à l'intérieur de F0 à une unité au moins du
+  bord, angle ≥ 25° ; plans nommés par trois des quatre sommets de leur section (sections en couleur) ;
+  a) K (leurres : croisement du dessin de deux côtés gauches, un point d'un seul plan, deux côtés
+  parallèles à l'axe), b) la direction (arête parallèle à l'axe ; leurres : la trace d'un seul plan, une
+  arête d'une autre direction), c) K′ touché dans F1. Écran c : 4 ou 5 points (`candidatsEcran3`) — le bon,
+  les croisements du DESSIN de la droite tracée avec des arêtes / côtés hors de la face (droites gauches,
+  message « ne fait que croiser [XY] sur le dessin »), puis des points de la droite hors de la face ou
+  encore dans le solide ; ≥ 26 px entre points, numérotés de gauche à droite ; un faux croisement à moins de
+  14 px du bon point → instance rejetée. Énoncé papier = texte + figure (plan (PQR) et [PQ], ou les deux
+  sections) + UNE consigne (« Construis le segment… » / « Détermine la droite d'intersection… ») ; étapes
+  dans le corrigé (`consignesEtapesPapier`), figure de la construction finale en `figureHtml`. Jamais
+  regroupé (solides et espace). `titrePapier` « Positions de deux plans » (§ 5) / « Intersection de deux
+  plans » (§ 8). Profil : `forme` = variante | axe ; aucun cas particulier. Niveau : 2 étapes + 1 lecture
+  (placer le point), méthode 1, `sansCharge` → 2, 7 min, constants.
+Pilotes `evaluationPayload.ts` : gen133 `cavaliere` (processus 1), gen134 `deux-plans` (processus 2) ;
+les libellés vides de gen39 / gen40 laissés aux lots qui les retouchent. Cartes : gen133 en § 1 (après
+gen104) et § 2 (variante « Points d'un plan ») ; gen134 en § 5 et § 8 (après gen102, variante « point et
+direction »).
+
+Mesures (dossier de travail `gen-4e8-H` : `sim133.mts`, `sim134.mts`, `coll.mts`, `code.mts`,
+`parcours.cjs`, `equilibre.cjs`, `docsH.cjs`, `deborde3.cjs`, `cap*.cjs`, `page.cjs`) : moteurs 300 + 2 000
+tirages par variante, réponses recontrôlées géométriquement (S dans (PQR) et dans F1, (RS) ∥ (PQ), K et K′
+dans les deux plans, direction ∥ (KK′)) : 0 anomalie, exactement un bon point à l'écran c ; fréquences
+gen133 positions doublées ≈ 1/3 chacune, croisement présent 100 % ; collecteur 1 500 tirages : 9 545
+formules KaTeX strictes, 3 822 relations du corrigé vérifiées (∈, ⊂, ∥, doublement), 0 fausse, 0 NaN /
+notation clavier / « déterminant » ; `?code=` 700 / 700 identiques ; iPhone 13 (chaque variante, 3 graines :
+juste, faux, toucher faux 1 ou 3 fois) scrollWidth 390, 0 erreur console, réponse + corrigé révélés,
+choix vides après « Nouvel exercice » ; plans réels 24 × 3 séries : même structure 24 / 24, énoncés tous
+différents ; documents (2 plans, interdite / autorisée en deux colonnes ; évaluation 2 séries + aménagée +
+corrigé + grille + feuille + aménagée + Word copie / corrigé / grille) : 0 `.katex-error`, 0 débordement à
+680 / 820 / 1 280 px ; page du chapitre 390 px : cartes présentes, 0 « $ » ni « ** ».
+
 ## Page de conception — proposition A (décision de l'utilisateur, 21/11/2026)
 
 `EvaluationGeneratorPanel.tsx` (feuille d'exercices, évaluation, examen ; maquettes `Main`,

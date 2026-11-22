@@ -106,7 +106,7 @@ export type IdGenerateurPilote =
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83' | 'gen129' | 'gen130'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54' | 'gen92' | 'gen93' | 'gen94' | 'gen95' | 'gen96' | 'gen97' | 'gen98' | 'gen99' | 'gen131' | 'gen132'
-  | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103' | 'gen102' | 'gen105' | 'gen104' | 'gen107' | 'gen106'
+  | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103' | 'gen102' | 'gen105' | 'gen104' | 'gen107' | 'gen106' | 'gen133' | 'gen134'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen63'
   | '5gen62'
@@ -378,6 +378,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'parallelisme', generatorId: 'gen103', label: 'Démontrer un parallélisme (gen103)', processus: 3 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'percee', generatorId: 'gen102', label: 'Point de percée par plan auxiliaire (gen102)', processus: 2 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'cavaliere', generatorId: 'gen104', label: 'Dessiner en perspective cavalière (gen104)', processus: 2 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'cavaliere', generatorId: 'gen133', label: 'Lire un solide en perspective : vocabulaire et positions (gen133)', processus: 1 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'deux-plans', generatorId: 'gen134', label: 'Intersection de deux plans par parallélisme (gen134)', processus: 2 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'section', generatorId: 'gen40', label: '' },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'point-de-fuite', generatorId: 'gen105', label: 'Perspective centrale : point de fuite (gen105)', processus: 2 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'ombre', generatorId: 'gen41', label: 'Ombre au soleil (gen41)', processus: 2 },
