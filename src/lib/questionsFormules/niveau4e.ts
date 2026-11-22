@@ -797,6 +797,11 @@ export const FORMULES_4E: BanqueFormules = {
         enonce: r`Décris la méthode du plan auxiliaire pour trouver le point de percée d'une droite $d$ dans un plan $\alpha$.`,
         corrige: r`On choisit un plan auxiliaire $\pi$ qui contient $d$ et qui coupe $\alpha$ ; on détermine la droite $b$ commune à $\pi$ et $\alpha$ ; le point de percée est l'intersection de $d$ et $b$, coplanaires dans $\pi$.`,
       },
+      {
+        id: 'percee-theoreme-toit',
+        enonce: r`Énonce le théorème du toit : deux plans sécants contiennent chacun une droite, et ces deux droites sont parallèles. Que peut-on dire de la droite d'intersection des deux plans ?`,
+        corrige: r`Elle est parallèle à ces deux droites (ou confondue avec l'une d'elles).`,
+      },
     ],
     section: [
       {

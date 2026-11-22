@@ -438,16 +438,19 @@ export const geometrieDansEspace: ChapterContent = {
           ],
         },
         {
-          kind: 'exemple',
-          badge: 'prouver que deux droites sont gauches',
-          formula: 'Dans le cube ABCDEFGH, montre que (AB) et (CG) sont gauches.',
-          steps: [
-            { tag: 'un plan qui contient (AB)', text: 'le plan de la base (ABC)' },
-            { tag: 'percée', text: '(CG) est verticale : elle n\'est pas incluse dans (ABC) et le perce au seul point C' },
-            { tag: 'pas sécantes', text: 'C n\'est pas sur (AB) : (CG) n\'a donc aucun point commun avec (AB)' },
-            { tag: 'pas parallèles', text: 'la parallèle à (AB) passant par C est (CD), qui est dans la base — pas (CG)' },
+          kind: 'exempleLibre',
+          label: 'Démonstration — (AB) et (CG) sont gauches',
+          blocks: [
+            { kind: 'para', text: 'Dans le cube $ABCDEFGH$, on montre que $(AB)$ et $(CG)$ ne sont **ni sécantes, ni parallèles**.' },
+            { kind: 'para', text: '**Pas sécantes.** $(AB)$ est dans le plan de la base $(ABC)$. $(CG)$ n\'y est pas incluse, car $G$ ' +
+              'n\'est pas dans la base ; elle a pourtant le point $C$ dans ce plan : elle perce donc $(ABC)$ ' +
+              'au seul point $C$. Un point commun à $(AB)$ et $(CG)$ serait dans $(ABC)$ et sur $(CG)$ : ce ' +
+              'serait $C$. Or $C$ n\'est pas sur $(AB)$. Les deux droites n\'ont donc aucun point commun.' },
+            { kind: 'para', text: '**Pas parallèles.** $ABCD$ est un carré : la parallèle à $(AB)$ menée par $C$ est $(CD)$. Par ' +
+              'unicité, c\'est la seule ; or $(CG)$ est une autre droite passant par $C$. Elle n\'est donc pas ' +
+              'parallèle à $(AB)$.' },
+            { kind: 'para', text: 'Ni sécantes, ni parallèles : $(AB)$ et $(CG)$ sont **gauches**.' },
           ],
-          result: { tag: 'résultat', text: '(AB) et (CG) ne sont ni sécantes ni parallèles : elles sont gauches.' },
         },
         {
           kind: 'atelier',
@@ -739,6 +742,25 @@ export const geometrieDansEspace: ChapterContent = {
           ],
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la propriété 2',
+          blocks: [
+            { kind: 'para', text: 'Soit $\\alpha$ et $\\alpha\'$ deux plans parallèles (aucun point commun), et $d$ une droite qui ' +
+              'coupe $\\alpha$ en un seul point $A$. Le point $A$ n\'est pas dans $\\alpha\'$ : $d$ n\'est donc pas ' +
+              'incluse dans $\\alpha\'$. Il reste à montrer qu\'elle rencontre $\\alpha\'$.' },
+            { kind: 'para', text: 'Supposons le contraire : $d$ n\'a aucun point commun avec $\\alpha\'$. Prenons un point $B$ de ' +
+              '$\\alpha\'$ et le plan $\\pi$ déterminé par $d$ et $B$. Il coupe $\\alpha\'$ (en $B$) sans être ' +
+              'confondu avec lui (il contient $A$) : il le coupe suivant une droite $d\'$. De même, il coupe ' +
+              '$\\alpha$ suivant une droite $d\'\'$ qui passe par $A$. Par la propriété 1, $d\'\' \\parallel d\'$.' },
+            { kind: 'para', text: 'Dans le plan $\\pi$, les droites $d$ et $d\'$ sont coplanaires ; elles n\'ont aucun point commun, ' +
+              'puisque $d\'$ est dans $\\alpha\'$ : elles sont parallèles. Les droites $d$ et $d\'\'$ passent ' +
+              'donc toutes les deux par $A$ et sont parallèles à $d\'$ : par unicité, $d = d\'\'$, et $d$ serait ' +
+              'incluse dans $\\alpha$.' },
+            { kind: 'para', text: 'C\'est impossible : $d$ coupe $\\alpha$ en un seul point. La supposition est fausse : $d$ coupe ' +
+              'aussi $\\alpha\'$, en un seul point.' },
+          ],
+        },
+        {
           kind: 'exemple',
           badge: 'deux plans parallèles coupés par un troisième',
           formula: 'Dans le cube, le plan (ACGE) coupe la base (ABCD) et la face (EFGH). Que dire de (AC) et de (EG) ?',
@@ -896,6 +918,27 @@ export const geometrieDansEspace: ChapterContent = {
           ],
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — les droites d\'intersection de trois plans',
+          blocks: [
+            { kind: 'para', text: 'Soit $\\alpha$, $\\beta$ et $\\gamma$ trois plans distincts, sécants deux à deux. Appelons $d$ la ' +
+              'droite commune à $\\alpha$ et $\\beta$, et étudions sa position par rapport à $\\gamma$ : elle le ' +
+              'perce, elle y est incluse, ou elle lui est parallèle.' },
+            { kind: 'para', text: '**Premier cas** : $d$ perce $\\gamma$ en un point $M$. Ce point est dans $\\alpha$, $\\beta$ et $\\gamma$ : les droites ' +
+              'communes à $\\alpha$ et $\\gamma$, puis à $\\beta$ et $\\gamma$, passent toutes les deux par $M$. ' +
+              'Les trois droites d\'intersection sont **concourantes** en $M$.' },
+            { kind: 'para', text: '**Deuxième cas** : $d$ est incluse dans $\\gamma$. Elle est alors commune à $\\alpha$ et $\\gamma$ ; or deux plans ' +
+              'sécants n\'ont qu\'une droite commune : c\'est $d$. De même pour $\\beta$ et $\\gamma$. Les trois ' +
+              'droites sont **confondues**.' },
+            { kind: 'para', text: '**Troisième cas** : $d$ est parallèle à $\\gamma$ (aucun point commun). La droite $e$ commune à $\\alpha$ et ' +
+              '$\\gamma$ est, comme $d$, dans $\\alpha$ ; elle est dans $\\gamma$, que $d$ ne rencontre pas : ' +
+              '$d$ et $e$ sont coplanaires sans point commun, donc parallèles. De même, la droite $f$ commune à ' +
+              '$\\beta$ et $\\gamma$ est parallèle à $d$. Enfin $e$ et $f$ sont dans $\\gamma$ ; un point commun ' +
+              'à $e$ et $f$ serait dans $\\alpha$ et $\\beta$, donc sur $d$ — impossible. Les trois droites ' +
+              'sont **parallèles**.' },
+          ],
+        },
+        {
           kind: 'exemple',
           badge: 'trois plans du cube sans point commun',
           formula: 'Dans le cube ABCDEFGH, les plans (ABC), (ABF) et (DCF) ont-ils un point commun ?',
@@ -962,6 +1005,23 @@ export const geometrieDansEspace: ChapterContent = {
             'l\'espace, c\'est toujours prouver un parallélisme entre deux **droites** ! Ce n\'est ' +
             'jamais un parallélisme « au jugé » entre deux plans entiers : un plan ne se compare ' +
             'à un autre qu\'à travers les droites qu\'il contient.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — le critère de parallélisme d\'une droite et d\'un plan',
+          blocks: [
+            { kind: 'para', text: 'Soit $d$ une droite parallèle à une droite $d\'$ du plan $\\alpha$, et non incluse dans ' +
+              '$\\alpha$. On montre que $d$ n\'a aucun point commun avec $\\alpha$.' },
+            { kind: 'para', text: '$d$ n\'est pas incluse dans $\\alpha$, donc $d \\neq d\'$. Deux droites parallèles distinctes ' +
+              'déterminent un plan $\\beta$. Ce plan contient $d\'$, donc il a des points communs avec ' +
+              '$\\alpha$ ; il n\'est pas confondu avec $\\alpha$, puisqu\'il contient $d$. Les plans $\\alpha$ et ' +
+              '$\\beta$ sont donc sécants, suivant la droite $d\'$.' },
+            { kind: 'para', text: 'Supposons que $d$ rencontre $\\alpha$ en un point $M$. $M$ est sur $d$, donc dans $\\beta$ ; il est ' +
+              'aussi dans $\\alpha$ : il est sur leur droite commune $d\'$. Les droites $d$ et $d\'$ auraient ' +
+              'le point commun $M$ — impossible, elles sont parallèles et distinctes.' },
+            { kind: 'para', text: 'La supposition est fausse : $d$ n\'a aucun point commun avec $\\alpha$, elle lui est ' +
+              '**parallèle**.' },
+          ],
         },
         {
           kind: 'exemple',
@@ -1033,7 +1093,7 @@ export const geometrieDansEspace: ChapterContent = {
       partie: 'Constructions sur un solide',
       essentiel: [
         'Point de percée de d dans α : un plan auxiliaire π qui contient d et coupe α, la droite b commune à π et α, puis l\'intersection de d et b, coplanaires dans π.',
-        'Intersection de deux plans sécants : deux points distincts communs aux deux plans, ou un point commun et la direction de la droite.',
+        'Intersection de deux plans sécants : deux points distincts communs aux deux plans, ou un point commun et la direction de la droite (théorème du toit : parallèle aux deux droites parallèles que contiennent les plans).',
       ],
       cartes: [
         { question: 'Quelles conditions doit remplir le plan auxiliaire π ?', reponse: 'Il contient la droite d et il est sécant au plan α.' },
@@ -1131,8 +1191,35 @@ export const geometrieDansEspace: ChapterContent = {
               'aux deux plans. Ça revient parfois à chercher les points de percée de deux droites ' +
               'd\'un même plan dans l\'autre plan.',
             'Repère **un point commun** aux deux plans. Trouve ensuite la direction de la droite ' +
-              'd\'intersection, en t\'appuyant sur les propriétés connues de la figure ' +
-              '(parallélisme, symétrie…).',
+              'd\'intersection, en t\'appuyant sur les propriétés connues de la figure : le plus ' +
+              'souvent, le théorème du toit ci-dessous.',
+          ],
+        },
+        {
+          kind: 'methode',
+          label: 'Théorème du toit',
+          items: [
+            'Si deux plans sécants contiennent chacun une droite, et que ces deux droites sont ' +
+              '**parallèles**, alors la droite d\'intersection des deux plans est **parallèle** à ces deux ' +
+              'droites (ou confondue avec l\'une d\'elles).',
+            'Comme le faîtage d\'un toit : les deux pans contiennent les gouttières, parallèles, et le ' +
+              'faîtage, leur droite commune, leur est parallèle.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — le théorème du toit',
+          blocks: [
+            { kind: 'para', text: 'Soit $\\alpha$ et $\\beta$ deux plans sécants suivant la droite $\\Delta$, $d$ une droite de ' +
+              '$\\alpha$ et $d\'$ une droite de $\\beta$, avec $d \\parallel d\'$. On montre que ' +
+              '$\\Delta \\parallel d$.' },
+            { kind: 'para', text: 'Si $d$ est aussi dans $\\beta$, elle est commune aux deux plans : $d = \\Delta$. Sinon, $d$ est ' +
+              'parallèle à la droite $d\'$ du plan $\\beta$ sans y être incluse : par le critère de la ' +
+              'section 7, elle est parallèle à $\\beta$ et n\'a aucun point commun avec lui.' },
+            { kind: 'para', text: 'Les droites $d$ et $\\Delta$ sont toutes les deux dans $\\alpha$. Comme $\\Delta$ est dans ' +
+              '$\\beta$, que $d$ ne rencontre pas, elles n\'ont aucun point commun : coplanaires sans point ' +
+              'commun, elles sont **parallèles**. Le même raisonnement, en échangeant les rôles de ' +
+              '$\\alpha$ et $\\beta$, montre que $\\Delta \\parallel d\'$.' },
           ],
         },
         {
@@ -1144,6 +1231,17 @@ export const geometrieDansEspace: ChapterContent = {
             { tag: '2e point commun', text: 'O′, centre de EFGH, est sur (EG) et sur (FH) : il appartient lui aussi aux deux plans' },
           ],
           result: { tag: 'résultat', text: 'deux points communs distincts suffisent : les plans se coupent suivant la droite verticale (OO′)' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'un point commun et une direction',
+          formula: 'Dans le cube ABCDEFGH, trouve la droite d\'intersection des plans (ABG) et (DCF).',
+          steps: [
+            { tag: 'les deux plans', text: '(ABG) est le plan du rectangle ABGH, (DCF) celui du rectangle DCFE' },
+            { tag: 'un point commun', text: 'dans la face ADHE, la diagonale [AH] est dans (ABG) et la diagonale [DE] dans (DCF) : elles se coupent en P, centre de cette face, qui appartient aux deux plans' },
+            { tag: 'la direction', text: '(AB) est dans (ABG), (DC) dans (DCF), et (AB) ∥ (DC) (ABCD est un carré) : par le théorème du toit, la droite cherchée est parallèle à (AB)' },
+          ],
+          result: { tag: 'résultat', text: 'les plans se coupent suivant la parallèle à (AB) menée par P ; elle passe aussi par Q, le centre de la face BCGF' },
         },
         {
           kind: 'entrainement',
@@ -1222,6 +1320,23 @@ export const geometrieDansEspace: ChapterContent = {
             ],
             caption: '4 arêtes verticales traversées → 4 points de section P, Q, R, S → un unique polygone fermé',
           },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — exactement deux sommets par face traversée',
+          blocks: [
+            { kind: 'para', text: 'Le plan de coupe $\\pi$ ne passe par aucun sommet et traverse une face convexe, située dans le ' +
+              'plan $\\varphi$. Les deux plans sont sécants : ils se coupent suivant une droite $\\ell$, et la ' +
+              'partie de la section située sur la face est la partie de $\\ell$ qui est dans la face.' },
+            { kind: 'para', text: '**Au moins deux points.** $\\ell$ traverse la face : elle y entre en un point du bord et en ' +
+              'ressort en un autre point du bord.' },
+            { kind: 'para', text: '**Pas plus de deux.** Supposons trois points $X$, $Y$ et $Z$ du bord sur $\\ell$, $Y$ entre $X$ et ' +
+              '$Z$. $Y$ est sur un côté de la face ; comme la face est convexe, elle est tout entière d\'un ' +
+              'même côté de la droite qui porte ce côté. $X$ et $Z$ sont donc de ce même côté, ou sur cette ' +
+              'droite ; or $Y$, entre eux, est sur la droite : $X$ et $Z$ y sont aussi. Alors $\\ell$ porte ' +
+              'ce côté de la face et passe par ses sommets — impossible.' },
+            { kind: 'para', text: 'La face apporte donc **exactement deux** sommets à la section, reliés par un côté.' },
+          ],
         },
         {
           kind: 'methode',
@@ -1356,6 +1471,35 @@ export const geometrieDansEspace: ChapterContent = {
             caption:
               'point auxiliaire : (PQ) et (BC) se coupent en I, hors du tétraèdre ; (IR) donne S sur ' +
               '[CD]. Les côtés cachés de la section sont en pointillés',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'section triangulaire',
+          formula: 'Dans le cube ABCDEFGH, P est sur [EF], Q sur [FG] et R sur [BF]. Construis la section par le plan (PQR).',
+          steps: [
+            { tag: 'trois segments directs', text: 'P et Q sont dans la face EFGH, Q et R dans la face BCGF, R et P dans la face ABFE : on trace [PQ], [QR] et [RP]' },
+          ],
+          result: { tag: 'résultat', text: 'la section est le triangle PQR : 3 faces traversées, 3 sommets, aucun point auxiliaire' },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'solidCavaliere',
+            size: 'large',
+            sectionPolygon: {
+              points: [
+                { x: 130, y: 90 },
+                { x: 187.68, y: 72.32 },
+                { x: 170, y: 130 },
+              ],
+            },
+            freePoints: [
+              { x: 130, y: 90, label: 'P', tone: 'accent' },
+              { x: 187.68, y: 72.32, label: 'Q', tone: 'accent' },
+              { x: 170, y: 130, label: 'R', tone: 'accent' },
+            ],
+            caption: 'un plan qui coupe le coin F du cube traverse 3 faces : la section est un triangle',
           },
         },
         {
@@ -1619,6 +1763,23 @@ export const geometrieDansEspace: ChapterContent = {
             'parallèles sur le dessin.',
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — des fuyantes parallèles ont un même point de fuite',
+          blocks: [
+            { kind: 'para', text: 'L\'œil est en $O$, devant une vitre plane. L\'image d\'une droite $d$ est la droite où le plan ' +
+              'qui contient $O$ et $d$ coupe la vitre. Soit $d_1$ et $d_2$ deux droites parallèles, non ' +
+              'parallèles à la vitre.' },
+            { kind: 'para', text: 'Par $O$, il passe une seule parallèle $\\delta$ à $d_1$ (unicité) ; elle est aussi parallèle à ' +
+              '$d_2$. Elle n\'est pas parallèle à la vitre : elle la perce en un point $F$.' },
+            { kind: 'para', text: 'Le plan qui contient $O$ et $d_1$ contient aussi $\\delta$ : $\\delta$ et $d_1$ sont deux ' +
+              'parallèles, dont l\'une passe par $O$. Ce plan coupe donc la vitre suivant une droite qui ' +
+              'passe par $F$ : l\'image de $d_1$ passe par $F$. Le même raisonnement vaut pour $d_2$.' },
+            { kind: 'para', text: 'Les images de $d_1$ et de $d_2$ passent par le même point $F$, leur **point de fuite**. Si les ' +
+              'droites sont horizontales, $\\delta$ est horizontale et passe par l\'œil : $F$ est à la ' +
+              'hauteur de l\'œil, sur la ligne d\'horizon.' },
+          ],
+        },
+        {
           kind: 'para',
           text:
             'Les procédés de construction découlent directement de ce principe. On les combine ' +
@@ -1683,6 +1844,23 @@ export const geometrieDansEspace: ChapterContent = {
             'par leur intersection (une verticale pour un mur) coupe le segment en son vrai milieu. C\'est la « propriété du trapèze » ' +
             'annoncée plus haut : les diagonales d\'un rectangle se coupent en son centre, et ce ' +
             'point d\'intersection résiste à la perspective.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — le milieu d\'une fuyante par les diagonales',
+          blocks: [
+            { kind: 'para', text: 'Le rectangle $ABCD$ est dessiné en perspective centrale ; ses côtés $[AD]$ et $[BC]$ sont ' +
+              'parallèles à la vitre, $[AB]$ et $[DC]$ sont fuyants. Sur le dessin, la face devient un trapèze.' },
+            { kind: 'para', text: 'Dans la réalité, les diagonales d\'un rectangle se coupent en son centre $O$, et la parallèle à ' +
+              '$(AD)$ menée par $O$ coupe $[AB]$ en son milieu $M$.' },
+            { kind: 'para', text: 'Sur le dessin, chaque droite devient une droite, et un point commun à deux droites reste ' +
+              'commun à leurs images : l\'image de $O$ est l\'intersection des diagonales du trapèze. La ' +
+              'parallèle à $(AD)$ menée par $O$ est parallèle à la vitre : son image reste parallèle aux ' +
+              'images de $[AD]$ et $[BC]$.' },
+            { kind: 'para', text: 'La parallèle aux côtés de face menée par l\'intersection des diagonales du trapèze est donc ' +
+              'l\'image de la droite $(OM)$ : elle coupe le côté fuyant en l\'image du **vrai milieu** $M$ de ' +
+              '$[AB]$.' },
+          ],
         },
         {
           kind: 'atelier',
@@ -1957,6 +2135,22 @@ export const geometrieDansEspace: ChapterContent = {
           ],
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — au soleil, les ombres de deux poteaux verticaux sont parallèles',
+          blocks: [
+            { kind: 'para', text: 'Deux poteaux verticaux $[AA\']$ et $[BB\']$ sont plantés dans un sol plan, aux pieds $A$ et $B$. ' +
+              'Les rayons du soleil sont tous parallèles. L\'ombre du poteau $[AA\']$ est dans le plan ' +
+              '$\\pi_A$ qui contient le poteau et le rayon issu de $A\'$ ; de même, celle de $[BB\']$ est dans ' +
+              'le plan $\\pi_B$ qui contient le poteau et le rayon issu de $B\'$.' },
+            { kind: 'para', text: 'Le poteau $(AA\')$ et le rayon issu de $A\'$ sont deux droites sécantes de $\\pi_A$ ; elles sont ' +
+              'parallèles au poteau $(BB\')$ (deux verticales) et au rayon issu de $B\'$, deux droites de ' +
+              '$\\pi_B$. Par le critère de la section 7, $\\pi_A$ et $\\pi_B$ sont parallèles (ou confondus).' },
+            { kind: 'para', text: 'Le sol coupe ces deux plans parallèles suivant les droites qui portent les ombres. Par la ' +
+              'propriété 1 de la section 5, ces droites sont **parallèles** (ou confondues, si les deux ' +
+              'poteaux sont dans un même plan de rayons).' },
+          ],
+        },
+        {
           kind: 'rappel',
           label: 'Pour aller plus loin — l\'ombre d\'une lampe',
           items: [
@@ -1995,6 +2189,20 @@ export const geometrieDansEspace: ChapterContent = {
             'Pour **retrouver la lampe** : prolonge deux ombres au-delà du pied de leur poteau, elles se ' +
               'coupent en L₀ ; la lampe L est à la verticale de L₀, sur les rayons qui joignent chaque ombre ' +
               'au sommet de son poteau.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — sous une lampe, les droites des ombres passent par L₀',
+          blocks: [
+            { kind: 'para', text: 'La lampe $L$ éclaire un sol plan ; $L_0$ est le point du sol situé à la verticale de $L$. Un ' +
+              'poteau vertical $[AA\']$ a son pied $A$ sur le sol, ailleurs qu\'en $L_0$.' },
+            { kind: 'para', text: 'Les droites $(LL_0)$ et $(AA\')$ sont deux verticales distinctes, donc parallèles : elles ' +
+              'déterminent un plan vertical $\\pi$. Ce plan contient $L$ et $A\'$, donc le rayon $(LA\')$ et ' +
+              'l\'ombre $S$ du sommet $A\'$, au bout de ce rayon.' },
+            { kind: 'para', text: '$\\pi$ coupe le sol suivant une droite, qui contient les points $A$, $L_0$ et $S$, tous dans ' +
+              '$\\pi$ et sur le sol. La droite qui porte l\'ombre $[AS]$ passe donc par $L_0$ — pour chaque ' +
+              'poteau : les droites des ombres passent toutes par le pied de la lampe.' },
           ],
         },
         {
