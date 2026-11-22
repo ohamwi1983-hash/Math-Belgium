@@ -13,8 +13,8 @@ import {
   tentativesMaxPhase,
 } from "./moteur/sessionSectionPlaneSolide";
 import type { EtatSessionSectionPlaneSolide, PhaseSectionPlaneSolide } from "./moteur/typesSectionPlaneSolide";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSectionPlaneSolide } from "./generateurs/sectionPlaneSolide";
-import type { NomSolide3D } from "./core/geometrieEspace.types";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSectionPlaneSolide, genererExerciceSectionPlaneSolideLibre } from "./generateurs/sectionPlaneSolide";
+import type { VarianteSectionPlaneSolide } from "./generateurs/sectionPlaneSolide";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeAuxiliaireFace } from "./components/EtapeAuxiliaireFace";
 import { EtapeAuxiliaireLignes } from "./components/EtapeAuxiliaireLignes";
@@ -31,6 +31,8 @@ import {
   faceDuSegmentTrace,
   libelleFace,
   libelleLigne,
+  messageFaceAuxiliaireFausse,
+  messageFaceSegmentFausse,
   texteReponseFace,
   texteReponseLignes,
   texteReponseSegmentDirect,
@@ -66,8 +68,10 @@ const REGLAGES_DEMO: ReglagesSession = {
   affichageExplication: true,
 };
 
+/** Tirage libre de l'appli : la section triangulaire une fois sur six (`…Libre`) ; un `?code=` imprimé
+ * reprend, lui, le tirage de l'adaptateur (`genererExerciceSectionPlaneSolide`, inchangé). */
 function nouvelleSession(): EtatSessionSectionPlaneSolide {
-  return demarrerSessionSectionPlaneSolide(REGLAGES_DEMO, genererExerciceSectionPlaneSolide);
+  return demarrerSessionSectionPlaneSolide(REGLAGES_DEMO, genererExerciceSectionPlaneSolideLibre);
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
@@ -76,7 +80,7 @@ function nouvelleSession(): EtatSessionSectionPlaneSolide {
 function sessionInitiale(): EtatSessionSectionPlaneSolide {
   const code = lireCodeDepuisUrl();
   if (!code) return nouvelleSession();
-  return demarrerSessionSectionPlaneSolide(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceSectionPlaneSolide, (id) => construireAvecVarianteId(id as NomSolide3D)));
+  return demarrerSessionSectionPlaneSolide(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceSectionPlaneSolide, (id) => construireAvecVarianteId(id as VarianteSectionPlaneSolide)));
 }
 
 /** Libellé de la phase COURANTE (fixe, 4 valeurs) — jamais un indicateur "écran X/N" par exercice,
@@ -101,6 +105,20 @@ interface TransitionEnAttente {
   revele: boolean;
   reponseAttendue: string;
   corrige: EtapeCorrection[];
+  /** Face retenue (choix de face jugé ✗ / ✓) et message propre au choix faux. */
+  faceJuste: number | null;
+  messageRevele?: string;
+}
+
+/** Face retenue par le moteur à la clôture d'un écran de choix de face (segment tracé, ou face de la
+ * construction auxiliaire) — `null` pour l'écran « droites ». */
+function faceConfirmee(etat: EtatSessionSectionPlaneSolide, suivant: EtatSessionSectionPlaneSolide): number | null {
+  if (etat.phase === "segmentDirect") {
+    const nouveau = suivant.segmentsTraces.find((cle) => !etat.segmentsTraces.includes(cle) && cle !== suivant.segmentAutomatique);
+    return nouveau ? faceDuSegmentTrace(etat.exerciceCourant, nouveau) : null;
+  }
+  if (etat.phase === "auxiliaireFace") return suivant.derniereConstruction?.face ?? null;
+  return null;
 }
 
 /** Réponse confirmée de l'écran qui vient de se clore — toujours lue dans l'état SUIVANT calculé par
@@ -155,12 +173,21 @@ export function AppSectionPlaneSolide() {
   }
 
   /** `saisie` : la réponse de l'élève déjà formatée, conservée pour la fiche de consultation. */
-  function terminerEtape(nouvelEtat: EtatSessionSectionPlaneSolide, saisie: string) {
+  function terminerEtape(nouvelEtat: EtatSessionSectionPlaneSolide, saisie: string, faceChoisie: number | null = null) {
     const transitionDEcran = nouvelEtat.scoresAccumules.length > etat.scoresAccumules.length;
     if (transitionDEcran) {
       const revele = nouvelEtat.revelesAccumules[nouvelEtat.revelesAccumules.length - 1]!;
       const reponseAttendue = reponseConfirmee(etat, nouvelEtat);
-      setEnAttente({ etatSuivant: nouvelEtat, revele, reponseAttendue, corrige: revele ? corrigeEcran(etat, nouvelEtat) : [] });
+      const faceJuste = faceConfirmee(etat, nouvelEtat);
+      const messageRevele =
+        revele && faceChoisie !== null
+          ? etat.phase === "segmentDirect"
+            ? messageFaceSegmentFausse(etat.exerciceCourant, etat.connus, faceChoisie)
+            : etat.phase === "auxiliaireFace" && etat.ligneAuxiliaireChoisie
+              ? messageFaceAuxiliaireFausse(etat.exerciceCourant, etat.connus, etat.ligneAuxiliaireChoisie, faceChoisie)
+              : undefined
+          : undefined;
+      setEnAttente({ etatSuivant: nouvelEtat, revele, reponseAttendue, corrige: revele ? corrigeEcran(etat, nouvelEtat) : [], faceJuste, messageRevele });
       setHistorique((h) => [...h, { titre: TITRE_ECRAN[etat.phase], votreReponse: saisie, correcte: !revele, reponseAttendue, aide: etat.niveauAide > 0 }]);
       return;
     }
@@ -186,12 +213,13 @@ export function AppSectionPlaneSolide() {
   }
 
   function forcerVariante(varianteId: string) {
-    demarrerNouvelExercice(demarrerSessionSectionPlaneSolide(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as NomSolide3D)));
+    demarrerNouvelExercice(demarrerSessionSectionPlaneSolide(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteSectionPlaneSolide)));
   }
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        messageRevele: enAttente.messageRevele,
         reponseAttendue: <p>{enAttente.reponseAttendue}</p>,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
@@ -233,12 +261,11 @@ export function AppSectionPlaneSolide() {
               exercice={exercice}
               connus={etat.connus}
               segmentsTraces={etat.segmentsTraces}
-              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(face) => terminerEtape(soumettreReponseSegmentDirect(etat, face), `Face ${libelleFace(exercice, face)}`)}
+              onValider={(face) => terminerEtape(soumettreReponseSegmentDirect(etat, face), `Face ${libelleFace(exercice, face)}`, face)}
               validation={validation}
+              faceJuste={enAttente?.faceJuste ?? null}
             />
           ) : etat.phase === "auxiliaireLignes" ? (
             <EtapeAuxiliaireLignes
@@ -266,12 +293,11 @@ export function AppSectionPlaneSolide() {
               connus={etat.connus}
               segmentsTraces={etat.segmentsTraces}
               ligneAuxiliaireChoisie={etat.ligneAuxiliaireChoisie}
-              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(face) => terminerEtape(soumettreReponseAuxiliaireFace(etat, face), `Face ${libelleFace(exercice, face)}`)}
+              onValider={(face) => terminerEtape(soumettreReponseAuxiliaireFace(etat, face), `Face ${libelleFace(exercice, face)}`, face)}
               validation={validation}
+              faceJuste={enAttente?.faceJuste ?? null}
               construction={enAttente?.etatSuivant.derniereConstruction ?? null}
             />
           ) : (

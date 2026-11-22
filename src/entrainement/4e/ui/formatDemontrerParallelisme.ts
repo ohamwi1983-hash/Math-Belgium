@@ -104,15 +104,15 @@ export interface EcranPairesParallelisme {
 export type EcranDemontrerParallelisme = EcranChoixParallelisme | EcranPairesParallelisme;
 
 const AIDES_CRITERE_DROITE = [
-  "Relis les trois critères de parallélisme du cours : lequel conclut qu'une DROITE est parallèle à un PLAN ?",
+  "Relis les trois critères de parallélisme du cours : lequel conclut qu'une droite est parallèle à un plan ?",
   "Le cours ramène toujours un parallélisme dans l'espace à un parallélisme entre deux droites.",
 ];
 const AIDES_CRITERE_PLANS = [
-  "Relis les trois critères de parallélisme du cours : lequel conclut que deux PLANS sont parallèles ?",
+  "Relis les trois critères de parallélisme du cours : lequel conclut que deux plans sont parallèles ?",
   "Compte les directions : une seule direction commune ne suffit jamais, deux plans sécants en ont une aussi.",
 ];
 const AIDES_TEMOIN = [
-  "La droite cherchée doit vérifier DEUX conditions : être une droite du plan, et être parallèle à la droite de l'énoncé.",
+  "La droite cherchée doit vérifier deux conditions : être une droite du plan, et être parallèle à la droite de l'énoncé.",
   "Une droite est dans le plan si deux de ses points y sont. Une droite parallèle à celle de l'énoncé mais qui passe hors du plan ne convient pas.",
 ];
 const AIDES_PAIRES = [
@@ -220,8 +220,8 @@ export function explicationPaires(e: ExerciceDeuxPlansParalleles, choix: [number
     const gb = e.candidats[b]!.gauche;
     lignes.push(
       memeDroite(e, ga, gb)
-        ? `C'est deux fois la même droite du plan ${nomP(e, 0)} : une seule direction. Le critère demande deux droites SÉCANTES.`
-        : `${libelle(ga)} et ${libelle(gb)} sont parallèles entre elles : elles ne donnent qu'une seule direction. Le critère demande deux droites SÉCANTES du plan ${nomP(e, 0)}.`,
+        ? `C'est deux fois la même droite du plan ${nomP(e, 0)} : une seule direction. Le critère demande deux droites sécantes.`
+        : `${libelle(ga)} et ${libelle(gb)} sont parallèles entre elles : elles ne donnent qu'une seule direction. Le critère demande deux droites sécantes du plan ${nomP(e, 0)}.`,
     );
   }
   const [x, y] = e.paireAttendue;

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { Solide3D } from "../core/geometrieEspace.types";
 import { fusionner, melangerCandidats } from "../ui/formatOmbreSoleil";
 import type { ElementsCroquis, EtatCandidat } from "../ui/formatOmbreSoleil";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { ariaOptionChoixFerme, classeOptionChoixFerme } from "../ui/choixFige";
 import { Solide3DSketch } from "./Solide3DSketch";
 import { BoutonAide } from "./BoutonAide";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -38,19 +38,21 @@ interface Props {
   onActiverAide: () => void;
   onValider: (id: string, fiche: FicheChoixOmbre) => void;
   validation?: ValidationEtapeProps | null;
+  /** Message propre au candidat choisi faux (une tentative, audit 4e ch. 8, lot B) — remplace
+   * « Tentatives épuisées ». */
+  messageFaux?: (id: string) => string;
 }
-
-const STYLE_CORRECT = { borderColor: "var(--color-success)", background: "var(--color-success-bg)", color: "var(--color-success)", fontWeight: 700 };
 
 /**
  * Écran de choix commun aux 4 écrans notés d'"Ombre au soleil" : les 4 candidats sont dessinés en
  * même temps, numérotés dans un ordre mélangé UNE fois par écran (la `key` posée par
  * `AppOmbreSoleil.tsx` change à chaque écran et à chaque exercice — audit du chapitre 8, point 28).
- * Seule l'option refusée passe en rouge (point 7) ; une fois l'écran clos, la bonne réponse est
- * montrée en vert sur le dessin et sur son bouton (points 6 et 30).
+ * Choix fermé à UNE tentative, jugé puis figé (audit 4e ch. 8, lot B, `ui/choixFige.ts`) : une fois
+ * l'écran clos, le candidat choisi faux est en rouge ✗ (dessin et bouton), le bon en vert ✓, et le
+ * message dit l'erreur de construction trahie par le choix (`messageFaux`).
  */
 export function ChoixCandidatsOmbre(props: Props) {
-  const { solide, fond, consigne, information, candidats, idCorrect, libelle, aides, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation } = props;
+  const { solide, fond, consigne, information, candidats, idCorrect, libelle, aides, niveauAide, onActiverAide, onValider, validation, messageFaux } = props;
   const [ordre] = useState(() => melangerCandidats(candidats));
   const [choix, setChoix] = useState<string | null>(null);
   const [soumis, setSoumis] = useState<string | null>(null);
@@ -63,7 +65,6 @@ export function ChoixCandidatsOmbre(props: Props) {
       if (validation.revele && id === soumis) return "refuse";
       return "neutre";
     }
-    if (tentativesUtilisees > 0 && id === soumis && id === choix) return "refuse";
     if (id === choix) return "selectionne";
     return "neutre";
   }
@@ -104,20 +105,22 @@ export function ChoixCandidatsOmbre(props: Props) {
 
       <Solide3DSketch solide={solide} pointsExtra={croquis.points} segmentsExtra={croquis.segments} labelsSommets={false} />
 
-      <div className="options-grid-compact">
+      <div className="options-grid-compact" role="radiogroup">
         {ordre.map((candidat, index) => {
-          const etat = etatDe(candidat.id);
-          const actif = !validation && choix === candidat.id;
+          const etatOptions = { selection: choix, choisie: validation ? soumis : null, bonne: idCorrect };
+          const aria = ariaOptionChoixFerme(candidat.id, etatOptions);
           return (
             <button
               key={candidat.id}
               type="button"
+              role="radio"
+              aria-checked={choix === candidat.id}
               disabled={!!validation}
-              className={`btn${actif || etat === "refuse" ? " toggle-active" : ""}${etat === "refuse" ? " is-erronee" : ""}`}
-              style={etat === "correct" ? STYLE_CORRECT : undefined}
+              className={classeOptionChoixFerme(candidat.id, etatOptions)}
               onClick={() => setChoix(candidat.id)}
             >
               {libelle(index + 1)}
+              {aria && <span className="sr-only"> — {aria}</span>}
             </button>
           );
         })}
@@ -136,14 +139,15 @@ export function ChoixCandidatsOmbre(props: Props) {
           <button type="button" className="btn btn-primary" disabled={choix === null} onClick={valider}>
             Valider
           </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-            </p>
-          )}
         </>
       )}
-      {validation && <ValidationEcran {...validation} reponseAttendue={<p>{libelle(numeroDe(idCorrect))}, en vert sur le dessin.</p>} />}
+      {validation && (
+        <ValidationEcran
+          {...validation}
+          messageRevele={validation.revele && soumis && soumis !== idCorrect && messageFaux ? messageFaux(soumis) : validation.messageRevele}
+          reponseAttendue={<p>{libelle(numeroDe(idCorrect))}, en vert sur le dessin.</p>}
+        />
+      )}
     </div>
   );
 }

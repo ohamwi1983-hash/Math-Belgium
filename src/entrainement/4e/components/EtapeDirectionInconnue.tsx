@@ -1,6 +1,6 @@
 import type { ExerciceOmbreSoleilDirectionInconnue } from "../core/ombreSoleil.types";
 import { sommetPiquet } from "../moteur/verificationOmbreSoleil";
-import { AIDE_DIRECTION_INCONNUE, avecId, COULEURS_OMBRE, fusionner, CONSIGNE_DIRECTION_INCONNUE, copieRayonDepuisPied, dessinDirection, directionCorrecte, elementsScene, libelleDirection, origineApercusDirection, solidePourAffichage } from "../ui/formatOmbreSoleil";
+import { messageDirectionFausse, AIDE_DIRECTION_INCONNUE, avecId, COULEURS_OMBRE, fusionner, CONSIGNE_DIRECTION_INCONNUE, copieRayonDepuisPied, dessinDirection, directionCorrecte, elementsScene, libelleDirection, origineApercusDirection, solidePourAffichage } from "../ui/formatOmbreSoleil";
 import { ChoixCandidatsOmbre } from "./ChoixCandidatsOmbre";
 import type { FicheChoixOmbre } from "./ChoixCandidatsOmbre";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -31,6 +31,7 @@ export function EtapeDirectionInconnue({ exercice, ...reste }: Props) {
       candidats={exercice.directionsCandidates.map((d) => ({ id: d.id, dessin: (numero, etat) => dessinDirection(sommet, d, numero, etat) }))}
       idCorrect={directionCorrecte(exercice).id}
       libelle={libelleDirection}
+      messageFaux={(id) => messageDirectionFausse(exercice.direction, exercice.directionsCandidates.find((d) => d.id === id)!.vecteur)}
       aides={[
         { texte: avecId(AIDE_DIRECTION_INCONNUE[0], origine.id, exercice.piquetConnu.id) },
         { texte: avecId(AIDE_DIRECTION_INCONNUE[1], origine.id, exercice.piquetConnu.id), dessin: { points: [], segments: [copie] } },

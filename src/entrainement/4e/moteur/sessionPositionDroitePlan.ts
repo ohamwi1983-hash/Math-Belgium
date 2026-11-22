@@ -5,12 +5,13 @@
  * les autres moteurs du projet.
  *
  * 2 phases fixes, toujours dans le même ordre : classification → justification. Aide PROGRESSIVE
- * par écran (2 niveaux sur "classification", 1 sur "justification") — voir `typesPositionDroitePlan.ts`.
+ * par écran (2 niveaux sur chacun des deux écrans) — voir `typesPositionDroitePlan.ts`.
  *
  * Tentatives PAR ÉCRAN (audit chapitre 8, décision H2a) : la classification n'a que 3 choix — avec
  * 3 tentatives elle se gagnait toujours par élimination (puce verte garantie), elle n'en a donc plus
- * qu'UNE. Justification : 2 tentatives sur une liste de candidats (sinon même élimination), 3 sur la
- * sélection libre de points du cas "incluse" (impossible à deviner au hasard).
+ * qu'UNE. Justification : UNE tentative sur une liste de candidats (choix fermé, audit 4e ch. 8 lot B,
+ * G1 — 2 tentatives sur 3 à 5 candidats se gagnaient encore par élimination), 3 sur la sélection
+ * libre de points du cas "incluse" (impossible à deviner au hasard, elle vaut un champ).
  */
 import type { ConclusionPositionDroitePlan, GenerateurExercicePositionDroitePlan, ReponseJustificationPositionDroitePlan } from "../core/positionDroitePlan.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -21,7 +22,8 @@ import type { EtatSessionPositionDroitePlan, ResultatExercicePositionDroitePlan 
 
 const POINTS_DE_BASE = 100;
 export const NIVEAU_AIDE_MAX_CLASSIFICATION = 2;
-export const NIVEAU_AIDE_MAX_JUSTIFICATION = 1;
+/** Deux niveaux (audit 4e ch. 8, lot B) : la propriété du cours, puis l'application à l'instance. */
+export const NIVEAU_AIDE_MAX_JUSTIFICATION = 2;
 
 export function demarrerSessionPositionDroitePlan(
   reglages: ReglagesSession,
@@ -46,7 +48,7 @@ export function demarrerSessionPositionDroitePlan(
 /** Nombre de tentatives de l'écran courant — voir l'en-tête (décision H2a). */
 export function tentativesMaxEcran(etat: EtatSessionPositionDroitePlan): number {
   if (etat.phase === "classification") return 1;
-  return etat.exerciceCourant.classification === "incluse" ? Math.max(etat.reglages.tentativesMax, 1) : Math.min(2, etat.reglages.tentativesMax);
+  return etat.exerciceCourant.classification === "incluse" ? Math.max(etat.reglages.tentativesMax, 1) : 1;
 }
 
 function reglagesEtape(etat: EtatSessionPositionDroitePlan): ReglagesEtape {

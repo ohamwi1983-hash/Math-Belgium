@@ -1,6 +1,6 @@
 import type { ExerciceOmbreSoleilObstacle } from "../core/ombreSoleil.types";
 import { sommetPiquet } from "../moteur/verificationOmbreSoleil";
-import { AIDE_POINT_OBSTACLE, COULEURS_OMBRE, CONSIGNE_POINT_OBSTACLE, dessinPoint, directionCorrecte, elementsScene, fusionner, libellePoint, rayonProlonge, solidePourAffichage, traceProlongee } from "../ui/formatOmbreSoleil";
+import { messagePointFaux, AIDE_POINT_OBSTACLE, COULEURS_OMBRE, CONSIGNE_POINT_OBSTACLE, dessinPoint, directionCorrecte, elementsScene, fusionner, libellePoint, rayonProlonge, solidePourAffichage, traceProlongee } from "../ui/formatOmbreSoleil";
 import { ChoixCandidatsOmbre } from "./ChoixCandidatsOmbre";
 import type { FicheChoixOmbre } from "./ChoixCandidatsOmbre";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -36,6 +36,7 @@ export function EtapePointOmbre({ exercice, ...reste }: Props) {
       candidats={exercice.pointsCandidats.map((c) => ({ id: c.id, dessin: (numero, etat) => dessinPoint(c.position, numero, etat) }))}
       idCorrect={exercice.pointsCandidats.find((c) => c.erreur === "aucune")!.id}
       libelle={libellePoint}
+      messageFaux={(id) => messagePointFaux(exercice.pointsCandidats.find((c) => c.id === id)!.erreur, exercice)}
       aides={[{ texte: AIDE_POINT_OBSTACLE[0] }, { texte: AIDE_POINT_OBSTACLE[1], dessin: aide2 }]}
     />
   );

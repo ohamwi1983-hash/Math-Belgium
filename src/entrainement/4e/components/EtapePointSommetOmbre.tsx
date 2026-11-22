@@ -1,6 +1,6 @@
 import type { ExerciceOmbreSoleilDirectionInconnue } from "../core/ombreSoleil.types";
 import { sommetPiquet } from "../moteur/verificationOmbreSoleil";
-import { AIDE_POINT_SOMMET, avecId, CONSIGNE_POINT_SOMMET, dessinPoint, elementsScene, fusionner, libellePoint, ombresDejaTrouvees, rayonProlonge, solidePourAffichage } from "../ui/formatOmbreSoleil";
+import { messagePointFaux, AIDE_POINT_SOMMET, avecId, CONSIGNE_POINT_SOMMET, dessinPoint, elementsScene, fusionner, libellePoint, ombresDejaTrouvees, rayonProlonge, solidePourAffichage } from "../ui/formatOmbreSoleil";
 import { ChoixCandidatsOmbre } from "./ChoixCandidatsOmbre";
 import type { FicheChoixOmbre } from "./ChoixCandidatsOmbre";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -32,6 +32,7 @@ export function EtapePointSommetOmbre({ exercice, index, ...reste }: Props) {
       candidats={p.pointsCandidats.map((c) => ({ id: c.id, dessin: (numero, etat) => dessinPoint(c.position, numero, etat) }))}
       idCorrect={p.pointsCandidats.find((c) => c.erreur === "aucune")!.id}
       libelle={libellePoint}
+      messageFaux={(id) => messagePointFaux(p.pointsCandidats.find((c) => c.id === id)!.erreur)}
       aides={[
         { texte: avecId(AIDE_POINT_SOMMET[0], p.piquet.id, exercice.piquetConnu.id) },
         { texte: avecId(AIDE_POINT_SOMMET[1], p.piquet.id, exercice.piquetConnu.id), dessin: { points: [], segments: [rayonProlonge(sommet, exercice.direction)] } },

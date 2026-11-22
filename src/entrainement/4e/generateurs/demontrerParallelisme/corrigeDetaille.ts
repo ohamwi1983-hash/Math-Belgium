@@ -132,7 +132,7 @@ function corrigeDeuxPlans(e: ExerciceDeuxPlansParalleles, paires: [number, numbe
     utilise("b", [texte(`Une droite est dans un plan quand deux de ses points y sont ${COURS_PLAN} ; les deux droites du premier plan doivent être sécantes (deux directions différentes).`)]),
     calcul("b", lignesB),
     resultat("b", [texte(`${libelleCandidat(ca)} et ${libelleCandidat(cb)}, avec ${libelle(ca.gauche)} et ${libelle(cb.gauche)} sécantes${pc ? ` en ${pc}` : ""} dans le plan ${nomP(e, 0)}.`)]),
-    piege("b", [texte(`Une seule droite, ou deux droites parallèles entre elles, ne suffisent pas : il faut deux droites SÉCANTES du plan ${nomP(e, 0)}, chacune parallèle à une droite du plan ${nomP(e, 1)}.`)]),
+    piege("b", [texte(`Une seule droite, ou deux droites parallèles entre elles, ne suffisent pas : il faut deux droites sécantes du plan ${nomP(e, 0)}, chacune parallèle à une droite du plan ${nomP(e, 1)}.`)]),
     ...etapeJustification("c", ca.raison!),
     resultat("c", [texte(texteRaison(ca.raison!))]),
     piege("c", [texte(PIEGE_JUSTIF)]),

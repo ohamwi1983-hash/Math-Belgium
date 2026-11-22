@@ -12,7 +12,7 @@ import {
   pointAuxiliaireDesLignes,
   resoudreLigne,
 } from "../moteur/verificationSectionPlaneSolide";
-import { distance3D } from "../moteur/geometrieEspace";
+import { distance3D, normalePlan, normeCarree3D, produitScalaire3D, soustraire3D } from "../moteur/geometrieEspace";
 
 /**
  * Présentation — "Section plane d'un solide" (40e générateur, chapitre "Géométrie dans l'espace").
@@ -345,4 +345,37 @@ export function texteConclusion(exercice: ExerciceSectionPlaneSolide, connus: re
     lignes.unshift(`Ses 2 points étant connus, le dernier segment ${nomSegment(connus, a, b)} se trace directement et referme la section.`);
   }
   return lignes;
+}
+
+// --- Choix de face jugés (audit 4e ch. 8, lot B) : message propre au choix faux ---------------------
+
+function pointsDeSectionDeLaFace(exercice: ExerciceSectionPlaneSolide, face: number) {
+  return exercice.points.filter((p) => p.faces.includes(face));
+}
+
+/** Écran « tracer un segment » : pourquoi la face choisie ne convient pas (une tentative). */
+export function messageFaceSegmentFausse(exercice: ExerciceSectionPlaneSolide, connus: readonly number[], face: number): string {
+  const nom = libelleFace(exercice, face);
+  const pts = pointsDeSectionDeLaFace(exercice, face);
+  const connusFace = pts.filter((p) => connus.includes(p.id));
+  if (pts.length === 0) return `Ce n'était pas la bonne face : le plan de coupe ne traverse pas la face ${nom}, aucun côté de la section n'y passe.`;
+  if (connusFace.length === 0) return `Ce n'était pas la bonne face : la face ${nom} n'a encore aucun point de section connu, on ne peut pas y tracer de segment.`;
+  return `Ce n'était pas la bonne face : la face ${nom} n'a qu'un seul point de section connu (${libellePoint(connus, connusFace[0]!.id)}). Il en faut deux pour tracer un segment ; l'autre se construira avec un point auxiliaire.`;
+}
+
+/** Écran « point auxiliaire — face » : pourquoi la face choisie ne convient pas (une tentative). */
+export function messageFaceAuxiliaireFausse(exercice: ExerciceSectionPlaneSolide, connus: readonly number[], lignes: readonly [string, string], face: number): string {
+  const nom = libelleFace(exercice, face);
+  const tete = "Ce n'était pas la bonne face : ";
+  const I = pointAuxiliaireDesLignes(exercice, lignes[0], lignes[1]);
+  const [a, b, c] = exercice.solide.faces[face]!.slice(0, 3).map((n) => exercice.solide.sommets[n]!);
+  const normale = normalePlan(a!, b!, c!);
+  const dansPlanFace = I !== null && Math.abs(produitScalaire3D(normale, soustraire3D(I, a!))) / Math.sqrt(normeCarree3D(normale)) < 1e-6;
+  if (!dansPlanFace) return `${tete}le point auxiliaire I n'est pas dans le plan de la face ${nom} (aucune des deux droites prolongées n'y est).`;
+  const pts = pointsDeSectionDeLaFace(exercice, face);
+  const connusFace = pts.filter((p) => connus.includes(p.id));
+  if (pts.length === 0) return `${tete}I est bien dans le plan de la face ${nom}, mais le plan de coupe ne traverse pas cette face.`;
+  if (connusFace.length === 2) return `${tete}les deux points de section de la face ${nom} sont déjà connus : I n'y apporte rien.`;
+  if (connusFace.length === 0) return `${tete}I est bien dans le plan de la face ${nom}, mais aucun point de section n'y est encore connu : il n'y a rien à relier à I.`;
+  return `${tete}dans la face ${nom}, I est confondu avec ${libellePoint(connus, connusFace[0]!.id)} : la droite qui les relierait n'est pas définie.`;
 }

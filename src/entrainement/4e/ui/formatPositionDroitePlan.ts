@@ -1,5 +1,6 @@
-import type { CandidatSecantePositionDroitePlan, ConclusionPositionDroitePlan, ExercicePositionDroitePlan } from "../core/positionDroitePlan.types";
-import { pointAppartientAuPlan } from "../moteur/geometrieEspace";
+import type { CandidatSecantePositionDroitePlan, ConclusionPositionDroitePlan, ExercicePositionDroitePlan, ReponseJustificationPositionDroitePlan } from "../core/positionDroitePlan.types";
+import type { Point3D } from "../core/geometrieEspace.types";
+import { distance3D, EPSILON_3D, intersectionDeuxDroites3D, pointAppartientAuPlan, pointSurSegmentOuvert, points3Colineaires, sontParalleles3D, soustraire3D } from "../moteur/geometrieEspace";
 import {
   pointsFigureDansLePlan,
   positionPointNomme,
@@ -94,7 +95,8 @@ export function texteAideJustification(classification: ConclusionPositionDroiteP
 
 export function consigneJustification(exercice: ExercicePositionDroitePlan): string {
   if (exercice.classification === "incluse") return `Sélectionne tous les points nommés de la figure qui appartiennent au plan ${libellePlan(exercice)}.`;
-  if (exercice.classification === "parallele") return `Sélectionne l'arête ou la diagonale du plan ${libellePlan(exercice)} qui a la même direction que la droite ${libelleDroite(exercice)}.`;
+  // « parallèle à », comme le cours (§ 4, § 7) — plus « même direction que » (audit 4e ch. 8, imprécision 12).
+  if (exercice.classification === "parallele") return `Sélectionne l'arête ou la diagonale du plan ${libellePlan(exercice)} qui est parallèle à la droite ${libelleDroite(exercice)}.`;
   return `Où la droite ${libelleDroite(exercice)} perce-t-elle le plan ${libellePlan(exercice)} ?`;
 }
 
@@ -111,4 +113,128 @@ export function texteReponseJustificationAttendue(exercice: ExercicePositionDroi
   }
   const index = exercice.candidatsSecante.findIndex((_, i) => verifierReponseSecante(exercice, i));
   return index >= 0 ? libelleCandidatSecante(exercice.candidatsSecante[index]) : "";
+}
+
+/** Le segment du plan parallèle à la droite (cas « parallèle »), celui que vérifie l'écran. */
+export function segmentParalleleAttendu(exercice: ExercicePositionDroitePlan): [string, string] | null {
+  const index = exercice.candidatsParallele.findIndex((_, i) => verifierReponseParallele(exercice, i));
+  return index >= 0 ? exercice.candidatsParallele[index].sommets : null;
+}
+
+/** Index du candidat juste de l'écran 2 (parallèle / sécante), `null` pour « incluse ». */
+export function indexCandidatJuste(exercice: ExercicePositionDroitePlan): number | null {
+  if (exercice.classification === "parallele") return exercice.candidatsParallele.findIndex((_, i) => verifierReponseParallele(exercice, i));
+  if (exercice.classification === "secante") return exercice.candidatsSecante.findIndex((_, i) => verifierReponseSecante(exercice, i));
+  return null;
+}
+
+// --- Écran 2 : aide de niveau 2 et messages ciblés (audit 4e ch. 8, lot B) -------------------------
+
+function pointsDuPlanNomme(e: ExercicePositionDroitePlan): [Point3D, Point3D, Point3D] {
+  return e.plan.map((n) => e.solide.sommets[n]) as [Point3D, Point3D, Point3D];
+}
+
+function dansLePlan(e: ExercicePositionDroitePlan, nom: string): boolean {
+  return pointAppartientAuPlan(positionPointNomme(e, nom)!, pointsDuPlanNomme(e));
+}
+
+function extremites(e: ExercicePositionDroitePlan): [Point3D, Point3D] {
+  return [positionPointNomme(e, e.droite[0])!, positionPointNomme(e, e.droite[1])!];
+}
+
+/** Faces du solide qui contiennent la droite (ses deux points). */
+function facesContenantLaDroite(e: ExercicePositionDroitePlan): string[][] {
+  const [a, b] = extremites(e);
+  return e.solide.faces.filter((face) => {
+    const pts = face.slice(0, 3).map((n) => e.solide.sommets[n]) as [Point3D, Point3D, Point3D];
+    return pointAppartientAuPlan(a, pts) && pointAppartientAuPlan(b, pts);
+  });
+}
+
+/** Segment dont un point nommé est le milieu (« I est le milieu de [EF] »), `null` pour un sommet. */
+function milieuDe(e: ExercicePositionDroitePlan, nom: string): [string, string] | null {
+  return e.pointsNommes.find((p) => p.nom === nom)?.milieuDe ?? null;
+}
+
+/** Aide 2 de l'écran « justification » : la méthode POSÉE pour l'instance (jamais la réponse). */
+export function texteAideJustificationNiveau2(e: ExercicePositionDroitePlan): string {
+  const pl = libellePlan(e);
+  const d = libelleDroite(e);
+  const [x, y] = e.droite;
+  if (e.classification === "incluse") {
+    const n = pointsFigureDansLePlan(e).length;
+    const parcours = `Passe en revue chaque point nommé de la figure : est-il un sommet de la surface colorée, ou le milieu d'une de ses arêtes ? Le plan ${pl} se prolonge au-delà de la surface colorée.`;
+    return n > 3 ? `Le plan ${pl} contient ${n} points nommés de la figure, dont ${e.plan.join(", ")}. ${parcours}` : parcours;
+  }
+  if (e.classification === "parallele") {
+    const mx = milieuDe(e, x);
+    const my = milieuDe(e, y);
+    if (mx && my) {
+      return `${x} est le milieu de [${mx.join("")}] et ${y} celui de [${my.join("")}] : repère la figure plane qui les contient (un triangle dont ${d} est une droite des milieux, ou un parallélogramme dont ce sont les milieux de deux côtés opposés). Elle donne une droite parallèle à ${d} ; cherche celle qui est dans le plan ${pl}.`;
+    }
+    return `Cherche un parallélogramme de la figure (une face, ou un rectangle qui traverse le solide) dont [${x}${y}] est un côté : son côté opposé est parallèle à ${d}. Il doit être dans le plan ${pl}.`;
+  }
+  const faces = facesContenantLaDroite(e);
+  if (faces.length > 0) {
+    return `La droite ${d} est dans la face (${faces[0]!.join("")}) : le point de percée est donc sur la droite commune à cette face et au plan ${pl}. Repère les points du plan ${pl} qui sont sur cette face.`;
+  }
+  return `Le point de percée est à la fois sur la droite ${d}, prolongée si besoin, et dans le plan ${pl}. Pour chaque proposition, vérifie d'abord qu'elle peut être sur ${d} : un sommet aligné avec ${x} et ${y}, ou une arête que ${d} rencontre vraiment (pas seulement sur le dessin).`;
+}
+
+/** Message d'un choix de position faux (écran 1, une tentative) — il explique le choix, sans donner
+ * la justification attendue à l'écran 2. */
+export function messageClassificationFausse(e: ExercicePositionDroitePlan, choisi: ConclusionPositionDroitePlan): string {
+  const pl = libellePlan(e);
+  const d = libelleDroite(e);
+  const [x, y] = e.droite;
+  const hors = e.droite.find((n) => !dansLePlan(e, n)) ?? x;
+  const tete = "Ce n'était pas le bon choix : ";
+  if (e.classification === "incluse") return `${tete}${x} et ${y} sont tous les deux dans le plan ${pl}, donc toute la droite ${d} y est incluse (on ne la dit alors ni parallèle ni sécante).`;
+  if (choisi === "incluse") return `${tete}${hors} n'est pas dans le plan ${pl}. Une droite incluse a ses deux points dans le plan.`;
+  if (e.classification === "parallele") return `${tete}la droite ${d} est parallèle à une droite du plan ${pl} : elle ne le rencontre jamais, même prolongée. Un croisement de traits sur le dessin n'est pas un point commun.`;
+  return `${tete}aucune droite du plan ${pl} n'est parallèle à ${d} : la droite perce le plan en un seul point.`;
+}
+
+/** Message d'une justification fausse (choix parmi des candidats, une tentative). */
+export function messageJustificationFausse(e: ExercicePositionDroitePlan, reponse: ReponseJustificationPositionDroitePlan): string | null {
+  const pl = libellePlan(e);
+  const d = libelleDroite(e);
+  const [a, b] = extremites(e);
+  if (reponse.type === "parallele") {
+    const c = e.candidatsParallele[reponse.indexCandidat];
+    if (!c) return null;
+    const [p, q] = c.sommets.map((n) => e.solide.sommets[n]) as [Point3D, Point3D];
+    const nom = `(${c.sommets.join("")})`;
+    const secantes = intersectionDeuxDroites3D([a, b], [p, q]) !== null;
+    return `Ce n'était pas la bonne droite : ${nom} n'est pas parallèle à ${d}. ${secantes ? "Ces deux droites se coupent (elles sont dans un même plan sans être parallèles)." : "Ces deux droites sont gauches : aucun plan ne les contient toutes les deux, même si leurs traits semblent se croiser sur le dessin."}`;
+  }
+  if (reponse.type === "secante") {
+    const c = e.candidatsSecante[reponse.indexCandidat];
+    if (!c) return null;
+    const tete = "Ce n'est pas le point de percée : ";
+    if (c.type === "sommet" || c.type === "point") {
+      const s = positionPointNomme(e, c.nom)!;
+      if (points3Colineaires(a, b, s)) return `${tete}${c.nom} est bien sur la droite ${d}, mais il n'est pas dans le plan ${pl}.`;
+      if (pointAppartientAuPlan(s, pointsDuPlanNomme(e))) return `${tete}${c.nom} est dans le plan ${pl}, mais pas sur la droite ${d}. Le point de percée est sur les deux.`;
+      return `${tete}${c.nom} n'est ni sur la droite ${d} ni dans le plan ${pl}.`;
+    }
+    const [p, q] = c.sommets.map((n) => e.solide.sommets[n]) as [Point3D, Point3D];
+    const seg = `[${c.sommets.join("")}]`;
+    const droiteSeg = `(${c.sommets.join("")})`;
+    if (sontParalleles3D(soustraire3D(b, a), soustraire3D(q, p))) return `${tete}la droite ${d} est parallèle à ${droiteSeg} : elle ne rencontre pas ${seg}.`;
+    const x = intersectionDeuxDroites3D([a, b], [p, q]);
+    if (!x) return `${tete}la droite ${d} ne rencontre pas ${seg} : sur le dessin leurs traits se croisent peut-être, mais ces deux droites sont gauches.`;
+    const bout = c.sommets.find((n) => distance3D(e.solide.sommets[n], x) < EPSILON_3D);
+    if (bout) return `${tete}la droite ${d} passe par ${bout}, extrémité de ${seg}, mais ${bout} n'est pas dans le plan ${pl}.`;
+    if (!pointSurSegmentOuvert(x, p, q)) return `${tete}la droite ${d} coupe la droite ${droiteSeg} en dehors du segment ${seg}.`;
+    return `${tete}la droite ${d} rencontre bien ${seg}, mais en un point qui n'est pas dans le plan ${pl}.`;
+  }
+  return null;
+}
+
+/** Message ciblé d'une sélection « incluse » fausse (trois tentatives) — sans dire quels points. */
+export function cibleSelectionIncluse(e: ExercicePositionDroitePlan, points: string[]): string {
+  const attendus = pointsFigureDansLePlan(e);
+  if (points.some((n) => !attendus.includes(n))) return `Au moins un des points choisis n'est pas dans le plan ${libellePlan(e)}.`;
+  return `Il manque des points : le plan ${libellePlan(e)} en contient d'autres (sommets de la surface colorée, milieux de ses arêtes).`;
 }

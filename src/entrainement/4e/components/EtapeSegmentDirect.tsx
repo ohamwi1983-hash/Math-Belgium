@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ExerciceSectionPlaneSolide } from "../core/sectionPlaneSolide.types";
 import { NIVEAU_AIDE_MAX_SEGMENT } from "../moteur/sessionSectionPlaneSolide";
 import { CONSIGNE_SEGMENT_DIRECT, TEXTE_AIDE_SEGMENT_NIVEAU1, apercuSegmentFace, candidatsFaces, libelleFace, pointsExtraConnus, segmentsExtraTraces, texteAideSegmentNiveau2, texteProgression } from "../ui/formatSectionPlaneSolide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { ariaOptionChoixFerme, classeOptionChoixFerme } from "../ui/choixFige";
 import { Solide3DSketch } from "./Solide3DSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -12,8 +12,6 @@ interface Props {
   exercice: ExerciceSectionPlaneSolide;
   connus: number[];
   segmentsTraces: string[];
-  tentativesUtilisees: number;
-  tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (face: number) => void;
@@ -21,6 +19,9 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Face retenue par le moteur (celle de l'élève si elle convenait, sinon la face révélée) — marquée
+   * en vert ✓ une fois l'écran clos ; un choix faux est marqué en rouge ✗ (audit 4e ch. 8, lot B). */
+  faceJuste?: number | null;
 }
 
 /**
@@ -31,11 +32,10 @@ interface Props {
  * écran par la `key` posée dans `AppSectionPlaneSolide.tsx` (audit chapitre 8, point 19 : une
  * sélection invisible survivait d'un écran au suivant).
  */
-export function EtapeSegmentDirect({ exercice, connus, segmentsTraces, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeSegmentDirect({ exercice, connus, segmentsTraces, niveauAide, onActiverAide, onValider, validation, faceJuste }: Props) {
   const [faceChoisie, setFaceChoisie] = useState<number | null>(null);
-  const [faceSoumise, setFaceSoumise] = useState<number | null>(null);
   const max = NIVEAU_AIDE_MAX_SEGMENT;
-  const refusee = (validation ? validation.revele : tentativesUtilisees > 0) && faceChoisie === faceSoumise;
+  const etatOptions = { selection: faceChoisie, choisie: validation ? faceChoisie : null, bonne: faceJuste ?? -1 };
 
   const candidats = candidatsFaces(exercice, new Set(segmentsTraces));
   const apercu = validation ? null : apercuSegmentFace(exercice, connus, faceChoisie);
@@ -51,18 +51,24 @@ export function EtapeSegmentDirect({ exercice, connus, segmentsTraces, tentative
         segmentsExtra={apercu ? [...segmentsExtraTraces(exercice, segmentsTraces), apercu] : segmentsExtraTraces(exercice, segmentsTraces)}
       />
 
-      <div className="options-grid-compact">
-        {candidats.map((face) => (
-          <button
-            key={face}
-            type="button"
-            className={`btn${faceChoisie === face ? " toggle-active" : ""}${refusee && faceChoisie === face ? " is-erronee" : ""}`}
-            onClick={() => setFaceChoisie(face)}
-            disabled={Boolean(validation)}
-          >
-            {libelleFace(exercice, face)}
-          </button>
-        ))}
+      <div className="options-grid-compact" role="radiogroup">
+        {candidats.map((face) => {
+          const aria = ariaOptionChoixFerme(face, etatOptions);
+          return (
+            <button
+              key={face}
+              type="button"
+              role="radio"
+              aria-checked={faceChoisie === face}
+              className={classeOptionChoixFerme(face, etatOptions)}
+              onClick={() => setFaceChoisie(face)}
+              disabled={Boolean(validation)}
+            >
+              {libelleFace(exercice, face)}
+              {aria && <span className="sr-only"> — {aria}</span>}
+            </button>
+          );
+        })}
       </div>
 
       {niveauAide > 0 && (
@@ -81,17 +87,11 @@ export function EtapeSegmentDirect({ exercice, connus, segmentsTraces, tentative
             disabled={faceChoisie === null}
             onClick={() => {
               if (faceChoisie === null) return;
-              setFaceSoumise(faceChoisie);
               onValider(faceChoisie);
             }}
           >
             Valider
           </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-            </p>
-          )}
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

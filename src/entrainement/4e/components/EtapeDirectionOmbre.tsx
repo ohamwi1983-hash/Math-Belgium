@@ -1,6 +1,6 @@
 import type { ExerciceOmbreSoleilObstacle } from "../core/ombreSoleil.types";
 import { sommetPiquet } from "../moteur/verificationOmbreSoleil";
-import { AIDE_DIRECTION_OBSTACLE, CONSIGNE_DIRECTION_OBSTACLE, copieRayonDepuisPied, dessinDirection, directionCorrecte, elementsScene, libelleDirection, solidePourAffichage } from "../ui/formatOmbreSoleil";
+import { messageDirectionFausse, AIDE_DIRECTION_OBSTACLE, CONSIGNE_DIRECTION_OBSTACLE, copieRayonDepuisPied, dessinDirection, directionCorrecte, elementsScene, libelleDirection, solidePourAffichage } from "../ui/formatOmbreSoleil";
 import { ChoixCandidatsOmbre } from "./ChoixCandidatsOmbre";
 import type { FicheChoixOmbre } from "./ChoixCandidatsOmbre";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -28,6 +28,7 @@ export function EtapeDirectionOmbre({ exercice, ...reste }: Props) {
       candidats={exercice.directionsCandidates.map((d) => ({ id: d.id, dessin: (numero, etat) => dessinDirection(sommet, d, numero, etat) }))}
       idCorrect={directionCorrecte(exercice).id}
       libelle={libelleDirection}
+      messageFaux={(id) => messageDirectionFausse(exercice.direction, exercice.directionsCandidates.find((d) => d.id === id)!.vecteur)}
       aides={[{ texte: AIDE_DIRECTION_OBSTACLE[0] }, { texte: AIDE_DIRECTION_OBSTACLE[1], dessin: { points: [], segments: [copie] } }]}
     />
   );

@@ -170,7 +170,7 @@ export function genererCavaliere(type: TypeErreurEspace): ExerciceDetectiveEspac
     aides: [
       [
         t("Compare chaque ligne à la convention du cours : face avant en vraie grandeur, fuyantes à 45° vers la droite et vers le haut, réduites de moitié, arêtes cachées en pointillés."),
-        t("Sers-toi du quadrillage : la face avant tombe sur les nœuds, et une fuyante à 45° traverse les carreaux en diagonale."),
+        t("Sers-toi du quadrillage : la face avant tombe sur les nœuds ; une fuyante est à 45°, et sa longueur se mesure à la règle (la diagonale d'un carreau mesure environ 1,4 cm)."),
       ],
       [
         t("Relis la ligne fausse : quelle règle de la perspective cavalière n'est pas respectée ?"),

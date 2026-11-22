@@ -1,6 +1,6 @@
 import type { ExerciceOmbreSoleilSimple } from "../core/ombreSoleil.types";
 import { sommetPiquet } from "../moteur/verificationOmbreSoleil";
-import { AIDE_POINT_SIMPLE, CONSIGNE_POINT_SIMPLE, dessinPoint, elementsScene, libellePoint, rayonProlonge, solidePourAffichage } from "../ui/formatOmbreSoleil";
+import { messagePointFaux, AIDE_POINT_SIMPLE, CONSIGNE_POINT_SIMPLE, dessinPoint, elementsScene, libellePoint, rayonProlonge, solidePourAffichage } from "../ui/formatOmbreSoleil";
 import { ChoixCandidatsOmbre } from "./ChoixCandidatsOmbre";
 import type { FicheChoixOmbre } from "./ChoixCandidatsOmbre";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -27,6 +27,7 @@ export function EtapePointSimple({ exercice, ...reste }: Props) {
       candidats={p.pointsCandidats.map((c) => ({ id: c.id, dessin: (numero, etat) => dessinPoint(c.position, numero, etat) }))}
       idCorrect={p.pointsCandidats.find((c) => c.erreur === "aucune")!.id}
       libelle={libellePoint}
+      messageFaux={(id) => messagePointFaux(p.pointsCandidats.find((c) => c.id === id)!.erreur)}
       aides={[{ texte: AIDE_POINT_SIMPLE[0] }, { texte: AIDE_POINT_SIMPLE[1], dessin: { points: [], segments: [rayonProlonge(sommetPiquet(p.piquet), exercice.direction)] } }]}
     />
   );

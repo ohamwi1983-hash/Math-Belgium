@@ -21,6 +21,8 @@ import {
   libelleCandidatSecante,
   libelleDroite,
   libellePlan,
+  messageClassificationFausse,
+  messageJustificationFausse,
   phrasePosition,
   textePointsNommes,
   texteReponseJustificationAttendue,
@@ -40,7 +42,8 @@ import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleePositionDroitePlan } from "./generateurs/positionDroitePlan/corrigeDetaille";
 
 /** `tentativesMax` n'est qu'un plafond : le nombre réel de tentatives est fixé PAR ÉCRAN par
- * `tentativesMaxEcran` (1 pour la classification — décision H2a, audit chapitre 8). */
+ * `tentativesMaxEcran` (1 pour chaque choix fermé — classification, justification « parallèle » /
+ * « sécante » ; 3 pour la sélection de points « incluse »). */
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
@@ -108,6 +111,8 @@ function texteReponseJustification(exercice: ExercicePositionDroitePlan, reponse
 interface TransitionEnAttente {
   etatSuivant: EtatSessionPositionDroitePlan;
   revele: boolean;
+  /** Message propre au choix fermé faux (une tentative) — remplace « Tentatives épuisées ». */
+  messageRevele?: string;
 }
 
 export function AppPositionDroitePlan() {
@@ -121,12 +126,12 @@ export function AppPositionDroitePlan() {
    * l'exercice précédent ne survive à « Générer » ou à « Nouvel exercice ». */
   const [numeroExercice, setNumeroExercice] = useState(0);
 
-  function terminerEtape(nouvelEtat: EtatSessionPositionDroitePlan, votreReponse: ReactNode) {
+  function terminerEtape(nouvelEtat: EtatSessionPositionDroitePlan, votreReponse: ReactNode, messageRevele?: string | null) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const revele =
         etat.phase === "classification" ? nouvelEtat.classificationRevele : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.justificationRevele;
-      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      setEnAttente({ etatSuivant: nouvelEtat, revele, messageRevele: revele ? (messageRevele ?? undefined) : undefined });
       setHistorique((h) => [
         ...h,
         { titre: TITRES_ECRANS[etat.phase], votreReponse, correcte: !revele, reponseAttendue: construireReponseAttendue(etat.exerciceCourant, etat.phase) },
@@ -161,6 +166,7 @@ export function AppPositionDroitePlan() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        messageRevele: enAttente.messageRevele,
         reponseAttendue: construireReponseAttendue(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
@@ -206,11 +212,9 @@ export function AppPositionDroitePlan() {
             <EtapeClassificationPositionDroitePlan
               key={`${numeroExercice}-${phase}`}
               exercice={exercice}
-              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={tentativesMaxEcran(etat)}
               niveauAide={etat.niveauAideClassification}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseClassification(etat, reponse), LIBELLE_CLASSIFICATION[reponse])}
+              onValider={(reponse) => terminerEtape(soumettreReponseClassification(etat, reponse), LIBELLE_CLASSIFICATION[reponse], messageClassificationFausse(exercice, reponse))}
               validation={validation}
             />
           ) : (
@@ -221,7 +225,7 @@ export function AppPositionDroitePlan() {
               tentativesMax={tentativesMaxEcran(etat)}
               niveauAide={etat.niveauAideJustification}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseJustification(etat, reponse), texteReponseJustification(exercice, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseJustification(etat, reponse), texteReponseJustification(exercice, reponse), messageJustificationFausse(exercice, reponse))}
               validation={validation}
             />
           )}

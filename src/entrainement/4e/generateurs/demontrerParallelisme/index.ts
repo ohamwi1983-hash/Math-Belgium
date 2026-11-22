@@ -362,7 +362,7 @@ function criteresDeuxPlans(P: string, Q: string, t1: string, t2: string): Option
     {
       texte: `Trouver deux droites parallèles du plan ${P}, parallèles à deux droites du plan ${Q}.`,
       valide: false,
-      defaut: "Deux droites parallèles entre elles ne donnent qu'une seule direction : le critère demande deux droites SÉCANTES.",
+      defaut: "Deux droites parallèles entre elles ne donnent qu'une seule direction : le critère demande deux droites sécantes.",
     },
     {
       texte: `Vérifier que les triangles ${t1} et ${t2} ne se touchent pas sur le dessin.`,
