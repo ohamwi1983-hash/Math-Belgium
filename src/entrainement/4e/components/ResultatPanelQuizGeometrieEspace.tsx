@@ -1,5 +1,6 @@
 import type { ResultatExerciceQuizGeometrieEspace } from "../moteur/typesQuizGeometrieEspace";
 import { LigneRecap, statutRecap } from "./LigneRecap";
+import { TexteRiche } from "./TexteRiche";
 
 interface Props {
   resultat: ResultatExerciceQuizGeometrieEspace;
@@ -27,14 +28,20 @@ export function ResultatPanelQuizGeometrieEspace({ resultat, labelBouton, onCont
   return (
     <div>
       <h2 className="result-title">{correct ? "Bonne réponse !" : "Mauvaise réponse"}</h2>
-      <p className="result-subtitle">{resultat.question.enonce}</p>
+      <p className="result-subtitle">
+        <TexteRiche texte={resultat.question.enonce} />
+      </p>
       <p className="prompt-text">
         Ta réponse : {libelleVraiFaux(resultat.reponseChoisie)} — Réponse correcte : {libelleVraiFaux(resultat.question.reponse)}
       </p>
       <LigneRecap label="Résultat" statut={statut}>
         {correct ? "Correct" : "Incorrect"}
       </LigneRecap>
-      <div className="triangle-quelconque-aide">{resultat.question.justification}</div>
+      <div className="triangle-quelconque-aide">
+        <p>
+          <TexteRiche texte={resultat.question.justification} />
+        </p>
+      </div>
       <button type="button" className="btn btn-primary" onClick={onContinuer}>
         {labelBouton}
       </button>

@@ -15,7 +15,7 @@ export const CATALOGUE_VARIANTES: { id: VarianteQuizGeometrieEspace; label: stri
   { id: "parallelismePercee", label: "Plans, parallélisme et point de percée" },
   { id: "sectionPlaneSolide", label: "Section plane d'un solide" },
   { id: "perspectiveCentrale", label: "Perspective centrale et point de fuite" },
-  { id: "ombreSoleil", label: "Ombre au soleil — projection parallèle" },
+  { id: "ombreSoleil", label: "Ombres : soleil et lampe" },
 ];
 
 /** Taille réelle de la banque d'un thème — jamais une constante fixe : `AppQuizGeometrieEspace.tsx`

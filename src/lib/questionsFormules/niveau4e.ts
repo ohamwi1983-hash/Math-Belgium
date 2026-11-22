@@ -794,8 +794,8 @@ export const FORMULES_4E: BanqueFormules = {
     percee: [
       {
         id: 'percee-plan-auxiliaire',
-        enonce: r`Décris la méthode du plan auxiliaire pour trouver le point de percée d'une droite $d$ dans un plan $lpha$.`,
-        corrige: r`On choisit un plan auxiliaire $\pi$ qui contient $d$ et qui coupe $lpha$ ; on détermine la droite $b$ commune à $\pi$ et $lpha$ ; le point de percée est l'intersection de $d$ et $b$, coplanaires dans $\pi$.`,
+        enonce: r`Décris la méthode du plan auxiliaire pour trouver le point de percée d'une droite $d$ dans un plan $\alpha$.`,
+        corrige: r`On choisit un plan auxiliaire $\pi$ qui contient $d$ et qui coupe $\alpha$ ; on détermine la droite $b$ commune à $\pi$ et $\alpha$ ; le point de percée est l'intersection de $d$ et $b$, coplanaires dans $\pi$.`,
       },
     ],
     section: [
