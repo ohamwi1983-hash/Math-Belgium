@@ -19,6 +19,19 @@ export const fonctionsExponentielles: ChapterContent = {
       number: 1,
       title: 'Calcul de limites',
       kicker: "la position de la base par rapport à 1, puis la dominance sur tout polynôme",
+      titreCourt: 'Limites et dominance',
+      partie: 'Limites et dérivée',
+      essentiel: [
+        'Pour $a > 0$ et $a \\neq 1$, $a^x$ est définie sur $\\mathbb{R}$ et toujours strictement positive ; les règles des puissances valent pour tout exposant réel.',
+        'En l\'infini, tout dépend de la base : si $a > 1$, $a^x$ tend vers 0 en −∞ et vers +∞ en +∞ ; si $0 < a < 1$, c\'est l\'inverse. La droite $y = 0$ est asymptote horizontale.',
+        'Dominance ($a > 1$) : $\\lim\\limits_{x \\to +\\infty} \\dfrac{x^n}{a^x} = 0$. Limite fondamentale : $\\lim\\limits_{x \\to 0} \\dfrac{e^x - 1}{x} = 1$.',
+      ],
+      cartes: [
+        { question: '$\\lim\\limits_{x \\to +\\infty} (2^x - x^{1000})$ ?', reponse: '$+\\infty$ : l\'exponentielle finit toujours par l\'emporter.' },
+        { question: '$\\lim\\limits_{x \\to +\\infty} x^2 \\cdot e^{-x}$ ?', reponse: '$x^2 \\cdot e^{-x} = \\dfrac{x^2}{e^x} \\to 0$, par dominance.' },
+        { question: '$\\lim\\limits_{x \\to -\\infty} 0{,}5^x$ ?', reponse: '$+\\infty$ : la base est comprise entre 0 et 1.' },
+        { question: 'Pourquoi $a^x = -3$ n\'a-t-elle aucune solution ?', reponse: 'Une exponentielle est toujours strictement positive.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Calcul de limites', youtubeId: '6s2MCrsEoTw' },
         {
@@ -565,6 +578,19 @@ export const fonctionsExponentielles: ChapterContent = {
       number: 2,
       title: 'Domaine et dérivée',
       kicker: "(aˣ)' = ln(a)·aˣ — et le cas particulier de e",
+      titreCourt: 'Domaine et dérivée',
+      partie: 'Limites et dérivée',
+      essentiel: [
+        '$(a^x)\' = \\ln(a) \\cdot a^x$ ; comme $\\ln(e) = 1$, $(e^x)\' = e^x$. Exposant composé : $\\left(a^{f(x)}\\right)\' = f\'(x) \\cdot a^{f(x)} \\cdot \\ln(a)$.',
+        '$\\ln(a)$ est, par définition, la pente de la tangente à la courbe de $a^x$ en $(0\\,;1)$ : positif si $a > 1$ (croissante), négatif si $0 < a < 1$ (décroissante).',
+        'Règle de L\'Hôpital : pour une forme $\\dfrac{0}{0}$ ou $\\dfrac{\\infty}{\\infty}$, si $\\dfrac{f\'(x)}{g\'(x)}$ tend vers L, alors $\\dfrac{f(x)}{g(x)}$ aussi. Vérifie toujours la forme d\'abord.',
+      ],
+      cartes: [
+        { question: 'Dérive $2^x$.', reponse: '$\\ln(2) \\cdot 2^x$, et non $2^x$ : seule la base e se dérive sans facteur.' },
+        { question: 'Dérive $e^{3x-1}$.', reponse: '$3e^{3x-1}$, par la règle de la chaîne.' },
+        { question: '$\\lim\\limits_{x \\to 0} \\dfrac{\\sin(4x)}{e^{2x} - 1}$ ?', reponse: 'Forme $\\dfrac{0}{0}$ ; L\'Hôpital : $\\dfrac{4\\cos(4x)}{2e^{2x}} \\to 2$.' },
+        { question: 'Comment le nombre e est-il défini ?', reponse: '$e = \\lim\\limits_{x \\to +\\infty} \\left(1+\\dfrac{1}{x}\\right)^x \\approx 2{,}718$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Domaine et dérivée', youtubeId: 'M2Bk_FhjiQ4' },
         {
@@ -1320,6 +1346,19 @@ export const fonctionsExponentielles: ChapterContent = {
       number: 3,
       title: 'Graphique de la dérivée',
       kicker: 'lire f′ pour connaître f ; fonction paire, dérivée impaire',
+      titreCourt: 'Graphique de la dérivée',
+      partie: 'Limites et dérivée',
+      essentiel: [
+        'Courbe de f′ au-dessus de l\'axe : f croissante ; en dessous : f décroissante. Un zéro de f′ avec changement de signe donne un extremum de f.',
+        'f′ croissante : f convexe ; f′ décroissante : f concave ; un extremum de f′ donne un point d\'inflexion de f. Le graphique de f′ ne dit ni le signe ni la hauteur de f.',
+        'La dérivée d\'une fonction **paire** est **impaire** ; celle d\'une fonction **impaire** est **paire**.',
+      ],
+      cartes: [
+        { question: 'f′ s\'annule en passant de − à + : que dire de f ?', reponse: 'f admet un minimum en ce point.' },
+        { question: 'f′ s\'annule sans changer de signe : y a-t-il un extremum ?', reponse: 'Non : une tangente horizontale, mais pas d\'extremum.' },
+        { question: '$f(x) = \\dfrac{e^x+e^{-x}}{2}$ est paire : quelle parité pour f′ ?', reponse: 'Impaire : $f\'(x) = \\dfrac{e^x-e^{-x}}{2}$.' },
+        { question: 'f′ est partout positive : f est-elle positive ?', reponse: 'Pas forcément : $e^x - 2$ a une dérivée positive, mais vaut −1 en 0.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Graphique de la dérivée', youtubeId: 'NKY7Nsu1THM' },
         {
@@ -1564,6 +1603,19 @@ export const fonctionsExponentielles: ChapterContent = {
       number: 4,
       title: 'Résoudre une équation exponentielle',
       kicker: 'même base d\'abord, substitution ensuite',
+      titreCourt: 'Équations exponentielles',
+      partie: 'Équations et inéquations',
+      essentiel: [
+        'Même base : $a^x = a^y \\iff x = y$ (pour $a > 0$, $a \\neq 1$), car une exponentielle est injective.',
+        'Substitution : si $a^x$ et son carré apparaissent, pose $t = a^x$ ; rejette toute racine $t \\le 0$.',
+        'Une somme de quantités strictement positives ne vaut jamais 0 : $5 \\cdot 2^x + 3 = 0$ n\'a aucune solution.',
+      ],
+      cartes: [
+        { question: 'Résous $3^{2x-1} = 3^5$.', reponse: '$2x - 1 = 5$, donc $x = 3$.' },
+        { question: 'Résous $4^x - 3 \\cdot 2^x + 2 = 0$.', reponse: 'Avec $t = 2^x$ : $t = 1$ ou $t = 2$, donc $x = 0$ ou $x = 1$.' },
+        { question: 'Résous $5^{4t^2} = 5^{3t+1}$.', reponse: '$4t^2 - 3t - 1 = 0$ : $t = 1$ ou $t = -\\dfrac{1}{4}$.' },
+        { question: 'Avec $t = 2^x$, on trouve $t = -3$ : que faire ?', reponse: 'Rejeter cette racine : $2^x > 0$, aucun x réel ne convient.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Résoudre une équation exponentielle', youtubeId: 'n7QfEIp463w' },
         {
@@ -1741,6 +1793,19 @@ export const fonctionsExponentielles: ChapterContent = {
       number: 5,
       title: 'Résoudre une inéquation exponentielle',
       kicker: 'le sens du comparateur dépend de la base',
+      titreCourt: 'Inéquations exponentielles',
+      partie: 'Équations et inéquations',
+      essentiel: [
+        'Si $a > 1$, l\'inégalité sur les exposants garde le même sens ; si $0 < a < 1$, il faut **inverser** le comparateur.',
+        '$e \\approx 2{,}718 > 1$ : une inéquation en $e^{\\ldots}$ garde toujours son comparateur.',
+        'Une quantité strictement positive n\'est jamais inférieure ou égale à un nombre négatif : S = ∅, sans calcul.',
+      ],
+      cartes: [
+        { question: 'Résous $2^{x-1} \\ge 8$.', reponse: '$8 = 2^3$, donc $x - 1 \\ge 3$ et $x \\ge 4$.' },
+        { question: 'Résous $(1/2)^x < 8$.', reponse: '$8 = (1/2)^{-3}$ et la base est entre 0 et 1 : $x > -3$.' },
+        { question: 'Résous $e^{4t-2} < e^{6t-5}$.', reponse: '$4t - 2 < 6t - 5$, donc $t > \\dfrac{3}{2}$.' },
+        { question: '$0{,}315^{x^2} < 0{,}315^{2x+3}$ : quelle inéquation sur les exposants ?', reponse: '$x^2 > 2x + 3$, sens inversé : $S = ]-\\infty\\,;\\,-1[ \\cup ]3\\,;\\,+\\infty[$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Résoudre une inéquation exponentielle', youtubeId: 'KEfl8oqQJMg' },
         {
@@ -2033,6 +2098,19 @@ export const fonctionsExponentielles: ChapterContent = {
       number: 6,
       title: 'Étudier une fonction exponentielle',
       kicker: 'domaine, limites, asymptotes, variation, concavité',
+      titreCourt: 'Étude complète',
+      partie: 'Étudier et modéliser',
+      essentiel: [
+        'Dans l\'ordre : domaine, limites, asymptotes, sens de variation (signe de f′), concavité (signe de f″).',
+        'Un changement de signe de f′ donne un extremum ; de f″, un point d\'inflexion. Comme $e^{u} > 0$, le signe d\'un produit par $e^{u}$ est celui de l\'autre facteur.',
+        'Asymptote oblique $y = mx + p$ si $f(x) - (mx + p)$ tend vers 0 : par exemple, $f(x) = 2x - 1 + e^{-x}$ en $+\\infty$.',
+      ],
+      cartes: [
+        { question: '$f(x) = x \\cdot e^x$ : où est son minimum ?', reponse: '$f\'(x) = e^x(1+x)$ : minimum en $x = -1$, de valeur $-\\dfrac{1}{e}$.' },
+        { question: '$f(x) = x \\cdot e^x$ : asymptote en $-\\infty$ ?', reponse: '$y = 0$ : $x \\cdot e^x \\to 0$ par dominance.' },
+        { question: '$f(x) = e^{-x^2}$ : points d\'inflexion ?', reponse: '$f\'\'(x) = (4x^2-2)e^{-x^2}$ change de signe en $x = \\pm\\dfrac{\\sqrt{2}}{2}$.' },
+        { question: 'Peut-on déduire la limite en −∞ de celle en +∞ ?', reponse: 'Non : chaque côté se calcule séparément ; $e^x - 2x$ tend vers +∞ des deux côtés.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étudier une fonction exponentielle', youtubeId: '8yEwf862Z3Q' },
         {
@@ -2348,6 +2426,19 @@ export const fonctionsExponentielles: ChapterContent = {
       number: 7,
       title: 'Exponentielles : problèmes',
       kicker: 'croissance, décroissance, saturation — un seul modèle, plusieurs contextes',
+      titreCourt: 'Problèmes et modèles',
+      partie: 'Étudier et modéliser',
+      essentiel: [
+        'Modèle $Q(t) = Q_0 \\cdot r^t$ : $r > 1$ pour une croissance, $0 < r < 1$ pour une décroissance.',
+        'Dans un tableau à pas constant, des **rapports** consécutifs constants signalent un modèle exponentiel ; des différences constantes, un modèle linéaire.',
+        '$T(t) = L + C \\cdot q^t$, avec $0 < q < 1$, tend vers L : asymptote $y = L$. Le maximum de $t^n \\cdot e^{-at}$ est atteint en $t = \\dfrac{n}{a}$.',
+      ],
+      cartes: [
+        { question: 'Mesures 100 ; 150 ; 225 ; 337,5 à pas constant : quel modèle ?', reponse: 'Rapports constants égaux à 1,5 : $Q(t) = 100 \\cdot 1{,}5^t$.' },
+        { question: '1000 individus, +5 % par an : combien après 10 ans ?', reponse: '$1000 \\cdot 1{,}05^{10} \\approx 1629$ individus.' },
+        { question: '$p(t) = 1 - e^{-0{,}1t}$ : vers quelle valeur tend-elle ?', reponse: 'Vers 1, soit 100 %, sans jamais l\'atteindre.' },
+        { question: '$C(t) = 5t \\cdot e^{-0{,}5t}$ : quand la concentration est-elle maximale ?', reponse: 'En $t = \\dfrac{1}{0{,}5} = 2$ h.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Exponentielles : problèmes', youtubeId: 'b5wBE_3U9nA' },
         {
