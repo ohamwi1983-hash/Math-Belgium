@@ -602,6 +602,11 @@ export const FORMULES_4E: BanqueFormules = {
         enonce: r`Écris une équation paramétrique de la droite qui passe par le point $(x_0\,;y_0)$ et admet le vecteur directeur $\begin{pmatrix} \alpha \\ \beta \end{pmatrix}$.`,
         corrige: r`$\begin{cases} x = x_0+t \cdot \alpha \\ y = y_0+t \cdot \beta \end{cases}$ ($t$ réel) — toujours possible.`,
       },
+      {
+        id: r`$\begin{pmatrix} \cos\theta \\ \sin\theta \end{pmatrix}$, $\begin{pmatrix} \sin\alpha \\ \cos\alpha \end{pmatrix}$`,
+        enonce: r`Une droite forme un angle $\theta$ avec l'axe $Ox$. Donne un vecteur directeur de cette droite. Même question si l'on connaît plutôt l'angle $\alpha$ qu'elle forme avec l'axe $Oy$.`,
+        corrige: r`Angle $\theta$ avec $Ox$ : $\begin{pmatrix} \cos\theta \\ \sin\theta \end{pmatrix}$. Angle $\alpha$ avec $Oy$ : $\begin{pmatrix} \sin\alpha \\ \cos\alpha \end{pmatrix}$ (ou tout multiple non nul).`,
+      },
     ],
     caracteristiques: [
       {
@@ -621,12 +626,53 @@ export const FORMULES_4E: BanqueFormules = {
         enonce: r`Deux droites ont pour vecteurs directeurs $\begin{pmatrix} \alpha \\ \beta \end{pmatrix}$ et $\begin{pmatrix} \alpha' \\ \beta' \end{pmatrix}$. Quelle condition traduit qu'elles sont parallèles ? Qu'elles sont perpendiculaires ? Donne aussi ces conditions avec leurs pentes $m$ et $m'$.`,
         corrige: r`Parallèles : $\alpha \cdot \beta' - \beta \cdot \alpha' = 0$ (critère de colinéarité), ou $m = m'$. Perpendiculaires : $\alpha \cdot \alpha' + \beta \cdot \beta' = 0$ (produit scalaire nul), ou $m \cdot m' = -1$ si aucune n'est verticale ni horizontale.`,
       },
+      {
+        id: r`$a(m) = b(m) = 0$`,
+        enonce: r`Une famille de droites s'écrit $a(m)\,x + b(m)\,y + c(m) = 0$, où les coefficients dépendent d'un paramètre $m$. Après avoir résolu l'équation en $m$ qui traduit la condition demandée, quelle valeur de $m$ faut-il rejeter, et pourquoi ?`,
+        corrige: r`On rejette toute valeur de $m$ pour laquelle $a(m) = b(m) = 0$ : l'équation n'est plus celle d'une droite (aucun vecteur directeur $\begin{pmatrix} -b(m) \\ a(m) \end{pmatrix}$ non nul).`,
+      },
+    ],
+    intersection: [
+      {
+        id: r`$t_1 = t_2$`,
+        enonce: r`Deux mobiles décrivent des trajectoires rectilignes données par des équations paramétriques en fonction du temps. Leurs trajectoires se coupent en un point $I$. À quelle condition les mobiles se rencontrent-ils ?`,
+        corrige: r`Ils se rencontrent seulement s'ils passent en $I$ au même instant : $t_1 = t_2$, où $t_1$ et $t_2$ sont les instants de passage de chaque mobile en $I$.`,
+      },
     ],
     distance: [
       {
         id: r`$|x_P - k|$`,
         enonce: r`Quelle est la distance d'un point $P(x_P\,;y_P)$ à la droite verticale $x = k$ ? Et à la droite horizontale $y = k$ ?`,
         corrige: r`$|x_P - k|$ pour la verticale ; $|y_P - k|$ pour l'horizontale.`,
+      },
+      {
+        id: r`$x_M=\dfrac{x_A+x_B}{2}$, $y_M=\dfrac{y_A+y_B}{2}$`,
+        enonce: r`Donne les coordonnées du milieu $M$ du segment $[AB]$, avec $A(x_A\,;\,y_A)$ et $B(x_B\,;\,y_B)$.`,
+        corrige: r`$x_M=\dfrac{x_A+x_B}{2}$ et $y_M=\dfrac{y_A+y_B}{2}$.`,
+      },
+      {
+        id: r`$x_G=\dfrac{x_A+x_B+x_C}{3}$, $y_G=\dfrac{y_A+y_B+y_C}{3}$`,
+        enonce: r`Donne les coordonnées du centre de gravité $G$ du triangle $ABC$ en fonction de celles de ses sommets.`,
+        corrige: r`$x_G=\dfrac{x_A+x_B+x_C}{3}$ et $y_G=\dfrac{y_A+y_B+y_C}{3}$ (moyennes des coordonnées des sommets).`,
+      },
+      {
+        id: r`$\mathcal{A}=\dfrac{BC \cdot AH}{2}$`,
+        enonce: r`On connaît les coordonnées des sommets d'un triangle $ABC$. Comment calcule-t-on son aire ? Quel point faut-il d'abord déterminer ?`,
+        corrige: r`On détermine le pied $H$ de la perpendiculaire à $(BC)$ issue de $A$ (perpendiculaire, puis intersection), puis $\mathcal{A}=\dfrac{BC \cdot AH}{2}$.`,
+      },
+      {
+        id: r`$a(x-x_M)+b(y-y_M)=0$`,
+        enonce: r`Dans un triangle $ABC$, donne une équation de la médiatrice de $[BC]$ et de la hauteur issue de $A$ (vecteur normal et point utilisés), puis un vecteur directeur de la médiane issue de $A$.`,
+        corrige: [
+          r`Médiatrice de $[BC]$ : vecteur normal $\vec{BC}\begin{pmatrix} a \\ b \end{pmatrix}$, passe par le milieu $M$ de $[BC]$ : $a(x-x_M)+b(y-y_M)=0$.`,
+          r`Hauteur issue de $A$ : même vecteur normal $\vec{BC}$, passe par $A$ : $a(x-x_A)+b(y-y_A)=0$.`,
+          r`Médiane issue de $A$ : vecteur directeur $\vec{AM}$, $M$ milieu de $[BC]$.`,
+        ],
+      },
+      {
+        id: r`$x_{A'}=2x_H-x_A$, $y_{A'}=2y_H-y_A$`,
+        enonce: r`Le point $H$ est le projeté orthogonal du point $A$ sur une droite $d$. Donne les coordonnées du symétrique $A'$ de $A$ par rapport à $d$.`,
+        corrige: r`$H$ est le milieu de $[AA']$ : $x_{A'}=2x_H-x_A$ et $y_{A'}=2y_H-y_A$.`,
       },
     ],
     'notion-lieu': [
@@ -647,6 +693,11 @@ export const FORMULES_4E: BanqueFormules = {
         enonce: r`Comment caractérise-t-on la tangente en un point $P$ d'un cercle de centre $C$ ? Quelle condition vérifie un point $M$ de cette tangente ?`,
         corrige: r`Elle est perpendiculaire au rayon $[CP]$ : $\vec{CP} \cdot \vec{PM} = 0$ (produit scalaire nul).`,
       },
+      {
+        id: r`$CH > r$, $CH = r$, $CH < r$`,
+        enonce: r`Une droite $d$ et un cercle de centre $C$ et de rayon $r$ sont donnés ; $CH$ est la distance du centre à la droite. Comment la comparaison de $CH$ et de $r$ donne-t-elle la position de $d$ par rapport au cercle ?`,
+        corrige: r`$CH > r$ : $d$ est extérieure (aucun point commun) ; $CH = r$ : $d$ est tangente (un point commun) ; $CH < r$ : $d$ est sécante (deux points communs). Un cercle de centre $C$ tangent à $d$ a donc pour rayon $r = CH$.`,
+      },
     ],
     parabole: [
       {
@@ -655,9 +706,26 @@ export const FORMULES_4E: BanqueFormules = {
         corrige: r`Axe vertical : $(x-x_S)^2=2p(y-y_S)$ avec $p=2(y_F-y_S)$. Axe horizontal : $(y-y_S)^2=2p(x-x_S)$ avec $p=2(x_F-x_S)$ ($p$ est signé).`,
       },
       {
+        id: r`$F\left(x_S\,;\,y_S+\dfrac{p}{2}\right)$, $y=y_S-\dfrac{p}{2}$`,
+        enonce: r`La parabole d'équation $(x-x_S)^2=2p(y-y_S)$ a un axe vertical. Donne les coordonnées de son foyer $F$ et une équation de sa directrice.`,
+        corrige: r`$F\left(x_S\,;\,y_S+\dfrac{p}{2}\right)$ et directrice $y=y_S-\dfrac{p}{2}$ : le sommet est le milieu entre le foyer et la directrice.`,
+      },
+      {
+        id: r`$F\left(x_S+\dfrac{p}{2}\,;\,y_S\right)$, $x=x_S-\dfrac{p}{2}$`,
+        enonce: r`La parabole d'équation $(y-y_S)^2=2p(x-x_S)$ a un axe horizontal. Donne les coordonnées de son foyer $F$ et une équation de sa directrice.`,
+        corrige: r`$F\left(x_S+\dfrac{p}{2}\,;\,y_S\right)$ et directrice $x=x_S-\dfrac{p}{2}$.`,
+      },
+      {
         id: r`$p = \dfrac{1}{2a}$`,
         enonce: r`La courbe de $y = ax^2$ est une parabole d'axe vertical et de sommet $O$. Que vaut son paramètre $p$ ?`,
         corrige: r`$p = \dfrac{1}{2a}$ (car $x^2 = \dfrac{1}{a}\,y$, donc $2p = \dfrac{1}{a}$).`,
+      },
+    ],
+    lieux: [
+      {
+        id: r`Soustraire les deux équations`,
+        enonce: r`Comment trouve-t-on les points communs de deux cercles dont on connaît les équations développées $x^2+y^2+\ldots=0$ ?`,
+        corrige: r`On soustrait les deux équations : $x^2$ et $y^2$ disparaissent, il reste l'équation d'une droite ; on substitue cette droite dans l'équation d'un des cercles et on résout l'équation du second degré obtenue.`,
       },
     ],
   },
