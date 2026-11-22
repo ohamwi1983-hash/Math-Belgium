@@ -310,6 +310,16 @@ export const geometrieDansEspace: ChapterContent = {
             'toutes les deux (section 3).',
         },
         {
+          kind: 'atelier',
+          tag: 'livre-plans-widget',
+          label: 'Manipule toi-même : le livre de plans',
+          caption:
+            'Une droite d, la reliure, et un plan qui pivote autour d\'elle comme une page. Ajoute un ' +
+            'point hors de d : un seul plan le contient, la page s\'immobilise. Un point sur d n\'arrête ' +
+            'rien. En mode « Deux droites », la page s\'arrête sur le plan commun de deux droites ' +
+            'sécantes ou parallèles ; avec deux droites gauches, elle ne contient jamais la seconde.',
+        },
+        {
           kind: 'rappel',
           label: 'À retenir',
           items: [
@@ -570,6 +580,16 @@ export const geometrieDansEspace: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'positions-cube-widget',
+          label: 'Manipule toi-même : une droite et un plan dans le cube',
+          caption:
+            'Choisis le mode « Droite et plan », puis une droite et un plan par leurs points nommés : ' +
+            'l\'atelier pose les 3 questions du cours dans l\'ordre et donne la position. Le point de percée ' +
+            'peut tomber hors du solide : fais tourner le cube pour le voir. Le mode Défi te fait répondre ' +
+            'd\'après la vue cavalière, en un seul essai.',
+        },
+        {
           kind: 'illustrationGroup',
           items: [
             {
@@ -783,6 +803,16 @@ export const geometrieDansEspace: ChapterContent = {
             'S\'il n\'y en a aucun, vérifie le critère de la section 7 : deux droites **sécantes** du ' +
               'premier plan, parallèles à deux droites du second. Les plans sont alors **parallèles**.',
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'deux-plans-cube-widget',
+          label: 'Manipule toi-même : deux plans dans le cube',
+          caption:
+            'Nomme deux plans par trois points chacun (sommets, milieux, centres). L\'atelier dit s\'ils ' +
+            'sont confondus, parallèles ou sécants ; s\'ils sont sécants, il trace leur droite commune et ' +
+            'construit ses points dans une même face, à la rencontre des traces des deux plans. Fais ' +
+            'tourner le cube : deux morceaux de plans qui ne se touchent pas peuvent être sécants.',
         },
         {
           kind: 'piege',
@@ -1070,6 +1100,16 @@ export const geometrieDansEspace: ChapterContent = {
             'jamais que deux droites sont parallèles : elles pourraient être gauches.',
         },
         {
+          kind: 'atelier',
+          tag: 'droite-temoin-widget',
+          label: 'Manipule toi-même : la droite témoin',
+          caption:
+            'Choisis une droite et un plan : les droites du cube parallèles à la droite s\'allument. En vert, ' +
+            'celles qui sont dans le plan, les vraies témoins ; en rouge pointillé, celles qui sont hors ' +
+            'du plan et ne prouvent rien. En mode « Deux plans », il faut deux témoins sécantes pour ' +
+            'conclure que les plans sont parallèles.',
+        },
+        {
           kind: 'entrainement',
           title: 'Démontrer un parallélisme',
           generatorId: 'gen103',
@@ -1175,6 +1215,16 @@ export const geometrieDansEspace: ChapterContent = {
             'communs ; s\'il en manque un, construis-le comme rencontre de deux droites tracées dans une ' +
             'même face, l\'une dans π, l\'autre dans α. Ne prends jamais pour point de percée l\'endroit où ' +
             'd croise une arête sur le dessin : d et cette arête sont souvent gauches.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'plan-auxiliaire-widget',
+          label: 'Manipule toi-même : le plan auxiliaire',
+          caption:
+            'Choisis une droite d, un plan α, puis un plan auxiliaire π : un plan du cube, ou le plan qui ' +
+            'contient d et un sommet. Un plan qui ne contient pas d est refusé, avec la raison. Sinon, ' +
+            'l\'atelier trace la droite b commune à π et α, puis le point de percée, intersection de d et b, ' +
+            'qui peut tomber hors du cube. Le réglage de départ reproduit l\'exemple de (AJ).',
         },
         { kind: 'subheading', text: 'Intersection de deux plans' },
         {
