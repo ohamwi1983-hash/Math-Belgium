@@ -117,9 +117,10 @@ function BandeauReprendre({ reprise }: { reprise: Reprise }) {
 }
 
 /** « Préparer mon interro » : l'assistant élève, sur le chapitre en cours s'il y en a un
- * (`/{niveau}/{chapitre}/exercices`, page verrouillée sur ce chapitre), sinon `/exercice`. */
-function CartePreparer({ reprise }: { reprise: Reprise | null }) {
-  const href = reprise ? `/${reprise.chapter.levelSlug}/${reprise.chapter.slug}/exercices` : '/exercice'
+ * (`/{niveau}/{chapitre}/exercices`, page verrouillée sur ce chapitre), sinon `/exercice?niveau=…`
+ * (l'assistant présélectionne l'année de l'onglet). */
+function CartePreparer({ reprise, niveau }: { reprise: Reprise | null; niveau: string }) {
+  const href = reprise ? `/${reprise.chapter.levelSlug}/${reprise.chapter.slug}/exercices` : `/exercice?niveau=${encodeURIComponent(niveau)}`
   return (
     <Link className="accueil-preparer" to={href}>
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -305,7 +306,7 @@ export function HomePage() {
             <div key={l.slug} className="accueil-annee" id={`annee-${l.slug}`} role="tabpanel" aria-labelledby={`onglet-annee-${l.slug}`} data-annee-bloc={l.slug}>
               <div className="accueil-actions">
                 {reprise && <BandeauReprendre reprise={reprise} />}
-                <CartePreparer reprise={reprise} />
+                <CartePreparer reprise={reprise} niveau={l.slug} />
               </div>
               <h2 className="accueil-liste-titre">
                 Les {pluriel(l.chapters.length, 'chapitre')} de {l.label}
