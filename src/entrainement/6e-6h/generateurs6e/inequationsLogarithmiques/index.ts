@@ -36,20 +36,20 @@ export type IdVarianteInequationLogarithmique =
   | "F";
 
 export const CATALOGUE_FAMILLES: { id: IdVarianteInequationLogarithmique; label: string }[] = [
-  { id: "A-sup1", label: "A — log_base(u) R k (base>1)" },
-  { id: "A-inf1", label: "A — log_base(u) R k (base<1)" },
-  { id: "B-direct-sup1", label: "B — comparaison directe, affine (base>1)" },
-  { id: "B-direct-inf1", label: "B — comparaison directe, affine (base<1)" },
-  { id: "B-racine-sup1", label: "B — comparaison directe, avec racine (base>1)" },
-  { id: "B-racine-inf1", label: "B — comparaison directe, avec racine (base<1)" },
-  { id: "C-produit-sup1", label: "C — combiner en produit (base>1)" },
-  { id: "C-produit-inf1", label: "C — combiner en produit (base<1)" },
-  { id: "C-quotient-sup1", label: "C — combiner en quotient (base>1)" },
-  { id: "C-quotient-inf1", label: "C — combiner en quotient (base<1)" },
-  { id: "D-sup1", label: "D — quadratique en y=log_base(x) (base>1)" },
-  { id: "D-inf1", label: "D — quadratique en y=log_base(x) (base<1)" },
+  { id: "A-sup1", label: "A — log_base(u) R k (base > 1)" },
+  { id: "A-inf1", label: "A — log_base(u) R k (base < 1)" },
+  { id: "B-direct-sup1", label: "B — comparaison directe, affine (base > 1)" },
+  { id: "B-direct-inf1", label: "B — comparaison directe, affine (base < 1)" },
+  { id: "B-racine-sup1", label: "B — comparaison directe, avec racine (base > 1)" },
+  { id: "B-racine-inf1", label: "B — comparaison directe, avec racine (base < 1)" },
+  { id: "C-produit-sup1", label: "C — combiner en produit (base > 1)" },
+  { id: "C-produit-inf1", label: "C — combiner en produit (base < 1)" },
+  { id: "C-quotient-sup1", label: "C — combiner en quotient (base > 1)" },
+  { id: "C-quotient-inf1", label: "C — combiner en quotient (base < 1)" },
+  { id: "D-sup1", label: "D — quadratique en y = log_base(x) (base > 1)" },
+  { id: "D-inf1", label: "D — quadratique en y = log_base(x) (base < 1)" },
   { id: "E", label: "E — domaine vide par construction" },
-  { id: "F", label: "F — base paramétrique a, split a>1/0<a<1" },
+  { id: "F", label: "F — base paramétrique a, a > 1 ou 0 < a < 1" },
 ];
 
 const MAX_TENTATIVES_SIGNE = 200;

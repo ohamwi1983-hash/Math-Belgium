@@ -66,13 +66,13 @@ export interface VarianteSecondDegre {
  * AUDIT-variantes-generateurs.md, section 1.
  */
 export const CATALOGUE_VARIANTES: VarianteSecondDegre[] = [
-  { id: "mise_en_evidence", label: "Mise en évidence (c=0)" },
-  { id: "binome_conjugue", label: "Binôme conjugué (b=0, différence de deux carrés)" },
-  { id: "produit_remarquable", label: "Produit remarquable (Δ=0, carré parfait)" },
+  { id: "mise_en_evidence", label: "Mise en évidence (c = 0)" },
+  { id: "binome_conjugue", label: "Binôme conjugué (b = 0, différence de deux carrés)" },
+  { id: "produit_remarquable", label: "Produit remarquable (Δ = 0, carré parfait)" },
   { id: "cas_general", label: "Cas général (formule du discriminant)" },
-  { id: "mise_en_evidence_generalisee", label: "Mise en évidence généralisée ((x+p)²=m(x+p))" },
+  { id: "mise_en_evidence_generalisee", label: "Mise en évidence généralisée ((x + p)² = m(x + p))" },
   // Ajoutée EN DERNIER : l'indice de variante des codes déjà imprimés (QR) ne change pas.
-  { id: "aucune_solution", label: "Aucune solution (b=0 et a, c de même signe, ou Δ<0)" },
+  { id: "aucune_solution", label: "Aucune solution (b = 0 et a, c de même signe, ou Δ < 0)" },
 ];
 
 const CONSTRUCTEURS_PAR_ID: Record<VarianteSecondDegreId, () => Exercice> = {

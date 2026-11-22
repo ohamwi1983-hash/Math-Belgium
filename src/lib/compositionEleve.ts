@@ -27,7 +27,7 @@ import { DEPASSEMENT_MAX } from '../components/admin/conception/composer'
 
 /**
  * Parcours ÉLÈVE — composition automatique d'une feuille d'exercices ou d'une ÉVALUATION BLANCHE
- * (assistant « Préparer mon évaluation », `components/eleve/AssistantEleve.tsx`).
+ * (assistant « Me préparer à l'évaluation », `components/eleve/AssistantEleve.tsx`).
  *
  * L'élève choisit des notions (sections du chapitre qui ont au moins un générateur), les compétences
  * annoncées (Connaître / Appliquer / Transférer, une à trois), une durée (20 / 30 / 50 min) et un ou

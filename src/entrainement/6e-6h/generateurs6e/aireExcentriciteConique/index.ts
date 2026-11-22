@@ -24,14 +24,14 @@ export type IdVarianteAireExcentriciteConique =
   | "B_distanceDirectrices_irrationnel";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteAireExcentriciteConique; label: string }[] = [
-  { id: "A_k_3_2", label: "A — k=3/2" },
-  { id: "A_k_2", label: "A — k=2" },
-  { id: "A_k_5_2", label: "A — k=5/2" },
-  { id: "A_k_3", label: "A — k=3" },
+  { id: "A_k_3_2", label: "A — k = 3⁄2" },
+  { id: "A_k_2", label: "A — k = 2" },
+  { id: "A_k_5_2", label: "A — k = 5⁄2" },
+  { id: "A_k_3", label: "A — k = 3" },
   { id: "B_abscisseFoyerParallele", label: "B — abscisse = foyer + droite parallèle" },
   { id: "B_angleDroitSommetSecondaire", label: "B — angle droit depuis un sommet secondaire" },
-  { id: "B_distanceDirectrices_carreParfait", label: "B — distance directrices (k=4, e propre)" },
-  { id: "B_distanceDirectrices_irrationnel", label: "B — distance directrices (k=5, e irrationnel)" },
+  { id: "B_distanceDirectrices_carreParfait", label: "B — distance directrices (k = 4, e propre)" },
+  { id: "B_distanceDirectrices_irrationnel", label: "B — distance directrices (k = 5, e irrationnel)" },
 ];
 
 export function construireAvecVarianteId(id: IdVarianteAireExcentriciteConique): ExerciceAireExcentriciteConique {

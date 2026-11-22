@@ -158,10 +158,10 @@ export function genererExerciceDefinitionDerivee(familleForcee?: ExerciceDefinit
 }
 
 export const CATALOGUE_FAMILLES: { id: string; label: string }[] = [
-  { id: "affine", label: "1. Affine — f(x)=mx+p" },
-  { id: "quadratique", label: "2. Quadratique — f(x)=mx²+p" },
-  { id: "rationnelleSimple", label: "3. Rationnelle simple — f(x)=k/x ou k/x²" },
-  { id: "rationnelleLineaire", label: "4. Rationnelle linéaire — f(x)=(mx+p)/(x-q)" },
+  { id: "affine", label: "1. Affine — f(x) = mx + p" },
+  { id: "quadratique", label: "2. Quadratique — f(x) = mx² + p" },
+  { id: "rationnelleSimple", label: "3. Rationnelle simple — f(x) = k/x ou k/x²" },
+  { id: "rationnelleLineaire", label: "4. Rationnelle linéaire — f(x) = (mx + p)/(x − q)" },
 ];
 
 export function construireAvecFamilleId(id: string): ExerciceDefinitionDerivee {

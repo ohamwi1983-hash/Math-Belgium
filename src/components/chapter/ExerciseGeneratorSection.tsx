@@ -18,7 +18,7 @@ export function ExerciseGeneratorSection({ chapter }: { chapter: ChapterContent 
           <span className="export-icon" aria-hidden="true">
             📝
           </span>
-          <span className="export-label">Préparer mon évaluation</span>
+          <span className="export-label">Me préparer à l'évaluation</span>
           <span className="export-sub">feuille d'exercices ou évaluation blanche</span>
         </Link>
       </div>

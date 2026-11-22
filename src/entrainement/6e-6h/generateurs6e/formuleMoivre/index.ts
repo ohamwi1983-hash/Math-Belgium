@@ -67,10 +67,10 @@ export function genererExerciceFormuleMoivre(): ExerciceFormuleMoivre {
 export type IdVarianteFormuleMoivre = "n3" | "n4" | "n5" | "n6" | "cosSeul" | "sinSurSin";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteFormuleMoivre; label: string }[] = [
-  { id: "n3", label: "n=3 — cos(3x) et sin(3x)" },
-  { id: "n4", label: "n=4 — cos(4x) et sin(4x)" },
-  { id: "n5", label: "n=5 — cos(5x) et sin(5x)" },
-  { id: "n6", label: "n=6 — cos(6x) et sin(6x)" },
+  { id: "n3", label: "n = 3 — cos(3x) et sin(3x)" },
+  { id: "n4", label: "n = 4 — cos(4x) et sin(4x)" },
+  { id: "n5", label: "n = 5 — cos(5x) et sin(5x)" },
+  { id: "n6", label: "n = 6 — cos(6x) et sin(6x)" },
   { id: "cosSeul", label: "cos(nx) en fonction de cos x seul" },
   { id: "sinSurSin", label: "sin(nx)/sin x en fonction de cos x seul" },
 ];

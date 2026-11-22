@@ -26,7 +26,7 @@ export type IdVarianteIntegralesProblemes = "A" | "B_evaluer" | "B_resoudre" | "
 export const CATALOGUE_VARIANTES: { id: IdVarianteIntegralesProblemes; label: string }[] = [
   { id: "A", label: "A — Méthode des trapèzes (profil discret)" },
   { id: "B_evaluer", label: "B — Cinématique : évaluer x(t1)" },
-  { id: "B_resoudre", label: "B — Cinématique : résoudre x(t)=cible" },
+  { id: "B_resoudre", label: "B — Cinématique : résoudre x(t) = cible" },
   { id: "C", label: "C — Travail, loi de Hooke" },
   { id: "C_variante", label: "C — Travail, loi de Hooke (2 intervalles à comparer)" },
   { id: "D", label: "D — Coût marginal, total et moyen" },

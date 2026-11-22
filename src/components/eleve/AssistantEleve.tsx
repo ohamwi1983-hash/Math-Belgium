@@ -40,7 +40,7 @@ import {
 } from '../../lib/compositionEleve'
 
 /**
- * Assistant « Préparer mon évaluation » — parcours ÉLÈVE des pages publiques `/exercice` et
+ * Assistant « Me préparer à l'évaluation » — parcours ÉLÈVE des pages publiques `/exercice` et
  * `/{niveau}/{chapitre}/exercices` (visiteur non connecté ; un professeur connecté voit le panneau
  * professeur). Trois blocs (maquettes validées « EleveAssistant » / « EleveTelephone ») : que veux-tu
  * faire (feuille d'exercices ou évaluation blanche), sur quoi (chapitre, notions, compétences annoncées),
@@ -462,7 +462,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
       <div className="eleve-tete">
         <div>
           <p className="eyebrow eleve-surtitre">{chapitre ? `${chapitre.level} · ${chapitre.title}` : 'Entraînement'}</p>
-          <h1 className="eleve-titre">Préparer mon évaluation</h1>
+          <h1 className="eleve-titre">Me préparer à l'évaluation</h1>
         </div>
         {lienProfesseur && (
           <Link className="eleve-lien-prof" to={`/connexion?retour=${retour}`}>

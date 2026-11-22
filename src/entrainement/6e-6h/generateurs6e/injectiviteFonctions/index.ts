@@ -9,8 +9,8 @@ import { construireRacinePlusConstante } from "./familles/racinePlusConstante";
 /** Catalogue de variantes `{id,label}` + `construireAvecFamilleId` — convention permanente du
  * projet (voir CLAUDE.md, "Catalogue de variantes"). */
 export const CATALOGUE_FAMILLES: { id: FamilleInjectiviteFonctions; label: string }[] = [
-  { id: "puissanceAffine", label: "a) (ax+b)^n" },
-  { id: "racineNieme", label: "b) (ax+b)^(1/n)" },
+  { id: "puissanceAffine", label: "a) (ax + b)^n" },
+  { id: "racineNieme", label: "b) (ax + b)^(1/n)" },
   { id: "puissanceMonome", label: "c) a·xⁿ+b" },
   { id: "racinePlusConstante", label: "d) √(ax+b)+c" },
   { id: "homographique", label: "e) (ax+b)/(cx+d)" },

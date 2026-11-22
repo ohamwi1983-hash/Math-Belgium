@@ -294,20 +294,20 @@ export function champsEcran(exercice: ExerciceOptimisation, phase: EcranOptimisa
     case "lien":
       if (exercice.famille === "trapeze") {
         return [
-          { kind: "texte", id: "h", label: "h(x)=", placeholder: "ex : 2,5 sin(x)", avecCalculatrice: false },
-          { kind: "texte", id: "B", label: "B(x)=", placeholder: "ex : 1,5 + 5 cos(x)", avecCalculatrice: false },
+          { kind: "texte", id: "h", label: "h(x) =", placeholder: "ex : 2,5 sin(x)", avecCalculatrice: false },
+          { kind: "texte", id: "B", label: "B(x) =", placeholder: "ex : 1,5 + 5 cos(x)", avecCalculatrice: false },
         ];
       }
       if (exercice.famille === "margesA" || exercice.famille === "margesB") {
-        return [{ kind: "texte", id: "y", label: "y(x)=", placeholder: "ex : 50/(x+3) − 1,5", avecCalculatrice: false }];
+        return [{ kind: "texte", id: "y", label: "y(x) =", placeholder: "ex : 50/(x+3) − 1,5", avecCalculatrice: false }];
       }
-      return [{ kind: "texte", id: "h", label: "h(x)=", placeholder: "ex : 12,5/x²", avecCalculatrice: false }];
+      return [{ kind: "texte", id: "h", label: "h(x) =", placeholder: "ex : 12,5/x²", avecCalculatrice: false }];
 
     case "construire":
-      return [{ kind: "texte", id: "F", label: "F(x)=", placeholder: "ex : 3x² + 7,5/x", avecCalculatrice: false }];
+      return [{ kind: "texte", id: "F", label: "F(x) =", placeholder: "ex : 3x² + 7,5/x", avecCalculatrice: false }];
 
     case "deriver":
-      return [{ kind: "texte", id: "Fprime", label: "F'(x)=", placeholder: "ex : 6x − 7,5/x²", avecCalculatrice: false }];
+      return [{ kind: "texte", id: "Fprime", label: "F'(x) =", placeholder: "ex : 6x − 7,5/x²", avecCalculatrice: false }];
 
     case "resoudre":
       if (exercice.famille === "trapeze") {
@@ -377,15 +377,15 @@ export function champsEcran(exercice: ExerciceOptimisation, phase: EcranOptimisa
 
     case "coeffsImmediats":
       return [
-        { kind: "texte", id: "c", label: "c=", placeholder: "ex : 7", avecCalculatrice: false },
-        { kind: "texte", id: "d", label: "d=", placeholder: "ex : 6", avecCalculatrice: false },
+        { kind: "texte", id: "c", label: "c =", placeholder: "ex : 7", avecCalculatrice: false },
+        { kind: "texte", id: "d", label: "d =", placeholder: "ex : 6", avecCalculatrice: false },
       ];
     case "relation":
-      return [{ kind: "texte", id: "b", label: "b=", placeholder: "ex : 5a", avecCalculatrice: false }];
+      return [{ kind: "texte", id: "b", label: "b =", placeholder: "ex : 5a", avecCalculatrice: false }];
     case "resoudreA":
-      return [{ kind: "texte", id: "a", label: "a=", placeholder: "ex : 4", avecCalculatrice: true }];
+      return [{ kind: "texte", id: "a", label: "a =", placeholder: "ex : 4", avecCalculatrice: true }];
     case "expressionFinale":
-      return [{ kind: "texte", id: "f", label: "f(x)=", placeholder: "ex : x³ − 4x² + 7", avecCalculatrice: false }];
+      return [{ kind: "texte", id: "f", label: "f(x) =", placeholder: "ex : x³ − 4x² + 7", avecCalculatrice: false }];
   }
 }
 

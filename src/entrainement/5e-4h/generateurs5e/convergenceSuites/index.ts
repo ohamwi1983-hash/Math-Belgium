@@ -6,7 +6,7 @@ import { genererExerciceConvergenceQuelconque } from "./quelconque";
 export const CATALOGUE_VARIANTES: { id: VarianteConvergenceSuite; label: string }[] = [
   { id: "arithmetique", label: "Suite arithmétique" },
   { id: "geometrique", label: "Suite géométrique" },
-  { id: "quelconque", label: "Suite rationnelle un=P(n)/Q(n)" },
+  { id: "quelconque", label: "Suite rationnelle un = P(n)/Q(n)" },
 ];
 
 export function construireAvecVarianteId(variante: VarianteConvergenceSuite): ExerciceConvergenceSuite {

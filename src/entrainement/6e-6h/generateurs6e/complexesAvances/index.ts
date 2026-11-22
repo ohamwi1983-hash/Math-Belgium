@@ -38,8 +38,8 @@ export type IdVarianteComplexesAvances =
   | "E_aucun";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteComplexesAvances; label: string }[] = [
-  { id: "A_n3", label: "A — Condition réel positif (n=3)" },
-  { id: "A_n4", label: "A — Condition réel positif (n=4)" },
+  { id: "A_n3", label: "A — Condition réel positif (n = 3)" },
+  { id: "A_n4", label: "A — Condition réel positif (n = 4)" },
   { id: "B_droite", label: "B — Lieu : droite" },
   { id: "B_cercleA", label: "B — Lieu : |z − a| = k" },
   { id: "B_argument", label: "B — Lieu : arg(z − a) ≡ θ (mod 2π)" },

@@ -113,7 +113,7 @@ Partage plus tard : table `partages (plan_id, destinataire, droit)` + politique 
   PUBLIQUES (pas de `PageReservee`). **Qui voit quoi** (décision de l'utilisateur, 21/11/2026) :
   professeur connecté (`estConnecteActif(useCompte())`, `useCompte()` SANS `demarrer`) → panneau des
   feuilles d'exercices tel quel (école/nom, coffre) ; visiteur non connecté (élève, ou Supabase non
-  configuré) → assistant « Préparer mon évaluation » (`components/eleve/AssistantEleve.tsx`, feuille
+  configuré) → assistant « Me préparer à l'évaluation » (`components/eleve/AssistantEleve.tsx`, feuille
   d'exercices ou évaluation blanche, voir `.claude/rules/feuilles-evaluations.md`) avec un lien
   discret « Je suis professeur : me connecter » (`/connexion?retour=<page>`, masqué si `indisponible`) ;
   session stockée en cours de lecture (`chargement`) → « Chargement… » (aucune bascule visible).

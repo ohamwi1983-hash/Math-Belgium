@@ -12,7 +12,7 @@ export const CATALOGUE_FAMILLES: { id: FamilleDeriveesCyclometriques; label: str
   { id: "A", label: "Application directe" },
   { id: "B", label: "Règle du produit" },
   { id: "C", label: "Règle du quotient, sans identité" },
-  { id: "D", label: "Quotient avec identité arcsin+arccos=π/2" },
+  { id: "D", label: "Quotient avec identité arcsin + arccos = π⁄2" },
   { id: "E", label: "Composition imbriquée, sans identité" },
   { id: "F", label: "Composition imbriquée + identité trigonométrique" },
   { id: "G", label: "Réciproque vs argument-fraction" },

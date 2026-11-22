@@ -7,7 +7,7 @@ import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { usePageNonIndexee } from '../lib/useDocumentMeta'
 
 /** `/exercice` — PUBLIC (décision de l'utilisateur : les élèves s'en servent pour préparer leurs
- * évaluations). Visiteur non connecté (élève) : assistant « Préparer mon évaluation » (feuille
+ * évaluations). Visiteur non connecté (élève) : assistant « Me préparer à l'évaluation » (feuille
  * d'exercices ou évaluation blanche, `components/eleve/AssistantEleve.tsx`). Professeur connecté
  * (`estConnecteActif`) : panneau des feuilles d'exercices tel quel (école et nom sur les copies, coffre),
  * dans le cadre « Mon espace » (`EspaceConception` : menu, bandeau sombre, « Voir comme un élève »).
@@ -19,7 +19,7 @@ export function ExercicePage() {
   // des élèves avec `?vue=eleve`, sans se déconnecter.
   const [params] = useSearchParams()
   const vueEleve = professeur && params.get('vue') === 'eleve'
-  usePageNonIndexee(professeur && !vueEleve ? "Feuilles d'exercices" : 'Préparer mon évaluation')
+  usePageNonIndexee(professeur && !vueEleve ? "Feuilles d'exercices" : "Me préparer à l'évaluation")
   return (
     <>
       <SiteHeader />

@@ -23,8 +23,8 @@ export const CATALOGUE_VARIANTES: { id: IdVarianteEquationsComplexes; label: str
   { id: "B", label: "B — Équation rationnelle en z — approfondissement" },
   { id: "C", label: "C — Second degré, discriminant réel négatif" },
   { id: "D", label: "D — Second degré, discriminant complexe — approfondissement" },
-  { id: "E", label: "E — Bicarrée u=z², coefficients réels" },
-  { id: "E_complexe", label: "E — Bicarrée u=z², coefficients complexes — approfondissement" },
+  { id: "E", label: "E — Bicarrée u = z², coefficients réels" },
+  { id: "E_complexe", label: "E — Bicarrée u = z², coefficients complexes — approfondissement" },
   { id: "F", label: "F — Quatrième degré, racines rationnelles et division — approfondissement" },
 ];
 

@@ -271,7 +271,7 @@ export function genererExerciceEtudeCompleteBonus(): ExerciceEtudeCompleteBonus 
 // ============================================================================
 
 export const CATALOGUE_FAMILLES: { id: string; label: string }[] = [
-  { id: "1-vaSimple-ahZero", label: "1 exclusion, AV simple — AH=0" },
+  { id: "1-vaSimple-ahZero", label: "1 exclusion, AV simple — AH = 0" },
   { id: "1-vaSimple-ahNonNul", label: "1 exclusion, AV simple — AH≠0" },
   { id: "1-vaSimple-ao", label: "1 exclusion, AV simple — AO" },
   { id: "1-vaSimple-aucune", label: "1 exclusion, AV simple — aucune asymptote" },
@@ -288,7 +288,7 @@ export const CATALOGUE_FAMILLES: { id: string; label: string }[] = [
   // Lots B–D : variantes AJOUTÉES EN FIN (les codes `?code=` imprimés gardent leur indice) pour que
   // chaque structure visible (nombre d'exclusions, comportement à l'infini, recoupement annoncé) ait
   // au moins deux natures d'exclusion possibles — groupes à verdict de l'évaluation.
-  { id: "1-vaDouble-ahZero", label: "1 exclusion, AV double — AH=0" },
+  { id: "1-vaDouble-ahZero", label: "1 exclusion, AV double — AH = 0" },
   { id: "1-vaDouble-ao", label: "1 exclusion, AV double — AO" },
   { id: "1-vaDouble-aucune", label: "1 exclusion, AV double — aucune asymptote" },
   { id: "2-vaSimple-vaSimple-aucune", label: "2 exclusions, simple+simple — aucune" },

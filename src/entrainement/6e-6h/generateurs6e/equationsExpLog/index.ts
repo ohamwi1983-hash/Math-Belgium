@@ -8,10 +8,10 @@ import { construireG } from "./familles/G";
 import { tirerParmi } from "./aleatoire";
 
 export const CATALOGUE_FAMILLES: { id: FamilleEquationsExpLog; label: string }[] = [
-  { id: "A", label: "A — base^(mx+n)=C, log direct ou superflu" },
+  { id: "A", label: "A — base^(mx + n) = C, log direct ou superflu" },
   { id: "B", label: "B — bases différentes, ln des deux membres" },
   { id: "C", label: "C — t-substitution, second degré" },
-  { id: "D", label: "D — log_a(x)=k" },
+  { id: "D", label: "D — logₐ(x) = k" },
   { id: "E", label: "E — combiner des logs, rejet CE" },
   { id: "G", label: "G — toujours vrai / toujours faux" },
 ];

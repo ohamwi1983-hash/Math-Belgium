@@ -78,8 +78,8 @@ export interface VarianteAnalyseFonction {
 
 /** Proposition à valider par l'utilisateur (voir RETROFIT-variantes-generateurs.md). */
 export const CATALOGUE_VARIANTES: VarianteAnalyseFonction[] = [
-  { id: "mise_en_evidence", label: "Mise en évidence (c=0)" },
-  { id: "binome_conjugue", label: "Binôme conjugué (b=0, différence de deux carrés)" },
+  { id: "mise_en_evidence", label: "Mise en évidence (c = 0)" },
+  { id: "binome_conjugue", label: "Binôme conjugué (b = 0, différence de deux carrés)" },
   { id: "produit_remarquable", label: "Produit remarquable (carré parfait)" },
   { id: "irreductible", label: "Non factorisable (sommet du côté de l'ouverture)" },
 ];

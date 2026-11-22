@@ -1068,7 +1068,7 @@ réponse, points à droite, pas de majuscules d'insistance, pied de page, option
 - **Remédiation** : `questionsRemediables` suit l'ordre des parties pour un examen (même
   `partiesExamen`) — vérifié identique à la copie A, par chapitre et par processus.
 
-## Parcours élève : assistant « Préparer mon évaluation » et évaluation blanche (décisions du 21 et du 22/11/2026)
+## Parcours élève : assistant « Me préparer à l'évaluation » et évaluation blanche (décisions du 21 et du 22/11/2026)
 
 Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBlanche ». Pages publiques
 `/exercice` et `/…/exercices`, visiteur NON connecté (qui voit quoi : `.claude/rules/comptes.md`).

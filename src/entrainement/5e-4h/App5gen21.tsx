@@ -320,8 +320,8 @@ function EcranClassique({ etat, terminer, aide, validation }: PropsClassique) {
         <EcranSaisieLimites
           {...commun}
           champs={[
-            { label: "Q(x)=", placeholder: "ex : 7x − 11", apercu: true, libelleApercu: "Q(x) =" },
-            { label: "R(x)=", placeholder: "ex : 9" },
+            { label: "Q(x) =", placeholder: "ex : 7x − 11", apercu: true, libelleApercu: "Q(x) =" },
+            { label: "R(x) =", placeholder: "ex : 9" },
           ]}
           illisible={([q, r]) => saisieDivisionRefusee(exercice, { quotient: q, reste: r })}
           texteIllisible={([q, r]) =>
@@ -416,7 +416,7 @@ function EcranPosition({ etat, terminer, aide, validation }: PropsPosition) {
         <EcranSaisieLimites
           {...commun}
           formule={labelNumerateur(e)}
-          champs={[{ label: "R(x)=", placeholder: "ex : 3x − 2", apercu: true, libelleApercu: "R(x) =" }]}
+          champs={[{ label: "R(x) =", placeholder: "ex : 3x − 2", apercu: true, libelleApercu: "R(x) =" }]}
           illisible={([s]) => expressionIllisible(s)}
           texteIllisible={() => MESSAGES_ILLISIBLE_LIMITES.expression}
           cible={([s]) => cibleNumerateur(e, s)}

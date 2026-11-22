@@ -16,8 +16,8 @@ export { construireAucun, construireExactement, construireFamilleA, construireTo
 export type IdVarianteProbabiliteHypergeometrique = "A_aucun" | "A_tous" | "A_exactement" | "B_ordreComposition" | "C_lotoBonus";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteProbabiliteHypergeometrique; label: string }[] = [
-  { id: "A_aucun", label: "A — Hypergéométrique de base : aucun succès (k=0)" },
-  { id: "A_tous", label: "A — Hypergéométrique de base : tous des succès (k=n)" },
+  { id: "A_aucun", label: "A — Hypergéométrique de base : aucun succès (k = 0)" },
+  { id: "A_tous", label: "A — Hypergéométrique de base : tous des succès (k = n)" },
   { id: "A_exactement", label: "A — Hypergéométrique de base : exactement k succès" },
   { id: "B_ordreComposition", label: "B — Contraste ordre vs composition (urne à 2 couleurs)" },
   { id: "C_lotoBonus", label: "C — Hypergéométrique à 2 catégories croisées (loto + bonus)" },

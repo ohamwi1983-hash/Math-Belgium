@@ -16,7 +16,7 @@ export type IdVarianteRacinesNiemes = "A" | "B" | "C";
 export const CATALOGUE_VARIANTES: { id: IdVarianteRacinesNiemes; label: string }[] = [
   { id: "A", label: "A — Racines n-ièmes, cas propre (angles remarquables)" },
   { id: "B", label: "B — Racines n-ièmes, cas général" },
-  { id: "C", label: "C — zⁿ=wⁿ, astuce racine de l'unité" },
+  { id: "C", label: "C — zⁿ = wⁿ, astuce racine de l'unité" },
 ];
 
 export function construireAvecVarianteId(id: IdVarianteRacinesNiemes): ExerciceRacinesNiemes {

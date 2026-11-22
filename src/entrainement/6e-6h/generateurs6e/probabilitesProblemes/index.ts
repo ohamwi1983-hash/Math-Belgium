@@ -57,8 +57,8 @@ export type IdVarianteProbabilitesProblemes =
   | "G-melangeObjets";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteProbabilitesProblemes; label: string }[] = [
-  { id: "A-n4", label: "A — anniversaires, n=4" },
-  { id: "A-n8", label: "A — anniversaires, n=8" },
+  { id: "A-n4", label: "A — anniversaires, n = 4" },
+  { id: "A-n8", label: "A — anniversaires, n = 8" },
   { id: "B-auMoinsK", label: "B — épreuves répétées, P(au moins k succès)" },
   { id: "B-unDeChaqueResultat", label: "B — épreuves répétées, au moins un succès et au moins un échec" },
   { id: "C-k1", label: "C — probabilités différentes, exactement 1 élément concerné" },

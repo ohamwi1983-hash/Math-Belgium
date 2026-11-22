@@ -129,9 +129,9 @@ export function construireExercice(variante: VarianteCaracteristiquesDroite): Ex
 }
 
 export const CATALOGUE_VARIANTES: { id: VarianteCaracteristiquesDroite; label: string }[] = [
-  { id: "implicite", label: "Implicite (ax+by+c=0)" },
-  { id: "explicite_y", label: "Explicite (y=mx+p)" },
-  { id: "explicite_x", label: "Explicite (x=ny+q)" },
+  { id: "implicite", label: "Implicite (ax + by + c = 0)" },
+  { id: "explicite_y", label: "Explicite (y = mx + p)" },
+  { id: "explicite_x", label: "Explicite (x = ny + q)" },
   { id: "parametrique", label: "Paramétrique" },
 ];
 

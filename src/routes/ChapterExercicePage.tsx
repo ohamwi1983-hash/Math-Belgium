@@ -10,7 +10,7 @@ import { usePageNonIndexee } from '../lib/useDocumentMeta'
 /** Page `/{levelSlug}/{chapterSlug}/exercices` — publique, comme `/exercice` (décision de
  * l'utilisateur : les élèves s'en servent pour préparer leurs évaluations), verrouillée sur LE
  * chapitre dont vient le visiteur (lien en bas de `ChapterPage.tsx`). Visiteur non connecté (élève) :
- * assistant « Préparer mon évaluation » sur ce chapitre (`AssistantEleve`, « Changer de chapitre » →
+ * assistant « Me préparer à l'évaluation » sur ce chapitre (`AssistantEleve`, « Changer de chapitre » →
  * `/exercice`). Professeur connecté : panneau des feuilles d'exercices tel quel, pré-verrouillé
  * (`EvaluationGeneratorPanel`, prop `verrouille`), dans le cadre « Mon espace » (`EspaceConception`). */
 export function ChapterExercicePage() {
@@ -22,7 +22,7 @@ export function ChapterExercicePage() {
   const [params] = useSearchParams()
   const vueEleve = connecte && params.get('vue') === 'eleve'
   const professeur = connecte && !vueEleve
-  usePageNonIndexee(chapter ? `${professeur ? "Feuille d'exercices" : 'Préparer mon évaluation'} — ${chapter.title}` : "Feuille d'exercices")
+  usePageNonIndexee(chapter ? `${professeur ? "Feuille d'exercices" : "Me préparer à l'évaluation"} — ${chapter.title}` : "Feuille d'exercices")
 
   if (!chapter || !levelSlug || !chapterSlug) return <Navigate to="/" replace />
 
@@ -34,7 +34,7 @@ export function ChapterExercicePage() {
         breadcrumb={[
           { label: level?.label ?? levelSlug, to: '/' },
           { label: chapter.title, to: `/${levelSlug}/${chapterSlug}` },
-          { label: professeur ? "Feuille d'exercices" : 'Préparer mon évaluation' },
+          { label: professeur ? "Feuille d'exercices" : "Me préparer à l'évaluation" },
         ]}
       />
       <div className="page-tool">

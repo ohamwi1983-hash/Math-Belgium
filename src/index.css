@@ -2092,7 +2092,7 @@ table.feature-table--synthese { font-family: inherit; font-size: 0.94em; }
   .conc-apercu-pied .conc-bouton { flex: 1 1 auto; min-height: 44px; }
 }
 
-/* ---------- Parcours élève : assistant « Préparer mon évaluation » (pages publiques /exercice et
+/* ---------- Parcours élève : assistant « Me préparer à l'évaluation » (pages publiques /exercice et
    /{niveau}/{chapitre}/exercices, visiteur non connecté ; maquettes « EleveAssistant » et
    « EleveTelephone » validées). Jetons du site uniquement : clair et sombre suivent le thème. */
 .eleve { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; min-width: 0; }

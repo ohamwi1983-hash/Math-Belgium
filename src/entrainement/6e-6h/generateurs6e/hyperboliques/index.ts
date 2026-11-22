@@ -44,8 +44,8 @@ export const CATALOGUE_VARIANTES: { id: VarianteId; label: string }[] = [
   { id: "A_shCube", label: "A — sh(x)³ [impaire]" },
   { id: "B_trouverCh", label: "B — donné sh, trouver ch (1 valeur)" },
   { id: "B_trouverShSansSigne", label: "B — donné ch, trouver sh (signe non précisé, 2 valeurs)" },
-  { id: "B_trouverShSignePlus", label: "B — donné ch, trouver sh (x0>0, 1 valeur)" },
-  { id: "B_trouverShSigneMoins", label: "B — donné ch, trouver sh (x0<0, 1 valeur)" },
+  { id: "B_trouverShSignePlus", label: "B — donné ch, trouver sh (x0 > 0, 1 valeur)" },
+  { id: "B_trouverShSigneMoins", label: "B — donné ch, trouver sh (x0 < 0, 1 valeur)" },
   { id: "C", label: "C — Dérivée et dérivée seconde de a·sh(kx)+b·ch(kx)" },
   { id: "D", label: "D — Limites en ±∞ de a·sh(x)+b·ch(x)" },
 ];

@@ -20,7 +20,7 @@ export const CATALOGUE_VARIANTES: { id: IdVarianteVariablesDiscretesEsperance; l
   { id: "B_contexteDirect", label: "B — Construire la loi (contexte direct) et E(X)" },
   { id: "B_hypergeometrique", label: "B — Construire la loi (hypergéométrique) et E(X)" },
   { id: "C_verifier", label: "C — Jeu équitable : vérifier E" },
-  { id: "C_imposer", label: "C — Jeu équitable : imposer m pour E=0" },
+  { id: "C_imposer", label: "C — Jeu équitable : imposer m pour E = 0" },
 ];
 
 export function construireAvecVarianteId(id: IdVarianteVariablesDiscretesEsperance): ExerciceVariablesDiscretesEsperance {

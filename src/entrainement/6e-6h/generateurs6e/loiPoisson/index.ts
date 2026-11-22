@@ -20,7 +20,7 @@ const CONTEXTE_EFFECTIF_DEFAUT_B = CONTEXTES_B.find((c) => c.id === "defectueuxB
 export type IdVarianteLoiPoisson = "A_verifier" | "B_exactement" | "B_entreAetB" | "B_auPlus" | "B_auMoins";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteLoiPoisson; label: string }[] = [
-  { id: "A_verifier", label: "A — Approximation Poisson (checklist + λ + P(X=k))" },
+  { id: "A_verifier", label: "A — Approximation Poisson (checklist + λ + P(X = k))" },
   { id: "B_exactement", label: "B — Exactement k occurrences (terme unique, 2 écrans)" },
   { id: "B_entreAetB", label: "B — Entre a et b occurrences (somme, 3 écrans)" },
   { id: "B_auPlus", label: "B — Au plus k occurrences (somme, 3 écrans)" },

@@ -325,8 +325,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           {...commun}
           {...champExpression}
           champs={[
-            { label: "N(x)=", placeholder: "ex : 2(x − 7)(x + 9)", apercu: true, libelleApercu: "N(x) =" },
-            { label: "D(x)=", placeholder: "ex : (x − 8)(x + 9)", apercu: true, libelleApercu: "D(x) =" },
+            { label: "N(x) =", placeholder: "ex : 2(x − 7)(x + 9)", apercu: true, libelleApercu: "N(x) =" },
+            { label: "D(x) =", placeholder: "ex : (x − 8)(x + 9)", apercu: true, libelleApercu: "D(x) =" },
           ]}
           illisible={(v) => expressionsIllisibles(v)}
           texteIllisible={() => MESSAGES_ILLISIBLE_LIMITES.facteurs}
@@ -346,7 +346,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           key={cleEcran}
           {...commun}
           {...champExpression}
-          champs={[{ label: "D(x)=", placeholder: "ex : 2(x − 1)(x + 3)", apercu: true, libelleApercu: "D(x) =" }]}
+          champs={[{ label: "D(x) =", placeholder: "ex : 2(x − 1)(x + 3)", apercu: true, libelleApercu: "D(x) =" }]}
           illisible={(v) => expressionsIllisibles(v)}
           texteIllisible={() => MESSAGES_ILLISIBLE_LIMITES.facteurs}
           controleSansTentative={(v) => (!estFormeFactorisee(v[0]) ? "Ce n'est pas encore une forme factorisée : écris un produit de facteurs du premier degré. Cette saisie ne compte pas comme une tentative." : null)}
