@@ -124,6 +124,19 @@ export const fonctionsComposees: ChapterContent = {
       number: 1,
       title: 'Le domaine de définition',
       kicker: 'dom f — ce que la machine accepte',
+      titreCourt: 'Domaine de définition',
+      partie: 'Le domaine, puis composer',
+      essentiel: [
+        'dom f est l\'ensemble des x pour lesquels f(x) peut être calculé. Un dénominateur doit être $\\ne 0$, le radicande d\'une racine d\'indice pair doit être $\\ge 0$ ; une racine impaire ou une valeur absolue n\'impose aucune condition.',
+        'On pose une condition par opération à risque, on résout chacune, puis on combine par **intersection**. Une racine au dénominateur impose $\\text{radicande} > 0$, une inégalité stricte.',
+        'Diviser par un nombre négatif change le sens de l\'inégalité : $-2x \\ge -6 \\iff x \\le 3$.',
+      ],
+      cartes: [
+        { question: 'Quelle condition d\'existence impose $\\sqrt[3]{x-5}$ ?', reponse: 'Aucune : une racine d\'indice impair est toujours définie.' },
+        { question: 'Domaine de $f(x) = \\dfrac{x+4}{\\sqrt{6-2x}}$ ?', reponse: '$6-2x > 0$, donc $\\operatorname{dom} f = \\mathopen{]}-\\infty\\,;\\,3\\mathclose{[}$.' },
+        { question: 'Domaine de $f(x) = \\dfrac{2x+1}{x^2-5x+6}$ ?', reponse: '$\\mathbb{R}\\setminus\\{2\\,;\\,3\\}$ : on retire les zéros du dénominateur.' },
+        { question: 'Pour $\\sqrt{\\dfrac{x-1}{x+2}}$, garde-t-on 1 ? Et −2 ?', reponse: '1 oui : le quotient y vaut 0 et $\\sqrt{0}$ existe. −2 non : le dénominateur s\'annule.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Le domaine de définition', youtubeId: 'hqFK11mLsYE' },
         {
@@ -458,6 +471,19 @@ export const fonctionsComposees: ChapterContent = {
       number: 2,
       title: 'Composer deux fonctions — et décomposer une écriture',
       kicker: '(f ∘ g)(x) = f(g(x))',
+      titreCourt: 'Composer, décomposer',
+      partie: 'Le domaine, puis composer',
+      essentiel: [
+        '$(f\\circ g)(x) = f(g(x))$ se lit « f rond g » et se calcule de droite à gauche : d\'abord g, ensuite f. En général, $f\\circ g \\ne g\\circ f$.',
+        'Décomposer : repère la toute dernière opération effectuée (la fonction la plus extérieure), enlève-la, recommence. Recompose ta chaîne à la fin : tu dois retrouver h(x) exactement.',
+        'La composée de deux fonctions affines est affine : sa pente est le produit des pentes.',
+      ],
+      cartes: [
+        { question: '$f(x) = x+1$ et $g(x) = x^2$ : que valent $(f\\circ g)(2)$ et $(g\\circ f)(2)$ ?', reponse: '$(f\\circ g)(2) = f(4) = 5$ et $(g\\circ f)(2) = g(3) = 9$.' },
+        { question: 'Décompose $h(x) = 5 - \\sqrt[3]{|x|}$.', reponse: '$g(x) = |x|$, puis $u(t) = \\sqrt[3]{t}$, puis $f(t) = 5 - t$ : $h = f\\circ u\\circ g$.' },
+        { question: 'Quelle question te poser à chaque étage d\'une décomposition ?', reponse: '« Quelle est la toute dernière opération effectuée ? » : c\'est la fonction la plus extérieure.' },
+        { question: '$f(x) = 2x+3$ et $g(x) = x-1$ : que vaut $(f\\circ g)(x)$ ?', reponse: '$2(x-1)+3 = 2x+1$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Composer deux fonctions et décomposer une écriture', youtubeId: '1jMYd8KobY8' },
         {
@@ -687,6 +713,19 @@ export const fonctionsComposees: ChapterContent = {
       number: 3,
       title: 'Composer f et g à partir de leurs expressions',
       kicker: 'écrire (f∘g)(x), puis en trouver le domaine',
+      titreCourt: 'Domaine d\'une composée',
+      partie: 'Le domaine, puis composer',
+      essentiel: [
+        'Composer, c\'est substituer : on remplace le t de f(t) par l\'expression complète de g(x).',
+        '$\\operatorname{dom}(f\\circ g)$ : x doit appartenir à $\\operatorname{dom} g$, et g(x) doit tomber dans $\\operatorname{dom} f$ — l\'intersection des deux conditions, jamais lue sur la formule simplifiée.',
+        'Si l\'image de g ne rencontre jamais $\\operatorname{dom} f$, la composée n\'est définie nulle part : $\\operatorname{dom}(f\\circ g) = \\varnothing$ est une réponse valable.',
+      ],
+      cartes: [
+        { question: 'Quelles sont les deux conditions de $\\operatorname{dom}(f\\circ g)$ ?', reponse: '$x \\in \\operatorname{dom} g$ et $g(x) \\in \\operatorname{dom} f$.' },
+        { question: '$f(t) = t^2$ et $g(x) = \\sqrt{x}$ donnent $f(g(x)) = x$ : le domaine est-il $\\mathbb{R}$ ?', reponse: 'Non : g(x) n\'existe que pour $x \\ge 0$, donc $\\operatorname{dom}(f\\circ g) = [0\\,;+\\infty[$.' },
+        { question: '$f(x) = \\sqrt{x-10}$ et $g(x) = -x^2$ : que vaut $\\operatorname{dom}(f\\circ g)$ ?', reponse: '$\\varnothing$ : $\\operatorname{Im} g = \\mathopen{]}-\\infty\\,;\\,0]$ ne rencontre jamais $\\operatorname{dom} f = [10\\,;\\,+\\infty[$.' },
+        { question: 'La composition est associative : est-elle aussi commutative ?', reponse: 'Non : seule la place des parenthèses est sans importance, l\'ordre des fonctions compte toujours.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Composer f et g à partir de leurs expressions', youtubeId: 'j4BmqIT-L3k' },
         {
@@ -960,6 +999,18 @@ export const fonctionsComposees: ChapterContent = {
       number: 4,
       title: 'Lire une composée sur un graphique',
       kicker: '(g∘f)(a) sans aucune formule',
+      titreCourt: 'Lecture graphique',
+      partie: 'Sur un graphique, en contexte',
+      essentiel: [
+        'Pour $(g\\circ f)(a)$ : lis f(a) sur $C_f$, reporte cette valeur comme nouvelle entrée sur $C_g$, puis lis g(f(a)). On lit **f d\'abord**.',
+        'Dans un même repère, la droite $y = x$ fait le report : une horizontale jusqu\'à $y = x$, puis une verticale jusqu\'à $C_g$.',
+        'Valeur reportée hors du domaine de g : g(f(a)) n\'existe pas. Seulement hors de la portion tracée : elle existe mais n\'est pas lisible. Jamais de valeur devinée.',
+      ],
+      cartes: [
+        { question: 'On lit f(2) = 4 sur $C_f$ et g(4) = 1 sur $C_g$ : que vaut $(g\\circ f)(2)$ ?', reponse: '$g(f(2)) = g(4) = 1$.' },
+        { question: 'Pour $(g\\circ f)(a)$, quel graphe lis-tu en premier ?', reponse: 'Celui de f : le rond se lit de droite à gauche.' },
+        { question: 'f(a) tombe hors de la portion tracée de $C_g$, mais g y est définie : que conclure ?', reponse: 'g(f(a)) existe, mais n\'est pas lisible sur ce graphique.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Lire une composée sur un graphique', youtubeId: 'OyXADsT7-Oc' },
         {
@@ -1092,6 +1143,19 @@ export const fonctionsComposees: ChapterContent = {
       number: 5,
       title: 'Fonctions en contexte',
       kicker: 'une grandeur physique devient une fonction d’une autre',
+      titreCourt: 'Fonctions en contexte',
+      partie: 'Sur un graphique, en contexte',
+      essentiel: [
+        'Écris d\'abord la relation de l\'énoncé, isole ensuite la grandeur demandée, puis réinjecte-la : avec $V = \\pi r^2 h$, on obtient $h(r) = \\dfrac{V}{\\pi r^2}$.',
+        'Le domaine du modèle est souvent plus restrictif que le domaine mathématique : un rayon vérifie $r > 0$.',
+        'Le coût unitaire $c(x) = \\dfrac{C(x)}{x}$ est un quotient, pas une composition. L\'entreprise est rentable quand le bénéfice $B(x) = CA(x) - C(x)$ est positif.',
+      ],
+      cartes: [
+        { question: 'Bidon cylindrique de 1 000 cm³ : exprime h en fonction de r.', reponse: '$h(r) = \\dfrac{1\\,000}{\\pi r^2}$, pour $r > 0$.' },
+        { question: 'Le coût unitaire $c(x) = \\dfrac{C(x)}{x}$ est-il une composée ?', reponse: 'Non : c\'est un quotient, on divise une sortie par une entrée.' },
+        { question: '$q(b) = 50 + 2b$ et $R(q) = 12q$ : quelle recette en fonction du budget b ?', reponse: '$(R\\circ q)(b) = R(50+2b) = 600 + 24b$.' },
+        { question: '$B(x) = -0{,}1x^2 + 10x - 160$ : pour quelles quantités est-on rentable ?', reponse: 'B s\'annule en 20 et en 80 : rentable pour $20 < x < 80$, seuil de rentabilité à 20 objets.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Fonctions en contexte : bidon cylindrique, coût unitaire', youtubeId: 'makuh8EtGt0' },
         {

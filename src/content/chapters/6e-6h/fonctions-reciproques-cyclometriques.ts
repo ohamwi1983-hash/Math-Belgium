@@ -32,6 +32,19 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       id: 'reciproques',
       number: 1,
       title: "Fonction réciproque d'une fonction bijective",
+      titreCourt: 'Fonction réciproque',
+      partie: 'Réciproques et arcfonctions',
+      essentiel: [
+        'f est **injective** si deux entrées différentes ne donnent jamais la même image : toute droite horizontale coupe son graphe en au plus un point. Seule une fonction bijective a une réciproque $f^{-1}$, qui « défait » f : $f^{-1}(f(x)) = x$.',
+        'dom($f^{-1}$) = Image($f$) et Image($f^{-1}$) = dom($f$) ; les deux graphes sont symétriques par rapport à $y = x$. Pour trouver $f^{-1}$ : permute x et y dans $y = f(x)$, puis isole y.',
+        'Dérivée d\'une réciproque : $(f^{-1})\'(x) = \\dfrac{1}{f\'(f^{-1}(x))}$, si $f\'(f^{-1}(x)) \\neq 0$ — la pente s\'inverse.',
+      ],
+      cartes: [
+        { question: '$f(x) = \\dfrac{5}{x-1}$ : que vaut $f^{-1}(x)$ ?', reponse: '$1 + \\dfrac{5}{x}$, et non $\\dfrac{1}{f(x)} = \\dfrac{x-1}{5}$.' },
+        { question: 'Comment rendre $x \\mapsto x^2$ inversible ?', reponse: 'La restreindre à $\\mathbb{R}^+$ : sa réciproque est alors $\\sqrt{x}$.' },
+        { question: '$f(x) = x^3 + x$ : que vaut $(f^{-1})\'(2)$ ?', reponse: '$f(1) = 2$ et $f\'(1) = 4$, donc $(f^{-1})\'(2) = \\dfrac{1}{4}$.' },
+        { question: 'Le point $(a ; b)$ est sur le graphe de f : quel point est sur celui de $f^{-1}$ ?', reponse: '$(b ; a)$, son symétrique par rapport à $y = x$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Fonction réciproque d\'une fonction bijective (1/2)', youtubeId: 'cljx_XgPpeE' },
         { kind: 'video', title: 'Fonction réciproque : trouver f⁻¹ et la dériver (2/2)', youtubeId: 'fzLkgKdVM3g' },
@@ -1006,6 +1019,19 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       id: 'cyclometriques',
       number: 2,
       title: 'Les fonctions cyclométriques : arcsin, arccos, arctan',
+      titreCourt: 'Fonctions cyclométriques',
+      partie: 'Réciproques et arcfonctions',
+      essentiel: [
+        'arcsin : $[-1 ; 1] \\to [-\\pi/2 ; \\pi/2]$ ; arccos : $[-1 ; 1] \\to [0 ; \\pi]$ ; arctan : $\\mathbb{R} \\to \\; ]-\\pi/2 ; \\pi/2[$. arcsin(x) est l\'**unique** angle de son image dont le sinus vaut x.',
+        'arcsin et arctan sont croissantes et impaires ; arccos est décroissante et vérifie $\\arccos(-x) = \\pi - \\arccos(x)$.',
+        '$\\sin(\\arcsin x) = x$ toujours, mais $\\arcsin(\\sin \\theta) = \\theta$ seulement si θ est dans l\'image. $\\cos(\\arcsin x) = \\sqrt{1 - x^2}$, jamais négatif.',
+      ],
+      cartes: [
+        { question: 'Que vaut $\\arccos\\left(-\\dfrac{1}{2}\\right)$ ?', reponse: '$\\dfrac{2\\pi}{3}$ : arccos ne donne jamais un angle négatif.' },
+        { question: 'Que vaut $\\arcsin\\left(\\sin \\dfrac{5\\pi}{6}\\right)$ ?', reponse: '$\\dfrac{\\pi}{6}$ : même sinus, et $\\dfrac{\\pi}{6}$ est dans $[-\\pi/2 ; \\pi/2]$.' },
+        { question: 'Que vaut $\\cos\\left(\\arcsin \\dfrac{3}{5}\\right)$ ?', reponse: '$\\sqrt{1 - \\dfrac{9}{25}} = \\dfrac{4}{5}$.' },
+        { question: '$\\arcsin(2)$ existe-t-il ?', reponse: 'Non : $2 \\notin [-1;1]$, hors du domaine.' },
+      ],
       blocks: [
         { kind: 'video', title: 'arcsin, arccos, arctan', youtubeId: 'Z6mRx1Lzgoc' },
         { kind: 'subheading', text: 'Restreindre sin, cos et tan pour les inverser' },
@@ -1835,6 +1861,19 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       id: 'equations',
       number: 3,
       title: 'Équations avec fonctions cyclométriques',
+      titreCourt: 'Équations avec arcfonctions',
+      partie: 'Équations et dérivées',
+      essentiel: [
+        'D\'abord la condition d\'existence : arcsin(u) et arccos(u) exigent $u \\in [-1;1]$ ; arctan(u) n\'impose aucune CE.',
+        'Même arcfonction des deux côtés : $\\arcsin(A) = \\arcsin(B) \\iff A = B$, puis on rejette les solutions hors CE. Arcfonction égale à un angle α : α doit être dans l\'image, puis $u = \\sin(\\alpha)$.',
+        'Deux arcfonctions différentes : une fonction trigonométrique des deux côtés, puis le tri des candidats (solutions parasites). Identité utile : $\\arcsin(u) + \\arccos(u) = \\pi/2$.',
+      ],
+      cartes: [
+        { question: '$\\arccos(x^2 - 1) = \\arccos(1 - x)$ donne $x = 1$ ou $x = -2$ : que garder ?', reponse: 'Seulement $x = 1$ : la CE est $[0 ; \\sqrt{2}]$, et $\\arccos(3)$ n\'existe pas.' },
+        { question: 'Résous $\\arctan(3x + 1) = \\dfrac{\\pi}{2}$.', reponse: '$S = \\varnothing$ : l\'image de arctan est l\'intervalle ouvert $]-\\pi/2 ; \\pi/2[$.' },
+        { question: 'Résous $\\arccos(2x - 1) = \\dfrac{2\\pi}{3}$.', reponse: '$2x - 1 = \\cos \\dfrac{2\\pi}{3} = -\\dfrac{1}{2}$, donc $x = \\dfrac{1}{4}$.' },
+        { question: 'Résous $\\arccos(x + 1) = -\\dfrac{\\pi}{4}$.', reponse: '$S = \\varnothing$, sans calcul : arccos ne prend jamais de valeur négative.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Équations avec fonctions cyclométriques', youtubeId: 'xt5WElsrQ5A' },
         { kind: 'subheading', text: "La condition d'existence d'abord" },
@@ -2200,6 +2239,19 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       id: 'derivees',
       number: 4,
       title: 'Dérivées des fonctions cyclométriques',
+      titreCourt: 'Dérivées des arcfonctions',
+      partie: 'Équations et dérivées',
+      essentiel: [
+        '$(\\arcsin u)\' = \\dfrac{u\'}{\\sqrt{1-u^2}}$, $(\\arccos u)\' = -\\dfrac{u\'}{\\sqrt{1-u^2}}$ et $(\\arctan u)\' = \\dfrac{u\'}{1+u^2}$.',
+        'Pour arcsin et arccos, valable seulement si $u(x) \\in \\; ]-1 ; 1[$ ; pour arctan, sur $\\mathbb{R}$. N\'oublie ni le facteur u′ ni le signe moins de arccos : c\'est u tout entier qui est mis au carré.',
+        'Une dérivée nulle sur un intervalle donne une fonction constante : $\\arctan(x) + \\arctan\\left(\\dfrac{1}{x}\\right) = \\dfrac{\\pi}{2}$ pour $x > 0$.',
+      ],
+      cartes: [
+        { question: 'Dérive $\\arctan(3x)$.', reponse: '$\\dfrac{3}{1 + 9x^2}$, et non $\\dfrac{3}{1 + 3x^2}$.' },
+        { question: 'Dérive $\\arccos(x^2)$.', reponse: '$-\\dfrac{2x}{\\sqrt{1 - x^4}}$, pour $x \\in \\; ]-1 ; 1[$.' },
+        { question: 'D\'où vient le signe moins de la dérivée de arccos ?', reponse: 'De la dérivée de cos, qui vaut −sin : arccos est décroissante.' },
+        { question: 'arcsin est-elle dérivable en 1 ?', reponse: 'Non : dériver $\\sin(\\arcsin x) = x$ en 1 donnerait $0 \\cdot \\arcsin\'(1) = 1$, absurde.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Dérivées des fonctions cyclométriques', youtubeId: 'UvcxAUJF9d0' },
         { kind: 'subheading', text: 'Les trois formules' },
@@ -2720,6 +2772,19 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       id: 'graphiques',
       number: 5,
       title: 'Reconnaître une fonction cyclométrique à son graphe',
+      titreCourt: 'Reconnaître le graphe',
+      partie: 'Graphes et études',
+      essentiel: [
+        'Domaine [−1 ; 1] : arcsin ou arccos ; domaine ℝ et asymptotes horizontales $y = \\pm\\pi/2$ : arctan. arccos est la seule décroissante.',
+        '$f(x) = c + k\\cdot\\arcsin(mx + n)$ : domaine par $-1 \\le mx + n \\le 1$ ; image : celle de l\'arcfonction multipliée par k, puis augmentée de c.',
+        'Passer par l\'origine ne suffit pas pour être impaire : seul le centre de symétrie, ou le calcul de f(−x), permet de conclure.',
+      ],
+      cartes: [
+        { question: '$f(x) = \\dfrac{\\pi}{2} + 2\\arcsin(x - 1)$ : domaine et image ?', reponse: 'Domaine $[0 ; 2]$, image $\\left[-\\dfrac{\\pi}{2} ; \\dfrac{3\\pi}{2}\\right]$.' },
+        { question: '$g(x) = \\dfrac{\\pi}{2} - 2\\arctan(x + 1)$ : croissante ou décroissante ?', reponse: 'Décroissante, car $k \\cdot m = -2 < 0$.' },
+        { question: 'Asymptotes horizontales de $c + k\\cdot\\arctan(mx + n)$ ?', reponse: '$y = c \\pm k\\dfrac{\\pi}{2}$.' },
+        { question: 'Un graphe de domaine ℝ sans asymptote : est-ce une arcfonction seule ?', reponse: 'Non : seule arctan a le domaine ℝ, et elle a les asymptotes $y = \\pm\\pi/2$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Reconnaître une fonction cyclométrique à son graphe', youtubeId: 'dCyJByIOeso' },
         { kind: 'subheading', text: 'Les trois graphes de référence' },
@@ -2986,6 +3051,19 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       id: 'etude',
       number: 6,
       title: 'Étudier une fonction cyclométrique',
+      titreCourt: 'Étude complète',
+      partie: 'Graphes et études',
+      essentiel: [
+        'Même ordre que pour toute fonction : domaine (CE), parité, limites et asymptotes, dérivée et signe, tableau de variations, graphe.',
+        '$\\lim\\limits_{x \\to \\pm\\infty} \\arctan(x) = \\pm\\dfrac{\\pi}{2}$. Asymptote oblique : $a = \\lim\\limits_{x \\to \\infty} \\dfrac{f(x)}{x}$, puis $b = \\lim\\limits_{x \\to \\infty} \\big(f(x) - ax\\big)$.',
+        'Une fonction paire ou impaire s\'étudie sur $[0 ; +\\infty[$, puis se complète par symétrie.',
+      ],
+      cartes: [
+        { question: '$g(x) = \\arctan(x) - \\dfrac{x}{2}$ : paire ou impaire ?', reponse: 'Impaire : $g(-x) = -\\arctan(x) + \\dfrac{x}{2} = -g(x)$.' },
+        { question: 'Même g : où est son maximum ?', reponse: '$g\'(x) = \\dfrac{1 - x^2}{2(1 + x^2)}$ s\'annule en 1 : maximum $g(1) = \\dfrac{\\pi}{4} - \\dfrac{1}{2}$.' },
+        { question: 'Même g : asymptote oblique en $+\\infty$ ?', reponse: '$y = -\\dfrac{x}{2} + \\dfrac{\\pi}{2}$, car $g(x) + \\dfrac{x}{2} = \\arctan(x) \\to \\dfrac{\\pi}{2}$.' },
+        { question: '$f(x) = x\\arctan(x)$ : paire ou impaire ?', reponse: 'Paire : produit de deux fonctions impaires.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étudier une fonction cyclométrique' },
         {

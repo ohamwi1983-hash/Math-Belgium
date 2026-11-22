@@ -23,6 +23,19 @@ export const nombresComplexes: ChapterContent = {
       number: 1,
       title: 'Opérations de base et puissances de i',
       kicker: 'i²=−1, forme a+bi, conjugué, division',
+      titreCourt: 'Opérations de base',
+      partie: 'Calculer dans ℂ',
+      essentiel: [
+        '$i^2 = -1$ ; un nombre complexe s\'écrit $z = a+bi$, de partie réelle a et de partie imaginaire b. Deux complexes sont égaux si leurs parties réelles et leurs parties imaginaires le sont.',
+        'Conjugué : $\\bar{z} = a-bi$ et $z\\cdot\\bar{z} = a^2+b^2$. Pour diviser, multiplie par le conjugué du **dénominateur**. Aucune relation d\'ordre dans ℂ.',
+        'Les puissances de i suivent un cycle de période 4 : $1, i, -1, -i$ ; pour $i^n$, garde le reste de la division de n par 4.',
+      ],
+      cartes: [
+        { question: 'Calcule $(2+i)(3-i)$.', reponse: '$6 - 2i + 3i - i^2 = 7+i$.' },
+        { question: 'Écris $\\dfrac{1+i}{1-i}$ sous la forme a + bi.', reponse: '$\\dfrac{(1+i)^2}{(1-i)(1+i)} = \\dfrac{2i}{2} = i$.' },
+        { question: 'Que vaut $i^{2021}$ ?', reponse: '$2021 = 4 \\times 505 + 1$, donc $i^{2021} = i$.' },
+        { question: 'Où est l\'erreur dans $\\sqrt{(-1)\\cdot(-1)} = \\sqrt{-1}\\cdot\\sqrt{-1}$ ?', reponse: '$\\sqrt{ab} = \\sqrt{a}\\cdot\\sqrt{b}$ n\'est vrai que pour $a \\geq 0$ et $b \\geq 0$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Le nombre i, la forme a+bi, égalité, addition et multiplication', youtubeId: 'wx8rh7lg4Ek' },
         { kind: 'video', title: 'Conjugué, division et puissances de i', youtubeId: '3wItJZm7MW0' },
@@ -345,6 +358,19 @@ export const nombresComplexes: ChapterContent = {
       number: 2,
       title: 'Affixes et racines carrées',
       kicker: 'affixe, plan d\'Argand, milieu, racine carrée',
+      titreCourt: 'Affixes et racines carrées',
+      partie: 'Calculer dans ℂ',
+      essentiel: [
+        '$z = a+bi$ est l\'affixe du point $M(a;b)$ du plan d\'Argand ; $\\vec{AB}$ a pour affixe $z_B - z_A$. Milieu : $z_M = \\dfrac{z_A+z_B}{2}$ ; distance : $AB = |z_B - z_A|$.',
+        'Racines carrées de $a+bi$ : $x^2-y^2 = a$, $2xy = b$ et $x^2+y^2 = \\sqrt{a^2+b^2}$ ; le signe de b fixe le signe relatif de x et y.',
+        'Un complexe non nul a toujours exactement deux racines carrées, opposées.',
+      ],
+      cartes: [
+        { question: 'Distance AB pour $z_A = 1+2i$ et $z_B = 4+6i$ ?', reponse: '$|z_B - z_A| = |3+4i| = \\sqrt{9+16} = 5$.' },
+        { question: 'Racines carrées de $3+4i$ ?', reponse: '$x^2 = 4$, $y^2 = 1$, x et y de même signe : $\\pm(2+i)$.' },
+        { question: 'Racines carrées de $5-12i$ ?', reponse: '$3-2i$ et $-3+2i$ : $2xy < 0$, x et y de signes opposés.' },
+        { question: 'Quel point a pour affixe $\\bar{z}$ ?', reponse: 'Le symétrique de M par rapport à l\'axe réel.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Affixes, plan d\'Argand et racine carrée d\'un complexe', youtubeId: '44TNtPom7L0' },
         {
@@ -561,6 +587,19 @@ export const nombresComplexes: ChapterContent = {
       number: 3,
       title: 'Équations dans ℂ',
       kicker: 'Δ<0, deux solutions conjuguées ; équations bicarrées',
+      titreCourt: 'Équations dans ℂ',
+      partie: 'Calculer dans ℂ',
+      essentiel: [
+        '$az^2+bz+c=0$ à coefficients réels, avec $\\Delta<0$ : deux solutions conjuguées, $z = \\dfrac{-b \\pm i\\sqrt{|\\Delta|}}{2a}$.',
+        'Bicarrée $az^4+bz^2+c=0$ : pose $u = z^2$ ; chaque $u \\neq 0$ donne deux valeurs de z, même si u est négatif.',
+        'Dans ℂ, un polynôme de degré n a exactement n racines, comptées avec multiplicité. Contrôle : $z_1+z_2 = -\\dfrac{b}{a}$ et $z_1z_2 = \\dfrac{c}{a}$.',
+      ],
+      cartes: [
+        { question: 'Résous $z^2+2z+5=0$ dans ℂ.', reponse: '$\\Delta = -16$, donc $z = -1\\pm2i$.' },
+        { question: 'Résous $z^4+5z^2+4=0$ dans ℂ.', reponse: '$u = -1$ ou $u = -4$, donc $z = \\pm i$ ou $z = \\pm2i$.' },
+        { question: '$z_0$ est une racine non réelle d\'un polynôme à coefficients réels : quelle autre racine ?', reponse: 'Son conjugué $\\bar{z}_0$.' },
+        { question: 'Résous $z^2-3z+(3+i)=0$ dans ℂ.', reponse: '$\\Delta = -3-4i$ et $\\delta = \\pm(1-2i)$ : $z_1 = 2-i$ et $z_2 = 1+i$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Équations dans ℂ : Δ < 0, bicarrées, racines conjuguées', youtubeId: 'o3zky-zKVCo' },
         {
@@ -771,6 +810,19 @@ export const nombresComplexes: ChapterContent = {
       number: 4,
       title: 'Forme trigonométrique, module, argument',
       kicker: 'module, argument, forme trigonométrique et exponentielle',
+      titreCourt: 'Module et argument',
+      partie: 'Module, argument, puissances',
+      essentiel: [
+        'Module : $|z| = \\sqrt{a^2+b^2}$, la distance à l\'origine. Argument : l\'angle entre l\'axe des réels positifs et $\\vec{OM}$, donné dans $]-\\pi\\,;\\pi]$.',
+        '$z = r(\\cos\\theta+i\\sin\\theta) = re^{i\\theta}$, avec $r \\geq 0$. Si $a<0$, corrige $\\arctan(b/a)$ de $+\\pi$ (si $b\\ge0$) ou de $-\\pi$ (si $b<0$).',
+        'Un produit **multiplie** les modules et **additionne** les arguments ; un quotient divise les modules et soustrait les arguments.',
+      ],
+      cartes: [
+        { question: 'Forme exponentielle de $1+i\\sqrt{3}$ ?', reponse: '$2e^{i\\pi/3}$.' },
+        { question: 'Argument de $-1-i$ ?', reponse: '$\\dfrac{\\pi}{4} - \\pi = -\\dfrac{3\\pi}{4}$ : troisième quadrant.' },
+        { question: 'Calcule $2e^{i\\pi/3} \\cdot 3e^{i\\pi/6}$.', reponse: '$6e^{i\\pi/2} = 6i$ : modules multipliés, arguments additionnés.' },
+        { question: 'Module et argument de $\\bar{z}$ ?', reponse: '$|\\bar{z}| = |z|$ et $\\arg(\\bar{z}) = -\\arg(z)$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Forme trigonométrique, module, argument, produit et quotient', youtubeId: 'vu9w4a5RF20' },
         {
@@ -1167,6 +1219,19 @@ export const nombresComplexes: ChapterContent = {
       number: 5,
       title: 'Formule de Moivre',
       kicker: '(cos θ + i sin θ)ⁿ = cos(nθ) + i sin(nθ)',
+      titreCourt: 'Formule de Moivre',
+      partie: 'Module, argument, puissances',
+      essentiel: [
+        '$(\\cos\\theta+i\\sin\\theta)^n = \\cos(n\\theta) + i\\sin(n\\theta)$, pour tout entier n.',
+        'Développe $(\\cos x+i\\sin x)^n$ par le binôme de Newton : les termes à k pair donnent $\\cos(nx)$, ceux à k impair $i\\sin(nx)$.',
+        'Linéariser : $\\cos x = \\dfrac{e^{ix}+e^{-ix}}{2}$, puis regrouper $e^{ikx}+e^{-ikx} = 2\\cos(kx)$.',
+      ],
+      cartes: [
+        { question: 'Développe $\\cos(2x)$ et $\\sin(2x)$.', reponse: '$\\cos(2x) = \\cos^2x-\\sin^2x$ et $\\sin(2x) = 2\\sin x\\cos x$.' },
+        { question: 'Linéarise $\\cos^2x$.', reponse: '$\\dfrac{1+\\cos(2x)}{2}$.' },
+        { question: 'Linéarise $\\cos^3x$.', reponse: '$\\dfrac{3\\cos x+\\cos(3x)}{4}$.' },
+        { question: 'Comment s\'écrit $\\sin x$ avec les formules d\'Euler ?', reponse: '$\\sin x = \\dfrac{e^{ix}-e^{-ix}}{2i}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Formule de Moivre', youtubeId: 'u4Zek-B6nnk' },
         {
@@ -1499,6 +1564,19 @@ export const nombresComplexes: ChapterContent = {
       number: 6,
       title: 'Racines n-ièmes d\'un nombre complexe',
       kicker: 'zₖ = ⁿ√r · exp(i(θ + 2kπ)/n) — polygone régulier',
+      titreCourt: 'Racines n-ièmes',
+      partie: 'Module, argument, puissances',
+      essentiel: [
+        'Les n racines n-ièmes de $z=re^{i\\theta}$ : $z_k = r^{1/n}\\cdot e^{i(\\theta+2k\\pi)/n}$, pour $k=0,1,\\ldots,n-1$.',
+        'Elles ont le même module et sont espacées de $2\\pi/n$ : ce sont les sommets d\'un polygone régulier à n côtés.',
+        'Racines n-ièmes de l\'unité : $e^{2ik\\pi/n}$ ; leur somme vaut 0 dès que $n\\ge2$.',
+      ],
+      cartes: [
+        { question: 'Quelles sont les racines quatrièmes de l\'unité ?', reponse: '$1, i, -1, -i$ : les sommets d\'un carré.' },
+        { question: 'Racines cubiques de $-8$ ?', reponse: '$1+i\\sqrt{3}$, $-2$ et $1-i\\sqrt{3}$.' },
+        { question: 'Écart angulaire entre deux racines n-ièmes consécutives ?', reponse: '$\\dfrac{2\\pi}{n}$, et non $\\dfrac{\\pi}{n}$.' },
+        { question: 'i est-elle une racine cubique de l\'unité ?', reponse: 'Non : $i^3 = -i$ ; i est une racine quatrième.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Racines n-ièmes d\'un nombre complexe', youtubeId: 'nMCp_ZjrrjQ' },
         {
@@ -1669,6 +1747,19 @@ export const nombresComplexes: ChapterContent = {
       number: 7,
       title: 'Transformations du plan',
       kicker: 'translation, rotation, homothétie, similitude',
+      titreCourt: 'Transformations du plan',
+      partie: 'Géométrie avec les complexes',
+      essentiel: [
+        'Translation : $z\' = z+b$. Rotation de centre $\\Omega(z_0)$ et d\'angle θ : $z\' = e^{i\\theta}(z-z_0)+z_0$. Homothétie de rapport k réel : $z\' = k(z-z_0)+z_0$.',
+        'Similitude $z\' = az+b$ ($a \\neq 0$) : angle $\\arg(a)$, rapport $|a|$ et, si $a \\neq 1$, centre $z_0 = \\dfrac{b}{1-a}$.',
+        'Multiplier par i, c\'est tourner d\'un quart de tour autour de O.',
+      ],
+      cartes: [
+        { question: 'Nature de $z\' = (1+i)z + 2$ ?', reponse: 'Similitude de centre $\\Omega(2i)$, d\'angle $\\dfrac{\\pi}{4}$ et de rapport $\\sqrt{2}$.' },
+        { question: '$z\' = -z$ : quelle transformation ?', reponse: 'La symétrie centrale de centre O, rotation d\'angle π.' },
+        { question: 'Rotation de centre $A(1)$ et d\'angle $\\dfrac{\\pi}{2}$ ?', reponse: '$z\' = i(z-1)+1 = iz+1-i$.' },
+        { question: 'À quelle condition $z\' = az+b$ est-elle une rotation ?', reponse: '$|a| = 1$ et $a \\neq 1$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Transformations du plan : translation, rotation, homothétie, similitude', youtubeId: 'C9EqFs1JjSA' },
         {
@@ -2003,6 +2094,19 @@ export const nombresComplexes: ChapterContent = {
       number: 8,
       title: 'Propriétés géométriques de triangles',
       kicker: 'alignement, orthogonalité, isocèle, rectangle, équilatéral',
+      titreCourt: 'Triangles et affixes',
+      partie: 'Géométrie avec les complexes',
+      essentiel: [
+        '$(\\overrightarrow{AB},\\overrightarrow{AC}) = \\arg\\left(\\dfrac{z_C-z_A}{z_B-z_A}\\right)$, et le module de ce rapport vaut $\\dfrac{AC}{AB}$.',
+        'Rapport **réel** : alignement ; rapport **imaginaire pur** : orthogonalité.',
+        'Isocèle en A : $|z_B-z_A| = |z_C-z_A|$. Isocèle rectangle : rapport $i$ ou $-i$. Équilatéral : rapport $e^{i\\pi/3}$ ou $e^{-i\\pi/3}$.',
+      ],
+      cartes: [
+        { question: '$A(1)$, $B(3)$ et $C(2+i\\sqrt{3})$ : nature du triangle ABC ?', reponse: '$\\dfrac{z_C-z_A}{z_B-z_A} = \\dfrac{1+i\\sqrt{3}}{2} = e^{i\\pi/3}$ : équilatéral.' },
+        { question: '$\\dfrac{z_C-z_A}{z_B-z_A}$ est imaginaire pur : que conclure ?', reponse: 'ABC est rectangle en A.' },
+        { question: '$\\dfrac{z_C-z_A}{z_B-z_A} = i$ : que conclure ?', reponse: 'ABC est isocèle rectangle en A.' },
+        { question: 'Comment construire F pour que OBF soit équilatéral ?', reponse: '$F = B\\cdot e^{i\\pi/3}$ : la rotation de centre O et d\'angle $\\dfrac{\\pi}{3}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Propriétés géométriques de triangles', youtubeId: 'ajlCdHMn4No' },
         {
@@ -2149,6 +2253,19 @@ export const nombresComplexes: ChapterContent = {
       number: 9,
       title: 'Nombres complexes : problèmes avancés',
       kicker: 'zⁿ réel/positif, lieux géométriques, transformations avancées',
+      titreCourt: 'Problèmes avancés',
+      partie: 'Géométrie avec les complexes',
+      essentiel: [
+        '$z^n$ réel ⟺ $n\\theta \\equiv 0 \\pmod{\\pi}$ ; $z^n$ réel **positif** ⟺ $n\\theta \\equiv 0 \\pmod{2\\pi}$.',
+        '$|z-a| = k$ : cercle de centre A ; $|z-a| = |z-b|$ : médiatrice de [AB] ; $\\arg(z-a) \\equiv \\theta_0 \\pmod{2\\pi}$ : demi-droite. Une inégalité décrit une région, de frontière le lieu correspondant.',
+        '$|z+w| \\le |z|+|w|$ : le module d\'une somme n\'est pas la somme des modules. En électricité, $j^2=-1$ et $Z_C = \\dfrac{1}{jC\\omega} = -\\dfrac{j}{C\\omega}$.',
+      ],
+      cartes: [
+        { question: '$z = e^{i\\theta}$, $\\theta\\in[0;2\\pi[$ : quand $z^3$ est-il réel positif ?', reponse: '$3\\theta = 2k\\pi$ : $\\theta \\in \\{0,\\ 2\\pi/3,\\ 4\\pi/3\\}$.' },
+        { question: 'Lieu des points tels que $|z-1| = |z+i|$ ?', reponse: 'La médiatrice de [AB], avec $A(1)$ et $B(-i)$ : la droite $y=-x$.' },
+        { question: '$|3+4i|$ vaut-il $|3|+|4i|$ ?', reponse: 'Non : $|3+4i| = 5$, alors que $|3|+|4i| = 7$.' },
+        { question: 'Circuit RLC série : $Z = 40+30j$ sous 230 V. Module et intensité ?', reponse: '$|Z| = 50$ Ω et $I = \\dfrac{230}{50} = 4{,}6$ A.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Problèmes avancés et synthèse du chapitre', youtubeId: 'QEzQJzT83TQ' },
         {

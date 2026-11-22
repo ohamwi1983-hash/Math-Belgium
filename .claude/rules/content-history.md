@@ -5286,3 +5286,22 @@ formule longue d'un seul tenant (formule unifiée des 8 paramètres, égalité �
 l'encadré et de la fiche — la couper en deux `$…$` (« g(u), avec u = … »). Vérifié : KaTeX strict sur
 tous les champs (0 erreur), étapes / fiche / 195 cartes retournées sans débordement, 0 erreur console,
 texte `pdftotext` des 7 PDF A4 identique avant / après.
+
+## 5e ch. 1–4 et 6e ch. 1–5 — champs du parcours (décision de l'utilisateur, 22/11/2026)
+
+`titreCourt`, `partie`, `essentiel`, `cartes` remplis pour les 9 chapitres « complets » (pas 5e ch. 5,
+pas 6e ch. 6–10), sur le modèle de la 4e (blocs du cours inchangés, notations reprises de chaque cours :
+`\lim\limits_{x \to a}`, dom($f^{-1}$), log décimal, radians). Parties : 5e ch. 1 « Le domaine, puis
+composer » 1–3 / « Sur un graphique, en contexte » 4–5 ; ch. 2 « Arcs, secteurs et aires » 1–3 / « Les
+fonctions sinusoïdales » 4–6 / « Équations et modélisation » 7–8 ; ch. 3 « Deux familles de suites » 1–2
+/ « Limites et problèmes classiques » 3–4 / « Comparer et prévoir le long terme » 5–6 ; ch. 4 « Calculer
+limites et asymptotes » 1–2 / « Lire, interpréter, étudier » 3–5 ; 6e ch. 1 « Réciproques et
+arcfonctions » 1–2 / « Équations et dérivées » 3–4 / « Graphes et études » 5–6 ; ch. 2 « Limites et
+dérivée » 1–3 / « Équations et inéquations » 4–5 / « Étudier et modéliser » 6–7 ; ch. 3 « Propriétés,
+équations, inéquations » 1–3 / « Dérivée, limites, paramètres » 4–6 / « Étudier, puis appliquer » 7–10 ;
+ch. 4 « Les primitives » 1–2 / « Intégrale définie et aires » 3–4 / « Volumes, longueurs, problèmes »
+5–7 ; ch. 5 « Calculer dans ℂ » 1–3 / « Module, argument, puissances » 4–6 / « Géométrie avec les
+complexes » 7–9. 63 sections, 63 essentiels (185 phrases), 248 cartes (réponses recalculées). Même piège
+qu'en 4e au rendu iPhone 13 : la carte « 1 = √((−1)(−1)) = … = −1 » débordait — réduite à la seule
+ligne fautive. Vérifié : KaTeX strict (0 erreur), étapes / fiche / 248 cartes sans débordement, 0 erreur
+console, `pdftotext` des 9 PDF A4 identique avant / après.
