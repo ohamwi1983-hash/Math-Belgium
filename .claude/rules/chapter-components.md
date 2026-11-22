@@ -97,3 +97,37 @@ d'encadrés : orange (essentiel, définition, méthode, rappel), rouge (attentio
 (exemple), violet (À toi) ; astuce/intuition en neutre clair. Ordinateur (≥ 760 px) : étape = carte
 des étapes à gauche + article ≤ 760 px ; ≥ 1200 px : + colonne de droite. `OutilsChapitre`
 (Feuilles, Carnet, Imprimer) : bas de la carte et colonne de gauche d'une étape.
+
+## Page d'un générateur `/entrainement/:chantier/:generatorId` (refonte du 22/11/2026)
+
+Maquettes A (partout), B (plusieurs étapes), C (choix entre graphiques), D (réponse révélée), E
+(rappels), ordinateur ; téléphone d'abord. **Aucun `App*.tsx` réécrit** : tout passe par le cadre
+partagé ; contenu, aides, tentatives et vérification inchangés, `SelecteurVarianteDev` intact.
+- `EntrainementPage` : `BarreGenerateur` (barre d'une ligne : retour ≥ 44 px vers la section,
+  « niveau · chapitre », segments, « Étape n / N ») à la place de `SiteHeader` + fil d'Ariane + lien
+  retour ; le `<h1>` du générateur reste (18 px), surtitre et ligne chapitre masqués à l'écran.
+- `components/cadreGenerateur.ts` : magasin externe (`useSyncExternalStore`). `ProgressionPuces`
+  y PUBLIE ses segments et son `onSegmentClick` (ne dessine plus rien sur place dans ce cadre) ; la
+  barre, `PanneauRappels` et `EnTeteExercice` s'y abonnent. Publier ne re-rend jamais le générateur.
+- `components/CadreActions.tsx` : ne déplace aucun nœud ; REPÈRE et marque `data-barre="principal"`
+  (seul `.btn-primary` visible de la carte, sinon `.validation-suivant`, sinon le dernier « Valider » ;
+  sinon rien), `"aide"` (`BoutonAide`, attribut `data-bouton-aide`, qui le précède), `"retour"` (message
+  qui le suit). < 1024 px : barre fixe du bas (`env(safe-area-inset-bottom)`, au-dessus du clavier via
+  `visualViewport` → `--clavier`) ; ≥ 1024 px : boutons sous l'étape. `data-saisie` (champ actif sur
+  écran tactile) : énoncé épinglé compact. Tiroir d'aide : COPIE en lecture seule des `.aide-5e` /
+  `.triangle-quelconque-aide` (l'original reste dans la page), « Aide suivante » clique le vrai bouton.
+  Ordinateur : énoncé (`.entete-exercice`) en position fixe calculée sur la carte (`data-enonce-fixe`,
+  `--col-x/-w/-top`), étapes à droite.
+- `ValidationEcran` : verdict + « Réponse attendue » dans un seul encadré (`.validation-verdict`),
+  bouton `.validation-suivant` (libellé `labelSuivant` inchangé). `PanneauRappels` (« Ce qu'on sait
+  déjà » des 3 `RecapitulatifPanel` et des socles `AppEcransTrigo`/`AppEcransExp`) : une ligne ≥ 48 px
+  par écran clos, ✓ vert / ✓ jaune (aide) / ✗ rouge, « Revoir › » seulement si la correspondance
+  entrée ↔ écran clos est sûre (même nombre, même verdict) et que le générateur a une fiche.
+- `EnTeteExercice` (×3) : carte sobre ; repliée en une ligne (touche pour déplier) dès qu'un écran
+  est clos. C : `EtapeSelectionGraphiqueQCM` (6gen8/11/20/21) et `EtapeApparierGraphiqueCyclo`
+  (6gen5) en grille 2 × 2 dès 312 px, carte cliquable (même sélection), `LoupeGraphique` plein écran ;
+  6gen20 : graphique de f épinglé (`ReferenceEpinglee`). 5gen25 : grille dès qu'il y a la place.
+- Styles : `src/entrainement/cadre.css`, chargé APRÈS `theme.css`, tout sous `.entrainement`.
+  Échelle 12 (capitales) / 14 / 16 / 18 px ; Andika (`--lecture`) pour énoncé et consignes. Piège
+  trouvé : `.btn:hover:not(:disabled)` (plus spécifique que `.btn-primary:hover`) rendait « Valider »
+  pâle sous texte blanc au survol / après un toucher — corrigé dans `cadre.css`.
