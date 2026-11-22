@@ -1,6 +1,8 @@
 import type { ExerciceEquationCercleDeveloppee } from "../../core/equationCercleDeveloppee.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, ErreurFrequente, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, ErreurFrequente, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeEquationCercleDeveloppee } from "./corrigeDetaille";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
   CONSIGNE_COMPLETION,
@@ -15,7 +17,6 @@ import {
   segmentsConsigneCentreRayon,
 } from "../../ui/formatEquationCercleDeveloppee";
 import { formatFractionIrreductible } from "../../ui/formatFraction";
-import { formatSommeTermes } from "../../ui/formatEquation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationCercleDeveloppee } from "./index";
 import { PARAMETRES_CERCLE_DEVELOPPE, profilEquationCercleDeveloppee } from "../profilsEvaluation4eCh7Coniques";
 
@@ -91,15 +92,7 @@ function nombreLatex(valeur: number): string {
   return valeur < 0 ? `-${corps}` : corps;
 }
 
-/** Carré d'une valeur absolue, parenthèses autour d'une fraction : `3^2`, `\left(\dfrac{3}{2}\right)^2`. */
-function carreLatex(valeur: number): string {
-  const abs = Math.abs(valeur);
-  return Number.isInteger(abs) ? `${abs}^2` : `\\left(${nombreLatex(abs)}\\right)^2`;
-}
 
-function binomeLatex(variable: "x" | "y", valeur: number): string {
-  return valeur > 0 ? `${variable} - ${nombreLatex(valeur)}` : `${variable} + ${nombreLatex(-valeur)}`;
-}
 
 /** R exact (racine simplifiée), suivi de sa valeur arrondie quand il est irrationnel. */
 function rayonLatex(instance: ExerciceEquationCercleDeveloppee): string {
@@ -107,70 +100,19 @@ function rayonLatex(instance: ExerciceEquationCercleDeveloppee): string {
   return instance.variante === "irrationnel" ? `${exact} \\approx ${formatRayonApprocheTexte(instance).replace(",", "{,}")}` : exact;
 }
 
-/** Équation divisée par k, avant regroupement : `x^2 + y^2 + px + qy = Q`. */
-function equationDiviseeLatex(instance: ExerciceEquationCercleDeveloppee): string {
-  const gauche = formatSommeTermes([
-    { valeur: 1, suffixe: "x^2" },
-    { valeur: 1, suffixe: "y^2" },
-    { valeur: instance.bx / instance.k, suffixe: "x" },
-    { valeur: instance.by / instance.k, suffixe: "y" },
-  ]);
-  return `${gauche} = ${instance.c / instance.k}`;
-}
 
-/** Ligne intermédiaire de la complétion : `(x - a)^2 - a^2 + (y - b)^2 - b^2 = Q`. */
-function completionIntermediaireLatex(instance: ExerciceEquationCercleDeveloppee): string {
-  const { x, y } = instance.centre;
-  return `(${binomeLatex("x", x)})^2 - ${carreLatex(x)} + (${binomeLatex("y", y)})^2 - ${carreLatex(y)} = ${instance.c / instance.k}`;
-}
 
-function sommeSecondMembreLatex(instance: ExerciceEquationCercleDeveloppee): string {
-  const { x, y } = instance.centre;
-  return `${instance.c / instance.k} + ${nombreLatex(x * x)} + ${nombreLatex(y * y)} = ${nombreLatex(instance.rayonCarre)}`;
-}
 
-function centreFractionnaire(instance: ExerciceEquationCercleDeveloppee): boolean {
-  return !Number.isInteger(instance.centre.x) || !Number.isInteger(instance.centre.y);
-}
-
-function difficulteEquationCercleDeveloppee(instance: ExerciceEquationCercleDeveloppee): 1 | 2 | 3 {
-  return centreFractionnaire(instance) ? 3 : 2;
-}
 
 function reponseBreveEquationCercleDeveloppee(instance: ExerciceEquationCercleDeveloppee): FragmentConsigne[] {
   return [texte("Centre "), latex(formatCentreAttenduLatex(instance)), texte(", rayon "), latex(rayonLatex(instance)), texte(".")];
 }
 
-function correctionDetailleeEquationCercleDeveloppee(instance: ExerciceEquationCercleDeveloppee): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [];
-  if (instance.k !== 1) {
-    lignes.push({ label: "Calcul", sousQuestion: "a", fragments: [texte(`x² et y² ont le même coefficient, ${instance.k} : on divise les deux membres par ${instance.k}, `), latex(equationDiviseeLatex(instance)), texte(".")] });
-  }
-  lignes.push(
-    { label: "Calcul", sousQuestion: "a", fragments: [texte("On regroupe les termes en x et les termes en y : "), latex(formatRegroupementLatex(instance)), texte(".")] },
-    {
-      label: "Méthode",
-      sousQuestion: "b",
-      fragments: [texte("Dans chaque parenthèse, on complète le carré : "), latex("x^2+px=\\left(x+\\dfrac{p}{2}\\right)^2-\\left(\\dfrac{p}{2}\\right)^2"), texte(".")],
-    },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(completionIntermediaireLatex(instance)), texte(".")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [texte("On passe les constantes dans le second membre : "), latex(sommeSecondMembreLatex(instance)), texte(", d'où "), latex(formatCompletionLatex(instance)), texte(".")] },
-    {
-      label: "Lecture",
-      sousQuestion: "c",
-      fragments: [texte("Par comparaison avec "), latex("(x-x_0)^2+(y-y_0)^2=R^2"), texte(" : centre "), latex(formatCentreAttenduLatex(instance)), texte(" et "), latex(`R^2 = ${nombreLatex(instance.rayonCarre)}`), texte(".")],
-    },
-    { label: "Conclusion", sousQuestion: "c", fragments: [latex(rayonLatex(instance)), texte(".")] },
-  );
-  const negatif = instance.centre.x < 0 ? { v: "x", c: instance.centre.x } : instance.centre.y < 0 ? { v: "y", c: instance.centre.y } : null;
-  lignes.push({
-    label: "Piège",
-    sousQuestion: "c",
-    fragments: negatif
-      ? [texte("Attention aux signes : "), latex(`(${binomeLatex(negatif.v as "x" | "y", negatif.c)})^2`), texte(" correspond à "), latex(`${negatif.v}_0 = ${nombreLatex(negatif.c)}`), texte(" ; et le second membre vaut "), latex("R^2"), texte(", pas R.")]
-      : [texte("Le second membre de la forme complétée vaut "), latex("R^2"), texte(" : il faut encore en prendre la racine carrée pour obtenir le rayon.")],
-  });
-  return lignes;
+/** Niveau (« Noter un nouveau chapitre ») : trois écrans qui transforment (regroupement,
+ * complétion, centre et rayon — R se calcule), méthode imposée par les consignes, aucun piège dans
+ * les données (le signe du centre est la méthode) ; valeurs exactes. */
+function criteresDifficulte(instance: ExerciceEquationCercleDeveloppee): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeEquationCercleDeveloppee(instance)), methode: 0, piege: 0, nombres: 0 };
 }
 
 function baremeEquationCercleDeveloppee(instance: ExerciceEquationCercleDeveloppee): BaremeExercice {
@@ -201,12 +143,11 @@ export const adaptateurEvaluationEquationCercleDeveloppee: AdaptateurFeuilleExer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceEquationCercleDeveloppee,
   construireCorrection: construireCorrectionEquationCercleDeveloppee,
-  difficulte: difficulteEquationCercleDeveloppee,
   reponseBreve: reponseBreveEquationCercleDeveloppee,
   correctionDetaillee: correctionDetailleeEquationCercleDeveloppee,
+  criteresDifficulte,
   bareme: baremeEquationCercleDeveloppee,
   enoncePapier: enoncePapierEquationCercleDeveloppee,
-  dureeMinutes: 6,
   profilInstance: profilEquationCercleDeveloppee,
   parametresAuChoix: PARAMETRES_CERCLE_DEVELOPPE,
 };

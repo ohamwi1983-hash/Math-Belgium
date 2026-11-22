@@ -19,6 +19,9 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import type { ExerciceEquationCercle } from "./core/equationCercle.types";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeEquationCercle } from "./generateurs/equationCercle/corrigeDetaille";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -142,6 +145,7 @@ export function AppEquationCercle() {
         reponseAttendue: construireReponseAttendue(exercice, etat.phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationCercle(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />,
       }
     : null;
 

@@ -1,21 +1,16 @@
-import type { ExerciceLieuxGeometriques, Lieu } from "../../core/lieuxGeometriques.types";
-import type { Point } from "../../core/vecteur.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, ErreurFrequente, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { ExerciceLieuxGeometriques } from "../../core/lieuxGeometriques.types";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, ErreurFrequente, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { conclusionLieux, correctionDetailleeLieuxGeometriques } from "./corrigeDetaille";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
   CONSIGNE_GENERALE_EQUATIONS,
   CONSIGNE_GENERALE_RESOLUTION,
-  formatEquationLieuLatex,
   formatEtatActuelSystemeLatex,
-  formatPointLatex,
   formatQuadratiqueSubstitutionLatex,
-  libelleChampEquation,
-  segmentsDescriptionLieu,
   segmentsEnonce,
-  substitutionResolution,
 } from "../../ui/formatLieuxGeometriques";
-import { formatFractionIrreductible } from "../../ui/formatFraction";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLieuxGeometriques } from "./index";
 import { profilLieuxGeometriques } from "../profilsEvaluation4eCh7Coniques";
 
@@ -77,16 +72,7 @@ import { profilLieuxGeometriques } from "../profilsEvaluation4eCh7Coniques";
  * sans jamais raisoner indépendamment sur `instance.quadratique`/discriminant).
  */
 
-/** Virgule décimale, jamais de point (racines toujours entières par construction, filet de
- * sécurité seulement). */
-function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "").replace(".", ",");
-}
 
-/** Points triés selon la composante `variable` (celle de l'équation du second degré obtenue). */
-function trierPointsParVariable(points: Point[], variable: "x" | "y"): Point[] {
-  return [...points].sort((p1, p2) => (variable === "x" ? p1.x - p2.x : p1.y - p2.y));
-}
 
 function construireEnonceLieuxGeometriques(instance: ExerciceLieuxGeometriques): SectionExercice {
   return {
@@ -116,7 +102,7 @@ function construireCorrectionLieuxGeometriques(instance: ExerciceLieuxGeometriqu
   return [
     { type: "paragraphe", fragments: [texte("Système : "), latex(formatEtatActuelSystemeLatex(instance)), texte(".")] },
     { type: "paragraphe", fragments: [texte("Équation obtenue par substitution : "), latex(formatQuadratiqueSubstitutionLatex(instance)), texte(".")] },
-    { type: "paragraphe", fragments: conclusion(instance) },
+    { type: "paragraphe", fragments: conclusionLieux(instance) },
   ];
 }
 
@@ -124,106 +110,24 @@ function construireCorrectionLieuxGeometriques(instance: ExerciceLieuxGeometriqu
 // Équation du second degré à coefficients entiers et discriminant (corrigé détaillé).
 // ---------------------------------------------------------------------------------------------
 
-function pgcd(a: number, b: number): number {
-  return b === 0 ? Math.abs(a) : pgcd(b, a % b);
-}
 
-function denominateur(valeur: number): number {
-  const brut = formatFractionIrreductible(Math.abs(valeur), 10000);
-  const m = /\/(\d+)$/.exec(brut);
-  return m ? Number(m[1]) : 1;
-}
 
-/** Mêmes coefficients entiers que la forme affichée par `formatQuadratiqueSubstitutionLatex`
- * (premiers entre eux, premier coefficient positif). */
-function quadratiqueEntiere(instance: ExerciceLieuxGeometriques): { variable: "x" | "y"; a: number; b: number; c: number } {
-  const { variable, A, B, C } = substitutionResolution(instance);
-  const ppcm = [A, B, C].map(denominateur).reduce((acc, d) => (acc * d) / pgcd(acc, d), 1);
-  const entiers = [A, B, C].map((v) => Math.round(v * ppcm));
-  const diviseur = entiers.reduce((acc, n) => pgcd(acc, n), 0) || 1;
-  const signe = entiers[0]! < 0 ? -1 : 1;
-  const [a, b, c] = entiers.map((n) => (signe * n) / diviseur) as [number, number, number];
-  return { variable, a, b, c };
-}
 
-function entreParentheses(n: number): string {
-  return n < 0 ? `(${n})` : String(n);
-}
 
-function discriminantLatex(instance: ExerciceLieuxGeometriques): { latex: string; valeur: number } {
-  const { a, b, c } = quadratiqueEntiere(instance);
-  const valeur = b * b - 4 * a * c;
-  return { latex: `\\Delta = ${entreParentheses(b)}^2 - 4 \\cdot ${entreParentheses(a)} \\cdot ${entreParentheses(c)} = ${valeur}`, valeur };
-}
 
-function droiteDe(instance: ExerciceLieuxGeometriques): Extract<Lieu, { type: "droite" }> {
-  return (instance.lieu1.type === "droite" ? instance.lieu1 : instance.lieu2) as Extract<Lieu, { type: "droite" }>;
-}
 
-function conclusion(instance: ExerciceLieuxGeometriques): FragmentConsigne[] {
-  if (instance.nombrePoints === 0) return [texte("Aucun point n'est à la fois sur les deux lieux : l'ensemble cherché est vide.")];
-  const pointsLatex = instance.points.map((p) => formatPointLatex(p));
-  if (instance.nombrePoints === 1) return [texte("Un seul point commun (la droite est tangente) : "), latex(pointsLatex[0]!), texte(".")];
-  return [texte("Deux points communs : "), latex(pointsLatex[0]!), texte(" et "), latex(pointsLatex[1]!), texte(".")];
-}
 
-/** Méthode de substitution, rédigée (même choix de variable que `substitutionResolution`). */
-function methodeSubstitution(instance: ExerciceLieuxGeometriques): string {
-  if (instance.paire === "cercleDroite") return "On remplace y par son expression tirée de l'équation de la droite dans l'équation du cercle : on obtient une équation du second degré en x.";
-  if (profilLieuxGeometriques(instance).forme === "horizontal") return "On exprime x en fonction de y à l'aide de l'équation de la droite, puis on le remplace dans l'équation de la parabole : on obtient une équation du second degré en y.";
-  return "On remplace y par son expression tirée de l'équation de la droite dans l'équation de la parabole : on obtient une équation du second degré en x.";
-}
-
-function difficulteLieuxGeometriques(instance: ExerciceLieuxGeometriques): 1 | 2 | 3 {
-  if (instance.paire === "droiteParabole" && profilLieuxGeometriques(instance).forme === "horizontal") return 3;
-  return instance.nombrePoints === 0 ? 2 : 3;
-}
 
 function reponseBreveLieuxGeometriques(instance: ExerciceLieuxGeometriques): FragmentConsigne[] {
-  return conclusion(instance);
+  return conclusionLieux(instance);
 }
 
-function correctionDetailleeLieuxGeometriques(instance: ExerciceLieuxGeometriques): EtapeCorrection[] {
-  const { variable, a } = quadratiqueEntiere(instance);
-  const autre = variable === "x" ? "y" : "x";
-  const delta = discriminantLatex(instance);
-  const droite = droiteDe(instance);
-  const lignes: EtapeCorrection[] = [
-    { label: "Lecture", sousQuestion: "a", fragments: [texte("Premier lieu : "), ...segmentsDescriptionLieu(instance.lieu1), texte(".")] },
-    { label: "Lecture", sousQuestion: "a", fragments: [texte("Second lieu : "), ...segmentsDescriptionLieu(instance.lieu2), texte(".")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [texte(`${libelleChampEquation(instance.lieu1)} `), latex(formatEquationLieuLatex(instance.lieu1)), texte(".")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [texte(`${libelleChampEquation(instance.lieu2)} `), latex(formatEquationLieuLatex(instance.lieu2)), texte(".")] },
-    { label: "Méthode", sousQuestion: "c", fragments: [texte("Les points communs vérifient le système "), latex(formatEtatActuelSystemeLatex(instance)), texte(". "), texte(methodeSubstitution(instance))] },
-    { label: "Calcul", sousQuestion: "c", fragments: [latex(formatQuadratiqueSubstitutionLatex(instance)), texte(" ; "), latex(delta.latex), texte(".")] },
-  ];
-  if (instance.nombrePoints === 0) {
-    lignes.push({ label: "Conclusion", sousQuestion: "c", fragments: [latex("\\Delta < 0"), texte(" : l'équation n'a pas de solution réelle, aucun point n'est commun aux deux lieux.")] });
-  } else {
-    const tries = trierPointsParVariable(instance.points, variable);
-    const racines = tries.map((p) => (variable === "x" ? p.x : p.y));
-    const racinesLatex =
-      instance.nombrePoints === 1
-        ? `${variable} = \\dfrac{${-quadratiqueEntiere(instance).b}}{${2 * a}} = ${formatNombre(racines[0]!)}`
-        : `${variable}_1 = ${formatNombre(racines[0]!)} \\text{ et } ${variable}_2 = ${formatNombre(racines[1]!)}`;
-    lignes.push(
-      { label: "Calcul", sousQuestion: "c", fragments: [texte(instance.nombrePoints === 1 ? "Δ = 0 : une solution double, " : "Δ > 0 : deux solutions, "), latex(racinesLatex), texte(".")] },
-      {
-        label: "Calcul",
-        sousQuestion: "c",
-        fragments: [texte(`On calcule ${autre} avec l'équation de la droite `), latex(formatEquationLieuLatex(droite)), texte(" : "), ...tries.flatMap((p, i) => [...(i > 0 ? [texte(" et ")] : []), latex(formatPointLatex(p))]), texte(".")],
-      },
-      { label: "Conclusion", sousQuestion: "c", fragments: conclusion(instance) },
-    );
-  }
-  lignes.push({
-    label: "Piège",
-    sousQuestion: "c",
-    fragments:
-      instance.nombrePoints === 0
-        ? [texte("Un discriminant négatif n'est pas une erreur de calcul : il signifie que les deux lieux ne se coupent pas.")]
-        : [texte(`Chaque solution ne donne que ${variable} : il faut encore calculer ${autre} (avec l'équation de la droite) pour obtenir les coordonnées du point.`)],
-  });
-  return lignes;
+/** Niveau (« Noter un nouveau chapitre ») : trois écrans qui transforment ; méthode 1 (reconnaître
+ * chaque lieu dans sa phrase parmi les trois du cours, choisir l'inconnue à remplacer) ; aucun piège
+ * dans les données. Niveau et durée CONSTANTS quel que soit le nombre de points communs (le verdict :
+ * `sansCharge`, sinon la résolution plus courte d'un Δ < 0 trahirait la réponse). */
+function criteresDifficulte(instance: ExerciceLieuxGeometriques): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeLieuxGeometriques(instance)), methode: 1, piege: 0, nombres: 0, sansCharge: true };
 }
 
 function baremeLieuxGeometriques(instance: ExerciceLieuxGeometriques): BaremeExercice {
@@ -233,7 +137,7 @@ function baremeLieuxGeometriques(instance: ExerciceLieuxGeometriques): BaremeExe
   ];
   if (instance.nombrePoints > 0) erreurs.push({ description: [texte("Seule la première coordonnée des points est donnée")], cout: "−0,5" });
   return {
-    reponseFinale: conclusion(instance),
+    reponseFinale: conclusionLieux(instance),
     criteres: [
       { sousQuestion: "a", critere: [texte("Les deux lieux identifiés avec leurs caractéristiques")], points: 1 },
       { sousQuestion: "b", critere: [texte("Les deux équations correctes")], points: 1 },
@@ -253,11 +157,10 @@ export const adaptateurEvaluationLieuxGeometriques: AdaptateurFeuilleExercices<E
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceLieuxGeometriques,
   construireCorrection: construireCorrectionLieuxGeometriques,
-  difficulte: difficulteLieuxGeometriques,
   reponseBreve: reponseBreveLieuxGeometriques,
   correctionDetaillee: correctionDetailleeLieuxGeometriques,
+  criteresDifficulte,
   bareme: baremeLieuxGeometriques,
   enoncePapier: enoncePapierLieuxGeometriques,
-  dureeMinutes: 10,
   profilInstance: profilLieuxGeometriques,
 };

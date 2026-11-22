@@ -25,6 +25,9 @@ import { EtapeTraceParabole } from "./components/EtapeTraceParabole";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeConstructionParabole } from "./generateurs/constructionParabole/corrigeDetaille";
 
 /**
  * `gen53` — Construction de la parabole au compas et à l'équerre. L'élève manipule de vrais
@@ -115,6 +118,7 @@ export function AppConstructionParabole() {
         reponseAttendue: enAttente.revele ? (ecran.type === "trace" ? "La courbe passe par les points de proche en proche, d'une extrémité à l'autre, en passant par le sommet." : "La construction attendue est dessinée sur la figure.") : undefined,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConstructionParabole(e), lettreEtape(etat.ecran))} />,
       }
     : null;
 
