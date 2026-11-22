@@ -797,6 +797,40 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   changent — copie et corrigé A/B (titre de section), copie et corrigé Word, feuille (étiquette, notion
   du corrigé, ligne « Je fais le point » § 8) ; aménagées et grilles identiques (elles n'impriment pas
   de titre) ; 20 HTML × 680 / 820 / 1 280 px : 0 débordement, 0 `.katex-error`.
+- **4e ch. 7 (lots B, C, D ; gen42–54)** : règles communes `4e/ui/retoursAnalytique.ts` (illisible PAR
+  NATURE de champ `ILLISIBLE_ANALYTIQUE` — coordonnée, composante, coefficient, pente, angle, distance,
+  rayon, paramètre, équation de droite / paramétriques / cercle / parabole / lieux —, lecture
+  `lireNombreAnalytique` avec √ et « − – — », messages ciblés : vecteur normal pris pour directeur,
+  droite décalée, pente inversée, paramétriques sans le point, centre au signe inversé, r² pour r) et
+  pied commun `4e/components/PiedAnalytique.tsx` (`useTentativeLisible`, `MessageRetour`). Choix fermés
+  jugés une fois et figés dans le moteur : gen42 « possible / impossible » (`choixPossibiliteFige`), gen54
+  nature des lieux (`naturesFigees`) et « Aucun / Au moins un » (`choixResolutionFige`), gen50 nature
+  (`natureFigee`). Aides à deux niveaux sans la réponse (gen44 points et tracé, gen45, gen46 extraction,
+  gen47 choix du point et aide en vecteur normal, gen49). Typographie : `\,;\,` dans les coordonnées,
+  graduations « − » espacées et jamais cachées (`4e/ui/graduationsSvg.ts` : un nombre qui toucherait un
+  point ou une étiquette passe de l'autre côté de l'axe, sinon n'est pas écrit — gen43, 49, 51 écran et
+  papier ; option `graduationsLisibles` de `figureLotG` (corrigé de gen47) et `figureRepere` (gen132),
+  absente = figure inchangée pour gen92–99), tan⁻¹ et θ / θ_Oy (gen46), rayon r (gen49, 50, 54), titres
+  papier de gen53 (`consignePapierEcran`). Angles 30°, 60°, 120°, 150° : valeurs exactes p + r√3
+  (`4e/ui/radical3.ts`, parseurs √ / sqrt / rac de `verificationDroite.ts`), 0° / 90° ≈ 20 %
+  (`PROBABILITE_ANGLE_AXE`, `PROPORTION_AXE`). **gen54** : pente tirée AVANT le verdict dans une même
+  liste (14 pentes cercle-droite, r² ∈ {2, 5, 8, 10, 20, 25} ; ±1, ±2, ±1/2 droite-parabole), énoncé
+  « s'obtient en multipliant l'abscisse par …, puis en ajoutant / retirant … », groupes
+  `groupe_points_cercle` / `groupe_points_parabole`. **Variantes EN FIN de catalogue** : gen54
+  `droiteParabole_axe` (parabole d'axe horizontal, droite y = k : un seul point, pas une tangence ;
+  piège 1, niveau 4) ; gen50 `est_ce_un_cercle` (nature tirée au tiers, centre entier, second membre c
+  TOUJOURS négatif — c ≥ 0 trahissait le cercle —, écran 3 : choix fermé puis centre et rayon si cercle ;
+  énoncé papier « … est-elle celle d'un cercle ? Justifie. Si oui… » ; critères fixes 3 étapes
+  `sansCharge` + piège : 3, 8 min pour les trois natures ; tirage libre de l'adaptateur et des codes
+  inchangé, l'appli la tire une fois sur trois). gen42 : l'issue « impossible » quitte la `forme` (la
+  série B la reproduisait 30 / 30). Grille : ligne « codes a) … j) » sécable entre deux codes (style en
+  ligne, documents sans groupe identiques). Mesuré : collecteurs `corrige-4e7-m1/m2` (outils recopiés)
+  3 980 tirages, ≈ 52 000 égalités, 0 fausse ; gen54 15 000 tirages par groupe : écart max
+  |P(pente | verdict) − P(pente)| 1,0 / 1,2 point ; gen42 angle 19,9 / 19,4 % d'axes, gen46 20,3 % ;
+  gen50 33,6 / 33,3 / 33,1 % ; niveau et durée constants dans chaque verdict ; plans réels 30 × 2 :
+  groupes gen54 B ≠ A 30 / 30, gen50 26 / 30 ; figures (300 tirages gen47, 300 gen132) : graduation
+  touchée 9 % → 0 (gen47), 90 % → 0 (gen132 « escalier ») ; `?code=` : seuls gen42 / gen46 « angle »
+  (et les tirages libres qui y tombent) et tout gen54 changent.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 
