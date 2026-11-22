@@ -4,12 +4,10 @@
  * analytique (droites et cercles)"). Structure identique aux 6 quiz précédents (gen59-64) :
  * mono-écran, une seule tentative, thème choisi par l'élève.
  *
- * 13 thèmes, un par générateur (gen42 à gen54) — contrairement à "Calcul vectoriel" (gen64), aucun
- * doublon de contenu mathématique ici entre deux générateurs distincts, donc aucune fusion de
- * thèmes : chaque générateur teste une compétence distincte (extraction de données différente,
- * forme de sortie différente, ou concept géométrique différent). Exclut délibérément gen39-41
- * ("Géométrie dans l'espace", autre sous-chapitre) et gen55-58 (autres chapitres) — hors périmètre
- * de "Géométrie analytique plane".
+ * 17 thèmes : treize suivent les anciens générateurs gen42–54, quatre regroupent les générateurs
+ * récents et le § 7 (lot E de l'audit 4e ch. 7) — « Cercle : tangente, position, conditions »
+ * (gen92, gen93), « Triangle, projeté, symétrique » (gen94, gen96), « Paramètres et mobiles » (gen95,
+ * gen97), « Lieux et deux cercles » (§ 7, gen98).
  */
 export type VarianteQuizGeometrieAnalytique =
   | "equationDroite"
@@ -24,7 +22,11 @@ export type VarianteQuizGeometrieAnalytique =
   | "equationParaboleGraphe"
   | "sommetFoyerParabole"
   | "constructionParabole"
-  | "lieuxGeometriques";
+  | "lieuxGeometriques"
+  | "cercleConditions"
+  | "triangleProjete"
+  | "parametresMobiles"
+  | "lieuxDeuxCercles";
 
 export interface QuestionVraiFaux {
   enonce: string;

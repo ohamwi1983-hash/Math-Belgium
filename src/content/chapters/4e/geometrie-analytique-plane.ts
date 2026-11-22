@@ -1481,7 +1481,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             caption:
               'le mur d est l\'axe Ox : A′ est le symétrique de A, et I le point où (A′B) coupe d. ' +
               '$AI + IB = A\'B = \\sqrt{50} \\approx 7{,}07$, alors qu\'en passant par J(2 ; 0) : ' +
-              '$AJ + JB = \\sqrt{10} + \\sqrt{20} \\approx 7{,}64$, plus long',
+              '$AJ + JB = \\sqrt{10} + \\sqrt{20} \\approx 7{,}63$, plus long',
           },
         },
         {
@@ -2749,11 +2749,11 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       id: 'revision',
       number: 11,
       title: 'Révision — quiz vrai/faux',
-      kicker: '455 affirmations en 13 thèmes',
+      kicker: '595 affirmations en 17 thèmes',
       titreCourt: 'Révision : vrai ou faux',
       partie: 'Lieux géométriques : cercle et parabole',
       essentiel: [
-        'Le quiz vrai/faux couvre les 13 générateurs du chapitre, un thème par générateur ; le détective d\'erreurs traque la ligne fausse d\'une copie.',
+        'Le quiz vrai/faux reprend tout le chapitre en 17 thèmes, un par grande notion, dans l\'ordre des sections ; le détective d\'erreurs traque la ligne fausse d\'une copie.',
       ],
       cartes: [
         { question: 'Une copie lit un rayon de 25 dans $(x-1)^2+(y-1)^2=25$. Quelle est l\'erreur ?', reponse: '25 est r² : le rayon vaut 5.' },
@@ -2763,10 +2763,11 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Un quiz vrai/faux qui couvre les treize générateurs de ce chapitre. Un thème par ' +
-            'générateur, sans fusion : contrairement au chapitre sur les vecteurs, chaque ' +
-            "générateur d'ici teste une compétence vraiment distincte. Le quiz se trouve tout en " +
-            'bas de la page, dans la synthèse.',
+            'Un quiz vrai/faux qui couvre tout le chapitre : 17 thèmes de 35 affirmations, un par ' +
+            'grande notion, dans l\'ordre des sections — de l\'équation d\'une droite aux lieux et aux ' +
+            'deux cercles, en passant par les droites à paramètre, les mobiles, les droites ' +
+            'remarquables, le projeté et la tangente. Le quiz se fait en ligne : sur la page du ' +
+            'chapitre, onglet **Réviser**.',
         },
         {
           kind: 'entrainement',
@@ -2930,7 +2931,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       kind: 'entrainement',
       title: 'Géométrie analytique plane — quiz vrai/faux',
       generatorId: 'gen65',
-      description: ['455 affirmations pré-écrites réparties en 13 thèmes (35 par thème), qui reprennent tout ce chapitre. Un seul essai par question, la justification est toujours révélée.'],
+      description: ['Choisis un thème et teste-toi : 595 affirmations pré-écrites réparties en 17 thèmes (35 par thème), qui reprennent tout le chapitre. Une seule tentative par question, justification toujours révélée.'],
       chantier: '4e',
       whereLabel: '4e → « 65. Géométrie analytique plane — quiz vrai/faux »',
     },

@@ -12,19 +12,23 @@ export const CATALOGUE_VARIANTES: { id: VarianteQuizGeometrieAnalytique; label: 
   { id: "equationDroite", label: "Équation d'une droite — à partir de 5 types de données d'entrée" },
   { id: "lectureGraphiqueDroite", label: "Lecture graphique — équation d'une droite" },
   { id: "constructionDroite", label: "Construction graphique — tracer une droite depuis son équation" },
-  { id: "relationsDroites", label: "Relations entre droites — parallèle et perpendiculaire" },
   { id: "caracteristiquesDroite", label: "Caractéristiques d'une droite — pente, angle, ordonnée à l'origine" },
-  { id: "distancePointDroite", label: "Distance point-droite et droite-droite" },
+  { id: "relationsDroites", label: "Relations entre droites — parallèle et perpendiculaire" },
+  { id: "parametresMobiles", label: "Paramètres et mobiles — droites à paramètre, trajectoires et rencontre" },
   { id: "intersectionDroites", label: "Intersection entre deux droites" },
+  { id: "distancePointDroite", label: "Distance point-droite et droite-droite" },
+  { id: "triangleProjete", label: "Triangle, projeté, symétrique — droites remarquables et réflexion" },
   { id: "equationCercleGraphe", label: "Équation d'un cercle (non développée) à partir d'un graphe" },
   { id: "centreRayonCercle", label: "Centre et rayon d'un cercle depuis l'équation développée" },
+  { id: "cercleConditions", label: "Cercle : tangente, position, conditions" },
   { id: "equationParaboleGraphe", label: "Équation d'une parabole depuis un graphe" },
   { id: "sommetFoyerParabole", label: "Sommet, foyer, p et directrice d'une parabole depuis l'équation développée" },
   { id: "constructionParabole", label: "Construction graphique de la parabole — méthode cercle-droite" },
   { id: "lieuxGeometriques", label: "Lieux géométriques — intersection de deux lieux" },
+  { id: "lieuxDeuxCercles", label: "Lieux et deux cercles — médiatrice, parallèles, soustraction" },
 ];
 
-/** Taille réelle de la banque d'un thème (35 aujourd'hui pour chacun des 13 thèmes) — jamais une
+/** Taille réelle de la banque d'un thème (35 aujourd'hui pour chacun des 17 thèmes, dans l'ordre des sections) — jamais une
  * constante fixe : `AppQuizGeometrieAnalytique.tsx` l'utilise pour fixer `nombreExercices`, seule
  * façon pour `creerGenerateurSansRepetition` de garder sa garantie « jamais de répétition dans une
  * session » si un thème venait à perdre ou gagner des affirmations (`.claude/rules/quiz-generators.md`). */

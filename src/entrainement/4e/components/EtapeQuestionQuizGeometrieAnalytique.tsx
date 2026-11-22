@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { QuestionVraiFaux } from "../core/quizGeometrieAnalytique.types";
-import { RenduFragments } from "./RenduFragments";
-import { fragmentsTexteGeometrieAnalytique } from "../ui/formatQuizGeometrieAnalytique";
+import { TexteRiche } from "./TexteRiche";
 
 interface Props {
   question: QuestionVraiFaux;
@@ -17,7 +16,7 @@ export function EtapeQuestionQuizGeometrieAnalytique({ question, onValider }: Pr
   return (
     <div>
       <p className="prompt-text">
-        <RenduFragments fragments={fragmentsTexteGeometrieAnalytique(question.enonce)} />
+        <TexteRiche texte={question.enonce} />
       </p>
 
       <div className="options-grid-compact">

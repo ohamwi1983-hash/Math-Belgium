@@ -1,6 +1,5 @@
 import type { ResultatExerciceQuizGeometrieAnalytique } from "../moteur/typesQuizGeometrieAnalytique";
-import { RenduFragments } from "./RenduFragments";
-import { fragmentsTexteGeometrieAnalytique } from "../ui/formatQuizGeometrieAnalytique";
+import { TexteRiche } from "./TexteRiche";
 
 interface Props {
   resultats: ResultatExerciceQuizGeometrieAnalytique[];
@@ -36,7 +35,7 @@ export function ResumeSessionQuizGeometrieAnalytique({ resultats, onRecommencer,
               <tr key={index}>
                 <td>{index + 1}</td>
                 <td>
-                  <RenduFragments fragments={fragmentsTexteGeometrieAnalytique(resultat.question.enonce)} />
+                  <TexteRiche texte={resultat.question.enonce} />
                 </td>
                 <td>{libelleVraiFaux(resultat.reponseChoisie)}</td>
                 <td>{resultat.score === 100 ? "✓" : "✗"}</td>
