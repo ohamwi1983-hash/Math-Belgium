@@ -5,8 +5,21 @@
  */
 import { ajouterJours, jourIso, type EtatJour } from '../../lib/calendrierFwb'
 import { creneauxDuJour, heureDe, journee, type CaseHoraire, type Creneau, type GrilleHoraire, type HeureCalculee, type PauseCalculee } from '../../lib/horaire'
+import { journeeAgenda, type ContexteAgenda, type CreneauSupprime } from '../../lib/agendaEvenements'
 
-export type LigneJour = { type: 'creneau'; c: Creneau } | { type: 'libre'; de: HeureCalculee; a: HeureCalculee } | { type: 'pause'; p: PauseCalculee }
+export type LigneJour =
+  | { type: 'creneau'; c: Creneau }
+  | { type: 'supprime'; s: CreneauSupprime }
+  | { type: 'libre'; de: HeureCalculee; a: HeureCalculee }
+  | { type: 'pause'; p: PauseCalculee }
+
+/** Créneaux d'une date : sans agenda, comme avant ; avec l'agenda (0006), les heures supprimées par
+ * un événement sont retirées des créneaux et rendues à part. */
+function creneauxEtSupprimes(date: string, grilles: GrilleHoraire[], cases: CaseHoraire[], agenda?: Omit<ContexteAgenda, 'grilles' | 'cases'>) {
+  if (!agenda) return { ...creneauxDuJour(date, grilles, cases), supprimes: [] as CreneauSupprime[] }
+  const j = journeeAgenda(date, { ...agenda, grilles, cases })
+  return { etat: j.etat, creneaux: j.creneaux, supprimes: j.supprimes }
+}
 
 /** Grilles qui ont au moins une case dans l'horaire. */
 export function grillesActives(grilles: GrilleHoraire[], cases: CaseHoraire[]): GrilleHoraire[] {
@@ -19,13 +32,24 @@ export function grillesActives(grilles: GrilleHoraire[], cases: CaseHoraire[]): 
  * midi) à leur place. Professeur dans plusieurs écoles le même jour : les créneaux seulement, dans
  * l'ordre de l'heure.
  */
-export function lignesDuJour(date: string, grilles: GrilleHoraire[], cases: CaseHoraire[]): { etat: EtatJour; creneaux: Creneau[]; lignes: LigneJour[] } {
-  const { etat, creneaux } = creneauxDuJour(date, grilles, cases)
-  const ecoles = [...new Set(creneaux.map((c) => c.ecole_id))]
-  if (creneaux.length === 0) return { etat, creneaux, lignes: [] }
-  if (ecoles.length > 1) return { etat, creneaux, lignes: creneaux.map((c) => ({ type: 'creneau', c })) }
+export function lignesDuJour(
+  date: string,
+  grilles: GrilleHoraire[],
+  cases: CaseHoraire[],
+  agenda?: Omit<ContexteAgenda, 'grilles' | 'cases'>,
+): { etat: EtatJour; creneaux: Creneau[]; supprimes: CreneauSupprime[]; lignes: LigneJour[] } {
+  const { etat, creneaux, supprimes } = creneauxEtSupprimes(date, grilles, cases, agenda)
+  const ecoles = [...new Set([...creneaux, ...supprimes].map((c) => c.ecole_id))]
+  const enVrac = (): LigneJour[] =>
+    [...creneaux.map((c): LigneJour => ({ type: 'creneau', c })), ...supprimes.map((x): LigneJour => ({ type: 'supprime', s: x }))].sort((a, b) => {
+      const da = a.type === 'creneau' ? a.c.debut : a.type === 'supprime' ? a.s.debut : 0
+      const db = b.type === 'creneau' ? b.c.debut : b.type === 'supprime' ? b.s.debut : 0
+      return da - db
+    })
+  if (creneaux.length === 0 && supprimes.length === 0) return { etat, creneaux, supprimes, lignes: [] }
+  if (ecoles.length > 1) return { etat, creneaux, supprimes, lignes: enVrac() }
   const g = grilles.find((x) => x.ecole_id === ecoles[0])
-  if (!g) return { etat, creneaux, lignes: creneaux.map((c) => ({ type: 'creneau', c })) }
+  if (!g) return { etat, creneaux, supprimes, lignes: enVrac() }
   const j = journee(g, jourIso(date))
   const lignes: LigneJour[] = []
   let libres: HeureCalculee[] = []
@@ -37,11 +61,17 @@ export function lignesDuJour(date: string, grilles: GrilleHoraire[], cases: Case
     const h = j.heures[k]
     let derniere = h.numero
     const c = creneaux.find((x) => x.heureDebut === h.numero)
+    const sup = c ? undefined : supprimes.find((x) => x.heureDebut === h.numero)
     if (c) {
       vider()
       lignes.push({ type: 'creneau', c })
       while (k + 1 < j.heures.length && j.heures[k + 1].numero <= c.heureFin) k++
       derniere = c.heureFin
+    } else if (sup) {
+      vider()
+      lignes.push({ type: 'supprime', s: sup })
+      while (k + 1 < j.heures.length && j.heures[k + 1].numero <= sup.heureFin) k++
+      derniere = sup.heureFin
     } else {
       libres.push(h)
     }
@@ -52,13 +82,14 @@ export function lignesDuJour(date: string, grilles: GrilleHoraire[], cases: Case
     }
   }
   vider()
-  return { etat, creneaux, lignes }
+  return { etat, creneaux, supprimes, lignes }
 }
 
 export type RangeeSemaine = { type: 'heure'; numero: number; debut: number; fin: number } | { type: 'pause'; p: PauseCalculee }
 
 export type CelluleSemaine =
   | { type: 'creneau'; c: Creneau; span: number }
+  | { type: 'supprime'; s: CreneauSupprime; span: number }
   | { type: 'libre'; numero: number }
   | { type: 'sans'; span: number }
   | { type: 'pause' }
@@ -73,12 +104,20 @@ export interface JourSemaine {
   /** Créneaux qui n'ont pas trouvé place (deux écoles à la même heure). */
   autres: Creneau[]
   creneaux: Creneau[]
+  /** Heures supprimées par un événement (agenda, 0006). */
+  supprimes: CreneauSupprime[]
 }
 
 /** Grille « Ma semaine » : rangées (heures de toutes les écoles actives, H0 comprise, pauses de
  * l'école principale) × 5 jours. Jour de congé : une cellule sur toute la hauteur ; heures sans
  * cours ce jour-là (mercredi après-midi) : regroupées. */
-export function grilleSemaine(lundi: string, grilles: GrilleHoraire[], cases: CaseHoraire[], principale?: string): { rangees: RangeeSemaine[]; jours: JourSemaine[] } {
+export function grilleSemaine(
+  lundi: string,
+  grilles: GrilleHoraire[],
+  cases: CaseHoraire[],
+  principale?: string,
+  agenda?: Omit<ContexteAgenda, 'grilles' | 'cases'>,
+): { rangees: RangeeSemaine[]; jours: JourSemaine[] } {
   const actives = grillesActives(grilles, cases).sort((a, b) => (a.ecole_id === principale ? -1 : b.ecole_id === principale ? 1 : 0))
   const numeros = new Map<number, HeureCalculee>()
   for (const g of actives) for (const h of journee(g, 1).heures) if (!numeros.has(h.numero)) numeros.set(h.numero, h)
@@ -93,13 +132,14 @@ export function grilleSemaine(lundi: string, grilles: GrilleHoraire[], cases: Ca
   for (let i = 0; i < 5; i++) {
     const date = ajouterJours(lundi, i)
     const jour = i + 1
-    const { etat, creneaux } = creneauxDuJour(date, grilles, cases)
+    const { etat, creneaux, supprimes } = creneauxEtSupprimes(date, grilles, cases, agenda)
     const cellules: (CelluleSemaine | null | undefined)[] = Array.from({ length: rangees.length }, () => undefined)
     const places = new Set<Creneau>()
+    const placesSupprimees = new Set<CreneauSupprime>()
     if (etat.type !== 'classe' && etat.type !== 'inconnu') {
       if (rangees.length > 0) cellules[0] = { type: 'conge', span: rangees.length, etat }
       for (let k = 1; k < rangees.length; k++) cellules[k] = null
-      jours.push({ date, jour, etat, cellules: cellules as (CelluleSemaine | null)[], autres: [], creneaux })
+      jours.push({ date, jour, etat, cellules: cellules as (CelluleSemaine | null)[], autres: [], creneaux, supprimes })
       continue
     }
     const journees = actives.map((g) => journee(g, jour))
@@ -114,10 +154,16 @@ export function grilleSemaine(lundi: string, grilles: GrilleHoraire[], cases: Ca
         continue
       }
       const c = debutDe(r.numero)
+      const sup = c ? undefined : supprimes.find((x) => x.heureDebut === r.numero && !placesSupprimees.has(x))
       if (c) {
         places.add(c)
         const fin = Math.max(k, indexHeure(c.heureFin))
         cellules[k] = { type: 'creneau', c, span: fin - k + 1 }
+        for (let m = k + 1; m <= fin; m++) cellules[m] = null
+      } else if (sup) {
+        placesSupprimees.add(sup)
+        const fin = Math.max(k, indexHeure(sup.heureFin))
+        cellules[k] = { type: 'supprime', s: sup, span: fin - k + 1 }
         for (let m = k + 1; m <= fin; m++) cellules[m] = null
       } else if (!existe(r.numero)) {
         let fin = k
@@ -133,7 +179,7 @@ export function grilleSemaine(lundi: string, grilles: GrilleHoraire[], cases: Ca
         cellules[k] = { type: 'libre', numero: r.numero }
       }
     }
-    jours.push({ date, jour, etat, cellules: cellules as (CelluleSemaine | null)[], autres: creneaux.filter((c) => !places.has(c)), creneaux })
+    jours.push({ date, jour, etat, cellules: cellules as (CelluleSemaine | null)[], autres: creneaux.filter((c) => !places.has(c)), creneaux, supprimes })
   }
   return { rangees, jours }
 }

@@ -62,7 +62,7 @@ export function EvaluationMatiere({ classe, seances, sansTitre = false }: { clas
               </li>
             ))}
           </ul>
-          <button type="button" className="compte-bouton" onClick={() => navigate(urlEvaluationMatiere(resultat.matiere!, depuis, classe.nom))}>
+          <button type="button" className="compte-bouton" onClick={() => navigate(urlEvaluationMatiere(resultat.matiere!, depuis, classe.nom, classe.id))}>
             Créer une évaluation sur la matière vue depuis le {dateCourte(depuis)}
           </button>
           <p className="compte-aide">Le panneau s'ouvre avec un exercice par générateur de ces sections ; tu ajustes ensuite.</p>

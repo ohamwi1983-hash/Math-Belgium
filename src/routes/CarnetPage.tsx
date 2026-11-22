@@ -13,8 +13,11 @@ import { MaSemaine } from '../components/carnet/MaSemaine'
 import { MessageHoraireInactif, MonHoraire } from '../components/carnet/MonHoraire'
 import { PageClasse } from '../components/carnet/PageClasse'
 import { PanneauLateral } from '../components/carnet/PanneauLateral'
+import { FormulaireEvenement } from '../components/carnet/FormulaireEvenement'
+import { ReglagesAgenda } from '../components/carnet/ReglagesAgenda'
 import { chapitreParDefaut, copierTexte, lireClasseMemorisee, memoriserClasse, texteReperes } from '../components/carnet/outilsCarnet'
 import '../components/carnet/carnet.css'
+import '../components/carnet/agenda.css'
 import '../components/compte/profil.css'
 import { findChapter } from '../content/chaptersIndex'
 import { dateIso, dateLongue, htmlSmartschool, texteSmartschool, type Classe, type ReglagesCarnet, type SaisieSeance, type Seance } from '../lib/carnet'
@@ -37,6 +40,8 @@ import {
   type DonneesHoraire,
 } from '../lib/carnetDonnees'
 import { creneauPropose, creneauxDuJour, seanceDuCreneau, type Creneau } from '../lib/horaire'
+import { AGENDA_INACTIF, ajouterEvenement, ajouterPeriode, chargerAgenda, enregistrerSeuil, modifierEvenement, modifierPeriode, supprimerEvenement, supprimerPeriode, type DonneesAgenda } from '../lib/agendaDonnees'
+import { predicatSuppression, type ContexteAgenda, type Evenement, type PeriodeBulletin, type SaisieEvenement } from '../lib/agendaEvenements'
 import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { messageErreur } from '../lib/compteValidation'
 
@@ -75,12 +80,15 @@ interface Donnees {
   reglages: ReglagesCarnet
   reglagesExiste: boolean
   horaire: DonneesHoraire
+  /** Agenda (0006) ; `actif` faux tant que 0006 n'est pas appliqué. */
+  agenda: DonneesAgenda
 }
 
 type Panneau =
   | { type: 'noter'; classeId: string; chapitre: string; creneau: Creneau | null; date?: string; chapitreChoisi?: boolean }
   | { type: 'modifier'; seance: Seance }
   | { type: 'voir'; seanceId: string }
+  | { type: 'evenement'; evenement: Evenement | null; prerempli: Partial<SaisieEvenement> }
 
 function MessageCarnetInactif() {
   return (
@@ -122,9 +130,10 @@ function Carnet() {
     if (!client) return
     try {
       // L'horaire (0003) d'abord : il dit si `seances.numero_heure_fin` existe.
-      const [classes, r, horaire] = await Promise.all([listerClasses(client), lireReglages(client), chargerHoraire(client)])
+      // L'agenda (0006) est facultatif : sans lui (ou en cas de panne de lecture), le carnet reste utilisable.
+      const [classes, r, horaire, agenda] = await Promise.all([listerClasses(client), lireReglages(client), chargerHoraire(client), chargerAgenda(client).catch(() => AGENDA_INACTIF)])
       const seances = await listerSeances(client, horaire.actif)
-      setDonnees({ classes, seances, reglages: r.reglages, reglagesExiste: r.existe, horaire })
+      setDonnees({ classes, seances, reglages: r.reglages, reglagesExiste: r.existe, horaire, agenda })
       setAbsent(false)
       setErreurChargement(null)
     } catch (ex) {
@@ -162,6 +171,11 @@ function Carnet() {
   const ecoles = compte.ecoles
   const profil = compte.profil
   const seances = donnees?.seances
+  // Heures supprimées par les événements : horaire (0003) ET agenda (0006) nécessaires.
+  const ctxAgenda = useMemo<ContexteAgenda | null>(() => {
+    if (!donnees || !donnees.horaire.actif || !donnees.agenda.actif) return null
+    return { grilles: donnees.horaire.grilles, cases: donnees.horaire.cases, evenements: donnees.agenda.evenements, classes: donnees.classes }
+  }, [donnees])
   const contexte = useMemo<ContexteCarnet | null>(() => {
     if (!donnees || !profil) return null
     return {
@@ -176,16 +190,21 @@ function Carnet() {
       supprimer: (s) => {
         if (window.confirm('Supprimer cette séance du carnet ?')) void agir(() => supprimerSeance(client!, s.id), 'Séance supprimée.').then((ok) => ok && setPanneau(null))
       },
+      agenda: donnees.agenda,
+      ctxAgenda,
+      nouvelEvenement: (prerempli = {}) => setPanneau({ type: 'evenement', evenement: null, prerempli }),
+      ouvrirEvenement: (e) => setPanneau({ type: 'evenement', evenement: e, prerempli: {} }),
     }
-  }, [donnees, ecoles, profil, occupe, client])
+  }, [donnees, ecoles, profil, occupe, client, ctxAgenda])
 
   // Nombre de créneaux d'aujourd'hui passés ou en cours sans séance (« 2 à noter » du menu).
   const aNoter = useMemo(() => {
     if (!donnees || !donnees.horaire.actif || !seances) return 0
     const d = dateIso(maintenant)
     const m = maintenant.getHours() * 60 + maintenant.getMinutes()
-    return creneauxDuJour(d, donnees.horaire.grilles, donnees.horaire.cases).creneaux.filter((c) => c.debut <= m && !seanceDuCreneau(c, seances)).length
-  }, [donnees, seances, maintenant])
+    const supprimee = ctxAgenda ? predicatSuppression(ctxAgenda) : undefined
+    return creneauxDuJour(d, donnees.horaire.grilles, donnees.horaire.cases, { supprimee }).creneaux.filter((c) => c.debut <= m && !seanceDuCreneau(c, seances)).length
+  }, [donnees, seances, maintenant, ctxAgenda])
 
   /** Menu « Mon espace » (carnet déplié) + bandeau sombre autour de chaque état de la page. */
   function cadre(contenu: ReactNode) {
@@ -321,6 +340,47 @@ function Carnet() {
     await agir(() => enregistrerReglages(client, r, existe, profil.id), 'Réglage enregistré.')
   }
 
+  async function enregistrerEvenement(saisie: SaisieEvenement) {
+    const p = panneau
+    if (!p || p.type !== 'evenement' || !client) return
+    const avant = p.evenement
+    const interro = saisie.type === 'interrogation'
+    const ok = await agir(
+      () => (avant ? modifierEvenement(client, avant, saisie) : ajouterEvenement(client, saisie)),
+      avant ? (interro ? 'Interrogation modifiée.' : 'Événement modifié.') : interro ? 'Interrogation enregistrée.' : 'Événement enregistré.',
+    )
+    if (ok) setPanneau(null)
+  }
+
+  async function supprimerUnEvenement() {
+    const p = panneau
+    if (!p || p.type !== 'evenement' || !p.evenement || !client) return
+    const e = p.evenement
+    const ok = await agir(() => supprimerEvenement(client, e.id), e.type === 'interrogation' ? 'Interrogation supprimée.' : 'Événement supprimé.')
+    if (ok) setPanneau(null)
+  }
+
+  const periodes: PeriodeBulletin[] = donnees.agenda.periodes
+  const reglagesAgenda = (
+    <ReglagesAgenda
+      actif={donnees.agenda.actif}
+      ecoles={ecoles}
+      periodes={periodes}
+      evenements={donnees.agenda.evenements}
+      seuil={donnees.agenda.seuil}
+      aujourdhui={dateIso(maintenant)}
+      occupe={occupe}
+      onAjouter={(ecoleId, annee, remise) => agir(() => ajouterPeriode(client, ecoleId, annee, remise, periodes), 'Période ajoutée.')}
+      onModifier={(per, remise) => agir(() => modifierPeriode(client, per, remise, periodes), `Période ${per.numero} modifiée.`)}
+      onSupprimer={(per) => agir(() => supprimerPeriode(client, per, periodes), `Période ${per.numero} supprimée.`)}
+      onSeuil={(seuil) => {
+        const existe = donnees.reglagesExiste
+        setDonnees({ ...donnees, agenda: { ...donnees.agenda, seuil } }) // affiché tout de suite ; relu après l'enregistrement
+        void agir(() => enregistrerSeuil(client, seuil, existe, profil.id), `Seuil : ${seuil} jour${seuil > 1 ? 's' : ''} de classe.`)
+      }}
+    />
+  )
+
   const gestionClasses = (
     <GestionClasses
       classes={donnees.classes}
@@ -341,8 +401,9 @@ function Carnet() {
   const reglagesSection = (
     <section className="compte-section carnet-page-simple" aria-labelledby="carnet-reglages">
       <h2 id="carnet-reglages" className="carnet-titre-vue">
-        Réglages
+        Réglages du carnet
       </h2>
+      {reglagesAgenda}
       <fieldset className="carnet-fieldset">
         <legend>Horaire des séances</legend>
         <label className="carnet-case">
@@ -570,6 +631,29 @@ function Carnet() {
               return k ? avecGrille(contexte, k) : false
             }}
             onEnregistrer={(s, copier) => void enregistrerSeance(s, copier)}
+            onAnnuler={() => setPanneau(null)}
+          />
+        </PanneauLateral>
+      )}
+      {panneau?.type === 'evenement' && (
+        <PanneauLateral titreId={titrePanneau} onFermer={() => setPanneau(null)}>
+          <FormulaireEvenement
+            key={panneau.evenement?.id ?? 'nouveau'}
+            initiale={panneau.evenement}
+            prerempli={panneau.prerempli}
+            classes={donnees.classes}
+            ecoles={ecoles}
+            grilles={grilles}
+            cases={horaire.actif ? horaire.cases : []}
+            periodes={periodes}
+            evenements={donnees.agenda.evenements}
+            seuil={donnees.agenda.seuil}
+            aujourdhui={dateIso(maintenant)}
+            actif={donnees.agenda.actif}
+            occupe={occupe}
+            titreId={titrePanneau}
+            onEnregistrer={(s) => void enregistrerEvenement(s)}
+            onSupprimer={() => void supprimerUnEvenement()}
             onAnnuler={() => setPanneau(null)}
           />
         </PanneauLateral>

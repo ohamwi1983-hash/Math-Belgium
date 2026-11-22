@@ -8,6 +8,8 @@ import { generatorLink } from '../../lib/generatorLink'
 import { resoudreSeance, type Classe, type FormatHoraire, type Seance, type SeanceResolue } from '../../lib/carnet'
 import type { Ecole } from '../../lib/compteValidation'
 import type { GrilleHoraire } from '../../lib/horaire'
+import type { ContexteAgenda, Evenement, SaisieEvenement } from '../../lib/agendaEvenements'
+import type { DonneesAgenda } from '../../lib/agendaDonnees'
 
 export interface ContexteCarnet {
   classes: Classe[]
@@ -21,6 +23,14 @@ export interface ContexteCarnet {
   voir: (s: Seance) => void
   modifier: (s: Seance) => void
   supprimer: (s: Seance) => void
+  /** Agenda (0006) : événements, périodes du bulletin, seuil ; `actif` faux sans 0006. */
+  agenda: DonneesAgenda
+  /** Horaire + événements + classes (heures supprimées) ; `null` sans horaire (0003). */
+  ctxAgenda: ContexteAgenda | null
+  /** Ouvre le formulaire « Nouvel événement » (valeurs pré-remplies facultatives). */
+  nouvelEvenement: (prerempli?: Partial<SaisieEvenement>) => void
+  /** Ouvre le formulaire sur un événement existant (le toucher dans l'agenda). */
+  ouvrirEvenement: (e: Evenement) => void
 }
 
 export const CarnetContexte = createContext<ContexteCarnet | null>(null)

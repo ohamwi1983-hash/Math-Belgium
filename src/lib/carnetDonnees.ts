@@ -34,6 +34,9 @@ export class ErreurCarnet extends Error {
     const absente = CODES_TABLE_ABSENTE.has(code) || /could not find the table|relation .* does not exist|schema cache/i.test(String(b.message ?? ''))
     let message: string
     if (absente) message = 'Carnet pas encore activé.'
+    else if (code === '23505' && /periodes_bulletin/i.test(String(b.message ?? ''))) message = 'Une autre période a déjà ce numéro ou cette date (autre onglet ?) : recharge la page.'
+    else if (code === '23505' && /evenements/i.test(String(b.message ?? ''))) message = 'Cette classe est déjà dans l’événement : recharge la page.'
+    else if (code === '23514' && /evenement|periodes_bulletin|seuil/i.test(String(b.message ?? ''))) message = 'Événement ou période refusé par le serveur (dates, heures ou classes incohérentes) : vérifie le formulaire.'
     else if (code === '23505' && /horaire/i.test(String(b.message ?? ''))) message = 'Cette case de l’horaire est déjà remplie (autre onglet ?) : recharge la page.'
     else if (code === '23505') message = 'Une classe porte déjà ce nom dans cette école.'
     else if (code === '23514' && /horaire/i.test(String(b.message ?? ''))) message = 'Grille horaire refusée par le serveur (valeur hors limites) : vérifie les heures et les pauses.'

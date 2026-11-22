@@ -5,8 +5,12 @@ import { dateCourte, dateIso, dateLongue, progressionClasse, type Classe, type S
 import { findChapter } from '../../content/chaptersIndex'
 import { creneauPropose, creneauxOublies, depuisParDefaut, numerosCreneau, plage, seanceDuCreneau, LIBELLE_PAUSE, type CaseHoraire, type Creneau, type GrilleHoraire } from '../../lib/horaire'
 import { ActionsSeance, CarteSeance, PastilleClasse } from './CarteSeance'
+import type { Evenement } from '../../lib/agendaEvenements'
 import { couleurClasse, useCarnet } from './contexteCarnet'
 import { lignesDuJour } from './journeeCarnet'
+import { avertissementsInterro, classesConcernees, interrosDuCreneau, motifCourt, predicatSuppression, texteAvertissement, texteBandeau, type CreneauSupprime } from '../../lib/agendaEvenements'
+import { BandeauEvenement, IconeType, PuceType, RepereRemise } from './AgendaUi'
+import { ResumeHeuresEffectives, titreChapitre } from './HeuresEffectives'
 import { capitale, chapitreEnCours, dateAbregee, derniereFois, heureCourte, lireDepuisOubliees, memoriserDepuisOubliees, resumeSeance, texteReperes, trierRecentes } from './outilsCarnet'
 
 const OUBLIEES_VISIBLES = 12
@@ -74,7 +78,9 @@ export function Aujourdhui({
   const jourValide = /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : aujourdhui
   const horaireRempli = grilles.some((g) => cases.some((c) => c.ecole_id === g.ecole_id))
 
-  const jour = useMemo(() => lignesDuJour(jourValide, grilles, cases), [jourValide, grilles, cases])
+  const agenda = ctx.ctxAgenda
+  const jour = useMemo(() => lignesDuJour(jourValide, grilles, cases, agenda ? { evenements: agenda.evenements, classes: agenda.classes } : undefined), [jourValide, grilles, cases, agenda])
+  const evenementsDuJour = ctx.agenda.actif ? ctx.agenda.evenements.filter((e) => e.du <= jourValide && jourValide <= e.au) : []
   const propose = jourValide === aujourdhui ? creneauPropose(jour.creneaux, minutesMaintenant) : null
   const seancesDuJour = seances.filter((s) => s.date_seance === jourValide)
   const horsHoraire = trierRecentes(seancesDuJour.filter((s) => !jour.creneaux.some((c) => seanceDuCreneau(c, [s]) !== null))).reverse()
@@ -89,7 +95,7 @@ export function Aujourdhui({
         ? `Congé : ${etat.libelle} — pas de cours.`
         : etat.type === 'ete'
           ? 'Vacances d’été : pas de cours.'
-          : jour.creneaux.length === 0
+          : jour.creneaux.length === 0 && jour.supprimes.length === 0
             ? 'Aucun cours ce jour-là dans ton horaire.'
             : null
 
@@ -111,6 +117,7 @@ export function Aujourdhui({
     const resume = s ? resumeSeance(s) : null
     const avant = s ? null : derniereFois(seances, c.classe_id, c.date, c.heureDebut)
     const details = s ? [s.generateurs.length > 0 ? `${s.generateurs.length} exercice${s.generateurs.length > 1 ? 's' : ''}` : '', s.devoir ? `Devoir : ${s.devoir}` : ''].filter(Boolean).join(' · ') : ''
+    const interros = ctx.agenda.actif ? interrosDuCreneau(c, ctx.agenda.evenements) : []
     return (
       <li key={`${c.ecole_id}-${c.heureDebut}`} className={`carnet-heure ${st}${estPropose ? ' propose' : ''}`} aria-current={estPropose && st === 'en-cours' ? 'time' : undefined}>
         <span className="carnet-heure-num">
@@ -135,6 +142,9 @@ export function Aujourdhui({
             </span>
           )}
           {ecole && <span className="carnet-puce-ecole">{ecole}</span>}
+          {interros.map((e) => (
+            <LigneInterro key={e.id} e={e} ecoleId={c.ecole_id} aujourdhui={aujourdhui} />
+          ))}
         </div>
         <div className="carnet-heure-actions">
           {s ? (
@@ -147,6 +157,34 @@ export function Aujourdhui({
               Noter la séance<span className="carnet-sr"> — {classe?.nom}, {numerosCreneau(c)}</span>
             </button>
           )}
+        </div>
+      </li>
+    )
+  }
+
+  /** Heure supprimée par un événement : barrée, « Pas cours — théâtre », jamais « Noter ». */
+  function ligneSupprimee(x: CreneauSupprime) {
+    const classe = classeDe(x.classe_id)
+    const concernees = classesConcernees(x.evenement, classes).map((id) => classeDe(id)?.nom ?? '')
+    const motif = x.accompagne
+      ? `Pas cours — tu accompagnes ${x.evenement.toutes_classes ? 'les classes' : `${concernees.length > 1 ? 'les' : 'la'} ${concernees.join(', ')}`} : ${motifCourt(x.evenement)}`
+      : `Pas cours — ${motifCourt(x.evenement)}`
+    return (
+      <li key={`s-${x.ecole_id}-${x.heureDebut}`} className="carnet-heure supprime">
+        <span className="carnet-heure-num">
+          {numerosCreneau(x)} <span className="carnet-heure-plage">{heureCourte(x.debut)}</span>
+          <span className="carnet-sr"> à {heureCourte(x.fin)}</span>
+        </span>
+        <div className="carnet-heure-texte">
+          <span className="carnet-heure-titre">
+            <s>{classe?.nom}</s>
+          </span>
+          <span className="carnet-heure-detail">{motif}</span>
+        </div>
+        <div className="carnet-heure-actions">
+          <button type="button" className="agenda-puce-bouton" onClick={() => ctx.ouvrirEvenement(x.evenement)} aria-label={`${motif}. Modifier l’événement`}>
+            <PuceType type={x.evenement.type} />
+          </button>
         </div>
       </li>
     )
@@ -182,8 +220,20 @@ export function Aujourdhui({
               <span className="carnet-sr">Autre jour</span>
               <input type="date" value={jourValide} onChange={(e) => setDate(e.target.value || aujourdhui)} />
             </label>
+            <button type="button" className="carnet-bouton principal agenda-bouton-evenement" onClick={() => ctx.nouvelEvenement({ du: jourValide, au: jourValide })}>
+              <span aria-hidden="true">+</span> Événement
+            </button>
           </div>
         </div>
+
+        {evenementsDuJour.length > 0 && (
+          <div className="agenda-bandeaux">
+            {evenementsDuJour.map((e) => {
+              const t = texteBandeau(e, jourValide, agenda ?? { grilles: [], cases: [], evenements: ctx.agenda.evenements, classes }, titreChapitre)
+              return <BandeauEvenement key={e.id} e={e} titre={t.titre} suite={t.suite} onOuvrir={() => ctx.ouvrirEvenement(e)} />
+            })}
+          </div>
+        )}
 
         {etat.type === 'inconnu' && (
           <p className="compte-aide carnet-a-confirmer" role="note">
@@ -226,6 +276,8 @@ export function Aujourdhui({
                 {jour.lignes.map((l) =>
                   l.type === 'creneau' ? (
                     ligneCreneau(l.c)
+                  ) : l.type === 'supprime' ? (
+                    ligneSupprimee(l.s)
                   ) : l.type === 'pause' ? (
                     <li key={`p${l.p.apres}`} className="carnet-heure-pause">
                       {plage(l.p.debut, l.p.fin)} · {LIBELLE_PAUSE[l.p.type].toLowerCase()}
@@ -243,6 +295,21 @@ export function Aujourdhui({
             )}
           </>
         )}
+
+        {ctx.agenda.actif &&
+          ecoles
+            .filter((e) => ctx.agenda.periodes.some((p) => p.ecole_id === e.id))
+            .map((e) => (
+              <RepereRemise
+                key={e.id}
+                ecoleId={e.id}
+                nomEcole={ecoles.filter((x) => ctx.agenda.periodes.some((p) => p.ecole_id === x.id)).length > 1 ? e.nom : undefined}
+                periodes={ctx.agenda.periodes}
+                evenements={ctx.agenda.evenements}
+                aujourdhui={aujourdhui}
+              />
+            ))}
+        {horaireRempli && <ResumeHeuresEffectives maintenant={maintenant} />}
 
         {horsHoraire.length > 0 && (
           <section className="carnet-bloc" aria-labelledby={`${id}-hors`}>
@@ -300,7 +367,8 @@ export function Aujourdhui({
  * par défaut les 14 derniers jours de classe), congés et week-ends FWB exclus. */
 function Rattraper({ grilles, cases, seances, maintenant, onNoter }: { grilles: GrilleHoraire[]; cases: CaseHoraire[]; seances: Seance[]; maintenant: Date; onNoter: (c: Creneau) => void }) {
   const id = useId()
-  const { classes } = useCarnet()
+  const { classes, ctxAgenda } = useCarnet()
+  const supprimee = useMemo(() => (ctxAgenda ? predicatSuppression(ctxAgenda) : undefined), [ctxAgenda])
   const aujourdhui = dateIso(maintenant)
   const minutesMaintenant = maintenant.getHours() * 60 + maintenant.getMinutes()
   const [depuisChoisi, setDepuisChoisi] = useState<string | null>(() => lireDepuisOubliees())
@@ -308,8 +376,8 @@ function Rattraper({ grilles, cases, seances, maintenant, onNoter }: { grilles: 
   const depuisDefaut = depuisParDefaut(aujourdhui)
   const depuis = depuisChoisi && depuisChoisi <= aujourdhui ? depuisChoisi : depuisDefaut
   const oubliees = useMemo(
-    () => creneauxOublies({ grilles, cases, seances, depuis, aujourdhui, maintenant: minutesMaintenant }).filter((c) => c.date < aujourdhui || c.fin <= minutesMaintenant),
-    [grilles, cases, seances, depuis, aujourdhui, minutesMaintenant],
+    () => creneauxOublies({ grilles, cases, seances, depuis, aujourdhui, maintenant: minutesMaintenant, supprimee }).filter((c) => c.date < aujourdhui || c.fin <= minutesMaintenant),
+    [grilles, cases, seances, depuis, aujourdhui, minutesMaintenant, supprimee],
   )
   // Les créneaux d'aujourd'hui sont déjà dans la liste du jour : seulement les jours précédents ici.
   const passees = oubliees.filter((c) => c.date < aujourdhui)
@@ -425,5 +493,24 @@ function OuEnSontMesClasses({ classes, seances }: { classes: Classe[]; seances: 
         </ul>
       )}
     </section>
+  )
+}
+
+/** « Interro · Suites » sur le créneau, avec l'avertissement éventuel (« ⚠ 2 jours pour corriger »). */
+function LigneInterro({ e, ecoleId, aujourdhui }: { e: Evenement; ecoleId: string; aujourdhui: string }) {
+  const ctx = useCarnet()
+  const av = avertissementsInterro({ date: e.du, ecoleId, periodes: ctx.agenda.periodes, evenements: ctx.agenda.evenements, seuil: ctx.agenda.seuil, aujourdhui })
+  return (
+    <span className="agenda-interro-ligne">
+      <button type="button" className="agenda-interro" onClick={() => ctx.ouvrirEvenement(e)}>
+        <IconeType type="interrogation" taille={13} /> Interro{e.chapitre ? ` · ${titreChapitre(e.chapitre)}` : ''}
+        <span className="carnet-sr"> — modifier</span>
+      </button>
+      {av.map((a) => (
+        <span key={a.type} className={`agenda-mini-alerte ${a.type === 'apres' ? 'apres' : 'presse'}`}>
+          <IconeType type="attention" taille={13} /> {texteAvertissement(a, e.du).court}
+        </span>
+      ))}
+    </span>
   )
 }

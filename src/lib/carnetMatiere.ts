@@ -38,11 +38,13 @@ export function decoderMatiere(brut: string | null | undefined): MatiereVue | nu
   return chapitres.length > 0 ? { levelSlug: niveau, chapitres } : null
 }
 
-/** Lien vers le panneau des évaluations, matière pré-sélectionnée. */
-export function urlEvaluationMatiere(m: MatiereVue, depuis: string, classe: string): string {
+/** Lien vers le panneau des évaluations, matière pré-sélectionnée. `classeId` (`cid`) : la classe du
+ * carnet, pour l'avertissement « date limite du bulletin » (agenda, 0006). */
+export function urlEvaluationMatiere(m: MatiereVue, depuis: string, classe: string, classeId?: string): string {
   const p = new URLSearchParams()
   p.set('matiere', encoderMatiere(m))
   if (depuis) p.set('depuis', depuis)
   if (classe) p.set('classe', classe)
+  if (classeId) p.set('cid', classeId)
   return `/evaluation?${p.toString()}`
 }

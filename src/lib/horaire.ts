@@ -307,7 +307,7 @@ export function numerosCreneau(c: Pick<Creneau, 'heureDebut' | 'heureFin'>): str
 /** Créneaux d'un jour de la semaine (1–5), toutes écoles, triés par heure de début. `fusion` :
  * heures doubles regroupées. `dateLimite` : n'utilise que les cases créées au plus tard ce jour-là
  * (une case ajoutée aujourd'hui ne crée pas d'« oubli » pour les semaines passées). */
-export function creneauxSemaine(jour: number, grilles: GrilleHoraire[], cases: CaseHoraire[], options: { fusion?: boolean; dateLimite?: string } = {}): Creneau[] {
+export function creneauxSemaine(jour: number, grilles: GrilleHoraire[], cases: CaseHoraire[], options: { fusion?: boolean; dateLimite?: string; garder?: (h: HeureDeCours) => boolean } = {}): Creneau[] {
   const fusion = options.fusion ?? true
   const resultat: Creneau[] = []
   if (jour < 1 || jour > 5) return resultat
@@ -316,6 +316,11 @@ export function creneauxSemaine(jour: number, grilles: GrilleHoraire[], cases: C
     const duJour = cases
       .filter((c) => c.ecole_id === g.ecole_id && c.jour === jour && c.semaine === null && heureDe(j, c.heure) !== undefined)
       .filter((c) => !options.dateLimite || !c.cree_le || c.cree_le.slice(0, 10) <= options.dateLimite)
+      .filter((c) => {
+        if (!options.garder) return true
+        const h = heureDe(j, c.heure) as HeureCalculee
+        return options.garder({ ecole_id: g.ecole_id, classe_id: c.classe_id, jour, heure: c.heure, debut: h.debut, fin: h.fin })
+      })
       .sort((a, b) => a.heure - b.heure)
     for (const c of duJour) {
       const h = heureDe(j, c.heure) as HeureCalculee
@@ -340,6 +345,20 @@ export function creneauxSemaine(jour: number, grilles: GrilleHoraire[], cases: C
   return resultat.sort((a, b) => a.debut - b.debut || a.heureDebut - b.heureDebut)
 }
 
+/** Une heure de cours de l'horaire (avant regroupement en heures doubles). */
+export interface HeureDeCours {
+  ecole_id: string
+  classe_id: string
+  jour: number
+  heure: number
+  debut: number
+  fin: number
+}
+
+/** Heure supprimée un jour donné (événement de l'agenda : sortie, journée pédagogique…). Facultatif
+ * partout : sans lui, rien ne change. */
+export type HeureSupprimee = (date: string, h: HeureDeCours) => boolean
+
 export interface JourneeDeClasse {
   etat: EtatJour
   /** Vide si congé, week-end ou vacances. */
@@ -348,10 +367,11 @@ export interface JourneeDeClasse {
 
 /** Créneaux d'une DATE : rien les week-ends, congés et vacances FWB ; une année au calendrier
  * inconnu garde ses créneaux (« à confirmer »). */
-export function creneauxDuJour(date: string, grilles: GrilleHoraire[], cases: CaseHoraire[], options: { dateLimite?: boolean } = {}): JourneeDeClasse {
+export function creneauxDuJour(date: string, grilles: GrilleHoraire[], cases: CaseHoraire[], options: { dateLimite?: boolean; supprimee?: HeureSupprimee } = {}): JourneeDeClasse {
   const etat = etatJour(date)
   if (etat.type !== 'classe' && etat.type !== 'inconnu') return { etat, creneaux: [] }
-  const creneaux = creneauxSemaine(jourIso(date), grilles, cases, { dateLimite: options.dateLimite ? date : undefined }).map((c) => ({ ...c, date }))
+  const supprimee = options.supprimee
+  const creneaux = creneauxSemaine(jourIso(date), grilles, cases, { dateLimite: options.dateLimite ? date : undefined, garder: supprimee ? (h) => !supprimee(date, h) : undefined }).map((c) => ({ ...c, date }))
   return { etat, creneaux }
 }
 
@@ -453,6 +473,8 @@ export function creneauxOublies<S extends SeanceHoraire>(p: {
   depuis: string
   aujourdhui: string
   maintenant: number
+  /** Heures supprimées par un événement (jamais « oubliées »). */
+  supprimee?: HeureSupprimee
 }): Creneau[] {
   const oublies: Creneau[] = []
   if (p.depuis > p.aujourdhui) return oublies
@@ -462,7 +484,7 @@ export function creneauxOublies<S extends SeanceHoraire>(p: {
     parDate.set(s.date_seance, [...(parDate.get(s.date_seance) ?? []), s])
   }
   for (let d = p.depuis, i = 0; d <= p.aujourdhui && i < 800; d = ajouterJours(d, 1), i++) {
-    const { creneaux } = creneauxDuJour(d, p.grilles, p.cases, { dateLimite: true })
+    const { creneaux } = creneauxDuJour(d, p.grilles, p.cases, { dateLimite: true, supprimee: p.supprimee })
     for (const c of creneaux) {
       if (d === p.aujourdhui && c.fin > p.maintenant) continue
       if (!seanceDuCreneau(c, parDate.get(d) ?? [])) oublies.push(c)
@@ -480,14 +502,14 @@ export interface HeuresRestantes {
 /** Heures de cours restantes par classe, de maintenant au `jusqua` inclus (congés FWB exclus ;
  * aujourd'hui : seulement les créneaux pas encore commencés). Une heure double = 2 heures,
  * 1 séance. `aConfirmer` : la période touche une année au calendrier inconnu. */
-export function heuresRestantes(p: { grilles: GrilleHoraire[]; cases: CaseHoraire[]; aujourdhui: string; maintenant: number; jusqua: string }): {
+export function heuresRestantes(p: { grilles: GrilleHoraire[]; cases: CaseHoraire[]; aujourdhui: string; maintenant: number; jusqua: string; supprimee?: HeureSupprimee }): {
   parClasse: Map<string, HeuresRestantes>
   aConfirmer: string[]
 } {
   const parClasse = new Map<string, HeuresRestantes>()
   const aConfirmer = new Set<string>()
   for (let d = p.aujourdhui, i = 0; d <= p.jusqua && i < 800; d = ajouterJours(d, 1), i++) {
-    const { etat, creneaux } = creneauxDuJour(d, p.grilles, p.cases)
+    const { etat, creneaux } = creneauxDuJour(d, p.grilles, p.cases, { supprimee: p.supprimee })
     if (!etat.verifie && etat.type !== 'weekend') aConfirmer.add(etat.annee)
     for (const c of creneaux) {
       if (d === p.aujourdhui && c.debut < p.maintenant) continue

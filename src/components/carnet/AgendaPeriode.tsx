@@ -16,6 +16,10 @@ import {
 import { agendaPeriodeHtml } from '../../lib/carnetFiche'
 import type { GrilleHoraire } from '../../lib/horaire'
 import { copierTexte, ouvrirFiche, telechargerFiche } from './outilsCarnet'
+import { classesTouchees, concerne, dateCourteJour, evenementsEntre, resumeSuppressions, titreEvenement } from '../../lib/agendaEvenements'
+import { PuceType } from './AgendaUi'
+import { useCarnet } from './contexteCarnet'
+import { titreChapitre } from './HeuresEffectives'
 
 const RACCOURCIS: Raccourci[] = ['semaine', 'mois', 'rentree', 'dernierConge']
 const TOUTES = '*'
@@ -48,6 +52,7 @@ export function AgendaPeriode({
   maintenant: Date
 }) {
   const id = useId()
+  const ctx = useCarnet()
   const aujourdhui = dateIso(maintenant)
   const depart = periodeRaccourci('dernierConge', aujourdhui)
   // `null` : pas encore choisie ici → suit la classe active du carnet.
@@ -225,6 +230,57 @@ export function AgendaPeriode({
       )}
       {texteManuel !== null && (
         <textarea className="carnet-texte-copie" readOnly rows={10} value={texteManuel} onFocus={(e) => e.currentTarget.select()} aria-label="Agenda pour Smartschool" />
+      )}
+
+      {ctx.agenda.actif && !erreurDates && (
+        <section className="agenda-periode-evenements" aria-labelledby={`${id}-evs`}>
+          <div className="agenda-periode-evenements-tete">
+            <h3 id={`${id}-evs`}>Événements de la période</h3>
+            <button
+              type="button"
+              className="carnet-bouton principal agenda-bouton-evenement"
+              onClick={() => {
+                const d = du <= aujourdhui && aujourdhui <= au ? aujourdhui : du
+                ctx.nouvelEvenement({ du: d, au: d, ...(classeId ? { ecole_id: classes.find((c) => c.id === classeId)?.ecole_id, toutes_classes: false, classes: [classeId] } : {}) })
+              }}
+            >
+              <span aria-hidden="true">+</span> Événement
+            </button>
+          </div>
+          {(() => {
+            const classe = classeId ? classes.find((c) => c.id === classeId) : undefined
+            const liste = evenementsEntre(ctx.agenda.evenements, du, au).filter((e) => {
+              if (!classe) return true
+              if (concerne(e, classe)) return true
+              // « J'accompagne » qui supprime une heure de cette classe.
+              return !!ctx.ctxAgenda && e.accompagne && classesTouchees(e, ctx.ctxAgenda).has(classe.id)
+            })
+            if (liste.length === 0) return <p className="compte-vide">Aucun événement {classe ? `pour ${classe.nom} ` : ''}sur cette période.</p>
+            return (
+              <ul className="agenda-liste-periode">
+                {liste.map((e) => {
+                  const r = ctx.ctxAgenda ? resumeSuppressions(e, ctx.ctxAgenda) : null
+                  const quoi = e.type === 'interrogation' ? [classes.find((c) => c.id === e.classe_id)?.nom, e.chapitre ? titreChapitre(e.chapitre) : null].filter(Boolean).join(' · ') : titreEvenement(e)
+                  return (
+                    <li key={e.id}>
+                      <button type="button" className="agenda-a-venir-ligne colonne" onClick={() => ctx.ouvrirEvenement(e)}>
+                        <PuceType type={e.type} />
+                        <span>
+                          {e.du === e.au ? dateCourteJour(e.du) : `${dateCourteJour(e.du)} → ${dateCourteJour(e.au)}`} — {quoi}
+                        </span>
+                      </button>
+                      {r && (
+                        <p className="agenda-heures-barrees">
+                          Pas cours : <s>{r.texte}</s>
+                        </p>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
+            )
+          })()}
+        </section>
       )}
     </section>
   )
