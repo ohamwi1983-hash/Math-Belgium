@@ -858,8 +858,9 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   plan (FAC) » (consigne, brève, corrigé, barème), libellés « arête [AB] » ; G7 (« lettre commune dans
   un cas parallèle ») impossible — une lettre commune est un point commun — et le nom du plan à sommet
   de percée ne faisait passer la stratégie « lettres » que de 43,0 à 42,5 % : non retenu. gen40 variante
-  `triangle` EN FIN de catalogue (P, Q, R sur les trois arêtes d'un sommet, t ∈ [0,25 ; 0,75], solide
-  tiré parmi les quatre ; deux écrans « segment » puis le troisième côté automatique), tirée une fois sur
+  `triangle` EN FIN de catalogue (P, Q, R sur les trois arêtes d'un sommet VISIBLE — ses trois faces
+  visibles, aucun côté en pointillés, décision de l'utilisateur : en pratique F du cube ou du pavé, le
+  prisme et le tétraèdre n'en ont pas —, t ∈ [0,25 ; 0,75] ; deux écrans « segment » puis le troisième côté automatique), tirée une fois sur
   six par l'appli (`genererExerciceSectionPlaneSolideLibre`), tirage libre de l'adaptateur et des codes
   inchangé ; barème propre (côtés directs, aucun point auxiliaire), niveau 1 · 7 min (cas particulier
   visible) ; noms des gabarits « Cube ABCDEFGH », « Parallélépipède rectangle ABCDEFGH », « Prisme droit

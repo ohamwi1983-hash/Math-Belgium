@@ -2,6 +2,7 @@ import type { NomSolide3D, Point3D, Solide3D } from "../../core/geometrieEspace.
 import type { ExerciceSectionPlaneSolide, LigneCandidateExercice, PointSectionExercice } from "../../core/sectionPlaneSolide.types";
 import { distance3D, EPSILON_3D } from "../solide3D/geometrieEspace";
 import { GABARITS_SOLIDE3D, GABARITS_TOUS, tirerNomGabarit } from "../solide3D/gabarits";
+import { faceEstVisible } from "../../ui/solide3DSketch";
 import { calculerPolygoneSection, lignesCandidatesStatiques, type PlanPoints3D, resolutionReference } from "./polygoneSection";
 
 /**
@@ -158,13 +159,25 @@ function pointDepuisSommet(solide: Solide3D, sommet: string, arete: [string, str
   return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t };
 }
 
-/** Section TRIANGULAIRE : P, Q, R sur les trois arêtes issues d'un même sommet (trois faces deux à
- * deux adjacentes) — trois côtés tracés directement, aucun point auxiliaire. Solide tiré parmi les
- * quatre gabarits ; t ∈ [0,25 ; 0,75] (triangle lisible, jamais collé au sommet ni au bout). */
+/** Sommets dont les trois faces sont VISIBLES sur le dessin (décision de l'utilisateur : aucun côté du
+ * triangle en pointillés). Un gabarit qui n'en a aucun (le tétraèdre) ne sert pas à la variante. */
+function sommetsVisibles(solide: Solide3D): string[] {
+  return Object.keys(solide.sommets).filter((n) => {
+    const faces = solide.faces.filter((f) => f.includes(n));
+    return faces.length === 3 && faces.every((f) => faceEstVisible(solide, f));
+  });
+}
+
+const GABARITS_TRIANGLE: NomSolide3D[] = GABARITS_TOUS.filter((n) => sommetsVisibles(GABARITS_SOLIDE3D[n]).length > 0);
+
+/** Section TRIANGULAIRE : P, Q, R sur les trois arêtes issues d'un même sommet VISIBLE (trois faces
+ * visibles deux à deux adjacentes) — trois côtés tracés directement, en trait plein, aucun point
+ * auxiliaire. Solide tiré parmi les gabarits qui ont un tel sommet ; t ∈ [0,25 ; 0,75] (triangle
+ * lisible, jamais collé au sommet ni au bout). */
 function tenterTriangle(): ExerciceSectionPlaneSolide | null {
-  const nomGabarit = tirerNomGabarit(GABARITS_TOUS);
+  const nomGabarit = tirerNomGabarit(GABARITS_TRIANGLE);
   const solide = GABARITS_SOLIDE3D[nomGabarit];
-  const sommets = Object.keys(solide.sommets);
+  const sommets = sommetsVisibles(solide);
   const sommet = sommets[randomInt(0, sommets.length - 1)];
   const aretes = melanger(aretesIssuesDe(solide, sommet));
   if (aretes.length !== 3) return null;
@@ -189,7 +202,7 @@ export type VarianteSectionPlaneSolide = NomSolide3D | "triangle";
  * les indices des quatre gabarits, donc les `?code=` déjà imprimés, ne changent pas. */
 export const CATALOGUE_VARIANTES: { id: VarianteSectionPlaneSolide; label: string }[] = [
   ...GABARITS_TOUS.map((id) => ({ id, label: GABARITS_SOLIDE3D[id].label })),
-  { id: "triangle", label: "Section triangulaire (P, Q, R autour d'un sommet)" },
+  { id: "triangle", label: "Section triangulaire (P, Q, R autour d'un sommet visible)" },
 ];
 
 export function construireAvecVarianteId(varianteId: VarianteSectionPlaneSolide): ExerciceSectionPlaneSolide {
