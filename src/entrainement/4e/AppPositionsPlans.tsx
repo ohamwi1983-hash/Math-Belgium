@@ -1,3 +1,6 @@
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleePositionsPlans } from "./generateurs/positionsPlans/corrigeDetaille";
 import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceDeuxPlans, ExercicePositionsPlans } from "./core/positionsPlans.types";
@@ -150,6 +153,7 @@ export function AppPositionsPlans() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePositionsPlans(e, enAttente.paire), lettreEtape(ecran))} />,
       }
     : null;
 

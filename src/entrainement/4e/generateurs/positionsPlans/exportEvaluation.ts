@@ -5,28 +5,22 @@ import type {
   CritereBareme,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
+  CriteresDifficulte,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { texte } from "../../../export/fragmentsDocx";
-import type { ExerciceDeuxPlans, ExercicePositionsPlans, ExerciceTroisPlans } from "../../core/positionsPlans.types";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleePositionsPlans } from "./corrigeDetaille";
+import type { ExercicePositionsPlans } from "../../core/positionsPlans.types";
 import { figurePositionsPlansSvg } from "../../ui/figurePositionsPlans";
 import {
-  conclusionTroisPlans,
   consigneGlobale,
-  descriptionPlan,
   droitePaire,
-  elementsFigureFinale,
   enonce,
   LIBELLES_ISSUE,
-  LIBELLES_POSITION,
-  legendeFigureFinale,
-  libellePaire,
   nomPlan,
-  pointNommeDansPlan,
   pointsDeLaPaire,
-  raisonCandidat,
 } from "../../ui/formatPositionsPlans";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExercicePositionsPlans } from "./index";
 import { profilPositionsPlans } from "./profil";
@@ -103,101 +97,6 @@ function reponseBreve(e: ExercicePositionsPlans): FragmentConsigne[] {
   return [texte(`${LIBELLES_ISSUE[e.issue]} ${valide(e)}`)];
 }
 
-function figureFinale(e: ExercicePositionsPlans): string {
-  return figurePositionsPlansSvg(e, { mode: "papier", ...elementsFigureFinale(e, null) });
-}
-
-function correctionDeuxPlans(e: ExerciceDeuxPlans): EtapeCorrection[] {
-  const P = nomPlan(e, 0);
-  const Q = nomPlan(e, 1);
-  const etapes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [texte("Les trois points d'un nom sont-ils dans l'autre plan ? Si oui, c'est le même plan. Sinon, les plans ont-ils un point commun ? Si oui, ils sont sécants ; sinon on vérifie le critère : deux droites sécantes de l'un parallèles à deux droites de l'autre.")],
-    },
-  ];
-  if (e.position === "secants") {
-    const horsP = e.plans[1].find((n) => !pointNommeDansPlan(e, n, 0));
-    const paire = e.paireAttendue!;
-    etapes.push({
-      label: "Constat",
-      sousQuestion: "a",
-      fragments: [texte(`${horsP ? `${horsP} n'appartient pas au plan ${P} : les plans ne sont pas confondus. ` : ""}Ils ont des points communs (par exemple ${libellePaire(e, paire)}, voir l'étape suivante) : ils ne sont pas parallèles.`)],
-    });
-    etapes.push({ label: "Conclusion", sousQuestion: "a", fragments: [texte(`Les plans ${P} et ${Q} sont sécants.`)] });
-    for (const i of paire) etapes.push({ label: "Point commun", sousQuestion: "b", fragments: [texte(raisonCandidat(e, e.candidats[i]!))] });
-    const noms = pointsDeLaPaire(e, paire).filter((p) => p.candidat.construction);
-    etapes.push({
-      label: "Conclusion",
-      sousQuestion: "b",
-      fragments: [texte(`${noms.length ? `On nomme ${noms.map((p) => `${p.nom} le point ${p.candidat.libelle}`).join(" et ")}. ` : ""}La droite d'intersection des deux plans est ${droitePaire(e, paire)}. ${legendeFigureFinale(e)}`)],
-      figureHtml: figureFinale(e),
-    });
-    etapes.push({
-      label: "Piège",
-      sousQuestion: "b",
-      fragments: [texte("Deux droites qui se croisent sur le dessin ne se coupent pas forcément : il faut qu'elles soient dans un même plan (une même face), sinon elles peuvent être gauches. Et deux triangles qui ne se touchent pas sur le dessin peuvent appartenir à des plans sécants : un plan est infini.")],
-    });
-    return etapes;
-  }
-  const description = descriptionPlan(e, 0);
-  etapes.push({ label: "Conclusion", sousQuestion: "a", fragments: [texte(LIBELLES_POSITION[e.position])] });
-  etapes.push({ label: "Justification", sousQuestion: "b", fragments: [texte(valide(e))] });
-  etapes.push({
-    label: "Conclusion",
-    sousQuestion: "b",
-    fragments: [
-      texte(
-        e.position === "paralleles"
-          ? `Deux droites sécantes de ${P} sont parallèles à deux droites de ${Q} : les plans sont parallèles. ${legendeFigureFinale(e)}`
-          : `Trois points non alignés de ${Q} sont dans ${P} : c'est le même plan${description ? `, ${description}` : ""}. ${legendeFigureFinale(e)}`,
-      ),
-    ],
-    figureHtml: figureFinale(e),
-  });
-  etapes.push({
-    label: "Piège",
-    sousQuestion: "b",
-    fragments: [
-      texte(
-        e.position === "paralleles"
-          ? "Deux droites parallèles entre elles ne suffisent pas, ni des triangles « qui ne se touchent pas » : le critère demande deux droites SÉCANTES du premier plan."
-          : "Deux points communs ne suffisent pas : deux plans sécants en ont aussi. Il faut trois points communs non alignés.",
-      ),
-    ],
-  });
-  return etapes;
-}
-
-function correctionTroisPlans(e: ExerciceTroisPlans): EtapeCorrection[] {
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [texte("On prend deux des plans : s'ils sont parallèles, il n'y a aucun point commun. Sinon, on cherche leur droite d'intersection d, puis la position de d par rapport au troisième plan : sécante → un seul point commun ; incluse → une droite commune ; parallèle → aucun point commun.")],
-    },
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte(LIBELLES_ISSUE[e.issue])] },
-    { label: "Justification", sousQuestion: "b", fragments: [texte(valide(e))] },
-    { label: "Conclusion", sousQuestion: "b", fragments: [texte(`${conclusionTroisPlans(e)} ${legendeFigureFinale(e)}`)], figureHtml: figureFinale(e) },
-    {
-      label: "Piège",
-      sousQuestion: "b",
-      fragments: [
-        texte(
-          e.issue === "aucun" && e.sousCas === "toblerone"
-            ? "Trois plans sécants deux à deux n'ont pas forcément un point commun : leurs trois droites d'intersection peuvent être parallèles (le Toblerone)."
-            : "La droite citée doit appartenir aux DEUX plans : vérifie que deux de ses points sont dans chacun d'eux, sans te fier au dessin.",
-        ),
-      ],
-    },
-  ];
-}
-
-function correctionDetaillee(e: ExercicePositionsPlans): EtapeCorrection[] {
-  return e.variante === "deux-plans" ? correctionDeuxPlans(e) : correctionTroisPlans(e);
-}
-
 function construireCorrection(e: ExercicePositionsPlans): BlocCorrection[] {
   return [{ type: "paragraphe", fragments: reponseBreve(e) }];
 }
@@ -234,8 +133,12 @@ function bareme(e: ExercicePositionsPlans): BaremeExercice {
   };
 }
 
-function difficulte(e: ExercicePositionsPlans): 1 | 2 | 3 {
-  return e.variante === "deux-plans" ? 2 : 3;
+/** Niveau CONSTANT dans un verdict (position des deux plans, issue des trois plans) : deux écrans de
+ * raisonnement, sans charge (le nombre de lignes dépend du verdict), méthode 1 (choisir la propriété
+ * du cours : trois points communs, point commun, critère de parallélisme, droite d'intersection),
+ * aucun piège dans les données, aucun nombre. */
+function criteresDifficulte(e: ExercicePositionsPlans): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleePositionsPlans(e)), sansCharge: true, methode: 1, piege: 0, nombres: 0 };
 }
 
 export const adaptateurEvaluationPositionsPlans: AdaptateurFeuilleExercices<ExercicePositionsPlans> = {
@@ -247,10 +150,9 @@ export const adaptateurEvaluationPositionsPlans: AdaptateurFeuilleExercices<Exer
   genererInstanceAvecVariante: construireAvecVariante,
   construireEnonce,
   construireCorrection,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: (e) => correctionDetailleePositionsPlans(e),
   bareme,
   enoncePapier,
-  dureeMinutes: 7,
 };

@@ -1,17 +1,13 @@
 import type { ExerciceOmbreSoleil, VarianteOmbreSoleil } from "../../core/ombreSoleil.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeOmbreSoleil } from "./corrigeDetaille";
+import { construireSvgOmbreSoleil } from "./figure";
 import { texte } from "../../../export/fragmentsDocx";
 import {
-  AIDE_POINT_SIMPLE,
-  elementsConclusion,
-  elementsScene,
-  fusionner,
   libelleObstacle,
-  solidePourAffichage,
   texteConclusion,
 } from "../../ui/formatOmbreSoleil";
-import type { ElementsCroquis } from "../../ui/formatOmbreSoleil";
-import { calculerEchelleProjection, calculerGeometrieSolide3D, HAUTEUR_SVG, LARGEUR_SVG, projeter3DVersPixel } from "../../ui/solide3DSketch";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOmbreSoleil } from "./index";
 import { profilOmbreSoleil } from "../profilsEvaluation4eCh8";
 
@@ -36,69 +32,6 @@ import { profilOmbreSoleil } from "../profilsEvaluation4eCh8";
  */
 
 // --- Rendu SVG imprimé de la scène (voir le commentaire de tête ci-dessus) ---
-
-const COULEUR_ARETE_VISIBLE = "#495057";
-const COULEUR_ARETE_CACHEE = "#adb5bd";
-
-/** Énoncé : la scène (sol, obstacles, exemple ou paire connue, bâton à résoudre) sans aucune ombre
- * à trouver ; correction : l'image de l'écran de conclusion (`elementsConclusion`). Les sommets à
- * projeter de la variante `directionInconnue` sont repérés par leur nom. */
-function elementsFigure(exercice: ExerciceOmbreSoleil, avecOmbre: boolean): ElementsCroquis {
-  if (avecOmbre) return elementsConclusion(exercice);
-  if (exercice.variante !== "directionInconnue") return elementsScene(exercice);
-  const reperes: ElementsCroquis = {
-    points: exercice.piquets.map((p) => ({ position: { x: p.piquet.base.x, y: p.piquet.base.y, z: p.piquet.hauteur }, label: p.piquet.id, couleur: COULEUR_ARETE_VISIBLE })),
-    segments: [],
-  };
-  return fusionner(elementsScene(exercice), reperes);
-}
-
-function construireSvgOmbreSoleil(exercice: ExerciceOmbreSoleil, avecOmbre: boolean): string {
-  const solide = solidePourAffichage(exercice);
-  const geometrie = calculerGeometrieSolide3D(solide);
-  const echelleProjection = calculerEchelleProjection(solide);
-  const { points, segments } = elementsFigure(exercice, avecOmbre);
-
-  const traits = geometrie.aretes
-    .map((arete) => {
-      const [n1, n2] = arete.sommets;
-      const p1 = geometrie.sommetsPixel[n1];
-      const p2 = geometrie.sommetsPixel[n2];
-      const couleur = arete.visible ? COULEUR_ARETE_VISIBLE : COULEUR_ARETE_CACHEE;
-      const pointille = arete.visible ? "" : ` stroke-dasharray="4 3"`;
-      return `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="${couleur}" stroke-width="1.6"${pointille}/>`;
-    })
-    .join("");
-
-  const traitsExtra = segments
-    .map((s) => {
-      const p1 = projeter3DVersPixel(s.a, echelleProjection);
-      const p2 = projeter3DVersPixel(s.b, echelleProjection);
-      const pointille = s.pointille ? ` stroke-dasharray="5 4"` : "";
-      return `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="${s.couleur}" stroke-width="1.6"${pointille}/>`;
-    })
-    .join("");
-
-  const pointsExtra = points
-    .map((pt) => {
-      const p = projeter3DVersPixel(pt.position, echelleProjection);
-      return (
-        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${pt.couleur}"/>` +
-        `<text x="${p.x.toFixed(1)}" y="${(p.y - 8).toFixed(1)}" font-size="13" font-weight="700" text-anchor="middle" fill="${pt.couleur}">${pt.label}</text>`
-      );
-    })
-    .join("");
-
-  const svg = `<svg width="${LARGEUR_SVG}" height="${HAUTEUR_SVG}" viewBox="0 0 ${LARGEUR_SVG} ${HAUTEUR_SVG}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Scène en perspective cavalière — ombre au soleil">
-<rect x="0" y="0" width="${LARGEUR_SVG}" height="${HAUTEUR_SVG}" fill="#ffffff"/>
-${traits}
-${traitsExtra}
-${pointsExtra}
-</svg>`;
-
-  // `page-break-inside`/`break-inside` évitent qu'une impression coupe la figure entre deux pages.
-  return `<div style="text-align:center;margin:0.6em 0;page-break-inside:avoid;break-inside:avoid;">${svg}</div>`;
-}
 
 // --- Énoncé papier et étapes ---
 
@@ -174,13 +107,14 @@ function construireCorrectionOmbreSoleil(instance: ExerciceOmbreSoleil): BlocCor
 
 const LETTRES = "abcdefghij";
 
-const sansMethode = (t: string) => t.replace(/^Méthode : /, "");
-const majuscule = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 
-function difficulteOmbreSoleil(exercice: ExerciceOmbreSoleil): 1 | 2 | 3 {
-  if (exercice.variante === "simple") return 1;
-  if (exercice.variante === "obstacle") return exercice.indexObstacleTouche === null ? 2 : 3;
-  return 3;
+/** Niveau : variante « simple » 1 étape ; « obstacle » et « direction inconnue » : l'écran du rayon
+ * (tracer la parallèle au rayon connu) est une lecture. Méthode 1 (construction du cours à appliquer),
+ * piège constant dans la variante « obstacle » (des obstacles sur la trace au sol, que le rayon les
+ * heurte ou non : le verdict ne change pas le niveau), aucun nombre. */
+function criteresDifficulteOmbreSoleil(exercice: ExerciceOmbreSoleil): CriteresDifficulte {
+  const lecture = exercice.variante === "simple" ? [] : ["a"];
+  return { ...etapesDuCorrige(correctionDetailleeOmbreSoleil(exercice), lecture), sansCharge: true, methode: 1, piege: exercice.variante === "obstacle" ? 1 : 0, nombres: 0 };
 }
 
 function reponseBreveOmbreSoleil(exercice: ExerciceOmbreSoleil): FragmentConsigne[] {
@@ -195,72 +129,6 @@ function reponseBreveOmbreSoleil(exercice: ExerciceOmbreSoleil): FragmentConsign
     ];
   }
   return [texte(`Ombres ${exercice.piquets.map((p) => `${p.piquet.id}′`).join(", ")} et contour de l'ombre portée : voir la figure du corrigé.`)];
-}
-
-function correctionDetailleeOmbreSoleil(exercice: ExerciceOmbreSoleil): EtapeCorrection[] {
-  const figure = construireSvgOmbreSoleil(exercice, true);
-  const conclusion = construireCorrectionOmbreSoleil(exercice)[1];
-  const texteConclusionDetail = conclusion.type === "paragraphe" ? conclusion.fragments : [texte(texteConclusion(exercice))];
-  if (exercice.variante === "simple") {
-    return [
-      { label: "Méthode", sousQuestion: "a", fragments: [texte(majuscule(sansMethode(AIDE_POINT_SIMPLE[0])))] },
-      { label: "Conclusion", sousQuestion: "a", fragments: texteConclusionDetail, figureHtml: figure },
-      { label: "Piège", sousQuestion: "a", fragments: [texte("Le rayon part du SOMMET du bâton, la trace au sol part de son PIED : les échanger, ou tracer la trace au sol depuis le pied de E, donne une ombre trop courte ou trop longue.")] },
-    ];
-  }
-  if (exercice.variante === "obstacle") {
-    const auSol = exercice.indexObstacleTouche === null;
-    return [
-      {
-        label: "Méthode",
-        sousQuestion: "a",
-        fragments: [texte("Les rayons du soleil sont parallèles, et des droites parallèles restent parallèles sur le dessin : le rayon issu du sommet de A a la même inclinaison et le même sens que le rayon pointillé de l'exemple.")],
-      },
-      { label: "Construction", sousQuestion: "a", fragments: [texte("Depuis le sommet de A, on trace la parallèle au rayon de l'exemple (du sommet de E vers E′), dans le même sens.")] },
-      {
-        label: "Méthode",
-        sousQuestion: "b",
-        fragments: [
-          texte(
-            "On suit la trace au sol issue du pied de A (parallèle à l'ombre de E) ; pour chaque obstacle qu'elle traverse, on regarde si le rayon passe au-dessus ou s'il le heurte. L'ombre s'arrête sur la PREMIÈRE surface que le rayon touche.",
-          ),
-        ],
-      },
-      { label: "Conclusion", sousQuestion: "b", fragments: texteConclusionDetail, figureHtml: figure },
-      {
-        label: "Piège",
-        sousQuestion: "b",
-        fragments: [
-          texte(
-            auSol
-              ? "Un obstacle traversé par la trace au sol n'arrête l'ombre que si le rayon le heurte : ici le rayon passe au-dessus, l'ombre va jusqu'au sol."
-              : "L'ombre s'arrête sur la PREMIÈRE surface que le rayon touche : ne pas la prolonger jusqu'au sol à travers l'obstacle.",
-          ),
-        ],
-      },
-    ];
-  }
-  const k = exercice.piquetConnu.id;
-  const etapes: EtapeCorrection[] = [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte(`La lumière va du sommet ${k} vers son ombre ${k}′ : tous les rayons sont parallèles au rayon pointillé ${k}${k}′ et de même sens (vers le sol, du côté de l'ombre).`)] },
-    { label: "Construction", sousQuestion: "a", fragments: [texte(`Depuis chaque sommet à projeter, on trace la parallèle au rayon ${k}${k}′, dirigée vers le sol du même côté que ${k}′.`)] },
-  ];
-  exercice.piquets.forEach((p, i) => {
-    const id = p.piquet.id;
-    etapes.push({
-      label: "Construction",
-      sousQuestion: LETTRES[i + 1],
-      fragments: [texte(`${id}′ est à l'intersection du rayon issu de ${id} (parallèle à ${k}${k}′) et de la trace au sol issue du pied de ${id} (le point du sol à sa verticale), parallèle à la trace au sol qui mène à ${k}′.`)],
-    });
-  });
-  const fin = LETTRES[exercice.piquets.length + 1];
-  etapes.push({ label: "Conclusion", sousQuestion: fin, fragments: texteConclusionDetail, figureHtml: figure });
-  etapes.push({
-    label: "Piège",
-    sousQuestion: LETTRES[1],
-    fragments: [texte("La trace au sol part du PIED du sommet (le point du sol à sa verticale), pas d'un coin de la base pris au hasard : sans ce pied, l'intersection avec le rayon n'a pas de sens.")],
-  });
-  return etapes;
 }
 
 function baremeOmbreSoleil(exercice: ExerciceOmbreSoleil): BaremeExercice {
@@ -331,12 +199,11 @@ export const adaptateurEvaluationOmbreSoleil: AdaptateurFeuilleExercices<Exercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteOmbreSoleil),
   construireEnonce: construireEnonceOmbreSoleil,
   construireCorrection: construireCorrectionOmbreSoleil,
-  difficulte: difficulteOmbreSoleil,
+  criteresDifficulte: criteresDifficulteOmbreSoleil,
   reponseBreve: reponseBreveOmbreSoleil,
   correctionDetaillee: correctionDetailleeOmbreSoleil,
   bareme: baremeOmbreSoleil,
   enoncePapier: enoncePapierOmbreSoleil,
-  dureeMinutes: 6,
   profilInstance: profilOmbreSoleil,
   // `enteteHtml` (la scène) utilisé systématiquement : condition à elle seule déjà exclusive pour
   // `regroupable`, quel que soit le nombre de questions par instance — voir le commentaire de tête.

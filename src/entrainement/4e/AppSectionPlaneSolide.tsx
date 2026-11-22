@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import type { EtapeCorrection } from "../export/genererFeuilleExercices";
+import { etapesFaceSection, etapesLignesSection, etapesSegmentSection } from "./generateurs/sectionPlaneSolide/corrigeDetaille";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -33,6 +36,26 @@ import {
   texteReponseSegmentDirect,
 } from "./ui/formatSectionPlaneSolide";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+
+/** Corrigé détaillé de l'écran qui vient de se clore — mêmes constructeurs que le papier
+ * (`generateurs/sectionPlaneSolide/corrigeDetaille.ts`), avec l'état CONFIRMÉ de la session (points
+ * connus dans l'ordre de découverte de l'élève, droites et face confirmées ; point auxiliaire « I »). */
+function corrigeEcran(etat: EtatSessionSectionPlaneSolide, suivant: EtatSessionSectionPlaneSolide): EtapeCorrection[] {
+  const { exerciceCourant: exercice, connus } = etat;
+  if (etat.phase === "segmentDirect") {
+    const nouveau = suivant.segmentsTraces.find((cle) => !etat.segmentsTraces.includes(cle) && cle !== suivant.segmentAutomatique);
+    if (!nouveau) return [];
+    const face = faceDuSegmentTrace(exercice, nouveau);
+    const [a, b] = nouveau.split("-").map(Number) as [number, number];
+    return face === null ? [] : etapesSegmentSection(exercice, connus, face, a, b, "a");
+  }
+  if (etat.phase === "auxiliaireLignes") {
+    const paire = suivant.ligneAuxiliaireChoisie;
+    return paire ? etapesLignesSection(exercice, connus, paire[0], paire[1], "I", "a") : [];
+  }
+  const construction = suivant.derniereConstruction;
+  return construction ? etapesFaceSection(exercice, connus, construction, "I", "a") : [];
+}
 
 const CONSIGNE_GENERALE = "Détermine la section plane de ce solide.";
 
@@ -77,6 +100,7 @@ interface TransitionEnAttente {
   etatSuivant: EtatSessionSectionPlaneSolide;
   revele: boolean;
   reponseAttendue: string;
+  corrige: EtapeCorrection[];
 }
 
 /** Réponse confirmée de l'écran qui vient de se clore — toujours lue dans l'état SUIVANT calculé par
@@ -136,7 +160,7 @@ export function AppSectionPlaneSolide() {
     if (transitionDEcran) {
       const revele = nouvelEtat.revelesAccumules[nouvelEtat.revelesAccumules.length - 1]!;
       const reponseAttendue = reponseConfirmee(etat, nouvelEtat);
-      setEnAttente({ etatSuivant: nouvelEtat, revele, reponseAttendue });
+      setEnAttente({ etatSuivant: nouvelEtat, revele, reponseAttendue, corrige: revele ? corrigeEcran(etat, nouvelEtat) : [] });
       setHistorique((h) => [...h, { titre: TITRE_ECRAN[etat.phase], votreReponse: saisie, correcte: !revele, reponseAttendue, aide: etat.niveauAide > 0 }]);
       return;
     }
@@ -171,6 +195,7 @@ export function AppSectionPlaneSolide() {
         reponseAttendue: <p>{enAttente.reponseAttendue}</p>,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={enAttente.corrige} />,
       }
     : null;
 

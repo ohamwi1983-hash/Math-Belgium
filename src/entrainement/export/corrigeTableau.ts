@@ -66,8 +66,8 @@ export function estLignePiege(e: EtapeCorrection): boolean {
   return e.type === "piege" || e.label.trim().toLowerCase() === "piège";
 }
 
-/** Relations de niveau 0 sur lesquelles une ligne de calcul s'aligne. */
-const RELATIONS_COMMANDES = new Set(["approx", "neq", "ne", "le", "leq", "ge", "geq", "equiv", "iff", "Leftrightarrow", "Longleftrightarrow", "Rightarrow", "Longrightarrow", "in", "notin", "simeq"]);
+/** Relations de niveau 0 sur lesquelles une ligne de calcul s'aligne (∥, ⊂ : géométrie dans l'espace, 4e ch. 8). */
+const RELATIONS_COMMANDES = new Set(["approx", "neq", "ne", "le", "leq", "ge", "geq", "equiv", "iff", "Leftrightarrow", "Longleftrightarrow", "Rightarrow", "Longrightarrow", "in", "notin", "simeq", "parallel", "nparallel", "subset", "nsubseteq"]);
 
 /**
  * Découpe une ligne de calcul à son PREMIER signe de relation de niveau 0 (hors accolades) :

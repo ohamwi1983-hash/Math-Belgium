@@ -35,6 +35,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleePositionDroitePlan } from "./generateurs/positionDroitePlan/corrigeDetaille";
 
 /** `tentativesMax` n'est qu'un plafond : le nombre réel de tentatives est fixé PAR ÉCRAN par
  * `tentativesMaxEcran` (1 pour la classification — décision H2a, audit chapitre 8). */
@@ -161,6 +164,7 @@ export function AppPositionDroitePlan() {
         reponseAttendue: construireReponseAttendue(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePositionDroitePlan(exercice), lettreEtape(ORDRE_PHASES.indexOf(phase)))} />,
       }
     : null;
 

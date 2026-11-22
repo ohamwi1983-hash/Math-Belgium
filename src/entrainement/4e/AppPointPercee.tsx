@@ -1,3 +1,6 @@
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleePercee } from "./generateurs/perceePlanAuxiliaire/corrigeDetaille";
 import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { ExercicePercee } from "./core/perceePlanAuxiliaire.types";
@@ -140,6 +143,7 @@ export function AppPointPercee() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePercee(e, indexSuivi, paire ?? undefined), lettreEtape(ecran))} />,
       }
     : null;
 

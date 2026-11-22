@@ -1,3 +1,6 @@
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeOmbreSoleil } from "./generateurs/ombreSoleil/corrigeDetaille";
 import { useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -130,6 +133,7 @@ export function AppOmbreSoleil() {
         revele: enAttente.revele,
         labelSuivant: "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOmbreSoleil(exercice), lettreEtape(etat.scoresAccumules.length))} />,
       }
     : null;
 
