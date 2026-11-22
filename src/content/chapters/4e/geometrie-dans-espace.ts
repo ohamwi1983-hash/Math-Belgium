@@ -211,6 +211,19 @@ export const geometrieDansEspace: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 104. Dessiner en perspective cavalière »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lire un solide en perspective : vocabulaire et positions',
+          generatorId: 'gen133',
+          description: [
+            'Sur un cube, un pavé, un prisme ou un tétraèdre dessiné en perspective cavalière, lis le ' +
+              'dessin d\'un coup d\'œil : faces en vraie grandeur ou déformées, arêtes cachées, vraie ' +
+              'longueur d\'une fuyante ; points nommés d\'un plan ; paires de droites sécantes, parallèles ' +
+              'ou gauches.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 133. Lire un solide en perspective : vocabulaire et positions »',
+        },
       ],
     },
 
@@ -320,6 +333,18 @@ export const geometrieDansEspace: ChapterContent = {
               'l\'espace. Un plan de l\'espace n\'est jamais qu\'une copie du plan habituel, ' +
               'posée quelque part en 3D.',
           ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Points d\'un plan sur un solide',
+          generatorId: 'gen133',
+          description: [
+            'Variante « Points d\'un plan » : un plan est nommé par trois points d\'un solide en ' +
+              'perspective cavalière. Coche tous les autres points nommés qui lui appartiennent — un ' +
+              'sommet sur une parallèle, un milieu d\'arête — sans te laisser tromper par le dessin.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 133. Lire un solide en perspective : vocabulaire et positions »',
         },
       ],
     },
@@ -769,6 +794,19 @@ export const geometrieDansEspace: ChapterContent = {
           ],
           result: { tag: 'conclusion', text: 'E, F et I, non alignés, sont dans le plan (ABJ) : les plans (ABJ) et (EFI) sont confondus — c\'est la face ABFE' },
         },
+        {
+          kind: 'entrainement',
+          title: 'Intersection de deux plans par parallélisme',
+          generatorId: 'gen134',
+          description: [
+            'Un plan (PQR) coupe une face d\'un cube ou d\'un pavé suivant [PQ] : construis son ' +
+              'intersection avec la face opposée par la parallèle à (PQ), grâce à la propriété 1. ' +
+              'Autre variante : deux plans qui contiennent des droites parallèles — un point commun, ' +
+              'la direction, puis la droite d\'intersection.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 134. Intersection de deux plans par parallélisme »',
+        },
       ],
     },
 
@@ -1132,6 +1170,18 @@ export const geometrieDansEspace: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 102. Point de percée par plan auxiliaire »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Intersection de deux plans : un point et une direction',
+          generatorId: 'gen134',
+          description: [
+            'Variante « Un point commun et une direction » : trouve un point commun à deux plans dans ' +
+              'une même face, puis la direction de leur droite d\'intersection — parallèle aux droites ' +
+              'parallèles que contient chacun des plans — et trace cette droite.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 134. Intersection de deux plans par parallélisme »',
         },
       ],
     },
