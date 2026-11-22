@@ -119,7 +119,7 @@ function niveauxDuType(c: Candidat, niveaux: readonly CategorieNiveau[]): string
 
 /** Nom d'un type d'exercice (texte simple, pour les noms accessibles des compteurs). */
 function nomType(c: Candidat): string {
-  return `${c.titre ?? 'Exercice'}${c.variante ? ` — ${c.variante}` : ''}`.replace(/\$/g, '')
+  return ([c.titre, c.variante].filter(Boolean).join(' — ') || 'Exercice').replace(/\$/g, '')
 }
 
 function nomFichier(chapitre: ChapterContent, type: TypeEleve, doc: DocumentGenere): string {
@@ -817,10 +817,10 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
                                 <li key={c.cle} className="eleve-type">
                                   <span className="eleve-type-nom">
                                     <span>
-                                      <RichText text={c.titre ?? 'Exercice'} />
+                                      {c.titre ? <RichText text={c.titre} /> : !c.variante && 'Exercice'}
                                       {c.variante && (
                                         <>
-                                          {' — '}
+                                          {c.titre ? ' — ' : ''}
                                           <RichText text={c.variante} />
                                         </>
                                       )}
