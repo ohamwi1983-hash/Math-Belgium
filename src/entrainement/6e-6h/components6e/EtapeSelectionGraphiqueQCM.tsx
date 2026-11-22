@@ -4,10 +4,14 @@ import { useLargeurConteneur } from "../components/useLargeurConteneur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { LoupeGraphique } from "../../components/LoupeGraphique";
 
 const LETTRES = ["A", "B", "C", "D", "E", "F"] as const;
 
-const LARGEUR_MIN = 200;
+/** Largeur minimale d'une colonne : 2 colonnes dès 312 px de conteneur (grille 2 × 2 sur téléphone,
+ * maquette C du 22/11/2026 — chaque carte a sa loupe pour agrandir le graphique en plein écran).
+ * Avant : 200 (une seule colonne sous 412 px, quatre graphiques empilés ≈ 4,7 écrans de haut). */
+const LARGEUR_MIN = 150;
 const LARGEUR_MAX = 360;
 const LARGEUR_PAR_DEFAUT = 280;
 /** Écart entre 2 cartes quand elles tiennent sur 2 colonnes. */
@@ -130,8 +134,14 @@ export function EtapeSelectionGraphiqueQCM({
         style={{ display: "grid", gridTemplateColumns: `repeat(${colonnes}, minmax(0, 1fr))`, gap: ECART_COLONNES }}
       >
         {Array.from({ length: nombreOptions }, (_, index) => (
-          <div className="graphe-qcm-carte" key={index}>
+          <div
+            className="graphe-qcm-carte graphe-qcm-choix"
+            key={index}
+            // Toucher la carte = toucher son bouton « Graphique X » (même sélection, jamais une validation).
+            onClick={validation ? undefined : () => setChoix(index)}
+          >
             <p className="graphe-qcm-label">{LETTRES[index]}</p>
+            <LoupeGraphique titre={`Graphique ${LETTRES[index]}`} ratio={RATIO_HAUTEUR} rendu={(l, h) => renderGraphique(index, l, h)} />
             {renderGraphique(index, largeur, hauteur)}
             <div className="options-grid-compact" style={{ gridTemplateColumns: "1fr", marginTop: 6 }}>
               <button
@@ -139,7 +149,10 @@ export function EtapeSelectionGraphiqueQCM({
                 className={`btn${choix === index ? " toggle-active" : ""}${refuse && choix === index && choixSoumis === index ? " is-erronee" : ""}`}
                 aria-pressed={choix === index}
                 disabled={!!validation}
-                onClick={() => setChoix(index)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setChoix(index);
+                }}
               >
                 Graphique {LETTRES[index]}
               </button>

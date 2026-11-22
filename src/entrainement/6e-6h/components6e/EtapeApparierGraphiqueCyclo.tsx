@@ -15,6 +15,7 @@ import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { GrapheOptionCyclo } from "./GrapheOptionCyclo";
+import { LoupeGraphique } from "../../components/LoupeGraphique";
 import { AidesCyclo, MESSAGES_ILLISIBLE_CYCLO, MessageRetourCyclo, useRetourCyclo } from "./RetourSaisieCyclo";
 
 const LETTRES = ["A", "B", "C", "D"] as const;
@@ -112,7 +113,10 @@ export function EtapeApparierGraphiqueCyclo({
   const retour = useRetourCyclo<ReponseEcranUniqueGraphiquesCyclometriques>();
 
   const [wrapperRef, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
-  const largeur = Math.min(360, Math.max(200, largeurMesuree || 280));
+  // Grille 2 × 2 dès 312 px (maquette C du 22/11/2026), loupe pour agrandir ; avant : une colonne,
+  // graphiques de 200 à 360 px empilés.
+  const colonnes = (largeurMesuree || 280) >= 312 ? 2 : 1;
+  const largeur = Math.round(Math.min(360, ((largeurMesuree || 280) - 12 * (colonnes - 1)) / colonnes));
   const viewBox = calculerViewBoxGraphique(exercice);
   const desactive = !!validation;
 
@@ -155,10 +159,11 @@ export function EtapeApparierGraphiqueCyclo({
         }
       />
 
-      <div className="graphes-qcm-liste" ref={wrapperRef}>
+      <div className="graphes-qcm-liste" ref={wrapperRef} style={{ display: "grid", gridTemplateColumns: `repeat(${colonnes}, minmax(0, 1fr))`, gap: 12 }}>
         {exercice.candidats.map((_, index) => (
-          <div className="graphe-qcm-carte" key={index}>
+          <div className={`graphe-qcm-carte${(lettreValidee ? exercice.indexCorrect : lettre) === index ? " est-choisi" : ""}`} key={index} onClick={desactive || lettreValidee ? undefined : () => setLettre(index)}>
             <p className="graphe-qcm-label">{LETTRES[index]}</p>
+            <LoupeGraphique titre={`Graphique ${LETTRES[index]}`} ratio={1} rendu={(l) => <GrapheOptionCyclo exercice={exercice} index={index} viewBox={viewBox} largeur={l} hauteur={l} />} />
             <GrapheOptionCyclo exercice={exercice} index={index} viewBox={viewBox} largeur={largeur} hauteur={largeur} />
           </div>
         ))}
