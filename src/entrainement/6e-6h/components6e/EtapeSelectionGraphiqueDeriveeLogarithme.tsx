@@ -7,6 +7,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { EtapeSelectionGraphiqueQCM } from "./EtapeSelectionGraphiqueQCM";
 import { GrapheOptionDeriveeLogarithme } from "./GrapheOptionDeriveeLogarithme";
+import { ReferenceEpinglee } from "../../components/LoupeGraphique";
 
 interface Props {
   exercice: ExerciceGraphiqueDeriveeLogarithme;
@@ -43,10 +44,17 @@ export function EtapeSelectionGraphiqueDeriveeLogarithme({ exercice, aideNiveau1
           </div>
         }
       />
-      <div className="graphe-qcm-carte" ref={refF}>
+      <div className="graphe-qcm-carte graphe-reference-complete" ref={refF}>
         <p className="graphe-qcm-label">Graphique de f</p>
         <GrapheOptionDeriveeLogarithme exercice={exercice} index={0} fonction viewBox={viewBoxF} largeur={largeurF} hauteur={Math.round(largeurF * 0.75)} />
       </div>
+      {/* Téléphone (maquette C) : le même graphique de f, épinglé en bande compacte sous la barre du
+       * haut pendant la comparaison avec A–D (la carte complète ci-dessus est alors masquée). */}
+      <ReferenceEpinglee
+        titre="Graphique de f"
+        ratio={0.75}
+        rendu={(l, h) => <GrapheOptionDeriveeLogarithme exercice={exercice} index={0} fonction viewBox={viewBoxF} largeur={l} hauteur={h} />}
+      />
       <p className="prompt-text">{consigneEcranSelection()}</p>
 
       <EtapeSelectionGraphiqueQCM

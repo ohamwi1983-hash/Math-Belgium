@@ -1,3 +1,6 @@
+import { useLayoutEffect, useState } from "react";
+import { useStoreCadre } from "./cadreGenerateur";
+
 /** "sans-objet" (audit 5e ch. 5, décision J) : écran prévu par la structure FIXE du niveau mais
  * sans objet pour CET exercice (ex. aucun extremum à évaluer) — affiché seulement une fois atteint,
  * pour que le nombre de puces ne révèle jamais la structure dès le premier écran. Compté comme clos. */
@@ -28,7 +31,27 @@ interface Props {
  * référence pouvait suggérer) — afficher une vraie fraction de progression plutôt que d'inventer un
  * barème parallèle.
  */
+let compteurPublications = 0;
+
+/**
+ * Sur la page d'un générateur (`EntrainementPage`, refonte du 22/11/2026) : les segments sont PUBLIÉS
+ * dans le cadre commun (`cadreGenerateur.ts`) et dessinés par la barre du haut (« Étape n / N »), plus
+ * ici ; le clic sur un segment clos y appelle le MÊME `onSegmentClick`. Hors de ce cadre, rendu
+ * historique ci-dessous, inchangé.
+ */
 export function ProgressionPuces({ segments, onSegmentClick }: Props) {
+  const store = useStoreCadre();
+  const [id] = useState(() => ++compteurPublications);
+  useLayoutEffect(() => {
+    if (store && segments.length > 0) store.publier(id, segments, onSegmentClick);
+    else store?.retirer(id);
+  });
+  useLayoutEffect(() => () => store?.retirer(id), [store, id]);
+  if (store) return null;
+  return <ProgressionPucesSurPlace segments={segments} onSegmentClick={onSegmentClick} />;
+}
+
+function ProgressionPucesSurPlace({ segments, onSegmentClick }: Props) {
   if (segments.length === 0) return null;
   const nbClotures = segments.filter((etat) => etat === "correcte" || etat === "aide" || etat === "revele" || etat === "sans-objet").length;
   const pourcentage = Math.round((nbClotures / segments.length) * 100);

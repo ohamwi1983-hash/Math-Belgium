@@ -40,7 +40,7 @@ export function BoutonAide({ niveauAide, niveauAideMax, onActiverAide }: Props) 
   if (niveauAideMax === 0) return null;
   const epuise = niveauAide >= niveauAideMax;
   return (
-    <button type="button" className="btn btn-aide" disabled={epuise} onClick={onActiverAide}>
+    <button type="button" className="btn btn-aide" disabled={epuise} onClick={onActiverAide} data-bouton-aide="" data-aide-niveau={Math.min(niveauAide, niveauAideMax)} data-aide-max={niveauAideMax}>
       <IconeAmpoule />
       {libelleBoutonAide(niveauAide, niveauAideMax)}
     </button>

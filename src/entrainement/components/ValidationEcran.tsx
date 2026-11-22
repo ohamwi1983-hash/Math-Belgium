@@ -37,20 +37,25 @@ type Props = ValidationEtapeProps;
  * suivant"). Partagé par 4e/5e-4h/6e-6h (comme `BoutonExportWord.tsx`), jamais dupliqué par niveau.
  */
 export function ValidationEcran({ revele, reponseAttendue, labelSuivant, onSuivant, messageRevele, corrigeDetaille, figureApres }: Props) {
+  // Refonte du 22/11/2026 (maquette D) : verdict et réponse attendue dans UN SEUL encadré ; le bouton
+  // (`validation-suivant`) devient, sur téléphone, la barre fixe du bas (voir `CadreActions.tsx`).
+  // Textes, ordre et libellé du bouton (`labelSuivant`) inchangés.
   return (
     <div className="validation-ecran">
-      <p className={revele ? "alert-error" : "alert-success"} role="alert">
-        {revele ? (messageRevele ?? "Tentatives épuisées — ce n'était pas la bonne réponse.") : "Bonne réponse !"}
-      </p>
-      {revele && reponseAttendue && (
-        <div className="validation-reponse-attendue">
-          <p className="validation-reponse-attendue-label">Réponse attendue :</p>
-          {reponseAttendue}
-        </div>
-      )}
+      <div className={`validation-verdict ${revele ? "validation-verdict-revele" : "validation-verdict-juste"}`}>
+        <p className={revele ? "alert-error" : "alert-success"} role="alert">
+          {revele ? (messageRevele ?? "Tentatives épuisées — ce n'était pas la bonne réponse.") : "Bonne réponse !"}
+        </p>
+        {revele && reponseAttendue && (
+          <div className="validation-reponse-attendue">
+            <p className="validation-reponse-attendue-label">Réponse attendue :</p>
+            {reponseAttendue}
+          </div>
+        )}
+      </div>
       {figureApres}
       {revele && corrigeDetaille}
-      <button type="button" className="btn btn-primary" onClick={onSuivant}>
+      <button type="button" className="btn btn-primary validation-suivant" onClick={onSuivant}>
         {labelSuivant}
       </button>
     </div>

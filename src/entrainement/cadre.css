@@ -1,0 +1,1251 @@
+/* Cadre commun de la page d'un générateur — refonte du 22/11/2026 (« je suis convaincu, go »).
+ * Maquettes : A partout (en-tête d'une ligne, énoncé en carte sobre, champs pleine largeur, barre fixe
+ * [Aide][Valider] en bas), B (énoncé replié, aide en tiroir), C (choix entre graphiques en grille),
+ * D (réponse révélée + corrigé, « Écran suivant » fixe), E (une ligne par écran clos, « Revoir »),
+ * ordinateur en deux colonnes. Public : 14–17 ans, téléphone d'abord.
+ *
+ * Chargé APRÈS `theme.css` (même spécificité : l'ordre décide) et, comme lui, entièrement scopé sous
+ * `.entrainement` : aucun effet hors de la page `/entrainement/:chantier/:generatorId`. Seules la mise
+ * en page, les tailles, les couleurs et l'emplacement changent — ni texte, ni comportement.
+ * Les attributs `data-barre`, `data-saisie`, `data-deux-colonnes`, `data-enonce-fixe` sont posés par
+ * `components/CadreActions.tsx` (repérage, jamais de déplacement de nœud).
+ *
+ * Échelle typographique : 12 (petites capitales), 14, 16, 18 px. Andika (`--lecture`, comme le cours)
+ * pour l'énoncé et les consignes ; Work Sans (`--sans`) pour l'interface. Couleurs : uniquement les
+ * jetons du site (le mode sombre de `:root` suit). Cibles tactiles ≥ 44 px. */
+
+.entrainement {
+  --lecture: "Andika", "Work Sans", "Segoe UI", system-ui, sans-serif;
+  --gouttiere: 16px;
+  --barre-haut-h: 60px;
+  --barre-h: 0px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  font: 16px/1.5 var(--sans);
+  background: var(--surface);
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+@media screen {
+  /* Fond uni : plus de quadrillage derrière l'exercice. */
+  body:has(.entrainement) {
+    background: var(--surface);
+  }
+}
+
+/* ---------- A — barre du haut (une ligne) ---------- */
+
+.entrainement .gen-barre {
+  position: sticky;
+  top: var(--vv-haut, 0px);
+  z-index: 300;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--barre-haut-h);
+  padding: 8px var(--gouttiere);
+  box-sizing: border-box;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.entrainement .gen-barre-retour {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: var(--surface);
+  text-decoration: none;
+}
+
+.entrainement .gen-barre-retour:hover {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.entrainement .gen-barre-retour:focus-visible,
+.entrainement .gen-segment-cliquable:focus-visible,
+.entrainement .recap-revoir:focus-visible,
+.entrainement .entete-exercice-bascule:focus-visible,
+.entrainement .gen-loupe:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.entrainement .gen-barre-milieu {
+  min-width: 0;
+}
+
+.entrainement .gen-barre-contexte {
+  margin: 0;
+  font: 600 12px/1.3 var(--sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entrainement .gen-barre-segments {
+  display: flex;
+  gap: 4px;
+  height: 22px;
+  margin-top: 2px;
+}
+
+/* Le trait visible fait 6 px ; la zone de toucher (bouton) toute la hauteur de la rangée. */
+.entrainement .gen-segment {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.entrainement .gen-segment::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.entrainement .gen-segment-correcte::before { background: var(--good); }
+.entrainement .gen-segment-aide::before { background: var(--tip); }
+.entrainement .gen-segment-revele::before { background: var(--bad); }
+.entrainement .gen-segment-courante::before { background: var(--accent); }
+.entrainement .gen-segment-sans-objet::before {
+  background: repeating-linear-gradient(135deg, var(--line) 0 4px, var(--ink-faint) 4px 6px);
+  opacity: 0.6;
+}
+
+.entrainement .gen-segment-cliquable {
+  cursor: pointer;
+}
+
+.entrainement .gen-segment-cliquable:hover::before {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--ink-soft);
+}
+
+.entrainement .gen-barre-etape {
+  margin: 0;
+  font: 600 14px/1.2 var(--sans);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* Vidéo explicative : sous la barre, cible de 44 px. */
+.entrainement .video-generateur-lien {
+  min-height: 44px;
+  margin: 4px var(--gouttiere) 0;
+  font: 600 14px var(--sans);
+}
+
+/* ---------- A — page, en-tête du générateur ---------- */
+
+.entrainement .app-shell {
+  min-height: 0;
+  justify-content: flex-start;
+  align-items: stretch;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 12px var(--gouttiere) 32px;
+  box-sizing: border-box;
+}
+
+.entrainement .app-header {
+  max-width: none;
+  margin-bottom: 14px;
+}
+
+/* Surtitre et ligne du chapitre : repris par la barre du haut. Le `<h1>` reste, plus petit. */
+@media screen {
+  .entrainement .app-eyebrow,
+  .entrainement .app-subtitle {
+    display: none;
+  }
+}
+
+.entrainement .app-title {
+  font: 600 18px/1.3 var(--sans);
+  letter-spacing: 0;
+}
+
+.entrainement .selecteur-variante-bloc {
+  margin-top: 2px;
+}
+
+.entrainement .selecteur-variante-toggle {
+  min-height: 44px;
+  font-size: 12px;
+}
+
+.entrainement .selecteur-variante-label {
+  font-size: 12px;
+}
+
+.entrainement .selecteur-variante-select,
+.entrainement .selecteur-variante-bouton {
+  min-height: 48px;
+}
+
+/* Carte de l'exercice : plus de filet orange ni de marge propre (la gouttière est celle de la page). */
+.entrainement .card {
+  max-width: none;
+  border-top: 0;
+  scroll-margin-top: calc(var(--barre-haut-h) + 8px);
+}
+
+.entrainement .card-body {
+  --card-body-padding: 0px;
+  padding: 0;
+}
+
+/* ---------- A — énoncé en carte sobre ---------- */
+
+.entrainement .entete-exercice {
+  position: relative;
+  margin: 0 0 20px;
+  padding: 14px 16px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+
+.entrainement .card-body .entete-exercice {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.entrainement .entete-exercice-label {
+  font: 600 12px/1.3 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 6px;
+}
+
+.entrainement .entete-exercice .prompt-text {
+  font: 400 18px/1.5 var(--lecture);
+  color: var(--ink);
+}
+
+.entrainement .entete-exercice .equation-box {
+  margin: 8px 0 0;
+  padding: 6px 0 2px;
+}
+
+.entrainement .entete-exercice .bloc-donnees-ligne {
+  font: 400 16px/1.5 var(--lecture);
+}
+
+/* Bouton « Énoncé ▾ » (énoncé repliable, maquette B). */
+.entrainement .entete-exercice-bascule {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 32px;
+  margin: -4px 0 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.entrainement .entete-exercice-bascule .entete-exercice-label {
+  margin: 0;
+}
+
+.entrainement .entete-exercice-chevron {
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  margin-right: 4px;
+  border-right: 2px solid var(--ink-soft);
+  border-bottom: 2px solid var(--ink-soft);
+  transform: rotate(225deg);
+  transition: transform 0.15s ease;
+}
+
+/* Consignes et question de l'écran : Andika, sans filet orange. */
+.entrainement .prompt-text {
+  font: 400 16px/1.5 var(--lecture);
+  color: var(--ink-soft);
+}
+
+.entrainement .prompt-text:not(:has(~ .prompt-text)),
+.entrainement .prompt-text.prompt-text--question-multiple {
+  font: 700 18px/1.4 var(--lecture);
+  color: var(--ink);
+  padding-left: 0;
+  border-left: 0;
+}
+
+.entrainement .entete-exercice .prompt-text:not(:has(~ .prompt-text)) {
+  font: 400 18px/1.5 var(--lecture);
+}
+
+.entrainement .bloc-donnees-ligne {
+  font-family: var(--lecture);
+}
+
+.entrainement .prompt-fact {
+  font-family: var(--lecture);
+  font-style: normal;
+}
+
+.entrainement .equation-box {
+  padding: 12px 4px;
+  margin-bottom: 16px;
+}
+
+.entrainement .equation-box .katex {
+  font-size: 1.3em;
+}
+
+/* ---------- A — champs et boutons ---------- */
+
+.entrainement .field-label {
+  font: 600 14px/1.35 var(--sans);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.entrainement .field-inline {
+  flex-wrap: wrap;
+}
+
+.entrainement .field-inline .text-input {
+  flex: 1 1 200px;
+}
+
+.entrainement .text-input {
+  min-height: 52px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  font-size: 18px;
+  line-height: 1.3;
+  box-sizing: border-box;
+}
+
+.entrainement .text-input::placeholder {
+  color: var(--ink-faint);
+}
+
+.entrainement .text-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.entrainement .text-input.is-erronee {
+  border: 2px solid var(--bad);
+  background: var(--bad-soft);
+}
+
+/* Champ figé après validation : la réponse de l'élève reste lisible (maquette D). */
+.entrainement .text-input:disabled {
+  opacity: 1;
+  color: var(--ink);
+  -webkit-text-fill-color: var(--ink);
+  background: var(--paper);
+}
+
+.entrainement .text-input.is-erronee:disabled {
+  background: var(--bad-soft);
+}
+
+/* Champs serrés (tableaux, intervalles, listes) : 44 px suffisent, 16 px de texte. */
+.entrainement .tf-table .text-input,
+.entrainement .morceau-row .text-input,
+.entrainement .grille-signes .text-input,
+.entrainement .liste-points-isoles .text-input,
+.entrainement .ce-ligne-compacte .text-input,
+.entrainement .summary-table .text-input {
+  min-height: 44px;
+  font-size: 16px;
+}
+
+.entrainement .ce-select,
+.entrainement .champ-avec-unite-select {
+  min-height: 44px;
+}
+
+.entrainement .btn {
+  min-height: 48px;
+  padding: 12px 16px;
+  font-size: 16px;
+}
+
+.entrainement .btn-aide {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.entrainement .btn-aide svg {
+  color: var(--tip);
+}
+
+.entrainement .btn-aide:hover:not(:disabled) {
+  border-color: var(--tip);
+  background: var(--tip-soft);
+}
+
+.entrainement .btn-aide:disabled {
+  color: var(--ink-faint);
+  background: var(--surface);
+}
+
+.entrainement .btn-aide:disabled svg {
+  color: var(--ink-faint);
+}
+
+.entrainement .btn-primary {
+  min-height: 52px;
+  border-radius: var(--radius-md);
+  font: 700 16px/1.25 var(--sans);
+}
+
+/* Survol/toucher du bouton principal : `.btn:hover:not(:disabled)` (plus spécifique) lui donnait le
+ * fond pâle des boutons neutres sous un texte blanc — illisible, et « collé » après un toucher. */
+.entrainement .btn-primary:hover:not(:disabled) {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+  color: var(--on-accent);
+}
+
+/* Valider désactivé : lisible (texte foncé sur fond clair bordé), jamais gris sur gris. */
+.entrainement .btn-primary:disabled {
+  background: var(--line-soft);
+  border-color: var(--line);
+  color: var(--ink-soft);
+}
+
+/* Messages de retour : 14 px, encadré fin. */
+.entrainement .alert-error,
+.entrainement .alert-success {
+  padding: 10px 12px;
+  font: 600 14px/1.45 var(--sans);
+  border: 1px solid transparent;
+}
+
+.entrainement .alert-error {
+  border-color: color-mix(in srgb, var(--bad) 35%, transparent);
+}
+
+.entrainement .alert-success {
+  border-color: color-mix(in srgb, var(--good) 35%, transparent);
+}
+
+.entrainement .aide-5e,
+.entrainement .triangle-quelconque-aide {
+  font: 400 16px/1.5 var(--lecture);
+  border-left: 0;
+  border: 1px solid color-mix(in srgb, var(--tip) 35%, transparent);
+}
+
+.entrainement .options-grid,
+.entrainement .options-grid-compact {
+  gap: 10px;
+}
+
+/* ---------- A — barre fixe du bas (téléphone et tablette) ---------- */
+
+@media screen and (max-width: 1023.98px) {
+  .entrainement[data-barre-active] {
+    --barre-h: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .entrainement[data-barre-active] .app-shell {
+    padding-bottom: calc(var(--barre-h) + var(--barre-retour-h, 0px) + 24px);
+  }
+
+  /* Un champ qui reçoit le focus est amené au-dessus de la barre (et sous la barre du haut). */
+  html:has(.entrainement[data-barre-active]) {
+    scroll-padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 16px);
+    scroll-padding-top: calc(var(--barre-haut-h, 60px) + 8px);
+  }
+
+  .entrainement .gen-barre-fond {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--clavier, 0px);
+    z-index: 400;
+    height: var(--barre-h);
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -4px 16px rgba(24, 36, 48, 0.08);
+  }
+
+  .entrainement [data-barre] {
+    position: fixed;
+    z-index: 410;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .entrainement [data-barre="principal"],
+  .entrainement [data-barre="aide"] {
+    bottom: calc(var(--clavier, 0px) + 12px + env(safe-area-inset-bottom, 0px));
+    height: 52px;
+    min-height: 52px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .entrainement [data-barre="principal"] {
+    left: var(--gouttiere);
+    right: var(--gouttiere);
+    width: auto;
+  }
+
+  .entrainement[data-barre-aide] [data-barre="principal"] {
+    left: calc(var(--gouttiere) + var(--barre-aide-w, 96px) + 10px);
+  }
+
+  .entrainement [data-barre="aide"] {
+    left: var(--gouttiere);
+    width: auto;
+    max-width: 46vw;
+    padding-left: 14px;
+    padding-right: 14px;
+    white-space: nowrap;
+  }
+
+  /* Le retour juste au-dessus des boutons (et du clavier). */
+  .entrainement [data-barre="retour"] {
+    left: var(--gouttiere);
+    right: var(--gouttiere);
+    bottom: calc(var(--clavier, 0px) + var(--barre-h) + 8px);
+    max-height: 32vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 14px rgba(24, 36, 48, 0.12);
+    background-color: var(--bad-soft);
+  }
+
+  .entrainement [data-barre="retour"].alert-success {
+    background-color: var(--good-soft);
+  }
+
+  /* La calculatrice flottante (tablette) passe au-dessus de la barre. */
+  .entrainement[data-barre-active] .calculatrice-bouton-flottant {
+    bottom: calc(var(--barre-h) + var(--barre-retour-h, 0px) + 12px);
+  }
+
+  .entrainement .validation-verdict {
+    scroll-margin-bottom: calc(var(--barre-h) + 16px);
+    scroll-margin-top: calc(var(--barre-haut-h) + 8px);
+  }
+}
+
+/* ---------- A — clavier ouvert : énoncé épinglé en bandeau compact ---------- */
+/* ---------- B — énoncé replié en une ligne (touche pour déplier) ---------- */
+
+@media screen and (max-width: 1023.98px) {
+  .entrainement[data-saisie] .entete-exercice {
+    position: sticky;
+    top: calc(var(--vv-haut, 0px) + var(--barre-haut-h));
+    z-index: 250;
+    box-shadow: 0 6px 14px rgba(24, 36, 48, 0.1);
+  }
+
+  .entrainement .entete-exercice.est-replie,
+  .entrainement[data-saisie] .entete-exercice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    max-height: 84px;
+    padding: 8px 40px 8px 14px;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .entrainement .entete-exercice.est-replie {
+    cursor: pointer;
+    margin-bottom: 14px;
+  }
+
+  .entrainement .entete-exercice.est-replie > .prompt-text,
+  .entrainement[data-saisie] .entete-exercice > .prompt-text {
+    display: none;
+  }
+
+  .entrainement .entete-exercice.est-replie > .entete-exercice-label,
+  .entrainement[data-saisie] .entete-exercice > .entete-exercice-label,
+  .entrainement .entete-exercice.est-replie > .entete-exercice-bascule,
+  .entrainement[data-saisie] .entete-exercice > .entete-exercice-bascule {
+    flex: none;
+    width: auto;
+    margin: 0;
+  }
+
+  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text),
+  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text) {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-height: 68px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-size: 0.82em;
+    text-align: left;
+    -webkit-mask-image: linear-gradient(to right, #000 88%, transparent);
+    mask-image: linear-gradient(to right, #000 88%, transparent);
+  }
+
+  .entrainement .entete-exercice.est-replie .equation-box .katex,
+  .entrainement[data-saisie] .entete-exercice .equation-box .katex {
+    font-size: 1.15em;
+  }
+
+  .entrainement .entete-exercice.est-replie .entete-exercice-chevron,
+  .entrainement[data-saisie] .entete-repliable .entete-exercice-chevron {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    margin-top: -6px;
+    transform: rotate(45deg);
+  }
+}
+
+/* ---------- D — réponse révélée, corrigé détaillé ---------- */
+
+.entrainement .validation-ecran {
+  gap: 14px;
+}
+
+.entrainement .validation-verdict {
+  padding: 12px 14px;
+  border: 1px solid;
+  border-radius: var(--radius-lg);
+}
+
+.entrainement .validation-verdict-revele {
+  background: var(--bad-soft);
+  border-color: color-mix(in srgb, var(--bad) 40%, transparent);
+}
+
+.entrainement .validation-verdict-juste {
+  background: var(--good-soft);
+  border-color: color-mix(in srgb, var(--good) 40%, transparent);
+}
+
+.entrainement .validation-verdict .alert-error,
+.entrainement .validation-verdict .alert-success {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 700 16px/1.4 var(--sans);
+  align-items: flex-start;
+}
+
+.entrainement .validation-verdict .alert-error::before,
+.entrainement .validation-verdict .alert-success::before {
+  margin-top: 3px;
+}
+
+.entrainement .validation-verdict .validation-reponse-attendue {
+  margin-top: 10px;
+  padding: 0;
+  text-align: left;
+}
+
+.entrainement .validation-reponse-attendue-label {
+  font: 600 12px/1.3 var(--sans);
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+.entrainement .validation-reponse-attendue .katex {
+  font-size: 1.2em;
+  color: var(--ink);
+}
+
+.entrainement .validation-reponse-attendue {
+  font: 400 16px/1.5 var(--lecture);
+  color: var(--ink);
+}
+
+.entrainement .corrige-ecran {
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  font-size: 16px;
+}
+
+.entrainement .corrige-ecran-titre {
+  margin-bottom: 8px;
+  font: 600 12px/1.3 var(--sans);
+  letter-spacing: 0.06em;
+}
+
+.entrainement .corrige-ecran-ligne {
+  padding: 10px 0;
+}
+
+.entrainement .corrige-ecran-lbl {
+  margin-bottom: 4px;
+  font: 700 14px/1.35 var(--sans);
+  color: var(--accent-ink);
+}
+
+.entrainement .corrige-ecran-contenu {
+  font-family: var(--lecture);
+}
+
+/* Justifications lisibles : 14 px, droites, encre secondaire (plus de petit italique gris). */
+.entrainement .corrige-ecran-calcul .cc-j {
+  font: 400 14px/1.4 var(--lecture);
+  font-style: normal;
+  color: var(--ink-soft);
+}
+
+.entrainement .corrige-ecran-calcul {
+  row-gap: 6px;
+}
+
+.entrainement .corrige-ecran-piege {
+  padding: 8px 12px;
+}
+
+.entrainement .corrige-ecran-piege-lbl {
+  font-size: 12px;
+}
+
+/* ---------- E — rappels des écrans précédents, fiche « Revoir » ---------- */
+
+.entrainement .recap-panel {
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.entrainement .card-body .recap-panel {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.entrainement .recap-panel-titre {
+  margin: 0 0 8px;
+  font: 600 12px/1.3 var(--sans);
+  letter-spacing: 0.06em;
+}
+
+.entrainement .recap-list {
+  gap: 8px;
+}
+
+.entrainement .recap-item {
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 6px 6px 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  font: 400 16px/1.4 var(--sans);
+  color: var(--ink);
+}
+
+.entrainement .recap-item-correcte {
+  background: var(--good-soft);
+  border-color: color-mix(in srgb, var(--good) 30%, transparent);
+}
+
+.entrainement .recap-item-aide {
+  background: var(--tip-soft);
+  border-color: color-mix(in srgb, var(--tip) 35%, transparent);
+}
+
+.entrainement .recap-item-revele {
+  background: var(--bad-soft);
+  border-color: color-mix(in srgb, var(--bad) 30%, transparent);
+}
+
+.entrainement .recap-icone {
+  width: 24px;
+  height: 24px;
+  margin-top: 0;
+  font-size: 14px;
+  color: var(--surface);
+  background: var(--good);
+}
+
+.entrainement .recap-icone.recap-ton-aide {
+  background: var(--tip);
+}
+
+.entrainement .recap-icone.recap-ton-revele {
+  background: var(--bad);
+}
+
+.entrainement .recap-corps {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Une formule ne se coupe pas au milieu (« −4x − / 8 = 0 ») : elle défile dans la ligne si besoin. */
+.entrainement .recap-corps .katex {
+  white-space: nowrap;
+}
+
+.entrainement .recap-note {
+  display: block;
+  font-size: 14px;
+  color: var(--bad);
+}
+
+.entrainement .recap-revoir {
+  flex: none;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--ink-soft);
+  font: 600 14px var(--sans);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.entrainement .recap-revoir:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+/* Fiche « lecture seule » : tiroir par le bas sur téléphone (inchangé au-delà de 640 px). */
+.entrainement .fiche-reponse-panneau {
+  padding: 8px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+}
+
+.entrainement .fiche-reponse-poignee {
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: 2px auto 12px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.entrainement .fiche-reponse-eyebrow,
+.entrainement .fiche-reponse-badge,
+.entrainement .fiche-reponse-bloc-label {
+  font-size: 12px;
+}
+
+.entrainement .fiche-reponse-bloc-valeur {
+  font-size: 16px;
+}
+
+.entrainement .fiche-reponse-fermer {
+  min-height: 52px;
+}
+
+/* ---------- B — aide en tiroir par le bas ---------- */
+
+.entrainement .gen-tiroir {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--clavier, 0px) + var(--barre-h));
+  z-index: 420;
+  display: flex;
+  flex-direction: column;
+  max-height: min(60vh, calc(100vh - var(--barre-h) - var(--clavier, 0px) - var(--barre-haut-h) - 16px));
+  padding: 6px var(--gouttiere) 12px;
+  box-sizing: border-box;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -10px 28px rgba(24, 36, 48, 0.2);
+  animation: gen-tiroir-entree 0.18s ease-out;
+}
+
+@keyframes gen-tiroir-entree {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.entrainement .gen-tiroir-poignee {
+  display: block;
+  flex: none;
+  width: 40px;
+  height: 4px;
+  margin: 4px auto 10px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.entrainement .gen-tiroir-titre {
+  margin: 0 0 8px;
+  font: 600 12px/1.3 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tip);
+}
+
+.entrainement .gen-tiroir-contenu {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.entrainement .gen-tiroir-contenu > .aide-5e,
+.entrainement .gen-tiroir-contenu > .triangle-quelconque-aide {
+  margin-top: 0;
+  margin-bottom: 8px;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.entrainement .gen-tiroir-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.entrainement .gen-tiroir-actions .btn {
+  flex: 1 1 auto;
+}
+
+.entrainement .gen-tiroir-fermer {
+  flex: 0 0 auto;
+}
+
+@media screen and (min-width: 1024px) {
+  .entrainement .gen-tiroir {
+    display: none;
+  }
+}
+
+/* ---------- C — choix entre graphiques ---------- */
+
+/* Le cadre de la carte est un contour (box-shadow) qui ne prend aucune place : le graphique garde
+ * exactement la largeur de colonne calculée par l'écran ; son propre cadre (`.mafs-graph`) s'efface. */
+.entrainement .graphe-qcm-carte {
+  position: relative;
+  padding: 0 0 6px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--line);
+  overflow: hidden;
+}
+
+.entrainement .graphe-qcm-carte .mafs-graph {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  background: none;
+}
+
+.entrainement .graphe-qcm-carte .options-grid-compact {
+  padding: 0 6px;
+}
+
+.entrainement .graphe-qcm-label {
+  margin: 0;
+  padding: 10px 10px 4px;
+  min-height: 24px;
+  font: 700 14px/1.3 var(--sans);
+  color: var(--ink);
+}
+
+/* Choix entouré : la carte du graphique choisi prend le contour de l'accent. */
+.entrainement .graphes-qcm-liste .graphe-qcm-carte:has(.toggle-active),
+.entrainement .graphes-qcm-liste .graphe-qcm-carte.est-choisi {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.entrainement .graphes-qcm-liste .graphe-qcm-carte:has(.toggle-active.is-erronee) {
+  box-shadow: 0 0 0 2px var(--bad);
+}
+
+.entrainement .graphe-qcm-choix {
+  cursor: pointer;
+}
+
+.entrainement .graphe-qcm-carte .options-grid-compact .btn {
+  min-height: 44px;
+  padding: 8px 6px;
+  font-size: 14px;
+}
+
+.entrainement .graphe-qcm-carte .mafs-graph-legende,
+.entrainement .graphe-qcm-carte .mafs-graph-pas {
+  font-size: 12px;
+}
+
+/* Graphique de référence épinglé (téléphone et tablette) ; carte complète sur ordinateur. */
+.entrainement .graphe-reference-epingle {
+  display: none;
+}
+
+@media screen and (max-width: 1023.98px) {
+  .entrainement .graphe-reference-complete:has(~ .graphe-reference-epingle) {
+    display: none;
+  }
+
+  .entrainement .graphe-reference-epingle {
+    display: block;
+    position: sticky;
+    top: calc(var(--vv-haut, 0px) + var(--barre-haut-h));
+    z-index: 240;
+    margin: 0 calc(-1 * var(--gouttiere)) 14px;
+    padding: 6px var(--gouttiere);
+    background: var(--paper);
+    border-bottom: 1px solid var(--line-soft);
+  }
+}
+
+.entrainement .graphe-reference-bouton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.entrainement .graphe-reference-vignette {
+  flex: none;
+  pointer-events: none;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface);
+  line-height: 0;
+}
+
+.entrainement .graphe-reference-vignette .mafs-graph {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.entrainement .graphe-reference-vignette .mafs-graph-legende,
+.entrainement .graphe-reference-vignette .mafs-graph-pas {
+  display: none;
+}
+
+.entrainement .graphe-reference-texte {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.entrainement .graphe-reference-titre {
+  font: 600 12px/1.3 var(--sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.entrainement .graphe-reference-aide {
+  font: 400 14px/1.3 var(--sans);
+  color: var(--ink-soft);
+}
+
+.entrainement .graphe-reference-loupe {
+  position: static;
+  margin-left: auto;
+  flex: none;
+}
+
+/* 5gen25 : propositions (graphiques de 280 px) en grille dès qu'il y a la place. */
+.entrainement .association-candidats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.entrainement .association-candidat {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+
+.entrainement .gen-loupe {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.entrainement .gen-loupe:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.entrainement .gen-loupe-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) var(--gouttiere) calc(16px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+}
+
+.entrainement .gen-loupe-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.entrainement .gen-loupe-titre {
+  margin: 0;
+  font: 700 16px/1.3 var(--sans);
+}
+
+.entrainement .gen-loupe-figure {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
+
+.entrainement .gen-loupe-figure svg {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+}
+
+/* ---------- Ordinateur (≥ 1024 px) : deux colonnes, barre non fixe ---------- */
+
+@media screen and (min-width: 1024px) {
+  .entrainement {
+    --gouttiere: 32px;
+    background: var(--paper);
+  }
+
+  body:has(.entrainement) {
+    background: var(--paper);
+  }
+
+  .entrainement .app-shell {
+    max-width: 1240px;
+    padding: 20px var(--gouttiere) 48px;
+  }
+
+  .entrainement .card {
+    max-width: 760px;
+  }
+
+  /* Énoncé toujours visible à gauche (position fixe calculée sur la carte par `CadreActions`),
+   * étapes à droite. */
+  .entrainement[data-deux-colonnes] .card {
+    max-width: none;
+    padding-left: calc(var(--col-w) + 28px);
+    box-sizing: border-box;
+    min-height: 60vh;
+  }
+
+  .entrainement [data-enonce-fixe] {
+    position: fixed;
+    left: var(--col-x);
+    top: var(--col-top);
+    width: var(--col-w);
+    max-height: calc(100vh - var(--col-top) - 16px);
+    overflow-y: auto;
+    margin: 0;
+    z-index: 5;
+    box-sizing: border-box;
+  }
+
+  .entrainement .entete-exercice-bascule {
+    pointer-events: none;
+  }
+
+  .entrainement .entete-exercice-chevron {
+    display: none;
+  }
+
+  .entrainement .recap-item,
+  .entrainement .graphe-qcm-carte {
+    background-clip: padding-box;
+  }
+
+  .entrainement .card-body {
+    background: transparent;
+  }
+
+  /* Boutons sous l'étape, côte à côte quand ils se suivent. */
+  .entrainement .btn-aide {
+    width: auto;
+    min-width: 112px;
+    margin-right: 10px;
+  }
+
+  .entrainement .btn-primary {
+    width: auto;
+    min-width: 220px;
+  }
+
+  .entrainement .fiche-reponse-fermer {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entrainement .gen-tiroir {
+    animation: none;
+  }
+
+  .entrainement .entete-exercice-chevron,
+  .entrainement .selecteur-variante-reveal,
+  .entrainement .btn {
+    transition: none;
+  }
+}
+
+/* gen53 : bouton « Recentrer » de la figure de construction, cible de 44 px. */
+.entrainement .construction-recentrer {
+  min-height: 44px;
+  padding: 4px 14px;
+  font-size: 14px;
+}

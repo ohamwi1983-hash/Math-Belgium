@@ -15,6 +15,7 @@ import type { EtatSessionEcrans } from "../moteur6e/sessionEcransExp";
 import { EtapeEcransExp, FigureSvg, Fragments, TableauDonneesVue } from "./EtapeEcransExp";
 import { SelecteurVarianteDev } from "./SelecteurVarianteDev";
 import { ProgressionPuces } from "../../components/ProgressionPuces";
+import { PanneauRappels } from "../../components/PanneauRappels";
 import type { EtatPuceProgression } from "../../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../../components/FicheReponseEcran";
@@ -56,24 +57,16 @@ function Recapitulatif<E, P extends string>({ def, etat }: { def: DefinitionEcra
   const phases = def.phases(e);
   const index = etat.terminee ? phases.length : phases.indexOf(etat.phase);
   const closes = phases.slice(0, index);
-  if (closes.length === 0) return null;
+  // Mise en page partagée (`PanneauRappels`, maquette E du 22/11/2026) ; mêmes valeurs qu'avant.
   return (
-    <div className="recap-panel">
-      <p className="recap-panel-titre">Ce qu'on sait déjà</p>
-      <ul className="recap-list">
-        {closes.map((phase, i) => {
-          const revele = etat.revelesPartiels[phase] ?? false;
-          return (
-            <li key={`${i}-${phase}`} className="recap-item">
-              <span className={`recap-icone ${revele ? "recap-icone-revele" : "recap-icone-correcte"}`}>{revele ? "✗" : "✓"}</span>
-              <span className="recap-corps">
-                <span className="recap-libelle">{def.libelle(e, phase)} :</span> <Fragments fragments={def.recap(e, phase)} />
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+    <PanneauRappels
+      entrees={closes.map((phase, i) => ({
+        cle: `${i}-${phase}`,
+        libelle: def.libelle(e, phase),
+        revele: etat.revelesPartiels[phase] ?? false,
+        valeur: <Fragments fragments={def.recap(e, phase)} />,
+      }))}
+    />
   );
 }
 

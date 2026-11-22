@@ -35,7 +35,8 @@ interface Props {
 export function FicheReponseEcran({ entree, onFermer }: Props) {
   return (
     <div className="fiche-reponse-overlay" onClick={onFermer}>
-      <div className="fiche-reponse-panneau" onClick={(e) => e.stopPropagation()}>
+      <div className="fiche-reponse-panneau" role="dialog" aria-modal="true" aria-label={`${entree.titre} : lecture seule`} onClick={(e) => e.stopPropagation()}>
+        <span className="fiche-reponse-poignee" aria-hidden="true" />
         <div className="fiche-reponse-entete">
           <p className="fiche-reponse-eyebrow">{entree.titre} · lecture seule</p>
           <span className={`fiche-reponse-badge ${entree.correcte ? "fiche-reponse-badge-correcte" : "fiche-reponse-badge-incorrecte"}`}>

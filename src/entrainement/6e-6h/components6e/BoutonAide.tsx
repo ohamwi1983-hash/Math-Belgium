@@ -44,7 +44,7 @@ export function BoutonAide({ niveauAide, niveauAideMax, onActiverAide }: Props) 
   const libelle = niveauAide === 0 ? "Aide" : plafondAtteint ? "Aide utilisée" : "Aide supplémentaire";
 
   return (
-    <button type="button" className="btn btn-aide" disabled={plafondAtteint} onClick={onActiverAide}>
+    <button type="button" className="btn btn-aide" disabled={plafondAtteint} onClick={onActiverAide} data-bouton-aide="" data-aide-niveau={Math.min(niveauAide, niveauAideMax)} data-aide-max={niveauAideMax}>
       <IconeAmpoule />
       {libelle}
     </button>

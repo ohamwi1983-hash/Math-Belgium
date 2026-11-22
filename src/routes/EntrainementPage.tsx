@@ -1,10 +1,13 @@
-import { lazy, Suspense, useMemo } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
-import { SiteHeader } from '../components/SiteHeader'
+import { lazy, Suspense, useMemo, useRef, useState } from 'react'
+import { Navigate, useParams } from 'react-router-dom'
 import { findChapter, trouverSectionGenerateur } from '../content/chaptersIndex'
 import { ENTRAINEMENT_REGISTRY, LEVEL_LABELS } from '../entrainement/registry'
 import { LienVideoGenerateur } from '../entrainement/components/LienVideoGenerateur'
+import { BarreGenerateur } from '../entrainement/components/BarreGenerateur'
+import { CadreActions } from '../entrainement/components/CadreActions'
+import { CadreGenerateurContext, creerStoreCadre } from '../entrainement/components/cadreGenerateur'
 import '../entrainement/theme.css'
+import '../entrainement/cadre.css'
 
 /** Page générique `/entrainement/:chantier/:generatorId` pour TOUT générateur rapatrié depuis
  * plateforme-maths (voir `ENTRAINEMENT_REGISTRY`) — remplace une page dédiée par générateur :
@@ -12,15 +15,23 @@ import '../entrainement/theme.css'
  * Le composant réel est chargé à la demande (`React.lazy`, voir le commentaire de tête d'App.tsx
  * sur pourquoi c'est indispensable dès qu'on dépasse un ou deux générateurs embarqués).
  *
- * Le fil d'Ariane renvoie déjà au chapitre, mais pas forcément à LA section qui a amené l'élève
- * ici (un chapitre peut référencer le même générateur depuis plusieurs sections, ou être long) —
+ * Le lien de retour renvoie au chapitre, et plus précisément à LA section qui a amené l'élève ici
+ * (un chapitre peut référencer le même générateur depuis plusieurs sections, ou être long) —
  * `trouverSectionGenerateur` retrouve cette section précise via `chaptersIndex.ts`, en lisant les
- * mêmes données que `ChapterPage`, jamais une liste entretenue à part. Le lien
- * pointe vers `#sectionId` : `ChapterPage` ouvre directement cette étape du parcours
- * à l'arrivée sur la page du chapitre. */
+ * mêmes données que `ChapterPage`, jamais une liste entretenue à part. Le lien pointe vers
+ * `#sectionId` : `ChapterPage` ouvre directement cette étape du parcours à l'arrivée.
+ *
+ * Refonte du 22/11/2026 (maquettes A–E, téléphone d'abord) : une barre d'une ligne (`BarreGenerateur` :
+ * retour, chapitre, progression « Étape n / N ») remplace l'en-tête du site, le fil d'Ariane et le lien
+ * de retour ; `CadreActions` forme la barre fixe du bas [Aide][Valider] à partir des boutons que chaque
+ * générateur rend déjà ; le magasin `cadreGenerateur` relie les deux aux composants partagés
+ * (`ProgressionPuces`, « Ce qu'on sait déjà », `EnTeteExercice`). Aucun générateur n'est réécrit. */
 export function EntrainementPage() {
   const { chantier, generatorId } = useParams<{ chantier: string; generatorId: string }>()
   const entry = generatorId ? ENTRAINEMENT_REGISTRY[generatorId] : undefined
+  const racineRef = useRef<HTMLDivElement>(null)
+  // Magasin du cadre (segments publiés par `ProgressionPuces`, retirés quand elle se démonte).
+  const [store] = useState(creerStoreCadre)
 
   const Component = useMemo(() => (entry ? lazy(entry.importComponent) : null), [entry])
 
@@ -33,23 +44,20 @@ export function EntrainementPage() {
   if (!entry || entry.chantier !== chantier) return <Navigate to="/" replace />
 
   const lienChapitre = `/${entry.chantier}/${entry.chapitreSlug}${section ? `#${section.id}` : ''}`
+  const libelleRetour = `Retour ${section ? `à « ${section.title} »` : `au chapitre « ${entry.chapitreTitle} »`}`
 
   return (
-    <>
-      <SiteHeader
-        breadcrumb={[
-          { label: LEVEL_LABELS[entry.chantier] ?? entry.chantier, to: '/' },
-          { label: entry.chapitreTitle, to: lienChapitre },
-          { label: "S'entraîner" },
-        ]}
-      />
-      <div className="entrainement">
-        <Link className="entrainement-retour" to={lienChapitre}>
-          <span aria-hidden="true">←</span> Retour {section ? `à « ${section.title} »` : `au chapitre « ${entry.chapitreTitle} »`}
-        </Link>
+    <CadreGenerateurContext.Provider value={store}>
+      <div className="entrainement" ref={racineRef}>
+        <BarreGenerateur
+          lienChapitre={lienChapitre}
+          libelleRetour={libelleRetour}
+          contexte={`${LEVEL_LABELS[entry.chantier] ?? entry.chantier} · ${entry.chapitreTitle}`}
+        />
         {generatorId && <LienVideoGenerateur generatorId={generatorId} />}
         <Suspense fallback={null}>{Component && <Component />}</Suspense>
+        <CadreActions racineRef={racineRef} />
       </div>
-    </>
+    </CadreGenerateurContext.Provider>
   )
 }
