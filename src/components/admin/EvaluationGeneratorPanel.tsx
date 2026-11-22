@@ -2238,7 +2238,7 @@ export function EvaluationGeneratorPanel({
                             'evaluation',
                             estExercice ? 'Préparer l’évaluation' : `Répartition ${texteRepartition(true, repartition)}`,
                             estExercice
-                              ? `Même répartition qu’une évaluation : ${texteRepartition(false, repartition)} (≈\u00a050\u00a0min).`
+                              ? `Ta répartition : ${texteRepartition(false, repartition)} (≈\u00a050\u00a0min), comme pour une évaluation.`
                               : `Connaître, Appliquer, Transférer : ${texteRepartition(false, repartition)} de ${dureeCibleComposer}\u00a0min.`,
                           ],
                           ['mesure', 'Sur mesure', 'Le catalogue complet, exercice par exercice.'],
