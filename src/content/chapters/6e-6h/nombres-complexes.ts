@@ -1545,7 +1545,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'entrainement',
           title: 'Formule de Moivre',
           generatorId: '6gen38',
-          description: ['Applique la formule de Moivre, et développe cos(nx)/sin(nx) grâce au binôme de Newton.'],
+          description: ['Applique la formule de Moivre, et développe cos(nx) ou sin(nx) grâce au binôme de Newton.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 38. Formule de Moivre »',
         },
