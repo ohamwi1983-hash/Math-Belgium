@@ -5,9 +5,12 @@
  * ou trois points, tracé) vont dans le corrigé. `forme` = méthode : la même dans toutes les séries.
  */
 import type { ExerciceConstructionParabole } from "../../core/constructionParabole.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, ProfilInstance, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, ProfilInstance, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { ecransConstructionParabole } from "../../moteur/modeleConstructionParabole";
+import { correctionDetailleeConstructionParabole, lettresRepetitivesConstruction } from "./corrigeDetaille";
 import { svgConstructionParabole } from "../../ui/figureConstructionParabole";
-import { fr } from "../../ui/formatConstructionParabole";
+import { consigneEcran, fr } from "../../ui/formatConstructionParabole";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceConstructionParabole } from "./index";
 
 type E = ExerciceConstructionParabole;
@@ -18,27 +21,10 @@ function enteteEnonce(e: E): FragmentConsigne[] {
     : fr("On donne le foyer $F$ et la directrice $d$ d'une parabole, ainsi que trois points $H_1$, $H_2$ et $H_3$ de $d$.");
 }
 
+/** Une question par ÉCRAN de l'appli (`ecransConstructionParabole`, consigne de l'écran) : ce sont
+ * les étapes du corrigé (« Étape n — … »), jamais des sous-questions imprimées (énoncé papier). */
 function questions(e: E): FragmentConsigne[][] {
-  const debut = [
-    fr("Construis à l'équerre l'axe de la parabole ; il coupe $d$ en $K$."),
-    fr("Construis au compas le sommet $S$, milieu de $[KF]$."),
-  ];
-  const fin = [fr("Trace la parabole.")];
-  if (e.methode === "cercle") {
-    const ordinal = ["un premier", "un deuxième", "un troisième"];
-    return [
-      ...debut,
-      ...ordinal.map((o, i) =>
-        fr(`Par la méthode du cercle et de la parallèle, construis ${o} couple de points de la parabole${i > 0 ? ", avec une autre ouverture de compas" : ""}.`),
-      ),
-      ...fin,
-    ];
-  }
-  return [
-    ...debut,
-    ...[1, 2, 3].map((i) => fr(`Par la méthode de la médiatrice, construis le point de la parabole qui se projette en $H_${i}$ sur $d$, puis son symétrique par rapport à l'axe.`)),
-    ...fin,
-  ];
+  return ecransConstructionParabole(e).map((ecran) => consigneEcran(ecran));
 }
 
 function construireEnonce(e: E): SectionExercice {
@@ -70,42 +56,6 @@ function construireCorrection(e: E): BlocCorrection[] {
   ];
 }
 
-function lignesCorrection(e: E): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [
-    { label: "Axe", sousQuestion: "a", fragments: fr("Un côté de l'angle droit de l'équerre sur $d$, l'autre passant par $F$ : l'axe est la perpendiculaire à $d$ passant par $F$ ; il coupe $d$ en $K$.") },
-    { label: "Sommet", sousQuestion: "b", fragments: fr("Même ouverture, plus grande que la moitié de $KF$ : un arc de centre $K$ et un arc de centre $F$ de chaque côté de l'axe. La droite qui joint leurs points d'intersection est la médiatrice de $[KF]$ ; elle coupe l'axe en $S$, avec $SK = SF$.") },
-  ];
-  if (e.methode === "cercle") {
-    ["c", "d", "e"].forEach((lettre, i) => {
-      lignes.push({
-        label: `Couple ${i + 1}`,
-        sousQuestion: lettre,
-        fragments: fr(
-          `Ouverture $r$${i > 0 ? " différente des précédentes" : ""}, plus grande que $KS$. Pointe en $K$ : l'arc coupe l'axe en $A$, du côté de $F$, à la distance $r$ de $d$. Équerre : la parallèle à $d$ passant par $A$. Même ouverture, pointe en $F$ : le cercle coupe la parallèle en $P$ et $P'$, avec $PF = r$ = distance de $P$ à $d$.`,
-        ),
-      });
-    });
-  } else {
-    ["c", "d", "e"].forEach((lettre, i) => {
-      const h = `H_${i + 1}`;
-      lignes.push({
-        label: `Point de H${"₁₂₃"[i]}`,
-        sousQuestion: lettre,
-        fragments: fr(
-          `Équerre : la perpendiculaire à $d$ en $${h}$. Compas : médiatrice de $[F${h}]$ (même ouverture, plus grande que la moitié de $F${h}$). Leur intersection $P_${i + 1}$ vérifie $P_${i + 1}F = P_${i + 1}${h}$ = distance de $P_${i + 1}$ à $d$. Son symétrique par rapport à l'axe est aussi sur la parabole.`,
-        ),
-      });
-    });
-  }
-  lignes.push({
-    label: "Tracé",
-    sousQuestion: "f",
-    fragments: fr("Courbe lisse, sans angle, passant par $S$ et par les six points de proche en proche, symétrique par rapport à l'axe et ouverte du côté de $F$."),
-    figureHtml: svgConstructionParabole(e, true),
-  });
-  return lignes;
-}
-
 function reponseBreve(e: E): FragmentConsigne[] {
   return e.methode === "cercle"
     ? fr("Axe : perpendiculaire à $d$ par $F$ ; $S$ milieu de $[KF]$ ; trois couples de points obtenus avec trois ouvertures différentes ; parabole tracée (voir la figure du corrigé).")
@@ -132,14 +82,27 @@ function bareme(e: E): BaremeExercice {
         ];
   return {
     reponseFinale: reponseBreve(e),
-    criteres: [
-      { sousQuestion: "a", critere: fr("Axe : perpendiculaire à $d$ passant par $F$, tracée à l'équerre"), points: 0.5 },
-      { sousQuestion: "b", critere: fr("Sommet $S$ construit comme milieu de $[KF]$ (médiatrice au compas)"), points: 0.5 },
-      { sousQuestion: "c", critere: [{ type: "texte", valeur: criteres[0]! }], points: 0.75 },
-      { sousQuestion: "d", critere: [{ type: "texte", valeur: criteres[1]! }], points: 0.75 },
-      { sousQuestion: "e", critere: [{ type: "texte", valeur: criteres[2]! }], points: 0.75 },
-      { sousQuestion: "f", critere: fr("Courbe lisse par $S$ et les six points, symétrique par rapport à l'axe"), points: 0.75 },
-    ],
+    criteres:
+      e.methode === "cercle"
+        ? [
+            { sousQuestion: "a", critere: fr("Axe : perpendiculaire à $d$ passant par $F$, tracée à l'équerre"), points: 0.5 },
+            { sousQuestion: "b", critere: fr("Sommet $S$ construit comme milieu de $[KF]$ (médiatrice au compas)"), points: 0.5 },
+            { sousQuestion: "c", critere: fr("Premier couple : arc de centre $K$, point $A$ sur l'axe du côté de $F$"), points: 0.25 },
+            { sousQuestion: "d", critere: fr("Premier couple : parallèle à $d$ passant par $A$"), points: 0.25 },
+            { sousQuestion: "e", critere: fr("Premier couple : cercle de centre $F$ de même ouverture, deux points"), points: 0.25 },
+            { sousQuestion: "f", critere: [{ type: "texte", valeur: criteres[1]! }], points: 0.75 },
+            { sousQuestion: "g", critere: [{ type: "texte", valeur: criteres[2]! }], points: 0.75 },
+            { sousQuestion: "h", critere: fr("Courbe lisse par $S$ et les six points, symétrique par rapport à l'axe"), points: 0.75 },
+          ]
+        : [
+            { sousQuestion: "a", critere: fr("Axe : perpendiculaire à $d$ passant par $F$, tracée à l'équerre"), points: 0.5 },
+            { sousQuestion: "b", critere: fr("Sommet $S$ construit comme milieu de $[KF]$ (médiatrice au compas)"), points: 0.5 },
+            { sousQuestion: "c", critere: fr("Point de $H_1$ : perpendiculaire à $d$ en $H_1$"), points: 0.25 },
+            { sousQuestion: "d", critere: fr("Point de $H_1$ : médiatrice de $[FH_1]$, point et symétrique"), points: 0.5 },
+            { sousQuestion: "e", critere: [{ type: "texte", valeur: criteres[1]! }], points: 0.75 },
+            { sousQuestion: "f", critere: [{ type: "texte", valeur: criteres[2]! }], points: 0.75 },
+            { sousQuestion: "g", critere: fr("Courbe lisse par $S$ et les six points, symétrique par rapport à l'axe"), points: 0.75 },
+          ],
     erreursFrequentes: [...erreurs, { description: fr("Points reliés par des segments, ou pointe anguleuse au sommet"), cout: "moitié des points du tracé" }],
     reponsesAcceptees:
       e.methode === "cercle"
@@ -148,8 +111,12 @@ function bareme(e: E): BaremeExercice {
   };
 }
 
-function difficulte(e: E): 1 | 2 | 3 {
-  return e.methode === "cercle" ? 2 : 3;
+/** Niveau (« Noter un nouveau chapitre ») : axe, sommet et premier couple (ou premier point)
+ * transforment ; les couples / points suivants répètent les mêmes gestes et le tracé est un geste à
+ * main levée — comptés comme des lectures (écrans répétitifs). Méthode imposée par l'énoncé, aucun
+ * piège dans les données, aucun nombre. */
+function criteresDifficulte(e: E): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeConstructionParabole(e), lettresRepetitivesConstruction(e)), methode: 0, piege: 0, nombres: 0 };
 }
 
 function profilInstance(e: E): ProfilInstance {
@@ -165,10 +132,9 @@ export const adaptateurEvaluationConstructionParabole: AdaptateurFeuilleExercice
   genererInstanceAvecVariante: construireAvecVarianteId,
   construireEnonce,
   construireCorrection,
-  difficulte,
   reponseBreve,
-  correctionDetaillee: lignesCorrection,
+  correctionDetaillee: correctionDetailleeConstructionParabole,
+  criteresDifficulte,
   bareme,
   enoncePapier,
-  dureeMinutes: 15,
 };

@@ -34,6 +34,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeLieuxGeometriques } from "./generateurs/lieuxGeometriques/corrigeDetaille";
 
 const CONSIGNE_GENERALE = "Détermine l'intersection de ces lieux géométriques.";
 
@@ -192,6 +195,7 @@ export function AppLieuxGeometriques() {
         reponseAttendue: construireReponseAttendue(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLieuxGeometriques(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />,
       }
     : null;
 

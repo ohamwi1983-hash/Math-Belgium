@@ -3,21 +3,21 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { formatNombreGraphique } from "../../../export/svgGraph";
-import { RATIO_GRAPHE_CERCLE, viewBoxEquationCercle } from "../../ui/equationCercleGraph";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { construireSvgEquationCercle } from "./figure";
+import { correctionDetailleeEquationCercle } from "./corrigeDetaille";
 import {
   CONSIGNE_CENTRE,
   CONSIGNE_EQUATION,
   CONSIGNE_GENERALE_EQUATION_CERCLE,
   consigneRayon,
-  formatAideRayonNiveau2Latex,
   formatEquationAttendueLatex,
   formatEtatActuelCentreLatex,
   formatRayonLatex,
@@ -92,129 +92,6 @@ import { PARAMETRES_CENTRE_CERCLE, profilEquationCercle } from "../profilsEvalua
  */
 
 // ============================================================================
-// Moteur de tracé SVG statique — cercle sur grille (aucun équivalent existant, voir commentaire de
-// tête de fichier : `export/svgGraph.ts::construireSvgFonction` est un tracé de COURBE `y=f(x)`,
-// inapplicable à un cercle multivalué en y).
-// ============================================================================
-
-const LARGEUR_SVG = 320;
-const MARGE_SVG = 14;
-const COULEUR_GRILLE = "#d8dee6";
-const COULEUR_AXE = "#495057";
-const COULEUR_CERCLE = "#1971c2";
-const COULEUR_POINT = "#f08c00";
-const COULEUR_CENTRE = "#2f9e44";
-const EPAISSEUR_CERCLE = 2.4;
-const EPAISSEUR_SEGMENT = 1.6;
-const DEMI_CROIX_CENTRE = 4;
-
-function ligneSvg(x1: number, y1: number, x2: number, y2: number, couleur: string, epaisseur: number, style?: "dashed"): string {
-  const traitPointille = style === "dashed" ? ' stroke-dasharray="5,4"' : "";
-  return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${couleur}" stroke-width="${epaisseur}"${traitPointille}/>`;
-}
-
-function texteSvg(x: number, y: number, couleur: string, contenu: string, ancre: "middle" | "end"): string {
-  return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="8" text-anchor="${ancre}" fill="${couleur}">${contenu}</text>`;
-}
-
-interface OptionsSvgEquationCercle {
-  /** Croix verte au centre — correction uniquement (aide niveau 2 côté écran), jamais l'énoncé (qui
-   * ne doit pas trahir la réponse). */
-  avecCentre?: boolean;
-  /** Segment pointillé centre↔point marqué — correction uniquement, même réserve que `avecCentre`. */
-  avecRayon?: boolean;
-}
-
-/**
- * `<svg>` autonome du graphe de gen49 — grille de pas 1 + axes gradués, cercle tracé, point
- * marqué ; le centre (croix) et le segment du rayon ne sont ajoutés que si demandé (`options`,
- * correction uniquement). Cadrage identique à l'écran (`viewBoxEquationCercle`, même
- * fonction pure que `EquationCercleGraph.tsx`), avec UNE
- * seule échelle sur les deux axes : le cercle est un vrai `<circle>`, jamais une ellipse.
- */
-function construireSvgEquationCercle(exercice: ExerciceEquationCercle, options: OptionsSvgEquationCercle = {}): string {
-  const viewBox = viewBoxEquationCercle(exercice);
-  const largeur = LARGEUR_SVG;
-  const hauteur = Math.round(largeur / RATIO_GRAPHE_CERCLE);
-  const [xMin, xMax] = viewBox.x;
-  const [yMin, yMax] = viewBox.y;
-  // UNE seule échelle pour les deux axes (audit chapitre 7, point 41) : deux échelles
-  // indépendantes déformaient le cercle en ellipse (jusqu'à 5 %) — la zone la plus contraignante
-  // fixe l'échelle, l'autre axe est centré.
-  const echelle = Math.min((largeur - 2 * MARGE_SVG) / (xMax - xMin), (hauteur - 2 * MARGE_SVG) / (yMax - yMin));
-  const decalageX = (largeur - echelle * (xMax - xMin)) / 2;
-  const decalageY = (hauteur - echelle * (yMax - yMin)) / 2;
-  const sx = (x: number) => decalageX + (x - xMin) * echelle;
-  const sy = (y: number) => decalageY + (yMax - y) * echelle;
-
-  // Quadrillage de pas 1 (coordonnées entières sur les nœuds, comme à l'écran) ; un nombre sur
-  // deux seulement quand une unité est trop étroite pour y écrire « −10 ».
-  const pasX = 1;
-  const pasY = 1;
-  const pasEtiquettes = echelle < 16 ? 2 : 1;
-
-  // Bords de la zone tracée et position des axes — un axe hors cadre n'est pas tracé, mais ses
-  // nombres restent épinglés au bord le plus proche (même principe que les graduations flottantes
-  // de l'écran, `GraduationsFlottantes`) : jamais une figure sans aucune coordonnée lisible.
-  const gauche = sx(xMin);
-  const droite = sx(xMax);
-  const haut = sy(yMax);
-  const bas = sy(yMin);
-  const borner = (valeur: number, min: number, max: number) => Math.min(max, Math.max(min, valeur));
-  const ligneNombresX = borner(sy(0), haut, bas - 12);
-  const colonneNombresY = borner(sx(0), gauche + 16, droite);
-
-  const grille: string[] = [];
-  const labels: string[] = [];
-  for (let v = Math.ceil(xMin / pasX) * pasX; v <= xMax + 1e-9; v += pasX) {
-    const px = sx(v);
-    grille.push(`<line x1="${px.toFixed(1)}" y1="${haut.toFixed(1)}" x2="${px.toFixed(1)}" y2="${bas.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9 && Math.round(v) % pasEtiquettes === 0) labels.push(texteSvg(px, ligneNombresX + 11, COULEUR_AXE, formatNombreGraphique(v), "middle"));
-  }
-  for (let v = Math.ceil(yMin / pasY) * pasY; v <= yMax + 1e-9; v += pasY) {
-    const py = sy(v);
-    grille.push(`<line x1="${gauche.toFixed(1)}" y1="${py.toFixed(1)}" x2="${droite.toFixed(1)}" y2="${py.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9 && Math.round(v) % pasEtiquettes === 0) labels.push(texteSvg(colonneNombresY - 4, py + 3, COULEUR_AXE, formatNombreGraphique(v), "end"));
-  }
-
-  const axeX = yMin <= 0 && 0 <= yMax ? ligneSvg(gauche, sy(0), droite, sy(0), COULEUR_AXE, 1.4) : "";
-  const axeY = xMin <= 0 && 0 <= xMax ? ligneSvg(sx(0), haut, sx(0), bas, COULEUR_AXE, 1.4) : "";
-
-  const { centre, rayon, pointMarque } = exercice;
-  const cercle = `<circle cx="${sx(centre.x).toFixed(1)}" cy="${sy(centre.y).toFixed(1)}" r="${(rayon * echelle).toFixed(1)}" fill="none" stroke="${COULEUR_CERCLE}" stroke-width="${EPAISSEUR_CERCLE}"/>`;
-  // Étiquette « P » : l'énoncé papier et le corrigé nomment ce point (placée côté extérieur du cercle).
-  const versExterieurX = Math.sign(pointMarque.x - centre.x);
-  const versExterieurY = Math.sign(pointMarque.y - centre.y);
-  const etiquetteP = `<text x="${(sx(pointMarque.x) + (versExterieurX >= 0 ? 6 : -6)).toFixed(1)}" y="${(sy(pointMarque.y) + (versExterieurY > 0 ? -6 : 12)).toFixed(1)}" font-size="11" font-weight="700" text-anchor="${versExterieurX >= 0 ? "start" : "end"}" fill="${COULEUR_POINT}">P</text>`;
-  const point = `<circle cx="${sx(pointMarque.x).toFixed(1)}" cy="${sy(pointMarque.y).toFixed(1)}" r="3.2" fill="${COULEUR_POINT}"/>${etiquetteP}`;
-
-  const segmentRayon = options.avecRayon ? ligneSvg(sx(centre.x), sy(centre.y), sx(pointMarque.x), sy(pointMarque.y), COULEUR_POINT, EPAISSEUR_SEGMENT, "dashed") : "";
-
-  let centreCroix = "";
-  if (options.avecCentre) {
-    const cx = sx(centre.x);
-    const cy = sy(centre.y);
-    centreCroix =
-      ligneSvg(cx - DEMI_CROIX_CENTRE, cy, cx + DEMI_CROIX_CENTRE, cy, COULEUR_CENTRE, 1.8) +
-      ligneSvg(cx, cy - DEMI_CROIX_CENTRE, cx, cy + DEMI_CROIX_CENTRE, COULEUR_CENTRE, 1.8);
-  }
-
-  const cadre = `<rect x="0.5" y="0.5" width="${largeur - 1}" height="${hauteur - 1}" fill="none" stroke="#adb5bd" stroke-width="1"/>`;
-
-  return `<svg class="graphe-cyclo" width="${largeur}" height="${hauteur}" viewBox="0 0 ${largeur} ${hauteur}" xmlns="http://www.w3.org/2000/svg">
-<rect x="0" y="0" width="${largeur}" height="${hauteur}" fill="#ffffff"/>
-${grille.join("")}
-${axeX}${axeY}
-${segmentRayon}
-${cercle}
-${point}
-${centreCroix}
-${labels.join("")}
-${cadre}
-</svg>`;
-}
-
-// ============================================================================
 // Adaptateur.
 // ============================================================================
 
@@ -250,65 +127,16 @@ function construireCorrectionEquationCercle(exercice: ExerciceEquationCercle): B
   ];
 }
 
-function pointLatex(x: number, y: number): string {
-  return `(${x}\\,;\\,${y})`;
-}
-
-function difficulteEquationCercle(exercice: ExerciceEquationCercle): 1 | 2 | 3 {
-  return exercice.variante === "rayon_direct" ? 1 : 2;
-}
-
 function reponseBreveEquationCercle(exercice: ExerciceEquationCercle): FragmentConsigne[] {
   return [latex(formatEquationAttendueLatex(exercice))];
 }
 
-function correctionDetailleeEquationCercle(exercice: ExerciceEquationCercle): EtapeCorrection[] {
-  const { centre, pointMarque } = exercice;
-  const lignes: EtapeCorrection[] = [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("Le centre est le point situé à égale distance de tous les points du cercle : le milieu du cercle tracé, lu sur les nœuds de la grille.")] },
-    {
-      label: "Lecture",
-      sousQuestion: "a",
-      fragments: [texte("Centre "), latex(`C${formatEtatActuelCentreLatex(exercice)}`), texte(" (croix sur la figure) ; le point marqué est "), latex(`P${pointLatex(pointMarque.x, pointMarque.y)}`), texte(".")],
-      figureHtml: construireSvgEquationCercle(exercice, { avecCentre: true, avecRayon: true }),
-    },
-  ];
-  if (exercice.variante === "rayon_direct") {
-    const horizontal = pointMarque.y === centre.y;
-    lignes.push({
-      label: "Lecture",
-      sousQuestion: "b",
-      fragments: [
-        texte(`P est sur la même ${horizontal ? "horizontale" : "verticale"} que le centre : le rayon se compte en carreaux, `),
-        latex(`R = CP = ${formatRayonLatex(exercice)}`),
-        texte(", donc "),
-        latex(`R^2 = ${exercice.rayonCarre}`),
-        texte("."),
-      ],
-    });
-  } else {
-    lignes.push(
-      { label: "Méthode", sousQuestion: "b", fragments: [texte("P n'est pas aligné avec le centre sur la grille : le rayon est la distance CP, calculée par le théorème de Pythagore à partir des écarts horizontal et vertical.")] },
-      {
-        label: "Calcul",
-        sousQuestion: "b",
-        fragments: [latex(`${formatAideRayonNiveau2Latex(exercice) as string} = \\sqrt{${exercice.rayonCarre}} = ${formatRayonLatex(exercice)}`), texte(", donc "), latex(`R^2 = ${exercice.rayonCarre}`), texte(".")],
-      },
-    );
-  }
-  lignes.push(
-    { label: "Méthode", sousQuestion: "c", fragments: [texte("Un cercle de centre "), latex("(x_0\\,;\\,y_0)"), texte(" et de rayon "), latex("R"), texte(" a pour équation "), latex(LATEX_GABARIT_EQUATION), texte(".")] },
-    { label: "Conclusion", sousQuestion: "c", fragments: [latex(formatEquationAttendueLatex(exercice)), texte(".")] },
-  );
-  const negatif = centre.x < 0 ? { variable: "x", valeur: centre.x } : centre.y < 0 ? { variable: "y", valeur: centre.y } : null;
-  lignes.push({
-    label: "Piège",
-    sousQuestion: "c",
-    fragments: negatif
-      ? [texte("Dans la parenthèse on soustrait la coordonnée du centre : "), latex(`${negatif.variable}_0 = ${negatif.valeur}`), texte(" donne "), latex(`(${negatif.variable} + ${-negatif.valeur})^2`), texte(", et le second membre est "), latex("R^2"), texte(", pas R.")]
-      : [texte("Le second membre de l'équation est "), latex(`R^2 = ${exercice.rayonCarre}`), texte(", pas "), latex(`R = ${formatRayonLatex(exercice).split(" \\approx")[0]}`), texte(".")],
-  });
-  return lignes;
+/** Niveau (règle « Noter un nouveau chapitre ») : l'écran du centre est une lecture ; le rayon
+ * aussi quand P est aligné avec C (carreaux comptés), sinon il se calcule (Pythagore). Méthode
+ * imposée par l'énoncé (forme non développée), aucun piège dans les données. */
+function criteresDifficulte(exercice: ExerciceEquationCercle): CriteresDifficulte {
+  const lecture = exercice.variante === "rayon_direct" ? ["a", "b"] : ["a"];
+  return { ...etapesDuCorrige(correctionDetailleeEquationCercle(exercice), lecture), methode: 0, piege: 0, nombres: 0 };
 }
 
 function baremeEquationCercle(exercice: ExerciceEquationCercle): BaremeExercice {
@@ -336,12 +164,11 @@ export const adaptateurEvaluationEquationCercle: AdaptateurFeuilleExercices<Exer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceEquationCercle,
   construireCorrection: construireCorrectionEquationCercle,
-  difficulte: difficulteEquationCercle,
   reponseBreve: reponseBreveEquationCercle,
   correctionDetaillee: correctionDetailleeEquationCercle,
+  criteresDifficulte,
   bareme: baremeEquationCercle,
   enoncePapier: enoncePapierEquationCercle,
-  dureeMinutes: 5,
   profilInstance: profilEquationCercle,
   parametresAuChoix: PARAMETRES_CENTRE_CERCLE,
   // PAS regroupable : 3 étapes par instance ET un enteteHtml (le graphique du cercle).

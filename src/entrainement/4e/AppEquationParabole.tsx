@@ -17,6 +17,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeEquationParabole } from "./generateurs/equationParabole/corrigeDetaille";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -142,6 +145,7 @@ export function AppEquationParabole() {
         reponseAttendue: construireReponseAttendue(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationParabole(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />,
       }
     : null;
 
