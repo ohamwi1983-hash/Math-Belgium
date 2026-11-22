@@ -36,6 +36,9 @@ export interface ContexteComposition {
   dureeVariante: (ligne: LigneSelection, varianteId: string) => number | undefined
   /** Durée visée (minutes) pour « Préparer l'évaluation ». */
   dureeCible: number
+  /** Répartition de « Préparer l'évaluation » (fractions par processus, somme 1) : celle réglée par le
+   * professeur (`repartitionProcessus.ts::fractionsRepartition`), sinon `REPARTITION_PROCESSUS`. */
+  repartition?: Readonly<Record<Processus, number>>
   /** « Sur quelques notions » : clés `chapitre::section` cochées. */
   sections?: Set<string>
   aleatoire?: () => number
@@ -202,20 +205,15 @@ function notions(ctx: ContexteComposition, alea: () => number): Selection {
   return sel
 }
 
-/** Préparer l'évaluation : durée visée répartie entre les processus selon `REPARTITION_PROCESSUS` (les points
- * automatiques suivent la durée, donc les points aussi) ; la part d'un processus absent passe à
- * Appliquer. */
+/** Préparer l'évaluation : durée visée répartie entre les processus selon la répartition réglée
+ * (`ctx.repartition`, sinon `REPARTITION_PROCESSUS` ; les points automatiques suivent la durée, donc
+ * les points aussi). Un processus à 0 % n'est JAMAIS choisi. La part d'un processus sans aucune
+ * question possible est cédée (`cederParts`). */
 function evaluation(ctx: ContexteComposition, alea: () => number): Selection {
   const sel = new Selection(ctx)
   const tout = unites(ctx)
-  const parts: Record<Processus, number> = { ...REPARTITION_PROCESSUS }
   const candidats = (p: Processus) => tout.filter((u) => u.processus === p)
-  for (const p of [1, 3] as const) {
-    if (candidats(p).length === 0) {
-      parts[2] += parts[p]
-      parts[p] = 0
-    }
-  }
+  const parts = cederParts({ ...(ctx.repartition ?? REPARTITION_PROCESSUS) }, ([1, 2, 3] as const).filter((p) => candidats(p).length > 0))
   const dureeUnite = (u: Unite): number => {
     const l = ctx.lignes[u.index]
     if (u.variante) return ctx.dureeVariante(l, u.variante) ?? 6
@@ -250,6 +248,25 @@ function evaluation(ctx: ContexteComposition, alea: () => number): Selection {
     }
   }
   return sel
+}
+
+/**
+ * Part d'un processus sans question possible : Connaître ou Transférer → Appliquer (règle d'avant,
+ * inchangée pour 25 / 50 / 25) si Appliquer a des questions et une part > 0 ; sinon les processus
+ * présents ayant une part > 0, au prorata ; s'il n'y en a aucun, Appliquer s'il est présent, sinon
+ * les présents à parts égales. Appliquer absent : sa part va aux présents de la même façon. Un
+ * processus présent réglé à 0 % ne reçoit donc rien tant qu'un autre présent a une part.
+ */
+export function cederParts(parts: Record<Processus, number>, presents: readonly Processus[]): Record<Processus, number> {
+  for (const p of [1, 3, 2] as const) {
+    if (presents.includes(p) || parts[p] <= 0) continue
+    const voulus = presents.filter((q) => parts[q] > 0)
+    const receveurs: Processus[] = p !== 2 && voulus.includes(2) ? [2] : voulus.length > 0 ? voulus : presents.includes(2) ? [2] : [...presents]
+    const somme = receveurs.reduce((t, q) => t + parts[q], 0)
+    for (const q of receveurs) parts[q] += somme > 0 ? (parts[p] * parts[q]) / somme : parts[p] / receveurs.length
+    parts[p] = 0
+  }
+  return parts
 }
 
 export function composer(facon: FaconComposer, ctx: ContexteComposition): ResultatComposition {

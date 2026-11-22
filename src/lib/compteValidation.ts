@@ -164,6 +164,7 @@ export function messageErreur(erreur: unknown): string {
   if (code === 'PGRST202' || code === 'PGRST205' || code === '42P01' || code === '42883')
     return "Base de données pas encore prête : le script d'installation (supabase/migrations/0001_comptes.sql) n'a pas été exécuté."
   if (code === '23505' && m.includes('ecoles_une_par_defaut')) return 'Une seule école peut être « par défaut ».'
+  if (code === '23514' && m.includes('repartition')) return 'Répartition refusée : trois nombres entiers de 0 à 100 dont la somme fait 100 %.'
   if (code === '23514') return 'Valeur refusée (trop longue ou vide).'
   if (code === 'P0001' || code === 'P0002' || code === '22023') return message
   return message ? `Erreur inattendue : ${message}` : 'Erreur inattendue : réessaie.'

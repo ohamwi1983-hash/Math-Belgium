@@ -40,7 +40,8 @@ import {
 } from '../../lib/evaluationLocal'
 import { construirePlanRemediation, questionsRemediables, titreSansPrefixe } from '../../lib/evaluationRemediation'
 import { normaliserSigneMoins } from '../../lib/normaliserSaisie'
-import { texteRepartition } from '../../lib/repartitionProcessus'
+import { fractionsRepartition, texteRepartition } from '../../lib/repartitionProcessus'
+import { noteCarteRepartition, ReglageRepartition, useRepartitionProfesseur } from './conception/ReglageRepartition'
 import { decoderMatiere } from '../../lib/carnetMatiere'
 import {
   horaireExamen,
@@ -317,6 +318,9 @@ export function EvaluationGeneratorPanel({
   const [faconActive, setFaconActive] = useState<FaconComposer | 'mesure' | null>(null)
   const [notionsCochees, setNotionsCochees] = useState<Set<string>>(() => new Set())
   const [composition, setComposition] = useState<{ texte: string; avant: LigneSelection[] } | null>(null)
+  /** Réglage de la répartition de « Préparer l'évaluation » (carte « Modifier ») ouvert. */
+  const [reglageRepartitionOuvert, setReglageRepartitionOuvert] = useState(false)
+  const boutonModifierRepartition = useRef<HTMLButtonElement>(null)
   const champRecherche = useRef<HTMLInputElement>(null)
   /** Lignes « Formule » / « Formule + démonstration » dont la liste de choix est dépliée. */
   const [choixOuverts, setChoixOuverts] = useState<Set<string>>(() => new Set())
@@ -340,6 +344,10 @@ export function EvaluationGeneratorPanel({
   const cartouche: CartoucheEcole | undefined = connecte ? cartoucheDepuisCompte(compte.profil, ecoleChoisie) : undefined
   const [coffre, setCoffre] = useState<PlanCoffre[] | null>(null)
   const [params, setParams] = useSearchParams()
+  /** Répartition Connaître / Appliquer / Transférer de « Préparer l'évaluation » : celle du profil
+   * (0005), sinon 25 / 50 / 25 ; réglable pour la session dans tous les cas. */
+  const repartitionProf = useRepartitionProfesseur(compte)
+  const repartition = repartitionProf.valeur
 
   const levelSlug = resoudreLevelSlug(niveau, heures)
   const niveauEntry = levelSlug ? LEVELS.find((l) => l.slug === levelSlug) : undefined
@@ -1427,10 +1435,11 @@ export function EvaluationGeneratorPanel({
   const dureeReference = estExamen ? (lectureDuree.etat === 'ok' ? lectureDuree.valeur : null) : estExercice ? null : 50
 
   /* Façons de composer : elles REMPLISSENT la sélection (rien n'est tiré ici). */
+  const dureeCibleComposer = estExamen ? (lectureDuree.etat === 'ok' ? lectureDuree.valeur : Math.min(150, 50 * Math.max(1, chapitres.length))) : 50
   function appliquerFacon(facon: FaconComposer) {
     const avant = lignes
     const vierges = lignesInitiales(chapitres)
-    const dureeCible = estExamen ? (lectureDuree.etat === 'ok' ? lectureDuree.valeur : Math.min(150, 50 * Math.max(1, chapitres.length))) : 50
+    const dureeCible = dureeCibleComposer
     const res = composer(facon, {
       lignes: vierges,
       mode: estExercice ? 'exercice' : 'evaluation',
@@ -1441,6 +1450,7 @@ export function EvaluationGeneratorPanel({
         return adaptateur ? dureeEstimeeVariante(adaptateur, varianteEstimation(adaptateur, varianteId), optionsEstimation(l, varianteId)) : undefined
       },
       dureeCible,
+      repartition: fractionsRepartition(repartition),
       sections: notionsCochees,
     })
     if (res.questions === 0) {
@@ -2226,32 +2236,70 @@ export function EvaluationGeneratorPanel({
                           ['notions', 'Sur quelques notions', 'Tu coches les notions, l’outil propose les exercices.'],
                           [
                             'evaluation',
-                            estExercice ? 'Préparer l’évaluation' : `Répartition ${texteRepartition(true)}`,
+                            estExercice ? 'Préparer l’évaluation' : `Répartition ${texteRepartition(true, repartition)}`,
                             estExercice
-                              ? `Même répartition qu’une évaluation : ${texteRepartition()} (≈ 50 min).`
-                              : `Connaître, Appliquer, Transférer : ${texteRepartition(true)} de ${estExamen && lectureDuree.etat === 'ok' ? lectureDuree.valeur : estExamen ? Math.min(150, 50 * Math.max(1, chapitres.length)) : 50} min.`,
+                              ? `Même répartition qu’une évaluation : ${texteRepartition(false, repartition)} (≈\u00a050\u00a0min).`
+                              : `Connaître, Appliquer, Transférer : ${texteRepartition(false, repartition)} de ${dureeCibleComposer}\u00a0min.`,
                           ],
                           ['mesure', 'Sur mesure', 'Le catalogue complet, exercice par exercice.'],
                         ] as const
-                      ).map(([id, titreFacon, texte]) => (
-                        <button
-                          key={id}
-                          type="button"
-                          className="conc-recette"
-                          aria-pressed={faconActive === id}
-                          onClick={() => {
-                            setFaconActive(id)
-                            if (id === 'mesure') {
-                              setComposition(null)
-                              champRecherche.current?.focus()
-                            } else if (id !== 'notions') appliquerFacon(id)
-                          }}
-                        >
-                          <span className="conc-recette-titre">{titreFacon}</span>
-                          <span className="conc-recette-texte">{texte}</span>
-                        </button>
-                      ))}
+                      ).map(([id, titreFacon, texte]) => {
+                        const carte = (
+                          <button
+                            key={id}
+                            type="button"
+                            className="conc-recette"
+                            aria-pressed={faconActive === id}
+                            onClick={() => {
+                              setFaconActive(id)
+                              if (id === 'mesure') {
+                                setComposition(null)
+                                champRecherche.current?.focus()
+                              } else if (id !== 'notions') appliquerFacon(id)
+                            }}
+                          >
+                            <span className="conc-recette-titre">{titreFacon}</span>
+                            <span className="conc-recette-texte">{texte}</span>
+                          </button>
+                        )
+                        if (id !== 'evaluation') return carte
+                        const note = noteCarteRepartition(repartitionProf)
+                        return (
+                          <div key={id} className="conc-recette-groupe">
+                            {carte}
+                            <button
+                              type="button"
+                              ref={boutonModifierRepartition}
+                              className="conc-recette-modifier"
+                              aria-expanded={reglageRepartitionOuvert}
+                              aria-controls="conc-rep"
+                              aria-label={`Modifier la répartition (${texteRepartition(false, repartition)})`}
+                              onClick={() => setReglageRepartitionOuvert((v) => !v)}
+                            >
+                              <span>
+                                <span aria-hidden="true">⚙</span> Modifier
+                              </span>
+                              {note ? <span className="conc-recette-note">{note}</span> : null}
+                            </button>
+                          </div>
+                        )
+                      })}
                     </div>
+                    {reglageRepartitionOuvert && (
+                      <ReglageRepartition
+                        rp={repartitionProf}
+                        connecte={connecte}
+                        dureeCible={dureeCibleComposer}
+                        onPreparer={() => {
+                          setFaconActive('evaluation')
+                          appliquerFacon('evaluation')
+                        }}
+                        onFermer={() => {
+                          setReglageRepartitionOuvert(false)
+                          boutonModifierRepartition.current?.focus()
+                        }}
+                      />
+                    )}
                     {faconActive === 'notions' && (
                       <div className="conc-notions">
                         <p className="conc-notions-titre">

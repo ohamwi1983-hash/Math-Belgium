@@ -174,6 +174,17 @@ grant select, insert, update, delete on public.ecoles to authenticated;
 grant select, insert, update, delete on public.plans to authenticated;
 grant select on public.invitations to authenticated;
 
+-- Colonne ajoutée plus tard (0005_repartition.sql), modifiable par le professeur : son droit est
+-- redonné si ce fichier est relancé APRÈS 0005 (le `revoke all` ci-dessus retire aussi les droits de
+-- colonne). Sans 0005, ce bloc ne fait rien.
+do $$
+begin
+  if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'profils' and column_name = 'repartition') then
+    grant update (repartition) on public.profils to authenticated;
+  end if;
+end;
+$$;
+
 -- -------------------------------------------------------------------------------------------------
 -- Row Level Security
 -- -------------------------------------------------------------------------------------------------
