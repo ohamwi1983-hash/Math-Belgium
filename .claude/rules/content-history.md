@@ -5268,6 +5268,55 @@ gen83 « lecture » : titre papier « Composantes d'un vecteur » (`titrePapier`
 laissé tel quel (décision). Détail et mesures : `feuilles-evaluations.md`, entrée « 4e ch. 6
 (retouches) ».
 
+## 4e, Chapitre 7 — Géométrie analytique plane, lots A, E, F et G de l'audit (cours, quiz gen65, démonstrations, ateliers)
+
+Lot A (cours) : C2 « coefficients différents → ellipse » corrigé (hyperbole, parabole, aucun point :
+les coniques en 6e ; libellé « Condition — même coefficient devant x² et y² ») ; C3 foyer-directrice
+chez Pappus, pas Apollonius ; C4 distance à la directrice $|y + p/2|$. **Angle avec Oy défini**
+(décision 3) : depuis le demi-axe positif de Oy, sens des aiguilles d'une montre, dans [0° ; 180°[
+(= 90° − θ_Ox ramené), paragraphe + figure ($y = -x + 2$, 135° et 135°). `\text{dist}`, GPS raisonné
+dans le plan (sphères, horloge), Pythagore « attribué à », piège « un seul point ≠ tangente » (droite
+parallèle à l'axe d'une parabole, essentiel du § 10). Formulaire complété (milieu, G, aire, médiatrice,
+hauteur, médiane, symétrique, CH comparé à r, r = CH, foyer et directrice, soustraction de deux cercles,
+t₁ = t₂, a(m) = b(m) = 0 rejeté, (sin α ; cos α)) ; récapitulatif : 4 puces (paramètres et mobiles,
+triangle/projeté/symétrique, cercle et droite, deux cercles).
+
+Lot F : onze démonstrations tirables (`exempleLibre` « Démonstration — … », paragraphes seuls : le
+corrigé n'en garde que les `para`) — D1 m·m′ = −1 (par le produit scalaire), D2 x² = 2py (p ≠ 0, valeur
+absolue), D3 cercle par Pythagore (ex-`rappel`), D4 paramétrique depuis AM = t·u (ex-`rappel`), D5
+(−b ; a) dirige ax + by + c = 0 (soustraction de deux points, critère de colinéarité), D6 médiatrice en
+coordonnées, D7 deux parallèles ne diffèrent que par c, D8 tangente ⟂ rayon (Pythagore, point unique),
+D9 coordonnées du symétrique, D10 soustraction de deux équations de cercles, D11 foyer de y = ax²
+(ex-`rappel` « Lien avec le chapitre 1 »). Énoncés par clé, sans méthode (`ENONCES_DEMONSTRATION` ;
+l'énoncé positionnel de la parabole devient une clé) — **piège des clés** : un label nouveau ne doit
+contenir aucune clé existante de sa section (« deux cercles », « axe vertical », « tangente en un point
+du cercle »…), d'où « soustraction de deux équations de cercles », « l'équation x² = 2py, sommet à
+l'origine ». Figures : deux mobiles (K, t₁ = 2 ≠ t₂ = 3), hauteurs et orthocentre, projeté et
+symétrique, réflexion (A′, I ; J plus long : $\sqrt{10} + \sqrt{20} \approx 7{,}63$, d'abord écrit 7,64 —
+trouvé par l'atelier), cercle par trois points et ses médiatrices, deux cercles et x = 4, droite x = 2
+et parabole x² = 4y. Exemples : « point et angle de 30° avec Oy » (§ 1, (1 ; √3)), « droite parallèle à
+l'axe d'une parabole » (§ 10).
+
+Lot E (quiz gen65) : banque passée en `$…$` par un convertisseur (jetons mathématiques → KaTeX,
+coordonnées `(a\,;\,b)`, fractions, `\vec{AB}=`, variables isolées), puis 33 retouches à la main et
+relecture (outil `restes.py` : notation clavier hors formule, « / » dans une formule) ; `TexteRiche` à
+l'écran, `formatQuizGeometrieAnalytique.ts` supprimé. Q3–Q7 corrigés (ellipse, « p impair » remplacés,
+« critère de colinéarité nul pour tester la colinéarité », « la valeur t = 1 donne le point … »,
+perpendiculaire par le vecteur normal, majuscules). Quatre thèmes de 35 (18 V / 17 F) : `cercleConditions`,
+`triangleProjete`, `parametresMobiles`, `lieuxDeuxCercles` ; 595 affirmations, 17 thèmes, catalogue dans
+l'ordre des sections ; `QUIZ_THEMES` (libellés des sections relations, distance, cercle ;
+`lieuxDeuxCercles` rattaché à `notion-lieu`) ; § 11 et carte : C1. Contrôles : `check_banque.mjs` 0
+problème ; parcours Playwright des 17 thèmes : 35 / 35 énoncés distincts, 0 `.katex-error`.
+
+Lot G : cinq ateliers sur un module partagé `geo-analytique-commun.js` (`window.GeoAnaCommun`,
+importé avant l'atelier par chaque `register-*.js` ; repère à fenêtre fixe, axes fléchés, graduations
+« − », coordonnées (x ; y) insécables, glisser) — `lieu-trace-widget` (§ 7, cinq règles, traces
+vertes / rouges, « Révéler le lieu »), `deux-mobiles-widget` (§ 5), `reflexion-viser-widget` (§ 6),
+`droites-remarquables-widget` (§ 6, équations entières, O, H, G en fractions « 8⁄3 »),
+`deux-cercles-widget` (§ 10). Figure seule dans `.graphe-zone` : épinglage 12 / 12 ateliers du chapitre
+sans problème (375×667, 390×664). Valeurs recoupées (`ateliers.cjs`, 28 contrôles × 2 tailles × 2
+thèmes : 112 / 112).
+
 ## 4e, chapitres 1–5, 7, 8 — champs du parcours (décision de l'utilisateur, 21/11/2026)
 
 `titreCourt`, `partie`, `essentiel`, `cartes` remplis pour les 7 autres chapitres de 4e sur le modèle
