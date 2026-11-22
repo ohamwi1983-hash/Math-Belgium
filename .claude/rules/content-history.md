@@ -5335,6 +5335,56 @@ symétrique, CH et r, foyer / directrice ×2, deux cercles, t₁ = t₂, a(m) = 
 sections `intersection` et `lieux` ajoutées. Détail : `feuilles-evaluations.md`, entrée « 4e ch. 7
 (lots B, C, D) ».
 
+## 4e, Chapitre 8 — Géométrie dans l'espace, lots A, E, F et G du second audit (cours, quiz gen66, démonstrations, ateliers)
+
+Lot A (cours) : C1 Monge (méthode tenue secrète par l'École du génie de Mézières, enseignée publiquement
+en 1795 — pas Napoléon), C2 « fuyantes » au lieu de « toutes les parallèles d'un plan horizontal » (kicker
+du § 11, synthèse, questions de compréhension), C3 lampe : ce sont les DROITES des ombres qui passent par
+L₀ (essentiel, carte, rappel, légende de `ombre-soleil-lampe-widget`). Décision 4 : critère du § 7
+« parallèle ou incluse », plans confondus au § 5. Décision 1 : étape 4 de « 4 faces traversées » par
+points auxiliaires — les faces latérales ne donnent que des points déjà connus, on passe par le plan de
+la base (I = (PQ)∩(AB), J = (QR)∩(BC), K = (IJ)∩(CD), puis (KR) donne S) ; énoncé par clé nommant le
+pavé ABCDEFGH. Décision 3 : phrase de cours (Thalès) pour la taille apparente de l'atelier du § 10.
+Cartes gen100 (§ 2) et gen101 (§ 5). Formulaire : « Deux plans, point de percée », « Justifier un
+parallélisme », « Ombre à la lampe », compléments cavalière et perspective centrale ; synthèse
+(+ cavalière, démontrer un parallélisme, lampe, croisement du dessin) et checklist (+ témoin, L₀).
+Banque « Formule » : 7 questions (positions droite/plan, deux plans ×2, plan auxiliaire, théorème du toit,
+Dürer, lampe). **Piège** : un `\alpha` écrit dans une chaîne Python NON brute devient `\x07lpha` (BEL)
+— corrigé au lot E ; écrire `\\alpha` ou une chaîne brute.
+
+Lot E (quiz gen66) : Q1 (trois plans « … ou confondues », et sa jumelle), Q2 bancal, Q3 fuyantes, Q4
+diagonales de la façade, Q5 retirée, Q6 « parallèle à une droite du plan », majuscules d'insistance.
+Couverture de gen100–107 en remplaçant des affirmations redondantes (toujours 7 × 35, 18 V / 17 F) :
+thème `ombreSoleil` renommé « Ombres : soleil et lampe » (9 sur la lampe), témoin dans le plan, droite des
+milieux, plans confondus, croisement du dessin, carrelage, poteaux, milieu d'une fuyante, objet de face,
+fuyante mesurée à la règle, pied de la hauteur. Banque passée en `$…$` par un convertisseur (noms entre
+parenthèses ou crochets, solides, points isolés, d, α, π, axes, degrés, cm), rendue par `TexteRiche`
+(question, résultat, résumé). `evaluationPayload` : les 4 thèmes manquants déclarés (cavaliere,
+deux-droites, parallelisme, point-de-fuite). Parcours Playwright des 7 thèmes : 35 / 35 énoncés
+distincts, 0 `.katex-error` ; évaluation et feuille réelles (2 séries, 14 vrai/faux des 7 thèmes) :
+0 `.katex-error`, 0 `$` visible.
+
+Lot F : D1 critère droite ∥ plan (§ 7), D2 propriété 2 (§ 5), D3 trois plans (§ 6), D4 deux sommets par
+face traversée (§ 9, argument de convexité), D5 ombres au soleil parallèles et D6 droites des ombres par
+L₀ (§ 12), D7 milieu d'une fuyante et D8 point de fuite commun (§ 11), D9 (AB)/(CG) gauches rédigée
+(ex-`exemple`, clé renommée), D10 théorème du toit (propriété au § 8, décision 2). Exemples « un point
+commun et une direction » ((ABG) ∩ (DCF) : centre de ADHE + direction (AB)) et « section triangulaire »
+(coin B, figure `solidCavaliere` avec sommets nommés). Énoncés par clé sans méthode, section
+`point-de-fuite` ajoutée ; **piège des clés** évité : « intersection de deux plans » et « tétraèdre »
+sont des clés existantes, aucun nouveau titre ne les contient.
+
+Lot G : module partagé `espace-commun.js` (`window.EspaceCommun` : cube de côté 2, points nommés I milieu
+de [AE], J de [BF], K de [FG], O, O′ ; calcul exact ; position de deux plans ; découpe ; localisation en
+mots ; vue cavalière cadrée sur l'encombrement réel ou tournée au doigt ; styles du thème). Ateliers
+`livre-plans-widget` (§ 2, pages fantômes, animation coupée si `prefers-reduced-motion`),
+`deux-plans-cube-widget` (§ 5), `droite-temoin-widget` (§ 7), `plan-auxiliaire-widget` (§ 8) ;
+`positions-cube-widget` réemployé au § 4. Contrôle `ateliers.cjs` (dossier de travail) : valeurs des
+réglages du cours + tirages (≈ 850 paires de plans, ≈ 1 000 droites/plans, ≈ 370 percées) recoupés, 0
+erreur, 390 px clair et sombre ; un premier passage a trouvé un faux « elle le perce » quand d est
+parallèle à α sans témoin tracée par deux points nommés (corrigé). Page du chapitre (iPhone 13 et 1 280,
+clair et sombre, 14 vues, 12 ateliers ouverts dans leur panneau) : scrollWidth = largeur, 0
+`.katex-error`, 0 `$`/astérisque isolé, 0 « déterminant »/radian, 0 erreur console.
+
 ## 4e, chapitres 1–5, 7, 8 — champs du parcours (décision de l'utilisateur, 21/11/2026)
 
 `titreCourt`, `partie`, `essentiel`, `cartes` remplis pour les 7 autres chapitres de 4e sur le modèle

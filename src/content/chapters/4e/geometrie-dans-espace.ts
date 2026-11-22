@@ -1526,9 +1526,9 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'exemple',
           badge: 'section triangulaire',
-          formula: 'Dans le cube ABCDEFGH, P est sur [EF], Q sur [FG] et R sur [BF]. Construis la section par le plan (PQR).',
+          formula: 'Dans le cube ABCDEFGH, P est sur [AB], Q sur [BC] et R sur [BF]. Construis la section par le plan (PQR).',
           steps: [
-            { tag: 'trois segments directs', text: 'P et Q sont dans la face EFGH, Q et R dans la face BCGF, R et P dans la face ABFE : on trace [PQ], [QR] et [RP]' },
+            { tag: 'trois segments directs', text: 'P et Q sont dans la face ABCD, Q et R dans la face BCGF, R et P dans la face ABFE : on trace [PQ], [QR] et [RP]' },
           ],
           result: { tag: 'résultat', text: 'la section est le triangle PQR : 3 faces traversées, 3 sommets, aucun point auxiliaire' },
         },
@@ -1539,17 +1539,27 @@ export const geometrieDansEspace: ChapterContent = {
             size: 'large',
             sectionPolygon: {
               points: [
-                { x: 130, y: 90 },
-                { x: 187.68, y: 72.32 },
-                { x: 170, y: 130 },
+                { x: 130, y: 190 },
+                { x: 187.68, y: 172.32 },
+                { x: 170, y: 132 },
               ],
             },
             freePoints: [
-              { x: 130, y: 90, label: 'P', tone: 'accent' },
-              { x: 187.68, y: 72.32, label: 'Q', tone: 'accent' },
-              { x: 170, y: 130, label: 'R', tone: 'accent' },
+              { x: 130, y: 190, label: 'P', tone: 'accent' },
+              { x: 187.68, y: 172.32, label: 'Q', tone: 'accent' },
+              { x: 170, y: 132, label: 'R', tone: 'accent' },
             ],
-            caption: 'un plan qui coupe le coin F du cube traverse 3 faces : la section est un triangle',
+            vertexLabels: [
+              { vertex: 'A', tone: 'ink' },
+              { vertex: 'B', tone: 'ink' },
+              { vertex: 'C', tone: 'ink' },
+              { vertex: 'D', tone: 'ink' },
+              { vertex: 'E', tone: 'ink' },
+              { vertex: 'F', tone: 'ink' },
+              { vertex: 'G', tone: 'ink' },
+              { vertex: 'H', tone: 'ink' },
+            ],
+            caption: 'un plan qui coupe le coin B du cube traverse 3 faces : la section est un triangle',
           },
         },
         {
