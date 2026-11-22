@@ -97,8 +97,9 @@ const NATURES: NatureEquationCercle[] = ["cercle", "point", "vide"];
 /**
  * Variante « Est-ce un cercle ? » (audit 4e ch. 7, G12) : la NATURE est tirée d'abord, au tiers
  * (verdict, jamais cas particulier), puis les nombres. Centre entier (A et B pairs) pour toutes les
- * natures — un second membre nul l'exige —, constante c de signe quelconque dans les trois cas (le
- * signe de c ne trahit pas la nature) : r² = (A² + B²)/4 + Q, de 1 à 12 (cercle), 0 (un point) ou
+ * natures — un second membre nul l'exige. Constante c (second membre de l'équation affichée)
+ * TOUJOURS négative : c > 0 ou c = 0 trahirait « cercle » sans calcul (mesuré : 11 % des cercles
+ * avant ce choix) ; r² = (A² + B²)/4 + Q, de 1 à min(12, (A² + B²)/4 − 1) (cercle), 0 (un point) ou
  * de −12 à −1 (aucun point).
  */
 export function construireEstCeUnCercle(nature: NatureEquationCercle = NATURES[randomInt(0, 2)]!): ExerciceEquationCercleDeveloppee {
@@ -111,7 +112,7 @@ export function construireEstCeUnCercle(nature: NatureEquationCercle = NATURES[r
   const A = pair();
   const B = pair();
   const base = (A * A + B * B) / 4;
-  const rayonCarre = nature === "cercle" ? randomInt(1, 12) : nature === "point" ? 0 : -randomInt(1, 12);
+  const rayonCarre = nature === "cercle" ? randomInt(1, Math.min(12, base - 1)) : nature === "point" ? 0 : -randomInt(1, 12);
   const Q = rayonCarre - base;
   const k = K_VALEURS[randomInt(0, K_VALEURS.length - 1)]!;
   return { variante: "est_ce_un_cercle", k, bx: -k * A, by: -k * B, c: k * Q, centre: { x: A / 2, y: B / 2 }, rayonCarre, rayon: Math.sqrt(Math.max(0, rayonCarre)) };

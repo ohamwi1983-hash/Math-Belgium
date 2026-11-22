@@ -9,10 +9,11 @@
  * Mesures (5 000 tirages par variante, `scratchpad/refonte-4e-ch7a/mesure.txt`) — voir chaque
  * profil. Le cas particulier commun est la droite PARALLÈLE À UN AXE (horizontale y = k ou verticale
  * x = k) : vecteur directeur à une composante nulle, équation, tracé, caractéristiques ou distance
- * se lisent alors sans calcul (raccourci du cours). Les verdicts — forme explicite possible ou non
- * (gen42), relation parallèles / perpendiculaires / aucune (gen45), sécantes / parallèles distinctes
- * / confondues (gen48) — ne sont JAMAIS filtrés : ils deviennent une `forme`, recopiée d'une série à
- * l'autre (même charge de travail), jamais imposée à l'intérieur d'une série.
+ * se lisent alors sans calcul (raccourci du cours). Les verdicts ne sont JAMAIS filtrés. Relation
+ * parallèles / perpendiculaires / aucune (gen45) et sécantes / parallèles distinctes / confondues
+ * (gen48) restent une `forme`, recopiée d'une série à l'autre (même charge de travail) ; forme
+ * explicite possible ou non (gen42) : plus dans la forme depuis le lot D de l'audit (tirée librement
+ * dans chaque série).
  *
  * `calcul` : seulement gen46, quand un ANGLE est demandé (angle remarquable 0°, 45°, 90°, 135° →
  * valeur exacte ; pente quelconque → arctan à la calculatrice). Les autres générateurs n'ont que des
@@ -41,11 +42,12 @@ export const LIBELLE_CAS_PARALLELE_AXE = "Inclure un cas particulier (droite par
  * EXISTE (y = p, x = q, ou cartésienne / paramétrique) — mesure : ≈ 50 % des variantes « angle »
  * (angles remarquables 0°, 45°, 90°, 135°), ≈ 6 à 9 % des autres (piège « forme impossible »
  * excepté). Une droite verticale à écrire « y = mx + p » (ou horizontale « x = ny + q ») est le
- * VERDICT « impossible » : jamais un cas, seulement une `forme` (forme demandée + issue). */
+ * VERDICT « impossible » : jamais un cas, et plus dans la `forme` (audit 4e ch. 7, lot D : la série B
+ * reproduisait l'issue de la série A — 30 / 30 plans) ; la forme est la forme demandée seule. */
 export function profilEquationDroite(e: ExerciceEquationDroite): ProfilInstance {
   return {
     casParticulier: e.possible && paralleleAxe(e.vecteur) ? CAS_AXE : null,
-    forme: e.possible ? e.formeCible : `${e.formeCible}-impossible`,
+    forme: e.formeCible,
   };
 }
 

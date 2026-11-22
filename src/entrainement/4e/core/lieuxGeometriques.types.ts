@@ -46,9 +46,8 @@ export type NombrePointsIntersection = 0 | 1 | 2;
 
 export interface LieuDroite {
   type: "droite";
-  /** Pente — jamais nulle et toujours définie (contrainte de génération : exclut les droites
-   * horizontales et verticales, la formulation verbale de pente ne fonctionnant naturellement que
-   * pour une pente non nulle et définie). */
+  /** Pente — toujours définie (jamais de droite verticale) ; nulle seulement dans la variante
+   * « droite parallèle à l'axe de la parabole » (droite y = k, énoncé « l'ordonnée vaut k »). */
   m: number;
   /** Ordonnée à l'origine — `y = m·x + p`. */
   p: number;
