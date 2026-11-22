@@ -26,6 +26,7 @@ import type { ExerciceLieuxGeometriques } from "../core/lieuxGeometriques.types"
 import { formatEquationExpliciteYLatex, formatPointLatex } from "./formatEquationDroite";
 import type { FragmentConsigne } from "./formatEquationDroite";
 import { formatFractionIrreductible } from "./formatFraction";
+import { racineCarreeLatex } from "./corrigeChapitre3";
 
 export type { FragmentConsigne };
 export { formatPointLatex };
@@ -138,19 +139,34 @@ function formatSommeTermesLatex(termes: { valeur: number; suffixe: string }[]): 
  * `m = 1` et `m = −1` ont leur propre tournure (« égale à leur abscisse », « égale à l'opposé de
  * leur abscisse ») — jamais « −1 fois leur abscisse » (audit chapitre 7, point 7). */
 function segmentsDefinitionDroite(droite: LieuDroite): FragmentConsigne[] {
-  const segments: FragmentConsigne[] =
+  // Pente nulle (variante « droite parallèle à l'axe ») : l'ordonnée est constante.
+  if (droite.m === 0) return [texte("les points dont l'ordonnée vaut "), latex(formatValeurFractionLatex(droite.p))];
+  // Sans terme constant : « égale à … fois leur abscisse » (aucune ambiguïté de portée).
+  if (droite.p === 0) {
+    if (droite.m === 1) return [texte("les points dont l'ordonnée est égale à leur abscisse")];
+    if (droite.m === -1) return [texte("les points dont l'ordonnée est égale à l'opposé de leur abscisse")];
+    return [texte("les points dont l'ordonnée est égale à "), latex(formatValeurFractionLatex(droite.m)), texte(" fois leur abscisse")];
+  }
+  // Audit 4e ch. 7, G8 : « égale à 1/2 fois leur abscisse, diminuée de 1/2 » se lisait de deux façons
+  // (y = ½x − ½ ou y = ½(x − ½)) ; l'ordre des opérations est maintenant dit explicitement.
+  const debut: FragmentConsigne[] =
     droite.m === 1
-      ? [texte("les points dont l'ordonnée est égale à leur abscisse")]
+      ? [texte("les points dont l'ordonnée s'obtient en partant de l'abscisse")]
       : droite.m === -1
-        ? [texte("les points dont l'ordonnée est égale à l'opposé de leur abscisse")]
-        : [texte("les points dont l'ordonnée est égale à "), latex(formatValeurFractionLatex(droite.m)), texte(" fois leur abscisse")];
-  if (droite.p > 0) segments.push(texte(", augmentée de "), latex(formatMagnitudeFractionLatex(droite.p)));
-  else if (droite.p < 0) segments.push(texte(", diminuée de "), latex(formatMagnitudeFractionLatex(-droite.p)));
-  return segments;
+        ? [texte("les points dont l'ordonnée s'obtient en prenant l'opposé de l'abscisse")]
+        : [texte("les points dont l'ordonnée s'obtient en multipliant l'abscisse par "), latex(formatValeurFractionLatex(droite.m))];
+  const fin: FragmentConsigne[] =
+    droite.p > 0 ? [texte(", puis en ajoutant "), latex(formatMagnitudeFractionLatex(droite.p))] : [texte(", puis en retirant "), latex(formatMagnitudeFractionLatex(-droite.p))];
+  return [...debut, ...fin];
+}
+
+/** Rayon en valeur exacte (« 5 », « \sqrt{5} », « 2\sqrt{2} ») : r² est entier par construction. */
+export function rayonLatex(cercle: LieuCercle): string {
+  return racineCarreeLatex(Math.round(cercle.rayon * cercle.rayon));
 }
 
 function segmentsDefinitionCercle(cercle: LieuCercle): FragmentConsigne[] {
-  return [texte("les points situés à une distance de "), latex(`${cercle.rayon}`), texte(" unités du point "), latex(formatPointLatex(cercle.centre))];
+  return [texte("les points situés à une distance de "), latex(rayonLatex(cercle)), texte(" unités du point "), latex(formatPointLatex(cercle.centre))];
 }
 
 function directriceLatex(parabole: LieuParabole): string {
@@ -196,7 +212,7 @@ export function segmentsDescriptionLieu(lieu: Lieu): FragmentConsigne[] {
     case "droite":
       return [texte("Droite de pente "), latex(`m=${formatValeurFractionLatex(lieu.m)}`), texte(" et d'ordonnée à l'origine "), latex(`p=${formatValeurFractionLatex(lieu.p)}`)];
     case "cercle":
-      return [texte("Cercle de centre "), latex(formatPointLatex(lieu.centre)), texte(" et de rayon "), latex(`r=${lieu.rayon}`)];
+      return [texte("Cercle de centre "), latex(formatPointLatex(lieu.centre)), texte(" et de rayon "), latex(`r=${rayonLatex(lieu)}`)];
     case "parabole":
       return [
         texte(`Parabole ${lieu.orientation === "vertical" ? "verticale" : "horizontale"} de foyer `),
@@ -214,7 +230,7 @@ export function formatCaracteristiquesLieuLatex(lieu: Lieu): string {
     case "droite":
       return `\\displaystyle m = ${formatValeurFractionLatex(lieu.m)},\\; p = ${formatValeurFractionLatex(lieu.p)}`;
     case "cercle":
-      return `\\displaystyle \\text{centre } ${formatPointLatex(lieu.centre)},\\; r = ${lieu.rayon}`;
+      return `\\displaystyle \\text{centre } ${formatPointLatex(lieu.centre)},\\; r = ${rayonLatex(lieu)}`;
     case "parabole":
       return `\\displaystyle \\text{foyer } ${formatPointLatex(lieu.foyer)},\\; p = ${formatValeurFractionLatex(lieu.p)}\\; (\\text{${lieu.orientation === "vertical" ? "axe vertical" : "axe horizontal"}})`;
   }
@@ -229,7 +245,7 @@ export const CONSIGNE_GENERALE_IDENTIFICATION = "Identifie le type de chacun des
 export function segmentsAideIdentificationNiveau1(): FragmentConsigne[] {
   return [
     texte(
-      "Une droite relie l'abscisse et l'ordonnée par un facteur constant (éventuellement décalé d'une constante). Un cercle est l'ensemble des points situés à une distance CONSTANTE d'un point fixe. Une parabole est l'ensemble des points ÉQUIDISTANTS d'un point fixe et d'une droite fixe. Pour le paramètre ",
+      "Une droite : l'ordonnée s'obtient à partir de l'abscisse en multipliant par un nombre, puis en ajoutant un nombre (ou elle est constante). Un cercle est l'ensemble des points situés à une distance constante d'un point fixe. Une parabole est l'ensemble des points équidistants d'un point fixe et d'une droite fixe. Pour le paramètre ",
     ),
     latex("p"),
     texte(" d'une parabole : "),
@@ -303,7 +319,7 @@ export function formatEquationLieuLatex(lieu: Lieu): string {
     case "droite":
       return formatEquationExpliciteYLatex(lieu.m, lieu.p);
     case "cercle":
-      return `${formatBinomeCarreLatex("x", lieu.centre.x)}+${formatBinomeCarreLatex("y", lieu.centre.y)}=${lieu.rayon * lieu.rayon}`;
+      return `${formatBinomeCarreLatex("x", lieu.centre.x)}+${formatBinomeCarreLatex("y", lieu.centre.y)}=${Math.round(lieu.rayon * lieu.rayon)}`;
     case "parabole": {
       const variableDirectrice = lieu.orientation === "vertical" ? "y" : "x";
       return `${formatBinomeCarreLatex("x", lieu.foyer.x)}+${formatBinomeCarreLatex("y", lieu.foyer.y)}=${formatBinomeCarreLatex(variableDirectrice, lieu.directrice)}`;
@@ -351,6 +367,7 @@ export function segmentsAideResolutionNiveau1(exercice: ExerciceLieuxGeometrique
     case "cercleDroite":
       return [texte("Substitue l'équation de la droite dans celle du cercle pour obtenir une équation du second degré, puis résous-la.")];
     case "droiteParabole":
+      if (trouverLieu(exercice, "droite").m === 0) return [texte("Substitue l'équation de la droite dans celle de la parabole, puis résous l'équation obtenue (regarde bien son degré).")];
       return [texte("Substitue l'équation de la droite dans celle de la parabole pour obtenir une équation du second degré, puis résous-la.")];
   }
 }
@@ -417,7 +434,8 @@ function substitutionCercleDroite(exercice: ExerciceLieuxGeometriques): Substitu
 function substitutionDroiteParabole(exercice: ExerciceLieuxGeometriques): SubstitutionQuadratique {
   const droite = trouverLieu(exercice, "droite");
   const parabole = trouverLieu(exercice, "parabole");
-  if (parabole.orientation === "vertical") {
+  // Axe vertical, ou droite horizontale (pente nulle) : on remplace y, l'inconnue restante est x.
+  if (parabole.orientation === "vertical" || droite.m === 0) {
     const { A, B, C } = coefficientsParEchantillonnage(
       cibleParaboleLieu(parabole),
       (v) => v,
@@ -488,7 +506,8 @@ export function formatQuadratiqueSubstitutionLatex(exercice: ExerciceLieuxGeomet
 // Révélation — panneau de résultat.
 // ============================================================================
 
-export function texteNombrePointsAttendu(nombrePoints: NombrePointsIntersection): string {
+export function texteNombrePointsAttendu(nombrePoints: NombrePointsIntersection, paralleleAxe = false): string {
+  if (paralleleAxe) return "1 point d'intersection (droite parallèle à l'axe : ce n'est pas une tangence).";
   return nombrePoints === 0 ? "Aucune intersection." : nombrePoints === 1 ? "1 point d'intersection (tangente)." : "2 points d'intersection.";
 }
 

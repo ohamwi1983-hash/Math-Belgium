@@ -196,3 +196,10 @@ export function verifierCentreRayon(exercice: ExerciceEquationCercleDeveloppee, 
   const { centre, rayon } = diagnostiquerCentreRayon(exercice, reponseCentre, texteRayon);
   return centre === "correct" && rayon === "correct";
 }
+
+
+/** Nature de l'ensemble décrit par l'équation (variante « Est-ce un cercle ? », audit 4e ch. 7,
+ * G12) : second membre de la forme complétée positif, nul ou négatif. */
+export function natureEquationCercle(e: ExerciceEquationCercleDeveloppee): "cercle" | "point" | "vide" {
+  return e.rayonCarre > 1e-9 ? "cercle" : Math.abs(e.rayonCarre) <= 1e-9 ? "point" : "vide";
+}

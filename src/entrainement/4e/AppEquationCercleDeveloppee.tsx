@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationCercleDeveloppee } from "./generateurs/equationCercleDeveloppee";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationCercleDeveloppee, genererExerciceEquationCercleDeveloppeeLibre, natureEquationCercle } from "./generateurs/equationCercleDeveloppee";
 import type { VarianteEquationCercleDeveloppee } from "./core/equationCercleDeveloppee.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { CalculatriceScientifique } from "./components/CalculatriceScientifique";
@@ -39,7 +39,7 @@ const REGLAGES_DEMO: ReglagesSession = {
 };
 
 function nouvelleSession(): EtatSessionEquationCercleDeveloppee {
-  return demarrerSessionEquationCercleDeveloppee(REGLAGES_DEMO, genererExerciceEquationCercleDeveloppee);
+  return demarrerSessionEquationCercleDeveloppee(REGLAGES_DEMO, genererExerciceEquationCercleDeveloppeeLibre);
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
@@ -79,6 +79,9 @@ const TITRES_ECRANS: Record<PhaseEquationCercleDeveloppee, string> = {
 function construireReponseAttendue(exercice: ExerciceEquationCercleDeveloppee, phase: PhaseEquationCercleDeveloppee): ReactNode {
   if (phase === "regroupement") return <Katex expression={formatRegroupementLatex(exercice)} />;
   if (phase === "completion") return <Katex expression={formatCompletionLatex(exercice)} />;
+  if (exercice.variante === "est_ce_un_cercle" && natureEquationCercle(exercice) !== "cercle") {
+    return <>{natureEquationCercle(exercice) === "point" ? "Un seul point (second membre nul) : le centre " : "Aucun point (second membre négatif)"}{natureEquationCercle(exercice) === "point" && <Katex expression={formatCentreAttenduLatex(exercice)} />}</>;
+  }
   return <Katex expression={`\\text{centre } ${formatCentreAttenduLatex(exercice)}, \\quad r = ${formatRayonAttenduLatex(exercice)}`} />;
 }
 
@@ -201,7 +204,13 @@ export function AppEquationCercleDeveloppee() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideCentreRayon}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => terminerEtape(soumettreReponseCentreRayon(etat, reponse), <>centre ({nombreFr(reponse.x)} ; {nombreFr(reponse.y)}), r = {saisieBrute(reponse.rayon)}</>)}
+            onValider={(reponse) =>
+              terminerEtape(
+                soumettreReponseCentreRayon(etat, reponse),
+                reponse.nature && reponse.nature !== "cercle" ? (reponse.nature === "point" ? "Un seul point" : "Aucun point") : <>centre ({nombreFr(reponse.x)} ; {nombreFr(reponse.y)}), r = {saisieBrute(reponse.rayon)}</>,
+              )
+            }
+            natureFigee={etat.natureFigee}
             validation={validation}
           />
         )}

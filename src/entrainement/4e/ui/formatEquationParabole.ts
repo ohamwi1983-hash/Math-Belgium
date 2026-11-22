@@ -53,11 +53,11 @@ function formatBinomeGroupeLatex(variable: "x" | "y", valeur: number): string {
 }
 
 export function formatSommetLatex(sommet: Point): string {
-  return `(${sommet.x} \\; ; \\; ${sommet.y})`;
+  return `(${sommet.x} \\,;\\, ${sommet.y})`;
 }
 
 export function formatFoyerLatex(foyer: Point): string {
-  return `(${foyer.x} \\; ; \\; ${foyer.y})`;
+  return `(${foyer.x} \\,;\\, ${foyer.y})`;
 }
 
 /** `(x-x_S)^2=2p(y-y_S)` (vertical) ou `(y-y_S)^2=2p(x-x_S)` (horizontal) — coefficient TOUJOURS

@@ -127,7 +127,9 @@ function reponseBreveLieuxGeometriques(instance: ExerciceLieuxGeometriques): Fra
  * dans les données. Niveau et durée CONSTANTS quel que soit le nombre de points communs (le verdict :
  * `sansCharge`, sinon la résolution plus courte d'un Δ < 0 trahirait la réponse). */
 function criteresDifficulte(instance: ExerciceLieuxGeometriques): CriteresDifficulte {
-  return { ...etapesDuCorrige(correctionDetailleeLieuxGeometriques(instance)), methode: 1, piege: 0, nombres: 0, sansCharge: true };
+  // Droite parallèle à l'axe (variante à part) : piège dans les données — un seul point, sans tangence.
+  const axe = (instance.lieu1.type === "droite" ? instance.lieu1 : instance.lieu2).type === "droite" && (instance.lieu1.type === "droite" ? instance.lieu1 : (instance.lieu2 as { m: number })).m === 0;
+  return { ...etapesDuCorrige(correctionDetailleeLieuxGeometriques(instance)), methode: 1, piege: axe ? 1 : 0, nombres: 0, sansCharge: true };
 }
 
 function baremeLieuxGeometriques(instance: ExerciceLieuxGeometriques): BaremeExercice {
@@ -149,7 +151,18 @@ function baremeLieuxGeometriques(instance: ExerciceLieuxGeometriques): BaremeExe
   };
 }
 
+/** Groupes à verdict (audit 4e ch. 7, G6, décision 1) : le nom de la variante disait le nombre de
+ * points communs ; dans le panneau d'évaluation, chaque paire devient UNE rangée dont le verdict
+ * est tiré (paquet mélangé, série B ≠ série A). La pente est tirée avant le verdict dans une même
+ * liste (`generateurs/lieuxGeometriques/index.ts`) : elle ne le trahit plus. La variante « droite
+ * parallèle à l'axe » reste à part (son équation y = k se voit dans l'énoncé). */
+const GROUPES_VERDICT: { id: string; label: string; variantes: string[] }[] = [
+  { id: "groupe_points_cercle", label: "Cercle-droite — 0, 1 ou 2 points communs, au hasard", variantes: ["cercleDroite_0", "cercleDroite_1", "cercleDroite_2"] },
+  { id: "groupe_points_parabole", label: "Droite-parabole — 0, 1 ou 2 points communs, au hasard", variantes: ["droiteParabole_0", "droiteParabole_1", "droiteParabole_2"] },
+];
+
 export const adaptateurEvaluationLieuxGeometriques: AdaptateurFeuilleExercices<ExerciceLieuxGeometriques> = {
+  groupesVerdict: GROUPES_VERDICT,
   titreDocument: "Intersection de deux lieux géométriques — Évaluation",
   nomFichierBase: "lieux-geometriques-intersection",
   genererInstance: genererExerciceLieuxGeometriques,

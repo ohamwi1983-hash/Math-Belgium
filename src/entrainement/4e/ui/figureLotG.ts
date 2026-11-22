@@ -1,4 +1,5 @@
 import type { Droite, Pt } from "./geometrieLotG";
+import { boiteDisque, boiteTexte, graduationsSansChevauchement, type Boite, type Graduation } from "./graduationsSvg";
 
 /**
  * Figure SVG autonome (écran APRÈS la réponse, corrigé papier) du lot G du chapitre 7 de 4e
@@ -19,6 +20,10 @@ export interface ObjetsFigure {
   anglesDroits?: { sommet: Pt; vers1: Pt; vers2: Pt }[];
   /** Points à garder dans la fenêtre sans les dessiner. */
   inclure?: Pt[];
+  /** Opt-in (audit 4e ch. 7, lot C — corrigé de gen47) : un nombre d'axe qui toucherait un point,
+   * son nom ou le nom d'une droite passe de l'autre côté de l'axe, sinon n'est pas écrit
+   * (`graduationsSvg.ts`). Absent : figure identique à avant (gen45, gen48, lot G gen92–95). */
+  graduationsLisibles?: boolean;
 }
 
 const TAILLE = 300;
@@ -76,6 +81,9 @@ export function figureLotG(o: ObjetsFigure): string {
   for (let x = x0; x <= x1; x++) parts.push(`<line x1="${fmt(X(x))}" y1="${fmt(Y(y0))}" x2="${fmt(X(x))}" y2="${fmt(Y(y1))}" stroke="${x === 0 ? "#495057" : "#dee2e6"}" stroke-width="${x === 0 ? 1.2 : 0.6}"/>`);
   for (let y = y0; y <= y1; y++) parts.push(`<line x1="${fmt(X(x0))}" y1="${fmt(Y(y))}" x2="${fmt(X(x1))}" y2="${fmt(Y(y))}" stroke="${y === 0 ? "#495057" : "#dee2e6"}" stroke-width="${y === 0 ? 1.2 : 0.6}"/>`);
   const moins = (v: number) => (v < 0 ? `−${-v}` : `${v}`);
+  if (o.graduationsLisibles) {
+    parts.push(graduationsLisiblesLotG(o, { x0, x1, y0, y1, X, Y, marge, pasEtiquette }));
+  } else {
   for (let x = Math.ceil(x0 / pasEtiquette) * pasEtiquette; x < x1; x += pasEtiquette) {
     if (x === 0 || x === x0) continue;
     const yt = Math.min(Math.max(Y(0) + 11, marge + 9), TAILLE - 3);
@@ -87,6 +95,7 @@ export function figureLotG(o: ObjetsFigure): string {
     parts.push(`<text x="${fmt(xt)}" y="${fmt(Y(y) + 3)}" font-size="9" text-anchor="end" fill="#495057" font-family="sans-serif">${moins(y)}</text>`);
   }
   if (x0 < 0 && x1 > 0 && y0 < 0 && y1 > 0) parts.push(`<text x="${fmt(X(0) - 3)}" y="${fmt(Y(0) + 11)}" font-size="9" text-anchor="end" fill="#495057" font-family="sans-serif">0</text>`);
+  }
   for (const c of o.cercles ?? []) {
     parts.push(`<circle cx="${fmt(X(c.c.x))}" cy="${fmt(Y(c.c.y))}" r="${fmt(c.r * u)}" fill="none" stroke="${COULEURS[c.couleur ?? "bleu"]}" stroke-width="2"/>`);
   }
@@ -136,4 +145,53 @@ export function figureLotG(o: ObjetsFigure): string {
     parts.push(`<text x="${fmt(tx)}" y="${fmt(ty)}" font-size="13" font-weight="600" text-anchor="${anchor}" fill="${couleur}" font-family="serif">${nomSvg(p.nom)}</text>`);
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${TAILLE}" height="${TAILLE}" viewBox="0 0 ${TAILLE} ${TAILLE}" role="img">${parts.join("")}</svg>`;
+}
+
+/** Position d'un nom de droite (même règle que `figureLotG`). */
+function positionNomDroite(seg: [Pt, Pt], X: (x: number) => number, Y: (y: number) => number, marge: number): { tx: number; ty: number } {
+  const e = seg[0].x + seg[0].y > seg[1].x + seg[1].y ? seg[0] : seg[1];
+  return { tx: Math.min(Math.max(X(e.x), marge + 8), TAILLE - marge - 8), ty: Math.min(Math.max(Y(e.y) + 12, marge + 10), TAILLE - marge - 2) };
+}
+
+/** Nombres des axes de `figureLotG` qui ne touchent ni un point, ni son nom, ni le nom d'une droite. */
+function graduationsLisiblesLotG(
+  o: ObjetsFigure,
+  f: { x0: number; x1: number; y0: number; y1: number; X: (x: number) => number; Y: (y: number) => number; marge: number; pasEtiquette: number },
+): string {
+  const { x0, x1, y0, y1, X, Y, marge, pasEtiquette } = f;
+  const obstacles: Boite[] = [];
+  for (const p of o.points ?? []) {
+    const px = X(p.p.x);
+    const py = Y(p.p.y);
+    obstacles.push(boiteDisque(px, py, 3.2));
+    const pos = p.position ?? "ne";
+    let tx = px + (pos.endsWith("e") ? 5 : -5);
+    const ty = Math.min(Math.max(py + (pos.startsWith("n") ? -5 : 13), 11), TAILLE - 3);
+    const ancre = pos.endsWith("e") ? "start" : "end";
+    if (ancre === "start" && tx > TAILLE - 16) tx = TAILLE - 16;
+    if (ancre === "end" && tx < 16) tx = 16;
+    obstacles.push(boiteTexte(tx, ty, p.nom, 13, ancre));
+  }
+  for (const dr of o.droites ?? []) {
+    if (!dr.nom) continue;
+    const seg = clipDroite(dr.d, x0, x1, y0, y1);
+    if (!seg) continue;
+    const { tx, ty } = positionNomDroite(seg, X, Y, marge);
+    obstacles.push(boiteTexte(tx, ty, dr.nom, 12, "middle"));
+  }
+  const graduations: Graduation[] = [];
+  for (let x = Math.ceil(x0 / pasEtiquette) * pasEtiquette; x < x1; x += pasEtiquette) {
+    if (x === 0 || x === x0) continue;
+    const yt = Math.min(Math.max(Y(0) + 11, marge + 9), TAILLE - 3);
+    const yr = Math.min(Math.max(Y(0) - 4, marge + 9), TAILLE - 3);
+    graduations.push({ valeur: x, x: X(x), y: yt, xRepli: X(x), yRepli: yr === yt ? yt - 15 : yr, ancre: "middle", ancreRepli: "middle" });
+  }
+  for (let y = Math.ceil(y0 / pasEtiquette) * pasEtiquette; y < y1; y += pasEtiquette) {
+    if (y === 0 || y === y0) continue;
+    const xt = Math.min(Math.max(X(0) - 3, marge + 12), TAILLE - 3);
+    const xr = Math.min(Math.max(X(0) + 3, marge + 2), TAILLE - 16);
+    graduations.push({ valeur: y, x: xt, y: Y(y) + 3, xRepli: xr, yRepli: Y(y) + 3, ancre: "end", ancreRepli: "start" });
+  }
+  if (x0 < 0 && x1 > 0 && y0 < 0 && y1 > 0) graduations.push({ valeur: 0, x: X(0) - 3, y: Y(0) + 11, xRepli: X(0) + 3, yRepli: Y(0) - 4, ancre: "end", ancreRepli: "start" });
+  return `<g font-family="sans-serif">${graduationsSansChevauchement(graduations, obstacles, { taille: 9, couleur: "#495057" })}</g>`;
 }

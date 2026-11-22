@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_COMPLETION } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerCompletionCarre } from "../moteur/verificationEquationCercleDeveloppee";
-import { CONSIGNE_COMPLETION, CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COMPLETION, segmentsAideCompletionNiveau1, formatAideCompletionNiveau2Latex, formatEquationDeveloppeeLatex } from "../ui/formatEquationCercleDeveloppee";
+import { CONSIGNE_COMPLETION, consigneGeneraleCentreRayon, PLACEHOLDER_COMPLETION, segmentsAideCompletionNiveau1, formatAideCompletionNiveau2Latex, formatEquationDeveloppeeLatex } from "../ui/formatEquationCercleDeveloppee";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -46,7 +46,7 @@ export function EtapeCompletionEquationCercleDeveloppee({ exercice, tentativesUt
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE_CENTRE_RAYON}
+        consigneGenerale={consigneGeneraleCentreRayon(exercice)}
         blocDonnees={
           <div className="equation-box">
             <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />

@@ -15,7 +15,7 @@ import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
 import type { EtatSessionEquationCercleDeveloppee, ReponseEcranCentreRayon, ResultatExerciceEquationCercleDeveloppee } from "./typesEquationCercleDeveloppee";
-import { verifierCentreRayon, verifierCompletionCarre, verifierRegroupement } from "./verificationEquationCercleDeveloppee";
+import { natureEquationCercle, verifierCentreRayon, verifierCompletionCarre, verifierRegroupement } from "./verificationEquationCercleDeveloppee";
 
 const POINTS_DE_BASE = 100;
 
@@ -39,6 +39,7 @@ function etatInitial(
   | "scoreCompletionExercice"
   | "completionRevele"
   | "completionAideUtilisee"
+  | "natureFigee"
 > {
   return {
     exerciceCourant: exercice,
@@ -53,6 +54,7 @@ function etatInitial(
     scoreCompletionExercice: null,
     completionRevele: false,
     completionAideUtilisee: false,
+    natureFigee: null,
   };
 }
 
@@ -177,6 +179,21 @@ export function soumettreReponseCentreRayon(etat: EtatSessionEquationCercleDevel
   }
   const exercice = etat.exerciceCourant;
 
+  // Variante « Est-ce un cercle ? » : nature jugée UNE fois (audit 4e ch. 7, G12 ; règle G3).
+  let natureFigee = etat.natureFigee;
+  if (exercice.variante === "est_ce_un_cercle") {
+    const bonne = natureEquationCercle(exercice);
+    if (natureFigee === null) {
+      natureFigee = { choisie: reponse.nature ?? "cercle", correcte: (reponse.nature ?? "cercle") === bonne };
+      if (!natureFigee.correcte) {
+        if (bonne === "cercle") return { ...etat, natureFigee };
+        return cloturerCentreRayon({ ...etat, natureFigee }, 0, true);
+      }
+      // Bonne nature et pas un cercle : rien d'autre à donner.
+      if (bonne !== "cercle") return cloturerCentreRayon({ ...etat, natureFigee }, POINTS_DE_BASE, false);
+    }
+  }
+
   const etapeCourante = soumettreEtapeTentatives<ReponseEcranCentreRayon>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
     verifier: (r) => verifierCentreRayon(exercice, { x: r.x, y: r.y }, r.rayon),
@@ -184,11 +201,15 @@ export function soumettreReponseCentreRayon(etat: EtatSessionEquationCercleDevel
   });
 
   if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
+    return { ...etat, etapeCourante, natureFigee };
   }
 
-  const score = etapeCourante.score as number;
+  const natureFausse = natureFigee !== null && !natureFigee.correcte;
+  return cloturerCentreRayon({ ...etat, natureFigee }, natureFausse ? 0 : (etapeCourante.score as number), etapeCourante.revelee || natureFausse);
+}
 
+function cloturerCentreRayon(etat: EtatSessionEquationCercleDeveloppee, score: number, revele: boolean): EtatSessionEquationCercleDeveloppee {
+  const exercice = etat.exerciceCourant;
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,
     scoreRegroupement: etat.scoreRegroupementExercice as number,
@@ -198,7 +219,7 @@ export function soumettreReponseCentreRayon(etat: EtatSessionEquationCercleDevel
     completionRevele: etat.completionRevele,
     completionAideUtilisee: etat.completionAideUtilisee,
     scoreCentreRayon: score,
-    centreRayonRevele: etapeCourante.revelee,
+    centreRayonRevele: revele,
     centreRayonAideUtilisee: etat.niveauAideCentreRayon > 0,
   });
 }

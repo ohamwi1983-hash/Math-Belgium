@@ -170,7 +170,7 @@ export function AppEquationCercle() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideCentre}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => terminerEtape(soumettreReponseCentre(etat, reponse), <Katex expression={`(${reponse.x} \\; ; \\; ${reponse.y})`} />)}
+            onValider={(reponse) => terminerEtape(soumettreReponseCentre(etat, reponse), <Katex expression={`(${reponse.x} \\,;\\, ${reponse.y})`} />)}
             validation={validation}
           />
         ) : etat.phase === "rayon" ? (

@@ -122,7 +122,7 @@ export function figureDroite(d: DroiteTracee, titre: string, escalier = false): 
     } else if (d.type === "horizontale") points.push({ P: { x: 0, y: d.k }, label: `(0 ; ${nombreTexte(d.k)})`, couleur: COULEURS.noir, position: "ne" });
     else points.push({ P: { x: d.k, y: 0 }, label: `(${nombreTexte(d.k)} ; 0)`, couleur: COULEURS.noir, position: "ne" });
   }
-  return avecTitre(figureRepere({ fenetre: FENETRE, unite: 20, droites: [{ d: c, couleur: COULEURS.accent, epaisseur: 2.2 }], segments, points }), titre);
+  return avecTitre(figureRepere({ fenetre: FENETRE, unite: 20, graduationsLisibles: true, droites: [{ d: c, couleur: COULEURS.accent, epaisseur: 2.2 }], segments, points }), titre);
 }
 
 export const titreFigure = (n: number) => `Droite ${n + 1}`;

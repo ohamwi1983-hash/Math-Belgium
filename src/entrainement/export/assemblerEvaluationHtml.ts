@@ -1435,7 +1435,14 @@ function blocGrilleHtml(item: ItemEvaluation, numero: number, libelleHtml: strin
   const erreurs = listeGrilleHtml("err", "Erreurs fréquentes", (bareme.erreursFrequentes ?? []).map((e) => ({ texte: fragmentsVersHtml(e.description), cout: e.cout })));
   const acceptees = listeGrilleHtml("ok", "Accepter", (bareme.reponsesAcceptees ?? []).map((r) => ({ texte: fragmentsVersHtml(r) })));
   const codesLignes = (item.groupe ?? []).map((l, i) => (l.item.code ? `${lettreCle(i)}) ${echapperHtml(l.item.code.code)}` : "")).filter(Boolean);
-  const code = item.code ? ` <span class="pts">code ${echapperHtml(item.code.code)}</span>` : codesLignes.length > 0 ? ` <span class="pts">codes ${codesLignes.join(" · ")}</span>` : "";
+  // Codes des lignes d'un groupe : la ligne « codes a) … j) » passe à la ligne ENTRE deux codes
+  // (`.pts` est en `nowrap` : elle débordait de 6 px à 680 px). Un code seul reste insécable ;
+  // documents sans groupe inchangés.
+  const code = item.code
+    ? ` <span class="pts">code ${echapperHtml(item.code.code)}</span>`
+    : codesLignes.length > 0
+      ? ` <span class="pts" style="white-space:normal">codes ${codesLignes.map((c) => `<span style="white-space:nowrap">${c}</span>`).join(" · ")}</span>`
+      : "";
   return `<section class="q">${tete}${criteres}${erreurs}${acceptees}${code ? `<div class="note">${code}</div>` : ""}</section>`;
 }
 

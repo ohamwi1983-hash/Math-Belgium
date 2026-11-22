@@ -36,7 +36,14 @@ function latex(valeur: string): FragmentConsigne {
  * `promptgen50modifications.md`, point 1. */
 export const CONSIGNE_GENERALE_CENTRE_RAYON = "Détermine le centre et le rayon du cercle d'équation :";
 
+/** Consigne générale selon la variante : « Est-ce un cercle ? » ne présume pas que l'équation est
+ * celle d'un cercle (audit 4e ch. 7, G12). */
+export function consigneGeneraleCentreRayon(exercice: ExerciceEquationCercleDeveloppee): string {
+  return exercice.variante === "est_ce_un_cercle" ? "Que représente l'équation suivante ?" : CONSIGNE_GENERALE_CENTRE_RAYON;
+}
+
 export const LIBELLE_VARIANTE: Record<ExerciceEquationCercleDeveloppee["variante"], string> = {
+  est_ce_un_cercle: "Est-ce un cercle ?",
   rationnel: "Rayon rationnel",
   irrationnel: "Rayon irrationnel",
 };
@@ -174,13 +181,25 @@ export function formatAideCompletionNiveau2Latex(exercice: ExerciceEquationCercl
  * « o(x_o ; y_o) » ne correspondait ni aux champs ni au cours). Pour la variante `irrationnel`, la
  * forme acceptée du rayon est annoncée (valeur exacte ou arrondie au centième). */
 export function segmentsConsigneCentreRayon(exercice: ExerciceEquationCercleDeveloppee): FragmentConsigne[] {
+  if (exercice.variante === "est_ce_un_cercle") {
+    return [texte("Cette équation est-elle celle d'un cercle ? Si oui, donne son centre "), latex("(x_0\\,;\\,y_0)"), texte(" et son rayon "), latex("r"), texte(" (valeur exacte).")];
+  }
   const base: FragmentConsigne[] = [texte("Donne le centre "), latex("(x_0\\,;\\,y_0)"), texte(" et le rayon "), latex("r"), texte(" du cercle.")];
   if (exercice.variante !== "irrationnel") return base;
   return [...base, texte(" (rayon : valeur exacte, par exemple √18 ou 3√2, ou valeur arrondie au centième)")];
 }
 
 /** Fragments texte/LaTeX (jamais une chaîne Unicode brute "(x-x₀)²+(y-y₀)²=r²"). */
-export function segmentsAideCentreRayonNiveau1(): FragmentConsigne[] {
+export function segmentsAideCentreRayonNiveau1(exercice?: ExerciceEquationCercleDeveloppee): FragmentConsigne[] {
+  if (exercice?.variante === "est_ce_un_cercle") {
+    return [
+      texte("Regarde le second membre de la forme complétée : une somme de deux carrés est toujours positive ou nulle. Strictement positif, il vaut "),
+      latex("r^2"),
+      texte(" ; nul, seul le point où les deux carrés s'annulent convient ; négatif, aucun point ne convient. Si c'est un cercle, compare avec "),
+      latex("(x-x_0)^2+(y-y_0)^2=r^2"),
+      texte(" — attention aux signes."),
+    ];
+  }
   return [
     texte("Compare ton équation complétée avec "),
     latex("(x-x_0)^2+(y-y_0)^2=r^2"),
@@ -209,7 +228,7 @@ export function formatEtatActuelRegroupementLatex(exercice: ExerciceEquationCerc
 
 export function formatCentreAttenduLatex(exercice: ExerciceEquationCercleDeveloppee): string {
   const { x, y } = exercice.centre;
-  return `(${formatValeurLatex(x)} \\; ; \\; ${formatValeurLatex(y)})`;
+  return `(${formatValeurLatex(x)} \\,;\\, ${formatValeurLatex(y)})`;
 }
 
 /** `√n` décomposé en `m√k` (k sans facteur carré). */
@@ -229,6 +248,12 @@ function decomposerRacine(n: number): { m: number; k: number } {
  * `\frac{3\sqrt{6}}{2}`). r² = R/4 avec R entier par construction, donc r = √R/2 = m√k/2, réduit. */
 export function formatRayonAttenduLatex(exercice: ExerciceEquationCercleDeveloppee): string {
   if (exercice.variante === "rationnel") return formatValeurLatex(exercice.rayon);
+  if (exercice.variante === "est_ce_un_cercle") {
+    // r² entier (de 1 à 12) : racine simplifiée, entière quand r² est un carré.
+    if (exercice.rayonCarre <= 0) return "0";
+    const { m, k } = decomposerRacine(Math.round(exercice.rayonCarre));
+    return k === 1 ? `${m}` : `${m === 1 ? "" : m}\\sqrt{${k}}`;
+  }
   const { m, k } = decomposerRacine(Math.round(exercice.rayonCarre * 4));
   const racine = `${m === 1 ? "" : m}\\sqrt{${k}}`;
   if (m % 2 === 0) {

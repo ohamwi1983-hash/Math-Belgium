@@ -6,7 +6,7 @@ import { correctionDetailleeEquationCercleDeveloppee } from "./corrigeDetaille";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
   CONSIGNE_COMPLETION,
-  CONSIGNE_GENERALE_CENTRE_RAYON,
+  consigneGeneraleCentreRayon,
   consigneRegroupement,
   formatCentreAttenduLatex,
   formatCompletionLatex,
@@ -17,7 +17,7 @@ import {
   segmentsConsigneCentreRayon,
 } from "../../ui/formatEquationCercleDeveloppee";
 import { formatFractionIrreductible } from "../../ui/formatFraction";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationCercleDeveloppee } from "./index";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationCercleDeveloppee, natureEquationCercle } from "./index";
 import { PARAMETRES_CERCLE_DEVELOPPE, profilEquationCercleDeveloppee } from "../profilsEvaluation4eCh7Coniques";
 
 /**
@@ -56,7 +56,7 @@ import { PARAMETRES_CERCLE_DEVELOPPE, profilEquationCercleDeveloppee } from "../
 
 function construireEnonceEquationCercleDeveloppee(instance: ExerciceEquationCercleDeveloppee): SectionExercice {
   return {
-    enteteFragments: [texte(`${CONSIGNE_GENERALE_CENTRE_RAYON} `), latex(formatEquationDeveloppeeLatex(instance))],
+    enteteFragments: [texte(`${consigneGeneraleCentreRayon(instance)} `), latex(formatEquationDeveloppeeLatex(instance))],
     questions: [{ consigne: [texte(consigneRegroupement(instance))] }, { consigne: [texte(CONSIGNE_COMPLETION)] }, { consigne: segmentsConsigneCentreRayon(instance) }],
   };
 }
@@ -64,6 +64,18 @@ function construireEnonceEquationCercleDeveloppee(instance: ExerciceEquationCerc
 /** Énoncé papier : l'équation et la consigne globale (les 3 écrans deviennent les étapes du
  * corrigé). La forme attendue du rayon est annoncée : valeur exacte. */
 function enoncePapierEquationCercleDeveloppee(instance: ExerciceEquationCercleDeveloppee): EnoncePapier {
+  if (instance.variante === "est_ce_un_cercle") {
+    return {
+      section: {
+        enteteFragments: [
+          texte("L'équation "),
+          latex(formatEquationDeveloppeeLatex(instance)),
+          texte(" est-elle celle d'un cercle ? Justifie. Si oui, donne son centre et son rayon (valeur exacte)."),
+        ],
+        questions: [],
+      },
+    };
+  }
   return {
     section: {
       enteteFragments: [
@@ -80,8 +92,17 @@ function construireCorrectionEquationCercleDeveloppee(instance: ExerciceEquation
   return [
     { type: "paragraphe", fragments: [texte("Regroupement : "), latex(formatRegroupementLatex(instance)), texte(".")] },
     { type: "paragraphe", fragments: [texte("Complétion du carré : "), latex(formatCompletionLatex(instance)), texte(".")] },
-    { type: "paragraphe", fragments: [texte("Centre "), latex(formatCentreAttenduLatex(instance)), texte(", rayon "), latex(rayonLatex(instance)), texte(".")] },
+    { type: "paragraphe", fragments: reponseBreveEquationCercleDeveloppee(instance) },
   ];
+}
+
+/** Variante « Est-ce un cercle ? » : conclusion quand le second membre n'est pas positif. */
+function conclusionNonCercle(instance: ExerciceEquationCercleDeveloppee): FragmentConsigne[] | null {
+  const nature = natureEquationCercle(instance);
+  if (nature === "cercle") return null;
+  return nature === "point"
+    ? [texte("Ce n'est pas un cercle : le second membre est nul, seul le point "), latex(formatCentreAttenduLatex(instance)), texte(" vérifie l'équation.")]
+    : [texte("Ce n'est pas un cercle : le second membre "), latex(`${nombreLatex(instance.rayonCarre)}`), texte(" est négatif, aucun point ne vérifie l'équation.")];
 }
 
 /** Nombre exact (entier ou fraction irréductible) en LaTeX, signe devant la fraction. */
@@ -105,6 +126,9 @@ function rayonLatex(instance: ExerciceEquationCercleDeveloppee): string {
 
 
 function reponseBreveEquationCercleDeveloppee(instance: ExerciceEquationCercleDeveloppee): FragmentConsigne[] {
+  const non = conclusionNonCercle(instance);
+  if (non) return non;
+  if (instance.variante === "est_ce_un_cercle") return [texte("C'est un cercle (second membre positif) : centre "), latex(formatCentreAttenduLatex(instance)), texte(", rayon "), latex(rayonLatex(instance)), texte(".")];
   return [texte("Centre "), latex(formatCentreAttenduLatex(instance)), texte(", rayon "), latex(rayonLatex(instance)), texte(".")];
 }
 
@@ -112,6 +136,10 @@ function reponseBreveEquationCercleDeveloppee(instance: ExerciceEquationCercleDe
  * complétion, centre et rayon — R se calcule), méthode imposée par les consignes, aucun piège dans
  * les données (le signe du centre est la méthode) ; valeurs exactes. */
 function criteresDifficulte(instance: ExerciceEquationCercleDeveloppee): CriteresDifficulte {
+  // « Est-ce un cercle ? » : critères FIXES (niveau et durée identiques quelle que soit la nature
+  // tirée — sinon ils trahiraient le verdict) : trois étapes sans charge, un piège dans les données
+  // (le signe du second membre).
+  if (instance.variante === "est_ce_un_cercle") return { etapesTransformation: 3, etapesLecture: 0, methode: 0, piege: 1, nombres: 0, sansCharge: true };
   return { ...etapesDuCorrige(correctionDetailleeEquationCercleDeveloppee(instance)), methode: 0, piege: 0, nombres: 0 };
 }
 
@@ -122,6 +150,23 @@ function baremeEquationCercleDeveloppee(instance: ExerciceEquationCercleDevelopp
     { description: [texte("Signe d'une coordonnée du centre inversé")], cout: "−0,5" },
   ];
   if (instance.k !== 1) erreurs.push({ description: [texte(`Second membre non divisé par ${instance.k}`)], cout: "−1" });
+  if (instance.variante === "est_ce_un_cercle") {
+    const cercle = natureEquationCercle(instance) === "cercle";
+    erreurs.unshift({ description: [texte("Conclure « cercle » sans regarder le signe du second membre (ou prendre la racine d'un nombre négatif)")], cout: "−1" });
+    return {
+      reponseFinale: reponseBreveEquationCercleDeveloppee(instance),
+      criteres: [
+        { sousQuestion: "a", critere: [texte(instance.k === 1 ? "Termes regroupés par variable" : `Division par ${instance.k} et termes regroupés par variable`)], points: 1 },
+        { sousQuestion: "b", critere: [texte("Carrés complétés : "), latex(formatCompletionLatex(instance))], points: 1.5 },
+        { sousQuestion: "c", critere: [texte("Nature justifiée par le signe du second membre")], points: 0.5 },
+        cercle
+          ? { sousQuestion: "c", critere: [texte("Centre "), latex(formatCentreAttenduLatex(instance)), texte(" et rayon exact "), latex(`r = ${formatRayonAttenduLatex(instance)}`)], points: 1 }
+          : { sousQuestion: "c", critere: [texte(natureEquationCercle(instance) === "point" ? "Conclusion : un seul point, le centre " : "Conclusion : aucun point")].concat(natureEquationCercle(instance) === "point" ? [latex(formatCentreAttenduLatex(instance))] : []), points: 1 },
+      ],
+      erreursFrequentes: erreurs,
+      reponsesAcceptees: [[texte("Rayon écrit sous forme d'une racine non simplifiée si elle est exacte")]],
+    };
+  }
   return {
     reponseFinale: reponseBreveEquationCercleDeveloppee(instance),
     criteres: [

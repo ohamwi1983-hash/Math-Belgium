@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_REGROUPEMENT } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerRegroupement } from "../moteur/verificationEquationCercleDeveloppee";
-import { CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_EQUATION, consigneRegroupement, formatAideRegroupementNiveau2Latex, texteAideRegroupementNiveau1, formatEquationDeveloppeeLatex } from "../ui/formatEquationCercleDeveloppee";
+import { consigneGeneraleCentreRayon, PLACEHOLDER_EQUATION, consigneRegroupement, formatAideRegroupementNiveau2Latex, texteAideRegroupementNiveau1, formatEquationDeveloppeeLatex } from "../ui/formatEquationCercleDeveloppee";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -42,7 +42,7 @@ export function EtapeRegroupementEquationCercleDeveloppee({ exercice, tentatives
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE_CENTRE_RAYON}
+        consigneGenerale={consigneGeneraleCentreRayon(exercice)}
         blocDonnees={
           <div className="equation-box">
             <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />

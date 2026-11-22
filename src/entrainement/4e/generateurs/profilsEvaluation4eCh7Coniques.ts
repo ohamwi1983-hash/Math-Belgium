@@ -64,6 +64,9 @@ export const PARAMETRES_CERCLE_DEVELOPPE = [
 ];
 
 export function profilEquationCercleDeveloppee(e: ExerciceEquationCercleDeveloppee): ProfilInstance {
+  // « Est-ce un cercle ? » : centre entier par construction (un second membre nul l'exige) et
+  // nature tirée au tiers — verdict, jamais cas particulier (audit 4e ch. 7, G12).
+  if (e.variante === "est_ce_un_cercle") return { casParticulier: cas([e.k === 1 && "k-egal-1"]) };
   return { casParticulier: cas([e.k === 1 && "k-egal-1", Number.isInteger(e.centre.x) && Number.isInteger(e.centre.y) && "centre-entier"]) };
 }
 

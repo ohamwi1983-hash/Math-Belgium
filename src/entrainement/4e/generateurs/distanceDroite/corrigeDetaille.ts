@@ -152,6 +152,7 @@ export function correctionDetailleeDistanceDroite(e: E, pointChoisi?: Point | nu
     {
       ...resultat(lD, [latex(`${nomDist}=PQ=${formatDistanceAttendueLatex(e.distanceCarree)}`)]),
       figureHtml: figureLotG({
+        graduationsLisibles: true,
         droites: [{ d: dN, couleur: "bleu", nom: lisible(nomCible) }, ...(source ? [{ d: normaliserSigneAffichage(source), couleur: "gris" as const, nom: lisible(nomSource) }] : []), { d: bN, couleur: "accent", nom: "b", pointilles: true }],
         points: [
           { p: P, nom: "P", couleur: "encre" },

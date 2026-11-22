@@ -68,7 +68,7 @@ function etapesEquationCercleDeveloppee(e: E): EtapeCorrection[] {
   ];
 
   const negatif = centre.x < 0 ? { v: "x" as const, c: centre.x } : centre.y < 0 ? { v: "y" as const, c: centre.y } : null;
-  return [
+  const etapesAB: EtapeCorrection[] = [
     utilise("a", [
       texte(k === 1 ? "Les termes en x et les termes en y sont regroupés dans deux parenthèses, la constante reste dans le second membre " : `x² et y² ont le même coefficient ${k} : on divise les deux membres par ${k}, puis on regroupe les termes en x et les termes en y `),
       texte(COURS_CERCLE + "."),
@@ -81,7 +81,10 @@ function etapesEquationCercleDeveloppee(e: E): EtapeCorrection[] {
     calcul("b", sansDoublons(lignesB)),
     resultat("b", [texte("Forme complétée : "), latex(formatCompletionLatex(e)), texte(".")]),
     piege("b", [texte("Le carré ajouté dans la parenthèse doit être retranché aussitôt (ou ajouté au second membre) : sinon l'équation change.")]),
-
+  ];
+  if (e.variante === "est_ce_un_cercle") return [...etapesAB, ...etapesNature(e)];
+  return [
+    ...etapesAB,
     utilise("c", [texte("Par comparaison avec "), latex("(x-x_0)^2+(y-y_0)^2=r^2"), texte(` : le centre est (x₀ ; y₀) et le second membre est r², positif ${COURS_CERCLE}.`)]),
     calcul("c", sansDoublons(lignesC)),
     resultat("c", [texte("Cercle de centre "), latex(`C${formatCentreAttenduLatex(e)}`), texte(" et de rayon "), latex(`r=${formatRayonAttenduLatex(e)}`), texte(".")]),
@@ -92,6 +95,50 @@ function etapesEquationCercleDeveloppee(e: E): EtapeCorrection[] {
         ? [texte("Attention aux signes : "), latex(carreBinome(negatif.c, negatif.v)), texte(" correspond à "), latex(`${negatif.v}_0=${q(negatif.c)}`), texte(". Et le second membre vaut "), latex("r^2"), texte(", pas r.")]
         : [texte("Le second membre de la forme complétée vaut "), latex("r^2"), texte(" : il faut encore en prendre la racine carrée pour obtenir le rayon.")],
     ),
+  ];
+}
+
+/** Variante « Est-ce un cercle ? » (audit 4e ch. 7, G12) : c) le signe du second membre décide. */
+function etapesNature(e: E): EtapeCorrection[] {
+  const { centre, rayonCarre } = e;
+  const binomes = `${carreBinome(centre.x, "x")}+${carreBinome(centre.y, "y")}`;
+  const utiliseC = utilise("c", [
+    texte("Une somme de deux carrés est toujours positive ou nulle, et elle n'est nulle que si les deux carrés le sont. Second membre strictement positif : cercle de rayon sa racine ; nul : un seul point ; négatif : aucun point " + COURS_CERCLE + "."),
+  ]);
+  if (rayonCarre > 1e-9) {
+    return [
+      utiliseC,
+      calcul("c", [
+        ligne(`${q(rayonCarre)}>0`, "le second membre est strictement positif : c'est un cercle"),
+        ligne(`x_0=${q(centre.x)}`, [latex(carreBinome(centre.x, "x")), texte(" : on lit "), latex("(x-x_0)^2"), texte(centre.x < 0 ? ", le signe change" : "")]),
+        ligne(`y_0=${q(centre.y)}`, [latex(carreBinome(centre.y, "y")), texte(" : on lit "), latex("(y-y_0)^2"), texte(centre.y < 0 ? ", le signe change" : "")]),
+        ligne(`r^2=${q(rayonCarre)}`, "le second membre"),
+        ...lignesRacine("r", rayonCarre, "un rayon est positif"),
+      ]),
+      resultat("c", [texte("C'est un cercle, de centre "), latex(`C${formatCentreAttenduLatex(e)}`), texte(" et de rayon "), latex(`r=${formatRayonAttenduLatex(e)}`), texte(".")]),
+      piege("c", [texte("Avant de prendre la racine, on vérifie le signe du second membre : c'est lui qui dit si l'équation est celle d'un cercle.")]),
+    ];
+  }
+  if (Math.abs(rayonCarre) <= 1e-9) {
+    return [
+      utiliseC,
+      calcul("c", [
+        ligne(`${binomes}=0`, "le second membre est nul"),
+        ligne(`${carreBinome(centre.x, "x")}=0 \\text{ et } ${carreBinome(centre.y, "y")}=0`, "deux carrés de somme nulle sont nuls tous les deux"),
+        ligne(`x=${q(centre.x)} \\text{ et } y=${q(centre.y)}`),
+      ]),
+      resultat("c", [texte("Ce n'est pas un cercle : seul le point "), latex(formatCentreAttenduLatex(e)), texte(" vérifie l'équation.")]),
+      piege("c", [texte("Un second membre nul ne donne pas un cercle de rayon 0 à tracer : l'ensemble se réduit à un point.")]),
+    ];
+  }
+  return [
+    utiliseC,
+    calcul("c", [
+      ligne(`${binomes}=${q(rayonCarre)}`, "le second membre est négatif"),
+      ligne(`${binomes}\\geq 0`, "une somme de deux carrés est positive ou nulle"),
+    ]),
+    resultat("c", [texte("Ce n'est pas un cercle : aucun point ne vérifie l'équation (une somme de carrés ne vaut jamais "), latex(q(rayonCarre)), texte(").")]),
+    piege("c", [texte("On ne prend pas la racine d'un nombre négatif : il n'y a ni rayon ni cercle.")]),
   ];
 }
 

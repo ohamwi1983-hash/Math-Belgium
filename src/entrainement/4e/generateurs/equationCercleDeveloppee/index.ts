@@ -24,7 +24,7 @@
  * La variante `"rationnel"` exclut donc explicitement ce cas (A et B tous deux impairs) plutôt que
  * de chercher indéfiniment un Q qui n'existe pas.
  */
-import type { ExerciceEquationCercleDeveloppee, VarianteEquationCercleDeveloppee } from "../../core/equationCercleDeveloppee.types";
+import type { ExerciceEquationCercleDeveloppee, NatureEquationCercle, VarianteEquationCercleDeveloppee } from "../../core/equationCercleDeveloppee.types";
 
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -88,13 +88,50 @@ export function construireExercice(variante: VarianteEquationCercleDeveloppee): 
 export const CATALOGUE_VARIANTES: { id: VarianteEquationCercleDeveloppee; label: string }[] = [
   { id: "rationnel", label: "Rayon rationnel" },
   { id: "irrationnel", label: "Rayon irrationnel" },
+  // Ajoutée EN FIN (audit 4e ch. 7, G12) : les `?code=` des deux premières variantes ne bougent pas.
+  { id: "est_ce_un_cercle", label: "Est-ce un cercle ? (second membre positif, nul ou négatif)" },
 ];
 
+const NATURES: NatureEquationCercle[] = ["cercle", "point", "vide"];
+
+/**
+ * Variante « Est-ce un cercle ? » (audit 4e ch. 7, G12) : la NATURE est tirée d'abord, au tiers
+ * (verdict, jamais cas particulier), puis les nombres. Centre entier (A et B pairs) pour toutes les
+ * natures — un second membre nul l'exige —, constante c de signe quelconque dans les trois cas (le
+ * signe de c ne trahit pas la nature) : r² = (A² + B²)/4 + Q, de 1 à 12 (cercle), 0 (un point) ou
+ * de −12 à −1 (aucun point).
+ */
+export function construireEstCeUnCercle(nature: NatureEquationCercle = NATURES[randomInt(0, 2)]!): ExerciceEquationCercleDeveloppee {
+  const pair = () => {
+    for (;;) {
+      const v = 2 * randomInt(-3, 3);
+      if (v !== 0) return v;
+    }
+  };
+  const A = pair();
+  const B = pair();
+  const base = (A * A + B * B) / 4;
+  const rayonCarre = nature === "cercle" ? randomInt(1, 12) : nature === "point" ? 0 : -randomInt(1, 12);
+  const Q = rayonCarre - base;
+  const k = K_VALEURS[randomInt(0, K_VALEURS.length - 1)]!;
+  return { variante: "est_ce_un_cercle", k, bx: -k * A, by: -k * B, c: k * Q, centre: { x: A / 2, y: B / 2 }, rayonCarre, rayon: Math.sqrt(Math.max(0, rayonCarre)) };
+}
+
+export { natureEquationCercle } from "../../moteur/verificationEquationCercleDeveloppee";
+
 export function construireAvecVarianteId(varianteId: VarianteEquationCercleDeveloppee): ExerciceEquationCercleDeveloppee {
+  if (varianteId === "est_ce_un_cercle") return construireEstCeUnCercle();
   return construireExercice(varianteId);
 }
 
+/** Tirage libre d'origine (deux variantes) — gardé tel quel : les `?code=` libres déjà imprimés
+ * rouvrent le même exercice. */
 export function genererExerciceEquationCercleDeveloppee(): ExerciceEquationCercleDeveloppee {
-  const varianteId = CATALOGUE_VARIANTES[randomInt(0, CATALOGUE_VARIANTES.length - 1)]!.id;
+  const varianteId = CATALOGUE_VARIANTES[randomInt(0, 1)]!.id;
   return construireAvecVarianteId(varianteId);
+}
+
+/** Tirage libre de l'appli : la variante « Est-ce un cercle ? » une fois sur trois. */
+export function genererExerciceEquationCercleDeveloppeeLibre(): ExerciceEquationCercleDeveloppee {
+  return Math.random() < 1 / 3 ? construireEstCeUnCercle() : genererExerciceEquationCercleDeveloppee();
 }

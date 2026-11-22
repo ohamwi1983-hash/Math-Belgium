@@ -12,6 +12,8 @@ export interface ReponseEcranCentreRayon {
   x: number;
   y: number;
   rayon: string;
+  /** Variante « Est-ce un cercle ? » : nature choisie (choix fermé jugé une fois puis figé). */
+  nature?: "cercle" | "point" | "vide";
 }
 
 export interface ResultatExerciceEquationCercleDeveloppee {
@@ -50,6 +52,10 @@ export interface EtatSessionEquationCercleDeveloppee {
   scoreCompletionExercice: number | null;
   completionRevele: boolean;
   completionAideUtilisee: boolean;
+  /** Variante « Est-ce un cercle ? » : nature jugée à la première validation de l'écran 3, puis
+   * figée (faux : révélée sans consommer de tentative ; centre et rayon restent à donner si c'est un
+   * cercle, sinon l'écran est clos). */
+  natureFigee: { choisie: "cercle" | "point" | "vide"; correcte: boolean } | null;
   resultats: ResultatExerciceEquationCercleDeveloppee[];
   terminee: boolean;
 }

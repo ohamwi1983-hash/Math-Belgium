@@ -14,7 +14,11 @@ import type { Point } from "./vecteur.types";
  * carré parfait de fraction : r est rationnel.
  * `"irrationnel"` — ce terme constant n'est PAS un carré parfait : r reste sous forme de racine.
  */
-export type VarianteEquationCercleDeveloppee = "rationnel" | "irrationnel";
+export type VarianteEquationCercleDeveloppee = "rationnel" | "irrationnel" | "est_ce_un_cercle";
+
+/** Nature de l'ensemble décrit (variante « Est-ce un cercle ? ») : second membre de la forme
+ * complétée positif (cercle), nul (un seul point, le centre) ou négatif (aucun point). */
+export type NatureEquationCercle = "cercle" | "point" | "vide";
 
 export interface ExerciceEquationCercleDeveloppee {
   variante: VarianteEquationCercleDeveloppee;

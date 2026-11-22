@@ -1,9 +1,14 @@
 import { useState } from "react";
+import { natureEquationCercle } from "../moteur/verificationEquationCercleDeveloppee";
+
+type Nature = "cercle" | "point" | "vide";
+const NATURES: Nature[] = ["cercle", "point", "vide"];
+const LIBELLE_NATURE: Record<Nature, string> = { cercle: "Un cercle", point: "Un seul point", vide: "Aucun point" };
 import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_CENTRE_RAYON } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerCentreRayon } from "../moteur/verificationEquationCercleDeveloppee";
 import type { ReponseEcranCentreRayon } from "../moteur/typesEquationCercleDeveloppee";
-import { CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COORDONNEE, PLACEHOLDER_RAYON, segmentsAideCentreRayonNiveau1, formatEquationDeveloppeeLatex, formatEquationReduiteLatex, segmentsConsigneCentreRayon } from "../ui/formatEquationCercleDeveloppee";
+import { consigneGeneraleCentreRayon, PLACEHOLDER_COORDONNEE, PLACEHOLDER_RAYON, segmentsAideCentreRayonNiveau1, formatEquationDeveloppeeLatex, formatEquationReduiteLatex, segmentsConsigneCentreRayon } from "../ui/formatEquationCercleDeveloppee";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -20,6 +25,8 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseEcranCentreRayon) => void;
+  /** Variante « Est-ce un cercle ? » : nature déjà jugée par le moteur (une fois), sinon `null`. */
+  natureFigee?: { choisie: Nature; correcte: boolean } | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -34,12 +41,17 @@ interface Props {
  * libre, parsé symboliquement (couvre les deux variantes de façon uniforme, jamais confondu avec
  * r² — le piège central de l'exercice).
  */
-export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation, natureFigee = null }: Props) {
+  const estNature = exercice.variante === "est_ce_un_cercle";
+  const bonneNature = natureEquationCercle(exercice);
+  const [natureLibre, setNatureLibre] = useState<Nature | null>(null);
+  const nature: Nature | null = natureFigee ? (natureFigee.correcte ? natureFigee.choisie : bonneNature) : natureLibre;
+  const champsVisibles = !estNature || nature === "cercle";
   const [x, setX] = useState("");
   const [y, setY] = useState("");
   const [rayon, setRayon] = useState("");
 
-  const complet = [x, y, rayon].every((v) => v.trim() !== "");
+  const complet = estNature ? nature !== null && (nature !== "cercle" || [x, y, rayon].every((v) => v.trim() !== "")) : [x, y, rayon].every((v) => v.trim() !== "");
 
   /** Coordonnée lue comme entier, décimal ou fraction (« 1/2 », « -5/2 ») — le centre est souvent
    * demi-entier et la réponse affichée l'écrit en fraction (audit chapitre 7, point 9). */
@@ -55,7 +67,7 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
   }
 
   function construireReponse(): ReponseEcranCentreRayon {
-    return { x: lireCoordonnee(x), y: lireCoordonnee(y), rayon };
+    return { x: lireCoordonnee(x), y: lireCoordonnee(y), rayon, ...(estNature && nature ? { nature } : {}) };
   }
 
   const apresEchec = tentativesUtilisees > 0;
@@ -66,7 +78,7 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE_CENTRE_RAYON}
+        consigneGenerale={consigneGeneraleCentreRayon(exercice)}
         blocDonnees={
           <div className="equation-box">
             <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />
@@ -77,6 +89,23 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
         <RenduFragments fragments={segmentsConsigneCentreRayon(exercice)} />
       </p>
 
+      {estNature && (
+        <div className="options-grid">
+          {NATURES.map((n) => (
+            <button key={n} type="button" disabled={!!validation || natureFigee !== null} className={`btn${nature === n ? " toggle-active" : ""}`} onClick={() => setNatureLibre(n)}>
+              {LIBELLE_NATURE[n]}
+            </button>
+          ))}
+        </div>
+      )}
+      {estNature && natureFigee !== null && !natureFigee.correcte && !validation && (
+        <p className="alert-error" role="status">
+          <span>Ce n'était pas la bonne nature : le second membre de la forme complétée est positif, c'est un cercle. Donne maintenant son centre et son rayon.</span>
+        </p>
+      )}
+
+      {champsVisibles && (
+      <>
       <div className="field-row">
         <div className="field field-inline">
           <label className="field-label field-label-minuscule" htmlFor="equation-cercle-developpee-centre-x">
@@ -115,11 +144,13 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
           onChange={(e) => setRayon(normaliserSigneMoins(e.target.value))}
         />
       </div>
+      </>
+      )}
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
           <p>
-            <RenduFragments fragments={segmentsAideCentreRayonNiveau1()} />
+            <RenduFragments fragments={segmentsAideCentreRayonNiveau1(exercice)} />
           </p>
           {niveauAide >= 2 && (
             <p>
@@ -135,7 +166,7 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
           onActiverAide={onActiverAide}
           complet={complet}
           reponse={() => construireReponse()}
-          lisible={(r) => nombresLisibles(x, y) && diagnostiquerCentreRayon(exercice, { x: r.x, y: r.y }, r.rayon).rayon !== "parse_error"}
+          lisible={(r) => !champsVisibles || (nombresLisibles(x, y) && diagnostiquerCentreRayon(exercice, { x: r.x, y: r.y }, r.rayon).rayon !== "parse_error")}
           onValider={onValider}
           texteIllisible={nombresLisibles(x, y) ? ILLISIBLE_ANALYTIQUE.rayon : ILLISIBLE_ANALYTIQUE.coordonnee}
           tentativesUtilisees={tentativesUtilisees}

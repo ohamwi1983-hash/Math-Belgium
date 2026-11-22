@@ -5,6 +5,7 @@ import { lireNombre, normaliserExpression } from "../moteur/verificationTransfer
 import { nombreLatex } from "../moteur/algebreTransfertSecondDegre";
 import { q, somme } from "./corrigeChapitre3";
 import type { ChampLibre } from "./ecransTransfertSecondDegre";
+import { boiteDisque, boiteTexte, graduationsSansChevauchement, type Boite, type Graduation } from "./graduationsSvg";
 
 /**
  * Outils communs du lot G du chapitre 7 de 4e (gen96 projeté / symétrique / réflexion, gen97
@@ -400,6 +401,10 @@ export interface SpecFigure {
   courbes?: { points: P[]; couleur?: string }[];
   segments?: { A: P; B: P; couleur?: string; pointille?: boolean; fleche?: boolean; epaisseur?: number }[];
   points?: { P: P; label?: string; couleur?: string; position?: "ne" | "no" | "se" | "so" | "n" | "s" | "e" | "o"; creux?: boolean }[];
+  /** Opt-in (audit 4e ch. 7, lot C — gen132) : un nombre d'axe qui toucherait un point, son
+   * étiquette ou le nom d'une droite passe de l'autre côté de l'axe, sinon n'est pas écrit
+   * (`graduationsSvg.ts`). Absent : figure identique à avant (lot G, gen96–99). */
+  graduationsLisibles?: boolean;
 }
 
 const NOIR = "#1b1d22";
@@ -428,6 +433,78 @@ export function fenetreAutour(points: P[], marge = 1, min = 6): Fenetre {
     if (yMax - yMin < min) yMin--;
   }
   return { xMin, xMax, yMin, yMax };
+}
+
+const DECALAGES: Record<string, [number, number, "start" | "middle" | "end"]> = {
+  ne: [6, -6, "start"],
+  no: [-6, -6, "end"],
+  se: [6, 14, "start"],
+  so: [-6, 14, "end"],
+  n: [0, -8, "middle"],
+  s: [0, 17, "middle"],
+  e: [8, 4, "start"],
+  o: [-8, 4, "end"],
+};
+
+type PositionEtiquette = "ne" | "no" | "se" | "so" | "n" | "s" | "e" | "o";
+
+/** Position d'une étiquette de point, retournée près des bords. */
+function positionEtiquette(position: PositionEtiquette | undefined, cx: number, cy: number, W: number, Ht: number): PositionEtiquette {
+  let pos: PositionEtiquette = position ?? "ne";
+  if (cx > W - 40 && pos.includes("e")) pos = pos.replace("e", "o") as PositionEtiquette;
+  if (cx < 40 && pos.includes("o")) pos = pos.replace("o", "e") as PositionEtiquette;
+  if (cy < 22 && pos.startsWith("n")) pos = (pos === "n" ? "s" : pos.replace("n", "s")) as PositionEtiquette;
+  if (cy > Ht - 22 && pos.startsWith("s")) pos = (pos === "s" ? "n" : pos.replace("s", "n")) as PositionEtiquette;
+  return pos;
+}
+
+/** Étiquette d'une droite (près de l'extrémité la plus haute, décalée vers l'intérieur). */
+function placementLabelDroite(s: [P, P], X: (x: number) => number, Y: (y: number) => number, W: number): { x: number; y: number; ancre: "start" | "end" } {
+  const haut = s[0].y >= s[1].y ? s[0] : s[1];
+  const bas = haut === s[0] ? s[1] : s[0];
+  const px = X(haut.x) + (X(bas.x) - X(haut.x)) * 0.08;
+  const py = Y(haut.y) + (Y(bas.y) - Y(haut.y)) * 0.08;
+  const dx = px > W / 2 ? -8 : 8;
+  return { x: px + dx, y: py + 4, ancre: dx < 0 ? "end" : "start" };
+}
+
+/** Nombres des axes de `figureRepere` qui ne touchent ni un point, ni son étiquette, ni le nom d'une droite. */
+function graduationsLisiblesRepere(spec: SpecFigure, g: { X: (x: number) => number; Y: (y: number) => number; W: number; Ht: number; pas: number }): string {
+  const f = spec.fenetre;
+  const { X, Y, W, Ht, pas } = g;
+  const dans = (p: P) => p.x >= f.xMin - 1e-9 && p.x <= f.xMax + 1e-9 && p.y >= f.yMin - 1e-9 && p.y <= f.yMax + 1e-9;
+  const obstacles: Boite[] = [];
+  for (const pt of spec.points ?? []) {
+    if (!dans(pt.P)) continue;
+    const cx = X(pt.P.x), cy = Y(pt.P.y);
+    obstacles.push(boiteDisque(cx, cy, 3.6));
+    if (pt.label) {
+      const [dx, dy, ancre] = DECALAGES[positionEtiquette(pt.position, cx, cy, W, Ht)]!;
+      obstacles.push(boiteTexte(cx + dx, cy + dy, pt.label, 12.5, ancre));
+    }
+  }
+  for (const dr of spec.droites ?? []) {
+    if (!dr.label) continue;
+    const s = segmentDansFenetre(dr.d, f);
+    if (!s) continue;
+    const e = placementLabelDroite(s, X, Y, W);
+    obstacles.push(boiteTexte(e.x, e.y, dr.label, 13, e.ancre));
+  }
+  const graduations: Graduation[] = [];
+  if (f.yMin <= 0 && f.yMax >= 0) {
+    for (let x = Math.ceil(f.xMin / pas) * pas; x <= f.xMax; x += pas) {
+      if (x === 0 || x === f.xMax) continue;
+      graduations.push({ valeur: x, x: X(x), y: Y(0) + 12, xRepli: X(x), yRepli: Y(0) - 4, ancre: "middle", ancreRepli: "middle" });
+    }
+  }
+  if (f.xMin <= 0 && f.xMax >= 0) {
+    for (let y = Math.ceil(f.yMin / pas) * pas; y <= f.yMax; y += pas) {
+      if (y === 0 || y === f.yMax) continue;
+      graduations.push({ valeur: y, x: X(0) - 4, y: Y(y) + 3.5, xRepli: X(0) + 4, yRepli: Y(y) + 3.5, ancre: "end", ancreRepli: "start" });
+    }
+    if (f.yMin <= 0 && f.yMax >= 0) graduations.push({ valeur: 0, x: X(0) - 4, y: Y(0) + 12, xRepli: X(0) + 4, yRepli: Y(0) - 4, ancre: "end", ancreRepli: "start" });
+  }
+  return `<g font-family="sans-serif">${graduationsSansChevauchement(graduations, obstacles, { taille: 10, couleur: NOIR })}</g>`;
 }
 
 /** Segment d'une droite à l'intérieur de la fenêtre (null si elle ne la traverse pas). */
@@ -478,6 +555,9 @@ export function figureRepere(spec: SpecFigure): string {
   const etendue = Math.max(f.xMax - f.xMin, f.yMax - f.yMin);
   const pas = etendue > 30 ? 5 : etendue > 16 ? 2 : 1;
   const ecr = (v: number) => (v < 0 ? `−${-v}` : `${v}`);
+  if (spec.graduationsLisibles) {
+    parts.push(graduationsLisiblesRepere(spec, { X, Y, W, Ht, pas }));
+  } else {
   if (f.yMin <= 0 && f.yMax >= 0) {
     for (let x = Math.ceil(f.xMin / pas) * pas; x <= f.xMax; x += pas) {
       if (x === 0 || x === f.xMax) continue;
@@ -490,6 +570,7 @@ export function figureRepere(spec: SpecFigure): string {
       parts.push(`<text x="${fmt(X(0) - 4)}" y="${fmt(Y(y) + 3.5)}" font-size="10" text-anchor="end" fill="${NOIR}" font-family="sans-serif">${ecr(y)}</text>`);
     }
     if (f.yMin <= 0 && f.yMax >= 0) parts.push(`<text x="${fmt(X(0) - 4)}" y="${fmt(Y(0) + 12)}" font-size="10" text-anchor="end" fill="${NOIR}" font-family="sans-serif">0</text>`);
+  }
   }
   for (const c of spec.cercles ?? []) {
     parts.push(`<circle cx="${fmt(X(c.centre.x))}" cy="${fmt(Y(c.centre.y))}" r="${fmt(c.rayon * u)}" fill="none" stroke="${c.couleur ?? COULEURS.bleu}" stroke-width="2"/>`);
@@ -537,28 +618,13 @@ export function figureRepere(spec: SpecFigure): string {
       parts.push(`<polygon points="${fmt(mx)},${fmt(my)} ${fmt(mx - ux * 9 - uy * 4.5)},${fmt(my - uy * 9 + ux * 4.5)} ${fmt(mx - ux * 9 + uy * 4.5)},${fmt(my - uy * 9 - ux * 4.5)}" fill="${sg.couleur ?? NOIR}"/>`);
     }
   }
-  const DECALAGES: Record<string, [number, number, string]> = {
-    ne: [6, -6, "start"],
-    no: [-6, -6, "end"],
-    se: [6, 14, "start"],
-    so: [-6, 14, "end"],
-    n: [0, -8, "middle"],
-    s: [0, 17, "middle"],
-    e: [8, 4, "start"],
-    o: [-8, 4, "end"],
-  };
   for (const pt of spec.points ?? []) {
     if (!dans(pt.P)) continue;
     const cx = X(pt.P.x), cy = Y(pt.P.y);
     const couleur = pt.couleur ?? NOIR;
     parts.push(pt.creux ? `<circle cx="${fmt(cx)}" cy="${fmt(cy)}" r="3.6" fill="#ffffff" stroke="${couleur}" stroke-width="1.6"/>` : `<circle cx="${fmt(cx)}" cy="${fmt(cy)}" r="3.4" fill="${couleur}"/>`);
     if (pt.label) {
-      let pos = pt.position ?? "ne";
-      if (cx > W - 40 && pos.includes("e")) pos = pos.replace("e", "o") as typeof pos;
-      if (cx < 40 && pos.includes("o")) pos = pos.replace("o", "e") as typeof pos;
-      if (cy < 22 && pos.startsWith("n")) pos = (pos === "n" ? "s" : pos.replace("n", "s")) as typeof pos;
-      if (cy > Ht - 22 && pos.startsWith("s")) pos = (pos === "s" ? "n" : pos.replace("s", "n")) as typeof pos;
-      const [dx, dy, ancre] = DECALAGES[pos]!;
+      const [dx, dy, ancre] = DECALAGES[positionEtiquette(pt.position, cx, cy, W, Ht)]!;
       parts.push(
         `<text x="${fmt(cx + dx)}" y="${fmt(cy + dy)}" font-size="12.5" text-anchor="${ancre}" fill="${couleur}" font-family="sans-serif" font-weight="600" stroke="#ffffff" stroke-width="3" paint-order="stroke">${pt.label}</text>`,
       );
