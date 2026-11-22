@@ -101,11 +101,6 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
         </button>
       </div>
 
-      {choixFige !== null && !choixFige.correct && !validation && (
-        <p className="alert-error" role="status">
-          <span>Ce n'était pas le bon choix : les deux lieux ont au moins un point commun. Donne maintenant ce ou ces points.</span>
-        </p>
-      )}
 
       {choix === "auMoinsUn" && (
         <div className="liste-morceaux contenu-conditionnel">
@@ -166,6 +161,7 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
       )}
       {!validation && (
         <PiedAnalytique
+          messageChoix={choixFige !== null && !choixFige.correct ? "Ce n'était pas le bon choix : les deux lieux ont au moins un point commun. Donne maintenant ce ou ces points." : null}
           niveauAide={niveauAide}
           niveauAideMax={2}
           onActiverAide={onActiverAide}

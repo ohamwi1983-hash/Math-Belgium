@@ -15,7 +15,7 @@ import {
   segmentsAideIdentificationNiveau1,
   segmentsAideIdentificationNiveau2,
 } from "../ui/formatLieuxGeometriques";
-import { ILLISIBLE_ANALYTIQUE, nombreOuNaN, nombresLisibles, t } from "../ui/retoursAnalytique";
+import { ILLISIBLE_ANALYTIQUE, nombreOuNaN, nombresLisibles } from "../ui/retoursAnalytique";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -325,17 +325,6 @@ export function EtapeIdentificationLieuxGeometriques({ exercice, tentativesUtili
 
       <ChampsLieuInput numero={1} champs={champs1} onChange={setChamps1} lieuCompare={lieuCompare1} apresEchec={apresEchec} typeVerrouille={!!validation || naturesFigees !== null} typeJuge={typeJugeBloc(0)} />
       <ChampsLieuInput numero={2} champs={champs2} onChange={setChamps2} lieuCompare={lieuCompare2} apresEchec={apresEchec} typeVerrouille={!!validation || naturesFigees !== null} typeJuge={typeJugeBloc(1)} />
-      {naturesFigees !== null && !naturesFigees.correct && !validation && (
-        <p className="alert-error" role="status">
-          <span>
-            <RenduFragments
-              fragments={[
-                t(`Ce n'étaient pas les bonnes natures : le premier lieu est ${ARTICLE_TYPE[exercice.lieu1.type]}, le second ${ARTICLE_TYPE[exercice.lieu2.type]}. Complète maintenant leurs caractéristiques.`),
-              ]}
-            />
-          </span>
-        </p>
-      )}
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
@@ -351,6 +340,7 @@ export function EtapeIdentificationLieuxGeometriques({ exercice, tentativesUtili
       )}
       {!validation && (
         <PiedAnalytique
+          messageChoix={naturesFigees !== null && !naturesFigees.correct ? `Ce n'étaient pas les bonnes natures : le premier lieu est ${ARTICLE_TYPE[exercice.lieu1.type]}, le second ${ARTICLE_TYPE[exercice.lieu2.type]}. Complète maintenant leurs caractéristiques.` : null}
           niveauAide={niveauAide}
           niveauAideMax={2}
           onActiverAide={onActiverAide}

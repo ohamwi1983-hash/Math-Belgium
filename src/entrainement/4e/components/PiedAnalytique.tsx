@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { FragmentConsigne } from "../ui/formatEquationDroite";
 import { BoutonAide } from "./BoutonAide";
 import { MessageRetour, useTentativeLisible } from "./RetourSaisie";
@@ -20,6 +21,8 @@ interface Props<T> {
   /** Message ciblé sur la dernière réponse réellement transmise (jamais la réponse attendue). */
   cible?: (soumise: T) => FragmentConsigne[] | null;
   libelleValider?: string;
+  /** Choix fermé jugé faux et figé : son message, en tête du bloc de retour (jamais un bloc à part). */
+  messageChoix?: ReactNode;
 }
 
 /**
@@ -52,6 +55,7 @@ export function PiedAnalytique<T>(props: Props<T>) {
         tentativesUtilisees={props.tentativesUtilisees}
         tentativesMax={props.tentativesMax}
         cible={derniere !== null && props.cible ? props.cible(derniere) : null}
+        entete={props.messageChoix}
       />
     </>
   );

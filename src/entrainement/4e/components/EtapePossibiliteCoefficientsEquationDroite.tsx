@@ -113,13 +113,6 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentative
           Impossible{aria("impossible") && <span className="sr-only"> — {aria("impossible")}</span>}
         </button>
       </div>
-      {choixFige !== null && !choixFige.correct && !validation && (
-        <p className="alert-error" role="status">
-          <span>
-            <RenduFragments fragments={messageChoixFaux} />
-          </span>
-        </p>
-      )}
 
       {choix !== null && (
         <div className="field contenu-conditionnel">
@@ -150,6 +143,7 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentative
       )}
       {!validation && (
         <PiedAnalytique
+          messageChoix={choixFige !== null && !choixFige.correct ? <RenduFragments fragments={messageChoixFaux} /> : null}
           niveauAide={niveauAide}
           niveauAideMax={NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS}
           onActiverAide={onActiverAide}

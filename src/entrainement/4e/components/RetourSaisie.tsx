@@ -65,22 +65,42 @@ interface PropsMessage {
   cible?: FragmentConsigne[] | null;
   /** Texte de la saisie illisible (défaut : expression ; `MESSAGE_BORNE_ILLISIBLE` pour un nombre). */
   texteIllisible?: string;
+  /** Message d'un choix fermé jugé faux et figé (« Ce n'était pas le bon choix… »), affiché EN TÊTE du
+   * même bloc que le retour du champ (audit 4e ch. 7) : deux blocs séparés se recouvraient sur
+   * téléphone, le retour étant épinglé au-dessus de la barre du bas. Absent : rendu inchangé. */
+  entete?: ReactNode;
 }
 
-export function MessageRetour({ illisible, tentativesUtilisees, tentativesMax, cible, texteIllisible = MESSAGE_ILLISIBLE }: PropsMessage) {
+export function MessageRetour({ illisible, tentativesUtilisees, tentativesMax, cible, texteIllisible = MESSAGE_ILLISIBLE, entete }: PropsMessage) {
+  const tete = entete ? <span style={{ display: "block", marginBottom: tentativesUtilisees > 0 || illisible ? 6 : 0 }}>{entete}</span> : null;
   if (illisible) {
     return (
       <p className="alert-error" role="alert">
-        {texteIllisible}
+        {tete ? (
+          <span>
+            {tete}
+            {texteIllisible}
+          </span>
+        ) : (
+          texteIllisible
+        )}
       </p>
     );
   }
-  if (tentativesUtilisees === 0) return null;
+  if (tentativesUtilisees === 0) {
+    if (!tete) return null;
+    return (
+      <p className="alert-error" role="status">
+        <span>{tete}</span>
+      </p>
+    );
+  }
   return (
     <p className="alert-error" role="alert">
       {/* Un seul enfant texte : `.alert-error` est un conteneur flex, chaque fragment y devenait
        * une colonne (« Relis le signe de | Δ | : … »). */}
       <span>
+        {tete}
         {cible && cible.length > 0 && (
           <>
             <RenduFragments fragments={cible} />{" "}

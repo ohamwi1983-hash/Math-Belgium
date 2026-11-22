@@ -101,11 +101,6 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
           ))}
         </div>
       )}
-      {estNature && natureFigee !== null && !natureFigee.correcte && !validation && (
-        <p className="alert-error" role="status">
-          <span>Ce n'était pas la bonne nature : le second membre de la forme complétée est positif, c'est un cercle. Donne maintenant son centre et son rayon.</span>
-        </p>
-      )}
 
       {champsVisibles && (
       <>
@@ -164,6 +159,7 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
       )}
       {!validation && (
         <PiedAnalytique
+          messageChoix={estNature && natureFigee !== null && !natureFigee.correcte ? "Ce n'était pas la bonne nature : le second membre de la forme complétée est positif, c'est un cercle. Donne maintenant son centre et son rayon." : null}
           niveauAide={niveauAide}
           niveauAideMax={NIVEAU_AIDE_MAX_CENTRE_RAYON}
           onActiverAide={onActiverAide}
