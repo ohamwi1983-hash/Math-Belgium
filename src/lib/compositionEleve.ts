@@ -6,6 +6,8 @@ import {
   NIVEAU_NUMERO,
   catalogueVariantesExercice,
   construireItemsPayload,
+  deriveQuestionsComprehension,
+  deriveQuestionsFormules,
   deriveQuestionsOuvertes,
   generateursPourSection,
   resoudreNiveauHeures,
@@ -47,7 +49,10 @@ import { DEPASSEMENT_MAX } from '../components/admin/conception/composer'
  * longueur […] rien à voir avec une évaluation ») : ni durée ni points ni parts de temps — un NOMBRE
  * d'exercices, global (1 à 30, réparti à parts égales entre compétences puis notions cochées) ou
  * choisi type par type (`ReglagesEleve.exercices`, `composerFeuille`) ; la retouche n'y corrige que le
- * niveau réel.
+ * niveau réel. Connaître y reprend aussi les questions ouvertes du panneau du professeur (décision du
+ * 22/11/2026) : « Formule » et compréhension par notion, démonstrations cochées par l'élève — sans
+ * niveau, une question = un exercice, jamais répétée dans la feuille.
+ * ÉVALUATION BLANCHE : au plus `MAX_VRAI_FAUX_BLANCHE` (5) affirmations vrai/faux au total.
  *
  * Aucune donnée d'élève : rien n'est enregistré (ni coffre, ni historique anti-doublon — l'historique
  * est seulement LU par `construirePlan`).
@@ -74,6 +79,16 @@ const DUREE_VRAI_FAUX = 2
 const NIVEAU_VRAI_FAUX = 2
 /** Durée par défaut d'un exercice d'un générateur sans durée (ni critères ni constante). */
 const DUREE_PAR_DEFAUT = 5
+/** Questions ouvertes de la feuille : « Formule » 1 pt, « compréhension » 2 pts au panneau (durée
+ * = 2 × points, comme `pointsDepuisDuree`) — seulement pour le total estimé, la feuille n'a ni durée
+ * ni points. */
+const DUREE_FORMULE = 2
+const DUREE_COMPREHENSION = 4
+/** Évaluation blanche (décision de l'utilisateur, 22/11/2026 : « pour la compétence connaître, limiter
+ * le nombre de vrai ou faux générés à maximum 5 ») : au plus 5 affirmations au total, tous thèmes
+ * confondus, quelles que soient la durée et la part de Connaître. La feuille d'exercices n'a pas ce
+ * plafond (l'élève choisit son nombre). */
+export const MAX_VRAI_FAUX_BLANCHE = 5
 
 export interface ReglagesEleve {
   levelSlug: string
@@ -92,8 +107,9 @@ export interface ReglagesEleve {
    * graine → mêmes parts et même composition) ou RÉGLÉES par l'élève (`pourcents`, `null` = parts
    * égales). Absent (feuille d'exercices) : parts égales, composition d'avant inchangée. */
   parts?: PartsEleve
-  /** Évaluation blanche : démonstrations ANNONCÉES par le professeur, cochées par l'élève (clés
-   * `cleDemonstration`) — seules celles-là peuvent être tirées ; aucune → aucune démonstration. */
+  /** Démonstrations cochées par l'élève (clés `cleDemonstration`) — évaluation blanche : celles que le
+   * professeur a ANNONCÉES ; feuille : celles qu'il veut travailler. Seules celles-là peuvent être
+   * tirées ; aucune → aucune démonstration. */
   demonstrations?: string[]
   /** FEUILLE d'exercices (décision de l'utilisateur, 22/11/2026 : « pas de limite de temps ou de
    * longueur […] rien à voir avec une évaluation ») : un NOMBRE d'exercices au lieu d'une durée —
@@ -167,7 +183,8 @@ export interface CandidatVraiFaux extends CandidatBase {
   disponibles: number
 }
 /** Démonstration du cours (question « démonstration » de Connaître) : tirée seulement si l'élève l'a
- * cochée comme annoncée par son professeur. Sans niveau (admise à tous les niveaux cochés). */
+ * cochée (évaluation blanche : annoncée par son professeur ; feuille : qu'il veut travailler). Sans
+ * niveau (admise à tous les niveaux cochés). */
 export interface CandidatDemonstration extends CandidatBase {
   sorte: 'demonstration'
   /** `QuestionOuverte.id` dans sa section (choix explicite de la ligne « demonstration »). */
@@ -177,7 +194,27 @@ export interface CandidatDemonstration extends CandidatBase {
   /** Énoncé imprimé (deux démonstrations d'un même résultat ont le même : une seule par document). */
   enonceCle: string
 }
-export type Candidat = CandidatExercice | CandidatVraiFaux | CandidatDemonstration
+/** FEUILLE d'exercices (décision de l'utilisateur, 22/11/2026) : questions ouvertes « Formule » et
+ * « compréhension » d'une notion — mêmes banques que les lignes du panneau du professeur
+ * (`deriveQuestionsFormules`, `deriveQuestionsComprehension`), tirées par `construireItemsPayload`.
+ * Sans niveau : toujours admises, quels que soient les niveaux cochés. */
+export interface CandidatOuverte extends CandidatBase {
+  sorte: 'formule' | 'comprehension'
+  /** Questions DISTINCTES de la banque de la notion (énoncés imprimés différents). */
+  disponibles: number
+}
+export type Candidat = CandidatExercice | CandidatVraiFaux | CandidatDemonstration | CandidatOuverte
+
+/** Question sans niveau (démonstration, formule, compréhension) : admise à tous les niveaux cochés,
+ * aucun badge de niveau. */
+export function estSansNiveau(c: Candidat): c is CandidatDemonstration | CandidatOuverte {
+  return c.sorte === 'demonstration' || c.sorte === 'formule' || c.sorte === 'comprehension'
+}
+
+/** Nombre d'énoncés imprimés distincts d'une banque (même règle que `sansDoublonsEnonce` du panneau). */
+function enoncesDistincts(banque: QuestionOuverte[]): number {
+  return new Set(banque.map((q) => JSON.stringify(q.enonce))).size
+}
 
 /** Durée d'une démonstration : celle d'un exercice qui vaudrait ses points (points = durée ÷ 2, comme
  * `pointsDepuisDuree`) — de 4 à 12 min selon la longueur du corrigé. */
@@ -341,11 +378,30 @@ async function calculerCandidats(chapter: ChapterContent, type: TypeEleve, progr
       }
     }
   }
-  // Évaluation blanche : démonstrations du cours (tirées seulement si l'élève les a cochées).
-  if (type === 'blanche') {
-    const enonces = new Map(chapter.sections.flatMap((s) => deriveQuestionsOuvertes(chapter.slug, s).map((q) => [cleDemonstration(s.id, q.id ?? ''), JSON.stringify(q.enonce)] as const)))
-    for (const d of demonstrationsDuChapitre(chapter)) {
-      candidats.push({ sorte: 'demonstration', cle: `${d.sectionId}|demo|${d.questionId}`, sectionId: d.sectionId, processus: 1, questionId: d.questionId, etapes: d.etapes, enonceCle: enonces.get(d.cle) ?? d.cle, duree: dureeDemonstration(d.etapes), niveaux: [] })
+  // Démonstrations du cours (tirées seulement si l'élève les a cochées) : évaluation blanche ET feuille.
+  const enonces = new Map(chapter.sections.flatMap((s) => deriveQuestionsOuvertes(chapter.slug, s).map((q) => [cleDemonstration(s.id, q.id ?? ''), JSON.stringify(q.enonce)] as const)))
+  for (const d of demonstrationsDuChapitre(chapter)) {
+    candidats.push({
+      sorte: 'demonstration',
+      cle: `${d.sectionId}|demo|${d.questionId}`,
+      sectionId: d.sectionId,
+      processus: 1,
+      questionId: d.questionId,
+      etapes: d.etapes,
+      enonceCle: enonces.get(d.cle) ?? d.cle,
+      duree: dureeDemonstration(d.etapes),
+      niveaux: [],
+      titre: `Démonstration — ${d.titre}`,
+    })
+  }
+  // Feuille d'exercices : « Formule » et questions de compréhension, par notion (section) qui en a.
+  if (type === 'feuille') {
+    for (const s of chapter.sections) {
+      const formules = enoncesDistincts(deriveQuestionsFormules(chapter, s.id))
+      if (formules > 0) candidats.push({ sorte: 'formule', cle: `${s.id}|formule`, sectionId: s.id, processus: 1, disponibles: formules, duree: DUREE_FORMULE, niveaux: [], titre: `Formule — ${s.title}` })
+      const comprehension = enoncesDistincts(deriveQuestionsComprehension(chapter.slug, s.id))
+      if (comprehension > 0)
+        candidats.push({ sorte: 'comprehension', cle: `${s.id}|comprehension`, sectionId: s.id, processus: 1, disponibles: comprehension, duree: DUREE_COMPREHENSION, niveaux: [], titre: `Question de compréhension — ${s.title}` })
     }
   }
   return candidats
@@ -389,8 +445,8 @@ export function partDansCategories(c: Candidat, categories: ReadonlySet<Categori
 /** Un candidat est retenu pour les niveaux cochés si au moins la moitié de ses tirages d'estimation y
  * tombent ; un générateur sans niveau seulement quand les cinq niveaux sont cochés. */
 export function candidatAuxNiveaux(c: Candidat, categories: ReadonlySet<CategorieNiveau>, tous: boolean): boolean {
-  // Démonstration annoncée (cochée par l'élève) : sans niveau, admise quels que soient les niveaux.
-  if (c.sorte === 'demonstration') return true
+  // Démonstration cochée, formule, compréhension : sans niveau, admises quels que soient les niveaux.
+  if (estSansNiveau(c)) return true
   return c.niveaux.length === 0 ? tous : partDansCategories(c, categories) >= 0.5
 }
 
@@ -426,7 +482,7 @@ function nombreDe(etat: EtatComposition, c: Candidat): number {
 }
 
 function cleGenerateur(c: Candidat): string {
-  return c.sorte === 'exercice' ? c.generatorId : c.sorte === 'vraiFaux' ? `vf:${c.theme}` : 'demonstration'
+  return c.sorte === 'exercice' ? c.generatorId : c.sorte === 'vraiFaux' ? `vf:${c.theme}` : c.sorte
 }
 
 /** Une démonstration au plus une fois, et jamais deux démonstrations au même énoncé imprimé. */
@@ -525,6 +581,9 @@ export function partsVisees(parts: PartsEleve, competences: readonly Processus[]
   return partsAuProrata(parts.pourcents ? fractionsRepartition(parts.pourcents) : partageEgal(cochees), base)
 }
 
+/** Temps des vrai/faux au plus dans une évaluation blanche (`MAX_VRAI_FAUX_BLANCHE` affirmations). */
+const PLAFOND_VRAI_FAUX_BLANCHE = MAX_VRAI_FAUX_BLANCHE * DUREE_VRAI_FAUX
+
 /** Un ajout dans la part d'une compétence est admis s'il ne dépasse son budget ni de plus de la moitié
  * de sa durée NI de plus de `DEPASSEMENT_MAX` minutes — règle de « Préparer l'évaluation » du
  * professeur (`conception/composer.ts`), la PREMIÈRE question comprise. */
@@ -565,7 +624,7 @@ function composerParParts(candidats: Candidat[], admis: Candidat[], reglages: Re
       const demos = ici.filter((c): c is CandidatDemonstration => c.sorte === 'demonstration' && admission(c) && etat.duree + c.duree <= plafondP + 1e-9)
       if (demos.length > 0) ajouter(etat, demos[Math.floor(aleatoire() * demos.length)])
     }
-    remplir(etat, { candidats: ici, rang }, budgets[p] - pris(p), plafondP, Infinity, aleatoire, admission)
+    remplir(etat, { candidats: ici, rang }, budgets[p] - pris(p), plafondP, PLAFOND_VRAI_FAUX_BLANCHE, aleatoire, admission)
   }
   ordre.forEach((p, i) => {
     const plafondP = plafond - reserve(i)
@@ -603,15 +662,39 @@ function composerParParts(candidats: Candidat[], admis: Candidat[], reglages: Re
  * Feuille d'exercices au NOMBRE d'exercices (ni durée ni points)
  * -------------------------------------------------------------------------------------------- */
 
-/** Exercices au plus d'un type dans une feuille : `MAX_PAR_TYPE` (vrai/faux : pas plus que
- * d'affirmations dans la banque du thème ; démonstration : une). */
+/** Exercices au plus d'un type dans une feuille : `MAX_PAR_TYPE` (vrai/faux, formule, compréhension :
+ * pas plus que de questions distinctes dans la banque — une question ouverte n'est jamais répétée ;
+ * démonstration : une, c'est une question unique). */
 export function capaciteType(c: Candidat): number {
-  return c.sorte === 'vraiFaux' ? Math.min(MAX_PAR_TYPE, c.disponibles) : c.sorte === 'demonstration' ? 1 : MAX_PAR_TYPE
+  return c.sorte === 'demonstration' ? 1 : c.sorte === 'exercice' ? MAX_PAR_TYPE : Math.min(MAX_PAR_TYPE, c.disponibles)
+}
+
+/** Deux démonstrations d'un même résultat ont le même énoncé imprimé : une seule par feuille. Clé de
+ * cet énoncé pour une démonstration, `null` pour tout autre type. */
+export function enonceDemonstration(c: Candidat): string | null {
+  return c.sorte === 'demonstration' ? c.enonceCle : null
+}
+
+/** Nombre d'exercices au plus possible avec ces types : somme des capacités, une seule démonstration
+ * par énoncé imprimé. */
+export function disponiblesFeuille(types: readonly Candidat[]): number {
+  const enonces = new Set<string>()
+  let total = 0
+  for (const c of types) {
+    const e = enonceDemonstration(c)
+    if (e !== null) {
+      if (enonces.has(e)) continue
+      enonces.add(e)
+    }
+    total += capaciteType(c)
+  }
+  return total
 }
 
 /** Types d'exercices proposés à la feuille pour ces choix : candidats des notions retenues et des
  * compétences cochées (jamais une autre), aux niveaux cochés (même règle que `composer` : au moins la
- * moitié des tirages d'estimation), dans l'ordre des sections du chapitre. Aucun niveau voisin : la
+ * moitié des tirages d'estimation), dans l'ordre des sections du chapitre. Questions sans niveau
+ * (formule, compréhension, démonstrations COCHÉES) : toujours admises. Aucun niveau voisin : la
  * feuille ne « remplit » rien, elle dit ce qui manque. */
 export function typesFeuille(candidatsChapitre: Candidat[], reglages: Pick<ReglagesEleve, 'sections' | 'competences' | 'niveaux' | 'demonstrations'>, chapter?: ChapterContent): Candidat[] {
   const cochees = new Set(reglages.niveaux)
@@ -641,15 +724,22 @@ function auPlusPetit<T>(liste: T[], valeur: (x: T) => number, aleatoire: () => n
  */
 export function composerFeuille(candidatsChapitre: Candidat[], reglages: ReglagesEleve, aleatoire: () => number = Math.random): Composition {
   const types = typesFeuille(candidatsChapitre, reglages)
-  const disponibles = types.reduce((t, c) => t + capaciteType(c), 0)
+  const disponibles = disponiblesFeuille(types)
   const niveauxAdmis = CATEGORIES_NIVEAU.filter((c) => reglages.niveaux.includes(c))
   const exercices = reglages.exercices!
   const nombres = new Map<string, number>()
   let demandes: number
   if (exercices.mode === 'carte') {
     demandes = 0
+    const enonces = new Set<string>()
     for (const c of types) {
-      const n = Math.max(0, Math.min(capaciteType(c), Math.floor(exercices.parType[c.cle] ?? 0)))
+      let n = Math.max(0, Math.min(capaciteType(c), Math.floor(exercices.parType[c.cle] ?? 0)))
+      // Une seule démonstration par énoncé imprimé (la liste ne permet pas d'en régler deux).
+      const e = enonceDemonstration(c)
+      if (e !== null && n > 0) {
+        if (enonces.has(e)) n = 0
+        else enonces.add(e)
+      }
       demandes += n
       if (n > 0) nombres.set(c.cle, n)
     }
@@ -659,8 +749,13 @@ export function composerFeuille(candidatsChapitre: Candidat[], reglages: Reglage
     const parNotion = new Map<string, number>()
     const parGenerateur = new Map<string, number>()
     const n = (c: Candidat) => nombres.get(c.cle) ?? 0
+    const enoncesPris = new Set<string>()
+    const libre = (c: Candidat) => {
+      const e = enonceDemonstration(c)
+      return n(c) < capaciteType(c) && (e === null || !enoncesPris.has(e))
+    }
     for (let k = 0; k < demandes; k++) {
-      const libres = types.filter((c) => n(c) < capaciteType(c))
+      const libres = types.filter(libre)
       if (libres.length === 0) break
       const p = auPlusPetit([...new Set(libres.map((c) => c.processus))], (q) => parCompetence.get(q) ?? 0, aleatoire)
       const dansP = libres.filter((c) => c.processus === p)
@@ -669,6 +764,8 @@ export function composerFeuille(candidatsChapitre: Candidat[], reglages: Reglage
       const peuServi = Math.min(...ici.map(n))
       const c = auPlusPetit(ici.filter((x) => n(x) === peuServi), (x) => parGenerateur.get(`${p}|${s}|${cleGenerateur(x)}`) ?? 0, aleatoire)
       nombres.set(c.cle, n(c) + 1)
+      const e = enonceDemonstration(c)
+      if (e !== null) enoncesPris.add(e)
       parCompetence.set(p, (parCompetence.get(p) ?? 0) + 1)
       parNotion.set(`${p}|${s}`, (parNotion.get(`${p}|${s}`) ?? 0) + 1)
       const g = `${p}|${s}|${cleGenerateur(c)}`
@@ -684,8 +781,9 @@ export function composerFeuille(candidatsChapitre: Candidat[], reglages: Reglage
 export function composer(candidatsChapitre: Candidat[], reglages: ReglagesEleve, aleatoire?: () => number): Composition {
   // Feuille au nombre d'exercices : ni durée ni parts de temps.
   if (reglages.exercices) return composerFeuille(candidatsChapitre, reglages, aleatoire)
-  // Jamais une compétence non cochée, même pour remplir la durée.
-  const candidats = candidatsDesReglages(candidatsChapitre, reglages)
+  // Jamais une compétence non cochée, même pour remplir la durée. Formule / compréhension : feuille au
+  // nombre d'exercices seulement (l'ancien chemin « durée » ne les tirait pas).
+  const candidats = candidatsDesReglages(candidatsChapitre, reglages).filter((c) => c.sorte !== 'formule' && c.sorte !== 'comprehension')
   const cochees = new Set(reglages.niveaux)
   const tous = tousLesNiveaux(reglages.niveaux)
   const admis = candidats.filter((c) => candidatAuxNiveaux(c, cochees, tous))
@@ -695,6 +793,8 @@ export function composer(candidatsChapitre: Candidat[], reglages: ReglagesEleve,
   }
   aleatoire ??= Math.random
   const cible = reglages.duree
+  // Évaluation blanche : au plus `MAX_VRAI_FAUX_BLANCHE` affirmations (la feuille n'a pas ce plafond).
+  const vf = (plafond: number) => (reglages.type === 'blanche' ? Math.min(plafond, PLAFOND_VRAI_FAUX_BLANCHE) : plafond)
   const plafond = cible * (1 + TOLERANCE_DEPASSEMENT)
   const etat: EtatComposition = { unites: new Map(), parSection: new Map(), parGenerateur: new Map(), parProcessus: new Map(), duree: 0, dureeVraiFaux: 0 }
   const bassin: Bassin = { candidats: admis, rang: new Map() }
@@ -704,11 +804,11 @@ export function composer(candidatsChapitre: Candidat[], reglages: ReglagesEleve,
   const presentes = ([1, 2, 3] as const).filter((p) => admis.some((c) => c.processus === p))
   const { budgets, bruts } = budgetsParCompetence(cible, reglages.competences, presentes)
   // Transférer d'abord (questions longues), puis Connaître, puis Appliquer jusqu'à la durée visée.
-  if (budgets[3] > 0) remplir(etat, parProcessus(bassin, 3), budgets[3], etat.duree + budgets[3] + cible * TOLERANCE_DEPASSEMENT, Infinity, aleatoire)
-  if (budgets[1] > 0) remplir(etat, parProcessus(bassin, 1), budgets[1], etat.duree + budgets[1] + 1, budgets[1] + 1, aleatoire)
-  if (budgets[2] > 0) remplir(etat, parProcessus(bassin, 2), cible - etat.duree, plafond, Infinity, aleatoire)
+  if (budgets[3] > 0) remplir(etat, parProcessus(bassin, 3), budgets[3], etat.duree + budgets[3] + cible * TOLERANCE_DEPASSEMENT, vf(Infinity), aleatoire)
+  if (budgets[1] > 0) remplir(etat, parProcessus(bassin, 1), budgets[1], etat.duree + budgets[1] + 1, vf(budgets[1] + 1), aleatoire)
+  if (budgets[2] > 0) remplir(etat, parProcessus(bassin, 2), cible - etat.duree, plafond, vf(Infinity), aleatoire)
   // Reste du temps (bassin trop court) : n'importe quelle compétence cochée.
-  remplir(etat, bassin, cible - etat.duree, plafond, budgets[1] + 1, aleatoire)
+  remplir(etat, bassin, cible - etat.duree, plafond, vf(budgets[1] + 1), aleatoire)
 
   // Niveaux cochés trop courts pour la durée : les niveaux voisins complètent, le plus proche
   // d'abord, toujours dans les compétences cochées (l'élève en est averti).
@@ -730,9 +830,9 @@ export function composer(candidatsChapitre: Candidat[], reglages: ReglagesEleve,
       // D'abord les compétences en retard sur leur part, puis n'importe laquelle des cochées.
       for (const p of [3, 1, 2] as const) {
         const manque = parts[p] - (etat.parProcessus.get(p) ?? 0)
-        if (manque >= 1.5) remplir(etat, parProcessus(bv, p), manque, plafond, parts[1] + 1, aleatoire)
+        if (manque >= 1.5) remplir(etat, parProcessus(bv, p), manque, plafond, vf(parts[1] + 1), aleatoire)
       }
-      remplir(etat, bv, cible - etat.duree, plafond, parts[1] + 1, aleatoire)
+      remplir(etat, bv, cible - etat.duree, plafond, vf(parts[1] + 1), aleatoire)
       if (etat.duree > avant) {
         elargi = true
         nouvelles.forEach((c) => voisinsUtilises.add(c))
@@ -757,6 +857,12 @@ export interface DisponibiliteCompetence {
   auxNiveauxCoches: boolean
   /** Connaître : les seules questions possibles sont des démonstrations (aucune cochée → rien). */
   demonstrationsSeules: boolean
+  /** Seulement des questions SANS niveau (démonstrations, formules, compréhension) : les niveaux
+   * cochés ne comptent pas pour cette compétence. */
+  sansNiveauSeules: boolean
+  /** Au moins une question sans niveau qui compte (formule, compréhension, démonstration cochée) :
+   * toujours proposée, quels que soient les niveaux cochés. */
+  questionsSansNiveau: boolean
 }
 
 export interface DisponibiliteEleve {
@@ -786,6 +892,8 @@ export function disponibilite(candidatsChapitre: Candidat[], reglages: Pick<Regl
       categories: CATEGORIES_NIVEAU.filter((k) => liste.some((c) => partDansCategories(c, new Set([k])) >= 0.5)),
       auxNiveauxCoches: liste.some((c) => comptee(c) && candidatAuxNiveaux(c, cochees, tous)),
       demonstrationsSeules: liste.length > 0 && liste.every((c) => c.sorte === 'demonstration'),
+      sansNiveauSeules: liste.length > 0 && liste.every(estSansNiveau),
+      questionsSansNiveau: liste.some((c) => estSansNiveau(c) && comptee(c)),
     }
   }
   const niveaux = {} as Record<CategorieNiveau, boolean>
@@ -834,8 +942,12 @@ export function lignesDeComposition(composition: Composition, chapter: ChapterCo
       ligne.pointsParChoix![c.questionId] = pointsDemonstration(c.etapes)
       ligne.nombre = ligne.choix!.length
       lignes.set(cle, ligne)
-    } else {
+    } else if (c.sorte === 'vraiFaux') {
       lignes.set(`${c.sectionId}|vf|${c.theme}`, { chapitreSlug: chapter.slug, sectionId: c.sectionId, processus: 1, type: 'vraiFaux', cle: c.theme, nombre, points: 1 })
+    } else {
+      // Feuille : ligne « Formule » / « compréhension » du panneau, sans choix — `construireItemsPayload`
+      // tire `nombre` questions distinctes de la banque de la notion (jamais deux fois la même).
+      lignes.set(`${c.sectionId}|${c.sorte}`, { chapitreSlug: chapter.slug, sectionId: c.sectionId, processus: 1, type: c.sorte, nombre, points: c.sorte === 'formule' ? 1 : 2 })
     }
   }
   return [...lignes.values()].sort((a, b) => (ordreSection.get(a.sectionId) ?? 0) - (ordreSection.get(b.sectionId) ?? 0))

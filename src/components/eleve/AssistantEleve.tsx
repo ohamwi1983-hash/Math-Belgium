@@ -19,6 +19,7 @@ import {
   NOMBRE_FEUILLE_MIN,
   capaciteType,
   demonstrationsDuChapitre,
+  enonceDemonstration,
   typesFeuille,
   type Composition,
   type ExercicesFeuille,
@@ -56,7 +57,9 @@ import {
  * Feuille d'exercices (décision de l'utilisateur, 22/11/2026 : « rien à voir avec une évaluation ») :
  * ni durée ni points — un nombre d'exercices global (− / +, 1 à 30, 10 par défaut), réparti à parts
  * égales, ou « Choisir exercice par exercice » (compteur par type, 0 à 5 ; « Revenir au nombre
- * global »). Aucune donnée d'élève : rien n'est enregistré.
+ * global »). Connaître y compte aussi les « Formule », les questions de compréhension et les
+ * démonstrations cochées dans « Démonstrations à travailler » (aucune par défaut) — sans niveau.
+ * Aucune donnée d'élève : rien n'est enregistré.
  */
 
 /** Numéros 1–7 d'une catégorie, tels qu'imprimés sur les feuilles (« 5–7 » pour très difficile). */
@@ -161,7 +164,8 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const [modeParts, setModeParts] = useState<'hasard' | 'reglee'>('hasard')
   const [partsManuelles, setPartsManuelles] = useState<RepartitionPourcents | null>(null)
   const [graineParts, setGraineParts] = useState(() => tirerGraine())
-  /** Démonstrations annoncées par le professeur (clés `cleDemonstration`) : aucune par défaut. */
+  /** Démonstrations cochées (clés `cleDemonstration`) — évaluation blanche : annoncées par le
+   * professeur ; feuille : à travailler. Aucune par défaut. */
   const [demosCochees, setDemosCochees] = useState<Set<string>>(() => new Set())
   /** FEUILLE d'exercices (décision de l'utilisateur, 22/11/2026) : ni durée ni points — un nombre
    * d'exercices global (10 par défaut), ou choisi exercice par exercice. Rien n'est mémorisé. */
@@ -187,7 +191,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const avecFormulaire = (chapitre?.formulaire?.groups.length ?? 0) > 0
   /** Démonstrations du chapitre dans les notions retenues (tout le chapitre : toutes). */
   const demonstrations = useMemo(() => (chapitre ? demonstrationsDuChapitre(chapitre).filter((d) => !choisies || choisies.has(d.sectionId)) : []), [chapitre, choisies])
-  const demosRetenues = useMemo(() => (blancheChoisie ? demonstrations.filter((d) => demosCochees.has(d.cle)).map((d) => d.cle) : []), [blancheChoisie, demonstrations, demosCochees])
+  const demosRetenues = useMemo(() => demonstrations.filter((d) => demosCochees.has(d.cle)).map((d) => d.cle), [demonstrations, demosCochees])
   const niveaux = useMemo(() => CATEGORIES_NIVEAU.filter((c) => niveauxCoches.has(c)), [niveauxCoches])
   const competences = useMemo(() => ([1, 2, 3] as Processus[]).filter((p) => competencesCochees.has(p)), [competencesCochees])
   // Disponibilité EN DIRECT, sur les candidats déjà préparés (niveaux des tirages d'estimation).
@@ -198,23 +202,42 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   /** Niveaux cochés ET proposés : au moins un, sinon rien n'est composé. */
   const niveauxUtiles = dispo ? niveaux.filter((c) => dispo.niveaux[c]) : niveaux
   const competencesUtiles = dispo ? competences.filter((p) => dispo.parCompetence[p].total > 0) : competences
-  // Seules des démonstrations cochées (sans niveau) : les niveaux ne comptent pas.
-  const seulementDemos = !!dispo && competencesUtiles.length > 0 && competencesUtiles.every((p) => dispo.parCompetence[p].demonstrationsSeules) && demosRetenues.length > 0
+  // Seulement des questions sans niveau (démonstrations cochées, formules, compréhension) : les niveaux
+  // ne comptent pas.
+  const seulementSansNiveau =
+    !!dispo && competencesUtiles.length > 0 && competencesUtiles.every((p) => dispo.parCompetence[p].sansNiveauSeules) && competencesUtiles.some((p) => dispo.parCompetence[p].auxNiveauxCoches)
   // Feuille : types d'exercices proposés pour ces choix (liste « exercice par exercice »), et nombre.
   const typesDispo = useMemo(
-    () => (!blancheChoisie && candidats && chapitre ? typesFeuille(candidats, { sections, competences, niveaux }, chapitre) : []),
-    [blancheChoisie, candidats, chapitre, sections, competences, niveaux],
+    () => (!blancheChoisie && candidats && chapitre ? typesFeuille(candidats, { sections, competences, niveaux, demonstrations: demosRetenues }, chapitre) : []),
+    [blancheChoisie, candidats, chapitre, sections, competences, niveaux, demosRetenues],
   )
-  /** Compteurs des seuls types encore proposés (un type qui disparaît avec les choix ne compte plus). */
+  /** Compteurs des seuls types encore proposés (un type qui disparaît avec les choix ne compte plus) ;
+   * deux démonstrations d'un même résultat (même énoncé imprimé) : la première réglée seulement. */
   const parTypeRetenu = useMemo(() => {
     const r: Record<string, number> = {}
-    for (const c of typesDispo) if (parType[c.cle]) r[c.cle] = Math.min(capaciteType(c), parType[c.cle])
+    const enonces = new Set<string>()
+    for (const c of typesDispo) {
+      if (!parType[c.cle]) continue
+      const e = enonceDemonstration(c)
+      if (e !== null) {
+        if (enonces.has(e)) continue
+        enonces.add(e)
+      }
+      r[c.cle] = Math.min(capaciteType(c), parType[c.cle])
+    }
     return r
   }, [typesDispo, parType])
+  /** Compteur au plus d'un type : sa capacité ; 0 pour une démonstration dont le même énoncé est déjà
+   * réglé par une autre. */
+  const maxType = (c: Candidat) => {
+    const e = enonceDemonstration(c)
+    if (e !== null && typesDispo.some((x) => x.cle !== c.cle && enonceDemonstration(x) === e && (parTypeRetenu[x.cle] ?? 0) > 0)) return 0
+    return capaciteType(c)
+  }
   const totalCarte = Object.values(parTypeRetenu).reduce((t, n) => t + n, 0)
   const exercices: ExercicesFeuille | undefined = blancheChoisie ? undefined : modeNombre === 'global' ? { mode: 'global', nombre: nombreExercices } : { mode: 'carte', parType: parTypeRetenu }
   const carteVide = exercices?.mode === 'carte' && totalCarte === 0
-  const reglagesValides = (niveauxUtiles.length > 0 || seulementDemos) && competencesUtiles.length > 0 && !carteVide
+  const reglagesValides = (niveauxUtiles.length > 0 || seulementSansNiveau) && competencesUtiles.length > 0 && !carteVide
   const cleCompetencesUtiles = competencesUtiles.join(',')
   // Cocher / décocher une compétence remet les parts réglées à égalité (comme le réglage du professeur).
   useEffect(() => setPartsManuelles(null), [cleCompetencesUtiles])
@@ -267,7 +290,8 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
       competences,
       type,
       amenagee,
-      ...(parts ? { parts, demonstrations: demosRetenues } : {}),
+      demonstrations: demosRetenues,
+      ...(parts ? { parts } : {}),
       ...(exercices ? { exercices } : {}),
     }
     const cle = JSON.stringify([levelSlug, chapitre.slug, sections, duree, niveaux, competences, type, amenagee, tirage, parts ?? null, demosRetenues, exercices ?? null])
@@ -435,14 +459,17 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
           : 'Préparation…'
   /** Niveaux et compétences réellement obtenus (récapitulatif exact). */
   const recapContenu = resume
-    ? `${resume.categories.length === 1 ? 'Niveau' : 'Niveaux'} : ${texteCategories(resume.categories) || '—'} · ${listeCompetences(resume.competences)}${blanche && resume.competences.length > 1 && !resume.parts ? ', temps partagé à parts égales' : ''}`
+    ? `${resume.categories.length === 0 ? 'Questions sans niveau' : `${resume.categories.length === 1 ? 'Niveau' : 'Niveaux'} : ${texteCategories(resume.categories)}`} · ${listeCompetences(resume.competences)}${blanche && resume.competences.length > 1 && !resume.parts ? ', temps partagé à parts égales' : ''}`
     : null
   /** Feuille au nombre global : moins de types que demandé (dit simplement). */
   const manqueExercices = !blanche && modeNombre === 'global' && resume?.disponibles !== undefined && resume.disponibles < nombreExercices ? resume.disponibles : null
   /** Feuille : des exercices de même consigne sont regroupés sous un même numéro. */
   const regroupes = !blanche && !!resume && resume.questions < resume.exercices
-  /** Liste « exercice par exercice », groupée par point du chapitre. */
-  const groupesTypes = notions.map((n) => ({ notion: n, types: typesDispo.filter((c) => c.sectionId === n.sectionId) })).filter((g) => g.types.length > 0)
+  /** Liste « exercice par exercice », groupée par point du chapitre (toutes les sections : une formule
+   * ou une démonstration peut appartenir à une section sans générateur, « Tout le chapitre »). */
+  const groupesTypes = (chapitre?.sections ?? [])
+    .map((s) => ({ notion: { sectionId: s.id, titre: s.title }, types: typesDispo.filter((c) => c.sectionId === s.id) }))
+    .filter((g) => g.types.length > 0)
   /** Évaluation blanche : parts obtenues (celles des points), et leur origine (même texte que le
    * document, `texteRepartitionBlanche` ; téléphone : l'avertissement final est masqué dans la barre
    * collante, il est écrit juste au-dessus, sous « Parts du temps et des points »). */
@@ -456,11 +483,19 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const niveauxGrises = dispo ? CATEGORIES_NIVEAU.filter((c) => !dispo.niveaux[c]) : []
   /** Pourquoi des niveaux sont grisés : ce que chaque compétence cochée offre vraiment. */
   const raisonsNiveaux =
-    dispo && niveauxGrises.length > 0 ? competences.filter((p) => dispo.parCompetence[p].total > 0).map((p) => `${LIBELLE_COMPETENCE[p]} : ${texteSeulement(dispo.parCompetence[p].categories)}`) : []
+    dispo && niveauxGrises.length > 0
+      ? competences
+          .filter((p) => dispo.parCompetence[p].total > 0)
+          .map((p) => {
+            const d = dispo.parCompetence[p]
+            if (d.categories.length === 0) return `${LIBELLE_COMPETENCE[p]} : seulement des questions sans niveau`
+            return `${LIBELLE_COMPETENCE[p]} : ${texteSeulement(d.categories)}${d.questionsSansNiveau ? ', plus des questions sans niveau (toujours proposées)' : ''}`
+          })
+      : []
   /** Compétences cochées sans exercice aux niveaux cochés : signalées, leur temps va aux autres. */
   const competencesSansNiveau = dispo ? competences.filter((p) => dispo.parCompetence[p].total > 0 && !dispo.parCompetence[p].auxNiveauxCoches) : []
   const connaitreCochee = competencesCochees.has(1) && !!dispo && dispo.parCompetence[1].total > 0
-  const montrerDemos = blanche && connaitreCochee && demonstrations.length > 0
+  const montrerDemos = connaitreCochee && demonstrations.length > 0
   const montrerParts = blanche && competencesUtiles.length > 1
 
   return (
@@ -596,8 +631,12 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
         </div>
         {montrerDemos && (
           <fieldset className="eleve-reglage eleve-demos">
-            <legend className="eleve-etiquette">Démonstrations annoncées</legend>
-            <p className="eleve-aide">Coche celles que ton professeur a demandé de retenir pour l'interro. Aucune cochée : pas de démonstration dans ton évaluation blanche.</p>
+            <legend className="eleve-etiquette">{blanche ? 'Démonstrations annoncées' : 'Démonstrations à travailler'}</legend>
+            <p className="eleve-aide">
+              {blanche
+                ? "Coche celles que ton professeur a demandé de retenir pour l'interro. Aucune cochée : pas de démonstration dans ton évaluation blanche."
+                : 'Coche celles que tu veux travailler. Aucune cochée : pas de démonstration dans ta feuille.'}
+            </p>
             <div className="eleve-demos-liste">
               {demonstrations.map((d) => (
                 <label key={d.cle} className="eleve-case eleve-demo">
@@ -720,8 +759,8 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
               {competencesSansNiveau.map((p) =>
                 dispo!.parCompetence[p].demonstrationsSeules ? (
                   <p key={p}>
-                    {LIBELLE_COMPETENCE[p]} : seulement des démonstrations ici — coche celles qui sont annoncées, sinon {blanche ? 'son temps va' : 'ses exercices vont'} aux autres compétences
-                    cochées.
+                    {LIBELLE_COMPETENCE[p]} : seulement des démonstrations ici — coche celles {blanche ? 'qui sont annoncées' : 'que tu veux travailler'}, sinon {blanche ? 'son temps va' : 'ses exercices vont'} aux
+                    autres compétences cochées.
                   </p>
                 ) : (
                   <p key={p}>
@@ -758,7 +797,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
                 <span className="eleve-etiquette" id="eleve-nombre">
                   Exercice par exercice
                 </span>
-                <p className="eleve-aide">Règle le nombre de chaque type d'exercice (de 0 à 5). Rien n'est mémorisé.</p>
+                <p className="eleve-aide">Règle le nombre de chaque type d'exercice (de 0 à 5 ; une démonstration : 0 ou 1). Rien n'est mémorisé.</p>
                 {groupesTypes.length === 0 ? (
                   <p className="eleve-note">Aucun exercice avec ces choix : ajoute une notion, un niveau ou une compétence.</p>
                 ) : (
@@ -791,7 +830,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
                                       {niv ? ` · niv. ${niv}` : ''}
                                     </span>
                                   </span>
-                                  <Compteur valeur={parTypeRetenu[c.cle] ?? 0} min={0} max={capaciteType(c)} nom={nomType(c)} onChange={(v) => setParType((avant) => ({ ...avant, [c.cle]: v }))} />
+                                  <Compteur valeur={parTypeRetenu[c.cle] ?? 0} min={0} max={maxType(c)} nom={nomType(c)} onChange={(v) => setParType((avant) => ({ ...avant, [c.cle]: v }))} />
                                 </li>
                               )
                             })}

@@ -1193,8 +1193,8 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   d'exercices ? » : niveaux, puis « Combien d'exercices ? » (`Compteur` − / +, 1 à 30, 10 par défaut,
   cibles 44 px, aucun champ numérique). `ReglagesEleve.exercices` (`ExercicesFeuille`, absent = ancien
   chemin « durée », gardé et inchangé) → `composerFeuille` : types = `typesFeuille` (notions,
-  compétences cochées, niveaux cochés par la règle des 50 % ; AUCUN niveau voisin, aucune démonstration
-  — la feuille n'en tirait pas) ; **global** : un exercice à la fois, compétence la moins servie, puis
+  compétences cochées, niveaux cochés par la règle des 50 % ; AUCUN niveau voisin ; questions ouvertes de
+  Connaître : puce suivante) ; **global** : un exercice à la fois, compétence la moins servie, puis
   notion la moins servie dans elle, puis type le moins servi (jamais deux fois le même type tant
   qu'un autre de cette notion et compétence est libre — l'équilibre passe avant), puis générateur,
   égalités au hasard ; au plus `MAX_PAR_TYPE` = 5 par type (vrai/faux : au plus la banque ; une
@@ -1218,6 +1218,36 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   affichée chaque fois) ; documents feuille + aménagée sans durée ni points ; blanche (hasard, réglée, sans parts) et ancien
   chemin feuille identiques à la branche de départ (4 × 644 compositions) ; Playwright iPhone 13 et
   1 280 px 86 vérifications, 0 erreur console, `scrollWidth` = largeur.
+- **Connaître plus riche dans la feuille ; vrai/faux plafonnés dans la blanche** (décisions de l'utilisateur,
+  22/11/2026). Feuille : Connaître reprend les questions ouvertes du panneau du professeur — types
+  `CandidatOuverte` « Formule — <notion> » et « Question de compréhension — <notion> » par section qui en a
+  (toutes les sections du chapitre, même sans générateur, comme les démonstrations), capacité
+  min(`MAX_PAR_TYPE`, questions DISTINCTES de la banque) ; démonstrations : liste « Démonstrations à
+  travailler » (même composant que la blanche, aide « Coche celles que tu veux travailler. », AUCUNE cochée
+  par défaut), seules les cochées sont des types (compteur 0 ou 1 ; deux démonstrations au même énoncé
+  imprimé : une seule par feuille — `disponiblesFeuille`, compteur de l'autre bloqué à 0). Global : même
+  répartition équilibrée que les autres types ; une question = un exercice. Lignes `formule` /
+  `comprehension` SANS choix (tirage de `nombre` questions distinctes par `construireItemsPayload`) et
+  `demonstration` à `choix` → `construirePlan` → `genererDocumentsDepuisPlan` : rendu de la feuille du
+  professeur (énoncé, carte « Je vérifie » « Voir le corrigé détaillé », corrigé ; l'aménagée de la
+  feuille n'a que l'énoncé, comme celle du professeur). **Niveaux (choix fait)** : ces questions n'ont pas
+  de niveau — toujours admises quels que soient les niveaux cochés (`estSansNiveau`, `candidatAuxNiveaux`),
+  aucun badge ; Connaître sans autre question que celles-là reste composable même si tous les niveaux
+  sont grisés (`sansNiveauSeules`) ; texte « …, plus des questions sans niveau (toujours proposées) »,
+  récapitulatif « Questions sans niveau · Connaître ». L'ancien chemin « durée » ne les tire pas.
+  Blanche : `MAX_VRAI_FAUX_BLANCHE = 5` affirmations au plus au total (plafond de temps vrai/faux de
+  `remplir`, parts ou non) ; le reste de la part de Connaître va aux autres questions Connaître ; un
+  seul vrai/faux imprimé, total 20. **Vérifié — 22/11** (dossier de travail `connaitre-eleve` :
+  `tests.mjs`, `docs.mjs`, `ui.mjs`) : 23 chapitres (tous ont formules et compréhension ; 18 ont des
+  démonstrations, 2 ont deux démonstrations au même énoncé) : 6 048 compositions globales (types Connaître
+  tous présents, 0 démonstration non cochée, nombre = min(demandé, disponibles), 0 déséquilibre, 0
+  répétition évitable) et 3 024 à la carte exactes ; 230 plans réels : 1 367 questions ouvertes, 0
+  répétée, 0 hors banque ; blanche 14 490 compositions et 138 plans : ≤ 5 affirmations, total 20, 0
+  compétence non cochée ; non-régression : feuille sans Connaître (1 632), ancien chemin (4 830), blanche
+  sans vrai/faux (9 660) identiques ; blanche avec vrai/faux identique dès que le plafond ne joue pas
+  (15 écarts, tous où le code d'avant tirait 5 affirmations et pouvait en tirer une 6e : le tirage
+  aléatoire se décale) ; 24 documents réels : énoncé / « Je vérifie » / corrigé présents, 0
+  `.katex-error`, 0 débordement ; Playwright 50 vérifications (iPhone 13 et 1 280 px), 0 erreur console.
 - **Document « Évaluation blanche »** (`EnTeteEvaluation.blanche = { dureeConseillee }`, mode
   `evaluation`, une série ; `genererDocumentsDepuisPlan` → type `blanche` + aménagée si demandée ; ni
   corrigé séparé ni grille ; `assemblerEvaluationHtml.ts::genererEvaluationBlanche`) : cartouche
