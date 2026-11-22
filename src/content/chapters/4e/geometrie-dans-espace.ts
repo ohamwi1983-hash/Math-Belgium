@@ -187,9 +187,9 @@ export const geometrieDansEspace: ChapterContent = {
             'représentation (plans d\'architecte, dessins d\'ingénieur, perspectives de ' +
             'peintre) restaient des savoir-faire empiriques, transmis d\'atelier en atelier, ' +
             'sans théorie commune. Monge les unifie en un système rigoureux — reposant sur ' +
-            'deux projections perpendiculaires d\'un même objet — si stratégiquement utile ' +
-            '(fortifications, artillerie) que Napoléon le classe secret militaire pendant ' +
-            'plusieurs années avant d\'en autoriser l\'enseignement public. Monge devient ' +
+            'deux projections perpendiculaires d\'un même objet — si utile aux fortifications ' +
+            'que l\'École du génie de Mézières, où Monge l\'enseigne, la tient secrète pendant ' +
+            'des années. Elle n\'est enseignée publiquement qu\'en 1795. Monge devient ' +
             'l\'un des fondateurs de l\'École polytechnique, où la géométrie descriptive ' +
             'reste enseignée pendant près de deux siècles.',
           image: {
@@ -320,6 +320,18 @@ export const geometrieDansEspace: ChapterContent = {
               'l\'espace. Un plan de l\'espace n\'est jamais qu\'une copie du plan habituel, ' +
               'posée quelque part en 3D.',
           ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Ces données déterminent-elles un plan ?',
+          generatorId: 'gen100',
+          description: [
+            'Sur un solide en perspective cavalière, décide si trois points, une droite et un point, ou ' +
+              'deux droites déterminent un plan — puis nomme ce plan, ou explique pourquoi il n\'existe ' +
+              'pas ou n\'est pas unique.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 100. Positions de deux droites et plan déterminé »',
         },
       ],
     },
@@ -642,11 +654,11 @@ export const geometrieDansEspace: ChapterContent = {
       id: 'deux-plans',
       number: 5,
       title: 'Positions de deux plans',
-      kicker: 'parallèles, ou sécants suivant une droite — jamais un point isolé',
+      kicker: 'parallèles (ou confondus), ou sécants suivant une droite — jamais un point isolé',
       titreCourt: 'Positions de deux plans',
       partie: 'Dessiner l\'espace, positionner droites et plans',
       essentiel: [
-        'Deux plans distincts sont **parallèles** (aucun point commun) ou **sécants** : leur intersection est alors toujours une droite entière, jamais un point isolé.',
+        'Deux plans distincts sont **parallèles** (aucun point commun) ou **sécants** : leur intersection est alors toujours une droite entière, jamais un point isolé. Deux noms peuvent aussi désigner le même plan : les plans sont alors **confondus**.',
         'Si un plan coupe deux plans parallèles, les deux droites d\'intersection sont parallèles ; et toute droite qui coupe l\'un de deux plans parallèles coupe l\'autre.',
       ],
       cartes: [
@@ -658,8 +670,8 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Deux plans distincts sont soit **parallèles** (aucun point commun), soit ' +
-            '**sécants**. S\'ils sont sécants, leur intersection n\'est jamais un point isolé : ' +
+            'Deux plans sont soit **parallèles** (aucun point commun), soit **sécants** — ou ' +
+            '**confondus** : deux noms pour un même plan. S\'ils sont sécants, leur intersection n\'est jamais un point isolé : ' +
             'c\'est toujours une **droite entière**. Dès que deux plans distincts partagent ' +
             'ne serait-ce qu\'un seul point commun, ils partagent en réalité toute une droite qui ' +
             'passe par ce point.',
@@ -768,6 +780,18 @@ export const geometrieDansEspace: ChapterContent = {
             { tag: 'les points de (ABJ)', text: 'A et B sont des sommets de la face ABFE, et J est sur l\'arête [BF]' },
           ],
           result: { tag: 'conclusion', text: 'E, F et I, non alignés, sont dans le plan (ABJ) : les plans (ABJ) et (EFI) sont confondus — c\'est la face ABFE' },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Positions de deux plans',
+          generatorId: 'gen101',
+          description: [
+            'Sur un solide en perspective cavalière, décide si deux plans nommés par leurs points sont ' +
+              'parallèles, confondus ou sécants — trouve alors deux points communs, parfois construits ' +
+              'dans une même face —, puis justifie ta réponse.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 101. Positions de deux plans et de trois plans »',
         },
       ],
     },
@@ -907,11 +931,11 @@ export const geometrieDansEspace: ChapterContent = {
       titreCourt: 'Critères de parallélisme',
       partie: 'Dessiner l\'espace, positionner droites et plans',
       essentiel: [
-        'Une droite est parallèle à un plan si elle est parallèle à **une droite de ce plan** ; deux plans sont parallèles si deux droites **sécantes** du premier sont parallèles à deux droites du second.',
+        'Une droite parallèle à **une droite d\'un plan** est parallèle à ce plan ou incluse dans celui-ci ; deux plans sont parallèles si deux droites **sécantes** du premier sont parallèles à deux droites du second.',
         'Par un point, il ne passe qu\'une seule parallèle à une droite donnée. Prouver un parallélisme, c\'est toujours le prouver entre deux **droites**, dans une figure plane (parallélogramme, droite des milieux).',
       ],
       cartes: [
-        { question: 'Quand une droite est-elle parallèle à un plan ?', reponse: 'Quand elle est parallèle à une droite de ce plan.' },
+        { question: 'Quand une droite est-elle parallèle à un plan ?', reponse: 'Quand elle est parallèle à une droite de ce plan sans être incluse dans le plan.' },
         { question: 'Quand deux plans sont-ils parallèles ?', reponse: 'Quand deux droites sécantes du premier sont parallèles à deux droites du second.' },
         { question: 'Tétraèdre ABCD, I et J milieux de [DA] et [DB] : pourquoi (IJ) est-elle parallèle au plan (ABC) ?', reponse: 'Par la droite des milieux, (IJ) est parallèle à (AB), une droite du plan (ABC).' },
         { question: 'Deux droites sans point commun sont-elles forcément parallèles ?', reponse: 'Non : elles peuvent être gauches.' },
@@ -923,8 +947,9 @@ export const geometrieDansEspace: ChapterContent = {
           items: [
             '**Unicité** — par un point donné de l\'espace, il ne passe qu\'**une seule** droite ' +
               'parallèle à une droite donnée.',
-            '**Droite ∥ plan** — une droite est parallèle à un plan si elle est parallèle à ' +
-              '**une droite de ce plan**. Tu as déjà vu ce cas dans la section 4 (le cas « parallèle »).',
+            '**Droite ∥ plan** — si une droite est parallèle à **une droite d\'un plan**, elle est ' +
+              'parallèle à ce plan ou incluse dans celui-ci. Si l\'un de ses points n\'est pas dans le ' +
+              'plan, elle lui est donc parallèle : c\'est le cas « parallèle » de la section 4.',
             '**Plan ∥ plan** — deux plans sont parallèles si deux droites sécantes du premier ' +
               'sont parallèles à deux droites du second.',
           ],
@@ -1249,8 +1274,9 @@ export const geometrieDansEspace: ChapterContent = {
           kind: 'exemple',
           badge: '4 faces traversées',
           formula:
-            'Le plan de coupe traverse les 4 arêtes verticales d\'un parallélépipède. P (arête avant ' +
-            'gauche), Q (arête avant droite) et R (arête arrière droite) sont connus au départ.',
+            'Le plan de coupe traverse les 4 arêtes verticales du parallélépipède ABCDEFGH. P sur [AE] ' +
+            '(arête avant gauche), Q sur [BF] (arête avant droite) et R sur [CG] (arête arrière droite) ' +
+            'sont connus au départ, à trois hauteurs différentes.',
           steps: [
             { tag: '1 — segment direct', text: 'la face avant a ses 2 points connus (P et Q) → on trace [PQ].' },
             { tag: '2 — segment direct', text: 'la face droite a ses 2 points connus (Q et R) → on trace [QR].' },
@@ -1259,19 +1285,27 @@ export const geometrieDansEspace: ChapterContent = {
               text: 'la face arrière n\'a qu\'un point connu (R), la face gauche aussi (P).',
             },
             {
-              tag: '4 — point manquant de la face arrière',
+              tag: '4 — deux points auxiliaires dans le plan du sol',
               text:
-                'croiser [QR] avec l\'arête arrière droite ne donnerait que R, déjà connu : aucun ' +
-                'point nouveau. Mais les faces avant et arrière sont parallèles, donc le plan de coupe ' +
-                'les traverse suivant deux droites parallèles. Par R, on mène dans la face arrière la ' +
-                'parallèle à (PQ) : elle coupe l\'arête arrière gauche au point S.',
+                'croiser [QR] avec (CG) ne donnerait que R, déjà connu : aucun point nouveau. On passe ' +
+                'par le plan de la base (ABCD). Dans la face avant, (PQ) et (AB) se coupent en I ; dans la ' +
+                'face droite, (QR) et (BC) se coupent en J. I et J sont à la fois dans le plan de coupe ' +
+                'et dans le plan de la base : (IJ) est leur droite commune.',
+            },
+            {
+              tag: '5 — point auxiliaire de la face arrière',
+              text:
+                'dans le plan de la base, (IJ) et (CD) se coupent en K, hors du solide. K est dans le plan ' +
+                'de coupe et dans le plan (CDHG) : la droite (KR) porte le côté de section de la face ' +
+                'arrière, et coupe l\'arête [DH] au point S.',
             },
           ],
           result: {
             tag: 'conclusion',
             text:
               'les 4 côtés [PQ], [QR], [RS] et [SP] ferment le polygone de section. Chaque face ' +
-              'traversée y a bien apporté exactement 2 sommets.',
+              'traversée y a bien apporté exactement 2 sommets. Contrôle : [RS] est parallèle à [PQ], ' +
+              'car les faces avant et arrière sont parallèles.',
           },
         },
         {
@@ -1412,7 +1446,7 @@ export const geometrieDansEspace: ChapterContent = {
           text:
             'Les peintres de la Renaissance ont élaboré les règles de la perspective centrale à ' +
             'l\'aide d\'un **perspectographe**, un dispositif décrit et illustré en 1525 par le ' +
-            'peintre allemand Dürer (1471-1528), sur une idée déjà proposée par Alberti (le ' +
+            'peintre allemand Dürer (1471–1528), sur une idée déjà proposée par Alberti (le ' +
             '« voile », 1435). La « fenêtre de Dürer » est composée d\'un cadre en bois et d\'une ' +
             'vitre quadrillée, placée devant la scène à représenter.',
         },
@@ -1448,6 +1482,14 @@ export const geometrieDansEspace: ChapterContent = {
               'vitre exactement au même endroit : ils ont donc la même taille apparente, à ' +
               'travers la fenêtre',
           },
+        },
+        {
+          kind: 'para',
+          text:
+            'Pourquoi ? L\'œil, l\'image d\'un bâton vertical sur la vitre et le bâton lui-même forment ' +
+            'deux triangles de même sommet (l\'œil) dont les bases sont parallèles : par Thalès, vu en 3e, ' +
+            'la taille de l\'image vaut **hauteur du bâton × distance œil–vitre ÷ distance œil–bâton**. ' +
+            'Un bâton deux fois plus loin doit donc être deux fois plus grand pour avoir la même image.',
         },
         {
           kind: 'atelier',
@@ -1514,7 +1556,7 @@ export const geometrieDansEspace: ChapterContent = {
       id: 'point-de-fuite',
       number: 11,
       title: 'Point de fuite et construction en perspective centrale',
-      kicker: 'toutes les parallèles d\'un plan horizontal convergent vers un point, sur la ligne d\'horizon',
+      kicker: 'les fuyantes parallèles convergent vers un même point de fuite, sur la ligne d\'horizon',
       titreCourt: 'Point de fuite',
       partie: 'Perspective centrale et ombres',
       essentiel: [
@@ -1637,8 +1679,8 @@ export const geometrieDansEspace: ChapterContent = {
           text:
             'Sur le dessin, le milieu d\'un segment fuyant n\'est **pas** au milieu de sa longueur ' +
             'dessinée : la partie éloignée paraît plus courte. Trace plutôt les diagonales de la ' +
-            'face qui le contient (un trapèze sur le dessin) : la verticale qui passe par leur ' +
-            'intersection coupe le segment en son vrai milieu. C\'est la « propriété du trapèze » ' +
+            'face qui le contient (un trapèze sur le dessin) : la parallèle aux côtés de face qui passe ' +
+            'par leur intersection (une verticale pour un mur) coupe le segment en son vrai milieu. C\'est la « propriété du trapèze » ' +
             'annoncée plus haut : les diagonales d\'un rectangle se coupent en son centre, et ce ' +
             'point d\'intersection résiste à la perspective.',
         },
@@ -1764,12 +1806,12 @@ export const geometrieDansEspace: ChapterContent = {
       essentiel: [
         'Au soleil, les rayons sont parallèles : la direction se lit sur un exemple déjà résolu, puis on mène par chaque point la parallèle à cette direction, jusqu\'au sol ou au premier obstacle.',
         'Le sens compte : une direction de sens opposé projette l\'ombre du mauvais côté, et la verticale n\'est pas la direction du soleil.',
-        'Sous une lampe, les rayons partent tous de la lampe (projection centrale) : les ombres de poteaux verticaux se rejoignent au pied L₀ de la lampe.',
+        'Sous une lampe, les rayons partent tous de la lampe (projection centrale) : les droites qui portent les ombres de poteaux verticaux passent toutes par le pied $L_0$ de la lampe (on les prolonge au-delà du pied des poteaux).',
       ],
       cartes: [
         { question: 'Comment connaît-on la direction du soleil ?', reponse: 'Par un exemple déjà résolu : un point et son ombre déjà connue.' },
         { question: 'Au soleil, que dire des ombres de deux piquets verticaux ?', reponse: 'Elles sont parallèles.' },
-        { question: 'Sous une lampe, où se rejoignent les ombres de deux poteaux ?', reponse: 'Au pied L₀ de la lampe, juste sous elle.' },
+        { question: 'Sous une lampe, par quel point passent les droites qui portent les ombres de deux poteaux ?', reponse: 'Par le pied $L_0$ de la lampe, juste sous elle : on prolonge les ombres au-delà du pied des poteaux.' },
         { question: 'Un rayon rencontre un obstacle avant le sol : où se forme l\'ombre ?', reponse: 'Sur le premier obstacle rencontré.' },
       ],
       blocks: [
@@ -1922,8 +1964,9 @@ export const geometrieDansEspace: ChapterContent = {
               'tous de la lampe. C\'est une **projection centrale**, comme la perspective des sections ' +
               '10 et 11, où les rayons partent de l\'œil.',
             'Conséquence visible : au soleil, les ombres de piquets verticaux sont parallèles entre ' +
-              'elles ; sous un lampadaire, elles partent dans des directions différentes, qui se ' +
-              'rejoignent toutes au pied du lampadaire.',
+              'elles ; sous un lampadaire, elles partent dans des directions différentes. Les droites ' +
+              'qui les portent passent toutes par le pied du lampadaire (on les prolonge au-delà du ' +
+              'pied des piquets) ; les ombres elles-mêmes partent du côté opposé et ne l\'atteignent jamais.',
           ],
         },
         {
@@ -1934,8 +1977,8 @@ export const geometrieDansEspace: ChapterContent = {
             'Éclaire trois piquets par le soleil, puis par une lampe. Au soleil, les rayons ' +
             'sont parallèles : les ombres le sont aussi, et chacune est proportionnelle à ' +
             'la hauteur de son piquet (c\'est une projection parallèle). Avec une lampe, les ' +
-            'rayons partent d\'un même point : les ombres convergent vers le pied de la ' +
-            'lampe (c\'est une projection centrale). Si la lampe est plus basse qu\'un ' +
+            'rayons partent d\'un même point : les droites qui portent les ombres passent par ' +
+            'le pied de la lampe (c\'est une projection centrale). Si la lampe est plus basse qu\'un ' +
             'piquet, l\'ombre de ce piquet ne s\'arrête jamais.',
         },
         {
@@ -2056,10 +2099,10 @@ export const geometrieDansEspace: ChapterContent = {
             'Un quiz vrai/faux qui couvre tout le chapitre, en 7 thèmes qui suivent l\'ordre des ' +
             'sections : perspective cavalière, plans et positions de deux droites, position d\'une ' +
             'droite par rapport à un plan, plans/parallélisme/point de percée, section plane, ' +
-            'perspective centrale, ombre au soleil. Contrairement au chapitre sur les droites et ' +
+            'perspective centrale, ombres au soleil et à la lampe. Contrairement au chapitre sur les droites et ' +
             'cercles du plan, aucune affirmation ne porte sur une coordonnée numérique : elles ' +
             'testent les définitions et le raisonnement géométrique — jamais un calcul chiffré. ' +
-            'Le quiz se trouve tout en bas de la page, dans la synthèse.',
+            'Le quiz se trouve dans l\'onglet Réviser (synthèse).',
         },
         {
           kind: 'entrainement',
@@ -2088,6 +2131,12 @@ export const geometrieDansEspace: ChapterContent = {
         formulas: [
           { text: 'Axes $x$ et $z$ : conservés à l\'échelle réelle' },
           { text: 'Axe $y$ (profondeur) : direction à 45°, longueur $\\times \\dfrac{1}{2}$' },
+          {
+            text: 'Fuyante : longueur dessinée = profondeur réelle $\\div 2$, mesurée à la règle le long de la fuyante',
+            condition: 'jamais « un carreau en diagonale » par centimètre : la diagonale d\'un carreau mesure environ $1{,}4$ cm',
+          },
+          { text: 'Pyramide droite : pied de la hauteur au croisement des diagonales de la base ; hauteur verticale, en vraie grandeur' },
+          { text: 'Arêtes cachées : en pointillés' },
         ],
       },
       {
@@ -2105,11 +2154,38 @@ export const geometrieDansEspace: ChapterContent = {
           { text: 'Unicité : par un point donné, une seule parallèle à une droite donnée' },
           {
             text: 'Droite ∥ plan : $d \\parallel \\alpha$',
-            condition: 'si $d \\parallel$ une droite de $\\alpha$',
+            condition: 'si $d \\parallel$ une droite de $\\alpha$ et si un point de $d$ n\'est pas dans $\\alpha$ (sinon $d$ est incluse)',
           },
           { text: 'Plan ∥ plan : 2 droites sécantes de l\'un, ∥ à 2 droites de l\'autre' },
           { text: 'Droites gauches : ni sécantes, ni parallèles (aucun plan commun)' },
           { text: 'Trois plans sécants deux à deux : intersections concourantes, parallèles ou confondues' },
+        ],
+      },
+      {
+        title: 'Deux plans, point de percée',
+        formulas: [
+          { text: 'Deux plans distincts : parallèles (aucun point commun) ou sécants suivant une droite' },
+          { text: 'Deux noms pour un même plan : les trois points de l\'un sont dans l\'autre → plans confondus' },
+          { text: 'Droite d\'intersection de deux plans : deux points communs distincts' },
+          {
+            text: 'Point commun construit : rencontre de deux droites tracées dans une même face, une de chaque plan',
+            condition: 'jamais un simple croisement des traits sur le dessin',
+          },
+          { text: 'Un plan coupe deux plans parallèles suivant deux droites parallèles' },
+          { text: 'Deux plans parallèles : toute droite qui coupe l\'un coupe l\'autre' },
+          {
+            text: 'Point de percée de $d$ dans $\\alpha$ : plan auxiliaire $\\pi$ qui contient $d$, droite $b$ commune à $\\pi$ et $\\alpha$, puis $d \\cap b$',
+            condition: '$\\pi$ contient $d$ et coupe $\\alpha$',
+          },
+        ],
+      },
+      {
+        title: 'Justifier un parallélisme',
+        formulas: [
+          { text: 'Côtés opposés d\'un parallélogramme (rectangle, carré) : parallèles' },
+          { text: 'Droite des milieux : la droite qui joint les milieux de deux côtés d\'un triangle est parallèle au troisième côté' },
+          { text: 'Milieux de deux côtés opposés d\'un parallélogramme : la droite qui les joint est parallèle aux deux autres côtés' },
+          { text: 'Droite témoin : une droite **du plan**, parallèle à la droite étudiée' },
         ],
       },
       {
@@ -2131,6 +2207,8 @@ export const geometrieDansEspace: ChapterContent = {
           { text: 'Fuyantes horizontales parallèles entre elles → un même point de fuite, sur la ligne d\'horizon' },
           { text: 'Les droites parallèles à la vitre restent parallèles ; seules les fuyantes convergent' },
           { text: 'Milieu d\'une fuyante : par les diagonales de la face qui la contient' },
+          { text: 'Carrelage : les diagonales des carreaux, parallèles entre elles, ont leur propre point de fuite sur la ligne d\'horizon' },
+          { text: 'Rangée de poteaux : joindre le sommet d\'un poteau au milieu du suivant donne, au sol, le pied du poteau d\'après' },
         ],
       },
       {
@@ -2144,6 +2222,18 @@ export const geometrieDansEspace: ChapterContent = {
           { text: 'Bâton vertical : trace au sol depuis le pied, parallèle à l\'ombre de l\'exemple' },
         ],
       },
+      {
+        title: 'Ombre à la lampe',
+        formulas: [
+          { text: 'Rayons issus de la lampe $L$ : ombre de $S$ sur le rayon $(LS)$' },
+          {
+            text: 'Trace au sol : la droite qui part du pied $L_0$ de la lampe et passe par le pied de l\'objet',
+            condition: 'l\'ombre du sommet est à l\'intersection du rayon et de la trace, du côté opposé à la lampe',
+          },
+          { text: 'Mur vertical : l\'ombre y monte verticalement, depuis le point où la trace touche le pied du mur' },
+          { text: 'Retrouver la lampe : deux ombres prolongées se coupent en $L_0$ ; $L$ est à la verticale de $L_0$' },
+        ],
+      },
     ],
   },
 
@@ -2153,34 +2243,50 @@ export const geometrieDansEspace: ChapterContent = {
         '$45^\\circ$, réduit de moitié. On ne lit jamais une longueur en profondeur à la règle sur le ' +
         'dessin. La perspective centrale (point de fuite) est plus réaliste, mais elle ne conserve le ' +
         'parallélisme que des droites parallèles à la vitre — plus lourde à main levée.',
+      'Dessiner en cavalière — face avant en vraie grandeur ; depuis chaque sommet, une fuyante à ' +
+        '$45^\\circ$ dont on mesure à la règle la moitié de la profondeur (jamais « un carreau en ' +
+        'diagonale » par centimètre) ; pied de la hauteur d\'une pyramide au croisement des diagonales ' +
+        'de sa base ; arêtes cachées en pointillés.',
       'Déterminer un plan — 4 façons équivalentes : 3 points non alignés, ou une droite + un ' +
         'point extérieur, ou 2 droites sécantes, ou 2 droites parallèles distinctes. Jamais une ' +
         'équation.',
       'Deux droites — sécantes ou parallèles (toujours coplanaires), ou **gauches** (aucun plan ' +
-        'commun). C\'est un troisième cas, impossible dans le plan.',
+        'commun). C\'est un troisième cas, impossible dans le plan. Un croisement des traits sur le ' +
+        'dessin n\'est jamais un point commun : il faut le prouver.',
       'Position droite/plan — 3 questions, toujours dans le même ordre : les 2 points sont-ils ' +
-        'dans le plan ? La direction est-elle parallèle au plan ? Sinon, c\'est sécant. Le plan ' +
+        'dans le plan ? La droite est-elle parallèle à une droite du plan ? Sinon, c\'est sécant. Le plan ' +
         'reste toujours infini — jamais limité au solide dessiné.',
-      'Deux plans — parallèles, ou sécants suivant une droite entière (jamais un point isolé). ' +
+      'Deux plans — parallèles, confondus (deux noms pour un même plan), ou sécants suivant une ' +
+        'droite entière (jamais un point isolé), trouvée par deux points communs ou par un point ' +
+        'commun et sa direction. ' +
         'Trois plans sécants deux à deux donnent des droites d\'intersection sécantes en un même ' +
         'point, parallèles entre elles, ou confondues (une droite commune).',
-      'Parallélisme — toujours ramené à une comparaison de directions : droite ∥ droite d\'un ' +
-        'plan, ou 2 droites sécantes d\'un plan ∥ 2 droites sécantes de l\'autre.',
+      'Parallélisme — toujours ramené à une comparaison de directions : droite $\\parallel$ droite ' +
+        'd\'un plan, ou 2 droites sécantes d\'un plan $\\parallel$ 2 droites de l\'autre.',
+      'Démontrer un parallélisme — la droite témoin doit être **dans** le plan ; on prouve chaque ' +
+        'parallélisme de deux droites dans une figure plane : côtés opposés d\'un parallélogramme, ' +
+        'droite des milieux, milieux de deux côtés opposés d\'un parallélogramme.',
       'Point de percée — construis un plan auxiliaire qui contient la droite et qui est sécant ' +
         'au plan cible. Le point cherché devient alors une simple intersection 2D, dans ce plan ' +
-        'auxiliaire.',
+        'auxiliaire. Jamais le croisement de la droite et d\'une arête sur le dessin : elles sont ' +
+        'souvent gauches.',
       'Section plane — un solide convexe coupé donne toujours un unique polygone fermé. Chaque ' +
         'face traversée fournit exactement 2 sommets. Segment direct si les 2 points d\'une face ' +
         'sont déjà connus ; sinon, construis un point auxiliaire par intersection de deux droites ' +
         'coplanaires (ou, sur un parallélépipède, par une parallèle).',
       'Perspective centrale — un dispositif d\'abord (la fenêtre de Dürer, vision monoculaire à ' +
-        'travers une vitre quadrillée), puis un principe : toutes les parallèles d\'un même plan ' +
-        'horizontal convergent vers un point de fuite, sur la ligne d\'horizon. Les verticales et ' +
+        'travers une vitre quadrillée), puis un principe : des horizontales parallèles qui ' +
+        's\'éloignent (les fuyantes) convergent vers un même point de fuite, sur la ligne d\'horizon ; ' +
+        'chaque direction a le sien. Les verticales et ' +
         'les droites parallèles à la vitre restent parallèles ; seules les fuyantes convergent.',
       'Ombre au soleil — la direction n\'est jamais donnée en nombres : tu la déduis d\'un ' +
         'exemple déjà résolu. La projection est toujours oblique, jamais verticale. Elle est ' +
         'sensible au sens, pas seulement à la direction. Relie les points-ombres pour ' +
         'reconstituer l\'ombre complète.',
+      'Ombre à la lampe — les rayons partent tous de la lampe $L$ (projection centrale). L\'ombre du ' +
+        'sommet d\'un poteau est à l\'intersection du rayon issu de $L$ et de la trace au sol issue du ' +
+        'pied $L_0$ ; les droites qui portent les ombres passent toutes par $L_0$, et les ombres ne sont ' +
+        'pas parallèles.',
     ],
     checklist: {
       label: 'Avant de rendre ta copie',
@@ -2194,6 +2300,10 @@ export const geometrieDansEspace: ChapterContent = {
           'connu ?',
         'Le point d\'intersection que j\'ai trouvé peut-il légitimement tomber en dehors du ' +
           'solide dessiné ?',
+        'Ma droite témoin est-elle bien une droite **du** plan, et pas seulement une parallèle ' +
+          'quelconque ?',
+        'Sous une lampe, ma trace au sol part-elle bien du pied $L_0$, et pas du point $L$ dessiné en ' +
+          'haut du mât ?',
       ],
     },
     forward:

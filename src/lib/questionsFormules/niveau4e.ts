@@ -753,6 +753,25 @@ export const FORMULES_4E: BanqueFormules = {
         corrige: r`Deux droites ni sécantes ni parallèles : aucun plan ne les contient toutes les deux.`,
       },
     ],
+    position: [
+      {
+        id: 'droite-plan-trois-positions',
+        enonce: r`Quelles sont les trois positions possibles d'une droite par rapport à un plan ? Dans quel ordre pose-t-on les questions pour la trouver ?`,
+        corrige: r`Incluse, parallèle (sans y être incluse) ou sécante (un seul point commun). D'abord : les deux points de la droite sont-ils dans le plan (incluse) ? Sinon : la droite est-elle parallèle à une droite du plan (parallèle) ? Sinon : sécante.`,
+      },
+    ],
+    'deux-plans': [
+      {
+        id: 'deux-plans-positions-intersection',
+        enonce: r`Quelles sont les positions possibles de deux plans ? Que peut être l'intersection de deux plans sécants ?`,
+        corrige: r`Parallèles (aucun point commun), confondus (deux noms pour un même plan) ou sécants. L'intersection de deux plans sécants est toujours une droite entière, jamais un point isolé.`,
+      },
+      {
+        id: 'deux-plans-proprietes-paralleles',
+        enonce: r`Énonce les deux propriétés des plans parallèles vues dans ce chapitre : l'une sur un plan qui coupe deux plans parallèles, l'autre sur une droite qui coupe l'un d'eux.`,
+        corrige: r`Si un plan coupe deux plans parallèles, les deux droites d'intersection sont parallèles. Si deux plans sont parallèles, toute droite qui coupe l'un coupe aussi l'autre.`,
+      },
+    ],
     'trois-plans': [
       {
         id: r`Trois plans sécants deux à deux : intersections concourantes, parallèles ou confondues`,
@@ -764,12 +783,19 @@ export const FORMULES_4E: BanqueFormules = {
       {
         id: r`Droite ∥ plan : $d \parallel \alpha$`,
         enonce: r`À quelle condition une droite $d$ est-elle parallèle à un plan $\alpha$ ?`,
-        corrige: r`$d \parallel \alpha$ si $d$ est parallèle à une droite du plan $\alpha$.`,
+        corrige: r`Si $d$ est parallèle à une droite du plan $\alpha$, elle est parallèle à $\alpha$ ou incluse dans $\alpha$ : $d \parallel \alpha$ dès qu'un de ses points n'est pas dans $\alpha$.`,
       },
       {
         id: r`Plan ∥ plan : 2 droites sécantes de l'un, ∥ à 2 droites de l'autre`,
         enonce: r`À quelle condition deux plans sont-ils parallèles ?`,
         corrige: r`Si deux droites sécantes de l'un sont parallèles à deux droites de l'autre.`,
+      },
+    ],
+    percee: [
+      {
+        id: 'percee-plan-auxiliaire',
+        enonce: r`Décris la méthode du plan auxiliaire pour trouver le point de percée d'une droite $d$ dans un plan $lpha$.`,
+        corrige: r`On choisit un plan auxiliaire $\pi$ qui contient $d$ et qui coupe $lpha$ ; on détermine la droite $b$ commune à $\pi$ et $lpha$ ; le point de percée est l'intersection de $d$ et $b$, coplanaires dans $\pi$.`,
       },
     ],
     section: [
@@ -791,11 +817,23 @@ export const FORMULES_4E: BanqueFormules = {
         corrige: r`La ligne d'horizon est à la hauteur de l'œil (ou de l'objectif). Des fuyantes horizontales parallèles convergent vers un même point de fuite, sur la ligne d'horizon. Les droites parallèles à la vitre restent parallèles.`,
       },
     ],
+    'fenetre-durer': [
+      {
+        id: 'durer-monoculaire',
+        enonce: r`Avec la fenêtre de Dürer, comment le peintre regarde-t-il la scène ? Que veut dire le mot « perspective » ?`,
+        corrige: r`D'un seul œil, à travers un œilleton : sa vision est monoculaire, et il reporte où les lignes de vision coupent le quadrillage de la vitre. « Perspective » vient du latin perspectiva : « voir au travers ».`,
+      },
+    ],
     ombre: [
       {
         id: r`Ombre d'un point : parallèle à la direction du soleil, jusqu'au sol ou au premier obstacle`,
         enonce: r`Au soleil, comment construit-on l'ombre d'un point ?`,
         corrige: r`On trace par ce point la parallèle à la direction du soleil (une seule direction pour toute la scène, dans le bon sens), jusqu'au sol ou au premier obstacle.`,
+      },
+      {
+        id: 'ombre-lampe-trace',
+        enonce: r`Sous une lampe $L$ de pied $L_0$, comment construit-on l'ombre du sommet $S$ d'un poteau vertical ? Par quel point passent les droites qui portent les ombres de plusieurs poteaux ?`,
+        corrige: r`On trace le rayon issu de $L$ qui passe par $S$, et la trace au sol issue de $L_0$ qui passe par le pied du poteau : leur intersection est l'ombre de $S$, du côté opposé à la lampe. Les droites qui portent les ombres passent toutes par $L_0$.`,
       },
     ],
   },

@@ -1127,7 +1127,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'une droite parallèle au plan', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$), détermine la position relative de la droite $(AB)$ et du plan $(EFGH)$, en justifiant." },
     ],
     section: [
-      { cle: '4 faces traversées', enonce: "Un plan coupe les 4 arêtes verticales d'un parallélépipède rectangle. On connaît les points $P$ (sur l'arête avant gauche), $Q$ (sur l'arête avant droite) et $R$ (sur l'arête arrière droite). Explique comment construire la section du parallélépipède par ce plan, en justifiant chaque côté tracé, en particulier la construction du quatrième sommet sur l'arête arrière gauche." },
+      { cle: '4 faces traversées', enonce: "Un plan coupe les 4 arêtes verticales du parallélépipède rectangle $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$). On connaît les points $P$ sur $[AE]$, $Q$ sur $[BF]$ et $R$ sur $[CG]$, à trois hauteurs différentes. Explique comment construire la section du parallélépipède par ce plan, en justifiant chaque côté tracé, en particulier la construction du quatrième sommet $S$ sur l'arête $[DH]$." },
       { cle: 'tétraèdre', enonce: "Dans un tétraèdre $ABCD$, on place $P$ sur $[AB]$, $Q$ sur $[AC]$ et $R$ sur $[BD]$, la droite $(PQ)$ n'étant pas parallèle à $(BC)$. Explique comment construire la section du tétraèdre par le plan $(PQR)$, en justifiant la construction du point auxiliaire." },
     ],
     ombre: [
@@ -2951,7 +2951,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       {
         enonce: "Pourquoi la perspective à point de fuite, plus fidèle à la vision humaine, n'est-elle pas utilisée pour tous les dessins de ce chapitre ?",
         corrige:
-          "Elle est beaucoup plus lourde à construire à la main (il faut placer un ou plusieurs points de fuite avant même de tracer une arête) et surtout, elle ne conserve jamais le parallélisme : deux arêtes parallèles du solide convergent vers un même point de fuite sur le dessin. La perspective cavalière, plus simple et qui conserve toujours ce parallélisme, est donc plus adaptée pour raisonner sur des solides.",
+          "Elle est beaucoup plus lourde à construire à la main (il faut gérer des points de fuite), et surtout elle ne conserve le parallélisme que pour les droites parallèles à la vitre : des arêtes parallèles qui s'éloignent (les fuyantes) convergent vers un même point de fuite sur le dessin. La perspective cavalière, plus simple et qui conserve toujours ce parallélisme, est donc plus adaptée pour raisonner sur des solides.",
       },
     ],
     'determiner-plan': [
@@ -3066,12 +3066,12 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       {
         enonce: "Pourquoi des rails de chemin de fer, strictement parallèles dans la réalité, semblent-ils se rejoindre à l'horizon sur un dessin en perspective centrale ?",
         corrige:
-          "C'est exactement le principe de cette perspective : toutes les droites parallèles d'un même plan horizontal se rencontrent, dans le DESSIN, en un seul point de fuite situé sur la ligne d'horizon. C'est un effet de la projection choisie, pas une vraie rencontre des rails, qui restent à distance constante partout dans la réalité.",
+          "C'est exactement le principe de cette perspective : des horizontales parallèles qui s'éloignent (les fuyantes) se rencontrent, dans le dessin, en un seul point de fuite situé sur la ligne d'horizon. C'est un effet de la projection choisie, pas une vraie rencontre des rails, qui restent à distance constante partout dans la réalité.",
       },
       {
         enonce: "Pourquoi un même solide, dessiné en perspective cavalière puis en perspective à point de fuite, donne-t-il deux dessins vraiment différents ?",
         corrige:
-          "La cavalière conserve toujours le parallélisme des arêtes (deux arêtes parallèles le restent sur le papier), alors que la perspective à point de fuite ne le fait jamais (des arêtes parallèles convergent vers leur point de fuite commun) — les deux conventions traitent le parallélisme de façons opposées, ce qui change fondamentalement l'allure du dessin final.",
+          "La cavalière conserve toujours le parallélisme des arêtes (deux arêtes parallèles le restent sur le papier), alors que la perspective à point de fuite ne le conserve que pour les droites parallèles à la vitre (des arêtes parallèles qui s'éloignent convergent vers leur point de fuite commun) — ce qui change fondamentalement l'allure du dessin final.",
       },
     ],
     ombre: [
