@@ -6,6 +6,7 @@ import { construireSvgOmbreSoleil } from "./figure";
 import { texte } from "../../../export/fragmentsDocx";
 import {
   libelleObstacle,
+  nomObstacle,
   texteConclusion,
 } from "../../ui/formatOmbreSoleil";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOmbreSoleil } from "./index";
@@ -42,7 +43,10 @@ function contexteScene(exercice: ExerciceOmbreSoleil): string {
     return `L'ombre du sommet ${k} du campanile est connue : les deux traits pointillés relient ce sommet ${k}, puis son pied (le point du sol à sa verticale), à son ombre ${k}′ sur le sol. Ils donnent la direction de la lumière du soleil et celle des ombres au sol.`;
   }
   const exemple = "Le soleil éclaire le bâton A comme le bâton E : le trait pointillé est le rayon qui passe par le sommet de E, et l'ombre de E au sol va de son pied jusqu'à E′.";
-  return exercice.variante === "obstacle" ? `${exemple} Des obstacles sont posés sur le sol.` : exemple;
+  if (exercice.variante !== "obstacle") return exemple;
+  const noms = exercice.obstacles.map((_, i) => nomObstacle(exercice, i)).filter((n): n is string => n !== null);
+  if (noms.length === 0) return `${exemple} ${exercice.obstacles[0]!.type === "escalier" ? "Un escalier est posé" : "Une caisse est posée"} sur le sol.`;
+  return `${exemple} Des obstacles, nommés ${noms.slice(0, -1).join(", ")} et ${noms[noms.length - 1]} sur la figure, sont posés sur le sol.`;
 }
 
 function sommetsAProjeter(exercice: Extract<ExerciceOmbreSoleil, { variante: "directionInconnue" }>): string {
@@ -52,7 +56,13 @@ function sommetsAProjeter(exercice: Extract<ExerciceOmbreSoleil, { variante: "di
 
 function consignePapier(exercice: ExerciceOmbreSoleil): string {
   if (exercice.variante === "simple") return "Construis l'ombre du bâton A au soleil ; nomme A′ l'ombre de son sommet.";
-  if (exercice.variante === "obstacle") return "Construis l'ombre du bâton A (nomme A′ l'ombre de son sommet) et indique où elle s'arrête : sur le sol, ou sur un obstacle — lequel ?";
+  // Obstacles NOMMÉS sur la figure quand il y en a plusieurs (audit 4e ch. 8, G11) : « lequel ? » a
+  // alors une réponse écrite ; avec un seul obstacle, il n'y a rien à nommer.
+  if (exercice.variante === "obstacle") {
+    return exercice.obstacles.length >= 2
+      ? "Construis l'ombre du bâton A (nomme A′ l'ombre de son sommet) et indique où elle s'arrête : sur le sol, ou sur un obstacle — lequel ?"
+      : `Construis l'ombre du bâton A (nomme A′ l'ombre de son sommet) et indique où elle s'arrête : sur le sol, ou sur ${libelleObstacle(exercice, 0)}.`;
+  }
   const autres = exercice.ombresAutres.length > 0 ? ", puis, par le même procédé, celles des autres sommets utiles," : ",";
   return `Construis les ombres des sommets ${sommetsAProjeter(exercice)} du campanile${autres} et trace le contour de l'ombre portée du campanile sur le sol.`;
 }
@@ -88,7 +98,7 @@ function construireCorrectionOmbreSoleil(instance: ExerciceOmbreSoleil): BlocCor
   const figureCorrigee: BlocCorrection = { type: "html", html: construireSvgOmbreSoleil(instance, true) };
   let detail = texteConclusion(instance);
   if (instance.variante === "obstacle" && instance.indexObstacleTouche !== null) {
-    detail = `La trace au sol issue du pied de A passe sous ${libelleObstacle(instance.obstacles[instance.indexObstacleTouche])}. ${detail}`;
+    detail = `La trace au sol issue du pied de A passe sous ${libelleObstacle(instance, instance.indexObstacleTouche)}. ${detail}`;
   }
   if (instance.variante === "directionInconnue") {
     const ids = [...instance.piquets.map((p) => p.piquet.id), ...instance.ombresAutres.map((o) => o.id)].join(", ");
@@ -124,7 +134,7 @@ function reponseBreveOmbreSoleil(exercice: ExerciceOmbreSoleil): FragmentConsign
       texte(
         exercice.indexObstacleTouche === null
           ? "L'ombre du sommet de A atteint le sol (le rayon passe au-dessus des obstacles)."
-          : `L'ombre du sommet de A s'arrête sur ${libelleObstacle(exercice.obstacles[exercice.indexObstacleTouche])}.`,
+          : `L'ombre du sommet de A s'arrête sur ${libelleObstacle(exercice, exercice.indexObstacleTouche)}.`,
       ),
     ];
   }
@@ -152,7 +162,7 @@ function baremeOmbreSoleil(exercice: ExerciceOmbreSoleil): BaremeExercice {
       criteres: [
         { sousQuestion: "a", critere: [texte("Rayon issu du sommet de A, parallèle au rayon de l'exemple")], points: 1 },
         { sousQuestion: "b", critere: [texte("Trace au sol issue du pied de A, parallèle à l'ombre de E")], points: 1 },
-        { sousQuestion: "b", critere: [texte(auSol ? "Rayon reconnu au-dessus des obstacles" : `Premier obstacle heurté : ${libelleObstacle(exercice.obstacles[exercice.indexObstacleTouche!])}`)], points: 1 },
+        { sousQuestion: "b", critere: [texte(auSol ? "Rayon reconnu au-dessus des obstacles" : `Premier obstacle heurté : ${libelleObstacle(exercice, exercice.indexObstacleTouche!)}`)], points: 1 },
         { sousQuestion: "b", critere: [texte(auSol ? "A′ placé au sol, ombre du bâton tracée" : "A′ placé sur la surface de l'obstacle")], points: 1 },
       ],
       erreursFrequentes: [

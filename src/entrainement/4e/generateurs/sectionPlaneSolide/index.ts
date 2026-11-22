@@ -12,6 +12,8 @@ import { calculerPolygoneSection, lignesCandidatesStatiques, type PlanPoints3D, 
  * 1. Le polygone de section doit croiser AU MOINS `K_MIN=4` faces — une section triangulaire
  *    (k=3) ne nécessite jamais de point auxiliaire, ce qui viderait l'exercice de son intérêt
  *    pédagogique central (spec : "piège central à cibler... construire un point auxiliaire").
+ *    La section triangulaire a sa PROPRE variante, ajoutée en fin de catalogue (audit 4e ch. 8, G9 :
+ *    0 triangle sur 8 000 tirages, alors que le cours, l'atelier et le quiz en parlent).
  * 2. `resolutionReference` doit confirmer que l'instance est réellement résoluble en un nombre
  *    borné d'itérations depuis {P,Q,R} — voir `polygoneSection.ts` pour la garantie de
  *    terminaison complète. Depuis l'audit du chapitre 8 (points 17-18), seules les constructions
@@ -95,10 +97,15 @@ function tenterGenererPourGabarit(nomGabarit: NomSolide3D): ExerciceSectionPlane
     tirerPointSurArete(solide, aretes[1]),
     tirerPointSurArete(solide, aretes[2]),
   ];
+  return assemblerDepuisPlan(solide, plan, K_MIN);
+}
 
+/** Instance complète depuis 3 points P, Q, R (dans cet ordre) — `null` si la section a moins de
+ * `kMin` côtés, si un sommet de section colle à un sommet du solide, ou si elle n'est pas résoluble. */
+function assemblerDepuisPlan(solide: Solide3D, plan: PlanPoints3D, kMin: number): ExerciceSectionPlaneSolide | null {
   const polygone = calculerPolygoneSection(solide, plan);
   if (!polygone) return null;
-  if (polygone.points.length < K_MIN) return null;
+  if (polygone.points.length < kMin) return null;
 
   // P, Q, R sont, par construction, 3 des sommets du polygone (chaque point de `plan` appartient
   // trivialement au plan qu'il définit) — retrouvés par coïncidence EXACTE de position, jamais par
@@ -137,16 +144,56 @@ function tenterGenererPourGabarit(nomGabarit: NomSolide3D): ExerciceSectionPlane
 
 const MAX_TENTATIVES = 2000;
 
-/** Convention CLAUDE.md — catalogue `{id,label}` + `construireAvecVarianteId` : le seul axe
- * discret pertinent pour ce générateur est le GABARIT lui-même (la section elle-même n'a pas de
- * "catégorie" comparable aux autres exercices — sa variété vient uniquement des points de départ
- * tirés). */
-export const CATALOGUE_VARIANTES: { id: NomSolide3D; label: string }[] = GABARITS_TOUS.map((id) => ({
-  id,
-  label: GABARITS_SOLIDE3D[id].label,
-}));
+// --- Variante « triangle » (audit 4e ch. 8, lot C, G9) -------------------------------------------
 
-export function construireAvecVarianteId(varianteId: NomSolide3D): ExerciceSectionPlaneSolide {
+/** Les 3 arêtes issues d'un sommet (tous les sommets des 4 gabarits sont de degré 3). */
+function aretesIssuesDe(solide: Solide3D, sommet: string): [string, string][] {
+  return toutesLesAretesNommees(solide).filter(([a, b]) => a === sommet || b === sommet);
+}
+
+/** Point de l'arête issue de `sommet`, à une fraction `t` de sa longueur depuis ce sommet. */
+function pointDepuisSommet(solide: Solide3D, sommet: string, arete: [string, string], t: number): Point3D {
+  const a = solide.sommets[sommet];
+  const b = solide.sommets[arete[0] === sommet ? arete[1] : arete[0]];
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t };
+}
+
+/** Section TRIANGULAIRE : P, Q, R sur les trois arêtes issues d'un même sommet (trois faces deux à
+ * deux adjacentes) — trois côtés tracés directement, aucun point auxiliaire. Solide tiré parmi les
+ * quatre gabarits ; t ∈ [0,25 ; 0,75] (triangle lisible, jamais collé au sommet ni au bout). */
+function tenterTriangle(): ExerciceSectionPlaneSolide | null {
+  const nomGabarit = tirerNomGabarit(GABARITS_TOUS);
+  const solide = GABARITS_SOLIDE3D[nomGabarit];
+  const sommets = Object.keys(solide.sommets);
+  const sommet = sommets[randomInt(0, sommets.length - 1)];
+  const aretes = melanger(aretesIssuesDe(solide, sommet));
+  if (aretes.length !== 3) return null;
+  const plan = aretes.map((arete) => pointDepuisSommet(solide, sommet, arete, 0.25 + Math.random() * 0.5)) as PlanPoints3D;
+  const instance = assemblerDepuisPlan(solide, plan, 3);
+  return instance && instance.points.length === 3 ? instance : null;
+}
+
+export function construireTriangle(): ExerciceSectionPlaneSolide {
+  for (let tentative = 0; tentative < MAX_TENTATIVES; tentative++) {
+    const resultat = tenterTriangle();
+    if (resultat) return resultat;
+  }
+  throw new Error(`construireTriangle : aucune section triangulaire trouvée après ${MAX_TENTATIVES} tentatives`);
+}
+
+export type VarianteSectionPlaneSolide = NomSolide3D | "triangle";
+
+/** Convention CLAUDE.md — catalogue `{id,label}` + `construireAvecVarianteId` : un gabarit par
+ * variante (la section n'a pas de « catégorie » comparable aux autres exercices — sa variété vient
+ * des points de départ tirés), puis la variante « triangle » AJOUTÉE EN FIN (audit 4e ch. 8, G9) :
+ * les indices des quatre gabarits, donc les `?code=` déjà imprimés, ne changent pas. */
+export const CATALOGUE_VARIANTES: { id: VarianteSectionPlaneSolide; label: string }[] = [
+  ...GABARITS_TOUS.map((id) => ({ id, label: GABARITS_SOLIDE3D[id].label })),
+  { id: "triangle", label: "Section triangulaire (P, Q, R autour d'un sommet)" },
+];
+
+export function construireAvecVarianteId(varianteId: VarianteSectionPlaneSolide): ExerciceSectionPlaneSolide {
+  if (varianteId === "triangle") return construireTriangle();
   for (let tentative = 0; tentative < MAX_TENTATIVES; tentative++) {
     const resultat = tenterGenererPourGabarit(varianteId);
     if (resultat) return resultat;
@@ -161,4 +208,11 @@ export function genererExerciceSectionPlaneSolide(): ExerciceSectionPlaneSolide 
     if (resultat) return resultat;
   }
   throw new Error(`genererExerciceSectionPlaneSolide : aucune instance résoluble trouvée après ${MAX_TENTATIVES} tentatives`);
+}
+
+/** Tirage libre de l'APPLI : la section triangulaire une fois sur six, sinon le tirage libre
+ * historique. Le tirage libre de l'adaptateur et des `?code=` reste `genererExerciceSectionPlaneSolide`
+ * (codes libres déjà imprimés inchangés). */
+export function genererExerciceSectionPlaneSolideLibre(): ExerciceSectionPlaneSolide {
+  return Math.random() < 1 / 6 ? construireTriangle() : genererExerciceSectionPlaneSolide();
 }

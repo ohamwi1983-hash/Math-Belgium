@@ -2,6 +2,7 @@ import type { PointExtraSolide3D, SegmentExtraSolide3D } from "../components/Sol
 import type { Point3D, Solide3D } from "../core/geometrieEspace.types";
 import type {
   CadrageScene,
+  ErreurPointOmbre,
   DirectionCandidate,
   ExerciceOmbreSoleil,
   ExerciceOmbreSoleilDirectionInconnue,
@@ -13,7 +14,7 @@ import type {
 } from "../core/ombreSoleil.types";
 import { additionner3D, multiplierScalaire3D, produitScalaire3D, soustraire3D } from "../moteur/geometrieEspace";
 import { sommetPiquet } from "../moteur/verificationOmbreSoleil";
-import { DIRECTION_VUE_3D } from "./solide3DSketch";
+import { calculerEchelleProjection, DIRECTION_VUE_3D, HAUTEUR_SVG, LARGEUR_SVG, projeter3DVersPixel } from "./solide3DSketch";
 
 /**
  * Présentation — "Ombre au soleil" (41e générateur, chapitre "Géométrie dans l'espace").
@@ -162,7 +163,7 @@ export function elementsScene(exercice: ExerciceOmbreSoleil, indexObstacleMisEnE
       points: [],
       segments: exercice.obstacles.flatMap((o, i) => aretesObstacle(o, i === indexObstacleMisEnEvidence ? COULEURS_OMBRE.correct : undefined)),
     };
-    return fusionner(sol, obstacles, elementsExemple(exercice.piquetExemple, exercice.ombreExemple), elementsBaton(exercice.baton));
+    return fusionner(sol, obstacles, { points: etiquettesObstacles(exercice), segments: [] }, elementsExemple(exercice.piquetExemple, exercice.ombreExemple), elementsBaton(exercice.baton));
   }
   return fusionner(sol, elementsPaireConnue(exercice));
 }
@@ -279,8 +280,112 @@ export function libellePoint(numero: number): string {
 
 // --- Conclusion ----------------------------------------------------------------------------------
 
-export function libelleObstacle(obstacle: ObstacleOmbreSoleil): string {
-  return obstacle.type === "escalier" ? "l'escalier" : "la caisse";
+/** Noms des obstacles d'une scène qui en a plusieurs (audit 4e ch. 8, G11) : dans l'ordre où la
+ * trace au sol issue du pied de A les rencontre (ordre du tableau, posé le long de la trace). */
+const NOMS_OBSTACLES = ["K", "L", "M"];
+
+export function nomObstacle(exercice: ExerciceOmbreSoleilObstacle, index: number): string | null {
+  return exercice.obstacles.length >= 2 ? (NOMS_OBSTACLES[index] ?? null) : null;
+}
+
+/** « la caisse », « l'escalier » ; « la caisse K » quand la scène a plusieurs obstacles. */
+export function libelleObstacle(exercice: ExerciceOmbreSoleilObstacle, index: number): string {
+  const base = exercice.obstacles[index]!.type === "escalier" ? "l'escalier" : "la caisse";
+  const nom = nomObstacle(exercice, index);
+  return nom ? `${base} ${nom}` : base;
+}
+
+interface Px {
+  x: number;
+  y: number;
+}
+
+/** Distance d'un point à un segment (pixels). */
+function distanceSegment(c: Px, a: Px, b: Px): number {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const t = Math.max(0, Math.min(1, ((c.x - a.x) * dx + (c.y - a.y) * dy) / (dx * dx + dy * dy || 1)));
+  return Math.hypot(a.x + t * dx - c.x, a.y + t * dy - c.y);
+}
+
+/** Décalages candidats d'une étiquette : 16 directions, rayons de 11 à 26 px. */
+const DECALAGES_ETIQUETTE: Px[] = [11, 15, 19, 23, 26].flatMap((r) =>
+  Array.from({ length: 16 }, (_, k) => ({ x: Math.round(r * Math.cos((k * Math.PI) / 8)), y: Math.round(r * 0.9 * Math.sin((k * Math.PI) / 8)) })),
+);
+
+/** Meilleur décalage d'une étiquette (≈ 10 × 14 px, centrée) posée près de `ancre` : le plus de
+ * dégagement possible (distance du bord de l'étiquette à tout trait, point ou étiquette déjà posée,
+ * plafonnée à 8 px), puis le plus court. `garde` : contrainte supplémentaire (ex. rester plus près de
+ * son obstacle que des autres). Partagé avec la figure du corrigé (`ombreSoleil/figure.ts`). */
+export function meilleurDecalageEtiquette(ancres: Px[], traits: [Px, Px][], points: Px[], etiquettes: Px[], garde: (c: Px, ancre: Px) => boolean = () => true): { ancre: number; d: Px; degagement: number } {
+  let meilleur = { ancre: 0, d: { x: 0, y: -14 }, degagement: -Infinity, score: -Infinity };
+  ancres.forEach((a, i) => {
+    for (const d of DECALAGES_ETIQUETTE) {
+      const c = { x: a.x + d.x, y: a.y + d.y };
+      if (c.x < 8 || c.x > LARGEUR_SVG - 8 || c.y < 10 || c.y > HAUTEUR_SVG - 8) continue;
+      if (!garde(c, a)) continue;
+      // Boîte de l'étiquette ≈ demi-largeur 5, demi-hauteur 7 : on retire ≈ 6 px au dégagement.
+      let min = Infinity;
+      for (const [p, q] of traits) min = Math.min(min, distanceSegment(c, p, q) - 6);
+      for (const q of points) min = Math.min(min, Math.hypot(q.x - c.x, q.y - c.y) - 9);
+      for (const q of etiquettes) min = Math.min(min, Math.hypot(q.x - c.x, q.y - c.y) - 13);
+      const score = Math.min(min, 8) * 10 - Math.hypot(d.x, d.y) * 0.2;
+      if (score > meilleur.score) meilleur = { ancre: i, d, degagement: min, score };
+    }
+  });
+  return { ancre: meilleur.ancre, d: meilleur.d, degagement: meilleur.degagement };
+}
+
+/** Étiquettes K, L, M des obstacles (scène à plusieurs obstacles), placées en PIXELS réels près d'un
+ * coin du dessus de leur obstacle, là où elles touchent le moins de traits, de points ou d'étiquettes
+ * (sol, obstacles, bâtons, exemple, candidats, aperçus de direction, rayons et traces du corrigé), et
+ * plus près de leur obstacle que de tout autre. Aucun disque (`rayon: 0`) : ce n'est pas un point. */
+function etiquettesObstacles(exercice: ExerciceOmbreSoleilObstacle): PointExtraSolide3D[] {
+  if (exercice.obstacles.length < 2) return [];
+  const echelle = calculerEchelleProjection(solidePourAffichage(exercice));
+  const px = (p: Point3D): Px => projeter3DVersPixel(p, echelle);
+  const sommetA = sommetPiquet(exercice.baton);
+  const sommetE = sommetPiquet(exercice.piquetExemple);
+  const s = exercice.cadrage.sol;
+  const segments3D: [Point3D, Point3D][] = [
+    ...s.map((a, i): [Point3D, Point3D] => [a, s[(i + 1) % 4]!]),
+    [exercice.baton.base, sommetA],
+    [exercice.piquetExemple.base, sommetE],
+    [sommetE, exercice.ombreExemple],
+    [exercice.piquetExemple.base, exercice.ombreExemple],
+    [sommetA, exercice.ombreSansObstacle],
+    [exercice.baton.base, exercice.ombreSansObstacle],
+    [sommetA, exercice.ombre],
+    [exercice.baton.base, exercice.ombre],
+    ...exercice.directionsCandidates.map((d): [Point3D, Point3D] => [sommetA, d.extremiteApercu]),
+  ];
+  const traits: [Px, Px][] = segments3D.map(([a, b]) => [px(a), px(b)]);
+  const traitsObstacles = exercice.obstacles.map((o) => aretesObstacle(o).map((sg): [Px, Px] => [px(sg.a), px(sg.b)]));
+  const tousTraits = [...traits, ...traitsObstacles.flat()];
+  const pts3D = [...exercice.pointsCandidats.map((c) => c.position), ...exercice.directionsCandidates.map((d) => d.extremiteApercu), exercice.ombre, sommetA, sommetE, exercice.ombreExemple];
+  // Un point dessiné porte aussi son étiquette (≈ 11 px au-dessus) : on évite les deux.
+  const points: Px[] = pts3D.flatMap((p) => {
+    const q = px(p);
+    return [q, { x: q.x, y: q.y - 11 }];
+  });
+  const posees: Px[] = [];
+  return exercice.obstacles.map((o, i) => {
+    const coins = o.boites.flatMap((b) => [
+      { x: b.min.x, y: b.min.y, z: b.max.z },
+      { x: b.max.x, y: b.min.y, z: b.max.z },
+      { x: b.max.x, y: b.max.y, z: b.max.z },
+      { x: b.min.x, y: b.max.y, z: b.max.z },
+      { x: b.min.x, y: b.min.y, z: b.min.z },
+      { x: b.max.x, y: b.min.y, z: b.min.z },
+    ]);
+    const distanceObstacle = (c: Px, j: number) => Math.min(...traitsObstacles[j]!.map(([a, b]) => distanceSegment(c, a, b)));
+    const garde = (c: Px) => exercice.obstacles.every((_, j) => j === i || distanceObstacle(c, i) < distanceObstacle(c, j));
+    const choix = meilleurDecalageEtiquette(coins.map(px), tousTraits, points, posees, garde);
+    const coin = coins[choix.ancre]!;
+    const p = px(coin);
+    posees.push({ x: p.x + choix.d.x, y: p.y + choix.d.y });
+    return { position: coin, label: NOMS_OBSTACLES[i]!, couleur: COULEURS_OMBRE.arete, rayon: 0, decalageLabel: choix.d };
+  });
 }
 
 export function texteConclusion(exercice: ExerciceOmbreSoleil): string {
@@ -291,7 +396,7 @@ export function texteConclusion(exercice: ExerciceOmbreSoleil): string {
     if (exercice.indexObstacleTouche === null) {
       return "Le rayon issu du sommet de A passe au-dessus (ou à côté) de tous les obstacles : l'ombre du sommet atteint le sol.";
     }
-    return `Le rayon issu du sommet de A heurte d'abord ${libelleObstacle(exercice.obstacles[exercice.indexObstacleTouche])} (en vert) : l'ombre du sommet s'arrête sur sa surface, elle n'atteint pas le sol.`;
+    return `Le rayon issu du sommet de A heurte d'abord ${libelleObstacle(exercice, exercice.indexObstacleTouche)} (en vert) : l'ombre du sommet s'arrête sur sa surface, elle n'atteint pas le sol.`;
   }
   return "L'ombre portée du campanile est reconstituée : son contour relie la base aux ombres des sommets. Les ombres des autres sommets s'obtiennent par le même procédé.";
 }
@@ -352,3 +457,44 @@ export function origineApercusDirection(exercice: ExerciceOmbreSoleilBoucle): Pi
 }
 
 export type { ExerciceOmbreSoleilSimple };
+
+// --- Choix fermés jugés (audit 4e ch. 8, lot B) : message propre au choix faux ----------------------
+
+/** Rayon candidat faux : sens opposé, inclinaison différente, ou direction différente. */
+export function messageDirectionFausse(correcte: Point3D, choisie: Point3D): string {
+  const horizontal = correcte.x * choisie.x + correcte.y * choisie.y;
+  const croix = correcte.x * choisie.y - correcte.y * choisie.x;
+  const normeH = Math.hypot(correcte.x, correcte.y) * Math.hypot(choisie.x, choisie.y);
+  const memeAxe = normeH > 0 && Math.abs(croix) < 1e-6 * normeH;
+  if (memeAxe && horizontal < 0) return "Ce n'était pas le bon rayon : il part du mauvais côté. Les rayons du soleil sont parallèles ET de même sens : l'ombre tombe du même côté que l'ombre donnée.";
+  if (memeAxe) return "Ce n'était pas le bon rayon : il part du bon côté, mais il est plus ou moins incliné que le rayon donné. Des droites parallèles gardent la même inclinaison sur le dessin.";
+  return "Ce n'était pas le bon rayon : il n'est pas parallèle au rayon donné. Au soleil, tous les rayons sont parallèles (même inclinaison, même sens sur le dessin).";
+}
+
+/** Point candidat faux : le message dit l'erreur de construction qu'il incarne (jamais la réponse). */
+export function messagePointFaux(erreur: ErreurPointOmbre, exercice?: ExerciceOmbreSoleilObstacle): string {
+  const tete = "Ce n'était pas le bon point : ";
+  const touche = exercice && exercice.indexObstacleTouche !== null ? libelleObstacle(exercice, exercice.indexObstacleTouche) : null;
+  switch (erreur) {
+    case "traceTropCourte":
+      return `${tete}il est bien sur la trace au sol issue du pied, mais avant le rayon. L'ombre du sommet est là où le rayon rencontre cette trace.`;
+    case "traceTropLongue":
+      return `${tete}il est bien sur la trace au sol issue du pied, mais au-delà du rayon. L'ombre du sommet est là où le rayon rencontre cette trace.`;
+    case "surRayonSansTrace":
+      return `${tete}sur le dessin, il semble sur le rayon, mais il n'est pas sur la trace au sol issue du pied. L'ombre est à l'intersection des deux.`;
+    case "sensOppose":
+      return `${tete}il est du mauvais côté du bâton. L'ombre part dans le même sens que l'ombre donnée.`;
+    case "composantesPermutees":
+      return `${tete}la trace qui y mène n'est pas parallèle à l'ombre donnée. Au soleil, les ombres au sol de segments verticaux sont parallèles.`;
+    case "traverseObstacle":
+      return `${tete}pour l'atteindre, le rayon devrait traverser ${touche ?? "un obstacle"}. L'ombre s'arrête sur la première surface que le rayon touche.`;
+    case "obstacleSuivant":
+      return `${tete}avant d'arriver là, le rayon heurte déjà ${touche ?? "un autre obstacle"}. L'ombre s'arrête sur la première surface touchée.`;
+    case "surObstacleSurvole":
+      return `${tete}le rayon passe au-dessus de cet obstacle sans le toucher : l'ombre ne s'y arrête pas.`;
+    case "surObstacleMauvaiseFace":
+      return `${tete}il est bien sur ${touche ?? "l'obstacle touché"}, mais pas à l'endroit où le rayon le heurte (suis la trace au sol issue du pied, puis remonte jusqu'au rayon).`;
+    default:
+      return "Ce n'était pas le bon point.";
+  }
+}

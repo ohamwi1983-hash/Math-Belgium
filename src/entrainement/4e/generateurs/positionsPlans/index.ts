@@ -38,6 +38,7 @@ import {
   type PointDispo,
   type RelationDroitePlan,
 } from "./geometriePlans";
+import { parallelismeJustifiable, type FigureEspace } from "../../ui/corrigeEspace1";
 
 /**
  * Générateur de gen101 — « Positions de deux plans et de trois plans » (4e, chapitre 8). Tout le
@@ -379,11 +380,37 @@ function pointCommunNomme(l: DroiteNommee, m: DroiteNommee): string | null {
   return l.noms.find((n) => m.noms.includes(n)) ?? null;
 }
 
+/** Figure de la brique de corrigé (`corrigeEspace1`) pour un nommage : sommets et milieux nommés. */
+function figureNommage(nommage: Nommage): FigureEspace {
+  const sommets: Record<string, Point3D> = {};
+  for (const n of nommage.nommes) if (!nommage.milieux.some((m) => m.nom === n.nom)) sommets[n.nom] = n.position;
+  return { sommets, faces: [], points: nommage.milieux.map((m) => ({ nom: m.nom, position: m.position, milieuDe: m.milieuDe })) };
+}
+
+/** (P) ∥ (Q) se prouve-t-il par le critère du cours avec des droites NOMMÉES : deux droites de (P)
+ * sécantes en un point nommé, chacune parallèle (parallélisme prouvable dans une figure plane) à une
+ * droite de (Q) ? Même exigence que `justificationsParalleles` (gen101 « trois plans »). */
+function plansParallelesProuvables(f: FigureEspace, nommage: Nommage, p: PlanGeo, q: PlanGeo): boolean {
+  const lignesP = droitesNommees(nommage.nommes, (a, b) => droiteDansPlan(a, b, p.trois));
+  const lignesQ = droitesNommees(nommage.nommes, (a, b) => droiteDansPlan(a, b, q.trois));
+  const prouvees = lignesP.filter((l) => lignesQ.some((m) => droitesParalleles(l.a, l.b, m.a, m.b) && parallelismeJustifiable(f, l.noms, m.noms)));
+  return prouvees.some((l1, i) => prouvees.some((l2, j) => j > i && !droitesParalleles(l1.a, l1.b, l2.a, l2.b) && pointCommunNomme(l1, l2) !== null));
+}
+
+/** Une droite nommée de (R) parallèle à (l), parallélisme prouvable (témoin de « (l) ∥ (R) »). */
+function temoinProuvable(f: FigureEspace, nommage: Nommage, l: DroiteNommee, r: PlanGeo): boolean {
+  return droitesNommees(nommage.nommes, (a, b) => droiteDansPlan(a, b, r.trois)).some((m) => droitesParalleles(l.a, l.b, m.a, m.b) && parallelismeJustifiable(f, l.noms, m.noms));
+}
+
 function justificationsParalleles(nommage: Nommage, p: PlanGeo, q: PlanGeo, noms: [PlanSolide3D, PlanSolide3D]): OptionJustification[] | null {
   const lignesP = droitesNommees(nommage.nommes, (a, b) => droiteDansPlan(a, b, p.trois));
   const lignesQ = droitesNommees(nommage.nommes, (a, b) => droiteDansPlan(a, b, q.trois));
+  // Seulement des parallélismes que le corrigé sait PROUVER dans une figure plane (points ouverts du
+  // corrigé, 4e ch. 8 : < 1 % de parallélismes ne restaient justifiés que par « même direction »,
+  // ex. (EI) ∥ (CJ) sommet–milieu) — pas de nouveau tirage : la boucle de rejet de l'appelant reprend.
+  const f = figureNommage(nommage);
   const paires: [DroiteNommee, DroiteNommee][] = [];
-  for (const l of lignesP) for (const m of lignesQ) if (droitesParalleles(l.a, l.b, m.a, m.b)) paires.push([l, m]);
+  for (const l of lignesP) for (const m of lignesQ) if (droitesParalleles(l.a, l.b, m.a, m.b) && parallelismeJustifiable(f, l.noms, m.noms)) paires.push([l, m]);
   if (paires.length < 2) return null;
 
   // Option valable : deux paires dont les droites de P sont sécantes (de préférence en un point nommé).
@@ -397,8 +424,11 @@ function justificationsParalleles(nommage: Nommage, p: PlanGeo, q: PlanGeo, noms
     }
   }
   if (valables.length === 0) return null;
+  // Deux droites sécantes en un point NOMMÉ (le corrigé prouve « sécantes » par ce point) : sans
+  // elles (≈ 1 tirage sur 300), le critère restait incomplet — instance rejetée.
   const avecPointNomme = valables.filter(([[l1], [l2]]) => pointCommunNomme(l1, l2));
-  const [[l1, m1], [l2, m2]] = choisir(avecPointNomme.length > 0 ? avecPointNomme : valables);
+  if (avecPointNomme.length === 0) return null;
+  const [[l1, m1], [l2, m2]] = choisir(avecPointNomme);
   const ptCommun = pointCommunNomme(l1, l2);
   const secantes = ptCommun ? `${libelleDroite(l1)} et ${libelleDroite(l2)} sont sécantes en ${ptCommun}` : `${libelleDroite(l1)} et ${libelleDroite(l2)} sont sécantes`;
   const valable: OptionJustification = { texte: `${texteParallele(l1, m1)} et ${texteParallele(l2, m2)} ; ${secantes}.`, valide: true, defaut: "" };
@@ -659,6 +689,7 @@ function justificationsTroisPlans(nommage: Nommage, plans: Triplet, noms: PlanSo
     [1, 2, 0],
   ];
   const relation: Relation = issue === "aucun" ? "parallele" : RELATION_ISSUE[issue];
+  const f = figureNommage(nommage);
 
   const affirmationsDroite: Affirmation[] = [];
   for (const [i, j, k] of paires) {
@@ -687,6 +718,9 @@ function justificationsTroisPlans(nommage: Nommage, plans: Triplet, noms: PlanSo
               ? `${libelleDroite(l)} est parallèle au plan ${nomP(k)}.`
               : `${libelleDroite(l)} perce le plan ${nomP(k)}.`;
       }
+      // Une affirmation VRAIE « … parallèle au plan (R) » doit avoir un témoin prouvable dans (R),
+      // sinon le corrigé ne la justifiait que par « même direction » : elle n'est pas proposée.
+      if (clause1 && clause2 && relation === "parallele" && !temoinProuvable(f, nommage, l, pk)) continue;
       affirmationsDroite.push({
         texte: `${premiere} se coupent suivant ${libelleDroite(l)}, et ${texteRelation(libelleDroite(l), relation, nomP(k))}.`,
         vraie: clause1 && clause2,
@@ -698,6 +732,8 @@ function justificationsTroisPlans(nommage: Nommage, plans: Triplet, noms: PlanSo
   if (issue === "aucun") {
     for (const [i, j] of paires) {
       const vraie = plansParalleles(plans[i]!, plans[j]!) && !memePlan(plans[i]!, plans[j]!);
+      // Vraie mais pas prouvable avec des droites nommées (critère incomplet au corrigé) : écartée.
+      if (vraie && !plansParallelesProuvables(f, nommage, plans[i]!, plans[j]!)) continue;
       affirmationsParalleles.push({ texte: `${nomP(i)} et ${nomP(j)} sont parallèles.`, vraie, defaut: vraie ? "" : `${nomP(i)} et ${nomP(j)} ne sont pas parallèles : ils ont des points communs.` });
     }
   }

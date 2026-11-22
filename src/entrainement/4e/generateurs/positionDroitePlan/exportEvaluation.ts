@@ -9,13 +9,14 @@ import {
   libelleDroite,
   libellePlan,
   phrasePosition,
+  segmentParalleleAttendu,
   texteAideJustification,
   texteFaitsAppartenance,
   textePointsNommes,
   texteReponseJustificationAttendue,
 } from "../../ui/formatPositionDroitePlan";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePositionDroitePlan } from "./index";
-import { LIBELLE_CAS_POSITION_DROITE_PLAN, PARAMETRES_POSITION_DROITE_PLAN, profilPositionDroitePlan } from "../profilsEvaluation4eCh8";
+import { GROUPES_VERDICT_POSITION_DROITE_PLAN, LIBELLE_CAS_POSITION_DROITE_PLAN, PARAMETRES_POSITION_DROITE_PLAN, profilPositionDroitePlan } from "../profilsEvaluation4eCh8";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExercicePositionDroitePlan>` pour gen39 (Position d'une
@@ -118,6 +119,12 @@ function construireEnoncePositionDroitePlan(exercice: ExercicePositionDroitePlan
   };
 }
 
+/** La droite du plan parallèle à la droite donnée, ex. « (AC) » (audit 4e ch. 8, G8 : plus « AC »). */
+function droiteParallele(exercice: ExercicePositionDroitePlan): string {
+  const s = segmentParalleleAttendu(exercice);
+  return s ? `(${s.join("")})` : "";
+}
+
 function paragraphe(lettre: string, contenu: string): BlocCorrection {
   return { type: "paragraphe", fragments: [texte(`${lettre}) ${contenu}`)] };
 }
@@ -131,7 +138,7 @@ function construireCorrectionPositionDroitePlan(exercice: ExercicePositionDroite
     classification === "incluse"
       ? `Points de la figure dans le plan ${libellePlan(exercice)} : ${reponse} — ${exercice.droite[0]} et ${exercice.droite[1]} en font partie.`
       : classification === "parallele"
-        ? `Ici, la droite ${libelleDroite(exercice)} a la même direction que ${reponse.startsWith("arête") ? "l'" : "la "}${reponse}, qui est dans le plan ${libellePlan(exercice)}.`
+        ? `Ici, la droite ${libelleDroite(exercice)} est parallèle à ${droiteParallele(exercice)}, une droite du plan ${libellePlan(exercice)}.`
         : `Ici, la droite ${libelleDroite(exercice)} perce le plan ${perceeEn(reponse)}.`;
 
   return [paragraphe("a", `${texteFaitsAppartenance(exercice)} ${conclusionClassification}`), paragraphe("b", `${texteAideJustification(classification)} ${ici}`)];
@@ -158,7 +165,7 @@ function reponseBrevePositionDroitePlan(exercice: ExercicePositionDroitePlan): F
     exercice.classification === "incluse"
       ? `points du plan : ${reponse}`
       : exercice.classification === "parallele"
-        ? `même direction que ${reponse.startsWith("arête") ? "l'" : "la "}${reponse}`
+        ? `parallèle à ${droiteParallele(exercice)}, une droite du plan ${libellePlan(exercice)}`
         : `percée ${perceeEn(reponse)}`;
   return [texte(`${LIBELLE_CLASSIFICATION[exercice.classification]} ${libellePlan(exercice)} : ${detail}.`)];
 }
@@ -177,7 +184,7 @@ function baremePositionDroitePlan(exercice: ExercicePositionDroitePlan): BaremeE
     exercice.classification === "incluse"
       ? `Points du plan cités (${reponse}), dont ${exercice.droite[0]} et ${exercice.droite[1]}`
       : exercice.classification === "parallele"
-        ? `Droite du plan de même direction : ${reponse}`
+        ? `Droite du plan parallèle à ${libelleDroite(exercice)} : ${droiteParallele(exercice)}`
         : `Point de percée : ${reponse}`;
   return {
     reponseFinale: reponseBrevePositionDroitePlan(exercice),
@@ -237,6 +244,7 @@ export const adaptateurEvaluationPositionDroitePlan: AdaptateurFeuilleExercices<
   profilInstance: profilPositionDroitePlan,
   parametresAuChoix: PARAMETRES_POSITION_DROITE_PLAN,
   libelleCasParticulier: LIBELLE_CAS_POSITION_DROITE_PLAN,
+  groupesVerdict: GROUPES_VERDICT_POSITION_DROITE_PLAN,
   // PAS regroupable : 2 questions par instance (classification/justification), jamais 1 seule, ET
   // `enteteHtml` (le croquis) utilisé sur chaque instance — 2 raisons indépendantes déjà suffisantes
   // chacune, voir le commentaire de tête.

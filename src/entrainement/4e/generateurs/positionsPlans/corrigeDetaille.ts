@@ -14,6 +14,7 @@ import {
   lignesPlansParalleles,
   lignesPointCommun,
   memeDirection,
+  parallelismeJustifiable,
   nomTex,
   phrase,
   planTex,
@@ -157,8 +158,11 @@ function lignesTroisPlans(e: ExerciceTroisPlans, f: FigureEspace): { lignes: Lig
   } else {
     // Parallèle au troisième plan, sans y être incluse : une droite de R de même direction.
     const nommes = [...Object.keys(f.sommets), ...f.points.map((x) => x.nom)].filter((n) => dansPlan(f, n, R));
-    let temoin: [string, string] | null = null;
-    for (let i = 0; i < nommes.length && !temoin; i++) for (let j = i + 1; j < nommes.length; j++) if (memeDirection(f, d, [nommes[i]!, nommes[j]!])) { temoin = [nommes[i]!, nommes[j]!]; break; }
+    // Témoin : une droite de R de même direction, de préférence une dont le parallélisme se prouve
+    // dans une figure plane (sinon « même direction » restait seul, < 1 % des tirages).
+    const temoins: [string, string][] = [];
+    for (let i = 0; i < nommes.length; i++) for (let j = i + 1; j < nommes.length; j++) if (memeDirection(f, d, [nommes[i]!, nommes[j]!])) temoins.push([nommes[i]!, nommes[j]!]);
+    const temoin: [string, string] | null = temoins.find((x) => parallelismeJustifiable(f, d, x)) ?? temoins[0] ?? null;
     const hors = d.find((n) => !dansPlan(f, n, R))!;
     if (temoin) lignes.push(...lignesParallele(f, d, temoin), ...lignesDroiteDansPlan(f, temoin, R));
     lignes.push(lignePointPlan(f, hors, R));

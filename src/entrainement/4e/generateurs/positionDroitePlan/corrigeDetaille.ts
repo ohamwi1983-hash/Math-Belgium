@@ -36,7 +36,7 @@ export function figureEspacePositionDroitePlan(e: E): FigureEspace {
   return { sommets: e.solide.sommets, faces: e.solide.faces, points: e.pointsNommes.map((p) => ({ nom: p.nom, position: p.position, milieuDe: p.milieuDe })) };
 }
 
-/** Le segment du plan de même direction que la droite (cas « parallèle »), celui de l'écran. */
+/** Le segment du plan parallèle à la droite (cas « parallèle »), celui de l'écran. */
 function segmentParallele(e: E): [string, string] {
   const i = e.candidatsParallele.findIndex((_, k) => verifierReponseParallele(e, k));
   return e.candidatsParallele[i]!.sommets;
@@ -124,9 +124,9 @@ function etapeJustification(e: E): EtapeCorrection[] {
   if (e.classification === "parallele") {
     const [x, y] = segmentParallele(e);
     return [
-      utilise("b", phrase(`Une droite est parallèle à un plan si elle est parallèle à une droite de ce plan ${COURS_PARALLELISME} : on cherche une arête ou une diagonale du plan de même direction, et on le prouve dans une figure plane (parallélogramme, droite des milieux).`)),
+      utilise("b", phrase(`Une droite est parallèle à un plan si elle est parallèle à une droite de ce plan ${COURS_PARALLELISME} : on cherche une arête ou une diagonale du plan parallèle à la droite, et on le prouve dans une figure plane (parallélogramme, droite des milieux).`)),
       calcul("b", [...lignesParallele(f, [p1, p2], [x, y]), ligne(`${droiteTex(x, y)}\\subset${pl}`, phrase(`$${nomTex(x)}$ et $${nomTex(y)}$ sont dans le plan`))]),
-      { ...resultat("b", phrase(`$${d}\\parallel${droiteTex(x, y)}$, ${reponse} du plan $${pl}$.`)), figureHtml: construireSvgPositionDroitePlan(e, { segment: [f.sommets[x]!, f.sommets[y]!] }) },
+      { ...resultat("b", phrase(`$${d}\\parallel${droiteTex(x, y)}$ : la droite est parallèle à $${droiteTex(x, y)}$ (${reponse}), une droite du plan $${pl}$.`)), figureHtml: construireSvgPositionDroitePlan(e, { segment: [f.sommets[x]!, f.sommets[y]!] }) },
       verification("b", phrase(`$${nomTex(p1)}\\notin${pl}$ : la droite n'est pas incluse, elle ne rencontre donc jamais le plan.`)),
       piege("b", [texte("La droite témoin doit être DANS le plan : une droite parallèle à la droite donnée mais hors du plan ne prouve rien.")]),
     ];

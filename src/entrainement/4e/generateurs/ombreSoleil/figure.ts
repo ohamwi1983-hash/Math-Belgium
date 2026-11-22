@@ -1,6 +1,6 @@
 import type { ExerciceOmbreSoleil, Piquet } from "../../core/ombreSoleil.types";
 import type { Point3D } from "../../core/geometrieEspace.types";
-import { COULEURS_OMBRE, elementsConclusion, elementsScene, fusionner, solidePourAffichage, type ElementsCroquis } from "../../ui/formatOmbreSoleil";
+import { COULEURS_OMBRE, elementsConclusion, elementsScene, fusionner, meilleurDecalageEtiquette, solidePourAffichage, type ElementsCroquis } from "../../ui/formatOmbreSoleil";
 import { calculerEchelleProjection, calculerGeometrieSolide3D, HAUTEUR_SVG, LARGEUR_SVG, projeter3DVersPixel } from "../../ui/solide3DSketch";
 
 /**
@@ -40,11 +40,42 @@ function constructionCorrige(e: ExerciceOmbreSoleil): ElementsCroquis {
 const COULEUR_ARETE_VISIBLE = "#495057";
 const COULEUR_ARETE_CACHEE = "#adb5bd";
 
+/** Étiquettes des PIEDS (A₀, S₀…) posées là où elles touchent le moins de traits (audit 4e ch. 8 :
+ * dans la variante « direction inconnue », S₀ et G₀ tombent dans l'emprise de la base et leurs
+ * étiquettes chevauchaient les arêtes). Décalage en pixels choisi parmi 12 directions, le plus loin
+ * possible de tout trait (arêtes du solide, traits annexes) et des autres points. */
+function placerEtiquettesPieds(exercice: ExerciceOmbreSoleil, elements: ElementsCroquis): ElementsCroquis {
+  const solide = solidePourAffichage(exercice);
+  const geometrie = calculerGeometrieSolide3D(solide);
+  const echelle = calculerEchelleProjection(solide);
+  const px = (p: Point3D) => projeter3DVersPixel(p, echelle);
+  const traits: [{ x: number; y: number }, { x: number; y: number }][] = [
+    ...geometrie.aretes.map((a): [{ x: number; y: number }, { x: number; y: number }] => [geometrie.sommetsPixel[a.sommets[0]]!, geometrie.sommetsPixel[a.sommets[1]]!]),
+    ...elements.segments.map((sg): [{ x: number; y: number }, { x: number; y: number }] => [px(sg.a), px(sg.b)]),
+  ];
+  const estPied = (label: string) => label.endsWith("₀");
+  // Les autres points et leurs étiquettes (12 px au-dessus, rendu d'avant) sont à éviter.
+  const autres = elements.points.filter((pt) => !estPied(pt.label)).flatMap((pt) => {
+    const q = px(pt.position);
+    return [q, { x: q.x, y: q.y - 12 }];
+  });
+  const posees: { x: number; y: number }[] = [];
+  const points = elements.points.map((pt) => {
+    if (!estPied(pt.label) || pt.decalageLabel) return pt;
+    const p = px(pt.position);
+    const autresPieds = elements.points.filter((q) => q !== pt && estPied(q.label)).map((q) => px(q.position));
+    const choix = meilleurDecalageEtiquette([p], traits, [...autres, ...autresPieds], posees);
+    posees.push({ x: p.x + choix.d.x, y: p.y + choix.d.y });
+    return { ...pt, decalageLabel: choix.d };
+  });
+  return { points, segments: elements.segments };
+}
+
 /** Énoncé : la scène (sol, obstacles, exemple ou paire connue, bâton à résoudre) sans aucune ombre
  * à trouver ; correction : l'image de l'écran de conclusion (`elementsConclusion`). Les sommets à
  * projeter de la variante `directionInconnue` sont repérés par leur nom. */
 function elementsFigure(exercice: ExerciceOmbreSoleil, avecOmbre: boolean): ElementsCroquis {
-  if (avecOmbre) return fusionner(elementsConclusion(exercice), constructionCorrige(exercice));
+  if (avecOmbre) return placerEtiquettesPieds(exercice, fusionner(elementsConclusion(exercice), constructionCorrige(exercice)));
   if (exercice.variante !== "directionInconnue") return elementsScene(exercice);
   const reperes: ElementsCroquis = {
     points: exercice.piquets.map((p) => ({ position: { x: p.piquet.base.x, y: p.piquet.base.y, z: p.piquet.hauteur }, label: p.piquet.id, couleur: COULEUR_ARETE_VISIBLE })),
@@ -82,10 +113,14 @@ export function construireSvgOmbreSoleil(exercice: ExerciceOmbreSoleil, avecOmbr
   const pointsExtra = points
     .map((pt) => {
       const p = projeter3DVersPixel(pt.position, echelleProjection);
-      return (
-        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${pt.couleur}"/>` +
-        `<text x="${p.x.toFixed(1)}" y="${(p.y - 8).toFixed(1)}" font-size="13" font-weight="700" text-anchor="middle" fill="${pt.couleur}">${pt.label}</text>`
-      );
+      // `rayon: 0` (étiquettes K, L, M des obstacles) : pas de disque ; `decalageLabel` : étiquette
+      // CENTRÉE à ce décalage (comme à l'écran), sinon 8 px au-dessus du point (rendu d'avant).
+      const rayon = pt.rayon ?? 3.5;
+      const disque = rayon > 0 ? `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rayon}" fill="${pt.couleur}"/>` : "";
+      const texteSvg = pt.decalageLabel
+        ? `<text x="${(p.x + pt.decalageLabel.x).toFixed(1)}" y="${(p.y + pt.decalageLabel.y).toFixed(1)}" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="${pt.couleur}">${pt.label}</text>`
+        : `<text x="${p.x.toFixed(1)}" y="${(p.y - 8).toFixed(1)}" font-size="13" font-weight="700" text-anchor="middle" fill="${pt.couleur}">${pt.label}</text>`;
+      return disque + texteSvg;
     })
     .join("");
 

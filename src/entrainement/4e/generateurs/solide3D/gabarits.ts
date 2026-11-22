@@ -17,7 +17,7 @@ import type { FaceSolide3D, NomSolide3D, Point3D, Solide3D } from "../../core/ge
 
 const PARALLELEPIPEDE: Solide3D = {
   id: "parallelepipede",
-  label: "Parallélépipède rectangle ABCD-EFGH",
+  label: "Parallélépipède rectangle ABCDEFGH",
   sommets: {
     A: { x: 0, y: 0, z: 0 },
     B: { x: 6, y: 0, z: 0 },
@@ -40,7 +40,7 @@ const PARALLELEPIPEDE: Solide3D = {
 
 const CUBE: Solide3D = {
   id: "cube",
-  label: "Cube ABCD-EFGH",
+  label: "Cube ABCDEFGH",
   sommets: {
     A: { x: 0, y: 0, z: 0 },
     B: { x: 4, y: 0, z: 0 },
@@ -63,7 +63,7 @@ const CUBE: Solide3D = {
 
 const PRISME: Solide3D = {
   id: "prisme",
-  label: "Prisme droit à base triangulaire ABC-DEF",
+  label: "Prisme droit ABCDEF (bases ABC et DEF)",
   sommets: {
     A: { x: 0, y: 0, z: 0 },
     B: { x: 5, y: 0, z: 0 },

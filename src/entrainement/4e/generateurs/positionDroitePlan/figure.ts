@@ -14,7 +14,7 @@ import {
 /**
  * Croquis papier de gen39 (sans `docx` : importé par l'adaptateur ET par le corrigé détaillé, donc
  * par l'appli). Sorti de `exportEvaluation.ts` à la migration « comme au tableau » ; option
- * `reponse` (corrigé) : la droite du plan de même direction (vert) ou le point de percée K (vert).
+ * `reponse` (corrigé) : la droite du plan parallèle à la droite (vert) ou le point de percée K (vert).
  */
 
 export interface ReponseFigurePositionDroitePlan {

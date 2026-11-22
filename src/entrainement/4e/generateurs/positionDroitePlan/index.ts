@@ -109,7 +109,7 @@ function estAreteSolide(solide: Solide3D, paire: [string, string]): boolean {
 
 function labelSegment(solide: Solide3D, paire: [string, string]): string {
   const [a, b] = paire;
-  return estAreteSolide(solide, paire) ? `arête ${a}${b}` : `diagonale ${a}${b}`;
+  return estAreteSolide(solide, paire) ? `arête [${a}${b}]` : `diagonale [${a}${b}]`;
 }
 
 // --- Points disponibles : sommets + milieux d'arêtes -----------------------------------------------
@@ -354,6 +354,10 @@ function nommerPlan(solide: Solide3D, plan: PlanCandidat, sommetsDroite: string[
   const partage = (t: string[]) => t.filter((n) => sommetsDroite.includes(n)).length;
   const minimum = Math.min(...triples.map(partage));
   const moinsPartages = triples.filter((t) => partage(t) === minimum);
+  // Audit 4e ch. 8, G7 (« lettre commune dans un cas parallèle ») : impossible — une lettre commune
+  // aux deux noms est un POINT commun, donc jamais une droite parallèle. Mesuré (3 000 tirages par
+  // verdict) : faire figurer dans le nom le sommet de percée d'une sécante une fois sur deux ne fait
+  // passer la stratégie « lettres » que de 43,0 % à 42,5 % : non retenu (codes inchangés).
   const pool = Math.random() < 0.9 ? moinsPartages : triples;
   return melanger([...pool[randomInt(0, pool.length - 1)]]) as PlanSolide3D;
 }
@@ -379,7 +383,12 @@ function construireCandidatsSecante(
       const c = [instance.p, instance.q].find((x) => nomDe(x) === candidat.nom);
       return c !== undefined && distance3D(c.position, percee) < EPSILON_3D;
     }
-    return pointSurSegmentOuvert(percee, solide.sommets[candidat.sommets[0]], solide.sommets[candidat.sommets[1]]);
+    // Segment FERMÉ (audit 4e ch. 8, G5) : une arête ou une diagonale dont la percée est une
+    // EXTRÉMITÉ contient elle aussi le point de percée — proposée comme leurre, elle était refusée
+    // alors qu'elle est vraie (« un point de la diagonale [BG] » quand la percée est G). Ces segments
+    // ne sont donc jamais proposés : la seule proposition vraie reste la cible.
+    const [a, b] = [solide.sommets[candidat.sommets[0]], solide.sommets[candidat.sommets[1]]];
+    return pointSurSegmentOuvert(percee, a, b) || distance3D(percee, a) < EPSILON_3D || distance3D(percee, b) < EPSILON_3D;
   };
   const cle = (c: CandidatSecantePositionDroitePlan) => (c.type === "arete" ? `a${[...c.sommets].sort().join("")}` : `${c.type}${c.nom}`);
 

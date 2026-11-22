@@ -10,7 +10,7 @@ import {
 } from "../../ui/formatSectionPlaneSolide";
 import { construireSvgSectionPlaneSolide, nomPointAuxiliaire, ordreCycliqueDepuisP, ordreLabelsDepuisExercice } from "./figure";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSectionPlaneSolide } from "./index";
-import { profilSectionPlaneSolide } from "../profilsEvaluation4eCh8";
+import { LIBELLE_CAS_SECTION_PLANE_SOLIDE, profilSectionPlaneSolide } from "../profilsEvaluation4eCh8";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceSectionPlaneSolide>` pour gen40 ("Section plane
@@ -213,7 +213,10 @@ function nombreAuxiliaires(exercice: ExerciceSectionPlaneSolide): number {
  * raisonnement retenues (côtés directs, construction auxiliaire, fermeture), sans charge, plus un
  * écran de lecture (repérer les faces et les points connus) ; méthode 1 (côté direct ou point
  * auxiliaire, à choisir à chaque étape), aucun piège dans les données, aucun nombre. */
-function criteresDifficulteSectionPlaneSolide(_exercice: ExerciceSectionPlaneSolide): CriteresDifficulte {
+function criteresDifficulteSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): CriteresDifficulte {
+  // Section triangulaire (cas particulier, déjà visible sur l'énoncé) : côtés directs puis
+  // fermeture, aucun point auxiliaire — méthode imposée (relier deux points d'une même face).
+  if (exercice.points.length === 3) return { etapesTransformation: 2, etapesLecture: 1, sansCharge: true, methode: 0, piege: 0, nombres: 0 };
   return { etapesTransformation: 3, etapesLecture: 1, sansCharge: true, methode: 1, piege: 0, nombres: 0 };
 }
 
@@ -229,6 +232,7 @@ function baremeSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): BaremeE
   const premiereFace = ecrans.findIndex((e) => e.type === "face");
   const n = nombreAuxiliaires(exercice);
   const k = exercice.points.length;
+  if (k === 3) return baremeTriangle(exercice, fin);
   const criteres: CritereBareme[] = [
     { sousQuestion: premierSegment >= 0 ? lettreEtape(premierSegment) : fin, critere: [texte("Côtés tracés directement dans les faces où 2 points de section sont connus")], points: 1 },
     {
@@ -248,6 +252,23 @@ function baremeSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): BaremeE
       { description: [texte("Côté situé sur une face cachée tracé en trait plein")], cout: "−0,5" },
     ],
     reponsesAcceptees: [[texte("Autres noms pour les nouveaux points de section ou les points auxiliaires, si la construction est juste")]],
+  };
+}
+
+/** Barème de la section triangulaire : trois côtés directs, aucun point auxiliaire. */
+function baremeTriangle(exercice: ExerciceSectionPlaneSolide, fin: string): BaremeExercice {
+  return {
+    reponseFinale: reponseBreveSectionPlaneSolide(exercice),
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Côtés tracés directement : chaque face traversée contient deux des points P, Q, R")], points: 2 },
+      { sousQuestion: fin, critere: [texte("Aucun point auxiliaire : les trois faces traversées sont deux à deux adjacentes (autour d'un sommet)")], points: 1 },
+      { sousQuestion: fin, critere: [texte("Triangle PQR fermé, côtés cachés en pointillés")], points: 1 },
+    ],
+    erreursFrequentes: [
+      { description: [texte("Deux points de section reliés alors qu'ils ne sont pas sur une même face (côté qui traverse le solide)")], cout: "−1" },
+      { description: [texte("Côté situé sur une face cachée tracé en trait plein")], cout: "−0,5" },
+    ],
+    reponsesAcceptees: [[texte("Côtés tracés dans un autre ordre, si chacun est dans sa face")]],
   };
 }
 
@@ -284,6 +305,7 @@ export const adaptateurEvaluationSectionPlaneSolide: AdaptateurFeuilleExercices<
   bareme: baremeSectionPlaneSolide,
   enoncePapier: enoncePapierSectionPlaneSolide,
   profilInstance: profilSectionPlaneSolide,
+  libelleCasParticulier: LIBELLE_CAS_SECTION_PLANE_SOLIDE,
   // PAS regroupable — `enteteHtml` (le solide en perspective cavalière) est utilisé, ce qui
   // disqualifie `regroupable` à lui seul, quelle que soit la consigne (voir le commentaire de tête).
 };

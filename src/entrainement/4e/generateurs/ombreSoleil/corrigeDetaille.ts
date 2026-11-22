@@ -68,7 +68,7 @@ function etapesObstacle(e: Extract<E, { variante: "obstacle" }>): EtapeCorrectio
   const a = e.baton.id;
   const k = e.piquetExemple.id;
   const auSol = e.indexObstacleTouche === null;
-  const obstacle = auSol ? "" : libelleObstacle(e.obstacles[e.indexObstacleTouche!]!);
+  const obstacle = auSol ? "" : libelleObstacle(e, e.indexObstacleTouche!);
   const lignesB: LigneCalcul[] = [
     ligneTrace(a, k, "d'", piedSurTraceConnue(e.baton.base, e.piquetExemple.base, e.ombreExemple)),
     auSol

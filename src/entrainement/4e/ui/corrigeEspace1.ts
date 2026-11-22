@@ -503,6 +503,14 @@ export function lignesParallele(f: FigureEspace, a: readonly [string, string], b
   return [ligne(rel(a, b), "même direction")];
 }
 
+/** (a) ∥ (b) se prouve-t-il par une figure plane du cours, directement ou par une droite
+ * intermédiaire (comme `lignesParallele`, sans compter dans `STATS_ESPACE`) ? Sert aux générateurs
+ * pour écarter au tirage un parallélisme que le corrigé ne saurait justifier (gen101). */
+export function parallelismeJustifiable(f: FigureEspace, a: readonly [string, string], b: readonly [string, string]): boolean {
+  if (raisonParalleleDirecte(f, a, b)) return true;
+  return droitesFigure(f).some((c) => !memeDroite(f, c, a) && !memeDroite(f, c, b) && raisonParalleleDirecte(f, a, c) !== null && raisonParalleleDirecte(f, c, b) !== null);
+}
+
 // --- Points communs à deux plans, intersection, plans parallèles --------------------------------
 
 export interface PointCommunCandidat {
