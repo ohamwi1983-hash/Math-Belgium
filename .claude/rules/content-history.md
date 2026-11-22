@@ -2515,6 +2515,16 @@ paths:
   4 svg de 57–71 px, jamais épinglées ; graphes passés à ≥ 80 px de haut (HG 92 → 110). Vérifié :
   0 débordement interne à 308 px, épinglage 390 × 760 et 1280 × 800 sans échec (les 3 non épinglés
   tiennent à l'écran), 0 erreur KaTeX/console, 0 `$` visible.
+- **5e (4h), Chapitre 5 — Dérivées et applications** (suite) : nouveaux générateurs 5gen68–70.
+  Cartes 5gen68 « Approximation affine » en § 2 (après 5gen28, précédée d'un `attention` « Erreur
+  commise, h négatif et radians »), 5gen70 « Taux de variation instantané en contexte » en § 3 (après
+  5gen27 ; `attention` « Unité et signe d'un taux de variation » juste après le tableau taux moyen /
+  nombre dérivé), 5gen69 « Déterminer une fonction par des conditions » en § 5 (après 5gen29, précédée
+  d'une `astuce` « Retrouver une fonction à partir de conditions ») ; aucun nouvel exemple (pas
+  d'énoncé de démonstration à ajouter). Registres (`registry.ts`, `evaluationAdapterRegistry.ts` avec
+  `versionPapier`, `evaluationPayload.ts` : processus 2 / 3 / 2 ; libellés des lignes pilotes 5gen27,
+  5gen28, 5gen29 remplis). Détail : `.claude/rules/feuilles-evaluations.md`, « 5e ch. 5, nouveaux
+  générateurs — 5gen68–70 ».
 
 - **6e (6h), Chapitre 5 — Nombres complexes** (`nombres-complexes`) : corrections issues de l'audit
   des générateurs (68 points, décisions A–M, toutes suivies ; 5 lots). Utilitaire commun

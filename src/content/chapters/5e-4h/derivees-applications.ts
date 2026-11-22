@@ -372,6 +372,16 @@ export const deriveesApplications: ChapterContent = {
           },
         },
         {
+          kind: 'attention',
+          label: 'Erreur commise, h négatif et radians',
+          text:
+            'L\'**erreur commise** est l\'écart, pris positivement, entre la valeur exacte (ou celle ' +
+            'de la calculatrice) et l\'approximation : $\\left|f(a+h)-\\big(f(a)+f\'(a)\\,h\\big)\\right|$. ' +
+            'h garde son signe : $\\sqrt{15{,}98}$ s\'écrit $f(16+h)$ avec $h=-0{,}02$. Pour sin, cos ' +
+            'et tan, l\'angle est en **radians** : c\'est seulement en radians que $(\\sin x)\'=\\cos x$, ' +
+            'd\'où $\\sin(0{,}1)\\approx \\sin 0+\\cos 0\\cdot 0{,}1=0{,}1$.',
+        },
+        {
           kind: 'historique',
           titre: 'Le professeur qui a préparé le terrain pour Newton',
           text:
@@ -402,6 +412,18 @@ export const deriveesApplications: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 28. Tangentes »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Approximation affine',
+          generatorId: '5gen68',
+          description: [
+            'Estime √4,02, 1,02⁵, 1/0,98 ou sin 0,1 sans calculatrice grâce à la tangente : ' +
+              'choisis a et h, calcule f(a) et f\'(a), puis f(a) + f\'(a)·h, et mesure l\'erreur ' +
+              'commise. Aussi en contexte : un cube ou une plaque qui se dilate.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 68. Approximation affine »',
         },
       ],
     },
@@ -483,6 +505,16 @@ export const deriveesApplications: ChapterContent = {
               'vitesse INSTANTANÉE de variation à l\'instant a (voir section 11)',
             ],
           ],
+        },
+        {
+          kind: 'attention',
+          label: 'Unité et signe d\'un taux de variation',
+          text:
+            'Un taux de variation (moyen ou instantané) est un quotient : il s\'exprime dans ' +
+            'l\'unité de f **par** unité de la variable — °C/h pour une température en fonction du ' +
+            'temps en heures, m/s pour une position en mètres, €/pièce pour un bénéfice. Le **signe** ' +
+            'de f\'(a) dit si la grandeur augmente (f\'(a) > 0) ou diminue (f\'(a) < 0) à l\'instant a ; ' +
+            'f\'(a) n\'est ni la valeur f(a) de la grandeur, ni sa variation moyenne sur un intervalle.',
         },
         { kind: 'subheading', text: 'Dérivées de référence' },
         {
@@ -690,6 +722,18 @@ export const deriveesApplications: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 27. Fonction dérivée »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Taux de variation instantané en contexte',
+          generatorId: '5gen70',
+          description: [
+            'Température, altitude d\'un drone, bénéfice, population : calcule le taux de ' +
+              'variation moyen sur un intervalle, puis le taux instantané f\'(a), donne son unité ' +
+              'et interprète son signe dans le contexte.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 70. Taux de variation instantané en contexte »',
         },
       ],
     },
@@ -1273,6 +1317,28 @@ export const deriveesApplications: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 29. Étude locale (extremums et points critiques) »',
+        },
+        {
+          kind: 'astuce',
+          label: 'Retrouver une fonction à partir de conditions',
+          text:
+            'Chaque condition sur la courbe de $f(x)=ax^3+bx^2+cx+d$ donne une équation : un point ' +
+            '$(x_0\\,;y_0)$ donne $f(x_0)=y_0$ ; une tangente horizontale en $x_0$ donne $f\'(x_0)=0$ ; ' +
+            'une tangente de pente m en $x_0$ donne $f\'(x_0)=m$ ; un point d\'inflexion en $x_1$ donne ' +
+            '$f\'\'(x_1)=0$. En $x=0$ tout se lit vite : $f(0)=d$ et $f\'(0)=c$. On résout le système, ' +
+            'puis on VÉRIFIE : une tangente horizontale n\'est un extremum que si $f\'$ y change de signe.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Déterminer une fonction par des conditions',
+          generatorId: '5gen69',
+          description: [
+            'Traduis des conditions (tangente donnée, tangente horizontale, point d\'inflexion, ' +
+              'point de la courbe) en un système, résous-le pour trouver f(x) = ax³ + bx² + cx + d, ' +
+              'puis vérifie par le signe de f\' (ou de f\'\') la nature du point.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 69. Déterminer une fonction par des conditions »',
         },
       ],
     },

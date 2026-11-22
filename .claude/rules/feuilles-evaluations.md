@@ -2120,6 +2120,71 @@ aménagée + feuille + Word du corrigé, calculatrice interdite / autorisée, av
 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error` ; `groupe_erreur` B ≠ A sur 30 plans ;
 `?code=` 36 / 36.
 
+## 5e ch. 5, nouveaux générateurs — 5gen68–70
+
+Socle d'écrans du 5e (`AppEcransTrigo` + `DefinitionEcrans`) réutilisé ; une option ADDITIVE :
+`DefinitionEcrans.bonneOption?(e, phase)` → choix fermé JUGÉ (rendu de `4e/ui/choixFige.ts` :
+option choisie fausse en rouge ✗, bonne en vert ✓, `aria-label`) dans `EtapeEcransTrigo` ; absente,
+l'ancien rendu reste (5gen54–67, 6gen148–159 inchangés). Modules communs : `moteur5e/lectureApplicationsDerivees.ts`
+(`lireNombre` : `lireValeur` + notation scientifique « 6,2·10^-6 », « 6,2e-6 », « 10⁻⁶ », préfixe
+« a = » et unité finale recopiée ignorés ; `lireFonctionVar(brut, "x" | "t" | "q")` : parseur PROPRE
+— sin, cos, tan EN RADIANS (« cos x », « cos²x », « 1/cos(x)^2 »), √, produits implicites, exposants
+Unicode ; l'évaluateur général du site travaille en DEGRÉS : cos(0,7) y vaut cos 0,7°, il ne convient
+pas aux dérivées de sin / cos / tan) et `ui5e/ecrituresApplicationsDerivees.ts` (`decL` / `decT`
+décimaux à virgule, `polyDL` coefficients décimaux, `sciL` notation scientifique, `equationABL` /
+`systemeL` systèmes en a et b). Corrigés `generateurs5e/{approximationAffine,fonctionConditions,tauxInstantane}/corrigeDetaille.ts`,
+une lettre par écran, branchés dans l'appli (`correction` de la définition).
+**5gen68** (approximation affine, § 2, Appliquer) : variantes racine (a ∈ {1, 4, 16, 25}), puissance
+(a ∈ {1, 2, 10}), inverse (a ∈ {1, 2, 4, 5, 10} : f′(a) décimal exact), trigo (sin, tan en 0 ; sin en π ;
+cos en π/2 — radians, a saisi « π » / « π/2 »), contexte (cube V(x) = x³ ou plaque A(x) = x² qui se
+dilate / se contracte, unités cm³ / cm²). Écrans : a et h → f′(x) → f(a) et f′(a) → approximation
+(décimal exact ; arrondi = `approchee`, sans tentative) → erreur commise = |valeur AFFICHÉE − approximation|
+à deux chiffres significatifs (tolérance 6 %, valeur négative = message ciblé). La valeur de la
+calculatrice (9 décimales, « = » si exacte) n'apparaît QU'au dernier écran (avant, elle donnait
+l'approximation). Signe de h tiré 50/50 AVANT le rejet ; rejet si erreur < 2·10⁻⁶ (moins de trois
+chiffres lisibles) ou > 0,4 % de la valeur (1,03⁶ ≈ 1,18 pour 1,194 n'est plus une approximation
+crédible). Énoncé papier : UNE consigne « Estime … sans calculatrice, à l'aide de l'approximation
+affine de f … La calculatrice affiche … : calcule l'erreur commise » ; regroupement a), b), c)
+`5gen68` (toutes variantes sauf contexte, consigne commune « Estime chaque nombre … »). Profil :
+`forme` = variante | signe de h (piège dans les données), aucun `calcul` (tout se fait sans
+calculatrice : la valeur affichée est donnée). **5gen69** (fonction par des conditions, § 5,
+Transférer) : f(x) = ax³ + bx² + cx + d entiers ; tangenteHorizontale (tangente y = mx + p en 0 ⇒ c, d ;
+tangente HORIZONTALE en (x₀ ; y₀) — jamais « extremum » annoncé : le verdict max / min / palier, un
+tiers chacun, est la vérification), inflexion (tangente en 0, f″(x₁) = 0, un point ; concave puis
+convexe ou l'inverse, 50/50), deuxTangentes (c = 0, f′(x₂) = 0, (0 ; d) et (x₂ ; y₂) ; max / min
+50/50). Écrans : c et d → système (choix fermé jugé ✗ / ✓ parmi quatre : bon, f / f′ échangées ou
+f′(x₁) = 0 pour l'inflexion, c et d oubliés, dérivée sans les exposants ; aucun faux système vérifié
+par la vraie solution, aucun équivalent au bon) → a et b → f′(x) (f″(x)) → nature (choix fermé jugé).
+Corrigé : système résolu par `lignesSysteme` (équation simplifiée par son pgcd, substitution quand un
+coefficient de b vaut ±1, sinon combinaison qui élimine b, vérification dans (E₂)), nature par la forme
+factorisée et deux valeurs tests x₀ ± 0,5 (± 1 pour f″). Énoncé papier : conditions + consigne SANS
+donnée tirée ; regroupement `5gen69` (une consigne par variante, ligne « La tangente … ; le point … »).
+Piège constant par variante (1 pour tangenteHorizontale : le niveau ne trahit jamais « palier ») ;
+`forme` = variante, aucun `calcul`. **5gen70** (taux instantané en contexte, § 3, Appliquer) :
+température T(t) = −0,5t² + t_v·t + γ (°C/h), altitude d'un drone h(t) = −t³ + 3kt² + δ (m/s), bénéfice
+B(q) = −0,5q² + βq − γ (€/pièce), population N(t) = 0,5t² − t_v·t + γ (milliers d'habitants par an) ;
+signe de f′(a) tiré 50/50 AVANT les nombres, f′(a) entier non nul, taux moyen décimal exact, a et b
+dans le domaine. Écrans : taux moyen sur [a ; b] → f′(t) (saisie en t ou q) → f′(a) → unité (choix
+jugé : bonne, unité de f, quotient inversé, produit) → interprétation (choix jugé : bonne, signe
+inversé, phrase de taux MOYEN, « vaut … » ; rejet si une phrase fausse devenait vraie). Énoncé papier :
+contexte + trois VRAIES questions a) taux moyen [a], b) taux instantané et unité [b, c, d],
+c) interprétation [e] — pas de regroupement. `forme` = contexte, aucun `calcul`.
+Niveaux (`niveauEtDuree`, 2 000 tirages par variante, `sansCharge`) : 5gen68 niv. 4 (h > 0) / 5 (h < 0 :
+piège), 13 min (nombres 1 : arrondi) ; 5gen69 niv. 5 (tangenteHorizontale) / 4, 14 min (méthode 2),
+constants dans chaque verdict ; 5gen70 niv. 3, 12 min, constants dans les deux signes. Mesures :
+moteurs 24 000 tirages (conditions de 5gen69 revérifiées sur f, nature recalculée par le signe de f′ /
+f″ en x₀ ± 0,01, f′(a) de 5gen70 par différence centrée ; écritures équivalentes — π, π/2, préfixes,
+unités, notation scientifique, cos x / 1 + tan²x — acceptées, opposés et ×10 refusés, illisible =
+`parse_error`) : 0 anomalie, verdicts 31–36 % / 50 ± 3 %, `?code=` 180 / 180 ; collecteur (outils de
+`5e4-lotG/coll` recopiés, `env.ts` : a, h ; a, b, c, d, x ; t / q et la fonction du contexte ; « ≈ »
+d'une approximation affine toléré à 0,45 %) 3 900 tirages, ≈ 85 000 égalités, 0 fausse (f″ et
+`cases` non évaluables) ; regroupement (`verifReg`, 30 / variante) : 5gen68 hors contexte et 5gen69
+30 / 30 ; parcours iPhone 13 (chaque variante : illisible → message sans tentative, erreur ciblée,
+bonne réponse, choix faux révélé ✗ / ✓) scrollWidth 390, 0 erreur console, 0 `.katex-error` ;
+plans réels `construirePlan` (3 séries calculatrice interdite, 2 séries autorisée ; + aménagée +
+corrigé + grille + feuille + Word du corrigé) : même multiset (variante, forme) dans chaque série,
+QR 12 / 12, 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error`.
+
 ## 4e ch. 7, lot G — gen92–gen95 (nouveaux, notés)
 
 Coquille `components/AppTransfertSecondDegre.tsx` réutilisée ; seule extension (ajout pur, sans effet sur

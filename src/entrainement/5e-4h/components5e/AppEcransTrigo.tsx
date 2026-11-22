@@ -253,6 +253,7 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
           aReprendre={def.aReprendre ? (v) => def.aReprendre!(e, phase, v) : undefined}
           messageIllisible={def.messageIllisible(e, phase)}
           approchee={def.approchee ? (v) => def.approchee!(e, phase, v) : undefined}
+          bonneOption={choix && def.bonneOption ? def.bonneOption(e, phase) : undefined}
           onValider={(v) => terminerEtape(soumettreEcran(def, etat, v), v)}
         />
       </main>

@@ -118,6 +118,7 @@ export type IdGenerateurPilote =
   | '5gen20' | '5gen21' | '5gen22' | '5gen23' | '5gen24'
   | '5gen64' | '5gen65' | '5gen66' | '5gen67'
   | '5gen25' | '5gen26' | '5gen27' | '5gen28' | '5gen29' | '5gen30' | '5gen31' | '5gen32' | '5gen33' | '5gen34' | '5gen35'
+  | '5gen68' | '5gen69' | '5gen70'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -435,9 +436,12 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'limites-asymptotes', sectionId: 'etude-complete', generatorId: '5gen67', label: "Détective d'erreurs : limites (5gen67)", processus: 3 },
   { chapitreSlug: 'derivees-applications', sectionId: 'signe-derivees', generatorId: '5gen25', label: '' },
   { chapitreSlug: 'derivees-applications', sectionId: 'definition-derivee', generatorId: '5gen26', label: '' },
-  { chapitreSlug: 'derivees-applications', sectionId: 'fonction-derivee', generatorId: '5gen27', label: '' },
-  { chapitreSlug: 'derivees-applications', sectionId: 'tangentes', generatorId: '5gen28', label: '' },
-  { chapitreSlug: 'derivees-applications', sectionId: 'etude-locale', generatorId: '5gen29', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'fonction-derivee', generatorId: '5gen27', label: 'Fonction dérivée (5gen27)' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'fonction-derivee', generatorId: '5gen70', label: 'Taux de variation instantané en contexte (5gen70)', processus: 2 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'tangentes', generatorId: '5gen28', label: 'Tangentes (5gen28)' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'tangentes', generatorId: '5gen68', label: 'Approximation affine (5gen68)', processus: 2 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'etude-locale', generatorId: '5gen29', label: 'Étude locale (5gen29)' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'etude-locale', generatorId: '5gen69', label: 'Déterminer une fonction par des conditions (5gen69)', processus: 3 },
   { chapitreSlug: 'derivees-applications', sectionId: 'lecture-graphique-derivees', generatorId: '5gen30', label: '' },
   { chapitreSlug: 'derivees-applications', sectionId: 'etudier-fonction', generatorId: '5gen31', label: '' },
   { chapitreSlug: 'derivees-applications', sectionId: 'optimisation-geometrique', generatorId: '5gen32', label: '', processus: 3 },
