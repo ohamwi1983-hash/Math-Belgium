@@ -1608,15 +1608,26 @@ Outils du pilote : `collecteur.ts`, `evalLatex.ts` (dossier de travail du chanti
 
 L'ancienne ligne « Questions ouvertes — formules / démonstrations » est remplacée par DEUX types
 (`TypeQuestionEvaluation`) :
-- **`formule`** — « Formule » : les formules du **formulaire** de fin de chapitre
-  (`deriveQuestionsFormules`, `lib/evaluationPayload.ts`). Énoncé : membre de gauche à compléter
-  (« Complète la formule (condition) : $s = \ldots$ ») ; pour une règle sans « = », ce qui suit le
-  premier séparateur hors formule (« : », « → », « ⟺ », « ⟹ ») est masqué ; sinon la condition
-  sert de description ; une simple propriété sans rien à compléter est écartée. Corrigé : la formule
-  et sa condition. Rattachement à une section : la PREMIÈRE section où la formule (premier morceau
-  contenant « = », ≥ 6 caractères) apparaît telle quelle, sinon le meilleur score de jetons rares
-  (+ titre du groupe ↔ titre de section) ; les sections « Révision » ne sont jamais candidates.
-  `ChapitreAvecSections.formulaire` doit être passé par le panneau.
+- **`formule`** — « Formule » : **banque écrite à la main**, chapitre par chapitre (décision de
+  l'utilisateur, 22/11/2026 : les questions fabriquées depuis le formulaire — membre de droite masqué,
+  condition seule, « Écris la formule : pour $x\in[-1;1]$. » — n'avaient souvent aucun sens).
+  `src/lib/questionsFormules/` (`niveau4e.ts`, `niveau5e.ts`, `niveau6e.ts`, type `QuestionFormuleBrute`
+  `{ id, enonce, corrige }`) : `chapitre → section → questions` ; `deriveQuestionsFormules(chapitre,
+  sectionId)` la lit (même signature ; le chapitre porte `slug` ou `chapitreSlug`). 384 questions,
+  23 chapitres (8 à 34 par chapitre). **Règles de rédaction** : énoncé autonome (de quoi on parle, ce
+  qu'on attend, notations du cours — relire la section), réponse jamais lisible dans l'énoncé (corrigé :
+  la formule et sa condition si elle compte), formules jumelles regroupées mais courtes (≈ 1 pt),
+  rattachée à la section où la formule est enseignée, jamais une formule absente du chapitre, RichText
+  du site (KaTeX strict : `^\circ`, pas de « ° » ni d'accent en mode math → `\text{…}`), 4e : degrés,
+  « critère de colinéarité ». **Ids** : une question qui reprend une ancienne formule garde l'ANCIEN id
+  (`normaliserCle(formule.text)`, 371 / 384) — un plan enregistré avec un `choix` explicite recharge la
+  question correspondante ; sinon un id court. **Plan rechargé avec un id disparu**
+  (`nettoyerChoixIntrouvables`, appelé par `chargerPlan`) : id retiré du choix (et de ses points) ; plus
+  aucun id → la ligne repasse au tirage au hasard du même nombre ; avis sous les messages du panneau
+  (les documents rechargés gardent l'ancien énoncé, enregistré dans le plan). `construireItemsPayload` :
+  un choix dont aucun id n'existe tire au hasard au lieu de faire disparaître la ligne. Contrôle au
+  build (`verifier-enonces-evaluation.mjs`) : chapitre et section existants, ids uniques, pas de « $ »
+  orphelin ni « $$ ». Ajouter une question : l'écrire dans le fichier du niveau, puis relire la liste.
 - **`demonstration`** — « Formule + démonstration » : uniquement les blocs `exempleLibre` dont le
   label commence par « Démonstration » (`estBlocDemonstration`). Les exemples résolus (calculs)
   ne sont PLUS proposés dans Connaître (ils relèvent d'Appliquer) ; leurs énoncés par clé restent
