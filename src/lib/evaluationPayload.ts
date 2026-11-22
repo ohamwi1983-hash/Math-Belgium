@@ -599,8 +599,12 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', quizTheme: 'constructionParabole', label: 'Construction', quizChapitre: 7 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'notion-lieu', quizTheme: 'lieuxDeuxCercles', label: 'Lieux et deux cercles', quizChapitre: 7 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lieux', quizTheme: 'lieuxGeometriques', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'cavaliere', quizTheme: 'perspectiveCavaliere', label: '', quizChapitre: 8 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'deux-droites', quizTheme: 'plansEtDroites', label: '', quizChapitre: 8 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'position', quizTheme: 'positionDroitePlan', label: '', quizChapitre: 8 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'parallelisme', quizTheme: 'parallelismePercee', label: '', quizChapitre: 8 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'section', quizTheme: 'sectionPlaneSolide', label: '', quizChapitre: 8 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'point-de-fuite', quizTheme: 'perspectiveCentrale', label: '', quizChapitre: 8 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'ombre', quizTheme: 'ombreSoleil', label: '', quizChapitre: 8 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'vocabulaire', label: 'Vocabulaire', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRationnel', label: 'Domaine — fonctions rationnelles', quizChapitre: 1 },
@@ -1129,30 +1133,43 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'une droite parallèle au plan', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$), détermine la position relative de la droite $(AB)$ et du plan $(EFGH)$, en justifiant." },
     ],
     section: [
-      { cle: '4 faces traversées', enonce: "Un plan coupe les 4 arêtes verticales d'un parallélépipède rectangle. On connaît les points $P$ (sur l'arête avant gauche), $Q$ (sur l'arête avant droite) et $R$ (sur l'arête arrière droite). Explique comment construire la section du parallélépipède par ce plan, en justifiant chaque côté tracé, en particulier la construction du quatrième sommet sur l'arête arrière gauche." },
+      { cle: '4 faces traversées', enonce: "Un plan coupe les 4 arêtes verticales du parallélépipède rectangle $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$). On connaît les points $P$ sur $[AE]$, $Q$ sur $[BF]$ et $R$ sur $[CG]$, à trois hauteurs différentes. Explique comment construire la section du parallélépipède par ce plan, en justifiant chaque côté tracé, en particulier la construction du quatrième sommet $S$ sur l'arête $[DH]$." },
       { cle: 'tétraèdre', enonce: "Dans un tétraèdre $ABCD$, on place $P$ sur $[AB]$, $Q$ sur $[AC]$ et $R$ sur $[BD]$, la droite $(PQ)$ n'étant pas parallèle à $(BC)$. Explique comment construire la section du tétraèdre par le plan $(PQR)$, en justifiant la construction du point auxiliaire." },
+      { cle: 'deux sommets par face traversée', enonce: "Un plan $\\pi$, qui ne passe par aucun sommet d'un solide, traverse une face convexe de ce solide. Démontre que la section du solide par $\\pi$ a exactement deux sommets sur cette face." },
+      { cle: 'section triangulaire', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$, $F$ au-dessus de $B$), $P$ est sur $[AB]$, $Q$ sur $[BC]$ et $R$ sur $[BF]$. Construis la section du cube par le plan $(PQR)$ et précise sa nature." },
     ],
     ombre: [
       { cle: 'objet à 2 points', enonce: "Une barre rigide relie les sommets de deux piquets verticaux plantés dans un sol plan. L'ombre d'un autre piquet donne la direction des rayons du soleil. Explique comment construire l'ombre complète de la barre sur le sol, en justifiant la construction." },
+      { cle: 'les ombres de deux poteaux verticaux sont parallèles', enonce: "Au soleil, les rayons sont parallèles. Deux poteaux verticaux sont plantés dans un sol plan. Démontre que les droites qui portent leurs ombres sont parallèles (ou confondues)." },
+      { cle: 'passent par L₀', enonce: "Une lampe ponctuelle $L$ éclaire un sol plan ; $L_0$ est le point du sol situé à la verticale de $L$. Démontre que la droite qui porte l'ombre d'un poteau vertical, planté ailleurs qu'en $L_0$, passe par $L_0$." },
     ],
     'deux-droites': [
-      { cle: 'prouver que deux droites sont gauches', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$, $G$ au-dessus de $C$), démontre que les droites $(AB)$ et $(CG)$ sont gauches." },
+      { cle: 'Démonstration — (AB) et (CG) sont gauches', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$, $G$ au-dessus de $C$), démontre que les droites $(AB)$ et $(CG)$ sont gauches." },
     ],
     'deux-plans': [
       { cle: "Démonstration par l", enonce: "Démontre que si un plan $\\pi$ coupe deux plans parallèles $\\alpha$ et $\\alpha'$ suivant des droites $d$ et $d'$, alors $d$ et $d'$ sont parallèles." },
       { cle: 'deux plans parallèles coupés par un troisième', enonce: "Dans le cube $ABCDEFGH$, le plan $(ACGE)$ coupe la base $(ABCD)$ et la face $(EFGH)$. Que peut-on dire des droites $(AC)$ et $(EG)$ ? Justifie." },
       { cle: 'deux noms pour un même plan', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$, $F$ au-dessus de $B$), $I$ est le milieu de $[AE]$ et $J$ celui de $[BF]$. Détermine la position relative des plans $(ABJ)$ et $(EFI)$, en justifiant." },
+      { cle: 'Démonstration — la propriété 2', enonce: "Soit $\\alpha$ et $\\alpha'$ deux plans parallèles, et $d$ une droite qui coupe $\\alpha$ en un seul point. Démontre que $d$ coupe aussi $\\alpha'$ en un seul point." },
     ],
     'trois-plans': [
       { cle: 'trois plans du cube sans point commun', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$), les plans $(ABC)$, $(ABF)$ et $(DCF)$ ont-ils un seul point commun, une droite commune ou aucun point commun ? Justifie." },
+      { cle: "les droites d'intersection de trois plans", enonce: "Trois plans distincts sont sécants deux à deux. Démontre que leurs trois droites d'intersection sont soit concourantes en un même point, soit parallèles, soit confondues." },
     ],
     'parallelisme': [
       { cle: 'deux plans parallèles dans le cube', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$), démontre que les plans $(AFH)$ et $(BDG)$ sont parallèles." },
       { cle: 'une droite parallèle à un plan', enonce: "Dans le tétraèdre $ABCD$, $I$ est le milieu de $[DA]$ et $J$ celui de $[DB]$. Démontre que la droite $(IJ)$ est parallèle au plan $(ABC)$." },
+      { cle: "le critère de parallélisme d'une droite et d'un plan", enonce: "Une droite $d$ est parallèle à une droite $d'$ d'un plan $\\alpha$, et elle n'est pas incluse dans $\\alpha$. Démontre que $d$ n'a aucun point commun avec $\\alpha$." },
     ],
     'percee': [
       { cle: 'point de percée hors du solide', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$, $F$ au-dessus de $B$), $J$ est le milieu de $[BF]$. Construis le point de percée $K$ de la droite $(AJ)$ dans le plan $(EFGH)$ et précise sa position." },
       { cle: 'intersection de deux plans', enonce: "Dans le cube $ABCDEFGH$, détermine la droite d'intersection des plans $(ACGE)$ et $(BDHF)$." },
+      { cle: 'le théorème du toit', enonce: "Deux plans sécants $\\alpha$ et $\\beta$ se coupent suivant une droite $\\Delta$. Le plan $\\alpha$ contient une droite $d$, le plan $\\beta$ une droite $d'$, et $d \\parallel d'$. Démontre que $\\Delta$ est parallèle à $d$ (ou confondue avec $d$)." },
+      { cle: 'un point commun et une direction', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$, $F$ au-dessus de $B$), détermine la droite d'intersection des plans $(ABG)$ et $(DCF)$." },
+    ],
+    'point-de-fuite': [
+      { cle: 'des fuyantes parallèles ont un même point de fuite', enonce: "En perspective centrale, l'œil $O$ regarde à travers une vitre plane. Deux droites $d_1$ et $d_2$ sont parallèles, et non parallèles à la vitre. Démontre que leurs images sur la vitre passent par un même point." },
+      { cle: "le milieu d'une fuyante par les diagonales", enonce: "Un rectangle $ABCD$ est dessiné en perspective centrale ; ses côtés $[AD]$ et $[BC]$ sont parallèles à la vitre. Démontre que, sur le dessin, la parallèle à ces côtés menée par le point d'intersection des diagonales coupe $[AB]$ en l'image de son vrai milieu." },
     ],
   },
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge (ou le
@@ -2953,7 +2970,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       {
         enonce: "Pourquoi la perspective à point de fuite, plus fidèle à la vision humaine, n'est-elle pas utilisée pour tous les dessins de ce chapitre ?",
         corrige:
-          "Elle est beaucoup plus lourde à construire à la main (il faut placer un ou plusieurs points de fuite avant même de tracer une arête) et surtout, elle ne conserve jamais le parallélisme : deux arêtes parallèles du solide convergent vers un même point de fuite sur le dessin. La perspective cavalière, plus simple et qui conserve toujours ce parallélisme, est donc plus adaptée pour raisonner sur des solides.",
+          "Elle est beaucoup plus lourde à construire à la main (il faut gérer des points de fuite), et surtout elle ne conserve le parallélisme que pour les droites parallèles à la vitre : des arêtes parallèles qui s'éloignent (les fuyantes) convergent vers un même point de fuite sur le dessin. La perspective cavalière, plus simple et qui conserve toujours ce parallélisme, est donc plus adaptée pour raisonner sur des solides.",
       },
     ],
     'determiner-plan': [
@@ -3068,12 +3085,12 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       {
         enonce: "Pourquoi des rails de chemin de fer, strictement parallèles dans la réalité, semblent-ils se rejoindre à l'horizon sur un dessin en perspective centrale ?",
         corrige:
-          "C'est exactement le principe de cette perspective : toutes les droites parallèles d'un même plan horizontal se rencontrent, dans le DESSIN, en un seul point de fuite situé sur la ligne d'horizon. C'est un effet de la projection choisie, pas une vraie rencontre des rails, qui restent à distance constante partout dans la réalité.",
+          "C'est exactement le principe de cette perspective : des horizontales parallèles qui s'éloignent (les fuyantes) se rencontrent, dans le dessin, en un seul point de fuite situé sur la ligne d'horizon. C'est un effet de la projection choisie, pas une vraie rencontre des rails, qui restent à distance constante partout dans la réalité.",
       },
       {
         enonce: "Pourquoi un même solide, dessiné en perspective cavalière puis en perspective à point de fuite, donne-t-il deux dessins vraiment différents ?",
         corrige:
-          "La cavalière conserve toujours le parallélisme des arêtes (deux arêtes parallèles le restent sur le papier), alors que la perspective à point de fuite ne le fait jamais (des arêtes parallèles convergent vers leur point de fuite commun) — les deux conventions traitent le parallélisme de façons opposées, ce qui change fondamentalement l'allure du dessin final.",
+          "La cavalière conserve toujours le parallélisme des arêtes (deux arêtes parallèles le restent sur le papier), alors que la perspective à point de fuite ne le conserve que pour les droites parallèles à la vitre (des arêtes parallèles qui s'éloignent convergent vers leur point de fuite commun) — ce qui change fondamentalement l'allure du dessin final.",
       },
     ],
     ombre: [
