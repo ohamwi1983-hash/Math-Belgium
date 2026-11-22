@@ -86,24 +86,7 @@
 .profil-contenu { container-type: inline-size; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .profil-message { margin: 0; }
 
-/* ---------- bandeau sombre ---------- */
-.profil-bandeau {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 20px 22px;
-  background: var(--profil-sombre); color: var(--profil-sur-sombre); border-radius: var(--radius);
-}
-.profil-initiale {
-  flex: none; width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-  background: var(--accent); color: var(--on-accent); font: 600 1.5rem var(--serif);
-}
-.profil-bandeau-texte { flex: 1 1 220px; min-width: 0; }
-.profil-bandeau-surtitre { margin: 0; font: 500 0.75rem var(--mono); letter-spacing: 0.06em; color: var(--profil-sur-sombre-accent); }
-.profil-bandeau h1 { margin: 2px 0 0; font: 600 clamp(1.6rem, 1.2rem + 1.2vw, 1.9rem)/1.1 var(--serif); color: var(--profil-sur-sombre); }
-.profil-bandeau-ecoles { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
-.profil-bandeau-ecole {
-  display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 4px 10px; border-radius: 999px;
-  background: var(--profil-sombre-2); color: var(--profil-sur-sombre); font: 600 0.78rem var(--sans); overflow-wrap: anywhere;
-}
-.profil-bandeau-ecole .carnet-point { width: 8px; height: 8px; }
+/* ---------- bandeau sombre : `bandeau-espace.css` (importé par `BandeauEspace.tsx`) ---------- */
 
 /* ---------- colonne + aperçu ---------- */
 .profil-grille { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
@@ -206,13 +189,6 @@
 @media (max-width: 759px) {
   .page-tool:has(> .profil) { padding-top: 0; }
   .profil-contenu { gap: 12px; }
-  .profil-bandeau {
-    margin: 0 calc(-1 * var(--page-gutter)); border-radius: 0; padding: 16px var(--page-gutter); gap: 12px;
-  }
-  .profil-initiale { width: 46px; height: 46px; font-size: 1.25rem; }
-  .profil-bandeau-texte { flex-basis: 0; }
-  .profil-bandeau h1 { font-size: 1.5rem; }
-  .profil-bandeau-ecoles { display: none; }
   .profil-grille, .profil-colonne { gap: 12px; }
   .profil-carte-tete { padding: 12px 14px; }
   .profil-carte-corps { padding: 14px; }

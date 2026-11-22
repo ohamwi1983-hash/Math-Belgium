@@ -1,0 +1,58 @@
+/* ---------- bandeau sombre « ESPACE PROFESSEUR » (`BandeauEspace.tsx`, qui importe ce fichier) ----------
+ * Sorti de `profil.css` (22/11/2026) pour servir aussi aux pages de connexion, d'inscription et de mot
+ * de passe sans charger tout `profil.css` (qui doit rester APRÈS `carnet.css`). Règles identiques à
+ * celles d'avant ; les variantes (`espace-bandeau-*`, `coffre-*`) restent dans leurs fichiers, avec une
+ * spécificité plus forte : l'ordre de chargement ne change rien. Jetons `--profil-*` répétés à
+ * l'identique (aussi dans `profil.css`). */
+
+:root {
+  --profil-sombre: #182430;
+  --profil-sombre-2: #2b3a48;
+  --profil-sur-sombre: #ffffff;
+  --profil-sur-sombre-doux: #a3b2bd;
+  --profil-sur-sombre-accent: #e6c8a4;
+  --profil-papier: #ffffff;
+  --profil-encre-papier: #1a1a1a;
+  --profil-gris-papier: #4a4a4a;
+  --profil-bleu-papier: #1f5f99;
+  --profil-surligne: #f4e3d1;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --profil-sombre: #0b1117;
+    --profil-sombre-2: #1e2a35;
+    --profil-sur-sombre: #e9eef2;
+    --profil-sur-sombre-doux: #a3b2bd;
+    --profil-sur-sombre-accent: #f3b877;
+    --profil-surligne: #f6d9b5;
+  }
+}
+
+/* ---------- bandeau sombre ---------- */
+.profil-bandeau {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 20px 22px;
+  background: var(--profil-sombre); color: var(--profil-sur-sombre); border-radius: var(--radius);
+}
+.profil-initiale {
+  flex: none; width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent); color: var(--on-accent); font: 600 1.5rem var(--serif);
+}
+.profil-bandeau-texte { flex: 1 1 220px; min-width: 0; }
+.profil-bandeau-surtitre { margin: 0; font: 500 0.75rem var(--mono); letter-spacing: 0.06em; color: var(--profil-sur-sombre-accent); }
+.profil-bandeau h1 { margin: 2px 0 0; font: 600 clamp(1.6rem, 1.2rem + 1.2vw, 1.9rem)/1.1 var(--serif); color: var(--profil-sur-sombre); }
+.profil-bandeau-ecoles { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.profil-bandeau-ecole {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 4px 10px; border-radius: 999px;
+  background: var(--profil-sombre-2); color: var(--profil-sur-sombre); font: 600 0.78rem var(--sans); overflow-wrap: anywhere;
+}
+.profil-bandeau-ecole .carnet-point { width: 8px; height: 8px; }
+
+@media (max-width: 759px) {
+  .profil-bandeau {
+    margin: 0 calc(-1 * var(--page-gutter)); border-radius: 0; padding: 16px var(--page-gutter); gap: 12px;
+  }
+  .profil-initiale { width: 46px; height: 46px; font-size: 1.25rem; }
+  .profil-bandeau-texte { flex-basis: 0; }
+  .profil-bandeau h1 { font-size: 1.5rem; }
+  .profil-bandeau-ecoles { display: none; }
+}

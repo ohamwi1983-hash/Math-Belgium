@@ -315,67 +315,85 @@ img, svg { max-width: 100%; }
 }
 
 /* ---------- site header ---------- */
-/* Marque · [fil d'Ariane] · recherche · « Je suis professeur » / « Mon compte ». Téléphone : marque,
-   loupe, compte sur une ligne ; fil d'Ariane dessous ; champ de recherche ouvert = ligne pleine
-   largeur. Ordinateur (≥ 900 px) : champ toujours visible, au centre ; fil d'Ariane en ligne dès 1 100 px. */
+/* Bannière claire (maquette « A » du 22/11/2026) : petit logo + marque · recherche · « Professeur » /
+   pastille « Mon compte ». Téléphone : tout sur UNE ligne (loupe = bouton bordé de 44 px), champ de
+   recherche ouvert = ligne pleine largeur ; ordinateur (≥ 900 px) : champ toujours visible, à droite,
+   à côté du compte. Fil d'Ariane : toujours SOUS la ligne, discret. */
 .site-header {
   position: relative;
   z-index: 40;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--line-soft);
   background: var(--surface);
+  --logo-fond: #182430;
+  --logo-trait: #f3b877;
+}
+/* Menu « Mon compte » ouvert : le tiroir et son voile passent au-dessus des barres fixes des pages. */
+.site-header:has(.menu-compte-panneau) { z-index: 90; }
+@media (prefers-color-scheme: dark) {
+  .site-header { --logo-fond: #273645; }
 }
 .site-header-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 10px 24px;
+  padding: 8px 24px;
   min-height: 64px;
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 12px;
+  gap: 4px 12px;
 }
 .site-header a.brand {
-  font-family: var(--serif);
-  font-weight: 600;
-  font-size: 1.15rem;
-  color: var(--ink);
-  text-decoration: none;
-  margin-right: auto;
-  min-height: 44px;
   display: inline-flex;
   align-items: center;
+  gap: 9px;
+  min-width: 0;
+  min-height: 44px;
+  margin-right: auto;
+  color: var(--ink);
+  text-decoration: none;
+  border-radius: var(--radius);
 }
-.site-header a.brand:hover { color: var(--accent-ink); }
+.brand-logo {
+  flex: none; width: 28px; height: 28px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--logo-fond); color: var(--logo-trait);
+}
+.brand-logo svg { display: block; }
+.brand-nom { font: 600 17px/1.2 var(--serif); letter-spacing: -0.01em; white-space: nowrap; }
+.site-header a.brand:hover .brand-nom { color: var(--accent-ink); }
 .site-header a.brand:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-/* Téléphone : marque, loupe et « Je suis professeur » tiennent sur UNE ligne dès 360 px. */
+/* Téléphone : marque, loupe et « Professeur » (ou la pastille) tiennent sur UNE ligne dès 360 px. */
 @media (max-width: 600px) {
-  .site-header-inner { padding: 8px 16px; min-height: 60px; column-gap: 3px; }
-  .site-header a.brand { font-size: 1.03rem; }
-  .site-header .menu-compte-lien { font-size: 13px; padding: 0 2px; }
+  .site-header-inner { padding: 8px 12px; min-height: 60px; column-gap: 6px; }
+}
+@media (max-width: 380px) {
+  .site-header-inner { padding-left: 10px; padding-right: 10px; column-gap: 4px; }
+  .site-header a.brand { gap: 7px; }
+  .brand-nom { font-size: 15px; }
+  .site-header .menu-compte-lien { padding: 0 7px; gap: 4px; }
 }
 .breadcrumb {
   order: 10;
   flex: 1 1 100%;
+  min-width: 0;
   font-family: var(--mono);
   font-size: 12.5px;
+  line-height: 1.5;
   color: var(--ink-faint);
   padding-bottom: 4px;
 }
-.breadcrumb a { color: var(--ink-faint); text-decoration: none; }
-.breadcrumb a:hover { color: var(--accent-ink); }
-@media (min-width: 1100px) {
-  .breadcrumb { order: 0; flex: 1 1 0; min-width: 0; padding: 0; }
-}
+.breadcrumb a { color: var(--ink-soft); text-decoration: none; }
+.breadcrumb a:hover { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+.breadcrumb a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Recherche (`RechercheSite.tsx`) — téléphone : `display: contents`, la loupe reste dans la ligne de
    la marque et la zone ouverte devient une ligne pleine largeur. */
 .recherche-site { display: contents; }
 .recherche-loupe {
-  flex: none; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
-  border: 0; border-radius: var(--radius); background: none; color: var(--ink-soft); cursor: pointer;
+  flex: none; width: 44px; height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink-soft); cursor: pointer;
 }
-.recherche-loupe:hover { color: var(--accent-ink); background: var(--surface-2); }
+.recherche-loupe:hover { color: var(--accent-ink); border-color: var(--accent-soft-line); background: var(--surface-2); }
 .recherche-loupe:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .recherche-site.ouvert .recherche-loupe { color: var(--ink); background: var(--surface-2); }
 .recherche-zone { display: none; position: relative; }
@@ -414,18 +432,14 @@ img, svg { max-width: 100%; }
 .recherche-plus { border-top: 1px solid var(--line-soft); font-size: 13px; }
 @media (min-width: 900px) {
   .site-header a.brand { margin-right: 0; }
-  .recherche-site { display: block; position: relative; flex: 0 1 380px; margin: 0 auto; }
-  .site-header-inner.avec-fil .recherche-site { flex-basis: 320px; }
+  .recherche-site { display: block; position: relative; flex: 0 1 380px; margin-left: auto; }
   .recherche-loupe { display: none; }
   .recherche-zone { display: block; }
-  .recherche-champ { min-height: 40px; }
+  .recherche-champ { min-height: 44px; }
   .recherche-champ input { font-size: 15px; }
-  .recherche-popup { right: auto; width: max(100%, 460px); }
+  .recherche-popup { left: auto; right: 0; width: max(100%, 460px); }
 }
-@media (min-width: 1100px) {
-  .site-header-inner.avec-fil .recherche-site { margin: 0; }
-}
-@media print { .recherche-site, .menu-compte-lien { display: none !important; } }
+@media print { .recherche-site, .menu-compte-lien, .menu-compte { display: none !important; } }
 
 /* Lien "Retour à la section" en tête de page générateur (EntrainementPage) : hors du fil
    d'Ariane (trop discret pour l'action la plus probable en sortant d'un exercice), avant le
@@ -1319,34 +1333,87 @@ table.feature-table--synthese { font-family: inherit; font-size: 0.94em; }
 /* ---------- comptes professeurs (connexion, inscription, profil, coffre, administration) ----------
  * Pages réservées, mêmes jetons que le reste du site (clair / sombre). Champs à 16 px minimum :
  * Safari iOS zoome sur un champ plus petit. Cibles tactiles ≥ 44 px (iPhone 13). */
-.menu-compte { position: relative; }
-.menu-compte-bouton {
-  font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft); text-decoration: none;
-  background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer;
-  min-height: 36px; display: inline-flex; align-items: center; gap: 4px;
-}
-/* Visiteur : « Je suis professeur » (lien discret, maquette de l'accueil). */
+/* Menu « Mon compte » (`MenuCompte.tsx`, maquette « Menu A » du 22/11/2026). Visiteur : bouton bordé
+   « Professeur » ; connecté : pastille (initiale) + ▾. Téléphone (< 760 px) : tiroir par le bas avec
+   voile ; ordinateur : liste déroulante de 300 px ancrée à droite. Lignes ≥ 48 px. */
+.menu-compte { position: relative; flex: none; }
 .menu-compte-lien {
-  font: 500 14px/1.2 var(--sans); color: var(--ink-soft); text-decoration: none; white-space: nowrap;
-  min-height: 44px; display: inline-flex; align-items: center; padding: 0 4px; border-radius: var(--radius);
+  flex: none; display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 0 9px; box-sizing: border-box;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
+  color: var(--ink); font: 600 14px/1.2 var(--sans); text-decoration: none; white-space: nowrap;
 }
-.menu-compte-lien:hover, .menu-compte-bouton:hover { color: var(--accent-ink); border-color: var(--accent-soft-line); }
-.menu-compte-lien:hover { text-decoration: underline; text-underline-offset: 3px; }
-.menu-compte-lien:focus-visible, .menu-compte-bouton:focus-visible, .menu-compte-liste a:focus-visible, .menu-compte-liste button:focus-visible {
-  outline: 2px solid var(--accent); outline-offset: 2px;
+.menu-compte-lien svg { width: 17px; height: 17px; flex: none; }
+.menu-compte-bouton {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 6px 0 4px; box-sizing: border-box;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); cursor: pointer; font: inherit;
 }
-.menu-compte-liste {
-  position: absolute; right: 0; top: calc(100% + 6px); z-index: 50; min-width: 220px;
-  display: flex; flex-direction: column; padding: 6px; background: var(--surface);
-  border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+.menu-compte-bouton[aria-expanded="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.menu-compte-lien:hover, .menu-compte-bouton:hover { border-color: var(--accent-soft-line); color: var(--accent-ink); background: var(--surface-2); }
+.menu-compte-lien:focus-visible, .menu-compte-bouton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.menu-compte-initiale {
+  flex: none; width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent); color: var(--on-accent); font: 600 17px/1 var(--serif);
 }
-.menu-compte-liste a, .menu-compte-liste button {
-  display: block; text-align: left; padding: 10px 12px; border-radius: 6px; color: var(--ink);
-  text-decoration: none; font: inherit; font-size: 0.95rem; background: none; border: 0; cursor: pointer; min-height: 44px;
+.menu-compte-initiale.grande { width: 44px; height: 44px; font-size: 20px; }
+.menu-compte-chevron { font-size: 12px; line-height: 1; }
+
+.menu-compte-voile { display: none; }
+.menu-compte-panneau {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 50; width: 300px; max-height: calc(100vh - 96px); overflow-y: auto;
+  box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; padding: 10px 8px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 14px 32px rgb(24 36 48 / 0.16);
+  text-align: left;
 }
-.menu-compte-liste a:hover, .menu-compte-liste button:hover:not(:disabled) { background: var(--accent-soft); color: var(--accent-ink); }
-.menu-compte-liste button:disabled { opacity: 0.5; cursor: wait; }
-.menu-compte-nom { margin: 4px 12px 6px; font-size: 0.8rem; color: var(--ink-faint); font-family: var(--mono); }
+.menu-compte-poignee { display: none; }
+.menu-compte-tete { display: flex; align-items: center; gap: 12px; padding: 4px 12px 12px; border-bottom: 1px solid var(--line-soft); }
+.menu-compte-identite { display: flex; flex-direction: column; min-width: 0; }
+.menu-compte-nom { font: 600 16px/1.3 var(--sans); color: var(--ink); overflow-wrap: anywhere; }
+.menu-compte-role { font: 400 13px/1.35 var(--sans); color: var(--ink-soft); }
+.menu-compte-groupe ul { list-style: none; margin: 0; padding: 0; }
+.menu-compte-groupe-titre { margin: 10px 12px 2px; font: 700 11px/1.4 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.menu-compte-lien-menu, .menu-compte-sortie {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 12px; box-sizing: border-box;
+  border-radius: var(--radius); font: 500 16px/1.25 var(--sans); text-decoration: none; text-align: left;
+}
+.menu-compte-lien-menu { color: var(--ink); }
+.menu-compte-lien-menu .menu-compte-icone { flex: none; color: var(--ink-soft); }
+.menu-compte-lien-menu:hover { background: var(--surface-2); color: var(--ink); }
+.menu-compte-lien-menu.ici { background: var(--accent-soft); }
+.menu-compte-lien-menu.ici .menu-compte-icone { color: var(--accent); }
+.menu-compte-libelle { min-width: 0; }
+.menu-compte-ici { margin-left: auto; padding-left: 8px; font: 600 12px/1.2 var(--sans); color: var(--accent-ink); white-space: nowrap; }
+.menu-compte-badge {
+  margin-left: auto; padding: 2px 8px; border-radius: 999px; background: var(--plan-soft); color: var(--plan-ink);
+  font: 600 12px/1.4 var(--sans); white-space: nowrap;
+}
+.menu-compte-sortie {
+  margin-top: 6px; border: 0; border-top: 1px solid var(--line-soft); border-radius: 0; background: none;
+  color: var(--bad); font-weight: 600; cursor: pointer;
+}
+.menu-compte-sortie .menu-compte-icone { flex: none; }
+.menu-compte-sortie:hover:not(:disabled) { background: var(--bad-soft); }
+.menu-compte-sortie:disabled { opacity: 0.5; cursor: wait; }
+.menu-compte-lien-menu:focus-visible, .menu-compte-sortie:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+@media (max-width: 759px) {
+  .menu-compte-voile { display: block; position: fixed; inset: 0; z-index: 60; background: rgb(24 36 48 / 0.45); }
+  .menu-compte-panneau {
+    position: fixed; left: 0; right: 0; top: auto; bottom: 0; z-index: 61; width: auto; max-height: 88vh; max-height: 88dvh;
+    overscroll-behavior: contain; padding: 10px 8px calc(18px + env(safe-area-inset-bottom));
+    border: 0; border-radius: 12px 12px 0 0; box-shadow: 0 -8px 28px rgb(0 0 0 / 0.18);
+  }
+  .menu-compte-poignee { display: block; flex: none; align-self: center; width: 36px; height: 4px; margin-bottom: 8px; border-radius: 2px; background: var(--line); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .menu-compte-panneau { animation: menu-compte-deroule 0.14s ease-out; }
+  .menu-compte-lien, .menu-compte-bouton { transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
+  @media (max-width: 759px) {
+    .menu-compte-panneau { animation: menu-compte-monte 0.22s ease-out; }
+    .menu-compte-voile { animation: menu-compte-fondu 0.22s ease-out; }
+  }
+}
+@keyframes menu-compte-deroule { from { opacity: 0; transform: translateY(-4px); } }
+@keyframes menu-compte-monte { from { transform: translateY(100%); } }
+@keyframes menu-compte-fondu { from { opacity: 0; } }
 
 .page-compte { max-width: 680px; margin: 0 auto; padding: 48px 24px 96px; }
 @media (max-width: 480px) { .page-compte { padding: 32px 16px 72px; } }
@@ -1363,8 +1430,17 @@ table.feature-table--synthese { font-family: inherit; font-size: 0.94em; }
 }
 .compte-champ input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
 .compte-champ input[aria-invalid="true"] { border-color: var(--bad); }
-.compte-champ-mdp { display: flex; gap: 8px; align-items: stretch; }
-.compte-champ-mdp input { flex: 1 1 auto; min-width: 0; }
+/* Mot de passe : l'œil « Afficher » est DANS le champ (bouton de 44 px, `aria-pressed`). */
+.compte-champ-mdp { position: relative; }
+.compte-champ-mdp input { padding-right: 52px; }
+.compte-champ-oeil {
+  position: absolute; top: 50%; right: 2px; transform: translateY(-50%); width: 44px; height: 44px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: var(--radius);
+  background: none; color: var(--ink-soft); cursor: pointer;
+}
+.compte-champ-oeil:hover { color: var(--accent-ink); }
+.compte-champ-oeil[aria-pressed="true"] { color: var(--accent-ink); }
+.compte-champ-oeil:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .compte-aide { margin: 0; font-size: 0.85rem; color: var(--ink-faint); }
 .compte-erreur-champ { margin: 0; font-size: 0.92rem; color: var(--bad); font-weight: 600; }
 .compte-message { margin: 0 0 12px; color: var(--good); font-weight: 600; }

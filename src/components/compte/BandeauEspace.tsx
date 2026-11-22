@@ -1,10 +1,12 @@
 import { Children, type ReactNode } from 'react'
+import './bandeau-espace.css'
 
 /**
  * Bandeau sombre des pages « Mon espace » (profil, coffre, carnet, feuilles d'exercices, évaluations
  * et examens) : pastille ronde (initiale ou icône), « ESPACE PROFESSEUR », le `<h1>` de la page,
- * puis des pastilles d'information. Classes `profil-bandeau…` de `profil.css` (à importer par la
- * page, après `carnet.css`) : le rendu du profil et du coffre est celui d'avant, balise pour balise.
+ * puis des pastilles d'information. Classes `profil-bandeau…` de `bandeau-espace.css` (importé ici ;
+ * sorties de `profil.css`) : le rendu du profil et du coffre est celui d'avant, balise pour balise.
+ * Sert aussi aux pages de connexion / inscription / mot de passe (`PageAcces`).
  * - `apresTitre` : sous-titre éventuel, dans le bloc du titre (ex. `coffre-bandeau-sous-titre`) ;
  * - `pastilles` : les `<li className="profil-bandeau-ecole">` (liste omise s'il n'y en a aucun) ;
  * - `fin` : contenu ajouté en dernier dans le bandeau (pastilles calculées ailleurs, lien…).

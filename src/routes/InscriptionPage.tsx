@@ -1,7 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Champ } from '../components/compte/Champ'
-import { MessageChargement, MessageIndisponible, PageCompte } from '../components/compte/PageReservee'
+import { IconeProfil } from '../components/compte/IconesEspace'
+import { MessageAcces, PageAcces } from '../components/compte/PageAcces'
+import { MessageChargement, MessageIndisponible } from '../components/compte/PageReservee'
 import { useCompte } from '../lib/compteContexte'
 import { inscrire, verifierCodeInvitation } from '../lib/compteDonnees'
 import { erreurCodeInvitation, erreurEmail, erreurMotDePasse, erreurNomAffiche, messageErreur, messageStatutCode, MOT_DE_PASSE_MIN } from '../lib/compteValidation'
@@ -12,7 +14,9 @@ type Erreurs = Partial<Record<'code' | 'nom' | 'email' | 'motDePasse' | 'general
  * `/inscription` — UNIQUEMENT avec un code d'invitation (décision de l'utilisateur). Le code est
  * d'abord vérifié (`verifier_code_invitation`, message clair), puis `signUp` le transmet dans les
  * métadonnées : le déclencheur SQL le consomme et crée le profil, ou refuse l'inscription.
- * `?code=` pré-remplit le champ (lien envoyé par l'administrateur).
+ * `?code=` pré-remplit le champ (lien envoyé par l'administrateur). Cadre `PageAcces` : la phrase
+ * d'introduction est devenue le sous-titre du bandeau, et « les cours restent accessibles à tous » la
+ * phrase « Tu es élève ? » (maquette du 22/11/2026).
  */
 export function InscriptionPage() {
   const compte = useCompte({ demarrer: true })
@@ -58,24 +62,29 @@ export function InscriptionPage() {
   }
 
   return (
-    <PageCompte titre="Inscription">
+    <PageAcces
+      titre="Inscription"
+      icone={<IconeProfil mode="bandeau" />}
+      sousTitre={
+        <>
+          Réservée aux professeurs, avec un <strong>code d'invitation</strong> donné par l'administrateur du site.
+        </>
+      }
+      eleve
+    >
       {compte.etat === 'indisponible' ? (
         <MessageIndisponible />
       ) : compte.etat === 'inactif' || (compte.etat === 'chargement' && !envoi) ? (
         <MessageChargement />
       ) : confirmationEnvoyee ? (
-        <div className="compte-encadre compte-succes" role="status">
+        <MessageAcces ton="succes" titre="Presque fini !" role="status">
           <p>
-            <strong>Presque fini !</strong> Un e-mail de confirmation vient d'être envoyé à <strong>{confirmationEnvoyee}</strong>. Clique sur le lien qu'il contient pour activer ton
-            compte (regarde aussi dans les courriers indésirables), puis <Link to="/connexion">connecte-toi</Link>.
+            Un e-mail de confirmation vient d'être envoyé à <strong>{confirmationEnvoyee}</strong>. Clique sur le lien qu'il contient pour activer ton compte (regarde aussi dans
+            les courriers indésirables), puis <Link to="/connexion">connecte-toi</Link>.
           </p>
-        </div>
+        </MessageAcces>
       ) : (
         <form className="compte-form" onSubmit={sInscrire} noValidate>
-          <p className="compte-intro">
-            L'inscription est réservée aux professeurs : il faut un <strong>code d'invitation</strong> donné par l'administrateur du site. Les cours et les générateurs restent
-            accessibles à tous sans compte.
-          </p>
           <Champ
             label="Code d'invitation"
             valeur={code}
@@ -112,6 +121,6 @@ export function InscriptionPage() {
           </p>
         </form>
       )}
-    </PageCompte>
+    </PageAcces>
   )
 }

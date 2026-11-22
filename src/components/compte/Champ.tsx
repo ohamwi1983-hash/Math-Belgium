@@ -4,7 +4,8 @@ import { useId, useState, type InputHTMLAttributes } from 'react'
  * Champ de formulaire des pages de compte : label, aide, message d'erreur relié
  * (`aria-describedby`, `aria-invalid`). Règle CLAUDE.md : la frappe n'est JAMAIS filtrée ni
  * bloquée (aucun `onKeyDown`, aucun `inputMode` numérique) — la saisie est jugée à l'envoi.
- * `type="password"` : bouton « Afficher » (utile sur téléphone, évite un champ de confirmation).
+ * `type="password"` : icône œil DANS le champ (« Afficher le mot de passe », `aria-pressed`) — utile sur
+ * téléphone, évite un champ de confirmation.
  */
 export function Champ({
   label,
@@ -41,8 +42,12 @@ export function Champ({
           {...reste}
         />
         {type === 'password' && (
-          <button type="button" className="compte-bouton-lien" aria-pressed={visible} onClick={() => setVisible((v) => !v)}>
-            {visible ? 'Masquer' : 'Afficher'}
+          <button type="button" className="compte-champ-oeil" aria-label="Afficher le mot de passe" aria-pressed={visible} onClick={() => setVisible((v) => !v)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+              <circle cx="12" cy="12" r="3" />
+              {visible && <path d="M4 4l16 16" />}
+            </svg>
           </button>
         )}
       </div>
