@@ -23,6 +23,19 @@ export const limitesAsymptotes: ChapterContent = {
       kicker:
         'bornes du domaine, définition intuitive, limite à gauche/à droite, limites de référence, ' +
         'formes indéterminées et techniques de levée',
+      titreCourt: 'Calculer une limite',
+      partie: 'Calculer limites et asymptotes',
+      essentiel: [
+        '$\\lim\\limits_{x \\to a} f(x) = L$ : f(x) se rapproche d\'autant plus de L que x se rapproche de a. Si la limite à gauche et la limite à droite diffèrent, la limite en a n\'existe pas.',
+        'Trois formes indéterminées : 0/0, on factorise et on simplifie ; ∞/∞, on met en évidence le terme de plus haut degré ; ∞−∞, terme dominant ou expression conjuguée s\'il y a des racines.',
+        'Forme $\\dfrac{k}{0}$ avec $k \\neq 0$ : la limite est infinie, son signe se lit à gauche et à droite. En $-\\infty$, $\\sqrt{x^2} = |x| = -x$.',
+      ],
+      cartes: [
+        { question: '$\\lim\\limits_{x \\to 2} \\dfrac{x^2-5x+6}{x-2}$ ?', reponse: 'Forme $\\dfrac{0}{0}$ : $\\dfrac{(x-2)(x-3)}{x-2} = x-3$, donc la limite vaut $-1$.' },
+        { question: '$\\lim\\limits_{x \\to +\\infty} \\dfrac{3x^2-5x+1}{x^2+2}$ ?', reponse: '3 : même degré, rapport des coefficients dominants.' },
+        { question: '$\\lim\\limits_{x \\to -3^-} \\dfrac{2x-5}{x+3}$ ?', reponse: '$\\dfrac{-11}{0^-} = +\\infty$ : ce n\'est pas une forme indéterminée.' },
+        { question: '$\\lim\\limits_{x \\to +\\infty} \\left[\\sqrt{x^2+4x} - x\\right]$ ?', reponse: 'Conjuguée : $\\dfrac{4x}{\\sqrt{x^2+4x}+x}$, puis terme dominant : la limite vaut 2, pas 0.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Introduction : que devient f(x) ?', youtubeId: 'Ox4FLOO-Fus' },
         { kind: 'video', title: 'Notion de limite : bornes du domaine, limite à gauche/à droite, limites de référence', youtubeId: 'GXuoF1-6fLU' },
@@ -785,6 +798,19 @@ export const limitesAsymptotes: ChapterContent = {
       kicker:
         'définir une asymptote (AV/AH/AO, cas général) ; y = ax + b, avec a = lim f(x)/x et ' +
         'b = lim (f(x) − ax) — lien avec le degré de N et D',
+      titreCourt: 'Asymptote oblique',
+      partie: 'Calculer limites et asymptotes',
+      essentiel: [
+        'AV $x=a$ : une limite infinie en a, d\'un côté suffit. AH $y=b$ : f(x) tend vers b en $+\\infty$ ou en $-\\infty$. AO $y=ax+b$ : $f(x)-(ax+b)$ tend vers 0.',
+        '$a = \\lim\\limits_{x \\to \\pm\\infty} \\dfrac{f(x)}{x}$, puis $b = \\lim\\limits_{x \\to \\pm\\infty} [f(x) - ax]$ ; ou la division euclidienne : l\'asymptote est le quotient, jamais le reste.',
+        'Fonction rationnelle : asymptote horizontale si deg(N) ≤ deg(D), oblique seulement si deg(N) = deg(D) + 1. Le signe de $f(x)-(ax+b)$ donne la position de la courbe.',
+      ],
+      cartes: [
+        { question: 'Asymptote oblique de $f(x) = \\dfrac{x^2-3x+5}{x-1}$ ?', reponse: '$f(x) = x-2 + \\dfrac{3}{x-1}$ : l\'asymptote est $y = x-2$.' },
+        { question: 'deg(N) = deg(D) : quel type d\'asymptote ?', reponse: 'Horizontale (a = 0) : y vaut le rapport des coefficients dominants.' },
+        { question: 'deg(N) = deg(D) + 2 : y a-t-il une asymptote oblique ?', reponse: 'Non : a est infini, la courbe diverge plus vite qu\'une droite.' },
+        { question: '$f(x)-(x+1) = \\dfrac{2x-4}{x^2+2x+5}$ : où la courbe est-elle au-dessus de $y = x+1$ ?', reponse: 'Le dénominateur est toujours positif : au-dessus pour $x > 2$, en dessous pour $x < 2$, point commun $(2\\,;3)$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Définir une asymptote : verticale, horizontale, oblique', youtubeId: 'Fa8J6v_n4Pw' },
         { kind: 'video', title: 'Asymptote oblique : comparer les degrés, deux méthodes, piège du reste', youtubeId: 'sVluREzWUF0' },
@@ -1125,6 +1151,19 @@ export const limitesAsymptotes: ChapterContent = {
       number: 3,
       title: 'Limites et asymptotes — lecture graphique',
       kicker: 'lire limites et asymptotes directement sur un graphique, sans calcul',
+      titreCourt: 'Lecture graphique',
+      partie: 'Lire, interpréter, étudier',
+      essentiel: [
+        'Sur un graphique : une verticale le long de laquelle la courbe part vers ±∞ (un seul côté suffit), une horizontale ou une oblique que la courbe rejoint aux extrémités.',
+        'Lis séparément la gauche et la droite d\'une asymptote verticale, puis $-\\infty$ et $+\\infty$ : les signes ne se devinent pas, ils se lisent.',
+        'Une fonction rationnelle a la même limite finie en $-\\infty$ et en $+\\infty$ ; d\'autres fonctions peuvent avoir deux asymptotes horizontales différentes.',
+      ],
+      cartes: [
+        { question: 'À gauche de x = 1, la courbe arrive sur un point plein ; à droite, elle part vers +∞. Asymptote verticale ?', reponse: 'Oui : il suffit qu\'un seul côté diverge.' },
+        { question: 'Comment distinguer une asymptote horizontale d\'une oblique ?', reponse: 'L\'horizontale garde la même hauteur partout ; l\'oblique continue de monter ou de descendre.' },
+        { question: 'Une fonction rationnelle peut-elle tendre vers −1 en −∞ et vers 3 en +∞ ?', reponse: 'Non : sa limite finie est la même des deux côtés.' },
+        { question: 'Racine double au dénominateur : quels signes de part et d\'autre de l\'asymptote verticale ?', reponse: 'Le même signe des deux côtés : un carré ne change jamais de signe.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Limites et asymptotes : lecture graphique', youtubeId: '6dFdWB1wZug' },
         {
@@ -1499,6 +1538,19 @@ export const limitesAsymptotes: ChapterContent = {
       number: 4,
       title: 'Limites et asymptotes en contexte',
       kicker: 'traduire saturation, seuil et long terme en limite ; interpréter une asymptote horizontale',
+      titreCourt: 'Limites en contexte',
+      partie: 'Lire, interpréter, étudier',
+      essentiel: [
+        'Le comportement à long terme d\'un modèle se lit comme une limite en $+\\infty$.',
+        '$f(x)=\\dfrac{bx+q}{x+p}$ s\'écrit $f(x)=b+\\dfrac{a}{x+p}$ : asymptote $y=b$. Avec $p>0$, si $a>0$, f descend vers b (un plancher) ; si $a<0$, elle monte vers b (un plafond).',
+        'Vérifie que l\'asymptote a un sens dans le contexte : une production ou un temps négatif n\'en a pas.',
+      ],
+      cartes: [
+        { question: '$C_u(x) = 8 + \\dfrac{240}{x}$ : coût unitaire à long terme ?', reponse: '8 € : un plancher jamais atteint, car $\\dfrac{240}{x} > 0$.' },
+        { question: '$P(x) = \\dfrac{5x+13}{x+2}$ : la population monte-t-elle ou descend-elle ?', reponse: '$P(x) = 5 + \\dfrac{3}{x+2}$, avec $3 > 0$ : elle descend vers 5 milliers.' },
+        { question: '$C(t) = \\dfrac{150t}{100+5t}$ : vers quelle concentration ?', reponse: '$\\dfrac{150}{5} = 30$ g/L, un plafond.' },
+        { question: '$N(x) = 2x+15-\\dfrac{8}{x+2}$ centaines d\'abonnés : évolution à long terme ?', reponse: 'Asymptote $y = 2x+15$ : environ 2 centaines d\'abonnés de plus par mois, la pente.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Limites et asymptotes en contexte : le coût unitaire', youtubeId: 'A58J7zT6au0' },
         {
@@ -1754,6 +1806,19 @@ export const limitesAsymptotes: ChapterContent = {
       number: 5,
       title: 'Étude complète',
       kicker: 'domaine → asymptotes verticales → asymptote horizontale/oblique → limites aux bornes → recoupement ; construire une fonction à partir de ses asymptotes',
+      titreCourt: 'Étude complète',
+      partie: 'Lire, interpréter, étudier',
+      essentiel: [
+        'Dans l\'ordre : domaine ; pour chaque valeur exclue, teste le numérateur ; degrés ; limites à chaque borne ; recoupement ; synthèse.',
+        'Un point vide n\'est **pas** une asymptote verticale : si le numérateur s\'annule aussi, on simplifie et la limite est finie.',
+        'Une courbe peut croiser son asymptote horizontale ou oblique : là où le reste de la division euclidienne vaut 0.',
+      ],
+      cartes: [
+        { question: '$f(x) = \\dfrac{x^2-1}{x^2-3x+2}$ : que se passe-t-il en x = 1 ?', reponse: 'Un point vide $(1\\,;-2)$ : pour $x \\neq 1$, $f(x) = \\dfrac{x+1}{x-2}$.' },
+        { question: '$f(x) = \\dfrac{x^2+x}{x^2+1}$ recoupe-t-elle son asymptote $y = 1$ ?', reponse: 'Oui : $f(x) = 1 + \\dfrac{x-1}{x^2+1}$, recoupement en $(1\\,;1)$.' },
+        { question: 'Donne une fonction d\'asymptotes $x = 2$ et $y = 3$.', reponse: '$f(x) = 3+\\dfrac{1}{x-2}$, par exemple : la réponse n\'est pas unique.' },
+        { question: '$f(x)=\\dfrac{ax+b}{x+d}$, asymptotes $x = 2$ et $y = 3$, passe par $A(0\\,;1)$ : f(x) ?', reponse: '$d = -2$, $a = 3$, puis $b = -2$ : $f(x) = \\dfrac{3x-2}{x-2}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étude complète d\'une fonction rationnelle : domaine, asymptotes, limites', youtubeId: 'j413TOzZQVM' },
         {
