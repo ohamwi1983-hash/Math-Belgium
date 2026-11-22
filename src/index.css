@@ -273,6 +273,20 @@ img, svg { max-width: 100%; }
    une formule qui tient dans le texte garde donc son rendu habituel, une trop large scrolle
    localement dans son propre encadré au lieu de pousser toute la page vers la droite. */
 .math-inline { display: inline-block; max-width: 100%; overflow-x: auto; vertical-align: middle; }
+/* Barres de défilement parasites (signalées par l'utilisateur, mesurées sur iPhone : 773 formules sur
+   5 497 avec une barre verticale, 509 avec une barre horizontale alors que 49 seulement débordent
+   vraiment). Cause : `overflow-x: auto` force aussi `overflow-y: auto`, et le contenu KaTeX (fractions,
+   primes, flèches) dépasse un peu sa boîte — jusqu'à 0,45 em mesuré. Correctif : aucun défilement
+   vertical, 0,5 em de marge intérieure invisible en haut et en bas compensée par une marge négative
+   (rien n'est rogné, l'interligne ne bouge pas), et barres masquées : une formule vraiment trop large
+   défile toujours au doigt / à la molette, sans trait gris. */
+.math-inline {
+  overflow-y: hidden;
+  padding-block: 0.5em;
+  margin-block: -0.5em;
+  scrollbar-width: none;
+}
+.math-inline::-webkit-scrollbar { display: none; }
 
 .page {
   max-width: 760px;
@@ -2087,7 +2101,7 @@ h1.eleve-titre { font-family: var(--serif); font-size: clamp(1.6rem, 5vw, 2.25re
   /* Une formule ne se casse plus en fin de ligne (« = » seul, « N » seul) : trop large, elle
      défile horizontalement dans son propre conteneur (`.math-inline`, déjà `overflow-x: auto`). */
   .parcours .math-inline .katex { white-space: nowrap; }
-  .parcours .math-inline { max-width: 100%; padding-bottom: 2px; }
+  .parcours .math-inline { max-width: 100%; }
   .parcours [tabindex="-1"]:focus { outline: none; }
   .parcours :is(button, a, [role="tab"]):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
