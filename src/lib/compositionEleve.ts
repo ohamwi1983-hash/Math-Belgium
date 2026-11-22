@@ -43,6 +43,12 @@ import { DEPASSEMENT_MAX } from '../components/admin/conception/composer'
  * `respecteContrainte`), et les points indicatifs sont posés (durée → `pointsDepuisDuree`, total
  * ramené à 20 par `mettreAEchelle`).
  *
+ * FEUILLE d'exercices (décision de l'utilisateur du 22/11/2026 : « pas de limite de temps ou de
+ * longueur […] rien à voir avec une évaluation ») : ni durée ni points ni parts de temps — un NOMBRE
+ * d'exercices, global (1 à 30, réparti à parts égales entre compétences puis notions cochées) ou
+ * choisi type par type (`ReglagesEleve.exercices`, `composerFeuille`) ; la retouche n'y corrige que le
+ * niveau réel.
+ *
  * Aucune donnée d'élève : rien n'est enregistré (ni coffre, ni historique anti-doublon — l'historique
  * est seulement LU par `construirePlan`).
  */
@@ -89,7 +95,23 @@ export interface ReglagesEleve {
   /** Évaluation blanche : démonstrations ANNONCÉES par le professeur, cochées par l'élève (clés
    * `cleDemonstration`) — seules celles-là peuvent être tirées ; aucune → aucune démonstration. */
   demonstrations?: string[]
+  /** FEUILLE d'exercices (décision de l'utilisateur, 22/11/2026 : « pas de limite de temps ou de
+   * longueur […] rien à voir avec une évaluation ») : un NOMBRE d'exercices au lieu d'une durée —
+   * global, réparti à parts égales (`composerFeuille`), ou choisi type par type. `duree` est alors
+   * ignorée. Absent : composition d'avant (durée), inchangée. */
+  exercices?: ExercicesFeuille
 }
+
+/** Nombre d'exercices de la feuille : global (réparti entre les notions et compétences cochées) ou
+ * « à la carte » (`parType` : clé du candidat → nombre, 0 à `capaciteType`). */
+export type ExercicesFeuille = { mode: 'global'; nombre: number } | { mode: 'carte'; parType: Record<string, number> }
+
+/** Bornes du nombre global d'exercices de la feuille, et sa valeur par défaut. */
+export const NOMBRE_FEUILLE_MIN = 1
+export const NOMBRE_FEUILLE_MAX = 30
+export const NOMBRE_FEUILLE_DEFAUT = 10
+/** Au plus ce nombre d'exercices d'un même type (variante, ou affirmations d'un thème vrai/faux). */
+export const MAX_PAR_TYPE = 5
 
 export type PartsEleve = { mode: 'hasard'; graine: number } | { mode: 'reglee'; pourcents: RepartitionPourcents | null; graine?: number }
 
@@ -111,6 +133,11 @@ export function notionsDuChapitre(chapter: ChapterContent): NotionEleve[] {
     .map((s) => ({ sectionId: s.id, numero: s.number, titre: s.title }))
 }
 
+/** Nom d'un générateur pour l'élève : son libellé du panneau sans l'identifiant final « (gen12) ». */
+function titreGenerateur(label: string): string {
+  return label.replace(/\s*\(\d*gen\d+\)\s*$/, '').trim() || label
+}
+
 /* ----------------------------------------------------------------------------------------------
  * Candidats (variantes et thèmes vrai/faux) avec leur niveau et leur durée estimés
  * -------------------------------------------------------------------------------------------- */
@@ -123,6 +150,10 @@ interface CandidatBase {
   duree: number
   /** Niveaux des tirages d'estimation (vide : générateur sans niveau). */
   niveaux: number[]
+  /** Nom affiché dans la liste « exercice par exercice » de la feuille (générateur ou thème). */
+  titre?: string
+  /** Variante (absente : variante unique / tirage aléatoire). */
+  variante?: string
 }
 export interface CandidatExercice extends CandidatBase {
   sorte: 'exercice'
@@ -272,11 +303,13 @@ export function preparerCandidats(chapter: ChapterContent, type: TypeEleve, prog
 
 async function calculerCandidats(chapter: ChapterContent, type: TypeEleve, progression?: (fait: number, total: number) => void): Promise<Candidat[]> {
   const mode = type === 'blanche' ? 'evaluation' : 'exercice'
-  const taches: { sectionId: string; generatorId: IdGenerateurPilote; varianteId: string; processus: Processus }[] = []
+  const taches: { sectionId: string; generatorId: IdGenerateurPilote; varianteId: string; processus: Processus; titre: string; variante?: string }[] = []
   for (const notion of notionsDuChapitre(chapter)) {
     for (const g of generateursPourSection(chapter.slug, notion.sectionId)) {
       if (!(g.generatorId in EVALUATION_ADAPTER_REGISTRY)) continue
-      for (const v of catalogueVariantesExercice(g.generatorId, mode)) taches.push({ sectionId: notion.sectionId, generatorId: g.generatorId, varianteId: v.id, processus: g.processus ?? 2 })
+      const catalogue = catalogueVariantesExercice(g.generatorId, mode)
+      for (const v of catalogue)
+        taches.push({ sectionId: notion.sectionId, generatorId: g.generatorId, varianteId: v.id, processus: g.processus ?? 2, titre: titreGenerateur(g.label), ...(catalogue.length > 1 && v.label ? { variante: v.label } : {}) })
     }
   }
   const candidats: Candidat[] = []
@@ -294,7 +327,17 @@ async function calculerCandidats(chapter: ChapterContent, type: TypeEleve, progr
       for (const theme of themesPourSection(chapter.slug, notion.sectionId)) {
         const banque = await chargerThemeVraiFaux(chapter.slug, theme.quizTheme).catch(() => null)
         if (!banque || banque.length === 0) continue
-        candidats.push({ sorte: 'vraiFaux', cle: `${notion.sectionId}|vf|${theme.quizTheme}`, sectionId: notion.sectionId, processus: 1, theme: theme.quizTheme, disponibles: banque.length, duree: DUREE_VRAI_FAUX, niveaux: [NIVEAU_VRAI_FAUX] })
+        candidats.push({
+          sorte: 'vraiFaux',
+          cle: `${notion.sectionId}|vf|${theme.quizTheme}`,
+          sectionId: notion.sectionId,
+          processus: 1,
+          theme: theme.quizTheme,
+          disponibles: banque.length,
+          duree: DUREE_VRAI_FAUX,
+          niveaux: [NIVEAU_VRAI_FAUX],
+          titre: theme.label ? `Vrai ou faux — ${theme.label}` : 'Vrai ou faux',
+        })
       }
     }
   }
@@ -329,6 +372,11 @@ export interface Composition {
   /** Évaluation blanche (`ReglagesEleve.parts`) : parts visées (fractions, somme 1) entre les
    * compétences cochées ayant des exercices — tirées au hasard ou réglées. Absent : parts égales. */
   parts?: Record<Processus, number>
+  /** Feuille au nombre d'exercices (`ReglagesEleve.exercices`) : nombre demandé (global : le nombre ;
+   * à la carte : la somme des compteurs) et nombre au plus possible avec ces choix (somme des
+   * `capaciteType` des types retenus). */
+  demandes?: number
+  disponibles?: number
 }
 
 /** Part des tirages d'estimation d'un candidat dont la catégorie est dans `categories` (générateur
@@ -551,9 +599,91 @@ function composerParParts(candidats: Candidat[], admis: Candidat[], reglages: Re
   return { unites: [...etat.unites.values()], dureeEstimee: etat.duree, elargi, niveauxAdmis: CATEGORIES_NIVEAU.filter((c) => cochees.has(c) || voisinsUtilises.has(c)), parts: fractions }
 }
 
+/* ----------------------------------------------------------------------------------------------
+ * Feuille d'exercices au NOMBRE d'exercices (ni durée ni points)
+ * -------------------------------------------------------------------------------------------- */
+
+/** Exercices au plus d'un type dans une feuille : `MAX_PAR_TYPE` (vrai/faux : pas plus que
+ * d'affirmations dans la banque du thème ; démonstration : une). */
+export function capaciteType(c: Candidat): number {
+  return c.sorte === 'vraiFaux' ? Math.min(MAX_PAR_TYPE, c.disponibles) : c.sorte === 'demonstration' ? 1 : MAX_PAR_TYPE
+}
+
+/** Types d'exercices proposés à la feuille pour ces choix : candidats des notions retenues et des
+ * compétences cochées (jamais une autre), aux niveaux cochés (même règle que `composer` : au moins la
+ * moitié des tirages d'estimation), dans l'ordre des sections du chapitre. Aucun niveau voisin : la
+ * feuille ne « remplit » rien, elle dit ce qui manque. */
+export function typesFeuille(candidatsChapitre: Candidat[], reglages: Pick<ReglagesEleve, 'sections' | 'competences' | 'niveaux' | 'demonstrations'>, chapter?: ChapterContent): Candidat[] {
+  const cochees = new Set(reglages.niveaux)
+  const tous = tousLesNiveaux(reglages.niveaux)
+  const admis = candidatsDesReglages(candidatsChapitre, reglages).filter((c) => candidatAuxNiveaux(c, cochees, tous))
+  if (!chapter) return admis
+  const ordre = new Map(chapter.sections.map((s, i) => [s.id, i]))
+  return admis.map((c, i) => ({ c, i })).sort((a, b) => (ordre.get(a.c.sectionId) ?? 0) - (ordre.get(b.c.sectionId) ?? 0) || a.i - b.i).map((x) => x.c)
+}
+
+/** Choisit au hasard (ou par `aleatoire`) parmi les éléments de plus petite valeur. */
+function auPlusPetit<T>(liste: T[], valeur: (x: T) => number, aleatoire: () => number): T {
+  const min = Math.min(...liste.map(valeur))
+  const ex = liste.filter((x) => valeur(x) === min)
+  return ex[Math.min(ex.length - 1, Math.floor(aleatoire() * ex.length))]
+}
+
+/**
+ * Composition d'une feuille au NOMBRE d'exercices (décision de l'utilisateur, 22/11/2026 : « les
+ * deux » — un nombre global par défaut ET un choix exercice par exercice).
+ * - À la carte : exactement les nombres demandés, type par type (bornés à `capaciteType`).
+ * - Global : un exercice à la fois — la compétence cochée la moins servie (parts égales), puis dans
+ *   elle la notion la moins servie, puis le type le moins servi (jamais deux fois le même type tant
+ *   qu'un autre de cette notion et de cette compétence est libre), puis le générateur le moins servi,
+ *   égalités au hasard ; un type plein (`capaciteType`) n'est plus proposé. Moins de types que
+ *   demandé : la feuille a le maximum possible (`disponibles`), et l'élève en est averti.
+ */
+export function composerFeuille(candidatsChapitre: Candidat[], reglages: ReglagesEleve, aleatoire: () => number = Math.random): Composition {
+  const types = typesFeuille(candidatsChapitre, reglages)
+  const disponibles = types.reduce((t, c) => t + capaciteType(c), 0)
+  const niveauxAdmis = CATEGORIES_NIVEAU.filter((c) => reglages.niveaux.includes(c))
+  const exercices = reglages.exercices!
+  const nombres = new Map<string, number>()
+  let demandes: number
+  if (exercices.mode === 'carte') {
+    demandes = 0
+    for (const c of types) {
+      const n = Math.max(0, Math.min(capaciteType(c), Math.floor(exercices.parType[c.cle] ?? 0)))
+      demandes += n
+      if (n > 0) nombres.set(c.cle, n)
+    }
+  } else {
+    demandes = Math.max(NOMBRE_FEUILLE_MIN, Math.min(NOMBRE_FEUILLE_MAX, Math.floor(exercices.nombre)))
+    const parCompetence = new Map<Processus, number>()
+    const parNotion = new Map<string, number>()
+    const parGenerateur = new Map<string, number>()
+    const n = (c: Candidat) => nombres.get(c.cle) ?? 0
+    for (let k = 0; k < demandes; k++) {
+      const libres = types.filter((c) => n(c) < capaciteType(c))
+      if (libres.length === 0) break
+      const p = auPlusPetit([...new Set(libres.map((c) => c.processus))], (q) => parCompetence.get(q) ?? 0, aleatoire)
+      const dansP = libres.filter((c) => c.processus === p)
+      const s = auPlusPetit([...new Set(dansP.map((c) => c.sectionId))], (x) => parNotion.get(`${p}|${x}`) ?? 0, aleatoire)
+      const ici = dansP.filter((c) => c.sectionId === s)
+      const peuServi = Math.min(...ici.map(n))
+      const c = auPlusPetit(ici.filter((x) => n(x) === peuServi), (x) => parGenerateur.get(`${p}|${s}|${cleGenerateur(x)}`) ?? 0, aleatoire)
+      nombres.set(c.cle, n(c) + 1)
+      parCompetence.set(p, (parCompetence.get(p) ?? 0) + 1)
+      parNotion.set(`${p}|${s}`, (parNotion.get(`${p}|${s}`) ?? 0) + 1)
+      const g = `${p}|${s}|${cleGenerateur(c)}`
+      parGenerateur.set(g, (parGenerateur.get(g) ?? 0) + 1)
+    }
+  }
+  const unites = types.filter((c) => nombres.has(c.cle)).map((c) => ({ candidat: c, nombre: nombres.get(c.cle)! }))
+  return { unites, dureeEstimee: unites.reduce((t, u) => t + u.nombre * u.candidat.duree, 0), elargi: false, niveauxAdmis, demandes, disponibles }
+}
+
 /** Compose une sélection pour les réglages — aléatoire à chaque appel, sauf graine des parts
  * (évaluation blanche) : mêmes réglages, mêmes candidats, même graine → même composition. */
 export function composer(candidatsChapitre: Candidat[], reglages: ReglagesEleve, aleatoire?: () => number): Composition {
+  // Feuille au nombre d'exercices : ni durée ni parts de temps.
+  if (reglages.exercices) return composerFeuille(candidatsChapitre, reglages, aleatoire)
   // Jamais une compétence non cochée, même pour remplir la durée.
   const candidats = candidatsDesReglages(candidatsChapitre, reglages)
   const cochees = new Set(reglages.niveaux)
@@ -737,6 +867,12 @@ export interface ResumeEleve {
    * RÉELLEMENT imprimées — celles des points (« Mon score ») — et leur origine. Absent : feuille. */
   parts?: RepartitionPourcents
   partsHasard?: boolean
+  /** Exercices imprimés AVANT regroupement : instances, affirmations vrai/faux et questions ouvertes
+   * (une feuille au nombre d'exercices en a `demandes`, ou `disponibles` s'il en manque). */
+  exercices: number
+  /** Feuille au nombre d'exercices : nombre demandé et nombre au plus possible (`Composition`). */
+  demandes?: number
+  disponibles?: number
 }
 
 export interface PlanEleve {
@@ -804,6 +940,7 @@ function retoucher(plan: PlanDocument, reglages: ReglagesEleve, composition: Com
   const serie = plan.series[0]
   const cible = reglages.duree
   const plafond = cible * (1 + TOLERANCE_DEPASSEMENT)
+  const feuille = !!reglages.exercices
   const mesures = new Map<ElementExercice, { niveau: number | null; duree: number }>()
   const empreintes = new Set<string>()
   const exercices = serie.elements.filter((e): e is ElementExercice => e.type === 'exercice')
@@ -826,7 +963,8 @@ function retoucher(plan: PlanDocument, reglages: ReglagesEleve, composition: Com
     const m = mesures.get(el)!
     const resteEstime = exercices.slice(k + 1).reduce((t, e) => t + (estimations.get(`${e.generatorId}|${e.instances[0].varianteId}`) ?? mesures.get(e)!.duree), 0)
     const budget = plafond - cumul - resteEstime
-    const bon = (x: { niveau: number | null; duree: number }) => niveauAdmis(x.niveau, reglages, composition) && x.duree <= Math.max(budget, 0) + 1e-9
+    // Feuille au nombre d'exercices : seul le niveau compte (aucune durée visée).
+    const bon = (x: { niveau: number | null; duree: number }) => niveauAdmis(x.niveau, reglages, composition) && (feuille || x.duree <= Math.max(budget, 0) + 1e-9)
     if (!bon(m)) {
       const contrainte = contrainteEleve(adaptateur, reglages.type)
       const fin = Date.now() + BUDGET_RETOUCHE_MS
@@ -871,9 +1009,10 @@ function retoucher(plan: PlanDocument, reglages: ReglagesEleve, composition: Com
     }
     cumul += mesures.get(el)!.duree
   })
-  // Dépassement restant : retirer l'exercice dont le retrait rapproche le plus de la cible.
+  // Dépassement restant : retirer l'exercice dont le retrait rapproche le plus de la cible (jamais
+  // pour une feuille au nombre d'exercices : le nombre demandé est respecté).
   const total = () => dureeAutres + [...mesures.values()].reduce((t, m) => t + m.duree, 0)
-  while (total() > plafond + 1e-9 && mesures.size > 1) {
+  while (!feuille && total() > plafond + 1e-9 && mesures.size > 1) {
     let retire: ElementExercice | null = null
     let ecart = Infinity
     for (const [el, m] of mesures) {
@@ -1000,5 +1139,23 @@ export async function construirePlanEleve(reglages: ReglagesEleve, chapter: Chap
   // Averti dès qu'un exercice imprimé sort des niveaux cochés (niveau voisin ajouté, ou variante dont
   // aucun tirage aux niveaux cochés n'a été trouvé dans le budget de la retouche).
   const categoriesHorsChoix = CATEGORIES_NIVEAU.filter((c) => imprimes.some((n) => categorieDuNiveau(n) === c && !niveauCoche(n, reglages)))
-  return { plan, resume: { questions, duree, dureeConseillee, points, pointsParProcessus, niveaux, categories, competences, categoriesHorsChoix, elargi: categoriesHorsChoix.length > 0, ...(parts ? { parts, partsHasard: reglages.parts?.mode === 'hasard' } : {}) } }
+  const exercices = elements.reduce((t, e) => t + (e.type === 'exercice' ? e.instances.length : e.type === 'vraiFaux' ? e.indices.length : 1), 0)
+  return {
+    plan,
+    resume: {
+      questions,
+      duree,
+      dureeConseillee,
+      points,
+      pointsParProcessus,
+      niveaux,
+      categories,
+      competences,
+      categoriesHorsChoix,
+      elargi: categoriesHorsChoix.length > 0,
+      ...(parts ? { parts, partsHasard: reglages.parts?.mode === 'hasard' } : {}),
+      exercices,
+      ...(composition.demandes !== undefined ? { demandes: composition.demandes, disponibles: composition.disponibles } : {}),
+    },
+  }
 }
