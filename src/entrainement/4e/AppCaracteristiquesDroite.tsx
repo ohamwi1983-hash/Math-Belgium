@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeCaracteristiquesDroite } from "./generateurs/caracteristiquesDroite/corrigeDetaille";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCaracteristiquesDroite } from "./generateurs/caracteristiquesDroite";
@@ -156,6 +159,7 @@ export function AppCaracteristiquesDroite() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : construireReponseAttendue(exercice, etat.phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCaracteristiquesDroite(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

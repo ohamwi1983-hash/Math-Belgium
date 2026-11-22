@@ -1,4 +1,7 @@
 import { useState, type ReactNode } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeEquationDroite } from "./generateurs/equationDroite/corrigeDetaille";
 import type { ExerciceEquationDroite } from "./core/equationDroite.types";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationDroite } from "./generateurs/equationDroite";
@@ -221,6 +224,7 @@ export function AppEquationDroite() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: etat.reglages.affichageReponseApresEchec ? construireReponseAttendue(exercice, phase) : undefined,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationDroite(exercice), lettreEtape(sequencePourExercice(exercice).indexOf(phase)))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

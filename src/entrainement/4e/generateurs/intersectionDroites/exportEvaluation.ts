@@ -1,5 +1,5 @@
 import type { ExerciceIntersectionDroites, LigneIntersection } from "../../core/intersectionDroites.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne as FragmentConsignePapier, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { formatFractionIrreductible } from "../../ui/formatFraction";
@@ -14,6 +14,7 @@ import {
   texteAidePointNiveau1,
   texteConclusionAttendue,
 } from "../../ui/formatIntersectionDroites";
+import { correctionDetailleeIntersectionDroites } from "./corrigeDetaille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntersectionDroites } from "./index";
 import { profilIntersectionDroites } from "../profilsEvaluation4eCh7Droites";
 
@@ -273,86 +274,6 @@ function enoncePapier(instance: ExerciceIntersectionDroites): EnoncePapier {
   };
 }
 
-/** Test « le point de d₁ appartient-il à d₂ ? » écrit sur l'équation de d₂ TELLE QU'AFFICHÉE
- * (explicite, implicite ou paramétrique) — jamais sur une forme implicite non simplifiée que
- * l'élève ne voit pas. */
-function testAppartenancePapier(instance: ExerciceIntersectionDroites): FragmentConsignePapier[] {
-  const p = instance.d1.point;
-  const d2 = instance.d2;
-  const v = (x: number) => formatValeurFractionLatex(x);
-  const debut: FragmentConsignePapier[] = [texte("Le point "), latex(`${formatPointLatex(p)}`), texte(" de "), latex("d_1"), texte(" appartient-il à "), latex("d_2"), texte(" ? ")];
-  let calcul: string;
-  let appartient: boolean;
-  switch (d2.forme) {
-    case "implicite": {
-      const { a, b, c } = d2.implicite;
-      const valeur = a * p.x + b * p.y + c;
-      appartient = valeur === 0;
-      calcul = `${facteurLatex(a)}\\cdot${facteurLatex(p.x)} ${termeLatex(b)}\\cdot${facteurLatex(p.y)} ${termeLatex(c)} = ${valeur}`;
-      break;
-    }
-    case "explicite_y": {
-      const { m, p: o } = d2.expliciteYAffichee!;
-      const y = m * p.x + o;
-      appartient = Math.abs(y - p.y) < 1e-9;
-      calcul = `${v(m)}\\cdot${facteurLatex(p.x)} ${o < 0 ? "-" : "+"} ${v(Math.abs(o))} = ${v(y)} ${appartient ? "=" : "\\neq"} ${p.y}`;
-      break;
-    }
-    case "explicite_x": {
-      const { n, q } = d2.expliciteXAffichee!;
-      const x = n * p.y + q;
-      appartient = Math.abs(x - p.x) < 1e-9;
-      calcul = `${v(n)}\\cdot${facteurLatex(p.y)} ${q < 0 ? "-" : "+"} ${v(Math.abs(q))} = ${v(x)} ${appartient ? "=" : "\\neq"} ${p.x}`;
-      break;
-    }
-    case "parametrique": {
-      const d = d2.parametriqueAffichee!;
-      const sVal = (p.x - d.x0) / d.a;
-      const y = d.y0 + d.b * sVal;
-      appartient = Math.abs(y - p.y) < 1e-9;
-      calcul = `${p.x} = ${d.x0} ${d.a < 0 ? "-" : "+"} ${Math.abs(d.a)}s \\Rightarrow s = ${v(sVal)}, \\quad y = ${d.y0} ${d.b < 0 ? "-" : "+"} ${Math.abs(d.b)}\\cdot${facteurLatex(sVal)} = ${v(y)} ${appartient ? "=" : "\\neq"} ${p.y}`;
-      break;
-    }
-  }
-  return [...debut, latex(calcul), texte(appartient ? " : oui, il appartient aussi à d₂." : " : non, il n'appartient pas à d₂.")];
-}
-
-function piege(instance: ExerciceIntersectionDroites): EtapeCorrection {
-  if (instance.conclusion !== "secantes") {
-    return { label: "Piège", sousQuestion: "a", fragments: [texte("Des directions identiques ne suffisent pas à conclure : il faut encore tester si un point de "), latex("d_1"), texte(" appartient à "), latex("d_2"), texte(" pour distinguer « parallèles distinctes » et « confondues ».")] };
-  }
-  switch (instance.variante) {
-    case "cart_cart":
-      return { label: "Piège", sousQuestion: "b", fragments: [texte("Une fois x trouvé, il faut encore calculer y en le remplaçant dans l'une des deux équations : le point d'intersection a deux coordonnées.")] };
-    case "param_cart":
-      return { label: "Piège", sousQuestion: "b", fragments: [texte("La valeur de t n'est pas la réponse : on la remplace dans les équations paramétriques pour obtenir les coordonnées du point.")] };
-    case "param_param":
-      return { label: "Piège", sousQuestion: "b", fragments: [texte("Les paramètres des deux droites sont différents (t et s) : écrire la même lettre dans les deux représentations rend le système faux.")] };
-  }
-}
-
-function correctionDetaillee(instance: ExerciceIntersectionDroites): EtapeCorrection[] {
-  const lignes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [texte("On compare les directions des deux droites (pentes ou vecteurs directeurs) : différentes → sécantes ; identiques → on teste si un point de "), latex("d_1"), texte(" appartient à "), latex("d_2"), texte(" (oui → confondues, non → parallèles distinctes).")],
-    },
-    { label: "Calcul", sousQuestion: "a", fragments: fragmentsCalculColinearite(instance) },
-  ];
-  if (instance.colineaires) lignes.push({ label: "Calcul", sousQuestion: "a", fragments: testAppartenancePapier(instance) });
-  lignes.push({ label: "Conclusion", sousQuestion: "a", fragments: [texte(texteConclusionAttendue(instance))] });
-  if (instance.conclusion === "secantes") {
-    lignes.push(
-      { label: "Méthode", sousQuestion: "b", fragments: [texte(texteAidePointNiveau1(instance))] },
-      { label: "Calcul", sousQuestion: "b", fragments: [latex(formatAidePointNiveau2Latex(instance))] },
-      { label: "Conclusion", sousQuestion: "b", fragments: [latex(formatReponsePointAttendueLatex(instance)!)] },
-    );
-  }
-  lignes.push(piege(instance));
-  return lignes;
-}
-
 function reponseBreve(instance: ExerciceIntersectionDroites) {
   if (instance.conclusion === "secantes") return [texte("Sécantes en "), latex(formatPointLatex(instance.point!)), texte(".")];
   return [texte(texteConclusionAttendue(instance))];
@@ -385,9 +306,13 @@ function bareme(instance: ExerciceIntersectionDroites): BaremeExercice {
   };
 }
 
-/** ★★★ deux droites paramétriques sécantes ; ★★ sinon. */
-function difficulte(instance: ExerciceIntersectionDroites): 1 | 2 | 3 {
-  return instance.conclusion === "secantes" && instance.variante === "param_param" ? 3 : 2;
+/** Niveau CONSTANT dans une variante : le verdict (sécantes / parallèles distinctes / confondues) est
+ * la réponse — un écran de plus pour les sécantes, ou un test d'appartenance pour des directions
+ * égales, ne doit pas se lire dans le niveau ni dans la durée. Deux étapes (diagnostic + point), trois
+ * pour deux paramétrages (système en t et s plus long), sans charge ; méthode 1 (substitution ou
+ * combinaison, comparaison des pentes ou des vecteurs) ; aucun piège dans les données. */
+function criteresDifficulte(instance: ExerciceIntersectionDroites): CriteresDifficulte {
+  return { etapesTransformation: instance.variante === "param_param" ? 3 : 2, etapesLecture: 0, sansCharge: true, methode: 1, piege: 0, nombres: 0 };
 }
 
 export const adaptateurEvaluationIntersectionDroites: AdaptateurFeuilleExercices<ExerciceIntersectionDroites> = {
@@ -398,11 +323,10 @@ export const adaptateurEvaluationIntersectionDroites: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceIntersectionDroites,
   construireCorrection: construireCorrectionIntersectionDroites,
-  difficulte,
+  criteresDifficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeIntersectionDroites,
   bareme,
   enoncePapier,
-  dureeMinutes: 6,
   profilInstance: profilIntersectionDroites,
 };

@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeLectureGraphiqueDroite } from "./generateurs/lectureGraphiqueDroite/corrigeDetaille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLectureGraphiqueDroite } from "./generateurs/lectureGraphiqueDroite";
 import type { VarianteLectureGraphiqueDroite } from "./core/lectureGraphiqueDroite.types";
 import type { ReglagesSession } from "./core/session.types";
@@ -88,6 +91,7 @@ export function AppLectureGraphiqueDroite() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: <Katex expression={formatReponseAttendueLatex(exercice)} />,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLectureGraphiqueDroite(exercice), lettreEtape(0))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
