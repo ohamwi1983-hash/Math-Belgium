@@ -1206,7 +1206,10 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   niveau réel seulement (aucune durée visée, aucun exercice retiré). Récapitulatif « 10 exercices »
   (`ResumeEleve.exercices` = instances + affirmations, avant regroupement ; note « les exercices de
   même consigne sont regroupés sous un même numéro » quand il y en a). Document : celui d'avant
-  (aucune durée ni aucun point n'y était imprimé). **Vérifié — 22/11** (dossier de travail
+  (aucune durée ni aucun point n'y était imprimé). Case **« Joindre le formulaire du chapitre (juste après les exercices) »**
+  (feuille seulement, chapitre qui a un `formulaire` ; décochée par défaut, décision du 22/11/2026) :
+  `entete.joindreFormulaire` posé au moment de « Générer » (cocher ne refait pas le tirage), même annexe
+  que la case du professeur, juste après l'énoncé, avant « Je vérifie ». **Vérifié — 22/11** (dossier de travail
   `feuille-eleve` : `tests.mjs`, `ui.mjs`) : 23 chapitres × 3 choix de notions × 7 combinaisons × 3
   choix de niveaux × 1, 5, 10, 30 = 5 796 compositions : nombre = min(demandé, disponibles), 0 hors
   choix, 0 déséquilibre, 0 répétition évitable, reproductible ; 2 898 « à la carte » exactes ;

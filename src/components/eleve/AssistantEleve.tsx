@@ -152,6 +152,10 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   /** Petit rappel quand l'élève essaie de tout décocher. */
   const [rappelMinimum, setRappelMinimum] = useState<'niveau' | 'competence' | null>(null)
   const [amenagee, setAmenagee] = useState(false)
+  /** Feuille d'exercices : joindre le formulaire du chapitre (annexe juste après l'énoncé, comme la case du
+   * professeur) — décoché par défaut (décision de l'utilisateur, 22/11/2026). Posé au moment de générer :
+   * cocher la case ne refait pas le tirage. */
+  const [formulaire, setFormulaire] = useState(false)
   /** Évaluation blanche (décision de l'utilisateur, 22/11/2026, choix c) : parts tirées au hasard à
    * chaque préparation (graine), ou réglées par l'élève — jamais mémorisé. */
   const [modeParts, setModeParts] = useState<'hasard' | 'reglee'>('hasard')
@@ -180,6 +184,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
 
   const sections = useMemo(() => (choisies ? [...choisies] : []), [choisies])
   const blancheChoisie = type === 'blanche'
+  const avecFormulaire = (chapitre?.formulaire?.groups.length ?? 0) > 0
   /** Démonstrations du chapitre dans les notions retenues (tout le chapitre : toutes). */
   const demonstrations = useMemo(() => (chapitre ? demonstrationsDuChapitre(chapitre).filter((d) => !choisies || choisies.has(d.sectionId)) : []), [chapitre, choisies])
   const demosRetenues = useMemo(() => (blancheChoisie ? demonstrations.filter((d) => demosCochees.has(d.cle)).map((d) => d.cle) : []), [blancheChoisie, demonstrations, demosCochees])
@@ -386,7 +391,8 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
     setGenereEnCours(true)
     setErreur(null)
     try {
-      const documents = await genererDocumentsDepuisPlan(prepare.plan)
+      const joindreFormulaire = type === 'feuille' && formulaire && avecFormulaire
+      const documents = await genererDocumentsDepuisPlan(joindreFormulaire ? { ...prepare.plan, entete: { ...prepare.plan.entete, joindreFormulaire: true } } : prepare.plan)
       urls.current.forEach((u) => URL.revokeObjectURL(u))
       urls.current = []
       setResultat({ plan: prepare, documents, type, chapitre })
@@ -807,6 +813,11 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             )}
             {regroupes && <p className="eleve-aide">Sur la feuille, les exercices qui ont la même consigne sont regroupés sous un même numéro (a, b, c…).</p>}
           </div>
+        )}
+        {!blanche && avecFormulaire && (
+          <label className="eleve-case">
+            <input type="checkbox" checked={formulaire} onChange={(e) => setFormulaire(e.target.checked)} /> Joindre le formulaire du chapitre (juste après les exercices)
+          </label>
         )}
         <label className="eleve-case">
           <input type="checkbox" checked={amenagee} onChange={(e) => setAmenagee(e.target.checked)} /> Version aménagée (plus grande, plus aérée)
