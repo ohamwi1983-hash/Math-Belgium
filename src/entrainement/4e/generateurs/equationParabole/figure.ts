@@ -1,5 +1,5 @@
 import type { ExerciceEquationParabole } from "../../core/equationParabole.types";
-import { formatNombreGraphique } from "../../../export/svgGraph";
+import { boiteDisque, boiteTexte, graduationsSansChevauchement, pasGraduations, texteGraduation, type Boite, type Graduation } from "../../ui/graduationsSvg";
 import { PAS_GRILLE_EQUATION_PARABOLE, directriceEquationParabole, viewBoxEquationParabole } from "../../ui/equationParaboleGraph";
 import { RATIO_GRAPHE } from "../../ui/mafsTransformation";
 
@@ -67,20 +67,21 @@ export function construireSvgParabole(exercice: ExerciceEquationParabole, avecCo
   const borner = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
   const ligneNombresX = borner(sy(0), haut, bas - 12);
   const colonneNombresY = borner(sx(0), gauche + 16, droite);
-  const pasEtiquettes = echelle < 16 ? 2 : 1;
+  // Nombres écrits tous les 1, 2, 5… carreaux, jamais collés, vrai « − » (audit 4e ch. 7, G5).
+  const pasEtiquettes = pasGraduations(echelle, xMin, xMax, 8);
 
   const pas = PAS_GRILLE_EQUATION_PARABOLE;
   const grille: string[] = [];
-  const labels: string[] = [];
+  const graduations: Graduation[] = [];
   for (let v = Math.ceil(xMin / pas) * pas; v <= xMax + 1e-9; v += pas) {
     const px = sx(v);
     grille.push(`<line x1="${px.toFixed(1)}" y1="${haut.toFixed(1)}" x2="${px.toFixed(1)}" y2="${bas.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9 && Math.round(v) % pasEtiquettes === 0) labels.push(texteSvg(px, ligneNombresX + 11, formatNombreGraphique(v)));
+    if (Math.abs(v) > 1e-9 && Math.round(v) % pasEtiquettes === 0) graduations.push({ valeur: v, x: px, y: ligneNombresX + 11, xRepli: px, yRepli: ligneNombresX - 4, ancre: "middle", ancreRepli: "middle" });
   }
   for (let v = Math.ceil(yMin / pas) * pas; v <= yMax + 1e-9; v += pas) {
     const py = sy(v);
     grille.push(`<line x1="${gauche.toFixed(1)}" y1="${py.toFixed(1)}" x2="${droite.toFixed(1)}" y2="${py.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9 && Math.round(v) % pasEtiquettes === 0) labels.push(texteSvg(colonneNombresY - 4, py + 3, formatNombreGraphique(v), { ancre: "end" }));
+    if (Math.abs(v) > 1e-9 && Math.round(v) % pasEtiquettes === 0) graduations.push({ valeur: v, x: colonneNombresY - 4, y: py + 3, xRepli: colonneNombresY + 4, yRepli: py + 3, ancre: "end", ancreRepli: "start" });
   }
   const axeX = yMin <= 0 && 0 <= yMax ? `<line x1="${gauche.toFixed(1)}" y1="${sy(0).toFixed(1)}" x2="${droite.toFixed(1)}" y2="${sy(0).toFixed(1)}" stroke="${COULEUR_AXE}" stroke-width="1.4"/>` : "";
   const axeY = xMin <= 0 && 0 <= xMax ? `<line x1="${sx(0).toFixed(1)}" y1="${haut.toFixed(1)}" x2="${sx(0).toFixed(1)}" y2="${bas.toFixed(1)}" stroke="${COULEUR_AXE}" stroke-width="1.4"/>` : "";
@@ -101,7 +102,7 @@ export function construireSvgParabole(exercice: ExerciceEquationParabole, avecCo
   const cyF = sy(foyer.y);
   const croixFoyer =
     `<g stroke="${COULEUR_FOYER}" stroke-width="2.2"><line x1="${(cxF - 4).toFixed(1)}" y1="${(cyF - 4).toFixed(1)}" x2="${(cxF + 4).toFixed(1)}" y2="${(cyF + 4).toFixed(1)}"/><line x1="${(cxF - 4).toFixed(1)}" y1="${(cyF + 4).toFixed(1)}" x2="${(cxF + 4).toFixed(1)}" y2="${(cyF - 4).toFixed(1)}"/></g>` +
-    texteSvg(cxF + 7, cyF - 6, avecCorrection ? `F(${formatNombreGraphique(foyer.x)} ; ${formatNombreGraphique(foyer.y)})` : "F", { couleur: COULEUR_FOYER, taille: avecCorrection ? 10 : 11, ancre: "start", gras: true });
+    texteSvg(cxF + 7, cyF - 6, avecCorrection ? `F(${texteGraduation(foyer.x)} ; ${texteGraduation(foyer.y)})` : "F", { couleur: COULEUR_FOYER, taille: avecCorrection ? 10 : 11, ancre: "start", gras: true });
 
   // Axe de la parabole (perpendiculaire à d par F) et son pied K sur d : S est le milieu de [KF].
   const axeParabole = avecCorrection
@@ -114,8 +115,23 @@ export function construireSvgParabole(exercice: ExerciceEquationParabole, avecCo
 
   const reperesCorrection = avecCorrection
     ? `<circle cx="${sx(sommet.x).toFixed(1)}" cy="${sy(sommet.y).toFixed(1)}" r="3" fill="${COULEUR_COURBE}"/>` +
-      texteSvg(sx(sommet.x) - 7, sy(sommet.y) + (variante === "vertical" ? (exercice.p > 0 ? 13 : -7) : 13), `S(${formatNombreGraphique(sommet.x)} ; ${formatNombreGraphique(sommet.y)})`, { couleur: COULEUR_COURBE, taille: 10, ancre: "end", gras: true })
+      texteSvg(sx(sommet.x) - 7, sy(sommet.y) + (variante === "vertical" ? (exercice.p > 0 ? 13 : -7) : 13), `S(${texteGraduation(sommet.x)} ; ${texteGraduation(sommet.y)})`, { couleur: COULEUR_COURBE, taille: 10, ancre: "end", gras: true })
     : "";
+
+  // Obstacles des nombres : F, S, K et leurs noms, le nom de d (jamais un nombre caché dessous).
+  const nomF = avecCorrection ? `F(${texteGraduation(foyer.x)} ; ${texteGraduation(foyer.y)})` : "F";
+  const obstacles: Boite[] = [boiteDisque(cxF, cyF, 4), boiteTexte(cxF + 7, cyF - 6, nomF, avecCorrection ? 10 : 11, "start")];
+  obstacles.push(
+    variante === "vertical"
+      ? boiteTexte(gauche + 6, sy(directrice) + (foyer.y > directrice ? 13 : -5), "d", 11, "start")
+      : boiteTexte(sx(directrice) + (foyer.x > directrice ? -5 : 5), haut + 28, "d", 11, foyer.x > directrice ? "end" : "start"),
+  );
+  if (avecCorrection) {
+    obstacles.push(boiteDisque(sx(sommet.x), sy(sommet.y), 3));
+    obstacles.push(boiteTexte(sx(sommet.x) - 7, sy(sommet.y) + (variante === "vertical" ? (exercice.p > 0 ? 13 : -7) : 13), `S(${texteGraduation(sommet.x)} ; ${texteGraduation(sommet.y)})`, 10, "end"));
+    obstacles.push(variante === "vertical" ? boiteDisque(sx(foyer.x), sy(directrice), 2.6) : boiteDisque(sx(directrice), sy(foyer.y), 2.6));
+  }
+  const labels = [graduationsSansChevauchement(graduations, obstacles, { taille: 8, couleur: COULEUR_AXE })];
 
   const idClip = `cadre-parabole-${++compteurClip}`;
   const cadre = `<rect x="0.5" y="0.5" width="${largeur - 1}" height="${hauteur - 1}" fill="none" stroke="#adb5bd" stroke-width="1"/>`;

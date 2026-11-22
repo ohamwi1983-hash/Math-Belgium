@@ -76,6 +76,19 @@ export function consigneEcran(ecran: EcranConstructionParabole): FragmentConsign
   }
 }
 
+/** Consigne d'une étape pour le PAPIER (titres « Étape n — … » du corrigé imprimé ; audit 4e ch. 7,
+ * lot B) : la même construction, sans tournure d'écran (« Fais glisser l'équerre », « touche-les »). */
+export function consignePapierEcran(ecran: EcranConstructionParabole): FragmentConsigne[] {
+  switch (ecran.type) {
+    case "axe":
+      return fr("Trace à l'équerre l'axe de la parabole : la perpendiculaire à $d$ passant par $F$.");
+    case "trace":
+      return fr("Relie les points construits d'une extrémité à l'autre, dans l'ordre le long de la courbe, en passant par $S$.");
+    default:
+      return consigneEcran(ecran);
+  }
+}
+
 export function aidesEcran(ecran: EcranConstructionParabole): FragmentConsigne[][] {
   switch (ecran.type) {
     case "axe":

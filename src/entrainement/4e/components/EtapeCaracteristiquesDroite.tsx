@@ -2,16 +2,16 @@ import { useState } from "react";
 import type { ExerciceCaracteristiquesDroite } from "../core/caracteristiquesDroite.types";
 import { NIVEAU_AIDE_MAX_CARACTERISTIQUES } from "../moteur/sessionCaracteristiquesDroite";
 import { cibleChampPrincipal, diagnostiquerCaracteristiques, diagnostiquerChamp, toleranceChampPrincipal } from "../moteur/verificationCaracteristiquesDroite";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
+import { ILLISIBLE_ANALYTIQUE, ciblePente, l, lireNombreAnalytique, t } from "../ui/retoursAnalytique";
+import { nomAngle } from "../ui/formatCaracteristiquesDroite";
+import { PiedAnalytique } from "./PiedAnalytique";
 import type { ReponseCaracteristiques, ReponseChamp } from "../moteur/verificationCaracteristiquesDroite";
 import { PLACEHOLDER_ANGLE, PLACEHOLDER_ORDONNEE, PLACEHOLDER_PENTE, QUESTION_ORDONNEE, QUESTION_PENTE, formatAideCaracteristiquesNiveau2Latex, segmentsAideCaracteristiquesNiveau1 } from "../ui/formatCaracteristiquesDroite";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneCaracteristiquesDroiteEcran2 } from "./ConsigneCaracteristiquesDroiteEcran2";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Choix = "existe" | "nExistePas";
@@ -32,8 +32,15 @@ interface Props {
 /** Valeur saisie — entier, décimal (virgule ou point) ou fraction « p/q » (pente et ordonnée à
  * l'origine rationnelles, ex. −1/3, 5/3) ; `null` tant que le champ est vide ou incomplet. */
 function lireValeur(valeur: string): ReponseChamp | null {
-  const nombre = parserNombreOuFraction(valeur);
-  return nombre !== null && Number.isFinite(nombre) ? { existe: true, valeur: nombre } : null;
+  if (valeur.trim() === "") return null;
+  // Une saisie non vide mais illisible reste « complète » : « Valider » affiche alors le message
+  // d'illisible, sans tentative (jamais un bouton grisé muet).
+  const nombre = lireNombreAnalytique(valeur);
+  return { existe: true, valeur: nombre !== null && Number.isFinite(nombre) ? nombre : Number.NaN };
+}
+
+function lisibleChamp(r: ReponseChamp | null): boolean {
+  return r !== null && (!r.existe || Number.isFinite(r.valeur));
 }
 
 function champDepuisSaisie(choix: Choix | null, valeur: string, toggleDisponible: boolean): ReponseChamp | null {
@@ -74,6 +81,27 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
   const erroneeOrdonnee = statutOrdonnee !== undefined && statutOrdonnee !== "correct";
   const statutCombine = apresEchec && complet ? diagnostiquerCaracteristiques(exercice, { champPrincipal: reponsePrincipale, ordonnee: reponseOrdonnee }) : undefined;
 
+  void statutCombine;
+
+  /** Message ciblé (jamais la réponse) : pente inversée ou de signe changé, signe de p, angle
+   * négatif non corrigé. */
+  function cible(r: ReponseCaracteristiques) {
+    const pr = r.champPrincipal;
+    if (!exercice.verticale && pr.existe) {
+      if (exercice.caracteristiqueDemandee === "pente") {
+        const m = ciblePente(pr.valeur, exercice.pente!);
+        if (m) return m;
+      } else if (exercice.caracteristiqueDemandee === "angleOx" && Math.abs(pr.valeur - (exercice.angleDeg - 180)) <= 0.5) {
+        return [t("La calculatrice donne un angle négatif : on ajoute 180°, l'angle d'une droite avec "), l("Ox"), t(" est compris entre 0° et 180°.")];
+      }
+    }
+    const o = r.ordonnee;
+    if (o.existe && exercice.ordonneeOrigine !== null && Math.abs(exercice.ordonneeOrigine) > 1e-9 && Math.abs(o.valeur + exercice.ordonneeOrigine) < 1e-6) {
+      return [t("Le signe de ton ordonnée à l'origine est faux : "), l("p=y_A-m\\cdot x_A"), t(", c'est la valeur de "), l("y"), t(" quand "), l("x=0"), t(".")];
+    }
+    return null;
+  }
+
   function choisirPrincipal(choix: Choix) {
     setChoixPrincipal(choix);
     setValeurPrincipal("");
@@ -90,7 +118,7 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
       {estAngle ? (
         <div className="field">
           <label className="field-label field-label-minuscule" htmlFor="caracteristiques-droite-principal">
-            Angle α (en degrés, arrondi à l'unité) =
+            Angle <Katex expression={nomAngle(exercice)} /> (en degrés, arrondi à l'unité) =
           </label>
           <input
             id="caracteristiques-droite-principal"
@@ -167,23 +195,19 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CARACTERISTIQUES} onActiverAide={onActiverAide} />
-
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={!complet}
-          onClick={() => complet && onValider({ champPrincipal: reponsePrincipale as ReponseChamp, ordonnee: reponseOrdonnee as ReponseChamp })}
-        >
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutCombine)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_CARACTERISTIQUES}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => ({ champPrincipal: reponsePrincipale as ReponseChamp, ordonnee: reponseOrdonnee as ReponseChamp })}
+          lisible={(r) => lisibleChamp(r.champPrincipal) && lisibleChamp(r.ordonnee)}
+          onValider={onValider}
+          texteIllisible={!lisibleChamp(reponsePrincipale) && estAngle ? ILLISIBLE_ANALYTIQUE.angle : ILLISIBLE_ANALYTIQUE.pentePente}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={cible}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

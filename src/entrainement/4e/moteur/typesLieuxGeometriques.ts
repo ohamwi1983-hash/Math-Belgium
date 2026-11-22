@@ -40,6 +40,11 @@ export interface EtatSessionLieuxGeometriques {
   identificationRevele: boolean;
   scoreEquationsExercice: number | null;
   equationsRevele: boolean;
+  /** Choix fermés jugés UNE fois puis figés (audit 4e ch. 7, lot B, G3) : nature des deux lieux
+   * (écran 1) et « Aucun / Au moins un » (écran 3). Faux : la bonne réponse est révélée, les champs
+   * gardent leurs tentatives (le choix faux n'en consomme aucune), l'écran compte comme révélé. */
+  naturesFigees: { correct: boolean } | null;
+  choixResolutionFige: { choisi: boolean; correct: boolean } | null;
   resultats: ResultatExerciceLieuxGeometriques[];
   terminee: boolean;
 }

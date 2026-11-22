@@ -1,8 +1,7 @@
 import { useState } from "react";
 import type { ExerciceLieuxGeometriques, Lieu, TypeLieu } from "../core/lieuxGeometriques.types";
-import { diagnostiquerIdentification, diagnostiquerIdentificationLieu, lieuxComparesIdentification } from "../moteur/verificationLieuxGeometriques";
+import { diagnostiquerIdentificationLieu, lieuxComparesIdentification } from "../moteur/verificationLieuxGeometriques";
 import type { ReponseIdentification, ReponseIdentificationLieu } from "../moteur/verificationLieuxGeometriques";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import {
   CONSIGNE_GENERALE_IDENTIFICATION,
   LIBELLE_TYPE_LIEU,
@@ -15,15 +14,17 @@ import {
   segmentsAideIdentificationNiveau1,
   segmentsAideIdentificationNiveau2,
 } from "../ui/formatLieuxGeometriques";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { ILLISIBLE_ANALYTIQUE, nombreOuNaN, nombresLisibles, t } from "../ui/retoursAnalytique";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 const TYPES_LIEU: TypeLieu[] = ["droite", "cercle", "parabole"];
+
+const ARTICLE_TYPE: Record<TypeLieu, string> = { droite: "une droite", cercle: "un cercle", parabole: "une parabole" };
 
 interface ChampsLieuBrut {
   type: TypeLieu | null;
@@ -41,8 +42,14 @@ const CHAMPS_VIDES: ChampsLieuBrut = { type: null, m: "", p: "", x0: "", y0: "",
 
 /** Entier, décimal (virgule ou point) ou fraction `p/q` (audit chapitre 7, point 60 : une pente
  * comme 3/4 doit pouvoir s'écrire telle quelle) — `NaN` si illisible (`parse_error` côté moteur). */
-function nombre(texte: string): number {
-  return parserNombreOuFraction(texte) ?? Number.NaN;
+const nombre = nombreOuNaN;
+
+/** Champs numériques présents (selon le type choisi) tous lisibles. */
+function champsLisibles(c: ChampsLieuBrut): boolean {
+  if (c.type === "droite") return nombresLisibles(c.m, c.p);
+  if (c.type === "cercle") return nombresLisibles(c.x0, c.y0, c.rayon);
+  if (c.type === "parabole") return nombresLisibles(c.xF, c.yF, c.pParabole);
+  return true;
 }
 
 /** Bloc de saisie d'UN lieu — encadré neutre, jamais le jaune `.triangle-quelconque-aide`, réservé
@@ -78,6 +85,8 @@ interface ChampsLieuInputProps {
   /** Lieu auquel ce bloc est comparé — appariement retenu par `lieuxComparesIdentification`. */
   lieuCompare: Lieu;
   apresEchec: boolean;
+  /** Nature déjà jugée (figée) : plus de changement de type. */
+  typeVerrouille: boolean;
 }
 
 /** Choix catégoriel (droite/cercle/parabole) puis champs numériques adaptés — un bloc par lieu,
@@ -85,7 +94,7 @@ interface ChampsLieuInputProps {
  * jamais affiché comme "premier"/"second" : la vérification se fait désormais PAR ENSEMBLE, voir
  * `verificationLieuxGeometriques.ts::diagnostiquerIdentification`, B.4). Un sous-titre apparaît
  * au-dessus des champs numériques une fois un type sélectionné (B.2), jamais avant. */
-function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec }: ChampsLieuInputProps) {
+function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec, typeVerrouille }: ChampsLieuInputProps) {
   const reponse = construireReponseLieu(champs);
   const erronee = apresEchec && reponse !== null && diagnostiquerIdentificationLieu(lieuCompare, reponse) !== "correct";
   const classeChamp = `text-input${erronee ? " is-erronee" : ""}`;
@@ -99,6 +108,7 @@ function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec }: 
             key={type}
             type="button"
             className={`btn${champs.type === type ? " toggle-active" : ""}`}
+            disabled={typeVerrouille}
             onClick={() => onChange({ ...CHAMPS_VIDES, type })}
           >
             {LIBELLE_TYPE_LIEU[type]}
@@ -167,7 +177,7 @@ function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec }: 
           </div>
           <div className="field field-inline">
             <label className="field-label" htmlFor={`${prefixe}-rayon`}>
-              R =
+              r =
             </label>
             <input
               id={`${prefixe}-rayon`}
@@ -233,6 +243,8 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseIdentification) => void;
+  /** Nature des lieux déjà jugée par le moteur (une fois), `null` tant qu'elle ne l'est pas. */
+  naturesFigees: { correct: boolean } | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -241,23 +253,43 @@ interface Props {
 
 /** Écran 1 — Identification. Pour chacun des 2 lieux : choix catégoriel (droite/cercle/parabole)
  * puis champs numériques adaptés au choix. */
-export function EtapeIdentificationLieuxGeometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeIdentificationLieuxGeometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, naturesFigees, validation }: Props) {
   const [champs1, setChamps1] = useState<ChampsLieuBrut>(CHAMPS_VIDES);
   const [champs2, setChamps2] = useState<ChampsLieuBrut>(CHAMPS_VIDES);
+  // Nature jugée fausse puis figée par le moteur : les deux blocs passent à la bonne nature (champs
+  // vides, à compléter avec leurs trois tentatives).
+  const [figeVu, setFigeVu] = useState(naturesFigees);
+  if (figeVu !== naturesFigees) {
+    setFigeVu(naturesFigees);
+    if (naturesFigees && !naturesFigees.correct) {
+      setChamps1({ ...CHAMPS_VIDES, type: exercice.lieu1.type });
+      setChamps2({ ...CHAMPS_VIDES, type: exercice.lieu2.type });
+    }
+  }
   const apresEchec = tentativesUtilisees > 0;
 
   const reponseLieu1 = construireReponseLieu(champs1);
   const reponseLieu2 = construireReponseLieu(champs2);
   const complet = reponseLieu1 !== null && reponseLieu2 !== null;
-  const statutGlobal = apresEchec && complet ? diagnostiquerIdentification(exercice, { lieu1: reponseLieu1, lieu2: reponseLieu2 }) : undefined;
   const [lieuCompare1, lieuCompare2] = lieuxComparesIdentification(exercice, reponseLieu1, reponseLieu2);
 
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_IDENTIFICATION}</p>
 
-      <ChampsLieuInput numero={1} champs={champs1} onChange={setChamps1} lieuCompare={lieuCompare1} apresEchec={apresEchec} />
-      <ChampsLieuInput numero={2} champs={champs2} onChange={setChamps2} lieuCompare={lieuCompare2} apresEchec={apresEchec} />
+      <ChampsLieuInput numero={1} champs={champs1} onChange={setChamps1} lieuCompare={lieuCompare1} apresEchec={apresEchec} typeVerrouille={!!validation || naturesFigees !== null} />
+      <ChampsLieuInput numero={2} champs={champs2} onChange={setChamps2} lieuCompare={lieuCompare2} apresEchec={apresEchec} typeVerrouille={!!validation || naturesFigees !== null} />
+      {naturesFigees !== null && !naturesFigees.correct && !validation && (
+        <p className="alert-error" role="status">
+          <span>
+            <RenduFragments
+              fragments={[
+                t(`Ce n'étaient pas les bonnes natures : le premier lieu est ${ARTICLE_TYPE[exercice.lieu1.type]}, le second ${ARTICLE_TYPE[exercice.lieu2.type]}. Complète maintenant leurs caractéristiques.`),
+              ]}
+            />
+          </span>
+        </p>
+      )}
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
@@ -272,23 +304,18 @@ export function EtapeIdentificationLieuxGeometriques({ exercice, tentativesUtili
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={2} onActiverAide={onActiverAide} />
-
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={!complet}
-          onClick={() => reponseLieu1 !== null && reponseLieu2 !== null && onValider({ lieu1: reponseLieu1, lieu2: reponseLieu2 })}
-        >
-          Valider
-        </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={2}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => ({ lieu1: reponseLieu1 as ReponseIdentificationLieu, lieu2: reponseLieu2 as ReponseIdentificationLieu })}
+          lisible={() => champsLisibles(champs1) && champsLisibles(champs2)}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.coefficient}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

@@ -2,14 +2,15 @@ import { useState } from "react";
 import type { ExerciceEquationParaboleDeveloppee } from "../core/equationParaboleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_REGROUPEMENT } from "../moteur/sessionEquationParaboleDeveloppee";
 import { diagnostiquerRegroupement, estEquivalenteEquationDepart } from "../moteur/verificationEquationParaboleDeveloppee";
-import { CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, TEXTE_AIDE_REGROUPEMENT_NIVEAU1, formatEquationDeveloppeeLatex, messageFormeNonAtteinte, placeholderRegroupement, segmentsConsigneRegroupement, texteAideRegroupementNiveau2 } from "../ui/formatEquationParaboleDeveloppee";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, TEXTE_AIDE_REGROUPEMENT_NIVEAU1, formatEquationDeveloppeeLatex, placeholderRegroupement, segmentsConsigneRegroupement, texteAideRegroupementNiveau2 } from "../ui/formatEquationParaboleDeveloppee";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, t } from "../ui/retoursAnalytique";
+import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -38,7 +39,6 @@ export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, tentativ
   const apresEchec = tentativesUtilisees > 0;
   const statut = apresEchec ? diagnostiquerRegroupement(exercice, texte) : undefined;
   const erronee = apresEchec && statut !== "correct";
-  const formeNonAtteinte = statut === "not_equivalent" && estEquivalenteEquationDepart(exercice, texte);
 
   return (
     <div>
@@ -64,7 +64,7 @@ export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, tentativ
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={placeholderRegroupement(exercice)}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserMoins(e.target.value))}
         />
       </div>
 
@@ -75,18 +75,19 @@ export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, tentativ
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_REGROUPEMENT} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formeNonAtteinte ? messageFormeNonAtteinte(tentativesUtilisees, tentativesMax) : formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_REGROUPEMENT}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => texte}
+          lisible={(r) => diagnostiquerRegroupement(exercice, r) !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.regroupementParabole}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => (diagnostiquerRegroupement(exercice, r) === "not_equivalent" && estEquivalenteEquationDepart(exercice, r) ? [t("Ton équation est juste, mais elle n'a pas encore la forme demandée : poursuis la transformation.")] : null)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

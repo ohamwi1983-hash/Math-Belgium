@@ -1,5 +1,5 @@
 import type { ExerciceEquationCercle } from "../../core/equationCercle.types";
-import { formatNombreGraphique } from "../../../export/svgGraph";
+import { boiteDisque, boiteTexte, graduationsSansChevauchement, pasGraduations, type Boite, type Graduation } from "../../ui/graduationsSvg";
 import { RATIO_GRAPHE_CERCLE, viewBoxEquationCercle } from "../../ui/equationCercleGraph";
 
 /**
@@ -25,15 +25,13 @@ const COULEUR_CENTRE = "#2f9e44";
 const EPAISSEUR_CERCLE = 2.4;
 const EPAISSEUR_SEGMENT = 1.6;
 const DEMI_CROIX_CENTRE = 4;
+const TAILLE_NOMBRES = 8;
 
 function ligneSvg(x1: number, y1: number, x2: number, y2: number, couleur: string, epaisseur: number, style?: "dashed"): string {
   const traitPointille = style === "dashed" ? ' stroke-dasharray="5,4"' : "";
   return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${couleur}" stroke-width="${epaisseur}"${traitPointille}/>`;
 }
 
-function texteSvg(x: number, y: number, couleur: string, contenu: string, ancre: "middle" | "end"): string {
-  return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="8" text-anchor="${ancre}" fill="${couleur}">${contenu}</text>`;
-}
 
 interface OptionsSvgEquationCercle {
   /** Croix verte au centre — correction uniquement (aide niveau 2 côté écran), jamais l'énoncé (qui
@@ -72,7 +70,8 @@ export function construireSvgEquationCercle(exercice: ExerciceEquationCercle, op
   // deux seulement quand une unité est trop étroite pour y écrire « −10 ».
   const pasX = 1;
   const pasY = 1;
-  const pasEtiquettes = echelle < 16 ? 2 : 1;
+  // Nombres écrits tous les 1, 2, 5… carreaux, jamais collés, vrai « − » (audit 4e ch. 7, G5).
+  const pasEtiquettes = pasGraduations(echelle, xMin, xMax, TAILLE_NOMBRES);
 
   // Bords de la zone tracée et position des axes — un axe hors cadre n'est pas tracé, mais ses
   // nombres restent épinglés au bord le plus proche (même principe que les graduations flottantes
@@ -86,16 +85,16 @@ export function construireSvgEquationCercle(exercice: ExerciceEquationCercle, op
   const colonneNombresY = borner(sx(0), gauche + 16, droite);
 
   const grille: string[] = [];
-  const labels: string[] = [];
+  const graduations: Graduation[] = [];
   for (let v = Math.ceil(xMin / pasX) * pasX; v <= xMax + 1e-9; v += pasX) {
     const px = sx(v);
     grille.push(`<line x1="${px.toFixed(1)}" y1="${haut.toFixed(1)}" x2="${px.toFixed(1)}" y2="${bas.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9 && Math.round(v) % pasEtiquettes === 0) labels.push(texteSvg(px, ligneNombresX + 11, COULEUR_AXE, formatNombreGraphique(v), "middle"));
+    if (Math.abs(v) > 1e-9 && Math.round(v) % pasEtiquettes === 0) graduations.push({ valeur: v, x: px, y: ligneNombresX + 11, xRepli: px, yRepli: ligneNombresX - 4, ancre: "middle", ancreRepli: "middle" });
   }
   for (let v = Math.ceil(yMin / pasY) * pasY; v <= yMax + 1e-9; v += pasY) {
     const py = sy(v);
     grille.push(`<line x1="${gauche.toFixed(1)}" y1="${py.toFixed(1)}" x2="${droite.toFixed(1)}" y2="${py.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9 && Math.round(v) % pasEtiquettes === 0) labels.push(texteSvg(colonneNombresY - 4, py + 3, COULEUR_AXE, formatNombreGraphique(v), "end"));
+    if (Math.abs(v) > 1e-9 && Math.round(v) % pasEtiquettes === 0) graduations.push({ valeur: v, x: colonneNombresY - 4, y: py + 3, xRepli: colonneNombresY + 4, yRepli: py + 3, ancre: "end", ancreRepli: "start" });
   }
 
   const axeX = yMin <= 0 && 0 <= yMax ? ligneSvg(gauche, sy(0), droite, sy(0), COULEUR_AXE, 1.4) : "";
@@ -138,6 +137,22 @@ export function construireSvgEquationCercle(exercice: ExerciceEquationCercle, op
       `<text x="${((sx(centre.x) + sx(coin.x)) / 2).toFixed(1)}" y="${(sy(coin.y) + (basVersP ? 12 : -5)).toFixed(1)}" font-size="10" font-weight="700" text-anchor="middle" fill="${COULEUR_CENTRE}">${dx}</text>` +
       `<text x="${(sx(coin.x) + (pointMarque.x > centre.x ? 5 : -5)).toFixed(1)}" y="${((sy(coin.y) + sy(pointMarque.y)) / 2 + 3).toFixed(1)}" font-size="10" font-weight="700" text-anchor="${pointMarque.x > centre.x ? "start" : "end"}" fill="${COULEUR_CENTRE}">${dy}</text>`;
   }
+
+  // Obstacles des nombres : P et son nom, le centre et son nom, les longueurs des écarts.
+  const obstacles: Boite[] = [boiteDisque(sx(pointMarque.x), sy(pointMarque.y), 3.2), boiteTexte(sx(pointMarque.x) + (versExterieurX >= 0 ? 6 : -6), sy(pointMarque.y) + (versExterieurY > 0 ? -6 : 12), "P", 11, versExterieurX >= 0 ? "start" : "end")];
+  if (options.avecCentre) {
+    const gaucheC = pointMarque.x >= centre.x;
+    const hautC = pointMarque.y < centre.y;
+    obstacles.push(boiteDisque(sx(centre.x), sy(centre.y), DEMI_CROIX_CENTRE), boiteTexte(sx(centre.x) + (gaucheC ? -6 : 6), sy(centre.y) + (hautC ? -6 : 13), "C", 11, gaucheC ? "end" : "start"));
+  }
+  if (options.avecEcarts && pointMarque.x !== centre.x && pointMarque.y !== centre.y) {
+    const basVersP = pointMarque.y > centre.y;
+    obstacles.push(
+      boiteTexte((sx(centre.x) + sx(pointMarque.x)) / 2, sy(centre.y) + (basVersP ? 12 : -5), String(Math.abs(pointMarque.x - centre.x)), 10, "middle"),
+      boiteTexte(sx(pointMarque.x) + (pointMarque.x > centre.x ? 5 : -5), (sy(centre.y) + sy(pointMarque.y)) / 2 + 3, String(Math.abs(pointMarque.y - centre.y)), 10, pointMarque.x > centre.x ? "start" : "end"),
+    );
+  }
+  const labels = [graduationsSansChevauchement(graduations, obstacles, { taille: TAILLE_NOMBRES, couleur: COULEUR_AXE })];
 
   const cadre = `<rect x="0.5" y="0.5" width="${largeur - 1}" height="${hauteur - 1}" fill="none" stroke="#adb5bd" stroke-width="1"/>`;
 

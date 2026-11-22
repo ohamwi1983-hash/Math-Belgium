@@ -75,7 +75,7 @@ function lignesIdentification(L: Lieu): LigneCalcul[] {
     return [
       ligne(`x_0=${q(L.centre.x)}`, "distance constante à un point : c'est un cercle, le point donné est son centre"),
       ligne(`y_0=${q(L.centre.y)}`),
-      ligne(`R=${q(L.rayon)}`, "la distance donnée est le rayon"),
+      ligne(`r=${q(L.rayon)}`, "la distance donnée est le rayon"),
     ];
   }
   const vertical = L.orientation === "vertical";
@@ -97,7 +97,7 @@ function lignesEquation(L: Lieu): LigneCalcul[] {
   if (L.type === "cercle") {
     const membre = `${carreBinome(L.centre.x, "x")}+${carreBinome(L.centre.y, "y")}`;
     return [
-      ligne(`\\sqrt{${membre}}=${q(L.rayon)}`, "MC = R : distance du point M(x ; y) au centre"),
+      ligne(`\\sqrt{${membre}}=${q(L.rayon)}`, "MC = r : distance du point M(x ; y) au centre"),
       ligne(`${membre}=${q(L.rayon * L.rayon)}`, "on élève au carré : deux nombres positifs"),
     ];
   }
@@ -276,19 +276,19 @@ function etapesLieuxGeometriques(e: E): EtapeCorrection[] {
     calcul("a", lignesIdentification(e.lieu1), [], "Premier lieu"),
     calcul("a", lignesIdentification(e.lieu2), [], "Second lieu"),
     resultat("a", [texte("Premier lieu : "), ...desc(e.lieu1), texte(". Second lieu : "), ...desc(e.lieu2), texte(".")]),
-    piege("a", C.type === "cercle" ? [texte("« À une distance de … unités du point » décrit un cercle : le nombre donné est le rayon R, pas R².")] : [texte("Pour la parabole, p est l'écart signé entre le foyer et la directrice (pas l'écart entre le foyer et le sommet, qui vaut "), latex("\\dfrac{p}{2}"), texte(").")]),
+    piege("a", C.type === "cercle" ? [texte("« À une distance de … unités du point » décrit un cercle : le nombre donné est le rayon r, pas r².")] : [texte("Pour la parabole, p est l'écart signé entre le foyer et la directrice (pas l'écart entre le foyer et le sommet, qui vaut "), latex("\\dfrac{p}{2}"), texte(").")]),
 
     utilise("b", [
       texte("Droite : "),
       latex("y=mx+p"),
       texte(". Cercle : MC = R, élevé au carré, "),
-      latex("(x-x_0)^2+(y-y_0)^2=R^2"),
+      latex("(x-x_0)^2+(y-y_0)^2=r^2"),
       texte(` ${COURS_CERCLE}. Parabole : MF = distance de M à la directrice, élevée au carré ${COURS_PARABOLE}.`),
     ]),
     calcul("b", lignesEquation(e.lieu1), [], "Premier lieu"),
     calcul("b", lignesEquation(e.lieu2), [], "Second lieu"),
     resultat("b", [texte(`${libelleChampEquation(e.lieu1)} `), latex(formatEquationLieuLatex(e.lieu1)), texte(`. ${libelleChampEquation(e.lieu2)} `), latex(formatEquationLieuLatex(e.lieu2)), texte(".")]),
-    piege("b", C.type === "cercle" ? [texte("Au second membre de l'équation du cercle, c'est "), latex("R^2"), texte(", pas R.")] : [texte("La distance de M à la directrice "), latex(C.orientation === "vertical" ? "y=k" : "x=k"), texte(" est "), latex(C.orientation === "vertical" ? "|y-k|" : "|x-k|"), texte(" : seule la coordonnée perpendiculaire à la directrice y entre.")]),
+    piege("b", C.type === "cercle" ? [texte("Au second membre de l'équation du cercle, c'est "), latex("r^2"), texte(", pas r.")] : [texte("La distance de M à la directrice "), latex(C.orientation === "vertical" ? "y=k" : "x=k"), texte(" est "), latex(C.orientation === "vertical" ? "|y-k|" : "|x-k|"), texte(" : seule la coordonnée perpendiculaire à la directrice y entre.")]),
 
     utilise("c", [
       texte("Les points communs vérifient les deux équations : on remplace "),

@@ -10,7 +10,7 @@ import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { ecransConstructionParabole } from "../../moteur/modeleConstructionParabole";
 import { correctionDetailleeConstructionParabole, lettresRepetitivesConstruction } from "./corrigeDetaille";
 import { svgConstructionParabole } from "../../ui/figureConstructionParabole";
-import { consigneEcran, fr } from "../../ui/formatConstructionParabole";
+import { consignePapierEcran, fr } from "../../ui/formatConstructionParabole";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceConstructionParabole } from "./index";
 
 type E = ExerciceConstructionParabole;
@@ -24,7 +24,7 @@ function enteteEnonce(e: E): FragmentConsigne[] {
 /** Une question par ÉCRAN de l'appli (`ecransConstructionParabole`, consigne de l'écran) : ce sont
  * les étapes du corrigé (« Étape n — … »), jamais des sous-questions imprimées (énoncé papier). */
 function questions(e: E): FragmentConsigne[][] {
-  return ecransConstructionParabole(e).map((ecran) => consigneEcran(ecran));
+  return ecransConstructionParabole(e).map((ecran) => consignePapierEcran(ecran));
 }
 
 function construireEnonce(e: E): SectionExercice {

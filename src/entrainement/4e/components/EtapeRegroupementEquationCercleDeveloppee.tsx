@@ -3,11 +3,13 @@ import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDev
 import { NIVEAU_AIDE_MAX_REGROUPEMENT } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerRegroupement } from "../moteur/verificationEquationCercleDeveloppee";
 import { CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_EQUATION, consigneRegroupement, formatAideRegroupementNiveau2Latex, texteAideRegroupementNiveau1, formatEquationDeveloppeeLatex } from "../ui/formatEquationCercleDeveloppee";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, t } from "../ui/retoursAnalytique";
+import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
+import { diagnostiquerEquationCercle } from "../moteur/verificationEquationCercle";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -58,7 +60,7 @@ export function EtapeRegroupementEquationCercleDeveloppee({ exercice, tentatives
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_EQUATION}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserMoins(e.target.value))}
         />
       </div>
 
@@ -73,18 +75,19 @@ export function EtapeRegroupementEquationCercleDeveloppee({ exercice, tentatives
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_REGROUPEMENT} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_REGROUPEMENT}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => texte}
+          lisible={(r) => diagnostiquerRegroupement(exercice, r) !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.regroupementCercle}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => (diagnostiquerEquationCercle(r, exercice.centre.x, exercice.centre.y, exercice.rayonCarre) === "correct" ? [t("Ton équation décrit bien ce cercle, mais elle n'est pas regroupée comme demandé : les termes en x entre parenthèses, puis ceux en y, la constante dans l\'autre membre.")] : null)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

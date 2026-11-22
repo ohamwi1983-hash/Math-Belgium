@@ -45,6 +45,8 @@ function etatInitial(
   | "identificationRevele"
   | "scoreEquationsExercice"
   | "equationsRevele"
+  | "naturesFigees"
+  | "choixResolutionFige"
 > {
   return {
     exerciceCourant: exercice,
@@ -57,6 +59,8 @@ function etatInitial(
     identificationRevele: false,
     scoreEquationsExercice: null,
     equationsRevele: false,
+    naturesFigees: null,
+    choixResolutionFige: null,
   };
 }
 
@@ -120,6 +124,15 @@ export function soumettreReponseIdentification(etat: EtatSessionLieuxGeometrique
   }
   const exercice = etat.exerciceCourant;
 
+  // Nature des deux lieux : choix fermé jugé à la PREMIÈRE validation, puis figé. Faux : il est
+  // révélé et figé SANS consommer de tentative (les caractéristiques, saisies pour une autre nature,
+  // restent à donner avec leurs trois tentatives).
+  if (etat.naturesFigees === null) {
+    const correct = naturesCorrectes(exercice, reponse);
+    if (!correct) return { ...etat, naturesFigees: { correct: false } };
+  }
+  const naturesFigees = etat.naturesFigees ?? { correct: true };
+
   const etapeCourante = soumettreEtapeTentatives<ReponseIdentification>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
     verifier: (r) => verifierIdentification(exercice, r),
@@ -127,17 +140,17 @@ export function soumettreReponseIdentification(etat: EtatSessionLieuxGeometrique
   });
 
   if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
+    return { ...etat, etapeCourante, naturesFigees };
   }
 
-  const score = etapeCourante.score as number;
+  const score = naturesFigees.correct ? (etapeCourante.score as number) : 0;
 
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "equations",
     scoreIdentificationExercice: score,
-    identificationRevele: etapeCourante.revelee,
+    identificationRevele: etapeCourante.revelee || !naturesFigees.correct,
   };
 }
 
@@ -176,23 +189,43 @@ export function soumettreReponseResolution(etat: EtatSessionLieuxGeometriques, r
     throw new Error("soumettreReponseResolution : la session n'est pas à l'étape resolution");
   }
   const exercice = etat.exerciceCourant;
+  const bon = exercice.nombrePoints !== 0;
 
-  // Verdict « Aucun / Au moins un » : un mauvais verdict clôt l'écran (réponse révélée) — choix
-  // binaire, sinon gagnable par élimination. Verdict juste mais points faux : les tentatives
-  // restantes servent à corriger les coordonnées.
-  const verdictFaux = reponse.auMoinsUn !== (exercice.nombrePoints !== 0);
+  // « Aucun / Au moins un » : choix fermé jugé à la PREMIÈRE validation, puis figé (G3). Faux :
+  // révélé ; s'il y a des points, ils restent à donner avec leurs trois tentatives (le choix faux
+  // n'en consomme aucune) ; s'il n'y en a pas, l'écran est clos (révélé).
+  if (etat.choixResolutionFige === null && reponse.auMoinsUn !== bon) {
+    const choixResolutionFige = { choisi: reponse.auMoinsUn, correct: false };
+    if (bon) return { ...etat, choixResolutionFige };
+    return cloturerResolution({ ...etat, choixResolutionFige }, 0, true);
+  }
+  const choixResolutionFige = etat.choixResolutionFige ?? { choisi: reponse.auMoinsUn, correct: true };
+
   const etapeCourante = soumettreEtapeTentatives<ReponseResolutionLieuxGeometriques>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
-    ...(verdictFaux ? { tentativesMax: 1 } : {}),
-    verifier: (r) => verifierResolution(exercice, r),
+    verifier: (r) => verifierResolution(exercice, { ...r, auMoinsUn: bon }),
     revelerReponse: () => {},
   });
 
   if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
+    return { ...etat, etapeCourante, choixResolutionFige };
   }
 
-  const score = etapeCourante.score as number;
+  return cloturerResolution(
+    { ...etat, choixResolutionFige },
+    choixResolutionFige.correct ? (etapeCourante.score as number) : 0,
+    etapeCourante.revelee || !choixResolutionFige.correct,
+  );
+}
+
+function naturesCorrectes(exercice: EtatSessionLieuxGeometriques["exerciceCourant"], reponse: ReponseIdentification): boolean {
+  const t1 = exercice.lieu1.type;
+  const t2 = exercice.lieu2.type;
+  return (reponse.lieu1.type === t1 && reponse.lieu2.type === t2) || (reponse.lieu1.type === t2 && reponse.lieu2.type === t1);
+}
+
+function cloturerResolution(etat: EtatSessionLieuxGeometriques, score: number, revele: boolean): EtatSessionLieuxGeometriques {
+  const exercice = etat.exerciceCourant;
 
   return cloturerExerciceOuSuivant(etat, {
     paire: exercice.paire,
@@ -204,7 +237,7 @@ export function soumettreReponseResolution(etat: EtatSessionLieuxGeometriques, r
     equationsRevele: etat.equationsRevele,
     niveauAideEquations: etat.niveauAideEquations,
     scoreResolution: score,
-    resolutionRevele: etapeCourante.revelee,
+    resolutionRevele: revele,
     niveauAideResolution: etat.niveauAideResolution,
   });
 }

@@ -8,15 +8,15 @@ import {
   diagnostiquerParametrique,
 } from "../moteur/verificationEquationDroite";
 import type { ReponseCoefficients } from "../moteur/typesEquationDroite";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
+import { parserExpressionAffineT } from "../moteur/verificationDroite";
 import { LATEX_GABARIT_FORME, consigneCoefficients, formatAideCoefficientsNiveau2Latex, formatEnonceLatex } from "../ui/formatEquationDroite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { ILLISIBLE_ANALYTIQUE, cibleEquationDroite, cibleVecteurDirecteur, l, nombreOuNaN, nombresLisibles, surDroite, t } from "../ui/retoursAnalytique";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { ConsigneGeneraleEquationDroite } from "./ConsigneGeneraleEquationDroite";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -61,10 +61,8 @@ export function EtapeCoefficientsEquationDroite({ exercice, tentativesUtilisees,
   const champsNumeriques = [champ1, champ2, champ3].slice(0, nombreChampsNumeriques);
   const complet = estParametrique ? texteX.trim() !== "" && texteY.trim() !== "" : champsNumeriques.every((v) => v.trim() !== "");
 
-  /** Fraction « p/q » acceptée (tout triplet proportionnel est juste, ex. a = 1, b = −1/2). */
-  function nombre(texte: string): number {
-    return parserNombreOuFraction(texte) ?? Number.NaN;
-  }
+  /** Fraction « p/q », racine « √3 » acceptées (tout triplet proportionnel est juste). */
+  const nombre = nombreOuNaN;
 
   function construireReponse(): ReponseCoefficients {
     if (estParametrique) return { texteX, texteY };
@@ -79,6 +77,32 @@ export function EtapeCoefficientsEquationDroite({ exercice, tentativesUtilisees,
     if (forme === "implicite") return diagnostiquerImplicite(exercice, reponse as { a: number; b: number; c: number });
     if (forme === "explicite_y") return diagnostiquerExpliciteY(exercice, reponse as { m: number; p: number });
     return diagnostiquerExpliciteX(exercice, reponse as { n: number; q: number });
+  }
+
+  function lisible(): boolean {
+    if (estParametrique) return diagnostiquerParametrique(exercice, { texteX, texteY }) !== "parse_error";
+    return nombresLisibles(...champsNumeriques);
+  }
+
+  /** Message ciblé (jamais la réponse). */
+  function cible(r: ReponseCoefficients) {
+    if ("texteX" in r) {
+      const ex = parserExpressionAffineT(r.texteX);
+      const ey = parserExpressionAffineT(r.texteY);
+      if (!ex || !ey) return null;
+      if (colonnesEchangees(ex.coefficient, ey.coefficient)) return [t("Chaque équation associe une coordonnée de "), l("A"), t(" à la même composante de "), l("\\vec{u}"), t(" : "), l("x=x_A+x_{\\vec{u}}\\,t"), t(".")];
+      const vecteur = cibleVecteurDirecteur({ x: ex.coefficient, y: ey.coefficient }, exercice.vecteur);
+      if (vecteur) return vecteur;
+      if (!surDroite({ x: ex.constante, y: ey.constante }, exercice.referenceImplicite)) return [t("Pour "), l("t=0"), t(", tes équations donnent un point qui n'est pas sur la droite : les termes constants sont les coordonnées d'un point de la droite.")];
+      return null;
+    }
+    if ("c" in r) return cibleEquationDroite({ a: r.a, b: r.b, c: r.c }, exercice.referenceImplicite, exercice.point);
+    return null;
+  }
+
+  function colonnesEchangees(cx: number, cy: number): boolean {
+    const u = exercice.vecteur;
+    return Math.abs(u.x - u.y) > 1e-9 && Math.abs(cx - u.y) < 1e-9 && Math.abs(cy - u.x) < 1e-9;
   }
 
   const apresEchec = tentativesUtilisees > 0;
@@ -112,7 +136,7 @@ export function EtapeCoefficientsEquationDroite({ exercice, tentativesUtilisees,
               className={`text-input${erronee ? " is-erronee" : ""}`}
               placeholder={PLACEHOLDER_TEXTE_X}
               value={texteX}
-              onChange={(e) => setTexteX(e.target.value)}
+              onChange={(e) => setTexteX(normaliserSigneMoins(e.target.value))}
             />
           </div>
           <div className="field">
@@ -124,7 +148,7 @@ export function EtapeCoefficientsEquationDroite({ exercice, tentativesUtilisees,
               className={`text-input${erronee ? " is-erronee" : ""}`}
               placeholder={PLACEHOLDER_TEXTE_Y}
               value={texteY}
-              onChange={(e) => setTexteY(e.target.value)}
+              onChange={(e) => setTexteY(normaliserSigneMoins(e.target.value))}
             />
           </div>
         </>
@@ -158,18 +182,19 @@ export function EtapeCoefficientsEquationDroite({ exercice, tentativesUtilisees,
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_COEFFICIENTS} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_COEFFICIENTS}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={construireReponse}
+          lisible={lisible}
+          onValider={onValider}
+          texteIllisible={estParametrique ? ILLISIBLE_ANALYTIQUE.parametriques : ILLISIBLE_ANALYTIQUE.coefficient}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={cible}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

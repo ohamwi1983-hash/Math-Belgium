@@ -6,7 +6,6 @@ import { NIVEAU_AIDE_MAX_EQUATION_B } from "../moteur/sessionDistanceDroite";
 import { diagnostiquerEquationB } from "../moteur/verificationDistanceDroite";
 import { COULEUR_B, COULEUR_D, COULEUR_P, LABEL_CHAMP_EQUATION_B, PLACEHOLDER_EQUATION, formatAideEquationBNiveau2Latex, nomDroiteCible, segmentsAideEquationBNiveau1, segmentsConsigneEquationB } from "../ui/formatDistanceDroite";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
 import { DistanceDroiteGraph } from "./DistanceDroiteGraph";
 import { DonneesDistanceDroite } from "./DonneesDistanceDroite";
@@ -14,7 +13,9 @@ import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, cibleEquationDroite, lireEquationDroite } from "../ui/retoursAnalytique";
+import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -60,7 +61,8 @@ export function EtapeEquationBDistanceDroite({ exercice, point, droiteCible, bAt
         ]
       : [{ droite: droiteCible, label: "d", couleur: COULEUR_D }];
   const cadrage = { droites: lignes.map((l) => l.droite), points: [point, qAttendu] };
-  if (niveauAide >= 1) lignes.push({ droite: bAttendue, label: "b", couleur: COULEUR_B });
+  // La droite b n'est tracée qu'à l'aide de niveau 2 (au niveau 1, elle donnait la réponse à lire).
+  if (niveauAide >= 2) lignes.push({ droite: bAttendue, label: "b", couleur: COULEUR_B });
 
   return (
     <div>
@@ -86,7 +88,7 @@ export function EtapeEquationBDistanceDroite({ exercice, point, droiteCible, bAt
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_EQUATION}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserMoins(e.target.value))}
         />
       </div>
 
@@ -97,24 +99,25 @@ export function EtapeEquationBDistanceDroite({ exercice, point, droiteCible, bAt
           </p>
           {niveauAide >= 2 && (
             <p>
-              <Katex expression={formatAideEquationBNiveau2Latex(droiteCible, nomDroiteCible(exercice).latex)} />
+              <Katex expression={formatAideEquationBNiveau2Latex(droiteCible, nomDroiteCible(exercice).latex, point)} />
             </p>
           )}
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_EQUATION_B} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_EQUATION_B}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => texte}
+          lisible={(r) => diagnostiquerEquationB(r, bAttendue) !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.equationDroite}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => cibleEquationDroite(lireEquationDroite(r), bAttendue, point, "P")}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

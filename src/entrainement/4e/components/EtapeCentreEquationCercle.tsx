@@ -4,11 +4,11 @@ import { NIVEAU_AIDE_MAX_CENTRE } from "../moteur/sessionEquationCercle";
 import { diagnostiquerCentre } from "../moteur/verificationEquationCercle";
 import type { ReponseCentre } from "../moteur/verificationEquationCercle";
 import { CONSIGNE_CENTRE, CONSIGNE_GENERALE_EQUATION_CERCLE, PLACEHOLDER_COORDONNEE, TEXTE_AIDE_CENTRE_NIVEAU1, TEXTE_AIDE_CENTRE_NIVEAU2 } from "../ui/formatEquationCercle";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationCercleGraph } from "./EquationCercleGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, nombreOuNaN, nombresLisibles, t } from "../ui/retoursAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -39,7 +39,7 @@ export function EtapeCentreEquationCercle({ exercice, tentativesUtilisees, tenta
   const complet = [x, y].every((v) => v.trim() !== "");
 
   function construireReponse(): ReponseCentre {
-    return { x: Number(x.replace(",", ".")), y: Number(y.replace(",", ".")) };
+    return { x: nombreOuNaN(x), y: nombreOuNaN(y) };
   }
 
   const apresEchec = tentativesUtilisees > 0;
@@ -88,18 +88,19 @@ export function EtapeCentreEquationCercle({ exercice, tentativesUtilisees, tenta
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CENTRE} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_CENTRE}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => construireReponse()}
+          lisible={() => nombresLisibles(x, y)}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.coordonnee}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => (r.x === exercice.centre.y && r.y === exercice.centre.x && r.x !== r.y ? [t("Tes deux coordonnées sont échangées : l'abscisse se lit sur l'axe horizontal, l'ordonnée sur l'axe vertical.")] : null)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

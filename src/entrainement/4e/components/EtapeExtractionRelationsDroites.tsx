@@ -3,7 +3,6 @@ import type { ExerciceRelationsDroites } from "../core/relationsDroites.types";
 import { NIVEAU_AIDE_MAX_EXTRACTION, NIVEAU_AIDE_MAX_EXTRACTION2 } from "../moteur/sessionRelationsDroites";
 import { diagnostiquerExtraction, diagnostiquerExtraction2 } from "../moteur/verificationRelationsDroites";
 import type { ReponseVecteur } from "../moteur/verificationRelationsDroites";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import {
   PLACEHOLDER_COMPOSANTE,
   consigneExtraction,
@@ -11,15 +10,17 @@ import {
   formatDonneesRechercheeLatex,
   formatEnonceLatex,
   segmentsAideExtraction2Niveau1,
+  segmentsAideExtraction2Niveau2,
   segmentsAideExtractionNiveau1,
+  segmentsAideExtractionNiveau2,
 } from "../ui/formatRelationsDroites";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleRelationsDroites } from "./ConsigneGeneraleRelationsDroites";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, cibleVecteurDirecteur, nombreOuNaN, nombresLisibles } from "../ui/retoursAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -54,7 +55,7 @@ export function EtapeExtractionRelationsDroites({ exercice, tentativesUtilisees,
   const complet = [x, y].every((v) => v.trim() !== "");
 
   function construireReponse(): ReponseVecteur {
-    return { x: parserNombreOuFraction(x) ?? Number.NaN, y: parserNombreOuFraction(y) ?? Number.NaN };
+    return { x: nombreOuNaN(x), y: nombreOuNaN(y) };
   }
 
   const apresEchec = tentativesUtilisees > 0;
@@ -106,21 +107,27 @@ export function EtapeExtractionRelationsDroites({ exercice, tentativesUtilisees,
           <p>
             <RenduFragments fragments={seconde ? segmentsAideExtraction2Niveau1(exercice) : segmentsAideExtractionNiveau1(exercice)} />
           </p>
+          {niveauAide >= 2 && (
+            <p>
+              <RenduFragments fragments={seconde ? segmentsAideExtraction2Niveau2(exercice) : segmentsAideExtractionNiveau2(exercice)} />
+            </p>
+          )}
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={seconde ? NIVEAU_AIDE_MAX_EXTRACTION2 : NIVEAU_AIDE_MAX_EXTRACTION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={seconde ? NIVEAU_AIDE_MAX_EXTRACTION2 : NIVEAU_AIDE_MAX_EXTRACTION}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => construireReponse()}
+          lisible={() => nombresLisibles(x, y)}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.composante}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => cibleVecteurDirecteur(r, seconde ? exercice.droite2!.vecteur : exercice.vecteurReference)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

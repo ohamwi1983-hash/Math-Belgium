@@ -4,15 +4,14 @@ import { NIVEAU_AIDE_MAX_EQUATION } from "../moteur/sessionRelationsDroites";
 import type { ReponseEquation } from "../moteur/typesRelationsDroites";
 import { diagnostiquerEquationCartesienne, diagnostiquerEquationParametrique } from "../moteur/verificationRelationsDroites";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_EQUATION, consigneEquation, formatAideEquationNiveau2Latex, formatDonneesRechercheeLatex, formatEnonceLatex, segmentsAideEquationNiveau1 } from "../ui/formatRelationsDroites";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleRelationsDroites } from "./ConsigneGeneraleRelationsDroites";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, cibleEquationDroite, cibleVecteurDirecteur, l, lireEquationDroite, nombreOuNaN, nombresLisibles, surDroite, t } from "../ui/retoursAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -21,9 +20,7 @@ import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 const SIGNES_MOINS = /[\u2212\u2013\u2014]/g;
 
 /** Entier, décimal (virgule ou point) ou fraction « p/q » — NaN si illisible (`parse_error`). */
-function lire(texte: string): number {
-  return parserNombreOuFraction(texte) ?? Number.NaN;
-}
+const lire = nombreOuNaN;
 
 interface Props {
   exercice: ExerciceRelationsDroites;
@@ -69,6 +66,19 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
     return cartesienne
       ? diagnostiquerEquationCartesienne(exercice, construireReponse() as string)
       : diagnostiquerEquationParametrique(exercice, construireReponse() as { x0: number; y0: number; a: number; b: number });
+  }
+
+  function lisible(): boolean {
+    return cartesienne ? diagnostiquerEquationCartesienne(exercice, texte) !== "parse_error" : nombresLisibles(x0, y0, a, b);
+  }
+
+  /** Message ciblé (jamais la réponse). */
+  function cible(r: ReponseEquation) {
+    if (typeof r === "string") return cibleEquationDroite(lireEquationDroite(r), exercice.referenceImpliciteSortie, exercice.pointCherche, "A");
+    const v = cibleVecteurDirecteur({ x: r.a, y: r.b }, exercice.vecteurCherche);
+    if (v) return v;
+    if (!surDroite({ x: r.x0, y: r.y0 }, exercice.referenceImpliciteSortie)) return [t("Ton point n'est pas sur la droite cherchée : elle passe par "), l("A"), t(".")];
+    return null;
   }
 
   const apresEchec = tentativesUtilisees > 0;
@@ -171,18 +181,19 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_EQUATION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_EQUATION}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => construireReponse()}
+          lisible={lisible}
+          onValider={onValider}
+          texteIllisible={cartesienne ? ILLISIBLE_ANALYTIQUE.equationDroite : ILLISIBLE_ANALYTIQUE.coordonnee}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={cible}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

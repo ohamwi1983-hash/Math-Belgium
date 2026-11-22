@@ -17,8 +17,7 @@
  * « b » pour une droite (conflit avec le coefficient b de `ax+by+c=0`).
  */
 import type { CritereRelation, DroiteDonneeRelation, ExerciceRelationsDroites, FormeEntreeRelation, FormeSortieRelation, RelationReconnue } from "../core/relationsDroites.types";
-import type { Composantes } from "../core/vecteur.types";
-import { type FragmentConsigne, formatEquationExpliciteXLatex, formatEquationExpliciteYLatex, formatEquationImpliciteLatex, formatPointLatex, formatRepresentationParametriqueLatex, formatVecteurLatex } from "./formatEquationDroite";
+import { type FragmentConsigne, formatEquationExpliciteXLatex, formatEquationExpliciteYLatex, formatEquationImpliciteLatex, formatPointLatex, formatRepresentationParametriqueLatex, formatValeurGenereeLatex, formatVecteurLatex } from "./formatEquationDroite";
 
 export { formatPointLatex, formatVecteurLatex };
 export type { FragmentConsigne };
@@ -193,6 +192,32 @@ export function segmentsAideExtraction2Niveau1(exercice: ExerciceRelationsDroite
   return segmentsAideExtractionForme(exercice.droite2!.formeEntree, "v");
 }
 
+/** Aide niveau 2 (audit 4e ch. 7, lot B) : les coefficients LUS dans l'équation, placés dans la règle
+ * du niveau 1 — le vecteur reste à écrire par l'élève. */
+function segmentsAideExtractionNiveau2Forme(d: DroiteDonneeRelation, nom: "u" | "v"): FragmentConsigne[] {
+  const v = formatValeurGenereeLatex;
+  switch (d.formeEntree) {
+    case "implicite": {
+      const e = d.impliciteEntree!;
+      return [texte("Ici "), latex(`a=${v(e.a)}`), texte(" et "), latex(`b=${v(e.b)}`), texte(" : "), latex(`\\vec{${nom}}=\\begin{pmatrix}-b\\\\ a\\end{pmatrix}`), texte(".")];
+    }
+    case "explicite_y":
+      return [texte("Ici "), latex(`m=${v(d.expliciteYEntree!.m)}`), texte(" : "), latex(`\\vec{${nom}}=\\begin{pmatrix}1\\\\ m\\end{pmatrix}`), texte(".")];
+    case "explicite_x":
+      return [texte("Ici "), latex(`n=${v(d.expliciteXEntree!.n)}`), texte(" : "), latex(`\\vec{${nom}}=\\begin{pmatrix}n\\\\ 1\\end{pmatrix}`), texte(".")];
+    case "parametrique":
+      return [texte("Dans "), latex(`x=x_A+x_{\\vec{${nom}}}\\,t`), texte(", le coefficient de "), latex("t"), texte(" est "), latex(`x_{\\vec{${nom}}}`), texte(" ; de même pour "), latex("y"), texte(".")];
+  }
+}
+
+export function segmentsAideExtractionNiveau2(exercice: ExerciceRelationsDroites): FragmentConsigne[] {
+  return segmentsAideExtractionNiveau2Forme(droiteDonnee1(exercice), "u");
+}
+
+export function segmentsAideExtraction2Niveau2(exercice: ExerciceRelationsDroites): FragmentConsigne[] {
+  return segmentsAideExtractionNiveau2Forme(exercice.droite2!, "v");
+}
+
 // ============================================================================
 // Écran 2 (famille `construction`) — vecteur directeur de la droite cherchée d′.
 // ============================================================================
@@ -222,8 +247,8 @@ export function formatAideConstructionNiveau2Latex(exercice: ExerciceRelationsDr
   if (exercice.critere === "parallele") {
     return `\\vec{u}${formatVecteurLatex(v)} \\quad \\vec{v} = k\\cdot\\vec{u}, \\; k \\neq 0`;
   }
-  const vPerp: Composantes = { x: v.y === 0 ? 0 : -v.y, y: v.x };
-  return `\\vec{u} = ${formatVecteurLatex(v)} \\quad \\vec{v} = ${formatVecteurLatex(vPerp)}`;
+  // Jamais le vecteur cherché (c'était la réponse) : la règle « échange + un signe », à appliquer.
+  return `\\vec{u} = ${formatVecteurLatex(v)} \\quad \\Rightarrow \\quad \\vec{v} = \\begin{pmatrix} -y_{\\vec{u}} \\\\ x_{\\vec{u}} \\end{pmatrix}`;
 }
 
 /** Réponse attendue de l'écran 2 — UN vecteur valable (tout multiple non nul l'est aussi). */
@@ -251,9 +276,9 @@ export function segmentsAideEquationNiveau1(exercice: ExerciceRelationsDroites):
   if (exercice.formeSortie === "cartesienne") {
     return [
       texte("Pour une droite de vecteur directeur "),
-      latex("\\vec{v}(x_{\\vec{v}} ; y_{\\vec{v}})"),
+      latex("\\vec{v}\\begin{pmatrix}x_{\\vec{v}}\\\\ y_{\\vec{v}}\\end{pmatrix}"),
       texte(" passant par le point "),
-      latex("A(x_A ; y_A)"),
+      latex("A(x_A\\,;\\,y_A)"),
       texte(", une équation cartésienne s'écrit "),
       latex("y_{\\vec{v}}\\cdot(x-x_A) - x_{\\vec{v}}\\cdot(y-y_A) = 0"),
       texte("."),
@@ -265,9 +290,9 @@ export function segmentsAideEquationNiveau1(exercice: ExerciceRelationsDroites):
     texte(", "),
     latex("y = y_A + y_{\\vec{v}}\\cdot t"),
     texte(", où "),
-    latex("A(x_A ; y_A)"),
+    latex("A(x_A\\,;\\,y_A)"),
     texte(" est un point de la droite et "),
-    latex("\\vec{v}(x_{\\vec{v}} ; y_{\\vec{v}})"),
+    latex("\\vec{v}\\begin{pmatrix}x_{\\vec{v}}\\\\ y_{\\vec{v}}\\end{pmatrix}"),
     texte(" son vecteur directeur."),
   ];
 }
@@ -284,7 +309,8 @@ export function formatAideEquationNiveau2Latex(exercice: ExerciceRelationsDroite
   if (exercice.formeSortie === "cartesienne") {
     return `${facteurLatex(v.y)}\\cdot\\big(x-${facteurLatex(p.x)}\\big) - ${facteurLatex(v.x)}\\cdot\\big(y-${facteurLatex(p.y)}\\big) = 0`;
   }
-  return formatRepresentationParametriqueLatex(p.x, v.x, p.y, v.y);
+  // Jamais les équations elles-mêmes (c'était la réponse) : les quatre nombres à placer.
+  return `x_A = ${formatValeurGenereeLatex(p.x)},\\ y_A = ${formatValeurGenereeLatex(p.y)} \\qquad x_{\\vec{v}} = ${formatValeurGenereeLatex(v.x)},\\ y_{\\vec{v}} = ${formatValeurGenereeLatex(v.y)}`;
 }
 
 function pgcd(a: number, b: number): number {

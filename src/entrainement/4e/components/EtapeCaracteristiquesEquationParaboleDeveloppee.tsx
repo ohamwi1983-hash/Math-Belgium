@@ -4,11 +4,13 @@ import { NIVEAU_AIDE_MAX_CARACTERISTIQUES } from "../moteur/sessionEquationParab
 import { diagnostiquerDirectrice, diagnostiquerFoyer, diagnostiquerP, diagnostiquerSommet } from "../moteur/verificationEquationParaboleDeveloppee";
 import type { ReponseEcranCaracteristiques } from "../moteur/typesEquationParaboleDeveloppee";
 import { CONSIGNE_CARACTERISTIQUES, CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_P, placeholderDirectrice, formatAideCaracteristiquesNiveau1Latex, formatAideCaracteristiquesNiveau2Latex, formatEquationDeveloppeeLatex } from "../ui/formatEquationParaboleDeveloppee";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, l, nombreOuNaN, nombresLisibles, t } from "../ui/retoursAnalytique";
+import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
+import { diagnostiquerEquivalenceQuadratiqueXY } from "../moteur/verificationEquationCercle";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -46,11 +48,11 @@ export function EtapeCaracteristiquesEquationParaboleDeveloppee({ exercice, tent
 
   function construireReponse(): ReponseEcranCaracteristiques {
     return {
-      sx: Number(sx.replace(",", ".")),
-      sy: Number(sy.replace(",", ".")),
-      fx: Number(fx.replace(",", ".")),
-      fy: Number(fy.replace(",", ".")),
-      p: Number(p.replace(",", ".")),
+      sx: nombreOuNaN(sx),
+      sy: nombreOuNaN(sy),
+      fx: nombreOuNaN(fx),
+      fy: nombreOuNaN(fy),
+      p: nombreOuNaN(p),
       directrice,
     };
   }
@@ -67,7 +69,20 @@ export function EtapeCaracteristiquesEquationParaboleDeveloppee({ exercice, tent
   const pErronee = apresEchec && statutP !== "correct";
   const directriceErronee = apresEchec && statutDirectrice !== "correct";
 
-  const premierStatutEnDefaut = apresEchec ? [statutSommet, statutFoyer, statutP, statutDirectrice].find((s) => s !== "correct") : undefined;
+  /** Message ciblé (jamais la réponse) : p au lieu de p/2, directrice du côté du foyer, p au lieu
+   * de 2p. */
+  function cible(r: ReponseEcranCaracteristiques) {
+    const S = exercice.sommet;
+    const vertical = exercice.variante === "vertical";
+    const pp = exercice.p;
+    const fLu = vertical ? r.fy : r.fx;
+    const sAxe = vertical ? S.y : S.x;
+    if (Math.abs(fLu - (sAxe + pp)) < 1e-9 && pp !== 0) return [t("Le foyer est à "), l("\\dfrac{p}{2}"), t(" du sommet, pas à "), l("p"), t(" : p est la distance entre le foyer et la directrice.")];
+    if (Number.isFinite(r.p) && Math.abs(r.p - pp / 2) < 1e-9) return [t("Compare au modèle du cours : le coefficient du second membre vaut "), l("2p"), t(", donc p est la moitié de ce coefficient.")];
+    const autreCote = vertical ? (x: number, y: number) => y - (S.y + pp / 2) + 0 * x : (x: number, y: number) => x - (S.x + pp / 2) + 0 * y;
+    if (diagnostiquerEquivalenceQuadratiqueXY(r.directrice.replace(/^\s*d\s*(?::|≡)\s*/, ""), S.x, S.y, autreCote) === "correct") return [t("Ta directrice passe du côté du foyer : elle est de l'autre côté du sommet, à "), l("\\dfrac{p}{2}"), t(" de lui.")];
+    return null;
+  }
 
   return (
     <div>
@@ -154,7 +169,7 @@ export function EtapeCaracteristiquesEquationParaboleDeveloppee({ exercice, tent
           className={`text-input${directriceErronee ? " is-erronee" : ""}`}
           placeholder={placeholderDirectrice(exercice)}
           value={directrice}
-          onChange={(e) => setDirectrice(e.target.value)}
+          onChange={(e) => setDirectrice(normaliserMoins(e.target.value))}
         />
       </div>
 
@@ -171,18 +186,19 @@ export function EtapeCaracteristiquesEquationParaboleDeveloppee({ exercice, tent
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CARACTERISTIQUES} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, premierStatutEnDefaut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_CARACTERISTIQUES}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={construireReponse}
+          lisible={(r) => nombresLisibles(sx, sy, fx, fy, p) && diagnostiquerDirectrice(exercice, r.directrice) !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={nombresLisibles(sx, sy, fx, fy) ? (nombresLisibles(p) ? ILLISIBLE_ANALYTIQUE.equationDroite : ILLISIBLE_ANALYTIQUE.parametre) : ILLISIBLE_ANALYTIQUE.coordonnee}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={cible}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

@@ -51,6 +51,7 @@ function etatInitial(exercice: ExerciceEquationDroite): Pick<
   | "niveauAidePossibiliteCoefficients"
   | "scoreExtractionExercice"
   | "extractionRevele"
+  | "choixPossibiliteFige"
 > {
   return {
     exerciceCourant: exercice,
@@ -61,6 +62,7 @@ function etatInitial(exercice: ExerciceEquationDroite): Pick<
     niveauAidePossibiliteCoefficients: 0,
     scoreExtractionExercice: null,
     extractionRevele: false,
+    choixPossibiliteFige: null,
   };
 }
 
@@ -200,18 +202,23 @@ export function soumettreReponsePossibiliteCoefficients(etat: EtatSessionEquatio
     throw new Error("soumettreReponsePossibiliteCoefficients : la session n'est pas à l'étape possibiliteCoefficients");
   }
   const exercice = etat.exerciceCourant;
+  // Choix fermé jugé à la PREMIÈRE validation puis figé (audit 4e ch. 7, lot B, G3) : ensuite seule
+  // l'équation compte, jugée avec le BON choix (celui affiché, révélé s'il était faux).
+  const bonChoix: "possible" | "impossible" = exercice.possible ? "possible" : "impossible";
+  const choixPossibiliteFige = etat.choixPossibiliteFige ?? { choisi: reponse.choix, correct: reponse.choix === bonChoix };
 
   const etapeCourante = soumettreEtapeTentatives<ReponsePossibiliteCoefficients>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
-    verifier: (r) => diagnostiquerPossibiliteCoefficients(exercice, r) === "correct",
+    verifier: (r) => diagnostiquerPossibiliteCoefficients(exercice, { choix: bonChoix, texte: r.texte }) === "correct",
     revelerReponse: () => {},
   });
 
   if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
+    return { ...etat, etapeCourante, choixPossibiliteFige };
   }
 
-  const score = etapeCourante.score as number;
+  const choixFaux = !choixPossibiliteFige.correct;
+  const score = choixFaux ? 0 : (etapeCourante.score as number);
 
   return cloturerExerciceOuSuivant(etat, {
     typeDonnee: exercice.donnees.type,
@@ -223,7 +230,7 @@ export function soumettreReponsePossibiliteCoefficients(etat: EtatSessionEquatio
     coefficientsRevele: false,
     coefficientsAideUtilisee: false,
     scorePossibiliteCoefficients: score,
-    possibiliteCoefficientsRevele: etapeCourante.revelee,
+    possibiliteCoefficientsRevele: etapeCourante.revelee || choixFaux,
     possibiliteCoefficientsAideUtilisee: etat.niveauAidePossibiliteCoefficients > 0,
   });
 }

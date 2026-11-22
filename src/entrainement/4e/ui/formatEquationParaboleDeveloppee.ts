@@ -205,7 +205,7 @@ export const CONSIGNE_CARACTERISTIQUES = "Détermine le sommet S, le foyer F, le
  * (`promptgen52modificationscompletes.md`, partie E.3) — remplace l'ancien texte générique qui
  * donnait les 2 orientations à la fois plus un avertissement de signe. */
 export function formatAideCaracteristiquesNiveau1Latex(exercice: ExerciceEquationParaboleDeveloppee): string {
-  return exercice.variante === "vertical" ? "F(x_S \\; ; \\; y_S+p/2)" : "F(x_S+p/2 \\; ; \\; y_S)";
+  return exercice.variante === "vertical" ? "F\\left(x_S\\,;\\,y_S+\\dfrac{p}{2}\\right)" : "F\\left(x_S+\\dfrac{p}{2}\\,;\\,y_S\\right)";
 }
 
 /** Aide 2 — formule de la directrice, ADAPTATIVE selon l'orientation réelle de l'instance
@@ -213,7 +213,7 @@ export function formatAideCaracteristiquesNiveau1Latex(exercice: ExerciceEquatio
  * (déjà validée séparément par son propre champ, `diagnostiquerP`) : notation `\equiv` pour nommer
  * la droite, même convention que le reste du chapitre 6 (groupe droites/cercles). */
 export function formatAideCaracteristiquesNiveau2Latex(exercice: ExerciceEquationParaboleDeveloppee): string {
-  return exercice.variante === "vertical" ? "d \\equiv y=y_S-p/2" : "d \\equiv x=x_S-p/2";
+  return exercice.variante === "vertical" ? "d \\equiv y=y_S-\\dfrac{p}{2}" : "d \\equiv x=x_S-\\dfrac{p}{2}";
 }
 
 /** Droite horizontale `y=...` (axe vertical) ou verticale `x=...` (axe horizontal) — gère les 2

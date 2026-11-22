@@ -96,7 +96,7 @@ function nombreLatex(valeur: number): string {
 
 /** R exact (racine simplifiée), suivi de sa valeur arrondie quand il est irrationnel. */
 function rayonLatex(instance: ExerciceEquationCercleDeveloppee): string {
-  const exact = `R = ${formatRayonAttenduLatex(instance)}`;
+  const exact = `r = ${formatRayonAttenduLatex(instance)}`;
   return instance.variante === "irrationnel" ? `${exact} \\approx ${formatRayonApprocheTexte(instance).replace(",", "{,}")}` : exact;
 }
 
@@ -117,7 +117,7 @@ function criteresDifficulte(instance: ExerciceEquationCercleDeveloppee): Critere
 
 function baremeEquationCercleDeveloppee(instance: ExerciceEquationCercleDeveloppee): BaremeExercice {
   const erreurs: ErreurFrequente[] = [
-    { description: [texte("Rayon confondu avec "), latex("R^2"), texte(" (racine carrée oubliée)")], cout: "−1" },
+    { description: [texte("Rayon confondu avec "), latex("r^2"), texte(" (racine carrée oubliée)")], cout: "−1" },
     { description: [texte("Carrés ajoutés dans une parenthèse mais pas retranchés (ou pas reportés dans le second membre)")], cout: "−1" },
     { description: [texte("Signe d'une coordonnée du centre inversé")], cout: "−0,5" },
   ];
@@ -128,10 +128,10 @@ function baremeEquationCercleDeveloppee(instance: ExerciceEquationCercleDevelopp
       { sousQuestion: "a", critere: [texte(instance.k === 1 ? "Termes regroupés par variable" : `Division par ${instance.k} et termes regroupés par variable`)], points: 1 },
       { sousQuestion: "b", critere: [texte("Carrés complétés : "), latex(formatCompletionLatex(instance))], points: 1.5 },
       { sousQuestion: "c", critere: [texte("Centre "), latex(formatCentreAttenduLatex(instance))], points: 0.5 },
-      { sousQuestion: "c", critere: [texte("Rayon exact "), latex(`R = ${formatRayonAttenduLatex(instance)}`)], points: 1 },
+      { sousQuestion: "c", critere: [texte("Rayon exact "), latex(`r = ${formatRayonAttenduLatex(instance)}`)], points: 1 },
     ],
     erreursFrequentes: erreurs,
-    reponsesAcceptees: instance.variante === "irrationnel" ? [[texte("Racine non simplifiée de "), latex(`R^2 = ${nombreLatex(instance.rayonCarre)}`), texte(" si elle est exacte")]] : [[texte("Rayon écrit sous forme décimale exacte")]],
+    reponsesAcceptees: instance.variante === "irrationnel" ? [[texte("Racine non simplifiée de "), latex(`r^2 = ${nombreLatex(instance.rayonCarre)}`), texte(" si elle est exacte")]] : [[texte("Rayon écrit sous forme décimale exacte")]],
   };
 }
 

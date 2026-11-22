@@ -1,6 +1,6 @@
 import type { ExerciceLectureGraphiqueDroite } from "../../core/lectureGraphiqueDroite.types";
 import type { Point } from "../../core/vecteur.types";
-import { formatNombreGraphique } from "../../../export/svgGraph";
+import { boiteDisque, boiteTexte, graduationsSansChevauchement, pasGraduations, type Boite, type Graduation } from "../../ui/graduationsSvg";
 import { RATIO_GRAPHE } from "../../ui/mafsTransformation";
 import type { ViewBoxTransformation } from "../../ui/vecteurGraph";
 import { PAS_GRILLE_LECTURE, pointsEntiersVisibles, viewBoxLectureGraphiqueDroite } from "../../ui/lectureGraphiqueDroiteGraph";
@@ -65,37 +65,41 @@ function construireEchelle(viewBox: ViewBoxTransformation): Echelle {
 /** Grille de pas 1 (`PAS_GRILLE_LECTURE`, même pas que l'écran) + axes x=0/y=0 — même
  * patron que `constructionVectorielle/exportEvaluation.ts::construireGrilleEtAxesHtml` (document
  * HTML d'évaluation autonome, sans dépendance à `App.css`). */
-function construireGrilleEtAxesHtml(viewBox: ViewBoxTransformation, echelle: Echelle): string {
+function construireGrilleEtAxesHtml(viewBox: ViewBoxTransformation, echelle: Echelle): { grille: string; graduations: Graduation[] } {
   const [xMin, xMax] = viewBox.x;
   const [yMin, yMax] = viewBox.y;
   // Même pas fixe qu'à l'écran (`PAS_GRILLE_LECTURE`) : les points marqués tombent sur les nœuds.
   const pasX = PAS_GRILLE_LECTURE;
   const pasY = PAS_GRILLE_LECTURE;
+  // Nombres écrits tous les 1, 2, 5… carreaux, jamais collés (audit 4e ch. 7, G5 : « 9-−8-−7… »).
+  const pixelsParUnite = echelle.sx(1) - echelle.sx(0);
+  const pasNombres = pasGraduations(pixelsParUnite, xMin, xMax, TAILLE_NOMBRES);
 
   const lignes: string[] = [];
-  const labels: string[] = [];
+  const graduations: Graduation[] = [];
 
   for (let v = Math.ceil(xMin / pasX) * pasX; v <= xMax + 1e-9; v += pasX) {
     const px = echelle.sx(v);
     lignes.push(`<line x1="${px.toFixed(1)}" y1="${MARGE_PX}" x2="${px.toFixed(1)}" y2="${HAUTEUR_SVG - MARGE_PX}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9) {
-      labels.push(`<text x="${px.toFixed(1)}" y="${(echelle.sy(0) + 13).toFixed(1)}" font-size="10" text-anchor="middle" fill="${COULEUR_AXE}" stroke="#ffffff" stroke-width="3" paint-order="stroke">${formatNombreGraphique(v)}</text>`);
+    if (Math.abs(v) > 1e-9 && Math.round(v) % pasNombres === 0) {
+      graduations.push({ valeur: v, x: px, y: echelle.sy(0) + 13, xRepli: px, yRepli: echelle.sy(0) - 5, ancre: "middle", ancreRepli: "middle" });
     }
   }
   for (let v = Math.ceil(yMin / pasY) * pasY; v <= yMax + 1e-9; v += pasY) {
     const py = echelle.sy(v);
     lignes.push(`<line x1="${MARGE_PX}" y1="${py.toFixed(1)}" x2="${LARGEUR_SVG - MARGE_PX}" y2="${py.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9) {
-      labels.push(`<text x="${(echelle.sx(0) - 4).toFixed(1)}" y="${(py + 3).toFixed(1)}" font-size="10" text-anchor="end" fill="${COULEUR_AXE}" stroke="#ffffff" stroke-width="3" paint-order="stroke">${formatNombreGraphique(v)}</text>`);
+    if (Math.abs(v) > 1e-9 && Math.round(v) % pasNombres === 0) {
+      graduations.push({ valeur: v, x: echelle.sx(0) - 4, y: py + 3, xRepli: echelle.sx(0) + 4, yRepli: py + 3, ancre: "end", ancreRepli: "start" });
     }
   }
 
   const axeX = `<line x1="${MARGE_PX}" y1="${echelle.sy(0).toFixed(1)}" x2="${LARGEUR_SVG - MARGE_PX}" y2="${echelle.sy(0).toFixed(1)}" stroke="${COULEUR_AXE}" stroke-width="1.4"/>`;
   const axeY = `<line x1="${echelle.sx(0).toFixed(1)}" y1="${MARGE_PX}" x2="${echelle.sx(0).toFixed(1)}" y2="${HAUTEUR_SVG - MARGE_PX}" stroke="${COULEUR_AXE}" stroke-width="1.4"/>`;
 
-  // Graduations APRÈS la droite (marqueur de coupure) : une droite qui passe sur une graduation ne la masque pas.
-  return `${lignes.join("")}${axeX}${axeY}<!--graduations-->${labels.join("")}`;
+  return { grille: `${lignes.join("")}${axeX}${axeY}`, graduations };
 }
+
+const TAILLE_NOMBRES = 10;
 
 /** Découpe la droite INFINIE (`point` + direction `vecteur`) aux bords du `viewBox` — méthode des
  * tranches (slab method), universellement correcte y compris pour une direction verticale/horizontale
@@ -141,8 +145,16 @@ export function construireSvgLectureGraphiqueDroite(exercice: ExerciceLectureGra
   const echelle = construireEchelle(viewBox);
   const [depart, arrivee] = decouperDroiteDansViewBox(exercice.point, exercice.vecteur, viewBox);
 
-  const [grilleHtml, graduationsHtml] = construireGrilleEtAxesHtml(viewBox, echelle).split("<!--graduations-->");
+  const { grille: grilleHtml, graduations } = construireGrilleEtAxesHtml(viewBox, echelle);
   const droiteHtml = `<line x1="${echelle.sx(depart.x).toFixed(1)}" y1="${echelle.sy(depart.y).toFixed(1)}" x2="${echelle.sx(arrivee.x).toFixed(1)}" y2="${echelle.sy(arrivee.y).toFixed(1)}" stroke="${COULEUR_DROITE}" stroke-width="2.4"/>`;
+  // Obstacles des nombres des axes : chaque point marqué et son nom (jamais un nombre caché dessous).
+  const obstacles: Boite[] = [];
+  pointsEntiersVisibles(exercice).forEach((p, i) => {
+    obstacles.push(boiteDisque(echelle.sx(p.x), echelle.sy(p.y), 3));
+    const nom = etiquettes ? (i === 0 ? "C" : i === 1 ? "A" : i === 2 ? "B" : "") : "";
+    if (nom) obstacles.push(boiteTexte(echelle.sx(p.x) + 7, echelle.sy(p.y) + 4, nom, 12, "start"));
+  });
+  const graduationsHtml = graduationsSansChevauchement(graduations, obstacles, { taille: TAILLE_NOMBRES, couleur: COULEUR_AXE });
   const pointsHtml = pointsEntiersVisibles(exercice)
     .map((p, i) => {
       const cercle = `<circle cx="${echelle.sx(p.x).toFixed(1)}" cy="${echelle.sy(p.y).toFixed(1)}" r="3" fill="${COULEUR_POINT}"/>`;

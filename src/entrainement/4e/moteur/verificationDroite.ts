@@ -201,7 +201,8 @@ export interface CoefficientsAffineT {
  * l'expression entière est prise comme membre de droite. */
 export function parserExpressionAffineT(expressionSaisie: string): CoefficientsAffineT | null {
   const membreDroite = expressionSaisie.replace(SIGNES_MOINS, "-").replace(/^\s*[a-zA-Z]\s*=\s*/, "");
-  const expressionSubstituee = membreDroite.replace(/t/gi, "x");
+  // t → x AVANT d'écrire les racines « sqrt(…) » (le « t » de « sqrt » ne doit pas devenir « x »).
+  const expressionSubstituee = radicauxEnSqrt(membreDroite.replace(/sqrt/gi, "√").replace(/t/gi, "x"));
   try {
     const constante = evaluerExpressionGenerale(expressionSubstituee, 0);
     const valeurEnUn = evaluerExpressionGenerale(expressionSubstituee, 1);
@@ -308,7 +309,45 @@ function decouperTermes(texte: string): string[] {
 }
 
 /** `null` si l'expression contient un terme non reconnu (syntaxe invalide, fonction, parenthèse...). */
+/** « √3 », « √(3) », « rac(3) » → « sqrt(3) » (angles de 30°, 60°… : décision 4 de l'audit du
+ * 4e ch. 7) ; « × », « · » → « * ». */
+export function radicauxEnSqrt(texte: string): string {
+  return texte
+    .replace(/[×·\u00b7]/g, "*")
+    .replace(/rac\s*\(/gi, "sqrt(")
+    .replace(/√\s*\(/g, "sqrt(")
+    .replace(/√\s*([0-9.,]+)/g, "sqrt($1)");
+}
+
+/** Membre linéaire en x et y écrit avec une racine (« √3x − 2√3 + 1 », « (√3/3)y ») : lu par
+ * l'évaluateur général (trois points, linéarité contrôlée en trois autres) — seulement quand la
+ * saisie contient une racine, pour ne changer aucun verdict des saisies sans racine. */
+function parserMembreAvecRacine(texte: string): ExpressionLineaireXY | null {
+  const s = radicauxEnSqrt(texte.replace(SIGNES_MOINS, "-")).replace(/,/g, ".").trim();
+  if (s === "" || /[a-wzA-WZ]/.test(s.replace(/sqrt/g, ""))) return null;
+  const f = (x: number, y: number) => evaluerExpressionGenerale(s, x, { y });
+  try {
+    const constante = f(0, 0);
+    const coefX = f(1, 0) - constante;
+    const coefY = f(0, 1) - constante;
+    if (![constante, coefX, coefY].every(Number.isFinite)) return null;
+    for (const [x, y] of [
+      [2.5, -1.25],
+      [-3.5, 4.75],
+      [0.37, 2.9],
+    ] as const) {
+      const v = f(x, y);
+      if (!Number.isFinite(v) || Math.abs(v - (coefX * x + coefY * y + constante)) > 1e-7 * Math.max(1, Math.abs(v))) return null;
+    }
+    const net = (v: number) => (Math.abs(v) < 1e-12 ? 0 : v);
+    return { coefX: net(coefX), coefY: net(coefY), constante: net(constante) };
+  } catch {
+    return null;
+  }
+}
+
 export function parserExpressionLineaireXY(texte: string): ExpressionLineaireXY | null {
+  if (/√|sqrt|rac\s*\(/i.test(texte)) return parserMembreAvecRacine(texte);
   const termes = decouperTermes(texte);
   if (termes.length === 0) return null;
 

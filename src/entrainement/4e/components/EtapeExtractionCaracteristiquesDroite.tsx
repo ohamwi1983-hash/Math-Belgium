@@ -3,15 +3,14 @@ import type { ExerciceCaracteristiquesDroite } from "../core/caracteristiquesDro
 import { NIVEAU_AIDE_MAX_EXTRACTION } from "../moteur/sessionCaracteristiquesDroite";
 import { diagnostiquerExtraction } from "../moteur/verificationCaracteristiquesDroite";
 import type { ReponseExtraction } from "../moteur/verificationCaracteristiquesDroite";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, formatAideExtractionNiveau2Latex, segmentsAideExtractionNiveau1 } from "../ui/formatCaracteristiquesDroite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { ILLISIBLE_ANALYTIQUE, cibleVecteurDirecteur, l, nombreOuNaN, nombresLisibles, surDroite, t } from "../ui/retoursAnalytique";
 import { ConsigneExtractionCaracteristiquesDroite } from "./ConsigneExtractionCaracteristiquesDroite";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
@@ -43,8 +42,15 @@ export function EtapeExtractionCaracteristiquesDroite({ exercice, tentativesUtil
 
   /** Fraction « p/q » acceptée (pente/ordonnée rationnelles : y = −1/3·x + 5/3 donne le point
    * (0 ; 5/3) et le vecteur (1 ; −1/3)) — une saisie illisible devient NaN (`parse_error`). */
-  function lire(texte: string): number {
-    return parserNombreOuFraction(texte) ?? Number.NaN;
+  const lire = nombreOuNaN;
+
+  /** Message ciblé (jamais la réponse) : vecteur normal pris pour directeur (lu sur a et b de
+   * ax + by + c = 0), composantes échangées, point hors de la droite. */
+  function cible(r: ReponseExtraction) {
+    const vecteur = cibleVecteurDirecteur(r.vecteur, exercice.vecteur);
+    if (vecteur) return vecteur;
+    if (!surDroite(r.point, exercice.referenceImplicite)) return [t("Ton point n'est pas sur la droite : ses coordonnées doivent vérifier l'équation (remplace "), l("x"), t(" et "), l("y"), t(" pour contrôler).")];
+    return null;
   }
 
   function construireReponse(): ReponseExtraction {
@@ -103,18 +109,19 @@ export function EtapeExtractionCaracteristiquesDroite({ exercice, tentativesUtil
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_EXTRACTION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_EXTRACTION}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={construireReponse}
+          lisible={() => nombresLisibles(px, py, vx, vy)}
+          onValider={onValider}
+          texteIllisible={() => (nombresLisibles(px, py) ? ILLISIBLE_ANALYTIQUE.composante : ILLISIBLE_ANALYTIQUE.coordonnee)}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={cible}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

@@ -2,14 +2,15 @@ import { useState } from "react";
 import type { ExerciceEquationParaboleDeveloppee } from "../core/equationParaboleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_COMPLETION } from "../moteur/sessionEquationParaboleDeveloppee";
 import { diagnostiquerCompletionCarre, estEquivalenteEquationDepart } from "../moteur/verificationEquationParaboleDeveloppee";
-import { CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, formatEquationDeveloppeeLatex, messageFormeNonAtteinte, placeholderCompletion, segmentsAideCompletionNiveau1, segmentsConsigneCompletion, texteAideCompletionNiveau2 } from "../ui/formatEquationParaboleDeveloppee";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, formatEquationDeveloppeeLatex, placeholderCompletion, segmentsAideCompletionNiveau1, segmentsConsigneCompletion, texteAideCompletionNiveau2 } from "../ui/formatEquationParaboleDeveloppee";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, t } from "../ui/retoursAnalytique";
+import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -40,7 +41,6 @@ export function EtapeCompletionEquationParaboleDeveloppee({ exercice, tentatives
   const apresEchec = tentativesUtilisees > 0;
   const statut = apresEchec ? diagnostiquerCompletionCarre(exercice, texte) : undefined;
   const erronee = apresEchec && statut !== "correct";
-  const formeNonAtteinte = statut === "not_equivalent" && estEquivalenteEquationDepart(exercice, texte);
 
   return (
     <div>
@@ -66,7 +66,7 @@ export function EtapeCompletionEquationParaboleDeveloppee({ exercice, tentatives
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={placeholderCompletion(exercice)}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserMoins(e.target.value))}
         />
       </div>
 
@@ -83,18 +83,19 @@ export function EtapeCompletionEquationParaboleDeveloppee({ exercice, tentatives
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_COMPLETION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formeNonAtteinte ? messageFormeNonAtteinte(tentativesUtilisees, tentativesMax) : formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_COMPLETION}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => texte}
+          lisible={(r) => diagnostiquerCompletionCarre(exercice, r) !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.equationParabole}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => (diagnostiquerCompletionCarre(exercice, r) === "not_equivalent" && estEquivalenteEquationDepart(exercice, r) ? [t("Ton équation est juste, mais elle n'a pas encore la forme demandée : poursuis la transformation.")] : null)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

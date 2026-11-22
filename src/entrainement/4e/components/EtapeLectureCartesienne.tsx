@@ -4,12 +4,26 @@ import { NIVEAU_AIDE_MAX } from "../moteur/sessionLectureGraphiqueDroite";
 import { diagnostiquerCartesienne } from "../moteur/verificationLectureGraphiqueDroite";
 import { consigneGeneraleLecture, consigneLecture, texteAideNiveau1 } from "../ui/formatLectureGraphiqueDroite";
 import { pointsAideExemple } from "../ui/lectureGraphiqueDroiteGraph";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { ILLISIBLE_ANALYTIQUE, cibleEquationDroite, l, lireEquationDroite, t } from "../ui/retoursAnalytique";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { RenduFragments } from "./RenduFragments";
 import { LectureGraphiqueDroiteGraph } from "./LectureGraphiqueDroiteGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
+
+
+/** Aide de niveau 2 (avec les deux points surlignés sur le graphe) : la règle posée, jamais la réponse. */
+const AIDE_NIVEAU_2 = [
+  t("Deux points de la droite sont maintenant surlignés en orange : lis leurs coordonnées "),
+  l("A(x_A\\,;\\,y_A)"),
+  t(" et "),
+  l("B(x_B\\,;\\,y_B)"),
+  t(", puis "),
+  l("\\vec{u}=\\begin{pmatrix}x_B-x_A\\\\ y_B-y_A\\end{pmatrix}"),
+  t("."),
+];
 
 interface Props {
   exercice: ExerciceLectureGraphiqueDroite;
@@ -56,29 +70,34 @@ export function EtapeLectureCartesienne({ exercice, tentativesUtilisees, tentati
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder="ex : y=0,4x+1,7"
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
           <p>{texteAideNiveau1(exercice)}</p>
-          {niveauAide >= 2 && <p>Deux points de la droite sont désormais surlignés en orange sur le graphe.</p>}
+          {niveauAide >= 2 && (
+            <p>
+              <RenduFragments fragments={AIDE_NIVEAU_2} />
+            </p>
+          )}
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX}
+          onActiverAide={onActiverAide}
+          complet={texte.trim() !== ""}
+          reponse={() => texte}
+          lisible={(r) => diagnostiquerCartesienne(exercice, r) !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.equationDroite}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => cibleEquationDroite(lireEquationDroite(r), exercice.referenceImplicite, exercice.point, "A")}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

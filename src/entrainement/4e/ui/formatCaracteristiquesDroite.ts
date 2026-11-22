@@ -13,6 +13,7 @@
  */
 import type { CaracteristiqueDemandee, ExerciceCaracteristiquesDroite } from "../core/caracteristiquesDroite.types";
 import { formatFractionIrreductible } from "./formatFraction";
+import { latexRadical3 } from "./radical3";
 import { type FragmentConsigne, formatEquationExpliciteXLatex, formatEquationExpliciteYLatex, formatEquationImpliciteLatex, formatPointLatex, formatRepresentationParametriqueLatex, formatVecteurLatex } from "./formatEquationDroite";
 
 export { formatPointLatex, formatVecteurLatex };
@@ -130,7 +131,7 @@ export function segmentsAideExtractionNiveau1(exercice: ExerciceCaracteristiques
         texte(" et "),
         latex("y_{\\vec{u}}=m"),
         texte(". Le point "),
-        latex("(x_A ; y_A)=(0 ; p)"),
+        latex("(x_A\\,;\\,y_A)=(0\\,;\\,p)"),
         texte(" appartient toujours à la droite."),
       ];
     case "explicite_x":
@@ -146,7 +147,7 @@ export function segmentsAideExtractionNiveau1(exercice: ExerciceCaracteristiques
         texte(" et "),
         latex("y_{\\vec{u}}=1"),
         texte(". Le point "),
-        latex("(x_A ; y_A)=(q ; 0)"),
+        latex("(x_A\\,;\\,y_A)=(q\\,;\\,0)"),
         texte(" appartient toujours à la droite."),
       ];
     case "parametrique":
@@ -175,7 +176,17 @@ function formatAideExtractionNiveau2Implicite(exercice: ExerciceCaracteristiques
  * déjà donnés (le vecteur directeur), jamais les deux à la fois — le point reste encore à trouver. */
 export function formatAideExtractionNiveau2Latex(exercice: ExerciceCaracteristiquesDroite): string {
   if (exercice.variante === "implicite") return formatAideExtractionNiveau2Implicite(exercice);
-  return `\\vec{u}${formatVecteurLatex(exercice.vecteur)}`;
+  // Jamais le vecteur lui-même (audit 4e ch. 7, G4 : c'était la réponse de deux champs) : les
+  // coefficients lus dans l'équation, à placer dans la règle du cours.
+  if (exercice.variante === "explicite_y") {
+    const d = exercice.expliciteYEntree!;
+    return `m = ${formatNombreLatex(d.m)},\\ p = ${formatNombreLatex(d.p)} \\quad \\Rightarrow \\quad \\vec{u} = \\begin{pmatrix} 1 \\\\ m \\end{pmatrix},\\ A(0\\,;\\,p)`;
+  }
+  if (exercice.variante === "explicite_x") {
+    const d = exercice.expliciteXEntree!;
+    return `n = ${formatNombreLatex(d.n)},\\ q = ${formatNombreLatex(d.q)} \\quad \\Rightarrow \\quad \\vec{u} = \\begin{pmatrix} n \\\\ 1 \\end{pmatrix},\\ A(q\\,;\\,0)`;
+  }
+  return "\\begin{cases} x = x_A + x_{\\vec{u}}\\,t \\\\ y = y_A + y_{\\vec{u}}\\,t \\end{cases}";
 }
 
 // ============================================================================
@@ -187,7 +198,7 @@ export function formatAideExtractionNiveau2Latex(exercice: ExerciceCaracteristiq
 function fragmentsChampPrincipal(caracteristiqueDemandee: CaracteristiqueDemandee): FragmentConsigne[] {
   if (caracteristiqueDemandee === "pente") return [texte("la pente")];
   const axe = caracteristiqueDemandee === "angleOx" ? "Ox" : "Oy";
-  return [texte("l'angle "), latex("\\alpha"), texte(" avec l'axe "), latex(axe)];
+  return [texte("l'angle "), latex(caracteristiqueDemandee === "angleOx" ? "\\theta" : "\\theta_{Oy}"), texte(" avec l'axe "), latex(axe)];
 }
 
 /** Consigne générale de l'écran 2 — adapte "Quel est.../Quelle est..." et le champ principal
@@ -197,7 +208,8 @@ function fragmentsChampPrincipal(caracteristiqueDemandee: CaracteristiqueDemande
  * Se termine par "?" (pas par ": [équation]") — l'équation de la droite est affichée une seule
  * fois, dans le bloc de données de l'en-tête de l'exercice, jamais répétée ici. */
 export function segmentsConsigneCaracteristiques(exercice: ExerciceCaracteristiquesDroite): FragmentConsigne[] {
-  const prefixe = exercice.caracteristiqueDemandee === "pente" ? "Quelle est " : "Quel est ";
+  // Deux grandeurs : « Quelles sont » (pente et ordonnée, féminins), « Quels sont » (angle et ordonnée).
+  const prefixe = exercice.caracteristiqueDemandee === "pente" ? "Quelles sont " : "Quels sont ";
   return [texte(prefixe), ...fragmentsChampPrincipal(exercice.caracteristiqueDemandee), texte(" et l'ordonnée à l'origine de cette droite ?")];
 }
 
@@ -215,6 +227,9 @@ export const QUESTION_ORDONNEE = "Quelle est l'ordonnée à l'origine ?";
 
 /** Nombre rationnel généré en LaTeX : entier, ou `\frac{p}{q}` signé (jamais « −1/1 »). */
 export function formatNombreLatex(valeur: number): string {
+  // Pente √3, √3/3… (angles de 30°, 60°, 120°, 150° : décision 4 de l'audit) : valeur exacte.
+  const radical = latexRadical3(valeur, false);
+  if (radical !== null) return radical;
   const [numerateur, denominateur] = formatFractionIrreductible(Math.abs(valeur)).split("/");
   const corps = denominateur === undefined ? numerateur! : `\\frac{${numerateur}}{${denominateur}}`;
   return valeur < 0 ? `-${corps}` : corps;
@@ -235,6 +250,11 @@ function estEntier(valeur: number): boolean {
  * l'unité, comme demandé à l'élève). */
 export function formatEgaliteAngleLatex(angleDeg: number): string {
   return estEntier(angleDeg) ? `= ${Math.round(angleDeg)}^\\circ` : `\\approx ${Math.round(angleDeg)}^\\circ`;
+}
+
+/** Nom de l'angle demandé, notation du cours (§ 3) : θ avec Ox, θ_Oy avec Oy. */
+export function nomAngle(exercice: ExerciceCaracteristiquesDroite): string {
+  return exercice.caracteristiqueDemandee === "angleOy" ? "\\theta_{Oy}" : "\\theta";
 }
 
 /** Angle demandé à l'écran 2 (Ox ou Oy) — jamais appelé quand c'est la pente qui est demandée. */
@@ -265,15 +285,15 @@ export function segmentsAideCaracteristiquesNiveau1(exercice: ExerciceCaracteris
       : demande === "angleOx"
         ? [
             texte(", angle "),
-            latex("\\alpha=\\arctan(m)"),
-            texte(" — si la calculatrice donne un angle négatif, ajoute 180° (l'angle d'une droite est toujours compris entre 0° et 180°)"),
+            latex("\\theta=\\tan^{-1} m"),
+            texte(" (touche tan⁻¹ de la calculatrice, en mode degrés) — si elle donne un angle négatif, ajoute 180° (l'angle d'une droite est toujours compris entre 0° et 180°)"),
           ]
-        : [texte(", angle "), latex("\\alpha=90^\\circ-\\arctan(m)"), texte(" (toujours compris entre 0° et 180°)")];
+        : [texte(", angle "), latex("\\theta_{Oy}=90^\\circ-\\tan^{-1} m"), texte(" (touche tan⁻¹ en mode degrés ; toujours compris entre 0° et 180°)")];
   return [
     texte("Vérifie d'abord si la droite est verticale (vecteur directeur "),
     latex("\\vec{u}"),
     texte(" de la forme "),
-    latex("(0 ; y_{\\vec{u}})"),
+    latex("\\begin{pmatrix} 0 \\\\ y_{\\vec{u}} \\end{pmatrix}"),
     ...casVertical,
     latex("m=\\dfrac{y_{\\vec{u}}}{x_{\\vec{u}}}"),
     ...formuleAngle,
@@ -288,7 +308,7 @@ export function segmentsAideCaracteristiquesNiveau1(exercice: ExerciceCaracteris
 /** Conclusion d'une verticale — uniquement ce qui est demandé (jamais « α = 90° » pour Oy). */
 function conclusionVerticaleLatex(exercice: ExerciceCaracteristiquesDroite): string {
   if (exercice.caracteristiqueDemandee === "pente") return "\\text{verticale} : \\; m \\text{ et } p \\text{ n'existent pas}";
-  return `\\text{verticale} : \\; \\alpha = ${Math.round(angleDemande(exercice))}^\\circ, \\; p \\text{ n'existe pas}`;
+  return `\\text{verticale} : \\; ${nomAngle(exercice)} = ${Math.round(angleDemande(exercice))}^\\circ, \\; p \\text{ n'existe pas}`;
 }
 
 /** Aide niveau 2 — formule(s) substituée(s) avec le point/vecteur CONFIRMÉS à l'écran 1, jamais
@@ -305,7 +325,7 @@ export function formatAideCaracteristiquesNiveau2Latex(exercice: ExerciceCaracte
     return `\\vec{u}${formatVecteurLatex(v)} : \\; m = \\dfrac{y_{\\vec{u}}}{x_{\\vec{u}}}, \\quad p = ${formatNombreLatex(a.y)} - m\\cdot ${formatFacteurLatex(a.x)}`;
   }
   const pente = exercice.pente!;
-  const formuleAngle = exercice.caracteristiqueDemandee === "angleOx" ? "\\alpha = \\arctan(m)" : "\\alpha = 90^\\circ - \\arctan(m)";
+  const formuleAngle = exercice.caracteristiqueDemandee === "angleOx" ? "\\theta = \\tan^{-1} m" : "\\theta_{Oy} = 90^\\circ - \\tan^{-1} m";
   return `m = ${formatNombreLatex(pente)}, \\quad ${formuleAngle}, \\quad p = ${formatNombreLatex(a.y)} - ${formatFacteurLatex(pente)}\\cdot ${formatFacteurLatex(a.x)}`;
 }
 
@@ -320,7 +340,7 @@ export function formatEtatActuelPointVecteurLatex(exercice: ExerciceCaracteristi
 export function formatCaracteristiquesAttenduesLatex(exercice: ExerciceCaracteristiquesDroite): string {
   if (exercice.verticale) return conclusionVerticaleLatex(exercice);
   const champPrincipal =
-    exercice.caracteristiqueDemandee === "pente" ? `m = ${formatNombreLatex(exercice.pente!)}` : `\\alpha ${formatEgaliteAngleLatex(angleDemande(exercice))}`;
+    exercice.caracteristiqueDemandee === "pente" ? `m = ${formatNombreLatex(exercice.pente!)}` : `${nomAngle(exercice)} ${formatEgaliteAngleLatex(angleDemande(exercice))}`;
   return `${champPrincipal}, \\quad p = ${formatNombreLatex(exercice.ordonneeOrigine!)}`;
 }
 
@@ -335,11 +355,11 @@ export function formatCorrectionCaracteristiquesLatex(exercice: ExerciceCaracter
     const arctan = (Math.atan(pente) * 180) / Math.PI;
     etapes.push(
       arctan < 0
-        ? `\\arctan(m) ${formatEgaliteAngleLatex(arctan)} < 0 \\Rightarrow \\alpha = \\arctan(m) + 180^\\circ ${formatEgaliteAngleLatex(exercice.angleDeg)}`
-        : `\\alpha = \\arctan(m) ${formatEgaliteAngleLatex(exercice.angleDeg)}`,
+        ? `\\tan^{-1} m ${formatEgaliteAngleLatex(arctan)} < 0 \\Rightarrow \\theta = \\tan^{-1} m + 180^\\circ ${formatEgaliteAngleLatex(exercice.angleDeg)}`
+        : `\\theta = \\tan^{-1} m ${formatEgaliteAngleLatex(exercice.angleDeg)}`,
     );
   } else if (exercice.caracteristiqueDemandee === "angleOy") {
-    etapes.push(`\\alpha = 90^\\circ - \\arctan(m) ${formatEgaliteAngleLatex(exercice.angleOyDeg)}`);
+    etapes.push(`\\theta_{Oy} = 90^\\circ - \\tan^{-1} m ${formatEgaliteAngleLatex(exercice.angleOyDeg)}`);
   }
   etapes.push(`p = ${formatNombreLatex(a.y)} - ${formatFacteurLatex(pente)}\\cdot ${formatFacteurLatex(a.x)} = ${formatNombreLatex(exercice.ordonneeOrigine!)}`);
   return etapes.join(", \\quad ");

@@ -63,6 +63,10 @@ export interface EtatSessionEquationDroite {
    * clôture de l'exercice, jamais relu à une phase ultérieure. */
   scoreExtractionExercice: number | null;
   extractionRevele: boolean;
+  /** Choix « Possible / Impossible » de l'écran fusionné, jugé UNE fois à la première validation puis
+   * figé (audit 4e ch. 7, lot B, G3) ; `null` tant qu'il ne l'est pas. Faux : la bonne réponse est
+   * révélée, l'équation garde ses tentatives, l'écran compte comme révélé. */
+  choixPossibiliteFige: { choisi: "possible" | "impossible"; correct: boolean } | null;
   resultats: ResultatExerciceEquationDroite[];
   terminee: boolean;
 }

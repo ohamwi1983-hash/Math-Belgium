@@ -3,14 +3,15 @@ import type { ExerciceDistanceParalleles } from "../core/distanceDroite.types";
 import type { Point } from "../core/vecteur.types";
 import { NIVEAU_AIDE_MAX_CHOIX_POINT } from "../moteur/sessionDistanceDroite";
 import { diagnostiquerChoixPoint } from "../moteur/verificationDistanceDroite";
-import { COULEUR_D, PLACEHOLDER_COORDONNEE, TEXTE_AIDE_CHOIX_POINT_NIVEAU1, consigneChoixPoint } from "../ui/formatDistanceDroite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { COULEUR_D, PLACEHOLDER_COORDONNEE, aideChoixPointNiveau1, aideChoixPointNiveau2, consigneChoixPoint } from "../ui/formatDistanceDroite";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
 import { DistanceDroiteGraph } from "./DistanceDroiteGraph";
 import { DonneesDistanceDroite } from "./DonneesDistanceDroite";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { RenduFragments } from "./RenduFragments";
+import { ILLISIBLE_ANALYTIQUE, l, nombreOuNaN, nombresLisibles, t } from "../ui/retoursAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -39,7 +40,7 @@ export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, t
   const complet = [x, y].every((v) => v.trim() !== "");
 
   function construireReponse(): Point {
-    return { x: Number(x.replace(",", ".")), y: Number(y.replace(",", ".")) };
+    return { x: nombreOuNaN(x), y: nombreOuNaN(y) };
   }
 
   const apresEchec = tentativesUtilisees > 0;
@@ -94,23 +95,37 @@ export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, t
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_CHOIX_POINT_NIVEAU1}</p>
+          <p>
+            <RenduFragments fragments={aideChoixPointNiveau1()} />
+          </p>
+          {niveauAide >= 2 && (
+            <p>
+              <RenduFragments fragments={aideChoixPointNiveau2(exercice)} />
+            </p>
+          )}
         </div>
       )}
       {!validation && (
         <>
-          {NIVEAU_AIDE_MAX_CHOIX_POINT > 0 && (
-            <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CHOIX_POINT} onActiverAide={onActiverAide} />
-          )}
-
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse(), { x, y })}>
-            Valider
-          </button>
-          {tentativesUtilisees > 0 && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-            </p>
-          )}
+          <PiedAnalytique
+            niveauAide={niveauAide}
+            niveauAideMax={NIVEAU_AIDE_MAX_CHOIX_POINT}
+            onActiverAide={onActiverAide}
+            complet={complet}
+            reponse={construireReponse}
+            lisible={() => nombresLisibles(x, y)}
+            onValider={(r) => onValider(r, { x, y })}
+            texteIllisible={ILLISIBLE_ANALYTIQUE.coordonnee}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cible={(r) => {
+              const d = exercice.droiteSource === "d1" ? exercice.d1 : exercice.d2;
+              const sur = Math.abs(d.a * r.x + d.b * r.y + d.c) < 1e-9;
+              if (sur && (!Number.isInteger(r.x) || !Number.isInteger(r.y))) return [t("Ce point est bien sur la droite, mais ses coordonnées ne sont pas entières : essaie une autre valeur de "), l("x"), t(".")];
+              if (!sur) return [t("Ce point n'est pas sur la droite demandée : remplace ses coordonnées dans son équation pour contrôler.")];
+              return null;
+            }}
+          />
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

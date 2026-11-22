@@ -79,7 +79,7 @@ const TITRES_ECRANS: Record<PhaseEquationCercleDeveloppee, string> = {
 function construireReponseAttendue(exercice: ExerciceEquationCercleDeveloppee, phase: PhaseEquationCercleDeveloppee): ReactNode {
   if (phase === "regroupement") return <Katex expression={formatRegroupementLatex(exercice)} />;
   if (phase === "completion") return <Katex expression={formatCompletionLatex(exercice)} />;
-  return <Katex expression={`\\text{centre } ${formatCentreAttenduLatex(exercice)}, \\quad R = ${formatRayonAttenduLatex(exercice)}`} />;
+  return <Katex expression={`\\text{centre } ${formatCentreAttenduLatex(exercice)}, \\quad r = ${formatRayonAttenduLatex(exercice)}`} />;
 }
 
 /** Saisie libre de l'élève, telle quelle — champ vide affiché « — ». */
@@ -201,7 +201,7 @@ export function AppEquationCercleDeveloppee() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideCentreRayon}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => terminerEtape(soumettreReponseCentreRayon(etat, reponse), <>centre ({nombreFr(reponse.x)} ; {nombreFr(reponse.y)}), R = {saisieBrute(reponse.rayon)}</>)}
+            onValider={(reponse) => terminerEtape(soumettreReponseCentreRayon(etat, reponse), <>centre ({nombreFr(reponse.x)} ; {nombreFr(reponse.y)}), r = {saisieBrute(reponse.rayon)}</>)}
             validation={validation}
           />
         )}

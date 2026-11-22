@@ -3,22 +3,19 @@ import type { ExerciceRelationsDroites } from "../core/relationsDroites.types";
 import { NIVEAU_AIDE_MAX_CONSTRUCTION } from "../moteur/sessionRelationsDroites";
 import { diagnostiquerConstruction } from "../moteur/verificationRelationsDroites";
 import type { ReponseVecteur } from "../moteur/verificationRelationsDroites";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { PLACEHOLDER_COMPOSANTE, consigneConstruction, formatAideConstructionNiveau2Latex, formatDonneesRechercheeLatex, formatEnonceLatex, segmentsAideConstructionNiveau1 } from "../ui/formatRelationsDroites";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleRelationsDroites } from "./ConsigneGeneraleRelationsDroites";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, colineaires, l, nombreOuNaN, nombresLisibles, t } from "../ui/retoursAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 /** Entier, décimal (virgule ou point) ou fraction « p/q » — NaN si illisible (`parse_error`). */
-function lire(texte: string): number {
-  return parserNombreOuFraction(texte) ?? Number.NaN;
-}
+const lire = nombreOuNaN;
 
 interface Props {
   exercice: ExerciceRelationsDroites;
@@ -46,6 +43,16 @@ export function EtapeConstructionRelationsDroites({ exercice, tentativesUtilisee
 
   function construireReponse(): ReponseVecteur {
     return { x: lire(x), y: lire(y) };
+  }
+
+  /** Message ciblé (jamais la réponse) : parallèle et perpendiculaire confondus. */
+  function cible(r: ReponseVecteur) {
+    if (!(Math.abs(r.x) > 1e-12 || Math.abs(r.y) > 1e-12)) return [t("Le vecteur nul n'a pas de direction : il ne peut pas diriger une droite.")];
+    const u = exercice.vecteurReference;
+    if (exercice.critere === "perpendiculaire" && colineaires(r, u)) return [t("Ton vecteur est colinéaire à "), l("\\vec{u}"), t(" : il dirige une parallèle à d, pas une perpendiculaire.")];
+    if (exercice.critere === "parallele" && colineaires(r, { x: -u.y, y: u.x })) return [t("Ton vecteur est perpendiculaire à "), l("\\vec{u}"), t(" (c'est un vecteur normal de d) : une parallèle garde la direction de "), l("\\vec{u}"), t(".")];
+    if (exercice.critere === "perpendiculaire" && colineaires(r, { x: u.y, y: u.x })) return [t("Tu as échangé les composantes sans changer le signe de l'une d'elles : vérifie avec le critère d'orthogonalité.")];
+    return null;
   }
 
   const apresEchec = tentativesUtilisees > 0;
@@ -105,18 +112,19 @@ export function EtapeConstructionRelationsDroites({ exercice, tentativesUtilisee
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONSTRUCTION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_CONSTRUCTION}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => construireReponse()}
+          lisible={() => nombresLisibles(x, y)}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.composante}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={cible}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

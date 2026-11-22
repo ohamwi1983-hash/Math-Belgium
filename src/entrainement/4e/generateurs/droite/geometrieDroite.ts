@@ -67,26 +67,39 @@ export function parametriqueDepuisPointVecteur(point: Point, v: Composantes): Dr
   return { x0: point.x, y0: point.y, a: v.x, b: v.y };
 }
 
-/** Valeurs remarquables de tan(α) pour les types de données "angle avec Ox/Oy" — `null` = tan(α)
- * non définie (α=90°). Restreint à {0°,45°,90°,135°} (tan rationnelle : 0, 1, indéfinie, -1) —
- * décision de scope délibérée : les angles remarquables usuels (30°,60°,120°,150°) ont une tangente
- * irrationnelle (`√3`, `√3/3`), ce qui exigerait un champ texte "radical-aware" plutôt qu'un simple
- * champ numérique pour ce type de donnée d'entrée — hors périmètre retenu pour ce générateur. */
-export const TAN_REMARQUABLE: Record<number, number | null> = { 0: 0, 45: 1, 90: null, 135: -1 };
+/** Valeurs remarquables de tan θ pour les types de données « angle avec Ox / Oy » — `null` = tan θ
+ * non définie (θ = 90°). Depuis l'audit du 4e ch. 7 (décision 4 de l'utilisateur) : 30°, 60°, 120° et
+ * 150° en plus de 0°, 45°, 90° et 135° — tangentes √3/3, √3, −√3, −√3/3 (saisie de « √3 » acceptée,
+ * affichage exact p + r√3 : `ui/radical3.ts`). */
+const RACINE3 = Math.sqrt(3);
+export const TAN_REMARQUABLE: Record<number, number | null> = { 0: 0, 30: RACINE3 / 3, 45: 1, 60: RACINE3, 90: null, 120: -RACINE3, 135: -1, 150: -RACINE3 / 3 };
 
-export const ANGLES_REMARQUABLES = [0, 45, 90, 135];
+export const ANGLES_REMARQUABLES = [0, 30, 45, 60, 90, 120, 135, 150];
 
-/** Type 3 — angle α avec Ox : vecteur = (1, tanα), ou (0,1) si α=90° (singularité). */
-export function vecteurDepuisAngleOx(angleDeg: number): Composantes {
-  const t = TAN_REMARQUABLE[angleDeg];
-  return t === null ? { x: 0, y: 1 } : { x: 1, y: t };
+/** Angles remarquables « obliques » (ni 0° ni 90° : droite ni horizontale ni verticale). */
+export const ANGLES_OBLIQUES = [30, 45, 60, 120, 135, 150];
+
+/** Tangente de dénominateur 3 (30°, 150°) : le vecteur (1 ; tan θ) est multiplié par 3 pour ne
+ * garder aucune fraction, (3 ; ±√3) — même direction. */
+function facteurSansFraction(t: number): number {
+  return Math.abs(Math.abs(t) - RACINE3 / 3) < 1e-12 ? 3 : 1;
 }
 
-/** Type 4 — angle α avec Oy : vecteur = (tanα, 1), ou (1,0) si α=90° (singularité — jamais α=0°,
- * qui donne déjà naturellement (0,1) avec cette même formule, cohérent, aucun cas particulier). */
+/** Type 3 — angle θ avec Ox : vecteur = (1, tan θ) (×3 pour 30° et 150°), ou (0, 1) si θ = 90°. */
+export function vecteurDepuisAngleOx(angleDeg: number): Composantes {
+  const t = TAN_REMARQUABLE[angleDeg];
+  if (t === null || t === undefined) return { x: 0, y: 1 };
+  const k = facteurSansFraction(t);
+  return { x: k, y: k * t };
+}
+
+/** Type 4 — angle θ avec Oy : vecteur = (tan θ, 1) (×3 pour 30° et 150°), ou (1, 0) si θ = 90°
+ * (jamais θ = 0°, qui donne déjà naturellement (0, 1) avec cette même formule). */
 export function vecteurDepuisAngleOy(angleDeg: number): Composantes {
   const t = TAN_REMARQUABLE[angleDeg];
-  return t === null ? { x: 1, y: 0 } : { x: t, y: 1 };
+  if (t === null || t === undefined) return { x: 1, y: 0 };
+  const k = facteurSansFraction(t);
+  return { x: k * t, y: k };
 }
 
 /** Type 5 — pente m : vecteur = (1, m), conversion directe (même formule que `vecteurDepuisExpliciteY`,

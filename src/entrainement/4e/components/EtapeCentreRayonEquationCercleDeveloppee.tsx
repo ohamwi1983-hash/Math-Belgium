@@ -3,14 +3,13 @@ import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDev
 import { NIVEAU_AIDE_MAX_CENTRE_RAYON } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerCentreRayon } from "../moteur/verificationEquationCercleDeveloppee";
 import type { ReponseEcranCentreRayon } from "../moteur/typesEquationCercleDeveloppee";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COORDONNEE, PLACEHOLDER_RAYON, segmentsAideCentreRayonNiveau1, formatEquationDeveloppeeLatex, formatEquationReduiteLatex, segmentsConsigneCentreRayon } from "../ui/formatEquationCercleDeveloppee";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, l, lireNombreAnalytique, nombreOuNaN, nombresLisibles, t } from "../ui/retoursAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -44,8 +43,15 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
 
   /** Coordonnée lue comme entier, décimal ou fraction (« 1/2 », « -5/2 ») — le centre est souvent
    * demi-entier et la réponse affichée l'écrit en fraction (audit chapitre 7, point 9). */
-  function lireCoordonnee(texte: string): number {
-    return parserNombreOuFraction(texte) ?? Number.NaN;
+  const lireCoordonnee = nombreOuNaN;
+
+  /** Message ciblé (jamais la réponse) : signe du centre, r² pris pour r. */
+  function cible(r: ReponseEcranCentreRayon) {
+    const c = exercice.centre;
+    if ((r.x === -c.x && c.x !== 0) || (r.y === -c.y && c.y !== 0)) return [t("Attention au signe : "), l("(x-x_0)^2"), t(" donne le centre d'abscisse "), l("x_0"), t(" ; "), l("(x+3)^2"), t(" correspond à "), l("x_0=-3"), t(".")];
+    const lu = lireNombreAnalytique(r.rayon);
+    if (lu !== null && Math.abs(lu - exercice.rayonCarre) < 1e-9 && exercice.rayonCarre !== exercice.rayon) return [t("Tu as donné "), l("r^2"), t(" : le rayon est la racine carrée du second membre.")];
+    return null;
   }
 
   function construireReponse(): ReponseEcranCentreRayon {
@@ -99,7 +105,7 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
       </div>
       <div className="field field-inline">
         <label className="field-label" htmlFor="equation-cercle-developpee-rayon">
-          R =
+          r =
         </label>
         <input
           id="equation-cercle-developpee-rayon"
@@ -123,18 +129,19 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CENTRE_RAYON} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut?.centre !== "correct" ? statut?.centre : statut?.rayon)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_CENTRE_RAYON}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => construireReponse()}
+          lisible={(r) => nombresLisibles(x, y) && diagnostiquerCentreRayon(exercice, { x: r.x, y: r.y }, r.rayon).rayon !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={nombresLisibles(x, y) ? ILLISIBLE_ANALYTIQUE.rayon : ILLISIBLE_ANALYTIQUE.coordonnee}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={cible}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

@@ -195,7 +195,42 @@ export function consigneChoixPoint(exercice: ExerciceDistanceParalleles): string
  * multiple du coefficient de l'autre variable pour que la substitution tombe toujours sur un
  * entier. */
 export const TEXTE_AIDE_CHOIX_POINT_NIVEAU1 =
-  "Pour garantir des coordonnées ENTIÈRES sur une droite ax+by+c=0 : choisis une valeur de x qui soit un multiple de b (le coefficient de y), pour que y=-(ax+c)/b tombe automatiquement sur un entier (ou la méthode symétrique : une valeur de y multiple de a, pour que x tombe sur un entier).";
+  "Pour obtenir des coordonnées entières sur une droite ax + by + c = 0 : donne à x une valeur entière, puis résous en y ; si y n'est pas entier, essaie une autre valeur de x.";
+
+/** Aide de niveau 1 (KaTeX) du choix du point — la méthode, sans valeur. */
+export function aideChoixPointNiveau1(): FragmentConsigne[] {
+  return [
+    texte("Pour obtenir un point à coordonnées entières sur une droite "),
+    latex("ax+by+c=0"),
+    texte(" : donne à "),
+    latex("x"),
+    texte(" une valeur entière, puis résous l'équation en "),
+    latex("y"),
+    texte(" ; si "),
+    latex("y"),
+    texte(" n'est pas entier, essaie une autre valeur de "),
+    latex("x"),
+    texte(" (ou fais l'inverse)."),
+  ];
+}
+
+/** Aide de niveau 2 — l'équation de la droite source avec une valeur de x qui marche, à résoudre
+ * (jamais le point lui-même). */
+export function aideChoixPointNiveau2(exercice: ExerciceDistanceParalleles): FragmentConsigne[] {
+  const d = exercice.droiteSource === "d1" ? exercice.d1 : exercice.d2;
+  const nom = exercice.droiteSource === "d1" ? "d_1" : "d_2";
+  if (d.b === 0) return [texte("La droite "), latex(nom), texte(" est verticale : "), latex("x"), texte(" vaut toujours la même valeur, choisis n'importe quel "), latex("y"), texte(" entier.")];
+  let x0 = 0;
+  for (let k = 0; k <= 30; k++) {
+    const essai = k % 2 === 0 ? k / 2 : -(k + 1) / 2;
+    if (Number.isInteger(-(d.a * essai + d.c) / d.b)) {
+      x0 = essai;
+      break;
+    }
+  }
+  const terme = (c: number, v: number) => `${formatValeurFractionLatex(c)}\\cdot ${v < 0 ? `(${formatValeurFractionLatex(v)})` : formatValeurFractionLatex(v)}`;
+  return [texte("Par exemple, pour "), latex(`x=${x0}`), texte(" : "), latex(`${terme(d.a, x0)}${d.b < 0 ? "-" : "+"}${formatValeurFractionLatex(Math.abs(d.b))}y${d.c < 0 ? "-" : "+"}${formatValeurFractionLatex(Math.abs(d.c))}=0`), texte(", à résoudre en "), latex("y"), texte(".")];
+}
 
 // ============================================================================
 // Écran 1 — équation cartésienne de b (perpendiculaire à la droite cible, passant par le point).
@@ -211,31 +246,25 @@ export function segmentsConsigneEquationB(exercice: ExerciceDistanceDroite): Fra
 
 export const LABEL_CHAMP_EQUATION_B = "Équation cartésienne de b :";
 
-/** Piège central du générateur (spec) : confondre b avec la droite ∥ à d, jamais la ⊥. */
+/** Aide de niveau 1 — méthode du cours par le VECTEUR NORMAL (audit 4e ch. 7, G11 : l'ancienne aide
+ * raisonnait en pentes, le cours et le corrigé construisent la perpendiculaire avec le vecteur
+ * normal). Piège central : construire la parallèle à d au lieu de la perpendiculaire. */
 export function segmentsAideEquationBNiveau1(exercice: ExerciceDistanceDroite): FragmentConsigne[] {
   const d = nomDroiteCible(exercice).latex;
   return [
-    texte("b doit vérifier "),
-    latex(`b \\perp ${d}`),
-    texte(", jamais "),
-    latex(`b \\parallel ${d}`),
-    texte(" — la pente de "),
-    latex("b"),
-    texte(" est l'opposé de l'inverse de la pente de "),
+    texte("Dans "),
+    latex(`${d}\\equiv ax+by+c=0`),
+    texte(", le vecteur "),
+    latex("\\begin{pmatrix}a\\\\ b\\end{pmatrix}"),
+    texte(" est normal à "),
     latex(d),
-    texte(" : "),
-    latex(`m_b = -\\dfrac{1}{m_{${d}}}`),
-    texte(" (si "),
-    latex(d),
-    texte(" est verticale — pente non définie — alors "),
+    texte(" : c'est donc un vecteur directeur de la perpendiculaire "),
     latex("b"),
-    texte(" est horizontale, pente "),
-    latex("0"),
-    texte(", et inversement). Attention à ne pas construire par erreur la droite "),
-    latex(`b \\parallel ${d}`),
-    texte(" passant par "),
+    texte(". Il reste à écrire l'équation de la droite qui passe par "),
     latex("P"),
-    texte("."),
+    texte(" avec ce vecteur directeur (jamais la parallèle à "),
+    latex(d),
+    texte(")."),
   ];
 }
 
@@ -243,12 +272,11 @@ export function segmentsAideEquationBNiveau1(exercice: ExerciceDistanceDroite): 
  * transversale chapitre 6, C.2), jamais le résultat final (l'équation de `b` elle-même). Cas
  * verticale/horizontale traité à part (pente non définie). `nomCible` : nom réel de la droite cible
  * (`d`, `d_1` ou `d_2`). */
-export function formatAideEquationBNiveau2Latex(droiteCible: DroiteImplicite, nomCible = "d"): string {
-  const { a, b } = droiteCible;
-  const mD = `m_{${nomCible}}`;
-  if (b === 0) return `${mD} \\text{ non définie (verticale)} \\quad m_b = 0`;
-  if (a === 0) return `${mD} = 0 \\quad m_b \\text{ non définie (verticale)}`;
-  return `${mD} = ${formatValeurFractionLatex(-a / b)} \\quad m_b = -\\dfrac{1}{${mD}} = ${formatValeurFractionLatex(b / a)}`;
+export function formatAideEquationBNiveau2Latex(droiteCible: DroiteImplicite, nomCible = "d", point?: Point): string {
+  void nomCible;
+  const n = normaliserSigneAffichage(droiteCible);
+  const p = point ? `\\quad P(${formatValeurFractionLatex(point.x)}\\,;\\,${formatValeurFractionLatex(point.y)})` : "";
+  return `\\vec{u}_b = \\begin{pmatrix} ${formatValeurFractionLatex(n.a)} \\\\ ${formatValeurFractionLatex(n.b)} \\end{pmatrix}${p} \\quad \\Rightarrow \\quad y_{\\vec{u}}(x-x_P)-x_{\\vec{u}}(y-y_P)=0`;
 }
 
 // ============================================================================
@@ -317,8 +345,8 @@ export const PLACEHOLDER_DISTANCE_PQ = "ex : 3√11";
 /** Raccourci du cours pour une droite cible verticale/horizontale (`|x_P − k|`, `|y_P − k|`) —
  * `null` dans le cas général (audit chapitre 7, point 34). */
 export function texteRaccourciDistanceAxiale(droiteCible: DroiteImplicite, nomCible: string): string | null {
-  if (droiteCible.b === 0) return `Raccourci du cours : ${nomCible} est verticale (x = k), la distance vaut simplement l'écart des abscisses |x_P − k|.`;
-  if (droiteCible.a === 0) return `Raccourci du cours : ${nomCible} est horizontale (y = k), la distance vaut simplement l'écart des ordonnées |y_P − k|.`;
+  if (droiteCible.b === 0) return `Raccourci du cours : ${nomCible} est verticale, la distance vaut simplement l'écart des abscisses de P et Q.`;
+  if (droiteCible.a === 0) return `Raccourci du cours : ${nomCible} est horizontale, la distance vaut simplement l'écart des ordonnées de P et Q.`;
   return null;
 }
 

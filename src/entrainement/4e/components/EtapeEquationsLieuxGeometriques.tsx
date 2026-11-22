@@ -2,13 +2,14 @@ import { useState } from "react";
 import type { ExerciceLieuxGeometriques, Lieu } from "../core/lieuxGeometriques.types";
 import { diagnostiquerEquationLieu } from "../moteur/verificationLieuxGeometriques";
 import type { ReponseEquations } from "../moteur/verificationLieuxGeometriques";
-import { CONSIGNE_GENERALE_EQUATIONS, LIBELLE_TYPE_LIEU, formatEquationLieuLatex, latexGabaritGenerique, libelleChampEquation, placeholderEquation } from "../ui/formatLieuxGeometriques";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { CONSIGNE_GENERALE_EQUATIONS, LIBELLE_TYPE_LIEU, formatCaracteristiquesLieuLatex, latexGabaritGenerique, libelleChampEquation, placeholderEquation } from "../ui/formatLieuxGeometriques";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, cibleEquationCercle } from "../ui/retoursAnalytique";
+import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceLieuxGeometriques;
@@ -48,7 +49,7 @@ function BlocEquationLieu({ lieu, id, texte, onChange, statut }: BlocEquationLie
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={placeholderEquation(lieu)}
           value={texte}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(normaliserMoins(e.target.value))}
         />
       </div>
     </div>
@@ -65,14 +66,6 @@ export function EtapeEquationsLieuxGeometriques({ exercice, tentativesUtilisees,
 
   const statutLieu1 = apresEchec ? diagnostiquerEquationLieu(exercice.lieu1, texteLieu1) : undefined;
   const statutLieu2 = apresEchec ? diagnostiquerEquationLieu(exercice.lieu2, texteLieu2) : undefined;
-  const statutGlobal =
-    statutLieu1 === "parse_error" || statutLieu2 === "parse_error"
-      ? "parse_error"
-      : statutLieu1 === "correct" && statutLieu2 === "correct"
-        ? "correct"
-        : apresEchec
-          ? "not_equivalent"
-          : undefined;
 
   return (
     <div>
@@ -91,25 +84,38 @@ export function EtapeEquationsLieuxGeometriques({ exercice, tentativesUtilisees,
           </p>
           {niveauAide >= 2 && (
             <p>
-              Formule substituée (non résolue) — {LIBELLE_TYPE_LIEU[exercice.lieu1.type].toLowerCase()} : <Katex expression={formatEquationLieuLatex(exercice.lieu1)} /> ;{" "}
-              {LIBELLE_TYPE_LIEU[exercice.lieu2.type].toLowerCase()} : <Katex expression={formatEquationLieuLatex(exercice.lieu2)} />
+              Caractéristiques confirmées à l'écran précédent, à placer dans ces formules — {LIBELLE_TYPE_LIEU[exercice.lieu1.type].toLowerCase()} :{" "}
+              <Katex expression={formatCaracteristiquesLieuLatex(exercice.lieu1)} /> ; {LIBELLE_TYPE_LIEU[exercice.lieu2.type].toLowerCase()} :{" "}
+              <Katex expression={formatCaracteristiquesLieuLatex(exercice.lieu2)} />
             </p>
           )}
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={2} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ texteLieu1, texteLieu2 })}>
-          Valider
-        </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={2}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => ({ texteLieu1, texteLieu2 })}
+          lisible={(r) => diagnostiquerEquationLieu(exercice.lieu1, r.texteLieu1) !== "parse_error" && diagnostiquerEquationLieu(exercice.lieu2, r.texteLieu2) !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.equationsLieux}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => {
+            for (const [lieu, texte] of [
+              [exercice.lieu1, r.texteLieu1],
+              [exercice.lieu2, r.texteLieu2],
+            ] as const) {
+              if (lieu.type === "cercle") {
+                const m = cibleEquationCercle((x0, y0, r2) => diagnostiquerEquationLieu({ ...lieu, centre: { x: x0, y: y0 }, rayon: Math.sqrt(r2) }, texte) === "correct", lieu.centre.x, lieu.centre.y, lieu.rayon * lieu.rayon);
+                if (m) return m;
+              }
+            }
+            return null;
+          }}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

@@ -196,7 +196,7 @@ export function segmentsDescriptionLieu(lieu: Lieu): FragmentConsigne[] {
     case "droite":
       return [texte("Droite de pente "), latex(`m=${formatValeurFractionLatex(lieu.m)}`), texte(" et d'ordonnée à l'origine "), latex(`p=${formatValeurFractionLatex(lieu.p)}`)];
     case "cercle":
-      return [texte("Cercle de centre "), latex(formatPointLatex(lieu.centre)), texte(" et de rayon "), latex(`R=${lieu.rayon}`)];
+      return [texte("Cercle de centre "), latex(formatPointLatex(lieu.centre)), texte(" et de rayon "), latex(`r=${lieu.rayon}`)];
     case "parabole":
       return [
         texte(`Parabole ${lieu.orientation === "vertical" ? "verticale" : "horizontale"} de foyer `),
@@ -214,7 +214,7 @@ export function formatCaracteristiquesLieuLatex(lieu: Lieu): string {
     case "droite":
       return `\\displaystyle m = ${formatValeurFractionLatex(lieu.m)},\\; p = ${formatValeurFractionLatex(lieu.p)}`;
     case "cercle":
-      return `\\displaystyle \\text{centre } ${formatPointLatex(lieu.centre)},\\; R = ${lieu.rayon}`;
+      return `\\displaystyle \\text{centre } ${formatPointLatex(lieu.centre)},\\; r = ${lieu.rayon}`;
     case "parabole":
       return `\\displaystyle \\text{foyer } ${formatPointLatex(lieu.foyer)},\\; p = ${formatValeurFractionLatex(lieu.p)}\\; (\\text{${lieu.orientation === "vertical" ? "axe vertical" : "axe horizontal"}})`;
   }
@@ -254,9 +254,9 @@ export function formatReponseIdentificationLatex(
     case "droite":
       return `\\text{Droite : } m = ${formatValeurSaisieLatex(reponse.m)},\\; p = ${formatValeurSaisieLatex(reponse.p)}`;
     case "cercle":
-      return `\\text{Cercle : centre } (${formatValeurSaisieLatex(reponse.x0)} ; ${formatValeurSaisieLatex(reponse.y0)}),\\; R = ${formatValeurSaisieLatex(reponse.rayon)}`;
+      return `\\text{Cercle : centre } (${formatValeurSaisieLatex(reponse.x0)}\\,;\\,${formatValeurSaisieLatex(reponse.y0)}),\\; r = ${formatValeurSaisieLatex(reponse.rayon)}`;
     case "parabole":
-      return `\\text{Parabole : foyer } (${formatValeurSaisieLatex(reponse.xF)} ; ${formatValeurSaisieLatex(reponse.yF)}),\\; p = ${formatValeurSaisieLatex(reponse.p)}`;
+      return `\\text{Parabole : foyer } (${formatValeurSaisieLatex(reponse.xF)}\\,;\\,${formatValeurSaisieLatex(reponse.yF)}),\\; p = ${formatValeurSaisieLatex(reponse.p)}`;
   }
 }
 
@@ -292,7 +292,7 @@ export function libelleChampEquation(lieu: Lieu): string {
  * jamais été calculé par l'élève à l'écran 1 (seuls foyer et p le sont). */
 export function latexGabaritGenerique(type: TypeLieu, orientation?: "vertical" | "horizontal"): string {
   if (type === "droite") return "y = mx + p";
-  if (type === "cercle") return "(x-x_0)^2+(y-y_0)^2=R^2";
+  if (type === "cercle") return "(x-x_0)^2+(y-y_0)^2=r^2";
   return orientation === "horizontal" ? "(x-x_F)^2+(y-y_F)^2=(x-x_{\\text{directrice}})^2" : "(x-x_F)^2+(y-y_F)^2=(y-y_{\\text{directrice}})^2";
 }
 

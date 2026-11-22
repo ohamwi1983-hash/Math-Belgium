@@ -1,7 +1,7 @@
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceEquationDroite } from "../../core/equationDroite.types";
-import { q } from "../../ui/corrigeChapitre3";
+import { q } from "../../ui/corrigeAnalytique1";
 import {
   COURS_DROITE,
   col,
@@ -9,6 +9,7 @@ import {
   lignesCoefficientsCartesiens,
   lignesExpliciteX,
   lignesExpliciteY,
+  lignesMultipleEntier,
   lignesParametriques,
   lignesPointSurCartesienne,
   lignesPointSurExpliciteX,
@@ -19,6 +20,7 @@ import {
   type Fragments,
 } from "../../ui/corrigeAnalytique1";
 import { finaliserVecteurs } from "../../ui/corrigeVecteurs2";
+import { TAN_REMARQUABLE } from "../droite/geometrieDroite";
 import {
   formatEquationExpliciteXLatex,
   formatEquationExpliciteYLatex,
@@ -45,6 +47,11 @@ function pointControle(e: E): { p: { x: number; y: number }; nom: string; texte:
   return { p: b, nom: "B", texte: [texte("Le point "), latex(`B=A+\\vec{u}`), texte(", c'est-à-dire "), latex(pt("B", b)), texte(", vérifie l'équation : ")] };
 }
 
+/** Vecteur (1 ; tan θ) : nommé u s'il est gardé, v s'il est ensuite multiplié (30°, 150° : ×3). */
+function nomLu(lu: { x: number; y: number }, u: { x: number; y: number }): string {
+  return Math.abs(lu.x - u.x) < 1e-9 && Math.abs(lu.y - u.y) < 1e-9 ? "\\vec{u}" : "\\vec{v}";
+}
+
 /* --- Étape a : point et vecteur directeur --------------------------------------------------- */
 
 function lignesExtraction(e: E): LigneCalcul[] {
@@ -55,12 +62,26 @@ function lignesExtraction(e: E): LigneCalcul[] {
       return lignesVecteurDeuxPoints("u", d.pointA, d.pointB);
     case "point_vecteur":
       return [ligne(`x_A=${q(d.point.x)}`, "lu dans l'énoncé"), ligne(`y_A=${q(d.point.y)}`), ligne(`\\vec{u}=${col(d.vecteur)}`, "donné dans l'énoncé")];
-    case "angle_ox":
+    case "angle_ox": {
       if (d.angleDeg === 90) return [ligne(`\\vec{u}=${col(u)}`, [texte("angle de 90° avec Ox : droite verticale ("), latex("\\tan 90^\\circ"), texte(" n'existe pas)")])];
-      return [ligne(`\\vec{u}=\\begin{pmatrix}1\\\\\\tan ${d.angleDeg}^\\circ\\end{pmatrix}`, [latex("x_{\\vec{u}}=1"), texte(", "), latex("y_{\\vec{u}}=\\tan\\alpha")]), ligne(`=${col(u)}`, [latex(`\\tan ${d.angleDeg}^\\circ=${q(u.y)}`)])];
-    case "angle_oy":
+      const t = TAN_REMARQUABLE[d.angleDeg] as number;
+      const lu = { x: 1, y: t };
+      return [
+        ligne(`${nomLu(lu, u)}=\\begin{pmatrix}1\\\\\\tan ${d.angleDeg}^\\circ\\end{pmatrix}`, [texte("la pente est "), latex("m=\\tan\\theta")]),
+        ligne(`=${col(lu)}`, [latex(`\\tan ${d.angleDeg}^\\circ=${q(t)}`)]),
+        ...lignesMultipleEntier(lu, u).map((m) => ({ ...m, latex: `\\vec{u}=${m.latex}` })),
+      ];
+    }
+    case "angle_oy": {
       if (d.angleDeg === 90) return [ligne(`\\vec{u}=${col(u)}`, [texte("angle de 90° avec Oy : droite horizontale ("), latex("\\tan 90^\\circ"), texte(" n'existe pas)")])];
-      return [ligne(`\\vec{u}=\\begin{pmatrix}\\tan ${d.angleDeg}^\\circ\\\\1\\end{pmatrix}`, [latex("x_{\\vec{u}}=\\tan\\alpha"), texte(", "), latex("y_{\\vec{u}}=1")]), ligne(`=${col(u)}`, [latex(`\\tan ${d.angleDeg}^\\circ=${q(u.x)}`)])];
+      const t = TAN_REMARQUABLE[d.angleDeg] as number;
+      const lu = { x: t, y: 1 };
+      return [
+        ligne(`${nomLu(lu, u)}=\\begin{pmatrix}\\tan ${d.angleDeg}^\\circ\\\\1\\end{pmatrix}`, [texte("angle "), latex("\\theta_{Oy}"), texte(" mesuré depuis Oy")]),
+        ligne(`=${col(lu)}`, [latex(`\\tan ${d.angleDeg}^\\circ=${q(t)}`)]),
+        ...lignesMultipleEntier(lu, u).map((m) => ({ ...m, latex: `\\vec{u}=${m.latex}` })),
+      ];
+    }
     case "pente":
       return [ligne(`\\vec{u}=\\begin{pmatrix}1\\\\m\\end{pmatrix}=${col(u)}`, [texte("pente "), latex(`m=${q(d.pente)}`)])];
   }
@@ -75,7 +96,7 @@ function piegeExtraction(e: E): Fragments {
     case "angle_ox":
       return [texte("Un angle de 90° avec Ox donne une droite verticale : "), latex("\\tan 90^\\circ"), texte(" n'existe pas, le vecteur directeur est "), latex("\\begin{pmatrix}0\\\\1\\end{pmatrix}"), texte(".")];
     case "angle_oy":
-      return [texte("L'angle est donné avec l'axe Oy, pas avec Ox : le vecteur directeur est "), latex("\\begin{pmatrix}\\tan\\alpha\\\\1\\end{pmatrix}"), texte(", et non "), latex("\\begin{pmatrix}1\\\\\\tan\\alpha\\end{pmatrix}"), texte(".")];
+      return [texte("L'angle est donné avec l'axe Oy, pas avec Ox : le vecteur directeur est "), latex("\\begin{pmatrix}\\tan\\theta_{Oy}\\\\1\\end{pmatrix}"), texte(", et non "), latex("\\begin{pmatrix}1\\\\\\tan\\theta_{Oy}\\end{pmatrix}"), texte(".")];
     case "pente":
       return [texte("La pente donne le vecteur "), latex("\\begin{pmatrix}1\\\\m\\end{pmatrix}"), texte(" : la première composante est 1, pas m.")];
   }

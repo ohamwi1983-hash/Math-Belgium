@@ -76,7 +76,7 @@ export function formatAideRayonNiveau2Latex(exercice: ExerciceEquationCercle): s
   if (exercice.variante === "rayon_direct") return null;
   const dx = exercice.pointMarque.x - exercice.centre.x;
   const dy = exercice.pointMarque.y - exercice.centre.y;
-  return `R = \\sqrt{${formatEcartCarreLatex(dx)} + ${formatEcartCarreLatex(dy)}}`;
+  return `r = \\sqrt{${formatEcartCarreLatex(dx)} + ${formatEcartCarreLatex(dy)}}`;
 }
 
 /** Rayon exact, racine simplifiée (`2\sqrt{5}`, jamais `\sqrt{20}`), suivi de sa valeur arrondie
@@ -91,25 +91,32 @@ export function formatRayonLatex(exercice: ExerciceEquationCercle): string {
  * l'élève (même principe que le reste du projet). VALEUR seule, jamais « Centre = » : le
  * récapitulatif et `ValidationEcran` portent déjà leur propre libellé (audit chapitre 7, point 43). */
 export function formatEtatActuelCentreLatex(exercice: ExerciceEquationCercle): string {
-  return `(${exercice.centre.x} \\; ; \\; ${exercice.centre.y})`;
+  return `(${exercice.centre.x}\\,;\\,${exercice.centre.y})`;
 }
 
 // ============================================================================
 // Écran 3 — équation.
 // ============================================================================
 
-export const CONSIGNE_EQUATION = "Écris l'équation de ce cercle, sous sa forme NON développée.";
+export const CONSIGNE_EQUATION = "Écris l'équation de ce cercle, sous sa forme non développée.";
 
-export const LATEX_GABARIT_EQUATION = "(x - x_0)^2 + (y - y_0)^2 = R^2";
+export const LATEX_GABARIT_EQUATION = "(x - x_0)^2 + (y - y_0)^2 = r^2";
 
 /** Équation équivalente mais développée (ou mal structurée) — audit chapitre 7, point 42 : elle
  * était acceptée alors que la consigne demande la forme NON développée. */
 export const MESSAGE_FORME_DEVELOPPEE =
-  "Ton équation décrit bien ce cercle, mais elle n'est pas sous la forme demandée : écris-la (x − x₀)² + (y − y₀)² = R², sans développer";
+  "Ton équation décrit bien ce cercle, mais elle n'est pas sous la forme demandée : écris-la (x − x₀)² + (y − y₀)² = r², sans développer";
 
 /** Prose seule — la formule générale (`LATEX_GABARIT_EQUATION`) est déjà rendue juste après en
  * KaTeX (`EtapeEquationEquationCercle.tsx`), jamais dupliquée ici en notation Unicode brute. */
-export const TEXTE_AIDE_EQUATION_NIVEAU1 = "Un cercle de centre (x₀ ; y₀) et de rayon R a pour équation (jamais développée à ce stade) :";
+export const TEXTE_AIDE_EQUATION_NIVEAU1 = "Un cercle de centre (x₀ ; y₀) et de rayon r a pour équation (jamais développée à ce stade) :";
+
+/** Aide de niveau 2 — les valeurs confirmées aux écrans précédents, à placer dans le gabarit (le
+ * second membre est r², pas r) ; jamais l'équation elle-même. */
+export function formatAideEquationNiveau2Latex(exercice: ExerciceEquationCercle): string {
+  const r = Number.isInteger(exercice.rayon) ? String(exercice.rayon) : formatLongueurIrreductibleLatex(exercice.rayonCarre);
+  return `x_0 = ${exercice.centre.x},\\ y_0 = ${exercice.centre.y},\\ r = ${r} \\quad \\Rightarrow \\quad \\text{second membre : } r^2`;
+}
 
 /** "x - a" ou "x + |a|" — jamais "x - (-3)" (double signe) ; "a=0" retourne la variable nue ("x"),
  * jamais "x - 0" (correction transversale chapitre 6, point 1). */
@@ -134,7 +141,7 @@ export function formatEquationAttendueLatex(exercice: ExerciceEquationCercle): s
 }
 
 /** Exemples de saisie choisis HORS de l'espace des tirages (centre dans [−4 ; 4]², R ≤ 5 en lecture
- * directe, R² ≤ 32 en lecture indirecte) — un placeholder ne vaut jamais la réponse (audit
+ * directe, r² ≤ 32 en lecture indirecte) — un placeholder ne vaut jamais la réponse (audit
  * chapitre 7, point 10). */
 export const PLACEHOLDER_COORDONNEE = "ex : 7";
 export function placeholderRayon(exercice: ExerciceEquationCercle): string {

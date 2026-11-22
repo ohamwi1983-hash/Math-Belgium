@@ -3,12 +3,14 @@ import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDev
 import { NIVEAU_AIDE_MAX_COMPLETION } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerCompletionCarre } from "../moteur/verificationEquationCercleDeveloppee";
 import { CONSIGNE_COMPLETION, CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COMPLETION, segmentsAideCompletionNiveau1, formatAideCompletionNiveau2Latex, formatEquationDeveloppeeLatex } from "../ui/formatEquationCercleDeveloppee";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, cibleEquationCercle, t } from "../ui/retoursAnalytique";
+import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
+import { diagnostiquerEquationCercle } from "../moteur/verificationEquationCercle";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -62,7 +64,7 @@ export function EtapeCompletionEquationCercleDeveloppee({ exercice, tentativesUt
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_COMPLETION}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserMoins(e.target.value))}
         />
       </div>
 
@@ -79,18 +81,23 @@ export function EtapeCompletionEquationCercleDeveloppee({ exercice, tentativesUt
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_COMPLETION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_COMPLETION}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => texte}
+          lisible={(r) => diagnostiquerCompletionCarre(exercice, r) !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.equationCercle}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => {
+            const juste = (x0: number, y0: number, r2: number) => diagnostiquerEquationCercle(r, x0, y0, r2) === "correct";
+            if (juste(exercice.centre.x, exercice.centre.y, exercice.rayonCarre)) return [t("Ton équation décrit bien ce cercle, mais elle n'est pas écrite sous la forme demandée : deux carrés complétés au premier membre, un nombre au second.")];
+            return cibleEquationCercle(juste, exercice.centre.x, exercice.centre.y, exercice.rayonCarre);
+          }}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

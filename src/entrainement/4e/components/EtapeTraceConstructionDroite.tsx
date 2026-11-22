@@ -3,13 +3,12 @@ import type { ExerciceConstructionDroite } from "../core/constructionDroite.type
 import type { Point } from "../core/vecteur.types";
 import { NIVEAU_AIDE_MAX_TRACE } from "../moteur/sessionConstructionDroite";
 import { pointCorrespondAUneCible } from "../moteur/verificationConstructionDroite";
-import { CONSIGNE_TRACE, consigneGeneraleTrace, formatEnonceLatex, texteAideTraceNiveau1 } from "../ui/formatConstructionDroite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { AIDE_TRACE_NIVEAU_1, CONSIGNE_TRACE, consigneGeneraleTrace, formatEnonceLatex, texteAideTraceNiveau1 } from "../ui/formatConstructionDroite";
+import { PiedAnalytique } from "./PiedAnalytique";
 import { ConstructionDroiteGraph } from "./ConstructionDroiteGraph";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -76,22 +75,23 @@ export function EtapeTraceConstructionDroite({ exercice, cible1, cible2, tentati
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideTraceNiveau1(cible1)}</p>
+          <p>{AIDE_TRACE_NIVEAU_1}</p>
+          {niveauAide >= 2 && <p>{texteAideTraceNiveau1(cible1)}</p>}
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_TRACE} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" onClick={() => onValider({ p1, p2 })}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_TRACE}
+          onActiverAide={onActiverAide}
+          complet
+          reponse={() => ({ p1, p2 })}
+          lisible={() => !(p1.x === MARQUEUR1_INITIAL[0] && p1.y === MARQUEUR1_INITIAL[1] && p2.x === MARQUEUR2_INITIAL[0] && p2.y === MARQUEUR2_INITIAL[1]) || (pointCorrespondAUneCible(p1, cible1, cible2) && pointCorrespondAUneCible(p2, cible1, cible2))}
+          onValider={onValider}
+          texteIllisible="Les deux marqueurs sont encore à leur place de départ : fais-les glisser jusqu'aux deux points avant de valider. Cette validation ne compte pas comme une tentative."
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

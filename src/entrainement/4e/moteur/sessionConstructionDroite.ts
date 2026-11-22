@@ -21,7 +21,7 @@ import type { ReponsePoints } from "./verificationConstructionDroite";
 const POINTS_DE_BASE = 100;
 
 export const NIVEAU_AIDE_MAX_POINTS = 2;
-export const NIVEAU_AIDE_MAX_TRACE = 1;
+export const NIVEAU_AIDE_MAX_TRACE = 2;
 
 function pointCanoniqueSecond(exercice: ExerciceConstructionDroite): Point {
   return { x: exercice.point.x + exercice.vecteur.x, y: exercice.point.y + exercice.vecteur.y };

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Line, Mafs, Plot, Point as MafsPoint, Vector } from "mafs";
 import "mafs/core.css";
 import type { ExerciceEquationParabole } from "../core/equationParabole.types";
-import { EPAISSEUR_TRAIT_ACCENTUE, EPAISSEUR_TRAIT_STANDARD, RATIO_GRAPHE, ZOOM_MAX } from "../ui/mafsTransformation";
+import { EPAISSEUR_TRAIT_ACCENTUE, EPAISSEUR_TRAIT_STANDARD, RATIO_GRAPHE, ZOOM_MAX, formatEtiquetteGrilleTypo } from "../ui/mafsTransformation";
 import { PAS_GRILLE_EQUATION_PARABOLE, directriceEquationParabole, pointDirectriceProcheFoyer, viewBoxEquationParabole } from "../ui/equationParaboleGraph";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { DomaineTraceX, DomaineTraceY, GrilleAdaptative, PointCroix } from "./mafsGraphPartage";
@@ -25,7 +25,6 @@ const COULEUR_VECTEUR_P = "#e03131";
  * multiplierait les lignes de quadrillage sans rien apporter à la lecture de S et F. */
 const ZOOM_MIN_EQUATION_PARABOLE = 0.5;
 /** En dessous de cette largeur, un nombre X sur deux seulement (le quadrillage reste complet). */
-const LARGEUR_UNE_ETIQUETTE_SUR_DEUX = 420;
 
 const LARGEUR_PAR_DEFAUT = 420;
 const LARGEUR_MIN = 240;
@@ -69,7 +68,9 @@ export function EquationParaboleGraph({ exercice, afficherSommet = false, affich
           onPasChange={(x, y) => setPas({ x, y })}
           pasFixe={PAS_GRILLE_EQUATION_PARABOLE}
           etiquettesAuxBords
-          uneEtiquetteXSurDeux={largeur < LARGEUR_UNE_ETIQUETTE_SUR_DEUX}
+          etiquettesLisibles
+          formatEtiquette={formatEtiquetteGrilleTypo}
+          pointsAEviter={afficherSommet ? [foyer, sommet] : [foyer]}
         />
         {exercice.variante === "vertical" ? (
           <DomaineTraceX largeur={largeur}>

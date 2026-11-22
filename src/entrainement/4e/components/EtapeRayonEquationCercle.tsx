@@ -3,12 +3,12 @@ import type { ExerciceEquationCercle } from "../core/equationCercle.types";
 import { NIVEAU_AIDE_MAX_RAYON } from "../moteur/sessionEquationCercle";
 import { diagnostiquerRayon } from "../moteur/verificationEquationCercle";
 import { CONSIGNE_GENERALE_EQUATION_CERCLE, consigneRayon, formatAideRayonNiveau2Latex, placeholderRayon, texteAideRayonNiveau1, texteAideRayonNiveau2 } from "../ui/formatEquationCercle";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationCercleGraph } from "./EquationCercleGraph";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, l, lireNombreAnalytique, t } from "../ui/retoursAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -53,7 +53,7 @@ export function EtapeRayonEquationCercle({ exercice, tentativesUtilisees, tentat
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="equation-cercle-rayon">
-          R =
+          r =
         </label>
         <input
           id="equation-cercle-rayon"
@@ -80,18 +80,19 @@ export function EtapeRayonEquationCercle({ exercice, tentativesUtilisees, tentat
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_RAYON} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(rayon)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_RAYON}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => rayon}
+          lisible={(r) => diagnostiquerRayon(exercice, r) !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.rayon}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => (Math.abs((lireNombreAnalytique(r) ?? NaN) - exercice.rayonCarre) < 1e-9 && exercice.rayonCarre !== exercice.rayon ? [t("Tu as donné "), l("r^2"), t(" : le rayon est sa racine carrée.")] : null)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

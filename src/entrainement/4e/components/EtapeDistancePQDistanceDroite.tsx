@@ -6,14 +6,16 @@ import { NIVEAU_AIDE_MAX_DISTANCE_PQ } from "../moteur/sessionDistanceDroite";
 import { diagnostiquerDistance } from "../moteur/verificationDistanceDroite";
 import { COULEUR_B, COULEUR_D, COULEUR_P, COULEUR_Q, CONSIGNE_DISTANCE_PQ, FORMULE_GENERALE_DISTANCE_PQ_LATEX, LABEL_DISTANCE_PQ, PLACEHOLDER_DISTANCE_PQ, formatAideDistancePQNiveau2Latex, nomDroiteCible, texteRaccourciDistanceAxiale } from "../ui/formatDistanceDroite";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
 import { DistanceDroiteGraph } from "./DistanceDroiteGraph";
 import { DonneesDistanceDroite } from "./DonneesDistanceDroite";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, l, lireNombreAnalytique, t } from "../ui/retoursAnalytique";
+import { MESSAGE_VALEUR_APPROCHEE } from "./RetourSaisie";
+import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -44,6 +46,11 @@ interface Props {
 export function EtapeDistancePQDistanceDroite({ exercice, point, droiteCible, bAttendue, qAttendu, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
+
+  /** Valeur approchée (décimale proche de la distance irrationnelle) : refusée sans tentative, la
+   * consigne demande la valeur exacte. */
+  const valeurLue = lireNombreAnalytique(texte);
+  const approchee = valeurLue !== null && !/√|sqrt|rac/i.test(texte) && /[.,]/.test(texte) && Math.abs(valeurLue - exercice.distance) < 0.06 && Math.abs(valeurLue - exercice.distance) > 1e-9;
 
   const apresEchec = tentativesUtilisees > 0;
   const statut = apresEchec ? diagnostiquerDistance(exercice, texte) : undefined;
@@ -89,7 +96,7 @@ export function EtapeDistancePQDistanceDroite({ exercice, point, droiteCible, bA
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_DISTANCE_PQ}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserMoins(e.target.value))}
         />
       </div>
 
@@ -107,18 +114,19 @@ export function EtapeDistancePQDistanceDroite({ exercice, point, droiteCible, bA
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_DISTANCE_PQ} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_DISTANCE_PQ}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => texte}
+          lisible={(r) => diagnostiquerDistance(exercice, r) !== "parse_error" && !approchee}
+          onValider={onValider}
+          texteIllisible={approchee ? MESSAGE_VALEUR_APPROCHEE : ILLISIBLE_ANALYTIQUE.distance}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => (Math.abs((lireNombreAnalytique(r) ?? NaN) - exercice.distance ** 2) < 1e-9 && exercice.distance > 1 ? [t("Tu as donné "), l("PQ^2"), t(" : la distance est sa racine carrée.")] : null)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

@@ -5,13 +5,16 @@ import { diagnostiquerPossibiliteCoefficients, estBonneDroiteMauvaiseForme } fro
 import { NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS } from "../moteur/sessionEquationDroite";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatAideNiveau2PossibiliteCoefficientsLatex, formatEnonceLatex, latexGabaritPossibiliteCoefficients, segmentsConsignePossibiliteCoefficients } from "../ui/formatEquationDroite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { ILLISIBLE_ANALYTIQUE, cibleEquationDroite, l, t } from "../ui/retoursAnalytique";
+import { normaliserSaisieEquation } from "../moteur/verificationEquationDroite";
+import { parserEquationDroiteXY } from "../moteur/verificationDroite";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { ConsigneGeneraleEquationDroite } from "./ConsigneGeneraleEquationDroite";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -21,6 +24,8 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponsePossibiliteCoefficients) => void;
+  /** Choix déjà jugé par le moteur (une seule fois), `null` tant qu'il ne l'est pas. */
+  choixFige: { choisi: "possible" | "impossible"; correct: boolean } | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -51,9 +56,13 @@ function latexFormeTestee(exercice: ExerciceEquationDroite): string {
  * `diagnostiquerPossibiliteCoefficients`, qui accepte n'importe quelle représentation valide de la
  * droite (`diagnostiquerEquationDroiteLibre`) quel que soit le choix, jamais un format imposé.
  */
-export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
-  const [choix, setChoix] = useState<"possible" | "impossible" | null>(null);
+export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, choixFige, validation }: Props) {
+  const [choixLibre, setChoix] = useState<"possible" | "impossible" | null>(null);
   const [texte, setTexte] = useState("");
+  const bonChoix: "possible" | "impossible" = exercice.possible ? "possible" : "impossible";
+  /** Choix affiché : le choix libre tant qu'il n'est pas jugé ; ensuite le bon (révélé s'il était faux). */
+  const choix = choixFige ? (choixFige.correct ? choixFige.choisi : bonChoix) : choixLibre;
+  const choixBloque = !!validation || choixFige !== null;
 
   function choisir(nouveauChoix: "possible" | "impossible") {
     setChoix(nouveauChoix);
@@ -64,6 +73,19 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentative
   const apresEchec = tentativesUtilisees > 0;
   const statut: StatutVerification | undefined = apresEchec && choix !== null ? diagnostiquerPossibiliteCoefficients(exercice, { choix, texte }) : undefined;
   const erronee = apresEchec && statut !== "correct";
+
+  /** Message ciblé sur l'équation transmise (jugée avec le bon choix). */
+  function cible(r: ReponsePossibiliteCoefficients) {
+    if (estBonneDroiteMauvaiseForme(exercice, { choix: bonChoix, texte: r.texte })) {
+      return [t("Ton équation décrit bien cette droite, mais elle n'est pas écrite sous la forme "), l(latexFormeTestee(exercice)), t(".")];
+    }
+    return cibleEquationDroite(parserEquationDroiteXY(normaliserSaisieEquation(r.texte).replace(/\s+/g, "")), exercice.referenceImplicite, exercice.point);
+  }
+
+  const messageChoixFaux =
+    exercice.possible
+      ? [t("Ce n'était pas le bon choix : cette droite n'est pas parallèle à l'axe concerné, elle peut s'écrire sous la forme "), l(latexFormeTestee(exercice)), t(". Écris maintenant son équation sous cette forme.")]
+      : [t(`Ce n'était pas le bon choix : cette droite est ${exercice.formeCible === "explicite_y" ? "verticale" : "horizontale"}, elle ne peut pas s'écrire sous la forme `), l(latexFormeTestee(exercice)), t(". Écris maintenant une autre équation de cette droite.")];
 
   return (
     <div>
@@ -80,13 +102,20 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentative
       </p>
 
       <div className="options-grid-compact">
-        <button type="button" className={choix === "possible" ? "btn toggle-active" : "btn"} onClick={() => choisir("possible")}>
+        <button disabled={choixBloque} type="button" className={choix === "possible" ? "btn toggle-active" : "btn"} onClick={() => choisir("possible")}>
           Possible
         </button>
-        <button type="button" className={choix === "impossible" ? "btn toggle-active" : "btn"} onClick={() => choisir("impossible")}>
+        <button disabled={choixBloque} type="button" className={choix === "impossible" ? "btn toggle-active" : "btn"} onClick={() => choisir("impossible")}>
           Impossible
         </button>
       </div>
+      {choixFige !== null && !choixFige.correct && !validation && (
+        <p className="alert-error" role="status">
+          <span>
+            <RenduFragments fragments={messageChoixFaux} />
+          </span>
+        </p>
+      )}
 
       {choix !== null && (
         <div className="field contenu-conditionnel">
@@ -98,7 +127,7 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentative
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={placeholderEquation(exercice, choix)}
             value={texte}
-            onChange={(e) => setTexte(e.target.value)}
+            onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
           />
         </div>
       )}
@@ -116,25 +145,20 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentative
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS} onActiverAide={onActiverAide} disabledSupplementaire={choix === null} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => choix !== null && onValider({ choix, texte })}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {choix !== null && estBonneDroiteMauvaiseForme(exercice, { choix, texte }) ? (
-              <>
-                Ton équation décrit bien cette droite, mais elle n'est pas écrite sous la forme <Katex expression={latexFormeTestee(exercice)} /> — tentative{" "}
-                {tentativesUtilisees}/{tentativesMax}, réessaie.
-              </>
-            ) : (
-              formatMessageErreur(tentativesUtilisees, tentativesMax, statut)
-            )}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS}
+          onActiverAide={onActiverAide}
+          aideIndisponible={choix === null}
+          complet={complet}
+          reponse={() => ({ choix: choix ?? "possible", texte })}
+          lisible={(r) => diagnostiquerPossibiliteCoefficients(exercice, r) !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.equationDroite}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={cible}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

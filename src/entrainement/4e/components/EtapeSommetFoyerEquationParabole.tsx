@@ -4,12 +4,12 @@ import { NIVEAU_AIDE_MAX_SOMMET_FOYER } from "../moteur/sessionEquationParabole"
 import { diagnostiquerSommetFoyer } from "../moteur/verificationEquationParabole";
 import type { ReponseSommetFoyer } from "../moteur/verificationEquationParabole";
 import { CONSIGNE_GENERALE_EQUATION_PARABOLE, CONSIGNE_SOMMET_FOYER, PLACEHOLDER_COORDONNEE, TEXTE_AIDE_SOMMET_FOYER_NIVEAU1, TEXTE_AIDE_SOMMET_FOYER_NIVEAU2 } from "../ui/formatEquationParabole";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationParaboleGraph } from "./EquationParaboleGraph";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, l, nombreOuNaN, nombresLisibles, t } from "../ui/retoursAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -37,7 +37,7 @@ export function EtapeSommetFoyerEquationParabole({ exercice, tentativesUtilisees
   const complet = [sx, sy, fx, fy].every((v) => v.trim() !== "");
 
   function construireReponse(): ReponseSommetFoyer {
-    return { sx: Number(sx.replace(",", ".")), sy: Number(sy.replace(",", ".")), fx: Number(fx.replace(",", ".")), fy: Number(fy.replace(",", ".")) };
+    return { sx: nombreOuNaN(sx), sy: nombreOuNaN(sy), fx: nombreOuNaN(fx), fy: nombreOuNaN(fy) };
   }
 
   const apresEchec = tentativesUtilisees > 0;
@@ -112,18 +112,25 @@ export function EtapeSommetFoyerEquationParabole({ exercice, tentativesUtilisees
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SOMMET_FOYER} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_SOMMET_FOYER}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => construireReponse()}
+          lisible={() => nombresLisibles(sx, sy, fx, fy)}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.coordonnee}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => {
+            const { sommet: S, foyer: F } = exercice;
+            if (r.sx === F.x && r.sy === F.y && r.fx === S.x && r.fy === S.y) return [t("Tu as échangé "), l("S"), t(" et "), l("F"), t(" : le foyer est la croix, le sommet est sur la courbe.")];
+            const K = { x: 2 * S.x - F.x, y: 2 * S.y - F.y };
+            if (r.sx === K.x && r.sy === K.y) return [t("Ce point est sur la directrice, pas sur la parabole : le sommet est le milieu entre le foyer et la directrice.")];
+            return null;
+          }}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

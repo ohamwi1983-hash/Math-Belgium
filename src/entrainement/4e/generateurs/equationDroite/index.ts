@@ -17,7 +17,7 @@ import type {
 import type { FormeSortieDroite } from "../../core/droite.types";
 import type { Composantes, Point } from "../../core/vecteur.types";
 import {
-  ANGLES_REMARQUABLES,
+  ANGLES_OBLIQUES,
   expliciteXDepuisPointVecteur,
   expliciteYDepuisPointVecteur,
   formeExpliciteXPossible,
@@ -62,6 +62,26 @@ function angleForceOy(contrainte: "vertical" | "horizontale"): number {
   return contrainte === "vertical" ? 0 : 90;
 }
 
+/** 30°, 45°, 60°, 120°, 135° ou 150° à parts égales (audit 4e ch. 7, décision 4). */
+function tirerAngleOblique(): number {
+  return ANGLES_OBLIQUES[randomInt(0, ANGLES_OBLIQUES.length - 1)]!;
+}
+
+/** Part des droites horizontales ou verticales (0° ou 90°) dans les variantes « angle » (décision 4
+ * de l'audit du 4e ch. 7 : 57 % avant, ramenée à ≈ 20 %). Pour y = mx + p / x = ny + q, c'est l'angle
+ * qui rend la forme impossible (droite verticale / horizontale) ; pour les deux autres formes, 0° ou
+ * 90° à pile ou face. */
+const PROBABILITE_ANGLE_AXE = 0.2;
+
+/** Contrainte des variantes « angle » : tirée ICI (les autres variantes gardent leur tirage, donc
+ * leurs `?code=` déjà imprimés). */
+function contrainteAngle(formeCible: FormeSortieDroite): "vertical" | "horizontale" | null {
+  if (Math.random() >= PROBABILITE_ANGLE_AXE) return null;
+  if (formeCible === "explicite_y") return "vertical";
+  if (formeCible === "explicite_x") return "horizontale";
+  return Math.random() < 0.5 ? "vertical" : "horizontale";
+}
+
 /** Construit les données d'entrée pour un type donné, en forçant `contrainte` quand fourni et
  * compatible avec ce type — sinon (type "pente" + contrainte "vertical", structurellement
  * impossible : `(1,m)` n'est jamais vertical) la contrainte est simplement ignorée, un cas générique
@@ -88,12 +108,12 @@ function construireDonnees(type: TypeDonneeEntree, contrainte: "vertical" | "hor
       return donnees;
     }
     case "angle_ox": {
-      const angleDeg = contrainte !== null ? angleForceOx(contrainte) : ANGLES_REMARQUABLES[randomInt(0, ANGLES_REMARQUABLES.length - 1)];
+      const angleDeg = contrainte !== null ? angleForceOx(contrainte) : tirerAngleOblique();
       const donnees: DonneesAngle = { type: "angle_ox", point, angleDeg };
       return donnees;
     }
     case "angle_oy": {
-      const angleDeg = contrainte !== null ? angleForceOy(contrainte) : ANGLES_REMARQUABLES[randomInt(0, ANGLES_REMARQUABLES.length - 1)];
+      const angleDeg = contrainte !== null ? angleForceOy(contrainte) : tirerAngleOblique();
       const donnees: DonneesAngle = { type: "angle_oy", point, angleDeg };
       return donnees;
     }
@@ -131,8 +151,10 @@ export function extrairePoint(donnees: DonneesEntreeDroite): Point {
 const PROBABILITE_PIEGE = 0.35;
 
 export function construireExercice(typeDonnee: TypeDonneeEntree, formeCible: FormeSortieDroite): ExerciceEquationDroite {
-  const contrainteVoulue: "vertical" | "horizontale" | null =
-    formeCible === "explicite_y" && Math.random() < PROBABILITE_PIEGE
+  const estAngle = typeDonnee === "angle_ox" || typeDonnee === "angle_oy";
+  const contrainteVoulue: "vertical" | "horizontale" | null = estAngle
+    ? contrainteAngle(formeCible)
+    : formeCible === "explicite_y" && Math.random() < PROBABILITE_PIEGE
       ? "vertical"
       : formeCible === "explicite_x" && Math.random() < PROBABILITE_PIEGE
         ? "horizontale"

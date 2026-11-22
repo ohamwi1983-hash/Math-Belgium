@@ -174,21 +174,21 @@ export function formatAideCompletionNiveau2Latex(exercice: ExerciceEquationCercl
  * « o(x_o ; y_o) » ne correspondait ni aux champs ni au cours). Pour la variante `irrationnel`, la
  * forme acceptée du rayon est annoncée (valeur exacte ou arrondie au centième). */
 export function segmentsConsigneCentreRayon(exercice: ExerciceEquationCercleDeveloppee): FragmentConsigne[] {
-  const base: FragmentConsigne[] = [texte("Donne le centre "), latex("(x_0\\,;\\,y_0)"), texte(" et le rayon "), latex("R"), texte(" du cercle.")];
+  const base: FragmentConsigne[] = [texte("Donne le centre "), latex("(x_0\\,;\\,y_0)"), texte(" et le rayon "), latex("r"), texte(" du cercle.")];
   if (exercice.variante !== "irrationnel") return base;
   return [...base, texte(" (rayon : valeur exacte, par exemple √18 ou 3√2, ou valeur arrondie au centième)")];
 }
 
-/** Fragments texte/LaTeX (jamais une chaîne Unicode brute "(x-x₀)²+(y-y₀)²=R²"). */
+/** Fragments texte/LaTeX (jamais une chaîne Unicode brute "(x-x₀)²+(y-y₀)²=r²"). */
 export function segmentsAideCentreRayonNiveau1(): FragmentConsigne[] {
   return [
     texte("Compare ton équation complétée avec "),
-    latex("(x-x_0)^2+(y-y_0)^2=R^2"),
+    latex("(x-x_0)^2+(y-y_0)^2=r^2"),
     texte(" : le centre est "),
     latex("(x_0\\,;\\,y_0)"),
     texte(" — attention aux signes — et le second membre vaut "),
-    latex("R^2"),
-    texte(", pas R."),
+    latex("r^2"),
+    texte(", pas r."),
   ];
 }
 

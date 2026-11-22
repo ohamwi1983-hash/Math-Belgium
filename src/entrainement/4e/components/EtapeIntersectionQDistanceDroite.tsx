@@ -4,18 +4,18 @@ import type { DroiteImplicite } from "../core/droite.types";
 import type { Point } from "../core/vecteur.types";
 import { diagnostiquerIntersection } from "../moteur/verificationDroite";
 import { NIVEAU_AIDE_MAX_INTERSECTION_Q } from "../moteur/sessionDistanceDroite";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import type { ReponseIntersection } from "../moteur/verificationDistanceDroite";
 import { COULEUR_B, COULEUR_D, COULEUR_P, COULEUR_Q, LABEL_X_Q, LABEL_Y_Q, PLACEHOLDER_COORDONNEE_FRACTION, TEXTE_AIDE_INTERSECTION_Q_NIVEAU1, consigneIntersectionQ, formatAideIntersectionQNiveau2Latex } from "../ui/formatDistanceDroite";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
 import { DistanceDroiteGraph } from "./DistanceDroiteGraph";
 import { DonneesDistanceDroite } from "./DonneesDistanceDroite";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, nombreOuNaN, nombresLisibles } from "../ui/retoursAnalytique";
+import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -53,7 +53,7 @@ export function EtapeIntersectionQDistanceDroite({ exercice, point, bAttendue, d
   const complet = [x, y].every((v) => v.trim() !== "");
 
   function construireReponse(): ReponseIntersection {
-    return { x: parserNombreOuFraction(x) ?? NaN, y: parserNombreOuFraction(y) ?? NaN };
+    return { x: nombreOuNaN(x), y: nombreOuNaN(y) };
   }
 
   const apresEchec = tentativesUtilisees > 0;
@@ -70,7 +70,8 @@ export function EtapeIntersectionQDistanceDroite({ exercice, point, bAttendue, d
   lignes.push({ droite: bAttendue, label: "b", couleur: COULEUR_B });
   const cadrage = { droites: lignes.map((l) => l.droite), points: [point, qAttendu] };
   const points = [{ point, label: "P", couleur: COULEUR_P }];
-  if (niveauAide >= 1) points.push({ point: qAttendu, label: "Q", couleur: COULEUR_Q });
+  // Q n'est marqué qu'à l'aide de niveau 2 (au niveau 1, il donnait la réponse à lire).
+  if (niveauAide >= 2) points.push({ point: qAttendu, label: "Q", couleur: COULEUR_Q });
 
   return (
     <div>
@@ -95,7 +96,7 @@ export function EtapeIntersectionQDistanceDroite({ exercice, point, bAttendue, d
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE_FRACTION}
             value={x}
-            onChange={(e) => setX(e.target.value)}
+            onChange={(e) => setX(normaliserMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -107,7 +108,7 @@ export function EtapeIntersectionQDistanceDroite({ exercice, point, bAttendue, d
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE_FRACTION}
             value={y}
-            onChange={(e) => setY(e.target.value)}
+            onChange={(e) => setY(normaliserMoins(e.target.value))}
           />
         </div>
       </div>
@@ -123,18 +124,18 @@ export function EtapeIntersectionQDistanceDroite({ exercice, point, bAttendue, d
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_INTERSECTION_Q} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse(), { x, y })}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_INTERSECTION_Q}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => construireReponse()}
+          lisible={() => nombresLisibles(x, y)}
+          onValider={(r) => onValider(r, { x, y })}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.coordonnee}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

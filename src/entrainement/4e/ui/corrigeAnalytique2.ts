@@ -141,10 +141,10 @@ export function sommeCarresPoint(p: { x: number; y: number }, c: { x: number; y:
 }
 
 /**
- * Vérification « P est sur le cercle (x − x₀)² + (y − y₀)² = R² » : substitution, carrés, somme
+ * Vérification « P est sur le cercle (x − x₀)² + (y − y₀)² = r² » : substitution, carrés, somme
  * (une transformation par ligne).
  */
-export function lignesPointSurCercle(c: { x: number; y: number }, r2: number, p: { x: number; y: number }, nomPoint: string, nomCarre = "R^2"): LigneCalcul[] {
+export function lignesPointSurCercle(c: { x: number; y: number }, r2: number, p: { x: number; y: number }, nomPoint: string, nomCarre = "r^2"): LigneCalcul[] {
   const dx = p.x - c.x;
   const dy = p.y - c.y;
   const val = dx * dx + dy * dy;
@@ -156,10 +156,10 @@ export function lignesPointSurCercle(c: { x: number; y: number }, r2: number, p:
 }
 
 /**
- * Équation du cercle de centre `c` et de rayon `rayonLatex` (R² = `r2`) : substitution brute du
+ * Équation du cercle de centre `c` et de rayon `rayonLatex` (r² = `r2`) : substitution brute du
  * centre et du rayon, puis signes simplifiés et rayon élevé au carré.
  */
-export function lignesEquationCercle(c: { x: number; y: number }, r2: number, rayonLatex: string, nomRayon = "R"): LigneCalcul[] {
+export function lignesEquationCercle(c: { x: number; y: number }, r2: number, rayonLatex: string, nomRayon = "r"): LigneCalcul[] {
   const rayonCarre = /^\d+$/.test(rayonLatex) ? `${rayonLatex}^2` : `(${rayonLatex})^2`;
   return sansDoublons([
     ligne(`${carreBrut(c.x, "x")}+${carreBrut(c.y, "y")}=${rayonCarre}`, [latex(`x_0=${q(c.x)}`), texte(", "), latex(`y_0=${q(c.y)}`), texte(", "), latex(`${nomRayon}=${rayonLatex}`), texte(" remplacés")]),

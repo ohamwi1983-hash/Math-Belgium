@@ -122,7 +122,7 @@ function enoncePapierEquationCercle(exercice: ExerciceEquationCercle): EnoncePap
 function construireCorrectionEquationCercle(exercice: ExerciceEquationCercle): BlocCorrection[] {
   return [
     { type: "html", html: construireSvgEquationCercle(exercice, { avecCentre: true, avecRayon: true }) },
-    { type: "paragraphe", fragments: [texte("Centre "), latex(`C${formatEtatActuelCentreLatex(exercice)}`), texte(", rayon "), latex(`R = ${formatRayonLatex(exercice)}`), texte(".")] },
+    { type: "paragraphe", fragments: [texte("Centre "), latex(`C${formatEtatActuelCentreLatex(exercice)}`), texte(", rayon "), latex(`r = ${formatRayonLatex(exercice)}`), texte(".")] },
     { type: "paragraphe", fragments: [texte("Équation : "), latex(formatEquationAttendueLatex(exercice)), texte(".")] },
   ];
 }
@@ -141,18 +141,18 @@ function criteresDifficulte(exercice: ExerciceEquationCercle): CriteresDifficult
 
 function baremeEquationCercle(exercice: ExerciceEquationCercle): BaremeExercice {
   const { centre } = exercice;
-  const erreurs: ErreurFrequente[] = [{ description: [texte("Rayon R écrit au second membre au lieu de "), latex("R^2")], cout: "−1" }];
+  const erreurs: ErreurFrequente[] = [{ description: [texte("Rayon r écrit au second membre au lieu de "), latex("r^2")], cout: "−1" }];
   if (centre.x !== 0 || centre.y !== 0) erreurs.push({ description: [texte("Signe d'une coordonnée du centre inversé dans la parenthèse")], cout: "−1" });
   if (exercice.variante === "rayon_indirect") erreurs.push({ description: [texte("Rayon lu « à vue » sur la grille au lieu du théorème de Pythagore")], cout: "−1" });
   return {
     reponseFinale: [latex(formatEquationAttendueLatex(exercice))],
     criteres: [
       { sousQuestion: "a", critere: [texte("Centre "), latex(formatEtatActuelCentreLatex(exercice))], points: 1 },
-      { sousQuestion: "b", critere: exercice.variante === "rayon_direct" ? [texte("Rayon lu sur la grille : "), latex(`R = ${formatRayonLatex(exercice)}`)] : [texte("Rayon calculé par Pythagore : "), latex(`R^2 = ${exercice.rayonCarre}`)], points: 1 },
-      { sousQuestion: "c", critere: [texte("Équation correcte sous la forme non développée (signes et "), latex("R^2"), texte(")")], points: 2 },
+      { sousQuestion: "b", critere: exercice.variante === "rayon_direct" ? [texte("Rayon lu sur la grille : "), latex(`r = ${formatRayonLatex(exercice)}`)] : [texte("Rayon calculé par Pythagore : "), latex(`r^2 = ${exercice.rayonCarre}`)], points: 1 },
+      { sousQuestion: "c", critere: [texte("Équation correcte sous la forme non développée (signes et "), latex("r^2"), texte(")")], points: 2 },
     ],
     erreursFrequentes: erreurs,
-    reponsesAcceptees: [[texte("Le rayon peut rester sous forme de racine : seul "), latex(`R^2 = ${exercice.rayonCarre}`), texte(" apparaît dans l'équation")]],
+    reponsesAcceptees: [[texte("Le rayon peut rester sous forme de racine : seul "), latex(`r^2 = ${exercice.rayonCarre}`), texte(" apparaît dans l'équation")]],
   };
 }
 

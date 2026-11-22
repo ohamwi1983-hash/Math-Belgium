@@ -1,14 +1,15 @@
 import { useState } from "react";
 import type { ExerciceEquationCercle } from "../core/equationCercle.types";
 import { NIVEAU_AIDE_MAX_EQUATION } from "../moteur/sessionEquationCercle";
-import { diagnostiquerEquationExercice, estEquationCercleDeveloppee } from "../moteur/verificationEquationCercle";
-import { CONSIGNE_EQUATION, CONSIGNE_GENERALE_EQUATION_CERCLE, LATEX_GABARIT_EQUATION, MESSAGE_FORME_DEVELOPPEE, PLACEHOLDER_EQUATION, TEXTE_AIDE_EQUATION_NIVEAU1 } from "../ui/formatEquationCercle";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { diagnostiquerEquationCercle, diagnostiquerEquationExercice, estEquationCercleDeveloppee } from "../moteur/verificationEquationCercle";
+import { CONSIGNE_EQUATION, CONSIGNE_GENERALE_EQUATION_CERCLE, LATEX_GABARIT_EQUATION, formatAideEquationNiveau2Latex, MESSAGE_FORME_DEVELOPPEE, PLACEHOLDER_EQUATION, TEXTE_AIDE_EQUATION_NIVEAU1 } from "../ui/formatEquationCercle";
 import { EquationCercleGraph } from "./EquationCercleGraph";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, cibleEquationCercle, t } from "../ui/retoursAnalytique";
+import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -39,7 +40,6 @@ export function EtapeEquationEquationCercle({ exercice, tentativesUtilisees, ten
   const apresEchec = tentativesUtilisees > 0;
   const statut = apresEchec ? diagnostiquerEquationExercice(exercice, texte) : undefined;
   const erronee = apresEchec && statut !== "correct";
-  const formeDeveloppee = erronee && estEquationCercleDeveloppee(exercice, texte);
 
   return (
     <div>
@@ -58,7 +58,7 @@ export function EtapeEquationEquationCercle({ exercice, tentativesUtilisees, ten
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_EQUATION}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserMoins(e.target.value))}
         />
       </div>
 
@@ -68,21 +68,31 @@ export function EtapeEquationEquationCercle({ exercice, tentativesUtilisees, ten
           <p>
             <Katex expression={LATEX_GABARIT_EQUATION} />
           </p>
+          {niveauAide >= 2 && (
+            <p>
+              <Katex expression={formatAideEquationNiveau2Latex(exercice)} />
+            </p>
+          )}
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_EQUATION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formeDeveloppee ? `${MESSAGE_FORME_DEVELOPPEE} — tentative ${tentativesUtilisees}/${tentativesMax}.` : formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_EQUATION}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => texte}
+          lisible={(r) => diagnostiquerEquationExercice(exercice, r) !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.equationCercle}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) =>
+            estEquationCercleDeveloppee(exercice, r)
+              ? [t(`${MESSAGE_FORME_DEVELOPPEE}.`)]
+              : cibleEquationCercle((x0, y0, r2) => diagnostiquerEquationCercle(r, x0, y0, r2) === "correct", exercice.centre.x, exercice.centre.y, exercice.rayonCarre)
+          }
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

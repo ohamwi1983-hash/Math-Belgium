@@ -30,7 +30,7 @@ import type { ReponseIntersection } from "./verificationDistanceDroite";
 
 const POINTS_DE_BASE = 100;
 
-export const NIVEAU_AIDE_MAX_CHOIX_POINT = 1;
+export const NIVEAU_AIDE_MAX_CHOIX_POINT = 2;
 export const NIVEAU_AIDE_MAX_EQUATION_B = 2;
 export const NIVEAU_AIDE_MAX_INTERSECTION_Q = 2;
 export const NIVEAU_AIDE_MAX_DISTANCE_PQ = 2;

@@ -3,13 +3,14 @@ import type { ExerciceEquationParabole } from "../core/equationParabole.types";
 import { NIVEAU_AIDE_MAX_EQUATION } from "../moteur/sessionEquationParabole";
 import { diagnostiquerEquation } from "../moteur/verificationEquationParabole";
 import { CONSIGNE_EQUATION, CONSIGNE_GENERALE_EQUATION_PARABOLE, PLACEHOLDER_EQUATION_HORIZONTAL, PLACEHOLDER_EQUATION_VERTICAL, formatAideEquationNiveau2Latex, segmentsAideEquationNiveau1 } from "../ui/formatEquationParabole";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationParaboleGraph } from "./EquationParaboleGraph";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, l, t } from "../ui/retoursAnalytique";
+import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -55,7 +56,7 @@ export function EtapeEquationEquationParabole({ exercice, tentativesUtilisees, t
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={exercice.variante === "vertical" ? PLACEHOLDER_EQUATION_VERTICAL : PLACEHOLDER_EQUATION_HORIZONTAL}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => setTexte(normaliserMoins(e.target.value))}
         />
       </div>
 
@@ -72,18 +73,24 @@ export function EtapeEquationEquationParabole({ exercice, tentativesUtilisees, t
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_EQUATION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_EQUATION}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => texte}
+          lisible={(r) => diagnostiquerEquation(exercice, r) !== "parse_error"}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.equationParabole}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => {
+            const avec = (pp: number) => diagnostiquerEquation({ ...exercice, p: pp }, r) === "correct";
+            if (avec(exercice.p / 2) || avec(exercice.p * 2)) return [t("Le coefficient est "), l("2p"), t(", où "), l("p"), t(" est la distance (signée) du foyer à la directrice — le double de la distance du sommet au foyer.")];
+            if (avec(-exercice.p)) return [t("Le signe de "), l("p"), t(" est faux : la parabole s'ouvre du côté du foyer ("), l("p>0"), t(" vers le haut ou la droite).")];
+            return null;
+          }}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

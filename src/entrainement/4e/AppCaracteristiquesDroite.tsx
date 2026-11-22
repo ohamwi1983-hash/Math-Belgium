@@ -91,7 +91,7 @@ function formatChampLatex(champ: ReponseChamp): string {
 function formatReponseExtraction(reponse: ReponseExtraction): ReactNode {
   return (
     <Katex
-      expression={`A(${formatSaisieLatex(reponse.point.x)} ; ${formatSaisieLatex(reponse.point.y)}) \\quad \\vec{u}\\begin{pmatrix} ${formatSaisieLatex(reponse.vecteur.x)} \\\\ ${formatSaisieLatex(reponse.vecteur.y)} \\end{pmatrix}`}
+      expression={`A(${formatSaisieLatex(reponse.point.x)}\\,;\\,${formatSaisieLatex(reponse.point.y)}) \\quad \\vec{u}\\begin{pmatrix} ${formatSaisieLatex(reponse.vecteur.x)} \\\\ ${formatSaisieLatex(reponse.vecteur.y)} \\end{pmatrix}`}
     />
   );
 }

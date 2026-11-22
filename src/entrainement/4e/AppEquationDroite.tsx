@@ -133,7 +133,7 @@ function saisieExtraction(reponse: ReponseExtraction): ReactNode {
   const lisibles = [reponse.x0, reponse.y0, reponse.a, reponse.b].every(Number.isFinite);
   if (!lisibles) {
     const valeurs = [reponse.x0, reponse.y0, reponse.a, reponse.b].map(nombreSaisiLatex);
-    return <Katex expression={`(${valeurs[0]} ; ${valeurs[1]}) \\quad \\vec{u}\\,(${valeurs[2]} ; ${valeurs[3]})`} />;
+    return <Katex expression={`(${valeurs[0]}\\,;\\,${valeurs[1]}) \\quad \\vec{u}\\begin{pmatrix}${valeurs[2]}\\\\ ${valeurs[3]}\\end{pmatrix}`} />;
   }
   return <Katex expression={`\\displaystyle ${formatPointLatex(point)} \\quad \\vec{u}${formatVecteurLatex(vecteur)}`} />;
 }
@@ -263,6 +263,7 @@ export function AppEquationDroite() {
             niveauAide={etat.niveauAidePossibiliteCoefficients}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponsePossibiliteCoefficients(etat, reponse), saisiePossibiliteCoefficients(reponse))}
+            choixFige={etat.choixPossibiliteFige}
             validation={validation}
           />
         ) : (

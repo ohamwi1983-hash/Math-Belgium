@@ -7,7 +7,7 @@ import { formatEtatActuelCentreLatex, formatRayonLatex } from "./formatEquationC
  * `moteur/typesEquationCercle.ts`), toujours traversées dans cet ordre par les deux variantes.
  * "Centre" réutilise TELLE QUELLE la fonction de formatage déjà écrite pour l'ancien bloc "état
  * actuel" de l'écran 2 (`EtapeRayonEquationCercle`). "Rayon" reprend le même format littéral
- * (`R = ...`) déjà utilisé par `AppEquationCercle` pour la réponse attendue de l'écran 2 — centre
+ * (`r = ...`) déjà utilisé par `AppEquationCercle` pour la réponse attendue de l'écran 2 — centre
  * et rayon sont deux phases distinctes avec leur propre `revele` (contrairement à l'ancien bloc
  * combiné `formatEtatActuelCentreRayonLatex` de l'écran 3, qui mélangeait les deux dans un seul
  * texte : chaque ligne du récapitulatif a besoin de sa propre icône ✓/✗).
@@ -21,7 +21,7 @@ export function calculerRecapitulatifEquationCercle(etat: EtatSessionEquationCer
   }
 
   if (etat.scoreRayonExercice !== null) {
-    entrees.push({ libelle: "Rayon", estLatex: true, valeur: `\\displaystyle R = ${formatRayonLatex(exercice)}`, revele: etat.rayonRevele });
+    entrees.push({ libelle: "Rayon", estLatex: true, valeur: `\\displaystyle r = ${formatRayonLatex(exercice)}`, revele: etat.rayonRevele });
   }
 
   return entrees;

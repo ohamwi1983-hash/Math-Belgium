@@ -24,10 +24,10 @@ import type { ReponseVecteur } from "./verificationRelationsDroites";
 
 const POINTS_DE_BASE = 100;
 
-export const NIVEAU_AIDE_MAX_EXTRACTION = 1;
+export const NIVEAU_AIDE_MAX_EXTRACTION = 2;
 export const NIVEAU_AIDE_MAX_CONSTRUCTION = 2;
 export const NIVEAU_AIDE_MAX_EQUATION = 2;
-export const NIVEAU_AIDE_MAX_EXTRACTION2 = 1;
+export const NIVEAU_AIDE_MAX_EXTRACTION2 = 2;
 export const NIVEAU_AIDE_MAX_RELATION = 2;
 
 function etatInitial(exercice: ExerciceRelationsDroites): Pick<

@@ -10,7 +10,7 @@
  */
 import type { CaracteristiqueDemandee, ExerciceCaracteristiquesDroite, VarianteCaracteristiquesDroite } from "../../core/caracteristiquesDroite.types";
 import type { Composantes, Point } from "../../core/vecteur.types";
-import { ANGLES_REMARQUABLES, expliciteXDepuisPointVecteur, expliciteYDepuisPointVecteur, implicteDepuisPointVecteur, parametriqueDepuisPointVecteur, vecteurDepuisAngleOx } from "../droite/geometrieDroite";
+import { ANGLES_OBLIQUES, expliciteXDepuisPointVecteur, expliciteYDepuisPointVecteur, implicteDepuisPointVecteur, parametriqueDepuisPointVecteur, vecteurDepuisAngleOx } from "../droite/geometrieDroite";
 
 function randomInt(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));
@@ -65,18 +65,29 @@ function angleOxDepuisVecteur(v: Composantes): number {
  * quelconques (`VECTEURS_PENTE_QUELCONQUE`, deux composantes non nulles) passent dans toutes les
  * formes.
  */
-function anglesDegsPossibles(variante: VarianteCaracteristiquesDroite): number[] {
-  if (variante === "explicite_y") return ANGLES_REMARQUABLES.filter((a) => a !== 90);
-  if (variante === "explicite_x") return ANGLES_REMARQUABLES.filter((a) => a !== 0);
-  return ANGLES_REMARQUABLES;
+function anglesAxesPossibles(variante: VarianteCaracteristiquesDroite): number[] {
+  if (variante === "explicite_y") return [0];
+  if (variante === "explicite_x") return [90];
+  return [0, 90];
+}
+
+/** Part des droites horizontales ou verticales (0° ou 90°) parmi les angles remarquables (décision 4
+ * de l'audit du 4e ch. 7 : 30°, 60°, 120°, 150° ajoutés ; 0° et 90° ramenés à ≈ 20 %). */
+const PROPORTION_AXE = 0.2;
+
+function tirerAngleRemarquable(variante: VarianteCaracteristiquesDroite): number {
+  if (Math.random() < PROPORTION_AXE) {
+    const axes = anglesAxesPossibles(variante);
+    return axes[randomInt(0, axes.length - 1)]!;
+  }
+  return ANGLES_OBLIQUES[randomInt(0, ANGLES_OBLIQUES.length - 1)]!;
 }
 
 export function construireExercice(variante: VarianteCaracteristiquesDroite): ExerciceCaracteristiquesDroite {
   let vecteur: Composantes;
   let angleDeg: number;
   if (Math.random() < PROPORTION_ANGLE_REMARQUABLE) {
-    const anglesPossibles = anglesDegsPossibles(variante);
-    angleDeg = anglesPossibles[randomInt(0, anglesPossibles.length - 1)]!;
+    angleDeg = tirerAngleRemarquable(variante);
     vecteur = vecteurDepuisAngleOx(angleDeg);
   } else {
     vecteur = VECTEURS_PENTE_QUELCONQUE[randomInt(0, VECTEURS_PENTE_QUELCONQUE.length - 1)]!;
@@ -89,6 +100,9 @@ export function construireExercice(variante: VarianteCaracteristiquesDroite): Ex
   if (verticale) {
     while (point.x === 0) point = tirerPoint();
   }
+  // Pente irrationnelle (√3, √3/3…) : point pris sur Oy, pour que l'équation donnée et l'ordonnée à
+  // l'origine restent rationnelles (y = √3x + 2, comme l'exemple du cours).
+  if (!Number.isInteger(vecteur.y) || !Number.isInteger(vecteur.x)) point = { x: 0, y: point.y };
 
   const referenceImplicite = implicteDepuisPointVecteur(point, vecteur);
 

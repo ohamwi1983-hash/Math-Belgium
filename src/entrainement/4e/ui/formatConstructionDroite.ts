@@ -9,7 +9,8 @@
  */
 import type { ExerciceConstructionDroite } from "../core/constructionDroite.types";
 import type { Point } from "../core/vecteur.types";
-import { formatEquationExpliciteXLatex, formatEquationExpliciteYLatex, formatEquationImpliciteLatex, formatPointLatex, formatRepresentationParametriqueLatex } from "./formatEquationDroite";
+import { formatEquationExpliciteXLatex, formatEquationExpliciteYLatex, formatEquationImpliciteLatex, formatPointLatex, formatRepresentationParametriqueLatex, formatValeurGenereeLatex } from "./formatEquationDroite";
+import type { FragmentConsigne } from "./formatEquationDroite";
 import { nombreFr } from "./nombreFr";
 
 
@@ -68,23 +69,63 @@ export function consignePoints(exercice: ExerciceConstructionDroite): string {
 
 /** Aide niveau 1 — rappel de méthode générique, jamais une valeur réelle de l'exercice. */
 export function texteAidePointsNiveau1(exercice: ExerciceConstructionDroite): string {
+  return aidePointsNiveau1(exercice)
+    .map((f) => f.valeur)
+    .join("")
+    .replace(/\\,/g, " ")
+    .replace(/\\cdot/g, "·");
+}
+
+/** Aide niveau 1 (KaTeX) — la méthode du cours, sans valeur de l'instance. */
+export function aidePointsNiveau1(exercice: ExerciceConstructionDroite): FragmentConsigne[] {
   switch (exercice.variante) {
     case "parametrique":
-      return "Remplace t par une valeur entière de ton choix dans les deux équations pour obtenir un point (x ; y) de la droite. Recommence avec une autre valeur de t pour un second point.";
+      return [t("Remplace "), l("t"), t(" par une valeur entière de ton choix dans les deux équations : tu obtiens un point "), l("(x\\,;\\,y)"), t(" de la droite. Recommence avec une autre valeur de "), l("t"), t(" pour un second point.")];
     case "implicite":
-      return "Choisis une valeur entière pour x, résous l'équation pour trouver y (ou l'inverse si c'est plus simple). Recommence avec une autre valeur pour un second point.";
+      return [t("Choisis une valeur entière pour "), l("x"), t(", puis résous l'équation pour trouver "), l("y"), t(" (ou l'inverse si c'est plus simple). Recommence avec une autre valeur pour un second point.")];
     case "explicite_y":
-      return "Remplace x par une valeur entière, calcule y = mx + p. Si m ou p est une fraction, toutes les valeurs de x ne donnent pas un y entier : essaie-en plusieurs jusqu'à obtenir un y entier. Pour le second point, ajoute à x le dénominateur de m (y augmente alors du numérateur, il reste entier).";
+      return [t("Remplace "), l("x"), t(" par une valeur entière et calcule "), l("y=mx+p"), t(". Si "), l("m"), t(" est une fraction, choisis "), l("x"), t(" multiple de son dénominateur pour que "), l("y"), t(" soit entier ; pour le second point, ajoute ce dénominateur à "), l("x"), t(".")];
     case "explicite_x":
-      return "Remplace y par une valeur entière, calcule x = ny + q. Si n ou q est une fraction, toutes les valeurs de y ne donnent pas un x entier : essaie-en plusieurs jusqu'à obtenir un x entier. Pour le second point, ajoute à y le dénominateur de n (x augmente alors du numérateur, il reste entier).";
+      return [t("Remplace "), l("y"), t(" par une valeur entière et calcule "), l("x=ny+q"), t(". Si "), l("n"), t(" est une fraction, choisis "), l("y"), t(" de façon à rendre "), l("x"), t(" entier ; pour le second point, ajoute le dénominateur de "), l("n"), t(" à "), l("y"), t(".")];
   }
 }
 
-/** Aide niveau 2 — un exemple de point RÉELLEMENT sur la droite (toujours `exercice.point`, valable
- * quelle que soit `variante` puisque les 4 formes décrivent la même droite) — jamais la seule paire
- * imposée : la vérification (`diagnostiquerPoints`) accepte n'importe quel autre point entier. */
-export function formatAidePointsNiveau2Latex(exercice: ExerciceConstructionDroite): string {
-  return `\\text{Par exemple : } ${formatPointLatex(exercice.point)}`;
+/** Aide niveau 2 (KaTeX) — la méthode posée pour UNE valeur bien choisie, le calcul laissé à l'élève
+ * (audit 4e ch. 7, G4 : jamais un point de la réponse tout fait). */
+export function aidePointsNiveau2(exercice: ExerciceConstructionDroite): FragmentConsigne[] {
+  const { point } = exercice;
+  const v = (n: number) => (n < 0 ? `(${formatValeurGenereeLatex(n)})` : formatValeurGenereeLatex(n));
+  switch (exercice.variante) {
+    case "parametrique": {
+      const d = exercice.parametrique!;
+      return [t("Par exemple, pour "), l("t=0"), t(" puis "), l("t=1"), t(" : "), l(`x=${formatValeurGenereeLatex(d.x0)}+${v(d.a)}\\cdot 0`), t(", "), l(`y=${formatValeurGenereeLatex(d.y0)}+${v(d.b)}\\cdot 0`), t(" ; puis "), l(`x=${formatValeurGenereeLatex(d.x0)}+${v(d.a)}\\cdot 1`), t(", "), l(`y=${formatValeurGenereeLatex(d.y0)}+${v(d.b)}\\cdot 1`), t(".")];
+    }
+    case "implicite": {
+      const d = exercice.implicite!;
+      if (Math.abs(d.b) > 1e-12) return [t("Par exemple, pour "), l(`x=${formatValeurGenereeLatex(point.x)}`), t(" : "), l(`${formatValeurGenereeLatex(d.a)}\\cdot ${v(point.x)}${d.b < 0 ? "-" : "+"}${formatValeurGenereeLatex(Math.abs(d.b))}y${d.c < 0 ? "-" : "+"}${formatValeurGenereeLatex(Math.abs(d.c))}=0`), t(" : il reste à résoudre en "), l("y"), t(".")];
+      return [t("La droite est verticale : "), l("x"), t(" est le même pour tous ses points ; choisis deux valeurs de "), l("y"), t(".")];
+    }
+    case "explicite_y": {
+      const d = exercice.expliciteY!;
+      return [t("Par exemple, pour "), l(`x=${formatValeurGenereeLatex(point.x)}`), t(" : "), l(`y=${formatValeurGenereeLatex(d.m)}\\cdot ${v(point.x)}+${v(d.p)}`), t(" ; le second point : "), l(`x=${formatValeurGenereeLatex(point.x)}+${formatValeurGenereeLatex(denominateur(d.m))}`), t(".")];
+    }
+    case "explicite_x": {
+      const d = exercice.expliciteX!;
+      return [t("Par exemple, pour "), l(`y=${formatValeurGenereeLatex(point.y)}`), t(" : "), l(`x=${formatValeurGenereeLatex(d.n)}\\cdot ${v(point.y)}+${v(d.q)}`), t(" ; le second point : "), l(`y=${formatValeurGenereeLatex(point.y)}+${formatValeurGenereeLatex(denominateur(d.n))}`), t(".")];
+    }
+  }
+}
+
+function denominateur(v: number): number {
+  for (let d = 1; d <= 100; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d;
+  return 1;
+}
+
+function t(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function l(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
 }
 
 export const PLACEHOLDER_COORDONNEE = "ex : 3";
@@ -104,6 +145,9 @@ export function formatEtatActuelPointsLatex(cible1: Point, cible2: Point): strin
 /** Aide (1 seul niveau) — rappel de méthode de placement, substitué avec les vraies coordonnées de
  * `cible1` à titre d'exemple (déjà connues de l'élève via le bloc "état actuel" ci-dessus — cette
  * aide porte sur la TECHNIQUE de placement, jamais sur une donnée cachée). */
+/** Aide de tracé, niveau 1 — la technique, sans valeur. */
+export const AIDE_TRACE_NIVEAU_1 = "Pour placer un point, pars de l'origine : avance horizontalement de son abscisse (vers la droite si elle est positive), puis verticalement de son ordonnée (vers le haut si elle est positive).";
+
 export function texteAideTraceNiveau1(cible1: Point): string {
   const signe = (v: number) => nombreFr(v).replace("-", "−");
   return `Pour placer le point (${signe(cible1.x)} ; ${signe(cible1.y)}) : pars de l'origine, ${deplacement(cible1.x, "vers la droite", "vers la gauche", "ne te déplace pas horizontalement")}, puis ${deplacement(cible1.y, "vers le haut", "vers le bas", "ne te déplace pas verticalement")}. Fais de même pour le second point.`;

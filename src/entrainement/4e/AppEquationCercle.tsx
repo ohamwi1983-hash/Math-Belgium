@@ -70,7 +70,7 @@ const TITRES_ECRANS: Record<PhaseEquationCercle, string> = {
  * affichent déjà eux-mêmes le libellé « Réponse attendue » (audit chapitre 7, point 5). */
 function construireReponseAttendue(exercice: ExerciceEquationCercle, phase: PhaseEquationCercle): ReactNode {
   if (phase === "centre") return <Katex expression={formatEtatActuelCentreLatex(exercice)} />;
-  if (phase === "rayon") return <Katex expression={`R = ${formatRayonLatex(exercice)}`} />;
+  if (phase === "rayon") return <Katex expression={`r = ${formatRayonLatex(exercice)}`} />;
   return <Katex expression={formatEquationAttendueLatex(exercice)} />;
 }
 

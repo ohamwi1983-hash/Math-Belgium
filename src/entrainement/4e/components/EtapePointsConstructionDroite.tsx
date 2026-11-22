@@ -3,12 +3,13 @@ import type { ExerciceConstructionDroite } from "../core/constructionDroite.type
 import { NIVEAU_AIDE_MAX_POINTS } from "../moteur/sessionConstructionDroite";
 import { diagnostiquerPoints } from "../moteur/verificationConstructionDroite";
 import type { ReponsePoints } from "../moteur/verificationConstructionDroite";
-import { PLACEHOLDER_COORDONNEE, consigneGeneraleTrace, consignePoints, formatAidePointsNiveau2Latex, formatEnonceLatex, texteAidePointsNiveau1 } from "../ui/formatConstructionDroite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { PLACEHOLDER_COORDONNEE, aidePointsNiveau1, aidePointsNiveau2, consigneGeneraleTrace, consignePoints, formatEnonceLatex } from "../ui/formatConstructionDroite";
+import { ILLISIBLE_ANALYTIQUE, l, nombreOuNaN, nombresLisibles, surDroite, t } from "../ui/retoursAnalytique";
+import { RenduFragments } from "./RenduFragments";
+import { PiedAnalytique } from "./PiedAnalytique";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -39,12 +40,24 @@ export function EtapePointsConstructionDroite({ exercice, tentativesUtilisees, t
   const complet = [x1, y1, x2, y2].every((v) => v.trim() !== "");
 
   function construireReponse(): ReponsePoints {
-    return {
-      x1: Number(x1.replace(",", ".")),
-      y1: Number(y1.replace(",", ".")),
-      x2: Number(x2.replace(",", ".")),
-      y2: Number(y2.replace(",", ".")),
-    };
+    return { x1: nombreOuNaN(x1), y1: nombreOuNaN(y1), x2: nombreOuNaN(x2), y2: nombreOuNaN(y2) };
+  }
+
+  /** Message ciblé (jamais la réponse) : point sur la droite mais non entier, point hors de la
+   * droite, deux points confondus. */
+  function cible(r: ReponsePoints) {
+    const ref = exercice.referenceImplicite;
+    const pts = [
+      { x: r.x1, y: r.y1 },
+      { x: r.x2, y: r.y2 },
+    ];
+    for (const [i, p] of pts.entries()) {
+      const nom = i === 0 ? "premier" : "second";
+      if (surDroite(p, ref) && (!Number.isInteger(p.x) || !Number.isInteger(p.y))) return [t(`Ton ${nom} point est bien sur la droite, mais ses coordonnées ne sont pas entières : choisis une autre valeur de départ.`)];
+      if (!surDroite(p, ref)) return [t(`Ton ${nom} point n'est pas sur la droite : remplace ses coordonnées dans l'équation pour contrôler.`)];
+    }
+    if (r.x1 === r.x2 && r.y1 === r.y2) return [t("Tes deux points sont confondus : il en faut deux "), l("\\text{différents}"), t(" pour tracer la droite.")];
+    return null;
   }
 
   const apresEchec = tentativesUtilisees > 0;
@@ -97,27 +110,30 @@ export function EtapePointsConstructionDroite({ exercice, tentativesUtilisees, t
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAidePointsNiveau1(exercice)}</p>
+          <p>
+            <RenduFragments fragments={aidePointsNiveau1(exercice)} />
+          </p>
           {niveauAide >= 2 && (
             <p>
-              <Katex expression={formatAidePointsNiveau2Latex(exercice)} />
+              <RenduFragments fragments={aidePointsNiveau2(exercice)} />
             </p>
           )}
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POINTS} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_POINTS}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={construireReponse}
+          lisible={() => nombresLisibles(x1, y1, x2, y2)}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.coordonnee}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={cible}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

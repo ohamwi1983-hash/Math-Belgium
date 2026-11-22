@@ -1,7 +1,7 @@
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceCaracteristiquesDroite } from "../../core/caracteristiquesDroite.types";
-import { plusQ, q, qp } from "../../ui/corrigeChapitre3";
+import { plusQ, q, qp } from "../../ui/corrigeAnalytique1";
 import {
   COURS_CARACTERISTIQUES,
   COURS_DROITE,
@@ -93,7 +93,7 @@ function etapesExtraction(e: E): EtapeCorrection[] {
     utilise("a", utiliseA),
     calcul("a", dedoublonner(lignes)),
     resultat("a", [latex(pt("A", a)), texte(" est un point de la droite et "), latex(`\\vec{u}=${col(u)}`), texte(" un vecteur directeur.")]),
-    piege("a", e.variante === "parametrique" ? [texte("Les constantes donnent le POINT, les coefficients de t le VECTEUR : ne pas les échanger.")] : [texte("Avec un coefficient fractionnaire, on choisit une valeur multiple du dénominateur pour obtenir un point à coordonnées entières.")]),
+    piege("a", e.variante === "parametrique" ? [texte("Les constantes donnent le point, les coefficients de t le vecteur : ne pas les échanger.")] : [texte("Avec un coefficient fractionnaire, on choisit une valeur multiple du dénominateur pour obtenir un point à coordonnées entières.")]),
   ];
 }
 
@@ -105,21 +105,21 @@ function lignesAngle(e: E, m: number): LigneCalcul[] {
   const rel = exact ? "=" : "\\approx";
   const mL = qp(m).startsWith("(") || !Number.isInteger(m) ? `\\left(${q(m)}\\right)` : q(m);
   if (e.caracteristiqueDemandee === "angleOx") {
-    const L: LigneCalcul[] = [ligne(`\\tan\\alpha=m=${q(m)}`, "la pente est la tangente de l'angle avec Ox")];
+    const L: LigneCalcul[] = [ligne(`\\tan\\theta=m=${q(m)}`, "la pente est la tangente de l'angle avec Ox")];
     if (brut >= -1e-9) {
-      L.push(ligne(`\\alpha=\\tan^{-1}${mL}${rel}${deg(Math.max(0, brut))}`, exact ? "angle remarquable" : "touche tan⁻¹ de la calculatrice (mode degrés)"));
+      L.push(ligne(`\\theta=\\tan^{-1}${mL}${rel}${deg(Math.max(0, brut))}`, exact ? "angle remarquable" : "touche tan⁻¹ de la calculatrice (mode degrés)"));
     } else {
       L.push(ligne(`\\tan^{-1}${mL}${rel}${deg(brut)}<0^\\circ`, exact ? "angle remarquable, négatif" : "calculatrice (mode degrés) : angle négatif"));
-      L.push(ligne(`\\alpha=\\tan^{-1}${mL}+180^\\circ`, "une droite fait un angle compris entre 0° et 180° avec Ox"));
+      L.push(ligne(`\\theta=\\tan^{-1}${mL}+180^\\circ`, "une droite fait un angle compris entre 0° et 180° avec Ox"));
       L.push(ligne(`${rel}${deg(brut + 180)}`));
     }
-    if (!exact) L.push(ligne(`\\alpha\\approx ${Math.round(e.angleDeg)}^\\circ`, "arrondi à l'unité"));
+    if (!exact) L.push(ligne(`\\theta\\approx ${Math.round(e.angleDeg)}^\\circ`, "arrondi à l'unité"));
     return L;
   }
-  const L: LigneCalcul[] = [ligne(`\\alpha=90^\\circ-\\tan^{-1}${mL}`, "angle avec Oy : complément de l'angle tan⁻¹ m")];
+  const L: LigneCalcul[] = [ligne(`\\theta_{Oy}=90^\\circ-\\tan^{-1}${mL}`, "angle avec Oy : complément de l'angle tan⁻¹ m")];
   L.push(ligne(`${rel}90^\\circ-${brut < 0 ? `(${deg(brut)})` : deg(brut)}`, exact ? "angle remarquable" : "calculatrice (mode degrés)"));
   L.push(ligne(`${rel}${deg(90 - brut)}`));
-  if (!exact) L.push(ligne(`\\alpha\\approx ${Math.round(e.angleOyDeg)}^\\circ`, "arrondi à l'unité"));
+  if (!exact) L.push(ligne(`\\theta_{Oy}\\approx ${Math.round(e.angleOyDeg)}^\\circ`, "arrondi à l'unité"));
   return L;
 }
 
@@ -132,15 +132,15 @@ function etapesCaracteristiques(e: E): EtapeCorrection[] {
     latex("x_{\\vec{u}}=0"),
     texte(", la droite est verticale : ni pente ni ordonnée à l'origine, angle 90° avec Ox (0° avec Oy). Sinon "),
     latex("m=\\dfrac{y_{\\vec{u}}}{x_{\\vec{u}}}"),
-    ...(demande === "angleOx" ? [texte(", "), latex("\\tan\\alpha=m"), texte(" avec α entre 0° et 180°")] : demande === "angleOy" ? [texte(", angle avec Oy "), latex("\\alpha=90^\\circ-\\tan^{-1}m")] : []),
+    ...(demande === "angleOx" ? [texte(", "), latex("\\tan\\theta=m"), texte(" avec θ entre 0° et 180°")] : demande === "angleOy" ? [texte(", angle avec Oy "), latex("\\theta_{Oy}=90^\\circ-\\tan^{-1}m")] : []),
     texte(" et "),
     latex("p=y_A-m\\cdot x_A"),
     texte(` ${COURS_CARACTERISTIQUES}.`),
   ];
   if (e.verticale) {
     const L: LigneCalcul[] = [ligne(`x_{\\vec{u}}=0`, "la droite est verticale : la pente n'existe pas")];
-    if (demande === "angleOx") L.push(ligne(`\\alpha=90^\\circ`, "une verticale est perpendiculaire à Ox"));
-    if (demande === "angleOy") L.push(ligne(`\\alpha=0^\\circ`, "une verticale est parallèle à Oy"));
+    if (demande === "angleOx") L.push(ligne(`\\theta=90^\\circ`, "une verticale est perpendiculaire à Ox"));
+    if (demande === "angleOy") L.push(ligne(`\\theta_{Oy}=0^\\circ`, "une verticale est parallèle à Oy"));
     return [
       utilise("b", utiliseB),
       calcul("b", L),
@@ -177,7 +177,7 @@ function etapesCaracteristiques(e: E): EtapeCorrection[] {
       : demande === "angleOx"
         ? [texte("Quand la pente est négative, la calculatrice donne un angle négatif : on lui ajoute 180° pour obtenir l'angle de la droite, compris entre 0° et 180°.")]
         : demande === "angleOy"
-          ? [texte("L'angle avec Oy n'est pas l'angle avec Ox : "), latex("\\alpha=90^\\circ-\\tan^{-1}m"), texte(".")]
+          ? [texte("L'angle avec Oy n'est pas l'angle avec Ox : "), latex("\\theta_{Oy}=90^\\circ-\\tan^{-1}m"), texte(".")]
           : [texte("La pente est "), latex("\\dfrac{y_{\\vec{u}}}{x_{\\vec{u}}}"), texte(" (variation de y sur variation de x), pas son inverse.")];
   return [utilise("b", utiliseB), ...blocs, resultat("b", [latex(formatCaracteristiquesAttenduesLatex(e))]), ...verif, piege("b", pieges)];
 }

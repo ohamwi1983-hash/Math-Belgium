@@ -95,6 +95,7 @@ export function GrilleAdaptative({
   pasFixe,
   etiquettesLisibles,
   etiquettesYMin,
+  pointsAEviter,
 }: {
   largeur: number;
   hauteur: number;
@@ -148,6 +149,10 @@ export function GrilleAdaptative({
    * cumulés ne sont jamais négatifs ; la marge sous l'axe (place des nombres X) ne porte aucune
    * graduation négative. */
   etiquettesYMin?: number;
+  /** Points marqués (coordonnées) : un nombre de graduation qui toucherait l'un d'eux n'est pas écrit
+   * (sa ligne de grille reste tracée) — jamais un nombre caché sous un point (audit 4e ch. 7, G5 :
+   * gen43, gen49, gen51). Absent par défaut (comportement inchangé). */
+  pointsAEviter?: { x: number; y: number }[];
 }) {
   const { viewTransform } = useTransformContext();
   const xSpan = largeur / viewTransform[0];
@@ -176,6 +181,7 @@ export function GrilleAdaptative({
           uneEtiquetteXSurDeux={uneEtiquetteXSurDeux}
           etiquettesLisibles={etiquettesLisibles}
           etiquettesYMin={etiquettesYMin}
+          pointsAEviter={pointsAEviter}
         />
       )}
     </Fragment>
@@ -230,6 +236,7 @@ function GraduationsFlottantes({
   uneEtiquetteXSurDeux = false,
   etiquettesLisibles = false,
   etiquettesYMin,
+  pointsAEviter = [],
 }: {
   largeur: number;
   hauteur: number;
@@ -242,6 +249,8 @@ function GraduationsFlottantes({
   etiquettesLisibles?: boolean;
   /** Voir `etiquettesYMin` de `GrilleAdaptative`. */
   etiquettesYMin?: number;
+  /** Voir `pointsAEviter` de `GrilleAdaptative`. */
+  pointsAEviter?: { x: number; y: number }[];
   /** Masque UNIQUEMENT les graduations flottantes de l'axe Y (jamais celles de l'axe X) — même
    * convention et même appelant que `masquerEtiquettesY` de `GrilleAdaptative` ci-dessus
    * (`BoiteMoustachesGraph.tsx` : axe Y jamais une vraie grandeur, juste un séparateur de ligne).
@@ -327,14 +336,26 @@ function GraduationsFlottantes({
         });
       });
 
+  // Option `pointsAEviter` : un nombre qui toucherait un point marqué (disque d'environ 6 px) n'est pas écrit.
+  const pointsEcran = pointsAEviter.map((p) => vec.transform([p.x, p.y], matrice));
+  const libreDesPoints = (cx: number, cy: number, demiLargeur: number, ancre: "middle" | "start" | "end") => {
+    const [g, d] = ancre === "middle" ? [cx - demiLargeur, cx + demiLargeur] : ancre === "start" ? [cx, cx + 2 * demiLargeur] : [cx - 2 * demiLargeur, cx];
+    return !pointsEcran.some(([px, py]) => px + 7 > g && px - 7 < d && Math.abs(py - cy) < 0.6 * taillePolice + 7);
+  };
+  const ticksXVisibles = pointsEcran.length === 0 ? ticksX : ticksX.filter((x) => libreDesPoints(vec.transform([x, 0], matrice)[0], yNombresX, (largeurEtiquetteEm(formatEtiquette(x)) * taillePolice) / 2, "middle"));
+  const ticksYVisibles =
+    pointsEcran.length === 0
+      ? ticksYEcrits
+      : ticksYEcrits.filter((y) => libreDesPoints(xNombresY, vec.transform([0, y], matrice)[1], (largeurEtiquetteEm(formatEtiquette(y)) * taillePolice) / 2, ancrageNombresY === "end" ? "end" : "start"));
+
   return (
     <g ref={groupRef} className="mafs-shadow">
-      {ticksX.map((x) => (
+      {ticksXVisibles.map((x) => (
         <text key={`x${x}`} x={vec.transform([x, 0], matrice)[0]} y={yNombresX} textAnchor="middle" dominantBaseline="central" style={{ fill: "var(--mafs-origin-color)" }}>
           {formatEtiquette(x)}
         </text>
       ))}
-      {ticksYEcrits.map((y) => (
+      {ticksYVisibles.map((y) => (
         <text key={`y${y}`} x={xNombresY} y={vec.transform([0, y], matrice)[1]} textAnchor={ancrageNombresY} dominantBaseline="central" style={{ fill: "var(--mafs-origin-color)" }}>
           {formatEtiquette(y)}
         </text>

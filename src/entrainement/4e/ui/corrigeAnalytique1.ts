@@ -1,6 +1,7 @@
 import { latex, ligne, texte } from "../../export/corrigeTableau";
 import type { FragmentConsigne, LigneCalcul } from "../../export/genererFeuilleExercices";
-import { moinsH, mono, nombreTexte, plusQ, q, qp, racineCarreeLatex, rationnel, sansDoublons, somme } from "./corrigeChapitre3";
+import { moinsH as moinsHRat, nombreTexte, plusQ as plusQRat, q as qRat, qp as qpRat, racineCarreeLatex, rationnel, sansDoublons } from "./corrigeChapitre3";
+import { estMixte3, latexRadical3, parties3 } from "./radical3";
 
 /**
  * Briques du corrigé détaillé « comme au tableau » des droites du chapitre 7 de 4e (« Géométrie
@@ -22,6 +23,67 @@ export interface D {
   a: number;
   b: number;
   c: number;
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Nombres exacts : fractions ET p + r√3 (angles de 30°, 60°, 120°, 150° — décision 4 de l'audit du
+ * 4e ch. 7). Pour une valeur rationnelle, mêmes écritures que `corrigeChapitre3` (corrigés des
+ * autres instances identiques).
+ * ------------------------------------------------------------------------------------------- */
+
+/** Nombre exact en LaTeX (entier, `\dfrac`, « 2-3\sqrt{3} »). */
+export function q(valeur: number): string {
+  return latexRadical3(valeur) ?? qRat(valeur);
+}
+
+/** Même nombre, entre parenthèses s'il est négatif ou s'il est une somme (« (2-\sqrt{3}) »). */
+export function qp(valeur: number): string {
+  const r = latexRadical3(valeur);
+  if (r === null) return qpRat(valeur);
+  return valeur < 0 || estMixte3(valeur) ? `(${r})` : r;
+}
+
+/** « +3 », « -\dfrac{1}{2} », « +2-\sqrt{3} » (rien si nul). */
+export function plusQ(valeur: number): string {
+  const parts = parties3(valeur);
+  if (parts === null) return plusQRat(valeur);
+  const rad = latexRadical3(parts.radicale) as string;
+  return `${plusQRat(parts.rationnelle)}${rad.startsWith("-") ? rad : `+${rad}`}`;
+}
+
+/** Monôme en tête : « 3x », « -x », « \sqrt{3}x », « (2-\sqrt{3})x » (partie vide : le nombre). */
+export function mono(coef: number, partie = ""): string {
+  const c = net(coef);
+  if (partie === "") return q(c);
+  if (c === 1) return partie;
+  if (c === -1) return `-${partie}`;
+  return estMixte3(c) ? `(${q(c)})${partie}` : `${q(c)}${partie}`;
+}
+
+/** Somme de monômes `[coef, partie]` (nuls omis, signes fusionnés) ; une constante p + r√3 donne
+ * deux termes. */
+export function somme(termes0: [number, string][]): string {
+  const termes: [number, string][] = termes0.flatMap(([c0, partie]): [number, string][] => {
+    const parts = partie === "" ? parties3(c0) : null;
+    return parts !== null && Math.abs(parts.rationnelle) > 1e-12 ? [[parts.rationnelle, ""], [parts.radicale, ""]] : [[c0, partie]];
+  });
+  let s = "";
+  for (const [c0, partie] of termes) {
+    const c = net(c0);
+    if (c === 0) continue;
+    if (s === "") s = mono(c, partie);
+    else if (estMixte3(c)) s += `+${mono(c, partie)}`;
+    else s += c > 0 ? `+${mono(c, partie)}` : `-${mono(-c, partie)}`;
+  }
+  return s === "" ? "0" : s;
+}
+
+/** « x-3 », « x+\dfrac{1}{2} », « x-(2-\sqrt{3}) ». */
+export function moinsH(h: number, x = "x"): string {
+  if (estMixte3(h)) return `${x}-(${q(h)})`;
+  const r = latexRadical3(h);
+  if (r !== null) return r.startsWith("-") ? `${x}+${r.slice(1)}` : `${x}-${r}`;
+  return moinsHRat(h, x);
 }
 
 export const COURS_DROITE = "(cours, § 1)";
@@ -86,6 +148,8 @@ export function equation(d: D): string {
 
 /** Coefficients entiers divisés par leur PGCD ; `signe` : premier coefficient non nul rendu positif. */
 export function simplifiee(d: D, signe = false): { d: D; k: number } {
+  // Coefficients non entiers (√3, fractions) : aucune simplification par un PGCD.
+  if (![d.a, d.b, d.c].every((v) => Math.abs(v - Math.round(v)) < 1e-9)) return { d, k: 1 };
   const g = pgcd(pgcd(Math.round(Math.abs(d.a)), Math.round(Math.abs(d.b))), Math.round(Math.abs(d.c))) || 1;
   const s = signe && (d.a < 0 || (d.a === 0 && d.b < 0)) ? -1 : 1;
   const k = s * g;
@@ -118,7 +182,9 @@ export function lignesMultipleEntier(lu: P, retenu: P): LigneCalcul[] {
   if (Math.abs(lu.x - retenu.x) < 1e-9 && Math.abs(lu.y - retenu.y) < 1e-9) return [];
   const k = Math.abs(lu.x) > 1e-12 ? retenu.x / lu.x : retenu.y / lu.y;
   const entiers = Number.isInteger(lu.x) && Number.isInteger(lu.y);
-  return [ligne(`${k === -1 ? "-" : q(k)}${col(lu)}=${col(retenu)}`, `on multiplie par ${nombreTexte(k)} : même direction${entiers ? "" : ", composantes entières"}`)];
+  const suite = `même direction${entiers ? "" : Number.isInteger(retenu.x) && Number.isInteger(retenu.y) ? ", composantes entières" : ", sans fraction"}`;
+  if (latexRadical3(k) !== null) return [ligne(`${qp(k)}${col(lu)}=${col(retenu)}`, [texte("on multiplie par "), latex(q(k)), texte(` : ${suite}`)])];
+  return [ligne(`${k === -1 ? "-" : q(k)}${col(lu)}=${col(retenu)}`, `on multiplie par ${nombreTexte(k)} : ${suite}`)];
 }
 
 /* ---------------------------------------------------------------------------------------------

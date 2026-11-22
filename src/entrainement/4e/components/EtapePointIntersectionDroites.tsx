@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { ExerciceIntersectionDroites } from "../core/intersectionDroites.types";
 import { NIVEAU_AIDE_MAX_POINT } from "../moteur/sessionIntersectionDroites";
 import { diagnostiquerPoint, type ReponsePoint } from "../moteur/verificationIntersectionDroites";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import {
   CONSIGNE_GENERALE_INTERSECTION,
   PLACEHOLDER_COORDONNEE_INTERSECTION,
@@ -12,12 +11,12 @@ import {
   segmentsConsignePoint,
   texteAidePointNiveau1,
 } from "../ui/formatIntersectionDroites";
-import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
+import { ILLISIBLE_ANALYTIQUE, l, nombreOuNaN, nombresLisibles, surDroite, t as txt } from "../ui/retoursAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -55,8 +54,19 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
 
   /** Fraction `p/q` acceptée (audit chapitre 7, point 40 : le point d'intersection peut désormais
    * être fractionnaire) — `NaN` pour un champ illisible (`parse_error`). */
-  function lire(texte: string): number {
-    return parserNombreOuFraction(texte) ?? Number.NaN;
+  const lire = nombreOuNaN;
+
+  /** Message ciblé (jamais la réponse) : le piège « s'arrêter à t » (valeur du paramètre donnée
+   * comme coordonnée), point juste sur une seule des deux droites. */
+  function cible(r: ReponsePoint) {
+    const P = exercice.point!;
+    if (exercice.tAttendu !== null && r.t !== null && Math.abs(r.t - exercice.tAttendu) < 1e-9 && (Math.abs(r.point.x - r.t) < 1e-9 || Math.abs(r.point.y - r.t) < 1e-9) && !(Math.abs(r.point.x - P.x) < 1e-9 && Math.abs(r.point.y - P.y) < 1e-9)) {
+      return [txt("La valeur de "), l("t"), txt(" n'est pas une coordonnée : remplace-la dans les équations paramétriques pour obtenir le point.")];
+    }
+    const sur1 = surDroite(r.point, exercice.d1.implicite);
+    const sur2 = surDroite(r.point, exercice.d2.implicite);
+    if (sur1 !== sur2) return [txt("Ton point est sur "), l(sur1 ? "d_1" : "d_2"), txt(" mais pas sur "), l(sur1 ? "d_2" : "d_1"), txt(" : le point d'intersection vérifie les deux équations.")];
+    return null;
   }
 
   function construireReponse(): ReponsePoint {
@@ -69,7 +79,6 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
 
   const apresEchec = tentativesUtilisees > 0;
   const statut = apresEchec ? diagnostiquerPoint(exercice, construireReponse()) : undefined;
-  const statutGlobal = statut ? (statut.t === "parse_error" || statut.s === "parse_error" || statut.point === "parse_error" ? "parse_error" : statut.t === "not_equivalent" || statut.s === "not_equivalent" || statut.point === "not_equivalent" ? "not_equivalent" : "correct") : undefined;
   const [ligneD1, ligneD2] = formatLignesEnonce(exercice);
 
   return (
@@ -153,18 +162,19 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POINT} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse(), { t, s, x, y })}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_POINT}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={() => construireReponse()}
+          lisible={() => nombresLisibles(x, y, ...(besoinT ? [t] : []), ...(besoinS ? [s] : []))}
+          onValider={(r) => onValider(r, { t, s, x, y })}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.coordonnee}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={cible}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

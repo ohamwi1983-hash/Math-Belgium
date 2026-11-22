@@ -3,15 +3,14 @@ import type { ExerciceEquationDroite } from "../core/equationDroite.types";
 import { NIVEAU_AIDE_MAX_EXTRACTION } from "../moteur/sessionEquationDroite";
 import { diagnostiquerExtraction } from "../moteur/verificationEquationDroite";
 import type { ReponseExtraction } from "../moteur/verificationEquationDroite";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, consigneExtraction, formatAideExtractionNiveau2Latex, formatEnonceLatex, segmentsAideExtractionNiveau1 } from "../ui/formatEquationDroite";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { ILLISIBLE_ANALYTIQUE, cibleVecteurDirecteur, l, nombreOuNaN, nombresLisibles, surDroite, t } from "../ui/retoursAnalytique";
 import { ConsigneGeneraleEquationDroite } from "./ConsigneGeneraleEquationDroite";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
@@ -41,19 +40,24 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
 
   const complet = [x0, y0, a, b].every((v) => v.trim() !== "");
 
-  /** Fraction « p/q » acceptée (un vecteur directeur colinéaire peut avoir des composantes
-   * fractionnaires, ex. (1 ; 1/2)) — illisible → NaN, donc `parse_error` côté vérification. */
-  function nombre(texte: string): number {
-    return parserNombreOuFraction(texte) ?? Number.NaN;
-  }
-
+  /** Fraction « p/q », racine « √3 » acceptées (un vecteur directeur colinéaire peut avoir des
+   * composantes fractionnaires ou irrationnelles) ; une saisie illisible n'est jamais transmise. */
   function construireReponse(): ReponseExtraction {
-    return { x0: nombre(x0), y0: nombre(y0), a: nombre(a), b: nombre(b) };
+    return { x0: nombreOuNaN(x0), y0: nombreOuNaN(y0), a: nombreOuNaN(a), b: nombreOuNaN(b) };
   }
 
   const apresEchec = tentativesUtilisees > 0;
   const statut = apresEchec ? diagnostiquerExtraction(exercice, construireReponse()) : undefined;
   const erronee = apresEchec && statut !== "correct";
+
+  /** Message ciblé (jamais la réponse) : vecteur normal pris pour directeur, composantes échangées,
+   * point hors de la droite. */
+  function cible(r: ReponseExtraction) {
+    const vecteur = cibleVecteurDirecteur({ x: r.a, y: r.b }, exercice.vecteur);
+    if (vecteur) return vecteur;
+    if (!surDroite({ x: r.x0, y: r.y0 }, exercice.referenceImplicite)) return [t("Ton point n'est pas sur la droite : prends un point donné dans l'énoncé, comme "), l("A"), t(".")];
+    return null;
+  }
 
   return (
     <div>
@@ -133,18 +137,19 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_EXTRACTION} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={NIVEAU_AIDE_MAX_EXTRACTION}
+          onActiverAide={onActiverAide}
+          complet={complet}
+          reponse={construireReponse}
+          lisible={() => nombresLisibles(x0, y0, a, b)}
+          onValider={onValider}
+          texteIllisible={() => (nombresLisibles(x0, y0) ? ILLISIBLE_ANALYTIQUE.composante : ILLISIBLE_ANALYTIQUE.coordonnee)}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={cible}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

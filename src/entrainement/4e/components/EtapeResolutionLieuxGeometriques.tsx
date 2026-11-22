@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { ExerciceLieuxGeometriques } from "../core/lieuxGeometriques.types";
 import { diagnostiquerResolution } from "../moteur/verificationLieuxGeometriques";
 import type { ReponseResolutionLieuxGeometriques } from "../moteur/verificationLieuxGeometriques";
-import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import {
   CONSIGNE_GENERALE_RESOLUTION,
   LIBELLE_AUCUN,
@@ -11,12 +10,12 @@ import {
   formatQuadratiqueSubstitutionLatex,
   segmentsAideResolutionNiveau1,
 } from "../ui/formatLieuxGeometriques";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { ILLISIBLE_ANALYTIQUE, nombreOuNaN, t } from "../ui/retoursAnalytique";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
+import { PiedAnalytique } from "./PiedAnalytique";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Choix = "aucun" | "auMoinsUn";
@@ -31,6 +30,8 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseResolutionLieuxGeometriques) => void;
+  /** Choix « Aucun / Au moins un » déjà jugé par le moteur (une fois), `null` tant qu'il ne l'est pas. */
+  choixFige: { choisi: boolean; correct: boolean } | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -41,8 +42,12 @@ interface Props {
  * d'intersection en saisie add-as-needed (couvre 1 ou 2 points sans distinction préalable imposée
  * par l'interface) — même patron "Pas de.../Au moins un(e)..." que `EtapeRacinesFlexibles.tsx`,
  * adapté à des PAIRES x/y plutôt qu'une liste de valeurs isolées. */
-export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
-  const [choix, setChoix] = useState<Choix | null>(null);
+export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, choixFige, validation }: Props) {
+  const [choixLibre, setChoix] = useState<Choix | null>(null);
+  /** Choix affiché : libre tant qu'il n'est pas jugé ; ensuite le bon (révélé s'il était faux). */
+  const bonChoix: Choix = exercice.nombrePoints !== 0 ? "auMoinsUn" : "aucun";
+  const choix: Choix | null = choixFige ? (choixFige.correct ? (choixFige.choisi ? "auMoinsUn" : "aucun") : bonChoix) : choixLibre;
+  const choixBloque = !!validation || choixFige !== null;
   const [points, setPoints] = useState<{ x: string; y: string }[]>([{ x: "", y: "" }]);
   const apresEchec = tentativesUtilisees > 0;
 
@@ -69,8 +74,9 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
     if (choix === "aucun") return { auMoinsUn: false, points: [] };
     if (choix === "auMoinsUn") {
       if (points.some((p) => p.x.trim() === "" || p.y.trim() === "")) return null;
-      const nombres = points.map((p) => ({ x: parserNombreOuFraction(p.x) ?? Number.NaN, y: parserNombreOuFraction(p.y) ?? Number.NaN }));
-      if (nombres.some((p) => !Number.isFinite(p.x) || !Number.isFinite(p.y))) return null;
+      // Coordonnée illisible : la réponse reste « complète » (« Valider » affiche le message
+      // d'illisible, sans tentative — jamais un bouton grisé muet).
+      const nombres = points.map((p) => ({ x: nombreOuNaN(p.x), y: nombreOuNaN(p.y) }));
       return { auMoinsUn: true, points: nombres };
     }
     return null;
@@ -84,13 +90,19 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
       <p className="prompt-text">{CONSIGNE_GENERALE_RESOLUTION}</p>
 
       <div className="options-grid-compact">
-        <button type="button" className={`btn${choix === "aucun" ? " toggle-active" : ""}`} onClick={() => choisir("aucun")}>
+        <button type="button" disabled={choixBloque} className={`btn${choix === "aucun" ? " toggle-active" : ""}`} onClick={() => choisir("aucun")}>
           {LIBELLE_AUCUN}
         </button>
-        <button type="button" className={`btn${choix === "auMoinsUn" ? " toggle-active" : ""}`} onClick={() => choisir("auMoinsUn")}>
+        <button type="button" disabled={choixBloque} className={`btn${choix === "auMoinsUn" ? " toggle-active" : ""}`} onClick={() => choisir("auMoinsUn")}>
           {LIBELLE_AU_MOINS_UN}
         </button>
       </div>
+
+      {choixFige !== null && !choixFige.correct && !validation && (
+        <p className="alert-error" role="status">
+          <span>Ce n'était pas le bon choix : les deux lieux ont au moins un point commun. Donne maintenant ce ou ces points.</span>
+        </p>
+      )}
 
       {choix === "auMoinsUn" && (
         <div className="liste-morceaux contenu-conditionnel">
@@ -150,18 +162,19 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
         </div>
       )}
       {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={2} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={reponse === null} onClick={() => reponse !== null && onValider(reponse)}>
-          Valider
-        </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
-        )}
-        </>
+        <PiedAnalytique
+          niveauAide={niveauAide}
+          niveauAideMax={2}
+          onActiverAide={onActiverAide}
+          complet={reponse !== null}
+          reponse={() => reponse as ReponseResolutionLieuxGeometriques}
+          lisible={(r) => r.points.every((pt) => Number.isFinite(pt.x) && Number.isFinite(pt.y))}
+          onValider={onValider}
+          texteIllisible={ILLISIBLE_ANALYTIQUE.coordonnee}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          cible={(r) => (r.points.length !== exercice.points.length && r.points.length > 0 ? [t(`Le nombre de points ne convient pas : compte les solutions de l'équation obtenue après substitution.`)] : null)}
+        />
       )}
       {validation && <ValidationEcran {...validation} />}
     </div>

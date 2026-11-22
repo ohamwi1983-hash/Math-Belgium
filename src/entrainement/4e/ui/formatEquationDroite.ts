@@ -12,7 +12,7 @@
 import type { FormeSortieDroite } from "../core/droite.types";
 import type { ExerciceEquationDroite } from "../core/equationDroite.types";
 import type { Composantes, Point } from "../core/vecteur.types";
-import { formatSommeTermes } from "./formatEquation";
+import { estMixte3, latexRadical3, parties3 } from "./radical3";
 import { formatFractionIrreductible } from "./formatFraction";
 
 // ============================================================================
@@ -28,6 +28,9 @@ import { formatFractionIrreductible } from "./formatFraction";
 
 /** Magnitude (toujours ≥0) en fraction irréductible si non entière, jamais en décimal. */
 function formatMagnitudeGenereeLatex(abs: number): string {
+  // Angles de 30°, 60°, 120°, 150° (audit 4e ch. 7, décision 4) : valeur exacte p + r√3.
+  const radical = latexRadical3(abs, false);
+  if (radical !== null) return radical;
   const texteFraction = formatFractionIrreductible(abs);
   const [numerateur, denominateur] = texteFraction.split("/");
   return denominateur === undefined ? numerateur : `\\frac{${numerateur}}{${denominateur}}`;
@@ -36,6 +39,9 @@ function formatMagnitudeGenereeLatex(abs: number): string {
 /** Valeur signée autonome (ex. une coordonnée de point/vecteur affichée seule) — jamais un double
  * signe, jamais de décimal. */
 export function formatValeurGenereeLatex(valeur: number): string {
+  if (Math.abs(valeur) < 1e-12) return "0";
+  const radical = latexRadical3(valeur, false);
+  if (radical !== null) return radical;
   return valeur < 0 ? `-${formatMagnitudeGenereeLatex(-valeur)}` : formatMagnitudeGenereeLatex(valeur);
 }
 
@@ -43,7 +49,7 @@ export function formatValeurGenereeLatex(valeur: number): string {
  * ne jamais afficher deux signes côte à côte comme « m·−4 » (audit chapitre 7, point 7). */
 function formatFacteurLatex(valeur: number): string {
   const texteValeur = formatValeurGenereeLatex(valeur);
-  return valeur < 0 ? `(${texteValeur})` : texteValeur;
+  return valeur < 0 || estMixte3(valeur) ? `(${texteValeur})` : texteValeur;
 }
 
 /** Même principe que `formatSommeTermes` (`ui/formatEquation.ts`, partagée par les exercices 1-6,
@@ -52,13 +58,26 @@ function formatFacteurLatex(valeur: number): string {
  * chapitre 6 a besoin de cette variante (pente/ordonnée à l'origine d'une droite explicite,
  * potentiellement non entières), jamais les exercices 1-6. Coefficient nul omis, coefficient ±1
  * jamais affiché littéralement, jamais de double signe — mêmes 3 règles que `formatSommeTermes`. */
-export function formatSommeTermesGeneree(termes: { valeur: number; suffixe: string }[]): string {
+export function formatSommeTermesGeneree(termes0: { valeur: number; suffixe: string }[]): string {
+  // Constante p + r√3 (angles de 30°, 60°…) : écrite en deux termes « + p + r√3 », jamais un
+  // facteur ambigu ; coefficient mixte devant une variable : entre parenthèses (ne se produit pas).
+  const termes = termes0.flatMap((t) => {
+    const parties = parties3(t.valeur);
+    if (t.suffixe === "" && parties !== null && Math.abs(parties.rationnelle) > 1e-12) {
+      return [
+        { valeur: parties.rationnelle, suffixe: "" },
+        { valeur: parties.radicale, suffixe: "" },
+      ];
+    }
+    return [{ ...t, valeur: Math.abs(t.valeur) < 1e-12 ? 0 : t.valeur }];
+  });
   const nonNuls = termes.filter((t) => t.valeur !== 0);
   if (nonNuls.length === 0) return "0";
   return nonNuls
     .map((terme, index) => {
       const abs = Math.abs(terme.valeur);
-      const corps = terme.suffixe !== "" && abs === 1 ? terme.suffixe : `${formatMagnitudeGenereeLatex(abs)}${terme.suffixe}`;
+      const magnitude = formatMagnitudeGenereeLatex(abs);
+      const corps = terme.suffixe !== "" && abs === 1 ? terme.suffixe : terme.suffixe !== "" && estMixte3(abs) ? `(${magnitude})${terme.suffixe}` : `${magnitude}${terme.suffixe}`;
       if (index === 0) return terme.valeur < 0 ? `-${corps}` : corps;
       return `${terme.valeur < 0 ? "-" : "+"} ${corps}`;
     })
@@ -69,7 +88,7 @@ export function formatSommeTermesGeneree(termes: { valeur: number; suffixe: stri
  * `formatVecteurLatex` ci-dessous, notation matricielle colonne, correction transversale
  * chapitre 6, point 5). */
 export function formatPointLatex(p: Point): string {
-  return `(${formatValeurGenereeLatex(p.x)} ; ${formatValeurGenereeLatex(p.y)})`;
+  return `(${formatValeurGenereeLatex(p.x)}\\,;\\,${formatValeurGenereeLatex(p.y)})`;
 }
 
 /** Composantes d'un vecteur — notation matricielle COLONNE (2×1), jamais la notation en ligne
@@ -95,7 +114,8 @@ export function formatDomaineParametreLatex(lettre = "t"): string {
  * implicite affichée (énoncé, état actuel, révélation, aide).
  */
 export function formatEquationImpliciteLatex(a: number, b: number, c: number): string {
-  return `${formatSommeTermes([
+  // Fraction-aware ET √3-aware (même sortie que `formatSommeTermes` pour des entiers).
+  return `${formatSommeTermesGeneree([
     { valeur: a, suffixe: "x" },
     { valeur: b, suffixe: "y" },
     { valeur: c, suffixe: "" },
@@ -149,9 +169,9 @@ export function formatEnonceLatex(exercice: ExerciceEquationDroite): string {
     case "point_vecteur":
       return `A${formatPointLatex(d.point)} \\quad \\vec{u}${formatVecteurLatex(d.vecteur)}`;
     case "angle_ox":
-      return `A${formatPointLatex(d.point)} \\quad \\alpha = ${d.angleDeg}^\\circ \\text{ (avec } Ox\\text{)}`;
+      return `A${formatPointLatex(d.point)} \\quad \\theta = ${d.angleDeg}^\\circ \\text{ (avec } Ox\\text{)}`;
     case "angle_oy":
-      return `A${formatPointLatex(d.point)} \\quad \\alpha = ${d.angleDeg}^\\circ \\text{ (avec } Oy\\text{)}`;
+      return `A${formatPointLatex(d.point)} \\quad \\theta_{Oy} = ${d.angleDeg}^\\circ`;
     case "pente":
       return `A${formatPointLatex(d.point)} \\quad m = ${d.pente}`;
   }
@@ -218,9 +238,9 @@ function fragmentsComplementDonnee(donnees: ExerciceEquationDroite["donnees"]): 
     case "pente":
       return [texte("et de pente "), latex("m")];
     case "angle_ox":
-      return [texte("et faisant un angle "), latex("\\alpha"), texte(" avec l'axe "), latex("Ox")];
+      return [texte("et faisant un angle "), latex("\\theta"), texte(" avec l'axe "), latex("Ox")];
     case "angle_oy":
-      return [texte("et faisant un angle "), latex("\\alpha"), texte(" avec l'axe "), latex("Oy")];
+      return [texte("et faisant un angle "), latex("\\theta_{Oy}"), texte(" avec l'axe "), latex("Oy")];
   }
 }
 
@@ -247,7 +267,7 @@ export function consigneExtraction(exercice: ExerciceEquationDroite): string {
     case "angle_ox":
       return "Détermine un point et un vecteur directeur de cette droite à partir de l'angle donné avec Ox.";
     case "angle_oy":
-      return "Détermine un point et un vecteur directeur de cette droite à partir de l'angle donné avec Oy (rappel : angle avec Ox = 90° − angle avec Oy, à ramener entre 0° et 180°).";
+      return "Détermine un point et un vecteur directeur de cette droite à partir de l'angle donné avec Oy.";
     case "pente":
       return "Détermine un point et un vecteur directeur de cette droite à partir de sa pente.";
   }
@@ -272,44 +292,36 @@ export function segmentsAideExtractionNiveau1(exercice: ExerciceEquationDroite):
       return [texte("Le point et le vecteur directeur sont déjà donnés directement dans l'énoncé.")];
     case "angle_ox":
       return [
-        texte("Le vecteur directeur d'une droite faisant un angle "),
-        latex("\\alpha"),
+        texte("Une droite qui fait un angle "),
+        latex("\\theta"),
         texte(" avec "),
         latex("Ox"),
-        texte(" a pour composantes "),
-        latex("x_{\\vec{u}} = 1"),
-        texte(" et "),
-        latex("y_{\\vec{u}} = \\tan\\alpha"),
-        texte(" — ou "),
-        latex("x_{\\vec{u}} = 0"),
-        texte(", "),
-        latex("y_{\\vec{u}} = 1"),
-        texte(" si "),
-        latex("\\alpha = 90^\\circ"),
+        texte(" a pour vecteur directeur "),
+        latex("\\begin{pmatrix}1\\\\ \\tan\\theta\\end{pmatrix}"),
+        texte(" (sa pente est "),
+        latex("\\tan\\theta"),
+        texte(") ; pour "),
+        latex("\\theta = 90^\\circ"),
+        texte(", la droite est verticale : "),
+        latex("\\begin{pmatrix}0\\\\ 1\\end{pmatrix}"),
         texte("."),
       ];
     case "angle_oy":
       return [
         texte("L'angle avec "),
         latex("Oy"),
-        texte(" et l'angle avec "),
-        latex("Ox"),
-        texte(" sont complémentaires : "),
-        latex("\\theta_{Ox} = 90^\\circ - \\theta_{Oy}"),
-        texte(" (ajoute 180° si le résultat est négatif). Le vecteur directeur d'une droite faisant un angle "),
-        latex("\\alpha"),
+        texte(" se mesure à partir du demi-axe positif de "),
+        latex("Oy"),
+        texte(", dans le sens des aiguilles d'une montre : une droite qui fait un angle "),
+        latex("\\theta_{Oy}"),
         texte(" avec "),
         latex("Oy"),
-        texte(" a donc pour composantes "),
-        latex("x_{\\vec{u}} = \\tan\\alpha"),
-        texte(" et "),
-        latex("y_{\\vec{u}} = 1"),
-        texte(" — ou "),
-        latex("x_{\\vec{u}} = 1"),
-        texte(", "),
-        latex("y_{\\vec{u}} = 0"),
-        texte(" si "),
-        latex("\\alpha = 90^\\circ"),
+        texte(" a pour vecteur directeur "),
+        latex("\\begin{pmatrix}\\tan\\theta_{Oy}\\\\ 1\\end{pmatrix}"),
+        texte(" ; pour "),
+        latex("\\theta_{Oy} = 90^\\circ"),
+        texte(", la droite est horizontale : "),
+        latex("\\begin{pmatrix}1\\\\ 0\\end{pmatrix}"),
         texte("."),
       ];
     case "pente":
@@ -332,15 +344,15 @@ export function formatAideExtractionNiveau2Latex(exercice: ExerciceEquationDroit
     case "deux_points":
       return `\\vec{u} = \\begin{pmatrix} ${d.pointB.x} - ${formatFacteurLatex(d.pointA.x)} \\\\ ${d.pointB.y} - ${formatFacteurLatex(d.pointA.y)} \\end{pmatrix}`;
     case "point_vecteur":
-      return `A${formatPointLatex(d.point)} \\quad \\vec{u}${formatVecteurLatex(d.vecteur)}`;
-    // α = 90° : tan(90°) n'existe pas — la droite est perpendiculaire à l'axe, le vecteur
+      return `x_0 = x_A,\\ y_0 = y_A \\qquad \\vec{u} = \\begin{pmatrix} x_{\\vec{u}} \\\\ y_{\\vec{u}} \\end{pmatrix}`;
+    // θ = 90° : tan(90°) n'existe pas — la droite est perpendiculaire à l'axe, le vecteur
     // directeur est directement (0 ; 1) (avec Ox) ou (1 ; 0) (avec Oy), jamais « tan(90°) ».
     case "angle_ox":
-      if (d.angleDeg === 90) return `\\alpha = 90^\\circ : \\vec{u} = \\begin{pmatrix} 0 \\\\ 1 \\end{pmatrix}`;
-      return `\\vec{u} = \\begin{pmatrix} 1 \\\\ \\tan(${d.angleDeg}^\\circ) \\end{pmatrix}`;
+      if (d.angleDeg === 90) return `\\theta = 90^\\circ : \\text{droite verticale}`;
+      return `\\vec{u} = \\begin{pmatrix} 1 \\\\ \\tan ${d.angleDeg}^\\circ \\end{pmatrix}`;
     case "angle_oy":
-      if (d.angleDeg === 90) return `\\alpha = 90^\\circ : \\vec{u} = \\begin{pmatrix} 1 \\\\ 0 \\end{pmatrix}`;
-      return `\\vec{u} = \\begin{pmatrix} \\tan(${d.angleDeg}^\\circ) \\\\ 1 \\end{pmatrix}`;
+      if (d.angleDeg === 90) return `\\theta_{Oy} = 90^\\circ : \\text{droite horizontale}`;
+      return `\\vec{u} = \\begin{pmatrix} \\tan ${d.angleDeg}^\\circ \\\\ 1 \\end{pmatrix}`;
     case "pente":
       return `\\vec{u} = \\begin{pmatrix} 1 \\\\ ${d.pente} \\end{pmatrix}`;
   }
@@ -372,9 +384,9 @@ export function consigneCoefficients(exercice: ExerciceEquationDroite): string {
  * branche "impossible", `promptgen42modificationsv2.md` partie A — la forme implicite de secours
  * y est demandée quelle que soit `exercice.formeCible` réelle, toujours explicite_y/explicite_x). */
 function formatAideCoefficientsImpliciteLatex(point: Point, vecteur: Composantes): string {
-  // « b = −0 » jamais : composante nulle → « b = 0 ».
-  const b = vecteur.x === 0 ? "0" : `-${formatFacteurLatex(vecteur.x)}`;
-  return `a = ${vecteur.y}, \\quad b = ${b}, \\quad c = -\\big(a\\cdot ${formatFacteurLatex(point.x)} + b\\cdot ${formatFacteurLatex(point.y)}\\big)`;
+  // Jamais la réponse (audit 4e ch. 7, lot B) : a et b restent à lire sur le vecteur confirmé, c est
+  // posé avec les coordonnées de A.
+  return `\\vec{u}${formatVecteurLatex(vecteur)} : \\ a = y_{\\vec{u}},\\ b = -x_{\\vec{u}}, \\quad c = -\\big(a\\cdot ${formatFacteurLatex(point.x)} + b\\cdot ${formatFacteurLatex(point.y)}\\big)`;
 }
 
 /** Aide niveau 2 — formule substituée avec le point/vecteur CONFIRMÉS, jamais calculée. */
@@ -382,13 +394,14 @@ export function formatAideCoefficientsNiveau2Latex(exercice: ExerciceEquationDro
   const { point, vecteur } = exercice;
   switch (exercice.formeCible) {
     case "parametrique":
-      return formatRepresentationParametriqueLatex(point.x, vecteur.x, point.y, vecteur.y);
+      // Jamais les équations elles-mêmes (c'était la réponse) : les quatre nombres à placer.
+      return `x_A = ${formatValeurGenereeLatex(point.x)},\\ y_A = ${formatValeurGenereeLatex(point.y)} \\qquad x_{\\vec{u}} = ${formatValeurGenereeLatex(vecteur.x)},\\ y_{\\vec{u}} = ${formatValeurGenereeLatex(vecteur.y)}`;
     case "implicite":
       return formatAideCoefficientsImpliciteLatex(point, vecteur);
     case "explicite_y":
-      return `m = \\dfrac{${vecteur.y}}{${vecteur.x}}, \\quad p = ${point.y} - m\\cdot ${formatFacteurLatex(point.x)}`;
+      return `m = \\dfrac{${formatValeurGenereeLatex(vecteur.y)}}{${formatValeurGenereeLatex(vecteur.x)}}, \\quad p = ${formatValeurGenereeLatex(point.y)} - m\\cdot ${formatFacteurLatex(point.x)}`;
     case "explicite_x":
-      return `n = \\dfrac{${vecteur.x}}{${vecteur.y}}, \\quad q = ${point.x} - n\\cdot ${formatFacteurLatex(point.y)}`;
+      return `n = \\dfrac{${formatValeurGenereeLatex(vecteur.x)}}{${formatValeurGenereeLatex(vecteur.y)}}, \\quad q = ${formatValeurGenereeLatex(point.x)} - n\\cdot ${formatFacteurLatex(point.y)}`;
   }
 }
 

@@ -231,6 +231,7 @@ export function AppLieuxGeometriques() {
             niveauAide={etat.niveauAideIdentification}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseIdentification(etat, reponse), reponseIdentificationSaisie(reponse))}
+            naturesFigees={etat.naturesFigees}
             validation={validation}
           />
         ) : phase === "equations" ? (
@@ -261,6 +262,7 @@ export function AppLieuxGeometriques() {
             niveauAide={etat.niveauAideResolution}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseResolution(etat, reponse), null)}
+            choixFige={etat.choixResolutionFige}
             validation={validation}
           />
         )}

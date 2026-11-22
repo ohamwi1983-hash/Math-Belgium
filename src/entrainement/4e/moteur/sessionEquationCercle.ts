@@ -21,7 +21,7 @@ const POINTS_DE_BASE = 100;
 
 export const NIVEAU_AIDE_MAX_CENTRE = 2;
 export const NIVEAU_AIDE_MAX_RAYON = 2;
-export const NIVEAU_AIDE_MAX_EQUATION = 1;
+export const NIVEAU_AIDE_MAX_EQUATION = 2;
 
 function etatInitial(
   exercice: ExerciceEquationCercle,
