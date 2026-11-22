@@ -6,6 +6,7 @@ import {
   NIVEAU_NUMERO,
   catalogueVariantesExercice,
   construireItemsPayload,
+  deriveQuestionsOuvertes,
   generateursPourSection,
   resoudreNiveauHeures,
   themesPourSection,
@@ -13,14 +14,16 @@ import {
   type IdGenerateurPilote,
   type LigneSelection,
   type Processus,
+  type QuestionOuverte,
 } from './evaluationPayload'
 import { construirePlan, elementsAPlat, empreinteSection, questionsDeSerie, respecteContrainte, tirerInstance, type Adaptateur, type ContrainteTirage, type ElementPlan, type PlanDocument } from './evaluationLocal'
 import { chapitreAUneBanqueVraiFauxLocale, chargerThemeVraiFaux } from './banquesVraiFaux'
-import { pointsDepuisDuree } from './pointsAutomatiques'
+import { pointsDemonstration, pointsDepuisDuree } from './pointsAutomatiques'
 import { CATEGORIES_NIVEAU, LIBELLE_CATEGORIE, categorieDuNiveau, niveauEtDuree, rangCategorie, type CategorieNiveau } from '../entrainement/export/niveauDifficulte'
-import { partageEgal } from './repartitionProcessus'
+import { aleatoireDepuisGraine, fractionsRepartition, partageEgal, partsAuProrata, pourcentsEntiers, texteParts, tirerPartsHasard, type RepartitionPourcents } from './repartitionProcessus'
 import { mettreAEchelle, mettreAEchelleParGroupes } from '../entrainement/export/examen'
 import { tirerGraine } from '../entrainement/export/codeExercice'
+import { DEPASSEMENT_MAX } from '../components/admin/conception/composer'
 
 /**
  * Parcours ÉLÈVE — composition automatique d'une feuille d'exercices ou d'une ÉVALUATION BLANCHE
@@ -78,7 +81,17 @@ export interface ReglagesEleve {
   competences: Processus[]
   type: TypeEleve
   amenagee: boolean
+  /** ÉVALUATION BLANCHE seulement (décision de l'utilisateur, 22/11/2026, choix c) : parts du temps et
+   * des points entre les compétences cochées — tirées AU HASARD (`graine` : mêmes réglages, même
+   * graine → mêmes parts et même composition) ou RÉGLÉES par l'élève (`pourcents`, `null` = parts
+   * égales). Absent (feuille d'exercices) : parts égales, composition d'avant inchangée. */
+  parts?: PartsEleve
+  /** Évaluation blanche : démonstrations ANNONCÉES par le professeur, cochées par l'élève (clés
+   * `cleDemonstration`) — seules celles-là peuvent être tirées ; aucune → aucune démonstration. */
+  demonstrations?: string[]
 }
+
+export type PartsEleve = { mode: 'hasard'; graine: number } | { mode: 'reglee'; pourcents: RepartitionPourcents | null; graine?: number }
 
 /** Les cinq niveaux cochés : niveaux mélangés (l'ancienne « vraie évaluation »). */
 export function tousLesNiveaux(niveaux: readonly CategorieNiveau[]): boolean {
@@ -122,7 +135,49 @@ export interface CandidatVraiFaux extends CandidatBase {
   /** Affirmations disponibles dans la banque du thème. */
   disponibles: number
 }
-export type Candidat = CandidatExercice | CandidatVraiFaux
+/** Démonstration du cours (question « démonstration » de Connaître) : tirée seulement si l'élève l'a
+ * cochée comme annoncée par son professeur. Sans niveau (admise à tous les niveaux cochés). */
+export interface CandidatDemonstration extends CandidatBase {
+  sorte: 'demonstration'
+  /** `QuestionOuverte.id` dans sa section (choix explicite de la ligne « demonstration »). */
+  questionId: string
+  /** Étapes du corrigé (points : `pointsDemonstration`). */
+  etapes: number
+  /** Énoncé imprimé (deux démonstrations d'un même résultat ont le même : une seule par document). */
+  enonceCle: string
+}
+export type Candidat = CandidatExercice | CandidatVraiFaux | CandidatDemonstration
+
+/** Durée d'une démonstration : celle d'un exercice qui vaudrait ses points (points = durée ÷ 2, comme
+ * `pointsDepuisDuree`) — de 4 à 12 min selon la longueur du corrigé. */
+export function dureeDemonstration(etapes: number): number {
+  return 2 * pointsDemonstration(etapes)
+}
+
+export interface DemonstrationEleve {
+  cle: string
+  sectionId: string
+  questionId: string
+  /** Titre du bloc (RichText) — libellé de la case. */
+  titre: string
+  /** Énoncé (RichText). */
+  apercu: string
+  etapes: number
+}
+
+/** Clé stable d'une démonstration dans un chapitre (les ids ne sont uniques que par section). */
+export function cleDemonstration(sectionId: string, questionId: string): string {
+  return `${sectionId}|${questionId}`
+}
+
+/** Démonstrations du chapitre (toutes ses sections), titres existants des blocs « Démonstration — … ». */
+export function demonstrationsDuChapitre(chapter: ChapterContent): DemonstrationEleve[] {
+  return chapter.sections.flatMap((s) =>
+    deriveQuestionsOuvertes(chapter.slug, s)
+      .filter((q): q is QuestionOuverte & { id: string } => !!q.id)
+      .map((q) => ({ cle: cleDemonstration(s.id, q.id), sectionId: s.id, questionId: q.id, titre: q.titre ?? 'Démonstration', apercu: q.apercu ?? '', etapes: q.corrige.length })),
+  )
+}
 
 const TIRAGES_ESTIMATION = 8
 const ESSAIS_FILTRE = 400
@@ -243,6 +298,13 @@ async function calculerCandidats(chapter: ChapterContent, type: TypeEleve, progr
       }
     }
   }
+  // Évaluation blanche : démonstrations du cours (tirées seulement si l'élève les a cochées).
+  if (type === 'blanche') {
+    const enonces = new Map(chapter.sections.flatMap((s) => deriveQuestionsOuvertes(chapter.slug, s).map((q) => [cleDemonstration(s.id, q.id ?? ''), JSON.stringify(q.enonce)] as const)))
+    for (const d of demonstrationsDuChapitre(chapter)) {
+      candidats.push({ sorte: 'demonstration', cle: `${d.sectionId}|demo|${d.questionId}`, sectionId: d.sectionId, processus: 1, questionId: d.questionId, etapes: d.etapes, enonceCle: enonces.get(d.cle) ?? d.cle, duree: dureeDemonstration(d.etapes), niveaux: [] })
+    }
+  }
   return candidats
 }
 
@@ -264,6 +326,9 @@ export interface Composition {
   elargi: boolean
   /** Niveaux admis à l'impression : les cochés, plus les voisins réellement utilisés. */
   niveauxAdmis: CategorieNiveau[]
+  /** Évaluation blanche (`ReglagesEleve.parts`) : parts visées (fractions, somme 1) entre les
+   * compétences cochées ayant des exercices — tirées au hasard ou réglées. Absent : parts égales. */
+  parts?: Record<Processus, number>
 }
 
 /** Part des tirages d'estimation d'un candidat dont la catégorie est dans `categories` (générateur
@@ -276,7 +341,20 @@ export function partDansCategories(c: Candidat, categories: ReadonlySet<Categori
 /** Un candidat est retenu pour les niveaux cochés si au moins la moitié de ses tirages d'estimation y
  * tombent ; un générateur sans niveau seulement quand les cinq niveaux sont cochés. */
 export function candidatAuxNiveaux(c: Candidat, categories: ReadonlySet<CategorieNiveau>, tous: boolean): boolean {
+  // Démonstration annoncée (cochée par l'élève) : sans niveau, admise quels que soient les niveaux.
+  if (c.sorte === 'demonstration') return true
   return c.niveaux.length === 0 ? tous : partDansCategories(c, categories) >= 0.5
+}
+
+/** Candidats des réglages : notions retenues, compétences cochées (jamais une autre), et seulement
+ * les démonstrations cochées. */
+function candidatsDesReglages(candidatsChapitre: Candidat[], reglages: Pick<ReglagesEleve, 'sections' | 'competences' | 'demonstrations'>): Candidat[] {
+  const sections = new Set(reglages.sections)
+  const competences = new Set(reglages.competences)
+  const demos = new Set(reglages.demonstrations ?? [])
+  return candidatsChapitre.filter(
+    (c) => (sections.size === 0 || sections.has(c.sectionId)) && competences.has(c.processus) && (c.sorte !== 'demonstration' || demos.has(cleDemonstration(c.sectionId, c.questionId))),
+  )
 }
 
 /** Distance (en pas de l'échelle) d'une catégorie aux catégories cochées. */
@@ -299,12 +377,22 @@ function nombreDe(etat: EtatComposition, c: Candidat): number {
   return etat.unites.get(c.cle)?.nombre ?? 0
 }
 
+function cleGenerateur(c: Candidat): string {
+  return c.sorte === 'exercice' ? c.generatorId : c.sorte === 'vraiFaux' ? `vf:${c.theme}` : 'demonstration'
+}
+
+/** Une démonstration au plus une fois, et jamais deux démonstrations au même énoncé imprimé. */
+function demonstrationPossible(etat: EtatComposition, c: CandidatDemonstration): boolean {
+  if (nombreDe(etat, c) > 0) return false
+  return ![...etat.unites.values()].some((u) => u.candidat.sorte === 'demonstration' && u.candidat.enonceCle === c.enonceCle)
+}
+
 function ajouter(etat: EtatComposition, c: Candidat): void {
   const u = etat.unites.get(c.cle)
   if (u) u.nombre++
   else etat.unites.set(c.cle, { candidat: c, nombre: 1 })
   etat.parSection.set(c.sectionId, (etat.parSection.get(c.sectionId) ?? 0) + 1)
-  const g = c.sorte === 'exercice' ? c.generatorId : `vf:${c.theme}`
+  const g = cleGenerateur(c)
   etat.parGenerateur.set(g, (etat.parGenerateur.get(g) ?? 0) + 1)
   etat.duree += c.duree
   etat.parProcessus.set(c.processus, (etat.parProcessus.get(c.processus) ?? 0) + c.duree)
@@ -322,22 +410,25 @@ interface Bassin {
  * `plafond` au total). Variété : la notion la moins servie d'abord, puis le générateur le moins servi,
  * jamais deux fois la même variante tant qu'une autre convient (au plus deux fois ensuite).
  */
-function remplir(etat: EtatComposition, bassin: Bassin, budget: number, plafond: number, plafondVraiFaux: number, aleatoire: () => number): void {
+function remplir(etat: EtatComposition, bassin: Bassin, budget: number, plafond: number, plafondVraiFaux: number, aleatoire: () => number, admission?: (c: Candidat) => boolean): void {
   const objectif = etat.duree + budget
   for (let garde = 0; garde < 200; garde++) {
     const restant = objectif - etat.duree
     if (restant < 1.5) return
     const convient = (c: Candidat, maxRepetitions: number) => {
       if (etat.duree + c.duree > plafond + 1e-9) return false
-      if (c.duree > restant + Math.max(2, budget * 0.25)) return false
+      // Parts de l'évaluation blanche : règle de « Préparer l'évaluation » (`admisDansPart`) ; sinon
+      // règle d'avant (parts égales).
+      if (admission ? !admission(c) : c.duree > restant + Math.max(2, budget * 0.25)) return false
       if (c.sorte === 'vraiFaux') return nombreDe(etat, c) < c.disponibles && etat.dureeVraiFaux + c.duree <= plafondVraiFaux + 1e-9
+      if (c.sorte === 'demonstration') return demonstrationPossible(etat, c)
       return nombreDe(etat, c) < maxRepetitions
     }
     let possibles = bassin.candidats.filter((c) => convient(c, 1))
     if (possibles.length === 0) possibles = bassin.candidats.filter((c) => convient(c, 2))
     if (possibles.length === 0) return
     const score = (c: Candidat) => {
-      const g = c.sorte === 'exercice' ? c.generatorId : `vf:${c.theme}`
+      const g = cleGenerateur(c)
       return (bassin.rang.get(c.cle) ?? 0) * 100 + (etat.parSection.get(c.sectionId) ?? 0) * 10 + (etat.parGenerateur.get(g) ?? 0) * 4 + nombreDe(etat, c) * 6 + aleatoire() * 3
     }
     let meilleur = possibles[0]
@@ -372,15 +463,107 @@ export function budgetsParCompetence(cible: number, competences: readonly Proces
   return { budgets, bruts }
 }
 
-/** Compose une sélection (aléatoire à chaque appel) pour les réglages. */
-export function composer(candidatsChapitre: Candidat[], reglages: ReglagesEleve, aleatoire: () => number = Math.random): Composition {
-  const sections = new Set(reglages.sections)
-  const competences = new Set(reglages.competences)
+/**
+ * Parts visées de l'évaluation blanche (fractions, somme 1) entre les compétences cochées qui ont des
+ * exercices aux niveaux cochés (`presentes` ; aucune → les cochées, que les niveaux voisins pourront
+ * servir) : tirées au hasard parmi ELLES (jamais de part pour une compétence vide), ou réglées par
+ * l'élève puis ramenées aux présentes au prorata (réglage `null` → parts égales).
+ */
+export function partsVisees(parts: PartsEleve, competences: readonly Processus[], presentes: readonly Processus[]): Record<Processus, number> {
+  const cochees = ([1, 2, 3] as const).filter((p) => competences.includes(p))
+  const servies = cochees.filter((p) => presentes.includes(p))
+  const base = servies.length > 0 ? servies : cochees
+  if (parts.mode === 'hasard') return fractionsRepartition(tirerPartsHasard(base, parts.graine))
+  return partsAuProrata(parts.pourcents ? fractionsRepartition(parts.pourcents) : partageEgal(cochees), base)
+}
+
+/** Un ajout dans la part d'une compétence est admis s'il ne dépasse son budget ni de plus de la moitié
+ * de sa durée NI de plus de `DEPASSEMENT_MAX` minutes — règle de « Préparer l'évaluation » du
+ * professeur (`conception/composer.ts`), la PREMIÈRE question comprise. */
+export function admisDansPart(dejaPris: number, duree: number, budget: number): boolean {
+  return dejaPris + duree <= budget + Math.min(duree / 2, DEPASSEMENT_MAX) + 1e-9
+}
+
+/**
+ * Composition de l'évaluation blanche selon des PARTS (hasard ou réglage) : chaque compétence cochée
+ * remplit SA part (`admisDansPart`), Transférer d'abord, puis Connaître (une démonstration annoncée
+ * d'abord si elle tient), puis Appliquer ; une compétence dont aucune question ne tient reçoit la plus
+ * courte si elle tient dans la durée (une compétence annoncée est présente) ; jamais de temps donné à
+ * une autre compétence pour « remplir » (les points suivent les parts, le document doit les respecter).
+ * Niveaux voisins : seulement pour les compétences en retard sur leur part, même règle.
+ */
+function composerParParts(candidats: Candidat[], admis: Candidat[], reglages: ReglagesEleve, parts: PartsEleve, aleatoire: () => number): Composition {
+  const cochees = new Set(reglages.niveaux)
+  const tous = tousLesNiveaux(reglages.niveaux)
+  const cible = reglages.duree
+  const plafond = cible * (1 + TOLERANCE_DEPASSEMENT)
+  const etat: EtatComposition = { unites: new Map(), parSection: new Map(), parGenerateur: new Map(), parProcessus: new Map(), duree: 0, dureeVraiFaux: 0 }
+  const presentes = ([1, 2, 3] as const).filter((p) => admis.some((c) => c.processus === p))
+  const fractions = partsVisees(parts, reglages.competences, presentes)
+  const budgets: Record<Processus, number> = { 1: cible * fractions[1], 2: cible * fractions[2], 3: cible * fractions[3] }
+  const pris = (p: Processus) => etat.parProcessus.get(p) ?? 0
+  const admission = (c: Candidat) => admisDansPart(pris(c.processus), c.duree, budgets[c.processus])
+  const plusCourte = (p: Processus) =>
+    admis.filter((c) => c.processus === p && (c.sorte !== 'demonstration' || demonstrationPossible(etat, c))).sort((a, b) => a.duree - b.duree)[0] as Candidat | undefined
+  const ordre = [3, 1, 2] as const
+  /** Temps gardé pour les compétences pas encore servies (leur question la plus courte) : chacune
+   * pourra être présente même si les précédentes remplissent leur part. */
+  const reserve = (i: number) => ordre.slice(i + 1).reduce((t, q) => t + (budgets[q] > 0 && pris(q) === 0 ? (plusCourte(q)?.duree ?? 0) : 0), 0)
+  const servir = (liste: Candidat[], p: Processus, rang: Map<string, number>, plafondP: number) => {
+    const ici = liste.filter((c) => c.processus === p)
+    if (budgets[p] <= 0 || ici.length === 0) return
+    // Connaître : une démonstration annoncée d'abord (au hasard parmi celles qui tiennent).
+    if (p === 1 && pris(1) === 0) {
+      const demos = ici.filter((c): c is CandidatDemonstration => c.sorte === 'demonstration' && admission(c) && etat.duree + c.duree <= plafondP + 1e-9)
+      if (demos.length > 0) ajouter(etat, demos[Math.floor(aleatoire() * demos.length)])
+    }
+    remplir(etat, { candidats: ici, rang }, budgets[p] - pris(p), plafondP, Infinity, aleatoire, admission)
+  }
+  ordre.forEach((p, i) => {
+    const plafondP = plafond - reserve(i)
+    servir(admis, p, new Map(), plafondP)
+    // Aucune question ne tient dans la part : la plus courte, si elle tient dans la durée.
+    const courte = budgets[p] > 0 && pris(p) === 0 ? plusCourte(p) : undefined
+    if (courte && etat.duree + courte.duree <= plafond + 1e-9) ajouter(etat, courte)
+  })
+
+  let elargi = false
+  const voisinsUtilises = new Set<CategorieNiveau>()
+  if (!tous) {
+    const vus = new Set(admis.map((c) => c.cle))
+    const etendus = new Set(cochees)
+    for (let d = 1; d < CATEGORIES_NIVEAU.length && etat.duree < cible * SEUIL_ELARGIR; d++) {
+      const nouvelles = CATEGORIES_NIVEAU.filter((c) => !etendus.has(c) && distanceCategorie(c, cochees) === d)
+      if (nouvelles.length === 0) continue
+      nouvelles.forEach((c) => etendus.add(c))
+      const voisins = candidats.filter((c) => !vus.has(c.cle) && c.niveaux.length > 0 && partDansCategories(c, etendus) >= 0.5)
+      voisins.forEach((c) => vus.add(c.cle))
+      if (voisins.length === 0) continue
+      const avant = etat.duree
+      const rang = new Map(voisins.map((c) => [c.cle, d]))
+      for (const p of ordre) if (budgets[p] - pris(p) >= 1.5) servir(voisins, p, rang, plafond)
+      if (etat.duree > avant) {
+        elargi = true
+        nouvelles.forEach((c) => voisinsUtilises.add(c))
+      }
+    }
+  }
+  return { unites: [...etat.unites.values()], dureeEstimee: etat.duree, elargi, niveauxAdmis: CATEGORIES_NIVEAU.filter((c) => cochees.has(c) || voisinsUtilises.has(c)), parts: fractions }
+}
+
+/** Compose une sélection pour les réglages — aléatoire à chaque appel, sauf graine des parts
+ * (évaluation blanche) : mêmes réglages, mêmes candidats, même graine → même composition. */
+export function composer(candidatsChapitre: Candidat[], reglages: ReglagesEleve, aleatoire?: () => number): Composition {
   // Jamais une compétence non cochée, même pour remplir la durée.
-  const candidats = candidatsChapitre.filter((c) => (sections.size === 0 || sections.has(c.sectionId)) && competences.has(c.processus))
+  const candidats = candidatsDesReglages(candidatsChapitre, reglages)
   const cochees = new Set(reglages.niveaux)
   const tous = tousLesNiveaux(reglages.niveaux)
   const admis = candidats.filter((c) => candidatAuxNiveaux(c, cochees, tous))
+  if (reglages.parts) {
+    const graine = reglages.parts.graine
+    return composerParParts(candidats, admis, reglages, reglages.parts, aleatoire ?? (graine !== undefined ? aleatoireDepuisGraine(graine ^ 0x5bd1e995) : Math.random))
+  }
+  aleatoire ??= Math.random
   const cible = reglages.duree
   const plafond = cible * (1 + TOLERANCE_DEPASSEMENT)
   const etat: EtatComposition = { unites: new Map(), parSection: new Map(), parGenerateur: new Map(), parProcessus: new Map(), duree: 0, dureeVraiFaux: 0 }
@@ -439,8 +622,11 @@ export interface DisponibiliteCompetence {
   total: number
   /** Niveaux où elle a au moins un exercice (majorité de ses tirages d'estimation à ce niveau). */
   categories: CategorieNiveau[]
-  /** Au moins un exercice retenu aux niveaux cochés (même règle que `composer`). */
+  /** Au moins un exercice retenu aux niveaux cochés (même règle que `composer`) — une démonstration
+   * seulement si elle est cochée. */
   auxNiveauxCoches: boolean
+  /** Connaître : les seules questions possibles sont des démonstrations (aucune cochée → rien). */
+  demonstrationsSeules: boolean
 }
 
 export interface DisponibiliteEleve {
@@ -453,9 +639,13 @@ export interface DisponibiliteEleve {
  * (aucun exercice des compétences cochées) et compétences sans exercice aux niveaux cochés. Même
  * règle d'appartenance que `composer` (au moins la moitié des tirages d'estimation) : un niveau
  * proposé, coché seul, donne au moins un exercice retenu. */
-export function disponibilite(candidatsChapitre: Candidat[], reglages: Pick<ReglagesEleve, 'sections' | 'competences' | 'niveaux'>): DisponibiliteEleve {
+export function disponibilite(candidatsChapitre: Candidat[], reglages: Pick<ReglagesEleve, 'sections' | 'competences' | 'niveaux' | 'demonstrations'>): DisponibiliteEleve {
   const sections = new Set(reglages.sections)
+  const demos = new Set(reglages.demonstrations ?? [])
+  // Une démonstration rend la compétence disponible (l'élève peut la cocher), mais ne compte pour la
+  // composition que si elle est cochée.
   const dansNotions = candidatsChapitre.filter((c) => sections.size === 0 || sections.has(c.sectionId))
+  const comptee = (c: Candidat) => c.sorte !== 'demonstration' || demos.has(cleDemonstration(c.sectionId, c.questionId))
   const cochees = new Set(reglages.niveaux)
   const tous = tousLesNiveaux(reglages.niveaux)
   const parCompetence = {} as Record<Processus, DisponibiliteCompetence>
@@ -464,7 +654,8 @@ export function disponibilite(candidatsChapitre: Candidat[], reglages: Pick<Regl
     parCompetence[p] = {
       total: liste.length,
       categories: CATEGORIES_NIVEAU.filter((k) => liste.some((c) => partDansCategories(c, new Set([k])) >= 0.5)),
-      auxNiveauxCoches: liste.some((c) => candidatAuxNiveaux(c, cochees, tous)),
+      auxNiveauxCoches: liste.some((c) => comptee(c) && candidatAuxNiveaux(c, cochees, tous)),
+      demonstrationsSeules: liste.length > 0 && liste.every((c) => c.sorte === 'demonstration'),
     }
   }
   const niveaux = {} as Record<CategorieNiveau, boolean>
@@ -504,6 +695,15 @@ export function lignesDeComposition(composition: Composition, chapter: ChapterCo
       ligne.pointsParVariante![c.varianteId] = pointsDepuisDuree(c.duree)
       ligne.nombre += nombre
       lignes.set(cle, ligne)
+    } else if (c.sorte === 'demonstration') {
+      // Démonstrations annoncées : ligne « demonstration » à CHOIX explicite (exactement celles-là),
+      // points d'après la longueur du corrigé (`pointsDemonstration`, comme le panneau).
+      const cle = `${c.sectionId}|demo`
+      const ligne = lignes.get(cle) ?? { chapitreSlug: chapter.slug, sectionId: c.sectionId, processus: 1, type: 'demonstration' as const, nombre: 0, choix: [], pointsParChoix: {}, points: 4 }
+      ligne.choix!.push(c.questionId)
+      ligne.pointsParChoix![c.questionId] = pointsDemonstration(c.etapes)
+      ligne.nombre = ligne.choix!.length
+      lignes.set(cle, ligne)
     } else {
       lignes.set(`${c.sectionId}|vf|${c.theme}`, { chapitreSlug: chapter.slug, sectionId: c.sectionId, processus: 1, type: 'vraiFaux', cle: c.theme, nombre, points: 1 })
     }
@@ -533,6 +733,10 @@ export interface ResumeEleve {
   /** Niveaux imprimés hors des niveaux cochés (niveaux voisins qui complètent). */
   categoriesHorsChoix: CategorieNiveau[]
   elargi: boolean
+  /** Évaluation blanche : parts du document (pourcentages entiers, somme 100) entre les compétences
+   * RÉELLEMENT imprimées — celles des points (« Mon score ») — et leur origine. Absent : feuille. */
+  parts?: RepartitionPourcents
+  partsHasard?: boolean
 }
 
 export interface PlanEleve {
@@ -544,6 +748,12 @@ const ESSAIS_RETOUCHE = 40
 const BUDGET_RETOUCHE_MS = 120
 
 type ElementExercice = Extract<ElementPlan, { type: 'exercice' }>
+
+/** Durée d'un vrai/faux (2 min par affirmation) ou d'une question ouverte (démonstration :
+ * `dureeDemonstration`, d'après la longueur de son corrigé). */
+function dureeHorsExercice(e: Exclude<ElementPlan, ElementExercice>): number {
+  return e.type === 'vraiFaux' ? e.indices.length * DUREE_VRAI_FAUX : dureeDemonstration(e.question.corrige.length)
+}
 
 function aujourdhui(): string {
   return new Date().toISOString().slice(0, 10)
@@ -608,7 +818,7 @@ function retoucher(plan: PlanDocument, reglages: ReglagesEleve, composition: Com
       mesures.set(el, { niveau: null, duree: estimations.get(`${el.generatorId}|${inst.varianteId}`) ?? DUREE_PAR_DEFAUT })
     }
   }
-  const dureeAutres = serie.elements.reduce((t, e) => t + (e.type === 'vraiFaux' ? e.indices.length * DUREE_VRAI_FAUX : 0), 0)
+  const dureeAutres = serie.elements.reduce((t, e) => t + (e.type === 'exercice' ? 0 : dureeHorsExercice(e)), 0)
   let cumul = dureeAutres
   exercices.forEach((el, k) => {
     const adaptateur = EVALUATION_ADAPTER_REGISTRY[el.generatorId] as Adaptateur
@@ -680,10 +890,10 @@ function retoucher(plan: PlanDocument, reglages: ReglagesEleve, composition: Com
   return mesures
 }
 
-/** Points indicatifs : durée de chaque exercice → `pointsDepuisDuree`, 1 pt par affirmation, puis
- * total ramené à 20, partagé à parts égales entre les compétences imprimées (comme le temps ; une
- * seule → les 20 pts). */
-function poserPoints(plan: PlanDocument, mesures: Map<ElementExercice, { niveau: number | null; duree: number }>): void {
+/** Points indicatifs : durée de chaque exercice → `pointsDepuisDuree`, 1 pt par affirmation, points de
+ * la démonstration, puis total ramené à 20, partagé entre les compétences imprimées selon les parts
+ * (`fractions`, déjà ramenées aux imprimées ; absent : parts égales ; une seule → les 20 pts). */
+function poserPoints(plan: PlanDocument, mesures: Map<ElementExercice, { niveau: number | null; duree: number }>, fractions?: Record<Processus, number>): boolean {
   const elements = plan.series[0].elements
   const bruts = elements.map((e) => (e.type === 'exercice' ? pointsDepuisDuree(mesures.get(e)?.duree ?? DUREE_PAR_DEFAUT) : e.type === 'vraiFaux' ? 1 : e.points))
   const nombres = elements.map((e) => (e.type === 'vraiFaux' ? Math.max(1, e.indices.length) : 1))
@@ -698,7 +908,7 @@ function poserPoints(plan: PlanDocument, mesures: Map<ElementExercice, { niveau:
   const echelle = (indices: number[], total: number) => mettreAEchelleParGroupes(indices.map((i) => bruts[i]), indices.map((i) => nombres[i]), total)
   const tous = elements.map((_, i) => i)
   const presents = ([1, 2, 3] as const).filter((p) => elements.some((e) => e.processus === p))
-  const egal = partageEgal(presents)
+  const egal = fractions ?? partageEgal(presents)
   const parts = presents.map((p) => egal[p])
   const totaux = mettreAEchelle(parts, TOTAL_POINTS_BLANCHE)
   if (totaux) {
@@ -708,11 +918,20 @@ function poserPoints(plan: PlanDocument, mesures: Map<ElementExercice, { niveau:
     })
     if (resultats.every((r) => r.points)) {
       resultats.forEach((r) => appliquer(r.indices, r.points!))
-      return
+      return true
     }
   }
   const points = echelle(tous, TOTAL_POINTS_BLANCHE)
   appliquer(tous, points ?? bruts)
+  return false
+}
+
+/** « Connaître 20 % · Appliquer 65 % · Transférer 15 % — tirées au hasard : ta vraie interro peut être
+ * répartie autrement » (une seule compétence : « Appliquer 100 % », sans avertissement). */
+export function texteRepartitionBlanche(parts: RepartitionPourcents, hasard: boolean): string {
+  const t = texteParts(parts)
+  if (Object.values(parts).filter((v) => v > 0).length < 2) return t
+  return `${t} — ${hasard ? 'tirées au hasard' : 'réglées par toi'} : ta vraie interro peut être répartie autrement`
 }
 
 /**
@@ -734,23 +953,44 @@ export async function construirePlanEleve(reglages: ReglagesEleve, chapter: Chap
 
   let pointsParProcessus: Partial<Record<Processus, number>> | undefined
   let points: number | undefined
+  let parts: RepartitionPourcents | undefined
   if (blanche) {
-    poserPoints(plan, mesures)
+    // Parts du document : parts visées ramenées aux compétences réellement imprimées (au prorata).
+    const imprimees = ([1, 2, 3] as const).filter((p) => plan.series[0].elements.some((e) => e.processus === p))
+    const fractions = composition.parts ? partsAuProrata(composition.parts, imprimees) : undefined
+    const fractionsPoints = fractions && imprimees.every((p) => fractions[p] > 0) ? fractions : undefined
+    let respectees = poserPoints(plan, mesures, fractionsPoints)
+    // Total impossible en demi-points avec des vrai/faux de n affirmations au même barème (ex. 15
+    // affirmations pour 20 pts) : chaque affirmation devient son propre élément (même thème, même
+    // section ; à l'impression, tous les vrai/faux restent UNE question), puis nouvel essai.
+    const serie = plan.series[0]
+    if (!respectees && serie.elements.some((e) => e.type === 'vraiFaux' && e.indices.length > 1)) {
+      serie.elements = serie.elements.flatMap((e) => (e.type === 'vraiFaux' && e.indices.length > 1 ? e.indices.map((i) => ({ ...e, indices: [i] })) : [e]))
+      respectees = poserPoints(plan, mesures, fractionsPoints)
+    }
     pointsParProcessus = {}
     for (const e of plan.series[0].elements) {
       const p = e.type === 'exercice' ? e.instances.reduce((t, i) => t + i.points, 0) : e.type === 'vraiFaux' ? e.pointsParAffirmation * e.indices.length : e.points
       pointsParProcessus[e.processus] = (pointsParProcessus[e.processus] ?? 0) + p
     }
     points = Object.values(pointsParProcessus).reduce((t, p) => t + (p ?? 0), 0)
+    if (composition.parts) {
+      // Parts affichées = celles des points : les parts visées si les points les suivent, sinon (repli
+      // de la mise à l'échelle, jamais observé) les parts des points réellement posés.
+      const total = points
+      const depuisPoints = { 1: (pointsParProcessus[1] ?? 0) / total, 2: (pointsParProcessus[2] ?? 0) / total, 3: (pointsParProcessus[3] ?? 0) / total }
+      parts = pourcentsEntiers(respectees && fractions ? fractions : depuisPoints)
+    }
   }
 
   const elements = plan.series[0].elements
-  const duree = elements.reduce((t, e) => t + (e.type === 'exercice' ? (mesures.get(e)?.duree ?? DUREE_PAR_DEFAUT) : e.type === 'vraiFaux' ? e.indices.length * DUREE_VRAI_FAUX : 2), 0)
+  const duree = elements.reduce((t, e) => t + (e.type === 'exercice' ? (mesures.get(e)?.duree ?? DUREE_PAR_DEFAUT) : dureeHorsExercice(e)), 0)
   const dureeConseillee = Math.max(5, Math.round(duree / 5) * 5)
   if (blanche) {
     // Calculatrice AUTORISÉE pour l'élève (choix : aucun chapitre ne l'interdit dans ses données) —
     // imprimée seulement : le tirage n'a pas été contraint (exercices exacts ET à la calculatrice).
-    plan.entete = { ...plan.entete, calculatrice: 'autorisee', blanche: { dureeConseillee } }
+    const partsHasard = reglages.parts?.mode === 'hasard'
+    plan.entete = { ...plan.entete, calculatrice: 'autorisee', blanche: { dureeConseillee, ...(parts ? { repartition: texteRepartitionBlanche(parts, partsHasard) } : {}) } }
   }
   const niveaux = [...mesures.values()].flatMap((m) => (m.niveau === null ? [] : [m.niveau]))
   const questions = questionsDeSerie(elementsAPlat(plan.series[0])).length
@@ -760,5 +1000,5 @@ export async function construirePlanEleve(reglages: ReglagesEleve, chapter: Chap
   // Averti dès qu'un exercice imprimé sort des niveaux cochés (niveau voisin ajouté, ou variante dont
   // aucun tirage aux niveaux cochés n'a été trouvé dans le budget de la retouche).
   const categoriesHorsChoix = CATEGORIES_NIVEAU.filter((c) => imprimes.some((n) => categorieDuNiveau(n) === c && !niveauCoche(n, reglages)))
-  return { plan, resume: { questions, duree, dureeConseillee, points, pointsParProcessus, niveaux, categories, competences, categoriesHorsChoix, elargi: categoriesHorsChoix.length > 0 } }
+  return { plan, resume: { questions, duree, dureeConseillee, points, pointsParProcessus, niveaux, categories, competences, categoriesHorsChoix, elargi: categoriesHorsChoix.length > 0, ...(parts ? { parts, partsHasard: reglages.parts?.mode === 'hasard' } : {}) } }
 }

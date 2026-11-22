@@ -695,8 +695,8 @@ valeur du professeur est mémorisée dans son profil. Défaut 25 / 50 / 25 (`REP
 du professeur — elle ne vaut QUE pour « Préparer l'examen » (mode examen du panneau), seul endroit où
 le réglage mémorisé et « Enregistrer comme ma répartition d'examen » apparaissent. Évaluations et
 feuilles d'exercices (« hyper flexible ») : compétences cochées, temps à parts égales, ajustable pour
-le document seulement, jamais mémorisé ; assistant élève (visiteurs) : parts égales entre les
-compétences cochées. Aucun changement SQL (colonne, contrainte, droits identiques). Logique de
+le document seulement, jamais mémorisé ; assistant élève (visiteurs) : parts égales pour la feuille,
+parts au hasard ou réglées par l'élève pour l'évaluation blanche. Aucun changement SQL (colonne, contrainte, droits identiques). Logique de
 composition et interface : `.claude/rules/feuilles-evaluations.md` (« Façons de composer »).
 
 **Schéma 0005** (idempotent, ne dépend que de 0001 ; « Success. No rows returned », 0005 exécutée trois
