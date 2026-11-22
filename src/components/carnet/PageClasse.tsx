@@ -11,6 +11,7 @@ import { EvaluationMatiere } from './EvaluationMatiere'
 import { FormClasse, type SaisieClasse } from './GestionClasses'
 import { jourMois, trierRecentes } from './outilsCarnet'
 import { ProgressionClasse } from './ProgressionClasse'
+import { CompteurClasse } from './HeuresEffectives'
 
 const SEMAINES_PAR_PAGE = 4
 const SEMAINES_COMPLETES = 2
@@ -133,6 +134,8 @@ export function PageClasse({
           </div>
         </section>
       )}
+
+      <CompteurClasse classe={classe} maintenant={maintenant} />
 
       <div className="carnet-classe-corps">
         <section className="carnet-colonne" aria-labelledby={`${id}-fil`}>

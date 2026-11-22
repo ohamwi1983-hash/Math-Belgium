@@ -10,6 +10,7 @@ paths:
   - "src/lib/repartitionProcessus.ts"
   - "src/components/admin/conception/ReglageRepartition.tsx"
   - "src/lib/calendrierFwb.ts"
+  - "src/lib/agenda*"
   - "src/components/carnet/**"
   - "supabase/**"
   - ".env*"
@@ -25,7 +26,8 @@ l'administration sont derrière la connexion.
 Aucune donnée d'élève. Phase 2 (faite, section « Phase 2 » en fin de fichier) : carnet de matière vue (`/carnet`),
 puis son horaire de la semaine (`0003_horaire.sql`, sous-section « Horaire de la semaine ») et l'heure
 zéro (`0004_heure_zero.sql`, même sous-section), puis l'agenda d'une période (sous-section « Agenda d'une
-période », sans migration). Répartition d'EXAMEN Connaître / Appliquer / Transférer (« Préparer
+période », sans migration), puis l'agenda : événements, périodes du bulletin et heures effectives
+(`0006_agenda.sql`, sous-section « Événements et bulletin »). Répartition d'EXAMEN Connaître / Appliquer / Transférer (« Préparer
 l'examen ») mémorisée dans le profil : `0005_repartition.sql` (section « Répartition mémorisée » en fin
 de fichier).
 Plus tard (pas fait) : partage entre collègues.
@@ -524,6 +526,130 @@ progression, fiches, séances à rattraper, messages, cas sans école / sans cla
   piégé, Échap, enregistrer et copier = aperçu, modifier, supprimer), semaine (heure double, mercredi,
   Armistice, Toussaint), classe, barre du bas, `?chapitre=`, cas vides ; 82 captures (clair + sombre),
   `scrollWidth` = largeur, 0 erreur console.
+
+### Événements et bulletin (`supabase/migrations/0006_agenda.sql`, dans `/carnet`, maquettes du 22/11/2026)
+
+Décisions de l'utilisateur : événements (sortie, voyage scolaire, journée pédagogique, conseil de classe,
+session d'examens, interrogation, autre) pour TOUTES les classes d'une école ou CERTAINES ; pendant un
+événement les classes concernées n'ont pas cours (heures SUPPRIMÉES) ; « J'accompagne » supprime aussi les
+heures du professeur avec ses AUTRES classes pendant l'événement ; une INTERROGATION (une classe, une date,
+heure et chapitre facultatifs) ne supprime rien. Pas de semaines A / B (`semaine` reste NULL). Périodes du
+bulletin par école ET par année scolaire (date de remise des points de P1 … Pn), seuil d'avertissement en
+jours de classe (défaut 3, 0–15). AUCUNE donnée d'élève.
+
+**Schéma 0006** (idempotent, à coller APRÈS 0005 ; « Success. No rows returned » ; vérifié sur Postgres 16
+local, 0001 → 0005 + données puis 0006 exécuté CINQ fois et 0002 → 0005 relancés après lui, données
+identiques — 135 vérifications, outils `agenda-evenements/test_sql.py` du dossier de travail) :
+
+| Table | Colonnes | Contraintes |
+| --- | --- | --- |
+| `evenements` | `proprietaire`, `ecole_id`, `type` (7 valeurs), `intitule` (≤ 120, vide = nom du type), `du`, `au`, `journee_entiere`, `heure_debut` / `heure_fin` (0–15 : H0 permise comme 0004), `toutes_classes`, `accompagne`, `classe_id` + `chapitre` (« niveau/slug ») de l'interro, dates | `au >= du`, ≤ 366 jours, années 2000–2100 ; journée entière ⟺ heures NULL, sinon fin ≥ début ; interro ⟺ `classe_id` + une date + pas « toutes » + pas « J'accompagne » (sinon `classe_id` et `chapitre` NULL) ; FK `(ecole_id, proprietaire) → ecoles` et `(classe_id, ecole_id, proprietaire) → classes` (cascade, ON UPDATE CASCADE : l'interro suit sa classe qui change d'école) |
+| `evenements_classes` | `evenement_id`, `classe_id`, `ecole_id`, `proprietaire` | clé `(evenement_id, classe_id, proprietaire)` ; FK `(evenement_id, ecole_id, proprietaire) → evenements` et `(classe_id, ecole_id, proprietaire) → classes` (cascades) : un événement à soi, une classe à soi DE LA MÊME ÉCOLE |
+| `periodes_bulletin` | `proprietaire`, `ecole_id`, `annee_scolaire` (« 2026-2027 », années consécutives), `numero` (1–8), `remise` (1er août → 31 juillet de l'année) | uniques `(proprietaire, ecole_id, annee_scolaire, numero)` et `(proprietaire, ecole_id, remise)` ; FK école (cascade) |
+| `carnet_reglages` | + `seuil_avertissement` (défaut 3) | `carnet_reglages_seuil_valide` 0–15 |
+
+Liaison plutôt qu'un tableau `uuid[]` : un élément de tableau ne porte pas de clé étrangère (il faudrait
+un déclencheur pour vérifier propriétaire ET école, et rien ne retirerait une classe supprimée) ; la FK
+composée le garantit, la cascade nettoie, le RLS s'applique ligne par ligne. Déclencheurs SECURITY INVOKER
+(`search_path = ''`) : `evenements_classes_coherence` (pas de liaison sur un événement « toutes » ou une
+interro — 23514), `evenements_retirer_liaisons` (passage à « toutes », à interro ou changement d'école →
+liaisons retirées), `classes_change_ecole_agenda` (une classe qui change d'école quitte les événements de
+l'ancienne). RLS des trois tables comme 0002 (`proprietaire = auth.uid() and est_actif()`, `anon` sans
+droit, l'admin ne voit rien) ; `supprimer_mon_compte()` inchangé (cascade).
+
+**0006 pas appliqué** : `agendaDonnees.ts::chargerAgenda` renvoie `AGENDA_INACTIF` (tables absentes —
+`ErreurCarnet.tableAbsente` — ou colonne `seuil_avertissement` inconnue) ; le carnet marche comme avant
+(aucune heure barrée, rien de nouveau dans Aujourd'hui / Ma semaine / la page classe) ; « + Événement »
+ouvre le panneau avec « Agenda pas encore activé : colle le fichier 0006_agenda.sql… », Réglages affiche le
+même message à la place des périodes. Une panne de lecture de l'agenda ne bloque pas le carnet.
+
+**Règles de calcul** (`lib/agendaEvenements.ts`, PUR, 126 vérifications esbuild + node — dont le scénario
+exact des maquettes : 5e B, 7 h prévues du jeu. 3/12 au ven. 11/12, − théâtre, − JP = 5 h ; 2 jours pour
+corriger le 9/12 ; interro du 14/12 → période 3 —, Noël / Toussaint, plusieurs jours, J'accompagne dans la
+même école et dans une autre, toutes / certaines, période sans date suivante, renumérotation) :
+- Heure supprimée (`raisonSuppression`) : événement non-interro du jour qui CONCERNE la classe (interro :
+  sa classe ; « toutes » : les classes de SON école ; sinon les liées encore existantes) et couvre l'heure
+  (journée entière, ou numéro entre `heure_debut` et `heure_fin`) — prioritaire —, sinon événement
+  « J'accompagne » d'autres classes : journée entière → toute la journée (toutes écoles) ; certaines heures →
+  même école par numéro, autre école par recouvrement de la plage horaire (grille de l'école de
+  l'événement). À égalité, le plus ancien créé. Événement « certaines » sans classe restante : ignoré.
+- `predicatSuppression` → option `supprimee` de `horaire.ts` (`creneauxDuJour`, `creneauxOublies`,
+  `heuresRestantes`, filtre `garder` de `creneauxSemaine`) : sans elle, comportement d'avant (les suites
+  horaire 116, heure zéro 82, carnet 85, agenda 103 repassent). Une heure supprimée n'est ni « à noter », ni
+  « à rattraper », ni comptée dans « Heures restantes ».
+- `journeeAgenda(date)` : créneaux qui ont lieu + `supprimes` (heures consécutives même classe même
+  événement regroupées) + événements du jour ; `journeeCarnet.ts::lignesDuJour` / `grilleSemaine` reçoivent
+  l'agenda en option (ligne / cellule `supprime`).
+- Jours de classe (`joursDeClasse(apres, jusqua, ecole)`) : APRÈS `apres`, jusqu'à `jusqua` INCLUS, jours
+  ouvrables hors congés FWB et hors événements « journée entière + toutes les classes » de l'école
+  (`texteSansCours` : « (la journée pédagogique ne compte pas) »).
+- Période d'une date : première remise ≥ date (même année scolaire) ; après la dernière → `numero + 1`,
+  remise `null` (« date de remise pas encore fixée dans tes réglages »).
+- Avertissements (`avertissementsInterro`) : « apres » si la date est STRICTEMENT après la remise de la
+  période en cours (prochaine remise ≥ aujourd'hui, même année) — « Comptera pour la période n » + raison ;
+  « peu-de-temps » si jours de classe entre l'interro (exclue) et la remise de SA période (incluse) ≤ seuil
+  — le jour de la remise compte (mer. 9/12 → ven. 11/12 = 2 : jeu., ven.). Les deux peuvent coexister.
+- Heures effectives (`compteurHeures`) : heures de l'horaire de la classe d'aujourd'hui (heures déjà
+  commencées exclues) à `jusqua` inclus, congés FWB déduits (« prévues »), moins une ligne par événement
+  (« − n h », détail « jeu. 3/12 · 3e h », au-delà de deux dates « du … au … »), accompagnement compris.
+  Jusqu'à la prochaine remise ET jusqu'à la fin de l'année (`finDAnnee` : veille de la session d'examens de
+  JUIN de l'école qui concerne la classe, sinon dernier jour de classe FWB).
+- Renumérotation des périodes (`planRenumerotation`) : P1 = la plus tôt ; ordre des mises à jour qui ne
+  heurte jamais l'unicité (montées du plus grand au plus petit, puis descentes) ; une date déplacée au-delà
+  d'une voisine est refusée (« … supprime cette période et ajoute-la à sa nouvelle date »).
+- Formats : « jeu. 3/12 », « vendredi 11/12 », réglages « ven. 04/06/2027 », ordinaux « 1re / 3e », H0.
+
+**Interface** (`components/carnet/` + `agenda.css`, importé par `CarnetPage` après `carnet.css`) :
+- `ContexteCarnet` gagne `agenda`, `ctxAgenda` (horaire + événements + classes, `null` sans 0003 ou 0006),
+  `nouvelEvenement(prerempli)`, `ouvrirEvenement(e)` ; panneau `{ type: 'evenement' }` dans `CarnetPage`.
+- `FormulaireEvenement` (dans `PanneauLateral`) : type en puces (radios), intitulé, école (si plusieurs),
+  du / au, « Journée entière » / « Certaines heures » (de la / à la : numéros de la grille de l'école,
+  « heure zéro (H0) »), « Toutes » / « Certaines » (pastilles = cases), « J'accompagne », résumé « Heures
+  supprimées : 5e B · 3e h — 6e C · 4e h (tu accompagnes). Rien n'est noté… » ; Interrogation : classe, date,
+  heure facultative (créneaux de la classe ce jour-là), chapitre (niveau de la classe), avertissements en
+  direct, « Enregistrer l'interrogation ». Supprimer : confirmation DANS le panneau (focus Annuler, Échap
+  l'annule sans fermer le panneau). Toucher un événement (bandeau, case barrée, puce, ligne) rouvre le même
+  formulaire. Aucun champ numérique.
+- `Aujourdhui` : « + Événement » ; bandeaux des événements du jour (« Théâtre — 5e B (3e à 5e heure). Tu
+  accompagnes : … ») ; heures supprimées barrées « Pas cours — théâtre … » / « Pas cours — tu accompagnes la
+  5e B : … » + puce du type, sans « Noter » ; « Interro · Suites ⚠ 2 jours pour corriger » sur le créneau ;
+  repère « Remise des points P2 : vendredi 11/12 — dans 5 jours de classe (…) » (une ligne par école qui a
+  des périodes) ; carte « Heures de cours effectives d'ici le 11/12 » (classes de l'horaire, liens vers la
+  page classe). « À rattraper » et la pastille « n à noter » ignorent les heures supprimées.
+- `MaSemaine` : « + Événement » ; rangée d'en-tête par jour (événements sans heure de cours propre, puce
+  « Remise des points P2 ») ; cases « pas cours » barrées ; interro dans la case ; téléphone : mêmes puces
+  au-dessus du jour ; colonne « Heures effectives restantes » (→ remise, → juin), carte de remise (« P3
+  ensuite »), « Événements de la semaine » ; `Planification` déduit les heures supprimées.
+- `PageClasse` → `HeuresEffectives.tsx::CompteurClasse` : deux grands chiffres (bandeau sombre), « Détail
+  jusqu'au 11/12 » ligne par ligne (horaire hebdomadaire, prévues, chaque événement « − n h », il reste),
+  « À venir pour la 5e B » (puces, avertissements), « + Événement pour la 5e B ».
+- `AgendaPeriode` : « Événements de la période » (classe choisie : ceux qui la concernent ou dont
+  l'accompagnement touche ses heures), heures barrées « Pas cours : 5e B · 3e h — … », « + Événement ». Le
+  document imprimé / Smartschool de l'agenda est INCHANGÉ (séances seulement).
+- Réglages (« Réglages du carnet ») : `ReglagesAgenda` (école si plusieurs, année scolaire en cours / suivante,
+  P1 … Pn avec « · examens de décembre ensuite » quand une session d'examens de l'école commence dans les
+  21 jours, crayon → date + Enregistrer / Annuler / « Supprimer la période » avec confirmation dans la page,
+  « + Ajouter une période », seuil − / + enregistré à chaque clic) puis le réglage d'horaire d'avant.
+- Panneau « Évaluations et examens » : `EvaluationMatiere` ajoute `cid=<classe>` à `urlEvaluationMatiere` ;
+  le panneau le retire de l'URL et affiche `AvertissementEvaluation` (lecture de la classe + `chargerAgenda`
+  par `import()`, `avertissement-evaluation.css`) d'après le champ Date de l'en-tête : « Comptera pour la
+  période 3 — évaluation du 14/12 pour la 5e B… », « Peu de temps pour corriger… ». Classe inconnue (panneau
+  ouvert sans passer par le carnet), feuille d'exercices, 0006 absent ou aucune période : rien.
+
+**Vérifications** (dossier de travail `agenda-evenements/` : `test_sql.py`, `agenda-evenements.test.ts`,
+`faux-supabase.js` étendu — tables, option `agendaAbsent`, contraintes, déclencheur, cascades —,
+`donnees.mjs` = scénario des maquettes, jeudi 3/12/2026 9h40, `parcours.mjs`, `captures.mjs`) : Playwright
+sur un build `NODE_ENV=development vite build --mode test`, iPhone 13 et 1 280 px, clair et sombre : 439
+vérifications (heures barrées partout, bandeaux, repère de remise, compteurs = valeurs de la logique pure,
+semaine, création / modification / suppression de chaque type, J'accompagne, erreurs, Échap, avertissements
+dans le formulaire et dans le panneau d'évaluation — et rien sans `cid` —, périodes : ajout au milieu,
+suppression, date refusée, seuil, agenda d'une période, 0006 absent, cibles ≥ 44 px, aucun champ
+numérique, `scrollWidth` = largeur, 0 erreur console).
+
+**Mise en service** : SQL Editor → New query → coller TOUT `0006_agenda.sql` → Run → « Success. No rows
+returned » ; recharger `/carnet` → Réglages → « Périodes du bulletin » (dates de remise) → « + Événement ».
+À vérifier contre le vrai projet : création d'un événement « certaines classes » (liaison), interro,
+périodes et seuil.
 
 ## Page « Mon profil » refondue (21/11/2026 : proposition A, style du carnet, AUCUNE migration)
 

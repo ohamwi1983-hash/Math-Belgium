@@ -51,6 +51,7 @@ import {
   type ReglageCompetencesDocument,
 } from './conception/ReglageCompetences'
 import { decoderMatiere } from '../../lib/carnetMatiere'
+import { AvertissementEvaluation } from '../carnet/AvertissementEvaluation'
 import {
   horaireExamen,
   lireDuree,
@@ -1110,6 +1111,8 @@ export function EvaluationGeneratorPanel({
   const matiereDemandee = verrouille ? null : params.get('matiere')
   const matiereTraitee = useRef<string | null>(null)
   const [bandeauCarnet, setBandeauCarnet] = useState<string | null>(null)
+  // Classe du carnet (`?cid=`) : avertissement « date limite du bulletin » d'après la date de l'en-tête.
+  const [classeCarnetId, setClasseCarnetId] = useState<string | null>(null)
   useEffect(() => {
     if (!matiereDemandee || matiereTraitee.current === matiereDemandee) return
     matiereTraitee.current = matiereDemandee
@@ -1120,7 +1123,9 @@ export function EvaluationGeneratorPanel({
     const suivant = new URLSearchParams(params)
     const depuis = /^\d{4}-\d{2}-\d{2}$/.test(suivant.get('depuis') ?? '') ? (suivant.get('depuis') as string).split('-').reverse().join('/') : ''
     const classe = (suivant.get('classe') ?? '').trim().slice(0, 40)
-    ;['matiere', 'depuis', 'classe'].forEach((k) => suivant.delete(k))
+    const cid = suivant.get('cid') ?? ''
+    if (/^[0-9a-f-]{36}$/i.test(cid)) setClasseCarnetId(cid)
+    ;['matiere', 'depuis', 'classe', 'cid'].forEach((k) => suivant.delete(k))
     setParams(suivant, { replace: true })
     if (!m || !nh || chapitresCarnet.length === 0) {
       setErreur('Matière du carnet illisible : choisis les chapitres à la main.')
@@ -2085,6 +2090,7 @@ export function EvaluationGeneratorPanel({
           {bandeauCarnet}
         </p>
       )}
+      {classeCarnetId && connecte && compte.client && !estExercice && <AvertissementEvaluation client={compte.client} classeId={classeCarnetId} date={date} />}
 
       {/* ---------- En-tête compact : chapitres, puis le document ---------- */}
       <section className="conc-entete" aria-label="Document">

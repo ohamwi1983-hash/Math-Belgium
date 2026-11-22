@@ -1,0 +1,8 @@
+/* Avertissement « date limite du bulletin » dans le panneau des évaluations (`AvertissementEvaluation.tsx`).
+ * Mêmes teintes que l'agenda du carnet (`agenda.css`) : après la remise = --bad, peu de temps = --attn. */
+.eval-agenda-avertissements { display: flex; flex-direction: column; gap: 8px; margin: 0 0 16px; }
+.eval-agenda-avertissement { margin: 0; padding: 12px 14px; border: 1px solid; border-radius: var(--radius); display: flex; flex-direction: column; gap: 4px; font-size: 0.95rem; line-height: 1.5; color: var(--ink); }
+.eval-agenda-avertissement.apres { background: var(--bad-soft); border-color: color-mix(in srgb, var(--bad) 35%, transparent); }
+.eval-agenda-avertissement.apres strong { color: var(--bad); }
+.eval-agenda-avertissement.presse { background: var(--attn-soft); border-color: color-mix(in srgb, var(--attn) 35%, transparent); }
+.eval-agenda-avertissement.presse strong { color: var(--attn); }

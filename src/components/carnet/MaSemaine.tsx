@@ -12,6 +12,9 @@ import { InvitationHoraire } from './Aujourdhui'
 import { grilleSemaine, type CelluleSemaine, type JourSemaine, type RangeeSemaine } from './journeeCarnet'
 import { capitale, dateAbregee, heureCourte, ouvrirFiche, resumeSeance, texteReperes, titreSemaine, trierRecentes, useEcranLarge } from './outilsCarnet'
 import { Planification } from './Planification'
+import { avertissementsInterro, dateCourteJour, evenementsEntre, interrosDuCreneau, motifCourt, predicatSuppression, texteAvertissement, titreEvenement, type Evenement } from '../../lib/agendaEvenements'
+import { CarteRemise, IconeType, PuceType } from './AgendaUi'
+import { TableauHeuresRestantes, titreChapitre } from './HeuresEffectives'
 
 const JOURS = ['Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.']
 const JOURS_LONGS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi']
@@ -54,7 +57,23 @@ export function MaSemaine({
   const vendredi = ajouterJours(lundi, 4)
   const horaireRempli = grilles.some((g) => cases.some((c) => c.ecole_id === g.ecole_id))
   const principale = ctx.ecoles.find((e) => e.par_defaut)?.id
-  const grille = useMemo(() => grilleSemaine(lundi, grilles, cases, principale), [lundi, grilles, cases, principale])
+  const agenda = ctx.ctxAgenda
+  const grille = useMemo(
+    () => grilleSemaine(lundi, grilles, cases, principale, agenda ? { evenements: agenda.evenements, classes: agenda.classes } : undefined),
+    [lundi, grilles, cases, principale, agenda],
+  )
+  const evenementsSemaine = ctx.agenda.actif ? evenementsEntre(ctx.agenda.evenements, lundi, vendredi) : []
+  // Bandeau d'un jour : événements sans heure de cours propre (pas les interros posées sur un créneau)
+  // et remise des points de ce jour-là.
+  const enTeteDuJour = (date: string) => {
+    const evs = evenementsSemaine.filter((e) => e.du <= date && date <= e.au && !(e.type === 'interrogation' && !e.journee_entiere))
+    const remises = ctx.agenda.actif ? ctx.agenda.periodes.filter((p) => p.remise === date) : []
+    return { evs, remises }
+  }
+  const avecEnTetes = grille.jours.some((j) => {
+    const t = enTeteDuJour(j.date)
+    return t.evs.length > 0 || t.remises.length > 0
+  })
   const seancesSemaine = seances.filter((s) => s.date_seance >= lundi && s.date_seance <= vendredi)
 
   // Séances de la semaine qui ne correspondent à aucun créneau : placées dans une case libre de
@@ -104,8 +123,66 @@ export function MaSemaine({
     if (!agenda.vide) ouvrirFiche(agendaPeriodeHtml(agenda, { remarques: false, liens: true, professeur: ctx.professeur }))
   }
 
+  function contenuEnTete(date: string) {
+    const { evs, remises } = enTeteDuJour(date)
+    if (evs.length === 0 && remises.length === 0) return null
+    return (
+      <div className="agenda-entete-jour">
+        {evs.map((e) => (
+          <button key={e.id} type="button" className={`agenda-puce-jour agenda-t-${e.type}`} onClick={() => ctx.ouvrirEvenement(e)}>
+            <IconeType type={e.type} taille={13} />
+            <span>{e.type === 'interrogation' ? `Interro · ${ctx.classes.find((c) => c.id === e.classe_id)?.nom ?? ''}` : titreEvenement(e)}</span>
+          </button>
+        ))}
+        {remises.map((p) => (
+          <span key={p.id} className="agenda-puce-jour agenda-remise-puce">
+            <IconeType type="remise" taille={13} />
+            <span>
+              Remise des points P{p.numero}
+              {ctx.ecoles.length > 1 ? ` · ${ctx.ecoles.find((e) => e.id === p.ecole_id)?.nom ?? ''}` : ''}
+            </span>
+          </span>
+        ))}
+      </div>
+    )
+  }
+
+  function lignesInterro(c: Creneau) {
+    const interros = ctx.agenda.actif ? interrosDuCreneau(c, ctx.agenda.evenements) : []
+    return interros.map((e) => {
+      const av = avertissementsInterro({ date: e.du, ecoleId: c.ecole_id, periodes: ctx.agenda.periodes, evenements: ctx.agenda.evenements, seuil: ctx.agenda.seuil, aujourdhui })
+      return (
+        <span key={e.id} className="agenda-case-interro">
+          <span className="agenda-case-interro-titre">Interro{e.chapitre ? ` · ${titreChapitre(e.chapitre)}` : ''}</span>
+          {av.map((a) => (
+            <span key={a.type} className={`agenda-mini-alerte ${a.type === 'apres' ? 'apres' : 'presse'}`}>
+              <IconeType type="attention" taille={12} /> {texteAvertissement(a, e.du).court}
+            </span>
+          ))}
+        </span>
+      )
+    })
+  }
+
   function contenuCellule(j: JourSemaine, k: number, cel: CelluleSemaine, compact: boolean) {
     const nomJour = `${JOURS_LONGS[j.jour - 1]} ${Number(j.date.slice(8, 10))}`
+    if (cel.type === 'supprime') {
+      const x = cel.s
+      const classe = ctx.classes.find((c) => c.id === x.classe_id)
+      const quand = `${numerosCreneau(x)} ${plage(x.debut, x.fin)}`
+      return (
+        <button
+          type="button"
+          className="carnet-case-semaine supprime"
+          onClick={() => ctx.ouvrirEvenement(x.evenement)}
+          aria-label={`${classe?.nom}, ${nomJour}, ${quand} : pas cours — ${motifCourt(x.evenement)}${x.accompagne ? ' (tu accompagnes)' : ''}. Modifier l’événement`}
+        >
+          <s>{classe?.nom}</s>
+          {compact && <span className="carnet-case-quand">{quand}</span>}
+          <span className="carnet-case-resume">pas cours{compact ? ` — ${motifCourt(x.evenement)}` : ''}</span>
+        </button>
+      )
+    }
     if (cel.type === 'creneau') {
       const c = cel.c
       const s = seanceDuCreneau(c, seances)
@@ -123,6 +200,7 @@ export function MaSemaine({
               {r.chapitre}
               {r.numeros && ` · ${r.numeros}`}
             </span>
+            {lignesInterro(c)}
           </button>
         )
       }
@@ -131,6 +209,7 @@ export function MaSemaine({
           <strong>{classe?.nom}</strong>
           {compact && <span className="carnet-case-quand">{quand}</span>}
           <span className="carnet-case-resume">{st === 'a-venir' ? 'à venir · noter' : st === 'en-cours' ? 'en cours · Noter' : 'Noter'}</span>
+          {lignesInterro(c)}
         </button>
       )
     }
@@ -200,6 +279,16 @@ export function MaSemaine({
             <button type="button" className="carnet-bouton" disabled={!pret} onClick={imprimer} title={pret ? undefined : 'Aucune séance notée cette semaine'}>
               Imprimer la semaine
             </button>
+            <button
+              type="button"
+              className="carnet-bouton principal agenda-bouton-evenement"
+              onClick={() => {
+                const d = lundi <= aujourdhui && aujourdhui <= vendredi ? aujourdhui : lundi
+                ctx.nouvelEvenement({ du: d, au: d })
+              }}
+            >
+              <span aria-hidden="true">+</span> Événement
+            </button>
           </div>
         </div>
 
@@ -219,6 +308,14 @@ export function MaSemaine({
                     </th>
                   ))}
                 </tr>
+                {avecEnTetes && (
+                  <tr className="agenda-rangee-entetes">
+                    <td />
+                    {grille.jours.map((j) => (
+                      <td key={j.date}>{contenuEnTete(j.date)}</td>
+                    ))}
+                  </tr>
+                )}
               </thead>
               <tbody>
                 {grille.rangees.map((r, k) => (
@@ -266,6 +363,7 @@ export function MaSemaine({
                     {capitale(dateAbregee(j.date))}
                     {j.date === aujourdhui && ' · aujourd’hui'}
                   </p>
+                  {contenuEnTete(j.date)}
                   {j.cellules[0]?.type === 'conge' ? (
                     <p className="carnet-case-conge seul">{contenuCellule(j, 0, j.cellules[0], true)}</p>
                   ) : (
@@ -316,11 +414,63 @@ export function MaSemaine({
         )}
       </section>
 
+      {ctx.agenda.actif && (
+        <aside className="carnet-cote agenda-cote-semaine" aria-label="Agenda de la semaine">
+          {horaireRempli && <TableauHeuresRestantes maintenant={maintenant} />}
+          {ctx.ecoles.map((e) => (
+            <CarteRemise
+              key={e.id}
+              ecoleId={e.id}
+              nomEcole={ctx.ecoles.filter((x) => ctx.agenda.periodes.some((p) => p.ecole_id === x.id)).length > 1 ? e.nom : undefined}
+              periodes={ctx.agenda.periodes}
+              aujourdhui={aujourdhui}
+            />
+          ))}
+          <section className="carnet-carte agenda-evenements-semaine" aria-labelledby={`${id}-evs`}>
+            <h3 id={`${id}-evs`} className="agenda-surtitre">
+              Événements de la semaine
+            </h3>
+            {evenementsSemaine.length === 0 ? (
+              <p className="compte-vide">Aucun événement cette semaine.</p>
+            ) : (
+              <ul>
+                {evenementsSemaine.map((e) => (
+                  <LigneEvenementSemaine key={e.id} e={e} />
+                ))}
+              </ul>
+            )}
+          </section>
+        </aside>
+      )}
+
       {horaireRempli && (
         <div id="heures-restantes" className="carnet-restantes-bloc">
-          <Planification grilles={grilles} cases={cases} classes={ctx.classes} maintenant={maintenant} />
+          <Planification grilles={grilles} cases={cases} classes={ctx.classes} maintenant={maintenant} supprimee={agenda ? predicatSuppression(agenda) : undefined} />
         </div>
       )}
     </div>
+  )
+}
+
+/** « Journée pédagogique — lun. 7/12 · toutes les classes », « Interrogation — mer. 9/12 · 5e B · Suites ». */
+function LigneEvenementSemaine({ e }: { e: Evenement }) {
+  const ctx = useCarnet()
+  const noms =
+    e.type === 'interrogation'
+      ? (ctx.classes.find((c) => c.id === e.classe_id)?.nom ?? '')
+      : e.toutes_classes
+        ? 'toutes les classes'
+        : e.classes
+            .map((cid) => ctx.classes.find((c) => c.id === cid)?.nom ?? '')
+            .filter(Boolean)
+            .join(', ')
+  const quoi = e.type === 'interrogation' ? (e.chapitre ? titreChapitre(e.chapitre) : '') : e.intitule.trim()
+  return (
+    <li>
+      <button type="button" className="agenda-a-venir-ligne colonne" onClick={() => ctx.ouvrirEvenement(e)}>
+        <PuceType type={e.type} />
+        <span>{[e.du === e.au ? dateCourteJour(e.du) : `${dateCourteJour(e.du)} → ${dateCourteJour(e.au)}`, noms, quoi].filter(Boolean).join(' · ')}</span>
+      </button>
+    </li>
   )
 }
