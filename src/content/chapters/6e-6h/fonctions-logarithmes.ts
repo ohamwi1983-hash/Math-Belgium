@@ -20,6 +20,19 @@ export const fonctionsLogarithmes: ChapterContent = {
       number: 1,
       title: 'Propriétés du logarithme',
       kicker: 'réciproque de exp_a, propriétés algébriques, changement de base',
+      titreCourt: 'Propriétés du logarithme',
+      partie: 'Propriétés, équations, inéquations',
+      essentiel: [
+        'Pour $a>0$, $a \\neq 1$ et $x>0$ : $\\log_a(x) = y \\iff a^y = x$. $\\log_a$ est la réciproque de $\\exp_a$, définie sur $]0;+\\infty[$ ; son graphique passe par $(1;0)$.',
+        '$\\log_a(xy) = \\log_a(x) + \\log_a(y)$, $\\log_a(x/y) = \\log_a(x) - \\log_a(y)$ et $\\log_a(x^r) = r \\cdot \\log_a(x)$ ; mais $\\log_a(x+y)$ ne se sépare jamais.',
+        'Changement de base : $\\log_a(x) = \\dfrac{\\ln(x)}{\\ln(a)}$, avec $\\ln = \\log_e$. Le nombre de chiffres d\'un entier N est la partie entière de $\\log(N)$, plus 1.',
+      ],
+      cartes: [
+        { question: 'Calcule $\\log_4(8)$ sans calculatrice.', reponse: '$8 = 4^{3/2}$, donc $\\log_4(8) = \\dfrac{3}{2}$.' },
+        { question: 'Écris $2\\ln(3) - \\ln(6) + \\ln(4)$ en un seul logarithme.', reponse: '$\\ln\\left(\\dfrac{9\\times4}{6}\\right) = \\ln(6)$.' },
+        { question: '$\\ln\\left(x^2\\right) = 2\\ln(x)$ : est-ce toujours vrai ?', reponse: 'Seulement si $x > 0$ ; pour tout $x \\neq 0$, $\\ln\\left(x^2\\right) = 2\\ln|x|$.' },
+        { question: 'Combien de chiffres compte $2^{1000}$ ?', reponse: '$1000\\log(2) \\approx 301{,}03$ : $301 + 1 = 302$ chiffres.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Définition du logarithme et premières propriétés (1/4)', youtubeId: 'Xg5LQ6_GBRg' },
         { kind: 'video', title: 'Propriétés algébriques : produit, quotient, puissance (2/4)', youtubeId: 'nei3-hTjJl4' },
@@ -1091,6 +1104,19 @@ export const fonctionsLogarithmes: ChapterContent = {
       number: 2,
       title: 'Résoudre une équation exponentielle ou logarithmique',
       kicker: 'appliquer log_a ou exp_a aux deux membres',
+      titreCourt: 'Résoudre une équation',
+      partie: 'Propriétés, équations, inéquations',
+      essentiel: [
+        '$a^x = b$ (avec $b>0$) donne $x = \\log_a(b) = \\dfrac{\\ln(b)}{\\ln(a)}$ ; $\\log_a(u) = b$ donne $u = a^b$.',
+        'D\'abord la CE : chaque argument de logarithme de l\'équation **initiale** strictement positif. $\\log_a(x) = \\log_a(y) \\iff x = y$, puis on rejette les solutions hors CE.',
+        'Regrouper des logarithmes peut changer le domaine et créer une solution parasite. Avec $t = \\log_a(x)$, aucune racine t n\'est à rejeter.',
+      ],
+      cartes: [
+        { question: 'Résous $3^x = 20$.', reponse: '$x = \\log_3(20) = \\dfrac{\\ln(20)}{\\ln(3)} \\approx 2{,}727$.' },
+        { question: 'Résous $\\ln(2x-1) = 3$.', reponse: '$2x - 1 = e^3$, donc $x = \\dfrac{e^3+1}{2} \\approx 10{,}54$.' },
+        { question: 'Résous $\\log_2(x) + \\log_2(x-2) = 3$.', reponse: 'CE : $x > 2$. $x(x-2) = 8$ donne 4 ou −2, et −2 est rejetée : $S = \\{4\\}$.' },
+        { question: 'Résous $(\\ln(x))^2 - \\ln(x) - 2 = 0$.', reponse: 'Avec $t = \\ln(x)$ : $t = 2$ ou $t = -1$, donc $x = e^2$ ou $x = e^{-1}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Résoudre une équation exponentielle ou logarithmique', youtubeId: 'X26gAVNimiU' },
         {
@@ -1386,6 +1412,19 @@ export const fonctionsLogarithmes: ChapterContent = {
       number: 3,
       title: 'Résoudre une inéquation logarithmique',
       kicker: 'le sens dépend de la base — domaine d\'abord, toujours',
+      titreCourt: 'Inéquations logarithmiques',
+      partie: 'Propriétés, équations, inéquations',
+      essentiel: [
+        'Le domaine d\'abord, toujours ; puis on résout l\'inégalité à l\'intérieur de ce domaine.',
+        'Si $a>1$ : $\\log_a(u) \\le \\log_a(v) \\iff u \\le v$ ; si $0<a<1$, le sens s\'inverse. Avec une constante : $\\log_a(u) \\le y \\iff u \\le a^y$ si $a>1$.',
+        '$\\ln(u) > 0 \\iff u > 1$ et $\\ln(u) < 0 \\iff 0 < u < 1$. Diviser par un logarithme négatif, comme $\\ln(0{,}8)$, inverse le sens.',
+      ],
+      cartes: [
+        { question: 'Résous $\\ln(x) \\le 2$.', reponse: 'Domaine $x > 0$, puis $x \\le e^2$ : $S = ]0\\,;\\,e^2]$.' },
+        { question: 'Résous $\\ln(x-1) > 0$.', reponse: 'Domaine $x > 1$ ; $x - 1 > 1$, donc $S = ]2\\,;\\,+\\infty[$.' },
+        { question: 'Résous $\\log_{0,5}(x) \\le 2$.', reponse: 'Base < 1, sens inversé : $x \\ge 0{,}5^2 = 0{,}25$, soit $S = [0{,}25\\,;+\\infty[$.' },
+        { question: 'À partir de quel entier n a-t-on $0{,}8^n < 0{,}05$ ?', reponse: '$n > \\dfrac{\\ln(0{,}05)}{\\ln(0{,}8)} \\approx 13{,}4$ (sens inversé), donc $n \\ge 14$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Résoudre une inéquation logarithmique', youtubeId: 'te3WQrHiU1c' },
         {
@@ -1735,6 +1774,19 @@ export const fonctionsLogarithmes: ChapterContent = {
       number: 4,
       title: 'Domaine, dérivée et dérivation logarithmique',
       kicker: "(ln x)' = 1/x, dérivation logarithmique, exposant variable",
+      titreCourt: 'Dérivée du logarithme',
+      partie: 'Dérivée, limites, paramètres',
+      essentiel: [
+        '$(\\ln(x))\' = \\dfrac{1}{x}$ et $(\\log_a(x))\' = \\dfrac{1}{x \\cdot \\ln(a)}$, pour $x > 0$.',
+        '$(\\ln(u(x)))\' = \\dfrac{u\'(x)}{u(x)}$ là où $u(x) > 0$ ; $(\\ln|u(x)|)\' = \\dfrac{u\'(x)}{u(x)}$ là où $u(x) \\neq 0$.',
+        'Exposant variable : $(g(x))^{h(x)} = e^{h(x) \\cdot \\ln(g(x))}$, puis la règle de la chaîne.',
+      ],
+      cartes: [
+        { question: 'Dérive $\\ln(x^2+1)$.', reponse: '$\\dfrac{2x}{x^2+1}$, sur $\\mathbb{R}$.' },
+        { question: 'Domaine et dérivée de $\\ln\\left|x^2-4\\right|$ ?', reponse: '$\\mathbb{R} \\setminus \\{-2;2\\}$ et $\\dfrac{2x}{x^2-4}$.' },
+        { question: '$f(x) = x\\ln(x) - x$ : où est son minimum ?', reponse: '$f\'(x) = \\ln(x)$ s\'annule en 1 : minimum $f(1) = -1$.' },
+        { question: 'Quelle tangente à la courbe de ln passe par l\'origine ?', reponse: '$y = \\dfrac{x}{e}$, la tangente au point $(e\\,;1)$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Domaine, dérivée et dérivation logarithmique', youtubeId: 'Pnu9FWGFghw' },
         {
@@ -2214,6 +2266,19 @@ export const fonctionsLogarithmes: ChapterContent = {
       number: 5,
       title: 'Calculer des limites',
       kicker: 'limites fondamentales, croissance comparée, classement complet',
+      titreCourt: 'Calculer des limites',
+      partie: 'Dérivée, limites, paramètres',
+      essentiel: [
+        'Pour $a>1$ : $\\log_a(x)$ tend vers −∞ en $0^+$ et vers +∞ en +∞ (très lentement) ; la droite $x = 0$ est asymptote verticale.',
+        'Croissance comparée : $\\lim\\limits_{x \\to +\\infty} \\dfrac{\\ln(x)}{x^k} = 0$ pour $k>0$, et $\\lim\\limits_{x \\to 0^+} x\\ln(x) = 0$. Les exponentielles dominent les puissances, qui dominent les logarithmes.',
+        '$\\lim\\limits_{u \\to 0} \\dfrac{\\ln(1+u)}{u} = 1$. Formes $1^{\\infty}$, $0^{0}$, $(+\\infty)^{0}$ : écris $f(x)^{g(x)} = e^{g(x)\\ln f(x)}$.',
+      ],
+      cartes: [
+        { question: '$\\lim\\limits_{x \\to 0^+} x^{x}$ ?', reponse: '$x^{x} = e^{x\\ln x}$ et $x\\ln x \\to 0$ : la limite vaut $e^0 = 1$.' },
+        { question: '$\\lim\\limits_{x \\to +\\infty} \\left(1+\\dfrac{1}{x}\\right)^{x}$ ?', reponse: '$e$ : la forme $1^{\\infty}$ ne vaut pas 1.' },
+        { question: '$\\lim\\limits_{x \\to +\\infty} x\\ln(x)$ : est-ce une forme indéterminée ?', reponse: 'Non : les deux facteurs tendent vers +∞, le produit aussi.' },
+        { question: '$\\lim\\limits_{x \\to +\\infty} \\left(x - \\ln(x)\\right)$ ?', reponse: '$x\\left(1 - \\dfrac{\\ln(x)}{x}\\right) \\to +\\infty$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Calculer des limites', youtubeId: '7sw4Ch5blnY' },
         {
@@ -2598,6 +2663,19 @@ export const fonctionsLogarithmes: ChapterContent = {
       number: 6,
       title: 'Paramètres depuis des conditions graphiques',
       kicker: 'f(x) = a + b·ln(x) — f(1)=a, f\'(1)=b',
+      titreCourt: 'Retrouver des paramètres',
+      partie: 'Dérivée, limites, paramètres',
+      essentiel: [
+        'Pour $f(x) = a + b \\cdot \\ln(x)$ : $f(1) = a$, car $\\ln(1)=0$, et $f\'(1) = b$.',
+        'Un point en $x = e$ donne $f(e) = a + b$, et non a, car $\\ln(e)=1$.',
+        '$f(x) = \\log_a(x - c) + d$ : asymptote $x = c$, point $(c+1\\,;\\,d)$, puis la base lue une unité plus haut ou plus bas.',
+      ],
+      cartes: [
+        { question: '$f(x) = a + b\\ln(x)$ passe par $(1;4)$, avec une tangente de pente 3 en x = 1 : f(x) ?', reponse: '$f(x) = 4 + 3\\ln(x)$.' },
+        { question: '$a = 2$ et la courbe passe par $(e;5)$ : que vaut b ?', reponse: '$a + b = 5$, donc $b = 3$.' },
+        { question: 'La courbe passe par $(e;5)$ et $\\left(e^3;11\\right)$ : a et b ?', reponse: '$a + b = 5$ et $a + 3b = 11$ : $b = 3$ et $a = 2$.' },
+        { question: '$f(x) = a + b\\ln(x - c)$ a pour asymptote $x = 2$ : que vaut c ?', reponse: '$c = 2$ : l\'argument $x - c$ s\'annule en $x = c$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Retrouver des paramètres depuis des conditions graphiques', youtubeId: 'U54C7GsoHs4' },
         {
@@ -2761,6 +2839,19 @@ export const fonctionsLogarithmes: ChapterContent = {
       number: 7,
       title: 'Sinus et cosinus hyperboliques',
       kicker: 'ch²−sh²=1, dérivées croisées, rien à voir avec les angles',
+      titreCourt: 'Fonctions hyperboliques',
+      partie: 'Étudier, puis appliquer',
+      essentiel: [
+        '$\\text{ch}(x) = \\dfrac{e^x+e^{-x}}{2}$, paire, toujours $\\ge 1$ ; $\\text{sh}(x) = \\dfrac{e^x-e^{-x}}{2}$, impaire.',
+        '$\\text{ch}^2(x) - \\text{sh}^2(x) = 1$ : un signe moins, contrairement à $\\cos^2+\\sin^2=1$. Dérivées croisées : $\\text{sh}\' = \\text{ch}$ et $\\text{ch}\' = \\text{sh}$.',
+        'La réciproque de sh est $x \\mapsto \\ln\\left(x + \\sqrt{x^2+1}\\right)$.',
+      ],
+      cartes: [
+        { question: 'Que vaut $\\text{ch}^2(x) - \\text{sh}^2(x)$ ?', reponse: '1, pour tout x réel.' },
+        { question: 'Quelle est la dérivée de ch ?', reponse: 'sh : les deux fonctions échangent leurs rôles par dérivation.' },
+        { question: 'ch peut-elle être négative ?', reponse: 'Non : $\\text{ch}(x) \\ge 1$, avec un minimum en x = 0.' },
+        { question: 'Quelle courbe parcourt le point $(\\text{ch}\\,t;\\text{sh}\\,t)$ ?', reponse: 'La branche droite de l\'hyperbole $x^2 - y^2 = 1$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Sinus et cosinus hyperboliques', youtubeId: 'g_DEAA_S8vA' },
         {
@@ -2927,6 +3018,19 @@ export const fonctionsLogarithmes: ChapterContent = {
       number: 8,
       title: 'Graphique de la fonction dérivée',
       kicker: 'le signe de f\' donne la variation, jamais directement la concavité',
+      titreCourt: 'Graphique de la dérivée',
+      partie: 'Étudier, puis appliquer',
+      essentiel: [
+        'f′ > 0 : f croissante ; f′ < 0 : f décroissante ; f′ s\'annule en changeant de signe : extremum de f.',
+        'Un extremum de f′ donne un point d\'inflexion de f : la concavité se lit sur f″, jamais sur le signe de f′.',
+        'Le minimum de $x - \\ln(x)$ vaut 1 : $\\ln(x) \\le x - 1$ pour tout $x > 0$.',
+      ],
+      cartes: [
+        { question: '$f(x) = x - \\ln(x)$ : minimum ?', reponse: '$f\'(x) = 1 - \\dfrac{1}{x}$ s\'annule en 1 : minimum $f(1) = 1$.' },
+        { question: '$f(x) = \\ln(x) - \\dfrac{x}{2}$ : maximum ?', reponse: '$f\'(x) = \\dfrac{2-x}{2x}$ : maximum en $x = 2$, $f(2) = \\ln(2) - 1$.' },
+        { question: 'Que fait $|f\'|$ près d\'une asymptote verticale de f ?', reponse: 'Il devient très grand : la courbe y devient presque verticale.' },
+        { question: 'f′ est décroissante sur un intervalle : que dire de f ?', reponse: 'f y est concave.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Graphique de la fonction dérivée', youtubeId: 'zCtu1A2BCy0' },
         {
@@ -3035,6 +3139,18 @@ export const fonctionsLogarithmes: ChapterContent = {
       number: 9,
       title: 'Étudier une fonction (synthèse)',
       kicker: 'domaine, limites et asymptotes, dérivée, concavité — dans l\'ordre',
+      titreCourt: 'Étude complète',
+      partie: 'Étudier, puis appliquer',
+      essentiel: [
+        'Dans l\'ordre : domaine, limites et asymptotes, dérivée et variations, concavité. Vérifie à la fois les restrictions du logarithme et celles d\'un dénominateur.',
+        'Pour optimiser en contexte : le domaine tient compte de la situation, et la réponse se donne dans les unités de l\'énoncé.',
+      ],
+      cartes: [
+        { question: '$f(x) = \\dfrac{\\ln(x)}{x}$ : maximum ?', reponse: '$f\'(x) = \\dfrac{1-\\ln(x)}{x^2}$ : maximum en $x = e$, $f(e) = \\dfrac{1}{e}$.' },
+        { question: 'Même f : quelles asymptotes ?', reponse: 'Verticale $x = 0$ ; horizontale $y = 0$ en $+\\infty$, par croissance comparée.' },
+        { question: '$f(x) = x\\ln(x)$ : minimum ?', reponse: '$f\'(x) = \\ln(x) + 1$ : minimum en $x = e^{-1}$, de valeur $-\\dfrac{1}{e}$.' },
+        { question: '$D(v) = 5v - 2v\\ln(v)$ : où le débit est-il maximal ?', reponse: '$D\'(v) = 3 - 2\\ln(v)$ s\'annule en $v = e^{3/2} \\approx 4{,}48$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étudier une fonction : f(x) = ln(x)/x', youtubeId: 'uZjWAZVXFTA' },
         {
@@ -3230,6 +3346,19 @@ export const fonctionsLogarithmes: ChapterContent = {
       number: 10,
       title: 'Logarithmes : problèmes',
       kicker: 'échelles logarithmiques, demi-vie, croissance logistique',
+      titreCourt: 'Échelles et demi-vie',
+      partie: 'Étudier, puis appliquer',
+      essentiel: [
+        'Échelle logarithmique $L = a \\cdot \\log(X) + b$ : multiplier X par k **ajoute** $a \\cdot \\log(k)$ à L. Deux sources sonores identiques : environ +3 dB.',
+        'Demi-vie de $N(t) = N_0 \\cdot e^{-\\lambda t}$ : $T = \\dfrac{\\ln(2)}{\\lambda}$, indépendante de $N_0$. Inconnue dans un exposant : isole l\'exponentielle, puis applique ln.',
+        'Linéariser : points $(x\\,;\\ln(y))$ alignés, modèle $y = k\\cdot a^x$ ; points $(\\ln(x)\\,;\\ln(y))$ alignés, modèle $y = k\\cdot x^n$.',
+      ],
+      cartes: [
+        { question: 'La concentration $[H^+]$ est multipliée par 10 : que devient le pH ?', reponse: 'Il diminue de 1 : la solution est plus acide.' },
+        { question: 'Séisme de magnitude 7 contre 5 : combien de fois plus d\'énergie ?', reponse: '$10^{1{,}5\\times 2} = 10^3$ fois plus.' },
+        { question: 'Deux machines de 60 dB fonctionnent ensemble : quel niveau ?', reponse: '$60 + 10\\log(2) \\approx 63$ dB, jamais 120.' },
+        { question: 'Capital $C_0\\,e^{0{,}035t}$ : en combien de temps double-t-il ?', reponse: '$t = \\dfrac{\\ln(2)}{0{,}035} \\approx 19{,}8$ ans.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Problèmes : pH, demi-vie et croissance logistique', youtubeId: 'HLIc56bYNr0' },
         {
