@@ -5305,3 +5305,24 @@ complexes » 7–9. 63 sections, 63 essentiels (185 phrases), 248 cartes (répon
 qu'en 4e au rendu iPhone 13 : la carte « 1 = √((−1)(−1)) = … = −1 » débordait — réduite à la seule
 ligne fautive. Vérifié : KaTeX strict (0 erreur), étapes / fiche / 248 cartes sans débordement, 0 erreur
 console, `pdftotext` des 9 PDF A4 identique avant / après.
+
+## Synthèses en KaTeX — les 23 chapitres (décision de l'utilisateur, 22/11/2026)
+
+« Ce qu'il faut retenir » (`recap`) entièrement en KaTeX (règle : `content-authoring.md`, « Synthèses en
+KaTeX »). Trouvé au départ : 6e ch. 3, tableau en notation clavier dans une police monospace
+(« ln(ab)=ln(a)+ln(b) », « 1/x (et (ln|x|)′ = 1/x pour x ≠ 0) », « ]0;+∞[ ») et checklist
+(« ln(x²) = 2 ln|x| »). Rendu : `FeatureTable synthese` (en-têtes par `RichText`, police de lecture) ;
+items, cellules, checklist et `forward` passaient déjà par `RichText`. Contenu : 211 champs réécrits
+(4e : 64, 5e : 42, 6e : 105 ; de 1 champ en 4e ch. 8 à 16 en 4e ch. 5), seuls les champs de `recap`
+touchés (diff limité aux littéraux modifiés). Vérifié : KaTeX `strict: 'error'` sur les 477 champs
+RichText des synthèses (0 erreur, 0 `$$`, 0 `$` orphelin, 0 `*` simple, 0 `^`/`sqrt`/`a/b`/`<=`/`>=`/`!=`/`->`
+hors `$…$`) ; onglet Réviser des 23 chapitres (build de production, iPhone 13 et 1 280 px) : 0 erreur
+console, 0 débordement de page ou de synthèse, 0 barre de défilement visible (seule formule plus large
+que l'écran du téléphone : la formule unifiée des 8 paramètres, 4e ch. 3, qui défile dans son cadre) ;
+PDF A4 de 3 chapitres : même nombre de pages, texte `pdftotext` hors synthèse identique (mêmes
+caractères ; dans le formulaire, seul l'ordre d'extraction des fractions KaTeX bouge, le formulaire
+étant décalé verticalement) ; export HTML (6e ch. 3) : synthèse sans `$` littéral, 25 formules KaTeX.
+Notation clavier repérée ailleurs dans le cours (pas corrigée) : fractions « a/b » dans des légendes,
+cellules et textes (« (x−2)/(x+1) », « √3/2 », « 0/0, ∞/∞ », « 3 + 10/71 < π »), « ^ » dans des
+étiquettes de figure (6e ch. 3 « y=2^x », 6e ch. 2 « 2^√3 » en description, 6e ch. 5 « e^(iπ/3) » en
+légende), « x* = (a − 10)/4 » (5e ch. 5, légende d'atelier), « Rm = Cm = 30 € » hors `$…$` (5e ch. 5).

@@ -58,6 +58,23 @@ ci-dessous.
 (`recap.table`, même forme que `featureTable`) sans liste à puces — cas rencontré dès qu'un
 chapitre récapitule plusieurs fonctions/objets comparables plutôt qu'une liste de principes.
 
+### Synthèses en KaTeX (décision de l'utilisateur)
+
+Toute la synthèse « Ce qu'il faut retenir » (`recap.items`, `recap.table` — **en-têtes compris** —,
+`recap.checklist.items`, `recap.forward`) est en KaTeX, jamais en notation clavier ni en Unicode
+« à la main » : `$]0\,;+\infty[$`, `$\ln(1)=0$`, `$\dfrac{1}{x}$`, `$x \neq 0$`, `$180^\circ - \theta$`,
+`$0{,}3$`, `$P(A\mid B)$`, `$\lim\limits_{x \to a}$`… Un nom de variable isolé dans une phrase aussi
+(« le signe de $a$ », « en $x$ »). Un titre en gras qui contient une variable : `**Coefficient**
+$\boldsymbol{a}$` (jamais `**Coefficient a**`, jamais `**…$a$…**`). Les connecteurs entre mots
+(« racines → signe de $a$ », « Horizontale ⟺ $f'(a)=0$ ») et les formules en mots
+(« Milieu = moyenne des coordonnées ») restent du texte. Rendu : `RecapFinal` passe le tableau à
+`FeatureTable synthese` — en-têtes par `RichText` (seule exception à la règle « en-têtes de
+`featureTable` en texte brut », qui vaut toujours dans le corps du cours) et police de lecture
+(`feature-table--synthese`) au lieu de la monospace des tableaux de signes. Restent en texte BRUT :
+`recap.checklist.label` et la carte `recap.entrainement` (titre, description). Contrôle : script de
+`.claude/rules/content-history.md` (« Synthèses en KaTeX ») — KaTeX strict, ni `$$`, ni `$` orphelin,
+ni `*` simple, ni `^`/`sqrt`/`a/b`/`<=`/`>=`/`!=`/`->` hors `$…$`.
+
 ## Champs facultatifs du parcours (`ChapterSection`) — page « une étape par écran »
 
 La page de chapitre est un parcours (carte → une étape par écran → Réviser, voir
@@ -130,7 +147,7 @@ jamais `$$...$$`.
 
 **Piège confirmé en pratique** : seuls `text`/`items`/`formula`/`caption` passent par `RichText`.
 Les `label` de callout, `badge` et `tag` d'exemple, `kicker` de section, `description` de bloc
-`entrainement` et en-têtes de `featureTable` sont rendus en texte BRUT — y écrire `$...$` affiche
+`entrainement` et en-têtes de `featureTable` (sauf `recap.table`, voir « Synthèses en KaTeX ») sont rendus en texte BRUT — y écrire `$...$` affiche
 les dollars littéralement (détecté uniquement au rendu navigateur, jamais par `tsc`). Y mettre des
 caractères Unicode (2ⁿ, x², ×, −), jamais du LaTeX.
 
