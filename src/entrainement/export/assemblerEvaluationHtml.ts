@@ -6,6 +6,7 @@ import { blocCorrectionHtml, echapperHtml, fragmentsEnteteHtml, fragmentsVersHtm
 import { obtenirCssKatexAutonome } from "./katexImage";
 import { qrCodeSvg } from "./qrSvg";
 import { cartoucheEffectif, morceauxSurtitre, type CartoucheEcole } from "./cartouche";
+import { CSS_VARIABLES_PROCESSUS } from "./couleursProcessus";
 import { etiquetteQuestion, examenDeSession, fragmentsConsigne, lignePartie, partiesExamen, NOM_PROCESSUS_EXAMEN, type ChapitreExamen, type OrganisationExamen, type PartieExamen, type QuestionOrdonnable } from "./examen";
 
 /**
@@ -184,6 +185,15 @@ export interface AnnexeDocument {
 }
 
 const NOM_PROCESSUS: Record<1 | 2 | 3, string> = { 1: "Connaître", 2: "Appliquer", 3: "Transférer" };
+/** Nom d'une compétence écrit dans SA couleur (encre de `couleursProcessus.ts` : sarcelle, bleu, bordeaux). */
+function nomProcessusHtml(p: 1 | 2 | 3, nom: string = NOM_PROCESSUS[p]): string {
+  return `<span class="np${p}">${echapperHtml(nom)}</span>`;
+}
+/** Compétence d'une partie d'examen organisée par processus (`processus:<n>`), sinon `null`. */
+function processusDePartie(partie: { cle: string }): 1 | 2 | 3 | null {
+  const m = /^processus:([123])$/.exec(partie.cle);
+  return m ? (Number(m[1]) as 1 | 2 | 3) : null;
+}
 const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
 
 export function dateEnToutesLettres(iso: string): string {
@@ -274,7 +284,9 @@ const POLICE_AMENAGEE = `<link rel="preconnect" href="https://fonts.googleapis.c
 const STYLE_COMMUN = `
 @page { size: A4; margin: 1.3cm 1.5cm; }
 * { box-sizing: border-box; }
-:root { --encre: #1b1d22; --gris: #4a4f58; --filet: #b9bec7; --accent: #1d5b8f; --fond-doux: #eef3f8; --alerte: #9a3b12; --bon: #2f6b3a; }
+:root { --encre: #1b1d22; --gris: #4a4f58; --filet: #b9bec7; --accent: #1d5b8f; --fond-doux: #eef3f8; --alerte: #9a3b12; --bon: #2f6b3a; ${CSS_VARIABLES_PROCESSUS} }
+/* Compétences : 1 Connaître vert sarcelle, 2 Appliquer bleu franc, 3 Transférer rouge bordeaux (couleursProcessus.ts). */
+.np1 { color: var(--proc1-encre); } .np2 { color: var(--proc2-encre); } .np3 { color: var(--proc3-encre); }
 body { margin: 0 auto; width: 21cm; max-width: 21cm; padding: 0.8cm 1cm; color: var(--encre); background: #fff;
   font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif; font-size: 11.5pt; line-height: 1.5; }
 /* Document A4 : largeur fixe (une page imprimée), jamais compressé par un écran étroit — le
@@ -563,6 +575,9 @@ const STYLE_EVALUATION = `
 .calc.autorisee { color: var(--bon); }
 .bloc-processus { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1.5px solid var(--accent); padding-bottom: 2px; margin: 14px 0 6px; break-after: avoid; page-break-after: avoid; }
 .bloc-processus h2 { font-family: Archivo, Arial, sans-serif; font-size: 11.5pt; font-weight: 700; color: var(--accent); }
+.bloc-processus.p1 { border-bottom-color: var(--proc1); } .bloc-processus.p1 h2 { color: var(--proc1-encre); }
+.bloc-processus.p2 { border-bottom-color: var(--proc2); } .bloc-processus.p2 h2 { color: var(--proc2-encre); }
+.bloc-processus.p3 { border-bottom-color: var(--proc3); } .bloc-processus.p3 h2 { color: var(--proc3-encre); }
 .titre-section { font-family: Archivo, Arial, sans-serif; font-size: 9pt; color: var(--gris); margin: 8px 0 2px; }
 .question { margin: 8px 0 0; break-inside: avoid; page-break-inside: avoid; }
 /* Corrigé : une question corrigée pas à pas peut dépasser une page — elle se coupe ENTRE deux
@@ -1083,12 +1098,13 @@ function enteteFeuilleHtml(entete: EnteteEvaluation, sousTitre: string): string 
 }
 
 function exerciceFeuilleHtml(item: ItemEvaluation, numero: number, deuxColonnes = false): string {
-  const tag = [item.notion, NOM_PROCESSUS[item.processus]].filter(Boolean).join(" · ");
+  // Étiquette « notion · compétence » : la compétence dans sa couleur (texte déjà échappé).
+  const tag = [item.notion ? echapperHtml(item.notion) : "", nomProcessusHtml(item.processus)].filter(Boolean).join(" · ");
   if (item.groupe && item.groupe.length > 0) {
     // Question regroupée : plage de niveaux en tête, niveau et QR code PAR LIGNE (pas de QR global).
     const corps = corpsQuestionHtml(item, undefined, { numero, qr: true });
     const sansQr = corpsQuestionHtml(item);
-    const tete = `<div class="ex-tete"><h3>Exercice ${numero}</h3>${niveauHtml(item)}${tag ? `<span class="tag">${echapperHtml(tag)}</span>` : ""}</div>`;
+    const tete = `<div class="ex-tete"><h3>Exercice ${numero}</h3>${niveauHtml(item)}${tag ? `<span class="tag">${tag}</span>` : ""}</div>`;
     // Groupe à graphique : le titre entre dans le début insécable du groupe (`avecTete`).
     if (corps.includes(DEBUT_GROUPE)) return `<section class="ex groupe${classeFigures(sansQr)}${classeLargeur(sansQr, deuxColonnes, 260)}">\n  <div class="ex-texte">${avecTete(tete, corps)}</div>\n</section>`;
     return `<section class="ex groupe${classeFigures(sansQr)}${classeLargeur(sansQr, deuxColonnes, 260)}">
@@ -1101,7 +1117,7 @@ function exerciceFeuilleHtml(item: ItemEvaluation, numero: number, deuxColonnes 
     : "";
   const corps = corpsQuestionHtml(item);
   return `<section class="ex${classeFigures(corps)}${classeLargeur(corps, deuxColonnes, 260)}">
-  <div class="ex-tete"><h3>Exercice ${numero}</h3>${niveauHtml(item)}${tag ? `<span class="tag">${echapperHtml(tag)}</span>` : ""}</div>
+  <div class="ex-tete"><h3>Exercice ${numero}</h3>${niveauHtml(item)}${tag ? `<span class="tag">${tag}</span>` : ""}</div>
   <div class="ex-corps"><div class="ex-texte">${corps}</div>${qr}</div>
 </section>`;
 }
@@ -1218,7 +1234,7 @@ function cartoucheEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation
 function resultatsHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
   const totaux = totauxParProcessus(items);
   const total = items.reduce((t, it) => t + it.points, 0);
-  const tetes = totaux.map((t) => `<th>${NOM_PROCESSUS[t.processus]}</th>`).join("");
+  const tetes = totaux.map((t) => `<th>${nomProcessusHtml(t.processus)}</th>`).join("");
   const cases = totaux.map((t) => `<td class="vide">…… / ${nombreFr(t.total)}</td>`).join("");
   return `<div class="resultats"><table><tr><th style="text-align:left">Processus</th>${tetes}<th class="total">Total</th></tr><tr><td class="lbl">Points</td>${cases}<td class="total vide">…… / ${nombreFr(total)}</td></tr></table>${calculatriceHtml(entete.calculatrice)}</div>`;
 }
@@ -1238,7 +1254,7 @@ function questionsEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation
   let html = "";
   for (const groupe of grouperParProcessus(items)) {
     const totalP = groupe.items.reduce((t, x) => t + x.item.points, 0);
-    const bandeau = `<div class="bloc-processus"><h2>Processus ${groupe.processus} — ${NOM_PROCESSUS[groupe.processus]}</h2><span class="pts">${pointsTexte(totalP)}</span></div>`;
+    const bandeau = `<div class="bloc-processus p${groupe.processus}"><h2>Processus ${groupe.processus} — ${NOM_PROCESSUS[groupe.processus]}</h2><span class="pts">${pointsTexte(totalP)}</span></div>`;
     if (!deuxColonnes) html += bandeau;
     let sectionCourante: string | null = null;
     let questions = "";
@@ -1403,10 +1419,11 @@ function listeGrilleHtml(classe: "err" | "ok", titre: string, entrees: { texte: 
     .join("")}</div>`;
 }
 
-/** Bloc d'une question dans la grille de correction (évaluation : `libelle` = processus). */
-function blocGrilleHtml(item: ItemEvaluation, numero: number, libelle: string): string {
+/** Bloc d'une question dans la grille de correction (évaluation : libellé = processus). `libelleHtml` : déjà
+ * échappé (le nom de la compétence y est dans sa couleur). */
+function blocGrilleHtml(item: ItemEvaluation, numero: number, libelleHtml: string): string {
   const reponse = item.bareme ? `Réponse : <b>${fragmentsVersHtml(item.bareme.reponseFinale)}</b>` : item.notion ? echapperHtml(item.notion) : "";
-  const tete = `<div class="q-tete"><span class="sans">Question ${numero} · ${echapperHtml(libelle)} · ${pointsTexte(item.points)}</span><span>${reponse}</span></div>`;
+  const tete = `<div class="q-tete"><span class="sans">Question ${numero} · ${libelleHtml} · ${pointsTexte(item.points)}</span><span>${reponse}</span></div>`;
   if (!item.bareme || item.bareme.criteres.length === 0) {
     return `<section class="q">${tete}<div class="note">Barème global : ${pointsTexte(item.points)}.</div><div style="padding:3px 10px 0">${correctionHtml(item)}</div></section>`;
   }
@@ -1425,9 +1442,9 @@ function blocGrilleHtml(item: ItemEvaluation, numero: number, libelle: string): 
 function grilleHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
   const totaux = totauxParProcessus(items);
   const total = items.reduce((t, it) => t + it.points, 0);
-  const resume = `${totaux.map((t) => `${NOM_PROCESSUS[t.processus]} ${nombreFr(t.total)}`).join(" · ")} · <b>Total ${nombreFr(total)}</b>`;
+  const resume = `${totaux.map((t) => `${nomProcessusHtml(t.processus)} ${nombreFr(t.total)}`).join(" · ")} · <b>Total ${nombreFr(total)}</b>`;
   const numerotes = itemsNumerotes(items);
-  const blocs = numerotes.map(({ item, numero }) => blocGrilleHtml(item, numero, NOM_PROCESSUS[item.processus])).join("");
+  const blocs = numerotes.map(({ item, numero }) => blocGrilleHtml(item, numero, nomProcessusHtml(item.processus))).join("");
   const reponses = pageReponsesHtml(entete.serieLettre, [{ questions: numerotes }]);
   return `<div class="grille"><div class="tete-grille"><div><span class="surtitre">Document professeur · Série <strong>${echapperHtml(entete.serieLettre)}</strong></span><h1>Grille de correction — ${echapperHtml(titreNettoye(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${reponses}${blocs}
 <div class="regle"><span class="sans">RÈGLE</span><span>Une erreur n'est pénalisée qu'une fois : si une valeur fausse est réutilisée correctement dans la suite, la suite rapporte ses points.</span></div>
@@ -1530,7 +1547,7 @@ function cartoucheBlancheHtml(entete: EnteteEvaluation, items: ItemEvaluation[])
 
 function resultatsBlancheHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
   const totaux = totauxParProcessus(items);
-  const tetes = totaux.map((t) => `<th>${NOM_PROCESSUS[t.processus]}</th>`).join("");
+  const tetes = totaux.map((t) => `<th>${nomProcessusHtml(t.processus)}</th>`).join("");
   const cases = totaux.map((t) => `<td class="vide">…… / ${nombreFr(t.total)}</td>`).join("");
   return `<div class="resultats"><table><tr><th style="text-align:left">Processus</th>${tetes}<th class="total">Total</th></tr><tr><td class="lbl">Mon score</td>${cases}<td class="total vide">…… / ${nombreFr(totalPoints(items))}</td></tr></table>${calculatriceHtml(entete.calculatrice)}</div>`;
 }
@@ -1550,7 +1567,7 @@ function questionsBlancheHtml(items: ItemEvaluation[]): string {
   let html = "";
   for (const groupe of grouperParProcessus(items)) {
     const totalP = groupe.items.reduce((t, x) => t + x.item.points, 0);
-    html += `<div class="bloc-processus"><h2>Processus ${groupe.processus} — ${NOM_PROCESSUS[groupe.processus]}</h2><span class="pts">${pointsTexte(totalP)}</span></div>`;
+    html += `<div class="bloc-processus p${groupe.processus}"><h2>Processus ${groupe.processus} — ${NOM_PROCESSUS[groupe.processus]}</h2><span class="pts">${pointsTexte(totalP)}</span></div>`;
     for (const { item, numero } of groupe.items) {
       const pts = pointsParSousQuestion(item);
       const tete = `<div class="ligne-titre"><span class="num">Question ${numero}</span><span class="pts">${pointsTexte(item.points)}</span></div>`;
@@ -1621,8 +1638,14 @@ const STYLE_EXAMEN = `
 .partie { margin: 16px 0 8px; border-top: 3px solid var(--accent); border-bottom: 1px solid var(--accent); padding: 6px 0 5px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; column-gap: 12px; row-gap: 1px; break-inside: avoid; page-break-inside: avoid; break-after: avoid; page-break-after: avoid; }
 .partie .no { font-family: Archivo, Arial, sans-serif; font-weight: 700; font-size: 9pt; letter-spacing: 0.14em; color: var(--accent); text-transform: uppercase; white-space: nowrap; }
 .partie h2 { font-size: 15pt; font-weight: 600; line-height: 1.25; min-width: 0; overflow-wrap: anywhere; }
+.partie.p1 { border-color: var(--proc1); } .partie.p1 .no { color: var(--proc1-encre); }
+.partie.p2 { border-color: var(--proc2); } .partie.p2 .no { color: var(--proc2-encre); }
+.partie.p3 { border-color: var(--proc3); } .partie.p3 .no { color: var(--proc3-encre); }
 .partie .chs { grid-column: 1 / -1; font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; color: var(--gris); }
 .question .ligne-titre .ch, .q-am .ch, .grille .q-tete .ch { font-family: Archivo, Arial, sans-serif; font-size: 8pt; font-weight: 600; color: var(--gris); border: 1px solid var(--filet); border-radius: 3px; padding: 0 6px; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+.question .ligne-titre .ch.np1, .q-am .ch.np1, .grille .q-tete .ch.np1 { border-color: var(--proc1); color: var(--proc1-encre); }
+.question .ligne-titre .ch.np2, .q-am .ch.np2, .grille .q-tete .ch.np2 { border-color: var(--proc2); color: var(--proc2-encre); }
+.question .ligne-titre .ch.np3, .q-am .ch.np3, .grille .q-tete .ch.np3 { border-color: var(--proc3); color: var(--proc3-encre); }
 .consignes ul.sup { margin: 3px 0 0; padding-left: 1.3em; }
 .consignes ul.sup li { margin: 1px 0; }
 .grille .partie { margin: 16px 0 4px; }
@@ -1697,7 +1720,7 @@ function cartoucheExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, s
 
 function resultatsExamenHtml(entete: EnteteEvaluation, parties: PartieExamen<ItemEvaluation>[]): string {
   const total = parties.reduce((t, p) => t + totalPartie(p), 0);
-  const tetes = parties.map((p) => `<th>${p.romain} · ${echapperHtml(p.titreCourt)}</th>`).join("");
+  const tetes = parties.map((p) => { const proc = processusDePartie(p); return `<th>${p.romain} · ${proc ? nomProcessusHtml(proc, p.titreCourt) : echapperHtml(p.titreCourt)}</th>`; }).join("");
   const cases = parties.map((p) => `<td class="vide">…… / ${nombreFr(totalPartie(p))}</td>`).join("");
   return `<div class="resultats examen"><table><tr><th style="text-align:left">Partie</th>${tetes}<th class="total">Total</th></tr><tr><td class="lbl">Points</td>${cases}<td class="total vide">…… / ${nombreFr(total)}</td></tr></table>${calculatriceHtml(entete.calculatrice)}</div>`;
 }
@@ -1716,12 +1739,15 @@ function consignesExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, i
 }
 
 function ouverturePartieHtml(examen: ExamenDocument, partie: PartieExamen<ItemEvaluation>): string {
-  return `<div class="partie"><span class="no">Partie ${partie.romain}</span><h2>${echapperHtml(partie.titre)}</h2><span class="pts">${pointsTexte(totalPartie(partie))}</span><span class="chs">${echapperHtml(lignePartie(partie, accesExamen, examen.organisation, examen.chapitres))}</span></div>`;
+  const proc = processusDePartie(partie);
+  return `<div class="partie${proc ? ` p${proc}` : ""}"><span class="no">Partie ${partie.romain}</span><h2>${echapperHtml(partie.titre)}</h2><span class="pts">${pointsTexte(totalPartie(partie))}</span><span class="chs">${echapperHtml(lignePartie(partie, accesExamen, examen.organisation, examen.chapitres))}</span></div>`;
 }
 
 function etiquetteHtml(examen: ExamenDocument, item: ItemEvaluation): string {
   const e = etiquetteQuestion(accesExamen(item), examen.organisation, examen.chapitres);
-  return e ? `<span class="ch">${echapperHtml(e)}</span>` : "";
+  // Parties par chapitre : l'étiquette est la compétence, dans sa couleur.
+  const proc = examen.organisation === "chapitre" ? item.processus : null;
+  return e ? `<span class="ch${proc ? ` np${proc}` : ""}">${echapperHtml(e)}</span>` : "";
 }
 
 /** Questions de l'examen, partie par partie. Deux colonnes : chaque partie s'ouvre sur toute la
@@ -1761,7 +1787,7 @@ function grilleExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, item
         .map(({ element: item, numero }) => {
           // Grille (document professeur) : processus ET chapitre de la question.
           const chapitre = examen.chapitres.filter((c) => (item.chapitres ?? []).includes(c.slug)).map((c) => c.titreCourt);
-          const libelle = [NOM_PROCESSUS_EXAMEN[item.processus], chapitre.length > 2 ? "Plusieurs chapitres" : chapitre.join(" · ")].filter(Boolean).join(" · ");
+          const libelle = [nomProcessusHtml(item.processus, NOM_PROCESSUS_EXAMEN[item.processus]), echapperHtml(chapitre.length > 2 ? "Plusieurs chapitres" : chapitre.join(" · "))].filter(Boolean).join(" · ");
           return blocGrilleHtml(item, numero, libelle);
         })
         .join("");

@@ -43,6 +43,7 @@ import {
   rangsDesFigures,
   SEUIL_DEUX_FIGURES,
 } from "./assemblerEvaluationHtml";
+import { couleurProcessusDocx } from "./couleursProcessus";
 import { etiquetteQuestion, fragmentsConsigne, lignePartie, NOM_PROCESSUS_EXAMEN, type PartieExamen } from "./examen";
 import type { BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, LigneCalcul } from "./genererFeuilleExercices";
 import { blocsDeColonnes, colonnesReponses, largeurColonneTableau, largeurFragments, largeurLibelleBloc, largeurLibelleTableau, segmentsDuGroupe, type TableauGroupe } from "./grilleCorrection";
@@ -152,9 +153,9 @@ async function htmlVersParagraphes(html: string): Promise<FileChild[]> {
   }
 }
 
-function cellule(texteCellule: string, options?: { gras?: boolean; largeur?: number }): TableCell {
+function cellule(texteCellule: string, options?: { gras?: boolean; largeur?: number; couleur?: string }): TableCell {
   return new TableCell({
-    children: [new Paragraph({ children: [new TextRun({ text: texteCellule, bold: options?.gras, size: 18 })], alignment: AlignmentType.CENTER })],
+    children: [new Paragraph({ children: [new TextRun({ text: texteCellule, bold: options?.gras, size: 18, color: options?.couleur })], alignment: AlignmentType.CENTER })],
     width: options?.largeur ? { size: options.largeur, type: WidthType.PERCENTAGE } : undefined,
   });
 }
@@ -165,7 +166,7 @@ function tableauResultats(items: ItemEvaluation[]): Table {
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     rows: [
-      new TableRow({ children: [cellule("Processus", { gras: true }), ...totaux.map((x) => cellule(NOM_PROCESSUS[x.p], { gras: true })), cellule("Total", { gras: true })] }),
+      new TableRow({ children: [cellule("Processus", { gras: true }), ...totaux.map((x) => cellule(NOM_PROCESSUS[x.p], { gras: true, couleur: couleurProcessusDocx(x.p) })), cellule("Total", { gras: true })] }),
       new TableRow({ children: [cellule("Points"), ...totaux.map((x) => cellule(`…… / ${nombreFr(x.t)}`)), cellule(`…… / ${nombreFr(total)}`, { gras: true })] }),
     ],
   });
@@ -242,18 +243,18 @@ async function pucesConsignesDocx(lignes: string[]): Promise<Paragraph[]> {
 /** Bandeau d'un processus (« Processus 2 — Appliquer (8 pts) »). */
 function bandeauProcessus(p: 1 | 2 | 3, total: number): Paragraph {
   return new Paragraph({
-    children: [new TextRun({ text: `Processus ${p} — ${NOM_PROCESSUS[p]}`, bold: true, color: ACCENT, size: 24 }), ptsRun(total)],
-    border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: ACCENT, space: 2 } },
+    children: [new TextRun({ text: `Processus ${p} — ${NOM_PROCESSUS[p]}`, bold: true, color: couleurProcessusDocx(p), size: 24 }), ptsRun(total)],
+    border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: couleurProcessusDocx(p, "trait"), space: 2 } },
     spacing: { before: 320, after: 120 },
     keepNext: true,
   });
 }
 
 /** Énoncé d'une question : titre et points, en-tête, figures, sous-questions avec leurs points. */
-async function enonceQuestionDocx(item: ItemEvaluation, numero: number, etiquette?: string): Promise<FileChild[]> {
+async function enonceQuestionDocx(item: ItemEvaluation, numero: number, etiquette?: string, couleurEtiquette?: string): Promise<FileChild[]> {
   const enfants: FileChild[] = [];
-  // Examen : étiquette du processus / du chapitre en petites capitales grises après le numéro.
-  const tag = etiquette ? [new TextRun({ text: `   ${etiquette.toLocaleUpperCase("fr")}`, size: 15, bold: true, color: GRIS, font: "Arial" })] : [];
+  // Examen : étiquette du processus (dans sa couleur) / du chapitre (grise) en petites capitales après le numéro.
+  const tag = etiquette ? [new TextRun({ text: `   ${etiquette.toLocaleUpperCase("fr")}`, size: 15, bold: true, color: couleurEtiquette ?? GRIS, font: "Arial" })] : [];
   enfants.push(new Paragraph({ children: [new TextRun({ text: `Question ${numero}`, bold: true }), ...tag, ptsRun(item.points)], spacing: { before: 200 }, keepNext: true }));
   // Groupe à graphique : la consigne reste avec la première rangée de figures.
   const figures = !!item.groupe?.some((l) => l.figureHtml);
@@ -522,12 +523,18 @@ function enteteExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument, suff
   ];
 }
 
+/** Compétence d'une partie d'examen organisée par processus (`processus:<n>`), sinon `null`. */
+function processusDePartie(partie: { cle: string }): 1 | 2 | 3 | null {
+  const m = /^processus:([123])$/.exec(partie.cle);
+  return m ? (Number(m[1]) as 1 | 2 | 3) : null;
+}
+
 function tableauPartiesDocx(parties: PartieExamen<ItemEvaluation>[]): Table {
   const total = parties.reduce((t, p) => t + totalPartie(p), 0);
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     rows: [
-      new TableRow({ children: [cellule("Partie", { gras: true }), ...parties.map((p) => cellule(`${p.romain} · ${p.titreCourt}`, { gras: true })), cellule("Total", { gras: true })] }),
+      new TableRow({ children: [cellule("Partie", { gras: true }), ...parties.map((p) => { const proc = processusDePartie(p); return cellule(`${p.romain} · ${p.titreCourt}`, { gras: true, couleur: proc ? couleurProcessusDocx(proc) : undefined }); }), cellule("Total", { gras: true })] }),
       new TableRow({ children: [cellule("Points"), ...parties.map((p) => cellule(`…… / ${nombreFr(totalPartie(p))}`)), cellule(`…… / ${nombreFr(total)}`, { gras: true })] }),
     ],
   });
@@ -552,14 +559,18 @@ async function consignesExamenDocx(entete: EnteteEvaluation, examen: ExamenDocum
 
 /** Ouverture d'une partie : filet épais d'accent, « PARTIE I  Titre » et ses points, ligne grise. */
 function ouverturePartieDocx(examen: ExamenDocument, partie: PartieExamen<ItemEvaluation>): Paragraph[] {
+  // Partie d'une compétence (examen par processus) : filets et « PARTIE I » dans sa couleur.
+  const proc = processusDePartie(partie);
+  const encre = proc ? couleurProcessusDocx(proc) : ACCENT;
+  const trait = proc ? couleurProcessusDocx(proc, "trait") : ACCENT;
   return [
     new Paragraph({
       children: [
-        new TextRun({ text: `PARTIE ${partie.romain}   `, bold: true, color: ACCENT, size: 18, font: "Arial", characterSpacing: 30 }),
+        new TextRun({ text: `PARTIE ${partie.romain}   `, bold: true, color: encre, size: 18, font: "Arial", characterSpacing: 30 }),
         new TextRun({ text: partie.titre, bold: true, size: 28 }),
         new TextRun({ text: `\t${pointsTexte(totalPartie(partie))}`, size: 18, color: GRIS }),
       ],
-      border: { top: { style: BorderStyle.SINGLE, size: 24, color: ACCENT, space: 4 } },
+      border: { top: { style: BorderStyle.SINGLE, size: 24, color: trait, space: 4 } },
       tabStops: [{ type: TabStopType.RIGHT, position: LARGEUR_UTILE }],
       spacing: { before: 320, after: 0 },
       keepNext: true,
@@ -567,7 +578,7 @@ function ouverturePartieDocx(examen: ExamenDocument, partie: PartieExamen<ItemEv
     }),
     new Paragraph({
       children: [new TextRun({ text: lignePartie(partie, accesItem, examen.organisation, examen.chapitres), size: 17, color: GRIS })],
-      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: ACCENT, space: 3 } },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: trait, space: 3 } },
       spacing: { after: 120 },
       keepNext: true,
     }),
@@ -584,7 +595,7 @@ async function questionsExamenDocx(entete: EnteteEvaluation, examen: ExamenDocum
         sectionCourante = item.titreSection;
         enfants.push(new Paragraph({ children: [new TextRun({ text: item.titreSection, size: 18, color: GRIS })], spacing: { before: 120 } }));
       }
-      enfants.push(...(await enonceQuestionDocx(item, numero, etiquetteQuestion(accesItem(item), examen.organisation, examen.chapitres))));
+      enfants.push(...(await enonceQuestionDocx(item, numero, etiquetteQuestion(accesItem(item), examen.organisation, examen.chapitres), examen.organisation === "chapitre" ? couleurProcessusDocx(item.processus) : undefined)));
       if (corrige) enfants.push(...(await correctionDocx(item)));
     }
   }
@@ -825,12 +836,21 @@ export async function genererGrilleEvaluationDocx(entete: EnteteEvaluation, item
   const totaux = ([1, 2, 3] as const).map((p) => ({ p, t: items.filter((it) => it.processus === p).reduce((s, it) => s + it.points, 0) })).filter((x) => x.t > 0);
   const total = items.reduce((s, it) => s + it.points, 0);
   const parties = examen ? partiesDuDocument(examen, items) : [];
-  const resume = examen ? parties.map((p) => `${p.romain} ${p.titreCourt} : ${nombreFr(totalPartie(p))}`).join(" · ") : totaux.map((x) => `${NOM_PROCESSUS[x.p]} ${nombreFr(x.t)}`).join(" · ");
+  // Résumé : le nom de chaque compétence dans sa couleur (examen par processus : le titre de la partie).
+  const resume: TextRun[] = (
+    examen
+      ? parties.map((p) => ({ nom: `${p.romain} ${p.titreCourt}`, suite: ` : ${nombreFr(totalPartie(p))}`, proc: processusDePartie(p) }))
+      : totaux.map((x) => ({ nom: NOM_PROCESSUS[x.p], suite: ` ${nombreFr(x.t)}`, proc: x.p }))
+  ).flatMap((m, i) => [
+    ...(i > 0 ? [new TextRun({ text: " · ", size: 18, color: GRIS })] : []),
+    new TextRun({ text: m.nom, size: 18, color: m.proc ? couleurProcessusDocx(m.proc) : GRIS }),
+    new TextRun({ text: m.suite, size: 18, color: GRIS }),
+  ]);
   const enfants: FileChild[] = [
     new Paragraph({ children: [new TextRun({ text: `Document professeur · ${examen ? "Examen · " : ""}Série `, size: 16, color: ACCENT }), new TextRun({ text: entete.serieLettre, size: 16, color: ACCENT, bold: true })] }),
     new Paragraph({ children: [new TextRun({ text: `Grille de correction — ${examen ? titreExamen(entete) : titreNettoye(entete)}`, bold: true, size: 32 })], spacing: { before: 60 } }),
     new Paragraph({
-      children: [new TextRun({ text: `${resume} · `, size: 18, color: GRIS }), new TextRun({ text: `Total ${nombreFr(total)}`, size: 18, bold: true })],
+      children: [...resume, new TextRun({ text: " · ", size: 18, color: GRIS }), new TextRun({ text: `Total ${nombreFr(total)}`, size: 18, bold: true })],
       border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: "1B1D22", space: 4 } },
       spacing: { after: 160 },
     }),
@@ -838,19 +858,20 @@ export async function genererGrilleEvaluationDocx(entete: EnteteEvaluation, item
   // Évaluation : questions par processus ; examen : partie par partie (ouverture de partie, libellé
   // processus · chapitre de chaque question).
   const groupes: { ouverture: Paragraph[]; questions: { item: ItemEvaluation; numero: number; libelle: string }[] }[] = [];
+  // `libelle` = ce qui suit le nom de la compétence (chapitre de l'examen), le nom est écrit dans sa couleur.
   if (examen) {
     for (const partie of parties) {
       groupes.push({
         ouverture: ouverturePartieDocx(examen, partie),
         questions: partie.questions.map(({ element: item, numero }) => {
           const chapitre = examen.chapitres.filter((c) => (item.chapitres ?? []).includes(c.slug)).map((c) => c.titreCourt);
-          return { item, numero, libelle: [NOM_PROCESSUS_EXAMEN[item.processus], chapitre.length > 2 ? "Plusieurs chapitres" : chapitre.join(" · ")].filter(Boolean).join(" · ") };
+          return { item, numero, libelle: chapitre.length > 2 ? "Plusieurs chapitres" : chapitre.join(" · ") };
         }),
       });
     }
   } else {
     let n = 0;
-    for (const p of [1, 2, 3] as const) groupes.push({ ouverture: [], questions: items.filter((it) => it.processus === p).map((item) => ({ item, numero: ++n, libelle: NOM_PROCESSUS[item.processus] })) });
+    for (const p of [1, 2, 3] as const) groupes.push({ ouverture: [], questions: items.filter((it) => it.processus === p).map((item) => ({ item, numero: ++n, libelle: "" })) });
   }
   // A : page « Réponses — Série A » (examen : un bloc par partie), puis le détail sur une page neuve.
   enfants.push(...(await pageReponsesDocx(entete.serieLettre, examen ? parties.map((p, k) => ({ titre: `Partie ${p.romain} · ${p.titre}`, points: totalPartie(p), questions: groupes[k].questions })) : [{ questions: groupes.flatMap((g) => g.questions) }])));
@@ -858,7 +879,11 @@ export async function genererGrilleEvaluationDocx(entete: EnteteEvaluation, item
   for (const groupe of groupes) {
     enfants.push(...groupe.ouverture);
     for (const { item, numero, libelle } of groupe.questions) {
-      const tete: ParagraphChild[] = [new TextRun({ text: `Question ${numero} · ${libelle} · ${pointsTexte(item.points)}`, bold: true, size: 19 })];
+      const tete: ParagraphChild[] = [
+        new TextRun({ text: `Question ${numero} · `, bold: true, size: 19 }),
+        new TextRun({ text: (examen ? NOM_PROCESSUS_EXAMEN : NOM_PROCESSUS)[item.processus], bold: true, size: 19, color: couleurProcessusDocx(item.processus) }),
+        new TextRun({ text: `${libelle ? ` · ${libelle}` : ""} · ${pointsTexte(item.points)}`, bold: true, size: 19 }),
+      ];
       if (item.bareme) tete.push(new TextRun({ text: "    Réponse : ", size: 19 }), ...(await fragmentsVersRunsDocx(item.bareme.reponseFinale, { gras: true })));
       else if (item.notion) tete.push(new TextRun({ text: `    ${item.notion}`, size: 19 }));
       enfants.push(new Paragraph({ children: tete, shading: { type: ShadingType.CLEAR, color: "auto", fill: "EEF3F8" }, spacing: { before: 200, after: 60 }, keepNext: true }));

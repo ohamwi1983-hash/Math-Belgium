@@ -64,6 +64,25 @@
   --dowel-light: #c8995f;
   --dowel-dark: #5c3016;
   --on-accent: #fff8f0;
+  /* Compétences (processus) 1 Connaître · 2 Appliquer · 3 Transférer — décision de l'utilisateur du
+     22/11/2026 : vert sarcelle (le plus clair), bleu franc (clarté moyenne), rouge bordeaux (le plus
+     foncé). Elles se distinguent par la teinte ET par la clarté (lisibles en niveaux de gris et en
+     deutéranopie / protanopie) ; le numéro reste dans la pastille. Jetons dédiés : --sky, --accent,
+     --plan, --good, --bad gardent leurs autres usages. `--procN` = pastille, barre, point ; `--on-procN`
+     = texte posé dessus (≥ 4,5:1) ; `--procN-ink` = texte sur la page ou sur `--procN-soft` (≥ 7:1).
+     Mêmes teintes sur papier et en Word : `entrainement/export/couleursProcessus.ts` (valeurs claires). */
+  --proc1: #0c828a;
+  --proc1-ink: #05585e;
+  --proc1-soft: #d8f5f6;
+  --on-proc1: #ffffff;
+  --proc2: #1d52a8;
+  --proc2-ink: #133f87;
+  --proc2-soft: #e3eefe;
+  --on-proc2: #ffffff;
+  --proc3: #67152e;
+  --proc3-ink: #60132a;
+  --proc3-soft: #fbe7ea;
+  --on-proc3: #ffffff;
   --radius: 3px;
   --serif: "Fraunces", "Iowan Old Style", "Georgia", serif;
   --sans: "Work Sans", "Segoe UI", system-ui, sans-serif;
@@ -131,6 +150,19 @@
     --dowel-light: #f0c892;
     --dowel-dark: #8a5a2e;
     --on-accent: #201404;
+    /* Compétences en sombre : même ordre de clarté (sarcelle > bleu > bordeaux), texte foncé dessus. */
+    --proc1: #7be0df;
+    --proc1-ink: #98e4e3;
+    --proc1-soft: #112e30;
+    --on-proc1: #10161d;
+    --proc2: #77a9f3;
+    --proc2-ink: #a7c9fc;
+    --proc2-soft: #1b273a;
+    --on-proc2: #10161d;
+    --proc3: #c1628b;
+    --proc3-ink: #e6afc4;
+    --proc3-soft: #341d27;
+    --on-proc3: #10161d;
     color-scheme: dark;
   }
 }
@@ -1716,11 +1748,10 @@ table.feature-table--synthese { font-family: inherit; font-size: 0.94em; }
 /* ---------- Page de conception des feuilles, évaluations et examens (proposition A, 21/11/2026) ----------
  * Catalogue à gauche (façons de composer, recherche, filtre par processus, sections en accordéon),
  * « Ma feuille » / « Mon évaluation » / « Mon examen » à droite, collant ; sous 960 px : une colonne et
- * une barre fixée en bas qui ouvre le panneau (feuille du bas). Processus : 1 = --sky, 2 = --accent,
- * 3 = --plan. Cibles ≥ 44 px sur téléphone. */
+ * une barre fixée en bas qui ouvre le panneau (feuille du bas). Processus : 1 = --proc1 (vert sarcelle),
+ * 2 = --proc2 (bleu franc), 3 = --proc3 (rouge bordeaux). Cibles ≥ 44 px sur téléphone. */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-.conc { --conc-on-pc: #fff; gap: 16px; }
-@media (prefers-color-scheme: dark) { .conc { --conc-on-pc: #10161d; } }
+.conc { gap: 16px; }
 .conc button:focus-visible, .conc input:focus-visible, .conc select:focus-visible, .conc textarea:focus-visible, .conc summary:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 2px;
 }
@@ -1756,12 +1787,12 @@ table.feature-table--synthese { font-family: inherit; font-size: 0.94em; }
 /* Pastilles de processus */
 .conc-pc {
   display: inline-flex; align-items: center; justify-content: center; flex: none;
-  width: 22px; height: 22px; border-radius: 50%; font: 700 12px/1 var(--sans); color: var(--conc-on-pc);
+  width: 22px; height: 22px; border-radius: 50%; font: 700 12px/1 var(--sans);
 }
 .conc-pc-petite { width: 18px; height: 18px; font-size: 10.5px; }
-.conc-pc-1 { background: var(--sky); }
-.conc-pc-2 { background: var(--accent); }
-.conc-pc-3 { background: var(--plan); }
+.conc-pc-1 { background: var(--proc1); color: var(--on-proc1); }
+.conc-pc-2 { background: var(--proc2); color: var(--on-proc2); }
+.conc-pc-3 { background: var(--proc3); color: var(--on-proc3); }
 .conc-pastilles { display: inline-flex; gap: 4px; align-items: center; }
 
 /* Puces (filtres, documents de l'aperçu) */
@@ -1838,11 +1869,11 @@ table.feature-table--synthese { font-family: inherit; font-size: 0.94em; }
 .conc-rep-barre { display: flex; height: 24px; border-radius: 999px; overflow: hidden; background: var(--paper); }
 .conc-rep-seg {
   display: flex; align-items: center; justify-content: center; flex-basis: 0; min-width: 0; overflow: hidden;
-  font: 700 0.74rem var(--mono); color: var(--conc-on-pc); white-space: nowrap; transition: flex-grow 0.15s;
+  font: 700 0.74rem var(--mono); white-space: nowrap; transition: flex-grow 0.15s;
 }
-.conc-rep-seg-1 { background: var(--sky); }
-.conc-rep-seg-2 { background: var(--accent); }
-.conc-rep-seg-3 { background: var(--plan); }
+.conc-rep-seg-1 { background: var(--proc1); color: var(--on-proc1); }
+.conc-rep-seg-2 { background: var(--proc2); color: var(--on-proc2); }
+.conc-rep-seg-3 { background: var(--proc3); color: var(--on-proc3); }
 .conc-rep-lignes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .conc-rep-ligne { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 4px 0; border-bottom: 1px solid var(--line-soft); }
 .conc-rep-ligne:last-child { border-bottom: 0; }
@@ -1979,13 +2010,13 @@ table.feature-table--synthese { font-family: inherit; font-size: 0.94em; }
 .conc-jauge > span { display: block; height: 100%; background: var(--good); border-radius: 999px; }
 .conc-jauge > span.conc-jauge-trop { background: var(--bad); }
 .conc-barre { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: var(--paper); }
-.conc-barre-p1 { background: var(--sky); }
-.conc-barre-p2 { background: var(--accent); }
-.conc-barre-p3 { background: var(--plan); }
+.conc-barre-p1 { background: var(--proc1); }
+.conc-barre-p2 { background: var(--proc2); }
+.conc-barre-p3 { background: var(--proc3); }
 .conc-legende { margin: 0; display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 0.78rem; color: var(--ink-soft); }
-.conc-legende-p1 { color: var(--sky-ink); }
-.conc-legende-p2 { color: var(--accent-ink); }
-.conc-legende-p3 { color: var(--plan-ink); }
+.conc-legende-p1 { color: var(--proc1-ink); }
+.conc-legende-p2 { color: var(--proc2-ink); }
+.conc-legende-p3 { color: var(--proc3-ink); }
 .conc-ajuster { margin-right: 0; }
 .conc-ajuster .conc-bouton { min-height: 36px; padding: 6px 12px; font-size: 0.85rem; }
 .conc-parties { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
