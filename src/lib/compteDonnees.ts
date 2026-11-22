@@ -12,6 +12,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PlanDocument } from './evaluationLocal'
 import { messageErreur, normaliserCodeInvitation, plansLocauxAImporter, typeDuPlan, type Ecole, type PlanLocal, type Profil, type TypePlan } from './compteValidation'
+import { estRepartitionDefaut, repartitionValide, type RepartitionPourcents } from './repartitionProcessus'
 
 export class ErreurCompte extends Error {
   constructor(brute: unknown) {
@@ -107,6 +108,44 @@ export async function lireProfil(c: SupabaseClient, id: string): Promise<Profil 
 
 export async function majNomAffiche(c: SupabaseClient, id: string, nom: string): Promise<void> {
   verifier(await c.from('profils').update({ nom_affiche: nom.trim() }).eq('id', id))
+}
+
+/* -------------------------------------------------------------------------- répartition (0005) */
+
+/** Colonne `profils.repartition` inconnue : `0005_repartition.sql` pas encore collé (Postgres 42703
+ * en lecture, PostgREST PGRST204 en écriture, ou message « schema cache » / « does not exist »). */
+export function colonneRepartitionAbsente(erreur: unknown): boolean {
+  const e = (erreur ?? {}) as { code?: string; message?: string }
+  return /repartition/i.test(String(e.message ?? '')) && (e.code === '42703' || e.code === 'PGRST204' || /does not exist|schema cache|could not find/i.test(String(e.message ?? '')))
+}
+
+/** `actif: false` = 0005 pas appliquée (le réglage ne vaut alors que pour la session) ;
+ * `repartition: null` = défaut (colonne NULL, ou valeur illisible — impossible avec la contrainte). */
+export type LectureRepartition = { actif: true; repartition: RepartitionPourcents | null } | { actif: false }
+
+/** Répartition « Préparer l'évaluation » du professeur. Lue À PART du profil (`lireProfil` ne
+ * change pas) : sans 0005, seul ce réglage est concerné, rien d'autre ne casse. */
+export async function lireRepartition(c: SupabaseClient, id: string): Promise<LectureRepartition> {
+  const res = await c.from('profils').select('repartition').eq('id', id).maybeSingle()
+  if (res.error) {
+    if (colonneRepartitionAbsente(res.error)) return { actif: false }
+    throw new ErreurCompte(res.error)
+  }
+  const brute = (res.data as { repartition?: unknown } | null)?.repartition ?? null
+  return { actif: true, repartition: repartitionValide(brute) ? brute : null }
+}
+
+/** Mémorise la répartition (le défaut est stocké NULL). Renvoie `false` si 0005 n'est pas appliquée
+ * (rien n'est écrit) ; toute autre erreur lève une `ErreurCompte`. */
+export async function enregistrerRepartition(c: SupabaseClient, id: string, r: RepartitionPourcents): Promise<boolean> {
+  if (!repartitionValide(r)) throw new ErreurCompte({ name: 'ErreurCompte', message: 'Répartition refusée : trois nombres entiers de 0 à 100 dont la somme fait 100 %.' })
+  const valeur = estRepartitionDefaut(r) ? null : { connaitre: r.connaitre, appliquer: r.appliquer, transferer: r.transferer }
+  const res = await c.from('profils').update({ repartition: valeur }).eq('id', id)
+  if (res.error) {
+    if (colonneRepartitionAbsente(res.error)) return false
+    throw new ErreurCompte(res.error)
+  }
+  return true
 }
 
 export async function lireEcoles(c: SupabaseClient): Promise<Ecole[]> {

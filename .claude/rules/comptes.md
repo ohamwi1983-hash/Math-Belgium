@@ -7,6 +7,8 @@ paths:
   - "src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation,Carnet,Exercice,ChapterExercice}*"
   - "src/lib/carnet*"
   - "src/lib/horaire.ts"
+  - "src/lib/repartitionProcessus.ts"
+  - "src/components/admin/conception/ReglageRepartition.tsx"
   - "src/lib/calendrierFwb.ts"
   - "src/components/carnet/**"
   - "supabase/**"
@@ -23,7 +25,8 @@ l'administration sont derrière la connexion.
 Aucune donnée d'élève. Phase 2 (faite, section « Phase 2 » en fin de fichier) : carnet de matière vue (`/carnet`),
 puis son horaire de la semaine (`0003_horaire.sql`, sous-section « Horaire de la semaine ») et l'heure
 zéro (`0004_heure_zero.sql`, même sous-section), puis l'agenda d'une période (sous-section « Agenda d'une
-période », sans migration).
+période », sans migration). Répartition Connaître / Appliquer / Transférer de « Préparer l'évaluation »
+mémorisée dans le profil : `0005_repartition.sql` (section « Répartition mémorisée » en fin de fichier).
 Plus tard (pas fait) : partage entre collègues.
 
 ## Décisions de l'utilisateur
@@ -58,7 +61,7 @@ Plus tard (pas fait) : partage entre collègues.
 
 | Table | Colonnes | RLS |
 | --- | --- | --- |
-| `profils` | `id` (= `auth.users.id`, cascade), `nom_affiche`, `est_admin` (faux), `actif` (vrai), dates | lecture : le sien (même désactivé) ou admin ; modification : `nom_affiche` SEUL (droit de colonne), le sien, actif ; pas d'insert/delete client |
+| `profils` | `id` (= `auth.users.id`, cascade), `nom_affiche`, `est_admin` (faux), `actif` (vrai), dates ; + `repartition` jsonb (0005) | lecture : le sien (même désactivé) ou admin ; modification : `nom_affiche` (et `repartition` depuis 0005) SEULS (droits de colonne), le sien, actif ; pas d'insert/delete client |
 | `ecoles` | `proprietaire` (défaut `auth.uid()`), `nom`, `adresse`, `par_defaut` (index unique partiel : une par professeur) | les siennes, compte actif |
 | `invitations` | `code` (A–Z0–9, unique), `cree_par`, `expire_le`, `note`, `utilise_par`, `utilise_par_email`, `utilise_le`, `revoque` | lecture admin ; écriture par les fonctions seulement |
 | `plans` | `proprietaire`, `type` (`exercice`/`evaluation`/`examen`/`remediation`), `titre`, `contenu` jsonb (objet, ≤ 2 Mo), dates | les siens, compte actif |
@@ -682,3 +685,78 @@ des pages inchangés.
   panneau, Aperçu, mode examen, vue élève aller-retour, visiteur sans bandeau, `scrollWidth` = largeur,
   0 erreur console hors document blob de l'Aperçu — `ERR_INVALID_URL`, antérieur) ; le parcours du carnet
   refondu (216, dont 25 textes Smartschool, 25 fiches, 4 agendas identiques à la référence) repasse.
+
+## Répartition mémorisée (22/11/2026 : `supabase/migrations/0005_repartition.sql`)
+
+Décision de l'utilisateur : la répartition Connaître / Appliquer / Transférer de « Préparer l'évaluation »
+(page de conception du professeur : feuilles d'exercices, évaluations, examens) est RÉGLABLE, et la
+valeur du professeur est mémorisée dans son profil. Défaut 25 / 50 / 25 (`REPARTITION_PROCESSUS`).
+L'assistant élève (visiteurs) garde la constante, inchangé. Logique de composition et interface :
+`.claude/rules/feuilles-evaluations.md` (« Façons de composer »).
+
+**Schéma 0005** (idempotent, ne dépend que de 0001 ; « Success. No rows returned », 0005 exécutée trois
+fois sur des données réelles sans rien changer) :
+- `profils.repartition jsonb` (`add column if not exists`), **NULL = défaut du site** (tous les profils
+  existants, et chaque nouvelle inscription) ; sinon `{"connaitre": 30, "appliquer": 45, "transferer":
+  25}`.
+- Contrainte `profils_repartition_valide` (ajoutée si absente) = `public.repartition_valide(j)`
+  (`immutable`, `set search_path = ''`, `case` sans conversion hasardeuse) : objet à EXACTEMENT ces trois
+  clés, nombres entiers écrits sans signe ni décimale (`25` ; `25.0`, `-5`, `"25"`, `null`, booléen
+  refusés), chacun ≤ 100, somme 100. Exécution : `revoke … from public, anon`, `grant execute … to
+  authenticated` (une contrainte appelle la fonction avec les droits de celui qui écrit).
+- Droits : `grant update (repartition) on public.profils to authenticated` (droit de COLONNE, comme
+  `nom_affiche` : `est_admin`, `actif`, `id`, dates restent refusés — 42501), `revoke all on
+  public.profils from anon`. Lecture : déjà couverte par le `grant select` de 0001. RLS et politiques
+  INCHANGÉS : on ne lit que son profil (l'administrateur lit les profils, répartition comprise, comme le
+  nom), on ne modifie que le sien et seulement compte actif (`profils_modification`) ; compte désactivé :
+  lecture de son profil, modification sans effet (0 ligne). `supprimer_mon_compte()` inchangé (la ligne
+  part avec le profil).
+- **0001 retouché** (sans effet sans 0005) : son `revoke all … from authenticated` retire aussi les
+  droits de colonne ; un bloc `do` redonne `update (repartition)` si la colonne existe. 0001 reste donc
+  « relançable sans danger » même après 0005 (vérifié : droits identiques, enregistrement possible).
+
+**Code** :
+- `lib/repartitionProcessus.ts` (pur) : `RepartitionPourcents`, `REPARTITION_DEFAUT` (tiré de la
+  constante), `repartitionValide` (même règle que la contrainte), `fractionsRepartition`,
+  `texteRepartition(compact, r)` (espace insécable avant « % »), `ajusterRepartition` (boutons − / +).
+- `lib/compteDonnees.ts` : `lireRepartition(c, id)` — lue À PART de `lireProfil` (inchangé : sans 0005
+  rien d'autre ne casse) → `{ actif: true, repartition | null }` ou `{ actif: false }` ;
+  `enregistrerRepartition(c, id, r)` (défaut écrit NULL ; `false` si 0005 absente) ;
+  `colonneRepartitionAbsente` (42703 / PGRST204 / « schema cache » / « does not exist » mentionnant
+  `repartition`). `messageErreur` : 23514 sur `repartition` → « Répartition refusée… ».
+- `components/admin/conception/ReglageRepartition.tsx` : `useRepartitionProfesseur(compte)` (état
+  `memo` : `sans-compte` / `chargement` / `active` / `absente` / `erreur` ; valeur de session gardée en
+  mémoire du module : elle survit au passage `/exercice` ↔ `/evaluation`, pas à un rechargement ; une
+  valeur réglée avant la fin de la lecture n'est pas écrasée) et `ReglageRepartition` (panneau).
+- **0005 pas appliquée** : réglage et composition marchent pour la session ; le panneau affiche
+  « Mémorisation pas encore activée : colle le fichier 0005_repartition.sql dans l'éditeur SQL de
+  Supabase (SQL Editor → coller tout le fichier → Run). En attendant, ce réglage vaut pour cette
+  session. » (aussi après « Enregistrer », qui n'écrit rien). **Sans compte** (Supabase non configuré,
+  `/admin` historique) : 25 / 50 / 25 réglable pour la session, pas de bouton « Enregistrer », note
+  « Sans compte connecté, ce réglage vaut pour cette session seulement. ».
+
+**Vérifications** (outils dans le dossier de travail `repartition/` : `test_sql.py`, `faux_auth.sql`,
+`composer.cjs`, `ui.mjs`, `faux-supabase.js` étendu) :
+- Postgres 16 local + faux schéma `auth` (0001 → 0004 + données, puis 0005 ×3, ×2 encore avec des
+  valeurs enregistrées, 0001 relancé, 0005 encore) : 93 vérifications — sortie vide (« No rows
+  returned »), données identiques, contrainte une seule fois, seuls droits ajoutés = `UPDATE
+  (repartition)` d'`authenticated`, RLS / politiques inchangés ; lecture / écriture de SA répartition
+  (0/100/0, 100/0/0, clés dans un autre ordre, 33/34/33, NULL, avec `nom_affiche` dans la même
+  requête), celle d'un autre refusée (0 ligne, même pour l'admin en écriture), 17 valeurs invalides
+  refusées (23514 : somme 95 / 105, clé manquante / en trop / mal nommée, négatif, 25.5, 25.0, "25",
+  null, > 100, booléen, tableau, nombre, texte, objet imbriqué, `{}` ; aussi pour le superutilisateur),
+  `est_admin` / `actif` / `id` / dates refusés (42501, seuls ou avec `repartition`), ni insert ni delete,
+  `anon` (lecture, écriture, fonction : 42501), compte désactivé puis réactivé, inscription après 0005
+  (NULL), suppression de compte. Les suites 0003 (90) et 0004 (81) repassent avec 0001 retouché.
+- Playwright (Vite de développement, faux client étendu : option `repartitionAbsente` — 42703 en
+  lecture, PGRST204 en écriture — et contrainte imitée), 1 280 px et iPhone 13 : 138 vérifications
+  (carte et nom accessible, réglage, total 100 à chaque clic, bornes, retour au défaut, enregistrement
+  en base, Échap + focus rendu, rechargement → valeur relue, composition qui suit la répartition — 0 %
+  jamais choisi —, `/evaluation` avec la valeur du profil puis examen, 0005 absente, sans compte,
+  cibles ≥ 44 px, aucun champ numérique, `scrollWidth` = largeur, 0 erreur console).
+
+**Mise en service** : SQL Editor → New query → coller TOUT `0005_repartition.sql` → Run → « Success. No
+rows returned » ; recharger une page de conception → « Préparer l'évaluation » → Modifier → régler →
+« Enregistrer comme ma répartition ». À vérifier contre le vrai projet : enregistrement puis
+rechargement (valeur relue), message « Répartition refusée » impossible depuis le site (les boutons ne
+produisent que des valeurs valides).

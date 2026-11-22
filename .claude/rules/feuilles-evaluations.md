@@ -1113,7 +1113,9 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   tirages y tombent (`candidatAuxNiveaux` ; générateur sans niveau : seulement avec les cinq cochés) —
   la même règle décide la disponibilité, donc un niveau proposé, coché seul, donne au moins un
   exercice. **Proportions** : `REPARTITION_PROCESSUS` (`lib/repartitionProcessus.ts`, répartition de
-  l'utilisateur, SEULE source — aussi « Préparer l'évaluation » du panneau et le texte de sa carte)
+  l'utilisateur, SEULE source du défaut — aussi « Préparer l'évaluation » du panneau tant que le
+  professeur ne l'a pas réglée ; l'assistant élève garde TOUJOURS la constante, jamais le réglage du
+  professeur)
   recalculée sur les compétences cochées (`budgetsParCompetence` ; une seule → 100 %), pour la feuille
   comme pour la blanche ; une compétence cochée sans exercice aux niveaux cochés cède son temps
   (Connaître ou Transférer → Appliquer, sinon l'autre cochée ; Appliquer → à parts égales). Remplissage :
@@ -2145,14 +2147,42 @@ Page du chapitre 390 / 1 280 px : 0 « $ » ni « ** » visible, 0 erreur.
   la part d'un processus absent va à Appliquer), une notion après l'autre, chapitres en alternance ;
   « Sur quelques notions » : notions cochées, 2 exercices + 1 Connaître chacune ; « Préparer
   l'évaluation » / « Répartition … % » : durée visée 50 min (examen : durée saisie, sinon
-  50 min par chapitre, 150 au plus) répartie selon `REPARTITION_PROCESSUS` (`lib/repartitionProcessus.ts`,
-  répartition de l'utilisateur, seule source ; le titre et le texte de la carte la lisent :
-  `texteRepartition`) avec les durées estimées. Variantes du
+  50 min par chapitre, 150 au plus) répartie selon la répartition RÉGLÉE (`ContexteComposition.repartition`,
+  fractions ; absente → `REPARTITION_PROCESSUS`, défaut 25 / 50 / 25 de l'utilisateur ; le titre et le
+  texte de la carte la lisent : `texteRepartition(compact, r)`) avec les durées estimées. Un processus
+  à 0 % n'est JAMAIS choisi ; la part d'un processus sans question possible est cédée
+  (`composer.ts::cederParts`) : Connaître ou Transférer → Appliquer s'il a des questions et une part
+  > 0 (règle d'avant, résultat identique pour 25 / 50 / 25), sinon aux processus présents ayant une part,
+  au prorata ; Appliquer absent → aux présents de la même façon (avant : sa part était perdue). Variantes du
   panneau seulement (groupes « à verdict » = une rangée), calculatrice interdite : variantes et
   générateurs `calculatriceIndispensable` exclus, aucun cas particulier coché, jamais de
   démonstration. Mesuré (23 chapitres × modes × calculatrice, 207 compositions) : 0 défaut, 6
   exercices imprimés pour chaque « équilibrée », durée « Préparer l'évaluation » de 43 à 67 min (médiane 51,
-mesurée avec l'ancienne répartition).
+mesurée avec l'ancienne répartition ; 25 / 50 / 25 : de 42 à 59 min, médiane 49).
+- **Répartition réglable** (décision de l'utilisateur, 22/11/2026 ; mémorisation : `.claude/rules/comptes.md`,
+  « Répartition mémorisée », `0005_repartition.sql`). Carte « Préparer l'évaluation » : la carte
+  (bouton) affiche la répartition courante (« 25 % / 50 % / 25 % ») et, dans le même cadre, un bouton
+  frère « ⚙ Modifier » (`aria-expanded`, nom « Modifier la répartition (25 % / 50 % / 25 %) », note
+  « ta répartition » / « réglée pour cette session »). Il ouvre sous les cartes le panneau
+  `conception/ReglageRepartition.tsx` : barre empilée aux couleurs des processus, une rangée par
+  compétence (pastille, nom, « ≈ m min » de la durée visée, boutons − / + de 5 en 5, cibles 44 px —
+  aucune saisie, donc ni champ numérique ni valeur bloquée pendant la frappe). **Total toujours 100**
+  (`repartitionProcessus.ts::ajusterRepartition`) : Appliquer compense quand on règle Connaître ou
+  Transférer (Transférer si Appliquer est à 0) ; régler Appliquer reprend à la plus grande des deux
+  autres (Transférer à égalité) ou donne à la plus petite (Connaître à égalité) ; bouton désactivé à
+  une borne. Toutes les répartitions par pas de 5 (231) sont atteignables. Boutons : « Préparer avec
+  30 / 45 / 25 % » (compose aussitôt), « Revenir à 25 / 50 / 25 », « Enregistrer comme ma répartition »
+  (professeur connecté ; désactivé quand rien n'a changé), « Fermer » (et Échap : focus rendu à
+  « Modifier ») ; état sous les boutons (`role=status`) : enregistrée, pas encore enregistrée (avec la
+  valeur mémorisée), « Mémorisation pas encore activée : colle le fichier 0005_repartition.sql… »,
+  sans compte (session seulement). Le réglage vaut pour feuille d'exercices, évaluation et examen.
+  Vérifié (`repartition/composer.cjs`, module réel) : contrôle d'origine (207 compositions, 0 défaut),
+  non-régression 1 863 / 1 863 compositions identiques au code d'avant à graine égale (trois façons ×
+  23 chapitres × modes × calculatrice × 3 graines, répartition absente / constante / réglée 25 / 50 /
+  25), 1 242 compositions sous 9 autres répartitions (0/100/0, 100/0/0, 0/0/100, 50/50/0, 0/50/50,
+  40/40/20, 10/80/10, 35/30/35, 30/45/25) : 0 question d'un processus à 0 %, rien de vide, temps par
+  processus à quelques minutes de sa part (écart médian 0 à 4 min) ; 1 346 contrôles purs. Playwright :
+  `.claude/rules/comptes.md`.
 - **Téléphone (< 960 px)** : une colonne ; barre fixée en bas « Ma feuille · n exercices ▴ ·
   ≈ m min · niveaux » + « Générer » ; le panneau s'ouvre en feuille du bas (voile, « Fermer ») ;
   cibles ≥ 44 px, champs à 16 px.
