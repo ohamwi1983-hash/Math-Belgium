@@ -510,6 +510,44 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           ],
         },
         {
+          kind: 'para',
+          text:
+            '**Comment se mesure l\'angle avec Oy ?** L\'angle avec Ox part du demi-axe positif de Ox ' +
+            'et tourne dans le sens inverse des aiguilles d\'une montre, vers le demi-axe positif de Oy, ' +
+            'jusqu\'à rencontrer la droite. L\'angle avec Oy fait le chemin symétrique : il part du ' +
+            '**demi-axe positif de Oy** et tourne dans le **sens des aiguilles d\'une montre**, vers le ' +
+            'demi-axe positif de Ox, jusqu\'à rencontrer la droite. On le prend lui aussi dans ' +
+            '$[0^{\\circ};180^{\\circ}[$ : c\'est exactement $90^{\\circ} - \\theta_{Ox}$, ramené dans cet ' +
+            'intervalle. Ce n\'est donc pas toujours le plus petit angle entre la droite et l\'axe : une ' +
+            'droite à $135^{\\circ}$ de Ox fait aussi $135^{\\circ}$ avec Oy, alors qu\'elle ne « penche » ' +
+            'que de $45^{\\circ}$ par rapport à lui.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -1.5,
+            xMax: 3.5,
+            yMin: -1.2,
+            yMax: 3.4875,
+            vectors: [{ from: { x: -1.2, y: 3.2 }, to: { x: 3.2, y: -1.2 }, tone: 'accent', arrow: false }],
+            points: [
+              { x: 2, y: 0, tone: 'ink', node: true },
+              { x: 0, y: 2, tone: 'ink', node: true },
+              { x: -0.95, y: 2.6, label: 'd', tone: 'accent', node: false },
+            ],
+            angleArcs: [
+              { cx: 2, cy: 0, fromDeg: 0, toDeg: 135, radiusPx: 22, label: '135°', tone: 'attn' },
+              { cx: 0, cy: 2, fromDeg: -45, toDeg: 90, radiusPx: 30, label: '135°', tone: 'good' },
+            ],
+            caption:
+              'd : $y = -x + 2$ — l\'angle avec $Ox$ (orange) part du demi-axe positif de $Ox$, sens inverse ' +
+              'des aiguilles d\'une montre ; l\'angle avec $Oy$ (vert) part du demi-axe positif de $Oy$, sens ' +
+              'des aiguilles d\'une montre : $90^{\\circ} - 135^{\\circ} = -45^{\\circ}$, plus $180^{\\circ}$, ' +
+              'donne $135^{\\circ}$',
+          },
+        },
+        {
           kind: 'exemple',
           badge: 'équation → pente, angles, p',
           formula: 'd : y = √3·x + 2',
@@ -1391,9 +1429,9 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'rien d\'autre que le théorème de **Pythagore** (6e siècle avant J.-C.) écrit ' +
             'avec des coordonnées : la distance entre deux points, ' +
             '$\\sqrt{(x-x_0)^2+(y-y_0)^2}$, est l\'hypoténuse d\'un triangle rectangle dont ' +
-            'les deux côtés mesurent $|x-x_0|$ et $|y-y_0|$. Pythagore et son école ' +
-            'pythagoricienne, dans la Grèce antique, démontrent ce résultat pour des ' +
-            'triangles concrets, dessinés — ils n\'ont ni coordonnées, ni algèbre, ni même de ' +
+            'les deux côtés mesurent $|x-x_0|$ et $|y-y_0|$. Ce résultat est attribué à ' +
+            'Pythagore et à son école, dans la Grèce antique, qui le pensaient pour des ' +
+            'triangles concrets, dessinés — ils n\'avaient ni coordonnées, ni algèbre, ni même de ' +
             'notation symbolique pour les nombres inconnus. Il faudra attendre près de 2000 ' +
             'ans, et l\'invention du repère par Fermat et Descartes, pour que ce théorème ' +
             'devienne aussi l\'équation d\'un cercle.',
@@ -1460,11 +1498,12 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         },
         {
           kind: 'attention',
-          label: 'Condition — un cercle, pas une ellipse',
+          label: 'Condition — même coefficient devant x² et y²',
           text:
             'Si les coefficients de x² et de y² sont **différents**, l\'équation ne décrit pas ' +
-            'un cercle, mais une ellipse ! Cette méthode ne marche que si le coefficient est ' +
-            'identique sur les deux carrés.',
+            'un cercle : ce peut être une ellipse, une hyperbole, une parabole, ou même aucun point ' +
+            '(tu verras ces courbes, les coniques, en 6e). Cette méthode ne marche que si le ' +
+            'coefficient est identique sur les deux carrés.',
         },
         {
           kind: 'exemple',
@@ -1608,14 +1647,16 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'Un récepteur GPS ne « voit » jamais directement sa position : il la calcule. ' +
             'Chaque satellite envoie un signal horodaté, et le récepteur mesure le temps que ' +
             'ce signal a mis à arriver pour en déduire sa distance exacte à ce satellite. ' +
-            'Connaître sa distance à UN satellite, c\'est savoir qu\'on se trouve quelque ' +
-            'part sur un cercle (en réalité une sphère, en 3D) centré sur ce satellite — ' +
-            'exactement l\'équation $(x-x_0)^2+(y-y_0)^2=r^2$ de cette section, avec r la ' +
-            'distance mesurée. Avec un seul satellite, une infinité de positions sont ' +
-            'possibles ; avec un deuxième, l\'intersection des deux cercles réduit à 2 ' +
-            'points ; un troisième satellite élimine la dernière ambiguïté. C\'est cette ' +
+            'Connaître sa distance à un satellite, c\'est savoir qu\'on se trouve quelque ' +
+            'part sur une sphère centrée sur ce satellite. Raisonnons **dans le plan**, où la ' +
+            'sphère devient un cercle — exactement l\'équation $(x-x_0)^2+(y-y_0)^2=r^2$ de cette ' +
+            'section, avec r la distance mesurée. Avec un seul satellite, une infinité de ' +
+            'positions sont possibles ; avec un deuxième, l\'intersection des deux cercles réduit ' +
+            'à 2 points ; un troisième satellite élimine la dernière ambiguïté. C\'est cette ' +
             'méthode, appelée **trilatération**, qui permet à ton téléphone d\'afficher ta ' +
-            'position à quelques mètres près.',
+            'position à quelques mètres près. Dans l\'espace, deux sphères se coupent en tout un ' +
+            'cercle, il faut donc une sphère de plus ; et un vrai récepteur utilise encore un ' +
+            'satellite supplémentaire pour corriger l\'erreur de sa propre horloge.',
           domaines: ['Navigation', 'Technologie'],
         },
         {
@@ -1679,7 +1720,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           text:
             'Une parabole, c\'est l\'ensemble des points P situés à la même distance d\'un ' +
             'point fixe F, le **foyer**, et d\'une droite fixe d, la **directrice**. Toujours ' +
-            '$PF = distance(P, d)$. Le **sommet** S de la parabole est le milieu du segment qui ' +
+            '$PF = \\text{dist}(P, d)$. Le **sommet** S de la parabole est le milieu du segment qui ' +
             "relie F au point de d le plus proche — exactement à mi-chemin entre le foyer et la " +
             'directrice.',
         },
@@ -1730,8 +1771,9 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'et au compas. En coupant un cône par un plan de différentes façons, il obtient ' +
             'plusieurs courbes nouvelles — dont la parabole — et montre qu\'elles permettent ' +
             'de résoudre son problème. La définition par foyer et directrice que tu utilises ' +
-            'aujourd\'hui viendra bien plus tard, avec Apollonius de Perga ; Ménechme, lui, ' +
-            'ne connaissait la parabole que comme une tranche de cône.',
+            'aujourd\'hui viendra bien plus tard : on la trouve chez **Pappus d\'Alexandrie**, au ' +
+            '4e siècle après J.-C., qui l\'attribue à Euclide. Ménechme, lui, ne connaissait la ' +
+            'parabole que comme une tranche de cône.',
         },
         { kind: 'subheading', text: "L'équation" },
         {
@@ -1754,13 +1796,13 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'para',
           text:
             'Prends le foyer $F(0 ; p/2)$ et la directrice $d : y=-p/2$. Un point P(x ; y) est ' +
-            'sur la parabole exactement quand $dist(P,F) = dist(P,d)$ :',
+            'sur la parabole exactement quand $\\text{dist}(P,F) = \\text{dist}(P,d)$ :',
         },
         {
           kind: 'exemple',
           steps: [
-            { tag: 'équidistance', text: '$\\sqrt{x^2+(y-p/2)^2} = y+p/2$' },
-            { tag: 'élever au carré', text: '$x^2+y^2-py+p^2/4 = y^2+py+p^2/4$' },
+            { tag: 'équidistance', text: '$\\sqrt{x^2+(y-p/2)^2} = |y+p/2|$' },
+            { tag: 'élever au carré', text: 'les deux membres sont positifs : $x^2+y^2-py+p^2/4 = y^2+py+p^2/4$' },
           ],
           result: { tag: 'après simplification', text: '$x^2=2py$' },
         },
@@ -1896,7 +1938,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             "la parallèle à $d$ passant par $A$ (c'est la perpendiculaire à l'axe en $A$) ; enfin, " +
             "**sans changer l'ouverture**, pointe en $F$ : le cercle coupe cette parallèle en deux " +
             "points de la parabole. La même ouverture sert deux fois — c'est elle qui garantit " +
-            "$PF = distance(P, d)$.",
+            "$PF = \\text{dist}(P, d)$.",
         },
         { kind: 'subheading', text: 'Deuxième méthode : la médiatrice' },
         {
@@ -1997,6 +2039,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       essentiel: [
         'Méthode : identifier chaque lieu, écrire son équation, résoudre le système par substitution, puis dénombrer les solutions.',
         'Avec une droite et un cercle (ou une parabole), on obtient une équation du second degré au plus : 0, 1 ou 2 points communs ; une racine double veut dire que la droite est tangente.',
+        'Une droite parallèle à l\'axe d\'une parabole donne une équation du **premier** degré : un seul point commun, sans être tangente.',
       ],
       cartes: [
         { question: '« Les points dont l\'ordonnée est le triple de l\'abscisse » : quel lieu ?', reponse: 'La droite $y = 3x$.' },
@@ -2139,6 +2182,16 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           result: { tag: 'résultat', text: 'un seul point, (2 ; 1) : la droite est tangente à la parabole' },
         },
         {
+          kind: 'piege',
+          label: 'Piège — un seul point ne veut pas toujours dire « tangente »',
+          text:
+            'Une droite **parallèle à l\'axe** d\'une parabole (une verticale $x = k$ pour une parabole ' +
+            'd\'axe vertical) la coupe en un seul point, mais elle la **traverse** : ce n\'est pas une ' +
+            'tangente. La substitution donne alors une équation du **premier** degré, pas une racine ' +
+            'double. La règle reste vraie : c\'est la racine **double** d\'une équation du second degré ' +
+            'qui signale une tangente, pas le simple fait d\'avoir un seul point.',
+        },
+        {
           kind: 'exemple',
           badge: 'à partir de deux phrases',
           formula:
@@ -2241,9 +2294,10 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       {
         title: 'Pente et angles',
         formulas: [
-          { text: '$m = \\tan\\theta$', condition: '$\\theta \\in [0°;180°[$' },
+          { text: '$m = \\tan\\theta$', condition: '$\\theta \\in [0^\\circ;180^\\circ[$, angle avec $Ox$' },
           { text: '$m = -\\dfrac{a}{b}$, $p = -\\dfrac{c}{b}$', condition: 'depuis $ax+by+c=0$, $b \\neq 0$' },
-          { text: '$\\theta_{Oy} = 90° - \\theta_{Ox}$', condition: 'ramené dans $[0°;180°[$ (+180° si négatif)' },
+          { text: '$\\theta_{Oy} = 90^\\circ - \\theta_{Ox}$', condition: 'ramené dans $[0^\\circ;180^\\circ[$ : $+180^\\circ$ si négatif ; mesuré depuis le demi-axe positif de $Oy$, dans le sens des aiguilles d\'une montre' },
+          { text: '$\\begin{pmatrix} \\cos\\theta \\\\ \\sin\\theta \\end{pmatrix}$, $\\begin{pmatrix} \\sin\\alpha \\\\ \\cos\\alpha \\end{pmatrix}$', condition: 'vecteur directeur : angle $\\theta$ avec $Ox$, angle $\\alpha$ avec $Oy$' },
         ],
       },
       {
@@ -2251,33 +2305,62 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         formulas: [
           {
             text: '$\\alpha \\cdot \\beta\' - \\beta \\cdot \\alpha\' = 0$',
-            condition: 'parallèles (critère de colinéarité nul) — ou $m=m\'$',
+            condition: 'parallèles, critère de colinéarité nul — ou $m=m\'$',
           },
           {
             text: '$\\alpha \\cdot \\alpha\' + \\beta \\cdot \\beta\' = 0$',
-            condition: 'perpendiculaires (produit scalaire nul) — ou $m \\cdot m\' = -1$ si aucune droite n\'est verticale ni horizontale',
+            condition: 'perpendiculaires, produit scalaire nul — ou $m \\cdot m\' = -1$ si aucune droite n\'est verticale ni horizontale',
           },
+          { text: '$ax + by + c\' = 0$', condition: 'parallèle à $ax + by + c = 0$ : seul $c$ change' },
+          { text: '$a(m) = b(m) = 0$', condition: 'droite à paramètre : cette valeur de $m$ est rejetée, ce n\'est plus une droite' },
         ],
       },
       {
-        title: 'Distance à une droite particulière',
+        title: 'Intersection, mobiles',
         formulas: [
-          { text: '$|x_P - k|$', condition: 'distance de P à la verticale x = k' },
-          { text: '$|y_P - k|$', condition: 'distance de P à l\'horizontale y = k' },
+          { text: '$t_1 = t_2$', condition: 'deux mobiles se rencontrent : même point des trajectoires au même instant' },
+        ],
+      },
+      {
+        title: 'Milieu, centre de gravité, aire',
+        formulas: [
+          { text: '$x_M=\\dfrac{x_A+x_B}{2}$, $y_M=\\dfrac{y_A+y_B}{2}$', condition: 'milieu $M$ de $[AB]$' },
+          { text: '$x_G=\\dfrac{x_A+x_B+x_C}{3}$, $y_G=\\dfrac{y_A+y_B+y_C}{3}$', condition: 'centre de gravité $G$ du triangle $ABC$' },
+          { text: '$\\mathcal{A}=\\dfrac{BC \\cdot AH}{2}$', condition: '$H$ pied de la perpendiculaire à $(BC)$ issue de $A$' },
+        ],
+      },
+      {
+        title: 'Droites remarquables',
+        formulas: [
+          { text: '$a(x-x_M)+b(y-y_M)=0$', condition: 'médiatrice de $[AB]$ : vecteur normal $\\vec{AB}\\begin{pmatrix} a \\\\ b \\end{pmatrix}$, passe par le milieu $M$' },
+          { text: '$a(x-x_A)+b(y-y_A)=0$', condition: 'hauteur issue de $A$ : vecteur normal $\\vec{BC}\\begin{pmatrix} a \\\\ b \\end{pmatrix}$' },
+          { text: '$\\vec{AM}$', condition: 'vecteur directeur de la médiane issue de $A$, $M$ milieu de $[BC]$' },
+        ],
+      },
+      {
+        title: 'Distance, projeté, symétrique',
+        formulas: [
+          { text: '$|x_P - k|$', condition: 'distance de $P$ à la verticale $x = k$' },
+          { text: '$|y_P - k|$', condition: 'distance de $P$ à l\'horizontale $y = k$' },
+          { text: '$x_{A\'}=2x_H-x_A$, $y_{A\'}=2y_H-y_A$', condition: 'symétrique $A\'$ de $A$ par rapport à $d$ ; $H$ projeté orthogonal de $A$ sur $d$' },
         ],
       },
       {
         title: 'Cercle',
         formulas: [
-          { text: '$(x-x_0)^2+(y-y_0)^2=r^2$', condition: 'centre $(x_0;y_0)$, rayon r — second membre ≤ 0 : pas de cercle' },
-          { text: '$\\vec{CP} \\cdot \\vec{PM} = 0$', condition: 'tangente en P : perpendiculaire au rayon [CP]' },
+          { text: '$(x-x_0)^2+(y-y_0)^2=r^2$', condition: 'centre $(x_0;y_0)$, rayon $r$ — second membre nul ou négatif : pas de cercle' },
+          { text: '$\\vec{CP} \\cdot \\vec{PM} = 0$', condition: 'tangente en $P$ : perpendiculaire au rayon $[CP]$' },
+          { text: '$CH > r$, $CH = r$, $CH < r$', condition: 'droite extérieure, tangente, sécante — $CH$ : distance du centre à la droite' },
+          { text: '$r = CH$', condition: 'cercle de centre $C$ tangent à la droite $d$' },
         ],
       },
       {
         title: 'Parabole',
         formulas: [
           { text: '$(x-x_S)^2=2p(y-y_S)$', condition: 'axe vertical — $p=2(y_F-y_S)$' },
+          { text: '$F\\left(x_S\\,;\\,y_S+\\dfrac{p}{2}\\right)$, $y=y_S-\\dfrac{p}{2}$', condition: 'axe vertical : foyer et directrice' },
           { text: '$(y-y_S)^2=2p(x-x_S)$', condition: 'axe horizontal — $p=2(x_F-x_S)$' },
+          { text: '$F\\left(x_S+\\dfrac{p}{2}\\,;\\,y_S\\right)$, $x=x_S-\\dfrac{p}{2}$', condition: 'axe horizontal : foyer et directrice' },
           { text: '$p = \\dfrac{1}{2a}$', condition: 'pour la parabole $y = ax^2$' },
         ],
       },
@@ -2285,6 +2368,8 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         title: 'Lieux géométriques',
         formulas: [
           { text: '$MA^2 = MB^2$', condition: 'médiatrice de [AB] — les carrés s\'éliminent, il reste une droite' },
+          { text: 'Soustraire les deux équations', condition: 'deux cercles : les carrés disparaissent, il reste une droite' },
+          { text: 'Racine double', condition: 'droite tangente au cercle ou à la parabole ; une droite parallèle à l\'axe d\'une parabole la coupe en un seul point sans être tangente' },
         ],
       },
     ],
@@ -2302,12 +2387,23 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       'Parallèles / perpendiculaires — critère de colinéarité nul ↔ colinéaires ; produit scalaire nul ↔ ' +
         'orthogonaux. En pentes : $m=m\'$ ou $m \\cdot m\'=-1$.',
       "Intersection — compare d'abord les vecteurs directeurs (sécantes ou colinéaires), avant tout calcul de système.",
+      'Paramètres et mobiles — une condition (parallèle, perpendiculaire, passe par un point…) donne une ' +
+        'équation en $m$, et on rejette toute valeur qui annule à la fois $a(m)$ et $b(m)$. Deux mobiles ne ' +
+        'se rencontrent que si, en plus d\'un point commun des trajectoires, $t_1 = t_2$.',
       'Distance — jamais de formule directe : perpendiculaire, intersection, puis norme du vecteur obtenu.',
+      'Triangle, projeté, symétrique — médiatrice et hauteur ont pour vecteur normal un côté du triangle ; ' +
+        'les coordonnées du centre de gravité $G$ sont les moyennes de celles des sommets. Le projeté $H$ ' +
+        'est le pied de la perpendiculaire, et le symétrique vérifie $x_{A\'} = 2x_H - x_A$.',
       'Cercle — $(x-x_0)^2+(y-y_0)^2=r^2$. En développée, le coefficient de $x^2$ et de $y^2$ doit ' +
         'être **identique**, puis tu complètes le carré pour retrouver centre et rayon.',
+      'Cercle et droite — la tangente en $P$ est perpendiculaire au rayon $[CP]$ ; une droite est ' +
+        'extérieure, tangente ou sécante selon que $CH > r$, $CH = r$ ou $CH < r$. Pour déterminer un ' +
+        'cercle, on cherche d\'abord son centre : milieu d\'un diamètre, intersection de deux médiatrices.',
       'Parabole — $PF = \\text{distance}(P, \\text{directrice})$. $p$ est **signé**, le sommet est à ' +
         'mi-chemin entre foyer et directrice, et il y a 2 orientations symétriques.',
-      'Lieux géométriques — traduis la phrase en équation, résous le système par substitution (au plus du second degré quand l\'un des deux lieux est une droite), dénombre 0, 1 ou 2 solutions.',
+      'Lieux géométriques — traduis la phrase en équation, résous le système par substitution (au plus du second degré quand l\'un des deux lieux est une droite), dénombre 0, 1 ou 2 solutions. Une droite parallèle à l\'axe d\'une parabole la coupe en un seul point sans être tangente.',
+      'Deux cercles — soustraire leurs équations fait disparaître les carrés : il reste une droite, que ' +
+        'l\'on substitue dans l\'une des deux équations.',
     ],
     checklist: {
       label: 'Avant de rendre ta copie',
