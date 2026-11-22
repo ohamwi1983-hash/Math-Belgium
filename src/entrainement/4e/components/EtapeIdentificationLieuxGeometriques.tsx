@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ariaOptionChoixFerme, classeOptionChoixFerme } from "../ui/choixFige";
 import type { ExerciceLieuxGeometriques, Lieu, TypeLieu } from "../core/lieuxGeometriques.types";
 import { diagnostiquerIdentificationLieu, lieuxComparesIdentification } from "../moteur/verificationLieuxGeometriques";
 import type { ReponseIdentification, ReponseIdentificationLieu } from "../moteur/verificationLieuxGeometriques";
@@ -36,9 +37,12 @@ interface ChampsLieuBrut {
   xF: string;
   yF: string;
   pParabole: string;
+  /** Droite verticale x = k (variante « parallèle à l'axe », parabole d'axe vertical) : un seul champ. */
+  verticale: boolean;
+  k: string;
 }
 
-const CHAMPS_VIDES: ChampsLieuBrut = { type: null, m: "", p: "", x0: "", y0: "", rayon: "", xF: "", yF: "", pParabole: "" };
+const CHAMPS_VIDES: ChampsLieuBrut = { type: null, m: "", p: "", x0: "", y0: "", rayon: "", xF: "", yF: "", pParabole: "", verticale: false, k: "" };
 
 /** Entier, décimal (virgule ou point) ou fraction `p/q` (audit chapitre 7, point 60 : une pente
  * comme 3/4 doit pouvoir s'écrire telle quelle) — `NaN` si illisible (`parse_error` côté moteur). */
@@ -46,7 +50,7 @@ const nombre = nombreOuNaN;
 
 /** Champs numériques présents (selon le type choisi) tous lisibles. */
 function champsLisibles(c: ChampsLieuBrut): boolean {
-  if (c.type === "droite") return nombresLisibles(c.m, c.p);
+  if (c.type === "droite") return c.verticale ? nombresLisibles(c.k) : nombresLisibles(c.m, c.p);
   if (c.type === "cercle") return nombresLisibles(c.x0, c.y0, c.rayon);
   if (c.type === "parabole") return nombresLisibles(c.xF, c.yF, c.pParabole);
   return true;
@@ -64,6 +68,7 @@ const STYLE_BLOC_LIEU = {
 
 function construireReponseLieu(champs: ChampsLieuBrut): ReponseIdentificationLieu | null {
   if (champs.type === "droite") {
+    if (champs.verticale) return champs.k.trim() === "" ? null : { type: "droite", m: 0, p: 0, abscisse: nombre(champs.k) };
     if (champs.m.trim() === "" || champs.p.trim() === "") return null;
     return { type: "droite", m: nombre(champs.m), p: nombre(champs.p) };
   }
@@ -87,6 +92,9 @@ interface ChampsLieuInputProps {
   apresEchec: boolean;
   /** Nature déjà jugée (figée) : plus de changement de type. */
   typeVerrouille: boolean;
+  /** Nature jugée : type choisi par l'élève et bon type de ce bloc (option fausse en rouge, bonne en
+   * vert) ; `null` tant qu'elle ne l'est pas. */
+  typeJuge: { choisi: TypeLieu; bon: TypeLieu } | null;
 }
 
 /** Choix catégoriel (droite/cercle/parabole) puis champs numériques adaptés — un bloc par lieu,
@@ -94,7 +102,8 @@ interface ChampsLieuInputProps {
  * jamais affiché comme "premier"/"second" : la vérification se fait désormais PAR ENSEMBLE, voir
  * `verificationLieuxGeometriques.ts::diagnostiquerIdentification`, B.4). Un sous-titre apparaît
  * au-dessus des champs numériques une fois un type sélectionné (B.2), jamais avant. */
-function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec, typeVerrouille }: ChampsLieuInputProps) {
+function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec, typeVerrouille, typeJuge }: ChampsLieuInputProps) {
+  const etatOptions = { selection: champs.type, choisie: typeJuge ? typeJuge.choisi : null, bonne: typeJuge ? typeJuge.bon : champs.type };
   const reponse = construireReponseLieu(champs);
   const erronee = apresEchec && reponse !== null && diagnostiquerIdentificationLieu(lieuCompare, reponse) !== "correct";
   const classeChamp = `text-input${erronee ? " is-erronee" : ""}`;
@@ -107,11 +116,12 @@ function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec, ty
           <button
             key={type}
             type="button"
-            className={`btn${champs.type === type ? " toggle-active" : ""}`}
+            className={classeOptionChoixFerme<TypeLieu | null>(type, etatOptions)}
             disabled={typeVerrouille}
             onClick={() => onChange({ ...CHAMPS_VIDES, type })}
           >
             {LIBELLE_TYPE_LIEU[type]}
+            {ariaOptionChoixFerme<TypeLieu | null>(type, etatOptions) && <span className="sr-only"> — {ariaOptionChoixFerme<TypeLieu | null>(type, etatOptions)}</span>}
           </button>
         ))}
       </div>
@@ -119,6 +129,29 @@ function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec, ty
       {champs.type !== null && <p className="field-label contenu-conditionnel">{SOUS_TITRE_CHAMPS_IDENTIFICATION[champs.type]}</p>}
 
       {champs.type === "droite" && (
+        <button
+          type="button"
+          className="btn"
+          style={{ marginBottom: 8 }}
+          aria-pressed={champs.verticale}
+          onClick={() => onChange({ ...champs, verticale: !champs.verticale, m: "", p: "", k: "" })}
+        >
+          {champs.verticale ? "Droite non verticale : y = mx + p" : "Droite verticale : x = k"}
+        </button>
+      )}
+
+      {champs.type === "droite" && champs.verticale && (
+        <div className="field-row">
+          <div className="field field-inline">
+            <label className="field-label field-label-minuscule" htmlFor={`${prefixe}-k`}>
+              x =
+            </label>
+            <input id={`${prefixe}-k`} className={classeChamp} placeholder={PLACEHOLDER_ORDONNEE_ORIGINE} value={champs.k} onChange={(e) => onChange({ ...champs, k: normaliserSigneMoins(e.target.value) })} />
+          </div>
+        </div>
+      )}
+
+      {champs.type === "droite" && !champs.verticale && (
         <div className="field-row">
           <div className="field field-inline">
             <label className="field-label field-label-minuscule" htmlFor={`${prefixe}-m`}>
@@ -259,14 +292,27 @@ export function EtapeIdentificationLieuxGeometriques({ exercice, tentativesUtili
   // Nature jugée fausse puis figée par le moteur : les deux blocs passent à la bonne nature (champs
   // vides, à compléter avec leurs trois tentatives).
   const [figeVu, setFigeVu] = useState(naturesFigees);
+  // Types choisis par l'élève, mémorisés au moment du jugement (avant que les blocs passent à la
+  // bonne nature) : pour marquer l'option fausse en rouge et la bonne en vert.
+  const [typesChoisis, setTypesChoisis] = useState<[TypeLieu | null, TypeLieu | null] | null>(null);
   if (figeVu !== naturesFigees) {
     setFigeVu(naturesFigees);
+    if (naturesFigees) setTypesChoisis([champs1.type, champs2.type]);
     if (naturesFigees && !naturesFigees.correct) {
       setChamps1({ ...CHAMPS_VIDES, type: exercice.lieu1.type });
       setChamps2({ ...CHAMPS_VIDES, type: exercice.lieu2.type });
     }
   }
   const apresEchec = tentativesUtilisees > 0;
+
+  // Nature jugée fausse : bon type = celui de chaque bloc après la remise à la bonne nature ; nature
+  // juste : le type choisi, marqué juste.
+  function typeJugeBloc(i: 0 | 1): { choisi: TypeLieu; bon: TypeLieu } | null {
+    const choisi = typesChoisis?.[i] ?? null;
+    if (!naturesFigees || choisi === null) return null;
+    const bon = naturesFigees.correct ? choisi : (i === 0 ? exercice.lieu1.type : exercice.lieu2.type);
+    return { choisi, bon };
+  }
 
   const reponseLieu1 = construireReponseLieu(champs1);
   const reponseLieu2 = construireReponseLieu(champs2);
@@ -277,8 +323,8 @@ export function EtapeIdentificationLieuxGeometriques({ exercice, tentativesUtili
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_IDENTIFICATION}</p>
 
-      <ChampsLieuInput numero={1} champs={champs1} onChange={setChamps1} lieuCompare={lieuCompare1} apresEchec={apresEchec} typeVerrouille={!!validation || naturesFigees !== null} />
-      <ChampsLieuInput numero={2} champs={champs2} onChange={setChamps2} lieuCompare={lieuCompare2} apresEchec={apresEchec} typeVerrouille={!!validation || naturesFigees !== null} />
+      <ChampsLieuInput numero={1} champs={champs1} onChange={setChamps1} lieuCompare={lieuCompare1} apresEchec={apresEchec} typeVerrouille={!!validation || naturesFigees !== null} typeJuge={typeJugeBloc(0)} />
+      <ChampsLieuInput numero={2} champs={champs2} onChange={setChamps2} lieuCompare={lieuCompare2} apresEchec={apresEchec} typeVerrouille={!!validation || naturesFigees !== null} typeJuge={typeJugeBloc(1)} />
       {naturesFigees !== null && !naturesFigees.correct && !validation && (
         <p className="alert-error" role="status">
           <span>

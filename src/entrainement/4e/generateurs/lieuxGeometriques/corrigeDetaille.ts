@@ -1,4 +1,5 @@
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
+import { estParalleleAxe } from "../../core/lieuxGeometriques.types";
 import { rayonLatex } from "../../ui/formatLieuxGeometriques";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceLieuxGeometriques, Lieu, LieuCercle, LieuDroite, LieuParabole } from "../../core/lieuxGeometriques.types";
@@ -58,7 +59,7 @@ export function pointsTries(e: E): { x: number; y: number }[] {
 export function conclusionLieux(e: E): Fragments {
   if (e.nombrePoints === 0) return [texte("Aucun point n'est à la fois sur les deux lieux : l'ensemble cherché est vide.")];
   const pts = pointsTries(e).map((p) => formatPointLatex(p));
-  if (e.nombrePoints === 1 && droiteDe(e).m === 0) return [texte("Un seul point commun (la droite est parallèle à l'axe de la parabole : ce n'est pas une tangence) : "), latex(pts[0]!), texte(".")];
+  if (e.nombrePoints === 1 && estParalleleAxe(droiteDe(e))) return [texte("Un seul point commun (la droite est parallèle à l'axe de la parabole : ce n'est pas une tangence) : "), latex(pts[0]!), texte(".")];
   if (e.nombrePoints === 1) return [texte("Un seul point commun (la droite est tangente) : "), latex(pts[0]!), texte(".")];
   return [texte("Deux points communs : "), latex(pts[0]!), texte(" et "), latex(pts[1]!), texte(".")];
 }
@@ -69,6 +70,7 @@ export function conclusionLieux(e: E): Fragments {
 
 function lignesIdentification(L: Lieu): LigneCalcul[] {
   if (L.type === "droite") {
+    if (L.abscisse !== undefined) return [ligne(`x=${q(L.abscisse)}`, "l'abscisse est constante : droite verticale, pas de pente")];
     if (L.m === 0) return [ligne("m=0", "l'ordonnée ne dépend pas de l'abscisse : droite horizontale"), ligne(`p=${q(L.p)}`, "l'ordonnée constante est l'ordonnée à l'origine")];
     const jm = L.m === 1 ? "on part de l'abscisse : facteur 1" : L.m === -1 ? "« l'opposé de l'abscisse » : facteur −1" : "nombre par lequel on multiplie l'abscisse";
     const jp = L.p > 0 ? "« puis en ajoutant … » : on ajoute p" : L.p < 0 ? "« puis en retirant … » : p est négatif" : "rien n'est ajouté à l'ordonnée";
@@ -96,6 +98,7 @@ function lignesIdentification(L: Lieu): LigneCalcul[] {
  * ------------------------------------------------------------------------------------------- */
 
 function lignesEquation(L: Lieu): LigneCalcul[] {
+  if (L.type === "droite" && L.abscisse !== undefined) return [ligne(`x=${q(L.abscisse)}`, [texte("droite verticale : "), latex("x=k"), texte(" avec k lu")])];
   if (L.type === "droite") return [ligne(`y=${somme([[L.m, "x"], [L.p, ""]])}`, [latex("y=mx+p"), texte(" avec m et p lus")])];
   if (L.type === "cercle") {
     const membre = `${carreBinome(L.centre.x, "x")}+${carreBinome(L.centre.y, "y")}`;
@@ -186,26 +189,28 @@ function etapeResolution(e: E): EtapeCorrection[] {
     ];
     blocs.push(calcul("c", dedoublonner(reduite), [], "Équation de la parabole"));
 
-    // Droite parallèle à l'axe (y = k, axe horizontal) : équation du PREMIER degré en x, un seul point.
-    if (D.m === 0 && !vertical) {
-      const kk = D.p;
+    // Droite parallèle à l'axe (y = k pour l'axe horizontal, x = k pour l'axe vertical) : on remplace
+    // u par k, équation du PREMIER degré en v, un seul point.
+    if (estParalleleAxe(D) && (vertical ? D.abscisse !== undefined : D.abscisse === undefined)) {
+      const kk = vertical ? D.abscisse! : D.p;
       const L2 = (kk - uF) ** 2;
       const ecart = L2 / (2 * p);
-      const x1 = vS + ecart;
+      const v1 = vS + ecart;
+      const membreV = vS === 0 ? `${q(2 * p)}${v}` : groupeV(moinsH(vS, v), estFraction(vS));
       blocs.push(
         calcul(
           "c",
           dedoublonner([
-            ligne(`${uF === 0 ? `${qp(kk)}^2` : `(${q(kk)}${uF < 0 ? `+${q(-uF)}` : `-${q(uF)}`})^2`}=${vS === 0 ? `${q(2 * p)}x` : groupeV(moinsH(vS, v), estFraction(vS))}`, [texte("on remplace y par "), latex(q(kk))]),
-            ligne(`${q(L2)}=${vS === 0 ? `${q(2 * p)}x` : groupeV(moinsH(vS, v), estFraction(vS))}`, "équation du premier degré en x : un seul point"),
-            ligne(`${vS === 0 ? "x" : moinsH(vS, "x")}=${q(ecart)}`, `on divise les deux membres par ${q(2 * p).replace(/\\dfrac\{(\d+)\}\{(\d+)\}/, "$1/$2")}`),
-            ...(vS === 0 ? [] : [ligne(`x=${q(x1)}`, "on isole x")]),
+            ligne(`${uF === 0 ? `${qp(kk)}^2` : `(${q(kk)}${uF < 0 ? `+${q(-uF)}` : `-${q(uF)}`})^2`}=${membreV}`, [texte(`on remplace ${u} par `), latex(q(kk))]),
+            ligne(`${q(L2)}=${membreV}`, `équation du premier degré en ${v} : un seul point`),
+            ligne(`${vS === 0 ? v : moinsH(vS, v)}=${q(ecart)}`, `on divise les deux membres par ${q(2 * p).replace(/\\dfrac\{(\d+)\}\{(\d+)\}/, "$1/$2")}`),
+            ...(vS === 0 ? [] : [ligne(`${v}=${q(v1)}`, `on isole ${v}`)]),
           ]),
           [],
           "Substitution",
         ),
       );
-      blocs.push(calcul("c", [ligne(`y=${q(kk)}`, "la droite donne directement l'ordonnée")], [], "Ordonnée"));
+      blocs.push(calcul("c", [ligne(`${u}=${q(kk)}`, vertical ? "la droite donne directement l'abscisse" : "la droite donne directement l'ordonnée")], [], vertical ? "Abscisse" : "Ordonnée"));
       return blocs;
     }
 
@@ -297,6 +302,7 @@ function etapesLieuxGeometriques(e: E): EtapeCorrection[] {
     utilise("a", [
       texte("Reconnaître un lieu dans sa phrase : l'ordonnée obtenue en multipliant l'abscisse par m, puis en ajoutant p, donne la droite "),
       latex("y=mx+p"),
+      ...(droiteDe(e).abscisse !== undefined ? [texte(" (une abscisse constante k, la droite verticale "), latex("x=k"), texte(")")] : []),
       texte(" ; une distance constante à un point, un cercle (centre et rayon) ; l'équidistance d'un point et d'une droite, une parabole (foyer et directrice) "),
       texte(`${COURS_LIEU}.`),
     ]),
@@ -317,8 +323,9 @@ function etapesLieuxGeometriques(e: E): EtapeCorrection[] {
     resultat("b", [texte(`${libelleChampEquation(e.lieu1)} `), latex(formatEquationLieuLatex(e.lieu1)), texte(`. ${libelleChampEquation(e.lieu2)} `), latex(formatEquationLieuLatex(e.lieu2)), texte(".")]),
     piege("b", C.type === "cercle" ? [texte("Au second membre de l'équation du cercle, c'est "), latex("r^2"), texte(", pas r.")] : [texte("La distance de M à la directrice "), latex(C.orientation === "vertical" ? "y=k" : "x=k"), texte(" est "), latex(C.orientation === "vertical" ? "|y-k|" : "|x-k|"), texte(" : seule la coordonnée perpendiculaire à la directrice y entre.")]),
 
-    utilise("c", droiteDe(e).m === 0 ? [
-      texte("Les points communs vérifient les deux équations : on remplace y par la valeur donnée par la droite dans l'équation de la parabole (ramenée à sa forme réduite). La droite est parallèle à l'axe de la parabole : l'équation obtenue est du premier degré, il y a un seul point commun, sans tangence "),
+    utilise("c", estParalleleAxe(droiteDe(e)) ? [
+      texte(`Les points communs vérifient les deux équations : on remplace ${droiteDe(e).abscisse !== undefined ? "x" : "y"} par la valeur donnée par la droite dans l'équation de la parabole (ramenée à sa forme réduite).`),
+      texte(" La droite est parallèle à l'axe de la parabole : l'équation obtenue est du premier degré, il y a un seul point commun, sans tangence "),
       texte(`${COURS_LIEUX}.`),
     ] : [
       texte("Les points communs vérifient les deux équations : on remplace "),
@@ -331,7 +338,7 @@ function etapesLieuxGeometriques(e: E): EtapeCorrection[] {
     ...(etapeV ? [etapeV] : []),
     piege(
       "c",
-      droiteDe(e).m === 0
+      estParalleleAxe(droiteDe(e))
         ? [texte("Un seul point commun ne veut pas dire tangence : ici l'équation est du premier degré, parce que la droite est parallèle à l'axe de la parabole ; elle la traverse.")]
         : e.nombrePoints === 0
         ? [texte("Un discriminant négatif n'est pas une erreur de calcul : il signifie que les deux lieux ne se coupent pas.")]

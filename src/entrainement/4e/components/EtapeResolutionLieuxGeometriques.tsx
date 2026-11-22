@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ariaOptionChoixFerme, classeOptionChoixFerme } from "../ui/choixFige";
 import type { ExerciceLieuxGeometriques } from "../core/lieuxGeometriques.types";
 import { diagnostiquerResolution } from "../moteur/verificationLieuxGeometriques";
 import type { ReponseResolutionLieuxGeometriques } from "../moteur/verificationLieuxGeometriques";
@@ -48,6 +49,8 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
   const bonChoix: Choix = exercice.nombrePoints !== 0 ? "auMoinsUn" : "aucun";
   const choix: Choix | null = choixFige ? (choixFige.correct ? (choixFige.choisi ? "auMoinsUn" : "aucun") : bonChoix) : choixLibre;
   const choixBloque = !!validation || choixFige !== null;
+  const etatOptions = { selection: choixLibre, choisie: choixFige ? (choixFige.choisi ? ("auMoinsUn" as Choix) : ("aucun" as Choix)) : validation ? choixLibre : null, bonne: bonChoix };
+  const aria = (o: Choix) => ariaOptionChoixFerme(o, etatOptions);
   const [points, setPoints] = useState<{ x: string; y: string }[]>([{ x: "", y: "" }]);
   const apresEchec = tentativesUtilisees > 0;
 
@@ -90,11 +93,11 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
       <p className="prompt-text">{CONSIGNE_GENERALE_RESOLUTION}</p>
 
       <div className="options-grid-compact">
-        <button type="button" disabled={choixBloque} className={`btn${choix === "aucun" ? " toggle-active" : ""}`} onClick={() => choisir("aucun")}>
-          {LIBELLE_AUCUN}
+        <button type="button" disabled={choixBloque} className={classeOptionChoixFerme<Choix>("aucun", etatOptions)} onClick={() => choisir("aucun")}>
+          {LIBELLE_AUCUN}{aria("aucun") && <span className="sr-only"> — {aria("aucun")}</span>}
         </button>
-        <button type="button" disabled={choixBloque} className={`btn${choix === "auMoinsUn" ? " toggle-active" : ""}`} onClick={() => choisir("auMoinsUn")}>
-          {LIBELLE_AU_MOINS_UN}
+        <button type="button" disabled={choixBloque} className={classeOptionChoixFerme<Choix>("auMoinsUn", etatOptions)} onClick={() => choisir("auMoinsUn")}>
+          {LIBELLE_AU_MOINS_UN}{aria("auMoinsUn") && <span className="sr-only"> — {aria("auMoinsUn")}</span>}
         </button>
       </div>
 

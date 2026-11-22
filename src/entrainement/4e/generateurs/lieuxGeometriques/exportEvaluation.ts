@@ -1,4 +1,5 @@
 import type { ExerciceLieuxGeometriques } from "../../core/lieuxGeometriques.types";
+import { estParalleleAxe } from "../../core/lieuxGeometriques.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, ErreurFrequente, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
@@ -128,7 +129,8 @@ function reponseBreveLieuxGeometriques(instance: ExerciceLieuxGeometriques): Fra
  * `sansCharge`, sinon la résolution plus courte d'un Δ < 0 trahirait la réponse). */
 function criteresDifficulte(instance: ExerciceLieuxGeometriques): CriteresDifficulte {
   // Droite parallèle à l'axe (variante à part) : piège dans les données — un seul point, sans tangence.
-  const axe = (instance.lieu1.type === "droite" ? instance.lieu1 : instance.lieu2).type === "droite" && (instance.lieu1.type === "droite" ? instance.lieu1 : (instance.lieu2 as { m: number })).m === 0;
+  const droite = instance.lieu1.type === "droite" ? instance.lieu1 : instance.lieu2.type === "droite" ? instance.lieu2 : null;
+  const axe = droite !== null && estParalleleAxe(droite);
   return { ...etapesDuCorrige(correctionDetailleeLieuxGeometriques(instance)), methode: 1, piege: axe ? 1 : 0, nombres: 0, sansCharge: true };
 }
 

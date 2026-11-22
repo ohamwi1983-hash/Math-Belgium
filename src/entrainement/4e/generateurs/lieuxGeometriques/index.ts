@@ -319,23 +319,28 @@ function construireDroiteParabole0(): ExerciceLieuxGeometriques {
 
 /**
  * Variante « droite parallèle à l'axe de la parabole » (audit 4e ch. 7, G13 ; ajoutée EN FIN de
- * catalogue) : parabole d'axe horizontal et droite horizontale y = k (pente nulle). La substitution
- * donne une équation du PREMIER degré : un seul point commun, qui n'est pas une tangence (piège du
- * cours, § 10). Point à coordonnées entières : (k − y_S)² divisible par 2p.
+ * catalogue) : parabole d'axe horizontal et droite horizontale y = k, ou parabole d'axe vertical et
+ * droite verticale x = k — les deux à parts égales (orientation tirée d'abord). La substitution donne
+ * une équation du PREMIER degré : un seul point commun, qui n'est pas une tangence (piège du cours,
+ * § 10). Point à coordonnées entières : (k − sommet)² divisible par 2p.
  */
 function construireDroiteParaboleAxe(): ExerciceLieuxGeometriques {
+  const orientation: OrientationParabole = Math.random() < 0.5 ? "horizontal" : "vertical";
   for (let essai = 0; essai < 400; essai++) {
-    const parametree = tirerParabole("horizontal");
+    const parametree = tirerParabole(orientation);
     const parabole = lieuParaboleDepuisParametree(parametree);
-    const xS = parabole.foyer.x - parabole.p / 2;
-    const yS = parabole.foyer.y;
+    const vertical = orientation === "vertical";
+    // u : coordonnée fixée par la droite (y pour l'axe horizontal, x pour l'axe vertical).
+    const uS = vertical ? parabole.foyer.x : parabole.foyer.y;
+    const vS = vertical ? parabole.foyer.y - parabole.p / 2 : parabole.foyer.x - parabole.p / 2;
     const ecarts = [-4, -2, 2, 4].filter((j) => Number.isInteger((j * j) / (2 * parabole.p)));
     if (ecarts.length === 0) continue;
     const j = choisir(ecarts);
-    const k = yS + j;
-    const point = { x: xS + (j * j) / (2 * parabole.p), y: k };
+    const k = uS + j;
+    const v = vS + (j * j) / (2 * parabole.p);
+    const point = vertical ? { x: k, y: v } : { x: v, y: k };
     if (!pointsRaisonnables([point]) || Math.abs(k) > ORDONNEE_ORIGINE_MAX) continue;
-    const lieuDroite: LieuDroite = { type: "droite", m: 0, p: k };
+    const lieuDroite: LieuDroite = vertical ? { type: "droite", m: 0, p: 0, abscisse: k } : { type: "droite", m: 0, p: k };
     return { paire: "droiteParabole", lieu1: lieuDroite, lieu2: parabole, nombrePoints: 1, points: [point], quadratique: quadratiqueSubstitution(coniqueDepuisParabole(parabole), lieuDroite) };
   }
   throw new Error("construireDroiteParaboleAxe : échec inattendu");

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ariaOptionChoixFerme, classeOptionChoixFerme } from "../ui/choixFige";
 import type { ExerciceEquationDroite } from "../core/equationDroite.types";
 import type { ReponsePossibiliteCoefficients } from "../moteur/typesEquationDroite";
 import { diagnostiquerPossibiliteCoefficients, estBonneDroiteMauvaiseForme } from "../moteur/verificationEquationDroite";
@@ -63,6 +64,9 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentative
   /** Choix affiché : le choix libre tant qu'il n'est pas jugé ; ensuite le bon (révélé s'il était faux). */
   const choix = choixFige ? (choixFige.correct ? choixFige.choisi : bonChoix) : choixLibre;
   const choixBloque = !!validation || choixFige !== null;
+  // Choix jugé (figé, ou écran clos) : l'option choisie fausse en rouge, la bonne en vert.
+  const etatOptions = { selection: choixLibre, choisie: choixFige ? choixFige.choisi : validation ? choixLibre : null, bonne: bonChoix };
+  const aria = (o: "possible" | "impossible") => ariaOptionChoixFerme(o, etatOptions);
 
   function choisir(nouveauChoix: "possible" | "impossible") {
     setChoix(nouveauChoix);
@@ -102,11 +106,11 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentative
       </p>
 
       <div className="options-grid-compact">
-        <button disabled={choixBloque} type="button" className={choix === "possible" ? "btn toggle-active" : "btn"} onClick={() => choisir("possible")}>
-          Possible
+        <button disabled={choixBloque} type="button" className={classeOptionChoixFerme("possible", etatOptions)} onClick={() => choisir("possible")}>
+          Possible{aria("possible") && <span className="sr-only"> — {aria("possible")}</span>}
         </button>
-        <button disabled={choixBloque} type="button" className={choix === "impossible" ? "btn toggle-active" : "btn"} onClick={() => choisir("impossible")}>
-          Impossible
+        <button disabled={choixBloque} type="button" className={classeOptionChoixFerme("impossible", etatOptions)} onClick={() => choisir("impossible")}>
+          Impossible{aria("impossible") && <span className="sr-only"> — {aria("impossible")}</span>}
         </button>
       </div>
       {choixFige !== null && !choixFige.correct && !validation && (

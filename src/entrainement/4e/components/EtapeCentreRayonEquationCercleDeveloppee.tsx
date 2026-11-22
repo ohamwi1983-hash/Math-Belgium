@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ariaOptionChoixFerme, classeOptionChoixFerme } from "../ui/choixFige";
 import { natureEquationCercle } from "../moteur/verificationEquationCercleDeveloppee";
 
 type Nature = "cercle" | "point" | "vide";
@@ -47,6 +48,7 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
   const [natureLibre, setNatureLibre] = useState<Nature | null>(null);
   const nature: Nature | null = natureFigee ? (natureFigee.correcte ? natureFigee.choisie : bonneNature) : natureLibre;
   const champsVisibles = !estNature || nature === "cercle";
+  const etatOptions = { selection: natureLibre, choisie: natureFigee ? natureFigee.choisie : validation ? natureLibre : null, bonne: bonneNature };
   const [x, setX] = useState("");
   const [y, setY] = useState("");
   const [rayon, setRayon] = useState("");
@@ -92,8 +94,9 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
       {estNature && (
         <div className="options-grid">
           {NATURES.map((n) => (
-            <button key={n} type="button" disabled={!!validation || natureFigee !== null} className={`btn${nature === n ? " toggle-active" : ""}`} onClick={() => setNatureLibre(n)}>
+            <button key={n} type="button" disabled={!!validation || natureFigee !== null} className={classeOptionChoixFerme<Nature>(n, etatOptions)} onClick={() => setNatureLibre(n)}>
               {LIBELLE_NATURE[n]}
+              {ariaOptionChoixFerme(n, etatOptions) && <span className="sr-only"> — {ariaOptionChoixFerme(n, etatOptions)}</span>}
             </button>
           ))}
         </div>

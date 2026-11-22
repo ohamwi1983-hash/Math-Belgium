@@ -9,11 +9,10 @@
  * Mesures (5 000 tirages par variante, `scratchpad/refonte-4e-ch7a/mesure.txt`) — voir chaque
  * profil. Le cas particulier commun est la droite PARALLÈLE À UN AXE (horizontale y = k ou verticale
  * x = k) : vecteur directeur à une composante nulle, équation, tracé, caractéristiques ou distance
- * se lisent alors sans calcul (raccourci du cours). Les verdicts ne sont JAMAIS filtrés. Relation
- * parallèles / perpendiculaires / aucune (gen45) et sécantes / parallèles distinctes / confondues
- * (gen48) restent une `forme`, recopiée d'une série à l'autre (même charge de travail) ; forme
- * explicite possible ou non (gen42) : plus dans la forme depuis le lot D de l'audit (tirée librement
- * dans chaque série).
+ * se lisent alors sans calcul (raccourci du cours). Les verdicts ne sont JAMAIS filtrés ni mis dans la
+ * `forme` (lot D de l'audit : la série B recopiait l'issue de la série A) : forme explicite possible
+ * ou non (gen42), relation parallèles / perpendiculaires / aucune (gen45), sécantes / parallèles
+ * distinctes / confondues (gen48) sont tirées librement dans chaque série.
  *
  * `calcul` : seulement gen46, quand un ANGLE est demandé (angle remarquable 0°, 45°, 90°, 135° →
  * valeur exacte ; pente quelconque → arctan à la calculatrice). Les autres générateurs n'ont que des
@@ -64,12 +63,10 @@ export function profilConstructionDroite(e: ExerciceConstructionDroite): ProfilI
 
 /** gen45 — relations entre droites. Cas particulier : droite de référence parallèle à un axe
  * (≈ 20 %) — la parallèle ou la perpendiculaire s'écrit alors immédiatement. Reconnaissance : la
- * relation trouvée (parallèles / perpendiculaires / aucune) est un verdict → `forme`. */
+ * relation trouvée (parallèles / perpendiculaires / aucune) est un verdict, tiré librement dans
+ * chaque série (plus dans la `forme` : la série B recopiait l'issue de la série A). */
 export function profilRelationsDroites(e: ExerciceRelationsDroites): ProfilInstance {
-  return {
-    casParticulier: paralleleAxe(e.vecteurReference) ? CAS_AXE : null,
-    forme: e.famille === "reconnaissance" ? (e.relation ?? undefined) : undefined,
-  };
+  return { casParticulier: paralleleAxe(e.vecteurReference) ? CAS_AXE : null };
 }
 
 /** gen46 — caractéristiques d'une droite. Cas particulier : droite horizontale ou verticale
@@ -95,7 +92,7 @@ export function profilDistanceDroite(e: ExerciceDistanceDroite): ProfilInstance 
 
 /** gen48 — intersection de deux droites. Aucun raccourci mesuré (vecteurs directeurs toujours à deux
  * composantes non nulles). La conclusion (sécantes / parallèles distinctes / confondues) est un
- * verdict → `forme` seulement. */
-export function profilIntersectionDroites(e: ExerciceIntersectionDroites): ProfilInstance {
-  return { casParticulier: null, forme: e.conclusion };
+ * verdict, tiré librement dans chaque série (plus dans la `forme`). */
+export function profilIntersectionDroites(_e: ExerciceIntersectionDroites): ProfilInstance {
+  return { casParticulier: null };
 }

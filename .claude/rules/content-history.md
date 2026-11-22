@@ -5328,7 +5328,8 @@ Cours intact. Générateurs gen42–54 : règles communes (illisible sans tentat
 aides à deux niveaux, messages ciblés, `\,;\,`, graduations, tan⁻¹, rayon r), angles 30°/60°/120°/150°
 dans les variantes « angle » de gen42 et gen46, gen54 pente indépendante du verdict + `groupe_points`,
 deux variantes en fin de catalogue (gen50 « Est-ce un cercle ? », gen54 « droite parallèle à l'axe de la
-parabole »), figures de gen47 (corrigé) et gen132 sans étiquette sur une graduation. Banque « Formule »
+parabole », droites y = k et x = k), verdicts hors de la `forme` (gen42, gen45, gen48), choix fermés
+jugés affichés rouge ✗ / vert ✓, figures de gen47 (corrigé) et gen132 sans étiquette sur une graduation. Banque « Formule »
 (`lib/questionsFormules/niveau4e.ts`) : douze questions (milieu, G, aire, droites remarquables,
 symétrique, CH et r, foyer / directrice ×2, deux cercles, t₁ = t₂, a(m) = b(m) = 0, (sin α ; cos α)),
 sections `intersection` et `lieux` ajoutées. Détail : `feuilles-evaluations.md`, entrée « 4e ch. 7

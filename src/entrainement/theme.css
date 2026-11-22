@@ -1622,6 +1622,39 @@
   background: var(--color-error);
 }
 
+/* Choix fermé JUGÉ (audit 4e ch. 7, `4e/ui/choixFige.ts`) : l'option choisie par l'élève, fausse,
+ * en rouge avec ✗ ; la bonne option en vert avec ✓ — jamais le style « sélectionné » sur la bonne
+ * option (l'élève croyait l'avoir choisie). Lisibles même désactivées (choix figé). */
+.entrainement .btn.is-juste,
+.entrainement .btn.is-faux {
+  font-weight: 700;
+  opacity: 1;
+}
+
+.entrainement .btn.is-juste {
+  border-color: var(--color-success);
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.entrainement .btn.is-faux {
+  border-color: var(--color-error);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.entrainement .options-grid .btn.is-juste::before,
+.entrainement .options-grid-compact .btn.is-juste::before {
+  border-color: var(--color-success);
+  background: var(--color-success) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.4 2.4 4.6-5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 11px no-repeat;
+}
+
+.entrainement .options-grid .btn.is-faux::before,
+.entrainement .options-grid-compact .btn.is-faux::before {
+  border-color: var(--color-error);
+  background: var(--color-error) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 3l6 6M9 3l-6 6' fill='none' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center / 10px no-repeat;
+}
+
 /* Sélection MULTIPLE (plusieurs cases à la fois, ex. gen28) : cases carrées cochées, jamais la
  * pastille ronde d'un choix unique (audit 4e ch. 6, G13). */
 .entrainement .options-multiples .btn::before {

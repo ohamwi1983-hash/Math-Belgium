@@ -51,6 +51,7 @@ export function coniqueDepuisParabole(parabole: LieuParabole): Conique {
  * `D=-m, E=1, F=-p` avec `A=B=C=0`. Permet à `intersectionDroiteConique`/l'appartenance générique de
  * traiter une droite comme n'importe quelle autre cible, sans branchement séparé. */
 export function coniqueDepuisDroite(droite: LieuDroite): Conique {
+  if (droite.abscisse !== undefined) return { A: 0, B: 0, C: 0, D: 1, E: 0, F: -droite.abscisse };
   return { A: 0, B: 0, C: 0, D: -droite.m, E: 1, F: -droite.p };
 }
 
@@ -67,6 +68,7 @@ export function coniqueDepuisLieu(lieu: Lieu): Conique {
 
 /** Forme implicite `a·x+b·y+c=0` d'un `LieuDroite` — `y=mx+p` ⟺ `m·x-y+p=0`. */
 export function impliciteDepuisLieuDroite(droite: LieuDroite): DroiteImplicite {
+  if (droite.abscisse !== undefined) return { a: 1, b: 0, c: -droite.abscisse };
   return { a: droite.m, b: -1, c: droite.p };
 }
 

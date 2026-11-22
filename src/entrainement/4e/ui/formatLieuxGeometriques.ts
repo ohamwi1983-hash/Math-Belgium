@@ -22,6 +22,7 @@
  * cercle »), jamais par un rang « premier »/« second ».
  */
 import type { Lieu, LieuCercle, LieuDroite, LieuParabole, NombrePointsIntersection, PaireLieux, TypeLieu } from "../core/lieuxGeometriques.types";
+import { estParalleleAxe } from "../core/lieuxGeometriques.types";
 import type { ExerciceLieuxGeometriques } from "../core/lieuxGeometriques.types";
 import { formatEquationExpliciteYLatex, formatPointLatex } from "./formatEquationDroite";
 import type { FragmentConsigne } from "./formatEquationDroite";
@@ -55,7 +56,7 @@ export const LIBELLE_PAIRE: Record<PaireLieux, string> = {
  * (audit chapitre 7, point 60), ou un arrondi au centième (`statutNumerique`, `TOLERANCE=0.01`).
  * `cercle`/`parabole` restent sans note : leurs champs sont toujours des entiers exacts. */
 export const SOUS_TITRE_CHAMPS_IDENTIFICATION: Record<TypeLieu, string> = {
-  droite: "Pente et ordonnée à l'origine (fraction comme 3/4 ou arrondi au centième) :",
+  droite: "Pente et ordonnée à l'origine (fraction comme 3/4 ou arrondi au centième) — ou, pour une droite verticale, son abscisse :",
   cercle: "Centre et rayon :",
   parabole: "Foyer et paramètre p :",
 };
@@ -139,6 +140,8 @@ function formatSommeTermesLatex(termes: { valeur: number; suffixe: string }[]): 
  * `m = 1` et `m = −1` ont leur propre tournure (« égale à leur abscisse », « égale à l'opposé de
  * leur abscisse ») — jamais « −1 fois leur abscisse » (audit chapitre 7, point 7). */
 function segmentsDefinitionDroite(droite: LieuDroite): FragmentConsigne[] {
+  // Droite verticale (variante « droite parallèle à l'axe », parabole d'axe vertical) : abscisse constante.
+  if (droite.abscisse !== undefined) return [texte("les points dont l'abscisse vaut "), latex(formatValeurFractionLatex(droite.abscisse))];
   // Pente nulle (variante « droite parallèle à l'axe ») : l'ordonnée est constante.
   if (droite.m === 0) return [texte("les points dont l'ordonnée vaut "), latex(formatValeurFractionLatex(droite.p))];
   // Sans terme constant : « égale à … fois leur abscisse » (aucune ambiguïté de portée).
@@ -210,6 +213,7 @@ export function segmentsEnonce(exercice: ExerciceLieuxGeometriques): FragmentCon
 export function segmentsDescriptionLieu(lieu: Lieu): FragmentConsigne[] {
   switch (lieu.type) {
     case "droite":
+      if (lieu.abscisse !== undefined) return [texte("Droite verticale d'équation "), latex(`x=${formatValeurFractionLatex(lieu.abscisse)}`)];
       return [texte("Droite de pente "), latex(`m=${formatValeurFractionLatex(lieu.m)}`), texte(" et d'ordonnée à l'origine "), latex(`p=${formatValeurFractionLatex(lieu.p)}`)];
     case "cercle":
       return [texte("Cercle de centre "), latex(formatPointLatex(lieu.centre)), texte(" et de rayon "), latex(`r=${rayonLatex(lieu)}`)];
@@ -228,6 +232,7 @@ export function segmentsDescriptionLieu(lieu: Lieu): FragmentConsigne[] {
 export function formatCaracteristiquesLieuLatex(lieu: Lieu): string {
   switch (lieu.type) {
     case "droite":
+      if (lieu.abscisse !== undefined) return `\\displaystyle \\text{verticale : } x = ${formatValeurFractionLatex(lieu.abscisse)}`;
       return `\\displaystyle m = ${formatValeurFractionLatex(lieu.m)},\\; p = ${formatValeurFractionLatex(lieu.p)}`;
     case "cercle":
       return `\\displaystyle \\text{centre } ${formatPointLatex(lieu.centre)},\\; r = ${rayonLatex(lieu)}`;
@@ -264,10 +269,11 @@ export function segmentsAideIdentificationNiveau2(exercice: ExerciceLieuxGeometr
 
 /** Réponse d'identification SAISIE par l'élève, mise en forme pour la fiche de consultation. */
 export function formatReponseIdentificationLatex(
-  reponse: { type: "droite"; m: number; p: number } | { type: "cercle"; x0: number; y0: number; rayon: number } | { type: "parabole"; xF: number; yF: number; p: number },
+  reponse: { type: "droite"; m: number; p: number; abscisse?: number } | { type: "cercle"; x0: number; y0: number; rayon: number } | { type: "parabole"; xF: number; yF: number; p: number },
 ): string {
   switch (reponse.type) {
     case "droite":
+      if (reponse.abscisse !== undefined) return `\\text{Droite verticale : } x = ${formatValeurSaisieLatex(reponse.abscisse)}`;
       return `\\text{Droite : } m = ${formatValeurSaisieLatex(reponse.m)},\\; p = ${formatValeurSaisieLatex(reponse.p)}`;
     case "cercle":
       return `\\text{Cercle : centre } (${formatValeurSaisieLatex(reponse.x0)}\\,;\\,${formatValeurSaisieLatex(reponse.y0)}),\\; r = ${formatValeurSaisieLatex(reponse.rayon)}`;
@@ -317,6 +323,7 @@ export function latexGabaritGenerique(type: TypeLieu, orientation?: "vertical" |
 export function formatEquationLieuLatex(lieu: Lieu): string {
   switch (lieu.type) {
     case "droite":
+      if (lieu.abscisse !== undefined) return `x=${formatValeurFractionLatex(lieu.abscisse)}`;
       return formatEquationExpliciteYLatex(lieu.m, lieu.p);
     case "cercle":
       return `${formatBinomeCarreLatex("x", lieu.centre.x)}+${formatBinomeCarreLatex("y", lieu.centre.y)}=${Math.round(lieu.rayon * lieu.rayon)}`;
@@ -367,7 +374,7 @@ export function segmentsAideResolutionNiveau1(exercice: ExerciceLieuxGeometrique
     case "cercleDroite":
       return [texte("Substitue l'équation de la droite dans celle du cercle pour obtenir une équation du second degré, puis résous-la.")];
     case "droiteParabole":
-      if (trouverLieu(exercice, "droite").m === 0) return [texte("Substitue l'équation de la droite dans celle de la parabole, puis résous l'équation obtenue (regarde bien son degré).")];
+      if (estParalleleAxe(trouverLieu(exercice, "droite"))) return [texte("Substitue l'équation de la droite dans celle de la parabole, puis résous l'équation obtenue (regarde bien son degré).")];
       return [texte("Substitue l'équation de la droite dans celle de la parabole pour obtenir une équation du second degré, puis résous-la.")];
   }
 }
@@ -434,6 +441,16 @@ function substitutionCercleDroite(exercice: ExerciceLieuxGeometriques): Substitu
 function substitutionDroiteParabole(exercice: ExerciceLieuxGeometriques): SubstitutionQuadratique {
   const droite = trouverLieu(exercice, "droite");
   const parabole = trouverLieu(exercice, "parabole");
+  // Droite verticale x = k : on remplace x, l'inconnue restante est y (équation du premier degré).
+  if (droite.abscisse !== undefined) {
+    const k = droite.abscisse;
+    const { A, B, C } = coefficientsParEchantillonnage(
+      cibleParaboleLieu(parabole),
+      () => k,
+      (v) => v,
+    );
+    return { variable: "y", A, B, C };
+  }
   // Axe vertical, ou droite horizontale (pente nulle) : on remplace y, l'inconnue restante est x.
   if (parabole.orientation === "vertical" || droite.m === 0) {
     const { A, B, C } = coefficientsParEchantillonnage(

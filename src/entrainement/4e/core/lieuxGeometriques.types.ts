@@ -46,11 +46,24 @@ export type NombrePointsIntersection = 0 | 1 | 2;
 
 export interface LieuDroite {
   type: "droite";
-  /** Pente — toujours définie (jamais de droite verticale) ; nulle seulement dans la variante
-   * « droite parallèle à l'axe de la parabole » (droite y = k, énoncé « l'ordonnée vaut k »). */
+  /** Pente ; nulle seulement dans la variante « droite parallèle à l'axe de la parabole » (droite
+   * y = k, énoncé « l'ordonnée vaut k »). Sans objet (0) pour une droite verticale. */
   m: number;
-  /** Ordonnée à l'origine — `y = m·x + p`. */
+  /** Ordonnée à l'origine — `y = m·x + p` (0 pour une droite verticale). */
   p: number;
+  /** Droite VERTICALE x = abscisse — seulement dans la variante « droite parallèle à l'axe » avec une
+   * parabole d'axe vertical (énoncé « l'abscisse vaut k ») ; absent : droite y = m·x + p. */
+  abscisse?: number;
+}
+
+/** Droite verticale x = k (variante « parallèle à l'axe », parabole d'axe vertical). */
+export function estVerticale(d: LieuDroite): d is LieuDroite & { abscisse: number } {
+  return d.abscisse !== undefined;
+}
+
+/** Droite parallèle à l'axe de la parabole (y = k ou x = k) : pente nulle ou verticale. */
+export function estParalleleAxe(d: LieuDroite): boolean {
+  return estVerticale(d) || d.m === 0;
 }
 
 export interface LieuCercle {

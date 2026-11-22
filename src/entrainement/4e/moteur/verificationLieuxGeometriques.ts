@@ -41,7 +41,7 @@ import { diagnostiquerEquation as diagnostiquerEquationParabole } from "./verifi
 // ============================================================================
 
 export type ReponseIdentificationLieu =
-  | { type: "droite"; m: number; p: number }
+  | { type: "droite"; m: number; p: number; abscisse?: number }
   | { type: "cercle"; x0: number; y0: number; rayon: number }
   | { type: "parabole"; xF: number; yF: number; p: number };
 
@@ -50,6 +50,11 @@ export type ReponseIdentificationLieu =
 export function diagnostiquerIdentificationLieu(lieu: Lieu, reponse: ReponseIdentificationLieu): StatutVerification {
   if (reponse.type !== lieu.type) return "not_equivalent";
   if (lieu.type === "droite" && reponse.type === "droite") {
+    // Droite verticale x = k : une seule caractéristique (k) ; la forme choisie doit correspondre.
+    if (lieu.abscisse !== undefined || reponse.abscisse !== undefined) {
+      if (lieu.abscisse === undefined || reponse.abscisse === undefined) return Number.isNaN(reponse.abscisse ?? reponse.m) ? "parse_error" : "not_equivalent";
+      return statutNumerique(reponse.abscisse, lieu.abscisse);
+    }
     return combinerStatuts(statutNumerique(reponse.m, lieu.m), statutNumerique(reponse.p, lieu.p));
   }
   if (lieu.type === "cercle" && reponse.type === "cercle") {
@@ -131,6 +136,7 @@ export function verifierIdentification(exercice: ExerciceLieuxGeometriques, repo
  * d'architecture non négociable, `src/moteur/` n'importe jamais `src/generateurs/`), même principe
  * que `pointDepuisImpliciteDroite` déjà dupliquée dans ce même fichier frère `verificationDroite.ts`. */
 function impliciteDepuisLieuDroiteMoteur(droite: LieuDroite): DroiteImplicite {
+  if (droite.abscisse !== undefined) return { a: 1, b: 0, c: -droite.abscisse };
   return { a: droite.m, b: -1, c: droite.p };
 }
 

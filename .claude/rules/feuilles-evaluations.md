@@ -817,13 +817,21 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   liste (14 pentes cercle-droite, r² ∈ {2, 5, 8, 10, 20, 25} ; ±1, ±2, ±1/2 droite-parabole), énoncé
   « s'obtient en multipliant l'abscisse par …, puis en ajoutant / retirant … », groupes
   `groupe_points_cercle` / `groupe_points_parabole`. **Variantes EN FIN de catalogue** : gen54
-  `droiteParabole_axe` (parabole d'axe horizontal, droite y = k : un seul point, pas une tangence ;
-  piège 1, niveau 4) ; gen50 `est_ce_un_cercle` (nature tirée au tiers, centre entier, second membre c
+  `droiteParabole_axe` (parabole d'axe horizontal et droite y = k, ou d'axe vertical et droite
+  x = k, à parts égales — `LieuDroite.abscisse`, bascule « Droite verticale : x = k » dans le bloc
+  « Droite » de l'identification, offerte dans toutes les variantes — : un seul point, pas une
+  tangence ; piège 1, niveau 4 et 8 min dans les deux orientations) ; gen50 `est_ce_un_cercle` (nature tirée au tiers, centre entier, second membre c
   TOUJOURS négatif — c ≥ 0 trahissait le cercle —, écran 3 : choix fermé puis centre et rayon si cercle ;
   énoncé papier « … est-elle celle d'un cercle ? Justifie. Si oui… » ; critères fixes 3 étapes
   `sansCharge` + piège : 3, 8 min pour les trois natures ; tirage libre de l'adaptateur et des codes
-  inchangé, l'appli la tire une fois sur trois). gen42 : l'issue « impossible » quitte la `forme` (la
-  série B la reproduisait 30 / 30). Grille : ligne « codes a) … j) » sécable entre deux codes (style en
+  inchangé, l'appli la tire une fois sur trois). Verdicts hors de la `forme` (la série B recopiait
+  l'issue de la série A, 30 / 30) : gen42 « impossible », gen45 relation reconnue, gen48 conclusion —
+  plans réels 30 × 2 : B ≠ A 7 / 30 (gen42, issue rare), 18–22 / 30 (gen45, gen48), niveau et durée
+  constants dans chaque verdict. **Choix fermé jugé** (`4e/ui/choixFige.ts`, classes `is-faux` /
+  `is-juste` de `theme.css`) : l'option choisie fausse en rouge avec ✗, la bonne en vert avec ✓ (avant,
+  la bonne option prenait le style « sélectionné » juste au-dessus du message d'erreur) — gen42
+  possible / impossible, gen50 nature, gen54 nature des lieux et « Aucun / Au moins un » ; les choix
+  figés du 4e ch. 6 (`EtapeValeursAvecChoix`…) ont encore l'ancien rendu. Grille : ligne « codes a) … j) » sécable entre deux codes (style en
   ligne, documents sans groupe identiques). Mesuré : collecteurs `corrige-4e7-m1/m2` (outils recopiés)
   3 980 tirages, ≈ 52 000 égalités, 0 fausse ; gen54 15 000 tirages par groupe : écart max
   |P(pente | verdict) − P(pente)| 1,0 / 1,2 point ; gen42 angle 19,9 / 19,4 % d'axes, gen46 20,3 % ;
