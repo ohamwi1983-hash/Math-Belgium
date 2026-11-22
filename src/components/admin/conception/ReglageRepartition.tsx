@@ -17,14 +17,16 @@ import {
 } from '../../../lib/repartitionProcessus'
 
 /**
- * Répartition Connaître / Appliquer / Transférer de « Préparer l'évaluation » (page de conception :
- * feuille d'exercices, évaluation, examen), réglable par le professeur (décision de l'utilisateur,
- * 22/11/2026) et mémorisée dans son profil (`profils.repartition`, `0005_repartition.sql`).
+ * Répartition d'EXAMEN Connaître / Appliquer / Transférer de « Préparer l'examen » (mode examen de la
+ * page de conception SEULEMENT), réglable par le professeur et mémorisée dans son profil
+ * (`profils.repartition`, `0005_repartition.sql`) — décisions de l'utilisateur du 22/11/2026. Les
+ * évaluations et feuilles d'exercices n'ont pas de répartition : compétences cochées, parts égales,
+ * réglage du document jamais mémorisé (`ReglageCompetences.tsx`).
  *
  * - Professeur connecté : valeur lue à part du profil (`compteDonnees.ts::lireRepartition`) ; 0005
  *   pas appliquée → le réglage vaut pour la session et la carte le dit (`memo === 'absente'`).
  * - Sans compte (Supabase non configuré, `/admin` historique) : 25 / 50 / 25, réglable pour la session.
- * - L'assistant élève n'utilise JAMAIS ce réglage (`compositionEleve.ts` garde la constante).
+ * - L'assistant élève n'utilise JAMAIS ce réglage (`compositionEleve.ts` : parts égales).
  *
  * « Session » = tant que l'onglet reste ouvert : la valeur réglée survit au passage d'une page de
  * conception à l'autre (`/exercice` ↔ `/evaluation`, mémoire du module), pas à un rechargement.
@@ -132,7 +134,7 @@ export function useRepartitionProfesseur(compte: ValeurCompte): RepartitionProfe
 /** Texte « Modifier » de la carte : état de la mémorisation, une ligne. */
 export function noteCarteRepartition(rp: RepartitionProfesseur): string | null {
   if (rp.memo === 'active' && !memeRepartition(rp.valeur, rp.enregistree)) return 'réglée pour cette session'
-  if (rp.memo === 'active' && !estRepartitionDefaut(rp.valeur)) return 'ta répartition'
+  if (rp.memo === 'active' && !estRepartitionDefaut(rp.valeur)) return 'ta répartition d’examen'
   if ((rp.memo === 'sans-compte' || rp.memo === 'absente' || rp.memo === 'erreur') && !estRepartitionDefaut(rp.valeur)) return 'réglée pour cette session'
   return null
 }
@@ -146,7 +148,7 @@ export function ReglageRepartition({
 }: {
   rp: RepartitionProfesseur
   connecte: boolean
-  /** Durée visée de « Préparer l'évaluation » (minutes), pour l'aide « ≈ m min ». */
+  /** Durée visée de « Préparer l'examen » (minutes), pour l'aide « ≈ m min ». */
   dureeCible: number
   onPreparer: () => void
   onFermer: () => void
@@ -166,10 +168,10 @@ export function ReglageRepartition({
   return (
     <div className="conc-rep" id="conc-rep" role="group" aria-labelledby="conc-rep-titre" onKeyDown={surTouche}>
       <p className="conc-rep-titre" id="conc-rep-titre" ref={titre} tabIndex={-1}>
-        Répartition de « Préparer l’évaluation »
+        Ta répartition d’examen
       </p>
       <p className="conc-rep-aide">
-        Temps (et donc points) donné à chaque compétence. Appliquer compense : le total reste toujours 100 %. Une compétence à 0 % n’est jamais choisie.
+        Temps (et donc points) donné à chaque compétence par « Préparer l’examen ». Appliquer compense : le total reste toujours 100 %. Une compétence à 0 % n’est jamais choisie. Elle ne vaut que pour les examens.
       </p>
       <div className="conc-rep-barre" aria-hidden="true">
         {CLES_REPARTITION.map((c) =>
@@ -213,7 +215,7 @@ export function ReglageRepartition({
       </p>
       <div className="conc-rep-actions">
         <button type="button" className="conc-bouton conc-bouton-principal" onClick={onPreparer}>
-          Préparer avec {texteRepartition(true, valeur)}
+          Préparer l’examen avec {texteRepartition(true, valeur)}
         </button>
         <button type="button" className="conc-bouton" disabled={estRepartitionDefaut(valeur)} onClick={() => rp.changer({ ...REPARTITION_DEFAUT })}>
           Revenir à {pourcentsRepartition(REPARTITION_DEFAUT).join(' / ')}
@@ -225,7 +227,7 @@ export function ReglageRepartition({
             disabled={rp.enCours || rp.memo === 'chargement' || (rp.memo === 'active' && !differenteDuCompte)}
             onClick={() => void rp.enregistrer()}
           >
-            {rp.enCours ? 'Enregistrement…' : 'Enregistrer comme ma répartition'}
+            {rp.enCours ? 'Enregistrement…' : 'Enregistrer comme ma répartition d’examen'}
           </button>
         )}
         <button type="button" className="conc-bouton conc-bouton-discret" onClick={onFermer}>
@@ -238,18 +240,18 @@ export function ReglageRepartition({
         ) : !connecte ? (
           <p>Sans compte connecté, ce réglage vaut pour cette session seulement.</p>
         ) : rp.memo === 'chargement' ? (
-          <p>Lecture de ta répartition…</p>
+          <p>Lecture de ta répartition d’examen…</p>
         ) : rp.memo === 'absente' ? (
           <p className="conc-rep-alerte">
             Mémorisation pas encore activée : colle le fichier <code>0005_repartition.sql</code> dans l’éditeur SQL de Supabase (SQL Editor → coller tout le fichier → Run). En attendant, ce réglage vaut pour cette session.
           </p>
         ) : rp.vientDEnregistrer ? (
-          <p className="conc-rep-ok">✓ Enregistrée : {texteRepartition(false, rp.enregistree)} sera proposée à chaque fois.</p>
+          <p className="conc-rep-ok">✓ Enregistrée : {texteRepartition(false, rp.enregistree)} sera proposée à chaque examen.</p>
         ) : differenteDuCompte ? (
-          <p>Pas encore enregistrée : ta répartition mémorisée est {texteRepartition(false, rp.enregistree)}.</p>
+          <p>Pas encore enregistrée : ta répartition d’examen mémorisée est {texteRepartition(false, rp.enregistree)}.</p>
         ) : (
           <p>
-            ✓ C’est ta répartition{estRepartitionDefaut(rp.enregistree) ? ' (celle par défaut)' : ' enregistrée'}.
+            ✓ C’est ta répartition d’examen{estRepartitionDefaut(rp.enregistree) ? ' (celle par défaut)' : ' enregistrée'}.
           </p>
         )}
       </div>

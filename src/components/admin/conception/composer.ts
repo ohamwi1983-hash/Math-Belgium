@@ -36,9 +36,16 @@ export interface ContexteComposition {
   dureeVariante: (ligne: LigneSelection, varianteId: string) => number | undefined
   /** Durée visée (minutes) pour « Préparer l'évaluation ». */
   dureeCible: number
-  /** Répartition de « Préparer l'évaluation » (fractions par processus, somme 1) : celle réglée par le
-   * professeur (`repartitionProcessus.ts::fractionsRepartition`), sinon `REPARTITION_PROCESSUS`. */
+  /** Parts de « Préparer l'évaluation / l'examen » (fractions par processus, somme 1). Examen : la
+   * répartition d'examen du professeur (`repartitionProcessus.ts::fractionsRepartition`), sinon
+   * `REPARTITION_PROCESSUS`. Évaluation / feuille : `partageEgal(cochées)` ou les parts ajustées du
+   * document ; une compétence non cochée vaut 0. */
   repartition?: Readonly<Record<Processus, number>>
+  /** Part d'une compétence sans question possible (`cederParts`) : « examen » (défaut) = règle de
+   * l'examen ; « cochees » (évaluation / feuille) = aux seules compétences cochées (part > 0) présentes,
+   * au prorata — jamais à une compétence non cochée (`cederPartsCochees`). */
+  cession?: 'examen' | 'cochees'
+
   /** « Sur quelques notions » : clés `chapitre::section` cochées. */
   sections?: Set<string>
   aleatoire?: () => number
@@ -49,6 +56,9 @@ export interface ResultatComposition {
   /** Nombre de questions/exercices ajoutés (affirmations vrai/faux comptées une par une). */
   questions: number
   notions: number
+  /** « Préparer l'évaluation » en cession « cochees » : compétences voulues (part > 0) sans aucune
+   * question possible, dont le temps est allé aux autres cochées (à dire au professeur). */
+  cedees: Processus[]
 }
 
 /** Unité qu'une recette peut ajouter à la sélection. */
@@ -205,15 +215,18 @@ function notions(ctx: ContexteComposition, alea: () => number): Selection {
   return sel
 }
 
-/** Préparer l'évaluation : durée visée répartie entre les processus selon la répartition réglée
+/** Préparer l'évaluation / l'examen : durée visée répartie entre les processus selon les parts
  * (`ctx.repartition`, sinon `REPARTITION_PROCESSUS` ; les points automatiques suivent la durée, donc
- * les points aussi). Un processus à 0 % n'est JAMAIS choisi. La part d'un processus sans aucune
- * question possible est cédée (`cederParts`). */
-function evaluation(ctx: ContexteComposition, alea: () => number): Selection {
+ * les points aussi). Un processus à 0 % (non coché) n'est JAMAIS choisi. La part d'un processus sans
+ * aucune question possible est cédée (`cederParts` pour l'examen, `cederPartsCochees` sinon). */
+function evaluation(ctx: ContexteComposition, alea: () => number): { sel: Selection; cedees: Processus[] } {
   const sel = new Selection(ctx)
   const tout = unites(ctx)
   const candidats = (p: Processus) => tout.filter((u) => u.processus === p)
-  const parts = cederParts({ ...(ctx.repartition ?? REPARTITION_PROCESSUS) }, ([1, 2, 3] as const).filter((p) => candidats(p).length > 0))
+  const voulues = { ...(ctx.repartition ?? REPARTITION_PROCESSUS) }
+  const presents = ([1, 2, 3] as const).filter((p) => candidats(p).length > 0)
+  const cedees = ctx.cession === 'cochees' ? ([1, 2, 3] as const).filter((p) => voulues[p] > 0 && !presents.includes(p)) : []
+  const parts = ctx.cession === 'cochees' ? cederPartsCochees(voulues, presents) : cederParts(voulues, presents)
   const dureeUnite = (u: Unite): number => {
     const l = ctx.lignes[u.index]
     if (u.variante) return ctx.dureeVariante(l, u.variante) ?? 6
@@ -227,15 +240,22 @@ function evaluation(ctx: ContexteComposition, alea: () => number): Selection {
     if (budget <= 0 || liste.length === 0) continue
     const ordre = sectionsReparties(liste, alea)
     let duree = 0
+    // Un ajout est admis s'il ne dépasse pas le budget de plus de la moitié de sa durée NI de plus de
+    // `DEPASSEMENT_MAX` minutes — la PREMIÈRE question du processus comprise. Avant : la première était
+    // toujours admise et le dépassement allait jusqu'à la moitié de la durée (un exercice de 28 min
+    // remplissait un budget de 15 min, un de 25 min passait 40 min à 52).
+    const admis = (x: Unite) => duree + dureeUnite(x) <= budget + Math.min(dureeUnite(x) / 2, DEPASSEMENT_MAX)
     for (let tour = 0; tour < 8 && duree < budget; tour++) {
       let progres = false
       for (const s of ordre) {
         const ici = melanger(liste.filter((u) => u.cleSection === s), alea)
-        const u = ici.find((x) => sel.nombreDe(x) === 0) ?? ici[0]
+        const premier = ici.find((x) => sel.nombreDe(x) === 0) ?? ici[0]
+        // Choix d'avant s'il tient ; sinon une autre question de la notion qui tient (pas encore prise
+        // d'abord). Aucun tirage de plus : composition identique quand le choix d'avant tient.
+        const u = premier && !admis(premier) ? (ici.find((x) => sel.nombreDe(x) === 0 && admis(x)) ?? ici.find(admis) ?? premier) : premier
         if (!u) continue
         const d = dureeUnite(u)
-        // On s'arrête quand l'ajout dépasserait le budget de plus de la moitié de sa durée.
-        if (duree > 0 && duree + d > budget + d / 2) continue
+        if (!admis(u)) continue
         // Vrai/faux : deux affirmations d'un coup (une seule question imprimée).
         const n = u.type === 'vraiFaux' ? 2 : 1
         if (sel.ajouter(u, n)) {
@@ -246,9 +266,19 @@ function evaluation(ctx: ContexteComposition, alea: () => number): Selection {
       }
       if (!progres) break
     }
+    // Aucune question ne tient dans le budget (toutes plus longues que deux fois la part) : la plus
+    // courte, pour que le processus voulu soit présent.
+    if (duree === 0) {
+      const plusCourte = [...liste].sort((a, b) => dureeUnite(a) - dureeUnite(b))[0]
+      if (plusCourte) sel.ajouter(plusCourte, plusCourte.type === 'vraiFaux' ? 2 : 1)
+    }
   }
-  return sel
+  return { sel, cedees }
 }
+
+/** Dépassement maximal (minutes) du budget d'un processus par un ajout de « Préparer l'évaluation /
+ * l'examen » (en plus de la règle « moitié de sa durée »). */
+export const DEPASSEMENT_MAX = 4
 
 /**
  * Part d'un processus sans question possible : Connaître ou Transférer → Appliquer (règle d'avant,
@@ -269,10 +299,36 @@ export function cederParts(parts: Record<Processus, number>, presents: readonly 
   return parts
 }
 
+/**
+ * Évaluation / feuille (compétences cochées = part > 0) : la part d'une cochée sans question possible
+ * va aux AUTRES cochées présentes, au prorata de leur part (parts égales → à parts égales). Une
+ * compétence non cochée (part 0) ne reçoit jamais rien ; aucune cochée présente → tout à 0 (rien
+ * n'est composé).
+ */
+export function cederPartsCochees(parts: Record<Processus, number>, presents: readonly Processus[]): Record<Processus, number> {
+  const res: Record<Processus, number> = { 1: 0, 2: 0, 3: 0 }
+  const receveurs = ([1, 2, 3] as const).filter((p) => parts[p] > 0 && presents.includes(p))
+  const somme = receveurs.reduce((t, p) => t + parts[p], 0)
+  const total = ([1, 2, 3] as const).reduce((t, p) => t + Math.max(0, parts[p]), 0)
+  for (const p of receveurs) res[p] = (parts[p] * total) / somme
+  return res
+}
+
+/** Processus ayant au moins une question composable (même calcul que « Préparer l'évaluation ») :
+ * le réglage des compétences signale une cochée qui n'en a aucune. */
+export function processusComposables(ctx: ContexteComposition): Processus[] {
+  const tout = unites(ctx)
+  return ([1, 2, 3] as const).filter((p) => tout.some((u) => u.processus === p))
+}
+
 export function composer(facon: FaconComposer, ctx: ContexteComposition): ResultatComposition {
   const alea = ctx.aleatoire ?? Math.random
-  const sel = facon === 'equilibree' ? equilibree(ctx, alea) : facon === 'notions' ? notions(ctx, alea) : evaluation(ctx, alea)
-  return { lignes: sel.lignes, questions: sel.questions, notions: sel.sections.size }
+  if (facon === 'evaluation') {
+    const { sel, cedees } = evaluation(ctx, alea)
+    return { lignes: sel.lignes, questions: sel.questions, notions: sel.sections.size, cedees }
+  }
+  const sel = facon === 'equilibree' ? equilibree(ctx, alea) : notions(ctx, alea)
+  return { lignes: sel.lignes, questions: sel.questions, notions: sel.sections.size, cedees: [] }
 }
 
 /** Processus présents dans une section (lignes utilisables seulement) — pastilles 1 / 2 / 3. */

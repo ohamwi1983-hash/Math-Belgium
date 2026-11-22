@@ -1,17 +1,19 @@
 import type { Processus } from './evaluationPayload'
 
 /**
- * Répartition d'une « vraie évaluation » entre les processus Connaître / Appliquer / Transférer —
- * répartition de l'utilisateur, 25 / 50 / 25 (décision du 22/11/2026). SEULE source de ces
- * proportions par défaut : assistant élève (`compositionEleve.ts`, recalculées sur les compétences
- * cochées — toujours la constante, jamais réglable), « Préparer l'évaluation » de la page de
- * conception (`components/admin/conception/composer.ts`) et le texte de sa carte (`texteRepartition`).
- * Ne jamais recopier ces nombres ailleurs (ni dans l'interface élève, qui dit « réparti comme une
- * vraie évaluation », ni dans la documentation).
+ * Répartition de l'EXAMEN entre les processus Connaître / Appliquer / Transférer — répartition de
+ * l'utilisateur, 25 / 50 / 25 (décisions du 22/11/2026). Elle ne vaut QUE pour l'examen : « Préparer
+ * l'examen » de la page de conception (`components/admin/conception/composer.ts`, mode examen du
+ * panneau) et le texte de sa carte (`texteRepartition`). Ne jamais recopier ces nombres ailleurs (ni
+ * dans l'interface élève, ni dans la documentation).
  *
- * Réglable par le professeur (décision de l'utilisateur, 22/11/2026) : « Préparer l'évaluation »
- * de la page de conception seulement, valeur mémorisée dans `profils.repartition`
- * (`supabase/migrations/0005_repartition.sql`, NULL = ce défaut) — voir `RepartitionPourcents`.
+ * Évaluations et feuilles d'exercices (panneau professeur) et assistant élève : AUCUNE répartition
+ * imposée — le temps est partagé à parts égales entre les compétences cochées (`partageEgal`), le
+ * professeur pouvant ajuster pour le document seulement (`ajusterParts`, jamais mémorisé).
+ *
+ * Réglable par le professeur (décision de l'utilisateur, 22/11/2026) : « Préparer l'examen » seulement,
+ * valeur mémorisée dans `profils.repartition` (`supabase/migrations/0005_repartition.sql`, NULL = ce
+ * défaut : c'est sa répartition d'EXAMEN) — voir `RepartitionPourcents`.
  */
 export const REPARTITION_PROCESSUS: Readonly<Record<Processus, number>> = { 1: 0.25, 2: 0.5, 3: 0.25 }
 
@@ -95,4 +97,70 @@ export function ajusterRepartition(r: RepartitionPourcents, cle: CleRepartition,
   const compense = ordre.find((c) => r[c] - delta >= 0 && r[c] - delta <= 100)
   if (!compense) return null
   return { ...r, [cle]: cible, [compense]: r[compense] - delta }
+}
+
+/* ----------------------------------------------------------------------------------------------
+ * Évaluations et feuilles d'exercices (panneau professeur) et assistant élève : partage ÉGAL entre
+ * les compétences cochées (décision de l'utilisateur, 22/11/2026 : « hyper flexible », une, deux ou
+ * trois compétences, sans répartition à respecter). Jamais mémorisé.
+ * -------------------------------------------------------------------------------------------- */
+
+const PROCESSUS_ORDRE = [1, 2, 3] as const
+
+/** Fractions (somme 1) : 1/n pour chacune des n compétences cochées, 0 pour les autres. Aucune
+ * cochée → tout à 0 (rien ne sera composé). */
+export function partageEgal(cochees: readonly Processus[]): Record<Processus, number> {
+  const liste = PROCESSUS_ORDRE.filter((p) => cochees.includes(p))
+  const r: Record<Processus, number> = { 1: 0, 2: 0, 3: 0 }
+  for (const p of liste) r[p] = 1 / liste.length
+  return r
+}
+
+export const CLE_DE_PROCESSUS: Readonly<Record<Processus, CleRepartition>> = { 1: 'connaitre', 2: 'appliquer', 3: 'transferer' }
+
+/** Parts égales en pourcentages entiers (somme 100) — point de départ des boutons − / + : trois
+ * cochées → 33 / 34 / 33 (le point restant à Appliquer s'il est coché, sinon à la première cochée). */
+export function pourcentsEgaux(cochees: readonly Processus[]): RepartitionPourcents {
+  const liste = PROCESSUS_ORDRE.filter((p) => cochees.includes(p))
+  const r: RepartitionPourcents = { connaitre: 0, appliquer: 0, transferer: 0 }
+  if (liste.length === 0) return r
+  const base = Math.floor(100 / liste.length)
+  for (const p of liste) r[CLE_DE_PROCESSUS[p]] = base
+  const reste = 100 - base * liste.length
+  if (reste > 0) r[CLE_DE_PROCESSUS[liste.includes(2) ? 2 : liste[0]]] += reste
+  return r
+}
+
+/** Plus petite part d'une compétence cochée (une cochée compte toujours ; pour l'enlever : la décocher). */
+export const PART_MIN_COCHEE = PAS_REPARTITION
+
+/**
+ * Bouton − / + du réglage d'une évaluation / feuille : comme `ajusterRepartition` (même ordre de
+ * compensation), mais seules les AUTRES compétences COCHÉES compensent, et une cochée garde au moins
+ * `PART_MIN_COCHEE` — une compétence non cochée reste à 0 %. `null` si impossible (une seule cochée,
+ * borne atteinte) : le bouton est désactivé.
+ */
+export function ajusterParts(r: RepartitionPourcents, cle: CleRepartition, delta: number, cochees: readonly Processus[]): RepartitionPourcents | null {
+  const cles = CLES_REPARTITION.filter((c) => cochees.includes(PROCESSUS_DE_CLE[c]))
+  if (!cles.includes(cle)) return null
+  const cible = r[cle] + delta
+  if (delta === 0 || cible < PART_MIN_COCHEE || cible > 100) return null
+  const autres = cles.filter((c) => c !== cle)
+  let ordre: CleRepartition[]
+  if (cle === 'appliquer' && autres.length === 2) {
+    const [a, b] = autres // connaitre, transferer
+    if (delta > 0) ordre = r[b] >= r[a] ? [b, a] : [a, b]
+    else ordre = r[a] <= r[b] ? [a, b] : [b, a]
+  } else {
+    ordre = [...autres].sort((x, y) => (x === 'appliquer' ? -1 : y === 'appliquer' ? 1 : 0))
+  }
+  const compense = ordre.find((c) => r[c] - delta >= PART_MIN_COCHEE && r[c] - delta <= 100)
+  if (!compense) return null
+  return { ...r, [cle]: cible, [compense]: r[compense] - delta }
+}
+
+/** « Connaître, Appliquer et Transférer » (ordre des processus). */
+export function texteCompetences(cochees: readonly Processus[]): string {
+  const noms = PROCESSUS_ORDRE.filter((p) => cochees.includes(p)).map((p) => LIBELLE_CLE[CLE_DE_PROCESSUS[p]])
+  return noms.length <= 1 ? (noms[0] ?? '') : `${noms.slice(0, -1).join(', ')} et ${noms[noms.length - 1]}`
 }

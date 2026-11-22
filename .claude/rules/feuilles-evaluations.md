@@ -1080,8 +1080,8 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   du registre (`notionsDuChapitre`), « Tout le chapitre » (exclusif : cocher une notion ne garde
   qu'elle) ; téléphone : 3 puces + « + n » ; puis **Compétences** cochables Connaître / Appliquer /
   Transférer (une à trois, les trois par défaut ; aide « Coche ce que ton professeur a annoncé pour
-  l'interrogation. Le temps est réparti entre les compétences cochées comme dans une vraie
-  évaluation. » — jamais les pourcentages à l'écran) ; 3. durée 20 / 30 / 50 min, **Niveaux** cochables
+  l'interrogation. Le temps est partagé à parts égales entre les compétences cochées. » — jamais de
+  pourcentages à l'écran) ; 3. durée 20 / 30 / 50 min, **Niveaux** cochables
   (cinq cases « 1 très facile » … « 5–7 très difficile », numéro dans sa case teintée ; un ou
   plusieurs, TOUS par défaut = niveaux mélangés, l'ancien « Réel » ; « Tout cocher » quand il en
   manque), « Version aménagée ». Cases ≥ 44 px, case carrée avec ✓ (l'état ne repose pas sur la seule
@@ -1112,13 +1112,14 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   remplir la durée (filtre AVANT tout). Un candidat est retenu aux niveaux cochés si ≥ 50 % de ses
   tirages y tombent (`candidatAuxNiveaux` ; générateur sans niveau : seulement avec les cinq cochés) —
   la même règle décide la disponibilité, donc un niveau proposé, coché seul, donne au moins un
-  exercice. **Proportions** : `REPARTITION_PROCESSUS` (`lib/repartitionProcessus.ts`, répartition de
-  l'utilisateur, SEULE source du défaut — aussi « Préparer l'évaluation » du panneau tant que le
-  professeur ne l'a pas réglée ; l'assistant élève garde TOUJOURS la constante, jamais le réglage du
-  professeur)
-  recalculée sur les compétences cochées (`budgetsParCompetence` ; une seule → 100 %), pour la feuille
-  comme pour la blanche ; une compétence cochée sans exercice aux niveaux cochés cède son temps
-  (Connaître ou Transférer → Appliquer, sinon l'autre cochée ; Appliquer → à parts égales). Remplissage :
+  exercice. **Proportions** (décision de l'utilisateur, 22/11/2026 : la répartition 25 / 50 / 25 ne
+  vaut que pour l'EXAMEN) : temps partagé à PARTS ÉGALES entre les compétences cochées
+  (`repartitionProcessus.ts::partageEgal`, appelé par `budgetsParCompetence` ; une seule → 100 %), pour
+  la feuille comme pour la blanche ; jamais le réglage du professeur ; une compétence cochée sans
+  exercice aux niveaux cochés cède son temps aux autres cochées présentes, à parts égales (aucune
+  présente → rien). Récapitulatif : « · Appliquer et Transférer, temps partagé à parts égales » dès
+  que deux compétences au moins sont imprimées. Phrase des niveaux : « Tous cochés : les niveaux sont
+  mélangés. » (plus « comme dans une vraie évaluation »). Remplissage :
   Transférer d'abord, puis Connaître (vrai/faux plafonnés à son budget), puis Appliquer jusqu'à la
   durée, puis n'importe quelle compétence cochée ; durée remplie jusqu'à la cible sans la dépasser de
   plus de 10 % ; variété (notion la moins servie, puis générateur, jamais deux fois la même variante
@@ -1131,10 +1132,11 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   énoncé déjà dans le document) ; dépassement restant → l'exercice le moins utile est retiré. Un
   exercice imprimé hors des niveaux cochés → note « Peu d'exercices aux niveaux cochés dans ces
   notions : des exercices de niveau moyen complètent. » (`categoriesHorsChoix`). Points (blanche) :
-  durée réelle → `pointsDepuisDuree`, vrai/faux 1 pt, puis 20 pts répartis entre les compétences
-  imprimées selon `REPARTITION_PROCESSUS` recalculée sur elles (`mettreAEchelle` puis
-  `mettreAEchelleParGroupes`). Les cinq niveaux et les trois compétences cochés = exactement l'ancien
-  « Réel » (même composition et même plan à graine égale, vérifié).
+  durée réelle → `pointsDepuisDuree`, vrai/faux 1 pt, puis 20 pts partagés à parts égales entre les
+  compétences imprimées (`partageEgal` → `mettreAEchelle` : 20, 10 / 10, 7 / 6,5 / 6,5 ; puis
+  `mettreAEchelleParGroupes`). Une seule compétence cochée : composition identique à celle d'avant le
+  partage égal à graine égale (vérifié). (Avant le 22/11 : les cinq niveaux et les trois compétences
+  cochés = exactement l'ancien « Réel ».)
   **Calculatrice** : « autorisée » imprimée (choix : aucun chapitre ne l'interdit dans ses données), le
   tirage n'est PAS contraint (sinon « autorisée » ne tirerait que des cas à la calculatrice) ; une
   variante `calculatriceIndispensable` reste donc permise.
@@ -2146,43 +2148,100 @@ Page du chapitre 390 / 1 280 px : 0 « $ » ni « ** » visible, 0 erreur.
   ≈ 6 exercices (1 Connaître — vrai/faux 3 affirmations, sinon formule —, 4 Appliquer, 1 Transférer,
   la part d'un processus absent va à Appliquer), une notion après l'autre, chapitres en alternance ;
   « Sur quelques notions » : notions cochées, 2 exercices + 1 Connaître chacune ; « Préparer
-  l'évaluation » / « Répartition … % » : durée visée 50 min (examen : durée saisie, sinon
-  50 min par chapitre, 150 au plus) répartie selon la répartition RÉGLÉE (`ContexteComposition.repartition`,
-  fractions ; absente → `REPARTITION_PROCESSUS`, défaut 25 / 50 / 25 de l'utilisateur ; le titre et le
-  texte de la carte la lisent : `texteRepartition(compact, r)`) avec les durées estimées. Un processus
-  à 0 % n'est JAMAIS choisi ; la part d'un processus sans question possible est cédée
-  (`composer.ts::cederParts`) : Connaître ou Transférer → Appliquer s'il a des questions et une part
-  > 0 (règle d'avant, résultat identique pour 25 / 50 / 25), sinon aux processus présents ayant une part,
-  au prorata ; Appliquer absent → aux présents de la même façon (avant : sa part était perdue). Variantes du
+  l'évaluation » (feuille, évaluation) / « Préparer l'examen » (examen) : durée visée 50 min (examen :
+  durée saisie, sinon 50 min par chapitre, 150 au plus) répartie selon les parts
+  (`ContexteComposition.repartition`, fractions) avec les durées estimées — examen : répartition
+  d'examen du professeur (absente → `REPARTITION_PROCESSUS`, 25 / 50 / 25) ; évaluation / feuille :
+  compétences cochées à parts égales ou parts ajustées du document (section suivante). Un processus
+  à 0 % n'est JAMAIS choisi ; la part d'un processus sans question possible est cédée — examen
+  (`cession` absente ou `'examen'`, `composer.ts::cederParts`) : Connaître ou Transférer → Appliquer
+  s'il a des questions et une part > 0 (règle d'avant, résultat identique pour 25 / 50 / 25), sinon aux
+  processus présents ayant une part, au prorata ; Appliquer absent → aux présents de la même façon
+  (avant : sa part était perdue) ; évaluation / feuille (`cession: 'cochees'`, `cederPartsCochees`) :
+  aux seules autres cochées présentes, au prorata (parts égales → à parts égales), jamais à une non
+  cochée ; aucune présente → rien n'est composé (« Rien à proposer pour Transférer avec ces
+  réglages… ») ; `ResultatComposition.cedees` = cochées sans question, dites dans le message
+  (« Transférer : aucun exercice dans ces chapitres — son temps va à Connaître et Appliquer. »).
+  **Respect des parts** (correction du 22/11/2026, examen ET évaluation / feuille) : un ajout n'est
+  admis que s'il ne dépasse le budget du processus ni de plus de la moitié de sa durée NI de plus de
+  `DEPASSEMENT_MAX` = 4 min, la PREMIÈRE question comprise ; si la question tirée pour une notion ne
+  tient pas, une autre de la même notion qui tient est prise (aucun tirage de plus) ; si aucune ne
+  tient, la plus courte du processus (un processus voulu est toujours présent). Avant, la première
+  question était toujours admise et le dépassement allait jusqu'à la moitié de sa durée : gen35
+  « classes » (28 min) remplissait un Appliquer de 15 min, 5gen31 (25 min) passait un budget de 40 min
+  à 52. Équilibrée et « Sur quelques notions » inchangées. Variantes du
   panneau seulement (groupes « à verdict » = une rangée), calculatrice interdite : variantes et
   générateurs `calculatriceIndispensable` exclus, aucun cas particulier coché, jamais de
   démonstration. Mesuré (23 chapitres × modes × calculatrice, 207 compositions) : 0 défaut, 6
   exercices imprimés pour chaque « équilibrée », durée « Préparer l'évaluation » de 43 à 67 min (médiane 51,
 mesurée avec l'ancienne répartition ; 25 / 50 / 25 : de 42 à 59 min, médiane 49).
-- **Répartition réglable** (décision de l'utilisateur, 22/11/2026 ; mémorisation : `.claude/rules/comptes.md`,
-  « Répartition mémorisée », `0005_repartition.sql`). Carte « Préparer l'évaluation » : la carte
-  (bouton) affiche la répartition courante (« 25 % / 50 % / 25 % ») et, dans le même cadre, un bouton
-  frère « ⚙ Modifier » (`aria-expanded`, nom « Modifier la répartition (25 % / 50 % / 25 %) », note
-  « ta répartition » / « réglée pour cette session »). Il ouvre sous les cartes le panneau
-  `conception/ReglageRepartition.tsx` : barre empilée aux couleurs des processus, une rangée par
-  compétence (pastille, nom, « ≈ m min » de la durée visée, boutons − / + de 5 en 5, cibles 44 px —
-  aucune saisie, donc ni champ numérique ni valeur bloquée pendant la frappe). **Total toujours 100**
-  (`repartitionProcessus.ts::ajusterRepartition`) : Appliquer compense quand on règle Connaître ou
-  Transférer (Transférer si Appliquer est à 0) ; régler Appliquer reprend à la plus grande des deux
-  autres (Transférer à égalité) ou donne à la plus petite (Connaître à égalité) ; bouton désactivé à
-  une borne. Toutes les répartitions par pas de 5 (231) sont atteignables. Boutons : « Préparer avec
-  30 / 45 / 25 % » (compose aussitôt), « Revenir à 25 / 50 / 25 », « Enregistrer comme ma répartition »
-  (professeur connecté ; désactivé quand rien n'a changé), « Fermer » (et Échap : focus rendu à
-  « Modifier ») ; état sous les boutons (`role=status`) : enregistrée, pas encore enregistrée (avec la
+- **Évaluation et feuille d'exercices : compétences cochées, parts égales** (décision de l'utilisateur,
+  22/11/2026 : « hyper flexible » pour ses évaluations — une, deux ou trois compétences, sans
+  répartition à respecter). Carte « Préparer l'évaluation » : « Tu choisis les compétences ; le temps
+  est partagé entre elles (≈ 50 min). » (aucun pourcentage) ; bouton frère « ⚙ Compétences »
+  (`aria-expanded`, nom « Choisir les compétences (Connaître, Appliquer et Transférer, parts égales) »,
+  note « Appliquer · Transférer » / « parts ajustées » quand ce n'est plus le défaut). Il ouvre
+  `conception/ReglageCompetences.tsx` (`#conc-comp`, mêmes classes `conc-rep-*`) : une rangée par
+  compétence avec sa CASE À COCHER (cible 44 px), pastille, nom, « ≈ m min » / « non cochée » /
+  « aucun exercice ici », boutons − / + ; trois cochées par défaut ; au moins une (décocher la dernière
+  → « Garde au moins une compétence. ») ; parts égales EXACTES pour la composition
+  (`partageEgal(cochées)`), affichées en entiers `pourcentsEgaux` (33 / 34 / 33, point restant à
+  Appliquer) ; − / + (`ajusterParts`) : seules les autres COCHÉES compensent (même ordre que
+  l'examen), une cochée garde au moins 5 %, une non cochée reste à 0 % (boutons désactivés) ; cocher /
+  décocher remet les parts égales ; boutons « Préparer avec ces compétences » (« Préparer avec
+  Transférer » s'il n'y en a qu'une), « Parts égales », « Fermer » (et Échap, focus rendu) ; une cochée
+  sans question composable (`composer.ts::processusComposables`) est signalée (« son temps va à … »).
+  Réglage du DOCUMENT : état du panneau (`reglageCompetences`), perdu au rechargement, JAMAIS mémorisé,
+  aucun « Enregistrer » ; passer d'Évaluation à Examen ferme le réglage ouvert.
+- **Examen : répartition d'examen réglable et mémorisée** (décision de l'utilisateur, 22/11/2026 ;
+  mémorisation : `.claude/rules/comptes.md`, « Répartition mémorisée », `0005_repartition.sql` — SEUL
+  endroit où elle apparaît). Carte « Préparer l'examen » : « Ta répartition d'examen : 25 % / 50 % /
+  25 % de 50 min. » et, dans le même cadre, un bouton frère « ⚙ Modifier » (`aria-expanded`, nom
+  « Modifier ta répartition d'examen (25 % / 50 % / 25 %) », note « ta répartition d'examen » /
+  « réglée pour cette session »). Il ouvre sous les cartes le panneau
+  `conception/ReglageRepartition.tsx` (titre « Ta répartition d'examen ») : barre empilée aux couleurs
+  des processus, une rangée par compétence (pastille, nom, « ≈ m min » de la durée visée, boutons − / +
+  de 5 en 5, cibles 44 px — aucune saisie, donc ni champ numérique ni valeur bloquée pendant la
+  frappe). **Total toujours 100** (`repartitionProcessus.ts::ajusterRepartition`) : Appliquer compense
+  quand on règle Connaître ou Transférer (Transférer si Appliquer est à 0) ; régler Appliquer reprend à
+  la plus grande des deux autres (Transférer à égalité) ou donne à la plus petite (Connaître à
+  égalité) ; bouton désactivé à une borne. Toutes les répartitions par pas de 5 (231) sont
+  atteignables. Boutons : « Préparer l'examen avec 30 / 45 / 25 % » (compose aussitôt), « Revenir à
+  25 / 50 / 25 », « Enregistrer comme ma répartition d'examen » (professeur connecté ; désactivé quand
+  rien n'a changé), « Fermer » (et Échap : focus rendu à « Modifier ») ; état sous les boutons
+  (`role=status`) : enregistrée (« sera proposée à chaque examen »), pas encore enregistrée (avec la
   valeur mémorisée), « Mémorisation pas encore activée : colle le fichier 0005_repartition.sql… »,
-  sans compte (session seulement). Le réglage vaut pour feuille d'exercices, évaluation et examen.
-  Vérifié (`repartition/composer.cjs`, module réel) : contrôle d'origine (207 compositions, 0 défaut),
-  non-régression 1 863 / 1 863 compositions identiques au code d'avant à graine égale (trois façons ×
-  23 chapitres × modes × calculatrice × 3 graines, répartition absente / constante / réglée 25 / 50 /
-  25), 1 242 compositions sous 9 autres répartitions (0/100/0, 100/0/0, 0/0/100, 50/50/0, 0/50/50,
-  40/40/20, 10/80/10, 35/30/35, 30/45/25) : 0 question d'un processus à 0 %, rien de vide, temps par
-  processus à quelques minutes de sa part (écart médian 0 à 4 min) ; 1 346 contrôles purs. Playwright :
-  `.claude/rules/comptes.md`.
+  sans compte (session seulement).
+  Vérifié (`repartition/composer.cjs`, module réel, avant la décision « examen seulement ») : contrôle
+  d'origine (207 compositions, 0 défaut), non-régression 1 863 / 1 863 compositions identiques au code
+  d'avant à graine égale, 1 242 compositions sous 9 autres répartitions (0/100/0, 100/0/0, 0/0/100,
+  50/50/0, 0/50/50, 40/40/20, 10/80/10, 35/30/35, 30/45/25) : 0 question d'un processus à 0 %, rien
+  de vide, temps par processus à quelques minutes de sa part (écart médian 0 à 4 min) ; 1 346
+  contrôles purs. Playwright : `.claude/rules/comptes.md`.
+- **Vérifié — 22/11, compétences / examen** (outils `tests.mjs`, `ui.mjs` du dossier de travail
+  `repartition-examen`, module réel via Vite) : 1 161 contrôles purs (`partageEgal` exact pour les
+  7 combinaisons, toutes les suites de clics `ajusterParts` — 19 états à deux cochées, 136 à trois :
+  total 100, non cochées à 0, cochées ≥ 5 —, cessions) ; 2 277 compositions « Préparer l'évaluation »
+  (23 chapitres × feuille / évaluation × calculatrice × 7 combinaisons × 3 graines, parts égales et
+  828 ajustées) : 0 question d'une compétence non cochée, 0 composition vide, `cedees` toujours juste,
+  parts effectives exactement égales, temps par compétence de −5 à +13 min de la part égale (médiane
+  1–2 ; après la correction « respect des parts » : de −6 à +4 min) ; examen : écart cible / obtenu
+  par processus (`examen-ecarts.mjs`, 23 chapitres × calculatrice × 10 répartitions — 25/50/25,
+  20/60/20, 30/45/25, 10/80/10, 35/30/35, 40/40/20, 0/50/50, 50/50/0, 0/100/0, 100/0/0 — × 3 graines,
+  1 380 compositions, 3 144 mesures ; cible = part APRÈS cession) : code d'avant moy. |écart| 2,0 min,
+  de −6 à +13,3 min, 95,2 % à 5 min près ; après correction moy. 1,8 min, de −5,5 à +7 min, 99,5 % à
+  5 min près, 100 % à 8 min ; les +7 restants = un Transférer de 5 min dont l'exercice le plus court
+  dure 12 min (incompressible). 0 processus à 0 % choisi, cession toujours d'abord à Appliquer ;
+  compositions identiques au code d'avant quand le choix d'avant tient (848 / 1 380 ; équilibrée et
+  notions : toutes) ; cession d'une
+  compétence retirée des lignes : 88 / 88 (temps aux autres cochées seulement) ; assistant élève
+  (5 chapitres × 2 types) : 420 compositions + 100 plans, 0 compétence non cochée, temps à ±9 min de
+  la part égale (médiane 0), blanche 20 / 10-10 / 7-6,5-6,5 pts, une compétence = composition d'avant
+  (90 / 90). Playwright (faux client, 1 280 px et iPhone 13) : 174 vérifications (carte sans
+  pourcentage, cases, 33 / 34 / 33, décocher, ajuster, dernière gardée, compositions sans compétence
+  non cochée, profil inchangé, rechargement → défaut ; examen : répartition du profil, réglage,
+  enregistrer, relire ; assistant : aide, phrase des niveaux, récapitulatif « temps partagé à parts
+  égales ») ; 0 erreur console, `scrollWidth` = largeur, aucun champ numérique.
 - **Téléphone (< 960 px)** : une colonne ; barre fixée en bas « Ma feuille · n exercices ▴ ·
   ≈ m min · niveaux » + « Générer » ; le panneau s'ouvre en feuille du bas (voile, « Fermer ») ;
   cibles ≥ 44 px, champs à 16 px.
