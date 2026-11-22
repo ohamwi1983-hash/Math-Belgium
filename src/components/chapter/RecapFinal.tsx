@@ -18,7 +18,7 @@ export function RecapFinal({ recap }: { recap: ChapterContent['recap'] }) {
           ))}
         </ul>
       )}
-      {recap.table && <FeatureTable block={{ kind: 'featureTable', ...recap.table }} />}
+      {recap.table && <FeatureTable block={{ kind: 'featureTable', ...recap.table }} synthese />}
       {recap.checklist && <ChecklistRelecture checklist={recap.checklist} />}
       {recap.forward && (
         <p className="forward">

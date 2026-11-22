@@ -1050,6 +1050,10 @@ table.tableau tr:last-child td { border-bottom: none; }
    ET tableaux de corps de section, dans plusieurs chapitres) que le nowrap force un défilement
    horizontal dès qu'une cellule mêle formule et texte un peu long. */
 table.feature-table td { white-space: normal; }
+/* Tableau de « Ce qu'il faut retenir » (`RecapFinal` → `FeatureTable synthese`) : police de LECTURE
+   du texte qui l'entoure (Andika à l'écran et à l'impression, Atkinson en version aménagée), pas la
+   monospace des tableaux de signes ; les formules sont en KaTeX (décision de l'utilisateur). */
+table.feature-table--synthese { font-family: inherit; font-size: 0.94em; }
 
 /* ---------- groupe d'illustrations compactes côte à côte ---------- */
 .diag-multi { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px; margin: 26px 0; }
