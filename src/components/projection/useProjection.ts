@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ChapterContent } from '../../content/types'
 import type { Diapo, Role } from '../../lib/projection/diapos'
+import type { EtatInstruments } from './instruments'
 
 /** État PARTAGÉ entre la fenêtre des diapos et celle du professeur (mode deux écrans). */
 export interface EtatProjection {
@@ -11,15 +12,48 @@ export interface EtatProjection {
   debut: number
   /** Minuteur de la barre d'outils : fin prévue (horodatage), null = arrêté. */
   minuteur: { fin: number | null; duree: number }
+  /** Fond de l'écran blanc : uni, quadrillé (carreaux de 40 px logiques) ou repère gradué. */
+  fond: FondBlanc
 }
 
-/** Trait d'annotation, en coordonnées de la diapo (1 280 × 720). */
+export type FondBlanc = 'uni' | 'quadrille' | 'repere'
+
+/** Trait d'annotation (stylo, surligneur ou gomme), en coordonnées de la diapo (1 280 × 720). */
 export interface Trait {
+  genre?: 'trait'
   id: string
   couleur: string
   gomme: boolean
+  /** Surligneur : trait large et transparent (calque « multiply » sous le stylo). */
+  fluo?: boolean
+  /** Épaisseur en px logiques (défaut : 5 au stylo, 22 au surligneur, 44 à la gomme). */
+  epaisseur?: number
   points: [number, number][]
 }
+
+/** Arc tracé au compas : centre, rayon, angles de départ et d'arrivée (radians, non ramenés à 2π). */
+export interface Arc {
+  genre: 'arc'
+  id: string
+  couleur: string
+  epaisseur: number
+  cx: number
+  cy: number
+  r: number
+  a0: number
+  a1: number
+}
+
+/** Résultat de la calculatrice épinglé sur la diapo (étiquette KaTeX déplaçable). */
+export interface Epingle {
+  genre: 'epingle'
+  id: string
+  x: number
+  y: number
+  latex: string
+}
+
+export type ElementAnnotation = Trait | Arc | Epingle
 
 export type MessageProjection =
   | { type: 'etat'; de: string; etat: EtatProjection }
@@ -27,6 +61,12 @@ export type MessageProjection =
   | { type: 'trait'; de: string; index: number; trait: Trait }
   | { type: 'point'; de: string; index: number; id: string; x: number; y: number }
   | { type: 'effacer'; de: string; index: number }
+  /** Ajout OU remplacement (même id) d'un élément : trait aimanté, arc en cours, étiquette déplacée. */
+  | { type: 'element'; de: string; index: number; element: ElementAnnotation }
+  | { type: 'retirer'; de: string; index: number; id: string }
+  /** Toutes les annotations (réponse à une fenêtre qui s'ouvre ou se recharge). */
+  | { type: 'annotations'; de: string; toutes: [number, ElementAnnotation[]][] }
+  | { type: 'instruments'; de: string; instruments: EtatInstruments }
 
 type Ecouteur = (m: MessageProjection) => void
 
@@ -38,7 +78,7 @@ type Ecouteur = (m: MessageProjection) => void
  * répond. Rien n'est envoyé hors du navigateur.
  */
 export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Role) {
-  const [etat, setEtat] = useState<EtatProjection>(() => ({ index: 0, pas: 0, blanc: false, debut: Date.now(), minuteur: { fin: null, duree: 300 } }))
+  const [etat, setEtat] = useState<EtatProjection>(() => ({ index: 0, pas: 0, blanc: false, debut: Date.now(), minuteur: { fin: null, duree: 300 }, fond: 'uni' }))
   const etatRef = useRef(etat)
   etatRef.current = etat
   const id = useMemo(() => Math.random().toString(36).slice(2), [])
@@ -74,11 +114,13 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
       if (m.type === 'etat') {
         actif.current = true
         const n = Math.max(0, Math.min(diapos.length - 1, m.etat.index))
-        const etatRecu = { ...m.etat, index: n }
+        const etatRecu = { ...m.etat, index: n, fond: m.etat.fond ?? 'uni' }
         etatRef.current = etatRecu
         setEtat(etatRecu)
       } else if (m.type === 'demande') {
         if (actif.current) envoyer({ type: 'etat', de: id, etat: etatRef.current })
+        // Annotations et instruments répondent aussi (chacun ce qu'il garde).
+        for (const f of ecouteurs.current) f(m)
       } else for (const f of ecouteurs.current) f(m)
     }
     envoyer({ type: 'demande', de: id })
@@ -124,6 +166,7 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
     [appliquer, diapos.length],
   )
   const basculerBlanc = useCallback(() => appliquer((e) => ({ ...e, blanc: !e.blanc })), [appliquer])
+  const choisirFond = useCallback((fond: FondBlanc) => appliquer((e) => (e.fond === fond ? e : { ...e, fond })), [appliquer])
   const lancerMinuteur = useCallback((duree: number) => appliquer((e) => ({ ...e, minuteur: { duree, fin: Date.now() + duree * 1000 } })), [appliquer])
   const arreterMinuteur = useCallback(() => appliquer((e) => ({ ...e, minuteur: { ...e.minuteur, fin: null } })), [appliquer])
 
@@ -134,7 +177,7 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
     }
   }, [])
 
-  return { etat, suivant, precedent, aller, basculerBlanc, lancerMinuteur, arreterMinuteur, envoyer, ecouter, id, synchro }
+  return { etat, suivant, precedent, aller, basculerBlanc, choisirFond, lancerMinuteur, arreterMinuteur, envoyer, ecouter, id, synchro }
 }
 
 export type Projection = ReturnType<typeof useProjection>
