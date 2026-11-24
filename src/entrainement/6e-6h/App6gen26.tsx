@@ -5,7 +5,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCalculAir
 import type { IdVarianteCalculAires } from "./generateurs6e/calculAires";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionCalculAires, soumettreReponseEcran, tentativesMaxCourant } from "./moteur6e/sessionCalculAires";
 import type { EtatSessionCalculAires, PhaseCalculAires } from "./moteur6e/typesCalculAires";
-import { diagnostiquerEcran } from "./moteur6e/verificationCalculAires";
+import { diagnostiquerEcran, refusSaisieCalculAires } from "./moteur6e/verificationCalculAires";
 import { EtapeChampsCalculAires } from "./components6e/EtapeChampsCalculAires";
 import { EtapeRacinesCalculAires } from "./components6e/EtapeRacinesCalculAires";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
@@ -209,6 +209,7 @@ export function App6gen26() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+            prevalider={(valeurs) => refusSaisieCalculAires(exercice, phase, valeurs)}
             onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), libellesReponse(champsEcran(exercice, phase), valeurs))}
           />
         )}

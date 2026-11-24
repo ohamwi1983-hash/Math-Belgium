@@ -3,6 +3,7 @@ import type { ExerciceIntegraleMoyenne, ExerciceIntegraleParametre, ExerciceInte
 import type { PhaseIntegralesDefinies } from "../moteur6e/typesIntegralesDefinies";
 import type { PhaseCalculPrimitives } from "../moteur6e/typesCalculPrimitives";
 import { phasesPourExercice as phasesPourExercicePrimitive } from "../moteur6e/typesCalculPrimitives";
+import { formeExacteExigee, valeurExacteIntegraleDefinie, valeurExacteMoyenne } from "../moteur6e/verificationIntegralesDefinies";
 import type { AideAvecLatex, ChampDef, FragmentConsigne } from "./formatCalculPrimitives";
 import { coefDevant, decimalLatex, egalExactPuisApproche, valeurExacteLatex } from "./formatMonome";
 import {
@@ -94,11 +95,26 @@ function latex(valeur: string): FragmentConsigne {
 
 /** Audit P17 : la précision attendue n'était annoncée nulle part. */
 const PRECISION: FragmentConsigne[] = [texte(" Donne chaque résultat sous forme exacte ou arrondi au centième.")];
+/** Résultat ni entier ni fractionnaire (ln, e, π, √…) : forme exacte EXIGÉE (décision de
+ * l'utilisateur, 24/11/2026 — la calculatrice n'en donne qu'un décimal) ; l'écran refuse l'arrondi
+ * sans tentative (`refusSaisieIntegralesDefinies`). */
+const PRECISION_EXACTE: FragmentConsigne[] = [texte(" Donne chaque résultat sous forme exacte.")];
+
+function precision(exercice: ExerciceIntegralesDefinies): FragmentConsigne[] {
+  return exercice.scenario !== "parametre" && formeExacteExigee(exercice) ? PRECISION_EXACTE : PRECISION;
+}
+
+/** « = exacte ≈ approchée » : valeur exacte SYMBOLIQUE quand elle est irrationnelle (la
+ * reconnaissance numérique ne voyait ni arctan(3) ni ln(7)), sinon l'affichage d'avant. */
+function egalValeurIntegrale(v: number, exacte: { latex: string; rationnel: boolean } | null): string {
+  if (!exacte || exacte.rationnel) return egalExactPuisApproche(v, 2);
+  return `= ${exacte.latex} \\approx ${decimalLatex(v, 2)}`;
+}
 const RAPPEL_CONSTANTE: FragmentConsigne[] = [texte(" La constante "), latex("+C"), texte(" est facultative dans la primitive.")];
 
 export function consigneGenerale(exercice: ExerciceIntegralesDefinies): FragmentConsigne[] {
-  if (exercice.scenario === "simple") return [texte("Calcule une primitive F de f, puis évalue l'intégrale définie ci-dessous."), ...RAPPEL_CONSTANTE, ...PRECISION];
-  if (exercice.scenario === "moyenne") return [texte("Calcule une primitive F de f, évalue l'intégrale définie, puis la valeur moyenne de f sur cet intervalle."), ...RAPPEL_CONSTANTE, ...PRECISION];
+  if (exercice.scenario === "simple") return [texte("Calcule une primitive F de f, puis évalue l'intégrale définie ci-dessous."), ...RAPPEL_CONSTANTE, ...precision(exercice)];
+  if (exercice.scenario === "moyenne") return [texte("Calcule une primitive F de f, évalue l'intégrale définie, puis la valeur moyenne de f sur cet intervalle."), ...RAPPEL_CONSTANTE, ...precision(exercice)];
   return [texte("Calcule une primitive F de f, puis détermine la ou les valeurs du paramètre m pour lesquelles l'intégrale définie ci-dessous vaut la valeur indiquée."), ...RAPPEL_CONSTANTE, ...PRECISION];
 }
 
@@ -234,7 +250,7 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceIntegralesDefi
   if (phase === "finalIntegrale") {
     const exerciceS = exercice as ExerciceIntegraleSimple | ExerciceIntegraleMoyenne;
     const [a, b] = bornesLatex(exercice);
-    return [`\\displaystyle\\int_{${a}}^{${b}} f(x)\\,dx ${egalExactPuisApproche(valeurIntegrale(exerciceS), 2)}`];
+    return [`\\displaystyle\\int_{${a}}^{${b}} f(x)\\,dx ${egalValeurIntegrale(valeurIntegrale(exerciceS), valeurExacteIntegraleDefinie(exerciceS))}`];
   }
   if (phase === "valeurMoyenne") {
     const exerciceM = exercice as ExerciceIntegraleMoyenne;
@@ -242,7 +258,7 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceIntegralesDefi
     const moyenne = valeurIntegrale(exerciceM) / (exerciceM.b - exerciceM.a);
     // Notation du cours (pas \bar f, absente du cours) : la formule elle-même, bornes numériques.
     const inverse = valeurExacteLatex(1 / (exerciceM.b - exerciceM.a)) ?? `\\dfrac{1}{b-a}`;
-    return [`${inverse === "1" ? "" : inverse}\\displaystyle\\int_{${a}}^{${b}} f(x)\\,dx ${egalExactPuisApproche(moyenne, 2)}`];
+    return [`${inverse === "1" ? "" : inverse}\\displaystyle\\int_{${a}}^{${b}} f(x)\\,dx ${egalValeurIntegrale(moyenne, valeurExacteMoyenne(exerciceM))}`];
   }
   const exerciceP = exercice as ExerciceIntegraleParametre;
   if (phase === "poserEquationM") {

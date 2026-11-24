@@ -179,7 +179,7 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
 - **Calculatrice interdite** → seulement des valeurs exactes / remarquables ; **autorisée** →
   seulement des cas qui exigent la calculatrice (pas d'angles ni de valeurs remarquables).
 - Contrat : `profilInstance(instance) → { casParticulier: string | null, calcul?: 'exacte' |
-  'calculatrice' }` + `libelleCasParticulier` (texte de la case). Plusieurs caractéristiques →
+  'calculatrice' | 'calculatriceDirecte' }` (la dernière : ni interdite ni autorisée, gen34) + `libelleCasParticulier` (texte de la case). Plusieurs caractéristiques →
   identifiants joints par « + » (jamais tirés pour la case). Rien d'autre à faire : le pipeline
   (`evaluationLocal.ts::graineInedite`) cherche une graine dont la PREMIÈRE instance respecte la
   contrainte — le QR code rouvre donc le même exercice sans changer l'appli. Paliers de repli :
@@ -302,9 +302,23 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   TI affiche exactement les Q₁ / médiane / Q₃ du cours (`quartilesTi30xb`, 91,8 % des exercices complets).
   Laissés sans `calcul` (la démarche est évaluée) : 6gen40 (traduire la transformation en formule), 6gen35 B
   et D, 6gen47 B et C, 6gen48 et 6gen52 « au moins / au plus », 6gen50, 6gen51 et 6gen52 « symétrique /
-  encadrée », 6gen51 E, 6gen53 (λ à ajuster, conditions), gen30, gen32 et gen33 « classes ». Candidats plus
-  larges (intégrales numériques, σ en 4e, impédances…) : listés, en attente de validation (revue, section
-  « 2 bis »).
+  encadrée », 6gen51 E, 6gen53 (λ à ajuster, conditions), gen30, gen32 et gen33 « classes ». **Section
+  « 2 bis » tranchée (24/11)** — intégrales (∫ de la Graph Math+) : instance entière ou fractionnaire →
+  `exacte` (6gen25 simple / moyenne, « diviser (fraction) » compris ; 6gen26 B, C, D « bornes » : toutes) ;
+  valeur avec ln, e, π, √… → `calcul` absent, tirée « interdite » ET « autorisée » (6gen25 :
+  `calculatriceIndispensable` retiré ; 6gen26 A, tout 6gen27) car la consigne EXIGE la forme exacte (« sous forme exacte » / « Donne la valeur exacte. »,
+  écran et papier), corrigé, réponse brève et barème donnent la valeur exacte (6gen25 : réduite
+  SYMBOLIQUEMENT, `moteur6e/valeurExacteIntegrale.ts`, qui décide aussi de la rationalité — l'ancien test
+  numérique à dénominateur ≤ 720 se trompait sur ≈ 8 % des tirages de B), l'écran refuse l'arrondi sans
+  tentative (`moteur6e/saisieValeurExacteIntegrale.ts`, champ `prevalider` des écrans). « Paramètre »
+  (équation en m) inchangé. gen34 « valeurs » : jamais tirée « autorisée » — σ entier `exacte`, sinon
+  `calculatriceDirecte` (nouvelle valeur du contrat : calculatrice nécessaire ET réponse directe → exclue
+  « autorisée » ET « interdite », `respecteContrainte`, `varianteToujoursExacte`) pour que « interdite »
+  reste « σ entier seulement ». Équations, systèmes, dérivée en un point (6gen3, 6gen9, 6gen14, 6gen28,
+  6gen55…) et 6gen96 : inchangés (décision). Mesuré : 520 tirages par variante, profil rationnel ⟺
+  `exacte`, 0 KaTeX invalide ; plans réels « autorisée » 5 760 instances, 0 `exacte` ; « interdite » :
+  seul changement de structure, 6gen25 y tire ses 27 variantes (16 avant), accord 76,8 % (76,9 % entre deux
+  passes du nouveau code, 80,1 % de l'ancien).
 - Recherche de graine bornée par le temps (200 ms par palier) : les cas rares (σ entier, combinaison
   précise de paramètres) sont trouvés sans bloquer le panneau. Un cas particulier va sur la DERNIÈRE
   question de la ligne qui peut le recevoir (cas propre à une seule variante).

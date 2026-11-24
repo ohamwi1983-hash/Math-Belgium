@@ -122,11 +122,19 @@ export function profilMediane(e: ExerciceMediane): ProfilInstance {
  * (`"valeurs"` / `"classes"`), imposée identique d'une série à l'autre quand la ligne tire au hasard
  * entre les deux familles (une chance sur deux chacune). Même règle de calculatrice : σ entier
  * (classes : 2,3 % des tirages, x̄ à au plus une décimale par construction) → `'exacte'`. Effectifs
- * tous égaux : impossibles en classes (x̄ serait la moyenne simple des centres, rejetée). */
+ * tous égaux : impossibles en classes (x̄ serait la moyenne simple des centres, rejetée).
+ * Revue des profils (décision de l'utilisateur, 24/11/2026, calculatrice des élèves de 4e : TI-30XB
+ * MultiView) : famille « valeurs » jamais tirée « calculatrice autorisée » — les valeurs x_i et leurs
+ * effectifs (FRQ) se tapent tels quels, « 1-Var Stats » affiche x̄ et σx (la variance est σx²). σ entier :
+ * `'exacte'` (faisable à la main) ; sinon `'calculatriceDirecte'` (la calculatrice est nécessaire pour
+ * σ au centième ET elle le donne directement) : ni autorisée, ni interdite — « interdite » ne change
+ * donc pas (σ entier seulement). « Classes » inchangée (centres à calculer d'abord ; `'exacte'`
+ * seulement si σ est entier). */
 export function profilDispersion(e: ExerciceDispersion): ProfilInstance {
+  const sigmaEntier = estEntier(Math.sqrt(e.varianceAttendue));
   return {
     casParticulier: cas([tousEgaux(e.lignes.map((l) => l.effectif)) && "effectifs-egaux"]),
-    calcul: estEntier(Math.sqrt(e.varianceAttendue)) ? "exacte" : "calculatrice",
+    calcul: sigmaEntier ? "exacte" : e.enClasses ? "calculatrice" : "calculatriceDirecte",
     forme: e.enClasses ? "classes" : "valeurs",
   };
 }

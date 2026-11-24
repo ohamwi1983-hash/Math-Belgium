@@ -14,8 +14,14 @@
  * - D (paramètre) : aire visée entière.
  *
  * Calculatrice : jamais indispensable — toutes les aires ont une valeur EXACTE (fractions ; e, ln, sin 1
- * en famille A), affichée au corrigé avant la valeur approchée. `calcul` est donc absent (un seul
- * régime par variante, aucune contrainte « calculatrice » ne s'y applique).
+ * en famille A), affichée au corrigé avant la valeur approchée. Revue des profils (décision de
+ * l'utilisateur, 24/11/2026 — la Graph Math+ calcule ∫ et ∫dx entre racines / intersections) :
+ * - aire entière ou fractionnaire (B, C, D « bornes données / à trouver » : polynômes à racines
+ *   entières) → `'exacte'` : la calculatrice l'affiche telle quelle, ces variantes ne sont plus tirées
+ *   « calculatrice autorisée » ;
+ * - aire avec e, ln ou sin 1 (famille A) → `calcul` absent (tirée dans les deux cas : « interdite »
+ *   inchangée), mais la consigne EXIGE la forme exacte (écran et papier ; l'écran refuse l'arrondi) ;
+ * - D « paramètre » (résoudre une équation en m) : `calcul` absent.
  */
 import type { ProfilInstance } from "../../../export/genererFeuilleExercices";
 import type { ExerciceCalculAires } from "../../core6e/calculAires.types";
@@ -31,13 +37,13 @@ export function profilCalculAires(e: ExerciceCalculAires): ProfilInstance {
       return { casParticulier: e.a === 0 || e.b === 0 ? "borne-nulle" : null };
     case "B":
       // Racines opposées : seulement pour la parabole (intégrande pair) ; la cubique a une racine double.
-      if (e.type === "parabole" && e.r1 === -e.r2) return { casParticulier: "racines-opposees" };
-      return { casParticulier: e.r1 === 0 || e.r2 === 0 ? "racine-nulle" : null };
+      if (e.type === "parabole" && e.r1 === -e.r2) return { casParticulier: "racines-opposees", calcul: "exacte" };
+      return { casParticulier: e.r1 === 0 || e.r2 === 0 ? "racine-nulle" : null, calcul: "exacte" };
     case "C":
-      return { casParticulier: e.r2 === 0 && e.r1 === -e.r3 ? "racines-symetriques" : null };
+      return { casParticulier: e.r2 === 0 && e.r1 === -e.r3 ? "racines-symetriques" : null, calcul: "exacte" };
     case "D":
       if (e.sousType === "parametre") return { casParticulier: estEntier(e.cible) ? "aire-entiere" : null };
-      if (e.termesG.length === 0) return { casParticulier: "g-nulle" };
-      return { casParticulier: e.termesG.every((t) => t.type === "constante") ? "g-constante" : null };
+      if (e.termesG.length === 0) return { casParticulier: "g-nulle", calcul: "exacte" };
+      return { casParticulier: e.termesG.every((t) => t.type === "constante") ? "g-constante" : null, calcul: "exacte" };
   }
 }

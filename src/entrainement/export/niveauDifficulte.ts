@@ -204,7 +204,8 @@ const TYPES_NOMBRES = new Set(["calcul", "resultat"]);
  * l'instance exige la calculatrice. */
 export function nombresDuCorrige<T>(adaptateur: AdaptateurFeuilleExercices<T>, instance: T, etapes: EtapeCorrection[], anglesEnPi = false): 0 | 1 {
   try {
-    if (adaptateur.profilInstance?.(instance).calcul === "calculatrice") return 1;
+    const calcul = adaptateur.profilInstance?.(instance).calcul;
+    if (calcul === "calculatrice" || calcul === "calculatriceDirecte") return 1;
   } catch {
     /* profil indisponible */
   }

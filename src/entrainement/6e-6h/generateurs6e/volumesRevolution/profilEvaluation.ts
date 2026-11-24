@@ -11,6 +11,10 @@
  *
  * Calculatrice : jamais indispensable — tous les volumes ont une valeur EXACTE (multiples rationnels
  * de π ; formes closes avec e ou sin 2 en A_exponentielle / A_trigonométrique). `calcul` absent.
+ * Revue des profils (décision de l'utilisateur, 24/11/2026 — la Graph Math+ calcule π∫ directement) :
+ * aucun volume n'est entier ni fractionnaire (tous contiennent π), donc aucun `'exacte'` ; la consigne
+ * EXIGE la forme exacte (écran et papier, l'écran refuse l'arrondi sans tentative) et l'exercice reste
+ * tiré « calculatrice interdite » comme « autorisée ».
  */
 import type { ProfilInstance } from "../../../export/genererFeuilleExercices";
 import type { ExerciceVolumesRevolution } from "../../core6e/volumesRevolution.types";

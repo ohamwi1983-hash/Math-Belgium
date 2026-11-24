@@ -6,7 +6,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntegrale
 import type { IdVarianteIntegralesDefinies } from "./generateurs6e/integralesDefinies";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionIntegralesDefinies, soumettreReponseEcran } from "./moteur6e/sessionIntegralesDefinies";
 import type { EtatSessionIntegralesDefinies, PhaseIntegralesDefinies } from "./moteur6e/typesIntegralesDefinies";
-import { diagnostiquerEcran } from "./moteur6e/verificationIntegralesDefinies";
+import { diagnostiquerEcran, refusSaisieIntegralesDefinies } from "./moteur6e/verificationIntegralesDefinies";
 import { messageSpecifiqueEcran } from "./moteur6e/verificationCalculPrimitives";
 import type { PhaseCalculPrimitives } from "./moteur6e/typesCalculPrimitives";
 import { EtapeChampsCalculPrimitives } from "./components6e/EtapeChampsCalculPrimitives";
@@ -201,6 +201,7 @@ export function App6gen25() {
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
             messageSpecifique={(valeurs) => messageSpecifiqueEcran(exercice.primitive, phase as PhaseCalculPrimitives, valeurs)}
+            prevalider={(valeurs) => refusSaisieIntegralesDefinies(exercice, phase, valeurs)}
             onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
           />
         )}

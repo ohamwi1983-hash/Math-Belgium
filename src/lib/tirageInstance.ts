@@ -53,7 +53,10 @@ function membreToujoursExact(generatorId: string, adaptateur: Adaptateur, varian
   for (let essai = 0; essai < ESSAIS_EXACTE && (essai < ESSAIS_MIN_EXACTE || Date.now() < fin); essai++) {
     try {
       tirages++
-      if (adaptateur.profilInstance!(tirerInstance(adaptateur, varianteId, tirerGraine())).calcul !== 'exacte') {
+      // `calculatriceDirecte` (la calculatrice donne directement la réponse) n'est pas tirée « autorisée »
+      // non plus : comptée comme `exacte` ici (gen34 « valeurs », revue des profils du 24/11/2026).
+      const calcul = adaptateur.profilInstance!(tirerInstance(adaptateur, varianteId, tirerGraine())).calcul
+      if (calcul !== 'exacte' && calcul !== 'calculatriceDirecte') {
         toujours = false
         break
       }

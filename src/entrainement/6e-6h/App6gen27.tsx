@@ -5,7 +5,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceVolumesRe
 import type { IdVarianteVolumesRevolution } from "./generateurs6e/volumesRevolution";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionVolumesRevolution, soumettreReponseEcran, tentativesMaxCourant } from "./moteur6e/sessionVolumesRevolution";
 import type { EtatSessionVolumesRevolution, PhaseVolumesRevolution } from "./moteur6e/typesVolumesRevolution";
-import { diagnostiquerEcran } from "./moteur6e/verificationVolumesRevolution";
+import { diagnostiquerEcran, refusSaisieVolumesRevolution } from "./moteur6e/verificationVolumesRevolution";
 import { EtapeChampsCalculAires } from "./components6e/EtapeChampsCalculAires";
 import { EtapeRacinesCalculAires } from "./components6e/EtapeRacinesCalculAires";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
@@ -208,6 +208,7 @@ export function App6gen27() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+            prevalider={(valeurs) => refusSaisieVolumesRevolution(exercice, phase, valeurs)}
             onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), libellesReponse(champsEcran(exercice, phase), valeurs))}
           />
         )}

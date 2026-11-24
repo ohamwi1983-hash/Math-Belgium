@@ -3,6 +3,7 @@ import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerEnsembleValeurs, diagnostiquerEquivalenceFonction, diagnostiquerValeur } from "./equivalenceExponentielle";
 import { evaluerValeurExponentielle } from "./expressionExponentielle";
 import type { PhaseCalculAires } from "./typesCalculAires";
+import { refusArrondi, toleranceExacte } from "./saisieValeurExacteIntegrale";
 
 /**
  * Couche B (6e) — vérification pour `6gen26` ("Calcul d'aires par intégrale", chapitre 4). N'importe
@@ -54,9 +55,22 @@ function aireSurABAvecPrimitive(a: number, b: number, primitiveReference: (x: nu
   return Math.abs(primitiveReference(b) - primitiveReference(a));
 }
 
+/** Aire de la famille A (e^b − e^a, ln q, k·sin 1) : jamais entière ni fractionnaire — forme exacte
+ * EXIGÉE (décision de l'utilisateur, 24/11/2026) : seule une valeur exacte est juste, l'arrondi est
+ * arrêté avant soumission (`refusSaisieCalculAires`, sans tentative). */
 export function diagnostiquerAEcran2(exercice: ExerciceAireA, valeurs: string[]): StatutVerification {
   const aire = aireSurABAvecPrimitive(exercice.a, exercice.b, exercice.primitiveReference);
-  return diagnostiquerValeur(valeurs[0], aire, toleranceValeur(aire));
+  return diagnostiquerValeur(valeurs[0], aire, toleranceExacte(aire));
+}
+
+const SYMBOLES_A: Record<ExerciceAireA["type"], string[]> = { exponentielle: ["e"], rationnelle: ["ln"], trigonometrique: ["sin"] };
+
+/** Contrôle AVANT soumission (écran) : arrondi de l'aire de la famille A → message, aucune tentative ;
+ * `null` sinon (les aires des familles B, C, D sont des fractions : l'arrondi reste accepté). */
+export function refusSaisieCalculAires(exercice: ExerciceCalculAires, phase: PhaseCalculAires, valeurs: string[]): string | null {
+  if (exercice.famille !== "A" || phase !== "aEcran2") return null;
+  const aire = aireSurABAvecPrimitive(exercice.a, exercice.b, exercice.primitiveReference);
+  return refusArrondi(valeurs[0] ?? "", aire, toleranceValeur(aire), SYMBOLES_A[exercice.type]);
 }
 export function verifierAEcran2(exercice: ExerciceAireA, valeurs: string[]): boolean {
   return diagnostiquerAEcran2(exercice, valeurs) === "correct";

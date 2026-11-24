@@ -12,7 +12,7 @@
  */
 import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
 import type { TermeA } from "../../core6e/calculPrimitives.types";
-import { CONSIGNE_PRECISION, decimalLatex, fractionDepuisValeur, fractionLatex } from "../../ui6e/nombresExactsIntegrales";
+import { CONSIGNE_EXACTE, CONSIGNE_PRECISION, decimalLatex, fractionDepuisValeur, fractionLatex } from "../../ui6e/nombresExactsIntegrales";
 
 /** Morceaux de texte retirés des consignes d'écran (dans cet ordre). */
 const RETRAITS: RegExp[] = [
@@ -43,7 +43,7 @@ export function nettoyerConsigne(fragments: FragmentConsigne[]): FragmentConsign
       sortie.push(f);
       continue;
     }
-    let valeur = f.valeur.split(CONSIGNE_PRECISION).join("");
+    let valeur = f.valeur.split(CONSIGNE_PRECISION).join("").split(CONSIGNE_EXACTE).join("");
     for (const motif of RETRAITS) valeur = valeur.replace(motif, "");
     valeur = valeur.replace(/^Confirme le signe/, "Détermine le signe").replace(/ +\./g, ".").replace(/\s+$/, (m) => (i === fragments.length - 1 ? "" : m));
     if (valeur.length > 0) sortie.push({ ...f, valeur });

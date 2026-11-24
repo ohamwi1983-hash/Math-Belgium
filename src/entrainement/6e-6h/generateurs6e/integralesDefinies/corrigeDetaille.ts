@@ -12,6 +12,8 @@ import { decimalLatex } from "../../ui6e/formatMonome";
 import { borneL, cours, crochet, exact, lignesCrochet, lignesFin, moins, par, q, qAdd, qDepuis, qL, qMul, qNeg, qP, qSub, qVal, substituer } from "../../ui6e/corrigeIntegrales1";
 import type { Q } from "../../ui6e/corrigeIntegrales1";
 import { etapesPhasePrimitive } from "../calculPrimitives/corrigeDetaille";
+import { valeurExacteIntegraleDefinie, valeurExacteMoyenne } from "../../moteur6e/verificationIntegralesDefinies";
+import type { ValeurExacte } from "../../moteur6e/valeurExacteIntegrale";
 
 /**
  * Corrigé détaillé « comme au tableau » de `6gen25` (intégrales définies, paramètre, valeur
@@ -36,6 +38,20 @@ export function piegeIntegralesDefinies(e: ExerciceIntegralesDefinies, phase: Ph
     return "Garder une solution hors de l'intervalle imposé pour m.";
   }
   return null;
+}
+
+/** Chaîne F(b) − F(a) : quand l'intégrale est irrationnelle (forme exacte exigée, décision du
+ * 24/11/2026), la valeur exacte RÉDUITE (`moteur6e/valeurExacteIntegrale.ts`) est écrite avant la
+ * valeur approchée si la chaîne ne l'a pas déjà (la reconnaissance numérique ne voyait ni arctan(3) ni
+ * ln(7) : la chaîne finissait par « ≈ » juste après la substitution). */
+function avecValeurExacte(lignes: LigneCalcul[], exacte: ValeurExacte | null): LigneCalcul[] {
+  if (!exacte || exacte.rationnel) return lignes;
+  const iApprox = lignes.findIndex((l) => l.latex.startsWith("\\approx"));
+  if (iApprox < 0) return lignes;
+  const normal = (s: string) => s.replace(/\\dfrac/g, "\\frac").replace(/\s+/g, "").replace(/^=/, "");
+  if (iApprox > 0 && normal(lignes[iApprox - 1].latex) === normal(exacte.latex)) return lignes;
+  const approx = { ...lignes[iApprox], justification: "valeur approchée" };
+  return [...lignes.slice(0, iApprox), ligne(`=${exacte.latex}`, "on réduit"), approx, ...lignes.slice(iApprox + 1)];
 }
 
 function reponse(e: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies): FragmentConsigne[] {
@@ -171,7 +187,7 @@ function etapesPropres(e: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefi
     const Fb = e.primitive.primitiveReference(e.b);
     etapes.push(
       utilise(sq, [t(`Théorème fondamental ${C3} : `), f("\\int_a^b f(x)\\,dx=F(b)-F(a)"), t(", avec la primitive trouvée (la constante disparaît dans la différence).")]),
-      calcul(sq, [ligne(`\\int_{${aL}}^{${bL}} f(x)\\,dx=${crochet(P, aL, bL)}`, "primitive de l'étape précédente"), ...lignesCrochet({ F: P, aL, bL, Fa, Fb, gauche: "" })]),
+      calcul(sq, avecValeurExacte([ligne(`\\int_{${aL}}^{${bL}} f(x)\\,dx=${crochet(P, aL, bL)}`, "primitive de l'étape précédente"), ...lignesCrochet({ F: P, aL, bL, Fa, Fb, gauche: "" })], valeurExacteIntegraleDefinie(e))),
     );
   } else if (phase === "valeurMoyenne" && e.scenario === "moyenne") {
     const aL = borneL(e.a);
@@ -181,8 +197,14 @@ function etapesPropres(e: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefi
     const L = borneL(e.b - e.a);
     const moyenne = I / (e.b - e.a);
     const lignes: LigneCalcul[] = [ligne(`\\mu=\\dfrac{1}{${bL}-${par(aL)}}\\int_{${aL}}^{${bL}} f(x)\\,dx`, "définition de la valeur moyenne")];
-    if (IL !== null) lignes.push(ligne(`=\\dfrac{1}{${L}}\\cdot ${par(IL)}`, "intégrale de l'étape précédente"));
-    lignes.push(...lignesFin(moyenne, null, "on divise"));
+    // Intégrale irrationnelle : sa valeur exacte symbolique (forme exacte exigée), sinon la reconnaissance d'avant.
+    const exacteI = valeurExacteIntegraleDefinie(e);
+    const IExact = exacteI && !exacteI.rationnel ? exacteI.latex : IL;
+    if (IExact !== null) lignes.push(ligne(`=\\dfrac{1}{${L}}\\cdot ${par(IExact)}`, "intégrale de l'étape précédente"));
+    const exacteM = valeurExacteMoyenne(e);
+    if (exacteM && !exacteM.rationnel) {
+      lignes.push(ligne(`=${exacteM.latex}`, "on divise"), ligne(`\\approx ${decimalLatex(moyenne, 2)}`, "valeur approchée"));
+    } else lignes.push(...lignesFin(moyenne, null, "on divise"));
     etapes.push(utilise(sq, [t(`Valeur moyenne de f sur [a ; b] ${C3} : `), f("\\mu=\\dfrac{1}{b-a}\\int_a^b f(x)\\,dx")]), calcul(sq, lignes));
   } else if (phase === "poserEquationM" && e.scenario === "parametre") {
     const { lignes, equation } = equationM(e);

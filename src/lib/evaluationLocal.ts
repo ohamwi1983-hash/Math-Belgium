@@ -249,8 +249,9 @@ export function respecteContrainte(profil: ProfilInstance, contrainte: Contraint
   if (!parametresRespectes(profil, contrainte)) return false
   if (!casRespecte(autresCaracteristiques(profil, contrainte.idsParametres), contrainte.cas)) return false
   if (contrainte.forme !== undefined && profil.forme !== contrainte.forme) return false
-  if (avecCalcul && contrainte.calculatrice === 'interdite' && profil.calcul === 'calculatrice') return false
-  if (avecCalcul && contrainte.calculatrice === 'autorisee' && profil.calcul === 'exacte') return false
+  // `calculatriceDirecte` (la calculatrice est nécessaire ET donne la réponse) : ni interdite, ni autorisée.
+  if (avecCalcul && contrainte.calculatrice === 'interdite' && (profil.calcul === 'calculatrice' || profil.calcul === 'calculatriceDirecte')) return false
+  if (avecCalcul && contrainte.calculatrice === 'autorisee' && (profil.calcul === 'exacte' || profil.calcul === 'calculatriceDirecte')) return false
   return true
 }
 
