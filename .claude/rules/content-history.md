@@ -325,6 +325,15 @@ paths:
   `evaluationPayload.ts`, processus 3 / 3 ; libellés pilotes de 5gen31 et 5gen32 remplis). Formule de
   la méthode coupée en deux formules en ligne (elle sortait du cadre à 390 px). Détail :
   `.claude/rules/feuilles-evaluations.md`, « 5e ch. 5, nouveaux générateurs — 5gen71–72 ».
+  **Lot H (nouveaux générateurs 5gen73–75)** : cartes 5gen73 « Lire f(a) et f′(a) sur un graphique » en § 2
+  (après 5gen68), 5gen74 « Du graphique de f′ aux variations de f » en § 6 (après 5gen30), 5gen75 « Dérivable ou
+  non en a ? » en § 4 (après 5gen25), précédée d'un `exempleLibre` « Dérivée à gauche et à droite : point
+  anguleux, tangente verticale » (|x − 2| en 2 : nombres dérivés −1 et 1 ; √x en 0 : 1/√h → +∞ ; rappel des
+  morceaux et du saut), énoncé par clé dans `ENONCES_DEMONSTRATION` ; l'exemple « lire f(a) et f′(a) sur une
+  tangente tracée » est laissé au lot F du cours. Registres (`registry.ts`, `evaluationAdapterRegistry.ts`
+  avec `versionPapier`, `evaluationPayload.ts`, processus 1 / 2 / 2 ; libellés pilotes de 5gen25 et 5gen30
+  remplis). 5gen75 en version MODESTE (morceaux, |x − a|, √(x − a)) : la version plus poussée (∛, x|x|·g)
+  est réservée à la 5e 6h. Détail : `.claude/rules/feuilles-evaluations.md`, « 5e ch. 5, lot H — 5gen73–75 ».
 
 - **5e (4h), Chapitre 4 — Limites et asymptotes** (`limites-asymptotes`) : enrichi depuis une
   version plus ancienne du même artifact `plateforme-maths` (5e/4h) ; aucune section n'a dû être

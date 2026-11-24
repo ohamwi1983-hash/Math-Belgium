@@ -522,6 +522,18 @@ export const deriveesApplications: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 68. Approximation affine »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lire f(a) et f\'(a) sur un graphique',
+          generatorId: '5gen73',
+          description: [
+            'Une courbe et sa tangente tracée en A : lis f(a), calcule f′(a) avec deux points de la ' +
+              'tangente (attention à l\'échelle), écris l\'équation de la tangente, puis compare les nombres ' +
+              'dérivés en trois points. Ou l\'inverse : la tangente est donnée, retrouve le bon graphique.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 73. Lire f(a) et f\'(a) sur un graphique »',
+        },
       ],
     },
     {
@@ -1184,6 +1196,27 @@ export const deriveesApplications: ChapterContent = {
           domaines: ['Santé publique', 'Biologie'],
         },
         {
+          kind: 'exempleLibre',
+          label: 'Dérivée à gauche et à droite : point anguleux, tangente verticale',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Pour savoir si f est dérivable en a, on calcule séparément la limite du taux ' +
+                'd\'accroissement quand h tend vers 0 par la gauche ($h < 0$) et par la droite ($h > 0$). ' +
+                'f est dérivable en a seulement si ces deux nombres dérivés existent (finis) et sont égaux.',
+            },
+            { kind: 'para', text: '**a.** $f(x) = |x-2|$ en $a = 2$. D\'abord $f(2) = 0$, et $|x-2|$ tend vers 0 des deux côtés : f est continue en 2.' },
+            { kind: 'para', text: 'À gauche ($h < 0$, donc $|h| = -h$) : $\\dfrac{f(2+h)-f(2)}{h} = \\dfrac{|h|}{h} = \\dfrac{-h}{h} = -1$, donc $\\lim\\limits_{h \\to 0^-} \\dfrac{f(2+h)-f(2)}{h} = -1$.' },
+            { kind: 'para', text: 'À droite ($h > 0$, donc $|h| = h$) : $\\dfrac{f(2+h)-f(2)}{h} = \\dfrac{h}{h} = 1$, donc $\\lim\\limits_{h \\to 0^+} \\dfrac{f(2+h)-f(2)}{h} = 1$.' },
+            { kind: 'para', text: 'Deux nombres dérivés finis mais différents ($-1$ et $1$) : f n\'est pas dérivable en 2, la courbe a un **point anguleux** — alors que f est continue en 2.' },
+            { kind: 'para', text: '**b.** $g(x) = \\sqrt{x}$ en $a = 0$ (g n\'est définie qu\'à droite de 0). $g(0) = 0$ et $\\sqrt{x}$ tend vers 0 quand $x \\to 0^+$ : g est continue en 0.' },
+            { kind: 'para', text: 'À droite ($h > 0$) : $\\dfrac{g(h)-g(0)}{h} = \\dfrac{\\sqrt{h}}{h} = \\dfrac{1}{\\sqrt{h}}$, qui tend vers $+\\infty$ quand $h \\to 0^+$.' },
+            { kind: 'para', text: 'Une limite infinie n\'est pas un nombre dérivé : g n\'est pas dérivable en 0, sa courbe y a une **tangente verticale**.' },
+            { kind: 'para', text: 'Pour une fonction définie par morceaux, on prend de chaque côté de a le morceau qui s\'y applique. Si f fait un saut en a, elle n\'est même pas continue : elle ne peut pas être dérivable.' },
+          ],
+        },
+        {
           kind: 'entrainement',
           title: 'Association graphique/mots ↔ signe de f\'/f\'\'',
           generatorId: '5gen25',
@@ -1195,6 +1228,17 @@ export const deriveesApplications: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 25. Association graphique/mots ↔ signe de f\'/f\'\' »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Dérivable ou non en a ?',
+          generatorId: '5gen75',
+          description: [
+            'Étudie la continuité d\'une fonction en a, puis ses nombres dérivés à gauche et à droite : ' +
+              'dérivable, point anguleux, tangente verticale ou saut ? Fonctions par morceaux, |x − a| et √(x − a).',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 75. Dérivable ou non en a ? »',
         },
       ],
     },
@@ -1780,6 +1824,17 @@ export const deriveesApplications: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 30. Lecture graphique — dérivées et applications »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Du graphique de f\' aux variations de f',
+          generatorId: '5gen74',
+          description: [
+            'Seul le graphique de f′ est donné : déduis-en le signe de f′, les extremums de f (attention ' +
+              'aux zéros sans changement de signe), sa concavité et ses points d\'inflexion.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 74. Du graphique de f\' aux variations de f »',
         },
       ],
     },
