@@ -16,6 +16,8 @@ import { imprimerChapitre, imprimerChapitreAmenage, imprimerFormulaireAmenage, i
  * - « Carnet » (professeur connecté SEULEMENT) : nouvelle séance du carnet de matière vue sur ce
  *   chapitre (`/carnet?chapitre=…`). `useCompte()` sans `demarrer` : un visiteur sans session stockée
  *   ne télécharge pas supabase-js et ne voit rien (même principe que `MenuCompte`).
+ * - « Projeter » (professeur connecté SEULEMENT, même règle que « Carnet ») : lanceur du mode
+ *   « Projeter en classe » (vue `#projeter`, voir `chapter-components.md`, « Mode projection »).
  * `avantImpression` : ferme le tiroir du téléphone avant d'ouvrir la boîte d'impression.
  */
 export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterContent; avantImpression?: () => void }) {
@@ -74,6 +76,15 @@ export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterC
               <path d="M11 9h5M11 13h5" />
             </svg>
             <span>Carnet</span>
+          </Link>
+        )}
+        {professeur && (
+          <Link className="lecture-outil" to={{ pathname: `/${chapter.levelSlug}/${chapter.slug}`, hash: 'projeter' }} title="Projeter en classe (diapos, deux écrans, PowerPoint)" aria-label="Projeter en classe">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="12" rx="1.5" />
+              <path d="M9 20h6M12 16v4" />
+            </svg>
+            <span>Projeter</span>
           </Link>
         )}
         <button

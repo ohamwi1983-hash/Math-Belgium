@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import type { ChapterContent, ChapterSection } from '../../content/types'
 import { RichText } from '../Math'
@@ -19,6 +19,10 @@ import { useMediaQuery } from '../../lib/useMediaQuery'
 
 /** « Avant de commencer : qu'est-ce qu'un vecteur ? » → « Qu'est-ce qu'un vecteur ? » (le bouton
  * porte déjà « Avant de commencer »). */
+/** Lanceur du mode « Projeter en classe » (vue `#projeter`, professeur connecté) : chargé à la demande,
+ * jamais rendu sans ce fragment (donc absent de la page pré-rendue). */
+const LanceurProjection = lazy(() => import('../projection/LanceurProjection'))
+
 function titreIntro(t: string): string {
   const reste = t.replace(/^Avant de commencer\s*[:—–-]\s*/i, '')
   return insecables(reste.charAt(0).toUpperCase() + reste.slice(1))
@@ -60,7 +64,7 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
   const sections = chapter.sections
   const indexEtape = sections.findIndex((s) => s.id === fragment)
   const etape = indexEtape >= 0 ? sections[indexEtape] : null
-  const vue: Vue = etape ? 'etape' : fragment === 'reviser' ? 'reviser' : fragment === 'entrainer' ? 'entrainer' : 'carte'
+  const vue: Vue = etape ? 'etape' : fragment === 'reviser' ? 'reviser' : fragment === 'entrainer' ? 'entrainer' : fragment === 'projeter' ? 'projeter' : 'carte'
   const large = useMediaQuery('(min-width: 1200px)')
   const colonneDroite = large && vue === 'etape'
   const { etat, ouvrir, marquer } = useParcours(chapter)
@@ -120,6 +124,12 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
             <RichText text={chapter.lede} />
           </p>
         </header>
+
+        {vue === 'projeter' && (
+          <Suspense fallback={null}>
+            <LanceurProjection chapter={chapter} aller={aller} />
+          </Suspense>
+        )}
 
         <BlocReprendre chapter={chapter} etat={etat} aller={aller} />
         <OngletsChapitre vue={vue} aller={aller} prefixe="page" className="onglets-page" />

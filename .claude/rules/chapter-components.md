@@ -96,7 +96,110 @@ Lecture (écran seulement) : corps, encadrés, légendes, tiroirs en Andika via 
 d'encadrés : orange (essentiel, définition, méthode, rappel), rouge (attention, piège), bleu
 (exemple), violet (À toi) ; astuce/intuition en neutre clair. Ordinateur (≥ 760 px) : étape = carte
 des étapes à gauche + article ≤ 760 px ; ≥ 1200 px : + colonne de droite. `OutilsChapitre`
-(Feuilles, Carnet, Imprimer) : bas de la carte et colonne de gauche d'une étape.
+(Feuilles, Carnet, Projeter — ces deux-là professeur connecté seulement —, Imprimer) : bas de la carte et colonne de gauche d'une étape.
+
+## Mode projection « Projeter en classe » (maquettes du 24/11/2026)
+
+Maquettes validées Main (lanceur, téléphone d'abord), Titre, Essentiel, Exemple, Teste (diapos
+1 280 × 720). **Réservé au professeur connecté** (décision de l'utilisateur) : bouton, lanceur, page de
+projection, fenêtre des diapos et PowerPoint. Rien n'est enregistré côté serveur.
+
+**Où** : deux morceaux, choisis pour ne rien changer à la page pré-rendue.
+- Lanceur = vue `#projeter` de la page du chapitre (même mécanisme que `#reviser`, `Vue` gagne
+  `'projeter'`) : `components/projection/LanceurProjection.tsx` (chargé à la demande, `lazy`), rendu
+  SEULEMENT quand le fragment vaut `#projeter` — le pré-rendu (sans fragment, sans session) n'en contient
+  rien ; règle d'écran `.parcours[data-vue="projeter"] .page > :not(.lanceur-projection)` masquée.
+  Bouton « Projeter » dans `OutilsChapitre` (bas de la carte, colonne de gauche d'une étape) : comme
+  « Carnet », seulement si `useCompte()` (sans `demarrer`) est `connecte` avec profil actif → absent du
+  pré-rendu et pour un visiteur (supabase-js non téléchargé).
+- Diapos = route dédiée `/{niveau}/{chapitre}/projeter?etapes=…&inclure=…[&role=diapos|prof][&repli=1]`
+  (`components/projection/ProjectionPage.tsx`, `lazy` dans `App.tsx`, absente de `scripts/routes.mjs`,
+  `usePageNonIndexee`). Route plutôt que fragment : plein cadre sans `SiteHeader` ni le DOM du chapitre
+  entier, une URL à donner à `window.open` (deux écrans), un morceau de code chargé seulement en classe.
+- Garde : `GardeProfesseur` (même règle que `PageReservee` : `useCompte({ demarrer: true })`, profil
+  actif) SANS redirection : « Connecte-toi pour projeter ce chapitre » + lien
+  `/connexion?retour=<page demandée, fragment compris>`. Lanceur, route et fenêtre des diapos (même
+  navigateur, même session) passent tous par elle.
+
+**Données → diapos** (`lib/projection/diapos.ts`, PUR) : `construireDiapos(chapter, choix)`, aucune
+donnée réécrite. Par étape cochée, dans l'ordre : `titre` (niveau · chapitre, « Étape n · partie »,
+`title`, `kicker`, intertitres en puces) ; `essentiel` (champ `essentiel`, + première figure de
+l'étape à côté — sauf phrases longues, > 300 caractères : la figure passe sur sa propre diapo, le texte
+resterait sinon sous 28 px) ; puis dans l'ordre écrit : `figure` (chaque `illustration`/`illustrationGroup`, titre = dernier
+`subheading`), `exemple` (formule = énoncé, étapes + résultat révélés une à une), `libre` (`exempleLibre`
+bloc par bloc ; `demo` si son label commence par « Démonstration »), `atelier` (widget monté en
+direct) ; enfin une diapo `teste` par carte (`cartes` : question, minuteur 1 min, réponse au clic).
+Cases du lanceur (`INCLUSIONS`) : L'essentiel, Figures, Exemples, Teste-toi, Ateliers (cochées) et
+Démonstrations (décochée). Chaque diapo porte ses `notes` (corrigé, réponse, légende : vue du
+professeur et notes PowerPoint) et son nombre d'étapes de révélation `pas`. Choix mémorisé par
+chapitre (`localStorage` `projection:{niveau}/{slug}`, try/catch) ; défaut : la dernière étape ouverte.
+
+**Rendu** (`Diapo.tsx` + `projection.css`) : 1 280 × 720 px logiques, mis à l'échelle par `Scene`
+(`transform: scale`, mesures toujours en px logiques). Composants du site réutilisés tels quels
+(`RichText`, `Illustration`, `BlockRenderer`, `InteractiveWidget sansEpingle` — atelier mis à l'échelle
+par `zoom`, jamais sous 0,8 : au-delà sa zone défile). Fond clair dans les deux thèmes : `.theme-clair`
+recopie les jetons CLAIRS de `:root` (figures, encadrés, KaTeX) — à tenir à jour si un jeton de couleur
+est ajouté à `index.css`. Tailles en `calc(N * var(--echelle))` : corps 32 px (exemple), 30–32 px
+(essentiel), 28 px (démonstration), titres 42–76 px. Une étiquette d'étape longue (> 16 caractères)
+passe au-dessus du texte ; PAS de `text-transform: uppercase` sur les étiquettes (« n→+∞ » deviendrait
+« N→+∞ »). Énoncé / question longs : titre réduit (`est-long`).
+- **Découpage** (`Paginateur.tsx`) : chaque exemple / démonstration est rendu hors écran tout révélé ;
+  ses lignes (blocs) sont réparties sans coupure sur autant de diapos que nécessaire (« · suite »),
+  avec 12 % de tolérance (absorbée par l'ajustement, jamais sous 28 px pour le corps de 32 px) ; jamais
+  le résultat seul sur une page. Même calcul dans les deux fenêtres et dans le PowerPoint.
+- **Ajustement** (`useAjustement`) : si le contenu déborde encore, `--echelle` descend par pas de 0,04
+  (dernier recours ; mesuré : voir Vérifications).
+
+**Projection** (`ProjectionPage.tsx`) : `useProjection` = état `{ index, pas, blanc, debut, minuteur }`
+partagé par `BroadcastChannel` (`math-belgium-projection:{niveau}/{slug}`) : chaque changement local est
+diffusé, un état reçu appliqué sans rediffusion ; une fenêtre qui s'ouvre demande l'état, seule une
+fenêtre « active » répond. Avancer = étape de révélation suivante, puis diapo suivante (reculer : la
+diapo précédente revient ENTIÈRE). Clavier (écouteur posé par cette page seulement, rien ailleurs) :
+→ ↓ Page suiv. Espace Entrée → suivant ; ← ↑ Page préc. Retour arrière ; Début / Fin ; B ou « . » écran
+blanc ; G vue d'ensemble ; Échap ferme ce qui est ouvert sinon ouvre la vue d'ensemble ; S stylo ;
+F / F5 plein écran. Une touche dans un champ, un bouton ou un atelier (Shadow DOM compris,
+`composedPath`) lui revient. Clic sur la diapo = suivant (sauf boutons, atelier, stylo actif) ;
+glisser au doigt = suivant / précédent.
+- Barre du bas (`BarreOutils`) : fil « chapitre · § n titre court », stylo (palette 4 couleurs, gomme,
+  tout effacer), minuteur (1/2/3/5/10 min, affiché en haut à droite, rouge clignotant à 0), écran blanc,
+  vue d'ensemble (grille de vignettes `mode="vignette"`, atelier non monté), plein écran (Fullscreen
+  API, refus ou absence → message « utilise F11 »), ‹ n / N ›, quitter (→ `#projeter`). Masquée (et le
+  curseur) après 3 s sans mouvement.
+- Stylo (`Annotations`, `Scene.tsx`) : canvas en coordonnées de diapo, traits gardés en mémoire
+  (redessinés à l'échelle), effacés au changement de diapo, envoyés à l'autre fenêtre.
+- **Un écran** : « Lancer » demande le plein écran DANS le clic (la navigation interne le garde).
+  **Deux écrans** : `window.open` DANS le clic (`lib/projection/fenetre.ts`, nom fixe) → fenêtre
+  `role=diapos` (accueil « Plein écran / Continuer sans ») ; la page courante devient la vue du
+  professeur (`role=prof`) : diapo projetée (stylo qui écrit aussi au tableau ; atelier en vignette, il
+  se manipule sur l'écran projeté), suivante (prochaine étape ou diapo), notes, minuteur, temps écoulé,
+  écran blanc, vue d'ensemble, « Ouvrir la fenêtre des diapos » si elle est fermée. Fenêtre bloquée →
+  un écran (`repli=1`) avec message.
+
+**PowerPoint** (`lib/projection/exportPptx.tsx`, chargé à la demande avec `pptxgenjs` 4.0.1 —
+l'ancien `buildPptx`/html2canvas avait été retiré en septembre, voir `export-pipeline.md`) : mêmes
+diapos (même découpage), état final. Textes sans formule ni figure (surtitre, titre, phrases de
+l'essentiel, question, réponse) = vraies zones de texte modifiables (Georgia / Calibri / Consolas, à
+leur place mesurée) ; le reste = image de fond 1 920 × 1 080 (SVG `<foreignObject>` autonome : CSS du
+site + polices Fraunces / Work Sans / Plex Mono — lues depuis la feuille Google Fonts — et KaTeX en
+`data:`, woff2 latin / latin-ext seulement ; Shadow DOM des ateliers aplati) ; notes = `notes` en texte
+(`texteBrut` / `latexEnTexte`). Une diapo par diapo finale, jamais une par étape de révélation.
+
+**Vérifications** (24/11/2026, dossier de travail `projection/` : `verif.mjs`, `verif-prod.mjs`,
+`compter_pptx.py`, `comparer_prerendu.py`) : build de test (`NODE_ENV=development vite build --mode test`
++ faux client connecté / `anonyme`) sur 4e ch. 6 (§ 6–11, 24 diapos), 5e ch. 3 (§ 3, 14 diapos) et 6e
+ch. 1 (§ 4 avec démonstrations et ateliers, 26 diapos), 1 280 × 720 et 1 920 × 1 080 : chaque diapo et
+chaque étape de révélation mesurée (aucun texte hors de la zone de contenu, 0 `.katex-error`, fond
+clair, aucun corps de texte sous 28 px), révélation pas à pas, stylo / gomme / effacement au changement
+de diapo, minuteur, écran blanc, vue d'ensemble (G, Échap, vignette → diapo), Page préc., barre masquée
+après 3 s, aucun raccourci hors projection ; deux écrans (deux pages : navigation et révélation dans
+les deux sens, stylo du professeur reproduit au tableau, minuteur partagé) et fenêtre bloquée (repli
++ message) ; lanceur iPhone 13 clair / sombre (diapos claires en sombre, pas de défilement horizontal,
+cibles ≥ 36 px) ; PowerPoint des trois chapitres (python-pptx : même nombre de diapos qu'à l'écran,
+une image + des zones de texte + des notes par diapo ; rendu LibreOffice relu) — 1 062 vérifications,
+0 erreur console. Build de PRODUCTION, visiteur sans session : aucun bouton, lanceur et route gardés
+(20 vérifications). Pré-rendu : texte, balises méta et JSON-LD des 24 pages identiques à avant.
+Piège trouvé : un `BroadcastChannel` créé dans un `useMemo` et fermé au démontage se tait sous
+StrictMode (démontage / remontage simulé) — créer et fermer le canal dans le MÊME effet.
 
 ## Page d'un générateur `/entrainement/:chantier/:generatorId` (refonte du 22/11/2026)
 
