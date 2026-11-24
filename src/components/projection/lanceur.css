@@ -1,0 +1,51 @@
+/* Lanceur « Projeter en classe » (vue `#projeter` de la page du chapitre, maquette « Main ») —
+   jetons du site : suit le thème clair / sombre (seules les diapos restent claires). */
+.lanceur-projection { display: block; }
+.lanceur { display: flex; flex-direction: column; gap: 12px; max-width: 560px; margin: 0 auto; font-family: var(--sans); color: var(--ink); }
+.lanceur-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lanceur-tete h1 { margin: 0; font: 600 22px/1.2 var(--serif); color: var(--ink); }
+.lanceur-tete h1:focus { outline: none; }
+.lanceur-tete h1:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.lanceur-fermer {
+  width: 44px; height: 44px; flex: none; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 3px;
+  background: transparent; color: var(--ink-soft); cursor: pointer;
+}
+.lanceur-fermer:hover { background: var(--surface-2); color: var(--ink); }
+.lanceur-intro { margin: 0; font: 400 14px/1.45 var(--sans); color: var(--ink-soft); }
+.lanceur-groupe { margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.lanceur-legende { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0; margin-bottom: 6px; font: 600 13px var(--sans); color: var(--ink-soft); }
+.lanceur-lien { min-height: 36px; padding: 0 6px; border: 0; background: none; color: var(--accent-ink); font: 600 13px var(--sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.lanceur-etapes { list-style: none; margin: 0; padding: 6px 12px; background: var(--surface); border: 1px solid var(--line-soft); border-radius: 3px; }
+.lanceur-etapes li + li { border-top: 1px solid var(--line-soft); }
+.lanceur-etape, .lanceur-option { position: relative; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 4px; cursor: pointer; }
+.lanceur-etape input, .lanceur-option input, .lanceur-puce input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.lanceur-case {
+  flex: none; width: 22px; height: 22px; border-radius: 4px; border: 2px solid var(--ink-faint); display: inline-flex; align-items: center;
+  justify-content: center; background: var(--surface); color: var(--surface);
+}
+input:checked + .lanceur-case { background: var(--ink); border-color: var(--ink); }
+input:focus-visible + .lanceur-case { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lanceur-num { flex: none; width: 22px; font: 600 14px var(--mono); color: var(--ink-soft); }
+.lanceur-nom { flex: 1; min-width: 0; font: 500 15px/1.3 var(--sans); color: var(--ink); padding: 8px 0; }
+.lanceur-compte { flex: none; font: 400 13px var(--sans); color: var(--ink-soft); }
+.lanceur-inclure { display: flex; flex-direction: column; }
+.lanceur-option { min-height: 40px; font: 500 15px/1.35 var(--sans); }
+.lanceur-ecrans { display: flex; flex-wrap: wrap; gap: 6px; }
+.lanceur-puce {
+  position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-soft); font: 600 14px/1.3 var(--sans); cursor: pointer;
+}
+.lanceur-puce.actif { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.lanceur-puce:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lanceur-total { margin: 4px 0 0; font: 500 14px var(--sans); color: var(--ink-soft); }
+.lanceur-lancer, .lanceur-pptx {
+  display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border-radius: 3px; font: 600 17px var(--sans); cursor: pointer;
+}
+.lanceur-lancer { border: 0; background: var(--accent); color: var(--on-accent); }
+.lanceur-pptx { min-height: 48px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 15px; font-weight: 500; }
+.lanceur-lancer:disabled, .lanceur-pptx:disabled { opacity: 0.5; cursor: default; }
+.lanceur-lancer:focus-visible, .lanceur-pptx:focus-visible, .lanceur-fermer:focus-visible, .lanceur-lien:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lanceur-etat { margin: 0; min-height: 1.4em; font: 400 14px var(--sans); color: var(--ink-soft); }
+.lanceur-etat.erreur { color: var(--bad); }
+.lanceur-aide { margin: 0; font: 400 13px/1.45 var(--sans); color: var(--ink-faint); }
+@media print { .lanceur-projection { display: none !important; } }

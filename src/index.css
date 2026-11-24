@@ -2289,6 +2289,8 @@ fieldset.eleve-demos { border: 0; margin: 0; padding: 0; }
   .parcours[data-vue="entrainer"] .page > .parcours-entrainer { display: block; }
   .parcours[data-vue="etape"] .page > .chapter-head { display: none; }
   .parcours:is([data-vue="reviser"], [data-vue="entrainer"]) .chapter-lede { display: none; }
+  /* Lanceur du mode projection (`#projeter`, rendu seulement dans cette vue) : seul visible. */
+  .parcours[data-vue="projeter"] .page > :not(.lanceur-projection) { display: none; }
   /* Exemples : rendus à leur place pour l'impression, relus à l'écran dans un tiroir. */
   .parcours .en-tiroir { display: none; }
 

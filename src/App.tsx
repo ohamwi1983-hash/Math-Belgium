@@ -23,6 +23,9 @@ const MotDePassePage = lazy(() => import('./routes/MotDePassePage').then((m) => 
 const ProfilPage = lazy(() => import('./routes/ProfilPage').then((m) => ({ default: m.ProfilPage })))
 const CoffrePage = lazy(() => import('./routes/CoffrePage').then((m) => ({ default: m.CoffrePage })))
 const CarnetPage = lazy(() => import('./routes/CarnetPage').then((m) => ({ default: m.CarnetPage })))
+/** Mode « Projeter en classe » (professeur connecté) : diapos plein écran, chargé à la demande, jamais
+ * pré-rendu ni indexé — voir `.claude/rules/chapter-components.md`, « Mode projection ». */
+const ProjectionPage = lazy(() => import('./components/projection/ProjectionPage').then((m) => ({ default: m.ProjectionPage })))
 
 function App() {
   return (
@@ -50,6 +53,7 @@ function App() {
            * lazy-loading. */}
           <Route path="/entrainement/:chantier/:generatorId" element={<EntrainementPage />} />
           <Route path="/:levelSlug/:chapterSlug/exercices" element={<ChapterExercicePage />} />
+          <Route path="/:levelSlug/:chapterSlug/projeter" element={<ProjectionPage />} />
           <Route path="/:levelSlug/:chapterSlug" element={<ChapterRoute />} />
           <Route path="*" element={<HomePage />} />
         </Routes>

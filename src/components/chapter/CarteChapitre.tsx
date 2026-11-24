@@ -6,8 +6,9 @@ import { titreCourt } from '../../lib/parcoursChapitre'
 import { Icone } from './Icones'
 
 /** Vue du parcours, lue dans le fragment de l'URL : rien → carte, `#<sectionId>` → étape,
- * `#reviser`, `#entrainer` → onglets Réviser / S'entraîner. */
-export type Vue = 'carte' | 'etape' | 'reviser' | 'entrainer'
+ * `#reviser`, `#entrainer` → onglets Réviser / S'entraîner, `#projeter` → lanceur du mode
+ * projection (professeur connecté). */
+export type Vue = 'carte' | 'etape' | 'reviser' | 'entrainer' | 'projeter'
 
 /** Navigation interne : `cible` = fragment sans « # » (null → carte). */
 export type Aller = (cible: string | null) => void
