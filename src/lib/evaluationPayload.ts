@@ -74,6 +74,7 @@ export { LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONN
 import { LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, type ChapitreFonctionnel } from './chapitresFonctionnels'
 import { catalogueAvecGroupes, variantesDe } from '../entrainement/export/groupesVerdict'
 import { QUESTIONS_FORMULES } from './questionsFormules'
+import { varianteToujoursExacte } from './tirageInstance'
 
 const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
   [LEVELSLUG_FONCTIONNEL_6E]: EVALUATION_BASE_URL_6E_6H,
@@ -716,6 +717,17 @@ export function varianteExigeCalculatrice(generatorId: string, varianteId: strin
   const valeur = adaptateur?.calculatriceIndispensable
   // Groupe « à verdict » : exclu seulement si TOUS ses membres exigent la calculatrice.
   return Array.isArray(valeur) && variantesDe(adaptateur, varianteId).every((v) => valeur.includes(v))
+}
+
+/** Symétrique de `varianteExigeCalculatrice` pour une évaluation « calculatrice autorisée » (décision de
+ * l'utilisateur, 24/11/2026) : variante dont TOUTES les instances sont `calcul: 'exacte'` — exclue
+ * (rangée grisée « se fait sans calculatrice », retirée des items). Détection : `tirageInstance.ts`. */
+export { varianteToujoursExacte }
+
+/** `true` si toutes les variantes proposées du générateur se font sans calculatrice. */
+export function generateurToujoursExact(generatorId: IdGenerateurPilote, mode: 'evaluation' | 'exercice' = 'evaluation'): boolean {
+  const catalogue = catalogueVariantesExercice(generatorId, mode)
+  return catalogue.length > 0 && catalogue.every((v) => varianteToujoursExacte(generatorId, v.id))
 }
 
 /** Nom lisible d'un générateur (titre de son document, sans « — Évaluation »). */
@@ -4908,7 +4920,13 @@ export function construireItemsPayload(entete: EnTeteEvaluation, lignes: LigneSe
       const config = generateursPourSection(ligne.chapitreSlug, ligne.sectionId).find((g) => g.generatorId === ligne.cle)
       if (!config) continue
       const parVariante = Object.entries(ligne.parVariante ?? {})
-        .filter(([cle, nombre]) => nombre > 0 && !(entete.calculatrice === 'interdite' && varianteExigeCalculatrice(config.generatorId, varianteDeCle(cle))))
+        .filter(
+          ([cle, nombre]) =>
+            nombre > 0 &&
+            !(entete.calculatrice === 'interdite' && varianteExigeCalculatrice(config.generatorId, varianteDeCle(cle))) &&
+            // Calculatrice autorisée : une variante toujours exacte n'est jamais tirée (pas de palier de repli).
+            !(entete.calculatrice === 'autorisee' && varianteToujoursExacte(config.generatorId, varianteDeCle(cle))),
+        )
         .map(([cle, nombre]) => {
           const reglages = reglagesVariante(ligne, cle)
           return {

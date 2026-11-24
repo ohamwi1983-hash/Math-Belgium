@@ -78,6 +78,7 @@ import {
   varianteDeCle,
   calculatriceIndispensable,
   varianteExigeCalculatrice,
+  varianteToujoursExacte,
   nomGenerateur,
   construireItemsPayload,
   deriveQuestionsComprehension,
@@ -526,12 +527,20 @@ export function EvaluationGeneratorPanel({
     })
   }
 
-  /** Décision de l'utilisateur : en évaluation « calculatrice interdite », une variante qui exige
-   * toujours la calculatrice (`calculatriceIndispensable` en liste) est exclue — rangée grisée, ni
-   * comptée ni tirée (`construireItemsPayload` la retire aussi). */
+  /** Décisions de l'utilisateur : en évaluation « calculatrice interdite », une variante qui exige
+   * toujours la calculatrice (`calculatriceIndispensable` en liste) est exclue ; en « calculatrice
+   * autorisée » (24/11/2026), une variante toujours exacte (`varianteToujoursExacte`, « se fait sans
+   * calculatrice ») l'est aussi — rangée grisée, ni comptée ni tirée (`construireItemsPayload` la retire
+   * aussi, sans palier de repli). Une variante déjà choisie avant de changer le réglage reste visible,
+   * grisée, avec la raison ; elle revient si le réglage est remis. */
   function varianteExclue(generatorId: string, cle: string): boolean {
-    return !estExercice && calculatrice === 'interdite' && varianteExigeCalculatrice(generatorId, varianteDeCle(cle))
+    if (estExercice) return false
+    const id = varianteDeCle(cle)
+    return calculatrice === 'interdite' ? varianteExigeCalculatrice(generatorId, id) : varianteToujoursExacte(generatorId, id)
   }
+  /** Raison d'une exclusion, selon le réglage (« demande une calculatrice » / « se fait sans calculatrice »). */
+  const raisonExclusion = calculatrice === 'interdite' ? 'demande une calculatrice' : 'se fait sans calculatrice'
+  const reglageSolution = calculatrice === 'interdite' ? 'Autorisée' : 'Interdite'
 
   function nombreLigne(ligne: LigneSelection): number {
     if (ligne.type !== 'exercice') return ligne.nombre
@@ -852,10 +861,12 @@ export function EvaluationGeneratorPanel({
   const apercuHoraire = horaireExamen(heureDepart, dureeExamen)
   const sessionDefaut = sessionParDefaut(date)
 
-  /** Bouton « Aller au réglage » des variantes exclues faute de calculatrice : fait défiler jusqu'au
-   * sélecteur « Calculatrice », lui donne le focus et le surligne un instant. Choix : on ne bascule PAS
-   * le réglage d'office — il vaut pour toute l'évaluation (« autorisée » ne tire plus que des cas qui
-   * exigent la calculatrice, dans TOUS les générateurs) ; le professeur décide en connaissance de cause. */
+  /** Bouton « Aller au réglage » des variantes exclues par la calculatrice (« demande une calculatrice »
+   * en interdite, « se fait sans calculatrice » en autorisée) : fait défiler jusqu'au sélecteur
+   * « Calculatrice », lui donne le focus et le surligne un instant. Choix : on ne bascule PAS le réglage
+   * d'office — il vaut pour toute l'évaluation (« autorisée » ne tire plus que des cas qui exigent la
+   * calculatrice, « interdite » plus que des cas exacts, dans TOUS les générateurs) ; le professeur décide
+   * en connaissance de cause. */
   const selectCalculatrice = useRef<HTMLSelectElement>(null)
   const [calculatriceSurlignee, setCalculatriceSurlignee] = useState(false)
   function allerAuReglageCalculatrice() {
@@ -1622,8 +1633,8 @@ export function EvaluationGeneratorPanel({
         {toutesExclues && (
           <div className="admin-eval-calculatrice-note" role="note">
             <span>
-              <b>{nom}</b> : toutes ses variantes demandent une calculatrice. Pour l’utiliser, passe la calculatrice à « Autorisée » (en haut) — ce réglage vaut pour toute
-              l’évaluation.
+              <b>{nom}</b> : toutes ses variantes {calculatrice === 'interdite' ? 'demandent une calculatrice' : 'se font sans calculatrice'}. Pour l’utiliser, passe la calculatrice à
+              « {reglageSolution} » (en haut) — ce réglage vaut pour toute l’évaluation.
             </span>
             <button type="button" className="admin-eval-lien-bouton" onClick={allerAuReglageCalculatrice}>
               Aller au réglage « Calculatrice »
@@ -1641,7 +1652,7 @@ export function EvaluationGeneratorPanel({
                 className="conc-var"
                 aria-pressed={n > 0}
                 disabled={exclue}
-                title={exclue ? 'Demande une calculatrice' : n > 0 ? 'Retirer cette variante' : 'Ajouter un exercice de cette variante'}
+                title={exclue ? `${raisonExclusion.charAt(0).toUpperCase()}${raisonExclusion.slice(1)}` : n > 0 ? 'Retirer cette variante' : 'Ajouter un exercice de cette variante'}
                 onClick={() => mettreAJourVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', variante.id, n > 0 ? 0 : 1)}
               >
                 <span className="conc-var-nom">
@@ -1649,7 +1660,7 @@ export function EvaluationGeneratorPanel({
                   {n > 0 && <span className="conc-var-n"> ×{n}</span>}
                 </span>
                 {exclue ? (
-                  <span className="admin-eval-variante-exclue">{toutesExclues ? 'demande une calculatrice' : 'calculatrice'}</span>
+                  <span className="admin-eval-variante-exclue">{toutesExclues ? raisonExclusion : calculatrice === 'interdite' ? 'calculatrice' : 'sans calculatrice'}</span>
                 ) : (
                   adaptateurLigne && (
                     <RepereNiveauDuree
@@ -1667,7 +1678,8 @@ export function EvaluationGeneratorPanel({
         {exclues.length > 0 && !toutesExclues && (
           <div className="admin-eval-calculatrice-note admin-eval-calculatrice-note-variante" role="note">
             <span>
-              <b>Demande une calculatrice</b> ({exclues.map((v) => `« ${v.label} »`).join(', ')}) : passe la calculatrice à « Autorisée » (en haut) pour l’utiliser.
+              <b>{calculatrice === 'interdite' ? 'Demande une calculatrice' : 'Se fait sans calculatrice'}</b> ({exclues.map((v) => `« ${v.label} »`).join(', ')}) : passe la calculatrice
+              à « {reglageSolution} » (en haut) pour l’utiliser.
             </span>
             <button type="button" className="admin-eval-lien-bouton" onClick={allerAuReglageCalculatrice}>
               Aller au réglage

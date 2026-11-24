@@ -3,6 +3,7 @@ import {
   catalogueVariantesExercice,
   sommeParVariante,
   varianteExigeCalculatrice,
+  varianteToujoursExacte,
   type IdGenerateurPilote,
   type LigneSelection,
   type Processus,
@@ -19,6 +20,7 @@ import { REPARTITION_PROCESSUS } from '../../../lib/repartitionProcessus'
  *   groupe « à verdict » reste UNE rangée (jamais le verdict choisi par la recette) ;
  * - calculatrice interdite (évaluation) : variantes qui l'exigent et générateurs
  *   `calculatriceIndispensable` exclus ;
+ * - calculatrice autorisée (évaluation) : variantes toujours exactes (`varianteToujoursExacte`) exclues ;
  * - aucune case « cas particulier » cochée, aucun paramètre décoché : exercices complets ;
  * - démonstrations jamais choisies d'office (longues, au professeur de décider).
  */
@@ -87,9 +89,11 @@ function melanger<T>(t: T[], alea: () => number): T[] {
 export function variantesComposables(ligne: LigneSelection, mode: 'exercice' | 'evaluation', calculatriceInterdite: boolean): string[] {
   const id = ligne.cle as IdGenerateurPilote
   const interdite = mode === 'evaluation' && calculatriceInterdite
+  // Calculatrice autorisée (décision de l'utilisateur, 24/11/2026) : jamais une variante toujours exacte.
+  const autorisee = mode === 'evaluation' && !calculatriceInterdite
   if (interdite && calculatriceIndispensable(id, [])) return []
   return catalogueVariantesExercice(id, mode, [])
-    .filter((v) => !(interdite && varianteExigeCalculatrice(id, v.id)))
+    .filter((v) => !(interdite && varianteExigeCalculatrice(id, v.id)) && !(autorisee && varianteToujoursExacte(id, v.id)))
     .map((v) => v.id)
 }
 

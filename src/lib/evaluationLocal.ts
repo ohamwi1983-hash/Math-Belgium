@@ -16,10 +16,11 @@ import { horaireExamen, lignesConsignes, mettreAEchelle, sessionParDefaut, titre
 import { annexeFormulaire } from '../entrainement/export/annexesPapier'
 import { niveauEtDuree, type NiveauDifficulte } from '../entrainement/export/niveauDifficulte'
 import { findChapter, LEVELS } from '../content/chaptersIndex'
-import { encoderCode, genererAvecCode, tirerGraine } from '../entrainement/export/codeExercice'
+import { encoderCode, tirerGraine } from '../entrainement/export/codeExercice'
 import { ENTRAINEMENT_REGISTRY } from '../entrainement/registry'
 import { EVALUATION_ADAPTER_REGISTRY } from './evaluationAdapterRegistry'
 import { groupeVerdict } from '../entrainement/export/groupesVerdict'
+import { indexVariante, tirerInstance, varianteToujoursExacte } from './tirageInstance'
 import { chapitreAUneBanqueVraiFauxLocale, chargerThemeVraiFaux } from './banquesVraiFaux'
 import { LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, LEVELSLUG_FONCTIONNEL_6E, type EnTeteEvaluation, type ItemPayload, type LigneSelection, type QuestionOuverte } from './evaluationPayload'
 
@@ -191,27 +192,9 @@ export function empreinteSection(generatorId: string, section: SectionExercice):
 
 export type Adaptateur = AdaptateurFeuilleExercices<never>
 
-function indexVariante(adaptateur: Adaptateur, varianteId: string): number | null {
-  if (!adaptateur.catalogueVariantes || !adaptateur.genererInstanceAvecVariante) return null
-  const i = adaptateur.catalogueVariantes.findIndex((v) => v.id === varianteId)
-  return i >= 0 ? i : null
-}
-
-/** Instance reproductible — EXACTEMENT le tirage que fait l'appli interactive à partir du code
- * (`genererAvecCode`), pour que le QR code rouvre le même exercice. */
-export function tirerInstance(adaptateur: Adaptateur, varianteId: string, graine: number): never {
-  // Un plan porte toujours la variante RÉELLE ; un id de groupe « à verdict » n'arrive ici que pour
-  // une sonde (`varianteAdmetCasParticulier`) : membre choisi par la graine, reproductible.
-  const groupe = groupeVerdict(adaptateur, varianteId)
-  if (groupe) varianteId = groupe.variantes[graine % groupe.variantes.length]!
-  const varianteIndex = indexVariante(adaptateur, varianteId)
-  return genererAvecCode(
-    { graine, varianteIndex },
-    adaptateur.catalogueVariantes,
-    () => adaptateur.genererInstance(),
-    adaptateur.genererInstanceAvecVariante ? (id) => adaptateur.genererInstanceAvecVariante!(id) : undefined,
-  )
-}
+// `tirerInstance` / `indexVariante` vivent dans `tirageInstance.ts` (aussi importé par `evaluationPayload`,
+// pour `varianteToujoursExacte`, sans dépendance circulaire) ; `tirerInstance` reste exporté ici.
+export { tirerInstance }
 
 function codeInstance(generatorId: string, adaptateur: Adaptateur, varianteId: string, graine: number): { code: string; url: string } | undefined {
   const entree = ENTRAINEMENT_REGISTRY[generatorId]
@@ -364,6 +347,15 @@ export function graineInedite(generatorId: string, adaptateur: Adaptateur, varia
   return repli ?? { graine: tirerGraine(), casParticulier: null }
 }
 
+/** Membres d'un groupe « à verdict » qu'une question peut tirer : tous, sauf en « calculatrice autorisée »
+ * ceux qui sont toujours exacts (`varianteToujoursExacte`, décision de l'utilisateur du 24/11/2026) —
+ * s'il en reste au moins un. « Interdite » : tous (comportement d'avant). */
+function membresTirables(generatorId: string, variantes: string[], calculatrice: 'interdite' | 'autorisee' | undefined): string[] {
+  if (calculatrice !== 'autorisee') return variantes
+  const restants = variantes.filter((v) => !varianteToujoursExacte(generatorId, v))
+  return restants.length > 0 ? restants : variantes
+}
+
 function melanger<T>(liste: T[]): T[] {
   const copie = [...liste]
   for (let i = copie.length - 1; i > 0; i--) {
@@ -439,7 +431,10 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
         const questions = entrees.flatMap((e, indexEntree) =>
           Array.from({ length: e.nombre }, () => {
             const groupe = groupeVerdict(adaptateur as Adaptateur, e.varianteId)
-            const varianteId = groupe ? verdictSuivant(`${indexItem}:${groupe.id}`, groupe.variantes) : e.varianteId
+            // Calculatrice autorisée : un membre toujours exact n'est jamais tiré (sauf si tous le sont —
+            // le groupe entier est alors déjà retiré par `construireItemsPayload`).
+            const membres = groupe ? membresTirables(generatorId, groupe.variantes, entete.calculatrice) : []
+            const varianteId = groupe ? verdictSuivant(`${indexItem}:${groupe.id}`, membres) : e.varianteId
             return { varianteId, points: e.points, indexEntree, exclus: exclusDe(e), formeCommune: !!groupe?.formeCommune }
           }),
         )
