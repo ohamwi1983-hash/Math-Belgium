@@ -11,8 +11,9 @@
  * Calculatrice (scénarios simple et moyenne ; décision de l'utilisateur du 24/11/2026 — la Graph
  * Math+ des élèves de 6e calcule ∫ directement) : `'exacte'` si le résultat (l'intégrale, et la
  * valeur moyenne en mode moyenne) est un entier ou une fraction — la calculatrice l'affiche tel quel,
- * « diviser d'abord (fraction) » compris ; sinon (ln, e, π, √, arctan…) `'calculatrice'`, et la
- * consigne exige alors la forme exacte (la calculatrice n'en donne qu'un décimal). Rationalité lue sur
+ * « diviser d'abord (fraction) » compris ; sinon (ln, e, π, √, arctan…) `calcul` ABSENT : la consigne
+ * exige la forme exacte (la calculatrice n'en donne qu'un décimal), l'instance est proposée dans les
+ * deux cas (arbitrage de l'utilisateur, 24/11/2026). Rationalité lue sur
  * la valeur exacte SYMBOLIQUE (`moteur6e/valeurExacteIntegrale.ts`), même critère que la consigne et
  * l'écran (`formeExacteExigee`). Le scénario paramètre (résoudre une équation en m) n'a pas de `calcul`.
  */
@@ -31,10 +32,11 @@ export function profilIntegralesDefinies(e: ExerciceIntegralesDefinies): ProfilI
   if (e.scenario === "parametre") return { casParticulier: null };
   const integrale = e.primitive.primitiveReference(e.b) - e.primitive.primitiveReference(e.a);
   const nulle = Math.abs(integrale) < 1e-9 && Math.abs(e.a + e.b) < 1e-9;
-  const calcul = formeExacteExigee(e) ? "calculatrice" : "exacte";
-  if (e.scenario === "simple") return { casParticulier: nulle ? "integrale-nulle" : null, calcul };
+  // Forme exacte exigée : `calcul` absent (tirée « interdite » ET « autorisée »).
+  const calcul = formeExacteExigee(e) ? {} : { calcul: "exacte" as const };
+  if (e.scenario === "simple") return { casParticulier: nulle ? "integrale-nulle" : null, ...calcul };
   return {
     casParticulier: cas([Math.abs(e.b - e.a - 1) < 1e-9 && "intervalle-longueur-1", nulle && "integrale-nulle"]),
-    calcul,
+    ...calcul,
   };
 }

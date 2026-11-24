@@ -53,7 +53,7 @@ const t = (valeur: string): FragmentConsigne => texte(valeur);
 const PRECISION = " Donne le résultat sous forme exacte, ou arrondi au centième.";
 /** Résultat ni entier ni fractionnaire (ln, e, π, √…) : forme exacte EXIGÉE (décision de
  * l'utilisateur, 24/11/2026 — la Graph Math+ calcule ∫ mais n'en donne qu'un décimal). Ces instances
- * restent tirées « calculatrice autorisée » ; les entières / fractionnaires sont `calcul: 'exacte'`. */
+ * sont tirées dans les deux cas (`calcul` absent) ; les entières / fractionnaires sont `calcul: 'exacte'`. */
 const PRECISION_EXACTE = " Donne le résultat sous forme exacte.";
 
 function exacteExigee(e: ExerciceIntegralesDefinies): boolean {
@@ -201,6 +201,6 @@ export const adaptateurEvaluationIntegralesDefinies: AdaptateurFeuilleExercices<
   enoncePapier,
   profilInstance: profilIntegralesDefinies,
   libelleCasParticulier: LIBELLE_CAS_INTEGRALES_DEFINIES,
-  // Résultat irrationnel dans 5 000 tirages sur 5 000.
-  calculatriceIndispensable: ["simple_C2", "simple_C3", "simple_C4", "simple_G4", "moyenne_A_diviserProduit", "moyenne_C2", "moyenne_C3", "moyenne_C4", "moyenne_G2", "moyenne_G3", "moyenne_G4"],
+  // Plus de `calculatriceIndispensable` (décision de l'utilisateur, 24/11/2026) : un résultat
+  // irrationnel exige la forme exacte, il se fait donc aussi sans calculatrice.
 };

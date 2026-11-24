@@ -305,8 +305,8 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   encadrée », 6gen51 E, 6gen53 (λ à ajuster, conditions), gen30, gen32 et gen33 « classes ». **Section
   « 2 bis » tranchée (24/11)** — intégrales (∫ de la Graph Math+) : instance entière ou fractionnaire →
   `exacte` (6gen25 simple / moyenne, « diviser (fraction) » compris ; 6gen26 B, C, D « bornes » : toutes) ;
-  valeur avec ln, e, π, √… → tirée « autorisée » (6gen25 `calculatrice`, 6gen26 A et tout 6gen27 sans
-  `calcul`) mais la consigne EXIGE la forme exacte (« sous forme exacte » / « Donne la valeur exacte. »,
+  valeur avec ln, e, π, √… → `calcul` absent, tirée « interdite » ET « autorisée » (6gen25 :
+  `calculatriceIndispensable` retiré ; 6gen26 A, tout 6gen27) car la consigne EXIGE la forme exacte (« sous forme exacte » / « Donne la valeur exacte. »,
   écran et papier), corrigé, réponse brève et barème donnent la valeur exacte (6gen25 : réduite
   SYMBOLIQUEMENT, `moteur6e/valeurExacteIntegrale.ts`, qui décide aussi de la rationalité — l'ancien test
   numérique à dénominateur ≤ 720 se trompait sur ≈ 8 % des tirages de B), l'écran refuse l'arrondi sans
@@ -316,8 +316,9 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   « autorisée » ET « interdite », `respecteContrainte`, `varianteToujoursExacte`) pour que « interdite »
   reste « σ entier seulement ». Équations, systèmes, dérivée en un point (6gen3, 6gen9, 6gen14, 6gen28,
   6gen55…) et 6gen96 : inchangés (décision). Mesuré : 520 tirages par variante, profil rationnel ⟺
-  `exacte`, 0 KaTeX invalide ; plans réels « autorisée » 5 760 instances, 0 `exacte` ; « interdite »
-  structure identique 22 / 23, accord 75,9 % (75,9 % entre deux passes du nouveau code, 80,1 % de l'ancien).
+  `exacte`, 0 KaTeX invalide ; plans réels « autorisée » 5 760 instances, 0 `exacte` ; « interdite » :
+  seul changement de structure, 6gen25 y tire ses 27 variantes (16 avant), accord 76,8 % (76,9 % entre deux
+  passes du nouveau code, 80,1 % de l'ancien).
 - Recherche de graine bornée par le temps (200 ms par palier) : les cas rares (σ entier, combinaison
   précise de paramètres) sont trouvés sans bloquer le panneau. Un cas particulier va sur la DERNIÈRE
   question de la ligne qui peut le recevoir (cas propre à une seule variante).

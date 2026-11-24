@@ -11,7 +11,7 @@ import { evaluerValeurExponentielle } from "./expressionExponentielle";
  */
 
 /** Écart relatif admis pour une saisie EXACTE (erreurs d'arrondi du calcul flottant seulement). */
-const TOLERANCE_EXACTE = 1e-9;
+const TOLERANCE_EXACTE = 1e-11;
 
 export function toleranceExacte(cible: number): number {
   return TOLERANCE_EXACTE * Math.max(1, Math.abs(cible));
