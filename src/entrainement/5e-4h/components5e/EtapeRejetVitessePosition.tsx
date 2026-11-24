@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ExerciceVitessePosition } from "../core5e/vitessePosition.types";
 import { consigneEcranRiche, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatVitessePosition";
+import { classeOptionChoixFerme } from "../../4e/ui/choixFige";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -21,7 +22,8 @@ interface Props {
  * comparable, ordre mélangé à la construction (`exercice.optionsRejetRacine`). */
 export function EtapeRejetVitessePosition({ exercice, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const [index, setIndex] = useState<number | null>(null);
-  const aides = niveauAide >= 2 ? [texteAideNiveau1("rejet"), texteAideNiveau2("rejet")] : niveauAide >= 1 ? [texteAideNiveau1("rejet")] : [];
+  const aides = niveauAide >= 2 ? [texteAideNiveau1("rejet"), texteAideNiveau2("rejet", exercice)] : niveauAide >= 1 ? [texteAideNiveau1("rejet")] : [];
+  const bonne = exercice.optionsRejetRacine.findIndex((o) => o.correcte);
 
   return (
     <div>
@@ -30,7 +32,7 @@ export function EtapeRejetVitessePosition({ exercice, niveauAide, niveauAideMax,
       </p>
       <div className="options-grid">
         {exercice.optionsRejetRacine.map((option, i) => (
-          <button key={i} type="button" className={`btn${index === i ? " toggle-active" : ""}${index === i && validation?.revele ? " is-erronee" : ""}`} disabled={!!validation} onClick={() => setIndex(i)}>
+          <button key={i} type="button" className={classeOptionChoixFerme<number | null>(i, { selection: index, choisie: validation ? index : null, bonne })} disabled={!!validation} onClick={() => setIndex(i)}>
             {option.texte}
           </button>
         ))}
