@@ -89,14 +89,23 @@ export function tangenteL(e: E): string {
 
 export function figureVerdict(e: E): string {
   const a = e.a;
-  const y0 = Math.round(fa(e));
+  // Lot H (brief 5e ch. 5) : fenêtre centrée sur A, échelle verticale choisie pour que les deux
+  // demi-tangentes (tracées sur 2 unités) restent lisibles — avant, x ∈ [a − 4 ; a + 4] et y à ±5 en
+  // carreaux d'une unité : des pentes −10 et −4 paraissaient verticales.
+  const pentes = e.variante === "racine" ? [1] : [limTauxGauche(e), verdict(e) !== "discontinue" ? limTauxDroite(e) : 0].filter((m) => Number.isFinite(m));
+  const M = Math.max(1, ...pentes.map((m) => Math.abs(m)));
+  const sauts = e.variante !== "racine" && verdict(e) === "discontinue" ? Math.abs(limDroite(e) - fa(e)) : 0;
+  const demiHauteur = Math.max(4, 2 * M + 1, sauts + 2);
+  const sy = [1, 2, 5, 10, 20, 50].find((p) => (2 * demiHauteur) / p <= 12) ?? 100;
+  const y0 = Math.round(fa(e) / sy) * sy;
+  const ny = Math.ceil(demiHauteur / sy);
   const s: SpecRepere = {
-    xmin: a - 4,
-    xmax: a + 4,
-    ymin: y0 - 5,
-    ymax: y0 + 5,
+    xmin: a - 3,
+    xmax: a + 3,
+    ymin: y0 - ny * sy,
+    ymax: y0 + ny * sy,
     sx: 1,
-    sy: 1,
+    sy,
     carreau: 22,
     police: 10,
     courbes: [],
